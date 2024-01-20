@@ -205,10 +205,4 @@ class ParserLogic {
 		let dynamic_class = eval(`${className}`);
 		return new dynamic_class(args);
 	}
-
-	// static array_f32 = (ar: f32[]): Float32Array => {
-	// 	let res = new Float32Array(ar.length);
-	// 	for (let i = 0; i < ar.length; ++i) res[i] = ar[i];
-	// 	return res;
-	// }
 }

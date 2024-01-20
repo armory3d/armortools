@@ -100,7 +100,7 @@ class TilingNode extends LogicNode {
 				name: _tr("Color"),
 				type: "RGBA",
 				color: 0xffc7c729,
-				default_value: array_f32([0.0, 0.0, 0.0, 1.0])
+				default_value: new Float32Array([0.0, 0.0, 0.0, 1.0])
 			}
 		],
 		outputs: [
@@ -110,7 +110,7 @@ class TilingNode extends LogicNode {
 				name: _tr("Color"),
 				type: "RGBA",
 				color: 0xffc7c729,
-				default_value: array_f32([0.0, 0.0, 0.0, 1.0])
+				default_value: new Float32Array([0.0, 0.0, 0.0, 1.0])
 			}
 		],
 		buttons: [

@@ -153,14 +153,14 @@ class UINodes {
 											ui.floatInput(hval1, tr("G"));
 											ui.floatInput(hval2, tr("B"));
 											ui.floatInput(hval3, tr("A"));
-											default_value = array_f32([hval0.value, hval1.value, hval2.value, hval3.value]);
+											default_value = new Float32Array([hval0.value, hval1.value, hval2.value, hval3.value]);
 										}
 										else if (type == 1) {
 											ui.row([1 / 3, 1 / 3, 1 / 3]);
 											hval0.value = ui.floatInput(hval0, tr("X"));
 											hval1.value = ui.floatInput(hval1, tr("Y"));
 											hval2.value = ui.floatInput(hval2, tr("Z"));
-											default_value = array_f32([hval0.value, hval1.value, hval2.value]);
+											default_value = new Float32Array([hval0.value, hval1.value, hval2.value]);
 										}
 										else {
 											default_value = ui.floatInput(hval0, tr("default_value"));
@@ -211,12 +211,6 @@ class UINodes {
 				///end
 			}
 		}
-	}
-
-	static array_f32 = (ar: f32[]): Float32Array => {
-		let res = new Float32Array(ar.length);
-		for (let i = 0; i < ar.length; ++i) res[i] = ar[i];
-		return res;
 	}
 
 	onCanvasReleased = () => {

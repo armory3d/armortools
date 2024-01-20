@@ -19,7 +19,7 @@ let import_fbx = function(path, done) {
 		let posa = new Int16Array(r.buffer, a._get_positions(), vertex_count * 4);
 		let nora = new Int16Array(r.buffer, a._get_normals(), vertex_count * 2);
 		let texa = a._get_uvs() > 0 ? new Int16Array(r.buffer, a._get_uvs(), vertex_count * 2) : null;
-		let cola = a._get_colors() > 0 ? new Int16Array(r.buffer, a._get_colors(), vertex_count * 4) : null;
+		let cola = a._get_colors() > 0 ? new Int16Array(r.buffer, a._get_colors(), vertex_count * 3) : null;
 
 		// Use .slice() for now as the next mesh will overwrite buffer data corrupting the old vertex data
 		done({

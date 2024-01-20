@@ -21,7 +21,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8, 1.0])
+						default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 					},
 					{
 						id: 0,
@@ -29,7 +29,7 @@ class NodesMaterial {
 						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -62,7 +62,7 @@ class NodesMaterial {
 						name: _tr("View Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -107,7 +107,7 @@ class NodesMaterial {
 						name: _tr("Normal"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					}
 				],
 				outputs: [
@@ -137,7 +137,7 @@ class NodesMaterial {
 						name: _tr("Position"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -145,7 +145,7 @@ class NodesMaterial {
 						name: _tr("Normal"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -153,7 +153,7 @@ class NodesMaterial {
 						name: _tr("Tangent"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -161,7 +161,7 @@ class NodesMaterial {
 						name: _tr("True Normal"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -169,7 +169,7 @@ class NodesMaterial {
 						name: _tr("Incoming"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -177,7 +177,7 @@ class NodesMaterial {
 						name: _tr("Parametric"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -221,7 +221,7 @@ class NodesMaterial {
 						name: _tr("Base Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.0, 0.0, 0.0, 1.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0, 1.0])
 					},
 					{
 						id: 0,
@@ -261,7 +261,7 @@ class NodesMaterial {
 						name: _tr("Normal Map"),
 						type: "VECTOR",
 						color: -10238109,
-						default_value: array_f32([0.5, 0.5, 1.0])
+						default_value: new Float32Array([0.5, 0.5, 1.0])
 					},
 					{
 						id: 0,
@@ -346,7 +346,7 @@ class NodesMaterial {
 						name: _tr("Normal"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					}
 				],
 				outputs: [
@@ -384,7 +384,7 @@ class NodesMaterial {
 						name: _tr("Base Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.0, 0.0, 0.0, 1.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0, 1.0])
 					},
 					{
 						id: 0,
@@ -424,7 +424,7 @@ class NodesMaterial {
 						name: _tr("Normal Map"),
 						type: "VECTOR",
 						color: -10238109,
-						default_value: array_f32([0.5, 0.5, 1.0])
+						default_value: new Float32Array([0.5, 0.5, 1.0])
 					},
 					{
 						id: 0,
@@ -475,7 +475,7 @@ class NodesMaterial {
 						name: _tr("Location"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -483,7 +483,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.0, 0.0, 0.0, 1.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0, 1.0])
 					},
 					{
 						id: 0,
@@ -527,7 +527,7 @@ class NodesMaterial {
 						name: _tr("Base Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.0, 0.0, 0.0, 1.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0, 1.0])
 					},
 					{
 						id: 0,
@@ -567,7 +567,7 @@ class NodesMaterial {
 						name: _tr("Normal Map"),
 						type: "VECTOR",
 						color: -10238109,
-						default_value: array_f32([0.5, 0.5, 1.0])
+						default_value: new Float32Array([0.5, 0.5, 1.0])
 					},
 					{
 						id: 0,
@@ -611,7 +611,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.5, 0.5, 0.5, 1.0])
+						default_value: new Float32Array([0.5, 0.5, 0.5, 1.0])
 					}
 				],
 				buttons: [
@@ -689,7 +689,7 @@ class NodesMaterial {
 						name: _tr("Tangent"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					}
 				],
 				buttons: []
@@ -709,7 +709,7 @@ class NodesMaterial {
 						name: _tr("Generated"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -717,7 +717,7 @@ class NodesMaterial {
 						name: _tr("Normal"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -725,7 +725,7 @@ class NodesMaterial {
 						name: _tr("UV"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -733,7 +733,7 @@ class NodesMaterial {
 						name: _tr("Object"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -741,7 +741,7 @@ class NodesMaterial {
 						name: _tr("Camera"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -749,7 +749,7 @@ class NodesMaterial {
 						name: _tr("Window"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -757,7 +757,7 @@ class NodesMaterial {
 						name: _tr("Reflection"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					}
 				],
 				buttons: []
@@ -777,7 +777,7 @@ class NodesMaterial {
 						name: _tr("UV"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					}
 				],
 				buttons: []
@@ -825,7 +825,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8, 1.0])
+						default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 					},
 					{
 						id: 0,
@@ -891,7 +891,7 @@ class NodesMaterial {
 		// 				name: _tr("Base Color"),
 		// 				type: "RGBA",
 		// 				color: 0xffc7c729,
-		// 				default_value: array_f32([0.8, 0.8, 0.8, 1.0])
+		// 				default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 		// 			},
 		// 			{
 		// 				id: 0,
@@ -931,7 +931,7 @@ class NodesMaterial {
 		// 				name: _tr("Normal Map"),
 		// 				type: "VECTOR",
 		// 				color: -10238109,
-		// 				default_value: array_f32([0.5, 0.5, 1.0])
+		// 				default_value: new Float32Array([0.5, 0.5, 1.0])
 		// 			},
 		// 			{
 		// 				id: 0,
@@ -977,7 +977,7 @@ class NodesMaterial {
 						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -985,7 +985,7 @@ class NodesMaterial {
 						name: _tr("Color 1"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8])
+						default_value: new Float32Array([0.8, 0.8, 0.8])
 					},
 					{
 						id: 0,
@@ -993,7 +993,7 @@ class NodesMaterial {
 						name: _tr("Color 2"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.2, 0.2, 0.2])
+						default_value: new Float32Array([0.2, 0.2, 0.2])
 					},
 					{
 						id: 0,
@@ -1001,7 +1001,7 @@ class NodesMaterial {
 						name: _tr("Mortar"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -1021,7 +1021,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8, 1.0])
+						default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 					},
 					{
 						id: 0,
@@ -1048,7 +1048,7 @@ class NodesMaterial {
 						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -1056,7 +1056,7 @@ class NodesMaterial {
 						name: _tr("Color 1"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8])
+						default_value: new Float32Array([0.8, 0.8, 0.8])
 					},
 					{
 						id: 0,
@@ -1064,7 +1064,7 @@ class NodesMaterial {
 						name: _tr("Color 2"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.2, 0.2, 0.2])
+						default_value: new Float32Array([0.2, 0.2, 0.2])
 					},
 					{
 						id: 0,
@@ -1084,7 +1084,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8, 1.0])
+						default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 					},
 					{
 						id: 0,
@@ -1162,7 +1162,7 @@ class NodesMaterial {
 						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					}
 				],
 				outputs: [
@@ -1172,7 +1172,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8, 1.0])
+						default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 					},
 					{
 						id: 0,
@@ -1208,7 +1208,7 @@ class NodesMaterial {
 						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					}
 				],
 				outputs: [
@@ -1218,7 +1218,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.0, 0.0, 0.0, 1.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0, 1.0])
 					},
 					{
 						id: 0,
@@ -1258,7 +1258,7 @@ class NodesMaterial {
 						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -1278,7 +1278,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8, 1.0])
+						default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 					},
 					{
 						id: 0,
@@ -1305,7 +1305,7 @@ class NodesMaterial {
 						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -1344,7 +1344,7 @@ class NodesMaterial {
 						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -1364,7 +1364,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8, 1.0])
+						default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 					},
 					{
 						id: 0,
@@ -1391,7 +1391,7 @@ class NodesMaterial {
 						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -1411,7 +1411,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8, 1.0])
+						default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 					},
 					{
 						id: 0,
@@ -1446,7 +1446,7 @@ class NodesMaterial {
 						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -1466,7 +1466,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8, 1.0])
+						default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 					},
 					{
 						id: 0,
@@ -1495,7 +1495,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8, 1.0])
+						default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 					},
 					{
 						id: 0,
@@ -1513,7 +1513,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8, 1.0])
+						default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 					}
 				],
 				buttons: []
@@ -1532,7 +1532,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8, 1.0])
+						default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 					},
 					{
 						id: 0,
@@ -1558,7 +1558,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8, 1.0])
+						default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 					}
 				],
 				buttons: []
@@ -1577,7 +1577,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8, 1.0])
+						default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 					},
 					{
 						id: 0,
@@ -1595,7 +1595,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8, 1.0])
+						default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 					}
 				],
 				buttons: []
@@ -1646,7 +1646,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8, 1.0])
+						default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 					}
 				],
 				outputs: [
@@ -1656,7 +1656,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8, 1.0])
+						default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 					}
 				],
 				buttons: []
@@ -1683,7 +1683,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.0, 0.0, 0.0, 1.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0, 1.0])
 					}
 				],
 				outputs: [
@@ -1693,7 +1693,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8, 1.0])
+						default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 					}
 				],
 				buttons: []
@@ -1720,7 +1720,7 @@ class NodesMaterial {
 						name: _tr("Color 1"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.5, 0.5, 0.5, 1.0])
+						default_value: new Float32Array([0.5, 0.5, 0.5, 1.0])
 					},
 					{
 						id: 0,
@@ -1728,7 +1728,7 @@ class NodesMaterial {
 						name: _tr("Color 2"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.5, 0.5, 0.5, 1.0])
+						default_value: new Float32Array([0.5, 0.5, 0.5, 1.0])
 					}
 				],
 				outputs: [
@@ -1738,7 +1738,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8, 1.0])
+						default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 					}
 				],
 				buttons: [
@@ -1781,7 +1781,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.0, 0.0, 0.0, 1.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0, 1.0])
 					}
 				],
 				outputs: [
@@ -1791,7 +1791,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8, 1.0])
+						default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 					}
 				],
 				buttons: []
@@ -1810,7 +1810,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8, 1.0])
+						default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 					},
 					{
 						id: 0,
@@ -1840,7 +1840,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8, 1.0])
+						default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 					}
 				],
 				buttons: []
@@ -1885,7 +1885,7 @@ class NodesMaterial {
 						name: _tr("Normal"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					}
 				],
 				outputs: [
@@ -1895,7 +1895,7 @@ class NodesMaterial {
 						name: _tr("Normal Map"),
 						type: "VECTOR",
 						color: -10238109,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					}
 				],
 				buttons: []
@@ -1914,7 +1914,7 @@ class NodesMaterial {
 						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -1922,7 +1922,7 @@ class NodesMaterial {
 						name: _tr("Location"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0]),
+						default_value: new Float32Array([0.0, 0.0, 0.0]),
 						display: 1
 					},
 					{
@@ -1931,7 +1931,7 @@ class NodesMaterial {
 						name: _tr("Rotation"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0]),
+						default_value: new Float32Array([0.0, 0.0, 0.0]),
 						max: 360.0,
 						display: 1
 					},
@@ -1941,7 +1941,7 @@ class NodesMaterial {
 						name: _tr("Scale"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([1.0, 1.0, 1.0]),
+						default_value: new Float32Array([1.0, 1.0, 1.0]),
 						display: 1
 					}
 				],
@@ -1952,7 +1952,7 @@ class NodesMaterial {
 						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					}
 				],
 				buttons: []
@@ -1971,7 +1971,7 @@ class NodesMaterial {
 						name: _tr("Normal Map 1"),
 						type: "VECTOR",
 						color: -10238109,
-						default_value: array_f32([0.5, 0.5, 1.0])
+						default_value: new Float32Array([0.5, 0.5, 1.0])
 					},
 					{
 						id: 0,
@@ -1979,7 +1979,7 @@ class NodesMaterial {
 						name: _tr("Normal Map 2"),
 						type: "VECTOR",
 						color: -10238109,
-						default_value: array_f32([0.5, 0.5, 1.0])
+						default_value: new Float32Array([0.5, 0.5, 1.0])
 					}
 				],
 				outputs: [
@@ -1989,7 +1989,7 @@ class NodesMaterial {
 						name: _tr("Normal Map"),
 						type: "VECTOR",
 						color: -10238109,
-						default_value: array_f32([0.5, 0.5, 1.0])
+						default_value: new Float32Array([0.5, 0.5, 1.0])
 					}
 				],
 				buttons: [
@@ -2016,7 +2016,7 @@ class NodesMaterial {
 						name: _tr("Normal"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					}
 				],
 				outputs: [
@@ -2026,7 +2026,7 @@ class NodesMaterial {
 						name: _tr("Normal"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -2041,7 +2041,7 @@ class NodesMaterial {
 					{
 						name: _tr("Vector"),
 						type: "VECTOR",
-						default_value: array_f32([0.0, 0.0, 0.0]),
+						default_value: new Float32Array([0.0, 0.0, 0.0]),
 						output: 0
 					}
 				]
@@ -2070,7 +2070,7 @@ class NodesMaterial {
 						name: _tr("Normal Map"),
 						type: "VECTOR",
 						color: -10238109,
-						default_value: array_f32([0.5, 0.5, 1.0])
+						default_value: new Float32Array([0.5, 0.5, 1.0])
 					}
 				],
 				outputs: [
@@ -2080,7 +2080,7 @@ class NodesMaterial {
 						name: _tr("Normal Map"),
 						type: "VECTOR",
 						color: -10238109,
-						default_value: array_f32([0.5, 0.5, 1.0])
+						default_value: new Float32Array([0.5, 0.5, 1.0])
 					}
 				],
 				buttons: []
@@ -2107,7 +2107,7 @@ class NodesMaterial {
 						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					}
 				],
 				outputs: [
@@ -2117,14 +2117,14 @@ class NodesMaterial {
 						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					}
 				],
 				buttons: [
 					{
 						name: "arm.NodesMaterial.vectorCurvesButton",
 						type: "CUSTOM",
-						default_value: [[array_f32([0.0, 0.0]), array_f32([0.0, 0.0])], [array_f32([0.0, 0.0]), array_f32([0.0, 0.0])], [array_f32([0.0, 0.0]), array_f32([0.0, 0.0])]],
+						default_value: [[new Float32Array([0.0, 0.0]), new Float32Array([0.0, 0.0])], [new Float32Array([0.0, 0.0]), new Float32Array([0.0, 0.0])], [new Float32Array([0.0, 0.0]), new Float32Array([0.0, 0.0])]],
 						output: 0,
 						height: 8.5
 					}
@@ -2209,7 +2209,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.0, 0.0, 0.0, 1.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0, 1.0])
 					},
 					{
 						id: 0,
@@ -2224,7 +2224,7 @@ class NodesMaterial {
 					{
 						name: "arm.NodesMaterial.colorRampButton",
 						type: "CUSTOM",
-						default_value: [array_f32([1.0, 1.0, 1.0, 1.0, 0.0])],
+						default_value: [new Float32Array([1.0, 1.0, 1.0, 1.0, 0.0])],
 						data: 0,
 						output: 0,
 						height: 4.5
@@ -2245,7 +2245,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8, 1.0])
+						default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 					},
 					{
 						id: 0,
@@ -2253,7 +2253,7 @@ class NodesMaterial {
 						name: _tr("Mask Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8, 1.0])
+						default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 					},
 					{
 						id: 0,
@@ -2326,7 +2326,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8, 1.0])
+						default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 					}
 				],
 				buttons: []
@@ -2371,7 +2371,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8, 1.0])
+						default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 					}
 				],
 				buttons: []
@@ -2416,7 +2416,7 @@ class NodesMaterial {
 						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					}
 				],
 				buttons: []
@@ -2554,7 +2554,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.0, 0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0, 0.0])
 					}
 				],
 				outputs: [
@@ -2583,7 +2583,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.5, 0.5, 0.5, 1.0])
+						default_value: new Float32Array([0.5, 0.5, 0.5, 1.0])
 					}
 				],
 				outputs: [
@@ -2628,7 +2628,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: array_f32([0.8, 0.8, 0.8, 1.0])
+						default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 					}
 				],
 				outputs: [
@@ -2673,7 +2673,7 @@ class NodesMaterial {
 						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					}
 				],
 				outputs: [
@@ -2718,7 +2718,7 @@ class NodesMaterial {
 						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -2726,7 +2726,7 @@ class NodesMaterial {
 						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					}
 				],
 				outputs: [
@@ -2736,7 +2736,7 @@ class NodesMaterial {
 						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: array_f32([0.0, 0.0, 0.0])
+						default_value: new Float32Array([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -2796,9 +2796,9 @@ class NodesMaterial {
 		// Edit
 		ui.row([1 / 5, 1 / 5, 3 / 5]);
 		if (ui.button("+")) {
-			let array_f32 = new Float32Array(2);
-			array_f32[0] = 0; array_f32[1] = 0;
-			val.push(array_f32);
+			let f32a = new Float32Array(2);
+			f32a[0] = 0; f32a[1] = 0;
+			val.push(f32a);
 		}
 		if (ui.button("-")) {
 			if (val.length > 2) val.pop();
@@ -2834,13 +2834,13 @@ class NodesMaterial {
 		ui.row([1 / 4, 1 / 4, 2 / 4]);
 		if (ui.button("+")) {
 			let last = vals[vals.length - 1];
-			let array_f32 = new Float32Array(5);
-			array_f32[0] = last[0];
-			array_f32[1] = last[1];
-			array_f32[2] = last[2];
-			array_f32[3] = last[3];
-			array_f32[4] = 1.0;
-			vals.push(array_f32);
+			let f32a = new Float32Array(5);
+			f32a[0] = last[0];
+			f32a[1] = last[1];
+			f32a[2] = last[2];
+			f32a[3] = last[3];
+			f32a[4] = 1.0;
+			vals.push(f32a);
 			ihandle.value += 1;
 		}
 		if (ui.button("-") && vals.length > 1) {
@@ -3008,7 +3008,7 @@ class NodesMaterial {
 	}
 
 	static get_socket_default_value = (type: string): any => {
-		return type == "RGBA" ? array_f32([0.8, 0.8, 0.8, 1.0]) : type == "VECTOR" ? array_f32([0.0, 0.0, 0.0]) : 0.0;
+		return type == "RGBA" ? new Float32Array([0.8, 0.8, 0.8, 1.0]) : type == "VECTOR" ? new Float32Array([0.0, 0.0, 0.0]) : 0.0;
 	}
 
 	static get_socket_name = (type: string): string => {
@@ -3041,11 +3041,5 @@ class NodesMaterial {
 		let node = UINodes.makeNode(n, nodes, canvas);
 		canvas.nodes.push(node);
 		return node;
-	}
-
-	static array_f32 = (ar: f32[]): Float32Array => {
-		let res = new Float32Array(ar.length);
-		for (let i = 0; i < ar.length; ++i) res[i] = ar[i];
-		return res;
 	}
 }

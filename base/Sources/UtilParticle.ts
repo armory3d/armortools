@@ -1,12 +1,6 @@
 
 class UtilParticle {
 
-	static array_f32 = (ar: f32[]): Float32Array => {
-		let res = new Float32Array(ar.length);
-		for (let i = 0; i < ar.length; ++i) res[i] = ar[i];
-		return res;
-	}
-
 	static initParticle = () => {
 		if (Context.raw.particleMaterial != null) return;
 
@@ -20,7 +14,7 @@ class UtilParticle {
 			lifetime: 400,
 			lifetime_random: 0.5,
 			emit_from: 1,
-			object_align_factor: array_f32([0, 0, -40]),
+			object_align_factor: new Float32Array([0, 0, -40]),
 			factor_random: 2.0,
 			physics_type: 0,
 			particle_size: 1.0,

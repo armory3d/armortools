@@ -92,7 +92,7 @@ class VectorNode extends LogicNode {
 				name: _tr("Vector"),
 				type: "VECTOR",
 				color: 0xff6363c7,
-				default_value: array_f32([0.0, 0.0, 0.0])
+				default_value: new Float32Array([0.0, 0.0, 0.0])
 			}
 		],
 		buttons: []
