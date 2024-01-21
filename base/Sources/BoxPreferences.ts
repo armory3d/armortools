@@ -211,10 +211,8 @@ class BoxPreferences {
 				}
 
 				// Theme fields
-				for (let key in theme) {
-					if (key == "theme_") continue;
-					if (key.startsWith("set_")) continue;
-					if (key.startsWith("get_")) key = key.substr(4);
+				for (let key of Object.getOwnPropertyNames(Theme.prototype)) {
+					if (key == "constructor") continue;
 
 					let h = hlist.nest(i++);
 					let val: any = theme[key];
