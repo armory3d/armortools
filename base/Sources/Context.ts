@@ -24,10 +24,10 @@ class Context {
 		if (Project.materials.indexOf(m) == -1) return;
 		Context.raw.material = m;
 		MakeMaterial.parsePaintMaterial();
-		UIBase.inst.hwnds[TabArea.TabSidebar1].redraws = 2;
-		UIHeader.inst.headerHandle.redraws = 2;
-		UINodes.inst.hwnd.redraws = 2;
-		UINodes.inst.groupStack = [];
+		UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
+		UIHeader.headerHandle.redraws = 2;
+		UINodes.hwnd.redraws = 2;
+		UINodes.groupStack = [];
 
 		let decal = Context.raw.tool == WorkspaceTool.ToolDecal || Context.raw.tool == WorkspaceTool.ToolText;
 		if (decal) {
@@ -47,8 +47,8 @@ class Context {
 		if (Project.brushes.indexOf(b) == -1) return;
 		Context.raw.brush = b;
 		MakeMaterial.parseBrush();
-		UIBase.inst.hwnds[TabArea.TabSidebar1].redraws = 2;
-		UINodes.inst.hwnd.redraws = 2;
+		UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
+		UINodes.hwnd.redraws = 2;
 	}
 
 	static selectFont = (i: i32) => {
@@ -61,8 +61,8 @@ class Context {
 		Context.raw.font = f;
 		UtilRender.makeTextPreview();
 		UtilRender.makeDecalPreview();
-		UIBase.inst.hwnds[TabArea.TabStatus].redraws = 2;
-		UIView2D.inst.hwnd.redraws = 2;
+		UIBase.hwnds[TabArea.TabStatus].redraws = 2;
+		UIView2D.hwnd.redraws = 2;
 	}
 
 	static selectLayer = (i: i32) => {
@@ -73,7 +73,7 @@ class Context {
 	static setLayer = (l: SlotLayer) => {
 		if (l == Context.raw.layer) return;
 		Context.raw.layer = l;
-		UIHeader.inst.headerHandle.redraws = 2;
+		UIHeader.headerHandle.redraws = 2;
 
 		let current = Graphics2.current;
 		if (current != null) current.end();
@@ -84,8 +84,8 @@ class Context {
 
 		if (current != null) current.begin(false);
 
-		UIBase.inst.hwnds[TabArea.TabSidebar0].redraws = 2;
-		UIView2D.inst.hwnd.redraws = 2;
+		UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
+		UIView2D.hwnd.redraws = 2;
 	}
 	///end
 
@@ -100,8 +100,8 @@ class Context {
 
 		///if (is_paint || is_sculpt)
 		Context.initTool();
-		UIHeader.inst.headerHandle.redraws = 2;
-		UIToolbar.inst.toolbarHandle.redraws = 2;
+		UIHeader.headerHandle.redraws = 2;
+		UIToolbar.toolbarHandle.redraws = 2;
 		///end
 	}
 
@@ -143,7 +143,7 @@ class Context {
 
 	static selectPaintObject = (o: MeshObject) => {
 		///if (is_paint || is_sculpt)
-		UIHeader.inst.headerHandle.redraws = 2;
+		UIHeader.headerHandle.redraws = 2;
 		for (let p of Project.paintObjects) p.skip_context = "paint";
 		Context.raw.paintObject = o;
 
@@ -197,7 +197,7 @@ class Context {
 		///if (is_paint || is_sculpt)
 		let mouse = Input.getMouse();
 		let right = App.w();
-		if (UIView2D.inst.show) right += UIView2D.inst.ww;
+		if (UIView2D.show) right += UIView2D.ww;
 		return mouse.viewX > 0 && mouse.viewX < right &&
 			   mouse.viewY > 0 && mouse.viewY < App.h();
 		///end
@@ -208,35 +208,35 @@ class Context {
 	}
 
 	static inLayers = (): bool => {
-		return UIBase.inst.ui.getHoveredTabName() == tr("Layers");
+		return UIBase.ui.getHoveredTabName() == tr("Layers");
 	}
 
 	static inMaterials = (): bool => {
-		return UIBase.inst.ui.getHoveredTabName() == tr("Materials");
+		return UIBase.ui.getHoveredTabName() == tr("Materials");
 	}
 
 	///if (is_paint || is_sculpt)
 	static in2dView = (type = View2DType.View2DLayer): bool => {
 		let mouse = Input.getMouse();
-		return UIView2D.inst.show && UIView2D.inst.type == type &&
-			   mouse.x > UIView2D.inst.wx && mouse.x < UIView2D.inst.wx + UIView2D.inst.ww &&
-			   mouse.y > UIView2D.inst.wy && mouse.y < UIView2D.inst.wy + UIView2D.inst.wh;
+		return UIView2D.show && UIView2D.type == type &&
+			   mouse.x > UIView2D.wx && mouse.x < UIView2D.wx + UIView2D.ww &&
+			   mouse.y > UIView2D.wy && mouse.y < UIView2D.wy + UIView2D.wh;
 	}
 	///end
 
 	static inNodes = (): bool => {
 		let mouse = Input.getMouse();
-		return UINodes.inst.show &&
-			   mouse.x > UINodes.inst.wx && mouse.x < UINodes.inst.wx + UINodes.inst.ww &&
-			   mouse.y > UINodes.inst.wy && mouse.y < UINodes.inst.wy + UINodes.inst.wh;
+		return UINodes.show &&
+			   mouse.x > UINodes.wx && mouse.x < UINodes.wx + UINodes.ww &&
+			   mouse.y > UINodes.wy && mouse.y < UINodes.wy + UINodes.wh;
 	}
 
 	static inSwatches = (): bool => {
-		return UIBase.inst.ui.getHoveredTabName() == tr("Swatches");
+		return UIBase.ui.getHoveredTabName() == tr("Swatches");
 	}
 
 	static inBrowser = (): bool => {
-		return UIBase.inst.ui.getHoveredTabName() == tr("Browser");
+		return UIBase.ui.getHoveredTabName() == tr("Browser");
 	}
 
 	static getAreaType = (): AreaType => {
@@ -264,10 +264,10 @@ class Context {
 			}
 			RenderPath.active.commands = RenderPathForward.commands;
 		}
-		let _workspace = UIHeader.inst.worktab.position;
-		UIHeader.inst.worktab.position = 0;
+		let _workspace = UIHeader.worktab.position;
+		UIHeader.worktab.position = 0;
 		MakeMaterial.parseMeshMaterial();
-		UIHeader.inst.worktab.position = _workspace;
+		UIHeader.worktab.position = _workspace;
 	}
 
 	static loadEnvmap = () => {
@@ -341,8 +341,8 @@ class Context {
 			Context.raw.lastPaintVecY = Context.raw.paintVec.y;
 		}
 
-		let nodes = UINodes.inst.getNodes();
-		let canvas = UINodes.inst.getCanvas(true);
+		let nodes = UINodes.getNodes();
+		let canvas = UINodes.getCanvas(true);
 		let inpaint = nodes.nodesSelectedId.length > 0 && nodes.getNode(canvas.nodes, nodes.nodesSelectedId[0]).type == "InpaintNode";
 
 		// Paint bounds

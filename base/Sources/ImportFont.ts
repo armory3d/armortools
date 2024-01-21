@@ -30,7 +30,7 @@ class ImportFont {
 			}
 			App.notifyOnInit(_init);
 
-			UIBase.inst.hwnds[TabArea.TabStatus].redraws = 2;
+			UIBase.hwnds[TabArea.TabStatus].redraws = 2;
 		});
 	}
 }

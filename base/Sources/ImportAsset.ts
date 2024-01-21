@@ -30,9 +30,9 @@ class ImportAsset {
 		else if (Path.isTexture(path)) {
 			ImportTexture.run(path, hdrAsEnvmap);
 			// Place image node
-			let x0 = UINodes.inst.wx;
-			let x1 = UINodes.inst.wx + UINodes.inst.ww;
-			if (UINodes.inst.show && dropX > x0 && dropX < x1) {
+			let x0 = UINodes.wx;
+			let x1 = UINodes.wx + UINodes.ww;
+			if (UINodes.show && dropX > x0 && dropX < x1) {
 				let assetIndex = 0;
 				for (let i = 0; i < Project.assets.length; ++i) {
 					if (Project.assets[i].file == path) {
@@ -40,14 +40,14 @@ class ImportAsset {
 						break;
 					}
 				}
-				UINodes.inst.acceptAssetDrag(assetIndex);
-				UINodes.inst.getNodes().nodesDrag = false;
-				UINodes.inst.hwnd.redraws = 2;
+				UINodes.acceptAssetDrag(assetIndex);
+				UINodes.getNodes().nodesDrag = false;
+				UINodes.hwnd.redraws = 2;
 			}
 
 			///if is_paint
 			if (Context.raw.tool == WorkspaceTool.ToolColorId && Project.assetNames.length == 1) {
-				UIHeader.inst.headerHandle.redraws = 2;
+				UIHeader.headerHandle.redraws = 2;
 				Context.raw.ddirty = 2;
 			}
 			///end

@@ -1,11 +1,10 @@
 
 class UIMenubar {
 
-	static inst: UIMenubar;
 	static defaultMenubarW = 330;
-	workspaceHandle = new Handle({ layout: Layout.Horizontal });
-	menuHandle = new Handle({ layout: Layout.Horizontal });
-	menubarw = UIMenubar.defaultMenubarW;
+	static workspaceHandle = new Handle({ layout: Layout.Horizontal });
+	static menuHandle = new Handle({ layout: Layout.Horizontal });
+	static menubarw = UIMenubar.defaultMenubarW;
 
 	///if is_lab
 	static _savedCamera: Mat4 = null;
@@ -13,20 +12,19 @@ class UIMenubar {
 	///end
 
 	constructor() {
-		UIMenubar.inst = this;
 	}
 
-	renderUI = (g: Graphics2) => {
-		let ui = UIBase.inst.ui;
+	static renderUI = (g: Graphics2) => {
+		let ui = UIBase.ui;
 
 		///if (is_paint || is_sculpt)
-		let panelx = App.x() - UIToolbar.inst.toolbarw;
+		let panelx = App.x() - UIToolbar.toolbarw;
 		///end
 		///if is_lab
 		let panelx = App.x();
 		///end
 
-		if (ui.window(this.menuHandle, panelx, 0, this.menubarw, UIHeader.headerh)) {
+		if (ui.window(UIMenubar.menuHandle, panelx, 0, UIMenubar.menubarw, UIHeader.headerh)) {
 			ui._x += 1; // Prevent "File" button highlight on startup
 
 			ui.beginMenu();
@@ -34,7 +32,7 @@ class UIMenubar {
 			if (Config.raw.touch_ui) {
 
 				///if (is_paint || is_sculpt)
-				ui._w = UIToolbar.inst.toolbarw;
+				ui._w = UIToolbar.toolbarw;
 				///end
 				///if is_lab
 				ui._w = 36;
@@ -56,13 +54,13 @@ class UIMenubar {
 				///end
 				let size = Math.floor(ui._w / ui.SCALE());
 				if (UIMenu.show && UIMenu.menuCategory == MenuCategory.MenuViewport) ui.fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
-				if (UIMenubar.iconButton(ui, 8, 2)) this.showMenu(ui, MenuCategory.MenuViewport);
+				if (UIMenubar.iconButton(ui, 8, 2)) UIMenubar.showMenu(ui, MenuCategory.MenuViewport);
 				if (UIMenu.show && UIMenu.menuCategory == MenuCategory.MenuMode) ui.fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
-				if (UIMenubar.iconButton(ui, 9, 2)) this.showMenu(ui, MenuCategory.MenuMode);
+				if (UIMenubar.iconButton(ui, 9, 2)) UIMenubar.showMenu(ui, MenuCategory.MenuMode);
 				if (UIMenu.show && UIMenu.menuCategory == MenuCategory.MenuCamera) ui.fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
-				if (UIMenubar.iconButton(ui, 10, 2)) this.showMenu(ui, MenuCategory.MenuCamera);
+				if (UIMenubar.iconButton(ui, 10, 2)) UIMenubar.showMenu(ui, MenuCategory.MenuCamera);
 				if (UIMenu.show && UIMenu.menuCategory == MenuCategory.MenuHelp) ui.fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
-				if (UIMenubar.iconButton(ui, 11, 2)) this.showMenu(ui, MenuCategory.MenuHelp);
+				if (UIMenubar.iconButton(ui, 11, 2)) UIMenubar.showMenu(ui, MenuCategory.MenuHelp);
 				ui.enabled = History.undos > 0;
 				if (UIMenubar.iconButton(ui, 6, 2)) History.undo();
 				ui.enabled = History.redos > 0;
@@ -73,49 +71,49 @@ class UIMenubar {
 				let categories = [tr("File"), tr("Edit"), tr("Viewport"), tr("Mode"), tr("Camera"), tr("Help")];
 				for (let i = 0; i < categories.length; ++i) {
 					if (ui.menuButton(categories[i]) || (UIMenu.show && UIMenu.menuCommands == null && ui.isHovered)) {
-						this.showMenu(ui, i);
+						UIMenubar.showMenu(ui, i);
 					}
 				}
 			}
 
-			if (this.menubarw < ui._x + 10) {
-				this.menubarw = Math.floor(ui._x + 10);
+			if (UIMenubar.menubarw < ui._x + 10) {
+				UIMenubar.menubarw = Math.floor(ui._x + 10);
 
 				///if (is_paint || is_sculpt)
-				UIToolbar.inst.toolbarHandle.redraws = 2;
+				UIToolbar.toolbarHandle.redraws = 2;
 				///end
 			}
 
 			ui.endMenu();
 		}
 
-		let nodesw = (UINodes.inst.show || UIView2D.inst.show) ? Config.raw.layout[LayoutSize.LayoutNodesW] : 0;
+		let nodesw = (UINodes.show || UIView2D.show) ? Config.raw.layout[LayoutSize.LayoutNodesW] : 0;
 		///if (is_paint || is_sculpt)
-		let ww = System.width - Config.raw.layout[LayoutSize.LayoutSidebarW] - this.menubarw - nodesw;
-		panelx = (App.x() - UIToolbar.inst.toolbarw) + this.menubarw;
+		let ww = System.width - Config.raw.layout[LayoutSize.LayoutSidebarW] - UIMenubar.menubarw - nodesw;
+		panelx = (App.x() - UIToolbar.toolbarw) + UIMenubar.menubarw;
 		///else
-		let ww = System.width - this.menubarw - nodesw;
-		panelx = (App.x()) + this.menubarw;
+		let ww = System.width - UIMenubar.menubarw - nodesw;
+		panelx = (App.x()) + UIMenubar.menubarw;
 		///end
 
-		if (ui.window(this.workspaceHandle, panelx, 0, ww, UIHeader.headerh)) {
+		if (ui.window(UIMenubar.workspaceHandle, panelx, 0, ww, UIHeader.headerh)) {
 
 			if (!Config.raw.touch_ui) {
-				ui.tab(UIHeader.inst.worktab, tr("3D View"));
+				ui.tab(UIHeader.worktab, tr("3D View"));
 			}
 			else {
 				ui.fill(0, 0, ui._windowW, ui._windowH + 4, ui.t.SEPARATOR_COL);
 			}
 
 			///if is_lab
-			ui.tab(UIHeader.inst.worktab, tr("2D View"));
-			if (UIHeader.inst.worktab.changed) {
+			ui.tab(UIHeader.worktab, tr("2D View"));
+			if (UIHeader.worktab.changed) {
 				Context.raw.ddirty = 2;
 				Context.raw.brushBlendDirty = true;
-				UIHeader.inst.headerHandle.redraws = 2;
+				UIHeader.headerHandle.redraws = 2;
 				Context.mainObject().skip_context = null;
 
-				if (UIHeader.inst.worktab.position == SpaceType.Space3D) {
+				if (UIHeader.worktab.position == SpaceType.Space3D) {
 					if (UIMenubar._savedCamera != null) {
 						Scene.active.camera.transform.setMatrix(UIMenubar._savedCamera);
 						UIMenubar._savedCamera = null;
@@ -124,7 +122,7 @@ class UIMenubar {
 				}
 				else { // Space2D
 					if (UIMenubar._plane == null) {
-						let mesh: any = new GeomPlane(1, 1, 2, 2);
+						let mesh: any = Geom.make_plane(1, 1, 2, 2);
 						let raw = {
 							name: "2DView",
 							vertex_arrays: [
@@ -160,7 +158,7 @@ class UIMenubar {
 		}
 	}
 
-	showMenu = (ui: Zui, category: i32) => {
+	static showMenu = (ui: Zui, category: i32) => {
 		UIMenu.show = true;
 		UIMenu.menuCommands = null;
 		UIMenu.menuCategory = category;

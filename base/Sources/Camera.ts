@@ -1,35 +1,28 @@
 
 class Camera {
 
-	static inst: Camera;
-	origins: Vec4[];
-	views: Mat4[];
-	redraws = 0;
-	first = true;
-	dir = new Vec4();
-	ease = 1.0;
-	controlsDown = false;
+	static origins: Vec4[];
+	static views: Mat4[];
+	static redraws = 0;
+	static dir = new Vec4();
+	static ease = 1.0;
+	static controlsDown = false;
 
 	constructor() {
-		Camera.inst = this;
+		Camera.reset();
 	}
 
-	update = () => {
+	static update = () => {
 		let mouse = Input.getMouse();
 		let kb = Input.getKeyboard();
 		let camera = Scene.active.camera;
-
-		if (this.first) {
-			this.first = false;
-			this.reset();
-		}
 
 		if (mouse.viewX < 0 ||
 			mouse.viewX > App.w() ||
 			mouse.viewY < 0 ||
 			mouse.viewY > App.h()) {
 
-			if (Config.raw.wrap_mouse && this.controlsDown) {
+			if (Config.raw.wrap_mouse && Camera.controlsDown) {
 				if (mouse.viewX < 0) {
 					mouse.x = mouse.lastX = App.x() + App.w();
 					Krom.setMousePosition(Math.floor(mouse.x), Math.floor(mouse.y));
@@ -64,7 +57,7 @@ class Camera {
 			(mouse.started("right") && !modif) ||
 			(mouse.started("middle") && !modif) ||
 			(mouse.wheelDelta != 0 && !modifKey)) {
-			this.controlsDown = true;
+			Camera.controlsDown = true;
 		}
 		else if (!Operator.shortcut(Config.keymap.action_rotate, ShortcutType.ShortcutDown) &&
 			!Operator.shortcut(Config.keymap.action_zoom, ShortcutType.ShortcutDown) &&
@@ -74,7 +67,7 @@ class Camera {
 			!(mouse.down("right") && !modif) &&
 			!(mouse.down("middle") && !modif) &&
 			(mouse.wheelDelta == 0 && !modifKey)) {
-			this.controlsDown = false;
+			Camera.controlsDown = false;
 		}
 
 		if (Input.occupied ||
@@ -82,14 +75,14 @@ class Camera {
 			Base.isDragging ||
 			Base.isScrolling() ||
 			Base.isComboSelected() ||
-			!this.controlsDown) {
+			!Camera.controlsDown) {
 			return;
 		}
 
 		let controls = Context.raw.cameraControls;
 		if (controls == CameraControls.ControlsOrbit && (Operator.shortcut(Config.keymap.action_rotate, ShortcutType.ShortcutDown) || (mouse.down("right") && !modif && defaultKeymap))) {
-			this.redraws = 2;
-			let dist = this.distance();
+			Camera.redraws = 2;
+			let dist = Camera.distance();
 			camera.transform.move(camera.lookWorld(), dist);
 			camera.transform.rotate(Vec4.zAxis(), -mouse.movementX / 100 * Config.raw.camera_rotation_speed);
 			camera.transform.rotate(camera.rightWorld(), -mouse.movementY / 100 * Config.raw.camera_rotation_speed);
@@ -99,7 +92,7 @@ class Camera {
 			camera.transform.move(camera.lookWorld(), -dist);
 		}
 		else if (controls == CameraControls.ControlsRotate && (Operator.shortcut(Config.keymap.action_rotate, ShortcutType.ShortcutDown) || (mouse.down("right") && !modif && defaultKeymap))) {
-			this.redraws = 2;
+			Camera.redraws = 2;
 			let t = Context.mainObject().transform;
 			let up = t.up().normalize();
 			t.rotate(up, mouse.movementX / 100 * Config.raw.camera_rotation_speed);
@@ -112,19 +105,19 @@ class Camera {
 		}
 
 		if (controls == CameraControls.ControlsRotate || controls == CameraControls.ControlsOrbit) {
-			this.panAction(modif, defaultKeymap);
+			Camera.panAction(modif, defaultKeymap);
 
 			if (Operator.shortcut(Config.keymap.action_zoom, ShortcutType.ShortcutDown)) {
-				this.redraws = 2;
+				Camera.redraws = 2;
 				let f = Camera.getZoomDelta() / 150;
-				f *= this.getCameraZoomSpeed();
+				f *= Camera.getCameraZoomSpeed();
 				camera.transform.move(camera.look(), f);
 			}
 
 			if (mouse.wheelDelta != 0 && !modifKey) {
-				this.redraws = 2;
+				Camera.redraws = 2;
 				let f = mouse.wheelDelta * (-0.1);
-				f *= this.getCameraZoomSpeed();
+				f *= Camera.getCameraZoomSpeed();
 				camera.transform.move(camera.look(), f);
 			}
 		}
@@ -141,37 +134,37 @@ class Camera {
 			}
 
 			if (moveForward || moveBackward || strafeRight || strafeLeft || strafeUp || strafeDown) {
-				this.ease += Time.delta * 15;
-				if (this.ease > 1.0) this.ease = 1.0;
-				this.dir.set(0, 0, 0);
-				if (moveForward) this.dir.addf(camera.look().x, camera.look().y, camera.look().z);
-				if (moveBackward) this.dir.addf(-camera.look().x, -camera.look().y, -camera.look().z);
-				if (strafeRight) this.dir.addf(camera.right().x, camera.right().y, camera.right().z);
-				if (strafeLeft) this.dir.addf(-camera.right().x, -camera.right().y, -camera.right().z);
-				if (strafeUp) this.dir.addf(0, 0, 1);
-				if (strafeDown) this.dir.addf(0, 0, -1);
+				Camera.ease += Time.delta * 15;
+				if (Camera.ease > 1.0) Camera.ease = 1.0;
+				Camera.dir.set(0, 0, 0);
+				if (moveForward) Camera.dir.addf(camera.look().x, camera.look().y, camera.look().z);
+				if (moveBackward) Camera.dir.addf(-camera.look().x, -camera.look().y, -camera.look().z);
+				if (strafeRight) Camera.dir.addf(camera.right().x, camera.right().y, camera.right().z);
+				if (strafeLeft) Camera.dir.addf(-camera.right().x, -camera.right().y, -camera.right().z);
+				if (strafeUp) Camera.dir.addf(0, 0, 1);
+				if (strafeDown) Camera.dir.addf(0, 0, -1);
 			}
 			else {
-				this.ease -= Time.delta * 20.0 * this.ease;
-				if (this.ease < 0.0) this.ease = 0.0;
+				Camera.ease -= Time.delta * 20.0 * Camera.ease;
+				if (Camera.ease < 0.0) Camera.ease = 0.0;
 			}
 
 
-			let d = Time.delta * fast * this.ease * 2.0 * ((moveForward || moveBackward) ? Config.raw.camera_zoom_speed : Config.raw.camera_pan_speed);
+			let d = Time.delta * fast * Camera.ease * 2.0 * ((moveForward || moveBackward) ? Config.raw.camera_zoom_speed : Config.raw.camera_pan_speed);
 			if (d > 0.0) {
-				camera.transform.move(this.dir, d);
+				camera.transform.move(Camera.dir, d);
 				if (Context.raw.cameraType == CameraType.CameraOrthographic) {
 					Viewport.updateCameraType(Context.raw.cameraType);
 				}
 			}
 
-			this.redraws = 2;
+			Camera.redraws = 2;
 			camera.transform.rotate(Vec4.zAxis(), -mouse.movementX / 200 * Config.raw.camera_rotation_speed);
 			camera.transform.rotate(camera.right(), -mouse.movementY / 200 * Config.raw.camera_rotation_speed);
 		}
 
 		if (Operator.shortcut(Config.keymap.rotate_light, ShortcutType.ShortcutDown)) {
-			this.redraws = 2;
+			Camera.redraws = 2;
 			let light = Scene.active.lights[0];
 			Context.raw.lightAngle = (Context.raw.lightAngle + ((mouse.movementX / 100) % (2 * Math.PI) + 2 * Math.PI)) % (2 * Math.PI);
 			let m = Mat4.rotationZ(mouse.movementX / 100);
@@ -180,12 +173,12 @@ class Camera {
 		}
 
 		if (Operator.shortcut(Config.keymap.rotate_envmap, ShortcutType.ShortcutDown)) {
-			this.redraws = 2;
+			Camera.redraws = 2;
 			Context.raw.envmapAngle -= mouse.movementX / 100;
 		}
 
-		if (this.redraws > 0) {
-			this.redraws--;
+		if (Camera.redraws > 0) {
+			Camera.redraws--;
 			Context.raw.ddirty = 2;
 
 			if (Context.raw.cameraType == CameraType.CameraOrthographic) {
@@ -194,45 +187,45 @@ class Camera {
 		}
 	}
 
-	distance = (): f32 => {
+	static distance = (): f32 => {
 		let camera = Scene.active.camera;
-		return Vec4.distance(this.origins[this.index()], camera.transform.loc);
+		return Vec4.distance(Camera.origins[Camera.index()], camera.transform.loc);
 	}
 
-	index = (): i32 => {
+	static index = (): i32 => {
 		return Context.raw.viewIndexLast > 0 ? 1 : 0;
 	}
 
-	getCameraZoomSpeed = (): f32 => {
+	static getCameraZoomSpeed = (): f32 => {
 		let sign = Config.raw.zoom_direction == ZoomDirection.ZoomVerticalInverted ||
 				   Config.raw.zoom_direction == ZoomDirection.ZoomHorizontalInverted ||
 				   Config.raw.zoom_direction == ZoomDirection.ZoomVerticalAndHorizontalInverted ? -1 : 1;
 		return Config.raw.camera_zoom_speed * sign;
 	}
 
-	reset = (viewIndex = -1) => {
+	static reset = (viewIndex = -1) => {
 		let camera = Scene.active.camera;
 		if (viewIndex == -1) {
-			this.origins = [new Vec4(0, 0, 0), new Vec4(0, 0, 0)];
-			this.views = [camera.transform.local.clone(), camera.transform.local.clone()];
+			Camera.origins = [new Vec4(0, 0, 0), new Vec4(0, 0, 0)];
+			Camera.views = [camera.transform.local.clone(), camera.transform.local.clone()];
 		}
 		else {
-			this.origins[viewIndex] = new Vec4(0, 0, 0);
-			this.views[viewIndex] = camera.transform.local.clone();
+			Camera.origins[viewIndex] = new Vec4(0, 0, 0);
+			Camera.views[viewIndex] = camera.transform.local.clone();
 		}
 	}
 
-	panAction = (modif: bool, defaultKeymap: bool) => {
+	static panAction = (modif: bool, defaultKeymap: bool) => {
 		let camera = Scene.active.camera;
 		let mouse = Input.getMouse();
 		if (Operator.shortcut(Config.keymap.action_pan, ShortcutType.ShortcutDown) || (mouse.down("middle") && !modif && defaultKeymap)) {
-			this.redraws = 2;
+			Camera.redraws = 2;
 			let look = camera.transform.look().normalize().mult(mouse.movementY / 150 * Config.raw.camera_pan_speed);
 			let right = camera.transform.right().normalize().mult(-mouse.movementX / 150 * Config.raw.camera_pan_speed);
 			camera.transform.loc.add(look);
 			camera.transform.loc.add(right);
-			this.origins[this.index()].add(look);
-			this.origins[this.index()].add(right);
+			Camera.origins[Camera.index()].add(look);
+			Camera.origins[Camera.index()].add(right);
 			camera.buildMatrix();
 		}
 	}

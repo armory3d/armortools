@@ -9,11 +9,11 @@ class TabBrowser {
 	static showDirectory = (directory: string) => {
 		TabBrowser.hpath.text = directory;
 		TabBrowser.hsearch.text = "";
-		UIBase.inst.htabs[TabArea.TabStatus].position = 0;
+		UIBase.htabs[TabArea.TabStatus].position = 0;
 	}
 
 	static draw = (htab: Handle) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		let statush = Config.raw.layout[LayoutSize.LayoutStatusH];
 		if (ui.tab(htab, tr("Browser")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
@@ -141,9 +141,9 @@ class TabBrowser {
 										if (assetIndex != -1) {
 											Context.raw.colorIdHandle.position = assetIndex;
 											Context.raw.colorIdPicked = false;
-											UIToolbar.inst.toolbarHandle.redraws = 1;
+											UIToolbar.toolbarHandle.redraws = 1;
 											if (Context.raw.tool == WorkspaceTool.ToolColorId) {
-												UIHeader.inst.headerHandle.redraws = 2;
+												UIHeader.headerHandle.redraws = 2;
 												Context.raw.ddirty = 2;
 											}
 										}

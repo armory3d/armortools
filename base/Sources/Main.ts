@@ -1,7 +1,7 @@
 
 class Main {
 
-	// @:keep static snapshotHelper = globalThis.Krom = {};
+	// static snapshotHelper = globalThis.Krom = {};
 	static tasks: i32;
 
 	static main = () => {
@@ -28,7 +28,6 @@ class Main {
 		///end
 	}
 
-	// @:keep
 	static kickstart = () => {
 		// Used to locate external application data folder
 		Krom.setApplicationName(Manifest.title);

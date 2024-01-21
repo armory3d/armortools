@@ -11,7 +11,7 @@ class TabLayers {
 	}
 
 	static drawMini = (htab: Handle) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		ui.setHoveredTabName(tr("Layers"));
 
 		let _ELEMENT_H = ui.t.ELEMENT_H;
@@ -34,7 +34,7 @@ class TabLayers {
 	}
 
 	static drawFull = (htab: Handle) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		if (ui.tab(htab, tr("Layers"))) {
 			ui.beginSticky();
 			ui.row([1 / 4, 1 / 4, 1 / 2]);
@@ -52,9 +52,9 @@ class TabLayers {
 	}
 
 	static button2dView = () => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		if (ui.button(tr("2D View"))) {
-			UIBase.inst.show2DView(View2DType.View2DLayer);
+			UIBase.show2DView(View2DType.View2DLayer);
 		}
 		else if (ui.isHovered) ui.tooltip(tr("Show 2D View") + ` (${Config.keymap.toggle_2d_view})`);
 	}
@@ -69,9 +69,9 @@ class TabLayers {
 	}
 
 	static highlightOddLines = () => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		let step = ui.t.ELEMENT_H * 2;
-		let fullH = ui._windowH - UIBase.inst.hwnds[0].scrollOffset;
+		let fullH = ui._windowH - UIBase.hwnds[0].scrollOffset;
 		for (let i = 0; i < Math.floor(fullH / step); ++i) {
 			if (i % 2 == 0) {
 				ui.fill(0, i * step, (ui._w / ui.SCALE() - 2), step, ui.t.WINDOW_BG_COL - 0x00040404);
@@ -80,7 +80,7 @@ class TabLayers {
 	}
 
 	static buttonNew = (text: string) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		if (ui.button(text)) {
 			UIMenu.draw((ui: Zui) => {
 				let l = Context.raw.layer;
@@ -155,7 +155,7 @@ class TabLayers {
 	}
 
 	static comboFilter = () => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		let ar = [tr("All")];
 		for (let p of Project.paintObjects) ar.push(p.name);
 		let atlases = Project.getUsedAtlases();
@@ -215,7 +215,7 @@ class TabLayers {
 	}
 
 	static drawLayerSlot = (l: SlotLayer, i: i32, mini: bool) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 
 		if (Context.raw.layerFilter > 0 &&
 			l.getObjectMask() > 0 &&
@@ -281,7 +281,7 @@ class TabLayers {
 	}
 
 	static drawLayerSlotMini = (l: SlotLayer, i: i32) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 
 		ui.row([1, 1]);
 		let uix = ui._x;
@@ -295,7 +295,7 @@ class TabLayers {
 	}
 
 	static drawLayerSlotFull = (l: SlotLayer, i: i32) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 
 		let step = ui.t.ELEMENT_H;
 
@@ -508,12 +508,12 @@ class TabLayers {
 
 	static layerToggleVisible = (l: SlotLayer) => {
 		l.visible = !l.visible;
-		UIView2D.inst.hwnd.redraws = 2;
+		UIView2D.hwnd.redraws = 2;
 		MakeMaterial.parseMeshMaterial();
 	}
 
 	static drawLayerHighlight = (l: SlotLayer, mini: bool) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		let step = ui.t.ELEMENT_H;
 
 		// Separator line
@@ -531,7 +531,7 @@ class TabLayers {
 	}
 
 	static handleLayerIconState = (l: SlotLayer, i: i32, state: State, uix: f32, uiy: f32) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 
 		///if is_paint
 		let texpaint_preview = l.texpaint_preview;
@@ -568,7 +568,7 @@ class TabLayers {
 		}
 		else if (state == State.Released) {
 			if (Time.time() - Context.raw.selectTime < 0.2) {
-				UIBase.inst.show2DView(View2DType.View2DLayer);
+				UIBase.show2DView(View2DType.View2DLayer);
 			}
 			if (Time.time() - Context.raw.selectTime > 0.2) {
 				Context.raw.selectTime = Time.time();
@@ -578,7 +578,7 @@ class TabLayers {
 	}
 
 	static drawLayerIcon = (l: SlotLayer, i: i32, uix: f32, uiy: f32, mini: bool) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		let icons = Res.get("icons.k");
 		let iconH = (ui.ELEMENT_H() - (mini ? 2 : 3)) * 2;
 
@@ -631,7 +631,7 @@ class TabLayers {
 			}
 
 			// Draw layer numbers when selecting a layer via keyboard shortcut
-			let isTyping = ui.isTyping || UIView2D.inst.ui.isTyping || UINodes.inst.ui.isTyping;
+			let isTyping = ui.isTyping || UIView2D.ui.isTyping || UINodes.ui.isTyping;
 			if (!isTyping) {
 				if (i < 9 && Operator.shortcut(Config.keymap.select_layer, ShortcutType.ShortcutDown)) {
 					let number = String(i + 1) ;

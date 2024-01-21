@@ -9,7 +9,7 @@ class TabObjects {
 	}
 
 	static draw = (htab: Handle) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		if (ui.tab(htab, tr("Objects"))) {
 			ui.beginSticky();
 			ui.row([1 / 4]);

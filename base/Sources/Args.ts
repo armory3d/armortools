@@ -89,7 +89,7 @@ class Args {
 					ImportAsset.run(Args.assetPath, -1, -1, false);
 					///if is_paint
 					if (Path.isTexture(Args.assetPath)) {
-						UIBase.inst.show2DView(View2DType.View2DAsset);
+						UIBase.show2DView(View2DType.View2DAsset);
 					}
 					///end
 				}

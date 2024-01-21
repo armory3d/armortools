@@ -4,7 +4,7 @@
 class TabBrushes {
 
 	static draw = (htab: Handle) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		if (ui.tab(htab, tr("Brushes"))) {
 			ui.beginSticky();
 			ui.row([1 / 4, 1 / 4, 1 / 4]);
@@ -12,13 +12,13 @@ class TabBrushes {
 				Context.raw.brush = new SlotBrush();
 				Project.brushes.push(Context.raw.brush);
 				MakeMaterial.parseBrush();
-				UINodes.inst.hwnd.redraws = 2;
+				UINodes.hwnd.redraws = 2;
 			}
 			if (ui.button(tr("Import"))) {
 				Project.importBrush();
 			}
 			if (ui.button(tr("Nodes"))) {
-				UIBase.inst.showBrushNodes();
+				UIBase.showBrushNodes();
 			}
 			ui.endSticky();
 			ui.separator(3, false);
@@ -64,7 +64,7 @@ class TabBrushes {
 					let state = Project.brushes[i].previewReady ? ui.image(img) : ui.image(Res.get("icons.k"), -1, null, tile * 5, tile, tile, tile);
 					if (state == State.Started) {
 						if (Context.raw.brush != Project.brushes[i]) Context.selectBrush(i);
-						if (Time.time() - Context.raw.selectTime < 0.25) UIBase.inst.showBrushNodes();
+						if (Time.time() - Context.raw.selectTime < 0.25) UIBase.showBrushNodes();
 						Context.raw.selectTime = Time.time();
 						// let mouse = Input.getMouse();
 						// App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
@@ -144,7 +144,7 @@ class TabBrushes {
 		let i = Project.brushes.indexOf(b);
 		Context.selectBrush(i == Project.brushes.length - 1 ? i - 1 : i + 1);
 		Project.brushes.splice(i, 1);
-		UIBase.inst.hwnds[1].redraws = 2;
+		UIBase.hwnds[1].redraws = 2;
 	}
 }
 

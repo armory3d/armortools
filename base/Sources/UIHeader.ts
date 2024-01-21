@@ -1,19 +1,16 @@
 
 class UIHeader {
 
-	static inst: UIHeader;
-
 	static defaultHeaderH = 28;
 	static headerh = UIHeader.defaultHeaderH;
-	headerHandle = new Handle({ layout: Layout.Horizontal });
-	worktab = new Handle();
+	static headerHandle = new Handle({ layout: Layout.Horizontal });
+	static worktab = new Handle();
 
 	constructor() {
-		UIHeader.inst = this;
 	}
 
-	renderUI = (g: Graphics2) => {
-		let ui = UIBase.inst.ui;
+	static renderUI = (g: Graphics2) => {
+		let ui = UIBase.ui;
 		if (Config.raw.touch_ui) {
 			UIHeader.headerh = UIHeader.defaultHeaderH + 6;
 		}
@@ -24,22 +21,22 @@ class UIHeader {
 
 		if (Config.raw.layout[LayoutSize.LayoutHeader] == 0) return;
 
-		let nodesw = (UINodes.inst.show || UIView2D.inst.show) ? Config.raw.layout[LayoutSize.LayoutNodesW] : 0;
+		let nodesw = (UINodes.show || UIView2D.show) ? Config.raw.layout[LayoutSize.LayoutNodesW] : 0;
 		///if is_lab
 		let ww = System.width - nodesw;
 		///else
-		let ww = System.width - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSize.LayoutSidebarW] - nodesw;
+		let ww = System.width - UIToolbar.toolbarw - Config.raw.layout[LayoutSize.LayoutSidebarW] - nodesw;
 		///end
 
-		if (ui.window(this.headerHandle, App.x(), UIHeader.headerh, ww, UIHeader.headerh)) {
+		if (ui.window(UIHeader.headerHandle, App.x(), UIHeader.headerh, ww, UIHeader.headerh)) {
 			ui._y += 2;
-			this.drawToolProperties(ui);
+			UIHeader.drawToolProperties(ui);
 		}
 	}
 
 	///if is_paint
 
-	drawToolProperties = (ui: Zui) => {
+	static drawToolProperties = (ui: Zui) => {
 		if (Context.raw.tool == WorkspaceTool.ToolColorId) {
 			ui.text(tr("Picked Color"));
 			if (Context.raw.colorIdPicked) {
@@ -48,7 +45,7 @@ class UIHeader {
 			ui.enabled = Context.raw.colorIdPicked;
 			if (ui.button(tr("Clear"))) {
 				Context.raw.colorIdPicked = false;
-				UIToolbar.inst.toolbarHandle.redraws = 1;
+				UIToolbar.toolbarHandle.redraws = 1;
 			}
 			ui.enabled = true;
 			ui.text(tr("Color ID Map"));
@@ -57,7 +54,7 @@ class UIHeader {
 				if (Context.raw.colorIdHandle.changed) {
 					Context.raw.ddirty = 2;
 					Context.raw.colorIdPicked = false;
-					UIToolbar.inst.toolbarHandle.redraws = 1;
+					UIToolbar.toolbarHandle.redraws = 1;
 				}
 				ui.image(Project.getImage(Project.assets[cid]));
 				if (ui.isHovered) ui.tooltipImage(Project.getImage(Project.assets[cid]), 256);
@@ -73,8 +70,8 @@ class UIHeader {
 					}
 					Context.raw.ddirty = 2;
 					Context.raw.colorIdPicked = false;
-					UIToolbar.inst.toolbarHandle.redraws = 1;
-					UIBase.inst.hwnds[2].redraws = 2;
+					UIToolbar.toolbarHandle.redraws = 1;
+					UIBase.hwnds[2].redraws = 2;
 				});
 			}
 			ui.enabled = Context.raw.colorIdPicked;
@@ -93,8 +90,8 @@ class UIHeader {
 					m.texpaint.g4.drawIndexedVertices();
 					m.texpaint.g4.end();
 					Context.raw.colorIdPicked = false;
-					UIToolbar.inst.toolbarHandle.redraws = 1;
-					UIHeader.inst.headerHandle.redraws = 1;
+					UIToolbar.toolbarHandle.redraws = 1;
+					UIHeader.headerHandle.redraws = 1;
 					Context.raw.layerPreviewDirty = true;
 					Base.updateFillLayers();
 				}
@@ -144,7 +141,7 @@ class UIHeader {
 				let newSwatch = Project.cloneSwatch(Context.raw.pickedColor);
 				Context.setSwatch(newSwatch);
 				Project.raw.swatches.push(newSwatch);
-				UIBase.inst.hwnds[2].redraws = 1;
+				UIBase.hwnds[2].redraws = 1;
 			}
 			if (ui.isHovered) ui.tooltip(tr("Add picked color to swatches"));
 
@@ -182,7 +179,7 @@ class UIHeader {
 				Base.notifyOnNextFrame(() => {
 					Context.raw.layerPreviewDirty = true;
 				});
-				UIBase.inst.hwnds[0].redraws = 2;
+				UIBase.hwnds[0].redraws = 2;
 				History.pushUndo = true;
 				///if (krom_direct3d12 || krom_vulkan || krom_metal)
 				RenderPathRaytraceBake.currentSample = 0;
@@ -472,7 +469,7 @@ class UIHeader {
 	///end
 
 	///if is_sculpt
-	drawToolProperties = (ui: Zui) => {
+	static drawToolProperties = (ui: Zui) => {
 		if (Context.raw.tool == WorkspaceTool.ToolBrush) {
 			Context.raw.brushRadius = ui.slider(Context.raw.brushRadiusHandle, tr("Radius"), 0.01, 2.0, true);
 			if (ui.isHovered) ui.tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", new Map([["brush_radius", Config.keymap.brush_radius], ["brush_radius_decrease", Config.keymap.brush_radius_decrease], ["brush_radius_increase", Config.keymap.brush_radius_increase]])));
@@ -481,7 +478,7 @@ class UIHeader {
 	///end
 
 	///if is_lab
-	drawToolProperties = (ui: Zui) => {
+	static drawToolProperties = (ui: Zui) => {
 		if (Context.raw.tool == WorkspaceTool.ToolPicker) {
 
 		}
@@ -490,8 +487,8 @@ class UIHeader {
 				 Context.raw.tool == WorkspaceTool.ToolBlur   ||
 				 Context.raw.tool == WorkspaceTool.ToolSmudge) {
 
-			let nodes = UINodes.inst.getNodes();
-			let canvas = UINodes.inst.getCanvas(true);
+			let nodes = UINodes.getNodes();
+			let canvas = UINodes.getCanvas(true);
 			let inpaint = nodes.nodesSelectedId.length > 0 && nodes.getNode(canvas.nodes, nodes.nodesSelectedId[0]).type == "InpaintNode";
 			if (inpaint) {
 				Context.raw.brushRadius = ui.slider(Context.raw.brushRadiusHandle, tr("Radius"), 0.01, 2.0, true);

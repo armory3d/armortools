@@ -5,7 +5,7 @@ class TabScript {
 	static textColoring: TTextColoring = null;
 
 	static draw = (htab: Handle) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		let statush = Config.raw.layout[LayoutSize.LayoutStatusH];
 		if (ui.tab(htab, tr("Script")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
 

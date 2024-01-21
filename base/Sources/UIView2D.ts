@@ -5,34 +5,31 @@ class UIView2D {
 	static pipe: PipelineState;
 	static channelLocation: ConstantLocation;
 	static textInputHover = false;
-	uvmapShow = false;
-	texType = PaintTex.TexBase;
-	layerMode = View2DLayerMode.View2DSelected;
+	static uvmapShow = false;
+	static texType = PaintTex.TexBase;
+	static layerMode = View2DLayerMode.View2DSelected;
 	///end
 
 	///if (is_paint || is_sculpt)
-	type = View2DType.View2DLayer;
+	static type = View2DType.View2DLayer;
 	///else
-	type = View2DType.View2DAsset;
+	static type = View2DType.View2DAsset;
 	///end
 
-	static inst: UIView2D;
-	show = false;
-	wx: i32;
-	wy: i32;
-	ww: i32;
-	wh: i32;
-	ui: Zui;
-	hwnd = new Handle();
-	panX = 0.0;
-	panY = 0.0;
-	panScale = 1.0;
-	tiledShow = false;
-	controlsDown = false;
+	static show = false;
+	static wx: i32;
+	static wy: i32;
+	static ww: i32;
+	static wh: i32;
+	static ui: Zui;
+	static hwnd = new Handle();
+	static panX = 0.0;
+	static panY = 0.0;
+	static panScale = 1.0;
+	static tiledShow = false;
+	static controlsDown = false;
 
 	constructor() {
-		UIView2D.inst = this;
-
 		///if (is_paint || is_sculpt)
 		UIView2D.pipe = new PipelineState();
 		UIView2D.pipe.vertexShader = System.getShader("layer_view.vert");
@@ -50,42 +47,42 @@ class UIView2D {
 		///end
 
 		let scale = Config.raw.window_scale;
-		this.ui = new Zui({ theme: Base.theme, font: Base.font, color_wheel: Base.colorWheel, black_white_gradient: Base.colorWheelGradient, scaleFactor: scale });
-		this.ui.scrollEnabled = false;
+		UIView2D.ui = new Zui({ theme: Base.theme, font: Base.font, color_wheel: Base.colorWheel, black_white_gradient: Base.colorWheelGradient, scaleFactor: scale });
+		UIView2D.ui.scrollEnabled = false;
 	}
 
-	render = (g: Graphics2) => {
+	static render = (g: Graphics2) => {
 
-		this.ww = Config.raw.layout[LayoutSize.LayoutNodesW];
+		UIView2D.ww = Config.raw.layout[LayoutSize.LayoutNodesW];
 
 		///if (is_paint || is_sculpt)
-		this.wx = Math.floor(App.w()) + UIToolbar.inst.toolbarw;
+		UIView2D.wx = Math.floor(App.w()) + UIToolbar.toolbarw;
 		///else
-		this.wx = Math.floor(App.w());
+		UIView2D.wx = Math.floor(App.w());
 		///end
 
-		this.wy = 0;
+		UIView2D.wy = 0;
 
 		///if (is_paint || is_sculpt)
-		if (!UIBase.inst.show) {
-			this.ww += Config.raw.layout[LayoutSize.LayoutSidebarW] + UIToolbar.inst.toolbarw;
-			this.wx -= UIToolbar.inst.toolbarw;
+		if (!UIBase.show) {
+			UIView2D.ww += Config.raw.layout[LayoutSize.LayoutSidebarW] + UIToolbar.toolbarw;
+			UIView2D.wx -= UIToolbar.toolbarw;
 		}
 		///end
 
-		if (!this.show) return;
+		if (!UIView2D.show) return;
 		if (System.width == 0 || System.height == 0) return;
 
-		if (Context.raw.pdirty >= 0) this.hwnd.redraws = 2; // Paint was active
+		if (Context.raw.pdirty >= 0) UIView2D.hwnd.redraws = 2; // Paint was active
 
 		g.end();
 
 		// Cache grid
-		if (UINodes.inst.grid == null) UINodes.inst.drawGrid();
+		if (UINodes.grid == null) UINodes.drawGrid();
 
 		// Ensure UV map is drawn
 		///if (is_paint || is_sculpt)
-		if (this.uvmapShow) UtilUV.cacheUVMap();
+		if (UIView2D.uvmapShow) UtilUV.cacheUVMap();
 		///end
 
 		// Ensure font image is drawn
@@ -93,24 +90,24 @@ class UIView2D {
 		if (Context.raw.font.image == null) UtilRender.makeFontPreview();
 		///end
 
-		this.ui.begin(g);
+		UIView2D.ui.begin(g);
 
 		let headerh = Config.raw.layout[LayoutSize.LayoutHeader] == 1 ? UIHeader.headerh * 2 : UIHeader.headerh;
 		let apph = System.height - Config.raw.layout[LayoutSize.LayoutStatusH] + headerh;
-		this.wh = System.height - Config.raw.layout[LayoutSize.LayoutStatusH];
+		UIView2D.wh = System.height - Config.raw.layout[LayoutSize.LayoutStatusH];
 
-		if (UINodes.inst.show) {
-			this.wh -= Config.raw.layout[LayoutSize.LayoutNodesH];
-			if (Config.raw.touch_ui) this.wh += UIHeader.headerh;
+		if (UINodes.show) {
+			UIView2D.wh -= Config.raw.layout[LayoutSize.LayoutNodesH];
+			if (Config.raw.touch_ui) UIView2D.wh += UIHeader.headerh;
 		}
 
-		if (this.ui.window(this.hwnd, this.wx, this.wy, this.ww, this.wh)) {
+		if (UIView2D.ui.window(UIView2D.hwnd, UIView2D.wx, UIView2D.wy, UIView2D.ww, UIView2D.wh)) {
 
-			this.ui.tab(Zui.handle("uiview2d_0"), tr("2D View"));
+			UIView2D.ui.tab(Zui.handle("uiview2d_0"), tr("2D View"));
 
 			// Grid
-			this.ui.g.color = 0xffffffff;
-			this.ui.g.drawImage(UINodes.inst.grid, (this.panX * this.panScale) % 100 - 100, (this.panY * this.panScale) % 100 - 100);
+			UIView2D.ui.g.color = 0xffffffff;
+			UIView2D.ui.g.drawImage(UINodes.grid, (UIView2D.panX * UIView2D.panScale) % 100 - 100, (UIView2D.panY * UIView2D.panScale) % 100 - 100);
 
 			// Texture
 			let tex: Image = null;
@@ -120,23 +117,23 @@ class UIView2D {
 			let channel = 0;
 			///end
 
-			let tw = this.ww * 0.95 * this.panScale;
-			let tx = this.ww / 2 - tw / 2 + this.panX;
-			let ty = apph / 2 - tw / 2 + this.panY;
+			let tw = UIView2D.ww * 0.95 * UIView2D.panScale;
+			let tx = UIView2D.ww / 2 - tw / 2 + UIView2D.panX;
+			let ty = apph / 2 - tw / 2 + UIView2D.panY;
 
-			if (this.type == View2DType.View2DAsset) {
+			if (UIView2D.type == View2DType.View2DAsset) {
 				tex = Project.getImage(Context.raw.texture);
 			}
-			else if (this.type == View2DType.View2DNode) {
+			else if (UIView2D.type == View2DType.View2DNode) {
 				///if (is_paint || is_sculpt)
 
 				tex = Context.raw.nodePreview;
 
 				///else
 
-				let nodes = UINodes.inst.getNodes();
+				let nodes = UINodes.getNodes();
 				if (nodes.nodesSelectedId.length > 0) {
-					let sel = nodes.getNode(UINodes.inst.getCanvas(true).nodes, nodes.nodesSelectedId[0]);
+					let sel = nodes.getNode(UINodes.getCanvas(true).nodes, nodes.nodesSelectedId[0]);
 					let brushNode = ParserLogic.getLogicNode(sel);
 					if (brushNode != null) {
 						tex = brushNode.getCachedImage();
@@ -146,14 +143,14 @@ class UIView2D {
 				///end
 			}
 			///if is_paint
-			else if (this.type == View2DType.View2DLayer) {
+			else if (UIView2D.type == View2DType.View2DLayer) {
 				let layer = l;
 
 				if (Config.raw.brush_live && RenderPathPaint.liveLayerDrawn > 0) {
 					layer = RenderPathPaint.liveLayer;
 				}
 
-				if (this.layerMode == View2DLayerMode.View2DVisible) {
+				if (UIView2D.layerMode == View2DLayerMode.View2DVisible) {
 					let current = Graphics2.current;
 					if (current != null) current.end();
 					layer = Base.flatten();
@@ -168,22 +165,22 @@ class UIView2D {
 
 				tex =
 					Context.raw.layer.isMask() ? layer.texpaint :
-					this.texType == PaintTex.TexBase     ? layer.texpaint :
-					this.texType == PaintTex.TexOpacity  ? layer.texpaint :
-					this.texType == PaintTex.TexNormal   ? layer.texpaint_nor :
+					UIView2D.texType == PaintTex.TexBase     ? layer.texpaint :
+					UIView2D.texType == PaintTex.TexOpacity  ? layer.texpaint :
+					UIView2D.texType == PaintTex.TexNormal   ? layer.texpaint_nor :
 														   layer.texpaint_pack;
 
 				channel =
 					Context.raw.layer.isMask()  ? 1 :
-					this.texType == PaintTex.TexOcclusion ? 1 :
-					this.texType == PaintTex.TexRoughness ? 2 :
-					this.texType == PaintTex.TexMetallic  ? 3 :
-					this.texType == PaintTex.TexOpacity   ? 4 :
-					this.texType == PaintTex.TexHeight    ? 4 :
-					this.texType == PaintTex.TexNormal    ? 5 :
+					UIView2D.texType == PaintTex.TexOcclusion ? 1 :
+					UIView2D.texType == PaintTex.TexRoughness ? 2 :
+					UIView2D.texType == PaintTex.TexMetallic  ? 3 :
+					UIView2D.texType == PaintTex.TexOpacity   ? 4 :
+					UIView2D.texType == PaintTex.TexHeight    ? 4 :
+					UIView2D.texType == PaintTex.TexNormal    ? 5 :
 															0;
 			}
-			else if (this.type == View2DType.View2DFont) {
+			else if (UIView2D.type == View2DType.View2DFont) {
 				tex = Context.raw.font.image;
 			}
 			///end
@@ -191,15 +188,15 @@ class UIView2D {
 			let th = tw;
 			if (tex != null) {
 				th = tw * (tex.height / tex.width);
-				ty = apph / 2 - th / 2 + this.panY;
+				ty = apph / 2 - th / 2 + UIView2D.panY;
 
 				///if (is_paint || is_sculpt)
-				if (this.type == View2DType.View2DLayer) {
+				if (UIView2D.type == View2DType.View2DLayer) {
 					///if (!krom_opengl)
-					this.ui.g.pipeline = UIView2D.pipe;
+					UIView2D.ui.g.pipeline = UIView2D.pipe;
 					///end
 					if (!Context.raw.textureFilter) {
-						this.ui.g.imageScaleQuality = ImageScaleQuality.Low;
+						UIView2D.ui.g.imageScaleQuality = ImageScaleQuality.Low;
 					}
 					///if krom_opengl
 					Krom.setPipeline(UIView2D.pipe.pipeline_);
@@ -208,31 +205,31 @@ class UIView2D {
 				}
 				///end
 
-				this.ui.g.drawScaledImage(tex, tx, ty, tw, th);
+				UIView2D.ui.g.drawScaledImage(tex, tx, ty, tw, th);
 
-				if (this.tiledShow) {
-					this.ui.g.drawScaledImage(tex, tx - tw, ty, tw, th);
-					this.ui.g.drawScaledImage(tex, tx - tw, ty - th, tw, th);
-					this.ui.g.drawScaledImage(tex, tx - tw, ty + th, tw, th);
-					this.ui.g.drawScaledImage(tex, tx + tw, ty, tw, th);
-					this.ui.g.drawScaledImage(tex, tx + tw, ty - th, tw, th);
-					this.ui.g.drawScaledImage(tex, tx + tw, ty + th, tw, th);
-					this.ui.g.drawScaledImage(tex, tx, ty - th, tw, th);
-					this.ui.g.drawScaledImage(tex, tx, ty + th, tw, th);
+				if (UIView2D.tiledShow) {
+					UIView2D.ui.g.drawScaledImage(tex, tx - tw, ty, tw, th);
+					UIView2D.ui.g.drawScaledImage(tex, tx - tw, ty - th, tw, th);
+					UIView2D.ui.g.drawScaledImage(tex, tx - tw, ty + th, tw, th);
+					UIView2D.ui.g.drawScaledImage(tex, tx + tw, ty, tw, th);
+					UIView2D.ui.g.drawScaledImage(tex, tx + tw, ty - th, tw, th);
+					UIView2D.ui.g.drawScaledImage(tex, tx + tw, ty + th, tw, th);
+					UIView2D.ui.g.drawScaledImage(tex, tx, ty - th, tw, th);
+					UIView2D.ui.g.drawScaledImage(tex, tx, ty + th, tw, th);
 				}
 
 				///if (is_paint || is_sculpt)
-				if (this.type == View2DType.View2DLayer) {
-					this.ui.g.pipeline = null;
+				if (UIView2D.type == View2DType.View2DLayer) {
+					UIView2D.ui.g.pipeline = null;
 					if (!Context.raw.textureFilter) {
-						this.ui.g.imageScaleQuality = ImageScaleQuality.High;
+						UIView2D.ui.g.imageScaleQuality = ImageScaleQuality.High;
 					}
 				}
 
 				// Texture and node preview color picking
-				if ((Context.in2dView(View2DType.View2DAsset) || Context.in2dView(View2DType.View2DNode)) && Context.raw.tool == WorkspaceTool.ToolPicker && this.ui.inputDown) {
-					let x = this.ui.inputX - tx - this.wx;
-					let y = this.ui.inputY - ty - this.wy;
+				if ((Context.in2dView(View2DType.View2DAsset) || Context.in2dView(View2DType.View2DNode)) && Context.raw.tool == WorkspaceTool.ToolPicker && UIView2D.ui.inputDown) {
+					let x = UIView2D.ui.inputX - tx - UIView2D.wx;
+					let y = UIView2D.ui.inputY - ty - UIView2D.wy;
 					Base.notifyOnNextFrame(() => {
 						let path = RenderPath.active;
 						let texpaint_picker = path.renderTargets.get("texpaint_picker").image;
@@ -254,7 +251,7 @@ class UIView2D {
 						Context.raw.pickedColor.base = color_set_rb(Context.raw.pickedColor.base, a.getUint8(i0));
 						Context.raw.pickedColor.base = color_set_gb(Context.raw.pickedColor.base, a.getUint8(i1));
 						Context.raw.pickedColor.base = color_set_bb(Context.raw.pickedColor.base, a.getUint8(i2));
-						UIHeader.inst.headerHandle.redraws = 2;
+						UIHeader.headerHandle.redraws = 2;
 					});
 				}
 				///end
@@ -262,85 +259,85 @@ class UIView2D {
 
 			///if (is_paint || is_sculpt)
 			// UV map
-			if (this.type == View2DType.View2DLayer && this.uvmapShow) {
-				this.ui.g.drawScaledImage(UtilUV.uvmap, tx, ty, tw, th);
+			if (UIView2D.type == View2DType.View2DLayer && UIView2D.uvmapShow) {
+				UIView2D.ui.g.drawScaledImage(UtilUV.uvmap, tx, ty, tw, th);
 			}
 			///end
 
 			// Menu
-			let ew = Math.floor(this.ui.ELEMENT_W());
-			this.ui.g.color = this.ui.t.SEPARATOR_COL;
-			this.ui.g.fillRect(0, this.ui.ELEMENT_H(), this.ww, this.ui.ELEMENT_H() + this.ui.ELEMENT_OFFSET() * 2);
-			this.ui.g.color = 0xffffffff;
+			let ew = Math.floor(UIView2D.ui.ELEMENT_W());
+			UIView2D.ui.g.color = UIView2D.ui.t.SEPARATOR_COL;
+			UIView2D.ui.g.fillRect(0, UIView2D.ui.ELEMENT_H(), UIView2D.ww, UIView2D.ui.ELEMENT_H() + UIView2D.ui.ELEMENT_OFFSET() * 2);
+			UIView2D.ui.g.color = 0xffffffff;
 
-			let startY = this.ui.ELEMENT_H() + this.ui.ELEMENT_OFFSET();
-			this.ui._x = 2;
-			this.ui._y = 2 + startY;
-			this.ui._w = ew;
+			let startY = UIView2D.ui.ELEMENT_H() + UIView2D.ui.ELEMENT_OFFSET();
+			UIView2D.ui._x = 2;
+			UIView2D.ui._y = 2 + startY;
+			UIView2D.ui._w = ew;
 
 			// Editable layer name
 			let h = Zui.handle("uiview2d_1");
 
 			///if (is_paint || is_sculpt)
-			let text = this.type == View2DType.View2DNode ? Context.raw.nodePreviewName : h.text;
+			let text = UIView2D.type == View2DType.View2DNode ? Context.raw.nodePreviewName : h.text;
 			///else
 			let text = h.text;
 			///end
 
-			this.ui._w = Math.floor(Math.min(this.ui.font.width(this.ui.fontSize, text) + 15 * this.ui.SCALE(), 100 * this.ui.SCALE()));
+			UIView2D.ui._w = Math.floor(Math.min(UIView2D.ui.font.width(UIView2D.ui.fontSize, text) + 15 * UIView2D.ui.SCALE(), 100 * UIView2D.ui.SCALE()));
 
-			if (this.type == View2DType.View2DAsset) {
+			if (UIView2D.type == View2DType.View2DAsset) {
 				let asset = Context.raw.texture;
 				if (asset != null) {
 					let assetNames = Project.assetNames;
 					let i = assetNames.indexOf(asset.name);
 					h.text = asset.name;
-					asset.name = this.ui.textInput(h, "");
+					asset.name = UIView2D.ui.textInput(h, "");
 					assetNames[i] = asset.name;
 				}
 			}
-			else if (this.type == View2DType.View2DNode) {
+			else if (UIView2D.type == View2DType.View2DNode) {
 				///if (is_paint || is_sculpt)
 
-				this.ui.text(Context.raw.nodePreviewName);
+				UIView2D.ui.text(Context.raw.nodePreviewName);
 
 				///else
 
-				let nodes = UINodes.inst.getNodes();
+				let nodes = UINodes.getNodes();
 				if (nodes.nodesSelectedId.length > 0) {
-					this.ui.text(nodes.getNode(UINodes.inst.getCanvas(true).nodes, nodes.nodesSelectedId[0]).name);
+					UIView2D.ui.text(nodes.getNode(UINodes.getCanvas(true).nodes, nodes.nodesSelectedId[0]).name);
 				}
 
 				///end
 			}
 			///if (is_paint || is_sculpt)
-			else if (this.type == View2DType.View2DLayer) {
+			else if (UIView2D.type == View2DType.View2DLayer) {
 				h.text = l.name;
-				l.name = this.ui.textInput(h, "");
-				UIView2D.textInputHover = this.ui.isHovered;
+				l.name = UIView2D.ui.textInput(h, "");
+				UIView2D.textInputHover = UIView2D.ui.isHovered;
 			}
-			else if (this.type == View2DType.View2DFont) {
+			else if (UIView2D.type == View2DType.View2DFont) {
 				h.text = Context.raw.font.name;
-				Context.raw.font.name = this.ui.textInput(h, "");
+				Context.raw.font.name = UIView2D.ui.textInput(h, "");
 			}
 			///end
 
-			if (h.changed) UIBase.inst.hwnds[0].redraws = 2;
-			this.ui._x += this.ui._w + 3;
-			this.ui._y = 2 + startY;
-			this.ui._w = ew;
+			if (h.changed) UIBase.hwnds[0].redraws = 2;
+			UIView2D.ui._x += UIView2D.ui._w + 3;
+			UIView2D.ui._y = 2 + startY;
+			UIView2D.ui._w = ew;
 
 			///if (is_paint || is_sculpt)
-			if (this.type == View2DType.View2DLayer) {
-				this.layerMode = this.ui.combo(Zui.handle("uiview2d_2", { position: this.layerMode }), [
+			if (UIView2D.type == View2DType.View2DLayer) {
+				UIView2D.layerMode = UIView2D.ui.combo(Zui.handle("uiview2d_2", { position: UIView2D.layerMode }), [
 					tr("Visible"),
 					tr("Selected"),
 				], tr("Layers"));
-				this.ui._x += ew + 3;
-				this.ui._y = 2 + startY;
+				UIView2D.ui._x += ew + 3;
+				UIView2D.ui._y = 2 + startY;
 
 				if (!Context.raw.layer.isMask()) {
-					this.texType = this.ui.combo(Zui.handle("uiview2d_3", { position: this.texType }), [
+					UIView2D.texType = UIView2D.ui.combo(Zui.handle("uiview2d_3", { position: UIView2D.texType }), [
 						tr("Base Color"),
 						tr("Normal Map"),
 						tr("Occlusion"),
@@ -349,77 +346,77 @@ class UIView2D {
 						tr("Opacity"),
 						tr("Height"),
 					], tr("Texture"));
-					this.ui._x += ew + 3;
-					this.ui._y = 2 + startY;
+					UIView2D.ui._x += ew + 3;
+					UIView2D.ui._y = 2 + startY;
 				}
 
-				this.ui._w = Math.floor(ew * 0.7 + 3);
-				this.uvmapShow = this.ui.check(Zui.handle("uiview2d_4", { selected: this.uvmapShow }), tr("UV Map"));
-				this.ui._x += ew * 0.7 + 3;
-				this.ui._y = 2 + startY;
+				UIView2D.ui._w = Math.floor(ew * 0.7 + 3);
+				UIView2D.uvmapShow = UIView2D.ui.check(Zui.handle("uiview2d_4", { selected: UIView2D.uvmapShow }), tr("UV Map"));
+				UIView2D.ui._x += ew * 0.7 + 3;
+				UIView2D.ui._y = 2 + startY;
 			}
 			///end
 
-			this.tiledShow = this.ui.check(Zui.handle("uiview2d_5", { selected: this.tiledShow }), tr("Tiled"));
-			this.ui._x += ew * 0.7 + 3;
-			this.ui._y = 2 + startY;
+			UIView2D.tiledShow = UIView2D.ui.check(Zui.handle("uiview2d_5", { selected: UIView2D.tiledShow }), tr("Tiled"));
+			UIView2D.ui._x += ew * 0.7 + 3;
+			UIView2D.ui._y = 2 + startY;
 
-			if (this.type == View2DType.View2DAsset && tex != null) { // Texture resolution
-				this.ui.text(tex.width + "x" + tex.height);
+			if (UIView2D.type == View2DType.View2DAsset && tex != null) { // Texture resolution
+				UIView2D.ui.text(tex.width + "x" + tex.height);
 			}
 
 			// Picked position
 			///if (is_paint || is_sculpt)
-			if (Context.raw.tool == WorkspaceTool.ToolPicker && (this.type == View2DType.View2DLayer || this.type == View2DType.View2DAsset)) {
+			if (Context.raw.tool == WorkspaceTool.ToolPicker && (UIView2D.type == View2DType.View2DLayer || UIView2D.type == View2DType.View2DAsset)) {
 				let cursorImg = Res.get("cursor.k");
-				let hsize = 16 * this.ui.SCALE();
+				let hsize = 16 * UIView2D.ui.SCALE();
 				let size = hsize * 2;
-				this.ui.g.drawScaledImage(cursorImg, tx + tw * Context.raw.uvxPicked - hsize, ty + th * Context.raw.uvyPicked - hsize, size, size);
+				UIView2D.ui.g.drawScaledImage(cursorImg, tx + tw * Context.raw.uvxPicked - hsize, ty + th * Context.raw.uvyPicked - hsize, size, size);
 			}
 			///end
 		}
-		this.ui.end();
+		UIView2D.ui.end();
 		g.begin(false);
 	}
 
-	update = () => {
+	static update = () => {
 		let mouse = Input.getMouse();
 		let kb = Input.getKeyboard();
 
-		let headerh = this.ui.ELEMENT_H() * 1.4;
+		let headerh = UIView2D.ui.ELEMENT_H() * 1.4;
 
 		///if (is_paint || is_sculpt)
 		Context.raw.paint2d = false;
 		///end
 
 		if (!Base.uiEnabled ||
-			!this.show ||
-			mouse.x < this.wx ||
-			mouse.x > this.wx + this.ww ||
-			mouse.y < this.wy + headerh ||
-			mouse.y > this.wy + this.wh) {
-			if (UIView2D.inst.controlsDown) {
-				UINodes.getCanvasControl(this.ui, UIView2D.inst);
+			!UIView2D.show ||
+			mouse.x < UIView2D.wx ||
+			mouse.x > UIView2D.wx + UIView2D.ww ||
+			mouse.y < UIView2D.wy + headerh ||
+			mouse.y > UIView2D.wy + UIView2D.wh) {
+			if (UIView2D.controlsDown) {
+				UINodes.getCanvasControl(UIView2D.ui, UIView2D);
 			}
 			return;
 		}
 
-		let control = UINodes.getCanvasControl(this.ui, UIView2D.inst);
-		this.panX += control.panX;
-		this.panY += control.panY;
+		let control = UINodes.getCanvasControl(UIView2D.ui, UIView2D);
+		UIView2D.panX += control.panX;
+		UIView2D.panY += control.panY;
 		if (control.zoom != 0) {
-			let _panX = this.panX / this.panScale;
-			let _panY = this.panY / this.panScale;
-			this.panScale += control.zoom;
-			if (this.panScale < 0.1) this.panScale = 0.1;
-			if (this.panScale > 6.0) this.panScale = 6.0;
-			this.panX = _panX * this.panScale;
-			this.panY = _panY * this.panScale;
+			let _panX = UIView2D.panX / UIView2D.panScale;
+			let _panY = UIView2D.panY / UIView2D.panScale;
+			UIView2D.panScale += control.zoom;
+			if (UIView2D.panScale < 0.1) UIView2D.panScale = 0.1;
+			if (UIView2D.panScale > 6.0) UIView2D.panScale = 6.0;
+			UIView2D.panX = _panX * UIView2D.panScale;
+			UIView2D.panY = _panY * UIView2D.panScale;
 
 			if (Zui.touchScroll) {
 				// Zoom to finger location
-				this.panX -= (this.ui.inputX - this.ui._windowX - this.ui._windowW / 2) * control.zoom;
-				this.panY -= (this.ui.inputY - this.ui._windowY - this.ui._windowH / 2) * control.zoom;
+				UIView2D.panX -= (UIView2D.ui.inputX - UIView2D.ui._windowX - UIView2D.ui._windowW / 2) * control.zoom;
+				UIView2D.panY -= (UIView2D.ui.inputY - UIView2D.ui._windowY - UIView2D.ui._windowH / 2) * control.zoom;
 			}
 		}
 
@@ -428,7 +425,7 @@ class UIView2D {
 		let decalMask = decal && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
 		let setCloneSource = Context.raw.tool == WorkspaceTool.ToolClone && Operator.shortcut(Config.keymap.set_clone_source + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
 
-		if (this.type == View2DType.View2DLayer &&
+		if (UIView2D.type == View2DType.View2DLayer &&
 			!UIView2D.textInputHover &&
 			(Operator.shortcut(Config.keymap.action_paint, ShortcutType.ShortcutDown) ||
 			 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown) ||
@@ -439,29 +436,29 @@ class UIView2D {
 		}
 		///end
 
-		if (this.ui.isTyping) return;
+		if (UIView2D.ui.isTyping) return;
 
-		if (kb.started("left")) this.panX -= 5;
-		else if (kb.started("right")) this.panX += 5;
-		if (kb.started("up")) this.panY -= 5;
-		else if (kb.started("down")) this.panY += 5;
+		if (kb.started("left")) UIView2D.panX -= 5;
+		else if (kb.started("right")) UIView2D.panX += 5;
+		if (kb.started("up")) UIView2D.panY -= 5;
+		else if (kb.started("down")) UIView2D.panY += 5;
 
 		// Limit panning to keep texture in viewport
 		let border = 32;
-		let tw = this.ww * 0.95 * this.panScale;
-		let tx = this.ww / 2 - tw / 2 + this.panX;
+		let tw = UIView2D.ww * 0.95 * UIView2D.panScale;
+		let tx = UIView2D.ww / 2 - tw / 2 + UIView2D.panX;
 		let hh = App.h();
-		let ty = hh / 2 - tw / 2 + this.panY;
+		let ty = hh / 2 - tw / 2 + UIView2D.panY;
 
-		if      (tx + border >  this.ww) this.panX =  this.ww / 2 + tw / 2 - border;
-		else if (tx - border < -tw) this.panX = -tw / 2 - this.ww / 2 + border;
-		if      (ty + border >  hh) this.panY =  hh / 2 + tw / 2 - border;
-		else if (ty - border < -tw) this.panY = -tw / 2 - hh / 2 + border;
+		if      (tx + border >  UIView2D.ww) UIView2D.panX =  UIView2D.ww / 2 + tw / 2 - border;
+		else if (tx - border < -tw) UIView2D.panX = -tw / 2 - UIView2D.ww / 2 + border;
+		if      (ty + border >  hh) UIView2D.panY =  hh / 2 + tw / 2 - border;
+		else if (ty - border < -tw) UIView2D.panY = -tw / 2 - hh / 2 + border;
 
 		if (Operator.shortcut(Config.keymap.view_reset)) {
-			this.panX = 0.0;
-			this.panY = 0.0;
-			this.panScale = 1.0;
+			UIView2D.panX = 0.0;
+			UIView2D.panY = 0.0;
+			UIView2D.panScale = 1.0;
 		}
 	}
 }

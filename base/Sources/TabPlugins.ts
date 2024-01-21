@@ -2,7 +2,7 @@
 class TabPlugins {
 
 	static draw = (htab: Handle) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		if (ui.tab(htab, tr("Plugins"))) {
 
 			ui.beginSticky();

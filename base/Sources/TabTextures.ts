@@ -2,7 +2,7 @@
 class TabTextures {
 
 	static draw = (htab: Handle) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		let statush = Config.raw.layout[LayoutSize.LayoutStatusH];
 		if (ui.tab(htab, tr("Textures")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
@@ -18,19 +18,19 @@ class TabTextures {
 			if (ui.button(tr("Import"))) {
 				UIFiles.show(Path.textureFormats.join(","), false, true, (path: string) => {
 					ImportAsset.run(path, -1.0, -1.0, true, false);
-					UIBase.inst.hwnds[TabArea.TabStatus].redraws = 2;
+					UIBase.hwnds[TabArea.TabStatus].redraws = 2;
 				});
 			}
 			if (ui.isHovered) ui.tooltip(tr("Import texture file") + ` (${Config.keymap.file_import_assets})`);
 
-			if (ui.button(tr("2D View"))) UIBase.inst.show2DView(View2DType.View2DAsset);
+			if (ui.button(tr("2D View"))) UIBase.show2DView(View2DType.View2DAsset);
 
 			ui.endSticky();
 
 			if (Project.assets.length > 0) {
 
 				///if (is_paint || is_sculpt)
-				let statusw = System.width - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSize.LayoutSidebarW];
+				let statusw = System.width - UIToolbar.toolbarw - Config.raw.layout[LayoutSize.LayoutSidebarW];
 				///end
 				///if is_lab
 				let statusw = System.width;
@@ -70,9 +70,9 @@ class TabTextures {
 							Base.dragAsset = asset;
 							Context.raw.texture = asset;
 
-							if (Time.time() - Context.raw.selectTime < 0.25) UIBase.inst.show2DView(View2DType.View2DAsset);
+							if (Time.time() - Context.raw.selectTime < 0.25) UIBase.show2DView(View2DType.View2DAsset);
 							Context.raw.selectTime = Time.time();
-							UIView2D.inst.hwnd.redraws = 2;
+							UIView2D.hwnd.redraws = 2;
 						}
 
 						if (asset == Context.raw.texture) {
@@ -158,9 +158,9 @@ class TabTextures {
 								if (UIMenu.menuButton(ui, tr("Set as Color ID Map"))) {
 									Context.raw.colorIdHandle.position = i;
 									Context.raw.colorIdPicked = false;
-									UIToolbar.inst.toolbarHandle.redraws = 1;
+									UIToolbar.toolbarHandle.redraws = 1;
 									if (Context.raw.tool == WorkspaceTool.ToolColorId) {
-										UIHeader.inst.headerHandle.redraws = 2;
+										UIHeader.headerHandle.redraws = 2;
 										Context.raw.ddirty = 2;
 									}
 								}
@@ -236,14 +236,14 @@ class TabTextures {
 		if (Project.assets.length > 1) {
 			Context.raw.texture = Project.assets[i == Project.assets.length - 1 ? i - 1 : i + 1];
 		}
-		UIBase.inst.hwnds[TabArea.TabStatus].redraws = 2;
+		UIBase.hwnds[TabArea.TabStatus].redraws = 2;
 
 		///if is_paint
 		if (Context.raw.tool == WorkspaceTool.ToolColorId && i == Context.raw.colorIdHandle.position) {
-			UIHeader.inst.headerHandle.redraws = 2;
+			UIHeader.headerHandle.redraws = 2;
 			Context.raw.ddirty = 2;
 			Context.raw.colorIdPicked = false;
-			UIToolbar.inst.toolbarHandle.redraws = 1;
+			UIToolbar.toolbarHandle.redraws = 1;
 		}
 		///end
 
@@ -256,7 +256,7 @@ class TabTextures {
 
 			///if (is_paint || is_sculpt)
 			UtilRender.makeMaterialPreview();
-			UIBase.inst.hwnds[TabArea.TabSidebar1].redraws = 2;
+			UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
 			///end
 		}
 		Base.notifyOnNextFrame(_next);

@@ -3,14 +3,13 @@
 
 class UIToolbar {
 
-	static inst: UIToolbar;
 	static defaultToolbarW = 36;
 
-	toolbarHandle = new Handle();
-	toolbarw = UIToolbar.defaultToolbarW;
-	lastTool = 0;
+	static toolbarHandle = new Handle();
+	static toolbarw = UIToolbar.defaultToolbarW;
+	static lastTool = 0;
 
-	toolNames = [
+	static toolNames = [
 		_tr("Brush"),
 		_tr("Eraser"),
 		_tr("Fill"),
@@ -28,21 +27,20 @@ class UIToolbar {
 	];
 
 	constructor() {
-		UIToolbar.inst = this;
 	}
 
-	renderUI = (g: Graphics2) => {
-		let ui = UIBase.inst.ui;
+	static renderUI = (g: Graphics2) => {
+		let ui = UIBase.ui;
 
 		if (Config.raw.touch_ui) {
-			this.toolbarw = UIToolbar.defaultToolbarW + 6;
+			UIToolbar.toolbarw = UIToolbar.defaultToolbarW + 6;
 		}
 		else {
-			this.toolbarw = UIToolbar.defaultToolbarW;
+			UIToolbar.toolbarw = UIToolbar.defaultToolbarW;
 		}
-		this.toolbarw = Math.floor(this.toolbarw * ui.SCALE());
+		UIToolbar.toolbarw = Math.floor(UIToolbar.toolbarw * ui.SCALE());
 
-		if (ui.window(this.toolbarHandle, 0, UIHeader.headerh, this.toolbarw, System.height - UIHeader.headerh)) {
+		if (ui.window(UIToolbar.toolbarHandle, 0, UIHeader.headerh, UIToolbar.toolbarw, System.height - UIHeader.headerh)) {
 			ui._y -= 4 * ui.SCALE();
 
 			ui.imageScrollAlign = false;
@@ -73,7 +71,7 @@ class UIToolbar {
 				let fontHeight = ui.font.height(ui.fontSize);
 				ui.fontOffsetY = (ui.ELEMENT_H() - fontHeight) / 2;
 				let _w = ui._w;
-				ui._w = this.toolbarw;
+				ui._w = UIToolbar.toolbarw;
 
 				if (ui.button(">>")) {
 					UIToolbar.toolPropertiesMenu();
@@ -118,10 +116,10 @@ class UIToolbar {
 					Context.selectTool(i);
 				}
 				else if (imageState == State.Released && Config.raw.layout[LayoutSize.LayoutHeader] == 0) {
-					if (this.lastTool == i) {
+					if (UIToolbar.lastTool == i) {
 						UIToolbar.toolPropertiesMenu();
 					}
-					this.lastTool = i;
+					UIToolbar.lastTool = i;
 				}
 
 				///if is_paint
@@ -130,7 +128,7 @@ class UIToolbar {
 				}
 				///end
 
-				if (ui.isHovered) ui.tooltip(tr(this.toolNames[i]) + " " + keys[i]);
+				if (ui.isHovered) ui.tooltip(tr(UIToolbar.toolNames[i]) + " " + keys[i]);
 				ui._x -= 2;
 				ui._y += 2;
 			}
@@ -168,7 +166,7 @@ class UIToolbar {
 	}
 
 	static toolPropertiesMenu = () => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		let _x = ui._x;
 		let _y = ui._y;
 		let _w = ui._w;
@@ -176,7 +174,7 @@ class UIToolbar {
 			let startY = ui._y;
 			ui.changed = false;
 
-			UIHeader.inst.drawToolProperties(ui);
+			UIHeader.drawToolProperties(ui);
 
 			if (ui.changed) {
 				UIMenu.keepOpen = true;
@@ -200,8 +198,8 @@ class UIToolbar {
 	}
 
 	static drawHighlight = () => {
-		let ui = UIBase.inst.ui;
-		let size = UIToolbar.inst.toolbarw - 4;
+		let ui = UIBase.ui;
+		let size = UIToolbar.toolbarw - 4;
 		ui.g.color = ui.t.HIGHLIGHT_COL;
 		ui.drawRect(ui.g, true, ui._x + -1,  ui._y + 2, size + 2, size + 2);
 	}

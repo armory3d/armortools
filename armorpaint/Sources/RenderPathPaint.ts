@@ -141,7 +141,7 @@ class RenderPathPaint {
 				RenderPathPaint.path.clearTarget(0xff000000);
 				RenderPathPaint.path.bindTarget("gbuffer2", "gbuffer2");
 				RenderPathPaint.path.drawMeshes("paint");
-				UIHeader.inst.headerHandle.redraws = 2;
+				UIHeader.headerHandle.redraws = 2;
 			}
 			else if (Context.raw.tool == WorkspaceTool.ToolPicker || Context.raw.tool == WorkspaceTool.ToolMaterial) {
 				if (Context.raw.pickPosNorTex) {
@@ -177,8 +177,8 @@ class RenderPathPaint {
 					RenderPathPaint.path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
 					RenderPathPaint.path.drawMeshes("paint");
 					if (useLiveLayer) RenderPathPaint.useLiveLayer(false);
-					UIHeader.inst.headerHandle.redraws = 2;
-					UIBase.inst.hwnds[2].redraws = 2;
+					UIHeader.headerHandle.redraws = 2;
+					UIBase.hwnds[2].redraws = 2;
 
 					let texpaint_picker = RenderPathPaint.path.renderTargets.get("texpaint_picker").image;
 					let texpaint_nor_picker = RenderPathPaint.path.renderTargets.get("texpaint_nor_picker").image;
@@ -434,7 +434,7 @@ class RenderPathPaint {
 
 		RenderPathPaint.liveLayerDrawn = 2;
 
-		UIView2D.inst.hwnd.redraws = 2;
+		UIView2D.hwnd.redraws = 2;
 		let _x = Context.raw.paintVec.x;
 		let _y = Context.raw.paintVec.y;
 		if (Context.raw.brushLocked) {
@@ -745,7 +745,7 @@ class RenderPathPaint {
 				///if (krom_direct3d12 || krom_vulkan || krom_metal)
 				else if (isRaytracedBake) {
 					let dirty = RenderPathRaytraceBake.commands(MakeMaterial.parsePaintMaterial);
-					if (dirty) UIHeader.inst.headerHandle.redraws = 2;
+					if (dirty) UIHeader.headerHandle.redraws = 2;
 					if (Config.raw.dilate == DilateType.DilateInstant) { // && Context.raw.pdirty == 1
 						RenderPathPaint.dilate(true, false);
 					}
@@ -807,9 +807,9 @@ class RenderPathPaint {
 		cam.buildProjection();
 		cam.buildMatrix();
 
-		let tw = 0.95 * UIView2D.inst.panScale;
-		let tx = UIView2D.inst.panX / UIView2D.inst.ww;
-		let ty = UIView2D.inst.panY / App.h();
+		let tw = 0.95 * UIView2D.panScale;
+		let tx = UIView2D.panX / UIView2D.ww;
+		let ty = UIView2D.panY / App.h();
 		m.setIdentity();
 		m.scale(new Vec4(tw, tw, 1));
 		m.setLoc(new Vec4(tx, ty, 0));
@@ -817,7 +817,7 @@ class RenderPathPaint {
 		m2.getInverse(Scene.active.camera.VP);
 		m.multmat(m2);
 
-		let tiled = UIView2D.inst.tiledShow;
+		let tiled = UIView2D.tiledShow;
 		if (tiled && Scene.active.getChild(".PlaneTiled") == null) {
 			// 3x3 planes
 			let posa = [32767,0,-32767,0,10922,0,-10922,0,10922,0,-32767,0,10922,0,-10922,0,-10922,0,10922,0,-10922,0,-10922,0,-10922,0,10922,0,-32767,0,32767,0,-32767,0,10922,0,10922,0,10922,0,-10922,0,32767,0,-10922,0,10922,0,32767,0,10922,0,10922,0,32767,0,10922,0,10922,0,-10922,0,-10922,0,-32767,0,10922,0,-32767,0,-10922,0,32767,0,-10922,0,10922,0,10922,0,10922,0,-10922,0,-10922,0,-32767,0,-32767,0,-10922,0,-32767,0,-32767,0,10922,0,-32767,0,-10922,0,-10922,0,-10922,0,-32767,0,32767,0,-32767,0,32767,0,-10922,0,10922,0,-10922,0,10922,0,-10922,0,10922,0,10922,0,-10922,0,10922,0,-10922,0,10922,0,-10922,0,32767,0,-32767,0,32767,0,10922,0,10922,0,10922,0,32767,0,-10922,0,32767,0,32767,0,10922,0,32767,0,32767,0,10922,0,32767,0,-10922,0,-10922,0,-10922,0,10922,0,-32767,0,10922,0,32767,0,-10922,0,32767,0,10922,0,10922,0,10922,0,-10922,0,-32767,0,-10922,0,-10922,0,-32767,0,-10922,0,10922,0,-32767,0,10922,0,-10922,0,-10922,0,-10922,0];

@@ -104,7 +104,7 @@ class RenderPathBase {
 			let cam = Scene.active.camera;
 			if (Context.raw.viewIndexLast > -1) {
 				// Save current viewport camera
-				Camera.inst.views[Context.raw.viewIndexLast].setFrom(cam.transform.local);
+				Camera.views[Context.raw.viewIndexLast].setFrom(cam.transform.local);
 			}
 
 			let decal = Context.raw.tool == WorkspaceTool.ToolDecal || Context.raw.tool == WorkspaceTool.ToolText;
@@ -114,7 +114,7 @@ class RenderPathBase {
 				Context.raw.ddirty = 1;
 			}
 
-			cam.transform.setMatrix(Camera.inst.views[Context.raw.viewIndex]);
+			cam.transform.setMatrix(Camera.views[Context.raw.viewIndex]);
 			cam.buildMatrix();
 			cam.buildProjection();
 		}
@@ -257,7 +257,7 @@ class RenderPathBase {
 			let cam = Scene.active.camera;
 
 			Context.raw.viewIndex = Context.raw.viewIndex == 0 ? 1 : 0;
-			cam.transform.setMatrix(Camera.inst.views[Context.raw.viewIndex]);
+			cam.transform.setMatrix(Camera.views[Context.raw.viewIndex]);
 			cam.buildMatrix();
 			cam.buildProjection();
 
@@ -275,7 +275,7 @@ class RenderPathBase {
 			///end
 
 			Context.raw.viewIndex = Context.raw.viewIndex == 0 ? 1 : 0;
-			cam.transform.setMatrix(Camera.inst.views[Context.raw.viewIndex]);
+			cam.transform.setMatrix(Camera.views[Context.raw.viewIndex]);
 			cam.buildMatrix();
 			cam.buildProjection();
 		}

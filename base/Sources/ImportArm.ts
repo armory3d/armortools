@@ -83,9 +83,9 @@ class ImportArm {
 				Scene.active.camera.data.raw.fov = Project.raw.camera_fov;
 				Scene.active.camera.buildProjection();
 				let origin = Project.raw.camera_origin;
-				Camera.inst.origins[0].x = origin[0];
-				Camera.inst.origins[0].y = origin[1];
-				Camera.inst.origins[0].z = origin[2];
+				Camera.origins[0].x = origin[0];
+				Camera.origins[0].y = origin[1];
+				Camera.origins[0].z = origin[2];
 			}
 
 			for (let file of project.assets) {
@@ -312,8 +312,8 @@ class ImportArm {
 			}
 			///end
 
-			UINodes.inst.hwnd.redraws = 2;
-			UINodes.inst.groupStack = [];
+			UINodes.hwnd.redraws = 2;
+			UINodes.groupStack = [];
 			Project.materialGroups = [];
 			if (project.material_groups != null) {
 				for (let g of project.material_groups) Project.materialGroups.push({ canvas: g, nodes: new Nodes() });
@@ -345,8 +345,8 @@ class ImportArm {
 				}
 			}
 
-			UIBase.inst.hwnds[TabArea.TabSidebar0].redraws = 2;
-			UIBase.inst.hwnds[TabArea.TabSidebar1].redraws = 2;
+			UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
+			UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
 			///end
 
 			///if is_lab
@@ -449,8 +449,8 @@ class ImportArm {
 		}
 		App.notifyOnInit(_init);
 
-		UINodes.inst.groupStack = [];
-		UIBase.inst.hwnds[TabArea.TabSidebar1].redraws = 2;
+		UINodes.groupStack = [];
+		UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
 		Data.deleteBlob(path);
 	}
 
@@ -520,7 +520,7 @@ class ImportArm {
 		}
 		App.notifyOnInit(_init);
 
-		UIBase.inst.hwnds[TabArea.TabSidebar1].redraws = 2;
+		UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
 		Data.deleteBlob(path);
 	}
 	///end
@@ -547,7 +547,7 @@ class ImportArm {
 				Project.raw.swatches.push(s);
 			}
 		}
-		UIBase.inst.hwnds[TabArea.TabStatus].redraws = 2;
+		UIBase.hwnds[TabArea.TabStatus].redraws = 2;
 		Data.deleteBlob(path);
 	}
 

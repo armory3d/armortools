@@ -4,7 +4,7 @@ class UINodesExt {
 	static lastVertices: DataView = null; // Before displacement
 
 	static drawButtons = (ew: f32, startY: f32) => {
-		let ui = UINodes.inst.ui;
+		let ui = UINodes.ui;
 		if (ui.button(tr("Run"))) {
 			Console.progress(tr("Processing"));
 
@@ -84,7 +84,7 @@ class UINodesExt {
 						texpaint_pack.g4.drawIndexedVertices();
 						texpaint_pack.g4.end();
 
-						if (UIHeader.inst.worktab.position == Space3D &&
+						if (UIHeader.worktab.position == Space3D &&
 							BrushOutputNode.inst.inputs[ChannelHeight].node.constructor != FloatNode) {
 
 							// Make copy of vertices before displacement

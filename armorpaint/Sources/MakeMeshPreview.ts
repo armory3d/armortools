@@ -52,7 +52,7 @@ class MakeMeshPreview {
 		ParserMaterial.sample_uv_scale = brushScale;
 		ParserMaterial.parse_height = MakeMaterial.heightUsed;
 		ParserMaterial.parse_height_as_channel = true;
-		let sout = ParserMaterial.parse(UINodes.inst.getCanvasMaterial(), con_mesh, vert, frag, matcon);
+		let sout = ParserMaterial.parse(UINodes.getCanvasMaterial(), con_mesh, vert, frag, matcon);
 		ParserMaterial.parse_height = false;
 		ParserMaterial.parse_height_as_channel = false;
 		ParserMaterial.sample_keep_aspect = false;

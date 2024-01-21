@@ -9,7 +9,7 @@ class MakeMaterial {
 	static subsUsed = false;
 
 	static getMOut = (): bool => {
-		for (let n of UINodes.inst.getCanvasMaterial().nodes) if (n.type == "OUTPUT_MATERIAL_PBR") return true;
+		for (let n of UINodes.getCanvasMaterial().nodes) if (n.type == "OUTPUT_MATERIAL_PBR") return true;
 		return false;
 	}
 
@@ -198,7 +198,7 @@ class MakeMaterial {
 			}
 		}
 
-		let sdata = new NodeShaderData({ name: "Material", canvas: UINodes.inst.getCanvasMaterial() });
+		let sdata = new NodeShaderData({ name: "Material", canvas: UINodes.getCanvasMaterial() });
 		let mcon: TMaterialContext = { name: "paint", bind_textures: [] };
 		let con = MakeSculpt.run(sdata, mcon);
 
@@ -223,7 +223,7 @@ class MakeMaterial {
 	static bakeNodePreviews = () => {
 		Context.raw.nodePreviewsUsed = [];
 		if (Context.raw.nodePreviews == null) Context.raw.nodePreviews = [];
-		traverseNodes(UINodes.inst.getCanvasMaterial().nodes, null, []);
+		traverseNodes(UINodes.getCanvasMaterial().nodes, null, []);
 		for (let key of Context.raw.nodePreviews.keys()) {
 			if (Context.raw.nodePreviewsUsed.indexOf(key) == -1) {
 				let image = Context.raw.nodePreviews.get(key);
@@ -263,7 +263,7 @@ class MakeMaterial {
 			}
 
 			ParserMaterial.blur_passthrough = true;
-			UtilRender.makeNodePreview(UINodes.inst.getCanvasMaterial(), node, image, group, parents);
+			UtilRender.makeNodePreview(UINodes.getCanvasMaterial(), node, image, group, parents);
 			ParserMaterial.blur_passthrough = false;
 		}
 		else if (node.type == "DIRECT_WARP") {
@@ -279,14 +279,14 @@ class MakeMaterial {
 			}
 
 			ParserMaterial.warp_passthrough = true;
-			UtilRender.makeNodePreview(UINodes.inst.getCanvasMaterial(), node, image, group, parents);
+			UtilRender.makeNodePreview(UINodes.getCanvasMaterial(), node, image, group, parents);
 			ParserMaterial.warp_passthrough = false;
 		}
 	}
 
 	static parseNodePreviewMaterial = (node: TNode, group: TNodeCanvas = null, parents: TNode[] = null): { scon: ShaderContext, mcon: MaterialContext } => {
 		if (node.outputs.length == 0) return null;
-		let sdata = new NodeShaderData({ name: "Material", canvas: UINodes.inst.getCanvasMaterial() });
+		let sdata = new NodeShaderData({ name: "Material", canvas: UINodes.getCanvasMaterial() });
 		let mcon_raw: TMaterialContext = { name: "mesh", bind_textures: [] };
 		let con = MakeNodePreview.run(sdata, mcon_raw, node, group, parents);
 		let compileError = false;

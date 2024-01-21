@@ -84,7 +84,7 @@ class RenderPathPaint {
 					path.bindTarget("texpaint_nor" + tid, "texpaint_nor");
 					path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
 					path.drawMeshes("paint");
-					UIHeader.inst.headerHandle.redraws = 2;
+					UIHeader.headerHandle.redraws = 2;
 
 					let texpaint_picker = path.renderTargets.get("texpaint_picker").image;
 					let texpaint_nor_picker = path.renderTargets.get("texpaint_nor_picker").image;
@@ -165,8 +165,8 @@ class RenderPathPaint {
 			return;
 		}
 
-		let nodes = UINodes.inst.getNodes();
-		let canvas = UINodes.inst.getCanvas(true);
+		let nodes = UINodes.getNodes();
+		let canvas = UINodes.getCanvas(true);
 		let inpaint = nodes.nodesSelectedId.length > 0 && nodes.getNode(canvas.nodes, nodes.nodesSelectedId[0]).type == "InpaintNode";
 
 		if (!Base.uiEnabled || Base.isDragging || !inpaint) {
@@ -256,8 +256,8 @@ class RenderPathPaint {
 
 	static bindLayers = () => {
 		let image: Image = null;
-		let nodes = UINodes.inst.getNodes();
-		let canvas = UINodes.inst.getCanvas(true);
+		let nodes = UINodes.getNodes();
+		let canvas = UINodes.getCanvas(true);
 		if (nodes.nodesSelectedId.length > 0) {
 			let node = nodes.getNode(canvas.nodes, nodes.nodesSelectedId[0]);
 			let brushNode = ParserLogic.getLogicNode(node);
@@ -289,8 +289,8 @@ class RenderPathPaint {
 			path.bindTarget("texpaint_nor_empty", "texpaint_nor");
 			path.bindTarget("texpaint_pack_empty", "texpaint_pack");
 
-			let nodes = UINodes.inst.getNodes();
-			let canvas = UINodes.inst.getCanvas(true);
+			let nodes = UINodes.getNodes();
+			let canvas = UINodes.getCanvas(true);
 			let node = nodes.getNode(canvas.nodes, nodes.nodesSelectedId[0]);
 			let inpaint = node.type == "InpaintNode";
 			if (inpaint) {

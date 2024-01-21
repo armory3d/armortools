@@ -2,7 +2,7 @@
 class TabMeshes {
 
 	static draw = (htab: Handle) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		let statush = Config.raw.layout[LayoutSize.LayoutStatusH];
 		if (ui.tab(htab, tr("Meshes")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
@@ -148,7 +148,7 @@ class TabMeshes {
 		let mo: MeshObject = null;
 		if (name == ".Plane" || name == ".Sphere") {
 			let res = Config.raw.rp_supersample > 1.0 ? 2048 : 1024;
-			let mesh: any = name == ".Plane" ? new GeomPlane(1, 1, res, res) : new GeomUVSphere(1.0, res, Math.floor(res / 2), false, 2.0);
+			let mesh: any = name == ".Plane" ? Geom.make_plane(1, 1, res, res) : Geom.make_uv_sphere(1.0, res, Math.floor(res / 2), false, 2.0);
 			let raw = {
 				name: "Tessellated",
 				vertex_arrays: [
@@ -175,7 +175,7 @@ class TabMeshes {
 		Context.raw.ddirty = 2;
 		Context.raw.paintObject = mo;
 		Project.paintObjects[0] = mo;
-		if (UIHeader.inst.worktab.position == SpaceType.Space3D) {
+		if (UIHeader.worktab.position == SpaceType.Space3D) {
 			Scene.active.meshes = [mo];
 		}
 

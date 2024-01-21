@@ -162,8 +162,8 @@ class Project {
 			let raw: TMeshData = null;
 			if (Context.raw.projectType == ProjectModel.ModelSphere || Context.raw.projectType == ProjectModel.ModelTessellatedPlane) {
 				let mesh: any = Context.raw.projectType == ProjectModel.ModelSphere ?
-					new GeomUVSphere(1, 512, 256) :
-					new GeomPlane(1, 1, 512, 512);
+					Geom.make_uv_sphere(1, 512, 256) :
+					Geom.make_plane(1, 1, 512, 512);
 				mesh.name = "Tessellated";
 				raw = ImportMesh.rawMesh(mesh);
 
@@ -231,8 +231,8 @@ class Project {
 			Context.raw.material = Project.materials[0];
 			///end
 
-			UINodes.inst.hwnd.redraws = 2;
-			UINodes.inst.groupStack = [];
+			UINodes.hwnd.redraws = 2;
+			UINodes.groupStack = [];
 			Project.materialGroups = [];
 
 			///if (is_paint || is_sculpt)
@@ -265,8 +265,8 @@ class Project {
 			Context.raw.ddirty = 4;
 
 			///if (is_paint || is_sculpt)
-			UIBase.inst.hwnds[TabArea.TabSidebar0].redraws = 2;
-			UIBase.inst.hwnds[TabArea.TabSidebar1].redraws = 2;
+			UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
+			UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
 			///end
 
 			if (resetLayers) {
@@ -350,7 +350,7 @@ class Project {
 
 				// Parse brush
 				MakeMaterial.parseBrush();
-				UINodes.inst.hwnd.redraws = 2;
+				UINodes.hwnd.redraws = 2;
 				let _init = () => {
 					UtilRender.makeBrushPreview();
 				}
@@ -536,7 +536,7 @@ class Project {
 
 				///if (is_paint || is_sculpt)
 				UtilRender.makeMaterialPreview();
-				UIBase.inst.hwnds[TabArea.TabSidebar1].redraws = 2;
+				UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
 				///end
 			}
 			Base.notifyOnNextFrame(_next);

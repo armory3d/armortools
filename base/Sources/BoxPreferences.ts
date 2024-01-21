@@ -25,7 +25,7 @@ class BoxPreferences {
 					let localeCode = BoxPreferences.locales[localeHandle.position];
 					Config.raw.locale = localeCode;
 					Translator.loadTranslations(localeCode);
-					UIBase.inst.tagUIRedraw();
+					UIBase.tagUIRedraw();
 				}
 
 				let hscale = Zui.handle("boxpreferences_1", { value: Config.raw.window_scale });
@@ -61,7 +61,7 @@ class BoxPreferences {
 				ui.changed = false;
 				Config.raw.show_asset_names = ui.check(Zui.handle("boxpreferences_8", { selected: Config.raw.show_asset_names }), tr("Show Asset Names"));
 				if (ui.changed) {
-					UIBase.inst.tagUIRedraw();
+					UIBase.tagUIRedraw();
 				}
 
 				///if !(krom_android || krom_ios)
@@ -71,7 +71,7 @@ class BoxPreferences {
 					Zui.touchScroll = Zui.touchHold = Zui.touchTooltip = Config.raw.touch_ui;
 					Config.loadTheme(Config.raw.theme);
 					BoxPreferences.setScale();
-					UIBase.inst.tagUIRedraw();
+					UIBase.tagUIRedraw();
 				}
 				///end
 
@@ -676,19 +676,19 @@ plugin.drawUI = (ui) { =>
 
 	static setScale = () => {
 		let scale = Config.raw.window_scale;
-		UIBase.inst.ui.setScale(scale);
+		UIBase.ui.setScale(scale);
 		UIHeader.headerh = Math.floor(UIHeader.defaultHeaderH * scale);
 		Config.raw.layout[LayoutSize.LayoutStatusH] = Math.floor(UIStatus.defaultStatusH * scale);
-		UIMenubar.inst.menubarw = Math.floor(UIMenubar.defaultMenubarW * scale);
-		UIBase.inst.setIconScale();
-		UINodes.inst.ui.setScale(scale);
-		UIView2D.inst.ui.setScale(scale);
+		UIMenubar.menubarw = Math.floor(UIMenubar.defaultMenubarW * scale);
+		UIBase.setIconScale();
+		UINodes.ui.setScale(scale);
+		UIView2D.ui.setScale(scale);
 		Base.uiBox.setScale(scale);
 		Base.uiMenu.setScale(scale);
 		Base.resize();
 		///if (is_paint || is_sculpt)
 		Config.raw.layout[LayoutSize.LayoutSidebarW] = Math.floor(UIBase.defaultSidebarW * scale);
-		UIToolbar.inst.toolbarw = Math.floor(UIToolbar.defaultToolbarW * scale);
+		UIToolbar.toolbarw = Math.floor(UIToolbar.defaultToolbarW * scale);
 		///end
 	}
 }

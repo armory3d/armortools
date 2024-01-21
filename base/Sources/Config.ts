@@ -287,7 +287,7 @@ class Config {
 		Base.theme.FILL_WINDOW_BG = true;
 		if (tagRedraw) {
 			for (let ui of Base.getUIs()) ui.t = Base.theme;
-			UIBase.inst.tagUIRedraw();
+			UIBase.tagUIRedraw();
 		}
 		if (Config.raw.touch_ui) {
 			// Enlarge elements

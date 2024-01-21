@@ -11,7 +11,7 @@ class TabLayers {
 	}
 
 	static drawMini = (htab: Handle) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		ui.setHoveredTabName(tr("Layers"));
 
 		let _ELEMENT_H = ui.t.ELEMENT_H;
@@ -33,7 +33,7 @@ class TabLayers {
 	}
 
 	static drawFull = (htab: Handle) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		if (ui.tab(htab, tr("Layers"))) {
 			ui.beginSticky();
 			ui.row([1 / 4, 3 / 4]);
@@ -59,9 +59,9 @@ class TabLayers {
 	}
 
 	static highlightOddLines = () => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		let step = ui.t.ELEMENT_H * 2;
-		let fullH = ui._windowH - UIBase.inst.hwnds[0].scrollOffset;
+		let fullH = ui._windowH - UIBase.hwnds[0].scrollOffset;
 		for (let i = 0; i < Math.floor(fullH / step); ++i) {
 			if (i % 2 == 0) {
 				ui.fill(0, i * step, (ui._w / ui.SCALE() - 2), step, ui.t.WINDOW_BG_COL - 0x00040404);
@@ -70,7 +70,7 @@ class TabLayers {
 	}
 
 	static buttonNew = (text: string) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		if (ui.button(text)) {
 			UIMenu.draw((ui: Zui) => {
 				let l = Context.raw.layer;
@@ -83,7 +83,7 @@ class TabLayers {
 	}
 
 	static comboFilter = () => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		let ar = [tr("All")];
 		let filterHandle = Zui.handle("tablayers_0");
 		filterHandle.position = Context.raw.layerFilter;
@@ -121,7 +121,7 @@ class TabLayers {
 	}
 
 	static drawLayerSlot = (l: SlotLayer, i: i32, mini: bool) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 
 		if (Context.raw.layerFilter > 0 &&
 			l.getObjectMask() > 0 &&
@@ -187,7 +187,7 @@ class TabLayers {
 	}
 
 	static drawLayerSlotMini = (l: SlotLayer, i: i32) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 
 		ui.row([1, 1]);
 		let uix = ui._x;
@@ -200,7 +200,7 @@ class TabLayers {
 	}
 
 	static drawLayerSlotFull = (l: SlotLayer, i: i32) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 
 		let step = ui.t.ELEMENT_H;
 
@@ -347,12 +347,12 @@ class TabLayers {
 
 	static layerToggleVisible = (l: SlotLayer) => {
 		l.visible = !l.visible;
-		UIView2D.inst.hwnd.redraws = 2;
+		UIView2D.hwnd.redraws = 2;
 		MakeMaterial.parseMeshMaterial();
 	}
 
 	static drawLayerHighlight = (l: SlotLayer, mini: bool) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		let step = ui.t.ELEMENT_H;
 
 		// Separator line

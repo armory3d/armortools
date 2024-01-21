@@ -186,20 +186,20 @@ class Base {
 					///end
 
 					App.notifyOnUpdate(Base.update);
-					App.notifyOnRender2D(UIView2D.inst.render);
-					App.notifyOnUpdate(UIView2D.inst.update);
+					App.notifyOnRender2D(UIView2D.render);
+					App.notifyOnUpdate(UIView2D.update);
 					///if (is_paint || is_sculpt)
-					App.notifyOnRender2D(UIBase.inst.renderCursor);
+					App.notifyOnRender2D(UIBase.renderCursor);
 					///end
-					App.notifyOnUpdate(UINodes.inst.update);
-					App.notifyOnRender2D(UINodes.inst.render);
-					App.notifyOnUpdate(UIBase.inst.update);
-					App.notifyOnRender2D(UIBase.inst.render);
-					App.notifyOnUpdate(Camera.inst.update);
+					App.notifyOnUpdate(UINodes.update);
+					App.notifyOnRender2D(UINodes.render);
+					App.notifyOnUpdate(UIBase.update);
+					App.notifyOnRender2D(UIBase.render);
+					App.notifyOnUpdate(Camera.update);
 					App.notifyOnRender2D(Base.render);
 
 					///if (is_paint || is_sculpt)
-					Base.appx = UIToolbar.inst.toolbarw;
+					Base.appx = UIToolbar.toolbarw;
 					///end
 					///if is_lab
 					Base.appx = 0;
@@ -236,34 +236,34 @@ class Base {
 	///if (is_paint || is_sculpt)
 	static w = (): i32 => {
 		// Drawing material preview
-		if (UIBase.inst != null && Context.raw.materialPreview) {
+		if (UIBase != null && Context.raw.materialPreview) {
 			return UtilRender.materialPreviewSize;
 		}
 
 		// Drawing decal preview
-		if (UIBase.inst != null && Context.raw.decalPreview) {
+		if (UIBase != null && Context.raw.decalPreview) {
 			return UtilRender.decalPreviewSize;
 		}
 
 		let res = 0;
-		if (UINodes.inst == null || UIBase.inst == null) {
+		if (UINodes == null || UIBase == null) {
 			let sidebarw = Config.raw.layout == null ? UIBase.defaultSidebarW : Config.raw.layout[LayoutSize.LayoutSidebarW];
 			res = System.width - sidebarw - UIToolbar.defaultToolbarW;
 		}
-		else if (UINodes.inst.show || UIView2D.inst.show) {
-			res = System.width - Config.raw.layout[LayoutSize.LayoutSidebarW] - Config.raw.layout[LayoutSize.LayoutNodesW] - UIToolbar.inst.toolbarw;
+		else if (UINodes.show || UIView2D.show) {
+			res = System.width - Config.raw.layout[LayoutSize.LayoutSidebarW] - Config.raw.layout[LayoutSize.LayoutNodesW] - UIToolbar.toolbarw;
 		}
-		else if (UIBase.inst.show) {
-			res = System.width - Config.raw.layout[LayoutSize.LayoutSidebarW] - UIToolbar.inst.toolbarw;
+		else if (UIBase.show) {
+			res = System.width - Config.raw.layout[LayoutSize.LayoutSidebarW] - UIToolbar.toolbarw;
 		}
 		else { // Distract free
 			res = System.width;
 		}
-		if (UIBase.inst != null && Context.raw.viewIndex > -1) {
+		if (UIBase != null && Context.raw.viewIndex > -1) {
 			res = Math.floor(res / 2);
 		}
 		if (Context.raw.paint2dView) {
-			res = UIView2D.inst.ww;
+			res = UIView2D.ww;
 		}
 
 		return res > 0 ? res : 1; // App was minimized, force render path resize
@@ -271,18 +271,18 @@ class Base {
 
 	static h = (): i32 => {
 		// Drawing material preview
-		if (UIBase.inst != null && Context.raw.materialPreview) {
+		if (UIBase != null && Context.raw.materialPreview) {
 			return UtilRender.materialPreviewSize;
 		}
 
 		// Drawing decal preview
-		if (UIBase.inst != null && Context.raw.decalPreview) {
+		if (UIBase != null && Context.raw.decalPreview) {
 			return UtilRender.decalPreviewSize;
 		}
 
 		let res = System.height;
 
-		if (UIBase.inst == null) {
+		if (UIBase == null) {
 			res -= UIHeader.defaultHeaderH * 2 + UIStatus.defaultStatusH;
 
 			///if (krom_android || krom_ios)
@@ -294,7 +294,7 @@ class Base {
 				res += UIHeader.headerh;
 			}
 		}
-		else if (UIBase.inst != null && UIBase.inst.show && res > 0) {
+		else if (UIBase != null && UIBase.show && res > 0) {
 			let statush = Config.raw.layout[LayoutSize.LayoutStatusH];
 			res -= Math.floor(UIHeader.defaultHeaderH * 2 * Config.raw.window_scale) + statush;
 
@@ -310,10 +310,10 @@ class Base {
 	///if is_lab
 	static w = (): i32 => {
 		let res = 0;
-		if (UINodes.inst == null) {
+		if (UINodes == null) {
 			res = System.width;
 		}
-		else if (UINodes.inst.show || UIView2D.inst.show) {
+		else if (UINodes.show || UIView2D.show) {
 			res = System.width - Config.raw.layout[LayoutSize.LayoutNodesW];
 		}
 		else { // Distract free
@@ -325,10 +325,10 @@ class Base {
 
 	static h = (): i32 => {
 		let res = System.height;
-		if (UIBase.inst == null) {
+		if (UIBase == null) {
 			res -= UIHeader.defaultHeaderH * 2 + UIStatus.defaultStatusH;
 		}
-		else if (UIBase.inst != null && res > 0) {
+		else if (UIBase != null && res > 0) {
 			let statush = Config.raw.layout[LayoutSize.LayoutStatusH];
 			res -= Math.floor(UIHeader.defaultHeaderH * 2 * Config.raw.window_scale) + statush;
 		}
@@ -397,9 +397,9 @@ class Base {
 
 		Context.raw.ddirty = 2;
 
-		if (UIBase.inst.show) {
+		if (UIBase.show) {
 			///if (is_paint || is_sculpt)
-			Base.appx = UIToolbar.inst.toolbarw;
+			Base.appx = UIToolbar.toolbarw;
 			///end
 			///if is_lab
 			Base.appx = 0;
@@ -414,31 +414,31 @@ class Base {
 			Base.appy = 0;
 		}
 
-		if (UINodes.inst.grid != null) {
-			let _grid = UINodes.inst.grid;
+		if (UINodes.grid != null) {
+			let _grid = UINodes.grid;
 			let _next = () => {
 				_grid.unload();
 			}
 			Base.notifyOnNextFrame(_next);
-			UINodes.inst.grid = null;
+			UINodes.grid = null;
 		}
 
 		Base.redrawUI();
 	}
 
 	static redrawUI = () => {
-		UIHeader.inst.headerHandle.redraws = 2;
-		UIBase.inst.hwnds[TabArea.TabStatus].redraws = 2;
-		UIMenubar.inst.menuHandle.redraws = 2;
-		UIMenubar.inst.workspaceHandle.redraws = 2;
-		UINodes.inst.hwnd.redraws = 2;
+		UIHeader.headerHandle.redraws = 2;
+		UIBase.hwnds[TabArea.TabStatus].redraws = 2;
+		UIMenubar.menuHandle.redraws = 2;
+		UIMenubar.workspaceHandle.redraws = 2;
+		UINodes.hwnd.redraws = 2;
 		UIBox.hwnd.redraws = 2;
-		UIView2D.inst.hwnd.redraws = 2;
+		UIView2D.hwnd.redraws = 2;
 		if (Context.raw.ddirty < 0) Context.raw.ddirty = 0; // Redraw viewport
 		///if (is_paint || is_sculpt)
-		UIBase.inst.hwnds[TabArea.TabSidebar0].redraws = 2;
-		UIBase.inst.hwnds[TabArea.TabSidebar1].redraws = 2;
-		UIToolbar.inst.toolbarHandle.redraws = 2;
+		UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
+		UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
+		UIToolbar.toolbarHandle.redraws = 2;
 		if (Context.raw.splitView) Context.raw.ddirty = 1;
 		///end
 	}
@@ -490,7 +490,7 @@ class Base {
 		if (mouse.released() && hasDrag) {
 			if (Base.dragAsset != null) {
 				if (Context.inNodes()) { // Create image texture
-					UINodes.inst.acceptAssetDrag(Project.assets.indexOf(Base.dragAsset));
+					UINodes.acceptAssetDrag(Project.assets.indexOf(Base.dragAsset));
 				}
 				else if (Context.inViewport()) {
 					if (Base.dragAsset.file.toLowerCase().endsWith(".hdr")) {
@@ -507,7 +507,7 @@ class Base {
 			}
 			else if (Base.dragSwatch != null) {
 				if (Context.inNodes()) { // Create RGB node
-					UINodes.inst.acceptSwatchDrag(Base.dragSwatch);
+					UINodes.acceptSwatchDrag(Base.dragSwatch);
 				}
 				else if (Context.inSwatches()) {
 					TabSwatches.acceptSwatchDrag(Base.dragSwatch);
@@ -559,7 +559,7 @@ class Base {
 			}
 			else if (Base.dragLayer != null) {
 				if (Context.inNodes()) {
-					UINodes.inst.acceptLayerDrag(Project.layers.indexOf(Base.dragLayer));
+					UINodes.acceptLayerDrag(Project.layers.indexOf(Base.dragLayer));
 				}
 				else if (Context.inLayers() && Base.isDragging) {
 					Base.dragLayer.move(Context.raw.dragDestination);
@@ -589,7 +589,7 @@ class Base {
 			Base.isDragging ||
 			isPicker ||
 			decal ||
-			UIView2D.inst.show ||
+			UIView2D.show ||
 			!Config.raw.brush_3d ||
 			Context.raw.frame < 3;
 		///end
@@ -612,7 +612,7 @@ class Base {
 			Base.createFillLayer(uvType, decalMat, Context.raw.dragDestination);
 		}
 		else if (Context.inNodes()) {
-			UINodes.inst.acceptMaterialDrag(Project.materials.indexOf(Base.dragMaterial));
+			UINodes.acceptMaterialDrag(Project.materials.indexOf(Base.dragMaterial));
 		}
 		Base.dragMaterial = null;
 	}
@@ -661,7 +661,7 @@ class Base {
 			if (Base.dragFileIcon != null) return Base.dragFileIcon;
 			let icons = Res.get("icons.k");
 			Base.dragRect = Base.dragFile.indexOf(".") > 0 ? Res.tile50(icons, 3, 1) : Res.tile50(icons, 2, 1);
-			Base.dragTint = UIBase.inst.ui.t.HIGHLIGHT_COL;
+			Base.dragTint = UIBase.ui.t.HIGHLIGHT_COL;
 			return icons;
 		}
 
@@ -674,7 +674,7 @@ class Base {
 			let folderClosed = Res.tile50(icons, 2, 1);
 			let folderOpen = Res.tile50(icons, 8, 1);
 			Base.dragRect = Base.dragLayer.show_panel ? folderOpen : folderClosed;
-			Base.dragTint = UIBase.inst.ui.t.LABEL_COL - 0x00202020;
+			Base.dragTint = UIBase.ui.t.LABEL_COL - 0x00202020;
 			return icons;
 		}
 		if (Base.dragLayer != null && Base.dragLayer.isMask() && Base.dragLayer.fill_layer == null) {
@@ -695,7 +695,7 @@ class Base {
 		if (Context.raw.frame == 2) {
 			///if (is_paint || is_sculpt)
 			UtilRender.makeMaterialPreview();
-			UIBase.inst.hwnds[TabArea.TabSidebar1].redraws = 2;
+			UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
 			///end
 
 			MakeMaterial.parseMeshMaterial();
@@ -714,9 +714,9 @@ class Base {
 
 			// Default workspace
 			if (Config.raw.workspace != 0) {
-				UIHeader.inst.worktab.position = Config.raw.workspace;
-				UIMenubar.inst.workspaceHandle.redraws = 2;
-				UIHeader.inst.worktab.changed = true;
+				UIHeader.worktab.position = Config.raw.workspace;
+				UIMenubar.workspaceHandle.redraws = 2;
+				UIHeader.worktab.changed = true;
 			}
 
 			// Default camera controls
@@ -750,7 +750,7 @@ class Base {
 			let img = Base.getDragImage();
 
 			///if (is_paint || is_sculpt)
-			let scaleFactor = UIBase.inst.ui.SCALE();
+			let scaleFactor = UIBase.ui.SCALE();
 			///end
 			///if is_lab
 			let scaleFactor = Base.uiBox.SCALE();
@@ -872,7 +872,7 @@ class Base {
 	}
 
 	static getUIs = (): Zui[] => {
-		return [Base.uiBox, Base.uiMenu, UIBase.inst.ui, UINodes.inst.ui, UIView2D.inst.ui];
+		return [Base.uiBox, Base.uiMenu, UIBase.ui, UINodes.ui, UIView2D.ui];
 	}
 
 	static isDecalLayer = (): bool => {
@@ -887,20 +887,18 @@ class Base {
 	}
 
 	static redrawStatus = () => {
-		if (UIStatus.inst != null) {
-			UIBase.inst.hwnds[TabArea.TabStatus].redraws = 2;
-		}
+		UIBase.hwnds[TabArea.TabStatus].redraws = 2;
 	}
 
 	static redrawConsole = () => {
 		let statush = Config.raw.layout[LayoutSize.LayoutStatusH];
-		if (UIStatus.inst != null && UIBase.inst != null && UIBase.inst.ui != null && statush > UIStatus.defaultStatusH * UIBase.inst.ui.SCALE()) {
-			UIBase.inst.hwnds[TabArea.TabStatus].redraws = 2;
+		if (UIBase != null && UIBase.ui != null && statush > UIStatus.defaultStatusH * UIBase.ui.SCALE()) {
+			UIBase.hwnds[TabArea.TabStatus].redraws = 2;
 		}
 	}
 
 	static initLayout = () => {
-		let show2d = (UINodes.inst != null && UINodes.inst.show) || (UIView2D.inst != null && UIView2D.inst.show);
+		let show2d = (UINodes != null && UINodes.show) || (UIView2D != null && UIView2D.show);
 
 		let raw = Config.raw;
 		raw.layout = [
@@ -2145,8 +2143,8 @@ class Base {
 		let texpaint_nor = BrushOutputNode.inst.texpaint_nor;
 		let texpaint_pack = BrushOutputNode.inst.texpaint_pack;
 
-		let nodes = UINodes.inst.getNodes();
-		let canvas = UINodes.inst.getCanvas(true);
+		let nodes = UINodes.getNodes();
+		let canvas = UINodes.getCanvas(true);
 		if (nodes.nodesSelectedId.length > 0) {
 			let node = nodes.getNode(canvas.nodes, nodes.nodesSelectedId[0]);
 			let brushNode = ParserLogic.getLogicNode(node);

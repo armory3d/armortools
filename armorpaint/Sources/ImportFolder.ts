@@ -116,7 +116,7 @@ class ImportFolder {
 
 		MakeMaterial.parsePaintMaterial();
 		UtilRender.makeMaterialPreview();
-		UIBase.inst.hwnds[1].redraws = 2;
+		UIBase.hwnds[1].redraws = 2;
 		History.newMaterial();
 	}
 

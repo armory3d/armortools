@@ -87,7 +87,7 @@ class UIFiles {
 		let file = Res.tile50(icons, 3, 1);
 		let isCloud = handle.text.startsWith("cloud");
 
-		if (isCloud && File.cloud == null) File.initCloud(() => { UIBase.inst.hwnds[TabArea.TabStatus].redraws = 3; });
+		if (isCloud && File.cloud == null) File.initCloud(() => { UIBase.hwnds[TabArea.TabStatus].redraws = 3; });
 		if (isCloud && File.readDirectory("cloud", false).length == 0) return handle.text;
 
 		///if krom_ios
@@ -191,7 +191,7 @@ class UIFiles {
 											icon.g2.pipeline = null;
 											icon.g2.end();
 											UIFiles.iconMap.set(handle.text + Path.sep + f, icon);
-											UIBase.inst.hwnds[TabArea.TabStatus].redraws = 3;
+											UIBase.hwnds[TabArea.TabStatus].redraws = 3;
 										});
 									});
 								}
@@ -292,7 +292,7 @@ class UIFiles {
 								icon.g2.pipeline = null;
 								icon.g2.end();
 								UIFiles.iconMap.set(shandle, icon);
-								UIBase.inst.hwnds[TabArea.TabStatus].redraws = 3;
+								UIBase.hwnds[TabArea.TabStatus].redraws = 3;
 								Data.deleteImage(shandle); // The big image is not needed anymore
 							});
 						});

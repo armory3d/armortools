@@ -4,7 +4,7 @@
 class TabFonts {
 
 	static draw = (htab: Handle) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		let statush = Config.raw.layout[LayoutSize.LayoutStatusH];
 		if (ui.tab(htab, tr("Fonts")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
@@ -20,12 +20,12 @@ class TabFonts {
 			if (ui.isHovered) ui.tooltip(tr("Import font file"));
 
 			if (ui.button(tr("2D View"))) {
-				UIBase.inst.show2DView(View2DType.View2DFont);
+				UIBase.show2DView(View2DType.View2DFont);
 			}
 			ui.endSticky();
 			ui.separator(3, false);
 
-			let statusw = System.width - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSize.LayoutSidebarW];
+			let statusw = System.width - UIToolbar.toolbarw - Config.raw.layout[LayoutSize.LayoutSidebarW];
 			let slotw = Math.floor(51 * ui.SCALE());
 			let num = Math.floor(statusw / slotw);
 
@@ -64,11 +64,11 @@ class TabFonts {
 					let tile = ui.SCALE() > 1 ? 100 : 50;
 					let state = State.Idle;
 					if (Project.fonts[i].previewReady) {
-						// ui.g.pipeline = UIView2D.inst.pipe; // L8
+						// ui.g.pipeline = UIView2D.pipe; // L8
 						// ///if krom_opengl
-						// ui.currentWindow.texture.g4.setPipeline(UIView2D.inst.pipe);
+						// ui.currentWindow.texture.g4.setPipeline(UIView2D.pipe);
 						// ///end
-						// ui.currentWindow.texture.g4.setInt(UIView2D.inst.channelLocation, 1);
+						// ui.currentWindow.texture.g4.setInt(UIView2D.channelLocation, 1);
 						state = ui.image(img);
 						// ui.g.pipeline = null;
 					}
@@ -83,7 +83,7 @@ class TabFonts {
 							}
 							App.notifyOnInit(_init);
 						}
-						if (Time.time() - Context.raw.selectTime < 0.25) UIBase.inst.show2DView(View2DType.View2DFont);
+						if (Time.time() - Context.raw.selectTime < 0.25) UIBase.show2DView(View2DType.View2DFont);
 						Context.raw.selectTime = Time.time();
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
@@ -143,7 +143,7 @@ class TabFonts {
 			Project.fonts.splice(i, 1);
 		}
 		App.notifyOnInit(_init);
-		UIBase.inst.hwnds[2].redraws = 2;
+		UIBase.hwnds[2].redraws = 2;
 	}
 }
 

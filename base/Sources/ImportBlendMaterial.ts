@@ -250,7 +250,7 @@ class ImportBlendMaterial {
 			}
 			App.notifyOnInit(_init);
 
-			UIBase.inst.hwnds[TabArea.TabSidebar1].redraws = 2;
+			UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
 			Data.deleteBlob(path);
 		});
 	}

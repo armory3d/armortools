@@ -9,7 +9,7 @@ class TabMaterials {
 	}
 
 	static drawMini = (htab: Handle) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		ui.setHoveredTabName(tr("Materials"));
 
 		ui.beginSticky();
@@ -24,7 +24,7 @@ class TabMaterials {
 	}
 
 	static drawFull = (htab: Handle) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		if (ui.tab(htab, tr("Materials"))) {
 			ui.beginSticky();
 			ui.row([1 / 4, 1 / 4, 1 / 4]);
@@ -42,15 +42,15 @@ class TabMaterials {
 	}
 
 	static buttonNodes = () => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		if (ui.button(tr("Nodes"))) {
-			UIBase.inst.showMaterialNodes();
+			UIBase.showMaterialNodes();
 		}
 		else if (ui.isHovered) ui.tooltip(tr("Show Node Editor") + ` (${Config.keymap.toggle_node_editor})`);
 	}
 
 	static drawSlots = (mini: bool) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		let slotw = Math.floor(51 * ui.SCALE());
 		let num = Math.floor(Config.raw.layout[LayoutSize.LayoutSidebarW] / slotw);
 
@@ -106,7 +106,7 @@ class TabMaterials {
 					ui.image(Res.get("icons.k"), 0xffffffff, null, tile, tile, tile, tile);
 
 				// Draw material numbers when selecting a material via keyboard shortcut
-				let isTyping = ui.isTyping || UIView2D.inst.ui.isTyping || UINodes.inst.ui.isTyping;
+				let isTyping = ui.isTyping || UIView2D.ui.isTyping || UINodes.ui.isTyping;
 				if (!isTyping) {
 					if (i < 9 && Operator.shortcut(Config.keymap.select_material, ShortcutType.ShortcutDown)) {
 						let number = String(i + 1);
@@ -138,7 +138,7 @@ class TabMaterials {
 					Base.dragMaterial = Context.raw.material;
 					// Double click to show nodes
 					if (Time.time() - Context.raw.selectTime < 0.25) {
-						UIBase.inst.showMaterialNodes();
+						UIBase.showMaterialNodes();
 						Base.dragMaterial = null;
 						Base.isDragging = false;
 					}
@@ -264,7 +264,7 @@ class TabMaterials {
 	}
 
 	static buttonNew = (text: string) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		if (ui.button(text)) {
 			ui.g.end();
 			Context.raw.material = new SlotMaterial(Project.materials[0].data);
@@ -276,9 +276,9 @@ class TabMaterials {
 	}
 
 	static updateMaterial = () => {
-		UIHeader.inst.headerHandle.redraws = 2;
-		UINodes.inst.hwnd.redraws = 2;
-		UINodes.inst.groupStack = [];
+		UIHeader.headerHandle.redraws = 2;
+		UINodes.hwnd.redraws = 2;
+		UINodes.groupStack = [];
 		MakeMaterial.parsePaintMaterial();
 		UtilRender.makeMaterialPreview();
 		let decal = Context.raw.tool == WorkspaceTool.ToolDecal || Context.raw.tool == WorkspaceTool.ToolText;
@@ -328,7 +328,7 @@ class TabMaterials {
 		History.deleteMaterial();
 		Context.selectMaterial(i == Project.materials.length - 1 ? i - 1 : i + 1);
 		Project.materials.splice(i, 1);
-		UIBase.inst.hwnds[1].redraws = 2;
+		UIBase.hwnds[1].redraws = 2;
 		for (let m of Project.materials) TabMaterials.updateMaterialPointers(m.canvas.nodes, i);
 		// for (let n of m.canvas.nodes) UINodes.onNodeRemove(n);
 	}

@@ -2,7 +2,7 @@
 class TabConsole {
 
 	static draw = (htab: Handle) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 
 		let title = Console.messageTimer > 0 ? Console.message + "        " : tr("Console");
 		let color = Console.messageTimer > 0 ? Console.messageColor : -1;

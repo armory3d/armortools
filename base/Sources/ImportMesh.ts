@@ -90,7 +90,7 @@ class ImportMesh {
 		MakeMaterial.parseMeshMaterial();
 
 		///if (is_paint || is_sculpt)
-		UIView2D.inst.hwnd.redraws = 2;
+		UIView2D.hwnd.redraws = 2;
 		///end
 
 		///if (krom_direct3d12 || krom_vulkan || krom_metal)
@@ -131,8 +131,8 @@ class ImportMesh {
 			Context.raw.ddirty = 4;
 
 			///if (is_paint || is_sculpt)
-			UIBase.inst.hwnds[TabArea.TabSidebar0].redraws = 2;
-			UIBase.inst.hwnds[TabArea.TabSidebar1].redraws = 2;
+			UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
+			UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
 			UtilUV.uvmapCached = false;
 			UtilUV.trianglemapCached = false;
 			UtilUV.dilatemapCached = false;
@@ -208,7 +208,7 @@ class ImportMesh {
 			Context.raw.ddirty = 4;
 
 			///if (is_paint || is_sculpt)
-			UIBase.inst.hwnds[TabArea.TabSidebar0].redraws = 2;
+			UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
 			UtilUV.uvmapCached = false;
 			UtilUV.trianglemapCached = false;
 			UtilUV.dilatemapCached = false;

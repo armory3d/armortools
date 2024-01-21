@@ -4,7 +4,7 @@
 class TabHistory {
 
 	static draw = (htab: Handle) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		if (ui.tab(htab, tr("History"))) {
 			for (let i = 0; i < History.steps.length; ++i) {
 				let active = History.steps.length - 1 - History.redos;

@@ -401,7 +401,7 @@ class SlotLayer {
 		let _next = () => {
 			MakeMaterial.parsePaintMaterial();
 			Context.raw.layerPreviewDirty = true;
-			UIBase.inst.hwnds[TabArea.TabSidebar0].redraws = 2;
+			UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
 		}
 		Base.notifyOnNextFrame(_next);
 	}
@@ -411,7 +411,7 @@ class SlotLayer {
 		this.fill_layer = null;
 		MakeMaterial.parsePaintMaterial();
 		Context.raw.layerPreviewDirty = true;
-		UIBase.inst.hwnds[TabArea.TabSidebar0].redraws = 2;
+		UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
 	}
 
 	isVisible = (): bool => {
@@ -624,7 +624,7 @@ class SlotLayer {
 
 		Context.setLayer(this);
 		History.orderLayers(to);
-		UIBase.inst.hwnds[TabArea.TabSidebar0].redraws = 2;
+		UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
 
 		array_remove(Project.layers, this);
 		Project.layers.splice(to, 0, this);

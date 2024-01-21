@@ -22,7 +22,7 @@ class TabSwatches {
 	static dragPosition: i32 = -1;
 
 	static draw = (htab: Handle) => {
-		let ui = UIBase.inst.ui;
+		let ui = UIBase.ui;
 		let statush = Config.raw.layout[LayoutSize.LayoutStatusH];
 		if (ui.tab(htab, tr("Swatches")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
@@ -252,6 +252,6 @@ class TabSwatches {
 		let i = Project.raw.swatches.indexOf(swatch);
 		Context.setSwatch(Project.raw.swatches[i == Project.raw.swatches.length - 1 ? i - 1 : i + 1]);
 		Project.raw.swatches.splice(i, 1);
-		UIBase.inst.hwnds[TabArea.TabStatus].redraws = 2;
+		UIBase.hwnds[TabArea.TabStatus].redraws = 2;
 	}
 }

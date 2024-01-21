@@ -193,9 +193,9 @@ class History {
 				Context.raw.material = new SlotMaterial(Project.materials[0].data);
 				Project.materials.splice(step.material, 0, Context.raw.material);
 				Context.raw.material.canvas = step.canvas;
-				UINodes.inst.canvasChanged();
-				UINodes.inst.getNodes().handle = new Handle();
-				UINodes.inst.hwnd.redraws = 2;
+				UINodes.canvasChanged();
+				UINodes.getNodes().handle = new Handle();
+				UINodes.hwnd.redraws = 2;
 			}
 			else if (step.name == tr("Duplicate Material")) {
 				Context.raw.material = Project.materials[step.material];
@@ -217,15 +217,15 @@ class History {
 			Context.raw.ddirty = 2;
 
 			///if (is_paint || is_sculpt)
-			UIBase.inst.hwnds[TabArea.TabSidebar0].redraws = 2;
-			UIBase.inst.hwnds[TabArea.TabSidebar1].redraws = 2;
-			if (UIView2D.inst.show) {
-				UIView2D.inst.hwnd.redraws = 2;
+			UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
+			UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
+			if (UIView2D.show) {
+				UIView2D.hwnd.redraws = 2;
 			}
 
 			if (Config.raw.touch_ui) {
 				// Refresh undo & redo buttons
-				UIMenubar.inst.menuHandle.redraws = 2;
+				UIMenubar.menuHandle.redraws = 2;
 			}
 			///end
 		}
@@ -379,9 +379,9 @@ class History {
 				Context.raw.material = new SlotMaterial(Project.materials[0].data);
 				Project.materials.splice(step.material, 0, Context.raw.material);
 				Context.raw.material.canvas = step.canvas;
-				UINodes.inst.canvasChanged();
-				UINodes.inst.getNodes().handle = new Handle();
-				UINodes.inst.hwnd.redraws = 2;
+				UINodes.canvasChanged();
+				UINodes.getNodes().handle = new Handle();
+				UINodes.hwnd.redraws = 2;
 			}
 			else if (step.name == tr("Delete Material")) {
 				Context.raw.material = Project.materials[step.material];
@@ -392,9 +392,9 @@ class History {
 				Context.raw.material = new SlotMaterial(Project.materials[0].data);
 				Project.materials.splice(step.material, 0, Context.raw.material);
 				Context.raw.material.canvas = step.canvas;
-				UINodes.inst.canvasChanged();
-				UINodes.inst.getNodes().handle = new Handle();
-				UINodes.inst.hwnd.redraws = 2;
+				UINodes.canvasChanged();
+				UINodes.getNodes().handle = new Handle();
+				UINodes.hwnd.redraws = 2;
 			}
 			else { // Paint operation
 				let lay = History.undoLayers[History.undoI];
@@ -411,13 +411,13 @@ class History {
 			Context.raw.ddirty = 2;
 
 			///if (is_paint || is_sculpt)
-			UIBase.inst.hwnds[TabArea.TabSidebar0].redraws = 2;
-			UIBase.inst.hwnds[TabArea.TabSidebar1].redraws = 2;
-			if (UIView2D.inst.show) UIView2D.inst.hwnd.redraws = 2;
+			UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
+			UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
+			if (UIView2D.show) UIView2D.hwnd.redraws = 2;
 
 			if (Config.raw.touch_ui) {
 				// Refresh undo & redo buttons
-				UIMenubar.inst.menuHandle.redraws = 2;
+				UIMenubar.menuHandle.redraws = 2;
 			}
 			///end
 		}
@@ -456,7 +456,7 @@ class History {
 		History.copyToUndo(Context.raw.layer.id, History.undoI, isMask);
 
 		History.pushUndo = false;
-		History.push(tr(UIToolbar.inst.toolNames[Context.raw.tool]));
+		History.push(tr(UIToolbar.toolNames[Context.raw.tool]));
 	}
 
 	static newLayer = () => {
@@ -599,7 +599,7 @@ class History {
 
 		if (Config.raw.touch_ui) {
 			// Refresh undo & redo buttons
-			UIMenubar.inst.menuHandle.redraws = 2;
+			UIMenubar.menuHandle.redraws = 2;
 		}
 
 		if (History.undos < Config.raw.undo_steps) History.undos++;
@@ -721,9 +721,9 @@ class History {
 		step.canvas = _canvas;
 		///end
 
-		UINodes.inst.canvasChanged();
-		UINodes.inst.getNodes().handle = new Handle();
-		UINodes.inst.hwnd.redraws = 2;
+		UINodes.canvasChanged();
+		UINodes.getNodes().handle = new Handle();
+		UINodes.hwnd.redraws = 2;
 	}
 }
 

@@ -2942,7 +2942,7 @@ class NodesMaterial {
 		}
 
 		if (ui.button(tr("Nodes"))) {
-			UINodes.inst.groupStack.push(group);
+			UINodes.groupStack.push(group);
 		}
 	}
 
@@ -2959,7 +2959,7 @@ class NodesMaterial {
 	static addSocketButton = (ui: Zui, nodes: Nodes, node: TNode, sockets: TNodeSocket[]) => {
 		if (ui.button(tr("Add"))) {
 			UIMenu.draw((ui: Zui) => {
-				let groupStack = UINodes.inst.groupStack;
+				let groupStack = UINodes.groupStack;
 				let c = groupStack[groupStack.length - 1].canvas;
 				if (UIMenu.menuButton(ui, tr("RGBA"))) {
 					sockets.push(NodesMaterial.createSocket(nodes, node, null, "RGBA", c));
@@ -2978,7 +2978,7 @@ class NodesMaterial {
 	}
 
 	static syncSockets = (node: TNode) => {
-		let groupStack = UINodes.inst.groupStack;
+		let groupStack = UINodes.groupStack;
 		let c = groupStack[groupStack.length - 1].canvas;
 		for (let m of Project.materials) NodesMaterial.syncGroupSockets(m.canvas, c.name, node);
 		for (let g of Project.materialGroups) NodesMaterial.syncGroupSockets(g.canvas, c.name, node);

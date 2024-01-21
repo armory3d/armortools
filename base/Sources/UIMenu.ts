@@ -107,8 +107,8 @@ class UIMenu {
 			}
 			else if (UIMenu.menuCategory == MenuCategory.MenuViewport) {
 				if (UIMenu.menuButton(ui, tr("Distract Free"), Config.keymap.view_distract_free)) {
-					UIBase.inst.toggleDistractFree();
-					UIBase.inst.ui.isHovered = false;
+					UIBase.toggleDistractFree();
+					UIBase.ui.isHovered = false;
 				}
 
 				///if !(krom_android || krom_ios)

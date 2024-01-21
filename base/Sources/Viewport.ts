@@ -30,7 +30,7 @@ class Viewport {
 				cam.data.raw.ortho = null;
 				cam.buildProjection();
 				Context.raw.ddirty = 2;
-				Camera.inst.reset();
+				Camera.reset();
 				Context.mainObject().transform.reset();
 				break;
 			}
@@ -47,12 +47,12 @@ class Viewport {
 		cam.transform.buildMatrix();
 		cam.buildProjection();
 		Context.raw.ddirty = 2;
-		Camera.inst.reset(Context.raw.viewIndexLast);
+		Camera.reset(Context.raw.viewIndexLast);
 	}
 
 	static orbit = (x: f32, y: f32) => {
 		let cam = Scene.active.camera;
-		let dist = Camera.inst.distance();
+		let dist = Camera.distance();
 		cam.transform.move(cam.lookWorld(), dist);
 		cam.transform.rotate(new Vec4(0, 0, 1), x);
 		cam.transform.rotate(cam.rightWorld(), y);

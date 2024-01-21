@@ -26,7 +26,7 @@ class UniformsExt {
 				let decalMask = decal && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
 				let brushDecalMaskRadius = Context.raw.brushDecalMaskRadius;
 				if (Config.raw.brush_3d) {
-					brushDecalMaskRadius *= Context.raw.paint2d ? 0.55 * UIView2D.inst.panScale : 2.0;
+					brushDecalMaskRadius *= Context.raw.paint2d ? 0.55 * UIView2D.panScale : 2.0;
 				}
 				let radius = decalMask ? brushDecalMaskRadius : Context.raw.brushRadius;
 				let val = (radius * Context.raw.brushNodesRadius) / 15.0;
@@ -37,7 +37,7 @@ class UniformsExt {
 				let scale2d = (900 / Base.h()) * Config.raw.window_scale;
 
 				if (Config.raw.brush_3d && !decal) {
-					val *= Context.raw.paint2d ? 0.55 * scale2d * UIView2D.inst.panScale : 2;
+					val *= Context.raw.paint2d ? 0.55 * scale2d * UIView2D.panScale : 2;
 				}
 				else {
 					val *= scale2d; // Projection ratio
@@ -92,7 +92,7 @@ class UniformsExt {
 				}
 				if (Config.raw.brush_3d) {
 					if (Context.raw.paint2d) {
-						val *= 1.0 / UIView2D.inst.panScale;
+						val *= 1.0 / UIView2D.panScale;
 					}
 					else {
 						val *= val;
@@ -260,7 +260,7 @@ class UniformsExt {
 	static vec2d = (x: f32) => {
 		// Transform from 3d viewport coord to 2d view coord
 		Context.raw.paint2dView = false;
-		let res = (x * Base.w() - Base.w()) / UIView2D.inst.ww;
+		let res = (x * Base.w() - Base.w()) / UIView2D.ww;
 		Context.raw.paint2dView = true;
 		return res;
 	}

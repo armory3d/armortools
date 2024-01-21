@@ -39,7 +39,7 @@ class ImportTexture {
 			if (Context.raw.texture == null) Context.raw.texture = asset;
 			Project.assetNames.push(name);
 			Project.assetMap.set(asset.id, image);
-			UIBase.inst.hwnds[TabArea.TabStatus].redraws = 2;
+			UIBase.hwnds[TabArea.TabStatus].redraws = 2;
 			Console.info(tr("Texture imported:") + " " + name);
 
 			// Set as envmap

@@ -200,7 +200,7 @@ class MakePaint {
 			ParserMaterial.triplanar = uvType == UVType.UVTriplanar && !decal;
 			ParserMaterial.sample_keep_aspect = decal;
 			ParserMaterial.sample_uv_scale = 'brushScale';
-			let sout = ParserMaterial.parse(UINodes.inst.getCanvasMaterial(), con_paint, vert, frag, matcon);
+			let sout = ParserMaterial.parse(UINodes.getCanvasMaterial(), con_paint, vert, frag, matcon);
 			ParserMaterial.parse_emission = false;
 			ParserMaterial.parse_subsurface = false;
 			ParserMaterial.parse_height_as_channel = false;

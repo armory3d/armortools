@@ -63,7 +63,7 @@ class ImportMesh {
 		MakeMaterial.parsePaintMaterial();
 		MakeMaterial.parseMeshMaterial();
 
-		UIView2D.inst.hwnd.redraws = 2;
+		UIView2D.hwnd.redraws = 2;
 
 		///if arm_physics
 		Context.raw.paintBody = null;
@@ -113,8 +113,8 @@ class ImportMesh {
 				Data.cachedMeshes.set(md.handle, md);
 
 				Context.raw.ddirty = 4;
-				UIBase.inst.hwnds[TabSidebar0].redraws = 2;
-				UIBase.inst.hwnds[TabSidebar1].redraws = 2;
+				UIBase.hwnds[TabSidebar0].redraws = 2;
+				UIBase.hwnds[TabSidebar1].redraws = 2;
 
 				// Wait for addMesh calls to finish
 				App.notifyOnInit(finishImport);
@@ -169,7 +169,7 @@ class ImportMesh {
 				Data.cachedMeshes.set(md.handle, md);
 
 				Context.raw.ddirty = 4;
-				UIBase.inst.hwnds[TabSidebar0].redraws = 2;
+				UIBase.hwnds[TabSidebar0].redraws = 2;
 			});
 		}
 
