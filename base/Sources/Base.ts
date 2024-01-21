@@ -236,18 +236,18 @@ class Base {
 	///if (is_paint || is_sculpt)
 	static w = (): i32 => {
 		// Drawing material preview
-		if (UIBase != null && Context.raw.materialPreview) {
+		if (Context.raw.materialPreview) {
 			return UtilRender.materialPreviewSize;
 		}
 
 		// Drawing decal preview
-		if (UIBase != null && Context.raw.decalPreview) {
+		if (Context.raw.decalPreview) {
 			return UtilRender.decalPreviewSize;
 		}
 
 		let res = 0;
-		if (UINodes == null || UIBase == null) {
-			let sidebarw = Config.raw.layout == null ? UIBase.defaultSidebarW : Config.raw.layout[LayoutSize.LayoutSidebarW];
+		if (Config.raw.layout == null) {
+			let sidebarw = UIBase.defaultSidebarW;
 			res = System.width - sidebarw - UIToolbar.defaultToolbarW;
 		}
 		else if (UINodes.show || UIView2D.show) {
@@ -259,7 +259,7 @@ class Base {
 		else { // Distract free
 			res = System.width;
 		}
-		if (UIBase != null && Context.raw.viewIndex > -1) {
+		if (Context.raw.viewIndex > -1) {
 			res = Math.floor(res / 2);
 		}
 		if (Context.raw.paint2dView) {
@@ -271,18 +271,18 @@ class Base {
 
 	static h = (): i32 => {
 		// Drawing material preview
-		if (UIBase != null && Context.raw.materialPreview) {
+		if (Context.raw.materialPreview) {
 			return UtilRender.materialPreviewSize;
 		}
 
 		// Drawing decal preview
-		if (UIBase != null && Context.raw.decalPreview) {
+		if (Context.raw.decalPreview) {
 			return UtilRender.decalPreviewSize;
 		}
 
 		let res = System.height;
 
-		if (UIBase == null) {
+		if (Config.raw.layout == null) {
 			res -= UIHeader.defaultHeaderH * 2 + UIStatus.defaultStatusH;
 
 			///if (krom_android || krom_ios)
@@ -294,7 +294,7 @@ class Base {
 				res += UIHeader.headerh;
 			}
 		}
-		else if (UIBase != null && UIBase.show && res > 0) {
+		else if (UIBase.show && res > 0) {
 			let statush = Config.raw.layout[LayoutSize.LayoutStatusH];
 			res -= Math.floor(UIHeader.defaultHeaderH * 2 * Config.raw.window_scale) + statush;
 
@@ -328,7 +328,7 @@ class Base {
 		if (UIBase == null) {
 			res -= UIHeader.defaultHeaderH * 2 + UIStatus.defaultStatusH;
 		}
-		else if (UIBase != null && res > 0) {
+		else if (res > 0) {
 			let statush = Config.raw.layout[LayoutSize.LayoutStatusH];
 			res -= Math.floor(UIHeader.defaultHeaderH * 2 * Config.raw.window_scale) + statush;
 		}
@@ -892,7 +892,7 @@ class Base {
 
 	static redrawConsole = () => {
 		let statush = Config.raw.layout[LayoutSize.LayoutStatusH];
-		if (UIBase != null && UIBase.ui != null && statush > UIStatus.defaultStatusH * UIBase.ui.SCALE()) {
+		if (UIBase.ui != null && statush > UIStatus.defaultStatusH * UIBase.ui.SCALE()) {
 			UIBase.hwnds[TabArea.TabStatus].redraws = 2;
 		}
 	}
