@@ -5,26 +5,26 @@ var UTIF={},pako=null;function log(){console.log(arguments)}!function(x,A){funct
 
 // Register as ArmorPaint plugin
 let import_tiff = function(path, done) {
-	iron.Data.getBlob(path, function(b) {
+	Data.getBlob(path, function(b) {
 		let ifds = UTIF.decode(b);
 		UTIF.decodeImage(b, ifds[0]);
 		let rgba = UTIF.toRGBA8(ifds[0]);
-		let image = core.Image.fromBytes(rgba.buffer, ifds[0].width, ifds[0].height);
+		let image = Image.fromBytes(rgba.buffer, ifds[0].width, ifds[0].height);
 		done(image);
 	});
 }
 
-let plugin = new arm.Plugin();
-let formats = arm.Path.textureFormats;
-let importers = arm.Path.textureImporters;
+let plugin = new Plugin();
+let formats = Path.textureFormats;
+let importers = Path.textureImporters;
 formats.push("tif");
 formats.push("tiff");
-importers.h["tif"] = import_tiff;
-importers.h["tiff"] = import_tiff;
+importers.set("tif", import_tiff);
+importers.set("tiff", import_tiff);
 
 plugin.delete = function() {
 	formats.splice(formats.indexOf("tif"), 1);
 	formats.splice(formats.indexOf("tiff"), 1);
-	importers.h["tif"] = null;
-	importers.h["tiff"] = null;
+	importers.delete("tif");
+	importers.delete("tiff");
 };

@@ -20,7 +20,7 @@ let read_f32 = function(view) {
 }
 
 let import_stl = function(path, done) {
-	iron.Data.getBlob(path, function(b) {
+	Data.getBlob(path, function(b) {
 		let view = new DataView(b);
 		pos = 0;
 		// let header = input.read(80);
@@ -80,17 +80,17 @@ let import_stl = function(path, done) {
 			scale_tex: 1.0
 		});
 
-		iron.Data.deleteBlob(path);
+		Data.deleteBlob(path);
 	});
 }
 
-let plugin = new arm.Plugin();
-let formats = arm.Path.meshFormats;
-let importers = arm.Path.meshImporters;
+let plugin = new Plugin();
+let formats = Path.meshFormats;
+let importers = Path.meshImporters;
 formats.push("stl");
-importers.h["stl"] = import_stl;
+importers.set("stl", import_stl);
 
 plugin.delete = function() {
 	formats.splice(formats.indexOf("stl"), 1);
-	importers.h["stl"] = null;
+	importers.delete("stl");
 };

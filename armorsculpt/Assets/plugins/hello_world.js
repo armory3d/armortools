@@ -1,13 +1,13 @@
 
-let plugin = new arm.Plugin();
+let plugin = new Plugin();
 
-let h1 = new zui.Handle();
-let h2 = new zui.Handle();
-let h3 = new zui.Handle();
-let h4 = new zui.Handle();
-let h5 = new zui.Handle();
-let h6 = new zui.Handle();
-let h7 = new zui.Handle();
+let h1 = new Handle();
+let h2 = new Handle();
+let h3 = new Handle();
+let h4 = new Handle();
+let h5 = new Handle();
+let h6 = new Handle();
+let h7 = new Handle();
 
 plugin.drawUI = function(ui) {
 	if (ui.panel(h1, "My Plugin")) {

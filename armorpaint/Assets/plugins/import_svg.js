@@ -7,7 +7,7 @@ let r = new R();
 
 // import_svg.js
 let import_svg = function(path, done) {
-	iron.Data.getBlob(path, function(b) {
+	Data.getBlob(path, function(b) {
 		let buf_off = a._init(b.byteLength + 1); //// Allocate r.buffer
 		let buf = new Uint8Array(r.buffer, buf_off, b.byteLength + 1);
 		let bbuf = new Uint8Array(b);
@@ -18,21 +18,21 @@ let import_svg = function(path, done) {
 		let w = a._get_pixels_w();
 		let h = a._get_pixels_h();
 		let pixels = r.buffer.slice(a._get_pixels(), a._get_pixels() + w * h * 4);
-		let image = core.Image.fromBytes(pixels, w, h);
+		let image = Image.fromBytes(pixels, w, h);
 		done(image);
 
 		// a._destroy(); //// Destroys r.buffer
-		iron.Data.deleteBlob(path);
+		Data.deleteBlob(path);
 	});
 }
 
-let plugin = new arm.Plugin();
-let formats = arm.Path.textureFormats;
-let importers = arm.Path.textureImporters;
+let plugin = new Plugin();
+let formats = Path.textureFormats;
+let importers = Path.textureImporters;
 formats.push("svg");
-importers.h["svg"] = import_svg;
+importers.set("svg", import_svg);
 
 plugin.delete = function() {
 	formats.splice(formats.indexOf("svg"), 1);
-	importers.h["svg"] = null;
+	importers.delete("svg");
 };

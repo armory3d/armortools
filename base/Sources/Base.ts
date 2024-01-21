@@ -168,7 +168,6 @@ class Base {
 					Base.defaultElementH = Base.uiMenu.t.ELEMENT_H;
 
 					// Init plugins
-					Plugin.init();
 					if (Config.raw.plugins != null) {
 						for (let plugin of Config.raw.plugins) {
 							Plugin.start(plugin);

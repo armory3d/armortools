@@ -1,12 +1,12 @@
 
-let plugin = new arm.Plugin();
+let plugin = new Plugin();
 
 let categoryName = "My Nodes";
 let nodeName = "Hello World";
 let nodeType = "HELLO_WORLD";
 
 // Create new node category
-let categories = arm.NodesMaterial.categories;
+let categories = NodesMaterial.categories;
 categories.push(categoryName);
 
 // Create new node
@@ -51,13 +51,13 @@ let nodes = [
 		buttons: []
 	}
 ];
-arm.NodesMaterial.list.push(nodes);
+NodesMaterial.list.push(nodes);
 
 // Node shader
-arm.ParserMaterial.customNodes.set(nodeType, function(node, socket) {
-	let frag = arm.ParserMaterial.frag;
-	let scale = arm.ParserMaterial.parse_value_input(node.inputs[0]);
-	let my_out = arm.ParserMaterial.node_name(node) + "_out";
+ParserMaterial.customNodes.set(nodeType, function(node, socket) {
+	let frag = ParserMaterial.frag;
+	let scale = ParserMaterial.parse_value_input(node.inputs[0]);
+	let my_out = ParserMaterial.node_name(node) + "_out";
 
 	frag.write(`
 		float ${my_out} = cos(sin(texCoord.x * 200.0 * ${scale}) + cos(texCoord.y * 200.0 * ${scale}));
@@ -73,7 +73,7 @@ arm.ParserMaterial.customNodes.set(nodeType, function(node, socket) {
 
 // Cleanup
 plugin.delete = function() {
-	arm.ParserMaterial.customNodes.delete(nodeType);
-	arm.NodesMaterial.list.splice(arm.NodesMaterial.list.indexOf(nodes), 1);
+	ParserMaterial.customNodes.delete(nodeType);
+	NodesMaterial.list.splice(NodesMaterial.list.indexOf(nodes), 1);
 	categories.splice(categories.indexOf(categoryName), 1);
 };

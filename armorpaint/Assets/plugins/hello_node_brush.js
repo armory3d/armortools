@@ -1,12 +1,12 @@
 
-let plugin = new arm.Plugin();
+let plugin = new Plugin();
 
 let categoryName = "My Nodes";
 let nodeName = "Hello World";
 let nodeType = "HELLO_WORLD";
 
 // Create new node category
-let categories = arm.NodesBrush.categories;
+let categories = NodesBrush.categories;
 categories.push(categoryName);
 
 // Create new node
@@ -43,16 +43,16 @@ let nodes = [
 		buttons: []
 	}
 ];
-arm.NodesBrush.list.push(nodes);
+NodesBrush.list.push(nodes);
 
 // Brush node
-arm.ParserLogic.customNodes.set(nodeType, function(node, from) {
+ParserLogic.customNodes.set(nodeType, function(node, from) {
 	return Math.sin(iron.Time.time() * node.inputs[0].get(0));
 });
 
 // Cleanup
 plugin.delete = function() {
-	arm.ParserLogic.customNodes.delete(nodeType);
-	arm.NodesBrush.list.splice(arm.NodesBrush.list.indexOf(nodes), 1);
+	ParserLogic.customNodes.delete(nodeType);
+	NodesBrush.list.splice(NodesBrush.list.indexOf(nodes), 1);
 	categories.splice(categories.indexOf(categoryName), 1);
 };

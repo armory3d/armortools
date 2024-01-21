@@ -1,7 +1,7 @@
 
-let plugin = new arm.Plugin();
-let h1 = new zui.Handle();
-let h2 = new zui.Handle();
+let plugin = new Plugin();
+let h1 = new Handle();
+let h2 = new Handle();
 
 let slots = ["base", "occ", "rough", "nor"];
 let breakdown = null;
@@ -21,7 +21,7 @@ plugin.drawUI = function(ui) {
 			let x = ui.inputX - ui._windowX;
 			let w = ui._windowW / slots.length;
 			let i = (x / w) | 0;
-			arm.UIMenu.draw(function(ui) {
+			UIMenu.draw(function(ui) {
 				ui.text(slots[i], 2, ui.t.HIGHLIGHT_COL);
 				if (ui.button("Delete", 0)) {
 					slots.splice(i, 1);
@@ -32,7 +32,7 @@ plugin.drawUI = function(ui) {
 		ui.row([1 / 4, 1 / 4]);
 
 		if (ui.button("Add")) {
-			arm.UIMenu.draw(function(ui) {
+			UIMenu.draw(function(ui) {
 				ui.text("Channel", 2, ui.t.HIGHLIGHT_COL);
 				if (ui.button("Base Color", 0)) { slots.push("base"); }
 				if (ui.button("Occlusion", 0)) { slots.push("occ"); }
@@ -43,12 +43,12 @@ plugin.drawUI = function(ui) {
 		}
 
 		if (ui.button("Export")) {
-			arm.UIFiles.show("png", true, false, function(path) {
-				arm.Base.notifyOnNextFrame(function() {
-					var f = arm.UIFiles.filename;
+			UIFiles.show("png", true, false, function(path) {
+				Base.notifyOnNextFrame(function() {
+					var f = UIFiles.filename;
 					if (f === "") f = "untitled";
 					if (!f.endsWith(".png")) f += ".png";
-					Krom.writePng(path + arm.Path.sep + f, breakdown.getPixels(), breakdown.get_width(), breakdown.get_height(), 2);
+					Krom.writePng(path + Path.sep + f, breakdown.getPixels(), breakdown.get_width(), breakdown.get_height(), 2);
 				});
 			});
 		}
@@ -64,9 +64,9 @@ function drawBreakdown(type) {
 	g2.disableScissor();
 
 	if (h2.position === 0) { // Material
-		var lay = arm.Context.raw.layer;
+		var lay = Context.raw.layer;
 		for (let i = 0; i < slots.length; ++i) {
-			g2.set_pipeline(arm.UIView2D.pipe);
+			g2.set_pipeline(UIView2D.pipe);
 			let image = lay.texpaint;
 			let channel = 0;
 			if (slots[i] === "occ") {
@@ -85,7 +85,7 @@ function drawBreakdown(type) {
 				image = lay.texpaint_nor;
 				channel = 5;
 			}
-			breakdown.get_g4().setInt(arm.UIView2D.channelLocation, channel);
+			breakdown.get_g4().setInt(UIView2D.channelLocation, channel);
 			var step_source = image.get_width() / slots.length;
 			var step_dest = breakdown.get_width() / slots.length;
 			g2.drawScaledSubImage(image, step_source * i, 0, step_source, image.get_height(), step_dest * i, 0, step_dest, breakdown.get_height());

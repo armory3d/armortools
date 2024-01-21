@@ -1,11 +1,11 @@
 
 let import_txt = function(path, done) {
-	iron.Data.getBlob(path, function(b) {
+	Data.getBlob(path, function(b) {
 		var filename = path.split('\\').pop().split('/').pop();
 		try {
-			arm.UIBox.showMessage(filename, core.System.bufferToString(b), true);
-			arm.UIBox.clickToHide = false;
-			iron.Data.deleteBlob(path);
+			UIBox.showMessage(filename, System.bufferToString(b), true);
+			UIBox.clickToHide = false;
+			Data.deleteBlob(path);
 		}
 		catch(e) {
 			console.error(e);
@@ -13,13 +13,13 @@ let import_txt = function(path, done) {
 	});
 }
 
-let plugin = new arm.Plugin();
-let formats = arm.Path.textureFormats;
-let importers = arm.Path.textureImporters;
+let plugin = new Plugin();
+let formats = Path.textureFormats;
+let importers = Path.textureImporters;
 formats.push("txt");
-importers.h["txt"] = import_txt;
+importers.set("txt", import_txt);
 
 plugin.delete = function() {
 	formats.splice(formats.indexOf("txt"), 1);
-	importers.h["txt"] = null;
+	importers.delete("txt");
 };
