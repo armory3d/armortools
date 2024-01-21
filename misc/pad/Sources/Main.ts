@@ -70,10 +70,8 @@ class Main {
 
 						let parsed = JSON.parse(System.bufferToString(blob_theme));
 						let theme: any = new Theme();
-						for (let key in theme) {
-							if (key == "theme_") continue;
-							if (key.startsWith("set_")) continue;
-							if (key.startsWith("get_")) key = key.substr(4);
+						for (let key of Object.getOwnPropertyNames(Theme.prototype)) {
+							if (key == "constructor") continue;
 							theme[key] = parsed[key];
 						}
 
