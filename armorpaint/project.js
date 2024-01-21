@@ -26,8 +26,8 @@ else if (flags.ios) {
 }
 
 if (flags.physics) {
-	// project.addDefine("arm_physics");
-	// project.addAssets("Assets/plugins/ammo/*", { destination: "data/plugins/{name}" });
+	project.addDefine("arm_physics");
+	project.addAssets("Assets/plugins/ammo/*", { destination: "data/plugins/{name}" });
 }
 
 if (flags.raytrace) {

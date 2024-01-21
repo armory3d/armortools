@@ -4,119 +4,113 @@
 class PhysicsWorld {
 
 	static active: PhysicsWorld = null;
-	static vec1: PhysicsBullet.Vector3 = null;
-	static vec2: PhysicsBullet.Vector3 = null;
+	static vec1: Ammo.btVector3 = null;
+	static vec2: Ammo.btVector3 = null;
 	static v1 = new Vec4();
 	static v2 = new Vec4();
 
-	world: PhysicsBullet.DiscreteDynamicsWorld;
-	dispatcher: PhysicsBullet.CollisionDispatcher;
+	world: Ammo.btDiscreteDynamicsWorld;
+	dispatcher: Ammo.btCollisionDispatcher;
 	contacts: TPair[] = [];
 	bodyMap = new Map<i32, PhysicsBody>();
 	timeScale = 1.0;
 	timeStep = 1 / 60;
 	maxSteps = 1;
 
-	static load(done: ()=>void) {
-		let b = Krom.loadBlob("data/plugins/ammo.wasm.js");
+	static load = (done: ()=>void) => {
+		let b = Krom.loadBlob("data/plugins/ammo.js");
+		globalThis.eval(System.bufferToString(b));
 		let print = (s: string) => { Krom.log(s); };
-		(1, eval)(System.bufferToString(b));
-		let instantiateWasm = (imports, successCallback) => {
-			let wasmbin = Krom.loadBlob("data/plugins/ammo.wasm.wasm");
-			let module = new webassembly.Module(wasmbin);
-			let inst = new webassembly.Instance(module, imports);
-			successCallback(inst);
-			return inst.exports;
-		};
-		Ammo({print: print, instantiateWasm: instantiateWasm}).then(done);
+		Ammo({print: print}).then(done);
+
 	}
 
 	constructor() {
-		active = this;
-		vec1 = new PhysicsBullet.Vector3(0, 0, 0);
-		vec2 = new PhysicsBullet.Vector3(0, 0, 0);
-		init();
+		PhysicsWorld.active = this;
+		PhysicsWorld.vec1 = new Ammo.btVector3(0, 0, 0);
+		PhysicsWorld.vec2 = new Ammo.btVector3(0, 0, 0);
+		this.init();
 	}
 
-	reset() {
-		for (let body of bodyMap) removeBody(body);
+	reset = () => {
+		for (let body of this.bodyMap.values()) this.removeBody(body);
 	}
 
-	init() {
-		let broadphase = new PhysicsBullet.DbvtBroadphase();
-		let collisionConfiguration = new PhysicsBullet.DefaultCollisionConfiguration();
-		dispatcher = new PhysicsBullet.CollisionDispatcher(collisionConfiguration);
-		let solver = new PhysicsBullet.SequentialImpulseConstraintSolver();
-		world = new PhysicsBullet.DiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
-		setGravity(new Vec4(0, 0, -9.81));
+	init = () => {
+		let broadphase = new Ammo.btDbvtBroadphase();
+		let collisionConfiguration = new Ammo.btDefaultCollisionConfiguration();
+		this.dispatcher = new Ammo.btCollisionDispatcher(collisionConfiguration);
+		let solver = new Ammo.btSequentialImpulseConstraintSolver();
+		this.world = new Ammo.btDiscreteDynamicsWorld(this.dispatcher, broadphase, solver, collisionConfiguration);
+		this.setGravity(new Vec4(0, 0, -9.81));
 	}
 
-	setGravity(v: Vec4) {
-		vec1.setValue(v.x, v.y, v.z);
-		world.setGravity(vec1);
+	setGravity = (v: Vec4) => {
+		PhysicsWorld.vec1.setValue(v.x, v.y, v.z);
+		this.world.setGravity(PhysicsWorld.vec1);
 	}
 
-	addBody(pb: PhysicsBody) {
-		world.addRigidBodyToGroup(pb.body, pb.group, pb.mask);
-		bodyMap.set(pb.id, pb);
+	addBody = (pb: PhysicsBody) => {
+		this.world.addRigidBody(pb.body, pb.group, pb.mask);
+		this.bodyMap.set(pb.id, pb);
 	}
 
-	removeBody(pb: PhysicsBody) {
+	removeBody = (pb: PhysicsBody) => {
 		if (pb.destroyed) return;
 		pb.destroyed = true;
-		if (world != null) world.removeRigidBody(pb.body);
-		bodyMap.remove(pb.id);
+		if (this.world != null) this.world.removeRigidBody(pb.body);
+		this.bodyMap.delete(pb.id);
 		pb.delete();
 	}
 
-	getContacts(pb: PhysicsBody): PhysicsBody[] {
-		if (contacts.length == 0) return null;
+	getContacts = (pb: PhysicsBody): PhysicsBody[] => {
+		if (this.contacts.length == 0) return null;
 		let res: PhysicsBody[] = [];
-		for (let i = 0; i < contacts.length; ++i) {
-			let c = contacts[i];
+		for (let i = 0; i < this.contacts.length; ++i) {
+			let c = this.contacts[i];
 			let pb: PhysicsBody = null;
-			if (c.a == pb.body.userIndex) pb = bodyMap.get(c.b);
-			else if (c.b == pb.body.userIndex) pb = bodyMap.get(c.a);
+			if (c.a == pb.body.userIndex) pb = this.bodyMap.get(c.b);
+			else if (c.b == pb.body.userIndex) pb = this.bodyMap.get(c.a);
 			if (pb != null && res.indexOf(pb) == -1) res.push(pb);
 		}
 		return res;
 	}
 
-	getContactPairs(pb: PhysicsBody): TPair[] {
-		if (contacts.length == 0) return null;
+	getContactPairs = (pb: PhysicsBody): TPair[] => {
+		if (this.contacts.length == 0) return null;
 		let res: TPair[] = [];
-		for (let i = 0; i < contacts.length; ++i) {
-			let c = contacts[i];
+		for (let i = 0; i < this.contacts.length; ++i) {
+			let c = this.contacts[i];
 			if (c.a == pb.body.userIndex) res.push(c);
 			else if (c.b == pb.body.userIndex) res.push(c);
 		}
 		return res;
 	}
 
-	lateUpdate() {
-		let t = Time.delta * timeScale;
+	lateUpdate = () => {
+		let t = Time.delta * this.timeScale;
 		if (t == 0.0) return; // Simulation paused
 
-		world.stepSimulation(timeStep, maxSteps, t);
-		updateContacts();
-		for (let body of bodyMap) body.physicsUpdate();
+		this.world.stepSimulation(this.timeStep, this.maxSteps, t);
+		this.updateContacts();
+		for (let body of this.bodyMap.values()) body.physicsUpdate();
 	}
 
-	updateContacts() {
-		contacts = [];
-		let disp: PhysicsBullet.Dispatcher = dispatcher;
+	updateContacts = () => {
+		this.contacts = [];
+		let disp: Ammo.btDispatcher = this.dispatcher;
 		let numManifolds = disp.getNumManifolds();
 
 		for (let i = 0; i < numManifolds; ++i) {
 			let contactManifold = disp.getManifoldByIndexInternal(i);
-			let body0 = PhysicsBullet.Ammo.btRigidBody.prototype.upcast(contactManifold.getBody0());
-			let body1 = PhysicsBullet.Ammo.btRigidBody.prototype.upcast(contactManifold.getBody1());
+			let body0 = Ammo.btRigidBody.prototype.upcast(contactManifold.getBody0());
+			let body1 = Ammo.btRigidBody.prototype.upcast(contactManifold.getBody1());
 
 			let numContacts = contactManifold.getNumContacts();
-			let pt: PhysicsBullet.ManifoldPoint = null;
-			let posA: PhysicsBullet.Vector3 = null;
-			let posB: PhysicsBullet.Vector3 = null;
-			let nor: PhysicsBullet.Vector3 = null;
+			let pt: Ammo.btManifoldPoint = null;
+			let posA: Ammo.btVector3 = null;
+			let posB: Ammo.btVector3 = null;
+			let nor: Ammo.btVector3 = null;
 			for (let j = 0; j < numContacts; ++j) {
 				pt = contactManifold.getContactPoint(j);
 				posA = pt.get_m_positionWorldOnA();
@@ -131,55 +125,55 @@ class PhysicsWorld {
 					impulse: pt.getAppliedImpulse(),
 					distance: pt.getDistance()
 				};
-				contacts.push(cp);
+				this.contacts.push(cp);
 			}
 		}
 	}
 
-	pickClosest(inputX: f32, inputY: f32): PhysicsBody {
+	pickClosest = (inputX: f32, inputY: f32): PhysicsBody => {
 		let camera = Scene.active.camera;
 		let start = new Vec4();
 		let end = new Vec4();
 		RayCaster.getDirection(start, end, inputX, inputY, camera);
-		let hit = rayCast(camera.transform.world.getLoc(), end);
+		let hit = this.rayCast(camera.transform.world.getLoc(), end);
 		let body = (hit != null) ? hit.body : null;
 		return body;
 	}
 
-	rayCast(from: Vec4, to: Vec4, group: i32 = 0x00000001, mask = 0xffffffff): THit {
-		let rayFrom = vec1;
-		let rayTo = vec2;
+	rayCast = (from: Vec4, to: Vec4, group: i32 = 0x00000001, mask = 0xffffffff): THit => {
+		let rayFrom = PhysicsWorld.vec1;
+		let rayTo = PhysicsWorld.vec2;
 		rayFrom.setValue(from.x, from.y, from.z);
 		rayTo.setValue(to.x, to.y, to.z);
 
-		let rayCallback = new PhysicsBullet.ClosestRayResultCallback(rayFrom, rayTo);
+		let rayCallback = new Ammo.ClosestRayResultCallback(rayFrom, rayTo);
 
 		rayCallback.set_m_collisionFilterGroup(group);
 		rayCallback.set_m_collisionFilterMask(mask);
 
-		let worldDyn: PhysicsBullet.DynamicsWorld = world;
-		let worldCol: PhysicsBullet.CollisionWorld = worldDyn;
+		let worldDyn: Ammo.btDynamicsWorld = this.world;
+		let worldCol: Ammo.btCollisionWorld = worldDyn;
 		worldCol.rayTest(rayFrom, rayTo, rayCallback);
 		let pb: PhysicsBody = null;
 		let hitInfo: THit = null;
 
-		let rc: PhysicsBullet.RayResultCallback = rayCallback;
+		let rc: Ammo.RayResultCallback = rayCallback;
 		if (rc.hasHit()) {
 			let co = rayCallback.get_m_collisionObject();
-			let body = PhysicsBullet.Ammo.btRigidBody.prototype.upcast(co);
+			let body = Ammo.btRigidBody.prototype.upcast(co);
 			let hit = rayCallback.get_m_hitPointWorld();
-			v1.set(hit.x(), hit.y(), hit.z());
+			PhysicsWorld.v1.set(hit.x(), hit.y(), hit.z());
 			let norm = rayCallback.get_m_hitNormalWorld();
-			v2.set(norm.x(), norm.y(), norm.z());
-			pb = bodyMap.get(body.userIndex);
+			PhysicsWorld.v2.set(norm.x(), norm.y(), norm.z());
+			pb = this.bodyMap.get(body.userIndex);
 			hitInfo = {
 				body: pb,
-				pos: v1,
-				normal: v2
+				pos: PhysicsWorld.v1,
+				normal: PhysicsWorld.v2
 			};
 		}
 
-		PhysicsBullet.Ammo.destroy(rayCallback);
+		Ammo.destroy(rayCallback);
 		return hitInfo;
 	}
 }

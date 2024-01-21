@@ -7,7 +7,7 @@ flags.vulkan = process.argv.indexOf("vulkan") >= 0;
 flags.metal = process.argv.indexOf("metal") >= 0;
 flags.raytrace = flags.d3d12 || flags.vulkan || flags.metal;
 flags.snapshot = process.argv.indexOf("--snapshot") >= 0;
-flags.physics = !flags.ios;
+flags.physics = true;
 flags.voxels = !flags.raytrace && !flags.android && !flags.ios;
 
 flags.with_d3dcompiler = true;
