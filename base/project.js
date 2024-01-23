@@ -112,12 +112,14 @@ if (flags.voxels) {
 let export_version_info = true;
 if (export_version_info) {
 	const fs = require("fs");
-	let dir = "../" + flags.name.toLowerCase() + "/build/krom/data";
+	let dir = "../" + flags.name.toLowerCase() + "/build";
 	let sha = require("child_process").execSync(`git log --pretty=format:"%h" -n 1`).toString().substr(1, 7);
 	let date = new Date().toISOString().split("T")[0];
 	let data = `{ "sha": "${sha}", "date": "${date}" }`;
 	fs.ensureDirSync(dir);
 	fs.writeFileSync(dir + "/version.json", data);
+	// Adds version.json to embed.txt list
+	project.addAssets(dir + "/version.json", { destination: "data/{name}", embed: flags.snapshot });
 }
 
 resolve(project);
