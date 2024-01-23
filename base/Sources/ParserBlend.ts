@@ -3,13 +3,12 @@
 // https://github.com/fschutt/mystery-of-the-blend-backup
 // https://web.archive.org/web/20170630054951/http://www.atmind.nl/blender/mystery_ot_blend.html
 // Usage:
-// let bl = new ParserBlend(blob: DataView);
-// Krom.log(bl.dir("Scene"));
-// let scenes = bl.get("Scene");
-// Krom.log(scenes[0].get("id").get("name"));
+// let bl = ParserBlend.init(blob: DataView);
+// Krom.log(ParserBlend.dir(bl, "Scene"));
+// let scenes = ParserBlend.get(bl, "Scene");
+// Krom.log(BlHandle.get(BlHandle.get(scenes[0], "id"), "name"));
 
-class ParserBlend {
-
+class BlendRaw {
 	pos: i32;
 	view: DataView;
 
@@ -21,42 +20,47 @@ class ParserBlend {
 	blocks: Block[] = [];
 	dna: Dna = null;
 	map = new Map<any, Block>(); // Map blocks by memory address
+}
 
-	constructor(buffer: ArrayBuffer) {
-		this.view = new DataView(buffer);
-		this.pos = 0;
-		if (this.readChars(7) != "BLENDER") {
-			this.view = new DataView(Krom.inflate(buffer, false));
-			this.pos = 0;
-			if (this.readChars(7) != "BLENDER") return;
+class ParserBlend {
+
+	static init = (buffer: ArrayBuffer): BlendRaw => {
+		let raw = new BlendRaw();
+		raw.view = new DataView(buffer);
+		raw.pos = 0;
+		if (ParserBlend.readChars(raw, 7) != "BLENDER") {
+			raw.view = new DataView(Krom.inflate(buffer, false));
+			raw.pos = 0;
+			if (ParserBlend.readChars(raw, 7) != "BLENDER") return null;
 		}
-		this.parse();
+		ParserBlend.parse(raw);
+		return raw;
 	}
 
-	dir = (type: string): string[] => {
+	static dir = (raw: BlendRaw, type: string): string[] => {
 		// Return structure fields
-		let typeIndex = ParserBlend.getTypeIndex(this.dna, type);
+		let typeIndex = ParserBlend.getTypeIndex(raw.dna, type);
 		if (typeIndex == -1) return null;
-		let ds = ParserBlend.getStruct(this.dna, typeIndex);
+		let ds = ParserBlend.getStruct(raw.dna, typeIndex);
 		let fields: string[] = [];
 		for (let i = 0; i < ds.fieldNames.length; ++i) {
 			let nameIndex = ds.fieldNames[i];
 			let typeIndex = ds.fieldTypes[i];
-			fields.push(this.dna.types[typeIndex] + " " + this.dna.names[nameIndex]);
+			fields.push(raw.dna.types[typeIndex] + " " + raw.dna.names[nameIndex]);
 		}
 		return fields;
 	}
 
-	get = (type: string): BlHandle[] => {
-		if (this.dna == null) return null;
+	static get = (raw: BlendRaw, type: string): BlHandleRaw[] => {
+		if (raw.dna == null) return null;
 		// Return all structures of type
-		let typeIndex = ParserBlend.getTypeIndex(this.dna, type);
+		let typeIndex = ParserBlend.getTypeIndex(raw.dna, type);
 		if (typeIndex == -1) return null;
-		let ds = ParserBlend.getStruct(this.dna, typeIndex);
-		let handles: BlHandle[] = [];
-		for (let b of this.blocks) {
-			if (this.dna.structs[b.sdnaIndex].type == typeIndex) {
-				let h = new BlHandle();
+		let ds = ParserBlend.getStruct(raw.dna, typeIndex);
+		let handles: BlHandleRaw[] = [];
+		for (let b of raw.blocks) {
+			if (raw.dna.structs[b.sdnaIndex].type == typeIndex) {
+				let h = new BlHandleRaw();
 				handles.push(h);
 				h.block = b;
 				h.ds = ds;
@@ -75,186 +79,185 @@ class ParserBlend {
 		return -1;
 	}
 
-	parse = () => {
+	static parse = (raw: BlendRaw) => {
 		// Pointer size: _ 32bit, - 64bit
-		this.pointerSize = this.readChar() == "_" ? 4 : 8;
+		raw.pointerSize = ParserBlend.readChar(raw) == "_" ? 4 : 8;
 
 		// v - little endian, V - big endian
-		this.littleEndian = this.readChar() == "v";
+		raw.littleEndian = ParserBlend.readChar(raw) == "v";
 
-		this.version = this.readChars(3);
+		raw.version = ParserBlend.readChars(raw, 3);
 
 		// Reading file blocks
 		// Header - data
-		while (this.pos < this.view.byteLength) {
-			this.align();
+		while (raw.pos < raw.view.byteLength) {
+			ParserBlend.align(raw);
 			let b = new Block();
 
 			// Block type
-			b.code = this.readChars(4);
+			b.code = ParserBlend.readChars(raw, 4);
 			if (b.code == "ENDB") break;
 
-			this.blocks.push(b);
-			b.blend = this;
+			raw.blocks.push(b);
+			b.blend = raw;
 
 			// Total block length
-			b.size = this.read32();
+			b.size = ParserBlend.read32(raw);
 
 			// Memory address
-			let addr = this.readPointer();
-			if (!this.map.has(addr)) this.map.set(addr, b);
+			let addr = ParserBlend.readPointer(raw);
+			if (!raw.map.has(addr)) raw.map.set(addr, b);
 
 			// Index of dna struct contained in this block
-			b.sdnaIndex = this.read32();
+			b.sdnaIndex = ParserBlend.read32(raw);
 
 			// Number of dna structs in this block
-			b.count = this.read32();
+			b.count = ParserBlend.read32(raw);
 
-			b.pos = this.pos;
+			b.pos = raw.pos;
 
 			// This block stores dna structures
 			if (b.code == "DNA1") {
-				this.dna = new Dna();
+				raw.dna = new Dna();
 
-				let id = this.readChars(4); // SDNA
-				let nameId = this.readChars(4); // NAME
-				let namesCount = this.read32();
+				let id = ParserBlend.readChars(raw, 4); // SDNA
+				let nameId = ParserBlend.readChars(raw, 4); // NAME
+				let namesCount = ParserBlend.read32(raw);
 				for (let i = 0; i < namesCount; ++i) {
-					this.dna.names.push(this.readString());
+					raw.dna.names.push(ParserBlend.readString(raw));
 				}
-				this.align();
+				ParserBlend.align(raw);
 
-				let typeId = this.readChars(4); // TYPE
-				let typesCount = this.read32();
+				let typeId = ParserBlend.readChars(raw, 4); // TYPE
+				let typesCount = ParserBlend.read32(raw);
 				for (let i = 0; i < typesCount; ++i) {
-					this.dna.types.push(this.readString());
+					raw.dna.types.push(ParserBlend.readString(raw));
 				}
-				this.align();
+				ParserBlend.align(raw);
 
-				let lenId = this.readChars(4); // TLEN
+				let lenId = ParserBlend.readChars(raw, 4); // TLEN
 				for (let i = 0; i < typesCount; ++i) {
-					this.dna.typesLength.push(this.read16());
+					raw.dna.typesLength.push(ParserBlend.read16(raw));
 				}
-				this.align();
+				ParserBlend.align(raw);
 
-				let structId = this.readChars(4); // STRC
-				let structCount = this.read32();
+				let structId = ParserBlend.readChars(raw, 4); // STRC
+				let structCount = ParserBlend.read32(raw);
 				for (let i = 0; i < structCount; ++i) {
 					let ds = new DnaStruct();
-					this.dna.structs.push(ds);
-					ds.dna = this.dna;
-					ds.type = this.read16();
-					let fieldCount = this.read16();
+					raw.dna.structs.push(ds);
+					ds.dna = raw.dna;
+					ds.type = ParserBlend.read16(raw);
+					let fieldCount = ParserBlend.read16(raw);
 					if (fieldCount > 0) {
 						ds.fieldTypes = [];
 						ds.fieldNames = [];
 						for (let j = 0; j < fieldCount; ++j) {
-							ds.fieldTypes.push(this.read16());
-							ds.fieldNames.push(this.read16());
+							ds.fieldTypes.push(ParserBlend.read16(raw));
+							ds.fieldNames.push(ParserBlend.read16(raw));
 						}
 					}
 				}
 			}
 			else {
-				this.pos += b.size;
+				raw.pos += b.size;
 			}
 		}
 	}
 
-	align = () => {
+	static align = (raw: BlendRaw) => {
 		// 4 bytes aligned
-		let mod = this.pos % 4;
-		if (mod > 0) this.pos += 4 - mod;
+		let mod = raw.pos % 4;
+		if (mod > 0) raw.pos += 4 - mod;
 	}
 
-	read8 = (): i32 => {
-		let i = this.view.getUint8(this.pos);
-		this.pos += 1;
+	static read8 = (raw: BlendRaw): i32 => {
+		let i = raw.view.getUint8(raw.pos);
+		raw.pos += 1;
 		return i;
 	}
 
-	read16 = (): i32 => {
-		let i = this.view.getInt16(this.pos, this.littleEndian);
-		this.pos += 2;
+	static read16 = (raw: BlendRaw): i32 => {
+		let i = raw.view.getInt16(raw.pos, raw.littleEndian);
+		raw.pos += 2;
 		return i;
 	}
 
-	read32 = (): i32 => {
-		let i = this.view.getInt32(this.pos, this.littleEndian);
-		this.pos += 4;
+	static read32 = (raw: BlendRaw): i32 => {
+		let i = raw.view.getInt32(raw.pos, raw.littleEndian);
+		raw.pos += 4;
 		return i;
 	}
 
-	read64 = (): any => {
-		let aview: any = this.view;
-		let i = aview.getBigInt64(this.pos, this.littleEndian);
-		this.pos += 8;
+	static read64 = (raw: BlendRaw): any => {
+		let aview: any = raw.view;
+		let i = aview.getBigInt64(raw.pos, raw.littleEndian);
+		raw.pos += 8;
 		return i;
 	}
 
-	readf32 = (): f32 => {
-		let f = this.view.getFloat32(this.pos, this.littleEndian);
-		this.pos += 4;
+	static readf32 = (raw: BlendRaw): f32 => {
+		let f = raw.view.getFloat32(raw.pos, raw.littleEndian);
+		raw.pos += 4;
 		return f;
 	}
 
-	read8array = (len: i32): Int32Array => {
+	static read8array = (raw: BlendRaw, len: i32): Int32Array => {
 		let ar = new Int32Array(len);
-		for (let i = 0; i < len; ++i) ar[i] = this.read8();
+		for (let i = 0; i < len; ++i) ar[i] = ParserBlend.read8(raw);
 		return ar;
 	}
 
-	read16array = (len: i32): Int32Array => {
+	static read16array = (raw: BlendRaw, len: i32): Int32Array => {
 		let ar = new Int32Array(len);
-		for (let i = 0; i < len; ++i) ar[i] = this.read16();
+		for (let i = 0; i < len; ++i) ar[i] = ParserBlend.read16(raw);
 		return ar;
 	}
 
-	read32array = (len: i32): Int32Array => {
+	static read32array = (raw: BlendRaw, len: i32): Int32Array => {
 		let ar = new Int32Array(len);
-		for (let i = 0; i < len; ++i) ar[i] = this.read32();
+		for (let i = 0; i < len; ++i) ar[i] = ParserBlend.read32(raw);
 		return ar;
 	}
 
-	readf32array = (len: i32): Float32Array => {
+	static readf32array = (raw: BlendRaw, len: i32): Float32Array => {
 		let ar = new Float32Array(len);
-		for (let i = 0; i < len; ++i) ar[i] = this.readf32();
+		for (let i = 0; i < len; ++i) ar[i] = ParserBlend.readf32(raw);
 		return ar;
 	}
 
-	readString = (): string => {
+	static readString = (raw: BlendRaw): string => {
 		let s = "";
 		while (true) {
-			let ch = this.read8();
+			let ch = ParserBlend.read8(raw);
 			if (ch == 0) break;
 			s += String.fromCharCode(ch);
 		}
 		return s;
 	}
 
-	readChars = (len: i32): string => {
+	static readChars = (raw: BlendRaw, len: i32): string => {
 		let s = "";
-		for (let i = 0; i < len; ++i) s += this.readChar();
+		for (let i = 0; i < len; ++i) s += ParserBlend.readChar(raw);
 		return s;
 	}
 
-	readChar = (): string => {
-		return String.fromCharCode(this.read8());
+	static readChar = (raw: BlendRaw): string => {
+		return String.fromCharCode(ParserBlend.read8(raw));
 	}
 
-	readPointer = (): any => {
-		return this.pointerSize == 4 ? this.read32() : this.read64();
+	static readPointer = (raw: BlendRaw): any => {
+		return raw.pointerSize == 4 ? ParserBlend.read32(raw) : ParserBlend.read64(raw);
 	}
 }
 
 class Block {
-	blend: ParserBlend;
+	blend: BlendRaw;
 	code: string;
 	size: i32;
 	sdnaIndex: i32;
 	count: i32;
 	pos: i32; // Byte pos of data start in blob
-	constructor() {}
 }
 
 class Dna {
@@ -262,7 +265,6 @@ class Dna {
 	types: string[] = [];
 	typesLength: i32[] = [];
 	structs: DnaStruct[] = [];
-	constructor() {}
 }
 
 class DnaStruct {
@@ -270,49 +272,48 @@ class DnaStruct {
 	type: i32; // Index in dna.types
 	fieldTypes: i32[]; // Index in dna.types
 	fieldNames: i32[]; // Index in dna.names
-	constructor() {}
 }
 
-class BlHandle {
+class BlHandleRaw {
 	block: Block;
 	offset: i32 = 0; // Block data bytes offset
 	ds: DnaStruct;
+}
 
-	constructor() {}
-
-	getSize = (index: i32): i32 => {
-		let nameIndex = this.ds.fieldNames[index];
-		let typeIndex = this.ds.fieldTypes[index];
-		let dna = this.ds.dna;
+class BlHandle {
+	static getSize = (raw: BlHandleRaw, index: i32): i32 => {
+		let nameIndex = raw.ds.fieldNames[index];
+		let typeIndex = raw.ds.fieldTypes[index];
+		let dna = raw.ds.dna;
 		let n = dna.names[nameIndex];
 		let size = 0;
-		if (n.indexOf("*") >= 0) size = this.block.blend.pointerSize;
+		if (n.indexOf("*") >= 0) size = raw.block.blend.pointerSize;
 		else size = dna.typesLength[typeIndex];
-		if (n.indexOf("[") > 0) size *= this.getArrayLen(n);
+		if (n.indexOf("[") > 0) size *= BlHandle.getArrayLen(n);
 		return size;
 	}
 
-	baseName = (s: string): string => {
+	static baseName = (s: string): string => {
 		while (s.charAt(0) == "*") s = s.substring(1, s.length);
 		if (s.charAt(s.length - 1) == "]") s = s.substring(0, s.indexOf("["));
 		return s;
 	}
 
-	getArrayLen = (s: string): i32 => {
+	static getArrayLen = (s: string): i32 => {
 		return parseInt(s.substring(s.indexOf("[") + 1, s.indexOf("]")));
 	}
 
-	get = (name: string, index = 0, asType: string = null, arrayLen = 0): any => {
+	static get = (raw: BlHandleRaw, name: string, index = 0, asType: string = null, arrayLen = 0): any => {
 		// Return raw type or structure
-		let dna = this.ds.dna;
-		for (let i = 0; i < this.ds.fieldNames.length; ++i) {
-			let nameIndex = this.ds.fieldNames[i];
+		let dna = raw.ds.dna;
+		for (let i = 0; i < raw.ds.fieldNames.length; ++i) {
+			let nameIndex = raw.ds.fieldNames[i];
 			let dnaName = dna.names[nameIndex];
-			if (name == this.baseName(dnaName)) {
-				let typeIndex = this.ds.fieldTypes[i];
+			if (name == BlHandle.baseName(dnaName)) {
+				let typeIndex = raw.ds.fieldTypes[i];
 				let type = dna.types[typeIndex];
-				let newOffset = this.offset;
-				for (let j = 0; j < i; ++j) newOffset += this.getSize(j);
+				let newOffset = raw.offset;
+				for (let j = 0; j < i; ++j) newOffset += BlHandle.getSize(raw, j);
 				// Cast void * to type
 				if (asType != null) {
 					for (let i = 0; i < dna.types.length; ++i) {
@@ -324,40 +325,40 @@ class BlHandle {
 				}
 				// Raw type
 				if (typeIndex < 12) {
-					let blend = this.block.blend;
-					blend.pos = this.block.pos + newOffset;
+					let blend = raw.block.blend;
+					blend.pos = raw.block.pos + newOffset;
 					let isArray = dnaName.charAt(dnaName.length - 1) == "]";
 					let len = isArray ? (arrayLen > 0 ? arrayLen : this.getArrayLen(dnaName)) : 1;
 					switch (type) {
-						case "int": return isArray ? blend.read32array(len) : blend.read32();
-						case "char": return isArray ? blend.readString() : blend.read8();
-						case "uchar": return isArray ? blend.read8array(len) : blend.read8();
-						case "short": return isArray ? blend.read16array(len) : blend.read16();
-						case "ushort": return isArray ? blend.read16array(len) : blend.read16();
-						case "float": return isArray ? blend.readf32array(len) : blend.readf32();
-						case "double": return 0; //blend.readf64();
-						case "long": return isArray ? blend.read32array(len) : blend.read32();
-						case "ulong": return isArray ? blend.read32array(len) : blend.read32();
-						case "int64_t": return blend.read64();
-						case "uint64_t": return blend.read64();
-						case "void": if (dnaName.charAt(0) == "*") { return blend.read64(); };
+						case "int": return isArray ? ParserBlend.read32array(blend, len) : ParserBlend.read32(blend);
+						case "char": return isArray ? ParserBlend.readString(blend) : ParserBlend.read8(blend);
+						case "uchar": return isArray ? ParserBlend.read8array(blend, len) : ParserBlend.read8(blend);
+						case "short": return isArray ? ParserBlend.read16array(blend, len) : ParserBlend.read16(blend);
+						case "ushort": return isArray ? ParserBlend.read16array(blend, len) : ParserBlend.read16(blend);
+						case "float": return isArray ? ParserBlend.readf32array(blend, len) : ParserBlend.readf32(blend);
+						case "double": return 0; //ParserBlend.readf64(blend);
+						case "long": return isArray ? ParserBlend.read32array(blend, len) : ParserBlend.read32(blend);
+						case "ulong": return isArray ? ParserBlend.read32array(blend, len) : ParserBlend.read32(blend);
+						case "int64_t": return ParserBlend.read64(blend);
+						case "uint64_t": return ParserBlend.read64(blend);
+						case "void": if (dnaName.charAt(0) == "*") { return ParserBlend.read64(blend); };
 					}
 				}
 				// Structure
-				let h = new BlHandle();
+				let h = new BlHandleRaw();
 				h.ds = ParserBlend.getStruct(dna, typeIndex);
 				let isPointer = dnaName.charAt(0) == "*";
 				if (isPointer) {
-					this.block.blend.pos = this.block.pos + newOffset;
-					let addr = this.block.blend.readPointer();
-					if (this.block.blend.map.has(addr)) {
-						h.block = this.block.blend.map.get(addr);
+					raw.block.blend.pos = raw.block.pos + newOffset;
+					let addr = ParserBlend.readPointer(raw.block.blend);
+					if (raw.block.blend.map.has(addr)) {
+						h.block = raw.block.blend.map.get(addr);
 					}
-					else h.block = this.block;
+					else h.block = raw.block;
 					h.offset = 0;
 				}
 				else {
-					h.block = this.block;
+					h.block = raw.block;
 					h.offset = newOffset;
 				}
 				h.offset += dna.typesLength[typeIndex] * index;
