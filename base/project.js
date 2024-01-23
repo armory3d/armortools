@@ -70,17 +70,12 @@ if (flags.snapshot) {
 	project.addDefine("arm_snapshot");
 	project.addDefine("arm_image_embed");
 	project.addDefine("arm_shader_embed");
-	project.addParameter("--no-traces");
 }
 else {
 	project.addDefine("arm_noembed");
 	project.addAssets("Assets/extra/*", { destination: "data/{name}" });
 }
 
-project.addParameter("--macro include('arm.nodes')");
-project.addParameter("-dce full");
-project.addDefine("analyzer-optimize");
-project.addDefine("js-es=6");
 project.addDefine("arm_particles");
 // project.addDefine("arm_skin");
 // project.addDefine("arm_audio");
