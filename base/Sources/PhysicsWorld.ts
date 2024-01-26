@@ -1,104 +1,107 @@
 
 ///if arm_physics
 
+class PhysicsWorldRaw {
+	world: Ammo.btDiscreteDynamicsWorld;
+	dispatcher: Ammo.btCollisionDispatcher;
+	contacts: TPair[] = [];
+	bodyMap = new Map<i32, PhysicsBodyRaw>();
+	timeScale = 1.0;
+	timeStep = 1 / 60;
+	maxSteps = 1;
+}
+
 class PhysicsWorld {
 
-	static active: PhysicsWorld = null;
+	static active: PhysicsWorldRaw = null;
 	static vec1: Ammo.btVector3 = null;
 	static vec2: Ammo.btVector3 = null;
 	static v1 = new Vec4();
 	static v2 = new Vec4();
-
-	world: Ammo.btDiscreteDynamicsWorld;
-	dispatcher: Ammo.btCollisionDispatcher;
-	contacts: TPair[] = [];
-	bodyMap = new Map<i32, PhysicsBody>();
-	timeScale = 1.0;
-	timeStep = 1 / 60;
-	maxSteps = 1;
 
 	static load = (done: ()=>void) => {
 		let b = Krom.loadBlob("data/plugins/ammo.js");
 		globalThis.eval(System.bufferToString(b));
 		let print = (s: string) => { Krom.log(s); };
 		Ammo({print: print}).then(done);
-
 	}
 
-	constructor() {
-		PhysicsWorld.active = this;
+	static create(): PhysicsWorldRaw {
+		let pw = new PhysicsWorldRaw();
+		PhysicsWorld.active = pw;
 		PhysicsWorld.vec1 = new Ammo.btVector3(0, 0, 0);
 		PhysicsWorld.vec2 = new Ammo.btVector3(0, 0, 0);
-		this.init();
+		PhysicsWorld.init(pw);
+		return pw;
 	}
 
-	reset = () => {
-		for (let body of this.bodyMap.values()) this.removeBody(body);
+	static reset = (pw: PhysicsWorldRaw) => {
+		for (let body of pw.bodyMap.values()) PhysicsWorld.removeBody(pw, body);
 	}
 
-	init = () => {
+	static init = (pw: PhysicsWorldRaw) => {
 		let broadphase = new Ammo.btDbvtBroadphase();
 		let collisionConfiguration = new Ammo.btDefaultCollisionConfiguration();
-		this.dispatcher = new Ammo.btCollisionDispatcher(collisionConfiguration);
+		pw.dispatcher = new Ammo.btCollisionDispatcher(collisionConfiguration);
 		let solver = new Ammo.btSequentialImpulseConstraintSolver();
-		this.world = new Ammo.btDiscreteDynamicsWorld(this.dispatcher, broadphase, solver, collisionConfiguration);
-		this.setGravity(new Vec4(0, 0, -9.81));
+		pw.world = new Ammo.btDiscreteDynamicsWorld(pw.dispatcher, broadphase, solver, collisionConfiguration);
+		PhysicsWorld.setGravity(pw, new Vec4(0, 0, -9.81));
 	}
 
-	setGravity = (v: Vec4) => {
+	static setGravity = (pw: PhysicsWorldRaw, v: Vec4) => {
 		PhysicsWorld.vec1.setValue(v.x, v.y, v.z);
-		this.world.setGravity(PhysicsWorld.vec1);
+		pw.world.setGravity(PhysicsWorld.vec1);
 	}
 
-	addBody = (pb: PhysicsBody) => {
-		this.world.addRigidBody(pb.body, pb.group, pb.mask);
-		this.bodyMap.set(pb.id, pb);
+	static addBody = (pw: PhysicsWorldRaw, pb: PhysicsBodyRaw) => {
+		pw.world.addRigidBody(pb.body, pb.group, pb.mask);
+		pw.bodyMap.set(pb.id, pb);
 	}
 
-	removeBody = (pb: PhysicsBody) => {
+	static removeBody = (pw: PhysicsWorldRaw, pb: PhysicsBodyRaw) => {
 		if (pb.destroyed) return;
 		pb.destroyed = true;
-		if (this.world != null) this.world.removeRigidBody(pb.body);
-		this.bodyMap.delete(pb.id);
-		pb.delete();
+		if (pw.world != null) pw.world.removeRigidBody(pb.body);
+		pw.bodyMap.delete(pb.id);
+		PhysicsBody.delete(pb);
 	}
 
-	getContacts = (pb: PhysicsBody): PhysicsBody[] => {
-		if (this.contacts.length == 0) return null;
-		let res: PhysicsBody[] = [];
-		for (let i = 0; i < this.contacts.length; ++i) {
-			let c = this.contacts[i];
-			let pb: PhysicsBody = null;
-			if (c.a == pb.body.userIndex) pb = this.bodyMap.get(c.b);
-			else if (c.b == pb.body.userIndex) pb = this.bodyMap.get(c.a);
+	static getContacts = (pw: PhysicsWorldRaw, pb: PhysicsBodyRaw): PhysicsBodyRaw[] => {
+		if (pw.contacts.length == 0) return null;
+		let res: PhysicsBodyRaw[] = [];
+		for (let i = 0; i < pw.contacts.length; ++i) {
+			let c = pw.contacts[i];
+			let pb: PhysicsBodyRaw = null;
+			if (c.a == pb.body.userIndex) pb = pw.bodyMap.get(c.b);
+			else if (c.b == pb.body.userIndex) pb = pw.bodyMap.get(c.a);
 			if (pb != null && res.indexOf(pb) == -1) res.push(pb);
 		}
 		return res;
 	}
 
-	getContactPairs = (pb: PhysicsBody): TPair[] => {
-		if (this.contacts.length == 0) return null;
+	static getContactPairs = (pw: PhysicsWorldRaw, pb: PhysicsBodyRaw): TPair[] => {
+		if (pw.contacts.length == 0) return null;
 		let res: TPair[] = [];
-		for (let i = 0; i < this.contacts.length; ++i) {
-			let c = this.contacts[i];
+		for (let i = 0; i < pw.contacts.length; ++i) {
+			let c = pw.contacts[i];
 			if (c.a == pb.body.userIndex) res.push(c);
 			else if (c.b == pb.body.userIndex) res.push(c);
 		}
 		return res;
 	}
 
-	lateUpdate = () => {
-		let t = Time.delta * this.timeScale;
+	static lateUpdate = (pw: PhysicsWorldRaw) => {
+		let t = Time.delta * pw.timeScale;
 		if (t == 0.0) return; // Simulation paused
 
-		this.world.stepSimulation(this.timeStep, this.maxSteps, t);
-		this.updateContacts();
-		for (let body of this.bodyMap.values()) body.physicsUpdate();
+		pw.world.stepSimulation(pw.timeStep, pw.maxSteps, t);
+		PhysicsWorld.updateContacts(pw);
+		for (let body of pw.bodyMap.values()) PhysicsBody.physicsUpdate(body);
 	}
 
-	updateContacts = () => {
-		this.contacts = [];
-		let disp: Ammo.btDispatcher = this.dispatcher;
+	static updateContacts = (pw: PhysicsWorldRaw) => {
+		pw.contacts = [];
+		let disp: Ammo.btDispatcher = pw.dispatcher;
 		let numManifolds = disp.getNumManifolds();
 
 		for (let i = 0; i < numManifolds; ++i) {
@@ -125,22 +128,22 @@ class PhysicsWorld {
 					impulse: pt.getAppliedImpulse(),
 					distance: pt.getDistance()
 				};
-				this.contacts.push(cp);
+				pw.contacts.push(cp);
 			}
 		}
 	}
 
-	pickClosest = (inputX: f32, inputY: f32): PhysicsBody => {
+	static pickClosest = (pw: PhysicsWorldRaw, inputX: f32, inputY: f32): PhysicsBodyRaw => {
 		let camera = Scene.active.camera;
 		let start = new Vec4();
 		let end = new Vec4();
 		RayCaster.getDirection(start, end, inputX, inputY, camera);
-		let hit = this.rayCast(camera.transform.world.getLoc(), end);
+		let hit = PhysicsWorld.rayCast(pw, camera.transform.world.getLoc(), end);
 		let body = (hit != null) ? hit.body : null;
 		return body;
 	}
 
-	rayCast = (from: Vec4, to: Vec4, group: i32 = 0x00000001, mask = 0xffffffff): THit => {
+	static rayCast = (pw: PhysicsWorldRaw, from: Vec4, to: Vec4, group: i32 = 0x00000001, mask = 0xffffffff): THit => {
 		let rayFrom = PhysicsWorld.vec1;
 		let rayTo = PhysicsWorld.vec2;
 		rayFrom.setValue(from.x, from.y, from.z);
@@ -151,10 +154,10 @@ class PhysicsWorld {
 		rayCallback.set_m_collisionFilterGroup(group);
 		rayCallback.set_m_collisionFilterMask(mask);
 
-		let worldDyn: Ammo.btDynamicsWorld = this.world;
+		let worldDyn: Ammo.btDynamicsWorld = pw.world;
 		let worldCol: Ammo.btCollisionWorld = worldDyn;
 		worldCol.rayTest(rayFrom, rayTo, rayCallback);
-		let pb: PhysicsBody = null;
+		let pb: PhysicsBodyRaw = null;
 		let hitInfo: THit = null;
 
 		let rc: Ammo.RayResultCallback = rayCallback;
@@ -165,7 +168,7 @@ class PhysicsWorld {
 			PhysicsWorld.v1.set(hit.x(), hit.y(), hit.z());
 			let norm = rayCallback.get_m_hitNormalWorld();
 			PhysicsWorld.v2.set(norm.x(), norm.y(), norm.z());
-			pb = this.bodyMap.get(body.userIndex);
+			pb = pw.bodyMap.get(body.userIndex);
 			hitInfo = {
 				body: pb,
 				pos: PhysicsWorld.v1,
@@ -179,7 +182,7 @@ class PhysicsWorld {
 }
 
 type THit = {
-	body: PhysicsBody;
+	body: PhysicsBodyRaw;
 	pos: Vec4;
 	normal: Vec4;
 }

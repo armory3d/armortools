@@ -1,9 +1,9 @@
 
 class MakeSculpt {
 
-	static run = (data: NodeShaderData, matcon: TMaterialContext): NodeShaderContext => {
+	static run = (data: TMaterial, matcon: TMaterialContext): NodeShaderContextRaw => {
 		let context_id = "paint";
-		let con_paint:NodeShaderContext = data.add_context({
+		let con_paint = NodeShaderContext.create(data, {
 			name: context_id,
 			depth_write: false,
 			compare_mode: "always", // TODO: align texcoords winding order
@@ -19,31 +19,31 @@ class MakeSculpt {
 		con_paint.data.color_writes_alpha = [true, true, true, true];
 		con_paint.allow_vcols = Context.raw.paintObject.data.cols != null;
 
-		let vert = con_paint.make_vert();
-		let frag = con_paint.make_frag();
+		let vert = NodeShaderContext.make_vert(con_paint);
+		let frag = NodeShaderContext.make_frag(con_paint);
 		frag.ins = vert.outs;
 
 		let faceFill = Context.raw.tool == ToolFill && Context.raw.fillTypeHandle.position == FillFace;
 		let decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
 
-		vert.add_out('vec2 texCoord');
-		vert.write('const vec2 madd = vec2(0.5, 0.5);');
-		vert.write('texCoord = pos.xy * madd + madd;');
+		NodeShader.add_out(vert, 'vec2 texCoord');
+		NodeShader.write(vert, 'const vec2 madd = vec2(0.5, 0.5);');
+		NodeShader.write(vert, 'texCoord = pos.xy * madd + madd;');
 		///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
-		vert.write('texCoord.y = 1.0 - texCoord.y;');
+		NodeShader.write(vert, 'texCoord.y = 1.0 - texCoord.y;');
 		///end
-		vert.write('gl_Position = vec4(pos.xy, 0.0, 1.0);');
+		NodeShader.write(vert, 'gl_Position = vec4(pos.xy, 0.0, 1.0);');
 
-		frag.add_uniform('vec4 inp', '_inputBrush');
-		frag.add_uniform('vec4 inplast', '_inputBrushLast');
+		NodeShader.add_uniform(frag, 'vec4 inp', '_inputBrush');
+		NodeShader.add_uniform(frag, 'vec4 inplast', '_inputBrushLast');
 
-		frag.add_uniform('sampler2D gbufferD');
+		NodeShader.add_uniform(frag, 'sampler2D gbufferD');
 
-		frag.add_out('vec4 fragColor[2]');
+		NodeShader.add_out(frag, 'vec4 fragColor[2]');
 
-		frag.add_uniform('float brushRadius', '_brushRadius');
-		frag.add_uniform('float brushOpacity', '_brushOpacity');
-		frag.add_uniform('float brushHardness', '_brushHardness');
+		NodeShader.add_uniform(frag, 'float brushRadius', '_brushRadius');
+		NodeShader.add_uniform(frag, 'float brushOpacity', '_brushOpacity');
+		NodeShader.add_uniform(frag, 'float brushHardness', '_brushHardness');
 
 		if (Context.raw.tool == ToolBrush  ||
 			Context.raw.tool == ToolEraser ||
@@ -58,33 +58,33 @@ class MakeSculpt {
 			MakeBrush.run(vert, frag);
 		}
 
-		frag.write('vec3 basecol = vec3(1.0, 1.0, 1.0);');
-		frag.write('float opacity = 1.0;');
-		frag.write('if (opacity == 0.0) discard;');
+		NodeShader.write(frag, 'vec3 basecol = vec3(1.0, 1.0, 1.0);');
+		NodeShader.write(frag, 'float opacity = 1.0;');
+		NodeShader.write(frag, 'if (opacity == 0.0) discard;');
 
-		frag.write('float str = clamp((brushRadius - dist) * brushHardness * 400.0, 0.0, 1.0) * opacity;');
+		NodeShader.write(frag, 'float str = clamp((brushRadius - dist) * brushHardness * 400.0, 0.0, 1.0) * opacity;');
 
-		frag.add_uniform('sampler2D texpaint_undo', '_texpaint_undo');
-		frag.write('vec4 sample_undo = textureLod(texpaint_undo, texCoord, 0.0);');
+		NodeShader.add_uniform(frag, 'sampler2D texpaint_undo', '_texpaint_undo');
+		NodeShader.write(frag, 'vec4 sample_undo = textureLod(texpaint_undo, texCoord, 0.0);');
 
-		frag.write('if (sample_undo.r == 0 && sample_undo.g == 0 && sample_undo.b == 0) discard;');
+		NodeShader.write(frag, 'if (sample_undo.r == 0 && sample_undo.g == 0 && sample_undo.b == 0) discard;');
 
-		frag.add_function(ShaderFunctions.str_octahedronWrap);
-		frag.add_uniform('sampler2D gbuffer0_undo');
-		frag.write('vec2 g0_undo = textureLod(gbuffer0_undo, inp.xy, 0.0).rg;');
-		frag.write('vec3 wn;');
-		frag.write('wn.z = 1.0 - abs(g0_undo.x) - abs(g0_undo.y);');
-		frag.write('wn.xy = wn.z >= 0.0 ? g0_undo.xy : octahedronWrap(g0_undo.xy);');
-		frag.write('vec3 n = normalize(wn);');
+		NodeShader.add_function(frag, ShaderFunctions.str_octahedronWrap);
+		NodeShader.add_uniform(frag, 'sampler2D gbuffer0_undo');
+		NodeShader.write(frag, 'vec2 g0_undo = textureLod(gbuffer0_undo, inp.xy, 0.0).rg;');
+		NodeShader.write(frag, 'vec3 wn;');
+		NodeShader.write(frag, 'wn.z = 1.0 - abs(g0_undo.x) - abs(g0_undo.y);');
+		NodeShader.write(frag, 'wn.xy = wn.z >= 0.0 ? g0_undo.xy : octahedronWrap(g0_undo.xy);');
+		NodeShader.write(frag, 'vec3 n = normalize(wn);');
 
-		frag.write('fragColor[0] = vec4(sample_undo.rgb + n * 0.1 * str, 1.0);');
+		NodeShader.write(frag, 'fragColor[0] = vec4(sample_undo.rgb + n * 0.1 * str, 1.0);');
 
-		frag.write('fragColor[1] = vec4(str, 0.0, 0.0, 1.0);');
+		NodeShader.write(frag, 'fragColor[1] = vec4(str, 0.0, 0.0, 1.0);');
 
 		ParserMaterial.finalize(con_paint);
 		con_paint.data.shader_from_source = true;
-		con_paint.data.vertex_shader = vert.get();
-		con_paint.data.fragment_shader = frag.get();
+		con_paint.data.vertex_shader = NodeShader.get(vert);
+		con_paint.data.fragment_shader = NodeShader.get(frag);
 
 		return con_paint;
 	}

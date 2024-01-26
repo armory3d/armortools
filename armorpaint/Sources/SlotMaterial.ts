@@ -1,5 +1,5 @@
 
-class SlotMaterial {
+class SlotMaterialRaw {
 	nodes = new Nodes();
 	canvas: TNodeCanvas;
 	image: Image = null;
@@ -7,7 +7,6 @@ class SlotMaterial {
 	previewReady = false;
 	data: MaterialData;
 	id = 0;
-	static defaultCanvas: ArrayBuffer = null;
 
 	paintBase = true;
 	paintOpac = true;
@@ -18,15 +17,20 @@ class SlotMaterial {
 	paintHeight = true;
 	paintEmis = true;
 	paintSubs = true;
+}
 
-	constructor(m: MaterialData = null, c: TNodeCanvas = null) {
-		for (let mat of Project.materials) if (mat.id >= this.id) this.id = mat.id + 1;
-		this.data = m;
+class SlotMaterial {
+	static defaultCanvas: ArrayBuffer = null;
+
+	static create(m: MaterialData = null, c: TNodeCanvas = null): SlotMaterialRaw {
+		let raw = new SlotMaterialRaw();
+		for (let mat of Project.materials) if (mat.id >= raw.id) raw.id = mat.id + 1;
+		raw.data = m;
 
 		let w = UtilRender.materialPreviewSize;
 		let wIcon = 50;
-		this.image = Image.createRenderTarget(w, w);
-		this.imageIcon = Image.createRenderTarget(wIcon, wIcon);
+		raw.image = Image.createRenderTarget(w, w);
+		raw.imageIcon = Image.createRenderTarget(wIcon, wIcon);
 
 		if (c == null) {
 			if (SlotMaterial.defaultCanvas == null) { // Synchronous
@@ -34,29 +38,31 @@ class SlotMaterial {
 					SlotMaterial.defaultCanvas = b;
 				});
 			}
-			this.canvas = ArmPack.decode(SlotMaterial.defaultCanvas);
-			this.canvas.name = "Material " + (this.id + 1);
+			raw.canvas = ArmPack.decode(SlotMaterial.defaultCanvas);
+			raw.canvas.name = "Material " + (raw.id + 1);
 		}
 		else {
-			this.canvas = c;
+			raw.canvas = c;
 		}
 
 		///if (krom_android || krom_ios)
-		this.nodes.panX -= 50; // Center initial position
+		raw.nodes.panX -= 50; // Center initial position
 		///end
+
+		return raw;
 	}
 
-	unload = () => {
+	static unload = (raw: SlotMaterialRaw) => {
 		let _next = () => {
-			this.image.unload();
-			this.imageIcon.unload();
+			raw.image.unload();
+			raw.imageIcon.unload();
 		}
 		Base.notifyOnNextFrame(_next);
 	}
 
-	delete = () => {
-		this.unload();
-		let mpos = Project.materials.indexOf(this);
+	static delete = (raw: SlotMaterialRaw) => {
+		SlotMaterial.unload(raw);
+		let mpos = Project.materials.indexOf(raw);
 		array_remove(Project.materials, this);
 		if (Project.materials.length > 0) {
 			Context.setMaterial(Project.materials[mpos > 0 ? mpos - 1 : 0]);

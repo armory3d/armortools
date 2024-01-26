@@ -61,7 +61,7 @@ class ImportFolder {
 		}
 
 		// Create material
-		Context.raw.material = new SlotMaterial(Project.materials[0].data);
+		Context.raw.material = SlotMaterial.create(Project.materials[0].data);
 		Project.materials.push(Context.raw.material);
 		let nodes = Context.raw.material.nodes;
 		let canvas = Context.raw.material.canvas;

@@ -1,5 +1,5 @@
 
-let plugin = new Plugin();
+let plugin = Plugin.create();
 let h1 = new Handle();
 let h2 = new Handle();
 

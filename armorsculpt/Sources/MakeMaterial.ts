@@ -56,7 +56,7 @@ class MakeMaterial {
 			}
 		}
 
-		let con = MakeMesh.run(new NodeShaderData({ name: "Material", canvas: null }));
+		let con = MakeMesh.run({ name: "Material", canvas: null });
 		let scon = new ShaderContext(con.data, (scon: ShaderContext) => {});
 		scon.overrideContext = {};
 		if (con.frag.sharedSamplers.length > 0) {
@@ -70,7 +70,7 @@ class MakeMaterial {
 		m.shader.contexts.push(scon);
 
 		for (let i = 1; i < MakeMesh.layerPassCount; ++i) {
-			let con = MakeMesh.run(new NodeShaderData({ name: "Material", canvas: null }), i);
+			let con = MakeMesh.run({ name: "Material", canvas: null }, i);
 			let scon = new ShaderContext(con.data, (scon: ShaderContext) => {});
 			scon.overrideContext = {};
 			if (con.frag.sharedSamplers.length > 0) {
@@ -108,7 +108,7 @@ class MakeMaterial {
 			m.shader.raw.contexts.remove(sc.raw);
 			m.shader.contexts.remove(sc);
 		}
-		let con = MakeParticle.run(new NodeShaderData({ name: "MaterialParticle", canvas: null }));
+		let con = MakeParticle.run({ name: "MaterialParticle", canvas: null });
 		if (sc != null) deleteContext(sc);
 		sc = new ShaderContext(con.data, (sc: ShaderContext) => {});
 		m.shader.raw.contexts.push(sc.raw);
@@ -131,7 +131,7 @@ class MakeMaterial {
 
 		let mcon: TMaterialContext = { name: "mesh", bind_textures: [] };
 
-		let sd = new NodeShaderData({ name: "Material", canvas: null });
+		let sd: TMaterial = { name: "Material", canvas: null };
 		let con = MakeMeshPreview.run(sd, mcon);
 
 		for (let i = 0; i < m.contexts.length; ++i) {
@@ -198,7 +198,7 @@ class MakeMaterial {
 			}
 		}
 
-		let sdata = new NodeShaderData({ name: "Material", canvas: UINodes.getCanvasMaterial() });
+		let sdata: TMaterial = { name: "Material", canvas: UINodes.getCanvasMaterial() };
 		let mcon: TMaterialContext = { name: "paint", bind_textures: [] };
 		let con = MakeSculpt.run(sdata, mcon);
 
@@ -286,7 +286,7 @@ class MakeMaterial {
 
 	static parseNodePreviewMaterial = (node: TNode, group: TNodeCanvas = null, parents: TNode[] = null): { scon: ShaderContext, mcon: MaterialContext } => {
 		if (node.outputs.length == 0) return null;
-		let sdata = new NodeShaderData({ name: "Material", canvas: UINodes.getCanvasMaterial() });
+		let sdata: TMaterial = { name: "Material", canvas: UINodes.getCanvasMaterial() };
 		let mcon_raw: TMaterialContext = { name: "mesh", bind_textures: [] };
 		let con = MakeNodePreview.run(sdata, mcon_raw, node, group, parents);
 		let compileError = false;

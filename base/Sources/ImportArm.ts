@@ -174,7 +174,7 @@ class ImportArm {
 			///if (is_paint || is_sculpt)
 			let tex = Project.layers[0].texpaint;
 			if (tex.width != Config.getTextureResX() || tex.height != Config.getTextureResY()) {
-				if (History.undoLayers != null) for (let l of History.undoLayers) l.resizeAndSetBits();
+				if (History.undoLayers != null) for (let l of History.undoLayers) SlotLayer.resizeAndSetBits(l);
 				let rts = RenderPath.active.renderTargets;
 				let _texpaint_blend0 = rts.get("texpaint_blend0").image;
 				Base.notifyOnNextFrame(() => {
@@ -193,7 +193,7 @@ class ImportArm {
 				Context.raw.brushBlendDirty = true;
 			}
 
-			for (let l of Project.layers) l.unload();
+			for (let l of Project.layers) SlotLayer.unload(l);
 			Project.layers = [];
 			for (let i = 0; i < project.layer_datas.length; ++i) {
 				let ld = project.layer_datas[i];
@@ -206,7 +206,7 @@ class ImportArm {
 				let isMask = false;
 				///end
 
-				let l = new SlotLayer("", isGroup ? LayerSlotType.SlotGroup : isMask ? LayerSlotType.SlotMask : LayerSlotType.SlotLayer);
+				let l = SlotLayer.create("", isGroup ? LayerSlotType.SlotGroup : isMask ? LayerSlotType.SlotMask : LayerSlotType.SlotLayer);
 				if (ld.name != null) l.name = ld.name;
 				l.visible = ld.visible;
 				Project.layers.push(l);
@@ -307,7 +307,7 @@ class ImportArm {
 			Project.materials = [];
 			for (let n of project.material_nodes) {
 				ImportArm.initNodes(n.nodes);
-				Context.raw.material = new SlotMaterial(m0, n);
+				Context.raw.material = SlotMaterial.create(m0, n);
 				Project.materials.push(Context.raw.material);
 			}
 			///end
@@ -329,7 +329,7 @@ class ImportArm {
 			Project.brushes = [];
 			for (let n of project.brush_nodes) {
 				ImportArm.initNodes(n.nodes);
-				Context.raw.brush = new SlotBrush(n);
+				Context.raw.brush = SlotBrush.create(n);
 				Project.brushes.push(Context.raw.brush);
 				MakeMaterial.parseBrush();
 				UtilRender.makeBrushPreview();
@@ -422,11 +422,11 @@ class ImportArm {
 			m0 = m;
 		});
 
-		let imported: SlotMaterial[] = [];
+		let imported: SlotMaterialRaw[] = [];
 
 		for (let c of project.material_nodes) {
 			ImportArm.initNodes(c.nodes);
-			Context.raw.material = new SlotMaterial(m0, c);
+			Context.raw.material = SlotMaterial.create(m0, c);
 			Project.materials.push(Context.raw.material);
 			imported.push(Context.raw.material);
 			History.newMaterial();
@@ -461,7 +461,7 @@ class ImportArm {
 		return false;
 	}
 
-	static renameGroup = (name: string, materials: SlotMaterial[], groups: TNodeCanvas[]) => {
+	static renameGroup = (name: string, materials: SlotMaterialRaw[], groups: TNodeCanvas[]) => {
 		for (let m of materials) {
 			for (let n of m.canvas.nodes) {
 				if (n.type == "GROUP" && n.name == name) n.name += ".1";
@@ -503,11 +503,11 @@ class ImportArm {
 			ImportTexture.run(abs);
 		}
 
-		let imported: SlotBrush[] = [];
+		let imported: SlotBrushRaw[] = [];
 
 		for (let n of project.brush_nodes) {
 			ImportArm.initNodes(n.nodes);
-			Context.raw.brush = new SlotBrush(n);
+			Context.raw.brush = SlotBrush.create(n);
 			Project.brushes.push(Context.raw.brush);
 			imported.push(Context.raw.brush);
 		}

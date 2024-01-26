@@ -87,7 +87,7 @@ class UtilParticle {
 		}
 
 		PhysicsWorld.load(() => {
-			Scene.active.sceneParent.addTrait(new PhysicsWorld());
+			PhysicsWorld.create();
 			UtilParticle.initParticleMesh();
 		});
 	}
@@ -101,9 +101,9 @@ class UtilParticle {
 		po.transform.scale.y = po.parent.transform.scale.y;
 		po.transform.scale.z = po.parent.transform.scale.z;
 
-		Context.raw.paintBody = new PhysicsBody();
+		Context.raw.paintBody = PhysicsBody.create();
 		Context.raw.paintBody.shape = ShapeType.ShapeMesh;
-		Context.raw.paintBody.init(po);
+		PhysicsBody.init(Context.raw.paintBody, po);
 		po.addTrait(Context.raw.paintBody);
 	}
 

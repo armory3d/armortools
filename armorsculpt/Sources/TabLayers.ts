@@ -101,26 +101,26 @@ class TabLayers {
 		}
 	}
 
-	static initLayerMap = (): Map<SlotLayer, i32> => {
-		let res: Map<SlotLayer, i32> = [];
+	static initLayerMap = (): Map<SlotLayerRaw, i32> => {
+		let res: Map<SlotLayerRaw, i32> = [];
 		for (let i = 0; i < Project.layers.length; ++i) res.set(Project.layers[i], i);
 		return res;
 	}
 
-	static fillLayerMap = (map: Map<SlotLayer, i32>): Map<i32, i32> => {
+	static fillLayerMap = (map: Map<SlotLayerRaw, i32>): Map<i32, i32> => {
 		let res: Map<i32, i32> = new Map();
 		for (let l of map.keys()) res.set(map.get(l), Project.layers.indexOf(l) > -1 ? Project.layers.indexOf(l) : 9999);
 		return res;
 	}
 
-	static setDragLayer = (layer: SlotLayer, offX: f32, offY: f32) => {
+	static setDragLayer = (layer: SlotLayerRaw, offX: f32, offY: f32) => {
 		Base.dragOffX = offX;
 		Base.dragOffY = offY;
 		Base.dragLayer = layer;
 		Context.raw.dragDestination = Project.layers.indexOf(layer);
 	}
 
-	static drawLayerSlot = (l: SlotLayer, i: i32, mini: bool) => {
+	static drawLayerSlot = (l: SlotLayerRaw, i: i32, mini: bool) => {
 		let ui = UIBase.ui;
 
 		if (Context.raw.layerFilter > 0 &&
@@ -186,7 +186,7 @@ class TabLayers {
 		}
 	}
 
-	static drawLayerSlotMini = (l: SlotLayer, i: i32) => {
+	static drawLayerSlotMini = (l: SlotLayerRaw, i: i32) => {
 		let ui = UIBase.ui;
 
 		ui.row([1, 1]);
@@ -199,7 +199,7 @@ class TabLayers {
 		ui._y -= ui.ELEMENT_OFFSET();
 	}
 
-	static drawLayerSlotFull = (l: SlotLayer, i: i32) => {
+	static drawLayerSlotFull = (l: SlotLayerRaw, i: i32) => {
 		let ui = UIBase.ui;
 
 		let step = ui.t.ELEMENT_H;
@@ -337,7 +337,7 @@ class TabLayers {
 		ui._y -= ui.ELEMENT_OFFSET();
 	}
 
-	static comboObject = (ui: Zui, l: SlotLayer, label = false): Handle => {
+	static comboObject = (ui: Zui, l: SlotLayerRaw, label = false): Handle => {
 		let ar = [tr("Shared")];
 		let objectHandle = Zui.handle("tablayers_2").nest(l.id);
 		objectHandle.position = l.objectMask;
@@ -345,13 +345,13 @@ class TabLayers {
 		return objectHandle;
 	}
 
-	static layerToggleVisible = (l: SlotLayer) => {
+	static layerToggleVisible = (l: SlotLayerRaw) => {
 		l.visible = !l.visible;
 		UIView2D.hwnd.redraws = 2;
 		MakeMaterial.parseMeshMaterial();
 	}
 
-	static drawLayerHighlight = (l: SlotLayer, mini: bool) => {
+	static drawLayerHighlight = (l: SlotLayerRaw, mini: bool) => {
 		let ui = UIBase.ui;
 		let step = ui.t.ELEMENT_H;
 
@@ -369,7 +369,7 @@ class TabLayers {
 		}
 	}
 
-	static canMergeDown = (l: SlotLayer) : bool => {
+	static canMergeDown = (l: SlotLayerRaw) : bool => {
 		let index = Project.layers.indexOf(l);
 		// Lowest layer
 		if (index == 0) return false;
@@ -382,7 +382,7 @@ class TabLayers {
 		return true;
 	}
 
-	static drawLayerContextMenu = (l: SlotLayer, mini: bool) => {
+	static drawLayerContextMenu = (l: SlotLayerRaw, mini: bool) => {
 
 	}
 

@@ -33,8 +33,8 @@ class Base {
 	static lastWindowWidth = 0;
 	static lastWindowHeight = 0;
 	///if (is_paint || is_sculpt)
-	static dragMaterial: SlotMaterial = null;
-	static dragLayer: SlotLayer = null;
+	static dragMaterial: SlotMaterialRaw = null;
+	static dragLayer: SlotLayerRaw = null;
 	///end
 
 	static pipeCopy: PipelineState;
@@ -562,7 +562,7 @@ class Base {
 					UINodes.acceptLayerDrag(Project.layers.indexOf(Base.dragLayer));
 				}
 				else if (Context.inLayers() && Base.isDragging) {
-					Base.dragLayer.move(Context.raw.dragDestination);
+					SlotLayer.move(Base.dragLayer, Context.raw.dragDestination);
 					MakeMaterial.parseMeshMaterial();
 				}
 				Base.dragLayer = null;
@@ -638,7 +638,7 @@ class Base {
 	///if (is_paint || is_sculpt)
 	static getDragBackground = (): TRect => {
 		let icons = Res.get("icons.k");
-		if (Base.dragLayer != null && !Base.dragLayer.isGroup() && Base.dragLayer.fill_layer == null) {
+		if (Base.dragLayer != null && !SlotLayer.isGroup(Base.dragLayer) && Base.dragLayer.fill_layer == null) {
 			return Res.tile50(icons, 4, 1);
 		}
 		return null;
@@ -669,7 +669,7 @@ class Base {
 		if (Base.dragMaterial != null) {
 			return Base.dragMaterial.imageIcon;
 		}
-		if (Base.dragLayer != null && Base.dragLayer.isGroup()) {
+		if (Base.dragLayer != null && SlotLayer.isGroup(Base.dragLayer)) {
 			let icons = Res.get("icons.k");
 			let folderClosed = Res.tile50(icons, 2, 1);
 			let folderOpen = Res.tile50(icons, 8, 1);
@@ -677,7 +677,7 @@ class Base {
 			Base.dragTint = UIBase.ui.t.LABEL_COL - 0x00202020;
 			return icons;
 		}
-		if (Base.dragLayer != null && Base.dragLayer.isMask() && Base.dragLayer.fill_layer == null) {
+		if (Base.dragLayer != null && SlotLayer.isMask(Base.dragLayer) && Base.dragLayer.fill_layer == null) {
 			TabLayers.makeMaskPreviewRgba32(Base.dragLayer);
 			return Context.raw.maskPreviewRgba32;
 		}
@@ -706,7 +706,7 @@ class Base {
 			if (History.undoLayers == null) {
 				History.undoLayers = [];
 				for (let i = 0; i < Config.raw.undo_steps; ++i) {
-					let l = new SlotLayer("_undo" + History.undoLayers.length);
+					let l = SlotLayer.create("_undo" + History.undoLayers.length);
 					History.undoLayers.push(l);
 				}
 			}
@@ -1016,7 +1016,7 @@ class Base {
 
 	static initLayers = () => {
 		///if (is_paint || is_sculpt)
-		Project.layers[0].clear(color_from_floats(Base.defaultBase, Base.defaultBase, Base.defaultBase, 1.0));
+		SlotLayer.clear(Project.layers[0], color_from_floats(Base.defaultBase, Base.defaultBase, Base.defaultBase, 1.0));
 		///end
 
 		///if is_lab
@@ -1054,12 +1054,12 @@ class Base {
 			while (History.undoLayers.length > C.undo_steps) {
 				let l = History.undoLayers.pop();
 				Base.notifyOnNextFrame(() => {
-					l.unload();
+					SlotLayer.unload(l);
 				});
 			}
 		}
-		for (let l of Project.layers) l.resizeAndSetBits();
-		for (let l of History.undoLayers) l.resizeAndSetBits();
+		for (let l of Project.layers) SlotLayer.resizeAndSetBits(l);
+		for (let l of History.undoLayers) SlotLayer.resizeAndSetBits(l);
 		let rts = RenderPath.active.renderTargets;
 		let _texpaint_blend0 = rts.get("texpaint_blend0").image;
 		Base.notifyOnNextFrame(() => {
@@ -1087,7 +1087,7 @@ class Base {
 			rts.get("texpaint_blur").raw.height = sizeY;
 			rts.get("texpaint_blur").image = Image.createRenderTarget(sizeX, sizeY);
 		}
-		if (RenderPathPaint.liveLayer != null) RenderPathPaint.liveLayer.resizeAndSetBits();
+		if (RenderPathPaint.liveLayer != null) SlotLayer.resizeAndSetBits(RenderPathPaint.liveLayer);
 		///if (krom_direct3d12 || krom_vulkan || krom_metal)
 		RenderPathRaytrace.ready = false; // Rebuild baketex
 		///end
@@ -1095,8 +1095,8 @@ class Base {
 	}
 
 	static setLayerBits = () => {
-		for (let l of Project.layers) l.resizeAndSetBits();
-		for (let l of History.undoLayers) l.resizeAndSetBits();
+		for (let l of Project.layers) SlotLayer.resizeAndSetBits(l);
+		for (let l of History.undoLayers) SlotLayer.resizeAndSetBits(l);
 	}
 
 	static makeMergePipe = (red: bool, green: bool, blue: bool, alpha: bool): PipelineState => {
@@ -1477,14 +1477,14 @@ class Base {
 	}
 
 	///if (is_paint || is_sculpt)
-	static duplicateLayer = (l: SlotLayer) => {
-		if (!l.isGroup()) {
-			let newLayer = l.duplicate();
+	static duplicateLayer = (l: SlotLayerRaw) => {
+		if (!SlotLayer.isGroup(l)) {
+			let newLayer = SlotLayer.duplicate(l);
 			Context.setLayer(newLayer);
-			let masks = l.getMasks(false);
+			let masks = SlotLayer.getMasks(l, false);
 			if (masks != null) {
 				for (let m of masks) {
-					m = m.duplicate();
+					m = SlotLayer.duplicate(m);
 					m.parent = newLayer;
 					array_remove(Project.layers, m);
 					Project.layers.splice(Project.layers.indexOf(newLayer), 0, m);
@@ -1497,25 +1497,25 @@ class Base {
 			array_remove(Project.layers, newGroup);
 			Project.layers.splice(Project.layers.indexOf(l) + 1, 0, newGroup);
 			// group.show_panel = true;
-			for (let c of l.getChildren()) {
-				let masks = c.getMasks(false);
-				let newLayer = c.duplicate();
+			for (let c of SlotLayer.getChildren(l)) {
+				let masks = SlotLayer.getMasks(c, false);
+				let newLayer = SlotLayer.duplicate(c);
 				newLayer.parent = newGroup;
 				array_remove(Project.layers, newLayer);
 				Project.layers.splice(Project.layers.indexOf(newGroup), 0, newLayer);
 				if (masks != null) {
 					for (let m of masks) {
-						let newMask = m.duplicate();
+						let newMask = SlotLayer.duplicate(m);
 						newMask.parent = newLayer;
 						array_remove(Project.layers, newMask);
 						Project.layers.splice(Project.layers.indexOf(newLayer), 0, newMask);
 					}
 				}
 			}
-			let groupMasks = l.getMasks();
+			let groupMasks = SlotLayer.getMasks(l);
 			if (groupMasks != null) {
 				for (let m of groupMasks) {
-					let newMask = m.duplicate();
+					let newMask = SlotLayer.duplicate(m);
 					newMask.parent = newGroup;
 					array_remove(Project.layers, newMask);
 					Project.layers.splice(Project.layers.indexOf(newGroup), 0, newMask);
@@ -1525,15 +1525,15 @@ class Base {
 		}
 	}
 
-	static applyMasks = (l: SlotLayer) => {
-		let masks = l.getMasks();
+	static applyMasks = (l: SlotLayerRaw) => {
+		let masks = SlotLayer.getMasks(l);
 
 		if (masks != null) {
 			for (let i = 0; i < masks.length - 1; ++i) {
 				Base.mergeLayer(masks[i + 1], masks[i]);
-				masks[i].delete();
+				SlotLayer.delete(masks[i]);
 			}
-			masks[masks.length - 1].applyMask();
+			SlotLayer.applyMask(masks[masks.length - 1]);
 			Context.raw.layerPreviewDirty = true;
 		}
 	}
@@ -1541,36 +1541,36 @@ class Base {
 	static mergeDown = () => {
 		let l1 = Context.raw.layer;
 
-		if (l1.isGroup()) {
+		if (SlotLayer.isGroup(l1)) {
 			l1 = Base.mergeGroup(l1);
 		}
-		else if (l1.hasMasks()) { // It is a layer
+		else if (SlotLayer.hasMasks(l1)) { // It is a layer
 			Base.applyMasks(l1);
 			Context.setLayer(l1);
 		}
 
 		let l0 = Project.layers[Project.layers.indexOf(l1) - 1];
 
-		if (l0.isGroup()) {
+		if (SlotLayer.isGroup(l0)) {
 			l0 = Base.mergeGroup(l0);
 		}
-		else if (l0.hasMasks()) { // It is a layer
+		else if (SlotLayer.hasMasks(l0)) { // It is a layer
 			Base.applyMasks(l0);
 			Context.setLayer(l0);
 		}
 
 		Base.mergeLayer(l0, l1);
-		l1.delete();
+		SlotLayer.delete(l1);
 		Context.setLayer(l0);
 		Context.raw.layerPreviewDirty = true;
 	}
 
-	static mergeGroup = (l: SlotLayer) => {
-		if (!l.isGroup()) return null;
+	static mergeGroup = (l: SlotLayerRaw) => {
+		if (!SlotLayer.isGroup(l)) return null;
 
-		let children = l.getChildren();
+		let children = SlotLayer.getChildren(l);
 
-		if (children.length == 1 && children[0].hasMasks(false)) {
+		if (children.length == 1 && SlotLayer.hasMasks(children[0], false)) {
 			Base.applyMasks(children[0]);
 		}
 
@@ -1581,24 +1581,24 @@ class Base {
 		}
 
 		// Now apply the group masks
-		let masks = l.getMasks();
+		let masks = SlotLayer.getMasks(l);
 		if (masks != null) {
 			for (let i = 0; i < masks.length - 1; ++i) {
 				Base.mergeLayer(masks[i + 1], masks[i]);
-				masks[i].delete();
+				SlotLayer.delete(masks[i]);
 			}
 			Base.applyMask(children[0], masks[masks.length - 1]);
 		}
 
 		children[0].parent = null;
 		children[0].name = l.name;
-		if (children[0].fill_layer != null) children[0].toPaintLayer();
-		l.delete();
+		if (children[0].fill_layer != null) SlotLayer.toPaintLayer(children[0]);
+		SlotLayer.delete(l);
 		return children[0];
 	}
 
-	static mergeLayer = (l0 : SlotLayer, l1: SlotLayer, use_mask = false) => {
-		if (!l1.visible || l1.isGroup()) return;
+	static mergeLayer = (l0 : SlotLayerRaw, l1: SlotLayerRaw, use_mask = false) => {
+		if (!l1.visible || SlotLayer.isGroup(l1)) return;
 
 		if (Base.pipeMerge == null) Base.makePipe();
 		Base.makeTempImg();
@@ -1612,7 +1612,7 @@ class Base {
 
 		let empty = RenderPath.active.renderTargets.get("empty_white").image;
 		let mask = empty;
-		let l1masks =  use_mask ? l1.getMasks() : null;
+		let l1masks =  use_mask ? SlotLayer.getMasks(l1) : null;
 		if (l1masks != null) {
 			// for (let i = 1; i < l1masks.length - 1; ++i) {
 			// 	mergeLayer(l1masks[i + 1], l1masks[i]);
@@ -1620,12 +1620,12 @@ class Base {
 			mask = l1masks[0].texpaint;
 		}
 
-		if (l1.isMask()) {
+		if (SlotLayer.isMask(l1)) {
 			l0.texpaint.g4.begin();
 			l0.texpaint.g4.setPipeline(Base.pipeMergeMask);
 			l0.texpaint.g4.setTexture(Base.tex0MergeMask, l1.texpaint);
 			l0.texpaint.g4.setTexture(Base.texaMergeMask, Base.tempImage);
-			l0.texpaint.g4.setFloat(Base.opacMergeMask, l1.getOpacity());
+			l0.texpaint.g4.setFloat(Base.opacMergeMask, SlotLayer.getOpacity(l1));
 			l0.texpaint.g4.setInt(Base.blendingMergeMask, l1.blending);
 			l0.texpaint.g4.setVertexBuffer(ConstData.screenAlignedVB);
 			l0.texpaint.g4.setIndexBuffer(ConstData.screenAlignedIB);
@@ -1633,7 +1633,7 @@ class Base {
 			l0.texpaint.g4.end();
 		}
 
-		if (l1.isLayer()) {
+		if (SlotLayer.isLayer(l1)) {
 			if (l1.paintBase) {
 				l0.texpaint.g4.begin();
 				l0.texpaint.g4.setPipeline(Base.pipeMerge);
@@ -1641,7 +1641,7 @@ class Base {
 				l0.texpaint.g4.setTexture(Base.tex1, empty);
 				l0.texpaint.g4.setTexture(Base.texmask, mask);
 				l0.texpaint.g4.setTexture(Base.texa, Base.tempImage);
-				l0.texpaint.g4.setFloat(Base.opac, l1.getOpacity());
+				l0.texpaint.g4.setFloat(Base.opac, SlotLayer.getOpacity(l1));
 				l0.texpaint.g4.setInt(Base.blending, l1.blending);
 				l0.texpaint.g4.setVertexBuffer(ConstData.screenAlignedVB);
 				l0.texpaint.g4.setIndexBuffer(ConstData.screenAlignedIB);
@@ -1663,7 +1663,7 @@ class Base {
 				l0.texpaint_nor.g4.setTexture(Base.tex1, l1.texpaint_nor);
 				l0.texpaint_nor.g4.setTexture(Base.texmask, mask);
 				l0.texpaint_nor.g4.setTexture(Base.texa, Base.tempImage);
-				l0.texpaint_nor.g4.setFloat(Base.opac, l1.getOpacity());
+				l0.texpaint_nor.g4.setFloat(Base.opac, SlotLayer.getOpacity(l1));
 				l0.texpaint_nor.g4.setInt(Base.blending, l1.paintNorBlend ? -2 : -1);
 				l0.texpaint_nor.g4.setVertexBuffer(ConstData.screenAlignedVB);
 				l0.texpaint_nor.g4.setIndexBuffer(ConstData.screenAlignedIB);
@@ -1679,19 +1679,19 @@ class Base {
 
 			if (l1.paintOcc || l1.paintRough || l1.paintMet || l1.paintHeight) {
 				if (l1.paintOcc && l1.paintRough && l1.paintMet && l1.paintHeight) {
-					Base.commandsMergePack(Base.pipeMerge, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask, l1.paintHeightBlend ? -3 : -1);
+					Base.commandsMergePack(Base.pipeMerge, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, SlotLayer.getOpacity(l1), mask, l1.paintHeightBlend ? -3 : -1);
 				}
 				else {
-					if (l1.paintOcc) Base.commandsMergePack(Base.pipeMergeR, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
-					if (l1.paintRough) Base.commandsMergePack(Base.pipeMergeG, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
-					if (l1.paintMet) Base.commandsMergePack(Base.pipeMergeB, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
+					if (l1.paintOcc) Base.commandsMergePack(Base.pipeMergeR, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, SlotLayer.getOpacity(l1), mask);
+					if (l1.paintRough) Base.commandsMergePack(Base.pipeMergeG, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, SlotLayer.getOpacity(l1), mask);
+					if (l1.paintMet) Base.commandsMergePack(Base.pipeMergeB, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, SlotLayer.getOpacity(l1), mask);
 				}
 			}
 			///end
 		}
 	}
 
-	static flatten = (heightToNormal = false, layers: SlotLayer[] = null): any => {
+	static flatten = (heightToNormal = false, layers: SlotLayerRaw[] = null): any => {
 		if (layers == null) layers = Project.layers;
 		Base.makeTempImg();
 		Base.makeExportImg();
@@ -1712,11 +1712,11 @@ class Base {
 
 		// Flatten layers
 		for (let l1 of layers) {
-			if (!l1.isVisible()) continue;
-			if (!l1.isLayer()) continue;
+			if (!SlotLayer.isVisible(l1)) continue;
+			if (!SlotLayer.isLayer(l1)) continue;
 
 			let mask = empty;
-			let l1masks = l1.getMasks();
+			let l1masks = SlotLayer.getMasks(l1);
 			if (l1masks != null) {
 				if (l1masks.length > 1) {
 					Base.makeTempMaskImg();
@@ -1744,7 +1744,7 @@ class Base {
 				Base.expa.g4.setTexture(Base.tex1, empty);
 				Base.expa.g4.setTexture(Base.texmask, mask);
 				Base.expa.g4.setTexture(Base.texa, Base.tempImage);
-				Base.expa.g4.setFloat(Base.opac, l1.getOpacity());
+				Base.expa.g4.setFloat(Base.opac, SlotLayer.getOpacity(l1));
 				Base.expa.g4.setInt(Base.blending, layers.length > 1 ? l1.blending : 0);
 				Base.expa.g4.setVertexBuffer(ConstData.screenAlignedVB);
 				Base.expa.g4.setIndexBuffer(ConstData.screenAlignedIB);
@@ -1766,7 +1766,7 @@ class Base {
 				Base.expb.g4.setTexture(Base.tex1, l1.texpaint_nor);
 				Base.expb.g4.setTexture(Base.texmask, mask);
 				Base.expb.g4.setTexture(Base.texa, Base.tempImage);
-				Base.expb.g4.setFloat(Base.opac, l1.getOpacity());
+				Base.expb.g4.setFloat(Base.opac, SlotLayer.getOpacity(l1));
 				Base.expb.g4.setInt(Base.blending, l1.paintNorBlend ? -2 : -1);
 				Base.expb.g4.setVertexBuffer(ConstData.screenAlignedVB);
 				Base.expb.g4.setIndexBuffer(ConstData.screenAlignedIB);
@@ -1782,12 +1782,12 @@ class Base {
 				Base.tempImage.g2.end();
 
 				if (l1.paintOcc && l1.paintRough && l1.paintMet && l1.paintHeight) {
-					Base.commandsMergePack(Base.pipeMerge, Base.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask, l1.paintHeightBlend ? -3 : -1);
+					Base.commandsMergePack(Base.pipeMerge, Base.expc, l1.texpaint, l1.texpaint_pack, SlotLayer.getOpacity(l1), mask, l1.paintHeightBlend ? -3 : -1);
 				}
 				else {
-					if (l1.paintOcc) Base.commandsMergePack(Base.pipeMergeR, Base.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
-					if (l1.paintRough) Base.commandsMergePack(Base.pipeMergeG, Base.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
-					if (l1.paintMet) Base.commandsMergePack(Base.pipeMergeB, Base.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
+					if (l1.paintOcc) Base.commandsMergePack(Base.pipeMergeR, Base.expc, l1.texpaint, l1.texpaint_pack, SlotLayer.getOpacity(l1), mask);
+					if (l1.paintRough) Base.commandsMergePack(Base.pipeMergeG, Base.expc, l1.texpaint, l1.texpaint_pack, SlotLayer.getOpacity(l1), mask);
+					if (l1.paintMet) Base.commandsMergePack(Base.pipeMergeB, Base.expc, l1.texpaint, l1.texpaint_pack, SlotLayer.getOpacity(l1), mask);
 				}
 			}
 			///end
@@ -1831,8 +1831,8 @@ class Base {
 		return l0;
 	}
 
-	static applyMask = (l: SlotLayer, m: SlotLayer) => {
-		if (!l.isLayer() || !m.isMask()) return;
+	static applyMask = (l: SlotLayerRaw, m: SlotLayerRaw) => {
+		if (!SlotLayer.isLayer(l) || !SlotLayer.isMask(m)) return;
 
 		if (Base.pipeMerge == null) Base.makePipe();
 		Base.makeTempImg();
@@ -1890,7 +1890,7 @@ class Base {
 		///if is_paint
 		if (Context.raw.tool == WorkspaceTool.ToolMaterial) {
 			if (RenderPathPaint.liveLayer == null) {
-				RenderPathPaint.liveLayer = new SlotLayer("_live");
+				RenderPathPaint.liveLayer = SlotLayer.create("_live");
 			}
 
 			current = Graphics2.current;
@@ -1916,8 +1916,8 @@ class Base {
 
 		let hasFillLayer = false;
 		let hasFillMask = false;
-		for (let l of Project.layers) if (l.isLayer() && l.fill_layer == Context.raw.material) hasFillLayer = true;
-		for (let l of Project.layers) if (l.isMask() && l.fill_layer == Context.raw.material) hasFillMask = true;
+		for (let l of Project.layers) if (SlotLayer.isLayer(l) && l.fill_layer == Context.raw.material) hasFillLayer = true;
+		for (let l of Project.layers) if (SlotLayer.isMask(l) && l.fill_layer == Context.raw.material) hasFillMask = true;
 
 		if (hasFillLayer || hasFillMask) {
 			current = Graphics2.current;
@@ -1929,14 +1929,14 @@ class Base {
 			if (hasFillLayer) {
 				let first = true;
 				for (let l of Project.layers) {
-					if (l.isLayer() && l.fill_layer == Context.raw.material) {
+					if (SlotLayer.isLayer(l) && l.fill_layer == Context.raw.material) {
 						Context.raw.layer = l;
 						if (first) {
 							first = false;
 							MakeMaterial.parsePaintMaterial(false);
 						}
 						Base.setObjectMask();
-						l.clear();
+						SlotLayer.clear(l);
 						RenderPathPaint.commandsPaint(false);
 						RenderPathPaint.dilate(true, true);
 					}
@@ -1945,14 +1945,14 @@ class Base {
 			if (hasFillMask) {
 				let first = true;
 				for (let l of Project.layers) {
-					if (l.isMask() && l.fill_layer == Context.raw.material) {
+					if (SlotLayer.isMask(l) && l.fill_layer == Context.raw.material) {
 						Context.raw.layer = l;
 						if (first) {
 							first = false;
 							MakeMaterial.parsePaintMaterial(false);
 						}
 						Base.setObjectMask();
-						l.clear();
+						SlotLayer.clear(l);
 						RenderPathPaint.commandsPaint(false);
 						RenderPathPaint.dilate(true, true);
 					}
@@ -1982,7 +1982,7 @@ class Base {
 		Context.raw.fillTypeHandle.position = FillType.FillObject;
 		Context.raw.pdirty = 1;
 
-		Context.raw.layer.clear();
+		SlotLayer.clear(Context.raw.layer);
 
 		if (parsePaint) MakeMaterial.parsePaintMaterial(false);
 		RenderPathPaint.commandsPaint(false);
@@ -2002,7 +2002,7 @@ class Base {
 		let ar = [tr("None")];
 		for (let p of Project.paintObjects) ar.push(p.name);
 
-		let mask = Context.objectMaskUsed() ? Context.raw.layer.getObjectMask() : 0;
+		let mask = Context.objectMaskUsed() ? SlotLayer.getObjectMask(Context.raw.layer) : 0;
 		if (Context.layerFilterUsed()) mask = Context.raw.layerFilter;
 		if (mask > 0) {
 			if (Context.raw.mergedObject != null) {
@@ -2018,9 +2018,9 @@ class Base {
 			Context.selectPaintObject(o);
 		}
 		else {
-			let isAtlas = Context.raw.layer.getObjectMask() > 0 && Context.raw.layer.getObjectMask() <= Project.paintObjects.length;
+			let isAtlas = SlotLayer.getObjectMask(Context.raw.layer) > 0 && SlotLayer.getObjectMask(Context.raw.layer) <= Project.paintObjects.length;
 			if (Context.raw.mergedObject == null || isAtlas || Context.raw.mergedObjectIsAtlas) {
-				let visibles = isAtlas ? Project.getAtlasObjects(Context.raw.layer.getObjectMask()) : null;
+				let visibles = isAtlas ? Project.getAtlasObjects(SlotLayer.getObjectMask(Context.raw.layer)) : null;
 				UtilMesh.mergeMesh(visibles);
 			}
 			Context.selectPaintObject(Context.mainObject());
@@ -2030,12 +2030,12 @@ class Base {
 		UtilUV.dilatemapCached = false;
 	}
 
-	static newLayer = (clear = true, position = -1): SlotLayer => {
+	static newLayer = (clear = true, position = -1): SlotLayerRaw => {
 		if (Project.layers.length > Base.maxLayers) return null;
-		let l = new SlotLayer();
+		let l = SlotLayer.create();
 		l.objectMask = Context.raw.layerFilter;
 		if (position == -1) {
-			if (Context.raw.layer.isMask()) Context.setLayer(Context.raw.layer.parent);
+			if (SlotLayer.isMask(Context.raw.layer)) Context.setLayer(Context.raw.layer.parent);
 			Project.layers.splice(Project.layers.indexOf(Context.raw.layer) + 1, 0, l);
 		}
 		else {
@@ -2046,29 +2046,29 @@ class Base {
 		let li = Project.layers.indexOf(Context.raw.layer);
 		if (li > 0) {
 			let below = Project.layers[li - 1];
-			if (below.isLayer()) {
+			if (SlotLayer.isLayer(below)) {
 				Context.raw.layer.parent = below.parent;
 			}
 		}
-		if (clear) App.notifyOnInit(() => { l.clear(); });
+		if (clear) App.notifyOnInit(() => { SlotLayer.clear(l); });
 		Context.raw.layerPreviewDirty = true;
 		return l;
 	}
 
-	static newMask = (clear = true, parent: SlotLayer, position = -1): SlotLayer => {
+	static newMask = (clear = true, parent: SlotLayerRaw, position = -1): SlotLayerRaw => {
 		if (Project.layers.length > Base.maxLayers) return null;
-		let l = new SlotLayer("", LayerSlotType.SlotMask, parent);
+		let l = SlotLayer.create("", LayerSlotType.SlotMask, parent);
 		if (position == -1) position = Project.layers.indexOf(parent);
 		Project.layers.splice(position, 0, l);
 		Context.setLayer(l);
-		if (clear) App.notifyOnInit(() => { l.clear(); });
+		if (clear) App.notifyOnInit(() => { SlotLayer.clear(l); });
 		Context.raw.layerPreviewDirty = true;
 		return l;
 	}
 
-	static newGroup = (): SlotLayer => {
+	static newGroup = (): SlotLayerRaw => {
 		if (Project.layers.length > Base.maxLayers) return null;
-		let l = new SlotLayer("", LayerSlotType.SlotGroup);
+		let l = SlotLayer.create("", LayerSlotType.SlotGroup);
 		Project.layers.push(l);
 		Context.setLayer(l);
 		return l;
@@ -2082,20 +2082,20 @@ class Base {
 			if (decalMat != null) l.decalMat = decalMat;
 			l.objectMask = Context.raw.layerFilter;
 			History.toFillLayer();
-			l.toFillLayer();
+			SlotLayer.toFillLayer(l);
 		}
 		App.notifyOnInit(_init);
 	}
 
 	static createImageMask = (asset: TAsset) => {
 		let l = Context.raw.layer;
-		if (l.isMask() || l.isGroup()) {
+		if (SlotLayer.isMask(l) || SlotLayer.isGroup(l)) {
 			return;
 		}
 
 		History.newLayer();
 		let m = Base.newMask(false, l);
-		m.clear(0x00000000, Project.getImage(asset));
+		SlotLayer.clear(m, 0x00000000, Project.getImage(asset));
 		Context.raw.layerPreviewDirty = true;
 	}
 
@@ -2105,7 +2105,7 @@ class Base {
 			History.newLayer();
 			l.uvType = UVType.UVMap;
 			l.objectMask = Context.raw.layerFilter;
-			l.clear(baseColor, null, occlusion, roughness, metallic);
+			SlotLayer.clear(l, baseColor, null, occlusion, roughness, metallic);
 		}
 		App.notifyOnInit(_init);
 	}

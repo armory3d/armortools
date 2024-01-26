@@ -35,7 +35,7 @@ let import_gltf_glb = function(path, done) {
 	});
 }
 
-let plugin = new Plugin();
+let plugin = Plugin.create();
 let formats = Path.meshFormats;
 let importers = Path.meshImporters;
 formats.push("gltf");

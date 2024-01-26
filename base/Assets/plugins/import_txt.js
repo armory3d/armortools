@@ -13,7 +13,7 @@ let import_txt = function(path, done) {
 	});
 }
 
-let plugin = new Plugin();
+let plugin = Plugin.create();
 let formats = Path.textureFormats;
 let importers = Path.textureImporters;
 formats.push("txt");

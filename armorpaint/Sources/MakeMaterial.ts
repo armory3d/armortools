@@ -56,7 +56,7 @@ class MakeMaterial {
 			}
 		}
 
-		let con = MakeMesh.run(new NodeShaderData({ name: "Material", canvas: null }));
+		let con = MakeMesh.run({ name: "Material", canvas: null });
 		let scon = new ShaderContext(con.data, (scon: ShaderContext) => {});
 		scon.overrideContext = {};
 		if (con.frag.sharedSamplers.length > 0) {
@@ -70,7 +70,7 @@ class MakeMaterial {
 		m.shader.contexts.push(scon);
 
 		for (let i = 1; i < MakeMesh.layerPassCount; ++i) {
-			let con = MakeMesh.run(new NodeShaderData({ name: "Material", canvas: null }), i);
+			let con = MakeMesh.run({ name: "Material", canvas: null }, i);
 			let scon = new ShaderContext(con.data, (scon: ShaderContext) => {});
 			scon.overrideContext = {};
 			if (con.frag.sharedSamplers.length > 0) {
@@ -112,7 +112,7 @@ class MakeMaterial {
 			array_remove(m.shader.raw.contexts, sc.raw);
 			array_remove(m.shader.contexts, sc);
 		}
-		let con = MakeParticle.run(new NodeShaderData({ name: "MaterialParticle", canvas: null }));
+		let con = MakeParticle.run({ name: "MaterialParticle", canvas: null });
 		if (sc != null) MakeMaterial.deleteContext(sc);
 		sc = new ShaderContext(con.data, (sc: ShaderContext) => {});
 		m.shader.raw.contexts.push(sc.raw);
@@ -135,7 +135,7 @@ class MakeMaterial {
 
 		let mcon: TMaterialContext = { name: "mesh", bind_textures: [] };
 
-		let sd = new NodeShaderData({ name: "Material", canvas: null });
+		let sd: TMaterial = { name: "Material", canvas: null };
 		let con = MakeMeshPreview.run(sd, mcon);
 
 		for (let i = 0; i < m.contexts.length; ++i) {
@@ -202,7 +202,7 @@ class MakeMaterial {
 			}
 		}
 
-		let sdata = new NodeShaderData({ name: "Material", canvas: UINodes.getCanvasMaterial() });
+		let sdata: TMaterial = { name: "Material", canvas: UINodes.getCanvasMaterial() };
 		let tmcon: TMaterialContext = { name: "paint", bind_textures: [] };
 		let con = MakePaint.run(sdata, tmcon);
 
@@ -299,7 +299,7 @@ class MakeMaterial {
 			}
 
 			if (RenderPathPaint.liveLayer == null) {
-				RenderPathPaint.liveLayer = new SlotLayer("_live");
+				RenderPathPaint.liveLayer = SlotLayer.create("_live");
 			}
 
 			let _space = UIHeader.worktab.position;
@@ -341,7 +341,7 @@ class MakeMaterial {
 
 	static parseNodePreviewMaterial = (node: TNode, group: TNodeCanvas = null, parents: TNode[] = null): { scon: ShaderContext, mcon: MaterialContext } => {
 		if (node.outputs.length == 0) return null;
-		let sdata = new NodeShaderData({ name: "Material", canvas: UINodes.getCanvasMaterial() });
+		let sdata: TMaterial = { name: "Material", canvas: UINodes.getCanvasMaterial() };
 		let mcon_raw: TMaterialContext = { name: "mesh", bind_textures: [] };
 		let con = MakeNodePreview.run(sdata, mcon_raw, node, group, parents);
 		let compileError = false;
@@ -357,7 +357,7 @@ class MakeMaterial {
 		ParserLogic.parse(Context.raw.brush.canvas);
 	}
 
-	static blendMode = (frag: NodeShader, blending: i32, cola: string, colb: string, opac: string): string => {
+	static blendMode = (frag: NodeShaderRaw, blending: i32, cola: string, colb: string, opac: string): string => {
 		if (blending == BlendType.BlendMix) {
 			return `mix(${cola}, ${colb}, ${opac})`;
 		}
@@ -405,24 +405,24 @@ class MakeMaterial {
 			return `vec3(1.0 - ${opac}, 1.0 - ${opac}, 1.0 - ${opac}) * ${cola} + vec3(${opac}, ${opac}, ${opac}) * ${cola} / ${colb}`;
 		}
 		else if (blending == BlendType.BlendHue) {
-			frag.add_function(ShaderFunctions.str_hue_sat);
+			NodeShader.add_function(frag, ShaderFunctions.str_hue_sat);
 			return `mix(${cola}, hsv_to_rgb(vec3(rgb_to_hsv(${colb}).r, rgb_to_hsv(${cola}).g, rgb_to_hsv(${cola}).b)), ${opac})`;
 		}
 		else if (blending == BlendType.BlendSaturation) {
-			frag.add_function(ShaderFunctions.str_hue_sat);
+			NodeShader.add_function(frag, ShaderFunctions.str_hue_sat);
 			return `mix(${cola}, hsv_to_rgb(vec3(rgb_to_hsv(${cola}).r, rgb_to_hsv(${colb}).g, rgb_to_hsv(${cola}).b)), ${opac})`;
 		}
 		else if (blending == BlendType.BlendColor) {
-			frag.add_function(ShaderFunctions.str_hue_sat);
+			NodeShader.add_function(frag, ShaderFunctions.str_hue_sat);
 			return `mix(${cola}, hsv_to_rgb(vec3(rgb_to_hsv(${colb}).r, rgb_to_hsv(${colb}).g, rgb_to_hsv(${cola}).b)), ${opac})`;
 		}
 		else { // BlendValue
-			frag.add_function(ShaderFunctions.str_hue_sat);
+			NodeShader.add_function(frag, ShaderFunctions.str_hue_sat);
 			return `mix(${cola}, hsv_to_rgb(vec3(rgb_to_hsv(${cola}).r, rgb_to_hsv(${cola}).g, rgb_to_hsv(${colb}).b)), ${opac})`;
 		}
 	}
 
-	static blendModeMask = (frag: NodeShader, blending: i32, cola: string, colb: string, opac: string): string => {
+	static blendModeMask = (frag: NodeShaderRaw, blending: i32, cola: string, colb: string, opac: string): string => {
 		if (blending == BlendType.BlendMix) {
 			return `mix(${cola}, ${colb}, ${opac})`;
 		}

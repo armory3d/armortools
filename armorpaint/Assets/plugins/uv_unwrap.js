@@ -69,7 +69,7 @@ function unwrap_mesh(mesh) {
 	// a._destroy(); //// Destroys r.buffer
 }
 
-let plugin = new Plugin();
+let plugin = Plugin.create();
 let h1 = new Handle();
 plugin.drawUI = function(ui) {
 	if (ui.panel(h1, "UV Unwrap")) {

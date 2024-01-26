@@ -11,13 +11,13 @@ class ImportFont {
 		Data.getFont(path, (font: Font) => {
 			font.init(); // Make sure font_ is ready
 			let count = Krom.g2_font_count(font.font_);
-			let fontSlots: SlotFont[] = [];
+			let fontSlots: SlotFontRaw[] = [];
 			for (let i = 0; i < count; ++i) {
 				let ar = path.split(Path.sep);
 				let name = ar[ar.length - 1];
 				let f = font.clone();
 				f.setFontIndex(i);
-				let fontSlot = new SlotFont(name, f, path);
+				let fontSlot = SlotFont.create(name, f, path);
 				fontSlots.push(fontSlot);
 			}
 

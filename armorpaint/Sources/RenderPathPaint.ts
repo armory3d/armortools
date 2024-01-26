@@ -1,7 +1,7 @@
 
 class RenderPathPaint {
 
-	static liveLayer: SlotLayer = null;
+	static liveLayer: SlotLayerRaw = null;
 	static liveLayerDrawn = 0;
 	static liveLayerLocked = false;
 	static path: RenderPath;
@@ -260,11 +260,11 @@ class RenderPathPaint {
 				RenderPathPaint.path.setTarget("texpaint_blend1");
 				RenderPathPaint.path.bindTarget("texpaint_blend0", "tex");
 				RenderPathPaint.path.drawShader("shader_datas/copy_pass/copyR8_pass");
-				let isMask = Context.raw.layer.isMask();
+				let isMask = SlotLayer.isMask(Context.raw.layer);
 				if (isMask) {
 					let ptid = Context.raw.layer.parent.id;
-					if (Context.raw.layer.parent.isGroup()) { // Group mask
-						for (let c of Context.raw.layer.parent.getChildren()) {
+					if (SlotLayer.isGroup(Context.raw.layer.parent)) { // Group mask
+						for (let c of SlotLayer.getChildren(Context.raw.layer.parent)) {
 							ptid = c.id;
 							break;
 						}
@@ -378,7 +378,7 @@ class RenderPathPaint {
 			RenderPathPaint._texpaint_pack = RenderPathPaint.path.renderTargets.get("texpaint_pack" + tid);
 			RenderPathPaint.path.renderTargets.set("texpaint_undo" + hid, RenderPathPaint.path.renderTargets.get("texpaint" + tid));
 			RenderPathPaint.path.renderTargets.set("texpaint" + tid, RenderPathPaint.path.renderTargets.get("texpaint_live"));
-			if (Context.raw.layer.isLayer()) {
+			if (SlotLayer.isLayer(Context.raw.layer)) {
 				RenderPathPaint.path.renderTargets.set("texpaint_nor_undo" + hid, RenderPathPaint.path.renderTargets.get("texpaint_nor" + tid));
 				RenderPathPaint.path.renderTargets.set("texpaint_pack_undo" + hid, RenderPathPaint.path.renderTargets.get("texpaint_pack" + tid));
 				RenderPathPaint.path.renderTargets.set("texpaint_nor" + tid, RenderPathPaint.path.renderTargets.get("texpaint_nor_live"));
@@ -388,7 +388,7 @@ class RenderPathPaint {
 		else {
 			RenderPathPaint.path.renderTargets.set("texpaint" + tid, RenderPathPaint._texpaint);
 			RenderPathPaint.path.renderTargets.set("texpaint_undo" + hid, RenderPathPaint._texpaint_undo);
-			if (Context.raw.layer.isLayer()) {
+			if (SlotLayer.isLayer(Context.raw.layer)) {
 				RenderPathPaint.path.renderTargets.set("texpaint_nor_undo" + hid, RenderPathPaint._texpaint_nor_undo);
 				RenderPathPaint.path.renderTargets.set("texpaint_pack_undo" + hid, RenderPathPaint._texpaint_pack_undo);
 				RenderPathPaint.path.renderTargets.set("texpaint_nor" + tid, RenderPathPaint._texpaint_nor);
@@ -413,11 +413,11 @@ class RenderPathPaint {
 		if (RenderPathPaint.liveLayerLocked) return;
 
 		if (RenderPathPaint.liveLayer == null) {
-			RenderPathPaint.liveLayer = new SlotLayer("_live");
+			RenderPathPaint.liveLayer = SlotLayer.create("_live");
 		}
 
 		let tid = Context.raw.layer.id;
-		if (Context.raw.layer.isMask()) {
+		if (SlotLayer.isMask(Context.raw.layer)) {
 			RenderPathPaint.path.setTarget("texpaint_live");
 			RenderPathPaint.path.bindTarget("texpaint" + tid, "tex");
 			RenderPathPaint.path.drawShader("shader_datas/copy_pass/copy_pass");
@@ -481,7 +481,7 @@ class RenderPathPaint {
 		}
 
 		let fillLayer = Context.raw.layer.fill_layer != null;
-		let groupLayer = Context.raw.layer.isGroup();
+		let groupLayer = SlotLayer.isGroup(Context.raw.layer);
 		if (!Base.uiEnabled || Base.isDragging || fillLayer || groupLayer) {
 			return;
 		}
@@ -589,7 +589,7 @@ class RenderPathPaint {
 		let fillLayer = Context.raw.layer.fill_layer != null && Context.raw.tool != WorkspaceTool.ToolPicker && Context.raw.tool != WorkspaceTool.ToolMaterial;
 		///end
 
-		let groupLayer = Context.raw.layer.isGroup();
+		let groupLayer = SlotLayer.isGroup(Context.raw.layer);
 		return !fillLayer && !groupLayer && !Context.raw.foregroundEvent;
 	}
 
@@ -827,12 +827,12 @@ class RenderPathPaint {
 			let raw: TMeshData = {
 				name: ".PlaneTiled",
 				vertex_arrays: [
-					{ attrib: "pos", values: RenderPathPaint.array_i16(posa), data: "short4norm" },
-					{ attrib: "nor", values: RenderPathPaint.array_i16(nora), data: "short2norm" },
-					{ attrib: "tex", values: RenderPathPaint.array_i16(texa), data: "short2norm" }
+					{ attrib: "pos", values: new Int16Array(posa), data: "short4norm" },
+					{ attrib: "nor", values: new Int16Array(nora), data: "short2norm" },
+					{ attrib: "tex", values: new Int16Array(texa), data: "short2norm" }
 				],
 				index_arrays: [
-					{ values: RenderPathPaint.array_u32(inda), material: 0 }
+					{ values: new Uint32Array(inda), material: 0 }
 				],
 				scale_pos: 1.5,
 				scale_tex: 1.0
@@ -889,7 +889,7 @@ class RenderPathPaint {
 			RenderPathPaint.path.bindTarget("texpaint" + l.id, "texpaint" + l.id);
 
 			///if is_paint
-			if (l.isLayer()) {
+			if (SlotLayer.isLayer(l)) {
 				RenderPathPaint.path.bindTarget("texpaint_nor" + l.id, "texpaint_nor" + l.id);
 				RenderPathPaint.path.bindTarget("texpaint_pack" + l.id, "texpaint_pack" + l.id);
 			}
@@ -920,7 +920,7 @@ class RenderPathPaint {
 				RenderPathPaint.path.bindTarget("temptex0", "tex");
 				RenderPathPaint.path.drawShader("shader_datas/dilate_pass/dilate_pass");
 			}
-			if (nor_pack && !Context.raw.layer.isMask()) {
+			if (nor_pack && !SlotLayer.isMask(Context.raw.layer)) {
 				RenderPathPaint.path.setTarget("temptex0");
 				RenderPathPaint.path.bindTarget("texpaint_nor" + tid, "tex");
 				RenderPathPaint.path.drawShader("shader_datas/copy_pass/copy_pass");
@@ -937,17 +937,5 @@ class RenderPathPaint {
 			}
 		}
 		///end
-	}
-
-	static array_u32 = (ar: i32[]): Uint32Array => {
-		let res = new Uint32Array(ar.length);
-		for (let i = 0; i < ar.length; ++i) res[i] = ar[i];
-		return res;
-	}
-
-	static array_i16 = (ar: i32[]): Int16Array => {
-		let res = new Int16Array(ar.length);
-		for (let i = 0; i < ar.length; ++i) res[i] = ar[i];
-		return res;
 	}
 }

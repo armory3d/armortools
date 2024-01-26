@@ -1189,9 +1189,9 @@ class UINodes {
 	///if (is_paint || is_sculpt)
 	static acceptLayerDrag = (index: i32) => {
 		UINodes.pushUndo();
-		if (Project.layers[index].isGroup()) return;
+		if (SlotLayer.isGroup(Project.layers[index])) return;
 		let g = UINodes.groupStack.length > 0 ? UINodes.groupStack[UINodes.groupStack.length - 1] : null;
-		let n = NodesMaterial.createNode(Context.raw.layer.isMask() ? "LAYER_MASK" : "LAYER", g);
+		let n = NodesMaterial.createNode(SlotLayer.isMask(Context.raw.layer) ? "LAYER_MASK" : "LAYER", g);
 		n.buttons[0].default_value = index;
 		UINodes.getNodes().nodesSelectedId = [n.id];
 	}

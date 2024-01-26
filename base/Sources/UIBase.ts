@@ -119,27 +119,27 @@ class UIBase {
 		if (Project.materials == null) {
 			Project.materials = [];
 			Data.getMaterial("Scene", "Material", (m: MaterialData) => {
-				Project.materials.push(new SlotMaterial(m));
+				Project.materials.push(SlotMaterial.create(m));
 				Context.raw.material = Project.materials[0];
 			});
 		}
 
 		if (Project.brushes == null) {
 			Project.brushes = [];
-			Project.brushes.push(new SlotBrush());
+			Project.brushes.push(SlotBrush.create());
 			Context.raw.brush = Project.brushes[0];
 			MakeMaterial.parseBrush();
 		}
 
 		if (Project.fonts == null) {
 			Project.fonts = [];
-			Project.fonts.push(new SlotFont("default.ttf", Base.font));
+			Project.fonts.push(SlotFont.create("default.ttf", Base.font));
 			Context.raw.font = Project.fonts[0];
 		}
 
 		if (Project.layers == null) {
 			Project.layers = [];
-			Project.layers.push(new SlotLayer());
+			Project.layers.push(SlotLayer.create());
 			Context.raw.layer = Project.layers[0];
 		}
 		///end
@@ -699,7 +699,7 @@ class UIBase {
 		if (Context.raw.tool == WorkspaceTool.ToolParticle && Context.raw.particlePhysics && Context.inPaintArea() && !Context.raw.paint2d) {
 			UtilParticle.initParticlePhysics();
 			let world = PhysicsWorld.active;
-			world.lateUpdate();
+			PhysicsWorld.lateUpdate(world);
 			Context.raw.ddirty = 2;
 			Context.raw.rdirty = 2;
 			if (mouse.started()) {
@@ -723,24 +723,24 @@ class UIBase {
 						mo.transform.scale.set(Context.raw.brushRadius * 0.2, Context.raw.brushRadius * 0.2, Context.raw.brushRadius * 0.2);
 						mo.transform.buildMatrix();
 
-						let body = new PhysicsBody();
+						let body = PhysicsBody.create();
 						body.shape = ShapeType.ShapeSphere;
 						body.mass = 1.0;
 						body.ccd = true;
 						mo.transform.radius /= 10; // Lower ccd radius
-						body.init(mo);
+						PhysicsBody.init(body, mo);
 						mo.addTrait(body);
 						mo.transform.radius *= 10;
 
 						let ray = RayCaster.getRay(mouse.viewX, mouse.viewY, camera);
-						body.applyImpulse(ray.direction.mult(0.15));
+						PhysicsBody.applyImpulse(body, ray.direction.mult(0.15));
 
 						Context.raw.particleTimer = Tween.timer(5, mo.remove);
 					});
 				});
 			}
 
-			let pairs = world.getContactPairs(Context.raw.paintBody);
+			let pairs = PhysicsWorld.getContactPairs(world, Context.raw.paintBody);
 			if (pairs != null) {
 				for (let p of pairs) {
 					Context.raw.lastParticleHitX = Context.raw.particleHitX != 0 ? Context.raw.particleHitX : p.posA.x;
@@ -1084,7 +1084,7 @@ class UIBase {
 			if (Base.pipeMerge == null) Base.makePipe();
 			// Update all layer previews
 			for (let l of Project.layers) {
-				if (l.isGroup()) continue;
+				if (SlotLayer.isGroup(l)) continue;
 				let target = l.texpaint_preview;
 				let source = l.texpaint;
 				let g2 = target.g2;
@@ -1097,7 +1097,7 @@ class UIBase {
 			}
 			UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
 		}
-		if (Context.raw.layerPreviewDirty && !Context.raw.layer.isGroup()) {
+		if (Context.raw.layerPreviewDirty && !SlotLayer.isGroup(Context.raw.layer)) {
 			Context.raw.layerPreviewDirty = false;
 			Context.raw.maskPreviewLast = null;
 			if (Base.pipeMerge == null) Base.makePipe();

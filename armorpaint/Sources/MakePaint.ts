@@ -9,10 +9,10 @@ class MakePaint {
 		///end
 	}
 
-	static run = (data: NodeShaderData, matcon: TMaterialContext): NodeShaderContext => {
+	static run = (data: TMaterial, matcon: TMaterialContext): NodeShaderContextRaw => {
 		let context_id = "paint";
 
-		let con_paint: NodeShaderContext = data.add_context({
+		let con_paint = NodeShaderContext.create(data, {
 			name: context_id,
 			depth_write: false,
 			compare_mode: "always", // TODO: align texcoords winding order
@@ -33,8 +33,8 @@ class MakePaint {
 		con_paint.data.color_writes_alpha = [true, true, true, true];
 		con_paint.allow_vcols = Context.raw.paintObject.data.cols != null;
 
-		let vert = con_paint.make_vert();
-		let frag = con_paint.make_frag();
+		let vert = NodeShaderContext.make_vert(con_paint);
+		let frag = NodeShaderContext.make_frag(con_paint);
 		frag.ins = vert.outs;
 
 		///if (krom_direct3d12 || krom_vulkan || krom_metal)
@@ -42,8 +42,8 @@ class MakePaint {
 			// Init raytraced bake
 			MakeBake.positionAndNormal(vert, frag);
 			con_paint.data.shader_from_source = true;
-			con_paint.data.vertex_shader = vert.get();
-			con_paint.data.fragment_shader = frag.get();
+			con_paint.data.vertex_shader = NodeShader.get(vert);
+			con_paint.data.fragment_shader = NodeShader.get(frag);
 			return con_paint;
 		}
 		///end
@@ -55,8 +55,8 @@ class MakePaint {
 		if (Context.raw.tool == WorkspaceTool.ToolColorId || Context.raw.tool == WorkspaceTool.ToolPicker || Context.raw.tool == WorkspaceTool.ToolMaterial) {
 			MakeColorIdPicker.run(vert, frag);
 			con_paint.data.shader_from_source = true;
-			con_paint.data.vertex_shader = vert.get();
-			con_paint.data.fragment_shader = frag.get();
+			con_paint.data.vertex_shader = NodeShader.get(vert);
+			con_paint.data.fragment_shader = NodeShader.get(frag);
 			return con_paint;
 		}
 
@@ -65,45 +65,45 @@ class MakePaint {
 		let decal = Context.raw.tool == WorkspaceTool.ToolDecal || Context.raw.tool == WorkspaceTool.ToolText;
 
 		///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
-		vert.write('vec2 tpos = vec2(tex.x * 2.0 - 1.0, (1.0 - tex.y) * 2.0 - 1.0);');
+		NodeShader.write(vert, 'vec2 tpos = vec2(tex.x * 2.0 - 1.0, (1.0 - tex.y) * 2.0 - 1.0);');
 		///else
-		vert.write('vec2 tpos = vec2(tex.xy * 2.0 - 1.0);');
+		NodeShader.write(vert, 'vec2 tpos = vec2(tex.xy * 2.0 - 1.0);');
 		///end
 
-		vert.write('gl_Position = vec4(tpos, 0.0, 1.0);');
+		NodeShader.write(vert, 'gl_Position = vec4(tpos, 0.0, 1.0);');
 
 		let decalLayer = Context.raw.layer.fill_layer != null && Context.raw.layer.uvType == UVType.UVProject;
 		if (decalLayer) {
-			vert.add_uniform('mat4 WVP', '_decalLayerMatrix');
+			NodeShader.add_uniform(vert, 'mat4 WVP', '_decalLayerMatrix');
 		}
 		else {
-			vert.add_uniform('mat4 WVP', '_worldViewProjectionMatrix');
+			NodeShader.add_uniform(vert, 'mat4 WVP', '_worldViewProjectionMatrix');
 		}
 
-		vert.add_out('vec4 ndc');
-		vert.write_attrib('ndc = mul(vec4(pos.xyz, 1.0), WVP);');
+		NodeShader.add_out(vert, 'vec4 ndc');
+		NodeShader.write_attrib(vert, 'ndc = mul(vec4(pos.xyz, 1.0), WVP);');
 
-		frag.write_attrib('vec3 sp = vec3((ndc.xyz / ndc.w) * 0.5 + 0.5);');
-		frag.write_attrib('sp.y = 1.0 - sp.y;');
-		frag.write_attrib('sp.z -= 0.0001;'); // small bias
+		NodeShader.write_attrib(frag, 'vec3 sp = vec3((ndc.xyz / ndc.w) * 0.5 + 0.5);');
+		NodeShader.write_attrib(frag, 'sp.y = 1.0 - sp.y;');
+		NodeShader.write_attrib(frag, 'sp.z -= 0.0001;'); // small bias
 
 		let uvType = Context.raw.layer.fill_layer != null ? Context.raw.layer.uvType : Context.raw.brushPaint;
 		if (uvType == UVType.UVProject) frag.ndcpos = true;
 
-		frag.add_uniform('vec4 inp', '_inputBrush');
-		frag.add_uniform('vec4 inplast', '_inputBrushLast');
-		frag.add_uniform('float aspectRatio', '_aspectRatioWindowF');
-		frag.write('vec2 bsp = sp.xy * 2.0 - 1.0;');
-		frag.write('bsp.x *= aspectRatio;');
-		frag.write('bsp = bsp * 0.5 + 0.5;');
+		NodeShader.add_uniform(frag, 'vec4 inp', '_inputBrush');
+		NodeShader.add_uniform(frag, 'vec4 inplast', '_inputBrushLast');
+		NodeShader.add_uniform(frag, 'float aspectRatio', '_aspectRatioWindowF');
+		NodeShader.write(frag, 'vec2 bsp = sp.xy * 2.0 - 1.0;');
+		NodeShader.write(frag, 'bsp.x *= aspectRatio;');
+		NodeShader.write(frag, 'bsp = bsp * 0.5 + 0.5;');
 
-		frag.add_uniform('sampler2D gbufferD');
+		NodeShader.add_uniform(frag, 'sampler2D gbufferD');
 
-		frag.add_out('vec4 fragColor[4]');
+		NodeShader.add_out(frag, 'vec4 fragColor[4]');
 
-		frag.add_uniform('float brushRadius', '_brushRadius');
-		frag.add_uniform('float brushOpacity', '_brushOpacity');
-		frag.add_uniform('float brushHardness', '_brushHardness');
+		NodeShader.add_uniform(frag, 'float brushRadius', '_brushRadius');
+		NodeShader.add_uniform(frag, 'float brushOpacity', '_brushOpacity');
+		NodeShader.add_uniform(frag, 'float brushHardness', '_brushHardness');
 
 		if (Context.raw.tool == WorkspaceTool.ToolBrush  ||
 			Context.raw.tool == WorkspaceTool.ToolEraser ||
@@ -124,42 +124,42 @@ class MakePaint {
 
 			if (depthReject) {
 				///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
-				frag.write('if (sp.z > textureLod(gbufferD, sp.xy, 0.0).r + 0.0005) discard;');
+				NodeShader.write(frag, 'if (sp.z > textureLod(gbufferD, sp.xy, 0.0).r + 0.0005) discard;');
 				///else
-				frag.write('if (sp.z > textureLod(gbufferD, vec2(sp.x, 1.0 - sp.y), 0.0).r + 0.0005) discard;');
+				NodeShader.write(frag, 'if (sp.z > textureLod(gbufferD, vec2(sp.x, 1.0 - sp.y), 0.0).r + 0.0005) discard;');
 				///end
 			}
 
 			MakeBrush.run(vert, frag);
 		}
 		else { // Fill, Bake
-			frag.write('float dist = 0.0;');
+			NodeShader.write(frag, 'float dist = 0.0;');
 			let angleFill = Context.raw.tool == WorkspaceTool.ToolFill && Context.raw.fillTypeHandle.position == FillType.FillAngle;
 			if (angleFill) {
-				frag.add_function(ShaderFunctions.str_octahedronWrap);
-				frag.add_uniform('sampler2D gbuffer0');
-				frag.write('vec2 g0 = textureLod(gbuffer0, inp.xy, 0.0).rg;');
-				frag.write('vec3 wn;');
-				frag.write('wn.z = 1.0 - abs(g0.x) - abs(g0.y);');
-				frag.write('wn.xy = wn.z >= 0.0 ? g0.xy : octahedronWrap(g0.xy);');
-				frag.write('wn = normalize(wn);');
+				NodeShader.add_function(frag, ShaderFunctions.str_octahedronWrap);
+				NodeShader.add_uniform(frag, 'sampler2D gbuffer0');
+				NodeShader.write(frag, 'vec2 g0 = textureLod(gbuffer0, inp.xy, 0.0).rg;');
+				NodeShader.write(frag, 'vec3 wn;');
+				NodeShader.write(frag, 'wn.z = 1.0 - abs(g0.x) - abs(g0.y);');
+				NodeShader.write(frag, 'wn.xy = wn.z >= 0.0 ? g0.xy : octahedronWrap(g0.xy);');
+				NodeShader.write(frag, 'wn = normalize(wn);');
 				frag.n = true;
 				let angle = Context.raw.brushAngleRejectDot;
-				frag.write(`if (dot(wn, n) < ${angle}) discard;`);
+				NodeShader.write(frag, `if (dot(wn, n) < ${angle}) discard;`);
 			}
 			let stencilFill = Context.raw.tool == WorkspaceTool.ToolFill && Context.raw.brushStencilImage != null;
 			if (stencilFill) {
 				///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
-				frag.write('if (sp.z > textureLod(gbufferD, sp.xy, 0.0).r + 0.0005) discard;');
+				NodeShader.write(frag, 'if (sp.z > textureLod(gbufferD, sp.xy, 0.0).r + 0.0005) discard;');
 				///else
-				frag.write('if (sp.z > textureLod(gbufferD, vec2(sp.x, 1.0 - sp.y), 0.0).r + 0.0005) discard;');
+				NodeShader.write(frag, 'if (sp.z > textureLod(gbufferD, vec2(sp.x, 1.0 - sp.y), 0.0).r + 0.0005) discard;');
 				///end
 			}
 		}
 
 		if (Context.raw.colorIdPicked || faceFill || uvIslandFill) {
-			vert.add_out('vec2 texCoordPick');
-			vert.write('texCoordPick = tex;');
+			NodeShader.add_out(vert, 'vec2 texCoordPick');
+			NodeShader.write(vert, 'texCoordPick = tex;');
 			if (Context.raw.colorIdPicked) {
 				MakeDiscard.colorId(vert, frag);
 			}
@@ -178,11 +178,11 @@ class MakePaint {
 		MakeTexcoord.run(vert, frag);
 
 		if (Context.raw.tool == WorkspaceTool.ToolClone || Context.raw.tool == WorkspaceTool.ToolBlur || Context.raw.tool == WorkspaceTool.ToolSmudge) {
-			frag.add_uniform('sampler2D gbuffer2');
-			frag.add_uniform('vec2 gbufferSize', '_gbufferSize');
-			frag.add_uniform('sampler2D texpaint_undo', '_texpaint_undo');
-			frag.add_uniform('sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
-			frag.add_uniform('sampler2D texpaint_pack_undo', '_texpaint_pack_undo');
+			NodeShader.add_uniform(frag, 'sampler2D gbuffer2');
+			NodeShader.add_uniform(frag, 'vec2 gbufferSize', '_gbufferSize');
+			NodeShader.add_uniform(frag, 'sampler2D texpaint_undo', '_texpaint_undo');
+			NodeShader.add_uniform(frag, 'sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
+			NodeShader.add_uniform(frag, 'sampler2D texpaint_pack_undo', '_texpaint_pack_undo');
 
 			if (Context.raw.tool == WorkspaceTool.ToolClone) {
 				MakeClone.run(vert, frag);
@@ -214,22 +214,22 @@ class MakePaint {
 			let opac = sout.out_opacity;
 			let emis = sout.out_emission;
 			let subs = sout.out_subsurface;
-			frag.write(`vec3 basecol = ${base};`);
-			frag.write(`float roughness = ${rough};`);
-			frag.write(`float metallic = ${met};`);
-			frag.write(`float occlusion = ${occ};`);
-			frag.write(`vec3 nortan = ${nortan};`);
-			frag.write(`float height = ${height};`);
-			frag.write(`float mat_opacity = ${opac};`);
-			frag.write('float opacity = mat_opacity;');
+			NodeShader.write(frag, `vec3 basecol = ${base};`);
+			NodeShader.write(frag, `float roughness = ${rough};`);
+			NodeShader.write(frag, `float metallic = ${met};`);
+			NodeShader.write(frag, `float occlusion = ${occ};`);
+			NodeShader.write(frag, `vec3 nortan = ${nortan};`);
+			NodeShader.write(frag, `float height = ${height};`);
+			NodeShader.write(frag, `float mat_opacity = ${opac};`);
+			NodeShader.write(frag, 'float opacity = mat_opacity;');
 			if (Context.raw.layer.fill_layer == null) {
-				frag.write('opacity *= brushOpacity;');
+				NodeShader.write(frag, 'opacity *= brushOpacity;');
 			}
 			if (Context.raw.material.paintEmis) {
-				frag.write(`float emis = ${emis};`);
+				NodeShader.write(frag, `float emis = ${emis};`);
 			}
 			if (Context.raw.material.paintSubs) {
-				frag.write(`float subs = ${subs};`);
+				NodeShader.write(frag, `float subs = ${subs};`);
 			}
 			if (parseFloat(height) != 0.0 && !MakeMaterial.heightUsed) {
 				MakeMaterial.heightUsed = true;
@@ -241,18 +241,18 @@ class MakePaint {
 		}
 
 		if (Context.raw.brushMaskImage != null && Context.raw.tool == WorkspaceTool.ToolDecal) {
-			frag.add_uniform('sampler2D texbrushmask', '_texbrushmask');
-			frag.write('vec4 mask_sample = textureLod(texbrushmask, uvsp, 0.0);');
+			NodeShader.add_uniform(frag, 'sampler2D texbrushmask', '_texbrushmask');
+			NodeShader.write(frag, 'vec4 mask_sample = textureLod(texbrushmask, uvsp, 0.0);');
 			if (Context.raw.brushMaskImageIsAlpha) {
-				frag.write('opacity *= mask_sample.a;');
+				NodeShader.write(frag, 'opacity *= mask_sample.a;');
 			}
 			else {
-				frag.write('opacity *= mask_sample.r * mask_sample.a;');
+				NodeShader.write(frag, 'opacity *= mask_sample.r * mask_sample.a;');
 			}
 		}
 		else if (Context.raw.tool == WorkspaceTool.ToolText) {
-			frag.add_uniform('sampler2D textexttool', '_textexttool');
-			frag.write('opacity *= textureLod(textexttool, uvsp, 0.0).r;');
+			NodeShader.add_uniform(frag, 'sampler2D textexttool', '_textexttool');
+			NodeShader.write(frag, 'opacity *= textureLod(textexttool, uvsp, 0.0).r;');
 		}
 
 		if (Context.raw.brushStencilImage != null && (
@@ -264,124 +264,124 @@ class MakePaint {
 			Context.raw.tool == WorkspaceTool.ToolSmudge   ||
 			Context.raw.tool == WorkspaceTool.ToolParticle ||
 			decal)) {
-			frag.add_uniform('sampler2D texbrushstencil', '_texbrushstencil');
-			frag.add_uniform('vec4 stencilTransform', '_stencilTransform');
-			frag.write('vec2 stencil_uv = vec2((sp.xy - stencilTransform.xy) / stencilTransform.z * vec2(aspectRatio, 1.0));');
-			frag.write('vec2 stencil_size = vec2(textureSize(texbrushstencil, 0));');
-			frag.write('float stencil_ratio = stencil_size.y / stencil_size.x;');
-			frag.write('stencil_uv -= vec2(0.5 / stencil_ratio, 0.5);');
-			frag.write(`stencil_uv = vec2(stencil_uv.x * cos(stencilTransform.w) - stencil_uv.y * sin(stencilTransform.w),
+			NodeShader.add_uniform(frag, 'sampler2D texbrushstencil', '_texbrushstencil');
+			NodeShader.add_uniform(frag, 'vec4 stencilTransform', '_stencilTransform');
+			NodeShader.write(frag, 'vec2 stencil_uv = vec2((sp.xy - stencilTransform.xy) / stencilTransform.z * vec2(aspectRatio, 1.0));');
+			NodeShader.write(frag, 'vec2 stencil_size = vec2(textureSize(texbrushstencil, 0));');
+			NodeShader.write(frag, 'float stencil_ratio = stencil_size.y / stencil_size.x;');
+			NodeShader.write(frag, 'stencil_uv -= vec2(0.5 / stencil_ratio, 0.5);');
+			NodeShader.write(frag, `stencil_uv = vec2(stencil_uv.x * cos(stencilTransform.w) - stencil_uv.y * sin(stencilTransform.w),
 										  stencil_uv.x * sin(stencilTransform.w) + stencil_uv.y * cos(stencilTransform.w));`);
-			frag.write('stencil_uv += vec2(0.5 / stencil_ratio, 0.5);');
-			frag.write('stencil_uv.x *= stencil_ratio;');
-			frag.write('if (stencil_uv.x < 0 || stencil_uv.x > 1 || stencil_uv.y < 0 || stencil_uv.y > 1) discard;');
-			frag.write('vec4 texbrushstencil_sample = textureLod(texbrushstencil, stencil_uv, 0.0);');
+			NodeShader.write(frag, 'stencil_uv += vec2(0.5 / stencil_ratio, 0.5);');
+			NodeShader.write(frag, 'stencil_uv.x *= stencil_ratio;');
+			NodeShader.write(frag, 'if (stencil_uv.x < 0 || stencil_uv.x > 1 || stencil_uv.y < 0 || stencil_uv.y > 1) discard;');
+			NodeShader.write(frag, 'vec4 texbrushstencil_sample = textureLod(texbrushstencil, stencil_uv, 0.0);');
 			if (Context.raw.brushStencilImageIsAlpha) {
-				frag.write('opacity *= texbrushstencil_sample.a;');
+				NodeShader.write(frag, 'opacity *= texbrushstencil_sample.a;');
 			}
 			else {
-				frag.write('opacity *= texbrushstencil_sample.r * texbrushstencil_sample.a;');
+				NodeShader.write(frag, 'opacity *= texbrushstencil_sample.r * texbrushstencil_sample.a;');
 			}
 		}
 
 		if (Context.raw.brushMaskImage != null && (Context.raw.tool == WorkspaceTool.ToolBrush || Context.raw.tool == WorkspaceTool.ToolEraser)) {
-			frag.add_uniform('sampler2D texbrushmask', '_texbrushmask');
-			frag.write('vec2 binp_mask = inp.xy * 2.0 - 1.0;');
-			frag.write('binp_mask.x *= aspectRatio;');
-			frag.write('binp_mask = binp_mask * 0.5 + 0.5;');
-			frag.write('vec2 pa_mask = bsp.xy - binp_mask.xy;');
+			NodeShader.add_uniform(frag, 'sampler2D texbrushmask', '_texbrushmask');
+			NodeShader.write(frag, 'vec2 binp_mask = inp.xy * 2.0 - 1.0;');
+			NodeShader.write(frag, 'binp_mask.x *= aspectRatio;');
+			NodeShader.write(frag, 'binp_mask = binp_mask * 0.5 + 0.5;');
+			NodeShader.write(frag, 'vec2 pa_mask = bsp.xy - binp_mask.xy;');
 			if (Context.raw.brushDirectional) {
-				frag.add_uniform('vec3 brushDirection', '_brushDirection');
-				frag.write('if (brushDirection.z == 0.0) discard;');
-				frag.write('pa_mask = vec2(pa_mask.x * brushDirection.x - pa_mask.y * brushDirection.y, pa_mask.x * brushDirection.y + pa_mask.y * brushDirection.x);');
+				NodeShader.add_uniform(frag, 'vec3 brushDirection', '_brushDirection');
+				NodeShader.write(frag, 'if (brushDirection.z == 0.0) discard;');
+				NodeShader.write(frag, 'pa_mask = vec2(pa_mask.x * brushDirection.x - pa_mask.y * brushDirection.y, pa_mask.x * brushDirection.y + pa_mask.y * brushDirection.x);');
 			}
 			let angle = Context.raw.brushAngle + Context.raw.brushNodesAngle;
 			if (angle != 0.0) {
-				frag.add_uniform('vec2 brushAngle', '_brushAngle');
-				frag.write('pa_mask.xy = vec2(pa_mask.x * brushAngle.x - pa_mask.y * brushAngle.y, pa_mask.x * brushAngle.y + pa_mask.y * brushAngle.x);');
+				NodeShader.add_uniform(frag, 'vec2 brushAngle', '_brushAngle');
+				NodeShader.write(frag, 'pa_mask.xy = vec2(pa_mask.x * brushAngle.x - pa_mask.y * brushAngle.y, pa_mask.x * brushAngle.y + pa_mask.y * brushAngle.x);');
 			}
-			frag.write('pa_mask /= brushRadius;');
+			NodeShader.write(frag, 'pa_mask /= brushRadius;');
 			if (Config.raw.brush_3d) {
-				frag.add_uniform('vec3 eye', '_cameraPosition');
-				frag.write('pa_mask *= distance(eye, winp.xyz) / 1.5;');
+				NodeShader.add_uniform(frag, 'vec3 eye', '_cameraPosition');
+				NodeShader.write(frag, 'pa_mask *= distance(eye, winp.xyz) / 1.5;');
 			}
-			frag.write('pa_mask = pa_mask.xy * 0.5 + 0.5;');
-			frag.write('vec4 mask_sample = textureLod(texbrushmask, pa_mask, 0.0);');
+			NodeShader.write(frag, 'pa_mask = pa_mask.xy * 0.5 + 0.5;');
+			NodeShader.write(frag, 'vec4 mask_sample = textureLod(texbrushmask, pa_mask, 0.0);');
 			if (Context.raw.brushMaskImageIsAlpha) {
-				frag.write('opacity *= mask_sample.a;');
+				NodeShader.write(frag, 'opacity *= mask_sample.a;');
 			}
 			else {
-				frag.write('opacity *= mask_sample.r * mask_sample.a;');
+				NodeShader.write(frag, 'opacity *= mask_sample.r * mask_sample.a;');
 			}
 		}
 
-		frag.write('if (opacity == 0.0) discard;');
+		NodeShader.write(frag, 'if (opacity == 0.0) discard;');
 
 		if (Context.raw.tool == WorkspaceTool.ToolParticle) { // Particle mask
 			MakeParticle.mask(vert, frag);
 		}
 		else { // Brush cursor mask
-			frag.write('float str = clamp((brushRadius - dist) * brushHardness * 400.0, 0.0, 1.0) * opacity;');
+			NodeShader.write(frag, 'float str = clamp((brushRadius - dist) * brushHardness * 400.0, 0.0, 1.0) * opacity;');
 		}
 
 		// Manual blending to preserve memory
 		frag.wvpposition = true;
-		frag.write('vec2 sample_tc = vec2(wvpposition.xy / wvpposition.w) * 0.5 + 0.5;');
+		NodeShader.write(frag, 'vec2 sample_tc = vec2(wvpposition.xy / wvpposition.w) * 0.5 + 0.5;');
 		///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
-		frag.write('sample_tc.y = 1.0 - sample_tc.y;');
+		NodeShader.write(frag, 'sample_tc.y = 1.0 - sample_tc.y;');
 		///end
-		frag.add_uniform('sampler2D paintmask');
-		frag.write('float sample_mask = textureLod(paintmask, sample_tc, 0.0).r;');
-		frag.write('str = max(str, sample_mask);');
-		// frag.write('str = clamp(str + sample_mask, 0.0, 1.0);');
+		NodeShader.add_uniform(frag, 'sampler2D paintmask');
+		NodeShader.write(frag, 'float sample_mask = textureLod(paintmask, sample_tc, 0.0).r;');
+		NodeShader.write(frag, 'str = max(str, sample_mask);');
+		// NodeShader.write(frag, 'str = clamp(str + sample_mask, 0.0, 1.0);');
 
-		frag.add_uniform('sampler2D texpaint_undo', '_texpaint_undo');
-		frag.write('vec4 sample_undo = textureLod(texpaint_undo, sample_tc, 0.0);');
+		NodeShader.add_uniform(frag, 'sampler2D texpaint_undo', '_texpaint_undo');
+		NodeShader.write(frag, 'vec4 sample_undo = textureLod(texpaint_undo, sample_tc, 0.0);');
 
 		let matid = Context.raw.material.id / 255;
 		if (Context.raw.pickerMaskHandle.position == PickerMask.MaskMaterial) {
 			matid = Context.raw.materialIdPicked / 255; // Keep existing material id in place when mask is set
 		}
 		let matidString = ParserMaterial.vec1(matid * 3.0);
-		frag.write(`float matid = ${matidString};`);
+		NodeShader.write(frag, `float matid = ${matidString};`);
 
 		// matid % 3 == 0 - normal, 1 - emission, 2 - subsurface
 		if (Context.raw.material.paintEmis) {
-			frag.write('if (emis > 0.0) {');
-			frag.write('	matid += 1.0 / 255.0;');
-			frag.write('	if (str == 0.0) discard;');
-			frag.write('}');
+			NodeShader.write(frag, 'if (emis > 0.0) {');
+			NodeShader.write(frag, '	matid += 1.0 / 255.0;');
+			NodeShader.write(frag, '	if (str == 0.0) discard;');
+			NodeShader.write(frag, '}');
 		}
 		else if (Context.raw.material.paintSubs) {
-			frag.write('if (subs > 0.0) {');
-			frag.write('    matid += 2.0 / 255.0;');
-			frag.write('	if (str == 0.0) discard;');
-			frag.write('}');
+			NodeShader.write(frag, 'if (subs > 0.0) {');
+			NodeShader.write(frag, '    matid += 2.0 / 255.0;');
+			NodeShader.write(frag, '	if (str == 0.0) discard;');
+			NodeShader.write(frag, '}');
 		}
 
-		let isMask = Context.raw.layer.isMask();
+		let isMask = SlotLayer.isMask(Context.raw.layer);
 		let layered = Context.raw.layer != Project.layers[0];
 		if (layered && !isMask) {
 			if (Context.raw.tool == WorkspaceTool.ToolEraser) {
-				frag.write('fragColor[0] = vec4(mix(sample_undo.rgb, vec3(0.0, 0.0, 0.0), str), sample_undo.a - str);');
-				frag.write('nortan = vec3(0.5, 0.5, 1.0);');
-				frag.write('occlusion = 1.0;');
-				frag.write('roughness = 0.0;');
-				frag.write('metallic = 0.0;');
-				frag.write('matid = 0.0;');
+				NodeShader.write(frag, 'fragColor[0] = vec4(mix(sample_undo.rgb, vec3(0.0, 0.0, 0.0), str), sample_undo.a - str);');
+				NodeShader.write(frag, 'nortan = vec3(0.5, 0.5, 1.0);');
+				NodeShader.write(frag, 'occlusion = 1.0;');
+				NodeShader.write(frag, 'roughness = 0.0;');
+				NodeShader.write(frag, 'metallic = 0.0;');
+				NodeShader.write(frag, 'matid = 0.0;');
 			}
 			else if (Context.raw.tool == WorkspaceTool.ToolParticle || decal || Context.raw.brushMaskImage != null) {
-				frag.write('fragColor[0] = vec4(' + MakeMaterial.blendMode(frag, Context.raw.brushBlending, 'sample_undo.rgb', 'basecol', 'str') + ', max(str, sample_undo.a));');
+				NodeShader.write(frag, 'fragColor[0] = vec4(' + MakeMaterial.blendMode(frag, Context.raw.brushBlending, 'sample_undo.rgb', 'basecol', 'str') + ', max(str, sample_undo.a));');
 			}
 			else {
 				if (Context.raw.layer.fill_layer != null) {
-					frag.write('fragColor[0] = vec4(' + MakeMaterial.blendMode(frag, Context.raw.brushBlending, 'sample_undo.rgb', 'basecol', 'opacity') + ', mat_opacity);');
+					NodeShader.write(frag, 'fragColor[0] = vec4(' + MakeMaterial.blendMode(frag, Context.raw.brushBlending, 'sample_undo.rgb', 'basecol', 'opacity') + ', mat_opacity);');
 				}
 				else {
-					frag.write('fragColor[0] = vec4(' + MakeMaterial.blendMode(frag, Context.raw.brushBlending, 'sample_undo.rgb', 'basecol', 'opacity') + ', max(str, sample_undo.a));');
+					NodeShader.write(frag, 'fragColor[0] = vec4(' + MakeMaterial.blendMode(frag, Context.raw.brushBlending, 'sample_undo.rgb', 'basecol', 'opacity') + ', max(str, sample_undo.a));');
 				}
 			}
-			frag.write('fragColor[1] = vec4(nortan, matid);');
+			NodeShader.write(frag, 'fragColor[1] = vec4(nortan, matid);');
 
 			let height = "0.0";
 			if (Context.raw.material.paintHeight && MakeMaterial.heightUsed) {
@@ -389,36 +389,36 @@ class MakePaint {
 			}
 
 			if (decal) {
-				frag.add_uniform('sampler2D texpaint_pack_undo', '_texpaint_pack_undo');
-				frag.write('vec4 sample_pack_undo = textureLod(texpaint_pack_undo, sample_tc, 0.0);');
-				frag.write(`fragColor[2] = mix(sample_pack_undo, vec4(occlusion, roughness, metallic, ${height}), str);`);
+				NodeShader.add_uniform(frag, 'sampler2D texpaint_pack_undo', '_texpaint_pack_undo');
+				NodeShader.write(frag, 'vec4 sample_pack_undo = textureLod(texpaint_pack_undo, sample_tc, 0.0);');
+				NodeShader.write(frag, `fragColor[2] = mix(sample_pack_undo, vec4(occlusion, roughness, metallic, ${height}), str);`);
 			}
 			else {
-				frag.write(`fragColor[2] = vec4(occlusion, roughness, metallic, ${height});`);
+				NodeShader.write(frag, `fragColor[2] = vec4(occlusion, roughness, metallic, ${height});`);
 			}
 		}
 		else {
 			if (Context.raw.tool == WorkspaceTool.ToolEraser) {
-				frag.write('fragColor[0] = vec4(mix(sample_undo.rgb, vec3(0.0, 0.0, 0.0), str), sample_undo.a - str);');
-				frag.write('fragColor[1] = vec4(0.5, 0.5, 1.0, 0.0);');
-				frag.write('fragColor[2] = vec4(1.0, 0.0, 0.0, 0.0);');
+				NodeShader.write(frag, 'fragColor[0] = vec4(mix(sample_undo.rgb, vec3(0.0, 0.0, 0.0), str), sample_undo.a - str);');
+				NodeShader.write(frag, 'fragColor[1] = vec4(0.5, 0.5, 1.0, 0.0);');
+				NodeShader.write(frag, 'fragColor[2] = vec4(1.0, 0.0, 0.0, 0.0);');
 			}
 			else {
-				frag.add_uniform('sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
-				frag.add_uniform('sampler2D texpaint_pack_undo', '_texpaint_pack_undo');
-				frag.write('vec4 sample_nor_undo = textureLod(texpaint_nor_undo, sample_tc, 0.0);');
-				frag.write('vec4 sample_pack_undo = textureLod(texpaint_pack_undo, sample_tc, 0.0);');
-				frag.write('fragColor[0] = vec4(' + MakeMaterial.blendMode(frag, Context.raw.brushBlending, 'sample_undo.rgb', 'basecol', 'str') + ', max(str, sample_undo.a));');
-				frag.write('fragColor[1] = vec4(mix(sample_nor_undo.rgb, nortan, str), matid);');
+				NodeShader.add_uniform(frag, 'sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
+				NodeShader.add_uniform(frag, 'sampler2D texpaint_pack_undo', '_texpaint_pack_undo');
+				NodeShader.write(frag, 'vec4 sample_nor_undo = textureLod(texpaint_nor_undo, sample_tc, 0.0);');
+				NodeShader.write(frag, 'vec4 sample_pack_undo = textureLod(texpaint_pack_undo, sample_tc, 0.0);');
+				NodeShader.write(frag, 'fragColor[0] = vec4(' + MakeMaterial.blendMode(frag, Context.raw.brushBlending, 'sample_undo.rgb', 'basecol', 'str') + ', max(str, sample_undo.a));');
+				NodeShader.write(frag, 'fragColor[1] = vec4(mix(sample_nor_undo.rgb, nortan, str), matid);');
 				if (Context.raw.material.paintHeight && MakeMaterial.heightUsed) {
-					frag.write('fragColor[2] = mix(sample_pack_undo, vec4(occlusion, roughness, metallic, height), str);');
+					NodeShader.write(frag, 'fragColor[2] = mix(sample_pack_undo, vec4(occlusion, roughness, metallic, height), str);');
 				}
 				else {
-					frag.write('fragColor[2] = vec4(mix(sample_pack_undo.rgb, vec3(occlusion, roughness, metallic), str), 0.0);');
+					NodeShader.write(frag, 'fragColor[2] = vec4(mix(sample_pack_undo.rgb, vec3(occlusion, roughness, metallic), str), 0.0);');
 				}
 			}
 		}
-		frag.write('fragColor[3] = vec4(str, 0.0, 0.0, 1.0);');
+		NodeShader.write(frag, 'fragColor[3] = vec4(str, 0.0, 0.0, 1.0);');
 
 		if (!Context.raw.material.paintBase) {
 			con_paint.data.color_writes_red[0] = false;
@@ -449,7 +449,7 @@ class MakePaint {
 		// Base color only as mask
 		if (isMask) {
 			// TODO: Apply opacity into base
-			// frag.write('fragColor[0].rgb *= fragColor[0].a;');
+			// NodeShader.write(frag, 'fragColor[0].rgb *= fragColor[0].a;');
 			con_paint.data.color_writes_green[0] = false;
 			con_paint.data.color_writes_blue[0] = false;
 			con_paint.data.color_writes_alpha[0] = false;
@@ -471,8 +471,8 @@ class MakePaint {
 		ParserMaterial.triplanar = false;
 		ParserMaterial.sample_keep_aspect = false;
 		con_paint.data.shader_from_source = true;
-		con_paint.data.vertex_shader = vert.get();
-		con_paint.data.fragment_shader = frag.get();
+		con_paint.data.vertex_shader = NodeShader.get(vert);
+		con_paint.data.fragment_shader = NodeShader.get(frag);
 
 		return con_paint;
 	}

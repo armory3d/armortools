@@ -273,12 +273,12 @@ class BoxPreferences {
 
 					///if (is_paint || is_sculpt)
 					while (History.undoLayers.length < Config.raw.undo_steps) {
-						let l = new SlotLayer("_undo" + History.undoLayers.length);
+						let l = SlotLayer.create("_undo" + History.undoLayers.length);
 						History.undoLayers.push(l);
 					}
 					while (History.undoLayers.length > Config.raw.undo_steps) {
 						let l = History.undoLayers.pop();
-						l.unload();
+						SlotLayer.unload(l);
 					}
 					///end
 
@@ -565,8 +565,8 @@ class BoxPreferences {
 							let pluginName = ui.textInput(Zui.handle("boxpreferences_55", { text: "new_plugin" }), tr("Name"));
 							if (ui.button(tr("OK")) || ui.isReturnDown) {
 								let template =
-`let plugin = new arm.Plugin();
-let h1 = new zui.Handle();
+`let plugin = Plugin.create();
+let h1 = new Handle();
 plugin.drawUI = (ui) { =>
 	if (ui.panel(h1, 'New Plugin')) {
 		if (ui.button('Button')) {

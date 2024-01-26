@@ -1,39 +1,39 @@
 
 class MakeBrush {
 
-	static run = (vert: NodeShader, frag: NodeShader) => {
+	static run = (vert: NodeShaderRaw, frag: NodeShaderRaw) => {
 
-		frag.write('float dist = 0.0;');
+		NodeShader.write(frag, 'float dist = 0.0;');
 
 		if (Config.raw.brush_3d) {
 			///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
-			frag.write('float depth = textureLod(gbufferD, inp.xy, 0.0).r;');
+			NodeShader.write(frag, 'float depth = textureLod(gbufferD, inp.xy, 0.0).r;');
 			///else
-			frag.write('float depth = textureLod(gbufferD, vec2(inp.x, 1.0 - inp.y), 0.0).r;');
+			NodeShader.write(frag, 'float depth = textureLod(gbufferD, vec2(inp.x, 1.0 - inp.y), 0.0).r;');
 			///end
 
-			frag.add_uniform('mat4 invVP', '_inverseViewProjectionMatrix');
-			frag.write('vec4 winp = vec4(vec2(inp.x, 1.0 - inp.y) * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);');
-			frag.write('winp = mul(winp, invVP);');
-			frag.write('winp.xyz /= winp.w;');
+			NodeShader.add_uniform(frag, 'mat4 invVP', '_inverseViewProjectionMatrix');
+			NodeShader.write(frag, 'vec4 winp = vec4(vec2(inp.x, 1.0 - inp.y) * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);');
+			NodeShader.write(frag, 'winp = mul(winp, invVP);');
+			NodeShader.write(frag, 'winp.xyz /= winp.w;');
 
-			frag.add_uniform('mat4 W', '_worldMatrix');
+			NodeShader.add_uniform(frag, 'mat4 W', '_worldMatrix');
 
-			frag.write_attrib('vec3 wposition = mul(texelFetch(texpaint_undo, ivec2(texCoord.x * textureSize(texpaint_undo, 0).x, texCoord.y * textureSize(texpaint_undo, 0).y), 0), W).xyz;');
+			NodeShader.write_attrib(frag, 'vec3 wposition = mul(texelFetch(texpaint_undo, ivec2(texCoord.x * textureSize(texpaint_undo, 0).x, texCoord.y * textureSize(texpaint_undo, 0).y), 0), W).xyz;');
 
 			///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
-			frag.write('float depthlast = textureLod(gbufferD, inplast.xy, 0.0).r;');
+			NodeShader.write(frag, 'float depthlast = textureLod(gbufferD, inplast.xy, 0.0).r;');
 			///else
-			frag.write('float depthlast = textureLod(gbufferD, vec2(inplast.x, 1.0 - inplast.y), 0.0).r;');
+			NodeShader.write(frag, 'float depthlast = textureLod(gbufferD, vec2(inplast.x, 1.0 - inplast.y), 0.0).r;');
 			///end
 
-			frag.write('vec4 winplast = vec4(vec2(inplast.x, 1.0 - inplast.y) * 2.0 - 1.0, depthlast * 2.0 - 1.0, 1.0);');
-			frag.write('winplast = mul(winplast, invVP);');
-			frag.write('winplast.xyz /= winplast.w;');
+			NodeShader.write(frag, 'vec4 winplast = vec4(vec2(inplast.x, 1.0 - inplast.y) * 2.0 - 1.0, depthlast * 2.0 - 1.0, 1.0);');
+			NodeShader.write(frag, 'winplast = mul(winplast, invVP);');
+			NodeShader.write(frag, 'winplast.xyz /= winplast.w;');
 
-			frag.write('dist = distance(wposition, winp.xyz);');
+			NodeShader.write(frag, 'dist = distance(wposition, winp.xyz);');
 		}
 
-		frag.write('if (dist > brushRadius) discard;');
+		NodeShader.write(frag, 'if (dist > brushRadius) discard;');
 	}
 }

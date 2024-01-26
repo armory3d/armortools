@@ -1,16 +1,20 @@
 
-class NodeShaderContext {
-	vert: NodeShader;
-	frag: NodeShader;
+class NodeShaderContextRaw {
+	vert: NodeShaderRaw;
+	frag: NodeShaderRaw;
 	data: TShaderContext;
 	allow_vcols = false;
 	material: TMaterial;
 	constants: TShaderConstant[];
 	tunits: TTextureUnit[];
+}
 
-	constructor(material: TMaterial, props: any) {
-		this.material = material;
-		this.data = {
+class NodeShaderContext {
+
+	static create(material: TMaterial, props: any): NodeShaderContextRaw {
+		let raw = new NodeShaderContextRaw();
+		raw.material = material;
+		raw.data = {
 			name: props.name,
 			depth_write: props.depth_write,
 			compare_mode: props.compare_mode,
@@ -29,32 +33,33 @@ class NodeShaderContext {
 		};
 
 		if (props.color_writes_red != null) {
-			this.data.color_writes_red = props.color_writes_red;
+			raw.data.color_writes_red = props.color_writes_red;
 		}
 		if (props.color_writes_green != null) {
-			this.data.color_writes_green = props.color_writes_green;
+			raw.data.color_writes_green = props.color_writes_green;
 		}
 		if (props.color_writes_blue != null) {
-			this.data.color_writes_blue = props.color_writes_blue;
+			raw.data.color_writes_blue = props.color_writes_blue;
 		}
 		if (props.color_writes_alpha != null) {
-			this.data.color_writes_alpha = props.color_writes_alpha;
+			raw.data.color_writes_alpha = props.color_writes_alpha;
 		}
 
-		this.tunits = this.data.texture_units = [];
-		this.constants = this.data.constants = [];
+		raw.tunits = raw.data.texture_units = [];
+		raw.constants = raw.data.constants = [];
+		return raw;
 	}
 
-	add_elem = (name: string, data_type: string) => {
-		for (let e of this.data.vertex_elements) {
+	static add_elem = (raw: NodeShaderContextRaw, name: string, data_type: string) => {
+		for (let e of raw.data.vertex_elements) {
 			if (e.name == name) return;
 		}
 		let elem: TVertexElement = { name: name, data: data_type };
-		this.data.vertex_elements.push(elem);
+		raw.data.vertex_elements.push(elem);
 	}
 
-	is_elem = (name: string): bool => {
-		for (let elem of this.data.vertex_elements) {
+	static is_elem = (raw: NodeShaderContextRaw, name: string): bool => {
+		for (let elem of raw.data.vertex_elements) {
 			if (elem.name == name) {
 				return true;
 			}
@@ -62,8 +67,8 @@ class NodeShaderContext {
 		return false;
 	}
 
-	get_elem = (name: string): TVertexElement => {
-		for (let elem of this.data.vertex_elements) {
+	static get_elem = (raw: NodeShaderContextRaw, name: string): TVertexElement => {
+		for (let elem of raw.data.vertex_elements) {
 			if (elem.name == name) {
 				return elem;
 			}
@@ -71,8 +76,8 @@ class NodeShaderContext {
 		return null;
 	}
 
-	add_constant = (ctype: string, name: string, link: string = null) => {
-		for (let c of this.constants) {
+	static add_constant = (raw: NodeShaderContextRaw, ctype: string, name: string, link: string = null) => {
+		for (let c of raw.constants) {
 			if (c.name == name) {
 				return;
 			}
@@ -82,11 +87,11 @@ class NodeShaderContext {
 		if (link != null) {
 			c.link = link;
 		}
-		this.constants.push(c);
+		raw.constants.push(c);
 	}
 
-	add_texture_unit = (ctype: string, name: string, link: string = null, is_image = false) => {
-		for (let c of this.tunits) {
+	static add_texture_unit = (raw: NodeShaderContextRaw, ctype: string, name: string, link: string = null, is_image = false) => {
+		for (let c of raw.tunits) {
 			if (c.name == name) {
 				return;
 			}
@@ -99,18 +104,23 @@ class NodeShaderContext {
 		if (is_image) {
 			c.is_image = is_image;
 		}
-		this.tunits.push(c);
+		raw.tunits.push(c);
 	}
 
-	make_vert = (): NodeShader => {
-		this.data.vertex_shader = this.material.name + '_' + this.data.name + '.vert';
-		this.vert = new NodeShader(this, 'vert');
-		return this.vert;
+	static make_vert = (raw: NodeShaderContextRaw): NodeShaderRaw => {
+		raw.data.vertex_shader = raw.material.name + '_' + raw.data.name + '.vert';
+		raw.vert = NodeShader.create(raw, 'vert');
+		return raw.vert;
 	}
 
-	make_frag = (): NodeShader => {
-		this.data.fragment_shader = this.material.name + '_' + this.data.name + '.frag';
-		this.frag = new NodeShader(this, 'frag');
-		return this.frag;
+	static make_frag = (raw: NodeShaderContextRaw): NodeShaderRaw => {
+		raw.data.fragment_shader = raw.material.name + '_' + raw.data.name + '.frag';
+		raw.frag = NodeShader.create(raw, 'frag');
+		return raw.frag;
 	}
+}
+
+type TMaterial = {
+	name: string;
+	canvas: TNodeCanvas;
 }

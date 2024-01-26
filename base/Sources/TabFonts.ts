@@ -135,7 +135,7 @@ class TabFonts {
 		}
 	}
 
-	static deleteFont = (font: SlotFont) => {
+	static deleteFont = (font: SlotFontRaw) => {
 		let i = Project.fonts.indexOf(font);
 		let _init = () => {
 			Context.selectFont(i == Project.fonts.length - 1 ? i - 1 : i + 1);

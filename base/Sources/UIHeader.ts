@@ -76,7 +76,7 @@ class UIHeader {
 			}
 			ui.enabled = Context.raw.colorIdPicked;
 			if (ui.button(tr("To Mask"))) {
-				if (Context.raw.layer.isMask()) Context.setLayer(Context.raw.layer.parent);
+				if (SlotLayer.isMask(Context.raw.layer)) Context.setLayer(Context.raw.layer.parent);
 				let m = Base.newMask(false, Context.raw.layer);
 				let _next = () => {
 					if (Base.pipeMerge == null) Base.makePipe();

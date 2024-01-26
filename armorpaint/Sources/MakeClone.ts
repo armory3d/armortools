@@ -1,15 +1,15 @@
 
 class MakeClone {
 
-	static run = (vert: NodeShader, frag: NodeShader) => {
-		frag.add_uniform('vec2 cloneDelta', '_cloneDelta');
+	static run = (vert: NodeShaderRaw, frag: NodeShaderRaw) => {
+		NodeShader.add_uniform(frag, 'vec2 cloneDelta', '_cloneDelta');
 		///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
-		frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.xy + cloneDelta) * gbufferSize), 0).ba;');
+		NodeShader.write(frag, 'vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.xy + cloneDelta) * gbufferSize), 0).ba;');
 		///else
-		frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.x + cloneDelta.x) * gbufferSize.x, (1.0 - (sp.y + cloneDelta.y)) * gbufferSize.y), 0).ba;');
+		NodeShader.write(frag, 'vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.x + cloneDelta.x) * gbufferSize.x, (1.0 - (sp.y + cloneDelta.y)) * gbufferSize.y), 0).ba;');
 		///end
 
-		frag.write('vec3 texpaint_pack_sample = textureLod(texpaint_pack_undo, texCoordInp, 0.0).rgb;');
+		NodeShader.write(frag, 'vec3 texpaint_pack_sample = textureLod(texpaint_pack_undo, texCoordInp, 0.0).rgb;');
 		let base = 'textureLod(texpaint_undo, texCoordInp, 0.0).rgb';
 		let rough = 'texpaint_pack_sample.g';
 		let met = 'texpaint_pack_sample.b';
@@ -17,19 +17,19 @@ class MakeClone {
 		let nortan = 'textureLod(texpaint_nor_undo, texCoordInp, 0.0).rgb';
 		let height = '0.0';
 		let opac = '1.0';
-		frag.write(`vec3 basecol = ${base};`);
-		frag.write(`float roughness = ${rough};`);
-		frag.write(`float metallic = ${met};`);
-		frag.write(`float occlusion = ${occ};`);
-		frag.write(`vec3 nortan = ${nortan};`);
-		frag.write(`float height = ${height};`);
-		frag.write(`float mat_opacity = ${opac};`);
-		frag.write('float opacity = mat_opacity * brushOpacity;');
+		NodeShader.write(frag, `vec3 basecol = ${base};`);
+		NodeShader.write(frag, `float roughness = ${rough};`);
+		NodeShader.write(frag, `float metallic = ${met};`);
+		NodeShader.write(frag, `float occlusion = ${occ};`);
+		NodeShader.write(frag, `vec3 nortan = ${nortan};`);
+		NodeShader.write(frag, `float height = ${height};`);
+		NodeShader.write(frag, `float mat_opacity = ${opac};`);
+		NodeShader.write(frag, 'float opacity = mat_opacity * brushOpacity;');
 		if (Context.raw.material.paintEmis) {
-			frag.write('float emis = 0.0;');
+			NodeShader.write(frag, 'float emis = 0.0;');
 		}
 		if (Context.raw.material.paintSubs) {
-			frag.write('float subs = 0.0;');
+			NodeShader.write(frag, 'float subs = 0.0;');
 		}
 	}
 }

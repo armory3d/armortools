@@ -156,22 +156,22 @@ class UIView2D {
 					layer = Base.flatten();
 					if (current != null) current.begin(false);
 				}
-				else if (layer.isGroup()) {
+				else if (SlotLayer.isGroup(layer)) {
 					let current = Graphics2.current;
 					if (current != null) current.end();
-					layer = Base.flatten(false, layer.getChildren());
+					layer = Base.flatten(false, SlotLayer.getChildren(layer));
 					if (current != null) current.begin(false);
 				}
 
 				tex =
-					Context.raw.layer.isMask() ? layer.texpaint :
+					SlotLayer.isMask(Context.raw.layer) ? layer.texpaint :
 					UIView2D.texType == PaintTex.TexBase     ? layer.texpaint :
 					UIView2D.texType == PaintTex.TexOpacity  ? layer.texpaint :
 					UIView2D.texType == PaintTex.TexNormal   ? layer.texpaint_nor :
 														   layer.texpaint_pack;
 
 				channel =
-					Context.raw.layer.isMask()  ? 1 :
+					SlotLayer.isMask(Context.raw.layer)  ? 1 :
 					UIView2D.texType == PaintTex.TexOcclusion ? 1 :
 					UIView2D.texType == PaintTex.TexRoughness ? 2 :
 					UIView2D.texType == PaintTex.TexMetallic  ? 3 :
@@ -336,7 +336,7 @@ class UIView2D {
 				UIView2D.ui._x += ew + 3;
 				UIView2D.ui._y = 2 + startY;
 
-				if (!Context.raw.layer.isMask()) {
+				if (!SlotLayer.isMask(Context.raw.layer)) {
 					UIView2D.texType = UIView2D.ui.combo(Zui.handle("uiview2d_3", { position: UIView2D.texType }), [
 						tr("Base Color"),
 						tr("Normal Map"),

@@ -1,9 +1,5 @@
 
-class Plugin {
-
-	static plugins: Map<string, Plugin> = new Map();
-	static pluginName: string;
-
+class PluginRaw {
 	drawUI: (ui: Zui)=>void = null;
 	draw: ()=>void = null;
 	update: ()=>void = null;
@@ -11,10 +7,18 @@ class Plugin {
 	version = "0.1";
 	apiversion = "0.1";
 	name: string;
+}
 
-	constructor() {
-		this.name = Plugin.pluginName;
-		Plugin.plugins.set(this.name, this);
+class Plugin {
+
+	static plugins: Map<string, PluginRaw> = new Map();
+	static pluginName: string;
+
+	static create(): PluginRaw {
+		let p = new PluginRaw();
+		p.name = Plugin.pluginName;
+		Plugin.plugins.set(p.name, p);
+		return p;
 	}
 
 	static start = (plugin: string) => {
@@ -37,15 +41,4 @@ class Plugin {
 		if (p != null && p.delete != null) p.delete();
 		Plugin.plugins.delete(plugin);
 	}
-}
-
-class CoreBridge {
-	static colorFromFloats = (r: f32, g: f32, b: f32, a: f32): Color => {
-		return color_from_floats(r, g, b, a);
-	}
-}
-
-class ConsoleBridge {
-	static log = Console.log;
-	static error = Console.error;
 }

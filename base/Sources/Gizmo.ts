@@ -83,7 +83,7 @@ class Gizmo {
 
 				paintObject.transform.buildMatrix();
 				///if arm_physics
-				let pb = paintObject.getTrait(PhysicsBody);
+				let pb = paintObject.getTrait(PhysicsBodyRaw);
 				if (pb != null) pb.syncTransform();
 				///end
 			}

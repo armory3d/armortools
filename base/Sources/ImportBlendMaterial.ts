@@ -15,11 +15,11 @@ class ImportBlendMaterial {
 				return;
 			}
 
-			let imported: SlotMaterial[] = [];
+			let imported: SlotMaterialRaw[] = [];
 
 			for (let mat of mats) {
 				// Material slot
-				Context.raw.material = new SlotMaterial(Project.materials[0].data);
+				Context.raw.material = SlotMaterial.create(Project.materials[0].data);
 				Project.materials.push(Context.raw.material);
 				imported.push(Context.raw.material);
 				let nodes = Context.raw.material.nodes;

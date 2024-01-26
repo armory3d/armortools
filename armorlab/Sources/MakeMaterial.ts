@@ -17,7 +17,7 @@ class MakeMaterial {
 			}
 		}
 
-		let con = MakeMesh.run(new NodeShaderData({ name: "Material", canvas: null }));
+		let con = MakeMesh.run({ name: "Material", canvas: null });
 		let scon = new ShaderContext(con.data, (scon: ShaderContext) => {});
 		scon.overrideContext = {};
 		if (con.frag.sharedSamplers.length > 0) {
@@ -78,7 +78,7 @@ class MakeMaterial {
 			}
 		}
 
-		let sdata = new NodeShaderData({ name: "Material", canvas: null });
+		let sdata: TMaterial = { name: "Material", canvas: null };
 		let mcon: TMaterialContext = { name: "paint", bind_textures: [] };
 		let con = MakePaint.run(sdata, mcon);
 

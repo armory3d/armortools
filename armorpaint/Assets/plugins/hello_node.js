@@ -1,5 +1,5 @@
 
-let plugin = new Plugin();
+let plugin = Plugin.create();
 
 let categoryName = "My Nodes";
 let nodeName = "Hello World";
@@ -59,7 +59,7 @@ ParserMaterial.customNodes.set(nodeType, function(node, socket) {
 	let scale = ParserMaterial.parse_value_input(node.inputs[0]);
 	let my_out = ParserMaterial.node_name(node) + "_out";
 
-	frag.write(`
+	NodeShader.write(frag, `
 		float ${my_out} = cos(sin(texCoord.x * 200.0 * ${scale}) + cos(texCoord.y * 200.0 * ${scale}));
 	`);
 

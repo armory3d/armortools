@@ -95,12 +95,12 @@ class TabLayers {
 					Base.createFillLayer(UVType.UVProject);
 				}
 				if (UIMenu.menuButton(ui, tr("Black Mask"))) {
-					if (l.isMask()) Context.setLayer(l.parent);
+					if (SlotLayer.isMask(l)) Context.setLayer(l.parent);
 					// let l = Context.raw.layer;
 
 					let m = Base.newMask(false, l);
 					let _next = () => {
-						m.clear(0x00000000);
+						SlotLayer.clear(m, 0x00000000);
 					}
 					Base.notifyOnNextFrame(_next);
 					Context.raw.layerPreviewDirty = true;
@@ -108,12 +108,12 @@ class TabLayers {
 					Base.updateFillLayers();
 				}
 				if (UIMenu.menuButton(ui, tr("White Mask"))) {
-					if (l.isMask()) Context.setLayer(l.parent);
+					if (SlotLayer.isMask(l)) Context.setLayer(l.parent);
 					// let l = Context.raw.layer;
 
 					let m = Base.newMask(false, l);
 					let _next = () => {
-						m.clear(0xffffffff);
+						SlotLayer.clear(m, 0xffffffff);
 					}
 					Base.notifyOnNextFrame(_next);
 					Context.raw.layerPreviewDirty = true;
@@ -121,23 +121,23 @@ class TabLayers {
 					Base.updateFillLayers();
 				}
 				if (UIMenu.menuButton(ui, tr("Fill Mask"))) {
-					if (l.isMask()) Context.setLayer(l.parent);
+					if (SlotLayer.isMask(l)) Context.setLayer(l.parent);
 					// let l = Context.raw.layer;
 
 					let m = Base.newMask(false, l);
 					let _init = () => {
-						m.toFillLayer();
+						SlotLayer.toFillLayer(m);
 					}
 					App.notifyOnInit(_init);
 					Context.raw.layerPreviewDirty = true;
 					History.newFillMask();
 					Base.updateFillLayers();
 				}
-				ui.enabled = !Context.raw.layer.isGroup() && !Context.raw.layer.isInGroup();
+				ui.enabled = !SlotLayer.isGroup(Context.raw.layer) && !SlotLayer.isInGroup(Context.raw.layer);
 				if (UIMenu.menuButton(ui, tr("Group"))) {
-					if (l.isGroup() || l.isInGroup()) return;
+					if (SlotLayer.isGroup(l) || SlotLayer.isInGroup(l)) return;
 
-					if (l.isLayerMask()) l = l.parent;
+					if (SlotLayer.isLayerMask(l)) l = l.parent;
 
 					let pointers = TabLayers.initLayerMap();
 					let group = Base.newGroup();
@@ -195,31 +195,31 @@ class TabLayers {
 		}
 	}
 
-	static initLayerMap = (): Map<SlotLayer, i32> => {
-		let res: Map<SlotLayer, i32> = new Map();
+	static initLayerMap = (): Map<SlotLayerRaw, i32> => {
+		let res: Map<SlotLayerRaw, i32> = new Map();
 		for (let i = 0; i < Project.layers.length; ++i) res.set(Project.layers[i], i);
 		return res;
 	}
 
-	static fillLayerMap = (map: Map<SlotLayer, i32>): Map<i32, i32> => {
+	static fillLayerMap = (map: Map<SlotLayerRaw, i32>): Map<i32, i32> => {
 		let res: Map<i32, i32> = new Map();
 		for (let l of map.keys()) res.set(map.get(l), Project.layers.indexOf(l) > -1 ? Project.layers.indexOf(l) : 9999);
 		return res;
 	}
 
-	static setDragLayer = (layer: SlotLayer, offX: f32, offY: f32) => {
+	static setDragLayer = (layer: SlotLayerRaw, offX: f32, offY: f32) => {
 		Base.dragOffX = offX;
 		Base.dragOffY = offY;
 		Base.dragLayer = layer;
 		Context.raw.dragDestination = Project.layers.indexOf(layer);
 	}
 
-	static drawLayerSlot = (l: SlotLayer, i: i32, mini: bool) => {
+	static drawLayerSlot = (l: SlotLayerRaw, i: i32, mini: bool) => {
 		let ui = UIBase.ui;
 
 		if (Context.raw.layerFilter > 0 &&
-			l.getObjectMask() > 0 &&
-			l.getObjectMask() != Context.raw.layerFilter) {
+			SlotLayer.getObjectMask(l) > 0 &&
+			SlotLayer.getObjectMask(l) != Context.raw.layerFilter) {
 			return;
 		}
 
@@ -244,16 +244,16 @@ class TabLayers {
 				let ls = Project.layers;
 				let dest = Context.raw.dragDestination;
 				let toGroup = down ? dest > 0 && ls[dest - 1].parent != null && ls[dest - 1].parent.show_panel : dest < ls.length && ls[dest].parent != null && ls[dest].parent.show_panel;
-				let nestedGroup = Base.dragLayer.isGroup() && toGroup;
+				let nestedGroup = SlotLayer.isGroup(Base.dragLayer) && toGroup;
 				if (!nestedGroup) {
-					if (Context.raw.layer.canMove(Context.raw.dragDestination)) {
+					if (SlotLayer.canMove(Context.raw.layer, Context.raw.dragDestination)) {
 						ui.fill(checkw, step * 2, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
 					}
 				}
 			}
 			else if (i == Project.layers.length - 1 && mouse.y < absy + step) {
 				Context.raw.dragDestination = Project.layers.length - 1;
-				if (Context.raw.layer.canMove(Context.raw.dragDestination)) {
+				if (SlotLayer.canMove(Context.raw.layer, Context.raw.dragDestination)) {
 					ui.fill(checkw, 0, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
 				}
 			}
@@ -280,7 +280,7 @@ class TabLayers {
 		}
 	}
 
-	static drawLayerSlotMini = (l: SlotLayer, i: i32) => {
+	static drawLayerSlotMini = (l: SlotLayerRaw, i: i32) => {
 		let ui = UIBase.ui;
 
 		ui.row([1, 1]);
@@ -294,12 +294,12 @@ class TabLayers {
 		ui._y -= ui.ELEMENT_OFFSET();
 	}
 
-	static drawLayerSlotFull = (l: SlotLayer, i: i32) => {
+	static drawLayerSlotFull = (l: SlotLayerRaw, i: i32) => {
 		let ui = UIBase.ui;
 
 		let step = ui.t.ELEMENT_H;
 
-		let hasPanel = l.isGroup() || (l.isLayer() && l.getMasks(false) != null);
+		let hasPanel = SlotLayer.isGroup(l) || (SlotLayer.isLayer(l) && SlotLayer.getMasks(l, false) != null);
 		if (hasPanel) {
 			ui.row([8 / 100, 16 / 100, 36 / 100, 30 / 100, 10 / 100]);
 		}
@@ -402,17 +402,17 @@ class TabLayers {
 			if (l.parent.parent != null) ui._x -= 10 * ui.SCALE();
 		}
 
-		if (l.isGroup()) {
+		if (SlotLayer.isGroup(l)) {
 			ui.endElement();
 		}
 		else {
-			if (l.isMask()) {
+			if (SlotLayer.isMask(l)) {
 				ui._y += center;
 			}
 
 			TabLayers.comboBlending(ui, l);
 
-			if (l.isMask()) {
+			if (SlotLayer.isMask(l)) {
 				ui._y -= center;
 			}
 		}
@@ -425,7 +425,7 @@ class TabLayers {
 			ui._y -= center;
 		}
 
-		if (l.isGroup() || l.isMask()) {
+		if (SlotLayer.isGroup(l) || SlotLayer.isMask(l)) {
 			ui._y -= ui.ELEMENT_OFFSET();
 			ui.endElement();
 		}
@@ -448,7 +448,7 @@ class TabLayers {
 		ui._y -= ui.ELEMENT_OFFSET();
 	}
 
-	static comboObject = (ui: Zui, l: SlotLayer, label = false): Handle => {
+	static comboObject = (ui: Zui, l: SlotLayerRaw, label = false): Handle => {
 		let ar = [tr("Shared")];
 		for (let p of Project.paintObjects) ar.push(p.name);
 		let atlases = Project.getUsedAtlases();
@@ -462,7 +462,7 @@ class TabLayers {
 			if (l.fill_layer != null) { // Fill layer
 				let _init = () => {
 					Context.raw.material = l.fill_layer;
-					l.clear();
+					SlotLayer.clear(l);
 					Base.updateFillLayers();
 				}
 				App.notifyOnInit(_init);
@@ -474,7 +474,7 @@ class TabLayers {
 		return objectHandle;
 	}
 
-	static comboBlending = (ui: Zui, l: SlotLayer, label = false): Handle => {
+	static comboBlending = (ui: Zui, l: SlotLayerRaw, label = false): Handle => {
 		let blendingHandle = Zui.handle("tablayers_3").nest(l.id);
 		blendingHandle.position = l.blending;
 		ui.combo(blendingHandle, [
@@ -506,13 +506,13 @@ class TabLayers {
 		return blendingHandle;
 	}
 
-	static layerToggleVisible = (l: SlotLayer) => {
+	static layerToggleVisible = (l: SlotLayerRaw) => {
 		l.visible = !l.visible;
 		UIView2D.hwnd.redraws = 2;
 		MakeMaterial.parseMeshMaterial();
 	}
 
-	static drawLayerHighlight = (l: SlotLayer, mini: bool) => {
+	static drawLayerHighlight = (l: SlotLayerRaw, mini: bool) => {
 		let ui = UIBase.ui;
 		let step = ui.t.ELEMENT_H;
 
@@ -530,7 +530,7 @@ class TabLayers {
 		}
 	}
 
-	static handleLayerIconState = (l: SlotLayer, i: i32, state: State, uix: f32, uiy: f32) => {
+	static handleLayerIconState = (l: SlotLayerRaw, i: i32, state: State, uix: f32, uiy: f32) => {
 		let ui = UIBase.ui;
 
 		///if is_paint
@@ -544,7 +544,7 @@ class TabLayers {
 
 		// Layer preview tooltip
 		if (ui.isHovered && texpaint_preview != null) {
-			if (l.isMask()) {
+			if (SlotLayer.isMask(l)) {
 				TabLayers.makeMaskPreviewRgba32(l);
 				ui.tooltipImage(Context.raw.maskPreviewRgba32);
 			}
@@ -577,7 +577,7 @@ class TabLayers {
 		}
 	}
 
-	static drawLayerIcon = (l: SlotLayer, i: i32, uix: f32, uiy: f32, mini: bool) => {
+	static drawLayerIcon = (l: SlotLayerRaw, i: i32, uix: f32, uiy: f32, mini: bool) => {
 		let ui = UIBase.ui;
 		let icons = Res.get("icons.k");
 		let iconH = (ui.ELEMENT_H() - (mini ? 2 : 3)) * 2;
@@ -595,7 +595,7 @@ class TabLayers {
 			}
 		}
 
-		if (!l.isGroup()) {
+		if (!SlotLayer.isGroup(l)) {
 			///if is_paint
 			let texpaint_preview = l.texpaint_preview;
 			///end
@@ -616,7 +616,7 @@ class TabLayers {
 				ui._y = _y;
 				ui._w = _w;
 			}
-			if (l.fill_layer == null && l.isMask()) {
+			if (l.fill_layer == null && SlotLayer.isMask(l)) {
 				ui.g.pipeline = UIView2D.pipe;
 				///if krom_opengl
 				Krom.setPipeline(UIView2D.pipe.pipeline_);
@@ -626,7 +626,7 @@ class TabLayers {
 
 			let state = ui.image(icon, 0xffffffff, iconH);
 
-			if (l.fill_layer == null && l.isMask()) {
+			if (l.fill_layer == null && SlotLayer.isMask(l)) {
 				ui.g.pipeline = null;
 			}
 
@@ -654,32 +654,32 @@ class TabLayers {
 		}
 	}
 
-	static canMergeDown = (l: SlotLayer) : bool => {
+	static canMergeDown = (l: SlotLayerRaw) : bool => {
 		let index = Project.layers.indexOf(l);
 		// Lowest layer
 		if (index == 0) return false;
 		// Lowest layer that has masks
-		if (l.isLayer() && Project.layers[0].isMask() && Project.layers[0].parent == l) return false;
+		if (SlotLayer.isLayer(l) && SlotLayer.isMask(Project.layers[0]) && Project.layers[0].parent == l) return false;
 		// The lowest toplevel layer is a group
-		if (l.isGroup() && Project.layers[0].isInGroup() && Project.layers[0].getContainingGroup() == l) return false;
+		if (SlotLayer.isGroup(l) && SlotLayer.isInGroup(Project.layers[0]) && SlotLayer.getContainingGroup(Project.layers[0]) == l) return false;
 		// Masks must be merged down to masks
-		if (l.isMask() && !Project.layers[index - 1].isMask()) return false;
+		if (SlotLayer.isMask(l) && !SlotLayer.isMask(Project.layers[index - 1])) return false;
 		return true;
 	}
 
-	static drawLayerContextMenu = (l: SlotLayer, mini: bool) => {
+	static drawLayerContextMenu = (l: SlotLayerRaw, mini: bool) => {
 		let add = 0;
 
 		if (l.fill_layer == null) add += 1; // Clear
-		if (l.fill_layer != null && !l.isMask()) add += 3;
-		if (l.fill_layer != null && l.isMask()) add += 2;
-		if (l.isMask()) add += 2;
+		if (l.fill_layer != null && !SlotLayer.isMask(l)) add += 3;
+		if (l.fill_layer != null && SlotLayer.isMask(l)) add += 2;
+		if (SlotLayer.isMask(l)) add += 2;
 		if (mini) {
 			add += 1;
-			if (!l.isGroup()) add += 1;
-			if (l.isLayer()) add += 1;
+			if (!SlotLayer.isGroup(l)) add += 1;
+			if (SlotLayer.isLayer(l)) add += 1;
 		}
-		let menuElements = l.isGroup() ? 7 : (19 + add);
+		let menuElements = SlotLayer.isGroup(l) ? 7 : (19 + add);
 
 		UIMenu.draw((ui: Zui) => {
 
@@ -693,13 +693,13 @@ class TabLayers {
 					UIMenu.keepOpen = true;
 				}
 
-				if (!l.isGroup()) {
+				if (!SlotLayer.isGroup(l)) {
 					UIMenu.menuFill(ui);
 					if (TabLayers.comboBlending(ui, l, true).changed) {
 						UIMenu.keepOpen = true;
 					}
 				}
-				if (l.isLayer()) {
+				if (SlotLayer.isLayer(l)) {
 					UIMenu.menuFill(ui);
 					if (TabLayers.comboObject(ui, l, true).changed) {
 						UIMenu.keepOpen = true;
@@ -708,7 +708,7 @@ class TabLayers {
 			}
 
 			if (UIMenu.menuButton(ui, tr("Export"))) {
-				if (l.isMask()) {
+				if (SlotLayer.isMask(l)) {
 					UIFiles.show("png", true, false, (path: string) => {
 						let f = UIFiles.filename;
 						if (f == "") f = tr("untitled");
@@ -724,21 +724,21 @@ class TabLayers {
 				}
 			}
 
-			if (!l.isGroup()) {
-				let toFillString = l.isLayer() ? tr("To Fill Layer") : tr("To Fill Mask");
-				let toPaintString = l.isLayer() ? tr("To Paint Layer") : tr("To Paint Mask");
+			if (!SlotLayer.isGroup(l)) {
+				let toFillString = SlotLayer.isLayer(l) ? tr("To Fill Layer") : tr("To Fill Mask");
+				let toPaintString = SlotLayer.isLayer(l) ? tr("To Paint Layer") : tr("To Paint Mask");
 
 				if (l.fill_layer == null && UIMenu.menuButton(ui, toFillString)) {
 					let _init = () => {
-						l.isLayer() ? History.toFillLayer() : History.toFillMask();
-						l.toFillLayer();
+						SlotLayer.isLayer(l) ? History.toFillLayer() : History.toFillMask();
+						SlotLayer.toFillLayer(l);
 					}
 					App.notifyOnInit(_init);
 				}
 				if (l.fill_layer != null && UIMenu.menuButton(ui, toPaintString)) {
 					let _init = () => {
-						l.isLayer() ? History.toPaintLayer() : History.toPaintMask();
-						l.toPaintLayer();
+						SlotLayer.isLayer(l) ? History.toPaintLayer() : History.toPaintMask();
+						SlotLayer.toPaintLayer(l);
 					}
 					App.notifyOnInit(_init);
 				}
@@ -756,15 +756,15 @@ class TabLayers {
 			if (l.fill_layer == null && UIMenu.menuButton(ui, tr("Clear"))) {
 				Context.setLayer(l);
 				let _init = () => {
-					if (!l.isGroup()) {
+					if (!SlotLayer.isGroup(l)) {
 						History.clearLayer();
-						l.clear();
+						SlotLayer.clear(l);
 					}
 					else {
-						for (let c of l.getChildren()) {
+						for (let c of SlotLayer.getChildren(l)) {
 							Context.raw.layer = c;
 							History.clearLayer();
-							c.clear();
+							SlotLayer.clear(c);
 						}
 						Context.raw.layersPreviewDirty = true;
 						Context.raw.layer = l;
@@ -772,26 +772,26 @@ class TabLayers {
 				}
 				App.notifyOnInit(_init);
 			}
-			if (l.isMask() && l.fill_layer == null && UIMenu.menuButton(ui, tr("Invert"))) {
+			if (SlotLayer.isMask(l) && l.fill_layer == null && UIMenu.menuButton(ui, tr("Invert"))) {
 				let _init = () => {
 					Context.setLayer(l);
 					History.invertMask();
-					l.invertMask();
+					SlotLayer.invertMask(l);
 				}
 				App.notifyOnInit(_init);
 			}
-			if (l.isMask() && UIMenu.menuButton(ui, tr("Apply"))) {
+			if (SlotLayer.isMask(l) && UIMenu.menuButton(ui, tr("Apply"))) {
 				let _init = () => {
 					Context.raw.layer = l;
 					History.applyMask();
-					l.applyMask();
+					SlotLayer.applyMask(l);
 					Context.setLayer(l.parent);
 					MakeMaterial.parseMeshMaterial();
 					Context.raw.layersPreviewDirty = true;
 				}
 				App.notifyOnInit(_init);
 			}
-			if (l.isGroup() && UIMenu.menuButton(ui, tr("Merge Group"))) {
+			if (SlotLayer.isGroup(l) && UIMenu.menuButton(ui, tr("Merge Group"))) {
 				let _init = () => {
 					Base.mergeGroup(l);
 				}
@@ -803,7 +803,7 @@ class TabLayers {
 					Context.setLayer(l);
 					History.mergeLayers();
 					Base.mergeDown();
-					if (Context.raw.layer.fill_layer != null) Context.raw.layer.toPaintLayer();
+					if (Context.raw.layer.fill_layer != null) SlotLayer.toPaintLayer(Context.raw.layer);
 				}
 				App.notifyOnInit(_init);
 			}
@@ -829,7 +829,7 @@ class TabLayers {
 				UIMenu.keepOpen = true;
 			}
 
-			if (!l.isGroup()) {
+			if (!SlotLayer.isGroup(l)) {
 				UIMenu.menuFill(ui);
 				UIMenu.menuAlign(ui);
 				let resHandleChangedLast = Base.resHandle.changed;
@@ -913,7 +913,7 @@ class TabLayers {
 				}
 			}
 
-			if (!l.isGroup()) {
+			if (!SlotLayer.isGroup(l)) {
 				let baseHandle = Zui.handle("tablayers_9").nest(l.id);
 				let opacHandle = Zui.handle("tablayers_10").nest(l.id);
 				let norHandle = Zui.handle("tablayers_11").nest(l.id);
@@ -976,7 +976,7 @@ class TabLayers {
 		}, menuElements);
 	}
 
-	static makeMaskPreviewRgba32 = (l: SlotLayer) => {
+	static makeMaskPreviewRgba32 = (l: SlotLayerRaw) => {
 		///if is_paint
 		if (Context.raw.maskPreviewRgba32 == null) {
 			Context.raw.maskPreviewRgba32 = Image.createRenderTarget(UtilRender.layerPreviewSize, UtilRender.layerPreviewSize);
@@ -996,84 +996,84 @@ class TabLayers {
 		///end
 	}
 
-	static deleteLayer = (l: SlotLayer) => {
+	static deleteLayer = (l: SlotLayerRaw) => {
 		let pointers = TabLayers.initLayerMap();
 
-		if (l.isLayer() && l.hasMasks(false)) {
-			for (let m of l.getMasks(false)) {
+		if (SlotLayer.isLayer(l) && SlotLayer.hasMasks(l, false)) {
+			for (let m of SlotLayer.getMasks(l, false)) {
 				Context.raw.layer = m;
 				History.deleteLayer();
-				m.delete();
+				SlotLayer.delete(m);
 			}
 		}
-		if (l.isGroup()) {
-			for (let c of l.getChildren()) {
-				if (c.hasMasks(false)) {
-					for (let m of c.getMasks(false)) {
+		if (SlotLayer.isGroup(l)) {
+			for (let c of SlotLayer.getChildren(l)) {
+				if (SlotLayer.hasMasks(c, false)) {
+					for (let m of SlotLayer.getMasks(c, false)) {
 						Context.raw.layer = m;
 						History.deleteLayer();
-						m.delete();
+						SlotLayer.delete(m);
 					}
 				}
 				Context.raw.layer = c;
 				History.deleteLayer();
-				c.delete();
+				SlotLayer.delete(c);
 			}
-			if (l.hasMasks()) {
-				for (let m of l.getMasks()) {
+			if (SlotLayer.hasMasks(l)) {
+				for (let m of SlotLayer.getMasks(l)) {
 					Context.raw.layer = m;
 					History.deleteLayer();
-					m.delete();
+					SlotLayer.delete(m);
 				}
 			}
 		}
 
 		Context.raw.layer = l;
 		History.deleteLayer();
-		l.delete();
+		SlotLayer.delete(l);
 
-		if (l.isMask()) {
+		if (SlotLayer.isMask(l)) {
 			Context.raw.layer = l.parent;
 			Base.updateFillLayers();
 		}
 
 		// Remove empty group
-		if (l.isInGroup() && l.getContainingGroup().getChildren() == null) {
-			let g = l.getContainingGroup();
+		if (SlotLayer.isInGroup(l) && SlotLayer.getChildren(SlotLayer.getContainingGroup(l)) == null) {
+			let g = SlotLayer.getContainingGroup(l);
 			// Maybe some group masks are left
-			if (g.hasMasks()) {
-				for (let m of g.getMasks()) {
+			if (SlotLayer.hasMasks(g)) {
+				for (let m of SlotLayer.getMasks(g)) {
 					Context.raw.layer = m;
 					History.deleteLayer();
-					m.delete();
+					SlotLayer.delete(m);
 				}
 			}
 			Context.raw.layer = l.parent;
 			History.deleteLayer();
-			l.parent.delete();
+			SlotLayer.delete(l.parent);
 		}
 		Context.raw.ddirty = 2;
 		for (let m of Project.materials) TabLayers.remapLayerPointers(m.canvas.nodes, TabLayers.fillLayerMap(pointers));
 	}
 
-	static canDelete = (l: SlotLayer) => {
+	static canDelete = (l: SlotLayerRaw) => {
 		let numLayers = 0;
 
-		if (l.isMask()) return true;
+		if (SlotLayer.isMask(l)) return true;
 
 		for (let slot of Project.layers) {
-			if (slot.isLayer()) ++numLayers;
+			if (SlotLayer.isLayer(slot)) ++numLayers;
 		}
 
 		// All layers are in one group
-		if (l.isGroup() && l.getChildren().length == numLayers) return false;
+		if (SlotLayer.isGroup(l) && SlotLayer.getChildren(l).length == numLayers) return false;
 
 		// Do not delete last layer
 		return numLayers > 1;
 	}
 
 	static canDropNewLayer = (position: i32) => {
-		if (position > 0 && position < Project.layers.length && Project.layers[position - 1].isMask()) {
+		if (position > 0 && position < Project.layers.length && SlotLayer.isMask(Project.layers[position - 1])) {
 			// 1. The layer to insert is inserted in the middle
 			// 2. The layer below is a mask, i.e. the layer would have to be a (group) mask, too.
 			return false;

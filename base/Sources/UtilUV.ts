@@ -121,7 +121,7 @@ class UtilUV {
 			// dilateTexUnpack = UtilUV.pipeDilate.getConstantLocation("texUnpack");
 		}
 
-		let mask = Context.objectMaskUsed() ? Context.raw.layer.getObjectMask() : 0;
+		let mask = Context.objectMaskUsed() ? SlotLayer.getObjectMask(Context.raw.layer) : 0;
 		if (Context.layerFilterUsed()) mask = Context.raw.layerFilter;
 		let geom = mask == 0 && Context.raw.mergedObject != null ? Context.raw.mergedObject.data : Context.raw.paintObject.data;
 		let g4 = UtilUV.dilatemap.g4;

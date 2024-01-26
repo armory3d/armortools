@@ -17,10 +17,10 @@
 
 class ParserMaterial {
 
-	static con: NodeShaderContext;
-	static vert: NodeShader;
-	static frag: NodeShader;
-	static curshader: NodeShader;
+	static con: NodeShaderContextRaw;
+	static vert: NodeShaderRaw;
+	static frag: NodeShaderRaw;
+	static curshader: NodeShaderRaw;
 	static matcon: TMaterialContext;
 	static parsed: string[];
 	static parents: TNode[];
@@ -106,7 +106,7 @@ class ParserMaterial {
 		ParserMaterial.parsing_basecolor = false;
 	}
 
-	static parse = (canvas: TNodeCanvas, _con: NodeShaderContext, _vert: NodeShader, _frag: NodeShader, _matcon: TMaterialContext): TShaderOut => {
+	static parse = (canvas: TNodeCanvas, _con: NodeShaderContextRaw, _vert: NodeShaderRaw, _frag: NodeShaderRaw, _matcon: TMaterialContext): TShaderOut => {
 		Nodes.updateCanvasFormat(canvas);
 		ParserMaterial.init();
 		ParserMaterial.canvases = [canvas];
@@ -149,7 +149,7 @@ class ParserMaterial {
 		return null;
 	}
 
-	static finalize = (con: NodeShaderContext) => {
+	static finalize = (con: NodeShaderContextRaw) => {
 		let vert = con.vert;
 		let frag = con.frag;
 
@@ -163,88 +163,88 @@ class ParserMaterial {
 
 		if (frag.bposition) {
 			if (ParserMaterial.triplanar) {
-				frag.write_attrib(`vec3 bposition = vec3(
+				NodeShader.write_attrib(frag, `vec3 bposition = vec3(
 					texCoord1.x * texCoordBlend.y + texCoord2.x * texCoordBlend.z,
 					texCoord.x * texCoordBlend.x + texCoord2.y * texCoordBlend.z,
 					texCoord.y * texCoordBlend.x + texCoord1.y * texCoordBlend.y);`);
 			}
 			else if (frag.ndcpos) {
-				vert.add_out("vec3 bposition");
-				vert.write(`bposition = (ndc.xyz / ndc.w);`);
+				NodeShader.add_out(vert, "vec3 bposition");
+				NodeShader.write(vert, `bposition = (ndc.xyz / ndc.w);`);
 			}
 			else {
-				vert.add_out("vec3 bposition");
-				vert.add_uniform("vec3 dim", "_dim");
-				vert.add_uniform("vec3 hdim", "_halfDim");
-				vert.write_attrib(`bposition = (pos.xyz + hdim) / dim;`);
+				NodeShader.add_out(vert, "vec3 bposition");
+				NodeShader.add_uniform(vert, "vec3 dim", "_dim");
+				NodeShader.add_uniform(vert, "vec3 hdim", "_halfDim");
+				NodeShader.write_attrib(vert, `bposition = (pos.xyz + hdim) / dim;`);
 			}
 		}
 		if (frag.wposition) {
-			vert.add_uniform("mat4 W", "_worldMatrix");
-			vert.add_out("vec3 wposition");
-			vert.write_attrib(`wposition = vec4(mul(vec4(pos.xyz, 1.0), W)).xyz;`);
+			NodeShader.add_uniform(vert, "mat4 W", "_worldMatrix");
+			NodeShader.add_out(vert, "vec3 wposition");
+			NodeShader.write_attrib(vert, `wposition = vec4(mul(vec4(pos.xyz, 1.0), W)).xyz;`);
 		}
 		else if (vert.wposition) {
-			vert.add_uniform("mat4 W", "_worldMatrix");
-			vert.write_attrib(`vec3 wposition = vec4(mul(vec4(pos.xyz, 1.0), W)).xyz;`);
+			NodeShader.add_uniform(vert, "mat4 W", "_worldMatrix");
+			NodeShader.write_attrib(vert, `vec3 wposition = vec4(mul(vec4(pos.xyz, 1.0), W)).xyz;`);
 		}
 		if (frag.vposition) {
-			vert.add_uniform("mat4 WV", "_worldViewMatrix");
-			vert.add_out("vec3 vposition");
-			vert.write_attrib(`vposition = vec4(mul(vec4(pos.xyz, 1.0), WV)).xyz;`);
+			NodeShader.add_uniform(vert, "mat4 WV", "_worldViewMatrix");
+			NodeShader.add_out(vert, "vec3 vposition");
+			NodeShader.write_attrib(vert, `vposition = vec4(mul(vec4(pos.xyz, 1.0), WV)).xyz;`);
 		}
 		if (frag.mposition) {
-			vert.add_out("vec3 mposition");
+			NodeShader.add_out(vert, "vec3 mposition");
 			if (frag.ndcpos) {
-				vert.write(`mposition = (ndc.xyz / ndc.w);`);
+				NodeShader.write(vert, `mposition = (ndc.xyz / ndc.w);`);
 			}
 			else {
-				vert.write_attrib(`mposition = pos.xyz;`);
+				NodeShader.write_attrib(vert, `mposition = pos.xyz;`);
 			}
 		}
 		if (frag.wtangent) {
-			// con.add_elem("tang", "short4norm");
-			// vert.add_uniform("mat3 N", "_normalMatrix");
-			vert.add_out("vec3 wtangent");
-			// vert.write_attrib(`wtangent = normalize(mul(tang.xyz, N));`);
-			vert.write_attrib(`wtangent = vec3(0.0, 0.0, 0.0);`);
+			// NodeShaderContext.add_elem(con, "tang", "short4norm");
+			// NodeShader.add_uniform(vert, "mat3 N", "_normalMatrix");
+			NodeShader.add_out(vert, "vec3 wtangent");
+			// NodeShader.write_attrib(vert, `wtangent = normalize(mul(tang.xyz, N));`);
+			NodeShader.write_attrib(vert, `wtangent = vec3(0.0, 0.0, 0.0);`);
 		}
 		if (frag.vVecCam) {
-			vert.add_uniform("mat4 WV", "_worldViewMatrix");
-			vert.add_out("vec3 eyeDirCam");
-			vert.write_attrib(`eyeDirCam = vec4(mul(vec4(pos.xyz, 1.0), WV)).xyz; eyeDirCam.z *= -1.0;`);
-			frag.write_attrib(`vec3 vVecCam = normalize(eyeDirCam);`);
+			NodeShader.add_uniform(vert, "mat4 WV", "_worldViewMatrix");
+			NodeShader.add_out(vert, "vec3 eyeDirCam");
+			NodeShader.write_attrib(vert, `eyeDirCam = vec4(mul(vec4(pos.xyz, 1.0), WV)).xyz; eyeDirCam.z *= -1.0;`);
+			NodeShader.write_attrib(frag, `vec3 vVecCam = normalize(eyeDirCam);`);
 		}
 		if (frag.vVec) {
-			vert.add_uniform("vec3 eye", "_cameraPosition");
-			vert.add_out("vec3 eyeDir");
-			vert.write_attrib(`eyeDir = eye - wposition;`);
-			frag.write_attrib(`vec3 vVec = normalize(eyeDir);`);
+			NodeShader.add_uniform(vert, "vec3 eye", "_cameraPosition");
+			NodeShader.add_out(vert, "vec3 eyeDir");
+			NodeShader.write_attrib(vert, `eyeDir = eye - wposition;`);
+			NodeShader.write_attrib(frag, `vec3 vVec = normalize(eyeDir);`);
 		}
 		if (frag.n) {
-			vert.add_uniform("mat3 N", "_normalMatrix");
-			vert.add_out("vec3 wnormal");
-			vert.write_attrib(`wnormal = mul(vec3(nor.xy, pos.w), N);`);
-			frag.write_attrib(`vec3 n = normalize(wnormal);`);
+			NodeShader.add_uniform(vert, "mat3 N", "_normalMatrix");
+			NodeShader.add_out(vert, "vec3 wnormal");
+			NodeShader.write_attrib(vert, `wnormal = mul(vec3(nor.xy, pos.w), N);`);
+			NodeShader.write_attrib(frag, `vec3 n = normalize(wnormal);`);
 		}
 		else if (vert.n) {
-			vert.add_uniform("mat3 N", "_normalMatrix");
-			vert.write_attrib(`vec3 wnormal = normalize(mul(vec3(nor.xy, pos.w), N));`);
+			NodeShader.add_uniform(vert, "mat3 N", "_normalMatrix");
+			NodeShader.write_attrib(vert, `vec3 wnormal = normalize(mul(vec3(nor.xy, pos.w), N));`);
 		}
 		if (frag.nAttr) {
-			vert.add_out("vec3 nAttr");
-			vert.write_attrib(`nAttr = vec3(nor.xy, pos.w);`);
+			NodeShader.add_out(vert, "vec3 nAttr");
+			NodeShader.write_attrib(vert, `nAttr = vec3(nor.xy, pos.w);`);
 		}
 		if (frag.dotNV) {
-			frag.write_attrib(`float dotNV = max(dot(n, vVec), 0.0);`);
+			NodeShader.write_attrib(frag, `float dotNV = max(dot(n, vVec), 0.0);`);
 		}
 		if (frag.wvpposition) {
-			vert.add_out("vec4 wvpposition");
-			vert.write_end(`wvpposition = gl_Position;`);
+			NodeShader.add_out(vert, "vec4 wvpposition");
+			NodeShader.write_end(vert, `wvpposition = gl_Position;`);
 		}
-		if (con.is_elem(`col`)) {
-			vert.add_out(`vec3 vcolor`);
-			vert.write_attrib(`vcolor = col.rgb;`);
+		if (NodeShaderContext.is_elem(con, `col`)) {
+			NodeShader.add_out(vert, `vec3 vcolor`);
+			NodeShader.write_attrib(vert, `vcolor = col.rgb;`);
 		}
 	}
 
@@ -433,7 +433,7 @@ class ParserMaterial {
 		else if (node.type == "ATTRIBUTE") {
 			if (socket == node.outputs[0]) { // Color
 				if (ParserMaterial.curshader.context.allow_vcols) {
-					ParserMaterial.curshader.context.add_elem("col", "short4norm"); // Vcols only for now
+					NodeShaderContext.add_elem(ParserMaterial.curshader.context, "col", "short4norm"); // Vcols only for now
 					return "vcolor";
 				}
 				else {
@@ -441,13 +441,13 @@ class ParserMaterial {
 				}
 			}
 			else { // Vector
-				ParserMaterial.curshader.context.add_elem("tex", "short2norm"); // UVMaps only for now
+				NodeShaderContext.add_elem(ParserMaterial.curshader.context, "tex", "short2norm"); // UVMaps only for now
 				return "vec3(texCoord.x, texCoord.y, 0.0)";
 			}
 		}
 		else if (node.type == "VERTEX_COLOR") {
 			if (ParserMaterial.curshader.context.allow_vcols) {
-				ParserMaterial.curshader.context.add_elem("col", "short4norm");
+				NodeShaderContext.add_elem(ParserMaterial.curshader.context, "col", "short4norm");
 				return "vcolor";
 			}
 			else {
@@ -459,7 +459,7 @@ class ParserMaterial {
 			return ParserMaterial.vec3(socket.default_value);
 		}
 		else if (node.type == "TEX_BRICK") {
-			ParserMaterial.curshader.add_function(ShaderFunctions.str_tex_brick);
+			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_tex_brick);
 			let co = ParserMaterial.getCoord(node);
 			let col1 = ParserMaterial.parse_vector_input(node.inputs[1]);
 			let col2 = ParserMaterial.parse_vector_input(node.inputs[2]);
@@ -469,7 +469,7 @@ class ParserMaterial {
 			return res;
 		}
 		else if (node.type == "TEX_CHECKER") {
-			ParserMaterial.curshader.add_function(ShaderFunctions.str_tex_checker);
+			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_tex_checker);
 			let co = ParserMaterial.getCoord(node);
 			let col1 = ParserMaterial.parse_vector_input(node.inputs[1]);
 			let col2 = ParserMaterial.parse_vector_input(node.inputs[2]);
@@ -501,27 +501,27 @@ class ParserMaterial {
 			}
 			else {
 				let tex_store = ParserMaterial.store_var_name(node); // Pink color for missing texture
-				ParserMaterial.curshader.write(`vec4 ${tex_store} = vec4(1.0, 0.0, 1.0, 1.0);`);
+				NodeShader.write(ParserMaterial.curshader, `vec4 ${tex_store} = vec4(1.0, 0.0, 1.0, 1.0);`);
 				return `${tex_store}.rgb`;
 			}
 		}
 		else if (node.type == "TEX_MAGIC") {
-			ParserMaterial.curshader.add_function(ShaderFunctions.str_tex_magic);
+			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_tex_magic);
 			let co = ParserMaterial.getCoord(node);
 			let scale = ParserMaterial.parse_value_input(node.inputs[1]);
 			let res = `tex_magic(${co} * ${scale} * 4.0)`;
 			return res;
 		}
 		else if (node.type == "TEX_NOISE") {
-			ParserMaterial.curshader.add_function(ShaderFunctions.str_tex_noise);
+			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_tex_noise);
 			let co = ParserMaterial.getCoord(node);
 			let scale = ParserMaterial.parse_value_input(node.inputs[1]);
 			let res = `vec3(tex_noise(${co} * ${scale}), tex_noise(${co} * ${scale} + 0.33), tex_noise(${co} * ${scale} + 0.66))`;
 			return res;
 		}
 		else if (node.type == "TEX_VORONOI") {
-			ParserMaterial.curshader.add_function(ShaderFunctions.str_tex_voronoi);
-			ParserMaterial.curshader.add_uniform("sampler2D snoise256", "$noise256.k");
+			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_tex_voronoi);
+			NodeShader.add_uniform(ParserMaterial.curshader, "sampler2D snoise256", "$noise256.k");
 			let co = ParserMaterial.getCoord(node);
 			let scale = ParserMaterial.parse_value_input(node.inputs[1]);
 			let but = node.buttons[0]; //coloring;
@@ -537,7 +537,7 @@ class ParserMaterial {
 			return res;
 		}
 		else if (node.type == "TEX_WAVE") {
-			ParserMaterial.curshader.add_function(ShaderFunctions.str_tex_wave);
+			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_tex_wave);
 			let co = ParserMaterial.getCoord(node);
 			let scale = ParserMaterial.parse_value_input(node.inputs[1]);
 			let res = ParserMaterial.to_vec3(`tex_wave_f(${co} * ${scale})`);
@@ -547,7 +547,7 @@ class ParserMaterial {
 			let out_col = ParserMaterial.parse_vector_input(node.inputs[0]);
 			let bright = ParserMaterial.parse_value_input(node.inputs[1]);
 			let contr = ParserMaterial.parse_value_input(node.inputs[2]);
-			ParserMaterial.curshader.add_function(ShaderFunctions.str_brightcontrast);
+			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_brightcontrast);
 			return `brightcontrast(${out_col}, ${bright}, ${contr})`;
 		}
 		else if (node.type == "GAMMA") {
@@ -560,11 +560,11 @@ class ParserMaterial {
 			let angle = ParserMaterial.parse_value_input(node.inputs[1], true);
 			let mask = ParserMaterial.parse_value_input(node.inputs[2], true);
 			let tex_name = "texwarp_" + ParserMaterial.node_name(node);
-			ParserMaterial.curshader.add_uniform("sampler2D " + tex_name, "_" + tex_name);
+			NodeShader.add_uniform(ParserMaterial.curshader, "sampler2D " + tex_name, "_" + tex_name);
 			let store = ParserMaterial.store_var_name(node);
-			ParserMaterial.curshader.write(`float ${store}_rad = ${angle} * (${Math.PI} / 180);`);
-			ParserMaterial.curshader.write(`float ${store}_x = cos(${store}_rad);`);
-			ParserMaterial.curshader.write(`float ${store}_y = sin(${store}_rad);`);
+			NodeShader.write(ParserMaterial.curshader, `float ${store}_rad = ${angle} * (${Math.PI} / 180);`);
+			NodeShader.write(ParserMaterial.curshader, `float ${store}_x = cos(${store}_rad);`);
+			NodeShader.write(ParserMaterial.curshader, `float ${store}_y = sin(${store}_rad);`);
 			return `texture(${tex_name}, texCoord + vec2(${store}_x, ${store}_y) * ${mask}).rgb;`;
 		}
 		else if (node.type == "BLUR") {
@@ -573,19 +573,19 @@ class ParserMaterial {
 			if (strength == "0.0") return "vec3(0.0, 0.0, 0.0)";
 			let steps = `int(${strength} * 10 + 1)`;
 			let tex_name = "texblur_" + ParserMaterial.node_name(node);
-			ParserMaterial.curshader.add_uniform("sampler2D " + tex_name, "_" + tex_name);
+			NodeShader.add_uniform(ParserMaterial.curshader, "sampler2D " + tex_name, "_" + tex_name);
 			let store = ParserMaterial.store_var_name(node);
-			ParserMaterial.curshader.write(`vec3 ${store}_res = vec3(0.0, 0.0, 0.0);`);
-			ParserMaterial.curshader.write(`for (int i = -$steps; i <= $steps; ++i) {`);
-			ParserMaterial.curshader.write(`for (int j = -$steps; j <= $steps; ++j) {`);
-			ParserMaterial.curshader.write(`${store}_res += texture(${tex_name}, texCoord + vec2(i, j) / vec2(textureSize(${tex_name}, 0))).rgb;`);
-			ParserMaterial.curshader.write(`}`);
-			ParserMaterial.curshader.write(`}`);
-			ParserMaterial.curshader.write(`${store}_res /= ($steps * 2 + 1) * ($steps * 2 + 1);`);
+			NodeShader.write(ParserMaterial.curshader, `vec3 ${store}_res = vec3(0.0, 0.0, 0.0);`);
+			NodeShader.write(ParserMaterial.curshader, `for (int i = -$steps; i <= $steps; ++i) {`);
+			NodeShader.write(ParserMaterial.curshader, `for (int j = -$steps; j <= $steps; ++j) {`);
+			NodeShader.write(ParserMaterial.curshader, `${store}_res += texture(${tex_name}, texCoord + vec2(i, j) / vec2(textureSize(${tex_name}, 0))).rgb;`);
+			NodeShader.write(ParserMaterial.curshader, `}`);
+			NodeShader.write(ParserMaterial.curshader, `}`);
+			NodeShader.write(ParserMaterial.curshader, `${store}_res /= ($steps * 2 + 1) * ($steps * 2 + 1);`);
 			return `${store}_res`;
 		}
 		else if (node.type == "HUE_SAT") {
-			ParserMaterial.curshader.add_function(ShaderFunctions.str_hue_sat);
+			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_hue_sat);
 			let hue = ParserMaterial.parse_value_input(node.inputs[0]);
 			let sat = ParserMaterial.parse_value_input(node.inputs[1]);
 			let val = ParserMaterial.parse_value_input(node.inputs[2]);
@@ -601,7 +601,7 @@ class ParserMaterial {
 		else if (node.type == "MIX_RGB") {
 			let fac = ParserMaterial.parse_value_input(node.inputs[0]);
 			let fac_var = ParserMaterial.node_name(node) + "_fac";
-			ParserMaterial.curshader.write(`float ${fac_var} = ${fac};`);
+			NodeShader.write(ParserMaterial.curshader, `float ${fac_var} = ${fac};`);
 			let col1 = ParserMaterial.parse_vector_input(node.inputs[1]);
 			let col2 = ParserMaterial.parse_vector_input(node.inputs[2]);
 			let but = node.buttons[0]; // blend_type
@@ -658,19 +658,19 @@ class ParserMaterial {
 				out_col = "(" + ParserMaterial.to_vec3(`(1.0 - ${fac_var}) * ${col1} + ${fac_var} * ${col1} / ${col2}`) + ")";
 			}
 			else if (blend == "HUE") {
-				ParserMaterial.curshader.add_function(ShaderFunctions.str_hue_sat);
+				NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_hue_sat);
 				out_col = `mix(${col1}, hsv_to_rgb(vec3(rgb_to_hsv(${col2}).r, rgb_to_hsv(${col1}).g, rgb_to_hsv(${col1}).b)), ${fac_var})`;
 			}
 			else if (blend == "SATURATION") {
-				ParserMaterial.curshader.add_function(ShaderFunctions.str_hue_sat);
+				NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_hue_sat);
 				out_col = `mix(${col1}, hsv_to_rgb(vec3(rgb_to_hsv(${col1}).r, rgb_to_hsv(${col2}).g, rgb_to_hsv(${col1}).b)), ${fac_var})`;
 			}
 			else if (blend == "COLOR") {
-				ParserMaterial.curshader.add_function(ShaderFunctions.str_hue_sat);
+				NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_hue_sat);
 				out_col = `mix(${col1}, hsv_to_rgb(vec3(rgb_to_hsv(${col2}).r, rgb_to_hsv(${col2}).g, rgb_to_hsv(${col1}).b)), ${fac_var})`;
 			}
 			else if (blend == "VALUE") {
-				ParserMaterial.curshader.add_function(ShaderFunctions.str_hue_sat);
+				NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_hue_sat);
 				out_col = `mix(${col1}, hsv_to_rgb(vec3(rgb_to_hsv(${col1}).r, rgb_to_hsv(${col1}).g, rgb_to_hsv(${col2}).b)), ${fac_var})`;
 			}
 			if (use_clamp) return `clamp(${out_col}, vec3(0.0, 0.0, 0.0), vec3(1.0, 1.0, 1.0))`;
@@ -690,29 +690,29 @@ class ParserMaterial {
 			}
 			// Write cols array
 			let cols_var = ParserMaterial.node_name(node) + "_cols";
-			ParserMaterial.curshader.write(`vec3 ${cols_var}[${elems.length}];`); // TODO: Make const
+			NodeShader.write(ParserMaterial.curshader, `vec3 ${cols_var}[${elems.length}];`); // TODO: Make const
 			for (let i = 0; i < elems.length; ++i) {
-				ParserMaterial.curshader.write(`${cols_var}[${i}] = ${ParserMaterial.vec3(elems[i])};`);
+				NodeShader.write(ParserMaterial.curshader, `${cols_var}[${i}] = ${ParserMaterial.vec3(elems[i])};`);
 			}
 			// Get index
 			let fac_var = ParserMaterial.node_name(node) + "_fac";
-			ParserMaterial.curshader.write(`float ${fac_var} = ${fac};`);
+			NodeShader.write(ParserMaterial.curshader, `float ${fac_var} = ${fac};`);
 			let index = "0";
 			for (let i = 1; i < elems.length; ++i) {
 				index += ` + (${fac_var} > ${elems[i][4]} ? 1 : 0)`;
 			}
 			// Write index
 			let index_var = ParserMaterial.node_name(node) + "_i";
-			ParserMaterial.curshader.write(`int ${index_var} = ${index};`);
+			NodeShader.write(ParserMaterial.curshader, `int ${index_var} = ${index};`);
 			if (interp == "CONSTANT") {
 				return `${cols_var}[${index_var}]`;
 			}
 			else { // Linear
 				// Write facs array
 				let facs_var = ParserMaterial.node_name(node) + "_facs";
-				ParserMaterial.curshader.write(`float ${facs_var}[${elems.length}];`); // TODO: Make const
+				NodeShader.write(ParserMaterial.curshader, `float ${facs_var}[${elems.length}];`); // TODO: Make const
 				for (let i = 0; i < elems.length; ++i) {
-					ParserMaterial.curshader.write(`${facs_var}[${i}] = ${elems[i][4]};`);
+					NodeShader.write(ParserMaterial.curshader, `${facs_var}[${i}] = ${elems[i][4]};`);
 				}
 				// Mix color
 				// float f = (pos - start) * (1.0 / (finish - start))
@@ -745,7 +745,7 @@ class ParserMaterial {
 			return `(sqrt(vec3(${vc0}, ${vc1}, ${vc2}) * vec3(${vc3a}, ${vc3b}, ${vc3c})) * ${fac})`;
 		}
 		else if (node.type == "COMBHSV") {
-			ParserMaterial.curshader.add_function(ShaderFunctions.str_hue_sat);
+			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_hue_sat);
 			let h = ParserMaterial.parse_value_input(node.inputs[0]);
 			let s = ParserMaterial.parse_value_input(node.inputs[1]);
 			let v = ParserMaterial.parse_value_input(node.inputs[2]);
@@ -758,9 +758,9 @@ class ParserMaterial {
 			return `vec3(${r}, ${g}, ${b})`;
 		}
 		else if (node.type == "WAVELENGTH") {
-			ParserMaterial.curshader.add_function(ShaderFunctions.str_wavelength_to_rgb);
+			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_wavelength_to_rgb);
 			let wl = ParserMaterial.parse_value_input(node.inputs[0]);
-			ParserMaterial.curshader.add_function(ShaderFunctions.str_wavelength_to_rgb);
+			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_wavelength_to_rgb);
 			return `wavelength_to_rgb((${wl} - 450.0) / 150.0)`;
 		}
 		else if (node.type == "CAMERA") {
@@ -770,11 +770,11 @@ class ParserMaterial {
 		else if (node.type == "LAYER") {
 			let l = node.buttons[0].default_value;
 			if (socket == node.outputs[0]) { // Base
-				ParserMaterial.curshader.add_uniform("sampler2D texpaint" + l, "_texpaint" + l);
+				NodeShader.add_uniform(ParserMaterial.curshader, "sampler2D texpaint" + l, "_texpaint" + l);
 				return "texture(texpaint" + l + ", texCoord).rgb";
 			}
 			else if (socket == node.outputs[5]) { // Normal
-				ParserMaterial.curshader.add_uniform("sampler2D texpaint_nor" + l, "_texpaint_nor" + l);
+				NodeShader.add_uniform(ParserMaterial.curshader, "sampler2D texpaint_nor" + l, "_texpaint_nor" + l);
 				return "texture(texpaint_nor" + l + ", texCoord).rgb";
 			}
 		}
@@ -802,11 +802,11 @@ class ParserMaterial {
 		}
 		else if (node.type == "PICKER") {
 			if (socket == node.outputs[0]) { // Base
-				ParserMaterial.curshader.add_uniform("vec3 pickerBase", "_pickerBase");
+				NodeShader.add_uniform(ParserMaterial.curshader, "vec3 pickerBase", "_pickerBase");
 				return "pickerBase";
 			}
 			else if (socket == node.outputs[5]) { // Normal
-				ParserMaterial.curshader.add_uniform("vec3 pickerNormal", "_pickerNormal");
+				NodeShader.add_uniform(ParserMaterial.curshader, "vec3 pickerNormal", "_pickerNormal");
 				return "pickerNormal";
 			}
 		}
@@ -870,7 +870,7 @@ class ParserMaterial {
 				return "n";
 			}
 			else if (socket == node.outputs[2]) {// UV
-				ParserMaterial.curshader.context.add_elem("tex", "short2norm");
+				NodeShaderContext.add_elem(ParserMaterial.curshader.context, "tex", "short2norm");
 				return "vec3(texCoord.x, texCoord.y, 0.0)";
 			}
 			else if (socket == node.outputs[3]) { // Object
@@ -890,7 +890,7 @@ class ParserMaterial {
 			}
 		}
 		else if (node.type == "UVMAP") {
-			ParserMaterial.curshader.context.add_elem("tex", "short2norm");
+			NodeShaderContext.add_elem(ParserMaterial.curshader.context, "tex", "short2norm");
 			return "vec3(texCoord.x, texCoord.y, 0.0)";
 		}
 		else if (node.type == "BUMP") {
@@ -899,8 +899,8 @@ class ParserMaterial {
 			let height = ParserMaterial.parse_value_input(node.inputs[2]);
 			let nor = ParserMaterial.parse_vector_input(node.inputs[3]);
 			let sample_bump_res = ParserMaterial.store_var_name(node) + "_bump";
-			ParserMaterial.curshader.write(`float ${sample_bump_res}_x = dFdx(float(${height})) * (${strength}) * 16.0;`);
-			ParserMaterial.curshader.write(`float ${sample_bump_res}_y = dFdy(float(${height})) * (${strength}) * 16.0;`);
+			NodeShader.write(ParserMaterial.curshader, `float ${sample_bump_res}_x = dFdx(float(${height})) * (${strength}) * 16.0;`);
+			NodeShader.write(ParserMaterial.curshader, `float ${sample_bump_res}_y = dFdy(float(${height})) * (${strength}) * 16.0;`);
 			return `(normalize(vec3(${sample_bump_res}_x, ${sample_bump_res}_y, 1.0) + ${nor}) * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5))`;
 		}
 		else if (node.type == "MAPPING") {
@@ -948,9 +948,9 @@ class ParserMaterial {
 			let norm = ParserMaterial.parse_vector_input(node.inputs[1]);
 
 			let store = ParserMaterial.store_var_name(node);
-			ParserMaterial.curshader.write(`vec3 ${store}_texn = ${norm} * 2.0 - 1.0;`);
-			ParserMaterial.curshader.write(`${store}_texn.xy = ${strength} * ${store}_texn.xy;`);
-			ParserMaterial.curshader.write(`${store}_texn = normalize(${store}_texn);`);
+			NodeShader.write(ParserMaterial.curshader, `vec3 ${store}_texn = ${norm} * 2.0 - 1.0;`);
+			NodeShader.write(ParserMaterial.curshader, `${store}_texn.xy = ${strength} * ${store}_texn.xy;`);
+			NodeShader.write(ParserMaterial.curshader, `${store}_texn = normalize(${store}_texn);`);
 
 			return `(0.5 * ${store}_texn + 0.5)`;
 		}
@@ -965,18 +965,18 @@ class ParserMaterial {
 			// The blending algorithms are based on the paper `Blending in Detail` by Colin Barré-Brisebois and Stephen Hill 2012
 			// https://blog.selfshadow.com/publications/blending-in-detail/
 			if (blend == "PARTIAL_DERIVATIVE") { //partial derivate blending
-				ParserMaterial.curshader.write(`vec3 ${store}_n1 = ${nm1} * 2.0 - 1.0;`);
-				ParserMaterial.curshader.write(`vec3 ${store}_n2 = ${nm2} * 2.0 - 1.0;`);
+				NodeShader.write(ParserMaterial.curshader, `vec3 ${store}_n1 = ${nm1} * 2.0 - 1.0;`);
+				NodeShader.write(ParserMaterial.curshader, `vec3 ${store}_n2 = ${nm2} * 2.0 - 1.0;`);
 				return `0.5 * normalize(vec3(${store}_n1.xy * ${store}_n2.z + ${store}_n2.xy * ${store}_n1.z, ${store}_n1.z * ${store}_n2.z)) + 0.5;`;
 			}
 			else if (blend == "WHITEOUT") { //whiteout blending
-				ParserMaterial.curshader.write(`vec3 ${store}_n1 = ${nm1} * 2.0 - 1.0;`);
-				ParserMaterial.curshader.write(`vec3 ${store}_n2 = ${nm2} * 2.0 - 1.0;`);
+				NodeShader.write(ParserMaterial.curshader, `vec3 ${store}_n1 = ${nm1} * 2.0 - 1.0;`);
+				NodeShader.write(ParserMaterial.curshader, `vec3 ${store}_n2 = ${nm2} * 2.0 - 1.0;`);
 				return `0.5 * normalize(vec3(${store}_n1.xy + ${store}_n2.xy, ${store}_n1.z * ${store}_n2.z)) + 0.5;`;
 			}
 			else if (blend == "REORIENTED") { //reoriented normal mapping
-				ParserMaterial.curshader.write(`vec3 ${store}_n1 = ${nm1} * 2.0 - vec3(1.0, 1.0, 0.0);`);
-				ParserMaterial.curshader.write(`vec3 ${store}_n2 = ${nm2} * vec3(-2.0, -2.0, 2.0) - vec3(-1.0, -1.0, 1.0);`);
+				NodeShader.write(ParserMaterial.curshader, `vec3 ${store}_n1 = ${nm1} * 2.0 - vec3(1.0, 1.0, 0.0);`);
+				NodeShader.write(ParserMaterial.curshader, `vec3 ${store}_n2 = ${nm2} * vec3(-2.0, -2.0, 2.0) - vec3(-1.0, -1.0, 1.0);`);
 				return `0.5 * normalize(${store}_n1 * dot(${store}_n1, ${store}_n2) - ${store}_n2 * ${store}_n1.z) + 0.5`;
 			}
 		}
@@ -1086,20 +1086,20 @@ class ParserMaterial {
 		ParserMaterial.frag.write_normal++;
 		ParserMaterial.out_normaltan = ParserMaterial.parse_vector_input(inp);
 		if (!ParserMaterial.arm_export_tangents) {
-			ParserMaterial.frag.write(`vec3 texn = (${ParserMaterial.out_normaltan}) * 2.0 - 1.0;`);
-			ParserMaterial.frag.write(`texn.y = -texn.y;`);
+			NodeShader.write(ParserMaterial.frag, `vec3 texn = (${ParserMaterial.out_normaltan}) * 2.0 - 1.0;`);
+			NodeShader.write(ParserMaterial.frag, `texn.y = -texn.y;`);
 			if (!ParserMaterial.cotangentFrameWritten) {
 				ParserMaterial.cotangentFrameWritten = true;
-				ParserMaterial.frag.add_function(ShaderFunctions.str_cotangentFrame);
+				NodeShader.add_function(ParserMaterial.frag, ShaderFunctions.str_cotangentFrame);
 			}
 			ParserMaterial.frag.n = true;
 			///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
-			ParserMaterial.frag.write(`mat3 TBN = cotangentFrame(n, vVec, texCoord);`);
+			NodeShader.write(ParserMaterial.frag, `mat3 TBN = cotangentFrame(n, vVec, texCoord);`);
 			///else
-			ParserMaterial.frag.write(`mat3 TBN = cotangentFrame(n, -vVec, texCoord);`);
+			NodeShader.write(ParserMaterial.frag, `mat3 TBN = cotangentFrame(n, -vVec, texCoord);`);
 			///end
 
-			ParserMaterial.frag.write(`n = mul(normalize(texn), TBN);`);
+			NodeShader.write(ParserMaterial.frag, `n = mul(normalize(texn), TBN);`);
 		}
 		ParserMaterial.frag.write_normal--;
 	}
@@ -1139,21 +1139,21 @@ class ParserMaterial {
 			return ParserMaterial.parse_group_input(node, socket);
 		}
 		else if (node.type == "ATTRIBUTE") {
-			ParserMaterial.curshader.add_uniform("float time", "_time");
+			NodeShader.add_uniform(ParserMaterial.curshader, "float time", "_time");
 			return "time";
 		}
 		else if (node.type == "VERTEX_COLOR") {
 			return "1.0";
 		}
 		else if (node.type == "WIREFRAME") {
-			ParserMaterial.curshader.add_uniform(`sampler2D texuvmap`, `_texuvmap`);
+			NodeShader.add_uniform(ParserMaterial.curshader, `sampler2D texuvmap`, `_texuvmap`);
 			let use_pixel_size = node.buttons[0].default_value == "true";
 			let pixel_size = ParserMaterial.parse_value_input(node.inputs[0]);
 			return "textureLod(texuvmap, texCoord, 0.0).r";
 		}
 		else if (node.type == "CAMERA") {
 			if (socket == node.outputs[1]) { // View Z Depth
-				ParserMaterial.curshader.add_uniform("vec2 cameraProj", "_cameraPlaneProj");
+				NodeShader.add_uniform(ParserMaterial.curshader, "vec2 cameraProj", "_cameraPlaneProj");
 				///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 				ParserMaterial.curshader.wvpposition = true;
 				return "(cameraProj.y / ((wvpposition.z / wvpposition.w) - cameraProj.x))";
@@ -1162,7 +1162,7 @@ class ParserMaterial {
 				///end
 			}
 			else { // View Distance
-				ParserMaterial.curshader.add_uniform("vec3 eye", "_cameraPosition");
+				NodeShader.add_uniform(ParserMaterial.curshader, "vec3 eye", "_cameraPosition");
 				ParserMaterial.curshader.wposition = true;
 				return "distance(eye, wposition)";
 			}
@@ -1170,30 +1170,30 @@ class ParserMaterial {
 		else if (node.type == "LAYER") {
 			let l = node.buttons[0].default_value;
 			if (socket == node.outputs[1]) { // Opac
-				ParserMaterial.curshader.add_uniform("sampler2D texpaint" + l, "_texpaint" + l);
+				NodeShader.add_uniform(ParserMaterial.curshader, "sampler2D texpaint" + l, "_texpaint" + l);
 				return "texture(texpaint" + l + ", texCoord).a";
 			}
 			else if (socket == node.outputs[2]) { // Occ
-				ParserMaterial.curshader.add_uniform("sampler2D texpaint_pack" + l, "_texpaint_pack" + l);
+				NodeShader.add_uniform(ParserMaterial.curshader, "sampler2D texpaint_pack" + l, "_texpaint_pack" + l);
 				return "texture(texpaint_pack" + l + ", texCoord).r";
 			}
 			else if (socket == node.outputs[3]) { // Rough
-				ParserMaterial.curshader.add_uniform("sampler2D texpaint_pack" + l, "_texpaint_pack" + l);
+				NodeShader.add_uniform(ParserMaterial.curshader, "sampler2D texpaint_pack" + l, "_texpaint_pack" + l);
 				return "texture(texpaint_pack" + l + ", texCoord).g";
 			}
 			else if (socket == node.outputs[4]) { // Metal
-				ParserMaterial.curshader.add_uniform("sampler2D texpaint_pack" + l, "_texpaint_pack" + l);
+				NodeShader.add_uniform(ParserMaterial.curshader, "sampler2D texpaint_pack" + l, "_texpaint_pack" + l);
 				return "texture(texpaint_pack" + l + ", texCoord).b";
 			}
 			else if (socket == node.outputs[7]) { // Height
-				ParserMaterial.curshader.add_uniform("sampler2D texpaint_pack" + l, "_texpaint_pack" + l);
+				NodeShader.add_uniform(ParserMaterial.curshader, "sampler2D texpaint_pack" + l, "_texpaint_pack" + l);
 				return "texture(texpaint_pack" + l + ", texCoord).a";
 			}
 		}
 		else if (node.type == "LAYER_MASK") {
 			if (socket == node.outputs[0]) {
 				let l = node.buttons[0].default_value;
-				ParserMaterial.curshader.add_uniform("sampler2D texpaint" + l, "_texpaint" + l);
+				NodeShader.add_uniform(ParserMaterial.curshader, "sampler2D texpaint" + l, "_texpaint" + l);
 				return "texture(texpaint" + l + ", texCoord).r";
 			}
 		}
@@ -1230,23 +1230,23 @@ class ParserMaterial {
 		}
 		else if (node.type == "PICKER") {
 			if (socket == node.outputs[1]) {
-				ParserMaterial.curshader.add_uniform("float pickerOpacity", "_pickerOpacity");
+				NodeShader.add_uniform(ParserMaterial.curshader, "float pickerOpacity", "_pickerOpacity");
 				return "pickerOpacity";
 			}
 			else if (socket == node.outputs[2]) {
-				ParserMaterial.curshader.add_uniform("float pickerOcclusion", "_pickerOcclusion");
+				NodeShader.add_uniform(ParserMaterial.curshader, "float pickerOcclusion", "_pickerOcclusion");
 				return "pickerOcclusion";
 			}
 			else if (socket == node.outputs[3]) {
-				ParserMaterial.curshader.add_uniform("float pickerRoughness", "_pickerRoughness");
+				NodeShader.add_uniform(ParserMaterial.curshader, "float pickerRoughness", "_pickerRoughness");
 				return "pickerRoughness";
 			}
 			else if (socket == node.outputs[4]) {
-				ParserMaterial.curshader.add_uniform("float pickerMetallic", "_pickerMetallic");
+				NodeShader.add_uniform(ParserMaterial.curshader, "float pickerMetallic", "_pickerMetallic");
 				return "pickerMetallic";
 			}
 			else if (socket == node.outputs[7]) {
-				ParserMaterial.curshader.add_uniform("float pickerHeight", "_pickerHeight");
+				NodeShader.add_uniform(ParserMaterial.curshader, "float pickerHeight", "_pickerHeight");
 				return "pickerHeight";
 			}
 		}
@@ -1269,10 +1269,10 @@ class ParserMaterial {
 				let offset = 0.0;
 				let store = ParserMaterial.store_var_name(node);
 				ParserMaterial.curshader.n = true;
-				ParserMaterial.curshader.write(`vec3 ${store}_dx = dFdx(n);`);
-				ParserMaterial.curshader.write(`vec3 ${store}_dy = dFdy(n);`);
-				ParserMaterial.curshader.write(`float ${store}_curvature = max(dot(${store}_dx, ${store}_dx), dot(${store}_dy, ${store}_dy));`);
-				ParserMaterial.curshader.write(`${store}_curvature = clamp(pow(${store}_curvature, (1.0 / ` + radius + `) * 0.25) * ` + strength + ` * 2.0 + ` + offset + ` / 10.0, 0.0, 1.0);`);
+				NodeShader.write(ParserMaterial.curshader, `vec3 ${store}_dx = dFdx(n);`);
+				NodeShader.write(ParserMaterial.curshader, `vec3 ${store}_dy = dFdy(n);`);
+				NodeShader.write(ParserMaterial.curshader, `float ${store}_curvature = max(dot(${store}_dx, ${store}_dx), dot(${store}_dy, ${store}_dy));`);
+				NodeShader.write(ParserMaterial.curshader, `${store}_curvature = clamp(pow(${store}_curvature, (1.0 / ` + radius + `) * 0.25) * ` + strength + ` * 2.0 + ` + offset + ` / 10.0, 0.0, 1.0);`);
 				return `${store}_curvature`;
 			}
 			else if (socket == node.outputs[8]) { // Random Per Island
@@ -1295,15 +1295,15 @@ class ParserMaterial {
 		}
 		else if (node.type == "OBJECT_INFO") {
 			if (socket == node.outputs[1]) { // Object Index
-				ParserMaterial.curshader.add_uniform("float objectInfoIndex", "_objectInfoIndex");
+				NodeShader.add_uniform(ParserMaterial.curshader, "float objectInfoIndex", "_objectInfoIndex");
 				return "objectInfoIndex";
 			}
 			else if (socket == node.outputs[2]) { // Material Index
-				ParserMaterial.curshader.add_uniform("float objectInfoMaterialIndex", "_objectInfoMaterialIndex");
+				NodeShader.add_uniform(ParserMaterial.curshader, "float objectInfoMaterialIndex", "_objectInfoMaterialIndex");
 				return "objectInfoMaterialIndex";
 			}
 			else if (socket == node.outputs[3]) { // Random
-				ParserMaterial.curshader.add_uniform("float objectInfoRandom", "_objectInfoRandom");
+				NodeShader.add_uniform(ParserMaterial.curshader, "float objectInfoRandom", "_objectInfoRandom");
 				return "objectInfoRandom";
 			}
 		}
@@ -1311,14 +1311,14 @@ class ParserMaterial {
 			return ParserMaterial.vec1(node.outputs[0].default_value);
 		}
 		else if (node.type == "TEX_BRICK") {
-			ParserMaterial.curshader.add_function(ShaderFunctions.str_tex_brick);
+			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_tex_brick);
 			let co = ParserMaterial.getCoord(node);
 			let scale = ParserMaterial.parse_value_input(node.inputs[4]);
 			let res = `tex_brick_f(${co} * ${scale})`;
 			return res;
 		}
 		else if (node.type == "TEX_CHECKER") {
-			ParserMaterial.curshader.add_function(ShaderFunctions.str_tex_checker);
+			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_tex_checker);
 			let co = ParserMaterial.getCoord(node);
 			let scale = ParserMaterial.parse_value_input(node.inputs[3]);
 			let res = `tex_checker_f(${co}, ${scale})`;
@@ -1348,29 +1348,29 @@ class ParserMaterial {
 			}
 		}
 		else if (node.type == "TEX_MAGIC") {
-			ParserMaterial.curshader.add_function(ShaderFunctions.str_tex_magic);
+			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_tex_magic);
 			let co = ParserMaterial.getCoord(node);
 			let scale = ParserMaterial.parse_value_input(node.inputs[1]);
 			let res = `tex_magic_f(${co} * ${scale} * 4.0)`;
 			return res;
 		}
 		else if (node.type == "TEX_MUSGRAVE") {
-			ParserMaterial.curshader.add_function(ShaderFunctions.str_tex_musgrave);
+			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_tex_musgrave);
 			let co = ParserMaterial.getCoord(node);
 			let scale = ParserMaterial.parse_value_input(node.inputs[1]);
 			let res = `tex_musgrave_f(${co} * ${scale} * 0.5)`;
 			return res;
 		}
 		else if (node.type == "TEX_NOISE") {
-			ParserMaterial.curshader.add_function(ShaderFunctions.str_tex_noise);
+			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_tex_noise);
 			let co = ParserMaterial.getCoord(node);
 			let scale = ParserMaterial.parse_value_input(node.inputs[1]);
 			let res = `tex_noise(${co} * ${scale})`;
 			return res;
 		}
 		else if (node.type == "TEX_VORONOI") {
-			ParserMaterial.curshader.add_function(ShaderFunctions.str_tex_voronoi);
-			ParserMaterial.curshader.add_uniform("sampler2D snoise256", "$noise256.k");
+			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_tex_voronoi);
+			NodeShader.add_uniform(ParserMaterial.curshader, "sampler2D snoise256", "$noise256.k");
 			let co = ParserMaterial.getCoord(node);
 			let scale = ParserMaterial.parse_value_input(node.inputs[1]);
 			let but = node.buttons[0]; // coloring
@@ -1386,7 +1386,7 @@ class ParserMaterial {
 			return res;
 		}
 		else if (node.type == "TEX_WAVE") {
-			ParserMaterial.curshader.add_function(ShaderFunctions.str_tex_wave);
+			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_tex_wave);
 			let co = ParserMaterial.getCoord(node);
 			let scale = ParserMaterial.parse_value_input(node.inputs[1]);
 			let res = `tex_wave_f(${co} * ${scale})`;
@@ -1400,9 +1400,9 @@ class ParserMaterial {
 				return "0.0";
 			}
 			let tex_name = "texbake_" + ParserMaterial.node_name(node);
-			ParserMaterial.curshader.add_uniform("sampler2D " + tex_name, "_" + tex_name);
+			NodeShader.add_uniform(ParserMaterial.curshader, "sampler2D " + tex_name, "_" + tex_name);
 			let store = ParserMaterial.store_var_name(node);
-			ParserMaterial.curshader.write(`float ${store}_res = texture(${tex_name}, texCoord).r;`);
+			NodeShader.write(ParserMaterial.curshader, `float ${store}_res = texture(${tex_name}, texCoord).r;`);
 			return `${store}_res`;
 		}
 		else if (node.type == "NORMAL") {
@@ -1543,7 +1543,7 @@ class ParserMaterial {
 			let script = node.buttons[0].default_value;
 			let link = ParserMaterial.node_name(node);
 			ParserMaterial.script_links.set(link, script);
-			ParserMaterial.curshader.add_uniform("float " + link, "_" + link);
+			NodeShader.add_uniform(ParserMaterial.curshader, "float " + link, "_" + link);
 			return link;
 		}
 		else if (node.type == "SHADER_GPU") {
@@ -1555,7 +1555,7 @@ class ParserMaterial {
 			return `(((${col}.r * 0.3 + ${col}.g * 0.59 + ${col}.b * 0.11) / 3.0) * 2.5)`;
 		}
 		else if (node.type == "SEPHSV") {
-			ParserMaterial.curshader.add_function(ShaderFunctions.str_hue_sat);
+			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_hue_sat);
 			let col = ParserMaterial.parse_vector_input(node.inputs[0]);
 			if (socket == node.outputs[0]) {
 				return `rgb_to_hsv(${col}).r`;
@@ -1687,26 +1687,26 @@ class ParserMaterial {
 		// Write Ys array
 		let ys_var = name + "_ys";
 		let num = points.length;
-		ParserMaterial.curshader.write(`float ${ys_var}[${num}];`); // TODO: Make const
+		NodeShader.write(ParserMaterial.curshader, `float ${ys_var}[${num}];`); // TODO: Make const
 		for (let i = 0; i < num; ++i) {
-			ParserMaterial.curshader.write(`${ys_var}[${i}] = ${points[i][1]};`);
+			NodeShader.write(ParserMaterial.curshader, `${ys_var}[${i}] = ${points[i][1]};`);
 		}
 		// Get index
 		let fac_var = name + "_fac";
-		ParserMaterial.curshader.write(`float ${fac_var} = ${fac};`);
+		NodeShader.write(ParserMaterial.curshader, `float ${fac_var} = ${fac};`);
 		let index = "0";
 		for (let i = 1; i < num; ++i) {
 			index += ` + (${fac_var} > ${points[i][0]} ? 1 : 0)`;
 		}
 		// Write index
 		let index_var = name + "_i";
-		ParserMaterial.curshader.write(`int ${index_var} = ${index};`);
+		NodeShader.write(ParserMaterial.curshader, `int ${index_var} = ${index};`);
 		// Linear
 		// Write Xs array
 		let facs_var = name + "_xs";
-		ParserMaterial.curshader.write(`float ${facs_var}[${num}];`); // TODO: Make const
+		NodeShader.write(ParserMaterial.curshader, `float ${facs_var}[${num}];`); // TODO: Make const
 		for (let i = 0; i < num; ++i) {
-			ParserMaterial.curshader.write(`${facs_var}[${i}] = ${points[i][0]};`);
+			NodeShader.write(ParserMaterial.curshader, `${facs_var}[${i}] = ${points[i][0]};`);
 		}
 		// Map vector
 		return `mix(${ys_var}[${index_var}], ${ys_var}[${index_var} + 1], (${fac_var} - ${facs_var}[${index_var}]) * (1.0 / (${facs_var}[${index_var} + 1] - ${facs_var}[${index_var}])))`;
@@ -1732,7 +1732,7 @@ class ParserMaterial {
 					return null;
 				}
 				ParserMaterial.parsedMap.set(res_var, res);
-				ParserMaterial.curshader.write(`vec3 ${res_var} = ${res};`);
+				NodeShader.write(ParserMaterial.curshader, `vec3 ${res_var} = ${res};`);
 			}
 			else if (st == "VALUE") {
 				let res = ParserMaterial.parse_value(from_node, from_socket);
@@ -1740,7 +1740,7 @@ class ParserMaterial {
 					return null;
 				}
 				ParserMaterial.parsedMap.set(res_var, res);
-				ParserMaterial.curshader.write(`float ${res_var} = ${res};`);
+				NodeShader.write(ParserMaterial.curshader, `float ${res_var} = ${res};`);
 			}
 		}
 		return res_var;
@@ -1752,8 +1752,8 @@ class ParserMaterial {
 
 	static texture_store = (node: TNode, tex: TBindTexture, tex_name: string, color_space: i32): string => {
 		ParserMaterial.matcon.bind_textures.push(tex);
-		ParserMaterial.curshader.context.add_elem("tex", "short2norm");
-		ParserMaterial.curshader.add_uniform("sampler2D " + tex_name);
+		NodeShaderContext.add_elem(ParserMaterial.curshader.context, "tex", "short2norm");
+		NodeShader.add_uniform(ParserMaterial.curshader, "sampler2D " + tex_name);
 		let uv_name = "";
 		if (ParserMaterial.getInputLink(node.inputs[0]) != null) {
 			uv_name = ParserMaterial.parse_vector_input(node.inputs[0]);
@@ -1764,45 +1764,45 @@ class ParserMaterial {
 		let tex_store = ParserMaterial.store_var_name(node);
 
 		if (ParserMaterial.sample_keep_aspect) {
-			ParserMaterial.curshader.write(`vec2 ${tex_store}_size = vec2(textureSize(${tex_name}, 0));`);
-			ParserMaterial.curshader.write(`float ${tex_store}_ax = ${tex_store}_size.x / ${tex_store}_size.y;`);
-			ParserMaterial.curshader.write(`float ${tex_store}_ay = ${tex_store}_size.y / ${tex_store}_size.x;`);
-			ParserMaterial.curshader.write(`vec2 ${tex_store}_uv = ((${uv_name}.xy / ${ParserMaterial.sample_uv_scale} - vec2(0.5, 0.5)) * vec2(max(${tex_store}_ay, 1.0), max(${tex_store}_ax, 1.0))) + vec2(0.5, 0.5);`);
-			ParserMaterial.curshader.write(`if (${tex_store}_uv.x < 0.0 || ${tex_store}_uv.y < 0.0 || ${tex_store}_uv.x > 1.0 || ${tex_store}_uv.y > 1.0) discard;`);
-			ParserMaterial.curshader.write(`${tex_store}_uv *= ${ParserMaterial.sample_uv_scale};`);
+			NodeShader.write(ParserMaterial.curshader, `vec2 ${tex_store}_size = vec2(textureSize(${tex_name}, 0));`);
+			NodeShader.write(ParserMaterial.curshader, `float ${tex_store}_ax = ${tex_store}_size.x / ${tex_store}_size.y;`);
+			NodeShader.write(ParserMaterial.curshader, `float ${tex_store}_ay = ${tex_store}_size.y / ${tex_store}_size.x;`);
+			NodeShader.write(ParserMaterial.curshader, `vec2 ${tex_store}_uv = ((${uv_name}.xy / ${ParserMaterial.sample_uv_scale} - vec2(0.5, 0.5)) * vec2(max(${tex_store}_ay, 1.0), max(${tex_store}_ax, 1.0))) + vec2(0.5, 0.5);`);
+			NodeShader.write(ParserMaterial.curshader, `if (${tex_store}_uv.x < 0.0 || ${tex_store}_uv.y < 0.0 || ${tex_store}_uv.x > 1.0 || ${tex_store}_uv.y > 1.0) discard;`);
+			NodeShader.write(ParserMaterial.curshader, `${tex_store}_uv *= ${ParserMaterial.sample_uv_scale};`);
 			uv_name = `${tex_store}_uv`;
 		}
 
 		if (ParserMaterial.triplanar) {
-			ParserMaterial.curshader.write(`vec4 ${tex_store} = vec4(0.0, 0.0, 0.0, 0.0);`);
-			ParserMaterial.curshader.write(`if (texCoordBlend.x > 0) ${tex_store} += texture(${tex_name}, ${uv_name}.xy) * texCoordBlend.x;`);
-			ParserMaterial.curshader.write(`if (texCoordBlend.y > 0) ${tex_store} += texture(${tex_name}, ${uv_name}1.xy) * texCoordBlend.y;`);
-			ParserMaterial.curshader.write(`if (texCoordBlend.z > 0) ${tex_store} += texture(${tex_name}, ${uv_name}2.xy) * texCoordBlend.z;`);
+			NodeShader.write(ParserMaterial.curshader, `vec4 ${tex_store} = vec4(0.0, 0.0, 0.0, 0.0);`);
+			NodeShader.write(ParserMaterial.curshader, `if (texCoordBlend.x > 0) ${tex_store} += texture(${tex_name}, ${uv_name}.xy) * texCoordBlend.x;`);
+			NodeShader.write(ParserMaterial.curshader, `if (texCoordBlend.y > 0) ${tex_store} += texture(${tex_name}, ${uv_name}1.xy) * texCoordBlend.y;`);
+			NodeShader.write(ParserMaterial.curshader, `if (texCoordBlend.z > 0) ${tex_store} += texture(${tex_name}, ${uv_name}2.xy) * texCoordBlend.z;`);
 		}
 		else {
 			if (ParserMaterial.curshader == ParserMaterial.frag) {
 				ParserMaterial.textureMap.set(tex_store, `texture(${tex_name}, ${uv_name}.xy)`);
-				ParserMaterial.curshader.write(`vec4 ${tex_store} = texture(${tex_name}, ${uv_name}.xy);`);
+				NodeShader.write(ParserMaterial.curshader, `vec4 ${tex_store} = texture(${tex_name}, ${uv_name}.xy);`);
 			}
 			else {
 				ParserMaterial.textureMap.set(tex_store, `textureLod(${tex_name}, ${uv_name}.xy, 0.0)`);
-				ParserMaterial.curshader.write(`vec4 ${tex_store} = textureLod(${tex_name}, ${uv_name}.xy, 0.0);`);
+				NodeShader.write(ParserMaterial.curshader, `vec4 ${tex_store} = textureLod(${tex_name}, ${uv_name}.xy, 0.0);`);
 			}
 			if (!tex.file.endsWith(".jpg")) { // Pre-mult alpha
-				ParserMaterial.curshader.write(`${tex_store}.rgb *= ${tex_store}.a;`);
+				NodeShader.write(ParserMaterial.curshader, `${tex_store}.rgb *= ${tex_store}.a;`);
 			}
 		}
 
 		if (ParserMaterial.transform_color_space) {
 			// Base color socket auto-converts from sRGB to linear
 			if (color_space == ColorSpace.SpaceLinear && ParserMaterial.parsing_basecolor) { // Linear to sRGB
-				ParserMaterial.curshader.write(`${tex_store}.rgb = pow(${tex_store}.rgb, vec3(2.2, 2.2, 2.2));`);
+				NodeShader.write(ParserMaterial.curshader, `${tex_store}.rgb = pow(${tex_store}.rgb, vec3(2.2, 2.2, 2.2));`);
 			}
 			else if (color_space == ColorSpace.SpaceSRGB && !ParserMaterial.parsing_basecolor) { // sRGB to linear
-				ParserMaterial.curshader.write(`${tex_store}.rgb = pow(${tex_store}.rgb, vec3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));`);
+				NodeShader.write(ParserMaterial.curshader, `${tex_store}.rgb = pow(${tex_store}.rgb, vec3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));`);
 			}
 			else if (color_space == ColorSpace.SpaceDirectXNormalMap) { // DirectX normal map to OpenGL normal map
-				ParserMaterial.curshader.write(`${tex_store}.y = 1.0 - ${tex_store}.y;`);
+				NodeShader.write(ParserMaterial.curshader, `${tex_store}.y = 1.0 - ${tex_store}.y;`);
 			}
 		}
 		return tex_store;

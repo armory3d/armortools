@@ -172,7 +172,7 @@ class TabMaterials {
 
 						if (UIMenu.menuButton(ui, tr("Duplicate"))) {
 							let _init = () => {
-								Context.raw.material = new SlotMaterial(Project.materials[0].data);
+								Context.raw.material = SlotMaterial.create(Project.materials[0].data);
 								Project.materials.push(Context.raw.material);
 								let cloned = JSON.parse(JSON.stringify(Project.materials[i].canvas));
 								Context.raw.material.canvas = cloned;
@@ -267,7 +267,7 @@ class TabMaterials {
 		let ui = UIBase.ui;
 		if (ui.button(text)) {
 			ui.g.end();
-			Context.raw.material = new SlotMaterial(Project.materials[0].data);
+			Context.raw.material = SlotMaterial.create(Project.materials[0].data);
 			Project.materials.push(Context.raw.material);
 			TabMaterials.updateMaterial();
 			ui.g.begin(false);
@@ -299,7 +299,7 @@ class TabMaterials {
 	}
 
 	static acceptSwatchDrag = (swatch: TSwatchColor) => {
-		Context.raw.material = new SlotMaterial(Project.materials[0].data);
+		Context.raw.material = SlotMaterial.create(Project.materials[0].data);
 		for (let node of Context.raw.material.canvas.nodes) {
 			if (node.type == "RGB" ) {
 				node.outputs[0].default_value = [
@@ -322,7 +322,7 @@ class TabMaterials {
 		History.newMaterial();
 	}
 
-	static deleteMaterial = (m: SlotMaterial) => {
+	static deleteMaterial = (m: SlotMaterialRaw) => {
 		let i = Project.materials.indexOf(m);
 		for (let l of Project.layers) if (l.fill_layer == m) l.fill_layer = null;
 		History.deleteMaterial();

@@ -14,8 +14,8 @@ class ExportTexture {
 		else if (Context.raw.layersExport == ExportMode.ExportPerUdimTile) {
 			let udimTiles: string[] = [];
 			for (let l of Project.layers) {
-				if (l.getObjectMask() > 0) {
-					let name = Project.paintObjects[l.getObjectMask() - 1].name;
+				if (SlotLayer.getObjectMask(l) > 0) {
+					let name = Project.paintObjects[SlotLayer.getObjectMask(l) - 1].name;
 					if (name.substr(name.length - 5, 2) == ".1") { // tile.1001
 						udimTiles.push(name.substr(name.length - 5));
 					}
@@ -29,8 +29,8 @@ class ExportTexture {
 		else if (Context.raw.layersExport == ExportMode.ExportPerObject) {
 			let objectNames: string[] = [];
 			for (let l of Project.layers) {
-				if (l.getObjectMask() > 0) {
-					let name = Project.paintObjects[l.getObjectMask() - 1].name;
+				if (SlotLayer.getObjectMask(l) > 0) {
+					let name = Project.paintObjects[SlotLayer.getObjectMask(l) - 1].name;
 					if (objectNames.indexOf(name) == -1) {
 						objectNames.push(name);
 					}
@@ -53,11 +53,11 @@ class ExportTexture {
 			}
 			if (atlasExport) {
 				for (let atlasIndex = 0; atlasIndex < Project.atlasObjects.length; ++atlasIndex) {
-					let layers: SlotLayer[] = [];
+					let layers: SlotLayerRaw[] = [];
 					for (let objectIndex = 0; objectIndex < Project.atlasObjects.length; ++objectIndex) {
 						if (Project.atlasObjects[objectIndex] == atlasIndex) {
 							for (let l of Project.layers) {
-								if (l.getObjectMask() == 0 /* shared object */ || l.getObjectMask() - 1 == objectIndex) layers.push(l);
+								if (SlotLayer.getObjectMask(l) == 0 /* shared object */ || SlotLayer.getObjectMask(l) - 1 == objectIndex) layers.push(l);
 							}
 						}
 					}
@@ -66,7 +66,7 @@ class ExportTexture {
 					}
 				}
 			}
-			else ExportTexture.runLayers(path, Context.raw.layersExport == ExportMode.ExportSelected ? (Context.raw.layer.isGroup() ? Context.raw.layer.getChildren() : [Context.raw.layer]) : Project.layers);
+			else ExportTexture.runLayers(path, Context.raw.layersExport == ExportMode.ExportSelected ? (SlotLayer.isGroup(Context.raw.layer) ? SlotLayer.getChildren(Context.raw.layer) : [Context.raw.layer]) : Project.layers);
 		}
 		///end
 
@@ -87,7 +87,7 @@ class ExportTexture {
 	///if is_paint
 	static runBakeMaterial = (path: string) => {
 		if (RenderPathPaint.liveLayer == null) {
-			RenderPathPaint.liveLayer = new SlotLayer("_live");
+			RenderPathPaint.liveLayer = SlotLayer.create("_live");
 		}
 
 		let _tool = Context.raw.tool;
@@ -112,7 +112,7 @@ class ExportTexture {
 	///end
 
 	///if is_paint
-	static runLayers = (path: string, layers: SlotLayer[], objectName = "", bakeMaterial = false) => {
+	static runLayers = (path: string, layers: SlotLayerRaw[], objectName = "", bakeMaterial = false) => {
 	///end
 
 	///if is_lab
@@ -145,8 +145,8 @@ class ExportTexture {
 
 		// Append object mask name
 		let exportSelected = Context.raw.layersExport == ExportMode.ExportSelected;
-		if (exportSelected && layers[0].getObjectMask() > 0) {
-			f += "_" + Project.paintObjects[layers[0].getObjectMask() - 1].name;
+		if (exportSelected && SlotLayer.getObjectMask(layers[0]) > 0) {
+			f += "_" + Project.paintObjects[SlotLayer.getObjectMask(layers[0]) - 1].name;
 		}
 		if (!isUdim && !exportSelected && objectName != "") {
 			f += "_" + objectName;
@@ -165,17 +165,17 @@ class ExportTexture {
 
 		// Flatten layers
 		for (let l1 of layers) {
-			if (!exportSelected && !l1.isVisible()) continue;
-			if (!l1.isLayer()) continue;
+			if (!exportSelected && !SlotLayer.isVisible(l1)) continue;
+			if (!SlotLayer.isLayer(l1)) continue;
 
-			if (objectName != "" && l1.getObjectMask() > 0) {
-				if (isUdim && !Project.paintObjects[l1.getObjectMask() - 1].name.endsWith(objectName)) continue;
+			if (objectName != "" && SlotLayer.getObjectMask(l1) > 0) {
+				if (isUdim && !Project.paintObjects[SlotLayer.getObjectMask(l1) - 1].name.endsWith(objectName)) continue;
 				let perObject = Context.raw.layersExport == ExportMode.ExportPerObject;
-				if (perObject && Project.paintObjects[l1.getObjectMask() - 1].name != objectName) continue;
+				if (perObject && Project.paintObjects[SlotLayer.getObjectMask(l1) - 1].name != objectName) continue;
 			}
 
 			let mask = empty;
-			let l1masks = l1.getMasks();
+			let l1masks = SlotLayer.getMasks(l1);
 			if (l1masks != null && !bakeMaterial) {
 				if (l1masks.length > 1) {
 					Base.makeTempMaskImg();
@@ -203,7 +203,7 @@ class ExportTexture {
 				Base.expa.g4.setTexture(Base.tex1, empty);
 				Base.expa.g4.setTexture(Base.texmask, mask);
 				Base.expa.g4.setTexture(Base.texa, Base.tempImage);
-				Base.expa.g4.setFloat(Base.opac, l1.getOpacity());
+				Base.expa.g4.setFloat(Base.opac, SlotLayer.getOpacity(l1));
 				Base.expa.g4.setInt(Base.blending, layers.length > 1 ? l1.blending : 0);
 				Base.expa.g4.setVertexBuffer(ConstData.screenAlignedVB);
 				Base.expa.g4.setIndexBuffer(ConstData.screenAlignedIB);
@@ -224,7 +224,7 @@ class ExportTexture {
 				Base.expb.g4.setTexture(Base.tex1, l1.texpaint_nor);
 				Base.expb.g4.setTexture(Base.texmask, mask);
 				Base.expb.g4.setTexture(Base.texa, Base.tempImage);
-				Base.expb.g4.setFloat(Base.opac, l1.getOpacity());
+				Base.expb.g4.setFloat(Base.opac, SlotLayer.getOpacity(l1));
 				Base.expb.g4.setInt(Base.blending, l1.paintNorBlend ? -2 : -1);
 				Base.expb.g4.setVertexBuffer(ConstData.screenAlignedVB);
 				Base.expb.g4.setIndexBuffer(ConstData.screenAlignedIB);
@@ -240,12 +240,12 @@ class ExportTexture {
 				Base.tempImage.g2.end();
 
 				if (l1.paintOcc && l1.paintRough && l1.paintMet && l1.paintHeight) {
-					Base.commandsMergePack(Base.pipeMerge, Base.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask, l1.paintHeightBlend ? -3 : -1);
+					Base.commandsMergePack(Base.pipeMerge, Base.expc, l1.texpaint, l1.texpaint_pack, SlotLayer.getOpacity(l1), mask, l1.paintHeightBlend ? -3 : -1);
 				}
 				else {
-					if (l1.paintOcc) Base.commandsMergePack(Base.pipeMergeR, Base.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
-					if (l1.paintRough) Base.commandsMergePack(Base.pipeMergeG, Base.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
-					if (l1.paintMet) Base.commandsMergePack(Base.pipeMergeB, Base.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
+					if (l1.paintOcc) Base.commandsMergePack(Base.pipeMergeR, Base.expc, l1.texpaint, l1.texpaint_pack, SlotLayer.getOpacity(l1), mask);
+					if (l1.paintRough) Base.commandsMergePack(Base.pipeMergeG, Base.expc, l1.texpaint, l1.texpaint_pack, SlotLayer.getOpacity(l1), mask);
+					if (l1.paintMet) Base.commandsMergePack(Base.pipeMergeB, Base.expc, l1.texpaint, l1.texpaint_pack, SlotLayer.getOpacity(l1), mask);
 				}
 			}
 		}

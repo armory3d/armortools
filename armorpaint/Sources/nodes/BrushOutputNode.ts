@@ -95,7 +95,7 @@ class BrushOutputNode extends LogicNode {
 		let fillLayer = Context.raw.layer.fill_layer != null && Context.raw.tool != WorkspaceTool.ToolPicker && Context.raw.tool != WorkspaceTool.ToolMaterial && Context.raw.tool != WorkspaceTool.ToolColorId;
 
 		// Do not paint over groups
-		let groupLayer = Context.raw.layer.isGroup();
+		let groupLayer = SlotLayer.isGroup(Context.raw.layer);
 
 		// Paint bounds
 		if (Context.raw.paintVec.x > left &&
@@ -104,7 +104,7 @@ class BrushOutputNode extends LogicNode {
 			Context.raw.paintVec.y < 1 &&
 			!fillLayer &&
 			!groupLayer &&
-			(Context.raw.layer.isVisible() || Context.raw.paint2d) &&
+			(SlotLayer.isVisible(Context.raw.layer) || Context.raw.paint2d) &&
 			!UIBase.ui.isHovered &&
 			!Base.isDragging &&
 			!Base.isResizing &&

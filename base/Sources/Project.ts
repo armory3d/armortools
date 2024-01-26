@@ -12,10 +12,10 @@ class Project {
 	static assetMap = new Map<i32, any>(); // Image | Font
 	static meshList: string[] = null;
 	///if (is_paint || is_sculpt)
-	static materials: SlotMaterial[] = null;
-	static brushes: SlotBrush[] = null;
-	static layers: SlotLayer[] = null;
-	static fonts: SlotFont[] = null;
+	static materials: SlotMaterialRaw[] = null;
+	static brushes: SlotBrushRaw[] = null;
+	static layers: SlotLayerRaw[] = null;
+	static fonts: SlotFontRaw[] = null;
 	static atlasObjects: i32[] = null;
 	static atlasNames: string[] = null;
 	///end
@@ -217,10 +217,10 @@ class Project {
 			Context.raw.paintObject.transform.buildMatrix();
 			Context.raw.paintObject.name = n;
 			Project.paintObjects = [Context.raw.paintObject];
-			while (Project.materials.length > 0) Project.materials.pop().unload();
+			while (Project.materials.length > 0) SlotMaterial.unload(Project.materials.pop());
 			Data.getMaterial("Scene", "Material", (m: MaterialData) => {
 				///if (is_paint || is_sculpt)
-				Project.materials.push(new SlotMaterial(m));
+				Project.materials.push(SlotMaterial.create(m));
 				///end
 				///if is_lab
 				Project.materialData = m;
@@ -236,10 +236,10 @@ class Project {
 			Project.materialGroups = [];
 
 			///if (is_paint || is_sculpt)
-			Project.brushes = [new SlotBrush()];
+			Project.brushes = [SlotBrush.create()];
 			Context.raw.brush = Project.brushes[0];
 
-			Project.fonts = [new SlotFont("default.ttf", Base.font)];
+			Project.fonts = [SlotFont.create("default.ttf", Base.font)];
 			Context.raw.font = Project.fonts[0];
 			///end
 
@@ -273,8 +273,8 @@ class Project {
 
 				///if (is_paint || is_sculpt)
 				let aspectRatioChanged = Project.layers[0].texpaint.width != Config.getTextureResX() || Project.layers[0].texpaint.height != Config.getTextureResY();
-				while (Project.layers.length > 0) Project.layers.pop().unload();
-				let layer = new SlotLayer();
+				while (Project.layers.length > 0) SlotLayer.unload(Project.layers.pop());
+				let layer = SlotLayer.create();
 				Project.layers.push(layer);
 				Context.setLayer(layer);
 				if (aspectRatioChanged) {
@@ -331,7 +331,7 @@ class Project {
 				}
 
 				// Create a new brush
-				Context.raw.brush = new SlotBrush();
+				Context.raw.brush = SlotBrush.create();
 				Project.brushes.push(Context.raw.brush);
 
 				// Create and link image node

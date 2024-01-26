@@ -20,7 +20,7 @@ class Context {
 		Context.setMaterial(Project.materials[i]);
 	}
 
-	static setMaterial = (m: SlotMaterial) => {
+	static setMaterial = (m: SlotMaterialRaw) => {
 		if (Project.materials.indexOf(m) == -1) return;
 		Context.raw.material = m;
 		MakeMaterial.parsePaintMaterial();
@@ -43,7 +43,7 @@ class Context {
 		Context.setBrush(Project.brushes[i]);
 	}
 
-	static setBrush = (b: SlotBrush) => {
+	static setBrush = (b: SlotBrushRaw) => {
 		if (Project.brushes.indexOf(b) == -1) return;
 		Context.raw.brush = b;
 		MakeMaterial.parseBrush();
@@ -56,7 +56,7 @@ class Context {
 		Context.setFont(Project.fonts[i]);
 	}
 
-	static setFont = (f: SlotFont) => {
+	static setFont = (f: SlotFontRaw) => {
 		if (Project.fonts.indexOf(f) == -1) return;
 		Context.raw.font = f;
 		UtilRender.makeTextPreview();
@@ -70,7 +70,7 @@ class Context {
 		Context.setLayer(Project.layers[i]);
 	}
 
-	static setLayer = (l: SlotLayer) => {
+	static setLayer = (l: SlotLayerRaw) => {
 		if (l == Context.raw.layer) return;
 		Context.raw.layer = l;
 		UIHeader.headerHandle.redraws = 2;
@@ -147,7 +147,7 @@ class Context {
 		for (let p of Project.paintObjects) p.skip_context = "paint";
 		Context.raw.paintObject = o;
 
-		let mask = Context.raw.layer.getObjectMask();
+		let mask = SlotLayer.getObjectMask(Context.raw.layer);
 		if (Context.layerFilterUsed()) mask = Context.raw.layerFilter;
 
 		if (Context.raw.mergedObject == null || mask > 0) {
@@ -185,7 +185,7 @@ class Context {
 	}
 
 	static objectMaskUsed = (): bool => {
-		return Context.raw.layer.getObjectMask() > 0 && Context.raw.layer.getObjectMask() <= Project.paintObjects.length;
+		return SlotLayer.getObjectMask(Context.raw.layer) > 0 && SlotLayer.getObjectMask(Context.raw.layer) <= Project.paintObjects.length;
 	}
 
 	static inViewport = (): bool => {
@@ -290,7 +290,7 @@ class Context {
 	}
 
 	// @:keep
-	static setViewportShader = (viewportShader: (ns: NodeShader)=>string) => {
+	static setViewportShader = (viewportShader: (ns: NodeShaderRaw)=>string) => {
 		Context.raw.viewportShader = viewportShader;
 		Context.setRenderPath();
 	}

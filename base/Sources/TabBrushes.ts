@@ -9,7 +9,7 @@ class TabBrushes {
 			ui.beginSticky();
 			ui.row([1 / 4, 1 / 4, 1 / 4]);
 			if (ui.button(tr("New"))) {
-				Context.raw.brush = new SlotBrush();
+				Context.raw.brush = SlotBrush.create();
 				Project.brushes.push(Context.raw.brush);
 				MakeMaterial.parseBrush();
 				UINodes.hwnd.redraws = 2;
@@ -84,7 +84,7 @@ class TabBrushes {
 
 							if (UIMenu.menuButton(ui, tr("Duplicate"))) {
 								let _init = () => {
-									Context.raw.brush = new SlotBrush();
+									Context.raw.brush = SlotBrush.create();
 									Project.brushes.push(Context.raw.brush);
 									let cloned = JSON.parse(JSON.stringify(Project.brushes[i].canvas));
 									Context.raw.brush.canvas = cloned;
@@ -140,7 +140,7 @@ class TabBrushes {
 		}
 	}
 
-	static deleteBrush = (b: SlotBrush) => {
+	static deleteBrush = (b: SlotBrushRaw) => {
 		let i = Project.brushes.indexOf(b);
 		Context.selectBrush(i == Project.brushes.length - 1 ? i - 1 : i + 1);
 		Project.brushes.splice(i, 1);

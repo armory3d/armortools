@@ -1,9 +1,9 @@
 
 class MakeParticle {
 
-	static run = (data: NodeShaderData): NodeShaderContext => {
+	static run = (data: TMaterial): NodeShaderContextRaw => {
 		let context_id = "mesh";
-		let con_part: NodeShaderContext = data.add_context({
+		let con_part = NodeShaderContext.create(data, {
 			name: context_id,
 			depth_write: false,
 			compare_mode: "always",
@@ -12,107 +12,107 @@ class MakeParticle {
 			color_attachments: ["R8"]
 		});
 
-		let vert = con_part.make_vert();
-		let frag = con_part.make_frag();
+		let vert = NodeShaderContext.make_vert(con_part);
+		let frag = NodeShaderContext.make_frag(con_part);
 		frag.ins = vert.outs;
 
-		vert.write_attrib('vec4 spos = vec4(pos.xyz, 1.0);');
+		NodeShader.write_attrib(vert, 'vec4 spos = vec4(pos.xyz, 1.0);');
 
-		vert.add_uniform('float brushRadius', '_brushRadius');
-		vert.write_attrib('vec3 emitFrom = vec3(fhash(gl_InstanceID), fhash(gl_InstanceID * 2), fhash(gl_InstanceID * 3));');
-		vert.write_attrib('emitFrom = emitFrom * brushRadius - brushRadius / 2.0;');
-		vert.write_attrib('spos.xyz += emitFrom * vec3(256.0, 256.0, 256.0);');
+		NodeShader.add_uniform(vert, 'float brushRadius', '_brushRadius');
+		NodeShader.write_attrib(vert, 'vec3 emitFrom = vec3(fhash(gl_InstanceID), fhash(gl_InstanceID * 2), fhash(gl_InstanceID * 3));');
+		NodeShader.write_attrib(vert, 'emitFrom = emitFrom * brushRadius - brushRadius / 2.0;');
+		NodeShader.write_attrib(vert, 'spos.xyz += emitFrom * vec3(256.0, 256.0, 256.0);');
 
-		vert.add_uniform('mat4 pd', '_particleData');
+		NodeShader.add_uniform(vert, 'mat4 pd', '_particleData');
 
 		let str_tex_hash = "float fhash(int n) { return fract(sin(float(n)) * 43758.5453); }\n";
-		vert.add_function(str_tex_hash);
-		vert.add_out('float p_age');
-		vert.write('p_age = pd[3][3] - float(gl_InstanceID) * pd[0][1];');
-		vert.write('p_age -= p_age * fhash(gl_InstanceID) * pd[2][3];');
+		NodeShader.add_function(vert, str_tex_hash);
+		NodeShader.add_out(vert, 'float p_age');
+		NodeShader.write(vert, 'p_age = pd[3][3] - float(gl_InstanceID) * pd[0][1];');
+		NodeShader.write(vert, 'p_age -= p_age * fhash(gl_InstanceID) * pd[2][3];');
 
-		vert.write('if (pd[0][0] > 0.0 && p_age < 0.0) p_age += float(int(-p_age / pd[0][0]) + 1) * pd[0][0];');
+		NodeShader.write(vert, 'if (pd[0][0] > 0.0 && p_age < 0.0) p_age += float(int(-p_age / pd[0][0]) + 1) * pd[0][0];');
 
-		vert.add_out('float p_lifetime');
-		vert.write('p_lifetime = pd[0][2];');
-		vert.write('if (p_age < 0.0 || p_age > p_lifetime) {');
-		// vert.write('SPIRV_Cross_Output stage_output;');
-		// vert.write('stage_output.svpos /= 0.0;');
-		// vert.write('return stage_output;');
-		vert.write('spos /= 0.0;');
-		vert.write('}');
+		NodeShader.add_out(vert, 'float p_lifetime');
+		NodeShader.write(vert, 'p_lifetime = pd[0][2];');
+		NodeShader.write(vert, 'if (p_age < 0.0 || p_age > p_lifetime) {');
+		// NodeShader.write(vert, 'SPIRV_Cross_Output stage_output;');
+		// NodeShader.write(vert, 'stage_output.svpos /= 0.0;');
+		// NodeShader.write(vert, 'return stage_output;');
+		NodeShader.write(vert, 'spos /= 0.0;');
+		NodeShader.write(vert, '}');
 
-		vert.add_out('vec3 p_velocity');
-		vert.write('p_velocity = vec3(pd[1][0], pd[1][1], pd[1][2]);');
-		vert.write('p_velocity.x += fhash(gl_InstanceID)                     * pd[1][3] - pd[1][3] / 2.0;');
-		vert.write('p_velocity.y += fhash(gl_InstanceID +     int(pd[0][3])) * pd[1][3] - pd[1][3] / 2.0;');
-		vert.write('p_velocity.z += fhash(gl_InstanceID + 2 * int(pd[0][3])) * pd[1][3] - pd[1][3] / 2.0;');
-		vert.write('p_velocity.x += (pd[2][0] * p_age) / 5.0;');
-		vert.write('p_velocity.y += (pd[2][1] * p_age) / 5.0;');
-		vert.write('p_velocity.z += (pd[2][2] * p_age) / 5.0;');
+		NodeShader.add_out(vert, 'vec3 p_velocity');
+		NodeShader.write(vert, 'p_velocity = vec3(pd[1][0], pd[1][1], pd[1][2]);');
+		NodeShader.write(vert, 'p_velocity.x += fhash(gl_InstanceID)                     * pd[1][3] - pd[1][3] / 2.0;');
+		NodeShader.write(vert, 'p_velocity.y += fhash(gl_InstanceID +     int(pd[0][3])) * pd[1][3] - pd[1][3] / 2.0;');
+		NodeShader.write(vert, 'p_velocity.z += fhash(gl_InstanceID + 2 * int(pd[0][3])) * pd[1][3] - pd[1][3] / 2.0;');
+		NodeShader.write(vert, 'p_velocity.x += (pd[2][0] * p_age) / 5.0;');
+		NodeShader.write(vert, 'p_velocity.y += (pd[2][1] * p_age) / 5.0;');
+		NodeShader.write(vert, 'p_velocity.z += (pd[2][2] * p_age) / 5.0;');
 
-		vert.add_out('vec3 p_location');
-		vert.write('p_location = p_velocity * p_age;');
-		vert.write('spos.xyz += p_location;');
-		vert.write('spos.xyz *= vec3(0.01, 0.01, 0.01);');
+		NodeShader.add_out(vert, 'vec3 p_location');
+		NodeShader.write(vert, 'p_location = p_velocity * p_age;');
+		NodeShader.write(vert, 'spos.xyz += p_location;');
+		NodeShader.write(vert, 'spos.xyz *= vec3(0.01, 0.01, 0.01);');
 
-		vert.add_uniform('mat4 WVP', '_worldViewProjectionMatrix');
-		vert.write('gl_Position = mul(spos, WVP);');
+		NodeShader.add_uniform(vert, 'mat4 WVP', '_worldViewProjectionMatrix');
+		NodeShader.write(vert, 'gl_Position = mul(spos, WVP);');
 
-		vert.add_uniform('vec4 inp', '_inputBrush');
-		vert.write('vec2 binp = vec2(inp.x, 1.0 - inp.y);');
-		vert.write('binp = binp * 2.0 - 1.0;');
-		vert.write('binp *= gl_Position.w;');
-		vert.write('gl_Position.xy += binp;');
+		NodeShader.add_uniform(vert, 'vec4 inp', '_inputBrush');
+		NodeShader.write(vert, 'vec2 binp = vec2(inp.x, 1.0 - inp.y);');
+		NodeShader.write(vert, 'binp = binp * 2.0 - 1.0;');
+		NodeShader.write(vert, 'binp *= gl_Position.w;');
+		NodeShader.write(vert, 'gl_Position.xy += binp;');
 
-		vert.add_out('float p_fade');
-		vert.write('p_fade = sin(min((p_age / 8.0) * 3.141592, 3.141592));');
+		NodeShader.add_out(vert, 'float p_fade');
+		NodeShader.write(vert, 'p_fade = sin(min((p_age / 8.0) * 3.141592, 3.141592));');
 
-		frag.add_out('float fragColor');
-		frag.write('fragColor = p_fade;');
+		NodeShader.add_out(frag, 'float fragColor');
+		NodeShader.write(frag, 'fragColor = p_fade;');
 
-		// vert.add_out('vec4 wvpposition');
-		// vert.write('wvpposition = gl_Position;');
-		// frag.write('vec2 texCoord = wvpposition.xy / wvpposition.w;');
-		// frag.add_uniform('sampler2D gbufferD');
-		// frag.write('fragColor *= 1.0 - clamp(distance(textureLod(gbufferD, texCoord, 0.0).r, wvpposition.z), 0.0, 1.0);');
+		// NodeShader.add_out(vert, 'vec4 wvpposition');
+		// NodeShader.write(vert, 'wvpposition = gl_Position;');
+		// NodeShader.write(frag, 'vec2 texCoord = wvpposition.xy / wvpposition.w;');
+		// NodeShader.add_uniform(frag, 'sampler2D gbufferD');
+		// NodeShader.write(frag, 'fragColor *= 1.0 - clamp(distance(textureLod(gbufferD, texCoord, 0.0).r, wvpposition.z), 0.0, 1.0);');
 
 		// Material.finalize(con_part);
 		con_part.data.shader_from_source = true;
-		con_part.data.vertex_shader = vert.get();
-		con_part.data.fragment_shader = frag.get();
+		con_part.data.vertex_shader = NodeShader.get(vert);
+		con_part.data.fragment_shader = NodeShader.get(frag);
 
 		return con_part;
 	}
 
-	static mask = (vert: NodeShader, frag: NodeShader) => {
+	static mask = (vert: NodeShaderRaw, frag: NodeShaderRaw) => {
 		///if arm_physics
 		if (Context.raw.particlePhysics) {
-			vert.add_out('vec4 wpos');
-			vert.add_uniform('mat4 W', '_worldMatrix');
-			vert.write_attrib('wpos = mul(vec4(pos.xyz, 1.0), W);');
-			frag.add_uniform('vec3 particleHit', '_particleHit');
-			frag.add_uniform('vec3 particleHitLast', '_particleHitLast');
+			NodeShader.add_out(vert, 'vec4 wpos');
+			NodeShader.add_uniform(vert, 'mat4 W', '_worldMatrix');
+			NodeShader.write_attrib(vert, 'wpos = mul(vec4(pos.xyz, 1.0), W);');
+			NodeShader.add_uniform(frag, 'vec3 particleHit', '_particleHit');
+			NodeShader.add_uniform(frag, 'vec3 particleHitLast', '_particleHitLast');
 
-			frag.write('vec3 pa = wpos.xyz - particleHit;');
-			frag.write('vec3 ba = particleHitLast - particleHit;');
-			frag.write('float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);');
-			frag.write('dist = length(pa - ba * h) * 10.0;');
-			// frag.write('dist = distance(particleHit, wpos.xyz) * 10.0;');
+			NodeShader.write(frag, 'vec3 pa = wpos.xyz - particleHit;');
+			NodeShader.write(frag, 'vec3 ba = particleHitLast - particleHit;');
+			NodeShader.write(frag, 'float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);');
+			NodeShader.write(frag, 'dist = length(pa - ba * h) * 10.0;');
+			// NodeShader.write(frag, 'dist = distance(particleHit, wpos.xyz) * 10.0;');
 
-			frag.write('if (dist > 1.0) discard;');
-			frag.write('float str = clamp(pow(1.0 / dist * brushHardness * 0.2, 4.0), 0.0, 1.0) * opacity;');
-			frag.write('if (particleHit.x == 0.0 && particleHit.y == 0.0 && particleHit.z == 0.0) str = 0.0;');
-			frag.write('if (str == 0.0) discard;');
+			NodeShader.write(frag, 'if (dist > 1.0) discard;');
+			NodeShader.write(frag, 'float str = clamp(pow(1.0 / dist * brushHardness * 0.2, 4.0), 0.0, 1.0) * opacity;');
+			NodeShader.write(frag, 'if (particleHit.x == 0.0 && particleHit.y == 0.0 && particleHit.z == 0.0) str = 0.0;');
+			NodeShader.write(frag, 'if (str == 0.0) discard;');
 			return;
 		}
 		///end
 
-		frag.add_uniform('sampler2D texparticle', '_texparticle');
+		NodeShader.add_uniform(frag, 'sampler2D texparticle', '_texparticle');
 		///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
-		frag.write('float str = textureLod(texparticle, sp.xy, 0.0).r;');
+		NodeShader.write(frag, 'float str = textureLod(texparticle, sp.xy, 0.0).r;');
 		///else
-		frag.write('float str = textureLod(texparticle, vec2(sp.x, (1.0 - sp.y)), 0.0).r;');
+		NodeShader.write(frag, 'float str = textureLod(texparticle, vec2(sp.x, (1.0 - sp.y)), 0.0).r;');
 		///end
 	}
 }

@@ -1,9 +1,9 @@
 
 class MakeNodePreview {
 
-	static run = (data: NodeShaderData, matcon: TMaterialContext, node: TNode, group: TNodeCanvas, parents: TNode[]): NodeShaderContext => {
+	static run = (data: TMaterial, matcon: TMaterialContext, node: TNode, group: TNodeCanvas, parents: TNode[]): NodeShaderContextRaw => {
 		let context_id = "mesh";
-		let con_mesh: NodeShaderContext = data.add_context({
+		let con_mesh = NodeShaderContext.create(data, {
 			name: context_id,
 			depth_write: false,
 			compare_mode: "always",
@@ -13,16 +13,16 @@ class MakeNodePreview {
 		});
 
 		con_mesh.allow_vcols = true;
-		let vert = con_mesh.make_vert();
-		let frag = con_mesh.make_frag();
+		let vert = NodeShaderContext.make_vert(con_mesh);
+		let frag = NodeShaderContext.make_frag(con_mesh);
 		frag.ins = vert.outs;
 
-		vert.write_attrib('gl_Position = vec4(pos.xy * 3.0, 0.0, 1.0);'); // Pos unpack
-		vert.write_attrib('const vec2 madd = vec2(0.5, 0.5);');
-		vert.add_out('vec2 texCoord');
-		vert.write_attrib('texCoord = gl_Position.xy * madd + madd;');
+		NodeShader.write_attrib(vert, 'gl_Position = vec4(pos.xy * 3.0, 0.0, 1.0);'); // Pos unpack
+		NodeShader.write_attrib(vert, 'const vec2 madd = vec2(0.5, 0.5);');
+		NodeShader.add_out(vert, 'vec2 texCoord');
+		NodeShader.write_attrib(vert, 'texCoord = gl_Position.xy * madd + madd;');
 		///if (!krom_opengl)
-		vert.write_attrib('texCoord.y = 1.0 - texCoord.y;');
+		NodeShader.write_attrib(vert, 'texCoord.y = 1.0 - texCoord.y;');
 		///end
 
 		ParserMaterial.init();
@@ -54,19 +54,19 @@ class MakeNodePreview {
 		}
 		array_remove(links, link);
 
-		frag.add_out('vec4 fragColor');
-		frag.write(`vec3 basecol = ${res};`);
-		frag.write('fragColor = vec4(basecol.rgb, 1.0);');
+		NodeShader.add_out(frag, 'vec4 fragColor');
+		NodeShader.write(frag, `vec3 basecol = ${res};`);
+		NodeShader.write(frag, 'fragColor = vec4(basecol.rgb, 1.0);');
 
 		// frag.ndcpos = true;
-		// vert.add_out('vec4 ndc');
-		// vert.write_attrib('ndc = vec4(gl_Position.xyz * vec3(0.5, 0.5, 0.0) + vec3(0.5, 0.5, 0.0), 1.0);');
+		// NodeShader.add_out(vert, 'vec4 ndc');
+		// NodeShader.write_attrib(vert, 'ndc = vec4(gl_Position.xyz * vec3(0.5, 0.5, 0.0) + vec3(0.5, 0.5, 0.0), 1.0);');
 
 		ParserMaterial.finalize(con_mesh);
 
 		con_mesh.data.shader_from_source = true;
-		con_mesh.data.vertex_shader = vert.get();
-		con_mesh.data.fragment_shader = frag.get();
+		con_mesh.data.vertex_shader = NodeShader.get(vert);
+		con_mesh.data.fragment_shader = NodeShader.get(frag);
 
 		return con_mesh;
 	}

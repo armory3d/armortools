@@ -1,10 +1,10 @@
 
-class SlotLayer {
+class SlotLayerRaw {
 	id = 0;
 	name: string;
 	ext = "";
 	visible = true;
-	parent: SlotLayer = null; // Group (for layers) or layer (for masks)
+	parent: SlotLayerRaw = null; // Group (for layers) or layer (for masks)
 
 	texpaint: Image = null; // Base or mask
 	///if is_paint
@@ -14,7 +14,7 @@ class SlotLayer {
 	///end
 
 	maskOpacity = 1.0; // Opacity mask
-	fill_layer: SlotMaterial = null;
+	fill_layer: SlotMaterialRaw = null;
 	show_panel = true;
 	blending = BlendType.BlendMix;
 	objectMask = 0;
@@ -33,21 +33,25 @@ class SlotLayer {
 	paintEmis = true;
 	paintSubs = true;
 	decalMat = Mat4.identity(); // Decal layer
+}
 
-	constructor(ext = "", type = LayerSlotType.SlotLayer, parent: SlotLayer = null) {
+class SlotLayer {
+
+	static create(ext = "", type = LayerSlotType.SlotLayer, parent: SlotLayerRaw = null): SlotLayerRaw {
+		let raw = new SlotLayerRaw();
 		if (ext == "") {
-			this.id = 0;
-			for (let l of Project.layers) if (l.id >= this.id) this.id = l.id + 1;
-			ext = this.id + "";
+			raw.id = 0;
+			for (let l of Project.layers) if (l.id >= raw.id) raw.id = l.id + 1;
+			ext = raw.id + "";
 		}
-		this.ext = ext;
-		this.parent = parent;
+		raw.ext = ext;
+		raw.parent = parent;
 
 		if (type == LayerSlotType.SlotGroup) {
-			this.name = "Group " + (this.id + 1);
+			raw.name = "Group " + (raw.id + 1);
 		}
 		else if (type == LayerSlotType.SlotLayer) {
-			this.name = "Layer " + (this.id + 1);
+			raw.name = "Layer " + (raw.id + 1);
 			///if is_paint
 			let format = Base.bitsHandle.position == TextureBits.Bits8  ? "RGBA32" :
 						 Base.bitsHandle.position == TextureBits.Bits16 ? "RGBA64" :
@@ -64,7 +68,7 @@ class SlotLayer {
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
 				t.format = format;
-				this.texpaint = RenderPath.active.createRenderTarget(t).image;
+				raw.texpaint = RenderPath.active.createRenderTarget(t).image;
 			}
 
 			///if is_paint
@@ -74,7 +78,7 @@ class SlotLayer {
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
 				t.format = format;
-				this.texpaint_nor = RenderPath.active.createRenderTarget(t).image;
+				raw.texpaint_nor = RenderPath.active.createRenderTarget(t).image;
 			}
 			{
 				let t = new RenderTargetRaw();
@@ -82,18 +86,18 @@ class SlotLayer {
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
 				t.format = format;
-				this.texpaint_pack = RenderPath.active.createRenderTarget(t).image;
+				raw.texpaint_pack = RenderPath.active.createRenderTarget(t).image;
 			}
 
-			this.texpaint_preview = Image.createRenderTarget(UtilRender.layerPreviewSize, UtilRender.layerPreviewSize, TextureFormat.RGBA32);
+			raw.texpaint_preview = Image.createRenderTarget(UtilRender.layerPreviewSize, UtilRender.layerPreviewSize, TextureFormat.RGBA32);
 			///end
 		}
 
 		///if is_paint
 		else { // Mask
-			this.name = "Mask " + (this.id + 1);
+			raw.name = "Mask " + (raw.id + 1);
 			let format = "RGBA32"; // Full bits for undo support, R8 is used
-			this.blending = BlendType.BlendAdd;
+			raw.blending = BlendType.BlendAdd;
 
 			{
 				let t = new RenderTargetRaw();
@@ -101,30 +105,32 @@ class SlotLayer {
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
 				t.format = format;
-				this.texpaint = RenderPath.active.createRenderTarget(t).image;
+				raw.texpaint = RenderPath.active.createRenderTarget(t).image;
 			}
 
-			this.texpaint_preview = Image.createRenderTarget(UtilRender.layerPreviewSize, UtilRender.layerPreviewSize, TextureFormat.RGBA32);
+			raw.texpaint_preview = Image.createRenderTarget(UtilRender.layerPreviewSize, UtilRender.layerPreviewSize, TextureFormat.RGBA32);
 		}
 		///end
+
+		return raw;
 	}
 
-	delete = () => {
-		this.unload();
+	static delete = (raw: SlotLayerRaw) => {
+		SlotLayer.unload(raw);
 
-		if (this.isLayer()) {
-			let masks = this.getMasks(false); // Prevents deleting group masks
-			if (masks != null) for (let m of masks) m.delete();
+		if (SlotLayer.isLayer(raw)) {
+			let masks = SlotLayer.getMasks(raw, false); // Prevents deleting group masks
+			if (masks != null) for (let m of masks) SlotLayer.delete(m);
 		}
-		else if (this.isGroup()) {
-			let children = this.getChildren();
-			if (children != null) for (let c of children) c.delete();
-			let masks = this.getMasks();
-			if (masks != null) for (let m of masks) m.delete();
+		else if (SlotLayer.isGroup(raw)) {
+			let children = SlotLayer.getChildren(raw);
+			if (children != null) for (let c of children) SlotLayer.delete(c);
+			let masks = SlotLayer.getMasks(raw);
+			if (masks != null) for (let m of masks) SlotLayer.delete(m);
 		}
 
-		let lpos = Project.layers.indexOf(this);
-		array_remove(Project.layers, this);
+		let lpos = Project.layers.indexOf(raw);
+		array_remove(Project.layers, raw);
 		// Undo can remove base layer and then restore it from undo layers
 		if (Project.layers.length > 0) {
 			Context.setLayer(Project.layers[lpos > 0 ? lpos - 1 : 0]);
@@ -133,14 +139,14 @@ class SlotLayer {
 		// Do not remove empty groups if the last layer is deleted as this prevents redo from working properly
 	}
 
-	unload = () => {
-		if (this.isGroup()) return;
+	static unload = (raw: SlotLayerRaw) => {
+		if (SlotLayer.isGroup(raw)) return;
 
-		let _texpaint = this.texpaint;
+		let _texpaint = raw.texpaint;
 		///if is_paint
-		let _texpaint_nor = this.texpaint_nor;
-		let _texpaint_pack = this.texpaint_pack;
-		let _texpaint_preview = this.texpaint_preview;
+		let _texpaint_nor = raw.texpaint_nor;
+		let _texpaint_pack = raw.texpaint_pack;
+		let _texpaint_preview = raw.texpaint_preview;
 		///end
 
 		let _next = () => {
@@ -153,64 +159,64 @@ class SlotLayer {
 		}
 		Base.notifyOnNextFrame(_next);
 
-		RenderPath.active.renderTargets.delete("texpaint" + this.ext);
+		RenderPath.active.renderTargets.delete("texpaint" + raw.ext);
 		///if is_paint
-		if (this.isLayer()) {
-			RenderPath.active.renderTargets.delete("texpaint_nor" + this.ext);
-			RenderPath.active.renderTargets.delete("texpaint_pack" + this.ext);
+		if (SlotLayer.isLayer(raw)) {
+			RenderPath.active.renderTargets.delete("texpaint_nor" + raw.ext);
+			RenderPath.active.renderTargets.delete("texpaint_pack" + raw.ext);
 		}
 		///end
 	}
 
-	swap = (other: SlotLayer) => {
-		if ((this.isLayer() || this.isMask()) && (other.isLayer() || other.isMask())) {
-			RenderPath.active.renderTargets.get("texpaint" + this.ext).image = other.texpaint;
-			RenderPath.active.renderTargets.get("texpaint" + other.ext).image = this.texpaint;
-			let _texpaint = this.texpaint;
-			this.texpaint = other.texpaint;
+	static swap = (raw: SlotLayerRaw, other: SlotLayerRaw) => {
+		if ((SlotLayer.isLayer(raw) || SlotLayer.isMask(raw)) && (SlotLayer.isLayer(other) || SlotLayer.isMask(other))) {
+			RenderPath.active.renderTargets.get("texpaint" + raw.ext).image = other.texpaint;
+			RenderPath.active.renderTargets.get("texpaint" + other.ext).image = raw.texpaint;
+			let _texpaint = raw.texpaint;
+			raw.texpaint = other.texpaint;
 			other.texpaint = _texpaint;
 
 			///if is_paint
-			let _texpaint_preview = this.texpaint_preview;
-			this.texpaint_preview = other.texpaint_preview;
+			let _texpaint_preview = raw.texpaint_preview;
+			raw.texpaint_preview = other.texpaint_preview;
 			other.texpaint_preview = _texpaint_preview;
 			///end
 		}
 
 		///if is_paint
-		if (this.isLayer() && other.isLayer()) {
-			RenderPath.active.renderTargets.get("texpaint_nor" + this.ext).image = other.texpaint_nor;
-			RenderPath.active.renderTargets.get("texpaint_pack" + this.ext).image = other.texpaint_pack;
-			RenderPath.active.renderTargets.get("texpaint_nor" + other.ext).image = this.texpaint_nor;
-			RenderPath.active.renderTargets.get("texpaint_pack" + other.ext).image = this.texpaint_pack;
-			let _texpaint_nor = this.texpaint_nor;
-			let _texpaint_pack = this.texpaint_pack;
-			this.texpaint_nor = other.texpaint_nor;
-			this.texpaint_pack = other.texpaint_pack;
+		if (SlotLayer.isLayer(raw) && SlotLayer.isLayer(other)) {
+			RenderPath.active.renderTargets.get("texpaint_nor" + raw.ext).image = other.texpaint_nor;
+			RenderPath.active.renderTargets.get("texpaint_pack" + raw.ext).image = other.texpaint_pack;
+			RenderPath.active.renderTargets.get("texpaint_nor" + other.ext).image = raw.texpaint_nor;
+			RenderPath.active.renderTargets.get("texpaint_pack" + other.ext).image = raw.texpaint_pack;
+			let _texpaint_nor = raw.texpaint_nor;
+			let _texpaint_pack = raw.texpaint_pack;
+			raw.texpaint_nor = other.texpaint_nor;
+			raw.texpaint_pack = other.texpaint_pack;
 			other.texpaint_nor = _texpaint_nor;
 			other.texpaint_pack = _texpaint_pack;
 		}
 		///end
 	}
 
-	clear = (baseColor = 0x00000000, baseImage: Image = null, occlusion = 1.0, roughness = Base.defaultRough, metallic = 0.0) => {
-		this.texpaint.g4.begin();
-		this.texpaint.g4.clear(baseColor); // Base
-		this.texpaint.g4.end();
+	static clear = (raw: SlotLayerRaw, baseColor = 0x00000000, baseImage: Image = null, occlusion = 1.0, roughness = Base.defaultRough, metallic = 0.0) => {
+		raw.texpaint.g4.begin();
+		raw.texpaint.g4.clear(baseColor); // Base
+		raw.texpaint.g4.end();
 		if (baseImage != null) {
-			this.texpaint.g2.begin(false);
-			this.texpaint.g2.drawScaledImage(baseImage, 0, 0, this.texpaint.width, this.texpaint.height);
-			this.texpaint.g2.end();
+			raw.texpaint.g2.begin(false);
+			raw.texpaint.g2.drawScaledImage(baseImage, 0, 0, raw.texpaint.width, raw.texpaint.height);
+			raw.texpaint.g2.end();
 		}
 
 		///if is_paint
-		if (this.isLayer()) {
-			this.texpaint_nor.g4.begin();
-			this.texpaint_nor.g4.clear(color_from_floats(0.5, 0.5, 1.0, 0.0)); // Nor
-			this.texpaint_nor.g4.end();
-			this.texpaint_pack.g4.begin();
-			this.texpaint_pack.g4.clear(color_from_floats(occlusion, roughness, metallic, 0.0)); // Occ, rough, met
-			this.texpaint_pack.g4.end();
+		if (SlotLayer.isLayer(raw)) {
+			raw.texpaint_nor.g4.begin();
+			raw.texpaint_nor.g4.clear(color_from_floats(0.5, 0.5, 1.0, 0.0)); // Nor
+			raw.texpaint_nor.g4.end();
+			raw.texpaint_pack.g4.begin();
+			raw.texpaint_pack.g4.clear(color_from_floats(occlusion, roughness, metallic, 0.0)); // Occ, rough, met
+			raw.texpaint_pack.g4.end();
 		}
 		///end
 
@@ -218,69 +224,69 @@ class SlotLayer {
 		Context.raw.ddirty = 3;
 	}
 
-	invertMask = () => {
+	static invertMask = (raw: SlotLayerRaw) => {
 		if (Base.pipeInvert8 == null) Base.makePipe();
-		let inverted = Image.createRenderTarget(this.texpaint.width, this.texpaint.height, TextureFormat.RGBA32);
+		let inverted = Image.createRenderTarget(raw.texpaint.width, raw.texpaint.height, TextureFormat.RGBA32);
 		inverted.g2.begin(false);
 		inverted.g2.pipeline = Base.pipeInvert8;
-		inverted.g2.drawImage(this.texpaint, 0, 0);
+		inverted.g2.drawImage(raw.texpaint, 0, 0);
 		inverted.g2.pipeline = null;
 		inverted.g2.end();
-		let _texpaint = this.texpaint;
+		let _texpaint = raw.texpaint;
 		let _next = () => {
 			_texpaint.unload();
 		}
 		Base.notifyOnNextFrame(_next);
-		this.texpaint = RenderPath.active.renderTargets.get("texpaint" + this.id).image = inverted;
+		raw.texpaint = RenderPath.active.renderTargets.get("texpaint" + raw.id).image = inverted;
 		Context.raw.layerPreviewDirty = true;
 		Context.raw.ddirty = 3;
 	}
 
-	applyMask = () => {
-		if (this.parent.fill_layer != null) {
-			this.parent.toPaintLayer();
+	static applyMask = (raw: SlotLayerRaw) => {
+		if (raw.parent.fill_layer != null) {
+			SlotLayer.toPaintLayer(raw.parent);
 		}
-		if (this.parent.isGroup()) {
-			for (let c of this.parent.getChildren()) {
-				Base.applyMask(c, this);
+		if (SlotLayer.isGroup(raw.parent)) {
+			for (let c of SlotLayer.getChildren(raw.parent)) {
+				Base.applyMask(c, raw);
 			}
 		}
 		else {
-			Base.applyMask(this.parent, this);
+			Base.applyMask(raw.parent, raw);
 		}
-		this.delete();
+		SlotLayer.delete(raw);
 	}
 
-	duplicate = (): SlotLayer => {
+	static duplicate = (raw: SlotLayerRaw): SlotLayerRaw => {
 		let layers = Project.layers;
-		let i = layers.indexOf(this) + 1;
-		let l = new SlotLayer("", this.isLayer() ? LayerSlotType.SlotLayer : this.isMask() ? LayerSlotType.SlotMask : LayerSlotType.SlotGroup, this.parent);
+		let i = layers.indexOf(raw) + 1;
+		let l = SlotLayer.create("", SlotLayer.isLayer(raw) ? LayerSlotType.SlotLayer : SlotLayer.isMask(raw) ? LayerSlotType.SlotMask : LayerSlotType.SlotGroup, raw.parent);
 		layers.splice(i, 0, l);
 
 		if (Base.pipeMerge == null) Base.makePipe();
-		if (this.isLayer()) {
+		if (SlotLayer.isLayer(raw)) {
 			l.texpaint.g2.begin(false);
 			l.texpaint.g2.pipeline = Base.pipeCopy;
-			l.texpaint.g2.drawImage(this.texpaint, 0, 0);
+			l.texpaint.g2.drawImage(raw.texpaint, 0, 0);
 			l.texpaint.g2.pipeline = null;
 			l.texpaint.g2.end();
 			///if is_paint
 			l.texpaint_nor.g2.begin(false);
 			l.texpaint_nor.g2.pipeline = Base.pipeCopy;
-			l.texpaint_nor.g2.drawImage(this.texpaint_nor, 0, 0);
+			l.texpaint_nor.g2.drawImage(raw.texpaint_nor, 0, 0);
 			l.texpaint_nor.g2.pipeline = null;
 			l.texpaint_nor.g2.end();
 			l.texpaint_pack.g2.begin(false);
 			l.texpaint_pack.g2.pipeline = Base.pipeCopy;
-			l.texpaint_pack.g2.drawImage(this.texpaint_pack, 0, 0);
+			l.texpaint_pack.g2.drawImage(raw.texpaint_pack, 0, 0);
 			l.texpaint_pack.g2.pipeline = null;
 			l.texpaint_pack.g2.end();
 			///end
 		}
-		else if (this.isMask()) {
+		else if (SlotLayer.isMask(raw)) {
 			l.texpaint.g2.begin(false);
 			l.texpaint.g2.pipeline = Base.pipeCopy8;
-			l.texpaint.g2.drawImage(this.texpaint, 0, 0);
+			l.texpaint.g2.drawImage(raw.texpaint, 0, 0);
 			l.texpaint.g2.pipeline = null;
 			l.texpaint.g2.end();
 		}
@@ -288,41 +294,41 @@ class SlotLayer {
 		///if is_paint
 		l.texpaint_preview.g2.begin(true, 0x00000000);
 		l.texpaint_preview.g2.pipeline = Base.pipeCopy;
-		l.texpaint_preview.g2.drawScaledImage(this.texpaint_preview, 0, 0, this.texpaint_preview.width, this.texpaint_preview.height);
+		l.texpaint_preview.g2.drawScaledImage(raw.texpaint_preview, 0, 0, raw.texpaint_preview.width, raw.texpaint_preview.height);
 		l.texpaint_preview.g2.pipeline = null;
 		l.texpaint_preview.g2.end();
 		///end
 
-		l.visible = this.visible;
-		l.maskOpacity = this.maskOpacity;
-		l.fill_layer = this.fill_layer;
-		l.objectMask = this.objectMask;
-		l.blending = this.blending;
-		l.uvType = this.uvType;
-		l.scale = this.scale;
-		l.angle = this.angle;
-		l.paintBase = this.paintBase;
-		l.paintOpac = this.paintOpac;
-		l.paintOcc = this.paintOcc;
-		l.paintRough = this.paintRough;
-		l.paintMet = this.paintMet;
-		l.paintNor = this.paintNor;
-		l.paintNorBlend = this.paintNorBlend;
-		l.paintHeight = this.paintHeight;
-		l.paintHeightBlend = this.paintHeightBlend;
-		l.paintEmis = this.paintEmis;
-		l.paintSubs = this.paintSubs;
+		l.visible = raw.visible;
+		l.maskOpacity = raw.maskOpacity;
+		l.fill_layer = raw.fill_layer;
+		l.objectMask = raw.objectMask;
+		l.blending = raw.blending;
+		l.uvType = raw.uvType;
+		l.scale = raw.scale;
+		l.angle = raw.angle;
+		l.paintBase = raw.paintBase;
+		l.paintOpac = raw.paintOpac;
+		l.paintOcc = raw.paintOcc;
+		l.paintRough = raw.paintRough;
+		l.paintMet = raw.paintMet;
+		l.paintNor = raw.paintNor;
+		l.paintNorBlend = raw.paintNorBlend;
+		l.paintHeight = raw.paintHeight;
+		l.paintHeightBlend = raw.paintHeightBlend;
+		l.paintEmis = raw.paintEmis;
+		l.paintSubs = raw.paintSubs;
 
 		return l;
 	}
 
-	resizeAndSetBits = () => {
+	static resizeAndSetBits = (raw: SlotLayerRaw) => {
 		let resX = Config.getTextureResX();
 		let resY = Config.getTextureResY();
 		let rts = RenderPath.active.renderTargets;
 		if (Base.pipeMerge == null) Base.makePipe();
 
-		if (this.isLayer()) {
+		if (SlotLayer.isLayer(raw)) {
 			///if is_paint
 			let format = Base.bitsHandle.position == TextureBits.Bits8  ? TextureFormat.RGBA32 :
 						 Base.bitsHandle.position == TextureBits.Bits16 ? TextureFormat.RGBA64 :
@@ -333,31 +339,31 @@ class SlotLayer {
 			let format = TextureFormat.RGBA128;
 			///end
 
-			let _texpaint = this.texpaint;
-			this.texpaint = Image.createRenderTarget(resX, resY, format);
-			this.texpaint.g2.begin(false);
-			this.texpaint.g2.pipeline = Base.pipeCopy;
-			this.texpaint.g2.drawScaledImage(_texpaint, 0, 0, resX, resY);
-			this.texpaint.g2.pipeline = null;
-			this.texpaint.g2.end();
+			let _texpaint = raw.texpaint;
+			raw.texpaint = Image.createRenderTarget(resX, resY, format);
+			raw.texpaint.g2.begin(false);
+			raw.texpaint.g2.pipeline = Base.pipeCopy;
+			raw.texpaint.g2.drawScaledImage(_texpaint, 0, 0, resX, resY);
+			raw.texpaint.g2.pipeline = null;
+			raw.texpaint.g2.end();
 
 			///if is_paint
-			let _texpaint_nor = this.texpaint_nor;
-			let _texpaint_pack = this.texpaint_pack;
-			this.texpaint_nor = Image.createRenderTarget(resX, resY, format);
-			this.texpaint_pack = Image.createRenderTarget(resX, resY, format);
+			let _texpaint_nor = raw.texpaint_nor;
+			let _texpaint_pack = raw.texpaint_pack;
+			raw.texpaint_nor = Image.createRenderTarget(resX, resY, format);
+			raw.texpaint_pack = Image.createRenderTarget(resX, resY, format);
 
-			this.texpaint_nor.g2.begin(false);
-			this.texpaint_nor.g2.pipeline = Base.pipeCopy;
-			this.texpaint_nor.g2.drawScaledImage(_texpaint_nor, 0, 0, resX, resY);
-			this.texpaint_nor.g2.pipeline = null;
-			this.texpaint_nor.g2.end();
+			raw.texpaint_nor.g2.begin(false);
+			raw.texpaint_nor.g2.pipeline = Base.pipeCopy;
+			raw.texpaint_nor.g2.drawScaledImage(_texpaint_nor, 0, 0, resX, resY);
+			raw.texpaint_nor.g2.pipeline = null;
+			raw.texpaint_nor.g2.end();
 
-			this.texpaint_pack.g2.begin(false);
-			this.texpaint_pack.g2.pipeline = Base.pipeCopy;
-			this.texpaint_pack.g2.drawScaledImage(_texpaint_pack, 0, 0, resX, resY);
-			this.texpaint_pack.g2.pipeline = null;
-			this.texpaint_pack.g2.end();
+			raw.texpaint_pack.g2.begin(false);
+			raw.texpaint_pack.g2.pipeline = Base.pipeCopy;
+			raw.texpaint_pack.g2.drawScaledImage(_texpaint_pack, 0, 0, resX, resY);
+			raw.texpaint_pack.g2.pipeline = null;
+			raw.texpaint_pack.g2.end();
 			///end
 
 			let _next = () => {
@@ -369,34 +375,34 @@ class SlotLayer {
 			}
 			Base.notifyOnNextFrame(_next);
 
-			rts.get("texpaint" + this.ext).image = this.texpaint;
+			rts.get("texpaint" + raw.ext).image = raw.texpaint;
 			///if is_paint
-			rts.get("texpaint_nor" + this.ext).image = this.texpaint_nor;
-			rts.get("texpaint_pack" + this.ext).image = this.texpaint_pack;
+			rts.get("texpaint_nor" + raw.ext).image = raw.texpaint_nor;
+			rts.get("texpaint_pack" + raw.ext).image = raw.texpaint_pack;
 			///end
 		}
-		else if (this.isMask()) {
-			let _texpaint = this.texpaint;
-			this.texpaint = Image.createRenderTarget(resX, resY, TextureFormat.RGBA32);
+		else if (SlotLayer.isMask(raw)) {
+			let _texpaint = raw.texpaint;
+			raw.texpaint = Image.createRenderTarget(resX, resY, TextureFormat.RGBA32);
 
-			this.texpaint.g2.begin(false);
-			this.texpaint.g2.pipeline = Base.pipeCopy8;
-			this.texpaint.g2.drawScaledImage(_texpaint, 0, 0, resX, resY);
-			this.texpaint.g2.pipeline = null;
-			this.texpaint.g2.end();
+			raw.texpaint.g2.begin(false);
+			raw.texpaint.g2.pipeline = Base.pipeCopy8;
+			raw.texpaint.g2.drawScaledImage(_texpaint, 0, 0, resX, resY);
+			raw.texpaint.g2.pipeline = null;
+			raw.texpaint.g2.end();
 
 			let _next = () => {
 				_texpaint.unload();
 			}
 			Base.notifyOnNextFrame(_next);
 
-			rts.get("texpaint" + this.ext).image = this.texpaint;
+			rts.get("texpaint" + raw.ext).image = raw.texpaint;
 		}
 	}
 
-	toFillLayer = () => {
-		Context.setLayer(this);
-		this.fill_layer = Context.raw.material;
+	static toFillLayer = (raw: SlotLayerRaw) => {
+		Context.setLayer(raw);
+		raw.fill_layer = Context.raw.material;
 		Base.updateFillLayer();
 		let _next = () => {
 			MakeMaterial.parsePaintMaterial();
@@ -406,22 +412,22 @@ class SlotLayer {
 		Base.notifyOnNextFrame(_next);
 	}
 
-	toPaintLayer = () => {
-		Context.setLayer(this);
-		this.fill_layer = null;
+	static toPaintLayer = (raw: SlotLayerRaw) => {
+		Context.setLayer(raw);
+		raw.fill_layer = null;
 		MakeMaterial.parsePaintMaterial();
 		Context.raw.layerPreviewDirty = true;
 		UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
 	}
 
-	isVisible = (): bool => {
-		return this.visible && (this.parent == null || this.parent.visible);
+	static isVisible = (raw: SlotLayerRaw): bool => {
+		return raw.visible && (raw.parent == null || raw.parent.visible);
 	}
 
-	getChildren = (): SlotLayer[] => {
-		let children: SlotLayer[] = null; // Child layers of a group
+	static getChildren = (raw: SlotLayerRaw): SlotLayerRaw[] => {
+		let children: SlotLayerRaw[] = null; // Child layers of a group
 		for (let l of Project.layers) {
-			if (l.parent == this && l.isLayer()) {
+			if (l.parent == raw && SlotLayer.isLayer(l)) {
 				if (children == null) children = [];
 				children.push(l);
 			}
@@ -429,14 +435,14 @@ class SlotLayer {
 		return children;
 	}
 
-	getRecursiveChildren = (): SlotLayer[] => {
-		let children: SlotLayer[] = null;
+	static getRecursiveChildren = (raw: SlotLayerRaw): SlotLayerRaw[] => {
+		let children: SlotLayerRaw[] = null;
 		for (let l of Project.layers) {
-			if (l.parent == this) { // Child layers and group masks
+			if (l.parent == raw) { // Child layers and group masks
 				if (children == null) children = [];
 				children.push(l);
 			}
-			if (l.parent != null && l.parent.parent == this) { // Layer masks
+			if (l.parent != null && l.parent.parent == raw) { // Layer masks
 				if (children == null) children = [];
 				children.push(l);
 			}
@@ -444,22 +450,22 @@ class SlotLayer {
 		return children;
 	}
 
-	getMasks = (includeGroupMasks = true): SlotLayer[] => {
-		if (this.isMask()) return null;
+	static getMasks = (raw: SlotLayerRaw, includeGroupMasks = true): SlotLayerRaw[] => {
+		if (SlotLayer.isMask(raw)) return null;
 
-		let children: SlotLayer[] = null;
+		let children: SlotLayerRaw[] = null;
 		// Child masks of a layer
 		for (let l of Project.layers) {
-			if (l.parent == this && l.isMask()) {
+			if (l.parent == raw && SlotLayer.isMask(l)) {
 				if (children == null) children = [];
 				children.push(l);
 			}
 		}
 		// Child masks of a parent group
 		if (includeGroupMasks) {
-			if (this.parent != null && this.parent.isGroup()) {
+			if (raw.parent != null && SlotLayer.isGroup(raw.parent)) {
 				for (let l of Project.layers) {
-					if (l.parent == this.parent && l.isMask()) {
+					if (l.parent == raw.parent && SlotLayer.isMask(l)) {
 						if (children == null) children = [];
 						children.push(l);
 					}
@@ -469,17 +475,17 @@ class SlotLayer {
 		return children;
 	}
 
-	hasMasks = (includeGroupMasks = true): bool => {
+	static hasMasks = (raw: SlotLayerRaw, includeGroupMasks = true): bool => {
 		// Layer mask
 		for (let l of Project.layers) {
-			if (l.parent == this && l.isMask()) {
+			if (l.parent == raw && SlotLayer.isMask(l)) {
 				return true;
 			}
 		}
 		// Group mask
-		if (includeGroupMasks && this.parent != null && this.parent.isGroup()) {
+		if (includeGroupMasks && raw.parent != null && SlotLayer.isGroup(raw.parent)) {
 			for (let l of Project.layers) {
-				if (l.parent == this.parent && l.isMask()) {
+				if (l.parent == raw.parent && SlotLayer.isMask(l)) {
 					return true;
 				}
 			}
@@ -487,70 +493,70 @@ class SlotLayer {
 		return false;
 	}
 
-	getOpacity = (): f32 => {
-		let f = this.maskOpacity;
-		if (this.isLayer() && this.parent != null) f *= this.parent.maskOpacity;
+	static getOpacity = (raw: SlotLayerRaw): f32 => {
+		let f = raw.maskOpacity;
+		if (SlotLayer.isLayer(raw) && raw.parent != null) f *= raw.parent.maskOpacity;
 		return f;
 	}
 
-	getObjectMask = (): i32 => {
-		return this.isMask() ? this.parent.objectMask : this.objectMask;
+	static getObjectMask = (raw: SlotLayerRaw): i32 => {
+		return SlotLayer.isMask(raw) ? raw.parent.objectMask : raw.objectMask;
 	}
 
-	isLayer = (): bool => {
+	static isLayer = (raw: SlotLayerRaw): bool => {
 		///if is_paint
-		return this.texpaint != null && this.texpaint_nor != null;
+		return raw.texpaint != null && raw.texpaint_nor != null;
 		///end
 		///if is_sculpt
-		return this.texpaint != null;
+		return raw.texpaint != null;
 		///end
 	}
 
-	isGroup = (): bool => {
-		return this.texpaint == null;
+	static isGroup = (raw: SlotLayerRaw): bool => {
+		return raw.texpaint == null;
 	}
 
-	getContainingGroup = (): SlotLayer => {
-		if (this.parent != null && this.parent.isGroup())
-			return this.parent;
-		else if (this.parent != null && this.parent.parent != null && this.parent.parent.isGroup())
-			return this.parent.parent;
+	static getContainingGroup = (raw: SlotLayerRaw): SlotLayerRaw => {
+		if (raw.parent != null && SlotLayer.isGroup(raw.parent))
+			return raw.parent;
+		else if (raw.parent != null && raw.parent.parent != null && SlotLayer.isGroup(raw.parent.parent))
+			return raw.parent.parent;
 		else return null;
 	}
 
-	isMask = (): bool => {
+	static isMask = (raw: SlotLayerRaw): bool => {
 		///if is_paint
-		return this.texpaint != null && this.texpaint_nor == null;
+		return raw.texpaint != null && raw.texpaint_nor == null;
 		///end
 		///if is_sculpt
 		return false;
 		///end
 	}
 
-	isGroupMask = (): bool => {
+	static isGroupMask = (raw: SlotLayerRaw): bool => {
 		///if is_paint
-		return this.texpaint != null && this.texpaint_nor == null && this.parent.isGroup();
+		return raw.texpaint != null && raw.texpaint_nor == null && SlotLayer.isGroup(raw.parent);
 		///end
 		///if is_sculpt
 		return false;
 		///end
 	}
 
-	isLayerMask = (): bool => {
+	static isLayerMask = (raw: SlotLayerRaw): bool => {
 		///if is_paint
-		return this.texpaint != null && this.texpaint_nor == null && this.parent.isLayer();
+		return raw.texpaint != null && raw.texpaint_nor == null && SlotLayer.isLayer(raw.parent);
 		///end
 		///if is_sculpt
 		return false;
 		///end
 	}
 
-	isInGroup = (): bool => {
-		return this.parent != null && (this.parent.isGroup() || (this.parent.parent != null && this.parent.parent.isGroup()));
+	static isInGroup = (raw: SlotLayerRaw): bool => {
+		return raw.parent != null && (SlotLayer.isGroup(raw.parent) || (raw.parent.parent != null && SlotLayer.isGroup(raw.parent.parent)));
 	}
 
-	canMove = (to: i32): bool => {
-		let oldIndex = Project.layers.indexOf(this);
+	static canMove = (raw: SlotLayerRaw, to: i32): bool => {
+		let oldIndex = Project.layers.indexOf(raw);
 
 		let delta = to - oldIndex; // If delta > 0 the layer is moved up, otherwise down
 		if (to < 0 || to > Project.layers.length - 1 || delta == 0) return false;
@@ -562,7 +568,7 @@ class SlotLayer {
 
 		// Group or layer is collapsed so we check below and update the upper layer.
 		if (newUpperLayer != null && !newUpperLayer.show_panel) {
-			let children = newUpperLayer.getRecursiveChildren();
+			let children = SlotLayer.getRecursiveChildren(newUpperLayer);
 			to -= children != null ? children.length : 0;
 			delta = to - oldIndex;
 			newUpperLayer = delta > 0 ? (to < Project.layers.length - 1 ? Project.layers[to + 1] : null) : Project.layers[to];
@@ -570,83 +576,83 @@ class SlotLayer {
 
 		let newLowerLayer = delta > 0 ? Project.layers[to] : (to > 0 ? Project.layers[to - 1] : null);
 
-		if (this.isMask()) {
+		if (SlotLayer.isMask(raw)) {
 			// Masks can not be on top.
 			if (newUpperLayer == null) return false;
 			// Masks should not be placed below a collapsed group. This condition can be savely removed.
-			if (newUpperLayer.isInGroup() && !newUpperLayer.getContainingGroup().show_panel) return false;
+			if (SlotLayer.isInGroup(newUpperLayer) && !SlotLayer.getContainingGroup(newUpperLayer).show_panel) return false;
 			// Masks should not be placed below a collapsed layer. This condition can be savely removed.
-			if (newUpperLayer.isMask() && !newUpperLayer.parent.show_panel) return false;
+			if (SlotLayer.isMask(newUpperLayer) && !newUpperLayer.parent.show_panel) return false;
 		}
 
-		if (this.isLayer()) {
+		if (SlotLayer.isLayer(raw)) {
 			// Layers can not be moved directly below its own mask(s).
-			if (newUpperLayer != null && newUpperLayer.isMask() && newUpperLayer.parent == this) return false;
+			if (newUpperLayer != null && SlotLayer.isMask(newUpperLayer) && newUpperLayer.parent == raw) return false;
 			// Layers can not be placed above a mask as the mask would be reparented.
-			if (newLowerLayer != null && newLowerLayer.isMask()) return false;
+			if (newLowerLayer != null && SlotLayer.isMask(newLowerLayer)) return false;
 		}
 
 		// Currently groups can not be nested. Thus valid positions for groups are:
-		if (this.isGroup()) {
+		if (SlotLayer.isGroup(raw)) {
 			// At the top.
 			if (newUpperLayer == null) return true;
 			// NOT below its own children.
-			if (newUpperLayer.getContainingGroup() == this) return false;
+			if (SlotLayer.getContainingGroup(newUpperLayer) == raw) return false;
 			// At the bottom.
 			if (newLowerLayer == null) return true;
 			// Above a group.
-			if (newLowerLayer.isGroup()) return true;
+			if (SlotLayer.isGroup(newLowerLayer)) return true;
 			// Above a non-grouped layer.
-			if (newLowerLayer.isLayer() && !newLowerLayer.isInGroup()) return true;
+			if (SlotLayer.isLayer(newLowerLayer) && !SlotLayer.isInGroup(newLowerLayer)) return true;
 			else return false;
 		}
 
 		return true;
 	}
 
-	move = (to: i32) => {
-		if (!this.canMove(to)) {
+	static move = (raw: SlotLayerRaw, to: i32) => {
+		if (!SlotLayer.canMove(raw, to)) {
 			return;
 		}
 
 		let pointers = TabLayers.initLayerMap();
-		let oldIndex = Project.layers.indexOf(this);
+		let oldIndex = Project.layers.indexOf(raw);
 		let delta = to - oldIndex;
 		let newUpperLayer = delta > 0 ? (to < Project.layers.length - 1 ? Project.layers[to + 1] : null) : Project.layers[to];
 
 		// Group or layer is collapsed so we check below and update the upper layer.
 		if (newUpperLayer != null && !newUpperLayer.show_panel) {
-			let children = newUpperLayer.getRecursiveChildren();
+			let children = SlotLayer.getRecursiveChildren(newUpperLayer);
 			to -= children != null ? children.length : 0;
 			delta = to - oldIndex;
 			newUpperLayer = delta > 0 ? (to < Project.layers.length - 1 ? Project.layers[to + 1] : null) : Project.layers[to];
 		}
 
-		Context.setLayer(this);
+		Context.setLayer(raw);
 		History.orderLayers(to);
 		UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
 
-		array_remove(Project.layers, this);
-		Project.layers.splice(to, 0, this);
+		array_remove(Project.layers, raw);
+		Project.layers.splice(to, 0, raw);
 
-		if (this.isLayer()) {
-			let oldParent = this.parent;
+		if (SlotLayer.isLayer(raw)) {
+			let oldParent = raw.parent;
 
 			if (newUpperLayer == null)
-				this.parent = null; // Placed on top.
-			else if (newUpperLayer.isInGroup() && !newUpperLayer.getContainingGroup().show_panel)
-				this.parent = null; // Placed below a collapsed group.
-			else if (newUpperLayer.isLayer())
-				this.parent = newUpperLayer.parent; // Placed below a layer, use the same parent.
-			else if (newUpperLayer.isGroup())
-				this.parent = newUpperLayer; // Placed as top layer in a group.
-			else if (newUpperLayer.isGroupMask())
-				this.parent = newUpperLayer.parent; // Placed in a group below the lowest group mask.
-			else if (newUpperLayer.isLayerMask())
-				this.parent = newUpperLayer.getContainingGroup(); // Either the group the mask belongs to or null.
+				raw.parent = null; // Placed on top.
+			else if (SlotLayer.isInGroup(newUpperLayer) && !SlotLayer.getContainingGroup(newUpperLayer).show_panel)
+				raw.parent = null; // Placed below a collapsed group.
+			else if (SlotLayer.isLayer(newUpperLayer))
+				raw.parent = newUpperLayer.parent; // Placed below a layer, use the same parent.
+			else if (SlotLayer.isGroup(newUpperLayer))
+				raw.parent = newUpperLayer; // Placed as top layer in a group.
+			else if (SlotLayer.isGroupMask(newUpperLayer))
+				raw.parent = newUpperLayer.parent; // Placed in a group below the lowest group mask.
+			else if (SlotLayer.isLayerMask(newUpperLayer))
+				raw.parent = SlotLayer.getContainingGroup(newUpperLayer); // Either the group the mask belongs to or null.
 
 			// Layers can have masks as children. These have to be moved, too.
-			let layerMasks = this.getMasks(false);
+			let layerMasks = SlotLayer.getMasks(raw, false);
 			if (layerMasks != null) {
 				for (let idx = 0; idx < layerMasks.length; ++idx) {
 					let mask = layerMasks[idx];
@@ -657,19 +663,19 @@ class SlotLayer {
 			}
 
 			// The layer is the last layer in the group, remove it. Notice that this might remove group masks.
-			if (oldParent != null && oldParent.getChildren() == null)
-				oldParent.delete();
+			if (oldParent != null && SlotLayer.getChildren(oldParent) == null)
+				SlotLayer.delete(oldParent);
 		}
-		else if (this.isMask()) {
+		else if (SlotLayer.isMask(raw)) {
 			// Precondition newUpperLayer != null, ensured in canMove.
-			if (newUpperLayer.isLayer() || newUpperLayer.isGroup())
-				this.parent = newUpperLayer;
-			else if (newUpperLayer.isMask()) { // Group mask or layer mask.
-				this.parent = newUpperLayer.parent;
+			if (SlotLayer.isLayer(newUpperLayer) || SlotLayer.isGroup(newUpperLayer))
+				raw.parent = newUpperLayer;
+			else if (SlotLayer.isMask(newUpperLayer)) { // Group mask or layer mask.
+				raw.parent = newUpperLayer.parent;
 			}
 		}
-		else if (this.isGroup()) {
-			let children = this.getRecursiveChildren();
+		else if (SlotLayer.isGroup(raw)) {
+			let children = SlotLayer.getRecursiveChildren(raw);
 			if (children != null) {
 				for (let idx = 0; idx < children.length; ++idx) {
 					let child = children[idx];

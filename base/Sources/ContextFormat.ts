@@ -60,7 +60,7 @@ class TContext {
 	renderMode? = RenderMode.RenderDeferred;
 	///end
 
-	viewportShader?: (ns: NodeShader)=>string = null;
+	viewportShader?: (ns: NodeShaderRaw)=>string = null;
 	hscaleWasChanged? = false;
 	exportMeshFormat? = MeshFormat.FormatObj;
 	exportMeshIndex? = 0;
@@ -116,10 +116,10 @@ class TContext {
 	penPaintingOnly? = false; // Reject painting with finger when using pen
 
 	///if (is_paint || is_sculpt)
-	material?: SlotMaterial;
-	layer?: SlotLayer;
-	brush?: SlotBrush;
-	font?: SlotFont;
+	material?: SlotMaterialRaw;
+	layer?: SlotLayerRaw;
+	brush?: SlotBrushRaw;
+	font?: SlotFontRaw;
 	tool? = WorkspaceTool.ToolBrush;
 
 	layerPreviewDirty? = true;
@@ -130,7 +130,7 @@ class TContext {
 	nodePreviewsUsed?: string[] = null;
 	nodePreviewName? = "";
 	maskPreviewRgba32?: Image = null;
-	maskPreviewLast?: SlotLayer = null;
+	maskPreviewLast?: SlotLayerRaw = null;
 
 	colorIdPicked? = false;
 	materialPreview? = false; // Drawing material previews
@@ -178,7 +178,7 @@ class TContext {
 	lastParticleHitY? = 0.0;
 	lastParticleHitZ? = 0.0;
 	particleTimer?: TAnim = null;
-	paintBody?: PhysicsBody = null;
+	paintBody?: PhysicsBodyRaw = null;
 	///end
 
 	layerFilter? = 0;

@@ -142,7 +142,7 @@ class ImportMesh {
 			if (ImportMesh.clearLayers) {
 				while (Project.layers.length > 0) {
 					let l = Project.layers.pop();
-					l.unload();
+					SlotLayer.unload(l);
 				}
 				Base.newLayer(false);
 				App.notifyOnInit(Base.initLayers);

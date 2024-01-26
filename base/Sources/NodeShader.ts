@@ -1,7 +1,6 @@
 
-class NodeShader {
-
-	context: NodeShaderContext;
+class NodeShaderRaw {
+	context: NodeShaderContextRaw;
 	shader_type = '';
 	includes: string[] = [];
 	ins: string[] = [];
@@ -36,32 +35,37 @@ class NodeShader {
 	nAttr = false;
 	dotNV = false;
 	invTBN = false;
+}
 
-	constructor(context: NodeShaderContext, shader_type: string) {
-		this.context = context;
-		this.shader_type = shader_type;
+class NodeShader {
+
+	static create(context: NodeShaderContextRaw, shader_type: string): NodeShaderRaw {
+		let raw = new NodeShaderRaw();
+		raw.context = context;
+		raw.shader_type = shader_type;
+		return raw;
 	}
 
-	add_include = (s: string) => {
-		this.includes.push(s);
+	static add_include = (raw: NodeShaderRaw, s: string) => {
+		raw.includes.push(s);
 	}
 
-	add_in = (s: string) => {
-		this.ins.push(s);
+	static add_in = (raw: NodeShaderRaw, s: string) => {
+		raw.ins.push(s);
 	}
 
-	add_out = (s: string) => {
-		this.outs.push(s);
+	static add_out = (raw: NodeShaderRaw, s: string) => {
+		raw.outs.push(s);
 	}
 
-	add_uniform = (s: string, link: string = null, included = false) => {
+	static add_uniform = (raw: NodeShaderRaw, s: string, link: string = null, included = false) => {
 		let ar = s.split(' ');
 		// layout(RGBA8) image3D voxels
 		let utype = ar[ar.length - 2];
 		let uname = ar[ar.length - 1];
 		if (utype.startsWith('sampler') || utype.startsWith('image') || utype.startsWith('uimage')) {
 			let is_image = (utype.startsWith('image') || utype.startsWith('uimage')) ? true : false;
-			this.context.add_texture_unit(utype, uname, link, is_image);
+			NodeShaderContext.add_texture_unit(raw.context, utype, uname, link, is_image);
 		}
 		else {
 			// Prefer vec4[] for d3d to avoid padding
@@ -73,72 +77,72 @@ class NodeShader {
 				ar[0] = 'floats';
 				ar[1] = ar[1].split('[')[0];
 			}
-			this.context.add_constant(ar[0], ar[1], link);
+			NodeShaderContext.add_constant(raw.context, ar[0], ar[1], link);
 		}
-		if (included == false && this.uniforms.indexOf(s) == -1) {
-			this.uniforms.push(s);
+		if (included == false && raw.uniforms.indexOf(s) == -1) {
+			raw.uniforms.push(s);
 		}
 	}
 
-	add_shared_sampler = (s: string) => {
-		if (this.sharedSamplers.indexOf(s) == -1) {
-			this.sharedSamplers.push(s);
+	static add_shared_sampler = (raw: NodeShaderRaw, s: string) => {
+		if (raw.sharedSamplers.indexOf(s) == -1) {
+			raw.sharedSamplers.push(s);
 			let ar = s.split(' ');
 			// layout(RGBA8) sampler2D tex
 			let utype = ar[ar.length - 2];
 			let uname = ar[ar.length - 1];
-			this.context.add_texture_unit(utype, uname, null, false);
+			NodeShaderContext.add_texture_unit(raw.context, utype, uname, null, false);
 		}
 	}
 
-	add_function = (s: string) => {
+	static add_function = (raw: NodeShaderRaw, s: string) => {
 		let fname = s.split('(')[0];
-		if (this.functions.has(fname)) return;
-		this.functions.set(fname, s);
+		if (raw.functions.has(fname)) return;
+		raw.functions.set(fname, s);
 	}
 
-	contains = (s: string): bool => {
-		return this.main.indexOf(s) >= 0 ||
-			   this.main_init.indexOf(s) >= 0 ||
-			   this.main_normal.indexOf(s) >= 0 ||
-			   this.ins.indexOf(s) >= 0 ||
-			   this.main_textures.indexOf(s) >= 0 ||
-			   this.main_attribs.indexOf(s) >= 0;
+	static contains = (raw: NodeShaderRaw, s: string): bool => {
+		return raw.main.indexOf(s) >= 0 ||
+			   raw.main_init.indexOf(s) >= 0 ||
+			   raw.main_normal.indexOf(s) >= 0 ||
+			   raw.ins.indexOf(s) >= 0 ||
+			   raw.main_textures.indexOf(s) >= 0 ||
+			   raw.main_attribs.indexOf(s) >= 0;
 	}
 
-	write_init = (s: string) => {
-		this.main_init = s + '\n' + this.main_init;
+	static write_init = (raw: NodeShaderRaw, s: string) => {
+		raw.main_init = s + '\n' + raw.main_init;
 	}
 
-	write = (s: string) => {
-		if (this.lock) return;
-		if (this.write_textures > 0) {
-			this.main_textures += s + '\n';
+	static write = (raw: NodeShaderRaw, s: string) => {
+		if (raw.lock) return;
+		if (raw.write_textures > 0) {
+			raw.main_textures += s + '\n';
 		}
-		else if (this.write_normal > 0) {
-			this.main_normal += s + '\n';
+		else if (raw.write_normal > 0) {
+			raw.main_normal += s + '\n';
 		}
-		else if (this.write_pre) {
-			this.main_init += s + '\n';
+		else if (raw.write_pre) {
+			raw.main_init += s + '\n';
 		}
 		else {
-			this.main += s + '\n';
+			raw.main += s + '\n';
 		}
 	}
 
-	write_header = (s: string) => {
-		this.header += s + '\n';
+	static write_header = (raw: NodeShaderRaw, s: string) => {
+		raw.header += s + '\n';
 	}
 
-	write_end = (s: string) => {
-		this.main_end += s + '\n';
+	static write_end = (raw: NodeShaderRaw, s: string) => {
+		raw.main_end += s + '\n';
 	}
 
-	write_attrib = (s: string) => {
-		this.main_attribs += s + '\n';
+	static write_attrib = (raw: NodeShaderRaw, s: string) => {
+		raw.main_attribs += s + '\n';
 	}
 
-	dataSize = (data: string): string => {
+	static dataSize = (raw: NodeShaderRaw, data: string): string => {
 		if (data == 'float1') return '1';
 		else if (data == 'float2') return '2';
 		else if (data == 'float3') return '3';
@@ -148,24 +152,24 @@ class NodeShader {
 		else return '1';
 	}
 
-	vstruct_to_vsin = () => {
+	static vstruct_to_vsin = (raw: NodeShaderRaw) => {
 		// if self.shader_type != 'vert' or self.ins != [] or not self.vstruct_as_vsin: # Vertex structure as vertex shader input
 			// return
-		let vs = this.context.data.vertex_elements;
+		let vs = raw.context.data.vertex_elements;
 		for (let e of vs) {
-			this.add_in('vec' + this.dataSize(e.data) + ' ' + e.name);
+			NodeShader.add_in(raw, 'vec' + NodeShader.dataSize(raw, e.data) + ' ' + e.name);
 		}
 	}
 
-	get = (): string => {
+	static get = (raw: NodeShaderRaw): string => {
 
-		if (this.shader_type == 'vert' && this.vstruct_as_vsin) {
-			this.vstruct_to_vsin();
+		if (raw.shader_type == 'vert' && raw.vstruct_as_vsin) {
+			NodeShader.vstruct_to_vsin(raw);
 		}
 
 		let sharedSampler = 'shared_sampler';
-		if (this.sharedSamplers.length > 0) {
-			sharedSampler = this.sharedSamplers[0].split(' ')[1] + '_sampler';
+		if (raw.sharedSamplers.length > 0) {
+			sharedSampler = raw.sharedSamplers[0].split(' ')[1] + '_sampler';
 		}
 
 		///if (krom_direct3d11 || krom_direct3d12)
@@ -198,58 +202,58 @@ class NodeShader {
 		s += '#define mix lerp\n';
 		// s += '#define fma mad\n';
 
-		s += this.header;
+		s += raw.header;
 
 		let in_ext = '';
 		let out_ext = '';
 
-		for (let a of this.includes) {
+		for (let a of raw.includes) {
 			s += '#include "' + a + '"\n';
 		}
 
 		// Input structure
 		let index = 0;
-		if (this.ins.length > 0) {
+		if (raw.ins.length > 0) {
 			s += 'struct SPIRV_Cross_Input {\n';
 			index = 0;
-			this.ins.sort((a, b): i32 => {
+			raw.ins.sort((a, b): i32 => {
 				// Sort inputs by name
 				return a.substring(4) >= b.substring(4) ? 1 : -1;
 			});
-			for (let a of this.ins) {
+			for (let a of raw.ins) {
 				s += `${a}${in_ext} : TEXCOORD${index};\n`;
 				index++;
 			}
 			// Built-ins
-			if (this.shader_type == 'vert' && this.main.indexOf("gl_VertexID") >= 0) {
+			if (raw.shader_type == 'vert' && raw.main.indexOf("gl_VertexID") >= 0) {
 				s += 'uint gl_VertexID : SV_VertexID;\n';
-				this.ins.push('uint gl_VertexID');
+				raw.ins.push('uint gl_VertexID');
 			}
-			if (this.shader_type == 'vert' && this.main.indexOf("gl_InstanceID") >= 0) {
+			if (raw.shader_type == 'vert' && raw.main.indexOf("gl_InstanceID") >= 0) {
 				s += 'uint gl_InstanceID : SV_InstanceID;\n';
-				this.ins.push('uint gl_InstanceID');
+				raw.ins.push('uint gl_InstanceID');
 			}
 			s += '};\n';
 		}
 
 		// Output structure
 		let num = 0;
-		if (this.outs.length > 0 || this.shader_type == 'vert') {
+		if (raw.outs.length > 0 || raw.shader_type == 'vert') {
 			s += 'struct SPIRV_Cross_Output {\n';
-			this.outs.sort((a, b): i32 => {
+			raw.outs.sort((a, b): i32 => {
 				// Sort outputs by name
 				return a.substring(4) >= b.substring(4) ? 1 : -1;
 			});
 			index = 0;
-			if (this.shader_type == 'vert') {
-				for (let a of this.outs) {
+			if (raw.shader_type == 'vert') {
+				for (let a of raw.outs) {
 					s += `${a}${out_ext} : TEXCOORD${index};\n`;
 					index++;
 				}
 				s += 'float4 svpos : SV_POSITION;\n';
 			}
 			else {
-				let out = this.outs[0];
+				let out = raw.outs[0];
 				// Multiple render targets
 				if (out.charAt(out.length - 1) == ']') {
 					num = parseInt(out.charAt(out.length - 2));
@@ -262,27 +266,27 @@ class NodeShader {
 			s += '};\n';
 		}
 
-		for (let a of this.uniforms) {
+		for (let a of raw.uniforms) {
 			s += 'uniform ' + a + ';\n';
 			if (a.startsWith('sampler')) {
 				s += 'SamplerState ' + a.split(' ')[1] + '_sampler;\n';
 			}
 		}
 
-		if (this.sharedSamplers.length > 0) {
-			for (let a of this.sharedSamplers) {
+		if (raw.sharedSamplers.length > 0) {
+			for (let a of raw.sharedSamplers) {
 				s += 'uniform ' + a + ';\n';
 			}
 			s += `SamplerState ${sharedSampler};\n`;
 		}
 
-		for (let f of this.functions.values()) {
+		for (let f of raw.functions.values()) {
 			s += f + '\n';
 		}
 
 		// Begin main
-		if (this.outs.length > 0 || this.shader_type == 'vert') {
-			if (this.ins.length > 0) {
+		if (raw.outs.length > 0 || raw.shader_type == 'vert') {
+			if (raw.ins.length > 0) {
 				s += 'SPIRV_Cross_Output main(SPIRV_Cross_Input stage_input) {\n';
 			}
 			else {
@@ -290,7 +294,7 @@ class NodeShader {
 			}
 		}
 		else {
-			if (this.ins.length > 0) {
+			if (raw.ins.length > 0) {
 				s += 'void main(SPIRV_Cross_Input stage_input) {\n';
 			}
 			else {
@@ -299,38 +303,38 @@ class NodeShader {
 		}
 
 		// Declare inputs
-		for (let a of this.ins) {
+		for (let a of raw.ins) {
 			let b = a.substring(5); // Remove type 'vec4 '
 			s += `${a} = stage_input.${b};\n`;
 		}
 
-		if (this.shader_type == 'vert') {
+		if (raw.shader_type == 'vert') {
 			s += 'vec4 gl_Position;\n';
-			for (let a of this.outs) {
+			for (let a of raw.outs) {
 				s += `${a};\n`;
 			}
 		}
 		else {
-			if (this.outs.length > 0) {
+			if (raw.outs.length > 0) {
 				if (num > 0) s += `vec4 fragColor[${num}];\n`;
 				else s += 'vec4 fragColor;\n';
 			}
 		}
 
-		s += this.main_attribs;
-		s += this.main_textures;
-		s += this.main_normal;
-		s += this.main_init;
-		s += this.main;
-		s += this.main_end;
+		s += raw.main_attribs;
+		s += raw.main_textures;
+		s += raw.main_normal;
+		s += raw.main_init;
+		s += raw.main;
+		s += raw.main_end;
 
 		// Write output structure
-		if (this.outs.length > 0 || this.shader_type == 'vert') {
+		if (raw.outs.length > 0 || raw.shader_type == 'vert') {
 			s += 'SPIRV_Cross_Output stage_output;\n';
-			if (this.shader_type == 'vert') {
+			if (raw.shader_type == 'vert') {
 				s += 'gl_Position.z = (gl_Position.z + gl_Position.w) * 0.5;\n';
 				s += 'stage_output.svpos = gl_Position;\n';
-				for (let a of this.outs) {
+				for (let a of raw.outs) {
 					let b = a.substring(5); // Remove type 'vec4 '
 					s += `stage_output.${b} = ${b};\n`;
 				}
@@ -383,29 +387,29 @@ class NodeShader {
 		s += '#define mul(a, b) b * a\n';
 		s += '#define discard discard_fragment()\n';
 
-		for (let a of this.includes) {
+		for (let a of raw.includes) {
 			s += '#include "' + a + '"\n';
 		}
 
-		s += this.header;
+		s += raw.header;
 
 		// Input structure
 		let index = 0;
 		//if (ins.length > 0) {
 			s += 'struct main_in {\n';
 			index = 0;
-			this.ins.sort((a, b): i32 => {
+			raw.ins.sort((a, b): i32 => {
 				// Sort inputs by name
 				return a.substring(4) >= b.substring(4) ? 1 : -1;
 			});
-			if (this.shader_type == 'vert') {
-				for (let a of this.ins) {
+			if (raw.shader_type == 'vert') {
+				for (let a of raw.ins) {
 					s += `${a} [[attribute(${index})]];\n`;
 					index++;
 				}
 			}
 			else {
-				for (let a of this.ins) {
+				for (let a of raw.ins) {
 					s += `${a} [[user(locn${index})]];\n`;
 					index++;
 				}
@@ -415,22 +419,22 @@ class NodeShader {
 
 		// Output structure
 		let num = 0;
-		if (this.outs.length > 0 || this.shader_type == 'vert') {
+		if (raw.outs.length > 0 || raw.shader_type == 'vert') {
 			s += 'struct main_out {\n';
-			this.outs.sort((a, b): i32 => {
+			raw.outs.sort((a, b): i32 => {
 				// Sort outputs by name
 				return a.substring(4) >= b.substring(4) ? 1 : -1;
 			});
 			index = 0;
-			if (this.shader_type == 'vert') {
-				for (let a of this.outs) {
+			if (raw.shader_type == 'vert') {
+				for (let a of raw.outs) {
 					s += `${a} [[user(locn${index})]];\n`;
 					index++;
 				}
 				s += 'float4 svpos [[position]];\n';
 			}
 			else {
-				let out = this.outs[0];
+				let out = raw.outs[0];
 				// Multiple render targets
 				if (out.charAt(out.length - 1) == ']') {
 					num = parseInt(out.charAt(out.length - 2));
@@ -447,10 +451,10 @@ class NodeShader {
 
 		let samplers: string[] = [];
 
-		if (this.uniforms.length > 0) {
+		if (raw.uniforms.length > 0) {
 			s += 'struct main_uniforms {\n';
 
-			for (let a of this.uniforms) {
+			for (let a of raw.uniforms) {
 				if (a.startsWith('sampler')) {
 					samplers.push(a);
 				}
@@ -462,21 +466,21 @@ class NodeShader {
 			s += '};\n';
 		}
 
-		for (let f of this.functions.values()) {
+		for (let f of raw.functions.values()) {
 			s += f + '\n';
 		}
 
 		// Begin main declaration
 		s += '#undef texture\n';
 
-		s += this.shader_type == 'vert' ? 'vertex ' : 'fragment ';
-		s += (this.outs.length > 0 || this.shader_type == 'vert') ? 'main_out ' : 'void ';
+		s += raw.shader_type == 'vert' ? 'vertex ' : 'fragment ';
+		s += (raw.outs.length > 0 || raw.shader_type == 'vert') ? 'main_out ' : 'void ';
 		s += 'my_main(';
 		//if (ins.length > 0) {
 			s += 'main_in in [[stage_in]]';
 		//}
-		if (this.uniforms.length > 0) {
-			let bufi = this.shader_type == 'vert' ? 1 : 0;
+		if (raw.uniforms.length > 0) {
+			let bufi = raw.shader_type == 'vert' ? 1 : 0;
 			s += `, constant main_uniforms& uniforms [[buffer(${bufi})]]`;
 		}
 
@@ -487,19 +491,19 @@ class NodeShader {
 			}
 		}
 
-		if (this.sharedSamplers.length > 0) {
-			for (let i = 0; i < this.sharedSamplers.length; ++i) {
+		if (raw.sharedSamplers.length > 0) {
+			for (let i = 0; i < raw.sharedSamplers.length; ++i) {
 				let index = samplers.length + i;
-				s += `, ${this.sharedSamplers[i]} [[texture(${index})]]`;
+				s += `, ${raw.sharedSamplers[i]} [[texture(${index})]]`;
 			}
 			s += `, sampler ${sharedSampler} [[sampler(${samplers.length})]]`;
 		}
 
 		// Built-ins
-		if (this.shader_type == 'vert' && this.main.indexOf("gl_VertexID") >= 0) {
+		if (raw.shader_type == 'vert' && raw.main.indexOf("gl_VertexID") >= 0) {
 			s += ', uint gl_VertexID [[vertex_id]]';
 		}
-		if (this.shader_type == 'vert' && this.main.indexOf("gl_InstanceID") >= 0) {
+		if (raw.shader_type == 'vert' && raw.main.indexOf("gl_InstanceID") >= 0) {
 			s += ', uint gl_InstanceID [[instance_id]]';
 		}
 
@@ -508,12 +512,12 @@ class NodeShader {
 		s += '#define texture(tex, coord) tex.sample(tex ## _sampler, coord)\n';
 
 		// Declare inputs
-		for (let a of this.ins) {
+		for (let a of raw.ins) {
 			let b = a.substring(5); // Remove type 'vec4 '
 			s += `${a} = in.${b};\n`;
 		}
 
-		for (let a of this.uniforms) {
+		for (let a of raw.uniforms) {
 			if (!a.startsWith('sampler')) {
 				let b = a.split(" ")[1]; // Remove type 'vec4 '
 				if (b.indexOf("[") >= 0) {
@@ -527,33 +531,33 @@ class NodeShader {
 			}
 		}
 
-		if (this.shader_type == 'vert') {
+		if (raw.shader_type == 'vert') {
 			s += 'vec4 gl_Position;\n';
-			for (let a of this.outs) {
+			for (let a of raw.outs) {
 				s += `${a};\n`;
 			}
 		}
 		else {
-			if (this.outs.length > 0) {
+			if (raw.outs.length > 0) {
 				if (num > 0) s += `vec4 fragColor[${num}];\n`;
 				else s += 'vec4 fragColor;\n';
 			}
 		}
 
-		s += this.main_attribs;
-		s += this.main_textures;
-		s += this.main_normal;
-		s += this.main_init;
-		s += this.main;
-		s += this.main_end;
+		s += raw.main_attribs;
+		s += raw.main_textures;
+		s += raw.main_normal;
+		s += raw.main_init;
+		s += raw.main;
+		s += raw.main_end;
 
 		// Write output structure
-		if (this.outs.length > 0 || this.shader_type == 'vert') {
+		if (raw.outs.length > 0 || raw.shader_type == 'vert') {
 			s += 'main_out out = {};\n';
-			if (this.shader_type == 'vert') {
+			if (raw.shader_type == 'vert') {
 				s += 'gl_Position.z = (gl_Position.z + gl_Position.w) * 0.5;\n';
 				s += 'out.svpos = gl_Position;\n';
-				for (let a of this.outs) {
+				for (let a of raw.outs) {
 					let b = a.split(" ")[1]; // Remove type 'vec4 '
 					s += `out.${b} = ${b};\n`;
 				}
@@ -578,7 +582,7 @@ class NodeShader {
 		let s = '#version 450\n';
 		///elseif krom_android
 		let s = '#version 300 es\n';
-		if (this.shader_type == 'frag') {
+		if (raw.shader_type == 'frag') {
 			s += 'precision highp float;\n';
 			s += 'precision mediump int;\n';
 		}
@@ -592,36 +596,36 @@ class NodeShader {
 		s += '#define textureShared texture\n';
 		s += '#define textureLodShared textureLod\n';
 		s += '#define atan2(x, y) atan(y, x)\n';
-		s += this.header;
+		s += raw.header;
 
 		let in_ext = '';
 		let out_ext = '';
 
-		for (let a of this.includes) {
+		for (let a of raw.includes) {
 			s += '#include "' + a + '"\n';
 		}
-		for (let a of this.ins) {
+		for (let a of raw.ins) {
 			s += `in ${a}${in_ext};\n`;
 		}
-		for (let a of this.outs) {
+		for (let a of raw.outs) {
 			s += `out ${a}${out_ext};\n`;
 		}
-		for (let a of this.uniforms) {
+		for (let a of raw.uniforms) {
 			s += 'uniform ' + a + ';\n';
 		}
-		for (let a of this.sharedSamplers) {
+		for (let a of raw.sharedSamplers) {
 			s += 'uniform ' + a + ';\n';
 		}
-		for (let f of this.functions.values()) {
+		for (let f of raw.functions.values()) {
 			s += f + '\n';
 		}
 		s += 'void main() {\n';
-		s += this.main_attribs;
-		s += this.main_textures;
-		s += this.main_normal;
-		s += this.main_init;
-		s += this.main;
-		s += this.main_end;
+		s += raw.main_attribs;
+		s += raw.main_textures;
+		s += raw.main_normal;
+		s += raw.main_init;
+		s += raw.main;
+		s += raw.main_end;
 		s += '}\n';
 
 		///end

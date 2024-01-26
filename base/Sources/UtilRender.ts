@@ -208,11 +208,11 @@ class UtilRender {
 
 		// Prepare layers
 		if (RenderPathPaint.liveLayer == null) {
-			RenderPathPaint.liveLayer = new SlotLayer("_live");
+			RenderPathPaint.liveLayer = SlotLayer.create("_live");
 		}
 
 		let l = RenderPathPaint.liveLayer;
-		l.clear();
+		SlotLayer.clear(l);
 
 		if (Context.raw.brush.image == null) {
 			Context.raw.brush.image = Image.createRenderTarget(UtilRender.materialPreviewSize, UtilRender.materialPreviewSize);
@@ -220,12 +220,12 @@ class UtilRender {
 		}
 
 		let _material = Context.raw.material;
-		Context.raw.material = new SlotMaterial();
+		Context.raw.material = SlotMaterial.create();
 		let _tool = Context.raw.tool;
 		Context.raw.tool = WorkspaceTool.ToolBrush;
 
 		let _layer = Context.raw.layer;
-		if (Context.raw.layer.isMask()) {
+		if (SlotLayer.isMask(Context.raw.layer)) {
 			Context.raw.layer = Context.raw.layer.parent;
 		}
 

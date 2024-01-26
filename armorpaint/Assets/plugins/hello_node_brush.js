@@ -1,5 +1,5 @@
 
-let plugin = new Plugin();
+let plugin = Plugin.create();
 
 let categoryName = "My Nodes";
 let nodeName = "Hello World";

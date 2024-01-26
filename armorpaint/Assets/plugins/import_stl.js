@@ -84,7 +84,7 @@ let import_stl = function(path, done) {
 	});
 }
 
-let plugin = new Plugin();
+let plugin = Plugin.create();
 let formats = Path.meshFormats;
 let importers = Path.meshImporters;
 formats.push("stl");

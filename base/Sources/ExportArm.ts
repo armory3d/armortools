@@ -372,7 +372,7 @@ class ExportArm {
 		return mesh_files;
 	}
 
-	static fontsToFiles = (projectPath: string, fonts: SlotFont[]): string[] => {
+	static fontsToFiles = (projectPath: string, fonts: SlotFontRaw[]): string[] => {
 		let font_files: string[] = [];
 		for (let i = 1; i <fonts.length; ++i) {
 			let f = fonts[i];

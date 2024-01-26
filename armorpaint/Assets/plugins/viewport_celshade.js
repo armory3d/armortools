@@ -1,5 +1,5 @@
 
-let plugin = new Plugin();
+let plugin = Plugin.create();
 
 // Register custom viewport shader
 ContextBase.setViewportShader(function(shader) {
