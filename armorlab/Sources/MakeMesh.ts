@@ -73,7 +73,7 @@ class MakeMesh {
 			NodeShader.write(frag, 'float height3 = 0.0;');
 		}
 
-		if (Context.raw.viewportMode == ViewLit && Context.raw.renderMode == RenderForward) {
+		if (Context.raw.viewportMode == ViewportMode.ViewLit && Context.raw.renderMode == RenderMode.RenderForward) {
 			NodeShader.add_uniform(frag, 'sampler2D senvmapBrdf', "$brdf.k");
 			NodeShader.add_uniform(frag, 'sampler2D senvmapRadiance', '_envmapRadiance');
 			NodeShader.add_uniform(frag, 'sampler2D sltcMat', '_ltcMat');
@@ -136,7 +136,7 @@ class MakeMesh {
 		NodeShader.write(frag, 'n.y = -n.y;');
 		NodeShader.write(frag, 'n = normalize(mul(n, TBN));');
 
-		if (Context.raw.viewportMode == ViewLit || Context.raw.viewportMode == ViewPathTrace) {
+		if (Context.raw.viewportMode == ViewportMode.ViewLit || Context.raw.viewportMode == ViewportMode.ViewPathTrace) {
 
 			NodeShader.write(frag, 'basecol = pow(basecol, vec3(2.2, 2.2, 2.2));');
 
@@ -144,7 +144,7 @@ class MakeMesh {
 				let color = Context.raw.viewportShader(frag);
 				NodeShader.write(frag, `fragColor[1] = vec4(${color}, 1.0);`);
 			}
-			else if (Context.raw.renderMode == RenderForward && Context.raw.viewportMode != ViewPathTrace) {
+			else if (Context.raw.renderMode == RenderMode.RenderForward && Context.raw.viewportMode != ViewportMode.ViewPathTrace) {
 				frag.wposition = true;
 				NodeShader.write(frag, 'vec3 albedo = mix(basecol, vec3(0.0, 0.0, 0.0), metallic);');
 				NodeShader.write(frag, 'vec3 f0 = mix(vec3(0.04, 0.04, 0.04), basecol, metallic);');
@@ -191,32 +191,32 @@ class MakeMesh {
 				NodeShader.write(frag, 'fragColor[1] = vec4(basecol, occlusion);');
 			}
 		}
-		else if (Context.raw.viewportMode == ViewBaseColor) {
+		else if (Context.raw.viewportMode == ViewportMode.ViewBaseColor) {
 			NodeShader.write(frag, 'fragColor[1] = vec4(basecol, 1.0);');
 		}
-		else if (Context.raw.viewportMode == ViewNormalMap) {
+		else if (Context.raw.viewportMode == ViewportMode.ViewNormalMap) {
 			NodeShader.write(frag, 'fragColor[1] = vec4(ntex.rgb, 1.0);');
 		}
-		else if (Context.raw.viewportMode == ViewOcclusion) {
+		else if (Context.raw.viewportMode == ViewportMode.ViewOcclusion) {
 			NodeShader.write(frag, 'fragColor[1] = vec4(vec3(occlusion, occlusion, occlusion), 1.0);');
 		}
-		else if (Context.raw.viewportMode == ViewRoughness) {
+		else if (Context.raw.viewportMode == ViewportMode.ViewRoughness) {
 			NodeShader.write(frag, 'fragColor[1] = vec4(vec3(roughness, roughness, roughness), 1.0);');
 		}
-		else if (Context.raw.viewportMode == ViewMetallic) {
+		else if (Context.raw.viewportMode == ViewportMode.ViewMetallic) {
 			NodeShader.write(frag, 'fragColor[1] = vec4(vec3(metallic, metallic, metallic), 1.0);');
 		}
-		else if (Context.raw.viewportMode == ViewOpacity) {
+		else if (Context.raw.viewportMode == ViewportMode.ViewOpacity) {
 			NodeShader.write(frag, 'fragColor[1] = vec4(vec3(texpaint_sample.a, texpaint_sample.a, texpaint_sample.a), 1.0);');
 		}
-		else if (Context.raw.viewportMode == ViewHeight) {
+		else if (Context.raw.viewportMode == ViewportMode.ViewHeight) {
 			NodeShader.write(frag, 'fragColor[1] = vec4(vec3(height, height, height), 1.0);');
 		}
 		else {
 			NodeShader.write(frag, 'fragColor[1] = vec4(1.0, 0.0, 1.0, 1.0);'); // Pink
 		}
 
-		if (Context.raw.viewportMode != ViewLit && Context.raw.viewportMode != ViewPathTrace) {
+		if (Context.raw.viewportMode != ViewportMode.ViewLit && Context.raw.viewportMode != ViewportMode.ViewPathTrace) {
 			NodeShader.write(frag, 'fragColor[1].rgb = pow(fragColor[1].rgb, vec3(2.2, 2.2, 2.2));');
 		}
 

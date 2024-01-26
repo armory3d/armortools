@@ -103,7 +103,7 @@ class MakeMesh {
 			NodeShader.add_uniform(frag, 'sampler2D texuvmap', '_texuvmap');
 		}
 
-		if (Context.raw.viewportMode == ViewLit && Context.raw.renderMode == RenderForward) {
+		if (Context.raw.viewportMode == ViewportMode.ViewLit && Context.raw.renderMode == RenderMode.RenderForward) {
 			textureCount += 4;
 			NodeShader.add_uniform(frag, 'sampler2D senvmapBrdf', "$brdf.k");
 			NodeShader.add_uniform(frag, 'sampler2D senvmapRadiance', '_envmapRadiance');
@@ -112,32 +112,32 @@ class MakeMesh {
 		}
 
 		// Get layers for this pass
-		layerPassCount = 1;
+		MakeMesh.layerPassCount = 1;
 		let layers: SlotLayerRaw[] = [];
 		let startCount = textureCount;
 		for (let l of Project.layers) {
-			if (!l.isLayer() || !l.isVisible()) continue;
+			if (!SlotLayer.isLayer(l) || !SlotLayer.isVisible(l)) continue;
 
 			let count = 3;
-			let masks = l.getMasks();
+			let masks = SlotLayer.getMasks(l);
 			if (masks != null) count += masks.length;
 			textureCount += count;
-			if (textureCount >= getMaxTextures()) {
+			if (textureCount >= MakeMesh.getMaxTextures()) {
 				textureCount = startCount + count + 3; // gbuffer0_copy, gbuffer1_copy, gbuffer2_copy
-				layerPassCount++;
+				MakeMesh.layerPassCount++;
 			}
-			if (layerPass == layerPassCount - 1) {
+			if (layerPass == MakeMesh.layerPassCount - 1) {
 				layers.push(l);
 			}
 		}
 
-		let lastPass = layerPass == layerPassCount - 1;
+		let lastPass = layerPass == MakeMesh.layerPassCount - 1;
 
 		for (let l of layers) {
-			if (l.getObjectMask() > 0) {
+			if (SlotLayer.getObjectMask(l) > 0) {
 				NodeShader.add_uniform(frag, 'int uid', '_uid');
-				if (l.getObjectMask() > Project.paintObjects.length) { // Atlas
-					let visibles = Project.getAtlasObjects(l.getObjectMask());
+				if (SlotLayer.getObjectMask(l) > Project.paintObjects.length) { // Atlas
+					let visibles = Project.getAtlasObjects(SlotLayer.getObjectMask(l));
 					NodeShader.write(frag, 'if (');
 					for (let i = 0; i < visibles.length; ++i) {
 						if (i > 0) NodeShader.write(frag, ' || ');
@@ -146,7 +146,7 @@ class MakeMesh {
 					NodeShader.write(frag, ') {');
 				}
 				else { // Object mask
-					let uid = Project.paintObjects[l.getObjectMask() - 1].uid;
+					let uid = Project.paintObjects[SlotLayer.getObjectMask(l) - 1].uid;
 					NodeShader.write(frag, `if (${uid} == uid) {`);
 				}
 			}
@@ -155,11 +155,11 @@ class MakeMesh {
 			NodeShader.write(frag, 'texpaint_sample = vec4(0.8, 0.8, 0.8, 1.0);');
 			NodeShader.write(frag, 'texpaint_opac = texpaint_sample.a;');
 
-			let masks = l.getMasks();
+			let masks = SlotLayer.getMasks(l);
 			if (masks != null) {
 				let hasVisible = false;
 				for (let m of masks) {
-					if (m.isVisible()) {
+					if (SlotLayer.isVisible(m)) {
 						hasVisible = true;
 						break;
 					}
@@ -168,7 +168,7 @@ class MakeMesh {
 					let texpaint_mask = 'texpaint_mask' + l.id;
 					NodeShader.write(frag, `float ${texpaint_mask} = 0.0;`);
 					for (let m of masks) {
-						if (!m.isVisible()) continue;
+						if (!SlotLayer.isVisible(m)) continue;
 						NodeShader.add_shared_sampler(frag, 'sampler2D texpaint' + m.id);
 						NodeShader.write(frag, '{'); // Group mask is sampled across multiple layers
 						NodeShader.write(frag, 'float texpaint_mask_sample' + m.id + ' = textureLodShared(texpaint' + m.id + ', texCoord, 0.0).r;');
@@ -178,15 +178,15 @@ class MakeMesh {
 				}
 			}
 
-			if (l.getOpacity() < 1) {
-				NodeShader.write(frag, `texpaint_opac *= ${l.getOpacity()};`);
+			if (SlotLayer.getOpacity(l) < 1) {
+				NodeShader.write(frag, `texpaint_opac *= ${SlotLayer.getOpacity(l)};`);
 			}
 
 			if (l == Project.layers[0]) {
 				NodeShader.write(frag, 'basecol = vec3(0.8, 0.8, 0.8);// texpaint_sample.rgb * texpaint_opac;');
 			}
 
-			if (l.getObjectMask() > 0) {
+			if (SlotLayer.getObjectMask(l) > 0) {
 				NodeShader.write(frag, '}');
 			}
 
@@ -236,7 +236,7 @@ class MakeMesh {
 			NodeShader.write(frag, 'n.y = -n.y;');
 			NodeShader.write(frag, 'n = normalize(mul(n, TBN));');
 
-			if (Context.raw.viewportMode == ViewLit) {
+			if (Context.raw.viewportMode == ViewportMode.ViewLit) {
 
 				NodeShader.write(frag, 'basecol = pow(basecol, vec3(2.2, 2.2, 2.2));');
 
@@ -244,7 +244,7 @@ class MakeMesh {
 					let color = Context.raw.viewportShader(frag);
 					NodeShader.write(frag, `fragColor[1] = vec4(${color}, 1.0);`);
 				}
-				else if (Context.raw.renderMode == RenderForward) {
+				else if (Context.raw.renderMode == RenderMode.RenderForward) {
 					frag.wposition = true;
 					NodeShader.write(frag, 'vec3 albedo = mix(basecol, vec3(0.0, 0.0, 0.0), metallic);');
 					NodeShader.write(frag, 'vec3 f0 = mix(vec3(0.04, 0.04, 0.04), basecol, metallic);');
@@ -292,11 +292,11 @@ class MakeMesh {
 					NodeShader.write(frag, 'fragColor[1] = vec4(basecol, occlusion);');
 				}
 			}
-			else if (Context.raw.viewportMode == ViewObjectNormal) {
+			else if (Context.raw.viewportMode == ViewportMode.ViewObjectNormal) {
 				frag.nAttr = true;
 				NodeShader.write(frag, 'fragColor[1] = vec4(nAttr, 1.0);');
 			}
-			else if (Context.raw.viewportMode == ViewObjectID) {
+			else if (Context.raw.viewportMode == ViewportMode.ViewObjectID) {
 				NodeShader.add_uniform(frag, 'float objectId', '_objectId');
 				NodeShader.write(frag, 'float obid = objectId + 1.0 / 255.0;');
 				NodeShader.write(frag, 'float id_r = fract(sin(dot(vec2(obid, obid * 20.0), vec2(12.9898, 78.233))) * 43758.5453);');
@@ -308,7 +308,7 @@ class MakeMesh {
 				NodeShader.write(frag, 'fragColor[1] = vec4(1.0, 0.0, 1.0, 1.0);'); // Pink
 			}
 
-			if (Context.raw.viewportMode != ViewLit && Context.raw.viewportMode != ViewPathTrace) {
+			if (Context.raw.viewportMode != ViewportMode.ViewLit && Context.raw.viewportMode != ViewportMode.ViewPathTrace) {
 				NodeShader.write(frag, 'fragColor[1].rgb = pow(fragColor[1].rgb, vec3(2.2, 2.2, 2.2));');
 			}
 

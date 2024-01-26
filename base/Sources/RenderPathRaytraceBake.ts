@@ -140,11 +140,10 @@ class RenderPathRaytraceBake {
 	}
 
 	static getBakeShaderName = (): string => {
-		return
-			Context.raw.bakeType == BakeType.BakeAO  		? "raytrace_bake_ao" + RenderPathRaytrace.ext :
-			Context.raw.bakeType == BakeType.BakeLightmap 	? "raytrace_bake_light" + RenderPathRaytrace.ext :
-			Context.raw.bakeType == BakeType.BakeBentNormal ? "raytrace_bake_bent" + RenderPathRaytrace.ext :
-													  		  "raytrace_bake_thick" + RenderPathRaytrace.ext;
+		return Context.raw.bakeType == BakeType.BakeAO  		? "raytrace_bake_ao" + RenderPathRaytrace.ext :
+			   Context.raw.bakeType == BakeType.BakeLightmap 	? "raytrace_bake_light" + RenderPathRaytrace.ext :
+			   Context.raw.bakeType == BakeType.BakeBentNormal  ? "raytrace_bake_bent" + RenderPathRaytrace.ext :
+												  				  "raytrace_bake_thick" + RenderPathRaytrace.ext;
 	}
 }
 

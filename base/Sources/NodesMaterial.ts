@@ -1,4 +1,4 @@
-/// <reference path='./index.ts'/>
+/// <reference path='./tr.ts'/>
 
 class NodesMaterial {
 
@@ -2779,7 +2779,6 @@ class NodesMaterial {
 		]
 	];
 
-	// @:keep
 	static vectorCurvesButton = (ui: Zui, nodes: Nodes, node: TNode) => {
 		let but = node.buttons[0];
 		let nhandle = Zui.handle("nodesmaterial_0").nest(node.id);
@@ -2813,7 +2812,6 @@ class NodesMaterial {
 		val[i][1] = ui.slider(nhandle.nest(0).nest(4, {value: 0}), "Y", -1, 1, true, 100, true, Align.Left);
 	}
 
-	// @:keep
 	static colorRampButton = (ui: Zui, nodes: Nodes, node: TNode) => {
 		let but = node.buttons[0];
 		let nhandle = Zui.handle("nodesmaterial_1").nest(node.id);
@@ -2872,7 +2870,6 @@ class NodesMaterial {
 		val[2] = color_get_bb(chandle.color) / 255;
 	}
 
-	// @:keep
 	static newGroupButton = (ui: Zui, nodes: Nodes, node: TNode) => {
 		if (node.name == "New Group") {
 			for (let i = 1; i < 999; ++i) {
@@ -2946,12 +2943,10 @@ class NodesMaterial {
 		}
 	}
 
-	// @:keep
 	static groupInputButton = (ui: Zui, nodes: Nodes, node: TNode) => {
 		NodesMaterial.addSocketButton(ui, nodes, node, node.outputs);
 	}
 
-	// @:keep
 	static groupOutputButton = (ui: Zui, nodes: Nodes, node: TNode) => {
 		NodesMaterial.addSocketButton(ui, nodes, node, node.inputs);
 	}

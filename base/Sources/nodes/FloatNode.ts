@@ -1,5 +1,4 @@
 
-// @:keep
 class FloatNode extends LogicNode {
 
 	value: f32;

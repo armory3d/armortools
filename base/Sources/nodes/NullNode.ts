@@ -1,5 +1,4 @@
 
-// @:keep
 class NullNode extends LogicNode {
 
 	constructor() {

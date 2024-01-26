@@ -1,4 +1,6 @@
 
+///if (is_paint || is_sculpt)
+
 class UtilRender {
 
 	static materialPreviewSize = 256;
@@ -445,3 +447,5 @@ class UtilRender {
 		UtilRender.screenAlignedFullIB.unlock();
 	}
 }
+
+///end

@@ -1,5 +1,4 @@
 
-// @:keep
 class BrushOutputNode extends LogicNode {
 
 	Directional = false; // button 0

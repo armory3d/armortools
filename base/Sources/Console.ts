@@ -1,5 +1,4 @@
 
-// @:keep
 class Console {
 
 	static message = "";

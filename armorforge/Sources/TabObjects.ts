@@ -28,7 +28,7 @@ class TabObjects {
 				let listW = ui._w;
 
 				let lineCounter = 0;
-				drawList(listHandle: zui.Zui.Handle, currentObject: BaseObject) => {
+				let drawList = (listHandle: Handle, currentObject: BaseObject) => {
 					if (currentObject.name.charAt(0) == ".") return; // Hidden
 					let b = false;
 
@@ -74,12 +74,12 @@ class TabObjects {
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.draw((ui: Zui) => {
 							if (UIMenu.menuButton(ui, "Assign Material")) {
-								materialId++;
+								TabObjects.materialId++;
 
 								for (let sh of Scene.active.raw.shader_datas) {
 									if (sh.name == "Material_data") {
 										let s: TShaderData = JSON.parse(JSON.stringify(sh));
-										s.name = "TempMaterial_data" + materialId;
+										s.name = "TempMaterial_data" + TabObjects.materialId;
 										Scene.active.raw.shader_datas.push(s);
 										break;
 									}
@@ -88,15 +88,15 @@ class TabObjects {
 								for (let mat of Scene.active.raw.material_datas) {
 									if (mat.name == "Material") {
 										let m: TMaterialData = JSON.parse(JSON.stringify(mat));
-										m.name = "TempMaterial" + materialId;
-										m.shader = "TempMaterial_data" + materialId;
+										m.name = "TempMaterial" + TabObjects.materialId;
+										m.shader = "TempMaterial_data" + TabObjects.materialId;
 										Scene.active.raw.material_datas.push(m);
 										break;
 									}
 								}
 
-								Data.getMaterial("Scene", "TempMaterial" + materialId, (md: MaterialData) => {
-									let mo: MeshObject = currentObject;
+								Data.getMaterial("Scene", "TempMaterial" + TabObjects.materialId, (md: MaterialData) => {
+									let mo: MeshObject = currentObject as MeshObject;
 									mo.materials = [md];
 									MakeMaterial.parseMeshPreviewMaterial(md);
 								});
@@ -146,17 +146,17 @@ class TabObjects {
 					ui.text("Loc");
 
 					h = Zui.handle("tabobjects_4");
-					h.text = roundfp(localPos.x) + "";
+					h.text = TabObjects.roundfp(localPos.x) + "";
 					f = parseFloat(ui.textInput(h, "X"));
 					if (h.changed) localPos.x = f;
 
 					h = Zui.handle("tabobjects_5");
-					h.text = roundfp(localPos.y) + "";
+					h.text = TabObjects.roundfp(localPos.y) + "";
 					f = parseFloat(ui.textInput(h, "Y"));
 					if (h.changed) localPos.y = f;
 
 					h = Zui.handle("tabobjects_6");
-					h.text = roundfp(localPos.z) + "";
+					h.text = TabObjects.roundfp(localPos.z) + "";
 					f = parseFloat(ui.textInput(h, "Z"));
 					if (h.changed) localPos.z = f;
 
@@ -164,18 +164,18 @@ class TabObjects {
 					ui.text("Rotation");
 
 					h = Zui.handle("tabobjects_7");
-					h.text = roundfp(rot.x) + "";
+					h.text = TabObjects.roundfp(rot.x) + "";
 					f = parseFloat(ui.textInput(h, "X"));
 					let changed = false;
 					if (h.changed) { changed = true; rot.x = f; }
 
 					h = Zui.handle("tabobjects_8");
-					h.text = roundfp(rot.y) + "";
+					h.text = TabObjects.roundfp(rot.y) + "";
 					f = parseFloat(ui.textInput(h, "Y"));
 					if (h.changed) { changed = true; rot.y = f; }
 
 					h = Zui.handle("tabobjects_9");
-					h.text = roundfp(rot.z) + "";
+					h.text = TabObjects.roundfp(rot.z) + "";
 					f = parseFloat(ui.textInput(h, "Z"));
 					if (h.changed) { changed = true; rot.z = f; }
 
@@ -193,17 +193,17 @@ class TabObjects {
 					ui.text("Scale");
 
 					h = Zui.handle("tabobjects_10");
-					h.text = roundfp(scale.x) + "";
+					h.text = TabObjects.roundfp(scale.x) + "";
 					f = parseFloat(ui.textInput(h, "X"));
 					if (h.changed) scale.x = f;
 
 					h = Zui.handle("tabobjects_11");
-					h.text = roundfp(scale.y) + "";
+					h.text = TabObjects.roundfp(scale.y) + "";
 					f = parseFloat(ui.textInput(h, "Y"));
 					if (h.changed) scale.y = f;
 
 					h = Zui.handle("tabobjects_12");
-					h.text = roundfp(scale.z) + "";
+					h.text = TabObjects.roundfp(scale.z) + "";
 					f = parseFloat(ui.textInput(h, "Z"));
 					if (h.changed) scale.z = f;
 
@@ -211,17 +211,17 @@ class TabObjects {
 					ui.text("Dimensions");
 
 					h = Zui.handle("tabobjects_13");
-					h.text = roundfp(dim.x) + "";
+					h.text = TabObjects.roundfp(dim.x) + "";
 					f = parseFloat(ui.textInput(h, "X"));
 					if (h.changed) dim.x = f;
 
 					h = Zui.handle("tabobjects_14");
-					h.text = roundfp(dim.y) + "";
+					h.text = TabObjects.roundfp(dim.y) + "";
 					f = parseFloat(ui.textInput(h, "Y"));
 					if (h.changed) dim.y = f;
 
 					h = Zui.handle("tabobjects_15");
-					h.text = roundfp(dim.z) + "";
+					h.text = TabObjects.roundfp(dim.z) + "";
 					f = parseFloat(ui.textInput(h, "Z"));
 					if (h.changed) dim.z = f;
 
@@ -232,13 +232,13 @@ class TabObjects {
 						p.raw.strength = ui.slider(Zui.handle("tabobjects_16", {value: p.raw.strength}), "Environment", 0.0, 5.0, true);
 					}
 					else if (Context.raw.selectedObject.constructor == LightObject) {
-						let light = cast(Context.raw.selectedObject, LightObject);
+						let light = (Context.raw.selectedObject as LightObject);
 						let lightHandle = Zui.handle("tabobjects_17");
 						lightHandle.value = light.data.raw.strength / 10;
 						light.data.raw.strength = ui.slider(lightHandle, "Strength", 0.0, 5.0, true) * 10;
 					}
 					else if (Context.raw.selectedObject.constructor == CameraObject) {
-						let cam = cast(Context.raw.selectedObject, CameraObject);
+						let cam = (Context.raw.selectedObject as CameraObject);
 						let fovHandle = Zui.handle("tabobjects_18");
 						fovHandle.value = Math.floor(cam.data.raw.fov * 100) / 100;
 						cam.data.raw.fov = ui.slider(fovHandle, "FoV", 0.3, 2.0, true);

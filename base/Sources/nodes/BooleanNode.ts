@@ -1,5 +1,4 @@
 
-// @:keep
 class BooleanNode extends LogicNode {
 
 	value: bool;

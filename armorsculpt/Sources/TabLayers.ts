@@ -6,8 +6,8 @@ class TabLayers {
 	static showContextMenu = false;
 
 	static draw = (htab: Handle) => {
-		let mini = Config.raw.layout[LayoutSidebarW] <= UIBase.sidebarMiniW;
-		mini ? drawMini(htab) : drawFull(htab);
+		let mini = Config.raw.layout[LayoutSize.LayoutSidebarW] <= UIBase.sidebarMiniW;
+		mini ? TabLayers.drawMini(htab) : TabLayers.drawFull(htab);
 	}
 
 	static drawMini = (htab: Handle) => {
@@ -20,14 +20,14 @@ class TabLayers {
 		ui.beginSticky();
 		ui.separator(5);
 
-		comboFilter();
-		buttonNew("+");
+		TabLayers.comboFilter();
+		TabLayers.buttonNew("+");
 
 		ui.endSticky();
 		ui._y += 2;
 
-		highlightOddLines();
-		drawSlots(true);
+		TabLayers.highlightOddLines();
+		TabLayers.drawSlots(true);
 
 		ui.t.ELEMENT_H = _ELEMENT_H;
 	}
@@ -38,14 +38,14 @@ class TabLayers {
 			ui.beginSticky();
 			ui.row([1 / 4, 3 / 4]);
 
-			buttonNew(tr("New"));
-			comboFilter();
+			TabLayers.buttonNew(tr("New"));
+			TabLayers.comboFilter();
 
 			ui.endSticky();
 			ui._y += 2;
 
-			highlightOddLines();
-			drawSlots(false);
+			TabLayers.highlightOddLines();
+			TabLayers.drawSlots(false);
 		}
 	}
 
@@ -54,7 +54,7 @@ class TabLayers {
 			if (i >= Project.layers.length) break; // Layer was deleted
 			let j = Project.layers.length - 1 - i;
 			let l = Project.layers[j];
-			drawLayerSlot(l, j, mini);
+			TabLayers.drawLayerSlot(l, j, mini);
 		}
 	}
 
@@ -87,14 +87,14 @@ class TabLayers {
 		let ar = [tr("All")];
 		let filterHandle = Zui.handle("tablayers_0");
 		filterHandle.position = Context.raw.layerFilter;
-		Context.raw.layerFilter = ui.combo(filterHandle, ar, tr("Filter"), false, Left);
+		Context.raw.layerFilter = ui.combo(filterHandle, ar, tr("Filter"), false, Align.Left);
 	}
 
 	static remapLayerPointers = (nodes: TNode[], pointerMap: Map<i32, i32>) => {
 		for (let n of nodes) {
 			if (n.type == "LAYER" || n.type == "LAYER_MASK") {
 				let i = n.buttons[0].default_value;
-				if (pointerMap.exists(i)) {
+				if (pointerMap.has(i)) {
 					n.buttons[0].default_value = pointerMap.get(i);
 				}
 			}
@@ -102,7 +102,7 @@ class TabLayers {
 	}
 
 	static initLayerMap = (): Map<SlotLayerRaw, i32> => {
-		let res: Map<SlotLayerRaw, i32> = [];
+		let res: Map<SlotLayerRaw, i32> = new Map();
 		for (let i = 0; i < Project.layers.length; ++i) res.set(Project.layers[i], i);
 		return res;
 	}
@@ -124,8 +124,8 @@ class TabLayers {
 		let ui = UIBase.ui;
 
 		if (Context.raw.layerFilter > 0 &&
-			l.getObjectMask() > 0 &&
-			l.getObjectMask() != Context.raw.layerFilter) {
+			SlotLayer.getObjectMask(l) > 0 &&
+			SlotLayer.getObjectMask(l) != Context.raw.layerFilter) {
 			return;
 		}
 
@@ -150,16 +150,16 @@ class TabLayers {
 				let ls = Project.layers;
 				let dest = Context.raw.dragDestination;
 				let toGroup = down ? dest > 0 && ls[dest - 1].parent != null && ls[dest - 1].parent.show_panel : dest < ls.length && ls[dest].parent != null && ls[dest].parent.show_panel;
-				let nestedGroup = Base.dragLayer.isGroup() && toGroup;
+				let nestedGroup = SlotLayer.isGroup(Base.dragLayer) && toGroup;
 				if (!nestedGroup) {
-					if (Context.raw.layer.canMove(Context.raw.dragDestination)) {
+					if (SlotLayer.canMove(Context.raw.layer, Context.raw.dragDestination)) {
 						ui.fill(checkw, step * 2, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
 					}
 				}
 			}
 			else if (i == Project.layers.length - 1 && mouse.y < absy + step) {
 				Context.raw.dragDestination = Project.layers.length - 1;
-				if (Context.raw.layer.canMove(Context.raw.dragDestination)) {
+				if (SlotLayer.canMove(Context.raw.layer, Context.raw.dragDestination)) {
 					ui.fill(checkw, 0, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
 				}
 			}
@@ -167,22 +167,22 @@ class TabLayers {
 		if (Base.isDragging && (Base.dragMaterial != null || Base.dragSwatch != null) && Context.inLayers()) {
 			if (mouse.y > absy + step && mouse.y < absy + step * 3) {
 				Context.raw.dragDestination = i;
-				if (canDropNewLayer(i))
+				if (TabLayers.canDropNewLayer(i))
 					ui.fill(checkw, 2 * step, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
 			}
 			else if (i == Project.layers.length - 1 && mouse.y < absy + step) {
 				Context.raw.dragDestination = Project.layers.length;
-				if (canDropNewLayer(Project.layers.length))
+				if (TabLayers.canDropNewLayer(Project.layers.length))
 					ui.fill(checkw, 0, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
 			}
 		}
 
-		mini ? drawLayerSlotMini(l, i) : drawLayerSlotFull(l, i);
+		mini ? TabLayers.drawLayerSlotMini(l, i) : TabLayers.drawLayerSlotFull(l, i);
 
-		drawLayerHighlight(l, mini);
+		TabLayers.drawLayerHighlight(l, mini);
 
-		if (showContextMenu) {
-			drawLayerContextMenu(l, mini);
+		if (TabLayers.showContextMenu) {
+			TabLayers.drawLayerContextMenu(l, mini);
 		}
 	}
 
@@ -204,7 +204,7 @@ class TabLayers {
 
 		let step = ui.t.ELEMENT_H;
 
-		let hasPanel = l.isGroup() || (l.isLayer() && l.getMasks(false) != null);
+		let hasPanel = SlotLayer.isGroup(l) || (SlotLayer.isLayer(l) && SlotLayer.getMasks(l, false) != null);
 		if (hasPanel) {
 			ui.row([8 / 100, 52 / 100, 30 / 100, 10 / 100]);
 		}
@@ -223,8 +223,8 @@ class TabLayers {
 		let parentHidden = l.parent != null && (!l.parent.visible || (l.parent.parent != null && !l.parent.parent.visible));
 		if (parentHidden) col -= 0x99000000;
 
-		if (ui.image(icons, col, null, r.x, r.y, r.w, r.h) == Released) {
-			layerToggleVisible(l);
+		if (ui.image(icons, col, null, r.x, r.y, r.w, r.h) == State.Released) {
+			TabLayers.layerToggleVisible(l);
 		}
 		ui._x -= 2;
 		ui._y -= 3;
@@ -235,10 +235,10 @@ class TabLayers {
 
 		// Draw layer name
 		ui._y += center;
-		if (layerNameEdit == l.id) {
-			layerNameHandle.text = l.name;
-			l.name = ui.textInput(layerNameHandle);
-			if (ui.textSelectedHandle_ptr != layerNameHandle.ptr) layerNameEdit = -1;
+		if (TabLayers.layerNameEdit == l.id) {
+			TabLayers.layerNameHandle.text = l.name;
+			l.name = ui.textInput(TabLayers.layerNameHandle);
+			if (ui.textSelectedHandle_ptr != TabLayers.layerNameHandle.ptr) TabLayers.layerNameEdit = -1;
 		}
 		else {
 			if (ui.enabled && ui.inputEnabled && ui.comboSelectedHandle_ptr == null &&
@@ -247,7 +247,7 @@ class TabLayers {
 				if (ui.inputStarted) {
 					Context.setLayer(l);
 					let mouse = Input.getMouse();
-					setDragLayer(Context.raw.layer, -(mouse.x - uix - ui._windowX - 3), -(mouse.y - uiy - ui._windowY + 1));
+					TabLayers.setDragLayer(Context.raw.layer, -(mouse.x - uix - ui._windowX - 3), -(mouse.y - uiy - ui._windowY + 1));
 				}
 				else if (ui.inputReleased) {
 					if (Time.time() - Context.raw.selectTime > 0.2) {
@@ -256,7 +256,7 @@ class TabLayers {
 				}
 				else if (ui.inputReleasedR) {
 					Context.setLayer(l);
-					showContextMenu = true;
+					TabLayers.showContextMenu = true;
 				}
 			}
 
@@ -264,9 +264,9 @@ class TabLayers {
 			if (state == State.Released) {
 				let td = Time.time() - Context.raw.selectTime;
 				if (td < 0.2 && td > 0.0) {
-					layerNameEdit = l.id;
-					layerNameHandle.text = l.name;
-					ui.startTextEdit(layerNameHandle);
+					TabLayers.layerNameEdit = l.id;
+					TabLayers.layerNameHandle.text = l.name;
+					ui.startTextEdit(TabLayers.layerNameHandle);
 				}
 			}
 
@@ -287,18 +287,18 @@ class TabLayers {
 			if (l.parent.parent != null) ui._x -= 10 * ui.SCALE();
 		}
 
-		if (l.isGroup()) {
+		if (SlotLayer.isGroup(l)) {
 			ui.endElement();
 		}
 		else {
-			if (l.isMask()) {
+			if (SlotLayer.isMask(l)) {
 				ui._y += center;
 			}
 
 			// comboBlending(ui, l);
 			ui.endElement();
 
-			if (l.isMask()) {
+			if (SlotLayer.isMask(l)) {
 				ui._y -= center;
 			}
 		}
@@ -311,7 +311,7 @@ class TabLayers {
 			ui._y -= center;
 		}
 
-		if (l.isGroup() || l.isMask()) {
+		if (SlotLayer.isGroup(l) || SlotLayer.isMask(l)) {
 			ui._y -= ui.ELEMENT_OFFSET();
 			ui.endElement();
 		}
@@ -328,7 +328,7 @@ class TabLayers {
 			}
 
 			ui._y -= center;
-			comboObject(ui, l);
+			TabLayers.comboObject(ui, l);
 			ui._y += center;
 
 			ui.endElement();
@@ -341,7 +341,7 @@ class TabLayers {
 		let ar = [tr("Shared")];
 		let objectHandle = Zui.handle("tablayers_2").nest(l.id);
 		objectHandle.position = l.objectMask;
-		l.objectMask = ui.combo(objectHandle, ar, tr("Object"), label, Left);
+		l.objectMask = ui.combo(objectHandle, ar, tr("Object"), label, Align.Left);
 		return objectHandle;
 	}
 
@@ -374,11 +374,11 @@ class TabLayers {
 		// Lowest layer
 		if (index == 0) return false;
 		// Lowest layer that has masks
-		if (l.isLayer() && Project.layers[0].isMask() && Project.layers[0].parent == l) return false;
+		if (SlotLayer.isLayer(l) && SlotLayer.isMask(Project.layers[0]) && Project.layers[0].parent == l) return false;
 		// The lowest toplevel layer is a group
-		if (l.isGroup() && Project.layers[0].isInGroup() && Project.layers[0].getContainingGroup() == l) return false;
+		if (SlotLayer.isGroup(l) && SlotLayer.isInGroup(Project.layers[0]) && SlotLayer.getContainingGroup(Project.layers[0]) == l) return false;
 		// Masks must be merged down to masks
-		if (l.isMask() && !Project.layers[index - 1].isMask()) return false;
+		if (SlotLayer.isMask(l) && !SlotLayer.isMask(Project.layers[index - 1])) return false;
 		return true;
 	}
 
@@ -387,7 +387,7 @@ class TabLayers {
 	}
 
 	static canDropNewLayer = (position: i32) => {
-		if (position > 0 && position < Project.layers.length && Project.layers[position - 1].isMask()) {
+		if (position > 0 && position < Project.layers.length && SlotLayer.isMask(Project.layers[position - 1])) {
 			// 1. The layer to insert is inserted in the middle
 			// 2. The layer below is a mask, i.e. the layer would have to be a (group) mask, too.
 			return false;

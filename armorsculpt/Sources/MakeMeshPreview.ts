@@ -21,8 +21,7 @@ class MakeMeshPreview {
 		let pos = "pos";
 
 		///if arm_skin
-		let isMesh = Context.raw.object.constructor == MeshObject;
-		let skin = isMesh && cast(Context.raw.object, MeshObject).data.geom.getVArray("bone") != null;
+		let skin = Context.raw.paintObject.data.getVArray("bone") != null;
 		if (skin) {
 			pos = "spos";
 			NodeShaderContext.add_elem(con_mesh, "bone", 'short4norm');
@@ -83,13 +82,13 @@ class MakeMeshPreview {
 		// }
 
 		if (decal) {
-			if (Context.raw.tool == ToolText) {
+			if (Context.raw.tool == WorkspaceTool.ToolText) {
 				NodeShader.add_uniform(frag, 'sampler2D textexttool', '_textexttool');
 				NodeShader.write(frag, `opacity *= textureLod(textexttool, texCoord / float(${brushScale}), 0.0).r;`);
 			}
 		}
 		if (decal) {
-			let opac = opacityDiscardDecal;
+			let opac = MakeMeshPreview.opacityDiscardDecal;
 			NodeShader.write(frag, `if (opacity < ${opac}) discard;`);
 		}
 

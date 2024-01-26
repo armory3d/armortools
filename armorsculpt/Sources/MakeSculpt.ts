@@ -23,8 +23,8 @@ class MakeSculpt {
 		let frag = NodeShaderContext.make_frag(con_paint);
 		frag.ins = vert.outs;
 
-		let faceFill = Context.raw.tool == ToolFill && Context.raw.fillTypeHandle.position == FillFace;
-		let decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
+		let faceFill = Context.raw.tool == WorkspaceTool.ToolFill && Context.raw.fillTypeHandle.position == FillType.FillFace;
+		let decal = Context.raw.tool == WorkspaceTool.ToolDecal || Context.raw.tool == WorkspaceTool.ToolText;
 
 		NodeShader.add_out(vert, 'vec2 texCoord');
 		NodeShader.write(vert, 'const vec2 madd = vec2(0.5, 0.5);');
@@ -45,12 +45,12 @@ class MakeSculpt {
 		NodeShader.add_uniform(frag, 'float brushOpacity', '_brushOpacity');
 		NodeShader.add_uniform(frag, 'float brushHardness', '_brushHardness');
 
-		if (Context.raw.tool == ToolBrush  ||
-			Context.raw.tool == ToolEraser ||
-			Context.raw.tool == ToolClone  ||
-			Context.raw.tool == ToolBlur   ||
-			Context.raw.tool == ToolSmudge   ||
-			Context.raw.tool == ToolParticle ||
+		if (Context.raw.tool == WorkspaceTool.ToolBrush  ||
+			Context.raw.tool == WorkspaceTool.ToolEraser ||
+			Context.raw.tool == WorkspaceTool.ToolClone  ||
+			Context.raw.tool == WorkspaceTool.ToolBlur   ||
+			Context.raw.tool == WorkspaceTool.ToolSmudge   ||
+			Context.raw.tool == WorkspaceTool.ToolParticle ||
 			decal) {
 
 			let depthReject = !Context.raw.xray;

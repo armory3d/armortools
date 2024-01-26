@@ -1,4 +1,6 @@
 
+///if (is_paint || is_sculpt)
+
 class Gizmo {
 
 	static v = new Vec4();
@@ -255,3 +257,5 @@ class Gizmo {
 		Input.occupied = (Context.raw.translateX || Context.raw.translateY || Context.raw.translateZ || Context.raw.scaleX || Context.raw.scaleY || Context.raw.scaleZ || Context.raw.rotateX || Context.raw.rotateY || Context.raw.rotateZ) && mouse.viewX < Base.w();
 	}
 }
+
+///end

@@ -1,5 +1,4 @@
 
-// @:keep
 class VarianceNode extends LogicNode {
 
 	static temp: Image = null;
@@ -9,30 +8,30 @@ class VarianceNode extends LogicNode {
 
 	constructor() {
 		super();
-		inst = this;
-		init();
+		VarianceNode.inst = this;
+		VarianceNode.init();
 	}
 
 	static init = () => {
-		if (temp == null) {
-			temp = Image.createRenderTarget(512, 512);
+		if (VarianceNode.temp == null) {
+			VarianceNode.temp = Image.createRenderTarget(512, 512);
 		}
 	}
 
-	static buttons = (ui: zui.Zui, nodes: zui.Zui.Nodes, node: zui.Zui.TNode) => {
-		prompt = ui.textArea(zui.Zui.handle("variancenode_0"), true, tr("prompt"), true);
-		node.buttons[0].height = prompt.split("\n").length;
+	static buttons = (ui: Zui, nodes: Nodes, node: TNode) => {
+		VarianceNode.prompt = ui.textArea(Zui.handle("variancenode_0"), Align.Left, true, tr("prompt"), true);
+		node.buttons[0].height = VarianceNode.prompt.split("\n").length;
 	}
 
 	override getAsImage = (from: i32, done: (img: Image)=>void) => {
-		let strength = inst.inputs[1].node.value;
+		let strength = (VarianceNode.inst.inputs[1].node as any).value;
 
-		inst.inputs[0].getAsImage((source: Image) => {
-			temp.g2.begin(false);
-			temp.g2.drawScaledImage(source, 0, 0, 512, 512);
-			temp.g2.end();
+		VarianceNode.inst.inputs[0].getAsImage((source: Image) => {
+			VarianceNode.temp.g2.begin(false);
+			VarianceNode.temp.g2.drawScaledImage(source, 0, 0, 512, 512);
+			VarianceNode.temp.g2.end();
 
-			let bytes_img = temp.getPixels().b.buffer;
+			let bytes_img = VarianceNode.temp.getPixels();
 			let u8a = new Uint8Array(bytes_img);
 			let f32a = new Float32Array(3 * 512 * 512);
 			for (let i = 0; i < (512 * 512); ++i) {
@@ -63,9 +62,9 @@ class VarianceNode extends LogicNode {
 					}
 					let t_start = num_inference_steps - init_timestep;
 
-					TextToPhotoNode.stableDiffusion(prompt, (_image: Image) => {
-						image = _image;
-						done(image);
+					TextToPhotoNode.stableDiffusion(VarianceNode.prompt, (_image: Image) => {
+						VarianceNode.image = _image;
+						done(VarianceNode.image);
 					}, latents, t_start);
 				});
 			});
@@ -73,10 +72,10 @@ class VarianceNode extends LogicNode {
 	}
 
 	override getCachedImage = (): Image => {
-		return image;
+		return VarianceNode.image;
 	}
 
-	static def: zui.Zui.TNode = {
+	static def: TNode = {
 		id: 0,
 		name: _tr("Variance"),
 		type: "VarianceNode",
@@ -113,7 +112,7 @@ class VarianceNode extends LogicNode {
 		],
 		buttons: [
 			{
-				name: "arm.nodes.VarianceNode.buttons",
+				name: "VarianceNode.buttons",
 				type: "CUSTOM",
 				height: 1
 			}

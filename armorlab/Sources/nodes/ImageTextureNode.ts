@@ -1,5 +1,4 @@
 
-// @:keep
 class ImageTextureNode extends LogicNode {
 
 	file: string;
@@ -10,18 +9,18 @@ class ImageTextureNode extends LogicNode {
 	}
 
 	override getAsImage = (from: i32, done: (img: Image)=>void) => {
-		let index = Project.assetNames.indexOf(file);
+		let index = Project.assetNames.indexOf(this.file);
 		let asset = Project.assets[index];
 		done(Project.getImage(asset));
 	}
 
 	override getCachedImage = (): Image => {
 		let image: Image;
-		getAsImage(0, (img: Image) => { image = img; });
+		this.getAsImage(0, (img: Image) => { image = img; });
 		return image;
 	}
 
-	static def: zui.Zui.TNode = {
+	static def: TNode = {
 		id: 0,
 		name: _tr("Image Texture"),
 		type: "ImageTextureNode",

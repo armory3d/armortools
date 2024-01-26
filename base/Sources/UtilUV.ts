@@ -1,4 +1,6 @@
 
+///if (is_paint || is_sculpt)
+
 class UtilUV {
 
 	static uvmap: Image = null;
@@ -183,3 +185,5 @@ type TCoord = {
 	x: i32;
 	y: i32;
 }
+
+///end

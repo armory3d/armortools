@@ -1,4 +1,6 @@
 
+///if (is_paint || is_forge)
+
 class MakePaint {
 
 	static get isRaytracedBake(): bool {
@@ -477,3 +479,5 @@ class MakePaint {
 		return con_paint;
 	}
 }
+
+///end

@@ -1,5 +1,4 @@
 
-// @:keep
 class StringNode extends LogicNode {
 
 	value: string;

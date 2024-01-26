@@ -1,4 +1,6 @@
 
+///if (is_paint || is_sculpt)
+
 class UtilParticle {
 
 	static initParticle = () => {
@@ -109,3 +111,5 @@ class UtilParticle {
 
 	///end
 }
+
+///end

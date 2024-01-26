@@ -1,5 +1,4 @@
 
-// @:keep
 class MathNode extends LogicNode {
 
 	operation: string;

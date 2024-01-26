@@ -1,5 +1,4 @@
 
-// @:keep
 class ColorNode extends LogicNode {
 
 	value = new Vec4();

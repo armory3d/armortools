@@ -1,5 +1,4 @@
 
-// @:keep
 class IntegerNode extends LogicNode {
 
 	value: i32;

@@ -8,7 +8,7 @@ class UINodesExt {
 		if (ui.button(tr("Run"))) {
 			Console.progress(tr("Processing"));
 
-			let delayIdleSleep = (_) => {
+			let delayIdleSleep = (_: any) => {
 				Krom.delayIdleSleep();
 			}
 			App.notifyOnRender2D(delayIdleSleep);
@@ -32,12 +32,12 @@ class UINodesExt {
 				let timer = Time.time();
 				ParserLogic.parse(Project.canvas);
 
-				arm.nodes.PhotoToPBRNode.cachedSource = null;
-				arm.nodes.BrushOutputNode.inst.getAsImage(ChannelBaseColor, (texbase: Image) => {
-				arm.nodes.BrushOutputNode.inst.getAsImage(ChannelOcclusion, (texocc: Image) => {
-				arm.nodes.BrushOutputNode.inst.getAsImage(ChannelRoughness, (texrough: Image) => {
-				arm.nodes.BrushOutputNode.inst.getAsImage(ChannelNormalMap, (texnor: Image) => {
-				arm.nodes.BrushOutputNode.inst.getAsImage(ChannelHeight, (texheight: Image) => {
+				PhotoToPBRNode.cachedSource = null;
+				BrushOutputNode.inst.getAsImage(ChannelType.ChannelBaseColor, (texbase: Image) => {
+				BrushOutputNode.inst.getAsImage(ChannelType.ChannelOcclusion, (texocc: Image) => {
+				BrushOutputNode.inst.getAsImage(ChannelType.ChannelRoughness, (texrough: Image) => {
+				BrushOutputNode.inst.getAsImage(ChannelType.ChannelNormalMap, (texnor: Image) => {
+				BrushOutputNode.inst.getAsImage(ChannelType.ChannelHeight, (texheight: Image) => {
 
 					if (texbase != null) {
 						let texpaint = RenderPath.active.renderTargets.get("texpaint").image;
@@ -84,22 +84,22 @@ class UINodesExt {
 						texpaint_pack.g4.drawIndexedVertices();
 						texpaint_pack.g4.end();
 
-						if (UIHeader.worktab.position == Space3D &&
-							BrushOutputNode.inst.inputs[ChannelHeight].node.constructor != FloatNode) {
+						if (UIHeader.worktab.position == SpaceType.Space3D &&
+							BrushOutputNode.inst.inputs[ChannelType.ChannelHeight].node.constructor != FloatNode) {
 
 							// Make copy of vertices before displacement
 							let o = Project.paintObjects[0];
 							let g = o.data;
 							let vertices = g.vertexBuffer.lock();
-							if (lastVertices == null || lastVertices.byteLength != vertices.byteLength) {
-								lastVertices = new DataView(new ArrayBuffer(vertices.byteLength));
+							if (UINodesExt.lastVertices == null || UINodesExt.lastVertices.byteLength != vertices.byteLength) {
+								UINodesExt.lastVertices = new DataView(new ArrayBuffer(vertices.byteLength));
 								for (let i = 0; i < Math.floor(vertices.byteLength / 2); ++i) {
-									lastVertices.setInt16(i * 2, vertices.getInt16(i * 2, true), true);
+									UINodesExt.lastVertices.setInt16(i * 2, vertices.getInt16(i * 2, true), true);
 								}
 							}
 							else {
 								for (let i = 0; i < Math.floor(vertices.byteLength / 2); ++i) {
-									vertices.setInt16(i * 2, lastVertices.getInt16(i * 2, true), true);
+									vertices.setInt16(i * 2, UINodesExt.lastVertices.getInt16(i * 2, true), true);
 								}
 							}
 							g.vertexBuffer.unlock();

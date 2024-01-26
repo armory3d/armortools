@@ -1,5 +1,4 @@
 
-// @:keep
 class VectorMathNode extends LogicNode {
 
 	operation: string;

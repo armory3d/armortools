@@ -2,6 +2,9 @@
 ///if is_paint
 /// <reference path='../../armorpaint/Sources/TabLayers.ts'/>
 ///end
+///if is_sculpt
+/// <reference path='../../armorsculpt/Sources/TabLayers.ts'/>
+///end
 ///if is_forge
 /// <reference path='../../armorforge/Sources/TabObjects.ts'/>
 ///end

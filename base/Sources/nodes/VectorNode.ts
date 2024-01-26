@@ -1,5 +1,4 @@
 
-// @:keep
 class VectorNode extends LogicNode {
 
 	value = new Vec4();

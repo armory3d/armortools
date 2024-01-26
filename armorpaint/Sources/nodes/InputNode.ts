@@ -1,5 +1,4 @@
 
-// @:keep
 class InputNode extends LogicNode {
 
 	static coords = new Vec4();

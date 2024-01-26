@@ -1,13 +1,12 @@
 
-// @:keep
 class BrushOutputNode extends LogicNode {
 
 	Directional = false; // button 0
 
 	constructor() {
 		super();
-		Context.raw.runBrush = run;
-		Context.raw.parseBrushInputs = parseInputs;
+		Context.raw.runBrush = this.run;
+		Context.raw.parseBrushInputs = this.parseInputs;
 	}
 
 	parseInputs = () => {
@@ -20,11 +19,11 @@ class BrushOutputNode extends LogicNode {
 		let input3: any;
 		let input4: any;
 		try {
-			inputs[0].get((value) => { input0 = value; });
-			inputs[1].get((value) => { input1 = value; });
-			inputs[2].get((value) => { input2 = value; });
-			inputs[3].get((value) => { input3 = value; });
-			inputs[4].get((value) => { input4 = value; });
+			this.inputs[0].get((value) => { input0 = value; });
+			this.inputs[1].get((value) => { input1 = value; });
+			this.inputs[2].get((value) => { input2 = value; });
+			this.inputs[3].get((value) => { input3 = value; });
+			this.inputs[4].get((value) => { input4 = value; });
 		}
 		catch (_) {
 			return;
@@ -68,7 +67,7 @@ class BrushOutputNode extends LogicNode {
 			MakeMaterial.parsePaintMaterial();
 		}
 
-		Context.raw.brushDirectional = Directional;
+		Context.raw.brushDirectional = this.Directional;
 	}
 
 	run = (from: i32) => {
@@ -89,7 +88,7 @@ class BrushOutputNode extends LogicNode {
 		let fillLayer = Context.raw.layer.fill_layer != null;
 
 		// Do not paint over groups
-		let groupLayer = Context.raw.layer.isGroup();
+		let groupLayer = SlotLayer.isGroup(Context.raw.layer);
 
 		// Paint bounds
 		if (Context.raw.paintVec.x > left &&
@@ -98,7 +97,7 @@ class BrushOutputNode extends LogicNode {
 			Context.raw.paintVec.y < 1 &&
 			!fillLayer &&
 			!groupLayer &&
-			(Context.raw.layer.isVisible() || Context.raw.paint2d) &&
+			(SlotLayer.isVisible(Context.raw.layer) || Context.raw.paint2d) &&
 			!UIBase.ui.isHovered &&
 			!Base.isDragging &&
 			!Base.isResizing &&
@@ -109,7 +108,7 @@ class BrushOutputNode extends LogicNode {
 
 			// Prevent painting the same spot
 			let sameSpot = Context.raw.paintVec.x == Context.raw.lastPaintX && Context.raw.paintVec.y == Context.raw.lastPaintY;
-			let lazy = Context.raw.tool == ToolBrush && Context.raw.brushLazyRadius > 0;
+			let lazy = Context.raw.tool == WorkspaceTool.ToolBrush && Context.raw.brushLazyRadius > 0;
 			if (down && (sameSpot || lazy)) {
 				Context.raw.painted++;
 			}
@@ -119,12 +118,12 @@ class BrushOutputNode extends LogicNode {
 			Context.raw.lastPaintX = Context.raw.paintVec.x;
 			Context.raw.lastPaintY = Context.raw.paintVec.y;
 
-			if (Context.raw.tool == ToolParticle) {
+			if (Context.raw.tool == WorkspaceTool.ToolParticle) {
 				Context.raw.painted = 0; // Always paint particles
 			}
 
 			if (Context.raw.painted == 0) {
-				parseInputs();
+				this.parseInputs();
 			}
 
 			if (Context.raw.painted == 0) {

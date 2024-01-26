@@ -527,7 +527,6 @@ class History {
 		History.push(tr("Invert Mask"));
 	}
 
-	// @:keep
 	static applyFilter = () => {
 		History.copyToUndo(Context.raw.layer.id, History.undoI, true);
 		History.push(tr("Apply Filter"));

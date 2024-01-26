@@ -18,9 +18,9 @@ class MakeMaterial {
 
 		for (let c of m.shader.contexts) {
 			if (c.raw.name == "mesh") {
-				m.shader.raw.contexts.remove(c.raw);
-				m.shader.contexts.remove(c);
-				deleteContext(c);
+				array_remove(m.shader.raw.contexts, c.raw);
+				array_remove(m.shader.contexts, c);
+				MakeMaterial.deleteContext(c);
 				break;
 			}
 		}
@@ -31,9 +31,9 @@ class MakeMaterial {
 				let c = m.shader.contexts[i];
 				for (let j = 1; j < MakeMesh.layerPassCount; ++j) {
 					if (c.raw.name == "mesh" + j) {
-						m.shader.raw.contexts.remove(c.raw);
-						m.shader.contexts.remove(c);
-						deleteContext(c);
+						array_remove(m.shader.raw.contexts, c.raw);
+						array_remove(m.shader.contexts, c);
+						MakeMaterial.deleteContext(c);
 						i--;
 						break;
 					}
@@ -46,8 +46,8 @@ class MakeMaterial {
 				let c = m.contexts[i];
 				for (let j = 1; j < MakeMesh.layerPassCount; ++j) {
 					if (c.raw.name == "mesh" + j) {
-						m.raw.contexts.remove(c.raw);
-						m.contexts.remove(c);
+						array_remove(m.raw.contexts, c.raw);
+						array_remove(m.contexts, c);
 						i--;
 						break;
 					}
@@ -91,7 +91,7 @@ class MakeMaterial {
 		Context.raw.ddirty = 2;
 
 		///if arm_voxels
-		makeVoxel(m);
+		MakeMaterial.makeVoxel(m);
 		///end
 	}
 
@@ -105,18 +105,18 @@ class MakeMaterial {
 			}
 		}
 		if (sc != null) {
-			m.shader.raw.contexts.remove(sc.raw);
-			m.shader.contexts.remove(sc);
+			array_remove(m.shader.raw.contexts, sc.raw);
+			array_remove(m.shader.contexts, sc);
 		}
 		let con = MakeParticle.run({ name: "MaterialParticle", canvas: null });
-		if (sc != null) deleteContext(sc);
+		if (sc != null) MakeMaterial.deleteContext(sc);
 		sc = new ShaderContext(con.data, (sc: ShaderContext) => {});
 		m.shader.raw.contexts.push(sc.raw);
 		m.shader.contexts.push(sc);
 	}
 
 	static parseMeshPreviewMaterial = () => {
-		if (!getMOut()) return;
+		if (!MakeMaterial.getMOut()) return;
 
 		let m = Project.materials[0].data;
 		let scon: ShaderContext = null;
@@ -126,8 +126,8 @@ class MakeMaterial {
 				break;
 			}
 		}
-		m.shader.raw.contexts.remove(scon.raw);
-		m.shader.contexts.remove(scon);
+		array_remove(m.shader.raw.contexts, scon.raw);
+		array_remove(m.shader.contexts, scon);
 
 		let mcon: TMaterialContext = { name: "mesh", bind_textures: [] };
 
@@ -141,7 +141,7 @@ class MakeMaterial {
 			}
 		}
 
-		if (scon != null) deleteContext(scon);
+		if (scon != null) MakeMaterial.deleteContext(scon);
 
 		let compileError = false;
 		scon = new ShaderContext(con.data, (scon: ShaderContext) => {
@@ -155,7 +155,7 @@ class MakeMaterial {
 
 	///if arm_voxels
 	static makeVoxel = (m: MaterialData) => {
-		let rebuild = heightUsed;
+		let rebuild = MakeMaterial.heightUsed;
 		if (Config.raw.rp_gi != false && rebuild) {
 			let scon: ShaderContext = null;
 			for (let c of m.shader.contexts) {
@@ -170,12 +170,12 @@ class MakeMaterial {
 	///end
 
 	static parsePaintMaterial = (bakePreviews = true) => {
-		if (!getMOut()) return;
+		if (!MakeMaterial.getMOut()) return;
 
 		if (bakePreviews) {
 			let current = Graphics2.current;
 			if (current != null) current.end();
-			bakeNodePreviews();
+			MakeMaterial.bakeNodePreviews();
 			if (current != null) current.begin(false);
 		}
 
@@ -184,63 +184,63 @@ class MakeMaterial {
 		let mcon: MaterialContext = null;
 		for (let c of m.shader.contexts) {
 			if (c.raw.name == "paint") {
-				m.shader.raw.contexts.remove(c.raw);
-				m.shader.contexts.remove(c);
-				if (c != defaultScon) deleteContext(c);
+				array_remove(m.shader.raw.contexts, c.raw);
+				array_remove(m.shader.contexts, c);
+				if (c != MakeMaterial.defaultScon) MakeMaterial.deleteContext(c);
 				break;
 			}
 		}
 		for (let c of m.contexts) {
 			if (c.raw.name == "paint") {
-				m.raw.contexts.remove(c.raw);
-				m.contexts.remove(c);
+				array_remove(m.raw.contexts, c.raw);
+				array_remove(m.contexts, c);
 				break;
 			}
 		}
 
 		let sdata: TMaterial = { name: "Material", canvas: UINodes.getCanvasMaterial() };
-		let mcon: TMaterialContext = { name: "paint", bind_textures: [] };
-		let con = MakeSculpt.run(sdata, mcon);
+		let mcon2: TMaterialContext = { name: "paint", bind_textures: [] };
+		let con = MakeSculpt.run(sdata, mcon2);
 
 		let compileError = false;
-		let scon = new ShaderContext(con.data, (scon: ShaderContext) => {
-			if (scon == null) compileError = true;
+		let scon2 = new ShaderContext(con.data, (scon: ShaderContext) => {
+			if (scon2 == null) compileError = true;
 		});
 		if (compileError) return;
-		scon.overrideContext = {};
-		scon.overrideContext.addressing = "repeat";
-		let mcon = new MaterialContext(mcon, (mcon: MaterialContext) => {});
+		scon2.overrideContext = {};
+		scon2.overrideContext.addressing = "repeat";
+		let mcon3 = new MaterialContext(mcon2, (mcon: MaterialContext) => {});
 
-		m.shader.raw.contexts.push(scon.raw);
-		m.shader.contexts.push(scon);
-		m.raw.contexts.push(mcon.raw);
-		m.contexts.push(mcon);
+		m.shader.raw.contexts.push(scon2.raw);
+		m.shader.contexts.push(scon2);
+		m.raw.contexts.push(mcon3.raw);
+		m.contexts.push(mcon3);
 
-		if (defaultScon == null) defaultScon = scon;
-		if (defaultMcon == null) defaultMcon = mcon;
+		if (MakeMaterial.defaultScon == null) MakeMaterial.defaultScon = scon2;
+		if (MakeMaterial.defaultMcon == null) MakeMaterial.defaultMcon = mcon3;
 	}
 
 	static bakeNodePreviews = () => {
 		Context.raw.nodePreviewsUsed = [];
-		if (Context.raw.nodePreviews == null) Context.raw.nodePreviews = [];
-		traverseNodes(UINodes.getCanvasMaterial().nodes, null, []);
+		if (Context.raw.nodePreviews == null) Context.raw.nodePreviews = new Map();
+		MakeMaterial.traverseNodes(UINodes.getCanvasMaterial().nodes, null, []);
 		for (let key of Context.raw.nodePreviews.keys()) {
 			if (Context.raw.nodePreviewsUsed.indexOf(key) == -1) {
 				let image = Context.raw.nodePreviews.get(key);
 				Base.notifyOnNextFrame(image.unload);
-				Context.raw.nodePreviews.remove(key);
+				Context.raw.nodePreviews.delete(key);
 			}
 		}
 	}
 
 	static traverseNodes = (nodes: TNode[], group: TNodeCanvas, parents: TNode[]) => {
 		for (let node of nodes) {
-			bakeNodePreview(node, group, parents);
+			MakeMaterial.bakeNodePreview(node, group, parents);
 			if (node.type == "GROUP") {
 				for (let g of Project.materialGroups) {
 					if (g.canvas.name == node.name) {
 						parents.push(node);
-						traverseNodes(g.canvas.nodes, g.canvas, parents);
+						MakeMaterial.traverseNodes(g.canvas.nodes, g.canvas, parents);
 						parents.pop();
 						break;
 					}

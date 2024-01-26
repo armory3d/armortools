@@ -161,18 +161,8 @@ class NodeShader {
 		}
 	}
 
-	static get = (raw: NodeShaderRaw): string => {
-
-		if (raw.shader_type == 'vert' && raw.vstruct_as_vsin) {
-			NodeShader.vstruct_to_vsin(raw);
-		}
-
-		let sharedSampler = 'shared_sampler';
-		if (raw.sharedSamplers.length > 0) {
-			sharedSampler = raw.sharedSamplers[0].split(' ')[1] + '_sampler';
-		}
-
-		///if (krom_direct3d11 || krom_direct3d12)
+	///if (krom_direct3d11 || krom_direct3d12)
+	static get_hlsl(raw: NodeShaderRaw, sharedSampler: string): string {
 		let s = '#define HLSL\n';
 		s += '#define textureArg(tex) Texture2D tex,SamplerState tex ## _sampler\n';
 		s += '#define texturePass(tex) tex,tex ## _sampler\n';
@@ -352,9 +342,12 @@ class NodeShader {
 			s += 'return stage_output;\n';
 		}
 		s += '}\n';
+		return s;
+	}
+	///end
 
-		///elseif krom_metal
-
+	///if krom_metal
+	static get_msl(raw: NodeShaderRaw, sharedSampler: string): string {
 		let s = '#define METAL\n';
 		s += '#include <metal_stdlib>\n';
 		s += '#include <simd/simd.h>\n';
@@ -575,21 +568,13 @@ class NodeShader {
 			s += 'return out;\n';
 		}
 		s += '}\n';
+		return s;
+	}
+	///end
 
-		///else // krom_opengl
-
-		///if krom_vulkan
-		let s = '#version 450\n';
-		///elseif krom_android
-		let s = '#version 300 es\n';
-		if (raw.shader_type == 'frag') {
-			s += 'precision highp float;\n';
-			s += 'precision mediump int;\n';
-		}
-		///else
-		let s = '#version 330\n';
-		///end
-
+	///if (krom_opengl || krom_vulkan)
+	static get_glsl(raw: NodeShaderRaw, sharedSampler: string, version_header: string): string {
+		let s = version_header;
 		s += '#define textureArg(tex) sampler2D tex\n';
 		s += '#define texturePass(tex) tex\n';
 		s += '#define mul(a, b) b * a\n';
@@ -627,7 +612,38 @@ class NodeShader {
 		s += raw.main;
 		s += raw.main_end;
 		s += '}\n';
+		return s;
+	}
+	///end
 
+	static get = (raw: NodeShaderRaw): string => {
+
+		if (raw.shader_type == 'vert' && raw.vstruct_as_vsin) {
+			NodeShader.vstruct_to_vsin(raw);
+		}
+
+		let sharedSampler = 'shared_sampler';
+		if (raw.sharedSamplers.length > 0) {
+			sharedSampler = raw.sharedSamplers[0].split(' ')[1] + '_sampler';
+		}
+
+		///if (krom_direct3d11 || krom_direct3d12)
+		let s = NodeShader.get_hlsl(raw, sharedSampler);
+		///elseif krom_metal
+		let s = NodeShader.get_msl(raw, sharedSampler);
+		///elseif krom_vulkan
+		let version_header = '#version 450\n';
+		let s = NodeShader.get_glsl(raw, sharedSampler, version_header);
+		///elseif krom_android
+		let version_header = '#version 300 es\n';
+		if (raw.shader_type == 'frag') {
+			s += 'precision highp float;\n';
+			s += 'precision mediump int;\n';
+		}
+		let s = NodeShader.get_glsl(raw, sharedSampler, version_header);
+		///elseif krom_opengl
+		let version_header = '#version 330\n';
+		let s = NodeShader.get_glsl(raw, sharedSampler, version_header);
 		///end
 
 		return s;

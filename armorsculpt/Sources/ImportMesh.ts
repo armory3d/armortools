@@ -11,18 +11,17 @@ class ImportMesh {
 			}
 		}
 
-		clearLayers = _clearLayers;
+		ImportMesh.clearLayers = _clearLayers;
 		Context.raw.layerFilter = 0;
 
 		let p = path.toLowerCase();
 		if (p.endsWith(".obj")) ImportObj.run(path, replaceExisting);
-		else if (p.endsWith(".fbx")) ImportFbx.run(path, replaceExisting);
 		else if (p.endsWith(".blend")) ImportBlendMesh.run(path, replaceExisting);
 		else {
 			let ext = path.substr(path.lastIndexOf(".") + 1);
 			let importer = Path.meshImporters.get(ext);
 			importer(path, (mesh: any) => {
-				replaceExisting ? makeMesh(mesh, path) : addMesh(mesh);
+				replaceExisting ? ImportMesh.makeMesh(mesh, path) : ImportMesh.addMesh(mesh);
 			});
 		}
 
@@ -77,7 +76,7 @@ class ImportMesh {
 		}
 
 		let _makeMesh = () => {
-			let raw = rawMesh(mesh);
+			let raw = ImportMesh.rawMesh(mesh);
 			if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
 
 			new MeshData(raw, (md: MeshData) => {
@@ -95,10 +94,10 @@ class ImportMesh {
 					Data.deleteMesh(handle);
 				}
 
-				if (clearLayers) {
+				if (ImportMesh.clearLayers) {
 					while (Project.layers.length > 0) {
 						let l = Project.layers.pop();
-						l.unload();
+						SlotLayer.unload(l);
 					}
 					Base.newLayer(false);
 					App.notifyOnInit(Base.initLayers);
@@ -113,11 +112,11 @@ class ImportMesh {
 				Data.cachedMeshes.set(md.handle, md);
 
 				Context.raw.ddirty = 4;
-				UIBase.hwnds[TabSidebar0].redraws = 2;
-				UIBase.hwnds[TabSidebar1].redraws = 2;
+				UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
+				UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
 
 				// Wait for addMesh calls to finish
-				App.notifyOnInit(finishImport);
+				App.notifyOnInit(ImportMesh.finishImport);
 
 				Base.notifyOnNextFrame(() => {
 					let f32 = new Float32Array(Config.getTextureResX() * Config.getTextureResY() * 4);
@@ -145,7 +144,7 @@ class ImportMesh {
 	static addMesh = (mesh: any) => {
 
 		let _addMesh = () => {
-			let raw = rawMesh(mesh);
+			let raw = ImportMesh.rawMesh(mesh);
 			if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
 
 			new MeshData(raw, (md: MeshData) => {
@@ -169,7 +168,7 @@ class ImportMesh {
 				Data.cachedMeshes.set(md.handle, md);
 
 				Context.raw.ddirty = 4;
-				UIBase.hwnds[TabSidebar0].redraws = 2;
+				UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
 			});
 		}
 

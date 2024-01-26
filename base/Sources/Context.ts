@@ -185,7 +185,13 @@ class Context {
 	}
 
 	static objectMaskUsed = (): bool => {
+		///if (is_paint || is_sculpt)
 		return SlotLayer.getObjectMask(Context.raw.layer) > 0 && SlotLayer.getObjectMask(Context.raw.layer) <= Project.paintObjects.length;
+		///end
+
+		///if is_lab
+		return false;
+		///end
 	}
 
 	static inViewport = (): bool => {
@@ -289,7 +295,6 @@ class Context {
 		}
 	}
 
-	// @:keep
 	static setViewportShader = (viewportShader: (ns: NodeShaderRaw)=>string) => {
 		Context.raw.viewportShader = viewportShader;
 		Context.setRenderPath();

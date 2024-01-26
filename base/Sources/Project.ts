@@ -217,7 +217,9 @@ class Project {
 			Context.raw.paintObject.transform.buildMatrix();
 			Context.raw.paintObject.name = n;
 			Project.paintObjects = [Context.raw.paintObject];
+			///if (is_paint || is_sculpt)
 			while (Project.materials.length > 0) SlotMaterial.unload(Project.materials.pop());
+			///end
 			Data.getMaterial("Scene", "Material", (m: MaterialData) => {
 				///if (is_paint || is_sculpt)
 				Project.materials.push(SlotMaterial.create(m));

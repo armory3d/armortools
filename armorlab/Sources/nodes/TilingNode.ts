@@ -1,5 +1,4 @@
 
-// @:keep
 class TilingNode extends LogicNode {
 
 	result: Image = null;
@@ -10,44 +9,44 @@ class TilingNode extends LogicNode {
 
 	constructor() {
 		super();
-		init();
+		TilingNode.init();
 	}
 
 	static init = () => {
-		if (image == null) {
-			image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
+		if (TilingNode.image == null) {
+			TilingNode.image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
 		}
 	}
 
-	static buttons = (ui: zui.Zui, nodes: zui.Zui.Nodes, node: zui.Zui.TNode) => {
-		auto = node.buttons[0].default_value == 0 ? false : true;
-		if (!auto) {
-			strength = ui.slider(zui.Zui.handle("tilingnode_0", {value: strength}), tr("strength"), 0, 1, true);
-			prompt = ui.textArea(zui.Zui.handle("tilingnode_1"), true, tr("prompt"), true);
-			node.buttons[1].height = 1 + prompt.split("\n").length;
+	static buttons = (ui: Zui, nodes: Nodes, node: TNode) => {
+		TilingNode.auto = node.buttons[0].default_value == 0 ? false : true;
+		if (!TilingNode.auto) {
+			TilingNode.strength = ui.slider(Zui.handle("tilingnode_0", {value: TilingNode.strength}), tr("strength"), 0, 1, true);
+			TilingNode.prompt = ui.textArea(Zui.handle("tilingnode_1"), Align.Left, true, tr("prompt"), true);
+			node.buttons[1].height = 1 + TilingNode.prompt.split("\n").length;
 		}
 		else node.buttons[1].height = 0;
 	}
 
 	override getAsImage = (from: i32, done: (img: Image)=>void) => {
-		inputs[0].getAsImage((source: Image) => {
-			image.g2.begin(false);
-			image.g2.drawScaledImage(source, 0, 0, Config.getTextureResX(), Config.getTextureResY());
-			image.g2.end();
+		this.inputs[0].getAsImage((source: Image) => {
+			TilingNode.image.g2.begin(false);
+			TilingNode.image.g2.drawScaledImage(source, 0, 0, Config.getTextureResX(), Config.getTextureResY());
+			TilingNode.image.g2.end();
 
 			Console.progress(tr("Processing") + " - " + tr("Tiling"));
 			Base.notifyOnNextFrame(() => {
 				let _done = (image: Image) => {
-					result = image;
+					this.result = image;
 					done(image);
 				}
-				auto ? InpaintNode.texsynthInpaint(image, true, null, _done) : sdTiling(image, -1, _done);
+				TilingNode.auto ? InpaintNode.texsynthInpaint(TilingNode.image, true, null, _done) : TilingNode.sdTiling(TilingNode.image, -1, _done);
 			});
 		});
 	}
 
 	override getCachedImage = (): Image => {
-		return result;
+		return this.result;
 	}
 
 	static sdTiling = (image: Image, seed: i32/* = -1*/, done: (img: Image)=>void) => {
@@ -80,13 +79,13 @@ class TilingNode extends LogicNode {
 		// }
 		let mask = Image.fromBytes(u8a.buffer, 512, 512, TextureFormat.R8);
 
-		InpaintNode.prompt = prompt;
-		InpaintNode.strength = strength;
+		InpaintNode.prompt = TilingNode.prompt;
+		InpaintNode.strength = TilingNode.strength;
 		if (seed >= 0) RandomNode.setSeed(seed);
 		InpaintNode.sdInpaint(tile, mask, done);
 	}
 
-	static def: zui.Zui.TNode = {
+	static def: TNode = {
 		id: 0,
 		name: _tr("Tiling"),
 		type: "TilingNode",
@@ -121,7 +120,7 @@ class TilingNode extends LogicNode {
 				output: 0
 			},
 			{
-				name: "arm.nodes.TilingNode.buttons",
+				name: "TilingNode.buttons",
 				type: "CUSTOM",
 				height: 0
 			}

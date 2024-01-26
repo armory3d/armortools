@@ -1,5 +1,4 @@
 
-// @:keep
 class TimeNode extends LogicNode {
 
 	constructor() {

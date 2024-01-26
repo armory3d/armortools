@@ -1,5 +1,4 @@
 
-// @:keep
 class TEX_IMAGE extends LogicNode {
 
 	file: string;

@@ -10,7 +10,7 @@ class MakePaint {
 			cull_mode: "none",
 			vertex_elements: [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}],
 			color_attachments:
-				Context.raw.tool == ToolPicker ? ["RGBA32", "RGBA32", "RGBA32", "RGBA32"] :
+				Context.raw.tool == WorkspaceTool.ToolPicker ? ["RGBA32", "RGBA32", "RGBA32", "RGBA32"] :
 					["RGBA32", "RGBA32", "RGBA32", "R8"]
 		});
 
@@ -24,7 +24,7 @@ class MakePaint {
 		let frag = NodeShaderContext.make_frag(con_paint);
 		frag.ins = vert.outs;
 
-		if (Context.raw.tool == ToolPicker) {
+		if (Context.raw.tool == WorkspaceTool.ToolPicker) {
 			// Mangle vertices to form full screen triangle
 			NodeShader.write(vert, 'gl_Position = vec4(-1.0 + float((gl_VertexID & 1) << 2), -1.0 + float((gl_VertexID & 2) << 1), 0.0, 1.0);');
 
@@ -85,10 +85,10 @@ class MakePaint {
 		NodeShader.add_uniform(frag, 'float brushOpacity', '_brushOpacity');
 		NodeShader.add_uniform(frag, 'float brushHardness', '_brushHardness');
 
-		if (Context.raw.tool == ToolEraser ||
-			Context.raw.tool == ToolClone  ||
-			Context.raw.tool == ToolBlur   ||
-			Context.raw.tool == ToolSmudge) {
+		if (Context.raw.tool == WorkspaceTool.ToolEraser ||
+			Context.raw.tool == WorkspaceTool.ToolClone  ||
+			Context.raw.tool == WorkspaceTool.ToolBlur   ||
+			Context.raw.tool == WorkspaceTool.ToolSmudge) {
 
 			NodeShader.write(frag, 'float dist = 0.0;');
 
@@ -129,14 +129,14 @@ class MakePaint {
 		// NodeShader.add_out(vert, 'vec2 texCoord');
 		// NodeShader.write(vert, 'texCoord = tex * brushScale * texScale;');
 
-		if (Context.raw.tool == ToolClone || Context.raw.tool == ToolBlur || Context.raw.tool == ToolSmudge) {
+		if (Context.raw.tool == WorkspaceTool.ToolClone || Context.raw.tool == WorkspaceTool.ToolBlur || Context.raw.tool == WorkspaceTool.ToolSmudge) {
 			NodeShader.add_uniform(frag, 'sampler2D gbuffer2');
 			NodeShader.add_uniform(frag, 'vec2 gbufferSize', '_gbufferSize');
 			NodeShader.add_uniform(frag, 'sampler2D texpaint_undo', '_texpaint_undo');
 			NodeShader.add_uniform(frag, 'sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
 			NodeShader.add_uniform(frag, 'sampler2D texpaint_pack_undo', '_texpaint_pack_undo');
 
-			if (Context.raw.tool == ToolClone) {
+			if (Context.raw.tool == WorkspaceTool.ToolClone) {
 				// NodeShader.add_uniform(frag, 'vec2 cloneDelta', '_cloneDelta');
 				// ///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 				// NodeShader.write(frag, 'vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.xy + cloneDelta) * gbufferSize), 0).ba;');
@@ -257,7 +257,7 @@ class MakePaint {
 		NodeShader.add_uniform(frag, 'sampler2D texpaint_undo', '_texpaint_undo');
 		NodeShader.write(frag, 'vec4 sample_undo = textureLod(texpaint_undo, sample_tc, 0.0);');
 
-		if (Context.raw.tool == ToolEraser) {
+		if (Context.raw.tool == WorkspaceTool.ToolEraser) {
 			// NodeShader.write(frag, 'fragColor[0] = vec4(mix(sample_undo.rgb, vec3(0.0, 0.0, 0.0), str), sample_undo.a - str);');
 			NodeShader.write(frag, 'fragColor[0] = vec4(0.0, 0.0, 0.0, 0.0);');
 			NodeShader.write(frag, 'fragColor[1] = vec4(0.5, 0.5, 1.0, 0.0);');

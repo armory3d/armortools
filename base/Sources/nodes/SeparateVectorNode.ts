@@ -1,5 +1,4 @@
 
-// @:keep
 class SeparateVectorNode extends LogicNode {
 
 	constructor() {

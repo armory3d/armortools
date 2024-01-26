@@ -1,5 +1,4 @@
 
-// @:keep
 class RandomNode extends LogicNode {
 
 	constructor() {

@@ -1,4 +1,6 @@
 
+///if (is_paint || is_sculpt)
+
 class ImportBlendMaterial {
 
 	static run = (path: string) => {
@@ -289,3 +291,5 @@ class ImportBlendMaterial {
 		return null;
 	}
 }
+
+///end

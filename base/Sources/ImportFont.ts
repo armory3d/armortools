@@ -1,4 +1,6 @@
 
+///if (is_paint || is_sculpt)
+
 class ImportFont {
 
 	static run = (path: string) => {
@@ -34,3 +36,5 @@ class ImportFont {
 		});
 	}
 }
+
+///end

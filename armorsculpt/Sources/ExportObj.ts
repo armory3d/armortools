@@ -9,7 +9,7 @@ class ExportObj {
 
 	static run = (path: string, paintObjects: MeshObject[], applyDisplacement = false) => {
 		let o: i32[] = [];
-		writeString(o, "# armorsculpt.org\n");
+		ExportObj.writeString(o, "# armorsculpt.org\n");
 
 		let texpaint = Project.layers[0].texpaint;
 		let pixels = texpaint.getPixels();
@@ -60,18 +60,18 @@ class ExportObj {
 				}
 			}
 
-			writeString(o, "o " + p.name + "\n");
+			ExportObj.writeString(o, "o " + p.name + "\n");
 			for (let i = 0; i < pi; ++i) {
-				writeString(o, "v ");
+				ExportObj.writeString(o, "v ");
 				let vx = posa2[i * 3] * sc + "";
-				writeString(o, vx.substr(0, vx.indexOf(".") + 7));
-				writeString(o, " ");
+				ExportObj.writeString(o, vx.substr(0, vx.indexOf(".") + 7));
+				ExportObj.writeString(o, " ");
 				let vy = posa2[i * 3 + 2] * sc + "";
-				writeString(o, vy.substr(0, vy.indexOf(".") + 7));
-				writeString(o, " ");
+				ExportObj.writeString(o, vy.substr(0, vy.indexOf(".") + 7));
+				ExportObj.writeString(o, " ");
 				let vz = -posa2[i * 3 + 1] * sc + "";
-				writeString(o, vz.substr(0, vz.indexOf(".") + 7));
-				writeString(o, "\n");
+				ExportObj.writeString(o, vz.substr(0, vz.indexOf(".") + 7));
+				ExportObj.writeString(o, "\n");
 			}
 
 			// let inda = mesh.index_arrays[0].values;
@@ -79,13 +79,13 @@ class ExportObj {
 				let pi1 = posmap.get(inda[i * 3    ]) + 1 + poff;
 				let pi2 = posmap.get(inda[i * 3 + 1]) + 1 + poff;
 				let pi3 = posmap.get(inda[i * 3 + 2]) + 1 + poff;
-				writeString(o, "f ");
-				writeString(o, pi1 + "");
-				writeString(o, " ");
-				writeString(o, pi2 + "");
-				writeString(o, " ");
-				writeString(o, pi3 + "");
-				writeString(o, "\n");
+				ExportObj.writeString(o, "f ");
+				ExportObj.writeString(o, pi1 + "");
+				ExportObj.writeString(o, " ");
+				ExportObj.writeString(o, pi2 + "");
+				ExportObj.writeString(o, " ");
+				ExportObj.writeString(o, pi3 + "");
+				ExportObj.writeString(o, "\n");
 			}
 			poff += pi;
 		// }
