@@ -637,8 +637,8 @@ class NodeShader {
 		///elseif krom_android
 		let version_header = '#version 300 es\n';
 		if (raw.shader_type == 'frag') {
-			s += 'precision highp float;\n';
-			s += 'precision mediump int;\n';
+			version_header += 'precision highp float;\n';
+			version_header += 'precision mediump int;\n';
 		}
 		let s = NodeShader.get_glsl(raw, sharedSampler, version_header);
 		///elseif krom_opengl
