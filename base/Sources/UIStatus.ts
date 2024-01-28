@@ -44,7 +44,7 @@ class UIStatus {
 		if (!Config.raw.touch_ui) {
 			let ui = UIBase.ui;
 			ui.enabled = false;
-			ui.tab(UIBase.htabs[TabArea.TabStatus], Manifest.version);
+			ui.tab(UIBase.htabs[TabArea.TabStatus], manifest_version);
 			ui.enabled = true;
 		}
 	}

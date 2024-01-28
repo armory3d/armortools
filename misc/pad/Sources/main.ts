@@ -1,4 +1,3 @@
-/// <reference path='../../../armorcore/Sources/iron/System.ts'/>
 
 type TStorage = {
 	project: string;
@@ -125,7 +124,7 @@ class Main {
 					Main.storage.file = abs;
 					let bytes = Krom.loadBlob(Main.storage.file);
 					Main.storage.text = f.endsWith(".arm") ? JSON.stringify(ArmPack.decode(bytes), null, 4) : System.bufferToString(bytes);
-					Main.storage.text = Main.storage.text.replace("\r", "");
+					Main.storage.text = Main.storage.text.replaceAll("\r", "");
 					Main.text_handle.text = Main.storage.text;
 					Main.editor_handle.redraws = 1;
 					Krom.setWindowTitle(abs);
@@ -248,7 +247,7 @@ class Main {
 		for (let i = 0; i < lines.length; ++i) lines[i] = trimEnd(lines[i]);
 		Main.storage.text = lines.join("\n");
 		// Spaces to tabs
-		Main.storage.text = Main.storage.text.replace("    ", "\t");
+		Main.storage.text = Main.storage.text.replaceAll("    ", "\t");
 		Main.text_handle.text = Main.storage.text;
 		// Write bytes
 		let bytes = Main.storage.file.endsWith(".arm") ? ArmPack.encode(JSON.parse(Main.storage.text)) : System.stringToBuffer(Main.storage.text);

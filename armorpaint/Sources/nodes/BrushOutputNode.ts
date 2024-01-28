@@ -220,6 +220,3 @@ class BrushOutputNode extends LogicNode {
 	// 	]
 	// };
 }
-
-
-Main.main();////

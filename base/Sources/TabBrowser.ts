@@ -168,7 +168,7 @@ class TabBrowser {
 			}
 			TabBrowser.known = TabBrowser.hpath.text.substr(TabBrowser.hpath.text.lastIndexOf(Path.sep)).indexOf(".") > 0;
 			///if krom_android
-			if (TabBrowser.hpath.text.endsWith("." + Manifest.title.toLowerCase())) TabBrowser.known = false;
+			if (TabBrowser.hpath.text.endsWith("." + manifest_title.toLowerCase())) TabBrowser.known = false;
 			///end
 
 			let bottomY = ui._y;

@@ -27,8 +27,8 @@ class UIFiles {
 		if (isSave) {
 			UIFiles.path = Krom.saveDialog(filters, "");
 			if (UIFiles.path != null) {
-				while (UIFiles.path.indexOf(Path.sep + Path.sep) >= 0) UIFiles.path = UIFiles.path.replace(Path.sep + Path.sep, Path.sep);
-				UIFiles.path = UIFiles.path.replace("\r", "");
+				while (UIFiles.path.indexOf(Path.sep + Path.sep) >= 0) UIFiles.path = UIFiles.path.replaceAll(Path.sep + Path.sep, Path.sep);
+				UIFiles.path = UIFiles.path.replaceAll("\r", "");
 				UIFiles.filename = UIFiles.path.substr(UIFiles.path.lastIndexOf(Path.sep) + 1);
 				UIFiles.path = UIFiles.path.substr(0, UIFiles.path.lastIndexOf(Path.sep));
 				filesDone(UIFiles.path);
@@ -38,8 +38,8 @@ class UIFiles {
 			let paths = Krom.openDialog(filters, "", openMultiple);
 			if (paths != null) {
 				for (let path of paths) {
-					while (path.indexOf(Path.sep + Path.sep) >= 0) path = path.replace(Path.sep + Path.sep, Path.sep);
-					path = path.replace("\r", "");
+					while (path.indexOf(Path.sep + Path.sep) >= 0) path = path.replaceAll(Path.sep + Path.sep, Path.sep);
+					path = path.replaceAll("\r", "");
 					UIFiles.filename = path.substr(path.lastIndexOf(Path.sep) + 1);
 					filesDone(path);
 				}

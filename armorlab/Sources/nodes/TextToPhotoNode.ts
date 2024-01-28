@@ -49,7 +49,7 @@ class TextToPhotoNode extends LogicNode {
 	static textEncoder = (prompt: string, inpaintLatents: Float32Array, done: (a: Float32Array, b: Float32Array)=>void) => {
 		Console.progress(tr("Processing") + " - " + tr("Text to Photo"));
 		Base.notifyOnNextFrame(() => {
-			let words = prompt.replace("\n", " ").replace(",", " , ").replace("  ", " ").trim().split(" ");
+			let words = prompt.replaceAll("\n", " ").replaceAll(",", " , ").replaceAll("  ", " ").trim().split(" ");
 			for (let i = 0; i < words.length; ++i) {
 				TextToPhotoNode.text_input_ids[i + 1] = TextToPhotoNode.vocab[words[i].toLowerCase() + "</w>"];
 			}

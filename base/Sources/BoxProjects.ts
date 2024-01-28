@@ -184,9 +184,9 @@ class BoxProjects {
 			for (let path of Config.raw.recent_projects) {
 				let file = path;
 				///if krom_windows
-				file = path.replace("/", "\\");
+				file = path.replaceAll("/", "\\");
 				///else
-				file = path.replace("\\", "/");
+				file = path.replaceAll("\\", "/");
 				///end
 				file = file.substr(file.lastIndexOf(Path.sep) + 1);
 
@@ -227,13 +227,13 @@ class BoxProjects {
 	static getStartedTab = (ui: Zui) => {
 		if (ui.tab(BoxProjects.htab, tr("Get Started"), true)) {
 			if (ui.button(tr("Manual"))) {
-				File.loadUrl(Manifest.url + "/manual");
+				File.loadUrl(manifest_url + "/manual");
 			}
 			if (ui.button(tr("How To"))) {
-				File.loadUrl(Manifest.url + "/howto");
+				File.loadUrl(manifest_url + "/howto");
 			}
 			if (ui.button(tr("What's New"))) {
-				File.loadUrl(Manifest.url + "/notes");
+				File.loadUrl(manifest_url + "/notes");
 			}
 		}
 	}

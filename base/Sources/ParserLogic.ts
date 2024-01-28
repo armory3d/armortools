@@ -52,7 +52,7 @@ class ParserLogic {
 	}
 
 	static safe_src = (s: string): string => {
-		return s.replace(" ", "");
+		return s.replaceAll(" ", "");
 	}
 
 	static node_name = (node: TNode): string => {

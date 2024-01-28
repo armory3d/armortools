@@ -481,7 +481,7 @@ class ParserMaterial {
 			let co = ParserMaterial.getCoord(node);
 			let but = node.buttons[0]; //gradient_type;
 			let grad: string = but.data[but.default_value].toUpperCase();
-			grad = grad.replace(" ", "_");
+			grad = grad.replaceAll(" ", "_");
 			let f = ParserMaterial.getGradient(grad, co);
 			let res = ParserMaterial.to_vec3(`clamp(${f}, 0.0, 1.0)`);
 			return res;
@@ -526,7 +526,7 @@ class ParserMaterial {
 			let scale = ParserMaterial.parse_value_input(node.inputs[1]);
 			let but = node.buttons[0]; //coloring;
 			let coloring: string = but.data[but.default_value].toUpperCase();
-			coloring = coloring.replace(" ", "_");
+			coloring = coloring.replaceAll(" ", "_");
 			let res = "";
 			if (coloring == "INTENSITY") {
 				res = ParserMaterial.to_vec3(`tex_voronoi(${co} * ${scale}, texturePass(snoise256)).a`);
@@ -606,7 +606,7 @@ class ParserMaterial {
 			let col2 = ParserMaterial.parse_vector_input(node.inputs[2]);
 			let but = node.buttons[0]; // blend_type
 			let blend: string = but.data[but.default_value].toUpperCase();
-			blend = blend.replace(" ", "_");
+			blend = blend.replaceAll(" ", "_");
 			let use_clamp = node.buttons[1].default_value == true;
 			let out_col = "";
 			if (blend == "MIX") {
@@ -959,7 +959,7 @@ class ParserMaterial {
 			let nm2 = ParserMaterial.parse_vector_input(node.inputs[1]);
 			let but = node.buttons[0];
 			let blend: string = but.data[but.default_value].toUpperCase(); // blend_type
-			blend = blend.replace(" ", "_");
+			blend = blend.replaceAll(" ", "_");
 			let store = ParserMaterial.store_var_name(node);
 
 			// The blending algorithms are based on the paper `Blending in Detail` by Colin Barré-Brisebois and Stephen Hill 2012
@@ -998,7 +998,7 @@ class ParserMaterial {
 			let vec2 = ParserMaterial.parse_vector_input(node.inputs[1]);
 			let but = node.buttons[0]; //operation;
 			let op: string = but.data[but.default_value].toUpperCase();
-			op = op.replace(" ", "_");
+			op = op.replaceAll(" ", "_");
 			if (op == "ADD") {
 				return `(${vec1} + ${vec2})`;
 			}
@@ -1328,7 +1328,7 @@ class ParserMaterial {
 			let co = ParserMaterial.getCoord(node);
 			let but = node.buttons[0]; //gradient_type;
 			let grad: string = but.data[but.default_value].toUpperCase();
-			grad = grad.replace(" ", "_");
+			grad = grad.replaceAll(" ", "_");
 			let f = ParserMaterial.getGradient(grad, co);
 			let res = `(clamp(${f}, 0.0, 1.0))`;
 			return res;
@@ -1375,7 +1375,7 @@ class ParserMaterial {
 			let scale = ParserMaterial.parse_value_input(node.inputs[1]);
 			let but = node.buttons[0]; // coloring
 			let coloring: string = but.data[but.default_value].toUpperCase();
-			coloring = coloring.replace(" ", "_");
+			coloring = coloring.replaceAll(" ", "_");
 			let res = "";
 			if (coloring == "INTENSITY") {
 				res = `tex_voronoi(${co} * ${scale}, texturePass(snoise256)).a`;
@@ -1422,7 +1422,7 @@ class ParserMaterial {
 			let val2 = ParserMaterial.parse_value_input(node.inputs[1]);
 			let but = node.buttons[0]; // operation
 			let op: string = but.data[but.default_value].toUpperCase();
-			op = op.replace(" ", "_");
+			op = op.replaceAll(" ", "_");
 			let use_clamp = node.buttons[1].default_value == true;
 			let out_val = "";
 			if (op == "ADD") {
@@ -1596,7 +1596,7 @@ class ParserMaterial {
 			let vec2 = ParserMaterial.parse_vector_input(node.inputs[1]);
 			let but = node.buttons[0]; //operation;
 			let op: string = but.data[but.default_value].toUpperCase();
-			op = op.replace(" ", "_");
+			op = op.replaceAll(" ", "_");
 			if (op == "DOT_PRODUCT") {
 				return `dot(${vec1}, ${vec2})`;
 			}
@@ -1616,7 +1616,7 @@ class ParserMaterial {
 			let max = ParserMaterial.parse_value_input(node.inputs[2]);
 			let but = node.buttons[0]; //operation;
 			let op: string = but.data[but.default_value].toUpperCase();
-			op = op.replace(" ", "_");
+			op = op.replaceAll(" ", "_");
 
 			if (op == "MIN_MAX") {
 				return `(clamp(${val}, ${min}, ${max}))`;
@@ -1855,11 +1855,11 @@ class ParserMaterial {
 			let code = s.charCodeAt(i);
 			let letter = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
 			let digit = code >= 48 && code <= 57;
-			if (!letter && !digit) s = s.replace(s.charAt(i), "_");
+			if (!letter && !digit) s = s.replaceAll(s.charAt(i), "_");
 			if (i == 0 && digit) s = "_" + s;
 		}
 		///if krom_opengl
-		while (s.indexOf("__") >= 0) s = s.replace("__", "_");
+		while (s.indexOf("__") >= 0) s = s.replaceAll("__", "_");
 		///end
 		return s;
 	}

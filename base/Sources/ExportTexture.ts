@@ -75,9 +75,9 @@ class ExportTexture {
 		///end
 
 		///if krom_ios
-		Console.info(tr("Textures exported") + " ('Files/On My iPad/" + Manifest.title + "')");
+		Console.info(tr("Textures exported") + " ('Files/On My iPad/" + manifest_title + "')");
 		///elseif krom_android
-		Console.info(tr("Textures exported") + " ('Files/Internal storage/Pictures/" + Manifest.title + "')");
+		Console.info(tr("Textures exported") + " ('Files/Internal storage/Pictures/" + manifest_title + "')");
 		///else
 		Console.info(tr("Textures exported"));
 		///end

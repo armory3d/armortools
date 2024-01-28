@@ -84,7 +84,7 @@ class MakeMaterial {
 
 		let compileError = false;
 		let scon2 = new ShaderContext(con.data, (scon: ShaderContext) => {
-			if (scon2 == null) compileError = true;
+			if (scon == null) compileError = true;
 		});
 		if (compileError) return;
 		scon2.overrideContext = {};

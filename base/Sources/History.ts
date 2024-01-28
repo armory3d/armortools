@@ -593,7 +593,7 @@ class History {
 	static push = (name: string): TStep => {
 		///if (krom_windows || krom_linux || krom_darwin)
 		let filename = Project.filepath == "" ? UIFiles.filename : Project.filepath.substring(Project.filepath.lastIndexOf(Path.sep) + 1, Project.filepath.length - 4);
-		System.title = filename + "* - " + Manifest.title;
+		System.title = filename + "* - " + manifest_title;
 		///end
 
 		if (Config.raw.touch_ui) {

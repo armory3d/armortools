@@ -59,7 +59,7 @@ class Project {
 
 		///if (krom_windows || krom_linux || krom_darwin)
 		let filename = Project.filepath.substring(Project.filepath.lastIndexOf(Path.sep) + 1, Project.filepath.length - 4);
-		System.title = filename + " - " + Manifest.title;
+		System.title = filename + " - " + manifest_title;
 		///end
 
 		let _init = () => {
@@ -117,7 +117,7 @@ class Project {
 
 	static projectNew = (resetLayers = true) => {
 		///if (krom_windows || krom_linux || krom_darwin)
-		System.title = Manifest.title;
+		System.title = manifest_title;
 		///end
 		Project.filepath = "";
 

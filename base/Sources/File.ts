@@ -18,11 +18,11 @@ class File {
 
 	static readDirectory = (path: string, foldersOnly = false): string[] => {
 		if (path.startsWith("cloud")) {
-			let files = File.cloud != null ? File.cloud.get(path.replace("\\", "/")) : null;
+			let files = File.cloud != null ? File.cloud.get(path.replaceAll("\\", "/")) : null;
 			return files != null ? files : [];
 		}
 		// ///if krom_android
-		// path = path.replace("//", "/");
+		// path = path.replaceAll("//", "/");
 		// if (internal == null) {
 		// 	internal = [];
 		// 	internal.set("/data/plugins", BuildMacros.readDirectory("krom/data/plugins"));
@@ -96,7 +96,7 @@ class File {
 
 	static cacheCloud = (path: string, done: (s: string)=>void) => {
 		///if krom_ios
-		let path2 = path.replace("/", "_"); // Cache everything into root folder
+		let path2 = path.replaceAll("/", "_"); // Cache everything into root folder
 		///else
 		let path2 = path;
 		///end
@@ -115,7 +115,7 @@ class File {
 			File.createDirectory(fileDir);
 		}
 		///if krom_windows
-		path = path.replace("\\", "/");
+		path = path.replaceAll("\\", "/");
 		///end
 		let url = Config.raw.server + "/" + path;
 		File.download(url, dest, () => {

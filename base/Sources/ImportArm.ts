@@ -37,7 +37,7 @@ class ImportArm {
 			///if (krom_android || krom_ios)
 			System.title = UIFiles.filename;
 			///else
-			System.title = UIFiles.filename + " - " + Manifest.title;
+			System.title = UIFiles.filename + " - " + manifest_title;
 			///end
 
 			///if (is_paint || is_sculpt)
@@ -90,9 +90,9 @@ class ImportArm {
 
 			for (let file of project.assets) {
 				///if krom_windows
-				file = file.replace("/", "\\");
+				file = file.replaceAll("/", "\\");
 				///else
-				file = file.replace("\\", "/");
+				file = file.replaceAll("\\", "/");
 				///end
 				// Convert image path from relative to absolute
 				let abs = Data.isAbsolute(file) ? file : base + file;
@@ -111,9 +111,9 @@ class ImportArm {
 			if (project.font_assets != null) {
 				for (let file of project.font_assets) {
 					///if krom_windows
-					file = file.replace("/", "\\");
+					file = file.replaceAll("/", "\\");
 					///else
-					file = file.replace("\\", "/");
+					file = file.replaceAll("\\", "/");
 					///end
 					// Convert font path from relative to absolute
 					let abs = Data.isAbsolute(file) ? file : base + file;
@@ -401,9 +401,9 @@ class ImportArm {
 		let base = Path.baseDir(path);
 		for (let file of project.assets) {
 			///if krom_windows
-			file = file.replace("/", "\\");
+			file = file.replaceAll("/", "\\");
 			///else
-			file = file.replace("\\", "/");
+			file = file.replaceAll("\\", "/");
 			///end
 			// Convert image path from relative to absolute
 			let abs = Data.isAbsolute(file) ? file : base + file;
@@ -487,9 +487,9 @@ class ImportArm {
 		let base = Path.baseDir(path);
 		for (let file of project.assets) {
 			///if krom_windows
-			file = file.replace("/", "\\");
+			file = file.replaceAll("/", "\\");
 			///else
-			file = file.replace("\\", "/");
+			file = file.replaceAll("\\", "/");
 			///end
 			// Convert image path from relative to absolute
 			let abs = Data.isAbsolute(file) ? file : base + file;
@@ -585,9 +585,9 @@ class ImportArm {
 		}
 		for (let pa of project.packed_assets) {
 			///if krom_windows
-			pa.name = pa.name.replace("/", "\\");
+			pa.name = pa.name.replaceAll("/", "\\");
 			///else
-			pa.name = pa.name.replace("\\", "/");
+			pa.name = pa.name.replaceAll("\\", "/");
 			///end
 			pa.name = Path.normalize(pa.name);
 			if (pa.name == file) pa.name = abs; // From relative to absolute

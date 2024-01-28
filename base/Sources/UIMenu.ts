@@ -394,50 +394,50 @@ class UIMenu {
 			}
 			else if (UIMenu.menuCategory == MenuCategory.MenuHelp) {
 				if (UIMenu.menuButton(ui, tr("Manual"))) {
-					File.loadUrl(Manifest.url + "/manual");
+					File.loadUrl(manifest_url + "/manual");
 				}
 				if (UIMenu.menuButton(ui, tr("How To"))) {
-					File.loadUrl(Manifest.url + "/howto");
+					File.loadUrl(manifest_url + "/howto");
 				}
 				if (UIMenu.menuButton(ui, tr("What's New"))) {
-					File.loadUrl(Manifest.url + "/notes");
+					File.loadUrl(manifest_url + "/notes");
 				}
 				if (UIMenu.menuButton(ui, tr("Issue Tracker"))) {
 					File.loadUrl("https://github.com/armory3d/armortools/issues");
 				}
 				if (UIMenu.menuButton(ui, tr("Report Bug"))) {
 					///if (krom_darwin || krom_ios) // Limited url length
-					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + Manifest.title + "%20" + Manifest.version + "-" + Config.getSha() + ",%20" + System.systemId);
+					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" + manifest_version + "-" + Config.getSha() + ",%20" + System.systemId);
 					///else
-					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + Manifest.title + "%20" + Manifest.version + "-" + Config.getSha() + ",%20" + System.systemId + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A");
+					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" + manifest_version + "-" + Config.getSha() + ",%20" + System.systemId + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A");
 					///end
 				}
 				if (UIMenu.menuButton(ui, tr("Request Feature"))) {
 					///if (krom_darwin || krom_ios) // Limited url length
-					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + Manifest.title + "%20" + Manifest.version + "-" + Config.getSha() + ",%20" + System.systemId);
+					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + Config.getSha() + ",%20" + System.systemId);
 					///else
-					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + Manifest.title + "%20" + Manifest.version + "-" + Config.getSha() + ",%20" + System.systemId + "*%0A%0A**Feature description:**%0A%0A");
+					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + Config.getSha() + ",%20" + System.systemId + "*%0A%0A**Feature description:**%0A%0A");
 					///end
 				}
 				UIMenu.menuSeparator(ui);
 
 				if (UIMenu.menuButton(ui, tr("Check for Updates..."))) {
 					///if krom_android
-					File.loadUrl(Manifest.url_android);
+					File.loadUrl(manifest_url_android);
 					///elseif krom_ios
-					File.loadUrl(Manifest.url_ios);
+					File.loadUrl(manifest_url_ios);
 					///else
 					// Retrieve latest version number
-					File.downloadBytes("https://server.armorpaint.org/" + Manifest.title.toLowerCase() + ".html", (buffer: ArrayBuffer) => {
+					File.downloadBytes("https://server.armorpaint.org/" + manifest_title.toLowerCase() + ".html", (buffer: ArrayBuffer) => {
 						if (buffer != null)  {
 							// Compare versions
 							let update = JSON.parse(System.bufferToString(buffer));
 							let updateVersion = Math.floor(update.version);
 							if (updateVersion > 0) {
 								let date = Config.getDate().substr(2); // 2019 -> 19
-								let dateInt = parseInt(date.replace("-", ""));
+								let dateInt = parseInt(date.replaceAll("-", ""));
 								if (updateVersion > dateInt) {
-									UIBox.showMessage(tr("Update"), tr("Update is available!\nPlease visit {url}.", new Map([["url", Manifest.url]])));
+									UIBox.showMessage(tr("Update"), tr("Update is available!\nPlease visit {url}.", new Map([["url", manifest_url]])));
 								}
 								else {
 									UIBox.showMessage(tr("Update"), tr("You are up to date!"));
@@ -445,7 +445,7 @@ class UIMenu {
 							}
 						}
 						else {
-							UIBox.showMessage(tr("Update"), tr("Unable to check for updates.\nPlease visit {url}.", new Map([["url", Manifest.url]])));
+							UIBox.showMessage(tr("Update"), tr("Unable to check for updates.\nPlease visit {url}.", new Map([["url", manifest_url]])));
 						}
 					});
 					///end
@@ -453,7 +453,7 @@ class UIMenu {
 
 				if (UIMenu.menuButton(ui, tr("About..."))) {
 
-					let msg = Manifest.title + ".org - v" + Manifest.version + " (" + Config.getDate() + ") - " + Config.getSha() + "\n";
+					let msg = manifest_title + ".org - v" + manifest_version + " (" + Config.getDate() + ") - " + Config.getSha() + "\n";
 					msg += System.systemId + " - " + Strings.graphics_api;
 
 					///if krom_windows

@@ -100,7 +100,7 @@ class ExportArm {
 		///end
 
 		Project.raw = {
-			version: Manifest.version,
+			version: manifest_version,
 			material_groups: mgroups,
 			assets: texture_files,
 			packed_assets: packed_assets,
@@ -241,14 +241,14 @@ class ExportArm {
 
 		let texture_files = ExportArm.assetsToFiles(path, assets);
 		let isCloud = path.endsWith("_cloud_.arm");
-		if (isCloud) path = path.replace("_cloud_", "");
+		if (isCloud) path = path.replaceAll("_cloud_", "");
 		let packed_assets: TPackedAsset[] = null;
 		if (!Context.raw.packAssetsOnExport) {
 			packed_assets = ExportArm.getPackedAssets(path, texture_files);
 		}
 
 		let raw: TProjectFormat = {
-			version: Manifest.version,
+			version: manifest_version,
 			material_nodes: mnodes,
 			material_groups: mgroups,
 			material_icons: isCloud ? null :
@@ -301,14 +301,14 @@ class ExportArm {
 
 		let texture_files = ExportArm.assetsToFiles(path, assets);
 		let isCloud = path.endsWith("_cloud_.arm");
-		if (isCloud) path = path.replace("_cloud_", "");
+		if (isCloud) path = path.replaceAll("_cloud_", "");
 		let packed_assets: TPackedAsset[] = null;
 		if (!Context.raw.packAssetsOnExport) {
 			packed_assets = ExportArm.getPackedAssets(path, texture_files);
 		}
 
 		let raw: TProjectFormat = {
-			version: Manifest.version,
+			version: manifest_version,
 			brush_nodes: bnodes,
 			brush_icons: isCloud ? null :
 			///if (krom_metal || krom_vulkan)
@@ -447,7 +447,7 @@ class ExportArm {
 	static runSwatches = (path: string) => {
 		if (!path.endsWith(".arm")) path += ".arm";
 		let raw = {
-			version: Manifest.version,
+			version: manifest_version,
 			swatches: Project.raw.swatches
 		};
 		let buffer = ArmPack.encode(raw);
