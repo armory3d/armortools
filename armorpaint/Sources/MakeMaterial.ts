@@ -330,7 +330,7 @@ class MakeMaterial {
 			Context.raw.bakeType = _bakeType;
 			MakeMaterial.parsePaintMaterial(false);
 
-			let rts = RenderPath.active.renderTargets;
+			let rts = RenderPath.renderTargets;
 			let texpaint_live = rts.get("texpaint_live");
 
 			image.g2.begin(false);

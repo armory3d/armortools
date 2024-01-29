@@ -259,13 +259,10 @@ class Context {
 
 		Context.raw.viewportMode = mode;
 		if (Context.useDeferred()) {
-			RenderPath.active.commands = RenderPathDeferred.commands;
+			RenderPath.commands = RenderPathDeferred.commands;
 		}
 		else {
-			if (RenderPathForward.path == null) {
-				RenderPathForward.init(RenderPath.active);
-			}
-			RenderPath.active.commands = RenderPathForward.commands;
+			RenderPath.commands = RenderPathForward.commands;
 		}
 		let _workspace = UIHeader.worktab.position;
 		UIHeader.worktab.position = 0;
@@ -279,16 +276,16 @@ class Context {
 			Context.raw.envmapLoaded = true;
 			Data.cachedImages.delete("World_radiance.k");
 		}
-		Scene.active.world.loadEnvmap((_) => {});
-		if (Context.raw.savedEnvmap == null) Context.raw.savedEnvmap = Scene.active.world.envmap;
+		Scene.world.loadEnvmap((_) => {});
+		if (Context.raw.savedEnvmap == null) Context.raw.savedEnvmap = Scene.world.envmap;
 	}
 
 	static updateEnvmap = () => {
 		if (Context.raw.showEnvmap) {
-			Scene.active.world.envmap = Context.raw.showEnvmapBlur ? Scene.active.world.radianceMipmaps[0] : Context.raw.savedEnvmap;
+			Scene.world.envmap = Context.raw.showEnvmapBlur ? Scene.world.radianceMipmaps[0] : Context.raw.savedEnvmap;
 		}
 		else {
-			Scene.active.world.envmap = Context.raw.emptyEnvmap;
+			Scene.world.envmap = Context.raw.emptyEnvmap;
 		}
 	}
 
@@ -299,13 +296,10 @@ class Context {
 
 	static setRenderPath = () => {
 		if (Context.raw.renderMode == RenderMode.RenderForward || Context.raw.viewportShader != null) {
-			if (RenderPathForward.path == null) {
-				RenderPathForward.init(RenderPath.active);
-			}
-			RenderPath.active.commands = RenderPathForward.commands;
+			RenderPath.commands = RenderPathForward.commands;
 		}
 		else {
-			RenderPath.active.commands = RenderPathDeferred.commands;
+			RenderPath.commands = RenderPathDeferred.commands;
 		}
 		App.notifyOnInit(() => {
 			MakeMaterial.parseMeshMaterial();

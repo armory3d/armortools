@@ -663,24 +663,23 @@ class History {
 	}
 
 	static copyToUndo = (fromId: i32, toId: i32, isMask: bool) => {
-		let path = RenderPath.active;
 
 		///if is_sculpt
 		isMask = true;
 		///end
 
 		if (isMask) {
-			path.setTarget("texpaint_undo" + toId);
-			path.bindTarget("texpaint" + fromId, "tex");
-			// path.drawShader("shader_datas/copy_pass/copyR8_pass");
-			path.drawShader("shader_datas/copy_pass/copy_pass");
+			RenderPath.setTarget("texpaint_undo" + toId);
+			RenderPath.bindTarget("texpaint" + fromId, "tex");
+			// RenderPath.drawShader("shader_datas/copy_pass/copyR8_pass");
+			RenderPath.drawShader("shader_datas/copy_pass/copy_pass");
 		}
 		else {
-			path.setTarget("texpaint_undo" + toId, ["texpaint_nor_undo" + toId, "texpaint_pack_undo" + toId]);
-			path.bindTarget("texpaint" + fromId, "tex0");
-			path.bindTarget("texpaint_nor" + fromId, "tex1");
-			path.bindTarget("texpaint_pack" + fromId, "tex2");
-			path.drawShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
+			RenderPath.setTarget("texpaint_undo" + toId, ["texpaint_nor_undo" + toId, "texpaint_pack_undo" + toId]);
+			RenderPath.bindTarget("texpaint" + fromId, "tex0");
+			RenderPath.bindTarget("texpaint_nor" + fromId, "tex1");
+			RenderPath.bindTarget("texpaint_pack" + fromId, "tex2");
+			RenderPath.drawShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
 		}
 		History.undoI = (History.undoI + 1) % Config.raw.undo_steps;
 	}

@@ -115,10 +115,10 @@ class UIMenubar {
 
 				if (UIHeader.worktab.position == SpaceType.Space3D) {
 					if (UIMenubar._savedCamera != null) {
-						Scene.active.camera.transform.setMatrix(UIMenubar._savedCamera);
+						Scene.camera.transform.setMatrix(UIMenubar._savedCamera);
 						UIMenubar._savedCamera = null;
 					}
-					Scene.active.meshes = [Context.mainObject()];
+					Scene.meshes = [Context.mainObject()];
 				}
 				else { // Space2D
 					if (UIMenubar._plane == null) {
@@ -137,18 +137,18 @@ class UIMenubar {
 							scale_tex: mesh.scaleTex
 						};
 						let md = new MeshData(raw, (md: MeshData) => {});
-						let dotPlane: MeshObject = Scene.active.getChild(".Plane") as MeshObject;
+						let dotPlane: MeshObject = Scene.getChild(".Plane") as MeshObject;
 						UIMenubar._plane = new MeshObject(md, dotPlane.materials);
-						array_remove(Scene.active.meshes, UIMenubar._plane);
+						array_remove(Scene.meshes, UIMenubar._plane);
 					}
 
 					if (UIMenubar._savedCamera == null) {
-						UIMenubar._savedCamera = Scene.active.camera.transform.local.clone();
+						UIMenubar._savedCamera = Scene.camera.transform.local.clone();
 					}
-					Scene.active.meshes = [UIMenubar._plane];
+					Scene.meshes = [UIMenubar._plane];
 					let m = Mat4.identity();
 					m.translate(0, 0, 1.6);
-					Scene.active.camera.transform.setMatrix(m);
+					Scene.camera.transform.setMatrix(m);
 				}
 				///if (krom_direct3d12 || krom_vulkan || krom_metal)
 				RenderPathRaytrace.ready = false;

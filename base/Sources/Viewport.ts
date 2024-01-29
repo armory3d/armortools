@@ -20,8 +20,8 @@ class Viewport {
 	}
 
 	static reset = () => {
-		let cam = Scene.active.camera;
-		for (let o of Scene.active.raw.objects) {
+		let cam = Scene.camera;
+		for (let o of Scene.raw.objects) {
 			if (o.type == "camera_object") {
 				cam.transform.local.setF32(o.transform.values);
 				cam.transform.decompose();
@@ -40,7 +40,7 @@ class Viewport {
 	static setView = (x: f32, y: f32, z: f32, rx: f32, ry: f32, rz: f32) => {
 		Context.raw.paintObject.transform.rot.set(0, 0, 0, 1);
 		Context.raw.paintObject.transform.dirty = true;
-		let cam = Scene.active.camera;
+		let cam = Scene.camera;
 		let dist = cam.transform.loc.length();
 		cam.transform.loc.set(x * dist, y * dist, z * dist);
 		cam.transform.rot.fromEuler(rx, ry, rz);
@@ -51,7 +51,7 @@ class Viewport {
 	}
 
 	static orbit = (x: f32, y: f32) => {
-		let cam = Scene.active.camera;
+		let cam = Scene.camera;
 		let dist = Camera.distance();
 		cam.transform.move(cam.lookWorld(), dist);
 		cam.transform.rotate(new Vec4(0, 0, 1), x);
@@ -61,20 +61,20 @@ class Viewport {
 	}
 
 	static orbitOpposite = () => {
-		let cam = Scene.active.camera;
+		let cam = Scene.camera;
 		let z = Math.abs(cam.look().z) - 1.0;
 		(z < 0.0001 && z > -0.0001) ? Viewport.orbit(0, Math.PI) : Viewport.orbit(Math.PI, 0);
 	}
 
 	static zoom = (f: f32) => {
-		let cam = Scene.active.camera;
+		let cam = Scene.camera;
 		cam.transform.move(cam.look(), f);
 		Context.raw.ddirty = 2;
 	}
 
 	static updateCameraType = (cameraType: i32) => {
-		let cam = Scene.active.cameras[0];
-		let light = Scene.active.lights[0];
+		let cam = Scene.cameras[0];
+		let light = Scene.lights[0];
 		if (cameraType == CameraType.CameraPerspective) {
 			cam.data.ortho = null;
 			light.visible = true;

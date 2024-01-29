@@ -207,7 +207,7 @@ class Base {
 
 					Base.appy = UIHeader.headerh;
 					if (Config.raw.layout[LayoutSize.LayoutHeader] == 1) Base.appy += UIHeader.headerh;
-					let cam = Scene.active.camera;
+					let cam = Scene.camera;
 					cam.data.fov = Math.floor(cam.data.fov * 100) / 100;
 					cam.buildProjection();
 
@@ -384,7 +384,7 @@ class Base {
 	static resize = () => {
 		if (System.width == 0 || System.height == 0) return;
 
-		let cam = Scene.active.camera;
+		let cam = Scene.camera;
 		if (cam.data.ortho != null) {
 			cam.data.ortho[2] = -2 * (App.h() / App.w());
 			cam.data.ortho[3] =  2 * (App.h() / App.w());
@@ -1015,9 +1015,9 @@ class Base {
 		///end
 
 		///if is_lab
-		let texpaint = RenderPath.active.renderTargets.get("texpaint").image;
-		let texpaint_nor = RenderPath.active.renderTargets.get("texpaint_nor").image;
-		let texpaint_pack = RenderPath.active.renderTargets.get("texpaint_pack").image;
+		let texpaint = RenderPath.renderTargets.get("texpaint").image;
+		let texpaint_nor = RenderPath.renderTargets.get("texpaint_nor").image;
+		let texpaint_pack = RenderPath.renderTargets.get("texpaint_pack").image;
 		texpaint.g2.begin(false);
 		texpaint.g2.drawScaledImage(Res.get("placeholder.k"), 0, 0, Config.getTextureResX(), Config.getTextureResY()); // Base
 		texpaint.g2.end();
@@ -1027,8 +1027,8 @@ class Base {
 		texpaint_pack.g4.begin();
 		texpaint_pack.g4.clear(color_from_floats(1.0, 0.4, 0.0, 0.0)); // Occ, rough, met
 		texpaint_pack.g4.end();
-		let texpaint_nor_empty = RenderPath.active.renderTargets.get("texpaint_nor_empty").image;
-		let texpaint_pack_empty = RenderPath.active.renderTargets.get("texpaint_pack_empty").image;
+		let texpaint_nor_empty = RenderPath.renderTargets.get("texpaint_nor_empty").image;
+		let texpaint_pack_empty = RenderPath.renderTargets.get("texpaint_pack_empty").image;
 		texpaint_nor_empty.g4.begin();
 		texpaint_nor_empty.g4.clear(color_from_floats(0.5, 0.5, 1.0, 0.0)); // Nor
 		texpaint_nor_empty.g4.end();
@@ -1055,7 +1055,7 @@ class Base {
 		}
 		for (let l of Project.layers) SlotLayer.resizeAndSetBits(l);
 		for (let l of History.undoLayers) SlotLayer.resizeAndSetBits(l);
-		let rts = RenderPath.active.renderTargets;
+		let rts = RenderPath.renderTargets;
 		let _texpaint_blend0 = rts.get("texpaint_blend0").image;
 		Base.notifyOnNextFrame(() => {
 			_texpaint_blend0.unload();
@@ -1363,11 +1363,11 @@ class Base {
 		///end
 
 		if (Base.tempImage != null && (Base.tempImage.width != l.texpaint.width || Base.tempImage.height != l.texpaint.height || Base.tempImage.format != l.texpaint.format)) {
-			let _temptex0 = RenderPath.active.renderTargets.get("temptex0");
+			let _temptex0 = RenderPath.renderTargets.get("temptex0");
 			Base.notifyOnNextFrame(() => {
 				_temptex0.unload();
 			});
-			RenderPath.active.renderTargets.delete("temptex0");
+			RenderPath.renderTargets.delete("temptex0");
 			Base.tempImage = null;
 		}
 		if (Base.tempImage == null) {
@@ -1385,7 +1385,7 @@ class Base {
 			t.width = l.texpaint.width;
 			t.height = l.texpaint.height;
 			t.format = format;
-			let rt = RenderPath.active.createRenderTarget(t);
+			let rt = RenderPath.createRenderTarget(t);
 			Base.tempImage = rt.image;
 		}
 	}
@@ -1425,9 +1425,9 @@ class Base {
 			Base.expa = null;
 			Base.expb = null;
 			Base.expc = null;
-			RenderPath.active.renderTargets.delete("expa");
-			RenderPath.active.renderTargets.delete("expb");
-			RenderPath.active.renderTargets.delete("expc");
+			RenderPath.renderTargets.delete("expa");
+			RenderPath.renderTargets.delete("expb");
+			RenderPath.renderTargets.delete("expc");
 		}
 		if (Base.expa == null) {
 			///if (is_paint || is_sculpt)
@@ -1445,7 +1445,7 @@ class Base {
 				t.width = l.texpaint.width;
 				t.height = l.texpaint.height;
 				t.format = format;
-				let rt = RenderPath.active.createRenderTarget(t);
+				let rt = RenderPath.createRenderTarget(t);
 				Base.expa = rt.image;
 			}
 
@@ -1455,7 +1455,7 @@ class Base {
 				t.width = l.texpaint.width;
 				t.height = l.texpaint.height;
 				t.format = format;
-				let rt = RenderPath.active.createRenderTarget(t);
+				let rt = RenderPath.createRenderTarget(t);
 				Base.expb = rt.image;
 			}
 
@@ -1465,7 +1465,7 @@ class Base {
 				t.width = l.texpaint.width;
 				t.height = l.texpaint.height;
 				t.format = format;
-				let rt = RenderPath.active.createRenderTarget(t);
+				let rt = RenderPath.createRenderTarget(t);
 				Base.expc = rt.image;
 			}
 		}
@@ -1605,7 +1605,7 @@ class Base {
 		Base.tempImage.g2.pipeline = null;
 		Base.tempImage.g2.end();
 
-		let empty = RenderPath.active.renderTargets.get("empty_white").image;
+		let empty = RenderPath.renderTargets.get("empty_white").image;
 		let mask = empty;
 		let l1masks =  use_mask ? SlotLayer.getMasks(l1) : null;
 		if (l1masks != null) {
@@ -1692,7 +1692,7 @@ class Base {
 		Base.makeExportImg();
 		if (Base.pipeMerge == null) Base.makePipe();
 		if (ConstData.screenAlignedVB == null) ConstData.createScreenAlignedData();
-		let empty = RenderPath.active.renderTargets.get("empty_white").image;
+		let empty = RenderPath.renderTargets.get("empty_white").image;
 
 		// Clear export layer
 		Base.expa.g4.begin();
@@ -2145,8 +2145,8 @@ class Base {
 			let brushNode = ParserLogic.getLogicNode(node);
 			if (brushNode != null && brushNode.getCachedImage() != null) {
 				texpaint = brushNode.getCachedImage();
-				texpaint_nor = RenderPath.active.renderTargets.get("texpaint_nor_empty").image;
-				texpaint_pack = RenderPath.active.renderTargets.get("texpaint_pack_empty").image;
+				texpaint_nor = RenderPath.renderTargets.get("texpaint_nor_empty").image;
+				texpaint_pack = RenderPath.renderTargets.get("texpaint_pack_empty").image;
 			}
 		}
 
@@ -2155,11 +2155,11 @@ class Base {
 
 	static onLayersResized = () => {
 		BrushOutputNode.inst.texpaint.unload();
-		BrushOutputNode.inst.texpaint = RenderPath.active.renderTargets.get("texpaint").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
+		BrushOutputNode.inst.texpaint = RenderPath.renderTargets.get("texpaint").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
 		BrushOutputNode.inst.texpaint_nor.unload();
-		BrushOutputNode.inst.texpaint_nor = RenderPath.active.renderTargets.get("texpaint_nor").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
+		BrushOutputNode.inst.texpaint_nor = RenderPath.renderTargets.get("texpaint_nor").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
 		BrushOutputNode.inst.texpaint_pack.unload();
-		BrushOutputNode.inst.texpaint_pack = RenderPath.active.renderTargets.get("texpaint_pack").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
+		BrushOutputNode.inst.texpaint_pack = RenderPath.renderTargets.get("texpaint_pack").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
 
 		if (InpaintNode.image != null) {
 			InpaintNode.image.unload();
@@ -2181,16 +2181,16 @@ class Base {
 			TilingNode.init();
 		}
 
-		RenderPath.active.renderTargets.get("texpaint_blend0").image.unload();
-		RenderPath.active.renderTargets.get("texpaint_blend0").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8);
-		RenderPath.active.renderTargets.get("texpaint_blend1").image.unload();
-		RenderPath.active.renderTargets.get("texpaint_blend1").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8);
+		RenderPath.renderTargets.get("texpaint_blend0").image.unload();
+		RenderPath.renderTargets.get("texpaint_blend0").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8);
+		RenderPath.renderTargets.get("texpaint_blend1").image.unload();
+		RenderPath.renderTargets.get("texpaint_blend1").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8);
 
-		if (RenderPath.active.renderTargets.get("texpaint_node") != null) {
-			RenderPath.active.renderTargets.delete("texpaint_node");
+		if (RenderPath.renderTargets.get("texpaint_node") != null) {
+			RenderPath.renderTargets.delete("texpaint_node");
 		}
-		if (RenderPath.active.renderTargets.get("texpaint_node_target") != null) {
-			RenderPath.active.renderTargets.delete("texpaint_node_target");
+		if (RenderPath.renderTargets.get("texpaint_node_target") != null) {
+			RenderPath.renderTargets.delete("texpaint_node_target");
 		}
 
 		Base.notifyOnNextFrame(() => {

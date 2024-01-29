@@ -206,7 +206,7 @@ class BoxPreferences {
 					Context.raw.emptyEnvmap = Image.fromBytes(b.buffer, 1, 1);
 					Context.raw.ddirty = 2;
 					if (!Context.raw.showEnvmap) {
-						Scene.active.world.envmap = Context.raw.emptyEnvmap;
+						Scene.world.envmap = Context.raw.emptyEnvmap;
 					}
 				}
 
@@ -468,7 +468,7 @@ class BoxPreferences {
 				// Context.raw.autoExposureStrength = ui.slider(h, "Auto Exposure", 0.0, 2.0, true);
 				// if (h.changed) Context.raw.ddirty = 2;
 
-				let cam = Scene.active.camera;
+				let cam = Scene.camera;
 				let camRaw = cam.data;
 				let near_handle = Zui.handle("boxpreferences_47");
 				let far_handle = Zui.handle("boxpreferences_48");

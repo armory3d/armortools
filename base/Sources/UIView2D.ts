@@ -231,8 +231,7 @@ class UIView2D {
 					let x = UIView2D.ui.inputX - tx - UIView2D.wx;
 					let y = UIView2D.ui.inputY - ty - UIView2D.wy;
 					Base.notifyOnNextFrame(() => {
-						let path = RenderPath.active;
-						let texpaint_picker = path.renderTargets.get("texpaint_picker").image;
+						let texpaint_picker = RenderPath.renderTargets.get("texpaint_picker").image;
 						let g2 = texpaint_picker.g2;
 						g2.begin(false);
 						g2.drawScaledImage(tex, -x, -y, tw, th);

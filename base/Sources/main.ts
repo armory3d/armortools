@@ -43,20 +43,18 @@ function main_start() {
 		App.init(function() {
 			Scene.setActive("Scene", function(o: BaseObject) {
 				UniformsExt.init();
-				let path = new RenderPath();
-				RenderPathBase.init(path);
+				RenderPathBase.init();
 
 				if (Context.raw.renderMode == RenderMode.RenderForward) {
-					RenderPathDeferred.init(path); // Allocate gbuffer
-					RenderPathForward.init(path);
-					path.commands = RenderPathForward.commands;
+					RenderPathDeferred.init(); // Allocate gbuffer
+					RenderPathForward.init();
+					RenderPath.commands = RenderPathForward.commands;
 				}
 				else {
-					RenderPathDeferred.init(path);
-					path.commands = RenderPathDeferred.commands;
+					RenderPathDeferred.init();
+					RenderPath.commands = RenderPathDeferred.commands;
 				}
 
-				RenderPath.setActive(path);
 				new Base();
 			});
 		});

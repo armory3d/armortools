@@ -7,7 +7,6 @@ class RenderPathRaytrace {
 	static ready = false;
 	static dirty = 0;
 	static uvScale = 1.0;
-	static path: RenderPath;
 	static first = true;
 	static f32a = new Float32Array(24);
 	static helpMat = Mat4.identity();
@@ -30,8 +29,7 @@ class RenderPathRaytrace {
 	static lastTexpaint: Image = null;
 	///end
 
-	static init = (_path: RenderPath) => {
-		RenderPathRaytrace.path = _path;
+	static init = () => {
 	}
 
 	static commands = (useLiveLayer: bool) => {
@@ -48,15 +46,15 @@ class RenderPathRaytrace {
 			Context.updateEnvmap();
 		}
 
-		let probe = Scene.active.world;
+		let probe = Scene.world;
 		let savedEnvmap = Context.raw.showEnvmapBlur ? probe.radianceMipmaps[0] : Context.raw.savedEnvmap;
 
 		if (RenderPathRaytrace.lastEnvmap != savedEnvmap) {
 			RenderPathRaytrace.lastEnvmap = savedEnvmap;
 
-			let bnoise_sobol = Scene.active.embedded.get("bnoise_sobol.k");
-			let bnoise_scramble = Scene.active.embedded.get("bnoise_scramble.k");
-			let bnoise_rank = Scene.active.embedded.get("bnoise_rank.k");
+			let bnoise_sobol = Scene.embedded.get("bnoise_sobol.k");
+			let bnoise_scramble = Scene.embedded.get("bnoise_scramble.k");
+			let bnoise_rank = Scene.embedded.get("bnoise_rank.k");
 
 			let l = Base.flatten(true);
 			Krom.raytraceSetTextures(l.texpaint, l.texpaint_nor, l.texpaint_pack, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
@@ -67,9 +65,9 @@ class RenderPathRaytrace {
 		if (l.texpaint != RenderPathRaytrace.lastTexpaint) {
 			RenderPathRaytrace.lastTexpaint = l.texpaint;
 
-			let bnoise_sobol = Scene.active.embedded.get("bnoise_sobol.k");
-			let bnoise_scramble = Scene.active.embedded.get("bnoise_scramble.k");
-			let bnoise_rank = Scene.active.embedded.get("bnoise_rank.k");
+			let bnoise_sobol = Scene.embedded.get("bnoise_sobol.k");
+			let bnoise_scramble = Scene.embedded.get("bnoise_scramble.k");
+			let bnoise_rank = Scene.embedded.get("bnoise_rank.k");
 
 			Krom.raytraceSetTextures(l.texpaint, l.texpaint_nor, l.texpaint_pack, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
 		}
@@ -79,7 +77,7 @@ class RenderPathRaytrace {
 			Base.flatten(true);
 		}
 
-		let cam = Scene.active.camera;
+		let cam = Scene.camera;
 		let ct = cam.transform;
 		RenderPathRaytrace.helpMat.setFrom(cam.V);
 		RenderPathRaytrace.helpMat.multmat(cam.P);
@@ -111,15 +109,15 @@ class RenderPathRaytrace {
 		RenderPathRaytrace.f32a[17] = RenderPathRaytrace.helpMat._31;
 		RenderPathRaytrace.f32a[18] = RenderPathRaytrace.helpMat._32;
 		RenderPathRaytrace.f32a[19] = RenderPathRaytrace.helpMat._33;
-		RenderPathRaytrace.f32a[20] = Scene.active.world.raw.strength * 1.5;
+		RenderPathRaytrace.f32a[20] = Scene.world.raw.strength * 1.5;
 		if (!Context.raw.showEnvmap) RenderPathRaytrace.f32a[20] = -RenderPathRaytrace.f32a[20];
 		RenderPathRaytrace.f32a[21] = Context.raw.envmapAngle;
 		RenderPathRaytrace.f32a[22] = RenderPathRaytrace.uvScale;
 		///if is_lab
-		RenderPathRaytrace.f32a[22] *= Scene.active.meshes[0].data.scaleTex;
+		RenderPathRaytrace.f32a[22] *= Scene.meshes[0].data.scaleTex;
 		///end
 
-		let framebuffer = RenderPathRaytrace.path.renderTargets.get("buf").image;
+		let framebuffer = RenderPath.renderTargets.get("buf").image;
 		Krom.raytraceDispatchRays(framebuffer.renderTarget_, RenderPathRaytrace.f32a.buffer);
 
 		if (Context.raw.ddirty == 1 || Context.raw.pdirty == 1) {
@@ -139,16 +137,16 @@ class RenderPathRaytrace {
 	static raytraceInit = (shaderName: string, build = true) => {
 		if (RenderPathRaytrace.first) {
 			RenderPathRaytrace.first = false;
-			Scene.active.embedData("bnoise_sobol.k", () => {});
-			Scene.active.embedData("bnoise_scramble.k", () => {});
-			Scene.active.embedData("bnoise_rank.k", () => {});
+			Scene.embedData("bnoise_sobol.k", () => {});
+			Scene.embedData("bnoise_scramble.k", () => {});
+			Scene.embedData("bnoise_rank.k", () => {});
 		}
 
 		Data.getBlob(shaderName, (shader: ArrayBuffer) => {
 			if (build) RenderPathRaytrace.buildData();
-			let bnoise_sobol = Scene.active.embedded.get("bnoise_sobol.k");
-			let bnoise_scramble = Scene.active.embedded.get("bnoise_scramble.k");
-			let bnoise_rank = Scene.active.embedded.get("bnoise_rank.k");
+			let bnoise_sobol = Scene.embedded.get("bnoise_sobol.k");
+			let bnoise_scramble = Scene.embedded.get("bnoise_scramble.k");
+			let bnoise_rank = Scene.embedded.get("bnoise_rank.k");
 			Krom.raytraceInit(shader, RenderPathRaytrace.vb.buffer_, RenderPathRaytrace.ib.buffer_, RenderPathRaytrace.vb_scale);
 		});
 	}
@@ -158,7 +156,7 @@ class RenderPathRaytrace {
 		///if is_paint
 		let mo = !Context.layerFilterUsed() ? Context.raw.mergedObject : Context.raw.paintObject;
 		///else
-		let mo = Scene.active.meshes[0];
+		let mo = Scene.meshes[0];
 		///end
 		let md = mo.data;
 		let mo_scale = mo.transform.scale.x; // Uniform scale only
@@ -183,16 +181,16 @@ class RenderPathRaytrace {
 		if (Config.raw.rp_bloom != false) {
 			RenderPathBase.drawBloom("buf");
 		}
-		RenderPathRaytrace.path.setTarget("buf");
-		RenderPathRaytrace.path.drawMeshes("overlay");
-		RenderPathRaytrace.path.setTarget("buf");
-		RenderPathBase.drawCompass(RenderPathRaytrace.path.currentG);
-		RenderPathRaytrace.path.setTarget("taa");
-		RenderPathRaytrace.path.bindTarget("buf", "tex");
-		RenderPathRaytrace.path.drawShader("shader_datas/compositor_pass/compositor_pass");
-		RenderPathRaytrace.path.setTarget("");
-		RenderPathRaytrace.path.bindTarget("taa", "tex");
-		RenderPathRaytrace.path.drawShader("shader_datas/copy_pass/copy_pass");
+		RenderPath.setTarget("buf");
+		RenderPath.drawMeshes("overlay");
+		RenderPath.setTarget("buf");
+		RenderPathBase.drawCompass(RenderPath.currentG);
+		RenderPath.setTarget("taa");
+		RenderPath.bindTarget("buf", "tex");
+		RenderPath.drawShader("shader_datas/compositor_pass/compositor_pass");
+		RenderPath.setTarget("");
+		RenderPath.bindTarget("taa", "tex");
+		RenderPath.drawShader("shader_datas/copy_pass/copy_pass");
 		if (Config.raw.brush_3d) {
 			RenderPathPaint.commandsCursor();
 		}

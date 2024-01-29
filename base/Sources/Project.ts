@@ -142,7 +142,7 @@ class Project {
 			Data.deleteMesh(p.data.handle);
 			p.remove();
 		}
-		let meshes = Scene.active.meshes;
+		let meshes = Scene.meshes;
 		let len = meshes.length;
 		for (let i = 0; i < len; ++i) {
 			let m = meshes[len - i - 1];
@@ -291,13 +291,13 @@ class Project {
 
 			Context.raw.savedEnvmap = null;
 			Context.raw.envmapLoaded = false;
-			Scene.active.world.envmap = Context.raw.emptyEnvmap;
-			Scene.active.world.raw.envmap = "World_radiance.k";
+			Scene.world.envmap = Context.raw.emptyEnvmap;
+			Scene.world.raw.envmap = "World_radiance.k";
 			Context.raw.showEnvmapHandle.selected = Context.raw.showEnvmap = false;
-			Scene.active.world.radiance = Context.raw.defaultRadiance;
-			Scene.active.world.radianceMipmaps = Context.raw.defaultRadianceMipmaps;
-			Scene.active.world.irradiance = Context.raw.defaultIrradiance;
-			Scene.active.world.raw.strength = 4.0;
+			Scene.world.radiance = Context.raw.defaultRadiance;
+			Scene.world.radianceMipmaps = Context.raw.defaultRadianceMipmaps;
+			Scene.world.irradiance = Context.raw.defaultIrradiance;
+			Scene.world.raw.strength = 4.0;
 
 			///if (is_paint || is_sculpt)
 			Context.initTool();

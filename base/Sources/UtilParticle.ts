@@ -25,7 +25,7 @@ class UtilParticle {
 			instance_object: ".Particle",
 			weight_gravity: 1
 		};
-		Scene.active.raw.particle_datas = [raw];
+		Scene.raw.particle_datas = [raw];
 		let particle_refs: TParticleReference[] = [
 			{
 				name: "Particles",
@@ -41,14 +41,14 @@ class UtilParticle {
 			t.height = 0;
 			t.format = "R8";
 			t.scale = RenderPathBase.getSuperSampling();
-			RenderPath.active.createRenderTarget(t);
+			RenderPath.createRenderTarget(t);
 		}
 
-		for (let mat of Scene.active.raw.material_datas) {
+		for (let mat of Scene.raw.material_datas) {
 			if (mat.name == "Material2") {
 				let m: TMaterialData = JSON.parse(JSON.stringify(mat));
 				m.name = "MaterialParticle";
-				Scene.active.raw.material_datas.push(m);
+				Scene.raw.material_datas.push(m);
 				break;
 			}
 		}
@@ -56,19 +56,19 @@ class UtilParticle {
 		Data.getMaterial("Scene", "MaterialParticle", (md: MaterialData) => {
 			Context.raw.particleMaterial = md;
 
-			for (let obj of Scene.active.raw.objects) {
+			for (let obj of Scene.raw.objects) {
 				if (obj.name == ".Sphere") {
 					let particle: TObj = JSON.parse(JSON.stringify(obj));
 					particle.name = ".Particle";
 					particle.is_particle = true;
 					particle.material_refs = ["MaterialParticle"];
-					Scene.active.raw.objects.push(particle);
+					Scene.raw.objects.push(particle);
 					for (let i = 0; i < 16; ++i) particle.transform.values[i] *= 0.01;
 					break;
 				}
 			}
 
-			Scene.active.spawnObject(".Sphere", null, (o: BaseObject) => {
+			Scene.spawnObject(".Sphere", null, (o: BaseObject) => {
 				let mo: MeshObject = o as MeshObject;
 				mo.name = ".ParticleEmitter";
 				mo.raw = JSON.parse(JSON.stringify(mo.raw));

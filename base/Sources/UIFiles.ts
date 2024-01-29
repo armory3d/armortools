@@ -167,7 +167,7 @@ class UIFiles {
 						let filesAll = File.readDirectory(handle.text);
 						let iconFile = f.substr(0, f.lastIndexOf(".")) + "_icon.jpg";
 						if (filesAll.indexOf(iconFile) >= 0) {
-							let empty = RenderPath.active.renderTargets.get("empty_black").image;
+							let empty = RenderPath.renderTargets.get("empty_black").image;
 							UIFiles.iconMap.set(handle.text + Path.sep + f, empty);
 							File.cacheCloud(handle.text + Path.sep + iconFile, (abs: string) => {
 								if (abs != null) {
@@ -277,7 +277,7 @@ class UIFiles {
 					let shandle = handle.text + Path.sep + f;
 					icon = UIFiles.iconMap.get(shandle);
 					if (icon == null) {
-						let empty = RenderPath.active.renderTargets.get("empty_black").image;
+						let empty = RenderPath.renderTargets.get("empty_black").image;
 						UIFiles.iconMap.set(shandle, empty);
 						Data.getImage(shandle, (image: Image) => {
 							App.notifyOnInit(() => {

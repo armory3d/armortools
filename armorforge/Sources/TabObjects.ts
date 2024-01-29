@@ -76,21 +76,21 @@ class TabObjects {
 							if (UIMenu.menuButton(ui, "Assign Material")) {
 								TabObjects.materialId++;
 
-								for (let sh of Scene.active.raw.shader_datas) {
+								for (let sh of Scene.raw.shader_datas) {
 									if (sh.name == "Material_data") {
 										let s: TShaderData = JSON.parse(JSON.stringify(sh));
 										s.name = "TempMaterial_data" + TabObjects.materialId;
-										Scene.active.raw.shader_datas.push(s);
+										Scene.raw.shader_datas.push(s);
 										break;
 									}
 								}
 
-								for (let mat of Scene.active.raw.material_datas) {
+								for (let mat of Scene.raw.material_datas) {
 									if (mat.name == "Material") {
 										let m: TMaterialData = JSON.parse(JSON.stringify(mat));
 										m.name = "TempMaterial" + TabObjects.materialId;
 										m.shader = "TempMaterial_data" + TabObjects.materialId;
-										Scene.active.raw.material_datas.push(m);
+										Scene.raw.material_datas.push(m);
 										break;
 									}
 								}
@@ -118,7 +118,7 @@ class TabObjects {
 						ui.g.color = 0xffffffff;
 					}
 				}
-				for (let c of Scene.active.root.children) {
+				for (let c of Scene.root.children) {
 					drawList(Zui.handle("tabobjects_1"), c);
 				}
 
@@ -227,7 +227,7 @@ class TabObjects {
 					Context.raw.selectedObject.transform.dirty = true;
 
 					if (Context.raw.selectedObject.name == "Scene") {
-						let p = Scene.active.world;
+						let p = Scene.world;
 						p.raw.strength = ui.slider(Zui.handle("tabobjects_16", {value: p.raw.strength}), "Environment", 0.0, 5.0, true);
 					}
 					else if (Context.raw.selectedObject.constructor == LightObject) {

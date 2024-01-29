@@ -12,25 +12,25 @@ class UtilRender {
 	static makeMaterialPreview = () => {
 		Context.raw.materialPreview = true;
 
-		let sphere: MeshObject = Scene.active.getChild(".Sphere") as MeshObject;
+		let sphere: MeshObject = Scene.getChild(".Sphere") as MeshObject;
 		sphere.visible = true;
-		let meshes = Scene.active.meshes;
-		Scene.active.meshes = [sphere];
+		let meshes = Scene.meshes;
+		Scene.meshes = [sphere];
 		let painto = Context.raw.paintObject;
 		Context.raw.paintObject = sphere;
 
 		sphere.materials[0] = Project.materials[0].data;
 		Context.raw.material.previewReady = true;
 
-		Context.raw.savedCamera.setFrom(Scene.active.camera.transform.local);
+		Context.raw.savedCamera.setFrom(Scene.camera.transform.local);
 		let m = new Mat4(0.9146286343879498, -0.0032648027153306235, 0.404281837254303, 0.4659988049397712, 0.404295023959927, 0.007367569133732468, -0.9145989516155143, -1.0687517188018691, 0.000007410128652369705, 0.9999675337275382, 0.008058532943908717, 0.015935682577325486, 0, 0, 0, 1);
-		Scene.active.camera.transform.setMatrix(m);
-		let savedFov = Scene.active.camera.data.fov;
-		Scene.active.camera.data.fov = 0.92;
+		Scene.camera.transform.setMatrix(m);
+		let savedFov = Scene.camera.data.fov;
+		Scene.camera.data.fov = 0.92;
 		Viewport.updateCameraType(CameraType.CameraPerspective);
-		let light = Scene.active.lights[0];
+		let light = Scene.lights[0];
 		let _lightStrength = light.data.strength;
-		let probe = Scene.active.world;
+		let probe = Scene.world;
 		let _probeStrength = probe.raw.strength;
 		light.data.strength = 0;
 		probe.raw.strength = 7;
@@ -41,39 +41,39 @@ class UtilRender {
 		let _brushNodesScale = Context.raw.brushNodesScale;
 		Context.raw.brushNodesScale = 1.0;
 
-		Scene.active.world.envmap = Context.raw.previewEnvmap;
+		Scene.world.envmap = Context.raw.previewEnvmap;
 		// No resize
-		RenderPath.active.lastW = UtilRender.materialPreviewSize;
-		RenderPath.active.lastH = UtilRender.materialPreviewSize;
-		Scene.active.camera.buildProjection();
-		Scene.active.camera.buildMatrix();
+		RenderPath.lastW = UtilRender.materialPreviewSize;
+		RenderPath.lastH = UtilRender.materialPreviewSize;
+		Scene.camera.buildProjection();
+		Scene.camera.buildMatrix();
 
 		MakeMaterial.parseMeshPreviewMaterial();
-		let _commands = RenderPath.active.commands;
-		RenderPath.active.commands = RenderPathPreview.commandsPreview;
-		RenderPath.active.renderFrame(RenderPath.active.frameG);
-		RenderPath.active.commands = _commands;
+		let _commands = RenderPath.commands;
+		RenderPath.commands = RenderPathPreview.commandsPreview;
+		RenderPath.renderFrame(RenderPath.frameG);
+		RenderPath.commands = _commands;
 
 		Context.raw.materialPreview = false;
-		RenderPath.active.lastW = App.w();
-		RenderPath.active.lastH = App.h();
+		RenderPath.lastW = App.w();
+		RenderPath.lastH = App.h();
 
 		// Restore
 		sphere.visible = false;
-		Scene.active.meshes = meshes;
+		Scene.meshes = meshes;
 		Context.raw.paintObject = painto;
 
-		Scene.active.camera.transform.setMatrix(Context.raw.savedCamera);
+		Scene.camera.transform.setMatrix(Context.raw.savedCamera);
 		Viewport.updateCameraType(Context.raw.cameraType);
-		Scene.active.camera.data.fov = savedFov;
-		Scene.active.camera.buildProjection();
-		Scene.active.camera.buildMatrix();
+		Scene.camera.data.fov = savedFov;
+		Scene.camera.buildProjection();
+		Scene.camera.buildMatrix();
 		light.data.strength = _lightStrength;
 		probe.raw.strength = _probeStrength;
 		Context.raw.envmapAngle = _envmapAngle;
 		Context.raw.brushScale = _brushScale;
 		Context.raw.brushNodesScale = _brushNodesScale;
-		Scene.active.world.envmap = Context.raw.showEnvmap ? Context.raw.savedEnvmap : Context.raw.emptyEnvmap;
+		Scene.world.envmap = Context.raw.showEnvmap ? Context.raw.savedEnvmap : Context.raw.emptyEnvmap;
 		MakeMaterial.parseMeshMaterial();
 		Context.raw.ddirty = 0;
 	}
@@ -87,56 +87,56 @@ class UtilRender {
 		}
 		Context.raw.decalPreview = true;
 
-		let plane: MeshObject = Scene.active.getChild(".Plane") as MeshObject;
+		let plane: MeshObject = Scene.getChild(".Plane") as MeshObject;
 		plane.transform.scale.set(1, 1, 1);
 		plane.transform.rot.fromEuler(-Math.PI / 2, 0, 0);
 		plane.transform.buildMatrix();
 		plane.visible = true;
-		let meshes = Scene.active.meshes;
-		Scene.active.meshes = [plane];
+		let meshes = Scene.meshes;
+		Scene.meshes = [plane];
 		let painto = Context.raw.paintObject;
 		Context.raw.paintObject = plane;
 
-		Context.raw.savedCamera.setFrom(Scene.active.camera.transform.local);
+		Context.raw.savedCamera.setFrom(Scene.camera.transform.local);
 		let m = Mat4.identity();
 		m.translate(0, 0, 1);
-		Scene.active.camera.transform.setMatrix(m);
-		let savedFov = Scene.active.camera.data.fov;
-		Scene.active.camera.data.fov = 0.92;
+		Scene.camera.transform.setMatrix(m);
+		let savedFov = Scene.camera.data.fov;
+		Scene.camera.data.fov = 0.92;
 		Viewport.updateCameraType(CameraType.CameraPerspective);
-		let light = Scene.active.lights[0];
+		let light = Scene.lights[0];
 		light.visible = false;
-		Scene.active.world.envmap = Context.raw.previewEnvmap;
+		Scene.world.envmap = Context.raw.previewEnvmap;
 
 		// No resize
-		RenderPath.active.lastW = UtilRender.decalPreviewSize;
-		RenderPath.active.lastH = UtilRender.decalPreviewSize;
-		Scene.active.camera.buildProjection();
-		Scene.active.camera.buildMatrix();
+		RenderPath.lastW = UtilRender.decalPreviewSize;
+		RenderPath.lastH = UtilRender.decalPreviewSize;
+		Scene.camera.buildProjection();
+		Scene.camera.buildMatrix();
 
 		MakeMaterial.parseMeshPreviewMaterial();
-		let _commands = RenderPath.active.commands;
-		RenderPath.active.commands = RenderPathPreview.commandsDecal;
-		RenderPath.active.renderFrame(RenderPath.active.frameG);
-		RenderPath.active.commands = _commands;
+		let _commands = RenderPath.commands;
+		RenderPath.commands = RenderPathPreview.commandsDecal;
+		RenderPath.renderFrame(RenderPath.frameG);
+		RenderPath.commands = _commands;
 
 		Context.raw.decalPreview = false;
-		RenderPath.active.lastW = App.w();
-		RenderPath.active.lastH = App.h();
+		RenderPath.lastW = App.w();
+		RenderPath.lastH = App.h();
 
 		// Restore
 		plane.visible = false;
-		Scene.active.meshes = meshes;
+		Scene.meshes = meshes;
 		Context.raw.paintObject = painto;
 
-		Scene.active.camera.transform.setMatrix(Context.raw.savedCamera);
-		Scene.active.camera.data.fov = savedFov;
+		Scene.camera.transform.setMatrix(Context.raw.savedCamera);
+		Scene.camera.data.fov = savedFov;
 		Viewport.updateCameraType(Context.raw.cameraType);
-		Scene.active.camera.buildProjection();
-		Scene.active.camera.buildMatrix();
-		light = Scene.active.lights[0];
+		Scene.camera.buildProjection();
+		Scene.camera.buildMatrix();
+		light = Scene.lights[0];
 		light.visible = true;
-		Scene.active.world.envmap = Context.raw.showEnvmap ? Context.raw.savedEnvmap : Context.raw.emptyEnvmap;
+		Scene.world.envmap = Context.raw.showEnvmap ? Context.raw.savedEnvmap : Context.raw.emptyEnvmap;
 
 		MakeMaterial.parseMeshMaterial();
 		Context.raw.ddirty = 1; // Refresh depth for decal paint
@@ -237,9 +237,8 @@ class UtilRender {
 		RenderPathPaint.useLiveLayer(true);
 		MakeMaterial.parsePaintMaterial(false);
 
-		let path = RenderPath.active;
 		let hid = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
-		path.renderTargets.set("texpaint_undo" + hid, path.renderTargets.get("empty_black"));
+		RenderPath.renderTargets.set("texpaint_undo" + hid, RenderPath.renderTargets.get("empty_black"));
 
 		// Set plane mesh
 		let painto = Context.raw.paintObject;
@@ -254,7 +253,7 @@ class UtilRender {
 			Context.raw.mergedObject.visible = false;
 		}
 
-		let cam = Scene.active.camera;
+		let cam = Scene.camera;
 		Context.raw.savedCamera.setFrom(cam.transform.local);
 		let savedFov = cam.data.fov;
 		Viewport.updateCameraType(CameraType.CameraPerspective);
@@ -264,9 +263,9 @@ class UtilRender {
 		cam.data.fov = 0.92;
 		cam.buildProjection();
 		cam.buildMatrix();
-		m.getInverse(Scene.active.camera.VP);
+		m.getInverse(Scene.camera.VP);
 
-		let planeo: MeshObject = Scene.active.getChild(".Plane") as MeshObject;
+		let planeo: MeshObject = Scene.getChild(".Plane") as MeshObject;
 		planeo.visible = true;
 		Context.raw.paintObject = planeo;
 
@@ -334,11 +333,11 @@ class UtilRender {
 			Context.raw.mergedObject.visible = mergedObjectVisible;
 		}
 		Context.raw.paintObject = painto;
-		Scene.active.camera.transform.setMatrix(Context.raw.savedCamera);
-		Scene.active.camera.data.fov = savedFov;
+		Scene.camera.transform.setMatrix(Context.raw.savedCamera);
+		Scene.camera.data.fov = savedFov;
 		Viewport.updateCameraType(Context.raw.cameraType);
-		Scene.active.camera.buildProjection();
-		Scene.active.camera.buildMatrix();
+		Scene.camera.buildProjection();
+		Scene.camera.buildMatrix();
 
 		// Scale layer down to to image preview
 		if (Base.pipeMerge == null) Base.makePipe();
@@ -351,11 +350,11 @@ class UtilRender {
 		target.g2.end();
 
 		// Scale image preview down to to icon
-		path.renderTargets.get("texpreview").image = Context.raw.brush.image;
-		path.renderTargets.get("texpreview_icon").image = Context.raw.brush.imageIcon;
-		path.setTarget("texpreview_icon");
-		path.bindTarget("texpreview", "tex");
-		path.drawShader("shader_datas/supersample_resolve/supersample_resolve");
+		RenderPath.renderTargets.get("texpreview").image = Context.raw.brush.image;
+		RenderPath.renderTargets.get("texpreview_icon").image = Context.raw.brush.imageIcon;
+		RenderPath.setTarget("texpreview_icon");
+		RenderPath.bindTarget("texpreview", "tex");
+		RenderPath.drawShader("shader_datas/supersample_resolve/supersample_resolve");
 
 		Context.raw.brush.previewReady = true;
 		Context.raw.brushBlendDirty = true;

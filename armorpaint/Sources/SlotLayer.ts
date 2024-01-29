@@ -68,7 +68,7 @@ class SlotLayer {
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
 				t.format = format;
-				raw.texpaint = RenderPath.active.createRenderTarget(t).image;
+				raw.texpaint = RenderPath.createRenderTarget(t).image;
 			}
 
 			///if is_paint
@@ -78,7 +78,7 @@ class SlotLayer {
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
 				t.format = format;
-				raw.texpaint_nor = RenderPath.active.createRenderTarget(t).image;
+				raw.texpaint_nor = RenderPath.createRenderTarget(t).image;
 			}
 			{
 				let t = new RenderTargetRaw();
@@ -86,7 +86,7 @@ class SlotLayer {
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
 				t.format = format;
-				raw.texpaint_pack = RenderPath.active.createRenderTarget(t).image;
+				raw.texpaint_pack = RenderPath.createRenderTarget(t).image;
 			}
 
 			raw.texpaint_preview = Image.createRenderTarget(UtilRender.layerPreviewSize, UtilRender.layerPreviewSize, TextureFormat.RGBA32);
@@ -105,7 +105,7 @@ class SlotLayer {
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
 				t.format = format;
-				raw.texpaint = RenderPath.active.createRenderTarget(t).image;
+				raw.texpaint = RenderPath.createRenderTarget(t).image;
 			}
 
 			raw.texpaint_preview = Image.createRenderTarget(UtilRender.layerPreviewSize, UtilRender.layerPreviewSize, TextureFormat.RGBA32);
@@ -159,19 +159,19 @@ class SlotLayer {
 		}
 		Base.notifyOnNextFrame(_next);
 
-		RenderPath.active.renderTargets.delete("texpaint" + raw.ext);
+		RenderPath.renderTargets.delete("texpaint" + raw.ext);
 		///if is_paint
 		if (SlotLayer.isLayer(raw)) {
-			RenderPath.active.renderTargets.delete("texpaint_nor" + raw.ext);
-			RenderPath.active.renderTargets.delete("texpaint_pack" + raw.ext);
+			RenderPath.renderTargets.delete("texpaint_nor" + raw.ext);
+			RenderPath.renderTargets.delete("texpaint_pack" + raw.ext);
 		}
 		///end
 	}
 
 	static swap = (raw: SlotLayerRaw, other: SlotLayerRaw) => {
 		if ((SlotLayer.isLayer(raw) || SlotLayer.isMask(raw)) && (SlotLayer.isLayer(other) || SlotLayer.isMask(other))) {
-			RenderPath.active.renderTargets.get("texpaint" + raw.ext).image = other.texpaint;
-			RenderPath.active.renderTargets.get("texpaint" + other.ext).image = raw.texpaint;
+			RenderPath.renderTargets.get("texpaint" + raw.ext).image = other.texpaint;
+			RenderPath.renderTargets.get("texpaint" + other.ext).image = raw.texpaint;
 			let _texpaint = raw.texpaint;
 			raw.texpaint = other.texpaint;
 			other.texpaint = _texpaint;
@@ -185,10 +185,10 @@ class SlotLayer {
 
 		///if is_paint
 		if (SlotLayer.isLayer(raw) && SlotLayer.isLayer(other)) {
-			RenderPath.active.renderTargets.get("texpaint_nor" + raw.ext).image = other.texpaint_nor;
-			RenderPath.active.renderTargets.get("texpaint_pack" + raw.ext).image = other.texpaint_pack;
-			RenderPath.active.renderTargets.get("texpaint_nor" + other.ext).image = raw.texpaint_nor;
-			RenderPath.active.renderTargets.get("texpaint_pack" + other.ext).image = raw.texpaint_pack;
+			RenderPath.renderTargets.get("texpaint_nor" + raw.ext).image = other.texpaint_nor;
+			RenderPath.renderTargets.get("texpaint_pack" + raw.ext).image = other.texpaint_pack;
+			RenderPath.renderTargets.get("texpaint_nor" + other.ext).image = raw.texpaint_nor;
+			RenderPath.renderTargets.get("texpaint_pack" + other.ext).image = raw.texpaint_pack;
 			let _texpaint_nor = raw.texpaint_nor;
 			let _texpaint_pack = raw.texpaint_pack;
 			raw.texpaint_nor = other.texpaint_nor;
@@ -237,7 +237,7 @@ class SlotLayer {
 			_texpaint.unload();
 		}
 		Base.notifyOnNextFrame(_next);
-		raw.texpaint = RenderPath.active.renderTargets.get("texpaint" + raw.id).image = inverted;
+		raw.texpaint = RenderPath.renderTargets.get("texpaint" + raw.id).image = inverted;
 		Context.raw.layerPreviewDirty = true;
 		Context.raw.ddirty = 3;
 	}
@@ -325,7 +325,7 @@ class SlotLayer {
 	static resizeAndSetBits = (raw: SlotLayerRaw) => {
 		let resX = Config.getTextureResX();
 		let resY = Config.getTextureResY();
-		let rts = RenderPath.active.renderTargets;
+		let rts = RenderPath.renderTargets;
 		if (Base.pipeMerge == null) Base.makePipe();
 
 		if (SlotLayer.isLayer(raw)) {

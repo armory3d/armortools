@@ -120,7 +120,7 @@ class UIMenu {
 				ui.changed = false;
 
 				UIMenu.menuFill(ui);
-				let p = Scene.active.world;
+				let p = Scene.world;
 				let envHandle = Zui.handle("uimenu_0");
 				envHandle.value = p.raw.strength;
 				UIMenu.menuAlign(ui);
@@ -141,8 +141,8 @@ class UIMenu {
 				if (ui.isHovered) ui.tooltip(tr("{shortcut} and move mouse", new Map([["shortcut", Config.keymap.rotate_envmap]])));
 				if (envaHandle.changed) Context.raw.ddirty = 2;
 
-				if (Scene.active.lights.length > 0) {
-					let light = Scene.active.lights[0];
+				if (Scene.lights.length > 0) {
+					let light = Scene.lights[0];
 
 					UIMenu.menuFill(ui);
 					let lhandle = Zui.handle("uimenu_2");
@@ -154,7 +154,7 @@ class UIMenu {
 					if (lhandle.changed) Context.raw.ddirty = 2;
 
 					UIMenu.menuFill(ui);
-					light = Scene.active.lights[0];
+					light = Scene.lights[0];
 					let lahandle = Zui.handle("uimenu_3");
 					lahandle.value = Context.raw.lightAngle / Math.PI * 180;
 					UIMenu.menuAlign(ui);
@@ -358,7 +358,7 @@ class UIMenu {
 				// menuSeparator(ui);
 
 				UIMenu.menuFill(ui);
-				let cam = Scene.active.camera;
+				let cam = Scene.camera;
 				Context.raw.fovHandle = Zui.handle("uimenu_11", { value: Math.floor(cam.data.fov * 100) / 100 });
 				UIMenu.menuAlign(ui);
 				cam.data.fov = ui.slider(Context.raw.fovHandle, tr("FoV"), 0.3, 1.4, true);

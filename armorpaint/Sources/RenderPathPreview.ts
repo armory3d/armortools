@@ -1,10 +1,7 @@
 
 class RenderPathPreview {
 
-	static path: RenderPath;
-
-	static init = (_path: RenderPath) => {
-		RenderPathPreview.path = _path;
+	static init = () => {
 
 		{
 			let t = new RenderTargetRaw();
@@ -12,7 +9,7 @@ class RenderPathPreview {
 			t.width = 1;
 			t.height = 1;
 			t.format = "RGBA32";
-			RenderPathPreview.path.createRenderTarget(t);
+			RenderPath.createRenderTarget(t);
 		}
 		{
 			let t = new RenderTargetRaw();
@@ -20,10 +17,10 @@ class RenderPathPreview {
 			t.width = 1;
 			t.height = 1;
 			t.format = "RGBA32";
-			RenderPathPreview.path.createRenderTarget(t);
+			RenderPath.createRenderTarget(t);
 		}
 
-		RenderPathPreview.path.createDepthBuffer("mmain", "DEPTH24");
+		RenderPath.createDepthBuffer("mmain", "DEPTH24");
 
 		{
 			let t = new RenderTargetRaw();
@@ -35,7 +32,7 @@ class RenderPathPreview {
 			///if krom_opengl
 			t.depth_buffer = "mmain";
 			///end
-			RenderPathPreview.path.createRenderTarget(t);
+			RenderPath.createRenderTarget(t);
 		}
 
 		{
@@ -46,7 +43,7 @@ class RenderPathPreview {
 			t.format = "RGBA64";
 			t.scale = RenderPathBase.getSuperSampling();
 			t.depth_buffer = "mmain";
-			RenderPathPreview.path.createRenderTarget(t);
+			RenderPath.createRenderTarget(t);
 		}
 
 		{
@@ -56,7 +53,7 @@ class RenderPathPreview {
 			t.height = Math.floor(UtilRender.materialPreviewSize * 2.0);
 			t.format = "RGBA64";
 			t.scale = RenderPathBase.getSuperSampling();
-			RenderPathPreview.path.createRenderTarget(t);
+			RenderPath.createRenderTarget(t);
 		}
 
 		{
@@ -66,13 +63,13 @@ class RenderPathPreview {
 			t.height = Math.floor(UtilRender.materialPreviewSize * 2.0);
 			t.format = "RGBA64";
 			t.scale = RenderPathBase.getSuperSampling();
-			RenderPathPreview.path.createRenderTarget(t);
+			RenderPath.createRenderTarget(t);
 		}
 	}
 
 	static commandsPreview = () => {
-		RenderPathPreview.path.setTarget("mgbuffer2");
-		RenderPathPreview.path.clearTarget(0xff000000);
+		RenderPath.setTarget("mgbuffer2");
+		RenderPath.clearTarget(0xff000000);
 
 		///if (krom_metal)
 		let clearColor = 0xffffffff;
@@ -80,49 +77,49 @@ class RenderPathPreview {
 		let clearColor: Null<i32> = null;
 		///end
 
-		RenderPathPreview.path.setTarget("mgbuffer0");
-		RenderPathPreview.path.clearTarget(clearColor, 1.0);
-		RenderPathPreview.path.setTarget("mgbuffer0", ["mgbuffer1", "mgbuffer2"]);
-		RenderPathPreview.path.drawMeshes("mesh");
+		RenderPath.setTarget("mgbuffer0");
+		RenderPath.clearTarget(clearColor, 1.0);
+		RenderPath.setTarget("mgbuffer0", ["mgbuffer1", "mgbuffer2"]);
+		RenderPath.drawMeshes("mesh");
 
 		// Deferred light
-		RenderPathPreview.path.setTarget("mtex");
-		RenderPathPreview.path.bindTarget("_mmain", "gbufferD");
-		RenderPathPreview.path.bindTarget("mgbuffer0", "gbuffer0");
-		RenderPathPreview.path.bindTarget("mgbuffer1", "gbuffer1");
+		RenderPath.setTarget("mtex");
+		RenderPath.bindTarget("_mmain", "gbufferD");
+		RenderPath.bindTarget("mgbuffer0", "gbuffer0");
+		RenderPath.bindTarget("mgbuffer1", "gbuffer1");
 		{
-			RenderPathPreview.path.bindTarget("empty_white", "ssaotex");
+			RenderPath.bindTarget("empty_white", "ssaotex");
 		}
-		RenderPathPreview.path.drawShader("shader_datas/deferred_light/deferred_light");
+		RenderPath.drawShader("shader_datas/deferred_light/deferred_light");
 
 		///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
-		RenderPathPreview.path.setDepthFrom("mtex", "mgbuffer0"); // Bind depth for world pass
+		RenderPath.setDepthFrom("mtex", "mgbuffer0"); // Bind depth for world pass
 		///end
 
-		RenderPathPreview.path.setTarget("mtex"); // Re-binds depth
-		RenderPathPreview.path.drawSkydome("shader_datas/world_pass/world_pass");
+		RenderPath.setTarget("mtex"); // Re-binds depth
+		RenderPath.drawSkydome("shader_datas/world_pass/world_pass");
 
 		///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
-		RenderPathPreview.path.setDepthFrom("mtex", "mgbuffer1"); // Unbind depth
+		RenderPath.setDepthFrom("mtex", "mgbuffer1"); // Unbind depth
 		///end
 
 		let framebuffer = "texpreview";
 		let selectedMat = Context.raw.material;
-		RenderPath.active.renderTargets.get("texpreview").image = selectedMat.image;
-		RenderPath.active.renderTargets.get("texpreview_icon").image = selectedMat.imageIcon;
+		RenderPath.renderTargets.get("texpreview").image = selectedMat.image;
+		RenderPath.renderTargets.get("texpreview_icon").image = selectedMat.imageIcon;
 
-		RenderPathPreview.path.setTarget(framebuffer);
-		RenderPathPreview.path.bindTarget("mtex", "tex");
-		RenderPathPreview.path.drawShader("shader_datas/compositor_pass/compositor_pass");
+		RenderPath.setTarget(framebuffer);
+		RenderPath.bindTarget("mtex", "tex");
+		RenderPath.drawShader("shader_datas/compositor_pass/compositor_pass");
 
-		RenderPathPreview.path.setTarget("texpreview_icon");
-		RenderPathPreview.path.bindTarget("texpreview", "tex");
-		RenderPathPreview.path.drawShader("shader_datas/supersample_resolve/supersample_resolve");
+		RenderPath.setTarget("texpreview_icon");
+		RenderPath.bindTarget("texpreview", "tex");
+		RenderPath.drawShader("shader_datas/supersample_resolve/supersample_resolve");
 	}
 
 	static commandsDecal = () => {
-		RenderPathPreview.path.setTarget("gbuffer2");
-		RenderPathPreview.path.clearTarget(0xff000000);
+		RenderPath.setTarget("gbuffer2");
+		RenderPath.clearTarget(0xff000000);
 
 		///if (krom_metal)
 		let clearColor = 0xffffffff;
@@ -130,38 +127,38 @@ class RenderPathPreview {
 		let clearColor: Null<i32> = null;
 		///end
 
-		RenderPathPreview.path.setTarget("gbuffer0");
-		RenderPathPreview.path.clearTarget(clearColor, 1.0);
-		RenderPathPreview.path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
-		RenderPathPreview.path.drawMeshes("mesh");
+		RenderPath.setTarget("gbuffer0");
+		RenderPath.clearTarget(clearColor, 1.0);
+		RenderPath.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
+		RenderPath.drawMeshes("mesh");
 
 		// Deferred light
-		RenderPathPreview.path.setTarget("tex");
-		RenderPathPreview.path.bindTarget("_main", "gbufferD");
-		RenderPathPreview.path.bindTarget("gbuffer0", "gbuffer0");
-		RenderPathPreview.path.bindTarget("gbuffer1", "gbuffer1");
+		RenderPath.setTarget("tex");
+		RenderPath.bindTarget("_main", "gbufferD");
+		RenderPath.bindTarget("gbuffer0", "gbuffer0");
+		RenderPath.bindTarget("gbuffer1", "gbuffer1");
 		{
-			RenderPathPreview.path.bindTarget("empty_white", "ssaotex");
+			RenderPath.bindTarget("empty_white", "ssaotex");
 		}
-		RenderPathPreview.path.drawShader("shader_datas/deferred_light/deferred_light");
+		RenderPath.drawShader("shader_datas/deferred_light/deferred_light");
 
 		///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
-		RenderPathPreview.path.setDepthFrom("tex", "gbuffer0"); // Bind depth for world pass
+		RenderPath.setDepthFrom("tex", "gbuffer0"); // Bind depth for world pass
 		///end
 
-		RenderPathPreview.path.setTarget("tex");
-		RenderPathPreview.path.drawSkydome("shader_datas/world_pass/world_pass");
+		RenderPath.setTarget("tex");
+		RenderPath.drawSkydome("shader_datas/world_pass/world_pass");
 
 		///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
-		RenderPathPreview.path.setDepthFrom("tex", "gbuffer1"); // Unbind depth
+		RenderPath.setDepthFrom("tex", "gbuffer1"); // Unbind depth
 		///end
 
 		let framebuffer = "texpreview";
-		RenderPath.active.renderTargets.get("texpreview").image = Context.raw.decalImage;
+		RenderPath.renderTargets.get("texpreview").image = Context.raw.decalImage;
 
-		RenderPathPreview.path.setTarget(framebuffer);
+		RenderPath.setTarget(framebuffer);
 
-		RenderPathPreview.path.bindTarget("tex", "tex");
-		RenderPathPreview.path.drawShader("shader_datas/compositor_pass/compositor_pass");
+		RenderPath.bindTarget("tex", "tex");
+		RenderPath.drawShader("shader_datas/compositor_pass/compositor_pass");
 	}
 }

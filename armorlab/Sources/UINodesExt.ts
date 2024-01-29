@@ -40,14 +40,14 @@ class UINodesExt {
 				BrushOutputNode.inst.getAsImage(ChannelType.ChannelHeight, (texheight: Image) => {
 
 					if (texbase != null) {
-						let texpaint = RenderPath.active.renderTargets.get("texpaint").image;
+						let texpaint = RenderPath.renderTargets.get("texpaint").image;
 						texpaint.g2.begin(false);
 						texpaint.g2.drawScaledImage(texbase, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 						texpaint.g2.end();
 					}
 
 					if (texnor != null) {
-						let texpaint_nor = RenderPath.active.renderTargets.get("texpaint_nor").image;
+						let texpaint_nor = RenderPath.renderTargets.get("texpaint_nor").image;
 						texpaint_nor.g2.begin(false);
 						texpaint_nor.g2.drawScaledImage(texnor, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 						texpaint_nor.g2.end();
@@ -57,7 +57,7 @@ class UINodesExt {
 					if (Base.pipeCopyA == null) Base.makePipeCopyA();
 					if (ConstData.screenAlignedVB == null) ConstData.createScreenAlignedData();
 
-					let texpaint_pack = RenderPath.active.renderTargets.get("texpaint_pack").image;
+					let texpaint_pack = RenderPath.renderTargets.get("texpaint_pack").image;
 
 					if (texocc != null) {
 						texpaint_pack.g2.begin(false);
@@ -110,7 +110,7 @@ class UINodesExt {
 								Base.notifyOnNextFrame(() => {
 									Console.progress(tr("Apply Displacement"));
 									Base.notifyOnNextFrame(() => {
-										let uv_scale = Scene.active.meshes[0].data.scaleTex * Context.raw.brushScale;
+										let uv_scale = Scene.meshes[0].data.scaleTex * Context.raw.brushScale;
 										UtilMesh.applyDisplacement(texpaint_pack, 0.05 * Config.raw.displace_strength, uv_scale);
 										UtilMesh.calcNormals();
 										taskDone();

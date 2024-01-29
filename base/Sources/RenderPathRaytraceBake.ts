@@ -12,7 +12,6 @@ class RenderPathRaytraceBake {
 	static lastBake = 0;
 
 	static commands = (parsePaintMaterial: (b?: bool)=>void): bool => {
-		let path = RenderPathRaytrace.path;
 
 		if (!RenderPathRaytrace.ready || !RenderPathRaytrace.isBake || RenderPathRaytraceBake.lastBake != Context.raw.bakeType) {
 			let rebuild = !(RenderPathRaytrace.ready && RenderPathRaytrace.isBake && RenderPathRaytraceBake.lastBake != Context.raw.bakeType);
@@ -22,10 +21,10 @@ class RenderPathRaytraceBake {
 			RenderPathRaytrace.lastEnvmap = null;
 			RenderPathRaytraceBake.lastLayer = null;
 
-			if (path.renderTargets.get("baketex0") != null) {
-				path.renderTargets.get("baketex0").image.unload();
-				path.renderTargets.get("baketex1").image.unload();
-				path.renderTargets.get("baketex2").image.unload();
+			if (RenderPath.renderTargets.get("baketex0") != null) {
+				RenderPath.renderTargets.get("baketex0").image.unload();
+				RenderPath.renderTargets.get("baketex1").image.unload();
+				RenderPath.renderTargets.get("baketex2").image.unload();
 			}
 
 			{
@@ -34,7 +33,7 @@ class RenderPathRaytraceBake {
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
 				t.format = "RGBA64";
-				path.createRenderTarget(t);
+				RenderPath.createRenderTarget(t);
 			}
 			{
 				let t = new RenderTargetRaw();
@@ -42,7 +41,7 @@ class RenderPathRaytraceBake {
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
 				t.format = "RGBA64";
-				path.createRenderTarget(t);
+				RenderPath.createRenderTarget(t);
 			}
 			{
 				let t = new RenderTargetRaw();
@@ -50,16 +49,16 @@ class RenderPathRaytraceBake {
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
 				t.format = "RGBA64"; // Match raytrace_target format
-				path.createRenderTarget(t);
+				RenderPath.createRenderTarget(t);
 			}
 
 			let _bakeType = Context.raw.bakeType;
 			Context.raw.bakeType = BakeType.BakeInit;
 			parsePaintMaterial();
-			path.setTarget("baketex0");
-			path.clearTarget(0x00000000); // Pixels with alpha of 0.0 are skipped during raytracing
-			path.setTarget("baketex0", ["baketex1"]);
-			path.drawMeshes("paint");
+			RenderPath.setTarget("baketex0");
+			RenderPath.clearTarget(0x00000000); // Pixels with alpha of 0.0 are skipped during raytracing
+			RenderPath.setTarget("baketex0", ["baketex1"]);
+			RenderPath.drawMeshes("paint");
 			Context.raw.bakeType = _bakeType;
 			let _next = () => {
 				parsePaintMaterial();
@@ -75,18 +74,18 @@ class RenderPathRaytraceBake {
 			Context.loadEnvmap();
 			Context.updateEnvmap();
 		}
-		let probe = Scene.active.world;
+		let probe = Scene.world;
 		let savedEnvmap = Context.raw.showEnvmapBlur ? probe.radianceMipmaps[0] : Context.raw.savedEnvmap;
 		if (RenderPathRaytrace.lastEnvmap != savedEnvmap || RenderPathRaytraceBake.lastLayer != Context.raw.layer.texpaint) {
 			RenderPathRaytrace.lastEnvmap = savedEnvmap;
 			RenderPathRaytraceBake.lastLayer = Context.raw.layer.texpaint;
 
-			let baketex0 = path.renderTargets.get("baketex0").image;
-			let baketex1 = path.renderTargets.get("baketex1").image;
-			let bnoise_sobol = Scene.active.embedded.get("bnoise_sobol.k");
-			let bnoise_scramble = Scene.active.embedded.get("bnoise_scramble.k");
-			let bnoise_rank = Scene.active.embedded.get("bnoise_rank.k");
-			let texpaint_undo = RenderPath.active.renderTargets.get("texpaint_undo" + History.undoI).image;
+			let baketex0 = RenderPath.renderTargets.get("baketex0").image;
+			let baketex1 = RenderPath.renderTargets.get("baketex1").image;
+			let bnoise_sobol = Scene.embedded.get("bnoise_sobol.k");
+			let bnoise_scramble = Scene.embedded.get("bnoise_scramble.k");
+			let bnoise_rank = Scene.embedded.get("bnoise_rank.k");
+			let texpaint_undo = RenderPath.renderTargets.get("texpaint_undo" + History.undoI).image;
 			Krom.raytraceSetTextures(baketex0, baketex1, texpaint_undo, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
 		}
 
@@ -101,16 +100,16 @@ class RenderPathRaytraceBake {
 			f32a[1] = Context.raw.bakeAoStrength;
 			f32a[2] = Context.raw.bakeAoRadius;
 			f32a[3] = Context.raw.bakeAoOffset;
-			f32a[4] = Scene.active.world.raw.strength;
+			f32a[4] = Scene.world.raw.strength;
 			f32a[5] = Context.raw.bakeUpAxis;
 			f32a[6] = Context.raw.envmapAngle;
 
-			let framebuffer = path.renderTargets.get("baketex2").image;
+			let framebuffer = RenderPath.renderTargets.get("baketex2").image;
 			Krom.raytraceDispatchRays(framebuffer.renderTarget_, f32a.buffer);
 
-			path.setTarget("texpaint" + Context.raw.layer.id);
-			path.bindTarget("baketex2", "tex");
-			path.drawShader("shader_datas/copy_pass/copy_pass");
+			RenderPath.setTarget("texpaint" + Context.raw.layer.id);
+			RenderPath.bindTarget("baketex2", "tex");
+			RenderPath.drawShader("shader_datas/copy_pass/copy_pass");
 
 			///if krom_metal
 			let samplesPerFrame = 4;

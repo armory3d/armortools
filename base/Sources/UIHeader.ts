@@ -40,7 +40,7 @@ class UIHeader {
 		if (Context.raw.tool == WorkspaceTool.ToolColorId) {
 			ui.text(tr("Picked Color"));
 			if (Context.raw.colorIdPicked) {
-				ui.image(RenderPath.active.renderTargets.get("texpaint_colorid").image, 0xffffffff, 64);
+				ui.image(RenderPath.renderTargets.get("texpaint_colorid").image, 0xffffffff, 64);
 			}
 			ui.enabled = Context.raw.colorIdPicked;
 			if (ui.button(tr("Clear"))) {
@@ -83,7 +83,7 @@ class UIHeader {
 					if (ConstData.screenAlignedVB == null) ConstData.createScreenAlignedData();
 					m.texpaint.g4.begin();
 					m.texpaint.g4.setPipeline(Base.pipeColorIdToMask);
-					m.texpaint.g4.setTexture(Base.texpaintColorId, RenderPath.active.renderTargets.get("texpaint_colorid").image);
+					m.texpaint.g4.setTexture(Base.texpaintColorId, RenderPath.renderTargets.get("texpaint_colorid").image);
 					m.texpaint.g4.setTexture(Base.texColorId, Project.getImage(Project.assets[Context.raw.colorIdHandle.position]));
 					m.texpaint.g4.setVertexBuffer(ConstData.screenAlignedVB);
 					m.texpaint.g4.setIndexBuffer(ConstData.screenAlignedIB);

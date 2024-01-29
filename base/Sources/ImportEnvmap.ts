@@ -74,18 +74,18 @@ class ImportEnvmap {
 		ImportEnvmap.radianceCpu.setMipmaps(ImportEnvmap.mipsCpu);
 
 		// Irradiance
-		Scene.active.world.irradiance = ImportEnvmap.getSphericalHarmonics(radiancePixels, ImportEnvmap.radiance.width, ImportEnvmap.radiance.height);
+		Scene.world.irradiance = ImportEnvmap.getSphericalHarmonics(radiancePixels, ImportEnvmap.radiance.width, ImportEnvmap.radiance.height);
 
 		// World
-		Scene.active.world.raw.strength = 1.0;
-		Scene.active.world.raw.radiance_mipmaps = ImportEnvmap.mipsCpu.length - 2;
-		Scene.active.world.envmap = image;
-		Scene.active.world.raw.envmap = path;
-		Scene.active.world.radiance = ImportEnvmap.radianceCpu;
-		Scene.active.world.radianceMipmaps = ImportEnvmap.mipsCpu;
+		Scene.world.raw.strength = 1.0;
+		Scene.world.raw.radiance_mipmaps = ImportEnvmap.mipsCpu.length - 2;
+		Scene.world.envmap = image;
+		Scene.world.raw.envmap = path;
+		Scene.world.radiance = ImportEnvmap.radianceCpu;
+		Scene.world.radianceMipmaps = ImportEnvmap.mipsCpu;
 		Context.raw.savedEnvmap = image;
 		if (Context.raw.showEnvmapBlur) {
-			Scene.active.world.envmap = Scene.active.world.radianceMipmaps[0];
+			Scene.world.envmap = Scene.world.radianceMipmaps[0];
 		}
 		Context.raw.ddirty = 2;
 		Project.raw.envmap = path;

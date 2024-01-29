@@ -30,7 +30,7 @@ class Gizmo {
 		else if (isDecal) {
 			gizmo.transform.loc.set(Context.raw.layer.decalMat._30, Context.raw.layer.decalMat._31, Context.raw.layer.decalMat._32);
 		}
-		let cam = Scene.active.camera;
+		let cam = Scene.camera;
 		let fov = cam.data.fov;
 		let dist = Vec4.distance(cam.transform.loc, gizmo.transform.loc) / 8 * fov;
 		gizmo.transform.scale.set(dist, dist, dist);
@@ -146,7 +146,7 @@ class Gizmo {
 			// Translate, scale
 			let trs = [Context.raw.gizmoTranslateX.transform, Context.raw.gizmoTranslateY.transform, Context.raw.gizmoTranslateZ.transform,
 					   Context.raw.gizmoScaleX.transform, Context.raw.gizmoScaleY.transform, Context.raw.gizmoScaleZ.transform];
-			let hit = RayCaster.closestBoxIntersect(trs, Mouse.viewX, Mouse.viewY, Scene.active.camera);
+			let hit = RayCaster.closestBoxIntersect(trs, Mouse.viewX, Mouse.viewY, Scene.camera);
 			if (hit != null) {
 				if (hit.object == Context.raw.gizmoTranslateX) Context.raw.translateX = true;
 				else if (hit.object == Context.raw.gizmoTranslateY) Context.raw.translateY = true;
@@ -162,7 +162,7 @@ class Gizmo {
 			else {
 				// Rotate
 				let trs = [Context.raw.gizmoRotateX.transform, Context.raw.gizmoRotateY.transform, Context.raw.gizmoRotateZ.transform];
-				let hit = RayCaster.closestBoxIntersect(trs, Mouse.viewX, Mouse.viewY, Scene.active.camera);
+				let hit = RayCaster.closestBoxIntersect(trs, Mouse.viewX, Mouse.viewY, Scene.camera);
 				if (hit != null) {
 					if (hit.object == Context.raw.gizmoRotateX) Context.raw.rotateX = true;
 					else if (hit.object == Context.raw.gizmoRotateY) Context.raw.rotateY = true;
@@ -192,28 +192,28 @@ class Gizmo {
 			}
 
 			if (Context.raw.translateX || Context.raw.scaleX) {
-				let hit = RayCaster.planeIntersect(Vec4.yAxis(), Gizmo.v, Mouse.viewX, Mouse.viewY, Scene.active.camera);
+				let hit = RayCaster.planeIntersect(Vec4.yAxis(), Gizmo.v, Mouse.viewX, Mouse.viewY, Scene.camera);
 				if (hit != null) {
 					if (Context.raw.gizmoStarted) Context.raw.gizmoOffset = hit.x - Gizmo.v.x;
 					Context.raw.gizmoDrag = hit.x - Context.raw.gizmoOffset;
 				}
 			}
 			else if (Context.raw.translateY || Context.raw.scaleY) {
-				let hit = RayCaster.planeIntersect(Vec4.xAxis(), Gizmo.v, Mouse.viewX, Mouse.viewY, Scene.active.camera);
+				let hit = RayCaster.planeIntersect(Vec4.xAxis(), Gizmo.v, Mouse.viewX, Mouse.viewY, Scene.camera);
 				if (hit != null) {
 					if (Context.raw.gizmoStarted) Context.raw.gizmoOffset = hit.y - Gizmo.v.y;
 					Context.raw.gizmoDrag = hit.y - Context.raw.gizmoOffset;
 				}
 			}
 			else if (Context.raw.translateZ || Context.raw.scaleZ) {
-				let hit = RayCaster.planeIntersect(Vec4.xAxis(), Gizmo.v, Mouse.viewX, Mouse.viewY, Scene.active.camera);
+				let hit = RayCaster.planeIntersect(Vec4.xAxis(), Gizmo.v, Mouse.viewX, Mouse.viewY, Scene.camera);
 				if (hit != null) {
 					if (Context.raw.gizmoStarted) Context.raw.gizmoOffset = hit.z - Gizmo.v.z;
 					Context.raw.gizmoDrag = hit.z - Context.raw.gizmoOffset;
 				}
 			}
 			else if (Context.raw.rotateX) {
-				let hit = RayCaster.planeIntersect(Vec4.xAxis(), Gizmo.v, Mouse.viewX, Mouse.viewY, Scene.active.camera);
+				let hit = RayCaster.planeIntersect(Vec4.xAxis(), Gizmo.v, Mouse.viewX, Mouse.viewY, Scene.camera);
 				if (hit != null) {
 					if (Context.raw.gizmoStarted) {
 						Context.raw.layer.decalMat.decompose(Gizmo.v, Gizmo.q, Gizmo.v0);
@@ -223,7 +223,7 @@ class Gizmo {
 				}
 			}
 			else if (Context.raw.rotateY) {
-				let hit = RayCaster.planeIntersect(Vec4.yAxis(), Gizmo.v, Mouse.viewX, Mouse.viewY, Scene.active.camera);
+				let hit = RayCaster.planeIntersect(Vec4.yAxis(), Gizmo.v, Mouse.viewX, Mouse.viewY, Scene.camera);
 				if (hit != null) {
 					if (Context.raw.gizmoStarted) {
 						Context.raw.layer.decalMat.decompose(Gizmo.v, Gizmo.q, Gizmo.v0);
@@ -233,7 +233,7 @@ class Gizmo {
 				}
 			}
 			else if (Context.raw.rotateZ) {
-				let hit = RayCaster.planeIntersect(Vec4.zAxis(), Gizmo.v, Mouse.viewX, Mouse.viewY, Scene.active.camera);
+				let hit = RayCaster.planeIntersect(Vec4.zAxis(), Gizmo.v, Mouse.viewX, Mouse.viewY, Scene.camera);
 				if (hit != null) {
 					if (Context.raw.gizmoStarted) {
 						Context.raw.layer.decalMat.decompose(Gizmo.v, Gizmo.q, Gizmo.v0);

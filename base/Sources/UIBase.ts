@@ -191,7 +191,7 @@ class UIBase {
 			Context.raw.previewEnvmap = Image.fromBytes(b.buffer, 1, 1);
 		}
 
-		let world = Scene.active.world;
+		let world = Scene.world;
 		if (Context.raw.savedEnvmap == null) {
 			// Context.raw.savedEnvmap = world.envmap;
 			Context.raw.defaultIrradiance = world.irradiance;
@@ -218,7 +218,7 @@ class UIBase {
 		///end
 
 		///if (is_paint || is_sculpt)
-		Context.raw.gizmo = Scene.active.getChild(".Gizmo");
+		Context.raw.gizmo = Scene.getChild(".Gizmo");
 		Context.raw.gizmoTranslateX = Context.raw.gizmo.getChild(".TranslateX");
 		Context.raw.gizmoTranslateY = Context.raw.gizmo.getChild(".TranslateY");
 		Context.raw.gizmoTranslateZ = Context.raw.gizmo.getChild(".TranslateZ");
@@ -234,7 +234,7 @@ class UIBase {
 
 		if (UIBase.ui.SCALE() > 1) UIBase.setIconScale();
 
-		Context.raw.paintObject = (Scene.active.getChild(".Cube") as MeshObject);
+		Context.raw.paintObject = (Scene.getChild(".Cube") as MeshObject);
 		Project.paintObjects = [Context.raw.paintObject];
 
 		if (Project.filepath == "") {
@@ -242,7 +242,7 @@ class UIBase {
 		}
 
 		Context.raw.projectObjects = [];
-		for (let m of Scene.active.meshes) Context.raw.projectObjects.push(m);
+		for (let m of Scene.meshes) Context.raw.projectObjects.push(m);
 
 		Operator.register("view_top", UIBase.view_top);
 	}
@@ -710,14 +710,14 @@ class UIBase {
 				}
 				History.pushUndo = true;
 				Context.raw.particleHitX = Context.raw.particleHitY = Context.raw.particleHitZ = 0;
-				Scene.active.spawnObject(".Sphere", null, (o: Object) => {
+				Scene.spawnObject(".Sphere", null, (o: Object) => {
 					Data.getMaterial("Scene", ".Gizmo", (md: MaterialData) => {
 						let mo: MeshObject = o as MeshObject;
 						mo.name = ".Bullet";
 						mo.materials[0] = md;
 						mo.visible = true;
 
-						let camera = Scene.active.camera;
+						let camera = Scene.camera;
 						let ct = camera.transform;
 						mo.transform.loc.set(ct.worldx(), ct.worldy(), ct.worldz());
 						mo.transform.scale.set(Context.raw.brushRadius * 0.2, Context.raw.brushRadius * 0.2, Context.raw.brushRadius * 0.2);
@@ -1019,7 +1019,7 @@ class UIBase {
 						else if (Context.raw.tool == WorkspaceTool.ToolParticle) {
 							// Reset particles
 							///if arm_particles
-							let emitter: MeshObject = Scene.active.getChild(".ParticleEmitter") as MeshObject;
+							let emitter: MeshObject = Scene.getChild(".ParticleEmitter") as MeshObject;
 							let psys = emitter.particleSystems[0];
 							psys.time = 0;
 							// psys.time = psys.seed * psys.animtime;

@@ -13,7 +13,7 @@ class Camera {
 	}
 
 	static update = () => {
-		let camera = Scene.active.camera;
+		let camera = Scene.camera;
 
 		if (Mouse.viewX < 0 ||
 			Mouse.viewX > App.w() ||
@@ -163,7 +163,7 @@ class Camera {
 
 		if (Operator.shortcut(Config.keymap.rotate_light, ShortcutType.ShortcutDown)) {
 			Camera.redraws = 2;
-			let light = Scene.active.lights[0];
+			let light = Scene.lights[0];
 			Context.raw.lightAngle = (Context.raw.lightAngle + ((Mouse.movementX / 100) % (2 * Math.PI) + 2 * Math.PI)) % (2 * Math.PI);
 			let m = Mat4.rotationZ(Mouse.movementX / 100);
 			light.transform.local.multmat(m);
@@ -186,7 +186,7 @@ class Camera {
 	}
 
 	static distance = (): f32 => {
-		let camera = Scene.active.camera;
+		let camera = Scene.camera;
 		return Vec4.distance(Camera.origins[Camera.index()], camera.transform.loc);
 	}
 
@@ -202,7 +202,7 @@ class Camera {
 	}
 
 	static reset = (viewIndex = -1) => {
-		let camera = Scene.active.camera;
+		let camera = Scene.camera;
 		if (viewIndex == -1) {
 			Camera.origins = [new Vec4(0, 0, 0), new Vec4(0, 0, 0)];
 			Camera.views = [camera.transform.local.clone(), camera.transform.local.clone()];
@@ -214,7 +214,7 @@ class Camera {
 	}
 
 	static panAction = (modif: bool, defaultKeymap: bool) => {
-		let camera = Scene.active.camera;
+		let camera = Scene.camera;
 		if (Operator.shortcut(Config.keymap.action_pan, ShortcutType.ShortcutDown) || (Mouse.down("middle") && !modif && defaultKeymap)) {
 			Camera.redraws = 2;
 			let look = camera.transform.look().normalize().mult(Mouse.movementY / 150 * Config.raw.camera_pan_speed);

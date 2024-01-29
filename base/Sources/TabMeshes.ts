@@ -72,7 +72,7 @@ class TabMeshes {
 				///end
 				///if is_lab
 				let displace_strength = Config.raw.displace_strength > 0 ? Config.raw.displace_strength : 1.0;
-				let uv_scale = Scene.active.meshes[0].data.scaleTex * Context.raw.brushScale;
+				let uv_scale = Scene.meshes[0].data.scaleTex * Context.raw.brushScale;
 				UtilMesh.applyDisplacement(BrushOutputNode.inst.texpaint_pack, 0.05 * displace_strength, uv_scale);
 				///end
 
@@ -164,11 +164,11 @@ class TabMeshes {
 			};
 			let md = new MeshData(raw, (md: MeshData) => {});
 			mo = new MeshObject(md, Context.raw.paintObject.materials);
-			array_remove(Scene.active.meshes, mo);
+			array_remove(Scene.meshes, mo);
 			mo.name = "Tessellated";
 		}
 		else {
-			mo = Scene.active.getChild(name) as MeshObject;
+			mo = Scene.getChild(name) as MeshObject;
 		}
 
 		mo.visible = true;
@@ -176,7 +176,7 @@ class TabMeshes {
 		Context.raw.paintObject = mo;
 		Project.paintObjects[0] = mo;
 		if (UIHeader.worktab.position == SpaceType.Space3D) {
-			Scene.active.meshes = [mo];
+			Scene.meshes = [mo];
 		}
 
 		///if (krom_direct3d12 || krom_vulkan || krom_metal)

@@ -106,10 +106,10 @@ class ExportArm {
 			packed_assets: packed_assets,
 			swatches: Project.raw.swatches,
 			envmap: Project.raw.envmap != null ? (sameDrive ? Path.toRelative(Project.filepath, Project.raw.envmap) : Project.raw.envmap) : null,
-			envmap_strength: Scene.active.world.raw.strength,
-			camera_world: Scene.active.camera.transform.local.toFloat32Array(),
+			envmap_strength: Scene.world.raw.strength,
+			camera_world: Scene.camera.transform.local.toFloat32Array(),
 			camera_origin: ExportArm.vec3f32(Camera.origins[0]),
-			camera_fov: Scene.active.camera.data.fov,
+			camera_fov: Scene.camera.data.fov,
 
 			///if (is_paint || is_sculpt)
 			mesh_datas: md,
@@ -138,7 +138,7 @@ class ExportArm {
 		};
 
 		///if (krom_android || krom_ios)
-		let tex = RenderPath.active.renderTargets.get(Context.raw.renderMode == RenderMode.RenderForward ? "buf" : "tex").image;
+		let tex = RenderPath.renderTargets.get(Context.raw.renderMode == RenderMode.RenderForward ? "buf" : "tex").image;
 		let mesh_icon = Image.createRenderTarget(256, 256);
 		let r = App.w() / App.h();
 		mesh_icon.g2.begin(false);

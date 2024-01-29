@@ -134,7 +134,7 @@ class PhysicsWorld {
 	}
 
 	static pickClosest = (pw: PhysicsWorldRaw, inputX: f32, inputY: f32): PhysicsBodyRaw => {
-		let camera = Scene.active.camera;
+		let camera = Scene.camera;
 		let start = new Vec4();
 		let end = new Vec4();
 		RayCaster.getDirection(start, end, inputX, inputY, camera);

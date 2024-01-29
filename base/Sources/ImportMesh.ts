@@ -187,7 +187,7 @@ class ImportMesh {
 
 		new MeshData(raw, (md: MeshData) => {
 
-			let object = Scene.active.addMeshObject(md, Context.raw.paintObject.materials, Context.raw.paintObject);
+			let object = Scene.addMeshObject(md, Context.raw.paintObject.materials, Context.raw.paintObject);
 			object.name = mesh.name;
 			object.skip_context = "paint";
 

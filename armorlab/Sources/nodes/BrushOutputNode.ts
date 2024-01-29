@@ -20,7 +20,7 @@ class BrushOutputNode extends LogicNode {
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
 				t.format = "RGBA32";
-				this.texpaint = RenderPath.active.createRenderTarget(t).image;
+				this.texpaint = RenderPath.createRenderTarget(t).image;
 			}
 			{
 				let t = new RenderTargetRaw();
@@ -28,7 +28,7 @@ class BrushOutputNode extends LogicNode {
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
 				t.format = "RGBA32";
-				this.texpaint_nor = RenderPath.active.createRenderTarget(t).image;
+				this.texpaint_nor = RenderPath.createRenderTarget(t).image;
 			}
 			{
 				let t = new RenderTargetRaw();
@@ -36,7 +36,7 @@ class BrushOutputNode extends LogicNode {
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
 				t.format = "RGBA32";
-				this.texpaint_pack = RenderPath.active.createRenderTarget(t).image;
+				this.texpaint_pack = RenderPath.createRenderTarget(t).image;
 			}
 			{
 				let t = new RenderTargetRaw();
@@ -44,7 +44,7 @@ class BrushOutputNode extends LogicNode {
 				t.width = 1;
 				t.height = 1;
 				t.format = "RGBA32";
-				this.texpaint_nor_empty = RenderPath.active.createRenderTarget(t).image;
+				this.texpaint_nor_empty = RenderPath.createRenderTarget(t).image;
 			}
 			{
 				let t = new RenderTargetRaw();
@@ -52,7 +52,7 @@ class BrushOutputNode extends LogicNode {
 				t.width = 1;
 				t.height = 1;
 				t.format = "RGBA32";
-				this.texpaint_pack_empty = RenderPath.active.createRenderTarget(t).image;
+				this.texpaint_pack_empty = RenderPath.createRenderTarget(t).image;
 			}
 		}
 		else {

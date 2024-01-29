@@ -135,7 +135,7 @@ class LineDraw {
 		LineDraw.midLine.set(x1, y1, z1);
 		LineDraw.midLine.sub(LineDraw.midPoint);
 
-		let camera = Scene.active.camera;
+		let camera = Scene.camera;
 		LineDraw.cameraLook = camera.transform.world.getLoc();
 		LineDraw.cameraLook.sub(LineDraw.midPoint);
 
@@ -181,7 +181,7 @@ class LineDraw {
 		LineDraw.g.setVertexBuffer(LineDraw.vertexBuffer);
 		LineDraw.g.setIndexBuffer(LineDraw.indexBuffer);
 		LineDraw.g.setPipeline(LineDraw.pipeline);
-		let camera = Scene.active.camera;
+		let camera = Scene.camera;
 		LineDraw.vp.setFrom(camera.V);
 		LineDraw.vp.multmat(camera.P);
 		LineDraw.g.setMatrix(LineDraw.vpID, LineDraw.vp);

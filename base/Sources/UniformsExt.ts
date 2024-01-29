@@ -152,7 +152,7 @@ class UniformsExt {
 		switch (link) {
 			case "_gbufferSize": {
 				UniformsExt.vec.set(0, 0, 0);
-				let gbuffer2 = RenderPath.active.renderTargets.get("gbuffer2");
+				let gbuffer2 = RenderPath.renderTargets.get("gbuffer2");
 				UniformsExt.vec.set(gbuffer2.image.width, gbuffer2.image.height, 0);
 				return UniformsExt.vec;
 			}
@@ -288,11 +288,11 @@ class UniformsExt {
 				return UniformsExt.vec;
 			}
 			case "_envmapData": {
-				UniformsExt.vec.set(Context.raw.envmapAngle, Math.sin(-Context.raw.envmapAngle), Math.cos(-Context.raw.envmapAngle), Scene.active.world.raw.strength);
+				UniformsExt.vec.set(Context.raw.envmapAngle, Math.sin(-Context.raw.envmapAngle), Math.cos(-Context.raw.envmapAngle), Scene.world.raw.strength);
 				return UniformsExt.vec;
 			}
 			case "_envmapDataWorld": {
-				UniformsExt.vec.set(Context.raw.envmapAngle, Math.sin(-Context.raw.envmapAngle), Math.cos(-Context.raw.envmapAngle), Context.raw.showEnvmap ? Scene.active.world.raw.strength : 1.0);
+				UniformsExt.vec.set(Context.raw.envmapAngle, Math.sin(-Context.raw.envmapAngle), Math.cos(-Context.raw.envmapAngle), Context.raw.showEnvmap ? Scene.world.raw.strength : 1.0);
 				return UniformsExt.vec;
 			}
 			///if (is_paint || is_sculpt)
@@ -320,7 +320,7 @@ class UniformsExt {
 		switch (link) {
 			///if (is_paint || is_sculpt)
 			case "_decalLayerMatrix": { // Decal layer
-				let camera = Scene.active.camera;
+				let camera = Scene.camera;
 				let m = Uniforms.helpMat;
 				m.setFrom(Context.raw.layer.decalMat);
 				m.getInverse(m);
@@ -337,7 +337,7 @@ class UniformsExt {
 			case "_texpaint_undo": {
 				///if (is_paint || is_sculpt)
 				let i = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
-				return RenderPath.active.renderTargets.get("texpaint_undo" + i).image;
+				return RenderPath.renderTargets.get("texpaint_undo" + i).image;
 				///end
 
 				///if is_lab
@@ -347,7 +347,7 @@ class UniformsExt {
 			case "_texpaint_nor_undo": {
 				///if (is_paint || is_sculpt)
 				let i = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
-				return RenderPath.active.renderTargets.get("texpaint_nor_undo" + i).image;
+				return RenderPath.renderTargets.get("texpaint_nor_undo" + i).image;
 				///end
 
 				///if is_lab
@@ -357,7 +357,7 @@ class UniformsExt {
 			case "_texpaint_pack_undo": {
 				///if (is_paint || is_sculpt)
 				let i = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
-				return RenderPath.active.renderTargets.get("texpaint_pack_undo" + i).image;
+				return RenderPath.renderTargets.get("texpaint_pack_undo" + i).image;
 				///end
 
 				///if is_lab
@@ -376,7 +376,7 @@ class UniformsExt {
 
 			///if (is_paint || is_sculpt)
 			case "_texcolorid": {
-				if (Project.assets.length == 0) return RenderPath.active.renderTargets.get("empty_white").image;
+				if (Project.assets.length == 0) return RenderPath.renderTargets.get("empty_white").image;
 				else return Project.getImage(Project.assets[Context.raw.colorIdHandle.position]);
 			}
 			case "_textexttool": { // Opacity map for text
@@ -389,7 +389,7 @@ class UniformsExt {
 				return Context.raw.brushStencilImage;
 			}
 			case "_texparticle": {
-				return RenderPath.active.renderTargets.get("texparticle").image;
+				return RenderPath.renderTargets.get("texparticle").image;
 			}
 			///end
 
@@ -417,7 +417,7 @@ class UniformsExt {
 					UtilUV.cacheUVIslandMap();
 				}
 				App.notifyOnInit(_init);
-				return UtilUV.uvislandmapCached ? UtilUV.uvislandmap : RenderPath.active.renderTargets.get("empty_black").image;
+				return UtilUV.uvislandmapCached ? UtilUV.uvislandmap : RenderPath.renderTargets.get("empty_black").image;
 			}
 			case "_texdilatemap": {
 				return UtilUV.dilatemap;
@@ -427,7 +427,7 @@ class UniformsExt {
 
 		if (link.startsWith("_texpaint_pack_vert")) {
 			let tid = link.substr(link.length - 1);
-			return RenderPath.active.renderTargets.get("texpaint_pack" + tid).image;
+			return RenderPath.renderTargets.get("texpaint_pack" + tid).image;
 		}
 
 		if (link.startsWith("_texpaint_vert")) {
@@ -474,15 +474,15 @@ class UniformsExt {
 		///if (is_paint || is_sculpt)
 		if (link.startsWith("_texblur_")) {
 			let id = link.substr(9);
-			return Context.raw.nodePreviews != null ? Context.raw.nodePreviews.get(id) : RenderPath.active.renderTargets.get("empty_black").image;
+			return Context.raw.nodePreviews != null ? Context.raw.nodePreviews.get(id) : RenderPath.renderTargets.get("empty_black").image;
 		}
 		if (link.startsWith("_texwarp_")) {
 			let id = link.substr(9);
-			return Context.raw.nodePreviews != null ? Context.raw.nodePreviews.get(id) : RenderPath.active.renderTargets.get("empty_black").image;
+			return Context.raw.nodePreviews != null ? Context.raw.nodePreviews.get(id) : RenderPath.renderTargets.get("empty_black").image;
 		}
 		if (link.startsWith("_texbake_")) {
 			let id = link.substr(9);
-			return Context.raw.nodePreviews != null ? Context.raw.nodePreviews.get(id) : RenderPath.active.renderTargets.get("empty_black").image;
+			return Context.raw.nodePreviews != null ? Context.raw.nodePreviews.get(id) : RenderPath.renderTargets.get("empty_black").image;
 		}
 		///end
 

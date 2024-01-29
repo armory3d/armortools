@@ -94,7 +94,7 @@ class ExportTexture {
 		Context.raw.tool = WorkspaceTool.ToolFill;
 		MakeMaterial.parsePaintMaterial();
 		let _paintObject = Context.raw.paintObject;
-		let planeo: MeshObject = Scene.active.getChild(".Plane") as MeshObject;
+		let planeo: MeshObject = Scene.getChild(".Plane") as MeshObject;
 		planeo.visible = true;
 		Context.raw.paintObject = planeo;
 		Context.raw.pdirty = 1;
@@ -141,7 +141,7 @@ class ExportTexture {
 		Base.makeExportImg();
 		if (Base.pipeMerge == null) Base.makePipe();
 		if (ConstData.screenAlignedVB == null) ConstData.createScreenAlignedData();
-		let empty = RenderPath.active.renderTargets.get("empty_white").image;
+		let empty = RenderPath.renderTargets.get("empty_white").image;
 
 		// Append object mask name
 		let exportSelected = Context.raw.layersExport == ExportMode.ExportSelected;

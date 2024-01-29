@@ -124,7 +124,7 @@ class UIToolbar {
 
 				///if is_paint
 				if (i == WorkspaceTool.ToolColorId && Context.raw.colorIdPicked) {
-					ui.g.drawScaledSubImage(RenderPath.active.renderTargets.get("texpaint_colorid").image, 0, 0, 1, 1, 0, _y + 1.5 * ui.SCALE(), 5 * ui.SCALE(), 34 * ui.SCALE());
+					ui.g.drawScaledSubImage(RenderPath.renderTargets.get("texpaint_colorid").image, 0, 0, 1, 1, 0, _y + 1.5 * ui.SCALE(), 5 * ui.SCALE(), 34 * ui.SCALE());
 				}
 				///end
 

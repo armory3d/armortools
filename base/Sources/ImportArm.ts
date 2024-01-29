@@ -75,13 +75,13 @@ class ImportArm {
 				Project.raw.envmap = Data.isAbsolute(Project.raw.envmap) ? Project.raw.envmap : base + Project.raw.envmap;
 			}
 			if (Project.raw.envmap_strength != null) {
-				Scene.active.world.raw.strength = Project.raw.envmap_strength;
+				Scene.world.raw.strength = Project.raw.envmap_strength;
 			}
 			if (Project.raw.camera_world != null) {
-				Scene.active.camera.transform.local = Mat4.fromFloat32Array(Project.raw.camera_world);
-				Scene.active.camera.transform.decompose();
-				Scene.active.camera.data.fov = Project.raw.camera_fov;
-				Scene.active.camera.buildProjection();
+				Scene.camera.transform.local = Mat4.fromFloat32Array(Project.raw.camera_world);
+				Scene.camera.transform.decompose();
+				Scene.camera.data.fov = Project.raw.camera_fov;
+				Scene.camera.buildProjection();
 				let origin = Project.raw.camera_origin;
 				Camera.origins[0].x = origin[0];
 				Camera.origins[0].y = origin[1];
@@ -144,7 +144,7 @@ class ImportArm {
 			for (let i = 1; i < project.mesh_datas.length; ++i) {
 				let raw = project.mesh_datas[i];
 				new MeshData(raw, (md: MeshData) => {
-					let object = Scene.active.addMeshObject(md, Context.raw.paintObject.materials, Context.raw.paintObject);
+					let object = Scene.addMeshObject(md, Context.raw.paintObject.materials, Context.raw.paintObject);
 					object.name = md.name;
 					object.skip_context = "paint";
 					Project.paintObjects.push(object);
@@ -175,7 +175,7 @@ class ImportArm {
 			let tex = Project.layers[0].texpaint;
 			if (tex.width != Config.getTextureResX() || tex.height != Config.getTextureResY()) {
 				if (History.undoLayers != null) for (let l of History.undoLayers) SlotLayer.resizeAndSetBits(l);
-				let rts = RenderPath.active.renderTargets;
+				let rts = RenderPath.renderTargets;
 				let _texpaint_blend0 = rts.get("texpaint_blend0").image;
 				Base.notifyOnNextFrame(() => {
 					_texpaint_blend0.unload();
@@ -371,7 +371,7 @@ class ImportArm {
 					object = Context.raw.paintObject;
 				}
 				else {
-					object = Scene.active.addMeshObject(md, Context.raw.paintObject.materials, Context.raw.paintObject);
+					object = Scene.addMeshObject(md, Context.raw.paintObject.materials, Context.raw.paintObject);
 					object.name = md.name;
 					object.skip_context = "paint";
 					md.handle = md.name;
