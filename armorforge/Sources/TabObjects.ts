@@ -227,20 +227,20 @@ class TabObjects {
 					Context.raw.selectedObject.transform.dirty = true;
 
 					if (Context.raw.selectedObject.name == "Scene") {
-						let p = Scene.active.world.probe;
+						let p = Scene.active.world;
 						p.raw.strength = ui.slider(Zui.handle("tabobjects_16", {value: p.raw.strength}), "Environment", 0.0, 5.0, true);
 					}
 					else if (Context.raw.selectedObject.constructor == LightObject) {
 						let light = (Context.raw.selectedObject as LightObject);
 						let lightHandle = Zui.handle("tabobjects_17");
-						lightHandle.value = light.data.raw.strength / 10;
-						light.data.raw.strength = ui.slider(lightHandle, "Strength", 0.0, 5.0, true) * 10;
+						lightHandle.value = light.data.strength / 10;
+						light.data.strength = ui.slider(lightHandle, "Strength", 0.0, 5.0, true) * 10;
 					}
 					else if (Context.raw.selectedObject.constructor == CameraObject) {
 						let cam = (Context.raw.selectedObject as CameraObject);
 						let fovHandle = Zui.handle("tabobjects_18");
-						fovHandle.value = Math.floor(cam.data.raw.fov * 100) / 100;
-						cam.data.raw.fov = ui.slider(fovHandle, "FoV", 0.3, 2.0, true);
+						fovHandle.value = Math.floor(cam.data.fov * 100) / 100;
+						cam.data.fov = ui.slider(fovHandle, "FoV", 0.3, 2.0, true);
 						if (fovHandle.changed) {
 							cam.buildProjection();
 						}

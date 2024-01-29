@@ -48,7 +48,7 @@ class RenderPathRaytrace {
 			Context.updateEnvmap();
 		}
 
-		let probe = Scene.active.world.probe;
+		let probe = Scene.active.world;
 		let savedEnvmap = Context.raw.showEnvmapBlur ? probe.radianceMipmaps[0] : Context.raw.savedEnvmap;
 
 		if (RenderPathRaytrace.lastEnvmap != savedEnvmap) {
