@@ -30,9 +30,8 @@ class UniformsExt {
 				}
 				let radius = decalMask ? brushDecalMaskRadius : Context.raw.brushRadius;
 				let val = (radius * Context.raw.brushNodesRadius) / 15.0;
-				let pen = Input.getPen();
-				if (Config.raw.pressure_radius && pen.down()) {
-					val *= pen.pressure * Config.raw.pressure_sensitivity;
+				if (Config.raw.pressure_radius && Pen.down()) {
+					val *= Pen.pressure * Config.raw.pressure_sensitivity;
 				}
 				let scale2d = (900 / Base.h()) * Config.raw.window_scale;
 
@@ -47,9 +46,8 @@ class UniformsExt {
 				///if is_lab
 				let radius = Context.raw.brushRadius;
 				let val = radius / 15.0;
-				let pen = Input.getPen();
-				if (Config.raw.pressure_radius && pen.down()) {
-					val *= pen.pressure * Config.raw.pressure_sensitivity;
+				if (Config.raw.pressure_radius && Pen.down()) {
+					val *= Pen.pressure * Config.raw.pressure_sensitivity;
 				}
 				val *= 2;
 				///end
@@ -75,9 +73,8 @@ class UniformsExt {
 			}
 			case "_brushOpacity": {
 				let val = Context.raw.brushOpacity * Context.raw.brushNodesOpacity;
-				let pen = Input.getPen();
-				if (Config.raw.pressure_opacity && pen.down()) {
-					val *= pen.pressure * Config.raw.pressure_sensitivity;
+				if (Config.raw.pressure_opacity && Pen.down()) {
+					val *= Pen.pressure * Config.raw.pressure_sensitivity;
 				}
 				return val;
 			}
@@ -86,9 +83,8 @@ class UniformsExt {
 				let decalMask = Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
 				if (Context.raw.tool != WorkspaceTool.ToolBrush && Context.raw.tool != WorkspaceTool.ToolEraser && Context.raw.tool != WorkspaceTool.ToolClone && !decalMask) return 1.0;
 				let val = Context.raw.brushHardness * Context.raw.brushNodesHardness;
-				let pen = Input.getPen();
-				if (Config.raw.pressure_hardness && pen.down()) {
-					val *= pen.pressure * Config.raw.pressure_sensitivity;
+				if (Config.raw.pressure_hardness && Pen.down()) {
+					val *= Pen.pressure * Config.raw.pressure_sensitivity;
 				}
 				if (Config.raw.brush_3d) {
 					if (Context.raw.paint2d) {
@@ -173,9 +169,8 @@ class UniformsExt {
 				let brushAngle = Context.raw.brushAngle + Context.raw.brushNodesAngle;
 				let angle = Context.raw.layer.fill_layer != null ? Context.raw.layer.angle : brushAngle;
 				angle *= (Math.PI / 180);
-				let pen = Input.getPen();
-				if (Config.raw.pressure_angle && pen.down()) {
-					angle *= pen.pressure * Config.raw.pressure_sensitivity;
+				if (Config.raw.pressure_angle && Pen.down()) {
+					angle *= Pen.pressure * Config.raw.pressure_sensitivity;
 				}
 				UniformsExt.vec.set(Math.cos(-angle), Math.sin(-angle), 0);
 				return UniformsExt.vec;
@@ -269,7 +264,7 @@ class UniformsExt {
 	static linkVec4 = (object: BaseObject, mat: MaterialData, link: string): Vec4 => {
 		switch (link) {
 			case "_inputBrush": {
-				let down = Input.getMouse().down() || Input.getPen().down();
+				let down = Mouse.down() || Pen.down();
 				UniformsExt.vec.set(Context.raw.paintVec.x, Context.raw.paintVec.y, down ? 1.0 : 0.0, 0.0);
 
 				///if (is_paint || is_sculpt)
@@ -281,7 +276,7 @@ class UniformsExt {
 				return UniformsExt.vec;
 			}
 			case "_inputBrushLast": {
-				let down = Input.getMouse().down() || Input.getPen().down();
+				let down = Mouse.down() || Pen.down();
 				UniformsExt.vec.set(Context.raw.lastPaintVecX, Context.raw.lastPaintVecY, down ? 1.0 : 0.0, 0.0);
 
 				///if (is_paint || is_sculpt)
@@ -293,11 +288,11 @@ class UniformsExt {
 				return UniformsExt.vec;
 			}
 			case "_envmapData": {
-				UniformsExt.vec.set(Context.raw.envmapAngle, Math.sin(-Context.raw.envmapAngle), Math.cos(-Context.raw.envmapAngle), Scene.active.world.probe.raw.strength);
+				UniformsExt.vec.set(Context.raw.envmapAngle, Math.sin(-Context.raw.envmapAngle), Math.cos(-Context.raw.envmapAngle), Scene.active.world.raw.strength);
 				return UniformsExt.vec;
 			}
 			case "_envmapDataWorld": {
-				UniformsExt.vec.set(Context.raw.envmapAngle, Math.sin(-Context.raw.envmapAngle), Math.cos(-Context.raw.envmapAngle), Context.raw.showEnvmap ? Scene.active.world.probe.raw.strength : 1.0);
+				UniformsExt.vec.set(Context.raw.envmapAngle, Math.sin(-Context.raw.envmapAngle), Math.cos(-Context.raw.envmapAngle), Context.raw.showEnvmap ? Scene.active.world.raw.strength : 1.0);
 				return UniformsExt.vec;
 			}
 			///if (is_paint || is_sculpt)

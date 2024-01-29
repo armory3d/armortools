@@ -106,7 +106,7 @@ class UtilParticle {
 		Context.raw.paintBody = PhysicsBody.create();
 		Context.raw.paintBody.shape = ShapeType.ShapeMesh;
 		PhysicsBody.init(Context.raw.paintBody, po);
-		po.addTrait(Context.raw.paintBody);
+		(po as any).physicsBody = Context.raw.paintBody;
 	}
 
 	///end

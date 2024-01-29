@@ -19,11 +19,9 @@ class UIBox {
 
 	static render = (g: Graphics2) => {
 		if (!UIMenu.show) {
-			let mouse = Input.getMouse();
-			let kb = Input.getKeyboard();
 			let ui = Base.uiBox;
 			let inUse = ui.comboSelectedHandle_ptr != null;
-			let isEscape = kb.started("escape");
+			let isEscape = Keyboard.started("escape");
 			if (UIBox.draws > 2 && (ui.inputReleased || isEscape) && !inUse && !ui.isTyping) {
 				let appw = System.width;
 				let apph = System.height;
@@ -33,8 +31,8 @@ class UIBox {
 				let right = (appw / 2 + mw / 2) + UIBox.hwnd.dragX;
 				let top = (apph / 2 - mh / 2) + UIBox.hwnd.dragY;
 				let bottom = (apph / 2 + mh / 2) + UIBox.hwnd.dragY;
-				let mx = mouse.x;
-				let my = mouse.y;
+				let mx = Mouse.x;
+				let my = Mouse.y;
 				if ((UIBox.clickToHide && (mx < left || mx > right || my < top || my > bottom)) || isEscape) {
 					UIBox.hide();
 				}

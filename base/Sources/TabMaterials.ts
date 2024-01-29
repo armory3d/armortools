@@ -132,9 +132,8 @@ class TabMaterials {
 						}
 						///end
 					}
-					let mouse = Input.getMouse();
-					Base.dragOffX = -(mouse.x - uix - ui._windowX - 3);
-					Base.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
+					Base.dragOffX = -(Mouse.x - uix - ui._windowX - 3);
+					Base.dragOffY = -(Mouse.y - uiy - ui._windowY + 1);
 					Base.dragMaterial = Context.raw.material;
 					// Double click to show nodes
 					if (Time.time() - Context.raw.selectTime < 0.25) {

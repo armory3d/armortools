@@ -25,14 +25,14 @@ class UtilRender {
 		Context.raw.savedCamera.setFrom(Scene.active.camera.transform.local);
 		let m = new Mat4(0.9146286343879498, -0.0032648027153306235, 0.404281837254303, 0.4659988049397712, 0.404295023959927, 0.007367569133732468, -0.9145989516155143, -1.0687517188018691, 0.000007410128652369705, 0.9999675337275382, 0.008058532943908717, 0.015935682577325486, 0, 0, 0, 1);
 		Scene.active.camera.transform.setMatrix(m);
-		let savedFov = Scene.active.camera.data.raw.fov;
-		Scene.active.camera.data.raw.fov = 0.92;
+		let savedFov = Scene.active.camera.data.fov;
+		Scene.active.camera.data.fov = 0.92;
 		Viewport.updateCameraType(CameraType.CameraPerspective);
 		let light = Scene.active.lights[0];
-		let _lightStrength = light.data.raw.strength;
-		let probe = Scene.active.world.probe;
+		let _lightStrength = light.data.strength;
+		let probe = Scene.active.world;
 		let _probeStrength = probe.raw.strength;
-		light.data.raw.strength = 0;
+		light.data.strength = 0;
 		probe.raw.strength = 7;
 		let _envmapAngle = Context.raw.envmapAngle;
 		Context.raw.envmapAngle = 6.0;
@@ -65,10 +65,10 @@ class UtilRender {
 
 		Scene.active.camera.transform.setMatrix(Context.raw.savedCamera);
 		Viewport.updateCameraType(Context.raw.cameraType);
-		Scene.active.camera.data.raw.fov = savedFov;
+		Scene.active.camera.data.fov = savedFov;
 		Scene.active.camera.buildProjection();
 		Scene.active.camera.buildMatrix();
-		light.data.raw.strength = _lightStrength;
+		light.data.strength = _lightStrength;
 		probe.raw.strength = _probeStrength;
 		Context.raw.envmapAngle = _envmapAngle;
 		Context.raw.brushScale = _brushScale;
@@ -101,8 +101,8 @@ class UtilRender {
 		let m = Mat4.identity();
 		m.translate(0, 0, 1);
 		Scene.active.camera.transform.setMatrix(m);
-		let savedFov = Scene.active.camera.data.raw.fov;
-		Scene.active.camera.data.raw.fov = 0.92;
+		let savedFov = Scene.active.camera.data.fov;
+		Scene.active.camera.data.fov = 0.92;
 		Viewport.updateCameraType(CameraType.CameraPerspective);
 		let light = Scene.active.lights[0];
 		light.visible = false;
@@ -130,7 +130,7 @@ class UtilRender {
 		Context.raw.paintObject = painto;
 
 		Scene.active.camera.transform.setMatrix(Context.raw.savedCamera);
-		Scene.active.camera.data.raw.fov = savedFov;
+		Scene.active.camera.data.fov = savedFov;
 		Viewport.updateCameraType(Context.raw.cameraType);
 		Scene.active.camera.buildProjection();
 		Scene.active.camera.buildMatrix();
@@ -256,12 +256,12 @@ class UtilRender {
 
 		let cam = Scene.active.camera;
 		Context.raw.savedCamera.setFrom(cam.transform.local);
-		let savedFov = cam.data.raw.fov;
+		let savedFov = cam.data.fov;
 		Viewport.updateCameraType(CameraType.CameraPerspective);
 		let m = Mat4.identity();
 		m.translate(0, 0, 0.5);
 		cam.transform.setMatrix(m);
-		cam.data.raw.fov = 0.92;
+		cam.data.fov = 0.92;
 		cam.buildProjection();
 		cam.buildMatrix();
 		m.getInverse(Scene.active.camera.VP);
@@ -335,7 +335,7 @@ class UtilRender {
 		}
 		Context.raw.paintObject = painto;
 		Scene.active.camera.transform.setMatrix(Context.raw.savedCamera);
-		Scene.active.camera.data.raw.fov = savedFov;
+		Scene.active.camera.data.fov = savedFov;
 		Viewport.updateCameraType(Context.raw.cameraType);
 		Scene.active.camera.buildProjection();
 		Scene.active.camera.buildMatrix();

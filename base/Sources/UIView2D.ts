@@ -380,9 +380,6 @@ class UIView2D {
 	}
 
 	static update = () => {
-		let mouse = Input.getMouse();
-		let kb = Input.getKeyboard();
-
 		let headerh = UIView2D.ui.ELEMENT_H() * 1.4;
 
 		///if (is_paint || is_sculpt)
@@ -391,10 +388,10 @@ class UIView2D {
 
 		if (!Base.uiEnabled ||
 			!UIView2D.show ||
-			mouse.x < UIView2D.wx ||
-			mouse.x > UIView2D.wx + UIView2D.ww ||
-			mouse.y < UIView2D.wy + headerh ||
-			mouse.y > UIView2D.wy + UIView2D.wh) {
+			Mouse.x < UIView2D.wx ||
+			Mouse.x > UIView2D.wx + UIView2D.ww ||
+			Mouse.y < UIView2D.wy + headerh ||
+			Mouse.y > UIView2D.wy + UIView2D.wh) {
 			if (UIView2D.controlsDown) {
 				UINodes.getCanvasControl(UIView2D.ui, UIView2D);
 			}
@@ -438,10 +435,10 @@ class UIView2D {
 
 		if (UIView2D.ui.isTyping) return;
 
-		if (kb.started("left")) UIView2D.panX -= 5;
-		else if (kb.started("right")) UIView2D.panX += 5;
-		if (kb.started("up")) UIView2D.panY -= 5;
-		else if (kb.started("down")) UIView2D.panY += 5;
+		if (Keyboard.started("left")) UIView2D.panX -= 5;
+		else if (Keyboard.started("right")) UIView2D.panX += 5;
+		if (Keyboard.started("up")) UIView2D.panY -= 5;
+		else if (Keyboard.started("down")) UIView2D.panY += 5;
 
 		// Limit panning to keep texture in viewport
 		let border = 32;

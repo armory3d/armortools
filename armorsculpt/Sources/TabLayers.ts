@@ -140,10 +140,9 @@ class TabLayers {
 		let checkw = (ui._windowW / 100 * 8) / ui.SCALE();
 
 		// Highlight drag destination
-		let mouse = Input.getMouse();
 		let absy = ui._windowY + ui._y;
 		if (Base.isDragging && Base.dragLayer != null && Context.inLayers()) {
-			if (mouse.y > absy + step && mouse.y < absy + step * 3) {
+			if (Mouse.y > absy + step && Mouse.y < absy + step * 3) {
 				let down = Project.layers.indexOf(Base.dragLayer) >= i;
 				Context.raw.dragDestination = down ? i : i - 1;
 
@@ -157,7 +156,7 @@ class TabLayers {
 					}
 				}
 			}
-			else if (i == Project.layers.length - 1 && mouse.y < absy + step) {
+			else if (i == Project.layers.length - 1 && Mouse.y < absy + step) {
 				Context.raw.dragDestination = Project.layers.length - 1;
 				if (SlotLayer.canMove(Context.raw.layer, Context.raw.dragDestination)) {
 					ui.fill(checkw, 0, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
@@ -165,12 +164,12 @@ class TabLayers {
 			}
 		}
 		if (Base.isDragging && (Base.dragMaterial != null || Base.dragSwatch != null) && Context.inLayers()) {
-			if (mouse.y > absy + step && mouse.y < absy + step * 3) {
+			if (Mouse.y > absy + step && Mouse.y < absy + step * 3) {
 				Context.raw.dragDestination = i;
 				if (TabLayers.canDropNewLayer(i))
 					ui.fill(checkw, 2 * step, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
 			}
-			else if (i == Project.layers.length - 1 && mouse.y < absy + step) {
+			else if (i == Project.layers.length - 1 && Mouse.y < absy + step) {
 				Context.raw.dragDestination = Project.layers.length;
 				if (TabLayers.canDropNewLayer(Project.layers.length))
 					ui.fill(checkw, 0, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
@@ -246,8 +245,7 @@ class TabLayers {
 				ui.inputY > ui._windowY + ui._y - center && ui.inputY < ui._windowY + ui._y - center + (step * ui.SCALE()) * 2) {
 				if (ui.inputStarted) {
 					Context.setLayer(l);
-					let mouse = Input.getMouse();
-					TabLayers.setDragLayer(Context.raw.layer, -(mouse.x - uix - ui._windowX - 3), -(mouse.y - uiy - ui._windowY + 1));
+					TabLayers.setDragLayer(Context.raw.layer, -(Mouse.x - uix - ui._windowX - 3), -(Mouse.y - uiy - ui._windowY + 1));
 				}
 				else if (ui.inputReleased) {
 					if (Time.time() - Context.raw.selectTime > 0.2) {

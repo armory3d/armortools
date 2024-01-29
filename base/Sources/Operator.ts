@@ -12,7 +12,7 @@ class Operator {
 	}
 
 	static update = () => {
-		if (Input.getMouse().startedAny() || Input.getKeyboard().startedAny()) {
+		if (Mouse.startedAny() || Keyboard.startedAny()) {
 			for (let op in Config.keymap) {
 				if (Operator.shortcut(Config.keymap[op])) Operator.run(op);
 			}
@@ -21,14 +21,12 @@ class Operator {
 
 	static shortcut = (s: string, type = ShortcutType.ShortcutStarted): bool => {
 		if (s == "") return false;
-		let mouse = Input.getMouse();
-		let kb = Input.getKeyboard();
 		let shift = s.indexOf("shift") >= 0;
 		let ctrl = s.indexOf("ctrl") >= 0;
 		let alt = s.indexOf("alt") >= 0;
-		let flag = shift == kb.down("shift") &&
-				   ctrl == kb.down("control") &&
-				   alt == kb.down("alt");
+		let flag = shift == Keyboard.down("shift") &&
+				   ctrl == Keyboard.down("control") &&
+				   alt == Keyboard.down("alt");
 		if (s.indexOf("+") > 0) {
 			s = s.substr(s.lastIndexOf("+") + 1);
 			if (s == "number") return flag;
@@ -36,9 +34,9 @@ class Operator {
 		else if (shift || ctrl || alt) return flag;
 		let key = (s == "left" || s == "right" || s == "middle") ?
 			// Mouse
-			(type == ShortcutType.ShortcutDown ? mouse.down(s) : mouse.started(s)) :
+			(type == ShortcutType.ShortcutDown ? Mouse.down(s) : Mouse.started(s)) :
 			// Keyboard
-			(type == ShortcutType.ShortcutRepeat ? kb.repeat(s) : type == ShortcutType.ShortcutDown ? kb.down(s) : type == ShortcutType.ShortcutReleased ? kb.released(s) : kb.started(s));
+			(type == ShortcutType.ShortcutRepeat ? Keyboard.repeat(s) : type == ShortcutType.ShortcutDown ? Keyboard.down(s) : type == ShortcutType.ShortcutReleased ? Keyboard.released(s) : Keyboard.started(s));
 		return flag && key;
 	}
 }

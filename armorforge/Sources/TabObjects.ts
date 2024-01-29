@@ -184,7 +184,6 @@ class TabObjects {
 						Context.raw.selectedObject.transform.rot.fromEuler(rot.x, rot.y, rot.z);
 						Context.raw.selectedObject.transform.buildMatrix();
 						// ///if arm_physics
-						// let rb = Context.raw.selectedObject.getTrait(RigidBody);
 						// if (rb != null) rb.syncTransform();
 						// ///end
 					}

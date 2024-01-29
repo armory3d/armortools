@@ -75,12 +75,12 @@ class ImportArm {
 				Project.raw.envmap = Data.isAbsolute(Project.raw.envmap) ? Project.raw.envmap : base + Project.raw.envmap;
 			}
 			if (Project.raw.envmap_strength != null) {
-				Scene.active.world.probe.raw.strength = Project.raw.envmap_strength;
+				Scene.active.world.raw.strength = Project.raw.envmap_strength;
 			}
 			if (Project.raw.camera_world != null) {
 				Scene.active.camera.transform.local = Mat4.fromFloat32Array(Project.raw.camera_world);
 				Scene.active.camera.transform.decompose();
-				Scene.active.camera.data.raw.fov = Project.raw.camera_fov;
+				Scene.active.camera.data.fov = Project.raw.camera_fov;
 				Scene.active.camera.buildProjection();
 				let origin = Project.raw.camera_origin;
 				Camera.origins[0].x = origin[0];

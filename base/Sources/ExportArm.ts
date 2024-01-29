@@ -106,10 +106,10 @@ class ExportArm {
 			packed_assets: packed_assets,
 			swatches: Project.raw.swatches,
 			envmap: Project.raw.envmap != null ? (sameDrive ? Path.toRelative(Project.filepath, Project.raw.envmap) : Project.raw.envmap) : null,
-			envmap_strength: Scene.active.world.probe.raw.strength,
+			envmap_strength: Scene.active.world.raw.strength,
 			camera_world: Scene.active.camera.transform.local.toFloat32Array(),
 			camera_origin: ExportArm.vec3f32(Camera.origins[0]),
-			camera_fov: Scene.active.camera.data.raw.fov,
+			camera_fov: Scene.active.camera.data.fov,
 
 			///if (is_paint || is_sculpt)
 			mesh_datas: md,

@@ -594,11 +594,10 @@ class RenderPathPaint {
 	}
 
 	static liveBrushDirty = () => {
-		let mouse = Input.getMouse();
 		let mx = RenderPathPaint.lastX;
 		let my = RenderPathPaint.lastY;
-		RenderPathPaint.lastX = mouse.viewX;
-		RenderPathPaint.lastY = mouse.viewY;
+		RenderPathPaint.lastX = Mouse.viewX;
+		RenderPathPaint.lastY = Mouse.viewY;
 		if (Config.raw.brush_live && Context.raw.pdirty <= 0) {
 			let moved = (mx != RenderPathPaint.lastX || my != RenderPathPaint.lastY) && (Context.inViewport() || Context.in2dView());
 			if (moved || Context.raw.brushLocked) {
@@ -798,12 +797,12 @@ class RenderPathPaint {
 
 		let cam = Scene.active.camera;
 		Context.raw.savedCamera.setFrom(cam.transform.local);
-		RenderPathPaint.savedFov = cam.data.raw.fov;
+		RenderPathPaint.savedFov = cam.data.fov;
 		Viewport.updateCameraType(CameraType.CameraPerspective);
 		let m = Mat4.identity();
 		m.translate(0, 0, 0.5);
 		cam.transform.setMatrix(m);
-		cam.data.raw.fov = Base.defaultFov;
+		cam.data.fov = Base.defaultFov;
 		cam.buildProjection();
 		cam.buildMatrix();
 
@@ -869,7 +868,7 @@ class RenderPathPaint {
 		}
 		Context.raw.paintObject = RenderPathPaint.painto;
 		Scene.active.camera.transform.setMatrix(Context.raw.savedCamera);
-		Scene.active.camera.data.raw.fov = RenderPathPaint.savedFov;
+		Scene.active.camera.data.fov = RenderPathPaint.savedFov;
 		Viewport.updateCameraType(Context.raw.cameraType);
 		Scene.active.camera.buildProjection();
 		Scene.active.camera.buildMatrix();

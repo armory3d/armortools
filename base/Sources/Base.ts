@@ -126,8 +126,8 @@ class Base {
 			() => {}, // Pause
 			() => { // Background
 				// Release keys after alt-tab / win-tab
-				Input.getKeyboard().upListener(KeyCode.Alt);
-				Input.getKeyboard().upListener(KeyCode.Win);
+				Keyboard.upListener(KeyCode.Alt);
+				Keyboard.upListener(KeyCode.Win);
 			},
 			() => { // Shutdown
 				///if (krom_android || krom_ios)
@@ -208,7 +208,7 @@ class Base {
 					Base.appy = UIHeader.headerh;
 					if (Config.raw.layout[LayoutSize.LayoutHeader] == 1) Base.appy += UIHeader.headerh;
 					let cam = Scene.active.camera;
-					cam.data.raw.fov = Math.floor(cam.data.raw.fov * 100) / 100;
+					cam.data.fov = Math.floor(cam.data.fov * 100) / 100;
 					cam.buildProjection();
 
 					Args.run();
@@ -385,9 +385,9 @@ class Base {
 		if (System.width == 0 || System.height == 0) return;
 
 		let cam = Scene.active.camera;
-		if (cam.data.raw.ortho != null) {
-			cam.data.raw.ortho[2] = -2 * (App.h() / App.w());
-			cam.data.raw.ortho[3] =  2 * (App.h() / App.w());
+		if (cam.data.ortho != null) {
+			cam.data.ortho[2] = -2 * (App.h() / App.w());
+			cam.data.ortho[3] =  2 * (App.h() / App.w());
 		}
 		cam.buildProjection();
 
@@ -444,10 +444,7 @@ class Base {
 	}
 
 	static update = () => {
-
-		let mouse = Input.getMouse();
-
-		if (mouse.movementX != 0 || mouse.movementY != 0) {
+		if (Mouse.movementX != 0 || Mouse.movementY != 0) {
 			Krom.setMouseCursor(0); // Arrow
 		}
 
@@ -461,15 +458,15 @@ class Base {
 		if (Config.raw.touch_ui) {
 			// Touch and hold to activate dragging
 			if (Base.dragStart < 0.2) {
-				if (hasDrag && mouse.down()) Base.dragStart += Time.realDelta;
+				if (hasDrag && Mouse.down()) Base.dragStart += Time.realDelta;
 				else Base.dragStart = 0;
 				hasDrag = false;
 			}
-			if (mouse.released()) {
+			if (Mouse.released()) {
 				Base.dragStart = 0;
 			}
-			let moved = Math.abs(mouse.movementX) > 1 && Math.abs(mouse.movementY) > 1;
-			if ((mouse.released() || moved) && !hasDrag) {
+			let moved = Math.abs(Mouse.movementX) > 1 && Math.abs(Mouse.movementY) > 1;
+			if ((Mouse.released() || moved) && !hasDrag) {
 				Base.dragAsset = null;
 				Base.dragSwatch = null;
 				Base.dragFile = null;
@@ -484,10 +481,10 @@ class Base {
 			Zui.touchScroll = !Base.isDragging;
 		}
 
-		if (hasDrag && (mouse.movementX != 0 || mouse.movementY != 0)) {
+		if (hasDrag && (Mouse.movementX != 0 || Mouse.movementY != 0)) {
 			Base.isDragging = true;
 		}
-		if (mouse.released() && hasDrag) {
+		if (Mouse.released() && hasDrag) {
 			if (Base.dragAsset != null) {
 				if (Context.inNodes()) { // Create image texture
 					UINodes.acceptAssetDrag(Project.assets.indexOf(Base.dragAsset));
@@ -532,8 +529,8 @@ class Base {
 			}
 			else if (Base.dragFile != null) {
 				if (!Context.inBrowser()) {
-					Base.dropX = mouse.x;
-					Base.dropY = mouse.y;
+					Base.dropX = Mouse.x;
+					Base.dropY = Mouse.y;
 
 					///if (is_paint || is_sculpt)
 					let materialCount = Project.materials.length;
@@ -572,7 +569,7 @@ class Base {
 			Krom.setMouseCursor(0); // Arrow
 			Base.isDragging = false;
 		}
-		if (Context.raw.colorPickerCallback != null && (mouse.released() || mouse.released("right"))) {
+		if (Context.raw.colorPickerCallback != null && (Mouse.released() || Mouse.released("right"))) {
 			Context.raw.colorPickerCallback = null;
 			Context.selectTool(Context.raw.colorPickerPreviousTool);
 		}
@@ -602,12 +599,12 @@ class Base {
 	static materialDropped = () => {
 		// Material drag and dropped onto viewport or layers tab
 		if (Context.inViewport()) {
-			let uvType = Input.getKeyboard().down("control") ? UVType.UVProject : UVType.UVMap;
+			let uvType = Keyboard.down("control") ? UVType.UVProject : UVType.UVMap;
 			let decalMat = uvType == UVType.UVProject ? UtilRender.getDecalMat() : null;
 			Base.createFillLayer(uvType, decalMat);
 		}
 		if (Context.inLayers() && TabLayers.canDropNewLayer(Context.raw.dragDestination)) {
-			let uvType = Input.getKeyboard().down("control") ? UVType.UVProject : UVType.UVMap;
+			let uvType = Keyboard.down("control") ? UVType.UVProject : UVType.UVMap;
 			let decalMat = uvType == UVType.UVProject ? UtilRender.getDecalMat() : null;
 			Base.createFillLayer(uvType, decalMat, Context.raw.dragDestination);
 		}
@@ -620,15 +617,14 @@ class Base {
 
 	static handleDropPaths = () => {
 		if (Base.dropPaths.length > 0) {
-			let mouse = Input.getMouse();
 			///if (krom_linux || krom_darwin)
-			let wait = !mouse.moved; // Mouse coords not updated during drag
+			let wait = !Mouse.moved; // Mouse coords not updated during drag
 			///else
 			let wait = false;
 			///end
 			if (!wait) {
-				Base.dropX = mouse.x;
-				Base.dropY = mouse.y;
+				Base.dropX = Mouse.x;
+				Base.dropY = Mouse.y;
 				let dropPath = Base.dropPaths.shift();
 				ImportAsset.run(dropPath, Base.dropX, Base.dropY);
 			}
@@ -744,7 +740,6 @@ class Base {
 		}
 		Context.raw.frame++;
 
-		let mouse = Input.getMouse();
 		if (Base.isDragging) {
 			Krom.setMouseCursor(1); // Hand
 			let img = Base.getDragImage();
@@ -771,17 +766,17 @@ class Base {
 			///if (is_paint || is_sculpt)
 			let bgRect = Base.getDragBackground();
 			if (bgRect != null) {
-				g.drawScaledSubImage(Res.get("icons.k"), bgRect.x, bgRect.y, bgRect.w, bgRect.h, mouse.x + Base.dragOffX, mouse.y + Base.dragOffY + inv, size, h - inv * 2);
+				g.drawScaledSubImage(Res.get("icons.k"), bgRect.x, bgRect.y, bgRect.w, bgRect.h, Mouse.x + Base.dragOffX, Mouse.y + Base.dragOffY + inv, size, h - inv * 2);
 			}
 			///end
 
 			Base.dragRect == null ?
-				g.drawScaledImage(img, mouse.x + Base.dragOffX, mouse.y + Base.dragOffY + inv, size, h - inv * 2) :
-				g.drawScaledSubImage(img, Base.dragRect.x, Base.dragRect.y, Base.dragRect.w, Base.dragRect.h, mouse.x + Base.dragOffX, mouse.y + Base.dragOffY + inv, size, h - inv * 2);
+				g.drawScaledImage(img, Mouse.x + Base.dragOffX, Mouse.y + Base.dragOffY + inv, size, h - inv * 2) :
+				g.drawScaledSubImage(img, Base.dragRect.x, Base.dragRect.y, Base.dragRect.w, Base.dragRect.h, Mouse.x + Base.dragOffX, Mouse.y + Base.dragOffY + inv, size, h - inv * 2);
 			g.color = 0xffffffff;
 		}
 
-		let usingMenu = UIMenu.show && mouse.y > UIHeader.headerh;
+		let usingMenu = UIMenu.show && Mouse.y > UIHeader.headerh;
 		Base.uiEnabled = !UIBox.show && !usingMenu && !Base.isComboSelected();
 		if (UIBox.show) UIBox.render(g);
 		if (UIMenu.show) UIMenu.render(g);
@@ -792,7 +787,7 @@ class Base {
 
 		///if (krom_android || krom_ios)
 		// No mouse move events for touch, re-init last paint position on touch start
-		if (!mouse.down()) {
+		if (!Mouse.down()) {
 			Context.raw.lastPaintX = -1;
 			Context.raw.lastPaintY = -1;
 		}

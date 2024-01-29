@@ -121,11 +121,10 @@ class UIHeader {
 			h.color = color;
 			let state = ui.text("", 0, h.color);
 			if (state == State.Started) {
-				let mouse = Input.getMouse();
 				let uix = ui._x;
 				let uiy = ui._y;
-				Base.dragOffX = -(mouse.x - uix - ui._windowX - 3);
-				Base.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
+				Base.dragOffX = -(Mouse.x - uix - ui._windowX - 3);
+				Base.dragOffY = -(Mouse.y - uiy - ui._windowY + 1);
 				Base.dragSwatch = Project.cloneSwatch(Context.raw.pickedColor);
 			}
 			if (ui.isHovered) ui.tooltip(tr("Drag and drop picked color to swatches, materials, layers or to the node editor"));

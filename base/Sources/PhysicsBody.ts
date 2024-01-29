@@ -14,7 +14,7 @@ class PhysicsBodyRaw {
 			let t = new PhysicsBodyRaw();
 			t._mass = f;
 			PhysicsBody.init(t, this.object);
-			this.object.addTrait(t);
+			(this.object as any).physicsBody = t;
 		}
 		else this._mass = f;
 	}

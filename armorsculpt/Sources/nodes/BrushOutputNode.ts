@@ -104,7 +104,7 @@ class BrushOutputNode extends LogicNode {
 			!Base.isScrolling() &&
 			!Base.isComboSelected()) {
 
-			let down = Input.getMouse().down() || Input.getPen().down();
+			let down = Mouse.down() || Pen.down();
 
 			// Prevent painting the same spot
 			let sameSpot = Context.raw.paintVec.x == Context.raw.lastPaintX && Context.raw.paintVec.y == Context.raw.lastPaintY;

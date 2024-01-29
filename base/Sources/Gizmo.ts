@@ -17,9 +17,6 @@ class Gizmo {
 		gizmo.visible = (isObject || isDecal) && !hide;
 		if (!gizmo.visible) return;
 
-		let mouse = Input.getMouse();
-		let kb = Input.getKeyboard();
-
 		let paintObject: BaseObject = Context.raw.paintObject;
 		///if is_forge
 		if (Context.raw.selectedObject != null) {
@@ -34,7 +31,7 @@ class Gizmo {
 			gizmo.transform.loc.set(Context.raw.layer.decalMat._30, Context.raw.layer.decalMat._31, Context.raw.layer.decalMat._32);
 		}
 		let cam = Scene.active.camera;
-		let fov = cam.data.raw.fov;
+		let fov = cam.data.fov;
 		let dist = Vec4.distance(cam.transform.loc, gizmo.transform.loc) / 8 * fov;
 		gizmo.transform.scale.set(dist, dist, dist);
 		Context.raw.gizmoTranslateX.transform.scale.set(dist, dist, dist);
@@ -85,7 +82,7 @@ class Gizmo {
 
 				paintObject.transform.buildMatrix();
 				///if arm_physics
-				let pb = paintObject.getTrait(PhysicsBodyRaw);
+				let pb = (paintObject as any).physicsBody;
 				if (pb != null) pb.syncTransform();
 				///end
 			}
@@ -145,11 +142,11 @@ class Gizmo {
 		}
 
 		Context.raw.gizmoStarted = false;
-		if (mouse.started("left") && paintObject.name != "Scene") {
+		if (Mouse.started("left") && paintObject.name != "Scene") {
 			// Translate, scale
 			let trs = [Context.raw.gizmoTranslateX.transform, Context.raw.gizmoTranslateY.transform, Context.raw.gizmoTranslateZ.transform,
 					   Context.raw.gizmoScaleX.transform, Context.raw.gizmoScaleY.transform, Context.raw.gizmoScaleZ.transform];
-			let hit = RayCaster.closestBoxIntersect(trs, mouse.viewX, mouse.viewY, Scene.active.camera);
+			let hit = RayCaster.closestBoxIntersect(trs, Mouse.viewX, Mouse.viewY, Scene.active.camera);
 			if (hit != null) {
 				if (hit.object == Context.raw.gizmoTranslateX) Context.raw.translateX = true;
 				else if (hit.object == Context.raw.gizmoTranslateY) Context.raw.translateY = true;
@@ -165,7 +162,7 @@ class Gizmo {
 			else {
 				// Rotate
 				let trs = [Context.raw.gizmoRotateX.transform, Context.raw.gizmoRotateY.transform, Context.raw.gizmoRotateZ.transform];
-				let hit = RayCaster.closestBoxIntersect(trs, mouse.viewX, mouse.viewY, Scene.active.camera);
+				let hit = RayCaster.closestBoxIntersect(trs, Mouse.viewX, Mouse.viewY, Scene.active.camera);
 				if (hit != null) {
 					if (hit.object == Context.raw.gizmoRotateX) Context.raw.rotateX = true;
 					else if (hit.object == Context.raw.gizmoRotateY) Context.raw.rotateY = true;
@@ -177,7 +174,7 @@ class Gizmo {
 				}
 			}
 		}
-		else if (mouse.released("left")) {
+		else if (Mouse.released("left")) {
 			Context.raw.translateX = Context.raw.translateY = Context.raw.translateZ = false;
 			Context.raw.scaleX = Context.raw.scaleY = Context.raw.scaleZ = false;
 			Context.raw.rotateX = Context.raw.rotateY = Context.raw.rotateZ = false;
@@ -195,28 +192,28 @@ class Gizmo {
 			}
 
 			if (Context.raw.translateX || Context.raw.scaleX) {
-				let hit = RayCaster.planeIntersect(Vec4.yAxis(), Gizmo.v, mouse.viewX, mouse.viewY, Scene.active.camera);
+				let hit = RayCaster.planeIntersect(Vec4.yAxis(), Gizmo.v, Mouse.viewX, Mouse.viewY, Scene.active.camera);
 				if (hit != null) {
 					if (Context.raw.gizmoStarted) Context.raw.gizmoOffset = hit.x - Gizmo.v.x;
 					Context.raw.gizmoDrag = hit.x - Context.raw.gizmoOffset;
 				}
 			}
 			else if (Context.raw.translateY || Context.raw.scaleY) {
-				let hit = RayCaster.planeIntersect(Vec4.xAxis(), Gizmo.v, mouse.viewX, mouse.viewY, Scene.active.camera);
+				let hit = RayCaster.planeIntersect(Vec4.xAxis(), Gizmo.v, Mouse.viewX, Mouse.viewY, Scene.active.camera);
 				if (hit != null) {
 					if (Context.raw.gizmoStarted) Context.raw.gizmoOffset = hit.y - Gizmo.v.y;
 					Context.raw.gizmoDrag = hit.y - Context.raw.gizmoOffset;
 				}
 			}
 			else if (Context.raw.translateZ || Context.raw.scaleZ) {
-				let hit = RayCaster.planeIntersect(Vec4.xAxis(), Gizmo.v, mouse.viewX, mouse.viewY, Scene.active.camera);
+				let hit = RayCaster.planeIntersect(Vec4.xAxis(), Gizmo.v, Mouse.viewX, Mouse.viewY, Scene.active.camera);
 				if (hit != null) {
 					if (Context.raw.gizmoStarted) Context.raw.gizmoOffset = hit.z - Gizmo.v.z;
 					Context.raw.gizmoDrag = hit.z - Context.raw.gizmoOffset;
 				}
 			}
 			else if (Context.raw.rotateX) {
-				let hit = RayCaster.planeIntersect(Vec4.xAxis(), Gizmo.v, mouse.viewX, mouse.viewY, Scene.active.camera);
+				let hit = RayCaster.planeIntersect(Vec4.xAxis(), Gizmo.v, Mouse.viewX, Mouse.viewY, Scene.active.camera);
 				if (hit != null) {
 					if (Context.raw.gizmoStarted) {
 						Context.raw.layer.decalMat.decompose(Gizmo.v, Gizmo.q, Gizmo.v0);
@@ -226,7 +223,7 @@ class Gizmo {
 				}
 			}
 			else if (Context.raw.rotateY) {
-				let hit = RayCaster.planeIntersect(Vec4.yAxis(), Gizmo.v, mouse.viewX, mouse.viewY, Scene.active.camera);
+				let hit = RayCaster.planeIntersect(Vec4.yAxis(), Gizmo.v, Mouse.viewX, Mouse.viewY, Scene.active.camera);
 				if (hit != null) {
 					if (Context.raw.gizmoStarted) {
 						Context.raw.layer.decalMat.decompose(Gizmo.v, Gizmo.q, Gizmo.v0);
@@ -236,7 +233,7 @@ class Gizmo {
 				}
 			}
 			else if (Context.raw.rotateZ) {
-				let hit = RayCaster.planeIntersect(Vec4.zAxis(), Gizmo.v, mouse.viewX, mouse.viewY, Scene.active.camera);
+				let hit = RayCaster.planeIntersect(Vec4.zAxis(), Gizmo.v, Mouse.viewX, Mouse.viewY, Scene.active.camera);
 				if (hit != null) {
 					if (Context.raw.gizmoStarted) {
 						Context.raw.layer.decalMat.decompose(Gizmo.v, Gizmo.q, Gizmo.v0);
@@ -254,7 +251,7 @@ class Gizmo {
 			///end
 		}
 
-		Input.occupied = (Context.raw.translateX || Context.raw.translateY || Context.raw.translateZ || Context.raw.scaleX || Context.raw.scaleY || Context.raw.scaleZ || Context.raw.rotateX || Context.raw.rotateY || Context.raw.rotateZ) && mouse.viewX < Base.w();
+		Input.occupied = (Context.raw.translateX || Context.raw.translateY || Context.raw.translateZ || Context.raw.scaleX || Context.raw.scaleY || Context.raw.scaleZ || Context.raw.rotateX || Context.raw.rotateY || Context.raw.rotateZ) && Mouse.viewX < Base.w();
 	}
 }
 

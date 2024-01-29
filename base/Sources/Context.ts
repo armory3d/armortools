@@ -201,11 +201,10 @@ class Context {
 
 	static inPaintArea = (): bool => {
 		///if (is_paint || is_sculpt)
-		let mouse = Input.getMouse();
 		let right = App.w();
 		if (UIView2D.show) right += UIView2D.ww;
-		return mouse.viewX > 0 && mouse.viewX < right &&
-			   mouse.viewY > 0 && mouse.viewY < App.h();
+		return Mouse.viewX > 0 && Mouse.viewX < right &&
+			   Mouse.viewY > 0 && Mouse.viewY < App.h();
 		///end
 
 		///if is_lab
@@ -223,18 +222,16 @@ class Context {
 
 	///if (is_paint || is_sculpt)
 	static in2dView = (type = View2DType.View2DLayer): bool => {
-		let mouse = Input.getMouse();
 		return UIView2D.show && UIView2D.type == type &&
-			   mouse.x > UIView2D.wx && mouse.x < UIView2D.wx + UIView2D.ww &&
-			   mouse.y > UIView2D.wy && mouse.y < UIView2D.wy + UIView2D.wh;
+			   Mouse.x > UIView2D.wx && Mouse.x < UIView2D.wx + UIView2D.ww &&
+			   Mouse.y > UIView2D.wy && Mouse.y < UIView2D.wy + UIView2D.wh;
 	}
 	///end
 
 	static inNodes = (): bool => {
-		let mouse = Input.getMouse();
 		return UINodes.show &&
-			   mouse.x > UINodes.wx && mouse.x < UINodes.wx + UINodes.ww &&
-			   mouse.y > UINodes.wy && mouse.y < UINodes.wy + UINodes.wh;
+			   Mouse.x > UINodes.wx && Mouse.x < UINodes.wx + UINodes.ww &&
+			   Mouse.y > UINodes.wy && Mouse.y < UINodes.wy + UINodes.wh;
 	}
 
 	static inSwatches = (): bool => {
@@ -288,7 +285,7 @@ class Context {
 
 	static updateEnvmap = () => {
 		if (Context.raw.showEnvmap) {
-			Scene.active.world.envmap = Context.raw.showEnvmapBlur ? Scene.active.world.probe.radianceMipmaps[0] : Context.raw.savedEnvmap;
+			Scene.active.world.envmap = Context.raw.showEnvmapBlur ? Scene.active.world.radianceMipmaps[0] : Context.raw.savedEnvmap;
 		}
 		else {
 			Scene.active.world.envmap = Context.raw.emptyEnvmap;
@@ -361,7 +358,7 @@ class Context {
 			!Base.isScrolling() &&
 			!Base.isComboSelected()) {
 
-			let down = Input.getMouse().down() || Input.getPen().down();
+			let down = Mouse.down() || Pen.down();
 
 			// Prevent painting the same spot
 			let sameSpot = Context.raw.paintVec.x == Context.raw.lastPaintX && Context.raw.paintVec.y == Context.raw.lastPaintY;
@@ -395,22 +392,20 @@ class Context {
 	}
 
 	static update = () => {
-		let mouse = Input.getMouse();
-		let paintX = mouse.viewX / App.w();
-		let paintY = mouse.viewY / App.h();
-		if (mouse.started()) {
-			Context.raw.startX = mouse.viewX / App.w();
-			Context.raw.startY = mouse.viewY / App.h();
+		let paintX = Mouse.viewX / App.w();
+		let paintY = Mouse.viewY / App.h();
+		if (Mouse.started()) {
+			Context.raw.startX = Mouse.viewX / App.w();
+			Context.raw.startY = Mouse.viewY / App.h();
 		}
 
-		let pen = Input.getPen();
-		if (pen.down()) {
-			paintX = pen.viewX / App.w();
-			paintY = pen.viewY / App.h();
+		if (Pen.down()) {
+			paintX = Pen.viewX / App.w();
+			paintY = Pen.viewY / App.h();
 		}
-		if (pen.started()) {
-			Context.raw.startX = pen.viewX / App.w();
-			Context.raw.startY = pen.viewY / App.h();
+		if (Pen.started()) {
+			Context.raw.startX = Pen.viewX / App.w();
+			Context.raw.startY = Pen.viewY / App.h();
 		}
 
 		if (Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown)) {
@@ -422,21 +417,20 @@ class Context {
 		Context.raw.coords.y = paintY;
 
 		if (Context.raw.lockBegin) {
-			let dx = Math.abs(Context.raw.lockStartX - mouse.viewX);
-			let dy = Math.abs(Context.raw.lockStartY - mouse.viewY);
+			let dx = Math.abs(Context.raw.lockStartX - Mouse.viewX);
+			let dy = Math.abs(Context.raw.lockStartY - Mouse.viewY);
 			if (dx > 1 || dy > 1) {
 				Context.raw.lockBegin = false;
 				dx > dy ? Context.raw.lockY = true : Context.raw.lockX = true;
 			}
 		}
 
-		let kb = Input.getKeyboard();
-		if (kb.started(Config.keymap.brush_ruler)) {
-			Context.raw.lockStartX = mouse.viewX;
-			Context.raw.lockStartY = mouse.viewY;
+		if (Keyboard.started(Config.keymap.brush_ruler)) {
+			Context.raw.lockStartX = Mouse.viewX;
+			Context.raw.lockStartY = Mouse.viewY;
 			Context.raw.lockBegin = true;
 		}
-		else if (kb.released(Config.keymap.brush_ruler)) {
+		else if (Keyboard.released(Config.keymap.brush_ruler)) {
 			Context.raw.lockX = Context.raw.lockY = Context.raw.lockBegin = false;
 		}
 

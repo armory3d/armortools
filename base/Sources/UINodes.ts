@@ -63,8 +63,7 @@ class UINodes {
 			else {
 				linkY += nodes.INPUT_Y(UINodes.getCanvas(true), node.inputs, linkDrag.to_socket) + nodes.OUTPUTS_H(node.outputs) + nodes.BUTTONS_H(node);
 			}
-			let mouse = Input.getMouse();
-			if (Math.abs(mouse.x - linkX) > 5 || Math.abs(mouse.y - linkY) > 5) { // Link length
+			if (Math.abs(Mouse.x - linkX) > 5 || Math.abs(Mouse.y - linkY) > 5) { // Link length
 				UINodes.nodeSearch(-1, -1, () => {
 					let n = nodes.getNode(UINodes.getCanvas(true).nodes, nodes.nodesSelectedId[0]);
 					if (linkDrag.to_id == -1 && n.inputs.length > 0) {
@@ -442,9 +441,6 @@ class UINodes {
 	static update = () => {
 		if (!UINodes.show || !Base.uiEnabled) return;
 
-		let mouse = Input.getMouse();
-		let kb = Input.getKeyboard();
-
 		///if (is_paint || is_sculpt)
 		UINodes.wx = Math.floor(App.w()) + UIToolbar.toolbarw;
 		///end
@@ -466,8 +462,8 @@ class UINodes {
 			UINodes.wy = 0;
 		}
 
-		let mx = mouse.x;
-		let my = mouse.y;
+		let mx = Mouse.x;
+		let my = Mouse.y;
 		if (mx < UINodes.wx || mx > UINodes.wx + ww || my < UINodes.wy) return;
 		if (UINodes.ui.isTyping || !UINodes.ui.inputEnabled) return;
 
@@ -482,8 +478,8 @@ class UINodes {
 		// Node search popup
 		if (Operator.shortcut(Config.keymap.node_search)) UINodes.nodeSearch();
 		if (UINodes.nodeSearchSpawn != null) {
-			UINodes.ui.inputX = mouse.x; // Fix inputDX after popup removal
-			UINodes.ui.inputY = mouse.y;
+			UINodes.ui.inputX = Mouse.x; // Fix inputDX after popup removal
+			UINodes.ui.inputY = Mouse.y;
 			UINodes.nodeSearchSpawn = null;
 		}
 
@@ -500,7 +496,6 @@ class UINodes {
 	}
 
 	static nodeSearch = (x = -1, y = -1, done: ()=>void = null) => {
-		let kb = Input.getKeyboard();
 		let searchHandle = Zui.handle("uinodes_9");
 		let first = true;
 		UIMenu.draw((ui: Zui) => {
@@ -522,7 +517,7 @@ class UINodes {
 				if (ui.key == KeyCode.Down && UINodes.nodeSearchOffset < 6) UINodes.nodeSearchOffset++;
 				if (ui.key == KeyCode.Up && UINodes.nodeSearchOffset > 0) UINodes.nodeSearchOffset--;
 			}
-			let enter = kb.down("enter");
+			let enter = Keyboard.down("enter");
 			let count = 0;
 			let BUTTON_COL = ui.t.BUTTON_COL;
 
@@ -571,13 +566,11 @@ class UINodes {
 	}
 
 	static getNodeX = (): i32 => {
-		let mouse = Input.getMouse();
-		return Math.floor((mouse.x - UINodes.wx - UINodes.getNodes().PAN_X()) / UINodes.getNodes().SCALE());
+		return Math.floor((Mouse.x - UINodes.wx - UINodes.getNodes().PAN_X()) / UINodes.getNodes().SCALE());
 	}
 
 	static getNodeY = (): i32 => {
-		let mouse = Input.getMouse();
-		return Math.floor((mouse.y - UINodes.wy - UINodes.getNodes().PAN_Y()) / UINodes.getNodes().SCALE());
+		return Math.floor((Mouse.y - UINodes.wy - UINodes.getNodes().PAN_Y()) / UINodes.getNodes().SCALE());
 	}
 
 	static drawGrid = () => {

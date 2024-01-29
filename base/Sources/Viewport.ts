@@ -25,9 +25,9 @@ class Viewport {
 			if (o.type == "camera_object") {
 				cam.transform.local.setF32(o.transform.values);
 				cam.transform.decompose();
-				if (Context.raw.fovHandle != null) Context.raw.fovHandle.value = cam.data.raw.fov = Base.defaultFov;
+				if (Context.raw.fovHandle != null) Context.raw.fovHandle.value = cam.data.fov = Base.defaultFov;
 				Context.raw.camHandle.position = 0;
-				cam.data.raw.ortho = null;
+				cam.data.ortho = null;
 				cam.buildProjection();
 				Context.raw.ddirty = 2;
 				Camera.reset();
@@ -76,17 +76,17 @@ class Viewport {
 		let cam = Scene.active.cameras[0];
 		let light = Scene.active.lights[0];
 		if (cameraType == CameraType.CameraPerspective) {
-			cam.data.raw.ortho = null;
+			cam.data.ortho = null;
 			light.visible = true;
 		}
 		else {
 			let f32a = new Float32Array(4);
-			let f = cam.data.raw.fov * cam.transform.world.getLoc().length() / 2.5;
+			let f = cam.data.fov * cam.transform.world.getLoc().length() / 2.5;
 			f32a[0] = -2 * f;
 			f32a[1] =  2 * f;
 			f32a[2] = -2 * f * (App.h() / App.w());
 			f32a[3] =  2 * f * (App.h() / App.w());
-			cam.data.raw.ortho = f32a;
+			cam.data.ortho = f32a;
 			light.visible = false;
 		}
 		cam.buildProjection();

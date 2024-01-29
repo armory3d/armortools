@@ -66,9 +66,8 @@ class TabBrushes {
 						if (Context.raw.brush != Project.brushes[i]) Context.selectBrush(i);
 						if (Time.time() - Context.raw.selectTime < 0.25) UIBase.showBrushNodes();
 						Context.raw.selectTime = Time.time();
-						// let mouse = Input.getMouse();
-						// App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
-						// App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
+						// App.dragOffX = -(Mouse.x - uix - ui._windowX - 3);
+						// App.dragOffY = -(Mouse.y - uiy - ui._windowY + 1);
 						// App.dragBrush = Context.raw.brush;
 					}
 					if (ui.isHovered && ui.inputReleasedR) {

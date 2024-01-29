@@ -111,7 +111,7 @@ class RenderPathRaytrace {
 		RenderPathRaytrace.f32a[17] = RenderPathRaytrace.helpMat._31;
 		RenderPathRaytrace.f32a[18] = RenderPathRaytrace.helpMat._32;
 		RenderPathRaytrace.f32a[19] = RenderPathRaytrace.helpMat._33;
-		RenderPathRaytrace.f32a[20] = Scene.active.world.probe.raw.strength * 1.5;
+		RenderPathRaytrace.f32a[20] = Scene.active.world.raw.strength * 1.5;
 		if (!Context.raw.showEnvmap) RenderPathRaytrace.f32a[20] = -RenderPathRaytrace.f32a[20];
 		RenderPathRaytrace.f32a[21] = Context.raw.envmapAngle;
 		RenderPathRaytrace.f32a[22] = RenderPathRaytrace.uvScale;
@@ -174,7 +174,7 @@ class RenderPathRaytrace {
 
 		///if krom_metal
 		// Delay path tracing additional samples while painting
-		let down = Input.getMouse().down() || Input.getPen().down();
+		let down = Mouse.down() || Pen.down();
 		if (Context.inViewport() && down) RenderPathRaytrace.frame = 0;
 		///end
 

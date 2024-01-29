@@ -110,14 +110,12 @@ class TabSwatches {
 					if (state == State.Started) {
 						Context.setSwatch(Project.raw.swatches[i]);
 
-						let mouse = Input.getMouse();
-						Base.dragOffX = -(mouse.x - uix - ui._windowX - 2 * slotw);
-						Base.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
+						Base.dragOffX = -(Mouse.x - uix - ui._windowX - 2 * slotw);
+						Base.dragOffY = -(Mouse.y - uiy - ui._windowY + 1);
 						Base.dragSwatch = Context.raw.swatch;
 					}
 					else if (state == State.Hovered) {
-						let mouse = Input.getMouse();
-						TabSwatches.dragPosition = (mouse.x > uix + ui._windowX + slotw / 2) ? i + 1 : i; // Switch to the next position if the mouse crosses the swatch rectangle center
+						TabSwatches.dragPosition = (Mouse.x > uix + ui._windowX + slotw / 2) ? i + 1 : i; // Switch to the next position if the mouse crosses the swatch rectangle center
 						dragPositionSet = true;
 					}
 					else if (state == State.Released) {
@@ -152,7 +150,7 @@ class TabSwatches {
 
 								if (ui.changed || ui.isTyping) UIMenu.keepOpen = true;
 								if (ui.inputReleased) Context.setSwatch(Context.raw.swatch); // Trigger material preview update
-							}, 16, Math.floor(Input.getMouse().x - 200 * ui.SCALE()), Math.floor(Input.getMouse().y - 250 * ui.SCALE()));
+							}, 16, Math.floor(Mouse.x - 200 * ui.SCALE()), Math.floor(Mouse.y - 250 * ui.SCALE()));
 						}
 
 						Context.raw.selectTime = Time.time();

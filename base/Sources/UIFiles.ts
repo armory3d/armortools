@@ -72,11 +72,10 @@ class UIFiles {
 
 	static releaseKeys = () => {
 		// File dialog may prevent firing key up events
-		let kb = Input.getKeyboard();
-		kb.upListener(KeyCode.Shift);
-		kb.upListener(KeyCode.Control);
+		Keyboard.upListener(KeyCode.Shift);
+		Keyboard.upListener(KeyCode.Control);
 		///if krom_darwin
-		kb.upListener(KeyCode.Meta);
+		Keyboard.upListener(KeyCode.Meta);
 		///end
 	}
 
@@ -319,9 +318,8 @@ class UIFiles {
 
 				if (state == State.Started) {
 					if (f != ".." && dragFiles) {
-						let mouse = Input.getMouse();
-						Base.dragOffX = -(mouse.x - uix - ui._windowX - 3);
-						Base.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
+						Base.dragOffX = -(Mouse.x - uix - ui._windowX - 3);
+						Base.dragOffY = -(Mouse.y - uiy - ui._windowY + 1);
 						Base.dragFile = handle.text;
 						///if krom_ios
 						if (!isCloud) Base.dragFile = documentDirectory + Base.dragFile;

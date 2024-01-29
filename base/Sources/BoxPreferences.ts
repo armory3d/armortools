@@ -469,7 +469,7 @@ class BoxPreferences {
 				// if (h.changed) Context.raw.ddirty = 2;
 
 				let cam = Scene.active.camera;
-				let camRaw = cam.data.raw;
+				let camRaw = cam.data;
 				let near_handle = Zui.handle("boxpreferences_47");
 				let far_handle = Zui.handle("boxpreferences_48");
 				near_handle.value = Math.floor(camRaw.near_plane * 1000) / 1000;

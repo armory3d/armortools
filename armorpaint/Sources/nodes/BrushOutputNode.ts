@@ -111,7 +111,7 @@ class BrushOutputNode extends LogicNode {
 			!Base.isComboSelected()) {
 
 			// Set color pick
-			let down = Input.getMouse().down() || Input.getPen().down();
+			let down = Mouse.down() || Pen.down();
 			if (down && Context.raw.tool == WorkspaceTool.ToolColorId && Project.assets.length > 0) {
 				Context.raw.colorIdPicked = true;
 				UIToolbar.toolbarHandle.redraws = 1;

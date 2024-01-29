@@ -294,10 +294,10 @@ class Project {
 			Scene.active.world.envmap = Context.raw.emptyEnvmap;
 			Scene.active.world.raw.envmap = "World_radiance.k";
 			Context.raw.showEnvmapHandle.selected = Context.raw.showEnvmap = false;
-			Scene.active.world.probe.radiance = Context.raw.defaultRadiance;
-			Scene.active.world.probe.radianceMipmaps = Context.raw.defaultRadianceMipmaps;
-			Scene.active.world.probe.irradiance = Context.raw.defaultIrradiance;
-			Scene.active.world.probe.raw.strength = 4.0;
+			Scene.active.world.radiance = Context.raw.defaultRadiance;
+			Scene.active.world.radianceMipmaps = Context.raw.defaultRadianceMipmaps;
+			Scene.active.world.irradiance = Context.raw.defaultIrradiance;
+			Scene.active.world.raw.strength = 4.0;
 
 			///if (is_paint || is_sculpt)
 			Context.initTool();

@@ -26,7 +26,7 @@ class InputNode extends LogicNode {
 
 	update = () => {
 		if (Context.raw.splitView) {
-			Context.raw.viewIndex = Input.getMouse().viewX > Base.w() / 2 ? 1 : 0;
+			Context.raw.viewIndex = Mouse.viewX > Base.w() / 2 ? 1 : 0;
 		}
 
 		let decal = Context.raw.tool == WorkspaceTool.ToolDecal || Context.raw.tool == WorkspaceTool.ToolText;
@@ -37,22 +37,20 @@ class InputNode extends LogicNode {
 			 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown) ||
 			 decalMask);
 
-		let mouse = Input.getMouse();
-		let paintX = mouse.viewX / App.w();
-		let paintY = mouse.viewY / App.h();
-		if (mouse.started()) {
-			InputNode.startX = mouse.viewX / App.w();
-			InputNode.startY = mouse.viewY / App.h();
+		let paintX = Mouse.viewX / App.w();
+		let paintY = Mouse.viewY / App.h();
+		if (Mouse.started()) {
+			InputNode.startX = Mouse.viewX / App.w();
+			InputNode.startY = Mouse.viewY / App.h();
 		}
 
-		let pen = Input.getPen();
-		if (pen.down()) {
-			paintX = pen.viewX / App.w();
-			paintY = pen.viewY / App.h();
+		if (Pen.down()) {
+			paintX = Pen.viewX / App.w();
+			paintY = Pen.viewY / App.h();
 		}
-		if (pen.started()) {
-			InputNode.startX = pen.viewX / App.w();
-			InputNode.startY = pen.viewY / App.h();
+		if (Pen.started()) {
+			InputNode.startX = Pen.viewX / App.w();
+			InputNode.startY = Pen.viewY / App.h();
 		}
 
 		if (Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown)) {
@@ -74,21 +72,20 @@ class InputNode extends LogicNode {
 		}
 
 		if (InputNode.lockBegin) {
-			let dx = Math.abs(InputNode.lockStartX - mouse.viewX);
-			let dy = Math.abs(InputNode.lockStartY - mouse.viewY);
+			let dx = Math.abs(InputNode.lockStartX - Mouse.viewX);
+			let dy = Math.abs(InputNode.lockStartY - Mouse.viewY);
 			if (dx > 1 || dy > 1) {
 				InputNode.lockBegin = false;
 				dx > dy ? InputNode.lockY = true : InputNode.lockX = true;
 			}
 		}
 
-		let kb = Input.getKeyboard();
-		if (kb.started(Config.keymap.brush_ruler)) {
-			InputNode.lockStartX = mouse.viewX;
-			InputNode.lockStartY = mouse.viewY;
+		if (Keyboard.started(Config.keymap.brush_ruler)) {
+			InputNode.lockStartX = Mouse.viewX;
+			InputNode.lockStartY = Mouse.viewY;
 			InputNode.lockBegin = true;
 		}
-		else if (kb.released(Config.keymap.brush_ruler)) {
+		else if (Keyboard.released(Config.keymap.brush_ruler)) {
 			InputNode.lockX = InputNode.lockY = InputNode.lockBegin = false;
 		}
 

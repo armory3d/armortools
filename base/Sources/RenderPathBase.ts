@@ -98,7 +98,7 @@ class RenderPathBase {
 			}
 			else {
 				// Set current viewport
-				Context.raw.viewIndex = Input.getMouse().viewX > Base.w() / 2 ? 1 : 0;
+				Context.raw.viewIndex = Mouse.viewX > Base.w() / 2 ? 1 : 0;
 			}
 
 			let cam = Scene.active.camera;
@@ -131,7 +131,7 @@ class RenderPathBase {
 		Context.raw.viewIndexLast = Context.raw.viewIndex;
 		Context.raw.viewIndex = -1;
 
-		if (Context.raw.foregroundEvent && !Input.getMouse().down()) {
+		if (Context.raw.foregroundEvent && !Mouse.down()) {
 			Context.raw.foregroundEvent = false;
 			Context.raw.pdirty = 0;
 		}
@@ -146,14 +146,13 @@ class RenderPathBase {
 	static isCached = (): bool => {
 		if (System.width == 0 || System.height == 0) return true;
 
-		let mouse = Input.getMouse();
 		let mx = RenderPathBase.lastX;
 		let my = RenderPathBase.lastY;
-		RenderPathBase.lastX = mouse.viewX;
-		RenderPathBase.lastY = mouse.viewY;
+		RenderPathBase.lastX = Mouse.viewX;
+		RenderPathBase.lastY = Mouse.viewY;
 
 		if (Context.raw.ddirty <= 0 && Context.raw.rdirty <= 0 && Context.raw.pdirty <= 0) {
-			if (mx != RenderPathBase.lastX || my != RenderPathBase.lastY || mouse.locked) Context.raw.ddirty = 0;
+			if (mx != RenderPathBase.lastX || my != RenderPathBase.lastY || Mouse.locked) Context.raw.ddirty = 0;
 			///if (krom_metal || krom_android)
 			if (Context.raw.ddirty > -6) {
 			///else
@@ -546,7 +545,7 @@ class RenderPathBase {
 			}
 		}
 
-		let hide = Operator.shortcut(Config.keymap.stencil_hide, ShortcutType.ShortcutDown) || Input.getKeyboard().down("control");
+		let hide = Operator.shortcut(Config.keymap.stencil_hide, ShortcutType.ShortcutDown) || Keyboard.down("control");
 		let isDecal = Base.isDecalLayer();
 		if (isDecal && !hide) LineDraw.render(currentG, Context.raw.layer.decalMat);
 	}

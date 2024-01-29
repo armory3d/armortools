@@ -120,7 +120,7 @@ class UIMenu {
 				ui.changed = false;
 
 				UIMenu.menuFill(ui);
-				let p = Scene.active.world.probe;
+				let p = Scene.active.world;
 				let envHandle = Zui.handle("uimenu_0");
 				envHandle.value = p.raw.strength;
 				UIMenu.menuAlign(ui);
@@ -147,10 +147,10 @@ class UIMenu {
 					UIMenu.menuFill(ui);
 					let lhandle = Zui.handle("uimenu_2");
 					let scale = 1333;
-					lhandle.value = light.data.raw.strength / scale;
+					lhandle.value = light.data.strength / scale;
 					lhandle.value = Math.floor(lhandle.value * 100) / 100;
 					UIMenu.menuAlign(ui);
-					light.data.raw.strength = ui.slider(lhandle, tr("Light"), 0.0, 4.0, true) * scale;
+					light.data.strength = ui.slider(lhandle, tr("Light"), 0.0, 4.0, true) * scale;
 					if (lhandle.changed) Context.raw.ddirty = 2;
 
 					UIMenu.menuFill(ui);
@@ -173,9 +173,9 @@ class UIMenu {
 
 					UIMenu.menuFill(ui);
 					let sxhandle = Zui.handle("uimenu_4");
-					sxhandle.value = light.data.raw.size;
+					sxhandle.value = light.data.size;
 					UIMenu.menuAlign(ui);
-					light.data.raw.size = ui.slider(sxhandle, tr("Light Size"), 0.0, 4.0, true);
+					light.data.size = ui.slider(sxhandle, tr("Light Size"), 0.0, 4.0, true);
 					if (sxhandle.changed) Context.raw.ddirty = 2;
 				}
 
@@ -359,9 +359,9 @@ class UIMenu {
 
 				UIMenu.menuFill(ui);
 				let cam = Scene.active.camera;
-				Context.raw.fovHandle = Zui.handle("uimenu_11", { value: Math.floor(cam.data.raw.fov * 100) / 100 });
+				Context.raw.fovHandle = Zui.handle("uimenu_11", { value: Math.floor(cam.data.fov * 100) / 100 });
 				UIMenu.menuAlign(ui);
-				cam.data.raw.fov = ui.slider(Context.raw.fovHandle, tr("FoV"), 0.3, 1.4, true);
+				cam.data.fov = ui.slider(Context.raw.fovHandle, tr("FoV"), 0.3, 1.4, true);
 				if (Context.raw.fovHandle.changed) {
 					Viewport.updateCameraType(Context.raw.cameraType);
 				}
@@ -538,8 +538,8 @@ class UIMenu {
 		UIMenu.show = true;
 		UIMenu.menuCommands = commands;
 		UIMenu.menuElements = elements;
-		UIMenu.menuX = x > -1 ? x : Math.floor(Input.getMouse().x + 1);
-		UIMenu.menuY = y > -1 ? y : Math.floor(Input.getMouse().y + 1);
+		UIMenu.menuX = x > -1 ? x : Math.floor(Mouse.x + 1);
+		UIMenu.menuY = y > -1 ? y : Math.floor(Mouse.y + 1);
 		UIMenu.fitToScreen();
 	}
 

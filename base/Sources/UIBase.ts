@@ -194,9 +194,9 @@ class UIBase {
 		let world = Scene.active.world;
 		if (Context.raw.savedEnvmap == null) {
 			// Context.raw.savedEnvmap = world.envmap;
-			Context.raw.defaultIrradiance = world.probe.irradiance;
-			Context.raw.defaultRadiance = world.probe.radiance;
-			Context.raw.defaultRadianceMipmaps = world.probe.radianceMipmaps;
+			Context.raw.defaultIrradiance = world.irradiance;
+			Context.raw.defaultRadiance = world.radiance;
+			Context.raw.defaultRadianceMipmaps = world.radianceMipmaps;
 		}
 		world.envmap = Context.raw.showEnvmap ? Context.raw.savedEnvmap : Context.raw.emptyEnvmap;
 		Context.raw.ddirty = 1;
@@ -309,9 +309,8 @@ class UIBase {
 		else if (Operator.shortcut(Config.keymap.file_import_assets)) Project.importAsset();
 		else if (Operator.shortcut(Config.keymap.edit_prefs)) BoxPreferences.show();
 
-		let kb = Input.getKeyboard();
-		if (kb.started(Config.keymap.view_distract_free) ||
-		   (kb.started("escape") && !UIBase.show && !UIBox.show)) {
+		if (Keyboard.started(Config.keymap.view_distract_free) ||
+		   (Keyboard.started("escape") && !UIBase.show && !UIBox.show)) {
 			UIBase.toggleDistractFree();
 		}
 
@@ -321,39 +320,37 @@ class UIBase {
 		}
 		///end
 
-		let mouse = Input.getMouse();
-
 		///if (is_paint || is_sculpt)
 		let decal = Context.raw.tool == WorkspaceTool.ToolDecal || Context.raw.tool == WorkspaceTool.ToolText;
 		let decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutType.ShortcutDown);
 
-		if ((Context.raw.brushCanLock || Context.raw.brushLocked) && mouse.moved) {
+		if ((Context.raw.brushCanLock || Context.raw.brushLocked) && Mouse.moved) {
 			if (Operator.shortcut(Config.keymap.brush_radius, ShortcutType.ShortcutDown) ||
 				Operator.shortcut(Config.keymap.brush_opacity, ShortcutType.ShortcutDown) ||
 				Operator.shortcut(Config.keymap.brush_angle, ShortcutType.ShortcutDown) ||
 				(decalMask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius, ShortcutType.ShortcutDown))) {
 				if (Context.raw.brushLocked) {
 					if (Operator.shortcut(Config.keymap.brush_opacity, ShortcutType.ShortcutDown)) {
-						Context.raw.brushOpacity += mouse.movementX / 500;
+						Context.raw.brushOpacity += Mouse.movementX / 500;
 						Context.raw.brushOpacity = Math.max(0.0, Math.min(1.0, Context.raw.brushOpacity));
 						Context.raw.brushOpacity = Math.round(Context.raw.brushOpacity * 100) / 100;
 						Context.raw.brushOpacityHandle.value = Context.raw.brushOpacity;
 					}
 					else if (Operator.shortcut(Config.keymap.brush_angle, ShortcutType.ShortcutDown)) {
-						Context.raw.brushAngle += mouse.movementX / 5;
+						Context.raw.brushAngle += Mouse.movementX / 5;
 						Context.raw.brushAngle = Math.floor(Context.raw.brushAngle) % 360;
 						if (Context.raw.brushAngle < 0) Context.raw.brushAngle += 360;
 						Context.raw.brushAngleHandle.value = Context.raw.brushAngle;
 						MakeMaterial.parsePaintMaterial();
 					}
 					else if (decalMask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius, ShortcutType.ShortcutDown)) {
-						Context.raw.brushDecalMaskRadius += mouse.movementX / 150;
+						Context.raw.brushDecalMaskRadius += Mouse.movementX / 150;
 						Context.raw.brushDecalMaskRadius = Math.max(0.01, Math.min(4.0, Context.raw.brushDecalMaskRadius));
 						Context.raw.brushDecalMaskRadius = Math.round(Context.raw.brushDecalMaskRadius * 100) / 100;
 						Context.raw.brushDecalMaskRadiusHandle.value = Context.raw.brushDecalMaskRadius;
 					}
 					else {
-						Context.raw.brushRadius += mouse.movementX / 150;
+						Context.raw.brushRadius += Mouse.movementX / 150;
 						Context.raw.brushRadius = Math.max(0.01, Math.min(4.0, Context.raw.brushRadius));
 						Context.raw.brushRadius = Math.round(Context.raw.brushRadius * 100) / 100;
 						Context.raw.brushRadiusHandle.value = Context.raw.brushRadius;
@@ -369,10 +366,10 @@ class UIBase {
 		///end
 
 		///if is_lab
-		if ((Context.raw.brushCanLock || Context.raw.brushLocked) && mouse.moved) {
+		if ((Context.raw.brushCanLock || Context.raw.brushLocked) && Mouse.moved) {
 			if (Operator.shortcut(Config.keymap.brush_radius, ShortcutType.ShortcutDown)) {
 				if (Context.raw.brushLocked) {
-					Context.raw.brushRadius += mouse.movementX / 150;
+					Context.raw.brushRadius += Mouse.movementX / 150;
 					Context.raw.brushRadius = Math.max(0.01, Math.min(4.0, Context.raw.brushRadius));
 					Context.raw.brushRadius = Math.round(Context.raw.brushRadius * 100) / 100;
 					Context.raw.brushRadiusHandle.value = Context.raw.brushRadius;
@@ -392,11 +389,11 @@ class UIBase {
 		if (!isTyping) {
 			if (Operator.shortcut(Config.keymap.select_material, ShortcutType.ShortcutDown)) {
 				UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
-				for (let i = 1; i < 10; ++i) if (kb.started(i + "")) Context.selectMaterial(i - 1);
+				for (let i = 1; i < 10; ++i) if (Keyboard.started(i + "")) Context.selectMaterial(i - 1);
 			}
 			else if (Operator.shortcut(Config.keymap.select_layer, ShortcutType.ShortcutDown)) {
 				UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
-				for (let i = 1; i < 10; ++i) if (kb.started(i + "")) Context.selectLayer(i - 1);
+				for (let i = 1; i < 10; ++i) if (Keyboard.started(i + "")) Context.selectLayer(i - 1);
 			}
 		}
 		///end
@@ -405,7 +402,7 @@ class UIBase {
 		if (Context.inPaintArea() && !isTyping) {
 
 			///if is_paint
-			if (!mouse.down("right")) { // Fly mode off
+			if (!Mouse.down("right")) { // Fly mode off
 				if (Operator.shortcut(Config.keymap.tool_brush)) Context.selectTool(WorkspaceTool.ToolBrush);
 				else if (Operator.shortcut(Config.keymap.tool_eraser)) Context.selectTool(WorkspaceTool.ToolEraser);
 				else if (Operator.shortcut(Config.keymap.tool_fill)) Context.selectTool(WorkspaceTool.ToolFill);
@@ -437,9 +434,9 @@ class UIBase {
 					Operator.shortcut(Config.keymap.brush_angle) ||
 					(decalMask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius))) {
 					Context.raw.brushCanLock = true;
-					if (!Input.getPen().connected) mouse.lock();
-					Context.raw.lockStartedX = mouse.x;
-					Context.raw.lockStartedY = mouse.y;
+					if (!Pen.connected) Mouse.lock();
+					Context.raw.lockStartedX = Mouse.x;
+					Context.raw.lockStartedY = Mouse.y;
 				}
 				else if (Operator.shortcut(Config.keymap.brush_radius_decrease, ShortcutType.ShortcutRepeat)) {
 					Context.raw.brushRadius -= UIBase.getRadiusIncrement();
@@ -483,9 +480,9 @@ class UIBase {
 					Context.raw.tool == WorkspaceTool.ToolSmudge) {
 					if (Operator.shortcut(Config.keymap.brush_radius)) {
 						Context.raw.brushCanLock = true;
-						if (!Input.getPen().connected) mouse.lock();
-						Context.raw.lockStartedX = mouse.x;
-						Context.raw.lockStartedY = mouse.y;
+						if (!Pen.connected) Mouse.lock();
+						Context.raw.lockStartedX = Mouse.x;
+						Context.raw.lockStartedY = Mouse.y;
 					}
 					else if (Operator.shortcut(Config.keymap.brush_radius_decrease, ShortcutType.ShortcutRepeat)) {
 						Context.raw.brushRadius -= UIBase.getRadiusIncrement();
@@ -504,7 +501,7 @@ class UIBase {
 			///end
 
 			// Viewpoint
-			if (mouse.viewX < App.w()) {
+			if (Mouse.viewX < App.w()) {
 				if (Operator.shortcut(Config.keymap.view_reset)) {
 					Viewport.reset();
 					Viewport.scaleToBounds();
@@ -599,7 +596,7 @@ class UIBase {
 		}
 
 		if (Context.raw.brushCanLock || Context.raw.brushLocked) {
-			if (mouse.moved && Context.raw.brushCanUnlock) {
+			if (Mouse.moved && Context.raw.brushCanUnlock) {
 				Context.raw.brushLocked = false;
 				Context.raw.brushCanUnlock = false;
 			}
@@ -617,7 +614,7 @@ class UIBase {
 			///end
 
 			if (b) {
-				mouse.unlock();
+				Mouse.unlock();
 				Context.raw.lastPaintX = -1;
 				Context.raw.lastPaintY = -1;
 				if (Context.raw.brushCanLock) {
@@ -635,30 +632,30 @@ class UIBase {
 		if (UIBase.borderHandle_ptr != 0) {
 			if (UIBase.borderHandle_ptr == UINodes.hwnd.ptr || UIBase.borderHandle_ptr == UIView2D.hwnd.ptr) {
 				if (UIBase.borderStarted == BorderSide.SideLeft) {
-					Config.raw.layout[LayoutSize.LayoutNodesW] -= Math.floor(mouse.movementX);
+					Config.raw.layout[LayoutSize.LayoutNodesW] -= Math.floor(Mouse.movementX);
 					if (Config.raw.layout[LayoutSize.LayoutNodesW] < 32) Config.raw.layout[LayoutSize.LayoutNodesW] = 32;
 					else if (Config.raw.layout[LayoutSize.LayoutNodesW] > System.width * 0.7) Config.raw.layout[LayoutSize.LayoutNodesW] = Math.floor(System.width * 0.7);
 				}
 				else { // UINodes / UIView2D ratio
-					Config.raw.layout[LayoutSize.LayoutNodesH] -= Math.floor(mouse.movementY);
+					Config.raw.layout[LayoutSize.LayoutNodesH] -= Math.floor(Mouse.movementY);
 					if (Config.raw.layout[LayoutSize.LayoutNodesH] < 32) Config.raw.layout[LayoutSize.LayoutNodesH] = 32;
 					else if (Config.raw.layout[LayoutSize.LayoutNodesH] > App.h() * 0.95) Config.raw.layout[LayoutSize.LayoutNodesH] = Math.floor(App.h() * 0.95);
 				}
 			}
 			else if (UIBase.borderHandle_ptr == UIBase.hwnds[TabArea.TabStatus].ptr) {
-				let my = Math.floor(mouse.movementY);
+				let my = Math.floor(Mouse.movementY);
 				if (Config.raw.layout[LayoutSize.LayoutStatusH] - my >= UIStatus.defaultStatusH * Config.raw.window_scale && Config.raw.layout[LayoutSize.LayoutStatusH] - my < System.height * 0.7) {
 					Config.raw.layout[LayoutSize.LayoutStatusH] -= my;
 				}
 			}
 			else {
 				if (UIBase.borderStarted == BorderSide.SideLeft) {
-					Config.raw.layout[LayoutSize.LayoutSidebarW] -= Math.floor(mouse.movementX);
+					Config.raw.layout[LayoutSize.LayoutSidebarW] -= Math.floor(Mouse.movementX);
 					if (Config.raw.layout[LayoutSize.LayoutSidebarW] < UIBase.sidebarMiniW) Config.raw.layout[LayoutSize.LayoutSidebarW] = UIBase.sidebarMiniW;
 					else if (Config.raw.layout[LayoutSize.LayoutSidebarW] > System.width - UIBase.sidebarMiniW) Config.raw.layout[LayoutSize.LayoutSidebarW] = System.width - UIBase.sidebarMiniW;
 				}
 				else {
-					let my = Math.floor(mouse.movementY);
+					let my = Math.floor(Mouse.movementY);
 					if (UIBase.borderHandle_ptr == UIBase.hwnds[TabArea.TabSidebar1].ptr && UIBase.borderStarted == BorderSide.SideTop) {
 						if (Config.raw.layout[LayoutSize.LayoutSidebarH0] + my > 32 && Config.raw.layout[LayoutSize.LayoutSidebarH1] - my > 32) {
 							Config.raw.layout[LayoutSize.LayoutSidebarH0] += my;
@@ -674,18 +671,18 @@ class UIBase {
 		if (UIBase.borderHandle_ptr != 0) {
 			if (UIBase.borderHandle_ptr == UINodes.hwnd.ptr || UIBase.borderHandle_ptr == UIView2D.hwnd.ptr) {
 				if (UIBase.borderStarted == BorderSide.SideLeft) {
-					Config.raw.layout[LayoutSize.LayoutNodesW] -= Math.floor(mouse.movementX);
+					Config.raw.layout[LayoutSize.LayoutNodesW] -= Math.floor(Mouse.movementX);
 					if (Config.raw.layout[LayoutSize.LayoutNodesW] < 32) Config.raw.layout[LayoutSize.LayoutNodesW] = 32;
 					else if (Config.raw.layout[LayoutSize.LayoutNodesW] > System.width * 0.7) Config.raw.layout[LayoutSize.LayoutNodesW] = Math.floor(System.width * 0.7);
 				}
 				else { // UINodes / UIView2D ratio
-					Config.raw.layout[LayoutSize.LayoutNodesH] -= Math.floor(mouse.movementY);
+					Config.raw.layout[LayoutSize.LayoutNodesH] -= Math.floor(Mouse.movementY);
 					if (Config.raw.layout[LayoutSize.LayoutNodesH] < 32) Config.raw.layout[LayoutSize.LayoutNodesH] = 32;
 					else if (Config.raw.layout[LayoutSize.LayoutNodesH] > App.h() * 0.95) Config.raw.layout[LayoutSize.LayoutNodesH] = Math.floor(App.h() * 0.95);
 				}
 			}
 			else if (UIBase.borderHandle_ptr == UIBase.hwnds[TabArea.TabStatus].ptr) {
-				let my = Math.floor(mouse.movementY);
+				let my = Math.floor(Mouse.movementY);
 				if (Config.raw.layout[LayoutSize.LayoutStatusH] - my >= UIStatus.defaultStatusH * Config.raw.window_scale && Config.raw.layout[LayoutSize.LayoutStatusH] - my < System.height * 0.7) {
 					Config.raw.layout[LayoutSize.LayoutStatusH] -= my;
 				}
@@ -693,7 +690,7 @@ class UIBase {
 		}
 		///end
 
-		if (!mouse.down()) {
+		if (!Mouse.down()) {
 			UIBase.borderHandle_ptr = 0;
 			Base.isResizing = false;
 		}
@@ -705,7 +702,7 @@ class UIBase {
 			PhysicsWorld.lateUpdate(world);
 			Context.raw.ddirty = 2;
 			Context.raw.rdirty = 2;
-			if (mouse.started()) {
+			if (Mouse.started()) {
 				if (Context.raw.particleTimer != null) {
 					Tween.stop(Context.raw.particleTimer);
 					Context.raw.particleTimer.done();
@@ -732,10 +729,10 @@ class UIBase {
 						body.ccd = true;
 						mo.transform.radius /= 10; // Lower ccd radius
 						PhysicsBody.init(body, mo);
-						mo.addTrait(body);
+						(mo as any).physicsBody = body;
 						mo.transform.radius *= 10;
 
-						let ray = RayCaster.getRay(mouse.viewX, mouse.viewY, camera);
+						let ray = RayCaster.getRay(Mouse.viewX, Mouse.viewY, camera);
 						PhysicsBody.applyImpulse(body, ray.direction.mult(0.15));
 
 						Context.raw.particleTimer = Tween.timer(5, mo.remove);
@@ -763,16 +760,14 @@ class UIBase {
 	static view_top = () => {
 		let isTyping = UIBase.ui.isTyping || UIView2D.ui.isTyping || UINodes.ui.isTyping;
 
-		let mouse = Input.getMouse();
 		if (Context.inPaintArea() && !isTyping) {
-			if (mouse.viewX < App.w()) {
+			if (Mouse.viewX < App.w()) {
 				Viewport.setView(0, 0, 1, 0, 0, 0);
 			}
 		}
 	}
 
 	static operatorSearch = () => {
-		let kb = Input.getKeyboard();
 		let searchHandle = Zui.handle("uibase_1");
 		let first = true;
 		UIMenu.draw((ui: Zui) => {
@@ -791,7 +786,7 @@ class UIBase {
 				if (ui.key == KeyCode.Down && UIBase.operatorSearchOffset < 6) UIBase.operatorSearchOffset++;
 				if (ui.key == KeyCode.Up && UIBase.operatorSearchOffset > 0) UIBase.operatorSearchOffset--;
 			}
-			let enter = kb.down("enter");
+			let enter = Keyboard.down("enter");
 			let count = 0;
 			let BUTTON_COL = ui.t.BUTTON_COL;
 
@@ -852,13 +847,10 @@ class UIBase {
 
 		if (!Base.uiEnabled) return;
 
-		let mouse = Input.getMouse();
-		let kb = Input.getKeyboard();
-
 		///if (is_paint || is_sculpt)
 		// Same mapping for paint and rotate (predefined in touch keymap)
 		if (Context.inViewport()) {
-			if (mouse.started() && Config.keymap.action_paint == Config.keymap.action_rotate) {
+			if (Mouse.started() && Config.keymap.action_paint == Config.keymap.action_rotate) {
 				UIBase.action_paint_remap = Config.keymap.action_paint;
 				UtilRender.pickPosNorTex();
 				let isMesh = Math.abs(Context.raw.posXPicked) < 50 && Math.abs(Context.raw.posYPicked) < 50 && Math.abs(Context.raw.posZPicked) < 50;
@@ -868,7 +860,7 @@ class UIBase {
 				///else
 				let penOnly = Context.raw.penPaintingOnly;
 				///end
-				let isPen = penOnly && Input.getPen().down();
+				let isPen = penOnly && Pen.down();
 				// Mesh picked - disable rotate
 				// Pen painting only - rotate with touch, paint with pen
 				if ((isMesh && !penOnly) || isPen) {
@@ -881,7 +873,7 @@ class UIBase {
 					Config.keymap.action_rotate = UIBase.action_paint_remap;
 				}
 			}
-			else if (!mouse.down() && UIBase.action_paint_remap != "") {
+			else if (!Mouse.down() && UIBase.action_paint_remap != "") {
 				Config.keymap.action_rotate = UIBase.action_paint_remap;
 				Config.keymap.action_paint = UIBase.action_paint_remap;
 				UIBase.action_paint_remap = "";
@@ -890,12 +882,12 @@ class UIBase {
 
 		if (Context.raw.brushStencilImage != null && Operator.shortcut(Config.keymap.stencil_transform, ShortcutType.ShortcutDown)) {
 			let r = UIBase.getBrushStencilRect();
-			if (mouse.started("left")) {
+			if (Mouse.started("left")) {
 				Context.raw.brushStencilScaling =
-					UIBase.hitRect(mouse.x, mouse.y, r.x - 8,       r.y - 8,       16, 16) ||
-					UIBase.hitRect(mouse.x, mouse.y, r.x - 8,       r.h + r.y - 8, 16, 16) ||
-					UIBase.hitRect(mouse.x, mouse.y, r.w + r.x - 8, r.y - 8,       16, 16) ||
-					UIBase.hitRect(mouse.x, mouse.y, r.w + r.x - 8, r.h + r.y - 8, 16, 16);
+					UIBase.hitRect(Mouse.x, Mouse.y, r.x - 8,       r.y - 8,       16, 16) ||
+					UIBase.hitRect(Mouse.x, Mouse.y, r.x - 8,       r.h + r.y - 8, 16, 16) ||
+					UIBase.hitRect(Mouse.x, Mouse.y, r.w + r.x - 8, r.y - 8,       16, 16) ||
+					UIBase.hitRect(Mouse.x, Mouse.y, r.w + r.x - 8, r.h + r.y - 8, 16, 16);
 				let cosa = Math.cos(-Context.raw.brushStencilAngle);
 				let sina = Math.sin(-Context.raw.brushStencilAngle);
 				let ox = 0;
@@ -905,27 +897,27 @@ class UIBase {
 				x += r.x + r.w / 2;
 				y += r.y + r.h / 2;
 				Context.raw.brushStencilRotating =
-					UIBase.hitRect(mouse.x, mouse.y, Math.floor(x - 16), Math.floor(y - 16), 32, 32);
+					UIBase.hitRect(Mouse.x, Mouse.y, Math.floor(x - 16), Math.floor(y - 16), 32, 32);
 			}
 			let _scale = Context.raw.brushStencilScale;
-			if (mouse.down("left")) {
+			if (Mouse.down("left")) {
 				if (Context.raw.brushStencilScaling) {
-					let mult = mouse.x > r.x + r.w / 2 ? 1 : -1;
-					Context.raw.brushStencilScale += mouse.movementX / 400 * mult;
+					let mult = Mouse.x > r.x + r.w / 2 ? 1 : -1;
+					Context.raw.brushStencilScale += Mouse.movementX / 400 * mult;
 				}
 				else if (Context.raw.brushStencilRotating) {
 					let gizmoX = r.x + r.w / 2;
 					let gizmoY = r.y + r.h / 2;
-					Context.raw.brushStencilAngle = -Math.atan2(mouse.y - gizmoY, mouse.x - gizmoX) - Math.PI / 2;
+					Context.raw.brushStencilAngle = -Math.atan2(Mouse.y - gizmoY, Mouse.x - gizmoX) - Math.PI / 2;
 				}
 				else {
-					Context.raw.brushStencilX += mouse.movementX / Base.w();
-					Context.raw.brushStencilY += mouse.movementY / Base.h();
+					Context.raw.brushStencilX += Mouse.movementX / Base.w();
+					Context.raw.brushStencilY += Mouse.movementY / Base.h();
 				}
 			}
 			else Context.raw.brushStencilScaling = false;
-			if (mouse.wheelDelta != 0) {
-				Context.raw.brushStencilScale -= mouse.wheelDelta / 10;
+			if (Mouse.wheelDelta != 0) {
+				Context.raw.brushStencilScale -= Mouse.wheelDelta / 10;
 			}
 			// Center after scale
 			let ratio = Base.h() / Context.raw.brushStencilImage.height;
@@ -947,17 +939,17 @@ class UIBase {
 				   decalMask ||
 				   setCloneSource ||
 				   Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown) ||
-				   (Input.getPen().down() && !kb.down("alt"));
+				   (Pen.down() && !Keyboard.down("alt"));
 		///end
 		///if is_lab
 		let down = Operator.shortcut(Config.keymap.action_paint, ShortcutType.ShortcutDown) ||
 				   setCloneSource ||
 				   Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown) ||
-				   (Input.getPen().down() && !kb.down("alt"));
+				   (Pen.down() && !Keyboard.down("alt"));
 		///end
 
 		if (Config.raw.touch_ui) {
-			if (Input.getPen().down()) {
+			if (Pen.down()) {
 				Context.raw.penPaintingOnly = true;
 			}
 			else if (Context.raw.penPaintingOnly) {
@@ -975,17 +967,17 @@ class UIBase {
 		///if krom_ios
 		// No hover on iPad, decals are painted by pen release
 		if (decal) {
-			down = Input.getPen().released();
+			down = Pen.released();
 			if (!Context.raw.penPaintingOnly) {
-				down = down || Input.getMouse().released();
+				down = down || Mouse.released();
 			}
 		}
 		///end
 		///end
 
 		if (down) {
-			let mx = mouse.viewX;
-			let my = mouse.viewY;
+			let mx = Mouse.viewX;
+			let my = Mouse.viewY;
 			let ww = App.w();
 
 			///if (is_paint || is_sculpt)
@@ -1121,14 +1113,14 @@ class UIBase {
 
 		let undoPressed = Operator.shortcut(Config.keymap.edit_undo);
 		let redoPressed = Operator.shortcut(Config.keymap.edit_redo) ||
-						  (kb.down("control") && kb.started("y"));
+						  (Keyboard.down("control") && Keyboard.started("y"));
 
 		// Two-finger tap to undo, three-finger tap to redo
 		if (Context.inViewport() && Config.raw.touch_ui) {
-			if (mouse.started("middle")) { UIBase.redoTapTime = Time.time(); }
-			else if (mouse.started("right")) { UIBase.undoTapTime = Time.time(); }
-			else if (mouse.released("middle") && Time.time() - UIBase.redoTapTime < 0.1) { UIBase.redoTapTime = UIBase.undoTapTime = 0; redoPressed = true; }
-			else if (mouse.released("right") && Time.time() - UIBase.undoTapTime < 0.1) { UIBase.redoTapTime = UIBase.undoTapTime = 0; undoPressed = true; }
+			if (Mouse.started("middle")) { UIBase.redoTapTime = Time.time(); }
+			else if (Mouse.started("right")) { UIBase.undoTapTime = Time.time(); }
+			else if (Mouse.released("middle") && Time.time() - UIBase.redoTapTime < 0.1) { UIBase.redoTapTime = UIBase.undoTapTime = 0; redoPressed = true; }
+			else if (Mouse.released("right") && Time.time() - UIBase.undoTapTime < 0.1) { UIBase.redoTapTime = UIBase.undoTapTime = 0; undoPressed = true; }
 		}
 
 		if (undoPressed) History.undo();
@@ -1332,10 +1324,7 @@ class UIBase {
 		let psize = Math.floor(cursorImg.width * (Context.raw.brushRadius * Context.raw.brushNodesRadius) * UIBase.ui.SCALE());
 
 		// Clone source cursor
-		let mouse = Input.getMouse();
-		let pen = Input.getPen();
-		let kb = Input.getKeyboard();
-		if (Context.raw.tool == WorkspaceTool.ToolClone && !kb.down("alt") && (mouse.down() || pen.down())) {
+		if (Context.raw.tool == WorkspaceTool.ToolClone && !Keyboard.down("alt") && (Mouse.down() || Pen.down())) {
 			g.color = 0x66ffffff;
 			g.drawScaledImage(cursorImg, mx + Context.raw.cloneDeltaX * App.w() - psize / 2, my + Context.raw.cloneDeltaY * App.h() - psize / 2, psize, psize);
 			g.color = 0xffffffff;
@@ -1515,7 +1504,7 @@ class UIBase {
 
 	static onDeselectText = () => {
 		///if krom_ios
-		Input.getKeyboard().upListener(KeyCode.Shift);
+		Keyboard.upListener(KeyCode.Shift);
 		///end
 	}
 
