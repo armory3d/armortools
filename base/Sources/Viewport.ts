@@ -4,12 +4,12 @@ class Viewport {
 	static scaleToBounds = () => {
 		let po = Context.raw.mergedObject == null ? Context.mainObject() : Context.raw.mergedObject;
 		let md = po.data;
-		md.calculateAABB();
-		let r = Math.sqrt(md.aabb.x * md.aabb.x + md.aabb.y * md.aabb.y + md.aabb.z * md.aabb.z);
+		let aabb = MeshData.calculateAABB(md);
+		let r = Math.sqrt(aabb.x * aabb.x + aabb.y * aabb.y + aabb.z * aabb.z);
 		po = Context.mainObject();
-		po.transform.dim.x = md.aabb.x;
-		po.transform.dim.y = md.aabb.y;
-		po.transform.dim.z = md.aabb.z;
+		po.transform.dim.x = aabb.x;
+		po.transform.dim.y = aabb.y;
+		po.transform.dim.z = aabb.z;
 		po.transform.scale.set(2 / r, 2 / r, 2 / r);
 		po.transform.loc.set(0, 0, 0);
 		po.transform.buildMatrix();

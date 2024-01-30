@@ -75,7 +75,7 @@ class RenderPathRaytraceBake {
 			Context.updateEnvmap();
 		}
 		let probe = Scene.world;
-		let savedEnvmap = Context.raw.showEnvmapBlur ? probe.radianceMipmaps[0] : Context.raw.savedEnvmap;
+		let savedEnvmap = Context.raw.showEnvmapBlur ? probe._radianceMipmaps[0] : Context.raw.savedEnvmap;
 		if (RenderPathRaytrace.lastEnvmap != savedEnvmap || RenderPathRaytraceBake.lastLayer != Context.raw.layer.texpaint) {
 			RenderPathRaytrace.lastEnvmap = savedEnvmap;
 			RenderPathRaytraceBake.lastLayer = Context.raw.layer.texpaint;
@@ -100,7 +100,7 @@ class RenderPathRaytraceBake {
 			f32a[1] = Context.raw.bakeAoStrength;
 			f32a[2] = Context.raw.bakeAoRadius;
 			f32a[3] = Context.raw.bakeAoOffset;
-			f32a[4] = Scene.world.raw.strength;
+			f32a[4] = Scene.world.strength;
 			f32a[5] = Context.raw.bakeUpAxis;
 			f32a[6] = Context.raw.envmapAngle;
 

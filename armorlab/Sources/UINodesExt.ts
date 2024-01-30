@@ -90,7 +90,7 @@ class UINodesExt {
 							// Make copy of vertices before displacement
 							let o = Project.paintObjects[0];
 							let g = o.data;
-							let vertices = g.vertexBuffer.lock();
+							let vertices = g._vertexBuffer.lock();
 							if (UINodesExt.lastVertices == null || UINodesExt.lastVertices.byteLength != vertices.byteLength) {
 								UINodesExt.lastVertices = new DataView(new ArrayBuffer(vertices.byteLength));
 								for (let i = 0; i < Math.floor(vertices.byteLength / 2); ++i) {
@@ -102,7 +102,7 @@ class UINodesExt {
 									vertices.setInt16(i * 2, UINodesExt.lastVertices.getInt16(i * 2, true), true);
 								}
 							}
-							g.vertexBuffer.unlock();
+							g._vertexBuffer.unlock();
 
 							// Apply displacement
 							if (Config.raw.displace_strength > 0) {
@@ -110,7 +110,7 @@ class UINodesExt {
 								Base.notifyOnNextFrame(() => {
 									Console.progress(tr("Apply Displacement"));
 									Base.notifyOnNextFrame(() => {
-										let uv_scale = Scene.meshes[0].data.scaleTex * Context.raw.brushScale;
+										let uv_scale = Scene.meshes[0].data.scale_tex * Context.raw.brushScale;
 										UtilMesh.applyDisplacement(texpaint_pack, 0.05 * Config.raw.displace_strength, uv_scale);
 										UtilMesh.calcNormals();
 										taskDone();

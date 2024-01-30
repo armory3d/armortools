@@ -121,7 +121,7 @@ class UIBase {
 		///if (is_paint || is_sculpt)
 		if (Project.materials == null) {
 			Project.materials = [];
-			Data.getMaterial("Scene", "Material", (m: MaterialData) => {
+			Data.getMaterial("Scene", "Material", (m: TMaterialData) => {
 				Project.materials.push(SlotMaterial.create(m));
 				Context.raw.material = Project.materials[0];
 			});
@@ -149,7 +149,7 @@ class UIBase {
 
 		///if is_lab
 		if (Project.materialData == null) {
-			Data.getMaterial("Scene", "Material", (m: MaterialData) => {
+			Data.getMaterial("Scene", "Material", (m: TMaterialData) => {
 				Project.materialData = m;
 			});
 		}
@@ -193,12 +193,12 @@ class UIBase {
 
 		let world = Scene.world;
 		if (Context.raw.savedEnvmap == null) {
-			// Context.raw.savedEnvmap = world.envmap;
-			Context.raw.defaultIrradiance = world.irradiance;
-			Context.raw.defaultRadiance = world.radiance;
-			Context.raw.defaultRadianceMipmaps = world.radianceMipmaps;
+			// Context.raw.savedEnvmap = world._envmap;
+			Context.raw.defaultIrradiance = world._irradiance;
+			Context.raw.defaultRadiance = world._radiance;
+			Context.raw.defaultRadianceMipmaps = world._radianceMipmaps;
 		}
-		world.envmap = Context.raw.showEnvmap ? Context.raw.savedEnvmap : Context.raw.emptyEnvmap;
+		world._envmap = Context.raw.showEnvmap ? Context.raw.savedEnvmap : Context.raw.emptyEnvmap;
 		Context.raw.ddirty = 1;
 
 		History.reset();
@@ -711,7 +711,7 @@ class UIBase {
 				History.pushUndo = true;
 				Context.raw.particleHitX = Context.raw.particleHitY = Context.raw.particleHitZ = 0;
 				Scene.spawnObject(".Sphere", null, (o: Object) => {
-					Data.getMaterial("Scene", ".Gizmo", (md: MaterialData) => {
+					Data.getMaterial("Scene", ".Gizmo", (md: TMaterialData) => {
 						let mo: MeshObject = o as MeshObject;
 						mo.name = ".Bullet";
 						mo.materials[0] = md;

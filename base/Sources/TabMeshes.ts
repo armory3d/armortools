@@ -72,7 +72,7 @@ class TabMeshes {
 				///end
 				///if is_lab
 				let displace_strength = Config.raw.displace_strength > 0 ? Config.raw.displace_strength : 1.0;
-				let uv_scale = Scene.meshes[0].data.scaleTex * Context.raw.brushScale;
+				let uv_scale = Scene.meshes[0].data.scale_tex * Context.raw.brushScale;
 				UtilMesh.applyDisplacement(BrushOutputNode.inst.texpaint_pack, 0.05 * displace_strength, uv_scale);
 				///end
 
@@ -125,7 +125,7 @@ class TabMeshes {
 									Project.paintObjects[0].transform.buildMatrix();
 								}
 							}
-							Data.deleteMesh(o.data.handle);
+							Data.deleteMesh(o.data._handle);
 							o.remove();
 							Context.raw.paintObject = Context.mainObject();
 							UtilMesh.mergeMesh();
@@ -162,7 +162,8 @@ class TabMeshes {
 				scale_pos: mesh.scalePos,
 				scale_tex: mesh.scaleTex
 			};
-			let md = new MeshData(raw, (md: MeshData) => {});
+			let md: TMeshData;
+			MeshData.create(raw, (_md: TMeshData) => { md = _md; });
 			mo = new MeshObject(md, Context.raw.paintObject.materials);
 			array_remove(Scene.meshes, mo);
 			mo.name = "Tessellated";

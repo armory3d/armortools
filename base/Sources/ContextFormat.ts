@@ -168,7 +168,7 @@ class TContext {
 
 	textToolImage?: Image = null;
 	textToolText?: string;
-	particleMaterial?: MaterialData = null;
+	particleMaterial?: TMaterialData = null;
 	///if arm_physics
 	particlePhysics? = false;
 	particleHitX? = 0.0;

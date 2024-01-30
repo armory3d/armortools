@@ -75,7 +75,7 @@ class ImportArm {
 				Project.raw.envmap = Data.isAbsolute(Project.raw.envmap) ? Project.raw.envmap : base + Project.raw.envmap;
 			}
 			if (Project.raw.envmap_strength != null) {
-				Scene.world.raw.strength = Project.raw.envmap_strength;
+				Scene.world.strength = Project.raw.envmap_strength;
 			}
 			if (Project.raw.camera_world != null) {
 				Scene.camera.transform.local = Mat4.fromFloat32Array(Project.raw.camera_world);
@@ -126,11 +126,11 @@ class ImportArm {
 
 			// Synchronous for now
 			///if (is_paint || is_sculpt)
-			new MeshData(project.mesh_datas[0], (md: MeshData) => {
+			MeshData.create(project.mesh_datas[0], (md: TMeshData) => {
 			///end
 
 			///if is_lab
-			new MeshData(project.mesh_data, (md: MeshData) => {
+			MeshData.create(project.mesh_data, (md: TMeshData) => {
 			///end
 
 				Context.raw.paintObject.setData(md);
@@ -143,7 +143,7 @@ class ImportArm {
 			///if (is_paint || is_sculpt)
 			for (let i = 1; i < project.mesh_datas.length; ++i) {
 				let raw = project.mesh_datas[i];
-				new MeshData(raw, (md: MeshData) => {
+				MeshData.create(raw, (md: TMeshData) => {
 					let object = Scene.addMeshObject(md, Context.raw.paintObject.materials, Context.raw.paintObject);
 					object.name = md.name;
 					object.skip_context = "paint";
@@ -299,8 +299,8 @@ class ImportArm {
 			Context.setLayer(Project.layers[0]);
 
 			// Materials
-			let m0: MaterialData = null;
-			Data.getMaterial("Scene", "Material", (m: MaterialData) => {
+			let m0: TMaterialData = null;
+			Data.getMaterial("Scene", "Material", (m: TMaterialData) => {
 				m0 = m;
 			});
 
@@ -364,7 +364,7 @@ class ImportArm {
 	static runMesh = (raw: TSceneFormat) => {
 		Project.paintObjects = [];
 		for (let i = 0; i < raw.mesh_datas.length; ++i) {
-			new MeshData(raw.mesh_datas[i], (md: MeshData) => {
+			MeshData.create(raw.mesh_datas[i], (md: TMeshData) => {
 				let object: MeshObject = null;
 				if (i == 0) {
 					Context.raw.paintObject.setData(md);
@@ -374,8 +374,8 @@ class ImportArm {
 					object = Scene.addMeshObject(md, Context.raw.paintObject.materials, Context.raw.paintObject);
 					object.name = md.name;
 					object.skip_context = "paint";
-					md.handle = md.name;
-					Data.cachedMeshes.set(md.handle, md);
+					md._handle = md.name;
+					Data.cachedMeshes.set(md._handle, md);
 				}
 				object.transform.scale.set(1, 1, 1);
 				object.transform.buildMatrix();
@@ -417,8 +417,8 @@ class ImportArm {
 			ImportTexture.run(abs);
 		}
 
-		let m0: MaterialData = null;
-		Data.getMaterial("Scene", "Material", (m: MaterialData) => {
+		let m0: TMaterialData = null;
+		Data.getMaterial("Scene", "Material", (m: TMaterialData) => {
 			m0 = m;
 		});
 

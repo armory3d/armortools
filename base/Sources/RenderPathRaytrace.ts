@@ -47,7 +47,7 @@ class RenderPathRaytrace {
 		}
 
 		let probe = Scene.world;
-		let savedEnvmap = Context.raw.showEnvmapBlur ? probe.radianceMipmaps[0] : Context.raw.savedEnvmap;
+		let savedEnvmap = Context.raw.showEnvmapBlur ? probe._radianceMipmaps[0] : Context.raw.savedEnvmap;
 
 		if (RenderPathRaytrace.lastEnvmap != savedEnvmap) {
 			RenderPathRaytrace.lastEnvmap = savedEnvmap;
@@ -109,12 +109,12 @@ class RenderPathRaytrace {
 		RenderPathRaytrace.f32a[17] = RenderPathRaytrace.helpMat._31;
 		RenderPathRaytrace.f32a[18] = RenderPathRaytrace.helpMat._32;
 		RenderPathRaytrace.f32a[19] = RenderPathRaytrace.helpMat._33;
-		RenderPathRaytrace.f32a[20] = Scene.world.raw.strength * 1.5;
+		RenderPathRaytrace.f32a[20] = Scene.world.strength * 1.5;
 		if (!Context.raw.showEnvmap) RenderPathRaytrace.f32a[20] = -RenderPathRaytrace.f32a[20];
 		RenderPathRaytrace.f32a[21] = Context.raw.envmapAngle;
 		RenderPathRaytrace.f32a[22] = RenderPathRaytrace.uvScale;
 		///if is_lab
-		RenderPathRaytrace.f32a[22] *= Scene.meshes[0].data.scaleTex;
+		RenderPathRaytrace.f32a[22] *= Scene.meshes[0].data.scale_tex;
 		///end
 
 		let framebuffer = RenderPath.renderTargets.get("buf").image;
@@ -160,10 +160,10 @@ class RenderPathRaytrace {
 		///end
 		let md = mo.data;
 		let mo_scale = mo.transform.scale.x; // Uniform scale only
-		RenderPathRaytrace.vb_scale = md.scalePos * mo_scale;
+		RenderPathRaytrace.vb_scale = md.scale_pos * mo_scale;
 		if (mo.parent != null) RenderPathRaytrace.vb_scale *= mo.parent.transform.scale.x;
-		RenderPathRaytrace.vb = md.vertexBuffer;
-		RenderPathRaytrace.ib = md.indexBuffers[0];
+		RenderPathRaytrace.vb = md._vertexBuffer;
+		RenderPathRaytrace.ib = md._indexBuffers[0];
 	}
 
 	static draw = (useLiveLayer: bool) => {

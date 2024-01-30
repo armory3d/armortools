@@ -206,7 +206,7 @@ class BoxPreferences {
 					Context.raw.emptyEnvmap = Image.fromBytes(b.buffer, 1, 1);
 					Context.raw.ddirty = 2;
 					if (!Context.raw.showEnvmap) {
-						Scene.world.envmap = Context.raw.emptyEnvmap;
+						Scene.world._envmap = Context.raw.emptyEnvmap;
 					}
 				}
 

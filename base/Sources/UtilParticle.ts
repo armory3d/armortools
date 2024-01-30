@@ -53,7 +53,7 @@ class UtilParticle {
 			}
 		}
 
-		Data.getMaterial("Scene", "MaterialParticle", (md: MaterialData) => {
+		Data.getMaterial("Scene", "MaterialParticle", (md: TMaterialData) => {
 			Context.raw.particleMaterial = md;
 
 			for (let obj of Scene.raw.objects) {

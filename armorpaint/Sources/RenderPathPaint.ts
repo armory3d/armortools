@@ -345,14 +345,14 @@ class RenderPathPaint {
 			}
 			RenderPath.bindTarget("gbuffer0_undo", "gbuffer0_undo");
 
-			let materialContexts: MaterialContext[] = [];
-			let shaderContexts: ShaderContext[] = [];
+			let materialContexts: TMaterialContext[] = [];
+			let shaderContexts: TShaderContext[] = [];
 			let mats = Project.paintObjects[0].materials;
 			Project.paintObjects[0].getContexts("paint", mats, materialContexts, shaderContexts);
 
 			let cc_context = shaderContexts[0];
 			if (ConstData.screenAlignedVB == null) ConstData.createScreenAlignedData();
-			RenderPath.currentG.setPipeline(cc_context.pipeState);
+			RenderPath.currentG.setPipeline(cc_context._pipeState);
 			Uniforms.setContextConstants(RenderPath.currentG, cc_context, RenderPath.bindParams);
 			Uniforms.setObjectConstants(RenderPath.currentG, cc_context, Project.paintObjects[0]);
 			Uniforms.setMaterialConstants(RenderPath.currentG, cc_context, materialContexts[0]);
@@ -520,11 +520,11 @@ class RenderPathPaint {
 		helpMat.getInverse(Scene.camera.VP);
 		g.setMatrix(Base.cursorInvVP, helpMat);
 		///if (krom_metal || krom_vulkan)
-		g.setVertexBuffer(geom.get([{name: "tex", data: "short2norm"}]));
+		g.setVertexBuffer(MeshData.get(geom, [{name: "tex", data: "short2norm"}]));
 		///else
-		g.setVertexBuffer(geom.vertexBuffer);
+		g.setVertexBuffer(geom._vertexBuffer);
 		///end
-		g.setIndexBuffer(geom.indexBuffers[0]);
+		g.setIndexBuffer(geom._indexBuffers[0]);
 		g.drawIndexedVertices();
 
 		g.disableScissor();
@@ -834,7 +834,7 @@ class RenderPathPaint {
 				scale_pos: 1.5,
 				scale_tex: 1.0
 			};
-			new MeshData(raw, (md: MeshData) => {
+			MeshData.create(raw, (md: TMeshData) => {
 				let materials = (Scene.getChild(".Plane") as MeshObject).materials;
 				let o = Scene.addMeshObject(md, materials);
 				o.name = ".PlaneTiled";

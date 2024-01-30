@@ -3,7 +3,7 @@ class ExportArm {
 
 	static runMesh = (path: string, paintObjects: MeshObject[]) => {
 		let mesh_datas: TMeshData[] = [];
-		for (let p of paintObjects) mesh_datas.push(p.data.raw);
+		for (let p of paintObjects) mesh_datas.push(p.data);
 		let raw: TSceneFormat = { mesh_datas: mesh_datas };
 		let b = ArmPack.encode(raw);
 		if (!path.endsWith(".arm")) path += ".arm";
@@ -40,11 +40,11 @@ class ExportArm {
 
 		///if (is_paint || is_sculpt)
 		let md: TMeshData[] = [];
-		for (let p of Project.paintObjects) md.push(p.data.raw);
+		for (let p of Project.paintObjects) md.push(p.data);
 		///end
 
 		///if is_lab
-		let md = Project.paintObjects[0].data.raw;
+		let md = Project.paintObjects[0].data;
 		///end
 
 		let texture_files = ExportArm.assetsToFiles(Project.filepath, Project.assets);
@@ -106,7 +106,7 @@ class ExportArm {
 			packed_assets: packed_assets,
 			swatches: Project.raw.swatches,
 			envmap: Project.raw.envmap != null ? (sameDrive ? Path.toRelative(Project.filepath, Project.raw.envmap) : Project.raw.envmap) : null,
-			envmap_strength: Scene.world.raw.strength,
+			envmap_strength: Scene.world.strength,
 			camera_world: Scene.camera.transform.local.toFloat32Array(),
 			camera_origin: ExportArm.vec3f32(Camera.origins[0]),
 			camera_fov: Scene.camera.data.fov,

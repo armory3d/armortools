@@ -276,16 +276,16 @@ class Context {
 			Context.raw.envmapLoaded = true;
 			Data.cachedImages.delete("World_radiance.k");
 		}
-		Scene.world.loadEnvmap((_) => {});
-		if (Context.raw.savedEnvmap == null) Context.raw.savedEnvmap = Scene.world.envmap;
+		WorldData.loadEnvmap(Scene.world, (_) => {});
+		if (Context.raw.savedEnvmap == null) Context.raw.savedEnvmap = Scene.world._envmap;
 	}
 
 	static updateEnvmap = () => {
 		if (Context.raw.showEnvmap) {
-			Scene.world.envmap = Context.raw.showEnvmapBlur ? Scene.world.radianceMipmaps[0] : Context.raw.savedEnvmap;
+			Scene.world._envmap = Context.raw.showEnvmapBlur ? Scene.world._radianceMipmaps[0] : Context.raw.savedEnvmap;
 		}
 		else {
-			Scene.world.envmap = Context.raw.emptyEnvmap;
+			Scene.world._envmap = Context.raw.emptyEnvmap;
 		}
 	}
 

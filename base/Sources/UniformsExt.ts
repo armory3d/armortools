@@ -14,11 +14,11 @@ class UniformsExt {
 		Uniforms.externalTextureLinks = [UniformsExt.linkTex];
 	}
 
-	static linkInt = (object: BaseObject, mat: MaterialData, link: string): Null<i32> => {
+	static linkInt = (object: BaseObject, mat: TMaterialData, link: string): Null<i32> => {
 		return null;
 	}
 
-	static linkFloat = (object: BaseObject, mat: MaterialData, link: string): Null<f32> => {
+	static linkFloat = (object: BaseObject, mat: TMaterialData, link: string): Null<f32> => {
 		switch (link) {
 			case "_brushRadius": {
 				///if (is_paint || is_sculpt)
@@ -148,7 +148,7 @@ class UniformsExt {
 		return null;
 	}
 
-	static linkVec2 = (object: BaseObject, mat: MaterialData, link: string): Vec4 => {
+	static linkVec2 = (object: BaseObject, mat: TMaterialData, link: string): Vec4 => {
 		switch (link) {
 			case "_gbufferSize": {
 				UniformsExt.vec.set(0, 0, 0);
@@ -180,7 +180,7 @@ class UniformsExt {
 		return null;
 	}
 
-	static linkVec3 = (object: BaseObject, mat: MaterialData, link: string): Vec4 => {
+	static linkVec3 = (object: BaseObject, mat: TMaterialData, link: string): Vec4 => {
 		let v: Vec4 = null;
 		switch (link) {
 			///if (is_paint || is_sculpt)
@@ -261,7 +261,7 @@ class UniformsExt {
 	}
 	///end
 
-	static linkVec4 = (object: BaseObject, mat: MaterialData, link: string): Vec4 => {
+	static linkVec4 = (object: BaseObject, mat: TMaterialData, link: string): Vec4 => {
 		switch (link) {
 			case "_inputBrush": {
 				let down = Mouse.down() || Pen.down();
@@ -288,11 +288,11 @@ class UniformsExt {
 				return UniformsExt.vec;
 			}
 			case "_envmapData": {
-				UniformsExt.vec.set(Context.raw.envmapAngle, Math.sin(-Context.raw.envmapAngle), Math.cos(-Context.raw.envmapAngle), Scene.world.raw.strength);
+				UniformsExt.vec.set(Context.raw.envmapAngle, Math.sin(-Context.raw.envmapAngle), Math.cos(-Context.raw.envmapAngle), Scene.world.strength);
 				return UniformsExt.vec;
 			}
 			case "_envmapDataWorld": {
-				UniformsExt.vec.set(Context.raw.envmapAngle, Math.sin(-Context.raw.envmapAngle), Math.cos(-Context.raw.envmapAngle), Context.raw.showEnvmap ? Scene.world.raw.strength : 1.0);
+				UniformsExt.vec.set(Context.raw.envmapAngle, Math.sin(-Context.raw.envmapAngle), Math.cos(-Context.raw.envmapAngle), Context.raw.showEnvmap ? Scene.world.strength : 1.0);
 				return UniformsExt.vec;
 			}
 			///if (is_paint || is_sculpt)
@@ -316,7 +316,7 @@ class UniformsExt {
 		return null;
 	}
 
-	static linkMat4 = (object: BaseObject, mat: MaterialData, link: string): Mat4 => {
+	static linkMat4 = (object: BaseObject, mat: TMaterialData, link: string): Mat4 => {
 		switch (link) {
 			///if (is_paint || is_sculpt)
 			case "_decalLayerMatrix": { // Decal layer
@@ -332,7 +332,7 @@ class UniformsExt {
 		return null;
 	}
 
-	static linkTex = (object: BaseObject, mat: MaterialData, link: string): Image => {
+	static linkTex = (object: BaseObject, mat: TMaterialData, link: string): Image => {
 		switch (link) {
 			case "_texpaint_undo": {
 				///if (is_paint || is_sculpt)

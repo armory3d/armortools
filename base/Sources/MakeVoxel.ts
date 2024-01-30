@@ -2,15 +2,15 @@
 class MakeVoxel {
 
 	///if arm_voxels
-	static run = (data: ShaderContext) => {
+	static run = (data: TShaderContext) => {
 		let structure = new VertexStructure();
 		structure.add("pos", VertexData.I16_4X_Normalized);
 		structure.add("nor", VertexData.I16_2X_Normalized);
 		structure.add("tex", VertexData.I16_2X_Normalized);
 
-		let pipeState = data.pipeState;
+		let pipeState = data._pipeState;
 		pipeState.inputLayout = [structure];
-		data.raw.vertex_elements = [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}];
+		data.vertex_elements = [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}];
 
 		// ///if arm_skin
 		// let isMesh = Context.raw.object.constructor == MeshObject;
@@ -27,10 +27,10 @@ class MakeVoxel {
 		pipeState.vertexShader = Shader.fromSource(MakeVoxel.voxelSource(), ShaderType.Vertex);
 
 		pipeState.compile();
-		data.raw.constants = [{ name: "W", type: "mat4", link: "_worldMatrix" }, { name: "N", type: "mat3", link: "_normalMatrix" }];
-		data.constants = [pipeState.getConstantLocation("W"), pipeState.getConstantLocation("N")];
-		data.raw.texture_units = [{ name: "texpaint_pack" }, { name: "voxels", is_image: true }];
-		data.textureUnits = [pipeState.getTextureUnit("texpaint_pack"), pipeState.getTextureUnit("voxels")];
+		data.constants = [{ name: "W", type: "mat4", link: "_worldMatrix" }, { name: "N", type: "mat3", link: "_normalMatrix" }];
+		data._constants = [pipeState.getConstantLocation("W"), pipeState.getConstantLocation("N")];
+		data.texture_units = [{ name: "texpaint_pack" }, { name: "voxels", is_image: true }];
+		data._textureUnits = [pipeState.getTextureUnit("texpaint_pack"), pipeState.getTextureUnit("voxels")];
 	}
 
 	static voxelSource = (): string => {

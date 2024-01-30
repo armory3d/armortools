@@ -15,9 +15,9 @@ class ExportObj {
 		let noff = 0;
 		let toff = 0;
 		for (let p of paintObjects) {
-			let mesh = p.data.raw;
+			let mesh = p.data;
 			let inv = 1 / 32767;
-			let sc = p.data.scalePos * inv;
+			let sc = p.data.scale_pos * inv;
 			let posa = mesh.vertex_arrays[0].values;
 			let nora = mesh.vertex_arrays[1].values;
 			let texa = mesh.vertex_arrays[2].values;

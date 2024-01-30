@@ -14,7 +14,7 @@ class ExportObj {
 		let texpaint = Project.layers[0].texpaint;
 		let pixels = texpaint.getPixels();
 		let pixelsView = new DataView(pixels);
-		let mesh = paintObjects[0].data.raw;
+		let mesh = paintObjects[0].data;
 		let inda = mesh.index_arrays[0].values;
 
 		let posa = new Int16Array(inda.length * 4);
@@ -30,7 +30,7 @@ class ExportObj {
 			let p = paintObjects[0];
 			// let mesh = p.data.raw;
 			let inv = 1 / 32767;
-			let sc = p.data.scalePos * inv;
+			let sc = p.data.scale_pos * inv;
 			// let posa = mesh.vertex_arrays[0].values;
 			let len = Math.floor(posa.length / 4);
 			// let len = Math.floor(inda.length);

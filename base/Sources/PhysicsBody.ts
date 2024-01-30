@@ -64,9 +64,9 @@ class PhysicsBody {
 	static trans2: Ammo.btTransform;
 	static quat = new Quat();
 
-	static convexHullCache = new Map<MeshData, Ammo.btConvexHullShape>();
-	static triangleMeshCache = new Map<MeshData, Ammo.btTriangleMesh>();
-	static usersCache = new Map<MeshData, i32>();
+	static convexHullCache = new Map<TMeshData, Ammo.btConvexHullShape>();
+	static triangleMeshCache = new Map<TMeshData, Ammo.btTriangleMesh>();
+	static usersCache = new Map<TMeshData, i32>();
 
 	static create(): PhysicsBodyRaw {
 		if (PhysicsBody.first) {
@@ -365,17 +365,15 @@ class PhysicsBody {
 		PhysicsBody.convexHullCache.set(data, shape);
 		PhysicsBody.usersCache.set(data, 1);
 
-		let positions = data.positions.values;
+		let positions = MeshData.getVArray(data, 'pos').values;
 
 		let sx: f32 = scale.x * (1.0 - margin) * (1 / 32767);
 		let sy: f32 = scale.y * (1.0 - margin) * (1 / 32767);
 		let sz: f32 = scale.z * (1.0 - margin) * (1 / 32767);
 
-		if (data.raw.scale_pos != null) {
-			sx *= data.raw.scale_pos;
-			sy *= data.raw.scale_pos;
-			sz *= data.raw.scale_pos;
-		}
+		sx *= data.scale_pos;
+		sy *= data.scale_pos;
+		sz *= data.scale_pos;
 
 		for (let i = 0; i < Math.floor(positions.length / 4); ++i) {
 			PhysicsBody.vec1.setX(positions[i * 4    ] * sx);
@@ -399,18 +397,16 @@ class PhysicsBody {
 		PhysicsBody.triangleMeshCache.set(data, triangleMesh);
 		PhysicsBody.usersCache.set(data, 1);
 
-		let positions = data.positions.values;
-		let indices = data.indices;
+		let positions = MeshData.getVArray(data, 'pos').values;
+		let indices = data._indices;
 
 		let sx: f32 = scale.x * (1 / 32767);
 		let sy: f32 = scale.y * (1 / 32767);
 		let sz: f32 = scale.z * (1 / 32767);
 
-		if (data.raw.scale_pos != null) {
-			sx *= data.raw.scale_pos;
-			sy *= data.raw.scale_pos;
-			sz *= data.raw.scale_pos;
-		}
+		sx *= data.scale_pos;
+		sy *= data.scale_pos;
+		sz *= data.scale_pos;
 
 		for (let ar of indices) {
 			for (let i = 0; i < Math.floor(ar.length / 3); ++i) {

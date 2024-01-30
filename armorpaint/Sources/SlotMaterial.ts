@@ -5,7 +5,7 @@ class SlotMaterialRaw {
 	image: Image = null;
 	imageIcon: Image = null;
 	previewReady = false;
-	data: MaterialData;
+	data: TMaterialData;
 	id = 0;
 
 	paintBase = true;
@@ -22,7 +22,7 @@ class SlotMaterialRaw {
 class SlotMaterial {
 	static defaultCanvas: ArrayBuffer = null;
 
-	static create(m: MaterialData = null, c: TNodeCanvas = null): SlotMaterialRaw {
+	static create(m: TMaterialData = null, c: TNodeCanvas = null): SlotMaterialRaw {
 		let raw = new SlotMaterialRaw();
 		for (let mat of Project.materials) if (mat.id >= raw.id) raw.id = mat.id + 1;
 		raw.data = m;

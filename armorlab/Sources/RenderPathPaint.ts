@@ -205,11 +205,11 @@ class RenderPathPaint {
 		helpMat.getInverse(Scene.camera.VP);
 		g.setMatrix(Base.cursorInvVP, helpMat);
 		///if (krom_metal || krom_vulkan)
-		g.setVertexBuffer(geom.get([{name: "tex", data: "short2norm"}]));
+		g.setVertexBuffer(MeshData.get(geom, [{name: "tex", data: "short2norm"}]));
 		///else
-		g.setVertexBuffer(geom.vertexBuffer);
+		g.setVertexBuffer(geom._vertexBuffer);
 		///end
-		g.setIndexBuffer(geom.indexBuffers[0]);
+		g.setIndexBuffer(geom._indexBuffers[0]);
 		g.drawIndexedVertices();
 
 		g.disableScissor();

@@ -337,7 +337,7 @@ class BoxExport {
 			let pos = BoxExport.exportMeshHandle.position;
 			let paintObjects = pos == 0 ? Project.paintObjects : [Project.paintObjects[pos - 1]];
 			for (let po of paintObjects) {
-				for (let inda of po.data.raw.index_arrays) {
+				for (let inda of po.data.index_arrays) {
 					tris += Math.floor(inda.values.length / 3);
 				}
 			}

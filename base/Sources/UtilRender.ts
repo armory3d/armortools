@@ -31,9 +31,9 @@ class UtilRender {
 		let light = Scene.lights[0];
 		let _lightStrength = light.data.strength;
 		let probe = Scene.world;
-		let _probeStrength = probe.raw.strength;
+		let _probeStrength = probe.strength;
 		light.data.strength = 0;
-		probe.raw.strength = 7;
+		probe.strength = 7;
 		let _envmapAngle = Context.raw.envmapAngle;
 		Context.raw.envmapAngle = 6.0;
 		let _brushScale = Context.raw.brushScale;
@@ -41,7 +41,7 @@ class UtilRender {
 		let _brushNodesScale = Context.raw.brushNodesScale;
 		Context.raw.brushNodesScale = 1.0;
 
-		Scene.world.envmap = Context.raw.previewEnvmap;
+		Scene.world._envmap = Context.raw.previewEnvmap;
 		// No resize
 		RenderPath.lastW = UtilRender.materialPreviewSize;
 		RenderPath.lastH = UtilRender.materialPreviewSize;
@@ -69,11 +69,11 @@ class UtilRender {
 		Scene.camera.buildProjection();
 		Scene.camera.buildMatrix();
 		light.data.strength = _lightStrength;
-		probe.raw.strength = _probeStrength;
+		probe.strength = _probeStrength;
 		Context.raw.envmapAngle = _envmapAngle;
 		Context.raw.brushScale = _brushScale;
 		Context.raw.brushNodesScale = _brushNodesScale;
-		Scene.world.envmap = Context.raw.showEnvmap ? Context.raw.savedEnvmap : Context.raw.emptyEnvmap;
+		Scene.world._envmap = Context.raw.showEnvmap ? Context.raw.savedEnvmap : Context.raw.emptyEnvmap;
 		MakeMaterial.parseMeshMaterial();
 		Context.raw.ddirty = 0;
 	}
@@ -106,7 +106,7 @@ class UtilRender {
 		Viewport.updateCameraType(CameraType.CameraPerspective);
 		let light = Scene.lights[0];
 		light.visible = false;
-		Scene.world.envmap = Context.raw.previewEnvmap;
+		Scene.world._envmap = Context.raw.previewEnvmap;
 
 		// No resize
 		RenderPath.lastW = UtilRender.decalPreviewSize;
@@ -136,7 +136,7 @@ class UtilRender {
 		Scene.camera.buildMatrix();
 		light = Scene.lights[0];
 		light.visible = true;
-		Scene.world.envmap = Context.raw.showEnvmap ? Context.raw.savedEnvmap : Context.raw.emptyEnvmap;
+		Scene.world._envmap = Context.raw.showEnvmap ? Context.raw.savedEnvmap : Context.raw.emptyEnvmap;
 
 		MakeMaterial.parseMeshMaterial();
 		Context.raw.ddirty = 1; // Refresh depth for decal paint
@@ -376,7 +376,7 @@ class UtilRender {
 		Context.raw.paintObject.transform.buildMatrix();
 
 		g4.begin();
-		g4.setPipeline(res.scon.pipeState);
+		g4.setPipeline(res.scon._pipeState);
 		Uniforms.setContextConstants(g4, res.scon, [""]);
 		Uniforms.setObjectConstants(g4, res.scon, Context.raw.paintObject);
 		Uniforms.setMaterialConstants(g4, res.scon, res.mcon);

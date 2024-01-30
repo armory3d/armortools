@@ -136,7 +136,8 @@ class UIMenubar {
 							scale_pos: mesh.scalePos,
 							scale_tex: mesh.scaleTex
 						};
-						let md = new MeshData(raw, (md: MeshData) => {});
+						let md: TMeshData;
+						MeshData.create(raw, (_md: TMeshData) => { md = _md; });
 						let dotPlane: MeshObject = Scene.getChild(".Plane") as MeshObject;
 						UIMenubar._plane = new MeshObject(md, dotPlane.materials);
 						array_remove(Scene.meshes, UIMenubar._plane);

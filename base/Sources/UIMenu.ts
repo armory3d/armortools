@@ -122,9 +122,9 @@ class UIMenu {
 				UIMenu.menuFill(ui);
 				let p = Scene.world;
 				let envHandle = Zui.handle("uimenu_0");
-				envHandle.value = p.raw.strength;
+				envHandle.value = p.strength;
 				UIMenu.menuAlign(ui);
-				p.raw.strength = ui.slider(envHandle, tr("Environment"), 0.0, 8.0, true);
+				p.strength = ui.slider(envHandle, tr("Environment"), 0.0, 8.0, true);
 				if (envHandle.changed) Context.raw.ddirty = 2;
 
 				UIMenu.menuFill(ui);

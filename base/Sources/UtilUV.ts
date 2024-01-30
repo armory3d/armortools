@@ -32,7 +32,7 @@ class UtilUV {
 		UtilUV.uvmapCached = true;
 		let merged = Context.raw.mergedObject;
 		let mesh = (Context.raw.layerFilter == 0 && merged != null) ?
-					merged.data.raw : Context.raw.paintObject.data.raw;
+					merged.data : Context.raw.paintObject.data;
 
 		let texa = mesh.vertex_arrays[2].values;
 		let inda = mesh.index_arrays[0].values;
@@ -68,7 +68,7 @@ class UtilUV {
 		}
 
 		UtilUV.trianglemapCached = true;
-		let merged = Context.raw.mergedObject != null ? Context.raw.mergedObject.data.raw : Context.raw.paintObject.data.raw;
+		let merged = Context.raw.mergedObject != null ? Context.raw.mergedObject.data : Context.raw.paintObject.data;
 		let mesh = merged;
 		let texa = mesh.vertex_arrays[2].values;
 		let inda = mesh.index_arrays[0].values;
@@ -131,11 +131,11 @@ class UtilUV {
 		g4.clear(0x00000000);
 		g4.setPipeline(UtilUV.pipeDilate);
 		///if (krom_metal || krom_vulkan)
-		g4.setVertexBuffer(geom.get([{name: "tex", data: "short2norm"}]));
+		g4.setVertexBuffer(MeshData.get(geom, [{name: "tex", data: "short2norm"}]));
 		///else
-		g4.setVertexBuffer(geom.vertexBuffer);
+		g4.setVertexBuffer(geom._vertexBuffer);
 		///end
-		g4.setIndexBuffer(geom.indexBuffers[0]);
+		g4.setIndexBuffer(geom._indexBuffers[0]);
 		g4.drawIndexedVertices();
 		g4.end();
 		UtilUV.dilatemapCached = true;

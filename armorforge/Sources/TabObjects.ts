@@ -95,7 +95,7 @@ class TabObjects {
 									}
 								}
 
-								Data.getMaterial("Scene", "TempMaterial" + TabObjects.materialId, (md: MaterialData) => {
+								Data.getMaterial("Scene", "TempMaterial" + TabObjects.materialId, (md: TMaterialData) => {
 									let mo: MeshObject = currentObject as MeshObject;
 									mo.materials = [md];
 									MakeMaterial.parseMeshPreviewMaterial(md);
@@ -228,7 +228,7 @@ class TabObjects {
 
 					if (Context.raw.selectedObject.name == "Scene") {
 						let p = Scene.world;
-						p.raw.strength = ui.slider(Zui.handle("tabobjects_16", {value: p.raw.strength}), "Environment", 0.0, 5.0, true);
+						p.strength = ui.slider(Zui.handle("tabobjects_16", {value: p.strength}), "Environment", 0.0, 5.0, true);
 					}
 					else if (Context.raw.selectedObject.constructor == LightObject) {
 						let light = (Context.raw.selectedObject as LightObject);

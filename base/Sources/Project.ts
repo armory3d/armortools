@@ -20,7 +20,7 @@ class Project {
 	static atlasNames: string[] = null;
 	///end
 	///if is_lab
-	static materialData: MaterialData = null; ////
+	static materialData: TMaterialData = null; ////
 	static materials: any[] = null; ////
 	static nodes: Nodes;
 	static canvas: TNodeCanvas;
@@ -124,7 +124,7 @@ class Project {
 		///if (is_paint || is_sculpt)
 		if (Context.raw.mergedObject != null) {
 			Context.raw.mergedObject.remove();
-			Data.deleteMesh(Context.raw.mergedObject.data.handle);
+			Data.deleteMesh(Context.raw.mergedObject.data._handle);
 			Context.raw.mergedObject = null;
 		}
 		Context.raw.layerPreviewDirty = true;
@@ -139,7 +139,7 @@ class Project {
 		for (let i = 1; i < Project.paintObjects.length; ++i) {
 			let p = Project.paintObjects[i];
 			if (p == Context.raw.paintObject) continue;
-			Data.deleteMesh(p.data.handle);
+			Data.deleteMesh(p.data._handle);
 			p.remove();
 		}
 		let meshes = Scene.meshes;
@@ -149,11 +149,11 @@ class Project {
 			if (Context.raw.projectObjects.indexOf(m) == -1 &&
 				m.name != ".ParticleEmitter" &&
 				m.name != ".Particle") {
-				Data.deleteMesh(m.data.handle);
+				Data.deleteMesh(m.data._handle);
 				m.remove();
 			}
 		}
-		let handle = Context.raw.paintObject.data.handle;
+		let handle = Context.raw.paintObject.data._handle;
 		if (handle != "SceneSphere" && handle != "ScenePlane") {
 			Data.deleteMesh(handle);
 		}
@@ -194,7 +194,8 @@ class Project {
 				});
 			}
 
-			let md = new MeshData(raw, (md: MeshData) => {});
+			let md: TMeshData;
+			MeshData.create(raw, (mdata: TMeshData) => { md = mdata; });
 			Data.cachedMeshes.set("SceneTessellated", md);
 
 			if (Context.raw.projectType == ProjectModel.ModelTessellatedPlane) {
@@ -203,7 +204,7 @@ class Project {
 		}
 
 		let n = Context.raw.projectType == ProjectModel.ModelRoundedCube ? ".Cube" : "Tessellated";
-		Data.getMesh("Scene", n, (md: MeshData) => {
+		Data.getMesh("Scene", n, (md: TMeshData) => {
 
 			let current = Graphics2.current;
 			if (current != null) current.end();
@@ -220,7 +221,7 @@ class Project {
 			///if (is_paint || is_sculpt)
 			while (Project.materials.length > 0) SlotMaterial.unload(Project.materials.pop());
 			///end
-			Data.getMaterial("Scene", "Material", (m: MaterialData) => {
+			Data.getMaterial("Scene", "Material", (m: TMaterialData) => {
 				///if (is_paint || is_sculpt)
 				Project.materials.push(SlotMaterial.create(m));
 				///end
@@ -291,13 +292,13 @@ class Project {
 
 			Context.raw.savedEnvmap = null;
 			Context.raw.envmapLoaded = false;
-			Scene.world.envmap = Context.raw.emptyEnvmap;
-			Scene.world.raw.envmap = "World_radiance.k";
+			Scene.world._envmap = Context.raw.emptyEnvmap;
+			Scene.world.envmap = "World_radiance.k";
 			Context.raw.showEnvmapHandle.selected = Context.raw.showEnvmap = false;
-			Scene.world.radiance = Context.raw.defaultRadiance;
-			Scene.world.radianceMipmaps = Context.raw.defaultRadianceMipmaps;
-			Scene.world.irradiance = Context.raw.defaultIrradiance;
-			Scene.world.raw.strength = 4.0;
+			Scene.world._radiance = Context.raw.defaultRadiance;
+			Scene.world._radianceMipmaps = Context.raw.defaultRadianceMipmaps;
+			Scene.world._irradiance = Context.raw.defaultIrradiance;
+			Scene.world.strength = 4.0;
 
 			///if (is_paint || is_sculpt)
 			Context.initTool();

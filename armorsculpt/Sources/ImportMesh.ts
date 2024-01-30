@@ -35,7 +35,7 @@ class ImportMesh {
 	static finishImport = () => {
 		if (Context.raw.mergedObject != null) {
 			Context.raw.mergedObject.remove();
-			Data.deleteMesh(Context.raw.mergedObject.data.handle);
+			Data.deleteMesh(Context.raw.mergedObject.data._handle);
 			Context.raw.mergedObject = null;
 		}
 
@@ -79,17 +79,17 @@ class ImportMesh {
 			let raw = ImportMesh.rawMesh(mesh);
 			if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
 
-			new MeshData(raw, (md: MeshData) => {
+			MeshData.create(raw, (md: TMeshData) => {
 				Context.raw.paintObject = Context.mainObject();
 
 				Context.selectPaintObject(Context.mainObject());
 				for (let i = 0; i < Project.paintObjects.length; ++i) {
 					let p = Project.paintObjects[i];
 					if (p == Context.raw.paintObject) continue;
-					Data.deleteMesh(p.data.handle);
+					Data.deleteMesh(p.data._handle);
 					p.remove();
 				}
-				let handle = Context.raw.paintObject.data.handle;
+				let handle = Context.raw.paintObject.data._handle;
 				if (handle != "SceneSphere" && handle != "ScenePlane") {
 					Data.deleteMesh(handle);
 				}
@@ -108,8 +108,8 @@ class ImportMesh {
 				Context.raw.paintObject.name = mesh.name;
 				Project.paintObjects = [Context.raw.paintObject];
 
-				md.handle = raw.name;
-				Data.cachedMeshes.set(md.handle, md);
+				md._handle = raw.name;
+				Data.cachedMeshes.set(md._handle, md);
 
 				Context.raw.ddirty = 4;
 				UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
@@ -147,7 +147,7 @@ class ImportMesh {
 			let raw = ImportMesh.rawMesh(mesh);
 			if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
 
-			new MeshData(raw, (md: MeshData) => {
+			MeshData.create(raw, (md: TMeshData) => {
 
 				let object = Scene.addMeshObject(md, Context.raw.paintObject.materials, Context.raw.paintObject);
 				object.name = mesh.name;
@@ -157,15 +157,15 @@ class ImportMesh {
 				for (let p of Project.paintObjects) {
 					if (p.name == object.name) {
 						p.name += ".001";
-						p.data.handle += ".001";
-						Data.cachedMeshes.set(p.data.handle, p.data);
+						p.data._handle += ".001";
+						Data.cachedMeshes.set(p.data._handle, p.data);
 					}
 				}
 
 				Project.paintObjects.push(object);
 
-				md.handle = raw.name;
-				Data.cachedMeshes.set(md.handle, md);
+				md._handle = raw.name;
+				Data.cachedMeshes.set(md._handle, md);
 
 				Context.raw.ddirty = 4;
 				UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
