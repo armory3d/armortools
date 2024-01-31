@@ -182,7 +182,7 @@ class RenderPathPaint {
 	}
 
 	static drawCursor = (mx: f32, my: f32, radius: f32, tintR = 1.0, tintG = 1.0, tintB = 1.0) => {
-		let plane = (Scene.getChild(".Plane") as MeshObject);
+		let plane = Scene.getChild(".Plane").ext;
 		let geom = plane.data;
 
 		let g = RenderPath.frameG;

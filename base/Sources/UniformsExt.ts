@@ -102,7 +102,7 @@ class UniformsExt {
 				return val;
 			}
 			case "_objectId": {
-				return Project.paintObjects.indexOf(object as MeshObject);
+				return Project.paintObjects.indexOf(object.ext);
 			}
 			///if is_paint
 			case "_dilateRadius": {

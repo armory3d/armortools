@@ -58,31 +58,31 @@ class RenderPathBase {
 	static drawCompass = (currentG: Graphics4) => {
 		if (Context.raw.showCompass) {
 			let cam = Scene.camera;
-			let compass: MeshObject = Scene.getChild(".Compass") as MeshObject;
+			let compass: MeshObject = Scene.getChild(".Compass").ext;
 
-			let _visible = compass.visible;
-			let _parent = compass.parent;
-			let _loc = compass.transform.loc;
-			let _rot = compass.transform.rot;
-			let crot = cam.transform.rot;
+			let _visible = compass.base.visible;
+			let _parent = compass.base.parent;
+			let _loc = compass.base.transform.loc;
+			let _rot = compass.base.transform.rot;
+			let crot = cam.base.transform.rot;
 			let ratio = App.w() / App.h();
 			let _P = cam.P;
 			cam.P = Mat4.ortho(-8 * ratio, 8 * ratio, -8, 8, -2, 2);
-			compass.visible = true;
-			compass.parent = cam;
-			compass.transform.loc = new Vec4(7.4 * ratio, 7.0, -1);
-			compass.transform.rot = new Quat(-crot.x, -crot.y, -crot.z, crot.w);
-			compass.transform.scale.set(0.4, 0.4, 0.4);
-			compass.transform.buildMatrix();
+			compass.base.visible = true;
+			compass.base.parent = cam.base;
+			compass.base.transform.loc = new Vec4(7.4 * ratio, 7.0, -1);
+			compass.base.transform.rot = new Quat(-crot.x, -crot.y, -crot.z, crot.w);
+			compass.base.transform.scale.set(0.4, 0.4, 0.4);
+			compass.base.transform.buildMatrix();
 			compass.frustumCulling = false;
 			compass.render(currentG, "overlay", []);
 
 			cam.P = _P;
-			compass.visible = _visible;
-			compass.parent = _parent;
-			compass.transform.loc = _loc;
-			compass.transform.rot = _rot;
-			compass.transform.buildMatrix();
+			compass.base.visible = _visible;
+			compass.base.parent = _parent;
+			compass.base.transform.loc = _loc;
+			compass.base.transform.rot = _rot;
+			compass.base.transform.buildMatrix();
 		}
 	}
 
@@ -101,7 +101,7 @@ class RenderPathBase {
 			let cam = Scene.camera;
 			if (Context.raw.viewIndexLast > -1) {
 				// Save current viewport camera
-				Camera.views[Context.raw.viewIndexLast].setFrom(cam.transform.local);
+				Camera.views[Context.raw.viewIndexLast].setFrom(cam.base.transform.local);
 			}
 
 			let decal = Context.raw.tool == WorkspaceTool.ToolDecal || Context.raw.tool == WorkspaceTool.ToolText;
@@ -111,7 +111,7 @@ class RenderPathBase {
 				Context.raw.ddirty = 1;
 			}
 
-			cam.transform.setMatrix(Camera.views[Context.raw.viewIndex]);
+			cam.base.transform.setMatrix(Camera.views[Context.raw.viewIndex]);
 			cam.buildMatrix();
 			cam.buildProjection();
 		}
@@ -253,7 +253,7 @@ class RenderPathBase {
 			let cam = Scene.camera;
 
 			Context.raw.viewIndex = Context.raw.viewIndex == 0 ? 1 : 0;
-			cam.transform.setMatrix(Camera.views[Context.raw.viewIndex]);
+			cam.base.transform.setMatrix(Camera.views[Context.raw.viewIndex]);
 			cam.buildMatrix();
 			cam.buildProjection();
 
@@ -271,7 +271,7 @@ class RenderPathBase {
 			///end
 
 			Context.raw.viewIndex = Context.raw.viewIndex == 0 ? 1 : 0;
-			cam.transform.setMatrix(Camera.views[Context.raw.viewIndex]);
+			cam.base.transform.setMatrix(Camera.views[Context.raw.viewIndex]);
 			cam.buildMatrix();
 			cam.buildProjection();
 		}

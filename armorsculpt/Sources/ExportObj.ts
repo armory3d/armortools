@@ -60,7 +60,7 @@ class ExportObj {
 				}
 			}
 
-			ExportObj.writeString(o, "o " + p.name + "\n");
+			ExportObj.writeString(o, "o " + p.base.name + "\n");
 			for (let i = 0; i < pi; ++i) {
 				ExportObj.writeString(o, "v ");
 				let vx = posa2[i * 3] * sc + "";

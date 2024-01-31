@@ -115,7 +115,7 @@ class UIMenubar {
 
 				if (UIHeader.worktab.position == SpaceType.Space3D) {
 					if (UIMenubar._savedCamera != null) {
-						Scene.camera.transform.setMatrix(UIMenubar._savedCamera);
+						Scene.camera.base.transform.setMatrix(UIMenubar._savedCamera);
 						UIMenubar._savedCamera = null;
 					}
 					Scene.meshes = [Context.mainObject()];
@@ -138,18 +138,18 @@ class UIMenubar {
 						};
 						let md: TMeshData;
 						MeshData.create(raw, (_md: TMeshData) => { md = _md; });
-						let dotPlane: MeshObject = Scene.getChild(".Plane") as MeshObject;
+						let dotPlane: MeshObject = Scene.getChild(".Plane").ext;
 						UIMenubar._plane = new MeshObject(md, dotPlane.materials);
 						array_remove(Scene.meshes, UIMenubar._plane);
 					}
 
 					if (UIMenubar._savedCamera == null) {
-						UIMenubar._savedCamera = Scene.camera.transform.local.clone();
+						UIMenubar._savedCamera = Scene.camera.base.transform.local.clone();
 					}
 					Scene.meshes = [UIMenubar._plane];
 					let m = Mat4.identity();
 					m.translate(0, 0, 1.6);
-					Scene.camera.transform.setMatrix(m);
+					Scene.camera.base.transform.setMatrix(m);
 				}
 				///if (krom_direct3d12 || krom_vulkan || krom_metal)
 				RenderPathRaytrace.ready = false;

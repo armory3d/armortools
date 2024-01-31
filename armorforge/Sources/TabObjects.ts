@@ -15,7 +15,7 @@ class TabObjects {
 			ui.row([1 / 4]);
 			if (ui.button("Import")) {
 				Project.importMesh(false, () => {
-					Project.paintObjects.pop().setParent(null);
+					Project.paintObjects.pop().base.setParent(null);
 				});
 			}
 			ui.endSticky();
@@ -96,7 +96,7 @@ class TabObjects {
 								}
 
 								Data.getMaterial("Scene", "TempMaterial" + TabObjects.materialId, (md: TMaterialData) => {
-									let mo: MeshObject = currentObject as MeshObject;
+									let mo: MeshObject = currentObject.ext;
 									mo.materials = [md];
 									MakeMaterial.parseMeshPreviewMaterial(md);
 								});

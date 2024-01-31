@@ -35,9 +35,9 @@ class UtilMesh {
 			// Translate
 			///if is_forge
 			for (let j = 0; j < Math.floor(va0.length / 4); ++j) {
-				va0[j * 4     + voff * 4] += Math.floor(paintObjects[i].transform.worldx() * 32767);
-				va0[j * 4 + 1 + voff * 4] += Math.floor(paintObjects[i].transform.worldy() * 32767);
-				va0[j * 4 + 2 + voff * 4] += Math.floor(paintObjects[i].transform.worldz() * 32767);
+				va0[j * 4     + voff * 4] += Math.floor(paintObjects[i].base.transform.worldx() * 32767);
+				va0[j * 4 + 1 + voff * 4] += Math.floor(paintObjects[i].base.transform.worldy() * 32767);
+				va0[j * 4 + 2 + voff * 4] += Math.floor(paintObjects[i].base.transform.worldz() * 32767);
 			}
 			///end
 
@@ -61,7 +61,7 @@ class UtilMesh {
 		}
 
 		let raw: TMeshData = {
-			name: Context.raw.paintObject.name,
+			name: Context.raw.paintObject.base.name,
 			vertex_arrays: [
 				{ values: va0, attrib: "pos", data: "short4norm" },
 				{ values: va1, attrib: "nor", data: "short2norm" },
@@ -78,9 +78,9 @@ class UtilMesh {
 		UtilMesh.removeMergedMesh();
 		MeshData.create(raw, (md: TMeshData) => {
 			Context.raw.mergedObject = new MeshObject(md, Context.raw.paintObject.materials);
-			Context.raw.mergedObject.name = Context.raw.paintObject.name + "_merged";
+			Context.raw.mergedObject.base.name = Context.raw.paintObject.base.name + "_merged";
 			Context.raw.mergedObject.force_context = "paint";
-			Context.raw.mergedObject.setParent(Context.mainObject());
+			Context.raw.mergedObject.base.setParent(Context.mainObject().base);
 		});
 
 		///if (krom_direct3d12 || krom_vulkan || krom_metal)
@@ -297,8 +297,8 @@ class UtilMesh {
 				if (Math.abs(va[i * 4 + 1] * sc - dy) > maxScale) maxScale = Math.abs(va[i * 4 + 1] * sc - dy);
 				if (Math.abs(va[i * 4 + 2] * sc - dz) > maxScale) maxScale = Math.abs(va[i * 4 + 2] * sc - dz);
 			}
-			o.transform.scaleWorld = o.data.scale_pos = o.data.scale_pos = maxScale;
-			o.transform.buildMatrix();
+			o.base.transform.scaleWorld = o.data.scale_pos = o.data.scale_pos = maxScale;
+			o.base.transform.buildMatrix();
 
 			for (let i = 0; i < Math.floor(va.length / 4); ++i) {
 				va[i * 4    ] = Math.floor((va[i * 4    ] * sc - dx) / maxScale * 32767);

@@ -157,7 +157,7 @@ class TabLayers {
 	static comboFilter = () => {
 		let ui = UIBase.ui;
 		let ar = [tr("All")];
-		for (let p of Project.paintObjects) ar.push(p.name);
+		for (let p of Project.paintObjects) ar.push(p.base.name);
 		let atlases = Project.getUsedAtlases();
 		if (atlases != null) for (let a of atlases) ar.push(a);
 		let filterHandle = Zui.handle("tablayers_0");
@@ -165,14 +165,14 @@ class TabLayers {
 		Context.raw.layerFilter = ui.combo(filterHandle, ar, tr("Filter"), false, Align.Left);
 		if (filterHandle.changed) {
 			for (let p of Project.paintObjects) {
-				p.visible = Context.raw.layerFilter == 0 || p.name == ar[Context.raw.layerFilter] || Project.isAtlasObject(p);
+				p.base.visible = Context.raw.layerFilter == 0 || p.base.name == ar[Context.raw.layerFilter] || Project.isAtlasObject(p);
 			}
 			if (Context.raw.layerFilter == 0 && Context.raw.mergedObjectIsAtlas) { // All
 				UtilMesh.mergeMesh();
 			}
 			else if (Context.raw.layerFilter > Project.paintObjects.length) { // Atlas
 				let visibles: MeshObject[] = [];
-				for (let p of Project.paintObjects) if (p.visible) visibles.push(p);
+				for (let p of Project.paintObjects) if (p.base.visible) visibles.push(p);
 				UtilMesh.mergeMesh(visibles);
 			}
 			Base.setObjectMask();
@@ -448,7 +448,7 @@ class TabLayers {
 
 	static comboObject = (ui: Zui, l: SlotLayerRaw, label = false): Handle => {
 		let ar = [tr("Shared")];
-		for (let p of Project.paintObjects) ar.push(p.name);
+		for (let p of Project.paintObjects) ar.push(p.base.name);
 		let atlases = Project.getUsedAtlases();
 		if (atlases != null) for (let a of atlases) ar.push(a);
 		let objectHandle = Zui.handle("tablayers_2").nest(l.id);

@@ -234,7 +234,7 @@ class UIBase {
 
 		if (UIBase.ui.SCALE() > 1) UIBase.setIconScale();
 
-		Context.raw.paintObject = (Scene.getChild(".Cube") as MeshObject);
+		Context.raw.paintObject = Scene.getChild(".Cube").ext;
 		Project.paintObjects = [Context.raw.paintObject];
 
 		if (Project.filepath == "") {
@@ -710,27 +710,27 @@ class UIBase {
 				}
 				History.pushUndo = true;
 				Context.raw.particleHitX = Context.raw.particleHitY = Context.raw.particleHitZ = 0;
-				Scene.spawnObject(".Sphere", null, (o: Object) => {
+				Scene.spawnObject(".Sphere", null, (o: BaseObject) => {
 					Data.getMaterial("Scene", ".Gizmo", (md: TMaterialData) => {
-						let mo: MeshObject = o as MeshObject;
-						mo.name = ".Bullet";
+						let mo: MeshObject = o.ext;
+						mo.base.name = ".Bullet";
 						mo.materials[0] = md;
-						mo.visible = true;
+						mo.base.visible = true;
 
 						let camera = Scene.camera;
-						let ct = camera.transform;
-						mo.transform.loc.set(ct.worldx(), ct.worldy(), ct.worldz());
-						mo.transform.scale.set(Context.raw.brushRadius * 0.2, Context.raw.brushRadius * 0.2, Context.raw.brushRadius * 0.2);
-						mo.transform.buildMatrix();
+						let ct = camera.base.transform;
+						mo.base.transform.loc.set(ct.worldx(), ct.worldy(), ct.worldz());
+						mo.base.transform.scale.set(Context.raw.brushRadius * 0.2, Context.raw.brushRadius * 0.2, Context.raw.brushRadius * 0.2);
+						mo.base.transform.buildMatrix();
 
 						let body = PhysicsBody.create();
 						body.shape = ShapeType.ShapeSphere;
 						body.mass = 1.0;
 						body.ccd = true;
-						mo.transform.radius /= 10; // Lower ccd radius
-						PhysicsBody.init(body, mo);
-						(mo as any).physicsBody = body;
-						mo.transform.radius *= 10;
+						mo.base.transform.radius /= 10; // Lower ccd radius
+						PhysicsBody.init(body, mo.base);
+						(mo.base as any).physicsBody = body;
+						mo.base.transform.radius *= 10;
 
 						let ray = RayCaster.getRay(Mouse.viewX, Mouse.viewY, camera);
 						PhysicsBody.applyImpulse(body, ray.direction.mult(0.15));
@@ -1019,7 +1019,7 @@ class UIBase {
 						else if (Context.raw.tool == WorkspaceTool.ToolParticle) {
 							// Reset particles
 							///if arm_particles
-							let emitter: MeshObject = Scene.getChild(".ParticleEmitter") as MeshObject;
+							let emitter: MeshObject = Scene.getChild(".ParticleEmitter").ext;
 							let psys = emitter.particleSystems[0];
 							psys.time = 0;
 							// psys.time = psys.seed * psys.animtime;

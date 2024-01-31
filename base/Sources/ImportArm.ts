@@ -78,8 +78,8 @@ class ImportArm {
 				Scene.world.strength = Project.raw.envmap_strength;
 			}
 			if (Project.raw.camera_world != null) {
-				Scene.camera.transform.local = Mat4.fromFloat32Array(Project.raw.camera_world);
-				Scene.camera.transform.decompose();
+				Scene.camera.base.transform.local = Mat4.fromFloat32Array(Project.raw.camera_world);
+				Scene.camera.base.transform.decompose();
 				Scene.camera.data.fov = Project.raw.camera_fov;
 				Scene.camera.buildProjection();
 				let origin = Project.raw.camera_origin;
@@ -134,9 +134,9 @@ class ImportArm {
 			///end
 
 				Context.raw.paintObject.setData(md);
-				Context.raw.paintObject.transform.scale.set(1, 1, 1);
-				Context.raw.paintObject.transform.buildMatrix();
-				Context.raw.paintObject.name = md.name;
+				Context.raw.paintObject.base.transform.scale.set(1, 1, 1);
+				Context.raw.paintObject.base.transform.buildMatrix();
+				Context.raw.paintObject.base.name = md.name;
 				Project.paintObjects = [Context.raw.paintObject];
 			});
 
@@ -144,8 +144,8 @@ class ImportArm {
 			for (let i = 1; i < project.mesh_datas.length; ++i) {
 				let raw = project.mesh_datas[i];
 				MeshData.create(raw, (md: TMeshData) => {
-					let object = Scene.addMeshObject(md, Context.raw.paintObject.materials, Context.raw.paintObject);
-					object.name = md.name;
+					let object = Scene.addMeshObject(md, Context.raw.paintObject.materials, Context.raw.paintObject.base);
+					object.base.name = md.name;
 					object.skip_context = "paint";
 					Project.paintObjects.push(object);
 				});
@@ -169,7 +169,7 @@ class ImportArm {
 			Context.selectPaintObject(Context.mainObject());
 			Viewport.scaleToBounds();
 			Context.raw.paintObject.skip_context = "paint";
-			Context.raw.mergedObject.visible = true;
+			Context.raw.mergedObject.base.visible = true;
 
 			///if (is_paint || is_sculpt)
 			let tex = Project.layers[0].texpaint;
@@ -371,15 +371,15 @@ class ImportArm {
 					object = Context.raw.paintObject;
 				}
 				else {
-					object = Scene.addMeshObject(md, Context.raw.paintObject.materials, Context.raw.paintObject);
-					object.name = md.name;
+					object = Scene.addMeshObject(md, Context.raw.paintObject.materials, Context.raw.paintObject.base);
+					object.base.name = md.name;
 					object.skip_context = "paint";
 					md._handle = md.name;
 					Data.cachedMeshes.set(md._handle, md);
 				}
-				object.transform.scale.set(1, 1, 1);
-				object.transform.buildMatrix();
-				object.name = md.name;
+				object.base.transform.scale.set(1, 1, 1);
+				object.base.transform.buildMatrix();
+				object.base.name = md.name;
 				Project.paintObjects.push(object);
 				UtilMesh.mergeMesh();
 				Viewport.scaleToBounds();

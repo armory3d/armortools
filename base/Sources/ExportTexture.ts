@@ -15,7 +15,7 @@ class ExportTexture {
 			let udimTiles: string[] = [];
 			for (let l of Project.layers) {
 				if (SlotLayer.getObjectMask(l) > 0) {
-					let name = Project.paintObjects[SlotLayer.getObjectMask(l) - 1].name;
+					let name = Project.paintObjects[SlotLayer.getObjectMask(l) - 1].base.name;
 					if (name.substr(name.length - 5, 2) == ".1") { // tile.1001
 						udimTiles.push(name.substr(name.length - 5));
 					}
@@ -30,7 +30,7 @@ class ExportTexture {
 			let objectNames: string[] = [];
 			for (let l of Project.layers) {
 				if (SlotLayer.getObjectMask(l) > 0) {
-					let name = Project.paintObjects[SlotLayer.getObjectMask(l) - 1].name;
+					let name = Project.paintObjects[SlotLayer.getObjectMask(l) - 1].base.name;
 					if (objectNames.indexOf(name) == -1) {
 						objectNames.push(name);
 					}
@@ -94,8 +94,8 @@ class ExportTexture {
 		Context.raw.tool = WorkspaceTool.ToolFill;
 		MakeMaterial.parsePaintMaterial();
 		let _paintObject = Context.raw.paintObject;
-		let planeo: MeshObject = Scene.getChild(".Plane") as MeshObject;
-		planeo.visible = true;
+		let planeo: MeshObject = Scene.getChild(".Plane").ext;
+		planeo.base.visible = true;
 		Context.raw.paintObject = planeo;
 		Context.raw.pdirty = 1;
 		RenderPathPaint.useLiveLayer(true);
@@ -104,7 +104,7 @@ class ExportTexture {
 		Context.raw.tool = _tool;
 		MakeMaterial.parsePaintMaterial();
 		Context.raw.pdirty = 0;
-		planeo.visible = false;
+		planeo.base.visible = false;
 		Context.raw.paintObject = _paintObject;
 
 		ExportTexture.runLayers(path, [RenderPathPaint.liveLayer], "", true);
@@ -146,7 +146,7 @@ class ExportTexture {
 		// Append object mask name
 		let exportSelected = Context.raw.layersExport == ExportMode.ExportSelected;
 		if (exportSelected && SlotLayer.getObjectMask(layers[0]) > 0) {
-			f += "_" + Project.paintObjects[SlotLayer.getObjectMask(layers[0]) - 1].name;
+			f += "_" + Project.paintObjects[SlotLayer.getObjectMask(layers[0]) - 1].base.name;
 		}
 		if (!isUdim && !exportSelected && objectName != "") {
 			f += "_" + objectName;
@@ -169,9 +169,9 @@ class ExportTexture {
 			if (!SlotLayer.isLayer(l1)) continue;
 
 			if (objectName != "" && SlotLayer.getObjectMask(l1) > 0) {
-				if (isUdim && !Project.paintObjects[SlotLayer.getObjectMask(l1) - 1].name.endsWith(objectName)) continue;
+				if (isUdim && !Project.paintObjects[SlotLayer.getObjectMask(l1) - 1].base.name.endsWith(objectName)) continue;
 				let perObject = Context.raw.layersExport == ExportMode.ExportPerObject;
-				if (perObject && Project.paintObjects[SlotLayer.getObjectMask(l1) - 1].name != objectName) continue;
+				if (perObject && Project.paintObjects[SlotLayer.getObjectMask(l1) - 1].base.name != objectName) continue;
 			}
 
 			let mask = empty;

@@ -147,8 +147,8 @@ class Project {
 		for (let i = 0; i < len; ++i) {
 			let m = meshes[len - i - 1];
 			if (Context.raw.projectObjects.indexOf(m) == -1 &&
-				m.name != ".ParticleEmitter" &&
-				m.name != ".Particle") {
+				m.base.name != ".ParticleEmitter" &&
+				m.base.name != ".Particle") {
 				Data.deleteMesh(m.data._handle);
 				m.remove();
 			}
@@ -214,9 +214,9 @@ class Project {
 			///end
 
 			Context.raw.paintObject.setData(md);
-			Context.raw.paintObject.transform.scale.set(1, 1, 1);
-			Context.raw.paintObject.transform.buildMatrix();
-			Context.raw.paintObject.name = n;
+			Context.raw.paintObject.base.transform.scale.set(1, 1, 1);
+			Context.raw.paintObject.base.transform.buildMatrix();
+			Context.raw.paintObject.base.name = n;
 			Project.paintObjects = [Context.raw.paintObject];
 			///if (is_paint || is_sculpt)
 			while (Project.materials.length > 0) SlotMaterial.unload(Project.materials.pop());

@@ -165,7 +165,7 @@ class Context {
 
 	static mainObject = (): MeshObject => {
 		///if (is_paint || is_sculpt)
-		for (let po of Project.paintObjects) if (po.children.length > 0) return po;
+		for (let po of Project.paintObjects) if (po.base.children.length > 0) return po;
 		return Project.paintObjects[0];
 		///end
 

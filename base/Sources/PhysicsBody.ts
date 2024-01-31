@@ -354,7 +354,7 @@ class PhysicsBody {
 
 	static fillConvexHull = (pb: PhysicsBodyRaw, scale: Vec4, margin: f32): Ammo.btConvexHullShape => {
 		// Check whether shape already exists
-		let data = (pb.object as MeshObject).data;
+		let data = pb.object.ext.data;
 		let shape = PhysicsBody.convexHullCache.get(data);
 		if (shape != null) {
 			PhysicsBody.usersCache.set(data, PhysicsBody.usersCache.get(data) + 1);
@@ -386,7 +386,7 @@ class PhysicsBody {
 
 	static fillTriangleMesh = (pb: PhysicsBodyRaw, scale: Vec4): Ammo.btTriangleMesh => {
 		// Check whether shape already exists
-		let data = (pb.object as MeshObject).data;
+		let data = pb.object.ext.data;
 		let triangleMesh = PhysicsBody.triangleMeshCache.get(data);
 		if (triangleMesh != null) {
 			PhysicsBody.usersCache.set(data, PhysicsBody.usersCache.get(data) + 1);
@@ -431,7 +431,7 @@ class PhysicsBody {
 
 		// Delete shape if no other user is found
 		if (pb.shape == ShapeType.ShapeConvexHull || pb.shape == ShapeType.ShapeMesh) {
-			let data = (pb.object as MeshObject).data;
+			let data = pb.object.ext.data;
 			let i = PhysicsBody.usersCache.get(data) - 1;
 			PhysicsBody.usersCache.set(data, i);
 			if (i <= 0) {

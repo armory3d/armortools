@@ -105,7 +105,7 @@ class MakeMaterial {
 	}
 
 	static getDisplaceStrength = (): f32 => {
-		let sc = Context.mainObject().transform.scale.x;
+		let sc = Context.mainObject().base.transform.scale.x;
 		return Config.raw.displace_strength * 0.02 * sc;
 	}
 

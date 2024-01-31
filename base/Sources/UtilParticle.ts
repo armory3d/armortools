@@ -69,10 +69,10 @@ class UtilParticle {
 			}
 
 			Scene.spawnObject(".Sphere", null, (o: BaseObject) => {
-				let mo: MeshObject = o as MeshObject;
-				mo.name = ".ParticleEmitter";
-				mo.raw = JSON.parse(JSON.stringify(mo.raw));
-				mo.raw.particle_refs = particle_refs;
+				let mo: MeshObject = o.ext;
+				mo.base.name = ".ParticleEmitter";
+				mo.base.raw = JSON.parse(JSON.stringify(mo.base.raw));
+				mo.base.raw.particle_refs = particle_refs;
 				///if arm_particles
 				mo.setupParticleSystem("Scene", particle_refs[0]);
 				///end
@@ -99,14 +99,14 @@ class UtilParticle {
 
 		let po = Context.raw.mergedObject != null ? Context.raw.mergedObject : Context.raw.paintObject;
 
-		po.transform.scale.x = po.parent.transform.scale.x;
-		po.transform.scale.y = po.parent.transform.scale.y;
-		po.transform.scale.z = po.parent.transform.scale.z;
+		po.base.transform.scale.x = po.base.parent.transform.scale.x;
+		po.base.transform.scale.y = po.base.parent.transform.scale.y;
+		po.base.transform.scale.z = po.base.parent.transform.scale.z;
 
 		Context.raw.paintBody = PhysicsBody.create();
 		Context.raw.paintBody.shape = ShapeType.ShapeMesh;
-		PhysicsBody.init(Context.raw.paintBody, po);
-		(po as any).physicsBody = Context.raw.paintBody;
+		PhysicsBody.init(Context.raw.paintBody, po.base);
+		(po.base as any).physicsBody = Context.raw.paintBody;
 	}
 
 	///end

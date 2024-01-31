@@ -12,8 +12,8 @@ class UtilRender {
 	static makeMaterialPreview = () => {
 		Context.raw.materialPreview = true;
 
-		let sphere: MeshObject = Scene.getChild(".Sphere") as MeshObject;
-		sphere.visible = true;
+		let sphere: MeshObject = Scene.getChild(".Sphere").ext;
+		sphere.base.visible = true;
 		let meshes = Scene.meshes;
 		Scene.meshes = [sphere];
 		let painto = Context.raw.paintObject;
@@ -22,9 +22,9 @@ class UtilRender {
 		sphere.materials[0] = Project.materials[0].data;
 		Context.raw.material.previewReady = true;
 
-		Context.raw.savedCamera.setFrom(Scene.camera.transform.local);
+		Context.raw.savedCamera.setFrom(Scene.camera.base.transform.local);
 		let m = new Mat4(0.9146286343879498, -0.0032648027153306235, 0.404281837254303, 0.4659988049397712, 0.404295023959927, 0.007367569133732468, -0.9145989516155143, -1.0687517188018691, 0.000007410128652369705, 0.9999675337275382, 0.008058532943908717, 0.015935682577325486, 0, 0, 0, 1);
-		Scene.camera.transform.setMatrix(m);
+		Scene.camera.base.transform.setMatrix(m);
 		let savedFov = Scene.camera.data.fov;
 		Scene.camera.data.fov = 0.92;
 		Viewport.updateCameraType(CameraType.CameraPerspective);
@@ -59,11 +59,11 @@ class UtilRender {
 		RenderPath.lastH = App.h();
 
 		// Restore
-		sphere.visible = false;
+		sphere.base.visible = false;
 		Scene.meshes = meshes;
 		Context.raw.paintObject = painto;
 
-		Scene.camera.transform.setMatrix(Context.raw.savedCamera);
+		Scene.camera.base.transform.setMatrix(Context.raw.savedCamera);
 		Viewport.updateCameraType(Context.raw.cameraType);
 		Scene.camera.data.fov = savedFov;
 		Scene.camera.buildProjection();
@@ -87,25 +87,25 @@ class UtilRender {
 		}
 		Context.raw.decalPreview = true;
 
-		let plane: MeshObject = Scene.getChild(".Plane") as MeshObject;
-		plane.transform.scale.set(1, 1, 1);
-		plane.transform.rot.fromEuler(-Math.PI / 2, 0, 0);
-		plane.transform.buildMatrix();
-		plane.visible = true;
+		let plane: MeshObject = Scene.getChild(".Plane").ext;
+		plane.base.transform.scale.set(1, 1, 1);
+		plane.base.transform.rot.fromEuler(-Math.PI / 2, 0, 0);
+		plane.base.transform.buildMatrix();
+		plane.base.visible = true;
 		let meshes = Scene.meshes;
 		Scene.meshes = [plane];
 		let painto = Context.raw.paintObject;
 		Context.raw.paintObject = plane;
 
-		Context.raw.savedCamera.setFrom(Scene.camera.transform.local);
+		Context.raw.savedCamera.setFrom(Scene.camera.base.transform.local);
 		let m = Mat4.identity();
 		m.translate(0, 0, 1);
-		Scene.camera.transform.setMatrix(m);
+		Scene.camera.base.transform.setMatrix(m);
 		let savedFov = Scene.camera.data.fov;
 		Scene.camera.data.fov = 0.92;
 		Viewport.updateCameraType(CameraType.CameraPerspective);
 		let light = Scene.lights[0];
-		light.visible = false;
+		light.base.visible = false;
 		Scene.world._envmap = Context.raw.previewEnvmap;
 
 		// No resize
@@ -125,17 +125,17 @@ class UtilRender {
 		RenderPath.lastH = App.h();
 
 		// Restore
-		plane.visible = false;
+		plane.base.visible = false;
 		Scene.meshes = meshes;
 		Context.raw.paintObject = painto;
 
-		Scene.camera.transform.setMatrix(Context.raw.savedCamera);
+		Scene.camera.base.transform.setMatrix(Context.raw.savedCamera);
 		Scene.camera.data.fov = savedFov;
 		Viewport.updateCameraType(Context.raw.cameraType);
 		Scene.camera.buildProjection();
 		Scene.camera.buildMatrix();
 		light = Scene.lights[0];
-		light.visible = true;
+		light.base.visible = true;
 		Scene.world._envmap = Context.raw.showEnvmap ? Context.raw.savedEnvmap : Context.raw.emptyEnvmap;
 
 		MakeMaterial.parseMeshMaterial();
@@ -244,37 +244,37 @@ class UtilRender {
 		let painto = Context.raw.paintObject;
 		let visibles: bool[] = [];
 		for (let p of Project.paintObjects) {
-			visibles.push(p.visible);
-			p.visible = false;
+			visibles.push(p.base.visible);
+			p.base.visible = false;
 		}
 		let mergedObjectVisible = false;
 		if (Context.raw.mergedObject != null) {
-			mergedObjectVisible = Context.raw.mergedObject.visible;
-			Context.raw.mergedObject.visible = false;
+			mergedObjectVisible = Context.raw.mergedObject.base.visible;
+			Context.raw.mergedObject.base.visible = false;
 		}
 
 		let cam = Scene.camera;
-		Context.raw.savedCamera.setFrom(cam.transform.local);
+		Context.raw.savedCamera.setFrom(cam.base.transform.local);
 		let savedFov = cam.data.fov;
 		Viewport.updateCameraType(CameraType.CameraPerspective);
 		let m = Mat4.identity();
 		m.translate(0, 0, 0.5);
-		cam.transform.setMatrix(m);
+		cam.base.transform.setMatrix(m);
 		cam.data.fov = 0.92;
 		cam.buildProjection();
 		cam.buildMatrix();
 		m.getInverse(Scene.camera.VP);
 
-		let planeo: MeshObject = Scene.getChild(".Plane") as MeshObject;
-		planeo.visible = true;
+		let planeo: MeshObject = Scene.getChild(".Plane").ext;
+		planeo.base.visible = true;
 		Context.raw.paintObject = planeo;
 
 		let v = new Vec4();
 		let sx = v.set(m._00, m._01, m._02).length();
-		planeo.transform.rot.fromEuler(-Math.PI / 2, 0, 0);
-		planeo.transform.scale.set(sx, 1.0, sx);
-		planeo.transform.loc.set(m._30, -m._31, 0.0);
-		planeo.transform.buildMatrix();
+		planeo.base.transform.rot.fromEuler(-Math.PI / 2, 0, 0);
+		planeo.base.transform.scale.set(sx, 1.0, sx);
+		planeo.base.transform.loc.set(m._30, -m._31, 0.0);
+		planeo.base.transform.buildMatrix();
 
 		RenderPathPaint.liveLayerDrawn = 0;
 		RenderPathBase.drawGbuffer();
@@ -325,15 +325,15 @@ class UtilRender {
 
 		// Restore paint mesh
 		Context.raw.materialPreview = false;
-		planeo.visible = false;
+		planeo.base.visible = false;
 		for (let i = 0; i < Project.paintObjects.length; ++i) {
-			Project.paintObjects[i].visible = visibles[i];
+			Project.paintObjects[i].base.visible = visibles[i];
 		}
 		if (Context.raw.mergedObject != null) {
-			Context.raw.mergedObject.visible = mergedObjectVisible;
+			Context.raw.mergedObject.base.visible = mergedObjectVisible;
 		}
 		Context.raw.paintObject = painto;
-		Scene.camera.transform.setMatrix(Context.raw.savedCamera);
+		Scene.camera.base.transform.setMatrix(Context.raw.savedCamera);
 		Scene.camera.data.fov = savedFov;
 		Viewport.updateCameraType(Context.raw.cameraType);
 		Scene.camera.buildProjection();
@@ -371,22 +371,22 @@ class UtilRender {
 			UtilRender.createScreenAlignedFullData();
 		}
 
-		let _scaleWorld = Context.raw.paintObject.transform.scaleWorld;
-		Context.raw.paintObject.transform.scaleWorld = 3.0;
-		Context.raw.paintObject.transform.buildMatrix();
+		let _scaleWorld = Context.raw.paintObject.base.transform.scaleWorld;
+		Context.raw.paintObject.base.transform.scaleWorld = 3.0;
+		Context.raw.paintObject.base.transform.buildMatrix();
 
 		g4.begin();
 		g4.setPipeline(res.scon._pipeState);
 		Uniforms.setContextConstants(g4, res.scon, [""]);
-		Uniforms.setObjectConstants(g4, res.scon, Context.raw.paintObject);
+		Uniforms.setObjectConstants(g4, res.scon, Context.raw.paintObject.base);
 		Uniforms.setMaterialConstants(g4, res.scon, res.mcon);
 		g4.setVertexBuffer(UtilRender.screenAlignedFullVB);
 		g4.setIndexBuffer(UtilRender.screenAlignedFullIB);
 		g4.drawIndexedVertices();
 		g4.end();
 
-		Context.raw.paintObject.transform.scaleWorld = _scaleWorld;
-		Context.raw.paintObject.transform.buildMatrix();
+		Context.raw.paintObject.base.transform.scaleWorld = _scaleWorld;
+		Context.raw.paintObject.base.transform.buildMatrix();
 	}
 
 	static pickPosNorTex = () => {

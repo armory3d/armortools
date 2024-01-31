@@ -141,12 +141,12 @@ class MakeMesh {
 					NodeShader.write(frag, 'if (');
 					for (let i = 0; i < visibles.length; ++i) {
 						if (i > 0) NodeShader.write(frag, ' || ');
-						NodeShader.write(frag, `${visibles[i].uid} == uid`);
+						NodeShader.write(frag, `${visibles[i].base.uid} == uid`);
 					}
 					NodeShader.write(frag, ') {');
 				}
 				else { // Object mask
-					let uid = Project.paintObjects[SlotLayer.getObjectMask(l) - 1].uid;
+					let uid = Project.paintObjects[SlotLayer.getObjectMask(l) - 1].base.uid;
 					NodeShader.write(frag, `if (${uid} == uid) {`);
 				}
 			}

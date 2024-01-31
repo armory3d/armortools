@@ -302,7 +302,7 @@ class BoxExport {
 			}
 			for (let i = 0; i < Project.paintObjects.length; ++i) {
 				ui.row([1 / 2, 1 / 2]);
-				ui.text(Project.paintObjects[i].name);
+				ui.text(Project.paintObjects[i].base.name);
 				let hatlas = Zui.handle("boxexport_7").nest(i);
 				hatlas.position = Project.atlasObjects[i];
 				Project.atlasObjects[i] = ui.combo(hatlas, Project.atlasNames, tr("Atlas"));
@@ -328,7 +328,7 @@ class BoxExport {
 			Context.raw.exportMeshFormat = ui.combo(Zui.handle("boxexport_9", { position: Context.raw.exportMeshFormat }), ["obj", "arm"], tr("Format"), true);
 
 			let ar = [tr("All")];
-			for (let p of Project.paintObjects) ar.push(p.name);
+			for (let p of Project.paintObjects) ar.push(p.base.name);
 			ui.combo(BoxExport.exportMeshHandle, ar, tr("Meshes"), true);
 
 			let applyDisplacement = ui.check(Zui.handle("boxexport_10"), tr("Apply Displacement"));

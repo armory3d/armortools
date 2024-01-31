@@ -78,7 +78,7 @@ class RenderPathRaytrace {
 		}
 
 		let cam = Scene.camera;
-		let ct = cam.transform;
+		let ct = cam.base.transform;
 		RenderPathRaytrace.helpMat.setFrom(cam.V);
 		RenderPathRaytrace.helpMat.multmat(cam.P);
 		RenderPathRaytrace.helpMat.getInverse(RenderPathRaytrace.helpMat);
@@ -159,9 +159,9 @@ class RenderPathRaytrace {
 		let mo = Scene.meshes[0];
 		///end
 		let md = mo.data;
-		let mo_scale = mo.transform.scale.x; // Uniform scale only
+		let mo_scale = mo.base.transform.scale.x; // Uniform scale only
 		RenderPathRaytrace.vb_scale = md.scale_pos * mo_scale;
-		if (mo.parent != null) RenderPathRaytrace.vb_scale *= mo.parent.transform.scale.x;
+		if (mo.base.parent != null) RenderPathRaytrace.vb_scale *= mo.base.parent.transform.scale.x;
 		RenderPathRaytrace.vb = md._vertexBuffer;
 		RenderPathRaytrace.ib = md._indexBuffers[0];
 	}

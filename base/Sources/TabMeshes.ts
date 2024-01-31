@@ -104,8 +104,8 @@ class TabMeshes {
 			for (let i = 0; i < Project.paintObjects.length; ++i) {
 				let o = Project.paintObjects[i];
 				let h = Zui.handle("tabmeshes_0");
-				h.selected = o.visible;
-				o.visible = ui.check(h, o.name);
+				h.selected = o.base.visible;
+				o.base.visible = ui.check(h, o.base.name);
 				if (ui.isHovered && ui.inputReleasedR) {
 					UIMenu.draw((ui: Zui) => {
 						if (UIMenu.menuButton(ui, tr("Export"))) {
@@ -114,15 +114,15 @@ class TabMeshes {
 						}
 						if (Project.paintObjects.length > 1 && UIMenu.menuButton(ui, tr("Delete"))) {
 							array_remove(Project.paintObjects, o);
-							while (o.children.length > 0) {
-								let child = o.children[0];
+							while (o.base.children.length > 0) {
+								let child = o.base.children[0];
 								child.setParent(null);
-								if (Project.paintObjects[0] != child) {
-									child.setParent(Project.paintObjects[0]);
+								if (Project.paintObjects[0].base != child) {
+									child.setParent(Project.paintObjects[0].base);
 								}
-								if (o.children.length == 0) {
-									Project.paintObjects[0].transform.scale.setFrom(o.transform.scale);
-									Project.paintObjects[0].transform.buildMatrix();
+								if (o.base.children.length == 0) {
+									Project.paintObjects[0].base.transform.scale.setFrom(o.base.transform.scale);
+									Project.paintObjects[0].base.transform.buildMatrix();
 								}
 							}
 							Data.deleteMesh(o.data._handle);
@@ -135,7 +135,7 @@ class TabMeshes {
 				}
 				if (h.changed) {
 					let visibles: MeshObject[] = [];
-					for (let p of Project.paintObjects) if (p.visible) visibles.push(p);
+					for (let p of Project.paintObjects) if (p.base.visible) visibles.push(p);
 					UtilMesh.mergeMesh(visibles);
 					Context.raw.ddirty = 2;
 				}
@@ -166,13 +166,13 @@ class TabMeshes {
 			MeshData.create(raw, (_md: TMeshData) => { md = _md; });
 			mo = new MeshObject(md, Context.raw.paintObject.materials);
 			array_remove(Scene.meshes, mo);
-			mo.name = "Tessellated";
+			mo.base.name = "Tessellated";
 		}
 		else {
-			mo = Scene.getChild(name) as MeshObject;
+			mo = Scene.getChild(name).ext;
 		}
 
-		mo.visible = true;
+		mo.base.visible = true;
 		Context.raw.ddirty = 2;
 		Context.raw.paintObject = mo;
 		Project.paintObjects[0] = mo;

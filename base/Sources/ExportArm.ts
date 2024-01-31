@@ -107,7 +107,7 @@ class ExportArm {
 			swatches: Project.raw.swatches,
 			envmap: Project.raw.envmap != null ? (sameDrive ? Path.toRelative(Project.filepath, Project.raw.envmap) : Project.raw.envmap) : null,
 			envmap_strength: Scene.world.strength,
-			camera_world: Scene.camera.transform.local.toFloat32Array(),
+			camera_world: Scene.camera.base.transform.local.toFloat32Array(),
 			camera_origin: ExportArm.vec3f32(Camera.origins[0]),
 			camera_fov: Scene.camera.data.fov,
 

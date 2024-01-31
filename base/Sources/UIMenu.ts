@@ -166,8 +166,8 @@ class UIMenu {
 						else if (newAngle > 2 * Math.PI) newAngle -= Math.floor(newAngle / (2 * Math.PI)) * 2 * Math.PI;
 						Context.raw.lightAngle = newAngle;
 						let m = Mat4.rotationZ(ldiff);
-						light.transform.local.multmat(m);
-						light.transform.decompose();
+						light.base.transform.local.multmat(m);
+						light.base.transform.decompose();
 						Context.raw.ddirty = 2;
 					}
 

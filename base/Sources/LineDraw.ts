@@ -136,7 +136,7 @@ class LineDraw {
 		LineDraw.midLine.sub(LineDraw.midPoint);
 
 		let camera = Scene.camera;
-		LineDraw.cameraLook = camera.transform.world.getLoc();
+		LineDraw.cameraLook = camera.base.transform.world.getLoc();
 		LineDraw.cameraLook.sub(LineDraw.midPoint);
 
 		let lineWidth = LineDraw.cameraLook.cross(LineDraw.midLine);

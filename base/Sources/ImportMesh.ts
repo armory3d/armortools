@@ -71,21 +71,21 @@ class ImportMesh {
 		if (Project.paintObjects.length > 1) {
 			// Sort by name
 			Project.paintObjects.sort((a, b): i32 => {
-				if (a.name < b.name) return -1;
-				else if (a.name > b.name) return 1;
+				if (a.base.name < b.base.name) return -1;
+				else if (a.base.name > b.base.name) return 1;
 				return 0;
 			});
 
 			// No mask by default
-			for (let p of Project.paintObjects) p.visible = true;
+			for (let p of Project.paintObjects) p.base.visible = true;
 			if (Context.raw.mergedObject == null) UtilMesh.mergeMesh();
 			Context.raw.paintObject.skip_context = "paint";
-			Context.raw.mergedObject.visible = true;
+			Context.raw.mergedObject.base.visible = true;
 		}
 
 		Viewport.scaleToBounds();
 
-		if (Context.raw.paintObject.name == "") Context.raw.paintObject.name = "Object";
+		if (Context.raw.paintObject.base.name == "") Context.raw.paintObject.base.name = "Object";
 		MakeMaterial.parsePaintMaterial();
 		MakeMaterial.parseMeshMaterial();
 
@@ -122,7 +122,7 @@ class ImportMesh {
 			}
 
 			Context.raw.paintObject.setData(md);
-			Context.raw.paintObject.name = mesh.name;
+			Context.raw.paintObject.base.name = mesh.name;
 			Project.paintObjects = [Context.raw.paintObject];
 
 			md._handle = raw.name;
@@ -187,14 +187,14 @@ class ImportMesh {
 
 		MeshData.create(raw, (md: TMeshData) => {
 
-			let object = Scene.addMeshObject(md, Context.raw.paintObject.materials, Context.raw.paintObject);
-			object.name = mesh.name;
+			let object = Scene.addMeshObject(md, Context.raw.paintObject.materials, Context.raw.paintObject.base);
+			object.base.name = mesh.name;
 			object.skip_context = "paint";
 
 			// Ensure unique names
 			for (let p of Project.paintObjects) {
-				if (p.name == object.name) {
-					p.name += ".001";
+				if (p.base.name == object.base.name) {
+					p.base.name += ".001";
 					p.data._handle += ".001";
 					Data.cachedMeshes.set(p.data._handle, p.data);
 				}

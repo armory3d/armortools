@@ -138,7 +138,7 @@ class PhysicsWorld {
 		let start = new Vec4();
 		let end = new Vec4();
 		RayCaster.getDirection(start, end, inputX, inputY, camera);
-		let hit = PhysicsWorld.rayCast(pw, camera.transform.world.getLoc(), end);
+		let hit = PhysicsWorld.rayCast(pw, camera.base.transform.world.getLoc(), end);
 		let body = (hit != null) ? hit.body : null;
 		return body;
 	}

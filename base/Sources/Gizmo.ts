@@ -17,7 +17,7 @@ class Gizmo {
 		gizmo.visible = (isObject || isDecal) && !hide;
 		if (!gizmo.visible) return;
 
-		let paintObject: BaseObject = Context.raw.paintObject;
+		let paintObject: BaseObject = Context.raw.paintObject.base;
 		///if is_forge
 		if (Context.raw.selectedObject != null) {
 			paintObject = Context.raw.selectedObject;
@@ -32,7 +32,7 @@ class Gizmo {
 		}
 		let cam = Scene.camera;
 		let fov = cam.data.fov;
-		let dist = Vec4.distance(cam.transform.loc, gizmo.transform.loc) / 8 * fov;
+		let dist = Vec4.distance(cam.base.transform.loc, gizmo.transform.loc) / 8 * fov;
 		gizmo.transform.scale.set(dist, dist, dist);
 		Context.raw.gizmoTranslateX.transform.scale.set(dist, dist, dist);
 		Context.raw.gizmoTranslateY.transform.scale.set(dist, dist, dist);

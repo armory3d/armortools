@@ -1995,17 +1995,17 @@ class Base {
 		///end
 
 		let ar = [tr("None")];
-		for (let p of Project.paintObjects) ar.push(p.name);
+		for (let p of Project.paintObjects) ar.push(p.base.name);
 
 		let mask = Context.objectMaskUsed() ? SlotLayer.getObjectMask(Context.raw.layer) : 0;
 		if (Context.layerFilterUsed()) mask = Context.raw.layerFilter;
 		if (mask > 0) {
 			if (Context.raw.mergedObject != null) {
-				Context.raw.mergedObject.visible = false;
+				Context.raw.mergedObject.base.visible = false;
 			}
 			let o = Project.paintObjects[0];
 			for (let p of Project.paintObjects) {
-				if (p.name == ar[mask]) {
+				if (p.base.name == ar[mask]) {
 					o = p;
 					break;
 				}
@@ -2020,7 +2020,7 @@ class Base {
 			}
 			Context.selectPaintObject(Context.mainObject());
 			Context.raw.paintObject.skip_context = "paint";
-			Context.raw.mergedObject.visible = true;
+			Context.raw.mergedObject.base.visible = true;
 		}
 		UtilUV.dilatemapCached = false;
 	}

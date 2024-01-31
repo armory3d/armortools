@@ -268,7 +268,7 @@ class UIHeader {
 			}
 			if (Context.raw.bakeType == BakeType.BakeNormal || Context.raw.bakeType == BakeType.BakeHeight || Context.raw.bakeType == BakeType.BakeDerivative) {
 				let ar = [];
-				for (let p of Project.paintObjects) ar.push(p.name);
+				for (let p of Project.paintObjects) ar.push(p.base.name);
 				let polyHandle = Zui.handle("uiheader_13", { position: Context.raw.bakeHighPoly });
 				Context.raw.bakeHighPoly = ui.combo(polyHandle, ar, tr("High Poly"));
 			}
