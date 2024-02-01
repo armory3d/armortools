@@ -79,9 +79,9 @@ class ImportArm {
 			}
 			if (Project.raw.camera_world != null) {
 				Scene.camera.base.transform.local = Mat4.fromFloat32Array(Project.raw.camera_world);
-				Scene.camera.base.transform.decompose();
+				Transform.decompose(Scene.camera.base.transform);
 				Scene.camera.data.fov = Project.raw.camera_fov;
-				Scene.camera.buildProjection();
+				CameraObject.buildProjection(Scene.camera);
 				let origin = Project.raw.camera_origin;
 				Camera.origins[0].x = origin[0];
 				Camera.origins[0].y = origin[1];
@@ -133,9 +133,9 @@ class ImportArm {
 			MeshData.create(project.mesh_data, (md: TMeshData) => {
 			///end
 
-				Context.raw.paintObject.setData(md);
-				Context.raw.paintObject.base.transform.scale.set(1, 1, 1);
-				Context.raw.paintObject.base.transform.buildMatrix();
+				MeshObject.setData(Context.raw.paintObject, md);
+				Vec4.set(Context.raw.paintObject.base.transform.scale, 1, 1, 1);
+				Transform.buildMatrix(Context.raw.paintObject.base.transform);
 				Context.raw.paintObject.base.name = md.name;
 				Project.paintObjects = [Context.raw.paintObject];
 			});
@@ -365,9 +365,9 @@ class ImportArm {
 		Project.paintObjects = [];
 		for (let i = 0; i < raw.mesh_datas.length; ++i) {
 			MeshData.create(raw.mesh_datas[i], (md: TMeshData) => {
-				let object: MeshObject = null;
+				let object: TMeshObject = null;
 				if (i == 0) {
-					Context.raw.paintObject.setData(md);
+					MeshObject.setData(Context.raw.paintObject, md);
 					object = Context.raw.paintObject;
 				}
 				else {
@@ -377,8 +377,8 @@ class ImportArm {
 					md._handle = md.name;
 					Data.cachedMeshes.set(md._handle, md);
 				}
-				object.base.transform.scale.set(1, 1, 1);
-				object.base.transform.buildMatrix();
+				Vec4.set(object.base.transform.scale, 1, 1, 1);
+				Transform.buildMatrix(object.base.transform);
 				object.base.name = md.name;
 				Project.paintObjects.push(object);
 				UtilMesh.mergeMesh();

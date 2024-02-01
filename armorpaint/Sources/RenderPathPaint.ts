@@ -7,8 +7,8 @@ class RenderPathPaint {
 	static dilated = true;
 	static initVoxels = true; // Bake AO
 	static pushUndoLast: bool;
-	static painto: MeshObject = null;
-	static planeo: MeshObject = null;
+	static painto: TMeshObject = null;
+	static planeo: TMeshObject = null;
 	static visibles: bool[] = null;
 	static mergedObjectVisible = false;
 	static savedFov = 0.0;
@@ -121,14 +121,14 @@ class RenderPathPaint {
 					RenderPath.bindTarget("gbuffer0", "gbuffer0");
 				}
 
-				let mo: MeshObject = Scene.getChild(".ParticleEmitter").ext;
+				let mo: TMeshObject = Scene.getChild(".ParticleEmitter").ext;
 				mo.base.visible = true;
-				mo.render(RenderPath.currentG, "mesh", RenderPath.bindParams);
+				MeshObject.render(mo, RenderPath.currentG, "mesh", RenderPath.bindParams);
 				mo.base.visible = false;
 
 				mo = Scene.getChild(".Particle").ext;
 				mo.base.visible = true;
-				mo.render(RenderPath.currentG, "mesh", RenderPath.bindParams);
+				MeshObject.render(mo, RenderPath.currentG, "mesh", RenderPath.bindParams);
 				mo.base.visible = false;
 				RenderPath.end();
 			}
@@ -348,7 +348,7 @@ class RenderPathPaint {
 			let materialContexts: TMaterialContext[] = [];
 			let shaderContexts: TShaderContext[] = [];
 			let mats = Project.paintObjects[0].materials;
-			Project.paintObjects[0].getContexts("paint", mats, materialContexts, shaderContexts);
+			MeshObject.getContexts(Project.paintObjects[0], "paint", mats, materialContexts, shaderContexts);
 
 			let cc_context = shaderContexts[0];
 			if (ConstData.screenAlignedVB == null) ConstData.createScreenAlignedData();
@@ -495,7 +495,7 @@ class RenderPathPaint {
 	}
 
 	static drawCursor = (mx: f32, my: f32, radius: f32, tintR = 1.0, tintG = 1.0, tintB = 1.0) => {
-		let plane: MeshObject = Scene.getChild(".Plane").ext;
+		let plane: TMeshObject = Scene.getChild(".Plane").ext;
 		let geom = plane.data;
 
 		let g = RenderPath.frameG;
@@ -512,12 +512,12 @@ class RenderPathPaint {
 		g.setFloat2(Base.cursorMouse, mx, my);
 		g.setFloat2(Base.cursorTexStep, 1 / gbuffer0.width, 1 / gbuffer0.height);
 		g.setFloat(Base.cursorRadius, radius);
-		let right = Scene.camera.rightWorld().normalize();
+		let right = Vec4.normalize(CameraObject.rightWorld(Scene.camera));
 		g.setFloat3(Base.cursorCameraRight, right.x, right.y, right.z);
 		g.setFloat3(Base.cursorTint, tintR, tintG, tintB);
 		g.setMatrix(Base.cursorVP, Scene.camera.VP);
 		let helpMat = Mat4.identity();
-		helpMat.getInverse(Scene.camera.VP);
+		Mat4.getInverse(helpMat, Scene.camera.VP);
 		g.setMatrix(Base.cursorInvVP, helpMat);
 		///if (krom_metal || krom_vulkan)
 		g.setVertexBuffer(MeshData.get(geom, [{name: "tex", data: "short2norm"}]));
@@ -539,42 +539,42 @@ class RenderPathPaint {
 			let sy = t.scale.y;
 			let sz = t.scale.z;
 			if (Context.raw.symX) {
-				t.scale.set(-sx, sy, sz);
-				t.buildMatrix();
+				Vec4.set(t.scale, -sx, sy, sz);
+				Transform.buildMatrix(t);
 				RenderPathPaint.commandsPaint(false);
 			}
 			if (Context.raw.symY) {
-				t.scale.set(sx, -sy, sz);
-				t.buildMatrix();
+				Vec4.set(t.scale, sx, -sy, sz);
+				Transform.buildMatrix(t);
 				RenderPathPaint.commandsPaint(false);
 			}
 			if (Context.raw.symZ) {
-				t.scale.set(sx, sy, -sz);
-				t.buildMatrix();
+				Vec4.set(t.scale, sx, sy, -sz);
+				Transform.buildMatrix(t);
 				RenderPathPaint.commandsPaint(false);
 			}
 			if (Context.raw.symX && Context.raw.symY) {
-				t.scale.set(-sx, -sy, sz);
-				t.buildMatrix();
+				Vec4.set(t.scale, -sx, -sy, sz);
+				Transform.buildMatrix(t);
 				RenderPathPaint.commandsPaint(false);
 			}
 			if (Context.raw.symX && Context.raw.symZ) {
-				t.scale.set(-sx, sy, -sz);
-				t.buildMatrix();
+				Vec4.set(t.scale, -sx, sy, -sz);
+				Transform.buildMatrix(t);
 				RenderPathPaint.commandsPaint(false);
 			}
 			if (Context.raw.symY && Context.raw.symZ) {
-				t.scale.set(sx, -sy, -sz);
-				t.buildMatrix();
+				Vec4.set(t.scale, sx, -sy, -sz);
+				Transform.buildMatrix(t);
 				RenderPathPaint.commandsPaint(false);
 			}
 			if (Context.raw.symX && Context.raw.symY && Context.raw.symZ) {
-				t.scale.set(-sx, -sy, -sz);
-				t.buildMatrix();
+				Vec4.set(t.scale, -sx, -sy, -sz);
+				Transform.buildMatrix(t);
 				RenderPathPaint.commandsPaint(false);
 			}
-			t.scale.set(sx, sy, sz);
-			t.buildMatrix();
+			Vec4.set(t.scale, sx, sy, sz);
+			Transform.buildMatrix(t);
 		}
 	}
 
@@ -794,25 +794,25 @@ class RenderPathPaint {
 		}
 
 		let cam = Scene.camera;
-		Context.raw.savedCamera.setFrom(cam.base.transform.local);
+		Mat4.setFrom(Context.raw.savedCamera, cam.base.transform.local);
 		RenderPathPaint.savedFov = cam.data.fov;
 		Viewport.updateCameraType(CameraType.CameraPerspective);
 		let m = Mat4.identity();
-		m.translate(0, 0, 0.5);
-		cam.base.transform.setMatrix(m);
+		Mat4.translate(m, 0, 0, 0.5);
+		Transform.setMatrix(cam.base.transform, m);
 		cam.data.fov = Base.defaultFov;
-		cam.buildProjection();
-		cam.buildMatrix();
+		CameraObject.buildProjection(cam);
+		CameraObject.buildMatrix(cam);
 
 		let tw = 0.95 * UIView2D.panScale;
 		let tx = UIView2D.panX / UIView2D.ww;
 		let ty = UIView2D.panY / App.h();
-		m.setIdentity();
-		m.scale(new Vec4(tw, tw, 1));
-		m.setLoc(new Vec4(tx, ty, 0));
+		Mat4.setIdentity(m);
+		Mat4.scale(m, Vec4.create(tw, tw, 1));
+		Mat4.setLoc(m, Vec4.create(tx, ty, 0));
 		let m2 = Mat4.identity();
-		m2.getInverse(Scene.camera.VP);
-		m.multmat(m2);
+		Mat4.getInverse(m2, Scene.camera.VP);
+		Mat4.multmat(m, m2);
 
 		let tiled = UIView2D.tiledShow;
 		if (tiled && Scene.getChild(".PlaneTiled") == null) {
@@ -845,19 +845,19 @@ class RenderPathPaint {
 		RenderPathPaint.planeo.base.visible = true;
 		Context.raw.paintObject = RenderPathPaint.planeo;
 
-		let v = new Vec4();
-		let sx = v.set(m._00, m._01, m._02).length();
-		RenderPathPaint.planeo.base.transform.rot.fromEuler(-Math.PI / 2, 0, 0);
-		RenderPathPaint.planeo.base.transform.scale.set(sx, 1.0, sx);
+		let v = Vec4.create();
+		let sx = Vec4.vec4_length(Vec4.set(v, m._00, m._01, m._02));
+		Quat.fromEuler(RenderPathPaint.planeo.base.transform.rot, -Math.PI / 2, 0, 0);
+		Vec4.set(RenderPathPaint.planeo.base.transform.scale, sx, 1.0, sx);
 		RenderPathPaint.planeo.base.transform.scale.z *= Config.getTextureResY() / Config.getTextureResX();
-		RenderPathPaint.planeo.base.transform.loc.set(m._30, -m._31, 0.0);
-		RenderPathPaint.planeo.base.transform.buildMatrix();
+		Vec4.set(RenderPathPaint.planeo.base.transform.loc, m._30, -m._31, 0.0);
+		Transform.buildMatrix(RenderPathPaint.planeo.base.transform);
 	}
 
 	static restorePlaneMesh = () => {
 		Context.raw.paint2dView = false;
 		RenderPathPaint.planeo.base.visible = false;
-		RenderPathPaint.planeo.base.transform.loc.set(0.0, 0.0, 0.0);
+		Vec4.set(RenderPathPaint.planeo.base.transform.loc, 0.0, 0.0, 0.0);
 		for (let i = 0; i < Project.paintObjects.length; ++i) {
 			Project.paintObjects[i].base.visible = RenderPathPaint.visibles[i];
 		}
@@ -865,11 +865,11 @@ class RenderPathPaint {
 			Context.raw.mergedObject.base.visible = RenderPathPaint.mergedObjectVisible;
 		}
 		Context.raw.paintObject = RenderPathPaint.painto;
-		Scene.camera.base.transform.setMatrix(Context.raw.savedCamera);
+		Transform.setMatrix(Scene.camera.base.transform, Context.raw.savedCamera);
 		Scene.camera.data.fov = RenderPathPaint.savedFov;
 		Viewport.updateCameraType(Context.raw.cameraType);
-		Scene.camera.buildProjection();
-		Scene.camera.buildMatrix();
+		CameraObject.buildProjection(Scene.camera);
+		CameraObject.buildMatrix(Scene.camera);
 
 		RenderPathBase.drawGbuffer();
 	}

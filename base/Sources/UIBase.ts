@@ -219,15 +219,15 @@ class UIBase {
 
 		///if (is_paint || is_sculpt)
 		Context.raw.gizmo = Scene.getChild(".Gizmo");
-		Context.raw.gizmoTranslateX = Context.raw.gizmo.getChild(".TranslateX");
-		Context.raw.gizmoTranslateY = Context.raw.gizmo.getChild(".TranslateY");
-		Context.raw.gizmoTranslateZ = Context.raw.gizmo.getChild(".TranslateZ");
-		Context.raw.gizmoScaleX = Context.raw.gizmo.getChild(".ScaleX");
-		Context.raw.gizmoScaleY = Context.raw.gizmo.getChild(".ScaleY");
-		Context.raw.gizmoScaleZ = Context.raw.gizmo.getChild(".ScaleZ");
-		Context.raw.gizmoRotateX = Context.raw.gizmo.getChild(".RotateX");
-		Context.raw.gizmoRotateY = Context.raw.gizmo.getChild(".RotateY");
-		Context.raw.gizmoRotateZ = Context.raw.gizmo.getChild(".RotateZ");
+		Context.raw.gizmoTranslateX = BaseObject.getChild(Context.raw.gizmo, ".TranslateX");
+		Context.raw.gizmoTranslateY = BaseObject.getChild(Context.raw.gizmo, ".TranslateY");
+		Context.raw.gizmoTranslateZ = BaseObject.getChild(Context.raw.gizmo, ".TranslateZ");
+		Context.raw.gizmoScaleX = BaseObject.getChild(Context.raw.gizmo, ".ScaleX");
+		Context.raw.gizmoScaleY = BaseObject.getChild(Context.raw.gizmo, ".ScaleY");
+		Context.raw.gizmoScaleZ = BaseObject.getChild(Context.raw.gizmo, ".ScaleZ");
+		Context.raw.gizmoRotateX = BaseObject.getChild(Context.raw.gizmo, ".RotateX");
+		Context.raw.gizmoRotateY = BaseObject.getChild(Context.raw.gizmo, ".RotateY");
+		Context.raw.gizmoRotateZ = BaseObject.getChild(Context.raw.gizmo, ".RotateZ");
 		///end
 
 		Res.load(resources, () => {});
@@ -710,18 +710,18 @@ class UIBase {
 				}
 				History.pushUndo = true;
 				Context.raw.particleHitX = Context.raw.particleHitY = Context.raw.particleHitZ = 0;
-				Scene.spawnObject(".Sphere", null, (o: BaseObject) => {
+				Scene.spawnObject(".Sphere", null, (o: TBaseObject) => {
 					Data.getMaterial("Scene", ".Gizmo", (md: TMaterialData) => {
-						let mo: MeshObject = o.ext;
+						let mo: TMeshObject = o.ext;
 						mo.base.name = ".Bullet";
 						mo.materials[0] = md;
 						mo.base.visible = true;
 
 						let camera = Scene.camera;
 						let ct = camera.base.transform;
-						mo.base.transform.loc.set(ct.worldx(), ct.worldy(), ct.worldz());
-						mo.base.transform.scale.set(Context.raw.brushRadius * 0.2, Context.raw.brushRadius * 0.2, Context.raw.brushRadius * 0.2);
-						mo.base.transform.buildMatrix();
+						Vec4.set(mo.base.transform.loc, Transform.worldx(ct), Transform.worldy(ct), Transform.worldz(ct));
+						Vec4.set(mo.base.transform.scale, Context.raw.brushRadius * 0.2, Context.raw.brushRadius * 0.2, Context.raw.brushRadius * 0.2);
+						Transform.buildMatrix(mo.base.transform);
 
 						let body = PhysicsBody.create();
 						body.shape = ShapeType.ShapeSphere;
@@ -733,9 +733,9 @@ class UIBase {
 						mo.base.transform.radius *= 10;
 
 						let ray = RayCaster.getRay(Mouse.viewX, Mouse.viewY, camera);
-						PhysicsBody.applyImpulse(body, ray.direction.mult(0.15));
+						PhysicsBody.applyImpulse(body, Vec4.mult(ray.direction, 0.15));
 
-						Context.raw.particleTimer = Tween.timer(5, mo.remove);
+						Context.raw.particleTimer = Tween.timer(5, function() { MeshObject.remove(mo); });
 					});
 				});
 			}
@@ -1019,7 +1019,7 @@ class UIBase {
 						else if (Context.raw.tool == WorkspaceTool.ToolParticle) {
 							// Reset particles
 							///if arm_particles
-							let emitter: MeshObject = Scene.getChild(".ParticleEmitter").ext;
+							let emitter: TMeshObject = Scene.getChild(".ParticleEmitter").ext;
 							let psys = emitter.particleSystems[0];
 							psys.time = 0;
 							// psys.time = psys.seed * psys.animtime;
@@ -1280,7 +1280,7 @@ class UIBase {
 				let angle = Context.raw.brushStencilAngle;
 				let cx = r.x + r.w / 2;
 				let cy = r.y + r.h / 2;
-				g.transformation = Mat3.translation(cx, cy).multmat(Mat3.rotation(-angle)).multmat(Mat3.translation(-cx, -cy));
+				g.transformation = mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(-angle)), mat3_translation(-cx, -cy));
 				g.drawScaledImage(Context.raw.brushStencilImage, r.x, r.y, r.w, r.h);
 				g.transformation = null;
 				g.color = 0xffffffff;
@@ -1298,7 +1298,7 @@ class UIBase {
 				let angle = Context.raw.brushStencilAngle;
 				let cx = r.x + r.w / 2;
 				let cy = r.y + r.h / 2;
-				g.transformation = Mat3.translation(cx, cy).multmat(Mat3.rotation(-angle)).multmat(Mat3.translation(-cx, -cy));
+				g.transformation = mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(-angle)), mat3_translation(-cx, -cy));
 				g.fillCircle(r.x + r.w / 2, r.y - 4, 8);
 				g.transformation = null;
 			}
@@ -1361,7 +1361,7 @@ class UIBase {
 					let angle = (Context.raw.brushAngle + Context.raw.brushNodesAngle) * (Math.PI / 180);
 					let cx = decalX + psizex / 2;
 					let cy = decalY + psizey / 2;
-					g.transformation = Mat3.translation(cx, cy).multmat(Mat3.rotation(angle)).multmat(Mat3.translation(-cx, -cy));
+					g.transformation = mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(angle)), mat3_translation(-cx, -cy));
 					///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 					g.drawScaledImage(Context.raw.decalImage, decalX, decalY, psizex, psizey);
 					///else

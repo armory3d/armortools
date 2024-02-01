@@ -171,7 +171,7 @@ class TabLayers {
 				UtilMesh.mergeMesh();
 			}
 			else if (Context.raw.layerFilter > Project.paintObjects.length) { // Atlas
-				let visibles: MeshObject[] = [];
+				let visibles: TMeshObject[] = [];
 				for (let p of Project.paintObjects) if (p.base.visible) visibles.push(p);
 				UtilMesh.mergeMesh(visibles);
 			}

@@ -7,8 +7,8 @@ class UIMenubar {
 	static menubarw = UIMenubar.defaultMenubarW;
 
 	///if is_lab
-	static _savedCamera: Mat4 = null;
-	static _plane: MeshObject = null;
+	static _savedCamera: TMat4 = null;
+	static _plane: TMeshObject = null;
 	///end
 
 	constructor() {
@@ -115,7 +115,7 @@ class UIMenubar {
 
 				if (UIHeader.worktab.position == SpaceType.Space3D) {
 					if (UIMenubar._savedCamera != null) {
-						Scene.camera.base.transform.setMatrix(UIMenubar._savedCamera);
+						Transform.setMatrix(Scene.camera.base.transform, UIMenubar._savedCamera);
 						UIMenubar._savedCamera = null;
 					}
 					Scene.meshes = [Context.mainObject()];
@@ -138,18 +138,18 @@ class UIMenubar {
 						};
 						let md: TMeshData;
 						MeshData.create(raw, (_md: TMeshData) => { md = _md; });
-						let dotPlane: MeshObject = Scene.getChild(".Plane").ext;
-						UIMenubar._plane = new MeshObject(md, dotPlane.materials);
+						let dotPlane: TMeshObject = Scene.getChild(".Plane").ext;
+						UIMenubar._plane = MeshObject.create(md, dotPlane.materials);
 						array_remove(Scene.meshes, UIMenubar._plane);
 					}
 
 					if (UIMenubar._savedCamera == null) {
-						UIMenubar._savedCamera = Scene.camera.base.transform.local.clone();
+						UIMenubar._savedCamera = Mat4.clone(Scene.camera.base.transform.local);
 					}
 					Scene.meshes = [UIMenubar._plane];
 					let m = Mat4.identity();
-					m.translate(0, 0, 1.6);
-					Scene.camera.base.transform.setMatrix(m);
+					Mat4.translate(m, 0, 0, 1.6);
+					Transform.setMatrix(Scene.camera.base.transform, m);
 				}
 				///if (krom_direct3d12 || krom_vulkan || krom_metal)
 				RenderPathRaytrace.ready = false;

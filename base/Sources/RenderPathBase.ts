@@ -58,7 +58,7 @@ class RenderPathBase {
 	static drawCompass = (currentG: Graphics4) => {
 		if (Context.raw.showCompass) {
 			let cam = Scene.camera;
-			let compass: MeshObject = Scene.getChild(".Compass").ext;
+			let compass: TMeshObject = Scene.getChild(".Compass").ext;
 
 			let _visible = compass.base.visible;
 			let _parent = compass.base.parent;
@@ -70,19 +70,19 @@ class RenderPathBase {
 			cam.P = Mat4.ortho(-8 * ratio, 8 * ratio, -8, 8, -2, 2);
 			compass.base.visible = true;
 			compass.base.parent = cam.base;
-			compass.base.transform.loc = new Vec4(7.4 * ratio, 7.0, -1);
-			compass.base.transform.rot = new Quat(-crot.x, -crot.y, -crot.z, crot.w);
-			compass.base.transform.scale.set(0.4, 0.4, 0.4);
-			compass.base.transform.buildMatrix();
+			compass.base.transform.loc = Vec4.create(7.4 * ratio, 7.0, -1);
+			compass.base.transform.rot = Quat.create(-crot.x, -crot.y, -crot.z, crot.w);
+			Vec4.set(compass.base.transform.scale, 0.4, 0.4, 0.4);
+			Transform.buildMatrix(compass.base.transform);
 			compass.frustumCulling = false;
-			compass.render(currentG, "overlay", []);
+			MeshObject.render(compass, currentG, "overlay", []);
 
 			cam.P = _P;
 			compass.base.visible = _visible;
 			compass.base.parent = _parent;
 			compass.base.transform.loc = _loc;
 			compass.base.transform.rot = _rot;
-			compass.base.transform.buildMatrix();
+			Transform.buildMatrix(compass.base.transform);
 		}
 	}
 
@@ -101,7 +101,7 @@ class RenderPathBase {
 			let cam = Scene.camera;
 			if (Context.raw.viewIndexLast > -1) {
 				// Save current viewport camera
-				Camera.views[Context.raw.viewIndexLast].setFrom(cam.base.transform.local);
+				Mat4.setFrom(Camera.views[Context.raw.viewIndexLast], cam.base.transform.local);
 			}
 
 			let decal = Context.raw.tool == WorkspaceTool.ToolDecal || Context.raw.tool == WorkspaceTool.ToolText;
@@ -111,16 +111,16 @@ class RenderPathBase {
 				Context.raw.ddirty = 1;
 			}
 
-			cam.base.transform.setMatrix(Camera.views[Context.raw.viewIndex]);
-			cam.buildMatrix();
-			cam.buildProjection();
+			Transform.setMatrix(cam.base.transform, Camera.views[Context.raw.viewIndex]);
+			CameraObject.buildMatrix(cam);
+			CameraObject.buildProjection(cam);
 		}
 
 		// Match projection matrix jitter
 		let skipTaa = Context.raw.splitView || ((Context.raw.tool == WorkspaceTool.ToolClone || Context.raw.tool == WorkspaceTool.ToolBlur || Context.raw.tool == WorkspaceTool.ToolSmudge) && Context.raw.pdirty > 0);
 		Scene.camera.frame = skipTaa ? 0 : RenderPathBase.taaFrame;
-		Scene.camera.projectionJitter();
-		Scene.camera.buildMatrix();
+		CameraObject.projectionJitter(Scene.camera);
+		CameraObject.buildMatrix(Scene.camera);
 	}
 
 	static end = () => {
@@ -253,9 +253,9 @@ class RenderPathBase {
 			let cam = Scene.camera;
 
 			Context.raw.viewIndex = Context.raw.viewIndex == 0 ? 1 : 0;
-			cam.base.transform.setMatrix(Camera.views[Context.raw.viewIndex]);
-			cam.buildMatrix();
-			cam.buildProjection();
+			Transform.setMatrix(cam.base.transform, Camera.views[Context.raw.viewIndex]);
+			CameraObject.buildMatrix(cam);
+			CameraObject.buildProjection(cam);
 
 			RenderPathBase.drawGbuffer();
 
@@ -271,9 +271,9 @@ class RenderPathBase {
 			///end
 
 			Context.raw.viewIndex = Context.raw.viewIndex == 0 ? 1 : 0;
-			cam.base.transform.setMatrix(Camera.views[Context.raw.viewIndex]);
-			cam.buildMatrix();
-			cam.buildProjection();
+			Transform.setMatrix(cam.base.transform, Camera.views[Context.raw.viewIndex]);
+			CameraObject.buildMatrix(cam);
+			CameraObject.buildProjection(cam);
 		}
 	}
 

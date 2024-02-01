@@ -3,8 +3,8 @@ class ImportEnvmap {
 
 	static pipeline: PipelineState = null;
 	static paramsLocation: ConstantLocation;
-	static params = new Vec4();
-	static n = new Vec4();
+	static params = Vec4.create();
+	static n = Vec4.create();
 	static radianceLocation: TextureUnit;
 	static radiance: Image = null;
 	static radianceCpu: Image = null;
@@ -103,11 +103,11 @@ class ImportEnvmap {
 		mip.g4.end();
 	}
 
-	static reverseEquirect = (x: f32, y: f32): Vec4 => {
+	static reverseEquirect = (x: f32, y: f32): TVec4 => {
 		let theta = x * Math.PI * 2 - Math.PI;
 		let phi = y * Math.PI;
 		// return n.set(Math.sin(phi) * Math.cos(theta), -(Math.sin(phi) * Math.sin(theta)), Math.cos(phi));
-		return ImportEnvmap.n.set(-Math.cos(phi), Math.sin(phi) * Math.cos(theta), -(Math.sin(phi) * Math.sin(theta)));
+		return Vec4.set(ImportEnvmap.n, -Math.cos(phi), Math.sin(phi) * Math.cos(theta), -(Math.sin(phi) * Math.sin(theta)));
 	}
 
 	// https://ndotl.wordpress.com/2015/03/07/pbr-cubemap-filtering

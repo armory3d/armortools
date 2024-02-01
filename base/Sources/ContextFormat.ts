@@ -4,8 +4,8 @@
 // type TContext = {
 class TContext {
 	texture?: TAsset = null;
-	paintObject?: MeshObject;
-	mergedObject?: MeshObject = null; // For object mask
+	paintObject?: TMeshObject;
+	mergedObject?: TMeshObject = null; // For object mask
 	mergedObjectIsAtlas? = false; // Only objects referenced by atlas are merged
 
 	ddirty? = 0; // depth
@@ -66,7 +66,7 @@ class TContext {
 	exportMeshIndex? = 0;
 	packAssetsOnExport? = true;
 
-	paintVec? = new Vec4();
+	paintVec? = Vec4.create();
 	lastPaintX? = -1.0;
 	lastPaintY? = -1.0;
 	foregroundEvent? = false;
@@ -80,7 +80,7 @@ class TContext {
 	showCompass? = true;
 	projectType? = ProjectModel.ModelRoundedCube;
 	projectAspectRatio? = 0; // 1:1, 2:1, 1:2
-	projectObjects?: MeshObject[];
+	projectObjects?: TMeshObject[];
 
 	lastPaintVecX? = -1.0;
 	lastPaintVecY? = -1.0;
@@ -185,16 +185,16 @@ class TContext {
 	runBrush?: (i: i32)=>void = null;
 	parseBrushInputs?: ()=>void = null;
 
-	gizmo?: BaseObject = null;
-	gizmoTranslateX?: BaseObject = null;
-	gizmoTranslateY?: BaseObject = null;
-	gizmoTranslateZ?: BaseObject = null;
-	gizmoScaleX?: BaseObject = null;
-	gizmoScaleY?: BaseObject = null;
-	gizmoScaleZ?: BaseObject = null;
-	gizmoRotateX?: BaseObject = null;
-	gizmoRotateY?: BaseObject = null;
-	gizmoRotateZ?: BaseObject = null;
+	gizmo?: TBaseObject = null;
+	gizmoTranslateX?: TBaseObject = null;
+	gizmoTranslateY?: TBaseObject = null;
+	gizmoTranslateZ?: TBaseObject = null;
+	gizmoScaleX?: TBaseObject = null;
+	gizmoScaleY?: TBaseObject = null;
+	gizmoScaleZ?: TBaseObject = null;
+	gizmoRotateX?: TBaseObject = null;
+	gizmoRotateY?: TBaseObject = null;
+	gizmoRotateZ?: TBaseObject = null;
 	gizmoStarted? = false;
 	gizmoOffset? = 0.0;
 	gizmoDrag? = 0.0;
@@ -287,7 +287,7 @@ class TContext {
 	brushRadiusHandle? = new Handle({ value: 0.25 });
 	brushScale? = 1.0;
 
-	coords? = new Vec4();
+	coords? = Vec4.create();
 	startX? = 0.0;
 	startY? = 0.0;
 
@@ -301,6 +301,6 @@ class TContext {
 	///end
 
 	///if is_forge
-	selectedObject?: BaseObject = null;
+	selectedObject?: TBaseObject = null;
 	///end
 }

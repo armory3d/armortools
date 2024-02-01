@@ -6,7 +6,7 @@ class SeparateVectorNode extends LogicNode {
 	}
 
 	override get = (from: i32, done: (a: any)=>void) => {
-		this.inputs[0].get((vector: Vec4) => {
+		this.inputs[0].get((vector: TVec4) => {
 			if (from == 0) done(vector.x);
 			else if (from == 1) done(vector.y);
 			else done(vector.z);

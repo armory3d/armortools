@@ -1,7 +1,7 @@
 
 class ExportArm {
 
-	static runMesh = (path: string, paintObjects: MeshObject[]) => {
+	static runMesh = (path: string, paintObjects: TMeshObject[]) => {
 		let mesh_datas: TMeshData[] = [];
 		for (let p of paintObjects) mesh_datas.push(p.data);
 		let raw: TSceneFormat = { mesh_datas: mesh_datas };
@@ -66,7 +66,7 @@ class ExportArm {
 				uv_scale: l.scale,
 				uv_rot: l.angle,
 				uv_type: l.uvType,
-				decal_mat: l.uvType == UVType.UVProject ? l.decalMat.toFloat32Array() : null,
+				decal_mat: l.uvType == UVType.UVProject ? Mat4.toFloat32Array(l.decalMat) : null,
 				opacity_mask: l.maskOpacity,
 				fill_layer: l.fill_layer != null ? Project.materials.indexOf(l.fill_layer) : -1,
 				object_mask: l.objectMask,
@@ -107,7 +107,7 @@ class ExportArm {
 			swatches: Project.raw.swatches,
 			envmap: Project.raw.envmap != null ? (sameDrive ? Path.toRelative(Project.filepath, Project.raw.envmap) : Project.raw.envmap) : null,
 			envmap_strength: Scene.world.strength,
-			camera_world: Scene.camera.base.transform.local.toFloat32Array(),
+			camera_world: Mat4.toFloat32Array(Scene.camera.base.transform.local),
 			camera_origin: ExportArm.vec3f32(Camera.origins[0]),
 			camera_fov: Scene.camera.data.fov,
 
@@ -454,7 +454,7 @@ class ExportArm {
 		Krom.fileSaveBytes(path, buffer, buffer.byteLength + 1);
 	}
 
-	static vec3f32 = (v: Vec4): Float32Array => {
+	static vec3f32 = (v: TVec4): Float32Array => {
 		let res = new Float32Array(3);
 		res[0] = v.x;
 		res[1] = v.y;

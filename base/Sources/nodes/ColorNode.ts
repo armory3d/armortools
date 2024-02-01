@@ -1,12 +1,12 @@
 
 class ColorNode extends LogicNode {
 
-	value = new Vec4();
+	value = Vec4.create();
 	image: Image = null;
 
 	constructor(r = 0.8, g = 0.8, b = 0.8, a = 1.0) {
 		super();
-		this.value.set(r, g, b, a);
+		Vec4.set(this.value, r, g, b, a);
 	}
 
 	override get = (from: i32, done: (a: any)=>void) => {

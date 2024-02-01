@@ -80,9 +80,9 @@ class ImportBlendMesh {
 				let cola = hascol ? new Int16Array(numtri * 3 * 3) : null;
 
 				let tri = 0;
-				let vec0 = new Vec4();
-				let vec1 = new Vec4();
-				let vec2 = new Vec4();
+				let vec0 = Vec4.create();
+				let vec1 = Vec4.create();
+				let vec2 = Vec4.create();
 				for (let i = 0; i < totpoly; ++i) {
 					let poly = BlHandle.get(m, "mpoly", i);
 					// let smooth = BlHandle.get(poly, "flag") & 1 == 1; // ME_SMOOTH
@@ -97,8 +97,8 @@ class ImportBlendMesh {
 						let no0 = BlHandle.get(v0, "no");
 						let no1 = BlHandle.get(v1, "no");
 						if (smooth) {
-							vec0.set(no0[0] / 32767, no0[1] / 32767, no0[2] / 32767).normalize(); // shortmax
-							vec1.set(no1[0] / 32767, no1[1] / 32767, no1[2] / 32767).normalize();
+							Vec4.normalize(Vec4.set(vec0, no0[0] / 32767, no0[1] / 32767, no0[2] / 32767)); // shortmax
+							Vec4.normalize(Vec4.set(vec1, no1[0] / 32767, no1[1] / 32767, no1[2] / 32767));
 						}
 						let uv0: Float32Array = null;
 						let uv1: Float32Array = null;
@@ -137,16 +137,16 @@ class ImportBlendMesh {
 							let co2 = BlHandle.get(v2, "co");
 							let no2 = BlHandle.get(v2, "no");
 							if (smooth) {
-								vec2.set(no2[0] / 32767, no2[1] / 32767, no2[2] / 32767).normalize();
+								Vec4.normalize(Vec4.set(vec2, no2[0] / 32767, no2[1] / 32767, no2[2] / 32767));
 							}
 							else {
-								vec2.set(co2[0], co2[1], co2[2]);
-								vec1.set(co1[0], co1[1], co1[2]);
-								vec0.subvecs(vec2, vec1);
-								vec2.set(co0[0], co0[1], co0[2]);
-								vec1.subvecs(vec2, vec1);
-								vec0.cross(vec1);
-								vec0.normalize();
+								Vec4.set(vec2, co2[0], co2[1], co2[2]);
+								Vec4.set(vec1, co1[0], co1[1], co1[2]);
+								Vec4.subvecs(vec0, vec2, vec1);
+								Vec4.set(vec2, co0[0], co0[1], co0[2]);
+								Vec4.subvecs(vec1, vec2, vec1);
+								Vec4.cross(vec0, vec1);
+								Vec4.normalize(vec0);
 							}
 							posa32[tri * 9    ] = co0[0];
 							posa32[tri * 9 + 1] = co0[1];
@@ -168,7 +168,7 @@ class ImportBlendMesh {
 							nora[tri * 6 + 5] = Math.floor((smooth ? vec2.y : vec0.y) * 32767);
 							co1 = co2;
 							no1 = no2;
-							vec1.setFrom(vec2);
+							Vec4.setFrom(vec1, vec2);
 							if (hasuv) {
 								bl.pos = uvdata_pos + (loopstart + j + 1) * 4 * 3;
 								uv2 = ParserBlend.readf32array(bl, 2);
@@ -212,13 +212,13 @@ class ImportBlendMesh {
 						let co0 = BlHandle.get(v0, "co");
 						let co1 = BlHandle.get(v1, "co");
 						let co2 = BlHandle.get(v2, "co");
-						vec2.set(co2[0], co2[1], co2[2]);
-						vec1.set(co1[0], co1[1], co1[2]);
-						vec0.subvecs(vec2, vec1);
-						vec2.set(co0[0], co0[1], co0[2]);
-						vec1.subvecs(vec2, vec1);
-						vec0.cross(vec1);
-						vec0.normalize();
+						Vec4.set(vec2, co2[0], co2[1], co2[2]);
+						Vec4.set(vec1, co1[0], co1[1], co1[2]);
+						Vec4.subvecs(vec0, vec2, vec1);
+						Vec4.set(vec2, co0[0], co0[1], co0[2]);
+						Vec4.subvecs(vec1, vec2, vec1);
+						Vec4.cross(vec0, vec1);
+						Vec4.normalize(vec0, );
 
 						let nx = vec0.x;
 						let ny = vec0.y;
@@ -291,18 +291,18 @@ class ImportBlendMesh {
 								let no1 = BlHandle.get(v1, "no");
 								let no2 = BlHandle.get(v2, "no");
 								if (smooth) {
-									vec0.set(no0[0] / 32767, no0[1] / 32767, no0[2] / 32767).normalize(); // shortmax
-									vec1.set(no1[0] / 32767, no1[1] / 32767, no1[2] / 32767).normalize();
-									vec2.set(no2[0] / 32767, no2[1] / 32767, no2[2] / 32767).normalize();
+									Vec4.normalize(Vec4.set(vec0, no0[0] / 32767, no0[1] / 32767, no0[2] / 32767)); // shortmax
+									Vec4.normalize(Vec4.set(vec1, no1[0] / 32767, no1[1] / 32767, no1[2] / 32767));
+									Vec4.normalize(Vec4.set(vec2, no2[0] / 32767, no2[1] / 32767, no2[2] / 32767));
 								}
 								else {
-									vec2.set(co2[0], co2[1], co2[2]);
-									vec1.set(co1[0], co1[1], co1[2]);
-									vec0.subvecs(vec2, vec1);
-									vec2.set(co0[0], co0[1], co0[2]);
-									vec1.subvecs(vec2, vec1);
-									vec0.cross(vec1);
-									vec0.normalize();
+									Vec4.set(vec2, co2[0], co2[1], co2[2]);
+									Vec4.set(vec1, co1[0], co1[1], co1[2]);
+									Vec4.subvecs(vec0, vec2, vec1);
+									Vec4.set(vec2, co0[0], co0[1], co0[2]);
+									Vec4.subvecs(vec1, vec2, vec1);
+									Vec4.cross(vec0, vec1);
+									Vec4.normalize(vec0, );
 								}
 								let uv0: Float32Array = null;
 								let uv1: Float32Array = null;
@@ -396,22 +396,22 @@ class ImportBlendMesh {
 
 				// Apply world matrix
 				let obmat = BlHandle.get(ob, "obmat", 0, "float", 16);
-				let mat = Mat4.fromFloat32Array(obmat).transpose();
-				let v = new Vec4();
+				let mat = Mat4.transpose(Mat4.fromFloat32Array(obmat));
+				let v = Vec4.create();
 				for (let i = 0; i < Math.floor(posa32.length / 3); ++i) {
-					v.set(posa32[i * 3], posa32[i * 3 + 1], posa32[i * 3 + 2]);
-					v.applymat4(mat);
+					Vec4.set(v, posa32[i * 3], posa32[i * 3 + 1], posa32[i * 3 + 2]);
+					Vec4.applymat4(v, mat);
 					posa32[i * 3    ] = v.x;
 					posa32[i * 3 + 1] = v.y;
 					posa32[i * 3 + 2] = v.z;
 				}
-				mat.getInverse(mat);
-				mat.transpose3x3();
+				Mat4.getInverse(mat, mat);
+				Mat4.transpose3x3(mat);
 				mat._30 = mat._31 = mat._32 = mat._33 = 0;
 				for (let i = 0; i < Math.floor(nora.length / 2); ++i) {
-					v.set(nora[i * 2] / 32767, nora[i * 2 + 1] / 32767, posa[i * 4 + 3] / 32767);
-					v.applymat(mat);
-					v.normalize();
+					Vec4.set(v, nora[i * 2] / 32767, nora[i * 2 + 1] / 32767, posa[i * 4 + 3] / 32767);
+					Vec4.applymat(v, mat);
+					Vec4.normalize(v);
 					nora[i * 2    ] = Math.floor(v.x * 32767);
 					nora[i * 2 + 1] = Math.floor(v.y * 32767);
 					posa[i * 4 + 3] = Math.floor(v.z * 32767);

@@ -1,10 +1,10 @@
 
 class Camera {
 
-	static origins: Vec4[];
-	static views: Mat4[];
+	static origins: TVec4[];
+	static views: TMat4[];
 	static redraws = 0;
-	static dir = new Vec4();
+	static dir = Vec4.create();
 	static ease = 1.0;
 	static controlsDown = false;
 
@@ -81,24 +81,24 @@ class Camera {
 		if (controls == CameraControls.ControlsOrbit && (Operator.shortcut(Config.keymap.action_rotate, ShortcutType.ShortcutDown) || (Mouse.down("right") && !modif && defaultKeymap))) {
 			Camera.redraws = 2;
 			let dist = Camera.distance();
-			camera.base.transform.move(camera.lookWorld(), dist);
-			camera.base.transform.rotate(Vec4.zAxis(), -Mouse.movementX / 100 * Config.raw.camera_rotation_speed);
-			camera.base.transform.rotate(camera.rightWorld(), -Mouse.movementY / 100 * Config.raw.camera_rotation_speed);
-			if (camera.upWorld().z < 0) {
-				camera.base.transform.rotate(camera.rightWorld(), Mouse.movementY / 100 * Config.raw.camera_rotation_speed);
+			Transform.move(camera.base.transform, CameraObject.lookWorld(camera), dist);
+			Transform.rotate(camera.base.transform, Vec4.zAxis(), -Mouse.movementX / 100 * Config.raw.camera_rotation_speed);
+			Transform.rotate(camera.base.transform, CameraObject.rightWorld(camera), -Mouse.movementY / 100 * Config.raw.camera_rotation_speed);
+			if (CameraObject.upWorld(camera).z < 0) {
+				Transform.rotate(camera.base.transform, CameraObject.rightWorld(camera), Mouse.movementY / 100 * Config.raw.camera_rotation_speed);
 			}
-			camera.base.transform.move(camera.lookWorld(), -dist);
+			Transform.move(camera.base.transform, CameraObject.lookWorld(camera), -dist);
 		}
 		else if (controls == CameraControls.ControlsRotate && (Operator.shortcut(Config.keymap.action_rotate, ShortcutType.ShortcutDown) || (Mouse.down("right") && !modif && defaultKeymap))) {
 			Camera.redraws = 2;
 			let t = Context.mainObject().base.transform;
-			let up = t.up().normalize();
-			t.rotate(up, Mouse.movementX / 100 * Config.raw.camera_rotation_speed);
-			let right = camera.rightWorld().normalize();
-			t.rotate(right, Mouse.movementY / 100 * Config.raw.camera_rotation_speed);
-			t.buildMatrix();
-			if (t.up().z < 0) {
-				t.rotate(right, -Mouse.movementY / 100 * Config.raw.camera_rotation_speed);
+			let up = Vec4.normalize(Transform.up(t));
+			Transform.rotate(t, up, Mouse.movementX / 100 * Config.raw.camera_rotation_speed);
+			let right = Vec4.normalize(CameraObject.rightWorld(camera));
+			Transform.rotate(t, right, Mouse.movementY / 100 * Config.raw.camera_rotation_speed);
+			Transform.buildMatrix(t);
+			if (Transform.up(t).z < 0) {
+				Transform.rotate(t, right, -Mouse.movementY / 100 * Config.raw.camera_rotation_speed);
 			}
 		}
 
@@ -109,14 +109,14 @@ class Camera {
 				Camera.redraws = 2;
 				let f = Camera.getZoomDelta() / 150;
 				f *= Camera.getCameraZoomSpeed();
-				camera.base.transform.move(camera.look(), f);
+				Transform.move(camera.base.transform, CameraObject.look(camera), f);
 			}
 
 			if (Mouse.wheelDelta != 0 && !modifKey) {
 				Camera.redraws = 2;
 				let f = Mouse.wheelDelta * (-0.1);
 				f *= Camera.getCameraZoomSpeed();
-				camera.base.transform.move(camera.look(), f);
+				Transform.move(camera.base.transform, CameraObject.look(camera), f);
 			}
 		}
 		else if (controls == CameraControls.ControlsFly && Mouse.down("right")) {
@@ -134,13 +134,13 @@ class Camera {
 			if (moveForward || moveBackward || strafeRight || strafeLeft || strafeUp || strafeDown) {
 				Camera.ease += Time.delta * 15;
 				if (Camera.ease > 1.0) Camera.ease = 1.0;
-				Camera.dir.set(0, 0, 0);
-				if (moveForward) Camera.dir.addf(camera.look().x, camera.look().y, camera.look().z);
-				if (moveBackward) Camera.dir.addf(-camera.look().x, -camera.look().y, -camera.look().z);
-				if (strafeRight) Camera.dir.addf(camera.right().x, camera.right().y, camera.right().z);
-				if (strafeLeft) Camera.dir.addf(-camera.right().x, -camera.right().y, -camera.right().z);
-				if (strafeUp) Camera.dir.addf(0, 0, 1);
-				if (strafeDown) Camera.dir.addf(0, 0, -1);
+				Vec4.set(Camera.dir, 0, 0, 0);
+				if (moveForward) Vec4.addf(Camera.dir, CameraObject.look(camera).x, CameraObject.look(camera).y, CameraObject.look(camera).z);
+				if (moveBackward) Vec4.addf(Camera.dir, -CameraObject.look(camera).x, -CameraObject.look(camera).y, -CameraObject.look(camera).z);
+				if (strafeRight) Vec4.addf(Camera.dir, CameraObject.right(camera).x, CameraObject.right(camera).y, CameraObject.right(camera).z);
+				if (strafeLeft) Vec4.addf(Camera.dir, -CameraObject.right(camera).x, -CameraObject.right(camera).y, -CameraObject.right(camera).z);
+				if (strafeUp) Vec4.addf(Camera.dir, 0, 0, 1);
+				if (strafeDown) Vec4.addf(Camera.dir, 0, 0, -1);
 			}
 			else {
 				Camera.ease -= Time.delta * 20.0 * Camera.ease;
@@ -150,15 +150,15 @@ class Camera {
 
 			let d = Time.delta * fast * Camera.ease * 2.0 * ((moveForward || moveBackward) ? Config.raw.camera_zoom_speed : Config.raw.camera_pan_speed);
 			if (d > 0.0) {
-				camera.base.transform.move(Camera.dir, d);
+				Transform.move(camera.base.transform, Camera.dir, d);
 				if (Context.raw.cameraType == CameraType.CameraOrthographic) {
 					Viewport.updateCameraType(Context.raw.cameraType);
 				}
 			}
 
 			Camera.redraws = 2;
-			camera.base.transform.rotate(Vec4.zAxis(), -Mouse.movementX / 200 * Config.raw.camera_rotation_speed);
-			camera.base.transform.rotate(camera.right(), -Mouse.movementY / 200 * Config.raw.camera_rotation_speed);
+			Transform.rotate(camera.base.transform, Vec4.zAxis(), -Mouse.movementX / 200 * Config.raw.camera_rotation_speed);
+			Transform.rotate(camera.base.transform, CameraObject.right(camera), -Mouse.movementY / 200 * Config.raw.camera_rotation_speed);
 		}
 
 		if (Operator.shortcut(Config.keymap.rotate_light, ShortcutType.ShortcutDown)) {
@@ -166,8 +166,8 @@ class Camera {
 			let light = Scene.lights[0];
 			Context.raw.lightAngle = (Context.raw.lightAngle + ((Mouse.movementX / 100) % (2 * Math.PI) + 2 * Math.PI)) % (2 * Math.PI);
 			let m = Mat4.rotationZ(Mouse.movementX / 100);
-			light.base.transform.local.multmat(m);
-			light.base.transform.decompose();
+			Mat4.multmat(light.base.transform.local, m);
+			Transform.decompose(light.base.transform);
 		}
 
 		if (Operator.shortcut(Config.keymap.rotate_envmap, ShortcutType.ShortcutDown)) {
@@ -204,12 +204,12 @@ class Camera {
 	static reset = (viewIndex = -1) => {
 		let camera = Scene.camera;
 		if (viewIndex == -1) {
-			Camera.origins = [new Vec4(0, 0, 0), new Vec4(0, 0, 0)];
-			Camera.views = [camera.base.transform.local.clone(), camera.base.transform.local.clone()];
+			Camera.origins = [Vec4.create(0, 0, 0), Vec4.create(0, 0, 0)];
+			Camera.views = [Mat4.clone(camera.base.transform.local), Mat4.clone(camera.base.transform.local)];
 		}
 		else {
-			Camera.origins[viewIndex] = new Vec4(0, 0, 0);
-			Camera.views[viewIndex] = camera.base.transform.local.clone();
+			Camera.origins[viewIndex] = Vec4.create(0, 0, 0);
+			Camera.views[viewIndex] = Mat4.clone(camera.base.transform.local);
 		}
 	}
 
@@ -217,13 +217,13 @@ class Camera {
 		let camera = Scene.camera;
 		if (Operator.shortcut(Config.keymap.action_pan, ShortcutType.ShortcutDown) || (Mouse.down("middle") && !modif && defaultKeymap)) {
 			Camera.redraws = 2;
-			let look = camera.base.transform.look().normalize().mult(Mouse.movementY / 150 * Config.raw.camera_pan_speed);
-			let right = camera.base.transform.right().normalize().mult(-Mouse.movementX / 150 * Config.raw.camera_pan_speed);
-			camera.base.transform.loc.add(look);
-			camera.base.transform.loc.add(right);
-			Camera.origins[Camera.index()].add(look);
-			Camera.origins[Camera.index()].add(right);
-			camera.buildMatrix();
+			let look = Vec4.mult(Vec4.normalize(Transform.look(camera.base.transform)), Mouse.movementY / 150 * Config.raw.camera_pan_speed);
+			let right = Vec4.mult(Vec4.normalize(Transform.right(camera.base.transform)), -Mouse.movementX / 150 * Config.raw.camera_pan_speed);
+			Vec4.add(camera.base.transform.loc, look);
+			Vec4.add(camera.base.transform.loc, right);
+			Vec4.add(Camera.origins[Camera.index()], look);
+			Vec4.add(Camera.origins[Camera.index()], right);
+			CameraObject.buildMatrix(camera);
 		}
 	}
 

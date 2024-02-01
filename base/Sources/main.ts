@@ -41,7 +41,7 @@ function main_start() {
 		if (Config.raw.layout == null) Base.initLayout();
 		Krom.setApplicationName(manifest_title);
 		App.init(function() {
-			Scene.setActive("Scene", function(o: BaseObject) {
+			Scene.setActive("Scene", function(o: TBaseObject) {
 				UniformsExt.init();
 				RenderPathBase.init();
 

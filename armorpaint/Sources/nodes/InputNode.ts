@@ -1,7 +1,7 @@
 
 class InputNode extends LogicNode {
 
-	static coords = new Vec4();
+	static coords = Vec4.create();
 
 	static startX = 0.0;
 	static startY = 0.0;
@@ -90,17 +90,17 @@ class InputNode extends LogicNode {
 		}
 
 		if (Context.raw.brushLazyRadius > 0) {
-			let v1 = new Vec4(Context.raw.brushLazyX * App.w(), Context.raw.brushLazyY * App.h(), 0.0);
-			let v2 = new Vec4(InputNode.coords.x * App.w(), InputNode.coords.y * App.h(), 0.0);
+			let v1 = Vec4.create(Context.raw.brushLazyX * App.w(), Context.raw.brushLazyY * App.h(), 0.0);
+			let v2 = Vec4.create(InputNode.coords.x * App.w(), InputNode.coords.y * App.h(), 0.0);
 			let d = Vec4.distance(v1, v2);
 			let r = Context.raw.brushLazyRadius * 85;
 			if (d > r) {
-				let v3 = new Vec4();
-				v3.subvecs(v2, v1);
-				v3.normalize();
-				v3.mult(1.0 - Context.raw.brushLazyStep);
-				v3.mult(r);
-				v2.addvecs(v1, v3);
+				let v3 = Vec4.create();
+				Vec4.subvecs(v3, v2, v1);
+				Vec4.normalize(v3, );
+				Vec4.mult(v3, 1.0 - Context.raw.brushLazyStep);
+				Vec4.mult(v3, r);
+				Vec4.addvecs(v2, v1, v3);
 				InputNode.coords.x = v2.x / App.w();
 				InputNode.coords.y = v2.y / App.h();
 				// Parse brush inputs once on next draw

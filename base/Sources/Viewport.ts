@@ -10,12 +10,12 @@ class Viewport {
 		po.base.transform.dim.x = aabb.x;
 		po.base.transform.dim.y = aabb.y;
 		po.base.transform.dim.z = aabb.z;
-		po.base.transform.scale.set(2 / r, 2 / r, 2 / r);
-		po.base.transform.loc.set(0, 0, 0);
-		po.base.transform.buildMatrix();
+		Vec4.set(po.base.transform.scale, 2 / r, 2 / r, 2 / r);
+		Vec4.set(po.base.transform.loc, 0, 0, 0);
+		Transform.buildMatrix(po.base.transform);
 		for (let c of po.base.children) {
-			c.transform.loc.set(0, 0, 0);
-			c.transform.buildMatrix();
+			Vec4.set(c.transform.loc, 0, 0, 0);
+			Transform.buildMatrix(c.transform);
 		}
 	}
 
@@ -23,29 +23,29 @@ class Viewport {
 		let cam = Scene.camera;
 		for (let o of Scene.raw.objects) {
 			if (o.type == "camera_object") {
-				cam.base.transform.local.setF32(o.transform.values);
-				cam.base.transform.decompose();
+				Mat4.setF32(cam.base.transform.local, o.transform.values);
+				Transform.decompose(cam.base.transform);
 				if (Context.raw.fovHandle != null) Context.raw.fovHandle.value = cam.data.fov = Base.defaultFov;
 				Context.raw.camHandle.position = 0;
 				cam.data.ortho = null;
-				cam.buildProjection();
+				CameraObject.buildProjection(cam);
 				Context.raw.ddirty = 2;
 				Camera.reset();
-				Context.mainObject().base.transform.reset();
+				Transform.reset(Context.mainObject().base.transform);
 				break;
 			}
 		}
 	}
 
 	static setView = (x: f32, y: f32, z: f32, rx: f32, ry: f32, rz: f32) => {
-		Context.raw.paintObject.base.transform.rot.set(0, 0, 0, 1);
+		Quat.set(Context.raw.paintObject.base.transform.rot, 0, 0, 0, 1);
 		Context.raw.paintObject.base.transform.dirty = true;
 		let cam = Scene.camera;
-		let dist = cam.base.transform.loc.length();
-		cam.base.transform.loc.set(x * dist, y * dist, z * dist);
-		cam.base.transform.rot.fromEuler(rx, ry, rz);
-		cam.base.transform.buildMatrix();
-		cam.buildProjection();
+		let dist = Vec4.vec4_length(cam.base.transform.loc);
+		Vec4.set(cam.base.transform.loc, x * dist, y * dist, z * dist);
+		Quat.fromEuler(cam.base.transform.rot, rx, ry, rz);
+		Transform.buildMatrix(cam.base.transform);
+		CameraObject.buildProjection(cam);
 		Context.raw.ddirty = 2;
 		Camera.reset(Context.raw.viewIndexLast);
 	}
@@ -53,22 +53,22 @@ class Viewport {
 	static orbit = (x: f32, y: f32) => {
 		let cam = Scene.camera;
 		let dist = Camera.distance();
-		cam.base.transform.move(cam.lookWorld(), dist);
-		cam.base.transform.rotate(new Vec4(0, 0, 1), x);
-		cam.base.transform.rotate(cam.rightWorld(), y);
-		cam.base.transform.move(cam.lookWorld(), -dist);
+		Transform.move(cam.base.transform, CameraObject.lookWorld(cam), dist);
+		Transform.rotate(cam.base.transform, Vec4.create(0, 0, 1), x);
+		Transform.rotate(cam.base.transform, CameraObject.rightWorld(cam), y);
+		Transform.move(cam.base.transform, CameraObject.lookWorld(cam), -dist);
 		Context.raw.ddirty = 2;
 	}
 
 	static orbitOpposite = () => {
 		let cam = Scene.camera;
-		let z = Math.abs(cam.look().z) - 1.0;
+		let z = Math.abs(CameraObject.look(cam).z) - 1.0;
 		(z < 0.0001 && z > -0.0001) ? Viewport.orbit(0, Math.PI) : Viewport.orbit(Math.PI, 0);
 	}
 
 	static zoom = (f: f32) => {
 		let cam = Scene.camera;
-		cam.base.transform.move(cam.look(), f);
+		Transform.move(cam.base.transform, CameraObject.look(cam), f);
 		Context.raw.ddirty = 2;
 	}
 
@@ -81,7 +81,7 @@ class Viewport {
 		}
 		else {
 			let f32a = new Float32Array(4);
-			let f = cam.data.fov * cam.base.transform.world.getLoc().length() / 2.5;
+			let f = cam.data.fov * Vec4.vec4_length(Mat4.getLoc(cam.base.transform.world)) / 2.5;
 			f32a[0] = -2 * f;
 			f32a[1] =  2 * f;
 			f32a[2] = -2 * f * (App.h() / App.w());
@@ -89,7 +89,7 @@ class Viewport {
 			cam.data.ortho = f32a;
 			light.base.visible = false;
 		}
-		cam.buildProjection();
+		CameraObject.buildProjection(cam);
 		Context.raw.ddirty = 2;
 	}
 }

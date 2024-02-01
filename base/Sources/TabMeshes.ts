@@ -116,17 +116,17 @@ class TabMeshes {
 							array_remove(Project.paintObjects, o);
 							while (o.base.children.length > 0) {
 								let child = o.base.children[0];
-								child.setParent(null);
+								BaseObject.setParent(child, null);
 								if (Project.paintObjects[0].base != child) {
-									child.setParent(Project.paintObjects[0].base);
+									BaseObject.setParent(child, Project.paintObjects[0].base);
 								}
 								if (o.base.children.length == 0) {
-									Project.paintObjects[0].base.transform.scale.setFrom(o.base.transform.scale);
-									Project.paintObjects[0].base.transform.buildMatrix();
+									Vec4.setFrom(Project.paintObjects[0].base.transform.scale, o.base.transform.scale);
+									Transform.buildMatrix(Project.paintObjects[0].base.transform);
 								}
 							}
 							Data.deleteMesh(o.data._handle);
-							o.remove();
+							MeshObject.remove(o);
 							Context.raw.paintObject = Context.mainObject();
 							UtilMesh.mergeMesh();
 							Context.raw.ddirty = 2;
@@ -134,7 +134,7 @@ class TabMeshes {
 					}, Project.paintObjects.length > 1 ? 2 : 1);
 				}
 				if (h.changed) {
-					let visibles: MeshObject[] = [];
+					let visibles: TMeshObject[] = [];
 					for (let p of Project.paintObjects) if (p.base.visible) visibles.push(p);
 					UtilMesh.mergeMesh(visibles);
 					Context.raw.ddirty = 2;
@@ -145,7 +145,7 @@ class TabMeshes {
 
 	///if is_lab
 	static setDefaultMesh = (name: string) => {
-		let mo: MeshObject = null;
+		let mo: TMeshObject = null;
 		if (name == ".Plane" || name == ".Sphere") {
 			let res = Config.raw.rp_supersample > 1.0 ? 2048 : 1024;
 			let mesh: any = name == ".Plane" ? Geom.make_plane(1, 1, res, res) : Geom.make_uv_sphere(1.0, res, Math.floor(res / 2), false, 2.0);
@@ -164,7 +164,7 @@ class TabMeshes {
 			};
 			let md: TMeshData;
 			MeshData.create(raw, (_md: TMeshData) => { md = _md; });
-			mo = new MeshObject(md, Context.raw.paintObject.materials);
+			mo = MeshObject.create(md, Context.raw.paintObject.materials);
 			array_remove(Scene.meshes, mo);
 			mo.base.name = "Tessellated";
 		}

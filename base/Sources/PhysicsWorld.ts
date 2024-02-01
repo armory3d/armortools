@@ -16,8 +16,8 @@ class PhysicsWorld {
 	static active: PhysicsWorldRaw = null;
 	static vec1: Ammo.btVector3 = null;
 	static vec2: Ammo.btVector3 = null;
-	static v1 = new Vec4();
-	static v2 = new Vec4();
+	static v1 = Vec4.create();
+	static v2 = Vec4.create();
 
 	static load = (done: ()=>void) => {
 		let b = Krom.loadBlob("data/plugins/ammo.js");
@@ -45,10 +45,10 @@ class PhysicsWorld {
 		pw.dispatcher = new Ammo.btCollisionDispatcher(collisionConfiguration);
 		let solver = new Ammo.btSequentialImpulseConstraintSolver();
 		pw.world = new Ammo.btDiscreteDynamicsWorld(pw.dispatcher, broadphase, solver, collisionConfiguration);
-		PhysicsWorld.setGravity(pw, new Vec4(0, 0, -9.81));
+		PhysicsWorld.setGravity(pw, Vec4.create(0, 0, -9.81));
 	}
 
-	static setGravity = (pw: PhysicsWorldRaw, v: Vec4) => {
+	static setGravity = (pw: PhysicsWorldRaw, v: TVec4) => {
 		PhysicsWorld.vec1.setValue(v.x, v.y, v.z);
 		pw.world.setGravity(PhysicsWorld.vec1);
 	}
@@ -122,9 +122,9 @@ class PhysicsWorld {
 				let cp: TPair = {
 					a: body0.userIndex,
 					b: body1.userIndex,
-					posA: new Vec4(posA.x(), posA.y(), posA.z()),
-					posB: new Vec4(posB.x(), posB.y(), posB.z()),
-					normOnB: new Vec4(nor.x(), nor.y(), nor.z()),
+					posA: Vec4.create(posA.x(), posA.y(), posA.z()),
+					posB: Vec4.create(posB.x(), posB.y(), posB.z()),
+					normOnB: Vec4.create(nor.x(), nor.y(), nor.z()),
 					impulse: pt.getAppliedImpulse(),
 					distance: pt.getDistance()
 				};
@@ -135,15 +135,15 @@ class PhysicsWorld {
 
 	static pickClosest = (pw: PhysicsWorldRaw, inputX: f32, inputY: f32): PhysicsBodyRaw => {
 		let camera = Scene.camera;
-		let start = new Vec4();
-		let end = new Vec4();
+		let start = Vec4.create();
+		let end = Vec4.create();
 		RayCaster.getDirection(start, end, inputX, inputY, camera);
-		let hit = PhysicsWorld.rayCast(pw, camera.base.transform.world.getLoc(), end);
+		let hit = PhysicsWorld.rayCast(pw, Mat4.getLoc(camera.base.transform.world), end);
 		let body = (hit != null) ? hit.body : null;
 		return body;
 	}
 
-	static rayCast = (pw: PhysicsWorldRaw, from: Vec4, to: Vec4, group: i32 = 0x00000001, mask = 0xffffffff): THit => {
+	static rayCast = (pw: PhysicsWorldRaw, from: TVec4, to: TVec4, group: i32 = 0x00000001, mask = 0xffffffff): THit => {
 		let rayFrom = PhysicsWorld.vec1;
 		let rayTo = PhysicsWorld.vec2;
 		rayFrom.setValue(from.x, from.y, from.z);
@@ -165,9 +165,9 @@ class PhysicsWorld {
 			let co = rayCallback.get_m_collisionObject();
 			let body = Ammo.btRigidBody.prototype.upcast(co);
 			let hit = rayCallback.get_m_hitPointWorld();
-			PhysicsWorld.v1.set(hit.x(), hit.y(), hit.z());
+			Vec4.set(PhysicsWorld.v1, hit.x(), hit.y(), hit.z());
 			let norm = rayCallback.get_m_hitNormalWorld();
-			PhysicsWorld.v2.set(norm.x(), norm.y(), norm.z());
+			Vec4.set(PhysicsWorld.v2, norm.x(), norm.y(), norm.z());
 			pb = pw.bodyMap.get(body.userIndex);
 			hitInfo = {
 				body: pb,
@@ -183,16 +183,16 @@ class PhysicsWorld {
 
 type THit = {
 	body: PhysicsBodyRaw;
-	pos: Vec4;
-	normal: Vec4;
+	pos: TVec4;
+	normal: TVec4;
 }
 
 type TPair = {
 	a: i32;
 	b: i32;
-	posA: Vec4;
-	posB: Vec4;
-	normOnB: Vec4;
+	posA: TVec4;
+	posB: TVec4;
+	normOnB: TVec4;
 	impulse: f32;
 	distance: f32;
 }

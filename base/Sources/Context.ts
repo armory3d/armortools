@@ -141,7 +141,7 @@ class Context {
 	}
 	///end
 
-	static selectPaintObject = (o: MeshObject) => {
+	static selectPaintObject = (o: TMeshObject) => {
 		///if (is_paint || is_sculpt)
 		UIHeader.headerHandle.redraws = 2;
 		for (let p of Project.paintObjects) p.skip_context = "paint";
@@ -163,7 +163,7 @@ class Context {
 		///end
 	}
 
-	static mainObject = (): MeshObject => {
+	static mainObject = (): TMeshObject => {
 		///if (is_paint || is_sculpt)
 		for (let po of Project.paintObjects) if (po.base.children.length > 0) return po;
 		return Project.paintObjects[0];

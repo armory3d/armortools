@@ -15,7 +15,7 @@ class TabObjects {
 			ui.row([1 / 4]);
 			if (ui.button("Import")) {
 				Project.importMesh(false, () => {
-					Project.paintObjects.pop().base.setParent(null);
+					BaseObject.setParent(Project.paintObjects.pop().base, null);
 				});
 			}
 			ui.endSticky();
@@ -28,7 +28,7 @@ class TabObjects {
 				let listW = ui._w;
 
 				let lineCounter = 0;
-				let drawList = (listHandle: Handle, currentObject: BaseObject) => {
+				let drawList = (listHandle: Handle, currentObject: TBaseObject) => {
 					if (currentObject.name.charAt(0) == ".") return; // Hidden
 					let b = false;
 
@@ -96,7 +96,7 @@ class TabObjects {
 								}
 
 								Data.getMaterial("Scene", "TempMaterial" + TabObjects.materialId, (md: TMaterialData) => {
-									let mo: MeshObject = currentObject.ext;
+									let mo: TMeshObject = currentObject.ext;
 									mo.materials = [md];
 									MakeMaterial.parseMeshPreviewMaterial(md);
 								});
@@ -135,11 +135,11 @@ class TabObjects {
 
 					let t = Context.raw.selectedObject.transform;
 					let localPos = t.loc;
-					let worldPos = new Vec4(t.worldx(), t.worldy(), t.worldz(), 1.0);
+					let worldPos = Vec4.create(Transform.worldx(t), Transform.worldy(t), Transform.worldz(t), 1.0);
 					let scale = t.scale;
-					let rot = t.rot.getEuler();
+					let rot = Quat.getEuler(t.rot);
 					let dim = t.dim;
-					rot.mult(180 / 3.141592);
+					Vec4.mult(rot, 180 / 3.141592);
 					let f = 0.0;
 
 					ui.row([1 / 4, 1 / 4, 1 / 4, 1 / 4]);
@@ -180,9 +180,9 @@ class TabObjects {
 					if (h.changed) { changed = true; rot.z = f; }
 
 					if (changed && Context.raw.selectedObject.name != "Scene") {
-						rot.mult(3.141592 / 180);
-						Context.raw.selectedObject.transform.rot.fromEuler(rot.x, rot.y, rot.z);
-						Context.raw.selectedObject.transform.buildMatrix();
+						Vec4.mult(rot, 3.141592 / 180);
+						Quat.fromEuler(Context.raw.selectedObject.transform.rot, rot.x, rot.y, rot.z);
+						Transform.buildMatrix(Context.raw.selectedObject.transform);
 						// ///if arm_physics
 						// if (rb != null) rb.syncTransform();
 						// ///end
@@ -230,19 +230,19 @@ class TabObjects {
 						let p = Scene.world;
 						p.strength = ui.slider(Zui.handle("tabobjects_16", {value: p.strength}), "Environment", 0.0, 5.0, true);
 					}
-					else if (Context.raw.selectedObject.constructor == LightObject) {
-						let light = (Context.raw.selectedObject as LightObject);
+					else if (Context.raw.selectedObject.ext.constructor == TLightObject) {
+						let light = Context.raw.selectedObject.ext;
 						let lightHandle = Zui.handle("tabobjects_17");
 						lightHandle.value = light.data.strength / 10;
 						light.data.strength = ui.slider(lightHandle, "Strength", 0.0, 5.0, true) * 10;
 					}
-					else if (Context.raw.selectedObject.constructor == CameraObject) {
-						let cam = (Context.raw.selectedObject as CameraObject);
+					else if (Context.raw.selectedObject.ext.constructor == TCameraObject) {
+						let cam = Context.raw.selectedObject.ext;
 						let fovHandle = Zui.handle("tabobjects_18");
 						fovHandle.value = Math.floor(cam.data.fov * 100) / 100;
 						cam.data.fov = ui.slider(fovHandle, "FoV", 0.3, 2.0, true);
 						if (fovHandle.changed) {
-							cam.buildProjection();
+							CameraObject.buildProjection(cam);
 						}
 					}
 				}

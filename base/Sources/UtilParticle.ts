@@ -68,13 +68,13 @@ class UtilParticle {
 				}
 			}
 
-			Scene.spawnObject(".Sphere", null, (o: BaseObject) => {
-				let mo: MeshObject = o.ext;
+			Scene.spawnObject(".Sphere", null, (o: TBaseObject) => {
+				let mo: TMeshObject = o.ext;
 				mo.base.name = ".ParticleEmitter";
 				mo.base.raw = JSON.parse(JSON.stringify(mo.base.raw));
 				mo.base.raw.particle_refs = particle_refs;
 				///if arm_particles
-				mo.setupParticleSystem("Scene", particle_refs[0]);
+				MeshObject.setupParticleSystem(mo, "Scene", particle_refs[0]);
 				///end
 			});
 		});

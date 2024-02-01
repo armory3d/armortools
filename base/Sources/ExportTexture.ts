@@ -94,7 +94,7 @@ class ExportTexture {
 		Context.raw.tool = WorkspaceTool.ToolFill;
 		MakeMaterial.parsePaintMaterial();
 		let _paintObject = Context.raw.paintObject;
-		let planeo: MeshObject = Scene.getChild(".Plane").ext;
+		let planeo: TMeshObject = Scene.getChild(".Plane").ext;
 		planeo.base.visible = true;
 		Context.raw.paintObject = planeo;
 		Context.raw.pdirty = 1;

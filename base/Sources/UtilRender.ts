@@ -12,7 +12,7 @@ class UtilRender {
 	static makeMaterialPreview = () => {
 		Context.raw.materialPreview = true;
 
-		let sphere: MeshObject = Scene.getChild(".Sphere").ext;
+		let sphere: TMeshObject = Scene.getChild(".Sphere").ext;
 		sphere.base.visible = true;
 		let meshes = Scene.meshes;
 		Scene.meshes = [sphere];
@@ -22,9 +22,9 @@ class UtilRender {
 		sphere.materials[0] = Project.materials[0].data;
 		Context.raw.material.previewReady = true;
 
-		Context.raw.savedCamera.setFrom(Scene.camera.base.transform.local);
-		let m = new Mat4(0.9146286343879498, -0.0032648027153306235, 0.404281837254303, 0.4659988049397712, 0.404295023959927, 0.007367569133732468, -0.9145989516155143, -1.0687517188018691, 0.000007410128652369705, 0.9999675337275382, 0.008058532943908717, 0.015935682577325486, 0, 0, 0, 1);
-		Scene.camera.base.transform.setMatrix(m);
+		Mat4.setFrom(Context.raw.savedCamera, Scene.camera.base.transform.local);
+		let m = Mat4.create(0.9146286343879498, -0.0032648027153306235, 0.404281837254303, 0.4659988049397712, 0.404295023959927, 0.007367569133732468, -0.9145989516155143, -1.0687517188018691, 0.000007410128652369705, 0.9999675337275382, 0.008058532943908717, 0.015935682577325486, 0, 0, 0, 1);
+		Transform.setMatrix(Scene.camera.base.transform, m);
 		let savedFov = Scene.camera.data.fov;
 		Scene.camera.data.fov = 0.92;
 		Viewport.updateCameraType(CameraType.CameraPerspective);
@@ -45,8 +45,8 @@ class UtilRender {
 		// No resize
 		RenderPath.lastW = UtilRender.materialPreviewSize;
 		RenderPath.lastH = UtilRender.materialPreviewSize;
-		Scene.camera.buildProjection();
-		Scene.camera.buildMatrix();
+		CameraObject.buildProjection(Scene.camera);
+		CameraObject.buildMatrix(Scene.camera);
 
 		MakeMaterial.parseMeshPreviewMaterial();
 		let _commands = RenderPath.commands;
@@ -63,11 +63,11 @@ class UtilRender {
 		Scene.meshes = meshes;
 		Context.raw.paintObject = painto;
 
-		Scene.camera.base.transform.setMatrix(Context.raw.savedCamera);
+		Transform.setMatrix(Scene.camera.base.transform, Context.raw.savedCamera);
 		Viewport.updateCameraType(Context.raw.cameraType);
 		Scene.camera.data.fov = savedFov;
-		Scene.camera.buildProjection();
-		Scene.camera.buildMatrix();
+		CameraObject.buildProjection(Scene.camera);
+		CameraObject.buildMatrix(Scene.camera);
 		light.data.strength = _lightStrength;
 		probe.strength = _probeStrength;
 		Context.raw.envmapAngle = _envmapAngle;
@@ -87,20 +87,20 @@ class UtilRender {
 		}
 		Context.raw.decalPreview = true;
 
-		let plane: MeshObject = Scene.getChild(".Plane").ext;
-		plane.base.transform.scale.set(1, 1, 1);
-		plane.base.transform.rot.fromEuler(-Math.PI / 2, 0, 0);
-		plane.base.transform.buildMatrix();
+		let plane: TMeshObject = Scene.getChild(".Plane").ext;
+		Vec4.set(plane.base.transform.scale, 1, 1, 1);
+		Quat.fromEuler(plane.base.transform.rot, -Math.PI / 2, 0, 0);
+		Transform.buildMatrix(plane.base.transform);
 		plane.base.visible = true;
 		let meshes = Scene.meshes;
 		Scene.meshes = [plane];
 		let painto = Context.raw.paintObject;
 		Context.raw.paintObject = plane;
 
-		Context.raw.savedCamera.setFrom(Scene.camera.base.transform.local);
+		Mat4.setFrom(Context.raw.savedCamera, Scene.camera.base.transform.local);
 		let m = Mat4.identity();
-		m.translate(0, 0, 1);
-		Scene.camera.base.transform.setMatrix(m);
+		Mat4.translate(m, 0, 0, 1);
+		Transform.setMatrix(Scene.camera.base.transform, m);
 		let savedFov = Scene.camera.data.fov;
 		Scene.camera.data.fov = 0.92;
 		Viewport.updateCameraType(CameraType.CameraPerspective);
@@ -111,8 +111,8 @@ class UtilRender {
 		// No resize
 		RenderPath.lastW = UtilRender.decalPreviewSize;
 		RenderPath.lastH = UtilRender.decalPreviewSize;
-		Scene.camera.buildProjection();
-		Scene.camera.buildMatrix();
+		CameraObject.buildProjection(Scene.camera);
+		CameraObject.buildMatrix(Scene.camera);
 
 		MakeMaterial.parseMeshPreviewMaterial();
 		let _commands = RenderPath.commands;
@@ -129,11 +129,11 @@ class UtilRender {
 		Scene.meshes = meshes;
 		Context.raw.paintObject = painto;
 
-		Scene.camera.base.transform.setMatrix(Context.raw.savedCamera);
+		Transform.setMatrix(Scene.camera.base.transform, Context.raw.savedCamera);
 		Scene.camera.data.fov = savedFov;
 		Viewport.updateCameraType(Context.raw.cameraType);
-		Scene.camera.buildProjection();
-		Scene.camera.buildMatrix();
+		CameraObject.buildProjection(Scene.camera);
+		CameraObject.buildMatrix(Scene.camera);
 		light = Scene.lights[0];
 		light.base.visible = true;
 		Scene.world._envmap = Context.raw.showEnvmap ? Context.raw.savedEnvmap : Context.raw.emptyEnvmap;
@@ -254,27 +254,27 @@ class UtilRender {
 		}
 
 		let cam = Scene.camera;
-		Context.raw.savedCamera.setFrom(cam.base.transform.local);
+		Mat4.setFrom(Context.raw.savedCamera, cam.base.transform.local);
 		let savedFov = cam.data.fov;
 		Viewport.updateCameraType(CameraType.CameraPerspective);
 		let m = Mat4.identity();
-		m.translate(0, 0, 0.5);
-		cam.base.transform.setMatrix(m);
+		Mat4.translate(m, 0, 0, 0.5);
+		Transform.setMatrix(cam.base.transform, m);
 		cam.data.fov = 0.92;
-		cam.buildProjection();
-		cam.buildMatrix();
-		m.getInverse(Scene.camera.VP);
+		CameraObject.buildProjection(cam);
+		CameraObject.buildMatrix(cam);
+		Mat4.getInverse(m, Scene.camera.VP);
 
-		let planeo: MeshObject = Scene.getChild(".Plane").ext;
+		let planeo: TMeshObject = Scene.getChild(".Plane").ext;
 		planeo.base.visible = true;
 		Context.raw.paintObject = planeo;
 
-		let v = new Vec4();
-		let sx = v.set(m._00, m._01, m._02).length();
-		planeo.base.transform.rot.fromEuler(-Math.PI / 2, 0, 0);
-		planeo.base.transform.scale.set(sx, 1.0, sx);
-		planeo.base.transform.loc.set(m._30, -m._31, 0.0);
-		planeo.base.transform.buildMatrix();
+		let v = Vec4.create();
+		let sx = Vec4.vec4_length(Vec4.set(v, m._00, m._01, m._02));
+		Quat.fromEuler(planeo.base.transform.rot, -Math.PI / 2, 0, 0);
+		Vec4.set(planeo.base.transform.scale, sx, 1.0, sx);
+		Vec4.set(planeo.base.transform.loc, m._30, -m._31, 0.0);
+		Transform.buildMatrix(planeo.base.transform);
 
 		RenderPathPaint.liveLayerDrawn = 0;
 		RenderPathBase.drawGbuffer();
@@ -333,11 +333,11 @@ class UtilRender {
 			Context.raw.mergedObject.base.visible = mergedObjectVisible;
 		}
 		Context.raw.paintObject = painto;
-		Scene.camera.base.transform.setMatrix(Context.raw.savedCamera);
+		Transform.setMatrix(Scene.camera.base.transform, Context.raw.savedCamera);
 		Scene.camera.data.fov = savedFov;
 		Viewport.updateCameraType(Context.raw.cameraType);
-		Scene.camera.buildProjection();
-		Scene.camera.buildMatrix();
+		CameraObject.buildProjection(Scene.camera);
+		CameraObject.buildMatrix(Scene.camera);
 
 		// Scale layer down to to image preview
 		if (Base.pipeMerge == null) Base.makePipe();
@@ -373,7 +373,7 @@ class UtilRender {
 
 		let _scaleWorld = Context.raw.paintObject.base.transform.scaleWorld;
 		Context.raw.paintObject.base.transform.scaleWorld = 3.0;
-		Context.raw.paintObject.base.transform.buildMatrix();
+		Transform.buildMatrix(Context.raw.paintObject.base.transform);
 
 		g4.begin();
 		g4.setPipeline(res.scon._pipeState);
@@ -386,7 +386,7 @@ class UtilRender {
 		g4.end();
 
 		Context.raw.paintObject.base.transform.scaleWorld = _scaleWorld;
-		Context.raw.paintObject.base.transform.buildMatrix();
+		Transform.buildMatrix(Context.raw.paintObject.base.transform);
 	}
 
 	static pickPosNorTex = () => {
@@ -412,13 +412,13 @@ class UtilRender {
 		Context.raw.pdirty = 0;
 	}
 
-	static getDecalMat = (): Mat4 => {
+	static getDecalMat = (): TMat4 => {
 		UtilRender.pickPosNorTex();
 		let decalMat = Mat4.identity();
-		let loc = new Vec4(Context.raw.posXPicked, Context.raw.posYPicked, Context.raw.posZPicked);
-		let rot = new Quat().fromTo(new Vec4(0.0, 0.0, -1.0), new Vec4(Context.raw.norXPicked, Context.raw.norYPicked, Context.raw.norZPicked));
-		let scale = new Vec4(Context.raw.brushRadius * 0.5, Context.raw.brushRadius * 0.5, Context.raw.brushRadius * 0.5);
-		decalMat.compose(loc, rot, scale);
+		let loc = Vec4.create(Context.raw.posXPicked, Context.raw.posYPicked, Context.raw.posZPicked);
+		let rot = Quat.fromTo(Quat.create(), Vec4.create(0.0, 0.0, -1.0), Vec4.create(Context.raw.norXPicked, Context.raw.norYPicked, Context.raw.norZPicked));
+		let scale = Vec4.create(Context.raw.brushRadius * 0.5, Context.raw.brushRadius * 0.5, Context.raw.brushRadius * 0.5);
+		Mat4.compose(decalMat, loc, rot, scale);
 		return decalMat;
 	}
 

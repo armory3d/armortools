@@ -3,10 +3,10 @@
 
 class Gizmo {
 
-	static v = new Vec4();
-	static v0 = new Vec4();
-	static q = new Quat();
-	static q0 = new Quat();
+	static v = Vec4.create();
+	static v0 = Vec4.create();
+	static q = Quat.create();
+	static q0 = Quat.create();
 
 	static update = () => {
 		let isObject = Context.raw.tool == WorkspaceTool.ToolGizmo;
@@ -17,7 +17,7 @@ class Gizmo {
 		gizmo.visible = (isObject || isDecal) && !hide;
 		if (!gizmo.visible) return;
 
-		let paintObject: BaseObject = Context.raw.paintObject.base;
+		let paintObject: TBaseObject = Context.raw.paintObject.base;
 		///if is_forge
 		if (Context.raw.selectedObject != null) {
 			paintObject = Context.raw.selectedObject;
@@ -25,25 +25,25 @@ class Gizmo {
 		///end
 
 		if (isObject) {
-			gizmo.transform.loc.setFrom(paintObject.transform.loc);
+			Vec4.setFrom(gizmo.transform.loc, paintObject.transform.loc);
 		}
 		else if (isDecal) {
-			gizmo.transform.loc.set(Context.raw.layer.decalMat._30, Context.raw.layer.decalMat._31, Context.raw.layer.decalMat._32);
+			Vec4.set(gizmo.transform.loc, Context.raw.layer.decalMat._30, Context.raw.layer.decalMat._31, Context.raw.layer.decalMat._32);
 		}
 		let cam = Scene.camera;
 		let fov = cam.data.fov;
 		let dist = Vec4.distance(cam.base.transform.loc, gizmo.transform.loc) / 8 * fov;
-		gizmo.transform.scale.set(dist, dist, dist);
-		Context.raw.gizmoTranslateX.transform.scale.set(dist, dist, dist);
-		Context.raw.gizmoTranslateY.transform.scale.set(dist, dist, dist);
-		Context.raw.gizmoTranslateZ.transform.scale.set(dist, dist, dist);
-		Context.raw.gizmoScaleX.transform.scale.set(dist, dist, dist);
-		Context.raw.gizmoScaleY.transform.scale.set(dist, dist, dist);
-		Context.raw.gizmoScaleZ.transform.scale.set(dist, dist, dist);
-		Context.raw.gizmoRotateX.transform.scale.set(dist, dist, dist);
-		Context.raw.gizmoRotateY.transform.scale.set(dist, dist, dist);
-		Context.raw.gizmoRotateZ.transform.scale.set(dist, dist, dist);
-		gizmo.transform.buildMatrix();
+		Vec4.set(gizmo.transform.scale, dist, dist, dist);
+		Vec4.set(Context.raw.gizmoTranslateX.transform.scale, dist, dist, dist);
+		Vec4.set(Context.raw.gizmoTranslateY.transform.scale, dist, dist, dist);
+		Vec4.set(Context.raw.gizmoTranslateZ.transform.scale, dist, dist, dist);
+		Vec4.set(Context.raw.gizmoScaleX.transform.scale, dist, dist, dist);
+		Vec4.set(Context.raw.gizmoScaleY.transform.scale, dist, dist, dist);
+		Vec4.set(Context.raw.gizmoScaleZ.transform.scale, dist, dist, dist);
+		Vec4.set(Context.raw.gizmoRotateX.transform.scale, dist, dist, dist);
+		Vec4.set(Context.raw.gizmoRotateY.transform.scale, dist, dist, dist);
+		Vec4.set(Context.raw.gizmoRotateZ.transform.scale, dist, dist, dist);
+		Transform.buildMatrix(gizmo.transform);
 
 		// Scene control
 		if (isObject) {
@@ -67,20 +67,20 @@ class Gizmo {
 					paintObject.transform.scale.z += Context.raw.gizmoDrag - Context.raw.gizmoDragLast;
 				}
 				else if (Context.raw.rotateX) {
-					Gizmo.q0.fromAxisAngle(Vec4.xAxis(), Context.raw.gizmoDrag - Context.raw.gizmoDragLast);
-					paintObject.transform.rot.mult(Gizmo.q0);
+					Quat.fromAxisAngle(Gizmo.q0, Vec4.xAxis(), Context.raw.gizmoDrag - Context.raw.gizmoDragLast);
+					Quat.mult(paintObject.transform.rot, Gizmo.q0);
 				}
 				else if (Context.raw.rotateY) {
-					Gizmo.q0.fromAxisAngle(Vec4.yAxis(), Context.raw.gizmoDrag - Context.raw.gizmoDragLast);
-					paintObject.transform.rot.mult(Gizmo.q0);
+					Quat.fromAxisAngle(Gizmo.q0, Vec4.yAxis(), Context.raw.gizmoDrag - Context.raw.gizmoDragLast);
+					Quat.mult(paintObject.transform.rot, Gizmo.q0);
 				}
 				else if (Context.raw.rotateZ) {
-					Gizmo.q0.fromAxisAngle(Vec4.zAxis(), Context.raw.gizmoDrag - Context.raw.gizmoDragLast);
-					paintObject.transform.rot.mult(Gizmo.q0);
+					Quat.fromAxisAngle(Gizmo.q0, Vec4.zAxis(), Context.raw.gizmoDrag - Context.raw.gizmoDragLast);
+					Quat.mult(paintObject.transform.rot, Gizmo.q0);
 				}
 				Context.raw.gizmoDragLast = Context.raw.gizmoDrag;
 
-				paintObject.transform.buildMatrix();
+				Transform.buildMatrix(paintObject.transform);
 				///if arm_physics
 				let pb = (paintObject as any).physicsBody;
 				if (pb != null) pb.syncTransform();
@@ -100,37 +100,37 @@ class Gizmo {
 					Context.raw.layer.decalMat._32 = Context.raw.gizmoDrag;
 				}
 				else if (Context.raw.scaleX) {
-					Context.raw.layer.decalMat.decompose(Gizmo.v, Gizmo.q, Gizmo.v0);
+					Mat4.decompose(Context.raw.layer.decalMat, Gizmo.v, Gizmo.q, Gizmo.v0);
 					Gizmo.v0.x += Context.raw.gizmoDrag - Context.raw.gizmoDragLast;
-					Context.raw.layer.decalMat.compose(Gizmo.v, Gizmo.q, Gizmo.v0);
+					Mat4.compose(Context.raw.layer.decalMat, Gizmo.v, Gizmo.q, Gizmo.v0);
 				}
 				else if (Context.raw.scaleY) {
-					Context.raw.layer.decalMat.decompose(Gizmo.v, Gizmo.q, Gizmo.v0);
+					Mat4.decompose(Context.raw.layer.decalMat, Gizmo.v, Gizmo.q, Gizmo.v0);
 					Gizmo.v0.y += Context.raw.gizmoDrag - Context.raw.gizmoDragLast;
-					Context.raw.layer.decalMat.compose(Gizmo.v, Gizmo.q, Gizmo.v0);
+					Mat4.compose(Context.raw.layer.decalMat, Gizmo.v, Gizmo.q, Gizmo.v0);
 				}
 				else if (Context.raw.scaleZ) {
-					Context.raw.layer.decalMat.decompose(Gizmo.v, Gizmo.q, Gizmo.v0);
+					Mat4.decompose(Context.raw.layer.decalMat, Gizmo.v, Gizmo.q, Gizmo.v0);
 					Gizmo.v0.z += Context.raw.gizmoDrag - Context.raw.gizmoDragLast;
-					Context.raw.layer.decalMat.compose(Gizmo.v, Gizmo.q, Gizmo.v0);
+					Mat4.compose(Context.raw.layer.decalMat, Gizmo.v, Gizmo.q, Gizmo.v0);
 				}
 				else if (Context.raw.rotateX) {
-					Context.raw.layer.decalMat.decompose(Gizmo.v, Gizmo.q, Gizmo.v0);
-					Gizmo.q0.fromAxisAngle(Vec4.xAxis(), -Context.raw.gizmoDrag + Context.raw.gizmoDragLast);
-					Gizmo.q.multquats(Gizmo.q0, Gizmo.q);
-					Context.raw.layer.decalMat.compose(Gizmo.v, Gizmo.q, Gizmo.v0);
+					Mat4.decompose(Context.raw.layer.decalMat, Gizmo.v, Gizmo.q, Gizmo.v0);
+					Quat.fromAxisAngle(Gizmo.q0, Vec4.xAxis(), -Context.raw.gizmoDrag + Context.raw.gizmoDragLast);
+					Quat.multquats(Gizmo.q, Gizmo.q0, Gizmo.q);
+					Mat4.compose(Context.raw.layer.decalMat, Gizmo.v, Gizmo.q, Gizmo.v0);
 				}
 				else if (Context.raw.rotateY) {
-					Context.raw.layer.decalMat.decompose(Gizmo.v, Gizmo.q, Gizmo.v0);
-					Gizmo.q0.fromAxisAngle(Vec4.yAxis(), -Context.raw.gizmoDrag + Context.raw.gizmoDragLast);
-					Gizmo.q.multquats(Gizmo.q0, Gizmo.q);
-					Context.raw.layer.decalMat.compose(Gizmo.v, Gizmo.q, Gizmo.v0);
+					Mat4.decompose(Context.raw.layer.decalMat, Gizmo.v, Gizmo.q, Gizmo.v0);
+					Quat.fromAxisAngle(Gizmo.q0, Vec4.yAxis(), -Context.raw.gizmoDrag + Context.raw.gizmoDragLast);
+					Quat.multquats(Gizmo.q, Gizmo.q0, Gizmo.q);
+					Mat4.compose(Context.raw.layer.decalMat, Gizmo.v, Gizmo.q, Gizmo.v0);
 				}
 				else if (Context.raw.rotateZ) {
-					Context.raw.layer.decalMat.decompose(Gizmo.v, Gizmo.q, Gizmo.v0);
-					Gizmo.q0.fromAxisAngle(Vec4.zAxis(), Context.raw.gizmoDrag - Context.raw.gizmoDragLast);
-					Gizmo.q.multquats(Gizmo.q0, Gizmo.q);
-					Context.raw.layer.decalMat.compose(Gizmo.v, Gizmo.q, Gizmo.v0);
+					Mat4.decompose(Context.raw.layer.decalMat, Gizmo.v, Gizmo.q, Gizmo.v0);
+					Quat.fromAxisAngle(Gizmo.q0, Vec4.zAxis(), Context.raw.gizmoDrag - Context.raw.gizmoDragLast);
+					Quat.multquats(Gizmo.q, Gizmo.q0, Gizmo.q);
+					Mat4.compose(Context.raw.layer.decalMat, Gizmo.v, Gizmo.q, Gizmo.v0);
 				}
 				Context.raw.gizmoDragLast = Context.raw.gizmoDrag;
 
@@ -185,10 +185,10 @@ class Gizmo {
 
 			if (isObject) {
 				let t = paintObject.transform;
-				Gizmo.v.set(t.worldx(), t.worldy(), t.worldz());
+				Vec4.set(Gizmo.v, Transform.worldx(t), Transform.worldy(t), Transform.worldz(t));
 			}
 			else if (isDecal) {
-				Gizmo.v.set(Context.raw.layer.decalMat._30, Context.raw.layer.decalMat._31, Context.raw.layer.decalMat._32);
+				Vec4.set(Gizmo.v, Context.raw.layer.decalMat._30, Context.raw.layer.decalMat._31, Context.raw.layer.decalMat._32);
 			}
 
 			if (Context.raw.translateX || Context.raw.scaleX) {
@@ -216,7 +216,7 @@ class Gizmo {
 				let hit = RayCaster.planeIntersect(Vec4.xAxis(), Gizmo.v, Mouse.viewX, Mouse.viewY, Scene.camera);
 				if (hit != null) {
 					if (Context.raw.gizmoStarted) {
-						Context.raw.layer.decalMat.decompose(Gizmo.v, Gizmo.q, Gizmo.v0);
+						Mat4.decompose(Context.raw.layer.decalMat, Gizmo.v, Gizmo.q, Gizmo.v0);
 						Context.raw.gizmoOffset = Math.atan2(hit.y - Gizmo.v.y, hit.z - Gizmo.v.z);
 					}
 					Context.raw.gizmoDrag = Math.atan2(hit.y - Gizmo.v.y, hit.z - Gizmo.v.z) - Context.raw.gizmoOffset;
@@ -226,7 +226,7 @@ class Gizmo {
 				let hit = RayCaster.planeIntersect(Vec4.yAxis(), Gizmo.v, Mouse.viewX, Mouse.viewY, Scene.camera);
 				if (hit != null) {
 					if (Context.raw.gizmoStarted) {
-						Context.raw.layer.decalMat.decompose(Gizmo.v, Gizmo.q, Gizmo.v0);
+						Mat4.decompose(Context.raw.layer.decalMat, Gizmo.v, Gizmo.q, Gizmo.v0);
 						Context.raw.gizmoOffset = Math.atan2(hit.z - Gizmo.v.z, hit.x - Gizmo.v.x);
 					}
 					Context.raw.gizmoDrag = Math.atan2(hit.z - Gizmo.v.z, hit.x - Gizmo.v.x) - Context.raw.gizmoOffset;
@@ -236,7 +236,7 @@ class Gizmo {
 				let hit = RayCaster.planeIntersect(Vec4.zAxis(), Gizmo.v, Mouse.viewX, Mouse.viewY, Scene.camera);
 				if (hit != null) {
 					if (Context.raw.gizmoStarted) {
-						Context.raw.layer.decalMat.decompose(Gizmo.v, Gizmo.q, Gizmo.v0);
+						Mat4.decompose(Context.raw.layer.decalMat, Gizmo.v, Gizmo.q, Gizmo.v0);
 						Context.raw.gizmoOffset = Math.atan2(hit.y - Gizmo.v.y, hit.x - Gizmo.v.x);
 					}
 					Context.raw.gizmoDrag = Math.atan2(hit.y - Gizmo.v.y, hit.x - Gizmo.v.x) - Context.raw.gizmoOffset;

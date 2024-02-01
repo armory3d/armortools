@@ -79,12 +79,12 @@ class RenderPathRaytrace {
 
 		let cam = Scene.camera;
 		let ct = cam.base.transform;
-		RenderPathRaytrace.helpMat.setFrom(cam.V);
-		RenderPathRaytrace.helpMat.multmat(cam.P);
-		RenderPathRaytrace.helpMat.getInverse(RenderPathRaytrace.helpMat);
-		RenderPathRaytrace.f32a[0] = ct.worldx();
-		RenderPathRaytrace.f32a[1] = ct.worldy();
-		RenderPathRaytrace.f32a[2] = ct.worldz();
+		Mat4.setFrom(RenderPathRaytrace.helpMat, cam.V);
+		Mat4.multmat(RenderPathRaytrace.helpMat, cam.P);
+		Mat4.getInverse(RenderPathRaytrace.helpMat, RenderPathRaytrace.helpMat);
+		RenderPathRaytrace.f32a[0] = Transform.worldx(ct);
+		RenderPathRaytrace.f32a[1] = Transform.worldy(ct);
+		RenderPathRaytrace.f32a[2] = Transform.worldz(ct);
 		RenderPathRaytrace.f32a[3] = RenderPathRaytrace.frame;
 		///if krom_metal
 		// frame = (frame % (16)) + 1; // _PAINT

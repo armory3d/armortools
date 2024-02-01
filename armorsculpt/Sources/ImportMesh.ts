@@ -34,7 +34,7 @@ class ImportMesh {
 
 	static finishImport = () => {
 		if (Context.raw.mergedObject != null) {
-			Context.raw.mergedObject.remove();
+			MeshObject.remove(Context.raw.mergedObject);
 			Data.deleteMesh(Context.raw.mergedObject.data._handle);
 			Context.raw.mergedObject = null;
 		}
@@ -87,7 +87,7 @@ class ImportMesh {
 					let p = Project.paintObjects[i];
 					if (p == Context.raw.paintObject) continue;
 					Data.deleteMesh(p.data._handle);
-					p.remove();
+					MeshObject.remove(p);
 				}
 				let handle = Context.raw.paintObject.data._handle;
 				if (handle != "SceneSphere" && handle != "ScenePlane") {
@@ -104,7 +104,7 @@ class ImportMesh {
 					History.reset();
 				}
 
-				Context.raw.paintObject.setData(md);
+				MeshObject.setData(Context.raw.paintObject, md);
 				Context.raw.paintObject.base.name = mesh.name;
 				Project.paintObjects = [Context.raw.paintObject];
 

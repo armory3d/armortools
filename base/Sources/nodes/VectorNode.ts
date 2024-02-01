@@ -1,7 +1,7 @@
 
 class VectorNode extends LogicNode {
 
-	value = new Vec4();
+	value = Vec4.create();
 	image: Image = null;
 
 	constructor(x: Null<f32> = null, y: Null<f32> = null, z: Null<f32> = null) {

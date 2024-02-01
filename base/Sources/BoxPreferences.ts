@@ -477,7 +477,7 @@ class BoxPreferences {
 				camRaw.near_plane = ui.slider(near_handle, tr("Clip Start"), 0.001, 1.0, true);
 				camRaw.far_plane = ui.slider(far_handle, tr("Clip End"), 50.0, 100.0, true);
 				if (near_handle.changed || far_handle.changed) {
-					cam.buildProjection();
+					CameraObject.buildProjection(cam);
 				}
 
 				let dispHandle = Zui.handle("boxpreferences_49", { value: Config.raw.displace_strength });

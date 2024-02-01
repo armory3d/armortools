@@ -8,7 +8,7 @@ class Project {
 	static assetId = 0;
 	static meshAssets: string[] = [];
 	static materialGroups: TNodeGroup[] = [];
-	static paintObjects: MeshObject[] = null;
+	static paintObjects: TMeshObject[] = null;
 	static assetMap = new Map<i32, any>(); // Image | Font
 	static meshList: string[] = null;
 	///if (is_paint || is_sculpt)
@@ -123,7 +123,7 @@ class Project {
 
 		///if (is_paint || is_sculpt)
 		if (Context.raw.mergedObject != null) {
-			Context.raw.mergedObject.remove();
+			MeshObject.remove(Context.raw.mergedObject);
 			Data.deleteMesh(Context.raw.mergedObject.data._handle);
 			Context.raw.mergedObject = null;
 		}
@@ -140,7 +140,7 @@ class Project {
 			let p = Project.paintObjects[i];
 			if (p == Context.raw.paintObject) continue;
 			Data.deleteMesh(p.data._handle);
-			p.remove();
+			MeshObject.remove(p);
 		}
 		let meshes = Scene.meshes;
 		let len = meshes.length;
@@ -150,7 +150,7 @@ class Project {
 				m.base.name != ".ParticleEmitter" &&
 				m.base.name != ".Particle") {
 				Data.deleteMesh(m.data._handle);
-				m.remove();
+				MeshObject.remove(m);
 			}
 		}
 		let handle = Context.raw.paintObject.data._handle;
@@ -213,9 +213,9 @@ class Project {
 			Context.raw.pickerMaskHandle.position = PickerMask.MaskNone;
 			///end
 
-			Context.raw.paintObject.setData(md);
-			Context.raw.paintObject.base.transform.scale.set(1, 1, 1);
-			Context.raw.paintObject.base.transform.buildMatrix();
+			MeshObject.setData(Context.raw.paintObject, md);
+			Vec4.set(Context.raw.paintObject.base.transform.scale, 1, 1, 1);
+			Transform.buildMatrix(Context.raw.paintObject.base.transform);
 			Context.raw.paintObject.base.name = n;
 			Project.paintObjects = [Context.raw.paintObject];
 			///if (is_paint || is_sculpt)
@@ -570,17 +570,17 @@ class Project {
 		else return null;
 	}
 
-	static isAtlasObject = (p: MeshObject): bool => {
+	static isAtlasObject = (p: TMeshObject): bool => {
 		if (Context.raw.layerFilter <= Project.paintObjects.length) return false;
 		let atlasName = Project.getUsedAtlases()[Context.raw.layerFilter - Project.paintObjects.length - 1];
 		let atlasI = Project.atlasNames.indexOf(atlasName);
 		return atlasI == Project.atlasObjects[Project.paintObjects.indexOf(p)];
 	}
 
-	static getAtlasObjects = (objectMask: i32): MeshObject[] => {
+	static getAtlasObjects = (objectMask: i32): TMeshObject[] => {
 		let atlasName = Project.getUsedAtlases()[objectMask - Project.paintObjects.length - 1];
 		let atlasI = Project.atlasNames.indexOf(atlasName);
-		let visibles: MeshObject[] = [];
+		let visibles: TMeshObject[] = [];
 		for (let i = 0; i < Project.paintObjects.length; ++i) if (Project.atlasObjects[i] == atlasI) visibles.push(Project.paintObjects[i]);
 		return visibles;
 	}

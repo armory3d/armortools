@@ -1,7 +1,7 @@
 
 class UniformsExt {
 
-	static vec = new Vec4();
+	static vec = Vec4.create();
 	static orthoP = Mat4.ortho(-0.5, 0.5, -0.5, 0.5, -0.5, 0.5);
 
 	static init = () => {
@@ -14,11 +14,11 @@ class UniformsExt {
 		Uniforms.externalTextureLinks = [UniformsExt.linkTex];
 	}
 
-	static linkInt = (object: BaseObject, mat: TMaterialData, link: string): Null<i32> => {
+	static linkInt = (object: TBaseObject, mat: TMaterialData, link: string): Null<i32> => {
 		return null;
 	}
 
-	static linkFloat = (object: BaseObject, mat: TMaterialData, link: string): Null<f32> => {
+	static linkFloat = (object: TBaseObject, mat: TMaterialData, link: string): Null<f32> => {
 		switch (link) {
 			case "_brushRadius": {
 				///if (is_paint || is_sculpt)
@@ -110,7 +110,7 @@ class UniformsExt {
 			}
 			///end
 			case "_decalLayerDim": {
-				return Context.raw.layer.decalMat.getScale().z * 0.5;
+				return Mat4.getScale(Context.raw.layer.decalMat).z * 0.5;
 			}
 			case "_pickerOpacity": {
 				return Context.raw.pickedColor.opacity;
@@ -148,20 +148,20 @@ class UniformsExt {
 		return null;
 	}
 
-	static linkVec2 = (object: BaseObject, mat: TMaterialData, link: string): Vec4 => {
+	static linkVec2 = (object: TBaseObject, mat: TMaterialData, link: string): TVec4 => {
 		switch (link) {
 			case "_gbufferSize": {
-				UniformsExt.vec.set(0, 0, 0);
+				Vec4.set(UniformsExt.vec, 0, 0, 0);
 				let gbuffer2 = RenderPath.renderTargets.get("gbuffer2");
-				UniformsExt.vec.set(gbuffer2.image.width, gbuffer2.image.height, 0);
+				Vec4.set(UniformsExt.vec, gbuffer2.image.width, gbuffer2.image.height, 0);
 				return UniformsExt.vec;
 			}
 			case "_cloneDelta": {
-				UniformsExt.vec.set(Context.raw.cloneDeltaX, Context.raw.cloneDeltaY, 0);
+				Vec4.set(UniformsExt.vec, Context.raw.cloneDeltaX, Context.raw.cloneDeltaY, 0);
 				return UniformsExt.vec;
 			}
 			case "_texpaintSize": {
-				UniformsExt.vec.set(Config.getTextureResX(), Config.getTextureResY(), 0);
+				Vec4.set(UniformsExt.vec, Config.getTextureResX(), Config.getTextureResY(), 0);
 				return UniformsExt.vec;
 			}
 			///if (is_paint || is_sculpt)
@@ -172,7 +172,7 @@ class UniformsExt {
 				if (Config.raw.pressure_angle && Pen.down()) {
 					angle *= Pen.pressure * Config.raw.pressure_sensitivity;
 				}
-				UniformsExt.vec.set(Math.cos(-angle), Math.sin(-angle), 0);
+				Vec4.set(UniformsExt.vec, Math.cos(-angle), Math.sin(-angle), 0);
 				return UniformsExt.vec;
 			}
 			///end
@@ -180,8 +180,8 @@ class UniformsExt {
 		return null;
 	}
 
-	static linkVec3 = (object: BaseObject, mat: TMaterialData, link: string): Vec4 => {
-		let v: Vec4 = null;
+	static linkVec3 = (object: TBaseObject, mat: TMaterialData, link: string): TVec4 => {
+		let v: TVec4 = null;
 		switch (link) {
 			///if (is_paint || is_sculpt)
 			case "_brushDirection": {
@@ -200,24 +200,24 @@ class UniformsExt {
 					lastx = UniformsExt.vec2d(lastx);
 				}
 				let angle = Math.atan2(-y + lasty, x - lastx) - Math.PI / 2;
-				v.set(Math.cos(angle), Math.sin(angle), allowPaint ? 1 : 0);
+				Vec4.set(v, Math.cos(angle), Math.sin(angle), allowPaint ? 1 : 0);
 				Context.raw.prevPaintVecX = Context.raw.lastPaintVecX;
 				Context.raw.prevPaintVecY = Context.raw.lastPaintVecY;
 				return v;
 			}
 			case "_decalLayerLoc": {
 				v = Uniforms.helpVec;
-				v.set(Context.raw.layer.decalMat._30, Context.raw.layer.decalMat._31, Context.raw.layer.decalMat._32);
+				Vec4.set(v, Context.raw.layer.decalMat._30, Context.raw.layer.decalMat._31, Context.raw.layer.decalMat._32);
 				return v;
 			}
 			case "_decalLayerNor": {
 				v = Uniforms.helpVec;
-				v.set(Context.raw.layer.decalMat._20, Context.raw.layer.decalMat._21, Context.raw.layer.decalMat._22).normalize();
+				Vec4.normalize(Vec4.set(v, Context.raw.layer.decalMat._20, Context.raw.layer.decalMat._21, Context.raw.layer.decalMat._22));
 				return v;
 			}
 			case "_pickerBase": {
 				v = Uniforms.helpVec;
-				v.set(
+				Vec4.set(v,
 					color_get_rb(Context.raw.pickedColor.base) / 255,
 					color_get_gb(Context.raw.pickedColor.base) / 255,
 					color_get_bb(Context.raw.pickedColor.base) / 255
@@ -226,7 +226,7 @@ class UniformsExt {
 			}
 			case "_pickerNormal": {
 				v = Uniforms.helpVec;
-				v.set(
+				Vec4.set(v,
 					color_get_rb(Context.raw.pickedColor.normal) / 255,
 					color_get_gb(Context.raw.pickedColor.normal) / 255,
 					color_get_bb(Context.raw.pickedColor.normal) / 255
@@ -236,12 +236,12 @@ class UniformsExt {
 			///if arm_physics
 			case "_particleHit": {
 				v = Uniforms.helpVec;
-				v.set(Context.raw.particleHitX, Context.raw.particleHitY, Context.raw.particleHitZ);
+				Vec4.set(v, Context.raw.particleHitX, Context.raw.particleHitY, Context.raw.particleHitZ);
 				return v;
 			}
 			case "_particleHitLast": {
 				v = Uniforms.helpVec;
-				v.set(Context.raw.lastParticleHitX, Context.raw.lastParticleHitY, Context.raw.lastParticleHitZ);
+				Vec4.set(v, Context.raw.lastParticleHitX, Context.raw.lastParticleHitY, Context.raw.lastParticleHitZ);
 				return v;
 			}
 			///end
@@ -261,11 +261,11 @@ class UniformsExt {
 	}
 	///end
 
-	static linkVec4 = (object: BaseObject, mat: TMaterialData, link: string): Vec4 => {
+	static linkVec4 = (object: TBaseObject, mat: TMaterialData, link: string): TVec4 => {
 		switch (link) {
 			case "_inputBrush": {
 				let down = Mouse.down() || Pen.down();
-				UniformsExt.vec.set(Context.raw.paintVec.x, Context.raw.paintVec.y, down ? 1.0 : 0.0, 0.0);
+				Vec4.set(UniformsExt.vec, Context.raw.paintVec.x, Context.raw.paintVec.y, down ? 1.0 : 0.0, 0.0);
 
 				///if (is_paint || is_sculpt)
 				if (Context.raw.paint2d) {
@@ -277,7 +277,7 @@ class UniformsExt {
 			}
 			case "_inputBrushLast": {
 				let down = Mouse.down() || Pen.down();
-				UniformsExt.vec.set(Context.raw.lastPaintVecX, Context.raw.lastPaintVecY, down ? 1.0 : 0.0, 0.0);
+				Vec4.set(UniformsExt.vec, Context.raw.lastPaintVecX, Context.raw.lastPaintVecY, down ? 1.0 : 0.0, 0.0);
 
 				///if (is_paint || is_sculpt)
 				if (Context.raw.paint2d) {
@@ -288,16 +288,16 @@ class UniformsExt {
 				return UniformsExt.vec;
 			}
 			case "_envmapData": {
-				UniformsExt.vec.set(Context.raw.envmapAngle, Math.sin(-Context.raw.envmapAngle), Math.cos(-Context.raw.envmapAngle), Scene.world.strength);
+				Vec4.set(UniformsExt.vec, Context.raw.envmapAngle, Math.sin(-Context.raw.envmapAngle), Math.cos(-Context.raw.envmapAngle), Scene.world.strength);
 				return UniformsExt.vec;
 			}
 			case "_envmapDataWorld": {
-				UniformsExt.vec.set(Context.raw.envmapAngle, Math.sin(-Context.raw.envmapAngle), Math.cos(-Context.raw.envmapAngle), Context.raw.showEnvmap ? Scene.world.strength : 1.0);
+				Vec4.set(UniformsExt.vec, Context.raw.envmapAngle, Math.sin(-Context.raw.envmapAngle), Math.cos(-Context.raw.envmapAngle), Context.raw.showEnvmap ? Scene.world.strength : 1.0);
 				return UniformsExt.vec;
 			}
 			///if (is_paint || is_sculpt)
 			case "_stencilTransform": {
-				UniformsExt.vec.set(Context.raw.brushStencilX, Context.raw.brushStencilY, Context.raw.brushStencilScale, Context.raw.brushStencilAngle);
+				Vec4.set(UniformsExt.vec, Context.raw.brushStencilX, Context.raw.brushStencilY, Context.raw.brushStencilScale, Context.raw.brushStencilAngle);
 				if (Context.raw.paint2d) UniformsExt.vec.x = UniformsExt.vec2d(UniformsExt.vec.x);
 				return UniformsExt.vec;
 			}
@@ -307,7 +307,7 @@ class UniformsExt {
 				let val = (Context.raw.brushRadius * Context.raw.brushNodesRadius) / 15.0;
 				let scale2d = (900 / Base.h()) * Config.raw.window_scale;
 				val *= scale2d; // Projection ratio
-				UniformsExt.vec.set(Context.raw.decalX, Context.raw.decalY, decalMask ? 1 : 0, val);
+				Vec4.set(UniformsExt.vec, Context.raw.decalX, Context.raw.decalY, decalMask ? 1 : 0, val);
 				if (Context.raw.paint2d) UniformsExt.vec.x = UniformsExt.vec2d(UniformsExt.vec.x);
 				return UniformsExt.vec;
 			}
@@ -316,15 +316,15 @@ class UniformsExt {
 		return null;
 	}
 
-	static linkMat4 = (object: BaseObject, mat: TMaterialData, link: string): Mat4 => {
+	static linkMat4 = (object: TBaseObject, mat: TMaterialData, link: string): TMat4 => {
 		switch (link) {
 			///if (is_paint || is_sculpt)
 			case "_decalLayerMatrix": { // Decal layer
 				let camera = Scene.camera;
 				let m = Uniforms.helpMat;
-				m.setFrom(Context.raw.layer.decalMat);
-				m.getInverse(m);
-				m.multmat(UniformsExt.orthoP);
+				Mat4.setFrom(m, Context.raw.layer.decalMat);
+				Mat4.getInverse(m, m);
+				Mat4.multmat(m, UniformsExt.orthoP);
 				return m;
 			}
 			///end
@@ -332,7 +332,7 @@ class UniformsExt {
 		return null;
 	}
 
-	static linkTex = (object: BaseObject, mat: TMaterialData, link: string): Image => {
+	static linkTex = (object: TBaseObject, mat: TMaterialData, link: string): Image => {
 		switch (link) {
 			case "_texpaint_undo": {
 				///if (is_paint || is_sculpt)

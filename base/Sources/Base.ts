@@ -209,7 +209,7 @@ class Base {
 					if (Config.raw.layout[LayoutSize.LayoutHeader] == 1) Base.appy += UIHeader.headerh;
 					let cam = Scene.camera;
 					cam.data.fov = Math.floor(cam.data.fov * 100) / 100;
-					cam.buildProjection();
+					CameraObject.buildProjection(cam);
 
 					Args.run();
 
@@ -389,7 +389,7 @@ class Base {
 			cam.data.ortho[2] = -2 * (App.h() / App.w());
 			cam.data.ortho[3] =  2 * (App.h() / App.w());
 		}
-		cam.buildProjection();
+		CameraObject.buildProjection(cam);
 
 		if (Context.raw.cameraType == CameraType.CameraOrthographic) {
 			Viewport.updateCameraType(Context.raw.cameraType);
@@ -2069,7 +2069,7 @@ class Base {
 		return l;
 	}
 
-	static createFillLayer = (uvType = UVType.UVMap, decalMat: Mat4 = null, position = -1) => {
+	static createFillLayer = (uvType = UVType.UVMap, decalMat: TMat4 = null, position = -1) => {
 		let _init = () => {
 			let l = Base.newLayer(false, position);
 			History.newLayer();

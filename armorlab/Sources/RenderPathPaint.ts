@@ -197,12 +197,12 @@ class RenderPathPaint {
 		g.setFloat2(Base.cursorMouse, mx, my);
 		g.setFloat2(Base.cursorTexStep, 1 / gbuffer0.width, 1 / gbuffer0.height);
 		g.setFloat(Base.cursorRadius, radius);
-		let right = Scene.camera.rightWorld().normalize();
+		let right = Vec4.normalize(CameraObject.rightWorld(Scene.camera));
 		g.setFloat3(Base.cursorCameraRight, right.x, right.y, right.z);
 		g.setFloat3(Base.cursorTint, tintR, tintG, tintB);
 		g.setMatrix(Base.cursorVP, Scene.camera.VP);
 		let helpMat = Mat4.identity();
-		helpMat.getInverse(Scene.camera.VP);
+		Mat4.getInverse(helpMat, Scene.camera.VP);
 		g.setMatrix(Base.cursorInvVP, helpMat);
 		///if (krom_metal || krom_vulkan)
 		g.setVertexBuffer(MeshData.get(geom, [{name: "tex", data: "short2norm"}]));
