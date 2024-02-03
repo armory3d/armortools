@@ -2,7 +2,7 @@
 class TextToPhotoNode extends LogicNode {
 
 	static prompt = "";
-	static image: Image = null;
+	static image: ImageRaw = null;
 	static tiling = false;
 	static text_encoder_blob : ArrayBuffer;
 	static unet_blob : ArrayBuffer;
@@ -12,14 +12,14 @@ class TextToPhotoNode extends LogicNode {
 		super();
 	}
 
-	override getAsImage = (from: i32, done: (img: Image)=>void) => {
-		TextToPhotoNode.stableDiffusion(TextToPhotoNode.prompt, (_image: Image) => {
+	override getAsImage = (from: i32, done: (img: ImageRaw)=>void) => {
+		TextToPhotoNode.stableDiffusion(TextToPhotoNode.prompt, (_image: ImageRaw) => {
 			TextToPhotoNode.image = _image;
 			done(TextToPhotoNode.image);
 		});
 	}
 
-	override getCachedImage = (): Image => {
+	override getCachedImage = (): ImageRaw => {
 		return TextToPhotoNode.image;
 	}
 
@@ -29,7 +29,7 @@ class TextToPhotoNode extends LogicNode {
 		node.buttons[1].height = TextToPhotoNode.prompt.split("\n").length;
 	}
 
-	static stableDiffusion = (prompt: string, done: (img: Image)=>void, inpaintLatents: Float32Array = null, offset = 0, upscale = true, mask: Float32Array = null, latents_orig: Float32Array = null) => {
+	static stableDiffusion = (prompt: string, done: (img: ImageRaw)=>void, inpaintLatents: Float32Array = null, offset = 0, upscale = true, mask: Float32Array = null, latents_orig: Float32Array = null) => {
 		Data.getBlob("models/sd_text_encoder.quant.onnx", (_text_encoder_blob: ArrayBuffer) => {
 		Data.getBlob("models/sd_unet.quant.onnx", (_unet_blob: ArrayBuffer) => {
 		Data.getBlob("models/sd_vae_decoder.quant.onnx", (_vae_decoder_blob: ArrayBuffer) => {
@@ -95,7 +95,7 @@ class TextToPhotoNode extends LogicNode {
 		let ets: Float32Array[] = [];
 		let counter = 0;
 
-		let processing = (g: Graphics2) => {
+		let processing = (g: Graphics2Raw) => {
 			Console.progress(tr("Processing") + " - " + tr("Text to Photo") + " (" + (counter + 1) + "/" + (50 - offset) + ")");
 
 			let timestep = TextToPhotoNode.timesteps[counter + offset];
@@ -195,7 +195,7 @@ class TextToPhotoNode extends LogicNode {
 		App.notifyOnRender2D(processing);
 	}
 
-	static vaeDecoder = (latents: Float32Array, upscale: bool, done: (img: Image)=>void) => {
+	static vaeDecoder = (latents: Float32Array, upscale: bool, done: (img: ImageRaw)=>void) => {
 		Console.progress(tr("Processing") + " - " + tr("Text to Photo"));
 		Base.notifyOnNextFrame(() => {
 			for (let i = 0; i < latents.length; ++i) {
@@ -231,7 +231,7 @@ class TextToPhotoNode extends LogicNode {
 						while (image.width < Config.getTextureResX()) {
 							let lastImage = image;
 							image = UpscaleNode.esrgan(image);
-							lastImage.unload();
+							Image.unload(lastImage);
 						}
 						done(image);
 					});

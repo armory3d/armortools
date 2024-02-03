@@ -8,7 +8,7 @@ class RenderPathRaytraceBake {
 	static currentSample = 0;
 	static raysTimer = 0.0;
 	static raysCounter = 0;
-	static lastLayer: Image = null;
+	static lastLayer: ImageRaw = null;
 	static lastBake = 0;
 
 	static commands = (parsePaintMaterial: (b?: bool)=>void): bool => {
@@ -22,13 +22,13 @@ class RenderPathRaytraceBake {
 			RenderPathRaytraceBake.lastLayer = null;
 
 			if (RenderPath.renderTargets.get("baketex0") != null) {
-				RenderPath.renderTargets.get("baketex0").image.unload();
-				RenderPath.renderTargets.get("baketex1").image.unload();
-				RenderPath.renderTargets.get("baketex2").image.unload();
+				Image.unload(RenderPath.renderTargets.get("baketex0").image);
+				Image.unload(RenderPath.renderTargets.get("baketex1").image);
+				Image.unload(RenderPath.renderTargets.get("baketex2").image);
 			}
 
 			{
-				let t = new RenderTargetRaw();
+				let t = RenderTarget.create();
 				t.name = "baketex0";
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
@@ -36,7 +36,7 @@ class RenderPathRaytraceBake {
 				RenderPath.createRenderTarget(t);
 			}
 			{
-				let t = new RenderTargetRaw();
+				let t = RenderTarget.create();
 				t.name = "baketex1";
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
@@ -44,7 +44,7 @@ class RenderPathRaytraceBake {
 				RenderPath.createRenderTarget(t);
 			}
 			{
-				let t = new RenderTargetRaw();
+				let t = RenderTarget.create();
 				t.name = "baketex2";
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();

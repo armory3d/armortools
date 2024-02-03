@@ -269,7 +269,7 @@ class BoxPreferences {
 					Config.raw.undo_steps = Math.floor(Context.raw.undoHandle.value = 1);
 				}
 				if (Context.raw.undoHandle.changed) {
-					ui.g.end();
+					Graphics2.end(ui.g);
 
 					///if (is_paint || is_sculpt)
 					while (History.undoLayers.length < Config.raw.undo_steps) {
@@ -283,7 +283,7 @@ class BoxPreferences {
 					///end
 
 					History.reset();
-					ui.g.begin(false);
+					Graphics2.begin(ui.g, false);
 				}
 
 				///if is_paint

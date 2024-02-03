@@ -17,11 +17,11 @@ class LogicNode {
 		done(null);
 	}
 
-	getAsImage = (from: i32, done: (img: Image)=>void) => {
+	getAsImage = (from: i32, done: (img: ImageRaw)=>void) => {
 		done(null);
 	}
 
-	getCachedImage = (): Image => {
+	getCachedImage = (): ImageRaw => {
 		return null;
 	}
 
@@ -41,7 +41,7 @@ class LogicNodeInput {
 		this.node.get(this.from, done);
 	}
 
-	getAsImage = (done: (img: Image)=>void) => {
+	getAsImage = (done: (img: ImageRaw)=>void) => {
 		this.node.getAsImage(this.from, done);
 	}
 

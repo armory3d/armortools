@@ -178,17 +178,17 @@ class ImportArm {
 				let rts = RenderPath.renderTargets;
 				let _texpaint_blend0 = rts.get("texpaint_blend0").image;
 				Base.notifyOnNextFrame(() => {
-					_texpaint_blend0.unload();
+					Image.unload(_texpaint_blend0);
 				});
-				rts.get("texpaint_blend0").raw.width = Config.getTextureResX();
-				rts.get("texpaint_blend0").raw.height = Config.getTextureResY();
+				rts.get("texpaint_blend0").width = Config.getTextureResX();
+				rts.get("texpaint_blend0").height = Config.getTextureResY();
 				rts.get("texpaint_blend0").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8, DepthStencilFormat.NoDepthAndStencil);
 				let _texpaint_blend1 = rts.get("texpaint_blend1").image;
 				Base.notifyOnNextFrame(() => {
-					_texpaint_blend1.unload();
+					Image.unload(_texpaint_blend1);
 				});
-				rts.get("texpaint_blend1").raw.width = Config.getTextureResX();
-				rts.get("texpaint_blend1").raw.height = Config.getTextureResY();
+				rts.get("texpaint_blend1").width = Config.getTextureResX();
+				rts.get("texpaint_blend1").height = Config.getTextureResY();
 				rts.get("texpaint_blend1").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8, DepthStencilFormat.NoDepthAndStencil);
 				Context.raw.brushBlendDirty = true;
 			}
@@ -214,45 +214,45 @@ class ImportArm {
 				if (!isGroup) {
 					if (Base.pipeMerge == null) Base.makePipe();
 
-					let _texpaint: Image = null;
+					let _texpaint: ImageRaw = null;
 
 					///if is_paint
-					let _texpaint_nor: Image = null;
-					let _texpaint_pack: Image = null;
+					let _texpaint_nor: ImageRaw = null;
+					let _texpaint_pack: ImageRaw = null;
 					///end
 
 					if (isMask) {
 						_texpaint = Image.fromBytes(Lz4.decode(ld.texpaint, ld.res * ld.res * 4), ld.res, ld.res, TextureFormat.RGBA32);
-						l.texpaint.g2.begin(false);
+						Graphics2.begin(l.texpaint.g2, false);
 						// l.texpaint.g2.pipeline = Base.pipeCopy8;
 						l.texpaint.g2.pipeline = project.is_bgra ? Base.pipeCopyBGRA : Base.pipeCopy; // Full bits for undo support, R8 is used
-						l.texpaint.g2.drawImage(_texpaint, 0, 0);
+						Graphics2.drawImage(_texpaint, 0, 0);
 						l.texpaint.g2.pipeline = null;
-						l.texpaint.g2.end();
+						Graphics2.end(l.texpaint.g2);
 					}
 					else { // Layer
 						// TODO: create render target from bytes
 						_texpaint = Image.fromBytes(Lz4.decode(ld.texpaint, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
-						l.texpaint.g2.begin(false);
+						Graphics2.begin(l.texpaint.g2, false);
 						l.texpaint.g2.pipeline = project.is_bgra ? Base.pipeCopyBGRA : Base.pipeCopy;
-						l.texpaint.g2.drawImage(_texpaint, 0, 0);
+						Graphics2.drawImage(_texpaint, 0, 0);
 						l.texpaint.g2.pipeline = null;
-						l.texpaint.g2.end();
+						Graphics2.end(l.texpaint.g2);
 
 						///if is_paint
 						_texpaint_nor = Image.fromBytes(Lz4.decode(ld.texpaint_nor, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
-						l.texpaint_nor.g2.begin(false);
+						Graphics2.begin(l.texpaint_nor.g2, false);
 						l.texpaint_nor.g2.pipeline = project.is_bgra ? Base.pipeCopyBGRA : Base.pipeCopy;
-						l.texpaint_nor.g2.drawImage(_texpaint_nor, 0, 0);
+						Graphics2.drawImage(_texpaint_nor, 0, 0);
 						l.texpaint_nor.g2.pipeline = null;
-						l.texpaint_nor.g2.end();
+						Graphics2.end(l.texpaint_nor.g2);
 
 						_texpaint_pack = Image.fromBytes(Lz4.decode(ld.texpaint_pack, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
-						l.texpaint_pack.g2.begin(false);
+						Graphics2.begin(l.texpaint_pack.g2, false);
 						l.texpaint_pack.g2.pipeline = project.is_bgra ? Base.pipeCopyBGRA : Base.pipeCopy;
-						l.texpaint_pack.g2.drawImage(_texpaint_pack, 0, 0);
+						Graphics2.drawImage(_texpaint_pack, 0, 0);
 						l.texpaint_pack.g2.pipeline = null;
-						l.texpaint_pack.g2.end();
+						Graphics2.end(l.texpaint_pack.g2);
 						///end
 					}
 
@@ -279,10 +279,10 @@ class ImportArm {
 					///end
 
 					Base.notifyOnNextFrame(() => {
-						_texpaint.unload();
+						Image.unload(_texpaint);
 						///if is_paint
-						if (_texpaint_nor != null) _texpaint_nor.unload();
-						if (_texpaint_pack != null) _texpaint_pack.unload();
+						if (_texpaint_nor != null) Image.unload(_texpaint_nor);
+						if (_texpaint_pack != null) Image.unload(_texpaint_pack);
 						///end
 					});
 				}
@@ -595,7 +595,7 @@ class ImportArm {
 				if (!Project.packedAssetExists(Project.raw.packed_assets, pa.name)) {
 					Project.raw.packed_assets.push(pa);
 				}
-				Image.fromEncodedBytes(pa.bytes, pa.name.endsWith(".jpg") ? ".jpg" : ".png", (image: Image) => {
+				Image.fromEncodedBytes(pa.bytes, pa.name.endsWith(".jpg") ? ".jpg" : ".png", (image: ImageRaw) => {
 					Data.cachedImages.set(abs, image);
 				}, null, false);
 				break;

@@ -120,8 +120,8 @@ class UtilMesh {
 			}
 
 			let g = o.data;
-			let l = g._struct.byteSize() / 2;
-			let vertices = g._vertexBuffer.lock(); // posnortex
+			let l = VertexStructure.byteSize(g._struct) / 2;
+			let vertices = VertexBuffer.lock(g._vertexBuffer); // posnortex
 			for (let i = 0; i < Math.floor(vertices.byteLength / 2 / l); ++i) {
 				vertices.setInt16((i * l    ) * 2, vas[0].values[i * 4    ], true);
 				vertices.setInt16((i * l + 1) * 2, vas[0].values[i * 4 + 1], true);
@@ -130,7 +130,7 @@ class UtilMesh {
 				vertices.setInt16((i * l + 4) * 2, vas[1].values[i * 2    ], true);
 				vertices.setInt16((i * l + 5) * 2, vas[1].values[i * 2 + 1], true);
 			}
-			g._vertexBuffer.unlock();
+			VertexBuffer.unlock(g._vertexBuffer);
 		}
 
 		UtilMesh.removeMergedMesh();
@@ -144,8 +144,8 @@ class UtilMesh {
 			let va0 = vas[0].values;
 			let va1 = vas[1].values;
 			let g = o.data;
-			let l = g._struct.byteSize() / 2;
-			let vertices = g._vertexBuffer.lock(); // posnortex
+			let l = VertexStructure.byteSize(g._struct) / 2;
+			let vertices = VertexBuffer.lock(g._vertexBuffer); // posnortex
 			for (let i = 0; i < Math.floor(vertices.byteLength / 2 / l); ++i) {
 				va0[i * 4 + 3] = -va0[i * 4 + 3];
 				va1[i * 2] = -va1[i * 2];
@@ -154,7 +154,7 @@ class UtilMesh {
 				vertices.setInt16((i * l + 4) * 2, -vertices.getInt16((i * l + 4) * 2, true), true);
 				vertices.setInt16((i * l + 5) * 2, -vertices.getInt16((i * l + 5) * 2, true), true);
 			}
-			g._vertexBuffer.unlock();
+			VertexBuffer.unlock(g._vertexBuffer);
 		}
 
 		///if (krom_direct3d12 || krom_vulkan || krom_metal)
@@ -171,9 +171,9 @@ class UtilMesh {
 		let objects = Project.paintObjects;
 		for (let o of objects) {
 			let g = o.data;
-			let l = g._struct.byteSize() / 2;
+			let l = VertexStructure.byteSize(g._struct) / 2;
 			let inda = g._indices[0];
-			let vertices = g._vertexBuffer.lock(); // posnortex
+			let vertices = VertexBuffer.lock(g._vertexBuffer); // posnortex
 			for (let i = 0; i < Math.floor(inda.length / 3); ++i) {
 				let i1 = inda[i * 3    ];
 				let i2 = inda[i * 3 + 1];
@@ -240,7 +240,7 @@ class UtilMesh {
 					}
 				}
 			}
-			g._vertexBuffer.unlock();
+			VertexBuffer.unlock(g._vertexBuffer);
 
 			let va0 = o.data.vertex_arrays[0].values;
 			let va1 = o.data.vertex_arrays[1].values;
@@ -306,27 +306,27 @@ class UtilMesh {
 				va[i * 4 + 2] = Math.floor((va[i * 4 + 2] * sc - dz) / maxScale * 32767);
 			}
 
-			let l = g._struct.byteSize() / 2;
-			let vertices = g._vertexBuffer.lock(); // posnortex
+			let l = VertexStructure.byteSize(g._struct) / 2;
+			let vertices = VertexBuffer.lock(g._vertexBuffer); // posnortex
 			for (let i = 0; i < Math.floor(vertices.byteLength / 2 / l); ++i) {
 				vertices.setInt16((i * l    ) * 2, va[i * 4    ], true);
 				vertices.setInt16((i * l + 1) * 2, va[i * 4 + 1], true);
 				vertices.setInt16((i * l + 2) * 2, va[i * 4 + 2], true);
 			}
-			g._vertexBuffer.unlock();
+			VertexBuffer.unlock(g._vertexBuffer);
 		}
 
 		UtilMesh.mergeMesh();
 	}
 
-	static applyDisplacement = (texpaint_pack: Image, strength = 0.1, uvScale = 1.0) => {
-		let height = texpaint_pack.getPixels();
+	static applyDisplacement = (texpaint_pack: ImageRaw, strength = 0.1, uvScale = 1.0) => {
+		let height = Image.getPixels(texpaint_pack);
 		let heightView = new DataView(height);
 		let res = texpaint_pack.width;
 		let o = Project.paintObjects[0];
 		let g = o.data;
-		let l = g._struct.byteSize() / 2;
-		let vertices = g._vertexBuffer.lock(); // posnortex
+		let l = VertexStructure.byteSize(g._struct) / 2;
+		let vertices = VertexBuffer.lock(g._vertexBuffer); // posnortex
 		for (let i = 0; i < Math.floor(vertices.byteLength / 2 / l); ++i) {
 			let x = Math.floor(vertices.getInt16((i * l + 6) * 2, true) / 32767 * res);
 			let y = Math.floor(vertices.getInt16((i * l + 7) * 2, true) / 32767 * res);
@@ -337,7 +337,7 @@ class UtilMesh {
 			vertices.setInt16((i * l + 1) * 2, vertices.getInt16((i * l + 1) * 2, true) - Math.floor(vertices.getInt16((i * l + 5) * 2, true) * h), true);
 			vertices.setInt16((i * l + 2) * 2, vertices.getInt16((i * l + 2) * 2, true) - Math.floor(vertices.getInt16((i * l + 3) * 2, true) * h), true);
 		}
-		g._vertexBuffer.unlock();
+		VertexBuffer.unlock(g._vertexBuffer);
 
 		let va0 = o.data.vertex_arrays[0].values;
 		for (let i = 0; i < Math.floor(vertices.byteLength / 4 / l); ++i) {

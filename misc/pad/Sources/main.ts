@@ -24,7 +24,7 @@ class Main {
 	static minimap_h = 0;
 	static minimap_box_h = 0;
 	static minimap_scrolling = false;
-	static minimap: Image = null;
+	static minimap: ImageRaw = null;
 	static window_header_h = 0;
 
 	static main = () => {
@@ -63,7 +63,7 @@ class Main {
 		};
 
 		System.start(ops, () => {
-			Data.getFont("font_mono.ttf", (font: Font) => {
+			Data.getFont("font_mono.ttf", (font: FontRaw) => {
 				Data.getBlob("themes/dark.json", (blob_theme: ArrayBuffer) => {
 					Data.getBlob("text_coloring.json", (blob_coloring: ArrayBuffer) => {
 
@@ -143,7 +143,7 @@ class Main {
 		}
 	}
 
-	static render = (g2: Graphics2, g4: Graphics4): void => {
+	static render = (g2: Graphics2Raw, g4: Graphics4Raw): void => {
 		let ui = Main.ui;
 		Main.storage.window_w = System.width;
 		Main.storage.window_h = System.height;

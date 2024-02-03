@@ -1,31 +1,31 @@
 
 class ImportEnvmap {
 
-	static pipeline: PipelineState = null;
+	static pipeline: PipelineStateRaw = null;
 	static paramsLocation: ConstantLocation;
 	static params = Vec4.create();
 	static n = Vec4.create();
 	static radianceLocation: TextureUnit;
-	static radiance: Image = null;
-	static radianceCpu: Image = null;
-	static mips: Image[] = null;
-	static mipsCpu: Image[] = null;
+	static radiance: ImageRaw = null;
+	static radianceCpu: ImageRaw = null;
+	static mips: ImageRaw[] = null;
+	static mipsCpu: ImageRaw[] = null;
 
-	static run = (path: string, image: Image) => {
+	static run = (path: string, image: ImageRaw) => {
 
 		// Init
 		if (ImportEnvmap.pipeline == null) {
-			ImportEnvmap.pipeline = new PipelineState();
+			ImportEnvmap.pipeline = PipelineState.create();
 			ImportEnvmap.pipeline.vertexShader = System.getShader("pass.vert");
 			ImportEnvmap.pipeline.fragmentShader = System.getShader("prefilter_envmap.frag");
-			let vs = new VertexStructure();
-			vs.add("pos", VertexData.F32_2X);
+			let vs = VertexStructure.create();
+			VertexStructure.add(vs, "pos", VertexData.F32_2X);
 			ImportEnvmap.pipeline.inputLayout = [vs];
 			ImportEnvmap.pipeline.colorAttachmentCount = 1;
 			ImportEnvmap.pipeline.colorAttachments[0] = TextureFormat.RGBA128;
-			ImportEnvmap.pipeline.compile();
-			ImportEnvmap.paramsLocation = ImportEnvmap.pipeline.getConstantLocation("params");
-			ImportEnvmap.radianceLocation = ImportEnvmap.pipeline.getTextureUnit("radiance");
+			PipelineState.compile(ImportEnvmap.pipeline);
+			ImportEnvmap.paramsLocation = PipelineState.getConstantLocation(ImportEnvmap.pipeline, "params");
+			ImportEnvmap.radianceLocation = PipelineState.getTextureUnit(ImportEnvmap.pipeline, "radiance");
 
 			ImportEnvmap.radiance = Image.createRenderTarget(1024, 512, TextureFormat.RGBA128);
 
@@ -40,17 +40,17 @@ class ImportEnvmap {
 		}
 
 		// Down-scale to 1024x512
-		ImportEnvmap.radiance.g2.begin(false);
+		Graphics2.begin(ImportEnvmap.radiance.g2, false);
 		ImportEnvmap.radiance.g2.pipeline = Base.pipeCopy128;
-		ImportEnvmap.radiance.g2.drawScaledImage(image, 0, 0, 1024, 512);
+		Graphics2.drawScaledImage(image, 0, 0, 1024, 512);
 		ImportEnvmap.radiance.g2.pipeline = null;
-		ImportEnvmap.radiance.g2.end();
+		Graphics2.end(ImportEnvmap.radiance.g2);
 
-		let radiancePixels = ImportEnvmap.radiance.getPixels();
+		let radiancePixels = Image.getPixels(ImportEnvmap.radiance);
 		if (ImportEnvmap.radianceCpu != null) {
 			let _radianceCpu = ImportEnvmap.radianceCpu;
 			Base.notifyOnNextFrame(() => {
-				_radianceCpu.unload();
+				Image.unload(_radianceCpu);
 			});
 		}
 		ImportEnvmap.radianceCpu = Image.fromBytes(radiancePixels, ImportEnvmap.radiance.width, ImportEnvmap.radiance.height, TextureFormat.RGBA128, Usage.DynamicUsage);
@@ -61,7 +61,7 @@ class ImportEnvmap {
 				let _mip = mip;
 				Base.notifyOnNextFrame(() => {
 					///if (!krom_direct3d12) // TODO: crashes after 50+ imports
-					_mip.unload();
+					Image.unload(_mip);
 					///end
 				});
 			}
@@ -69,9 +69,9 @@ class ImportEnvmap {
 		ImportEnvmap.mipsCpu = [];
 		for (let i = 0; i < ImportEnvmap.mips.length; ++i) {
 			ImportEnvmap.getRadianceMip(ImportEnvmap.mips[i], i, ImportEnvmap.radiance);
-			ImportEnvmap.mipsCpu.push(Image.fromBytes(ImportEnvmap.mips[i].getPixels(), ImportEnvmap.mips[i].width, ImportEnvmap.mips[i].height, TextureFormat.RGBA128, Usage.DynamicUsage));
+			ImportEnvmap.mipsCpu.push(Image.fromBytes(Image.getPixels(ImportEnvmap.mips[i]), ImportEnvmap.mips[i].width, ImportEnvmap.mips[i].height, TextureFormat.RGBA128, Usage.DynamicUsage));
 		}
-		ImportEnvmap.radianceCpu.setMipmaps(ImportEnvmap.mipsCpu);
+		Image.setMipmaps(ImportEnvmap.radianceCpu, ImportEnvmap.mipsCpu);
 
 		// Irradiance
 		Scene.world._irradiance = ImportEnvmap.getSphericalHarmonics(radiancePixels, ImportEnvmap.radiance.width, ImportEnvmap.radiance.height);
@@ -91,16 +91,16 @@ class ImportEnvmap {
 		Project.raw.envmap = path;
 	}
 
-	static getRadianceMip = (mip: Image, level: i32, radiance: Image) => {
-		mip.g4.begin();
-		mip.g4.setVertexBuffer(ConstData.screenAlignedVB);
-		mip.g4.setIndexBuffer(ConstData.screenAlignedIB);
-		mip.g4.setPipeline(ImportEnvmap.pipeline);
+	static getRadianceMip = (mip: ImageRaw, level: i32, radiance: ImageRaw) => {
+		Graphics4.begin(mip.g4);
+		Graphics4.setVertexBuffer(ConstData.screenAlignedVB);
+		Graphics4.setIndexBuffer(ConstData.screenAlignedIB);
+		Graphics4.setPipeline(ImportEnvmap.pipeline);
 		ImportEnvmap.params.x = 0.1 + level / 8;
-		mip.g4.setFloat4(ImportEnvmap.paramsLocation, ImportEnvmap.params.x, ImportEnvmap.params.y, ImportEnvmap.params.z, ImportEnvmap.params.w);
-		mip.g4.setTexture(ImportEnvmap.radianceLocation, radiance);
-		mip.g4.drawIndexedVertices();
-		mip.g4.end();
+		Graphics4.setFloat4(ImportEnvmap.paramsLocation, ImportEnvmap.params.x, ImportEnvmap.params.y, ImportEnvmap.params.z, ImportEnvmap.params.w);
+		Graphics4.setTexture(ImportEnvmap.radianceLocation, radiance);
+		Graphics4.drawIndexedVertices();
+		Graphics4.end();
 	}
 
 	static reverseEquirect = (x: f32, y: f32): TVec4 => {

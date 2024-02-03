@@ -15,7 +15,7 @@ class UIStatus {
 		///end
 	}
 
-	static renderUI = (g: Graphics2) => {
+	static renderUI = (g: Graphics2Raw) => {
 		let ui = UIBase.ui;
 
 		let statush = Config.raw.layout[LayoutSize.LayoutStatusH];
@@ -25,8 +25,8 @@ class UIStatus {
 
 			// Border
 			ui.g.color = ui.t.SEPARATOR_COL;
-			ui.g.fillRect(0, 0, 1, ui._windowH);
-			ui.g.fillRect(ui._windowW - 1, 0, 1, ui._windowH);
+			Graphics2.fillRect(0, 0, 1, ui._windowH);
+			Graphics2.fillRect(ui._windowW - 1, 0, 1, ui._windowH);
 
 			// Draw tabs
 			for (let draw of UIBase.hwndTabs[TabArea.TabStatus]) draw(UIBase.htabs[TabArea.TabStatus]);

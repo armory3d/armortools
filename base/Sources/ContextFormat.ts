@@ -23,11 +23,11 @@ class TContext {
 	colorPickerCallback?: (sc: TSwatchColor)=>void = null;
 
 	defaultIrradiance?: Float32Array = null;
-	defaultRadiance?: Image = null;
-	defaultRadianceMipmaps?: Image[] = null;
-	savedEnvmap?: Image = null;
-	emptyEnvmap?: Image = null;
-	previewEnvmap?: Image = null;
+	defaultRadiance?: ImageRaw = null;
+	defaultRadianceMipmaps?: ImageRaw[] = null;
+	savedEnvmap?: ImageRaw = null;
+	emptyEnvmap?: ImageRaw = null;
+	previewEnvmap?: ImageRaw = null;
 	envmapLoaded? = false;
 	showEnvmap? = false;
 	showEnvmapHandle? = new Handle({ selected: false });
@@ -125,11 +125,11 @@ class TContext {
 	layerPreviewDirty? = true;
 	layersPreviewDirty? = false;
 	nodePreviewDirty? = false;
-	nodePreview?: Image = null;
-	nodePreviews?: Map<string, Image> = null;
+	nodePreview?: ImageRaw = null;
+	nodePreviews?: Map<string, ImageRaw> = null;
 	nodePreviewsUsed?: string[] = null;
 	nodePreviewName? = "";
-	maskPreviewRgba32?: Image = null;
+	maskPreviewRgba32?: ImageRaw = null;
 	maskPreviewLast?: SlotLayerRaw = null;
 
 	colorIdPicked? = false;
@@ -158,7 +158,7 @@ class TContext {
 	colorIdHandle? = new Handle();
 	layersExport? = ExportMode.ExportVisible;
 
-	decalImage?: Image = null;
+	decalImage?: ImageRaw = null;
 	decalPreview? = false;
 	decalX? = 0.0;
 	decalY? = 0.0;
@@ -166,7 +166,7 @@ class TContext {
 	cacheDraws? = false;
 	writeIconOnExport? = false;
 
-	textToolImage?: Image = null;
+	textToolImage?: ImageRaw = null;
 	textToolText?: string;
 	particleMaterial?: TMaterialData = null;
 	///if arm_physics
@@ -211,9 +211,9 @@ class TContext {
 
 	brushNodesRadius? = 1.0;
 	brushNodesOpacity? = 1.0;
-	brushMaskImage?: Image = null;
+	brushMaskImage?: ImageRaw = null;
 	brushMaskImageIsAlpha? = false;
-	brushStencilImage?: Image = null;
+	brushStencilImage?: ImageRaw = null;
 	brushStencilImageIsAlpha? = false;
 	brushStencilX? = 0.02;
 	brushStencilY? = 0.02;

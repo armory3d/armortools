@@ -14,7 +14,7 @@ class ImportTexture {
 			if (a.file == path) {
 				// Set as envmap
 				if (hdrAsEnvmap && path.toLowerCase().endsWith(".hdr")) {
-					Data.getImage(path, (image: Image) => {
+					Data.getImage(path, (image: ImageRaw) => {
 						Base.notifyOnNextFrame(() => { // Make sure file browser process did finish
 							ImportEnvmap.run(path, image);
 						});
@@ -30,7 +30,7 @@ class ImportTexture {
 		let cached = Data.cachedImages.get(path) != null; // Already loaded or pink texture for missing file
 		if (importer == null || cached) importer = ImportTexture.defaultImporter;
 
-		importer(path, (image: Image) => {
+		importer(path, (image: ImageRaw) => {
 			Data.cachedImages.set(path, image);
 			let ar = path.split(Path.sep);
 			let name = ar[ar.length - 1];
@@ -51,7 +51,7 @@ class ImportTexture {
 		});
 	}
 
-	static defaultImporter = (path: string, done: (img: Image)=>void) => {
+	static defaultImporter = (path: string, done: (img: ImageRaw)=>void) => {
 		Data.getImage(path, done);
 	}
 }

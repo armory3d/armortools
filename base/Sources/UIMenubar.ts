@@ -14,7 +14,7 @@ class UIMenubar {
 	constructor() {
 	}
 
-	static renderUI = (g: Graphics2) => {
+	static renderUI = (g: Graphics2Raw) => {
 		let ui = UIBase.ui;
 
 		///if (is_paint || is_sculpt)

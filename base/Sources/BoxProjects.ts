@@ -3,7 +3,7 @@ class BoxProjects {
 
 	static htab = new Handle();
 	static hsearch = new Handle();
-	static iconMap: Map<string, Image> = null;
+	static iconMap: Map<string, ImageRaw> = null;
 
 	static show = () => {
 		if (BoxProjects.iconMap != null) {
@@ -100,7 +100,7 @@ class BoxProjects {
 					if (BoxProjects.iconMap == null) BoxProjects.iconMap = new Map();
 					let icon = BoxProjects.iconMap.get(iconPath);
 					if (icon == null) {
-						Data.getImage(iconPath, (image: Image) => {
+						Data.getImage(iconPath, (image: ImageRaw) => {
 							icon = image;
 							BoxProjects.iconMap.set(iconPath, icon);
 						});
@@ -194,11 +194,11 @@ class BoxProjects {
 
 				if (ui.button(file, Align.Left) && File.exists(path)) {
 					let current = Graphics2.current;
-					if (current != null) current.end();
+					if (current != null) Graphics2.end(current);
 
 					ImportArm.runProject(path);
 
-					if (current != null) current.begin(false);
+					if (current != null) Graphics2.begin(current, false);
 					UIBox.hide();
 				}
 				if (ui.isHovered) ui.tooltip(path);
@@ -218,7 +218,7 @@ class BoxProjects {
 	}
 
 	static drawBadge = (ui: Zui) => {
-		Data.getImage("badge.k", (img: Image) => {
+		Data.getImage("badge.k", (img: ImageRaw) => {
 			ui.image(img);
 			ui.endElement();
 		});

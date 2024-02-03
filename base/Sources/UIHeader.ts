@@ -9,7 +9,7 @@ class UIHeader {
 	constructor() {
 	}
 
-	static renderUI = (g: Graphics2) => {
+	static renderUI = (g: Graphics2Raw) => {
 		let ui = UIBase.ui;
 		if (Config.raw.touch_ui) {
 			UIHeader.headerh = UIHeader.defaultHeaderH + 6;
@@ -81,14 +81,14 @@ class UIHeader {
 				let _next = () => {
 					if (Base.pipeMerge == null) Base.makePipe();
 					if (ConstData.screenAlignedVB == null) ConstData.createScreenAlignedData();
-					m.texpaint.g4.begin();
-					m.texpaint.g4.setPipeline(Base.pipeColorIdToMask);
-					m.texpaint.g4.setTexture(Base.texpaintColorId, RenderPath.renderTargets.get("texpaint_colorid").image);
-					m.texpaint.g4.setTexture(Base.texColorId, Project.getImage(Project.assets[Context.raw.colorIdHandle.position]));
-					m.texpaint.g4.setVertexBuffer(ConstData.screenAlignedVB);
-					m.texpaint.g4.setIndexBuffer(ConstData.screenAlignedIB);
-					m.texpaint.g4.drawIndexedVertices();
-					m.texpaint.g4.end();
+					Graphics4.begin(m.texpaint.g4);
+					Graphics4.setPipeline(Base.pipeColorIdToMask);
+					Graphics4.setTexture(Base.texpaintColorId, RenderPath.renderTargets.get("texpaint_colorid").image);
+					Graphics4.setTexture(Base.texColorId, Project.getImage(Project.assets[Context.raw.colorIdHandle.position]));
+					Graphics4.setVertexBuffer(ConstData.screenAlignedVB);
+					Graphics4.setIndexBuffer(ConstData.screenAlignedIB);
+					Graphics4.drawIndexedVertices();
+					Graphics4.end();
 					Context.raw.colorIdPicked = false;
 					UIToolbar.toolbarHandle.redraws = 1;
 					UIHeader.headerHandle.redraws = 1;
@@ -311,9 +311,9 @@ class UIHeader {
 				Context.raw.brushScale = ui.slider(brushScaleHandle, tr("UV Scale"), 0.01, 5.0, true);
 				if (brushScaleHandle.changed) {
 					if (Context.raw.tool == WorkspaceTool.ToolDecal || Context.raw.tool == WorkspaceTool.ToolText) {
-						ui.g.end();
+						Graphics2.end(ui.g);
 						UtilRender.makeDecalPreview();
-						ui.g.begin(false);
+						Graphics2.begin(ui.g, false);
 					}
 				}
 
@@ -378,10 +378,10 @@ class UIHeader {
 				ui._w = w;
 
 				if (h.changed) {
-					ui.g.end();
+					Graphics2.end(ui.g);
 					UtilRender.makeTextPreview();
 					UtilRender.makeDecalPreview();
-					ui.g.begin(false);
+					Graphics2.begin(ui.g, false);
 				}
 			}
 
@@ -389,10 +389,10 @@ class UIHeader {
 				ui.combo(Context.raw.fillTypeHandle, [tr("Object"), tr("Face"), tr("Angle"), tr("UV Island")], tr("Fill Mode"));
 				if (Context.raw.fillTypeHandle.changed) {
 					if (Context.raw.fillTypeHandle.position == FillType.FillFace) {
-						ui.g.end();
+						Graphics2.end(ui.g);
 						// UtilUV.cacheUVMap();
 						UtilUV.cacheTriangleMap();
-						ui.g.begin(false);
+						Graphics2.begin(ui.g, false);
 						// wireframeHandle.selected = drawWireframe = true;
 					}
 					MakeMaterial.parsePaintMaterial();

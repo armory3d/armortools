@@ -6,7 +6,7 @@ class RenderPathPaint {
 	static init = () => {
 
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "texpaint_blend0";
 			t.width = Config.getTextureResX();
 			t.height = Config.getTextureResY();
@@ -14,7 +14,7 @@ class RenderPathPaint {
 			RenderPath.createRenderTarget(t);
 		}
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "texpaint_blend1";
 			t.width = Config.getTextureResX();
 			t.height = Config.getTextureResY();
@@ -22,7 +22,7 @@ class RenderPathPaint {
 			RenderPath.createRenderTarget(t);
 		}
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "texpaint_picker";
 			t.width = 1;
 			t.height = 1;
@@ -30,7 +30,7 @@ class RenderPathPaint {
 			RenderPath.createRenderTarget(t);
 		}
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "texpaint_nor_picker";
 			t.width = 1;
 			t.height = 1;
@@ -38,7 +38,7 @@ class RenderPathPaint {
 			RenderPath.createRenderTarget(t);
 		}
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "texpaint_pack_picker";
 			t.width = 1;
 			t.height = 1;
@@ -46,7 +46,7 @@ class RenderPathPaint {
 			RenderPath.createRenderTarget(t);
 		}
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "texpaint_uv_picker";
 			t.width = 1;
 			t.height = 1;
@@ -88,10 +88,10 @@ class RenderPathPaint {
 					let texpaint_nor_picker = RenderPath.renderTargets.get("texpaint_nor_picker").image;
 					let texpaint_pack_picker = RenderPath.renderTargets.get("texpaint_pack_picker").image;
 					let texpaint_uv_picker = RenderPath.renderTargets.get("texpaint_uv_picker").image;
-					let a = texpaint_picker.getPixels();
-					let b = texpaint_nor_picker.getPixels();
-					let c = texpaint_pack_picker.getPixels();
-					let d = texpaint_uv_picker.getPixels();
+					let a = Image.getPixels(texpaint_picker);
+					let b = Image.getPixels(texpaint_nor_picker);
+					let c = Image.getPixels(texpaint_pack_picker);
+					let d = Image.getPixels(texpaint_uv_picker);
 
 					if (Context.raw.colorPickerCallback != null) {
 						Context.raw.colorPickerCallback(Context.raw.pickedColor);
@@ -184,35 +184,33 @@ class RenderPathPaint {
 	static drawCursor = (mx: f32, my: f32, radius: f32, tintR = 1.0, tintG = 1.0, tintB = 1.0) => {
 		let plane = Scene.getChild(".Plane").ext;
 		let geom = plane.data;
-
-		let g = RenderPath.frameG;
 		if (Base.pipeCursor == null) Base.makeCursorPipe();
 
 		RenderPath.setTarget("");
-		g.setPipeline(Base.pipeCursor);
+		Graphics4.setPipeline(Base.pipeCursor);
 		let img = Res.get("cursor.k");
-		g.setTexture(Base.cursorTex, img);
+		Graphics4.setTexture(Base.cursorTex, img);
 		let gbuffer0 = RenderPath.renderTargets.get("gbuffer0").image;
-		g.setTextureDepth(Base.cursorGbufferD, gbuffer0);
-		g.setFloat2(Base.cursorMouse, mx, my);
-		g.setFloat2(Base.cursorTexStep, 1 / gbuffer0.width, 1 / gbuffer0.height);
-		g.setFloat(Base.cursorRadius, radius);
+		Graphics4.setTextureDepth(Base.cursorGbufferD, gbuffer0);
+		Graphics4.setFloat2(Base.cursorMouse, mx, my);
+		Graphics4.setFloat2(Base.cursorTexStep, 1 / gbuffer0.width, 1 / gbuffer0.height);
+		Graphics4.setFloat(Base.cursorRadius, radius);
 		let right = Vec4.normalize(CameraObject.rightWorld(Scene.camera));
-		g.setFloat3(Base.cursorCameraRight, right.x, right.y, right.z);
-		g.setFloat3(Base.cursorTint, tintR, tintG, tintB);
-		g.setMatrix(Base.cursorVP, Scene.camera.VP);
+		Graphics4.setFloat3(Base.cursorCameraRight, right.x, right.y, right.z);
+		Graphics4.setFloat3(Base.cursorTint, tintR, tintG, tintB);
+		Graphics4.setMatrix(Base.cursorVP, Scene.camera.VP);
 		let helpMat = Mat4.identity();
 		Mat4.getInverse(helpMat, Scene.camera.VP);
-		g.setMatrix(Base.cursorInvVP, helpMat);
+		Graphics4.setMatrix(Base.cursorInvVP, helpMat);
 		///if (krom_metal || krom_vulkan)
-		g.setVertexBuffer(MeshData.get(geom, [{name: "tex", data: "short2norm"}]));
+		Graphics4.setVertexBuffer(MeshData.get(geom, [{name: "tex", data: "short2norm"}]));
 		///else
-		g.setVertexBuffer(geom._vertexBuffer);
+		Graphics4.setVertexBuffer(geom._vertexBuffer);
 		///end
-		g.setIndexBuffer(geom._indexBuffers[0]);
-		g.drawIndexedVertices();
+		Graphics4.setIndexBuffer(geom._indexBuffers[0]);
+		Graphics4.drawIndexedVertices();
 
-		g.disableScissor();
+		Graphics4.disableScissor();
 		RenderPath.end();
 	}
 
@@ -253,7 +251,7 @@ class RenderPathPaint {
 	}
 
 	static bindLayers = () => {
-		let image: Image = null;
+		let image: ImageRaw = null;
 		let nodes = UINodes.getNodes();
 		let canvas = UINodes.getCanvas(true);
 		if (nodes.nodesSelectedId.length > 0) {
@@ -265,22 +263,20 @@ class RenderPathPaint {
 		}
 		if (image != null) {
 			if (RenderPath.renderTargets.get("texpaint_node") == null) {
-				let t = new RenderTargetRaw();
+				let t = RenderTarget.create();
 				t.name = "texpaint_node";
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
 				t.format = "RGBA32";
-				let rt = new RenderTarget(t);
-				RenderPath.renderTargets.set(t.name, rt);
+				RenderPath.renderTargets.set(t.name, t);
 			}
 			if (RenderPath.renderTargets.get("texpaint_node_target") == null) {
-				let t = new RenderTargetRaw();
+				let t = RenderTarget.create();
 				t.name = "texpaint_node_target";
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
 				t.format = "RGBA32";
-				let rt = new RenderTarget(t);
-				RenderPath.renderTargets.set(t.name, rt);
+				RenderPath.renderTargets.set(t.name, t);
 			}
 			RenderPath.renderTargets.get("texpaint_node").image = image;
 			RenderPath.bindTarget("texpaint_node", "texpaint");

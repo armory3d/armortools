@@ -110,12 +110,12 @@ class TabMaterials {
 				if (!isTyping) {
 					if (i < 9 && Operator.shortcut(Config.keymap.select_material, ShortcutType.ShortcutDown)) {
 						let number = String(i + 1);
-						let width = ui.font.width(ui.fontSize, number) + 10;
-						let height = ui.font.height(ui.fontSize);
+						let width = Font.width(ui.font, ui.fontSize, number) + 10;
+						let height = Font.height(ui.font, ui.fontSize);
 						ui.g.color = ui.t.TEXT_COL;
-						ui.g.fillRect(uix, uiy, width, height);
+						Graphics2.fillRect(uix, uiy, width, height);
 						ui.g.color = ui.t.ACCENT_COL;
-						ui.g.drawString(number, uix + 5, uiy);
+						Graphics2.drawString(number, uix + 5, uiy);
 					}
 				}
 
@@ -265,11 +265,11 @@ class TabMaterials {
 	static buttonNew = (text: string) => {
 		let ui = UIBase.ui;
 		if (ui.button(text)) {
-			ui.g.end();
+			Graphics2.end(ui.g);
 			Context.raw.material = SlotMaterial.create(Project.materials[0].data);
 			Project.materials.push(Context.raw.material);
 			TabMaterials.updateMaterial();
-			ui.g.begin(false);
+			Graphics2.begin(ui.g, false);
 			History.newMaterial();
 		}
 	}

@@ -13,7 +13,7 @@ class Path {
 	static textureFormats = ["jpg", "jpeg", "png", "tga", "bmp", "psd", "gif", "hdr", "k"];
 
 	static meshImporters = new Map<string, (s: string, f: (a: any)=>void)=>void>();
-	static textureImporters = new Map<string, (s: string, f: (img: Image)=>void)=>void>();
+	static textureImporters = new Map<string, (s: string, f: (img: ImageRaw)=>void)=>void>();
 
 	static baseColorExt = ["albedo", "alb", "basecol", "basecolor", "diffuse", "diff", "base", "bc", "d", "color", "col"];
 	static opacityExt = ["opac", "opacity", "alpha"];

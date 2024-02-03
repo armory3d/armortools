@@ -1083,12 +1083,12 @@ class UIBase {
 				let target = l.texpaint_preview;
 				let source = l.texpaint;
 				let g2 = target.g2;
-				g2.begin(true, 0x00000000);
+				Graphics2.begin(g2, true, 0x00000000);
 				// g2.pipeline = l.isMask() ? Base.pipeCopy8 : Base.pipeCopy;
 				g2.pipeline = Base.pipeCopy; // texpaint_preview is always RGBA32 for now
-				g2.drawScaledImage(source, 0, 0, target.width, target.height);
+				Graphics2.drawScaledImage(source, 0, 0, target.width, target.height);
 				g2.pipeline = null;
-				g2.end();
+				Graphics2.end(g2);
 			}
 			UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
 		}
@@ -1101,12 +1101,12 @@ class UIBase {
 			let target = l.texpaint_preview;
 			let source = l.texpaint;
 			let g2 = target.g2;
-			g2.begin(true, 0x00000000);
+			Graphics2.begin(g2, true, 0x00000000);
 			// g2.pipeline = Context.raw.layer.isMask() ? Base.pipeCopy8 : Base.pipeCopy;
 			g2.pipeline = Base.pipeCopy; // texpaint_preview is always RGBA32 for now
-			g2.drawScaledImage(source, 0, 0, target.width, target.height);
+			Graphics2.drawScaledImage(source, 0, 0, target.width, target.height);
 			g2.pipeline = null;
-			g2.end();
+			Graphics2.end(g2);
 			UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
 		}
 		///end
@@ -1131,10 +1131,10 @@ class UIBase {
 		///end
 	}
 
-	static render = (g: Graphics2) => {
+	static render = (g: Graphics2Raw) => {
 		if (!UIBase.show && Config.raw.touch_ui) {
 			UIBase.ui.inputEnabled = true;
-			g.end();
+			Graphics2.end(g);
 			UIBase.ui.begin(g);
 			if (UIBase.ui.window(Zui.handle("uibase_2"), 0, 0, 150, Math.floor(UIBase.ui.ELEMENT_H() + UIBase.ui.ELEMENT_OFFSET() + 1))) {
 				if (UIBase.ui.button(tr("Close"))) {
@@ -1142,7 +1142,7 @@ class UIBase {
 				}
 			}
 			UIBase.ui.end();
-			g.begin(false);
+			Graphics2.begin(g, false);
 		}
 
 		if (!UIBase.show || System.width == 0 || System.height == 0) return;
@@ -1162,7 +1162,7 @@ class UIBase {
 			UIBase.htabs[i].position = Config.raw.layout_tabs[i];
 		}
 
-		g.end();
+		Graphics2.end(g);
 		UIBase.ui.begin(g);
 
 		///if (is_paint || is_sculpt)
@@ -1177,7 +1177,7 @@ class UIBase {
 		///end
 
 		UIBase.ui.end();
-		g.begin(false);
+		Graphics2.begin(g, false);
 	}
 
 	///if (is_paint || is_sculpt)
@@ -1221,7 +1221,7 @@ class UIBase {
 
 		// Expand button
 		if (Config.raw.layout[LayoutSize.LayoutSidebarW] == 0) {
-			let width = Math.floor(UIBase.ui.font.width(UIBase.ui.fontSize, "<<") + 25 * UIBase.ui.SCALE());
+			let width = Math.floor(Font.width(UIBase.ui.font, UIBase.ui.fontSize, "<<") + 25 * UIBase.ui.SCALE());
 			if (UIBase.ui.window(UIBase.hminimized, System.width - width, 0, width, Math.floor(UIBase.ui.ELEMENT_H() + UIBase.ui.ELEMENT_OFFSET() + 1))) {
 				UIBase.ui._w = width;
 				let _BUTTON_H = UIBase.ui.t.BUTTON_H;
@@ -1246,7 +1246,7 @@ class UIBase {
 		Context.raw.lastHtab0Position = UIBase.htabs[TabArea.TabSidebar0].position;
 	}
 
-	static renderCursor = (g: Graphics2) => {
+	static renderCursor = (g: Graphics2Raw) => {
 		if (!Base.uiEnabled) return;
 
 		///if is_paint
@@ -1281,25 +1281,25 @@ class UIBase {
 				let cx = r.x + r.w / 2;
 				let cy = r.y + r.h / 2;
 				g.transformation = mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(-angle)), mat3_translation(-cx, -cy));
-				g.drawScaledImage(Context.raw.brushStencilImage, r.x, r.y, r.w, r.h);
+				Graphics2.drawScaledImage(Context.raw.brushStencilImage, r.x, r.y, r.w, r.h);
 				g.transformation = null;
 				g.color = 0xffffffff;
 			}
 			let transform = Operator.shortcut(Config.keymap.stencil_transform, ShortcutType.ShortcutDown);
 			if (transform) {
 				// Outline
-				g.drawRect(r.x, r.y, r.w, r.h);
+				Graphics2.drawRect(r.x, r.y, r.w, r.h);
 				// Scale
-				g.drawRect(r.x - 8,       r.y - 8,       16, 16);
-				g.drawRect(r.x - 8 + r.w, r.y - 8,       16, 16);
-				g.drawRect(r.x - 8,       r.y - 8 + r.h, 16, 16);
-				g.drawRect(r.x - 8 + r.w, r.y - 8 + r.h, 16, 16);
+				Graphics2.drawRect(r.x - 8,       r.y - 8,       16, 16);
+				Graphics2.drawRect(r.x - 8 + r.w, r.y - 8,       16, 16);
+				Graphics2.drawRect(r.x - 8,       r.y - 8 + r.h, 16, 16);
+				Graphics2.drawRect(r.x - 8 + r.w, r.y - 8 + r.h, 16, 16);
 				// Rotate
 				let angle = Context.raw.brushStencilAngle;
 				let cx = r.x + r.w / 2;
 				let cy = r.y + r.h / 2;
 				g.transformation = mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(-angle)), mat3_translation(-cx, -cy));
-				g.fillCircle(r.x + r.w / 2, r.y - 4, 8);
+				Graphics2.fillCircle(r.x + r.w / 2, r.y - 4, 8);
 				g.transformation = null;
 			}
 		}
@@ -1309,15 +1309,15 @@ class UIBase {
 		if (Context.raw.tool == WorkspaceTool.ToolPicker && Context.raw.pickerSelectMaterial && Context.raw.colorPickerCallback == null) {
 			let img = Context.raw.material.imageIcon;
 			///if krom_opengl
-			g.drawScaledImage(img, mx + 10, my + 10 + img.height, img.width, -img.height);
+			Graphics2.drawScaledImage(img, mx + 10, my + 10 + img.height, img.width, -img.height);
 			///else
-			g.drawImage(img, mx + 10, my + 10);
+			Graphics2.drawImage(img, mx + 10, my + 10);
 			///end
 		}
 		if (Context.raw.tool == WorkspaceTool.ToolPicker && Context.raw.colorPickerCallback != null) {
 			let img = Res.get("icons.k");
 			let rect = Res.tile50(img, WorkspaceTool.ToolPicker, 0);
-			g.drawSubImage(img, mx + 10, my + 10, rect.x, rect.y, rect.w, rect.h);
+			Graphics2.drawSubImage(img, mx + 10, my + 10, rect.x, rect.y, rect.w, rect.h);
 		}
 
 		let cursorImg = Res.get("cursor.k");
@@ -1326,7 +1326,7 @@ class UIBase {
 		// Clone source cursor
 		if (Context.raw.tool == WorkspaceTool.ToolClone && !Keyboard.down("alt") && (Mouse.down() || Pen.down())) {
 			g.color = 0x66ffffff;
-			g.drawScaledImage(cursorImg, mx + Context.raw.cloneDeltaX * App.w() - psize / 2, my + Context.raw.cloneDeltaY * App.h() - psize / 2, psize, psize);
+			Graphics2.drawScaledImage(cursorImg, mx + Context.raw.cloneDeltaX * App.w() - psize / 2, my + Context.raw.cloneDeltaY * App.h() - psize / 2, psize, psize);
 			g.color = 0xffffffff;
 		}
 
@@ -1363,9 +1363,9 @@ class UIBase {
 					let cy = decalY + psizey / 2;
 					g.transformation = mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(angle)), mat3_translation(-cx, -cy));
 					///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
-					g.drawScaledImage(Context.raw.decalImage, decalX, decalY, psizex, psizey);
+					Graphics2.drawScaledImage(Context.raw.decalImage, decalX, decalY, psizex, psizey);
 					///else
-					g.drawScaledImage(Context.raw.decalImage, decalX, decalY + psizey, psizex, -psizey);
+					Graphics2.drawScaledImage(Context.raw.decalImage, decalX, decalY + psizey, psizex, -psizey);
 					///end
 					g.transformation = null;
 					g.color = 0xffffffff;
@@ -1385,7 +1385,7 @@ class UIBase {
 				if (Config.raw.brush_3d && Context.in2dView()) {
 					psize = Math.floor(psize * UIView2D.panScale);
 				}
-				g.drawScaledImage(cursorImg, mx - psize / 2, my - psize / 2, psize, psize);
+				Graphics2.drawScaledImage(cursorImg, mx - psize / 2, my - psize / 2, psize, psize);
 			}
 		}
 
@@ -1398,12 +1398,12 @@ class UIBase {
 			 Context.raw.tool == WorkspaceTool.ToolBlur ||
 			 Context.raw.tool == WorkspaceTool.ToolSmudge ||
 			 Context.raw.tool == WorkspaceTool.ToolParticle)) {
-			g.fillRect(mx - 1, my - 1, 2, 2);
+			Graphics2.fillRect(mx - 1, my - 1, 2, 2);
 			mx = Context.raw.brushLazyX * Base.w() + Base.x();
 			my = Context.raw.brushLazyY * Base.h() + Base.y();
 			let radius = Context.raw.brushLazyRadius * 180;
 			g.color = 0xff666666;
-			g.drawScaledImage(cursorImg, mx - radius / 2, my - radius / 2, radius, radius);
+			Graphics2.drawScaledImage(cursorImg, mx - radius / 2, my - radius / 2, radius, radius);
 			g.color = 0xffffffff;
 		}
 	}

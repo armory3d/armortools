@@ -1,11 +1,11 @@
 
 class PhotoToPBRNode extends LogicNode {
 
-	static temp: Image = null;
-	static images: Image[] = null;
+	static temp: ImageRaw = null;
+	static images: ImageRaw[] = null;
 	static modelNames = ["base", "occlusion", "roughness", "metallic", "normal", "height"];
 
-	static cachedSource: Image = null;
+	static cachedSource: ImageRaw = null;
 	static borderW = 64;
 	static tileW = 2048;
 	static tileWithBorderW = PhotoToPBRNode.tileW + PhotoToPBRNode.borderW * 2;
@@ -29,13 +29,13 @@ class PhotoToPBRNode extends LogicNode {
 		}
 	}
 
-	override getAsImage = (from: i32, done: (img: Image)=>void) => {
-		let getSource = (done: (img: Image)=>void) => {
+	override getAsImage = (from: i32, done: (img: ImageRaw)=>void) => {
+		let getSource = (done: (img: ImageRaw)=>void) => {
 			if (PhotoToPBRNode.cachedSource != null) done(PhotoToPBRNode.cachedSource);
 			else this.inputs[0].getAsImage(done);
 		}
 
-		getSource((source: Image) => {
+		getSource((source: ImageRaw) => {
 			PhotoToPBRNode.cachedSource = source;
 
 			Console.progress(tr("Processing") + " - " + tr("Photo to PBR"));
@@ -48,17 +48,17 @@ class PhotoToPBRNode extends LogicNode {
 					let x = i % tilesX;
 					let y = Math.floor(i / tilesX);
 
-					PhotoToPBRNode.temp.g2.begin(false);
-					PhotoToPBRNode.temp.g2.drawScaledImage(source, PhotoToPBRNode.borderW - x * PhotoToPBRNode.tileW, PhotoToPBRNode.borderW - y * PhotoToPBRNode.tileW, -Config.getTextureResX(), Config.getTextureResY());
-					PhotoToPBRNode.temp.g2.drawScaledImage(source, PhotoToPBRNode.borderW - x * PhotoToPBRNode.tileW, PhotoToPBRNode.borderW - y * PhotoToPBRNode.tileW, Config.getTextureResX(), -Config.getTextureResY());
-					PhotoToPBRNode.temp.g2.drawScaledImage(source, PhotoToPBRNode.borderW - x * PhotoToPBRNode.tileW, PhotoToPBRNode.borderW - y * PhotoToPBRNode.tileW, -Config.getTextureResX(), -Config.getTextureResY());
-					PhotoToPBRNode.temp.g2.drawScaledImage(source, PhotoToPBRNode.borderW - x * PhotoToPBRNode.tileW + PhotoToPBRNode.tileW, PhotoToPBRNode.borderW - y * PhotoToPBRNode.tileW + PhotoToPBRNode.tileW, Config.getTextureResX(), Config.getTextureResY());
-					PhotoToPBRNode.temp.g2.drawScaledImage(source, PhotoToPBRNode.borderW - x * PhotoToPBRNode.tileW + PhotoToPBRNode.tileW, PhotoToPBRNode.borderW - y * PhotoToPBRNode.tileW + PhotoToPBRNode.tileW, -Config.getTextureResX(), Config.getTextureResY());
-					PhotoToPBRNode.temp.g2.drawScaledImage(source, PhotoToPBRNode.borderW - x * PhotoToPBRNode.tileW + PhotoToPBRNode.tileW, PhotoToPBRNode.borderW - y * PhotoToPBRNode.tileW + PhotoToPBRNode.tileW, Config.getTextureResX(), -Config.getTextureResY());
-					PhotoToPBRNode.temp.g2.drawScaledImage(source, PhotoToPBRNode.borderW - x * PhotoToPBRNode.tileW, PhotoToPBRNode.borderW - y * PhotoToPBRNode.tileW, Config.getTextureResX(), Config.getTextureResY());
-					PhotoToPBRNode.temp.g2.end();
+					Graphics2.begin(PhotoToPBRNode.temp.g2, false);
+					Graphics2.drawScaledImage(source, PhotoToPBRNode.borderW - x * PhotoToPBRNode.tileW, PhotoToPBRNode.borderW - y * PhotoToPBRNode.tileW, -Config.getTextureResX(), Config.getTextureResY());
+					Graphics2.drawScaledImage(source, PhotoToPBRNode.borderW - x * PhotoToPBRNode.tileW, PhotoToPBRNode.borderW - y * PhotoToPBRNode.tileW, Config.getTextureResX(), -Config.getTextureResY());
+					Graphics2.drawScaledImage(source, PhotoToPBRNode.borderW - x * PhotoToPBRNode.tileW, PhotoToPBRNode.borderW - y * PhotoToPBRNode.tileW, -Config.getTextureResX(), -Config.getTextureResY());
+					Graphics2.drawScaledImage(source, PhotoToPBRNode.borderW - x * PhotoToPBRNode.tileW + PhotoToPBRNode.tileW, PhotoToPBRNode.borderW - y * PhotoToPBRNode.tileW + PhotoToPBRNode.tileW, Config.getTextureResX(), Config.getTextureResY());
+					Graphics2.drawScaledImage(source, PhotoToPBRNode.borderW - x * PhotoToPBRNode.tileW + PhotoToPBRNode.tileW, PhotoToPBRNode.borderW - y * PhotoToPBRNode.tileW + PhotoToPBRNode.tileW, -Config.getTextureResX(), Config.getTextureResY());
+					Graphics2.drawScaledImage(source, PhotoToPBRNode.borderW - x * PhotoToPBRNode.tileW + PhotoToPBRNode.tileW, PhotoToPBRNode.borderW - y * PhotoToPBRNode.tileW + PhotoToPBRNode.tileW, Config.getTextureResX(), -Config.getTextureResY());
+					Graphics2.drawScaledImage(source, PhotoToPBRNode.borderW - x * PhotoToPBRNode.tileW, PhotoToPBRNode.borderW - y * PhotoToPBRNode.tileW, Config.getTextureResX(), Config.getTextureResY());
+					Graphics2.end(PhotoToPBRNode.temp.g2);
 
-					let bytes_img = PhotoToPBRNode.temp.getPixels();
+					let bytes_img = Image.getPixels(PhotoToPBRNode.temp);
 					let u8a = new Uint8Array(bytes_img);
 					let f32a = new Float32Array(3 * PhotoToPBRNode.tileWithBorderW * PhotoToPBRNode.tileWithBorderW);
 					for (let i = 0; i < (PhotoToPBRNode.tileWithBorderW * PhotoToPBRNode.tileWithBorderW); ++i) {
@@ -142,11 +142,11 @@ class PhotoToPBRNode extends LogicNode {
 						///end
 
 						let temp2 = Image.fromBytes(u8a.buffer, PhotoToPBRNode.tileW, PhotoToPBRNode.tileW);
-						PhotoToPBRNode.images[from].g2.begin(false);
-						PhotoToPBRNode.images[from].g2.drawImage(temp2, x * PhotoToPBRNode.tileW, y * PhotoToPBRNode.tileW);
-						PhotoToPBRNode.images[from].g2.end();
+						Graphics2.begin(PhotoToPBRNode.images[from].g2, false);
+						Graphics2.drawImage(temp2, x * PhotoToPBRNode.tileW, y * PhotoToPBRNode.tileW);
+						Graphics2.end(PhotoToPBRNode.images[from].g2);
 						Base.notifyOnNextFrame(() => {
-							temp2.unload();
+							Image.unload(temp2);
 						});
 					});
 				}

@@ -178,9 +178,9 @@ class Config {
 		Context.raw.ddirty = 2;
 
 		let current = Graphics2.current;
-		if (current != null) current.end();
+		if (current != null) Graphics2.end(current);
 		RenderPathBase.applyConfig();
-		if (current != null) current.begin(false);
+		if (current != null) Graphics2.begin(current, false);
 	}
 
 	static loadKeymap = () => {

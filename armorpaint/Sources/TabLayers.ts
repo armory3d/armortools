@@ -632,12 +632,12 @@ class TabLayers {
 			if (!isTyping) {
 				if (i < 9 && Operator.shortcut(Config.keymap.select_layer, ShortcutType.ShortcutDown)) {
 					let number = String(i + 1) ;
-					let width = ui.font.width(ui.fontSize, number) + 10;
-					let height = ui.font.height(ui.fontSize);
+					let width = Font.width(ui.font, ui.fontSize, number) + 10;
+					let height = Font.height(ui.font, ui.fontSize);
 					ui.g.color = ui.t.TEXT_COL;
-					ui.g.fillRect(uix, uiy, width, height);
+					Graphics2.fillRect(uix, uiy, width, height);
 					ui.g.color = ui.t.ACCENT_COL;
-					ui.g.drawString(number, uix + 5, uiy);
+					Graphics2.drawString(number, uix + 5, uiy);
 				}
 			}
 
@@ -710,7 +710,7 @@ class TabLayers {
 						let f = UIFiles.filename;
 						if (f == "") f = tr("untitled");
 						if (!f.endsWith(".png")) f += ".png";
-						Krom.writePng(path + Path.sep + f, l.texpaint.getPixels(), l.texpaint.width, l.texpaint.height, 3); // RRR1
+						Krom.writePng(path + Path.sep + f, Image.getPixels(l.texpaint), l.texpaint.width, l.texpaint.height, 3); // RRR1
 					});
 				}
 				else {
@@ -982,11 +982,11 @@ class TabLayers {
 		if (Context.raw.maskPreviewLast != l) {
 			Context.raw.maskPreviewLast = l;
 			App.notifyOnInit(() => {
-				Context.raw.maskPreviewRgba32.g2.begin();
+				Graphics2.begin(Context.raw.maskPreviewRgba32.g2);
 				Context.raw.maskPreviewRgba32.g2.pipeline = UIView2D.pipe;
-				Context.raw.maskPreviewRgba32.g4.setInt(UIView2D.channelLocation, 1);
-				Context.raw.maskPreviewRgba32.g2.drawImage(l.texpaint_preview, 0, 0);
-				Context.raw.maskPreviewRgba32.g2.end();
+				Graphics4.setInt(UIView2D.channelLocation, 1);
+				Graphics2.drawImage(l.texpaint_preview, 0, 0);
+				Graphics2.end(Context.raw.maskPreviewRgba32.g2);
 				Context.raw.maskPreviewRgba32.g2.pipeline = null;
 			});
 		}

@@ -18,7 +18,7 @@ class UIFiles {
 	static lastPath = "";
 	static lastSearch = "";
 	static files: string[] = null;
-	static iconMap: Map<string, Image> = null;
+	static iconMap: Map<string, ImageRaw> = null;
 	static selected = -1;
 	static showExtensions = false;
 	static offline = false;
@@ -158,7 +158,7 @@ class UIFiles {
 				let uiy = ui._y;
 				let state = State.Idle;
 				let generic = true;
-				let icon: Image = null;
+				let icon: ImageRaw = null;
 
 				if (isCloud && f != ".." && !UIFiles.offline) {
 					if (UIFiles.iconMap == null) UIFiles.iconMap = new Map();
@@ -171,24 +171,24 @@ class UIFiles {
 							UIFiles.iconMap.set(handle.text + Path.sep + f, empty);
 							File.cacheCloud(handle.text + Path.sep + iconFile, (abs: string) => {
 								if (abs != null) {
-									Data.getImage(abs, (image: Image) => {
+									Data.getImage(abs, (image: ImageRaw) => {
 										App.notifyOnInit(() => {
 											if (Base.pipeCopyRGB == null) Base.makePipeCopyRGB();
 											icon = Image.createRenderTarget(image.width, image.height);
 											if (f.endsWith(".arm")) { // Used for material sphere alpha cutout
-												icon.g2.begin(false);
+												Graphics2.begin(icon.g2, false);
 
 												///if (is_paint || is_sculpt)
-												icon.g2.drawImage(Project.materials[0].image, 0, 0);
+												Graphics2.drawImage(Project.materials[0].image, 0, 0);
 												///end
 											}
 											else {
-												icon.g2.begin(true, 0xffffffff);
+												Graphics2.begin(icon.g2, true, 0xffffffff);
 											}
 											icon.g2.pipeline = Base.pipeCopyRGB;
-											icon.g2.drawImage(image, 0, 0);
+											Graphics2.drawImage(image, 0, 0);
 											icon.g2.pipeline = null;
-											icon.g2.end();
+											Graphics2.end(icon.g2);
 											UIFiles.iconMap.set(handle.text + Path.sep + f, icon);
 											UIBase.hwnds[TabArea.TabStatus].redraws = 3;
 										});
@@ -279,17 +279,17 @@ class UIFiles {
 					if (icon == null) {
 						let empty = RenderPath.renderTargets.get("empty_black").image;
 						UIFiles.iconMap.set(shandle, empty);
-						Data.getImage(shandle, (image: Image) => {
+						Data.getImage(shandle, (image: ImageRaw) => {
 							App.notifyOnInit(() => {
 								if (Base.pipeCopyRGB == null) Base.makePipeCopyRGB();
 								let sw = image.width > image.height ? w : Math.floor(1.0 * image.width / image.height * w);
 								let sh = image.width > image.height ? Math.floor(1.0 * image.height / image.width * w) : w;
 								icon = Image.createRenderTarget(sw, sh);
-								icon.g2.begin(true, 0xffffffff);
+								Graphics2.begin(icon.g2, true, 0xffffffff);
 								icon.g2.pipeline = Base.pipeCopyRGB;
-								icon.g2.drawScaledImage(image, 0, 0, sw, sh);
+								Graphics2.drawScaledImage(image, 0, 0, sw, sh);
 								icon.g2.pipeline = null;
-								icon.g2.end();
+								Graphics2.end(icon.g2);
 								UIFiles.iconMap.set(shandle, icon);
 								UIBase.hwnds[TabArea.TabStatus].redraws = 3;
 								Data.deleteImage(shandle); // The big image is not needed anymore
@@ -358,7 +358,7 @@ class UIFiles {
 				ui._y += slotw * 0.75;
 				let label0 = (UIFiles.showExtensions || f.indexOf(".") <= 0) ? f : f.substr(0, f.lastIndexOf("."));
 				let label1 = "";
-				while (label0.length > 0 && ui.font.width(ui.fontSize, label0) > ui._w - 6) { // 2 line split
+				while (label0.length > 0 && Font.width(ui.font, ui.fontSize, label0) > ui._w - 6) { // 2 line split
 					label1 = label0.charAt(label0.length - 1) + label1;
 					label0 = label0.substr(0, label0.length - 1);
 				}
@@ -367,10 +367,10 @@ class UIFiles {
 				if (ui.isHovered) ui.tooltip(label0 + label1);
 				if (label1 != "") { // Second line
 					ui._x = _x;
-					ui._y += ui.font.height(ui.fontSize);
+					ui._y += Font.height(ui.font, ui.fontSize);
 					ui.text(label1, Align.Center);
 					if (ui.isHovered) ui.tooltip(label0 + label1);
-					ui._y -= ui.font.height(ui.fontSize);
+					ui._y -= Font.height(ui.font, ui.fontSize);
 				}
 
 				ui._y -= slotw * 0.75;

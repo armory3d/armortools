@@ -32,7 +32,7 @@ class UINodes {
 	static releaseLink = false;
 	static isNodeMenuOperation = false;
 
-	static grid: Image = null;
+	static grid: ImageRaw = null;
 	static hwnd = new Handle();
 	static groupStack: TNodeGroup[] = [];
 	static controlsDown = false;
@@ -589,30 +589,30 @@ class UINodes {
 		if (w < 1) w = 1;
 		if (h < 1) h = 1;
 		UINodes.grid = Image.createRenderTarget(w, h);
-		UINodes.grid.g2.begin(true, UINodes.ui.t.SEPARATOR_COL);
+		Graphics2.begin(UINodes.grid.g2, true, UINodes.ui.t.SEPARATOR_COL);
 
 		UINodes.grid.g2.color = UINodes.ui.t.SEPARATOR_COL - 0x00050505;
 		step = 20 * UINodes.ui.SCALE();
 		for (let i = 0; i < Math.floor(h / step) + 1; ++i) {
-			UINodes.grid.g2.drawLine(0, i * step, w, i * step);
+			Graphics2.drawLine(0, i * step, w, i * step);
 		}
 		for (let i = 0; i < Math.floor(w / step) + 1; ++i) {
-			UINodes.grid.g2.drawLine(i * step, 0, i * step, h);
+			Graphics2.drawLine(i * step, 0, i * step, h);
 		}
 
 		UINodes.grid.g2.color = UINodes.ui.t.SEPARATOR_COL - 0x00090909;
 		step = 100 * UINodes.ui.SCALE();
 		for (let i = 0; i < Math.floor(h / step) + 1; ++i) {
-			UINodes.grid.g2.drawLine(0, i * step, w, i * step);
+			Graphics2.drawLine(0, i * step, w, i * step);
 		}
 		for (let i = 0; i < Math.floor(w / step) + 1; ++i) {
-			UINodes.grid.g2.drawLine(i * step, 0, i * step, h);
+			Graphics2.drawLine(i * step, 0, i * step, h);
 		}
 
-		UINodes.grid.g2.end();
+		Graphics2.end(UINodes.grid.g2);
 	}
 
-	static render = (g: Graphics2) => {
+	static render = (g: Graphics2Raw) => {
 		if (UINodes.recompileMat) {
 			///if (is_paint || is_sculpt)
 			if (UINodes.canvasType == CanvasType.CanvasBrush) {
@@ -683,7 +683,7 @@ class UINodes {
 
 		UINodes.ui.inputEnabled = Base.uiEnabled;
 
-		g.end();
+		Graphics2.end(g);
 
 		if (UINodes.grid == null) UINodes.drawGrid();
 
@@ -735,7 +735,7 @@ class UINodes {
 			// Grid
 			UINodes.ui.g.color = 0xffffffff;
 			let step = 100 * UINodes.ui.SCALE();
-			UINodes.ui.g.drawImage(UINodes.grid, (nodes.panX * nodes.SCALE()) % step - step, (nodes.panY * nodes.SCALE()) % step - step);
+			Graphics2.drawImage(UINodes.grid, (nodes.panX * nodes.SCALE()) % step - step, (nodes.panY * nodes.SCALE()) % step - step);
 
 			// Undo
 			if (UINodes.ui.inputStarted || UINodes.ui.isKeyPressed) {
@@ -832,7 +832,7 @@ class UINodes {
 
 			// Node previews
 			if (Config.raw.node_preview && nodes.nodesSelectedId.length > 0) {
-				let img: Image = null;
+				let img: ImageRaw = null;
 				let sel = nodes.getNode(c.nodes, nodes.nodesSelectedId[0]);
 
 				///if (is_paint || is_sculpt)
@@ -895,8 +895,8 @@ class UINodes {
 
 					UINodes.ui.g.color = 0xffffffff;
 					invertY ?
-						UINodes.ui.g.drawScaledImage(img, tx, ty + th, tw, -th) :
-						UINodes.ui.g.drawScaledImage(img, tx, ty, tw, th);
+						Graphics2.drawScaledImage(img, tx, ty + th, tw, -th) :
+						Graphics2.drawScaledImage(img, tx, ty, tw, th);
 
 					///if (is_paint || is_sculpt)
 					if  (singleChannel) {
@@ -908,7 +908,7 @@ class UINodes {
 
 			// Menu
 			UINodes.ui.g.color = UINodes.ui.t.SEPARATOR_COL;
-			UINodes.ui.g.fillRect(0, UINodes.ui.ELEMENT_H(), UINodes.ww, UINodes.ui.ELEMENT_H() + UINodes.ui.ELEMENT_OFFSET() * 2);
+			Graphics2.fillRect(0, UINodes.ui.ELEMENT_H(), UINodes.ww, UINodes.ui.ELEMENT_H() + UINodes.ui.ELEMENT_OFFSET() * 2);
 			UINodes.ui.g.color = 0xffffffff;
 
 			let startY = UINodes.ui.ELEMENT_H() + UINodes.ui.ELEMENT_OFFSET();
@@ -920,7 +920,7 @@ class UINodes {
 			// Editable canvas name
 			let h = Zui.handle("uinodes_11");
 			h.text = c.name;
-			UINodes.ui._w = Math.floor(Math.min(UINodes.ui.font.width(UINodes.ui.fontSize, h.text) + 15 * UINodes.ui.SCALE(), 100 * UINodes.ui.SCALE()));
+			UINodes.ui._w = Math.floor(Math.min(Font.width(UINodes.ui.font, UINodes.ui.fontSize, h.text) + 15 * UINodes.ui.SCALE(), 100 * UINodes.ui.SCALE()));
 			let newName = UINodes.ui.textInput(h, "");
 			UINodes.ui._x += UINodes.ui._w + 3;
 			UINodes.ui._y = 2 + startY;
@@ -1018,7 +1018,7 @@ class UINodes {
 
 		UINodes.ui.end(!UINodes.showMenu);
 
-		g.begin(false);
+		Graphics2.begin(g, false);
 
 		if (UINodes.showMenu) {
 			///if (is_paint || is_sculpt)

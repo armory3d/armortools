@@ -9,7 +9,7 @@ class Project {
 	static meshAssets: string[] = [];
 	static materialGroups: TNodeGroup[] = [];
 	static paintObjects: TMeshObject[] = null;
-	static assetMap = new Map<i32, any>(); // Image | Font
+	static assetMap = new Map<i32, any>(); // ImageRaw | FontRaw
 	static meshList: string[] = null;
 	///if (is_paint || is_sculpt)
 	static materials: SlotMaterialRaw[] = null;
@@ -35,11 +35,11 @@ class Project {
 			}
 
 			let current = Graphics2.current;
-			if (current != null) current.end();
+			if (current != null) Graphics2.end(current);
 
 			ImportArm.runProject(path);
 
-			if (current != null) current.begin(false);
+			if (current != null) Graphics2.begin(current, false);
 		});
 	}
 
@@ -180,11 +180,11 @@ class Project {
 
 					let imgmesh = Image.fromBytes(f32a.buffer, Config.getTextureResX(), Config.getTextureResY(), TextureFormat.RGBA128);
 					let texpaint = Project.layers[0].texpaint;
-					texpaint.g2.begin(false);
+					Graphics2.begin(texpaint.g2, false);
 					texpaint.g2.pipeline = Base.pipeCopy128;
-					texpaint.g2.drawScaledImage(imgmesh, 0, 0, Config.getTextureResX(), Config.getTextureResY());
+					Graphics2.drawScaledImage(imgmesh, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 					texpaint.g2.pipeline = null;
-					texpaint.g2.end();
+					Graphics2.end(texpaint.g2);
 				});
 				///end
 			}
@@ -207,7 +207,7 @@ class Project {
 		Data.getMesh("Scene", n, (md: TMeshData) => {
 
 			let current = Graphics2.current;
-			if (current != null) current.end();
+			if (current != null) Graphics2.end(current);
 
 			///if is_paint
 			Context.raw.pickerMaskHandle.position = PickerMask.MaskNone;
@@ -288,7 +288,7 @@ class Project {
 				App.notifyOnInit(Base.initLayers);
 			}
 
-			if (current != null) current.begin(false);
+			if (current != null) Graphics2.begin(current, false);
 
 			Context.raw.savedEnvmap = null;
 			Context.raw.envmapLoaded = false;
@@ -553,7 +553,7 @@ class Project {
 		else load(asset.file);
 	}
 
-	static getImage = (asset: TAsset): Image => {
+	static getImage = (asset: TAsset): ImageRaw => {
 		return asset != null ? Project.assetMap.get(asset.id) : null;
 	}
 

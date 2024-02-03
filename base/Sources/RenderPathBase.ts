@@ -5,7 +5,7 @@ class RenderPathBase {
 	static superSample = 1.0;
 	static lastX = -1.0;
 	static lastY = -1.0;
-	static bloomMipmaps: RenderTarget[];
+	static bloomMipmaps: RenderTargetRaw[];
 	static bloomCurrentMip = 0;
 	static bloomSampleScale: f32;
 	///if arm_voxels
@@ -23,7 +23,7 @@ class RenderPathBase {
 		RenderPathBase.voxelsCreated = true;
 
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = targetName;
 			t.format = "R8";
 			t.width = RenderPathBase.voxelsRes;
@@ -40,8 +40,8 @@ class RenderPathBase {
 		if (RenderPathBase.superSample != Config.raw.rp_supersample) {
 			RenderPathBase.superSample = Config.raw.rp_supersample;
 			for (let rt of RenderPath.renderTargets.values()) {
-				if (rt.raw.width == 0 && rt.raw.scale != null) {
-					rt.raw.scale = RenderPathBase.superSample;
+				if (rt.width == 0 && rt.scale != null) {
+					rt.scale = RenderPathBase.superSample;
 				}
 			}
 			RenderPath.resize();
@@ -55,7 +55,7 @@ class RenderPathBase {
 		return RenderPathBase.superSample;
 	}
 
-	static drawCompass = (currentG: Graphics4) => {
+	static drawCompass = (currentG: Graphics4Raw) => {
 		if (Context.raw.showCompass) {
 			let cam = Scene.camera;
 			let compass: TMeshObject = Scene.getChild(".Compass").ext;
@@ -202,7 +202,7 @@ class RenderPathBase {
 
 				let prevScale = 1.0;
 				for (let i = 0; i < 10; ++i) {
-					let t = new RenderTargetRaw();
+					let t = RenderTarget.create();
 					t.name = "bloom_mip_" + i;
 					t.width = 0;
 					t.height = 0;
@@ -232,16 +232,16 @@ class RenderPathBase {
 
 			for (let i = 0; i < numMips; ++i) {
 				RenderPathBase.bloomCurrentMip = i;
-				RenderPath.setTarget(RenderPathBase.bloomMipmaps[i].raw.name);
+				RenderPath.setTarget(RenderPathBase.bloomMipmaps[i].name);
 				RenderPath.clearTarget();
-				RenderPath.bindTarget(i == 0 ? tex : RenderPathBase.bloomMipmaps[i - 1].raw.name, "tex");
+				RenderPath.bindTarget(i == 0 ? tex : RenderPathBase.bloomMipmaps[i - 1].name, "tex");
 				RenderPath.drawShader("shader_datas/bloom_pass/bloom_downsample_pass");
 			}
 			for (let i = 0; i < numMips; ++i) {
 				let mipLevel = numMips - 1 - i;
 				RenderPathBase.bloomCurrentMip = mipLevel;
-				RenderPath.setTarget(mipLevel == 0 ? tex : RenderPathBase.bloomMipmaps[mipLevel - 1].raw.name);
-				RenderPath.bindTarget(RenderPathBase.bloomMipmaps[mipLevel].raw.name, "tex");
+				RenderPath.setTarget(mipLevel == 0 ? tex : RenderPathBase.bloomMipmaps[mipLevel - 1].name);
+				RenderPath.bindTarget(RenderPathBase.bloomMipmaps[mipLevel].name, "tex");
 				RenderPath.drawShader("shader_datas/bloom_pass/bloom_upsample_pass");
 			}
 		}
@@ -299,7 +299,7 @@ class RenderPathBase {
 
 	static initSSAO = () => {
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "singlea";
 			t.width = 0;
 			t.height = 0;
@@ -308,7 +308,7 @@ class RenderPathBase {
 			RenderPath.createRenderTarget(t);
 		}
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "singleb";
 			t.width = 0;
 			t.height = 0;
@@ -386,7 +386,7 @@ class RenderPathBase {
 		if (Config.raw.rp_ssr != false) {
 			if (RenderPath.cachedShaderContexts.get("shader_datas/ssr_pass/ssr_pass") == null) {
 				{
-					let t = new RenderTargetRaw();
+					let t = RenderTarget.create();
 					t.name = "bufb";
 					t.width = 0;
 					t.height = 0;
@@ -443,7 +443,7 @@ class RenderPathBase {
 
 	// static drawHistogram = () => {
 	// 	{
-	// 		let t = new RenderTargetRaw();
+	// 		let t = RenderTarget.create();
 	// 		t.name = "histogram";
 	// 		t.width = 1;
 	// 		t.height = 1;
@@ -551,7 +551,7 @@ class RenderPathBase {
 		let copy = RenderPath.renderTargets.get("gbuffer0_copy");
 		if (copy == null || copy.image.width != RenderPath.renderTargets.get("gbuffer0").image.width || copy.image.height != RenderPath.renderTargets.get("gbuffer0").image.height) {
 			{
-				let t = new RenderTargetRaw();
+				let t = RenderTarget.create();
 				t.name = "gbuffer0_copy";
 				t.width = 0;
 				t.height = 0;
@@ -561,7 +561,7 @@ class RenderPathBase {
 				RenderPath.createRenderTarget(t);
 			}
 			{
-				let t = new RenderTargetRaw();
+				let t = RenderTarget.create();
 				t.name = "gbuffer1_copy";
 				t.width = 0;
 				t.height = 0;
@@ -570,7 +570,7 @@ class RenderPathBase {
 				RenderPath.createRenderTarget(t);
 			}
 			{
-				let t = new RenderTargetRaw();
+				let t = RenderTarget.create();
 				t.name = "gbuffer2_copy";
 				t.width = 0;
 				t.height = 0;

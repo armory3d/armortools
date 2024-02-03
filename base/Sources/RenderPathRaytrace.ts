@@ -11,10 +11,10 @@ class RenderPathRaytrace {
 	static f32a = new Float32Array(24);
 	static helpMat = Mat4.identity();
 	static vb_scale = 1.0;
-	static vb: VertexBuffer;
-	static ib: IndexBuffer;
+	static vb: VertexBufferRaw;
+	static ib: IndexBufferRaw;
 
-	static lastEnvmap: Image = null;
+	static lastEnvmap: ImageRaw = null;
 	static isBake = false;
 
 	///if krom_direct3d12
@@ -26,7 +26,7 @@ class RenderPathRaytrace {
 	///end
 
 	///if is_lab
-	static lastTexpaint: Image = null;
+	static lastTexpaint: ImageRaw = null;
 	///end
 
 	static init = () => {

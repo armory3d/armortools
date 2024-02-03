@@ -29,7 +29,7 @@ class UIToolbar {
 	constructor() {
 	}
 
-	static renderUI = (g: Graphics2) => {
+	static renderUI = (g: Graphics2Raw) => {
 		let ui = UIBase.ui;
 
 		if (Config.raw.touch_ui) {
@@ -68,7 +68,7 @@ class UIToolbar {
 				ui.t.ELEMENT_H = Math.floor(ui.t.ELEMENT_H * 1.5);
 				ui.t.BUTTON_H = ui.t.ELEMENT_H;
 				ui.t.BUTTON_COL = ui.t.WINDOW_BG_COL;
-				let fontHeight = ui.font.height(ui.fontSize);
+				let fontHeight = Font.height(ui.font, ui.fontSize);
 				ui.fontOffsetY = (ui.ELEMENT_H() - fontHeight) / 2;
 				let _w = ui._w;
 				ui._w = UIToolbar.toolbarw;
@@ -124,7 +124,7 @@ class UIToolbar {
 
 				///if is_paint
 				if (i == WorkspaceTool.ToolColorId && Context.raw.colorIdPicked) {
-					ui.g.drawScaledSubImage(RenderPath.renderTargets.get("texpaint_colorid").image, 0, 0, 1, 1, 0, _y + 1.5 * ui.SCALE(), 5 * ui.SCALE(), 34 * ui.SCALE());
+					Graphics2.drawScaledSubImage(RenderPath.renderTargets.get("texpaint_colorid").image, 0, 0, 1, 1, 0, _y + 1.5 * ui.SCALE(), 5 * ui.SCALE(), 34 * ui.SCALE());
 				}
 				///end
 

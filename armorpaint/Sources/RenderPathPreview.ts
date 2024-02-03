@@ -4,7 +4,7 @@ class RenderPathPreview {
 	static init = () => {
 
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "texpreview";
 			t.width = 1;
 			t.height = 1;
@@ -12,7 +12,7 @@ class RenderPathPreview {
 			RenderPath.createRenderTarget(t);
 		}
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "texpreview_icon";
 			t.width = 1;
 			t.height = 1;
@@ -23,7 +23,7 @@ class RenderPathPreview {
 		RenderPath.createDepthBuffer("mmain", "DEPTH24");
 
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "mtex";
 			t.width = Math.floor(UtilRender.materialPreviewSize * 2.0);
 			t.height = Math.floor(UtilRender.materialPreviewSize * 2.0);
@@ -36,7 +36,7 @@ class RenderPathPreview {
 		}
 
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "mgbuffer0";
 			t.width = Math.floor(UtilRender.materialPreviewSize * 2.0);
 			t.height = Math.floor(UtilRender.materialPreviewSize * 2.0);
@@ -47,7 +47,7 @@ class RenderPathPreview {
 		}
 
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "mgbuffer1";
 			t.width = Math.floor(UtilRender.materialPreviewSize * 2.0);
 			t.height = Math.floor(UtilRender.materialPreviewSize * 2.0);
@@ -57,7 +57,7 @@ class RenderPathPreview {
 		}
 
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "mgbuffer2";
 			t.width = Math.floor(UtilRender.materialPreviewSize * 2.0);
 			t.height = Math.floor(UtilRender.materialPreviewSize * 2.0);

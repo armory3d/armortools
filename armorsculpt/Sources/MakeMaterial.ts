@@ -178,9 +178,9 @@ class MakeMaterial {
 
 		if (bakePreviews) {
 			let current = Graphics2.current;
-			if (current != null) current.end();
+			if (current != null) Graphics2.end(current);
 			MakeMaterial.bakeNodePreviews();
-			if (current != null) current.begin(false);
+			if (current != null) Graphics2.begin(current, false);
 		}
 
 		let m = Project.materials[0].data;
@@ -234,7 +234,7 @@ class MakeMaterial {
 		for (let key of Context.raw.nodePreviews.keys()) {
 			if (Context.raw.nodePreviewsUsed.indexOf(key) == -1) {
 				let image = Context.raw.nodePreviews.get(key);
-				Base.notifyOnNextFrame(image.unload);
+				Base.notifyOnNextFrame(function() { Image.unload(image); });
 				Context.raw.nodePreviews.delete(key);
 			}
 		}
@@ -264,7 +264,7 @@ class MakeMaterial {
 			let resX = Math.floor(Config.getTextureResX() / 4);
 			let resY = Math.floor(Config.getTextureResY() / 4);
 			if (image == null || image.width != resX || image.height != resY) {
-				if (image != null) image.unload();
+				if (image != null) Image.unload(image);
 				image = Image.createRenderTarget(resX, resY);
 				Context.raw.nodePreviews.set(id, image);
 			}
@@ -280,7 +280,7 @@ class MakeMaterial {
 			let resX = Math.floor(Config.getTextureResX());
 			let resY = Math.floor(Config.getTextureResY());
 			if (image == null || image.width != resX || image.height != resY) {
-				if (image != null) image.unload();
+				if (image != null) Image.unload(image);
 				image = Image.createRenderTarget(resX, resY);
 				Context.raw.nodePreviews.set(id, image);
 			}

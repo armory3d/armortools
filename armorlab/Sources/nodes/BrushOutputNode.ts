@@ -2,11 +2,11 @@
 class BrushOutputNode extends LogicNode {
 
 	id = 0;
-	texpaint: Image = null;
-	texpaint_nor: Image = null;
-	texpaint_pack: Image = null;
-	texpaint_nor_empty: Image = null;
-	texpaint_pack_empty: Image = null;
+	texpaint: ImageRaw = null;
+	texpaint_nor: ImageRaw = null;
+	texpaint_pack: ImageRaw = null;
+	texpaint_nor_empty: ImageRaw = null;
+	texpaint_pack_empty: ImageRaw = null;
 
 	static inst: BrushOutputNode = null;
 
@@ -15,7 +15,7 @@ class BrushOutputNode extends LogicNode {
 
 		if (BrushOutputNode.inst == null) {
 			{
-				let t = new RenderTargetRaw();
+				let t = RenderTarget.create();
 				t.name = "texpaint";
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
@@ -23,7 +23,7 @@ class BrushOutputNode extends LogicNode {
 				this.texpaint = RenderPath.createRenderTarget(t).image;
 			}
 			{
-				let t = new RenderTargetRaw();
+				let t = RenderTarget.create();
 				t.name = "texpaint_nor";
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
@@ -31,7 +31,7 @@ class BrushOutputNode extends LogicNode {
 				this.texpaint_nor = RenderPath.createRenderTarget(t).image;
 			}
 			{
-				let t = new RenderTargetRaw();
+				let t = RenderTarget.create();
 				t.name = "texpaint_pack";
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
@@ -39,7 +39,7 @@ class BrushOutputNode extends LogicNode {
 				this.texpaint_pack = RenderPath.createRenderTarget(t).image;
 			}
 			{
-				let t = new RenderTargetRaw();
+				let t = RenderTarget.create();
 				t.name = "texpaint_nor_empty";
 				t.width = 1;
 				t.height = 1;
@@ -47,7 +47,7 @@ class BrushOutputNode extends LogicNode {
 				this.texpaint_nor_empty = RenderPath.createRenderTarget(t).image;
 			}
 			{
-				let t = new RenderTargetRaw();
+				let t = RenderTarget.create();
 				t.name = "texpaint_pack_empty";
 				t.width = 1;
 				t.height = 1;
@@ -64,7 +64,7 @@ class BrushOutputNode extends LogicNode {
 		BrushOutputNode.inst = this;
 	}
 
-	override getAsImage = (from: i32, done: (img: Image)=>void) => {
+	override getAsImage = (from: i32, done: (img: ImageRaw)=>void) => {
 		this.inputs[from].getAsImage(done);
 	}
 }

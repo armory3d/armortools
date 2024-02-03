@@ -35,14 +35,14 @@ class TabObjects {
 					// Highlight every other line
 					if (lineCounter % 2 == 0) {
 						ui.g.color = ui.t.SEPARATOR_COL;
-						ui.g.fillRect(0, ui._y, ui._windowW, ui.ELEMENT_H());
+						Graphics2.fillRect(0, ui._y, ui._windowW, ui.ELEMENT_H());
 						ui.g.color = 0xffffffff;
 					}
 
 					// Highlight selected line
 					if (currentObject == Context.raw.selectedObject) {
 						ui.g.color = 0xff205d9c;
-						ui.g.fillRect(0, ui._y, ui._windowW, ui.ELEMENT_H());
+						Graphics2.fillRect(0, ui._y, ui._windowW, ui.ELEMENT_H());
 						ui.g.color = 0xffffffff;
 					}
 
@@ -56,7 +56,7 @@ class TabObjects {
 
 						// Draw line that shows parent relations
 						ui.g.color = ui.t.ACCENT_COL;
-						ui.g.drawLine(ui._x - 10, ui._y + ui.ELEMENT_H() / 2, ui._x, ui._y + ui.ELEMENT_H() / 2);
+						Graphics2.drawLine(ui._x - 10, ui._y + ui.ELEMENT_H() / 2, ui._x, ui._y + ui.ELEMENT_H() / 2);
 						ui.g.color = 0xffffffff;
 
 						ui.text(currentObject.name);
@@ -114,7 +114,7 @@ class TabObjects {
 
 						// Draw line that shows parent relations
 						ui.g.color = ui.t.ACCENT_COL;
-						ui.g.drawLine(ui._x + 14, currentY, ui._x + 14, ui._y - ui.ELEMENT_H() / 2);
+						Graphics2.drawLine(ui._x + 14, currentY, ui._x + 14, ui._y - ui.ELEMENT_H() / 2);
 						ui.g.color = 0xffffffff;
 					}
 				}

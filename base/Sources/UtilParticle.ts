@@ -35,7 +35,7 @@ class UtilParticle {
 		];
 
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "texparticle";
 			t.width = 0;
 			t.height = 0;

@@ -2,8 +2,8 @@
 class SlotMaterialRaw {
 	nodes = new Nodes();
 	canvas: TNodeCanvas;
-	image: Image = null;
-	imageIcon: Image = null;
+	image: ImageRaw = null;
+	imageIcon: ImageRaw = null;
 	previewReady = false;
 	data: TMaterialData;
 	id = 0;
@@ -54,8 +54,8 @@ class SlotMaterial {
 
 	static unload = (raw: SlotMaterialRaw) => {
 		let _next = () => {
-			raw.image.unload();
-			raw.imageIcon.unload();
+			Image.unload(raw.image);
+			Image.unload(raw.imageIcon);
 		}
 		Base.notifyOnNextFrame(_next);
 	}

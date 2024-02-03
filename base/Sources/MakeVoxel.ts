@@ -3,10 +3,10 @@ class MakeVoxel {
 
 	///if arm_voxels
 	static run = (data: TShaderContext) => {
-		let structure = new VertexStructure();
-		structure.add("pos", VertexData.I16_4X_Normalized);
-		structure.add("nor", VertexData.I16_2X_Normalized);
-		structure.add("tex", VertexData.I16_2X_Normalized);
+		let structure = VertexStructure.create();
+		VertexStructure.add(structure, "pos", VertexData.I16_4X_Normalized);
+		VertexStructure.add(structure, "nor", VertexData.I16_2X_Normalized);
+		VertexStructure.add(structure, "tex", VertexData.I16_2X_Normalized);
 
 		let pipeState = data._pipeState;
 		pipeState.inputLayout = [structure];
@@ -16,8 +16,8 @@ class MakeVoxel {
 		// let isMesh = Context.raw.object.constructor == TMeshObject;
 		// let skin = isMesh && cast(Context.raw.object, TMeshObject).data.geom.bones != null;
 		// if (skin) {
-		// 	structure.add("bone", VertexData.I16_4X_Normalized);
-		// 	structure.add("weight", VertexData.I16_4X_Normalized);
+		// 	VertexStructure.add(structure, "bone", VertexData.I16_4X_Normalized);
+		// 	VertexStructure.add(structure, "weight", VertexData.I16_4X_Normalized);
 		// 	data.raw.vertex_elements.push({ name: "bone", data: 'short4norm' });
 		// 	data.raw.vertex_elements.push({ name: "weight", data: 'short4norm' });
 		// }
@@ -26,11 +26,11 @@ class MakeVoxel {
 		let ds = MakeMaterial.getDisplaceStrength();
 		pipeState.vertexShader = Shader.fromSource(MakeVoxel.voxelSource(), ShaderType.Vertex);
 
-		pipeState.compile();
+		PipelineState.compile(pipeState);
 		data.constants = [{ name: "W", type: "mat4", link: "_worldMatrix" }, { name: "N", type: "mat3", link: "_normalMatrix" }];
-		data._constants = [pipeState.getConstantLocation("W"), pipeState.getConstantLocation("N")];
+		data._constants = [PipelineState.getConstantLocation(pipeState, "W"), PipelineState.getConstantLocation(pipeState, "N")];
 		data.texture_units = [{ name: "texpaint_pack" }, { name: "voxels", is_image: true }];
-		data._textureUnits = [pipeState.getTextureUnit("texpaint_pack"), pipeState.getTextureUnit("voxels")];
+		data._textureUnits = [PipelineState.getTextureUnit(pipeState, "texpaint_pack"), PipelineState.getTextureUnit(pipeState, "voxels")];
 	}
 
 	static voxelSource = (): string => {

@@ -7,7 +7,7 @@ class Base {
 	static dragAsset: TAsset = null;
 	static dragSwatch: TSwatchColor = null;
 	static dragFile: string = null;
-	static dragFileIcon: Image = null;
+	static dragFileIcon: ImageRaw = null;
 	static dragTint = 0xffffffff;
 	static dragSize = -1;
 	static dragRect: TRect = null;
@@ -16,10 +16,10 @@ class Base {
 	static dragStart = 0.0;
 	static dropX = 0.0;
 	static dropY = 0.0;
-	static font: Font = null;
+	static font: FontRaw = null;
 	static theme: Theme;
-	static colorWheel: Image;
-	static colorWheelGradient: Image;
+	static colorWheel: ImageRaw;
+	static colorWheelGradient: ImageRaw;
 	static uiBox: Zui;
 	static uiMenu: Zui;
 	static defaultElementW = 100;
@@ -37,21 +37,21 @@ class Base {
 	static dragLayer: SlotLayerRaw = null;
 	///end
 
-	static pipeCopy: PipelineState;
-	static pipeCopy8: PipelineState;
-	static pipeCopy128: PipelineState;
-	static pipeCopyBGRA: PipelineState;
-	static pipeCopyRGB: PipelineState = null;
+	static pipeCopy: PipelineStateRaw;
+	static pipeCopy8: PipelineStateRaw;
+	static pipeCopy128: PipelineStateRaw;
+	static pipeCopyBGRA: PipelineStateRaw;
+	static pipeCopyRGB: PipelineStateRaw = null;
 	///if (is_paint || is_sculpt)
-	static pipeMerge: PipelineState = null;
-	static pipeMergeR: PipelineState = null;
-	static pipeMergeG: PipelineState = null;
-	static pipeMergeB: PipelineState = null;
-	static pipeMergeA: PipelineState = null;
-	static pipeInvert8: PipelineState;
-	static pipeApplyMask: PipelineState;
-	static pipeMergeMask: PipelineState;
-	static pipeColorIdToMask: PipelineState;
+	static pipeMerge: PipelineStateRaw = null;
+	static pipeMergeR: PipelineStateRaw = null;
+	static pipeMergeG: PipelineStateRaw = null;
+	static pipeMergeB: PipelineStateRaw = null;
+	static pipeMergeA: PipelineStateRaw = null;
+	static pipeInvert8: PipelineStateRaw;
+	static pipeApplyMask: PipelineStateRaw;
+	static pipeMergeMask: PipelineStateRaw;
+	static pipeColorIdToMask: PipelineStateRaw;
 	static tex0: TextureUnit;
 	static tex1: TextureUnit;
 	static texmask: TextureUnit;
@@ -66,23 +66,23 @@ class Base {
 	static texpaintColorId: TextureUnit;
 	static opacMergeMask: ConstantLocation;
 	static blendingMergeMask: ConstantLocation;
-	static tempMaskImage: Image = null;
+	static tempMaskImage: ImageRaw = null;
 	///end
 	///if is_lab
-	static pipeCopyR: PipelineState;
-	static pipeCopyG: PipelineState;
-	static pipeCopyB: PipelineState;
-	static pipeCopyA: PipelineState;
+	static pipeCopyR: PipelineStateRaw;
+	static pipeCopyG: PipelineStateRaw;
+	static pipeCopyB: PipelineStateRaw;
+	static pipeCopyA: PipelineStateRaw;
 	static pipeCopyATex: TextureUnit;
-	static pipeInpaintPreview: PipelineState;
+	static pipeInpaintPreview: PipelineStateRaw;
 	static tex0InpaintPreview: TextureUnit;
 	static texaInpaintPreview: TextureUnit;
 	///end
-	static tempImage: Image = null;
-	static expa: Image = null;
-	static expb: Image = null;
-	static expc: Image = null;
-	static pipeCursor: PipelineState;
+	static tempImage: ImageRaw = null;
+	static expa: ImageRaw = null;
+	static expb: ImageRaw = null;
+	static expc: ImageRaw = null;
+	static pipeCursor: PipelineStateRaw;
 	static cursorVP: ConstantLocation;
 	static cursorInvVP: ConstantLocation;
 	static cursorMouse: ConstantLocation;
@@ -138,9 +138,9 @@ class Base {
 
 		Krom.setSaveAndQuitCallback(Base.saveAndQuitCallback);
 
-		Data.getFont("font.ttf", (f: Font) => {
-			Data.getImage("color_wheel.k", (imageColorWheel: Image) => {
-				Data.getImage("color_wheel_gradient.k", (imageColorWheelGradient: Image) => {
+		Data.getFont("font.ttf", (f: FontRaw) => {
+			Data.getImage("color_wheel.k", (imageColorWheel: ImageRaw) => {
+				Data.getImage("color_wheel_gradient.k", (imageColorWheelGradient: ImageRaw) => {
 
 					Base.font = f;
 					Config.loadTheme(Config.raw.theme, false);
@@ -157,7 +157,7 @@ class Base {
 						Base.font.font_ = Krom.g2_font_13(Base.font.blob);
 						Base.font.fontGlyphs = Graphics2.fontGlyphs;
 					}
-					else Base.font.init();
+					else Font.init(Base.font);
 
 					Base.colorWheel = imageColorWheel;
 					Base.colorWheelGradient = imageColorWheelGradient;
@@ -417,7 +417,7 @@ class Base {
 		if (UINodes.grid != null) {
 			let _grid = UINodes.grid;
 			let _next = () => {
-				_grid.unload();
+				Image.unload(_grid);
 			}
 			Base.notifyOnNextFrame(_next);
 			UINodes.grid = null;
@@ -641,7 +641,7 @@ class Base {
 	}
 	///end
 
-	static getDragImage = (): Image => {
+	static getDragImage = (): ImageRaw => {
 		Base.dragTint = 0xffffffff;
 		Base.dragSize = -1;
 		Base.dragRect = null;
@@ -685,7 +685,7 @@ class Base {
 		return null;
 	}
 
-	static render = (g: Graphics2) => {
+	static render = (g: Graphics2Raw) => {
 		if (System.width == 0 || System.height == 0) return;
 
 		if (Context.raw.frame == 2) {
@@ -766,13 +766,13 @@ class Base {
 			///if (is_paint || is_sculpt)
 			let bgRect = Base.getDragBackground();
 			if (bgRect != null) {
-				g.drawScaledSubImage(Res.get("icons.k"), bgRect.x, bgRect.y, bgRect.w, bgRect.h, Mouse.x + Base.dragOffX, Mouse.y + Base.dragOffY + inv, size, h - inv * 2);
+				Graphics2.drawScaledSubImage(Res.get("icons.k"), bgRect.x, bgRect.y, bgRect.w, bgRect.h, Mouse.x + Base.dragOffX, Mouse.y + Base.dragOffY + inv, size, h - inv * 2);
 			}
 			///end
 
 			Base.dragRect == null ?
-				g.drawScaledImage(img, Mouse.x + Base.dragOffX, Mouse.y + Base.dragOffY + inv, size, h - inv * 2) :
-				g.drawScaledSubImage(img, Base.dragRect.x, Base.dragRect.y, Base.dragRect.w, Base.dragRect.h, Mouse.x + Base.dragOffX, Mouse.y + Base.dragOffY + inv, size, h - inv * 2);
+				Graphics2.drawScaledImage(img, Mouse.x + Base.dragOffX, Mouse.y + Base.dragOffY + inv, size, h - inv * 2) :
+				Graphics2.drawScaledSubImage(img, Base.dragRect.x, Base.dragRect.y, Base.dragRect.w, Base.dragRect.h, Mouse.x + Base.dragOffX, Mouse.y + Base.dragOffY + inv, size, h - inv * 2);
 			g.color = 0xffffffff;
 		}
 
@@ -1018,23 +1018,23 @@ class Base {
 		let texpaint = RenderPath.renderTargets.get("texpaint").image;
 		let texpaint_nor = RenderPath.renderTargets.get("texpaint_nor").image;
 		let texpaint_pack = RenderPath.renderTargets.get("texpaint_pack").image;
-		texpaint.g2.begin(false);
-		texpaint.g2.drawScaledImage(Res.get("placeholder.k"), 0, 0, Config.getTextureResX(), Config.getTextureResY()); // Base
-		texpaint.g2.end();
-		texpaint_nor.g4.begin();
-		texpaint_nor.g4.clear(color_from_floats(0.5, 0.5, 1.0, 0.0)); // Nor
-		texpaint_nor.g4.end();
-		texpaint_pack.g4.begin();
-		texpaint_pack.g4.clear(color_from_floats(1.0, 0.4, 0.0, 0.0)); // Occ, rough, met
-		texpaint_pack.g4.end();
+		Graphics2.begin(texpaint.g2, false);
+		Graphics2.drawScaledImage(Res.get("placeholder.k"), 0, 0, Config.getTextureResX(), Config.getTextureResY()); // Base
+		Graphics2.end(texpaint.g2);
+		Graphics4.begin(texpaint_nor.g4);
+		Graphics4.clear(color_from_floats(0.5, 0.5, 1.0, 0.0)); // Nor
+		Graphics4.end();
+		Graphics4.begin(texpaint_pack.g4);
+		Graphics4.clear(color_from_floats(1.0, 0.4, 0.0, 0.0)); // Occ, rough, met
+		Graphics4.end();
 		let texpaint_nor_empty = RenderPath.renderTargets.get("texpaint_nor_empty").image;
 		let texpaint_pack_empty = RenderPath.renderTargets.get("texpaint_pack_empty").image;
-		texpaint_nor_empty.g4.begin();
-		texpaint_nor_empty.g4.clear(color_from_floats(0.5, 0.5, 1.0, 0.0)); // Nor
-		texpaint_nor_empty.g4.end();
-		texpaint_pack_empty.g4.begin();
-		texpaint_pack_empty.g4.clear(color_from_floats(1.0, 0.4, 0.0, 0.0)); // Occ, rough, met
-		texpaint_pack_empty.g4.end();
+		Graphics4.begin(texpaint_nor_empty.g4);
+		Graphics4.clear(color_from_floats(0.5, 0.5, 1.0, 0.0)); // Nor
+		Graphics4.end();
+		Graphics4.begin(texpaint_pack_empty.g4);
+		Graphics4.clear(color_from_floats(1.0, 0.4, 0.0, 0.0)); // Occ, rough, met
+		Graphics4.end();
 		///end
 	}
 
@@ -1058,28 +1058,28 @@ class Base {
 		let rts = RenderPath.renderTargets;
 		let _texpaint_blend0 = rts.get("texpaint_blend0").image;
 		Base.notifyOnNextFrame(() => {
-			_texpaint_blend0.unload();
+			Image.unload(_texpaint_blend0);
 		});
-		rts.get("texpaint_blend0").raw.width = Config.getTextureResX();
-		rts.get("texpaint_blend0").raw.height = Config.getTextureResY();
+		rts.get("texpaint_blend0").width = Config.getTextureResX();
+		rts.get("texpaint_blend0").height = Config.getTextureResY();
 		rts.get("texpaint_blend0").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8);
 		let _texpaint_blend1 = rts.get("texpaint_blend1").image;
 		Base.notifyOnNextFrame(() => {
-			_texpaint_blend1.unload();
+			Image.unload(_texpaint_blend1);
 		});
-		rts.get("texpaint_blend1").raw.width = Config.getTextureResX();
-		rts.get("texpaint_blend1").raw.height = Config.getTextureResY();
+		rts.get("texpaint_blend1").width = Config.getTextureResX();
+		rts.get("texpaint_blend1").height = Config.getTextureResY();
 		rts.get("texpaint_blend1").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8);
 		Context.raw.brushBlendDirty = true;
 		if (rts.get("texpaint_blur") != null) {
 			let _texpaint_blur = rts.get("texpaint_blur").image;
 			Base.notifyOnNextFrame(() => {
-				_texpaint_blur.unload();
+				Image.unload(_texpaint_blur);
 			});
 			let sizeX = Math.floor(Config.getTextureResX() * 0.95);
 			let sizeY = Math.floor(Config.getTextureResY() * 0.95);
-			rts.get("texpaint_blur").raw.width = sizeX;
-			rts.get("texpaint_blur").raw.height = sizeY;
+			rts.get("texpaint_blur").width = sizeX;
+			rts.get("texpaint_blur").height = sizeY;
 			rts.get("texpaint_blur").image = Image.createRenderTarget(sizeX, sizeY);
 		}
 		if (RenderPathPaint.liveLayer != null) SlotLayer.resizeAndSetBits(RenderPathPaint.liveLayer);
@@ -1094,18 +1094,18 @@ class Base {
 		for (let l of History.undoLayers) SlotLayer.resizeAndSetBits(l);
 	}
 
-	static makeMergePipe = (red: bool, green: bool, blue: bool, alpha: bool): PipelineState => {
-		let pipe = new PipelineState();
+	static makeMergePipe = (red: bool, green: bool, blue: bool, alpha: bool): PipelineStateRaw => {
+		let pipe = PipelineState.create();
 		pipe.vertexShader = System.getShader("pass.vert");
 		pipe.fragmentShader = System.getShader("layer_merge.frag");
-		let vs = new VertexStructure();
-		vs.add("pos", VertexData.F32_2X);
+		let vs = VertexStructure.create();
+		VertexStructure.add(vs, "pos", VertexData.F32_2X);
 		pipe.inputLayout = [vs];
 		pipe.colorWriteMasksRed = [red];
 		pipe.colorWriteMasksGreen = [green];
 		pipe.colorWriteMasksBlue = [blue];
 		pipe.colorWriteMasksAlpha = [alpha];
-		pipe.compile();
+		PipelineState.compile(pipe);
 		return pipe;
 	}
 	///end
@@ -1117,65 +1117,65 @@ class Base {
 		Base.pipeMergeG = Base.makeMergePipe(false, true, false, false);
 		Base.pipeMergeB = Base.makeMergePipe(false, false, true, false);
 		Base.pipeMergeA = Base.makeMergePipe(false, false, false, true);
-		Base.tex0 = Base.pipeMerge.getTextureUnit("tex0"); // Always binding texpaint.a for blending
-		Base.tex1 = Base.pipeMerge.getTextureUnit("tex1");
-		Base.texmask = Base.pipeMerge.getTextureUnit("texmask");
-		Base.texa = Base.pipeMerge.getTextureUnit("texa");
-		Base.opac = Base.pipeMerge.getConstantLocation("opac");
-		Base.blending = Base.pipeMerge.getConstantLocation("blending");
+		Base.tex0 =PipelineState.getTextureUnit( Base.pipeMerge, "tex0"); // Always binding texpaint.a for blending
+		Base.tex1 =PipelineState.getTextureUnit( Base.pipeMerge, "tex1");
+		Base.texmask =PipelineState.getTextureUnit( Base.pipeMerge, "texmask");
+		Base.texa =PipelineState.getTextureUnit( Base.pipeMerge, "texa");
+		Base.opac =PipelineState.getConstantLocation( Base.pipeMerge, "opac");
+		Base.blending =PipelineState.getConstantLocation( Base.pipeMerge, "blending");
 		///end
 
 		{
-			Base.pipeCopy = new PipelineState();
+			Base.pipeCopy = PipelineState.create();
 			Base.pipeCopy.vertexShader = System.getShader("layer_view.vert");
 			Base.pipeCopy.fragmentShader = System.getShader("layer_copy.frag");
-			let vs = new VertexStructure();
-			vs.add("pos", VertexData.F32_3X);
-			vs.add("tex", VertexData.F32_2X);
-			vs.add("col", VertexData.U8_4X_Normalized);
+			let vs = VertexStructure.create();
+			VertexStructure.add(vs, "pos", VertexData.F32_3X);
+			VertexStructure.add(vs, "tex", VertexData.F32_2X);
+			VertexStructure.add(vs, "col", VertexData.U8_4X_Normalized);
 			Base.pipeCopy.inputLayout = [vs];
-			Base.pipeCopy.compile();
+			PipelineState.compile(Base.pipeCopy);
 		}
 
 		{
-			Base.pipeCopyBGRA = new PipelineState();
+			Base.pipeCopyBGRA = PipelineState.create();
 			Base.pipeCopyBGRA.vertexShader = System.getShader("layer_view.vert");
 			Base.pipeCopyBGRA.fragmentShader = System.getShader("layer_copy_bgra.frag");
-			let vs = new VertexStructure();
-			vs.add("pos", VertexData.F32_3X);
-			vs.add("tex", VertexData.F32_2X);
-			vs.add("col", VertexData.U8_4X_Normalized);
+			let vs = VertexStructure.create();
+			VertexStructure.add(vs, "pos", VertexData.F32_3X);
+			VertexStructure.add(vs, "tex", VertexData.F32_2X);
+			VertexStructure.add(vs, "col", VertexData.U8_4X_Normalized);
 			Base.pipeCopyBGRA.inputLayout = [vs];
-			Base.pipeCopyBGRA.compile();
+			PipelineState.compile(Base.pipeCopyBGRA);
 		}
 
 		///if (krom_metal || krom_vulkan || krom_direct3d12)
 		{
-			Base.pipeCopy8 = new PipelineState();
+			Base.pipeCopy8 = PipelineState.create();
 			Base.pipeCopy8.vertexShader = System.getShader("layer_view.vert");
 			Base.pipeCopy8.fragmentShader = System.getShader("layer_copy.frag");
-			let vs = new VertexStructure();
-			vs.add("pos", VertexData.F32_3X);
-			vs.add("tex", VertexData.F32_2X);
-			vs.add("col", VertexData.U8_4X_Normalized);
+			let vs = VertexStructure.create();
+			VertexStructure.add(vs, "pos", VertexData.F32_3X);
+			VertexStructure.add(vs, "tex", VertexData.F32_2X);
+			VertexStructure.add(vs, "col", VertexData.U8_4X_Normalized);
 			Base.pipeCopy8.inputLayout = [vs];
 			Base.pipeCopy8.colorAttachmentCount = 1;
 			Base.pipeCopy8.colorAttachments[0] = TextureFormat.R8;
-			Base.pipeCopy8.compile();
+			PipelineState.compile(Base.pipeCopy8);
 		}
 
 		{
-			Base.pipeCopy128 = new PipelineState();
+			Base.pipeCopy128 = PipelineState.create();
 			Base.pipeCopy128.vertexShader = System.getShader("layer_view.vert");
 			Base.pipeCopy128.fragmentShader = System.getShader("layer_copy.frag");
-			let vs = new VertexStructure();
-			vs.add("pos", VertexData.F32_3X);
-			vs.add("tex", VertexData.F32_2X);
-			vs.add("col", VertexData.U8_4X_Normalized);
+			let vs = VertexStructure.create();
+			VertexStructure.add(vs, "pos", VertexData.F32_3X);
+			VertexStructure.add(vs, "tex", VertexData.F32_2X);
+			VertexStructure.add(vs, "col", VertexData.U8_4X_Normalized);
 			Base.pipeCopy128.inputLayout = [vs];
 			Base.pipeCopy128.colorAttachmentCount = 1;
 			Base.pipeCopy128.colorAttachments[0] = TextureFormat.RGBA128;
-			Base.pipeCopy128.compile();
+			PipelineState.compile(Base.pipeCopy128);
 		}
 		///else
 		Base.pipeCopy8 = Base.pipeCopy;
@@ -1184,174 +1184,174 @@ class Base {
 
 		///if (is_paint || is_sculpt)
 		{
-			Base.pipeInvert8 = new PipelineState();
+			Base.pipeInvert8 = PipelineState.create();
 			Base.pipeInvert8.vertexShader = System.getShader("layer_view.vert");
 			Base.pipeInvert8.fragmentShader = System.getShader("layer_invert.frag");
-			let vs = new VertexStructure();
-			vs.add("pos", VertexData.F32_3X);
-			vs.add("tex", VertexData.F32_2X);
-			vs.add("col", VertexData.U8_4X_Normalized);
+			let vs = VertexStructure.create();
+			VertexStructure.add(vs, "pos", VertexData.F32_3X);
+			VertexStructure.add(vs, "tex", VertexData.F32_2X);
+			VertexStructure.add(vs, "col", VertexData.U8_4X_Normalized);
 			Base.pipeInvert8.inputLayout = [vs];
 			Base.pipeInvert8.colorAttachmentCount = 1;
 			Base.pipeInvert8.colorAttachments[0] = TextureFormat.R8;
-			Base.pipeInvert8.compile();
+			PipelineState.compile(Base.pipeInvert8);
 		}
 
 		{
-			Base.pipeApplyMask = new PipelineState();
+			Base.pipeApplyMask = PipelineState.create();
 			Base.pipeApplyMask.vertexShader = System.getShader("pass.vert");
 			Base.pipeApplyMask.fragmentShader = System.getShader("mask_apply.frag");
-			let vs = new VertexStructure();
-			vs.add("pos", VertexData.F32_2X);
+			let vs = VertexStructure.create();
+			VertexStructure.add(vs, "pos", VertexData.F32_2X);
 			Base.pipeApplyMask.inputLayout = [vs];
-			Base.pipeApplyMask.compile();
-			Base.tex0Mask = Base.pipeApplyMask.getTextureUnit("tex0");
-			Base.texaMask = Base.pipeApplyMask.getTextureUnit("texa");
+			PipelineState.compile(Base.pipeApplyMask);
+			Base.tex0Mask = PipelineState.getTextureUnit(Base.pipeApplyMask, "tex0");
+			Base.texaMask = PipelineState.getTextureUnit(Base.pipeApplyMask, "texa");
 		}
 
 		{
-			Base.pipeMergeMask = new PipelineState();
+			Base.pipeMergeMask = PipelineState.create();
 			Base.pipeMergeMask.vertexShader = System.getShader("pass.vert");
 			Base.pipeMergeMask.fragmentShader = System.getShader("mask_merge.frag");
-			let vs = new VertexStructure();
-			vs.add("pos", VertexData.F32_2X);
+			let vs = VertexStructure.create();
+			VertexStructure.add(vs, "pos", VertexData.F32_2X);
 			Base.pipeMergeMask.inputLayout = [vs];
-			Base.pipeMergeMask.compile();
-			Base.tex0MergeMask = Base.pipeMergeMask.getTextureUnit("tex0");
-			Base.texaMergeMask = Base.pipeMergeMask.getTextureUnit("texa");
-			Base.opacMergeMask = Base.pipeMergeMask.getConstantLocation("opac");
-			Base.blendingMergeMask = Base.pipeMergeMask.getConstantLocation("blending");
+			PipelineState.compile(Base.pipeMergeMask);
+			Base.tex0MergeMask = PipelineState.getTextureUnit(Base.pipeMergeMask, "tex0");
+			Base.texaMergeMask = PipelineState.getTextureUnit(Base.pipeMergeMask, "texa");
+			Base.opacMergeMask = PipelineState.getConstantLocation(Base.pipeMergeMask, "opac");
+			Base.blendingMergeMask = PipelineState.getConstantLocation(Base.pipeMergeMask, "blending");
 		}
 
 		{
-			Base.pipeColorIdToMask = new PipelineState();
+			Base.pipeColorIdToMask = PipelineState.create();
 			Base.pipeColorIdToMask.vertexShader = System.getShader("pass.vert");
 			Base.pipeColorIdToMask.fragmentShader = System.getShader("mask_colorid.frag");
-			let vs = new VertexStructure();
-			vs.add("pos", VertexData.F32_2X);
+			let vs = VertexStructure.create();
+			VertexStructure.add(vs, "pos", VertexData.F32_2X);
 			Base.pipeColorIdToMask.inputLayout = [vs];
-			Base.pipeColorIdToMask.compile();
-			Base.texpaintColorId = Base.pipeColorIdToMask.getTextureUnit("texpaint_colorid");
-			Base.texColorId = Base.pipeColorIdToMask.getTextureUnit("texcolorid");
+			PipelineState.compile(Base.pipeColorIdToMask);
+			Base.texpaintColorId = PipelineState.getTextureUnit(Base.pipeColorIdToMask, "texpaint_colorid");
+			Base.texColorId = PipelineState.getTextureUnit(Base.pipeColorIdToMask, "texcolorid");
 		}
 		///end
 
 		///if is_lab
 		{
-			Base.pipeCopyR = new PipelineState();
+			Base.pipeCopyR = PipelineState.create();
 			Base.pipeCopyR.vertexShader = System.getShader("layer_view.vert");
 			Base.pipeCopyR.fragmentShader = System.getShader("layer_copy.frag");
-			let vs = new VertexStructure();
-			vs.add("pos", VertexData.F32_3X);
-			vs.add("tex", VertexData.F32_2X);
-			vs.add("col", VertexData.U8_4X_Normalized);
+			let vs = VertexStructure.create();
+			VertexStructure.add(vs, "pos", VertexData.F32_3X);
+			VertexStructure.add(vs, "tex", VertexData.F32_2X);
+			VertexStructure.add(vs, "col", VertexData.U8_4X_Normalized);
 			Base.pipeCopyR.inputLayout = [vs];
 			Base.pipeCopyR.colorWriteMasksGreen = [false];
 			Base.pipeCopyR.colorWriteMasksBlue = [false];
 			Base.pipeCopyR.colorWriteMasksAlpha = [false];
-			Base.pipeCopyR.compile();
+			PipelineState.compile(Base.pipeCopyR);
 		}
 
 		{
-			Base.pipeCopyG = new PipelineState();
+			Base.pipeCopyG = PipelineState.create();
 			Base.pipeCopyG.vertexShader = System.getShader("layer_view.vert");
 			Base.pipeCopyG.fragmentShader = System.getShader("layer_copy.frag");
-			let vs = new VertexStructure();
-			vs.add("pos", VertexData.F32_3X);
-			vs.add("tex", VertexData.F32_2X);
-			vs.add("col", VertexData.U8_4X_Normalized);
+			let vs = VertexStructure.create();
+			VertexStructure.add(vs, "pos", VertexData.F32_3X);
+			VertexStructure.add(vs, "tex", VertexData.F32_2X);
+			VertexStructure.add(vs, "col", VertexData.U8_4X_Normalized);
 			Base.pipeCopyG.inputLayout = [vs];
 			Base.pipeCopyG.colorWriteMasksRed = [false];
 			Base.pipeCopyG.colorWriteMasksBlue = [false];
 			Base.pipeCopyG.colorWriteMasksAlpha = [false];
-			Base.pipeCopyG.compile();
+			PipelineState.compile(Base.pipeCopyG);
 		}
 
 		{
-			Base.pipeCopyB = new PipelineState();
+			Base.pipeCopyB = PipelineState.create();
 			Base.pipeCopyB.vertexShader = System.getShader("layer_view.vert");
 			Base.pipeCopyB.fragmentShader = System.getShader("layer_copy.frag");
-			let vs = new VertexStructure();
-			vs.add("pos", VertexData.F32_3X);
-			vs.add("tex", VertexData.F32_2X);
-			vs.add("col", VertexData.U8_4X_Normalized);
+			let vs = VertexStructure.create();
+			VertexStructure.add(vs, "pos", VertexData.F32_3X);
+			VertexStructure.add(vs, "tex", VertexData.F32_2X);
+			VertexStructure.add(vs, "col", VertexData.U8_4X_Normalized);
 			Base.pipeCopyB.inputLayout = [vs];
 			Base.pipeCopyB.colorWriteMasksRed = [false];
 			Base.pipeCopyB.colorWriteMasksGreen = [false];
 			Base.pipeCopyB.colorWriteMasksAlpha = [false];
-			Base.pipeCopyB.compile();
+			PipelineState.compile(Base.pipeCopyB);
 		}
 
 		{
-			Base.pipeInpaintPreview = new PipelineState();
+			Base.pipeInpaintPreview = PipelineState.create();
 			Base.pipeInpaintPreview.vertexShader = System.getShader("pass.vert");
 			Base.pipeInpaintPreview.fragmentShader = System.getShader("inpaint_preview.frag");
-			let vs = new VertexStructure();
-			vs.add("pos", VertexData.F32_2X);
+			let vs = VertexStructure.create();
+			VertexStructure.add(vs, "pos", VertexData.F32_2X);
 			Base.pipeInpaintPreview.inputLayout = [vs];
-			Base.pipeInpaintPreview.compile();
-			Base.tex0InpaintPreview = Base.pipeInpaintPreview.getTextureUnit("tex0");
-			Base.texaInpaintPreview = Base.pipeInpaintPreview.getTextureUnit("texa");
+			PipelineState.compile(Base.pipeInpaintPreview);
+			Base.tex0InpaintPreview = PipelineState.getTextureUnit(Base.pipeInpaintPreview, "tex0");
+			Base.texaInpaintPreview = PipelineState.getTextureUnit(Base.pipeInpaintPreview, "texa");
 		}
 		///end
 	}
 
 	static makePipeCopyRGB = () => {
-		Base.pipeCopyRGB = new PipelineState();
+		Base.pipeCopyRGB = PipelineState.create();
 		Base.pipeCopyRGB.vertexShader = System.getShader("layer_view.vert");
 		Base.pipeCopyRGB.fragmentShader = System.getShader("layer_copy.frag");
-		let vs = new VertexStructure();
-		vs.add("pos", VertexData.F32_3X);
-		vs.add("tex", VertexData.F32_2X);
-		vs.add("col", VertexData.U8_4X_Normalized);
+		let vs = VertexStructure.create();
+		VertexStructure.add(vs, "pos", VertexData.F32_3X);
+		VertexStructure.add(vs, "tex", VertexData.F32_2X);
+		VertexStructure.add(vs, "col", VertexData.U8_4X_Normalized);
 		Base.pipeCopyRGB.inputLayout = [vs];
 		Base.pipeCopyRGB.colorWriteMasksAlpha = [false];
-		Base.pipeCopyRGB.compile();
+		PipelineState.compile(Base.pipeCopyRGB);
 	}
 
 	///if is_lab
 	static makePipeCopyA = () => {
-		Base.pipeCopyA = new PipelineState();
+		Base.pipeCopyA = PipelineState.create();
 		Base.pipeCopyA.vertexShader = System.getShader("pass.vert");
 		Base.pipeCopyA.fragmentShader = System.getShader("layer_copy_rrrr.frag");
-		let vs = new VertexStructure();
-		vs.add("pos", VertexData.F32_2X);
+		let vs = VertexStructure.create();
+		VertexStructure.add(vs, "pos", VertexData.F32_2X);
 		Base.pipeCopyA.inputLayout = [vs];
 		Base.pipeCopyA.colorWriteMasksRed = [false];
 		Base.pipeCopyA.colorWriteMasksGreen = [false];
 		Base.pipeCopyA.colorWriteMasksBlue = [false];
-		Base.pipeCopyA.compile();
-		Base.pipeCopyATex = Base.pipeCopyA.getTextureUnit("tex");
+		PipelineState.compile(Base.pipeCopyA);
+		Base.pipeCopyATex = PipelineState.getTextureUnit(Base.pipeCopyA, "tex");
 	}
 	///end
 
 	static makeCursorPipe = () => {
-		Base.pipeCursor = new PipelineState();
+		Base.pipeCursor = PipelineState.create();
 		Base.pipeCursor.vertexShader = System.getShader("cursor.vert");
 		Base.pipeCursor.fragmentShader = System.getShader("cursor.frag");
-		let vs = new VertexStructure();
+		let vs = VertexStructure.create();
 		///if (krom_metal || krom_vulkan)
-		vs.add("tex", VertexData.I16_2X_Normalized);
+		VertexStructure.add(vs, "tex", VertexData.I16_2X_Normalized);
 		///else
-		vs.add("pos", VertexData.I16_4X_Normalized);
-		vs.add("nor", VertexData.I16_2X_Normalized);
-		vs.add("tex", VertexData.I16_2X_Normalized);
+		VertexStructure.add(vs, "pos", VertexData.I16_4X_Normalized);
+		VertexStructure.add(vs, "nor", VertexData.I16_2X_Normalized);
+		VertexStructure.add(vs, "tex", VertexData.I16_2X_Normalized);
 		///end
 		Base.pipeCursor.inputLayout = [vs];
 		Base.pipeCursor.blendSource = BlendingFactor.SourceAlpha;
 		Base.pipeCursor.blendDestination = BlendingFactor.InverseSourceAlpha;
 		Base.pipeCursor.depthWrite = false;
 		Base.pipeCursor.depthMode = CompareMode.Always;
-		Base.pipeCursor.compile();
-		Base.cursorVP = Base.pipeCursor.getConstantLocation("VP");
-		Base.cursorInvVP = Base.pipeCursor.getConstantLocation("invVP");
-		Base.cursorMouse = Base.pipeCursor.getConstantLocation("mouse");
-		Base.cursorTexStep = Base.pipeCursor.getConstantLocation("texStep");
-		Base.cursorRadius = Base.pipeCursor.getConstantLocation("radius");
-		Base.cursorCameraRight = Base.pipeCursor.getConstantLocation("cameraRight");
-		Base.cursorTint = Base.pipeCursor.getConstantLocation("tint");
-		Base.cursorGbufferD = Base.pipeCursor.getTextureUnit("gbufferD");
-		Base.cursorTex = Base.pipeCursor.getTextureUnit("tex");
+		PipelineState.compile(Base.pipeCursor);
+		Base.cursorVP = PipelineState.getConstantLocation(Base.pipeCursor, "VP");
+		Base.cursorInvVP = PipelineState.getConstantLocation(Base.pipeCursor, "invVP");
+		Base.cursorMouse = PipelineState.getConstantLocation(Base.pipeCursor, "mouse");
+		Base.cursorTexStep = PipelineState.getConstantLocation(Base.pipeCursor, "texStep");
+		Base.cursorRadius = PipelineState.getConstantLocation(Base.pipeCursor, "radius");
+		Base.cursorCameraRight = PipelineState.getConstantLocation(Base.pipeCursor, "cameraRight");
+		Base.cursorTint = PipelineState.getConstantLocation(Base.pipeCursor, "tint");
+		Base.cursorGbufferD = PipelineState.getTextureUnit(Base.pipeCursor, "gbufferD");
+		Base.cursorTex = PipelineState.getTextureUnit(Base.pipeCursor, "tex");
 	}
 
 	static makeTempImg = () => {
@@ -1365,7 +1365,7 @@ class Base {
 		if (Base.tempImage != null && (Base.tempImage.width != l.texpaint.width || Base.tempImage.height != l.texpaint.height || Base.tempImage.format != l.texpaint.format)) {
 			let _temptex0 = RenderPath.renderTargets.get("temptex0");
 			Base.notifyOnNextFrame(() => {
-				_temptex0.unload();
+				RenderTarget.unload(_temptex0);
 			});
 			RenderPath.renderTargets.delete("temptex0");
 			Base.tempImage = null;
@@ -1380,7 +1380,7 @@ class Base {
 			let format = "RGBA32";
 			///end
 
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "temptex0";
 			t.width = l.texpaint.width;
 			t.height = l.texpaint.height;
@@ -1395,7 +1395,7 @@ class Base {
 		if (Base.tempMaskImage != null && (Base.tempMaskImage.width != Config.getTextureResX() || Base.tempMaskImage.height != Config.getTextureResY())) {
 			let _tempMaskImage = Base.tempMaskImage;
 			Base.notifyOnNextFrame(() => {
-				_tempMaskImage.unload();
+				Image.unload(_tempMaskImage);
 			});
 			Base.tempMaskImage = null;
 		}
@@ -1418,9 +1418,9 @@ class Base {
 			let _expb = Base.expb;
 			let _expc = Base.expc;
 			Base.notifyOnNextFrame(() => {
-				_expa.unload();
-				_expb.unload();
-				_expc.unload();
+				Image.unload(_expa);
+				Image.unload(_expb);
+				Image.unload(_expc);
 			});
 			Base.expa = null;
 			Base.expb = null;
@@ -1440,7 +1440,7 @@ class Base {
 			///end
 
 			{
-				let t = new RenderTargetRaw();
+				let t = RenderTarget.create();
 				t.name = "expa";
 				t.width = l.texpaint.width;
 				t.height = l.texpaint.height;
@@ -1450,7 +1450,7 @@ class Base {
 			}
 
 			{
-				let t = new RenderTargetRaw();
+				let t = RenderTarget.create();
 				t.name = "expb";
 				t.width = l.texpaint.width;
 				t.height = l.texpaint.height;
@@ -1460,7 +1460,7 @@ class Base {
 			}
 
 			{
-				let t = new RenderTargetRaw();
+				let t = RenderTarget.create();
 				t.name = "expc";
 				t.width = l.texpaint.width;
 				t.height = l.texpaint.height;
@@ -1599,11 +1599,11 @@ class Base {
 		Base.makeTempImg();
 		if (ConstData.screenAlignedVB == null) ConstData.createScreenAlignedData();
 
-		Base.tempImage.g2.begin(false); // Copy to temp
+		Graphics2.begin(Base.tempImage.g2, false); // Copy to temp
 		Base.tempImage.g2.pipeline = Base.pipeCopy;
-		Base.tempImage.g2.drawImage(l0.texpaint, 0, 0);
+		Graphics2.drawImage(l0.texpaint, 0, 0);
 		Base.tempImage.g2.pipeline = null;
-		Base.tempImage.g2.end();
+		Graphics2.end(Base.tempImage.g2);
 
 		let empty = RenderPath.renderTargets.get("empty_white").image;
 		let mask = empty;
@@ -1616,61 +1616,61 @@ class Base {
 		}
 
 		if (SlotLayer.isMask(l1)) {
-			l0.texpaint.g4.begin();
-			l0.texpaint.g4.setPipeline(Base.pipeMergeMask);
-			l0.texpaint.g4.setTexture(Base.tex0MergeMask, l1.texpaint);
-			l0.texpaint.g4.setTexture(Base.texaMergeMask, Base.tempImage);
-			l0.texpaint.g4.setFloat(Base.opacMergeMask, SlotLayer.getOpacity(l1));
-			l0.texpaint.g4.setInt(Base.blendingMergeMask, l1.blending);
-			l0.texpaint.g4.setVertexBuffer(ConstData.screenAlignedVB);
-			l0.texpaint.g4.setIndexBuffer(ConstData.screenAlignedIB);
-			l0.texpaint.g4.drawIndexedVertices();
-			l0.texpaint.g4.end();
+			Graphics4.begin(l0.texpaint.g4);
+			Graphics4.setPipeline(Base.pipeMergeMask);
+			Graphics4.setTexture(Base.tex0MergeMask, l1.texpaint);
+			Graphics4.setTexture(Base.texaMergeMask, Base.tempImage);
+			Graphics4.setFloat(Base.opacMergeMask, SlotLayer.getOpacity(l1));
+			Graphics4.setInt(Base.blendingMergeMask, l1.blending);
+			Graphics4.setVertexBuffer(ConstData.screenAlignedVB);
+			Graphics4.setIndexBuffer(ConstData.screenAlignedIB);
+			Graphics4.drawIndexedVertices();
+			Graphics4.end();
 		}
 
 		if (SlotLayer.isLayer(l1)) {
 			if (l1.paintBase) {
-				l0.texpaint.g4.begin();
-				l0.texpaint.g4.setPipeline(Base.pipeMerge);
-				l0.texpaint.g4.setTexture(Base.tex0, l1.texpaint);
-				l0.texpaint.g4.setTexture(Base.tex1, empty);
-				l0.texpaint.g4.setTexture(Base.texmask, mask);
-				l0.texpaint.g4.setTexture(Base.texa, Base.tempImage);
-				l0.texpaint.g4.setFloat(Base.opac, SlotLayer.getOpacity(l1));
-				l0.texpaint.g4.setInt(Base.blending, l1.blending);
-				l0.texpaint.g4.setVertexBuffer(ConstData.screenAlignedVB);
-				l0.texpaint.g4.setIndexBuffer(ConstData.screenAlignedIB);
-				l0.texpaint.g4.drawIndexedVertices();
-				l0.texpaint.g4.end();
+				Graphics4.begin(l0.texpaint.g4);
+				Graphics4.setPipeline(Base.pipeMerge);
+				Graphics4.setTexture(Base.tex0, l1.texpaint);
+				Graphics4.setTexture(Base.tex1, empty);
+				Graphics4.setTexture(Base.texmask, mask);
+				Graphics4.setTexture(Base.texa, Base.tempImage);
+				Graphics4.setFloat(Base.opac, SlotLayer.getOpacity(l1));
+				Graphics4.setInt(Base.blending, l1.blending);
+				Graphics4.setVertexBuffer(ConstData.screenAlignedVB);
+				Graphics4.setIndexBuffer(ConstData.screenAlignedIB);
+				Graphics4.drawIndexedVertices();
+				Graphics4.end();
 			}
 
 			///if is_paint
-			Base.tempImage.g2.begin(false);
+			Graphics2.begin(Base.tempImage.g2, false);
 			Base.tempImage.g2.pipeline = Base.pipeCopy;
-			Base.tempImage.g2.drawImage(l0.texpaint_nor, 0, 0);
+			Graphics2.drawImage(l0.texpaint_nor, 0, 0);
 			Base.tempImage.g2.pipeline = null;
-			Base.tempImage.g2.end();
+			Graphics2.end(Base.tempImage.g2);
 
 			if (l1.paintNor) {
-				l0.texpaint_nor.g4.begin();
-				l0.texpaint_nor.g4.setPipeline(Base.pipeMerge);
-				l0.texpaint_nor.g4.setTexture(Base.tex0, l1.texpaint);
-				l0.texpaint_nor.g4.setTexture(Base.tex1, l1.texpaint_nor);
-				l0.texpaint_nor.g4.setTexture(Base.texmask, mask);
-				l0.texpaint_nor.g4.setTexture(Base.texa, Base.tempImage);
-				l0.texpaint_nor.g4.setFloat(Base.opac, SlotLayer.getOpacity(l1));
-				l0.texpaint_nor.g4.setInt(Base.blending, l1.paintNorBlend ? -2 : -1);
-				l0.texpaint_nor.g4.setVertexBuffer(ConstData.screenAlignedVB);
-				l0.texpaint_nor.g4.setIndexBuffer(ConstData.screenAlignedIB);
-				l0.texpaint_nor.g4.drawIndexedVertices();
-				l0.texpaint_nor.g4.end();
+				Graphics4.begin(l0.texpaint_nor.g4);
+				Graphics4.setPipeline(Base.pipeMerge);
+				Graphics4.setTexture(Base.tex0, l1.texpaint);
+				Graphics4.setTexture(Base.tex1, l1.texpaint_nor);
+				Graphics4.setTexture(Base.texmask, mask);
+				Graphics4.setTexture(Base.texa, Base.tempImage);
+				Graphics4.setFloat(Base.opac, SlotLayer.getOpacity(l1));
+				Graphics4.setInt(Base.blending, l1.paintNorBlend ? -2 : -1);
+				Graphics4.setVertexBuffer(ConstData.screenAlignedVB);
+				Graphics4.setIndexBuffer(ConstData.screenAlignedIB);
+				Graphics4.drawIndexedVertices();
+				Graphics4.end();
 			}
 
-			Base.tempImage.g2.begin(false);
+			Graphics2.begin(Base.tempImage.g2, false);
 			Base.tempImage.g2.pipeline = Base.pipeCopy;
-			Base.tempImage.g2.drawImage(l0.texpaint_pack, 0, 0);
+			Graphics2.drawImage(l0.texpaint_pack, 0, 0);
 			Base.tempImage.g2.pipeline = null;
-			Base.tempImage.g2.end();
+			Graphics2.end(Base.tempImage.g2);
 
 			if (l1.paintOcc || l1.paintRough || l1.paintMet || l1.paintHeight) {
 				if (l1.paintOcc && l1.paintRough && l1.paintMet && l1.paintHeight) {
@@ -1695,15 +1695,15 @@ class Base {
 		let empty = RenderPath.renderTargets.get("empty_white").image;
 
 		// Clear export layer
-		Base.expa.g4.begin();
-		Base.expa.g4.clear(color_from_floats(0.0, 0.0, 0.0, 0.0));
-		Base.expa.g4.end();
-		Base.expb.g4.begin();
-		Base.expb.g4.clear(color_from_floats(0.5, 0.5, 1.0, 0.0));
-		Base.expb.g4.end();
-		Base.expc.g4.begin();
-		Base.expc.g4.clear(color_from_floats(1.0, 0.0, 0.0, 0.0));
-		Base.expc.g4.end();
+		Graphics4.begin(Base.expa.g4);
+		Graphics4.clear(color_from_floats(0.0, 0.0, 0.0, 0.0));
+		Graphics4.end();
+		Graphics4.begin(Base.expb.g4);
+		Graphics4.clear(color_from_floats(0.5, 0.5, 1.0, 0.0));
+		Graphics4.end();
+		Graphics4.begin(Base.expc.g4);
+		Graphics4.clear(color_from_floats(1.0, 0.0, 0.0, 0.0));
+		Graphics4.end();
 
 		// Flatten layers
 		for (let l1 of layers) {
@@ -1715,8 +1715,8 @@ class Base {
 			if (l1masks != null) {
 				if (l1masks.length > 1) {
 					Base.makeTempMaskImg();
-					Base.tempMaskImage.g2.begin(true, 0x00000000);
-					Base.tempMaskImage.g2.end();
+					Graphics2.begin(Base.tempMaskImage.g2, true, 0x00000000);
+					Graphics2.end(Base.tempMaskImage.g2);
 					let l1: any = { texpaint: Base.tempMaskImage };
 					for (let i = 0; i < l1masks.length; ++i) {
 						Base.mergeLayer(l1, l1masks[i]);
@@ -1727,54 +1727,54 @@ class Base {
 			}
 
 			if (l1.paintBase) {
-				Base.tempImage.g2.begin(false); // Copy to temp
+				Graphics2.begin(Base.tempImage.g2, false); // Copy to temp
 				Base.tempImage.g2.pipeline = Base.pipeCopy;
-				Base.tempImage.g2.drawImage(Base.expa, 0, 0);
+				Graphics2.drawImage(Base.expa, 0, 0);
 				Base.tempImage.g2.pipeline = null;
-				Base.tempImage.g2.end();
+				Graphics2.end(Base.tempImage.g2);
 
-				Base.expa.g4.begin();
-				Base.expa.g4.setPipeline(Base.pipeMerge);
-				Base.expa.g4.setTexture(Base.tex0, l1.texpaint);
-				Base.expa.g4.setTexture(Base.tex1, empty);
-				Base.expa.g4.setTexture(Base.texmask, mask);
-				Base.expa.g4.setTexture(Base.texa, Base.tempImage);
-				Base.expa.g4.setFloat(Base.opac, SlotLayer.getOpacity(l1));
-				Base.expa.g4.setInt(Base.blending, layers.length > 1 ? l1.blending : 0);
-				Base.expa.g4.setVertexBuffer(ConstData.screenAlignedVB);
-				Base.expa.g4.setIndexBuffer(ConstData.screenAlignedIB);
-				Base.expa.g4.drawIndexedVertices();
-				Base.expa.g4.end();
+				Graphics4.begin(Base.expa.g4);
+				Graphics4.setPipeline(Base.pipeMerge);
+				Graphics4.setTexture(Base.tex0, l1.texpaint);
+				Graphics4.setTexture(Base.tex1, empty);
+				Graphics4.setTexture(Base.texmask, mask);
+				Graphics4.setTexture(Base.texa, Base.tempImage);
+				Graphics4.setFloat(Base.opac, SlotLayer.getOpacity(l1));
+				Graphics4.setInt(Base.blending, layers.length > 1 ? l1.blending : 0);
+				Graphics4.setVertexBuffer(ConstData.screenAlignedVB);
+				Graphics4.setIndexBuffer(ConstData.screenAlignedIB);
+				Graphics4.drawIndexedVertices();
+				Graphics4.end();
 			}
 
 			///if is_paint
 			if (l1.paintNor) {
-				Base.tempImage.g2.begin(false);
+				Graphics2.begin(Base.tempImage.g2, false);
 				Base.tempImage.g2.pipeline = Base.pipeCopy;
-				Base.tempImage.g2.drawImage(Base.expb, 0, 0);
+				Graphics2.drawImage(Base.expb, 0, 0);
 				Base.tempImage.g2.pipeline = null;
-				Base.tempImage.g2.end();
+				Graphics2.end(Base.tempImage.g2);
 
-				Base.expb.g4.begin();
-				Base.expb.g4.setPipeline(Base.pipeMerge);
-				Base.expb.g4.setTexture(Base.tex0, l1.texpaint);
-				Base.expb.g4.setTexture(Base.tex1, l1.texpaint_nor);
-				Base.expb.g4.setTexture(Base.texmask, mask);
-				Base.expb.g4.setTexture(Base.texa, Base.tempImage);
-				Base.expb.g4.setFloat(Base.opac, SlotLayer.getOpacity(l1));
-				Base.expb.g4.setInt(Base.blending, l1.paintNorBlend ? -2 : -1);
-				Base.expb.g4.setVertexBuffer(ConstData.screenAlignedVB);
-				Base.expb.g4.setIndexBuffer(ConstData.screenAlignedIB);
-				Base.expb.g4.drawIndexedVertices();
-				Base.expb.g4.end();
+				Graphics4.begin(Base.expb.g4);
+				Graphics4.setPipeline(Base.pipeMerge);
+				Graphics4.setTexture(Base.tex0, l1.texpaint);
+				Graphics4.setTexture(Base.tex1, l1.texpaint_nor);
+				Graphics4.setTexture(Base.texmask, mask);
+				Graphics4.setTexture(Base.texa, Base.tempImage);
+				Graphics4.setFloat(Base.opac, SlotLayer.getOpacity(l1));
+				Graphics4.setInt(Base.blending, l1.paintNorBlend ? -2 : -1);
+				Graphics4.setVertexBuffer(ConstData.screenAlignedVB);
+				Graphics4.setIndexBuffer(ConstData.screenAlignedIB);
+				Graphics4.drawIndexedVertices();
+				Graphics4.end();
 			}
 
 			if (l1.paintOcc || l1.paintRough || l1.paintMet || l1.paintHeight) {
-				Base.tempImage.g2.begin(false);
+				Graphics2.begin(Base.tempImage.g2, false);
 				Base.tempImage.g2.pipeline = Base.pipeCopy;
-				Base.tempImage.g2.drawImage(Base.expc, 0, 0);
+				Graphics2.drawImage(Base.expc, 0, 0);
 				Base.tempImage.g2.pipeline = null;
-				Base.tempImage.g2.end();
+				Graphics2.end(Base.tempImage.g2);
 
 				if (l1.paintOcc && l1.paintRough && l1.paintMet && l1.paintHeight) {
 					Base.commandsMergePack(Base.pipeMerge, Base.expc, l1.texpaint, l1.texpaint_pack, SlotLayer.getOpacity(l1), mask, l1.paintHeightBlend ? -3 : -1);
@@ -1790,12 +1790,12 @@ class Base {
 
 		///if krom_metal
 		// Flush command list
-		Base.expa.g2.begin(false);
-		Base.expa.g2.end();
-		Base.expb.g2.begin(false);
-		Base.expb.g2.end();
-		Base.expc.g2.begin(false);
-		Base.expc.g2.end();
+		Graphics2.begin(Base.expa.g2, false);
+		Graphics2.end(Base.expa.g2);
+		Graphics2.begin(Base.expb.g2, false);
+		Graphics2.end(Base.expb.g2);
+		Graphics2.begin(Base.expc.g2, false);
+		Graphics2.end(Base.expc.g2);
 		///end
 
 		let l0 = { texpaint: Base.expa, texpaint_nor: Base.expb, texpaint_pack: Base.expc };
@@ -1803,24 +1803,24 @@ class Base {
 		// Merge height map into normal map
 		if (heightToNormal && MakeMaterial.heightUsed) {
 
-			Base.tempImage.g2.begin(false);
+			Graphics2.begin(Base.tempImage.g2, false);
 			Base.tempImage.g2.pipeline = Base.pipeCopy;
-			Base.tempImage.g2.drawImage(l0.texpaint_nor, 0, 0);
+			Graphics2.drawImage(l0.texpaint_nor, 0, 0);
 			Base.tempImage.g2.pipeline = null;
-			Base.tempImage.g2.end();
+			Graphics2.end(Base.tempImage.g2);
 
-			l0.texpaint_nor.g4.begin();
-			l0.texpaint_nor.g4.setPipeline(Base.pipeMerge);
-			l0.texpaint_nor.g4.setTexture(Base.tex0, Base.tempImage);
-			l0.texpaint_nor.g4.setTexture(Base.tex1, l0.texpaint_pack);
-			l0.texpaint_nor.g4.setTexture(Base.texmask, empty);
-			l0.texpaint_nor.g4.setTexture(Base.texa, empty);
-			l0.texpaint_nor.g4.setFloat(Base.opac, 1.0);
-			l0.texpaint_nor.g4.setInt(Base.blending, -4);
-			l0.texpaint_nor.g4.setVertexBuffer(ConstData.screenAlignedVB);
-			l0.texpaint_nor.g4.setIndexBuffer(ConstData.screenAlignedIB);
-			l0.texpaint_nor.g4.drawIndexedVertices();
-			l0.texpaint_nor.g4.end();
+			Graphics4.begin(l0.texpaint_nor.g4);
+			Graphics4.setPipeline(Base.pipeMerge);
+			Graphics4.setTexture(Base.tex0, Base.tempImage);
+			Graphics4.setTexture(Base.tex1, l0.texpaint_pack);
+			Graphics4.setTexture(Base.texmask, empty);
+			Graphics4.setTexture(Base.texa, empty);
+			Graphics4.setFloat(Base.opac, 1.0);
+			Graphics4.setInt(Base.blending, -4);
+			Graphics4.setVertexBuffer(ConstData.screenAlignedVB);
+			Graphics4.setIndexBuffer(ConstData.screenAlignedIB);
+			Graphics4.drawIndexedVertices();
+			Graphics4.end();
 		}
 
 		return l0;
@@ -1833,37 +1833,37 @@ class Base {
 		Base.makeTempImg();
 
 		// Copy layer to temp
-		Base.tempImage.g2.begin(false);
+		Graphics2.begin(Base.tempImage.g2, false);
 		Base.tempImage.g2.pipeline = Base.pipeCopy;
-		Base.tempImage.g2.drawImage(l.texpaint, 0, 0);
+		Graphics2.drawImage(l.texpaint, 0, 0);
 		Base.tempImage.g2.pipeline = null;
-		Base.tempImage.g2.end();
+		Graphics2.end(Base.tempImage.g2);
 
 		// Apply mask
 		if (ConstData.screenAlignedVB == null) ConstData.createScreenAlignedData();
-		l.texpaint.g4.begin();
-		l.texpaint.g4.setPipeline(Base.pipeApplyMask);
-		l.texpaint.g4.setTexture(Base.tex0Mask, Base.tempImage);
-		l.texpaint.g4.setTexture(Base.texaMask, m.texpaint);
-		l.texpaint.g4.setVertexBuffer(ConstData.screenAlignedVB);
-		l.texpaint.g4.setIndexBuffer(ConstData.screenAlignedIB);
-		l.texpaint.g4.drawIndexedVertices();
-		l.texpaint.g4.end();
+		Graphics4.begin(l.texpaint.g4);
+		Graphics4.setPipeline(Base.pipeApplyMask);
+		Graphics4.setTexture(Base.tex0Mask, Base.tempImage);
+		Graphics4.setTexture(Base.texaMask, m.texpaint);
+		Graphics4.setVertexBuffer(ConstData.screenAlignedVB);
+		Graphics4.setIndexBuffer(ConstData.screenAlignedIB);
+		Graphics4.drawIndexedVertices();
+		Graphics4.end();
 	}
 
-	static commandsMergePack = (pipe: PipelineState, i0: Image, i1: Image, i1pack: Image, i1maskOpacity: f32, i1texmask: Image, i1blending = -1) => {
-		i0.g4.begin();
-		i0.g4.setPipeline(pipe);
-		i0.g4.setTexture(Base.tex0, i1);
-		i0.g4.setTexture(Base.tex1, i1pack);
-		i0.g4.setTexture(Base.texmask, i1texmask);
-		i0.g4.setTexture(Base.texa, Base.tempImage);
-		i0.g4.setFloat(Base.opac, i1maskOpacity);
-		i0.g4.setInt(Base.blending, i1blending);
-		i0.g4.setVertexBuffer(ConstData.screenAlignedVB);
-		i0.g4.setIndexBuffer(ConstData.screenAlignedIB);
-		i0.g4.drawIndexedVertices();
-		i0.g4.end();
+	static commandsMergePack = (pipe: PipelineStateRaw, i0: ImageRaw, i1: ImageRaw, i1pack: ImageRaw, i1maskOpacity: f32, i1texmask: ImageRaw, i1blending = -1) => {
+		Graphics4.begin(i0.g4);
+		Graphics4.setPipeline(pipe);
+		Graphics4.setTexture(Base.tex0, i1);
+		Graphics4.setTexture(Base.tex1, i1pack);
+		Graphics4.setTexture(Base.texmask, i1texmask);
+		Graphics4.setTexture(Base.texa, Base.tempImage);
+		Graphics4.setFloat(Base.opac, i1maskOpacity);
+		Graphics4.setInt(Base.blending, i1blending);
+		Graphics4.setVertexBuffer(ConstData.screenAlignedVB);
+		Graphics4.setIndexBuffer(ConstData.screenAlignedIB);
+		Graphics4.drawIndexedVertices();
+		Graphics4.end();
 	}
 
 	static isFillMaterial = (): bool => {
@@ -1880,7 +1880,7 @@ class Base {
 		let _layer = Context.raw.layer;
 		let _tool = Context.raw.tool;
 		let _fillType = Context.raw.fillTypeHandle.position;
-		let current: Graphics2 = null;
+		let current: Graphics2Raw = null;
 
 		///if is_paint
 		if (Context.raw.tool == WorkspaceTool.ToolMaterial) {
@@ -1889,7 +1889,7 @@ class Base {
 			}
 
 			current = Graphics2.current;
-			if (current != null) current.end();
+			if (current != null) Graphics2.end(current);
 
 			Context.raw.tool = WorkspaceTool.ToolFill;
 			Context.raw.fillTypeHandle.position = FillType.FillObject;
@@ -1904,7 +1904,7 @@ class Base {
 			Context.raw.pdirty = 0;
 			Context.raw.rdirty = 2;
 
-			if (current != null) current.begin(false);
+			if (current != null) Graphics2.begin(current, false);
 			return;
 		}
 		///end
@@ -1916,7 +1916,7 @@ class Base {
 
 		if (hasFillLayer || hasFillMask) {
 			current = Graphics2.current;
-			if (current != null) current.end();
+			if (current != null) Graphics2.end(current);
 			Context.raw.pdirty = 1;
 			Context.raw.tool = WorkspaceTool.ToolFill;
 			Context.raw.fillTypeHandle.position = FillType.FillObject;
@@ -1958,7 +1958,7 @@ class Base {
 			Context.raw.ddirty = 2;
 			Context.raw.rdirty = 2;
 			Context.raw.layersPreviewDirty = true; // Repaint all layer previews as multiple layers might have changed.
-			if (current != null) current.begin(false);
+			if (current != null) Graphics2.begin(current, false);
 			Context.raw.layer = _layer;
 			Base.setObjectMask();
 			Context.raw.tool = _tool;
@@ -1969,7 +1969,7 @@ class Base {
 
 	static updateFillLayer = (parsePaint = true) => {
 		let current = Graphics2.current;
-		if (current != null) current.end();
+		if (current != null) Graphics2.end(current);
 
 		let _tool = Context.raw.tool;
 		let _fillType = Context.raw.fillTypeHandle.position;
@@ -1986,7 +1986,7 @@ class Base {
 		Context.raw.rdirty = 2;
 		Context.raw.tool = _tool;
 		Context.raw.fillTypeHandle.position = _fillType;
-		if (current != null) current.begin(false);
+		if (current != null) Graphics2.begin(current, false);
 	}
 
 	static setObjectMask = () => {
@@ -2154,36 +2154,36 @@ class Base {
 	}
 
 	static onLayersResized = () => {
-		BrushOutputNode.inst.texpaint.unload();
+		Image.unload(BrushOutputNode.inst.texpaint);
 		BrushOutputNode.inst.texpaint = RenderPath.renderTargets.get("texpaint").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
-		BrushOutputNode.inst.texpaint_nor.unload();
+		Image.unload(BrushOutputNode.inst.texpaint_nor);
 		BrushOutputNode.inst.texpaint_nor = RenderPath.renderTargets.get("texpaint_nor").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
-		BrushOutputNode.inst.texpaint_pack.unload();
+		Image.unload(BrushOutputNode.inst.texpaint_pack);
 		BrushOutputNode.inst.texpaint_pack = RenderPath.renderTargets.get("texpaint_pack").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
 
 		if (InpaintNode.image != null) {
-			InpaintNode.image.unload();
+			Image.unload(InpaintNode.image);
 			InpaintNode.image = null;
-			InpaintNode.mask.unload();
+			Image.unload(InpaintNode.mask);
 			InpaintNode.mask = null;
 			InpaintNode.init();
 		}
 
 		if (PhotoToPBRNode.images != null) {
-			for (let image of PhotoToPBRNode.images) image.unload();
+			for (let image of PhotoToPBRNode.images) Image.unload(image);
 			PhotoToPBRNode.images = null;
 			PhotoToPBRNode.init();
 		}
 
 		if (TilingNode.image != null) {
-			TilingNode.image.unload();
+			Image.unload(TilingNode.image);
 			TilingNode.image = null;
 			TilingNode.init();
 		}
 
-		RenderPath.renderTargets.get("texpaint_blend0").image.unload();
+		Image.unload(RenderPath.renderTargets.get("texpaint_blend0").image);
 		RenderPath.renderTargets.get("texpaint_blend0").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8);
-		RenderPath.renderTargets.get("texpaint_blend1").image.unload();
+		Image.unload(RenderPath.renderTargets.get("texpaint_blend1").image);
 		RenderPath.renderTargets.get("texpaint_blend1").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8);
 
 		if (RenderPath.renderTargets.get("texpaint_node") != null) {

@@ -51,7 +51,7 @@ class TabConsole {
 
 			let _font = ui.font;
 			let _fontSize = ui.fontSize;
-			Data.getFont("font_mono.ttf", (f: Font) => { ui.setFont(f); }); // Sync
+			Data.getFont("font_mono.ttf", (f: FontRaw) => { ui.setFont(f); }); // Sync
 			ui.fontSize = Math.floor(15 * ui.SCALE());
 			for (let t of Console.lastTraces) {
 				ui.text(t);

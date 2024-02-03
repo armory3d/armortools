@@ -5,7 +5,7 @@ class RenderPathDeferred {
 		RenderPath.createDepthBuffer("main", "DEPTH24");
 
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "gbuffer0";
 			t.width = 0;
 			t.height = 0;
@@ -15,7 +15,7 @@ class RenderPathDeferred {
 			RenderPath.createRenderTarget(t);
 		}
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "gbuffer1";
 			t.width = 0;
 			t.height = 0;
@@ -24,7 +24,7 @@ class RenderPathDeferred {
 			RenderPath.createRenderTarget(t);
 		}
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "gbuffer2";
 			t.width = 0;
 			t.height = 0;
@@ -33,7 +33,7 @@ class RenderPathDeferred {
 			RenderPath.createRenderTarget(t);
 		}
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "tex";
 			t.width = 0;
 			t.height = 0;
@@ -45,7 +45,7 @@ class RenderPathDeferred {
 			RenderPath.createRenderTarget(t);
 		}
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "buf";
 			t.width = 0;
 			t.height = 0;
@@ -60,7 +60,7 @@ class RenderPathDeferred {
 			RenderPath.createRenderTarget(t);
 		}
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "buf2";
 			t.width = 0;
 			t.height = 0;
@@ -69,7 +69,7 @@ class RenderPathDeferred {
 			RenderPath.createRenderTarget(t);
 		}
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "taa";
 			t.width = 0;
 			t.height = 0;
@@ -78,7 +78,7 @@ class RenderPathDeferred {
 			RenderPath.createRenderTarget(t);
 		}
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "taa2";
 			t.width = 0;
 			t.height = 0;
@@ -87,38 +87,36 @@ class RenderPathDeferred {
 			RenderPath.createRenderTarget(t);
 		}
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "empty_white";
 			t.width = 1;
 			t.height = 1;
 			t.format = "R8";
-			let rt = new RenderTarget(t);
 			let b = new ArrayBuffer(1);
 			let v = new DataView(b);
 			v.setUint8(0, 255);
-			rt.image = Image.fromBytes(b, t.width, t.height, TextureFormat.R8);
-			RenderPath.renderTargets.set(t.name, rt);
+			t.image = Image.fromBytes(b, t.width, t.height, TextureFormat.R8);
+			RenderPath.renderTargets.set(t.name, t);
 		}
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "empty_black";
 			t.width = 1;
 			t.height = 1;
 			t.format = "RGBA32";
-			let rt = new RenderTarget(t);
 			let b = new ArrayBuffer(4);
 			let v = new DataView(b);
 			v.setUint8(0, 0);
 			v.setUint8(1, 0);
 			v.setUint8(2, 0);
 			v.setUint8(3, 0);
-			rt.image = Image.fromBytes(b, t.width, t.height, TextureFormat.RGBA32);
-			RenderPath.renderTargets.set(t.name, rt);
+			t.image = Image.fromBytes(b, t.width, t.height, TextureFormat.RGBA32);
+			RenderPath.renderTargets.set(t.name, t);
 		}
 
 		///if is_sculpt
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "gbuffer0_undo";
 			t.width = 0;
 			t.height = 0;
@@ -127,7 +125,7 @@ class RenderPathDeferred {
 			RenderPath.createRenderTarget(t);
 		}
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "gbufferD_undo";
 			t.width = 0;
 			t.height = 0;

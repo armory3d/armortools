@@ -13,7 +13,7 @@ class UIMenu {
 	static showMenuFirst = true;
 	static hideMenu = false;
 
-	static render = (g: Graphics2) => {
+	static render = (g: Graphics2Raw) => {
 		let ui = Base.uiMenu;
 		let menuW = UIMenu.menuCommands != null ? Math.floor(Base.defaultElementW * Base.uiMenu.SCALE() * 2.3) : Math.floor(ui.ELEMENT_W() * 2.3);
 		let _BUTTON_COL = ui.t.BUTTON_COL;
@@ -221,9 +221,9 @@ class UIMenu {
 				UIMenu.menuFill(ui);
 				Context.raw.drawWireframe = ui.check(Context.raw.wireframeHandle, " " + tr("Wireframe"));
 				if (Context.raw.wireframeHandle.changed) {
-					ui.g.end();
+					Graphics2.end(ui.g);
 					UtilUV.cacheUVMap();
-					ui.g.begin(false);
+					Graphics2.begin(ui.g, false);
 					MakeMaterial.parseMeshMaterial();
 				}
 				///end
@@ -483,7 +483,7 @@ class UIMenu {
 						let tabVertical = Config.raw.touch_ui;
 						if (ui.tab(Zui.handle("uimenu_13"), tr("About"), tabVertical)) {
 
-							Data.getImage("badge.k", (img: Image) => {
+							Data.getImage("badge.k", (img: ImageRaw) => {
 								ui.image(img);
 								ui.endElement();
 							});
@@ -568,9 +568,9 @@ class UIMenu {
 
 	static menuFill = (ui: Zui) => {
 		ui.g.color = ui.t.ACCENT_SELECT_COL;
-		ui.g.fillRect(ui._x - 1, ui._y, ui._w + 2, ui.ELEMENT_H() + 1 + 1);
+		Graphics2.fillRect(ui._x - 1, ui._y, ui._w + 2, ui.ELEMENT_H() + 1 + 1);
 		ui.g.color = ui.t.SEPARATOR_COL;
-		ui.g.fillRect(ui._x, ui._y, ui._w, ui.ELEMENT_H() + 1);
+		Graphics2.fillRect(ui._x, ui._y, ui._w, ui.ELEMENT_H() + 1);
 		ui.g.color = 0xffffffff;
 	}
 
@@ -608,17 +608,17 @@ class UIMenu {
 		// Draw top border
 		ui.g.color = ui.t.ACCENT_SELECT_COL;
 		if (Config.raw.touch_ui) {
-			ui.g.fillRect(ui._x + ui._w / 2 + UIMenu.menuCategoryW / 2, ui._y - 1, ui._w / 2 - UIMenu.menuCategoryW / 2 + 1, 1);
-			ui.g.fillRect(ui._x - 1, ui._y - 1, ui._w / 2 - UIMenu.menuCategoryW / 2 + 1, 1);
-			ui.g.fillRect(ui._x + ui._w / 2 - UIMenu.menuCategoryW / 2, ui._y - UIMenu.menuCategoryH, UIMenu.menuCategoryW, 1);
-			ui.g.fillRect(ui._x + ui._w / 2 - UIMenu.menuCategoryW / 2, ui._y - UIMenu.menuCategoryH, 1, UIMenu.menuCategoryH);
-			ui.g.fillRect(ui._x + ui._w / 2 + UIMenu.menuCategoryW / 2, ui._y - UIMenu.menuCategoryH, 1, UIMenu.menuCategoryH);
+			Graphics2.fillRect(ui._x + ui._w / 2 + UIMenu.menuCategoryW / 2, ui._y - 1, ui._w / 2 - UIMenu.menuCategoryW / 2 + 1, 1);
+			Graphics2.fillRect(ui._x - 1, ui._y - 1, ui._w / 2 - UIMenu.menuCategoryW / 2 + 1, 1);
+			Graphics2.fillRect(ui._x + ui._w / 2 - UIMenu.menuCategoryW / 2, ui._y - UIMenu.menuCategoryH, UIMenu.menuCategoryW, 1);
+			Graphics2.fillRect(ui._x + ui._w / 2 - UIMenu.menuCategoryW / 2, ui._y - UIMenu.menuCategoryH, 1, UIMenu.menuCategoryH);
+			Graphics2.fillRect(ui._x + ui._w / 2 + UIMenu.menuCategoryW / 2, ui._y - UIMenu.menuCategoryH, 1, UIMenu.menuCategoryH);
 		}
 		else {
-			ui.g.fillRect(ui._x - 1 + UIMenu.menuCategoryW, ui._y - 1, ui._w + 2 - UIMenu.menuCategoryW, 1);
-			ui.g.fillRect(ui._x - 1, ui._y - UIMenu.menuCategoryH, UIMenu.menuCategoryW, 1);
-			ui.g.fillRect(ui._x - 1, ui._y - UIMenu.menuCategoryH, 1, UIMenu.menuCategoryH);
-			ui.g.fillRect(ui._x - 1 + UIMenu.menuCategoryW, ui._y - UIMenu.menuCategoryH, 1, UIMenu.menuCategoryH);
+			Graphics2.fillRect(ui._x - 1 + UIMenu.menuCategoryW, ui._y - 1, ui._w + 2 - UIMenu.menuCategoryW, 1);
+			Graphics2.fillRect(ui._x - 1, ui._y - UIMenu.menuCategoryH, UIMenu.menuCategoryW, 1);
+			Graphics2.fillRect(ui._x - 1, ui._y - UIMenu.menuCategoryH, 1, UIMenu.menuCategoryH);
+			Graphics2.fillRect(ui._x - 1 + UIMenu.menuCategoryW, ui._y - UIMenu.menuCategoryH, 1, UIMenu.menuCategoryH);
 		}
 		ui.g.color = 0xffffffff;
 	}

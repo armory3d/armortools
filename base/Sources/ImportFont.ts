@@ -10,15 +10,15 @@ class ImportFont {
 				return;
 			}
 		}
-		Data.getFont(path, (font: Font) => {
-			font.init(); // Make sure font_ is ready
+		Data.getFont(path, (font: FontRaw) => {
+			Font.init(font); // Make sure font_ is ready
 			let count = Krom.g2_font_count(font.font_);
 			let fontSlots: SlotFontRaw[] = [];
 			for (let i = 0; i < count; ++i) {
 				let ar = path.split(Path.sep);
 				let name = ar[ar.length - 1];
-				let f = font.clone();
-				f.setFontIndex(i);
+				let f = Font.clone(font);
+				Font.setFontIndex(f, i);
 				let fontSlot = SlotFont.create(name, f, path);
 				fontSlots.push(fontSlot);
 			}

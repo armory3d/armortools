@@ -332,7 +332,7 @@ class UniformsExt {
 		return null;
 	}
 
-	static linkTex = (object: TBaseObject, mat: TMaterialData, link: string): Image => {
+	static linkTex = (object: TBaseObject, mat: TMaterialData, link: string): ImageRaw => {
 		switch (link) {
 			case "_texpaint_undo": {
 				///if (is_paint || is_sculpt)

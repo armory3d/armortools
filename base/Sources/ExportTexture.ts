@@ -153,15 +153,15 @@ class ExportTexture {
 		}
 
 		// Clear export layer
-		Base.expa.g4.begin();
-		Base.expa.g4.clear(color_from_floats(0.0, 0.0, 0.0, 0.0));
-		Base.expa.g4.end();
-		Base.expb.g4.begin();
-		Base.expb.g4.clear(color_from_floats(0.5, 0.5, 1.0, 0.0));
-		Base.expb.g4.end();
-		Base.expc.g4.begin();
-		Base.expc.g4.clear(color_from_floats(1.0, 0.0, 0.0, 0.0));
-		Base.expc.g4.end();
+		Graphics4.begin(Base.expa.g4);
+		Graphics4.clear(color_from_floats(0.0, 0.0, 0.0, 0.0));
+		Graphics4.end();
+		Graphics4.begin(Base.expb.g4);
+		Graphics4.clear(color_from_floats(0.5, 0.5, 1.0, 0.0));
+		Graphics4.end();
+		Graphics4.begin(Base.expc.g4);
+		Graphics4.clear(color_from_floats(1.0, 0.0, 0.0, 0.0));
+		Graphics4.end();
 
 		// Flatten layers
 		for (let l1 of layers) {
@@ -179,8 +179,8 @@ class ExportTexture {
 			if (l1masks != null && !bakeMaterial) {
 				if (l1masks.length > 1) {
 					Base.makeTempMaskImg();
-					Base.tempMaskImage.g2.begin(true, 0x00000000);
-					Base.tempMaskImage.g2.end();
+					Graphics2.begin(Base.tempMaskImage.g2, true, 0x00000000);
+					Graphics2.end(Base.tempMaskImage.g2);
 					let l1: any = { texpaint: Base.tempMaskImage };
 					for (let i = 0; i < l1masks.length; ++i) {
 						Base.mergeLayer(l1, l1masks[i]);
@@ -191,53 +191,53 @@ class ExportTexture {
 			}
 
 			if (l1.paintBase) {
-				Base.tempImage.g2.begin(false); // Copy to temp
+				Graphics2.begin(Base.tempImage.g2, false); // Copy to temp
 				Base.tempImage.g2.pipeline = Base.pipeCopy;
-				Base.tempImage.g2.drawImage(Base.expa, 0, 0);
+				Graphics2.drawImage(Base.expa, 0, 0);
 				Base.tempImage.g2.pipeline = null;
-				Base.tempImage.g2.end();
+				Graphics2.end(Base.tempImage.g2);
 
-				Base.expa.g4.begin();
-				Base.expa.g4.setPipeline(Base.pipeMerge);
-				Base.expa.g4.setTexture(Base.tex0, l1.texpaint);
-				Base.expa.g4.setTexture(Base.tex1, empty);
-				Base.expa.g4.setTexture(Base.texmask, mask);
-				Base.expa.g4.setTexture(Base.texa, Base.tempImage);
-				Base.expa.g4.setFloat(Base.opac, SlotLayer.getOpacity(l1));
-				Base.expa.g4.setInt(Base.blending, layers.length > 1 ? l1.blending : 0);
-				Base.expa.g4.setVertexBuffer(ConstData.screenAlignedVB);
-				Base.expa.g4.setIndexBuffer(ConstData.screenAlignedIB);
-				Base.expa.g4.drawIndexedVertices();
-				Base.expa.g4.end();
+				Graphics4.begin(Base.expa.g4);
+				Graphics4.setPipeline(Base.pipeMerge);
+				Graphics4.setTexture(Base.tex0, l1.texpaint);
+				Graphics4.setTexture(Base.tex1, empty);
+				Graphics4.setTexture(Base.texmask, mask);
+				Graphics4.setTexture(Base.texa, Base.tempImage);
+				Graphics4.setFloat(Base.opac, SlotLayer.getOpacity(l1));
+				Graphics4.setInt(Base.blending, layers.length > 1 ? l1.blending : 0);
+				Graphics4.setVertexBuffer(ConstData.screenAlignedVB);
+				Graphics4.setIndexBuffer(ConstData.screenAlignedIB);
+				Graphics4.drawIndexedVertices();
+				Graphics4.end();
 			}
 
 			if (l1.paintNor) {
-				Base.tempImage.g2.begin(false);
+				Graphics2.begin(Base.tempImage.g2, false);
 				Base.tempImage.g2.pipeline = Base.pipeCopy;
-				Base.tempImage.g2.drawImage(Base.expb, 0, 0);
+				Graphics2.drawImage(Base.expb, 0, 0);
 				Base.tempImage.g2.pipeline = null;
-				Base.tempImage.g2.end();
+				Graphics2.end(Base.tempImage.g2);
 
-				Base.expb.g4.begin();
-				Base.expb.g4.setPipeline(Base.pipeMerge);
-				Base.expb.g4.setTexture(Base.tex0, l1.texpaint);
-				Base.expb.g4.setTexture(Base.tex1, l1.texpaint_nor);
-				Base.expb.g4.setTexture(Base.texmask, mask);
-				Base.expb.g4.setTexture(Base.texa, Base.tempImage);
-				Base.expb.g4.setFloat(Base.opac, SlotLayer.getOpacity(l1));
-				Base.expb.g4.setInt(Base.blending, l1.paintNorBlend ? -2 : -1);
-				Base.expb.g4.setVertexBuffer(ConstData.screenAlignedVB);
-				Base.expb.g4.setIndexBuffer(ConstData.screenAlignedIB);
-				Base.expb.g4.drawIndexedVertices();
-				Base.expb.g4.end();
+				Graphics4.begin(Base.expb.g4);
+				Graphics4.setPipeline(Base.pipeMerge);
+				Graphics4.setTexture(Base.tex0, l1.texpaint);
+				Graphics4.setTexture(Base.tex1, l1.texpaint_nor);
+				Graphics4.setTexture(Base.texmask, mask);
+				Graphics4.setTexture(Base.texa, Base.tempImage);
+				Graphics4.setFloat(Base.opac, SlotLayer.getOpacity(l1));
+				Graphics4.setInt(Base.blending, l1.paintNorBlend ? -2 : -1);
+				Graphics4.setVertexBuffer(ConstData.screenAlignedVB);
+				Graphics4.setIndexBuffer(ConstData.screenAlignedIB);
+				Graphics4.drawIndexedVertices();
+				Graphics4.end();
 			}
 
 			if (l1.paintOcc || l1.paintRough || l1.paintMet || l1.paintHeight) {
-				Base.tempImage.g2.begin(false);
+				Graphics2.begin(Base.tempImage.g2, false);
 				Base.tempImage.g2.pipeline = Base.pipeCopy;
-				Base.tempImage.g2.drawImage(Base.expc, 0, 0);
+				Graphics2.drawImage(Base.expc, 0, 0);
 				Base.tempImage.g2.pipeline = null;
-				Base.tempImage.g2.end();
+				Graphics2.end(Base.tempImage.g2);
 
 				if (l1.paintOcc && l1.paintRough && l1.paintMet && l1.paintHeight) {
 					Base.commandsMergePack(Base.pipeMerge, Base.expc, l1.texpaint, l1.texpaint_pack, SlotLayer.getOpacity(l1), mask, l1.paintHeightBlend ? -3 : -1);
@@ -252,12 +252,12 @@ class ExportTexture {
 
 		///if krom_metal
 		// Flush command list
-		Base.expa.g2.begin(false);
-		Base.expa.g2.end();
-		Base.expb.g2.begin(false);
-		Base.expb.g2.end();
-		Base.expc.g2.begin(false);
-		Base.expc.g2.end();
+		Graphics2.begin(Base.expa.g2, false);
+		Graphics2.end(Base.expa.g2);
+		Graphics2.begin(Base.expb.g2, false);
+		Graphics2.end(Base.expb.g2);
+		Graphics2.begin(Base.expc.g2, false);
+		Graphics2.end(Base.expc.g2);
 		///end
 		///end
 
@@ -281,9 +281,9 @@ class ExportTexture {
 
 		for (let t of preset.textures) {
 			for (let c of t.channels) {
-				if      ((c == "base_r" || c == "base_g" || c == "base_b" || c == "opac") && pixpaint == null) pixpaint = texpaint.getPixels();
-				else if ((c == "nor_r" || c == "nor_g" || c == "nor_g_directx" || c == "nor_b" || c == "emis" || c == "subs") && pixpaint_nor == null) pixpaint_nor = texpaint_nor.getPixels();
-				else if ((c == "occ" || c == "rough" || c == "metal" || c == "height" || c == "smooth") && pixpaint_pack == null) pixpaint_pack = texpaint_pack.getPixels();
+				if      ((c == "base_r" || c == "base_g" || c == "base_b" || c == "opac") && pixpaint == null) pixpaint = Image.getPixels(texpaint);
+				else if ((c == "nor_r" || c == "nor_g" || c == "nor_g_directx" || c == "nor_b" || c == "emis" || c == "subs") && pixpaint_nor == null) pixpaint_nor = Image.getPixels(texpaint_nor);
+				else if ((c == "occ" || c == "rough" || c == "metal" || c == "height" || c == "smooth") && pixpaint_pack == null) pixpaint_pack = Image.getPixels(texpaint_pack);
 			}
 		}
 

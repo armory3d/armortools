@@ -76,13 +76,13 @@ class Context {
 		UIHeader.headerHandle.redraws = 2;
 
 		let current = Graphics2.current;
-		if (current != null) current.end();
+		if (current != null) Graphics2.end(current);
 
 		Base.setObjectMask();
 		MakeMaterial.parseMeshMaterial();
 		MakeMaterial.parsePaintMaterial();
 
-		if (current != null) current.begin(false);
+		if (current != null) Graphics2.begin(current, false);
 
 		UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
 		UIView2D.hwnd.redraws = 2;

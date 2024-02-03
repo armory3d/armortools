@@ -114,11 +114,11 @@ class Translator {
 		Graphics2.fontGlyphs.sort((a: i32, b: i32) => { return a - b; });
 		// Load and assign font with cjk characters
 		App.notifyOnInit(() => {
-			Data.getFont(fontPath, (f: Font) => {
+			Data.getFont(fontPath, (f: FontRaw) => {
 				if (cjk) {
 					let acjkFontIndices = Translator.cjkFontIndices as any;
 					let fontIndex = Translator.cjkFontIndices.has(Config.raw.locale) ? acjkFontIndices[Config.raw.locale] : 0;
-					f.setFontIndex(fontIndex);
+					Font.setFontIndex(f, fontIndex);
 				}
 				Base.font = f;
 				// Scale up the font size and elements width a bit

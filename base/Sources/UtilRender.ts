@@ -6,8 +6,8 @@ class UtilRender {
 	static materialPreviewSize = 256;
 	static decalPreviewSize = 512;
 	static layerPreviewSize = 200;
-	static screenAlignedFullVB: VertexBuffer = null;
-	static screenAlignedFullIB: IndexBuffer = null;
+	static screenAlignedFullVB: VertexBufferRaw = null;
+	static screenAlignedFullIB: IndexBufferRaw = null;
 
 	static makeMaterialPreview = () => {
 		Context.raw.materialPreview = true;
@@ -80,7 +80,7 @@ class UtilRender {
 
 	static makeDecalPreview = () => {
 		let current = Graphics2.current;
-		if (current != null) current.end();
+		if (current != null) Graphics2.end(current);
 
 		if (Context.raw.decalImage == null) {
 			Context.raw.decalImage = Image.createRenderTarget(UtilRender.decalPreviewSize, UtilRender.decalPreviewSize);
@@ -141,22 +141,22 @@ class UtilRender {
 		MakeMaterial.parseMeshMaterial();
 		Context.raw.ddirty = 1; // Refresh depth for decal paint
 
-		if (current != null) current.begin(false);
+		if (current != null) Graphics2.begin(current, false);
 	}
 
 	static makeTextPreview = () => {
 		let current = Graphics2.current;
-		if (current != null) current.end();
+		if (current != null) Graphics2.end(current);
 
 		let text = Context.raw.textToolText;
 		let font = Context.raw.font.font;
 		let fontSize = 200;
-		let textW = Math.floor(font.width(fontSize, text));
-		let textH = Math.floor(font.height(fontSize));
+		let textW = Math.floor(Font.width(font, fontSize, text));
+		let textH = Math.floor(Font.height(font, fontSize));
 		let texW = textW + 32;
 		if (texW < 512) texW = 512;
 		if (Context.raw.textToolImage != null && Context.raw.textToolImage.width < texW) {
-			Context.raw.textToolImage.unload();
+			Image.unload(Context.raw.textToolImage);
 			Context.raw.textToolImage = null;
 		}
 		if (Context.raw.textToolImage == null) {
@@ -167,38 +167,38 @@ class UtilRender {
 			///end
 		}
 		let g2 = Context.raw.textToolImage.g2;
-		g2.begin(true, 0xff000000);
+		Graphics2.begin(g2, true, 0xff000000);
 		g2.font = font;
 		g2.fontSize = fontSize;
 		g2.color = 0xffffffff;
-		g2.drawString(text, texW / 2 - textW / 2, texW / 2 - textH / 2);
-		g2.end();
+		Graphics2.drawString(text, texW / 2 - textW / 2, texW / 2 - textH / 2);
+		Graphics2.end(g2);
 
-		if (current != null) current.begin(false);
+		if (current != null) Graphics2.begin(current, false);
 	}
 
 	static makeFontPreview = () => {
 		let current = Graphics2.current;
-		if (current != null) current.end();
+		if (current != null) Graphics2.end(current);
 
 		let text = "Abg";
 		let font = Context.raw.font.font;
 		let fontSize = 318;
-		let textW = Math.floor(font.width(fontSize, text)) + 8;
-		let textH = Math.floor(font.height(fontSize)) + 8;
+		let textW = Math.floor(Font.width(font, fontSize, text)) + 8;
+		let textH = Math.floor(Font.height(font, fontSize)) + 8;
 		if (Context.raw.font.image == null) {
 			Context.raw.font.image = Image.createRenderTarget(512, 512, TextureFormat.RGBA32);
 		}
 		let g2 = Context.raw.font.image.g2;
-		g2.begin(true, 0x00000000);
+		Graphics2.begin(g2, true, 0x00000000);
 		g2.font = font;
 		g2.fontSize = fontSize;
 		g2.color = 0xffffffff;
-		g2.drawString(text, 512 / 2 - textW / 2, 512 / 2 - textH / 2);
-		g2.end();
+		Graphics2.drawString(text, 512 / 2 - textW / 2, 512 / 2 - textH / 2);
+		Graphics2.end(g2);
 		Context.raw.font.previewReady = true;
 
-		if (current != null) current.begin(false);
+		if (current != null) Graphics2.begin(current, false);
 	}
 
 	static makeBrushPreview = () => {
@@ -206,7 +206,7 @@ class UtilRender {
 		Context.raw.materialPreview = true;
 
 		let current = Graphics2.current;
-		if (current != null) current.end();
+		if (current != null) Graphics2.end(current);
 
 		// Prepare layers
 		if (RenderPathPaint.liveLayer == null) {
@@ -343,11 +343,11 @@ class UtilRender {
 		if (Base.pipeMerge == null) Base.makePipe();
 		l = RenderPathPaint.liveLayer;
 		let target = Context.raw.brush.image;
-		target.g2.begin(true, 0x00000000);
+		Graphics2.begin(target.g2, true, 0x00000000);
 		target.g2.pipeline = Base.pipeCopy;
-		target.g2.drawScaledImage(l.texpaint, 0, 0, target.width, target.height);
+		Graphics2.drawScaledImage(l.texpaint, 0, 0, target.width, target.height);
 		target.g2.pipeline = null;
-		target.g2.end();
+		Graphics2.end(target.g2);
 
 		// Scale image preview down to to icon
 		RenderPath.renderTargets.get("texpreview").image = Context.raw.brush.image;
@@ -359,10 +359,10 @@ class UtilRender {
 		Context.raw.brush.previewReady = true;
 		Context.raw.brushBlendDirty = true;
 
-		if (current != null) current.begin(false);
+		if (current != null) Graphics2.begin(current, false);
 	}
 
-	static makeNodePreview = (canvas: TNodeCanvas, node: TNode, image: Image, group: TNodeCanvas = null, parents: TNode[] = null) => {
+	static makeNodePreview = (canvas: TNodeCanvas, node: TNode, image: ImageRaw, group: TNodeCanvas = null, parents: TNode[] = null) => {
 		let res = MakeMaterial.parseNodePreviewMaterial(node, group, parents);
 		if (res == null || res.scon == null) return;
 
@@ -375,15 +375,15 @@ class UtilRender {
 		Context.raw.paintObject.base.transform.scaleWorld = 3.0;
 		Transform.buildMatrix(Context.raw.paintObject.base.transform);
 
-		g4.begin();
-		g4.setPipeline(res.scon._pipeState);
+		Graphics4.begin(g4);
+		Graphics4.setPipeline(res.scon._pipeState);
 		Uniforms.setContextConstants(g4, res.scon, [""]);
 		Uniforms.setObjectConstants(g4, res.scon, Context.raw.paintObject.base);
 		Uniforms.setMaterialConstants(g4, res.scon, res.mcon);
-		g4.setVertexBuffer(UtilRender.screenAlignedFullVB);
-		g4.setIndexBuffer(UtilRender.screenAlignedFullIB);
-		g4.drawIndexedVertices();
-		g4.end();
+		Graphics4.setVertexBuffer(UtilRender.screenAlignedFullVB);
+		Graphics4.setIndexBuffer(UtilRender.screenAlignedFullIB);
+		Graphics4.drawIndexedVertices();
+		Graphics4.end();
 
 		Context.raw.paintObject.base.transform.scaleWorld = _scaleWorld;
 		Transform.buildMatrix(Context.raw.paintObject.base.transform);
@@ -430,20 +430,20 @@ class UtilRender {
 		let indices = [0, 1, 2];
 
 		// Mandatory vertex data names and sizes
-		let structure = new VertexStructure();
-		structure.add("pos", VertexData.I16_4X_Normalized);
-		structure.add("nor", VertexData.I16_2X_Normalized);
-		structure.add("tex", VertexData.I16_2X_Normalized);
-		structure.add("col", VertexData.I16_4X_Normalized);
-		UtilRender.screenAlignedFullVB = new VertexBuffer(Math.floor(data.length / Math.floor(structure.byteSize() / 4)), structure, Usage.StaticUsage);
-		let vertices = UtilRender.screenAlignedFullVB.lock();
+		let structure = VertexStructure.create();
+		VertexStructure.add(structure, "pos", VertexData.I16_4X_Normalized);
+		VertexStructure.add(structure, "nor", VertexData.I16_2X_Normalized);
+		VertexStructure.add(structure, "tex", VertexData.I16_2X_Normalized);
+		VertexStructure.add(structure, "col", VertexData.I16_4X_Normalized);
+		UtilRender.screenAlignedFullVB = VertexBuffer.create(Math.floor(data.length / Math.floor(VertexStructure.byteSize(structure) / 4)), structure, Usage.StaticUsage);
+		let vertices = VertexBuffer.lock(UtilRender.screenAlignedFullVB);
 		for (let i = 0; i < Math.floor(vertices.byteLength / 2); ++i) vertices.setInt16(i * 2, data[i], true);
-		UtilRender.screenAlignedFullVB.unlock();
+		VertexBuffer.unlock(UtilRender.screenAlignedFullVB);
 
-		UtilRender.screenAlignedFullIB = new IndexBuffer(indices.length, Usage.StaticUsage);
-		let id = UtilRender.screenAlignedFullIB.lock();
+		UtilRender.screenAlignedFullIB = IndexBuffer.create(indices.length, Usage.StaticUsage);
+		let id = IndexBuffer.lock(UtilRender.screenAlignedFullIB);
 		for (let i = 0; i < id.length; ++i) id[i] = indices[i];
-		UtilRender.screenAlignedFullIB.unlock();
+		IndexBuffer.unlock(UtilRender.screenAlignedFullIB);
 	}
 }
 

@@ -1,8 +1,8 @@
 
 class VarianceNode extends LogicNode {
 
-	static temp: Image = null;
-	static image: Image = null;
+	static temp: ImageRaw = null;
+	static image: ImageRaw = null;
 	static inst: VarianceNode = null;
 	static prompt = "";
 
@@ -23,15 +23,15 @@ class VarianceNode extends LogicNode {
 		node.buttons[0].height = VarianceNode.prompt.split("\n").length;
 	}
 
-	override getAsImage = (from: i32, done: (img: Image)=>void) => {
+	override getAsImage = (from: i32, done: (img: ImageRaw)=>void) => {
 		let strength = (VarianceNode.inst.inputs[1].node as any).value;
 
-		VarianceNode.inst.inputs[0].getAsImage((source: Image) => {
-			VarianceNode.temp.g2.begin(false);
-			VarianceNode.temp.g2.drawScaledImage(source, 0, 0, 512, 512);
-			VarianceNode.temp.g2.end();
+		VarianceNode.inst.inputs[0].getAsImage((source: ImageRaw) => {
+			Graphics2.begin(VarianceNode.temp.g2, false);
+			Graphics2.drawScaledImage(source, 0, 0, 512, 512);
+			Graphics2.end(VarianceNode.temp.g2);
 
-			let bytes_img = VarianceNode.temp.getPixels();
+			let bytes_img = Image.getPixels(VarianceNode.temp);
 			let u8a = new Uint8Array(bytes_img);
 			let f32a = new Float32Array(3 * 512 * 512);
 			for (let i = 0; i < (512 * 512); ++i) {
@@ -62,7 +62,7 @@ class VarianceNode extends LogicNode {
 					}
 					let t_start = num_inference_steps - init_timestep;
 
-					TextToPhotoNode.stableDiffusion(VarianceNode.prompt, (_image: Image) => {
+					TextToPhotoNode.stableDiffusion(VarianceNode.prompt, (_image: ImageRaw) => {
 						VarianceNode.image = _image;
 						done(VarianceNode.image);
 					}, latents, t_start);
@@ -71,7 +71,7 @@ class VarianceNode extends LogicNode {
 		});
 	}
 
-	override getCachedImage = (): Image => {
+	override getCachedImage = (): ImageRaw => {
 		return VarianceNode.image;
 	}
 

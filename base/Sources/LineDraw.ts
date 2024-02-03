@@ -6,9 +6,9 @@ class LineDraw {
 	static mat: TMat4 = null;
 	static dim: TVec4 = null;
 
-	static vertexBuffer: VertexBuffer;
-	static indexBuffer: IndexBuffer;
-	static pipeline: PipelineState = null;
+	static vertexBuffer: VertexBufferRaw;
+	static indexBuffer: IndexBufferRaw;
+	static pipeline: PipelineStateRaw = null;
 
 	static vp: TMat4;
 	static vpID: ConstantLocation;
@@ -21,18 +21,18 @@ class LineDraw {
 	static maxIndices = LineDraw.maxLines * 6;
 	static lines = 0;
 
-	static g: Graphics4;
+	static g: Graphics4Raw;
 
-	static render = (g4: Graphics4, matrix: TMat4) => {
+	static render = (g4: Graphics4Raw, matrix: TMat4) => {
 		LineDraw.g = g4;
 		LineDraw.mat = matrix;
 		LineDraw.dim = Mat4.getScale(matrix);
 
 		if (LineDraw.pipeline == null) {
-			let structure = new VertexStructure();
-			structure.add("pos", VertexData.F32_3X);
-			structure.add("col", VertexData.F32_3X);
-			LineDraw.pipeline = new PipelineState();
+			let structure = VertexStructure.create();
+			VertexStructure.add(structure, "pos", VertexData.F32_3X);
+			VertexStructure.add(structure, "col", VertexData.F32_3X);
+			LineDraw.pipeline = PipelineState.create();
 			LineDraw.pipeline.inputLayout = [structure];
 			LineDraw.pipeline.fragmentShader = System.getShader("line.frag");
 			LineDraw.pipeline.vertexShader = System.getShader("line.vert");
@@ -44,11 +44,11 @@ class LineDraw {
 			LineDraw.pipeline.colorAttachments[1] = TextureFormat.RGBA64;
 			LineDraw.pipeline.colorAttachments[2] = TextureFormat.RGBA64;
 			LineDraw.pipeline.depthStencilAttachment = DepthStencilFormat.DepthOnly;
-			LineDraw.pipeline.compile();
-			LineDraw.vpID = LineDraw.pipeline.getConstantLocation("VP");
+			PipelineState.compile(LineDraw.pipeline);
+			LineDraw.vpID = PipelineState.getConstantLocation(LineDraw.pipeline, "VP");
 			LineDraw.vp = Mat4.identity();
-			LineDraw.vertexBuffer = new VertexBuffer(LineDraw.maxVertices, structure, Usage.DynamicUsage);
-			LineDraw.indexBuffer = new IndexBuffer(LineDraw.maxIndices, Usage.DynamicUsage);
+			LineDraw.vertexBuffer = VertexBuffer.create(LineDraw.maxVertices, structure, Usage.DynamicUsage);
+			LineDraw.indexBuffer = IndexBuffer.create(LineDraw.maxIndices, Usage.DynamicUsage);
 		}
 
 		LineDraw.begin();
@@ -170,22 +170,22 @@ class LineDraw {
 
 	static begin = () => {
 		LineDraw.lines = 0;
-		LineDraw.vbData = LineDraw.vertexBuffer.lock();
-		LineDraw.ibData = LineDraw.indexBuffer.lock();
+		LineDraw.vbData = VertexBuffer.lock(LineDraw.vertexBuffer);
+		LineDraw.ibData = IndexBuffer.lock(LineDraw.indexBuffer);
 	}
 
 	static end = () => {
-		LineDraw.vertexBuffer.unlock();
-		LineDraw.indexBuffer.unlock();
+		VertexBuffer.unlock(LineDraw.vertexBuffer);
+		IndexBuffer.unlock(LineDraw.indexBuffer);
 
-		LineDraw.g.setVertexBuffer(LineDraw.vertexBuffer);
-		LineDraw.g.setIndexBuffer(LineDraw.indexBuffer);
-		LineDraw.g.setPipeline(LineDraw.pipeline);
+		Graphics4.setVertexBuffer(LineDraw.vertexBuffer);
+		Graphics4.setIndexBuffer(LineDraw.indexBuffer);
+		Graphics4.setPipeline(LineDraw.pipeline);
 		let camera = Scene.camera;
 		Mat4.setFrom(LineDraw.vp, camera.V);
 		Mat4.multmat(LineDraw.vp, camera.P);
-		LineDraw.g.setMatrix(LineDraw.vpID, LineDraw.vp);
-		LineDraw.g.drawIndexedVertices(0, LineDraw.lines * 6);
+		Graphics4.setMatrix(LineDraw.vpID, LineDraw.vp);
+		Graphics4.drawIndexedVertices(0, LineDraw.lines * 6);
 	}
 
 	static addVbData = (i: i32, data: f32[]) => {

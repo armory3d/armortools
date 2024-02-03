@@ -1,13 +1,13 @@
 
 class TabSwatches {
 
-	static _empty: Image;
+	static _empty: ImageRaw;
 
-	static set empty(image: Image) {
+	static set empty(image: ImageRaw) {
 		TabSwatches._empty = image;
 	}
 
-	static get empty(): Image {
+	static get empty(): ImageRaw {
 		if (TabSwatches._empty == null) {
 			let b = new Uint8Array(4);
 			b[0] = 255;

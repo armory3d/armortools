@@ -1,8 +1,8 @@
 
 class TilingNode extends LogicNode {
 
-	result: Image = null;
-	static image: Image = null;
+	result: ImageRaw = null;
+	static image: ImageRaw = null;
 	static prompt = "";
 	static strength = 0.5;
 	static auto = true;
@@ -28,15 +28,15 @@ class TilingNode extends LogicNode {
 		else node.buttons[1].height = 0;
 	}
 
-	override getAsImage = (from: i32, done: (img: Image)=>void) => {
-		this.inputs[0].getAsImage((source: Image) => {
-			TilingNode.image.g2.begin(false);
-			TilingNode.image.g2.drawScaledImage(source, 0, 0, Config.getTextureResX(), Config.getTextureResY());
-			TilingNode.image.g2.end();
+	override getAsImage = (from: i32, done: (img: ImageRaw)=>void) => {
+		this.inputs[0].getAsImage((source: ImageRaw) => {
+			Graphics2.begin(TilingNode.image.g2, false);
+			Graphics2.drawScaledImage(source, 0, 0, Config.getTextureResX(), Config.getTextureResY());
+			Graphics2.end(TilingNode.image.g2);
 
 			Console.progress(tr("Processing") + " - " + tr("Tiling"));
 			Base.notifyOnNextFrame(() => {
-				let _done = (image: Image) => {
+				let _done = (image: ImageRaw) => {
 					this.result = image;
 					done(image);
 				}
@@ -45,19 +45,19 @@ class TilingNode extends LogicNode {
 		});
 	}
 
-	override getCachedImage = (): Image => {
+	override getCachedImage = (): ImageRaw => {
 		return this.result;
 	}
 
-	static sdTiling = (image: Image, seed: i32/* = -1*/, done: (img: Image)=>void) => {
+	static sdTiling = (image: ImageRaw, seed: i32/* = -1*/, done: (img: ImageRaw)=>void) => {
 		TextToPhotoNode.tiling = false;
 		let tile = Image.createRenderTarget(512, 512);
-		tile.g2.begin(false);
-		tile.g2.drawScaledImage(image, -256, -256, 512, 512);
-		tile.g2.drawScaledImage(image, 256, -256, 512, 512);
-		tile.g2.drawScaledImage(image, -256, 256, 512, 512);
-		tile.g2.drawScaledImage(image, 256, 256, 512, 512);
-		tile.g2.end();
+		Graphics2.begin(tile.g2, false);
+		Graphics2.drawScaledImage(image, -256, -256, 512, 512);
+		Graphics2.drawScaledImage(image, 256, -256, 512, 512);
+		Graphics2.drawScaledImage(image, -256, 256, 512, 512);
+		Graphics2.drawScaledImage(image, 256, 256, 512, 512);
+		Graphics2.end(tile.g2);
 
 		let u8a = new Uint8Array(512 * 512);
 		for (let i = 0; i < 512 * 512; ++i) {

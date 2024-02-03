@@ -13,19 +13,19 @@ class RenderPathPaint {
 	static mergedObjectVisible = false;
 	static savedFov = 0.0;
 	static baking = false;
-	static _texpaint: RenderTarget;
-	static _texpaint_nor: RenderTarget;
-	static _texpaint_pack: RenderTarget;
-	static _texpaint_undo: RenderTarget;
-	static _texpaint_nor_undo: RenderTarget;
-	static _texpaint_pack_undo: RenderTarget;
+	static _texpaint: RenderTargetRaw;
+	static _texpaint_nor: RenderTargetRaw;
+	static _texpaint_pack: RenderTargetRaw;
+	static _texpaint_undo: RenderTargetRaw;
+	static _texpaint_nor_undo: RenderTargetRaw;
+	static _texpaint_pack_undo: RenderTargetRaw;
 	static lastX = -1.0;
 	static lastY = -1.0;
 
 	static init = () => {
 
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "texpaint_blend0";
 			t.width = Config.getTextureResX();
 			t.height = Config.getTextureResY();
@@ -33,7 +33,7 @@ class RenderPathPaint {
 			RenderPath.createRenderTarget(t);
 		}
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "texpaint_blend1";
 			t.width = Config.getTextureResX();
 			t.height = Config.getTextureResY();
@@ -41,7 +41,7 @@ class RenderPathPaint {
 			RenderPath.createRenderTarget(t);
 		}
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "texpaint_colorid";
 			t.width = 1;
 			t.height = 1;
@@ -49,7 +49,7 @@ class RenderPathPaint {
 			RenderPath.createRenderTarget(t);
 		}
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "texpaint_picker";
 			t.width = 1;
 			t.height = 1;
@@ -57,7 +57,7 @@ class RenderPathPaint {
 			RenderPath.createRenderTarget(t);
 		}
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "texpaint_nor_picker";
 			t.width = 1;
 			t.height = 1;
@@ -65,7 +65,7 @@ class RenderPathPaint {
 			RenderPath.createRenderTarget(t);
 		}
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "texpaint_pack_picker";
 			t.width = 1;
 			t.height = 1;
@@ -73,7 +73,7 @@ class RenderPathPaint {
 			RenderPath.createRenderTarget(t);
 		}
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "texpaint_uv_picker";
 			t.width = 1;
 			t.height = 1;
@@ -81,7 +81,7 @@ class RenderPathPaint {
 			RenderPath.createRenderTarget(t);
 		}
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "texpaint_posnortex_picker0";
 			t.width = 1;
 			t.height = 1;
@@ -89,7 +89,7 @@ class RenderPathPaint {
 			RenderPath.createRenderTarget(t);
 		}
 		{
-			let t = new RenderTargetRaw();
+			let t = RenderTarget.create();
 			t.name = "texpaint_posnortex_picker1";
 			t.width = 1;
 			t.height = 1;
@@ -153,8 +153,8 @@ class RenderPathPaint {
 					RenderPath.drawMeshes("paint");
 					let texpaint_posnortex_picker0 = RenderPath.renderTargets.get("texpaint_posnortex_picker0").image;
 					let texpaint_posnortex_picker1 = RenderPath.renderTargets.get("texpaint_posnortex_picker1").image;
-					let a = new DataView(texpaint_posnortex_picker0.getPixels());
-					let b = new DataView(texpaint_posnortex_picker1.getPixels());
+					let a = new DataView(Image.getPixels(texpaint_posnortex_picker0));
+					let b = new DataView(Image.getPixels(texpaint_posnortex_picker1));
 					Context.raw.posXPicked = a.getFloat32(0, true);
 					Context.raw.posYPicked = a.getFloat32(4, true);
 					Context.raw.posZPicked = a.getFloat32(8, true);
@@ -182,10 +182,10 @@ class RenderPathPaint {
 					let texpaint_nor_picker = RenderPath.renderTargets.get("texpaint_nor_picker").image;
 					let texpaint_pack_picker = RenderPath.renderTargets.get("texpaint_pack_picker").image;
 					let texpaint_uv_picker = RenderPath.renderTargets.get("texpaint_uv_picker").image;
-					let a = new DataView(texpaint_picker.getPixels());
-					let b = new DataView(texpaint_nor_picker.getPixels());
-					let c = new DataView(texpaint_pack_picker.getPixels());
-					let d = new DataView(texpaint_uv_picker.getPixels());
+					let a = new DataView(Image.getPixels(texpaint_picker));
+					let b = new DataView(Image.getPixels(texpaint_nor_picker));
+					let c = new DataView(Image.getPixels(texpaint_pack_picker));
+					let d = new DataView(Image.getPixels(texpaint_uv_picker));
 
 					if (Context.raw.colorPickerCallback != null) {
 						Context.raw.colorPickerCallback(Context.raw.pickedColor);
@@ -299,7 +299,7 @@ class RenderPathPaint {
 
 				if (Context.raw.tool == WorkspaceTool.ToolBake && Context.raw.bakeType == BakeType.BakeCurvature && Context.raw.bakeCurvSmooth > 0) {
 					if (RenderPath.renderTargets.get("texpaint_blur") == null) {
-						let t = new RenderTargetRaw();
+						let t = RenderTarget.create();
 						t.name = "texpaint_blur";
 						t.width = Math.floor(Config.getTextureResX() * 0.95);
 						t.height = Math.floor(Config.getTextureResY() * 0.95);
@@ -352,13 +352,13 @@ class RenderPathPaint {
 
 			let cc_context = shaderContexts[0];
 			if (ConstData.screenAlignedVB == null) ConstData.createScreenAlignedData();
-			RenderPath.currentG.setPipeline(cc_context._pipeState);
+			Graphics4.setPipeline(cc_context._pipeState);
 			Uniforms.setContextConstants(RenderPath.currentG, cc_context, RenderPath.bindParams);
 			Uniforms.setObjectConstants(RenderPath.currentG, cc_context, Project.paintObjects[0].base);
 			Uniforms.setMaterialConstants(RenderPath.currentG, cc_context, materialContexts[0]);
-			RenderPath.currentG.setVertexBuffer(ConstData.screenAlignedVB);
-			RenderPath.currentG.setIndexBuffer(ConstData.screenAlignedIB);
-			RenderPath.currentG.drawIndexedVertices();
+			Graphics4.setVertexBuffer(ConstData.screenAlignedVB);
+			Graphics4.setIndexBuffer(ConstData.screenAlignedIB);
+			Graphics4.drawIndexedVertices();
 			RenderPath.end();
 			///end
 		}
@@ -502,32 +502,32 @@ class RenderPathPaint {
 		if (Base.pipeCursor == null) Base.makeCursorPipe();
 
 		RenderPath.setTarget("");
-		g.setPipeline(Base.pipeCursor);
+		Graphics4.setPipeline(Base.pipeCursor);
 		let decal = Context.raw.tool == WorkspaceTool.ToolDecal || Context.raw.tool == WorkspaceTool.ToolText;
 		let decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutType.ShortcutDown);
 		let img = (decal && !decalMask) ? Context.raw.decalImage : Res.get("cursor.k");
-		g.setTexture(Base.cursorTex, img);
+		Graphics4.setTexture(Base.cursorTex, img);
 		let gbuffer0 = RenderPath.renderTargets.get("gbuffer0").image;
-		g.setTextureDepth(Base.cursorGbufferD, gbuffer0);
-		g.setFloat2(Base.cursorMouse, mx, my);
-		g.setFloat2(Base.cursorTexStep, 1 / gbuffer0.width, 1 / gbuffer0.height);
-		g.setFloat(Base.cursorRadius, radius);
+		Graphics4.setTextureDepth(Base.cursorGbufferD, gbuffer0);
+		Graphics4.setFloat2(Base.cursorMouse, mx, my);
+		Graphics4.setFloat2(Base.cursorTexStep, 1 / gbuffer0.width, 1 / gbuffer0.height);
+		Graphics4.setFloat(Base.cursorRadius, radius);
 		let right = Vec4.normalize(CameraObject.rightWorld(Scene.camera));
-		g.setFloat3(Base.cursorCameraRight, right.x, right.y, right.z);
-		g.setFloat3(Base.cursorTint, tintR, tintG, tintB);
-		g.setMatrix(Base.cursorVP, Scene.camera.VP);
+		Graphics4.setFloat3(Base.cursorCameraRight, right.x, right.y, right.z);
+		Graphics4.setFloat3(Base.cursorTint, tintR, tintG, tintB);
+		Graphics4.setMatrix(Base.cursorVP, Scene.camera.VP);
 		let helpMat = Mat4.identity();
 		Mat4.getInverse(helpMat, Scene.camera.VP);
-		g.setMatrix(Base.cursorInvVP, helpMat);
+		Graphics4.setMatrix(Base.cursorInvVP, helpMat);
 		///if (krom_metal || krom_vulkan)
-		g.setVertexBuffer(MeshData.get(geom, [{name: "tex", data: "short2norm"}]));
+		Graphics4.setVertexBuffer(MeshData.get(geom, [{name: "tex", data: "short2norm"}]));
 		///else
-		g.setVertexBuffer(geom._vertexBuffer);
+		Graphics4.setVertexBuffer(geom._vertexBuffer);
 		///end
-		g.setIndexBuffer(geom._indexBuffers[0]);
-		g.drawIndexedVertices();
+		Graphics4.setIndexBuffer(geom._indexBuffers[0]);
+		Graphics4.drawIndexedVertices();
 
-		g.disableScissor();
+		Graphics4.disableScissor();
 		RenderPath.end();
 	}
 

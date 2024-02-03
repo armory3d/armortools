@@ -3,11 +3,11 @@ declare let Krom_texsynth: any;
 
 class InpaintNode extends LogicNode {
 
-	static image: Image = null;
-	static mask: Image = null;
-	static result: Image = null;
+	static image: ImageRaw = null;
+	static mask: ImageRaw = null;
+	static result: ImageRaw = null;
 
-	static temp: Image = null;
+	static temp: ImageRaw = null;
 	static prompt = "";
 	static strength = 0.5;
 	static auto = true;
@@ -25,9 +25,9 @@ class InpaintNode extends LogicNode {
 		if (InpaintNode.mask == null) {
 			InpaintNode.mask = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8);
 			Base.notifyOnNextFrame(() => {
-				InpaintNode.mask.g4.begin();
-				InpaintNode.mask.g4.clear(color_from_floats(1.0, 1.0, 1.0, 1.0));
-				InpaintNode.mask.g4.end();
+				Graphics4.begin(InpaintNode.mask.g4);
+				Graphics4.clear(color_from_floats(1.0, 1.0, 1.0, 1.0));
+				Graphics4.end();
 			});
 		}
 
@@ -50,48 +50,48 @@ class InpaintNode extends LogicNode {
 		else node.buttons[1].height = 0;
 	}
 
-	override getAsImage = (from: i32, done: (img: Image)=>void) => {
-		this.inputs[0].getAsImage((source: Image) => {
+	override getAsImage = (from: i32, done: (img: ImageRaw)=>void) => {
+		this.inputs[0].getAsImage((source: ImageRaw) => {
 
 			Console.progress(tr("Processing") + " - " + tr("Inpaint"));
 			Base.notifyOnNextFrame(() => {
-				InpaintNode.image.g2.begin(false);
-				InpaintNode.image.g2.drawScaledImage(source, 0, 0, Config.getTextureResX(), Config.getTextureResY());
-				InpaintNode.image.g2.end();
+				Graphics2.begin(InpaintNode.image.g2, false);
+				Graphics2.drawScaledImage(source, 0, 0, Config.getTextureResX(), Config.getTextureResY());
+				Graphics2.end(InpaintNode.image.g2);
 
 				InpaintNode.auto ? InpaintNode.texsynthInpaint(InpaintNode.image, false, InpaintNode.mask, done) : InpaintNode.sdInpaint(InpaintNode.image, InpaintNode.mask, done);
 			});
 		});
 	}
 
-	override getCachedImage = (): Image => {
+	override getCachedImage = (): ImageRaw => {
 		Base.notifyOnNextFrame(() => {
-			this.inputs[0].getAsImage((source: Image) => {
+			this.inputs[0].getAsImage((source: ImageRaw) => {
 				if (Base.pipeCopy == null) Base.makePipe();
 				if (ConstData.screenAlignedVB == null) ConstData.createScreenAlignedData();
-				InpaintNode.image.g4.begin();
-				InpaintNode.image.g4.setPipeline(Base.pipeInpaintPreview);
-				InpaintNode.image.g4.setTexture(Base.tex0InpaintPreview, source);
-				InpaintNode.image.g4.setTexture(Base.texaInpaintPreview, InpaintNode.mask);
-				InpaintNode.image.g4.setVertexBuffer(ConstData.screenAlignedVB);
-				InpaintNode.image.g4.setIndexBuffer(ConstData.screenAlignedIB);
-				InpaintNode.image.g4.drawIndexedVertices();
-				InpaintNode.image.g4.end();
+				Graphics4.begin(InpaintNode.image.g4);
+				Graphics4.setPipeline(Base.pipeInpaintPreview);
+				Graphics4.setTexture(Base.tex0InpaintPreview, source);
+				Graphics4.setTexture(Base.texaInpaintPreview, InpaintNode.mask);
+				Graphics4.setVertexBuffer(ConstData.screenAlignedVB);
+				Graphics4.setIndexBuffer(ConstData.screenAlignedIB);
+				Graphics4.drawIndexedVertices();
+				Graphics4.end();
 			});
 		});
 		return InpaintNode.image;
 	}
 
-	getTarget = (): Image => {
+	getTarget = (): ImageRaw => {
 		return InpaintNode.mask;
 	}
 
-	static texsynthInpaint = (image: Image, tiling: bool, mask: Image/* = null*/, done: (img: Image)=>void) => {
+	static texsynthInpaint = (image: ImageRaw, tiling: bool, mask: ImageRaw/* = null*/, done: (img: ImageRaw)=>void) => {
 		let w = Config.getTextureResX();
 		let h = Config.getTextureResY();
 
-		let bytes_img = image.getPixels();
-		let bytes_mask = mask != null ? mask.getPixels() : new ArrayBuffer(w * h);
+		let bytes_img = Image.getPixels(image);
+		let bytes_mask = mask != null ? Image.getPixels(mask) : new ArrayBuffer(w * h);
 		let bytes_out = new ArrayBuffer(w * h * 4);
 		Krom_texsynth.inpaint(w, h, bytes_out, bytes_img, bytes_mask, tiling);
 
@@ -99,10 +99,10 @@ class InpaintNode extends LogicNode {
 		done(InpaintNode.result);
 	}
 
-	static sdInpaint = (image: Image, mask: Image, done: (img: Image)=>void) => {
+	static sdInpaint = (image: ImageRaw, mask: ImageRaw, done: (img: ImageRaw)=>void) => {
 		InpaintNode.init();
 
-		let bytes_img = mask.getPixels();
+		let bytes_img = Image.getPixels(mask);
 		let u8 = new Uint8Array(bytes_img);
 		let f32mask = new Float32Array(4 * 64 * 64);
 
@@ -127,12 +127,12 @@ class InpaintNode extends LogicNode {
 						}
 					}
 
-					InpaintNode.temp.g2.begin(false);
-					// InpaintNode.temp.g2.drawImage(image, -x * 512, -y * 512);
-					InpaintNode.temp.g2.drawScaledImage(image, 0, 0, 512, 512);
-					InpaintNode.temp.g2.end();
+					Graphics2.begin(InpaintNode.temp.g2, false);
+					// Graphics2.drawImage(image, -x * 512, -y * 512);
+					Graphics2.drawScaledImage(image, 0, 0, 512, 512);
+					Graphics2.end(InpaintNode.temp.g2);
 
-					let bytes_img = InpaintNode.temp.getPixels();
+					let bytes_img = Image.getPixels(InpaintNode.temp);
 					let u8a = new Uint8Array(bytes_img);
 					let f32a = new Float32Array(3 * 512 * 512);
 					for (let i = 0; i < (512 * 512); ++i) {
@@ -163,7 +163,7 @@ class InpaintNode extends LogicNode {
 
 					let start = num_inference_steps - init_timestep;
 
-					TextToPhotoNode.stableDiffusion(InpaintNode.prompt, (img: Image) => {
+					TextToPhotoNode.stableDiffusion(InpaintNode.prompt, (img: ImageRaw) => {
 						// result.g2.begin(false);
 						// result.g2.drawImage(img, x * 512, y * 512);
 						// result.g2.end();

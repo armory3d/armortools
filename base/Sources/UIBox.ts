@@ -17,7 +17,7 @@ class UIBox {
 	static tweenAlpha = 0.0;
 	///end
 
-	static render = (g: Graphics2) => {
+	static render = (g: Graphics2Raw) => {
 		if (!UIMenu.show) {
 			let ui = Base.uiBox;
 			let inUse = ui.comboSelectedHandle_ptr != null;
@@ -45,10 +45,10 @@ class UIBox {
 			///else
 			g.color = color_from_floats(0, 0, 0, 0.5);
 			///end
-			g.fillRect(0, 0, System.width, System.height);
+			Graphics2.fillRect(0, 0, System.width, System.height);
 		}
 
-		g.end();
+		Graphics2.end(g);
 
 		let ui = Base.uiBox;
 		let appw = System.width;
@@ -105,7 +105,7 @@ class UIBox {
 			ui.end();
 		}
 
-		g.begin(false);
+		Graphics2.begin(g, false);
 
 		UIBox.draws++;
 	}
@@ -176,12 +176,12 @@ class UIBox {
 	static windowBorder = (ui: Zui) => {
 		if (ui.scissor) {
 			ui.scissor = false;
-			ui.g.disableScissor();
+			Graphics2.disableScissor(ui.g);
 		}
 		// Border
 		ui.g.color = ui.t.SEPARATOR_COL;
-		ui.g.fillRect(0, 0, 1, ui._windowH);
-		ui.g.fillRect(0 + ui._windowW - 1, 0, 1, ui._windowH);
-		ui.g.fillRect(0, 0 + ui._windowH - 1, ui._windowW, 1);
+		Graphics2.fillRect(0, 0, 1, ui._windowH);
+		Graphics2.fillRect(0 + ui._windowW - 1, 0, 1, ui._windowH);
+		Graphics2.fillRect(0, 0 + ui._windowH - 1, ui._windowW, 1);
 	}
 }

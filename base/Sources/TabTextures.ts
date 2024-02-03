@@ -120,17 +120,17 @@ class TabTextures {
 											///end
 
 											let target = Image.createRenderTarget(TabTextures.to_pow2(img.width), TabTextures.to_pow2(img.height));
-											target.g2.begin(false);
+											Graphics2.begin(target.g2, false);
 											target.g2.pipeline = Base.pipeCopy;
-											target.g2.drawScaledImage(img, 0, 0, target.width, target.height);
+											Graphics2.drawScaledImage(img, 0, 0, target.width, target.height);
 											target.g2.pipeline = null;
-											target.g2.end();
+											Graphics2.end(target.g2);
 											Base.notifyOnNextFrame(() => {
 												let f = UIFiles.filename;
 												if (f == "") f = tr("untitled");
 												if (!f.endsWith(".png")) f += ".png";
-												Krom.writePng(path + Path.sep + f, target.getPixels(), target.width, target.height, 0);
-												target.unload();
+												Krom.writePng(path + Path.sep + f, Image.getPixels(target), target.width, target.height, 0);
+												Image.unload(target);
 											});
 										});
 									});

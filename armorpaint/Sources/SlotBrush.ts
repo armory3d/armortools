@@ -2,8 +2,8 @@
 class SlotBrushRaw {
 	nodes = new Nodes();
 	canvas: TNodeCanvas;
-	image: Image = null; // 200px
-	imageIcon: Image = null; // 50px
+	image: ImageRaw = null; // 200px
+	imageIcon: ImageRaw = null; // 50px
 	previewReady = false;
 	id = 0;
 }

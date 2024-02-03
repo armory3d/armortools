@@ -129,11 +129,11 @@ class ImportMesh {
 					}
 					let imgmesh = Image.fromBytes(f32.buffer, Config.getTextureResX(), Config.getTextureResY(), TextureFormat.RGBA128);
 					let texpaint = Project.layers[0].texpaint;
-					texpaint.g2.begin(false);
+					Graphics2.begin(texpaint.g2, false);
 					texpaint.g2.pipeline = Base.pipeCopy128;
-					texpaint.g2.drawScaledImage(imgmesh, 0, 0, Config.getTextureResX(), Config.getTextureResY());
+					Graphics2.drawScaledImage(imgmesh, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 					texpaint.g2.pipeline = null;
-					texpaint.g2.end();
+					Graphics2.end(texpaint.g2);
 				});
 			});
 		}

@@ -62,7 +62,7 @@ class ExportArm {
 				name: l.name,
 				res: l.texpaint != null ? l.texpaint.width : Project.layers[0].texpaint.width,
 				bpp: bpp,
-				texpaint: l.texpaint != null ? Lz4.encode(l.texpaint.getPixels()) : null,
+				texpaint: l.texpaint != null ? Lz4.encode(Image.getPixels(l.texpaint)) : null,
 				uv_scale: l.scale,
 				uv_rot: l.angle,
 				uv_type: l.uvType,
@@ -74,8 +74,8 @@ class ExportArm {
 				parent: l.parent != null ? Project.layers.indexOf(l.parent) : -1,
 				visible: l.visible,
 				///if is_paint
-				texpaint_nor: l.texpaint_nor != null ? Lz4.encode(l.texpaint_nor.getPixels()) : null,
-				texpaint_pack: l.texpaint_pack != null ? Lz4.encode(l.texpaint_pack.getPixels()) : null,
+				texpaint_nor: l.texpaint_nor != null ? Lz4.encode(Image.getPixels(l.texpaint_nor)) : null,
+				texpaint_pack: l.texpaint_pack != null ? Lz4.encode(Image.getPixels(l.texpaint_pack)) : null,
 				paint_base: l.paintBase,
 				paint_opac: l.paintOpac,
 				paint_occ: l.paintOcc,
@@ -153,7 +153,7 @@ class ExportArm {
 		mesh_icon.g2.begin(false);
 		mesh_icon.g2.end();
 		///end
-		let mesh_icon_pixels = mesh_icon.getPixels();
+		let mesh_icon_pixels = Image.getPixels(mesh_icon);
 		let u8a = new Uint8Array(mesh_icon_pixels);
 		for (let i = 0; i < 256 * 256 * 4; ++i) {
 			u8a[i] = Math.floor(Math.pow(u8a[i] / 255, 1.0 / 2.2) * 255);
@@ -162,7 +162,7 @@ class ExportArm {
 		ExportArm.bgraSwap(mesh_icon_pixels);
 		///end
 		Base.notifyOnNextFrame(() => {
-			mesh_icon.unload();
+			Image.unload(mesh_icon);
 		});
 		// Project.raw.mesh_icons =
 		// 	///if (krom_metal || krom_vulkan)
@@ -253,18 +253,18 @@ class ExportArm {
 			material_groups: mgroups,
 			material_icons: isCloud ? null :
 				///if (krom_metal || krom_vulkan)
-				[Lz4.encode(ExportArm.bgraSwap(m.image.getPixels()))],
+				[Lz4.encode(ExportArm.bgraSwap(Image.getPixels(m.image)))],
 				///else
-				[Lz4.encode(m.image.getPixels())],
+				[Lz4.encode(Image.getPixels(m.image))],
 				///end
 			assets: texture_files,
 			packed_assets: packed_assets
 		};
 
 		if (Context.raw.writeIconOnExport) { // Separate icon files
-			Krom.writePng(path.substr(0, path.length - 4) + "_icon.png", m.image.getPixels(), m.image.width, m.image.height, 0);
+			Krom.writePng(path.substr(0, path.length - 4) + "_icon.png", Image.getPixels(m.image), m.image.width, m.image.height, 0);
 			if (isCloud) {
-				Krom.writeJpg(path.substr(0, path.length - 4) + "_icon.jpg", m.image.getPixels(), m.image.width, m.image.height, 0, 50);
+				Krom.writeJpg(path.substr(0, path.length - 4) + "_icon.jpg", Image.getPixels(m.image), m.image.width, m.image.height, 0, 50);
 			}
 		}
 
@@ -312,16 +312,16 @@ class ExportArm {
 			brush_nodes: bnodes,
 			brush_icons: isCloud ? null :
 			///if (krom_metal || krom_vulkan)
-			[Lz4.encode(ExportArm.bgraSwap(b.image.getPixels()))],
+			[Lz4.encode(ExportArm.bgraSwap(Image.getPixels(b.image)))],
 			///else
-			[Lz4.encode(b.image.getPixels())],
+			[Lz4.encode(Image.getPixels(b.image))],
 			///end
 			assets: texture_files,
 			packed_assets: packed_assets
 		};
 
 		if (Context.raw.writeIconOnExport) { // Separate icon file
-			Krom.writePng(path.substr(0, path.length - 4) + "_icon.png", b.image.getPixels(), b.image.width, b.image.height, 0);
+			Krom.writePng(path.substr(0, path.length - 4) + "_icon.png", Image.getPixels(b.image), b.image.width, b.image.height, 0);
 		}
 
 		if (Context.raw.packAssetsOnExport) { // Pack textures
@@ -422,25 +422,25 @@ class ExportArm {
 		if (raw.packed_assets == null) {
 			raw.packed_assets = [];
 		}
-		let tempImages: Image[] = [];
+		let tempImages: ImageRaw[] = [];
 		for (let i = 0; i < assets.length; ++i) {
 			if (!Project.packedAssetExists(raw.packed_assets, assets[i].file)) {
 				let image = Project.getImage(assets[i]);
 				let temp = Image.createRenderTarget(image.width, image.height);
-				temp.g2.begin(false);
-				temp.g2.drawImage(image, 0, 0);
-				temp.g2.end();
+				Graphics2.begin(temp.g2, false);
+				Graphics2.drawImage(image, 0, 0);
+				Graphics2.end(temp.g2);
 				tempImages.push(temp);
 				raw.packed_assets.push({
 					name: assets[i].file,
 					bytes: assets[i].file.endsWith(".jpg") ?
-						Krom.encodeJpg(temp.getPixels(), temp.width, temp.height, 0, 80) :
-						Krom.encodePng(temp.getPixels(), temp.width, temp.height, 0)
+						Krom.encodeJpg(Image.getPixels(temp), temp.width, temp.height, 0, 80) :
+						Krom.encodePng(Image.getPixels(temp), temp.width, temp.height, 0)
 				});
 			}
 		}
 		Base.notifyOnNextFrame(() => {
-			for (let image of tempImages) image.unload();
+			for (let image of tempImages) Image.unload(image);
 		});
 	}
 

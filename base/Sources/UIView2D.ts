@@ -2,7 +2,7 @@
 class UIView2D {
 
 	///if (is_paint || is_sculpt)
-	static pipe: PipelineState;
+	static pipe: PipelineStateRaw;
 	static channelLocation: ConstantLocation;
 	static textInputHover = false;
 	static uvmapShow = false;
@@ -31,19 +31,19 @@ class UIView2D {
 
 	constructor() {
 		///if (is_paint || is_sculpt)
-		UIView2D.pipe = new PipelineState();
+		UIView2D.pipe = PipelineState.create();
 		UIView2D.pipe.vertexShader = System.getShader("layer_view.vert");
 		UIView2D.pipe.fragmentShader = System.getShader("layer_view.frag");
-		let vs = new VertexStructure();
-		vs.add("pos", VertexData.F32_3X);
-		vs.add("tex", VertexData.F32_2X);
-		vs.add("col", VertexData.U8_4X_Normalized);
+		let vs = VertexStructure.create();
+		VertexStructure.add(vs, "pos", VertexData.F32_3X);
+		VertexStructure.add(vs, "tex", VertexData.F32_2X);
+		VertexStructure.add(vs, "col", VertexData.U8_4X_Normalized);
 		UIView2D.pipe.inputLayout = [vs];
 		UIView2D.pipe.blendSource = BlendingFactor.BlendOne;
 		UIView2D.pipe.blendDestination = BlendingFactor.BlendZero;
 		UIView2D.pipe.colorWriteMasksAlpha[0] = false;
-		UIView2D.pipe.compile();
-		UIView2D.channelLocation = UIView2D.pipe.getConstantLocation("channel");
+		PipelineState.compile(UIView2D.pipe);
+		UIView2D.channelLocation = PipelineState.getConstantLocation(UIView2D.pipe, "channel");
 		///end
 
 		let scale = Config.raw.window_scale;
@@ -51,7 +51,7 @@ class UIView2D {
 		UIView2D.ui.scrollEnabled = false;
 	}
 
-	static render = (g: Graphics2) => {
+	static render = (g: Graphics2Raw) => {
 
 		UIView2D.ww = Config.raw.layout[LayoutSize.LayoutNodesW];
 
@@ -75,7 +75,7 @@ class UIView2D {
 
 		if (Context.raw.pdirty >= 0) UIView2D.hwnd.redraws = 2; // Paint was active
 
-		g.end();
+		Graphics2.end(g);
 
 		// Cache grid
 		if (UINodes.grid == null) UINodes.drawGrid();
@@ -107,10 +107,10 @@ class UIView2D {
 
 			// Grid
 			UIView2D.ui.g.color = 0xffffffff;
-			UIView2D.ui.g.drawImage(UINodes.grid, (UIView2D.panX * UIView2D.panScale) % 100 - 100, (UIView2D.panY * UIView2D.panScale) % 100 - 100);
+			Graphics2.drawImage(UINodes.grid, (UIView2D.panX * UIView2D.panScale) % 100 - 100, (UIView2D.panY * UIView2D.panScale) % 100 - 100);
 
 			// Texture
-			let tex: Image = null;
+			let tex: ImageRaw = null;
 
 			///if (is_paint || is_sculpt)
 			let l = Context.raw.layer;
@@ -152,15 +152,15 @@ class UIView2D {
 
 				if (UIView2D.layerMode == View2DLayerMode.View2DVisible) {
 					let current = Graphics2.current;
-					if (current != null) current.end();
+					if (current != null) Graphics2.end(current);
 					layer = Base.flatten();
-					if (current != null) current.begin(false);
+					if (current != null) Graphics2.begin(current, false);
 				}
 				else if (SlotLayer.isGroup(layer)) {
 					let current = Graphics2.current;
-					if (current != null) current.end();
+					if (current != null) Graphics2.end(current);
 					layer = Base.flatten(false, SlotLayer.getChildren(layer));
-					if (current != null) current.begin(false);
+					if (current != null) Graphics2.begin(current, false);
 				}
 
 				tex =
@@ -205,17 +205,17 @@ class UIView2D {
 				}
 				///end
 
-				UIView2D.ui.g.drawScaledImage(tex, tx, ty, tw, th);
+				Graphics2.drawScaledImage(tex, tx, ty, tw, th);
 
 				if (UIView2D.tiledShow) {
-					UIView2D.ui.g.drawScaledImage(tex, tx - tw, ty, tw, th);
-					UIView2D.ui.g.drawScaledImage(tex, tx - tw, ty - th, tw, th);
-					UIView2D.ui.g.drawScaledImage(tex, tx - tw, ty + th, tw, th);
-					UIView2D.ui.g.drawScaledImage(tex, tx + tw, ty, tw, th);
-					UIView2D.ui.g.drawScaledImage(tex, tx + tw, ty - th, tw, th);
-					UIView2D.ui.g.drawScaledImage(tex, tx + tw, ty + th, tw, th);
-					UIView2D.ui.g.drawScaledImage(tex, tx, ty - th, tw, th);
-					UIView2D.ui.g.drawScaledImage(tex, tx, ty + th, tw, th);
+					Graphics2.drawScaledImage(tex, tx - tw, ty, tw, th);
+					Graphics2.drawScaledImage(tex, tx - tw, ty - th, tw, th);
+					Graphics2.drawScaledImage(tex, tx - tw, ty + th, tw, th);
+					Graphics2.drawScaledImage(tex, tx + tw, ty, tw, th);
+					Graphics2.drawScaledImage(tex, tx + tw, ty - th, tw, th);
+					Graphics2.drawScaledImage(tex, tx + tw, ty + th, tw, th);
+					Graphics2.drawScaledImage(tex, tx, ty - th, tw, th);
+					Graphics2.drawScaledImage(tex, tx, ty + th, tw, th);
 				}
 
 				///if (is_paint || is_sculpt)
@@ -233,10 +233,10 @@ class UIView2D {
 					Base.notifyOnNextFrame(() => {
 						let texpaint_picker = RenderPath.renderTargets.get("texpaint_picker").image;
 						let g2 = texpaint_picker.g2;
-						g2.begin(false);
-						g2.drawScaledImage(tex, -x, -y, tw, th);
-						g2.end();
-						let a = new DataView(texpaint_picker.getPixels());
+						Graphics2.begin(g2, false);
+						Graphics2.drawScaledImage(tex, -x, -y, tw, th);
+						Graphics2.end(g2);
+						let a = new DataView(Image.getPixels(texpaint_picker));
 						///if (krom_metal || krom_vulkan)
 						let i0 = 2;
 						let i1 = 1;
@@ -259,14 +259,14 @@ class UIView2D {
 			///if (is_paint || is_sculpt)
 			// UV map
 			if (UIView2D.type == View2DType.View2DLayer && UIView2D.uvmapShow) {
-				UIView2D.ui.g.drawScaledImage(UtilUV.uvmap, tx, ty, tw, th);
+				Graphics2.drawScaledImage(UtilUV.uvmap, tx, ty, tw, th);
 			}
 			///end
 
 			// Menu
 			let ew = Math.floor(UIView2D.ui.ELEMENT_W());
 			UIView2D.ui.g.color = UIView2D.ui.t.SEPARATOR_COL;
-			UIView2D.ui.g.fillRect(0, UIView2D.ui.ELEMENT_H(), UIView2D.ww, UIView2D.ui.ELEMENT_H() + UIView2D.ui.ELEMENT_OFFSET() * 2);
+			Graphics2.fillRect(0, UIView2D.ui.ELEMENT_H(), UIView2D.ww, UIView2D.ui.ELEMENT_H() + UIView2D.ui.ELEMENT_OFFSET() * 2);
 			UIView2D.ui.g.color = 0xffffffff;
 
 			let startY = UIView2D.ui.ELEMENT_H() + UIView2D.ui.ELEMENT_OFFSET();
@@ -283,7 +283,7 @@ class UIView2D {
 			let text = h.text;
 			///end
 
-			UIView2D.ui._w = Math.floor(Math.min(UIView2D.ui.font.width(UIView2D.ui.fontSize, text) + 15 * UIView2D.ui.SCALE(), 100 * UIView2D.ui.SCALE()));
+			UIView2D.ui._w = Math.floor(Math.min(Font.width(UIView2D.ui.font, UIView2D.ui.fontSize, text) + 15 * UIView2D.ui.SCALE(), 100 * UIView2D.ui.SCALE()));
 
 			if (UIView2D.type == View2DType.View2DAsset) {
 				let asset = Context.raw.texture;
@@ -370,12 +370,12 @@ class UIView2D {
 				let cursorImg = Res.get("cursor.k");
 				let hsize = 16 * UIView2D.ui.SCALE();
 				let size = hsize * 2;
-				UIView2D.ui.g.drawScaledImage(cursorImg, tx + tw * Context.raw.uvxPicked - hsize, ty + th * Context.raw.uvyPicked - hsize, size, size);
+				Graphics2.drawScaledImage(cursorImg, tx + tw * Context.raw.uvxPicked - hsize, ty + th * Context.raw.uvyPicked - hsize, size, size);
 			}
 			///end
 		}
 		UIView2D.ui.end();
-		g.begin(false);
+		Graphics2.begin(g, false);
 	}
 
 	static update = () => {
