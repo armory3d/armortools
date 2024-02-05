@@ -13,7 +13,7 @@ class Path {
 	static textureFormats = ["jpg", "jpeg", "png", "tga", "bmp", "psd", "gif", "hdr", "k"];
 
 	static meshImporters = new Map<string, (s: string, f: (a: any)=>void)=>void>();
-	static textureImporters = new Map<string, (s: string, f: (img: ImageRaw)=>void)=>void>();
+	static textureImporters = new Map<string, (s: string, f: (img: image_t)=>void)=>void>();
 
 	static baseColorExt = ["albedo", "alb", "basecol", "basecolor", "diffuse", "diff", "base", "bc", "d", "color", "col"];
 	static opacityExt = ["opac", "opacity", "alpha"];
@@ -73,7 +73,7 @@ class Path {
 			let cmd = Path.pwd;
 			let save = (Path.isProtected() ? Krom.savePath() : Path.data() + Path.sep) + "working_dir.txt";
 			Krom.sysCommand(cmd + ' > "' + save + '"');
-			Path.workingDirCache = trim_end(System.bufferToString(Krom.loadBlob(save)));
+			Path.workingDirCache = trim_end(sys_buffer_to_string(Krom.loadBlob(save)));
 		}
 		return Path.workingDirCache;
 	}

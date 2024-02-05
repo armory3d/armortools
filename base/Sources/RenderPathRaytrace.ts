@@ -9,12 +9,12 @@ class RenderPathRaytrace {
 	static uvScale = 1.0;
 	static first = true;
 	static f32a = new Float32Array(24);
-	static helpMat = Mat4.identity();
+	static helpMat = mat4_identity();
 	static vb_scale = 1.0;
-	static vb: VertexBufferRaw;
-	static ib: IndexBufferRaw;
+	static vb: vertex_buffer_t;
+	static ib: index_buffer_t;
 
-	static lastEnvmap: ImageRaw = null;
+	static lastEnvmap: image_t = null;
 	static isBake = false;
 
 	///if krom_direct3d12
@@ -26,7 +26,7 @@ class RenderPathRaytrace {
 	///end
 
 	///if is_lab
-	static lastTexpaint: ImageRaw = null;
+	static lastTexpaint: image_t = null;
 	///end
 
 	static init = () => {
@@ -46,15 +46,15 @@ class RenderPathRaytrace {
 			Context.updateEnvmap();
 		}
 
-		let probe = Scene.world;
+		let probe = scene_world;
 		let savedEnvmap = Context.raw.showEnvmapBlur ? probe._radianceMipmaps[0] : Context.raw.savedEnvmap;
 
 		if (RenderPathRaytrace.lastEnvmap != savedEnvmap) {
 			RenderPathRaytrace.lastEnvmap = savedEnvmap;
 
-			let bnoise_sobol = Scene.embedded.get("bnoise_sobol.k");
-			let bnoise_scramble = Scene.embedded.get("bnoise_scramble.k");
-			let bnoise_rank = Scene.embedded.get("bnoise_rank.k");
+			let bnoise_sobol = scene_embedded.get("bnoise_sobol.k");
+			let bnoise_scramble = scene_embedded.get("bnoise_scramble.k");
+			let bnoise_rank = scene_embedded.get("bnoise_rank.k");
 
 			let l = Base.flatten(true);
 			Krom.raytraceSetTextures(l.texpaint, l.texpaint_nor, l.texpaint_pack, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
@@ -65,9 +65,9 @@ class RenderPathRaytrace {
 		if (l.texpaint != RenderPathRaytrace.lastTexpaint) {
 			RenderPathRaytrace.lastTexpaint = l.texpaint;
 
-			let bnoise_sobol = Scene.embedded.get("bnoise_sobol.k");
-			let bnoise_scramble = Scene.embedded.get("bnoise_scramble.k");
-			let bnoise_rank = Scene.embedded.get("bnoise_rank.k");
+			let bnoise_sobol = scene_embedded.get("bnoise_sobol.k");
+			let bnoise_scramble = scene_embedded.get("bnoise_scramble.k");
+			let bnoise_rank = scene_embedded.get("bnoise_rank.k");
 
 			Krom.raytraceSetTextures(l.texpaint, l.texpaint_nor, l.texpaint_pack, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
 		}
@@ -77,14 +77,14 @@ class RenderPathRaytrace {
 			Base.flatten(true);
 		}
 
-		let cam = Scene.camera;
+		let cam = scene_camera;
 		let ct = cam.base.transform;
-		Mat4.setFrom(RenderPathRaytrace.helpMat, cam.V);
-		Mat4.multmat(RenderPathRaytrace.helpMat, cam.P);
-		Mat4.getInverse(RenderPathRaytrace.helpMat, RenderPathRaytrace.helpMat);
-		RenderPathRaytrace.f32a[0] = Transform.worldx(ct);
-		RenderPathRaytrace.f32a[1] = Transform.worldy(ct);
-		RenderPathRaytrace.f32a[2] = Transform.worldz(ct);
+		mat4_set_from(RenderPathRaytrace.helpMat, cam.V);
+		mat4_mult_mat(RenderPathRaytrace.helpMat, cam.P);
+		mat4_get_inv(RenderPathRaytrace.helpMat, RenderPathRaytrace.helpMat);
+		RenderPathRaytrace.f32a[0] = transform_world_x(ct);
+		RenderPathRaytrace.f32a[1] = transform_world_y(ct);
+		RenderPathRaytrace.f32a[2] = transform_world_z(ct);
 		RenderPathRaytrace.f32a[3] = RenderPathRaytrace.frame;
 		///if krom_metal
 		// frame = (frame % (16)) + 1; // _PAINT
@@ -109,15 +109,15 @@ class RenderPathRaytrace {
 		RenderPathRaytrace.f32a[17] = RenderPathRaytrace.helpMat._31;
 		RenderPathRaytrace.f32a[18] = RenderPathRaytrace.helpMat._32;
 		RenderPathRaytrace.f32a[19] = RenderPathRaytrace.helpMat._33;
-		RenderPathRaytrace.f32a[20] = Scene.world.strength * 1.5;
+		RenderPathRaytrace.f32a[20] = scene_world.strength * 1.5;
 		if (!Context.raw.showEnvmap) RenderPathRaytrace.f32a[20] = -RenderPathRaytrace.f32a[20];
 		RenderPathRaytrace.f32a[21] = Context.raw.envmapAngle;
 		RenderPathRaytrace.f32a[22] = RenderPathRaytrace.uvScale;
 		///if is_lab
-		RenderPathRaytrace.f32a[22] *= Scene.meshes[0].data.scale_tex;
+		RenderPathRaytrace.f32a[22] *= scene_meshes[0].data.scale_tex;
 		///end
 
-		let framebuffer = RenderPath.renderTargets.get("buf").image;
+		let framebuffer = render_path_render_targets.get("buf").image;
 		Krom.raytraceDispatchRays(framebuffer.renderTarget_, RenderPathRaytrace.f32a.buffer);
 
 		if (Context.raw.ddirty == 1 || Context.raw.pdirty == 1) {
@@ -137,16 +137,16 @@ class RenderPathRaytrace {
 	static raytraceInit = (shaderName: string, build = true) => {
 		if (RenderPathRaytrace.first) {
 			RenderPathRaytrace.first = false;
-			Scene.embedData("bnoise_sobol.k", () => {});
-			Scene.embedData("bnoise_scramble.k", () => {});
-			Scene.embedData("bnoise_rank.k", () => {});
+			scene_embed_data("bnoise_sobol.k", () => {});
+			scene_embed_data("bnoise_scramble.k", () => {});
+			scene_embed_data("bnoise_rank.k", () => {});
 		}
 
 		Data.getBlob(shaderName, (shader: ArrayBuffer) => {
 			if (build) RenderPathRaytrace.buildData();
-			let bnoise_sobol = Scene.embedded.get("bnoise_sobol.k");
-			let bnoise_scramble = Scene.embedded.get("bnoise_scramble.k");
-			let bnoise_rank = Scene.embedded.get("bnoise_rank.k");
+			let bnoise_sobol = scene_embedded.get("bnoise_sobol.k");
+			let bnoise_scramble = scene_embedded.get("bnoise_scramble.k");
+			let bnoise_rank = scene_embedded.get("bnoise_rank.k");
 			Krom.raytraceInit(shader, RenderPathRaytrace.vb.buffer_, RenderPathRaytrace.ib.buffer_, RenderPathRaytrace.vb_scale);
 		});
 	}
@@ -156,14 +156,14 @@ class RenderPathRaytrace {
 		///if is_paint
 		let mo = !Context.layerFilterUsed() ? Context.raw.mergedObject : Context.raw.paintObject;
 		///else
-		let mo = Scene.meshes[0];
+		let mo = scene_meshes[0];
 		///end
 		let md = mo.data;
 		let mo_scale = mo.base.transform.scale.x; // Uniform scale only
 		RenderPathRaytrace.vb_scale = md.scale_pos * mo_scale;
 		if (mo.base.parent != null) RenderPathRaytrace.vb_scale *= mo.base.parent.transform.scale.x;
-		RenderPathRaytrace.vb = md._vertexBuffer;
-		RenderPathRaytrace.ib = md._indexBuffers[0];
+		RenderPathRaytrace.vb = md._vertex_buffer;
+		RenderPathRaytrace.ib = md._index_buffers[0];
 	}
 
 	static draw = (useLiveLayer: bool) => {
@@ -172,7 +172,7 @@ class RenderPathRaytrace {
 
 		///if krom_metal
 		// Delay path tracing additional samples while painting
-		let down = Mouse.down() || Pen.down();
+		let down = mouse_down() || pen_down();
 		if (Context.inViewport() && down) RenderPathRaytrace.frame = 0;
 		///end
 
@@ -181,16 +181,16 @@ class RenderPathRaytrace {
 		if (Config.raw.rp_bloom != false) {
 			RenderPathBase.drawBloom("buf");
 		}
-		RenderPath.setTarget("buf");
-		RenderPath.drawMeshes("overlay");
-		RenderPath.setTarget("buf");
-		RenderPathBase.drawCompass(RenderPath.currentG);
-		RenderPath.setTarget("taa");
-		RenderPath.bindTarget("buf", "tex");
-		RenderPath.drawShader("shader_datas/compositor_pass/compositor_pass");
-		RenderPath.setTarget("");
-		RenderPath.bindTarget("taa", "tex");
-		RenderPath.drawShader("shader_datas/copy_pass/copy_pass");
+		render_path_set_target("buf");
+		render_path_draw_meshes("overlay");
+		render_path_set_target("buf");
+		RenderPathBase.drawCompass(_render_path_current_g);
+		render_path_set_target("taa");
+		render_path_bind_target("buf", "tex");
+		render_path_draw_shader("shader_datas/compositor_pass/compositor_pass");
+		render_path_set_target("");
+		render_path_bind_target("taa", "tex");
+		render_path_draw_shader("shader_datas/copy_pass/copy_pass");
 		if (Config.raw.brush_3d) {
 			RenderPathPaint.commandsCursor();
 		}

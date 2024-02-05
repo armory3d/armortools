@@ -1,33 +1,33 @@
 
 class TabMeshes {
 
-	static draw = (htab: Handle) => {
+	static draw = (htab: HandleRaw) => {
 		let ui = UIBase.ui;
 		let statush = Config.raw.layout[LayoutSize.LayoutStatusH];
-		if (ui.tab(htab, tr("Meshes")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
+		if (Zui.tab(htab, tr("Meshes")) && statush > UIStatus.defaultStatusH * Zui.SCALE(ui)) {
 
-			ui.beginSticky();
+			Zui.beginSticky();
 
 			///if (is_paint || is_sculpt)
 			if (Config.raw.touch_ui) {
-				ui.row([1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6]);
+				Zui.row([1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6]);
 			}
 			else {
-				ui.row([1 / 14, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 14]);
+				Zui.row([1 / 14, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 14]);
 			}
 			///end
 
 			///if is_lab
 			if (Config.raw.touch_ui) {
-				ui.row([1 / 7, 1 / 7, 1 / 7, 1 / 7, 1 / 7, 1 / 7, 1 / 7]);
+				Zui.row([1 / 7, 1 / 7, 1 / 7, 1 / 7, 1 / 7, 1 / 7, 1 / 7]);
 			}
 			else {
-				ui.row([1 / 14, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 14]);
+				Zui.row([1 / 14, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 14]);
 			}
 			///end
 
-			if (ui.button(tr("Import"))) {
-				UIMenu.draw((ui: Zui) => {
+			if (Zui.button(tr("Import"))) {
+				UIMenu.draw((ui: ZuiRaw) => {
 					if (UIMenu.menuButton(ui, tr("Replace Existing"), `${Config.keymap.file_import_assets}`)) {
 						Project.importMesh(true);
 					}
@@ -36,11 +36,11 @@ class TabMeshes {
 					}
 				}, 2);
 			}
-			if (ui.isHovered) ui.tooltip(tr("Import mesh file"));
+			if (ui.isHovered) Zui.tooltip(tr("Import mesh file"));
 
 			///if is_lab
-			if (ui.button(tr("Set Default"))) {
-				UIMenu.draw((ui: Zui) => {
+			if (Zui.button(tr("Set Default"))) {
+				UIMenu.draw((ui: ZuiRaw) => {
 					if (UIMenu.menuButton(ui, tr("Cube"))) TabMeshes.setDefaultMesh(".Cube");
 					if (UIMenu.menuButton(ui, tr("Plane"))) TabMeshes.setDefaultMesh(".Plane");
 					if (UIMenu.menuButton(ui, tr("Sphere"))) TabMeshes.setDefaultMesh(".Sphere");
@@ -49,30 +49,30 @@ class TabMeshes {
 			}
 			///end
 
-			if (ui.button(tr("Flip Normals"))) {
+			if (Zui.button(tr("Flip Normals"))) {
 				UtilMesh.flipNormals();
 				Context.raw.ddirty = 2;
 			}
 
-			if (ui.button(tr("Calculate Normals"))) {
-				UIMenu.draw((ui: Zui) => {
+			if (Zui.button(tr("Calculate Normals"))) {
+				UIMenu.draw((ui: ZuiRaw) => {
 					if (UIMenu.menuButton(ui, tr("Smooth"))) { UtilMesh.calcNormals(true); Context.raw.ddirty = 2; }
 					if (UIMenu.menuButton(ui, tr("Flat"))) { UtilMesh.calcNormals(false); Context.raw.ddirty = 2; }
 				}, 2);
 			}
 
-			if (ui.button(tr("Geometry to Origin"))) {
+			if (Zui.button(tr("Geometry to Origin"))) {
 				UtilMesh.toOrigin();
 				Context.raw.ddirty = 2;
 			}
 
-			if (ui.button(tr("Apply Displacement"))) {
+			if (Zui.button(tr("Apply Displacement"))) {
 				///if is_paint
 				UtilMesh.applyDisplacement(Project.layers[0].texpaint_pack);
 				///end
 				///if is_lab
 				let displace_strength = Config.raw.displace_strength > 0 ? Config.raw.displace_strength : 1.0;
-				let uv_scale = Scene.meshes[0].data.scale_tex * Context.raw.brushScale;
+				let uv_scale = scene_meshes[0].data.scale_tex * Context.raw.brushScale;
 				UtilMesh.applyDisplacement(BrushOutputNode.inst.texpaint_pack, 0.05 * displace_strength, uv_scale);
 				///end
 
@@ -80,8 +80,8 @@ class TabMeshes {
 				Context.raw.ddirty = 2;
 			}
 
-			if (ui.button(tr("Rotate"))) {
-				UIMenu.draw((ui: Zui) => {
+			if (Zui.button(tr("Rotate"))) {
+				UIMenu.draw((ui: ZuiRaw) => {
 					if (UIMenu.menuButton(ui, tr("Rotate X"))) {
 						UtilMesh.swapAxis(1, 2);
 						Context.raw.ddirty = 2;
@@ -99,15 +99,15 @@ class TabMeshes {
 				}, 3);
 			}
 
-			ui.endSticky();
+			Zui.endSticky();
 
 			for (let i = 0; i < Project.paintObjects.length; ++i) {
 				let o = Project.paintObjects[i];
 				let h = Zui.handle("tabmeshes_0");
 				h.selected = o.base.visible;
-				o.base.visible = ui.check(h, o.base.name);
+				o.base.visible = Zui.check(h, o.base.name);
 				if (ui.isHovered && ui.inputReleasedR) {
-					UIMenu.draw((ui: Zui) => {
+					UIMenu.draw((ui: ZuiRaw) => {
 						if (UIMenu.menuButton(ui, tr("Export"))) {
 							Context.raw.exportMeshIndex = i + 1;
 							BoxExport.showMesh();
@@ -121,8 +121,8 @@ class TabMeshes {
 									BaseObject.setParent(child, Project.paintObjects[0].base);
 								}
 								if (o.base.children.length == 0) {
-									Vec4.setFrom(Project.paintObjects[0].base.transform.scale, o.base.transform.scale);
-									Transform.buildMatrix(Project.paintObjects[0].base.transform);
+									vec4_set_from(Project.paintObjects[0].base.transform.scale, o.base.transform.scale);
+									transform_build_matrix(Project.paintObjects[0].base.transform);
 								}
 							}
 							Data.deleteMesh(o.data._handle);
@@ -162,14 +162,14 @@ class TabMeshes {
 				scale_pos: mesh.scalePos,
 				scale_tex: mesh.scaleTex
 			};
-			let md: TMeshData;
-			MeshData.create(raw, (_md: TMeshData) => { md = _md; });
+			let md: mesh_data_t;
+			MeshData.create(raw, (_md: mesh_data_t) => { md = _md; });
 			mo = MeshObject.create(md, Context.raw.paintObject.materials);
-			array_remove(Scene.meshes, mo);
+			array_remove(scene_meshes, mo);
 			mo.base.name = "Tessellated";
 		}
 		else {
-			mo = Scene.getChild(name).ext;
+			mo = scene_get_child(name).ext;
 		}
 
 		mo.base.visible = true;
@@ -177,7 +177,7 @@ class TabMeshes {
 		Context.raw.paintObject = mo;
 		Project.paintObjects[0] = mo;
 		if (UIHeader.worktab.position == SpaceType.Space3D) {
-			Scene.meshes = [mo];
+			scene_meshes = [mo];
 		}
 
 		///if (krom_direct3d12 || krom_vulkan || krom_metal)

@@ -76,7 +76,7 @@ class ImportFolder {
 		}
 		for (let n of canvas.nodes) {
 			if (n.name == "RGB") {
-				nodes.removeNode(n, canvas);
+				Nodes.removeNode(n, canvas);
 				break;
 			}
 		}
@@ -120,12 +120,12 @@ class ImportFolder {
 		History.newMaterial();
 	}
 
-	static placeImageNode = (nodes: Nodes, canvas: TNodeCanvas, asset: string, ny: i32, to_id: i32, to_socket: i32) => {
+	static placeImageNode = (nodes: NodesRaw, canvas: TNodeCanvas, asset: string, ny: i32, to_id: i32, to_socket: i32) => {
 		let n = NodesMaterial.createNode("TEX_IMAGE");
 		n.buttons[0].default_value = Base.getAssetIndex(asset);
 		n.x = 72;
 		n.y = ny;
-		let l: TNodeLink = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: to_id, to_socket: to_socket };
+		let l: TNodeLink = { id: Nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: to_id, to_socket: to_socket };
 		canvas.links.push(l);
 	}
 }

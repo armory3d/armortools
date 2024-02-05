@@ -2,11 +2,11 @@
 class NodeShaderContextRaw {
 	vert: NodeShaderRaw;
 	frag: NodeShaderRaw;
-	data: TShaderContext;
+	data: shader_context_t;
 	allow_vcols = false;
 	material: TMaterial;
-	constants: TShaderConstant[];
-	tunits: TTextureUnit[];
+	constants: shader_const_t[];
+	tunits: tex_unit_t[];
 }
 
 class NodeShaderContext {
@@ -54,7 +54,7 @@ class NodeShaderContext {
 		for (let e of raw.data.vertex_elements) {
 			if (e.name == name) return;
 		}
-		let elem: TVertexElement = { name: name, data: data_type };
+		let elem: vertex_element_t = { name: name, data: data_type };
 		raw.data.vertex_elements.push(elem);
 	}
 
@@ -67,7 +67,7 @@ class NodeShaderContext {
 		return false;
 	}
 
-	static get_elem = (raw: NodeShaderContextRaw, name: string): TVertexElement => {
+	static get_elem = (raw: NodeShaderContextRaw, name: string): vertex_element_t => {
 		for (let elem of raw.data.vertex_elements) {
 			if (elem.name == name) {
 				return elem;
@@ -83,7 +83,7 @@ class NodeShaderContext {
 			}
 		}
 
-		let c: TShaderConstant = { name: name, type: ctype };
+		let c: shader_const_t = { name: name, type: ctype };
 		if (link != null) {
 			c.link = link;
 		}
@@ -97,7 +97,7 @@ class NodeShaderContext {
 			}
 		}
 
-		let c: TTextureUnit = { name: name };
+		let c: tex_unit_t = { name: name };
 		if (link != null) {
 			c.link = link;
 		}

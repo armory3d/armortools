@@ -2779,58 +2779,58 @@ class NodesMaterial {
 		]
 	];
 
-	static vectorCurvesButton = (ui: Zui, nodes: Nodes, node: TNode) => {
+	static vectorCurvesButton = (ui: ZuiRaw, nodes: NodesRaw, node: TNode) => {
 		let but = node.buttons[0];
-		let nhandle = Zui.handle("nodesmaterial_0").nest(node.id);
-		ui.row([1 / 3, 1 / 3, 1 / 3]);
-		ui.radio(nhandle.nest(0).nest(1), 0, "X");
-		ui.radio(nhandle.nest(0).nest(1), 1, "Y");
-		ui.radio(nhandle.nest(0).nest(1), 2, "Z");
+		let nhandle = Zui.nest(Zui.handle("nodesmaterial_0"), node.id);
+		Zui.row([1 / 3, 1 / 3, 1 / 3]);
+		Zui.radio(Zui.nest(Zui.nest(nhandle, 0), 1), 0, "X");
+		Zui.radio(Zui.nest(Zui.nest(nhandle, 0), 1), 1, "Y");
+		Zui.radio(Zui.nest(Zui.nest(nhandle, 0), 1), 2, "Z");
 		// Preview
-		let axis = nhandle.nest(0).nest(1).position;
+		let axis = Zui.nest(Zui.nest(nhandle, 0), 1).position;
 		let val: Float32Array[] = but.default_value[axis]; // [ [[x, y], [x, y], ..], [[x, y]], ..]
 		let num = val.length;
 		// for (let i = 0; i < num; ++i) { ui.line(); }
-		ui._y += nodes.LINE_H() * 5;
+		ui._y += Nodes.LINE_H() * 5;
 		// Edit
-		ui.row([1 / 5, 1 / 5, 3 / 5]);
-		if (ui.button("+")) {
+		Zui.row([1 / 5, 1 / 5, 3 / 5]);
+		if (Zui.button("+")) {
 			let f32a = new Float32Array(2);
 			f32a[0] = 0; f32a[1] = 0;
 			val.push(f32a);
 		}
-		if (ui.button("-")) {
+		if (Zui.button("-")) {
 			if (val.length > 2) val.pop();
 		}
-		let ihandle = nhandle.nest(0).nest(2).nest(axis, {position: 0});
-		let i = Math.floor(ui.slider(ihandle, "Index", 0, num - 1, false, 1, true, Align.Left));
+		let ihandle = Zui.nest(Zui.nest(Zui.nest(nhandle, 0), 2), axis, {position: 0});
+		let i = Math.floor(Zui.slider(ihandle, "Index", 0, num - 1, false, 1, true, Align.Left));
 		if (i >= val.length || i < 0) ihandle.value = i = val.length - 1; // Stay in bounds
-		ui.row([1 / 2, 1 / 2]);
-		nhandle.nest(0).nest(3).value = val[i][0];
-		nhandle.nest(0).nest(4).value = val[i][1];
-		val[i][0] = ui.slider(nhandle.nest(0).nest(3, {value: 0}), "X", -1, 1, true, 100, true, Align.Left);
-		val[i][1] = ui.slider(nhandle.nest(0).nest(4, {value: 0}), "Y", -1, 1, true, 100, true, Align.Left);
+		Zui.row([1 / 2, 1 / 2]);
+		Zui.nest(Zui.nest(nhandle, 0), 3).value = val[i][0];
+		Zui.nest(Zui.nest(nhandle, 0), 4).value = val[i][1];
+		val[i][0] = Zui.slider(Zui.nest(Zui.nest(nhandle, 0), 3, {value: 0}), "X", -1, 1, true, 100, true, Align.Left);
+		val[i][1] = Zui.slider(Zui.nest(Zui.nest(nhandle, 0), 4, {value: 0}), "Y", -1, 1, true, 100, true, Align.Left);
 	}
 
-	static colorRampButton = (ui: Zui, nodes: Nodes, node: TNode) => {
+	static colorRampButton = (ui: ZuiRaw, nodes: NodesRaw, node: TNode) => {
 		let but = node.buttons[0];
-		let nhandle = Zui.handle("nodesmaterial_1").nest(node.id);
+		let nhandle = Zui.nest(Zui.handle("nodesmaterial_1"), node.id);
 		let nx = ui._x;
 		let ny = ui._y;
 
 		// Preview
 		let vals: Float32Array[] = but.default_value; // [[r, g, b, a, pos], ..]
-		let sw = ui._w / nodes.SCALE();
+		let sw = ui._w / Nodes.SCALE();
 		for (let val of vals) {
 			let pos = val[4];
 			let col = color_from_floats(val[0], val[1], val[2]);
-			ui.fill(pos * sw, 0, (1.0 - pos) * sw, nodes.LINE_H() - 2 * nodes.SCALE(), col);
+			Zui.fill(pos * sw, 0, (1.0 - pos) * sw, Nodes.LINE_H() - 2 * Nodes.SCALE(), col);
 		}
-		ui._y += nodes.LINE_H();
+		ui._y += Nodes.LINE_H();
 		// Edit
-		let ihandle = nhandle.nest(0).nest(2);
-		ui.row([1 / 4, 1 / 4, 2 / 4]);
-		if (ui.button("+")) {
+		let ihandle = Zui.nest(Zui.nest(nhandle, 0), 2);
+		Zui.row([1 / 4, 1 / 4, 2 / 4]);
+		if (Zui.button("+")) {
 			let last = vals[vals.length - 1];
 			let f32a = new Float32Array(5);
 			f32a[0] = last[0];
@@ -2841,36 +2841,36 @@ class NodesMaterial {
 			vals.push(f32a);
 			ihandle.value += 1;
 		}
-		if (ui.button("-") && vals.length > 1) {
+		if (Zui.button("-") && vals.length > 1) {
 			vals.pop();
 			ihandle.value -= 1;
 		}
-		but.data = ui.combo(nhandle.nest(0).nest(1, {position: but.data}), [tr("Linear"), tr("Constant")], tr("Interpolate"));
+		but.data = Zui.combo(Zui.nest(Zui.nest(nhandle, 0), 1, {position: but.data}), [tr("Linear"), tr("Constant")], tr("Interpolate"));
 
-		ui.row([1 / 2, 1 / 2]);
-		let i = Math.floor(ui.slider(ihandle, "Index", 0, vals.length - 1, false, 1, true, Align.Left));
+		Zui.row([1 / 2, 1 / 2]);
+		let i = Math.floor(Zui.slider(ihandle, "Index", 0, vals.length - 1, false, 1, true, Align.Left));
 		if (i >= vals.length || i < 0) ihandle.value = i = vals.length - 1; // Stay in bounds
 
 		let val = vals[i];
-		nhandle.nest(0).nest(3).value = val[4];
-		val[4] = ui.slider(nhandle.nest(0).nest(3), "Pos", 0, 1, true, 100, true, Align.Left);
+		Zui.nest(Zui.nest(nhandle, 0), 3).value = val[4];
+		val[4] = Zui.slider(Zui.nest(Zui.nest(nhandle, 0), 3), "Pos", 0, 1, true, 100, true, Align.Left);
 		if (val[4] > 1.0) val[4] = 1.0; // Stay in bounds
 		else if (val[4] < 0.0) val[4] = 0.0;
 
-		let chandle = nhandle.nest(0).nest(4);
+		let chandle = Zui.nest(Zui.nest(nhandle, 0), 4);
 		chandle.color = color_from_floats(val[0], val[1], val[2]);
-		if (ui.text("", Align.Right, chandle.color) == State.Started) {
-			let rx = nx + ui._w - nodes.p(37);
-			let ry = ny - nodes.p(5);
+		if (Zui.text("", Align.Right, chandle.color) == State.Started) {
+			let rx = nx + ui._w - Nodes.p(37);
+			let ry = ny - Nodes.p(5);
 			nodes._inputStarted = ui.inputStarted = false;
-			nodes.rgbaPopup(ui, chandle, val, Math.floor(rx), Math.floor(ry + ui.ELEMENT_H()));
+			Nodes.rgbaPopup(ui, chandle, val, Math.floor(rx), Math.floor(ry + Zui.ELEMENT_H(ui)));
 		}
 		val[0] = color_get_rb(chandle.color) / 255;
 		val[1] = color_get_gb(chandle.color) / 255;
 		val[2] = color_get_bb(chandle.color) / 255;
 	}
 
-	static newGroupButton = (ui: Zui, nodes: Nodes, node: TNode) => {
+	static newGroupButton = (ui: ZuiRaw, nodes: NodesRaw, node: TNode) => {
 		if (node.name == "New Group") {
 			for (let i = 1; i < 999; ++i) {
 				node.name = tr("Group") + " " + i;
@@ -2927,7 +2927,7 @@ class NodesMaterial {
 				],
 				links: []
 			};
-			Project.materialGroups.push({ canvas: canvas, nodes: new Nodes() });
+			Project.materialGroups.push({ canvas: canvas, nodes: Nodes.create() });
 		}
 
 		let group: TNodeGroup = null;
@@ -2938,22 +2938,22 @@ class NodesMaterial {
 			}
 		}
 
-		if (ui.button(tr("Nodes"))) {
+		if (Zui.button(tr("Nodes"))) {
 			UINodes.groupStack.push(group);
 		}
 	}
 
-	static groupInputButton = (ui: Zui, nodes: Nodes, node: TNode) => {
+	static groupInputButton = (ui: ZuiRaw, nodes: NodesRaw, node: TNode) => {
 		NodesMaterial.addSocketButton(ui, nodes, node, node.outputs);
 	}
 
-	static groupOutputButton = (ui: Zui, nodes: Nodes, node: TNode) => {
+	static groupOutputButton = (ui: ZuiRaw, nodes: NodesRaw, node: TNode) => {
 		NodesMaterial.addSocketButton(ui, nodes, node, node.inputs);
 	}
 
-	static addSocketButton = (ui: Zui, nodes: Nodes, node: TNode, sockets: TNodeSocket[]) => {
-		if (ui.button(tr("Add"))) {
-			UIMenu.draw((ui: Zui) => {
+	static addSocketButton = (ui: ZuiRaw, nodes: NodesRaw, node: TNode, sockets: TNodeSocket[]) => {
+		if (Zui.button(tr("Add"))) {
+			UIMenu.draw((ui: ZuiRaw) => {
 				let groupStack = UINodes.groupStack;
 				let c = groupStack[groupStack.length - 1].canvas;
 				if (UIMenu.menuButton(ui, tr("RGBA"))) {
@@ -3010,9 +3010,9 @@ class NodesMaterial {
 		return type == "RGBA" ? _tr("Color") : type == "VECTOR" ? _tr("Vector") : _tr("Value");
 	}
 
-	static createSocket = (nodes: Nodes, node: TNode, name: string, type: string, canvas: TNodeCanvas, min = 0.0, max = 1.0, default_value: any = null): TNodeSocket => {
+	static createSocket = (nodes: NodesRaw, node: TNode, name: string, type: string, canvas: TNodeCanvas, min = 0.0, max = 1.0, default_value: any = null): TNodeSocket => {
 		return {
-			id: nodes.getSocketId(canvas.nodes),
+			id: Nodes.getSocketId(canvas.nodes),
 			node_id: node.id,
 			name: name == null ? NodesMaterial.get_socket_name(type) : name,
 			type: type,

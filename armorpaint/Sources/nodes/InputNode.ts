@@ -1,7 +1,7 @@
 
 class InputNode extends LogicNode {
 
-	static coords = Vec4.create();
+	static coords = vec4_create();
 
 	static startX = 0.0;
 	static startY = 0.0;
@@ -26,7 +26,7 @@ class InputNode extends LogicNode {
 
 	update = () => {
 		if (Context.raw.splitView) {
-			Context.raw.viewIndex = Mouse.viewX > Base.w() / 2 ? 1 : 0;
+			Context.raw.viewIndex = mouse_view_x() > Base.w() / 2 ? 1 : 0;
 		}
 
 		let decal = Context.raw.tool == WorkspaceTool.ToolDecal || Context.raw.tool == WorkspaceTool.ToolText;
@@ -37,20 +37,20 @@ class InputNode extends LogicNode {
 			 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown) ||
 			 decalMask);
 
-		let paintX = Mouse.viewX / App.w();
-		let paintY = Mouse.viewY / App.h();
-		if (Mouse.started()) {
-			InputNode.startX = Mouse.viewX / App.w();
-			InputNode.startY = Mouse.viewY / App.h();
+		let paintX = mouse_view_x() / App.w();
+		let paintY = mouse_view_y() / App.h();
+		if (mouse_started()) {
+			InputNode.startX = mouse_view_x() / App.w();
+			InputNode.startY = mouse_view_y() / App.h();
 		}
 
-		if (Pen.down()) {
-			paintX = Pen.viewX / App.w();
-			paintY = Pen.viewY / App.h();
+		if (pen_down()) {
+			paintX = pen_view_x() / App.w();
+			paintY = pen_view_y() / App.h();
 		}
-		if (Pen.started()) {
-			InputNode.startX = Pen.viewX / App.w();
-			InputNode.startY = Pen.viewY / App.h();
+		if (pen_started()) {
+			InputNode.startX = pen_view_x() / App.w();
+			InputNode.startY = pen_view_y() / App.h();
 		}
 
 		if (Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown)) {
@@ -72,35 +72,35 @@ class InputNode extends LogicNode {
 		}
 
 		if (InputNode.lockBegin) {
-			let dx = Math.abs(InputNode.lockStartX - Mouse.viewX);
-			let dy = Math.abs(InputNode.lockStartY - Mouse.viewY);
+			let dx = Math.abs(InputNode.lockStartX - mouse_view_x());
+			let dy = Math.abs(InputNode.lockStartY - mouse_view_y());
 			if (dx > 1 || dy > 1) {
 				InputNode.lockBegin = false;
 				dx > dy ? InputNode.lockY = true : InputNode.lockX = true;
 			}
 		}
 
-		if (Keyboard.started(Config.keymap.brush_ruler)) {
-			InputNode.lockStartX = Mouse.viewX;
-			InputNode.lockStartY = Mouse.viewY;
+		if (keyboard_started(Config.keymap.brush_ruler)) {
+			InputNode.lockStartX = mouse_view_x();
+			InputNode.lockStartY = mouse_view_y();
 			InputNode.lockBegin = true;
 		}
-		else if (Keyboard.released(Config.keymap.brush_ruler)) {
+		else if (keyboard_released(Config.keymap.brush_ruler)) {
 			InputNode.lockX = InputNode.lockY = InputNode.lockBegin = false;
 		}
 
 		if (Context.raw.brushLazyRadius > 0) {
-			let v1 = Vec4.create(Context.raw.brushLazyX * App.w(), Context.raw.brushLazyY * App.h(), 0.0);
-			let v2 = Vec4.create(InputNode.coords.x * App.w(), InputNode.coords.y * App.h(), 0.0);
-			let d = Vec4.distance(v1, v2);
+			let v1 = vec4_create(Context.raw.brushLazyX * App.w(), Context.raw.brushLazyY * App.h(), 0.0);
+			let v2 = vec4_create(InputNode.coords.x * App.w(), InputNode.coords.y * App.h(), 0.0);
+			let d = vec4_dist(v1, v2);
 			let r = Context.raw.brushLazyRadius * 85;
 			if (d > r) {
-				let v3 = Vec4.create();
-				Vec4.subvecs(v3, v2, v1);
-				Vec4.normalize(v3, );
-				Vec4.mult(v3, 1.0 - Context.raw.brushLazyStep);
-				Vec4.mult(v3, r);
-				Vec4.addvecs(v2, v1, v3);
+				let v3 = vec4_create();
+				vec4_sub_vecs(v3, v2, v1);
+				vec4_normalize(v3, );
+				vec4_mult(v3, 1.0 - Context.raw.brushLazyStep);
+				vec4_mult(v3, r);
+				vec4_add_vecs(v2, v1, v3);
 				InputNode.coords.x = v2.x / App.w();
 				InputNode.coords.y = v2.y / App.h();
 				// Parse brush inputs once on next draw

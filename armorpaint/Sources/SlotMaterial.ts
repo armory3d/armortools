@@ -1,11 +1,11 @@
 
 class SlotMaterialRaw {
-	nodes = new Nodes();
+	nodes = Nodes.create();
 	canvas: TNodeCanvas;
-	image: ImageRaw = null;
-	imageIcon: ImageRaw = null;
+	image: image_t = null;
+	imageIcon: image_t = null;
 	previewReady = false;
-	data: TMaterialData;
+	data: material_data_t;
 	id = 0;
 
 	paintBase = true;
@@ -22,15 +22,15 @@ class SlotMaterialRaw {
 class SlotMaterial {
 	static defaultCanvas: ArrayBuffer = null;
 
-	static create(m: TMaterialData = null, c: TNodeCanvas = null): SlotMaterialRaw {
+	static create(m: material_data_t = null, c: TNodeCanvas = null): SlotMaterialRaw {
 		let raw = new SlotMaterialRaw();
 		for (let mat of Project.materials) if (mat.id >= raw.id) raw.id = mat.id + 1;
 		raw.data = m;
 
 		let w = UtilRender.materialPreviewSize;
 		let wIcon = 50;
-		raw.image = Image.createRenderTarget(w, w);
-		raw.imageIcon = Image.createRenderTarget(wIcon, wIcon);
+		raw.image = image_create_render_target(w, w);
+		raw.imageIcon = image_create_render_target(wIcon, wIcon);
 
 		if (c == null) {
 			if (SlotMaterial.defaultCanvas == null) { // Synchronous
@@ -38,7 +38,7 @@ class SlotMaterial {
 					SlotMaterial.defaultCanvas = b;
 				});
 			}
-			raw.canvas = ArmPack.decode(SlotMaterial.defaultCanvas);
+			raw.canvas = armpack_decode(SlotMaterial.defaultCanvas);
 			raw.canvas.name = "Material " + (raw.id + 1);
 		}
 		else {
@@ -54,8 +54,8 @@ class SlotMaterial {
 
 	static unload = (raw: SlotMaterialRaw) => {
 		let _next = () => {
-			Image.unload(raw.image);
-			Image.unload(raw.imageIcon);
+			image_unload(raw.image);
+			image_unload(raw.imageIcon);
 		}
 		Base.notifyOnNextFrame(_next);
 	}

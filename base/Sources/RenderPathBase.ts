@@ -5,7 +5,7 @@ class RenderPathBase {
 	static superSample = 1.0;
 	static lastX = -1.0;
 	static lastY = -1.0;
-	static bloomMipmaps: RenderTargetRaw[];
+	static bloomMipmaps: render_target_t[];
 	static bloomCurrentMip = 0;
 	static bloomSampleScale: f32;
 	///if arm_voxels
@@ -23,7 +23,7 @@ class RenderPathBase {
 		RenderPathBase.voxelsCreated = true;
 
 		{
-			let t = RenderTarget.create();
+			let t = render_target_create();
 			t.name = targetName;
 			t.format = "R8";
 			t.width = RenderPathBase.voxelsRes;
@@ -31,7 +31,7 @@ class RenderPathBase {
 			t.depth = RenderPathBase.voxelsRes;
 			t.is_image = true;
 			t.mipmaps = true;
-			RenderPath.createRenderTarget(t);
+			render_path_create_render_target(t);
 		}
 	}
 	///end
@@ -39,12 +39,12 @@ class RenderPathBase {
 	static applyConfig = () => {
 		if (RenderPathBase.superSample != Config.raw.rp_supersample) {
 			RenderPathBase.superSample = Config.raw.rp_supersample;
-			for (let rt of RenderPath.renderTargets.values()) {
+			for (let rt of render_path_render_targets.values()) {
 				if (rt.width == 0 && rt.scale != null) {
 					rt.scale = RenderPathBase.superSample;
 				}
 			}
-			RenderPath.resize();
+			render_path_resize();
 		}
 		///if arm_voxels
 		if (!RenderPathBase.voxelsCreated) RenderPathBase.initVoxels();
@@ -55,10 +55,10 @@ class RenderPathBase {
 		return RenderPathBase.superSample;
 	}
 
-	static drawCompass = (currentG: Graphics4Raw) => {
+	static drawCompass = (currentG: g4_t) => {
 		if (Context.raw.showCompass) {
-			let cam = Scene.camera;
-			let compass: TMeshObject = Scene.getChild(".Compass").ext;
+			let cam = scene_camera;
+			let compass: TMeshObject = scene_get_child(".Compass").ext;
 
 			let _visible = compass.base.visible;
 			let _parent = compass.base.parent;
@@ -67,13 +67,13 @@ class RenderPathBase {
 			let crot = cam.base.transform.rot;
 			let ratio = App.w() / App.h();
 			let _P = cam.P;
-			cam.P = Mat4.ortho(-8 * ratio, 8 * ratio, -8, 8, -2, 2);
+			cam.P = mat4_ortho(-8 * ratio, 8 * ratio, -8, 8, -2, 2);
 			compass.base.visible = true;
 			compass.base.parent = cam.base;
-			compass.base.transform.loc = Vec4.create(7.4 * ratio, 7.0, -1);
-			compass.base.transform.rot = Quat.create(-crot.x, -crot.y, -crot.z, crot.w);
-			Vec4.set(compass.base.transform.scale, 0.4, 0.4, 0.4);
-			Transform.buildMatrix(compass.base.transform);
+			compass.base.transform.loc = vec4_create(7.4 * ratio, 7.0, -1);
+			compass.base.transform.rot = quat_create(-crot.x, -crot.y, -crot.z, crot.w);
+			vec4_set(compass.base.transform.scale, 0.4, 0.4, 0.4);
+			transform_build_matrix(compass.base.transform);
 			compass.frustumCulling = false;
 			MeshObject.render(compass, currentG, "overlay", []);
 
@@ -82,7 +82,7 @@ class RenderPathBase {
 			compass.base.parent = _parent;
 			compass.base.transform.loc = _loc;
 			compass.base.transform.rot = _rot;
-			Transform.buildMatrix(compass.base.transform);
+			transform_build_matrix(compass.base.transform);
 		}
 	}
 
@@ -95,13 +95,13 @@ class RenderPathBase {
 			}
 			else {
 				// Set current viewport
-				Context.raw.viewIndex = Mouse.viewX > Base.w() / 2 ? 1 : 0;
+				Context.raw.viewIndex = mouse_view_x() > Base.w() / 2 ? 1 : 0;
 			}
 
-			let cam = Scene.camera;
+			let cam = scene_camera;
 			if (Context.raw.viewIndexLast > -1) {
 				// Save current viewport camera
-				Mat4.setFrom(Camera.views[Context.raw.viewIndexLast], cam.base.transform.local);
+				mat4_set_from(Camera.views[Context.raw.viewIndexLast], cam.base.transform.local);
 			}
 
 			let decal = Context.raw.tool == WorkspaceTool.ToolDecal || Context.raw.tool == WorkspaceTool.ToolText;
@@ -111,16 +111,16 @@ class RenderPathBase {
 				Context.raw.ddirty = 1;
 			}
 
-			Transform.setMatrix(cam.base.transform, Camera.views[Context.raw.viewIndex]);
+			transform_set_matrix(cam.base.transform, Camera.views[Context.raw.viewIndex]);
 			CameraObject.buildMatrix(cam);
 			CameraObject.buildProjection(cam);
 		}
 
 		// Match projection matrix jitter
 		let skipTaa = Context.raw.splitView || ((Context.raw.tool == WorkspaceTool.ToolClone || Context.raw.tool == WorkspaceTool.ToolBlur || Context.raw.tool == WorkspaceTool.ToolSmudge) && Context.raw.pdirty > 0);
-		Scene.camera.frame = skipTaa ? 0 : RenderPathBase.taaFrame;
-		CameraObject.projectionJitter(Scene.camera);
-		CameraObject.buildMatrix(Scene.camera);
+		scene_camera.frame = skipTaa ? 0 : RenderPathBase.taaFrame;
+		CameraObject.projectionJitter(scene_camera);
+		CameraObject.buildMatrix(scene_camera);
 	}
 
 	static end = () => {
@@ -128,7 +128,7 @@ class RenderPathBase {
 		Context.raw.viewIndexLast = Context.raw.viewIndex;
 		Context.raw.viewIndex = -1;
 
-		if (Context.raw.foregroundEvent && !Mouse.down()) {
+		if (Context.raw.foregroundEvent && !mouse_down()) {
 			Context.raw.foregroundEvent = false;
 			Context.raw.pdirty = 0;
 		}
@@ -141,25 +141,25 @@ class RenderPathBase {
 	}
 
 	static isCached = (): bool => {
-		if (System.width == 0 || System.height == 0) return true;
+		if (sys_width() == 0 || sys_height() == 0) return true;
 
 		let mx = RenderPathBase.lastX;
 		let my = RenderPathBase.lastY;
-		RenderPathBase.lastX = Mouse.viewX;
-		RenderPathBase.lastY = Mouse.viewY;
+		RenderPathBase.lastX = mouse_view_x();
+		RenderPathBase.lastY = mouse_view_y();
 
 		if (Context.raw.ddirty <= 0 && Context.raw.rdirty <= 0 && Context.raw.pdirty <= 0) {
-			if (mx != RenderPathBase.lastX || my != RenderPathBase.lastY || Mouse.locked) Context.raw.ddirty = 0;
+			if (mx != RenderPathBase.lastX || my != RenderPathBase.lastY || mouse_locked) Context.raw.ddirty = 0;
 			///if (krom_metal || krom_android)
 			if (Context.raw.ddirty > -6) {
 			///else
 			if (Context.raw.ddirty > -2) {
 			///end
-				RenderPath.setTarget("");
-				RenderPath.bindTarget("taa", "tex");
+				render_path_set_target("");
+				render_path_bind_target("taa", "tex");
 				RenderPathBase.ssaa4() ?
-					RenderPath.drawShader("shader_datas/supersample_resolve/supersample_resolve") :
-					RenderPath.drawShader("shader_datas/copy_pass/copy_pass");
+					render_path_draw_shader("shader_datas/supersample_resolve/supersample_resolve") :
+					render_path_draw_shader("shader_datas/copy_pass/copy_pass");
 				RenderPathPaint.commandsCursor();
 				if (Context.raw.ddirty <= 0) Context.raw.ddirty--;
 			}
@@ -202,47 +202,47 @@ class RenderPathBase {
 
 				let prevScale = 1.0;
 				for (let i = 0; i < 10; ++i) {
-					let t = RenderTarget.create();
+					let t = render_target_create();
 					t.name = "bloom_mip_" + i;
 					t.width = 0;
 					t.height = 0;
 					t.scale = (prevScale *= 0.5);
 					t.format = "RGBA64";
-					RenderPathBase.bloomMipmaps.push(RenderPath.createRenderTarget(t));
+					RenderPathBase.bloomMipmaps.push(render_path_create_render_target(t));
 				}
 
-				RenderPath.loadShader("shader_datas/bloom_pass/bloom_downsample_pass");
-				RenderPath.loadShader("shader_datas/bloom_pass/bloom_upsample_pass");
+				render_path_load_shader("shader_datas/bloom_pass/bloom_downsample_pass");
+				render_path_load_shader("shader_datas/bloom_pass/bloom_upsample_pass");
 
-				Uniforms.externalIntLinks.push((_: any, __: any, link: string) => {
+				uniforms_i32_links.push((_: any, __: any, link: string) => {
 					if (link == "_bloomCurrentMip") return RenderPathBase.bloomCurrentMip;
 					return null;
 				});
-				Uniforms.externalFloatLinks.push((_: any, __: any, link: string) => {
+				uniforms_f32_links.push((_: any, __: any, link: string) => {
 					if (link == "_bloomSampleScale") return RenderPathBase.bloomSampleScale;
 					return null;
 				});
 			}
 
 			let bloomRadius = 6.5;
-			let minDim = Math.min(RenderPath.currentW, RenderPath.currentH);
+			let minDim = Math.min(render_path_current_w,render_path_current_h);
 			let logMinDim = Math.max(1.0, Math.log2(minDim) + (bloomRadius - 8.0));
 			let numMips = Math.floor(logMinDim);
 			RenderPathBase.bloomSampleScale = 0.5 + logMinDim - numMips;
 
 			for (let i = 0; i < numMips; ++i) {
 				RenderPathBase.bloomCurrentMip = i;
-				RenderPath.setTarget(RenderPathBase.bloomMipmaps[i].name);
-				RenderPath.clearTarget();
-				RenderPath.bindTarget(i == 0 ? tex : RenderPathBase.bloomMipmaps[i - 1].name, "tex");
-				RenderPath.drawShader("shader_datas/bloom_pass/bloom_downsample_pass");
+				render_path_set_target(RenderPathBase.bloomMipmaps[i].name);
+				render_path_clear_target();
+				render_path_bind_target(i == 0 ? tex : RenderPathBase.bloomMipmaps[i - 1].name, "tex");
+				render_path_draw_shader("shader_datas/bloom_pass/bloom_downsample_pass");
 			}
 			for (let i = 0; i < numMips; ++i) {
 				let mipLevel = numMips - 1 - i;
 				RenderPathBase.bloomCurrentMip = mipLevel;
-				RenderPath.setTarget(mipLevel == 0 ? tex : RenderPathBase.bloomMipmaps[mipLevel - 1].name);
-				RenderPath.bindTarget(RenderPathBase.bloomMipmaps[mipLevel].name, "tex");
-				RenderPath.drawShader("shader_datas/bloom_pass/bloom_upsample_pass");
+				render_path_set_target(mipLevel == 0 ? tex : RenderPathBase.bloomMipmaps[mipLevel - 1].name);
+				render_path_bind_target(RenderPathBase.bloomMipmaps[mipLevel].name, "tex");
+				render_path_draw_shader("shader_datas/bloom_pass/bloom_upsample_pass");
 			}
 		}
 	}
@@ -250,10 +250,10 @@ class RenderPathBase {
 	static drawSplit = (drawCommands: ()=>void) => {
 		if (Context.raw.splitView && !Context.raw.paint2dView) {
 			Context.raw.ddirty = 2;
-			let cam = Scene.camera;
+			let cam = scene_camera;
 
 			Context.raw.viewIndex = Context.raw.viewIndex == 0 ? 1 : 0;
-			Transform.setMatrix(cam.base.transform, Camera.views[Context.raw.viewIndex]);
+			transform_set_matrix(cam.base.transform, Camera.views[Context.raw.viewIndex]);
 			CameraObject.buildMatrix(cam);
 			CameraObject.buildProjection(cam);
 
@@ -271,7 +271,7 @@ class RenderPathBase {
 			///end
 
 			Context.raw.viewIndex = Context.raw.viewIndex == 0 ? 1 : 0;
-			Transform.setMatrix(cam.base.transform, Camera.views[Context.raw.viewIndex]);
+			transform_set_matrix(cam.base.transform, Camera.views[Context.raw.viewIndex]);
 			CameraObject.buildMatrix(cam);
 			CameraObject.buildProjection(cam);
 		}
@@ -282,16 +282,16 @@ class RenderPathBase {
 		if (Config.raw.rp_gi != false) {
 			let voxelize = Context.raw.ddirty > 0 && RenderPathBase.taaFrame > 0;
 			if (voxelize) {
-				RenderPath.clearImage("voxels", 0x00000000);
-				RenderPath.setTarget("");
-				RenderPath.setViewport(RenderPathBase.voxelsRes, RenderPathBase.voxelsRes);
-				RenderPath.bindTarget("voxels", "voxels");
+				render_path_clear_image("voxels", 0x00000000);
+				render_path_set_target("");
+				render_path_set_viewport(RenderPathBase.voxelsRes, RenderPathBase.voxelsRes);
+				render_path_bind_target("voxels", "voxels");
 				if (MakeMaterial.heightUsed) {
 					let tid = 0; // Project.layers[0].id;
-					RenderPath.bindTarget("texpaint_pack" + tid, "texpaint_pack");
+					render_path_bind_target("texpaint_pack" + tid, "texpaint_pack");
 				}
-				RenderPath.drawMeshes("voxel");
-				RenderPath.generateMipmaps("voxels");
+				render_path_draw_meshes("voxel");
+				render_path_gen_mipmaps("voxels");
 			}
 		}
 	}
@@ -299,145 +299,145 @@ class RenderPathBase {
 
 	static initSSAO = () => {
 		{
-			let t = RenderTarget.create();
+			let t = render_target_create();
 			t.name = "singlea";
 			t.width = 0;
 			t.height = 0;
 			t.format = "R8";
 			t.scale = RenderPathBase.getSuperSampling();
-			RenderPath.createRenderTarget(t);
+			render_path_create_render_target(t);
 		}
 		{
-			let t = RenderTarget.create();
+			let t = render_target_create();
 			t.name = "singleb";
 			t.width = 0;
 			t.height = 0;
 			t.format = "R8";
 			t.scale = RenderPathBase.getSuperSampling();
-			RenderPath.createRenderTarget(t);
+			render_path_create_render_target(t);
 		}
-		RenderPath.loadShader("shader_datas/ssao_pass/ssao_pass");
-		RenderPath.loadShader("shader_datas/ssao_blur_pass/ssao_blur_pass_x");
-		RenderPath.loadShader("shader_datas/ssao_blur_pass/ssao_blur_pass_y");
+		render_path_load_shader("shader_datas/ssao_pass/ssao_pass");
+		render_path_load_shader("shader_datas/ssao_blur_pass/ssao_blur_pass_x");
+		render_path_load_shader("shader_datas/ssao_blur_pass/ssao_blur_pass_y");
 	}
 
 	static drawSSAO = () => {
 		let ssao = Config.raw.rp_ssao != false && Context.raw.cameraType == CameraType.CameraPerspective;
 		if (ssao && Context.raw.ddirty > 0 && RenderPathBase.taaFrame > 0) {
-			if (RenderPath.renderTargets.get("singlea") == null) {
+			if (render_path_render_targets.get("singlea") == null) {
 				RenderPathBase.initSSAO();
 			}
 
-			RenderPath.setTarget("singlea");
-			RenderPath.bindTarget("_main", "gbufferD");
-			RenderPath.bindTarget("gbuffer0", "gbuffer0");
-			RenderPath.drawShader("shader_datas/ssao_pass/ssao_pass");
+			render_path_set_target("singlea");
+			render_path_bind_target("_main", "gbufferD");
+			render_path_bind_target("gbuffer0", "gbuffer0");
+			render_path_draw_shader("shader_datas/ssao_pass/ssao_pass");
 
-			RenderPath.setTarget("singleb");
-			RenderPath.bindTarget("singlea", "tex");
-			RenderPath.bindTarget("gbuffer0", "gbuffer0");
-			RenderPath.drawShader("shader_datas/ssao_blur_pass/ssao_blur_pass_x");
+			render_path_set_target("singleb");
+			render_path_bind_target("singlea", "tex");
+			render_path_bind_target("gbuffer0", "gbuffer0");
+			render_path_draw_shader("shader_datas/ssao_blur_pass/ssao_blur_pass_x");
 
-			RenderPath.setTarget("singlea");
-			RenderPath.bindTarget("singleb", "tex");
-			RenderPath.bindTarget("gbuffer0", "gbuffer0");
-			RenderPath.drawShader("shader_datas/ssao_blur_pass/ssao_blur_pass_y");
+			render_path_set_target("singlea");
+			render_path_bind_target("singleb", "tex");
+			render_path_bind_target("gbuffer0", "gbuffer0");
+			render_path_draw_shader("shader_datas/ssao_blur_pass/ssao_blur_pass_y");
 		}
 	}
 
 	static drawDeferredLight = () => {
-		RenderPath.setTarget("tex");
-		RenderPath.bindTarget("_main", "gbufferD");
-		RenderPath.bindTarget("gbuffer0", "gbuffer0");
-		RenderPath.bindTarget("gbuffer1", "gbuffer1");
+		render_path_set_target("tex");
+		render_path_bind_target("_main", "gbufferD");
+		render_path_bind_target("gbuffer0", "gbuffer0");
+		render_path_bind_target("gbuffer1", "gbuffer1");
 		let ssao = Config.raw.rp_ssao != false && Context.raw.cameraType == CameraType.CameraPerspective;
 		if (ssao && RenderPathBase.taaFrame > 0) {
-			RenderPath.bindTarget("singlea", "ssaotex");
+			render_path_bind_target("singlea", "ssaotex");
 		}
 		else {
-			RenderPath.bindTarget("empty_white", "ssaotex");
+			render_path_bind_target("empty_white", "ssaotex");
 		}
 
 		let voxelao_pass = false;
 		///if arm_voxels
 		if (Config.raw.rp_gi != false) {
 			voxelao_pass = true;
-			RenderPath.bindTarget("voxels", "voxels");
+			render_path_bind_target("voxels", "voxels");
 		}
 		///end
 
 		voxelao_pass ?
-			RenderPath.drawShader("shader_datas/deferred_light/deferred_light_voxel") :
-			RenderPath.drawShader("shader_datas/deferred_light/deferred_light");
+			render_path_draw_shader("shader_datas/deferred_light/deferred_light_voxel") :
+			render_path_draw_shader("shader_datas/deferred_light/deferred_light");
 
 		///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
-		RenderPath.setDepthFrom("tex", "gbuffer0"); // Bind depth for world pass
+		render_path_set_depth_from("tex", "gbuffer0"); // Bind depth for world pass
 		///end
 
-		RenderPath.setTarget("tex");
-		RenderPath.drawSkydome("shader_datas/world_pass/world_pass");
+		render_path_set_target("tex");
+		render_path_draw_skydome("shader_datas/world_pass/world_pass");
 
 		///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
-		RenderPath.setDepthFrom("tex", "gbuffer1"); // Unbind depth
+		render_path_set_depth_from("tex", "gbuffer1"); // Unbind depth
 		///end
 	}
 
 	static drawSSR = () => {
 		if (Config.raw.rp_ssr != false) {
-			if (RenderPath.cachedShaderContexts.get("shader_datas/ssr_pass/ssr_pass") == null) {
+			if (render_path_cached_shader_contexts.get("shader_datas/ssr_pass/ssr_pass") == null) {
 				{
-					let t = RenderTarget.create();
+					let t = render_target_create();
 					t.name = "bufb";
 					t.width = 0;
 					t.height = 0;
 					t.format = "RGBA64";
-					RenderPath.createRenderTarget(t);
+					render_path_create_render_target(t);
 				}
-				RenderPath.loadShader("shader_datas/ssr_pass/ssr_pass");
-				RenderPath.loadShader("shader_datas/ssr_blur_pass/ssr_blur_pass_x");
-				RenderPath.loadShader("shader_datas/ssr_blur_pass/ssr_blur_pass_y3_blend");
+				render_path_load_shader("shader_datas/ssr_pass/ssr_pass");
+				render_path_load_shader("shader_datas/ssr_blur_pass/ssr_blur_pass_x");
+				render_path_load_shader("shader_datas/ssr_blur_pass/ssr_blur_pass_y3_blend");
 			}
 			let targeta = "bufb";
 			let targetb = "gbuffer1";
 
-			RenderPath.setTarget(targeta);
-			RenderPath.bindTarget("tex", "tex");
-			RenderPath.bindTarget("_main", "gbufferD");
-			RenderPath.bindTarget("gbuffer0", "gbuffer0");
-			RenderPath.bindTarget("gbuffer1", "gbuffer1");
-			RenderPath.drawShader("shader_datas/ssr_pass/ssr_pass");
+			render_path_set_target(targeta);
+			render_path_bind_target("tex", "tex");
+			render_path_bind_target("_main", "gbufferD");
+			render_path_bind_target("gbuffer0", "gbuffer0");
+			render_path_bind_target("gbuffer1", "gbuffer1");
+			render_path_draw_shader("shader_datas/ssr_pass/ssr_pass");
 
-			RenderPath.setTarget(targetb);
-			RenderPath.bindTarget(targeta, "tex");
-			RenderPath.bindTarget("gbuffer0", "gbuffer0");
-			RenderPath.drawShader("shader_datas/ssr_blur_pass/ssr_blur_pass_x");
+			render_path_set_target(targetb);
+			render_path_bind_target(targeta, "tex");
+			render_path_bind_target("gbuffer0", "gbuffer0");
+			render_path_draw_shader("shader_datas/ssr_blur_pass/ssr_blur_pass_x");
 
-			RenderPath.setTarget("tex");
-			RenderPath.bindTarget(targetb, "tex");
-			RenderPath.bindTarget("gbuffer0", "gbuffer0");
-			RenderPath.drawShader("shader_datas/ssr_blur_pass/ssr_blur_pass_y3_blend");
+			render_path_set_target("tex");
+			render_path_bind_target(targetb, "tex");
+			render_path_bind_target("gbuffer0", "gbuffer0");
+			render_path_draw_shader("shader_datas/ssr_blur_pass/ssr_blur_pass_y3_blend");
 		}
 	}
 
 	// static drawMotionBlur = () => {
 	// 	if (Config.raw.rp_motionblur != false) {
-	// 		RenderPath.setTarget("buf");
-	// 		RenderPath.bindTarget("tex", "tex");
-	// 		RenderPath.bindTarget("gbuffer0", "gbuffer0");
+	// 		render_path_set_target("buf");
+	// 		render_path_bind_target("tex", "tex");
+	// 		render_path_bind_target("gbuffer0", "gbuffer0");
 	// 		///if (rp_motionblur == "Camera")
 	// 		{
-	// 			RenderPath.bindTarget("_main", "gbufferD");
-	// 			RenderPath.drawShader("shader_datas/motion_blur_pass/motion_blur_pass");
+	// 			render_path_bind_target("_main", "gbufferD");
+	// 			render_path_draw_shader("shader_datas/motion_blur_pass/motion_blur_pass");
 	// 		}
 	// 		///else
 	// 		{
-	// 			RenderPath.bindTarget("gbuffer2", "sveloc");
-	// 			RenderPath.drawShader("shader_datas/motion_blur_veloc_pass/motion_blur_veloc_pass");
+	// 			render_path_bind_target("gbuffer2", "sveloc");
+	// 			render_path_draw_shader("shader_datas/motion_blur_veloc_pass/motion_blur_veloc_pass");
 	// 		}
 	// 		///end
-	// 		RenderPath.setTarget("tex");
-	// 		RenderPath.bindTarget("buf", "tex");
-	// 		RenderPath.drawShader("shader_datas/copy_pass/copy_pass");
+	// 		render_path_set_target("tex");
+	// 		render_path_bind_target("buf", "tex");
+	// 		render_path_draw_shader("shader_datas/copy_pass/copy_pass");
 	// 	}
 	// }
 
@@ -448,77 +448,77 @@ class RenderPathBase {
 	// 		t.width = 1;
 	// 		t.height = 1;
 	// 		t.format = "RGBA64";
-	// 		RenderPath.createRenderTarget(t);
+	// 		render_path_create_render_target(t);
 
-	// 		RenderPath.loadShader("shader_datas/histogram_pass/histogram_pass");
+	// 		render_path_load_shader("shader_datas/histogram_pass/histogram_pass");
 	// 	}
 
-	// 	RenderPath.setTarget("histogram");
-	// 	RenderPath.bindTarget("taa", "tex");
-	// 	RenderPath.drawShader("shader_datas/histogram_pass/histogram_pass");
+	// 	render_path_set_target("histogram");
+	// 	render_path_bind_target("taa", "tex");
+	// 	render_path_draw_shader("shader_datas/histogram_pass/histogram_pass");
 	// }
 
 	static drawTAA = () => {
 		let current = RenderPathBase.taaFrame % 2 == 0 ? "buf2" : "taa2";
 		let last = RenderPathBase.taaFrame % 2 == 0 ? "taa2" : "buf2";
 
-		RenderPath.setTarget(current);
-		RenderPath.clearTarget(0x00000000);
-		RenderPath.bindTarget("buf", "colorTex");
-		RenderPath.drawShader("shader_datas/smaa_edge_detect/smaa_edge_detect");
+		render_path_set_target(current);
+		render_path_clear_target(0x00000000);
+		render_path_bind_target("buf", "colorTex");
+		render_path_draw_shader("shader_datas/smaa_edge_detect/smaa_edge_detect");
 
-		RenderPath.setTarget("taa");
-		RenderPath.clearTarget(0x00000000);
-		RenderPath.bindTarget(current, "edgesTex");
-		RenderPath.drawShader("shader_datas/smaa_blend_weight/smaa_blend_weight");
+		render_path_set_target("taa");
+		render_path_clear_target(0x00000000);
+		render_path_bind_target(current, "edgesTex");
+		render_path_draw_shader("shader_datas/smaa_blend_weight/smaa_blend_weight");
 
-		RenderPath.setTarget(current);
-		RenderPath.bindTarget("buf", "colorTex");
-		RenderPath.bindTarget("taa", "blendTex");
-		RenderPath.bindTarget("gbuffer2", "sveloc");
-		RenderPath.drawShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
+		render_path_set_target(current);
+		render_path_bind_target("buf", "colorTex");
+		render_path_bind_target("taa", "blendTex");
+		render_path_bind_target("gbuffer2", "sveloc");
+		render_path_draw_shader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
 
 		let skipTaa = Context.raw.splitView;
 		if (skipTaa) {
-			RenderPath.setTarget("taa");
-			RenderPath.bindTarget(current, "tex");
-			RenderPath.drawShader("shader_datas/copy_pass/copy_pass");
+			render_path_set_target("taa");
+			render_path_bind_target(current, "tex");
+			render_path_draw_shader("shader_datas/copy_pass/copy_pass");
 		}
 		else {
-			RenderPath.setTarget("taa");
-			RenderPath.bindTarget(current, "tex");
-			RenderPath.bindTarget(last, "tex2");
-			RenderPath.bindTarget("gbuffer2", "sveloc");
-			RenderPath.drawShader("shader_datas/taa_pass/taa_pass");
+			render_path_set_target("taa");
+			render_path_bind_target(current, "tex");
+			render_path_bind_target(last, "tex2");
+			render_path_bind_target("gbuffer2", "sveloc");
+			render_path_draw_shader("shader_datas/taa_pass/taa_pass");
 		}
 
 		if (RenderPathBase.ssaa4()) {
-			RenderPath.setTarget("");
-			RenderPath.bindTarget(RenderPathBase.taaFrame % 2 == 0 ? "taa2" : "taa", "tex");
-			RenderPath.drawShader("shader_datas/supersample_resolve/supersample_resolve");
+			render_path_set_target("");
+			render_path_bind_target(RenderPathBase.taaFrame % 2 == 0 ? "taa2" : "taa", "tex");
+			render_path_draw_shader("shader_datas/supersample_resolve/supersample_resolve");
 		}
 		else {
-			RenderPath.setTarget("");
-			RenderPath.bindTarget(RenderPathBase.taaFrame == 0 ? current : "taa", "tex");
-			RenderPath.drawShader("shader_datas/copy_pass/copy_pass");
+			render_path_set_target("");
+			render_path_bind_target(RenderPathBase.taaFrame == 0 ? current : "taa", "tex");
+			render_path_draw_shader("shader_datas/copy_pass/copy_pass");
 		}
 	}
 
 	static drawGbuffer = () => {
-		RenderPath.setTarget("gbuffer0"); // Only clear gbuffer0
+		render_path_set_target("gbuffer0"); // Only clear gbuffer0
 		///if krom_metal
-		RenderPath.clearTarget(0x00000000, 1.0);
+		render_path_clear_target(0x00000000, 1.0);
 		///else
-		RenderPath.clearTarget(null, 1.0);
+		render_path_clear_target(null, 1.0);
 		///end
 		if (MakeMesh.layerPassCount == 1) {
-			RenderPath.setTarget("gbuffer2");
-			RenderPath.clearTarget(0xff000000);
+			render_path_set_target("gbuffer2");
+			render_path_clear_target(0xff000000);
 		}
-		RenderPath.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
-		let currentG = RenderPath.currentG;
+		render_path_set_target("gbuffer0", ["gbuffer1", "gbuffer2"]);
+		let currentG =_render_path_current_g;
 		RenderPathPaint.bindLayers();
-		RenderPath.drawMeshes("mesh");
+		render_path_draw_meshes("mesh");
 		RenderPathPaint.unbindLayers();
 		if (MakeMesh.layerPassCount > 1) {
 			RenderPathBase.makeGbufferCopyTextures();
@@ -526,15 +526,15 @@ class RenderPathBase {
 				let ping = i % 2 == 1 ? "_copy" : "";
 				let pong = i % 2 == 1 ? "" : "_copy";
 				if (i == MakeMesh.layerPassCount - 1) {
-					RenderPath.setTarget("gbuffer2" + ping);
-					RenderPath.clearTarget(0xff000000);
+					render_path_set_target("gbuffer2" + ping);
+					render_path_clear_target(0xff000000);
 				}
-				RenderPath.setTarget("gbuffer0" + ping, ["gbuffer1" + ping, "gbuffer2" + ping]);
-				RenderPath.bindTarget("gbuffer0" + pong, "gbuffer0");
-				RenderPath.bindTarget("gbuffer1" + pong, "gbuffer1");
-				RenderPath.bindTarget("gbuffer2" + pong, "gbuffer2");
+				render_path_set_target("gbuffer0" + ping, ["gbuffer1" + ping, "gbuffer2" + ping]);
+				render_path_bind_target("gbuffer0" + pong, "gbuffer0");
+				render_path_bind_target("gbuffer1" + pong, "gbuffer1");
+				render_path_bind_target("gbuffer2" + pong, "gbuffer2");
 				RenderPathPaint.bindLayers();
-				RenderPath.drawMeshes("mesh" + i);
+				render_path_draw_meshes("mesh" + i);
 				RenderPathPaint.unbindLayers();
 			}
 			if (MakeMesh.layerPassCount % 2 == 0) {
@@ -542,56 +542,56 @@ class RenderPathBase {
 			}
 		}
 
-		let hide = Operator.shortcut(Config.keymap.stencil_hide, ShortcutType.ShortcutDown) || Keyboard.down("control");
+		let hide = Operator.shortcut(Config.keymap.stencil_hide, ShortcutType.ShortcutDown) || keyboard_down("control");
 		let isDecal = Base.isDecalLayer();
 		if (isDecal && !hide) LineDraw.render(currentG, Context.raw.layer.decalMat);
 	}
 
 	static makeGbufferCopyTextures = () => {
-		let copy = RenderPath.renderTargets.get("gbuffer0_copy");
-		if (copy == null || copy.image.width != RenderPath.renderTargets.get("gbuffer0").image.width || copy.image.height != RenderPath.renderTargets.get("gbuffer0").image.height) {
+		let copy = render_path_render_targets.get("gbuffer0_copy");
+		if (copy == null || copy.image.width != render_path_render_targets.get("gbuffer0").image.width || copy.image.height != render_path_render_targets.get("gbuffer0").image.height) {
 			{
-				let t = RenderTarget.create();
+				let t = render_target_create();
 				t.name = "gbuffer0_copy";
 				t.width = 0;
 				t.height = 0;
 				t.format = "RGBA64";
 				t.scale = RenderPathBase.getSuperSampling();
 				t.depth_buffer = "main";
-				RenderPath.createRenderTarget(t);
+				render_path_create_render_target(t);
 			}
 			{
-				let t = RenderTarget.create();
+				let t = render_target_create();
 				t.name = "gbuffer1_copy";
 				t.width = 0;
 				t.height = 0;
 				t.format = "RGBA64";
 				t.scale = RenderPathBase.getSuperSampling();
-				RenderPath.createRenderTarget(t);
+				render_path_create_render_target(t);
 			}
 			{
-				let t = RenderTarget.create();
+				let t = render_target_create();
 				t.name = "gbuffer2_copy";
 				t.width = 0;
 				t.height = 0;
 				t.format = "RGBA64";
 				t.scale = RenderPathBase.getSuperSampling();
-				RenderPath.createRenderTarget(t);
+				render_path_create_render_target(t);
 			}
 
 			///if krom_metal
 			// TODO: Fix depth attach for gbuffer0_copy on metal
 			// Use resize to re-create buffers from scratch for now
-			RenderPath.resize();
+			render_path_resize();
 			///end
 		}
 	}
 
 	static copyToGbuffer = () => {
-		RenderPath.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
-		RenderPath.bindTarget("gbuffer0_copy", "tex0");
-		RenderPath.bindTarget("gbuffer1_copy", "tex1");
-		RenderPath.bindTarget("gbuffer2_copy", "tex2");
-		RenderPath.drawShader("shader_datas/copy_mrt3_pass/copy_mrt3RGBA64_pass");
+		render_path_set_target("gbuffer0", ["gbuffer1", "gbuffer2"]);
+		render_path_bind_target("gbuffer0_copy", "tex0");
+		render_path_bind_target("gbuffer1_copy", "tex1");
+		render_path_bind_target("gbuffer2_copy", "tex2");
+		render_path_draw_shader("shader_datas/copy_mrt3_pass/copy_mrt3RGBA64_pass");
 	}
 }

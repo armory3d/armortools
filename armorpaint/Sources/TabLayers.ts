@@ -2,29 +2,29 @@
 class TabLayers {
 
 	static layerNameEdit = -1;
-	static layerNameHandle = new Handle();
+	static layerNameHandle = Handle.create();
 	static showContextMenu = false;
 
-	static draw = (htab: Handle) => {
+	static draw = (htab: HandleRaw) => {
 		let mini = Config.raw.layout[LayoutSize.LayoutSidebarW] <= UIBase.sidebarMiniW;
 		mini ? TabLayers.drawMini(htab) : TabLayers.drawFull(htab);
 	}
 
-	static drawMini = (htab: Handle) => {
+	static drawMini = (htab: HandleRaw) => {
 		let ui = UIBase.ui;
-		ui.setHoveredTabName(tr("Layers"));
+		Zui.setHoveredTabName(tr("Layers"));
 
 		let _ELEMENT_H = ui.t.ELEMENT_H;
-		ui.t.ELEMENT_H = Math.floor(UIBase.sidebarMiniW / 2 / ui.SCALE());
+		ui.t.ELEMENT_H = Math.floor(UIBase.sidebarMiniW / 2 / Zui.SCALE(ui));
 
-		ui.beginSticky();
-		ui.separator(5);
+		Zui.beginSticky();
+		Zui.separator(5);
 
 		TabLayers.comboFilter();
 		TabLayers.button2dView();
 		TabLayers.buttonNew("+");
 
-		ui.endSticky();
+		Zui.endSticky();
 		ui._y += 2;
 
 		TabLayers.highlightOddLines();
@@ -33,17 +33,17 @@ class TabLayers {
 		ui.t.ELEMENT_H = _ELEMENT_H;
 	}
 
-	static drawFull = (htab: Handle) => {
+	static drawFull = (htab: HandleRaw) => {
 		let ui = UIBase.ui;
-		if (ui.tab(htab, tr("Layers"))) {
-			ui.beginSticky();
-			ui.row([1 / 4, 1 / 4, 1 / 2]);
+		if (Zui.tab(htab, tr("Layers"))) {
+			Zui.beginSticky();
+			Zui.row([1 / 4, 1 / 4, 1 / 2]);
 
 			TabLayers.buttonNew(tr("New"));
 			TabLayers.button2dView();
 			TabLayers.comboFilter();
 
-			ui.endSticky();
+			Zui.endSticky();
 			ui._y += 2;
 
 			TabLayers.highlightOddLines();
@@ -53,10 +53,10 @@ class TabLayers {
 
 	static button2dView = () => {
 		let ui = UIBase.ui;
-		if (ui.button(tr("2D View"))) {
+		if (Zui.button(tr("2D View"))) {
 			UIBase.show2DView(View2DType.View2DLayer);
 		}
-		else if (ui.isHovered) ui.tooltip(tr("Show 2D View") + ` (${Config.keymap.toggle_2d_view})`);
+		else if (ui.isHovered) Zui.tooltip(tr("Show 2D View") + ` (${Config.keymap.toggle_2d_view})`);
 	}
 
 	static drawSlots = (mini: bool) => {
@@ -74,15 +74,15 @@ class TabLayers {
 		let fullH = ui._windowH - UIBase.hwnds[0].scrollOffset;
 		for (let i = 0; i < Math.floor(fullH / step); ++i) {
 			if (i % 2 == 0) {
-				ui.fill(0, i * step, (ui._w / ui.SCALE() - 2), step, ui.t.WINDOW_BG_COL - 0x00040404);
+				Zui.fill(0, i * step, (ui._w / Zui.SCALE(ui) - 2), step, ui.t.WINDOW_BG_COL - 0x00040404);
 			}
 		}
 	}
 
 	static buttonNew = (text: string) => {
 		let ui = UIBase.ui;
-		if (ui.button(text)) {
-			UIMenu.draw((ui: Zui) => {
+		if (Zui.button(text)) {
+			UIMenu.draw((ui: ZuiRaw) => {
 				let l = Context.raw.layer;
 				if (UIMenu.menuButton(ui, tr("Paint Layer"))) {
 					Base.newLayer();
@@ -162,7 +162,7 @@ class TabLayers {
 		if (atlases != null) for (let a of atlases) ar.push(a);
 		let filterHandle = Zui.handle("tablayers_0");
 		filterHandle.position = Context.raw.layerFilter;
-		Context.raw.layerFilter = ui.combo(filterHandle, ar, tr("Filter"), false, Align.Left);
+		Context.raw.layerFilter = Zui.combo(filterHandle, ar, tr("Filter"), false, Align.Left);
 		if (filterHandle.changed) {
 			for (let p of Project.paintObjects) {
 				p.base.visible = Context.raw.layerFilter == 0 || p.base.name == ar[Context.raw.layerFilter] || Project.isAtlasObject(p);
@@ -231,12 +231,12 @@ class TabLayers {
 		}
 
 		let step = ui.t.ELEMENT_H;
-		let checkw = (ui._windowW / 100 * 8) / ui.SCALE();
+		let checkw = (ui._windowW / 100 * 8) / Zui.SCALE(ui);
 
 		// Highlight drag destination
 		let absy = ui._windowY + ui._y;
 		if (Base.isDragging && Base.dragLayer != null && Context.inLayers()) {
-			if (Mouse.y > absy + step && Mouse.y < absy + step * 3) {
+			if (mouse_y > absy + step && mouse_y < absy + step * 3) {
 				let down = Project.layers.indexOf(Base.dragLayer) >= i;
 				Context.raw.dragDestination = down ? i : i - 1;
 
@@ -246,27 +246,27 @@ class TabLayers {
 				let nestedGroup = SlotLayer.isGroup(Base.dragLayer) && toGroup;
 				if (!nestedGroup) {
 					if (SlotLayer.canMove(Context.raw.layer, Context.raw.dragDestination)) {
-						ui.fill(checkw, step * 2, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
+						Zui.fill(checkw, step * 2, (ui._windowW / Zui.SCALE(ui) - 2) - checkw, 2 * Zui.SCALE(ui), ui.t.HIGHLIGHT_COL);
 					}
 				}
 			}
-			else if (i == Project.layers.length - 1 && Mouse.y < absy + step) {
+			else if (i == Project.layers.length - 1 && mouse_y < absy + step) {
 				Context.raw.dragDestination = Project.layers.length - 1;
 				if (SlotLayer.canMove(Context.raw.layer, Context.raw.dragDestination)) {
-					ui.fill(checkw, 0, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
+					Zui.fill(checkw, 0, (ui._windowW / Zui.SCALE(ui) - 2) - checkw, 2 * Zui.SCALE(ui), ui.t.HIGHLIGHT_COL);
 				}
 			}
 		}
 		if (Base.isDragging && (Base.dragMaterial != null || Base.dragSwatch != null) && Context.inLayers()) {
-			if (Mouse.y > absy + step && Mouse.y < absy + step * 3) {
+			if (mouse_y > absy + step && mouse_y < absy + step * 3) {
 				Context.raw.dragDestination = i;
 				if (TabLayers.canDropNewLayer(i))
-					ui.fill(checkw, 2 * step, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
+					Zui.fill(checkw, 2 * step, (ui._windowW / Zui.SCALE(ui) - 2) - checkw, 2 * Zui.SCALE(ui), ui.t.HIGHLIGHT_COL);
 			}
-			else if (i == Project.layers.length - 1 && Mouse.y < absy + step) {
+			else if (i == Project.layers.length - 1 && mouse_y < absy + step) {
 				Context.raw.dragDestination = Project.layers.length;
 				if (TabLayers.canDropNewLayer(Project.layers.length))
-					ui.fill(checkw, 0, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
+					Zui.fill(checkw, 0, (ui._windowW / Zui.SCALE(ui) - 2) - checkw, 2 * Zui.SCALE(ui), ui.t.HIGHLIGHT_COL);
 			}
 		}
 
@@ -282,15 +282,15 @@ class TabLayers {
 	static drawLayerSlotMini = (l: SlotLayerRaw, i: i32) => {
 		let ui = UIBase.ui;
 
-		ui.row([1, 1]);
+		Zui.row([1, 1]);
 		let uix = ui._x;
 		let uiy = ui._y;
 		let state = TabLayers.drawLayerIcon(l, i, uix, uiy, true);
 		TabLayers.handleLayerIconState(l, i, state, uix, uiy);
-		ui.endElement();
+		Zui.endElement();
 
-		ui._y += ui.ELEMENT_H();
-		ui._y -= ui.ELEMENT_OFFSET();
+		ui._y += Zui.ELEMENT_H(ui);
+		ui._y -= Zui.ELEMENT_OFFSET(ui);
 	}
 
 	static drawLayerSlotFull = (l: SlotLayerRaw, i: i32) => {
@@ -300,16 +300,16 @@ class TabLayers {
 
 		let hasPanel = SlotLayer.isGroup(l) || (SlotLayer.isLayer(l) && SlotLayer.getMasks(l, false) != null);
 		if (hasPanel) {
-			ui.row([8 / 100, 16 / 100, 36 / 100, 30 / 100, 10 / 100]);
+			Zui.row([8 / 100, 16 / 100, 36 / 100, 30 / 100, 10 / 100]);
 		}
 		else {
-			ui.row([8 / 100, 16 / 100, 36 / 100, 30 / 100]);
+			Zui.row([8 / 100, 16 / 100, 36 / 100, 30 / 100]);
 		}
 
 		// Draw eye icon
 		let icons = Res.get("icons.k");
 		let r = Res.tile18(icons, l.visible ? 0 : 1, 0);
-		let center = (step / 2) * ui.SCALE();
+		let center = (step / 2) * Zui.SCALE(ui);
 		ui._x += 2;
 		ui._y += 3;
 		ui._y += center;
@@ -317,7 +317,7 @@ class TabLayers {
 		let parentHidden = l.parent != null && (!l.parent.visible || (l.parent.parent != null && !l.parent.parent.visible));
 		if (parentHidden) col -= 0x99000000;
 
-		if (ui.image(icons, col, null, r.x, r.y, r.w, r.h) == State.Released) {
+		if (Zui.image(icons, col, null, r.x, r.y, r.w, r.h) == State.Released) {
 			TabLayers.layerToggleVisible(l);
 		}
 		ui._x -= 2;
@@ -333,8 +333,8 @@ class TabLayers {
 		ui._x += 2;
 		ui._y += 3;
 		if (l.parent != null) {
-			ui._x += 10 * ui.SCALE();
-			if (l.parent.parent != null) ui._x += 10 * ui.SCALE();
+			ui._x += 10 * Zui.SCALE(ui);
+			if (l.parent.parent != null) ui._x += 10 * Zui.SCALE(ui);
 		}
 
 		let state = TabLayers.drawLayerIcon(l, i, uix, uiy, false);
@@ -343,7 +343,7 @@ class TabLayers {
 		ui._y -= 3;
 
 		if (Config.raw.touch_ui) {
-			ui._x += 12 * ui.SCALE();
+			ui._x += 12 * Zui.SCALE(ui);
 		}
 
 		///if krom_opengl
@@ -356,16 +356,16 @@ class TabLayers {
 		ui._y += center;
 		if (TabLayers.layerNameEdit == l.id) {
 			TabLayers.layerNameHandle.text = l.name;
-			l.name = ui.textInput(TabLayers.layerNameHandle);
+			l.name = Zui.textInput(TabLayers.layerNameHandle);
 			if (ui.textSelectedHandle_ptr != TabLayers.layerNameHandle.ptr) TabLayers.layerNameEdit = -1;
 		}
 		else {
 			if (ui.enabled && ui.inputEnabled && ui.comboSelectedHandle_ptr == null &&
 				ui.inputX > ui._windowX + ui._x && ui.inputX < ui._windowX + ui._windowW &&
-				ui.inputY > ui._windowY + ui._y - center && ui.inputY < ui._windowY + ui._y - center + (step * ui.SCALE()) * 2) {
+				ui.inputY > ui._windowY + ui._y - center && ui.inputY < ui._windowY + ui._y - center + (step * Zui.SCALE(ui)) * 2) {
 				if (ui.inputStarted) {
 					Context.setLayer(l);
-					TabLayers.setDragLayer(Context.raw.layer, -(Mouse.x - uix - ui._windowX - 3), -(Mouse.y - uiy - ui._windowY + 1));
+					TabLayers.setDragLayer(Context.raw.layer, -(mouse_x - uix - ui._windowX - 3), -(mouse_y - uiy - ui._windowY + 1));
 				}
 				else if (ui.inputReleasedR) {
 					Context.setLayer(l);
@@ -373,14 +373,14 @@ class TabLayers {
 				}
 			}
 
-			let state = ui.text(l.name);
+			let state = Zui.text(l.name);
 			if (state == State.Released) {
-				if (Time.time() - Context.raw.selectTime < 0.25) {
+				if (time_time() - Context.raw.selectTime < 0.25) {
 					TabLayers.layerNameEdit = l.id;
 					TabLayers.layerNameHandle.text = l.name;
-					ui.startTextEdit(TabLayers.layerNameHandle);
+					Zui.startTextEdit(TabLayers.layerNameHandle);
 				}
-				Context.raw.selectTime = Time.time();
+				Context.raw.selectTime = time_time();
 			}
 
 			let inFocus = ui.inputX > ui._windowX && ui.inputX < ui._windowX + ui._windowW &&
@@ -396,12 +396,12 @@ class TabLayers {
 		ui._y -= center;
 
 		if (l.parent != null) {
-			ui._x -= 10 * ui.SCALE();
-			if (l.parent.parent != null) ui._x -= 10 * ui.SCALE();
+			ui._x -= 10 * Zui.SCALE(ui);
+			if (l.parent.parent != null) ui._x -= 10 * Zui.SCALE(ui);
 		}
 
 		if (SlotLayer.isGroup(l)) {
-			ui.endElement();
+			Zui.endElement();
 		}
 		else {
 			if (SlotLayer.isMask(l)) {
@@ -417,43 +417,43 @@ class TabLayers {
 
 		if (hasPanel) {
 			ui._y += center;
-			let layerPanel = Zui.handle("tablayers_1").nest(l.id);
+			let layerPanel = Zui.nest(Zui.handle("tablayers_1"), l.id);
 			layerPanel.selected = l.show_panel;
-			l.show_panel = ui.panel(layerPanel, "", true, false, false);
+			l.show_panel = Zui.panel(layerPanel, "", true, false, false);
 			ui._y -= center;
 		}
 
 		if (SlotLayer.isGroup(l) || SlotLayer.isMask(l)) {
-			ui._y -= ui.ELEMENT_OFFSET();
-			ui.endElement();
+			ui._y -= Zui.ELEMENT_OFFSET(ui);
+			Zui.endElement();
 		}
 		else {
-			ui._y -= ui.ELEMENT_OFFSET();
+			ui._y -= Zui.ELEMENT_OFFSET(ui);
 
-			ui.row([8 / 100, 16 / 100, 36 / 100, 30 / 100, 10 / 100]);
-			ui.endElement();
-			ui.endElement();
-			ui.endElement();
+			Zui.row([8 / 100, 16 / 100, 36 / 100, 30 / 100, 10 / 100]);
+			Zui.endElement();
+			Zui.endElement();
+			Zui.endElement();
 
 			if (Config.raw.touch_ui) {
-				ui._x += 12 * ui.SCALE();
+				ui._x += 12 * Zui.SCALE(ui);
 			}
 
 			TabLayers.comboObject(ui, l);
-			ui.endElement();
+			Zui.endElement();
 		}
 
-		ui._y -= ui.ELEMENT_OFFSET();
+		ui._y -= Zui.ELEMENT_OFFSET(ui);
 	}
 
-	static comboObject = (ui: Zui, l: SlotLayerRaw, label = false): Handle => {
+	static comboObject = (ui: ZuiRaw, l: SlotLayerRaw, label = false): HandleRaw => {
 		let ar = [tr("Shared")];
 		for (let p of Project.paintObjects) ar.push(p.base.name);
 		let atlases = Project.getUsedAtlases();
 		if (atlases != null) for (let a of atlases) ar.push(a);
-		let objectHandle = Zui.handle("tablayers_2").nest(l.id);
+		let objectHandle = Zui.nest(Zui.handle("tablayers_2"), l.id);
 		objectHandle.position = l.objectMask;
-		l.objectMask = ui.combo(objectHandle, ar, tr("Object"), label, Align.Left);
+		l.objectMask = Zui.combo(objectHandle, ar, tr("Object"), label, Align.Left);
 		if (objectHandle.changed) {
 			Context.setLayer(l);
 			MakeMaterial.parseMeshMaterial();
@@ -472,10 +472,10 @@ class TabLayers {
 		return objectHandle;
 	}
 
-	static comboBlending = (ui: Zui, l: SlotLayerRaw, label = false): Handle => {
-		let blendingHandle = Zui.handle("tablayers_3").nest(l.id);
+	static comboBlending = (ui: ZuiRaw, l: SlotLayerRaw, label = false): HandleRaw => {
+		let blendingHandle = Zui.nest(Zui.handle("tablayers_3"), l.id);
 		blendingHandle.position = l.blending;
-		ui.combo(blendingHandle, [
+		Zui.combo(blendingHandle, [
 			tr("Mix"),
 			tr("Darken"),
 			tr("Multiply"),
@@ -515,15 +515,15 @@ class TabLayers {
 		let step = ui.t.ELEMENT_H;
 
 		// Separator line
-		ui.fill(0, 0, (ui._w / ui.SCALE() - 2), 1 * ui.SCALE(), ui.t.SEPARATOR_COL);
+		Zui.fill(0, 0, (ui._w / Zui.SCALE(ui) - 2), 1 * Zui.SCALE(ui), ui.t.SEPARATOR_COL);
 
 		// Highlight selected
 		if (Context.raw.layer == l) {
 			if (mini) {
-				ui.rect(1, -step * 2, ui._w / ui.SCALE() - 1, step * 2 + (mini ? -1 : 1), ui.t.HIGHLIGHT_COL, 3);
+				Zui.rect(1, -step * 2, ui._w / Zui.SCALE(ui) - 1, step * 2 + (mini ? -1 : 1), ui.t.HIGHLIGHT_COL, 3);
 			}
 			else {
-				ui.rect(1, -step * 2 - 1, ui._w / ui.SCALE() - 2, step * 2 + (mini ? -2 : 1), ui.t.HIGHLIGHT_COL, 2);
+				Zui.rect(1, -step * 2 - 1, ui._w / Zui.SCALE(ui) - 2, step * 2 + (mini ? -2 : 1), ui.t.HIGHLIGHT_COL, 2);
 			}
 		}
 	}
@@ -544,13 +544,13 @@ class TabLayers {
 		if (ui.isHovered && texpaint_preview != null) {
 			if (SlotLayer.isMask(l)) {
 				TabLayers.makeMaskPreviewRgba32(l);
-				ui.tooltipImage(Context.raw.maskPreviewRgba32);
+				Zui.tooltipImage(Context.raw.maskPreviewRgba32);
 			}
 			else {
-				ui.tooltipImage(texpaint_preview);
+				Zui.tooltipImage(texpaint_preview);
 			}
-			if (i < 9) ui.tooltip(l.name + " - (" + Config.keymap.select_layer + " " + (i + 1) + ")");
-			else ui.tooltip(l.name);
+			if (i < 9) Zui.tooltip(l.name + " - (" + Config.keymap.select_layer + " " + (i + 1) + ")");
+			else Zui.tooltip(l.name);
 		}
 
 		// Show context menu
@@ -561,14 +561,14 @@ class TabLayers {
 
 		if (state == State.Started) {
 			Context.setLayer(l);
-			TabLayers.setDragLayer(Context.raw.layer, -(Mouse.x - uix - ui._windowX - 3), -(Mouse.y - uiy - ui._windowY + 1));
+			TabLayers.setDragLayer(Context.raw.layer, -(mouse_x - uix - ui._windowX - 3), -(mouse_y - uiy - ui._windowY + 1));
 		}
 		else if (state == State.Released) {
-			if (Time.time() - Context.raw.selectTime < 0.2) {
+			if (time_time() - Context.raw.selectTime < 0.2) {
 				UIBase.show2DView(View2DType.View2DLayer);
 			}
-			if (Time.time() - Context.raw.selectTime > 0.2) {
-				Context.raw.selectTime = Time.time();
+			if (time_time() - Context.raw.selectTime > 0.2) {
+				Context.raw.selectTime = time_time();
 			}
 			if (l.fill_layer != null) Context.setMaterial(l.fill_layer);
 		}
@@ -577,10 +577,10 @@ class TabLayers {
 	static drawLayerIcon = (l: SlotLayerRaw, i: i32, uix: f32, uiy: f32, mini: bool) => {
 		let ui = UIBase.ui;
 		let icons = Res.get("icons.k");
-		let iconH = (ui.ELEMENT_H() - (mini ? 2 : 3)) * 2;
+		let iconH = (Zui.ELEMENT_H(ui) - (mini ? 2 : 3)) * 2;
 
-		if (mini && ui.SCALE() > 1) {
-			ui._x -= 1 * ui.SCALE();
+		if (mini && Zui.SCALE(ui) > 1) {
+			ui._x -= 1 * Zui.SCALE(ui);
 		}
 
 		if (l.parent != null) {
@@ -607,7 +607,7 @@ class TabLayers {
 				let _x = ui._x;
 				let _y = ui._y;
 				let _w = ui._w;
-				ui.image(icons, 0xffffffff, iconH, r.x, r.y, r.w, r.h);
+				Zui.image(icons, 0xffffffff, iconH, r.x, r.y, r.w, r.h);
 				ui.curRatio--;
 				ui._x = _x;
 				ui._y = _y;
@@ -621,7 +621,7 @@ class TabLayers {
 				Krom.setInt(UIView2D.channelLocation, 1);
 			}
 
-			let state = ui.image(icon, 0xffffffff, iconH);
+			let state = Zui.image(icon, 0xffffffff, iconH);
 
 			if (l.fill_layer == null && SlotLayer.isMask(l)) {
 				ui.g.pipeline = null;
@@ -632,12 +632,12 @@ class TabLayers {
 			if (!isTyping) {
 				if (i < 9 && Operator.shortcut(Config.keymap.select_layer, ShortcutType.ShortcutDown)) {
 					let number = String(i + 1) ;
-					let width = Font.width(ui.font, ui.fontSize, number) + 10;
-					let height = Font.height(ui.font, ui.fontSize);
+					let width = font_width(ui.font, ui.fontSize, number) + 10;
+					let height = font_height(ui.font, ui.fontSize);
 					ui.g.color = ui.t.TEXT_COL;
-					Graphics2.fillRect(uix, uiy, width, height);
+					g2_fill_rect(uix, uiy, width, height);
 					ui.g.color = ui.t.ACCENT_COL;
-					Graphics2.drawString(number, uix + 5, uiy);
+					g2_draw_string(number, uix + 5, uiy);
 				}
 			}
 
@@ -647,7 +647,7 @@ class TabLayers {
 			let folderClosed = Res.tile50(icons, 2, 1);
 			let folderOpen = Res.tile50(icons, 8, 1);
 			let folder = l.show_panel ? folderOpen : folderClosed;
-			return ui.image(icons, ui.t.LABEL_COL - 0x00202020, iconH, folder.x, folder.y, folder.w, folder.h);
+			return Zui.image(icons, ui.t.LABEL_COL - 0x00202020, iconH, folder.x, folder.y, folder.w, folder.h);
 		}
 	}
 
@@ -678,13 +678,13 @@ class TabLayers {
 		}
 		let menuElements = SlotLayer.isGroup(l) ? 7 : (19 + add);
 
-		UIMenu.draw((ui: Zui) => {
+		UIMenu.draw((ui: ZuiRaw) => {
 
 			if (mini) {
 				let visibleHandle = Zui.handle("tablayers_4");
 				visibleHandle.selected = l.visible;
 				UIMenu.menuFill(ui);
-				ui.check(visibleHandle, tr("Visible"));
+				Zui.check(visibleHandle, tr("Visible"));
 				if (visibleHandle.changed) {
 					TabLayers.layerToggleVisible(l);
 					UIMenu.keepOpen = true;
@@ -710,7 +710,7 @@ class TabLayers {
 						let f = UIFiles.filename;
 						if (f == "") f = tr("untitled");
 						if (!f.endsWith(".png")) f += ".png";
-						Krom.writePng(path + Path.sep + f, Image.getPixels(l.texpaint), l.texpaint.width, l.texpaint.height, 3); // RRR1
+						Krom.writePng(path + Path.sep + f, image_get_pixels(l.texpaint), l.texpaint.width, l.texpaint.height, 3); // RRR1
 					});
 				}
 				else {
@@ -816,9 +816,9 @@ class TabLayers {
 
 			UIMenu.menuFill(ui);
 			UIMenu.menuAlign(ui);
-			let layerOpacHandle = Zui.handle("tablayers_5").nest(l.id);
+			let layerOpacHandle = Zui.nest(Zui.handle("tablayers_5"), l.id);
 			layerOpacHandle.value = l.maskOpacity;
-			ui.slider(layerOpacHandle, tr("Opacity"), 0.0, 1.0, true);
+			Zui.slider(layerOpacHandle, tr("Opacity"), 0.0, 1.0, true);
 			if (layerOpacHandle.changed) {
 				if (ui.inputStarted) History.layerOpacity();
 				l.maskOpacity = layerOpacHandle.value;
@@ -837,7 +837,7 @@ class TabLayers {
 				///end
 				let _y = ui._y;
 				Base.resHandle.value = Base.resHandle.position;
-				Base.resHandle.position = Math.floor(ui.slider(Base.resHandle, ar[Base.resHandle.position], 0, ar.length - 1, false, 1, false, Align.Left, false));
+				Base.resHandle.position = Math.floor(Zui.slider(Base.resHandle, ar[Base.resHandle.position], 0, ar.length - 1, false, 1, false, Align.Left, false));
 				if (Base.resHandle.changed) {
 					UIMenu.keepOpen = true;
 				}
@@ -845,15 +845,15 @@ class TabLayers {
 					Base.onLayersResized();
 				}
 				ui._y = _y;
-				ui.drawString(ui.g, tr("Res"), null, 0, Align.Right);
-				ui.endElement();
+				Zui.drawString(ui.g, tr("Res"), null, 0, Align.Right);
+				Zui.endElement();
 
 				UIMenu.menuFill(ui);
 				UIMenu.menuAlign(ui);
 				///if (krom_android || krom_ios)
-				ui.inlineRadio(Base.bitsHandle, ["8bit"]);
+				Zui.inlineRadio(Base.bitsHandle, ["8bit"]);
 				///else
-				ui.inlineRadio(Base.bitsHandle, ["8bit", "16bit", "32bit"]);
+				Zui.inlineRadio(Base.bitsHandle, ["8bit", "16bit", "32bit"]);
 				///end
 				if (Base.bitsHandle.changed) {
 					App.notifyOnInit(Base.setLayerBits);
@@ -864,9 +864,9 @@ class TabLayers {
 			if (l.fill_layer != null) {
 				UIMenu.menuFill(ui);
 				UIMenu.menuAlign(ui);
-				let scaleHandle = Zui.handle("tablayers_6").nest(l.id);
+				let scaleHandle = Zui.nest(Zui.handle("tablayers_6"), l.id);
 				scaleHandle.value = l.scale;
-				l.scale = ui.slider(scaleHandle, tr("UV Scale"), 0.0, 5.0, true);
+				l.scale = Zui.slider(scaleHandle, tr("UV Scale"), 0.0, 5.0, true);
 				if (scaleHandle.changed) {
 					Context.setMaterial(l.fill_layer);
 					Context.setLayer(l);
@@ -879,9 +879,9 @@ class TabLayers {
 
 				UIMenu.menuFill(ui);
 				UIMenu.menuAlign(ui);
-				let angleHandle = Zui.handle("tablayers_7").nest(l.id);
+				let angleHandle = Zui.nest(Zui.handle("tablayers_7"), l.id);
 				angleHandle.value = l.angle;
-				l.angle = ui.slider(angleHandle, tr("Angle"), 0.0, 360, true, 1);
+				l.angle = Zui.slider(angleHandle, tr("Angle"), 0.0, 360, true, 1);
 				if (angleHandle.changed) {
 					Context.setMaterial(l.fill_layer);
 					Context.setLayer(l);
@@ -895,9 +895,9 @@ class TabLayers {
 
 				UIMenu.menuFill(ui);
 				UIMenu.menuAlign(ui);
-				let uvTypeHandle = Zui.handle("tablayers_8").nest(l.id);
+				let uvTypeHandle = Zui.nest(Zui.handle("tablayers_8"), l.id);
 				uvTypeHandle.position = l.uvType;
-				l.uvType = ui.inlineRadio(uvTypeHandle, [tr("UV Map"), tr("Triplanar"), tr("Project")], Align.Left);
+				l.uvType = Zui.inlineRadio(uvTypeHandle, [tr("UV Map"), tr("Triplanar"), tr("Project")], Align.Left);
 				if (uvTypeHandle.changed) {
 					Context.setMaterial(l.fill_layer);
 					Context.setLayer(l);
@@ -911,17 +911,17 @@ class TabLayers {
 			}
 
 			if (!SlotLayer.isGroup(l)) {
-				let baseHandle = Zui.handle("tablayers_9").nest(l.id);
-				let opacHandle = Zui.handle("tablayers_10").nest(l.id);
-				let norHandle = Zui.handle("tablayers_11").nest(l.id);
-				let norBlendHandle = Zui.handle("tablayers_12").nest(l.id);
-				let occHandle = Zui.handle("tablayers_13").nest(l.id);
-				let roughHandle = Zui.handle("tablayers_14").nest(l.id);
-				let metHandle = Zui.handle("tablayers_15").nest(l.id);
-				let heightHandle = Zui.handle("tablayers_16").nest(l.id);
-				let heightBlendHandle = Zui.handle("tablayers_17").nest(l.id);
-				let emisHandle = Zui.handle("tablayers_18").nest(l.id);
-				let subsHandle = Zui.handle("tablayers_19").nest(l.id);
+				let baseHandle = Zui.nest(Zui.handle("tablayers_9"), l.id);
+				let opacHandle = Zui.nest(Zui.handle("tablayers_10"), l.id);
+				let norHandle = Zui.nest(Zui.handle("tablayers_11"), l.id);
+				let norBlendHandle = Zui.nest(Zui.handle("tablayers_12"), l.id);
+				let occHandle = Zui.nest(Zui.handle("tablayers_13"), l.id);
+				let roughHandle = Zui.nest(Zui.handle("tablayers_14"), l.id);
+				let metHandle = Zui.nest(Zui.handle("tablayers_15"), l.id);
+				let heightHandle = Zui.nest(Zui.handle("tablayers_16"), l.id);
+				let heightBlendHandle = Zui.nest(Zui.handle("tablayers_17"), l.id);
+				let emisHandle = Zui.nest(Zui.handle("tablayers_18"), l.id);
+				let subsHandle = Zui.nest(Zui.handle("tablayers_19"), l.id);
 				baseHandle.selected = l.paintBase;
 				opacHandle.selected = l.paintOpac;
 				norHandle.selected = l.paintNor;
@@ -934,27 +934,27 @@ class TabLayers {
 				emisHandle.selected = l.paintEmis;
 				subsHandle.selected = l.paintSubs;
 				UIMenu.menuFill(ui);
-				l.paintBase = ui.check(baseHandle, tr("Base Color"));
+				l.paintBase = Zui.check(baseHandle, tr("Base Color"));
 				UIMenu.menuFill(ui);
-				l.paintOpac = ui.check(opacHandle, tr("Opacity"));
+				l.paintOpac = Zui.check(opacHandle, tr("Opacity"));
 				UIMenu.menuFill(ui);
-				l.paintNor = ui.check(norHandle, tr("Normal"));
+				l.paintNor = Zui.check(norHandle, tr("Normal"));
 				UIMenu.menuFill(ui);
-				l.paintNorBlend = ui.check(norBlendHandle, tr("Normal Blending"));
+				l.paintNorBlend = Zui.check(norBlendHandle, tr("Normal Blending"));
 				UIMenu.menuFill(ui);
-				l.paintOcc = ui.check(occHandle, tr("Occlusion"));
+				l.paintOcc = Zui.check(occHandle, tr("Occlusion"));
 				UIMenu.menuFill(ui);
-				l.paintRough = ui.check(roughHandle, tr("Roughness"));
+				l.paintRough = Zui.check(roughHandle, tr("Roughness"));
 				UIMenu.menuFill(ui);
-				l.paintMet = ui.check(metHandle, tr("Metallic"));
+				l.paintMet = Zui.check(metHandle, tr("Metallic"));
 				UIMenu.menuFill(ui);
-				l.paintHeight = ui.check(heightHandle, tr("Height"));
+				l.paintHeight = Zui.check(heightHandle, tr("Height"));
 				UIMenu.menuFill(ui);
-				l.paintHeightBlend = ui.check(heightBlendHandle, tr("Height Blending"));
+				l.paintHeightBlend = Zui.check(heightBlendHandle, tr("Height Blending"));
 				UIMenu.menuFill(ui);
-				l.paintEmis = ui.check(emisHandle, tr("Emission"));
+				l.paintEmis = Zui.check(emisHandle, tr("Emission"));
 				UIMenu.menuFill(ui);
-				l.paintSubs = ui.check(subsHandle, tr("Subsurface"));
+				l.paintSubs = Zui.check(subsHandle, tr("Subsurface"));
 				if (baseHandle.changed ||
 					opacHandle.changed ||
 					norHandle.changed ||
@@ -976,17 +976,17 @@ class TabLayers {
 	static makeMaskPreviewRgba32 = (l: SlotLayerRaw) => {
 		///if is_paint
 		if (Context.raw.maskPreviewRgba32 == null) {
-			Context.raw.maskPreviewRgba32 = Image.createRenderTarget(UtilRender.layerPreviewSize, UtilRender.layerPreviewSize);
+			Context.raw.maskPreviewRgba32 = image_create_render_target(UtilRender.layerPreviewSize, UtilRender.layerPreviewSize);
 		}
 		// Convert from R8 to RGBA32 for tooltip display
 		if (Context.raw.maskPreviewLast != l) {
 			Context.raw.maskPreviewLast = l;
 			App.notifyOnInit(() => {
-				Graphics2.begin(Context.raw.maskPreviewRgba32.g2);
+				g2_begin(Context.raw.maskPreviewRgba32.g2);
 				Context.raw.maskPreviewRgba32.g2.pipeline = UIView2D.pipe;
-				Graphics4.setInt(UIView2D.channelLocation, 1);
-				Graphics2.drawImage(l.texpaint_preview, 0, 0);
-				Graphics2.end(Context.raw.maskPreviewRgba32.g2);
+				g4_set_int(UIView2D.channelLocation, 1);
+				g2_draw_image(l.texpaint_preview, 0, 0);
+				g2_end(Context.raw.maskPreviewRgba32.g2);
 				Context.raw.maskPreviewRgba32.g2.pipeline = null;
 			});
 		}

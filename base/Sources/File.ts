@@ -142,7 +142,7 @@ class File {
 			let files: string[] = [];
 			let sizes: i32[] = [];
 
-			let str = System.bufferToString(buffer);
+			let str = sys_buffer_to_string(buffer);
 			let pos_start = 0;
 			let pos_end = 0;
 

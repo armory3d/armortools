@@ -28,7 +28,7 @@ class ImportMesh {
 		Project.meshAssets = [path];
 
 		///if (krom_android || krom_ios)
-		System.title = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
+		sys_title_set(path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf(".")));
 		///end
 	}
 
@@ -79,7 +79,7 @@ class ImportMesh {
 			let raw = ImportMesh.rawMesh(mesh);
 			if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
 
-			MeshData.create(raw, (md: TMeshData) => {
+			MeshData.create(raw, (md: mesh_data_t) => {
 				Context.raw.paintObject = Context.mainObject();
 
 				Context.selectPaintObject(Context.mainObject());
@@ -127,13 +127,13 @@ class ImportMesh {
 						f32[i * 4 + 2] = mesh.posa[index * 4 + 2] / 32767;
 						f32[i * 4 + 3] = 1.0;
 					}
-					let imgmesh = Image.fromBytes(f32.buffer, Config.getTextureResX(), Config.getTextureResY(), TextureFormat.RGBA128);
+					let imgmesh = image_from_bytes(f32.buffer, Config.getTextureResX(), Config.getTextureResY(), TextureFormat.RGBA128);
 					let texpaint = Project.layers[0].texpaint;
-					Graphics2.begin(texpaint.g2, false);
+					g2_begin(texpaint.g2, false);
 					texpaint.g2.pipeline = Base.pipeCopy128;
-					Graphics2.drawScaledImage(imgmesh, 0, 0, Config.getTextureResX(), Config.getTextureResY());
+					g2_draw_scaled_image(imgmesh, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 					texpaint.g2.pipeline = null;
-					Graphics2.end(texpaint.g2);
+					g2_end(texpaint.g2);
 				});
 			});
 		}
@@ -147,9 +147,9 @@ class ImportMesh {
 			let raw = ImportMesh.rawMesh(mesh);
 			if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
 
-			MeshData.create(raw, (md: TMeshData) => {
+			MeshData.create(raw, (md: mesh_data_t) => {
 
-				let object = Scene.addMeshObject(md, Context.raw.paintObject.materials, Context.raw.paintObject.base);
+				let object = scene_add_mesh_object(md, Context.raw.paintObject.materials, Context.raw.paintObject.base);
 				object.base.name = mesh.base.name;
 				object.skip_context = "paint";
 
@@ -175,7 +175,7 @@ class ImportMesh {
 		_addMesh();
 	}
 
-	static rawMesh = (mesh: any): TMeshData => {
+	static rawMesh = (mesh: any): mesh_data_t => {
 		let posa = new Int16Array(Math.floor(mesh.inda.length * 4));
 		for (let i = 0; i < posa.length; ++i) posa[i] = 32767;
 		let inda = new Uint32Array(mesh.inda.length);

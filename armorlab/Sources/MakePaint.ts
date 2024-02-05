@@ -1,7 +1,7 @@
 
 class MakePaint {
 
-	static run = (data: TMaterial, matcon: TMaterialContext): NodeShaderContextRaw => {
+	static run = (data: TMaterial, matcon: material_context_t): NodeShaderContextRaw => {
 		let con_paint = NodeShaderContext.create(data, {
 			name: "paint",
 			depth_write: false,

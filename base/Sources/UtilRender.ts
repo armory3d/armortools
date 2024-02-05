@@ -6,31 +6,31 @@ class UtilRender {
 	static materialPreviewSize = 256;
 	static decalPreviewSize = 512;
 	static layerPreviewSize = 200;
-	static screenAlignedFullVB: VertexBufferRaw = null;
-	static screenAlignedFullIB: IndexBufferRaw = null;
+	static screenAlignedFullVB: vertex_buffer_t = null;
+	static screenAlignedFullIB: index_buffer_t = null;
 
 	static makeMaterialPreview = () => {
 		Context.raw.materialPreview = true;
 
-		let sphere: TMeshObject = Scene.getChild(".Sphere").ext;
+		let sphere: TMeshObject = scene_get_child(".Sphere").ext;
 		sphere.base.visible = true;
-		let meshes = Scene.meshes;
-		Scene.meshes = [sphere];
+		let meshes = scene_meshes;
+		scene_meshes = [sphere];
 		let painto = Context.raw.paintObject;
 		Context.raw.paintObject = sphere;
 
 		sphere.materials[0] = Project.materials[0].data;
 		Context.raw.material.previewReady = true;
 
-		Mat4.setFrom(Context.raw.savedCamera, Scene.camera.base.transform.local);
-		let m = Mat4.create(0.9146286343879498, -0.0032648027153306235, 0.404281837254303, 0.4659988049397712, 0.404295023959927, 0.007367569133732468, -0.9145989516155143, -1.0687517188018691, 0.000007410128652369705, 0.9999675337275382, 0.008058532943908717, 0.015935682577325486, 0, 0, 0, 1);
-		Transform.setMatrix(Scene.camera.base.transform, m);
-		let savedFov = Scene.camera.data.fov;
-		Scene.camera.data.fov = 0.92;
+		mat4_set_from(Context.raw.savedCamera, scene_camera.base.transform.local);
+		let m = mat4_create(0.9146286343879498, -0.0032648027153306235, 0.404281837254303, 0.4659988049397712, 0.404295023959927, 0.007367569133732468, -0.9145989516155143, -1.0687517188018691, 0.000007410128652369705, 0.9999675337275382, 0.008058532943908717, 0.015935682577325486, 0, 0, 0, 1);
+		transform_set_matrix(scene_camera.base.transform, m);
+		let savedFov = scene_camera.data.fov;
+		scene_camera.data.fov = 0.92;
 		Viewport.updateCameraType(CameraType.CameraPerspective);
-		let light = Scene.lights[0];
+		let light = scene_lights[0];
 		let _lightStrength = light.data.strength;
-		let probe = Scene.world;
+		let probe = scene_world;
 		let _probeStrength = probe.strength;
 		light.data.strength = 0;
 		probe.strength = 7;
@@ -41,172 +41,172 @@ class UtilRender {
 		let _brushNodesScale = Context.raw.brushNodesScale;
 		Context.raw.brushNodesScale = 1.0;
 
-		Scene.world._envmap = Context.raw.previewEnvmap;
+		scene_world._envmap = Context.raw.previewEnvmap;
 		// No resize
-		RenderPath.lastW = UtilRender.materialPreviewSize;
-		RenderPath.lastH = UtilRender.materialPreviewSize;
-		CameraObject.buildProjection(Scene.camera);
-		CameraObject.buildMatrix(Scene.camera);
+		render_path_last_w = UtilRender.materialPreviewSize;
+		render_path_last_h = UtilRender.materialPreviewSize;
+		CameraObject.buildProjection(scene_camera);
+		CameraObject.buildMatrix(scene_camera);
 
 		MakeMaterial.parseMeshPreviewMaterial();
-		let _commands = RenderPath.commands;
-		RenderPath.commands = RenderPathPreview.commandsPreview;
-		RenderPath.renderFrame(RenderPath.frameG);
-		RenderPath.commands = _commands;
+		let _commands = render_path_commands;
+		render_path_commands = RenderPathPreview.commandsPreview;
+		render_path_render_frame(_render_path_frame_g);
+		render_path_commands = _commands;
 
 		Context.raw.materialPreview = false;
-		RenderPath.lastW = App.w();
-		RenderPath.lastH = App.h();
+		render_path_last_w = App.w();
+		render_path_last_h = App.h();
 
 		// Restore
 		sphere.base.visible = false;
-		Scene.meshes = meshes;
+		scene_meshes = meshes;
 		Context.raw.paintObject = painto;
 
-		Transform.setMatrix(Scene.camera.base.transform, Context.raw.savedCamera);
+		transform_set_matrix(scene_camera.base.transform, Context.raw.savedCamera);
 		Viewport.updateCameraType(Context.raw.cameraType);
-		Scene.camera.data.fov = savedFov;
-		CameraObject.buildProjection(Scene.camera);
-		CameraObject.buildMatrix(Scene.camera);
+		scene_camera.data.fov = savedFov;
+		CameraObject.buildProjection(scene_camera);
+		CameraObject.buildMatrix(scene_camera);
 		light.data.strength = _lightStrength;
 		probe.strength = _probeStrength;
 		Context.raw.envmapAngle = _envmapAngle;
 		Context.raw.brushScale = _brushScale;
 		Context.raw.brushNodesScale = _brushNodesScale;
-		Scene.world._envmap = Context.raw.showEnvmap ? Context.raw.savedEnvmap : Context.raw.emptyEnvmap;
+		scene_world._envmap = Context.raw.showEnvmap ? Context.raw.savedEnvmap : Context.raw.emptyEnvmap;
 		MakeMaterial.parseMeshMaterial();
 		Context.raw.ddirty = 0;
 	}
 
 	static makeDecalPreview = () => {
-		let current = Graphics2.current;
-		if (current != null) Graphics2.end(current);
+		let current = _g2_current;
+		if (current != null) g2_end(current);
 
 		if (Context.raw.decalImage == null) {
-			Context.raw.decalImage = Image.createRenderTarget(UtilRender.decalPreviewSize, UtilRender.decalPreviewSize);
+			Context.raw.decalImage = image_create_render_target(UtilRender.decalPreviewSize, UtilRender.decalPreviewSize);
 		}
 		Context.raw.decalPreview = true;
 
-		let plane: TMeshObject = Scene.getChild(".Plane").ext;
-		Vec4.set(plane.base.transform.scale, 1, 1, 1);
-		Quat.fromEuler(plane.base.transform.rot, -Math.PI / 2, 0, 0);
-		Transform.buildMatrix(plane.base.transform);
+		let plane: TMeshObject = scene_get_child(".Plane").ext;
+		vec4_set(plane.base.transform.scale, 1, 1, 1);
+		quat_from_euler(plane.base.transform.rot, -Math.PI / 2, 0, 0);
+		transform_build_matrix(plane.base.transform);
 		plane.base.visible = true;
-		let meshes = Scene.meshes;
-		Scene.meshes = [plane];
+		let meshes = scene_meshes;
+		scene_meshes = [plane];
 		let painto = Context.raw.paintObject;
 		Context.raw.paintObject = plane;
 
-		Mat4.setFrom(Context.raw.savedCamera, Scene.camera.base.transform.local);
-		let m = Mat4.identity();
-		Mat4.translate(m, 0, 0, 1);
-		Transform.setMatrix(Scene.camera.base.transform, m);
-		let savedFov = Scene.camera.data.fov;
-		Scene.camera.data.fov = 0.92;
+		mat4_set_from(Context.raw.savedCamera, scene_camera.base.transform.local);
+		let m = mat4_identity();
+		mat4_translate(m, 0, 0, 1);
+		transform_set_matrix(scene_camera.base.transform, m);
+		let savedFov = scene_camera.data.fov;
+		scene_camera.data.fov = 0.92;
 		Viewport.updateCameraType(CameraType.CameraPerspective);
-		let light = Scene.lights[0];
+		let light = scene_lights[0];
 		light.base.visible = false;
-		Scene.world._envmap = Context.raw.previewEnvmap;
+		scene_world._envmap = Context.raw.previewEnvmap;
 
 		// No resize
-		RenderPath.lastW = UtilRender.decalPreviewSize;
-		RenderPath.lastH = UtilRender.decalPreviewSize;
-		CameraObject.buildProjection(Scene.camera);
-		CameraObject.buildMatrix(Scene.camera);
+		render_path_last_w = UtilRender.decalPreviewSize;
+		render_path_last_h = UtilRender.decalPreviewSize;
+		CameraObject.buildProjection(scene_camera);
+		CameraObject.buildMatrix(scene_camera);
 
 		MakeMaterial.parseMeshPreviewMaterial();
-		let _commands = RenderPath.commands;
-		RenderPath.commands = RenderPathPreview.commandsDecal;
-		RenderPath.renderFrame(RenderPath.frameG);
-		RenderPath.commands = _commands;
+		let _commands = render_path_commands;
+		render_path_commands = RenderPathPreview.commandsDecal;
+		render_path_render_frame(_render_path_frame_g);
+		render_path_commands = _commands;
 
 		Context.raw.decalPreview = false;
-		RenderPath.lastW = App.w();
-		RenderPath.lastH = App.h();
+		render_path_last_w = App.w();
+		render_path_last_h = App.h();
 
 		// Restore
 		plane.base.visible = false;
-		Scene.meshes = meshes;
+		scene_meshes = meshes;
 		Context.raw.paintObject = painto;
 
-		Transform.setMatrix(Scene.camera.base.transform, Context.raw.savedCamera);
-		Scene.camera.data.fov = savedFov;
+		transform_set_matrix(scene_camera.base.transform, Context.raw.savedCamera);
+		scene_camera.data.fov = savedFov;
 		Viewport.updateCameraType(Context.raw.cameraType);
-		CameraObject.buildProjection(Scene.camera);
-		CameraObject.buildMatrix(Scene.camera);
-		light = Scene.lights[0];
+		CameraObject.buildProjection(scene_camera);
+		CameraObject.buildMatrix(scene_camera);
+		light = scene_lights[0];
 		light.base.visible = true;
-		Scene.world._envmap = Context.raw.showEnvmap ? Context.raw.savedEnvmap : Context.raw.emptyEnvmap;
+		scene_world._envmap = Context.raw.showEnvmap ? Context.raw.savedEnvmap : Context.raw.emptyEnvmap;
 
 		MakeMaterial.parseMeshMaterial();
 		Context.raw.ddirty = 1; // Refresh depth for decal paint
 
-		if (current != null) Graphics2.begin(current, false);
+		if (current != null) g2_begin(current, false);
 	}
 
 	static makeTextPreview = () => {
-		let current = Graphics2.current;
-		if (current != null) Graphics2.end(current);
+		let current = _g2_current;
+		if (current != null) g2_end(current);
 
 		let text = Context.raw.textToolText;
 		let font = Context.raw.font.font;
 		let fontSize = 200;
-		let textW = Math.floor(Font.width(font, fontSize, text));
-		let textH = Math.floor(Font.height(font, fontSize));
+		let textW = Math.floor(font_width(font, fontSize, text));
+		let textH = Math.floor(font_height(font, fontSize));
 		let texW = textW + 32;
 		if (texW < 512) texW = 512;
 		if (Context.raw.textToolImage != null && Context.raw.textToolImage.width < texW) {
-			Image.unload(Context.raw.textToolImage);
+			image_unload(Context.raw.textToolImage);
 			Context.raw.textToolImage = null;
 		}
 		if (Context.raw.textToolImage == null) {
 			///if krom_metal
-			Context.raw.textToolImage = Image.createRenderTarget(texW, texW, TextureFormat.RGBA32);
+			Context.raw.textToolImage = image_create_render_target(texW, texW, TextureFormat.RGBA32);
 			///else
-			Context.raw.textToolImage = Image.createRenderTarget(texW, texW, TextureFormat.R8);
+			Context.raw.textToolImage = image_create_render_target(texW, texW, TextureFormat.R8);
 			///end
 		}
 		let g2 = Context.raw.textToolImage.g2;
-		Graphics2.begin(g2, true, 0xff000000);
+		g2_begin(g2, true, 0xff000000);
 		g2.font = font;
-		g2.fontSize = fontSize;
+		g2.font_size = fontSize;
 		g2.color = 0xffffffff;
-		Graphics2.drawString(text, texW / 2 - textW / 2, texW / 2 - textH / 2);
-		Graphics2.end(g2);
+		g2_draw_string(text, texW / 2 - textW / 2, texW / 2 - textH / 2);
+		g2_end(g2);
 
-		if (current != null) Graphics2.begin(current, false);
+		if (current != null) g2_begin(current, false);
 	}
 
 	static makeFontPreview = () => {
-		let current = Graphics2.current;
-		if (current != null) Graphics2.end(current);
+		let current = _g2_current;
+		if (current != null) g2_end(current);
 
 		let text = "Abg";
 		let font = Context.raw.font.font;
 		let fontSize = 318;
-		let textW = Math.floor(Font.width(font, fontSize, text)) + 8;
-		let textH = Math.floor(Font.height(font, fontSize)) + 8;
+		let textW = Math.floor(font_width(font, fontSize, text)) + 8;
+		let textH = Math.floor(font_height(font, fontSize)) + 8;
 		if (Context.raw.font.image == null) {
-			Context.raw.font.image = Image.createRenderTarget(512, 512, TextureFormat.RGBA32);
+			Context.raw.font.image = image_create_render_target(512, 512, TextureFormat.RGBA32);
 		}
 		let g2 = Context.raw.font.image.g2;
-		Graphics2.begin(g2, true, 0x00000000);
+		g2_begin(g2, true, 0x00000000);
 		g2.font = font;
-		g2.fontSize = fontSize;
+		g2.font_size = fontSize;
 		g2.color = 0xffffffff;
-		Graphics2.drawString(text, 512 / 2 - textW / 2, 512 / 2 - textH / 2);
-		Graphics2.end(g2);
+		g2_draw_string(text, 512 / 2 - textW / 2, 512 / 2 - textH / 2);
+		g2_end(g2);
 		Context.raw.font.previewReady = true;
 
-		if (current != null) Graphics2.begin(current, false);
+		if (current != null) g2_begin(current, false);
 	}
 
 	static makeBrushPreview = () => {
 		if (RenderPathPaint.liveLayerLocked) return;
 		Context.raw.materialPreview = true;
 
-		let current = Graphics2.current;
-		if (current != null) Graphics2.end(current);
+		let current = _g2_current;
+		if (current != null) g2_end(current);
 
 		// Prepare layers
 		if (RenderPathPaint.liveLayer == null) {
@@ -217,8 +217,8 @@ class UtilRender {
 		SlotLayer.clear(l);
 
 		if (Context.raw.brush.image == null) {
-			Context.raw.brush.image = Image.createRenderTarget(UtilRender.materialPreviewSize, UtilRender.materialPreviewSize);
-			Context.raw.brush.imageIcon = Image.createRenderTarget(50, 50);
+			Context.raw.brush.image = image_create_render_target(UtilRender.materialPreviewSize, UtilRender.materialPreviewSize);
+			Context.raw.brush.imageIcon = image_create_render_target(50, 50);
 		}
 
 		let _material = Context.raw.material;
@@ -238,7 +238,7 @@ class UtilRender {
 		MakeMaterial.parsePaintMaterial(false);
 
 		let hid = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
-		RenderPath.renderTargets.set("texpaint_undo" + hid, RenderPath.renderTargets.get("empty_black"));
+		render_path_render_targets.set("texpaint_undo" + hid,render_path_render_targets.get("empty_black"));
 
 		// Set plane mesh
 		let painto = Context.raw.paintObject;
@@ -253,28 +253,28 @@ class UtilRender {
 			Context.raw.mergedObject.base.visible = false;
 		}
 
-		let cam = Scene.camera;
-		Mat4.setFrom(Context.raw.savedCamera, cam.base.transform.local);
+		let cam = scene_camera;
+		mat4_set_from(Context.raw.savedCamera, cam.base.transform.local);
 		let savedFov = cam.data.fov;
 		Viewport.updateCameraType(CameraType.CameraPerspective);
-		let m = Mat4.identity();
-		Mat4.translate(m, 0, 0, 0.5);
-		Transform.setMatrix(cam.base.transform, m);
+		let m = mat4_identity();
+		mat4_translate(m, 0, 0, 0.5);
+		transform_set_matrix(cam.base.transform, m);
 		cam.data.fov = 0.92;
 		CameraObject.buildProjection(cam);
 		CameraObject.buildMatrix(cam);
-		Mat4.getInverse(m, Scene.camera.VP);
+		mat4_get_inv(m, scene_camera.VP);
 
-		let planeo: TMeshObject = Scene.getChild(".Plane").ext;
+		let planeo: TMeshObject = scene_get_child(".Plane").ext;
 		planeo.base.visible = true;
 		Context.raw.paintObject = planeo;
 
-		let v = Vec4.create();
-		let sx = Vec4.vec4_length(Vec4.set(v, m._00, m._01, m._02));
-		Quat.fromEuler(planeo.base.transform.rot, -Math.PI / 2, 0, 0);
-		Vec4.set(planeo.base.transform.scale, sx, 1.0, sx);
-		Vec4.set(planeo.base.transform.loc, m._30, -m._31, 0.0);
-		Transform.buildMatrix(planeo.base.transform);
+		let v = vec4_create();
+		let sx = vec4_len(vec4_set(v, m._00, m._01, m._02));
+		quat_from_euler(planeo.base.transform.rot, -Math.PI / 2, 0, 0);
+		vec4_set(planeo.base.transform.scale, sx, 1.0, sx);
+		vec4_set(planeo.base.transform.loc, m._30, -m._31, 0.0);
+		transform_build_matrix(planeo.base.transform);
 
 		RenderPathPaint.liveLayerDrawn = 0;
 		RenderPathBase.drawGbuffer();
@@ -333,36 +333,36 @@ class UtilRender {
 			Context.raw.mergedObject.base.visible = mergedObjectVisible;
 		}
 		Context.raw.paintObject = painto;
-		Transform.setMatrix(Scene.camera.base.transform, Context.raw.savedCamera);
-		Scene.camera.data.fov = savedFov;
+		transform_set_matrix(scene_camera.base.transform, Context.raw.savedCamera);
+		scene_camera.data.fov = savedFov;
 		Viewport.updateCameraType(Context.raw.cameraType);
-		CameraObject.buildProjection(Scene.camera);
-		CameraObject.buildMatrix(Scene.camera);
+		CameraObject.buildProjection(scene_camera);
+		CameraObject.buildMatrix(scene_camera);
 
 		// Scale layer down to to image preview
 		if (Base.pipeMerge == null) Base.makePipe();
 		l = RenderPathPaint.liveLayer;
 		let target = Context.raw.brush.image;
-		Graphics2.begin(target.g2, true, 0x00000000);
+		g2_begin(target.g2, true, 0x00000000);
 		target.g2.pipeline = Base.pipeCopy;
-		Graphics2.drawScaledImage(l.texpaint, 0, 0, target.width, target.height);
+		g2_draw_scaled_image(l.texpaint, 0, 0, target.width, target.height);
 		target.g2.pipeline = null;
-		Graphics2.end(target.g2);
+		g2_end(target.g2);
 
 		// Scale image preview down to to icon
-		RenderPath.renderTargets.get("texpreview").image = Context.raw.brush.image;
-		RenderPath.renderTargets.get("texpreview_icon").image = Context.raw.brush.imageIcon;
-		RenderPath.setTarget("texpreview_icon");
-		RenderPath.bindTarget("texpreview", "tex");
-		RenderPath.drawShader("shader_datas/supersample_resolve/supersample_resolve");
+		render_path_render_targets.get("texpreview").image = Context.raw.brush.image;
+		render_path_render_targets.get("texpreview_icon").image = Context.raw.brush.imageIcon;
+		render_path_set_target("texpreview_icon");
+		render_path_bind_target("texpreview", "tex");
+		render_path_draw_shader("shader_datas/supersample_resolve/supersample_resolve");
 
 		Context.raw.brush.previewReady = true;
 		Context.raw.brushBlendDirty = true;
 
-		if (current != null) Graphics2.begin(current, false);
+		if (current != null) g2_begin(current, false);
 	}
 
-	static makeNodePreview = (canvas: TNodeCanvas, node: TNode, image: ImageRaw, group: TNodeCanvas = null, parents: TNode[] = null) => {
+	static makeNodePreview = (canvas: TNodeCanvas, node: TNode, image: image_t, group: TNodeCanvas = null, parents: TNode[] = null) => {
 		let res = MakeMaterial.parseNodePreviewMaterial(node, group, parents);
 		if (res == null || res.scon == null) return;
 
@@ -371,22 +371,22 @@ class UtilRender {
 			UtilRender.createScreenAlignedFullData();
 		}
 
-		let _scaleWorld = Context.raw.paintObject.base.transform.scaleWorld;
-		Context.raw.paintObject.base.transform.scaleWorld = 3.0;
-		Transform.buildMatrix(Context.raw.paintObject.base.transform);
+		let _scaleWorld = Context.raw.paintObject.base.transform.scale_world;
+		Context.raw.paintObject.base.transform.scale_world = 3.0;
+		transform_build_matrix(Context.raw.paintObject.base.transform);
 
-		Graphics4.begin(g4);
-		Graphics4.setPipeline(res.scon._pipeState);
-		Uniforms.setContextConstants(g4, res.scon, [""]);
-		Uniforms.setObjectConstants(g4, res.scon, Context.raw.paintObject.base);
-		Uniforms.setMaterialConstants(g4, res.scon, res.mcon);
-		Graphics4.setVertexBuffer(UtilRender.screenAlignedFullVB);
-		Graphics4.setIndexBuffer(UtilRender.screenAlignedFullIB);
-		Graphics4.drawIndexedVertices();
-		Graphics4.end();
+		g4_begin(g4);
+		g4_set_pipeline(res.scon._pipe_state);
+		uniforms_set_context_consts(g4, res.scon, [""]);
+		uniforms_set_obj_consts(g4, res.scon, Context.raw.paintObject.base);
+		uniforms_set_material_consts(g4, res.scon, res.mcon);
+		g4_set_vertex_buffer(UtilRender.screenAlignedFullVB);
+		g4_set_index_buffer(UtilRender.screenAlignedFullIB);
+		g4_draw();
+		g4_end();
 
-		Context.raw.paintObject.base.transform.scaleWorld = _scaleWorld;
-		Transform.buildMatrix(Context.raw.paintObject.base.transform);
+		Context.raw.paintObject.base.transform.scale_world = _scaleWorld;
+		transform_build_matrix(Context.raw.paintObject.base.transform);
 	}
 
 	static pickPosNorTex = () => {
@@ -412,13 +412,13 @@ class UtilRender {
 		Context.raw.pdirty = 0;
 	}
 
-	static getDecalMat = (): TMat4 => {
+	static getDecalMat = (): mat4_t => {
 		UtilRender.pickPosNorTex();
-		let decalMat = Mat4.identity();
-		let loc = Vec4.create(Context.raw.posXPicked, Context.raw.posYPicked, Context.raw.posZPicked);
-		let rot = Quat.fromTo(Quat.create(), Vec4.create(0.0, 0.0, -1.0), Vec4.create(Context.raw.norXPicked, Context.raw.norYPicked, Context.raw.norZPicked));
-		let scale = Vec4.create(Context.raw.brushRadius * 0.5, Context.raw.brushRadius * 0.5, Context.raw.brushRadius * 0.5);
-		Mat4.compose(decalMat, loc, rot, scale);
+		let decalMat = mat4_identity();
+		let loc = vec4_create(Context.raw.posXPicked, Context.raw.posYPicked, Context.raw.posZPicked);
+		let rot = quat_from_to(quat_create(), vec4_create(0.0, 0.0, -1.0), vec4_create(Context.raw.norXPicked, Context.raw.norYPicked, Context.raw.norZPicked));
+		let scale = vec4_create(Context.raw.brushRadius * 0.5, Context.raw.brushRadius * 0.5, Context.raw.brushRadius * 0.5);
+		mat4_compose(decalMat, loc, rot, scale);
 		return decalMat;
 	}
 
@@ -430,20 +430,20 @@ class UtilRender {
 		let indices = [0, 1, 2];
 
 		// Mandatory vertex data names and sizes
-		let structure = VertexStructure.create();
-		VertexStructure.add(structure, "pos", VertexData.I16_4X_Normalized);
-		VertexStructure.add(structure, "nor", VertexData.I16_2X_Normalized);
-		VertexStructure.add(structure, "tex", VertexData.I16_2X_Normalized);
-		VertexStructure.add(structure, "col", VertexData.I16_4X_Normalized);
-		UtilRender.screenAlignedFullVB = VertexBuffer.create(Math.floor(data.length / Math.floor(VertexStructure.byteSize(structure) / 4)), structure, Usage.StaticUsage);
-		let vertices = VertexBuffer.lock(UtilRender.screenAlignedFullVB);
+		let structure = vertex_struct_create();
+		vertex_struct_add(structure, "pos", VertexData.I16_4X_Normalized);
+		vertex_struct_add(structure, "nor", VertexData.I16_2X_Normalized);
+		vertex_struct_add(structure, "tex", VertexData.I16_2X_Normalized);
+		vertex_struct_add(structure, "col", VertexData.I16_4X_Normalized);
+		UtilRender.screenAlignedFullVB = vertex_buffer_create(Math.floor(data.length / Math.floor(vertex_struct_byte_size(structure) / 4)), structure, Usage.StaticUsage);
+		let vertices = vertex_buffer_lock(UtilRender.screenAlignedFullVB);
 		for (let i = 0; i < Math.floor(vertices.byteLength / 2); ++i) vertices.setInt16(i * 2, data[i], true);
-		VertexBuffer.unlock(UtilRender.screenAlignedFullVB);
+		vertex_buffer_unlock(UtilRender.screenAlignedFullVB);
 
-		UtilRender.screenAlignedFullIB = IndexBuffer.create(indices.length, Usage.StaticUsage);
-		let id = IndexBuffer.lock(UtilRender.screenAlignedFullIB);
+		UtilRender.screenAlignedFullIB = index_buffer_create(indices.length);
+		let id = index_buffer_lock(UtilRender.screenAlignedFullIB);
 		for (let i = 0; i < id.length; ++i) id[i] = indices[i];
-		IndexBuffer.unlock(UtilRender.screenAlignedFullIB);
+		index_buffer_unlock(UtilRender.screenAlignedFullIB);
 	}
 }
 

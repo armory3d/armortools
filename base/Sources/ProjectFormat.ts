@@ -19,7 +19,7 @@ type TProjectFormat = {
 	material_icons?: ArrayBuffer[];
 	font_assets?: string[];
 	layer_datas?: TLayerData[];
-	mesh_datas?: TMeshData[];
+	mesh_datas?: mesh_data_t[];
 	mesh_assets?: string[];
 	mesh_icons?: ArrayBuffer[];
 	///end
@@ -32,7 +32,7 @@ type TProjectFormat = {
 	///if is_lab
 	material?: TNodeCanvas;
 	material_groups?: TNodeCanvas[];
-	mesh_data?: TMeshData;
+	mesh_data?: mesh_data_t;
 	mesh_icon?: ArrayBuffer;
 	///end
 }

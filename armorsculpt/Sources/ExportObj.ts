@@ -12,7 +12,7 @@ class ExportObj {
 		ExportObj.writeString(o, "# armorsculpt.org\n");
 
 		let texpaint = Project.layers[0].texpaint;
-		let pixels = Image.getPixels(texpaint);
+		let pixels = image_get_pixels(texpaint);
 		let pixelsView = new DataView(pixels);
 		let mesh = paintObjects[0].data;
 		let inda = mesh.index_arrays[0].values;

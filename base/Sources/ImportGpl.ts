@@ -5,7 +5,7 @@ class ImportGpl {
 		Data.getBlob(path, (b: ArrayBuffer) => {
 			// let swatches = [];
 
-			// let str = System.bufferToString(b);
+			// let str = sys_buffer_to_string(b);
 			// let lines = str.split("\n");
 
 			// let view = new DataView(b);

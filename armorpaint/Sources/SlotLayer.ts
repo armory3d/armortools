@@ -6,11 +6,11 @@ class SlotLayerRaw {
 	visible = true;
 	parent: SlotLayerRaw = null; // Group (for layers) or layer (for masks)
 
-	texpaint: ImageRaw = null; // Base or mask
+	texpaint: image_t = null; // Base or mask
 	///if is_paint
-	texpaint_nor: ImageRaw = null;
-	texpaint_pack: ImageRaw = null;
-	texpaint_preview: ImageRaw = null; // Layer preview
+	texpaint_nor: image_t = null;
+	texpaint_pack: image_t = null;
+	texpaint_preview: image_t = null; // Layer preview
 	///end
 
 	maskOpacity = 1.0; // Opacity mask
@@ -32,7 +32,7 @@ class SlotLayerRaw {
 	paintHeightBlend = true;
 	paintEmis = true;
 	paintSubs = true;
-	decalMat = Mat4.identity(); // Decal layer
+	decalMat = mat4_identity(); // Decal layer
 }
 
 class SlotLayer {
@@ -63,33 +63,33 @@ class SlotLayer {
 			///end
 
 			{
-				let t = RenderTarget.create();
+				let t = render_target_create();
 				t.name = "texpaint" + ext;
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
 				t.format = format;
-				raw.texpaint = RenderPath.createRenderTarget(t).image;
+				raw.texpaint = render_path_create_render_target(t).image;
 			}
 
 			///if is_paint
 			{
-				let t = RenderTarget.create();
+				let t = render_target_create();
 				t.name = "texpaint_nor" + ext;
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
 				t.format = format;
-				raw.texpaint_nor = RenderPath.createRenderTarget(t).image;
+				raw.texpaint_nor = render_path_create_render_target(t).image;
 			}
 			{
-				let t = RenderTarget.create();
+				let t = render_target_create();
 				t.name = "texpaint_pack" + ext;
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
 				t.format = format;
-				raw.texpaint_pack = RenderPath.createRenderTarget(t).image;
+				raw.texpaint_pack = render_path_create_render_target(t).image;
 			}
 
-			raw.texpaint_preview = Image.createRenderTarget(UtilRender.layerPreviewSize, UtilRender.layerPreviewSize, TextureFormat.RGBA32);
+			raw.texpaint_preview = image_create_render_target(UtilRender.layerPreviewSize, UtilRender.layerPreviewSize, TextureFormat.RGBA32);
 			///end
 		}
 
@@ -100,15 +100,15 @@ class SlotLayer {
 			raw.blending = BlendType.BlendAdd;
 
 			{
-				let t = RenderTarget.create();
+				let t = render_target_create();
 				t.name = "texpaint" + ext;
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
 				t.format = format;
-				raw.texpaint = RenderPath.createRenderTarget(t).image;
+				raw.texpaint = render_path_create_render_target(t).image;
 			}
 
-			raw.texpaint_preview = Image.createRenderTarget(UtilRender.layerPreviewSize, UtilRender.layerPreviewSize, TextureFormat.RGBA32);
+			raw.texpaint_preview = image_create_render_target(UtilRender.layerPreviewSize, UtilRender.layerPreviewSize, TextureFormat.RGBA32);
 		}
 		///end
 
@@ -150,28 +150,28 @@ class SlotLayer {
 		///end
 
 		let _next = () => {
-			Image.unload(_texpaint);
+			image_unload(_texpaint);
 			///if is_paint
-			if (_texpaint_nor != null) Image.unload(_texpaint_nor);
-			if (_texpaint_pack != null) Image.unload(_texpaint_pack);
-			Image.unload(_texpaint_preview);
+			if (_texpaint_nor != null) image_unload(_texpaint_nor);
+			if (_texpaint_pack != null) image_unload(_texpaint_pack);
+			image_unload(_texpaint_preview);
 			///end
 		}
 		Base.notifyOnNextFrame(_next);
 
-		RenderPath.renderTargets.delete("texpaint" + raw.ext);
+		render_path_render_targets.delete("texpaint" + raw.ext);
 		///if is_paint
 		if (SlotLayer.isLayer(raw)) {
-			RenderPath.renderTargets.delete("texpaint_nor" + raw.ext);
-			RenderPath.renderTargets.delete("texpaint_pack" + raw.ext);
+			render_path_render_targets.delete("texpaint_nor" + raw.ext);
+			render_path_render_targets.delete("texpaint_pack" + raw.ext);
 		}
 		///end
 	}
 
 	static swap = (raw: SlotLayerRaw, other: SlotLayerRaw) => {
 		if ((SlotLayer.isLayer(raw) || SlotLayer.isMask(raw)) && (SlotLayer.isLayer(other) || SlotLayer.isMask(other))) {
-			RenderPath.renderTargets.get("texpaint" + raw.ext).image = other.texpaint;
-			RenderPath.renderTargets.get("texpaint" + other.ext).image = raw.texpaint;
+			render_path_render_targets.get("texpaint" + raw.ext).image = other.texpaint;
+			render_path_render_targets.get("texpaint" + other.ext).image = raw.texpaint;
 			let _texpaint = raw.texpaint;
 			raw.texpaint = other.texpaint;
 			other.texpaint = _texpaint;
@@ -185,10 +185,10 @@ class SlotLayer {
 
 		///if is_paint
 		if (SlotLayer.isLayer(raw) && SlotLayer.isLayer(other)) {
-			RenderPath.renderTargets.get("texpaint_nor" + raw.ext).image = other.texpaint_nor;
-			RenderPath.renderTargets.get("texpaint_pack" + raw.ext).image = other.texpaint_pack;
-			RenderPath.renderTargets.get("texpaint_nor" + other.ext).image = raw.texpaint_nor;
-			RenderPath.renderTargets.get("texpaint_pack" + other.ext).image = raw.texpaint_pack;
+			render_path_render_targets.get("texpaint_nor" + raw.ext).image = other.texpaint_nor;
+			render_path_render_targets.get("texpaint_pack" + raw.ext).image = other.texpaint_pack;
+			render_path_render_targets.get("texpaint_nor" + other.ext).image = raw.texpaint_nor;
+			render_path_render_targets.get("texpaint_pack" + other.ext).image = raw.texpaint_pack;
 			let _texpaint_nor = raw.texpaint_nor;
 			let _texpaint_pack = raw.texpaint_pack;
 			raw.texpaint_nor = other.texpaint_nor;
@@ -199,24 +199,24 @@ class SlotLayer {
 		///end
 	}
 
-	static clear = (raw: SlotLayerRaw, baseColor = 0x00000000, baseImage: ImageRaw = null, occlusion = 1.0, roughness = Base.defaultRough, metallic = 0.0) => {
-		Graphics4.begin(raw.texpaint.g4);
-		Graphics4.clear(baseColor); // Base
-		Graphics4.end();
+	static clear = (raw: SlotLayerRaw, baseColor = 0x00000000, baseImage: image_t = null, occlusion = 1.0, roughness = Base.defaultRough, metallic = 0.0) => {
+		g4_begin(raw.texpaint.g4);
+		g4_clear(baseColor); // Base
+		g4_end();
 		if (baseImage != null) {
-			Graphics2.begin(raw.texpaint.g2, false);
-			Graphics2.drawScaledImage(baseImage, 0, 0, raw.texpaint.width, raw.texpaint.height);
-			Graphics2.end(raw.texpaint.g2);
+			g2_begin(raw.texpaint.g2, false);
+			g2_draw_scaled_image(baseImage, 0, 0, raw.texpaint.width, raw.texpaint.height);
+			g2_end(raw.texpaint.g2);
 		}
 
 		///if is_paint
 		if (SlotLayer.isLayer(raw)) {
-			Graphics4.begin(raw.texpaint_nor.g4);
-			Graphics4.clear(color_from_floats(0.5, 0.5, 1.0, 0.0)); // Nor
-			Graphics4.end();
-			Graphics4.begin(raw.texpaint_pack.g4);
-			Graphics4.clear(color_from_floats(occlusion, roughness, metallic, 0.0)); // Occ, rough, met
-			Graphics4.end();
+			g4_begin(raw.texpaint_nor.g4);
+			g4_clear(color_from_floats(0.5, 0.5, 1.0, 0.0)); // Nor
+			g4_end();
+			g4_begin(raw.texpaint_pack.g4);
+			g4_clear(color_from_floats(occlusion, roughness, metallic, 0.0)); // Occ, rough, met
+			g4_end();
 		}
 		///end
 
@@ -226,18 +226,18 @@ class SlotLayer {
 
 	static invertMask = (raw: SlotLayerRaw) => {
 		if (Base.pipeInvert8 == null) Base.makePipe();
-		let inverted = Image.createRenderTarget(raw.texpaint.width, raw.texpaint.height, TextureFormat.RGBA32);
-		Graphics2.begin(inverted.g2, false);
+		let inverted = image_create_render_target(raw.texpaint.width, raw.texpaint.height, TextureFormat.RGBA32);
+		g2_begin(inverted.g2, false);
 		inverted.g2.pipeline = Base.pipeInvert8;
-		Graphics2.drawImage(raw.texpaint, 0, 0);
+		g2_draw_image(raw.texpaint, 0, 0);
 		inverted.g2.pipeline = null;
-		Graphics2.end(inverted.g2);
+		g2_end(inverted.g2);
 		let _texpaint = raw.texpaint;
 		let _next = () => {
-			Image.unload(_texpaint);
+			image_unload(_texpaint);
 		}
 		Base.notifyOnNextFrame(_next);
-		raw.texpaint = RenderPath.renderTargets.get("texpaint" + raw.id).image = inverted;
+		raw.texpaint = render_path_render_targets.get("texpaint" + raw.id).image = inverted;
 		Context.raw.layerPreviewDirty = true;
 		Context.raw.ddirty = 3;
 	}
@@ -265,38 +265,38 @@ class SlotLayer {
 
 		if (Base.pipeMerge == null) Base.makePipe();
 		if (SlotLayer.isLayer(raw)) {
-			Graphics2.begin(l.texpaint.g2, false);
+			g2_begin(l.texpaint.g2, false);
 			l.texpaint.g2.pipeline = Base.pipeCopy;
-			Graphics2.drawImage(raw.texpaint, 0, 0);
+			g2_draw_image(raw.texpaint, 0, 0);
 			l.texpaint.g2.pipeline = null;
-			Graphics2.end(l.texpaint.g2);
+			g2_end(l.texpaint.g2);
 			///if is_paint
-			Graphics2.begin(l.texpaint_nor.g2, false);
+			g2_begin(l.texpaint_nor.g2, false);
 			l.texpaint_nor.g2.pipeline = Base.pipeCopy;
-			Graphics2.drawImage(raw.texpaint_nor, 0, 0);
+			g2_draw_image(raw.texpaint_nor, 0, 0);
 			l.texpaint_nor.g2.pipeline = null;
-			Graphics2.end(l.texpaint_nor.g2);
-			Graphics2.begin(l.texpaint_pack.g2, false);
+			g2_end(l.texpaint_nor.g2);
+			g2_begin(l.texpaint_pack.g2, false);
 			l.texpaint_pack.g2.pipeline = Base.pipeCopy;
-			Graphics2.drawImage(raw.texpaint_pack, 0, 0);
+			g2_draw_image(raw.texpaint_pack, 0, 0);
 			l.texpaint_pack.g2.pipeline = null;
-			Graphics2.end(l.texpaint_pack.g2);
+			g2_end(l.texpaint_pack.g2);
 			///end
 		}
 		else if (SlotLayer.isMask(raw)) {
-			Graphics2.begin(l.texpaint.g2, false);
+			g2_begin(l.texpaint.g2, false);
 			l.texpaint.g2.pipeline = Base.pipeCopy8;
-			Graphics2.drawImage(raw.texpaint, 0, 0);
+			g2_draw_image(raw.texpaint, 0, 0);
 			l.texpaint.g2.pipeline = null;
-			Graphics2.end(l.texpaint.g2);
+			g2_end(l.texpaint.g2);
 		}
 
 		///if is_paint
-		Graphics2.begin(l.texpaint_preview.g2, true, 0x00000000);
+		g2_begin(l.texpaint_preview.g2, true, 0x00000000);
 		l.texpaint_preview.g2.pipeline = Base.pipeCopy;
-		Graphics2.drawScaledImage(raw.texpaint_preview, 0, 0, raw.texpaint_preview.width, raw.texpaint_preview.height);
+		g2_draw_scaled_image(raw.texpaint_preview, 0, 0, raw.texpaint_preview.width, raw.texpaint_preview.height);
 		l.texpaint_preview.g2.pipeline = null;
-		Graphics2.end(l.texpaint_preview.g2);
+		g2_end(l.texpaint_preview.g2);
 		///end
 
 		l.visible = raw.visible;
@@ -325,7 +325,7 @@ class SlotLayer {
 	static resizeAndSetBits = (raw: SlotLayerRaw) => {
 		let resX = Config.getTextureResX();
 		let resY = Config.getTextureResY();
-		let rts = RenderPath.renderTargets;
+		let rts = render_path_render_targets;
 		if (Base.pipeMerge == null) Base.makePipe();
 
 		if (SlotLayer.isLayer(raw)) {
@@ -340,37 +340,37 @@ class SlotLayer {
 			///end
 
 			let _texpaint = raw.texpaint;
-			raw.texpaint = Image.createRenderTarget(resX, resY, format);
-			Graphics2.begin(raw.texpaint.g2, false);
+			raw.texpaint = image_create_render_target(resX, resY, format);
+			g2_begin(raw.texpaint.g2, false);
 			raw.texpaint.g2.pipeline = Base.pipeCopy;
-			Graphics2.drawScaledImage(_texpaint, 0, 0, resX, resY);
+			g2_draw_scaled_image(_texpaint, 0, 0, resX, resY);
 			raw.texpaint.g2.pipeline = null;
-			Graphics2.end(raw.texpaint.g2);
+			g2_end(raw.texpaint.g2);
 
 			///if is_paint
 			let _texpaint_nor = raw.texpaint_nor;
 			let _texpaint_pack = raw.texpaint_pack;
-			raw.texpaint_nor = Image.createRenderTarget(resX, resY, format);
-			raw.texpaint_pack = Image.createRenderTarget(resX, resY, format);
+			raw.texpaint_nor = image_create_render_target(resX, resY, format);
+			raw.texpaint_pack = image_create_render_target(resX, resY, format);
 
-			Graphics2.begin(raw.texpaint_nor.g2, false);
+			g2_begin(raw.texpaint_nor.g2, false);
 			raw.texpaint_nor.g2.pipeline = Base.pipeCopy;
-			Graphics2.drawScaledImage(_texpaint_nor, 0, 0, resX, resY);
+			g2_draw_scaled_image(_texpaint_nor, 0, 0, resX, resY);
 			raw.texpaint_nor.g2.pipeline = null;
-			Graphics2.end(raw.texpaint_nor.g2);
+			g2_end(raw.texpaint_nor.g2);
 
-			Graphics2.begin(raw.texpaint_pack.g2, false);
+			g2_begin(raw.texpaint_pack.g2, false);
 			raw.texpaint_pack.g2.pipeline = Base.pipeCopy;
-			Graphics2.drawScaledImage(_texpaint_pack, 0, 0, resX, resY);
+			g2_draw_scaled_image(_texpaint_pack, 0, 0, resX, resY);
 			raw.texpaint_pack.g2.pipeline = null;
-			Graphics2.end(raw.texpaint_pack.g2);
+			g2_end(raw.texpaint_pack.g2);
 			///end
 
 			let _next = () => {
-				Image.unload(_texpaint);
+				image_unload(_texpaint);
 				///if is_paint
-				Image.unload(_texpaint_nor);
-				Image.unload(_texpaint_pack);
+				image_unload(_texpaint_nor);
+				image_unload(_texpaint_pack);
 				///end
 			}
 			Base.notifyOnNextFrame(_next);
@@ -383,16 +383,16 @@ class SlotLayer {
 		}
 		else if (SlotLayer.isMask(raw)) {
 			let _texpaint = raw.texpaint;
-			raw.texpaint = Image.createRenderTarget(resX, resY, TextureFormat.RGBA32);
+			raw.texpaint = image_create_render_target(resX, resY, TextureFormat.RGBA32);
 
-			Graphics2.begin(raw.texpaint.g2, false);
+			g2_begin(raw.texpaint.g2, false);
 			raw.texpaint.g2.pipeline = Base.pipeCopy8;
-			Graphics2.drawScaledImage(_texpaint, 0, 0, resX, resY);
+			g2_draw_scaled_image(_texpaint, 0, 0, resX, resY);
 			raw.texpaint.g2.pipeline = null;
-			Graphics2.end(raw.texpaint.g2);
+			g2_end(raw.texpaint.g2);
 
 			let _next = () => {
-				Image.unload(_texpaint);
+				image_unload(_texpaint);
 			}
 			Base.notifyOnNextFrame(_next);
 

@@ -36,7 +36,7 @@ class ImportBlendMaterial {
 				}
 				for (let n of canvas.nodes) {
 					if (n.name == "RGB") {
-						nodes.removeNode(n, canvas);
+						Nodes.removeNode(n, canvas);
 						break;
 					}
 				}
@@ -226,7 +226,7 @@ class ImportBlendMaterial {
 
 						if (valid) {
 							let raw: TNodeLink = {
-								id: nodes.getLinkId(canvas.links),
+								id: Nodes.getLinkId(canvas.links),
 								from_id: from_id,
 								from_socket: from_socket,
 								to_id: to_id,

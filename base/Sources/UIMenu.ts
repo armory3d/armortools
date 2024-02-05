@@ -9,13 +9,13 @@ class UIMenu {
 	static menuY = 0;
 	static menuElements = 0;
 	static keepOpen = false;
-	static menuCommands: (ui: Zui)=>void = null;
+	static menuCommands: (ui: ZuiRaw)=>void = null;
 	static showMenuFirst = true;
 	static hideMenu = false;
 
-	static render = (g: Graphics2Raw) => {
+	static render = (g: g2_t) => {
 		let ui = Base.uiMenu;
-		let menuW = UIMenu.menuCommands != null ? Math.floor(Base.defaultElementW * Base.uiMenu.SCALE() * 2.3) : Math.floor(ui.ELEMENT_W() * 2.3);
+		let menuW = UIMenu.menuCommands != null ? Math.floor(Base.defaultElementW * Zui.SCALE(Base.uiMenu) * 2.3) : Math.floor(Zui.ELEMENT_W(ui) * 2.3);
 		let _BUTTON_COL = ui.t.BUTTON_COL;
 		ui.t.BUTTON_COL = ui.t.SEPARATOR_COL;
 		let _ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
@@ -23,13 +23,13 @@ class UIMenu {
 		let _ELEMENT_H = ui.t.ELEMENT_H;
 		ui.t.ELEMENT_H = Config.raw.touch_ui ? (28 + 2) : 28;
 
-		ui.beginRegion(g, UIMenu.menuX, UIMenu.menuY, menuW);
+		Zui.beginRegion(ui, g, UIMenu.menuX, UIMenu.menuY, menuW);
 
 		if (UIMenu.menuCommands != null) {
 			ui.g.color = ui.t.ACCENT_SELECT_COL;
-			ui.drawRect(ui.g, true, ui._x + -1, ui._y + -1, ui._w + 2, ui.ELEMENT_H() * UIMenu.menuElements + 2);
+			Zui.drawRect(ui.g, true, ui._x + -1, ui._y + -1, ui._w + 2, Zui.ELEMENT_H(ui) * UIMenu.menuElements + 2);
 			ui.g.color = ui.t.SEPARATOR_COL;
-			ui.drawRect(ui.g, true, ui._x + 0, ui._y + 0, ui._w, ui.ELEMENT_H() * UIMenu.menuElements);
+			Zui.drawRect(ui.g, true, ui._x + 0, ui._y + 0, ui._w, Zui.ELEMENT_H(ui) * UIMenu.menuElements);
 			ui.g.color = 0xffffffff;
 
 			UIMenu.menuCommands(ui);
@@ -86,7 +86,7 @@ class UIMenu {
 				///end
 
 				UIMenu.menuSeparator(ui);
-				if (UIMenu.menuButton(ui, tr("Exit"))) System.stop();
+				if (UIMenu.menuButton(ui, tr("Exit"))) sys_stop();
 			}
 			else if (UIMenu.menuCategory == MenuCategory.MenuEdit) {
 				let stepUndo = "";
@@ -120,11 +120,11 @@ class UIMenu {
 				ui.changed = false;
 
 				UIMenu.menuFill(ui);
-				let p = Scene.world;
+				let p = scene_world;
 				let envHandle = Zui.handle("uimenu_0");
 				envHandle.value = p.strength;
 				UIMenu.menuAlign(ui);
-				p.strength = ui.slider(envHandle, tr("Environment"), 0.0, 8.0, true);
+				p.strength = Zui.slider(envHandle, tr("Environment"), 0.0, 8.0, true);
 				if (envHandle.changed) Context.raw.ddirty = 2;
 
 				UIMenu.menuFill(ui);
@@ -137,12 +137,12 @@ class UIMenu {
 					envaHandle.value -= Math.floor(envaHandle.value / 360) * 360;
 				}
 				UIMenu.menuAlign(ui);
-				Context.raw.envmapAngle = ui.slider(envaHandle, tr("Environment Angle"), 0.0, 360.0, true, 1) / 180.0 * Math.PI;
-				if (ui.isHovered) ui.tooltip(tr("{shortcut} and move mouse", new Map([["shortcut", Config.keymap.rotate_envmap]])));
+				Context.raw.envmapAngle = Zui.slider(envaHandle, tr("Environment Angle"), 0.0, 360.0, true, 1) / 180.0 * Math.PI;
+				if (ui.isHovered) Zui.tooltip(tr("{shortcut} and move mouse", new Map([["shortcut", Config.keymap.rotate_envmap]])));
 				if (envaHandle.changed) Context.raw.ddirty = 2;
 
-				if (Scene.lights.length > 0) {
-					let light = Scene.lights[0];
+				if (scene_lights.length > 0) {
+					let light = scene_lights[0];
 
 					UIMenu.menuFill(ui);
 					let lhandle = Zui.handle("uimenu_2");
@@ -150,24 +150,24 @@ class UIMenu {
 					lhandle.value = light.data.strength / scale;
 					lhandle.value = Math.floor(lhandle.value * 100) / 100;
 					UIMenu.menuAlign(ui);
-					light.data.strength = ui.slider(lhandle, tr("Light"), 0.0, 4.0, true) * scale;
+					light.data.strength = Zui.slider(lhandle, tr("Light"), 0.0, 4.0, true) * scale;
 					if (lhandle.changed) Context.raw.ddirty = 2;
 
 					UIMenu.menuFill(ui);
-					light = Scene.lights[0];
+					light = scene_lights[0];
 					let lahandle = Zui.handle("uimenu_3");
 					lahandle.value = Context.raw.lightAngle / Math.PI * 180;
 					UIMenu.menuAlign(ui);
-					let newAngle = ui.slider(lahandle, tr("Light Angle"), 0.0, 360.0, true, 1) / 180 * Math.PI;
-					if (ui.isHovered) ui.tooltip(tr("{shortcut} and move mouse", new Map([["shortcut", Config.keymap.rotate_light]])));
+					let newAngle = Zui.slider(lahandle, tr("Light Angle"), 0.0, 360.0, true, 1) / 180 * Math.PI;
+					if (ui.isHovered) Zui.tooltip(tr("{shortcut} and move mouse", new Map([["shortcut", Config.keymap.rotate_light]])));
 					let ldiff = newAngle - Context.raw.lightAngle;
 					if (Math.abs(ldiff) > 0.005) {
 						if (newAngle < 0) newAngle += (Math.floor(-newAngle / (2 * Math.PI)) + 1) * 2 * Math.PI;
 						else if (newAngle > 2 * Math.PI) newAngle -= Math.floor(newAngle / (2 * Math.PI)) * 2 * Math.PI;
 						Context.raw.lightAngle = newAngle;
-						let m = Mat4.rotationZ(ldiff);
-						Mat4.multmat(light.base.transform.local, m);
-						Transform.decompose(light.base.transform);
+						let m = mat4_rot_z(ldiff);
+						mat4_mult_mat(light.base.transform.local, m);
+						transform_decompose(light.base.transform);
 						Context.raw.ddirty = 2;
 					}
 
@@ -175,14 +175,14 @@ class UIMenu {
 					let sxhandle = Zui.handle("uimenu_4");
 					sxhandle.value = light.data.size;
 					UIMenu.menuAlign(ui);
-					light.data.size = ui.slider(sxhandle, tr("Light Size"), 0.0, 4.0, true);
+					light.data.size = Zui.slider(sxhandle, tr("Light Size"), 0.0, 4.0, true);
 					if (sxhandle.changed) Context.raw.ddirty = 2;
 				}
 
 				///if (is_paint || is_sculpt)
 				UIMenu.menuFill(ui);
 				let splitViewHandle = Zui.handle("uimenu_5", { selected: Context.raw.splitView });
-				Context.raw.splitView = ui.check(splitViewHandle, " " + tr("Split View"));
+				Context.raw.splitView = Zui.check(splitViewHandle, " " + tr("Split View"));
 				if (splitViewHandle.changed) {
 					Base.resize();
 				}
@@ -192,7 +192,7 @@ class UIMenu {
 				UIMenu.menuFill(ui);
 				let brushScaleHandle = Zui.handle("uimenu_6", { value: Context.raw.brushScale });
 				UIMenu.menuAlign(ui);
-				Context.raw.brushScale = ui.slider(brushScaleHandle, tr("UV Scale"), 0.01, 5.0, true);
+				Context.raw.brushScale = Zui.slider(brushScaleHandle, tr("UV Scale"), 0.01, 5.0, true);
 				if (brushScaleHandle.changed) {
 					MakeMaterial.parseMeshMaterial();
 					///if (krom_direct3d12 || krom_vulkan || krom_metal)
@@ -204,14 +204,14 @@ class UIMenu {
 
 				UIMenu.menuFill(ui);
 				let cullHandle = Zui.handle("uimenu_7", { selected: Context.raw.cullBackfaces });
-				Context.raw.cullBackfaces = ui.check(cullHandle, " " + tr("Cull Backfaces"));
+				Context.raw.cullBackfaces = Zui.check(cullHandle, " " + tr("Cull Backfaces"));
 				if (cullHandle.changed) {
 					MakeMaterial.parseMeshMaterial();
 				}
 
 				UIMenu.menuFill(ui);
 				let filterHandle = Zui.handle("uimenu_8", { selected: Context.raw.textureFilter });
-				Context.raw.textureFilter = ui.check(filterHandle, " " + tr("Filter Textures"));
+				Context.raw.textureFilter = Zui.check(filterHandle, " " + tr("Filter Textures"));
 				if (filterHandle.changed) {
 					MakeMaterial.parsePaintMaterial();
 					MakeMaterial.parseMeshMaterial();
@@ -219,18 +219,18 @@ class UIMenu {
 
 				///if (is_paint || is_sculpt)
 				UIMenu.menuFill(ui);
-				Context.raw.drawWireframe = ui.check(Context.raw.wireframeHandle, " " + tr("Wireframe"));
+				Context.raw.drawWireframe = Zui.check(Context.raw.wireframeHandle, " " + tr("Wireframe"));
 				if (Context.raw.wireframeHandle.changed) {
-					Graphics2.end(ui.g);
+					g2_end(ui.g);
 					UtilUV.cacheUVMap();
-					Graphics2.begin(ui.g, false);
+					g2_begin(ui.g, false);
 					MakeMaterial.parseMeshMaterial();
 				}
 				///end
 
 				///if is_paint
 				UIMenu.menuFill(ui);
-				Context.raw.drawTexels = ui.check(Context.raw.texelsHandle, " " + tr("Texels"));
+				Context.raw.drawTexels = Zui.check(Context.raw.texelsHandle, " " + tr("Texels"));
 				if (Context.raw.texelsHandle.changed) {
 					MakeMaterial.parseMeshMaterial();
 				}
@@ -238,18 +238,18 @@ class UIMenu {
 
 				UIMenu.menuFill(ui);
 				let compassHandle = Zui.handle("uimenu_9", { selected: Context.raw.showCompass });
-				Context.raw.showCompass = ui.check(compassHandle, " " + tr("Compass"));
+				Context.raw.showCompass = Zui.check(compassHandle, " " + tr("Compass"));
 				if (compassHandle.changed) Context.raw.ddirty = 2;
 
 				UIMenu.menuFill(ui);
-				Context.raw.showEnvmap = ui.check(Context.raw.showEnvmapHandle, " " + tr("Envmap"));
+				Context.raw.showEnvmap = Zui.check(Context.raw.showEnvmapHandle, " " + tr("Envmap"));
 				if (Context.raw.showEnvmapHandle.changed) {
 					Context.loadEnvmap();
 					Context.raw.ddirty = 2;
 				}
 
 				UIMenu.menuFill(ui);
-				Context.raw.showEnvmapBlur = ui.check(Context.raw.showEnvmapBlurHandle, " " + tr("Blur Envmap"));
+				Context.raw.showEnvmapBlur = Zui.check(Context.raw.showEnvmapBlurHandle, " " + tr("Blur Envmap"));
 				if (Context.raw.showEnvmapBlurHandle.changed) Context.raw.ddirty = 2;
 
 				Context.updateEnvmap();
@@ -294,7 +294,7 @@ class UIMenu {
 				for (let i = 0; i < modes.length; ++i) {
 					UIMenu.menuFill(ui);
 					let shortcut = Config.raw.touch_ui ? "" : Config.keymap.viewport_mode + ", " + shortcuts[i];
-					ui.radio(modeHandle, i, modes[i], shortcut);
+					Zui.radio(modeHandle, i, modes[i], shortcut);
 				}
 
 				if (modeHandle.changed) {
@@ -358,10 +358,10 @@ class UIMenu {
 				// menuSeparator(ui);
 
 				UIMenu.menuFill(ui);
-				let cam = Scene.camera;
+				let cam = scene_camera;
 				Context.raw.fovHandle = Zui.handle("uimenu_11", { value: Math.floor(cam.data.fov * 100) / 100 });
 				UIMenu.menuAlign(ui);
-				cam.data.fov = ui.slider(Context.raw.fovHandle, tr("FoV"), 0.3, 1.4, true);
+				cam.data.fov = Zui.slider(Context.raw.fovHandle, tr("FoV"), 0.3, 1.4, true);
 				if (Context.raw.fovHandle.changed) {
 					Viewport.updateCameraType(Context.raw.cameraType);
 				}
@@ -370,7 +370,7 @@ class UIMenu {
 				UIMenu.menuAlign(ui);
 				let cameraControlsHandle = Zui.handle("uimenu_12");
 				cameraControlsHandle.position = Context.raw.cameraControls;
-				Context.raw.cameraControls = ui.inlineRadio(cameraControlsHandle, [tr("Orbit"), tr("Rotate"), tr("Fly")], Align.Left);
+				Context.raw.cameraControls = Zui.inlineRadio(cameraControlsHandle, [tr("Orbit"), tr("Rotate"), tr("Fly")], Align.Left);
 
 				let orbitAndRotateTooltip = tr("Orbit and Rotate mode:\n{rotate_shortcut} or move right mouse button to rotate.\n{zoom_shortcut} or scroll to zoom.\n{pan_shortcut} or move middle mouse to pan.",
 					new Map([
@@ -380,12 +380,12 @@ class UIMenu {
 					])
 				);
 				let flyTooltip = tr("Fly mode:\nHold the right mouse button and one of the following commands:\nmove mouse to rotate.\nw, up or scroll up to move forward.\ns, down or scroll down to move backward.\na or left to move left.\nd or right to move right.\ne to move up.\nq to move down.\nHold shift to move faster or alt to move slower.");
-				if (ui.isHovered) ui.tooltip(orbitAndRotateTooltip + "\n\n" + flyTooltip);
+				if (ui.isHovered) Zui.tooltip(orbitAndRotateTooltip + "\n\n" + flyTooltip);
 
 				UIMenu.menuFill(ui);
 				UIMenu.menuAlign(ui);
-				Context.raw.cameraType = ui.inlineRadio(Context.raw.camHandle, [tr("Perspective"), tr("Orthographic")], Align.Left);
-				if (ui.isHovered) ui.tooltip(tr("Camera Type") + ` (${Config.keymap.view_camera_type})`);
+				Context.raw.cameraType = Zui.inlineRadio(Context.raw.camHandle, [tr("Perspective"), tr("Orthographic")], Align.Left);
+				if (ui.isHovered) Zui.tooltip(tr("Camera Type") + ` (${Config.keymap.view_camera_type})`);
 				if (Context.raw.camHandle.changed) {
 					Viewport.updateCameraType(Context.raw.cameraType);
 				}
@@ -407,16 +407,16 @@ class UIMenu {
 				}
 				if (UIMenu.menuButton(ui, tr("Report Bug"))) {
 					///if (krom_darwin || krom_ios) // Limited url length
-					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" + manifest_version + "-" + Config.getSha() + ",%20" + System.systemId);
+					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" + manifest_version + "-" + Config.getSha() + ",%20" + sys_system_id());
 					///else
-					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" + manifest_version + "-" + Config.getSha() + ",%20" + System.systemId + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A");
+					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" + manifest_version + "-" + Config.getSha() + ",%20" + sys_system_id() + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A");
 					///end
 				}
 				if (UIMenu.menuButton(ui, tr("Request Feature"))) {
 					///if (krom_darwin || krom_ios) // Limited url length
-					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + Config.getSha() + ",%20" + System.systemId);
+					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + Config.getSha() + ",%20" + sys_system_id());
 					///else
-					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + Config.getSha() + ",%20" + System.systemId + "*%0A%0A**Feature description:**%0A%0A");
+					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + Config.getSha() + ",%20" + sys_system_id() + "*%0A%0A**Feature description:**%0A%0A");
 					///end
 				}
 				UIMenu.menuSeparator(ui);
@@ -431,7 +431,7 @@ class UIMenu {
 					File.downloadBytes("https://server.armorpaint.org/" + manifest_title.toLowerCase() + ".html", (buffer: ArrayBuffer) => {
 						if (buffer != null)  {
 							// Compare versions
-							let update = JSON.parse(System.bufferToString(buffer));
+							let update = JSON.parse(sys_buffer_to_string(buffer));
 							let updateVersion = Math.floor(update.version);
 							if (updateVersion > 0) {
 								let date = Config.getDate().substr(2); // 2019 -> 19
@@ -454,7 +454,7 @@ class UIMenu {
 				if (UIMenu.menuButton(ui, tr("About..."))) {
 
 					let msg = manifest_title + ".org - v" + manifest_version + " (" + Config.getDate() + ") - " + Config.getSha() + "\n";
-					msg += System.systemId + " - " + Strings.graphics_api;
+					msg += sys_system_id() + " - " + Strings.graphics_api;
 
 					///if krom_windows
 					let save = (Path.isProtected() ? Krom.savePath() : Path.data()) + Path.sep + "tmp.txt";
@@ -479,31 +479,31 @@ class UIMenu {
 					// { lshw -C display }
 					///end
 
-					UIBox.showCustom((ui: Zui) => {
+					UIBox.showCustom((ui: ZuiRaw) => {
 						let tabVertical = Config.raw.touch_ui;
-						if (ui.tab(Zui.handle("uimenu_13"), tr("About"), tabVertical)) {
+						if (Zui.tab(Zui.handle("uimenu_13"), tr("About"), tabVertical)) {
 
-							Data.getImage("badge.k", (img: ImageRaw) => {
-								ui.image(img);
-								ui.endElement();
+							Data.getImage("badge.k", (img: image_t) => {
+								Zui.image(img);
+								Zui.endElement();
 							});
 
-							ui.textArea(Zui.handle("uimenu_14", { text: msg }), Align.Left, false);
+							Zui.textArea(Zui.handle("uimenu_14", { text: msg }), Align.Left, false);
 
-							ui.row([1 / 3, 1 / 3, 1 / 3]);
+							Zui.row([1 / 3, 1 / 3, 1 / 3]);
 
 							///if (krom_windows || krom_linux || krom_darwin)
-							if (ui.button(tr("Copy"))) {
+							if (Zui.button(tr("Copy"))) {
 								Krom.copyToClipboard(msg);
 							}
 							///else
-							ui.endElement();
+							Zui.endElement();
 							///end
 
-							if (ui.button(tr("Contributors"))) {
+							if (Zui.button(tr("Contributors"))) {
 								File.loadUrl("https://github.com/armory3d/armortools/graphs/contributors");
 							}
-							if (ui.button(tr("OK"))) {
+							if (Zui.button(tr("OK"))) {
 								UIBox.hide();
 							}
 						}
@@ -519,7 +519,7 @@ class UIMenu {
 		ui.t.BUTTON_COL = _BUTTON_COL;
 		ui.t.ELEMENT_OFFSET = _ELEMENT_OFFSET;
 		ui.t.ELEMENT_H = _ELEMENT_H;
-		ui.endRegion();
+		Zui.endRegion();
 
 		if (UIMenu.hideMenu) {
 			UIMenu.hide();
@@ -533,58 +533,58 @@ class UIMenu {
 		Base.redrawUI();
 	}
 
-	static draw = (commands: (ui: Zui)=>void = null, elements: i32, x = -1, y = -1) => {
-		Base.uiMenu.endInput();
+	static draw = (commands: (ui: ZuiRaw)=>void = null, elements: i32, x = -1, y = -1) => {
+		Zui.endInput();
 		UIMenu.show = true;
 		UIMenu.menuCommands = commands;
 		UIMenu.menuElements = elements;
-		UIMenu.menuX = x > -1 ? x : Math.floor(Mouse.x + 1);
-		UIMenu.menuY = y > -1 ? y : Math.floor(Mouse.y + 1);
+		UIMenu.menuX = x > -1 ? x : Math.floor(mouse_x + 1);
+		UIMenu.menuY = y > -1 ? y : Math.floor(mouse_y + 1);
 		UIMenu.fitToScreen();
 	}
 
 	static fitToScreen = () => {
 		// Prevent the menu going out of screen
-		let menuW = Base.defaultElementW * Base.uiMenu.SCALE() * 2.3;
-		if (UIMenu.menuX + menuW > System.width) {
+		let menuW = Base.defaultElementW * Zui.SCALE(Base.uiMenu) * 2.3;
+		if (UIMenu.menuX + menuW > sys_width()) {
 			if (UIMenu.menuX - menuW > 0) {
 				UIMenu.menuX = Math.floor(UIMenu.menuX - menuW);
 			}
 			else {
-				UIMenu.menuX = Math.floor(System.width - menuW);
+				UIMenu.menuX = Math.floor(sys_width() - menuW);
 			}
 		}
-		let menuH = Math.floor(UIMenu.menuElements * 30 * Base.uiMenu.SCALE()); // ui.t.ELEMENT_H
-		if (UIMenu.menuY + menuH > System.height) {
+		let menuH = Math.floor(UIMenu.menuElements * 30 * Zui.SCALE(Base.uiMenu)); // ui.t.ELEMENT_H
+		if (UIMenu.menuY + menuH > sys_height()) {
 			if (UIMenu.menuY - menuH > 0) {
 				UIMenu.menuY = Math.floor(UIMenu.menuY - menuH);
 			}
 			else {
-				UIMenu.menuY = System.height - menuH;
+				UIMenu.menuY = sys_height() - menuH;
 			}
 			UIMenu.menuX += 1; // Move out of mouse focus
 		}
 	}
 
-	static menuFill = (ui: Zui) => {
+	static menuFill = (ui: ZuiRaw) => {
 		ui.g.color = ui.t.ACCENT_SELECT_COL;
-		Graphics2.fillRect(ui._x - 1, ui._y, ui._w + 2, ui.ELEMENT_H() + 1 + 1);
+		g2_fill_rect(ui._x - 1, ui._y, ui._w + 2, Zui.ELEMENT_H(ui) + 1 + 1);
 		ui.g.color = ui.t.SEPARATOR_COL;
-		Graphics2.fillRect(ui._x, ui._y, ui._w, ui.ELEMENT_H() + 1);
+		g2_fill_rect(ui._x, ui._y, ui._w, Zui.ELEMENT_H(ui) + 1);
 		ui.g.color = 0xffffffff;
 	}
 
-	static menuSeparator = (ui: Zui) => {
+	static menuSeparator = (ui: ZuiRaw) => {
 		ui._y++;
 		if (Config.raw.touch_ui) {
-			ui.fill(0, 0, ui._w / ui.SCALE(), 1, ui.t.ACCENT_SELECT_COL);
+			Zui.fill(0, 0, ui._w / Zui.SCALE(ui), 1, ui.t.ACCENT_SELECT_COL);
 		}
 		else {
-			ui.fill(26, 0, ui._w / ui.SCALE() - 26, 1, ui.t.ACCENT_SELECT_COL);
+			Zui.fill(26, 0, ui._w / Zui.SCALE(ui) - 26, 1, ui.t.ACCENT_SELECT_COL);
 		}
 	}
 
-	static menuButton = (ui: Zui, text: string, label = ""/*, icon = -1*/): bool => {
+	static menuButton = (ui: ZuiRaw, text: string, label = ""/*, icon = -1*/): bool => {
 		UIMenu.menuFill(ui);
 		if (Config.raw.touch_ui) {
 			label = "";
@@ -592,33 +592,33 @@ class UIMenu {
 
 		// let icons = icon > -1 ? Res.get("icons.k") : null;
 		// let r = Res.tile25(icons, icon, 8);
-		// return ui.button(Config.buttonSpacing + text, Config.buttonAlign, label, icons, r.x, r.y, r.w, r.h);
+		// return Zui.button(Config.buttonSpacing + text, Config.buttonAlign, label, icons, r.x, r.y, r.w, r.h);
 
-		return ui.button(Config.buttonSpacing + text, Config.buttonAlign, label);
+		return Zui.button(Config.buttonSpacing + text, Config.buttonAlign, label);
 	}
 
-	static menuAlign = (ui: Zui) => {
+	static menuAlign = (ui: ZuiRaw) => {
 		if (!Config.raw.touch_ui) {
-			ui.row([12 / 100, 88 / 100]);
-			ui.endElement();
+			Zui.row([12 / 100, 88 / 100]);
+			Zui.endElement();
 		}
 	}
 
-	static menuStart = (ui: Zui) => {
+	static menuStart = (ui: ZuiRaw) => {
 		// Draw top border
 		ui.g.color = ui.t.ACCENT_SELECT_COL;
 		if (Config.raw.touch_ui) {
-			Graphics2.fillRect(ui._x + ui._w / 2 + UIMenu.menuCategoryW / 2, ui._y - 1, ui._w / 2 - UIMenu.menuCategoryW / 2 + 1, 1);
-			Graphics2.fillRect(ui._x - 1, ui._y - 1, ui._w / 2 - UIMenu.menuCategoryW / 2 + 1, 1);
-			Graphics2.fillRect(ui._x + ui._w / 2 - UIMenu.menuCategoryW / 2, ui._y - UIMenu.menuCategoryH, UIMenu.menuCategoryW, 1);
-			Graphics2.fillRect(ui._x + ui._w / 2 - UIMenu.menuCategoryW / 2, ui._y - UIMenu.menuCategoryH, 1, UIMenu.menuCategoryH);
-			Graphics2.fillRect(ui._x + ui._w / 2 + UIMenu.menuCategoryW / 2, ui._y - UIMenu.menuCategoryH, 1, UIMenu.menuCategoryH);
+			g2_fill_rect(ui._x + ui._w / 2 + UIMenu.menuCategoryW / 2, ui._y - 1, ui._w / 2 - UIMenu.menuCategoryW / 2 + 1, 1);
+			g2_fill_rect(ui._x - 1, ui._y - 1, ui._w / 2 - UIMenu.menuCategoryW / 2 + 1, 1);
+			g2_fill_rect(ui._x + ui._w / 2 - UIMenu.menuCategoryW / 2, ui._y - UIMenu.menuCategoryH, UIMenu.menuCategoryW, 1);
+			g2_fill_rect(ui._x + ui._w / 2 - UIMenu.menuCategoryW / 2, ui._y - UIMenu.menuCategoryH, 1, UIMenu.menuCategoryH);
+			g2_fill_rect(ui._x + ui._w / 2 + UIMenu.menuCategoryW / 2, ui._y - UIMenu.menuCategoryH, 1, UIMenu.menuCategoryH);
 		}
 		else {
-			Graphics2.fillRect(ui._x - 1 + UIMenu.menuCategoryW, ui._y - 1, ui._w + 2 - UIMenu.menuCategoryW, 1);
-			Graphics2.fillRect(ui._x - 1, ui._y - UIMenu.menuCategoryH, UIMenu.menuCategoryW, 1);
-			Graphics2.fillRect(ui._x - 1, ui._y - UIMenu.menuCategoryH, 1, UIMenu.menuCategoryH);
-			Graphics2.fillRect(ui._x - 1 + UIMenu.menuCategoryW, ui._y - UIMenu.menuCategoryH, 1, UIMenu.menuCategoryH);
+			g2_fill_rect(ui._x - 1 + UIMenu.menuCategoryW, ui._y - 1, ui._w + 2 - UIMenu.menuCategoryW, 1);
+			g2_fill_rect(ui._x - 1, ui._y - UIMenu.menuCategoryH, UIMenu.menuCategoryW, 1);
+			g2_fill_rect(ui._x - 1, ui._y - UIMenu.menuCategoryH, 1, UIMenu.menuCategoryH);
+			g2_fill_rect(ui._x - 1 + UIMenu.menuCategoryW, ui._y - UIMenu.menuCategoryH, 1, UIMenu.menuCategoryH);
 		}
 		ui.g.color = 0xffffffff;
 	}

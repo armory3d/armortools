@@ -6,8 +6,8 @@ let h2 = new Handle({value: 5});
 let timer = 0.0;
 
 plugin.drawUI = function(ui) {
-	if (ui.panel(h1, "Auto Save")) {
-		ui.slider(h2, "min", 1, 15, false, 1);
+	if (Zui.panel(h1, "Auto Save")) {
+		Zui.slider(h2, "min", 1, 15, false, 1);
 	}
 }
 

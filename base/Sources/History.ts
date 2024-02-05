@@ -181,7 +181,7 @@ class History {
 				MakeMaterial.parseMeshMaterial();
 			}
 			else if (step.name == tr("Delete Node Group")) {
-				Project.materialGroups.splice(step.canvas_group, 0, { canvas: null, nodes: new Nodes() });
+				Project.materialGroups.splice(step.canvas_group, 0, { canvas: null, nodes: Nodes.create() });
 				History.swapCanvas(step);
 			}
 			else if (step.name == tr("New Material")) {
@@ -194,7 +194,6 @@ class History {
 				Project.materials.splice(step.material, 0, Context.raw.material);
 				Context.raw.material.canvas = step.canvas;
 				UINodes.canvasChanged();
-				UINodes.getNodes().handle = new Handle();
 				UINodes.hwnd.redraws = 2;
 			}
 			else if (step.name == tr("Duplicate Material")) {
@@ -380,7 +379,6 @@ class History {
 				Project.materials.splice(step.material, 0, Context.raw.material);
 				Context.raw.material.canvas = step.canvas;
 				UINodes.canvasChanged();
-				UINodes.getNodes().handle = new Handle();
 				UINodes.hwnd.redraws = 2;
 			}
 			else if (step.name == tr("Delete Material")) {
@@ -393,7 +391,6 @@ class History {
 				Project.materials.splice(step.material, 0, Context.raw.material);
 				Context.raw.material.canvas = step.canvas;
 				UINodes.canvasChanged();
-				UINodes.getNodes().handle = new Handle();
 				UINodes.hwnd.redraws = 2;
 			}
 			else { // Paint operation
@@ -593,7 +590,7 @@ class History {
 	static push = (name: string): TStep => {
 		///if (krom_windows || krom_linux || krom_darwin)
 		let filename = Project.filepath == "" ? UIFiles.filename : Project.filepath.substring(Project.filepath.lastIndexOf(Path.sep) + 1, Project.filepath.length - 4);
-		System.title = filename + "* - " + manifest_title;
+		sys_title_set(filename + "* - " + manifest_title);
 		///end
 
 		if (Config.raw.touch_ui) {
@@ -669,17 +666,17 @@ class History {
 		///end
 
 		if (isMask) {
-			RenderPath.setTarget("texpaint_undo" + toId);
-			RenderPath.bindTarget("texpaint" + fromId, "tex");
-			// RenderPath.drawShader("shader_datas/copy_pass/copyR8_pass");
-			RenderPath.drawShader("shader_datas/copy_pass/copy_pass");
+			render_path_set_target("texpaint_undo" + toId);
+			render_path_bind_target("texpaint" + fromId, "tex");
+			// render_path_draw_shader("shader_datas/copy_pass/copyR8_pass");
+			render_path_draw_shader("shader_datas/copy_pass/copy_pass");
 		}
 		else {
-			RenderPath.setTarget("texpaint_undo" + toId, ["texpaint_nor_undo" + toId, "texpaint_pack_undo" + toId]);
-			RenderPath.bindTarget("texpaint" + fromId, "tex0");
-			RenderPath.bindTarget("texpaint_nor" + fromId, "tex1");
-			RenderPath.bindTarget("texpaint_pack" + fromId, "tex2");
-			RenderPath.drawShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
+			render_path_set_target("texpaint_undo" + toId, ["texpaint_nor_undo" + toId, "texpaint_pack_undo" + toId]);
+			render_path_bind_target("texpaint" + fromId, "tex0");
+			render_path_bind_target("texpaint_nor" + fromId, "tex1");
+			render_path_bind_target("texpaint_pack" + fromId, "tex2");
+			render_path_draw_shader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
 		}
 		History.undoI = (History.undoI + 1) % Config.raw.undo_steps;
 	}
@@ -720,7 +717,6 @@ class History {
 		///end
 
 		UINodes.canvasChanged();
-		UINodes.getNodes().handle = new Handle();
 		UINodes.hwnd.redraws = 2;
 	}
 }

@@ -20,9 +20,9 @@ class Project {
 	static atlasNames: string[] = null;
 	///end
 	///if is_lab
-	static materialData: TMaterialData = null; ////
+	static materialData: material_data_t = null; ////
 	static materials: any[] = null; ////
-	static nodes: Nodes;
+	static nodes: NodesRaw;
 	static canvas: TNodeCanvas;
 	static defaultCanvas: ArrayBuffer = null;
 	///end
@@ -34,12 +34,12 @@ class Project {
 				return;
 			}
 
-			let current = Graphics2.current;
-			if (current != null) Graphics2.end(current);
+			let current = _g2_current;
+			if (current != null) g2_end(current);
 
 			ImportArm.runProject(path);
 
-			if (current != null) Graphics2.begin(current, false);
+			if (current != null) g2_begin(current, false);
 		});
 	}
 
@@ -48,9 +48,9 @@ class Project {
 			///if krom_ios
 			let documentDirectory = Krom.saveDialog("", "");
 			documentDirectory = documentDirectory.substr(0, documentDirectory.length - 8); // Strip /'untitled'
-			Project.filepath = documentDirectory + "/" + System.title + ".arm";
+			Project.filepath = documentDirectory + "/" + sys_title() + ".arm";
 			///elseif krom_android
-			Project.filepath = Krom.savePath() + "/" + System.title + ".arm";
+			Project.filepath = Krom.savePath() + "/" + sys_title() + ".arm";
 			///else
 			Project.projectSaveAs(saveAndQuit);
 			return;
@@ -59,12 +59,12 @@ class Project {
 
 		///if (krom_windows || krom_linux || krom_darwin)
 		let filename = Project.filepath.substring(Project.filepath.lastIndexOf(Path.sep) + 1, Project.filepath.length - 4);
-		System.title = filename + " - " + manifest_title;
+		sys_title_set(filename + " - " + manifest_title);
 		///end
 
 		let _init = () => {
 			ExportArm.runProject();
-			if (saveAndQuit) System.stop();
+			if (saveAndQuit) sys_stop();
 		}
 		App.notifyOnInit(_init);
 	}
@@ -81,8 +81,8 @@ class Project {
 
 	static projectNewBox = () => {
 		///if (is_paint || is_sculpt)
-		UIBox.showCustom((ui: Zui) => {
-			if (ui.tab(Zui.handle("project_0"), tr("New Project"))) {
+		UIBox.showCustom((ui: ZuiRaw) => {
+			if (Zui.tab(Zui.handle("project_0"), tr("New Project"))) {
 				if (Project.meshList == null) {
 					Project.meshList = File.readDirectory(Path.data() + Path.sep + "meshes");
 					for (let i = 0; i < Project.meshList.length; ++i) Project.meshList[i] = Project.meshList[i].substr(0, Project.meshList[i].length - 4); // Trim .arm
@@ -91,16 +91,16 @@ class Project {
 					Project.meshList.unshift("rounded_cube");
 				}
 
-				ui.row([0.5, 0.5]);
-				Context.raw.projectType = ui.combo(Zui.handle("project_1", { position: Context.raw.projectType }), Project.meshList, tr("Template"), true);
-				Context.raw.projectAspectRatio = ui.combo(Zui.handle("project_2", { position: Context.raw.projectAspectRatio }), ["1:1", "2:1", "1:2"], tr("Aspect Ratio"), true);
+				Zui.row([0.5, 0.5]);
+				Context.raw.projectType = Zui.combo(Zui.handle("project_1", { position: Context.raw.projectType }), Project.meshList, tr("Template"), true);
+				Context.raw.projectAspectRatio = Zui.combo(Zui.handle("project_2", { position: Context.raw.projectAspectRatio }), ["1:1", "2:1", "1:2"], tr("Aspect Ratio"), true);
 
-				ui.endElement();
-				ui.row([0.5, 0.5]);
-				if (ui.button(tr("Cancel"))) {
+				Zui.endElement();
+				Zui.row([0.5, 0.5]);
+				if (Zui.button(tr("Cancel"))) {
 					UIBox.hide();
 				}
-				if (ui.button(tr("OK")) || ui.isReturnDown) {
+				if (Zui.button(tr("OK")) || ui.isReturnDown) {
 					Project.projectNew();
 					Viewport.scaleToBounds();
 					UIBox.hide();
@@ -117,7 +117,7 @@ class Project {
 
 	static projectNew = (resetLayers = true) => {
 		///if (krom_windows || krom_linux || krom_darwin)
-		System.title = manifest_title;
+		sys_title_set(manifest_title);
 		///end
 		Project.filepath = "";
 
@@ -142,7 +142,7 @@ class Project {
 			Data.deleteMesh(p.data._handle);
 			MeshObject.remove(p);
 		}
-		let meshes = Scene.meshes;
+		let meshes = scene_meshes;
 		let len = meshes.length;
 		for (let i = 0; i < len; ++i) {
 			let m = meshes[len - i - 1];
@@ -159,7 +159,7 @@ class Project {
 		}
 
 		if (Context.raw.projectType != ProjectModel.ModelRoundedCube) {
-			let raw: TMeshData = null;
+			let raw: mesh_data_t = null;
 			if (Context.raw.projectType == ProjectModel.ModelSphere || Context.raw.projectType == ProjectModel.ModelTessellatedPlane) {
 				let mesh: any = Context.raw.projectType == ProjectModel.ModelSphere ?
 					Geom.make_uv_sphere(1, 512, 256) :
@@ -178,24 +178,24 @@ class Project {
 						f32a[i * 4 + 3] = 1.0;
 					}
 
-					let imgmesh = Image.fromBytes(f32a.buffer, Config.getTextureResX(), Config.getTextureResY(), TextureFormat.RGBA128);
+					let imgmesh = image_from_bytes(f32a.buffer, Config.getTextureResX(), Config.getTextureResY(), TextureFormat.RGBA128);
 					let texpaint = Project.layers[0].texpaint;
-					Graphics2.begin(texpaint.g2, false);
+					g2_begin(texpaint.g2, false);
 					texpaint.g2.pipeline = Base.pipeCopy128;
-					Graphics2.drawScaledImage(imgmesh, 0, 0, Config.getTextureResX(), Config.getTextureResY());
+					g2_draw_scaled_image(imgmesh, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 					texpaint.g2.pipeline = null;
-					Graphics2.end(texpaint.g2);
+					g2_end(texpaint.g2);
 				});
 				///end
 			}
 			else {
 				Data.getBlob("meshes/" + Project.meshList[Context.raw.projectType] + ".arm", (b: ArrayBuffer) => {
-					raw = ArmPack.decode(b).mesh_datas[0];
+					raw = armpack_decode(b).mesh_datas[0];
 				});
 			}
 
-			let md: TMeshData;
-			MeshData.create(raw, (mdata: TMeshData) => { md = mdata; });
+			let md: mesh_data_t;
+			MeshData.create(raw, (mdata: mesh_data_t) => { md = mdata; });
 			Data.cachedMeshes.set("SceneTessellated", md);
 
 			if (Context.raw.projectType == ProjectModel.ModelTessellatedPlane) {
@@ -204,24 +204,24 @@ class Project {
 		}
 
 		let n = Context.raw.projectType == ProjectModel.ModelRoundedCube ? ".Cube" : "Tessellated";
-		Data.getMesh("Scene", n, (md: TMeshData) => {
+		Data.getMesh("Scene", n, (md: mesh_data_t) => {
 
-			let current = Graphics2.current;
-			if (current != null) Graphics2.end(current);
+			let current = _g2_current;
+			if (current != null) g2_end(current);
 
 			///if is_paint
 			Context.raw.pickerMaskHandle.position = PickerMask.MaskNone;
 			///end
 
 			MeshObject.setData(Context.raw.paintObject, md);
-			Vec4.set(Context.raw.paintObject.base.transform.scale, 1, 1, 1);
-			Transform.buildMatrix(Context.raw.paintObject.base.transform);
+			vec4_set(Context.raw.paintObject.base.transform.scale, 1, 1, 1);
+			transform_build_matrix(Context.raw.paintObject.base.transform);
 			Context.raw.paintObject.base.name = n;
 			Project.paintObjects = [Context.raw.paintObject];
 			///if (is_paint || is_sculpt)
 			while (Project.materials.length > 0) SlotMaterial.unload(Project.materials.pop());
 			///end
-			Data.getMaterial("Scene", "Material", (m: TMaterialData) => {
+			Data.getMaterial("Scene", "Material", (m: material_data_t) => {
 				///if (is_paint || is_sculpt)
 				Project.materials.push(SlotMaterial.create(m));
 				///end
@@ -288,17 +288,17 @@ class Project {
 				App.notifyOnInit(Base.initLayers);
 			}
 
-			if (current != null) Graphics2.begin(current, false);
+			if (current != null) g2_begin(current, false);
 
 			Context.raw.savedEnvmap = null;
 			Context.raw.envmapLoaded = false;
-			Scene.world._envmap = Context.raw.emptyEnvmap;
-			Scene.world.envmap = "World_radiance.k";
+			scene_world._envmap = Context.raw.emptyEnvmap;
+			scene_world.envmap = "World_radiance.k";
 			Context.raw.showEnvmapHandle.selected = Context.raw.showEnvmap = false;
-			Scene.world._radiance = Context.raw.defaultRadiance;
-			Scene.world._radianceMipmaps = Context.raw.defaultRadianceMipmaps;
-			Scene.world._irradiance = Context.raw.defaultIrradiance;
-			Scene.world.strength = 4.0;
+			scene_world._radiance = Context.raw.defaultRadiance;
+			scene_world._radianceMipmaps = Context.raw.defaultRadianceMipmaps;
+			scene_world._irradiance = Context.raw.defaultIrradiance;
+			scene_world.strength = 4.0;
 
 			///if (is_paint || is_sculpt)
 			Context.initTool();
@@ -344,7 +344,7 @@ class Project {
 				n.buttons[0].default_value = assetIndex;
 				let links = Context.raw.brush.canvas.links;
 				links.push({
-					id: Context.raw.brush.nodes.getLinkId(links),
+					id: Nodes.getLinkId(links),
 					from_id: n.id,
 					from_socket: 0,
 					to_id: 0,
@@ -380,38 +380,38 @@ class Project {
 		// Data.getBlob(path, (b: Blob) => {});
 		///end
 
-		UIBox.showCustom((ui: Zui) => {
+		UIBox.showCustom((ui: ZuiRaw) => {
 			let tabVertical = Config.raw.touch_ui;
-			if (ui.tab(Zui.handle("project_3"), tr("Import Mesh"), tabVertical)) {
+			if (Zui.tab(Zui.handle("project_3"), tr("Import Mesh"), tabVertical)) {
 
 				if (path.toLowerCase().endsWith(".obj")) {
-					Context.raw.splitBy = ui.combo(Zui.handle("project_4"), [
+					Context.raw.splitBy = Zui.combo(Zui.handle("project_4"), [
 						tr("Object"),
 						tr("Group"),
 						tr("Material"),
 						tr("UDIM Tile"),
 					], tr("Split By"), true);
-					if (ui.isHovered) ui.tooltip(tr("Split .obj mesh into objects"));
+					if (ui.isHovered) Zui.tooltip(tr("Split .obj mesh into objects"));
 				}
 
 				// if (path.toLowerCase().endsWith(".fbx")) {
-				// 	Context.raw.parseTransform = ui.check(Zui.handle("project_5", { selected: Context.raw.parseTransform }), tr("Parse Transforms"));
-				// 	if (ui.isHovered) ui.tooltip(tr("Load per-object transforms from .fbx"));
+				// 	Context.raw.parseTransform = Zui.check(Zui.handle("project_5", { selected: Context.raw.parseTransform }), tr("Parse Transforms"));
+				// 	if (ui.isHovered) Zui.tooltip(tr("Load per-object transforms from .fbx"));
 				// }
 
 				///if (is_paint || is_sculpt)
 				// if (path.toLowerCase().endsWith(".fbx") || path.toLowerCase().endsWith(".blend")) {
 				if (path.toLowerCase().endsWith(".blend")) {
-					Context.raw.parseVCols = ui.check(Zui.handle("project_6", { selected: Context.raw.parseVCols }), tr("Parse Vertex Colors"));
-					if (ui.isHovered) ui.tooltip(tr("Import vertex color data"));
+					Context.raw.parseVCols = Zui.check(Zui.handle("project_6", { selected: Context.raw.parseVCols }), tr("Parse Vertex Colors"));
+					if (ui.isHovered) Zui.tooltip(tr("Import vertex color data"));
 				}
 				///end
 
-				ui.row([0.45, 0.45, 0.1]);
-				if (ui.button(tr("Cancel"))) {
+				Zui.row([0.45, 0.45, 0.1]);
+				if (Zui.button(tr("Cancel"))) {
 					UIBox.hide();
 				}
-				if (ui.button(tr("Import")) || ui.isReturnDown) {
+				if (Zui.button(tr("Import")) || ui.isReturnDown) {
 					UIBox.hide();
 					let doImport = () => {
 						///if (is_paint || is_sculpt)
@@ -431,7 +431,7 @@ class Project {
 					doImport();
 					///end
 				}
-				if (ui.button(tr("?"))) {
+				if (Zui.button(tr("?"))) {
 					File.loadUrl("https://github.com/armory3d/armorpaint_docs/blob/master/faq.md");
 				}
 			}
@@ -447,9 +447,9 @@ class Project {
 	}
 
 	static unwrapMeshBox = (mesh: any, done: (a: any)=>void, skipUI = false) => {
-		UIBox.showCustom((ui: Zui) => {
+		UIBox.showCustom((ui: ZuiRaw) => {
 			let tabVertical = Config.raw.touch_ui;
-			if (ui.tab(Zui.handle("project_7"), tr("Unwrap Mesh"), tabVertical)) {
+			if (Zui.tab(Zui.handle("project_7"), tr("Unwrap Mesh"), tabVertical)) {
 
 				let unwrapPlugins: string[] = [];
 				if (BoxPreferences.filesPlugin == null) {
@@ -462,13 +462,13 @@ class Project {
 				}
 				unwrapPlugins.push("equirect");
 
-				let unwrapBy = ui.combo(Zui.handle("project_8"), unwrapPlugins, tr("Plugin"), true);
+				let unwrapBy = Zui.combo(Zui.handle("project_8"), unwrapPlugins, tr("Plugin"), true);
 
-				ui.row([0.5, 0.5]);
-				if (ui.button(tr("Cancel"))) {
+				Zui.row([0.5, 0.5]);
+				if (Zui.button(tr("Cancel"))) {
 					UIBox.hide();
 				}
-				if (ui.button(tr("Unwrap")) || ui.isReturnDown || skipUI) {
+				if (Zui.button(tr("Unwrap")) || ui.isReturnDown || skipUI) {
 					UIBox.hide();
 					let doUnwrap = () => {
 						if (unwrapBy == unwrapPlugins.length - 1) {
@@ -553,7 +553,7 @@ class Project {
 		else load(asset.file);
 	}
 
-	static getImage = (asset: TAsset): ImageRaw => {
+	static getImage = (asset: TAsset): image_t => {
 		return asset != null ? Project.assetMap.get(asset.id) : null;
 	}
 
@@ -639,6 +639,6 @@ class Project {
 }
 
 type TNodeGroup = {
-	nodes: Nodes;
+	nodes: NodesRaw;
 	canvas: TNodeCanvas;
 }

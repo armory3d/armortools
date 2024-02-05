@@ -2,38 +2,38 @@
 class RenderPathDeferred {
 
 	static init = () => {
-		RenderPath.createDepthBuffer("main", "DEPTH24");
+		render_path_create_depth_buffer("main", "DEPTH24");
 
 		{
-			let t = RenderTarget.create();
+			let t = render_target_create();
 			t.name = "gbuffer0";
 			t.width = 0;
 			t.height = 0;
 			t.format = "RGBA64";
 			t.scale = RenderPathBase.getSuperSampling();
 			t.depth_buffer = "main";
-			RenderPath.createRenderTarget(t);
+			render_path_create_render_target(t);
 		}
 		{
-			let t = RenderTarget.create();
+			let t = render_target_create();
 			t.name = "gbuffer1";
 			t.width = 0;
 			t.height = 0;
 			t.format = "RGBA64";
 			t.scale = RenderPathBase.getSuperSampling();
-			RenderPath.createRenderTarget(t);
+			render_path_create_render_target(t);
 		}
 		{
-			let t = RenderTarget.create();
+			let t = render_target_create();
 			t.name = "gbuffer2";
 			t.width = 0;
 			t.height = 0;
 			t.format = "RGBA64";
 			t.scale = RenderPathBase.getSuperSampling();
-			RenderPath.createRenderTarget(t);
+			render_path_create_render_target(t);
 		}
 		{
-			let t = RenderTarget.create();
+			let t = render_target_create();
 			t.name = "tex";
 			t.width = 0;
 			t.height = 0;
@@ -42,10 +42,10 @@ class RenderPathDeferred {
 			///if krom_opengl
 			t.depth_buffer = "main";
 			///end
-			RenderPath.createRenderTarget(t);
+			render_path_create_render_target(t);
 		}
 		{
-			let t = RenderTarget.create();
+			let t = render_target_create();
 			t.name = "buf";
 			t.width = 0;
 			t.height = 0;
@@ -57,37 +57,37 @@ class RenderPathDeferred {
 			t.format = "RGBA32";
 			///end
 			t.scale = RenderPathBase.getSuperSampling();
-			RenderPath.createRenderTarget(t);
+			render_path_create_render_target(t);
 		}
 		{
-			let t = RenderTarget.create();
+			let t = render_target_create();
 			t.name = "buf2";
 			t.width = 0;
 			t.height = 0;
 			t.format = "RGBA32";
 			t.scale = RenderPathBase.getSuperSampling();
-			RenderPath.createRenderTarget(t);
+			render_path_create_render_target(t);
 		}
 		{
-			let t = RenderTarget.create();
+			let t = render_target_create();
 			t.name = "taa";
 			t.width = 0;
 			t.height = 0;
 			t.format = "RGBA32";
 			t.scale = RenderPathBase.getSuperSampling();
-			RenderPath.createRenderTarget(t);
+			render_path_create_render_target(t);
 		}
 		{
-			let t = RenderTarget.create();
+			let t = render_target_create();
 			t.name = "taa2";
 			t.width = 0;
 			t.height = 0;
 			t.format = "RGBA32";
 			t.scale = RenderPathBase.getSuperSampling();
-			RenderPath.createRenderTarget(t);
+			render_path_create_render_target(t);
 		}
 		{
-			let t = RenderTarget.create();
+			let t = render_target_create();
 			t.name = "empty_white";
 			t.width = 1;
 			t.height = 1;
@@ -95,11 +95,11 @@ class RenderPathDeferred {
 			let b = new ArrayBuffer(1);
 			let v = new DataView(b);
 			v.setUint8(0, 255);
-			t.image = Image.fromBytes(b, t.width, t.height, TextureFormat.R8);
-			RenderPath.renderTargets.set(t.name, t);
+			t.image = image_from_bytes(b, t.width, t.height, TextureFormat.R8);
+			render_path_render_targets.set(t.name, t);
 		}
 		{
-			let t = RenderTarget.create();
+			let t = render_target_create();
 			t.name = "empty_black";
 			t.width = 1;
 			t.height = 1;
@@ -110,28 +110,28 @@ class RenderPathDeferred {
 			v.setUint8(1, 0);
 			v.setUint8(2, 0);
 			v.setUint8(3, 0);
-			t.image = Image.fromBytes(b, t.width, t.height, TextureFormat.RGBA32);
-			RenderPath.renderTargets.set(t.name, t);
+			t.image = image_from_bytes(b, t.width, t.height, TextureFormat.RGBA32);
+			render_path_render_targets.set(t.name, t);
 		}
 
 		///if is_sculpt
 		{
-			let t = RenderTarget.create();
+			let t = render_target_create();
 			t.name = "gbuffer0_undo";
 			t.width = 0;
 			t.height = 0;
 			t.format = "RGBA64";
 			t.scale = RenderPathBase.getSuperSampling();
-			RenderPath.createRenderTarget(t);
+			render_path_create_render_target(t);
 		}
 		{
-			let t = RenderTarget.create();
+			let t = render_target_create();
 			t.name = "gbufferD_undo";
 			t.width = 0;
 			t.height = 0;
 			t.format = "R32";
 			t.scale = RenderPathBase.getSuperSampling();
-			RenderPath.createRenderTarget(t);
+			render_path_create_render_target(t);
 		}
 		///end
 
@@ -139,22 +139,22 @@ class RenderPathDeferred {
 			RenderPathBase.initSSAO();
 		}
 
-		RenderPath.loadShader("shader_datas/world_pass/world_pass");
-		RenderPath.loadShader("shader_datas/deferred_light/deferred_light");
-		RenderPath.loadShader("shader_datas/compositor_pass/compositor_pass");
-		RenderPath.loadShader("shader_datas/copy_pass/copy_pass");
-		RenderPath.loadShader("shader_datas/copy_pass/copyR8_pass");
-		RenderPath.loadShader("shader_datas/smaa_edge_detect/smaa_edge_detect");
-		RenderPath.loadShader("shader_datas/smaa_blend_weight/smaa_blend_weight");
-		RenderPath.loadShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
-		RenderPath.loadShader("shader_datas/taa_pass/taa_pass");
-		RenderPath.loadShader("shader_datas/supersample_resolve/supersample_resolve");
-		// RenderPath.loadShader("shader_datas/motion_blur_pass/motion_blur_pass");
-		// RenderPath.loadShader("shader_datas/motion_blur_veloc_pass/motion_blur_veloc_pass");
+		render_path_load_shader("shader_datas/world_pass/world_pass");
+		render_path_load_shader("shader_datas/deferred_light/deferred_light");
+		render_path_load_shader("shader_datas/compositor_pass/compositor_pass");
+		render_path_load_shader("shader_datas/copy_pass/copy_pass");
+		render_path_load_shader("shader_datas/copy_pass/copyR8_pass");
+		render_path_load_shader("shader_datas/smaa_edge_detect/smaa_edge_detect");
+		render_path_load_shader("shader_datas/smaa_blend_weight/smaa_blend_weight");
+		render_path_load_shader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
+		render_path_load_shader("shader_datas/taa_pass/taa_pass");
+		render_path_load_shader("shader_datas/supersample_resolve/supersample_resolve");
+		// render_path_load_shader("shader_datas/motion_blur_pass/motion_blur_pass");
+		// render_path_load_shader("shader_datas/motion_blur_veloc_pass/motion_blur_veloc_pass");
 		///if arm_voxels
 		{
 			RenderPathBase.initVoxels();
-			RenderPath.loadShader("shader_datas/deferred_light/deferred_light_voxel");
+			render_path_load_shader("shader_datas/deferred_light/deferred_light_voxel");
 		}
 		///end
 
@@ -187,14 +187,14 @@ class RenderPathDeferred {
 		// RenderPathBase.drawMotionBlur();
 		// RenderPathBase.drawHistogram();
 
-		RenderPath.setTarget("buf");
-		RenderPath.bindTarget("tex", "tex");
-		// RenderPath.bindTarget("histogram", "histogram");
-		RenderPath.drawShader("shader_datas/compositor_pass/compositor_pass");
+		render_path_set_target("buf");
+		render_path_bind_target("tex", "tex");
+		// render_path_bind_target("histogram", "histogram");
+		render_path_draw_shader("shader_datas/compositor_pass/compositor_pass");
 
-		RenderPath.setTarget("buf");
-		RenderPathBase.drawCompass(RenderPath.currentG);
-		RenderPath.drawMeshes("overlay");
+		render_path_set_target("buf");
+		RenderPathBase.drawCompass(_render_path_current_g);
+		render_path_draw_meshes("overlay");
 
 		RenderPathBase.drawTAA();
 	}

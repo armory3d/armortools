@@ -7,42 +7,42 @@ let slots = ["base", "occ", "rough", "nor"];
 let breakdown = null;
 
 plugin.drawUI = function(ui) {
-	if (ui.panel(h1, "Texture Breakdown")) {
+	if (Zui.panel(h1, "Texture Breakdown")) {
 
 		ui.g.end();
 		drawBreakdown();
 		ui.g.begin(false);
 
-		// ui.row([1 / 4]);
-		// ui.combo(h2, ["Material", "Viewport"], "Type");
+		// Zui.row([1 / 4]);
+		// Zui.combo(h2, ["Material", "Viewport"], "Type");
 
-		ui.image(breakdown);
+		Zui.image(breakdown);
 		if (ui.isHovered && ui.inputReleasedR) {
 			let x = ui.inputX - ui._windowX;
 			let w = ui._windowW / slots.length;
 			let i = (x / w) | 0;
 			arm.UIMenu.draw(function(ui) {
-				ui.text(slots[i], 2, ui.t.HIGHLIGHT_COL);
-				if (ui.button("Delete", 0)) {
+				Zui.text(slots[i], 2, ui.t.HIGHLIGHT_COL);
+				if (Zui.button("Delete", 0)) {
 					slots.splice(i, 1);
 				}
 			}, 2);
 		}
 
-		ui.row([1 / 4, 1 / 4]);
+		Zui.row([1 / 4, 1 / 4]);
 
-		if (ui.button("Add")) {
+		if (Zui.button("Add")) {
 			arm.UIMenu.draw(function(ui) {
-				ui.text("Channel", 2, ui.t.HIGHLIGHT_COL);
-				if (ui.button("Base Color", 0)) { slots.push("base"); }
-				if (ui.button("Occlusion", 0)) { slots.push("occ"); }
-				if (ui.button("Roughness", 0)) { slots.push("rough"); }
-				if (ui.button("Metallic", 0)) { slots.push("metal"); }
-				if (ui.button("Normal Map", 0)) { slots.push("nor"); }
+				Zui.text("Channel", 2, ui.t.HIGHLIGHT_COL);
+				if (Zui.button("Base Color", 0)) { slots.push("base"); }
+				if (Zui.button("Occlusion", 0)) { slots.push("occ"); }
+				if (Zui.button("Roughness", 0)) { slots.push("rough"); }
+				if (Zui.button("Metallic", 0)) { slots.push("metal"); }
+				if (Zui.button("Normal Map", 0)) { slots.push("nor"); }
 			}, 6);
 		}
 
-		if (ui.button("Export")) {
+		if (Zui.button("Export")) {
 			arm.UIFiles.show("png", true, false, function(path) {
 				Base.notifyOnNextFrame(function() {
 					var f = arm.UIFiles.filename;

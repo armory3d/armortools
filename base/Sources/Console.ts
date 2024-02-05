@@ -7,22 +7,22 @@ class Console {
 	static lastTraces: string[] = [""];
 	static progressText: string = null;
 
-	static drawToast = (s: string, g: Graphics2Raw) => {
+	static drawToast = (s: string, g: g2_t) => {
 		g.color = 0x55000000;
-		Graphics2.fillRect(0, 0, System.width, System.height);
-		let scale = Base.getUIs()[0].SCALE();
-		let x = System.width / 2;
-		let y = System.height - 200 * scale;
-		Graphics2.fillRect(x - 200 * scale, y, 400 * scale, 80 * scale);
+		g2_fill_rect(0, 0, sys_width(), sys_height());
+		let scale = Zui.SCALE(Base.getUIs()[0]);
+		let x = sys_width() / 2;
+		let y = sys_height() - 200 * scale;
+		g2_fill_rect(x - 200 * scale, y, 400 * scale, 80 * scale);
 		g.font = Base.font;
-		g.fontSize = Math.floor(22 * scale);
+		g.font_size = Math.floor(22 * scale);
 		g.color = 0xffffffff;
-		Graphics2.drawString(s, x - Font.width(g.font, g.fontSize, s) / 2, y + 40 * scale - Font.height(g.font, g.fontSize) / 2);
+		g2_draw_string(s, x - font_width(g.font, g.font_size, s) / 2, y + 40 * scale - font_height(g.font, g.font_size) / 2);
 	}
 
-	static toast = (s: string, g2: Graphics2Raw = null) => {
+	static toast = (s: string, g2: g2_t = null) => {
 		// Show a popup message
-		let _render = (g: Graphics2Raw) => {
+		let _render = (g: g2_t) => {
 			Console.drawToast(s, g);
 			if (g2 == null) {
 				Base.notifyOnNextFrame(() => {
@@ -34,7 +34,7 @@ class Console {
 		Console.consoleTrace(s);
 	}
 
-	static drawProgress = (g: Graphics2Raw) => {
+	static drawProgress = (g: g2_t) => {
 		Console.drawToast(Console.progressText, g);
 	}
 

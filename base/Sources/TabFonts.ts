@@ -3,65 +3,65 @@
 
 class TabFonts {
 
-	static draw = (htab: Handle) => {
+	static draw = (htab: HandleRaw) => {
 		let ui = UIBase.ui;
 		let statush = Config.raw.layout[LayoutSize.LayoutStatusH];
-		if (ui.tab(htab, tr("Fonts")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
+		if (Zui.tab(htab, tr("Fonts")) && statush > UIStatus.defaultStatusH * Zui.SCALE(ui)) {
 
-			ui.beginSticky();
+			Zui.beginSticky();
 			if (Config.raw.touch_ui) {
-				ui.row([1 / 4, 1 / 4]);
+				Zui.row([1 / 4, 1 / 4]);
 			}
 			else {
-				ui.row([1 / 14, 1 / 14]);
+				Zui.row([1 / 14, 1 / 14]);
 			}
 
-			if (ui.button(tr("Import"))) Project.importAsset("ttf,ttc,otf");
-			if (ui.isHovered) ui.tooltip(tr("Import font file"));
+			if (Zui.button(tr("Import"))) Project.importAsset("ttf,ttc,otf");
+			if (ui.isHovered) Zui.tooltip(tr("Import font file"));
 
-			if (ui.button(tr("2D View"))) {
+			if (Zui.button(tr("2D View"))) {
 				UIBase.show2DView(View2DType.View2DFont);
 			}
-			ui.endSticky();
-			ui.separator(3, false);
+			Zui.endSticky();
+			Zui.separator(3, false);
 
-			let statusw = System.width - UIToolbar.toolbarw - Config.raw.layout[LayoutSize.LayoutSidebarW];
-			let slotw = Math.floor(51 * ui.SCALE());
+			let statusw = sys_width() - UIToolbar.toolbarw - Config.raw.layout[LayoutSize.LayoutSidebarW];
+			let slotw = Math.floor(51 * Zui.SCALE(ui));
 			let num = Math.floor(statusw / slotw);
 
 			for (let row = 0; row < Math.floor(Math.ceil(Project.fonts.length / num)); ++row) {
 				let mult = Config.raw.show_asset_names ? 2 : 1;
 				let ar = [];
 				for (let i = 0; i < num * mult; ++i) ar.push(1 / num);
-				ui.row(ar);
+				Zui.row(ar);
 
 				ui._x += 2;
-				let off = Config.raw.show_asset_names ? ui.ELEMENT_OFFSET() * 10.0 : 6;
+				let off = Config.raw.show_asset_names ? Zui.ELEMENT_OFFSET(ui) * 10.0 : 6;
 				if (row > 0) ui._y += off;
 
 				for (let j = 0; j < num; ++j) {
-					let imgw = Math.floor(50 * ui.SCALE());
+					let imgw = Math.floor(50 * Zui.SCALE(ui));
 					let i = j + row * num;
 					if (i >= Project.fonts.length) {
-						ui.endElement(imgw);
-						if (Config.raw.show_asset_names) ui.endElement(0);
+						Zui.endElement(imgw);
+						if (Config.raw.show_asset_names) Zui.endElement(0);
 						continue;
 					}
 					let img = Project.fonts[i].image;
 
 					if (Context.raw.font == Project.fonts[i]) {
-						// ui.fill(1, -2, img.width + 3, img.height + 3, ui.t.HIGHLIGHT_COL); // TODO
+						// Zui.fill(1, -2, img.width + 3, img.height + 3, ui.t.HIGHLIGHT_COL); // TODO
 						let off = row % 2 == 1 ? 1 : 0;
 						let w = 50;
 						if (Config.raw.window_scale > 1) w += Math.floor(Config.raw.window_scale * 2);
-						ui.fill(-1,         -2, w + 3,       2, ui.t.HIGHLIGHT_COL);
-						ui.fill(-1,    w - off, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
-						ui.fill(-1,         -2,     2,   w + 3, ui.t.HIGHLIGHT_COL);
-						ui.fill(w + 1,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
+						Zui.fill(-1,         -2, w + 3,       2, ui.t.HIGHLIGHT_COL);
+						Zui.fill(-1,    w - off, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
+						Zui.fill(-1,         -2,     2,   w + 3, ui.t.HIGHLIGHT_COL);
+						Zui.fill(w + 1,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
 					}
 
 					let uix = ui._x;
-					let tile = ui.SCALE() > 1 ? 100 : 50;
+					let tile = Zui.SCALE(ui) > 1 ? 100 : 50;
 					let state = State.Idle;
 					if (Project.fonts[i].previewReady) {
 						// ui.g.pipeline = UIView2D.pipe; // L8
@@ -69,11 +69,11 @@ class TabFonts {
 						// ui.currentWindow.texture.g4.setPipeline(UIView2D.pipe);
 						// ///end
 						// ui.currentWindow.texture.g4.setInt(UIView2D.channelLocation, 1);
-						state = ui.image(img);
+						state = Zui.image(img);
 						// ui.g.pipeline = null;
 					}
 					else {
-						state = ui.image(Res.get("icons.k"), -1, null, tile * 6, tile, tile, tile);
+						state = Zui.image(Res.get("icons.k"), -1, null, tile * 6, tile, tile, tile);
 					}
 
 					if (state == State.Started) {
@@ -83,14 +83,14 @@ class TabFonts {
 							}
 							App.notifyOnInit(_init);
 						}
-						if (Time.time() - Context.raw.selectTime < 0.25) UIBase.show2DView(View2DType.View2DFont);
-						Context.raw.selectTime = Time.time();
+						if (time_time() - Context.raw.selectTime < 0.25) UIBase.show2DView(View2DType.View2DFont);
+						Context.raw.selectTime = time_time();
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
 						Context.selectFont(i);
 						let add = Project.fonts.length > 1 ? 1 : 0;
 						let fontName = Project.fonts[i].name;
-						UIMenu.draw((ui: Zui) => {
+						UIMenu.draw((ui: ZuiRaw) => {
 							if (Project.fonts.length > 1 && UIMenu.menuButton(ui, tr("Delete"), "delete") && Project.fonts[i].file != "") {
 								TabFonts.deleteFont(Project.fonts[i]);
 							}
@@ -106,19 +106,19 @@ class TabFonts {
 							});
 						}
 						else {
-							ui.tooltipImage(img);
-							ui.tooltip(Project.fonts[i].name);
+							Zui.tooltipImage(img);
+							Zui.tooltip(Project.fonts[i].name);
 						}
 					}
 
 					if (Config.raw.show_asset_names) {
 						ui._x = uix;
 						ui._y += slotw * 0.9;
-						ui.text(Project.fonts[i].name, Align.Center);
-						if (ui.isHovered) ui.tooltip(Project.fonts[i].name);
+						Zui.text(Project.fonts[i].name, Align.Center);
+						if (ui.isHovered) Zui.tooltip(Project.fonts[i].name);
 						ui._y -= slotw * 0.9;
 						if (i == Project.fonts.length - 1) {
-							ui._y += j == num - 1 ? imgw : imgw + ui.ELEMENT_H() + ui.ELEMENT_OFFSET();
+							ui._y += j == num - 1 ? imgw : imgw + Zui.ELEMENT_H(ui) + Zui.ELEMENT_OFFSET(ui);
 						}
 					}
 				}

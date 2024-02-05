@@ -37,22 +37,22 @@ function main_start() {
 	App.y = Base.y;
 
 	Config.init();
-	System.start(Config.getOptions(), function() {
+	sys_start(Config.getOptions(), function() {
 		if (Config.raw.layout == null) Base.initLayout();
 		Krom.setApplicationName(manifest_title);
 		App.init(function() {
-			Scene.setActive("Scene", function(o: TBaseObject) {
+			scene_set_active("Scene", function(o: TBaseObject) {
 				UniformsExt.init();
 				RenderPathBase.init();
 
 				if (Context.raw.renderMode == RenderMode.RenderForward) {
 					RenderPathDeferred.init(); // Allocate gbuffer
 					RenderPathForward.init();
-					RenderPath.commands = RenderPathForward.commands;
+					render_path_commands = RenderPathForward.commands;
 				}
 				else {
 					RenderPathDeferred.init();
-					RenderPath.commands = RenderPathDeferred.commands;
+					render_path_commands = RenderPathDeferred.commands;
 				}
 
 				new Base();

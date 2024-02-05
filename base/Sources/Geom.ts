@@ -70,7 +70,7 @@ class Geom {
 		mesh.texa = new Int16Array(widthVerts * heightVerts * 2);
 		mesh.inda = new Uint32Array(widthSegments * heightSegments * 6 - widthSegments * 6);
 
-		let nor = Vec4.create();
+		let nor = vec4_create();
 		let pos = 0;
 		for (let y = 0; y < heightVerts; ++y) {
 			let v = y / heightSegments;
@@ -90,7 +90,7 @@ class Geom {
 				mesh.posa[i4    ] = Math.floor(vx * inv);
 				mesh.posa[i4 + 1] = Math.floor(vy * inv);
 				mesh.posa[i4 + 2] = Math.floor(vz * inv);
-				Vec4.normalize(Vec4.set(nor, vx, vy, vz));
+				vec4_normalize(vec4_set(nor, vx, vy, vz));
 				mesh.posa[i4 + 3] = Math.floor(nor.z * 32767);
 				mesh.nora[i2    ] = Math.floor(nor.x * 32767);
 				mesh.nora[i2 + 1] = Math.floor(nor.y * 32767);

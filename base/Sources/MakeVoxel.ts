@@ -2,13 +2,13 @@
 class MakeVoxel {
 
 	///if arm_voxels
-	static run = (data: TShaderContext) => {
-		let structure = VertexStructure.create();
-		VertexStructure.add(structure, "pos", VertexData.I16_4X_Normalized);
-		VertexStructure.add(structure, "nor", VertexData.I16_2X_Normalized);
-		VertexStructure.add(structure, "tex", VertexData.I16_2X_Normalized);
+	static run = (data: shader_context_t) => {
+		let structure = vertex_struct_create();
+		vertex_struct_add(structure, "pos", VertexData.I16_4X_Normalized);
+		vertex_struct_add(structure, "nor", VertexData.I16_2X_Normalized);
+		vertex_struct_add(structure, "tex", VertexData.I16_2X_Normalized);
 
-		let pipeState = data._pipeState;
+		let pipeState = data._pipe_state;
 		pipeState.inputLayout = [structure];
 		data.vertex_elements = [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}];
 
@@ -24,13 +24,13 @@ class MakeVoxel {
 		// ///end
 
 		let ds = MakeMaterial.getDisplaceStrength();
-		pipeState.vertexShader = Shader.fromSource(MakeVoxel.voxelSource(), ShaderType.Vertex);
+		pipeState.vertexShader = shader_from_source(MakeVoxel.voxelSource(), ShaderType.Vertex);
 
-		PipelineState.compile(pipeState);
+		pipeline_compile(pipeState);
 		data.constants = [{ name: "W", type: "mat4", link: "_worldMatrix" }, { name: "N", type: "mat3", link: "_normalMatrix" }];
-		data._constants = [PipelineState.getConstantLocation(pipeState, "W"), PipelineState.getConstantLocation(pipeState, "N")];
+		data._constants = [pipeline_get_const_loc(pipeState, "W"), pipeline_get_const_loc(pipeState, "N")];
 		data.texture_units = [{ name: "texpaint_pack" }, { name: "voxels", is_image: true }];
-		data._textureUnits = [PipelineState.getTextureUnit(pipeState, "texpaint_pack"), PipelineState.getTextureUnit(pipeState, "voxels")];
+		data._tex_units = [pipeline_get_tex_unit(pipeState, "texpaint_pack"), pipeline_get_tex_unit(pipeState, "voxels")];
 	}
 
 	static voxelSource = (): string => {

@@ -2,40 +2,40 @@
 class VectorMathNode extends LogicNode {
 
 	operation: string;
-	v = Vec4.create();
+	v = vec4_create();
 
 	constructor() {
 		super();
 	}
 
 	override get = (from: i32, done: (a: any)=>void) => {
-		this.inputs[0].get((v1: TVec4) => {
-			this.inputs[1].get((v2: TVec4) => {
-				Vec4.setFrom(this.v, v1);
+		this.inputs[0].get((v1: vec4_t) => {
+			this.inputs[1].get((v2: vec4_t) => {
+				vec4_set_from(this.v, v1);
 				let f = 0.0;
 
 				switch (this.operation) {
 					case "Add":
-						Vec4.add(this.v, v2);
+						vec4_add(this.v, v2);
 						break;
 					case "Subtract":
-						Vec4.sub(this.v, v2);
+						vec4_sub(this.v, v2);
 						break;
 					case "Average":
-						Vec4.add(this.v, v2);
+						vec4_add(this.v, v2);
 						this.v.x *= 0.5;
 						this.v.y *= 0.5;
 						this.v.z *= 0.5;
 						break;
 					case "Dot Product":
-						f = Vec4.dot(this.v, v2);
-						Vec4.set(this.v, f, f, f);
+						f = vec4_dot(this.v, v2);
+						vec4_set(this.v, f, f, f);
 						break;
 					case "Cross Product":
-						Vec4.cross(this.v, v2);
+						vec4_cross(this.v, v2);
 						break;
 					case "Normalize":
-						Vec4.normalize(this.v, );
+						vec4_normalize(this.v, );
 						break;
 					case "Multiply":
 						this.v.x *= v2.x;
@@ -48,22 +48,22 @@ class VectorMathNode extends LogicNode {
 						this.v.z /= v2.z == 0.0 ? 0.000001 : v2.z;
 						break;
 					case "Length":
-						f = Vec4.vec4_length(this.v);
-						Vec4.set(this.v, f, f, f);
+						f = vec4_len(this.v);
+						vec4_set(this.v, f, f, f);
 						break;
 					case "Distance":
-						f = Vec4.distanceTo(this.v, v2);
-						Vec4.set(this.v, f, f, f);
+						f = vec4_dist_to(this.v, v2);
+						vec4_set(this.v, f, f, f);
 						break;
 					case "Project":
-						Vec4.setFrom(this.v, v2);
-						Vec4.mult(this.v, Vec4.dot(v1, v2) / Vec4.dot(v2, v2));
+						vec4_set_from(this.v, v2);
+						vec4_mult(this.v, vec4_dot(v1, v2) / vec4_dot(v2, v2));
 						break;
 					case "Reflect":
-						let tmp = Vec4.create();
-						Vec4.setFrom(tmp, v2);
-						Vec4.normalize(tmp);
-						Vec4.reflect(this.v, tmp);
+						let tmp = vec4_create();
+						vec4_set_from(tmp, v2);
+						vec4_normalize(tmp);
+						vec4_reflect(this.v, tmp);
 						break;
 					case "Scale":
 						this.v.x *= v2.x;

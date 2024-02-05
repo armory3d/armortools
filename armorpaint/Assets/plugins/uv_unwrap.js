@@ -72,8 +72,8 @@ function unwrap_mesh(mesh) {
 let plugin = Plugin.create();
 let h1 = new Handle();
 plugin.drawUI = function(ui) {
-	if (ui.panel(h1, "UV Unwrap")) {
-		if (ui.button("Unwrap Mesh")) {
+	if (Zui.panel(h1, "UV Unwrap")) {
+		if (Zui.button("Unwrap Mesh")) {
 			for (const po of Project.paintObjects) {
 				let raw = po.data.raw;
 				var mesh = {

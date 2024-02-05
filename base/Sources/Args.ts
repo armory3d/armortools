@@ -146,7 +146,7 @@ class Args {
 							}
 
 							Data.getBlob(file, (blob: ArrayBuffer) => {
-								BoxExport.preset = JSON.parse(System.bufferToString(blob));
+								BoxExport.preset = JSON.parse(sys_buffer_to_string(blob));
 								Data.deleteBlob("export_presets/" + file);
 							});
 
@@ -185,7 +185,7 @@ class Args {
 				}
 				///end
 
-				if (Args.background) System.stop();
+				if (Args.background) sys_stop();
 			});
 		}
 	}

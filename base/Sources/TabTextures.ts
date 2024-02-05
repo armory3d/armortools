@@ -1,60 +1,60 @@
 
 class TabTextures {
 
-	static draw = (htab: Handle) => {
+	static draw = (htab: HandleRaw) => {
 		let ui = UIBase.ui;
 		let statush = Config.raw.layout[LayoutSize.LayoutStatusH];
-		if (ui.tab(htab, tr("Textures")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
+		if (Zui.tab(htab, tr("Textures")) && statush > UIStatus.defaultStatusH * Zui.SCALE(ui)) {
 
-			ui.beginSticky();
+			Zui.beginSticky();
 
 			if (Config.raw.touch_ui) {
-				ui.row([1 / 4, 1 / 4]);
+				Zui.row([1 / 4, 1 / 4]);
 			}
 			else {
-				ui.row([1 / 14, 1 / 14]);
+				Zui.row([1 / 14, 1 / 14]);
 			}
 
-			if (ui.button(tr("Import"))) {
+			if (Zui.button(tr("Import"))) {
 				UIFiles.show(Path.textureFormats.join(","), false, true, (path: string) => {
 					ImportAsset.run(path, -1.0, -1.0, true, false);
 					UIBase.hwnds[TabArea.TabStatus].redraws = 2;
 				});
 			}
-			if (ui.isHovered) ui.tooltip(tr("Import texture file") + ` (${Config.keymap.file_import_assets})`);
+			if (ui.isHovered) Zui.tooltip(tr("Import texture file") + ` (${Config.keymap.file_import_assets})`);
 
-			if (ui.button(tr("2D View"))) UIBase.show2DView(View2DType.View2DAsset);
+			if (Zui.button(tr("2D View"))) UIBase.show2DView(View2DType.View2DAsset);
 
-			ui.endSticky();
+			Zui.endSticky();
 
 			if (Project.assets.length > 0) {
 
 				///if (is_paint || is_sculpt)
-				let statusw = System.width - UIToolbar.toolbarw - Config.raw.layout[LayoutSize.LayoutSidebarW];
+				let statusw = sys_width() - UIToolbar.toolbarw - Config.raw.layout[LayoutSize.LayoutSidebarW];
 				///end
 				///if is_lab
-				let statusw = System.width;
+				let statusw = sys_width();
 				///end
 
-				let slotw = Math.floor(52 * ui.SCALE());
+				let slotw = Math.floor(52 * Zui.SCALE(ui));
 				let num = Math.floor(statusw / slotw);
 
 				for (let row = 0; row < Math.floor(Math.ceil(Project.assets.length / num)); ++row) {
 					let mult = Config.raw.show_asset_names ? 2 : 1;
 					let ar = [];
 					for (let i = 0; i < num * mult; ++i) ar.push(1 / num);
-					ui.row(ar);
+					Zui.row(ar);
 
 					ui._x += 2;
-					let off = Config.raw.show_asset_names ? ui.ELEMENT_OFFSET() * 10.0 : 6;
+					let off = Config.raw.show_asset_names ? Zui.ELEMENT_OFFSET(ui) * 10.0 : 6;
 					if (row > 0) ui._y += off;
 
 					for (let j = 0; j < num; ++j) {
-						let imgw = Math.floor(50 * ui.SCALE());
+						let imgw = Math.floor(50 * Zui.SCALE(ui));
 						let i = j + row * num;
 						if (i >= Project.assets.length) {
-							ui.endElement(imgw);
-							if (Config.raw.show_asset_names) ui.endElement(0);
+							Zui.endElement(imgw);
+							if (Config.raw.show_asset_names) Zui.endElement(0);
 							continue;
 						}
 
@@ -63,14 +63,14 @@ class TabTextures {
 						let uix = ui._x;
 						let uiy = ui._y;
 						let sw = img.height < img.width ? img.height : 0;
-						if (ui.image(img, 0xffffffff, slotw, 0, 0, sw, sw) == State.Started && ui.inputY > ui._windowY) {
-							Base.dragOffX = -(Mouse.x - uix - ui._windowX - 3);
-							Base.dragOffY = -(Mouse.y - uiy - ui._windowY + 1);
+						if (Zui.image(img, 0xffffffff, slotw, 0, 0, sw, sw) == State.Started && ui.inputY > ui._windowY) {
+							Base.dragOffX = -(mouse_x - uix - ui._windowX - 3);
+							Base.dragOffY = -(mouse_y - uiy - ui._windowY + 1);
 							Base.dragAsset = asset;
 							Context.raw.texture = asset;
 
-							if (Time.time() - Context.raw.selectTime < 0.25) UIBase.show2DView(View2DType.View2DAsset);
-							Context.raw.selectTime = Time.time();
+							if (time_time() - Context.raw.selectTime < 0.25) UIBase.show2DView(View2DType.View2DAsset);
+							Context.raw.selectTime = time_time();
 							UIView2D.hwnd.redraws = 2;
 						}
 
@@ -81,10 +81,10 @@ class TabTextures {
 							ui._y = uiy;
 							let off = i % 2 == 1 ? 1 : 0;
 							let w = 50;
-							ui.fill(0,               0, w + 3,       2, ui.t.HIGHLIGHT_COL);
-							ui.fill(0,     w - off + 2, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
-							ui.fill(0,               0,     2,   w + 3, ui.t.HIGHLIGHT_COL);
-							ui.fill(w + 2,           0,     2,   w + 4, ui.t.HIGHLIGHT_COL);
+							Zui.fill(0,               0, w + 3,       2, ui.t.HIGHLIGHT_COL);
+							Zui.fill(0,     w - off + 2, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
+							Zui.fill(0,               0,     2,   w + 3, ui.t.HIGHLIGHT_COL);
+							Zui.fill(w + 2,           0,     2,   w + 4, ui.t.HIGHLIGHT_COL);
 							ui._x = _uix;
 							ui._y = _uiy;
 						}
@@ -92,8 +92,8 @@ class TabTextures {
 						let isPacked = Project.raw.packed_assets != null && Project.packedAssetExists(Project.raw.packed_assets, asset.file);
 
 						if (ui.isHovered) {
-							ui.tooltipImage(img, 256);
-							ui.tooltip(asset.name + (isPacked ? " " + tr("(packed)") : ""));
+							Zui.tooltipImage(img, 256);
+							Zui.tooltip(asset.name + (isPacked ? " " + tr("(packed)") : ""));
 						}
 
 						if (ui.isHovered && ui.inputReleasedR) {
@@ -108,7 +108,7 @@ class TabTextures {
 							count = isPacked ? 6 : 6;
 							///end
 
-							UIMenu.draw((ui: Zui) => {
+							UIMenu.draw((ui: ZuiRaw) => {
 								if (UIMenu.menuButton(ui, tr("Export"))) {
 									UIFiles.show("png", true, false, (path: string) => {
 										Base.notifyOnNextFrame(() => {
@@ -119,18 +119,18 @@ class TabTextures {
 											if (Base.pipeCopy == null) Base.makePipe();
 											///end
 
-											let target = Image.createRenderTarget(TabTextures.to_pow2(img.width), TabTextures.to_pow2(img.height));
-											Graphics2.begin(target.g2, false);
+											let target = image_create_render_target(TabTextures.to_pow2(img.width), TabTextures.to_pow2(img.height));
+											g2_begin(target.g2, false);
 											target.g2.pipeline = Base.pipeCopy;
-											Graphics2.drawScaledImage(img, 0, 0, target.width, target.height);
+											g2_draw_scaled_image(img, 0, 0, target.width, target.height);
 											target.g2.pipeline = null;
-											Graphics2.end(target.g2);
+											g2_end(target.g2);
 											Base.notifyOnNextFrame(() => {
 												let f = UIFiles.filename;
 												if (f == "") f = tr("untitled");
 												if (!f.endsWith(".png")) f += ".png";
-												Krom.writePng(path + Path.sep + f, Image.getPixels(target), target.width, target.height, 0);
-												Image.unload(target);
+												Krom.writePng(path + Path.sep + f, image_get_pixels(target), target.width, target.height, 0);
+												image_unload(target);
 											});
 										});
 									});
@@ -180,11 +180,11 @@ class TabTextures {
 						if (Config.raw.show_asset_names) {
 							ui._x = uix;
 							ui._y += slotw * 0.9;
-							ui.text(Project.assets[i].name, Align.Center);
-							if (ui.isHovered) ui.tooltip(Project.assets[i].name);
+							Zui.text(Project.assets[i].name, Align.Center);
+							if (ui.isHovered) Zui.tooltip(Project.assets[i].name);
 							ui._y -= slotw * 0.9;
 							if (i == Project.assets.length - 1) {
-								ui._y += j == num - 1 ? imgw : imgw + ui.ELEMENT_H() + ui.ELEMENT_OFFSET();
+								ui._y += j == num - 1 ? imgw : imgw + Zui.ELEMENT_H(ui) + Zui.ELEMENT_OFFSET(ui);
 							}
 						}
 					}
@@ -193,8 +193,8 @@ class TabTextures {
 			else {
 				let img = Res.get("icons.k");
 				let r = Res.tile50(img, 0, 1);
-				ui.image(img, ui.t.BUTTON_COL, r.h, r.x, r.y, r.w, r.h);
-				if (ui.isHovered) ui.tooltip(tr("Drag and drop files here"));
+				Zui.image(img, ui.t.BUTTON_COL, r.h, r.x, r.y, r.w, r.h);
+				if (ui.isHovered) Zui.tooltip(tr("Drag and drop files here"));
 			}
 
 			let inFocus = ui.inputX > ui._windowX && ui.inputX < ui._windowX + ui._windowW &&

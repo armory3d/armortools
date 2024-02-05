@@ -1,16 +1,16 @@
 
 class UpscaleNode extends LogicNode {
 
-	static temp: ImageRaw = null;
-	static image: ImageRaw = null;
+	static temp: image_t = null;
+	static image: image_t = null;
 	static esrgan_blob: ArrayBuffer;
 
 	constructor() {
 		super();
 	}
 
-	override getAsImage = (from: i32, done: (img: ImageRaw)=>void) => {
-		this.inputs[0].getAsImage((_image: ImageRaw) => {
+	override getAsImage = (from: i32, done: (img: image_t)=>void) => {
+		this.inputs[0].getAsImage((_image: image_t) => {
 			UpscaleNode.image = _image;
 
 			Console.progress(tr("Processing") + " - " + tr("Upscale"));
@@ -21,7 +21,7 @@ class UpscaleNode extends LogicNode {
 						while (UpscaleNode.image.width < Config.getTextureResX()) {
 							let lastImage = UpscaleNode.image;
 							UpscaleNode.image = UpscaleNode.esrgan(UpscaleNode.image);
-							Image.unload(lastImage);
+							image_unload(lastImage);
 						}
 					}
 					done(UpscaleNode.image);
@@ -37,25 +37,25 @@ class UpscaleNode extends LogicNode {
 		});
 	}
 
-	override getCachedImage = (): ImageRaw => {
+	override getCachedImage = (): image_t => {
 		return UpscaleNode.image;
 	}
 
-	static doTile = (source: ImageRaw) => {
-		let result: ImageRaw = null;
+	static doTile = (source: image_t) => {
+		let result: image_t = null;
 		let size1w = source.width;
 		let size1h = source.height;
 		let size2w = Math.floor(size1w * 2);
 		let size2h = Math.floor(size1h * 2);
 		if (UpscaleNode.temp != null) {
-			Image.unload(UpscaleNode.temp);
+			image_unload(UpscaleNode.temp);
 		}
-		UpscaleNode.temp = Image.createRenderTarget(size1w, size1h);
-		Graphics2.begin(UpscaleNode.temp.g2, false);
-		Graphics2.drawScaledImage(source, 0, 0, size1w, size1h);
-		Graphics2.end(UpscaleNode.temp.g2);
+		UpscaleNode.temp = image_create_render_target(size1w, size1h);
+		g2_begin(UpscaleNode.temp.g2, false);
+		g2_draw_scaled_image(source, 0, 0, size1w, size1h);
+		g2_end(UpscaleNode.temp.g2);
 
-		let bytes_img = Image.getPixels(UpscaleNode.temp);
+		let bytes_img = image_get_pixels(UpscaleNode.temp);
 		let u8a = new Uint8Array(bytes_img);
 		let f32a = new Float32Array(3 * size1w * size1h);
 		for (let i = 0; i < (size1w * size1h); ++i) {
@@ -79,12 +79,12 @@ class UpscaleNode extends LogicNode {
 			u8a[i * 4 + 3] = 255;
 		}
 
-		result = Image.fromBytes(u8a.buffer, size2w, size2h);
+		result = image_from_bytes(u8a.buffer, size2w, size2h);
 		return result;
 	}
 
-	static esrgan = (source: ImageRaw): ImageRaw => {
-		let result: ImageRaw = null;
+	static esrgan = (source: image_t): image_t => {
+		let result: image_t = null;
 		let size1w = source.width;
 		let size1h = source.height;
 		let tileSize = 512;
@@ -93,27 +93,27 @@ class UpscaleNode extends LogicNode {
 		if (size1w >= tileSize2x || size1h >= tileSize2x) { // Split into tiles
 			let size2w = Math.floor(size1w * 2);
 			let size2h = Math.floor(size1h * 2);
-			result = Image.createRenderTarget(size2w, size2h);
-			let tileSource = Image.createRenderTarget(tileSize + 32 * 2, tileSize + 32 * 2);
+			result = image_create_render_target(size2w, size2h);
+			let tileSource = image_create_render_target(tileSize + 32 * 2, tileSize + 32 * 2);
 			for (let x = 0; x < Math.floor(size1w / tileSize); ++x) {
 				for (let y = 0; y < Math.floor(size1h / tileSize); ++y) {
-					Graphics2.begin(tileSource.g2, false);
-					Graphics2.drawScaledImage(source, 32 - x * tileSize, 32 - y * tileSize, -source.width, source.height);
-					Graphics2.drawScaledImage(source, 32 - x * tileSize, 32 - y * tileSize, source.width, -source.height);
-					Graphics2.drawScaledImage(source, 32 - x * tileSize, 32 - y * tileSize, -source.width, -source.height);
-					Graphics2.drawScaledImage(source, 32 - x * tileSize + tileSize, 32 - y * tileSize + tileSize, source.width, source.height);
-					Graphics2.drawScaledImage(source, 32 - x * tileSize + tileSize, 32 - y * tileSize + tileSize, -source.width, source.height);
-					Graphics2.drawScaledImage(source, 32 - x * tileSize + tileSize, 32 - y * tileSize + tileSize, source.width, -source.height);
-					Graphics2.drawScaledImage(source, 32 - x * tileSize, 32 - y * tileSize, source.width, source.height);
-					Graphics2.end(tileSource.g2);
+					g2_begin(tileSource.g2, false);
+					g2_draw_scaled_image(source, 32 - x * tileSize, 32 - y * tileSize, -source.width, source.height);
+					g2_draw_scaled_image(source, 32 - x * tileSize, 32 - y * tileSize, source.width, -source.height);
+					g2_draw_scaled_image(source, 32 - x * tileSize, 32 - y * tileSize, -source.width, -source.height);
+					g2_draw_scaled_image(source, 32 - x * tileSize + tileSize, 32 - y * tileSize + tileSize, source.width, source.height);
+					g2_draw_scaled_image(source, 32 - x * tileSize + tileSize, 32 - y * tileSize + tileSize, -source.width, source.height);
+					g2_draw_scaled_image(source, 32 - x * tileSize + tileSize, 32 - y * tileSize + tileSize, source.width, -source.height);
+					g2_draw_scaled_image(source, 32 - x * tileSize, 32 - y * tileSize, source.width, source.height);
+					g2_end(tileSource.g2);
 					let tileResult = UpscaleNode.doTile(tileSource);
-					Graphics2.begin(result.g2, false);
-					Graphics2.drawSubImage(tileResult, x * tileSize2x, y * tileSize2x, 64, 64, tileSize2x, tileSize2x);
-					Graphics2.end(result.g2);
-					Image.unload(tileResult);
+					g2_begin(result.g2, false);
+					g2_draw_sub_image(tileResult, x * tileSize2x, y * tileSize2x, 64, 64, tileSize2x, tileSize2x);
+					g2_end(result.g2);
+					image_unload(tileResult);
 				}
 			}
-			Image.unload(tileSource);
+			image_unload(tileSource);
 		}
 		else result = UpscaleNode.doTile(source); // Single tile
 		return result;

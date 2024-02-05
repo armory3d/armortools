@@ -1,8 +1,8 @@
 
 class TabBrowser {
 
-	static hpath = new Handle();
-	static hsearch = new Handle();
+	static hpath = Handle.create();
+	static hsearch = Handle.create();
 	static known = false;
 	static lastPath =  "";
 
@@ -12,35 +12,35 @@ class TabBrowser {
 		UIBase.htabs[TabArea.TabStatus].position = 0;
 	}
 
-	static draw = (htab: Handle) => {
+	static draw = (htab: HandleRaw) => {
 		let ui = UIBase.ui;
 		let statush = Config.raw.layout[LayoutSize.LayoutStatusH];
-		if (ui.tab(htab, tr("Browser")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
+		if (Zui.tab(htab, tr("Browser")) && statush > UIStatus.defaultStatusH * Zui.SCALE(ui)) {
 
 			if (Config.raw.bookmarks == null) {
 				Config.raw.bookmarks = [];
 			}
 
-			let bookmarksW = Math.floor(100 * ui.SCALE());
+			let bookmarksW = Math.floor(100 * Zui.SCALE(ui));
 
 			if (TabBrowser.hpath.text == "" && Config.raw.bookmarks.length > 0) { // Init to first bookmark
 				TabBrowser.hpath.text = Config.raw.bookmarks[0];
 			}
 
-			ui.beginSticky();
+			Zui.beginSticky();
 			let step = (1 - bookmarksW / ui._w);
 			if (TabBrowser.hsearch.text != "") {
-				ui.row([bookmarksW / ui._w, step * 0.73, step * 0.07, step * 0.17, step * 0.03]);
+				Zui.row([bookmarksW / ui._w, step * 0.73, step * 0.07, step * 0.17, step * 0.03]);
 			}
 			else {
-				ui.row([bookmarksW / ui._w, step * 0.73, step * 0.07, step * 0.2]);
+				Zui.row([bookmarksW / ui._w, step * 0.73, step * 0.07, step * 0.2]);
 			}
 
-			if (ui.button("+")) {
+			if (Zui.button("+")) {
 				Config.raw.bookmarks.push(TabBrowser.hpath.text);
 				Config.save();
 			}
-			if (ui.isHovered) ui.tooltip(tr("Add bookmark"));
+			if (ui.isHovered) Zui.tooltip(tr("Add bookmark"));
 
 			///if krom_android
 			let stripped = false;
@@ -51,7 +51,7 @@ class TabBrowser {
 			}
 			///end
 
-			TabBrowser.hpath.text = ui.textInput(TabBrowser.hpath, tr("Path"));
+			TabBrowser.hpath.text = Zui.textInput(TabBrowser.hpath, tr("Path"));
 
 			///if krom_android
 			if (stripped) {
@@ -62,18 +62,18 @@ class TabBrowser {
 			let refresh = false;
 			let inFocus = ui.inputX > ui._windowX && ui.inputX < ui._windowX + ui._windowW &&
 						  ui.inputY > ui._windowY && ui.inputY < ui._windowY + ui._windowH;
-			if (ui.button(tr("Refresh")) || (inFocus && ui.isKeyPressed && ui.key == KeyCode.F5)) {
+			if (Zui.button(tr("Refresh")) || (inFocus && ui.isKeyPressed && ui.key == KeyCode.F5)) {
 				refresh = true;
 			}
-			TabBrowser.hsearch.text = ui.textInput(TabBrowser.hsearch, tr("Search"), Align.Left, true, true);
-			if (ui.isHovered) ui.tooltip(tr("ctrl+f to search") + "\n" + tr("esc to cancel"));
+			TabBrowser.hsearch.text = Zui.textInput(TabBrowser.hsearch, tr("Search"), Align.Left, true, true);
+			if (ui.isHovered) Zui.tooltip(tr("ctrl+f to search") + "\n" + tr("esc to cancel"));
 			if (ui.isCtrlDown && ui.isKeyPressed && ui.key == KeyCode.F) { // Start searching via ctrl+f
-				ui.startTextEdit(TabBrowser.hsearch);
+				Zui.startTextEdit(TabBrowser.hsearch);
 			}
-			if (TabBrowser.hsearch.text != "" && (ui.button(tr("X")) || ui.isEscapeDown)) {
+			if (TabBrowser.hsearch.text != "" && (Zui.button(tr("X")) || ui.isEscapeDown)) {
 				TabBrowser.hsearch.text = "";
 			}
-			ui.endSticky();
+			Zui.endSticky();
 
 			if (TabBrowser.lastPath != TabBrowser.hpath.text) {
 				TabBrowser.hsearch.text = "";
@@ -86,7 +86,7 @@ class TabBrowser {
 			UIFiles.fileBrowser(ui, TabBrowser.hpath, false, true, TabBrowser.hsearch.text, refresh, (file: string) => {
 				let fileName = file.substr(file.lastIndexOf(Path.sep) + 1);
 				if (fileName != "..") {
-					UIMenu.draw((ui: Zui) => {
+					UIMenu.draw((ui: ZuiRaw) => {
 						if (UIMenu.menuButton(ui, tr("Import"))) {
 							ImportAsset.run(file);
 						}
@@ -176,13 +176,13 @@ class TabBrowser {
 			ui._y = _y;
 			ui._w = bookmarksW;
 
-			if (ui.button(tr("Cloud"), Align.Left)) {
+			if (Zui.button(tr("Cloud"), Align.Left)) {
 				TabBrowser.hpath.text = "cloud";
 			}
 
-			if (ui.button(tr("Disk"), Align.Left)) {
+			if (Zui.button(tr("Disk"), Align.Left)) {
 				///if krom_android
-				UIMenu.draw((ui: Zui) => {
+				UIMenu.draw((ui: ZuiRaw) => {
 					if (UIMenu.menuButton(ui, tr("Download"))) {
 						TabBrowser.hpath.text = UIFiles.defaultPath;
 					}
@@ -204,12 +204,12 @@ class TabBrowser {
 			for (let b of Config.raw.bookmarks) {
 				let folder = b.substr(b.lastIndexOf(Path.sep) + 1);
 
-				if (ui.button(folder, Align.Left)) {
+				if (Zui.button(folder, Align.Left)) {
 					TabBrowser.hpath.text = b;
 				}
 
 				if (ui.isHovered && ui.inputReleasedR) {
-					UIMenu.draw((ui: Zui) => {
+					UIMenu.draw((ui: ZuiRaw) => {
 						if (UIMenu.menuButton(ui, tr("Delete"))) {
 							array_remove(Config.raw.bookmarks, b);
 							Config.save();

@@ -3,15 +3,15 @@ class LineDraw {
 
 	static color: Color = 0xffff0000;
 	static strength = 0.005;
-	static mat: TMat4 = null;
-	static dim: TVec4 = null;
+	static mat: mat4_t = null;
+	static dim: vec4_t = null;
 
-	static vertexBuffer: VertexBufferRaw;
-	static indexBuffer: IndexBufferRaw;
-	static pipeline: PipelineStateRaw = null;
+	static vertexBuffer: vertex_buffer_t;
+	static indexBuffer: index_buffer_t;
+	static pipeline: pipeline_t = null;
 
-	static vp: TMat4;
-	static vpID: ConstantLocation;
+	static vp: mat4_t;
+	static vpID: kinc_const_loc_t;
 
 	static vbData: DataView;
 	static ibData: Uint32Array;
@@ -21,21 +21,21 @@ class LineDraw {
 	static maxIndices = LineDraw.maxLines * 6;
 	static lines = 0;
 
-	static g: Graphics4Raw;
+	static g: g4_t;
 
-	static render = (g4: Graphics4Raw, matrix: TMat4) => {
+	static render = (g4: g4_t, matrix: mat4_t) => {
 		LineDraw.g = g4;
 		LineDraw.mat = matrix;
-		LineDraw.dim = Mat4.getScale(matrix);
+		LineDraw.dim = mat4_get_scale(matrix);
 
 		if (LineDraw.pipeline == null) {
-			let structure = VertexStructure.create();
-			VertexStructure.add(structure, "pos", VertexData.F32_3X);
-			VertexStructure.add(structure, "col", VertexData.F32_3X);
-			LineDraw.pipeline = PipelineState.create();
+			let structure = vertex_struct_create();
+			vertex_struct_add(structure, "pos", VertexData.F32_3X);
+			vertex_struct_add(structure, "col", VertexData.F32_3X);
+			LineDraw.pipeline = pipeline_create();
 			LineDraw.pipeline.inputLayout = [structure];
-			LineDraw.pipeline.fragmentShader = System.getShader("line.frag");
-			LineDraw.pipeline.vertexShader = System.getShader("line.vert");
+			LineDraw.pipeline.fragmentShader = sys_get_shader("line.frag");
+			LineDraw.pipeline.vertexShader = sys_get_shader("line.vert");
 			LineDraw.pipeline.depthWrite = true;
 			LineDraw.pipeline.depthMode = CompareMode.Less;
 			LineDraw.pipeline.cullMode = CullMode.None;
@@ -43,12 +43,12 @@ class LineDraw {
 			LineDraw.pipeline.colorAttachments[0] = TextureFormat.RGBA64;
 			LineDraw.pipeline.colorAttachments[1] = TextureFormat.RGBA64;
 			LineDraw.pipeline.colorAttachments[2] = TextureFormat.RGBA64;
-			LineDraw.pipeline.depthStencilAttachment = DepthStencilFormat.DepthOnly;
-			PipelineState.compile(LineDraw.pipeline);
-			LineDraw.vpID = PipelineState.getConstantLocation(LineDraw.pipeline, "VP");
-			LineDraw.vp = Mat4.identity();
-			LineDraw.vertexBuffer = VertexBuffer.create(LineDraw.maxVertices, structure, Usage.DynamicUsage);
-			LineDraw.indexBuffer = IndexBuffer.create(LineDraw.maxIndices, Usage.DynamicUsage);
+			LineDraw.pipeline.depthStencilAttachment = DepthFormat.DepthOnly;
+			pipeline_compile(LineDraw.pipeline);
+			LineDraw.vpID = pipeline_get_const_loc(LineDraw.pipeline, "VP");
+			LineDraw.vp = mat4_identity();
+			LineDraw.vertexBuffer = vertex_buffer_create(LineDraw.maxVertices, structure, Usage.DynamicUsage);
+			LineDraw.indexBuffer = index_buffer_create(LineDraw.maxIndices);
 		}
 
 		LineDraw.begin();
@@ -56,30 +56,30 @@ class LineDraw {
 		LineDraw.end();
 	}
 
-	static wpos: TVec4;
-	static vx = Vec4.create();
-	static vy = Vec4.create();
-	static vz = Vec4.create();
+	static wpos: vec4_t;
+	static vx = vec4_create();
+	static vy = vec4_create();
+	static vz = vec4_create();
 
-	static bounds = (mat: TMat4, dim: TVec4) => {
-		LineDraw.wpos = Mat4.getLoc(mat);
+	static bounds = (mat: mat4_t, dim: vec4_t) => {
+		LineDraw.wpos = mat4_get_loc(mat);
 		let dx = dim.x / 2;
 		let dy = dim.y / 2;
 		let dz = dim.z / 2;
 
-		let up = Mat4.up(mat);
-		let look = Mat4.look(mat);
-		let right = Mat4.right(mat);
-		Vec4.normalize(up);
-		Vec4.normalize(look);
-		Vec4.normalize(right);
+		let up = mat4_up(mat);
+		let look = mat4_look(mat);
+		let right = mat4_right(mat);
+		vec4_normalize(up);
+		vec4_normalize(look);
+		vec4_normalize(right);
 
-		Vec4.setFrom(LineDraw.vx, right);
-		Vec4.mult(LineDraw.vx, dx);
-		Vec4.setFrom(LineDraw.vy, look);
-		Vec4.mult(LineDraw.vy, dy);
-		Vec4.setFrom(LineDraw.vz, up);
-		Vec4.mult(LineDraw.vz, dz);
+		vec4_set_from(LineDraw.vx, right);
+		vec4_mult(LineDraw.vx, dx);
+		vec4_set_from(LineDraw.vy, look);
+		vec4_mult(LineDraw.vy, dy);
+		vec4_set_from(LineDraw.vz, up);
+		vec4_mult(LineDraw.vz, dz);
 
 		LineDraw.lineb(-1, -1, -1,  1, -1, -1);
 		LineDraw.lineb(-1,  1, -1,  1,  1, -1);
@@ -97,31 +97,31 @@ class LineDraw {
 		LineDraw.lineb( 1,  1, -1,  1,  1,  1);
 	}
 
-	static v1 = Vec4.create();
-	static v2 = Vec4.create();
-	static t = Vec4.create();
+	static v1 = vec4_create();
+	static v2 = vec4_create();
+	static t = vec4_create();
 
 	static lineb = (a: i32, b: i32, c: i32, d: i32, e: i32, f: i32) => {
-		Vec4.setFrom(LineDraw.v1, LineDraw.wpos);
-		Vec4.setFrom(LineDraw.t, LineDraw.vx); Vec4.mult(LineDraw.t, a); Vec4.add(LineDraw.v1, LineDraw.t);
-		Vec4.setFrom(LineDraw.t, LineDraw.vy); Vec4.mult(LineDraw.t, b); Vec4.add(LineDraw.v1, LineDraw.t);
-		Vec4.setFrom(LineDraw.t, LineDraw.vz); Vec4.mult(LineDraw.t, c); Vec4.add(LineDraw.v1, LineDraw.t);
+		vec4_set_from(LineDraw.v1, LineDraw.wpos);
+		vec4_set_from(LineDraw.t, LineDraw.vx); vec4_mult(LineDraw.t, a); vec4_add(LineDraw.v1, LineDraw.t);
+		vec4_set_from(LineDraw.t, LineDraw.vy); vec4_mult(LineDraw.t, b); vec4_add(LineDraw.v1, LineDraw.t);
+		vec4_set_from(LineDraw.t, LineDraw.vz); vec4_mult(LineDraw.t, c); vec4_add(LineDraw.v1, LineDraw.t);
 
-		Vec4.setFrom(LineDraw.v2, LineDraw.wpos);
-		Vec4.setFrom(LineDraw.t, LineDraw.vx); Vec4.mult(LineDraw.t, d); Vec4.add(LineDraw.v2, LineDraw.t);
-		Vec4.setFrom(LineDraw.t, LineDraw.vy); Vec4.mult(LineDraw.t, e); Vec4.add(LineDraw.v2, LineDraw.t);
-		Vec4.setFrom(LineDraw.t, LineDraw.vz); Vec4.mult(LineDraw.t, f); Vec4.add(LineDraw.v2, LineDraw.t);
+		vec4_set_from(LineDraw.v2, LineDraw.wpos);
+		vec4_set_from(LineDraw.t, LineDraw.vx); vec4_mult(LineDraw.t, d); vec4_add(LineDraw.v2, LineDraw.t);
+		vec4_set_from(LineDraw.t, LineDraw.vy); vec4_mult(LineDraw.t, e); vec4_add(LineDraw.v2, LineDraw.t);
+		vec4_set_from(LineDraw.t, LineDraw.vz); vec4_mult(LineDraw.t, f); vec4_add(LineDraw.v2, LineDraw.t);
 
 		LineDraw.line(LineDraw.v1.x, LineDraw.v1.y, LineDraw.v1.z, LineDraw.v2.x, LineDraw.v2.y, LineDraw.v2.z);
 	}
 
-	static midPoint = Vec4.create();
-	static midLine = Vec4.create();
-	static corner1 = Vec4.create();
-	static corner2 = Vec4.create();
-	static corner3 = Vec4.create();
-	static corner4 = Vec4.create();
-	static cameraLook = Vec4.create();
+	static midPoint = vec4_create();
+	static midLine = vec4_create();
+	static corner1 = vec4_create();
+	static corner2 = vec4_create();
+	static corner3 = vec4_create();
+	static corner4 = vec4_create();
+	static cameraLook = vec4_create();
 
 	static line = (x1: f32, y1: f32, z1: f32, x2: f32, y2: f32, z2: f32) => {
 		if (LineDraw.lines >= LineDraw.maxLines) {
@@ -129,24 +129,24 @@ class LineDraw {
 			LineDraw.begin();
 		}
 
-		Vec4.set(LineDraw.midPoint, x1 + x2, y1 + y2, z1 + z2);
-		Vec4.mult(LineDraw.midPoint, 0.5);
+		vec4_set(LineDraw.midPoint, x1 + x2, y1 + y2, z1 + z2);
+		vec4_mult(LineDraw.midPoint, 0.5);
 
-		Vec4.set(LineDraw.midLine, x1, y1, z1);
-		Vec4.sub(LineDraw.midLine, LineDraw.midPoint);
+		vec4_set(LineDraw.midLine, x1, y1, z1);
+		vec4_sub(LineDraw.midLine, LineDraw.midPoint);
 
-		let camera = Scene.camera;
-		LineDraw.cameraLook = Mat4.getLoc(camera.base.transform.world);
-		Vec4.sub(LineDraw.cameraLook, LineDraw.midPoint);
+		let camera = scene_camera;
+		LineDraw.cameraLook = mat4_get_loc(camera.base.transform.world);
+		vec4_sub(LineDraw.cameraLook, LineDraw.midPoint);
 
-		let lineWidth = Vec4.cross(LineDraw.cameraLook, LineDraw.midLine);
-		Vec4.normalize(lineWidth, );
-		Vec4.mult(lineWidth, LineDraw.strength);
+		let lineWidth = vec4_cross(LineDraw.cameraLook, LineDraw.midLine);
+		vec4_normalize(lineWidth, );
+		vec4_mult(lineWidth, LineDraw.strength);
 
-		Vec4.add(Vec4.set(LineDraw.corner1, x1, y1, z1), lineWidth);
-		Vec4.sub(Vec4.set(LineDraw.corner2, x1, y1, z1), lineWidth);
-		Vec4.sub(Vec4.set(LineDraw.corner3, x2, y2, z2), lineWidth);
-		Vec4.add(Vec4.set(LineDraw.corner4, x2, y2, z2), lineWidth);
+		vec4_add(vec4_set(LineDraw.corner1, x1, y1, z1), lineWidth);
+		vec4_sub(vec4_set(LineDraw.corner2, x1, y1, z1), lineWidth);
+		vec4_sub(vec4_set(LineDraw.corner3, x2, y2, z2), lineWidth);
+		vec4_add(vec4_set(LineDraw.corner4, x2, y2, z2), lineWidth);
 
 		let i = LineDraw.lines * 24; // 4 * 6 (structure len)
 		LineDraw.addVbData(i, [LineDraw.corner1.x, LineDraw.corner1.y, LineDraw.corner1.z, color_get_rb(LineDraw.color) / 255, color_get_gb(LineDraw.color) / 255, color_get_ab(LineDraw.color) / 255]);
@@ -170,22 +170,22 @@ class LineDraw {
 
 	static begin = () => {
 		LineDraw.lines = 0;
-		LineDraw.vbData = VertexBuffer.lock(LineDraw.vertexBuffer);
-		LineDraw.ibData = IndexBuffer.lock(LineDraw.indexBuffer);
+		LineDraw.vbData = vertex_buffer_lock(LineDraw.vertexBuffer);
+		LineDraw.ibData = index_buffer_lock(LineDraw.indexBuffer);
 	}
 
 	static end = () => {
-		VertexBuffer.unlock(LineDraw.vertexBuffer);
-		IndexBuffer.unlock(LineDraw.indexBuffer);
+		vertex_buffer_unlock(LineDraw.vertexBuffer);
+		index_buffer_unlock(LineDraw.indexBuffer);
 
-		Graphics4.setVertexBuffer(LineDraw.vertexBuffer);
-		Graphics4.setIndexBuffer(LineDraw.indexBuffer);
-		Graphics4.setPipeline(LineDraw.pipeline);
-		let camera = Scene.camera;
-		Mat4.setFrom(LineDraw.vp, camera.V);
-		Mat4.multmat(LineDraw.vp, camera.P);
-		Graphics4.setMatrix(LineDraw.vpID, LineDraw.vp);
-		Graphics4.drawIndexedVertices(0, LineDraw.lines * 6);
+		g4_set_vertex_buffer(LineDraw.vertexBuffer);
+		g4_set_index_buffer(LineDraw.indexBuffer);
+		g4_set_pipeline(LineDraw.pipeline);
+		let camera = scene_camera;
+		mat4_set_from(LineDraw.vp, camera.V);
+		mat4_mult_mat(LineDraw.vp, camera.P);
+		g4_set_mat(LineDraw.vpID, LineDraw.vp);
+		g4_draw(0, LineDraw.lines * 6);
 	}
 
 	static addVbData = (i: i32, data: f32[]) => {

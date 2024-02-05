@@ -18,7 +18,7 @@ class UIFiles {
 	static lastPath = "";
 	static lastSearch = "";
 	static files: string[] = null;
-	static iconMap: Map<string, ImageRaw> = null;
+	static iconMap: Map<string, image_t> = null;
 	static selected = -1;
 	static showExtensions = false;
 	static offline = false;
@@ -51,14 +51,14 @@ class UIFiles {
 
 	// static showCustom = (filters: string, isSave: bool, filesDone: (s: string)=>void) => {
 	// 	let known = false;
-	// 	UIBox.showCustom((ui: Zui) => {
-	// 		if (ui.tab(Zui.handle(), tr("File Browser"))) {
+	// 	UIBox.showCustom((ui: ZuiRaw) => {
+	// 		if (Zui.tab(Zui.handle(), tr("File Browser"))) {
 	// 			let pathHandle = Zui.handle();
 	// 			let fileHandle = Zui.handle();
-	// 			ui.row([6 / 10, 2 / 10, 2 / 10]);
-	// 			filename = ui.textInput(fileHandle, tr("File"));
-	// 			ui.text("*." + filters, Center);
-	// 			if (ui.button(isSave ? tr("Save") : tr("Open")) || known || ui.isReturnDown) {
+	// 			Zui.row([6 / 10, 2 / 10, 2 / 10]);
+	// 			filename = Zui.textInput(fileHandle, tr("File"));
+	// 			Zui.text("*." + filters, Center);
+	// 			if (Zui.button(isSave ? tr("Save") : tr("Open")) || known || ui.isReturnDown) {
 	// 				UIBox.hide();
 	// 				filesDone((known || isSave) ? path : path + Path.sep + filename);
 	// 				if (known) pathHandle.text = pathHandle.text.substr(0, pathHandle.text.lastIndexOf(Path.sep));
@@ -72,14 +72,14 @@ class UIFiles {
 
 	static releaseKeys = () => {
 		// File dialog may prevent firing key up events
-		Keyboard.upListener(KeyCode.Shift);
-		Keyboard.upListener(KeyCode.Control);
+		keyboard_up_listener(KeyCode.Shift);
+		keyboard_up_listener(KeyCode.Control);
 		///if krom_darwin
-		Keyboard.upListener(KeyCode.Meta);
+		keyboard_up_listener(KeyCode.Meta);
 		///end
 	}
 
-	static fileBrowser = (ui: Zui, handle: Handle, foldersOnly = false, dragFiles = false, search = "", refresh = false, contextMenu: (s: string)=>void = null): string => {
+	static fileBrowser = (ui: ZuiRaw, handle: HandleRaw, foldersOnly = false, dragFiles = false, search = "", refresh = false, contextMenu: (s: string)=>void = null): string => {
 
 		let icons = Res.get("icons.k");
 		let folder = Res.tile50(icons, 2, 1);
@@ -125,7 +125,7 @@ class UIFiles {
 		UIFiles.lastSearch = search;
 		handle.changed = false;
 
-		let slotw = Math.floor(70 * ui.SCALE());
+		let slotw = Math.floor(70 * Zui.SCALE(ui));
 		let num = Math.floor(ui._w / slotw);
 
 		ui._y += 4; // Don't cut off the border around selected materials
@@ -133,14 +133,14 @@ class UIFiles {
 		for (let row = 0; row < Math.floor(Math.ceil(UIFiles.files.length / num)); ++row) {
 			let ar = [];
 			for (let i = 0; i < num * 2; ++i) ar.push(1 / num);
-			ui.row(ar);
-			if (row > 0) ui._y += ui.ELEMENT_OFFSET() * 14.0;
+			Zui.row(ar);
+			if (row > 0) ui._y += Zui.ELEMENT_OFFSET(ui) * 14.0;
 
 			for (let j = 0; j < num; ++j) {
 				let i = j + row * num;
 				if (i >= UIFiles.files.length) {
-					ui.endElement(slotw);
-					ui.endElement(slotw);
+					Zui.endElement(slotw);
+					Zui.endElement(slotw);
 					continue;
 				}
 
@@ -151,14 +151,14 @@ class UIFiles {
 				let col = rect == file ? ui.t.LABEL_COL : ui.t.LABEL_COL - 0x00202020;
 				if (UIFiles.selected == i) col = ui.t.HIGHLIGHT_COL;
 
-				let off = ui._w / 2 - 25 * ui.SCALE();
+				let off = ui._w / 2 - 25 * Zui.SCALE(ui);
 				ui._x += off;
 
 				let uix = ui._x;
 				let uiy = ui._y;
 				let state = State.Idle;
 				let generic = true;
-				let icon: ImageRaw = null;
+				let icon: image_t = null;
 
 				if (isCloud && f != ".." && !UIFiles.offline) {
 					if (UIFiles.iconMap == null) UIFiles.iconMap = new Map();
@@ -167,28 +167,28 @@ class UIFiles {
 						let filesAll = File.readDirectory(handle.text);
 						let iconFile = f.substr(0, f.lastIndexOf(".")) + "_icon.jpg";
 						if (filesAll.indexOf(iconFile) >= 0) {
-							let empty = RenderPath.renderTargets.get("empty_black").image;
+							let empty = render_path_render_targets.get("empty_black").image;
 							UIFiles.iconMap.set(handle.text + Path.sep + f, empty);
 							File.cacheCloud(handle.text + Path.sep + iconFile, (abs: string) => {
 								if (abs != null) {
-									Data.getImage(abs, (image: ImageRaw) => {
+									Data.getImage(abs, (image: image_t) => {
 										App.notifyOnInit(() => {
 											if (Base.pipeCopyRGB == null) Base.makePipeCopyRGB();
-											icon = Image.createRenderTarget(image.width, image.height);
+											icon = image_create_render_target(image.width, image.height);
 											if (f.endsWith(".arm")) { // Used for material sphere alpha cutout
-												Graphics2.begin(icon.g2, false);
+												g2_begin(icon.g2, false);
 
 												///if (is_paint || is_sculpt)
-												Graphics2.drawImage(Project.materials[0].image, 0, 0);
+												g2_draw_image(Project.materials[0].image, 0, 0);
 												///end
 											}
 											else {
-												Graphics2.begin(icon.g2, true, 0xffffffff);
+												g2_begin(icon.g2, true, 0xffffffff);
 											}
 											icon.g2.pipeline = Base.pipeCopyRGB;
-											Graphics2.drawImage(image, 0, 0);
+											g2_draw_image(image, 0, 0);
 											icon.g2.pipeline = null;
-											Graphics2.end(icon.g2);
+											g2_end(icon.g2);
 											UIFiles.iconMap.set(handle.text + Path.sep + f, icon);
 											UIBase.hwnds[TabArea.TabStatus].redraws = 3;
 										});
@@ -201,15 +201,15 @@ class UIFiles {
 					if (icon != null) {
 						let w = 50;
 						if (i == UIFiles.selected) {
-							ui.fill(-2,        -2, w + 4,     2, ui.t.HIGHLIGHT_COL);
-							ui.fill(-2,     w + 2, w + 4,     2, ui.t.HIGHLIGHT_COL);
-							ui.fill(-2,         0,     2, w + 4, ui.t.HIGHLIGHT_COL);
-							ui.fill(w + 2 ,    -2,     2, w + 6, ui.t.HIGHLIGHT_COL);
+							Zui.fill(-2,        -2, w + 4,     2, ui.t.HIGHLIGHT_COL);
+							Zui.fill(-2,     w + 2, w + 4,     2, ui.t.HIGHLIGHT_COL);
+							Zui.fill(-2,         0,     2, w + 4, ui.t.HIGHLIGHT_COL);
+							Zui.fill(w + 2 ,    -2,     2, w + 6, ui.t.HIGHLIGHT_COL);
 						}
-						state = ui.image(icon, 0xffffffff, w * ui.SCALE());
+						state = Zui.image(icon, 0xffffffff, w * Zui.SCALE(ui));
 						if (ui.isHovered) {
-							ui.tooltipImage(icon);
-							ui.tooltip(f);
+							Zui.tooltipImage(icon);
+							Zui.tooltip(f);
 						}
 						generic = false;
 					}
@@ -227,27 +227,27 @@ class UIFiles {
 						///else
 
 						let buffer = Krom.loadBlob(blobPath);
-						let raw = ArmPack.decode(buffer);
+						let raw = armpack_decode(buffer);
 						if (raw.material_icons != null) {
 							let bytesIcon = raw.material_icons[0];
-							icon = Image.fromBytes(Lz4.decode(bytesIcon, 256 * 256 * 4), 256, 256);
+							icon = image_from_bytes(lz4_decode(bytesIcon, 256 * 256 * 4), 256, 256);
 						}
 
 						///if (is_paint || is_sculpt)
 						else if (raw.mesh_icons != null) {
 							let bytesIcon = raw.mesh_icons[0];
-							icon = Image.fromBytes(Lz4.decode(bytesIcon, 256 * 256 * 4), 256, 256);
+							icon = image_from_bytes(lz4_decode(bytesIcon, 256 * 256 * 4), 256, 256);
 						}
 						else if (raw.brush_icons != null) {
 							let bytesIcon = raw.brush_icons[0];
-							icon = Image.fromBytes(Lz4.decode(bytesIcon, 256 * 256 * 4), 256, 256);
+							icon = image_from_bytes(lz4_decode(bytesIcon, 256 * 256 * 4), 256, 256);
 						}
 						///end
 
 						///if is_lab
 						if (raw.mesh_icon != null) {
 							let bytesIcon = raw.mesh_icon;
-							icon = Image.fromBytes(Lz4.decode(bytesIcon, 256 * 256 * 4), 256, 256);
+							icon = image_from_bytes(lz4_decode(bytesIcon, 256 * 256 * 4), 256, 256);
 						}
 						///end
 
@@ -257,15 +257,15 @@ class UIFiles {
 					if (icon != null) {
 						let w = 50;
 						if (i == UIFiles.selected) {
-							ui.fill(-2,        -2, w + 4,     2, ui.t.HIGHLIGHT_COL);
-							ui.fill(-2,     w + 2, w + 4,     2, ui.t.HIGHLIGHT_COL);
-							ui.fill(-2,         0,     2, w + 4, ui.t.HIGHLIGHT_COL);
-							ui.fill(w + 2 ,    -2,     2, w + 6, ui.t.HIGHLIGHT_COL);
+							Zui.fill(-2,        -2, w + 4,     2, ui.t.HIGHLIGHT_COL);
+							Zui.fill(-2,     w + 2, w + 4,     2, ui.t.HIGHLIGHT_COL);
+							Zui.fill(-2,         0,     2, w + 4, ui.t.HIGHLIGHT_COL);
+							Zui.fill(w + 2 ,    -2,     2, w + 6, ui.t.HIGHLIGHT_COL);
 						}
-						state = ui.image(icon, 0xffffffff, w * ui.SCALE());
+						state = Zui.image(icon, 0xffffffff, w * Zui.SCALE(ui));
 						if (ui.isHovered) {
-							ui.tooltipImage(icon);
-							ui.tooltip(f);
+							Zui.tooltipImage(icon);
+							Zui.tooltip(f);
 						}
 						generic = false;
 					}
@@ -277,19 +277,19 @@ class UIFiles {
 					let shandle = handle.text + Path.sep + f;
 					icon = UIFiles.iconMap.get(shandle);
 					if (icon == null) {
-						let empty = RenderPath.renderTargets.get("empty_black").image;
+						let empty = render_path_render_targets.get("empty_black").image;
 						UIFiles.iconMap.set(shandle, empty);
-						Data.getImage(shandle, (image: ImageRaw) => {
+						Data.getImage(shandle, (image: image_t) => {
 							App.notifyOnInit(() => {
 								if (Base.pipeCopyRGB == null) Base.makePipeCopyRGB();
 								let sw = image.width > image.height ? w : Math.floor(1.0 * image.width / image.height * w);
 								let sh = image.width > image.height ? Math.floor(1.0 * image.height / image.width * w) : w;
-								icon = Image.createRenderTarget(sw, sh);
-								Graphics2.begin(icon.g2, true, 0xffffffff);
+								icon = image_create_render_target(sw, sh);
+								g2_begin(icon.g2, true, 0xffffffff);
 								icon.g2.pipeline = Base.pipeCopyRGB;
-								Graphics2.drawScaledImage(image, 0, 0, sw, sh);
+								g2_draw_scaled_image(image, 0, 0, sw, sh);
 								icon.g2.pipeline = null;
-								Graphics2.end(icon.g2);
+								g2_end(icon.g2);
 								UIFiles.iconMap.set(shandle, icon);
 								UIBase.hwnds[TabArea.TabStatus].redraws = 3;
 								Data.deleteImage(shandle); // The big image is not needed anymore
@@ -298,18 +298,18 @@ class UIFiles {
 					}
 					if (icon != null) {
 						if (i == UIFiles.selected) {
-							ui.fill(-2,        -2, w + 4,     2, ui.t.HIGHLIGHT_COL);
-							ui.fill(-2,     w + 2, w + 4,     2, ui.t.HIGHLIGHT_COL);
-							ui.fill(-2,         0,     2, w + 4, ui.t.HIGHLIGHT_COL);
-							ui.fill(w + 2 ,    -2,     2, w + 6, ui.t.HIGHLIGHT_COL);
+							Zui.fill(-2,        -2, w + 4,     2, ui.t.HIGHLIGHT_COL);
+							Zui.fill(-2,     w + 2, w + 4,     2, ui.t.HIGHLIGHT_COL);
+							Zui.fill(-2,         0,     2, w + 4, ui.t.HIGHLIGHT_COL);
+							Zui.fill(w + 2 ,    -2,     2, w + 6, ui.t.HIGHLIGHT_COL);
 						}
-						state = ui.image(icon, 0xffffffff, icon.height * ui.SCALE());
+						state = Zui.image(icon, 0xffffffff, icon.height * Zui.SCALE(ui));
 						generic = false;
 					}
 				}
 
 				if (generic) {
-					state = ui.image(icons, col, 50 * ui.SCALE(), rect.x, rect.y, rect.w, rect.h);
+					state = Zui.image(icons, col, 50 * Zui.SCALE(ui), rect.x, rect.y, rect.w, rect.h);
 				}
 
 				if (ui.isHovered && ui.inputReleasedR && contextMenu != null) {
@@ -318,8 +318,8 @@ class UIFiles {
 
 				if (state == State.Started) {
 					if (f != ".." && dragFiles) {
-						Base.dragOffX = -(Mouse.x - uix - ui._windowX - 3);
-						Base.dragOffY = -(Mouse.y - uiy - ui._windowY + 1);
+						Base.dragOffX = -(mouse_x - uix - ui._windowX - 3);
+						Base.dragOffY = -(mouse_y - uiy - ui._windowY + 1);
 						Base.dragFile = handle.text;
 						///if krom_ios
 						if (!isCloud) Base.dragFile = documentDirectory + Base.dragFile;
@@ -332,7 +332,7 @@ class UIFiles {
 					}
 
 					UIFiles.selected = i;
-					if (Time.time() - Context.raw.selectTime < 0.25) {
+					if (time_time() - Context.raw.selectTime < 0.25) {
 						Base.dragFile = null;
 						Base.dragFileIcon = null;
 						Base.isDragging = false;
@@ -350,7 +350,7 @@ class UIFiles {
 						}
 						UIFiles.selected = -1;
 					}
-					Context.raw.selectTime = Time.time();
+					Context.raw.selectTime = time_time();
 				}
 
 				// Label
@@ -358,19 +358,19 @@ class UIFiles {
 				ui._y += slotw * 0.75;
 				let label0 = (UIFiles.showExtensions || f.indexOf(".") <= 0) ? f : f.substr(0, f.lastIndexOf("."));
 				let label1 = "";
-				while (label0.length > 0 && Font.width(ui.font, ui.fontSize, label0) > ui._w - 6) { // 2 line split
+				while (label0.length > 0 && font_width(ui.font, ui.fontSize, label0) > ui._w - 6) { // 2 line split
 					label1 = label0.charAt(label0.length - 1) + label1;
 					label0 = label0.substr(0, label0.length - 1);
 				}
 				if (label1 != "") ui.curRatio--;
-				ui.text(label0, Align.Center);
-				if (ui.isHovered) ui.tooltip(label0 + label1);
+				Zui.text(label0, Align.Center);
+				if (ui.isHovered) Zui.tooltip(label0 + label1);
 				if (label1 != "") { // Second line
 					ui._x = _x;
-					ui._y += Font.height(ui.font, ui.fontSize);
-					ui.text(label1, Align.Center);
-					if (ui.isHovered) ui.tooltip(label0 + label1);
-					ui._y -= Font.height(ui.font, ui.fontSize);
+					ui._y += font_height(ui.font, ui.fontSize);
+					Zui.text(label1, Align.Center);
+					if (ui.isHovered) Zui.tooltip(label0 + label1);
+					ui._y -= font_height(ui.font, ui.fontSize);
 				}
 
 				ui._y -= slotw * 0.75;

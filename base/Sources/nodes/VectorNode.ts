@@ -1,8 +1,8 @@
 
 class VectorNode extends LogicNode {
 
-	value = Vec4.create();
-	image: ImageRaw = null;
+	value = vec4_create();
+	image: image_t = null;
 
 	constructor(x: Null<f32> = null, y: Null<f32> = null, z: Null<f32> = null) {
 		super();
@@ -27,18 +27,18 @@ class VectorNode extends LogicNode {
 		});
 	}
 
-	override getAsImage = (from: i32, done: (img: ImageRaw)=>void) => {
+	override getAsImage = (from: i32, done: (img: image_t)=>void) => {
 		this.inputs[0].get((x: f32) => {
 			this.inputs[1].get((y: f32) => {
 				this.inputs[2].get((z: f32) => {
-					if (this.image != null) Image.unload(this.image);
+					if (this.image != null) image_unload(this.image);
 					let b = new ArrayBuffer(16);
 					let v = new DataView(b);
 					v.setFloat32(0, (this.inputs[0].node as any).value, true);
 					v.setFloat32(4, (this.inputs[1].node as any).value, true);
 					v.setFloat32(8, (this.inputs[2].node as any).value, true);
 					v.setFloat32(12, 1.0, true);
-					this.image = Image.fromBytes(b, 1, 1, TextureFormat.RGBA128);
+					this.image = image_from_bytes(b, 1, 1, TextureFormat.RGBA128);
 					done(this.image);
 				});
 			});

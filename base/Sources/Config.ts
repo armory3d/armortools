@@ -12,7 +12,7 @@ class Config {
 		try {
 			Data.getBlob((Path.isProtected() ? Krom.savePath() : "") + "config.json", (blob: ArrayBuffer) => {
 				Config.configLoaded = true;
-				Config.raw = JSON.parse(System.bufferToString(blob));
+				Config.raw = JSON.parse(sys_buffer_to_string(blob));
 
 				done();
 			});
@@ -22,7 +22,7 @@ class Config {
 			try { // Protected directory
 				Data.getBlob(Krom.savePath() + "config.json", (blob: ArrayBuffer) => {
 					Config.configLoaded = true;
-					Config.raw = JSON.parse(System.bufferToString(blob));
+					Config.raw = JSON.parse(sys_buffer_to_string(blob));
 					done();
 				});
 			}
@@ -39,7 +39,7 @@ class Config {
 		// Use system application data folder
 		// when running from protected path like "Program Files"
 		let path = (Path.isProtected() ? Krom.savePath() : Path.data() + Path.sep) + "config.json";
-		let buffer = System.stringToBuffer(JSON.stringify(Config.raw));
+		let buffer = sys_string_to_buffer(JSON.stringify(Config.raw));
 		Krom.fileSaveBytes(path, buffer);
 
 		///if krom_linux // Protected directory
@@ -64,14 +64,14 @@ class Config {
 			Config.raw.window_x = -1;
 			Config.raw.window_y = -1;
 			Config.raw.window_scale = 1.0;
-			if (System.displayWidth() >= 2560 && System.displayHeight() >= 1600) {
+			if (sys_display_width() >= 2560 && sys_display_height() >= 1600) {
 				Config.raw.window_scale = 2.0;
 			}
 			///if (krom_android || krom_ios || krom_darwin)
 			Config.raw.window_scale = 2.0;
 			///end
 			Config.raw.window_vsync = true;
-			Config.raw.window_frequency = System.displayFrequency();
+			Config.raw.window_frequency = sys_display_frequency();
 			Config.raw.rp_bloom = false;
 			Config.raw.rp_gi = false;
 			Config.raw.rp_vignette = 0.2;
@@ -109,7 +109,7 @@ class Config {
 	static getSha = (): string => {
 		let sha = "";
 		Data.getBlob("version.json", (blob: ArrayBuffer) => {
-			sha = JSON.parse(System.bufferToString(blob)).sha;
+			sha = JSON.parse(sys_buffer_to_string(blob)).sha;
 		});
 		return sha;
 	}
@@ -117,12 +117,12 @@ class Config {
 	static getDate = (): string => {
 		let date = "";
 		Data.getBlob("version.json", (blob: ArrayBuffer) => {
-			date = JSON.parse(System.bufferToString(blob)).date;
+			date = JSON.parse(sys_buffer_to_string(blob)).date;
 		});
 		return date;
 	}
 
-	static getOptions = (): SystemOptions => {
+	static getOptions = (): kinc_sys_ops_t => {
 		let windowMode = Config.raw.window_mode == 0 ? WindowMode.Windowed : WindowMode.Fullscreen;
 		let windowFeatures = WindowFeatures.FeatureNone;
 		if (Config.raw.window_resizable) windowFeatures |= WindowFeatures.FeatureResizable;
@@ -177,10 +177,10 @@ class Config {
 		Config.save();
 		Context.raw.ddirty = 2;
 
-		let current = Graphics2.current;
-		if (current != null) Graphics2.end(current);
+		let current = _g2_current;
+		if (current != null) g2_end(current);
 		RenderPathBase.applyConfig();
-		if (current != null) Graphics2.begin(current, false);
+		if (current != null) g2_begin(current, false);
 	}
 
 	static loadKeymap = () => {
@@ -189,7 +189,7 @@ class Config {
 		}
 		else {
 			Data.getBlob("keymap_presets/" + Config.raw.keymap, (blob: ArrayBuffer) => {
-				Config.keymap = JSON.parse(System.bufferToString(blob));
+				Config.keymap = JSON.parse(sys_buffer_to_string(blob));
 				// Fill in undefined keys with defaults
 				for (let field in Base.defaultKeymap) {
 					if (!(field in Config.keymap)) {
@@ -204,7 +204,7 @@ class Config {
 	static saveKeymap = () => {
 		if (Config.raw.keymap == "default.json") return;
 		let path = Data.dataPath + "keymap_presets/" + Config.raw.keymap;
-		let buffer = System.stringToBuffer(JSON.stringify(Config.keymap));
+		let buffer = sys_string_to_buffer(JSON.stringify(Config.keymap));
 		Krom.fileSaveBytes(path, buffer);
 	}
 
@@ -269,12 +269,12 @@ class Config {
 
 	static loadTheme = (theme: string, tagRedraw = true) => {
 		if (theme == "default.json") { // Built-in default
-			Base.theme = new Theme();
+			Base.theme = Theme.create();
 		}
 		else {
 			Data.getBlob("themes/" + theme, (b: ArrayBuffer) => {
-				let parsed = JSON.parse(System.bufferToString(b));
-				Base.theme = new Theme();
+				let parsed = JSON.parse(sys_buffer_to_string(b));
+				Base.theme = Theme.create();
 				for (let key in Base.theme) {
 					if (key == "theme_") continue;
 					if (key.startsWith("set_")) continue;

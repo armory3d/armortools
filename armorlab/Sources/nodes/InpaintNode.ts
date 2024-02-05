@@ -3,11 +3,11 @@ declare let Krom_texsynth: any;
 
 class InpaintNode extends LogicNode {
 
-	static image: ImageRaw = null;
-	static mask: ImageRaw = null;
-	static result: ImageRaw = null;
+	static image: image_t = null;
+	static mask: image_t = null;
+	static result: image_t = null;
 
-	static temp: ImageRaw = null;
+	static temp: image_t = null;
 	static prompt = "";
 	static strength = 0.5;
 	static auto = true;
@@ -19,90 +19,90 @@ class InpaintNode extends LogicNode {
 
 	static init = () => {
 		if (InpaintNode.image == null) {
-			InpaintNode.image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
+			InpaintNode.image = image_create_render_target(Config.getTextureResX(), Config.getTextureResY());
 		}
 
 		if (InpaintNode.mask == null) {
-			InpaintNode.mask = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8);
+			InpaintNode.mask = image_create_render_target(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8);
 			Base.notifyOnNextFrame(() => {
-				Graphics4.begin(InpaintNode.mask.g4);
-				Graphics4.clear(color_from_floats(1.0, 1.0, 1.0, 1.0));
-				Graphics4.end();
+				g4_begin(InpaintNode.mask.g4);
+				g4_clear(color_from_floats(1.0, 1.0, 1.0, 1.0));
+				g4_end();
 			});
 		}
 
 		if (InpaintNode.temp == null) {
-			InpaintNode.temp = Image.createRenderTarget(512, 512);
+			InpaintNode.temp = image_create_render_target(512, 512);
 		}
 
 		if (InpaintNode.result == null) {
-			InpaintNode.result = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
+			InpaintNode.result = image_create_render_target(Config.getTextureResX(), Config.getTextureResY());
 		}
 	}
 
-	static buttons = (ui: Zui, nodes: Nodes, node: TNode) => {
+	static buttons = (ui: ZuiRaw, nodes: NodesRaw, node: TNode) => {
 		InpaintNode.auto = node.buttons[0].default_value == 0 ? false : true;
 		if (!InpaintNode.auto) {
-			InpaintNode.strength = ui.slider(Zui.handle("inpaintnode_0", {value: InpaintNode.strength}), tr("strength"), 0, 1, true);
-			InpaintNode.prompt = ui.textArea(Zui.handle("inpaintnode_1"), Align.Left, true, tr("prompt"), true);
+			InpaintNode.strength = Zui.slider(Zui.handle("inpaintnode_0", {value: InpaintNode.strength}), tr("strength"), 0, 1, true);
+			InpaintNode.prompt = Zui.textArea(Zui.handle("inpaintnode_1"), Align.Left, true, tr("prompt"), true);
 			node.buttons[1].height = 1 + InpaintNode.prompt.split("\n").length;
 		}
 		else node.buttons[1].height = 0;
 	}
 
-	override getAsImage = (from: i32, done: (img: ImageRaw)=>void) => {
-		this.inputs[0].getAsImage((source: ImageRaw) => {
+	override getAsImage = (from: i32, done: (img: image_t)=>void) => {
+		this.inputs[0].getAsImage((source: image_t) => {
 
 			Console.progress(tr("Processing") + " - " + tr("Inpaint"));
 			Base.notifyOnNextFrame(() => {
-				Graphics2.begin(InpaintNode.image.g2, false);
-				Graphics2.drawScaledImage(source, 0, 0, Config.getTextureResX(), Config.getTextureResY());
-				Graphics2.end(InpaintNode.image.g2);
+				g2_begin(InpaintNode.image.g2, false);
+				g2_draw_scaled_image(source, 0, 0, Config.getTextureResX(), Config.getTextureResY());
+				g2_end(InpaintNode.image.g2);
 
 				InpaintNode.auto ? InpaintNode.texsynthInpaint(InpaintNode.image, false, InpaintNode.mask, done) : InpaintNode.sdInpaint(InpaintNode.image, InpaintNode.mask, done);
 			});
 		});
 	}
 
-	override getCachedImage = (): ImageRaw => {
+	override getCachedImage = (): image_t => {
 		Base.notifyOnNextFrame(() => {
-			this.inputs[0].getAsImage((source: ImageRaw) => {
+			this.inputs[0].getAsImage((source: image_t) => {
 				if (Base.pipeCopy == null) Base.makePipe();
 				if (ConstData.screenAlignedVB == null) ConstData.createScreenAlignedData();
-				Graphics4.begin(InpaintNode.image.g4);
-				Graphics4.setPipeline(Base.pipeInpaintPreview);
-				Graphics4.setTexture(Base.tex0InpaintPreview, source);
-				Graphics4.setTexture(Base.texaInpaintPreview, InpaintNode.mask);
-				Graphics4.setVertexBuffer(ConstData.screenAlignedVB);
-				Graphics4.setIndexBuffer(ConstData.screenAlignedIB);
-				Graphics4.drawIndexedVertices();
-				Graphics4.end();
+				g4_begin(InpaintNode.image.g4);
+				g4_set_pipeline(Base.pipeInpaintPreview);
+				g4_set_tex(Base.tex0InpaintPreview, source);
+				g4_set_tex(Base.texaInpaintPreview, InpaintNode.mask);
+				g4_set_vertex_buffer(ConstData.screenAlignedVB);
+				g4_set_index_buffer(ConstData.screenAlignedIB);
+				g4_draw();
+				g4_end();
 			});
 		});
 		return InpaintNode.image;
 	}
 
-	getTarget = (): ImageRaw => {
+	getTarget = (): image_t => {
 		return InpaintNode.mask;
 	}
 
-	static texsynthInpaint = (image: ImageRaw, tiling: bool, mask: ImageRaw/* = null*/, done: (img: ImageRaw)=>void) => {
+	static texsynthInpaint = (image: image_t, tiling: bool, mask: image_t/* = null*/, done: (img: image_t)=>void) => {
 		let w = Config.getTextureResX();
 		let h = Config.getTextureResY();
 
-		let bytes_img = Image.getPixels(image);
-		let bytes_mask = mask != null ? Image.getPixels(mask) : new ArrayBuffer(w * h);
+		let bytes_img = image_get_pixels(image);
+		let bytes_mask = mask != null ? image_get_pixels(mask) : new ArrayBuffer(w * h);
 		let bytes_out = new ArrayBuffer(w * h * 4);
 		Krom_texsynth.inpaint(w, h, bytes_out, bytes_img, bytes_mask, tiling);
 
-		InpaintNode.result = Image.fromBytes(bytes_out, w, h);
+		InpaintNode.result = image_from_bytes(bytes_out, w, h);
 		done(InpaintNode.result);
 	}
 
-	static sdInpaint = (image: ImageRaw, mask: ImageRaw, done: (img: ImageRaw)=>void) => {
+	static sdInpaint = (image: image_t, mask: image_t, done: (img: image_t)=>void) => {
 		InpaintNode.init();
 
-		let bytes_img = Image.getPixels(mask);
+		let bytes_img = image_get_pixels(mask);
 		let u8 = new Uint8Array(bytes_img);
 		let f32mask = new Float32Array(4 * 64 * 64);
 
@@ -127,12 +127,12 @@ class InpaintNode extends LogicNode {
 						}
 					}
 
-					Graphics2.begin(InpaintNode.temp.g2, false);
-					// Graphics2.drawImage(image, -x * 512, -y * 512);
-					Graphics2.drawScaledImage(image, 0, 0, 512, 512);
-					Graphics2.end(InpaintNode.temp.g2);
+					g2_begin(InpaintNode.temp.g2, false);
+					// g2_drawImage(image, -x * 512, -y * 512);
+					g2_draw_scaled_image(image, 0, 0, 512, 512);
+					g2_end(InpaintNode.temp.g2);
 
-					let bytes_img = Image.getPixels(InpaintNode.temp);
+					let bytes_img = image_get_pixels(InpaintNode.temp);
 					let u8a = new Uint8Array(bytes_img);
 					let f32a = new Float32Array(3 * 512 * 512);
 					for (let i = 0; i < (512 * 512); ++i) {
@@ -163,10 +163,10 @@ class InpaintNode extends LogicNode {
 
 					let start = num_inference_steps - init_timestep;
 
-					TextToPhotoNode.stableDiffusion(InpaintNode.prompt, (img: ImageRaw) => {
-						// result.g2.begin(false);
-						// result.g2.drawImage(img, x * 512, y * 512);
-						// result.g2.end();
+					TextToPhotoNode.stableDiffusion(InpaintNode.prompt, (img: image_t) => {
+						// result.g2_begin(false);
+						// result.g2_draw_image(img, x * 512, y * 512);
+						// result.g2_end();
 						InpaintNode.result = img;
 						done(img);
 					}, latents, start, true, f32mask, latents_orig);

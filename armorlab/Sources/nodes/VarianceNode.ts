@@ -1,8 +1,8 @@
 
 class VarianceNode extends LogicNode {
 
-	static temp: ImageRaw = null;
-	static image: ImageRaw = null;
+	static temp: image_t = null;
+	static image: image_t = null;
 	static inst: VarianceNode = null;
 	static prompt = "";
 
@@ -14,24 +14,24 @@ class VarianceNode extends LogicNode {
 
 	static init = () => {
 		if (VarianceNode.temp == null) {
-			VarianceNode.temp = Image.createRenderTarget(512, 512);
+			VarianceNode.temp = image_create_render_target(512, 512);
 		}
 	}
 
-	static buttons = (ui: Zui, nodes: Nodes, node: TNode) => {
-		VarianceNode.prompt = ui.textArea(Zui.handle("variancenode_0"), Align.Left, true, tr("prompt"), true);
+	static buttons = (ui: ZuiRaw, nodes: NodesRaw, node: TNode) => {
+		VarianceNode.prompt = Zui.textArea(Zui.handle("variancenode_0"), Align.Left, true, tr("prompt"), true);
 		node.buttons[0].height = VarianceNode.prompt.split("\n").length;
 	}
 
-	override getAsImage = (from: i32, done: (img: ImageRaw)=>void) => {
+	override getAsImage = (from: i32, done: (img: image_t)=>void) => {
 		let strength = (VarianceNode.inst.inputs[1].node as any).value;
 
-		VarianceNode.inst.inputs[0].getAsImage((source: ImageRaw) => {
-			Graphics2.begin(VarianceNode.temp.g2, false);
-			Graphics2.drawScaledImage(source, 0, 0, 512, 512);
-			Graphics2.end(VarianceNode.temp.g2);
+		VarianceNode.inst.inputs[0].getAsImage((source: image_t) => {
+			g2_begin(VarianceNode.temp.g2, false);
+			g2_draw_scaled_image(source, 0, 0, 512, 512);
+			g2_end(VarianceNode.temp.g2);
 
-			let bytes_img = Image.getPixels(VarianceNode.temp);
+			let bytes_img = image_get_pixels(VarianceNode.temp);
 			let u8a = new Uint8Array(bytes_img);
 			let f32a = new Float32Array(3 * 512 * 512);
 			for (let i = 0; i < (512 * 512); ++i) {
@@ -62,7 +62,7 @@ class VarianceNode extends LogicNode {
 					}
 					let t_start = num_inference_steps - init_timestep;
 
-					TextToPhotoNode.stableDiffusion(VarianceNode.prompt, (_image: ImageRaw) => {
+					TextToPhotoNode.stableDiffusion(VarianceNode.prompt, (_image: image_t) => {
 						VarianceNode.image = _image;
 						done(VarianceNode.image);
 					}, latents, t_start);
@@ -71,7 +71,7 @@ class VarianceNode extends LogicNode {
 		});
 	}
 
-	override getCachedImage = (): ImageRaw => {
+	override getCachedImage = (): image_t => {
 		return VarianceNode.image;
 	}
 

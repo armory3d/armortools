@@ -1,16 +1,16 @@
 
 class RGBNode extends LogicNode {
 
-	image: ImageRaw = null;
+	image: image_t = null;
 
 	constructor() {
 		super();
 	}
 
-	override getAsImage = (from: i32, done: (img: ImageRaw)=>void) => {
+	override getAsImage = (from: i32, done: (img: image_t)=>void) => {
 		if (this.image != null) {
 			Base.notifyOnNextFrame(() => {
-				Image.unload(this.image);
+				image_unload(this.image);
 			});
 		}
 
@@ -21,12 +21,12 @@ class RGBNode extends LogicNode {
 		f32a[1] = default_value[1];
 		f32a[2] = default_value[2];
 		f32a[3] = default_value[3];
-		this.image = Image.fromBytes(f32a.buffer, 1, 1, TextureFormat.RGBA128);
+		this.image = image_from_bytes(f32a.buffer, 1, 1, TextureFormat.RGBA128);
 		done(this.image);
 	}
 
-	override getCachedImage = (): ImageRaw => {
-		this.getAsImage(0, (img: ImageRaw) => {});
+	override getCachedImage = (): image_t => {
+		this.getAsImage(0, (img: image_t) => {});
 		return this.image;
 	}
 

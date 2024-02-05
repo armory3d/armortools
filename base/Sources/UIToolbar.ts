@@ -5,7 +5,7 @@ class UIToolbar {
 
 	static defaultToolbarW = 36;
 
-	static toolbarHandle = new Handle();
+	static toolbarHandle = Handle.create();
 	static toolbarw = UIToolbar.defaultToolbarW;
 	static lastTool = 0;
 
@@ -29,7 +29,7 @@ class UIToolbar {
 	constructor() {
 	}
 
-	static renderUI = (g: Graphics2Raw) => {
+	static renderUI = (g: g2_t) => {
 		let ui = UIBase.ui;
 
 		if (Config.raw.touch_ui) {
@@ -38,14 +38,14 @@ class UIToolbar {
 		else {
 			UIToolbar.toolbarw = UIToolbar.defaultToolbarW;
 		}
-		UIToolbar.toolbarw = Math.floor(UIToolbar.toolbarw * ui.SCALE());
+		UIToolbar.toolbarw = Math.floor(UIToolbar.toolbarw * Zui.SCALE(ui));
 
-		if (ui.window(UIToolbar.toolbarHandle, 0, UIHeader.headerh, UIToolbar.toolbarw, System.height - UIHeader.headerh)) {
-			ui._y -= 4 * ui.SCALE();
+		if (Zui.window(ui, UIToolbar.toolbarHandle, 0, UIHeader.headerh, UIToolbar.toolbarw, sys_height() - UIHeader.headerh)) {
+			ui._y -= 4 * Zui.SCALE(ui);
 
 			ui.imageScrollAlign = false;
 			let img = Res.get("icons.k");
-			let imgw = ui.SCALE() > 1 ? 100 : 50;
+			let imgw = Zui.SCALE(ui) > 1 ? 100 : 50;
 
 			let col = ui.t.WINDOW_BG_COL;
 			if (col < 0) col += 4294967296;
@@ -55,7 +55,7 @@ class UIToolbar {
 			// Properties icon
 			if (Config.raw.layout[LayoutSize.LayoutHeader] == 1) {
 				let rect = Res.tile50(img, 7, 1);
-				if (ui.image(img, light ? 0xff666666 : ui.t.BUTTON_COL, null, rect.x, rect.y, rect.w, rect.h) == State.Released) {
+				if (Zui.image(img, light ? 0xff666666 : ui.t.BUTTON_COL, null, rect.x, rect.y, rect.w, rect.h) == State.Released) {
 					Config.raw.layout[LayoutSize.LayoutHeader] = 0;
 				}
 			}
@@ -68,12 +68,12 @@ class UIToolbar {
 				ui.t.ELEMENT_H = Math.floor(ui.t.ELEMENT_H * 1.5);
 				ui.t.BUTTON_H = ui.t.ELEMENT_H;
 				ui.t.BUTTON_COL = ui.t.WINDOW_BG_COL;
-				let fontHeight = Font.height(ui.font, ui.fontSize);
-				ui.fontOffsetY = (ui.ELEMENT_H() - fontHeight) / 2;
+				let fontHeight = font_height(ui.font, ui.fontSize);
+				ui.fontOffsetY = (Zui.ELEMENT_H(ui) - fontHeight) / 2;
 				let _w = ui._w;
 				ui._w = UIToolbar.toolbarw;
 
-				if (ui.button(">>")) {
+				if (Zui.button(">>")) {
 					UIToolbar.toolPropertiesMenu();
 				}
 
@@ -83,8 +83,8 @@ class UIToolbar {
 				ui.t.BUTTON_COL = _BUTTON_COL;
 				ui.fontOffsetY = _fontOffsetY;
 			}
-			if (ui.isHovered) ui.tooltip(tr("Toggle header"));
-			ui._y -= 4 * ui.SCALE();
+			if (ui.isHovered) Zui.tooltip(tr("Toggle header"));
+			ui._y -= 4 * Zui.SCALE(ui);
 
 			let keys = [
 				"(" + Config.keymap.tool_brush + ") - " + tr("Hold {action_paint} to paint\nHold {key} and press {action_paint} to paint a straight line (ruler mode)", new Map([["key", Config.keymap.brush_ruler], ["action_paint", Config.keymap.action_paint]])),
@@ -111,7 +111,7 @@ class UIToolbar {
 				let rect = Res.tile50(img, tileX, tileY);
 				let _y = ui._y;
 
-				let imageState = ui.image(img, iconAccent, null, rect.x, rect.y, rect.w, rect.h);
+				let imageState = Zui.image(img, iconAccent, null, rect.x, rect.y, rect.w, rect.h);
 				if (imageState == State.Started) {
 					Context.selectTool(i);
 				}
@@ -124,11 +124,11 @@ class UIToolbar {
 
 				///if is_paint
 				if (i == WorkspaceTool.ToolColorId && Context.raw.colorIdPicked) {
-					Graphics2.drawScaledSubImage(RenderPath.renderTargets.get("texpaint_colorid").image, 0, 0, 1, 1, 0, _y + 1.5 * ui.SCALE(), 5 * ui.SCALE(), 34 * ui.SCALE());
+					g2_draw_scaled_sub_image(render_path_render_targets.get("texpaint_colorid").image, 0, 0, 1, 1, 0, _y + 1.5 * Zui.SCALE(ui), 5 * Zui.SCALE(ui), 34 * Zui.SCALE(ui));
 				}
 				///end
 
-				if (ui.isHovered) ui.tooltip(tr(UIToolbar.toolNames[i]) + " " + keys[i]);
+				if (ui.isHovered) Zui.tooltip(tr(UIToolbar.toolNames[i]) + " " + keys[i]);
 				ui._x -= 2;
 				ui._y += 2;
 			}
@@ -160,7 +160,7 @@ class UIToolbar {
 			// Hide scrollbar
 			let _SCROLL_W = ui.t.SCROLL_W;
 			ui.t.SCROLL_W = 0;
-			ui.endWindow();
+			Zui.endWindow();
 			ui.t.SCROLL_W = _SCROLL_W;
 		}
 	}
@@ -170,7 +170,7 @@ class UIToolbar {
 		let _x = ui._x;
 		let _y = ui._y;
 		let _w = ui._w;
-		UIMenu.draw((ui: Zui) => {
+		UIMenu.draw((ui: ZuiRaw) => {
 			let startY = ui._y;
 			ui.changed = false;
 
@@ -180,28 +180,28 @@ class UIToolbar {
 				UIMenu.keepOpen = true;
 			}
 
-			if (ui.button(tr("Pin to Header"), Align.Left)) {
+			if (Zui.button(tr("Pin to Header"), Align.Left)) {
 				Config.raw.layout[LayoutSize.LayoutHeader] = 1;
 			}
 
 			let h = ui._y - startY;
-			UIMenu.menuElements = Math.floor(h / ui.ELEMENT_H());
+			UIMenu.menuElements = Math.floor(h / Zui.ELEMENT_H(ui));
 			UIMenu.menuX = Math.floor(_x + _w + 2);
-			UIMenu.menuY = Math.floor(_y - 6 * ui.SCALE());
+			UIMenu.menuY = Math.floor(_y - 6 * Zui.SCALE(ui));
 			UIMenu.fitToScreen();
 
 		}, 0);
 
 		// First draw out of screen, then align the menu based on menu height
-		UIMenu.menuX = -System.width;
-		UIMenu.menuY = -System.height;
+		UIMenu.menuX = -sys_width();
+		UIMenu.menuY = -sys_height();
 	}
 
 	static drawHighlight = () => {
 		let ui = UIBase.ui;
 		let size = UIToolbar.toolbarw - 4;
 		ui.g.color = ui.t.HIGHLIGHT_COL;
-		ui.drawRect(ui.g, true, ui._x + -1,  ui._y + 2, size + 2, size + 2);
+		Zui.drawRect(ui.g, true, ui._x + -1,  ui._y + 2, size + 2, size + 2);
 	}
 }
 

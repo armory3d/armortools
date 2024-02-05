@@ -3,7 +3,7 @@ class ImportArm {
 
 	static runProject = (path: string) => {
 		Data.getBlob(path, (b: ArrayBuffer) => {
-			let project: TProjectFormat = ArmPack.decode(b);
+			let project: TProjectFormat = armpack_decode(b);
 
 			///if (is_paint || is_sculpt)
 			if (project.version != null && project.layer_datas == null) {
@@ -35,9 +35,9 @@ class ImportArm {
 			Project.filepath = path;
 			UIFiles.filename = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
 			///if (krom_android || krom_ios)
-			System.title = UIFiles.filename;
+			sys_title_set(UIFiles.filename);
 			///else
-			System.title = UIFiles.filename + " - " + manifest_title;
+			sys_title_set(UIFiles.filename + " - " + manifest_title);
 			///end
 
 			///if (is_paint || is_sculpt)
@@ -75,13 +75,13 @@ class ImportArm {
 				Project.raw.envmap = Data.isAbsolute(Project.raw.envmap) ? Project.raw.envmap : base + Project.raw.envmap;
 			}
 			if (Project.raw.envmap_strength != null) {
-				Scene.world.strength = Project.raw.envmap_strength;
+				scene_world.strength = Project.raw.envmap_strength;
 			}
 			if (Project.raw.camera_world != null) {
-				Scene.camera.base.transform.local = Mat4.fromFloat32Array(Project.raw.camera_world);
-				Transform.decompose(Scene.camera.base.transform);
-				Scene.camera.data.fov = Project.raw.camera_fov;
-				CameraObject.buildProjection(Scene.camera);
+				scene_camera.base.transform.local = mat4_from_f32_array(Project.raw.camera_world);
+				transform_decompose(scene_camera.base.transform);
+				scene_camera.data.fov = Project.raw.camera_fov;
+				CameraObject.buildProjection(scene_camera);
 				let origin = Project.raw.camera_origin;
 				Camera.origins[0].x = origin[0];
 				Camera.origins[0].y = origin[1];
@@ -126,16 +126,16 @@ class ImportArm {
 
 			// Synchronous for now
 			///if (is_paint || is_sculpt)
-			MeshData.create(project.mesh_datas[0], (md: TMeshData) => {
+			MeshData.create(project.mesh_datas[0], (md: mesh_data_t) => {
 			///end
 
 			///if is_lab
-			MeshData.create(project.mesh_data, (md: TMeshData) => {
+			MeshData.create(project.mesh_data, (md: mesh_data_t) => {
 			///end
 
 				MeshObject.setData(Context.raw.paintObject, md);
-				Vec4.set(Context.raw.paintObject.base.transform.scale, 1, 1, 1);
-				Transform.buildMatrix(Context.raw.paintObject.base.transform);
+				vec4_set(Context.raw.paintObject.base.transform.scale, 1, 1, 1);
+				transform_build_matrix(Context.raw.paintObject.base.transform);
 				Context.raw.paintObject.base.name = md.name;
 				Project.paintObjects = [Context.raw.paintObject];
 			});
@@ -143,8 +143,8 @@ class ImportArm {
 			///if (is_paint || is_sculpt)
 			for (let i = 1; i < project.mesh_datas.length; ++i) {
 				let raw = project.mesh_datas[i];
-				MeshData.create(raw, (md: TMeshData) => {
-					let object = Scene.addMeshObject(md, Context.raw.paintObject.materials, Context.raw.paintObject.base);
+				MeshData.create(raw, (md: mesh_data_t) => {
+					let object = scene_add_mesh_object(md, Context.raw.paintObject.materials, Context.raw.paintObject.base);
 					object.base.name = md.name;
 					object.skip_context = "paint";
 					Project.paintObjects.push(object);
@@ -175,21 +175,21 @@ class ImportArm {
 			let tex = Project.layers[0].texpaint;
 			if (tex.width != Config.getTextureResX() || tex.height != Config.getTextureResY()) {
 				if (History.undoLayers != null) for (let l of History.undoLayers) SlotLayer.resizeAndSetBits(l);
-				let rts = RenderPath.renderTargets;
+				let rts = render_path_render_targets;
 				let _texpaint_blend0 = rts.get("texpaint_blend0").image;
 				Base.notifyOnNextFrame(() => {
-					Image.unload(_texpaint_blend0);
+					image_unload(_texpaint_blend0);
 				});
 				rts.get("texpaint_blend0").width = Config.getTextureResX();
 				rts.get("texpaint_blend0").height = Config.getTextureResY();
-				rts.get("texpaint_blend0").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8, DepthStencilFormat.NoDepthAndStencil);
+				rts.get("texpaint_blend0").image = image_create_render_target(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8, DepthFormat.NoDepthAndStencil);
 				let _texpaint_blend1 = rts.get("texpaint_blend1").image;
 				Base.notifyOnNextFrame(() => {
-					Image.unload(_texpaint_blend1);
+					image_unload(_texpaint_blend1);
 				});
 				rts.get("texpaint_blend1").width = Config.getTextureResX();
 				rts.get("texpaint_blend1").height = Config.getTextureResY();
-				rts.get("texpaint_blend1").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8, DepthStencilFormat.NoDepthAndStencil);
+				rts.get("texpaint_blend1").image = image_create_render_target(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8, DepthFormat.NoDepthAndStencil);
 				Context.raw.brushBlendDirty = true;
 			}
 
@@ -214,52 +214,52 @@ class ImportArm {
 				if (!isGroup) {
 					if (Base.pipeMerge == null) Base.makePipe();
 
-					let _texpaint: ImageRaw = null;
+					let _texpaint: image_t = null;
 
 					///if is_paint
-					let _texpaint_nor: ImageRaw = null;
-					let _texpaint_pack: ImageRaw = null;
+					let _texpaint_nor: image_t = null;
+					let _texpaint_pack: image_t = null;
 					///end
 
 					if (isMask) {
-						_texpaint = Image.fromBytes(Lz4.decode(ld.texpaint, ld.res * ld.res * 4), ld.res, ld.res, TextureFormat.RGBA32);
-						Graphics2.begin(l.texpaint.g2, false);
+						_texpaint = image_from_bytes(lz4_decode(ld.texpaint, ld.res * ld.res * 4), ld.res, ld.res, TextureFormat.RGBA32);
+						g2_begin(l.texpaint.g2, false);
 						// l.texpaint.g2.pipeline = Base.pipeCopy8;
 						l.texpaint.g2.pipeline = project.is_bgra ? Base.pipeCopyBGRA : Base.pipeCopy; // Full bits for undo support, R8 is used
-						Graphics2.drawImage(_texpaint, 0, 0);
+						g2_draw_image(_texpaint, 0, 0);
 						l.texpaint.g2.pipeline = null;
-						Graphics2.end(l.texpaint.g2);
+						g2_end(l.texpaint.g2);
 					}
 					else { // Layer
 						// TODO: create render target from bytes
-						_texpaint = Image.fromBytes(Lz4.decode(ld.texpaint, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
-						Graphics2.begin(l.texpaint.g2, false);
+						_texpaint = image_from_bytes(lz4_decode(ld.texpaint, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
+						g2_begin(l.texpaint.g2, false);
 						l.texpaint.g2.pipeline = project.is_bgra ? Base.pipeCopyBGRA : Base.pipeCopy;
-						Graphics2.drawImage(_texpaint, 0, 0);
+						g2_draw_image(_texpaint, 0, 0);
 						l.texpaint.g2.pipeline = null;
-						Graphics2.end(l.texpaint.g2);
+						g2_end(l.texpaint.g2);
 
 						///if is_paint
-						_texpaint_nor = Image.fromBytes(Lz4.decode(ld.texpaint_nor, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
-						Graphics2.begin(l.texpaint_nor.g2, false);
+						_texpaint_nor = image_from_bytes(lz4_decode(ld.texpaint_nor, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
+						g2_begin(l.texpaint_nor.g2, false);
 						l.texpaint_nor.g2.pipeline = project.is_bgra ? Base.pipeCopyBGRA : Base.pipeCopy;
-						Graphics2.drawImage(_texpaint_nor, 0, 0);
+						g2_draw_image(_texpaint_nor, 0, 0);
 						l.texpaint_nor.g2.pipeline = null;
-						Graphics2.end(l.texpaint_nor.g2);
+						g2_end(l.texpaint_nor.g2);
 
-						_texpaint_pack = Image.fromBytes(Lz4.decode(ld.texpaint_pack, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
-						Graphics2.begin(l.texpaint_pack.g2, false);
+						_texpaint_pack = image_from_bytes(lz4_decode(ld.texpaint_pack, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
+						g2_begin(l.texpaint_pack.g2, false);
 						l.texpaint_pack.g2.pipeline = project.is_bgra ? Base.pipeCopyBGRA : Base.pipeCopy;
-						Graphics2.drawImage(_texpaint_pack, 0, 0);
+						g2_draw_image(_texpaint_pack, 0, 0);
 						l.texpaint_pack.g2.pipeline = null;
-						Graphics2.end(l.texpaint_pack.g2);
+						g2_end(l.texpaint_pack.g2);
 						///end
 					}
 
 					l.scale = ld.uv_scale;
 					l.angle = ld.uv_rot;
 					l.uvType = ld.uv_type;
-					if (ld.decal_mat != null) l.decalMat = Mat4.fromFloat32Array(ld.decal_mat);
+					if (ld.decal_mat != null) l.decalMat = mat4_from_f32_array(ld.decal_mat);
 					l.maskOpacity = ld.opacity_mask;
 					l.objectMask = ld.object_mask;
 					l.blending = ld.blending;
@@ -279,10 +279,10 @@ class ImportArm {
 					///end
 
 					Base.notifyOnNextFrame(() => {
-						Image.unload(_texpaint);
+						image_unload(_texpaint);
 						///if is_paint
-						if (_texpaint_nor != null) Image.unload(_texpaint_nor);
-						if (_texpaint_pack != null) Image.unload(_texpaint_pack);
+						if (_texpaint_nor != null) image_unload(_texpaint_nor);
+						if (_texpaint_pack != null) image_unload(_texpaint_pack);
 						///end
 					});
 				}
@@ -299,8 +299,8 @@ class ImportArm {
 			Context.setLayer(Project.layers[0]);
 
 			// Materials
-			let m0: TMaterialData = null;
-			Data.getMaterial("Scene", "Material", (m: TMaterialData) => {
+			let m0: material_data_t = null;
+			Data.getMaterial("Scene", "Material", (m: material_data_t) => {
 				m0 = m;
 			});
 
@@ -316,7 +316,7 @@ class ImportArm {
 			UINodes.groupStack = [];
 			Project.materialGroups = [];
 			if (project.material_groups != null) {
-				for (let g of project.material_groups) Project.materialGroups.push({ canvas: g, nodes: new Nodes() });
+				for (let g of project.material_groups) Project.materialGroups.push({ canvas: g, nodes: Nodes.create() });
 			}
 
 			///if (is_paint || is_sculpt)
@@ -361,24 +361,24 @@ class ImportArm {
 	}
 
 	///if (is_paint || is_sculpt)
-	static runMesh = (raw: TSceneFormat) => {
+	static runMesh = (raw: scene_t) => {
 		Project.paintObjects = [];
 		for (let i = 0; i < raw.mesh_datas.length; ++i) {
-			MeshData.create(raw.mesh_datas[i], (md: TMeshData) => {
+			MeshData.create(raw.mesh_datas[i], (md: mesh_data_t) => {
 				let object: TMeshObject = null;
 				if (i == 0) {
 					MeshObject.setData(Context.raw.paintObject, md);
 					object = Context.raw.paintObject;
 				}
 				else {
-					object = Scene.addMeshObject(md, Context.raw.paintObject.materials, Context.raw.paintObject.base);
+					object = scene_add_mesh_object(md, Context.raw.paintObject.materials, Context.raw.paintObject.base);
 					object.base.name = md.name;
 					object.skip_context = "paint";
 					md._handle = md.name;
 					Data.cachedMeshes.set(md._handle, md);
 				}
-				Vec4.set(object.base.transform.scale, 1, 1, 1);
-				Transform.buildMatrix(object.base.transform);
+				vec4_set(object.base.transform.scale, 1, 1, 1);
+				transform_build_matrix(object.base.transform);
 				object.base.name = md.name;
 				Project.paintObjects.push(object);
 				UtilMesh.mergeMesh();
@@ -391,7 +391,7 @@ class ImportArm {
 
 	static runMaterial = (path: string) => {
 		Data.getBlob(path, (b: ArrayBuffer) => {
-			let project: TProjectFormat = ArmPack.decode(b);
+			let project: TProjectFormat = armpack_decode(b);
 			if (project.version == null) { Data.deleteBlob(path); return; }
 			ImportArm.runMaterialFromProject(project, path);
 		});
@@ -417,8 +417,8 @@ class ImportArm {
 			ImportTexture.run(abs);
 		}
 
-		let m0: TMaterialData = null;
-		Data.getMaterial("Scene", "Material", (m: TMaterialData) => {
+		let m0: material_data_t = null;
+		Data.getMaterial("Scene", "Material", (m: material_data_t) => {
 			m0 = m;
 		});
 
@@ -436,7 +436,7 @@ class ImportArm {
 			for (let c of project.material_groups) {
 				while (ImportArm.groupExists(c)) ImportArm.renameGroup(c.name, imported, project.material_groups); // Ensure unique group name
 				ImportArm.initNodes(c.nodes);
-				Project.materialGroups.push({ canvas: c, nodes: new Nodes() });
+				Project.materialGroups.push({ canvas: c, nodes: Nodes.create() });
 			}
 		}
 
@@ -477,7 +477,7 @@ class ImportArm {
 
 	static runBrush = (path: string) => {
 		Data.getBlob(path, (b: ArrayBuffer) => {
-			let project: TProjectFormat = ArmPack.decode(b);
+			let project: TProjectFormat = armpack_decode(b);
 			if (project.version == null) { Data.deleteBlob(path); return; }
 			ImportArm.runBrushFromProject(project, path);
 		});
@@ -527,7 +527,7 @@ class ImportArm {
 
 	static runSwatches = (path: string, replaceExisting = false) => {
 		Data.getBlob(path, (b: ArrayBuffer) => {
-			let project: TProjectFormat = ArmPack.decode(b);
+			let project: TProjectFormat = armpack_decode(b);
 			if (project.version == null) { Data.deleteBlob(path); return; }
 			ImportArm.runSwatchesFromProject(project, path, replaceExisting);
 		});
@@ -558,7 +558,7 @@ class ImportArm {
 		b[1] = 0;
 		b[2] = 255;
 		b[3] = 255;
-		let pink = Image.fromBytes(b.buffer, 1, 1);
+		let pink = image_from_bytes(b.buffer, 1, 1);
 		Data.cachedImages.set(abs, pink);
 	}
 
@@ -595,7 +595,7 @@ class ImportArm {
 				if (!Project.packedAssetExists(Project.raw.packed_assets, pa.name)) {
 					Project.raw.packed_assets.push(pa);
 				}
-				Image.fromEncodedBytes(pa.bytes, pa.name.endsWith(".jpg") ? ".jpg" : ".png", (image: ImageRaw) => {
+				image_from_encoded_bytes(pa.bytes, pa.name.endsWith(".jpg") ? ".jpg" : ".png", (image: image_t) => {
 					Data.cachedImages.set(abs, image);
 				}, null, false);
 				break;

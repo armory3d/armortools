@@ -3,7 +3,7 @@ class MakeMeshPreview {
 
 	static opacityDiscardDecal = 0.05;
 
-	static run = (data: TMaterial, matcon: TMaterialContext): NodeShaderContextRaw => {
+	static run = (data: TMaterial, matcon: material_context_t): NodeShaderContextRaw => {
 		let context_id = "mesh";
 		let con_mesh = NodeShaderContext.create(data, {
 			name: context_id,
@@ -21,7 +21,7 @@ class MakeMeshPreview {
 		let pos = "pos";
 
 		///if arm_skin
-		let skin = Context.raw.paintObject.data.getVArray("bone") != null;
+		let skin = MeshData.getVArray(Context.raw.paintObject.data, "bone") != null;
 		if (skin) {
 			pos = "spos";
 			NodeShaderContext.add_elem(con_mesh, "bone", 'short4norm');

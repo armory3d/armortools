@@ -21,7 +21,7 @@ class ParserMaterial {
 	static vert: NodeShaderRaw;
 	static frag: NodeShaderRaw;
 	static curshader: NodeShaderRaw;
-	static matcon: TMaterialContext;
+	static matcon: material_context_t;
 	static parsed: string[];
 	static parents: TNode[];
 
@@ -106,7 +106,7 @@ class ParserMaterial {
 		ParserMaterial.parsing_basecolor = false;
 	}
 
-	static parse = (canvas: TNodeCanvas, _con: NodeShaderContextRaw, _vert: NodeShaderRaw, _frag: NodeShaderRaw, _matcon: TMaterialContext): TShaderOut => {
+	static parse = (canvas: TNodeCanvas, _con: NodeShaderContextRaw, _vert: NodeShaderRaw, _frag: NodeShaderRaw, _matcon: material_context_t): TShaderOut => {
 		Nodes.updateCanvasFormat(canvas);
 		ParserMaterial.init();
 		ParserMaterial.canvases = [canvas];
@@ -1750,7 +1750,7 @@ class ParserMaterial {
 		return ParserMaterial.node_name(node) + "_store";
 	}
 
-	static texture_store = (node: TNode, tex: TBindTexture, tex_name: string, color_space: i32): string => {
+	static texture_store = (node: TNode, tex: bind_tex_t, tex_name: string, color_space: i32): string => {
 		ParserMaterial.matcon.bind_textures.push(tex);
 		NodeShaderContext.add_elem(ParserMaterial.curshader.context, "tex", "short2norm");
 		NodeShader.add_uniform(ParserMaterial.curshader, "sampler2D " + tex_name);
@@ -1869,14 +1869,14 @@ class ParserMaterial {
 		return "";
 	}
 
-	static make_texture = (image_node: TNode, tex_name: string, matname: string = null): TBindTexture => {
+	static make_texture = (image_node: TNode, tex_name: string, matname: string = null): bind_tex_t => {
 
 		let filepath = ParserMaterial.enumData(Base.enumTexts(image_node.type)[image_node.buttons[0].default_value]);
 		if (filepath == "" || filepath.indexOf(".") == -1) {
 			return null;
 		}
 
-		let tex: TBindTexture = {
+		let tex: bind_tex_t = {
 			name: tex_name,
 			file: filepath
 		};

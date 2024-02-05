@@ -12,6 +12,6 @@ class ExportGpl {
 			o += String(color_get_rb(swatch.base)) + " " + String(color_get_gb(swatch.base)) + " " + String(color_get_bb(swatch.base)) + "\n";
 		}
 
-		Krom.fileSaveBytes(path, System.stringToBuffer(o), o.length);
+		Krom.fileSaveBytes(path, sys_string_to_buffer(o), o.length);
 	}
 }

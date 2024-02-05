@@ -3,10 +3,10 @@ class UIBox {
 
 	static show = false;
 	static draggable = true;
-	static hwnd = new Handle();
+	static hwnd = Handle.create();
 	static boxTitle = "";
 	static boxText = "";
-	static boxCommands: (ui: Zui)=>void = null;
+	static boxCommands: (ui: ZuiRaw)=>void = null;
 	static clickToHide = true;
 	static modalW = 400;
 	static modalH = 170;
@@ -17,22 +17,22 @@ class UIBox {
 	static tweenAlpha = 0.0;
 	///end
 
-	static render = (g: Graphics2Raw) => {
+	static render = (g: g2_t) => {
 		if (!UIMenu.show) {
 			let ui = Base.uiBox;
 			let inUse = ui.comboSelectedHandle_ptr != null;
-			let isEscape = Keyboard.started("escape");
+			let isEscape = keyboard_started("escape");
 			if (UIBox.draws > 2 && (ui.inputReleased || isEscape) && !inUse && !ui.isTyping) {
-				let appw = System.width;
-				let apph = System.height;
-				let mw = Math.floor(UIBox.modalW * ui.SCALE());
-				let mh = Math.floor(UIBox.modalH * ui.SCALE());
+				let appw = sys_width();
+				let apph = sys_height();
+				let mw = Math.floor(UIBox.modalW * Zui.SCALE(ui));
+				let mh = Math.floor(UIBox.modalH * Zui.SCALE(ui));
 				let left = (appw / 2 - mw / 2) + UIBox.hwnd.dragX;
 				let right = (appw / 2 + mw / 2) + UIBox.hwnd.dragX;
 				let top = (apph / 2 - mh / 2) + UIBox.hwnd.dragY;
 				let bottom = (apph / 2 + mh / 2) + UIBox.hwnd.dragY;
-				let mx = Mouse.x;
-				let my = Mouse.y;
+				let mx = mouse_x;
+				let my = mouse_y;
 				if ((UIBox.clickToHide && (mx < left || mx > right || my < top || my > bottom)) || isEscape) {
 					UIBox.hide();
 				}
@@ -45,67 +45,67 @@ class UIBox {
 			///else
 			g.color = color_from_floats(0, 0, 0, 0.5);
 			///end
-			Graphics2.fillRect(0, 0, System.width, System.height);
+			g2_fill_rect(0, 0, sys_width(), sys_height());
 		}
 
-		Graphics2.end(g);
+		g2_end(g);
 
 		let ui = Base.uiBox;
-		let appw = System.width;
-		let apph = System.height;
-		let mw = Math.floor(UIBox.modalW * ui.SCALE());
-		let mh = Math.floor(UIBox.modalH * ui.SCALE());
+		let appw = sys_width();
+		let apph = sys_height();
+		let mw = Math.floor(UIBox.modalW * Zui.SCALE(ui));
+		let mh = Math.floor(UIBox.modalH * Zui.SCALE(ui));
 		if (mw > appw) mw = appw;
 		if (mh > apph) mh = apph;
 		let left = Math.floor(appw / 2 - mw / 2);
 		let top = Math.floor(apph / 2 - mh / 2);
 
 		if (UIBox.boxCommands == null) {
-			ui.begin(g);
-			if (ui.window(UIBox.hwnd, left, top, mw, mh, UIBox.draggable)) {
+			Zui.begin(ui, g);
+			if (Zui.window(ui, UIBox.hwnd, left, top, mw, mh, UIBox.draggable)) {
 				ui._y += 10;
 				let tabVertical = Config.raw.touch_ui;
-				if (ui.tab(Zui.handle("uibox_0"), UIBox.boxTitle, tabVertical)) {
+				if (Zui.tab(Zui.handle("uibox_0"), UIBox.boxTitle, tabVertical)) {
 					let htext = Zui.handle("uibox_1");
 					htext.text = UIBox.boxText;
 					UIBox.copyable ?
-						ui.textArea(htext, Align.Left, false) :
-						ui.text(UIBox.boxText);
-					ui.endElement();
+						Zui.textArea(htext, Align.Left, false) :
+						Zui.text(UIBox.boxText);
+					Zui.endElement();
 
 					///if (krom_windows || krom_linux || krom_darwin)
-					if (UIBox.copyable) ui.row([1 / 3, 1 / 3, 1 / 3]);
-					else ui.row([2 / 3, 1 / 3]);
+					if (UIBox.copyable) Zui.row([1 / 3, 1 / 3, 1 / 3]);
+					else Zui.row([2 / 3, 1 / 3]);
 					///else
-					ui.row([2 / 3, 1 / 3]);
+					Zui.row([2 / 3, 1 / 3]);
 					///end
 
-					ui.endElement();
+					Zui.endElement();
 
 					///if (krom_windows || krom_linux || krom_darwin)
-					if (UIBox.copyable && ui.button(tr("Copy"))) {
+					if (UIBox.copyable && Zui.button(tr("Copy"))) {
 						Krom.copyToClipboard(UIBox.boxText);
 					}
 					///end
-					if (ui.button(tr("OK"))) {
+					if (Zui.button(tr("OK"))) {
 						UIBox.hide();
 					}
 				}
 				UIBox.windowBorder(ui);
 			}
-			ui.end();
+			Zui.end();
 		}
 		else {
-			ui.begin(g);
-			if (ui.window(UIBox.hwnd, left, top, mw, mh, UIBox.draggable)) {
+			Zui.begin(ui, g);
+			if (Zui.window(ui, UIBox.hwnd, left, top, mw, mh, UIBox.draggable)) {
 				ui._y += 10;
 				UIBox.boxCommands(ui);
 				UIBox.windowBorder(ui);
 			}
-			ui.end();
+			Zui.end();
 		}
 
-		Graphics2.begin(g, false);
+		g2_begin(g, false);
 
 		UIBox.draws++;
 	}
@@ -124,7 +124,7 @@ class UIBox {
 		///end
 	}
 
-	static showCustom = (commands: (ui: Zui)=>void = null, mw = 400, mh = 200, onHide: ()=>void = null, draggable = true) => {
+	static showCustom = (commands: (ui: ZuiRaw)=>void = null, mw = 400, mh = 200, onHide: ()=>void = null, draggable = true) => {
 		UIBox.init();
 		UIBox.modalW = mw;
 		UIBox.modalH = mh;
@@ -152,15 +152,15 @@ class UIBox {
 
 	///if (krom_android || krom_ios)
 	static tweenIn = () => {
-		Tween.reset();
-		Tween.to({target: UIBox, props: { tweenAlpha: 0.5 }, duration: 0.2, ease: Ease.ExpoOut});
-		UIBox.hwnd.dragY = Math.floor(System.height / 2);
-		Tween.to({target: UIBox.hwnd, props: { dragY: 0 }, duration: 0.2, ease: Ease.ExpoOut, tick: () => { Base.redrawUI(); }});
+		tween_reset();
+		tween_to({target: UIBox, props: { tweenAlpha: 0.5 }, duration: 0.2, ease: Ease.ExpoOut});
+		UIBox.hwnd.dragY = Math.floor(sys_height() / 2);
+		tween_to({target: UIBox.hwnd, props: { dragY: 0 }, duration: 0.2, ease: Ease.ExpoOut, tick: () => { Base.redrawUI(); }});
 	}
 
 	static tweenOut = () => {
-		Tween.to({target: UIBox, props: { tweenAlpha: 0.0 }, duration: 0.2, ease: Ease.ExpoIn, done: UIBox.hideInternal});
-		Tween.to({target: UIBox.hwnd, props: { dragY: System.height / 2 }, duration: 0.2, ease: Ease.ExpoIn});
+		tween_to({target: UIBox, props: { tweenAlpha: 0.0 }, duration: 0.2, ease: Ease.ExpoIn, done: UIBox.hideInternal});
+		tween_to({target: UIBox.hwnd, props: { dragY: sys_height() / 2 }, duration: 0.2, ease: Ease.ExpoIn});
 	}
 	///end
 
@@ -173,15 +173,15 @@ class UIBox {
 		UIBox.clickToHide = true;
 	}
 
-	static windowBorder = (ui: Zui) => {
+	static windowBorder = (ui: ZuiRaw) => {
 		if (ui.scissor) {
 			ui.scissor = false;
-			Graphics2.disableScissor(ui.g);
+			g2_disable_scissor(ui.g);
 		}
 		// Border
 		ui.g.color = ui.t.SEPARATOR_COL;
-		Graphics2.fillRect(0, 0, 1, ui._windowH);
-		Graphics2.fillRect(0 + ui._windowW - 1, 0, 1, ui._windowH);
-		Graphics2.fillRect(0, 0 + ui._windowH - 1, ui._windowW, 1);
+		g2_fill_rect(0, 0, 1, ui._windowH);
+		g2_fill_rect(0 + ui._windowW - 1, 0, 1, ui._windowH);
+		g2_fill_rect(0, 0 + ui._windowH - 1, ui._windowW, 1);
 	}
 }

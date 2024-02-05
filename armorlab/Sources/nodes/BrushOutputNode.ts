@@ -2,11 +2,11 @@
 class BrushOutputNode extends LogicNode {
 
 	id = 0;
-	texpaint: ImageRaw = null;
-	texpaint_nor: ImageRaw = null;
-	texpaint_pack: ImageRaw = null;
-	texpaint_nor_empty: ImageRaw = null;
-	texpaint_pack_empty: ImageRaw = null;
+	texpaint: image_t = null;
+	texpaint_nor: image_t = null;
+	texpaint_pack: image_t = null;
+	texpaint_nor_empty: image_t = null;
+	texpaint_pack_empty: image_t = null;
 
 	static inst: BrushOutputNode = null;
 
@@ -15,44 +15,44 @@ class BrushOutputNode extends LogicNode {
 
 		if (BrushOutputNode.inst == null) {
 			{
-				let t = RenderTarget.create();
+				let t = render_target_create();
 				t.name = "texpaint";
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
 				t.format = "RGBA32";
-				this.texpaint = RenderPath.createRenderTarget(t).image;
+				this.texpaint = render_path_create_render_target(t).image;
 			}
 			{
-				let t = RenderTarget.create();
+				let t = render_target_create();
 				t.name = "texpaint_nor";
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
 				t.format = "RGBA32";
-				this.texpaint_nor = RenderPath.createRenderTarget(t).image;
+				this.texpaint_nor = render_path_create_render_target(t).image;
 			}
 			{
-				let t = RenderTarget.create();
+				let t = render_target_create();
 				t.name = "texpaint_pack";
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
 				t.format = "RGBA32";
-				this.texpaint_pack = RenderPath.createRenderTarget(t).image;
+				this.texpaint_pack = render_path_create_render_target(t).image;
 			}
 			{
-				let t = RenderTarget.create();
+				let t = render_target_create();
 				t.name = "texpaint_nor_empty";
 				t.width = 1;
 				t.height = 1;
 				t.format = "RGBA32";
-				this.texpaint_nor_empty = RenderPath.createRenderTarget(t).image;
+				this.texpaint_nor_empty = render_path_create_render_target(t).image;
 			}
 			{
-				let t = RenderTarget.create();
+				let t = render_target_create();
 				t.name = "texpaint_pack_empty";
 				t.width = 1;
 				t.height = 1;
 				t.format = "RGBA32";
-				this.texpaint_pack_empty = RenderPath.createRenderTarget(t).image;
+				this.texpaint_pack_empty = render_path_create_render_target(t).image;
 			}
 		}
 		else {
@@ -64,7 +64,7 @@ class BrushOutputNode extends LogicNode {
 		BrushOutputNode.inst = this;
 	}
 
-	override getAsImage = (from: i32, done: (img: ImageRaw)=>void) => {
+	override getAsImage = (from: i32, done: (img: image_t)=>void) => {
 		this.inputs[from].getAsImage(done);
 	}
 }

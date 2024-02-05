@@ -23,16 +23,16 @@ class TContext {
 	colorPickerCallback?: (sc: TSwatchColor)=>void = null;
 
 	defaultIrradiance?: Float32Array = null;
-	defaultRadiance?: ImageRaw = null;
-	defaultRadianceMipmaps?: ImageRaw[] = null;
-	savedEnvmap?: ImageRaw = null;
-	emptyEnvmap?: ImageRaw = null;
-	previewEnvmap?: ImageRaw = null;
+	defaultRadiance?: image_t = null;
+	defaultRadianceMipmaps?: image_t[] = null;
+	savedEnvmap?: image_t = null;
+	emptyEnvmap?: image_t = null;
+	previewEnvmap?: image_t = null;
 	envmapLoaded? = false;
 	showEnvmap? = false;
-	showEnvmapHandle? = new Handle({ selected: false });
+	showEnvmapHandle? = Handle.create({ selected: false });
 	showEnvmapBlur? = false;
-	showEnvmapBlurHandle? = new Handle({ selected: false });
+	showEnvmapBlurHandle? = Handle.create({ selected: false });
 	envmapAngle? = 0.0;
 	lightAngle? = 0.0;
 	cullBackfaces? = true;
@@ -66,7 +66,7 @@ class TContext {
 	exportMeshIndex? = 0;
 	packAssetsOnExport? = true;
 
-	paintVec? = Vec4.create();
+	paintVec? = vec4_create();
 	lastPaintX? = -1.0;
 	lastPaintY? = -1.0;
 	foregroundEvent? = false;
@@ -95,14 +95,14 @@ class TContext {
 	brushCanLock? = false;
 	brushCanUnlock? = false;
 	cameraType? = CameraType.CameraPerspective;
-	camHandle? = new Handle();
-	fovHandle?: Handle = null;
-	undoHandle?: Handle = null;
-	hssao?: Handle = null;
-	hssr?: Handle = null;
-	hbloom?: Handle = null;
-	hsupersample?: Handle = null;
-	hvxao?: Handle = null;
+	camHandle? = Handle.create();
+	fovHandle?: HandleRaw = null;
+	undoHandle?: HandleRaw = null;
+	hssao?: HandleRaw = null;
+	hssr?: HandleRaw = null;
+	hbloom?: HandleRaw = null;
+	hsupersample?: HandleRaw = null;
+	hvxao?: HandleRaw = null;
 	///if is_forge
 	vxaoExt? = 2.0;
 	///else
@@ -125,23 +125,23 @@ class TContext {
 	layerPreviewDirty? = true;
 	layersPreviewDirty? = false;
 	nodePreviewDirty? = false;
-	nodePreview?: ImageRaw = null;
-	nodePreviews?: Map<string, ImageRaw> = null;
+	nodePreview?: image_t = null;
+	nodePreviews?: Map<string, image_t> = null;
 	nodePreviewsUsed?: string[] = null;
 	nodePreviewName? = "";
-	maskPreviewRgba32?: ImageRaw = null;
+	maskPreviewRgba32?: image_t = null;
 	maskPreviewLast?: SlotLayerRaw = null;
 
 	colorIdPicked? = false;
 	materialPreview? = false; // Drawing material previews
-	savedCamera? = Mat4.identity();
+	savedCamera? = mat4_identity();
 
 	colorPickerPreviousTool? = WorkspaceTool.ToolBrush;
 	materialIdPicked? = 0;
 	uvxPicked? = 0.0;
 	uvyPicked? = 0.0;
 	pickerSelectMaterial? = true;
-	pickerMaskHandle? = new Handle();
+	pickerMaskHandle? = Handle.create();
 	pickPosNorTex? = false;
 	posXPicked? = 0.0;
 	posYPicked? = 0.0;
@@ -151,14 +151,14 @@ class TContext {
 	norZPicked? = 0.0;
 
 	drawWireframe? = false;
-	wireframeHandle? = new Handle({ selected: false });
+	wireframeHandle? = Handle.create({ selected: false });
 	drawTexels? = false;
-	texelsHandle? = new Handle({ selected: false });
+	texelsHandle? = Handle.create({ selected: false });
 
-	colorIdHandle? = new Handle();
+	colorIdHandle? = Handle.create();
 	layersExport? = ExportMode.ExportVisible;
 
-	decalImage?: ImageRaw = null;
+	decalImage?: image_t = null;
 	decalPreview? = false;
 	decalX? = 0.0;
 	decalY? = 0.0;
@@ -166,9 +166,9 @@ class TContext {
 	cacheDraws? = false;
 	writeIconOnExport? = false;
 
-	textToolImage?: ImageRaw = null;
+	textToolImage?: image_t = null;
 	textToolText?: string;
-	particleMaterial?: TMaterialData = null;
+	particleMaterial?: material_data_t = null;
 	///if arm_physics
 	particlePhysics? = false;
 	particleHitX? = 0.0;
@@ -177,7 +177,7 @@ class TContext {
 	lastParticleHitX? = 0.0;
 	lastParticleHitY? = 0.0;
 	lastParticleHitZ? = 0.0;
-	particleTimer?: TAnim = null;
+	particleTimer?: tween_anim_t = null;
 	paintBody?: PhysicsBodyRaw = null;
 	///end
 
@@ -211,9 +211,9 @@ class TContext {
 
 	brushNodesRadius? = 1.0;
 	brushNodesOpacity? = 1.0;
-	brushMaskImage?: ImageRaw = null;
+	brushMaskImage?: image_t = null;
 	brushMaskImageIsAlpha? = false;
-	brushStencilImage?: ImageRaw = null;
+	brushStencilImage?: image_t = null;
 	brushStencilImageIsAlpha? = false;
 	brushStencilX? = 0.02;
 	brushStencilY? = 0.02;
@@ -227,17 +227,17 @@ class TContext {
 	brushDirectional? = false;
 
 	brushRadius? = 0.5;
-	brushRadiusHandle? = new Handle({ value: 0.5 });
+	brushRadiusHandle? = Handle.create({ value: 0.5 });
 	brushScaleX? = 1.0;
 	brushDecalMaskRadius? = 0.5;
-	brushDecalMaskRadiusHandle? = new Handle({ value: 0.5 });
-	brushScaleXHandle? = new Handle({ value: 1.0 });
+	brushDecalMaskRadiusHandle? = Handle.create({ value: 0.5 });
+	brushScaleXHandle? = Handle.create({ value: 1.0 });
 	brushBlending? = BlendType.BlendMix;
 	brushOpacity? = 1.0;
-	brushOpacityHandle? = new Handle({ value: 1.0 });
+	brushOpacityHandle? = Handle.create({ value: 1.0 });
 	brushScale? = 1.0;
 	brushAngle? = 0.0;
-	brushAngleHandle? = new Handle({ value: 0.0 });
+	brushAngleHandle? = Handle.create({ value: 0.0 });
 	///if is_paint
 	brushHardness? = 0.8;
 	///end
@@ -267,7 +267,7 @@ class TContext {
 	symX? = false;
 	symY? = false;
 	symZ? = false;
-	fillTypeHandle? = new Handle();
+	fillTypeHandle? = Handle.create();
 
 	paint2d? = false;
 
@@ -284,10 +284,10 @@ class TContext {
 	colorPickerPreviousTool? = WorkspaceTool.ToolEraser;
 
 	brushRadius? = 0.25;
-	brushRadiusHandle? = new Handle({ value: 0.25 });
+	brushRadiusHandle? = Handle.create({ value: 0.25 });
 	brushScale? = 1.0;
 
-	coords? = Vec4.create();
+	coords? = vec4_create();
 	startX? = 0.0;
 	startY? = 0.0;
 

@@ -3,20 +3,20 @@
 
 class UtilUV {
 
-	static uvmap: ImageRaw = null;
+	static uvmap: image_t = null;
 	static uvmapCached = false;
-	static trianglemap: ImageRaw = null;
+	static trianglemap: image_t = null;
 	static trianglemapCached = false;
-	static dilatemap: ImageRaw = null;
+	static dilatemap: image_t = null;
 	static dilatemapCached = false;
-	static uvislandmap: ImageRaw = null;
+	static uvislandmap: image_t = null;
 	static uvislandmapCached = false;
 	static dilateBytes: ArrayBuffer = null;
-	static pipeDilate: PipelineStateRaw = null;
+	static pipeDilate: pipeline_t = null;
 
 	static cacheUVMap = () => {
 		if (UtilUV.uvmap != null && (UtilUV.uvmap.width != Config.getTextureResX() || UtilUV.uvmap.height != Config.getTextureResY())) {
-			Image.unload(UtilUV.uvmap);
+			image_unload(UtilUV.uvmap);
 			UtilUV.uvmap = null;
 			UtilUV.uvmapCached = false;
 		}
@@ -26,7 +26,7 @@ class UtilUV {
 		let resX = Config.getTextureResX();
 		let resY = Config.getTextureResY();
 		if (UtilUV.uvmap == null) {
-			UtilUV.uvmap = Image.createRenderTarget(resX, resY);
+			UtilUV.uvmap = image_create_render_target(resX, resY);
 		}
 
 		UtilUV.uvmapCached = true;
@@ -36,7 +36,7 @@ class UtilUV {
 
 		let texa = mesh.vertex_arrays[2].values;
 		let inda = mesh.index_arrays[0].values;
-		Graphics2.begin(UtilUV.uvmap.g2, true, 0x00000000);
+		g2_begin(UtilUV.uvmap.g2, true, 0x00000000);
 		UtilUV.uvmap.g2.color = 0xffcccccc;
 		let strength = resX > 2048 ? 2.0 : 1.0;
 		let f = (1 / 32767) * UtilUV.uvmap.width;
@@ -47,16 +47,16 @@ class UtilUV {
 			let y1 = (texa[inda[i * 3    ] * 2 + 1]) * f;
 			let y2 = (texa[inda[i * 3 + 1] * 2 + 1]) * f;
 			let y3 = (texa[inda[i * 3 + 2] * 2 + 1]) * f;
-			Graphics2.drawLine(x1, y1, x2, y2, strength);
-			Graphics2.drawLine(x2, y2, x3, y3, strength);
-			Graphics2.drawLine(x3, y3, x1, y1, strength);
+			g2_draw_line(x1, y1, x2, y2, strength);
+			g2_draw_line(x2, y2, x3, y3, strength);
+			g2_draw_line(x3, y3, x1, y1, strength);
 		}
-		Graphics2.end(UtilUV.uvmap.g2);
+		g2_end(UtilUV.uvmap.g2);
 	}
 
 	static cacheTriangleMap = () => {
 		if (UtilUV.trianglemap != null && (UtilUV.trianglemap.width != Config.getTextureResX() || UtilUV.trianglemap.height != Config.getTextureResY())) {
-			Image.unload(UtilUV.trianglemap);
+			image_unload(UtilUV.trianglemap);
 			UtilUV.trianglemap = null;
 			UtilUV.trianglemapCached = false;
 		}
@@ -64,7 +64,7 @@ class UtilUV {
 		if (UtilUV.trianglemapCached) return;
 
 		if (UtilUV.trianglemap == null) {
-			UtilUV.trianglemap = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
+			UtilUV.trianglemap = image_create_render_target(Config.getTextureResX(), Config.getTextureResY());
 		}
 
 		UtilUV.trianglemapCached = true;
@@ -72,7 +72,7 @@ class UtilUV {
 		let mesh = merged;
 		let texa = mesh.vertex_arrays[2].values;
 		let inda = mesh.index_arrays[0].values;
-		Graphics2.begin(UtilUV.trianglemap.g2, true, 0xff000000);
+		g2_begin(UtilUV.trianglemap.g2, true, 0xff000000);
 		let f = (1 / 32767) * UtilUV.trianglemap.width;
 		let color = 0xff000001;
 		for (let i = 0; i < Math.floor(inda.length / 3); ++i) {
@@ -85,14 +85,14 @@ class UtilUV {
 			let y1 = (texa[inda[i * 3    ] * 2 + 1]) * f;
 			let y2 = (texa[inda[i * 3 + 1] * 2 + 1]) * f;
 			let y3 = (texa[inda[i * 3 + 2] * 2 + 1]) * f;
-			Graphics2.fillTriangle(x1, y1, x2, y2, x3, y3);
+			g2_fill_triangle(x1, y1, x2, y2, x3, y3);
 		}
-		Graphics2.end(UtilUV.trianglemap.g2);
+		g2_end(UtilUV.trianglemap.g2);
 	}
 
 	static cacheDilateMap = () => {
 		if (UtilUV.dilatemap != null && (UtilUV.dilatemap.width != Config.getTextureResX() || UtilUV.dilatemap.height != Config.getTextureResY())) {
-			Image.unload(UtilUV.dilatemap);
+			image_unload(UtilUV.dilatemap);
 			UtilUV.dilatemap = null;
 			UtilUV.dilatemapCached = false;
 		}
@@ -100,44 +100,44 @@ class UtilUV {
 		if (UtilUV.dilatemapCached) return;
 
 		if (UtilUV.dilatemap == null) {
-			UtilUV.dilatemap = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8);
+			UtilUV.dilatemap = image_create_render_target(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8);
 		}
 
 		if (UtilUV.pipeDilate == null) {
-			UtilUV.pipeDilate = PipelineState.create();
-			UtilUV.pipeDilate.vertexShader = System.getShader("dilate_map.vert");
-			UtilUV.pipeDilate.fragmentShader = System.getShader("dilate_map.frag");
-			let vs = VertexStructure.create();
+			UtilUV.pipeDilate = pipeline_create();
+			UtilUV.pipeDilate.vertexShader = sys_get_shader("dilate_map.vert");
+			UtilUV.pipeDilate.fragmentShader = sys_get_shader("dilate_map.frag");
+			let vs = vertex_struct_create();
 			///if (krom_metal || krom_vulkan)
-			VertexStructure.add(vs, "tex", VertexData.I16_2X_Normalized);
+			vertex_struct_add(vs, "tex", VertexData.I16_2X_Normalized);
 			///else
-			VertexStructure.add(vs, "pos", VertexData.I16_4X_Normalized);
-			VertexStructure.add(vs, "nor", VertexData.I16_2X_Normalized);
-			VertexStructure.add(vs, "tex", VertexData.I16_2X_Normalized);
+			vertex_struct_add(vs, "pos", VertexData.I16_4X_Normalized);
+			vertex_struct_add(vs, "nor", VertexData.I16_2X_Normalized);
+			vertex_struct_add(vs, "tex", VertexData.I16_2X_Normalized);
 			///end
 			UtilUV.pipeDilate.inputLayout = [vs];
 			UtilUV.pipeDilate.depthWrite = false;
 			UtilUV.pipeDilate.depthMode = CompareMode.Always;
 			UtilUV.pipeDilate.colorAttachments[0] = TextureFormat.R8;
-			PipelineState.compile(UtilUV.pipeDilate);
-			// dilateTexUnpack = PipelineState.getConstantLocation(UtilUV.pipeDilate, "texUnpack");
+			pipeline_compile(UtilUV.pipeDilate);
+			// dilateTexUnpack = getConstantLocation(UtilUV.pipeDilate, "texUnpack");
 		}
 
 		let mask = Context.objectMaskUsed() ? SlotLayer.getObjectMask(Context.raw.layer) : 0;
 		if (Context.layerFilterUsed()) mask = Context.raw.layerFilter;
 		let geom = mask == 0 && Context.raw.mergedObject != null ? Context.raw.mergedObject.data : Context.raw.paintObject.data;
 		let g4 = UtilUV.dilatemap.g4;
-		Graphics4.begin(g4);
-		Graphics4.clear(0x00000000);
-		Graphics4.setPipeline(UtilUV.pipeDilate);
+		g4_begin(g4);
+		g4_clear(0x00000000);
+		g4_set_pipeline(UtilUV.pipeDilate);
 		///if (krom_metal || krom_vulkan)
-		Graphics4.setVertexBuffer(MeshData.get(geom, [{name: "tex", data: "short2norm"}]));
+		g4_set_vertex_buffer(MeshData.get(geom, [{name: "tex", data: "short2norm"}]));
 		///else
-		Graphics4.setVertexBuffer(geom._vertexBuffer);
+		g4_set_vertex_buffer(geom._vertex_buffer);
 		///end
-		Graphics4.setIndexBuffer(geom._indexBuffers[0]);
-		Graphics4.drawIndexedVertices();
-		Graphics4.end();
+		g4_set_index_buffer(geom._index_buffers[0]);
+		g4_draw();
+		g4_end();
 		UtilUV.dilatemapCached = true;
 		UtilUV.dilateBytes = null;
 	}
@@ -145,7 +145,7 @@ class UtilUV {
 	static cacheUVIslandMap = () => {
 		UtilUV.cacheDilateMap();
 		if (UtilUV.dilateBytes == null) {
-			UtilUV.dilateBytes = Image.getPixels(UtilUV.dilatemap);
+			UtilUV.dilateBytes = image_get_pixels(UtilUV.dilatemap);
 		}
 		UtilRender.pickPosNorTex();
 		let w = 2048; // Config.getTextureResX()
@@ -174,9 +174,9 @@ class UtilUV {
 		}
 
 		if (UtilUV.uvislandmap != null) {
-			Image.unload(UtilUV.uvislandmap);
+			image_unload(UtilUV.uvislandmap);
 		}
-		UtilUV.uvislandmap = Image.fromBytes(bytes, w, h, TextureFormat.R8);
+		UtilUV.uvislandmap = image_from_bytes(bytes, w, h, TextureFormat.R8);
 		UtilUV.uvislandmapCached = true;
 	}
 }

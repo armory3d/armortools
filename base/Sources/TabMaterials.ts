@@ -3,92 +3,92 @@
 
 class TabMaterials {
 
-	static draw = (htab: Handle) => {
+	static draw = (htab: HandleRaw) => {
 		let mini = Config.raw.layout[LayoutSize.LayoutSidebarW] <= UIBase.sidebarMiniW;
 		mini ? TabMaterials.drawMini(htab) : TabMaterials.drawFull(htab);
 	}
 
-	static drawMini = (htab: Handle) => {
+	static drawMini = (htab: HandleRaw) => {
 		let ui = UIBase.ui;
-		ui.setHoveredTabName(tr("Materials"));
+		Zui.setHoveredTabName(tr("Materials"));
 
-		ui.beginSticky();
-		ui.separator(5);
+		Zui.beginSticky();
+		Zui.separator(5);
 
 		TabMaterials.buttonNodes();
 		TabMaterials.buttonNew("+");
 
-		ui.endSticky();
-		ui.separator(3, false);
+		Zui.endSticky();
+		Zui.separator(3, false);
 		TabMaterials.drawSlots(true);
 	}
 
-	static drawFull = (htab: Handle) => {
+	static drawFull = (htab: HandleRaw) => {
 		let ui = UIBase.ui;
-		if (ui.tab(htab, tr("Materials"))) {
-			ui.beginSticky();
-			ui.row([1 / 4, 1 / 4, 1 / 4]);
+		if (Zui.tab(htab, tr("Materials"))) {
+			Zui.beginSticky();
+			Zui.row([1 / 4, 1 / 4, 1 / 4]);
 
 			TabMaterials.buttonNew(tr("New"));
-			if (ui.button(tr("Import"))) {
+			if (Zui.button(tr("Import"))) {
 				Project.importMaterial();
 			}
 			TabMaterials.buttonNodes();
 
-			ui.endSticky();
-			ui.separator(3, false);
+			Zui.endSticky();
+			Zui.separator(3, false);
 			TabMaterials.drawSlots(false);
 		}
 	}
 
 	static buttonNodes = () => {
 		let ui = UIBase.ui;
-		if (ui.button(tr("Nodes"))) {
+		if (Zui.button(tr("Nodes"))) {
 			UIBase.showMaterialNodes();
 		}
-		else if (ui.isHovered) ui.tooltip(tr("Show Node Editor") + ` (${Config.keymap.toggle_node_editor})`);
+		else if (ui.isHovered) Zui.tooltip(tr("Show Node Editor") + ` (${Config.keymap.toggle_node_editor})`);
 	}
 
 	static drawSlots = (mini: bool) => {
 		let ui = UIBase.ui;
-		let slotw = Math.floor(51 * ui.SCALE());
+		let slotw = Math.floor(51 * Zui.SCALE(ui));
 		let num = Math.floor(Config.raw.layout[LayoutSize.LayoutSidebarW] / slotw);
 
 		for (let row = 0; row < Math.floor(Math.ceil(Project.materials.length / num)); ++row) {
 			let mult = Config.raw.show_asset_names ? 2 : 1;
 			let ar = [];
 			for (let i = 0; i < num * mult; ++i) ar.push(1 / num);
-			ui.row(ar);
+			Zui.row(ar);
 
 			ui._x += 2;
-			let off = Config.raw.show_asset_names ? ui.ELEMENT_OFFSET() * 10.0 : 6;
+			let off = Config.raw.show_asset_names ? Zui.ELEMENT_OFFSET(ui) * 10.0 : 6;
 			if (row > 0) ui._y += off;
 
 			for (let j = 0; j < num; ++j) {
-				let imgw = Math.floor(50 * ui.SCALE());
+				let imgw = Math.floor(50 * Zui.SCALE(ui));
 				let i = j + row * num;
 				if (i >= Project.materials.length) {
-					ui.endElement(imgw);
-					if (Config.raw.show_asset_names) ui.endElement(0);
+					Zui.endElement(imgw);
+					if (Config.raw.show_asset_names) Zui.endElement(0);
 					continue;
 				}
-				let img = ui.SCALE() > 1 ? Project.materials[i].image : Project.materials[i].imageIcon;
+				let img = Zui.SCALE(ui) > 1 ? Project.materials[i].image : Project.materials[i].imageIcon;
 				let imgFull = Project.materials[i].image;
 
 				// Highligh selected
 				if (Context.raw.material == Project.materials[i]) {
 					if (mini) {
-						let w = ui._w / ui.SCALE();
-						ui.rect(0, -2, w - 2, w - 4, ui.t.HIGHLIGHT_COL, 3);
+						let w = ui._w / Zui.SCALE(ui);
+						Zui.rect(0, -2, w - 2, w - 4, ui.t.HIGHLIGHT_COL, 3);
 					}
 					else {
 						let off = row % 2 == 1 ? 1 : 0;
 						let w = 50;
 						if (Config.raw.window_scale > 1) w += Math.floor(Config.raw.window_scale * 2);
-						ui.fill(-1,         -2, w + 3,       2, ui.t.HIGHLIGHT_COL);
-						ui.fill(-1,    w - off, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
-						ui.fill(-1,         -2,     2,   w + 3, ui.t.HIGHLIGHT_COL);
-						ui.fill(w + 1,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
+						Zui.fill(-1,         -2, w + 3,       2, ui.t.HIGHLIGHT_COL);
+						Zui.fill(-1,    w - off, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
+						Zui.fill(-1,         -2,     2,   w + 3, ui.t.HIGHLIGHT_COL);
+						Zui.fill(w + 1,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
 					}
 				}
 
@@ -99,23 +99,23 @@ class TabMaterials {
 				// Draw material icon
 				let uix = ui._x;
 				let uiy = ui._y;
-				let tile = ui.SCALE() > 1 ? 100 : 50;
-				let imgh: Null<f32> = mini ? UIBase.defaultSidebarMiniW * 0.85 * ui.SCALE() : null;
+				let tile = Zui.SCALE(ui) > 1 ? 100 : 50;
+				let imgh: Null<f32> = mini ? UIBase.defaultSidebarMiniW * 0.85 * Zui.SCALE(ui) : null;
 				let state = Project.materials[i].previewReady ?
-					ui.image(img, 0xffffffff, imgh) :
-					ui.image(Res.get("icons.k"), 0xffffffff, null, tile, tile, tile, tile);
+					Zui.image(img, 0xffffffff, imgh) :
+					Zui.image(Res.get("icons.k"), 0xffffffff, null, tile, tile, tile, tile);
 
 				// Draw material numbers when selecting a material via keyboard shortcut
 				let isTyping = ui.isTyping || UIView2D.ui.isTyping || UINodes.ui.isTyping;
 				if (!isTyping) {
 					if (i < 9 && Operator.shortcut(Config.keymap.select_material, ShortcutType.ShortcutDown)) {
 						let number = String(i + 1);
-						let width = Font.width(ui.font, ui.fontSize, number) + 10;
-						let height = Font.height(ui.font, ui.fontSize);
+						let width = font_width(ui.font, ui.fontSize, number) + 10;
+						let height = font_height(ui.font, ui.fontSize);
 						ui.g.color = ui.t.TEXT_COL;
-						Graphics2.fillRect(uix, uiy, width, height);
+						g2_fill_rect(uix, uiy, width, height);
 						ui.g.color = ui.t.ACCENT_COL;
-						Graphics2.drawString(number, uix + 5, uiy);
+						g2_draw_string(number, uix + 5, uiy);
 					}
 				}
 
@@ -132,16 +132,16 @@ class TabMaterials {
 						}
 						///end
 					}
-					Base.dragOffX = -(Mouse.x - uix - ui._windowX - 3);
-					Base.dragOffY = -(Mouse.y - uiy - ui._windowY + 1);
+					Base.dragOffX = -(mouse_x - uix - ui._windowX - 3);
+					Base.dragOffY = -(mouse_y - uiy - ui._windowY + 1);
 					Base.dragMaterial = Context.raw.material;
 					// Double click to show nodes
-					if (Time.time() - Context.raw.selectTime < 0.25) {
+					if (time_time() - Context.raw.selectTime < 0.25) {
 						UIBase.showMaterialNodes();
 						Base.dragMaterial = null;
 						Base.isDragging = false;
 					}
-					Context.raw.selectTime = Time.time();
+					Context.raw.selectTime = time_time();
 				}
 
 				// Context menu
@@ -149,7 +149,7 @@ class TabMaterials {
 					Context.selectMaterial(i);
 					let add = Project.materials.length > 1 ? 1 : 0;
 
-					UIMenu.draw((ui: Zui) => {
+					UIMenu.draw((ui: ZuiRaw) => {
 						let m = Project.materials[i];
 
 						if (UIMenu.menuButton(ui, tr("To Fill Layer"))) {
@@ -185,33 +185,33 @@ class TabMaterials {
 							TabMaterials.deleteMaterial(m);
 						}
 
-						let baseHandle = Zui.handle("tabmaterials_0").nest(m.id, {selected: m.paintBase});
-						let opacHandle = Zui.handle("tabmaterials_1").nest(m.id, {selected: m.paintOpac});
-						let norHandle = Zui.handle("tabmaterials_2").nest(m.id, {selected: m.paintNor});
-						let occHandle = Zui.handle("tabmaterials_3").nest(m.id, {selected: m.paintOcc});
-						let roughHandle = Zui.handle("tabmaterials_4").nest(m.id, {selected: m.paintRough});
-						let metHandle = Zui.handle("tabmaterials_5").nest(m.id, {selected: m.paintMet});
-						let heightHandle = Zui.handle("tabmaterials_6").nest(m.id, {selected: m.paintHeight});
-						let emisHandle = Zui.handle("tabmaterials_7").nest(m.id, {selected: m.paintEmis});
-						let subsHandle = Zui.handle("tabmaterials_8").nest(m.id, {selected: m.paintSubs});
+						let baseHandle = Zui.nest(Zui.handle("tabmaterials_0"), m.id, {selected: m.paintBase});
+						let opacHandle = Zui.nest(Zui.handle("tabmaterials_1"), m.id, {selected: m.paintOpac});
+						let norHandle = Zui.nest(Zui.handle("tabmaterials_2"), m.id, {selected: m.paintNor});
+						let occHandle = Zui.nest(Zui.handle("tabmaterials_3"), m.id, {selected: m.paintOcc});
+						let roughHandle = Zui.nest(Zui.handle("tabmaterials_4"), m.id, {selected: m.paintRough});
+						let metHandle = Zui.nest(Zui.handle("tabmaterials_5"), m.id, {selected: m.paintMet});
+						let heightHandle = Zui.nest(Zui.handle("tabmaterials_6"), m.id, {selected: m.paintHeight});
+						let emisHandle = Zui.nest(Zui.handle("tabmaterials_7"), m.id, {selected: m.paintEmis});
+						let subsHandle = Zui.nest(Zui.handle("tabmaterials_8"), m.id, {selected: m.paintSubs});
 						UIMenu.menuFill(ui);
-						m.paintBase = ui.check(baseHandle, tr("Base Color"));
+						m.paintBase = Zui.check(baseHandle, tr("Base Color"));
 						UIMenu.menuFill(ui);
-						m.paintOpac = ui.check(opacHandle, tr("Opacity"));
+						m.paintOpac = Zui.check(opacHandle, tr("Opacity"));
 						UIMenu.menuFill(ui);
-						m.paintNor = ui.check(norHandle, tr("Normal"));
+						m.paintNor = Zui.check(norHandle, tr("Normal"));
 						UIMenu.menuFill(ui);
-						m.paintOcc = ui.check(occHandle, tr("Occlusion"));
+						m.paintOcc = Zui.check(occHandle, tr("Occlusion"));
 						UIMenu.menuFill(ui);
-						m.paintRough = ui.check(roughHandle, tr("Roughness"));
+						m.paintRough = Zui.check(roughHandle, tr("Roughness"));
 						UIMenu.menuFill(ui);
-						m.paintMet = ui.check(metHandle, tr("Metallic"));
+						m.paintMet = Zui.check(metHandle, tr("Metallic"));
 						UIMenu.menuFill(ui);
-						m.paintHeight = ui.check(heightHandle, tr("Height"));
+						m.paintHeight = Zui.check(heightHandle, tr("Height"));
 						UIMenu.menuFill(ui);
-						m.paintEmis = ui.check(emisHandle, tr("Emission"));
+						m.paintEmis = Zui.check(emisHandle, tr("Emission"));
 						UIMenu.menuFill(ui);
-						m.paintSubs = ui.check(subsHandle, tr("Subsurface"));
+						m.paintSubs = Zui.check(subsHandle, tr("Subsurface"));
 						if (baseHandle.changed ||
 							opacHandle.changed ||
 							norHandle.changed ||
@@ -227,22 +227,22 @@ class TabMaterials {
 					}, 13 + add);
 				}
 				if (ui.isHovered) {
-					ui.tooltipImage(imgFull);
-					if (i < 9) ui.tooltip(Project.materials[i].canvas.name + " - (" + Config.keymap.select_material + " " + (i + 1) + ")");
-					else ui.tooltip(Project.materials[i].canvas.name);
+					Zui.tooltipImage(imgFull);
+					if (i < 9) Zui.tooltip(Project.materials[i].canvas.name + " - (" + Config.keymap.select_material + " " + (i + 1) + ")");
+					else Zui.tooltip(Project.materials[i].canvas.name);
 				}
 
 				if (Config.raw.show_asset_names) {
 					ui._x = uix;
 					ui._y += slotw * 0.9;
-					ui.text(Project.materials[i].canvas.name, Align.Center);
+					Zui.text(Project.materials[i].canvas.name, Align.Center);
 					if (ui.isHovered) {
-						if (i < 9) ui.tooltip(Project.materials[i].canvas.name + " - (" + Config.keymap.select_material + " " + (i + 1) + ")");
-						else ui.tooltip(Project.materials[i].canvas.name);
+						if (i < 9) Zui.tooltip(Project.materials[i].canvas.name + " - (" + Config.keymap.select_material + " " + (i + 1) + ")");
+						else Zui.tooltip(Project.materials[i].canvas.name);
 					}
 					ui._y -= slotw * 0.9;
 					if (i == Project.materials.length - 1) {
-						ui._y += j == num - 1 ? imgw : imgw + ui.ELEMENT_H() + ui.ELEMENT_OFFSET();
+						ui._y += j == num - 1 ? imgw : imgw + Zui.ELEMENT_H(ui) + Zui.ELEMENT_OFFSET(ui);
 					}
 				}
 			}
@@ -264,12 +264,12 @@ class TabMaterials {
 
 	static buttonNew = (text: string) => {
 		let ui = UIBase.ui;
-		if (ui.button(text)) {
-			Graphics2.end(ui.g);
+		if (Zui.button(text)) {
+			g2_end(ui.g);
 			Context.raw.material = SlotMaterial.create(Project.materials[0].data);
 			Project.materials.push(Context.raw.material);
 			TabMaterials.updateMaterial();
-			Graphics2.begin(ui.g, false);
+			g2_begin(ui.g, false);
 			History.newMaterial();
 		}
 	}
@@ -329,7 +329,6 @@ class TabMaterials {
 		Project.materials.splice(i, 1);
 		UIBase.hwnds[1].redraws = 2;
 		for (let m of Project.materials) TabMaterials.updateMaterialPointers(m.canvas.nodes, i);
-		// for (let n of m.canvas.nodes) UINodes.onNodeRemove(n);
 	}
 }
 

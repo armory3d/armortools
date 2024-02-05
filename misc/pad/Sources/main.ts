@@ -14,10 +14,10 @@ type TStorage = {
 
 class Main {
 
-	static ui: Zui;
-	static text_handle = new Handle();
-	static sidebar_handle = new Handle();
-	static editor_handle = new Handle();
+	static ui: ZuiRaw;
+	static text_handle = Handle.create();
+	static sidebar_handle = Handle.create();
+	static editor_handle = Handle.create();
 	static storage: TStorage = null;
 	static resizing_sidebar = false;
 	static minimap_w = 150;
@@ -47,10 +47,10 @@ class Main {
 				sidebar_w: 230,
 			};
 		}
-		else Main.storage = JSON.parse(System.bufferToString(blob_storage));
+		else Main.storage = JSON.parse(sys_buffer_to_string(blob_storage));
 
 		Main.text_handle.text = Main.storage.text;
-		let ops: SystemOptions = {
+		let ops: kinc_sys_ops_t = {
 			title: "ArmorPad",
 			x: Main.storage.window_x,
 			y: Main.storage.window_y,
@@ -62,29 +62,29 @@ class Main {
 			vsync: true
 		};
 
-		System.start(ops, () => {
+		sys_start(ops, () => {
 			Data.getFont("font_mono.ttf", (font: FontRaw) => {
 				Data.getBlob("themes/dark.json", (blob_theme: ArrayBuffer) => {
 					Data.getBlob("text_coloring.json", (blob_coloring: ArrayBuffer) => {
 
-						let parsed = JSON.parse(System.bufferToString(blob_theme));
-						let theme: any = new Theme();
+						let parsed = JSON.parse(sys_buffer_to_string(blob_theme));
+						let theme: any = Theme.create();
 						for (let key of Object.getOwnPropertyNames(Theme.prototype)) {
 							if (key == "constructor") continue;
 							theme[key] = parsed[key];
 						}
 
-						font.init();
-						Main.ui = new Zui({ theme: theme, font: font, scaleFactor: 1.0, color_wheel: null, black_white_gradient: null });
+						font_init(font);
+						Main.ui = Zui.create({ theme: theme, font: font, scaleFactor: 1.0, color_wheel: null, black_white_gradient: null });
 						Zui.onBorderHover = Main.on_border_hover;
 						Zui.onTextHover = Main.on_text_hover;
 
-						let textColoring: TTextColoring = JSON.parse(System.bufferToString(blob_coloring));
+						let textColoring: TTextColoring = JSON.parse(sys_buffer_to_string(blob_coloring));
 						textColoring.default_color = Math.floor(textColoring.default_color);
 						for (let coloring of textColoring.colorings) coloring.color = Math.floor(coloring.color);
 						Zui.textAreaColoring = textColoring;
 
-						System.notifyOnFrames(Main.render);
+						sys_notify_on_frames(Main.render);
 					});
 				});
 			});
@@ -97,7 +97,7 @@ class Main {
 
 		Krom.setApplicationStateCallback(() => {}, () => {}, () => {}, () => {},
 			() => { // Shutdown
-				Krom.fileSaveBytes(Krom.savePath() + "/config.json", System.stringToBuffer(JSON.stringify(Main.storage)));
+				Krom.fileSaveBytes(Krom.savePath() + "/config.json", sys_string_to_buffer(JSON.stringify(Main.storage)));
 			}
 		);
 	}
@@ -112,18 +112,18 @@ class Main {
 
 			// Active file
 			if (abs == Main.storage.file) {
-				ui.fill(0, 1, ui._w - 1, ui.ELEMENT_H() - 1, ui.t.BUTTON_PRESSED_COL);
+				Zui.fill(0, 1, ui._w - 1, Zui.ELEMENT_H(ui) - 1, ui.t.BUTTON_PRESSED_COL);
 			}
 
 			let prefix = "";
 			if (!isFile) prefix = isExpanded ? "- " : "+ ";
 
-			if (ui.button(prefix + f, Align.Left)) {
+			if (Zui.button(prefix + f, Align.Left)) {
 				// Open file
 				if (isFile) {
 					Main.storage.file = abs;
 					let bytes = Krom.loadBlob(Main.storage.file);
-					Main.storage.text = f.endsWith(".arm") ? JSON.stringify(ArmPack.decode(bytes), null, 4) : System.bufferToString(bytes);
+					Main.storage.text = f.endsWith(".arm") ? JSON.stringify(decode(bytes), null, 4) : sys_buffer_to_string(bytes);
 					Main.storage.text = Main.storage.text.replaceAll("\r", "");
 					Main.text_handle.text = Main.storage.text;
 					Main.editor_handle.redraws = 1;
@@ -145,39 +145,39 @@ class Main {
 
 	static render = (g2: Graphics2Raw, g4: Graphics4Raw): void => {
 		let ui = Main.ui;
-		Main.storage.window_w = System.width;
-		Main.storage.window_h = System.height;
+		Main.storage.window_w = sys_width();
+		Main.storage.window_h = sys_height();
 		Main.storage.window_x = Krom.windowX();
 		Main.storage.window_y = Krom.windowY();
 		if (ui.inputDX != 0 || ui.inputDY != 0) Krom.setMouseCursor(0); // Arrow
 
-		ui.begin(g2);
+		Zui.begin(ui, g2);
 
-		if (ui.window(Main.sidebar_handle, 0, 0, Main.storage.sidebar_w, System.height, false)) {
+		if (Zui.window(ui, Main.sidebar_handle, 0, 0, Main.storage.sidebar_w, sys_height(), false)) {
 			let _BUTTON_TEXT_COL = ui.t.BUTTON_TEXT_COL;
 			ui.t.BUTTON_TEXT_COL = ui.t.ACCENT_COL;
 			if (Main.storage.project != "") {
 				Main.list_folder(Main.storage.project);
 			}
 			else {
-				ui.button("Drop folder here", Align.Left);
+				Zui.button("Drop folder here", Align.Left);
 			}
 			ui.t.BUTTON_TEXT_COL = _BUTTON_TEXT_COL;
 		}
 
-		ui.fill(System.width - Main.minimap_w, 0, Main.minimap_w, ui.ELEMENT_H() + ui.ELEMENT_OFFSET() + 1, ui.t.SEPARATOR_COL);
-		ui.fill(Main.storage.sidebar_w, 0, 1, System.height, ui.t.SEPARATOR_COL);
+		Zui.fill(sys_width() - Main.minimap_w, 0, Main.minimap_w, Zui.ELEMENT_H(ui) + Zui.ELEMENT_OFFSET(ui) + 1, ui.t.SEPARATOR_COL);
+		Zui.fill(Main.storage.sidebar_w, 0, 1, sys_height(), ui.t.SEPARATOR_COL);
 
 		let editor_updated = false;
 
-		if (ui.window(Main.editor_handle, Main.storage.sidebar_w + 1, 0, System.width - Main.storage.sidebar_w - Main.minimap_w, System.height, false)) {
+		if (Zui.window(ui, Main.editor_handle, Main.storage.sidebar_w + 1, 0, sys_width() - Main.storage.sidebar_w - Main.minimap_w, sys_height(), false)) {
 			editor_updated = true;
 			let htab = Zui.handle("main_0", { position: 0 });
 			let file_name = Main.storage.file.substring(Main.storage.file.lastIndexOf("/") + 1);
 			let file_names = [file_name];
 
 			for (let file_name of file_names) {
-				if (ui.tab(htab, file_name + (Main.storage.modified ? "*" : ""))) {
+				if (Zui.tab(htab, file_name + (Main.storage.modified ? "*" : ""))) {
 					// File modified
 					if (ui.isKeyPressed) {
 						Main.storage.modified = true;
@@ -188,7 +188,7 @@ class Main {
 						Main.save_file();
 					}
 
-					Main.storage.text = ui.textArea(Main.text_handle);
+					Main.storage.text = Zui.textArea(Main.text_handle);
 				}
 			}
 
@@ -203,7 +203,7 @@ class Main {
 		}
 
 		// Minimap controls
-		let minimap_x = System.width - Main.minimap_w;
+		let minimap_x = sys_width() - Main.minimap_w;
 		let minimap_y = Main.window_header_h + 1;
 		let redraw = false;
 		if (ui.inputStarted && Main.hit_test(ui.inputX, ui.inputY, minimap_x + 5, minimap_y, Main.minimap_w, Main.minimap_h)) {
@@ -213,8 +213,8 @@ class Main {
 			Main.minimap_scrolling = false;
 		}
 		if (Main.minimap_scrolling) {
-			// Main.editor_handle.scrollOffset -= ui.inputDY * ui.ELEMENT_H() / 2;
-			// // Main.editor_handle.scrollOffset = -((ui.inputY - minimap_y - Main.minimap_box_h / 2) * ui.ELEMENT_H() / 2);
+			// Main.editor_handle.scrollOffset -= ui.inputDY * Zui.ELEMENT_H(ui) / 2;
+			// // Main.editor_handle.scrollOffset = -((ui.inputY - minimap_y - Main.minimap_box_h / 2) * Zui.ELEMENT_H(ui) / 2);
 			redraw = true;
 		}
 
@@ -224,16 +224,16 @@ class Main {
 			Main.build_project();
 		}
 
-		ui.end();
+		Zui.end();
 
 		if (redraw) {
 			Main.editor_handle.redraws = 2;
 		}
 
 		if (Main.minimap != null) {
-			g2.begin(false);
-			g2.drawImage(Main.minimap, minimap_x, minimap_y);
-			g2.end();
+			Graphics2.begin(g2, false);
+			Graphics2.drawImage(Main.minimap, minimap_x, minimap_y);
+			Graphics2.end(g2);
 		}
 
 		if (editor_updated) {
@@ -244,13 +244,13 @@ class Main {
 	static save_file = () => {
 		// Trim
 		let lines = Main.storage.text.split("\n");
-		for (let i = 0; i < lines.length; ++i) lines[i] = trimEnd(lines[i]);
+		for (let i = 0; i < lines.length; ++i) lines[i] = trim_end(lines[i]);
 		Main.storage.text = lines.join("\n");
 		// Spaces to tabs
 		Main.storage.text = Main.storage.text.replaceAll("    ", "\t");
 		Main.text_handle.text = Main.storage.text;
 		// Write bytes
-		let bytes = Main.storage.file.endsWith(".arm") ? ArmPack.encode(JSON.parse(Main.storage.text)) : System.stringToBuffer(Main.storage.text);
+		let bytes = Main.storage.file.endsWith(".arm") ? encode(JSON.parse(Main.storage.text)) : sys_string_to_buffer(Main.storage.text);
 		Krom.fileSaveBytes(Main.storage.file, bytes, bytes.byteLength);
 		Main.storage.modified = false;
 	}
@@ -269,17 +269,17 @@ class Main {
 
 	static draw_minimap = () => {
 		let ui = Main.ui;
-		if (Main.minimap_h != System.height) {
-			Main.minimap_h = System.height;
-			if (Main.minimap != null) Main.minimap.unload();
-			Main.minimap = Image.createRenderTarget(Main.minimap_w, Main.minimap_h);
+		if (Main.minimap_h != sys_height()) {
+			Main.minimap_h = sys_height();
+			if (Main.minimap != null) image_unload(Main.minimap);
+			Main.minimap = image_create_render_target(Main.minimap_w, Main.minimap_h);
 		}
 
-		Main.minimap.g2.begin(true, ui.t.SEPARATOR_COL);
+		Graphics2.begin(Main.minimap.g2, true, ui.t.SEPARATOR_COL);
 		Main.minimap.g2.color = 0xff333333;
 		let lines = Main.storage.text.split("\n");
 		let minimap_full_h = lines.length * 2;
-		let scrollProgress = -Main.editor_handle.scrollOffset / (lines.length * ui.ELEMENT_H());
+		let scrollProgress = -Main.editor_handle.scrollOffset / (lines.length * Zui.ELEMENT_H(ui));
 		let outOfScreen = minimap_full_h - Main.minimap_h;
 		if (outOfScreen < 0) outOfScreen = 0;
 		let offset = Math.floor((outOfScreen * scrollProgress) / 2);
@@ -293,7 +293,7 @@ class Main {
 			let x = 0;
 			for (let j = 0; j < words.length; ++j) {
 				let word = words[j];
-				Main.minimap.g2.fillRect(x, i * 2, word.length, 2);
+				Graphics2.fillRect(x, i * 2, word.length, 2);
 				x += word.length + 1;
 			}
 		}
@@ -301,9 +301,9 @@ class Main {
 		// Current position
 		let visibleArea = outOfScreen > 0 ? Main.minimap_h : minimap_full_h;
 		Main.minimap.g2.color = 0x11ffffff;
-		Main.minimap_box_h = Math.floor((System.height - Main.window_header_h) / ui.ELEMENT_H() * 2);
-		Main.minimap.g2.fillRect(0, scrollProgress * visibleArea, Main.minimap_w, Main.minimap_box_h);
-		Main.minimap.g2.end();
+		Main.minimap_box_h = Math.floor((sys_height() - Main.window_header_h) / Zui.ELEMENT_H(ui) * 2);
+		Graphics2.fillRect(0, scrollProgress * visibleArea, Main.minimap_w, Main.minimap_box_h);
+		Graphics2.end(Main.minimap.g2);
 	}
 
 	static hit_test = (mx: f32, my: f32, x: f32, y: f32, w: f32, h: f32): bool => {

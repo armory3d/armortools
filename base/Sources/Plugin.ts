@@ -1,6 +1,6 @@
 
 class PluginRaw {
-	drawUI: (ui: Zui)=>void = null;
+	drawUI: (ui: ZuiRaw)=>void = null;
 	draw: ()=>void = null;
 	update: ()=>void = null;
 	delete: ()=>void = null;
@@ -25,8 +25,8 @@ class Plugin {
 		try {
 			Data.getBlob("plugins/" + plugin, (blob: ArrayBuffer) => {
 				Plugin.pluginName = plugin;
-				// (1, eval)(System.bufferToString(blob)); // Global scope
-				eval(System.bufferToString(blob)); // Local scope
+				// (1, eval)(sys_buffer_to_string(blob)); // Global scope
+				eval(sys_buffer_to_string(blob)); // Local scope
 				Data.deleteBlob("plugins/" + plugin);
 			});
 		}

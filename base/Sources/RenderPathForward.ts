@@ -12,18 +12,18 @@ class RenderPathForward {
 	}
 
 	static drawForward = () => {
-		RenderPath.setDepthFrom("gbuffer1", "gbuffer0");
-		RenderPath.setTarget("gbuffer1");
-		RenderPath.drawSkydome("shader_datas/world_pass/world_pass");
-		RenderPath.setDepthFrom("gbuffer1", "gbuffer2");
+		render_path_set_depth_from("gbuffer1", "gbuffer0");
+		render_path_set_target("gbuffer1");
+		render_path_draw_skydome("shader_datas/world_pass/world_pass");
+		render_path_set_depth_from("gbuffer1", "gbuffer2");
 
-		RenderPath.setTarget("buf");
-		RenderPath.bindTarget("gbuffer1", "tex");
-		RenderPath.drawShader("shader_datas/compositor_pass/compositor_pass");
+		render_path_set_target("buf");
+		render_path_bind_target("gbuffer1", "tex");
+		render_path_draw_shader("shader_datas/compositor_pass/compositor_pass");
 
-		RenderPath.setTarget("buf");
-		RenderPathBase.drawCompass(RenderPath.currentG);
-		RenderPath.drawMeshes("overlay");
+		render_path_set_target("buf");
+		RenderPathBase.drawCompass(_render_path_current_g);
+		render_path_draw_meshes("overlay");
 
 		RenderPathBase.drawTAA();
 	}

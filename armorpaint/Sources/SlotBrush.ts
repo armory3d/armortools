@@ -1,9 +1,9 @@
 
 class SlotBrushRaw {
-	nodes = new Nodes();
+	nodes = Nodes.create();
 	canvas: TNodeCanvas;
-	image: ImageRaw = null; // 200px
-	imageIcon: ImageRaw = null; // 50px
+	image: image_t = null; // 200px
+	imageIcon: image_t = null; // 50px
 	previewReady = false;
 	id = 0;
 }
@@ -21,7 +21,7 @@ class SlotBrush {
 					SlotBrush.defaultCanvas = b;
 				});
 			}
-			raw.canvas = ArmPack.decode(SlotBrush.defaultCanvas);
+			raw.canvas = armpack_decode(SlotBrush.defaultCanvas);
 			raw.canvas.name = "Brush " + (raw.id + 1);
 		}
 		else {

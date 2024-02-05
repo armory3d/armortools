@@ -44,7 +44,7 @@ class ImportMesh {
 						has_next = mesh.has_next;
 						ImportMesh.addMesh(mesh);
 
-						// let m = Mat4.fromFloat32Array(mesh.transform);
+						// let m = fromFloat32Array(mesh.transform);
 						// Project.paintObjects[Project.paintObjects.length - 1].transform.localOnly = true;
 						// Project.paintObjects[Project.paintObjects.length - 1].transform.setMatrix(m);
 					});
@@ -55,7 +55,7 @@ class ImportMesh {
 		Project.meshAssets = [path];
 
 		///if (krom_android || krom_ios)
-		System.title = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
+		sys_title_set(path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf(".")));
 		///end
 	}
 
@@ -106,7 +106,7 @@ class ImportMesh {
 		let raw = ImportMesh.rawMesh(mesh);
 		if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
 
-		MeshData.create(raw, (md: TMeshData) => {
+		MeshData.create(raw, (md: mesh_data_t) => {
 			Context.raw.paintObject = Context.mainObject();
 
 			Context.selectPaintObject(Context.mainObject());
@@ -185,9 +185,9 @@ class ImportMesh {
 		let raw = ImportMesh.rawMesh(mesh);
 		if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
 
-		MeshData.create(raw, (md: TMeshData) => {
+		MeshData.create(raw, (md: mesh_data_t) => {
 
-			let object = Scene.addMeshObject(md, Context.raw.paintObject.materials, Context.raw.paintObject.base);
+			let object = scene_add_mesh_object(md, Context.raw.paintObject.materials, Context.raw.paintObject.base);
 			object.base.name = mesh.name;
 			object.skip_context = "paint";
 
@@ -226,7 +226,7 @@ class ImportMesh {
 		}
 	}
 
-	static rawMesh = (mesh: any): TMeshData => {
+	static rawMesh = (mesh: any): mesh_data_t => {
 		return {
 			name: mesh.name,
 			vertex_arrays: [
