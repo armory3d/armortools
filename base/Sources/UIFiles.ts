@@ -79,7 +79,7 @@ class UIFiles {
 		///end
 	}
 
-	static fileBrowser = (ui: ZuiRaw, handle: HandleRaw, foldersOnly = false, dragFiles = false, search = "", refresh = false, contextMenu: (s: string)=>void = null): string => {
+	static fileBrowser = (ui: zui_t, handle: zui_handle_t, foldersOnly = false, dragFiles = false, search = "", refresh = false, contextMenu: (s: string)=>void = null): string => {
 
 		let icons = Res.get("icons.k");
 		let folder = Res.tile50(icons, 2, 1);
@@ -125,7 +125,7 @@ class UIFiles {
 		UIFiles.lastSearch = search;
 		handle.changed = false;
 
-		let slotw = Math.floor(70 * Zui.SCALE(ui));
+		let slotw = Math.floor(70 * zui_SCALE(ui));
 		let num = Math.floor(ui._w / slotw);
 
 		ui._y += 4; // Don't cut off the border around selected materials
@@ -133,14 +133,14 @@ class UIFiles {
 		for (let row = 0; row < Math.floor(Math.ceil(UIFiles.files.length / num)); ++row) {
 			let ar = [];
 			for (let i = 0; i < num * 2; ++i) ar.push(1 / num);
-			Zui.row(ar);
-			if (row > 0) ui._y += Zui.ELEMENT_OFFSET(ui) * 14.0;
+			zui_row(ar);
+			if (row > 0) ui._y += zui_ELEMENT_OFFSET(ui) * 14.0;
 
 			for (let j = 0; j < num; ++j) {
 				let i = j + row * num;
 				if (i >= UIFiles.files.length) {
-					Zui.endElement(slotw);
-					Zui.endElement(slotw);
+					zui_end_element(slotw);
+					zui_end_element(slotw);
 					continue;
 				}
 
@@ -151,7 +151,7 @@ class UIFiles {
 				let col = rect == file ? ui.t.LABEL_COL : ui.t.LABEL_COL - 0x00202020;
 				if (UIFiles.selected == i) col = ui.t.HIGHLIGHT_COL;
 
-				let off = ui._w / 2 - 25 * Zui.SCALE(ui);
+				let off = ui._w / 2 - 25 * zui_SCALE(ui);
 				ui._x += off;
 
 				let uix = ui._x;
@@ -171,8 +171,8 @@ class UIFiles {
 							UIFiles.iconMap.set(handle.text + Path.sep + f, empty);
 							File.cacheCloud(handle.text + Path.sep + iconFile, (abs: string) => {
 								if (abs != null) {
-									Data.getImage(abs, (image: image_t) => {
-										App.notifyOnInit(() => {
+									data_get_image(abs, (image: image_t) => {
+										app_notify_on_init(() => {
 											if (Base.pipeCopyRGB == null) Base.makePipeCopyRGB();
 											icon = image_create_render_target(image.width, image.height);
 											if (f.endsWith(".arm")) { // Used for material sphere alpha cutout
@@ -201,15 +201,15 @@ class UIFiles {
 					if (icon != null) {
 						let w = 50;
 						if (i == UIFiles.selected) {
-							Zui.fill(-2,        -2, w + 4,     2, ui.t.HIGHLIGHT_COL);
-							Zui.fill(-2,     w + 2, w + 4,     2, ui.t.HIGHLIGHT_COL);
-							Zui.fill(-2,         0,     2, w + 4, ui.t.HIGHLIGHT_COL);
-							Zui.fill(w + 2 ,    -2,     2, w + 6, ui.t.HIGHLIGHT_COL);
+							zui_fill(-2,        -2, w + 4,     2, ui.t.HIGHLIGHT_COL);
+							zui_fill(-2,     w + 2, w + 4,     2, ui.t.HIGHLIGHT_COL);
+							zui_fill(-2,         0,     2, w + 4, ui.t.HIGHLIGHT_COL);
+							zui_fill(w + 2 ,    -2,     2, w + 6, ui.t.HIGHLIGHT_COL);
 						}
-						state = Zui.image(icon, 0xffffffff, w * Zui.SCALE(ui));
-						if (ui.isHovered) {
-							Zui.tooltipImage(icon);
-							Zui.tooltip(f);
+						state = zui_image(icon, 0xffffffff, w * zui_SCALE(ui));
+						if (ui.is_hovered) {
+							zui_tooltip_image(icon);
+							zui_tooltip(f);
 						}
 						generic = false;
 					}
@@ -257,15 +257,15 @@ class UIFiles {
 					if (icon != null) {
 						let w = 50;
 						if (i == UIFiles.selected) {
-							Zui.fill(-2,        -2, w + 4,     2, ui.t.HIGHLIGHT_COL);
-							Zui.fill(-2,     w + 2, w + 4,     2, ui.t.HIGHLIGHT_COL);
-							Zui.fill(-2,         0,     2, w + 4, ui.t.HIGHLIGHT_COL);
-							Zui.fill(w + 2 ,    -2,     2, w + 6, ui.t.HIGHLIGHT_COL);
+							zui_fill(-2,        -2, w + 4,     2, ui.t.HIGHLIGHT_COL);
+							zui_fill(-2,     w + 2, w + 4,     2, ui.t.HIGHLIGHT_COL);
+							zui_fill(-2,         0,     2, w + 4, ui.t.HIGHLIGHT_COL);
+							zui_fill(w + 2 ,    -2,     2, w + 6, ui.t.HIGHLIGHT_COL);
 						}
-						state = Zui.image(icon, 0xffffffff, w * Zui.SCALE(ui));
-						if (ui.isHovered) {
-							Zui.tooltipImage(icon);
-							Zui.tooltip(f);
+						state = zui_image(icon, 0xffffffff, w * zui_SCALE(ui));
+						if (ui.is_hovered) {
+							zui_tooltip_image(icon);
+							zui_tooltip(f);
 						}
 						generic = false;
 					}
@@ -279,8 +279,8 @@ class UIFiles {
 					if (icon == null) {
 						let empty = render_path_render_targets.get("empty_black").image;
 						UIFiles.iconMap.set(shandle, empty);
-						Data.getImage(shandle, (image: image_t) => {
-							App.notifyOnInit(() => {
+						data_get_image(shandle, (image: image_t) => {
+							app_notify_on_init(() => {
 								if (Base.pipeCopyRGB == null) Base.makePipeCopyRGB();
 								let sw = image.width > image.height ? w : Math.floor(1.0 * image.width / image.height * w);
 								let sh = image.width > image.height ? Math.floor(1.0 * image.height / image.width * w) : w;
@@ -292,34 +292,34 @@ class UIFiles {
 								g2_end(icon.g2);
 								UIFiles.iconMap.set(shandle, icon);
 								UIBase.hwnds[TabArea.TabStatus].redraws = 3;
-								Data.deleteImage(shandle); // The big image is not needed anymore
+								data_delete_image(shandle); // The big image is not needed anymore
 							});
 						});
 					}
 					if (icon != null) {
 						if (i == UIFiles.selected) {
-							Zui.fill(-2,        -2, w + 4,     2, ui.t.HIGHLIGHT_COL);
-							Zui.fill(-2,     w + 2, w + 4,     2, ui.t.HIGHLIGHT_COL);
-							Zui.fill(-2,         0,     2, w + 4, ui.t.HIGHLIGHT_COL);
-							Zui.fill(w + 2 ,    -2,     2, w + 6, ui.t.HIGHLIGHT_COL);
+							zui_fill(-2,        -2, w + 4,     2, ui.t.HIGHLIGHT_COL);
+							zui_fill(-2,     w + 2, w + 4,     2, ui.t.HIGHLIGHT_COL);
+							zui_fill(-2,         0,     2, w + 4, ui.t.HIGHLIGHT_COL);
+							zui_fill(w + 2 ,    -2,     2, w + 6, ui.t.HIGHLIGHT_COL);
 						}
-						state = Zui.image(icon, 0xffffffff, icon.height * Zui.SCALE(ui));
+						state = zui_image(icon, 0xffffffff, icon.height * zui_SCALE(ui));
 						generic = false;
 					}
 				}
 
 				if (generic) {
-					state = Zui.image(icons, col, 50 * Zui.SCALE(ui), rect.x, rect.y, rect.w, rect.h);
+					state = zui_image(icons, col, 50 * zui_SCALE(ui), rect.x, rect.y, rect.w, rect.h);
 				}
 
-				if (ui.isHovered && ui.inputReleasedR && contextMenu != null) {
+				if (ui.is_hovered && ui.input_released_r && contextMenu != null) {
 					contextMenu(handle.text + Path.sep + f);
 				}
 
 				if (state == State.Started) {
 					if (f != ".." && dragFiles) {
-						Base.dragOffX = -(mouse_x - uix - ui._windowX - 3);
-						Base.dragOffY = -(mouse_y - uiy - ui._windowY + 1);
+						Base.dragOffX = -(mouse_x - uix - ui._window_x - 3);
+						Base.dragOffY = -(mouse_y - uiy - ui._window_y + 1);
 						Base.dragFile = handle.text;
 						///if krom_ios
 						if (!isCloud) Base.dragFile = documentDirectory + Base.dragFile;
@@ -358,19 +358,19 @@ class UIFiles {
 				ui._y += slotw * 0.75;
 				let label0 = (UIFiles.showExtensions || f.indexOf(".") <= 0) ? f : f.substr(0, f.lastIndexOf("."));
 				let label1 = "";
-				while (label0.length > 0 && font_width(ui.font, ui.fontSize, label0) > ui._w - 6) { // 2 line split
+				while (label0.length > 0 && font_width(ui.font, ui.font_size, label0) > ui._w - 6) { // 2 line split
 					label1 = label0.charAt(label0.length - 1) + label1;
 					label0 = label0.substr(0, label0.length - 1);
 				}
-				if (label1 != "") ui.curRatio--;
-				Zui.text(label0, Align.Center);
-				if (ui.isHovered) Zui.tooltip(label0 + label1);
+				if (label1 != "") ui.cur_ratio--;
+				zui_text(label0, Align.Center);
+				if (ui.is_hovered) zui_tooltip(label0 + label1);
 				if (label1 != "") { // Second line
 					ui._x = _x;
-					ui._y += font_height(ui.font, ui.fontSize);
-					Zui.text(label1, Align.Center);
-					if (ui.isHovered) Zui.tooltip(label0 + label1);
-					ui._y -= font_height(ui.font, ui.fontSize);
+					ui._y += font_height(ui.font, ui.font_size);
+					zui_text(label1, Align.Center);
+					if (ui.is_hovered) zui_tooltip(label0 + label1);
+					ui._y -= font_height(ui.font, ui.font_size);
 				}
 
 				ui._y -= slotw * 0.75;

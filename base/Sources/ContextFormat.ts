@@ -4,8 +4,8 @@
 // type TContext = {
 class TContext {
 	texture?: TAsset = null;
-	paintObject?: TMeshObject;
-	mergedObject?: TMeshObject = null; // For object mask
+	paintObject?: mesh_object_t;
+	mergedObject?: mesh_object_t = null; // For object mask
 	mergedObjectIsAtlas? = false; // Only objects referenced by atlas are merged
 
 	ddirty? = 0; // depth
@@ -30,9 +30,9 @@ class TContext {
 	previewEnvmap?: image_t = null;
 	envmapLoaded? = false;
 	showEnvmap? = false;
-	showEnvmapHandle? = Handle.create({ selected: false });
+	showEnvmapHandle? = zui_handle_create({ selected: false });
 	showEnvmapBlur? = false;
-	showEnvmapBlurHandle? = Handle.create({ selected: false });
+	showEnvmapBlurHandle? = zui_handle_create({ selected: false });
 	envmapAngle? = 0.0;
 	lightAngle? = 0.0;
 	cullBackfaces? = true;
@@ -80,7 +80,7 @@ class TContext {
 	showCompass? = true;
 	projectType? = ProjectModel.ModelRoundedCube;
 	projectAspectRatio? = 0; // 1:1, 2:1, 1:2
-	projectObjects?: TMeshObject[];
+	projectObjects?: mesh_object_t[];
 
 	lastPaintVecX? = -1.0;
 	lastPaintVecY? = -1.0;
@@ -95,14 +95,14 @@ class TContext {
 	brushCanLock? = false;
 	brushCanUnlock? = false;
 	cameraType? = CameraType.CameraPerspective;
-	camHandle? = Handle.create();
-	fovHandle?: HandleRaw = null;
-	undoHandle?: HandleRaw = null;
-	hssao?: HandleRaw = null;
-	hssr?: HandleRaw = null;
-	hbloom?: HandleRaw = null;
-	hsupersample?: HandleRaw = null;
-	hvxao?: HandleRaw = null;
+	camHandle? = zui_handle_create();
+	fovHandle?: zui_handle_t = null;
+	undoHandle?: zui_handle_t = null;
+	hssao?: zui_handle_t = null;
+	hssr?: zui_handle_t = null;
+	hbloom?: zui_handle_t = null;
+	hsupersample?: zui_handle_t = null;
+	hvxao?: zui_handle_t = null;
 	///if is_forge
 	vxaoExt? = 2.0;
 	///else
@@ -141,7 +141,7 @@ class TContext {
 	uvxPicked? = 0.0;
 	uvyPicked? = 0.0;
 	pickerSelectMaterial? = true;
-	pickerMaskHandle? = Handle.create();
+	pickerMaskHandle? = zui_handle_create();
 	pickPosNorTex? = false;
 	posXPicked? = 0.0;
 	posYPicked? = 0.0;
@@ -151,11 +151,11 @@ class TContext {
 	norZPicked? = 0.0;
 
 	drawWireframe? = false;
-	wireframeHandle? = Handle.create({ selected: false });
+	wireframeHandle? = zui_handle_create({ selected: false });
 	drawTexels? = false;
-	texelsHandle? = Handle.create({ selected: false });
+	texelsHandle? = zui_handle_create({ selected: false });
 
-	colorIdHandle? = Handle.create();
+	colorIdHandle? = zui_handle_create();
 	layersExport? = ExportMode.ExportVisible;
 
 	decalImage?: image_t = null;
@@ -185,16 +185,16 @@ class TContext {
 	runBrush?: (i: i32)=>void = null;
 	parseBrushInputs?: ()=>void = null;
 
-	gizmo?: TBaseObject = null;
-	gizmoTranslateX?: TBaseObject = null;
-	gizmoTranslateY?: TBaseObject = null;
-	gizmoTranslateZ?: TBaseObject = null;
-	gizmoScaleX?: TBaseObject = null;
-	gizmoScaleY?: TBaseObject = null;
-	gizmoScaleZ?: TBaseObject = null;
-	gizmoRotateX?: TBaseObject = null;
-	gizmoRotateY?: TBaseObject = null;
-	gizmoRotateZ?: TBaseObject = null;
+	gizmo?: object_t = null;
+	gizmoTranslateX?: object_t = null;
+	gizmoTranslateY?: object_t = null;
+	gizmoTranslateZ?: object_t = null;
+	gizmoScaleX?: object_t = null;
+	gizmoScaleY?: object_t = null;
+	gizmoScaleZ?: object_t = null;
+	gizmoRotateX?: object_t = null;
+	gizmoRotateY?: object_t = null;
+	gizmoRotateZ?: object_t = null;
 	gizmoStarted? = false;
 	gizmoOffset? = 0.0;
 	gizmoDrag? = 0.0;
@@ -227,17 +227,17 @@ class TContext {
 	brushDirectional? = false;
 
 	brushRadius? = 0.5;
-	brushRadiusHandle? = Handle.create({ value: 0.5 });
+	brushRadiusHandle? = zui_handle_create({ value: 0.5 });
 	brushScaleX? = 1.0;
 	brushDecalMaskRadius? = 0.5;
-	brushDecalMaskRadiusHandle? = Handle.create({ value: 0.5 });
-	brushScaleXHandle? = Handle.create({ value: 1.0 });
+	brushDecalMaskRadiusHandle? = zui_handle_create({ value: 0.5 });
+	brushScaleXHandle? = zui_handle_create({ value: 1.0 });
 	brushBlending? = BlendType.BlendMix;
 	brushOpacity? = 1.0;
-	brushOpacityHandle? = Handle.create({ value: 1.0 });
+	brushOpacityHandle? = zui_handle_create({ value: 1.0 });
 	brushScale? = 1.0;
 	brushAngle? = 0.0;
-	brushAngleHandle? = Handle.create({ value: 0.0 });
+	brushAngleHandle? = zui_handle_create({ value: 0.0 });
 	///if is_paint
 	brushHardness? = 0.8;
 	///end
@@ -267,7 +267,7 @@ class TContext {
 	symX? = false;
 	symY? = false;
 	symZ? = false;
-	fillTypeHandle? = Handle.create();
+	fillTypeHandle? = zui_handle_create();
 
 	paint2d? = false;
 
@@ -284,7 +284,7 @@ class TContext {
 	colorPickerPreviousTool? = WorkspaceTool.ToolEraser;
 
 	brushRadius? = 0.25;
-	brushRadiusHandle? = Handle.create({ value: 0.25 });
+	brushRadiusHandle? = zui_handle_create({ value: 0.25 });
 	brushScale? = 1.0;
 
 	coords? = vec4_create();
@@ -301,6 +301,6 @@ class TContext {
 	///end
 
 	///if is_forge
-	selectedObject?: TBaseObject = null;
+	selectedObject?: object_t = null;
 	///end
 }

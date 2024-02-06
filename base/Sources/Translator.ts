@@ -113,8 +113,8 @@ class Translator {
 	static initFont = (cjk: bool, fontPath: string, fontScale: f32) => {
 		_g2_font_glyphs.sort((a: i32, b: i32) => { return a - b; });
 		// Load and assign font with cjk characters
-		App.notifyOnInit(() => {
-			Data.getFont(fontPath, (f: font_t) => {
+		app_notify_on_init(() => {
+			data_get_font(fontPath, (f: font_t) => {
 				if (cjk) {
 					let acjkFontIndices = Translator.cjkFontIndices as any;
 					let fontIndex = Translator.cjkFontIndices.has(Config.raw.locale) ? acjkFontIndices[Config.raw.locale] : 0;
@@ -126,8 +126,8 @@ class Translator {
 				Base.theme.ELEMENT_W = Math.floor(Base.defaultElementW * (Config.raw.locale != "en" ? 1.4 : 1.0));
 				let uis = Base.getUIs();
 				for (let ui of uis) {
-					Zui.setFont(ui, f);
-					Zui.setScale(ui, Zui.SCALE(ui));
+					zui_set_font(ui, f);
+					zui_set_scale(ui, zui_SCALE(ui));
 				}
 			});
 		});

@@ -30,7 +30,7 @@ class RGBNode extends LogicNode {
 		return this.image;
 	}
 
-	static def: TNode = {
+	static def: zui_node_t = {
 		id: 0,
 		name: _tr("RGB"),
 		type: "RGBNode",

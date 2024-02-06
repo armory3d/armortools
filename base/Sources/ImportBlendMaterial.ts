@@ -4,7 +4,7 @@
 class ImportBlendMaterial {
 
 	static run = (path: string) => {
-		Data.getBlob(path, (b: ArrayBuffer) => {
+		data_get_blob(path, (b: ArrayBuffer) => {
 			let bl = ParserBlend.init(b);
 			if (bl.dna == null) {
 				Console.error(Strings.error3());
@@ -27,7 +27,7 @@ class ImportBlendMaterial {
 				let nodes = Context.raw.material.nodes;
 				let canvas = Context.raw.material.canvas;
 				canvas.name = BlHandle.get(BlHandle.get(mat, "id"), "name").substr(2); // MAWood
-				let nout: TNode = null;
+				let nout: zui_node_t = null;
 				for (let n of canvas.nodes) {
 					if (n.type == "OUTPUT_MATERIAL_PBR") {
 						nout = n;
@@ -36,7 +36,7 @@ class ImportBlendMaterial {
 				}
 				for (let n of canvas.nodes) {
 					if (n.name == "RGB") {
-						Nodes.removeNode(n, canvas);
+						zui_remove_node(n, canvas);
 						break;
 					}
 				}
@@ -69,7 +69,7 @@ class ImportBlendMaterial {
 				while (true) {
 					// Search for node in list
 					let search = BlHandle.get(node, "idname").substr(10).toLowerCase();
-					let base: TNode = null;
+					let base: zui_node_t = null;
 					for (let list of NodesMaterial.list) {
 						let found = false;
 						for (let n of list) {
@@ -225,8 +225,8 @@ class ImportBlendMaterial {
 						}
 
 						if (valid) {
-							let raw: TNodeLink = {
-								id: Nodes.getLinkId(canvas.links),
+							let raw: zui_node_link_t = {
+								id: zui_get_link_id(canvas.links),
 								from_id: from_id,
 								from_socket: from_socket,
 								to_id: to_id,
@@ -250,10 +250,10 @@ class ImportBlendMaterial {
 					UtilRender.makeMaterialPreview();
 				}
 			}
-			App.notifyOnInit(_init);
+			app_notify_on_init(_init);
 
 			UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
-			Data.deleteBlob(path);
+			data_delete_blob(path);
 		});
 	}
 

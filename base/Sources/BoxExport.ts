@@ -1,12 +1,12 @@
 
 class BoxExport {
 
-	static htab = Handle.create();
+	static htab = zui_handle_create();
 	static files: string[] = null;
-	static exportMeshHandle = Handle.create();
+	static exportMeshHandle = zui_handle_create();
 
 	///if (is_paint || is_lab)
-	static hpreset = Handle.create();
+	static hpreset = zui_handle_create();
 	static preset: TExportPreset = null;
 	static channels = ["base_r", "base_g", "base_b", "height", "metal", "nor_r", "nor_g", "nor_g_directx", "nor_b", "occ", "opac", "rough", "smooth", "emis", "subs", "0.0", "1.0"];
 	static colorSpaces = ["linear", "srgb"];
@@ -14,7 +14,7 @@ class BoxExport {
 
 	///if (is_paint || is_lab)
 	static showTextures = () => {
-		UIBox.showCustom((ui: ZuiRaw) => {
+		UIBox.showCustom((ui: zui_t) => {
 
 			if (BoxExport.files == null) {
 				BoxExport.fetchPresets();
@@ -41,7 +41,7 @@ class BoxExport {
 
 	///if is_paint
 	static showBakeMaterial = () => {
-		UIBox.showCustom((ui: ZuiRaw) => {
+		UIBox.showCustom((ui: zui_t) => {
 
 			if (BoxExport.files == null) {
 				BoxExport.fetchPresets();
@@ -60,25 +60,25 @@ class BoxExport {
 	///end
 
 	///if (is_paint || is_lab)
-	static tabExportTextures = (ui: ZuiRaw, title: string, bakeMaterial = false) => {
+	static tabExportTextures = (ui: zui_t, title: string, bakeMaterial = false) => {
 		let tabVertical = Config.raw.touch_ui;
-		if (Zui.tab(BoxExport.htab, title, tabVertical)) {
+		if (zui_tab(BoxExport.htab, title, tabVertical)) {
 
-			Zui.row([0.5, 0.5]);
+			zui_row([0.5, 0.5]);
 
 			///if is_paint
 			///if (krom_android || krom_ios)
-			Zui.combo(Base.resHandle, ["128", "256", "512", "1K", "2K", "4K"], tr("Resolution"), true);
+			zui_combo(Base.resHandle, ["128", "256", "512", "1K", "2K", "4K"], tr("Resolution"), true);
 			///else
-			Zui.combo(Base.resHandle, ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"], tr("Resolution"), true);
+			zui_combo(Base.resHandle, ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"], tr("Resolution"), true);
 			///end
 			///end
 
 			///if is_lab
 			///if (krom_android || krom_ios)
-			Zui.combo(Base.resHandle, ["2K", "4K"], tr("Resolution"), true);
+			zui_combo(Base.resHandle, ["2K", "4K"], tr("Resolution"), true);
 			///else
-			Zui.combo(Base.resHandle, ["2K", "4K", "8K", "16K"], tr("Resolution"), true);
+			zui_combo(Base.resHandle, ["2K", "4K", "8K", "16K"], tr("Resolution"), true);
 			///end
 			///end
 
@@ -87,52 +87,52 @@ class BoxExport {
 			}
 
 			///if (is_lab || krom_android || krom_ios)
-			Zui.combo(Base.bitsHandle, ["8bit"], tr("Color"), true);
+			zui_combo(Base.bitsHandle, ["8bit"], tr("Color"), true);
 			///else
-			Zui.combo(Base.bitsHandle, ["8bit", "16bit", "32bit"], tr("Color"), true);
+			zui_combo(Base.bitsHandle, ["8bit", "16bit", "32bit"], tr("Color"), true);
 			///end
 
 			///if is_paint
 			if (Base.bitsHandle.changed) {
-				App.notifyOnInit(Base.setLayerBits);
+				app_notify_on_init(Base.setLayerBits);
 			}
 			///end
 
-			Zui.row([0.5, 0.5]);
+			zui_row([0.5, 0.5]);
 			if (Base.bitsHandle.position == TextureBits.Bits8) {
-				Context.raw.formatType = Zui.combo(Zui.handle("boxexport_0", { position: Context.raw.formatType }), ["png", "jpg"], tr("Format"), true);
+				Context.raw.formatType = zui_combo(zui_handle("boxexport_0", { position: Context.raw.formatType }), ["png", "jpg"], tr("Format"), true);
 			}
 			else {
-				Context.raw.formatType = Zui.combo(Zui.handle("boxexport_1", { position: Context.raw.formatType }), ["exr"], tr("Format"), true);
+				Context.raw.formatType = zui_combo(zui_handle("boxexport_1", { position: Context.raw.formatType }), ["exr"], tr("Format"), true);
 			}
 
 			ui.enabled = Context.raw.formatType == TextureLdrFormat.FormatJpg && Base.bitsHandle.position == TextureBits.Bits8;
-			Context.raw.formatQuality = Zui.slider(Zui.handle("boxexport_2", { value: Context.raw.formatQuality }), tr("Quality"), 0.0, 100.0, true, 1);
+			Context.raw.formatQuality = zui_slider(zui_handle("boxexport_2", { value: Context.raw.formatQuality }), tr("Quality"), 0.0, 100.0, true, 1);
 			ui.enabled = true;
 
 			///if is_paint
-			Zui.row([0.5, 0.5]);
+			zui_row([0.5, 0.5]);
 			ui.enabled = !bakeMaterial;
-			let layersExportHandle = Zui.handle("boxexport_3");
+			let layersExportHandle = zui_handle("boxexport_3");
 			layersExportHandle.position = Context.raw.layersExport;
-			Context.raw.layersExport = Zui.combo(layersExportHandle, [tr("Visible"), tr("Selected"), tr("Per Object"), tr("Per Udim Tile")], tr("Layers"), true);
+			Context.raw.layersExport = zui_combo(layersExportHandle, [tr("Visible"), tr("Selected"), tr("Per Object"), tr("Per Udim Tile")], tr("Layers"), true);
 			ui.enabled = true;
 			///end
 
-			Zui.combo(BoxExport.hpreset, BoxExport.files, tr("Preset"), true);
+			zui_combo(BoxExport.hpreset, BoxExport.files, tr("Preset"), true);
 			if (BoxExport.hpreset.changed) BoxExport.preset = null;
 
-			let layersDestinationHandle = Zui.handle("boxexport_4");
+			let layersDestinationHandle = zui_handle("boxexport_4");
 			layersDestinationHandle.position = Context.raw.layersDestination;
-			Context.raw.layersDestination = Zui.combo(layersDestinationHandle, [tr("Disk"), tr("Packed")], tr("Destination"), true);
+			Context.raw.layersDestination = zui_combo(layersDestinationHandle, [tr("Disk"), tr("Packed")], tr("Destination"), true);
 
-			Zui.endElement();
+			zui_end_element();
 
-			Zui.row([0.5, 0.5]);
-			if (Zui.button(tr("Cancel"))) {
+			zui_row([0.5, 0.5]);
+			if (zui_button(tr("Cancel"))) {
 				UIBox.hide();
 			}
-			if (Zui.button(tr("Export"))) {
+			if (zui_button(tr("Export"))) {
 				UIBox.hide();
 				if (Context.raw.layersDestination == ExportDestination.DestinationPacked) {
 					Context.raw.textureExportPath = "/";
@@ -144,7 +144,7 @@ class BoxExport {
 						ExportTexture.run(Context.raw.textureExportPath);
 						///end
 					}
-					App.notifyOnInit(_init);
+					app_notify_on_init(_init);
 				}
 				else {
 					let filters = Base.bitsHandle.position != TextureBits.Bits8 ? "exr" : Context.raw.formatType == TextureLdrFormat.FormatPng ? "png" : "jpg";
@@ -159,7 +159,7 @@ class BoxExport {
 								ExportTexture.run(Context.raw.textureExportPath);
 								///end
 							}
-							App.notifyOnInit(_init);
+							app_notify_on_init(_init);
 						}
 						///if (krom_android || krom_ios)
 						Base.notifyOnNextFrame(() => {
@@ -172,25 +172,25 @@ class BoxExport {
 					});
 				}
 			}
-			if (ui.isHovered) Zui.tooltip(tr("Export texture files") + ` (${Config.keymap.file_export_textures})`);
+			if (ui.is_hovered) zui_tooltip(tr("Export texture files") + ` (${Config.keymap.file_export_textures})`);
 		}
 	}
 
-	static tabPresets = (ui: ZuiRaw) => {
+	static tabPresets = (ui: zui_t) => {
 		let tabVertical = Config.raw.touch_ui;
-		if (Zui.tab(BoxExport.htab, tr("Presets"), tabVertical)) {
-			Zui.row([3 / 5, 1 / 5, 1 / 5]);
+		if (zui_tab(BoxExport.htab, tr("Presets"), tabVertical)) {
+			zui_row([3 / 5, 1 / 5, 1 / 5]);
 
-			Zui.combo(BoxExport.hpreset, BoxExport.files, tr("Preset"));
+			zui_combo(BoxExport.hpreset, BoxExport.files, tr("Preset"));
 			if (BoxExport.hpreset.changed) BoxExport.preset = null;
 
-			if (Zui.button(tr("New"))) {
-				UIBox.showCustom((ui: ZuiRaw) => {
+			if (zui_button(tr("New"))) {
+				UIBox.showCustom((ui: zui_t) => {
 					let tabVertical = Config.raw.touch_ui;
-					if (Zui.tab(Zui.handle("boxexport_5"), tr("New Preset"), tabVertical)) {
-						Zui.row([0.5, 0.5]);
-						let presetName = Zui.textInput(Zui.handle("boxexport_6", { text: "new_preset" }), tr("Name"));
-						if (Zui.button(tr("OK")) || ui.isReturnDown) {
+					if (zui_tab(zui_handle("boxexport_5"), tr("New Preset"), tabVertical)) {
+						zui_row([0.5, 0.5]);
+						let presetName = zui_text_input(zui_handle("boxexport_6", { text: "new_preset" }), tr("Name"));
+						if (zui_button(tr("OK")) || ui.is_return_down) {
 							BoxExport.newPreset(presetName);
 							BoxExport.fetchPresets();
 							BoxExport.preset = null;
@@ -203,7 +203,7 @@ class BoxExport {
 				});
 			}
 
-			if (Zui.button(tr("Import"))) {
+			if (zui_button(tr("Import"))) {
 				UIFiles.show("json", false, false, (path: string) => {
 					path = path.toLowerCase();
 					if (path.endsWith(".json")) {
@@ -225,24 +225,24 @@ class BoxExport {
 			}
 
 			// Texture list
-			Zui.separator(10, false);
-			Zui.row([1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6]);
-			Zui.text(tr("Texture"));
-			Zui.text(tr("R"));
-			Zui.text(tr("G"));
-			Zui.text(tr("B"));
-			Zui.text(tr("A"));
-			Zui.text(tr("Color Space"));
+			zui_separator(10, false);
+			zui_row([1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6]);
+			zui_text(tr("Texture"));
+			zui_text(tr("R"));
+			zui_text(tr("G"));
+			zui_text(tr("B"));
+			zui_text(tr("A"));
+			zui_text(tr("Color Space"));
 			ui.changed = false;
 			for (let i = 0; i < BoxExport.preset.textures.length; ++i) {
 				let t = BoxExport.preset.textures[i];
-				Zui.row([1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6]);
-				let htex = Zui.nest(BoxExport.hpreset, i);
+				zui_row([1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6]);
+				let htex = zui_nest(BoxExport.hpreset, i);
 				htex.text = t.name;
-				t.name = Zui.textInput(htex);
+				t.name = zui_text_input(htex);
 
-				if (ui.isHovered && ui.inputReleasedR) {
-					UIMenu.draw((ui: ZuiRaw) => {
+				if (ui.is_hovered && ui.input_released_r) {
+					UIMenu.draw((ui: zui_t) => {
 						if (UIMenu.menuButton(ui, tr("Delete"))) {
 							array_remove(BoxExport.preset.textures, t);
 							BoxExport.savePreset();
@@ -250,27 +250,27 @@ class BoxExport {
 					}, 1);
 				}
 
-				let hr = Zui.nest(htex, 0);
+				let hr = zui_nest(htex, 0);
 				hr.position = BoxExport.channels.indexOf(t.channels[0]);
-				let hg = Zui.nest(htex, 1);
+				let hg = zui_nest(htex, 1);
 				hg.position = BoxExport.channels.indexOf(t.channels[1]);
-				let hb = Zui.nest(htex, 2);
+				let hb = zui_nest(htex, 2);
 				hb.position = BoxExport.channels.indexOf(t.channels[2]);
-				let ha = Zui.nest(htex, 3);
+				let ha = zui_nest(htex, 3);
 				ha.position = BoxExport.channels.indexOf(t.channels[3]);
 
-				Zui.combo(hr, BoxExport.channels, tr("R"));
+				zui_combo(hr, BoxExport.channels, tr("R"));
 				if (hr.changed) t.channels[0] = BoxExport.channels[hr.position];
-				Zui.combo(hg, BoxExport.channels, tr("G"));
+				zui_combo(hg, BoxExport.channels, tr("G"));
 				if (hg.changed) t.channels[1] = BoxExport.channels[hg.position];
-				Zui.combo(hb, BoxExport.channels, tr("B"));
+				zui_combo(hb, BoxExport.channels, tr("B"));
 				if (hb.changed) t.channels[2] = BoxExport.channels[hb.position];
-				Zui.combo(ha, BoxExport.channels, tr("A"));
+				zui_combo(ha, BoxExport.channels, tr("A"));
 				if (ha.changed) t.channels[3] = BoxExport.channels[ha.position];
 
-				let hspace = Zui.nest(htex, 4);
+				let hspace = zui_nest(htex, 4);
 				hspace.position = BoxExport.colorSpaces.indexOf(t.color_space);
-				Zui.combo(hspace, BoxExport.colorSpaces, tr("Color Space"));
+				zui_combo(hspace, BoxExport.colorSpaces, tr("Color Space"));
 				if (hspace.changed) t.color_space = BoxExport.colorSpaces[hspace.position];
 			}
 
@@ -278,8 +278,8 @@ class BoxExport {
 				BoxExport.savePreset();
 			}
 
-			Zui.row([1 / 8]);
-			if (Zui.button(tr("Add"))) {
+			zui_row([1 / 8]);
+			if (zui_button(tr("Add"))) {
 				BoxExport.preset.textures.push({ name: "base", channels: ["base_r", "base_g", "base_b", "1.0"], color_space: "linear" });
 				BoxExport.hpreset.children = null;
 				BoxExport.savePreset();
@@ -289,9 +289,9 @@ class BoxExport {
 	///end
 
 	///if is_paint
-	static tabAtlases = (ui: ZuiRaw) => {
+	static tabAtlases = (ui: zui_t) => {
 		let tabVertical = Config.raw.touch_ui;
-		if (Zui.tab(BoxExport.htab, tr("Atlases"), tabVertical)) {
+		if (zui_tab(BoxExport.htab, tr("Atlases"), tabVertical)) {
 			if (Project.atlasObjects == null || Project.atlasObjects.length != Project.paintObjects.length) {
 				Project.atlasObjects = [];
 				Project.atlasNames = [];
@@ -301,11 +301,11 @@ class BoxExport {
 				}
 			}
 			for (let i = 0; i < Project.paintObjects.length; ++i) {
-				Zui.row([1 / 2, 1 / 2]);
-				Zui.text(Project.paintObjects[i].base.name);
-				let hatlas = Zui.nest(Zui.handle("boxexport_7"), i);
+				zui_row([1 / 2, 1 / 2]);
+				zui_text(Project.paintObjects[i].base.name);
+				let hatlas = zui_nest(zui_handle("boxexport_7"), i);
 				hatlas.position = Project.atlasObjects[i];
-				Project.atlasObjects[i] = Zui.combo(hatlas, Project.atlasNames, tr("Atlas"));
+				Project.atlasObjects[i] = zui_combo(hatlas, Project.atlasNames, tr("Atlas"));
 			}
 		}
 	}
@@ -313,25 +313,25 @@ class BoxExport {
 
 	static showMesh = () => {
 		BoxExport.exportMeshHandle.position = Context.raw.exportMeshIndex;
-		UIBox.showCustom((ui: ZuiRaw) => {
-			let htab = Zui.handle("boxexport_8");
+		UIBox.showCustom((ui: zui_t) => {
+			let htab = zui_handle("boxexport_8");
 			BoxExport.tabExportMesh(ui, htab);
 		});
 	}
 
-	static tabExportMesh = (ui: ZuiRaw, htab: HandleRaw) => {
+	static tabExportMesh = (ui: zui_t, htab: zui_handle_t) => {
 		let tabVertical = Config.raw.touch_ui;
-		if (Zui.tab(htab, tr("Export Mesh"), tabVertical)) {
+		if (zui_tab(htab, tr("Export Mesh"), tabVertical)) {
 
-			Zui.row([1 / 2, 1 / 2]);
+			zui_row([1 / 2, 1 / 2]);
 
-			Context.raw.exportMeshFormat = Zui.combo(Zui.handle("boxexport_9", { position: Context.raw.exportMeshFormat }), ["obj", "arm"], tr("Format"), true);
+			Context.raw.exportMeshFormat = zui_combo(zui_handle("boxexport_9", { position: Context.raw.exportMeshFormat }), ["obj", "arm"], tr("Format"), true);
 
 			let ar = [tr("All")];
 			for (let p of Project.paintObjects) ar.push(p.base.name);
-			Zui.combo(BoxExport.exportMeshHandle, ar, tr("Meshes"), true);
+			zui_combo(BoxExport.exportMeshHandle, ar, tr("Meshes"), true);
 
-			let applyDisplacement = Zui.check(Zui.handle("boxexport_10"), tr("Apply Displacement"));
+			let applyDisplacement = zui_check(zui_handle("boxexport_10"), tr("Apply Displacement"));
 
 			let tris = 0;
 			let pos = BoxExport.exportMeshHandle.position;
@@ -341,13 +341,13 @@ class BoxExport {
 					tris += Math.floor(inda.values.length / 3);
 				}
 			}
-			Zui.text(tris + " " + tr("triangles"));
+			zui_text(tris + " " + tr("triangles"));
 
-			Zui.row([0.5, 0.5]);
-			if (Zui.button(tr("Cancel"))) {
+			zui_row([0.5, 0.5]);
+			if (zui_button(tr("Cancel"))) {
 				UIBox.hide();
 			}
-			if (Zui.button(tr("Export"))) {
+			if (zui_button(tr("Export"))) {
 				UIBox.hide();
 				UIFiles.show(Context.raw.exportMeshFormat == MeshFormat.FormatObj ? "obj" : "arm", true, false, (path: string) => {
 					///if (krom_android || krom_ios)
@@ -374,26 +374,26 @@ class BoxExport {
 
 	///if (is_paint || is_sculpt)
 	static showMaterial = () => {
-		UIBox.showCustom((ui: ZuiRaw) => {
-			let htab = Zui.handle("boxexport_11");
+		UIBox.showCustom((ui: zui_t) => {
+			let htab = zui_handle("boxexport_11");
 			let tabVertical = Config.raw.touch_ui;
-			if (Zui.tab(htab, tr("Export Material"), tabVertical)) {
-				let h1 = Zui.handle("boxexport_12");
-				let h2 = Zui.handle("boxexport_13");
+			if (zui_tab(htab, tr("Export Material"), tabVertical)) {
+				let h1 = zui_handle("boxexport_12");
+				let h2 = zui_handle("boxexport_13");
 				h1.selected = Context.raw.packAssetsOnExport;
 				h2.selected = Context.raw.writeIconOnExport;
-				Context.raw.packAssetsOnExport = Zui.check(h1, tr("Pack Assets"));
-				Context.raw.writeIconOnExport = Zui.check(h2, tr("Export Icon"));
-				Zui.row([0.5, 0.5]);
-				if (Zui.button(tr("Cancel"))) {
+				Context.raw.packAssetsOnExport = zui_check(h1, tr("Pack Assets"));
+				Context.raw.writeIconOnExport = zui_check(h2, tr("Export Icon"));
+				zui_row([0.5, 0.5]);
+				if (zui_button(tr("Cancel"))) {
 					UIBox.hide();
 				}
-				if (Zui.button(tr("Export"))) {
+				if (zui_button(tr("Export"))) {
 					UIBox.hide();
 					UIFiles.show("arm", true, false, (path: string) => {
 						let f = UIFiles.filename;
 						if (f == "") f = tr("untitled");
-						App.notifyOnInit(() => {
+						app_notify_on_init(() => {
 							ExportArm.runMaterial(path + Path.sep + f);
 						});
 					});
@@ -403,26 +403,26 @@ class BoxExport {
 	}
 
 	static showBrush = () => {
-		UIBox.showCustom((ui: ZuiRaw) => {
-			let htab = Zui.handle("boxexport_14");
+		UIBox.showCustom((ui: zui_t) => {
+			let htab = zui_handle("boxexport_14");
 			let tabVertical = Config.raw.touch_ui;
-			if (Zui.tab(htab, tr("Export Brush"), tabVertical)) {
-				let h1 = Zui.handle("boxexport_15");
-				let h2 = Zui.handle("boxexport_16");
+			if (zui_tab(htab, tr("Export Brush"), tabVertical)) {
+				let h1 = zui_handle("boxexport_15");
+				let h2 = zui_handle("boxexport_16");
 				h1.selected = Context.raw.packAssetsOnExport;
 				h2.selected = Context.raw.writeIconOnExport;
-				Context.raw.packAssetsOnExport = Zui.check(h1, tr("Pack Assets"));
-				Context.raw.writeIconOnExport = Zui.check(h2, tr("Export Icon"));
-				Zui.row([0.5, 0.5]);
-				if (Zui.button(tr("Cancel"))) {
+				Context.raw.packAssetsOnExport = zui_check(h1, tr("Pack Assets"));
+				Context.raw.writeIconOnExport = zui_check(h2, tr("Export Icon"));
+				zui_row([0.5, 0.5]);
+				if (zui_button(tr("Cancel"))) {
 					UIBox.hide();
 				}
-				if (Zui.button(tr("Export"))) {
+				if (zui_button(tr("Export"))) {
 					UIBox.hide();
 					UIFiles.show("arm", true, false, (path: string) => {
 						let f = UIFiles.filename;
 						if (f == "") f = tr("untitled");
-						App.notifyOnInit(() => {
+						app_notify_on_init(() => {
 							ExportArm.runBrush(path + Path.sep + f);
 						});
 					});
@@ -442,9 +442,9 @@ class BoxExport {
 
 	static parsePreset = () => {
 		let file = "export_presets/" + BoxExport.files[BoxExport.hpreset.position] + ".json";
-		Data.getBlob(file, (blob: ArrayBuffer) => {
+		data_get_blob(file, (blob: ArrayBuffer) => {
 			BoxExport.preset = JSON.parse(sys_buffer_to_string(blob));
-			Data.deleteBlob("export_presets/" + file);
+			data_delete_blob("export_presets/" + file);
 		});
 	}
 

@@ -36,7 +36,7 @@ class ImportEnvmap {
 				w = Math.floor(w / 2);
 			}
 
-			if (ConstData.screenAlignedVB == null) ConstData.createScreenAlignedData();
+			if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
 		}
 
 		// Down-scale to 1024x512
@@ -93,8 +93,8 @@ class ImportEnvmap {
 
 	static getRadianceMip = (mip: image_t, level: i32, radiance: image_t) => {
 		g4_begin(mip.g4);
-		g4_set_vertex_buffer(ConstData.screenAlignedVB);
-		g4_set_index_buffer(ConstData.screenAlignedIB);
+		g4_set_vertex_buffer(const_data_screen_aligned_vb);
+		g4_set_index_buffer(const_data_screen_aligned_ib);
 		g4_set_pipeline(ImportEnvmap.pipeline);
 		ImportEnvmap.params.x = 0.1 + level / 8;
 		g4_set_float4(ImportEnvmap.paramsLocation, ImportEnvmap.params.x, ImportEnvmap.params.y, ImportEnvmap.params.z, ImportEnvmap.params.w);

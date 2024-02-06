@@ -2,7 +2,7 @@
 class ImportGpl {
 
 	static run = (path: string, replaceExisting: bool) => {
-		Data.getBlob(path, (b: ArrayBuffer) => {
+		data_get_blob(path, (b: ArrayBuffer) => {
 			// let swatches = [];
 
 			// let str = sys_buffer_to_string(b);

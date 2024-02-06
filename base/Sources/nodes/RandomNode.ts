@@ -51,7 +51,7 @@ class RandomNode extends LogicNode {
 		return RandomNode.getInt() / 0x7fffffff;
 	}
 
-	static def: TNode = {
+	static def: zui_node_t = {
 		id: 0,
 		name: _tr("Random"),
 		type: "RandomNode",

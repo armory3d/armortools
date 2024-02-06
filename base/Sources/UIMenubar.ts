@@ -2,13 +2,13 @@
 class UIMenubar {
 
 	static defaultMenubarW = 330;
-	static workspaceHandle = Handle.create({ layout: Layout.Horizontal });
-	static menuHandle = Handle.create({ layout: Layout.Horizontal });
+	static workspaceHandle = zui_handle_create({ layout: Layout.Horizontal });
+	static menuHandle = zui_handle_create({ layout: Layout.Horizontal });
 	static menubarw = UIMenubar.defaultMenubarW;
 
 	///if is_lab
 	static _savedCamera: mat4_t = null;
-	static _plane: TMeshObject = null;
+	static _plane: mesh_object_t = null;
 	///end
 
 	constructor() {
@@ -18,16 +18,16 @@ class UIMenubar {
 		let ui = UIBase.ui;
 
 		///if (is_paint || is_sculpt)
-		let panelx = App.x() - UIToolbar.toolbarw;
+		let panelx = app_x() - UIToolbar.toolbarw;
 		///end
 		///if is_lab
-		let panelx = App.x();
+		let panelx = app_x();
 		///end
 
-		if (Zui.window(ui, UIMenubar.menuHandle, panelx, 0, UIMenubar.menubarw, UIHeader.headerh)) {
+		if (zui_window(ui, UIMenubar.menuHandle, panelx, 0, UIMenubar.menubarw, UIHeader.headerh)) {
 			ui._x += 1; // Prevent "File" button highlight on startup
 
-			Zui.beginMenu();
+			zui_begin_menu();
 
 			if (Config.raw.touch_ui) {
 
@@ -52,14 +52,14 @@ class UIMenubar {
 				///if (is_paint || is_lab)
 				if (UIMenubar.iconButton(ui, 5, 2)) BoxExport.showTextures();
 				///end
-				let size = Math.floor(ui._w / Zui.SCALE(ui));
-				if (UIMenu.show && UIMenu.menuCategory == MenuCategory.MenuViewport) Zui.fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
+				let size = Math.floor(ui._w / zui_SCALE(ui));
+				if (UIMenu.show && UIMenu.menuCategory == MenuCategory.MenuViewport) zui_fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
 				if (UIMenubar.iconButton(ui, 8, 2)) UIMenubar.showMenu(ui, MenuCategory.MenuViewport);
-				if (UIMenu.show && UIMenu.menuCategory == MenuCategory.MenuMode) Zui.fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
+				if (UIMenu.show && UIMenu.menuCategory == MenuCategory.MenuMode) zui_fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
 				if (UIMenubar.iconButton(ui, 9, 2)) UIMenubar.showMenu(ui, MenuCategory.MenuMode);
-				if (UIMenu.show && UIMenu.menuCategory == MenuCategory.MenuCamera) Zui.fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
+				if (UIMenu.show && UIMenu.menuCategory == MenuCategory.MenuCamera) zui_fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
 				if (UIMenubar.iconButton(ui, 10, 2)) UIMenubar.showMenu(ui, MenuCategory.MenuCamera);
-				if (UIMenu.show && UIMenu.menuCategory == MenuCategory.MenuHelp) Zui.fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
+				if (UIMenu.show && UIMenu.menuCategory == MenuCategory.MenuHelp) zui_fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
 				if (UIMenubar.iconButton(ui, 11, 2)) UIMenubar.showMenu(ui, MenuCategory.MenuHelp);
 				ui.enabled = History.undos > 0;
 				if (UIMenubar.iconButton(ui, 6, 2)) History.undo();
@@ -70,7 +70,7 @@ class UIMenubar {
 			else {
 				let categories = [tr("File"), tr("Edit"), tr("Viewport"), tr("Mode"), tr("Camera"), tr("Help")];
 				for (let i = 0; i < categories.length; ++i) {
-					if (Zui.menuButton(categories[i]) || (UIMenu.show && UIMenu.menuCommands == null && ui.isHovered)) {
+					if (zui_menu_button(categories[i]) || (UIMenu.show && UIMenu.menuCommands == null && ui.is_hovered)) {
 						UIMenubar.showMenu(ui, i);
 					}
 				}
@@ -84,29 +84,29 @@ class UIMenubar {
 				///end
 			}
 
-			Zui.endMenu();
+			zui_end_menu();
 		}
 
 		let nodesw = (UINodes.show || UIView2D.show) ? Config.raw.layout[LayoutSize.LayoutNodesW] : 0;
 		///if (is_paint || is_sculpt)
 		let ww = sys_width() - Config.raw.layout[LayoutSize.LayoutSidebarW] - UIMenubar.menubarw - nodesw;
-		panelx = (App.x() - UIToolbar.toolbarw) + UIMenubar.menubarw;
+		panelx = (app_x() - UIToolbar.toolbarw) + UIMenubar.menubarw;
 		///else
 		let ww = sys_width() - UIMenubar.menubarw - nodesw;
-		panelx = (App.x()) + UIMenubar.menubarw;
+		panelx = (app_x()) + UIMenubar.menubarw;
 		///end
 
-		if (Zui.window(ui, UIMenubar.workspaceHandle, panelx, 0, ww, UIHeader.headerh)) {
+		if (zui_window(ui, UIMenubar.workspaceHandle, panelx, 0, ww, UIHeader.headerh)) {
 
 			if (!Config.raw.touch_ui) {
-				Zui.tab(UIHeader.worktab, tr("3D View"));
+				zui_tab(UIHeader.worktab, tr("3D View"));
 			}
 			else {
-				Zui.fill(0, 0, ui._windowW, ui._windowH + 4, ui.t.SEPARATOR_COL);
+				zui_fill(0, 0, ui._window_w, ui._window_h + 4, ui.t.SEPARATOR_COL);
 			}
 
 			///if is_lab
-			Zui.tab(UIHeader.worktab, tr("2D View"));
+			zui_tab(UIHeader.worktab, tr("2D View"));
 			if (UIHeader.worktab.changed) {
 				Context.raw.ddirty = 2;
 				Context.raw.brushBlendDirty = true;
@@ -137,9 +137,9 @@ class UIMenubar {
 							scale_tex: mesh.scaleTex
 						};
 						let md: mesh_data_t;
-						MeshData.create(raw, (_md: mesh_data_t) => { md = _md; });
-						let dotPlane: TMeshObject = scene_get_child(".Plane").ext;
-						UIMenubar._plane = MeshObject.create(md, dotPlane.materials);
+						mesh_data_create(raw, (_md: mesh_data_t) => { md = _md; });
+						let dotPlane: mesh_object_t = scene_get_child(".Plane").ext;
+						UIMenubar._plane = mesh_object_create(md, dotPlane.materials);
 						array_remove(scene_meshes, UIMenubar._plane);
 					}
 
@@ -159,30 +159,30 @@ class UIMenubar {
 		}
 	}
 
-	static showMenu = (ui: ZuiRaw, category: i32) => {
+	static showMenu = (ui: zui_t, category: i32) => {
 		UIMenu.show = true;
 		UIMenu.menuCommands = null;
 		UIMenu.menuCategory = category;
 		UIMenu.menuCategoryW = ui._w;
-		UIMenu.menuCategoryH = Math.floor(Zui.MENUBAR_H(ui));
+		UIMenu.menuCategoryH = Math.floor(zui_MENUBAR_H(ui));
 		UIMenu.menuX = Math.floor(ui._x - ui._w);
-		UIMenu.menuY = Math.floor(Zui.MENUBAR_H(ui));
+		UIMenu.menuY = Math.floor(zui_MENUBAR_H(ui));
 		if (Config.raw.touch_ui) {
-			let menuW = Math.floor(Base.defaultElementW * Zui.SCALE(Base.uiMenu) * 2.0);
+			let menuW = Math.floor(Base.defaultElementW * zui_SCALE(Base.uiMenu) * 2.0);
 			UIMenu.menuX -= Math.floor((menuW - ui._w) / 2) + Math.floor(UIHeader.headerh / 2);
-			UIMenu.menuX += Math.floor(2 * Zui.SCALE(Base.uiMenu));
-			UIMenu.menuY -= Math.floor(2 * Zui.SCALE(Base.uiMenu));
+			UIMenu.menuX += Math.floor(2 * zui_SCALE(Base.uiMenu));
+			UIMenu.menuY -= Math.floor(2 * zui_SCALE(Base.uiMenu));
 			UIMenu.keepOpen = true;
 		}
 	}
 
-	static iconButton = (ui: ZuiRaw, i: i32, j: i32): bool => {
+	static iconButton = (ui: zui_t, i: i32, j: i32): bool => {
 		let col = ui.t.WINDOW_BG_COL;
 		if (col < 0) col += 4294967296;
 		let light = col > 0xff666666 + 4294967296;
 		let iconAccent = light ? 0xff666666 : 0xffaaaaaa;
 		let img = Res.get("icons.k");
 		let rect = Res.tile50(img, i, j);
-		return Zui.image(img, iconAccent, null, rect.x, rect.y, rect.w, rect.h) == State.Released;
+		return zui_image(img, iconAccent, null, rect.x, rect.y, rect.w, rect.h) == State.Released;
 	}
 }

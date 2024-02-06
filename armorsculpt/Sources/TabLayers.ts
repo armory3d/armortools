@@ -2,28 +2,28 @@
 class TabLayers {
 
 	static layerNameEdit = -1;
-	static layerNameHandle = Handle.create();
+	static layerNameHandle = zui_handle_create();
 	static showContextMenu = false;
 
-	static draw = (htab: HandleRaw) => {
+	static draw = (htab: zui_handle_t) => {
 		let mini = Config.raw.layout[LayoutSize.LayoutSidebarW] <= UIBase.sidebarMiniW;
 		mini ? TabLayers.drawMini(htab) : TabLayers.drawFull(htab);
 	}
 
-	static drawMini = (htab: HandleRaw) => {
+	static drawMini = (htab: zui_handle_t) => {
 		let ui = UIBase.ui;
-		Zui.setHoveredTabName(tr("Layers"));
+		zui_set_hovered_tab_name(tr("Layers"));
 
 		let _ELEMENT_H = ui.t.ELEMENT_H;
-		ui.t.ELEMENT_H = Math.floor(UIBase.sidebarMiniW / 2 / Zui.SCALE(ui));
+		ui.t.ELEMENT_H = Math.floor(UIBase.sidebarMiniW / 2 / zui_SCALE(ui));
 
-		Zui.beginSticky();
-		Zui.separator(5);
+		zui_begin_sticky();
+		zui_separator(5);
 
 		TabLayers.comboFilter();
 		TabLayers.buttonNew("+");
 
-		Zui.endSticky();
+		zui_end_sticky();
 		ui._y += 2;
 
 		TabLayers.highlightOddLines();
@@ -32,16 +32,16 @@ class TabLayers {
 		ui.t.ELEMENT_H = _ELEMENT_H;
 	}
 
-	static drawFull = (htab: HandleRaw) => {
+	static drawFull = (htab: zui_handle_t) => {
 		let ui = UIBase.ui;
-		if (Zui.tab(htab, tr("Layers"))) {
-			Zui.beginSticky();
-			Zui.row([1 / 4, 3 / 4]);
+		if (zui_tab(htab, tr("Layers"))) {
+			zui_begin_sticky();
+			zui_row([1 / 4, 3 / 4]);
 
 			TabLayers.buttonNew(tr("New"));
 			TabLayers.comboFilter();
 
-			Zui.endSticky();
+			zui_end_sticky();
 			ui._y += 2;
 
 			TabLayers.highlightOddLines();
@@ -61,18 +61,18 @@ class TabLayers {
 	static highlightOddLines = () => {
 		let ui = UIBase.ui;
 		let step = ui.t.ELEMENT_H * 2;
-		let fullH = ui._windowH - UIBase.hwnds[0].scrollOffset;
+		let fullH = ui._window_h - UIBase.hwnds[0].scroll_offset;
 		for (let i = 0; i < Math.floor(fullH / step); ++i) {
 			if (i % 2 == 0) {
-				Zui.fill(0, i * step, (ui._w / Zui.SCALE(ui) - 2), step, ui.t.WINDOW_BG_COL - 0x00040404);
+				zui_fill(0, i * step, (ui._w / zui_SCALE(ui) - 2), step, ui.t.WINDOW_BG_COL - 0x00040404);
 			}
 		}
 	}
 
 	static buttonNew = (text: string) => {
 		let ui = UIBase.ui;
-		if (Zui.button(text)) {
-			UIMenu.draw((ui: ZuiRaw) => {
+		if (zui_button(text)) {
+			UIMenu.draw((ui: zui_t) => {
 				let l = Context.raw.layer;
 				if (UIMenu.menuButton(ui, tr("Paint Layer"))) {
 					Base.newLayer();
@@ -85,12 +85,12 @@ class TabLayers {
 	static comboFilter = () => {
 		let ui = UIBase.ui;
 		let ar = [tr("All")];
-		let filterHandle = Zui.handle("tablayers_0");
+		let filterHandle = zui_handle("tablayers_0");
 		filterHandle.position = Context.raw.layerFilter;
-		Context.raw.layerFilter = Zui.combo(filterHandle, ar, tr("Filter"), false, Align.Left);
+		Context.raw.layerFilter = zui_combo(filterHandle, ar, tr("Filter"), false, Align.Left);
 	}
 
-	static remapLayerPointers = (nodes: TNode[], pointerMap: Map<i32, i32>) => {
+	static remapLayerPointers = (nodes: zui_node_t[], pointerMap: Map<i32, i32>) => {
 		for (let n of nodes) {
 			if (n.type == "LAYER" || n.type == "LAYER_MASK") {
 				let i = n.buttons[0].default_value;
@@ -137,10 +137,10 @@ class TabLayers {
 		}
 
 		let step = ui.t.ELEMENT_H;
-		let checkw = (ui._windowW / 100 * 8) / Zui.SCALE(ui);
+		let checkw = (ui._window_w / 100 * 8) / zui_SCALE(ui);
 
 		// Highlight drag destination
-		let absy = ui._windowY + ui._y;
+		let absy = ui._window_y + ui._y;
 		if (Base.isDragging && Base.dragLayer != null && Context.inLayers()) {
 			if (mouse_y > absy + step && mouse_y < absy + step * 3) {
 				let down = Project.layers.indexOf(Base.dragLayer) >= i;
@@ -152,14 +152,14 @@ class TabLayers {
 				let nestedGroup = SlotLayer.isGroup(Base.dragLayer) && toGroup;
 				if (!nestedGroup) {
 					if (SlotLayer.canMove(Context.raw.layer, Context.raw.dragDestination)) {
-						Zui.fill(checkw, step * 2, (ui._windowW / Zui.SCALE(ui) - 2) - checkw, 2 * Zui.SCALE(ui), ui.t.HIGHLIGHT_COL);
+						zui_fill(checkw, step * 2, (ui._window_w / zui_SCALE(ui) - 2) - checkw, 2 * zui_SCALE(ui), ui.t.HIGHLIGHT_COL);
 					}
 				}
 			}
 			else if (i == Project.layers.length - 1 && mouse_y < absy + step) {
 				Context.raw.dragDestination = Project.layers.length - 1;
 				if (SlotLayer.canMove(Context.raw.layer, Context.raw.dragDestination)) {
-					Zui.fill(checkw, 0, (ui._windowW / Zui.SCALE(ui) - 2) - checkw, 2 * Zui.SCALE(ui), ui.t.HIGHLIGHT_COL);
+					zui_fill(checkw, 0, (ui._window_w / zui_SCALE(ui) - 2) - checkw, 2 * zui_SCALE(ui), ui.t.HIGHLIGHT_COL);
 				}
 			}
 		}
@@ -167,12 +167,12 @@ class TabLayers {
 			if (mouse_y > absy + step && mouse_y < absy + step * 3) {
 				Context.raw.dragDestination = i;
 				if (TabLayers.canDropNewLayer(i))
-					Zui.fill(checkw, 2 * step, (ui._windowW / Zui.SCALE(ui) - 2) - checkw, 2 * Zui.SCALE(ui), ui.t.HIGHLIGHT_COL);
+					zui_fill(checkw, 2 * step, (ui._window_w / zui_SCALE(ui) - 2) - checkw, 2 * zui_SCALE(ui), ui.t.HIGHLIGHT_COL);
 			}
 			else if (i == Project.layers.length - 1 && mouse_y < absy + step) {
 				Context.raw.dragDestination = Project.layers.length;
 				if (TabLayers.canDropNewLayer(Project.layers.length))
-					Zui.fill(checkw, 0, (ui._windowW / Zui.SCALE(ui) - 2) - checkw, 2 * Zui.SCALE(ui), ui.t.HIGHLIGHT_COL);
+					zui_fill(checkw, 0, (ui._window_w / zui_SCALE(ui) - 2) - checkw, 2 * zui_SCALE(ui), ui.t.HIGHLIGHT_COL);
 			}
 		}
 
@@ -188,14 +188,14 @@ class TabLayers {
 	static drawLayerSlotMini = (l: SlotLayerRaw, i: i32) => {
 		let ui = UIBase.ui;
 
-		Zui.row([1, 1]);
+		zui_row([1, 1]);
 		let uix = ui._x;
 		let uiy = ui._y;
-		Zui.endElement();
-		Zui.endElement();
+		zui_end_element();
+		zui_end_element();
 
-		ui._y += Zui.ELEMENT_H(ui);
-		ui._y -= Zui.ELEMENT_OFFSET(ui);
+		ui._y += zui_ELEMENT_H(ui);
+		ui._y -= zui_ELEMENT_OFFSET(ui);
 	}
 
 	static drawLayerSlotFull = (l: SlotLayerRaw, i: i32) => {
@@ -205,16 +205,16 @@ class TabLayers {
 
 		let hasPanel = SlotLayer.isGroup(l) || (SlotLayer.isLayer(l) && SlotLayer.getMasks(l, false) != null);
 		if (hasPanel) {
-			Zui.row([8 / 100, 52 / 100, 30 / 100, 10 / 100]);
+			zui_row([8 / 100, 52 / 100, 30 / 100, 10 / 100]);
 		}
 		else {
-			Zui.row([8 / 100, 52 / 100, 30 / 100]);
+			zui_row([8 / 100, 52 / 100, 30 / 100]);
 		}
 
 		// Draw eye icon
 		let icons = Res.get("icons.k");
 		let r = Res.tile18(icons, l.visible ? 0 : 1, 0);
-		let center = (step / 2) * Zui.SCALE(ui);
+		let center = (step / 2) * zui_SCALE(ui);
 		ui._x += 2;
 		ui._y += 3;
 		ui._y += center;
@@ -222,7 +222,7 @@ class TabLayers {
 		let parentHidden = l.parent != null && (!l.parent.visible || (l.parent.parent != null && !l.parent.parent.visible));
 		if (parentHidden) col -= 0x99000000;
 
-		if (Zui.image(icons, col, null, r.x, r.y, r.w, r.h) == State.Released) {
+		if (zui_image(icons, col, null, r.x, r.y, r.w, r.h) == State.Released) {
 			TabLayers.layerToggleVisible(l);
 		}
 		ui._x -= 2;
@@ -236,35 +236,35 @@ class TabLayers {
 		ui._y += center;
 		if (TabLayers.layerNameEdit == l.id) {
 			TabLayers.layerNameHandle.text = l.name;
-			l.name = Zui.textInput(TabLayers.layerNameHandle);
-			if (ui.textSelectedHandle_ptr != TabLayers.layerNameHandle.ptr) TabLayers.layerNameEdit = -1;
+			l.name = zui_text_input(TabLayers.layerNameHandle);
+			if (ui.text_selected_handle_ptr != TabLayers.layerNameHandle.ptr) TabLayers.layerNameEdit = -1;
 		}
 		else {
-			if (ui.enabled && ui.inputEnabled && ui.comboSelectedHandle_ptr == null &&
-				ui.inputX > ui._windowX + ui._x && ui.inputX < ui._windowX + ui._windowW &&
-				ui.inputY > ui._windowY + ui._y - center && ui.inputY < ui._windowY + ui._y - center + (step * Zui.SCALE(ui)) * 2) {
-				if (ui.inputStarted) {
+			if (ui.enabled && ui.input_enabled && ui.combo_selected_handle_ptr == null &&
+				ui.input_x > ui._window_x + ui._x && ui.input_x < ui._window_x + ui._window_w &&
+				ui.input_y > ui._window_y + ui._y - center && ui.input_y < ui._window_y + ui._y - center + (step * zui_SCALE(ui)) * 2) {
+				if (ui.input_started) {
 					Context.setLayer(l);
-					TabLayers.setDragLayer(Context.raw.layer, -(mouse_x - uix - ui._windowX - 3), -(mouse_y - uiy - ui._windowY + 1));
+					TabLayers.setDragLayer(Context.raw.layer, -(mouse_x - uix - ui._window_x - 3), -(mouse_y - uiy - ui._window_y + 1));
 				}
-				else if (ui.inputReleased) {
+				else if (ui.input_released) {
 					if (time_time() - Context.raw.selectTime > 0.2) {
 						Context.raw.selectTime = time_time();
 					}
 				}
-				else if (ui.inputReleasedR) {
+				else if (ui.input_released_r) {
 					Context.setLayer(l);
 					TabLayers.showContextMenu = true;
 				}
 			}
 
-			let state = Zui.text(l.name);
+			let state = zui_text(l.name);
 			if (state == State.Released) {
 				let td = time_time() - Context.raw.selectTime;
 				if (td < 0.2 && td > 0.0) {
 					TabLayers.layerNameEdit = l.id;
 					TabLayers.layerNameHandle.text = l.name;
-					Zui.startTextEdit(TabLayers.layerNameHandle);
+					zui_start_text_edit(TabLayers.layerNameHandle);
 				}
 			}
 
@@ -275,18 +275,18 @@ class TabLayers {
 			// 	let _init() = () => {
 			// 		deleteLayer(Context.raw.layer);
 			// 	}
-			// 	App.notifyOnInit(_init);
+			// 	app_notify_on_init(_init);
 			// }
 		}
 		ui._y -= center;
 
 		if (l.parent != null) {
-			ui._x -= 10 * Zui.SCALE(ui);
-			if (l.parent.parent != null) ui._x -= 10 * Zui.SCALE(ui);
+			ui._x -= 10 * zui_SCALE(ui);
+			if (l.parent.parent != null) ui._x -= 10 * zui_SCALE(ui);
 		}
 
 		if (SlotLayer.isGroup(l)) {
-			Zui.endElement();
+			zui_end_element();
 		}
 		else {
 			if (SlotLayer.isMask(l)) {
@@ -294,7 +294,7 @@ class TabLayers {
 			}
 
 			// comboBlending(ui, l);
-			Zui.endElement();
+			zui_end_element();
 
 			if (SlotLayer.isMask(l)) {
 				ui._y -= center;
@@ -303,43 +303,43 @@ class TabLayers {
 
 		if (hasPanel) {
 			ui._y += center;
-			let layerPanel = Zui.nest(Zui.handle("tablayers_1"), l.id);
+			let layerPanel = zui_nest(zui_handle("tablayers_1"), l.id);
 			layerPanel.selected = l.show_panel;
-			l.show_panel = Zui.panel(layerPanel, "", true, false, false);
+			l.show_panel = zui_panel(layerPanel, "", true, false, false);
 			ui._y -= center;
 		}
 
 		if (SlotLayer.isGroup(l) || SlotLayer.isMask(l)) {
-			ui._y -= Zui.ELEMENT_OFFSET(ui);
-			Zui.endElement();
+			ui._y -= zui_ELEMENT_OFFSET(ui);
+			zui_end_element();
 		}
 		else {
-			ui._y -= Zui.ELEMENT_OFFSET(ui);
+			ui._y -= zui_ELEMENT_OFFSET(ui);
 
-			Zui.row([8 / 100, 16 / 100, 36 / 100, 30 / 100, 10 / 100]);
-			Zui.endElement();
-			Zui.endElement();
-			Zui.endElement();
+			zui_row([8 / 100, 16 / 100, 36 / 100, 30 / 100, 10 / 100]);
+			zui_end_element();
+			zui_end_element();
+			zui_end_element();
 
 			if (Config.raw.touch_ui) {
-				ui._x += 12 * Zui.SCALE(ui);
+				ui._x += 12 * zui_SCALE(ui);
 			}
 
 			ui._y -= center;
 			TabLayers.comboObject(ui, l);
 			ui._y += center;
 
-			Zui.endElement();
+			zui_end_element();
 		}
 
-		ui._y -= Zui.ELEMENT_OFFSET(ui);
+		ui._y -= zui_ELEMENT_OFFSET(ui);
 	}
 
-	static comboObject = (ui: ZuiRaw, l: SlotLayerRaw, label = false): HandleRaw => {
+	static comboObject = (ui: zui_t, l: SlotLayerRaw, label = false): zui_handle_t => {
 		let ar = [tr("Shared")];
-		let objectHandle = Zui.nest(Zui.handle("tablayers_2"), l.id);
+		let objectHandle = zui_nest(zui_handle("tablayers_2"), l.id);
 		objectHandle.position = l.objectMask;
-		l.objectMask = Zui.combo(objectHandle, ar, tr("Object"), label, Align.Left);
+		l.objectMask = zui_combo(objectHandle, ar, tr("Object"), label, Align.Left);
 		return objectHandle;
 	}
 
@@ -354,15 +354,15 @@ class TabLayers {
 		let step = ui.t.ELEMENT_H;
 
 		// Separator line
-		Zui.fill(0, 0, (ui._w / Zui.SCALE(ui) - 2), 1 * Zui.SCALE(ui), ui.t.SEPARATOR_COL);
+		zui_fill(0, 0, (ui._w / zui_SCALE(ui) - 2), 1 * zui_SCALE(ui), ui.t.SEPARATOR_COL);
 
 		// Highlight selected
 		if (Context.raw.layer == l) {
 			if (mini) {
-				Zui.rect(1, -step * 2, ui._w / Zui.SCALE(ui) - 1, step * 2 + (mini ? -1 : 1), ui.t.HIGHLIGHT_COL, 3);
+				zui_rect(1, -step * 2, ui._w / zui_SCALE(ui) - 1, step * 2 + (mini ? -1 : 1), ui.t.HIGHLIGHT_COL, 3);
 			}
 			else {
-				Zui.rect(1, -step * 2 - 1, ui._w / Zui.SCALE(ui) - 2, step * 2 + (mini ? -2 : 1), ui.t.HIGHLIGHT_COL, 2);
+				zui_rect(1, -step * 2 - 1, ui._w / zui_SCALE(ui) - 2, step * 2 + (mini ? -2 : 1), ui.t.HIGHLIGHT_COL, 2);
 			}
 		}
 	}

@@ -21,27 +21,27 @@ class TabSwatches {
 
 	static dragPosition: i32 = -1;
 
-	static draw = (htab: HandleRaw) => {
+	static draw = (htab: zui_handle_t) => {
 		let ui = UIBase.ui;
 		let statush = Config.raw.layout[LayoutSize.LayoutStatusH];
-		if (Zui.tab(htab, tr("Swatches")) && statush > UIStatus.defaultStatusH * Zui.SCALE(ui)) {
+		if (zui_tab(htab, tr("Swatches")) && statush > UIStatus.defaultStatusH * zui_SCALE(ui)) {
 
-			Zui.beginSticky();
+			zui_begin_sticky();
 			if (Config.raw.touch_ui) {
-				Zui.row([1 / 5, 1 / 5, 1 / 5, 1 / 5, 1 / 5]);
+				zui_row([1 / 5, 1 / 5, 1 / 5, 1 / 5, 1 / 5]);
 			}
 			else {
-				Zui.row([1 / 14, 1 / 14, 1 / 14, 1 / 14, 1 / 14]);
+				zui_row([1 / 14, 1 / 14, 1 / 14, 1 / 14, 1 / 14]);
 			}
 
-			if (Zui.button(tr("New"))) {
+			if (zui_button(tr("New"))) {
 				Context.setSwatch(Project.makeSwatch());
 				Project.raw.swatches.push(Context.raw.swatch);
 			}
-			if (ui.isHovered) Zui.tooltip(tr("Add new swatch"));
+			if (ui.is_hovered) zui_tooltip(tr("Add new swatch"));
 
-			if (Zui.button(tr("Import"))) {
-				UIMenu.draw((ui: ZuiRaw) => {
+			if (zui_button(tr("Import"))) {
+				UIMenu.draw((ui: zui_t) => {
 					if (UIMenu.menuButton(ui, tr("Replace Existing"))) {
 						Project.importSwatches(true);
 						Context.setSwatch(Project.raw.swatches[0]);
@@ -51,26 +51,26 @@ class TabSwatches {
 					}
 				}, 2);
 			}
-			if (ui.isHovered) Zui.tooltip(tr("Import swatches"));
+			if (ui.is_hovered) zui_tooltip(tr("Import swatches"));
 
-			if (Zui.button(tr("Export"))) Project.exportSwatches();
-			if (ui.isHovered) Zui.tooltip(tr("Export swatches"));
+			if (zui_button(tr("Export"))) Project.exportSwatches();
+			if (ui.is_hovered) zui_tooltip(tr("Export swatches"));
 
-			if (Zui.button(tr("Clear"))) {
+			if (zui_button(tr("Clear"))) {
 				Context.setSwatch(Project.makeSwatch());
 				Project.raw.swatches = [Context.raw.swatch];
 			}
 
-			if (Zui.button(tr("Restore"))) {
+			if (zui_button(tr("Restore"))) {
 				Project.setDefaultSwatches();
 				Context.setSwatch(Project.raw.swatches[0]);
 			}
-			if (ui.isHovered) Zui.tooltip(tr("Restore default swatches"));
+			if (ui.is_hovered) zui_tooltip(tr("Restore default swatches"));
 
-			Zui.endSticky();
-			Zui.separator(3, false);
+			zui_end_sticky();
+			zui_separator(3, false);
 
-			let slotw = Math.floor(26 * Zui.SCALE(ui));
+			let slotw = Math.floor(26 * zui_SCALE(ui));
 			let num = Math.floor(ui._w / (slotw + 3));
 			let dragPositionSet = false;
 
@@ -79,7 +79,7 @@ class TabSwatches {
 			for (let row = 0; row < Math.floor(Math.ceil(Project.raw.swatches.length / num)); ++row) {
 				let ar = [];
 				for (let i = 0; i < num; ++i) ar.push(1 / num);
-				Zui.row(ar);
+				zui_row(ar);
 
 				ui._x += 2;
 				if (row > 0) ui._y += 6;
@@ -87,14 +87,14 @@ class TabSwatches {
 				for (let j = 0; j < num; ++j) {
 					let i = j + row * num;
 					if (i >= Project.raw.swatches.length) {
-						Zui.endElement(slotw);
+						zui_end_element(slotw);
 						continue;
 					}
 
 					if (Context.raw.swatch == Project.raw.swatches[i]) {
 						let off = row % 2 == 1 ? 1 : 0;
 						let w = 32;
-						Zui.fill(-2, -2, w, w, ui.t.HIGHLIGHT_COL);
+						zui_fill(-2, -2, w, w, ui.t.HIGHLIGHT_COL);
 					}
 
 					uix = ui._x;
@@ -102,60 +102,60 @@ class TabSwatches {
 
 					// Draw the drag position indicator
 					if (Base.dragSwatch != null && TabSwatches.dragPosition == i) {
-						Zui.fill(-1, -2 , 2, 32, ui.t.HIGHLIGHT_COL);
+						zui_fill(-1, -2 , 2, 32, ui.t.HIGHLIGHT_COL);
 					}
 
-					let state = Zui.image(TabSwatches.empty, Project.raw.swatches[i].base, slotw);
+					let state = zui_image(TabSwatches.empty, Project.raw.swatches[i].base, slotw);
 
 					if (state == State.Started) {
 						Context.setSwatch(Project.raw.swatches[i]);
 
-						Base.dragOffX = -(mouse_x - uix - ui._windowX - 2 * slotw);
-						Base.dragOffY = -(mouse_y - uiy - ui._windowY + 1);
+						Base.dragOffX = -(mouse_x - uix - ui._window_x - 2 * slotw);
+						Base.dragOffY = -(mouse_y - uiy - ui._window_y + 1);
 						Base.dragSwatch = Context.raw.swatch;
 					}
 					else if (state == State.Hovered) {
-						TabSwatches.dragPosition = (mouse_x > uix + ui._windowX + slotw / 2) ? i + 1 : i; // Switch to the next position if the mouse crosses the swatch rectangle center
+						TabSwatches.dragPosition = (mouse_x > uix + ui._window_x + slotw / 2) ? i + 1 : i; // Switch to the next position if the mouse crosses the swatch rectangle center
 						dragPositionSet = true;
 					}
 					else if (state == State.Released) {
 						if (time_time() - Context.raw.selectTime < 0.25) {
-							UIMenu.draw((ui: ZuiRaw) => {
+							UIMenu.draw((ui: zui_t) => {
 								ui.changed = false;
-								let h = Zui.handle("tabswatches_0");
+								let h = zui_handle("tabswatches_0");
 								h.color = Context.raw.swatch.base;
 
-								Context.raw.swatch.base = Zui.colorWheel(h, false, null, 11 * ui.t.ELEMENT_H * Zui.SCALE(ui), true, () => {
+								Context.raw.swatch.base = zui_color_wheel(h, false, null, 11 * ui.t.ELEMENT_H * zui_SCALE(ui), true, () => {
 									Context.raw.colorPickerPreviousTool = Context.raw.tool;
 									Context.selectTool(WorkspaceTool.ToolPicker);
 									Context.raw.colorPickerCallback = (color: TSwatchColor) => {
 										Project.raw.swatches[i] = Project.cloneSwatch(color);
 									};
 								});
-								let hopacity = Zui.handle("tabswatches_1");
+								let hopacity = zui_handle("tabswatches_1");
 								hopacity.value = Context.raw.swatch.opacity;
-								Context.raw.swatch.opacity = Zui.slider(hopacity, "Opacity", 0, 1, true);
-								let hocclusion = Zui.handle("tabswatches_2");
+								Context.raw.swatch.opacity = zui_slider(hopacity, "Opacity", 0, 1, true);
+								let hocclusion = zui_handle("tabswatches_2");
 								hocclusion.value = Context.raw.swatch.occlusion;
-								Context.raw.swatch.occlusion = Zui.slider(hocclusion, "Occlusion", 0, 1, true);
-								let hroughness = Zui.handle("tabswatches_3");
+								Context.raw.swatch.occlusion = zui_slider(hocclusion, "Occlusion", 0, 1, true);
+								let hroughness = zui_handle("tabswatches_3");
 								hroughness.value = Context.raw.swatch.roughness;
-								Context.raw.swatch.roughness = Zui.slider(hroughness, "Roughness", 0, 1, true);
-								let hmetallic = Zui.handle("tabswatches_4");
+								Context.raw.swatch.roughness = zui_slider(hroughness, "Roughness", 0, 1, true);
+								let hmetallic = zui_handle("tabswatches_4");
 								hmetallic.value = Context.raw.swatch.metallic;
-								Context.raw.swatch.metallic = Zui.slider(hmetallic, "Metallic", 0, 1, true);
-								let hheight = Zui.handle("tabswatches_5");
+								Context.raw.swatch.metallic = zui_slider(hmetallic, "Metallic", 0, 1, true);
+								let hheight = zui_handle("tabswatches_5");
 								hheight.value = Context.raw.swatch.height;
-								Context.raw.swatch.height = Zui.slider(hheight, "Height", 0, 1, true);
+								Context.raw.swatch.height = zui_slider(hheight, "Height", 0, 1, true);
 
-								if (ui.changed || ui.isTyping) UIMenu.keepOpen = true;
-								if (ui.inputReleased) Context.setSwatch(Context.raw.swatch); // Trigger material preview update
-							}, 16, Math.floor(mouse_x - 200 * Zui.SCALE(ui)), Math.floor(mouse_y - 250 * Zui.SCALE(ui)));
+								if (ui.changed || ui.is_typing) UIMenu.keepOpen = true;
+								if (ui.input_released) Context.setSwatch(Context.raw.swatch); // Trigger material preview update
+							}, 16, Math.floor(mouse_x - 200 * zui_SCALE(ui)), Math.floor(mouse_y - 250 * zui_SCALE(ui)));
 						}
 
 						Context.raw.selectTime = time_time();
 					}
-					if (ui.isHovered && ui.inputReleasedR) {
+					if (ui.is_hovered && ui.input_released_r) {
 						Context.setSwatch(Project.raw.swatches[i]);
 						let add = Project.raw.swatches.length > 1 ? 1 : 0;
 						///if (krom_windows || krom_linux || krom_darwin)
@@ -169,7 +169,7 @@ class TabSwatches {
 						add += 1;
 						///end
 
-						UIMenu.draw((ui: ZuiRaw) => {
+						UIMenu.draw((ui: zui_t) => {
 							if (UIMenu.menuButton(ui, tr("Duplicate"))) {
 								Context.setSwatch(Project.cloneSwatch(Context.raw.swatch));
 								Project.raw.swatches.push(Context.raw.swatch);
@@ -198,12 +198,12 @@ class TabSwatches {
 							///end
 						}, add);
 					}
-					if (ui.isHovered) {
+					if (ui.is_hovered) {
 						let color = Project.raw.swatches[i].base;
 						color = color_set_ab(color, Project.raw.swatches[i].opacity * 255);
 						let val = color;
 						if (val < 0) val += 4294967296;
-						Zui.tooltip("#" + val.toString(16));
+						zui_tooltip("#" + val.toString(16));
 					}
 				}
 			}
@@ -212,7 +212,7 @@ class TabSwatches {
 			if (Base.dragSwatch != null && TabSwatches.dragPosition == Project.raw.swatches.length) {
 				ui._x = uix; // Reset the position because otherwise it would start in the row below
 				ui._y = uiy;
-				Zui.fill(28, -2, 2, 32, ui.t.HIGHLIGHT_COL);
+				zui_fill(28, -2, 2, 32, ui.t.HIGHLIGHT_COL);
 			}
 
 			// Currently there is no valid dragPosition so reset it
@@ -220,10 +220,10 @@ class TabSwatches {
 				TabSwatches.dragPosition = -1;
 			}
 
-			let inFocus = ui.inputX > ui._windowX && ui.inputX < ui._windowX + ui._windowW &&
-						  ui.inputY > ui._windowY && ui.inputY < ui._windowY + ui._windowH;
-			if (inFocus && ui.isDeleteDown && Project.raw.swatches.length > 1) {
-				ui.isDeleteDown = false;
+			let inFocus = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
+						  ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
+			if (inFocus && ui.is_delete_down && Project.raw.swatches.length > 1) {
+				ui.is_delete_down = false;
 				TabSwatches.deleteSwatch(Context.raw.swatch);
 			}
 		}

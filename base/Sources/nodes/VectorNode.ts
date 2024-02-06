@@ -51,7 +51,7 @@ class VectorNode extends LogicNode {
 		this.inputs[2].set(value.z);
 	}
 
-	static def: TNode = {
+	static def: zui_node_t = {
 		id: 0,
 		name: _tr("Vector"),
 		type: "VectorNode",

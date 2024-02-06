@@ -131,7 +131,7 @@ class UtilUV {
 		g4_clear(0x00000000);
 		g4_set_pipeline(UtilUV.pipeDilate);
 		///if (krom_metal || krom_vulkan)
-		g4_set_vertex_buffer(MeshData.get(geom, [{name: "tex", data: "short2norm"}]));
+		g4_set_vertex_buffer(mesh_data_get(geom, [{name: "tex", data: "short2norm"}]));
 		///else
 		g4_set_vertex_buffer(geom._vertex_buffer);
 		///end

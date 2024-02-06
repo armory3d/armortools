@@ -4,7 +4,7 @@ class ImportBlendMesh {
 	static eps = 1.0 / 32767;
 
 	static run = (path: string, replaceExisting = true) => {
-		Data.getBlob(path, (b: ArrayBuffer) => {
+		data_get_blob(path, (b: ArrayBuffer) => {
 			let bl = ParserBlend.init(b);
 			if (bl.dna == null) {
 				Console.error(Strings.error3());
@@ -436,7 +436,7 @@ class ImportBlendMesh {
 				first = false;
 			}
 
-			Data.deleteBlob(path);
+			data_delete_blob(path);
 		});
 	}
 

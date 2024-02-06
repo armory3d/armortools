@@ -3,7 +3,7 @@ class UtilMesh {
 
 	static unwrappers: Map<string, ((a: any)=>void)> = new Map();
 
-	static mergeMesh = (paintObjects: TMeshObject[] = null) => {
+	static mergeMesh = (paintObjects: mesh_object_t[] = null) => {
 		if (paintObjects == null) paintObjects = Project.paintObjects;
 		if (paintObjects.length == 0) return;
 		Context.raw.mergedObjectIsAtlas = paintObjects.length < Project.paintObjects.length;
@@ -76,11 +76,11 @@ class UtilMesh {
 		if (va3 != null) raw.vertex_arrays.push({ values: va3, attrib: "col", data: "short4norm", padding: 1 });
 
 		UtilMesh.removeMergedMesh();
-		MeshData.create(raw, (md: mesh_data_t) => {
-			Context.raw.mergedObject = MeshObject.create(md, Context.raw.paintObject.materials);
+		mesh_data_create(raw, (md: mesh_data_t) => {
+			Context.raw.mergedObject = mesh_object_create(md, Context.raw.paintObject.materials);
 			Context.raw.mergedObject.base.name = Context.raw.paintObject.base.name + "_merged";
 			Context.raw.mergedObject.force_context = "paint";
-			BaseObject.setParent(Context.raw.mergedObject.base, Context.mainObject().base);
+			object_set_parent(Context.raw.mergedObject.base, Context.mainObject().base);
 		});
 
 		///if (krom_direct3d12 || krom_vulkan || krom_metal)
@@ -90,8 +90,8 @@ class UtilMesh {
 
 	static removeMergedMesh = () => {
 		if (Context.raw.mergedObject != null) {
-			MeshData.delete(Context.raw.mergedObject.data);
-			MeshObject.remove(Context.raw.mergedObject);
+			mesh_data_delete(Context.raw.mergedObject.data);
+			mesh_object_remove(Context.raw.mergedObject);
 			Context.raw.mergedObject = null;
 		}
 	}

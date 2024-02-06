@@ -67,7 +67,7 @@ class PhotoToPBRNode extends LogicNode {
 						f32a[i + PhotoToPBRNode.tileWithBorderW * PhotoToPBRNode.tileWithBorderW * 2] = (u8a[i * 4 + 2] / 255 - 0.5) / 0.5;
 					}
 
-					Data.getBlob("models/photo_to_" + PhotoToPBRNode.modelNames[from] + ".quant.onnx", (model_blob: ArrayBuffer) => {
+					data_get_blob("models/photo_to_" + PhotoToPBRNode.modelNames[from] + ".quant.onnx", (model_blob: ArrayBuffer) => {
 						let buf = Krom.mlInference(model_blob, [f32a.buffer], null, null, Config.raw.gpu_inference);
 						let ar = new Float32Array(buf);
 						let u8a = new Uint8Array(4 * PhotoToPBRNode.tileW * PhotoToPBRNode.tileW);
@@ -168,7 +168,7 @@ class PhotoToPBRNode extends LogicNode {
 	}
 	///end
 
-	static def: TNode = {
+	static def: zui_node_t = {
 		id: 0,
 		name: _tr("Photo to PBR"),
 		type: "PhotoToPBRNode",

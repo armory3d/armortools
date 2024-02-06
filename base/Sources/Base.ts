@@ -17,16 +17,16 @@ class Base {
 	static dropX = 0.0;
 	static dropY = 0.0;
 	static font: font_t = null;
-	static theme: Theme;
+	static theme: theme_t;
 	static colorWheel: image_t;
 	static colorWheelGradient: image_t;
-	static uiBox: ZuiRaw;
-	static uiMenu: ZuiRaw;
+	static uiBox: zui_t;
+	static uiMenu: zui_t;
 	static defaultElementW = 100;
 	static defaultElementH = 28;
 	static defaultFontSize = 13;
-	static resHandle = Handle.create();
-	static bitsHandle = Handle.create();
+	static resHandle = zui_handle_create();
+	static bitsHandle = zui_handle_create();
 	static dropPaths: string[] = [];
 	static appx = 0;
 	static appy = 0;
@@ -138,9 +138,9 @@ class Base {
 
 		Krom.setSaveAndQuitCallback(Base.saveAndQuitCallback);
 
-		Data.getFont("font.ttf", (f: font_t) => {
-			Data.getImage("color_wheel.k", (imageColorWheel: image_t) => {
-				Data.getImage("color_wheel_gradient.k", (imageColorWheelGradient: image_t) => {
+		data_get_font("font.ttf", (f: font_t) => {
+			data_get_image("color_wheel.k", (imageColorWheel: image_t) => {
+				data_get_image("color_wheel_gradient.k", (imageColorWheelGradient: image_t) => {
 
 					Base.font = f;
 					Config.loadTheme(Config.raw.theme, false);
@@ -161,10 +161,10 @@ class Base {
 
 					Base.colorWheel = imageColorWheel;
 					Base.colorWheelGradient = imageColorWheelGradient;
-					Nodes.enumTexts = Base.enumTexts;
-					Nodes.tr = tr;
-					Base.uiBox = Zui.create({ theme: Base.theme, font: f, scaleFactor: Config.raw.window_scale, color_wheel: Base.colorWheel, black_white_gradient: Base.colorWheelGradient });
-					Base.uiMenu = Zui.create({ theme: Base.theme, font: f, scaleFactor: Config.raw.window_scale, color_wheel: Base.colorWheel, black_white_gradient: Base.colorWheelGradient });
+					zui_set_enum_texts(Base.enumTexts);
+					zui_tr = tr;
+					Base.uiBox = zui_create({ theme: Base.theme, font: f, scaleFactor: Config.raw.window_scale, color_wheel: Base.colorWheel, black_white_gradient: Base.colorWheelGradient });
+					Base.uiMenu = zui_create({ theme: Base.theme, font: f, scaleFactor: Config.raw.window_scale, color_wheel: Base.colorWheel, black_white_gradient: Base.colorWheelGradient });
 					Base.defaultElementH = Base.uiMenu.t.ELEMENT_H;
 
 					// Init plugins
@@ -185,18 +185,18 @@ class Base {
 					RandomNode.setSeed(Math.floor(time_time() * 4294967295));
 					///end
 
-					App.notifyOnUpdate(Base.update);
-					App.notifyOnRender2D(UIView2D.render);
-					App.notifyOnUpdate(UIView2D.update);
+					app_notify_on_update(Base.update);
+					app_notify_on_render_2d(UIView2D.render);
+					app_notify_on_update(UIView2D.update);
 					///if (is_paint || is_sculpt)
-					App.notifyOnRender2D(UIBase.renderCursor);
+					app_notify_on_render_2d(UIBase.renderCursor);
 					///end
-					App.notifyOnUpdate(UINodes.update);
-					App.notifyOnRender2D(UINodes.render);
-					App.notifyOnUpdate(UIBase.update);
-					App.notifyOnRender2D(UIBase.render);
-					App.notifyOnUpdate(Camera.update);
-					App.notifyOnRender2D(Base.render);
+					app_notify_on_update(UINodes.update);
+					app_notify_on_render_2d(UINodes.render);
+					app_notify_on_update(UIBase.update);
+					app_notify_on_render_2d(UIBase.render);
+					app_notify_on_update(Camera.update);
+					app_notify_on_render_2d(Base.render);
 
 					///if (is_paint || is_sculpt)
 					Base.appx = UIToolbar.toolbarw;
@@ -209,7 +209,7 @@ class Base {
 					if (Config.raw.layout[LayoutSize.LayoutHeader] == 1) Base.appy += UIHeader.headerh;
 					let cam = scene_camera;
 					cam.data.fov = Math.floor(cam.data.fov * 100) / 100;
-					CameraObject.buildProjection(cam);
+					camera_object_build_projection(cam);
 
 					Args.run();
 
@@ -386,10 +386,10 @@ class Base {
 
 		let cam = scene_camera;
 		if (cam.data.ortho != null) {
-			cam.data.ortho[2] = -2 * (App.h() / App.w());
-			cam.data.ortho[3] =  2 * (App.h() / App.w());
+			cam.data.ortho[2] = -2 * (app_h() / app_w());
+			cam.data.ortho[3] =  2 * (app_h() / app_w());
 		}
-		CameraObject.buildProjection(cam);
+		camera_object_build_projection(cam);
 
 		if (Context.raw.cameraType == CameraType.CameraOrthographic) {
 			Viewport.updateCameraType(Context.raw.cameraType);
@@ -478,7 +478,7 @@ class Base {
 				///end
 			}
 			// Disable touch scrolling while dragging is active
-			Zui.touchScroll = !Base.isDragging;
+			zui_set_touch_scroll(!Base.isDragging);
 		}
 
 		if (hasDrag && (mouse_movement_x != 0 || mouse_movement_y != 0)) {
@@ -580,7 +580,7 @@ class Base {
 		///if krom_windows
 		let isPicker = Context.raw.tool == WorkspaceTool.ToolPicker || Context.raw.tool == WorkspaceTool.ToolMaterial;
 		let decal = Context.raw.tool == WorkspaceTool.ToolDecal || Context.raw.tool == WorkspaceTool.ToolText;
-		Zui.alwaysRedrawWindow = !Context.raw.cacheDraws ||
+		zui_set_always_redraw_window(!Context.raw.cacheDraws ||
 			UIMenu.show ||
 			UIBox.show ||
 			Base.isDragging ||
@@ -588,11 +588,11 @@ class Base {
 			decal ||
 			UIView2D.show ||
 			!Config.raw.brush_3d ||
-			Context.raw.frame < 3;
+			Context.raw.frame < 3);
 		///end
 		///end
 
-		if (Zui.alwaysRedrawWindow && Context.raw.ddirty < 0) Context.raw.ddirty = 0;
+		if (zui_always_redraw_window() && Context.raw.ddirty < 0) Context.raw.ddirty = 0;
 	}
 
 	///if (is_paint || is_sculpt)
@@ -745,10 +745,10 @@ class Base {
 			let img = Base.getDragImage();
 
 			///if (is_paint || is_sculpt)
-			let scaleFactor = Zui.SCALE(UIBase.ui);
+			let scaleFactor = zui_SCALE(UIBase.ui);
 			///end
 			///if is_lab
-			let scaleFactor = Zui.SCALE(Base.uiBox);
+			let scaleFactor = zui_SCALE(Base.uiBox);
 			///end
 
 			let size = (Base.dragSize == -1 ? 50 : Base.dragSize) * scaleFactor;
@@ -827,16 +827,16 @@ class Base {
 
 	static notifyOnNextFrame = (f: ()=>void) => {
 		let _render = (_: any) => {
-			App.notifyOnInit(() => {
+			app_notify_on_init(() => {
 				let _update = () => {
-					App.notifyOnInit(f);
-					App.removeUpdate(_update);
+					app_notify_on_init(f);
+					app_remove_update(_update);
 				}
-				App.notifyOnUpdate(_update);
+				app_notify_on_update(_update);
 			});
-			App.removeRender(_render);
+			app_remove_render(_render);
 		}
-		App.notifyOnRender(_render);
+		app_notify_on_render(_render);
 	}
 
 	static toggleFullscreen = () => {
@@ -857,16 +857,16 @@ class Base {
 	}
 
 	static isScrolling = (): bool => {
-		for (let ui of Base.getUIs()) if (ui.isScrolling) return true;
+		for (let ui of Base.getUIs()) if (ui.is_scrolling) return true;
 		return false;
 	}
 
 	static isComboSelected = (): bool => {
-		for (let ui of Base.getUIs()) if (ui.comboSelectedHandle_ptr != null) return true;
+		for (let ui of Base.getUIs()) if (ui.combo_selected_handle_ptr != null) return true;
 		return false;
 	}
 
-	static getUIs = (): ZuiRaw[] => {
+	static getUIs = (): zui_t[] => {
 		return [Base.uiBox, Base.uiMenu, UIBase.ui, UINodes.ui, UIView2D.ui];
 	}
 
@@ -887,7 +887,7 @@ class Base {
 
 	static redrawConsole = () => {
 		let statush = Config.raw.layout[LayoutSize.LayoutStatusH];
-		if (UIBase.ui != null && statush > UIStatus.defaultStatusH * Zui.SCALE(UIBase.ui)) {
+		if (UIBase.ui != null && statush > UIStatus.defaultStatusH * zui_SCALE(UIBase.ui)) {
 			UIBase.hwnds[TabArea.TabStatus].redraws = 2;
 		}
 	}
@@ -904,14 +904,14 @@ class Base {
 			///end
 
 			///if krom_ios
-			show2d ? Math.floor((App.w() + raw.layout[LayoutSize.LayoutNodesW]) * 0.473) : Math.floor(App.w() * 0.473), // LayoutNodesW
+			show2d ? Math.floor((app_w() + raw.layout[LayoutSize.LayoutNodesW]) * 0.473) : Math.floor(app_w() * 0.473), // LayoutNodesW
 			///elseif krom_android
-			show2d ? Math.floor((App.w() + raw.layout[LayoutSize.LayoutNodesW]) * 0.473) : Math.floor(App.w() * 0.473),
+			show2d ? Math.floor((app_w() + raw.layout[LayoutSize.LayoutNodesW]) * 0.473) : Math.floor(app_w() * 0.473),
 			///else
-			show2d ? Math.floor((App.w() + raw.layout[LayoutSize.LayoutNodesW]) * 0.515) : Math.floor(App.w() * 0.515), // Align with ui header controls
+			show2d ? Math.floor((app_w() + raw.layout[LayoutSize.LayoutNodesW]) * 0.515) : Math.floor(app_w() * 0.515), // Align with ui header controls
 			///end
 
-			Math.floor(App.h() / 2), // LayoutNodesH
+			Math.floor(app_h() / 2), // LayoutNodesH
 			Math.floor(UIStatus.defaultStatusH * raw.window_scale), // LayoutStatusH
 
 			///if (krom_android || krom_ios)
@@ -1597,7 +1597,7 @@ class Base {
 
 		if (Base.pipeMerge == null) Base.makePipe();
 		Base.makeTempImg();
-		if (ConstData.screenAlignedVB == null) ConstData.createScreenAlignedData();
+		if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
 
 		g2_begin(Base.tempImage.g2, false); // Copy to temp
 		Base.tempImage.g2.pipeline = Base.pipeCopy;
@@ -1622,8 +1622,8 @@ class Base {
 			g4_set_tex(Base.texaMergeMask, Base.tempImage);
 			g4_set_float(Base.opacMergeMask, SlotLayer.getOpacity(l1));
 			g4_set_int(Base.blendingMergeMask, l1.blending);
-			g4_set_vertex_buffer(ConstData.screenAlignedVB);
-			g4_set_index_buffer(ConstData.screenAlignedIB);
+			g4_set_vertex_buffer(const_data_screen_aligned_vb);
+			g4_set_index_buffer(const_data_screen_aligned_ib);
 			g4_draw();
 			g4_end();
 		}
@@ -1638,8 +1638,8 @@ class Base {
 				g4_set_tex(Base.texa, Base.tempImage);
 				g4_set_float(Base.opac, SlotLayer.getOpacity(l1));
 				g4_set_int(Base.blending, l1.blending);
-				g4_set_vertex_buffer(ConstData.screenAlignedVB);
-				g4_set_index_buffer(ConstData.screenAlignedIB);
+				g4_set_vertex_buffer(const_data_screen_aligned_vb);
+				g4_set_index_buffer(const_data_screen_aligned_ib);
 				g4_draw();
 				g4_end();
 			}
@@ -1660,8 +1660,8 @@ class Base {
 				g4_set_tex(Base.texa, Base.tempImage);
 				g4_set_float(Base.opac, SlotLayer.getOpacity(l1));
 				g4_set_int(Base.blending, l1.paintNorBlend ? -2 : -1);
-				g4_set_vertex_buffer(ConstData.screenAlignedVB);
-				g4_set_index_buffer(ConstData.screenAlignedIB);
+				g4_set_vertex_buffer(const_data_screen_aligned_vb);
+				g4_set_index_buffer(const_data_screen_aligned_ib);
 				g4_draw();
 				g4_end();
 			}
@@ -1691,7 +1691,7 @@ class Base {
 		Base.makeTempImg();
 		Base.makeExportImg();
 		if (Base.pipeMerge == null) Base.makePipe();
-		if (ConstData.screenAlignedVB == null) ConstData.createScreenAlignedData();
+		if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
 		let empty = render_path_render_targets.get("empty_white").image;
 
 		// Clear export layer
@@ -1741,8 +1741,8 @@ class Base {
 				g4_set_tex(Base.texa, Base.tempImage);
 				g4_set_float(Base.opac, SlotLayer.getOpacity(l1));
 				g4_set_int(Base.blending, layers.length > 1 ? l1.blending : 0);
-				g4_set_vertex_buffer(ConstData.screenAlignedVB);
-				g4_set_index_buffer(ConstData.screenAlignedIB);
+				g4_set_vertex_buffer(const_data_screen_aligned_vb);
+				g4_set_index_buffer(const_data_screen_aligned_ib);
 				g4_draw();
 				g4_end();
 			}
@@ -1763,8 +1763,8 @@ class Base {
 				g4_set_tex(Base.texa, Base.tempImage);
 				g4_set_float(Base.opac, SlotLayer.getOpacity(l1));
 				g4_set_int(Base.blending, l1.paintNorBlend ? -2 : -1);
-				g4_set_vertex_buffer(ConstData.screenAlignedVB);
-				g4_set_index_buffer(ConstData.screenAlignedIB);
+				g4_set_vertex_buffer(const_data_screen_aligned_vb);
+				g4_set_index_buffer(const_data_screen_aligned_ib);
 				g4_draw();
 				g4_end();
 			}
@@ -1817,8 +1817,8 @@ class Base {
 			g4_set_tex(Base.texa, empty);
 			g4_set_float(Base.opac, 1.0);
 			g4_set_int(Base.blending, -4);
-			g4_set_vertex_buffer(ConstData.screenAlignedVB);
-			g4_set_index_buffer(ConstData.screenAlignedIB);
+			g4_set_vertex_buffer(const_data_screen_aligned_vb);
+			g4_set_index_buffer(const_data_screen_aligned_ib);
 			g4_draw();
 			g4_end();
 		}
@@ -1840,13 +1840,13 @@ class Base {
 		g2_end(Base.tempImage.g2);
 
 		// Apply mask
-		if (ConstData.screenAlignedVB == null) ConstData.createScreenAlignedData();
+		if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
 		g4_begin(l.texpaint.g4);
 		g4_set_pipeline(Base.pipeApplyMask);
 		g4_set_tex(Base.tex0Mask, Base.tempImage);
 		g4_set_tex(Base.texaMask, m.texpaint);
-		g4_set_vertex_buffer(ConstData.screenAlignedVB);
-		g4_set_index_buffer(ConstData.screenAlignedIB);
+		g4_set_vertex_buffer(const_data_screen_aligned_vb);
+		g4_set_index_buffer(const_data_screen_aligned_ib);
 		g4_draw();
 		g4_end();
 	}
@@ -1860,8 +1860,8 @@ class Base {
 		g4_set_tex(Base.texa, Base.tempImage);
 		g4_set_float(Base.opac, i1maskOpacity);
 		g4_set_int(Base.blending, i1blending);
-		g4_set_vertex_buffer(ConstData.screenAlignedVB);
-		g4_set_index_buffer(ConstData.screenAlignedIB);
+		g4_set_vertex_buffer(const_data_screen_aligned_vb);
+		g4_set_index_buffer(const_data_screen_aligned_ib);
 		g4_draw();
 		g4_end();
 	}
@@ -2045,7 +2045,7 @@ class Base {
 				Context.raw.layer.parent = below.parent;
 			}
 		}
-		if (clear) App.notifyOnInit(() => { SlotLayer.clear(l); });
+		if (clear) app_notify_on_init(() => { SlotLayer.clear(l); });
 		Context.raw.layerPreviewDirty = true;
 		return l;
 	}
@@ -2056,7 +2056,7 @@ class Base {
 		if (position == -1) position = Project.layers.indexOf(parent);
 		Project.layers.splice(position, 0, l);
 		Context.setLayer(l);
-		if (clear) App.notifyOnInit(() => { SlotLayer.clear(l); });
+		if (clear) app_notify_on_init(() => { SlotLayer.clear(l); });
 		Context.raw.layerPreviewDirty = true;
 		return l;
 	}
@@ -2079,7 +2079,7 @@ class Base {
 			History.toFillLayer();
 			SlotLayer.toFillLayer(l);
 		}
-		App.notifyOnInit(_init);
+		app_notify_on_init(_init);
 	}
 
 	static createImageMask = (asset: TAsset) => {
@@ -2102,11 +2102,11 @@ class Base {
 			l.objectMask = Context.raw.layerFilter;
 			SlotLayer.clear(l, baseColor, null, occlusion, roughness, metallic);
 		}
-		App.notifyOnInit(_init);
+		app_notify_on_init(_init);
 	}
 
 	static onLayersResized = () => {
-		App.notifyOnInit(() => {
+		app_notify_on_init(() => {
 			Base.resizeLayers();
 			let _layer = Context.raw.layer;
 			let _material = Context.raw.material;
@@ -2141,7 +2141,7 @@ class Base {
 		let nodes = UINodes.getNodes();
 		let canvas = UINodes.getCanvas(true);
 		if (nodes.nodesSelectedId.length > 0) {
-			let node = Nodes.getNode(canvas.nodes, nodes.nodesSelectedId[0]);
+			let node = zui_get_node(canvas.nodes, nodes.nodesSelectedId[0]);
 			let brushNode = ParserLogic.getLogicNode(node);
 			if (brushNode != null && brushNode.getCachedImage() != null) {
 				texpaint = brushNode.getCachedImage();

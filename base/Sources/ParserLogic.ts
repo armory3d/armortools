@@ -2,33 +2,33 @@
 class ParserLogic {
 
 	static customNodes = new Map();
-	static nodes: TNode[];
-	static links: TNodeLink[];
+	static nodes: zui_node_t[];
+	static links: zui_node_link_t[];
 
 	static parsed_nodes: string[] = null;
 	static parsed_labels: Map<string, string> = null;
 	static nodeMap: Map<string, LogicNode>;
-	static rawMap: Map<LogicNode, TNode>;
+	static rawMap: Map<LogicNode, zui_node_t>;
 
-	static getLogicNode = (node: TNode): LogicNode => {
+	static getLogicNode = (node: zui_node_t): LogicNode => {
 		return ParserLogic.nodeMap.get(ParserLogic.node_name(node));
 	}
 
-	static getRawNode = (node: LogicNode): TNode => {
+	static getRawNode = (node: LogicNode): zui_node_t => {
 		return ParserLogic.rawMap.get(node);
 	}
 
-	static getNode = (id: i32): TNode => {
+	static getNode = (id: i32): zui_node_t => {
 		for (let n of ParserLogic.nodes) if (n.id == id) return n;
 		return null;
 	}
 
-	static getLink = (id: i32): TNodeLink => {
+	static getLink = (id: i32): zui_node_link_t => {
 		for (let l of ParserLogic.links) if (l.id == id) return l;
 		return null;
 	}
 
-	static getInputLink = (inp: TNodeSocket): TNodeLink => {
+	static getInputLink = (inp: zui_node_socket_t): zui_node_link_t => {
 		for (let l of ParserLogic.links) {
 			if (l.to_id == inp.node_id) {
 				let node = ParserLogic.getNode(inp.node_id);
@@ -39,8 +39,8 @@ class ParserLogic {
 		return null;
 	}
 
-	static getOutputLinks = (out: TNodeSocket): TNodeLink[] => {
-		let res: TNodeLink[] = [];
+	static getOutputLinks = (out: zui_node_socket_t): zui_node_link_t[] => {
+		let res: zui_node_link_t[] = [];
 		for (let l of ParserLogic.links) {
 			if (l.from_id == out.node_id) {
 				let node = ParserLogic.getNode(out.node_id);
@@ -55,12 +55,12 @@ class ParserLogic {
 		return s.replaceAll(" ", "");
 	}
 
-	static node_name = (node: TNode): string => {
+	static node_name = (node: zui_node_t): string => {
 		let s = ParserLogic.safe_src(node.name) + node.id;
 		return s;
 	}
 
-	static parse = (canvas: TNodeCanvas) => {
+	static parse = (canvas: zui_node_canvas_t) => {
 		ParserLogic.nodes = canvas.nodes;
 		ParserLogic.links = canvas.links;
 
@@ -73,7 +73,7 @@ class ParserLogic {
 		for (let node of root_nodes) ParserLogic.build_node(node);
 	}
 
-	static build_node = (node: TNode): string => {
+	static build_node = (node: zui_node_t): string => {
 		// Get node name
 		let name = ParserLogic.node_name(node);
 
@@ -94,7 +94,7 @@ class ParserLogic {
 			if (b.type == "ENUM") {
 				// let arrayData = Array.isArray(b.data);
 				let arrayData = b.data.length > 1;
-				let texts = arrayData ? b.data : Nodes.enumTextsHaxe(node.type);
+				let texts = arrayData ? b.data : zui_enum_texts_js(node.type);
 				v[b.name] = texts[b.default_value];
 			}
 			else {
@@ -144,8 +144,8 @@ class ParserLogic {
 		return name;
 	}
 
-	static get_root_nodes = (node_group: TNodeCanvas): TNode[] => {
-		let roots: TNode[] = [];
+	static get_root_nodes = (node_group: zui_node_canvas_t): zui_node_t[] => {
+		let roots: zui_node_t[] = [];
 		for (let node of node_group.nodes) {
 			let linked = false;
 			for (let out of node.outputs) {
@@ -162,7 +162,7 @@ class ParserLogic {
 		return roots;
 	}
 
-	static build_default_node = (inp: TNodeSocket): LogicNode => {
+	static build_default_node = (inp: zui_node_socket_t): LogicNode => {
 
 		let v: LogicNode = null;
 

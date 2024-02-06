@@ -14,11 +14,11 @@ class UniformsExt {
 		uniforms_tex_links = [UniformsExt.linkTex];
 	}
 
-	static linkInt = (object: TBaseObject, mat: material_data_t, link: string): Null<i32> => {
+	static linkInt = (object: object_t, mat: material_data_t, link: string): Null<i32> => {
 		return null;
 	}
 
-	static linkFloat = (object: TBaseObject, mat: material_data_t, link: string): Null<f32> => {
+	static linkFloat = (object: object_t, mat: material_data_t, link: string): Null<f32> => {
 		switch (link) {
 			case "_brushRadius": {
 				///if (is_paint || is_sculpt)
@@ -148,7 +148,7 @@ class UniformsExt {
 		return null;
 	}
 
-	static linkVec2 = (object: TBaseObject, mat: material_data_t, link: string): vec4_t => {
+	static linkVec2 = (object: object_t, mat: material_data_t, link: string): vec4_t => {
 		switch (link) {
 			case "_gbufferSize": {
 				vec4_set(UniformsExt.vec, 0, 0, 0);
@@ -180,7 +180,7 @@ class UniformsExt {
 		return null;
 	}
 
-	static linkVec3 = (object: TBaseObject, mat: material_data_t, link: string): vec4_t => {
+	static linkVec3 = (object: object_t, mat: material_data_t, link: string): vec4_t => {
 		let v: vec4_t = null;
 		switch (link) {
 			///if (is_paint || is_sculpt)
@@ -261,7 +261,7 @@ class UniformsExt {
 	}
 	///end
 
-	static linkVec4 = (object: TBaseObject, mat: material_data_t, link: string): vec4_t => {
+	static linkVec4 = (object: object_t, mat: material_data_t, link: string): vec4_t => {
 		switch (link) {
 			case "_inputBrush": {
 				let down = mouse_down() || pen_down();
@@ -316,7 +316,7 @@ class UniformsExt {
 		return null;
 	}
 
-	static linkMat4 = (object: TBaseObject, mat: material_data_t, link: string): mat4_t => {
+	static linkMat4 = (object: object_t, mat: material_data_t, link: string): mat4_t => {
 		switch (link) {
 			///if (is_paint || is_sculpt)
 			case "_decalLayerMatrix": { // Decal layer
@@ -332,7 +332,7 @@ class UniformsExt {
 		return null;
 	}
 
-	static linkTex = (object: TBaseObject, mat: material_data_t, link: string): image_t => {
+	static linkTex = (object: object_t, mat: material_data_t, link: string): image_t => {
 		switch (link) {
 			case "_texpaint_undo": {
 				///if (is_paint || is_sculpt)
@@ -366,12 +366,12 @@ class UniformsExt {
 			}
 
 			case "_ltcMat": {
-				if (ConstData.ltcMatTex == null) ConstData.initLTC();
-				return ConstData.ltcMatTex;
+				if (const_data_ltc_mat_tex == null) const_data_init_ltc();
+				return const_data_ltc_mat_tex;
 			}
 			case "_ltcMag": {
-				if (ConstData.ltcMagTex == null) ConstData.initLTC();
-				return ConstData.ltcMagTex;
+				if (const_data_ltc_mag_tex == null) const_data_init_ltc();
+				return const_data_ltc_mag_tex;
 			}
 
 			///if (is_paint || is_sculpt)
@@ -399,7 +399,7 @@ class UniformsExt {
 					let _init = () => {
 						UtilUV.cacheUVMap();
 					}
-					App.notifyOnInit(_init);
+					app_notify_on_init(_init);
 				}
 				return UtilUV.uvmap;
 			}
@@ -408,7 +408,7 @@ class UniformsExt {
 					let _init = () => {
 						UtilUV.cacheTriangleMap();
 					}
-					App.notifyOnInit(_init);
+					app_notify_on_init(_init);
 				}
 				return UtilUV.trianglemap;
 			}
@@ -416,7 +416,7 @@ class UniformsExt {
 				let _init = () => {
 					UtilUV.cacheUVIslandMap();
 				}
-				App.notifyOnInit(_init);
+				app_notify_on_init(_init);
 				return UtilUV.uvislandmapCached ? UtilUV.uvislandmap :render_path_render_targets.get("empty_black").image;
 			}
 			case "_texdilatemap": {

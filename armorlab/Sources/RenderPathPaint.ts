@@ -165,7 +165,7 @@ class RenderPathPaint {
 
 		let nodes = UINodes.getNodes();
 		let canvas = UINodes.getCanvas(true);
-		let inpaint = nodes.nodesSelectedId.length > 0 && Nodes.getNode(canvas.nodes, nodes.nodesSelectedId[0]).type == "InpaintNode";
+		let inpaint = nodes.nodesSelectedId.length > 0 && zui_get_node(canvas.nodes, nodes.nodesSelectedId[0]).type == "InpaintNode";
 
 		if (!Base.uiEnabled || Base.isDragging || !inpaint) {
 			return;
@@ -174,8 +174,8 @@ class RenderPathPaint {
 		let mx = Context.raw.paintVec.x;
 		let my = 1.0 - Context.raw.paintVec.y;
 		if (Context.raw.brushLocked) {
-			mx = (Context.raw.lockStartedX - App.x()) / App.w();
-			my = 1.0 - (Context.raw.lockStartedY - App.y()) / App.h();
+			mx = (Context.raw.lockStartedX - app_x()) / app_w();
+			my = 1.0 - (Context.raw.lockStartedY - app_y()) / app_h();
 		}
 		let radius = Context.raw.brushRadius;
 		RenderPathPaint.drawCursor(mx, my, radius / 3.4);
@@ -195,15 +195,15 @@ class RenderPathPaint {
 		g4_set_float2(Base.cursorMouse, mx, my);
 		g4_set_float2(Base.cursorTexStep, 1 / gbuffer0.width, 1 / gbuffer0.height);
 		g4_set_float(Base.cursorRadius, radius);
-		let right = vec4_normalize(CameraObject.rightWorld(scene_camera));
+		let right = vec4_normalize(camera_object_right_world(scene_camera));
 		g4_set_float3(Base.cursorCameraRight, right.x, right.y, right.z);
 		g4_set_float3(Base.cursorTint, tintR, tintG, tintB);
-		g4_set_mat(Base.cursorVP, scene_camera.VP);
+		g4_set_mat(Base.cursorVP, scene_camera.vp);
 		let helpMat = mat4_identity();
-		mat4_get_inv(helpMat, scene_camera.VP);
+		mat4_get_inv(helpMat, scene_camera.vp);
 		g4_set_mat(Base.cursorInvVP, helpMat);
 		///if (krom_metal || krom_vulkan)
-		g4_set_vertex_buffer(MeshData.get(geom, [{name: "tex", data: "short2norm"}]));
+		g4_set_vertex_buffer(mesh_data_get(geom, [{name: "tex", data: "short2norm"}]));
 		///else
 		g4_set_vertex_buffer(geom._vertexBuffer);
 		///end
@@ -255,7 +255,7 @@ class RenderPathPaint {
 		let nodes = UINodes.getNodes();
 		let canvas = UINodes.getCanvas(true);
 		if (nodes.nodesSelectedId.length > 0) {
-			let node = Nodes.getNode(canvas.nodes, nodes.nodesSelectedId[0]);
+			let node = zui_get_node(canvas.nodes, nodes.nodesSelectedId[0]);
 			let brushNode = ParserLogic.getLogicNode(node);
 			if (brushNode != null) {
 				image = brushNode.getCachedImage();
@@ -285,7 +285,7 @@ class RenderPathPaint {
 
 			let nodes = UINodes.getNodes();
 			let canvas = UINodes.getCanvas(true);
-			let node = Nodes.getNode(canvas.nodes, nodes.nodesSelectedId[0]);
+			let node = zui_get_node(canvas.nodes, nodes.nodesSelectedId[0]);
 			let inpaint = node.type == "InpaintNode";
 			if (inpaint) {
 				let brushNode = ParserLogic.getLogicNode(node);

@@ -12,10 +12,10 @@ type TProjectFormat = {
 	swatches?: TSwatchColor[];
 
 	///if (is_paint || is_sculpt)
-	brush_nodes?: TNodeCanvas[];
+	brush_nodes?: zui_node_canvas_t[];
 	brush_icons?: ArrayBuffer[];
-	material_nodes?: TNodeCanvas[];
-	material_groups?: TNodeCanvas[];
+	material_nodes?: zui_node_canvas_t[];
+	material_groups?: zui_node_canvas_t[];
 	material_icons?: ArrayBuffer[];
 	font_assets?: string[];
 	layer_datas?: TLayerData[];
@@ -30,8 +30,8 @@ type TProjectFormat = {
 	///end
 
 	///if is_lab
-	material?: TNodeCanvas;
-	material_groups?: TNodeCanvas[];
+	material?: zui_node_canvas_t;
+	material_groups?: zui_node_canvas_t[];
 	mesh_data?: mesh_data_t;
 	mesh_icon?: ArrayBuffer;
 	///end

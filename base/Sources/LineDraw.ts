@@ -182,8 +182,8 @@ class LineDraw {
 		g4_set_index_buffer(LineDraw.indexBuffer);
 		g4_set_pipeline(LineDraw.pipeline);
 		let camera = scene_camera;
-		mat4_set_from(LineDraw.vp, camera.V);
-		mat4_mult_mat(LineDraw.vp, camera.P);
+		mat4_set_from(LineDraw.vp, camera.v);
+		mat4_mult_mat(LineDraw.vp, camera.p);
 		g4_set_mat(LineDraw.vpID, LineDraw.vp);
 		g4_draw(0, LineDraw.lines * 6);
 	}

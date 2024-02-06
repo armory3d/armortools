@@ -20,13 +20,13 @@ class UIStatus {
 
 		let statush = Config.raw.layout[LayoutSize.LayoutStatusH];
 
-		if (Zui.window(ui, UIBase.hwnds[TabArea.TabStatus], App.x(), sys_height() - statush, UIStatus.width, statush)) {
+		if (zui_window(ui, UIBase.hwnds[TabArea.TabStatus], app_x(), sys_height() - statush, UIStatus.width, statush)) {
 			ui._y += 2;
 
 			// Border
 			ui.g.color = ui.t.SEPARATOR_COL;
-			g2_fill_rect(0, 0, 1, ui._windowH);
-			g2_fill_rect(ui._windowW - 1, 0, 1, ui._windowH);
+			g2_fill_rect(0, 0, 1, ui._window_h);
+			g2_fill_rect(ui._window_w - 1, 0, 1, ui._window_h);
 
 			// Draw tabs
 			for (let draw of UIBase.hwndTabs[TabArea.TabStatus]) draw(UIBase.htabs[TabArea.TabStatus]);
@@ -39,12 +39,12 @@ class UIStatus {
 		}
 	}
 
-	static drawVersionTab = (htab: HandleRaw) => {
+	static drawVersionTab = (htab: zui_handle_t) => {
 		// Version label
 		if (!Config.raw.touch_ui) {
 			let ui = UIBase.ui;
 			ui.enabled = false;
-			Zui.tab(UIBase.htabs[TabArea.TabStatus], manifest_version);
+			zui_tab(UIBase.htabs[TabArea.TabStatus], manifest_version);
 			ui.enabled = true;
 		}
 	}

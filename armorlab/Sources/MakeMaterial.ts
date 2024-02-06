@@ -93,7 +93,7 @@ class MakeMaterial {
 		scon2._override_context = {};
 		scon2._override_context.addressing = "repeat";
 		let mcon3: material_context_t;
-		MaterialContext.create(mcon2, (_mcon: material_context_t) => { mcon3 = _mcon; });
+		material_context_create(mcon2, (_mcon: material_context_t) => { mcon3 = _mcon; });
 
 		m._shader.contexts.push(scon2);
 		m._shader._contexts.push(scon2);

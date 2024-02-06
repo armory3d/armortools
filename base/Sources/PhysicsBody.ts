@@ -19,7 +19,7 @@ class PhysicsBodyRaw {
 		else this._mass = f;
 	}
 
-	object: TBaseObject;
+	object: object_t;
 	friction = 0.5;
 	restitution = 0.0;
 	collisionMargin = 0.0;
@@ -86,12 +86,12 @@ class PhysicsBody {
 		return f - f * pb.collisionMargin;
 	}
 
-	static init = (pb: PhysicsBodyRaw, o: TBaseObject) => {
+	static init = (pb: PhysicsBodyRaw, o: object_t) => {
 		pb.object = o;
 		if (pb.ready) return;
 		pb.ready = true;
 
-		if (pb.object.ext.constructor != TMeshObject) return; // No mesh data
+		if (pb.object.ext.constructor != mesh_object_t) return; // No mesh data
 		let transform = o.transform;
 		let physics = PhysicsWorld.active;
 
@@ -365,7 +365,7 @@ class PhysicsBody {
 		PhysicsBody.convexHullCache.set(data, shape);
 		PhysicsBody.usersCache.set(data, 1);
 
-		let positions = MeshData.getVArray(data, 'pos').values;
+		let positions = mesh_data_get_vertex_array(data, 'pos').values;
 
 		let sx: f32 = scale.x * (1.0 - margin) * (1 / 32767);
 		let sy: f32 = scale.y * (1.0 - margin) * (1 / 32767);
@@ -397,7 +397,7 @@ class PhysicsBody {
 		PhysicsBody.triangleMeshCache.set(data, triangleMesh);
 		PhysicsBody.usersCache.set(data, 1);
 
-		let positions = MeshData.getVArray(data, 'pos').values;
+		let positions = mesh_data_get_vertex_array(data, 'pos').values;
 		let indices = data._indices;
 
 		let sx: f32 = scale.x * (1 / 32767);

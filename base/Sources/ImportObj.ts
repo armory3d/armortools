@@ -9,7 +9,7 @@ class ImportObj {
 			 i == SplitType.SplitGroup 			   ? "g".charCodeAt(0) :
 			 				 			   			 "u".charCodeAt(0); // usemtl
 
-		Data.getBlob(path, (b: ArrayBuffer) => {
+		data_get_blob(path, (b: ArrayBuffer) => {
 
 			if (isUdim) {
 				let part = Krom.io_obj_parse(b, splitCode, 0, isUdim);
@@ -112,7 +112,7 @@ class ImportObj {
 					ImportMesh.addMesh(parts[i]);
 				}
 			}
-			Data.deleteBlob(path);
+			data_delete_blob(path);
 		});
 	}
 }

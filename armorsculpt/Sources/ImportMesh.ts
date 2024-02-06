@@ -34,8 +34,8 @@ class ImportMesh {
 
 	static finishImport = () => {
 		if (Context.raw.mergedObject != null) {
-			MeshObject.remove(Context.raw.mergedObject);
-			Data.deleteMesh(Context.raw.mergedObject.data._handle);
+			mesh_object_remove(Context.raw.mergedObject);
+			data_delete_mesh(Context.raw.mergedObject.data._handle);
 			Context.raw.mergedObject = null;
 		}
 
@@ -79,19 +79,19 @@ class ImportMesh {
 			let raw = ImportMesh.rawMesh(mesh);
 			if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
 
-			MeshData.create(raw, (md: mesh_data_t) => {
+			mesh_data_create(raw, (md: mesh_data_t) => {
 				Context.raw.paintObject = Context.mainObject();
 
 				Context.selectPaintObject(Context.mainObject());
 				for (let i = 0; i < Project.paintObjects.length; ++i) {
 					let p = Project.paintObjects[i];
 					if (p == Context.raw.paintObject) continue;
-					Data.deleteMesh(p.data._handle);
-					MeshObject.remove(p);
+					data_delete_mesh(p.data._handle);
+					mesh_object_remove(p);
 				}
 				let handle = Context.raw.paintObject.data._handle;
 				if (handle != "SceneSphere" && handle != "ScenePlane") {
-					Data.deleteMesh(handle);
+					data_delete_mesh(handle);
 				}
 
 				if (ImportMesh.clearLayers) {
@@ -100,23 +100,23 @@ class ImportMesh {
 						SlotLayer.unload(l);
 					}
 					Base.newLayer(false);
-					App.notifyOnInit(Base.initLayers);
+					app_notify_on_init(Base.initLayers);
 					History.reset();
 				}
 
-				MeshObject.setData(Context.raw.paintObject, md);
+				mesh_object_set_data(Context.raw.paintObject, md);
 				Context.raw.paintObject.base.name = mesh.name;
 				Project.paintObjects = [Context.raw.paintObject];
 
 				md._handle = raw.name;
-				Data.cachedMeshes.set(md._handle, md);
+				data_cached_meshes.set(md._handle, md);
 
 				Context.raw.ddirty = 4;
 				UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
 				UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
 
 				// Wait for addMesh calls to finish
-				App.notifyOnInit(ImportMesh.finishImport);
+				app_notify_on_init(ImportMesh.finishImport);
 
 				Base.notifyOnNextFrame(() => {
 					let f32 = new Float32Array(Config.getTextureResX() * Config.getTextureResY() * 4);
@@ -147,7 +147,7 @@ class ImportMesh {
 			let raw = ImportMesh.rawMesh(mesh);
 			if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
 
-			MeshData.create(raw, (md: mesh_data_t) => {
+			mesh_data_create(raw, (md: mesh_data_t) => {
 
 				let object = scene_add_mesh_object(md, Context.raw.paintObject.materials, Context.raw.paintObject.base);
 				object.base.name = mesh.base.name;
@@ -158,14 +158,14 @@ class ImportMesh {
 					if (p.base.name == object.base.name) {
 						p.base.name += ".001";
 						p.data._handle += ".001";
-						Data.cachedMeshes.set(p.data._handle, p.data);
+						data_cached_meshes.set(p.data._handle, p.data);
 					}
 				}
 
 				Project.paintObjects.push(object);
 
 				md._handle = raw.name;
-				Data.cachedMeshes.set(md._handle, md);
+				data_cached_meshes.set(md._handle, md);
 
 				Context.raw.ddirty = 4;
 				UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;

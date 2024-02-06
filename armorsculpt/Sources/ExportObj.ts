@@ -7,7 +7,7 @@ class ExportObj {
 		}
 	}
 
-	static run = (path: string, paintObjects: TMeshObject[], applyDisplacement = false) => {
+	static run = (path: string, paintObjects: mesh_object_t[], applyDisplacement = false) => {
 		let o: i32[] = [];
 		ExportObj.writeString(o, "# armorsculpt.org\n");
 

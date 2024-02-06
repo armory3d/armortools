@@ -40,11 +40,11 @@ class InpaintNode extends LogicNode {
 		}
 	}
 
-	static buttons = (ui: ZuiRaw, nodes: NodesRaw, node: TNode) => {
+	static buttons = (ui: zui_t, nodes: zui_nodes_t, node: zui_node_t) => {
 		InpaintNode.auto = node.buttons[0].default_value == 0 ? false : true;
 		if (!InpaintNode.auto) {
-			InpaintNode.strength = Zui.slider(Zui.handle("inpaintnode_0", {value: InpaintNode.strength}), tr("strength"), 0, 1, true);
-			InpaintNode.prompt = Zui.textArea(Zui.handle("inpaintnode_1"), Align.Left, true, tr("prompt"), true);
+			InpaintNode.strength = zui_slider(zui_handle("inpaintnode_0", { value: InpaintNode.strength }), tr("strength"), 0, 1, true);
+			InpaintNode.prompt = zui_text_area(zui_handle("inpaintnode_1"), Align.Left, true, tr("prompt"), true);
 			node.buttons[1].height = 1 + InpaintNode.prompt.split("\n").length;
 		}
 		else node.buttons[1].height = 0;
@@ -68,13 +68,13 @@ class InpaintNode extends LogicNode {
 		Base.notifyOnNextFrame(() => {
 			this.inputs[0].getAsImage((source: image_t) => {
 				if (Base.pipeCopy == null) Base.makePipe();
-				if (ConstData.screenAlignedVB == null) ConstData.createScreenAlignedData();
+				if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
 				g4_begin(InpaintNode.image.g4);
 				g4_set_pipeline(Base.pipeInpaintPreview);
 				g4_set_tex(Base.tex0InpaintPreview, source);
 				g4_set_tex(Base.texaInpaintPreview, InpaintNode.mask);
-				g4_set_vertex_buffer(ConstData.screenAlignedVB);
-				g4_set_index_buffer(ConstData.screenAlignedIB);
+				g4_set_vertex_buffer(const_data_screen_aligned_vb);
+				g4_set_index_buffer(const_data_screen_aligned_ib);
 				g4_draw();
 				g4_end();
 			});
@@ -106,7 +106,7 @@ class InpaintNode extends LogicNode {
 		let u8 = new Uint8Array(bytes_img);
 		let f32mask = new Float32Array(4 * 64 * 64);
 
-		Data.getBlob("models/sd_vae_encoder.quant.onnx", (vae_encoder_blob: ArrayBuffer) => {
+		data_get_blob("models/sd_vae_encoder.quant.onnx", (vae_encoder_blob: ArrayBuffer) => {
 			// for (let x = 0; x < Math.floor(image.width / 512); ++x) {
 				// for (let y = 0; y < Math.floor(image.height / 512); ++y) {
 					let x = 0;
@@ -175,7 +175,7 @@ class InpaintNode extends LogicNode {
 		});
 	}
 
-	static def: TNode = {
+	static def: zui_node_t = {
 		id: 0,
 		name: _tr("Inpaint"),
 		type: "InpaintNode",

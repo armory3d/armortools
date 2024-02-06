@@ -16,25 +16,25 @@ class Camera {
 		let camera = scene_camera;
 
 		if (mouse_view_x() < 0 ||
-			mouse_view_x() > App.w() ||
+			mouse_view_x() > app_w() ||
 			mouse_view_y() < 0 ||
-			mouse_view_y() > App.h()) {
+			mouse_view_y() > app_h()) {
 
 			if (Config.raw.wrap_mouse && Camera.controlsDown) {
 				if (mouse_view_x() < 0) {
-					mouse_x = mouse_last_x = App.x() + App.w();
+					mouse_x = mouse_last_x = app_x() + app_w();
 					Krom.setMousePosition(Math.floor(mouse_x), Math.floor(mouse_y));
 				}
-				else if (mouse_view_x() > App.w()) {
-					mouse_x = mouse_last_x = App.x();
+				else if (mouse_view_x() > app_w()) {
+					mouse_x = mouse_last_x = app_x();
 					Krom.setMousePosition(Math.floor(mouse_x), Math.floor(mouse_y));
 				}
 				else if (mouse_view_y() < 0) {
-					mouse_y = mouse_last_y = App.y() + App.h();
+					mouse_y = mouse_last_y = app_y() + app_h();
 					Krom.setMousePosition(Math.floor(mouse_x), Math.floor(mouse_y));
 				}
-				else if (mouse_view_y() > App.h()) {
-					mouse_y = mouse_last_y = App.y();
+				else if (mouse_view_y() > app_h()) {
+					mouse_y = mouse_last_y = app_y();
 					Krom.setMousePosition(Math.floor(mouse_x), Math.floor(mouse_y));
 				}
 			}
@@ -81,20 +81,20 @@ class Camera {
 		if (controls == CameraControls.ControlsOrbit && (Operator.shortcut(Config.keymap.action_rotate, ShortcutType.ShortcutDown) || (mouse_down("right") && !modif && defaultKeymap))) {
 			Camera.redraws = 2;
 			let dist = Camera.distance();
-			transform_move(camera.base.transform, CameraObject.lookWorld(camera), dist);
+			transform_move(camera.base.transform, camera_object_look_world(camera), dist);
 			transform_rotate(camera.base.transform, vec4_z_axis(), -mouse_movement_x / 100 * Config.raw.camera_rotation_speed);
-			transform_rotate(camera.base.transform, CameraObject.rightWorld(camera), -mouse_movement_y / 100 * Config.raw.camera_rotation_speed);
-			if (CameraObject.upWorld(camera).z < 0) {
-				transform_rotate(camera.base.transform, CameraObject.rightWorld(camera), mouse_movement_y / 100 * Config.raw.camera_rotation_speed);
+			transform_rotate(camera.base.transform, camera_object_right_world(camera), -mouse_movement_y / 100 * Config.raw.camera_rotation_speed);
+			if (camera_object_up_world(camera).z < 0) {
+				transform_rotate(camera.base.transform, camera_object_right_world(camera), mouse_movement_y / 100 * Config.raw.camera_rotation_speed);
 			}
-			transform_move(camera.base.transform, CameraObject.lookWorld(camera), -dist);
+			transform_move(camera.base.transform, camera_object_look_world(camera), -dist);
 		}
 		else if (controls == CameraControls.ControlsRotate && (Operator.shortcut(Config.keymap.action_rotate, ShortcutType.ShortcutDown) || (mouse_down("right") && !modif && defaultKeymap))) {
 			Camera.redraws = 2;
 			let t = Context.mainObject().base.transform;
 			let up = vec4_normalize(transform_up(t));
 			transform_rotate(t, up, mouse_movement_x / 100 * Config.raw.camera_rotation_speed);
-			let right = vec4_normalize(CameraObject.rightWorld(camera));
+			let right = vec4_normalize(camera_object_right_world(camera));
 			transform_rotate(t, right, mouse_movement_y / 100 * Config.raw.camera_rotation_speed);
 			transform_build_matrix(t);
 			if (transform_up(t).z < 0) {
@@ -109,14 +109,14 @@ class Camera {
 				Camera.redraws = 2;
 				let f = Camera.getZoomDelta() / 150;
 				f *= Camera.getCameraZoomSpeed();
-				transform_move(camera.base.transform, CameraObject.look(camera), f);
+				transform_move(camera.base.transform, camera_object_look(camera), f);
 			}
 
 			if (mouse_wheel_delta != 0 && !modifKey) {
 				Camera.redraws = 2;
 				let f = mouse_wheel_delta * (-0.1);
 				f *= Camera.getCameraZoomSpeed();
-				transform_move(camera.base.transform, CameraObject.look(camera), f);
+				transform_move(camera.base.transform, camera_object_look(camera), f);
 			}
 		}
 		else if (controls == CameraControls.ControlsFly && mouse_down("right")) {
@@ -135,10 +135,10 @@ class Camera {
 				Camera.ease += time_delta() * 15;
 				if (Camera.ease > 1.0) Camera.ease = 1.0;
 				vec4_set(Camera.dir, 0, 0, 0);
-				if (moveForward) vec4_add_f(Camera.dir, CameraObject.look(camera).x, CameraObject.look(camera).y, CameraObject.look(camera).z);
-				if (moveBackward) vec4_add_f(Camera.dir, -CameraObject.look(camera).x, -CameraObject.look(camera).y, -CameraObject.look(camera).z);
-				if (strafeRight) vec4_add_f(Camera.dir, CameraObject.right(camera).x, CameraObject.right(camera).y, CameraObject.right(camera).z);
-				if (strafeLeft) vec4_add_f(Camera.dir, -CameraObject.right(camera).x, -CameraObject.right(camera).y, -CameraObject.right(camera).z);
+				if (moveForward) vec4_add_f(Camera.dir, camera_object_look(camera).x, camera_object_look(camera).y, camera_object_look(camera).z);
+				if (moveBackward) vec4_add_f(Camera.dir, -camera_object_look(camera).x, -camera_object_look(camera).y, -camera_object_look(camera).z);
+				if (strafeRight) vec4_add_f(Camera.dir, camera_object_right(camera).x, camera_object_right(camera).y, camera_object_right(camera).z);
+				if (strafeLeft) vec4_add_f(Camera.dir, -camera_object_right(camera).x, -camera_object_right(camera).y, -camera_object_right(camera).z);
 				if (strafeUp) vec4_add_f(Camera.dir, 0, 0, 1);
 				if (strafeDown) vec4_add_f(Camera.dir, 0, 0, -1);
 			}
@@ -158,7 +158,7 @@ class Camera {
 
 			Camera.redraws = 2;
 			transform_rotate(camera.base.transform, vec4_z_axis(), -mouse_movement_x / 200 * Config.raw.camera_rotation_speed);
-			transform_rotate(camera.base.transform, CameraObject.right(camera), -mouse_movement_y / 200 * Config.raw.camera_rotation_speed);
+			transform_rotate(camera.base.transform, camera_object_right(camera), -mouse_movement_y / 200 * Config.raw.camera_rotation_speed);
 		}
 
 		if (Operator.shortcut(Config.keymap.rotate_light, ShortcutType.ShortcutDown)) {
@@ -223,7 +223,7 @@ class Camera {
 			vec4_add(camera.base.transform.loc, right);
 			vec4_add(Camera.origins[Camera.index()], look);
 			vec4_add(Camera.origins[Camera.index()], right);
-			CameraObject.buildMatrix(camera);
+			camera_object_build_matrix(camera);
 		}
 	}
 

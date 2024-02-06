@@ -7,8 +7,8 @@ class RenderPathPaint {
 	static dilated = true;
 	static initVoxels = true; // Bake AO
 	static pushUndoLast: bool;
-	static painto: TMeshObject = null;
-	static planeo: TMeshObject = null;
+	static painto: mesh_object_t = null;
+	static planeo: mesh_object_t = null;
 	static visibles: bool[] = null;
 	static mergedObjectVisible = false;
 	static savedFov = 0.0;
@@ -121,14 +121,14 @@ class RenderPathPaint {
 					render_path_bind_target("gbuffer0", "gbuffer0");
 				}
 
-				let mo: TMeshObject = scene_get_child(".ParticleEmitter").ext;
+				let mo: mesh_object_t = scene_get_child(".ParticleEmitter").ext;
 				mo.base.visible = true;
-				MeshObject.render(mo,_render_path_current_g, "mesh",render_path_bind_params);
+				mesh_object_render(mo,_render_path_current_g, "mesh",render_path_bind_params);
 				mo.base.visible = false;
 
 				mo = scene_get_child(".Particle").ext;
 				mo.base.visible = true;
-				MeshObject.render(mo,_render_path_current_g, "mesh",render_path_bind_params);
+				mesh_object_render(mo,_render_path_current_g, "mesh",render_path_bind_params);
 				mo.base.visible = false;
 				render_path_end();
 			}
@@ -348,16 +348,16 @@ class RenderPathPaint {
 			let materialContexts: material_context_t[] = [];
 			let shaderContexts: shader_context_t[] = [];
 			let mats = Project.paintObjects[0].materials;
-			MeshObject.getContexts(Project.paintObjects[0], "paint", mats, materialContexts, shaderContexts);
+			mesh_object_get_contexts(Project.paintObjects[0], "paint", mats, materialContexts, shaderContexts);
 
 			let cc_context = shaderContexts[0];
-			if (ConstData.screenAlignedVB == null) ConstData.createScreenAlignedData();
+			if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
 			g4_set_pipeline(cc_context._pipe_state);
 			uniforms_set_context_consts(_render_path_current_g, cc_context,render_path_bind_params);
 			uniforms_set_obj_consts(_render_path_current_g, cc_context, Project.paintObjects[0].base);
 			uniforms_set_material_consts(_render_path_current_g, cc_context, materialContexts[0]);
-			g4_set_vertex_buffer(ConstData.screenAlignedVB);
-			g4_set_index_buffer(ConstData.screenAlignedIB);
+			g4_set_vertex_buffer(const_data_screen_aligned_vb);
+			g4_set_index_buffer(const_data_screen_aligned_ib);
 			g4_draw();
 			render_path_end();
 			///end
@@ -436,8 +436,8 @@ class RenderPathPaint {
 		let _x = Context.raw.paintVec.x;
 		let _y = Context.raw.paintVec.y;
 		if (Context.raw.brushLocked) {
-			Context.raw.paintVec.x = (Context.raw.lockStartedX - App.x()) / App.w();
-			Context.raw.paintVec.y = (Context.raw.lockStartedY - App.y()) / App.h();
+			Context.raw.paintVec.x = (Context.raw.lockStartedX - app_x()) / app_w();
+			Context.raw.paintVec.y = (Context.raw.lockStartedY - app_y()) / app_h();
 		}
 		let _lastX = Context.raw.lastPaintVecX;
 		let _lastY = Context.raw.lastPaintVecY;
@@ -487,15 +487,15 @@ class RenderPathPaint {
 		let mx = Context.raw.paintVec.x;
 		let my = 1.0 - Context.raw.paintVec.y;
 		if (Context.raw.brushLocked) {
-			mx = (Context.raw.lockStartedX - App.x()) / App.w();
-			my = 1.0 - (Context.raw.lockStartedY - App.y()) / App.h();
+			mx = (Context.raw.lockStartedX - app_x()) / app_w();
+			my = 1.0 - (Context.raw.lockStartedY - app_y()) / app_h();
 		}
 		let radius = decalMask ? Context.raw.brushDecalMaskRadius : Context.raw.brushRadius;
 		RenderPathPaint.drawCursor(mx, my, Context.raw.brushNodesRadius * radius / 3.4);
 	}
 
 	static drawCursor = (mx: f32, my: f32, radius: f32, tintR = 1.0, tintG = 1.0, tintB = 1.0) => {
-		let plane: TMeshObject = scene_get_child(".Plane").ext;
+		let plane: mesh_object_t = scene_get_child(".Plane").ext;
 		let geom = plane.data;
 
 		let g =_render_path_frame_g;
@@ -512,15 +512,15 @@ class RenderPathPaint {
 		g4_set_float2(Base.cursorMouse, mx, my);
 		g4_set_float2(Base.cursorTexStep, 1 / gbuffer0.width, 1 / gbuffer0.height);
 		g4_set_float(Base.cursorRadius, radius);
-		let right = vec4_normalize(CameraObject.rightWorld(scene_camera));
+		let right = vec4_normalize(camera_object_right_world(scene_camera));
 		g4_set_float3(Base.cursorCameraRight, right.x, right.y, right.z);
 		g4_set_float3(Base.cursorTint, tintR, tintG, tintB);
-		g4_set_mat(Base.cursorVP, scene_camera.VP);
+		g4_set_mat(Base.cursorVP, scene_camera.vp);
 		let helpMat = mat4_identity();
-		mat4_get_inv(helpMat, scene_camera.VP);
+		mat4_get_inv(helpMat, scene_camera.vp);
 		g4_set_mat(Base.cursorInvVP, helpMat);
 		///if (krom_metal || krom_vulkan)
-		g4_set_vertex_buffer(MeshData.get(geom, [{name: "tex", data: "short2norm"}]));
+		g4_set_vertex_buffer(mesh_data_get(geom, [{name: "tex", data: "short2norm"}]));
 		///else
 		g4_set_vertex_buffer(geom._vertex_buffer);
 		///end
@@ -716,10 +716,10 @@ class RenderPathPaint {
 							RenderPathPaint.commandsPaint();
 							Context.raw.pdirty = 0;
 							if (RenderPathPaint.pushUndoLast) History.paint();
-							App.notifyOnInit(_renderFinal);
+							app_notify_on_init(_renderFinal);
 						}
 						let bakeType = Context.raw.bakeType as BakeType;
-						App.notifyOnInit(bakeType == BakeType.BakeDerivative ? _renderDeriv : _renderFinal);
+						app_notify_on_init(bakeType == BakeType.BakeDerivative ? _renderDeriv : _renderFinal);
 					}
 				}
 				else if (Context.raw.bakeType == BakeType.BakeObjectID) {
@@ -801,17 +801,17 @@ class RenderPathPaint {
 		mat4_translate(m, 0, 0, 0.5);
 		transform_set_matrix(cam.base.transform, m);
 		cam.data.fov = Base.defaultFov;
-		CameraObject.buildProjection(cam);
-		CameraObject.buildMatrix(cam);
+		camera_object_build_projection(cam);
+		camera_object_build_matrix(cam);
 
 		let tw = 0.95 * UIView2D.panScale;
 		let tx = UIView2D.panX / UIView2D.ww;
-		let ty = UIView2D.panY / App.h();
+		let ty = UIView2D.panY / app_h();
 		mat4_set_identity(m);
 		mat4_scale(m, vec4_create(tw, tw, 1));
 		mat4_set_loc(m, vec4_create(tx, ty, 0));
 		let m2 = mat4_identity();
-		mat4_get_inv(m2, scene_camera.VP);
+		mat4_get_inv(m2, scene_camera.vp);
 		mat4_mult_mat(m, m2);
 
 		let tiled = UIView2D.tiledShow;
@@ -834,7 +834,7 @@ class RenderPathPaint {
 				scale_pos: 1.5,
 				scale_tex: 1.0
 			};
-			MeshData.create(raw, (md: mesh_data_t) => {
+			mesh_data_create(raw, (md: mesh_data_t) => {
 				let materials: material_data_t[] = scene_get_child(".Plane").ext.materials;
 				let o = scene_add_mesh_object(md, materials);
 				o.base.name = ".PlaneTiled";
@@ -868,8 +868,8 @@ class RenderPathPaint {
 		transform_set_matrix(scene_camera.base.transform, Context.raw.savedCamera);
 		scene_camera.data.fov = RenderPathPaint.savedFov;
 		Viewport.updateCameraType(Context.raw.cameraType);
-		CameraObject.buildProjection(scene_camera);
-		CameraObject.buildMatrix(scene_camera);
+		camera_object_build_projection(scene_camera);
+		camera_object_build_matrix(scene_camera);
 
 		RenderPathBase.drawGbuffer();
 	}

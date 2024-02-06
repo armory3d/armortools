@@ -21,7 +21,7 @@ class MakeMeshPreview {
 		let pos = "pos";
 
 		///if arm_skin
-		let skin = MeshData.getVArray(Context.raw.paintObject.data, "bone") != null;
+		let skin = mesh_data_get_vertex_array(Context.raw.paintObject.data, "bone") != null;
 		if (skin) {
 			pos = "spos";
 			NodeShaderContext.add_elem(con_mesh, "bone", 'short4norm');

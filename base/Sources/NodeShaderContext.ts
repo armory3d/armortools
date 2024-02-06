@@ -122,5 +122,5 @@ class NodeShaderContext {
 
 type TMaterial = {
 	name: string;
-	canvas: TNodeCanvas;
+	canvas: zui_node_canvas_t;
 }

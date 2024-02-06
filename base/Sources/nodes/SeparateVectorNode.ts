@@ -13,7 +13,7 @@ class SeparateVectorNode extends LogicNode {
 		});
 	}
 
-	static def: TNode = {
+	static def: zui_node_t = {
 		id: 0,
 		name: _tr("Separate Vector"),
 		type: "SeparateVectorNode",

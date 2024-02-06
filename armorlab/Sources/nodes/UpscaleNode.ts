@@ -31,7 +31,7 @@ class UpscaleNode extends LogicNode {
 	}
 
 	static loadBlob = (done: ()=>void) => {
-		Data.getBlob("models/esrgan.quant.onnx", (_esrgan_blob: ArrayBuffer) => {
+		data_get_blob("models/esrgan.quant.onnx", (_esrgan_blob: ArrayBuffer) => {
 			UpscaleNode.esrgan_blob = _esrgan_blob;
 			done();
 		});
@@ -119,7 +119,7 @@ class UpscaleNode extends LogicNode {
 		return result;
 	}
 
-	static def: TNode = {
+	static def: zui_node_t = {
 		id: 0,
 		name: _tr("Upscale"),
 		type: "UpscaleNode",

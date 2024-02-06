@@ -20,7 +20,7 @@ class ImageTextureNode extends LogicNode {
 		return image;
 	}
 
-	static def: TNode = {
+	static def: zui_node_t = {
 		id: 0,
 		name: _tr("Image Texture"),
 		type: "ImageTextureNode",

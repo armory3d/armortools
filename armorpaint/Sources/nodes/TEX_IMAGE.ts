@@ -13,7 +13,7 @@ class TEX_IMAGE extends LogicNode {
 		else done(this.file + ".a");
 	}
 
-	static def: TNode = {
+	static def: zui_node_t = {
 		id: 0,
 		name: _tr("Image Texture"),
 		type: "TEX_IMAGE",

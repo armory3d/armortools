@@ -10,7 +10,7 @@ class ImportFont {
 				return;
 			}
 		}
-		Data.getFont(path, (font: font_t) => {
+		data_get_font(path, (font: font_t) => {
 			font_init(font); // Make sure font_ is ready
 			let count = Krom.g2_font_count(font.font_);
 			let fontSlots: SlotFontRaw[] = [];
@@ -30,7 +30,7 @@ class ImportFont {
 					UtilRender.makeFontPreview();
 				}
 			}
-			App.notifyOnInit(_init);
+			app_notify_on_init(_init);
 
 			UIBase.hwnds[TabArea.TabStatus].redraws = 2;
 		});

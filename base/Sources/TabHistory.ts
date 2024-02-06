@@ -3,16 +3,16 @@
 
 class TabHistory {
 
-	static draw = (htab: HandleRaw) => {
+	static draw = (htab: zui_handle_t) => {
 		let ui = UIBase.ui;
-		if (Zui.tab(htab, tr("History"))) {
+		if (zui_tab(htab, tr("History"))) {
 			for (let i = 0; i < History.steps.length; ++i) {
 				let active = History.steps.length - 1 - History.redos;
 				if (i == active) {
-					Zui.fill(0, 0, ui._windowW, ui.t.ELEMENT_H, ui.t.HIGHLIGHT_COL);
+					zui_fill(0, 0, ui._window_w, ui.t.ELEMENT_H, ui.t.HIGHLIGHT_COL);
 				}
-				Zui.text(History.steps[i].name);
-				if (ui.isReleased) { // Jump to undo step
+				zui_text(History.steps[i].name);
+				if (ui.is_released) { // Jump to undo step
 					let diff = i - active;
 					while (diff > 0) {
 						diff--;
@@ -23,7 +23,7 @@ class TabHistory {
 						History.undo();
 					}
 				}
-				Zui.fill(0, 0, (ui._windowW / Zui.SCALE(ui) - 2), 1 * Zui.SCALE(ui), ui.t.SEPARATOR_COL);
+				zui_fill(0, 0, (ui._window_w / zui_SCALE(ui) - 2), 1 * zui_SCALE(ui), ui.t.SEPARATOR_COL);
 			}
 		}
 	}

@@ -32,7 +32,7 @@ class FloatNode extends LogicNode {
 		else this.value = value;
 	}
 
-	static def: TNode = {
+	static def: zui_node_t = {
 		id: 0,
 		name: _tr("Value"),
 		type: "FloatNode",

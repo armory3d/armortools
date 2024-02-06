@@ -53,7 +53,7 @@ class UtilParticle {
 			}
 		}
 
-		Data.getMaterial("Scene", "MaterialParticle", (md: material_data_t) => {
+		data_get_material("Scene", "MaterialParticle", (md: material_data_t) => {
 			Context.raw.particleMaterial = md;
 
 			for (let obj of _scene_raw.objects) {
@@ -68,13 +68,13 @@ class UtilParticle {
 				}
 			}
 
-			scene_spawn_object(".Sphere", null, (o: TBaseObject) => {
-				let mo: TMeshObject = o.ext;
+			scene_spawn_object(".Sphere", null, (o: object_t) => {
+				let mo: mesh_object_t = o.ext;
 				mo.base.name = ".ParticleEmitter";
 				mo.base.raw = JSON.parse(JSON.stringify(mo.base.raw));
 				mo.base.raw.particle_refs = particle_refs;
 				///if arm_particles
-				MeshObject.setupParticleSystem(mo, "Scene", particle_refs[0]);
+				mesh_object_setup_particle_system(mo, "Scene", particle_refs[0]);
 				///end
 			});
 		});

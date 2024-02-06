@@ -23,16 +23,16 @@ class TextToPhotoNode extends LogicNode {
 		return TextToPhotoNode.image;
 	}
 
-	static buttons = (ui: ZuiRaw, nodes: NodesRaw, node: TNode) => {
+	static buttons = (ui: zui_t, nodes: zui_nodes_t, node: zui_node_t) => {
 		TextToPhotoNode.tiling = node.buttons[0].default_value == 0 ? false : true;
-		TextToPhotoNode.prompt = Zui.textArea(Zui.handle("texttophotonode_0"), Align.Left, true, tr("prompt"), true);
+		TextToPhotoNode.prompt = zui_text_area(zui_handle("texttophotonode_0"), Align.Left, true, tr("prompt"), true);
 		node.buttons[1].height = TextToPhotoNode.prompt.split("\n").length;
 	}
 
 	static stableDiffusion = (prompt: string, done: (img: image_t)=>void, inpaintLatents: Float32Array = null, offset = 0, upscale = true, mask: Float32Array = null, latents_orig: Float32Array = null) => {
-		Data.getBlob("models/sd_text_encoder.quant.onnx", (_text_encoder_blob: ArrayBuffer) => {
-		Data.getBlob("models/sd_unet.quant.onnx", (_unet_blob: ArrayBuffer) => {
-		Data.getBlob("models/sd_vae_decoder.quant.onnx", (_vae_decoder_blob: ArrayBuffer) => {
+		data_get_blob("models/sd_text_encoder.quant.onnx", (_text_encoder_blob: ArrayBuffer) => {
+		data_get_blob("models/sd_unet.quant.onnx", (_unet_blob: ArrayBuffer) => {
+		data_get_blob("models/sd_vae_decoder.quant.onnx", (_vae_decoder_blob: ArrayBuffer) => {
 			TextToPhotoNode.text_encoder_blob = _text_encoder_blob;
 			TextToPhotoNode.unet_blob = _unet_blob;
 			TextToPhotoNode.vae_decoder_blob = _vae_decoder_blob;
@@ -188,11 +188,11 @@ class TextToPhotoNode extends LogicNode {
 			}
 
 			if (counter == (51 - offset)) {
-				App.removeRender2D(processing);
+				app_remove_render_2d(processing);
 				done(latents);
 			}
 		}
-		App.notifyOnRender2D(processing);
+		app_notify_on_render_2d(processing);
 	}
 
 	static vaeDecoder = (latents: Float32Array, upscale: bool, done: (img: image_t)=>void) => {
@@ -241,7 +241,7 @@ class TextToPhotoNode extends LogicNode {
 		});
 	}
 
-	static def: TNode = {
+	static def: zui_node_t = {
 		id: 0,
 		name: _tr("Text to Photo"),
 		type: "TextToPhotoNode",

@@ -1,36 +1,36 @@
 
 class TabConsole {
 
-	static draw = (htab: HandleRaw) => {
+	static draw = (htab: zui_handle_t) => {
 		let ui = UIBase.ui;
 
 		let title = Console.messageTimer > 0 ? Console.message + "        " : tr("Console");
 		let color = Console.messageTimer > 0 ? Console.messageColor : -1;
 
 		let statush = Config.raw.layout[LayoutSize.LayoutStatusH];
-		if (Zui.tab(htab, title, false, color) && statush > UIStatus.defaultStatusH * Zui.SCALE(ui)) {
+		if (zui_tab(htab, title, false, color) && statush > UIStatus.defaultStatusH * zui_SCALE(ui)) {
 
-			Zui.beginSticky();
+			zui_begin_sticky();
 			///if (krom_windows || krom_linux || krom_darwin) // Copy
 			if (Config.raw.touch_ui) {
-				Zui.row([1 / 4, 1 / 4, 1 / 4]);
+				zui_row([1 / 4, 1 / 4, 1 / 4]);
 			}
 			else {
-				Zui.row([1 / 14, 1 / 14, 1 / 14]);
+				zui_row([1 / 14, 1 / 14, 1 / 14]);
 			}
 			///else
 			if (Config.raw.touch_ui) {
-				Zui.row([1 / 4, 1 / 4]);
+				zui_row([1 / 4, 1 / 4]);
 			}
 			else {
-				Zui.row([1 / 14, 1 / 14]);
+				zui_row([1 / 14, 1 / 14]);
 			}
 			///end
 
-			if (Zui.button(tr("Clear"))) {
+			if (zui_button(tr("Clear"))) {
 				Console.lastTraces = [];
 			}
-			if (Zui.button(tr("Export"))) {
+			if (zui_button(tr("Export"))) {
 				let str = Console.lastTraces.join("\n");
 				UIFiles.show("txt", true, false, (path: string) => {
 					let f = UIFiles.filename;
@@ -41,23 +41,23 @@ class TabConsole {
 				});
 			}
 			///if (krom_windows || krom_linux || krom_darwin)
-			if (Zui.button(tr("Copy"))) {
+			if (zui_button(tr("Copy"))) {
 				let str = Console.lastTraces.join("\n");
 				Krom.copyToClipboard(str);
 			}
 			///end
 
-			Zui.endSticky();
+			zui_end_sticky();
 
 			let _font = ui.font;
-			let _fontSize = ui.fontSize;
-			Data.getFont("font_mono.ttf", (f: font_t) => { Zui.setFont(ui, f); }); // Sync
-			ui.fontSize = Math.floor(15 * Zui.SCALE(ui));
+			let _fontSize = ui.font_size;
+			data_get_font("font_mono.ttf", (f: font_t) => { zui_set_font(ui, f); }); // Sync
+			ui.font_size = Math.floor(15 * zui_SCALE(ui));
 			for (let t of Console.lastTraces) {
-				Zui.text(t);
+				zui_text(t);
 			}
-			Zui.setFont(ui, _font);
-			ui.fontSize = _fontSize;
+			zui_set_font(ui, _font);
+			ui.font_size = _fontSize;
 		}
 	}
 }

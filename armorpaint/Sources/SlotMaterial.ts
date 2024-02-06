@@ -1,7 +1,7 @@
 
 class SlotMaterialRaw {
-	nodes = Nodes.create();
-	canvas: TNodeCanvas;
+	nodes = zui_nodes_create();
+	canvas: zui_node_canvas_t;
 	image: image_t = null;
 	imageIcon: image_t = null;
 	previewReady = false;
@@ -22,7 +22,7 @@ class SlotMaterialRaw {
 class SlotMaterial {
 	static defaultCanvas: ArrayBuffer = null;
 
-	static create(m: material_data_t = null, c: TNodeCanvas = null): SlotMaterialRaw {
+	static create(m: material_data_t = null, c: zui_node_canvas_t = null): SlotMaterialRaw {
 		let raw = new SlotMaterialRaw();
 		for (let mat of Project.materials) if (mat.id >= raw.id) raw.id = mat.id + 1;
 		raw.data = m;
@@ -34,7 +34,7 @@ class SlotMaterial {
 
 		if (c == null) {
 			if (SlotMaterial.defaultCanvas == null) { // Synchronous
-				Data.getBlob("default_material.arm", (b: ArrayBuffer) => {
+				data_get_blob("default_material.arm", (b: ArrayBuffer) => {
 					SlotMaterial.defaultCanvas = b;
 				});
 			}

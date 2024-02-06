@@ -12,7 +12,7 @@ class UtilRender {
 	static makeMaterialPreview = () => {
 		Context.raw.materialPreview = true;
 
-		let sphere: TMeshObject = scene_get_child(".Sphere").ext;
+		let sphere: mesh_object_t = scene_get_child(".Sphere").ext;
 		sphere.base.visible = true;
 		let meshes = scene_meshes;
 		scene_meshes = [sphere];
@@ -45,8 +45,8 @@ class UtilRender {
 		// No resize
 		render_path_last_w = UtilRender.materialPreviewSize;
 		render_path_last_h = UtilRender.materialPreviewSize;
-		CameraObject.buildProjection(scene_camera);
-		CameraObject.buildMatrix(scene_camera);
+		camera_object_build_projection(scene_camera);
+		camera_object_build_matrix(scene_camera);
 
 		MakeMaterial.parseMeshPreviewMaterial();
 		let _commands = render_path_commands;
@@ -55,8 +55,8 @@ class UtilRender {
 		render_path_commands = _commands;
 
 		Context.raw.materialPreview = false;
-		render_path_last_w = App.w();
-		render_path_last_h = App.h();
+		render_path_last_w = app_w();
+		render_path_last_h = app_h();
 
 		// Restore
 		sphere.base.visible = false;
@@ -66,8 +66,8 @@ class UtilRender {
 		transform_set_matrix(scene_camera.base.transform, Context.raw.savedCamera);
 		Viewport.updateCameraType(Context.raw.cameraType);
 		scene_camera.data.fov = savedFov;
-		CameraObject.buildProjection(scene_camera);
-		CameraObject.buildMatrix(scene_camera);
+		camera_object_build_projection(scene_camera);
+		camera_object_build_matrix(scene_camera);
 		light.data.strength = _lightStrength;
 		probe.strength = _probeStrength;
 		Context.raw.envmapAngle = _envmapAngle;
@@ -87,7 +87,7 @@ class UtilRender {
 		}
 		Context.raw.decalPreview = true;
 
-		let plane: TMeshObject = scene_get_child(".Plane").ext;
+		let plane: mesh_object_t = scene_get_child(".Plane").ext;
 		vec4_set(plane.base.transform.scale, 1, 1, 1);
 		quat_from_euler(plane.base.transform.rot, -Math.PI / 2, 0, 0);
 		transform_build_matrix(plane.base.transform);
@@ -111,8 +111,8 @@ class UtilRender {
 		// No resize
 		render_path_last_w = UtilRender.decalPreviewSize;
 		render_path_last_h = UtilRender.decalPreviewSize;
-		CameraObject.buildProjection(scene_camera);
-		CameraObject.buildMatrix(scene_camera);
+		camera_object_build_projection(scene_camera);
+		camera_object_build_matrix(scene_camera);
 
 		MakeMaterial.parseMeshPreviewMaterial();
 		let _commands = render_path_commands;
@@ -121,8 +121,8 @@ class UtilRender {
 		render_path_commands = _commands;
 
 		Context.raw.decalPreview = false;
-		render_path_last_w = App.w();
-		render_path_last_h = App.h();
+		render_path_last_w = app_w();
+		render_path_last_h = app_h();
 
 		// Restore
 		plane.base.visible = false;
@@ -132,8 +132,8 @@ class UtilRender {
 		transform_set_matrix(scene_camera.base.transform, Context.raw.savedCamera);
 		scene_camera.data.fov = savedFov;
 		Viewport.updateCameraType(Context.raw.cameraType);
-		CameraObject.buildProjection(scene_camera);
-		CameraObject.buildMatrix(scene_camera);
+		camera_object_build_projection(scene_camera);
+		camera_object_build_matrix(scene_camera);
 		light = scene_lights[0];
 		light.base.visible = true;
 		scene_world._envmap = Context.raw.showEnvmap ? Context.raw.savedEnvmap : Context.raw.emptyEnvmap;
@@ -261,11 +261,11 @@ class UtilRender {
 		mat4_translate(m, 0, 0, 0.5);
 		transform_set_matrix(cam.base.transform, m);
 		cam.data.fov = 0.92;
-		CameraObject.buildProjection(cam);
-		CameraObject.buildMatrix(cam);
-		mat4_get_inv(m, scene_camera.VP);
+		camera_object_build_projection(cam);
+		camera_object_build_matrix(cam);
+		mat4_get_inv(m, scene_camera.vp);
 
-		let planeo: TMeshObject = scene_get_child(".Plane").ext;
+		let planeo: mesh_object_t = scene_get_child(".Plane").ext;
 		planeo.base.visible = true;
 		Context.raw.paintObject = planeo;
 
@@ -321,7 +321,7 @@ class UtilRender {
 		let _init = () => {
 			MakeMaterial.parsePaintMaterial(false);
 		}
-		App.notifyOnInit(_init);
+		app_notify_on_init(_init);
 
 		// Restore paint mesh
 		Context.raw.materialPreview = false;
@@ -336,8 +336,8 @@ class UtilRender {
 		transform_set_matrix(scene_camera.base.transform, Context.raw.savedCamera);
 		scene_camera.data.fov = savedFov;
 		Viewport.updateCameraType(Context.raw.cameraType);
-		CameraObject.buildProjection(scene_camera);
-		CameraObject.buildMatrix(scene_camera);
+		camera_object_build_projection(scene_camera);
+		camera_object_build_matrix(scene_camera);
 
 		// Scale layer down to to image preview
 		if (Base.pipeMerge == null) Base.makePipe();
@@ -362,7 +362,7 @@ class UtilRender {
 		if (current != null) g2_begin(current, false);
 	}
 
-	static makeNodePreview = (canvas: TNodeCanvas, node: TNode, image: image_t, group: TNodeCanvas = null, parents: TNode[] = null) => {
+	static makeNodePreview = (canvas: zui_node_canvas_t, node: zui_node_t, image: image_t, group: zui_node_canvas_t = null, parents: zui_node_t[] = null) => {
 		let res = MakeMaterial.parseNodePreviewMaterial(node, group, parents);
 		if (res == null || res.scon == null) return;
 

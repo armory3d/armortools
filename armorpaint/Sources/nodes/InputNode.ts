@@ -20,7 +20,7 @@ class InputNode extends LogicNode {
 
 		if (!InputNode.registered) {
 			InputNode.registered = true;
-			App.notifyOnUpdate(this.update);
+			app_notify_on_update(this.update);
 		}
 	}
 
@@ -37,20 +37,20 @@ class InputNode extends LogicNode {
 			 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown) ||
 			 decalMask);
 
-		let paintX = mouse_view_x() / App.w();
-		let paintY = mouse_view_y() / App.h();
+		let paintX = mouse_view_x() / app_w();
+		let paintY = mouse_view_y() / app_h();
 		if (mouse_started()) {
-			InputNode.startX = mouse_view_x() / App.w();
-			InputNode.startY = mouse_view_y() / App.h();
+			InputNode.startX = mouse_view_x() / app_w();
+			InputNode.startY = mouse_view_y() / app_h();
 		}
 
 		if (pen_down()) {
-			paintX = pen_view_x() / App.w();
-			paintY = pen_view_y() / App.h();
+			paintX = pen_view_x() / app_w();
+			paintY = pen_view_y() / app_h();
 		}
 		if (pen_started()) {
-			InputNode.startX = pen_view_x() / App.w();
-			InputNode.startY = pen_view_y() / App.h();
+			InputNode.startX = pen_view_x() / app_w();
+			InputNode.startY = pen_view_y() / app_h();
 		}
 
 		if (Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown)) {
@@ -90,8 +90,8 @@ class InputNode extends LogicNode {
 		}
 
 		if (Context.raw.brushLazyRadius > 0) {
-			let v1 = vec4_create(Context.raw.brushLazyX * App.w(), Context.raw.brushLazyY * App.h(), 0.0);
-			let v2 = vec4_create(InputNode.coords.x * App.w(), InputNode.coords.y * App.h(), 0.0);
+			let v1 = vec4_create(Context.raw.brushLazyX * app_w(), Context.raw.brushLazyY * app_h(), 0.0);
+			let v2 = vec4_create(InputNode.coords.x * app_w(), InputNode.coords.y * app_h(), 0.0);
 			let d = vec4_dist(v1, v2);
 			let r = Context.raw.brushLazyRadius * 85;
 			if (d > r) {
@@ -101,8 +101,8 @@ class InputNode extends LogicNode {
 				vec4_mult(v3, 1.0 - Context.raw.brushLazyStep);
 				vec4_mult(v3, r);
 				vec4_add_vecs(v2, v1, v3);
-				InputNode.coords.x = v2.x / App.w();
-				InputNode.coords.y = v2.y / App.h();
+				InputNode.coords.x = v2.x / app_w();
+				InputNode.coords.y = v2.y / app_h();
 				// Parse brush inputs once on next draw
 				Context.raw.painted = -1;
 			}
@@ -123,7 +123,7 @@ class InputNode extends LogicNode {
 		});
 	}
 
-	static def: TNode = {
+	static def: zui_node_t = {
 		id: 0,
 		name: _tr("Input"),
 		type: "InputNode",

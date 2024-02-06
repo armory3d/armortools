@@ -17,7 +17,7 @@ class MakeSculpt {
 		con_paint.data.color_writes_green = [true, true, true, true];
 		con_paint.data.color_writes_blue = [true, true, true, true];
 		con_paint.data.color_writes_alpha = [true, true, true, true];
-		con_paint.allow_vcols = MeshData.getVArray(Context.raw.paintObject.data, "col") != null;
+		con_paint.allow_vcols = mesh_data_get_vertex_array(Context.raw.paintObject.data, "col") != null;
 
 		let vert = NodeShaderContext.make_vert(con_paint);
 		let frag = NodeShaderContext.make_frag(con_paint);

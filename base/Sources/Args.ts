@@ -81,7 +81,7 @@ class Args {
 
 	static run = () => {
 		if (Args.useArgs) {
-			App.notifyOnInit(() => {
+			app_notify_on_init(() => {
 				if (Project.filepath != "") {
 					ImportArm.runProject(Project.filepath);
 				}
@@ -145,13 +145,13 @@ class Args {
 								file = "export_presets/" + BoxExport.files[BoxExport.files.indexOf(f)] + ".json";
 							}
 
-							Data.getBlob(file, (blob: ArrayBuffer) => {
+							data_get_blob(file, (blob: ArrayBuffer) => {
 								BoxExport.preset = JSON.parse(sys_buffer_to_string(blob));
-								Data.deleteBlob("export_presets/" + file);
+								data_delete_blob("export_presets/" + file);
 							});
 
 							// Export queue
-							App.notifyOnInit(() => {
+							app_notify_on_init(() => {
 								ExportTexture.run(Args.exportTexturesPath);
 							});
 						}

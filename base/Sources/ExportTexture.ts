@@ -94,7 +94,7 @@ class ExportTexture {
 		Context.raw.tool = WorkspaceTool.ToolFill;
 		MakeMaterial.parsePaintMaterial();
 		let _paintObject = Context.raw.paintObject;
-		let planeo: TMeshObject = scene_get_child(".Plane").ext;
+		let planeo: mesh_object_t = scene_get_child(".Plane").ext;
 		planeo.base.visible = true;
 		Context.raw.paintObject = planeo;
 		Context.raw.pdirty = 1;
@@ -140,7 +140,7 @@ class ExportTexture {
 		Base.makeTempImg();
 		Base.makeExportImg();
 		if (Base.pipeMerge == null) Base.makePipe();
-		if (ConstData.screenAlignedVB == null) ConstData.createScreenAlignedData();
+		if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
 		let empty = render_path_render_targets.get("empty_white").image;
 
 		// Append object mask name
@@ -205,8 +205,8 @@ class ExportTexture {
 				g4_set_tex(Base.texa, Base.tempImage);
 				g4_set_float(Base.opac, SlotLayer.getOpacity(l1));
 				g4_set_int(Base.blending, layers.length > 1 ? l1.blending : 0);
-				g4_set_vertex_buffer(ConstData.screenAlignedVB);
-				g4_set_index_buffer(ConstData.screenAlignedIB);
+				g4_set_vertex_buffer(const_data_screen_aligned_vb);
+				g4_set_index_buffer(const_data_screen_aligned_ib);
 				g4_draw();
 				g4_end();
 			}
@@ -226,8 +226,8 @@ class ExportTexture {
 				g4_set_tex(Base.texa, Base.tempImage);
 				g4_set_float(Base.opac, SlotLayer.getOpacity(l1));
 				g4_set_int(Base.blending, l1.paintNorBlend ? -2 : -1);
-				g4_set_vertex_buffer(ConstData.screenAlignedVB);
-				g4_set_index_buffer(ConstData.screenAlignedIB);
+				g4_set_vertex_buffer(const_data_screen_aligned_vb);
+				g4_set_index_buffer(const_data_screen_aligned_ib);
 				g4_draw();
 				g4_end();
 			}
@@ -361,7 +361,7 @@ class ExportTexture {
 
 		if (Context.raw.layersDestination == ExportDestination.DestinationPacked) {
 			let image = image_from_bytes(pixels, resX, resY);
-			Data.cachedImages.set(file, image);
+			data_cached_images.set(file, image);
 			let ar = file.split(Path.sep);
 			let name = ar[ar.length - 1];
 			let asset: TAsset = {name: name, file: file, id: Project.assetId++};

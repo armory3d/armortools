@@ -30,18 +30,18 @@ function kickstart() {
 }
 
 function main_start() {
-	App.onResize = Base.onResize;
-	App.w = Base.w;
-	App.h = Base.h;
-	App.x = Base.x;
-	App.y = Base.y;
+	app_on_resize = Base.onResize;
+	app_w = Base.w;
+	app_h = Base.h;
+	app_x = Base.x;
+	app_y = Base.y;
 
 	Config.init();
 	sys_start(Config.getOptions(), function() {
 		if (Config.raw.layout == null) Base.initLayout();
 		Krom.setApplicationName(manifest_title);
-		App.init(function() {
-			scene_set_active("Scene", function(o: TBaseObject) {
+		app_init(function() {
+			scene_set_active("Scene", function(o: object_t) {
 				UniformsExt.init();
 				RenderPathBase.init();
 

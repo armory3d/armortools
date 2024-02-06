@@ -67,7 +67,7 @@ class ImportFolder {
 		let canvas = Context.raw.material.canvas;
 		let dirs = path.split(Path.sep);
 		canvas.name = dirs[dirs.length - 1];
-		let nout: TNode = null;
+		let nout: zui_node_t = null;
 		for (let n of canvas.nodes) {
 			if (n.type == "OUTPUT_MATERIAL_PBR") {
 				nout = n;
@@ -76,7 +76,7 @@ class ImportFolder {
 		}
 		for (let n of canvas.nodes) {
 			if (n.name == "RGB") {
-				Nodes.removeNode(n, canvas);
+				zui_remove_node(n, canvas);
 				break;
 			}
 		}
@@ -120,12 +120,12 @@ class ImportFolder {
 		History.newMaterial();
 	}
 
-	static placeImageNode = (nodes: NodesRaw, canvas: TNodeCanvas, asset: string, ny: i32, to_id: i32, to_socket: i32) => {
+	static placeImageNode = (nodes: zui_nodes_t, canvas: zui_node_canvas_t, asset: string, ny: i32, to_id: i32, to_socket: i32) => {
 		let n = NodesMaterial.createNode("TEX_IMAGE");
 		n.buttons[0].default_value = Base.getAssetIndex(asset);
 		n.x = 72;
 		n.y = ny;
-		let l: TNodeLink = { id: Nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: to_id, to_socket: to_socket };
+		let l: zui_node_link_t = { id: zui_get_link_id(canvas.links), from_id: n.id, from_socket: 0, to_id: to_id, to_socket: to_socket };
 		canvas.links.push(l);
 	}
 }

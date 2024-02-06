@@ -10,7 +10,7 @@ class Console {
 	static drawToast = (s: string, g: g2_t) => {
 		g.color = 0x55000000;
 		g2_fill_rect(0, 0, sys_width(), sys_height());
-		let scale = Zui.SCALE(Base.getUIs()[0]);
+		let scale = zui_SCALE(Base.getUIs()[0]);
 		let x = sys_width() / 2;
 		let y = sys_height() - 200 * scale;
 		g2_fill_rect(x - 200 * scale, y, 400 * scale, 80 * scale);
@@ -26,11 +26,11 @@ class Console {
 			Console.drawToast(s, g);
 			if (g2 == null) {
 				Base.notifyOnNextFrame(() => {
-					App.removeRender2D(_render);
+					app_remove_render_2d(_render);
 				});
 			}
 		}
-		g2 != null ? _render(g2) : App.notifyOnRender2D(_render);
+		g2 != null ? _render(g2) : app_notify_on_render_2d(_render);
 		Console.consoleTrace(s);
 	}
 
@@ -41,10 +41,10 @@ class Console {
 	static progress = (s: string) => {
 		// Keep popup message displayed until s == null
 		if (s == null) {
-			App.removeRender2D(Console.drawProgress);
+			app_remove_render_2d(Console.drawProgress);
 		}
 		else if (Console.progressText == null) {
-			App.notifyOnRender2D(Console.drawProgress);
+			app_notify_on_render_2d(Console.drawProgress);
 		}
 		if (s != null) Console.consoleTrace(s);
 		Console.progressText = s;

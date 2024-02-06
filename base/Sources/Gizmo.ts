@@ -17,7 +17,7 @@ class Gizmo {
 		gizmo.visible = (isObject || isDecal) && !hide;
 		if (!gizmo.visible) return;
 
-		let paintObject: TBaseObject = Context.raw.paintObject.base;
+		let paintObject: object_t = Context.raw.paintObject.base;
 		///if is_forge
 		if (Context.raw.selectedObject != null) {
 			paintObject = Context.raw.selectedObject;

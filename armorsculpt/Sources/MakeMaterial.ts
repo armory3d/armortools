@@ -86,7 +86,7 @@ class MakeMaterial {
 			m._shader._contexts.push(scon);
 
 			let mcon: material_context_t;
-			MaterialContext.create({ name: "mesh" + i, bind_textures: [] }, (self: material_context_t) => { mcon = self; });
+			material_context_create({ name: "mesh" + i, bind_textures: [] }, (self: material_context_t) => { mcon = self; });
 			m.contexts.push(mcon);
 			m._contexts.push(mcon);
 		}
@@ -139,7 +139,7 @@ class MakeMaterial {
 
 		for (let i = 0; i < m.contexts.length; ++i) {
 			if (m.contexts[i].name == "mesh") {
-				MaterialContext.create(mcon, (self: material_context_t) => { m.contexts[i] = self; });
+				material_context_create(mcon, (self: material_context_t) => { m.contexts[i] = self; });
 				break;
 			}
 		}
@@ -216,7 +216,7 @@ class MakeMaterial {
 		scon2._override_context = {};
 		scon2._override_context.addressing = "repeat";
 		let mcon3: material_context_t;
-		MaterialContext.create(mcon2, (_mcon: material_context_t) => { mcon3 = _mcon; });
+		material_context_create(mcon2, (_mcon: material_context_t) => { mcon3 = _mcon; });
 
 		m._shader.contexts.push(scon2);
 		m._shader._contexts.push(scon2);
@@ -240,7 +240,7 @@ class MakeMaterial {
 		}
 	}
 
-	static traverseNodes = (nodes: TNode[], group: TNodeCanvas, parents: TNode[]) => {
+	static traverseNodes = (nodes: zui_node_t[], group: zui_node_canvas_t, parents: zui_node_t[]) => {
 		for (let node of nodes) {
 			MakeMaterial.bakeNodePreview(node, group, parents);
 			if (node.type == "GROUP") {
@@ -256,7 +256,7 @@ class MakeMaterial {
 		}
 	}
 
-	static bakeNodePreview = (node: TNode, group: TNodeCanvas, parents: TNode[]) => {
+	static bakeNodePreview = (node: zui_node_t, group: zui_node_canvas_t, parents: zui_node_t[]) => {
 		if (node.type == "BLUR") {
 			let id = ParserMaterial.node_name(node, parents);
 			let image = Context.raw.nodePreviews.get(id);
@@ -291,7 +291,7 @@ class MakeMaterial {
 		}
 	}
 
-	static parseNodePreviewMaterial = (node: TNode, group: TNodeCanvas = null, parents: TNode[] = null): { scon: shader_context_t, mcon: material_context_t } => {
+	static parseNodePreviewMaterial = (node: zui_node_t, group: zui_node_canvas_t = null, parents: zui_node_t[] = null): { scon: shader_context_t, mcon: material_context_t } => {
 		if (node.outputs.length == 0) return null;
 		let sdata: TMaterial = { name: "Material", canvas: UINodes.getCanvasMaterial() };
 		let mcon_raw: material_context_t = { name: "mesh", bind_textures: [] };
@@ -304,7 +304,7 @@ class MakeMaterial {
 		});
 		if (compileError) return null;
 		let mcon: material_context_t;
-		MaterialContext.create(mcon_raw, (_mcon: material_context_t) => { mcon = _mcon; });
+		material_context_create(mcon_raw, (_mcon: material_context_t) => { mcon = _mcon; });
 		return { scon: scon, mcon: mcon };
 	}
 

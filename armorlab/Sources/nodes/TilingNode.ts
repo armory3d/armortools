@@ -18,11 +18,11 @@ class TilingNode extends LogicNode {
 		}
 	}
 
-	static buttons = (ui: ZuiRaw, nodes: NodesRaw, node: TNode) => {
+	static buttons = (ui: zui_t, nodes: zui_nodes_t, node: zui_node_t) => {
 		TilingNode.auto = node.buttons[0].default_value == 0 ? false : true;
 		if (!TilingNode.auto) {
-			TilingNode.strength = Zui.slider(Zui.handle("tilingnode_0", {value: TilingNode.strength}), tr("strength"), 0, 1, true);
-			TilingNode.prompt = Zui.textArea(Zui.handle("tilingnode_1"), Align.Left, true, tr("prompt"), true);
+			TilingNode.strength = zui_slider(zui_handle("tilingnode_0", { value: TilingNode.strength }), tr("strength"), 0, 1, true);
+			TilingNode.prompt = zui_text_area(zui_handle("tilingnode_1"), Align.Left, true, tr("prompt"), true);
 			node.buttons[1].height = 1 + TilingNode.prompt.split("\n").length;
 		}
 		else node.buttons[1].height = 0;
@@ -85,7 +85,7 @@ class TilingNode extends LogicNode {
 		InpaintNode.sdInpaint(tile, mask, done);
 	}
 
-	static def: TNode = {
+	static def: zui_node_t = {
 		id: 0,
 		name: _tr("Tiling"),
 		type: "TilingNode",

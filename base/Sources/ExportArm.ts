@@ -1,7 +1,7 @@
 
 class ExportArm {
 
-	static runMesh = (path: string, paintObjects: TMeshObject[]) => {
+	static runMesh = (path: string, paintObjects: mesh_object_t[]) => {
 		let mesh_datas: mesh_data_t[] = [];
 		for (let p of paintObjects) mesh_datas.push(p.data);
 		let raw: scene_t = { mesh_datas: mesh_datas };
@@ -12,27 +12,27 @@ class ExportArm {
 
 	static runProject = () => {
 		///if (is_paint || is_sculpt)
-		let mnodes: TNodeCanvas[] = [];
+		let mnodes: zui_node_canvas_t[] = [];
 		for (let m of Project.materials) {
-			let c: TNodeCanvas = JSON.parse(JSON.stringify(m.canvas));
+			let c: zui_node_canvas_t = JSON.parse(JSON.stringify(m.canvas));
 			for (let n of c.nodes) ExportArm.exportNode(n);
 			mnodes.push(c);
 		}
 
-		let bnodes: TNodeCanvas[] = [];
+		let bnodes: zui_node_canvas_t[] = [];
 		for (let b of Project.brushes) bnodes.push(b.canvas);
 		///end
 
 		///if is_lab
-		let c: TNodeCanvas = JSON.parse(JSON.stringify(Project.canvas));
+		let c: zui_node_canvas_t = JSON.parse(JSON.stringify(Project.canvas));
 		for (let n of c.nodes) ExportArm.exportNode(n);
 		///end
 
-		let mgroups: TNodeCanvas[] = null;
+		let mgroups: zui_node_canvas_t[] = null;
 		if (Project.materialGroups.length > 0) {
 			mgroups = [];
 			for (let g of Project.materialGroups) {
-				let c: TNodeCanvas = JSON.parse(JSON.stringify(g.canvas));
+				let c: zui_node_canvas_t = JSON.parse(JSON.stringify(g.canvas));
 				for (let n of c.nodes) ExportArm.exportNode(n);
 				mgroups.push(c);
 			}
@@ -140,7 +140,7 @@ class ExportArm {
 		///if (krom_android || krom_ios)
 		let tex = render_path_render_targets.get(Context.raw.renderMode == RenderMode.RenderForward ? "buf" : "tex").image;
 		let mesh_icon = image_create_render_target(256, 256);
-		let r = App.w() / App.h();
+		let r = app_w() / app_h();
 		g2_begin(mesh_icon.g2, false);
 		///if krom_opengl
 		g2_draw_scaled_image(tex, -(256 * r - 256) / 2, 256, 256 * r, -256);
@@ -205,7 +205,7 @@ class ExportArm {
 		///end
 	}
 
-	static exportNode = (n: TNode, assets: TAsset[] = null) => {
+	static exportNode = (n: zui_node_t, assets: TAsset[] = null) => {
 		if (n.type == ExportArm.textureNodeName()) {
 			let index = n.buttons[0].default_value;
 			n.buttons[0].data = Base.enumTexts(n.type)[index];
@@ -226,10 +226,10 @@ class ExportArm {
 	///if (is_paint || is_sculpt)
 	static runMaterial = (path: string) => {
 		if (!path.endsWith(".arm")) path += ".arm";
-		let mnodes: TNodeCanvas[] = [];
-		let mgroups: TNodeCanvas[] = null;
+		let mnodes: zui_node_canvas_t[] = [];
+		let mgroups: zui_node_canvas_t[] = null;
 		let m = Context.raw.material;
-		let c: TNodeCanvas = JSON.parse(JSON.stringify(m.canvas));
+		let c: zui_node_canvas_t = JSON.parse(JSON.stringify(m.canvas));
 		let assets: TAsset[] = [];
 		if (UINodes.hasGroup(c)) {
 			mgroups = [];
@@ -292,9 +292,9 @@ class ExportArm {
 	///if (is_paint || is_sculpt)
 	static runBrush = (path: string) => {
 		if (!path.endsWith(".arm")) path += ".arm";
-		let bnodes: TNodeCanvas[] = [];
+		let bnodes: zui_node_canvas_t[] = [];
 		let b = Context.raw.brush;
-		let c: TNodeCanvas = JSON.parse(JSON.stringify(b.canvas));
+		let c: zui_node_canvas_t = JSON.parse(JSON.stringify(b.canvas));
 		let assets: TAsset[] = [];
 		for (let n of c.nodes) ExportArm.exportNode(n, assets);
 		bnodes.push(c);

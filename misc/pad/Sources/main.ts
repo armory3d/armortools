@@ -15,9 +15,9 @@ type TStorage = {
 class Main {
 
 	static ui: ZuiRaw;
-	static text_handle = Handle.create();
-	static sidebar_handle = Handle.create();
-	static editor_handle = Handle.create();
+	static text_handle = zui_handle_create();
+	static sidebar_handle = zui_handle_create();
+	static editor_handle = zui_handle_create();
 	static storage: TStorage = null;
 	static resizing_sidebar = false;
 	static minimap_w = 150;
@@ -63,9 +63,9 @@ class Main {
 		};
 
 		sys_start(ops, () => {
-			Data.getFont("font_mono.ttf", (font: FontRaw) => {
-				Data.getBlob("themes/dark.json", (blob_theme: ArrayBuffer) => {
-					Data.getBlob("text_coloring.json", (blob_coloring: ArrayBuffer) => {
+			data_get_font("font_mono.ttf", (font: FontRaw) => {
+				data_get_blob("themes/dark.json", (blob_theme: ArrayBuffer) => {
+					data_get_blob("text_coloring.json", (blob_coloring: ArrayBuffer) => {
 
 						let parsed = JSON.parse(sys_buffer_to_string(blob_theme));
 						let theme: any = Theme.create();

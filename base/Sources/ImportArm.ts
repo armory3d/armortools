@@ -2,7 +2,7 @@
 class ImportArm {
 
 	static runProject = (path: string) => {
-		Data.getBlob(path, (b: ArrayBuffer) => {
+		data_get_blob(path, (b: ArrayBuffer) => {
 			let project: TProjectFormat = armpack_decode(b);
 
 			///if (is_paint || is_sculpt)
@@ -72,7 +72,7 @@ class ImportArm {
 
 			let base = Path.baseDir(path);
 			if (Project.raw.envmap != null) {
-				Project.raw.envmap = Data.isAbsolute(Project.raw.envmap) ? Project.raw.envmap : base + Project.raw.envmap;
+				Project.raw.envmap = data_is_abs(Project.raw.envmap) ? Project.raw.envmap : base + Project.raw.envmap;
 			}
 			if (Project.raw.envmap_strength != null) {
 				scene_world.strength = Project.raw.envmap_strength;
@@ -81,7 +81,7 @@ class ImportArm {
 				scene_camera.base.transform.local = mat4_from_f32_array(Project.raw.camera_world);
 				transform_decompose(scene_camera.base.transform);
 				scene_camera.data.fov = Project.raw.camera_fov;
-				CameraObject.buildProjection(scene_camera);
+				camera_object_build_projection(scene_camera);
 				let origin = Project.raw.camera_origin;
 				Camera.origins[0].x = origin[0];
 				Camera.origins[0].y = origin[1];
@@ -95,12 +95,12 @@ class ImportArm {
 				file = file.replaceAll("\\", "/");
 				///end
 				// Convert image path from relative to absolute
-				let abs = Data.isAbsolute(file) ? file : base + file;
+				let abs = data_is_abs(file) ? file : base + file;
 				if (project.packed_assets != null) {
 					abs = Path.normalize(abs);
 					ImportArm.unpackAsset(project, abs, file);
 				}
-				if (Data.cachedImages.get(abs) == null && !File.exists(abs)) {
+				if (data_cached_images.get(abs) == null && !File.exists(abs)) {
 					ImportArm.makePink(abs);
 				}
 				let hdrAsEnvmap = abs.endsWith(".hdr") && Project.raw.envmap == abs;
@@ -116,7 +116,7 @@ class ImportArm {
 					file = file.replaceAll("\\", "/");
 					///end
 					// Convert font path from relative to absolute
-					let abs = Data.isAbsolute(file) ? file : base + file;
+					let abs = data_is_abs(file) ? file : base + file;
 					if (File.exists(abs)) {
 						ImportFont.run(abs);
 					}
@@ -126,14 +126,14 @@ class ImportArm {
 
 			// Synchronous for now
 			///if (is_paint || is_sculpt)
-			MeshData.create(project.mesh_datas[0], (md: mesh_data_t) => {
+			mesh_data_create(project.mesh_datas[0], (md: mesh_data_t) => {
 			///end
 
 			///if is_lab
-			MeshData.create(project.mesh_data, (md: mesh_data_t) => {
+			mesh_data_create(project.mesh_data, (md: mesh_data_t) => {
 			///end
 
-				MeshObject.setData(Context.raw.paintObject, md);
+				mesh_object_set_data(Context.raw.paintObject, md);
 				vec4_set(Context.raw.paintObject.base.transform.scale, 1, 1, 1);
 				transform_build_matrix(Context.raw.paintObject.base.transform);
 				Context.raw.paintObject.base.name = md.name;
@@ -143,7 +143,7 @@ class ImportArm {
 			///if (is_paint || is_sculpt)
 			for (let i = 1; i < project.mesh_datas.length; ++i) {
 				let raw = project.mesh_datas[i];
-				MeshData.create(raw, (md: mesh_data_t) => {
+				mesh_data_create(raw, (md: mesh_data_t) => {
 					let object = scene_add_mesh_object(md, Context.raw.paintObject.materials, Context.raw.paintObject.base);
 					object.base.name = md.name;
 					object.skip_context = "paint";
@@ -153,7 +153,7 @@ class ImportArm {
 
 			if (project.mesh_assets != null && project.mesh_assets.length > 0) {
 				let file = project.mesh_assets[0];
-				let abs = Data.isAbsolute(file) ? file : base + file;
+				let abs = data_is_abs(file) ? file : base + file;
 				Project.meshAssets = [abs];
 			}
 
@@ -300,7 +300,7 @@ class ImportArm {
 
 			// Materials
 			let m0: material_data_t = null;
-			Data.getMaterial("Scene", "Material", (m: material_data_t) => {
+			data_get_material("Scene", "Material", (m: material_data_t) => {
 				m0 = m;
 			});
 
@@ -316,7 +316,7 @@ class ImportArm {
 			UINodes.groupStack = [];
 			Project.materialGroups = [];
 			if (project.material_groups != null) {
-				for (let g of project.material_groups) Project.materialGroups.push({ canvas: g, nodes: Nodes.create() });
+				for (let g of project.material_groups) Project.materialGroups.push({ canvas: g, nodes: zui_nodes_create() });
 			}
 
 			///if (is_paint || is_sculpt)
@@ -356,7 +356,7 @@ class ImportArm {
 			///end
 
 			Context.raw.ddirty = 4;
-			Data.deleteBlob(path);
+			data_delete_blob(path);
 		});
 	}
 
@@ -364,10 +364,10 @@ class ImportArm {
 	static runMesh = (raw: scene_t) => {
 		Project.paintObjects = [];
 		for (let i = 0; i < raw.mesh_datas.length; ++i) {
-			MeshData.create(raw.mesh_datas[i], (md: mesh_data_t) => {
-				let object: TMeshObject = null;
+			mesh_data_create(raw.mesh_datas[i], (md: mesh_data_t) => {
+				let object: mesh_object_t = null;
 				if (i == 0) {
-					MeshObject.setData(Context.raw.paintObject, md);
+					mesh_object_set_data(Context.raw.paintObject, md);
 					object = Context.raw.paintObject;
 				}
 				else {
@@ -375,7 +375,7 @@ class ImportArm {
 					object.base.name = md.name;
 					object.skip_context = "paint";
 					md._handle = md.name;
-					Data.cachedMeshes.set(md._handle, md);
+					data_cached_meshes.set(md._handle, md);
 				}
 				vec4_set(object.base.transform.scale, 1, 1, 1);
 				transform_build_matrix(object.base.transform);
@@ -385,14 +385,14 @@ class ImportArm {
 				Viewport.scaleToBounds();
 			});
 		}
-		App.notifyOnInit(Base.initLayers);
+		app_notify_on_init(Base.initLayers);
 		History.reset();
 	}
 
 	static runMaterial = (path: string) => {
-		Data.getBlob(path, (b: ArrayBuffer) => {
+		data_get_blob(path, (b: ArrayBuffer) => {
 			let project: TProjectFormat = armpack_decode(b);
-			if (project.version == null) { Data.deleteBlob(path); return; }
+			if (project.version == null) { data_delete_blob(path); return; }
 			ImportArm.runMaterialFromProject(project, path);
 		});
 	}
@@ -406,19 +406,19 @@ class ImportArm {
 			file = file.replaceAll("\\", "/");
 			///end
 			// Convert image path from relative to absolute
-			let abs = Data.isAbsolute(file) ? file : base + file;
+			let abs = data_is_abs(file) ? file : base + file;
 			if (project.packed_assets != null) {
 				abs = Path.normalize(abs);
 				ImportArm.unpackAsset(project, abs, file);
 			}
-			if (Data.cachedImages.get(abs) == null && !File.exists(abs)) {
+			if (data_cached_images.get(abs) == null && !File.exists(abs)) {
 				ImportArm.makePink(abs);
 			}
 			ImportTexture.run(abs);
 		}
 
 		let m0: material_data_t = null;
-		Data.getMaterial("Scene", "Material", (m: material_data_t) => {
+		data_get_material("Scene", "Material", (m: material_data_t) => {
 			m0 = m;
 		});
 
@@ -436,7 +436,7 @@ class ImportArm {
 			for (let c of project.material_groups) {
 				while (ImportArm.groupExists(c)) ImportArm.renameGroup(c.name, imported, project.material_groups); // Ensure unique group name
 				ImportArm.initNodes(c.nodes);
-				Project.materialGroups.push({ canvas: c, nodes: Nodes.create() });
+				Project.materialGroups.push({ canvas: c, nodes: zui_nodes_create() });
 			}
 		}
 
@@ -447,21 +447,21 @@ class ImportArm {
 				UtilRender.makeMaterialPreview();
 			}
 		}
-		App.notifyOnInit(_init);
+		app_notify_on_init(_init);
 
 		UINodes.groupStack = [];
 		UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
-		Data.deleteBlob(path);
+		data_delete_blob(path);
 	}
 
-	static groupExists = (c: TNodeCanvas): bool => {
+	static groupExists = (c: zui_node_canvas_t): bool => {
 		for (let g of Project.materialGroups) {
 			if (g.canvas.name == c.name) return true;
 		}
 		return false;
 	}
 
-	static renameGroup = (name: string, materials: SlotMaterialRaw[], groups: TNodeCanvas[]) => {
+	static renameGroup = (name: string, materials: SlotMaterialRaw[], groups: zui_node_canvas_t[]) => {
 		for (let m of materials) {
 			for (let n of m.canvas.nodes) {
 				if (n.type == "GROUP" && n.name == name) n.name += ".1";
@@ -476,9 +476,9 @@ class ImportArm {
 	}
 
 	static runBrush = (path: string) => {
-		Data.getBlob(path, (b: ArrayBuffer) => {
+		data_get_blob(path, (b: ArrayBuffer) => {
 			let project: TProjectFormat = armpack_decode(b);
-			if (project.version == null) { Data.deleteBlob(path); return; }
+			if (project.version == null) { data_delete_blob(path); return; }
 			ImportArm.runBrushFromProject(project, path);
 		});
 	}
@@ -492,12 +492,12 @@ class ImportArm {
 			file = file.replaceAll("\\", "/");
 			///end
 			// Convert image path from relative to absolute
-			let abs = Data.isAbsolute(file) ? file : base + file;
+			let abs = data_is_abs(file) ? file : base + file;
 			if (project.packed_assets != null) {
 				abs = Path.normalize(abs);
 				ImportArm.unpackAsset(project, abs, file);
 			}
-			if (Data.cachedImages.get(abs) == null && !File.exists(abs)) {
+			if (data_cached_images.get(abs) == null && !File.exists(abs)) {
 				ImportArm.makePink(abs);
 			}
 			ImportTexture.run(abs);
@@ -518,17 +518,17 @@ class ImportArm {
 				UtilRender.makeBrushPreview();
 			}
 		}
-		App.notifyOnInit(_init);
+		app_notify_on_init(_init);
 
 		UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
-		Data.deleteBlob(path);
+		data_delete_blob(path);
 	}
 	///end
 
 	static runSwatches = (path: string, replaceExisting = false) => {
-		Data.getBlob(path, (b: ArrayBuffer) => {
+		data_get_blob(path, (b: ArrayBuffer) => {
 			let project: TProjectFormat = armpack_decode(b);
-			if (project.version == null) { Data.deleteBlob(path); return; }
+			if (project.version == null) { data_delete_blob(path); return; }
 			ImportArm.runSwatchesFromProject(project, path, replaceExisting);
 		});
 	}
@@ -548,7 +548,7 @@ class ImportArm {
 			}
 		}
 		UIBase.hwnds[TabArea.TabStatus].redraws = 2;
-		Data.deleteBlob(path);
+		data_delete_blob(path);
 	}
 
 	static makePink = (abs: string) => {
@@ -559,7 +559,7 @@ class ImportArm {
 		b[2] = 255;
 		b[3] = 255;
 		let pink = image_from_bytes(b.buffer, 1, 1);
-		Data.cachedImages.set(abs, pink);
+		data_cached_images.set(abs, pink);
 	}
 
 	static textureNodeName = (): string => {
@@ -570,7 +570,7 @@ class ImportArm {
 		///end
 	}
 
-	static initNodes = (nodes: TNode[]) => {
+	static initNodes = (nodes: zui_node_t[]) => {
 		for (let node of nodes) {
 			if (node.type == ImportArm.textureNodeName()) {
 				node.buttons[0].default_value = Base.getAssetIndex(node.buttons[0].data);
@@ -596,7 +596,7 @@ class ImportArm {
 					Project.raw.packed_assets.push(pa);
 				}
 				image_from_encoded_bytes(pa.bytes, pa.name.endsWith(".jpg") ? ".jpg" : ".png", (image: image_t) => {
-					Data.cachedImages.set(abs, image);
+					data_cached_images.set(abs, image);
 				}, null, false);
 				break;
 			}

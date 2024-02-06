@@ -25,7 +25,7 @@
 class UIBase {
 
 	static show = true;
-	static ui: ZuiRaw;
+	static ui: zui_t;
 	static borderStarted = 0;
 	static borderHandle_ptr: i32 = 0;
 	static action_paint_remap = "";
@@ -33,27 +33,27 @@ class UIBase {
 	static undoTapTime = 0.0;
 	static redoTapTime = 0.0;
 
-	static init_hwnds = (): HandleRaw[] => {
+	static init_hwnds = (): zui_handle_t[] => {
 		///if is_paint
-		return [Handle.create(), Handle.create(), Handle.create()];
+		return [zui_handle_create(), zui_handle_create(), zui_handle_create()];
 		///end
 		///if is_sculpt
-		return [Handle.create(), Handle.create(), Handle.create()];
+		return [zui_handle_create(), zui_handle_create(), zui_handle_create()];
 		///end
 		///if is_lab
-		return [Handle.create()];
+		return [zui_handle_create()];
 		///end
 	}
 
-	static init_htabs = (): HandleRaw[] => {
+	static init_htabs = (): zui_handle_t[] => {
 		///if is_paint
-		return [Handle.create(), Handle.create(), Handle.create()];
+		return [zui_handle_create(), zui_handle_create(), zui_handle_create()];
 		///end
 		///if is_sculpt
-		return [Handle.create(), Handle.create(), Handle.create()];
+		return [zui_handle_create(), zui_handle_create(), zui_handle_create()];
 		///end
 		///if is_lab
-		return [Handle.create()];
+		return [zui_handle_create()];
 		///end
 	}
 
@@ -100,7 +100,7 @@ class UIBase {
 	static defaultSidebarW = UIBase.defaultSidebarFullW;
 	///end
 	static tabx = 0;
-	static hminimized = Handle.create();
+	static hminimized = zui_handle_create();
 	static sidebarMiniW = UIBase.defaultSidebarMiniW;
 	///end
 
@@ -121,7 +121,7 @@ class UIBase {
 		///if (is_paint || is_sculpt)
 		if (Project.materials == null) {
 			Project.materials = [];
-			Data.getMaterial("Scene", "Material", (m: material_data_t) => {
+			data_get_material("Scene", "Material", (m: material_data_t) => {
 				Project.materials.push(SlotMaterial.create(m));
 				Context.raw.material = Project.materials[0];
 			});
@@ -149,18 +149,18 @@ class UIBase {
 
 		///if is_lab
 		if (Project.materialData == null) {
-			Data.getMaterial("Scene", "Material", (m: material_data_t) => {
+			data_get_material("Scene", "Material", (m: material_data_t) => {
 				Project.materialData = m;
 			});
 		}
 
 		if (Project.defaultCanvas == null) { // Synchronous
-			Data.getBlob("default_brush.arm", (b: ArrayBuffer) => {
+			data_get_blob("default_brush.arm", (b: ArrayBuffer) => {
 				Project.defaultCanvas = b;
 			});
 		}
 
-		Project.nodes = Nodes.create();
+		Project.nodes = zui_nodes_create();
 		Project.canvas = armpack_decode(Project.defaultCanvas);
 		Project.canvas.name = "Brush 1";
 
@@ -204,11 +204,11 @@ class UIBase {
 		History.reset();
 
 		let scale = Config.raw.window_scale;
-		UIBase.ui = Zui.create({ theme: Base.theme, font: Base.font, scaleFactor: scale, color_wheel: Base.colorWheel, black_white_gradient: Base.colorWheelGradient });
-		Zui.onBorderHover = UIBase.onBorderHover;
-		Zui.onTextHover = UIBase.onTextHover;
-		Zui.onDeselectText = UIBase.onDeselectText;
-		Zui.onTabDrop = UIBase.onTabDrop;
+		UIBase.ui = zui_create({ theme: Base.theme, font: Base.font, scaleFactor: scale, color_wheel: Base.colorWheel, black_white_gradient: Base.colorWheelGradient });
+		zui_set_on_border_hover(UIBase.onBorderHover);
+		zui_set_on_text_hover(UIBase.onTextHover);
+		zui_set_on_deselect_text(UIBase.onDeselectText);
+		zui_set_on_tab_drop(UIBase.onTabDrop);
 
 		///if (is_paint || is_sculpt)
 		let resources = ["cursor.k", "icons.k"];
@@ -219,26 +219,26 @@ class UIBase {
 
 		///if (is_paint || is_sculpt)
 		Context.raw.gizmo = scene_get_child(".Gizmo");
-		Context.raw.gizmoTranslateX = BaseObject.getChild(Context.raw.gizmo, ".TranslateX");
-		Context.raw.gizmoTranslateY = BaseObject.getChild(Context.raw.gizmo, ".TranslateY");
-		Context.raw.gizmoTranslateZ = BaseObject.getChild(Context.raw.gizmo, ".TranslateZ");
-		Context.raw.gizmoScaleX = BaseObject.getChild(Context.raw.gizmo, ".ScaleX");
-		Context.raw.gizmoScaleY = BaseObject.getChild(Context.raw.gizmo, ".ScaleY");
-		Context.raw.gizmoScaleZ = BaseObject.getChild(Context.raw.gizmo, ".ScaleZ");
-		Context.raw.gizmoRotateX = BaseObject.getChild(Context.raw.gizmo, ".RotateX");
-		Context.raw.gizmoRotateY = BaseObject.getChild(Context.raw.gizmo, ".RotateY");
-		Context.raw.gizmoRotateZ = BaseObject.getChild(Context.raw.gizmo, ".RotateZ");
+		Context.raw.gizmoTranslateX = object_get_child(Context.raw.gizmo, ".TranslateX");
+		Context.raw.gizmoTranslateY = object_get_child(Context.raw.gizmo, ".TranslateY");
+		Context.raw.gizmoTranslateZ = object_get_child(Context.raw.gizmo, ".TranslateZ");
+		Context.raw.gizmoScaleX = object_get_child(Context.raw.gizmo, ".ScaleX");
+		Context.raw.gizmoScaleY = object_get_child(Context.raw.gizmo, ".ScaleY");
+		Context.raw.gizmoScaleZ = object_get_child(Context.raw.gizmo, ".ScaleZ");
+		Context.raw.gizmoRotateX = object_get_child(Context.raw.gizmo, ".RotateX");
+		Context.raw.gizmoRotateY = object_get_child(Context.raw.gizmo, ".RotateY");
+		Context.raw.gizmoRotateZ = object_get_child(Context.raw.gizmo, ".RotateZ");
 		///end
 
 		Res.load(resources, () => {});
 
-		if (Zui.SCALE(UIBase.ui) > 1) UIBase.setIconScale();
+		if (zui_SCALE(UIBase.ui) > 1) UIBase.setIconScale();
 
 		Context.raw.paintObject = scene_get_child(".Cube").ext;
 		Project.paintObjects = [Context.raw.paintObject];
 
 		if (Project.filepath == "") {
-			App.notifyOnInit(Base.initLayers);
+			app_notify_on_init(Base.initLayers);
 		}
 
 		Context.raw.projectObjects = [];
@@ -255,7 +255,7 @@ class UIBase {
 
 		if (!Base.uiEnabled) return;
 
-		if (!UINodes.ui.isTyping && !UIBase.ui.isTyping) {
+		if (!UINodes.ui.is_typing && !UIBase.ui.is_typing) {
 			if (Operator.shortcut(Config.keymap.toggle_node_editor)) {
 				///if (is_paint || is_sculpt)
 				UINodes.canvasType == CanvasType.CanvasMaterial ? UIBase.showMaterialNodes() : UIBase.showBrushNodes();
@@ -296,7 +296,7 @@ class UIBase {
 				let _init = () => {
 					ExportTexture.run(Context.raw.textureExportPath);
 				}
-				App.notifyOnInit(_init);
+				app_notify_on_init(_init);
 			}
 		}
 		else if (Operator.shortcut(Config.keymap.file_export_textures_as)) {
@@ -383,7 +383,7 @@ class UIBase {
 		}
 		///end
 
-		let isTyping = UIBase.ui.isTyping || UIView2D.ui.isTyping || UINodes.ui.isTyping;
+		let isTyping = UIBase.ui.is_typing || UIView2D.ui.is_typing || UINodes.ui.is_typing;
 
 		///if (is_paint || is_sculpt)
 		if (!isTyping) {
@@ -501,7 +501,7 @@ class UIBase {
 			///end
 
 			// Viewpoint
-			if (mouse_view_x() < App.w()) {
+			if (mouse_view_x() < app_w()) {
 				if (Operator.shortcut(Config.keymap.view_reset)) {
 					Viewport.reset();
 					Viewport.scaleToBounds();
@@ -541,10 +541,10 @@ class UIBase {
 					///end
 					///end
 
-					UIMenu.draw((ui: ZuiRaw) => {
-						let modeHandle = Zui.handle("uibase_0");
+					UIMenu.draw((ui: zui_t) => {
+						let modeHandle = zui_handle("uibase_0");
 						modeHandle.position = Context.raw.viewportMode;
-						Zui.text(tr("Viewport Mode"), Align.Right, ui.t.HIGHLIGHT_COL);
+						zui_text(tr("Viewport Mode"), Align.Right, ui.t.HIGHLIGHT_COL);
 						let modes = [
 							tr("Lit"),
 							tr("Base Color"),
@@ -575,11 +575,11 @@ class UIBase {
 						///end
 
 						for (let i = 0; i < modes.length; ++i) {
-							Zui.radio(modeHandle, i, modes[i], shortcuts[i]);
+							zui_radio(modeHandle, i, modes[i], shortcuts[i]);
 						}
 
 						let index = shortcuts.indexOf(keyboard_key_code(ui.key));
-						if (ui.isKeyPressed && index != -1) {
+						if (ui.is_key_pressed && index != -1) {
 							modeHandle.position = index;
 							ui.changed = true;
 							Context.setViewportMode(modeHandle.position);
@@ -639,7 +639,7 @@ class UIBase {
 				else { // UINodes / UIView2D ratio
 					Config.raw.layout[LayoutSize.LayoutNodesH] -= Math.floor(mouse_movement_y);
 					if (Config.raw.layout[LayoutSize.LayoutNodesH] < 32) Config.raw.layout[LayoutSize.LayoutNodesH] = 32;
-					else if (Config.raw.layout[LayoutSize.LayoutNodesH] > App.h() * 0.95) Config.raw.layout[LayoutSize.LayoutNodesH] = Math.floor(App.h() * 0.95);
+					else if (Config.raw.layout[LayoutSize.LayoutNodesH] > app_h() * 0.95) Config.raw.layout[LayoutSize.LayoutNodesH] = Math.floor(app_h() * 0.95);
 				}
 			}
 			else if (UIBase.borderHandle_ptr == UIBase.hwnds[TabArea.TabStatus].ptr) {
@@ -678,7 +678,7 @@ class UIBase {
 				else { // UINodes / UIView2D ratio
 					Config.raw.layout[LayoutSize.LayoutNodesH] -= Math.floor(mouse_movement_y);
 					if (Config.raw.layout[LayoutSize.LayoutNodesH] < 32) Config.raw.layout[LayoutSize.LayoutNodesH] = 32;
-					else if (Config.raw.layout[LayoutSize.LayoutNodesH] > App.h() * 0.95) Config.raw.layout[LayoutSize.LayoutNodesH] = Math.floor(App.h() * 0.95);
+					else if (Config.raw.layout[LayoutSize.LayoutNodesH] > app_h() * 0.95) Config.raw.layout[LayoutSize.LayoutNodesH] = Math.floor(app_h() * 0.95);
 				}
 			}
 			else if (UIBase.borderHandle_ptr == UIBase.hwnds[TabArea.TabStatus].ptr) {
@@ -710,9 +710,9 @@ class UIBase {
 				}
 				History.pushUndo = true;
 				Context.raw.particleHitX = Context.raw.particleHitY = Context.raw.particleHitZ = 0;
-				scene_spawn_object(".Sphere", null, (o: TBaseObject) => {
-					Data.getMaterial("Scene", ".Gizmo", (md: material_data_t) => {
-						let mo: TMeshObject = o.ext;
+				scene_spawn_object(".Sphere", null, (o: object_t) => {
+					data_get_material("Scene", ".Gizmo", (md: material_data_t) => {
+						let mo: mesh_object_t = o.ext;
 						mo.base.name = ".Bullet";
 						mo.materials[0] = md;
 						mo.base.visible = true;
@@ -735,7 +735,7 @@ class UIBase {
 						let ray = raycast_get_ray(mouse_view_x(), mouse_view_y(), camera);
 						PhysicsBody.applyImpulse(body, vec4_mult(ray.dir, 0.15));
 
-						Context.raw.particleTimer = tween_timer(5, function() { MeshObject.remove(mo); });
+						Context.raw.particleTimer = tween_timer(5, function() { mesh_object_remove(mo); });
 					});
 				});
 			}
@@ -758,31 +758,31 @@ class UIBase {
 	}
 
 	static view_top = () => {
-		let isTyping = UIBase.ui.isTyping || UIView2D.ui.isTyping || UINodes.ui.isTyping;
+		let isTyping = UIBase.ui.is_typing || UIView2D.ui.is_typing || UINodes.ui.is_typing;
 
 		if (Context.inPaintArea() && !isTyping) {
-			if (mouse_view_x() < App.w()) {
+			if (mouse_view_x() < app_w()) {
 				Viewport.setView(0, 0, 1, 0, 0, 0);
 			}
 		}
 	}
 
 	static operatorSearch = () => {
-		let searchHandle = Zui.handle("uibase_1");
+		let searchHandle = zui_handle("uibase_1");
 		let first = true;
-		UIMenu.draw((ui: ZuiRaw) => {
-			Zui.fill(0, 0, ui._w / Zui.SCALE(ui), ui.t.ELEMENT_H * 8, ui.t.SEPARATOR_COL);
-			let search = Zui.textInput(searchHandle, "", Align.Left, true, true);
+		UIMenu.draw((ui: zui_t) => {
+			zui_fill(0, 0, ui._w / zui_SCALE(ui), ui.t.ELEMENT_H * 8, ui.t.SEPARATOR_COL);
+			let search = zui_text_input(searchHandle, "", Align.Left, true, true);
 			ui.changed = false;
 			if (first) {
 				first = false;
 				searchHandle.text = "";
-				Zui.startTextEdit(searchHandle); // Focus search bar
+				zui_start_text_edit(searchHandle); // Focus search bar
 			}
 
 			if (searchHandle.changed) UIBase.operatorSearchOffset = 0;
 
-			if (ui.isKeyPressed) { // Move selection
+			if (ui.is_key_pressed) { // Move selection
 				if (ui.key == KeyCode.Down && UIBase.operatorSearchOffset < 6) UIBase.operatorSearchOffset++;
 				if (ui.key == KeyCode.Up && UIBase.operatorSearchOffset > 0) UIBase.operatorSearchOffset--;
 			}
@@ -793,7 +793,7 @@ class UIBase {
 			for (let n in Config.keymap) {
 				if (n.indexOf(search) >= 0) {
 					ui.t.BUTTON_COL = count == UIBase.operatorSearchOffset ? ui.t.HIGHLIGHT_COL : ui.t.SEPARATOR_COL;
-					if (Zui.button(n, Align.Left, Config.keymap[n]) || (enter && count == UIBase.operatorSearchOffset)) {
+					if (zui_button(n, Align.Left, Config.keymap[n]) || (enter && count == UIBase.operatorSearchOffset)) {
 						if (enter) {
 							ui.changed = true;
 							count = 6; // Trigger break
@@ -842,7 +842,7 @@ class UIBase {
 		}
 
 		///if (is_paint || is_sculpt)
-		UIBase.sidebarMiniW = Math.floor(UIBase.defaultSidebarMiniW * Zui.SCALE(UIBase.ui));
+		UIBase.sidebarMiniW = Math.floor(UIBase.defaultSidebarMiniW * zui_SCALE(UIBase.ui));
 		///end
 
 		if (!Base.uiEnabled) return;
@@ -978,19 +978,19 @@ class UIBase {
 		if (down) {
 			let mx = mouse_view_x();
 			let my = mouse_view_y();
-			let ww = App.w();
+			let ww = app_w();
 
 			///if (is_paint || is_sculpt)
 			if (Context.raw.paint2d) {
-				mx -= App.w();
+				mx -= app_w();
 				ww = UIView2D.ww;
 			}
 			///end
 
 			if (mx < ww &&
-				mx > App.x() &&
-				my < App.h() &&
-				my > App.y()) {
+				mx > app_x() &&
+				my < app_h() &&
+				my > app_y()) {
 
 				if (setCloneSource) {
 					Context.raw.cloneStartX = mx;
@@ -1013,14 +1013,14 @@ class UIBase {
 
 						if (Context.raw.tool == WorkspaceTool.ToolClone && Context.raw.cloneStartX >= 0.0) { // Clone delta
 							Context.raw.cloneDeltaX = (Context.raw.cloneStartX - mx) / ww;
-							Context.raw.cloneDeltaY = (Context.raw.cloneStartY - my) / App.h();
+							Context.raw.cloneDeltaY = (Context.raw.cloneStartY - my) / app_h();
 							Context.raw.cloneStartX = -1;
 						}
 						else if (Context.raw.tool == WorkspaceTool.ToolParticle) {
 							// Reset particles
 							///if arm_particles
-							let emitter: TMeshObject = scene_get_child(".ParticleEmitter").ext;
-							let psys = emitter.particleSystems[0];
+							let emitter: mesh_object_t = scene_get_child(".ParticleEmitter").ext;
+							let psys = emitter.particle_systems[0];
 							psys.time = 0;
 							// psys.time = psys.seed * psys.animtime;
 							// psys.seed++;
@@ -1133,21 +1133,21 @@ class UIBase {
 
 	static render = (g: g2_t) => {
 		if (!UIBase.show && Config.raw.touch_ui) {
-			UIBase.ui.inputEnabled = true;
+			UIBase.ui.input_enabled = true;
 			g2_end(g);
-			Zui.begin(UIBase.ui, g);
-			if (Zui.window(UIBase.ui, Zui.handle("uibase_2"), 0, 0, 150, Math.floor(Zui.ELEMENT_H(UIBase.ui) + Zui.ELEMENT_OFFSET(UIBase.ui) + 1))) {
-				if (Zui.button(tr("Close"))) {
+			zui_begin(UIBase.ui, g);
+			if (zui_window(UIBase.ui, zui_handle("uibase_2"), 0, 0, 150, Math.floor(zui_ELEMENT_H(UIBase.ui) + zui_ELEMENT_OFFSET(UIBase.ui) + 1))) {
+				if (zui_button(tr("Close"))) {
 					UIBase.toggleDistractFree();
 				}
 			}
-			Zui.end();
+			zui_end();
 			g2_begin(g, false);
 		}
 
 		if (!UIBase.show || sys_width() == 0 || sys_height() == 0) return;
 
-		UIBase.ui.inputEnabled = Base.uiEnabled;
+		UIBase.ui.input_enabled = Base.uiEnabled;
 
 		// Remember last tab positions
 		for (let i = 0; i < UIBase.htabs.length; ++i) {
@@ -1163,7 +1163,7 @@ class UIBase {
 		}
 
 		g2_end(g);
-		Zui.begin(UIBase.ui, g);
+		zui_begin(UIBase.ui, g);
 
 		///if (is_paint || is_sculpt)
 		UIToolbar.renderUI(g);
@@ -1176,7 +1176,7 @@ class UIBase {
 		UIBase.drawSidebar();
 		///end
 
-		Zui.end();
+		zui_end();
 		g2_begin(g, false);
 	}
 
@@ -1184,35 +1184,35 @@ class UIBase {
 	static drawSidebar = () => {
 		// Tabs
 		let mini = Config.raw.layout[LayoutSize.LayoutSidebarW] <= UIBase.sidebarMiniW;
-		let expandButtonOffset = Config.raw.touch_ui ? Math.floor(Zui.ELEMENT_H(UIBase.ui) + Zui.ELEMENT_OFFSET(UIBase.ui)) : 0;
+		let expandButtonOffset = Config.raw.touch_ui ? Math.floor(zui_ELEMENT_H(UIBase.ui) + zui_ELEMENT_OFFSET(UIBase.ui)) : 0;
 		UIBase.tabx = sys_width() - Config.raw.layout[LayoutSize.LayoutSidebarW];
 
 		let _SCROLL_W = UIBase.ui.t.SCROLL_W;
 		if (mini) UIBase.ui.t.SCROLL_W = UIBase.ui.t.SCROLL_MINI_W;
 
-		if (Zui.window(UIBase.ui, UIBase.hwnds[TabArea.TabSidebar0], UIBase.tabx, 0, Config.raw.layout[LayoutSize.LayoutSidebarW], Config.raw.layout[LayoutSize.LayoutSidebarH0])) {
+		if (zui_window(UIBase.ui, UIBase.hwnds[TabArea.TabSidebar0], UIBase.tabx, 0, Config.raw.layout[LayoutSize.LayoutSidebarW], Config.raw.layout[LayoutSize.LayoutSidebarH0])) {
 			for (let i = 0; i < (mini ? 1 : UIBase.hwndTabs[TabArea.TabSidebar0].length); ++i) UIBase.hwndTabs[TabArea.TabSidebar0][i](UIBase.htabs[TabArea.TabSidebar0]);
 		}
-		if (Zui.window(UIBase.ui, UIBase.hwnds[TabArea.TabSidebar1], UIBase.tabx, Config.raw.layout[LayoutSize.LayoutSidebarH0], Config.raw.layout[LayoutSize.LayoutSidebarW], Config.raw.layout[LayoutSize.LayoutSidebarH1] - expandButtonOffset)) {
+		if (zui_window(UIBase.ui, UIBase.hwnds[TabArea.TabSidebar1], UIBase.tabx, Config.raw.layout[LayoutSize.LayoutSidebarH0], Config.raw.layout[LayoutSize.LayoutSidebarW], Config.raw.layout[LayoutSize.LayoutSidebarH1] - expandButtonOffset)) {
 			for (let i = 0; i < (mini ? 1 : UIBase.hwndTabs[TabArea.TabSidebar1].length); ++i) UIBase.hwndTabs[TabArea.TabSidebar1][i](UIBase.htabs[TabArea.TabSidebar1]);
 		}
 
-		Zui.endWindow();
+		zui_end_window();
 		UIBase.ui.t.SCROLL_W = _SCROLL_W;
 
 		// Collapse / expand button for mini sidebar
 		if (Config.raw.touch_ui) {
 			let width = Config.raw.layout[LayoutSize.LayoutSidebarW];
-			let height = Math.floor(Zui.ELEMENT_H(UIBase.ui) + Zui.ELEMENT_OFFSET(UIBase.ui));
-			if (Zui.window(UIBase.ui, Zui.handle("uibase_3"), sys_width() - width, sys_height() - height, width, height + 1)) {
+			let height = Math.floor(zui_ELEMENT_H(UIBase.ui) + zui_ELEMENT_OFFSET(UIBase.ui));
+			if (zui_window(UIBase.ui, zui_handle("uibase_3"), sys_width() - width, sys_height() - height, width, height + 1)) {
 				UIBase.ui._w = width;
 				let _BUTTON_H = UIBase.ui.t.BUTTON_H;
 				let _BUTTON_COL = UIBase.ui.t.BUTTON_COL;
 				UIBase.ui.t.BUTTON_H = UIBase.ui.t.ELEMENT_H;
 				UIBase.ui.t.BUTTON_COL = UIBase.ui.t.WINDOW_BG_COL;
-				if (Zui.button(mini ? "<<" : ">>")) {
+				if (zui_button(mini ? "<<" : ">>")) {
 					Config.raw.layout[LayoutSize.LayoutSidebarW] = mini ? UIBase.defaultSidebarFullW : UIBase.defaultSidebarMiniW;
-					Config.raw.layout[LayoutSize.LayoutSidebarW] = Math.floor(Config.raw.layout[LayoutSize.LayoutSidebarW] * Zui.SCALE(UIBase.ui));
+					Config.raw.layout[LayoutSize.LayoutSidebarW] = Math.floor(Config.raw.layout[LayoutSize.LayoutSidebarW] * zui_SCALE(UIBase.ui));
 				}
 				UIBase.ui.t.BUTTON_H = _BUTTON_H;
 				UIBase.ui.t.BUTTON_COL = _BUTTON_COL;
@@ -1221,15 +1221,15 @@ class UIBase {
 
 		// Expand button
 		if (Config.raw.layout[LayoutSize.LayoutSidebarW] == 0) {
-			let width = Math.floor(font_width(UIBase.ui.font, UIBase.ui.fontSize, "<<") + 25 * Zui.SCALE(UIBase.ui));
-			if (Zui.window(UIBase.ui, UIBase.hminimized, sys_width() - width, 0, width, Math.floor(Zui.ELEMENT_H(UIBase.ui) + Zui.ELEMENT_OFFSET(UIBase.ui) + 1))) {
+			let width = Math.floor(font_width(UIBase.ui.font, UIBase.ui.font_size, "<<") + 25 * zui_SCALE(UIBase.ui));
+			if (zui_window(UIBase.ui, UIBase.hminimized, sys_width() - width, 0, width, Math.floor(zui_ELEMENT_H(UIBase.ui) + zui_ELEMENT_OFFSET(UIBase.ui) + 1))) {
 				UIBase.ui._w = width;
 				let _BUTTON_H = UIBase.ui.t.BUTTON_H;
 				let _BUTTON_COL = UIBase.ui.t.BUTTON_COL;
 				UIBase.ui.t.BUTTON_H = UIBase.ui.t.ELEMENT_H;
 				UIBase.ui.t.BUTTON_COL = UIBase.ui.t.SEPARATOR_COL;
 
-				if (Zui.button("<<")) {
+				if (zui_button("<<")) {
 					Config.raw.layout[LayoutSize.LayoutSidebarW] = Context.raw.maximizedSidebarWidth != 0 ? Context.raw.maximizedSidebarWidth : Math.floor(UIBase.defaultSidebarW * Config.raw.window_scale);
 				}
 				UIBase.ui.t.BUTTON_H = _BUTTON_H;
@@ -1321,12 +1321,12 @@ class UIBase {
 		}
 
 		let cursorImg = Res.get("cursor.k");
-		let psize = Math.floor(cursorImg.width * (Context.raw.brushRadius * Context.raw.brushNodesRadius) * Zui.SCALE(UIBase.ui));
+		let psize = Math.floor(cursorImg.width * (Context.raw.brushRadius * Context.raw.brushNodesRadius) * zui_SCALE(UIBase.ui));
 
 		// Clone source cursor
 		if (Context.raw.tool == WorkspaceTool.ToolClone && !keyboard_down("alt") && (mouse_down() || pen_down())) {
 			g.color = 0x66ffffff;
-			g2_draw_scaled_image(cursorImg, mx + Context.raw.cloneDeltaX * App.w() - psize / 2, my + Context.raw.cloneDeltaY * App.h() - psize / 2, psize, psize);
+			g2_draw_scaled_image(cursorImg, mx + Context.raw.cloneDeltaX * app_w() - psize / 2, my + Context.raw.cloneDeltaY * app_h() - psize / 2, psize, psize);
 			g.color = 0xffffffff;
 		}
 
@@ -1349,8 +1349,8 @@ class UIBase {
 				}
 
 				if (!Config.raw.brush_live) {
-					let psizex = Math.floor(256 * Zui.SCALE(UIBase.ui) * (Context.raw.brushRadius * Context.raw.brushNodesRadius * Context.raw.brushScaleX));
-					let psizey = Math.floor(256 * Zui.SCALE(UIBase.ui) * (Context.raw.brushRadius * Context.raw.brushNodesRadius));
+					let psizex = Math.floor(256 * zui_SCALE(UIBase.ui) * (Context.raw.brushRadius * Context.raw.brushNodesRadius * Context.raw.brushScaleX));
+					let psizey = Math.floor(256 * zui_SCALE(UIBase.ui) * (Context.raw.brushRadius * Context.raw.brushNodesRadius));
 
 					Context.raw.viewIndex = Context.raw.viewIndexLast;
 					let decalX = Base.x() + Context.raw.decalX * Base.w() - psizex / 2;
@@ -1380,7 +1380,7 @@ class UIBase {
 				(decalMask && !Config.raw.brush_3d) ||
 				(decalMask && Context.in2dView())) {
 				if (decalMask) {
-					psize = Math.floor(cursorImg.width * (Context.raw.brushDecalMaskRadius * Context.raw.brushNodesRadius) * Zui.SCALE(UIBase.ui));
+					psize = Math.floor(cursorImg.width * (Context.raw.brushDecalMaskRadius * Context.raw.brushNodesRadius) * zui_SCALE(UIBase.ui));
 				}
 				if (Config.raw.brush_3d && Context.in2dView()) {
 					psize = Math.floor(psize * UIView2D.panScale);
@@ -1411,7 +1411,7 @@ class UIBase {
 
 	static showMaterialNodes = () => {
 		// Clear input state as ui receives input events even when not drawn
-		Zui.endInput();
+		zui_end_input();
 
 		///if (is_paint || is_sculpt)
 		UINodes.show = !UINodes.show || UINodes.canvasType != CanvasType.CanvasMaterial;
@@ -1427,7 +1427,7 @@ class UIBase {
 	///if (is_paint || is_sculpt)
 	static showBrushNodes = () => {
 		// Clear input state as ui receives input events even when not drawn
-		Zui.endInput();
+		zui_end_input();
 		UINodes.show = !UINodes.show || UINodes.canvasType != CanvasType.CanvasBrush;
 		UINodes.canvasType = CanvasType.CanvasBrush;
 		Base.resize();
@@ -1436,7 +1436,7 @@ class UIBase {
 
 	static show2DView = (type: View2DType) => {
 		// Clear input state as ui receives input events even when not drawn
-		Zui.endInput();
+		zui_end_input();
 		if (UIView2D.type != type) UIView2D.show = true;
 		else UIView2D.show = !UIView2D.show;
 		UIView2D.type = type;
@@ -1451,7 +1451,7 @@ class UIBase {
 	}
 
 	static setIconScale = () => {
-		if (Zui.SCALE(UIBase.ui) > 1) {
+		if (zui_SCALE(UIBase.ui) > 1) {
 			Res.load(["icons2x.k"], () => {
 				Res.bundled.set("icons.k", Res.get("icons2x.k"));
 			});
@@ -1491,7 +1491,7 @@ class UIBase {
 			Krom.setMouseCursor(3) : // Horizontal
 			Krom.setMouseCursor(4);  // Vertical
 
-		if (Zui.current.inputStarted) {
+		if (zui_current.input_started) {
 			UIBase.borderStarted = side;
 			UIBase.borderHandle_ptr = handle_ptr;
 			Base.isResizing = true;

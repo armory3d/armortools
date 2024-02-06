@@ -58,26 +58,26 @@ class RenderPathBase {
 	static drawCompass = (currentG: g4_t) => {
 		if (Context.raw.showCompass) {
 			let cam = scene_camera;
-			let compass: TMeshObject = scene_get_child(".Compass").ext;
+			let compass: mesh_object_t = scene_get_child(".Compass").ext;
 
 			let _visible = compass.base.visible;
 			let _parent = compass.base.parent;
 			let _loc = compass.base.transform.loc;
 			let _rot = compass.base.transform.rot;
 			let crot = cam.base.transform.rot;
-			let ratio = App.w() / App.h();
-			let _P = cam.P;
-			cam.P = mat4_ortho(-8 * ratio, 8 * ratio, -8, 8, -2, 2);
+			let ratio = app_w() / app_h();
+			let _P = cam.p;
+			cam.p = mat4_ortho(-8 * ratio, 8 * ratio, -8, 8, -2, 2);
 			compass.base.visible = true;
 			compass.base.parent = cam.base;
 			compass.base.transform.loc = vec4_create(7.4 * ratio, 7.0, -1);
 			compass.base.transform.rot = quat_create(-crot.x, -crot.y, -crot.z, crot.w);
 			vec4_set(compass.base.transform.scale, 0.4, 0.4, 0.4);
 			transform_build_matrix(compass.base.transform);
-			compass.frustumCulling = false;
-			MeshObject.render(compass, currentG, "overlay", []);
+			compass.frustum_culling = false;
+			mesh_object_render(compass, currentG, "overlay", []);
 
-			cam.P = _P;
+			cam.p = _P;
 			compass.base.visible = _visible;
 			compass.base.parent = _parent;
 			compass.base.transform.loc = _loc;
@@ -112,15 +112,15 @@ class RenderPathBase {
 			}
 
 			transform_set_matrix(cam.base.transform, Camera.views[Context.raw.viewIndex]);
-			CameraObject.buildMatrix(cam);
-			CameraObject.buildProjection(cam);
+			camera_object_build_matrix(cam);
+			camera_object_build_projection(cam);
 		}
 
 		// Match projection matrix jitter
 		let skipTaa = Context.raw.splitView || ((Context.raw.tool == WorkspaceTool.ToolClone || Context.raw.tool == WorkspaceTool.ToolBlur || Context.raw.tool == WorkspaceTool.ToolSmudge) && Context.raw.pdirty > 0);
 		scene_camera.frame = skipTaa ? 0 : RenderPathBase.taaFrame;
-		CameraObject.projectionJitter(scene_camera);
-		CameraObject.buildMatrix(scene_camera);
+		camera_object_projection_jitter(scene_camera);
+		camera_object_build_matrix(scene_camera);
 	}
 
 	static end = () => {
@@ -254,8 +254,8 @@ class RenderPathBase {
 
 			Context.raw.viewIndex = Context.raw.viewIndex == 0 ? 1 : 0;
 			transform_set_matrix(cam.base.transform, Camera.views[Context.raw.viewIndex]);
-			CameraObject.buildMatrix(cam);
-			CameraObject.buildProjection(cam);
+			camera_object_build_matrix(cam);
+			camera_object_build_projection(cam);
 
 			RenderPathBase.drawGbuffer();
 
@@ -272,8 +272,8 @@ class RenderPathBase {
 
 			Context.raw.viewIndex = Context.raw.viewIndex == 0 ? 1 : 0;
 			transform_set_matrix(cam.base.transform, Camera.views[Context.raw.viewIndex]);
-			CameraObject.buildMatrix(cam);
-			CameraObject.buildProjection(cam);
+			camera_object_build_matrix(cam);
+			camera_object_build_projection(cam);
 		}
 	}
 

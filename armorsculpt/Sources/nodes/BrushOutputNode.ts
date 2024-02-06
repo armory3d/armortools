@@ -98,7 +98,7 @@ class BrushOutputNode extends LogicNode {
 			!fillLayer &&
 			!groupLayer &&
 			(SlotLayer.isVisible(Context.raw.layer) || Context.raw.paint2d) &&
-			!UIBase.ui.isHovered &&
+			!UIBase.ui.is_hovered &&
 			!Base.isDragging &&
 			!Base.isResizing &&
 			!Base.isScrolling() &&

@@ -1,7 +1,7 @@
 
 class MakeNodePreview {
 
-	static run = (data: TMaterial, matcon: material_context_t, node: TNode, group: TNodeCanvas, parents: TNode[]): NodeShaderContextRaw => {
+	static run = (data: TMaterial, matcon: material_context_t, node: zui_node_t, group: zui_node_canvas_t, parents: zui_node_t[]): NodeShaderContextRaw => {
 		let context_id = "mesh";
 		let con_mesh = NodeShaderContext.create(data, {
 			name: context_id,
@@ -36,7 +36,7 @@ class MakeNodePreview {
 		let links = ParserMaterial.links;
 		let nodes = Context.raw.material.nodes;
 
-		let link: TNodeLink = { id: Nodes.getLinkId(links), from_id: node.id, from_socket: Context.raw.nodePreviewSocket, to_id: -1, to_socket: -1 };
+		let link: zui_node_link_t = { id: zui_get_link_id(links), from_id: node.id, from_socket: Context.raw.nodePreviewSocket, to_id: -1, to_socket: -1 };
 		links.push(link);
 
 		ParserMaterial.con = con_mesh;

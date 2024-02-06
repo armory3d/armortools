@@ -6,7 +6,7 @@ class Res {
 	static load = (names: string[], done: ()=>void) => {
 		let loaded = 0;
 		for (let s of names) {
-			Data.getImage(s, (image: image_t) => {
+			data_get_image(s, (image: image_t) => {
 				Res.bundled.set(s, image);
 				loaded++;
 				if (loaded == names.length) done();
@@ -35,17 +35,17 @@ class Res {
 
 	///if arm_snapshot
 	static embedRaw = (handle: string, name: string, file: ArrayBuffer) => {
-		Data.cachedBlobs.set(name, file);
-		Data.getSceneRaw(handle, (_) => {});
-		Data.cachedBlobs.delete(name);
+		data_cached_blobs.set(name, file);
+		data_get_scene_raw(handle, (_) => {});
+		data_cached_blobs.delete(name);
 	}
 
 	static embedBlob = (name: string, file: ArrayBuffer) => {
-		Data.cachedBlobs.set(name, file);
+		data_cached_blobs.set(name, file);
 	}
 
 	static embedFont = (name: string, file: ArrayBuffer) => {
-		Data.cachedFonts.set(name, font_create(file));
+		data_cached_fonts.set(name, font_create(file));
 	}
 	///end
 }

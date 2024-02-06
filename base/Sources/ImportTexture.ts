@@ -14,7 +14,7 @@ class ImportTexture {
 			if (a.file == path) {
 				// Set as envmap
 				if (hdrAsEnvmap && path.toLowerCase().endsWith(".hdr")) {
-					Data.getImage(path, (image: image_t) => {
+					data_get_image(path, (image: image_t) => {
 						Base.notifyOnNextFrame(() => { // Make sure file browser process did finish
 							ImportEnvmap.run(path, image);
 						});
@@ -27,11 +27,11 @@ class ImportTexture {
 
 		let ext = path.substr(path.lastIndexOf(".") + 1);
 		let importer = Path.textureImporters.get(ext);
-		let cached = Data.cachedImages.get(path) != null; // Already loaded or pink texture for missing file
+		let cached = data_cached_images.get(path) != null; // Already loaded or pink texture for missing file
 		if (importer == null || cached) importer = ImportTexture.defaultImporter;
 
 		importer(path, (image: image_t) => {
-			Data.cachedImages.set(path, image);
+			data_cached_images.set(path, image);
 			let ar = path.split(Path.sep);
 			let name = ar[ar.length - 1];
 			let asset: TAsset = {name: name, file: path, id: Project.assetId++};
@@ -52,6 +52,6 @@ class ImportTexture {
 	}
 
 	static defaultImporter = (path: string, done: (img: image_t)=>void) => {
-		Data.getImage(path, done);
+		data_get_image(path, done);
 	}
 }

@@ -11,7 +11,7 @@ class NodesBrush {
 
 	static categories = [_tr("Input"), _tr("Model")];
 
-	static list: TNode[][] = [
+	static list: zui_node_t[][] = [
 		[ // Input
 			ImageTextureNode.def,
 			RGBNode.def,
@@ -26,7 +26,7 @@ class NodesBrush {
 		]
 	];
 
-	static createNode = (nodeType: string): TNode => {
+	static createNode = (nodeType: string): zui_node_t => {
 		for (let c of NodesBrush.list) {
 			for (let n of c) {
 				if (n.type == nodeType) {

@@ -10,7 +10,7 @@ class Config {
 
 	static load = (done: ()=>void) => {
 		try {
-			Data.getBlob((Path.isProtected() ? Krom.savePath() : "") + "config.json", (blob: ArrayBuffer) => {
+			data_get_blob((Path.isProtected() ? Krom.savePath() : "") + "config.json", (blob: ArrayBuffer) => {
 				Config.configLoaded = true;
 				Config.raw = JSON.parse(sys_buffer_to_string(blob));
 
@@ -20,7 +20,7 @@ class Config {
 		catch (e: any) {
 			///if krom_linux
 			try { // Protected directory
-				Data.getBlob(Krom.savePath() + "config.json", (blob: ArrayBuffer) => {
+				data_get_blob(Krom.savePath() + "config.json", (blob: ArrayBuffer) => {
 					Config.configLoaded = true;
 					Config.raw = JSON.parse(sys_buffer_to_string(blob));
 					done();
@@ -101,14 +101,16 @@ class Config {
 			}
 		}
 
-		Zui.touchScroll = Zui.touchHold = Zui.touchTooltip = Config.raw.touch_ui;
+		zui_set_touch_scroll(Config.raw.touch_ui);
+		zui_set_touch_hold(Config.raw.touch_ui);
+		zui_set_touch_tooltip(Config.raw.touch_ui);
 		Base.resHandle.position = Config.raw.layer_res;
 		Config.loadKeymap();
 	}
 
 	static getSha = (): string => {
 		let sha = "";
-		Data.getBlob("version.json", (blob: ArrayBuffer) => {
+		data_get_blob("version.json", (blob: ArrayBuffer) => {
 			sha = JSON.parse(sys_buffer_to_string(blob)).sha;
 		});
 		return sha;
@@ -116,7 +118,7 @@ class Config {
 
 	static getDate = (): string => {
 		let date = "";
-		Data.getBlob("version.json", (blob: ArrayBuffer) => {
+		data_get_blob("version.json", (blob: ArrayBuffer) => {
 			date = JSON.parse(sys_buffer_to_string(blob)).date;
 		});
 		return date;
@@ -143,7 +145,7 @@ class Config {
 	}
 
 	static restore = () => {
-		Zui.children = new Map(); // Reset ui handles
+		zui_children = new Map(); // Reset ui handles
 		Config.configLoaded = false;
 		let _layout = Config.raw.layout;
 		Config.init();
@@ -160,7 +162,7 @@ class Config {
 		Config.raw = from;
 		Config.raw.sha = _sha;
 		Config.raw.version = _version;
-		Zui.children = new Map(); // Reset ui handles
+		zui_children = new Map(); // Reset ui handles
 		Config.loadKeymap();
 		Base.initLayout();
 		Translator.loadTranslations(Config.raw.locale);
@@ -188,7 +190,7 @@ class Config {
 			Config.keymap = Base.defaultKeymap;
 		}
 		else {
-			Data.getBlob("keymap_presets/" + Config.raw.keymap, (blob: ArrayBuffer) => {
+			data_get_blob("keymap_presets/" + Config.raw.keymap, (blob: ArrayBuffer) => {
 				Config.keymap = JSON.parse(sys_buffer_to_string(blob));
 				// Fill in undefined keys with defaults
 				for (let field in Base.defaultKeymap) {
@@ -203,7 +205,7 @@ class Config {
 
 	static saveKeymap = () => {
 		if (Config.raw.keymap == "default.json") return;
-		let path = Data.dataPath + "keymap_presets/" + Config.raw.keymap;
+		let path = data_data_path() + "keymap_presets/" + Config.raw.keymap;
 		let buffer = sys_string_to_buffer(JSON.stringify(Config.keymap));
 		Krom.fileSaveBytes(path, buffer);
 	}
@@ -269,12 +271,12 @@ class Config {
 
 	static loadTheme = (theme: string, tagRedraw = true) => {
 		if (theme == "default.json") { // Built-in default
-			Base.theme = Theme.create();
+			Base.theme = zui_theme_create();
 		}
 		else {
-			Data.getBlob("themes/" + theme, (b: ArrayBuffer) => {
+			data_get_blob("themes/" + theme, (b: ArrayBuffer) => {
 				let parsed = JSON.parse(sys_buffer_to_string(b));
-				Base.theme = Theme.create();
+				Base.theme = zui_theme_create();
 				for (let key in Base.theme) {
 					if (key == "theme_") continue;
 					if (key.startsWith("set_")) continue;

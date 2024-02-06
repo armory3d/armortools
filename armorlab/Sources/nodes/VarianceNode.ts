@@ -18,8 +18,8 @@ class VarianceNode extends LogicNode {
 		}
 	}
 
-	static buttons = (ui: ZuiRaw, nodes: NodesRaw, node: TNode) => {
-		VarianceNode.prompt = Zui.textArea(Zui.handle("variancenode_0"), Align.Left, true, tr("prompt"), true);
+	static buttons = (ui: zui_t, nodes: zui_nodes_t, node: zui_node_t) => {
+		VarianceNode.prompt = zui_text_area(zui_handle("variancenode_0"), Align.Left, true, tr("prompt"), true);
 		node.buttons[0].height = VarianceNode.prompt.split("\n").length;
 	}
 
@@ -42,7 +42,7 @@ class VarianceNode extends LogicNode {
 
 			Console.progress(tr("Processing") + " - " + tr("Variance"));
 			Base.notifyOnNextFrame(() => {
-				Data.getBlob("models/sd_vae_encoder.quant.onnx", (vae_encoder_blob: ArrayBuffer) => {
+				data_get_blob("models/sd_vae_encoder.quant.onnx", (vae_encoder_blob: ArrayBuffer) => {
 					let latents_buf = Krom.mlInference(vae_encoder_blob, [f32a.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], Config.raw.gpu_inference);
 					let latents = new Float32Array(latents_buf);
 					for (let i = 0; i < latents.length; ++i) {
@@ -75,7 +75,7 @@ class VarianceNode extends LogicNode {
 		return VarianceNode.image;
 	}
 
-	static def: TNode = {
+	static def: zui_node_t = {
 		id: 0,
 		name: _tr("Variance"),
 		type: "VarianceNode",

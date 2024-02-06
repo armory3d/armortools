@@ -13,7 +13,7 @@ class UINodes {
 	static ww: i32;
 	static wh: i32;
 
-	static ui: ZuiRaw;
+	static ui: zui_t;
 	static canvasType = CanvasType.CanvasMaterial;
 	static showMenu = false;
 	static showMenuFirst = true;
@@ -25,46 +25,46 @@ class UINodes {
 	static uichangedLast = false;
 	static recompileMat = false; // Mat preview
 	static recompileMatFinal = false;
-	static nodeSearchSpawn: TNode = null;
+	static nodeSearchSpawn: zui_node_t = null;
 	static nodeSearchOffset = 0;
-	static lastCanvas: TNodeCanvas = null;
+	static lastCanvas: zui_node_canvas_t = null;
 	static lastNodeSelectedId = -1;
 	static releaseLink = false;
 	static isNodeMenuOperation = false;
 
 	static grid: image_t = null;
-	static hwnd = Handle.create();
+	static hwnd = zui_handle_create();
 	static groupStack: TNodeGroup[] = [];
 	static controlsDown = false;
 
 	constructor() {
-		Nodes.onLinkDrag = UINodes.onLinkDrag;
-		Nodes.onSocketReleased = UINodes.onSocketReleased;
-		Nodes.onCanvasReleased = UINodes.onCanvasReleased;
-		Nodes.onCanvasControl = UINodes.onCanvasControl;
+		zui_set_on_link_drag(UINodes.onLinkDrag);
+		zui_set_on_socket_released(UINodes.onSocketReleased);
+		zui_set_on_canvas_released(UINodes.onCanvasReleased);
+		zui_set_on_canvas_control(UINodes.onCanvasControl);
 
 		let scale = Config.raw.window_scale;
-		UINodes.ui = Zui.create({ theme: Base.theme, font: Base.font, color_wheel: Base.colorWheel, black_white_gradient: Base.colorWheelGradient, scaleFactor: scale });
-		UINodes.ui.scrollEnabled = false;
+		UINodes.ui = zui_create({ theme: Base.theme, font: Base.font, color_wheel: Base.colorWheel, black_white_gradient: Base.colorWheelGradient, scaleFactor: scale });
+		UINodes.ui.scroll_enabled = false;
 	}
 
 	static onLinkDrag = (linkDragId: i32, isNewLink: bool) => {
 		if (isNewLink) {
 			let nodes = UINodes.getNodes();
-			let linkDrag = Nodes.getLink(UINodes.getCanvas(true).links, linkDragId);
-			let node = Nodes.getNode(UINodes.getCanvas(true).nodes, linkDrag.from_id > -1 ? linkDrag.from_id : linkDrag.to_id);
-			let linkX = UINodes.ui._windowX + Nodes.NODE_X(node);
-			let linkY = UINodes.ui._windowY + Nodes.NODE_Y(node);
+			let linkDrag = zui_get_link(UINodes.getCanvas(true).links, linkDragId);
+			let node = zui_get_node(UINodes.getCanvas(true).nodes, linkDrag.from_id > -1 ? linkDrag.from_id : linkDrag.to_id);
+			let linkX = UINodes.ui._window_x + zui_nodes_NODE_X(node);
+			let linkY = UINodes.ui._window_y + zui_nodes_NODE_Y(node);
 			if (linkDrag.from_id > -1) {
-				linkX += Nodes.NODE_W(node);
-				linkY += Nodes.OUTPUT_Y(node.outputs, linkDrag.from_socket);
+				linkX += zui_nodes_NODE_W(node);
+				linkY += zui_nodes_OUTPUT_Y(node.outputs, linkDrag.from_socket);
 			}
 			else {
-				linkY += Nodes.INPUT_Y(UINodes.getCanvas(true), node.inputs, linkDrag.to_socket) + Nodes.OUTPUTS_H(node.outputs) + Nodes.BUTTONS_H(node);
+				linkY += zui_nodes_INPUT_Y(UINodes.getCanvas(true), node.inputs, linkDrag.to_socket) + zui_nodes_OUTPUTS_H(node.outputs) + zui_nodes_BUTTONS_H(node);
 			}
 			if (Math.abs(mouse_x - linkX) > 5 || Math.abs(mouse_y - linkY) > 5) { // Link length
 				UINodes.nodeSearch(-1, -1, () => {
-					let n = Nodes.getNode(UINodes.getCanvas(true).nodes, nodes.nodesSelectedId[0]);
+					let n = zui_get_node(UINodes.getCanvas(true).nodes, nodes.nodesSelectedId[0]);
 					if (linkDrag.to_id == -1 && n.inputs.length > 0) {
 						linkDrag.to_id = n.id;
 						let fromType = node.outputs[linkDrag.from_socket].type;
@@ -103,21 +103,21 @@ class UINodes {
 	static onSocketReleased = (socket_id: i32) => {
 		let nodes = UINodes.getNodes();
 		let canvas = UINodes.getCanvas(true);
-		let socket = Nodes.getSocket(canvas.nodes, socket_id);
-		let node = Nodes.getNode(canvas.nodes, socket.node_id);
-		if (UINodes.ui.inputReleasedR) {
+		let socket = zui_get_socket(canvas.nodes, socket_id);
+		let node = zui_get_node(canvas.nodes, socket.node_id);
+		if (UINodes.ui.input_released_r) {
 			if (node.type == "GROUP_INPUT" || node.type == "GROUP_OUTPUT") {
 				Base.notifyOnNextFrame(() => {
-					UIMenu.draw((ui: ZuiRaw) => {
+					UIMenu.draw((ui: zui_t) => {
 						if (UIMenu.menuButton(ui, tr("Edit"))) {
-							let htype = Zui.handle("uinodes_0");
-							let hname = Zui.handle("uinodes_1");
-							let hmin = Zui.handle("uinodes_2");
-							let hmax = Zui.handle("uinodes_3");
-							let hval0 = Zui.handle("uinodes_4");
-							let hval1 = Zui.handle("uinodes_5");
-							let hval2 = Zui.handle("uinodes_6");
-							let hval3 = Zui.handle("uinodes_7");
+							let htype = zui_handle("uinodes_0");
+							let hname = zui_handle("uinodes_1");
+							let hmin = zui_handle("uinodes_2");
+							let hmax = zui_handle("uinodes_3");
+							let hval0 = zui_handle("uinodes_4");
+							let hval1 = zui_handle("uinodes_5");
+							let hval2 = zui_handle("uinodes_6");
+							let hval3 = zui_handle("uinodes_7");
 							htype.position = socket.type == "RGBA" ? 0 : socket.type == "VECTOR" ? 1 : 2;
 							hname.text = socket.name;
 							hmin.value = socket.min;
@@ -132,34 +132,34 @@ class UINodes {
 							}
 							else hval0.value = socket.default_value;
 							Base.notifyOnNextFrame(() => {
-								Zui.endInput();
-								UIBox.showCustom((ui: ZuiRaw) => {
-									if (Zui.tab(Zui.handle("uinodes_8"), tr("Socket"))) {
-										let type = Zui.combo(htype, [tr("Color"), tr("Vector"), tr("Value")], tr("Type"), true);
+								zui_end_input();
+								UIBox.showCustom((ui: zui_t) => {
+									if (zui_tab(zui_handle("uinodes_8"), tr("Socket"))) {
+										let type = zui_combo(htype, [tr("Color"), tr("Vector"), tr("Value")], tr("Type"), true);
 										if (htype.changed) hname.text = type == 0 ? tr("Color") : type == 1 ? tr("Vector") : tr("Value");
-										let name = Zui.textInput(hname, tr("Name"));
-										let min = Zui.floatInput(hmin, tr("Min"));
-										let max = Zui.floatInput(hmax, tr("Max"));
+										let name = zui_text_input(hname, tr("Name"));
+										let min = zui_float_input(hmin, tr("Min"));
+										let max = zui_float_input(hmax, tr("Max"));
 										let default_value: any = null;
 										if (type == 0) {
-											Zui.row([1 / 4, 1 / 4, 1 / 4, 1 / 4]);
-											Zui.floatInput(hval0, tr("R"));
-											Zui.floatInput(hval1, tr("G"));
-											Zui.floatInput(hval2, tr("B"));
-											Zui.floatInput(hval3, tr("A"));
+											zui_row([1 / 4, 1 / 4, 1 / 4, 1 / 4]);
+											zui_float_input(hval0, tr("R"));
+											zui_float_input(hval1, tr("G"));
+											zui_float_input(hval2, tr("B"));
+											zui_float_input(hval3, tr("A"));
 											default_value = new Float32Array([hval0.value, hval1.value, hval2.value, hval3.value]);
 										}
 										else if (type == 1) {
-											Zui.row([1 / 3, 1 / 3, 1 / 3]);
-											hval0.value = Zui.floatInput(hval0, tr("X"));
-											hval1.value = Zui.floatInput(hval1, tr("Y"));
-											hval2.value = Zui.floatInput(hval2, tr("Z"));
+											zui_row([1 / 3, 1 / 3, 1 / 3]);
+											hval0.value = zui_float_input(hval0, tr("X"));
+											hval1.value = zui_float_input(hval1, tr("Y"));
+											hval2.value = zui_float_input(hval2, tr("Z"));
 											default_value = new Float32Array([hval0.value, hval1.value, hval2.value]);
 										}
 										else {
-											default_value = Zui.floatInput(hval0, tr("default_value"));
+											default_value = zui_float_input(hval0, tr("default_value"));
 										}
-										if (Zui.button(tr("OK"))) { // || ui.isReturnDown
+										if (zui_button(tr("OK"))) { // || ui.isReturnDown
 											socket.name = name;
 											socket.type = type == 0 ? "RGBA" : type == 1 ? "VECTOR" : "VALUE";
 											socket.color = NodesMaterial.get_socket_color(socket.type);
@@ -208,13 +208,13 @@ class UINodes {
 	}
 
 	static onCanvasReleased = () => {
-		if (UINodes.ui.inputReleasedR && Math.abs(UINodes.ui.inputX - UINodes.ui.inputStartedX) < 2 && Math.abs(UINodes.ui.inputY - UINodes.ui.inputStartedY) < 2) {
+		if (UINodes.ui.input_released_r && Math.abs(UINodes.ui.input_x - UINodes.ui.input_started_x) < 2 && Math.abs(UINodes.ui.input_y - UINodes.ui.input_started_y) < 2) {
 			// Node selection
 			let nodes = UINodes.getNodes();
 			let canvas = UINodes.getCanvas(true);
-			let selected: TNode = null;
+			let selected: zui_node_t = null;
 			for (let node of canvas.nodes) {
-				if (Zui.getInputInRect(UINodes.ui._windowX + Nodes.NODE_X(node), UINodes.ui._windowY + Nodes.NODE_Y(node), Nodes.NODE_W(node), Nodes.NODE_H(canvas, node))) {
+				if (zui_get_input_in_rect(UINodes.ui._window_x + zui_nodes_NODE_X(node), UINodes.ui._window_y + zui_nodes_NODE_Y(node), zui_nodes_NODE_W(node), zui_nodes_NODE_H(canvas, node))) {
 					selected = node;
 					break;
 				}
@@ -223,12 +223,12 @@ class UINodes {
 			else if (nodes.nodesSelectedId.indexOf(selected.id) == -1) nodes.nodesSelectedId = [selected.id];
 
 			// Node context menu
-			if (!Nodes.socketReleased) {
+			if (!zui_socket_released()) {
 				let numberOfEntries = 5;
 				if (UINodes.canvasType == CanvasType.CanvasMaterial) ++numberOfEntries;
 				if (selected != null && selected.type == "RGB") ++numberOfEntries;
 
-				UIMenu.draw((uiMenu: ZuiRaw) => {
+				UIMenu.draw((uiMenu: zui_t) => {
 					uiMenu._y += 1;
 					let isProtected = selected == null ||
 									///if (is_paint || is_sculpt)
@@ -241,22 +241,22 @@ class UINodes {
 					if (UIMenu.menuButton(uiMenu, tr("Cut"), "ctrl+x")) {
 						Base.notifyOnNextFrame(() => {
 							UINodes.hwnd.redraws = 2;
-							Zui.isCopy = true;
-							Zui.isCut = true;
+							zui_set_is_copy(true);
+							zui_set_is_cut(true);
 							UINodes.isNodeMenuOperation = true;
 						});
 					}
 					if (UIMenu.menuButton(uiMenu, tr("Copy"), "ctrl+c")) {
 						Base.notifyOnNextFrame(() => {
-							Zui.isCopy = true;
+							zui_set_is_copy(true);
 							UINodes.isNodeMenuOperation = true;
 						});
 					}
-					uiMenu.enabled = Nodes.clipboard != "";
+					uiMenu.enabled = zui_clipboard != "";
 					if (UIMenu.menuButton(uiMenu, tr("Paste"), "ctrl+v")) {
 						Base.notifyOnNextFrame(() => {
 							UINodes.hwnd.redraws = 2;
-							Zui.isPaste = true;
+							zui_set_is_paste(true);
 							UINodes.isNodeMenuOperation = true;
 						});
 					}
@@ -264,15 +264,15 @@ class UINodes {
 					if (UIMenu.menuButton(uiMenu, tr("Delete"), "delete")) {
 						Base.notifyOnNextFrame(() => {
 							UINodes.hwnd.redraws = 2;
-							UINodes.ui.isDeleteDown = true;
+							UINodes.ui.is_delete_down = true;
 							UINodes.isNodeMenuOperation = true;
 						});
 					}
 					if (UIMenu.menuButton(uiMenu, tr("Duplicate"))) {
 						Base.notifyOnNextFrame(() => {
 							UINodes.hwnd.redraws = 2;
-							Zui.isCopy = true;
-							Zui.isPaste = true;
+							zui_set_is_copy(true);
+							zui_set_is_paste(true);
 							UINodes.isNodeMenuOperation = true;
 						});
 					}
@@ -298,11 +298,11 @@ class UINodes {
 			}
 		}
 
-		if (UINodes.ui.inputReleased) {
+		if (UINodes.ui.input_released) {
 			let nodes = UINodes.getNodes();
 			let canvas = UINodes.getCanvas(true);
 			for (let node of canvas.nodes) {
-				if (Zui.getInputInRect(UINodes.ui._windowX + Nodes.NODE_X(node), UINodes.ui._windowY + Nodes.NODE_Y(node), Nodes.NODE_W(node), Nodes.NODE_H(canvas, node))) {
+				if (zui_get_input_in_rect(UINodes.ui._window_x + zui_nodes_NODE_X(node), UINodes.ui._window_y + zui_nodes_NODE_Y(node), zui_nodes_NODE_W(node), zui_nodes_NODE_H(canvas, node))) {
 					if (node.id == nodes.nodesSelectedId[0]) {
 						UIView2D.hwnd.redraws = 2;
 						if (time_time() - Context.raw.selectTime < 0.25) UIBase.show2DView(View2DType.View2DNode);
@@ -314,40 +314,40 @@ class UINodes {
 		}
 	}
 
-	static onCanvasControl = (): CanvasControl => {
+	static onCanvasControl = (): zui_canvas_control_t => {
 		return UINodes.getCanvasControl(UINodes.ui, UINodes);
 	}
 
-	static getCanvasControl = (ui: ZuiRaw, parent: any): CanvasControl => {
+	static getCanvasControl = (ui: zui_t, parent: any): zui_canvas_control_t => {
 		if (Config.raw.wrap_mouse && parent.controlsDown) {
-			if (ui.inputX < ui._windowX) {
-				ui.inputX = ui._windowX + ui._windowW;
-				Krom.setMousePosition(Math.floor(ui.inputX), Math.floor(ui.inputY));
+			if (ui.input_x < ui._window_x) {
+				ui.input_x = ui._window_x + ui._window_w;
+				Krom.setMousePosition(Math.floor(ui.input_x), Math.floor(ui.input_y));
 			}
-			else if (ui.inputX > ui._windowX + ui._windowW) {
-				ui.inputX = ui._windowX;
-				Krom.setMousePosition(Math.floor(ui.inputX), Math.floor(ui.inputY));
+			else if (ui.input_x > ui._window_x + ui._window_w) {
+				ui.input_x = ui._window_x;
+				Krom.setMousePosition(Math.floor(ui.input_x), Math.floor(ui.input_y));
 			}
-			else if (ui.inputY < ui._windowY) {
-				ui.inputY = ui._windowY + ui._windowH;
-				Krom.setMousePosition(Math.floor(ui.inputX), Math.floor(ui.inputY));
+			else if (ui.input_y < ui._window_y) {
+				ui.input_y = ui._window_y + ui._window_h;
+				Krom.setMousePosition(Math.floor(ui.input_x), Math.floor(ui.input_y));
 			}
-			else if (ui.inputY > ui._windowY + ui._windowH) {
-				ui.inputY = ui._windowY;
-				Krom.setMousePosition(Math.floor(ui.inputX), Math.floor(ui.inputY));
+			else if (ui.input_y > ui._window_y + ui._window_h) {
+				ui.input_y = ui._window_y;
+				Krom.setMousePosition(Math.floor(ui.input_x), Math.floor(ui.input_y));
 			}
 		}
 
 		if (Operator.shortcut(Config.keymap.action_pan, ShortcutType.ShortcutStarted) ||
 			Operator.shortcut(Config.keymap.action_zoom, ShortcutType.ShortcutStarted) ||
-			ui.inputStartedR ||
-			ui.inputWheelDelta != 0.0) {
+			ui.input_started_r ||
+			ui.input_wheel_delta != 0.0) {
 			parent.controlsDown = true;
 		}
 		else if (!Operator.shortcut(Config.keymap.action_pan, ShortcutType.ShortcutDown) &&
 			!Operator.shortcut(Config.keymap.action_zoom, ShortcutType.ShortcutDown) &&
-			!ui.inputDownR &&
-			ui.inputWheelDelta == 0.0) {
+			!ui.input_down_r &&
+			ui.input_wheel_delta == 0.0) {
 			parent.controlsDown = false;
 		}
 		if (!parent.controlsDown) {
@@ -358,26 +358,26 @@ class UINodes {
 			}
 		}
 
-		let pan = ui.inputDownR || Operator.shortcut(Config.keymap.action_pan, ShortcutType.ShortcutDown);
+		let pan = ui.input_down_r || Operator.shortcut(Config.keymap.action_pan, ShortcutType.ShortcutDown);
 		let zoomDelta = Operator.shortcut(Config.keymap.action_zoom, ShortcutType.ShortcutDown) ? UINodes.getZoomDelta(ui) / 100.0 : 0.0;
 		let control = {
-			panX: pan ? ui.inputDX : 0.0,
-			panY: pan ? ui.inputDY : 0.0,
-			zoom: ui.inputWheelDelta != 0.0 ? -ui.inputWheelDelta / 10 : zoomDelta
+			panX: pan ? ui.input_dx : 0.0,
+			panY: pan ? ui.input_dy : 0.0,
+			zoom: ui.input_wheel_delta != 0.0 ? -ui.input_wheel_delta / 10 : zoomDelta
 		};
 		if (Base.isComboSelected()) control.zoom = 0.0;
 		return control;
 	}
 
-	static getZoomDelta = (ui: ZuiRaw): f32 => {
-		return Config.raw.zoom_direction == ZoomDirection.ZoomVertical ? -ui.inputDY :
-			   Config.raw.zoom_direction == ZoomDirection.ZoomVerticalInverted ? -ui.inputDY :
-			   Config.raw.zoom_direction == ZoomDirection.ZoomHorizontal ? ui.inputDX :
-			   Config.raw.zoom_direction == ZoomDirection.ZoomHorizontalInverted ? ui.inputDX :
-			   -(ui.inputDY - ui.inputDX);
+	static getZoomDelta = (ui: zui_t): f32 => {
+		return Config.raw.zoom_direction == ZoomDirection.ZoomVertical ? -ui.input_dy :
+			   Config.raw.zoom_direction == ZoomDirection.ZoomVerticalInverted ? -ui.input_dy :
+			   Config.raw.zoom_direction == ZoomDirection.ZoomHorizontal ? ui.input_dx :
+			   Config.raw.zoom_direction == ZoomDirection.ZoomHorizontalInverted ? ui.input_dx :
+			   -(ui.input_dy - ui.input_dx);
 	}
 
-	static getCanvas = (groups = false): TNodeCanvas => {
+	static getCanvas = (groups = false): zui_node_canvas_t => {
 		///if (is_paint || is_sculpt)
 		if (UINodes.canvasType == CanvasType.CanvasMaterial) {
 			if (groups && UINodes.groupStack.length > 0) return UINodes.groupStack[UINodes.groupStack.length - 1].canvas;
@@ -392,12 +392,12 @@ class UINodes {
 	}
 
 	///if (is_paint || is_sculpt)
-	static getCanvasMaterial = (): TNodeCanvas => {
+	static getCanvasMaterial = (): zui_node_canvas_t => {
 		return Context.raw.material.canvas;
 	}
 	///end
 
-	static getNodes = (): NodesRaw => {
+	static getNodes = (): zui_nodes_t => {
 		///if (is_paint || is_sculpt)
 		if (UINodes.canvasType == CanvasType.CanvasMaterial) {
 			if (UINodes.groupStack.length > 0) return UINodes.groupStack[UINodes.groupStack.length - 1].nodes;
@@ -416,15 +416,15 @@ class UINodes {
 		if (!UINodes.show || !Base.uiEnabled) return;
 
 		///if (is_paint || is_sculpt)
-		UINodes.wx = Math.floor(App.w()) + UIToolbar.toolbarw;
+		UINodes.wx = Math.floor(app_w()) + UIToolbar.toolbarw;
 		///end
 		///if is_lab
-		UINodes.wx = Math.floor(App.w());
+		UINodes.wx = Math.floor(app_w());
 		///end
 		UINodes.wy = UIHeader.headerh * 2;
 
 		if (UIView2D.show) {
-			UINodes.wy += App.h() - Config.raw.layout[LayoutSize.LayoutNodesH];
+			UINodes.wy += app_h() - Config.raw.layout[LayoutSize.LayoutNodesH];
 		}
 
 		let ww = Config.raw.layout[LayoutSize.LayoutNodesW];
@@ -439,21 +439,21 @@ class UINodes {
 		let mx = mouse_x;
 		let my = mouse_y;
 		if (mx < UINodes.wx || mx > UINodes.wx + ww || my < UINodes.wy) return;
-		if (UINodes.ui.isTyping || !UINodes.ui.inputEnabled) return;
+		if (UINodes.ui.is_typing || !UINodes.ui.input_enabled) return;
 
 		let nodes = UINodes.getNodes();
-		if (nodes.nodesSelectedId.length > 0 && UINodes.ui.isKeyPressed) {
-			if (UINodes.ui.key == KeyCode.Left) for (let n of nodes.nodesSelectedId) Nodes.getNode(UINodes.getCanvas(true).nodes, n).x -= 1;
-			else if (UINodes.ui.key == KeyCode.Right) for (let n of nodes.nodesSelectedId) Nodes.getNode(UINodes.getCanvas(true).nodes, n).x += 1;
-			if (UINodes.ui.key == KeyCode.Up) for (let n of nodes.nodesSelectedId) Nodes.getNode(UINodes.getCanvas(true).nodes, n).y -= 1;
-			else if (UINodes.ui.key == KeyCode.Down) for (let n of nodes.nodesSelectedId) Nodes.getNode(UINodes.getCanvas(true).nodes, n).y += 1;
+		if (nodes.nodesSelectedId.length > 0 && UINodes.ui.is_key_pressed) {
+			if (UINodes.ui.key == KeyCode.Left) for (let n of nodes.nodesSelectedId) zui_get_node(UINodes.getCanvas(true).nodes, n).x -= 1;
+			else if (UINodes.ui.key == KeyCode.Right) for (let n of nodes.nodesSelectedId) zui_get_node(UINodes.getCanvas(true).nodes, n).x += 1;
+			if (UINodes.ui.key == KeyCode.Up) for (let n of nodes.nodesSelectedId) zui_get_node(UINodes.getCanvas(true).nodes, n).y -= 1;
+			else if (UINodes.ui.key == KeyCode.Down) for (let n of nodes.nodesSelectedId) zui_get_node(UINodes.getCanvas(true).nodes, n).y += 1;
 		}
 
 		// Node search popup
 		if (Operator.shortcut(Config.keymap.node_search)) UINodes.nodeSearch();
 		if (UINodes.nodeSearchSpawn != null) {
-			UINodes.ui.inputX = mouse_x; // Fix inputDX after popup removal
-			UINodes.ui.inputY = mouse_y;
+			UINodes.ui.input_x = mouse_x; // Fix inputDX after popup removal
+			UINodes.ui.input_y = mouse_y;
 			UINodes.nodeSearchSpawn = null;
 		}
 
@@ -470,24 +470,24 @@ class UINodes {
 	}
 
 	static nodeSearch = (x = -1, y = -1, done: ()=>void = null) => {
-		let searchHandle = Zui.handle("uinodes_9");
+		let searchHandle = zui_handle("uinodes_9");
 		let first = true;
-		UIMenu.draw((ui: ZuiRaw) => {
+		UIMenu.draw((ui: zui_t) => {
 			ui.g.color = ui.t.SEPARATOR_COL;
-			Zui.drawRect(ui.g, true, ui._x, ui._y, ui._w, Zui.ELEMENT_H(ui) * 8);
+			zui_draw_rect(ui.g, true, ui._x, ui._y, ui._w, zui_ELEMENT_H(ui) * 8);
 			ui.g.color = 0xffffffff;
 
-			let search = Zui.textInput(searchHandle, "", Align.Left, true, true).toLowerCase();
+			let search = zui_text_input(searchHandle, "", Align.Left, true, true).toLowerCase();
 			ui.changed = false;
 			if (first) {
 				first = false;
 				searchHandle.text = "";
-				Zui.startTextEdit(searchHandle); // Focus search bar
+				zui_start_text_edit(searchHandle); // Focus search bar
 			}
 
 			if (searchHandle.changed) UINodes.nodeSearchOffset = 0;
 
-			if (ui.isKeyPressed) { // Move selection
+			if (ui.is_key_pressed) { // Move selection
 				if (ui.key == KeyCode.Down && UINodes.nodeSearchOffset < 6) UINodes.nodeSearchOffset++;
 				if (ui.key == KeyCode.Up && UINodes.nodeSearchOffset > 0) UINodes.nodeSearchOffset--;
 			}
@@ -506,7 +506,7 @@ class UINodes {
 				for (let n of list) {
 					if (tr(n.name).toLowerCase().indexOf(search) >= 0) {
 						ui.t.BUTTON_COL = count == UINodes.nodeSearchOffset ? ui.t.HIGHLIGHT_COL : ui.t.SEPARATOR_COL;
-						if (Zui.button(tr(n.name), Align.Left) || (enter && count == UINodes.nodeSearchOffset)) {
+						if (zui_button(tr(n.name), Align.Left) || (enter && count == UINodes.nodeSearchOffset)) {
 							UINodes.pushUndo();
 							let nodes = UINodes.getNodes();
 							let canvas = UINodes.getCanvas(true);
@@ -540,11 +540,11 @@ class UINodes {
 	}
 
 	static getNodeX = (): i32 => {
-		return Math.floor((mouse_x - UINodes.wx - Nodes.PAN_X()) / Nodes.SCALE());
+		return Math.floor((mouse_x - UINodes.wx - zui_nodes_PAN_X()) / zui_nodes_SCALE());
 	}
 
 	static getNodeY = (): i32 => {
-		return Math.floor((mouse_y - UINodes.wy - Nodes.PAN_Y()) / Nodes.SCALE());
+		return Math.floor((mouse_y - UINodes.wy - zui_nodes_PAN_Y()) / zui_nodes_SCALE());
 	}
 
 	static drawGrid = () => {
@@ -556,8 +556,8 @@ class UINodes {
 		}
 		///end
 
-		let wh = App.h();
-		let step = 100 * Zui.SCALE(UINodes.ui);
+		let wh = app_h();
+		let step = 100 * zui_SCALE(UINodes.ui);
 		let w = Math.floor(ww + step * 3);
 		let h = Math.floor(wh + step * 3);
 		if (w < 1) w = 1;
@@ -566,7 +566,7 @@ class UINodes {
 		g2_begin(UINodes.grid.g2, true, UINodes.ui.t.SEPARATOR_COL);
 
 		UINodes.grid.g2.color = UINodes.ui.t.SEPARATOR_COL - 0x00050505;
-		step = 20 * Zui.SCALE(UINodes.ui);
+		step = 20 * zui_SCALE(UINodes.ui);
 		for (let i = 0; i < Math.floor(h / step) + 1; ++i) {
 			g2_draw_line(0, i * step, w, i * step);
 		}
@@ -575,7 +575,7 @@ class UINodes {
 		}
 
 		UINodes.grid.g2.color = UINodes.ui.t.SEPARATOR_COL - 0x00090909;
-		step = 100 * Zui.SCALE(UINodes.ui);
+		step = 100 * zui_SCALE(UINodes.ui);
 		for (let i = 0; i < Math.floor(h / step) + 1; ++i) {
 			g2_draw_line(0, i * step, w, i * step);
 		}
@@ -648,14 +648,14 @@ class UINodes {
 		// Remove dragged link when mouse is released out of the node viewport
 		let c = UINodes.getCanvas(true);
 		if (UINodes.releaseLink && nodes.linkDragId != -1) {
-			array_remove(c.links, Nodes.getLink(c.links, nodes.linkDragId));
+			array_remove(c.links, zui_get_link(c.links, nodes.linkDragId));
 			nodes.linkDragId = -1;
 		}
-		UINodes.releaseLink = UINodes.ui.inputReleased;
+		UINodes.releaseLink = UINodes.ui.input_released;
 
 		if (!UINodes.show || sys_width() == 0 || sys_height() == 0) return;
 
-		UINodes.ui.inputEnabled = Base.uiEnabled;
+		UINodes.ui.input_enabled = Base.uiEnabled;
 
 		g2_end(g);
 
@@ -668,16 +668,16 @@ class UINodes {
 		///end
 
 		// Start with UI
-		Zui.begin(UINodes.ui, g);
+		zui_begin(UINodes.ui, g);
 
 		// Make window
 		UINodes.ww = Config.raw.layout[LayoutSize.LayoutNodesW];
 
 		///if (is_paint || is_sculpt)
-		UINodes.wx = Math.floor(App.w()) + UIToolbar.toolbarw;
+		UINodes.wx = Math.floor(app_w()) + UIToolbar.toolbarw;
 		///end
 		///if is_lab
-		UINodes.wx = Math.floor(App.w());
+		UINodes.wx = Math.floor(app_w());
 		///end
 
 		UINodes.wy = 0;
@@ -689,43 +689,43 @@ class UINodes {
 		}
 		///end
 
-		let ew = Math.floor(Zui.ELEMENT_W(UINodes.ui) * 0.7);
-		UINodes.wh = App.h() + UIHeader.headerh;
+		let ew = Math.floor(zui_ELEMENT_W(UINodes.ui) * 0.7);
+		UINodes.wh = app_h() + UIHeader.headerh;
 		if (Config.raw.layout[LayoutSize.LayoutHeader] == 1) UINodes.wh += UIHeader.headerh;
 
 		if (UIView2D.show) {
 			UINodes.wh = Config.raw.layout[LayoutSize.LayoutNodesH];
-			UINodes.wy = App.h() - Config.raw.layout[LayoutSize.LayoutNodesH] + UIHeader.headerh;
+			UINodes.wy = app_h() - Config.raw.layout[LayoutSize.LayoutNodesH] + UIHeader.headerh;
 			if (Config.raw.layout[LayoutSize.LayoutHeader] == 1) UINodes.wy += UIHeader.headerh;
 			if (!UIBase.show) {
 				UINodes.wy -= UIHeader.headerh * 2;
 			}
 		}
 
-		if (Zui.window(UINodes.ui, UINodes.hwnd, UINodes.wx, UINodes.wy, UINodes.ww, UINodes.wh)) {
+		if (zui_window(UINodes.ui, UINodes.hwnd, UINodes.wx, UINodes.wy, UINodes.ww, UINodes.wh)) {
 
-			Zui.tab(Zui.handle("uinodes_10"), tr("Nodes"));
+			zui_tab(zui_handle("uinodes_10"), tr("Nodes"));
 
 			// Grid
 			UINodes.ui.g.color = 0xffffffff;
-			let step = 100 * Zui.SCALE(UINodes.ui);
-			g2_draw_image(UINodes.grid, (nodes.panX * Nodes.SCALE()) % step - step, (nodes.panY * Nodes.SCALE()) % step - step);
+			let step = 100 * zui_SCALE(UINodes.ui);
+			g2_draw_image(UINodes.grid, (nodes.panX * zui_nodes_SCALE()) % step - step, (nodes.panY * zui_nodes_SCALE()) % step - step);
 
 			// Undo
-			if (UINodes.ui.inputStarted || UINodes.ui.isKeyPressed) {
+			if (UINodes.ui.input_started || UINodes.ui.is_key_pressed) {
 				UINodes.lastCanvas = JSON.parse(JSON.stringify(UINodes.getCanvas(true)));
 			}
 
 			// Nodes
-			let _inputEnabled = UINodes.ui.inputEnabled;
-			UINodes.ui.inputEnabled = _inputEnabled && !UINodes.showMenu;
+			let _inputEnabled = UINodes.ui.input_enabled;
+			UINodes.ui.input_enabled = _inputEnabled && !UINodes.showMenu;
 			///if (is_paint || is_sculpt)
-			UINodes.ui.windowBorderRight = Config.raw.layout[LayoutSize.LayoutSidebarW];
+			UINodes.ui.window_border_right = Config.raw.layout[LayoutSize.LayoutSidebarW];
 			///end
-			UINodes.ui.windowBorderTop = UIHeader.headerh * 2;
-			UINodes.ui.windowBorderBottom = Config.raw.layout[LayoutSize.LayoutStatusH];
-			Nodes.nodeCanvas(nodes, UINodes.ui, c);
-			UINodes.ui.inputEnabled = _inputEnabled;
+			UINodes.ui.window_border_top = UIHeader.headerh * 2;
+			UINodes.ui.window_border_bottom = Config.raw.layout[LayoutSize.LayoutStatusH];
+			zui_node_canvas(nodes, UINodes.ui, c);
+			UINodes.ui.input_enabled = _inputEnabled;
 
 			if (nodes.colorPickerCallback != null) {
 				Context.raw.colorPickerPreviousTool = Context.raw.tool;
@@ -750,7 +750,7 @@ class UINodes {
 			}
 
 			// Remove nodes with unknown id for this canvas type
-			if (Zui.isPaste) {
+			if (zui_is_paste) {
 				///if (is_paint || is_sculpt)
 				let nodeList = UINodes.canvasType == CanvasType.CanvasMaterial ? NodesMaterial.list : NodesBrush.list;
 				///end
@@ -761,7 +761,7 @@ class UINodes {
 				let i = 0;
 				while (i++ < c.nodes.length) {
 					let canvasNode = c.nodes[i - 1];
-					if (Nodes.excludeRemove.indexOf(canvasNode.type) >= 0) {
+					if (zui_exclude_remove.indexOf(canvasNode.type) >= 0) {
 						continue;
 					}
 					let found = false;
@@ -778,7 +778,7 @@ class UINodes {
 						found = false;
 					}
 					if (!found) {
-						Nodes.removeNode(canvasNode, c);
+						zui_remove_node(canvasNode, c);
 						array_remove(nodes.nodesSelectedId, canvasNode.id);
 						i--;
 					}
@@ -786,16 +786,19 @@ class UINodes {
 			}
 
 			if (UINodes.isNodeMenuOperation) {
-				Zui.isCopy = Zui.isCut = Zui.isPaste = UINodes.ui.isDeleteDown = false;
+				zui_set_is_copy(false);
+				zui_set_is_cut(false);
+				zui_set_is_paste(false);
+				UINodes.ui.is_delete_down = false;
 			}
 
 			// Recompile material on change
 			if (UINodes.ui.changed) {
 				///if (is_paint || is_sculpt)
-				UINodes.recompileMat = (UINodes.ui.inputDX != 0 || UINodes.ui.inputDY != 0 || !UINodes.uichangedLast) && Config.raw.material_live; // Instant preview
+				UINodes.recompileMat = (UINodes.ui.input_dx != 0 || UINodes.ui.input_dy != 0 || !UINodes.uichangedLast) && Config.raw.material_live; // Instant preview
 				///end
 				///if is_lab
-				UINodes.recompileMat = (UINodes.ui.inputDX != 0 || UINodes.ui.inputDY != 0 || !UINodes.uichangedLast); // Instant preview
+				UINodes.recompileMat = (UINodes.ui.input_dx != 0 || UINodes.ui.input_dy != 0 || !UINodes.uichangedLast); // Instant preview
 				///end
 			}
 			else if (UINodes.uichangedLast) {
@@ -807,7 +810,7 @@ class UINodes {
 			// Node previews
 			if (Config.raw.node_preview && nodes.nodesSelectedId.length > 0) {
 				let img: image_t = null;
-				let sel = Nodes.getNode(c.nodes, nodes.nodesSelectedId[0]);
+				let sel = zui_get_node(c.nodes, nodes.nodesSelectedId[0]);
 
 				///if (is_paint || is_sculpt)
 
@@ -846,10 +849,10 @@ class UINodes {
 				///end
 
 				if (img != null) {
-					let tw = 128 * Zui.SCALE(UINodes.ui);
+					let tw = 128 * zui_SCALE(UINodes.ui);
 					let th = tw * (img.height / img.width);
-					let tx = UINodes.ww - tw - 8 * Zui.SCALE(UINodes.ui);
-					let ty = UINodes.wh - th - 8 * Zui.SCALE(UINodes.ui);
+					let tx = UINodes.ww - tw - 8 * zui_SCALE(UINodes.ui);
+					let ty = UINodes.wh - th - 8 * zui_SCALE(UINodes.ui);
 
 					///if krom_opengl
 					let invertY = sel.type == "MATERIAL";
@@ -882,20 +885,20 @@ class UINodes {
 
 			// Menu
 			UINodes.ui.g.color = UINodes.ui.t.SEPARATOR_COL;
-			g2_fill_rect(0, Zui.ELEMENT_H(UINodes.ui), UINodes.ww, Zui.ELEMENT_H(UINodes.ui) + Zui.ELEMENT_OFFSET(UINodes.ui) * 2);
+			g2_fill_rect(0, zui_ELEMENT_H(UINodes.ui), UINodes.ww, zui_ELEMENT_H(UINodes.ui) + zui_ELEMENT_OFFSET(UINodes.ui) * 2);
 			UINodes.ui.g.color = 0xffffffff;
 
-			let startY = Zui.ELEMENT_H(UINodes.ui) + Zui.ELEMENT_OFFSET(UINodes.ui);
+			let startY = zui_ELEMENT_H(UINodes.ui) + zui_ELEMENT_OFFSET(UINodes.ui);
 			UINodes.ui._x = 0;
 			UINodes.ui._y = 2 + startY;
 			UINodes.ui._w = ew;
 
 			///if (is_paint || is_sculpt)
 			// Editable canvas name
-			let h = Zui.handle("uinodes_11");
+			let h = zui_handle("uinodes_11");
 			h.text = c.name;
-			UINodes.ui._w = Math.floor(Math.min(font_width(UINodes.ui.font, UINodes.ui.fontSize, h.text) + 15 * Zui.SCALE(UINodes.ui), 100 * Zui.SCALE(UINodes.ui)));
-			let newName = Zui.textInput(h, "");
+			UINodes.ui._w = Math.floor(Math.min(font_width(UINodes.ui.font, UINodes.ui.font_size, h.text) + 15 * zui_SCALE(UINodes.ui), 100 * zui_SCALE(UINodes.ui)));
+			let newName = zui_text_input(h, "");
 			UINodes.ui._x += UINodes.ui._w + 3;
 			UINodes.ui._y = 2 + startY;
 			UINodes.ui._w = ew;
@@ -910,7 +913,7 @@ class UINodes {
 					if (canRename) {
 						let oldName = c.name;
 						c.name = newName;
-						let canvases: TNodeCanvas[] = [];
+						let canvases: zui_node_canvas_t[] = [];
 						for (let m of Project.materials) canvases.push(m.canvas);
 						for (let m of Project.materialGroups) canvases.push(m.canvas);
 						for (let canvas of canvases) {
@@ -929,7 +932,7 @@ class UINodes {
 			///end
 
 			///if is_lab
-			UINodes.ui.windowBorderTop = 0;
+			UINodes.ui.window_border_top = 0;
 			UINodesExt.drawButtons(ew, startY);
 			///end
 
@@ -944,7 +947,7 @@ class UINodes {
 			///end
 
 			for (let i = 0; i < cats.length; ++i) {
-				if ((Zui.menuButton(tr(cats[i]))) || (UINodes.ui.isHovered && UINodes.showMenu)) {
+				if ((zui_menu_button(tr(cats[i]))) || (UINodes.ui.is_hovered && UINodes.showMenu)) {
 					UINodes.showMenu = true;
 					UINodes.menuCategory = i;
 					UINodes.popupX = UINodes.wx + UINodes.ui._x;
@@ -956,7 +959,7 @@ class UINodes {
 						UINodes.popupX += UINodes.ui._w / 2;
 					}
 					UIMenu.menuCategoryW = UINodes.ui._w;
-					UIMenu.menuCategoryH = Math.floor(Zui.MENUBAR_H(UINodes.ui));
+					UIMenu.menuCategoryH = Math.floor(zui_MENUBAR_H(UINodes.ui));
 				}
 				UINodes.ui._x += UINodes.ui._w + 3;
 				UINodes.ui._y = 2 + startY;
@@ -964,20 +967,20 @@ class UINodes {
 
 			if (Config.raw.touch_ui) {
 				let _w = UINodes.ui._w;
-				UINodes.ui._w = Math.floor(36 * Zui.SCALE(UINodes.ui));
-				UINodes.ui._y = 4 * Zui.SCALE(UINodes.ui) + startY;
+				UINodes.ui._w = Math.floor(36 * zui_SCALE(UINodes.ui));
+				UINodes.ui._y = 4 * zui_SCALE(UINodes.ui) + startY;
 				if (UIMenubar.iconButton(UINodes.ui, 2, 3)) {
-					UINodes.nodeSearch(Math.floor(UINodes.ui._windowX + UINodes.ui._x), Math.floor(UINodes.ui._windowY + UINodes.ui._y));
+					UINodes.nodeSearch(Math.floor(UINodes.ui._window_x + UINodes.ui._x), Math.floor(UINodes.ui._window_y + UINodes.ui._y));
 				}
 				UINodes.ui._w = _w;
 			}
 			else {
-				if (Zui.menuButton(tr("Search"))) {
-					UINodes.nodeSearch(Math.floor(UINodes.ui._windowX + UINodes.ui._x), Math.floor(UINodes.ui._windowY + UINodes.ui._y));
+				if (zui_menu_button(tr("Search"))) {
+					UINodes.nodeSearch(Math.floor(UINodes.ui._window_x + UINodes.ui._x), Math.floor(UINodes.ui._window_y + UINodes.ui._y));
 				}
 			}
-			if (UINodes.ui.isHovered) {
-				Zui.tooltip(tr("Search for nodes") + ` (${Config.keymap.node_search})`);
+			if (UINodes.ui.is_hovered) {
+				zui_tooltip(tr("Search for nodes") + ` (${Config.keymap.node_search})`);
 			}
 			UINodes.ui._x += UINodes.ui._w + 3;
 			UINodes.ui._y = 2 + startY;
@@ -985,12 +988,12 @@ class UINodes {
 			UINodes.ui.t.BUTTON_COL = _BUTTON_COL;
 
 			// Close node group
-			if (UINodes.groupStack.length > 0 && Zui.menuButton(tr("Close"))) {
+			if (UINodes.groupStack.length > 0 && zui_menu_button(tr("Close"))) {
 				UINodes.groupStack.pop();
 			}
 		}
 
-		Zui.end(!UINodes.showMenu);
+		zui_end(!UINodes.showMenu);
 
 		g2_begin(g, false);
 
@@ -1015,7 +1018,7 @@ class UINodes {
 
 			let py = UINodes.popupY;
 			let menuw = Math.floor(ew * 2.3);
-			Zui.beginRegion(UINodes.ui, g, Math.floor(UINodes.popupX), Math.floor(py), menuw);
+			zui_begin_region(UINodes.ui, g, Math.floor(UINodes.popupX), Math.floor(py), menuw);
 			let _BUTTON_COL = UINodes.ui.t.BUTTON_COL;
 			UINodes.ui.t.BUTTON_COL = UINodes.ui.t.SEPARATOR_COL;
 			let _ELEMENT_OFFSET = UINodes.ui.t.ELEMENT_OFFSET;
@@ -1039,19 +1042,19 @@ class UINodes {
 					///end
 				}
 				// Next column
-				if (UINodes.ui._y - UINodes.wy + Zui.ELEMENT_H(UINodes.ui) / 2 > UINodes.wh) {
+				if (UINodes.ui._y - UINodes.wy + zui_ELEMENT_H(UINodes.ui) / 2 > UINodes.wh) {
 					UINodes.ui._x += menuw;
 					UINodes.ui._y = py;
 				}
 			}
 			if (isGroupCategory) {
 				for (let g of Project.materialGroups) {
-					Zui.fill(0, 1, UINodes.ui._w / Zui.SCALE(UINodes.ui), UINodes.ui.t.BUTTON_H + 2, UINodes.ui.t.ACCENT_SELECT_COL);
-					Zui.fill(1, 1, UINodes.ui._w / Zui.SCALE(UINodes.ui) - 2, UINodes.ui.t.BUTTON_H + 1, UINodes.ui.t.SEPARATOR_COL);
+					zui_fill(0, 1, UINodes.ui._w / zui_SCALE(UINodes.ui), UINodes.ui.t.BUTTON_H + 2, UINodes.ui.t.ACCENT_SELECT_COL);
+					zui_fill(1, 1, UINodes.ui._w / zui_SCALE(UINodes.ui) - 2, UINodes.ui.t.BUTTON_H + 1, UINodes.ui.t.SEPARATOR_COL);
 					UINodes.ui.enabled = UINodes.canPlaceGroup(g.canvas.name);
 					UIMenu.menuFill(UINodes.ui);
-					Zui.row([5 / 6, 1 / 6]);
-					if (Zui.button(Config.buttonSpacing + g.canvas.name, Align.Left)) {
+					zui_row([5 / 6, 1 / 6]);
+					if (zui_button(Config.buttonSpacing + g.canvas.name, Align.Left)) {
 						UINodes.pushUndo();
 						let canvas = UINodes.getCanvas(true);
 						let nodes = UINodes.getNodes();
@@ -1063,7 +1066,7 @@ class UINodes {
 
 					///if (is_paint || is_sculpt)
 					UINodes.ui.enabled = !Project.isMaterialGroupInUse(g);
-					if (Zui.button("x", Align.Center)) {
+					if (zui_button("x", Align.Center)) {
 						History.deleteMaterialGroup(g);
 						array_remove(Project.materialGroups, g);
 					}
@@ -1073,13 +1076,13 @@ class UINodes {
 				}
 			}
 
-			UINodes.hideMenu = UINodes.ui.comboSelectedHandle_ptr == null && !UINodes.showMenuFirst && (UINodes.ui.changed || UINodes.ui.inputReleased || UINodes.ui.inputReleasedR || UINodes.ui.isEscapeDown);
+			UINodes.hideMenu = UINodes.ui.combo_selected_handle_ptr == null && !UINodes.showMenuFirst && (UINodes.ui.changed || UINodes.ui.input_released || UINodes.ui.input_released_r || UINodes.ui.is_escape_down);
 			UINodes.showMenuFirst = false;
 
 			UINodes.ui.t.BUTTON_COL = _BUTTON_COL;
 			UINodes.ui.t.ELEMENT_OFFSET = _ELEMENT_OFFSET;
 			UINodes.ui.t.ELEMENT_H = _ELEMENT_H;
-			Zui.endRegion();
+			zui_end_region();
 		}
 
 		if (UINodes.hideMenu) {
@@ -1122,7 +1125,7 @@ class UINodes {
 		return true;
 	}
 
-	static pushUndo = (lastCanvas: TNodeCanvas = null) => {
+	static pushUndo = (lastCanvas: zui_node_canvas_t = null) => {
 		if (lastCanvas == null) lastCanvas = UINodes.getCanvas(true);
 		let canvasGroup = UINodes.groupStack.length > 0 ? Project.materialGroups.indexOf(UINodes.groupStack[UINodes.groupStack.length - 1]) : null;
 
@@ -1187,34 +1190,34 @@ class UINodes {
 		///end
 	}
 
-	static makeNode = (n: TNode, nodes: NodesRaw, canvas: TNodeCanvas): TNode => {
-		let node: TNode = JSON.parse(JSON.stringify(n));
-		node.id = Nodes.getNodeId(canvas.nodes);
+	static makeNode = (n: zui_node_t, nodes: zui_nodes_t, canvas: zui_node_canvas_t): zui_node_t => {
+		let node: zui_node_t = JSON.parse(JSON.stringify(n));
+		node.id = zui_get_node_id(canvas.nodes);
 		node.x = UINodes.getNodeX();
 		node.y = UINodes.getNodeY();
 		let count = 0;
 		for (let soc of node.inputs) {
-			soc.id = Nodes.getSocketId(canvas.nodes) + count;
+			soc.id = zui_get_socket_id(canvas.nodes) + count;
 			soc.node_id = node.id;
 			count++;
 		}
 		for (let soc of node.outputs) {
-			soc.id = Nodes.getSocketId(canvas.nodes) + count;
+			soc.id = zui_get_socket_id(canvas.nodes) + count;
 			soc.node_id = node.id;
 			count++;
 		}
 		return node;
 	}
 
-	static makeGroupNode = (groupCanvas: TNodeCanvas, nodes: NodesRaw, canvas: TNodeCanvas): TNode => {
+	static makeGroupNode = (groupCanvas: zui_node_canvas_t, nodes: zui_nodes_t, canvas: zui_node_canvas_t): zui_node_t => {
 		let n = NodesMaterial.list[5][0];
-		let node: TNode = JSON.parse(JSON.stringify(n));
+		let node: zui_node_t = JSON.parse(JSON.stringify(n));
 		node.name = groupCanvas.name;
-		node.id = Nodes.getNodeId(canvas.nodes);
+		node.id = zui_get_node_id(canvas.nodes);
 		node.x = UINodes.getNodeX();
 		node.y = UINodes.getNodeY();
-		let groupInput: TNode = null;
-		let groupOutput: TNode = null;
+		let groupInput: zui_node_t = null;
+		let groupOutput: zui_node_t = null;
 		for (let g of Project.materialGroups) {
 			if (g.canvas.name == node.name) {
 				for (let n of g.canvas.nodes) {
@@ -1240,7 +1243,7 @@ class UINodes {
 		let nodes = Context.raw.material.nodes;
 		if (nodes.nodesSelectedId.length == 0) return;
 
-		let node = Nodes.getNode(Context.raw.material.canvas.nodes, nodes.nodesSelectedId[0]);
+		let node = zui_get_node(Context.raw.material.canvas.nodes, nodes.nodesSelectedId[0]);
 		// if (node == null) return;
 		Context.raw.nodePreviewName = node.name;
 
@@ -1261,16 +1264,16 @@ class UINodes {
 	}
 	///end
 
-	static hasGroup = (c: TNodeCanvas): bool => {
+	static hasGroup = (c: zui_node_canvas_t): bool => {
 		for (let n of c.nodes) if (n.type == "GROUP") return true;
 		return false;
 	}
 
-	static traverseGroup = (mgroups: TNodeCanvas[], c: TNodeCanvas) => {
+	static traverseGroup = (mgroups: zui_node_canvas_t[], c: zui_node_canvas_t) => {
 		for (let n of c.nodes) {
 			if (n.type == "GROUP") {
 				if (UINodes.getGroup(mgroups, n.name) == null) {
-					let canvases: TNodeCanvas[] = [];
+					let canvases: zui_node_canvas_t[] = [];
 					for (let g of Project.materialGroups) canvases.push(g.canvas);
 					let group = UINodes.getGroup(canvases, n.name);
 					mgroups.push(JSON.parse(JSON.stringify(group)));
@@ -1280,7 +1283,7 @@ class UINodes {
 		}
 	}
 
-	static getGroup = (canvases: TNodeCanvas[], name: string): TNodeCanvas => {
+	static getGroup = (canvases: zui_node_canvas_t[], name: string): zui_node_canvas_t => {
 		for (let c of canvases) if (c.name == name) return c;
 		return null;
 	}

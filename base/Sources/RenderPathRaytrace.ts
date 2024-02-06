@@ -79,8 +79,8 @@ class RenderPathRaytrace {
 
 		let cam = scene_camera;
 		let ct = cam.base.transform;
-		mat4_set_from(RenderPathRaytrace.helpMat, cam.V);
-		mat4_mult_mat(RenderPathRaytrace.helpMat, cam.P);
+		mat4_set_from(RenderPathRaytrace.helpMat, cam.v);
+		mat4_mult_mat(RenderPathRaytrace.helpMat, cam.p);
 		mat4_get_inv(RenderPathRaytrace.helpMat, RenderPathRaytrace.helpMat);
 		RenderPathRaytrace.f32a[0] = transform_world_x(ct);
 		RenderPathRaytrace.f32a[1] = transform_world_y(ct);
@@ -142,7 +142,7 @@ class RenderPathRaytrace {
 			scene_embed_data("bnoise_rank.k", () => {});
 		}
 
-		Data.getBlob(shaderName, (shader: ArrayBuffer) => {
+		data_get_blob(shaderName, (shader: ArrayBuffer) => {
 			if (build) RenderPathRaytrace.buildData();
 			let bnoise_sobol = scene_embedded.get("bnoise_sobol.k");
 			let bnoise_scramble = scene_embedded.get("bnoise_scramble.k");

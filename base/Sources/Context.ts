@@ -141,7 +141,7 @@ class Context {
 	}
 	///end
 
-	static selectPaintObject = (o: TMeshObject) => {
+	static selectPaintObject = (o: mesh_object_t) => {
 		///if (is_paint || is_sculpt)
 		UIHeader.headerHandle.redraws = 2;
 		for (let p of Project.paintObjects) p.skip_context = "paint";
@@ -163,7 +163,7 @@ class Context {
 		///end
 	}
 
-	static mainObject = (): TMeshObject => {
+	static mainObject = (): mesh_object_t => {
 		///if (is_paint || is_sculpt)
 		for (let po of Project.paintObjects) if (po.base.children.length > 0) return po;
 		return Project.paintObjects[0];
@@ -201,10 +201,10 @@ class Context {
 
 	static inPaintArea = (): bool => {
 		///if (is_paint || is_sculpt)
-		let right = App.w();
+		let right = app_w();
 		if (UIView2D.show) right += UIView2D.ww;
 		return mouse_view_x() > 0 && mouse_view_x() < right &&
-			   mouse_view_y() > 0 && mouse_view_y() < App.h();
+			   mouse_view_y() > 0 && mouse_view_y() < app_h();
 		///end
 
 		///if is_lab
@@ -213,11 +213,11 @@ class Context {
 	}
 
 	static inLayers = (): bool => {
-		return Zui.getHoveredTabName() == tr("Layers");
+		return zui_get_hovered_tab_name() == tr("Layers");
 	}
 
 	static inMaterials = (): bool => {
-		return Zui.getHoveredTabName() == tr("Materials");
+		return zui_get_hovered_tab_name() == tr("Materials");
 	}
 
 	///if (is_paint || is_sculpt)
@@ -235,11 +235,11 @@ class Context {
 	}
 
 	static inSwatches = (): bool => {
-		return Zui.getHoveredTabName() == tr("Swatches");
+		return zui_get_hovered_tab_name() == tr("Swatches");
 	}
 
 	static inBrowser = (): bool => {
-		return Zui.getHoveredTabName() == tr("Browser");
+		return zui_get_hovered_tab_name() == tr("Browser");
 	}
 
 	static getAreaType = (): AreaType => {
@@ -274,7 +274,7 @@ class Context {
 		if (!Context.raw.envmapLoaded) {
 			// TODO: Unable to share texture for both radiance and envmap - reload image
 			Context.raw.envmapLoaded = true;
-			Data.cachedImages.delete("World_radiance.k");
+			data_cached_images.delete("World_radiance.k");
 		}
 		world_data_load_envmap(scene_world, (_) => {});
 		if (Context.raw.savedEnvmap == null) Context.raw.savedEnvmap = scene_world._envmap;
@@ -301,7 +301,7 @@ class Context {
 		else {
 			render_path_commands = RenderPathDeferred.commands;
 		}
-		App.notifyOnInit(() => {
+		app_notify_on_init(() => {
 			MakeMaterial.parseMeshMaterial();
 		});
 	}
@@ -339,7 +339,7 @@ class Context {
 
 		let nodes = UINodes.getNodes();
 		let canvas = UINodes.getCanvas(true);
-		let inpaint = nodes.nodesSelectedId.length > 0 && Nodes.getNode(canvas.nodes, nodes.nodesSelectedId[0]).type == "InpaintNode";
+		let inpaint = nodes.nodesSelectedId.length > 0 && zui_get_node(canvas.nodes, nodes.nodesSelectedId[0]).type == "InpaintNode";
 
 		// Paint bounds
 		if (inpaint &&
@@ -379,27 +379,27 @@ class Context {
 	static parseBrushInputs = () => {
 		if (!Context.raw.registered) {
 			Context.raw.registered = true;
-			App.notifyOnUpdate(Context.update);
+			app_notify_on_update(Context.update);
 		}
 
 		Context.raw.paintVec = Context.raw.coords;
 	}
 
 	static update = () => {
-		let paintX = mouse_view_x() / App.w();
-		let paintY = mouse_view_y() / App.h();
+		let paintX = mouse_view_x() / app_w();
+		let paintY = mouse_view_y() / app_h();
 		if (mouse_started()) {
-			Context.raw.startX = mouse_view_x() / App.w();
-			Context.raw.startY = mouse_view_y() / App.h();
+			Context.raw.startX = mouse_view_x() / app_w();
+			Context.raw.startY = mouse_view_y() / app_h();
 		}
 
 		if (pen_down()) {
-			paintX = pen_view_x() / App.w();
-			paintY = pen_view_y() / App.h();
+			paintX = pen_view_x() / app_w();
+			paintY = pen_view_y() / app_h();
 		}
 		if (pen_started()) {
-			Context.raw.startX = pen_view_x() / App.w();
-			Context.raw.startY = pen_view_y() / App.h();
+			Context.raw.startX = pen_view_x() / app_w();
+			Context.raw.startY = pen_view_y() / app_h();
 		}
 
 		if (Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown)) {

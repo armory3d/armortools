@@ -5,13 +5,13 @@ class UINodesExt {
 
 	static drawButtons = (ew: f32, startY: f32) => {
 		let ui = UINodes.ui;
-		if (Zui.button(tr("Run"))) {
+		if (zui_button(tr("Run"))) {
 			Console.progress(tr("Processing"));
 
 			let delayIdleSleep = (_: any) => {
 				Krom.delayIdleSleep();
 			}
-			App.notifyOnRender2D(delayIdleSleep);
+			app_notify_on_render_2d(delayIdleSleep);
 
 			let tasks = 1;
 
@@ -20,7 +20,7 @@ class UINodesExt {
 				if (tasks == 0) {
 					Console.progress(null);
 					Context.raw.ddirty = 2;
-					App.removeRender2D(delayIdleSleep);
+					app_remove_render_2d(delayIdleSleep);
 
 					///if (krom_direct3d12 || krom_vulkan || krom_metal)
 					RenderPathRaytrace.ready = false;
@@ -55,7 +55,7 @@ class UINodesExt {
 
 					if (Base.pipeCopy == null) Base.makePipe();
 					if (Base.pipeCopyA == null) Base.makePipeCopyA();
-					if (ConstData.screenAlignedVB == null) ConstData.createScreenAlignedData();
+					if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
 
 					let texpaint_pack = render_path_render_targets.get("texpaint_pack").image;
 
@@ -79,8 +79,8 @@ class UINodesExt {
 						g4_begin(texpaint_pack.g4);
 						g4_set_pipeline(Base.pipeCopyA);
 						g4_set_tex(Base.pipeCopyATex, texheight);
-						g4_set_vertex_buffer(ConstData.screenAlignedVB);
-						g4_set_index_buffer(ConstData.screenAlignedIB);
+						g4_set_vertex_buffer(const_data_screen_aligned_vb);
+						g4_set_index_buffer(const_data_screen_aligned_ib);
 						g4_draw();
 						g4_end();
 
@@ -135,9 +135,9 @@ class UINodesExt {
 		ui._y = 2 + startY;
 
 		///if (krom_android || krom_ios)
-		Zui.combo(Base.resHandle, ["2K", "4K"], tr("Resolution"));
+		zui_combo(Base.resHandle, ["2K", "4K"], tr("Resolution"));
 		///else
-		Zui.combo(Base.resHandle, ["2K", "4K", "8K", "16K"], tr("Resolution"));
+		zui_combo(Base.resHandle, ["2K", "4K", "8K", "16K"], tr("Resolution"));
 		///end
 		if (Base.resHandle.changed) {
 			Base.onLayersResized();
