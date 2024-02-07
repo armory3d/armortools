@@ -11,7 +11,7 @@ class ImportFont {
 			}
 		}
 		data_get_font(path, (font: font_t) => {
-			font_init(font); // Make sure font_ is ready
+			g2_font_init(font); // Make sure font_ is ready
 			let count = Krom.g2_font_count(font.font_);
 			let fontSlots: SlotFontRaw[] = [];
 			for (let i = 0; i < count; ++i) {

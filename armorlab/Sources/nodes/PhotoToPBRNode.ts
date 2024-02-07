@@ -48,7 +48,7 @@ class PhotoToPBRNode extends LogicNode {
 					let x = i % tilesX;
 					let y = Math.floor(i / tilesX);
 
-					g2_begin(PhotoToPBRNode.temp.g2, false);
+					g2_begin(PhotoToPBRNode.temp, false);
 					g2_draw_scaled_image(source, PhotoToPBRNode.borderW - x * PhotoToPBRNode.tileW, PhotoToPBRNode.borderW - y * PhotoToPBRNode.tileW, -Config.getTextureResX(), Config.getTextureResY());
 					g2_draw_scaled_image(source, PhotoToPBRNode.borderW - x * PhotoToPBRNode.tileW, PhotoToPBRNode.borderW - y * PhotoToPBRNode.tileW, Config.getTextureResX(), -Config.getTextureResY());
 					g2_draw_scaled_image(source, PhotoToPBRNode.borderW - x * PhotoToPBRNode.tileW, PhotoToPBRNode.borderW - y * PhotoToPBRNode.tileW, -Config.getTextureResX(), -Config.getTextureResY());
@@ -56,7 +56,7 @@ class PhotoToPBRNode extends LogicNode {
 					g2_draw_scaled_image(source, PhotoToPBRNode.borderW - x * PhotoToPBRNode.tileW + PhotoToPBRNode.tileW, PhotoToPBRNode.borderW - y * PhotoToPBRNode.tileW + PhotoToPBRNode.tileW, -Config.getTextureResX(), Config.getTextureResY());
 					g2_draw_scaled_image(source, PhotoToPBRNode.borderW - x * PhotoToPBRNode.tileW + PhotoToPBRNode.tileW, PhotoToPBRNode.borderW - y * PhotoToPBRNode.tileW + PhotoToPBRNode.tileW, Config.getTextureResX(), -Config.getTextureResY());
 					g2_draw_scaled_image(source, PhotoToPBRNode.borderW - x * PhotoToPBRNode.tileW, PhotoToPBRNode.borderW - y * PhotoToPBRNode.tileW, Config.getTextureResX(), Config.getTextureResY());
-					g2_end(PhotoToPBRNode.temp.g2);
+					g2_end();
 
 					let bytes_img = image_get_pixels(PhotoToPBRNode.temp);
 					let u8a = new Uint8Array(bytes_img);
@@ -142,9 +142,9 @@ class PhotoToPBRNode extends LogicNode {
 						///end
 
 						let temp2 = image_from_bytes(u8a.buffer, PhotoToPBRNode.tileW, PhotoToPBRNode.tileW);
-						g2_begin(PhotoToPBRNode.images[from].g2, false);
+						g2_begin(PhotoToPBRNode.images[from], false);
 						g2_draw_image(temp2, x * PhotoToPBRNode.tileW, y * PhotoToPBRNode.tileW);
-						g2_end(PhotoToPBRNode.images[from].g2);
+						g2_end();
 						Base.notifyOnNextFrame(() => {
 							image_unload(temp2);
 						});

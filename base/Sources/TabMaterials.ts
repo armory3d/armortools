@@ -112,9 +112,9 @@ class TabMaterials {
 						let number = String(i + 1);
 						let width = font_width(ui.font, ui.font_size, number) + 10;
 						let height = font_height(ui.font, ui.font_size);
-						ui.g.color = ui.t.TEXT_COL;
+						g2_set_color(ui.t.TEXT_COL);
 						g2_fill_rect(uix, uiy, width, height);
-						ui.g.color = ui.t.ACCENT_COL;
+						g2_set_color(ui.t.ACCENT_COL);
 						g2_draw_string(number, uix + 5, uiy);
 					}
 				}
@@ -265,11 +265,12 @@ class TabMaterials {
 	static buttonNew = (text: string) => {
 		let ui = UIBase.ui;
 		if (zui_button(text)) {
-			g2_end(ui.g);
+			let current = _g2_current;
+			g2_end();
 			Context.raw.material = SlotMaterial.create(Project.materials[0].data);
 			Project.materials.push(Context.raw.material);
 			TabMaterials.updateMaterial();
-			g2_begin(ui.g, false);
+			g2_begin(current, false);
 			History.newMaterial();
 		}
 	}

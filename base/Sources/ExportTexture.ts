@@ -153,13 +153,13 @@ class ExportTexture {
 		}
 
 		// Clear export layer
-		g4_begin(Base.expa.g4);
+		g4_begin(Base.expa);
 		g4_clear(color_from_floats(0.0, 0.0, 0.0, 0.0));
 		g4_end();
-		g4_begin(Base.expb.g4);
+		g4_begin(Base.expb);
 		g4_clear(color_from_floats(0.5, 0.5, 1.0, 0.0));
 		g4_end();
-		g4_begin(Base.expc.g4);
+		g4_begin(Base.expc);
 		g4_clear(color_from_floats(1.0, 0.0, 0.0, 0.0));
 		g4_end();
 
@@ -179,8 +179,8 @@ class ExportTexture {
 			if (l1masks != null && !bakeMaterial) {
 				if (l1masks.length > 1) {
 					Base.makeTempMaskImg();
-					g2_begin(Base.tempMaskImage.g2, true, 0x00000000);
-					g2_end(Base.tempMaskImage.g2);
+					g2_begin(Base.tempMaskImage, true, 0x00000000);
+					g2_end();
 					let l1: any = { texpaint: Base.tempMaskImage };
 					for (let i = 0; i < l1masks.length; ++i) {
 						Base.mergeLayer(l1, l1masks[i]);
@@ -191,13 +191,13 @@ class ExportTexture {
 			}
 
 			if (l1.paintBase) {
-				g2_begin(Base.tempImage.g2, false); // Copy to temp
-				Base.tempImage.g2.pipeline = Base.pipeCopy;
+				g2_begin(Base.tempImage, false); // Copy to temp
+				g2_set_pipeline(Base.pipeCopy);
 				g2_draw_image(Base.expa, 0, 0);
-				Base.tempImage.g2.pipeline = null;
-				g2_end(Base.tempImage.g2);
+				g2_set_pipeline(null);
+				g2_end();
 
-				g4_begin(Base.expa.g4);
+				g4_begin(Base.expa);
 				g4_set_pipeline(Base.pipeMerge);
 				g4_set_tex(Base.tex0, l1.texpaint);
 				g4_set_tex(Base.tex1, empty);
@@ -212,13 +212,13 @@ class ExportTexture {
 			}
 
 			if (l1.paintNor) {
-				g2_begin(Base.tempImage.g2, false);
-				Base.tempImage.g2.pipeline = Base.pipeCopy;
+				g2_begin(Base.tempImage, false);
+				g2_set_pipeline(Base.pipeCopy);
 				g2_draw_image(Base.expb, 0, 0);
-				Base.tempImage.g2.pipeline = null;
-				g2_end(Base.tempImage.g2);
+				g2_set_pipeline(null);
+				g2_end();
 
-				g4_begin(Base.expb.g4);
+				g4_begin(Base.expb);
 				g4_set_pipeline(Base.pipeMerge);
 				g4_set_tex(Base.tex0, l1.texpaint);
 				g4_set_tex(Base.tex1, l1.texpaint_nor);
@@ -233,11 +233,11 @@ class ExportTexture {
 			}
 
 			if (l1.paintOcc || l1.paintRough || l1.paintMet || l1.paintHeight) {
-				g2_begin(Base.tempImage.g2, false);
-				Base.tempImage.g2.pipeline = Base.pipeCopy;
+				g2_begin(Base.tempImage, false);
+				g2_set_pipeline(Base.pipeCopy);
 				g2_draw_image(Base.expc, 0, 0);
-				Base.tempImage.g2.pipeline = null;
-				g2_end(Base.tempImage.g2);
+				g2_set_pipeline(null);
+				g2_end();
 
 				if (l1.paintOcc && l1.paintRough && l1.paintMet && l1.paintHeight) {
 					Base.commandsMergePack(Base.pipeMerge, Base.expc, l1.texpaint, l1.texpaint_pack, SlotLayer.getOpacity(l1), mask, l1.paintHeightBlend ? -3 : -1);
@@ -252,12 +252,12 @@ class ExportTexture {
 
 		///if krom_metal
 		// Flush command list
-		g2_begin(Base.expa.g2, false);
-		g2_end(Base.expa.g2);
-		g2_begin(Base.expb.g2, false);
-		g2_end(Base.expb.g2);
-		g2_begin(Base.expc.g2, false);
-		g2_end(Base.expc.g2);
+		g2_begin(Base.expa, false);
+		g2_end();
+		g2_begin(Base.expb, false);
+		g2_end();
+		g2_begin(Base.expc, false);
+		g2_end();
 		///end
 		///end
 

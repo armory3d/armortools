@@ -176,19 +176,19 @@ class UIFiles {
 											if (Base.pipeCopyRGB == null) Base.makePipeCopyRGB();
 											icon = image_create_render_target(image.width, image.height);
 											if (f.endsWith(".arm")) { // Used for material sphere alpha cutout
-												g2_begin(icon.g2, false);
+												g2_begin(icon, false);
 
 												///if (is_paint || is_sculpt)
 												g2_draw_image(Project.materials[0].image, 0, 0);
 												///end
 											}
 											else {
-												g2_begin(icon.g2, true, 0xffffffff);
+												g2_begin(icon, true, 0xffffffff);
 											}
-											icon.g2.pipeline = Base.pipeCopyRGB;
+											g2_set_pipeline(Base.pipeCopyRGB);
 											g2_draw_image(image, 0, 0);
-											icon.g2.pipeline = null;
-											g2_end(icon.g2);
+											g2_set_pipeline(null);
+											g2_end();
 											UIFiles.iconMap.set(handle.text + Path.sep + f, icon);
 											UIBase.hwnds[TabArea.TabStatus].redraws = 3;
 										});
@@ -285,11 +285,11 @@ class UIFiles {
 								let sw = image.width > image.height ? w : Math.floor(1.0 * image.width / image.height * w);
 								let sh = image.width > image.height ? Math.floor(1.0 * image.height / image.width * w) : w;
 								icon = image_create_render_target(sw, sh);
-								g2_begin(icon.g2, true, 0xffffffff);
-								icon.g2.pipeline = Base.pipeCopyRGB;
+								g2_begin(icon, true, 0xffffffff);
+								g2_set_pipeline(Base.pipeCopyRGB);
 								g2_draw_scaled_image(image, 0, 0, sw, sh);
-								icon.g2.pipeline = null;
-								g2_end(icon.g2);
+								g2_set_pipeline(null);
+								g2_end();
 								UIFiles.iconMap.set(shandle, icon);
 								UIBase.hwnds[TabArea.TabStatus].redraws = 3;
 								data_delete_image(shandle); // The big image is not needed anymore

@@ -21,10 +21,7 @@ class LineDraw {
 	static maxIndices = LineDraw.maxLines * 6;
 	static lines = 0;
 
-	static g: g4_t;
-
-	static render = (g4: g4_t, matrix: mat4_t) => {
-		LineDraw.g = g4;
+	static render = (matrix: mat4_t) => {
 		LineDraw.mat = matrix;
 		LineDraw.dim = mat4_get_scale(matrix);
 
@@ -33,17 +30,17 @@ class LineDraw {
 			vertex_struct_add(structure, "pos", VertexData.F32_3X);
 			vertex_struct_add(structure, "col", VertexData.F32_3X);
 			LineDraw.pipeline = pipeline_create();
-			LineDraw.pipeline.inputLayout = [structure];
-			LineDraw.pipeline.fragmentShader = sys_get_shader("line.frag");
-			LineDraw.pipeline.vertexShader = sys_get_shader("line.vert");
-			LineDraw.pipeline.depthWrite = true;
-			LineDraw.pipeline.depthMode = CompareMode.Less;
-			LineDraw.pipeline.cullMode = CullMode.None;
-			LineDraw.pipeline.colorAttachmentCount = 3;
-			LineDraw.pipeline.colorAttachments[0] = TextureFormat.RGBA64;
-			LineDraw.pipeline.colorAttachments[1] = TextureFormat.RGBA64;
-			LineDraw.pipeline.colorAttachments[2] = TextureFormat.RGBA64;
-			LineDraw.pipeline.depthStencilAttachment = DepthFormat.DepthOnly;
+			LineDraw.pipeline.input_layout = [structure];
+			LineDraw.pipeline.fragment_shader = sys_get_shader("line.frag");
+			LineDraw.pipeline.vertex_shader = sys_get_shader("line.vert");
+			LineDraw.pipeline.depth_write = true;
+			LineDraw.pipeline.depth_mode = CompareMode.Less;
+			LineDraw.pipeline.cull_mode = CullMode.None;
+			LineDraw.pipeline.color_attachment_count = 3;
+			LineDraw.pipeline.color_attachments[0] = TextureFormat.RGBA64;
+			LineDraw.pipeline.color_attachments[1] = TextureFormat.RGBA64;
+			LineDraw.pipeline.color_attachments[2] = TextureFormat.RGBA64;
+			LineDraw.pipeline.depth_attachment = DepthFormat.DepthOnly;
 			pipeline_compile(LineDraw.pipeline);
 			LineDraw.vpID = pipeline_get_const_loc(LineDraw.pipeline, "VP");
 			LineDraw.vp = mat4_identity();

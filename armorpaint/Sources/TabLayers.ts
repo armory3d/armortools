@@ -614,7 +614,7 @@ class TabLayers {
 				ui._w = _w;
 			}
 			if (l.fill_layer == null && SlotLayer.isMask(l)) {
-				ui.g.pipeline = UIView2D.pipe;
+				g2_set_pipeline(UIView2D.pipe);
 				///if krom_opengl
 				Krom.setPipeline(UIView2D.pipe.pipeline_);
 				///end
@@ -624,7 +624,7 @@ class TabLayers {
 			let state = zui_image(icon, 0xffffffff, iconH);
 
 			if (l.fill_layer == null && SlotLayer.isMask(l)) {
-				ui.g.pipeline = null;
+				g2_set_pipeline(null);
 			}
 
 			// Draw layer numbers when selecting a layer via keyboard shortcut
@@ -634,9 +634,9 @@ class TabLayers {
 					let number = String(i + 1) ;
 					let width = font_width(ui.font, ui.font_size, number) + 10;
 					let height = font_height(ui.font, ui.font_size);
-					ui.g.color = ui.t.TEXT_COL;
+					g2_set_color(ui.t.TEXT_COL);
 					g2_fill_rect(uix, uiy, width, height);
-					ui.g.color = ui.t.ACCENT_COL;
+					g2_set_color(ui.t.ACCENT_COL);
 					g2_draw_string(number, uix + 5, uiy);
 				}
 			}
@@ -845,7 +845,7 @@ class TabLayers {
 					Base.onLayersResized();
 				}
 				ui._y = _y;
-				zui_draw_string(ui.g, tr("Res"), null, 0, Align.Right);
+				zui_draw_string(tr("Res"), null, 0, Align.Right);
 				zui_end_element();
 
 				UIMenu.menuFill(ui);
@@ -982,12 +982,12 @@ class TabLayers {
 		if (Context.raw.maskPreviewLast != l) {
 			Context.raw.maskPreviewLast = l;
 			app_notify_on_init(() => {
-				g2_begin(Context.raw.maskPreviewRgba32.g2);
-				Context.raw.maskPreviewRgba32.g2.pipeline = UIView2D.pipe;
+				g2_begin(Context.raw.maskPreviewRgba32);
+				g2_set_pipeline(UIView2D.pipe);
 				g4_set_int(UIView2D.channelLocation, 1);
 				g2_draw_image(l.texpaint_preview, 0, 0);
-				g2_end(Context.raw.maskPreviewRgba32.g2);
-				Context.raw.maskPreviewRgba32.g2.pipeline = null;
+				g2_end();
+				g2_set_pipeline(null);
 			});
 		}
 		///end

@@ -180,7 +180,7 @@ class Config {
 		Context.raw.ddirty = 2;
 
 		let current = _g2_current;
-		if (current != null) g2_end(current);
+		if (current != null) g2_end();
 		RenderPathBase.applyConfig();
 		if (current != null) g2_begin(current, false);
 	}
@@ -205,7 +205,7 @@ class Config {
 
 	static saveKeymap = () => {
 		if (Config.raw.keymap == "default.json") return;
-		let path = data_data_path() + "keymap_presets/" + Config.raw.keymap;
+		let path = data_path() + "keymap_presets/" + Config.raw.keymap;
 		let buffer = sys_string_to_buffer(JSON.stringify(Config.keymap));
 		Krom.fileSaveBytes(path, buffer);
 	}

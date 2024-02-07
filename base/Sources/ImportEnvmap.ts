@@ -16,13 +16,13 @@ class ImportEnvmap {
 		// Init
 		if (ImportEnvmap.pipeline == null) {
 			ImportEnvmap.pipeline = pipeline_create();
-			ImportEnvmap.pipeline.vertexShader = sys_get_shader("pass.vert");
-			ImportEnvmap.pipeline.fragmentShader = sys_get_shader("prefilter_envmap.frag");
+			ImportEnvmap.pipeline.vertex_shader = sys_get_shader("pass.vert");
+			ImportEnvmap.pipeline.fragment_shader = sys_get_shader("prefilter_envmap.frag");
 			let vs = vertex_struct_create();
 			vertex_struct_add(vs, "pos", VertexData.F32_2X);
-			ImportEnvmap.pipeline.inputLayout = [vs];
-			ImportEnvmap.pipeline.colorAttachmentCount = 1;
-			ImportEnvmap.pipeline.colorAttachments[0] = TextureFormat.RGBA128;
+			ImportEnvmap.pipeline.input_layout = [vs];
+			ImportEnvmap.pipeline.color_attachment_count = 1;
+			ImportEnvmap.pipeline.color_attachments[0] = TextureFormat.RGBA128;
 			pipeline_compile(ImportEnvmap.pipeline);
 			ImportEnvmap.paramsLocation = pipeline_get_const_loc(ImportEnvmap.pipeline, "params");
 			ImportEnvmap.radianceLocation = pipeline_get_tex_unit(ImportEnvmap.pipeline, "radiance");
@@ -40,11 +40,11 @@ class ImportEnvmap {
 		}
 
 		// Down-scale to 1024x512
-		g2_begin(ImportEnvmap.radiance.g2, false);
-		ImportEnvmap.radiance.g2.pipeline = Base.pipeCopy128;
+		g2_begin(ImportEnvmap.radiance, false);
+		g2_set_pipeline(Base.pipeCopy128);
 		g2_draw_scaled_image(image, 0, 0, 1024, 512);
-		ImportEnvmap.radiance.g2.pipeline = null;
-		g2_end(ImportEnvmap.radiance.g2);
+		g2_set_pipeline(null);
+		g2_end();
 
 		let radiancePixels = image_get_pixels(ImportEnvmap.radiance);
 		if (ImportEnvmap.radianceCpu != null) {
@@ -82,17 +82,17 @@ class ImportEnvmap {
 		scene_world._envmap = image;
 		scene_world.envmap = path;
 		scene_world._radiance = ImportEnvmap.radianceCpu;
-		scene_world._radianceMipmaps = ImportEnvmap.mipsCpu;
+		scene_world._radiance_mipmaps = ImportEnvmap.mipsCpu;
 		Context.raw.savedEnvmap = image;
 		if (Context.raw.showEnvmapBlur) {
-			scene_world._envmap = scene_world._radianceMipmaps[0];
+			scene_world._envmap = scene_world._radiance_mipmaps[0];
 		}
 		Context.raw.ddirty = 2;
 		Project.raw.envmap = path;
 	}
 
 	static getRadianceMip = (mip: image_t, level: i32, radiance: image_t) => {
-		g4_begin(mip.g4);
+		g4_begin(mip);
 		g4_set_vertex_buffer(const_data_screen_aligned_vb);
 		g4_set_index_buffer(const_data_screen_aligned_ib);
 		g4_set_pipeline(ImportEnvmap.pipeline);

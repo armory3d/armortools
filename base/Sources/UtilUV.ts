@@ -36,8 +36,8 @@ class UtilUV {
 
 		let texa = mesh.vertex_arrays[2].values;
 		let inda = mesh.index_arrays[0].values;
-		g2_begin(UtilUV.uvmap.g2, true, 0x00000000);
-		UtilUV.uvmap.g2.color = 0xffcccccc;
+		g2_begin(UtilUV.uvmap, true, 0x00000000);
+		g2_set_color(0xffcccccc);
 		let strength = resX > 2048 ? 2.0 : 1.0;
 		let f = (1 / 32767) * UtilUV.uvmap.width;
 		for (let i = 0; i < Math.floor(inda.length / 3); ++i) {
@@ -51,7 +51,7 @@ class UtilUV {
 			g2_draw_line(x2, y2, x3, y3, strength);
 			g2_draw_line(x3, y3, x1, y1, strength);
 		}
-		g2_end(UtilUV.uvmap.g2);
+		g2_end();
 	}
 
 	static cacheTriangleMap = () => {
@@ -72,13 +72,13 @@ class UtilUV {
 		let mesh = merged;
 		let texa = mesh.vertex_arrays[2].values;
 		let inda = mesh.index_arrays[0].values;
-		g2_begin(UtilUV.trianglemap.g2, true, 0xff000000);
+		g2_begin(UtilUV.trianglemap, true, 0xff000000);
 		let f = (1 / 32767) * UtilUV.trianglemap.width;
 		let color = 0xff000001;
 		for (let i = 0; i < Math.floor(inda.length / 3); ++i) {
 			if (color == 0xffffffff) color = 0xff000001;
 			color++;
-			UtilUV.trianglemap.g2.color = color;
+			g2_set_color(color);
 			let x1 = (texa[inda[i * 3    ] * 2    ]) * f;
 			let x2 = (texa[inda[i * 3 + 1] * 2    ]) * f;
 			let x3 = (texa[inda[i * 3 + 2] * 2    ]) * f;
@@ -87,7 +87,7 @@ class UtilUV {
 			let y3 = (texa[inda[i * 3 + 2] * 2 + 1]) * f;
 			g2_fill_triangle(x1, y1, x2, y2, x3, y3);
 		}
-		g2_end(UtilUV.trianglemap.g2);
+		g2_end();
 	}
 
 	static cacheDilateMap = () => {
@@ -105,8 +105,8 @@ class UtilUV {
 
 		if (UtilUV.pipeDilate == null) {
 			UtilUV.pipeDilate = pipeline_create();
-			UtilUV.pipeDilate.vertexShader = sys_get_shader("dilate_map.vert");
-			UtilUV.pipeDilate.fragmentShader = sys_get_shader("dilate_map.frag");
+			UtilUV.pipeDilate.vertex_shader = sys_get_shader("dilate_map.vert");
+			UtilUV.pipeDilate.fragment_shader = sys_get_shader("dilate_map.frag");
 			let vs = vertex_struct_create();
 			///if (krom_metal || krom_vulkan)
 			vertex_struct_add(vs, "tex", VertexData.I16_2X_Normalized);
@@ -115,10 +115,10 @@ class UtilUV {
 			vertex_struct_add(vs, "nor", VertexData.I16_2X_Normalized);
 			vertex_struct_add(vs, "tex", VertexData.I16_2X_Normalized);
 			///end
-			UtilUV.pipeDilate.inputLayout = [vs];
-			UtilUV.pipeDilate.depthWrite = false;
-			UtilUV.pipeDilate.depthMode = CompareMode.Always;
-			UtilUV.pipeDilate.colorAttachments[0] = TextureFormat.R8;
+			UtilUV.pipeDilate.input_layout = [vs];
+			UtilUV.pipeDilate.depth_write = false;
+			UtilUV.pipeDilate.depth_mode = CompareMode.Always;
+			UtilUV.pipeDilate.color_attachments[0] = TextureFormat.R8;
 			pipeline_compile(UtilUV.pipeDilate);
 			// dilateTexUnpack = getConstantLocation(UtilUV.pipeDilate, "texUnpack");
 		}
@@ -126,8 +126,7 @@ class UtilUV {
 		let mask = Context.objectMaskUsed() ? SlotLayer.getObjectMask(Context.raw.layer) : 0;
 		if (Context.layerFilterUsed()) mask = Context.raw.layerFilter;
 		let geom = mask == 0 && Context.raw.mergedObject != null ? Context.raw.mergedObject.data : Context.raw.paintObject.data;
-		let g4 = UtilUV.dilatemap.g4;
-		g4_begin(g4);
+		g4_begin(UtilUV.dilatemap);
 		g4_clear(0x00000000);
 		g4_set_pipeline(UtilUV.pipeDilate);
 		///if (krom_metal || krom_vulkan)

@@ -95,7 +95,7 @@ class TextToPhotoNode extends LogicNode {
 		let ets: Float32Array[] = [];
 		let counter = 0;
 
-		let processing = (g: g2_t) => {
+		let processing = () => {
 			Console.progress(tr("Processing") + " - " + tr("Text to Photo") + " (" + (counter + 1) + "/" + (50 - offset) + ")");
 
 			let timestep = TextToPhotoNode.timesteps[counter + offset];

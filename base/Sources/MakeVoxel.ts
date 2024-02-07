@@ -9,7 +9,7 @@ class MakeVoxel {
 		vertex_struct_add(structure, "tex", VertexData.I16_2X_Normalized);
 
 		let pipeState = data._pipe_state;
-		pipeState.inputLayout = [structure];
+		pipeState.input_layout = [structure];
 		data.vertex_elements = [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}];
 
 		// ///if arm_skin
@@ -24,7 +24,7 @@ class MakeVoxel {
 		// ///end
 
 		let ds = MakeMaterial.getDisplaceStrength();
-		pipeState.vertexShader = shader_from_source(MakeVoxel.voxelSource(), ShaderType.Vertex);
+		pipeState.vertex_shader = shader_from_source(MakeVoxel.voxelSource(), ShaderType.Vertex);
 
 		pipeline_compile(pipeState);
 		data.constants = [{ name: "W", type: "mat4", link: "_worldMatrix" }, { name: "N", type: "mat3", link: "_normalMatrix" }];

@@ -32,16 +32,16 @@ class UIView2D {
 	constructor() {
 		///if (is_paint || is_sculpt)
 		UIView2D.pipe = pipeline_create();
-		UIView2D.pipe.vertexShader = sys_get_shader("layer_view.vert");
-		UIView2D.pipe.fragmentShader = sys_get_shader("layer_view.frag");
+		UIView2D.pipe.vertex_shader = sys_get_shader("layer_view.vert");
+		UIView2D.pipe.fragment_shader = sys_get_shader("layer_view.frag");
 		let vs = vertex_struct_create();
 		vertex_struct_add(vs, "pos", VertexData.F32_3X);
 		vertex_struct_add(vs, "tex", VertexData.F32_2X);
 		vertex_struct_add(vs, "col", VertexData.U8_4X_Normalized);
-		UIView2D.pipe.inputLayout = [vs];
-		UIView2D.pipe.blendSource = BlendingFactor.BlendOne;
-		UIView2D.pipe.blendDestination = BlendingFactor.BlendZero;
-		UIView2D.pipe.colorWriteMasksAlpha[0] = false;
+		UIView2D.pipe.input_layout = [vs];
+		UIView2D.pipe.blend_source = BlendingFactor.BlendOne;
+		UIView2D.pipe.blend_dest = BlendingFactor.BlendZero;
+		UIView2D.pipe.color_write_masks_alpha[0] = false;
 		pipeline_compile(UIView2D.pipe);
 		UIView2D.channelLocation = pipeline_get_const_loc(UIView2D.pipe, "channel");
 		///end
@@ -51,7 +51,7 @@ class UIView2D {
 		UIView2D.ui.scroll_enabled = false;
 	}
 
-	static render = (g: g2_t) => {
+	static render = () => {
 
 		UIView2D.ww = Config.raw.layout[LayoutSize.LayoutNodesW];
 
@@ -75,7 +75,7 @@ class UIView2D {
 
 		if (Context.raw.pdirty >= 0) UIView2D.hwnd.redraws = 2; // Paint was active
 
-		g2_end(g);
+		g2_end();
 
 		// Cache grid
 		if (UINodes.grid == null) UINodes.drawGrid();
@@ -90,7 +90,7 @@ class UIView2D {
 		if (Context.raw.font.image == null) UtilRender.makeFontPreview();
 		///end
 
-		zui_begin(UIView2D.ui, g);
+		zui_begin(UIView2D.ui);
 
 		let headerh = Config.raw.layout[LayoutSize.LayoutHeader] == 1 ? UIHeader.headerh * 2 : UIHeader.headerh;
 		let apph = sys_height() - Config.raw.layout[LayoutSize.LayoutStatusH] + headerh;
@@ -101,12 +101,12 @@ class UIView2D {
 			if (Config.raw.touch_ui) UIView2D.wh += UIHeader.headerh;
 		}
 
-		if (zui_window(UIView2D.ui, UIView2D.hwnd, UIView2D.wx, UIView2D.wy, UIView2D.ww, UIView2D.wh)) {
+		if (zui_window(UIView2D.hwnd, UIView2D.wx, UIView2D.wy, UIView2D.ww, UIView2D.wh)) {
 
 			zui_tab(zui_handle("uiview2d_0"), tr("2D View"));
 
 			// Grid
-			UIView2D.ui.g.color = 0xffffffff;
+			g2_set_color(0xffffffff);
 			g2_draw_image(UINodes.grid, (UIView2D.panX * UIView2D.panScale) % 100 - 100, (UIView2D.panY * UIView2D.panScale) % 100 - 100);
 
 			// Texture
@@ -152,13 +152,13 @@ class UIView2D {
 
 				if (UIView2D.layerMode == View2DLayerMode.View2DVisible) {
 					let current = _g2_current;
-					if (current != null) g2_end(current);
+					if (current != null) g2_end();
 					layer = Base.flatten();
 					if (current != null) g2_begin(current, false);
 				}
 				else if (SlotLayer.isGroup(layer)) {
 					let current = _g2_current;
-					if (current != null) g2_end(current);
+					if (current != null) g2_end();
 					layer = Base.flatten(false, SlotLayer.getChildren(layer));
 					if (current != null) g2_begin(current, false);
 				}
@@ -193,10 +193,10 @@ class UIView2D {
 				///if (is_paint || is_sculpt)
 				if (UIView2D.type == View2DType.View2DLayer) {
 					///if (!krom_opengl)
-					UIView2D.ui.g.pipeline = UIView2D.pipe;
+					g2_set_pipeline(UIView2D.pipe);
 					///end
 					if (!Context.raw.textureFilter) {
-						UIView2D.ui.g.image_scale_quality = ImageScaleQuality.Low;
+						g2_set_image_scale_quality(ImageScaleQuality.Low);
 					}
 					///if krom_opengl
 					Krom.setPipeline(UIView2D.pipe.pipeline_);
@@ -220,9 +220,9 @@ class UIView2D {
 
 				///if (is_paint || is_sculpt)
 				if (UIView2D.type == View2DType.View2DLayer) {
-					UIView2D.ui.g.pipeline = null;
+					g2_set_pipeline(null);
 					if (!Context.raw.textureFilter) {
-						UIView2D.ui.g.image_scale_quality = ImageScaleQuality.High;
+						g2_set_image_scale_quality(ImageScaleQuality.High);
 					}
 				}
 
@@ -232,10 +232,9 @@ class UIView2D {
 					let y = UIView2D.ui.input_y - ty - UIView2D.wy;
 					Base.notifyOnNextFrame(() => {
 						let texpaint_picker = render_path_render_targets.get("texpaint_picker").image;
-						let g2 = texpaint_picker.g2;
-						g2_begin(g2, false);
+						g2_begin(texpaint_picker, false);
 						g2_draw_scaled_image(tex, -x, -y, tw, th);
-						g2_end(g2);
+						g2_end();
 						let a = new DataView(image_get_pixels(texpaint_picker));
 						///if (krom_metal || krom_vulkan)
 						let i0 = 2;
@@ -265,9 +264,9 @@ class UIView2D {
 
 			// Menu
 			let ew = Math.floor(zui_ELEMENT_W(UIView2D.ui));
-			UIView2D.ui.g.color = UIView2D.ui.t.SEPARATOR_COL;
+			g2_set_color(UIView2D.ui.t.SEPARATOR_COL);
 			g2_fill_rect(0, zui_ELEMENT_H(UIView2D.ui), UIView2D.ww, zui_ELEMENT_H(UIView2D.ui) + zui_ELEMENT_OFFSET(UIView2D.ui) * 2);
-			UIView2D.ui.g.color = 0xffffffff;
+			g2_set_color(0xffffffff);
 
 			let startY = zui_ELEMENT_H(UIView2D.ui) + zui_ELEMENT_OFFSET(UIView2D.ui);
 			UIView2D.ui._x = 2;
@@ -375,7 +374,7 @@ class UIView2D {
 			///end
 		}
 		zui_end();
-		g2_begin(g, false);
+		g2_begin(null, false);
 	}
 
 	static update = () => {

@@ -55,7 +55,7 @@ class RenderPathBase {
 		return RenderPathBase.superSample;
 	}
 
-	static drawCompass = (currentG: g4_t) => {
+	static drawCompass = () => {
 		if (Context.raw.showCompass) {
 			let cam = scene_camera;
 			let compass: mesh_object_t = scene_get_child(".Compass").ext;
@@ -75,7 +75,7 @@ class RenderPathBase {
 			vec4_set(compass.base.transform.scale, 0.4, 0.4, 0.4);
 			transform_build_matrix(compass.base.transform);
 			compass.frustum_culling = false;
-			mesh_object_render(compass, currentG, "overlay", []);
+			mesh_object_render(compass, "overlay", []);
 
 			cam.p = _P;
 			compass.base.visible = _visible;
@@ -516,7 +516,6 @@ class RenderPathBase {
 			render_path_clear_target(0xff000000);
 		}
 		render_path_set_target("gbuffer0", ["gbuffer1", "gbuffer2"]);
-		let currentG =_render_path_current_g;
 		RenderPathPaint.bindLayers();
 		render_path_draw_meshes("mesh");
 		RenderPathPaint.unbindLayers();
@@ -544,7 +543,7 @@ class RenderPathBase {
 
 		let hide = Operator.shortcut(Config.keymap.stencil_hide, ShortcutType.ShortcutDown) || keyboard_down("control");
 		let isDecal = Base.isDecalLayer();
-		if (isDecal && !hide) LineDraw.render(currentG, Context.raw.layer.decalMat);
+		if (isDecal && !hide) LineDraw.render(Context.raw.layer.decalMat);
 	}
 
 	static makeGbufferCopyTextures = () => {

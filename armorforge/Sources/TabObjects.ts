@@ -34,16 +34,16 @@ class TabObjects {
 
 					// Highlight every other line
 					if (lineCounter % 2 == 0) {
-						ui.g.color = ui.t.SEPARATOR_COL;
+						g2_set_color(ui.t.SEPARATOR_COL);
 						g2_fill_rect(0, ui._y, ui._window_w, zui_ELEMENT_H(ui));
-						ui.g.color = 0xffffffff;
+						g2_set_color(0xffffffff);
 					}
 
 					// Highlight selected line
 					if (currentObject == Context.raw.selectedObject) {
-						ui.g.color = 0xff205d9c;
+						g2_set_color(0xff205d9c);
 						g2_fill_rect(0, ui._y, ui._window_w, zui_ELEMENT_H(ui));
-						ui.g.color = 0xffffffff;
+						g2_set_color(0xffffffff);
 					}
 
 					if (currentObject.children.length > 0) {
@@ -55,9 +55,9 @@ class TabObjects {
 						ui._x += 18; // Sign offset
 
 						// Draw line that shows parent relations
-						ui.g.color = ui.t.ACCENT_COL;
+						g2_set_color(ui.t.ACCENT_COL);
 						g2_draw_line(ui._x - 10, ui._y + zui_ELEMENT_H(ui) / 2, ui._x, ui._y + zui_ELEMENT_H(ui) / 2);
-						ui.g.color = 0xffffffff;
+						g2_set_color(0xffffffff);
 
 						zui_text(currentObject.name);
 						ui._x -= 18;
@@ -113,9 +113,9 @@ class TabObjects {
 						}
 
 						// Draw line that shows parent relations
-						ui.g.color = ui.t.ACCENT_COL;
+						g2_set_color(ui.t.ACCENT_COL);
 						g2_draw_line(ui._x + 14, currentY, ui._x + 14, ui._y - zui_ELEMENT_H(ui) / 2);
-						ui.g.color = 0xffffffff;
+						g2_set_color(0xffffffff);
 					}
 				}
 				for (let c of _scene_root.children) {

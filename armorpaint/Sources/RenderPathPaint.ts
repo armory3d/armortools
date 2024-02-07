@@ -123,12 +123,12 @@ class RenderPathPaint {
 
 				let mo: mesh_object_t = scene_get_child(".ParticleEmitter").ext;
 				mo.base.visible = true;
-				mesh_object_render(mo,_render_path_current_g, "mesh",render_path_bind_params);
+				mesh_object_render(mo, "mesh",render_path_bind_params);
 				mo.base.visible = false;
 
 				mo = scene_get_child(".Particle").ext;
 				mo.base.visible = true;
-				mesh_object_render(mo,_render_path_current_g, "mesh",render_path_bind_params);
+				mesh_object_render(mo, "mesh",render_path_bind_params);
 				mo.base.visible = false;
 				render_path_end();
 			}
@@ -353,9 +353,9 @@ class RenderPathPaint {
 			let cc_context = shaderContexts[0];
 			if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
 			g4_set_pipeline(cc_context._pipe_state);
-			uniforms_set_context_consts(_render_path_current_g, cc_context,render_path_bind_params);
-			uniforms_set_obj_consts(_render_path_current_g, cc_context, Project.paintObjects[0].base);
-			uniforms_set_material_consts(_render_path_current_g, cc_context, materialContexts[0]);
+			uniforms_set_context_consts(cc_context,render_path_bind_params);
+			uniforms_set_obj_consts(cc_context, Project.paintObjects[0].base);
+			uniforms_set_material_consts(cc_context, materialContexts[0]);
 			g4_set_vertex_buffer(const_data_screen_aligned_vb);
 			g4_set_index_buffer(const_data_screen_aligned_ib);
 			g4_draw();
@@ -498,7 +498,6 @@ class RenderPathPaint {
 		let plane: mesh_object_t = scene_get_child(".Plane").ext;
 		let geom = plane.data;
 
-		let g =_render_path_frame_g;
 		if (Base.pipeCursor == null) Base.makeCursorPipe();
 
 		render_path_set_target("");

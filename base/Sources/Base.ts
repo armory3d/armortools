@@ -157,7 +157,7 @@ class Base {
 						Base.font.font_ = Krom.g2_font_13(Base.font.blob);
 						Base.font.glyphs = _g2_font_glyphs;
 					}
-					else font_init(Base.font);
+					else g2_font_init(Base.font);
 
 					Base.colorWheel = imageColorWheel;
 					Base.colorWheelGradient = imageColorWheelGradient;
@@ -685,7 +685,7 @@ class Base {
 		return null;
 	}
 
-	static render = (g: g2_t) => {
+	static render = () => {
 		if (sys_width() == 0 || sys_height() == 0) return;
 
 		if (Context.raw.frame == 2) {
@@ -761,7 +761,7 @@ class Base {
 			let inv = (Base.dragMaterial != null || (Base.dragLayer != null && Base.dragLayer.fill_layer != null)) ? h : 0;
 			///end
 
-			g.color = Base.dragTint;
+			g2_set_color(Base.dragTint);
 
 			///if (is_paint || is_sculpt)
 			let bgRect = Base.getDragBackground();
@@ -773,13 +773,13 @@ class Base {
 			Base.dragRect == null ?
 				g2_draw_scaled_image(img, mouse_x + Base.dragOffX, mouse_y + Base.dragOffY + inv, size, h - inv * 2) :
 				g2_draw_scaled_sub_image(img, Base.dragRect.x, Base.dragRect.y, Base.dragRect.w, Base.dragRect.h, mouse_x + Base.dragOffX, mouse_y + Base.dragOffY + inv, size, h - inv * 2);
-			g.color = 0xffffffff;
+			g2_set_color(0xffffffff);
 		}
 
 		let usingMenu = UIMenu.show && mouse_y > UIHeader.headerh;
 		Base.uiEnabled = !UIBox.show && !usingMenu && !Base.isComboSelected();
-		if (UIBox.show) UIBox.render(g);
-		if (UIMenu.show) UIMenu.render(g);
+		if (UIBox.show) UIBox.render();
+		if (UIMenu.show) UIMenu.render();
 
 		// Save last pos for continuos paint
 		Context.raw.lastPaintVecX = Context.raw.paintVec.x;
@@ -826,7 +826,7 @@ class Base {
 	}
 
 	static notifyOnNextFrame = (f: ()=>void) => {
-		let _render = (_: any) => {
+		let _render = () => {
 			app_notify_on_init(() => {
 				let _update = () => {
 					app_notify_on_init(f);
@@ -1018,21 +1018,21 @@ class Base {
 		let texpaint = render_path_render_targets.get("texpaint").image;
 		let texpaint_nor = render_path_render_targets.get("texpaint_nor").image;
 		let texpaint_pack = render_path_render_targets.get("texpaint_pack").image;
-		g2_begin(texpaint.g2, false);
+		g2_begin(texpaint, false);
 		g2_draw_scaled_image(Res.get("placeholder.k"), 0, 0, Config.getTextureResX(), Config.getTextureResY()); // Base
-		g2_end(texpaint.g2);
-		g4_begin(texpaint_nor.g4);
+		g2_end();
+		g4_begin(texpaint_nor);
 		g4_clear(color_from_floats(0.5, 0.5, 1.0, 0.0)); // Nor
 		g4_end();
-		g4_begin(texpaint_pack.g4);
+		g4_begin(texpaint_pack);
 		g4_clear(color_from_floats(1.0, 0.4, 0.0, 0.0)); // Occ, rough, met
 		g4_end();
 		let texpaint_nor_empty = render_path_render_targets.get("texpaint_nor_empty").image;
 		let texpaint_pack_empty = render_path_render_targets.get("texpaint_pack_empty").image;
-		g4_begin(texpaint_nor_empty.g4);
+		g4_begin(texpaint_nor_empty);
 		g4_clear(color_from_floats(0.5, 0.5, 1.0, 0.0)); // Nor
 		g4_end();
-		g4_begin(texpaint_pack_empty.g4);
+		g4_begin(texpaint_pack_empty);
 		g4_clear(color_from_floats(1.0, 0.4, 0.0, 0.0)); // Occ, rough, met
 		g4_end();
 		///end
@@ -1096,15 +1096,15 @@ class Base {
 
 	static makeMergePipe = (red: bool, green: bool, blue: bool, alpha: bool): pipeline_t => {
 		let pipe = pipeline_create();
-		pipe.vertexShader = sys_get_shader("pass.vert");
-		pipe.fragmentShader = sys_get_shader("layer_merge.frag");
+		pipe.vertex_shader = sys_get_shader("pass.vert");
+		pipe.fragment_shader = sys_get_shader("layer_merge.frag");
 		let vs = vertex_struct_create();
 		vertex_struct_add(vs, "pos", VertexData.F32_2X);
-		pipe.inputLayout = [vs];
-		pipe.colorWriteMasksRed = [red];
-		pipe.colorWriteMasksGreen = [green];
-		pipe.colorWriteMasksBlue = [blue];
-		pipe.colorWriteMasksAlpha = [alpha];
+		pipe.input_layout = [vs];
+		pipe.color_write_masks_red = [red];
+		pipe.color_write_masks_green = [green];
+		pipe.color_write_masks_blue = [blue];
+		pipe.color_write_masks_alpha = [alpha];
 		pipeline_compile(pipe);
 		return pipe;
 	}
@@ -1127,54 +1127,54 @@ class Base {
 
 		{
 			Base.pipeCopy = pipeline_create();
-			Base.pipeCopy.vertexShader = sys_get_shader("layer_view.vert");
-			Base.pipeCopy.fragmentShader = sys_get_shader("layer_copy.frag");
+			Base.pipeCopy.vertex_shader = sys_get_shader("layer_view.vert");
+			Base.pipeCopy.fragment_shader = sys_get_shader("layer_copy.frag");
 			let vs = vertex_struct_create();
 			vertex_struct_add(vs, "pos", VertexData.F32_3X);
 			vertex_struct_add(vs, "tex", VertexData.F32_2X);
 			vertex_struct_add(vs, "col", VertexData.U8_4X_Normalized);
-			Base.pipeCopy.inputLayout = [vs];
+			Base.pipeCopy.input_layout = [vs];
 			pipeline_compile(Base.pipeCopy);
 		}
 
 		{
 			Base.pipeCopyBGRA = pipeline_create();
-			Base.pipeCopyBGRA.vertexShader = sys_get_shader("layer_view.vert");
-			Base.pipeCopyBGRA.fragmentShader = sys_get_shader("layer_copy_bgra.frag");
+			Base.pipeCopyBGRA.vertex_shader = sys_get_shader("layer_view.vert");
+			Base.pipeCopyBGRA.fragment_shader = sys_get_shader("layer_copy_bgra.frag");
 			let vs = vertex_struct_create();
 			vertex_struct_add(vs, "pos", VertexData.F32_3X);
 			vertex_struct_add(vs, "tex", VertexData.F32_2X);
 			vertex_struct_add(vs, "col", VertexData.U8_4X_Normalized);
-			Base.pipeCopyBGRA.inputLayout = [vs];
+			Base.pipeCopyBGRA.input_layout = [vs];
 			pipeline_compile(Base.pipeCopyBGRA);
 		}
 
 		///if (krom_metal || krom_vulkan || krom_direct3d12)
 		{
 			Base.pipeCopy8 = pipeline_create();
-			Base.pipeCopy8.vertexShader = sys_get_shader("layer_view.vert");
-			Base.pipeCopy8.fragmentShader = sys_get_shader("layer_copy.frag");
+			Base.pipeCopy8.vertex_shader = sys_get_shader("layer_view.vert");
+			Base.pipeCopy8.fragment_shader = sys_get_shader("layer_copy.frag");
 			let vs = vertex_struct_create();
 			vertex_struct_add(vs, "pos", VertexData.F32_3X);
 			vertex_struct_add(vs, "tex", VertexData.F32_2X);
 			vertex_struct_add(vs, "col", VertexData.U8_4X_Normalized);
-			Base.pipeCopy8.inputLayout = [vs];
-			Base.pipeCopy8.colorAttachmentCount = 1;
-			Base.pipeCopy8.colorAttachments[0] = TextureFormat.R8;
+			Base.pipeCopy8.input_layout = [vs];
+			Base.pipeCopy8.color_attachment_count = 1;
+			Base.pipeCopy8.color_attachments[0] = TextureFormat.R8;
 			pipeline_compile(Base.pipeCopy8);
 		}
 
 		{
 			Base.pipeCopy128 = pipeline_create();
-			Base.pipeCopy128.vertexShader = sys_get_shader("layer_view.vert");
-			Base.pipeCopy128.fragmentShader = sys_get_shader("layer_copy.frag");
+			Base.pipeCopy128.vertex_shader = sys_get_shader("layer_view.vert");
+			Base.pipeCopy128.fragment_shader = sys_get_shader("layer_copy.frag");
 			let vs = vertex_struct_create();
 			vertex_struct_add(vs, "pos", VertexData.F32_3X);
 			vertex_struct_add(vs, "tex", VertexData.F32_2X);
 			vertex_struct_add(vs, "col", VertexData.U8_4X_Normalized);
-			Base.pipeCopy128.inputLayout = [vs];
-			Base.pipeCopy128.colorAttachmentCount = 1;
-			Base.pipeCopy128.colorAttachments[0] = TextureFormat.RGBA128;
+			Base.pipeCopy128.input_layout = [vs];
+			Base.pipeCopy128.color_attachment_count = 1;
+			Base.pipeCopy128.color_attachments[0] = TextureFormat.RGBA128;
 			pipeline_compile(Base.pipeCopy128);
 		}
 		///else
@@ -1185,25 +1185,25 @@ class Base {
 		///if (is_paint || is_sculpt)
 		{
 			Base.pipeInvert8 = pipeline_create();
-			Base.pipeInvert8.vertexShader = sys_get_shader("layer_view.vert");
-			Base.pipeInvert8.fragmentShader = sys_get_shader("layer_invert.frag");
+			Base.pipeInvert8.vertex_shader = sys_get_shader("layer_view.vert");
+			Base.pipeInvert8.fragment_shader = sys_get_shader("layer_invert.frag");
 			let vs = vertex_struct_create();
 			vertex_struct_add(vs, "pos", VertexData.F32_3X);
 			vertex_struct_add(vs, "tex", VertexData.F32_2X);
 			vertex_struct_add(vs, "col", VertexData.U8_4X_Normalized);
-			Base.pipeInvert8.inputLayout = [vs];
-			Base.pipeInvert8.colorAttachmentCount = 1;
-			Base.pipeInvert8.colorAttachments[0] = TextureFormat.R8;
+			Base.pipeInvert8.input_layout = [vs];
+			Base.pipeInvert8.color_attachment_count = 1;
+			Base.pipeInvert8.color_attachments[0] = TextureFormat.R8;
 			pipeline_compile(Base.pipeInvert8);
 		}
 
 		{
 			Base.pipeApplyMask = pipeline_create();
-			Base.pipeApplyMask.vertexShader = sys_get_shader("pass.vert");
-			Base.pipeApplyMask.fragmentShader = sys_get_shader("mask_apply.frag");
+			Base.pipeApplyMask.vertex_shader = sys_get_shader("pass.vert");
+			Base.pipeApplyMask.fragment_shader = sys_get_shader("mask_apply.frag");
 			let vs = vertex_struct_create();
 			vertex_struct_add(vs, "pos", VertexData.F32_2X);
-			Base.pipeApplyMask.inputLayout = [vs];
+			Base.pipeApplyMask.input_layout = [vs];
 			pipeline_compile(Base.pipeApplyMask);
 			Base.tex0Mask = pipeline_get_tex_unit(Base.pipeApplyMask, "tex0");
 			Base.texaMask = pipeline_get_tex_unit(Base.pipeApplyMask, "texa");
@@ -1211,11 +1211,11 @@ class Base {
 
 		{
 			Base.pipeMergeMask = pipeline_create();
-			Base.pipeMergeMask.vertexShader = sys_get_shader("pass.vert");
-			Base.pipeMergeMask.fragmentShader = sys_get_shader("mask_merge.frag");
+			Base.pipeMergeMask.vertex_shader = sys_get_shader("pass.vert");
+			Base.pipeMergeMask.fragment_shader = sys_get_shader("mask_merge.frag");
 			let vs = vertex_struct_create();
 			vertex_struct_add(vs, "pos", VertexData.F32_2X);
-			Base.pipeMergeMask.inputLayout = [vs];
+			Base.pipeMergeMask.input_layout = [vs];
 			pipeline_compile(Base.pipeMergeMask);
 			Base.tex0MergeMask = pipeline_get_tex_unit(Base.pipeMergeMask, "tex0");
 			Base.texaMergeMask = pipeline_get_tex_unit(Base.pipeMergeMask, "texa");
@@ -1225,11 +1225,11 @@ class Base {
 
 		{
 			Base.pipeColorIdToMask = pipeline_create();
-			Base.pipeColorIdToMask.vertexShader = sys_get_shader("pass.vert");
-			Base.pipeColorIdToMask.fragmentShader = sys_get_shader("mask_colorid.frag");
+			Base.pipeColorIdToMask.vertex_shader = sys_get_shader("pass.vert");
+			Base.pipeColorIdToMask.fragment_shader = sys_get_shader("mask_colorid.frag");
 			let vs = vertex_struct_create();
 			vertex_struct_add(vs, "pos", VertexData.F32_2X);
-			Base.pipeColorIdToMask.inputLayout = [vs];
+			Base.pipeColorIdToMask.input_layout = [vs];
 			pipeline_compile(Base.pipeColorIdToMask);
 			Base.texpaintColorId = pipeline_get_tex_unit(Base.pipeColorIdToMask, "texpaint_colorid");
 			Base.texColorId = pipeline_get_tex_unit(Base.pipeColorIdToMask, "texcolorid");
@@ -1239,56 +1239,56 @@ class Base {
 		///if is_lab
 		{
 			Base.pipeCopyR = pipeline_create();
-			Base.pipeCopyR.vertexShader = sys_get_shader("layer_view.vert");
-			Base.pipeCopyR.fragmentShader = sys_get_shader("layer_copy.frag");
+			Base.pipeCopyR.vertex_shader = sys_get_shader("layer_view.vert");
+			Base.pipeCopyR.fragment_shader = sys_get_shader("layer_copy.frag");
 			let vs = vertex_struct_create();
 			vertex_struct_add(vs, "pos", VertexData.F32_3X);
 			vertex_struct_add(vs, "tex", VertexData.F32_2X);
 			vertex_struct_add(vs, "col", VertexData.U8_4X_Normalized);
-			Base.pipeCopyR.inputLayout = [vs];
-			Base.pipeCopyR.colorWriteMasksGreen = [false];
-			Base.pipeCopyR.colorWriteMasksBlue = [false];
-			Base.pipeCopyR.colorWriteMasksAlpha = [false];
+			Base.pipeCopyR.input_layout = [vs];
+			Base.pipeCopyR.color_write_masks_green = [false];
+			Base.pipeCopyR.color_write_masks_blue = [false];
+			Base.pipeCopyR.color_write_masks_alpha = [false];
 			pipeline_compile(Base.pipeCopyR);
 		}
 
 		{
 			Base.pipeCopyG = pipeline_create();
-			Base.pipeCopyG.vertexShader = sys_get_shader("layer_view.vert");
-			Base.pipeCopyG.fragmentShader = sys_get_shader("layer_copy.frag");
+			Base.pipeCopyG.vertex_shader = sys_get_shader("layer_view.vert");
+			Base.pipeCopyG.fragment_shader = sys_get_shader("layer_copy.frag");
 			let vs = vertex_struct_create();
 			vertex_struct_add(vs, "pos", VertexData.F32_3X);
 			vertex_struct_add(vs, "tex", VertexData.F32_2X);
 			vertex_struct_add(vs, "col", VertexData.U8_4X_Normalized);
-			Base.pipeCopyG.inputLayout = [vs];
-			Base.pipeCopyG.colorWriteMasksRed = [false];
-			Base.pipeCopyG.colorWriteMasksBlue = [false];
-			Base.pipeCopyG.colorWriteMasksAlpha = [false];
+			Base.pipeCopyG.input_layout = [vs];
+			Base.pipeCopyG.color_write_masks_red = [false];
+			Base.pipeCopyG.color_write_masks_blue = [false];
+			Base.pipeCopyG.color_write_masks_alpha = [false];
 			pipeline_compile(Base.pipeCopyG);
 		}
 
 		{
 			Base.pipeCopyB = pipeline_create();
-			Base.pipeCopyB.vertexShader = sys_get_shader("layer_view.vert");
-			Base.pipeCopyB.fragmentShader = sys_get_shader("layer_copy.frag");
+			Base.pipeCopyB.vertex_shader = sys_get_shader("layer_view.vert");
+			Base.pipeCopyB.fragment_shader = sys_get_shader("layer_copy.frag");
 			let vs = vertex_struct_create();
 			vertex_struct_add(vs, "pos", VertexData.F32_3X);
 			vertex_struct_add(vs, "tex", VertexData.F32_2X);
 			vertex_struct_add(vs, "col", VertexData.U8_4X_Normalized);
-			Base.pipeCopyB.inputLayout = [vs];
-			Base.pipeCopyB.colorWriteMasksRed = [false];
-			Base.pipeCopyB.colorWriteMasksGreen = [false];
-			Base.pipeCopyB.colorWriteMasksAlpha = [false];
+			Base.pipeCopyB.input_layout = [vs];
+			Base.pipeCopyB.color_write_masks_red = [false];
+			Base.pipeCopyB.color_write_masks_green = [false];
+			Base.pipeCopyB.color_write_masks_alpha = [false];
 			pipeline_compile(Base.pipeCopyB);
 		}
 
 		{
 			Base.pipeInpaintPreview = pipeline_create();
-			Base.pipeInpaintPreview.vertexShader = sys_get_shader("pass.vert");
-			Base.pipeInpaintPreview.fragmentShader = sys_get_shader("inpaint_preview.frag");
+			Base.pipeInpaintPreview.vertex_shader = sys_get_shader("pass.vert");
+			Base.pipeInpaintPreview.fragment_shader = sys_get_shader("inpaint_preview.frag");
 			let vs = vertex_struct_create();
 			vertex_struct_add(vs, "pos", VertexData.F32_2X);
-			Base.pipeInpaintPreview.inputLayout = [vs];
+			Base.pipeInpaintPreview.input_layout = [vs];
 			pipeline_compile(Base.pipeInpaintPreview);
 			Base.tex0InpaintPreview = pipeline_get_tex_unit(Base.pipeInpaintPreview, "tex0");
 			Base.texaInpaintPreview = pipeline_get_tex_unit(Base.pipeInpaintPreview, "texa");
@@ -1298,28 +1298,28 @@ class Base {
 
 	static makePipeCopyRGB = () => {
 		Base.pipeCopyRGB = pipeline_create();
-		Base.pipeCopyRGB.vertexShader = sys_get_shader("layer_view.vert");
-		Base.pipeCopyRGB.fragmentShader = sys_get_shader("layer_copy.frag");
+		Base.pipeCopyRGB.vertex_shader = sys_get_shader("layer_view.vert");
+		Base.pipeCopyRGB.fragment_shader = sys_get_shader("layer_copy.frag");
 		let vs = vertex_struct_create();
 		vertex_struct_add(vs, "pos", VertexData.F32_3X);
 		vertex_struct_add(vs, "tex", VertexData.F32_2X);
 		vertex_struct_add(vs, "col", VertexData.U8_4X_Normalized);
-		Base.pipeCopyRGB.inputLayout = [vs];
-		Base.pipeCopyRGB.colorWriteMasksAlpha = [false];
+		Base.pipeCopyRGB.input_layout = [vs];
+		Base.pipeCopyRGB.color_write_masks_alpha = [false];
 		pipeline_compile(Base.pipeCopyRGB);
 	}
 
 	///if is_lab
 	static makePipeCopyA = () => {
 		Base.pipeCopyA = pipeline_create();
-		Base.pipeCopyA.vertexShader = sys_get_shader("pass.vert");
-		Base.pipeCopyA.fragmentShader = sys_get_shader("layer_copy_rrrr.frag");
+		Base.pipeCopyA.vertex_shader = sys_get_shader("pass.vert");
+		Base.pipeCopyA.fragment_shader = sys_get_shader("layer_copy_rrrr.frag");
 		let vs = vertex_struct_create();
 		vertex_struct_add(vs, "pos", VertexData.F32_2X);
-		Base.pipeCopyA.inputLayout = [vs];
-		Base.pipeCopyA.colorWriteMasksRed = [false];
-		Base.pipeCopyA.colorWriteMasksGreen = [false];
-		Base.pipeCopyA.colorWriteMasksBlue = [false];
+		Base.pipeCopyA.input_layout = [vs];
+		Base.pipeCopyA.color_write_masks_red = [false];
+		Base.pipeCopyA.color_write_masks_green = [false];
+		Base.pipeCopyA.color_write_masks_blue = [false];
 		pipeline_compile(Base.pipeCopyA);
 		Base.pipeCopyATex = pipeline_get_tex_unit(Base.pipeCopyA, "tex");
 	}
@@ -1327,8 +1327,8 @@ class Base {
 
 	static makeCursorPipe = () => {
 		Base.pipeCursor = pipeline_create();
-		Base.pipeCursor.vertexShader = sys_get_shader("cursor.vert");
-		Base.pipeCursor.fragmentShader = sys_get_shader("cursor.frag");
+		Base.pipeCursor.vertex_shader = sys_get_shader("cursor.vert");
+		Base.pipeCursor.fragment_shader = sys_get_shader("cursor.frag");
 		let vs = vertex_struct_create();
 		///if (krom_metal || krom_vulkan)
 		vertex_struct_add(vs, "tex", VertexData.I16_2X_Normalized);
@@ -1337,11 +1337,11 @@ class Base {
 		vertex_struct_add(vs, "nor", VertexData.I16_2X_Normalized);
 		vertex_struct_add(vs, "tex", VertexData.I16_2X_Normalized);
 		///end
-		Base.pipeCursor.inputLayout = [vs];
-		Base.pipeCursor.blendSource = BlendingFactor.SourceAlpha;
-		Base.pipeCursor.blendDestination = BlendingFactor.InverseSourceAlpha;
-		Base.pipeCursor.depthWrite = false;
-		Base.pipeCursor.depthMode = CompareMode.Always;
+		Base.pipeCursor.input_layout = [vs];
+		Base.pipeCursor.blend_source = BlendingFactor.SourceAlpha;
+		Base.pipeCursor.blend_dest = BlendingFactor.InverseSourceAlpha;
+		Base.pipeCursor.depth_write = false;
+		Base.pipeCursor.depth_mode = CompareMode.Always;
 		pipeline_compile(Base.pipeCursor);
 		Base.cursorVP = pipeline_get_const_loc(Base.pipeCursor, "VP");
 		Base.cursorInvVP = pipeline_get_const_loc(Base.pipeCursor, "invVP");
@@ -1599,11 +1599,11 @@ class Base {
 		Base.makeTempImg();
 		if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
 
-		g2_begin(Base.tempImage.g2, false); // Copy to temp
-		Base.tempImage.g2.pipeline = Base.pipeCopy;
+		g2_begin(Base.tempImage, false); // Copy to temp
+		g2_set_pipeline(Base.pipeCopy);
 		g2_draw_image(l0.texpaint, 0, 0);
-		Base.tempImage.g2.pipeline = null;
-		g2_end(Base.tempImage.g2);
+		g2_set_pipeline(null);
+		g2_end();
 
 		let empty = render_path_render_targets.get("empty_white").image;
 		let mask = empty;
@@ -1616,7 +1616,7 @@ class Base {
 		}
 
 		if (SlotLayer.isMask(l1)) {
-			g4_begin(l0.texpaint.g4);
+			g4_begin(l0.texpaint);
 			g4_set_pipeline(Base.pipeMergeMask);
 			g4_set_tex(Base.tex0MergeMask, l1.texpaint);
 			g4_set_tex(Base.texaMergeMask, Base.tempImage);
@@ -1630,7 +1630,7 @@ class Base {
 
 		if (SlotLayer.isLayer(l1)) {
 			if (l1.paintBase) {
-				g4_begin(l0.texpaint.g4);
+				g4_begin(l0.texpaint);
 				g4_set_pipeline(Base.pipeMerge);
 				g4_set_tex(Base.tex0, l1.texpaint);
 				g4_set_tex(Base.tex1, empty);
@@ -1645,14 +1645,14 @@ class Base {
 			}
 
 			///if is_paint
-			g2_begin(Base.tempImage.g2, false);
-			Base.tempImage.g2.pipeline = Base.pipeCopy;
+			g2_begin(Base.tempImage, false);
+			g2_set_pipeline(Base.pipeCopy);
 			g2_draw_image(l0.texpaint_nor, 0, 0);
-			Base.tempImage.g2.pipeline = null;
-			g2_end(Base.tempImage.g2);
+			g2_set_pipeline(null);
+			g2_end();
 
 			if (l1.paintNor) {
-				g4_begin(l0.texpaint_nor.g4);
+				g4_begin(l0.texpaint_nor);
 				g4_set_pipeline(Base.pipeMerge);
 				g4_set_tex(Base.tex0, l1.texpaint);
 				g4_set_tex(Base.tex1, l1.texpaint_nor);
@@ -1666,11 +1666,11 @@ class Base {
 				g4_end();
 			}
 
-			g2_begin(Base.tempImage.g2, false);
-			Base.tempImage.g2.pipeline = Base.pipeCopy;
+			g2_begin(Base.tempImage, false);
+			g2_set_pipeline(Base.pipeCopy);
 			g2_draw_image(l0.texpaint_pack, 0, 0);
-			Base.tempImage.g2.pipeline = null;
-			g2_end(Base.tempImage.g2);
+			g2_set_pipeline(null);
+			g2_end();
 
 			if (l1.paintOcc || l1.paintRough || l1.paintMet || l1.paintHeight) {
 				if (l1.paintOcc && l1.paintRough && l1.paintMet && l1.paintHeight) {
@@ -1695,13 +1695,13 @@ class Base {
 		let empty = render_path_render_targets.get("empty_white").image;
 
 		// Clear export layer
-		g4_begin(Base.expa.g4);
+		g4_begin(Base.expa);
 		g4_clear(color_from_floats(0.0, 0.0, 0.0, 0.0));
 		g4_end();
-		g4_begin(Base.expb.g4);
+		g4_begin(Base.expb);
 		g4_clear(color_from_floats(0.5, 0.5, 1.0, 0.0));
 		g4_end();
-		g4_begin(Base.expc.g4);
+		g4_begin(Base.expc);
 		g4_clear(color_from_floats(1.0, 0.0, 0.0, 0.0));
 		g4_end();
 
@@ -1715,8 +1715,8 @@ class Base {
 			if (l1masks != null) {
 				if (l1masks.length > 1) {
 					Base.makeTempMaskImg();
-					g2_begin(Base.tempMaskImage.g2, true, 0x00000000);
-					g2_end(Base.tempMaskImage.g2);
+					g2_begin(Base.tempMaskImage, true, 0x00000000);
+					g2_end();
 					let l1: any = { texpaint: Base.tempMaskImage };
 					for (let i = 0; i < l1masks.length; ++i) {
 						Base.mergeLayer(l1, l1masks[i]);
@@ -1727,13 +1727,13 @@ class Base {
 			}
 
 			if (l1.paintBase) {
-				g2_begin(Base.tempImage.g2, false); // Copy to temp
-				Base.tempImage.g2.pipeline = Base.pipeCopy;
+				g2_begin(Base.tempImage, false); // Copy to temp
+				g2_set_pipeline(Base.pipeCopy);
 				g2_draw_image(Base.expa, 0, 0);
-				Base.tempImage.g2.pipeline = null;
-				g2_end(Base.tempImage.g2);
+				g2_set_pipeline(null);
+				g2_end();
 
-				g4_begin(Base.expa.g4);
+				g4_begin(Base.expa);
 				g4_set_pipeline(Base.pipeMerge);
 				g4_set_tex(Base.tex0, l1.texpaint);
 				g4_set_tex(Base.tex1, empty);
@@ -1749,13 +1749,13 @@ class Base {
 
 			///if is_paint
 			if (l1.paintNor) {
-				g2_begin(Base.tempImage.g2, false);
-				Base.tempImage.g2.pipeline = Base.pipeCopy;
+				g2_begin(Base.tempImage, false);
+				g2_set_pipeline(Base.pipeCopy);
 				g2_draw_image(Base.expb, 0, 0);
-				Base.tempImage.g2.pipeline = null;
-				g2_end(Base.tempImage.g2);
+				g2_set_pipeline(null);
+				g2_end();
 
-				g4_begin(Base.expb.g4);
+				g4_begin(Base.expb);
 				g4_set_pipeline(Base.pipeMerge);
 				g4_set_tex(Base.tex0, l1.texpaint);
 				g4_set_tex(Base.tex1, l1.texpaint_nor);
@@ -1770,11 +1770,11 @@ class Base {
 			}
 
 			if (l1.paintOcc || l1.paintRough || l1.paintMet || l1.paintHeight) {
-				g2_begin(Base.tempImage.g2, false);
-				Base.tempImage.g2.pipeline = Base.pipeCopy;
+				g2_begin(Base.tempImage, false);
+				g2_set_pipeline(Base.pipeCopy);
 				g2_draw_image(Base.expc, 0, 0);
-				Base.tempImage.g2.pipeline = null;
-				g2_end(Base.tempImage.g2);
+				g2_set_pipeline(null);
+				g2_end();
 
 				if (l1.paintOcc && l1.paintRough && l1.paintMet && l1.paintHeight) {
 					Base.commandsMergePack(Base.pipeMerge, Base.expc, l1.texpaint, l1.texpaint_pack, SlotLayer.getOpacity(l1), mask, l1.paintHeightBlend ? -3 : -1);
@@ -1790,12 +1790,12 @@ class Base {
 
 		///if krom_metal
 		// Flush command list
-		g2_begin(Base.expa.g2, false);
-		g2_end(Base.expa.g2);
-		g2_begin(Base.expb.g2, false);
-		g2_end(Base.expb.g2);
-		g2_begin(Base.expc.g2, false);
-		g2_end(Base.expc.g2);
+		g2_begin(Base.expa, false);
+		g2_end();
+		g2_begin(Base.expb, false);
+		g2_end();
+		g2_begin(Base.expc, false);
+		g2_end();
 		///end
 
 		let l0 = { texpaint: Base.expa, texpaint_nor: Base.expb, texpaint_pack: Base.expc };
@@ -1803,13 +1803,13 @@ class Base {
 		// Merge height map into normal map
 		if (heightToNormal && MakeMaterial.heightUsed) {
 
-			g2_begin(Base.tempImage.g2, false);
-			Base.tempImage.g2.pipeline = Base.pipeCopy;
+			g2_begin(Base.tempImage, false);
+			g2_set_pipeline(Base.pipeCopy);
 			g2_draw_image(l0.texpaint_nor, 0, 0);
-			Base.tempImage.g2.pipeline = null;
-			g2_end(Base.tempImage.g2);
+			g2_set_pipeline(null);
+			g2_end();
 
-			g4_begin(l0.texpaint_nor.g4);
+			g4_begin(l0.texpaint_nor);
 			g4_set_pipeline(Base.pipeMerge);
 			g4_set_tex(Base.tex0, Base.tempImage);
 			g4_set_tex(Base.tex1, l0.texpaint_pack);
@@ -1833,15 +1833,15 @@ class Base {
 		Base.makeTempImg();
 
 		// Copy layer to temp
-		g2_begin(Base.tempImage.g2, false);
-		Base.tempImage.g2.pipeline = Base.pipeCopy;
+		g2_begin(Base.tempImage, false);
+		g2_set_pipeline(Base.pipeCopy);
 		g2_draw_image(l.texpaint, 0, 0);
-		Base.tempImage.g2.pipeline = null;
-		g2_end(Base.tempImage.g2);
+		g2_set_pipeline(null);
+		g2_end();
 
 		// Apply mask
 		if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
-		g4_begin(l.texpaint.g4);
+		g4_begin(l.texpaint);
 		g4_set_pipeline(Base.pipeApplyMask);
 		g4_set_tex(Base.tex0Mask, Base.tempImage);
 		g4_set_tex(Base.texaMask, m.texpaint);
@@ -1852,7 +1852,7 @@ class Base {
 	}
 
 	static commandsMergePack = (pipe: pipeline_t, i0: image_t, i1: image_t, i1pack: image_t, i1maskOpacity: f32, i1texmask: image_t, i1blending = -1) => {
-		g4_begin(i0.g4);
+		g4_begin(i0);
 		g4_set_pipeline(pipe);
 		g4_set_tex(Base.tex0, i1);
 		g4_set_tex(Base.tex1, i1pack);
@@ -1880,7 +1880,7 @@ class Base {
 		let _layer = Context.raw.layer;
 		let _tool = Context.raw.tool;
 		let _fillType = Context.raw.fillTypeHandle.position;
-		let current: g2_t = null;
+		let current: image_t = null;
 
 		///if is_paint
 		if (Context.raw.tool == WorkspaceTool.ToolMaterial) {
@@ -1889,7 +1889,7 @@ class Base {
 			}
 
 			current = _g2_current;
-			if (current != null) g2_end(current);
+			if (current != null) g2_end();
 
 			Context.raw.tool = WorkspaceTool.ToolFill;
 			Context.raw.fillTypeHandle.position = FillType.FillObject;
@@ -1916,7 +1916,7 @@ class Base {
 
 		if (hasFillLayer || hasFillMask) {
 			current = _g2_current;
-			if (current != null) g2_end(current);
+			if (current != null) g2_end();
 			Context.raw.pdirty = 1;
 			Context.raw.tool = WorkspaceTool.ToolFill;
 			Context.raw.fillTypeHandle.position = FillType.FillObject;
@@ -1969,7 +1969,7 @@ class Base {
 
 	static updateFillLayer = (parsePaint = true) => {
 		let current = _g2_current;
-		if (current != null) g2_end(current);
+		if (current != null) g2_end();
 
 		let _tool = Context.raw.tool;
 		let _fillType = Context.raw.fillTypeHandle.position;

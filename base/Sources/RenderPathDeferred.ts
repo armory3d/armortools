@@ -193,7 +193,7 @@ class RenderPathDeferred {
 		render_path_draw_shader("shader_datas/compositor_pass/compositor_pass");
 
 		render_path_set_target("buf");
-		RenderPathBase.drawCompass(_render_path_current_g);
+		RenderPathBase.drawCompass();
 		render_path_draw_meshes("overlay");
 
 		RenderPathBase.drawTAA();

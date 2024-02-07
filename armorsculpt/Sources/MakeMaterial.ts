@@ -178,7 +178,7 @@ class MakeMaterial {
 
 		if (bakePreviews) {
 			let current = _g2_current;
-			if (current != null) g2_end(current);
+			if (current != null) g2_end();
 			MakeMaterial.bakeNodePreviews();
 			if (current != null) g2_begin(current, false);
 		}

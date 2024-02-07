@@ -120,11 +120,11 @@ class TabTextures {
 											///end
 
 											let target = image_create_render_target(TabTextures.to_pow2(img.width), TabTextures.to_pow2(img.height));
-											g2_begin(target.g2, false);
-											target.g2.pipeline = Base.pipeCopy;
+											g2_begin(target, false);
+											g2_set_pipeline(Base.pipeCopy);
 											g2_draw_scaled_image(img, 0, 0, target.width, target.height);
-											target.g2.pipeline = null;
-											g2_end(target.g2);
+											g2_set_pipeline(null);
+											g2_end();
 											Base.notifyOnNextFrame(() => {
 												let f = UIFiles.filename;
 												if (f == "") f = tr("untitled");

@@ -13,7 +13,7 @@ class UIMenu {
 	static showMenuFirst = true;
 	static hideMenu = false;
 
-	static render = (g: g2_t) => {
+	static render = () => {
 		let ui = Base.uiMenu;
 		let menuW = UIMenu.menuCommands != null ? Math.floor(Base.defaultElementW * zui_SCALE(Base.uiMenu) * 2.3) : Math.floor(zui_ELEMENT_W(ui) * 2.3);
 		let _BUTTON_COL = ui.t.BUTTON_COL;
@@ -23,14 +23,14 @@ class UIMenu {
 		let _ELEMENT_H = ui.t.ELEMENT_H;
 		ui.t.ELEMENT_H = Config.raw.touch_ui ? (28 + 2) : 28;
 
-		zui_begin_region(ui, g, UIMenu.menuX, UIMenu.menuY, menuW);
+		zui_begin_region(ui, UIMenu.menuX, UIMenu.menuY, menuW);
 
 		if (UIMenu.menuCommands != null) {
-			ui.g.color = ui.t.ACCENT_SELECT_COL;
-			zui_draw_rect(ui.g, true, ui._x + -1, ui._y + -1, ui._w + 2, zui_ELEMENT_H(ui) * UIMenu.menuElements + 2);
-			ui.g.color = ui.t.SEPARATOR_COL;
-			zui_draw_rect(ui.g, true, ui._x + 0, ui._y + 0, ui._w, zui_ELEMENT_H(ui) * UIMenu.menuElements);
-			ui.g.color = 0xffffffff;
+			g2_set_color(ui.t.ACCENT_SELECT_COL);
+			zui_draw_rect(true, ui._x + -1, ui._y + -1, ui._w + 2, zui_ELEMENT_H(ui) * UIMenu.menuElements + 2);
+			g2_set_color(ui.t.SEPARATOR_COL);
+			zui_draw_rect(true, ui._x + 0, ui._y + 0, ui._w, zui_ELEMENT_H(ui) * UIMenu.menuElements);
+			g2_set_color(0xffffffff);
 
 			UIMenu.menuCommands(ui);
 		}
@@ -221,9 +221,10 @@ class UIMenu {
 				UIMenu.menuFill(ui);
 				Context.raw.drawWireframe = zui_check(Context.raw.wireframeHandle, " " + tr("Wireframe"));
 				if (Context.raw.wireframeHandle.changed) {
-					g2_end(ui.g);
+					let current = _g2_current;
+					g2_end();
 					UtilUV.cacheUVMap();
-					g2_begin(ui.g, false);
+					g2_begin(current, false);
 					MakeMaterial.parseMeshMaterial();
 				}
 				///end
@@ -567,11 +568,11 @@ class UIMenu {
 	}
 
 	static menuFill = (ui: zui_t) => {
-		ui.g.color = ui.t.ACCENT_SELECT_COL;
+		g2_set_color(ui.t.ACCENT_SELECT_COL);
 		g2_fill_rect(ui._x - 1, ui._y, ui._w + 2, zui_ELEMENT_H(ui) + 1 + 1);
-		ui.g.color = ui.t.SEPARATOR_COL;
+		g2_set_color(ui.t.SEPARATOR_COL);
 		g2_fill_rect(ui._x, ui._y, ui._w, zui_ELEMENT_H(ui) + 1);
-		ui.g.color = 0xffffffff;
+		g2_set_color(0xffffffff);
 	}
 
 	static menuSeparator = (ui: zui_t) => {
@@ -606,7 +607,7 @@ class UIMenu {
 
 	static menuStart = (ui: zui_t) => {
 		// Draw top border
-		ui.g.color = ui.t.ACCENT_SELECT_COL;
+		g2_set_color(ui.t.ACCENT_SELECT_COL);
 		if (Config.raw.touch_ui) {
 			g2_fill_rect(ui._x + ui._w / 2 + UIMenu.menuCategoryW / 2, ui._y - 1, ui._w / 2 - UIMenu.menuCategoryW / 2 + 1, 1);
 			g2_fill_rect(ui._x - 1, ui._y - 1, ui._w / 2 - UIMenu.menuCategoryW / 2 + 1, 1);
@@ -620,6 +621,6 @@ class UIMenu {
 			g2_fill_rect(ui._x - 1, ui._y - UIMenu.menuCategoryH, 1, UIMenu.menuCategoryH);
 			g2_fill_rect(ui._x - 1 + UIMenu.menuCategoryW, ui._y - UIMenu.menuCategoryH, 1, UIMenu.menuCategoryH);
 		}
-		ui.g.color = 0xffffffff;
+		g2_set_color(0xffffffff);
 	}
 }

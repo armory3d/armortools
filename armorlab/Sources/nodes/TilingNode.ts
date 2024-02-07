@@ -30,9 +30,9 @@ class TilingNode extends LogicNode {
 
 	override getAsImage = (from: i32, done: (img: image_t)=>void) => {
 		this.inputs[0].getAsImage((source: image_t) => {
-			g2_begin(TilingNode.image.g2, false);
+			g2_begin(TilingNode.image, false);
 			g2_draw_scaled_image(source, 0, 0, Config.getTextureResX(), Config.getTextureResY());
-			g2_end(TilingNode.image.g2);
+			g2_end();
 
 			Console.progress(tr("Processing") + " - " + tr("Tiling"));
 			Base.notifyOnNextFrame(() => {
@@ -52,12 +52,12 @@ class TilingNode extends LogicNode {
 	static sdTiling = (image: image_t, seed: i32/* = -1*/, done: (img: image_t)=>void) => {
 		TextToPhotoNode.tiling = false;
 		let tile = image_create_render_target(512, 512);
-		g2_begin(tile.g2, false);
+		g2_begin(tile, false);
 		g2_draw_scaled_image(image, -256, -256, 512, 512);
 		g2_draw_scaled_image(image, 256, -256, 512, 512);
 		g2_draw_scaled_image(image, -256, 256, 512, 512);
 		g2_draw_scaled_image(image, 256, 256, 512, 512);
-		g2_end(tile.g2);
+		g2_end();
 
 		let u8a = new Uint8Array(512 * 512);
 		for (let i = 0; i < 512 * 512; ++i) {

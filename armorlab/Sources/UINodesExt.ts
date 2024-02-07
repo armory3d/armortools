@@ -8,7 +8,7 @@ class UINodesExt {
 		if (zui_button(tr("Run"))) {
 			Console.progress(tr("Processing"));
 
-			let delayIdleSleep = (_: any) => {
+			let delayIdleSleep = () => {
 				Krom.delayIdleSleep();
 			}
 			app_notify_on_render_2d(delayIdleSleep);
@@ -41,16 +41,16 @@ class UINodesExt {
 
 					if (texbase != null) {
 						let texpaint = render_path_render_targets.get("texpaint").image;
-						g2_begin(texpaint.g2, false);
+						g2_begin(texpaint, false);
 						g2_draw_scaled_image(texbase, 0, 0, Config.getTextureResX(), Config.getTextureResY());
-						g2_end(texpaint.g2);
+						g2_end();
 					}
 
 					if (texnor != null) {
 						let texpaint_nor = render_path_render_targets.get("texpaint_nor").image;
-						g2_begin(texpaint_nor.g2, false);
+						g2_begin(texpaint_nor, false);
 						g2_draw_scaled_image(texnor, 0, 0, Config.getTextureResX(), Config.getTextureResY());
-						g2_end(texpaint_nor.g2);
+						g2_end();
 					}
 
 					if (Base.pipeCopy == null) Base.makePipe();
@@ -60,23 +60,23 @@ class UINodesExt {
 					let texpaint_pack = render_path_render_targets.get("texpaint_pack").image;
 
 					if (texocc != null) {
-						g2_begin(texpaint_pack.g2, false);
-						texpaint_pack.g2.pipeline = Base.pipeCopyR;
+						g2_begin(texpaint_pack, false);
+						g2_set_pipeline(Base.pipeCopyR);
 						g2_draw_scaled_image(texocc, 0, 0, Config.getTextureResX(), Config.getTextureResY());
-						texpaint_pack.g2.pipeline = null;
-						g2_end(texpaint_pack.g2);
+						g2_set_pipeline(null);
+						g2_end();
 					}
 
 					if (texrough != null) {
-						g2_begin(texpaint_pack.g2, false);
-						texpaint_pack.g2.pipeline = Base.pipeCopyG;
+						g2_begin(texpaint_pack, false);
+						g2_set_pipeline(Base.pipeCopyG);
 						g2_draw_scaled_image(texrough, 0, 0, Config.getTextureResX(), Config.getTextureResY());
-						texpaint_pack.g2.pipeline = null;
-						g2_end(texpaint_pack.g2);
+						g2_set_pipeline(null);
+						g2_end();
 					}
 
 					if (texheight != null) {
-						g4_begin(texpaint_pack.g4);
+						g4_begin(texpaint_pack);
 						g4_set_pipeline(Base.pipeCopyA);
 						g4_set_tex(Base.pipeCopyATex, texheight);
 						g4_set_vertex_buffer(const_data_screen_aligned_vb);

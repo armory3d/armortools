@@ -26,7 +26,7 @@ class Path {
 	static workingDirCache: string = null;
 
 	static data = (): string => {
-		return Krom.getFilesLocation() + Path.sep + data_data_path();
+		return Krom.getFilesLocation() + Path.sep + data_path();
 	}
 
 	static toRelative = (from: string, to: string): string => {

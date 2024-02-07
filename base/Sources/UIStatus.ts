@@ -15,16 +15,16 @@ class UIStatus {
 		///end
 	}
 
-	static renderUI = (g: g2_t) => {
+	static renderUI = () => {
 		let ui = UIBase.ui;
 
 		let statush = Config.raw.layout[LayoutSize.LayoutStatusH];
 
-		if (zui_window(ui, UIBase.hwnds[TabArea.TabStatus], app_x(), sys_height() - statush, UIStatus.width, statush)) {
+		if (zui_window(UIBase.hwnds[TabArea.TabStatus], app_x(), sys_height() - statush, UIStatus.width, statush)) {
 			ui._y += 2;
 
 			// Border
-			ui.g.color = ui.t.SEPARATOR_COL;
+			g2_set_color(ui.t.SEPARATOR_COL);
 			g2_fill_rect(0, 0, 1, ui._window_h);
 			g2_fill_rect(ui._window_w - 1, 0, 1, ui._window_h);
 

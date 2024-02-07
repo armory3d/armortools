@@ -64,13 +64,13 @@ class TabFonts {
 					let tile = zui_SCALE(ui) > 1 ? 100 : 50;
 					let state = State.Idle;
 					if (Project.fonts[i].previewReady) {
-						// ui.g.pipeline = UIView2D.pipe; // L8
+						// g2_set_pipeline(UIView2D.pipe); // L8
 						// ///if krom_opengl
-						// ui.currentWindow.texture.g4.setPipeline(UIView2D.pipe);
+						// g4_set_pipeline(UIView2D.pipe);
 						// ///end
-						// ui.currentWindow.texture.g4.setInt(UIView2D.channelLocation, 1);
+						// g4_set_int(UIView2D.channelLocation, 1);
 						state = zui_image(img);
-						// ui.g.pipeline = null;
+						// g2_set_pipeline(null);
 					}
 					else {
 						state = zui_image(Res.get("icons.k"), -1, null, tile * 6, tile, tile, tile);

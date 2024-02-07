@@ -29,7 +29,7 @@ class UIToolbar {
 	constructor() {
 	}
 
-	static renderUI = (g: g2_t) => {
+	static renderUI = () => {
 		let ui = UIBase.ui;
 
 		if (Config.raw.touch_ui) {
@@ -40,7 +40,7 @@ class UIToolbar {
 		}
 		UIToolbar.toolbarw = Math.floor(UIToolbar.toolbarw * zui_SCALE(ui));
 
-		if (zui_window(ui, UIToolbar.toolbarHandle, 0, UIHeader.headerh, UIToolbar.toolbarw, sys_height() - UIHeader.headerh)) {
+		if (zui_window(UIToolbar.toolbarHandle, 0, UIHeader.headerh, UIToolbar.toolbarw, sys_height() - UIHeader.headerh)) {
 			ui._y -= 4 * zui_SCALE(ui);
 
 			ui.image_scroll_align = false;
@@ -200,8 +200,8 @@ class UIToolbar {
 	static drawHighlight = () => {
 		let ui = UIBase.ui;
 		let size = UIToolbar.toolbarw - 4;
-		ui.g.color = ui.t.HIGHLIGHT_COL;
-		zui_draw_rect(ui.g, true, ui._x + -1,  ui._y + 2, size + 2, size + 2);
+		g2_set_color(ui.t.HIGHLIGHT_COL);
+		zui_draw_rect(true, ui._x + -1,  ui._y + 2, size + 2, size + 2);
 	}
 }
 

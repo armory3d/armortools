@@ -35,7 +35,7 @@ class Project {
 			}
 
 			let current = _g2_current;
-			if (current != null) g2_end(current);
+			if (current != null) g2_end();
 
 			ImportArm.runProject(path);
 
@@ -180,11 +180,11 @@ class Project {
 
 					let imgmesh = image_from_bytes(f32a.buffer, Config.getTextureResX(), Config.getTextureResY(), TextureFormat.RGBA128);
 					let texpaint = Project.layers[0].texpaint;
-					g2_begin(texpaint.g2, false);
-					texpaint.g2.pipeline = Base.pipeCopy128;
+					g2_begin(texpaint, false);
+					g2_set_pipeline(Base.pipeCopy128);
 					g2_draw_scaled_image(imgmesh, 0, 0, Config.getTextureResX(), Config.getTextureResY());
-					texpaint.g2.pipeline = null;
-					g2_end(texpaint.g2);
+					g2_set_pipeline(null);
+					g2_end();
 				});
 				///end
 			}
@@ -207,7 +207,7 @@ class Project {
 		data_get_mesh("Scene", n, (md: mesh_data_t) => {
 
 			let current = _g2_current;
-			if (current != null) g2_end(current);
+			if (current != null) g2_end();
 
 			///if is_paint
 			Context.raw.pickerMaskHandle.position = PickerMask.MaskNone;
@@ -296,7 +296,7 @@ class Project {
 			scene_world.envmap = "World_radiance.k";
 			Context.raw.showEnvmapHandle.selected = Context.raw.showEnvmap = false;
 			scene_world._radiance = Context.raw.defaultRadiance;
-			scene_world._radianceMipmaps = Context.raw.defaultRadianceMipmaps;
+			scene_world._radiance_mipmaps = Context.raw.defaultRadianceMipmaps;
 			scene_world._irradiance = Context.raw.defaultIrradiance;
 			scene_world.strength = 4.0;
 

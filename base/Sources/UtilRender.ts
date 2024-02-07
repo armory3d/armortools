@@ -51,7 +51,7 @@ class UtilRender {
 		MakeMaterial.parseMeshPreviewMaterial();
 		let _commands = render_path_commands;
 		render_path_commands = RenderPathPreview.commandsPreview;
-		render_path_render_frame(_render_path_frame_g);
+		render_path_render_frame();
 		render_path_commands = _commands;
 
 		Context.raw.materialPreview = false;
@@ -80,7 +80,7 @@ class UtilRender {
 
 	static makeDecalPreview = () => {
 		let current = _g2_current;
-		if (current != null) g2_end(current);
+		if (current != null) g2_end();
 
 		if (Context.raw.decalImage == null) {
 			Context.raw.decalImage = image_create_render_target(UtilRender.decalPreviewSize, UtilRender.decalPreviewSize);
@@ -117,7 +117,7 @@ class UtilRender {
 		MakeMaterial.parseMeshPreviewMaterial();
 		let _commands = render_path_commands;
 		render_path_commands = RenderPathPreview.commandsDecal;
-		render_path_render_frame(_render_path_frame_g);
+		render_path_render_frame();
 		render_path_commands = _commands;
 
 		Context.raw.decalPreview = false;
@@ -146,7 +146,7 @@ class UtilRender {
 
 	static makeTextPreview = () => {
 		let current = _g2_current;
-		if (current != null) g2_end(current);
+		if (current != null) g2_end();
 
 		let text = Context.raw.textToolText;
 		let font = Context.raw.font.font;
@@ -166,20 +166,19 @@ class UtilRender {
 			Context.raw.textToolImage = image_create_render_target(texW, texW, TextureFormat.R8);
 			///end
 		}
-		let g2 = Context.raw.textToolImage.g2;
-		g2_begin(g2, true, 0xff000000);
-		g2.font = font;
-		g2.font_size = fontSize;
-		g2.color = 0xffffffff;
+		g2_begin(Context.raw.textToolImage, true, 0xff000000);
+		g2_set_font(font);
+		g2_set_font_size(fontSize);
+		g2_set_color(0xffffffff);
 		g2_draw_string(text, texW / 2 - textW / 2, texW / 2 - textH / 2);
-		g2_end(g2);
+		g2_end();
 
 		if (current != null) g2_begin(current, false);
 	}
 
 	static makeFontPreview = () => {
 		let current = _g2_current;
-		if (current != null) g2_end(current);
+		if (current != null) g2_end();
 
 		let text = "Abg";
 		let font = Context.raw.font.font;
@@ -189,13 +188,12 @@ class UtilRender {
 		if (Context.raw.font.image == null) {
 			Context.raw.font.image = image_create_render_target(512, 512, TextureFormat.RGBA32);
 		}
-		let g2 = Context.raw.font.image.g2;
-		g2_begin(g2, true, 0x00000000);
-		g2.font = font;
-		g2.font_size = fontSize;
-		g2.color = 0xffffffff;
+		g2_begin(Context.raw.font.image, true, 0x00000000);
+		g2_set_font(font);
+		g2_set_font_size(fontSize);
+		g2_set_color(0xffffffff);
 		g2_draw_string(text, 512 / 2 - textW / 2, 512 / 2 - textH / 2);
-		g2_end(g2);
+		g2_end();
 		Context.raw.font.previewReady = true;
 
 		if (current != null) g2_begin(current, false);
@@ -206,7 +204,7 @@ class UtilRender {
 		Context.raw.materialPreview = true;
 
 		let current = _g2_current;
-		if (current != null) g2_end(current);
+		if (current != null) g2_end();
 
 		// Prepare layers
 		if (RenderPathPaint.liveLayer == null) {
@@ -343,11 +341,11 @@ class UtilRender {
 		if (Base.pipeMerge == null) Base.makePipe();
 		l = RenderPathPaint.liveLayer;
 		let target = Context.raw.brush.image;
-		g2_begin(target.g2, true, 0x00000000);
-		target.g2.pipeline = Base.pipeCopy;
+		g2_begin(target, true, 0x00000000);
+		g2_set_pipeline(Base.pipeCopy);
 		g2_draw_scaled_image(l.texpaint, 0, 0, target.width, target.height);
-		target.g2.pipeline = null;
-		g2_end(target.g2);
+		g2_set_pipeline(null);
+		g2_end();
 
 		// Scale image preview down to to icon
 		render_path_render_targets.get("texpreview").image = Context.raw.brush.image;
@@ -366,7 +364,6 @@ class UtilRender {
 		let res = MakeMaterial.parseNodePreviewMaterial(node, group, parents);
 		if (res == null || res.scon == null) return;
 
-		let g4 = image.g4;
 		if (UtilRender.screenAlignedFullVB == null) {
 			UtilRender.createScreenAlignedFullData();
 		}
@@ -375,11 +372,11 @@ class UtilRender {
 		Context.raw.paintObject.base.transform.scale_world = 3.0;
 		transform_build_matrix(Context.raw.paintObject.base.transform);
 
-		g4_begin(g4);
+		g4_begin(image);
 		g4_set_pipeline(res.scon._pipe_state);
-		uniforms_set_context_consts(g4, res.scon, [""]);
-		uniforms_set_obj_consts(g4, res.scon, Context.raw.paintObject.base);
-		uniforms_set_material_consts(g4, res.scon, res.mcon);
+		uniforms_set_context_consts(res.scon, [""]);
+		uniforms_set_obj_consts(res.scon, Context.raw.paintObject.base);
+		uniforms_set_material_consts(res.scon, res.mcon);
 		g4_set_vertex_buffer(UtilRender.screenAlignedFullVB);
 		g4_set_index_buffer(UtilRender.screenAlignedFullIB);
 		g4_draw();

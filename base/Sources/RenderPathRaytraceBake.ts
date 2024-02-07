@@ -75,7 +75,7 @@ class RenderPathRaytraceBake {
 			Context.updateEnvmap();
 		}
 		let probe = scene_world;
-		let savedEnvmap = Context.raw.showEnvmapBlur ? probe._radianceMipmaps[0] : Context.raw.savedEnvmap;
+		let savedEnvmap = Context.raw.showEnvmapBlur ? probe._radiance_mipmaps[0] : Context.raw.savedEnvmap;
 		if (RenderPathRaytrace.lastEnvmap != savedEnvmap || RenderPathRaytraceBake.lastLayer != Context.raw.layer.texpaint) {
 			RenderPathRaytrace.lastEnvmap = savedEnvmap;
 			RenderPathRaytraceBake.lastLayer = Context.raw.layer.texpaint;
@@ -105,7 +105,7 @@ class RenderPathRaytraceBake {
 			f32a[6] = Context.raw.envmapAngle;
 
 			let framebuffer = render_path_render_targets.get("baketex2").image;
-			Krom.raytraceDispatchRays(framebuffer.renderTarget_, f32a.buffer);
+			Krom.raytraceDispatchRays(framebuffer.render_target_, f32a.buffer);
 
 			render_path_set_target("texpaint" + Context.raw.layer.id);
 			render_path_bind_target("baketex2", "tex");

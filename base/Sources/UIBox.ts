@@ -17,7 +17,7 @@ class UIBox {
 	static tweenAlpha = 0.0;
 	///end
 
-	static render = (g: g2_t) => {
+	static render = () => {
 		if (!UIMenu.show) {
 			let ui = Base.uiBox;
 			let inUse = ui.combo_selected_handle_ptr != null;
@@ -41,14 +41,14 @@ class UIBox {
 
 		if (Config.raw.touch_ui) { // Darken bg
 			///if (krom_android || krom_ios)
-			g.color = color_from_floats(0, 0, 0, UIBox.tweenAlpha);
+			g2_set_color(color_from_floats(0, 0, 0, UIBox.tweenAlpha));
 			///else
-			g.color = color_from_floats(0, 0, 0, 0.5);
+			g2_set_color(color_from_floats(0, 0, 0, 0.5));
 			///end
 			g2_fill_rect(0, 0, sys_width(), sys_height());
 		}
 
-		g2_end(g);
+		g2_end();
 
 		let ui = Base.uiBox;
 		let appw = sys_width();
@@ -61,8 +61,8 @@ class UIBox {
 		let top = Math.floor(apph / 2 - mh / 2);
 
 		if (UIBox.boxCommands == null) {
-			zui_begin(ui, g);
-			if (zui_window(ui, UIBox.hwnd, left, top, mw, mh, UIBox.draggable)) {
+			zui_begin(ui);
+			if (zui_window(UIBox.hwnd, left, top, mw, mh, UIBox.draggable)) {
 				ui._y += 10;
 				let tabVertical = Config.raw.touch_ui;
 				if (zui_tab(zui_handle("uibox_0"), UIBox.boxTitle, tabVertical)) {
@@ -96,8 +96,8 @@ class UIBox {
 			zui_end();
 		}
 		else {
-			zui_begin(ui, g);
-			if (zui_window(ui, UIBox.hwnd, left, top, mw, mh, UIBox.draggable)) {
+			zui_begin(ui);
+			if (zui_window(UIBox.hwnd, left, top, mw, mh, UIBox.draggable)) {
 				ui._y += 10;
 				UIBox.boxCommands(ui);
 				UIBox.windowBorder(ui);
@@ -105,7 +105,7 @@ class UIBox {
 			zui_end();
 		}
 
-		g2_begin(g, false);
+		g2_begin(null, false);
 
 		UIBox.draws++;
 	}
@@ -176,10 +176,10 @@ class UIBox {
 	static windowBorder = (ui: zui_t) => {
 		if (ui.scissor) {
 			ui.scissor = false;
-			g2_disable_scissor(ui.g);
+			g2_disable_scissor();
 		}
 		// Border
-		ui.g.color = ui.t.SEPARATOR_COL;
+		g2_set_color(ui.t.SEPARATOR_COL);
 		g2_fill_rect(0, 0, 1, ui._window_h);
 		g2_fill_rect(0 + ui._window_w - 1, 0, 1, ui._window_h);
 		g2_fill_rect(0, 0 + ui._window_h - 1, ui._window_w, 1);

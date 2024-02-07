@@ -25,7 +25,7 @@ class InpaintNode extends LogicNode {
 		if (InpaintNode.mask == null) {
 			InpaintNode.mask = image_create_render_target(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8);
 			Base.notifyOnNextFrame(() => {
-				g4_begin(InpaintNode.mask.g4);
+				g4_begin(InpaintNode.mask);
 				g4_clear(color_from_floats(1.0, 1.0, 1.0, 1.0));
 				g4_end();
 			});
@@ -55,9 +55,9 @@ class InpaintNode extends LogicNode {
 
 			Console.progress(tr("Processing") + " - " + tr("Inpaint"));
 			Base.notifyOnNextFrame(() => {
-				g2_begin(InpaintNode.image.g2, false);
+				g2_begin(InpaintNode.image, false);
 				g2_draw_scaled_image(source, 0, 0, Config.getTextureResX(), Config.getTextureResY());
-				g2_end(InpaintNode.image.g2);
+				g2_end();
 
 				InpaintNode.auto ? InpaintNode.texsynthInpaint(InpaintNode.image, false, InpaintNode.mask, done) : InpaintNode.sdInpaint(InpaintNode.image, InpaintNode.mask, done);
 			});
@@ -69,7 +69,7 @@ class InpaintNode extends LogicNode {
 			this.inputs[0].getAsImage((source: image_t) => {
 				if (Base.pipeCopy == null) Base.makePipe();
 				if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
-				g4_begin(InpaintNode.image.g4);
+				g4_begin(InpaintNode.image);
 				g4_set_pipeline(Base.pipeInpaintPreview);
 				g4_set_tex(Base.tex0InpaintPreview, source);
 				g4_set_tex(Base.texaInpaintPreview, InpaintNode.mask);
@@ -127,10 +127,10 @@ class InpaintNode extends LogicNode {
 						}
 					}
 
-					g2_begin(InpaintNode.temp.g2, false);
+					g2_begin(InpaintNode.temp, false);
 					// g2_drawImage(image, -x * 512, -y * 512);
 					g2_draw_scaled_image(image, 0, 0, 512, 512);
-					g2_end(InpaintNode.temp.g2);
+					g2_end();
 
 					let bytes_img = image_get_pixels(InpaintNode.temp);
 					let u8a = new Uint8Array(bytes_img);

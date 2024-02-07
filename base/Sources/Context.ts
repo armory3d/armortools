@@ -76,7 +76,7 @@ class Context {
 		UIHeader.headerHandle.redraws = 2;
 
 		let current = _g2_current;
-		if (current != null) g2_end(current);
+		if (current != null) g2_end();
 
 		Base.setObjectMask();
 		MakeMaterial.parseMeshMaterial();
@@ -282,7 +282,7 @@ class Context {
 
 	static updateEnvmap = () => {
 		if (Context.raw.showEnvmap) {
-			scene_world._envmap = Context.raw.showEnvmapBlur ? scene_world._radianceMipmaps[0] : Context.raw.savedEnvmap;
+			scene_world._envmap = Context.raw.showEnvmapBlur ? scene_world._radiance_mipmaps[0] : Context.raw.savedEnvmap;
 		}
 		else {
 			scene_world._envmap = Context.raw.emptyEnvmap;

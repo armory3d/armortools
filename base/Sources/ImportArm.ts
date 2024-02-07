@@ -223,36 +223,36 @@ class ImportArm {
 
 					if (isMask) {
 						_texpaint = image_from_bytes(lz4_decode(ld.texpaint, ld.res * ld.res * 4), ld.res, ld.res, TextureFormat.RGBA32);
-						g2_begin(l.texpaint.g2, false);
-						// l.texpaint.g2.pipeline = Base.pipeCopy8;
-						l.texpaint.g2.pipeline = project.is_bgra ? Base.pipeCopyBGRA : Base.pipeCopy; // Full bits for undo support, R8 is used
+						g2_begin(l.texpaint, false);
+						// g2_set_pipeline(Base.pipeCopy8);
+						g2_set_pipeline(project.is_bgra ? Base.pipeCopyBGRA : Base.pipeCopy); // Full bits for undo support, R8 is used
 						g2_draw_image(_texpaint, 0, 0);
-						l.texpaint.g2.pipeline = null;
-						g2_end(l.texpaint.g2);
+						g2_set_pipeline(null);
+						g2_end();
 					}
 					else { // Layer
 						// TODO: create render target from bytes
 						_texpaint = image_from_bytes(lz4_decode(ld.texpaint, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
-						g2_begin(l.texpaint.g2, false);
-						l.texpaint.g2.pipeline = project.is_bgra ? Base.pipeCopyBGRA : Base.pipeCopy;
+						g2_begin(l.texpaint, false);
+						g2_set_pipeline(project.is_bgra ? Base.pipeCopyBGRA : Base.pipeCopy);
 						g2_draw_image(_texpaint, 0, 0);
-						l.texpaint.g2.pipeline = null;
-						g2_end(l.texpaint.g2);
+						g2_set_pipeline(null);
+						g2_end();
 
 						///if is_paint
 						_texpaint_nor = image_from_bytes(lz4_decode(ld.texpaint_nor, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
-						g2_begin(l.texpaint_nor.g2, false);
-						l.texpaint_nor.g2.pipeline = project.is_bgra ? Base.pipeCopyBGRA : Base.pipeCopy;
+						g2_begin(l.texpaint_nor, false);
+						g2_set_pipeline(project.is_bgra ? Base.pipeCopyBGRA : Base.pipeCopy);
 						g2_draw_image(_texpaint_nor, 0, 0);
-						l.texpaint_nor.g2.pipeline = null;
-						g2_end(l.texpaint_nor.g2);
+						g2_set_pipeline(null);
+						g2_end();
 
 						_texpaint_pack = image_from_bytes(lz4_decode(ld.texpaint_pack, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
-						g2_begin(l.texpaint_pack.g2, false);
-						l.texpaint_pack.g2.pipeline = project.is_bgra ? Base.pipeCopyBGRA : Base.pipeCopy;
+						g2_begin(l.texpaint_pack, false);
+						g2_set_pipeline(project.is_bgra ? Base.pipeCopyBGRA : Base.pipeCopy);
 						g2_draw_image(_texpaint_pack, 0, 0);
-						l.texpaint_pack.g2.pipeline = null;
-						g2_end(l.texpaint_pack.g2);
+						g2_set_pipeline(null);
+						g2_end();
 						///end
 					}
 
@@ -597,7 +597,7 @@ class ImportArm {
 				}
 				image_from_encoded_bytes(pa.bytes, pa.name.endsWith(".jpg") ? ".jpg" : ".png", (image: image_t) => {
 					data_cached_images.set(abs, image);
-				}, null, false);
+				}, false);
 				break;
 			}
 		}

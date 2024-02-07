@@ -51,9 +51,9 @@ class UpscaleNode extends LogicNode {
 			image_unload(UpscaleNode.temp);
 		}
 		UpscaleNode.temp = image_create_render_target(size1w, size1h);
-		g2_begin(UpscaleNode.temp.g2, false);
+		g2_begin(UpscaleNode.temp, false);
 		g2_draw_scaled_image(source, 0, 0, size1w, size1h);
-		g2_end(UpscaleNode.temp.g2);
+		g2_end();
 
 		let bytes_img = image_get_pixels(UpscaleNode.temp);
 		let u8a = new Uint8Array(bytes_img);
@@ -97,7 +97,7 @@ class UpscaleNode extends LogicNode {
 			let tileSource = image_create_render_target(tileSize + 32 * 2, tileSize + 32 * 2);
 			for (let x = 0; x < Math.floor(size1w / tileSize); ++x) {
 				for (let y = 0; y < Math.floor(size1h / tileSize); ++y) {
-					g2_begin(tileSource.g2, false);
+					g2_begin(tileSource, false);
 					g2_draw_scaled_image(source, 32 - x * tileSize, 32 - y * tileSize, -source.width, source.height);
 					g2_draw_scaled_image(source, 32 - x * tileSize, 32 - y * tileSize, source.width, -source.height);
 					g2_draw_scaled_image(source, 32 - x * tileSize, 32 - y * tileSize, -source.width, -source.height);
@@ -105,11 +105,11 @@ class UpscaleNode extends LogicNode {
 					g2_draw_scaled_image(source, 32 - x * tileSize + tileSize, 32 - y * tileSize + tileSize, -source.width, source.height);
 					g2_draw_scaled_image(source, 32 - x * tileSize + tileSize, 32 - y * tileSize + tileSize, source.width, -source.height);
 					g2_draw_scaled_image(source, 32 - x * tileSize, 32 - y * tileSize, source.width, source.height);
-					g2_end(tileSource.g2);
+					g2_end();
 					let tileResult = UpscaleNode.doTile(tileSource);
-					g2_begin(result.g2, false);
+					g2_begin(result, false);
 					g2_draw_sub_image(tileResult, x * tileSize2x, y * tileSize2x, 64, 64, tileSize2x, tileSize2x);
-					g2_end(result.g2);
+					g2_end();
 					image_unload(tileResult);
 				}
 			}

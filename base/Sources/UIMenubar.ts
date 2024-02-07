@@ -14,7 +14,7 @@ class UIMenubar {
 	constructor() {
 	}
 
-	static renderUI = (g: g2_t) => {
+	static renderUI = () => {
 		let ui = UIBase.ui;
 
 		///if (is_paint || is_sculpt)
@@ -24,7 +24,7 @@ class UIMenubar {
 		let panelx = app_x();
 		///end
 
-		if (zui_window(ui, UIMenubar.menuHandle, panelx, 0, UIMenubar.menubarw, UIHeader.headerh)) {
+		if (zui_window(UIMenubar.menuHandle, panelx, 0, UIMenubar.menubarw, UIHeader.headerh)) {
 			ui._x += 1; // Prevent "File" button highlight on startup
 
 			zui_begin_menu();
@@ -96,7 +96,7 @@ class UIMenubar {
 		panelx = (app_x()) + UIMenubar.menubarw;
 		///end
 
-		if (zui_window(ui, UIMenubar.workspaceHandle, panelx, 0, ww, UIHeader.headerh)) {
+		if (zui_window(UIMenubar.workspaceHandle, panelx, 0, ww, UIHeader.headerh)) {
 
 			if (!Config.raw.touch_ui) {
 				zui_tab(UIHeader.worktab, tr("3D View"));

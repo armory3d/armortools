@@ -9,7 +9,7 @@ class UIHeader {
 	constructor() {
 	}
 
-	static renderUI = (g: g2_t) => {
+	static renderUI = () => {
 		let ui = UIBase.ui;
 		if (Config.raw.touch_ui) {
 			UIHeader.headerh = UIHeader.defaultHeaderH + 6;
@@ -28,7 +28,7 @@ class UIHeader {
 		let ww = sys_width() - UIToolbar.toolbarw - Config.raw.layout[LayoutSize.LayoutSidebarW] - nodesw;
 		///end
 
-		if (zui_window(ui, UIHeader.headerHandle, app_x(), UIHeader.headerh, ww, UIHeader.headerh)) {
+		if (zui_window(UIHeader.headerHandle, app_x(), UIHeader.headerh, ww, UIHeader.headerh)) {
 			ui._y += 2;
 			UIHeader.drawToolProperties(ui);
 		}
@@ -81,7 +81,7 @@ class UIHeader {
 				let _next = () => {
 					if (Base.pipeMerge == null) Base.makePipe();
 					if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
-					g4_begin(m.texpaint.g4);
+					g4_begin(m.texpaint);
 					g4_set_pipeline(Base.pipeColorIdToMask);
 					g4_set_tex(Base.texpaintColorId,render_path_render_targets.get("texpaint_colorid").image);
 					g4_set_tex(Base.texColorId, Project.getImage(Project.assets[Context.raw.colorIdHandle.position]));
@@ -246,11 +246,11 @@ class UIHeader {
 				let progress = RenderPathRaytraceBake.currentSample / Context.raw.bakeSamples;
 				if (progress > 1.0) progress = 1.0;
 				// Progress bar
-				ui.g.color = ui.t.SEPARATOR_COL;
-				zui_draw_rect(ui.g, true, ui._x + 1, ui._y, ui._w - 2, zui_ELEMENT_H(ui));
-				ui.g.color = ui.t.HIGHLIGHT_COL;
-				zui_draw_rect(ui.g, true, ui._x + 1, ui._y, (ui._w - 2) * progress, zui_ELEMENT_H(ui));
-				ui.g.color = 0xffffffff;
+				g2_set_color(ui.t.SEPARATOR_COL);
+				zui_draw_rect(true, ui._x + 1, ui._y, ui._w - 2, zui_ELEMENT_H(ui));
+				g2_set_color(ui.t.HIGHLIGHT_COL);
+				zui_draw_rect(true, ui._x + 1, ui._y, (ui._w - 2) * progress, zui_ELEMENT_H(ui));
+				g2_set_color(0xffffffff);
 				zui_text(tr("Samples") + ": " + RenderPathRaytraceBake.currentSample);
 				zui_text(tr("Rays/pixel" + ": ") + RenderPathRaytraceBake.raysPix);
 				zui_text(tr("Rays/second" + ": ") + RenderPathRaytraceBake.raysSec);
@@ -311,9 +311,10 @@ class UIHeader {
 				Context.raw.brushScale = zui_slider(brushScaleHandle, tr("UV Scale"), 0.01, 5.0, true);
 				if (brushScaleHandle.changed) {
 					if (Context.raw.tool == WorkspaceTool.ToolDecal || Context.raw.tool == WorkspaceTool.ToolText) {
-						g2_end(ui.g);
+						let current = _g2_current;
+						g2_end();
 						UtilRender.makeDecalPreview();
-						g2_begin(ui.g, false);
+						g2_begin(current, false);
 					}
 				}
 
@@ -378,10 +379,11 @@ class UIHeader {
 				ui._w = w;
 
 				if (h.changed) {
-					g2_end(ui.g);
+					let current = _g2_current;
+					g2_end();
 					UtilRender.makeTextPreview();
 					UtilRender.makeDecalPreview();
-					g2_begin(ui.g, false);
+					g2_begin(current, false);
 				}
 			}
 
@@ -389,10 +391,11 @@ class UIHeader {
 				zui_combo(Context.raw.fillTypeHandle, [tr("Object"), tr("Face"), tr("Angle"), tr("UV Island")], tr("Fill Mode"));
 				if (Context.raw.fillTypeHandle.changed) {
 					if (Context.raw.fillTypeHandle.position == FillType.FillFace) {
-						g2_end(ui.g);
+						let current = _g2_current;
+						g2_end();
 						// UtilUV.cacheUVMap();
 						UtilUV.cacheTriangleMap();
-						g2_begin(ui.g, false);
+						g2_begin(current, false);
 						// wireframeHandle.selected = drawWireframe = true;
 					}
 					MakeMaterial.parsePaintMaterial();

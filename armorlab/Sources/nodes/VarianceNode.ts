@@ -27,9 +27,9 @@ class VarianceNode extends LogicNode {
 		let strength = (VarianceNode.inst.inputs[1].node as any).value;
 
 		VarianceNode.inst.inputs[0].getAsImage((source: image_t) => {
-			g2_begin(VarianceNode.temp.g2, false);
+			g2_begin(VarianceNode.temp, false);
 			g2_draw_scaled_image(source, 0, 0, 512, 512);
-			g2_end(VarianceNode.temp.g2);
+			g2_end();
 
 			let bytes_img = image_get_pixels(VarianceNode.temp);
 			let u8a = new Uint8Array(bytes_img);

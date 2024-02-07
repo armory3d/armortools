@@ -473,9 +473,9 @@ class UINodes {
 		let searchHandle = zui_handle("uinodes_9");
 		let first = true;
 		UIMenu.draw((ui: zui_t) => {
-			ui.g.color = ui.t.SEPARATOR_COL;
-			zui_draw_rect(ui.g, true, ui._x, ui._y, ui._w, zui_ELEMENT_H(ui) * 8);
-			ui.g.color = 0xffffffff;
+			g2_set_color(ui.t.SEPARATOR_COL);
+			zui_draw_rect(true, ui._x, ui._y, ui._w, zui_ELEMENT_H(ui) * 8);
+			g2_set_color(0xffffffff);
 
 			let search = zui_text_input(searchHandle, "", Align.Left, true, true).toLowerCase();
 			ui.changed = false;
@@ -563,9 +563,9 @@ class UINodes {
 		if (w < 1) w = 1;
 		if (h < 1) h = 1;
 		UINodes.grid = image_create_render_target(w, h);
-		g2_begin(UINodes.grid.g2, true, UINodes.ui.t.SEPARATOR_COL);
+		g2_begin(UINodes.grid, true, UINodes.ui.t.SEPARATOR_COL);
 
-		UINodes.grid.g2.color = UINodes.ui.t.SEPARATOR_COL - 0x00050505;
+		g2_set_color(UINodes.ui.t.SEPARATOR_COL - 0x00050505);
 		step = 20 * zui_SCALE(UINodes.ui);
 		for (let i = 0; i < Math.floor(h / step) + 1; ++i) {
 			g2_draw_line(0, i * step, w, i * step);
@@ -574,7 +574,7 @@ class UINodes {
 			g2_draw_line(i * step, 0, i * step, h);
 		}
 
-		UINodes.grid.g2.color = UINodes.ui.t.SEPARATOR_COL - 0x00090909;
+		g2_set_color(UINodes.ui.t.SEPARATOR_COL - 0x00090909);
 		step = 100 * zui_SCALE(UINodes.ui);
 		for (let i = 0; i < Math.floor(h / step) + 1; ++i) {
 			g2_draw_line(0, i * step, w, i * step);
@@ -583,10 +583,10 @@ class UINodes {
 			g2_draw_line(i * step, 0, i * step, h);
 		}
 
-		g2_end(UINodes.grid.g2);
+		g2_end();
 	}
 
-	static render = (g: g2_t) => {
+	static render = () => {
 		if (UINodes.recompileMat) {
 			///if (is_paint || is_sculpt)
 			if (UINodes.canvasType == CanvasType.CanvasBrush) {
@@ -657,7 +657,7 @@ class UINodes {
 
 		UINodes.ui.input_enabled = Base.uiEnabled;
 
-		g2_end(g);
+		g2_end();
 
 		if (UINodes.grid == null) UINodes.drawGrid();
 
@@ -668,7 +668,7 @@ class UINodes {
 		///end
 
 		// Start with UI
-		zui_begin(UINodes.ui, g);
+		zui_begin(UINodes.ui);
 
 		// Make window
 		UINodes.ww = Config.raw.layout[LayoutSize.LayoutNodesW];
@@ -702,12 +702,12 @@ class UINodes {
 			}
 		}
 
-		if (zui_window(UINodes.ui, UINodes.hwnd, UINodes.wx, UINodes.wy, UINodes.ww, UINodes.wh)) {
+		if (zui_window(UINodes.hwnd, UINodes.wx, UINodes.wy, UINodes.ww, UINodes.wh)) {
 
 			zui_tab(zui_handle("uinodes_10"), tr("Nodes"));
 
 			// Grid
-			UINodes.ui.g.color = 0xffffffff;
+			g2_set_color(0xffffffff);
 			let step = 100 * zui_SCALE(UINodes.ui);
 			g2_draw_image(UINodes.grid, (nodes.panX * zui_nodes_SCALE()) % step - step, (nodes.panY * zui_nodes_SCALE()) % step - step);
 
@@ -862,7 +862,7 @@ class UINodes {
 
 					///if (is_paint || is_sculpt)
 					if (singleChannel) {
-						UINodes.ui.g.pipeline = UIView2D.pipe;
+						g2_set_pipeline(UIView2D.pipe);
 						///if krom_opengl
 						Krom.setPipeline(UIView2D.pipe.pipeline_);
 						///end
@@ -870,23 +870,23 @@ class UINodes {
 					}
 					///end
 
-					UINodes.ui.g.color = 0xffffffff;
+					g2_set_color(0xffffffff);
 					invertY ?
 						g2_draw_scaled_image(img, tx, ty + th, tw, -th) :
 						g2_draw_scaled_image(img, tx, ty, tw, th);
 
 					///if (is_paint || is_sculpt)
-					if  (singleChannel) {
-						UINodes.ui.g.pipeline = null;
+					if (singleChannel) {
+						g2_set_pipeline(null);
 					}
 					///end
 				}
 			}
 
 			// Menu
-			UINodes.ui.g.color = UINodes.ui.t.SEPARATOR_COL;
+			g2_set_color(UINodes.ui.t.SEPARATOR_COL);
 			g2_fill_rect(0, zui_ELEMENT_H(UINodes.ui), UINodes.ww, zui_ELEMENT_H(UINodes.ui) + zui_ELEMENT_OFFSET(UINodes.ui) * 2);
-			UINodes.ui.g.color = 0xffffffff;
+			g2_set_color(0xffffffff);
 
 			let startY = zui_ELEMENT_H(UINodes.ui) + zui_ELEMENT_OFFSET(UINodes.ui);
 			UINodes.ui._x = 0;
@@ -995,7 +995,7 @@ class UINodes {
 
 		zui_end(!UINodes.showMenu);
 
-		g2_begin(g, false);
+		g2_begin(null, false);
 
 		if (UINodes.showMenu) {
 			///if (is_paint || is_sculpt)
@@ -1018,7 +1018,7 @@ class UINodes {
 
 			let py = UINodes.popupY;
 			let menuw = Math.floor(ew * 2.3);
-			zui_begin_region(UINodes.ui, g, Math.floor(UINodes.popupX), Math.floor(py), menuw);
+			zui_begin_region(UINodes.ui, Math.floor(UINodes.popupX), Math.floor(py), menuw);
 			let _BUTTON_COL = UINodes.ui.t.BUTTON_COL;
 			UINodes.ui.t.BUTTON_COL = UINodes.ui.t.SEPARATOR_COL;
 			let _ELEMENT_OFFSET = UINodes.ui.t.ELEMENT_OFFSET;

@@ -47,7 +47,7 @@ class RenderPathRaytrace {
 		}
 
 		let probe = scene_world;
-		let savedEnvmap = Context.raw.showEnvmapBlur ? probe._radianceMipmaps[0] : Context.raw.savedEnvmap;
+		let savedEnvmap = Context.raw.showEnvmapBlur ? probe._radiance_mipmaps[0] : Context.raw.savedEnvmap;
 
 		if (RenderPathRaytrace.lastEnvmap != savedEnvmap) {
 			RenderPathRaytrace.lastEnvmap = savedEnvmap;
@@ -118,7 +118,7 @@ class RenderPathRaytrace {
 		///end
 
 		let framebuffer = render_path_render_targets.get("buf").image;
-		Krom.raytraceDispatchRays(framebuffer.renderTarget_, RenderPathRaytrace.f32a.buffer);
+		Krom.raytraceDispatchRays(framebuffer.render_target_, RenderPathRaytrace.f32a.buffer);
 
 		if (Context.raw.ddirty == 1 || Context.raw.pdirty == 1) {
 			///if krom_metal
@@ -184,7 +184,7 @@ class RenderPathRaytrace {
 		render_path_set_target("buf");
 		render_path_draw_meshes("overlay");
 		render_path_set_target("buf");
-		RenderPathBase.drawCompass(_render_path_current_g);
+		RenderPathBase.drawCompass();
 		render_path_set_target("taa");
 		render_path_bind_target("buf", "tex");
 		render_path_draw_shader("shader_datas/compositor_pass/compositor_pass");

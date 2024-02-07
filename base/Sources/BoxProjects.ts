@@ -194,7 +194,7 @@ class BoxProjects {
 
 				if (zui_button(file, Align.Left) && File.exists(path)) {
 					let current = _g2_current;
-					if (current != null) g2_end(current);
+					if (current != null) g2_end();
 
 					ImportArm.runProject(path);
 
