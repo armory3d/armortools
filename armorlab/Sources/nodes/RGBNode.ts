@@ -21,7 +21,7 @@ class RGBNode extends LogicNode {
 		f32a[1] = default_value[1];
 		f32a[2] = default_value[2];
 		f32a[3] = default_value[3];
-		this.image = image_from_bytes(f32a.buffer, 1, 1, TextureFormat.RGBA128);
+		this.image = image_from_bytes(f32a.buffer, 1, 1, tex_format_t.RGBA128);
 		done(this.image);
 	}
 

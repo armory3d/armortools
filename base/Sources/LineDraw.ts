@@ -27,24 +27,24 @@ class LineDraw {
 
 		if (LineDraw.pipeline == null) {
 			let structure = vertex_struct_create();
-			vertex_struct_add(structure, "pos", VertexData.F32_3X);
-			vertex_struct_add(structure, "col", VertexData.F32_3X);
+			vertex_struct_add(structure, "pos", vertex_data_t.F32_3X);
+			vertex_struct_add(structure, "col", vertex_data_t.F32_3X);
 			LineDraw.pipeline = pipeline_create();
 			LineDraw.pipeline.input_layout = [structure];
 			LineDraw.pipeline.fragment_shader = sys_get_shader("line.frag");
 			LineDraw.pipeline.vertex_shader = sys_get_shader("line.vert");
 			LineDraw.pipeline.depth_write = true;
-			LineDraw.pipeline.depth_mode = CompareMode.Less;
-			LineDraw.pipeline.cull_mode = CullMode.None;
+			LineDraw.pipeline.depth_mode = compare_mode_t.LESS;
+			LineDraw.pipeline.cull_mode = cull_mode_t.NONE;
 			LineDraw.pipeline.color_attachment_count = 3;
-			LineDraw.pipeline.color_attachments[0] = TextureFormat.RGBA64;
-			LineDraw.pipeline.color_attachments[1] = TextureFormat.RGBA64;
-			LineDraw.pipeline.color_attachments[2] = TextureFormat.RGBA64;
-			LineDraw.pipeline.depth_attachment = DepthFormat.DepthOnly;
+			LineDraw.pipeline.color_attachments[0] = tex_format_t.RGBA64;
+			LineDraw.pipeline.color_attachments[1] = tex_format_t.RGBA64;
+			LineDraw.pipeline.color_attachments[2] = tex_format_t.RGBA64;
+			LineDraw.pipeline.depth_attachment = depth_format_t.DEPTH24;
 			pipeline_compile(LineDraw.pipeline);
 			LineDraw.vpID = pipeline_get_const_loc(LineDraw.pipeline, "VP");
 			LineDraw.vp = mat4_identity();
-			LineDraw.vertexBuffer = vertex_buffer_create(LineDraw.maxVertices, structure, Usage.DynamicUsage);
+			LineDraw.vertexBuffer = vertex_buffer_create(LineDraw.maxVertices, structure, usage_t.DYNAMIC);
 			LineDraw.indexBuffer = index_buffer_create(LineDraw.maxIndices);
 		}
 

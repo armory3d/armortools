@@ -72,10 +72,10 @@ class UIFiles {
 
 	static releaseKeys = () => {
 		// File dialog may prevent firing key up events
-		keyboard_up_listener(KeyCode.Shift);
-		keyboard_up_listener(KeyCode.Control);
+		keyboard_up_listener(key_code_t.SHIFT);
+		keyboard_up_listener(key_code_t.CONTROL);
 		///if krom_darwin
-		keyboard_up_listener(KeyCode.Meta);
+		keyboard_up_listener(key_code_t.META);
 		///end
 	}
 

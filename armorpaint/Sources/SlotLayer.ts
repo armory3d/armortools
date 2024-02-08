@@ -89,7 +89,7 @@ class SlotLayer {
 				raw.texpaint_pack = render_path_create_render_target(t).image;
 			}
 
-			raw.texpaint_preview = image_create_render_target(UtilRender.layerPreviewSize, UtilRender.layerPreviewSize, TextureFormat.RGBA32);
+			raw.texpaint_preview = image_create_render_target(UtilRender.layerPreviewSize, UtilRender.layerPreviewSize, tex_format_t.RGBA32);
 			///end
 		}
 
@@ -108,7 +108,7 @@ class SlotLayer {
 				raw.texpaint = render_path_create_render_target(t).image;
 			}
 
-			raw.texpaint_preview = image_create_render_target(UtilRender.layerPreviewSize, UtilRender.layerPreviewSize, TextureFormat.RGBA32);
+			raw.texpaint_preview = image_create_render_target(UtilRender.layerPreviewSize, UtilRender.layerPreviewSize, tex_format_t.RGBA32);
 		}
 		///end
 
@@ -226,7 +226,7 @@ class SlotLayer {
 
 	static invertMask = (raw: SlotLayerRaw) => {
 		if (Base.pipeInvert8 == null) Base.makePipe();
-		let inverted = image_create_render_target(raw.texpaint.width, raw.texpaint.height, TextureFormat.RGBA32);
+		let inverted = image_create_render_target(raw.texpaint.width, raw.texpaint.height, tex_format_t.RGBA32);
 		g2_begin(inverted, false);
 		g2_set_pipeline(Base.pipeInvert8);
 		g2_draw_image(raw.texpaint, 0, 0);
@@ -330,13 +330,13 @@ class SlotLayer {
 
 		if (SlotLayer.isLayer(raw)) {
 			///if is_paint
-			let format = Base.bitsHandle.position == TextureBits.Bits8  ? TextureFormat.RGBA32 :
-						 Base.bitsHandle.position == TextureBits.Bits16 ? TextureFormat.RGBA64 :
-						 									  			  TextureFormat.RGBA128;
+			let format = Base.bitsHandle.position == TextureBits.Bits8  ? tex_format_t.RGBA32 :
+						 Base.bitsHandle.position == TextureBits.Bits16 ? tex_format_t.RGBA64 :
+						 									  			  tex_format_t.RGBA128;
 			///end
 
 			///if is_sculpt
-			let format = TextureFormat.RGBA128;
+			let format = tex_format_t.RGBA128;
 			///end
 
 			let _texpaint = raw.texpaint;
@@ -383,7 +383,7 @@ class SlotLayer {
 		}
 		else if (SlotLayer.isMask(raw)) {
 			let _texpaint = raw.texpaint;
-			raw.texpaint = image_create_render_target(resX, resY, TextureFormat.RGBA32);
+			raw.texpaint = image_create_render_target(resX, resY, tex_format_t.RGBA32);
 
 			g2_begin(raw.texpaint, false);
 			g2_set_pipeline(Base.pipeCopy8);

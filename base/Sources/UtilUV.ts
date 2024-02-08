@@ -100,7 +100,7 @@ class UtilUV {
 		if (UtilUV.dilatemapCached) return;
 
 		if (UtilUV.dilatemap == null) {
-			UtilUV.dilatemap = image_create_render_target(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8);
+			UtilUV.dilatemap = image_create_render_target(Config.getTextureResX(), Config.getTextureResY(), tex_format_t.R8);
 		}
 
 		if (UtilUV.pipeDilate == null) {
@@ -109,16 +109,16 @@ class UtilUV {
 			UtilUV.pipeDilate.fragment_shader = sys_get_shader("dilate_map.frag");
 			let vs = vertex_struct_create();
 			///if (krom_metal || krom_vulkan)
-			vertex_struct_add(vs, "tex", VertexData.I16_2X_Normalized);
+			vertex_struct_add(vs, "tex", vertex_data_t.I16_2X_NORM);
 			///else
-			vertex_struct_add(vs, "pos", VertexData.I16_4X_Normalized);
-			vertex_struct_add(vs, "nor", VertexData.I16_2X_Normalized);
-			vertex_struct_add(vs, "tex", VertexData.I16_2X_Normalized);
+			vertex_struct_add(vs, "pos", vertex_data_t.I16_4X_NORM);
+			vertex_struct_add(vs, "nor", vertex_data_t.I16_2X_NORM);
+			vertex_struct_add(vs, "tex", vertex_data_t.I16_2X_NORM);
 			///end
 			UtilUV.pipeDilate.input_layout = [vs];
 			UtilUV.pipeDilate.depth_write = false;
-			UtilUV.pipeDilate.depth_mode = CompareMode.Always;
-			UtilUV.pipeDilate.color_attachments[0] = TextureFormat.R8;
+			UtilUV.pipeDilate.depth_mode = compare_mode_t.ALWAYS;
+			UtilUV.pipeDilate.color_attachments[0] = tex_format_t.R8;
 			pipeline_compile(UtilUV.pipeDilate);
 			// dilateTexUnpack = getConstantLocation(UtilUV.pipeDilate, "texUnpack");
 		}
@@ -175,7 +175,7 @@ class UtilUV {
 		if (UtilUV.uvislandmap != null) {
 			image_unload(UtilUV.uvislandmap);
 		}
-		UtilUV.uvislandmap = image_from_bytes(bytes, w, h, TextureFormat.R8);
+		UtilUV.uvislandmap = image_from_bytes(bytes, w, h, tex_format_t.R8);
 		UtilUV.uvislandmapCached = true;
 	}
 }

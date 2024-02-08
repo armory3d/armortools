@@ -62,12 +62,12 @@ class TabBrowser {
 			let refresh = false;
 			let inFocus = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
 						  ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
-			if (zui_button(tr("Refresh")) || (inFocus && ui.is_key_pressed && ui.key == KeyCode.F5)) {
+			if (zui_button(tr("Refresh")) || (inFocus && ui.is_key_pressed && ui.key == key_code_t.F5)) {
 				refresh = true;
 			}
 			TabBrowser.hsearch.text = zui_text_input(TabBrowser.hsearch, tr("Search"), Align.Left, true, true);
 			if (ui.is_hovered) zui_tooltip(tr("ctrl+f to search") + "\n" + tr("esc to cancel"));
-			if (ui.is_ctrl_down && ui.is_key_pressed && ui.key == KeyCode.F) { // Start searching via ctrl+f
+			if (ui.is_ctrl_down && ui.is_key_pressed && ui.key == key_code_t.F) { // Start searching via ctrl+f
 				zui_start_text_edit(TabBrowser.hsearch);
 			}
 			if (TabBrowser.hsearch.text != "" && (zui_button(tr("X")) || ui.is_escape_down)) {

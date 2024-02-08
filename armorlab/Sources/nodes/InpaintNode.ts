@@ -23,7 +23,7 @@ class InpaintNode extends LogicNode {
 		}
 
 		if (InpaintNode.mask == null) {
-			InpaintNode.mask = image_create_render_target(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8);
+			InpaintNode.mask = image_create_render_target(Config.getTextureResX(), Config.getTextureResY(), tex_format_t.R8);
 			Base.notifyOnNextFrame(() => {
 				g4_begin(InpaintNode.mask);
 				g4_clear(color_from_floats(1.0, 1.0, 1.0, 1.0));

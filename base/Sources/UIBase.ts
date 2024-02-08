@@ -783,8 +783,8 @@ class UIBase {
 			if (searchHandle.changed) UIBase.operatorSearchOffset = 0;
 
 			if (ui.is_key_pressed) { // Move selection
-				if (ui.key == KeyCode.Down && UIBase.operatorSearchOffset < 6) UIBase.operatorSearchOffset++;
-				if (ui.key == KeyCode.Up && UIBase.operatorSearchOffset > 0) UIBase.operatorSearchOffset--;
+				if (ui.key == key_code_t.DOWN && UIBase.operatorSearchOffset < 6) UIBase.operatorSearchOffset++;
+				if (ui.key == key_code_t.UP && UIBase.operatorSearchOffset > 0) UIBase.operatorSearchOffset--;
 			}
 			let enter = keyboard_down("enter");
 			let count = 0;
@@ -1502,7 +1502,7 @@ class UIBase {
 
 	static onDeselectText = () => {
 		///if krom_ios
-		keyboard_up_listener(KeyCode.Shift);
+		keyboard_up_listener(key_code_t.SHIFT);
 		///end
 	}
 

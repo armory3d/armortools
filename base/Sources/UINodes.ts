@@ -443,10 +443,10 @@ class UINodes {
 
 		let nodes = UINodes.getNodes();
 		if (nodes.nodesSelectedId.length > 0 && UINodes.ui.is_key_pressed) {
-			if (UINodes.ui.key == KeyCode.Left) for (let n of nodes.nodesSelectedId) zui_get_node(UINodes.getCanvas(true).nodes, n).x -= 1;
-			else if (UINodes.ui.key == KeyCode.Right) for (let n of nodes.nodesSelectedId) zui_get_node(UINodes.getCanvas(true).nodes, n).x += 1;
-			if (UINodes.ui.key == KeyCode.Up) for (let n of nodes.nodesSelectedId) zui_get_node(UINodes.getCanvas(true).nodes, n).y -= 1;
-			else if (UINodes.ui.key == KeyCode.Down) for (let n of nodes.nodesSelectedId) zui_get_node(UINodes.getCanvas(true).nodes, n).y += 1;
+			if (UINodes.ui.key == key_code_t.LEFT) for (let n of nodes.nodesSelectedId) zui_get_node(UINodes.getCanvas(true).nodes, n).x -= 1;
+			else if (UINodes.ui.key == key_code_t.RIGHT) for (let n of nodes.nodesSelectedId) zui_get_node(UINodes.getCanvas(true).nodes, n).x += 1;
+			if (UINodes.ui.key == key_code_t.UP) for (let n of nodes.nodesSelectedId) zui_get_node(UINodes.getCanvas(true).nodes, n).y -= 1;
+			else if (UINodes.ui.key == key_code_t.DOWN) for (let n of nodes.nodesSelectedId) zui_get_node(UINodes.getCanvas(true).nodes, n).y += 1;
 		}
 
 		// Node search popup
@@ -488,8 +488,8 @@ class UINodes {
 			if (searchHandle.changed) UINodes.nodeSearchOffset = 0;
 
 			if (ui.is_key_pressed) { // Move selection
-				if (ui.key == KeyCode.Down && UINodes.nodeSearchOffset < 6) UINodes.nodeSearchOffset++;
-				if (ui.key == KeyCode.Up && UINodes.nodeSearchOffset > 0) UINodes.nodeSearchOffset--;
+				if (ui.key == key_code_t.DOWN && UINodes.nodeSearchOffset < 6) UINodes.nodeSearchOffset++;
+				if (ui.key == key_code_t.UP && UINodes.nodeSearchOffset > 0) UINodes.nodeSearchOffset--;
 			}
 			let enter = keyboard_down("enter");
 			let count = 0;

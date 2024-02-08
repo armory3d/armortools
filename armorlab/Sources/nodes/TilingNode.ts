@@ -77,7 +77,7 @@ class TilingNode extends LogicNode {
 		// 		u8a[y * 512 + x] = 0;
 		// 	}
 		// }
-		let mask = image_from_bytes(u8a.buffer, 512, 512, TextureFormat.R8);
+		let mask = image_from_bytes(u8a.buffer, 512, 512, tex_format_t.R8);
 
 		InpaintNode.prompt = TilingNode.prompt;
 		InpaintNode.strength = TilingNode.strength;

@@ -19,20 +19,20 @@ class ImportEnvmap {
 			ImportEnvmap.pipeline.vertex_shader = sys_get_shader("pass.vert");
 			ImportEnvmap.pipeline.fragment_shader = sys_get_shader("prefilter_envmap.frag");
 			let vs = vertex_struct_create();
-			vertex_struct_add(vs, "pos", VertexData.F32_2X);
+			vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
 			ImportEnvmap.pipeline.input_layout = [vs];
 			ImportEnvmap.pipeline.color_attachment_count = 1;
-			ImportEnvmap.pipeline.color_attachments[0] = TextureFormat.RGBA128;
+			ImportEnvmap.pipeline.color_attachments[0] = tex_format_t.RGBA128;
 			pipeline_compile(ImportEnvmap.pipeline);
 			ImportEnvmap.paramsLocation = pipeline_get_const_loc(ImportEnvmap.pipeline, "params");
 			ImportEnvmap.radianceLocation = pipeline_get_tex_unit(ImportEnvmap.pipeline, "radiance");
 
-			ImportEnvmap.radiance = image_create_render_target(1024, 512, TextureFormat.RGBA128);
+			ImportEnvmap.radiance = image_create_render_target(1024, 512, tex_format_t.RGBA128);
 
 			ImportEnvmap.mips = [];
 			let w = 512;
 			for (let i = 0; i < 10; ++i) {
-				ImportEnvmap.mips.push(image_create_render_target(w, w > 1 ? Math.floor(w / 2) : 1, TextureFormat.RGBA128));
+				ImportEnvmap.mips.push(image_create_render_target(w, w > 1 ? Math.floor(w / 2) : 1, tex_format_t.RGBA128));
 				w = Math.floor(w / 2);
 			}
 
@@ -53,7 +53,7 @@ class ImportEnvmap {
 				image_unload(_radianceCpu);
 			});
 		}
-		ImportEnvmap.radianceCpu = image_from_bytes(radiancePixels, ImportEnvmap.radiance.width, ImportEnvmap.radiance.height, TextureFormat.RGBA128, Usage.DynamicUsage);
+		ImportEnvmap.radianceCpu = image_from_bytes(radiancePixels, ImportEnvmap.radiance.width, ImportEnvmap.radiance.height, tex_format_t.RGBA128, usage_t.DYNAMIC);
 
 		// Radiance
 		if (ImportEnvmap.mipsCpu != null) {
@@ -69,7 +69,7 @@ class ImportEnvmap {
 		ImportEnvmap.mipsCpu = [];
 		for (let i = 0; i < ImportEnvmap.mips.length; ++i) {
 			ImportEnvmap.getRadianceMip(ImportEnvmap.mips[i], i, ImportEnvmap.radiance);
-			ImportEnvmap.mipsCpu.push(image_from_bytes(image_get_pixels(ImportEnvmap.mips[i]), ImportEnvmap.mips[i].width, ImportEnvmap.mips[i].height, TextureFormat.RGBA128, Usage.DynamicUsage));
+			ImportEnvmap.mipsCpu.push(image_from_bytes(image_get_pixels(ImportEnvmap.mips[i]), ImportEnvmap.mips[i].width, ImportEnvmap.mips[i].height, tex_format_t.RGBA128, usage_t.DYNAMIC));
 		}
 		image_set_mipmaps(ImportEnvmap.radianceCpu, ImportEnvmap.mipsCpu);
 

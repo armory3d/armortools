@@ -95,7 +95,7 @@ class RenderPathDeferred {
 			let b = new ArrayBuffer(1);
 			let v = new DataView(b);
 			v.setUint8(0, 255);
-			t.image = image_from_bytes(b, t.width, t.height, TextureFormat.R8);
+			t.image = image_from_bytes(b, t.width, t.height, tex_format_t.R8);
 			render_path_render_targets.set(t.name, t);
 		}
 		{
@@ -110,7 +110,7 @@ class RenderPathDeferred {
 			v.setUint8(1, 0);
 			v.setUint8(2, 0);
 			v.setUint8(3, 0);
-			t.image = image_from_bytes(b, t.width, t.height, TextureFormat.RGBA32);
+			t.image = image_from_bytes(b, t.width, t.height, tex_format_t.RGBA32);
 			render_path_render_targets.set(t.name, t);
 		}
 

@@ -127,7 +127,7 @@ class ImportMesh {
 						f32[i * 4 + 2] = mesh.posa[index * 4 + 2] / 32767;
 						f32[i * 4 + 3] = 1.0;
 					}
-					let imgmesh = image_from_bytes(f32.buffer, Config.getTextureResX(), Config.getTextureResY(), TextureFormat.RGBA128);
+					let imgmesh = image_from_bytes(f32.buffer, Config.getTextureResX(), Config.getTextureResY(), tex_format_t.RGBA128);
 					let texpaint = Project.layers[0].texpaint;
 					g2_begin(texpaint, false);
 					g2_set_pipeline(Base.pipeCopy128);

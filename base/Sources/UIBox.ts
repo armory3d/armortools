@@ -153,14 +153,14 @@ class UIBox {
 	///if (krom_android || krom_ios)
 	static tweenIn = () => {
 		tween_reset();
-		tween_to({target: UIBox, props: { tweenAlpha: 0.5 }, duration: 0.2, ease: Ease.ExpoOut});
+		tween_to({target: UIBox, props: { tweenAlpha: 0.5 }, duration: 0.2, ease: ease_t.EXPO_OUT});
 		UIBox.hwnd.drag_y = Math.floor(sys_height() / 2);
-		tween_to({target: UIBox.hwnd, props: { dragY: 0 }, duration: 0.2, ease: Ease.ExpoOut, tick: () => { Base.redrawUI(); }});
+		tween_to({target: UIBox.hwnd, props: { dragY: 0 }, duration: 0.2, ease: ease_t.EXPO_OUT, tick: () => { Base.redrawUI(); }});
 	}
 
 	static tweenOut = () => {
-		tween_to({target: UIBox, props: { tweenAlpha: 0.0 }, duration: 0.2, ease: Ease.ExpoIn, done: UIBox.hideInternal});
-		tween_to({target: UIBox.hwnd, props: { dragY: sys_height() / 2 }, duration: 0.2, ease: Ease.ExpoIn});
+		tween_to({target: UIBox, props: { tweenAlpha: 0.0 }, duration: 0.2, ease: ease_t.EXPO_IN, done: UIBox.hideInternal});
+		tween_to({target: UIBox.hwnd, props: { dragY: sys_height() / 2 }, duration: 0.2, ease: ease_t.EXPO_IN});
 	}
 	///end
 

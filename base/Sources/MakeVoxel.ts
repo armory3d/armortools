@@ -4,9 +4,9 @@ class MakeVoxel {
 	///if arm_voxels
 	static run = (data: shader_context_t) => {
 		let structure = vertex_struct_create();
-		vertex_struct_add(structure, "pos", VertexData.I16_4X_Normalized);
-		vertex_struct_add(structure, "nor", VertexData.I16_2X_Normalized);
-		vertex_struct_add(structure, "tex", VertexData.I16_2X_Normalized);
+		vertex_struct_add(structure, "pos", vertex_data_t.I16_4X_NORM);
+		vertex_struct_add(structure, "nor", vertex_data_t.I16_2X_NORM);
+		vertex_struct_add(structure, "tex", vertex_data_t.I16_2X_NORM);
 
 		let pipeState = data._pipe_state;
 		pipeState.input_layout = [structure];
@@ -24,7 +24,7 @@ class MakeVoxel {
 		// ///end
 
 		let ds = MakeMaterial.getDisplaceStrength();
-		pipeState.vertex_shader = shader_from_source(MakeVoxel.voxelSource(), ShaderType.Vertex);
+		pipeState.vertex_shader = shader_from_source(MakeVoxel.voxelSource(), shader_type_t.VERTEX);
 
 		pipeline_compile(pipeState);
 		data.constants = [{ name: "W", type: "mat4", link: "_worldMatrix" }, { name: "N", type: "mat3", link: "_normalMatrix" }];

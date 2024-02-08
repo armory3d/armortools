@@ -23,7 +23,7 @@ class ColorNode extends LogicNode {
 		v.setFloat32(4, this.value.y, true);
 		v.setFloat32(8, this.value.z, true);
 		v.setFloat32(12, this.value.w, true);
-		this.image = image_from_bytes(b, 1, 1, TextureFormat.RGBA128);
+		this.image = image_from_bytes(b, 1, 1, tex_format_t.RGBA128);
 		done(this.image);
 	}
 

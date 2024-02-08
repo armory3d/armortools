@@ -213,15 +213,6 @@ class RenderPathBase {
 
 				render_path_load_shader("shader_datas/bloom_pass/bloom_downsample_pass");
 				render_path_load_shader("shader_datas/bloom_pass/bloom_upsample_pass");
-
-				uniforms_i32_links.push((_: any, __: any, link: string) => {
-					if (link == "_bloomCurrentMip") return RenderPathBase.bloomCurrentMip;
-					return null;
-				});
-				uniforms_f32_links.push((_: any, __: any, link: string) => {
-					if (link == "_bloomSampleScale") return RenderPathBase.bloomSampleScale;
-					return null;
-				});
 			}
 
 			let bloomRadius = 6.5;

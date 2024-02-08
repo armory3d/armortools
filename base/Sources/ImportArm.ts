@@ -67,7 +67,7 @@ class ImportArm {
 			let bitsPos = l0.bpp == 8 ? TextureBits.Bits8 : l0.bpp == 16 ? TextureBits.Bits16 : TextureBits.Bits32;
 			Base.bitsHandle.position = bitsPos;
 			let bytesPerPixel = Math.floor(l0.bpp / 8);
-			let format = l0.bpp == 8 ? TextureFormat.RGBA32 : l0.bpp == 16 ? TextureFormat.RGBA64 : TextureFormat.RGBA128;
+			let format = l0.bpp == 8 ? tex_format_t.RGBA32 : l0.bpp == 16 ? tex_format_t.RGBA64 : tex_format_t.RGBA128;
 			///end
 
 			let base = Path.baseDir(path);
@@ -182,14 +182,14 @@ class ImportArm {
 				});
 				rts.get("texpaint_blend0").width = Config.getTextureResX();
 				rts.get("texpaint_blend0").height = Config.getTextureResY();
-				rts.get("texpaint_blend0").image = image_create_render_target(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8, DepthFormat.NoDepthAndStencil);
+				rts.get("texpaint_blend0").image = image_create_render_target(Config.getTextureResX(), Config.getTextureResY(), tex_format_t.R8, depth_format_t.NO_DEPTH);
 				let _texpaint_blend1 = rts.get("texpaint_blend1").image;
 				Base.notifyOnNextFrame(() => {
 					image_unload(_texpaint_blend1);
 				});
 				rts.get("texpaint_blend1").width = Config.getTextureResX();
 				rts.get("texpaint_blend1").height = Config.getTextureResY();
-				rts.get("texpaint_blend1").image = image_create_render_target(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8, DepthFormat.NoDepthAndStencil);
+				rts.get("texpaint_blend1").image = image_create_render_target(Config.getTextureResX(), Config.getTextureResY(), tex_format_t.R8, depth_format_t.NO_DEPTH);
 				Context.raw.brushBlendDirty = true;
 			}
 
@@ -222,7 +222,7 @@ class ImportArm {
 					///end
 
 					if (isMask) {
-						_texpaint = image_from_bytes(lz4_decode(ld.texpaint, ld.res * ld.res * 4), ld.res, ld.res, TextureFormat.RGBA32);
+						_texpaint = image_from_bytes(lz4_decode(ld.texpaint, ld.res * ld.res * 4), ld.res, ld.res, tex_format_t.RGBA32);
 						g2_begin(l.texpaint, false);
 						// g2_set_pipeline(Base.pipeCopy8);
 						g2_set_pipeline(project.is_bgra ? Base.pipeCopyBGRA : Base.pipeCopy); // Full bits for undo support, R8 is used

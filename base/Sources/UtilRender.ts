@@ -161,9 +161,9 @@ class UtilRender {
 		}
 		if (Context.raw.textToolImage == null) {
 			///if krom_metal
-			Context.raw.textToolImage = image_create_render_target(texW, texW, TextureFormat.RGBA32);
+			Context.raw.textToolImage = image_create_render_target(texW, texW, tex_format_t.RGBA32);
 			///else
-			Context.raw.textToolImage = image_create_render_target(texW, texW, TextureFormat.R8);
+			Context.raw.textToolImage = image_create_render_target(texW, texW, tex_format_t.R8);
 			///end
 		}
 		g2_begin(Context.raw.textToolImage, true, 0xff000000);
@@ -186,7 +186,7 @@ class UtilRender {
 		let textW = Math.floor(font_width(font, fontSize, text)) + 8;
 		let textH = Math.floor(font_height(font, fontSize)) + 8;
 		if (Context.raw.font.image == null) {
-			Context.raw.font.image = image_create_render_target(512, 512, TextureFormat.RGBA32);
+			Context.raw.font.image = image_create_render_target(512, 512, tex_format_t.RGBA32);
 		}
 		g2_begin(Context.raw.font.image, true, 0x00000000);
 		g2_set_font(font);
@@ -428,11 +428,11 @@ class UtilRender {
 
 		// Mandatory vertex data names and sizes
 		let structure = vertex_struct_create();
-		vertex_struct_add(structure, "pos", VertexData.I16_4X_Normalized);
-		vertex_struct_add(structure, "nor", VertexData.I16_2X_Normalized);
-		vertex_struct_add(structure, "tex", VertexData.I16_2X_Normalized);
-		vertex_struct_add(structure, "col", VertexData.I16_4X_Normalized);
-		UtilRender.screenAlignedFullVB = vertex_buffer_create(Math.floor(data.length / Math.floor(vertex_struct_byte_size(structure) / 4)), structure, Usage.StaticUsage);
+		vertex_struct_add(structure, "pos", vertex_data_t.I16_4X_NORM);
+		vertex_struct_add(structure, "nor", vertex_data_t.I16_2X_NORM);
+		vertex_struct_add(structure, "tex", vertex_data_t.I16_2X_NORM);
+		vertex_struct_add(structure, "col", vertex_data_t.I16_4X_NORM);
+		UtilRender.screenAlignedFullVB = vertex_buffer_create(Math.floor(data.length / Math.floor(vertex_struct_byte_size(structure) / 4)), structure, usage_t.STATIC);
 		let vertices = vertex_buffer_lock(UtilRender.screenAlignedFullVB);
 		for (let i = 0; i < Math.floor(vertices.byteLength / 2); ++i) vertices.setInt16(i * 2, data[i], true);
 		vertex_buffer_unlock(UtilRender.screenAlignedFullVB);

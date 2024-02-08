@@ -38,7 +38,7 @@ class VectorNode extends LogicNode {
 					v.setFloat32(4, (this.inputs[1].node as any).value, true);
 					v.setFloat32(8, (this.inputs[2].node as any).value, true);
 					v.setFloat32(12, 1.0, true);
-					this.image = image_from_bytes(b, 1, 1, TextureFormat.RGBA128);
+					this.image = image_from_bytes(b, 1, 1, tex_format_t.RGBA128);
 					done(this.image);
 				});
 			});

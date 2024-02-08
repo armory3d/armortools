@@ -302,7 +302,7 @@ class MakeMaterial {
 			let resY = Math.floor(Config.getTextureResY());
 			if (image == null || image.width != resX || image.height != resY) {
 				if (image != null) image_unload(image);
-				image = image_create_render_target(resX, resY, TextureFormat.R8);
+				image = image_create_render_target(resX, resY, tex_format_t.R8);
 				Context.raw.nodePreviews.set(id, image);
 			}
 

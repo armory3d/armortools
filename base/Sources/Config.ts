@@ -125,11 +125,11 @@ class Config {
 	}
 
 	static getOptions = (): kinc_sys_ops_t => {
-		let windowMode = Config.raw.window_mode == 0 ? WindowMode.Windowed : WindowMode.Fullscreen;
-		let windowFeatures = WindowFeatures.FeatureNone;
-		if (Config.raw.window_resizable) windowFeatures |= WindowFeatures.FeatureResizable;
-		if (Config.raw.window_maximizable) windowFeatures |= WindowFeatures.FeatureMaximizable;
-		if (Config.raw.window_minimizable) windowFeatures |= WindowFeatures.FeatureMinimizable;
+		let windowMode = Config.raw.window_mode == 0 ? window_mode_t.WINDOWED : window_mode_t.FULLSCREEN;
+		let windowFeatures = window_features_t.NONE;
+		if (Config.raw.window_resizable) windowFeatures |= window_features_t.RESIZABLE;
+		if (Config.raw.window_maximizable) windowFeatures |= window_features_t.MAXIMIZABLE;
+		if (Config.raw.window_minimizable) windowFeatures |= window_features_t.MINIMIZABLE;
 		let title = "untitled - " + manifest_title;
 		return {
 			title: title,

@@ -35,12 +35,12 @@ class UIView2D {
 		UIView2D.pipe.vertex_shader = sys_get_shader("layer_view.vert");
 		UIView2D.pipe.fragment_shader = sys_get_shader("layer_view.frag");
 		let vs = vertex_struct_create();
-		vertex_struct_add(vs, "pos", VertexData.F32_3X);
-		vertex_struct_add(vs, "tex", VertexData.F32_2X);
-		vertex_struct_add(vs, "col", VertexData.U8_4X_Normalized);
+		vertex_struct_add(vs, "pos", vertex_data_t.F32_3X);
+		vertex_struct_add(vs, "tex", vertex_data_t.F32_2X);
+		vertex_struct_add(vs, "col", vertex_data_t.U8_4X_NORM);
 		UIView2D.pipe.input_layout = [vs];
-		UIView2D.pipe.blend_source = BlendingFactor.BlendOne;
-		UIView2D.pipe.blend_dest = BlendingFactor.BlendZero;
+		UIView2D.pipe.blend_source = blend_factor_t.BLEND_ONE;
+		UIView2D.pipe.blend_dest = blend_factor_t.BLEND_ZERO;
 		UIView2D.pipe.color_write_masks_alpha[0] = false;
 		pipeline_compile(UIView2D.pipe);
 		UIView2D.channelLocation = pipeline_get_const_loc(UIView2D.pipe, "channel");
@@ -196,7 +196,7 @@ class UIView2D {
 					g2_set_pipeline(UIView2D.pipe);
 					///end
 					if (!Context.raw.textureFilter) {
-						g2_set_image_scale_quality(ImageScaleQuality.Low);
+						g2_set_bilinear_filter(false);
 					}
 					///if krom_opengl
 					Krom.setPipeline(UIView2D.pipe.pipeline_);
@@ -222,7 +222,7 @@ class UIView2D {
 				if (UIView2D.type == View2DType.View2DLayer) {
 					g2_set_pipeline(null);
 					if (!Context.raw.textureFilter) {
-						g2_set_image_scale_quality(ImageScaleQuality.High);
+						g2_set_bilinear_filter(true);
 					}
 				}
 

@@ -5,16 +5,17 @@ class UniformsExt {
 	static orthoP = mat4_ortho(-0.5, 0.5, -0.5, 0.5, -0.5, 0.5);
 
 	static init = () => {
-		uniforms_i32_links = [UniformsExt.linkInt];
-		uniforms_f32_links = [UniformsExt.linkFloat];
-		uniforms_vec2_links = [UniformsExt.linkVec2];
-		uniforms_vec3_links = [UniformsExt.linkVec3];
-		uniforms_vec4_links = [UniformsExt.linkVec4];
-		uniforms_mat4_links = [UniformsExt.linkMat4];
-		uniforms_tex_links = [UniformsExt.linkTex];
+		uniforms_i32_links = UniformsExt.linkInt;
+		uniforms_f32_links = UniformsExt.linkFloat;
+		uniforms_vec2_links = UniformsExt.linkVec2;
+		uniforms_vec3_links = UniformsExt.linkVec3;
+		uniforms_vec4_links = UniformsExt.linkVec4;
+		uniforms_mat4_links = UniformsExt.linkMat4;
+		uniforms_tex_links = UniformsExt.linkTex;
 	}
 
 	static linkInt = (object: object_t, mat: material_data_t, link: string): Null<i32> => {
+		if (link == "_bloomCurrentMip") return RenderPathBase.bloomCurrentMip;
 		return null;
 	}
 
@@ -65,6 +66,9 @@ class UniformsExt {
 			}
 			case "_coneAperture": {
 				return Context.raw.vxaoAperture;
+			}
+			case "_bloomSampleScale": {
+				return RenderPathBase.bloomSampleScale;
 			}
 
 			///if (is_paint || is_sculpt)
