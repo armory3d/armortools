@@ -110,8 +110,8 @@ class TabMaterials {
 				if (!isTyping) {
 					if (i < 9 && Operator.shortcut(Config.keymap.select_material, ShortcutType.ShortcutDown)) {
 						let number = String(i + 1);
-						let width = font_width(ui.font, ui.font_size, number) + 10;
-						let height = font_height(ui.font, ui.font_size);
+						let width = g2_font_width(ui.font, ui.font_size, number) + 10;
+						let height = g2_font_height(ui.font, ui.font_size);
 						g2_set_color(ui.t.TEXT_COL);
 						g2_fill_rect(uix, uiy, width, height);
 						g2_set_color(ui.t.ACCENT_COL);

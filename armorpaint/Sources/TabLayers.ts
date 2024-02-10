@@ -616,9 +616,9 @@ class TabLayers {
 			if (l.fill_layer == null && SlotLayer.isMask(l)) {
 				g2_set_pipeline(UIView2D.pipe);
 				///if krom_opengl
-				Krom.setPipeline(UIView2D.pipe.pipeline_);
+				krom_g4_set_pipeline(UIView2D.pipe.pipeline_);
 				///end
-				Krom.setInt(UIView2D.channelLocation, 1);
+				krom_g4_set_int(UIView2D.channelLocation, 1);
 			}
 
 			let state = zui_image(icon, 0xffffffff, iconH);
@@ -632,8 +632,8 @@ class TabLayers {
 			if (!isTyping) {
 				if (i < 9 && Operator.shortcut(Config.keymap.select_layer, ShortcutType.ShortcutDown)) {
 					let number = String(i + 1) ;
-					let width = font_width(ui.font, ui.font_size, number) + 10;
-					let height = font_height(ui.font, ui.font_size);
+					let width = g2_font_width(ui.font, ui.font_size, number) + 10;
+					let height = g2_font_height(ui.font, ui.font_size);
 					g2_set_color(ui.t.TEXT_COL);
 					g2_fill_rect(uix, uiy, width, height);
 					g2_set_color(ui.t.ACCENT_COL);
@@ -710,7 +710,7 @@ class TabLayers {
 						let f = UIFiles.filename;
 						if (f == "") f = tr("untitled");
 						if (!f.endsWith(".png")) f += ".png";
-						Krom.writePng(path + Path.sep + f, image_get_pixels(l.texpaint), l.texpaint.width, l.texpaint.height, 3); // RRR1
+						krom_write_png(path + Path.sep + f, image_get_pixels(l.texpaint), l.texpaint.width, l.texpaint.height, 3); // RRR1
 					});
 				}
 				else {

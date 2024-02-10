@@ -123,12 +123,12 @@ class RenderPathPaint {
 
 				let mo: mesh_object_t = scene_get_child(".ParticleEmitter").ext;
 				mo.base.visible = true;
-				mesh_object_render(mo, "mesh",render_path_bind_params);
+				mesh_object_render(mo, "mesh",_render_path_bind_params);
 				mo.base.visible = false;
 
 				mo = scene_get_child(".Particle").ext;
 				mo.base.visible = true;
-				mesh_object_render(mo, "mesh",render_path_bind_params);
+				mesh_object_render(mo, "mesh",_render_path_bind_params);
 				mo.base.visible = false;
 				render_path_end();
 			}
@@ -353,7 +353,7 @@ class RenderPathPaint {
 			let cc_context = shaderContexts[0];
 			if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
 			g4_set_pipeline(cc_context._pipe_state);
-			uniforms_set_context_consts(cc_context,render_path_bind_params);
+			uniforms_set_context_consts(cc_context,_render_path_bind_params);
 			uniforms_set_obj_consts(cc_context, Project.paintObjects[0].base);
 			uniforms_set_material_consts(cc_context, materialContexts[0]);
 			g4_set_vertex_buffer(const_data_screen_aligned_vb);
@@ -800,8 +800,8 @@ class RenderPathPaint {
 		mat4_translate(m, 0, 0, 0.5);
 		transform_set_matrix(cam.base.transform, m);
 		cam.data.fov = Base.defaultFov;
-		camera_object_build_projection(cam);
-		camera_object_build_matrix(cam);
+		camera_object_build_proj(cam);
+		camera_object_build_mat(cam);
 
 		let tw = 0.95 * UIView2D.panScale;
 		let tx = UIView2D.panX / UIView2D.ww;
@@ -845,11 +845,11 @@ class RenderPathPaint {
 		Context.raw.paintObject = RenderPathPaint.planeo;
 
 		let v = vec4_create();
-		let sx = vec4_len(vec4_set(v, m._00, m._01, m._02));
+		let sx = vec4_len(vec4_set(v, m.m[0], m.m[1], m.m[2]));
 		quat_from_euler(RenderPathPaint.planeo.base.transform.rot, -Math.PI / 2, 0, 0);
 		vec4_set(RenderPathPaint.planeo.base.transform.scale, sx, 1.0, sx);
 		RenderPathPaint.planeo.base.transform.scale.z *= Config.getTextureResY() / Config.getTextureResX();
-		vec4_set(RenderPathPaint.planeo.base.transform.loc, m._30, -m._31, 0.0);
+		vec4_set(RenderPathPaint.planeo.base.transform.loc, m.m[12], -m.m[13], 0.0);
 		transform_build_matrix(RenderPathPaint.planeo.base.transform);
 	}
 
@@ -867,8 +867,8 @@ class RenderPathPaint {
 		transform_set_matrix(scene_camera.base.transform, Context.raw.savedCamera);
 		scene_camera.data.fov = RenderPathPaint.savedFov;
 		Viewport.updateCameraType(Context.raw.cameraType);
-		camera_object_build_projection(scene_camera);
-		camera_object_build_matrix(scene_camera);
+		camera_object_build_proj(scene_camera);
+		camera_object_build_mat(scene_camera);
 
 		RenderPathBase.drawGbuffer();
 	}

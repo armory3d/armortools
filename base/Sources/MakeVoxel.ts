@@ -3,10 +3,10 @@ class MakeVoxel {
 
 	///if arm_voxels
 	static run = (data: shader_context_t) => {
-		let structure = vertex_struct_create();
-		vertex_struct_add(structure, "pos", vertex_data_t.I16_4X_NORM);
-		vertex_struct_add(structure, "nor", vertex_data_t.I16_2X_NORM);
-		vertex_struct_add(structure, "tex", vertex_data_t.I16_2X_NORM);
+		let structure = g4_vertex_struct_create();
+		g4_vertex_struct_add(structure, "pos", vertex_data_t.I16_4X_NORM);
+		g4_vertex_struct_add(structure, "nor", vertex_data_t.I16_2X_NORM);
+		g4_vertex_struct_add(structure, "tex", vertex_data_t.I16_2X_NORM);
 
 		let pipeState = data._pipe_state;
 		pipeState.input_layout = [structure];
@@ -24,13 +24,13 @@ class MakeVoxel {
 		// ///end
 
 		let ds = MakeMaterial.getDisplaceStrength();
-		pipeState.vertex_shader = shader_from_source(MakeVoxel.voxelSource(), shader_type_t.VERTEX);
+		pipeState.vertex_shader = g4_shader_from_source(MakeVoxel.voxelSource(), shader_type_t.VERTEX);
 
-		pipeline_compile(pipeState);
+		g4_pipeline_compile(pipeState);
 		data.constants = [{ name: "W", type: "mat4", link: "_worldMatrix" }, { name: "N", type: "mat3", link: "_normalMatrix" }];
-		data._constants = [pipeline_get_const_loc(pipeState, "W"), pipeline_get_const_loc(pipeState, "N")];
+		data._constants = [g4_pipeline_get_const_loc(pipeState, "W"), g4_pipeline_get_const_loc(pipeState, "N")];
 		data.texture_units = [{ name: "texpaint_pack" }, { name: "voxels", is_image: true }];
-		data._tex_units = [pipeline_get_tex_unit(pipeState, "texpaint_pack"), pipeline_get_tex_unit(pipeState, "voxels")];
+		data._tex_units = [g4_pipeline_get_tex_unit(pipeState, "texpaint_pack"), g4_pipeline_get_tex_unit(pipeState, "voxels")];
 	}
 
 	static voxelSource = (): string => {

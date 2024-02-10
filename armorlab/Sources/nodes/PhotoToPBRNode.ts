@@ -68,7 +68,7 @@ class PhotoToPBRNode extends LogicNode {
 					}
 
 					data_get_blob("models/photo_to_" + PhotoToPBRNode.modelNames[from] + ".quant.onnx", (model_blob: ArrayBuffer) => {
-						let buf = Krom.mlInference(model_blob, [f32a.buffer], null, null, Config.raw.gpu_inference);
+						let buf = krom_ml_inference(model_blob, [f32a.buffer], null, null, Config.raw.gpu_inference);
 						let ar = new Float32Array(buf);
 						let u8a = new Uint8Array(4 * PhotoToPBRNode.tileW * PhotoToPBRNode.tileW);
 						let offsetG = (from == ChannelType.ChannelBaseColor || from == ChannelType.ChannelNormalMap) ? PhotoToPBRNode.tileWithBorderW * PhotoToPBRNode.tileWithBorderW : 0;

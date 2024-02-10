@@ -129,7 +129,7 @@ class TabTextures {
 												let f = UIFiles.filename;
 												if (f == "") f = tr("untitled");
 												if (!f.endsWith(".png")) f += ".png";
-												Krom.writePng(path + Path.sep + f, image_get_pixels(target), target.width, target.height, 0);
+												krom_write_png(path + Path.sep + f, image_get_pixels(target), target.width, target.height, 0);
 												image_unload(target);
 											});
 										});

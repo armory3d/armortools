@@ -26,10 +26,10 @@ class LineDraw {
 		LineDraw.dim = mat4_get_scale(matrix);
 
 		if (LineDraw.pipeline == null) {
-			let structure = vertex_struct_create();
-			vertex_struct_add(structure, "pos", vertex_data_t.F32_3X);
-			vertex_struct_add(structure, "col", vertex_data_t.F32_3X);
-			LineDraw.pipeline = pipeline_create();
+			let structure = g4_vertex_struct_create();
+			g4_vertex_struct_add(structure, "pos", vertex_data_t.F32_3X);
+			g4_vertex_struct_add(structure, "col", vertex_data_t.F32_3X);
+			LineDraw.pipeline = g4_pipeline_create();
 			LineDraw.pipeline.input_layout = [structure];
 			LineDraw.pipeline.fragment_shader = sys_get_shader("line.frag");
 			LineDraw.pipeline.vertex_shader = sys_get_shader("line.vert");
@@ -41,11 +41,11 @@ class LineDraw {
 			LineDraw.pipeline.color_attachments[1] = tex_format_t.RGBA64;
 			LineDraw.pipeline.color_attachments[2] = tex_format_t.RGBA64;
 			LineDraw.pipeline.depth_attachment = depth_format_t.DEPTH24;
-			pipeline_compile(LineDraw.pipeline);
-			LineDraw.vpID = pipeline_get_const_loc(LineDraw.pipeline, "VP");
+			g4_pipeline_compile(LineDraw.pipeline);
+			LineDraw.vpID = g4_pipeline_get_const_loc(LineDraw.pipeline, "VP");
 			LineDraw.vp = mat4_identity();
-			LineDraw.vertexBuffer = vertex_buffer_create(LineDraw.maxVertices, structure, usage_t.DYNAMIC);
-			LineDraw.indexBuffer = index_buffer_create(LineDraw.maxIndices);
+			LineDraw.vertexBuffer = g4_vertex_buffer_create(LineDraw.maxVertices, structure, usage_t.DYNAMIC);
+			LineDraw.indexBuffer = g4_index_buffer_create(LineDraw.maxIndices);
 		}
 
 		LineDraw.begin();
@@ -167,13 +167,13 @@ class LineDraw {
 
 	static begin = () => {
 		LineDraw.lines = 0;
-		LineDraw.vbData = vertex_buffer_lock(LineDraw.vertexBuffer);
-		LineDraw.ibData = index_buffer_lock(LineDraw.indexBuffer);
+		LineDraw.vbData = g4_vertex_buffer_lock(LineDraw.vertexBuffer);
+		LineDraw.ibData = g4_index_buffer_lock(LineDraw.indexBuffer);
 	}
 
 	static end = () => {
-		vertex_buffer_unlock(LineDraw.vertexBuffer);
-		index_buffer_unlock(LineDraw.indexBuffer);
+		g4_vertex_buffer_unlock(LineDraw.vertexBuffer);
+		g4_index_buffer_unlock(LineDraw.indexBuffer);
 
 		g4_set_vertex_buffer(LineDraw.vertexBuffer);
 		g4_set_index_buffer(LineDraw.indexBuffer);

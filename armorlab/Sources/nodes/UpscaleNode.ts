@@ -64,7 +64,7 @@ class UpscaleNode extends LogicNode {
 			f32a[i + size1w * size1w * 2] = (u8a[i * 4 + 2] / 255);
 		}
 
-		let esrgan2x_buf = Krom.mlInference(UpscaleNode.esrgan_blob, [f32a.buffer], [[1, 3, size1w, size1h]], [1, 3, size2w, size2h], Config.raw.gpu_inference);
+		let esrgan2x_buf = krom_ml_inference(UpscaleNode.esrgan_blob, [f32a.buffer], [[1, 3, size1w, size1h]], [1, 3, size2w, size2h], Config.raw.gpu_inference);
 		let esrgan2x = new Float32Array(esrgan2x_buf);
 		for (let i = 0; i < esrgan2x.length; ++i) {
 			if (esrgan2x[i] < 0) esrgan2x[i] = 0;

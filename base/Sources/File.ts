@@ -34,60 +34,60 @@ class File {
 		// }
 		// if (internal.exists(path)) return internal.get(path);
 		// ///end
-		return Krom.readDirectory(path, foldersOnly).split("\n");
+		return krom_read_directory(path, foldersOnly).split("\n");
 	}
 
 	static createDirectory = (path: string) => {
-		Krom.sysCommand(File.cmd_mkdir + ' "' + path + '"');
+		krom_sys_command(File.cmd_mkdir + ' "' + path + '"');
 	}
 
 	static copy = (srcPath: string, dstPath: string) => {
-		Krom.sysCommand(File.cmd_copy + ' "' + srcPath + '" "' + dstPath + '"');
+		krom_sys_command(File.cmd_copy + ' "' + srcPath + '" "' + dstPath + '"');
 	}
 
 	static start = (path: string) => {
 		///if krom_windows
-		Krom.sysCommand('start "" "' + path + '"');
+		krom_sys_command('start "" "' + path + '"');
 		///elseif krom_linux
-		Krom.sysCommand('xdg-open "' + path + '"');
+		krom_sys_command('xdg-open "' + path + '"');
 		///else
-		Krom.sysCommand('open "' + path + '"');
+		krom_sys_command('open "' + path + '"');
 		///end
 	}
 
 	static loadUrl = (url: string) => {
-		Krom.loadUrl(url);
+		krom_load_url(url);
 	}
 
 	static delete = (path: string) => {
-		Krom.deleteFile(path);
+		krom_delete_file(path);
 	}
 
 	static exists = (path: string): bool => {
-		return Krom.fileExists(path);
+		return krom_file_exists(path);
 	}
 
 	static download = (url: string, dstPath: string, done: ()=>void, size = 0) => {
 		///if (krom_windows || krom_darwin || krom_ios || krom_android)
-		Krom.httpRequest(url, size, (ab: ArrayBuffer) => {
-			if (ab != null) Krom.fileSaveBytes(dstPath, ab);
+		krom_http_request(url, size, (ab: ArrayBuffer) => {
+			if (ab != null) krom_file_save_bytes(dstPath, ab);
 			done();
 		});
 		///elseif krom_linux
-		Krom.sysCommand('wget -O "' + dstPath + '" "' + url + '"');
+		krom_sys_command('wget -O "' + dstPath + '" "' + url + '"');
 		done();
 		///else
-		Krom.sysCommand('curl -L ' + url + ' -o "' + dstPath + '"');
+		krom_sys_command('curl -L ' + url + ' -o "' + dstPath + '"');
 		done();
 		///end
 	}
 
 	static downloadBytes = (url: string, done: (ab: ArrayBuffer)=>void) => {
-		let save = (Path.isProtected() ? Krom.savePath() : Path.data() + Path.sep) + "download.bin";
+		let save = (Path.isProtected() ? krom_save_path() : Path.data() + Path.sep) + "download.bin";
 		File.download(url, save, () => {
 			let buffer: ArrayBuffer = null;
 			try {
-				buffer = Krom.loadBlob(save);
+				buffer = krom_load_blob(save);
 			}
 			catch (e: any) {}
 			done(buffer);
@@ -100,12 +100,12 @@ class File {
 		///else
 		let path2 = path;
 		///end
-		let dest = (Path.isProtected() ? Krom.savePath() : Krom.getFilesLocation() + Path.sep) + path2;
+		let dest = (Path.isProtected() ? krom_save_path() : krom_get_files_location() + Path.sep) + path2;
 		if (File.exists(dest)) {
 			///if (krom_darwin || krom_ios)
 			done(dest);
 			///else
-			done((Path.isProtected() ? Krom.savePath() : Path.workingDir() + Path.sep) + path);
+			done((Path.isProtected() ? krom_save_path() : Path.workingDir() + Path.sep) + path);
 			///end
 			return;
 		}
@@ -127,7 +127,7 @@ class File {
 			///if (krom_darwin || krom_ios)
 			done(dest);
 			///else
-			done((Path.isProtected() ? Krom.savePath() : Path.workingDir() + Path.sep) + path);
+			done((Path.isProtected() ? krom_save_path() : Path.workingDir() + Path.sep) + path);
 			///end
 		}, File.cloudSizes.get(path));
 	}

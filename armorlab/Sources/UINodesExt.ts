@@ -9,7 +9,7 @@ class UINodesExt {
 			Console.progress(tr("Processing"));
 
 			let delayIdleSleep = () => {
-				Krom.delayIdleSleep();
+				krom_delay_idle_sleep();
 			}
 			app_notify_on_render_2d(delayIdleSleep);
 
@@ -90,7 +90,7 @@ class UINodesExt {
 							// Make copy of vertices before displacement
 							let o = Project.paintObjects[0];
 							let g = o.data;
-							let vertices = vertex_buffer_lock(g._vertex_buffer);
+							let vertices = g4_vertex_buffer_lock(g._vertex_buffer);
 							if (UINodesExt.lastVertices == null || UINodesExt.lastVertices.byteLength != vertices.byteLength) {
 								UINodesExt.lastVertices = new DataView(new ArrayBuffer(vertices.byteLength));
 								for (let i = 0; i < Math.floor(vertices.byteLength / 2); ++i) {
@@ -102,7 +102,7 @@ class UINodesExt {
 									vertices.setInt16(i * 2, UINodesExt.lastVertices.getInt16(i * 2, true), true);
 								}
 							}
-							vertex_buffer_unlock(g._vertex_buffer);
+							g4_vertex_buffer_unlock(g._vertex_buffer);
 
 							// Apply displacement
 							if (Config.raw.displace_strength > 0) {
@@ -121,7 +121,7 @@ class UINodesExt {
 					}
 
 					Console.log("Processing finished in " + (time_time() - timer));
-					Krom.mlUnload();
+					krom_ml_unload();
 
 					taskDone();
 				});

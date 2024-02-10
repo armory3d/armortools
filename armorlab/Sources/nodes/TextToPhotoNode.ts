@@ -58,11 +58,11 @@ class TextToPhotoNode extends LogicNode {
 			}
 
 			let i32a = new Int32Array(TextToPhotoNode.text_input_ids);
-			let text_embeddings_buf = Krom.mlInference(TextToPhotoNode.text_encoder_blob, [i32a.buffer], [[1, 77]], [1, 77, 768], Config.raw.gpu_inference);
+			let text_embeddings_buf = krom_ml_inference(TextToPhotoNode.text_encoder_blob, [i32a.buffer], [[1, 77]], [1, 77, 768], Config.raw.gpu_inference);
 			let text_embeddings = new Float32Array(text_embeddings_buf);
 
 			i32a = new Int32Array(TextToPhotoNode.uncond_input_ids);
-			let uncond_embeddings_buf = Krom.mlInference(TextToPhotoNode.text_encoder_blob, [i32a.buffer], [[1, 77]], [1, 77, 768], Config.raw.gpu_inference);
+			let uncond_embeddings_buf = krom_ml_inference(TextToPhotoNode.text_encoder_blob, [i32a.buffer], [[1, 77]], [1, 77, 768], Config.raw.gpu_inference);
 			let uncond_embeddings = new Float32Array(uncond_embeddings_buf);
 
 			let f32a = new Float32Array(uncond_embeddings.length + text_embeddings.length);
@@ -104,7 +104,7 @@ class TextToPhotoNode extends LogicNode {
 
 			let t32 = new Int32Array(2);
 			t32[0] = timestep;
-			let noise_pred_buf = Krom.mlInference(TextToPhotoNode.unet_blob, [latent_model_input.buffer, t32.buffer, text_embeddings.buffer], [[2, 4, 64, 64], [1], [2, 77, 768]], [2, 4, 64, 64], Config.raw.gpu_inference);
+			let noise_pred_buf = krom_ml_inference(TextToPhotoNode.unet_blob, [latent_model_input.buffer, t32.buffer, text_embeddings.buffer], [[2, 4, 64, 64], [1], [2, 77, 768]], [2, 4, 64, 64], Config.raw.gpu_inference);
 			let noise_pred = new Float32Array(noise_pred_buf);
 
 			for (let i = 0; i < noise_pred_uncond.length; ++i) noise_pred_uncond[i] = noise_pred[i];
@@ -202,7 +202,7 @@ class TextToPhotoNode extends LogicNode {
 				latents[i] = 1.0 / 0.18215 * latents[i];
 			}
 
-			let pyimage_buf = Krom.mlInference(TextToPhotoNode.vae_decoder_blob, [latents.buffer], [[1, 4, 64, 64]], [1, 3, 512, 512], Config.raw.gpu_inference);
+			let pyimage_buf = krom_ml_inference(TextToPhotoNode.vae_decoder_blob, [latents.buffer], [[1, 4, 64, 64]], [1, 3, 512, 512], Config.raw.gpu_inference);
 			let pyimage = new Float32Array(pyimage_buf);
 
 			for (let i = 0; i < pyimage.length; ++i) {

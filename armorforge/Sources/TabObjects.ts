@@ -242,7 +242,7 @@ class TabObjects {
 						fovHandle.value = Math.floor(cam.data.fov * 100) / 100;
 						cam.data.fov = zui_slider(fovHandle, "FoV", 0.3, 2.0, true);
 						if (fovHandle.changed) {
-							camera_object_build_projection(cam);
+							camera_object_build_proj(cam);
 						}
 					}
 				}

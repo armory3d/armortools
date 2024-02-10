@@ -84,7 +84,7 @@ class UIBox {
 
 					///if (krom_windows || krom_linux || krom_darwin)
 					if (UIBox.copyable && zui_button(tr("Copy"))) {
-						Krom.copyToClipboard(UIBox.boxText);
+						krom_copy_to_clipboard(UIBox.boxText);
 					}
 					///end
 					if (zui_button(tr("OK"))) {

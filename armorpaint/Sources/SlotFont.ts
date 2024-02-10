@@ -3,14 +3,14 @@ class SlotFontRaw {
 	image: image_t = null; // 200px
 	previewReady = false;
 	id = 0;
-	font: font_t;
+	font: g2_font_t;
 	name: string;
 	file: string;
 }
 
 class SlotFont {
 
-	static create(name: string, font: font_t, file = ""): SlotFontRaw {
+	static create(name: string, font: g2_font_t, file = ""): SlotFontRaw {
 		let raw = new SlotFontRaw();
 		for (let slot of Project.fonts) if (slot.id >= raw.id) raw.id = slot.id + 1;
 		raw.name = name;

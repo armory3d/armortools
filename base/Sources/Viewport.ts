@@ -28,7 +28,7 @@ class Viewport {
 				if (Context.raw.fovHandle != null) Context.raw.fovHandle.value = cam.data.fov = Base.defaultFov;
 				Context.raw.camHandle.position = 0;
 				cam.data.ortho = null;
-				camera_object_build_projection(cam);
+				camera_object_build_proj(cam);
 				Context.raw.ddirty = 2;
 				Camera.reset();
 				transform_reset(Context.mainObject().base.transform);
@@ -45,7 +45,7 @@ class Viewport {
 		vec4_set(cam.base.transform.loc, x * dist, y * dist, z * dist);
 		quat_from_euler(cam.base.transform.rot, rx, ry, rz);
 		transform_build_matrix(cam.base.transform);
-		camera_object_build_projection(cam);
+		camera_object_build_proj(cam);
 		Context.raw.ddirty = 2;
 		Camera.reset(Context.raw.viewIndexLast);
 	}
@@ -89,7 +89,7 @@ class Viewport {
 			cam.data.ortho = f32a;
 			light.base.visible = false;
 		}
-		camera_object_build_projection(cam);
+		camera_object_build_proj(cam);
 		Context.raw.ddirty = 2;
 	}
 }

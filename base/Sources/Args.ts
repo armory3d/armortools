@@ -21,13 +21,13 @@ class Args {
 	///end
 
 	static parse = () => {
-		if (Krom.getArgCount() > 1) {
+		if (krom_get_arg_count() > 1) {
 			Args.useArgs = true;
 
 			let i = 0;
-			while (i < Krom.getArgCount()) {
+			while (i < krom_get_arg_count()) {
 				// Process each arg
-				let currentArg = Krom.getArg(i);
+				let currentArg = krom_get_arg(i);
 
 				if (Path.isProject(currentArg)) {
 					Project.filepath = currentArg;
@@ -40,14 +40,14 @@ class Args {
 				else if (Path.isTexture(currentArg)) {
 					Args.assetPath = currentArg;
 				}
-				else if (currentArg == "--export-textures" && (i + 3) <= Krom.getArgCount()) {
+				else if (currentArg == "--export-textures" && (i + 3) <= krom_get_arg_count()) {
 					Args.exportTextures = true;
 					++i;
-					Args.exportTexturesType = Krom.getArg(i);
+					Args.exportTexturesType = krom_get_arg(i);
 					++i;
-					Args.exportTexturesPreset = Krom.getArg(i);
+					Args.exportTexturesPreset = krom_get_arg(i);
 					++i;
-					Args.exportTexturesPath = Krom.getArg(i);
+					Args.exportTexturesPath = krom_get_arg(i);
 				}
 				///end
 
@@ -55,10 +55,10 @@ class Args {
 				else if (currentArg == "--reload-mesh") {
 					Args.reimportMesh = true;
 				}
-				else if (currentArg == "--export-mesh" && (i + 1) <= Krom.getArgCount()) {
+				else if (currentArg == "--export-mesh" && (i + 1) <= krom_get_arg_count()) {
 					Args.exportMesh = true;
 					++i;
-					Args.exportMeshPath = Krom.getArg(i);
+					Args.exportMeshPath = krom_get_arg(i);
 				}
 				else if (Path.isMesh(currentArg) ||
 						(i > 1 && !currentArg.startsWith("-") && Path.isFolder(currentArg))) {
@@ -67,10 +67,10 @@ class Args {
 				///end
 
 				///if is_paint
-				else if (currentArg == "--export-material" && (i + 1) <= Krom.getArgCount()) {
+				else if (currentArg == "--export-material" && (i + 1) <= krom_get_arg_count()) {
 					Args.exportMaterial = true;
 					++i;
-					Args.exportMaterialPath = Krom.getArg(i);
+					Args.exportMaterialPath = krom_get_arg(i);
 				}
 				///end
 
@@ -156,11 +156,11 @@ class Args {
 							});
 						}
 						else {
-							Krom.log(tr("Invalid export directory"));
+							krom_log(tr("Invalid export directory"));
 						}
 					}
 					else {
-						Krom.log(tr("Invalid texture type"));
+						krom_log(tr("Invalid texture type"));
 					}
 				}
 				///end
@@ -173,7 +173,7 @@ class Args {
 						ExportMesh.run(Args.exportMeshPath + Path.sep + f, null, false);
 					}
 					else {
-						Krom.log(tr("Invalid export directory"));
+						krom_log(tr("Invalid export directory"));
 					}
 				}
 				///end

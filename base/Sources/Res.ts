@@ -45,7 +45,7 @@ class Res {
 	}
 
 	static embedFont = (name: string, file: ArrayBuffer) => {
-		data_cached_fonts.set(name, font_create(file));
+		data_cached_fonts.set(name, g2_font_create(file));
 	}
 	///end
 }

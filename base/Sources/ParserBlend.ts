@@ -4,9 +4,9 @@
 // https://web.archive.org/web/20170630054951/http://www.atmind.nl/blender/mystery_ot_blend.html
 // Usage:
 // let bl = ParserBlend.init(blob: DataView);
-// Krom.log(ParserBlend.dir(bl, "Scene"));
+// krom_log(ParserBlend.dir(bl, "Scene"));
 // let scenes = ParserBlend.get(bl, "Scene");
-// Krom.log(BlHandle.get(BlHandle.get(scenes[0], "id"), "name"));
+// krom_log(BlHandle.get(BlHandle.get(scenes[0], "id"), "name"));
 
 class BlendRaw {
 	pos: i32;
@@ -29,7 +29,7 @@ class ParserBlend {
 		raw.view = new DataView(buffer);
 		raw.pos = 0;
 		if (ParserBlend.readChars(raw, 7) != "BLENDER") {
-			raw.view = new DataView(Krom.inflate(buffer, false));
+			raw.view = new DataView(krom_inflate(buffer, false));
 			raw.pos = 0;
 			if (ParserBlend.readChars(raw, 7) != "BLENDER") return null;
 		}

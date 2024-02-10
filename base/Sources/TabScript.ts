@@ -42,14 +42,14 @@ class TabScript {
 					if (f == "") f = tr("untitled");
 					path = path + Path.sep + f;
 					if (!path.endsWith(".js")) path += ".js";
-					Krom.fileSaveBytes(path, sys_string_to_buffer(str));
+					krom_file_save_bytes(path, sys_string_to_buffer(str));
 				});
 			}
 			zui_end_sticky();
 
 			let _font = ui.font;
 			let _fontSize = ui.font_size;
-			data_get_font("font_mono.ttf", (f: font_t) => { zui_set_font(ui, f); }); // Sync
+			data_get_font("font_mono.ttf", (f: g2_font_t) => { zui_set_font(ui, f); }); // Sync
 			ui.font_size = Math.floor(15 * zui_SCALE(ui));
 			zui_set_text_area_line_numbers(true);
 			zui_set_text_area_scroll_past_end(true);

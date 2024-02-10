@@ -46,11 +46,11 @@ class Project {
 	static projectSave = (saveAndQuit = false) => {
 		if (Project.filepath == "") {
 			///if krom_ios
-			let documentDirectory = Krom.saveDialog("", "");
+			let documentDirectory = krom_save_dialog("", "");
 			documentDirectory = documentDirectory.substr(0, documentDirectory.length - 8); // Strip /'untitled'
 			Project.filepath = documentDirectory + "/" + sys_title() + ".arm";
 			///elseif krom_android
-			Project.filepath = Krom.savePath() + "/" + sys_title() + ".arm";
+			Project.filepath = krom_save_path() + "/" + sys_title() + ".arm";
 			///else
 			Project.projectSaveAs(saveAndQuit);
 			return;

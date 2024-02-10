@@ -57,7 +57,7 @@ class RenderPathRaytrace {
 			let bnoise_rank = scene_embedded.get("bnoise_rank.k");
 
 			let l = Base.flatten(true);
-			Krom.raytraceSetTextures(l.texpaint, l.texpaint_nor, l.texpaint_pack, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
+			krom_raytrace_set_textures(l.texpaint, l.texpaint_nor, l.texpaint_pack, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
 		}
 
 		///if is_lab
@@ -69,7 +69,7 @@ class RenderPathRaytrace {
 			let bnoise_scramble = scene_embedded.get("bnoise_scramble.k");
 			let bnoise_rank = scene_embedded.get("bnoise_rank.k");
 
-			Krom.raytraceSetTextures(l.texpaint, l.texpaint_nor, l.texpaint_pack, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
+			krom_raytrace_set_textures(l.texpaint, l.texpaint_nor, l.texpaint_pack, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
 		}
 		///end
 
@@ -93,22 +93,22 @@ class RenderPathRaytrace {
 		RenderPathRaytrace.frame = (RenderPathRaytrace.frame % 4) + 1; // _PAINT
 		// frame = frame + 1; // _RENDER
 		///end
-		RenderPathRaytrace.f32a[4] = RenderPathRaytrace.helpMat._00;
-		RenderPathRaytrace.f32a[5] = RenderPathRaytrace.helpMat._01;
-		RenderPathRaytrace.f32a[6] = RenderPathRaytrace.helpMat._02;
-		RenderPathRaytrace.f32a[7] = RenderPathRaytrace.helpMat._03;
-		RenderPathRaytrace.f32a[8] = RenderPathRaytrace.helpMat._10;
-		RenderPathRaytrace.f32a[9] = RenderPathRaytrace.helpMat._11;
-		RenderPathRaytrace.f32a[10] = RenderPathRaytrace.helpMat._12;
-		RenderPathRaytrace.f32a[11] = RenderPathRaytrace.helpMat._13;
-		RenderPathRaytrace.f32a[12] = RenderPathRaytrace.helpMat._20;
-		RenderPathRaytrace.f32a[13] = RenderPathRaytrace.helpMat._21;
-		RenderPathRaytrace.f32a[14] = RenderPathRaytrace.helpMat._22;
-		RenderPathRaytrace.f32a[15] = RenderPathRaytrace.helpMat._23;
-		RenderPathRaytrace.f32a[16] = RenderPathRaytrace.helpMat._30;
-		RenderPathRaytrace.f32a[17] = RenderPathRaytrace.helpMat._31;
-		RenderPathRaytrace.f32a[18] = RenderPathRaytrace.helpMat._32;
-		RenderPathRaytrace.f32a[19] = RenderPathRaytrace.helpMat._33;
+		RenderPathRaytrace.f32a[4] = RenderPathRaytrace.helpMat.m[0];
+		RenderPathRaytrace.f32a[5] = RenderPathRaytrace.helpMat.m[1];
+		RenderPathRaytrace.f32a[6] = RenderPathRaytrace.helpMat.m[2];
+		RenderPathRaytrace.f32a[7] = RenderPathRaytrace.helpMat.m[3];
+		RenderPathRaytrace.f32a[8] = RenderPathRaytrace.helpMat.m[4];
+		RenderPathRaytrace.f32a[9] = RenderPathRaytrace.helpMat.m[5];
+		RenderPathRaytrace.f32a[10] = RenderPathRaytrace.helpMat.m[6];
+		RenderPathRaytrace.f32a[11] = RenderPathRaytrace.helpMat.m[7];
+		RenderPathRaytrace.f32a[12] = RenderPathRaytrace.helpMat.m[8];
+		RenderPathRaytrace.f32a[13] = RenderPathRaytrace.helpMat.m[9];
+		RenderPathRaytrace.f32a[14] = RenderPathRaytrace.helpMat.m[10];
+		RenderPathRaytrace.f32a[15] = RenderPathRaytrace.helpMat.m[11];
+		RenderPathRaytrace.f32a[16] = RenderPathRaytrace.helpMat.m[12];
+		RenderPathRaytrace.f32a[17] = RenderPathRaytrace.helpMat.m[13];
+		RenderPathRaytrace.f32a[18] = RenderPathRaytrace.helpMat.m[14];
+		RenderPathRaytrace.f32a[19] = RenderPathRaytrace.helpMat.m[15];
 		RenderPathRaytrace.f32a[20] = scene_world.strength * 1.5;
 		if (!Context.raw.showEnvmap) RenderPathRaytrace.f32a[20] = -RenderPathRaytrace.f32a[20];
 		RenderPathRaytrace.f32a[21] = Context.raw.envmapAngle;
@@ -118,7 +118,7 @@ class RenderPathRaytrace {
 		///end
 
 		let framebuffer = render_path_render_targets.get("buf").image;
-		Krom.raytraceDispatchRays(framebuffer.render_target_, RenderPathRaytrace.f32a.buffer);
+		krom_raytrace_dispatch_rays(framebuffer.render_target_, RenderPathRaytrace.f32a.buffer);
 
 		if (Context.raw.ddirty == 1 || Context.raw.pdirty == 1) {
 			///if krom_metal
@@ -147,7 +147,7 @@ class RenderPathRaytrace {
 			let bnoise_sobol = scene_embedded.get("bnoise_sobol.k");
 			let bnoise_scramble = scene_embedded.get("bnoise_scramble.k");
 			let bnoise_rank = scene_embedded.get("bnoise_rank.k");
-			Krom.raytraceInit(shader, RenderPathRaytrace.vb.buffer_, RenderPathRaytrace.ib.buffer_, RenderPathRaytrace.vb_scale);
+			krom_raytrace_init(shader, RenderPathRaytrace.vb.buffer_, RenderPathRaytrace.ib.buffer_, RenderPathRaytrace.vb_scale);
 		});
 	}
 

@@ -12,7 +12,7 @@ class ImportObj {
 		data_get_blob(path, (b: ArrayBuffer) => {
 
 			if (isUdim) {
-				let part = Krom.io_obj_parse(b, splitCode, 0, isUdim);
+				let part = krom_io_obj_parse(b, splitCode, 0, isUdim);
 				let name = part.name;
 				for (let i = 0; i < part.udims.length; ++i) {
 					if (part.udims[i].length == 0) continue;
@@ -25,10 +25,10 @@ class ImportObj {
 			}
 			else {
 				let parts: any[] = [];
-				let part = Krom.io_obj_parse(b, splitCode, 0, false);
+				let part = krom_io_obj_parse(b, splitCode, 0, false);
 				parts.push(part);
 				while (part.has_next) {
-					part = Krom.io_obj_parse(b, splitCode, part.pos, false);
+					part = krom_io_obj_parse(b, splitCode, part.pos, false);
 					// This part does not contain faces (may contain lines only)
 					if (part.inda.length == 0) {
 						continue;

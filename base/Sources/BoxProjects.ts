@@ -91,7 +91,7 @@ class BoxProjects {
 					let path = recent_projects[i];
 
 					///if krom_ios
-					let documentDirectory = Krom.saveDialog("", "");
+					let documentDirectory = krom_save_dialog("", "");
 					documentDirectory = documentDirectory.substr(0, documentDirectory.length - 8); // Strip /'untitled'
 					path = documentDirectory + path;
 					///end

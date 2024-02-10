@@ -20,9 +20,9 @@ class PhysicsWorld {
 	static v2 = vec4_create();
 
 	static load = (done: ()=>void) => {
-		let b = Krom.loadBlob("data/plugins/ammo.js");
+		let b = krom_load_blob("data/plugins/ammo.js");
 		globalThis.eval(sys_buffer_to_string(b));
-		let print = (s: string) => { Krom.log(s); };
+		let print = (s: string) => { krom_log(s); };
 		Ammo({print: print}).then(done);
 	}
 

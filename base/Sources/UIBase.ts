@@ -568,7 +568,7 @@ class UIBase {
 						let shortcuts = ["l", "b", "n", "o", "r", "m", "a", "h", "e", "s", "t", "1", "2", "3", "4"];
 
 						///if (krom_direct3d12 || krom_vulkan || krom_metal)
-						if (Krom.raytraceSupported()) {
+						if (krom_raytrace_supported()) {
 							modes.push(tr("Path Traced"));
 							shortcuts.push("p");
 						}
@@ -1219,7 +1219,7 @@ class UIBase {
 
 		// Expand button
 		if (Config.raw.layout[LayoutSize.LayoutSidebarW] == 0) {
-			let width = Math.floor(font_width(UIBase.ui.font, UIBase.ui.font_size, "<<") + 25 * zui_SCALE(UIBase.ui));
+			let width = Math.floor(g2_font_width(UIBase.ui.font, UIBase.ui.font_size, "<<") + 25 * zui_SCALE(UIBase.ui));
 			if (zui_window(UIBase.hminimized, sys_width() - width, 0, width, Math.floor(zui_ELEMENT_H(UIBase.ui) + zui_ELEMENT_OFFSET(UIBase.ui) + 1))) {
 				UIBase.ui._w = width;
 				let _BUTTON_H = UIBase.ui.t.BUTTON_H;
@@ -1486,8 +1486,8 @@ class UIBase {
 		if (side == BorderSide.SideRight) return; // UI is snapped to the right side
 
 		side == BorderSide.SideLeft || side == BorderSide.SideRight ?
-			Krom.setMouseCursor(3) : // Horizontal
-			Krom.setMouseCursor(4);  // Vertical
+			krom_set_mouse_cursor(3) : // Horizontal
+			krom_set_mouse_cursor(4);  // Vertical
 
 		if (zui_current.input_started) {
 			UIBase.borderStarted = side;
@@ -1497,7 +1497,7 @@ class UIBase {
 	}
 
 	static onTextHover = () => {
-		Krom.setMouseCursor(2); // I-cursor
+		krom_set_mouse_cursor(2); // I-cursor
 	}
 
 	static onDeselectText = () => {

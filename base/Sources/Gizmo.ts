@@ -28,7 +28,7 @@ class Gizmo {
 			vec4_set_from(gizmo.transform.loc, paintObject.transform.loc);
 		}
 		else if (isDecal) {
-			vec4_set(gizmo.transform.loc, Context.raw.layer.decalMat._30, Context.raw.layer.decalMat._31, Context.raw.layer.decalMat._32);
+			vec4_set(gizmo.transform.loc, Context.raw.layer.decalMat.m[12], Context.raw.layer.decalMat.m[13], Context.raw.layer.decalMat.m[14]);
 		}
 		let cam = scene_camera;
 		let fov = cam.data.fov;
@@ -91,13 +91,13 @@ class Gizmo {
 		else if (isDecal) {
 			if (Context.raw.translateX || Context.raw.translateY || Context.raw.translateZ || Context.raw.scaleX || Context.raw.scaleY || Context.raw.scaleZ || Context.raw.rotateX || Context.raw.rotateY || Context.raw.rotateZ) {
 				if (Context.raw.translateX) {
-					Context.raw.layer.decalMat._30 = Context.raw.gizmoDrag;
+					Context.raw.layer.decalMat.m[12] = Context.raw.gizmoDrag;
 				}
 				else if (Context.raw.translateY) {
-					Context.raw.layer.decalMat._31 = Context.raw.gizmoDrag;
+					Context.raw.layer.decalMat.m[13] = Context.raw.gizmoDrag;
 				}
 				else if (Context.raw.translateZ) {
-					Context.raw.layer.decalMat._32 = Context.raw.gizmoDrag;
+					Context.raw.layer.decalMat.m[14] = Context.raw.gizmoDrag;
 				}
 				else if (Context.raw.scaleX) {
 					mat4_decompose(Context.raw.layer.decalMat, Gizmo.v, Gizmo.q, Gizmo.v0);
@@ -188,7 +188,7 @@ class Gizmo {
 				vec4_set(Gizmo.v, transform_world_x(t), transform_world_y(t), transform_world_z(t));
 			}
 			else if (isDecal) {
-				vec4_set(Gizmo.v, Context.raw.layer.decalMat._30, Context.raw.layer.decalMat._31, Context.raw.layer.decalMat._32);
+				vec4_set(Gizmo.v, Context.raw.layer.decalMat.m[12], Context.raw.layer.decalMat.m[13], Context.raw.layer.decalMat.m[14]);
 			}
 
 			if (Context.raw.translateX || Context.raw.scaleX) {

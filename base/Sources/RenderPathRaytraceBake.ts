@@ -86,7 +86,7 @@ class RenderPathRaytraceBake {
 			let bnoise_scramble = scene_embedded.get("bnoise_scramble.k");
 			let bnoise_rank = scene_embedded.get("bnoise_rank.k");
 			let texpaint_undo = render_path_render_targets.get("texpaint_undo" + History.undoI).image;
-			Krom.raytraceSetTextures(baketex0, baketex1, texpaint_undo, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
+			krom_raytrace_set_textures(baketex0, baketex1, texpaint_undo, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
 		}
 
 		if (Context.raw.brushTime > 0) {
@@ -105,7 +105,7 @@ class RenderPathRaytraceBake {
 			f32a[6] = Context.raw.envmapAngle;
 
 			let framebuffer = render_path_render_targets.get("baketex2").image;
-			Krom.raytraceDispatchRays(framebuffer.render_target_, f32a.buffer);
+			krom_raytrace_dispatch_rays(framebuffer.render_target_, f32a.buffer);
 
 			render_path_set_target("texpaint" + Context.raw.layer.id);
 			render_path_bind_target("baketex2", "tex");
@@ -126,7 +126,7 @@ class RenderPathRaytraceBake {
 				RenderPathRaytraceBake.raysCounter = 0;
 			}
 			RenderPathRaytraceBake.currentSample++;
-			Krom.delayIdleSleep();
+			krom_delay_idle_sleep();
 			return true;
 		}
 		else {

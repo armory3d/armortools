@@ -17,7 +17,7 @@ class Console {
 		g2_set_font(Base.font);
 		g2_set_font_size(Math.floor(22 * scale));
 		g2_set_color(0xffffffff);
-		g2_draw_string(s, x - font_width(_g2_font, _g2_font_size, s) / 2, y + 40 * scale - font_height(_g2_font, _g2_font_size) / 2);
+		g2_draw_string(s, x - g2_font_width(_g2_font, _g2_font_size, s) / 2, y + 40 * scale - g2_font_height(_g2_font, _g2_font_size) / 2);
 	}
 
 	static toast = (s: string) => {

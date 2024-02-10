@@ -29,8 +29,8 @@ function main() {
 	zui_set_text_area_line_numbers(true);
 	zui_set_text_area_scroll_past_end(true);
 
-	Krom.setApplicationName("ArmorPad");
-	let blob_storage = Krom.loadBlob(Krom.savePath() + "/config.json");
+	krom_set_application_name("ArmorPad");
+	let blob_storage = krom_load_blob(krom_save_path() + "/config.json");
 	if (blob_storage == null) {
 		storage = {
 			project: "",
@@ -94,24 +94,24 @@ function main() {
 		});
 	});
 
-	Krom.setDropFilesCallback(function (path: string) {
+	krom_set_drop_files_callback(function (path: string) {
 		storage.project = path;
 		sidebar_handle.redraws = 1;
 	});
 
-	Krom.setApplicationStateCallback(
+	krom_set_application_state_callback(
 		function() {},
 		function() {},
 		function() {},
 		function() {},
 		function () { // Shutdown
-			Krom.fileSaveBytes(Krom.savePath() + "/config.json", sys_string_to_buffer(JSON.stringify(storage)));
+			krom_file_save_bytes(krom_save_path() + "/config.json", sys_string_to_buffer(JSON.stringify(storage)));
 		}
 	);
 }
 
 function list_folder(path: string) {
-	let files = Krom.readDirectory(path, false).split("\n");
+	let files = krom_read_directory(path, false).split("\n");
 	for (let f of files) {
 		let abs = path + "/" + f;
 		let is_file = f.indexOf(".") >= 0;
@@ -131,12 +131,12 @@ function list_folder(path: string) {
 			// Open file
 			if (is_file) {
 				storage.file = abs;
-				let bytes = Krom.loadBlob(storage.file);
+				let bytes = krom_load_blob(storage.file);
 				storage.text = f.endsWith(".arm") ? JSON.stringify(armpack_decode(bytes), null, 4) : sys_buffer_to_string(bytes);
 				storage.text = storage.text.replaceAll("\r", "");
 				text_handle.text = storage.text;
 				editor_handle.redraws = 1;
-				Krom.setWindowTitle(abs);
+				krom_set_window_title(abs);
 			}
 			// Expand folder
 			else {
@@ -155,10 +155,10 @@ function list_folder(path: string) {
 function render() {
 	storage.window_w = sys_width();
 	storage.window_h = sys_height();
-	storage.window_x = Krom.windowX();
-	storage.window_y = Krom.windowY();
+	storage.window_x = krom_window_x();
+	storage.window_y = krom_window_y();
 	if (ui.input_dx != 0 || ui.input_dy != 0) {
-		Krom.setMouseCursor(0); // Arrow
+		krom_set_mouse_cursor(0); // Arrow
 	}
 
 	zui_begin(ui);
@@ -263,7 +263,7 @@ function save_file() {
 	text_handle.text = storage.text;
 	// Write bytes
 	let bytes = storage.file.endsWith(".arm") ? armpack_encode(JSON.parse(storage.text)) : sys_string_to_buffer(storage.text);
-	Krom.fileSaveBytes(storage.file, bytes, bytes.byteLength);
+	krom_file_save_bytes(storage.file, bytes, bytes.byteLength);
 	storage.modified = false;
 }
 
@@ -276,7 +276,7 @@ function build_file(): string {
 }
 
 function build_project() {
-	Krom.sysCommand(storage.project + build_file() + " " + storage.project);
+	krom_sys_command(storage.project + build_file() + " " + storage.project);
 }
 
 function draw_minimap() {
@@ -333,7 +333,7 @@ function on_border_hover(handle: zui_handle_t, side: i32) {
 		return; // Right
 	}
 
-	Krom.setMouseCursor(3); // Horizontal
+	krom_set_mouse_cursor(3); // Horizontal
 
 	if (zui_current.input_started) {
 		resizing_sidebar = true;
@@ -341,7 +341,7 @@ function on_border_hover(handle: zui_handle_t, side: i32) {
 }
 
 function on_text_hover() {
-	Krom.setMouseCursor(2); // I-cursor
+	krom_set_mouse_cursor(2); // I-cursor
 }
 
 main();

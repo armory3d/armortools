@@ -37,13 +37,13 @@ class TabConsole {
 					if (f == "") f = tr("untitled");
 					path = path + Path.sep + f;
 					if (!path.endsWith(".txt")) path += ".txt";
-					Krom.fileSaveBytes(path, sys_string_to_buffer(str));
+					krom_file_save_bytes(path, sys_string_to_buffer(str));
 				});
 			}
 			///if (krom_windows || krom_linux || krom_darwin)
 			if (zui_button(tr("Copy"))) {
 				let str = Console.lastTraces.join("\n");
-				Krom.copyToClipboard(str);
+				krom_copy_to_clipboard(str);
 			}
 			///end
 
@@ -51,7 +51,7 @@ class TabConsole {
 
 			let _font = ui.font;
 			let _fontSize = ui.font_size;
-			data_get_font("font_mono.ttf", (f: font_t) => { zui_set_font(ui, f); }); // Sync
+			data_get_font("font_mono.ttf", (f: g2_font_t) => { zui_set_font(ui, f); }); // Sync
 			ui.font_size = Math.floor(15 * zui_SCALE(ui));
 			for (let t of Console.lastTraces) {
 				zui_text(t);

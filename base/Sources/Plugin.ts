@@ -32,7 +32,7 @@ class Plugin {
 		}
 		catch (e: any) {
 			Console.error(tr("Failed to load plugin") + " '" + plugin + "'");
-			Krom.log(e);
+			krom_log(e);
 		}
 	}
 

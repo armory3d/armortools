@@ -10,7 +10,7 @@ class Config {
 
 	static load = (done: ()=>void) => {
 		try {
-			data_get_blob((Path.isProtected() ? Krom.savePath() : "") + "config.json", (blob: ArrayBuffer) => {
+			data_get_blob((Path.isProtected() ? krom_save_path() : "") + "config.json", (blob: ArrayBuffer) => {
 				Config.configLoaded = true;
 				Config.raw = JSON.parse(sys_buffer_to_string(blob));
 
@@ -20,7 +20,7 @@ class Config {
 		catch (e: any) {
 			///if krom_linux
 			try { // Protected directory
-				data_get_blob(Krom.savePath() + "config.json", (blob: ArrayBuffer) => {
+				data_get_blob(krom_save_path() + "config.json", (blob: ArrayBuffer) => {
 					Config.configLoaded = true;
 					Config.raw = JSON.parse(sys_buffer_to_string(blob));
 					done();
@@ -38,12 +38,12 @@ class Config {
 	static save = () => {
 		// Use system application data folder
 		// when running from protected path like "Program Files"
-		let path = (Path.isProtected() ? Krom.savePath() : Path.data() + Path.sep) + "config.json";
+		let path = (Path.isProtected() ? krom_save_path() : Path.data() + Path.sep) + "config.json";
 		let buffer = sys_string_to_buffer(JSON.stringify(Config.raw));
-		Krom.fileSaveBytes(path, buffer);
+		krom_file_save_bytes(path, buffer);
 
 		///if krom_linux // Protected directory
-		if (!File.exists(path)) Krom.fileSaveBytes(Krom.savePath() + "config.json", buffer);
+		if (!File.exists(path)) krom_file_save_bytes(krom_save_path() + "config.json", buffer);
 		///end
 	}
 
@@ -207,7 +207,7 @@ class Config {
 		if (Config.raw.keymap == "default.json") return;
 		let path = data_path() + "keymap_presets/" + Config.raw.keymap;
 		let buffer = sys_string_to_buffer(JSON.stringify(Config.keymap));
-		Krom.fileSaveBytes(path, buffer);
+		krom_file_save_bytes(path, buffer);
 	}
 
 	static getSuperSampleQuality = (f: f32): i32 => {

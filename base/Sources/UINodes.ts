@@ -322,19 +322,19 @@ class UINodes {
 		if (Config.raw.wrap_mouse && parent.controlsDown) {
 			if (ui.input_x < ui._window_x) {
 				ui.input_x = ui._window_x + ui._window_w;
-				Krom.setMousePosition(Math.floor(ui.input_x), Math.floor(ui.input_y));
+				krom_set_mouse_position(Math.floor(ui.input_x), Math.floor(ui.input_y));
 			}
 			else if (ui.input_x > ui._window_x + ui._window_w) {
 				ui.input_x = ui._window_x;
-				Krom.setMousePosition(Math.floor(ui.input_x), Math.floor(ui.input_y));
+				krom_set_mouse_position(Math.floor(ui.input_x), Math.floor(ui.input_y));
 			}
 			else if (ui.input_y < ui._window_y) {
 				ui.input_y = ui._window_y + ui._window_h;
-				Krom.setMousePosition(Math.floor(ui.input_x), Math.floor(ui.input_y));
+				krom_set_mouse_position(Math.floor(ui.input_x), Math.floor(ui.input_y));
 			}
 			else if (ui.input_y > ui._window_y + ui._window_h) {
 				ui.input_y = ui._window_y;
-				Krom.setMousePosition(Math.floor(ui.input_x), Math.floor(ui.input_y));
+				krom_set_mouse_position(Math.floor(ui.input_x), Math.floor(ui.input_y));
 			}
 		}
 
@@ -864,9 +864,9 @@ class UINodes {
 					if (singleChannel) {
 						g2_set_pipeline(UIView2D.pipe);
 						///if krom_opengl
-						Krom.setPipeline(UIView2D.pipe.pipeline_);
+						krom_g4_set_pipeline(UIView2D.pipe.pipeline_);
 						///end
-						Krom.setInt(UIView2D.channelLocation, 1);
+						krom_g4_set_int(UIView2D.channelLocation, 1);
 					}
 					///end
 
@@ -897,7 +897,7 @@ class UINodes {
 			// Editable canvas name
 			let h = zui_handle("uinodes_11");
 			h.text = c.name;
-			UINodes.ui._w = Math.floor(Math.min(font_width(UINodes.ui.font, UINodes.ui.font_size, h.text) + 15 * zui_SCALE(UINodes.ui), 100 * zui_SCALE(UINodes.ui)));
+			UINodes.ui._w = Math.floor(Math.min(g2_font_width(UINodes.ui.font, UINodes.ui.font_size, h.text) + 15 * zui_SCALE(UINodes.ui), 100 * zui_SCALE(UINodes.ui)));
 			let newName = zui_text_input(h, "");
 			UINodes.ui._x += UINodes.ui._w + 3;
 			UINodes.ui._y = 2 + startY;

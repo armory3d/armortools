@@ -104,22 +104,22 @@ class UtilUV {
 		}
 
 		if (UtilUV.pipeDilate == null) {
-			UtilUV.pipeDilate = pipeline_create();
+			UtilUV.pipeDilate = g4_pipeline_create();
 			UtilUV.pipeDilate.vertex_shader = sys_get_shader("dilate_map.vert");
 			UtilUV.pipeDilate.fragment_shader = sys_get_shader("dilate_map.frag");
-			let vs = vertex_struct_create();
+			let vs = g4_vertex_struct_create();
 			///if (krom_metal || krom_vulkan)
-			vertex_struct_add(vs, "tex", vertex_data_t.I16_2X_NORM);
+			g4_vertex_struct_add(vs, "tex", vertex_data_t.I16_2X_NORM);
 			///else
-			vertex_struct_add(vs, "pos", vertex_data_t.I16_4X_NORM);
-			vertex_struct_add(vs, "nor", vertex_data_t.I16_2X_NORM);
-			vertex_struct_add(vs, "tex", vertex_data_t.I16_2X_NORM);
+			g4_vertex_struct_add(vs, "pos", vertex_data_t.I16_4X_NORM);
+			g4_vertex_struct_add(vs, "nor", vertex_data_t.I16_2X_NORM);
+			g4_vertex_struct_add(vs, "tex", vertex_data_t.I16_2X_NORM);
 			///end
 			UtilUV.pipeDilate.input_layout = [vs];
 			UtilUV.pipeDilate.depth_write = false;
 			UtilUV.pipeDilate.depth_mode = compare_mode_t.ALWAYS;
 			UtilUV.pipeDilate.color_attachments[0] = tex_format_t.R8;
-			pipeline_compile(UtilUV.pipeDilate);
+			g4_pipeline_compile(UtilUV.pipeDilate);
 			// dilateTexUnpack = getConstantLocation(UtilUV.pipeDilate, "texUnpack");
 		}
 

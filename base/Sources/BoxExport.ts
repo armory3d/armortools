@@ -458,14 +458,14 @@ class BoxExport {
 `;
 		if (!name.endsWith(".json")) name += ".json";
 		let path = Path.data() + Path.sep + "export_presets" + Path.sep + name;
-		Krom.fileSaveBytes(path, sys_string_to_buffer(template));
+		krom_file_save_bytes(path, sys_string_to_buffer(template));
 	}
 
 	static savePreset = () => {
 		let name = BoxExport.files[BoxExport.hpreset.position];
 		if (name == "generic") return; // generic is const
 		let path = Path.data() + Path.sep + "export_presets" + Path.sep + name + ".json";
-		Krom.fileSaveBytes(path, sys_string_to_buffer(JSON.stringify(BoxExport.preset)));
+		krom_file_save_bytes(path, sys_string_to_buffer(JSON.stringify(BoxExport.preset)));
 	}
 	///end
 }

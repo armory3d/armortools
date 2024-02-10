@@ -112,15 +112,15 @@ class RenderPathBase {
 			}
 
 			transform_set_matrix(cam.base.transform, Camera.views[Context.raw.viewIndex]);
-			camera_object_build_matrix(cam);
-			camera_object_build_projection(cam);
+			camera_object_build_mat(cam);
+			camera_object_build_proj(cam);
 		}
 
 		// Match projection matrix jitter
 		let skipTaa = Context.raw.splitView || ((Context.raw.tool == WorkspaceTool.ToolClone || Context.raw.tool == WorkspaceTool.ToolBlur || Context.raw.tool == WorkspaceTool.ToolSmudge) && Context.raw.pdirty > 0);
 		scene_camera.frame = skipTaa ? 0 : RenderPathBase.taaFrame;
-		camera_object_projection_jitter(scene_camera);
-		camera_object_build_matrix(scene_camera);
+		camera_object_proj_jitter(scene_camera);
+		camera_object_build_mat(scene_camera);
 	}
 
 	static end = () => {
@@ -245,8 +245,8 @@ class RenderPathBase {
 
 			Context.raw.viewIndex = Context.raw.viewIndex == 0 ? 1 : 0;
 			transform_set_matrix(cam.base.transform, Camera.views[Context.raw.viewIndex]);
-			camera_object_build_matrix(cam);
-			camera_object_build_projection(cam);
+			camera_object_build_mat(cam);
+			camera_object_build_proj(cam);
 
 			RenderPathBase.drawGbuffer();
 
@@ -263,8 +263,8 @@ class RenderPathBase {
 
 			Context.raw.viewIndex = Context.raw.viewIndex == 0 ? 1 : 0;
 			transform_set_matrix(cam.base.transform, Camera.views[Context.raw.viewIndex]);
-			camera_object_build_matrix(cam);
-			camera_object_build_projection(cam);
+			camera_object_build_mat(cam);
+			camera_object_build_proj(cam);
 		}
 	}
 
@@ -375,7 +375,7 @@ class RenderPathBase {
 
 	static drawSSR = () => {
 		if (Config.raw.rp_ssr != false) {
-			if (render_path_cached_shader_contexts.get("shader_datas/ssr_pass/ssr_pass") == null) {
+			if (_render_path_cached_shader_contexts.get("shader_datas/ssr_pass/ssr_pass") == null) {
 				{
 					let t = render_target_create();
 					t.name = "bufb";

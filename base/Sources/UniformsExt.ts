@@ -211,12 +211,12 @@ class UniformsExt {
 			}
 			case "_decalLayerLoc": {
 				v = _uniforms_vec;
-				vec4_set(v, Context.raw.layer.decalMat._30, Context.raw.layer.decalMat._31, Context.raw.layer.decalMat._32);
+				vec4_set(v, Context.raw.layer.decalMat.m[12], Context.raw.layer.decalMat.m[13], Context.raw.layer.decalMat.m[14]);
 				return v;
 			}
 			case "_decalLayerNor": {
 				v = _uniforms_vec;
-				vec4_normalize(vec4_set(v, Context.raw.layer.decalMat._20, Context.raw.layer.decalMat._21, Context.raw.layer.decalMat._22));
+				vec4_normalize(vec4_set(v, Context.raw.layer.decalMat.m[8], Context.raw.layer.decalMat.m[9], Context.raw.layer.decalMat.m[10]));
 				return v;
 			}
 			case "_pickerBase": {

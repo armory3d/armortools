@@ -193,7 +193,7 @@ class TabBrowser {
 						TabBrowser.hpath.text = "/storage/emulated/0/DCIM/Camera";
 					}
 					if (UIMenu.menuButton(ui, tr("Projects"))) {
-						TabBrowser.hpath.text = Krom.savePath();
+						TabBrowser.hpath.text = krom_save_path();
 					}
 				}, 4);
 				///else

@@ -25,21 +25,21 @@ function main() {
 
 function kickstart() {
 	// Used to locate external application data folder
-	Krom.setApplicationName(manifest_title);
+	krom_set_app_name(manifest_title);
 	Config.load(main_start);
 }
 
 function main_start() {
 	app_on_resize = Base.onResize;
-	app_w = Base.w;
-	app_h = Base.h;
-	app_x = Base.x;
-	app_y = Base.y;
+	app_on_w = Base.w;
+	app_on_h = Base.h;
+	app_on_x = Base.x;
+	app_on_y = Base.y;
 
 	Config.init();
 	sys_start(Config.getOptions(), function() {
 		if (Config.raw.layout == null) Base.initLayout();
-		Krom.setApplicationName(manifest_title);
+		krom_set_app_name(manifest_title);
 		app_init(function() {
 			scene_set_active("Scene", function(o: object_t) {
 				UniformsExt.init();

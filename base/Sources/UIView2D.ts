@@ -31,19 +31,19 @@ class UIView2D {
 
 	constructor() {
 		///if (is_paint || is_sculpt)
-		UIView2D.pipe = pipeline_create();
+		UIView2D.pipe = g4_pipeline_create();
 		UIView2D.pipe.vertex_shader = sys_get_shader("layer_view.vert");
 		UIView2D.pipe.fragment_shader = sys_get_shader("layer_view.frag");
-		let vs = vertex_struct_create();
-		vertex_struct_add(vs, "pos", vertex_data_t.F32_3X);
-		vertex_struct_add(vs, "tex", vertex_data_t.F32_2X);
-		vertex_struct_add(vs, "col", vertex_data_t.U8_4X_NORM);
+		let vs = g4_vertex_struct_create();
+		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_3X);
+		g4_vertex_struct_add(vs, "tex", vertex_data_t.F32_2X);
+		g4_vertex_struct_add(vs, "col", vertex_data_t.U8_4X_NORM);
 		UIView2D.pipe.input_layout = [vs];
 		UIView2D.pipe.blend_source = blend_factor_t.BLEND_ONE;
 		UIView2D.pipe.blend_dest = blend_factor_t.BLEND_ZERO;
 		UIView2D.pipe.color_write_masks_alpha[0] = false;
-		pipeline_compile(UIView2D.pipe);
-		UIView2D.channelLocation = pipeline_get_const_loc(UIView2D.pipe, "channel");
+		g4_pipeline_compile(UIView2D.pipe);
+		UIView2D.channelLocation = g4_pipeline_get_const_loc(UIView2D.pipe, "channel");
 		///end
 
 		let scale = Config.raw.window_scale;
@@ -199,9 +199,9 @@ class UIView2D {
 						g2_set_bilinear_filter(false);
 					}
 					///if krom_opengl
-					Krom.setPipeline(UIView2D.pipe.pipeline_);
+					krom_g4_set_pipeline(UIView2D.pipe.pipeline_);
 					///end
-					Krom.setInt(UIView2D.channelLocation, channel);
+					krom_g4_set_int(UIView2D.channelLocation, channel);
 				}
 				///end
 
@@ -282,7 +282,7 @@ class UIView2D {
 			let text = h.text;
 			///end
 
-			UIView2D.ui._w = Math.floor(Math.min(font_width(UIView2D.ui.font, UIView2D.ui.font_size, text) + 15 * zui_SCALE(UIView2D.ui), 100 * zui_SCALE(UIView2D.ui)));
+			UIView2D.ui._w = Math.floor(Math.min(g2_font_width(UIView2D.ui.font, UIView2D.ui.font_size, text) + 15 * zui_SCALE(UIView2D.ui), 100 * zui_SCALE(UIView2D.ui)));
 
 			if (UIView2D.type == View2DType.View2DAsset) {
 				let asset = Context.raw.texture;

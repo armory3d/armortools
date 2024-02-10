@@ -43,10 +43,10 @@ class UtilRender {
 
 		scene_world._envmap = Context.raw.previewEnvmap;
 		// No resize
-		render_path_last_w = UtilRender.materialPreviewSize;
-		render_path_last_h = UtilRender.materialPreviewSize;
-		camera_object_build_projection(scene_camera);
-		camera_object_build_matrix(scene_camera);
+		_render_path_last_w = UtilRender.materialPreviewSize;
+		_render_path_last_h = UtilRender.materialPreviewSize;
+		camera_object_build_proj(scene_camera);
+		camera_object_build_mat(scene_camera);
 
 		MakeMaterial.parseMeshPreviewMaterial();
 		let _commands = render_path_commands;
@@ -55,8 +55,8 @@ class UtilRender {
 		render_path_commands = _commands;
 
 		Context.raw.materialPreview = false;
-		render_path_last_w = app_w();
-		render_path_last_h = app_h();
+		_render_path_last_w = app_w();
+		_render_path_last_h = app_h();
 
 		// Restore
 		sphere.base.visible = false;
@@ -66,8 +66,8 @@ class UtilRender {
 		transform_set_matrix(scene_camera.base.transform, Context.raw.savedCamera);
 		Viewport.updateCameraType(Context.raw.cameraType);
 		scene_camera.data.fov = savedFov;
-		camera_object_build_projection(scene_camera);
-		camera_object_build_matrix(scene_camera);
+		camera_object_build_proj(scene_camera);
+		camera_object_build_mat(scene_camera);
 		light.data.strength = _lightStrength;
 		probe.strength = _probeStrength;
 		Context.raw.envmapAngle = _envmapAngle;
@@ -109,10 +109,10 @@ class UtilRender {
 		scene_world._envmap = Context.raw.previewEnvmap;
 
 		// No resize
-		render_path_last_w = UtilRender.decalPreviewSize;
-		render_path_last_h = UtilRender.decalPreviewSize;
-		camera_object_build_projection(scene_camera);
-		camera_object_build_matrix(scene_camera);
+		_render_path_last_w = UtilRender.decalPreviewSize;
+		_render_path_last_h = UtilRender.decalPreviewSize;
+		camera_object_build_proj(scene_camera);
+		camera_object_build_mat(scene_camera);
 
 		MakeMaterial.parseMeshPreviewMaterial();
 		let _commands = render_path_commands;
@@ -121,8 +121,8 @@ class UtilRender {
 		render_path_commands = _commands;
 
 		Context.raw.decalPreview = false;
-		render_path_last_w = app_w();
-		render_path_last_h = app_h();
+		_render_path_last_w = app_w();
+		_render_path_last_h = app_h();
 
 		// Restore
 		plane.base.visible = false;
@@ -132,8 +132,8 @@ class UtilRender {
 		transform_set_matrix(scene_camera.base.transform, Context.raw.savedCamera);
 		scene_camera.data.fov = savedFov;
 		Viewport.updateCameraType(Context.raw.cameraType);
-		camera_object_build_projection(scene_camera);
-		camera_object_build_matrix(scene_camera);
+		camera_object_build_proj(scene_camera);
+		camera_object_build_mat(scene_camera);
 		light = scene_lights[0];
 		light.base.visible = true;
 		scene_world._envmap = Context.raw.showEnvmap ? Context.raw.savedEnvmap : Context.raw.emptyEnvmap;
@@ -151,8 +151,8 @@ class UtilRender {
 		let text = Context.raw.textToolText;
 		let font = Context.raw.font.font;
 		let fontSize = 200;
-		let textW = Math.floor(font_width(font, fontSize, text));
-		let textH = Math.floor(font_height(font, fontSize));
+		let textW = Math.floor(g2_font_width(font, fontSize, text));
+		let textH = Math.floor(g2_font_height(font, fontSize));
 		let texW = textW + 32;
 		if (texW < 512) texW = 512;
 		if (Context.raw.textToolImage != null && Context.raw.textToolImage.width < texW) {
@@ -183,8 +183,8 @@ class UtilRender {
 		let text = "Abg";
 		let font = Context.raw.font.font;
 		let fontSize = 318;
-		let textW = Math.floor(font_width(font, fontSize, text)) + 8;
-		let textH = Math.floor(font_height(font, fontSize)) + 8;
+		let textW = Math.floor(g2_font_width(font, fontSize, text)) + 8;
+		let textH = Math.floor(g2_font_height(font, fontSize)) + 8;
 		if (Context.raw.font.image == null) {
 			Context.raw.font.image = image_create_render_target(512, 512, tex_format_t.RGBA32);
 		}
@@ -259,8 +259,8 @@ class UtilRender {
 		mat4_translate(m, 0, 0, 0.5);
 		transform_set_matrix(cam.base.transform, m);
 		cam.data.fov = 0.92;
-		camera_object_build_projection(cam);
-		camera_object_build_matrix(cam);
+		camera_object_build_proj(cam);
+		camera_object_build_mat(cam);
 		mat4_get_inv(m, scene_camera.vp);
 
 		let planeo: mesh_object_t = scene_get_child(".Plane").ext;
@@ -268,10 +268,10 @@ class UtilRender {
 		Context.raw.paintObject = planeo;
 
 		let v = vec4_create();
-		let sx = vec4_len(vec4_set(v, m._00, m._01, m._02));
+		let sx = vec4_len(vec4_set(v, m.m[0], m.m[1], m.m[2]));
 		quat_from_euler(planeo.base.transform.rot, -Math.PI / 2, 0, 0);
 		vec4_set(planeo.base.transform.scale, sx, 1.0, sx);
-		vec4_set(planeo.base.transform.loc, m._30, -m._31, 0.0);
+		vec4_set(planeo.base.transform.loc, m.m[12], -m.m[13], 0.0);
 		transform_build_matrix(planeo.base.transform);
 
 		RenderPathPaint.liveLayerDrawn = 0;
@@ -334,8 +334,8 @@ class UtilRender {
 		transform_set_matrix(scene_camera.base.transform, Context.raw.savedCamera);
 		scene_camera.data.fov = savedFov;
 		Viewport.updateCameraType(Context.raw.cameraType);
-		camera_object_build_projection(scene_camera);
-		camera_object_build_matrix(scene_camera);
+		camera_object_build_proj(scene_camera);
+		camera_object_build_mat(scene_camera);
 
 		// Scale layer down to to image preview
 		if (Base.pipeMerge == null) Base.makePipe();
@@ -427,20 +427,20 @@ class UtilRender {
 		let indices = [0, 1, 2];
 
 		// Mandatory vertex data names and sizes
-		let structure = vertex_struct_create();
-		vertex_struct_add(structure, "pos", vertex_data_t.I16_4X_NORM);
-		vertex_struct_add(structure, "nor", vertex_data_t.I16_2X_NORM);
-		vertex_struct_add(structure, "tex", vertex_data_t.I16_2X_NORM);
-		vertex_struct_add(structure, "col", vertex_data_t.I16_4X_NORM);
-		UtilRender.screenAlignedFullVB = vertex_buffer_create(Math.floor(data.length / Math.floor(vertex_struct_byte_size(structure) / 4)), structure, usage_t.STATIC);
-		let vertices = vertex_buffer_lock(UtilRender.screenAlignedFullVB);
+		let structure = g4_vertex_struct_create();
+		g4_vertex_struct_add(structure, "pos", vertex_data_t.I16_4X_NORM);
+		g4_vertex_struct_add(structure, "nor", vertex_data_t.I16_2X_NORM);
+		g4_vertex_struct_add(structure, "tex", vertex_data_t.I16_2X_NORM);
+		g4_vertex_struct_add(structure, "col", vertex_data_t.I16_4X_NORM);
+		UtilRender.screenAlignedFullVB = g4_vertex_buffer_create(Math.floor(data.length / Math.floor(g4_vertex_struct_byte_size(structure) / 4)), structure, usage_t.STATIC);
+		let vertices = g4_vertex_buffer_lock(UtilRender.screenAlignedFullVB);
 		for (let i = 0; i < Math.floor(vertices.byteLength / 2); ++i) vertices.setInt16(i * 2, data[i], true);
-		vertex_buffer_unlock(UtilRender.screenAlignedFullVB);
+		g4_vertex_buffer_unlock(UtilRender.screenAlignedFullVB);
 
-		UtilRender.screenAlignedFullIB = index_buffer_create(indices.length);
-		let id = index_buffer_lock(UtilRender.screenAlignedFullIB);
+		UtilRender.screenAlignedFullIB = g4_index_buffer_create(indices.length);
+		let id = g4_index_buffer_lock(UtilRender.screenAlignedFullIB);
 		for (let i = 0; i < id.length; ++i) id[i] = indices[i];
-		index_buffer_unlock(UtilRender.screenAlignedFullIB);
+		g4_index_buffer_unlock(UtilRender.screenAlignedFullIB);
 	}
 }
 

@@ -149,7 +149,7 @@ class BoxPreferences {
 								let template = JSON.stringify(Base.theme);
 								if (!themeName.endsWith(".json")) themeName += ".json";
 								let path = Path.data() + Path.sep + "themes" + Path.sep + themeName;
-								Krom.fileSaveBytes(path, sys_string_to_buffer(template));
+								krom_file_save_bytes(path, sys_string_to_buffer(template));
 								BoxPreferences.fetchThemes(); // Refresh file list
 								Config.raw.theme = themeName;
 								BoxPreferences.themeHandle.position = BoxPreferences.getThemeIndex();
@@ -171,7 +171,7 @@ class BoxPreferences {
 					UIFiles.show("json", true, false, (path: string) => {
 						path += Path.sep + UIFiles.filename;
 						if (!path.endsWith(".json")) path += ".json";
-						Krom.fileSaveBytes(path, sys_string_to_buffer(JSON.stringify(Base.theme)));
+						krom_file_save_bytes(path, sys_string_to_buffer(JSON.stringify(Base.theme)));
 					});
 				}
 
@@ -480,7 +480,7 @@ class BoxPreferences {
 				camRaw.near_plane = zui_slider(near_handle, tr("Clip Start"), 0.001, 1.0, true);
 				camRaw.far_plane = zui_slider(far_handle, tr("Clip End"), 50.0, 100.0, true);
 				if (near_handle.changed || far_handle.changed) {
-					camera_object_build_projection(cam);
+					camera_object_build_proj(cam);
 				}
 
 				let dispHandle = zui_handle("boxpreferences_49", { value: Config.raw.displace_strength });
@@ -516,7 +516,7 @@ class BoxPreferences {
 								let template = JSON.stringify(Base.defaultKeymap);
 								if (!keymapName.endsWith(".json")) keymapName += ".json";
 								let path = Path.data() + Path.sep + "keymap_presets" + Path.sep + keymapName;
-								Krom.fileSaveBytes(path, sys_string_to_buffer(template));
+								krom_file_save_bytes(path, sys_string_to_buffer(template));
 								BoxPreferences.fetchKeymaps(); // Refresh file list
 								Config.raw.keymap = keymapName;
 								BoxPreferences.presetHandle.position = BoxPreferences.getPresetIndex();
@@ -580,7 +580,7 @@ plugin.drawUI = (ui) { =>
 `;
 								if (!pluginName.endsWith(".js")) pluginName += ".js";
 								let path = Path.data() + Path.sep + "plugins" + Path.sep + pluginName;
-								Krom.fileSaveBytes(path, sys_string_to_buffer(template));
+								krom_file_save_bytes(path, sys_string_to_buffer(template));
 								BoxPreferences.filesPlugin = null; // Refresh file list
 								UIBox.hide();
 								BoxPreferences.htab.position = 6; // Plugins

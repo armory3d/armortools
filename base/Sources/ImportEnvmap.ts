@@ -15,17 +15,17 @@ class ImportEnvmap {
 
 		// Init
 		if (ImportEnvmap.pipeline == null) {
-			ImportEnvmap.pipeline = pipeline_create();
+			ImportEnvmap.pipeline = g4_pipeline_create();
 			ImportEnvmap.pipeline.vertex_shader = sys_get_shader("pass.vert");
 			ImportEnvmap.pipeline.fragment_shader = sys_get_shader("prefilter_envmap.frag");
-			let vs = vertex_struct_create();
-			vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
+			let vs = g4_vertex_struct_create();
+			g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
 			ImportEnvmap.pipeline.input_layout = [vs];
 			ImportEnvmap.pipeline.color_attachment_count = 1;
 			ImportEnvmap.pipeline.color_attachments[0] = tex_format_t.RGBA128;
-			pipeline_compile(ImportEnvmap.pipeline);
-			ImportEnvmap.paramsLocation = pipeline_get_const_loc(ImportEnvmap.pipeline, "params");
-			ImportEnvmap.radianceLocation = pipeline_get_tex_unit(ImportEnvmap.pipeline, "radiance");
+			g4_pipeline_compile(ImportEnvmap.pipeline);
+			ImportEnvmap.paramsLocation = g4_pipeline_get_const_loc(ImportEnvmap.pipeline, "params");
+			ImportEnvmap.radianceLocation = g4_pipeline_get_tex_unit(ImportEnvmap.pipeline, "radiance");
 
 			ImportEnvmap.radiance = image_create_render_target(1024, 512, tex_format_t.RGBA128);
 

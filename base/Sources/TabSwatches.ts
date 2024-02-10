@@ -180,7 +180,7 @@ class TabSwatches {
 								color = color_set_ab(color, Context.raw.swatch.opacity * 255);
 								let val = color;
 								if (val < 0) val += 4294967296;
-								Krom.copyToClipboard(val.toString(16));
+								krom_copy_to_clipboard(val.toString(16));
 							}
 							///end
 							else if (Project.raw.swatches.length > 1 && UIMenu.menuButton(ui, tr("Delete"), "delete")) {

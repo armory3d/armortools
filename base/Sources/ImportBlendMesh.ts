@@ -407,7 +407,7 @@ class ImportBlendMesh {
 				}
 				mat4_get_inv(mat, mat);
 				mat4_transpose3x3(mat);
-				mat._30 = mat._31 = mat._32 = mat._33 = 0;
+				mat.m[12] = mat.m[13] = mat.m[14] = mat.m[15] = 0;
 				for (let i = 0; i < Math.floor(nora.length / 2); ++i) {
 					vec4_set(v, nora[i * 2] / 32767, nora[i * 2 + 1] / 32767, posa[i * 4 + 3] / 32767);
 					vec4_apply_mat(v, mat);

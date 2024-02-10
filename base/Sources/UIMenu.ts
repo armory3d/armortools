@@ -286,7 +286,7 @@ class UIMenu {
 				let shortcuts = ["l", "b", "n", "o", "r", "m", "a", "h", "e", "s", "t", "1", "2", "3", "4"];
 
 				///if (krom_direct3d12 || krom_vulkan || krom_metal)
-				if (Krom.raytraceSupported()) {
+				if (krom_raytrace_supported()) {
 					modes.push(tr("Path Traced"));
 					shortcuts.push("p");
 				}
@@ -458,9 +458,9 @@ class UIMenu {
 					msg += sys_system_id() + " - " + Strings.graphics_api;
 
 					///if krom_windows
-					let save = (Path.isProtected() ? Krom.savePath() : Path.data()) + Path.sep + "tmp.txt";
-					Krom.sysCommand('wmic path win32_VideoController get name > "' + save + '"');
-					let blob = Krom.loadBlob(save);
+					let save = (Path.isProtected() ? krom_save_path() : Path.data()) + Path.sep + "tmp.txt";
+					krom_sys_command('wmic path win32_VideoController get name > "' + save + '"');
+					let blob = krom_load_blob(save);
 					let u8 = new Uint8Array(blob);
 					let gpuRaw = "";
 					for (let i = 0; i < Math.floor(u8.length / 2); ++i) {
@@ -495,7 +495,7 @@ class UIMenu {
 
 							///if (krom_windows || krom_linux || krom_darwin)
 							if (zui_button(tr("Copy"))) {
-								Krom.copyToClipboard(msg);
+								krom_copy_to_clipboard(msg);
 							}
 							///else
 							zui_end_element();

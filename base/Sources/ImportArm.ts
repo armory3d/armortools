@@ -81,7 +81,7 @@ class ImportArm {
 				scene_camera.base.transform.local = mat4_from_f32_array(Project.raw.camera_world);
 				transform_decompose(scene_camera.base.transform);
 				scene_camera.data.fov = Project.raw.camera_fov;
-				camera_object_build_projection(scene_camera);
+				camera_object_build_proj(scene_camera);
 				let origin = Project.raw.camera_origin;
 				Camera.origins[0].x = origin[0];
 				Camera.origins[0].y = origin[1];

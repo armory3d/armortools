@@ -375,14 +375,14 @@ class ExportTexture {
 		}
 
 		if (bits == 8 && Context.raw.formatType == TextureLdrFormat.FormatPng) {
-			Krom.writePng(file, pixels, resX, resY, format);
+			krom_write_png(file, pixels, resX, resY, format);
 		}
 		else if (bits == 8 && Context.raw.formatType == TextureLdrFormat.FormatJpg) {
-			Krom.writeJpg(file, pixels, resX, resY, format, Math.floor(Context.raw.formatQuality));
+			krom_write_jpg(file, pixels, resX, resY, format, Math.floor(Context.raw.formatQuality));
 		}
 		else { // Exr
 			let b = ParserExr.run(resX, resY, pixels, bits, type, off);
-			Krom.fileSaveBytes(file, b, b.byteLength);
+			krom_file_save_bytes(file, b, b.byteLength);
 		}
 	}
 

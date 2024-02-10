@@ -141,7 +141,7 @@ class InpaintNode extends LogicNode {
 						f32a[i + 512 * 512 * 2] = (u8a[i * 4 + 2] / 255.0) * 2.0 - 1.0;
 					}
 
-					let latents_buf = Krom.mlInference(vae_encoder_blob, [f32a.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], Config.raw.gpu_inference);
+					let latents_buf = krom_ml_inference(vae_encoder_blob, [f32a.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], Config.raw.gpu_inference);
 					let latents = new Float32Array(latents_buf);
 					for (let i = 0; i < latents.length; ++i) {
 						latents[i] = 0.18215 * latents[i];

@@ -200,7 +200,7 @@ class UIHeader {
 				tr("Vertex Color"),
 			];
 			///if (krom_direct3d12 || krom_vulkan || krom_metal)
-			if (Krom.raytraceSupported()) {
+			if (krom_raytrace_supported()) {
 				bakes.push(tr("Lightmap"));
 				bakes.push(tr("Bent Normal"));
 				bakes.push(tr("Thickness"));
@@ -213,7 +213,7 @@ class UIHeader {
 			Context.raw.bakeType = zui_combo(bakeHandle, bakes, tr("Bake"));
 
 			///if (krom_direct3d12 || krom_vulkan || krom_metal)
-			if (!Krom.raytraceSupported()) {
+			if (!krom_raytrace_supported()) {
 				Context.raw.bakeType += 1; // Offset for removed AO
 			}
 			///end

@@ -23,19 +23,19 @@ class Camera {
 			if (Config.raw.wrap_mouse && Camera.controlsDown) {
 				if (mouse_view_x() < 0) {
 					mouse_x = mouse_last_x = app_x() + app_w();
-					Krom.setMousePosition(Math.floor(mouse_x), Math.floor(mouse_y));
+					krom_set_mouse_position(Math.floor(mouse_x), Math.floor(mouse_y));
 				}
 				else if (mouse_view_x() > app_w()) {
 					mouse_x = mouse_last_x = app_x();
-					Krom.setMousePosition(Math.floor(mouse_x), Math.floor(mouse_y));
+					krom_set_mouse_position(Math.floor(mouse_x), Math.floor(mouse_y));
 				}
 				else if (mouse_view_y() < 0) {
 					mouse_y = mouse_last_y = app_y() + app_h();
-					Krom.setMousePosition(Math.floor(mouse_x), Math.floor(mouse_y));
+					krom_set_mouse_position(Math.floor(mouse_x), Math.floor(mouse_y));
 				}
 				else if (mouse_view_y() > app_h()) {
 					mouse_y = mouse_last_y = app_y();
-					Krom.setMousePosition(Math.floor(mouse_x), Math.floor(mouse_y));
+					krom_set_mouse_position(Math.floor(mouse_x), Math.floor(mouse_y));
 				}
 			}
 			else {
@@ -68,12 +68,7 @@ class Camera {
 			Camera.controlsDown = false;
 		}
 
-		if (_input_occupied ||
-			!Base.uiEnabled ||
-			Base.isDragging ||
-			Base.isScrolling() ||
-			Base.isComboSelected() ||
-			!Camera.controlsDown) {
+		if (_input_occupied || !Base.uiEnabled || Base.isDragging || Base.isScrolling() || Base.isComboSelected() || !Camera.controlsDown) {
 			return;
 		}
 
@@ -223,7 +218,7 @@ class Camera {
 			vec4_add(camera.base.transform.loc, right);
 			vec4_add(Camera.origins[Camera.index()], look);
 			vec4_add(Camera.origins[Camera.index()], right);
-			camera_object_build_matrix(camera);
+			camera_object_build_mat(camera);
 		}
 	}
 

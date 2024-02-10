@@ -25,7 +25,7 @@ class UIFiles {
 
 	static show = (filters: string, isSave: bool, openMultiple: bool, filesDone: (s: string)=>void) => {
 		if (isSave) {
-			UIFiles.path = Krom.saveDialog(filters, "");
+			UIFiles.path = krom_save_dialog(filters, "");
 			if (UIFiles.path != null) {
 				while (UIFiles.path.indexOf(Path.sep + Path.sep) >= 0) UIFiles.path = UIFiles.path.replaceAll(Path.sep + Path.sep, Path.sep);
 				UIFiles.path = UIFiles.path.replaceAll("\r", "");
@@ -35,7 +35,7 @@ class UIFiles {
 			}
 		}
 		else {
-			let paths = Krom.openDialog(filters, "", openMultiple);
+			let paths = krom_open_dialog(filters, "", openMultiple);
 			if (paths != null) {
 				for (let path of paths) {
 					while (path.indexOf(Path.sep + Path.sep) >= 0) path = path.replaceAll(Path.sep + Path.sep, Path.sep);
@@ -90,7 +90,7 @@ class UIFiles {
 		if (isCloud && File.readDirectory("cloud", false).length == 0) return handle.text;
 
 		///if krom_ios
-		let documentDirectory = Krom.saveDialog("", "");
+		let documentDirectory = krom_save_dialog("", "");
 		documentDirectory = documentDirectory.substr(0, documentDirectory.length - 8); // Strip /'untitled'
 		///end
 
@@ -226,7 +226,7 @@ class UIFiles {
 						// TODO: implement native .arm parsing first
 						///else
 
-						let buffer = Krom.loadBlob(blobPath);
+						let buffer = krom_load_blob(blobPath);
 						let raw = armpack_decode(buffer);
 						if (raw.material_icons != null) {
 							let bytesIcon = raw.material_icons[0];
@@ -358,7 +358,7 @@ class UIFiles {
 				ui._y += slotw * 0.75;
 				let label0 = (UIFiles.showExtensions || f.indexOf(".") <= 0) ? f : f.substr(0, f.lastIndexOf("."));
 				let label1 = "";
-				while (label0.length > 0 && font_width(ui.font, ui.font_size, label0) > ui._w - 6) { // 2 line split
+				while (label0.length > 0 && g2_font_width(ui.font, ui.font_size, label0) > ui._w - 6) { // 2 line split
 					label1 = label0.charAt(label0.length - 1) + label1;
 					label0 = label0.substr(0, label0.length - 1);
 				}
@@ -367,10 +367,10 @@ class UIFiles {
 				if (ui.is_hovered) zui_tooltip(label0 + label1);
 				if (label1 != "") { // Second line
 					ui._x = _x;
-					ui._y += font_height(ui.font, ui.font_size);
+					ui._y += g2_font_height(ui.font, ui.font_size);
 					zui_text(label1, Align.Center);
 					if (ui.is_hovered) zui_tooltip(label0 + label1);
-					ui._y -= font_height(ui.font, ui.font_size);
+					ui._y -= g2_font_height(ui.font, ui.font_size);
 				}
 
 				ui._y -= slotw * 0.75;

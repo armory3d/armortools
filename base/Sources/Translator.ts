@@ -42,7 +42,7 @@ class Translator {
 	// (Re)loads translations for the specified locale
 	static loadTranslations = (newLocale: string) => {
 		if (newLocale == "system") {
-			Config.raw.locale = Krom.language();
+			Config.raw.locale = krom_language();
 		}
 
 		// Check whether the requested or detected locale is available
@@ -63,7 +63,7 @@ class Translator {
 
 		if (Config.raw.locale != "en") {
 			// Load the translation file
-			let translationJson = sys_buffer_to_string(Krom.loadBlob(`data/locale/${Config.raw.locale}.json`));
+			let translationJson = sys_buffer_to_string(krom_load_blob(`data/locale/${Config.raw.locale}.json`));
 
 			let data = JSON.parse(translationJson);
 			for (let field in data) {
@@ -91,8 +91,8 @@ class Translator {
 		}
 
 		if (cjk) {
-			let cjkFontPath = (Path.isProtected() ? Krom.savePath() : "") + "font_cjk.ttc";
-			let cjkFontDiskPath = (Path.isProtected() ? Krom.savePath() : Path.data() + Path.sep) + "font_cjk.ttc";
+			let cjkFontPath = (Path.isProtected() ? krom_save_path() : "") + "font_cjk.ttc";
+			let cjkFontDiskPath = (Path.isProtected() ? krom_save_path() : Path.data() + Path.sep) + "font_cjk.ttc";
 			if (!File.exists(cjkFontDiskPath)) {
 				File.download("https://github.com/armory3d/armorbase/raw/main/Assets/common/extra/font_cjk.ttc", cjkFontDiskPath, () => {
 					if (!File.exists(cjkFontDiskPath)) {
@@ -114,11 +114,11 @@ class Translator {
 		_g2_font_glyphs.sort((a: i32, b: i32) => { return a - b; });
 		// Load and assign font with cjk characters
 		app_notify_on_init(() => {
-			data_get_font(fontPath, (f: font_t) => {
+			data_get_font(fontPath, (f: g2_font_t) => {
 				if (cjk) {
 					let acjkFontIndices = Translator.cjkFontIndices as any;
 					let fontIndex = Translator.cjkFontIndices.has(Config.raw.locale) ? acjkFontIndices[Config.raw.locale] : 0;
-					font_set_font_index(f, fontIndex);
+					g2_font_set_font_index(f, fontIndex);
 				}
 				Base.font = f;
 				// Scale up the font size and elements width a bit

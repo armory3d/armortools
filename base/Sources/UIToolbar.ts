@@ -68,7 +68,7 @@ class UIToolbar {
 				ui.t.ELEMENT_H = Math.floor(ui.t.ELEMENT_H * 1.5);
 				ui.t.BUTTON_H = ui.t.ELEMENT_H;
 				ui.t.BUTTON_COL = ui.t.WINDOW_BG_COL;
-				let fontHeight = font_height(ui.font, ui.font_size);
+				let fontHeight = g2_font_height(ui.font, ui.font_size);
 				ui.font_offset_y = (zui_ELEMENT_H(ui) - fontHeight) / 2;
 				let _w = ui._w;
 				ui._w = UIToolbar.toolbarw;
