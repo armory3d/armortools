@@ -88,10 +88,14 @@ class PhysicsBody {
 
 	static init = (pb: PhysicsBodyRaw, o: object_t) => {
 		pb.object = o;
-		if (pb.ready) return;
+		if (pb.ready) {
+			return;
+		}
 		pb.ready = true;
 
-		if (pb.object.ext.constructor != mesh_object_t) return; // No mesh data
+		if (pb.object.ext_type != "mesh_object_t") {
+			return; // No mesh data
+		}
 		let transform = o.transform;
 		let physics = PhysicsWorld.active;
 
@@ -185,7 +189,9 @@ class PhysicsBody {
 		PhysicsBody.vec1.setZ(0);
 		let inertia = PhysicsBody.vec1;
 
-		if (pb.mass > 0) pb.btshape.calculateLocalInertia(pb.mass, inertia);
+		if (pb.mass > 0) {
+			pb.btshape.calculateLocalInertia(pb.mass, inertia);
+		}
 		let bodyCI = new Ammo.btRigidBodyConstructionInfo(pb.mass, pb.motionState, pb.btshape, inertia);
 		pb.body = new Ammo.btRigidBody(bodyCI);
 
@@ -199,9 +205,15 @@ class PhysicsBody {
 		pb.body.setDamping(pb.linearDamping, pb.angularDamping);
 		PhysicsBody.setLinearFactor(pb, pb.linearFactors[0], pb.linearFactors[1], pb.linearFactors[2]);
 		PhysicsBody.setAngularFactor(pb, pb.angularFactors[0], pb.angularFactors[1], pb.angularFactors[2]);
-		if (pb.trigger) pb.body.setCollisionFlags(pb.body.getCollisionFlags() | CollisionFlags.CF_NO_CONTACT_RESPONSE);
-		if (pb.mass == 0.0) pb.body.setCollisionFlags(pb.body.getCollisionFlags() | CollisionFlags.CF_STATIC_OBJECT);
-		if (pb.ccd) PhysicsBody.setCcd(pb, transform.radius);
+		if (pb.trigger) {
+			pb.body.setCollisionFlags(pb.body.getCollisionFlags() | CollisionFlags.CF_NO_CONTACT_RESPONSE);
+		}
+		if (pb.mass == 0.0) {
+			pb.body.setCollisionFlags(pb.body.getCollisionFlags() | CollisionFlags.CF_STATIC_OBJECT);
+		}
+		if (pb.ccd) {
+			PhysicsBody.setCcd(pb, transform.radius);
+		}
 
 		pb.bodyScaleX = pb.currentScaleX = transform.scale.x;
 		pb.bodyScaleY = pb.currentScaleY = transform.scale.y;
@@ -218,7 +230,9 @@ class PhysicsBody {
 	}
 
 	static physicsUpdate = (pb: PhysicsBodyRaw) => {
-		if (!pb.ready) return;
+		if (!pb.ready) {
+			return;
+		}
 		let trans = pb.body.getWorldTransform();
 
 		let p = trans.getOrigin();
@@ -343,7 +357,9 @@ class PhysicsBody {
 		PhysicsBody.quat1.setValue(PhysicsBody.quat.x, PhysicsBody.quat.y, PhysicsBody.quat.z, PhysicsBody.quat.w);
 		PhysicsBody.trans1.setRotation(PhysicsBody.quat1);
 		pb.body.setWorldTransform(PhysicsBody.trans1);
-		if (pb.currentScaleX != t.scale.x || pb.currentScaleY != t.scale.y || pb.currentScaleZ != t.scale.z) PhysicsBody.setScale(pb, t.scale);
+		if (pb.currentScaleX != t.scale.x || pb.currentScaleY != t.scale.y || pb.currentScaleZ != t.scale.z) {
+			PhysicsBody.setScale(pb, t.scale);
+		}
 		PhysicsBody.activate(pb);
 	}
 

@@ -61,7 +61,7 @@ class MakePaint {
 
 		NodeShader.write(vert, 'gl_Position = vec4(tpos, 0.0, 1.0);');
 
-		NodeShader.add_uniform(vert, 'mat4 WVP', '_worldViewProjectionMatrix');
+		NodeShader.add_uniform(vert, 'mat4 WVP', '_world_view_proj_matrix');
 
 		NodeShader.add_out(vert, 'vec4 ndc');
 		NodeShader.write_attrib(vert, 'ndc = mul(vec4(pos.xyz, 1.0), WVP);');
@@ -72,7 +72,7 @@ class MakePaint {
 
 		NodeShader.add_uniform(frag, 'vec4 inp', '_inputBrush');
 		NodeShader.add_uniform(frag, 'vec4 inplast', '_inputBrushLast');
-		NodeShader.add_uniform(frag, 'float aspectRatio', '_aspectRatioWindowF');
+		NodeShader.add_uniform(frag, 'float aspectRatio', '_aspect_ratio_window');
 		NodeShader.write(frag, 'vec2 bsp = sp.xy * 2.0 - 1.0;');
 		NodeShader.write(frag, 'bsp.x *= aspectRatio;');
 		NodeShader.write(frag, 'bsp = bsp * 0.5 + 0.5;');
@@ -98,7 +98,7 @@ class MakePaint {
 			NodeShader.write(frag, 'float depth = textureLod(gbufferD, vec2(inp.x, 1.0 - inp.y), 0.0).r;');
 			///end
 
-			NodeShader.add_uniform(frag, 'mat4 invVP', '_inverseViewProjectionMatrix');
+			NodeShader.add_uniform(frag, 'mat4 invVP', '_inv_view_proj_matrix');
 			NodeShader.write(frag, 'vec4 winp = vec4(vec2(inp.x, 1.0 - inp.y) * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);');
 			NodeShader.write(frag, 'winp = mul(winp, invVP);');
 			NodeShader.write(frag, 'winp.xyz /= winp.w;');
@@ -125,7 +125,7 @@ class MakePaint {
 		}
 
 		// NodeShader.add_uniform(vert, 'float brushScale', '_brushScale');
-		// NodeShader.add_uniform(vert, 'float texScale', '_texUnpack');
+		// NodeShader.add_uniform(vert, 'float texScale', '_tex_unpack');
 		// NodeShader.add_out(vert, 'vec2 texCoord');
 		// NodeShader.write(vert, 'texCoord = tex * brushScale * texScale;');
 

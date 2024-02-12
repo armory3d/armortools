@@ -126,7 +126,7 @@ class MakeBake {
 	static positionAndNormal = (vert: NodeShaderRaw, frag: NodeShaderRaw) => {
 		NodeShader.add_out(vert, 'vec3 position');
 		NodeShader.add_out(vert, 'vec3 normal');
-		NodeShader.add_uniform(vert, 'mat4 W', '_worldMatrix');
+		NodeShader.add_uniform(vert, 'mat4 W', '_world_matrix');
 		NodeShader.write(vert, 'position = vec4(mul(vec4(pos.xyz, 1.0), W)).xyz;');
 		NodeShader.write(vert, 'normal = vec3(nor.xy, pos.w);');
 		NodeShader.write(vert, 'vec2 tpos = vec2(tex.x * 2.0 - 1.0, (1.0 - tex.y) * 2.0 - 1.0);');

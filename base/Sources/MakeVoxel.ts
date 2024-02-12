@@ -27,7 +27,7 @@ class MakeVoxel {
 		pipeState.vertex_shader = g4_shader_from_source(MakeVoxel.voxelSource(), shader_type_t.VERTEX);
 
 		g4_pipeline_compile(pipeState);
-		data.constants = [{ name: "W", type: "mat4", link: "_worldMatrix" }, { name: "N", type: "mat3", link: "_normalMatrix" }];
+		data.constants = [{ name: "W", type: "mat4", link: "_world_matrix" }, { name: "N", type: "mat3", link: "_normal_matrix" }];
 		data._constants = [g4_pipeline_get_const_loc(pipeState, "W"), g4_pipeline_get_const_loc(pipeState, "N")];
 		data.texture_units = [{ name: "texpaint_pack" }, { name: "voxels", is_image: true }];
 		data._tex_units = [g4_pipeline_get_tex_unit(pipeState, "texpaint_pack"), g4_pipeline_get_tex_unit(pipeState, "voxels")];

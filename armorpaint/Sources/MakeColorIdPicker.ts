@@ -25,7 +25,7 @@ class MakeColorIdPicker {
 			if (Context.raw.pickPosNorTex) {
 				NodeShader.add_out(frag, 'vec4 fragColor[2]');
 				NodeShader.add_uniform(frag, 'sampler2D gbufferD');
-				NodeShader.add_uniform(frag, 'mat4 invVP', '_inverseViewProjectionMatrix');
+				NodeShader.add_uniform(frag, 'mat4 invVP', '_inv_view_proj_matrix');
 				NodeShader.add_function(frag, ShaderFunctions.str_get_pos_from_depth);
 				NodeShader.add_function(frag, ShaderFunctions.str_get_nor_from_depth);
 				NodeShader.write(frag, 'fragColor[0] = vec4(get_pos_from_depth(vec2(inp.x, 1.0 - inp.y), invVP, texturePass(gbufferD)), texCoordInp.x);');

@@ -23,7 +23,7 @@ class MakeParticle {
 		NodeShader.write_attrib(vert, 'emitFrom = emitFrom * brushRadius - brushRadius / 2.0;');
 		NodeShader.write_attrib(vert, 'spos.xyz += emitFrom * vec3(256.0, 256.0, 256.0);');
 
-		NodeShader.add_uniform(vert, 'mat4 pd', '_particleData');
+		NodeShader.add_uniform(vert, 'mat4 pd', '_particle_data');
 
 		let str_tex_hash = "float fhash(int n) { return fract(sin(float(n)) * 43758.5453); }\n";
 		NodeShader.add_function(vert, str_tex_hash);
@@ -56,7 +56,7 @@ class MakeParticle {
 		NodeShader.write(vert, 'spos.xyz += p_location;');
 		NodeShader.write(vert, 'spos.xyz *= vec3(0.01, 0.01, 0.01);');
 
-		NodeShader.add_uniform(vert, 'mat4 WVP', '_worldViewProjectionMatrix');
+		NodeShader.add_uniform(vert, 'mat4 WVP', '_world_view_proj_matrix');
 		NodeShader.write(vert, 'gl_Position = mul(spos, WVP);');
 
 		NodeShader.add_uniform(vert, 'vec4 inp', '_inputBrush');
@@ -89,7 +89,7 @@ class MakeParticle {
 		///if arm_physics
 		if (Context.raw.particlePhysics) {
 			NodeShader.add_out(vert, 'vec4 wpos');
-			NodeShader.add_uniform(vert, 'mat4 W', '_worldMatrix');
+			NodeShader.add_uniform(vert, 'mat4 W', '_world_matrix');
 			NodeShader.write_attrib(vert, 'wpos = mul(vec4(pos.xyz, 1.0), W);');
 			NodeShader.add_uniform(frag, 'vec3 particleHit', '_particleHit');
 			NodeShader.add_uniform(frag, 'vec3 particleHitLast', '_particleHitLast');

@@ -79,7 +79,7 @@ class MakePaint {
 			NodeShader.add_uniform(vert, 'mat4 WVP', '_decalLayerMatrix');
 		}
 		else {
-			NodeShader.add_uniform(vert, 'mat4 WVP', '_worldViewProjectionMatrix');
+			NodeShader.add_uniform(vert, 'mat4 WVP', '_world_view_proj_matrix');
 		}
 
 		NodeShader.add_out(vert, 'vec4 ndc');
@@ -94,7 +94,7 @@ class MakePaint {
 
 		NodeShader.add_uniform(frag, 'vec4 inp', '_inputBrush');
 		NodeShader.add_uniform(frag, 'vec4 inplast', '_inputBrushLast');
-		NodeShader.add_uniform(frag, 'float aspectRatio', '_aspectRatioWindowF');
+		NodeShader.add_uniform(frag, 'float aspectRatio', '_aspect_ratio_window');
 		NodeShader.write(frag, 'vec2 bsp = sp.xy * 2.0 - 1.0;');
 		NodeShader.write(frag, 'bsp.x *= aspectRatio;');
 		NodeShader.write(frag, 'bsp = bsp * 0.5 + 0.5;');
@@ -304,7 +304,7 @@ class MakePaint {
 			}
 			NodeShader.write(frag, 'pa_mask /= brushRadius;');
 			if (Config.raw.brush_3d) {
-				NodeShader.add_uniform(frag, 'vec3 eye', '_cameraPosition');
+				NodeShader.add_uniform(frag, 'vec3 eye', '_camera_pos');
 				NodeShader.write(frag, 'pa_mask *= distance(eye, winp.xyz) / 1.5;');
 			}
 			NodeShader.write(frag, 'pa_mask = pa_mask.xy * 0.5 + 0.5;');

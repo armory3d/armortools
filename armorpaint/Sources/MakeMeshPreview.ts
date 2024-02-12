@@ -27,8 +27,8 @@ class MakeMeshPreview {
 			NodeShaderContext.add_elem(con_mesh, "bone", 'short4norm');
 			NodeShaderContext.add_elem(con_mesh, "weight", 'short4norm');
 			NodeShader.add_function(vert, ShaderFunctions.str_getSkinningDualQuat);
-			NodeShader.add_uniform(vert, 'vec4 skinBones[128 * 2]', '_skinBones');
-			NodeShader.add_uniform(vert, 'float posUnpack', '_posUnpack');
+			NodeShader.add_uniform(vert, 'vec4 skinBones[128 * 2]', '_skin_bones');
+			NodeShader.add_uniform(vert, 'float posUnpack', '_pos_unpack');
 			NodeShader.write_attrib(vert, 'vec4 skinA;');
 			NodeShader.write_attrib(vert, 'vec4 skinB;');
 			NodeShader.write_attrib(vert, 'getSkinningDualQuat(ivec4(bone * 32767), weight, skinA, skinB);');
@@ -40,7 +40,7 @@ class MakeMeshPreview {
 		}
 		///end
 
-		NodeShader.add_uniform(vert, 'mat4 WVP', '_worldViewProjectionMatrix');
+		NodeShader.add_uniform(vert, 'mat4 WVP', '_world_view_proj_matrix');
 		NodeShader.write_attrib(vert, `gl_Position = mul(vec4(${pos}.xyz, 1.0), WVP);`);
 
 		let brushScale = (Context.raw.brushScale * Context.raw.brushNodesScale) + "";

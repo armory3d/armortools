@@ -175,21 +175,21 @@ class ParserMaterial {
 			else {
 				NodeShader.add_out(vert, "vec3 bposition");
 				NodeShader.add_uniform(vert, "vec3 dim", "_dim");
-				NodeShader.add_uniform(vert, "vec3 hdim", "_halfDim");
+				NodeShader.add_uniform(vert, "vec3 hdim", "_half_dim");
 				NodeShader.write_attrib(vert, `bposition = (pos.xyz + hdim) / dim;`);
 			}
 		}
 		if (frag.wposition) {
-			NodeShader.add_uniform(vert, "mat4 W", "_worldMatrix");
+			NodeShader.add_uniform(vert, "mat4 W", "_world_matrix");
 			NodeShader.add_out(vert, "vec3 wposition");
 			NodeShader.write_attrib(vert, `wposition = vec4(mul(vec4(pos.xyz, 1.0), W)).xyz;`);
 		}
 		else if (vert.wposition) {
-			NodeShader.add_uniform(vert, "mat4 W", "_worldMatrix");
+			NodeShader.add_uniform(vert, "mat4 W", "_world_matrix");
 			NodeShader.write_attrib(vert, `vec3 wposition = vec4(mul(vec4(pos.xyz, 1.0), W)).xyz;`);
 		}
 		if (frag.vposition) {
-			NodeShader.add_uniform(vert, "mat4 WV", "_worldViewMatrix");
+			NodeShader.add_uniform(vert, "mat4 WV", "_world_view_matrix");
 			NodeShader.add_out(vert, "vec3 vposition");
 			NodeShader.write_attrib(vert, `vposition = vec4(mul(vec4(pos.xyz, 1.0), WV)).xyz;`);
 		}
@@ -204,31 +204,31 @@ class ParserMaterial {
 		}
 		if (frag.wtangent) {
 			// NodeShaderContext.add_elem(con, "tang", "short4norm");
-			// NodeShader.add_uniform(vert, "mat3 N", "_normalMatrix");
+			// NodeShader.add_uniform(vert, "mat3 N", "_normal_matrix");
 			NodeShader.add_out(vert, "vec3 wtangent");
 			// NodeShader.write_attrib(vert, `wtangent = normalize(mul(tang.xyz, N));`);
 			NodeShader.write_attrib(vert, `wtangent = vec3(0.0, 0.0, 0.0);`);
 		}
 		if (frag.vVecCam) {
-			NodeShader.add_uniform(vert, "mat4 WV", "_worldViewMatrix");
+			NodeShader.add_uniform(vert, "mat4 WV", "_world_view_matrix");
 			NodeShader.add_out(vert, "vec3 eyeDirCam");
 			NodeShader.write_attrib(vert, `eyeDirCam = vec4(mul(vec4(pos.xyz, 1.0), WV)).xyz; eyeDirCam.z *= -1.0;`);
 			NodeShader.write_attrib(frag, `vec3 vVecCam = normalize(eyeDirCam);`);
 		}
 		if (frag.vVec) {
-			NodeShader.add_uniform(vert, "vec3 eye", "_cameraPosition");
+			NodeShader.add_uniform(vert, "vec3 eye", "_camera_pos");
 			NodeShader.add_out(vert, "vec3 eyeDir");
 			NodeShader.write_attrib(vert, `eyeDir = eye - wposition;`);
 			NodeShader.write_attrib(frag, `vec3 vVec = normalize(eyeDir);`);
 		}
 		if (frag.n) {
-			NodeShader.add_uniform(vert, "mat3 N", "_normalMatrix");
+			NodeShader.add_uniform(vert, "mat3 N", "_normal_matrix");
 			NodeShader.add_out(vert, "vec3 wnormal");
 			NodeShader.write_attrib(vert, `wnormal = mul(vec3(nor.xy, pos.w), N);`);
 			NodeShader.write_attrib(frag, `vec3 n = normalize(wnormal);`);
 		}
 		else if (vert.n) {
-			NodeShader.add_uniform(vert, "mat3 N", "_normalMatrix");
+			NodeShader.add_uniform(vert, "mat3 N", "_normal_matrix");
 			NodeShader.write_attrib(vert, `vec3 wnormal = normalize(mul(vec3(nor.xy, pos.w), N));`);
 		}
 		if (frag.nAttr) {
@@ -1153,7 +1153,7 @@ class ParserMaterial {
 		}
 		else if (node.type == "CAMERA") {
 			if (socket == node.outputs[1]) { // View Z Depth
-				NodeShader.add_uniform(ParserMaterial.curshader, "vec2 cameraProj", "_cameraPlaneProj");
+				NodeShader.add_uniform(ParserMaterial.curshader, "vec2 cameraProj", "_camera_plane_proj");
 				///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 				ParserMaterial.curshader.wvpposition = true;
 				return "(cameraProj.y / ((wvpposition.z / wvpposition.w) - cameraProj.x))";
@@ -1162,7 +1162,7 @@ class ParserMaterial {
 				///end
 			}
 			else { // View Distance
-				NodeShader.add_uniform(ParserMaterial.curshader, "vec3 eye", "_cameraPosition");
+				NodeShader.add_uniform(ParserMaterial.curshader, "vec3 eye", "_camera_pos");
 				ParserMaterial.curshader.wposition = true;
 				return "distance(eye, wposition)";
 			}
@@ -1295,15 +1295,15 @@ class ParserMaterial {
 		}
 		else if (node.type == "OBJECT_INFO") {
 			if (socket == node.outputs[1]) { // Object Index
-				NodeShader.add_uniform(ParserMaterial.curshader, "float objectInfoIndex", "_objectInfoIndex");
+				NodeShader.add_uniform(ParserMaterial.curshader, "float objectInfoIndex", "_object_info_index");
 				return "objectInfoIndex";
 			}
 			else if (socket == node.outputs[2]) { // Material Index
-				NodeShader.add_uniform(ParserMaterial.curshader, "float objectInfoMaterialIndex", "_objectInfoMaterialIndex");
+				NodeShader.add_uniform(ParserMaterial.curshader, "float objectInfoMaterialIndex", "_object_info_material_index");
 				return "objectInfoMaterialIndex";
 			}
 			else if (socket == node.outputs[3]) { // Random
-				NodeShader.add_uniform(ParserMaterial.curshader, "float objectInfoRandom", "_objectInfoRandom");
+				NodeShader.add_uniform(ParserMaterial.curshader, "float objectInfoRandom", "_object_info_random");
 				return "objectInfoRandom";
 			}
 		}
