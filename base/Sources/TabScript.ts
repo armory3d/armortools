@@ -29,10 +29,9 @@ class TabScript {
 			}
 			if (zui_button(tr("Import"))) {
 				UIFiles.show("js", false, false, (path: string) => {
-					data_get_blob(path, (b: ArrayBuffer) => {
-						TabScript.hscript.text = sys_buffer_to_string(b);
-						data_delete_blob(path);
-					});
+					let b: ArrayBuffer = data_get_blob(path);
+					TabScript.hscript.text = sys_buffer_to_string(b);
+					data_delete_blob(path);
 				});
 			}
 			if (zui_button(tr("Export"))) {
@@ -49,7 +48,8 @@ class TabScript {
 
 			let _font = ui.font;
 			let _fontSize = ui.font_size;
-			data_get_font("font_mono.ttf", (f: g2_font_t) => { zui_set_font(ui, f); }); // Sync
+			let f: g2_font_t = data_get_font("font_mono.ttf");
+			zui_set_font(ui, f);
 			ui.font_size = Math.floor(15 * zui_SCALE(ui));
 			zui_set_text_area_line_numbers(true);
 			zui_set_text_area_scroll_past_end(true);
@@ -65,11 +65,12 @@ class TabScript {
 
 	static getTextColoring = (): zui_text_coloring_t => {
 		if (TabScript.textColoring == null) {
-			data_get_blob("text_coloring.json", (blob: ArrayBuffer) => {
-				TabScript.textColoring = JSON.parse(sys_buffer_to_string(blob));
-				TabScript.textColoring.default_color = Math.floor(TabScript.textColoring.default_color);
-				for (let coloring of TabScript.textColoring.colorings) coloring.color = Math.floor(coloring.color);
-			});
+			let blob: ArrayBuffer = data_get_blob("text_coloring.json");
+			TabScript.textColoring = JSON.parse(sys_buffer_to_string(blob));
+			TabScript.textColoring.default_color = Math.floor(TabScript.textColoring.default_color);
+			for (let coloring of TabScript.textColoring.colorings) {
+				coloring.color = Math.floor(coloring.color);
+			}
 		}
 		return TabScript.textColoring;
 	}

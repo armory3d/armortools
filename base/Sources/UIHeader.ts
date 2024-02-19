@@ -114,7 +114,7 @@ class UIHeader {
 			let opacityPicked = Math.round(Context.raw.pickedColor.opacity * 100) / 100;
 
 			let h = zui_handle("uiheader_0");
-			let color: Color = 0xffffffff;
+			let color: color_t = 0xffffffff;
 			color = color_set_rb(color, baseRPicked * 255);
 			color = color_set_gb(color, baseGPicked * 255);
 			color = color_set_bb(color, baseBPicked * 255);

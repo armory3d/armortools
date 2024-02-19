@@ -114,22 +114,21 @@ class Translator {
 		_g2_font_glyphs.sort((a: i32, b: i32) => { return a - b; });
 		// Load and assign font with cjk characters
 		app_notify_on_init(() => {
-			data_get_font(fontPath, (f: g2_font_t) => {
-				if (cjk) {
-					let acjkFontIndices = Translator.cjkFontIndices as any;
-					let fontIndex = Translator.cjkFontIndices.has(Config.raw.locale) ? acjkFontIndices[Config.raw.locale] : 0;
-					g2_font_set_font_index(f, fontIndex);
-				}
-				Base.font = f;
-				// Scale up the font size and elements width a bit
-				Base.theme.FONT_SIZE = Math.floor(Base.defaultFontSize * fontScale);
-				Base.theme.ELEMENT_W = Math.floor(Base.defaultElementW * (Config.raw.locale != "en" ? 1.4 : 1.0));
-				let uis = Base.getUIs();
-				for (let ui of uis) {
-					zui_set_font(ui, f);
-					zui_set_scale(ui, zui_SCALE(ui));
-				}
-			});
+			let f: g2_font_t = data_get_font(fontPath);
+			if (cjk) {
+				let acjkFontIndices = Translator.cjkFontIndices as any;
+				let fontIndex = Translator.cjkFontIndices.has(Config.raw.locale) ? acjkFontIndices[Config.raw.locale] : 0;
+				g2_font_set_font_index(f, fontIndex);
+			}
+			Base.font = f;
+			// Scale up the font size and elements width a bit
+			Base.theme.FONT_SIZE = Math.floor(Base.defaultFontSize * fontScale);
+			Base.theme.ELEMENT_W = Math.floor(Base.defaultElementW * (Config.raw.locale != "en" ? 1.4 : 1.0));
+			let uis = Base.getUIs();
+			for (let ui of uis) {
+				zui_set_font(ui, f);
+				zui_set_scale(ui, zui_SCALE(ui));
+			}
 		});
 	}
 

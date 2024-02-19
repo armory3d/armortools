@@ -106,58 +106,57 @@ class ImportMesh {
 		let raw = ImportMesh.rawMesh(mesh);
 		if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
 
-		mesh_data_create(raw, (md: mesh_data_t) => {
-			Context.raw.paintObject = Context.mainObject();
+		let md: mesh_data_t = mesh_data_create(raw);
+		Context.raw.paintObject = Context.mainObject();
 
-			Context.selectPaintObject(Context.mainObject());
-			for (let i = 0; i < Project.paintObjects.length; ++i) {
-				let p = Project.paintObjects[i];
-				if (p == Context.raw.paintObject) continue;
-				data_delete_mesh(p.data._handle);
-				mesh_object_remove(p);
+		Context.selectPaintObject(Context.mainObject());
+		for (let i = 0; i < Project.paintObjects.length; ++i) {
+			let p = Project.paintObjects[i];
+			if (p == Context.raw.paintObject) continue;
+			data_delete_mesh(p.data._handle);
+			mesh_object_remove(p);
+		}
+		let handle = Context.raw.paintObject.data._handle;
+		if (handle != "SceneSphere" && handle != "ScenePlane") {
+			data_delete_mesh(handle);
+		}
+
+		mesh_object_set_data(Context.raw.paintObject, md);
+		Context.raw.paintObject.base.name = mesh.name;
+		Project.paintObjects = [Context.raw.paintObject];
+
+		md._handle = raw.name;
+		data_cached_meshes.set(md._handle, md);
+
+		Context.raw.ddirty = 4;
+
+		///if (is_paint || is_sculpt)
+		UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
+		UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
+		UtilUV.uvmapCached = false;
+		UtilUV.trianglemapCached = false;
+		UtilUV.dilatemapCached = false;
+		///end
+
+		///if (is_paint || is_sculpt)
+		if (ImportMesh.clearLayers) {
+			while (Project.layers.length > 0) {
+				let l = Project.layers.pop();
+				SlotLayer.unload(l);
 			}
-			let handle = Context.raw.paintObject.data._handle;
-			if (handle != "SceneSphere" && handle != "ScenePlane") {
-				data_delete_mesh(handle);
-			}
+			Base.newLayer(false);
+			app_notify_on_init(Base.initLayers);
+			History.reset();
+		}
+		///end
 
-			mesh_object_set_data(Context.raw.paintObject, md);
-			Context.raw.paintObject.base.name = mesh.name;
-			Project.paintObjects = [Context.raw.paintObject];
-
-			md._handle = raw.name;
-			data_cached_meshes.set(md._handle, md);
-
-			Context.raw.ddirty = 4;
-
-			///if (is_paint || is_sculpt)
-			UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
-			UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
-			UtilUV.uvmapCached = false;
-			UtilUV.trianglemapCached = false;
-			UtilUV.dilatemapCached = false;
-			///end
-
-			///if (is_paint || is_sculpt)
-			if (ImportMesh.clearLayers) {
-				while (Project.layers.length > 0) {
-					let l = Project.layers.pop();
-					SlotLayer.unload(l);
-				}
-				Base.newLayer(false);
-				app_notify_on_init(Base.initLayers);
-				History.reset();
-			}
-			///end
-
-			// Wait for addMesh calls to finish
-			if (ImportMesh.meshesToUnwrap != null) {
-				Base.notifyOnNextFrame(ImportMesh.finishImport);
-			}
-			else {
-				app_notify_on_init(ImportMesh.finishImport);
-			}
-		});
+		// Wait for addMesh calls to finish
+		if (ImportMesh.meshesToUnwrap != null) {
+			Base.notifyOnNextFrame(ImportMesh.finishImport);
+		}
+		else {
+			app_notify_on_init(ImportMesh.finishImport);
+		}
 	}
 
 	static makeMesh = (mesh: any, path: string) => {
@@ -185,35 +184,34 @@ class ImportMesh {
 		let raw = ImportMesh.rawMesh(mesh);
 		if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
 
-		mesh_data_create(raw, (md: mesh_data_t) => {
+		let md: mesh_data_t = mesh_data_create(raw);
 
-			let object = scene_add_mesh_object(md, Context.raw.paintObject.materials, Context.raw.paintObject.base);
-			object.base.name = mesh.name;
-			object.skip_context = "paint";
+		let object = scene_add_mesh_object(md, Context.raw.paintObject.materials, Context.raw.paintObject.base);
+		object.base.name = mesh.name;
+		object.skip_context = "paint";
 
-			// Ensure unique names
-			for (let p of Project.paintObjects) {
-				if (p.base.name == object.base.name) {
-					p.base.name += ".001";
-					p.data._handle += ".001";
-					data_cached_meshes.set(p.data._handle, p.data);
-				}
+		// Ensure unique names
+		for (let p of Project.paintObjects) {
+			if (p.base.name == object.base.name) {
+				p.base.name += ".001";
+				p.data._handle += ".001";
+				data_cached_meshes.set(p.data._handle, p.data);
 			}
+		}
 
-			Project.paintObjects.push(object);
+		Project.paintObjects.push(object);
 
-			md._handle = raw.name;
-			data_cached_meshes.set(md._handle, md);
+		md._handle = raw.name;
+		data_cached_meshes.set(md._handle, md);
 
-			Context.raw.ddirty = 4;
+		Context.raw.ddirty = 4;
 
-			///if (is_paint || is_sculpt)
-			UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
-			UtilUV.uvmapCached = false;
-			UtilUV.trianglemapCached = false;
-			UtilUV.dilatemapCached = false;
-			///end
-		});
+		///if (is_paint || is_sculpt)
+		UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
+		UtilUV.uvmapCached = false;
+		UtilUV.trianglemapCached = false;
+		UtilUV.dilatemapCached = false;
+		///end
 	}
 
 	static addMesh = (mesh: any) => {

@@ -17,9 +17,8 @@ class SlotBrush {
 
 		if (c == null) {
 			if (SlotBrush.defaultCanvas == null) { // Synchronous
-				data_get_blob("default_brush.arm", (b: ArrayBuffer) => {
-					SlotBrush.defaultCanvas = b;
-				});
+				let b: ArrayBuffer = data_get_blob("default_brush.arm")
+				SlotBrush.defaultCanvas = b;
 			}
 			raw.canvas = armpack_decode(SlotBrush.defaultCanvas);
 			raw.canvas.name = "Brush " + (raw.id + 1);

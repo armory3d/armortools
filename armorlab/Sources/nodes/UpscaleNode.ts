@@ -31,10 +31,9 @@ class UpscaleNode extends LogicNode {
 	}
 
 	static loadBlob = (done: ()=>void) => {
-		data_get_blob("models/esrgan.quant.onnx", (_esrgan_blob: ArrayBuffer) => {
-			UpscaleNode.esrgan_blob = _esrgan_blob;
-			done();
-		});
+		let _esrgan_blob: ArrayBuffer = data_get_blob("models/esrgan.quant.onnx");
+		UpscaleNode.esrgan_blob = _esrgan_blob;
+		done();
 	}
 
 	override getCachedImage = (): image_t => {

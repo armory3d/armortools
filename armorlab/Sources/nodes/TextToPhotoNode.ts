@@ -30,19 +30,16 @@ class TextToPhotoNode extends LogicNode {
 	}
 
 	static stableDiffusion = (prompt: string, done: (img: image_t)=>void, inpaintLatents: Float32Array = null, offset = 0, upscale = true, mask: Float32Array = null, latents_orig: Float32Array = null) => {
-		data_get_blob("models/sd_text_encoder.quant.onnx", (_text_encoder_blob: ArrayBuffer) => {
-		data_get_blob("models/sd_unet.quant.onnx", (_unet_blob: ArrayBuffer) => {
-		data_get_blob("models/sd_vae_decoder.quant.onnx", (_vae_decoder_blob: ArrayBuffer) => {
-			TextToPhotoNode.text_encoder_blob = _text_encoder_blob;
-			TextToPhotoNode.unet_blob = _unet_blob;
-			TextToPhotoNode.vae_decoder_blob = _vae_decoder_blob;
-			TextToPhotoNode.textEncoder(prompt, inpaintLatents, (latents: Float32Array, text_embeddings: Float32Array) => {
-				TextToPhotoNode.unet(latents, text_embeddings, mask, latents_orig, offset, (latents: Float32Array) => {
-					TextToPhotoNode.vaeDecoder(latents, upscale, done);
-				});
+		let _text_encoder_blob: ArrayBuffer = data_get_blob("models/sd_text_encoder.quant.onnx");
+		let _unet_blob: ArrayBuffer = data_get_blob("models/sd_unet.quant.onnx");
+		let _vae_decoder_blob: ArrayBuffer = data_get_blob("models/sd_vae_decoder.quant.onnx");
+		TextToPhotoNode.text_encoder_blob = _text_encoder_blob;
+		TextToPhotoNode.unet_blob = _unet_blob;
+		TextToPhotoNode.vae_decoder_blob = _vae_decoder_blob;
+		TextToPhotoNode.textEncoder(prompt, inpaintLatents, (latents: Float32Array, text_embeddings: Float32Array) => {
+			TextToPhotoNode.unet(latents, text_embeddings, mask, latents_orig, offset, (latents: Float32Array) => {
+				TextToPhotoNode.vaeDecoder(latents, upscale, done);
 			});
-		});
-		});
 		});
 	}
 

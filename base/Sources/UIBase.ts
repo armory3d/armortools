@@ -121,10 +121,9 @@ class UIBase {
 		///if (is_paint || is_sculpt)
 		if (Project.materials == null) {
 			Project.materials = [];
-			data_get_material("Scene", "Material", (m: material_data_t) => {
-				Project.materials.push(SlotMaterial.create(m));
-				Context.raw.material = Project.materials[0];
-			});
+			let m: material_data_t = data_get_material("Scene", "Material");
+			Project.materials.push(SlotMaterial.create(m));
+			Context.raw.material = Project.materials[0];
 		}
 
 		if (Project.brushes == null) {
@@ -149,15 +148,13 @@ class UIBase {
 
 		///if is_lab
 		if (Project.materialData == null) {
-			data_get_material("Scene", "Material", (m: material_data_t) => {
-				Project.materialData = m;
-			});
+			let m: material_data_t = data_get_material("Scene", "Material");
+			Project.materialData = m;
 		}
 
 		if (Project.defaultCanvas == null) { // Synchronous
-			data_get_blob("default_brush.arm", (b: ArrayBuffer) => {
-				Project.defaultCanvas = b;
-			});
+			let b: ArrayBuffer = data_get_blob("default_brush.arm");
+			Project.defaultCanvas = b;
 		}
 
 		Project.nodes = zui_nodes_create();
@@ -710,34 +707,32 @@ class UIBase {
 				}
 				History.pushUndo = true;
 				Context.raw.particleHitX = Context.raw.particleHitY = Context.raw.particleHitZ = 0;
-				scene_spawn_object(".Sphere", null, (o: object_t) => {
-					data_get_material("Scene", ".Gizmo", (md: material_data_t) => {
-						let mo: mesh_object_t = o.ext;
-						mo.base.name = ".Bullet";
-						mo.materials[0] = md;
-						mo.base.visible = true;
+				let o: object_t = scene_spawn_object(".Sphere");
+				let md: material_data_t = data_get_material("Scene", ".Gizmo");
+				let mo: mesh_object_t = o.ext;
+				mo.base.name = ".Bullet";
+				mo.materials[0] = md;
+				mo.base.visible = true;
 
-						let camera = scene_camera;
-						let ct = camera.base.transform;
-						vec4_set(mo.base.transform.loc, transform_world_x(ct), transform_world_y(ct), transform_world_z(ct));
-						vec4_set(mo.base.transform.scale, Context.raw.brushRadius * 0.2, Context.raw.brushRadius * 0.2, Context.raw.brushRadius * 0.2);
-						transform_build_matrix(mo.base.transform);
+				let camera = scene_camera;
+				let ct = camera.base.transform;
+				vec4_set(mo.base.transform.loc, transform_world_x(ct), transform_world_y(ct), transform_world_z(ct));
+				vec4_set(mo.base.transform.scale, Context.raw.brushRadius * 0.2, Context.raw.brushRadius * 0.2, Context.raw.brushRadius * 0.2);
+				transform_build_matrix(mo.base.transform);
 
-						let body = PhysicsBody.create();
-						body.shape = ShapeType.ShapeSphere;
-						body.mass = 1.0;
-						body.ccd = true;
-						mo.base.transform.radius /= 10; // Lower ccd radius
-						PhysicsBody.init(body, mo.base);
-						(mo.base as any).physicsBody = body;
-						mo.base.transform.radius *= 10;
+				let body = PhysicsBody.create();
+				body.shape = ShapeType.ShapeSphere;
+				body.mass = 1.0;
+				body.ccd = true;
+				mo.base.transform.radius /= 10; // Lower ccd radius
+				PhysicsBody.init(body, mo.base);
+				(mo.base as any).physicsBody = body;
+				mo.base.transform.radius *= 10;
 
-						let ray = raycast_get_ray(mouse_view_x(), mouse_view_y(), camera);
-						PhysicsBody.applyImpulse(body, vec4_mult(ray.dir, 0.15));
+				let ray = raycast_get_ray(mouse_view_x(), mouse_view_y(), camera);
+				PhysicsBody.applyImpulse(body, vec4_mult(ray.dir, 0.15));
 
-						Context.raw.particleTimer = tween_timer(5, function() { mesh_object_remove(mo); });
-					});
-				});
+				Context.raw.particleTimer = tween_timer(5, function() { mesh_object_remove(mo); });
 			}
 
 			let pairs = PhysicsWorld.getContactPairs(world, Context.raw.paintBody);

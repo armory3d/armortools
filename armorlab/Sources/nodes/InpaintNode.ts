@@ -106,73 +106,72 @@ class InpaintNode extends LogicNode {
 		let u8 = new Uint8Array(bytes_img);
 		let f32mask = new Float32Array(4 * 64 * 64);
 
-		data_get_blob("models/sd_vae_encoder.quant.onnx", (vae_encoder_blob: ArrayBuffer) => {
-			// for (let x = 0; x < Math.floor(image.width / 512); ++x) {
-				// for (let y = 0; y < Math.floor(image.height / 512); ++y) {
-					let x = 0;
-					let y = 0;
+		let vae_encoder_blob: ArrayBuffer = data_get_blob("models/sd_vae_encoder.quant.onnx");
+		// for (let x = 0; x < Math.floor(image.width / 512); ++x) {
+			// for (let y = 0; y < Math.floor(image.height / 512); ++y) {
+				let x = 0;
+				let y = 0;
 
-					for (let xx = 0; xx < 64; ++xx) {
-						for (let yy = 0; yy < 64; ++yy) {
-							// let step = Math.floor(512 / 64);
-							// let j = (yy * step * mask.width + xx * step) + (y * 512 * mask.width + x * 512);
-							let step = Math.floor(mask.width / 64);
-							let j = (yy * step * mask.width + xx * step);
-							let f = u8[j] / 255.0;
-							let i = yy * 64 + xx;
-							f32mask[i              ] = f;
-							f32mask[i + 64 * 64    ] = f;
-							f32mask[i + 64 * 64 * 2] = f;
-							f32mask[i + 64 * 64 * 3] = f;
-						}
+				for (let xx = 0; xx < 64; ++xx) {
+					for (let yy = 0; yy < 64; ++yy) {
+						// let step = Math.floor(512 / 64);
+						// let j = (yy * step * mask.width + xx * step) + (y * 512 * mask.width + x * 512);
+						let step = Math.floor(mask.width / 64);
+						let j = (yy * step * mask.width + xx * step);
+						let f = u8[j] / 255.0;
+						let i = yy * 64 + xx;
+						f32mask[i              ] = f;
+						f32mask[i + 64 * 64    ] = f;
+						f32mask[i + 64 * 64 * 2] = f;
+						f32mask[i + 64 * 64 * 3] = f;
 					}
+				}
 
-					g2_begin(InpaintNode.temp, false);
-					// g2_drawImage(image, -x * 512, -y * 512);
-					g2_draw_scaled_image(image, 0, 0, 512, 512);
-					g2_end();
+				g2_begin(InpaintNode.temp, false);
+				// g2_drawImage(image, -x * 512, -y * 512);
+				g2_draw_scaled_image(image, 0, 0, 512, 512);
+				g2_end();
 
-					let bytes_img = image_get_pixels(InpaintNode.temp);
-					let u8a = new Uint8Array(bytes_img);
-					let f32a = new Float32Array(3 * 512 * 512);
-					for (let i = 0; i < (512 * 512); ++i) {
-						f32a[i                ] = (u8a[i * 4    ] / 255.0) * 2.0 - 1.0;
-						f32a[i + 512 * 512    ] = (u8a[i * 4 + 1] / 255.0) * 2.0 - 1.0;
-						f32a[i + 512 * 512 * 2] = (u8a[i * 4 + 2] / 255.0) * 2.0 - 1.0;
-					}
+				bytes_img = image_get_pixels(InpaintNode.temp);
+				let u8a = new Uint8Array(bytes_img);
+				let f32a = new Float32Array(3 * 512 * 512);
+				for (let i = 0; i < (512 * 512); ++i) {
+					f32a[i                ] = (u8a[i * 4    ] / 255.0) * 2.0 - 1.0;
+					f32a[i + 512 * 512    ] = (u8a[i * 4 + 1] / 255.0) * 2.0 - 1.0;
+					f32a[i + 512 * 512 * 2] = (u8a[i * 4 + 2] / 255.0) * 2.0 - 1.0;
+				}
 
-					let latents_buf = krom_ml_inference(vae_encoder_blob, [f32a.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], Config.raw.gpu_inference);
-					let latents = new Float32Array(latents_buf);
-					for (let i = 0; i < latents.length; ++i) {
-						latents[i] = 0.18215 * latents[i];
-					}
-					let latents_orig = latents.slice(0);
+				let latents_buf = krom_ml_inference(vae_encoder_blob, [f32a.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], Config.raw.gpu_inference);
+				let latents = new Float32Array(latents_buf);
+				for (let i = 0; i < latents.length; ++i) {
+					latents[i] = 0.18215 * latents[i];
+				}
+				let latents_orig = latents.slice(0);
 
-					let noise = new Float32Array(latents.length);
-					for (let i = 0; i < noise.length; ++i) noise[i] = Math.cos(2.0 * 3.14 * RandomNode.getFloat()) * Math.sqrt(-2.0 * Math.log(RandomNode.getFloat()));
+				let noise = new Float32Array(latents.length);
+				for (let i = 0; i < noise.length; ++i) noise[i] = Math.cos(2.0 * 3.14 * RandomNode.getFloat()) * Math.sqrt(-2.0 * Math.log(RandomNode.getFloat()));
 
-					let num_inference_steps = 50;
-					let init_timestep = Math.floor(num_inference_steps * InpaintNode.strength);
-					let timestep = TextToPhotoNode.timesteps[num_inference_steps - init_timestep];
-					let alphas_cumprod = TextToPhotoNode.alphas_cumprod;
-					let sqrt_alpha_prod = Math.pow(alphas_cumprod[timestep], 0.5);
-					let sqrt_one_minus_alpha_prod = Math.pow(1.0 - alphas_cumprod[timestep], 0.5);
-					for (let i = 0; i < latents.length; ++i) {
-						latents[i] = sqrt_alpha_prod * latents[i] + sqrt_one_minus_alpha_prod * noise[i];
-					}
+				let num_inference_steps = 50;
+				let init_timestep = Math.floor(num_inference_steps * InpaintNode.strength);
+				let timestep = TextToPhotoNode.timesteps[num_inference_steps - init_timestep];
+				let alphas_cumprod = TextToPhotoNode.alphas_cumprod;
+				let sqrt_alpha_prod = Math.pow(alphas_cumprod[timestep], 0.5);
+				let sqrt_one_minus_alpha_prod = Math.pow(1.0 - alphas_cumprod[timestep], 0.5);
+				for (let i = 0; i < latents.length; ++i) {
+					latents[i] = sqrt_alpha_prod * latents[i] + sqrt_one_minus_alpha_prod * noise[i];
+				}
 
-					let start = num_inference_steps - init_timestep;
+				let start = num_inference_steps - init_timestep;
 
-					TextToPhotoNode.stableDiffusion(InpaintNode.prompt, (img: image_t) => {
-						// result.g2_begin(false);
-						// result.g2_draw_image(img, x * 512, y * 512);
-						// result.g2_end();
-						InpaintNode.result = img;
-						done(img);
-					}, latents, start, true, f32mask, latents_orig);
-				// }
+				TextToPhotoNode.stableDiffusion(InpaintNode.prompt, (img: image_t) => {
+					// result.g2_begin(false);
+					// result.g2_draw_image(img, x * 512, y * 512);
+					// result.g2_end();
+					InpaintNode.result = img;
+					done(img);
+				}, latents, start, true, f32mask, latents_orig);
 			// }
-		});
+		// }
 	}
 
 	static def: zui_node_t = {

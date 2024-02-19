@@ -833,11 +833,10 @@ class RenderPathPaint {
 				scale_pos: 1.5,
 				scale_tex: 1.0
 			};
-			mesh_data_create(raw, (md: mesh_data_t) => {
-				let materials: material_data_t[] = scene_get_child(".Plane").ext.materials;
-				let o = scene_add_mesh_object(md, materials);
-				o.base.name = ".PlaneTiled";
-			});
+			let md: mesh_data_t = mesh_data_create(raw);
+			let materials: material_data_t[] = scene_get_child(".Plane").ext.materials;
+			let o = scene_add_mesh_object(md, materials);
+			o.base.name = ".PlaneTiled";
 		}
 
 		RenderPathPaint.planeo = scene_get_child(tiled ? ".PlaneTiled" : ".Plane").ext;

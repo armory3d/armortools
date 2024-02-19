@@ -10,21 +10,18 @@ class Config {
 
 	static load = (done: ()=>void) => {
 		try {
-			data_get_blob((Path.isProtected() ? krom_save_path() : "") + "config.json", (blob: ArrayBuffer) => {
-				Config.configLoaded = true;
-				Config.raw = JSON.parse(sys_buffer_to_string(blob));
-
-				done();
-			});
+			let blob: ArrayBuffer = data_get_blob((Path.isProtected() ? krom_save_path() : "") + "config.json");
+			Config.configLoaded = true;
+			Config.raw = JSON.parse(sys_buffer_to_string(blob));
+			done();
 		}
 		catch (e: any) {
 			///if krom_linux
 			try { // Protected directory
-				data_get_blob(krom_save_path() + "config.json", (blob: ArrayBuffer) => {
-					Config.configLoaded = true;
-					Config.raw = JSON.parse(sys_buffer_to_string(blob));
-					done();
-				});
+				let blob: ArrayBuffer = data_get_blob(krom_save_path() + "config.json");
+				Config.configLoaded = true;
+				Config.raw = JSON.parse(sys_buffer_to_string(blob));
+				done();
 			}
 			catch (e: any) {
 				done();
@@ -110,17 +107,15 @@ class Config {
 
 	static getSha = (): string => {
 		let sha = "";
-		data_get_blob("version.json", (blob: ArrayBuffer) => {
-			sha = JSON.parse(sys_buffer_to_string(blob)).sha;
-		});
+		let blob: ArrayBuffer = data_get_blob("version.json");
+		sha = JSON.parse(sys_buffer_to_string(blob)).sha;
 		return sha;
 	}
 
 	static getDate = (): string => {
 		let date = "";
-		data_get_blob("version.json", (blob: ArrayBuffer) => {
-			date = JSON.parse(sys_buffer_to_string(blob)).date;
-		});
+		let blob: ArrayBuffer = data_get_blob("version.json");
+		date = JSON.parse(sys_buffer_to_string(blob)).date;
 		return date;
 	}
 
@@ -190,16 +185,15 @@ class Config {
 			Config.keymap = Base.defaultKeymap;
 		}
 		else {
-			data_get_blob("keymap_presets/" + Config.raw.keymap, (blob: ArrayBuffer) => {
-				Config.keymap = JSON.parse(sys_buffer_to_string(blob));
-				// Fill in undefined keys with defaults
-				for (let field in Base.defaultKeymap) {
-					if (!(field in Config.keymap)) {
-						let adefaultKeymap: any = Base.defaultKeymap;
-						Config.keymap[field] = adefaultKeymap[field];
-					}
+			let blob: ArrayBuffer = data_get_blob("keymap_presets/" + Config.raw.keymap);
+			Config.keymap = JSON.parse(sys_buffer_to_string(blob));
+			// Fill in undefined keys with defaults
+			for (let field in Base.defaultKeymap) {
+				if (!(field in Config.keymap)) {
+					let adefaultKeymap: any = Base.defaultKeymap;
+					Config.keymap[field] = adefaultKeymap[field];
 				}
-			});
+			}
 		}
 	}
 
@@ -274,17 +268,16 @@ class Config {
 			Base.theme = zui_theme_create();
 		}
 		else {
-			data_get_blob("themes/" + theme, (b: ArrayBuffer) => {
-				let parsed = JSON.parse(sys_buffer_to_string(b));
-				Base.theme = zui_theme_create();
-				for (let key in Base.theme) {
-					if (key == "theme_") continue;
-					if (key.startsWith("set_")) continue;
-					if (key.startsWith("get_")) key = key.substr(4);
-					let atheme: any = Base.theme;
-					atheme[key] = parsed[key];
-				}
-			});
+			let b: ArrayBuffer = data_get_blob("themes/" + theme);
+			let parsed = JSON.parse(sys_buffer_to_string(b));
+			Base.theme = zui_theme_create();
+			for (let key in Base.theme) {
+				if (key == "theme_") continue;
+				if (key.startsWith("set_")) continue;
+				if (key.startsWith("get_")) key = key.substr(4);
+				let atheme: any = Base.theme;
+				atheme[key] = parsed[key];
+			}
 		}
 		Base.theme.FILL_WINDOW_BG = true;
 		if (tagRedraw) {

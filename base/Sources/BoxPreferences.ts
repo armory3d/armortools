@@ -100,15 +100,14 @@ class BoxPreferences {
 						}
 						if (UIMenu.menuButton(ui, tr("Import..."))) {
 							UIFiles.show("json", false, false, (path: string) => {
-								data_get_blob(path, (b: ArrayBuffer) => {
-									let raw = JSON.parse(sys_buffer_to_string(b));
-									app_notify_on_init(() => {
-										ui.t.ELEMENT_H = Base.defaultElementH;
-										Config.importFrom(raw);
-										BoxPreferences.setScale();
-										MakeMaterial.parseMeshMaterial();
-										MakeMaterial.parsePaintMaterial();
-									});
+								let b: ArrayBuffer = data_get_blob(path);
+								let raw = JSON.parse(sys_buffer_to_string(b));
+								app_notify_on_init(() => {
+									ui.t.ELEMENT_H = Base.defaultElementH;
+									Config.importFrom(raw);
+									BoxPreferences.setScale();
+									MakeMaterial.parseMeshMaterial();
+									MakeMaterial.parsePaintMaterial();
 								});
 							});
 						}
@@ -620,12 +619,10 @@ plugin.drawUI = (ui) { =>
 								File.start(path);
 							}
 							if (UIMenu.menuButton(ui, tr("Edit in Script Tab"))) {
-								data_get_blob("plugins/" + f, (blob: ArrayBuffer) => {
-									TabScript.hscript.text = sys_buffer_to_string(blob);
-									data_delete_blob("plugins/" + f);
-									Console.info(tr("Script opened"));
-								});
-
+								let blob: ArrayBuffer = data_get_blob("plugins/" + f);
+								TabScript.hscript.text = sys_buffer_to_string(blob);
+								data_delete_blob("plugins/" + f);
+								Console.info(tr("Script opened"));
 							}
 							if (UIMenu.menuButton(ui, tr("Export"))) {
 								UIFiles.show("js", true, false, (dest: string) => {

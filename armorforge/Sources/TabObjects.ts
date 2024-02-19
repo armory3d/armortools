@@ -95,11 +95,10 @@ class TabObjects {
 									}
 								}
 
-								data_get_material("Scene", "TempMaterial" + TabObjects.materialId, (md: material_data_t) => {
-									let mo: mesh_object_t = currentObject.ext;
-									mo.materials = [md];
-									MakeMaterial.parseMeshPreviewMaterial(md);
-								});
+								let md: material_data_t = data_get_material("Scene", "TempMaterial" + TabObjects.materialId);
+								let mo: mesh_object_t = currentObject.ext;
+								mo.materials = [md];
+								MakeMaterial.parseMeshPreviewMaterial(md);
 							}
 						}, 1);
 					}
@@ -230,13 +229,13 @@ class TabObjects {
 						let p = scene_world;
 						p.strength = zui_slider(zui_handle("tabobjects_16", {value: p.strength}), "Environment", 0.0, 5.0, true);
 					}
-					else if (Context.raw.selectedObject.ext.constructor == light_object_t) {
+					else if (Context.raw.selectedObject.ext_type == "light_object_t") {
 						let light = Context.raw.selectedObject.ext;
 						let lightHandle = zui_handle("tabobjects_17");
 						lightHandle.value = light.data.strength / 10;
 						light.data.strength = zui_slider(lightHandle, "Strength", 0.0, 5.0, true) * 10;
 					}
-					else if (Context.raw.selectedObject.ext.constructor == camera_object_t) {
+					else if (Context.raw.selectedObject.ext_type == "camera_object_t") {
 						let cam = Context.raw.selectedObject.ext;
 						let fovHandle = zui_handle("tabobjects_18");
 						fovHandle.value = Math.floor(cam.data.fov * 100) / 100;

@@ -100,10 +100,9 @@ class BoxProjects {
 					if (BoxProjects.iconMap == null) BoxProjects.iconMap = new Map();
 					let icon = BoxProjects.iconMap.get(iconPath);
 					if (icon == null) {
-						data_get_image(iconPath, (image: image_t) => {
-							icon = image;
-							BoxProjects.iconMap.set(iconPath, icon);
-						});
+						let image: image_t = data_get_image(iconPath);
+						icon = image;
+						BoxProjects.iconMap.set(iconPath, icon);
 					}
 
 					let uix = ui._x;
@@ -218,10 +217,9 @@ class BoxProjects {
 	}
 
 	static drawBadge = (ui: zui_t) => {
-		data_get_image("badge.k", (img: image_t) => {
-			zui_image(img);
-			zui_end_element();
-		});
+		let img: image_t = data_get_image("badge.k");
+		zui_image(img);
+		zui_end_element();
 	}
 
 	static getStartedTab = (ui: zui_t) => {

@@ -51,7 +51,8 @@ class TabConsole {
 
 			let _font = ui.font;
 			let _fontSize = ui.font_size;
-			data_get_font("font_mono.ttf", (f: g2_font_t) => { zui_set_font(ui, f); }); // Sync
+			let f: g2_font_t = data_get_font("font_mono.ttf");
+			zui_set_font(ui, f);
 			ui.font_size = Math.floor(15 * zui_SCALE(ui));
 			for (let t of Console.lastTraces) {
 				zui_text(t);

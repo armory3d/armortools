@@ -18,8 +18,7 @@ class MakeMaterial {
 		}
 
 		let con = MakeMesh.run({ name: "Material", canvas: null });
-		let scon: shader_context_t;
-		shader_context_create(con.data, (_scon: shader_context_t) => { scon = _scon; });
+		let scon: shader_context_t = shader_context_create(con.data);
 		scon._override_context = {};
 		if (con.frag.sharedSamplers.length > 0) {
 			let sampler = con.frag.sharedSamplers[0];
@@ -85,15 +84,14 @@ class MakeMaterial {
 
 		let compileError = false;
 		let scon2: shader_context_t;
-		shader_context_create(con.data, (_scon: shader_context_t) => {
-			if (_scon == null) compileError = true;
-			scon2 = _scon;
-		});
+		let _scon: shader_context_t = shader_context_create(con.data);
+		if (_scon == null) compileError = true;
+		scon2 = _scon;
+
 		if (compileError) return;
 		scon2._override_context = {};
 		scon2._override_context.addressing = "repeat";
-		let mcon3: material_context_t;
-		material_context_create(mcon2, (_mcon: material_context_t) => { mcon3 = _mcon; });
+		let mcon3: material_context_t = material_context_create(mcon2);
 
 		m._shader.contexts.push(scon2);
 		m._shader._contexts.push(scon2);

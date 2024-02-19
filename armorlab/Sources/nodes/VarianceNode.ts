@@ -42,31 +42,30 @@ class VarianceNode extends LogicNode {
 
 			Console.progress(tr("Processing") + " - " + tr("Variance"));
 			Base.notifyOnNextFrame(() => {
-				data_get_blob("models/sd_vae_encoder.quant.onnx", (vae_encoder_blob: ArrayBuffer) => {
-					let latents_buf = krom_ml_inference(vae_encoder_blob, [f32a.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], Config.raw.gpu_inference);
-					let latents = new Float32Array(latents_buf);
-					for (let i = 0; i < latents.length; ++i) {
-						latents[i] = 0.18215 * latents[i];
-					}
+				let vae_encoder_blob: ArrayBuffer = data_get_blob("models/sd_vae_encoder.quant.onnx");
+				let latents_buf = krom_ml_inference(vae_encoder_blob, [f32a.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], Config.raw.gpu_inference);
+				let latents = new Float32Array(latents_buf);
+				for (let i = 0; i < latents.length; ++i) {
+					latents[i] = 0.18215 * latents[i];
+				}
 
-					let noise = new Float32Array(latents.length);
-					for (let i = 0; i < noise.length; ++i) noise[i] = Math.cos(2.0 * 3.14 * RandomNode.getFloat()) * Math.sqrt(-2.0 * Math.log(RandomNode.getFloat()));
-					let num_inference_steps = 50;
-					let init_timestep = Math.floor(num_inference_steps * strength);
-					let timesteps = TextToPhotoNode.timesteps[num_inference_steps - init_timestep];
-					let alphas_cumprod = TextToPhotoNode.alphas_cumprod;
-					let sqrt_alpha_prod = Math.pow(alphas_cumprod[timesteps], 0.5);
-					let sqrt_one_minus_alpha_prod = Math.pow(1.0 - alphas_cumprod[timesteps], 0.5);
-					for (let i = 0; i < latents.length; ++i) {
-						latents[i] = sqrt_alpha_prod * latents[i] + sqrt_one_minus_alpha_prod * noise[i];
-					}
-					let t_start = num_inference_steps - init_timestep;
+				let noise = new Float32Array(latents.length);
+				for (let i = 0; i < noise.length; ++i) noise[i] = Math.cos(2.0 * 3.14 * RandomNode.getFloat()) * Math.sqrt(-2.0 * Math.log(RandomNode.getFloat()));
+				let num_inference_steps = 50;
+				let init_timestep = Math.floor(num_inference_steps * strength);
+				let timesteps = TextToPhotoNode.timesteps[num_inference_steps - init_timestep];
+				let alphas_cumprod = TextToPhotoNode.alphas_cumprod;
+				let sqrt_alpha_prod = Math.pow(alphas_cumprod[timesteps], 0.5);
+				let sqrt_one_minus_alpha_prod = Math.pow(1.0 - alphas_cumprod[timesteps], 0.5);
+				for (let i = 0; i < latents.length; ++i) {
+					latents[i] = sqrt_alpha_prod * latents[i] + sqrt_one_minus_alpha_prod * noise[i];
+				}
+				let t_start = num_inference_steps - init_timestep;
 
-					TextToPhotoNode.stableDiffusion(VarianceNode.prompt, (_image: image_t) => {
-						VarianceNode.image = _image;
-						done(VarianceNode.image);
-					}, latents, t_start);
-				});
+				TextToPhotoNode.stableDiffusion(VarianceNode.prompt, (_image: image_t) => {
+					VarianceNode.image = _image;
+					done(VarianceNode.image);
+				}, latents, t_start);
 			});
 		});
 	}

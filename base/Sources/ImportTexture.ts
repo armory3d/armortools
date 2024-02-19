@@ -14,10 +14,9 @@ class ImportTexture {
 			if (a.file == path) {
 				// Set as envmap
 				if (hdrAsEnvmap && path.toLowerCase().endsWith(".hdr")) {
-					data_get_image(path, (image: image_t) => {
-						Base.notifyOnNextFrame(() => { // Make sure file browser process did finish
-							ImportEnvmap.run(path, image);
-						});
+					let image: image_t = data_get_image(path);
+					Base.notifyOnNextFrame(() => { // Make sure file browser process did finish
+						ImportEnvmap.run(path, image);
 					});
 				}
 				Console.info(Strings.info0());
@@ -52,6 +51,7 @@ class ImportTexture {
 	}
 
 	static defaultImporter = (path: string, done: (img: image_t)=>void) => {
-		data_get_image(path, done);
+		let img: image_t = data_get_image(path);
+		done(img);
 	}
 }

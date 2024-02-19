@@ -162,8 +162,7 @@ class TabMeshes {
 				scale_pos: mesh.scalePos,
 				scale_tex: mesh.scaleTex
 			};
-			let md: mesh_data_t;
-			mesh_data_create(raw, (_md: mesh_data_t) => { md = _md; });
+			let md: mesh_data_t = mesh_data_create(raw);
 			mo = mesh_object_create(md, Context.raw.paintObject.materials);
 			array_remove(scene_meshes, mo);
 			mo.base.name = "Tessellated";

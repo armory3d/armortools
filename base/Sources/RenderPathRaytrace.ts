@@ -137,18 +137,17 @@ class RenderPathRaytrace {
 	static raytraceInit = (shaderName: string, build = true) => {
 		if (RenderPathRaytrace.first) {
 			RenderPathRaytrace.first = false;
-			scene_embed_data("bnoise_sobol.k", () => {});
-			scene_embed_data("bnoise_scramble.k", () => {});
-			scene_embed_data("bnoise_rank.k", () => {});
+			scene_embed_data("bnoise_sobol.k");
+			scene_embed_data("bnoise_scramble.k");
+			scene_embed_data("bnoise_rank.k");
 		}
 
-		data_get_blob(shaderName, (shader: ArrayBuffer) => {
-			if (build) RenderPathRaytrace.buildData();
-			let bnoise_sobol = scene_embedded.get("bnoise_sobol.k");
-			let bnoise_scramble = scene_embedded.get("bnoise_scramble.k");
-			let bnoise_rank = scene_embedded.get("bnoise_rank.k");
-			krom_raytrace_init(shader, RenderPathRaytrace.vb.buffer_, RenderPathRaytrace.ib.buffer_, RenderPathRaytrace.vb_scale);
-		});
+		let shader: ArrayBuffer = data_get_blob(shaderName);
+		if (build) RenderPathRaytrace.buildData();
+		let bnoise_sobol = scene_embedded.get("bnoise_sobol.k");
+		let bnoise_scramble = scene_embedded.get("bnoise_scramble.k");
+		let bnoise_rank = scene_embedded.get("bnoise_rank.k");
+		krom_raytrace_init(shader, RenderPathRaytrace.vb.buffer_, RenderPathRaytrace.ib.buffer_, RenderPathRaytrace.vb_scale);
 	}
 
 	static buildData = () => {

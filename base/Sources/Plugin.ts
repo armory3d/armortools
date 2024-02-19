@@ -23,12 +23,11 @@ class Plugin {
 
 	static start = (plugin: string) => {
 		try {
-			data_get_blob("plugins/" + plugin, (blob: ArrayBuffer) => {
-				Plugin.pluginName = plugin;
-				// (1, eval)(sys_buffer_to_string(blob)); // Global scope
-				eval(sys_buffer_to_string(blob)); // Local scope
-				data_delete_blob("plugins/" + plugin);
-			});
+			let blob: ArrayBuffer = data_get_blob("plugins/" + plugin);
+			Plugin.pluginName = plugin;
+			// (1, eval)(sys_buffer_to_string(blob)); // Global scope
+			eval(sys_buffer_to_string(blob)); // Local scope
+			data_delete_blob("plugins/" + plugin);
 		}
 		catch (e: any) {
 			Console.error(tr("Failed to load plugin") + " '" + plugin + "'");

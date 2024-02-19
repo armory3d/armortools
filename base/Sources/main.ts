@@ -41,22 +41,21 @@ function main_start() {
 		if (Config.raw.layout == null) Base.initLayout();
 		krom_set_app_name(manifest_title);
 		app_init(function() {
-			scene_set_active("Scene", function(o: object_t) {
-				UniformsExt.init();
-				RenderPathBase.init();
+			let o: object_t = scene_set_active("Scene");
+			UniformsExt.init();
+			RenderPathBase.init();
 
-				if (Context.raw.renderMode == RenderMode.RenderForward) {
-					RenderPathDeferred.init(); // Allocate gbuffer
-					RenderPathForward.init();
-					render_path_commands = RenderPathForward.commands;
-				}
-				else {
-					RenderPathDeferred.init();
-					render_path_commands = RenderPathDeferred.commands;
-				}
+			if (Context.raw.renderMode == RenderMode.RenderForward) {
+				RenderPathDeferred.init(); // Allocate gbuffer
+				RenderPathForward.init();
+				render_path_commands = RenderPathForward.commands;
+			}
+			else {
+				RenderPathDeferred.init();
+				render_path_commands = RenderPathDeferred.commands;
+			}
 
-				new Base();
-			});
+			new Base();
 		});
 	});
 }

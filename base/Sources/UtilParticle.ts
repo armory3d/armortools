@@ -53,31 +53,29 @@ class UtilParticle {
 			}
 		}
 
-		data_get_material("Scene", "MaterialParticle", (md: material_data_t) => {
-			Context.raw.particleMaterial = md;
+		let md: material_data_t = data_get_material("Scene", "MaterialParticle");
+		Context.raw.particleMaterial = md;
 
-			for (let obj of _scene_raw.objects) {
-				if (obj.name == ".Sphere") {
-					let particle: obj_t = JSON.parse(JSON.stringify(obj));
-					particle.name = ".Particle";
-					particle.is_particle = true;
-					particle.material_refs = ["MaterialParticle"];
-					_scene_raw.objects.push(particle);
-					for (let i = 0; i < 16; ++i) particle.transform.values[i] *= 0.01;
-					break;
-				}
+		for (let obj of _scene_raw.objects) {
+			if (obj.name == ".Sphere") {
+				let particle: obj_t = JSON.parse(JSON.stringify(obj));
+				particle.name = ".Particle";
+				particle.is_particle = true;
+				particle.material_refs = ["MaterialParticle"];
+				_scene_raw.objects.push(particle);
+				for (let i = 0; i < 16; ++i) particle.transform.values[i] *= 0.01;
+				break;
 			}
+		}
 
-			scene_spawn_object(".Sphere", null, (o: object_t) => {
-				let mo: mesh_object_t = o.ext;
-				mo.base.name = ".ParticleEmitter";
-				mo.base.raw = JSON.parse(JSON.stringify(mo.base.raw));
-				mo.base.raw.particle_refs = particle_refs;
-				///if arm_particles
-				mesh_object_setup_particle_system(mo, "Scene", particle_refs[0]);
-				///end
-			});
-		});
+		let o: object_t = scene_spawn_object(".Sphere");
+		let mo: mesh_object_t = o.ext;
+		mo.base.name = ".ParticleEmitter";
+		mo.base.raw = JSON.parse(JSON.stringify(mo.base.raw));
+		mo.base.raw.particle_refs = particle_refs;
+		///if arm_particles
+		mesh_object_setup_particle_system(mo, "Scene", particle_refs[0]);
+		///end
 	}
 
 	///if arm_physics

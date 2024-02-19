@@ -34,9 +34,8 @@ class SlotMaterial {
 
 		if (c == null) {
 			if (SlotMaterial.defaultCanvas == null) { // Synchronous
-				data_get_blob("default_material.arm", (b: ArrayBuffer) => {
-					SlotMaterial.defaultCanvas = b;
-				});
+				let b: ArrayBuffer = data_get_blob("default_material.arm");
+				SlotMaterial.defaultCanvas = b;
 			}
 			raw.canvas = armpack_decode(SlotMaterial.defaultCanvas);
 			raw.canvas.name = "Material " + (raw.id + 1);

@@ -138,93 +138,90 @@ class Base {
 
 		krom_set_save_and_quit_callback(Base.saveAndQuitCallback);
 
-		data_get_font("font.ttf", (f: g2_font_t) => {
-			data_get_image("color_wheel.k", (imageColorWheel: image_t) => {
-				data_get_image("color_wheel_gradient.k", (imageColorWheelGradient: image_t) => {
+		let f: g2_font_t = data_get_font("font.ttf");
+		let imageColorWheel: image_t = data_get_image("color_wheel.k");
+		let imageColorWheelGradient: image_t = data_get_image("color_wheel_gradient.k");
 
-					Base.font = f;
-					Config.loadTheme(Config.raw.theme, false);
-					Base.defaultElementW = Base.theme.ELEMENT_W;
-					Base.defaultFontSize = Base.theme.FONT_SIZE;
-					Translator.loadTranslations(Config.raw.locale);
-					UIFiles.filename = tr("untitled");
-					///if (krom_android || krom_ios)
-					sys_title_set(tr("untitled"));
-					///end
+		Base.font = f;
+		Config.loadTheme(Config.raw.theme, false);
+		Base.defaultElementW = Base.theme.ELEMENT_W;
+		Base.defaultFontSize = Base.theme.FONT_SIZE;
+		Translator.loadTranslations(Config.raw.locale);
+		UIFiles.filename = tr("untitled");
+		///if (krom_android || krom_ios)
+		sys_title_set(tr("untitled"));
+		///end
 
-					// Baked font for fast startup
-					if (Config.raw.locale == "en") {
-						Base.font.font_ = krom_g2_font_13(Base.font.blob);
-						Base.font.glyphs = _g2_font_glyphs;
-					}
-					else g2_font_init(Base.font);
+		// Baked font for fast startup
+		if (Config.raw.locale == "en") {
+			Base.font.font_ = krom_g2_font_13(Base.font.blob);
+			Base.font.glyphs = _g2_font_glyphs;
+		}
+		else g2_font_init(Base.font);
 
-					Base.colorWheel = imageColorWheel;
-					Base.colorWheelGradient = imageColorWheelGradient;
-					zui_set_enum_texts(Base.enumTexts);
-					zui_tr = tr;
-					Base.uiBox = zui_create({ theme: Base.theme, font: f, scaleFactor: Config.raw.window_scale, color_wheel: Base.colorWheel, black_white_gradient: Base.colorWheelGradient });
-					Base.uiMenu = zui_create({ theme: Base.theme, font: f, scaleFactor: Config.raw.window_scale, color_wheel: Base.colorWheel, black_white_gradient: Base.colorWheelGradient });
-					Base.defaultElementH = Base.uiMenu.t.ELEMENT_H;
+		Base.colorWheel = imageColorWheel;
+		Base.colorWheelGradient = imageColorWheelGradient;
+		zui_set_enum_texts(Base.enumTexts);
+		zui_tr = tr;
+		Base.uiBox = zui_create({ theme: Base.theme, font: f, scaleFactor: Config.raw.window_scale, color_wheel: Base.colorWheel, black_white_gradient: Base.colorWheelGradient });
+		Base.uiMenu = zui_create({ theme: Base.theme, font: f, scaleFactor: Config.raw.window_scale, color_wheel: Base.colorWheel, black_white_gradient: Base.colorWheelGradient });
+		Base.defaultElementH = Base.uiMenu.t.ELEMENT_H;
 
-					// Init plugins
-					if (Config.raw.plugins != null) {
-						for (let plugin of Config.raw.plugins) {
-							Plugin.start(plugin);
-						}
-					}
+		// Init plugins
+		if (Config.raw.plugins != null) {
+			for (let plugin of Config.raw.plugins) {
+				Plugin.start(plugin);
+			}
+		}
 
-					Args.parse();
+		Args.parse();
 
-					new Camera();
-					new UIBase();
-					new UINodes();
-					new UIView2D();
+		new Camera();
+		new UIBase();
+		new UINodes();
+		new UIView2D();
 
-					///if is_lab
-					RandomNode.setSeed(Math.floor(time_time() * 4294967295));
-					///end
+		///if is_lab
+		RandomNode.setSeed(Math.floor(time_time() * 4294967295));
+		///end
 
-					app_notify_on_update(Base.update);
-					app_notify_on_render_2d(UIView2D.render);
-					app_notify_on_update(UIView2D.update);
-					///if (is_paint || is_sculpt)
-					app_notify_on_render_2d(UIBase.renderCursor);
-					///end
-					app_notify_on_update(UINodes.update);
-					app_notify_on_render_2d(UINodes.render);
-					app_notify_on_update(UIBase.update);
-					app_notify_on_render_2d(UIBase.render);
-					app_notify_on_update(Camera.update);
-					app_notify_on_render_2d(Base.render);
+		app_notify_on_update(Base.update);
+		app_notify_on_render_2d(UIView2D.render);
+		app_notify_on_update(UIView2D.update);
+		///if (is_paint || is_sculpt)
+		app_notify_on_render_2d(UIBase.renderCursor);
+		///end
+		app_notify_on_update(UINodes.update);
+		app_notify_on_render_2d(UINodes.render);
+		app_notify_on_update(UIBase.update);
+		app_notify_on_render_2d(UIBase.render);
+		app_notify_on_update(Camera.update);
+		app_notify_on_render_2d(Base.render);
 
-					///if (is_paint || is_sculpt)
-					Base.appx = UIToolbar.toolbarw;
-					///end
-					///if is_lab
-					Base.appx = 0;
-					///end
+		///if (is_paint || is_sculpt)
+		Base.appx = UIToolbar.toolbarw;
+		///end
+		///if is_lab
+		Base.appx = 0;
+		///end
 
-					Base.appy = UIHeader.headerh;
-					if (Config.raw.layout[LayoutSize.LayoutHeader] == 1) Base.appy += UIHeader.headerh;
-					let cam = scene_camera;
-					cam.data.fov = Math.floor(cam.data.fov * 100) / 100;
-					camera_object_build_proj(cam);
+		Base.appy = UIHeader.headerh;
+		if (Config.raw.layout[LayoutSize.LayoutHeader] == 1) Base.appy += UIHeader.headerh;
+		let cam = scene_camera;
+		cam.data.fov = Math.floor(cam.data.fov * 100) / 100;
+		camera_object_build_proj(cam);
 
-					Args.run();
+		Args.run();
 
-					///if (krom_android || krom_ios)
-					let hasProjects = Config.raw.recent_projects.length > 0;
-					///else
-					let hasProjects = true;
-					///end
+		///if (krom_android || krom_ios)
+		let hasProjects = Config.raw.recent_projects.length > 0;
+		///else
+		let hasProjects = true;
+		///end
 
-					if (Config.raw.splash_screen && hasProjects) {
-						BoxProjects.show();
-					}
-				});
-			});
-		});
+		if (Config.raw.splash_screen && hasProjects) {
+			BoxProjects.show();
+		}
 	}
 
 	static saveAndQuitCallback = (save: bool) => {

@@ -76,12 +76,11 @@ class UtilMesh {
 		if (va3 != null) raw.vertex_arrays.push({ values: va3, attrib: "col", data: "short4norm", padding: 1 });
 
 		UtilMesh.removeMergedMesh();
-		mesh_data_create(raw, (md: mesh_data_t) => {
-			Context.raw.mergedObject = mesh_object_create(md, Context.raw.paintObject.materials);
-			Context.raw.mergedObject.base.name = Context.raw.paintObject.base.name + "_merged";
-			Context.raw.mergedObject.force_context = "paint";
-			object_set_parent(Context.raw.mergedObject.base, Context.mainObject().base);
-		});
+		let md: mesh_data_t = mesh_data_create(raw);
+		Context.raw.mergedObject = mesh_object_create(md, Context.raw.paintObject.materials);
+		Context.raw.mergedObject.base.name = Context.raw.paintObject.base.name + "_merged";
+		Context.raw.mergedObject.force_context = "paint";
+		object_set_parent(Context.raw.mergedObject.base, Context.mainObject().base);
 
 		///if (krom_direct3d12 || krom_vulkan || krom_metal)
 		RenderPathRaytrace.ready = false;

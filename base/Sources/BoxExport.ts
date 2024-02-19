@@ -442,10 +442,9 @@ class BoxExport {
 
 	static parsePreset = () => {
 		let file = "export_presets/" + BoxExport.files[BoxExport.hpreset.position] + ".json";
-		data_get_blob(file, (blob: ArrayBuffer) => {
-			BoxExport.preset = JSON.parse(sys_buffer_to_string(blob));
-			data_delete_blob("export_presets/" + file);
-		});
+		let blob: ArrayBuffer = data_get_blob(file);
+		BoxExport.preset = JSON.parse(sys_buffer_to_string(blob));
+		data_delete_blob("export_presets/" + file);
 	}
 
 	static newPreset = (name: string) => {

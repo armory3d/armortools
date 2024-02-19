@@ -189,13 +189,11 @@ class Project {
 				///end
 			}
 			else {
-				data_get_blob("meshes/" + Project.meshList[Context.raw.projectType] + ".arm", (b: ArrayBuffer) => {
-					raw = armpack_decode(b).mesh_datas[0];
-				});
+				let b: ArrayBuffer = data_get_blob("meshes/" + Project.meshList[Context.raw.projectType] + ".arm");
+				raw = armpack_decode(b).mesh_datas[0];
 			}
 
-			let md: mesh_data_t;
-			mesh_data_create(raw, (mdata: mesh_data_t) => { md = mdata; });
+			let md: mesh_data_t = mesh_data_create(raw);
 			data_cached_meshes.set("SceneTessellated", md);
 
 			if (Context.raw.projectType == ProjectModel.ModelTessellatedPlane) {
@@ -204,106 +202,104 @@ class Project {
 		}
 
 		let n = Context.raw.projectType == ProjectModel.ModelRoundedCube ? ".Cube" : "Tessellated";
-		data_get_mesh("Scene", n, (md: mesh_data_t) => {
+		let md: mesh_data_t = data_get_mesh("Scene", n);
 
-			let current = _g2_current;
-			if (current != null) g2_end();
+		let current = _g2_current;
+		if (current != null) g2_end();
 
-			///if is_paint
-			Context.raw.pickerMaskHandle.position = PickerMask.MaskNone;
-			///end
+		///if is_paint
+		Context.raw.pickerMaskHandle.position = PickerMask.MaskNone;
+		///end
 
-			mesh_object_set_data(Context.raw.paintObject, md);
-			vec4_set(Context.raw.paintObject.base.transform.scale, 1, 1, 1);
-			transform_build_matrix(Context.raw.paintObject.base.transform);
-			Context.raw.paintObject.base.name = n;
-			Project.paintObjects = [Context.raw.paintObject];
+		mesh_object_set_data(Context.raw.paintObject, md);
+		vec4_set(Context.raw.paintObject.base.transform.scale, 1, 1, 1);
+		transform_build_matrix(Context.raw.paintObject.base.transform);
+		Context.raw.paintObject.base.name = n;
+		Project.paintObjects = [Context.raw.paintObject];
+		///if (is_paint || is_sculpt)
+		while (Project.materials.length > 0) SlotMaterial.unload(Project.materials.pop());
+		///end
+		let m: material_data_t = data_get_material("Scene", "Material");
+		///if (is_paint || is_sculpt)
+		Project.materials.push(SlotMaterial.create(m));
+		///end
+		///if is_lab
+		Project.materialData = m;
+		///end
+
+		///if (is_paint || is_sculpt)
+		Context.raw.material = Project.materials[0];
+		///end
+
+		UINodes.hwnd.redraws = 2;
+		UINodes.groupStack = [];
+		Project.materialGroups = [];
+
+		///if (is_paint || is_sculpt)
+		Project.brushes = [SlotBrush.create()];
+		Context.raw.brush = Project.brushes[0];
+
+		Project.fonts = [SlotFont.create("default.ttf", Base.font)];
+		Context.raw.font = Project.fonts[0];
+		///end
+
+		Project.setDefaultSwatches();
+		Context.raw.swatch = Project.raw.swatches[0];
+
+		Context.raw.pickedColor = Project.makeSwatch();
+		Context.raw.colorPickerCallback = null;
+		History.reset();
+
+		MakeMaterial.parsePaintMaterial();
+
+		///if (is_paint || is_sculpt)
+		UtilRender.makeMaterialPreview();
+		///end
+
+		for (let a of Project.assets) data_delete_image(a.file);
+		Project.assets = [];
+		Project.assetNames = [];
+		Project.assetMap = new Map();
+		Project.assetId = 0;
+		Project.raw.packed_assets = [];
+		Context.raw.ddirty = 4;
+
+		///if (is_paint || is_sculpt)
+		UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
+		UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
+		///end
+
+		if (resetLayers) {
+
 			///if (is_paint || is_sculpt)
-			while (Project.materials.length > 0) SlotMaterial.unload(Project.materials.pop());
-			///end
-			data_get_material("Scene", "Material", (m: material_data_t) => {
-				///if (is_paint || is_sculpt)
-				Project.materials.push(SlotMaterial.create(m));
-				///end
-				///if is_lab
-				Project.materialData = m;
-				///end
-			});
-
-			///if (is_paint || is_sculpt)
-			Context.raw.material = Project.materials[0];
-			///end
-
-			UINodes.hwnd.redraws = 2;
-			UINodes.groupStack = [];
-			Project.materialGroups = [];
-
-			///if (is_paint || is_sculpt)
-			Project.brushes = [SlotBrush.create()];
-			Context.raw.brush = Project.brushes[0];
-
-			Project.fonts = [SlotFont.create("default.ttf", Base.font)];
-			Context.raw.font = Project.fonts[0];
-			///end
-
-			Project.setDefaultSwatches();
-			Context.raw.swatch = Project.raw.swatches[0];
-
-			Context.raw.pickedColor = Project.makeSwatch();
-			Context.raw.colorPickerCallback = null;
-			History.reset();
-
-			MakeMaterial.parsePaintMaterial();
-
-			///if (is_paint || is_sculpt)
-			UtilRender.makeMaterialPreview();
-			///end
-
-			for (let a of Project.assets) data_delete_image(a.file);
-			Project.assets = [];
-			Project.assetNames = [];
-			Project.assetMap = new Map();
-			Project.assetId = 0;
-			Project.raw.packed_assets = [];
-			Context.raw.ddirty = 4;
-
-			///if (is_paint || is_sculpt)
-			UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
-			UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
-			///end
-
-			if (resetLayers) {
-
-				///if (is_paint || is_sculpt)
-				let aspectRatioChanged = Project.layers[0].texpaint.width != Config.getTextureResX() || Project.layers[0].texpaint.height != Config.getTextureResY();
-				while (Project.layers.length > 0) SlotLayer.unload(Project.layers.pop());
-				let layer = SlotLayer.create();
-				Project.layers.push(layer);
-				Context.setLayer(layer);
-				if (aspectRatioChanged) {
-					app_notify_on_init(Base.resizeLayers);
-				}
-				///end
-
-				app_notify_on_init(Base.initLayers);
+			let aspectRatioChanged = Project.layers[0].texpaint.width != Config.getTextureResX() || Project.layers[0].texpaint.height != Config.getTextureResY();
+			while (Project.layers.length > 0) SlotLayer.unload(Project.layers.pop());
+			let layer = SlotLayer.create();
+			Project.layers.push(layer);
+			Context.setLayer(layer);
+			if (aspectRatioChanged) {
+				app_notify_on_init(Base.resizeLayers);
 			}
-
-			if (current != null) g2_begin(current, false);
-
-			Context.raw.savedEnvmap = null;
-			Context.raw.envmapLoaded = false;
-			scene_world._envmap = Context.raw.emptyEnvmap;
-			scene_world.envmap = "World_radiance.k";
-			Context.raw.showEnvmapHandle.selected = Context.raw.showEnvmap = false;
-			scene_world._radiance = Context.raw.defaultRadiance;
-			scene_world._radiance_mipmaps = Context.raw.defaultRadianceMipmaps;
-			scene_world._irradiance = Context.raw.defaultIrradiance;
-			scene_world.strength = 4.0;
-
-			///if (is_paint || is_sculpt)
-			Context.initTool();
 			///end
-		});
+
+			app_notify_on_init(Base.initLayers);
+		}
+
+		if (current != null) g2_begin(current, false);
+
+		Context.raw.savedEnvmap = null;
+		Context.raw.envmapLoaded = false;
+		scene_world._envmap = Context.raw.emptyEnvmap;
+		scene_world.envmap = "World_radiance.k";
+		Context.raw.showEnvmapHandle.selected = Context.raw.showEnvmap = false;
+		scene_world._radiance = Context.raw.defaultRadiance;
+		scene_world._radiance_mipmaps = Context.raw.defaultRadianceMipmaps;
+		scene_world._irradiance = Context.raw.defaultIrradiance;
+		scene_world.strength = 4.0;
+
+		///if (is_paint || is_sculpt)
+		Context.initTool();
+		///end
 
 		///if (krom_direct3d12 || krom_vulkan || krom_metal)
 		RenderPathRaytrace.ready = false;

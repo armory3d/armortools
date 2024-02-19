@@ -6,11 +6,10 @@ class Res {
 	static load = (names: string[], done: ()=>void) => {
 		let loaded = 0;
 		for (let s of names) {
-			data_get_image(s, (image: image_t) => {
-				Res.bundled.set(s, image);
-				loaded++;
-				if (loaded == names.length) done();
-			});
+			let image: image_t = data_get_image(s);
+			Res.bundled.set(s, image);
+			loaded++;
+			if (loaded == names.length) done();
 		}
 	}
 

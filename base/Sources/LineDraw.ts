@@ -1,7 +1,7 @@
 
 class LineDraw {
 
-	static color: Color = 0xffff0000;
+	static color: color_t = 0xffff0000;
 	static strength = 0.005;
 	static mat: mat4_t = null;
 	static dim: vec4_t = null;

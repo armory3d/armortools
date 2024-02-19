@@ -484,10 +484,9 @@ class UIMenu {
 						let tabVertical = Config.raw.touch_ui;
 						if (zui_tab(zui_handle("uimenu_13"), tr("About"), tabVertical)) {
 
-							data_get_image("badge.k", (img: image_t) => {
-								zui_image(img);
-								zui_end_element();
-							});
+							let img: image_t = data_get_image("badge.k");
+							zui_image(img);
+							zui_end_element();
 
 							zui_text_area(zui_handle("uimenu_14", { text: msg }), Align.Left, false);
 

@@ -49,12 +49,12 @@ type TPackedAsset = {
 }
 
 type TSwatchColor = {
-	base: Color;
+	base: color_t;
 	opacity: f32;
 	occlusion: f32;
 	roughness: f32;
 	metallic: f32;
-	normal: Color;
+	normal: color_t;
 	emission: f32;
 	height: f32;
 	subsurface: f32;
