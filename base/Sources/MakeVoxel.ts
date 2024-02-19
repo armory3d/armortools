@@ -13,8 +13,8 @@ class MakeVoxel {
 		data.vertex_elements = [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}];
 
 		// ///if arm_skin
-		// let isMesh = Context.raw.object.constructor == TMeshObject;
-		// let skin = isMesh && cast(Context.raw.object, TMeshObject).data.geom.bones != null;
+		// let isMesh = Context.raw.object.constructor == mesh_object_t;
+		// let skin = isMesh && cast(Context.raw.object, mesh_object_t).data.geom.bones != null;
 		// if (skin) {
 		// 	VertexStructure.add(structure, "bone", VertexData.I16_4X_Normalized);
 		// 	VertexStructure.add(structure, "weight", VertexData.I16_4X_Normalized);
