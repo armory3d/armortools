@@ -77,7 +77,7 @@ class ImportMesh {
 
 		let _makeMesh = () => {
 			let raw = ImportMesh.rawMesh(mesh);
-			if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
+			if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm" });
 
 			let md: mesh_data_t = mesh_data_create(raw);
 			Context.raw.paintObject = Context.mainObject();
@@ -129,7 +129,7 @@ class ImportMesh {
 				}
 				let imgmesh = image_from_bytes(f32.buffer, Config.getTextureResX(), Config.getTextureResY(), tex_format_t.RGBA128);
 				let texpaint = Project.layers[0].texpaint;
-				g2_begin(texpaint, false);
+				g2_begin(texpaint);
 				g2_set_pipeline(Base.pipeCopy128);
 				g2_draw_scaled_image(imgmesh, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 				g2_set_pipeline(null);
@@ -144,7 +144,7 @@ class ImportMesh {
 
 		let _addMesh = () => {
 			let raw = ImportMesh.rawMesh(mesh);
-			if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
+			if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm" });
 
 			let md: mesh_data_t = mesh_data_create(raw);
 

@@ -55,7 +55,7 @@ class InpaintNode extends LogicNode {
 
 			Console.progress(tr("Processing") + " - " + tr("Inpaint"));
 			Base.notifyOnNextFrame(() => {
-				g2_begin(InpaintNode.image, false);
+				g2_begin(InpaintNode.image);
 				g2_draw_scaled_image(source, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 				g2_end();
 
@@ -127,7 +127,7 @@ class InpaintNode extends LogicNode {
 					}
 				}
 
-				g2_begin(InpaintNode.temp, false);
+				g2_begin(InpaintNode.temp);
 				// g2_drawImage(image, -x * 512, -y * 512);
 				g2_draw_scaled_image(image, 0, 0, 512, 512);
 				g2_end();
@@ -164,7 +164,7 @@ class InpaintNode extends LogicNode {
 				let start = num_inference_steps - init_timestep;
 
 				TextToPhotoNode.stableDiffusion(InpaintNode.prompt, (img: image_t) => {
-					// result.g2_begin(false);
+					// result.g2_begin();
 					// result.g2_draw_image(img, x * 512, y * 512);
 					// result.g2_end();
 					InpaintNode.result = img;

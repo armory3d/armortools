@@ -182,7 +182,7 @@ class MakeMaterial {
 			let current = _g2_current;
 			if (current != null) g2_end();
 			MakeMaterial.bakeNodePreviews();
-			if (current != null) g2_begin(current, false);
+			if (current != null) g2_begin(current);
 		}
 
 		let m = Project.materials[0].data;
@@ -336,7 +336,7 @@ class MakeMaterial {
 			let rts = render_path_render_targets;
 			let texpaint_live = rts.get("texpaint_live");
 
-			g2_begin(image, false);
+			g2_begin(image);
 			g2_draw_image(texpaint_live.image, 0, 0);
 			g2_end();
 		}

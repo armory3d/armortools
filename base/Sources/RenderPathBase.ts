@@ -498,9 +498,9 @@ class RenderPathBase {
 	static drawGbuffer = () => {
 		render_path_set_target("gbuffer0"); // Only clear gbuffer0
 		///if krom_metal
-		render_path_clear_target(0x00000000, 1.0);
+		render_path_clear_target(0x00000000, 1.0, clear_flag_t.COLOR | clear_flag_t.DEPTH);
 		///else
-		render_path_clear_target(null, 1.0);
+		render_path_clear_target(null, 1.0, clear_flag_t.DEPTH);
 		///end
 		if (MakeMesh.layerPassCount == 1) {
 			render_path_set_target("gbuffer2");

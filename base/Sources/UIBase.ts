@@ -1077,7 +1077,8 @@ class UIBase {
 				if (SlotLayer.isGroup(l)) continue;
 				let target = l.texpaint_preview;
 				let source = l.texpaint;
-				g2_begin(target, true, 0x00000000);
+				g2_begin(target);
+				g2_clear(0x00000000);
 				// g2_set_pipeline(l.isMask() ? Base.pipeCopy8 : Base.pipeCopy);
 				g2_set_pipeline(Base.pipeCopy); // texpaint_preview is always RGBA32 for now
 				g2_draw_scaled_image(source, 0, 0, target.width, target.height);
@@ -1094,7 +1095,8 @@ class UIBase {
 			let l = Context.raw.layer;
 			let target = l.texpaint_preview;
 			let source = l.texpaint;
-			g2_begin(target, true, 0x00000000);
+			g2_begin(target);
+			g2_clear(0x00000000);
 			// g2_set_pipeline(Context.raw.layer.isMask() ? Base.pipeCopy8 : Base.pipeCopy);
 			g2_set_pipeline(Base.pipeCopy); // texpaint_preview is always RGBA32 for now
 			g2_draw_scaled_image(source, 0, 0, target.width, target.height);
@@ -1135,7 +1137,7 @@ class UIBase {
 				}
 			}
 			zui_end();
-			g2_begin(null, false);
+			g2_begin(null);
 		}
 
 		if (!UIBase.show || sys_width() == 0 || sys_height() == 0) return;
@@ -1170,7 +1172,7 @@ class UIBase {
 		///end
 
 		zui_end();
-		g2_begin(null, false);
+		g2_begin(null);
 	}
 
 	///if (is_paint || is_sculpt)

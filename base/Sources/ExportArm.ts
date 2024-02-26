@@ -141,7 +141,7 @@ class ExportArm {
 		let tex = render_path_render_targets.get(Context.raw.renderMode == RenderMode.RenderForward ? "buf" : "tex").image;
 		let mesh_icon = image_create_render_target(256, 256);
 		let r = app_w() / app_h();
-		g2_begin(mesh_icon, false);
+		g2_begin(mesh_icon);
 		///if krom_opengl
 		g2_draw_scaled_image(tex, -(256 * r - 256) / 2, 256, 256 * r, -256);
 		///else
@@ -150,7 +150,7 @@ class ExportArm {
 		g2_end();
 		///if krom_metal
 		// Flush command list
-		g2_begin(mesh_icon, false);
+		g2_begin(mesh_icon);
 		g2_end();
 		///end
 		let mesh_icon_pixels = image_get_pixels(mesh_icon);
@@ -427,7 +427,7 @@ class ExportArm {
 			if (!Project.packedAssetExists(raw.packed_assets, assets[i].file)) {
 				let image = Project.getImage(assets[i]);
 				let temp = image_create_render_target(image.width, image.height);
-				g2_begin(temp, false);
+				g2_begin(temp);
 				g2_draw_image(image, 0, 0);
 				g2_end();
 				tempImages.push(temp);

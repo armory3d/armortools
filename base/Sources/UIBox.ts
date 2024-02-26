@@ -105,7 +105,7 @@ class UIBox {
 			zui_end();
 		}
 
-		g2_begin(null, false);
+		g2_begin(null);
 
 		UIBox.draws++;
 	}

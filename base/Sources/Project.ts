@@ -39,7 +39,7 @@ class Project {
 
 			ImportArm.runProject(path);
 
-			if (current != null) g2_begin(current, false);
+			if (current != null) g2_begin(current);
 		});
 	}
 
@@ -285,7 +285,7 @@ class Project {
 			app_notify_on_init(Base.initLayers);
 		}
 
-		if (current != null) g2_begin(current, false);
+		if (current != null) g2_begin(current);
 
 		Context.raw.savedEnvmap = null;
 		Context.raw.envmapLoaded = false;

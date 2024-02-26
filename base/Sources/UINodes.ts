@@ -563,7 +563,8 @@ class UINodes {
 		if (w < 1) w = 1;
 		if (h < 1) h = 1;
 		UINodes.grid = image_create_render_target(w, h);
-		g2_begin(UINodes.grid, true, UINodes.ui.t.SEPARATOR_COL);
+		g2_begin(UINodes.grid);
+		g2_clear(UINodes.ui.t.SEPARATOR_COL);
 
 		g2_set_color(UINodes.ui.t.SEPARATOR_COL - 0x00050505);
 		step = 20 * zui_SCALE(UINodes.ui);
@@ -995,7 +996,7 @@ class UINodes {
 
 		zui_end(!UINodes.showMenu);
 
-		g2_begin(null, false);
+		g2_begin(null);
 
 		if (UINodes.showMenu) {
 			///if (is_paint || is_sculpt)

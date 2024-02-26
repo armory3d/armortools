@@ -41,14 +41,14 @@ class UINodesExt {
 
 					if (texbase != null) {
 						let texpaint = render_path_render_targets.get("texpaint").image;
-						g2_begin(texpaint, false);
+						g2_begin(texpaint);
 						g2_draw_scaled_image(texbase, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 						g2_end();
 					}
 
 					if (texnor != null) {
 						let texpaint_nor = render_path_render_targets.get("texpaint_nor").image;
-						g2_begin(texpaint_nor, false);
+						g2_begin(texpaint_nor);
 						g2_draw_scaled_image(texnor, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 						g2_end();
 					}
@@ -60,7 +60,7 @@ class UINodesExt {
 					let texpaint_pack = render_path_render_targets.get("texpaint_pack").image;
 
 					if (texocc != null) {
-						g2_begin(texpaint_pack, false);
+						g2_begin(texpaint_pack);
 						g2_set_pipeline(Base.pipeCopyR);
 						g2_draw_scaled_image(texocc, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 						g2_set_pipeline(null);
@@ -68,7 +68,7 @@ class UINodesExt {
 					}
 
 					if (texrough != null) {
-						g2_begin(texpaint_pack, false);
+						g2_begin(texpaint_pack);
 						g2_set_pipeline(Base.pipeCopyG);
 						g2_draw_scaled_image(texrough, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 						g2_set_pipeline(null);

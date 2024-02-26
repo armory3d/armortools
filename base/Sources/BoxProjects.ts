@@ -197,7 +197,7 @@ class BoxProjects {
 
 					ImportArm.runProject(path);
 
-					if (current != null) g2_begin(current, false);
+					if (current != null) g2_begin(current);
 					UIBox.hide();
 				}
 				if (ui.is_hovered) zui_tooltip(path);

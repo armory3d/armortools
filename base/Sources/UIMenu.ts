@@ -224,7 +224,7 @@ class UIMenu {
 					let current = _g2_current;
 					g2_end();
 					UtilUV.cacheUVMap();
-					g2_begin(current, false);
+					g2_begin(current);
 					MakeMaterial.parseMeshMaterial();
 				}
 				///end

@@ -78,7 +78,7 @@ class RenderPathPreview {
 		///end
 
 		render_path_set_target("mgbuffer0");
-		render_path_clear_target(clearColor, 1.0);
+		render_path_clear_target(clearColor, 1.0, clear_flag_t.COLOR | clear_flag_t.DEPTH);
 		render_path_set_target("mgbuffer0", ["mgbuffer1", "mgbuffer2"]);
 		render_path_draw_meshes("mesh");
 
@@ -128,7 +128,7 @@ class RenderPathPreview {
 		///end
 
 		render_path_set_target("gbuffer0");
-		render_path_clear_target(clearColor, 1.0);
+		render_path_clear_target(clearColor, 1.0, clear_flag_t.COLOR | clear_flag_t.DEPTH);
 		render_path_set_target("gbuffer0", ["gbuffer1", "gbuffer2"]);
 		render_path_draw_meshes("mesh");
 

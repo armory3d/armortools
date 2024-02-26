@@ -179,7 +179,8 @@ class ExportTexture {
 			if (l1masks != null && !bakeMaterial) {
 				if (l1masks.length > 1) {
 					Base.makeTempMaskImg();
-					g2_begin(Base.tempMaskImage, true, 0x00000000);
+					g2_begin(Base.tempMaskImage);
+					g2_clear(0x00000000);
 					g2_end();
 					let l1: any = { texpaint: Base.tempMaskImage };
 					for (let i = 0; i < l1masks.length; ++i) {
@@ -191,7 +192,7 @@ class ExportTexture {
 			}
 
 			if (l1.paintBase) {
-				g2_begin(Base.tempImage, false); // Copy to temp
+				g2_begin(Base.tempImage); // Copy to temp
 				g2_set_pipeline(Base.pipeCopy);
 				g2_draw_image(Base.expa, 0, 0);
 				g2_set_pipeline(null);
@@ -212,7 +213,7 @@ class ExportTexture {
 			}
 
 			if (l1.paintNor) {
-				g2_begin(Base.tempImage, false);
+				g2_begin(Base.tempImage);
 				g2_set_pipeline(Base.pipeCopy);
 				g2_draw_image(Base.expb, 0, 0);
 				g2_set_pipeline(null);
@@ -233,7 +234,7 @@ class ExportTexture {
 			}
 
 			if (l1.paintOcc || l1.paintRough || l1.paintMet || l1.paintHeight) {
-				g2_begin(Base.tempImage, false);
+				g2_begin(Base.tempImage);
 				g2_set_pipeline(Base.pipeCopy);
 				g2_draw_image(Base.expc, 0, 0);
 				g2_set_pipeline(null);
@@ -252,11 +253,11 @@ class ExportTexture {
 
 		///if krom_metal
 		// Flush command list
-		g2_begin(Base.expa, false);
+		g2_begin(Base.expa);
 		g2_end();
-		g2_begin(Base.expb, false);
+		g2_begin(Base.expb);
 		g2_end();
-		g2_begin(Base.expc, false);
+		g2_begin(Base.expc);
 		g2_end();
 		///end
 		///end

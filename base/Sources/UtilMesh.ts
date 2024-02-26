@@ -19,7 +19,7 @@ class UtilMesh {
 		let va0 = new Int16Array(vlen * 4);
 		let va1 = new Int16Array(vlen * 2);
 		let va2 = new Int16Array(vlen * 2);
-		let va3 = paintObjects[0].data.vertex_arrays.length > 3 ? new Int16Array(vlen * 3) : null; // +1 padding
+		let va3 = paintObjects[0].data.vertex_arrays.length > 3 ? new Int16Array(vlen * 4) : null;
 		let ia = new Uint32Array(ilen);
 
 		let voff = 0;
@@ -52,7 +52,7 @@ class UtilMesh {
 			// Tex
 			for (let j = 0; j < vas[2].values.length; ++j) va2[j + voff * 2] = vas[2].values[j];
 			// Col
-			if (va3 != null) for (let j = 0; j < vas[3].values.length; ++j) va3[j + voff * 3] = vas[3].values[j];
+			if (va3 != null) for (let j = 0; j < vas[3].values.length; ++j) va3[j + voff * 4] = vas[3].values[j];
 			// Indices
 			for (let j = 0; j < ias[0].values.length; ++j) ia[j + ioff] = ias[0].values[j] + voff;
 
@@ -73,7 +73,7 @@ class UtilMesh {
 			scale_pos: maxScale,
 			scale_tex: 1.0
 		};
-		if (va3 != null) raw.vertex_arrays.push({ values: va3, attrib: "col", data: "short4norm", padding: 1 });
+		if (va3 != null) raw.vertex_arrays.push({ values: va3, attrib: "col", data: "short4norm" });
 
 		UtilMesh.removeMergedMesh();
 		let md: mesh_data_t = mesh_data_create(raw);

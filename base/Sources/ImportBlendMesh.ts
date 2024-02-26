@@ -77,7 +77,7 @@ class ImportBlendMesh {
 			let hasuv = uvdata != null;
 			let texa = hasuv ? new Int16Array(numtri * 3 * 2) : null;
 			let hascol = Context.raw.parseVCols && coldata != null;
-			let cola = hascol ? new Int16Array(numtri * 3 * 3) : null;
+			let cola = hascol ? new Int16Array(numtri * 3 * 4) : null;
 
 			let tri = 0;
 			let vec0 = vec4_create();
@@ -187,15 +187,15 @@ class ImportBlendMesh {
 							col2r = ParserBlend.read8(bl);
 							col2g = ParserBlend.read8(bl);
 							col2b = ParserBlend.read8(bl);
-							cola[tri * 9    ] = col0r * 128;
-							cola[tri * 9 + 1] = col0g * 128;
-							cola[tri * 9 + 2] = col0b * 128;
-							cola[tri * 9 + 3] = col1r * 128;
-							cola[tri * 9 + 4] = col1g * 128;
-							cola[tri * 9 + 5] = col1b * 128;
-							cola[tri * 9 + 6] = col2r * 128;
-							cola[tri * 9 + 7] = col2g * 128;
-							cola[tri * 9 + 8] = col2b * 128;
+							cola[tri * 12    ] = col0r * 128;
+							cola[tri * 12 + 1] = col0g * 128;
+							cola[tri * 12 + 2] = col0b * 128;
+							cola[tri * 12 + 3] = col1r * 128;
+							cola[tri * 12 + 4] = col1g * 128;
+							cola[tri * 12 + 5] = col1b * 128;
+							cola[tri * 12 + 6] = col2r * 128;
+							cola[tri * 12 + 7] = col2g * 128;
+							cola[tri * 12 + 8] = col2b * 128;
 							col1r = col2r;
 							col1g = col2g;
 							col1b = col2b;
@@ -371,15 +371,15 @@ class ImportBlendMesh {
 								texa[tri * 6 + 5] = Math.floor((1.0 - uv2[1]) * 32767);
 							}
 							if (hascol) {
-								cola[tri * 9    ] = col0r * 128;
-								cola[tri * 9 + 1] = col0g * 128;
-								cola[tri * 9 + 2] = col0b * 128;
-								cola[tri * 9 + 3] = col1r * 128;
-								cola[tri * 9 + 4] = col1g * 128;
-								cola[tri * 9 + 5] = col1b * 128;
-								cola[tri * 9 + 6] = col2r * 128;
-								cola[tri * 9 + 7] = col2g * 128;
-								cola[tri * 9 + 8] = col2b * 128;
+								cola[tri * 12    ] = col0r * 128;
+								cola[tri * 12 + 1] = col0g * 128;
+								cola[tri * 12 + 2] = col0b * 128;
+								cola[tri * 12 + 3] = col1r * 128;
+								cola[tri * 12 + 4] = col1g * 128;
+								cola[tri * 12 + 5] = col1b * 128;
+								cola[tri * 12 + 6] = col2r * 128;
+								cola[tri * 12 + 7] = col2g * 128;
+								cola[tri * 12 + 8] = col2b * 128;
 							}
 							tri++;
 						}

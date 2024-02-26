@@ -1015,7 +1015,7 @@ class Base {
 		let texpaint = render_path_render_targets.get("texpaint").image;
 		let texpaint_nor = render_path_render_targets.get("texpaint_nor").image;
 		let texpaint_pack = render_path_render_targets.get("texpaint_pack").image;
-		g2_begin(texpaint, false);
+		g2_begin(texpaint);
 		g2_draw_scaled_image(Res.get("placeholder.k"), 0, 0, Config.getTextureResX(), Config.getTextureResY()); // Base
 		g2_end();
 		g4_begin(texpaint_nor);
@@ -1596,7 +1596,7 @@ class Base {
 		Base.makeTempImg();
 		if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
 
-		g2_begin(Base.tempImage, false); // Copy to temp
+		g2_begin(Base.tempImage); // Copy to temp
 		g2_set_pipeline(Base.pipeCopy);
 		g2_draw_image(l0.texpaint, 0, 0);
 		g2_set_pipeline(null);
@@ -1642,7 +1642,7 @@ class Base {
 			}
 
 			///if is_paint
-			g2_begin(Base.tempImage, false);
+			g2_begin(Base.tempImage);
 			g2_set_pipeline(Base.pipeCopy);
 			g2_draw_image(l0.texpaint_nor, 0, 0);
 			g2_set_pipeline(null);
@@ -1663,7 +1663,7 @@ class Base {
 				g4_end();
 			}
 
-			g2_begin(Base.tempImage, false);
+			g2_begin(Base.tempImage);
 			g2_set_pipeline(Base.pipeCopy);
 			g2_draw_image(l0.texpaint_pack, 0, 0);
 			g2_set_pipeline(null);
@@ -1712,7 +1712,8 @@ class Base {
 			if (l1masks != null) {
 				if (l1masks.length > 1) {
 					Base.makeTempMaskImg();
-					g2_begin(Base.tempMaskImage, true, 0x00000000);
+					g2_begin(Base.tempMaskImage);
+					g2_clear(0x00000000);
 					g2_end();
 					let l1: any = { texpaint: Base.tempMaskImage };
 					for (let i = 0; i < l1masks.length; ++i) {
@@ -1724,7 +1725,7 @@ class Base {
 			}
 
 			if (l1.paintBase) {
-				g2_begin(Base.tempImage, false); // Copy to temp
+				g2_begin(Base.tempImage); // Copy to temp
 				g2_set_pipeline(Base.pipeCopy);
 				g2_draw_image(Base.expa, 0, 0);
 				g2_set_pipeline(null);
@@ -1746,7 +1747,7 @@ class Base {
 
 			///if is_paint
 			if (l1.paintNor) {
-				g2_begin(Base.tempImage, false);
+				g2_begin(Base.tempImage);
 				g2_set_pipeline(Base.pipeCopy);
 				g2_draw_image(Base.expb, 0, 0);
 				g2_set_pipeline(null);
@@ -1767,7 +1768,7 @@ class Base {
 			}
 
 			if (l1.paintOcc || l1.paintRough || l1.paintMet || l1.paintHeight) {
-				g2_begin(Base.tempImage, false);
+				g2_begin(Base.tempImage);
 				g2_set_pipeline(Base.pipeCopy);
 				g2_draw_image(Base.expc, 0, 0);
 				g2_set_pipeline(null);
@@ -1787,11 +1788,11 @@ class Base {
 
 		///if krom_metal
 		// Flush command list
-		g2_begin(Base.expa, false);
+		g2_begin(Base.expa);
 		g2_end();
-		g2_begin(Base.expb, false);
+		g2_begin(Base.expb);
 		g2_end();
-		g2_begin(Base.expc, false);
+		g2_begin(Base.expc);
 		g2_end();
 		///end
 
@@ -1800,7 +1801,7 @@ class Base {
 		// Merge height map into normal map
 		if (heightToNormal && MakeMaterial.heightUsed) {
 
-			g2_begin(Base.tempImage, false);
+			g2_begin(Base.tempImage);
 			g2_set_pipeline(Base.pipeCopy);
 			g2_draw_image(l0.texpaint_nor, 0, 0);
 			g2_set_pipeline(null);
@@ -1830,7 +1831,7 @@ class Base {
 		Base.makeTempImg();
 
 		// Copy layer to temp
-		g2_begin(Base.tempImage, false);
+		g2_begin(Base.tempImage);
 		g2_set_pipeline(Base.pipeCopy);
 		g2_draw_image(l.texpaint, 0, 0);
 		g2_set_pipeline(null);
@@ -1901,7 +1902,7 @@ class Base {
 			Context.raw.pdirty = 0;
 			Context.raw.rdirty = 2;
 
-			if (current != null) g2_begin(current, false);
+			if (current != null) g2_begin(current);
 			return;
 		}
 		///end
@@ -1955,7 +1956,7 @@ class Base {
 			Context.raw.ddirty = 2;
 			Context.raw.rdirty = 2;
 			Context.raw.layersPreviewDirty = true; // Repaint all layer previews as multiple layers might have changed.
-			if (current != null) g2_begin(current, false);
+			if (current != null) g2_begin(current);
 			Context.raw.layer = _layer;
 			Base.setObjectMask();
 			Context.raw.tool = _tool;
@@ -1983,7 +1984,7 @@ class Base {
 		Context.raw.rdirty = 2;
 		Context.raw.tool = _tool;
 		Context.raw.fillTypeHandle.position = _fillType;
-		if (current != null) g2_begin(current, false);
+		if (current != null) g2_begin(current);
 	}
 
 	static setObjectMask = () => {

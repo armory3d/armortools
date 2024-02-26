@@ -36,7 +36,8 @@ class UtilUV {
 
 		let texa = mesh.vertex_arrays[2].values;
 		let inda = mesh.index_arrays[0].values;
-		g2_begin(UtilUV.uvmap, true, 0x00000000);
+		g2_begin(UtilUV.uvmap);
+		g2_clear(0x00000000);
 		g2_set_color(0xffcccccc);
 		let strength = resX > 2048 ? 2.0 : 1.0;
 		let f = (1 / 32767) * UtilUV.uvmap.width;
@@ -72,7 +73,8 @@ class UtilUV {
 		let mesh = merged;
 		let texa = mesh.vertex_arrays[2].values;
 		let inda = mesh.index_arrays[0].values;
-		g2_begin(UtilUV.trianglemap, true, 0xff000000);
+		g2_begin(UtilUV.trianglemap);
+		g2_clear(0xff000000);
 		let f = (1 / 32767) * UtilUV.trianglemap.width;
 		let color = 0xff000001;
 		for (let i = 0; i < Math.floor(inda.length / 3); ++i) {

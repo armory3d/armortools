@@ -314,7 +314,7 @@ class UIHeader {
 						let current = _g2_current;
 						g2_end();
 						UtilRender.makeDecalPreview();
-						g2_begin(current, false);
+						g2_begin(current);
 					}
 				}
 
@@ -383,7 +383,7 @@ class UIHeader {
 					g2_end();
 					UtilRender.makeTextPreview();
 					UtilRender.makeDecalPreview();
-					g2_begin(current, false);
+					g2_begin(current);
 				}
 			}
 
@@ -395,7 +395,7 @@ class UIHeader {
 						g2_end();
 						// UtilUV.cacheUVMap();
 						UtilUV.cacheTriangleMap();
-						g2_begin(current, false);
+						g2_begin(current);
 						// wireframeHandle.selected = drawWireframe = true;
 					}
 					MakeMaterial.parsePaintMaterial();

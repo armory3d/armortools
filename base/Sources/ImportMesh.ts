@@ -104,7 +104,7 @@ class ImportMesh {
 
 	static _makeMesh = (mesh: any) => {
 		let raw = ImportMesh.rawMesh(mesh);
-		if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
+		if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm" });
 
 		let md: mesh_data_t = mesh_data_create(raw);
 		Context.raw.paintObject = Context.mainObject();
@@ -182,7 +182,7 @@ class ImportMesh {
 
 	static _addMesh = (mesh: any) => {
 		let raw = ImportMesh.rawMesh(mesh);
-		if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
+		if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm" });
 
 		let md: mesh_data_t = mesh_data_create(raw);
 

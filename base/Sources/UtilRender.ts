@@ -141,7 +141,7 @@ class UtilRender {
 		MakeMaterial.parseMeshMaterial();
 		Context.raw.ddirty = 1; // Refresh depth for decal paint
 
-		if (current != null) g2_begin(current, false);
+		if (current != null) g2_begin(current);
 	}
 
 	static makeTextPreview = () => {
@@ -166,14 +166,15 @@ class UtilRender {
 			Context.raw.textToolImage = image_create_render_target(texW, texW, tex_format_t.R8);
 			///end
 		}
-		g2_begin(Context.raw.textToolImage, true, 0xff000000);
+		g2_begin(Context.raw.textToolImage);
+		g2_clear(0xff000000);
 		g2_set_font(font);
 		g2_set_font_size(fontSize);
 		g2_set_color(0xffffffff);
 		g2_draw_string(text, texW / 2 - textW / 2, texW / 2 - textH / 2);
 		g2_end();
 
-		if (current != null) g2_begin(current, false);
+		if (current != null) g2_begin(current);
 	}
 
 	static makeFontPreview = () => {
@@ -188,7 +189,8 @@ class UtilRender {
 		if (Context.raw.font.image == null) {
 			Context.raw.font.image = image_create_render_target(512, 512, tex_format_t.RGBA32);
 		}
-		g2_begin(Context.raw.font.image, true, 0x00000000);
+		g2_begin(Context.raw.font.image);
+		g2_clear(0x00000000);
 		g2_set_font(font);
 		g2_set_font_size(fontSize);
 		g2_set_color(0xffffffff);
@@ -196,7 +198,7 @@ class UtilRender {
 		g2_end();
 		Context.raw.font.previewReady = true;
 
-		if (current != null) g2_begin(current, false);
+		if (current != null) g2_begin(current);
 	}
 
 	static makeBrushPreview = () => {
@@ -341,7 +343,8 @@ class UtilRender {
 		if (Base.pipeMerge == null) Base.makePipe();
 		l = RenderPathPaint.liveLayer;
 		let target = Context.raw.brush.image;
-		g2_begin(target, true, 0x00000000);
+		g2_begin(target);
+		g2_clear(0x00000000);
 		g2_set_pipeline(Base.pipeCopy);
 		g2_draw_scaled_image(l.texpaint, 0, 0, target.width, target.height);
 		g2_set_pipeline(null);
@@ -357,7 +360,7 @@ class UtilRender {
 		Context.raw.brush.previewReady = true;
 		Context.raw.brushBlendDirty = true;
 
-		if (current != null) g2_begin(current, false);
+		if (current != null) g2_begin(current);
 	}
 
 	static makeNodePreview = (canvas: zui_node_canvas_t, node: zui_node_t, image: image_t, group: zui_node_canvas_t = null, parents: zui_node_t[] = null) => {

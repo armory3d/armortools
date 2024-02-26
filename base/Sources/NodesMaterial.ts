@@ -2823,7 +2823,7 @@ class NodesMaterial {
 		let sw = ui._w / zui_nodes_SCALE();
 		for (let val of vals) {
 			let pos = val[4];
-			let col = color_from_floats(val[0], val[1], val[2]);
+			let col = color_from_floats(val[0], val[1], val[2], 1.0);
 			zui_fill(pos * sw, 0, (1.0 - pos) * sw, zui_nodes_LINE_H() - 2 * zui_nodes_SCALE(), col);
 		}
 		ui._y += zui_nodes_LINE_H();
@@ -2858,7 +2858,7 @@ class NodesMaterial {
 		else if (val[4] < 0.0) val[4] = 0.0;
 
 		let chandle = zui_nest(zui_nest(nhandle, 0), 4);
-		chandle.color = color_from_floats(val[0], val[1], val[2]);
+		chandle.color = color_from_floats(val[0], val[1], val[2], 1.0);
 		if (zui_text("", Align.Right, chandle.color) == State.Started) {
 			let rx = nx + ui._w - zui_nodes_p(37);
 			let ry = ny - zui_nodes_p(5);

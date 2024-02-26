@@ -270,7 +270,7 @@ class TabMaterials {
 			Context.raw.material = SlotMaterial.create(Project.materials[0].data);
 			Project.materials.push(Context.raw.material);
 			TabMaterials.updateMaterial();
-			g2_begin(current, false);
+			g2_begin(current);
 			History.newMaterial();
 		}
 	}

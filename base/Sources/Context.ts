@@ -82,7 +82,7 @@ class Context {
 		MakeMaterial.parseMeshMaterial();
 		MakeMaterial.parsePaintMaterial();
 
-		if (current != null) g2_begin(current, false);
+		if (current != null) g2_begin(current);
 
 		UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
 		UIView2D.hwnd.redraws = 2;

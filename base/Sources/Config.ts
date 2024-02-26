@@ -177,7 +177,7 @@ class Config {
 		let current = _g2_current;
 		if (current != null) g2_end();
 		RenderPathBase.applyConfig();
-		if (current != null) g2_begin(current, false);
+		if (current != null) g2_begin(current);
 	}
 
 	static loadKeymap = () => {

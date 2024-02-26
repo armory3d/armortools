@@ -176,14 +176,15 @@ class UIFiles {
 										if (Base.pipeCopyRGB == null) Base.makePipeCopyRGB();
 										icon = image_create_render_target(image.width, image.height);
 										if (f.endsWith(".arm")) { // Used for material sphere alpha cutout
-											g2_begin(icon, false);
+											g2_begin(icon);
 
 											///if (is_paint || is_sculpt)
 											g2_draw_image(Project.materials[0].image, 0, 0);
 											///end
 										}
 										else {
-											g2_begin(icon, true, 0xffffffff);
+											g2_begin(icon);
+											g2_clear(0xffffffff);
 										}
 										g2_set_pipeline(Base.pipeCopyRGB);
 										g2_draw_image(image, 0, 0);
@@ -284,7 +285,8 @@ class UIFiles {
 							let sw = image.width > image.height ? w : Math.floor(1.0 * image.width / image.height * w);
 							let sh = image.width > image.height ? Math.floor(1.0 * image.height / image.width * w) : w;
 							icon = image_create_render_target(sw, sh);
-							g2_begin(icon, true, 0xffffffff);
+							g2_begin(icon);
+							g2_clear(0xffffffff);
 							g2_set_pipeline(Base.pipeCopyRGB);
 							g2_draw_scaled_image(image, 0, 0, sw, sh);
 							g2_set_pipeline(null);

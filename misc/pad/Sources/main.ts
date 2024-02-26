@@ -288,7 +288,8 @@ function draw_minimap() {
 		minimap = image_create_render_target(minimap_w, minimap_h);
 	}
 
-	g2_begin(minimap, true, ui.t.SEPARATOR_COL);
+	g2_begin(minimap);
+	g2_clear(ui.t.SEPARATOR_COL);
 	g2_set_color(0xff333333);
 	let lines = storage.text.split("\n");
 	let minimap_full_h = lines.length * 2;

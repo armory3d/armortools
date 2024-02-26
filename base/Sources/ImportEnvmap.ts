@@ -40,7 +40,7 @@ class ImportEnvmap {
 		}
 
 		// Down-scale to 1024x512
-		g2_begin(ImportEnvmap.radiance, false);
+		g2_begin(ImportEnvmap.radiance);
 		g2_set_pipeline(Base.pipeCopy128);
 		g2_draw_scaled_image(image, 0, 0, 1024, 512);
 		g2_set_pipeline(null);

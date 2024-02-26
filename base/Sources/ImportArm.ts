@@ -220,7 +220,7 @@ class ImportArm {
 
 				if (isMask) {
 					_texpaint = image_from_bytes(lz4_decode(ld.texpaint, ld.res * ld.res * 4), ld.res, ld.res, tex_format_t.RGBA32);
-					g2_begin(l.texpaint, false);
+					g2_begin(l.texpaint);
 					// g2_set_pipeline(Base.pipeCopy8);
 					g2_set_pipeline(project.is_bgra ? Base.pipeCopyBGRA : Base.pipeCopy); // Full bits for undo support, R8 is used
 					g2_draw_image(_texpaint, 0, 0);
@@ -230,7 +230,7 @@ class ImportArm {
 				else { // Layer
 					// TODO: create render target from bytes
 					_texpaint = image_from_bytes(lz4_decode(ld.texpaint, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
-					g2_begin(l.texpaint, false);
+					g2_begin(l.texpaint);
 					g2_set_pipeline(project.is_bgra ? Base.pipeCopyBGRA : Base.pipeCopy);
 					g2_draw_image(_texpaint, 0, 0);
 					g2_set_pipeline(null);
@@ -238,14 +238,14 @@ class ImportArm {
 
 					///if is_paint
 					_texpaint_nor = image_from_bytes(lz4_decode(ld.texpaint_nor, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
-					g2_begin(l.texpaint_nor, false);
+					g2_begin(l.texpaint_nor);
 					g2_set_pipeline(project.is_bgra ? Base.pipeCopyBGRA : Base.pipeCopy);
 					g2_draw_image(_texpaint_nor, 0, 0);
 					g2_set_pipeline(null);
 					g2_end();
 
 					_texpaint_pack = image_from_bytes(lz4_decode(ld.texpaint_pack, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
-					g2_begin(l.texpaint_pack, false);
+					g2_begin(l.texpaint_pack);
 					g2_set_pipeline(project.is_bgra ? Base.pipeCopyBGRA : Base.pipeCopy);
 					g2_draw_image(_texpaint_pack, 0, 0);
 					g2_set_pipeline(null);

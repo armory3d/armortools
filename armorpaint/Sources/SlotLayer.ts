@@ -204,7 +204,7 @@ class SlotLayer {
 		g4_clear(baseColor); // Base
 		g4_end();
 		if (baseImage != null) {
-			g2_begin(raw.texpaint, false);
+			g2_begin(raw.texpaint);
 			g2_draw_scaled_image(baseImage, 0, 0, raw.texpaint.width, raw.texpaint.height);
 			g2_end();
 		}
@@ -227,7 +227,7 @@ class SlotLayer {
 	static invertMask = (raw: SlotLayerRaw) => {
 		if (Base.pipeInvert8 == null) Base.makePipe();
 		let inverted = image_create_render_target(raw.texpaint.width, raw.texpaint.height, tex_format_t.RGBA32);
-		g2_begin(inverted, false);
+		g2_begin(inverted);
 		g2_set_pipeline(Base.pipeInvert8);
 		g2_draw_image(raw.texpaint, 0, 0);
 		g2_set_pipeline(null);
@@ -265,18 +265,18 @@ class SlotLayer {
 
 		if (Base.pipeMerge == null) Base.makePipe();
 		if (SlotLayer.isLayer(raw)) {
-			g2_begin(l.texpaint, false);
+			g2_begin(l.texpaint);
 			g2_set_pipeline(Base.pipeCopy);
 			g2_draw_image(raw.texpaint, 0, 0);
 			g2_set_pipeline(null);
 			g2_end();
 			///if is_paint
-			g2_begin(l.texpaint_nor, false);
+			g2_begin(l.texpaint_nor);
 			g2_set_pipeline(Base.pipeCopy);
 			g2_draw_image(raw.texpaint_nor, 0, 0);
 			g2_set_pipeline(null);
 			g2_end();
-			g2_begin(l.texpaint_pack, false);
+			g2_begin(l.texpaint_pack);
 			g2_set_pipeline(Base.pipeCopy);
 			g2_draw_image(raw.texpaint_pack, 0, 0);
 			g2_set_pipeline(null);
@@ -284,7 +284,7 @@ class SlotLayer {
 			///end
 		}
 		else if (SlotLayer.isMask(raw)) {
-			g2_begin(l.texpaint, false);
+			g2_begin(l.texpaint);
 			g2_set_pipeline(Base.pipeCopy8);
 			g2_draw_image(raw.texpaint, 0, 0);
 			g2_set_pipeline(null);
@@ -292,7 +292,8 @@ class SlotLayer {
 		}
 
 		///if is_paint
-		g2_begin(l.texpaint_preview, true, 0x00000000);
+		g2_begin(l.texpaint_preview);
+		g2_clear(0x00000000);
 		g2_set_pipeline(Base.pipeCopy);
 		g2_draw_scaled_image(raw.texpaint_preview, 0, 0, raw.texpaint_preview.width, raw.texpaint_preview.height);
 		g2_set_pipeline(null);
@@ -341,7 +342,7 @@ class SlotLayer {
 
 			let _texpaint = raw.texpaint;
 			raw.texpaint = image_create_render_target(resX, resY, format);
-			g2_begin(raw.texpaint, false);
+			g2_begin(raw.texpaint);
 			g2_set_pipeline(Base.pipeCopy);
 			g2_draw_scaled_image(_texpaint, 0, 0, resX, resY);
 			g2_set_pipeline(null);
@@ -353,13 +354,13 @@ class SlotLayer {
 			raw.texpaint_nor = image_create_render_target(resX, resY, format);
 			raw.texpaint_pack = image_create_render_target(resX, resY, format);
 
-			g2_begin(raw.texpaint_nor, false);
+			g2_begin(raw.texpaint_nor);
 			g2_set_pipeline(Base.pipeCopy);
 			g2_draw_scaled_image(_texpaint_nor, 0, 0, resX, resY);
 			g2_set_pipeline(null);
 			g2_end();
 
-			g2_begin(raw.texpaint_pack, false);
+			g2_begin(raw.texpaint_pack);
 			g2_set_pipeline(Base.pipeCopy);
 			g2_draw_scaled_image(_texpaint_pack, 0, 0, resX, resY);
 			g2_set_pipeline(null);
@@ -385,7 +386,7 @@ class SlotLayer {
 			let _texpaint = raw.texpaint;
 			raw.texpaint = image_create_render_target(resX, resY, tex_format_t.RGBA32);
 
-			g2_begin(raw.texpaint, false);
+			g2_begin(raw.texpaint);
 			g2_set_pipeline(Base.pipeCopy8);
 			g2_draw_scaled_image(_texpaint, 0, 0, resX, resY);
 			g2_set_pipeline(null);

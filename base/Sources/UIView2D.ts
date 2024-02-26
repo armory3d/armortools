@@ -154,13 +154,13 @@ class UIView2D {
 					let current = _g2_current;
 					if (current != null) g2_end();
 					layer = Base.flatten();
-					if (current != null) g2_begin(current, false);
+					if (current != null) g2_begin(current);
 				}
 				else if (SlotLayer.isGroup(layer)) {
 					let current = _g2_current;
 					if (current != null) g2_end();
 					layer = Base.flatten(false, SlotLayer.getChildren(layer));
-					if (current != null) g2_begin(current, false);
+					if (current != null) g2_begin(current);
 				}
 
 				tex =
@@ -232,7 +232,7 @@ class UIView2D {
 					let y = UIView2D.ui.input_y - ty - UIView2D.wy;
 					Base.notifyOnNextFrame(() => {
 						let texpaint_picker = render_path_render_targets.get("texpaint_picker").image;
-						g2_begin(texpaint_picker, false);
+						g2_begin(texpaint_picker);
 						g2_draw_scaled_image(tex, -x, -y, tw, th);
 						g2_end();
 						let a = new DataView(image_get_pixels(texpaint_picker));
@@ -374,7 +374,7 @@ class UIView2D {
 			///end
 		}
 		zui_end();
-		g2_begin(null, false);
+		g2_begin(null);
 	}
 
 	static update = () => {

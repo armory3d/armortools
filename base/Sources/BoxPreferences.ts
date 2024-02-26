@@ -285,7 +285,7 @@ class BoxPreferences {
 					///end
 
 					History.reset();
-					g2_begin(current, false);
+					g2_begin(current);
 				}
 
 				///if is_paint
