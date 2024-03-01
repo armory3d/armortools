@@ -23,7 +23,7 @@ class Viewport {
 		let cam = scene_camera;
 		for (let o of _scene_raw.objects) {
 			if (o.type == "camera_object") {
-				mat4_set_from_f32_array(cam.base.transform.local, o.transform.values);
+				mat4_set_from_f32_array(cam.base.transform.local, o.transform);
 				transform_decompose(cam.base.transform);
 				if (Context.raw.fovHandle != null) Context.raw.fovHandle.value = cam.data.fov = Base.defaultFov;
 				Context.raw.camHandle.position = 0;

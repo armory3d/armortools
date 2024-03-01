@@ -138,7 +138,7 @@ class ExportArm {
 		};
 
 		///if (krom_android || krom_ios)
-		let tex = render_path_render_targets.get(Context.raw.renderMode == RenderMode.RenderForward ? "buf" : "tex").image;
+		let tex = render_path_render_targets.get(Context.raw.renderMode == RenderMode.RenderForward ? "buf" : "tex")._image;
 		let mesh_icon = image_create_render_target(256, 256);
 		let r = app_w() / app_h();
 		g2_begin(mesh_icon);

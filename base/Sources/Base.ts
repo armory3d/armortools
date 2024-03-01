@@ -1012,9 +1012,9 @@ class Base {
 		///end
 
 		///if is_lab
-		let texpaint = render_path_render_targets.get("texpaint").image;
-		let texpaint_nor = render_path_render_targets.get("texpaint_nor").image;
-		let texpaint_pack = render_path_render_targets.get("texpaint_pack").image;
+		let texpaint = render_path_render_targets.get("texpaint")._image;
+		let texpaint_nor = render_path_render_targets.get("texpaint_nor")._image;
+		let texpaint_pack = render_path_render_targets.get("texpaint_pack")._image;
 		g2_begin(texpaint);
 		g2_draw_scaled_image(Res.get("placeholder.k"), 0, 0, Config.getTextureResX(), Config.getTextureResY()); // Base
 		g2_end();
@@ -1024,8 +1024,8 @@ class Base {
 		g4_begin(texpaint_pack);
 		g4_clear(color_from_floats(1.0, 0.4, 0.0, 0.0)); // Occ, rough, met
 		g4_end();
-		let texpaint_nor_empty = render_path_render_targets.get("texpaint_nor_empty").image;
-		let texpaint_pack_empty = render_path_render_targets.get("texpaint_pack_empty").image;
+		let texpaint_nor_empty = render_path_render_targets.get("texpaint_nor_empty")._image;
+		let texpaint_pack_empty = render_path_render_targets.get("texpaint_pack_empty")._image;
 		g4_begin(texpaint_nor_empty);
 		g4_clear(color_from_floats(0.5, 0.5, 1.0, 0.0)); // Nor
 		g4_end();
@@ -1053,23 +1053,23 @@ class Base {
 		for (let l of Project.layers) SlotLayer.resizeAndSetBits(l);
 		for (let l of History.undoLayers) SlotLayer.resizeAndSetBits(l);
 		let rts = render_path_render_targets;
-		let _texpaint_blend0 = rts.get("texpaint_blend0").image;
+		let _texpaint_blend0 = rts.get("texpaint_blend0")._image;
 		Base.notifyOnNextFrame(() => {
 			image_unload(_texpaint_blend0);
 		});
 		rts.get("texpaint_blend0").width = Config.getTextureResX();
 		rts.get("texpaint_blend0").height = Config.getTextureResY();
-		rts.get("texpaint_blend0").image = image_create_render_target(Config.getTextureResX(), Config.getTextureResY(), tex_format_t.R8);
-		let _texpaint_blend1 = rts.get("texpaint_blend1").image;
+		rts.get("texpaint_blend0")._image = image_create_render_target(Config.getTextureResX(), Config.getTextureResY(), tex_format_t.R8);
+		let _texpaint_blend1 = rts.get("texpaint_blend1")._image;
 		Base.notifyOnNextFrame(() => {
 			image_unload(_texpaint_blend1);
 		});
 		rts.get("texpaint_blend1").width = Config.getTextureResX();
 		rts.get("texpaint_blend1").height = Config.getTextureResY();
-		rts.get("texpaint_blend1").image = image_create_render_target(Config.getTextureResX(), Config.getTextureResY(), tex_format_t.R8);
+		rts.get("texpaint_blend1")._image = image_create_render_target(Config.getTextureResX(), Config.getTextureResY(), tex_format_t.R8);
 		Context.raw.brushBlendDirty = true;
 		if (rts.get("texpaint_blur") != null) {
-			let _texpaint_blur = rts.get("texpaint_blur").image;
+			let _texpaint_blur = rts.get("texpaint_blur")._image;
 			Base.notifyOnNextFrame(() => {
 				image_unload(_texpaint_blur);
 			});
@@ -1077,7 +1077,7 @@ class Base {
 			let sizeY = Math.floor(Config.getTextureResY() * 0.95);
 			rts.get("texpaint_blur").width = sizeX;
 			rts.get("texpaint_blur").height = sizeY;
-			rts.get("texpaint_blur").image = image_create_render_target(sizeX, sizeY);
+			rts.get("texpaint_blur")._image = image_create_render_target(sizeX, sizeY);
 		}
 		if (RenderPathPaint.liveLayer != null) SlotLayer.resizeAndSetBits(RenderPathPaint.liveLayer);
 		///if (krom_direct3d12 || krom_vulkan || krom_metal)
@@ -1383,7 +1383,7 @@ class Base {
 			t.height = l.texpaint.height;
 			t.format = format;
 			let rt = render_path_create_render_target(t);
-			Base.tempImage = rt.image;
+			Base.tempImage = rt._image;
 		}
 	}
 
@@ -1443,7 +1443,7 @@ class Base {
 				t.height = l.texpaint.height;
 				t.format = format;
 				let rt = render_path_create_render_target(t);
-				Base.expa = rt.image;
+				Base.expa = rt._image;
 			}
 
 			{
@@ -1453,7 +1453,7 @@ class Base {
 				t.height = l.texpaint.height;
 				t.format = format;
 				let rt = render_path_create_render_target(t);
-				Base.expb = rt.image;
+				Base.expb = rt._image;
 			}
 
 			{
@@ -1463,7 +1463,7 @@ class Base {
 				t.height = l.texpaint.height;
 				t.format = format;
 				let rt = render_path_create_render_target(t);
-				Base.expc = rt.image;
+				Base.expc = rt._image;
 			}
 		}
 	}
@@ -1602,7 +1602,7 @@ class Base {
 		g2_set_pipeline(null);
 		g2_end();
 
-		let empty = render_path_render_targets.get("empty_white").image;
+		let empty = render_path_render_targets.get("empty_white")._image;
 		let mask = empty;
 		let l1masks =  use_mask ? SlotLayer.getMasks(l1) : null;
 		if (l1masks != null) {
@@ -1689,7 +1689,7 @@ class Base {
 		Base.makeExportImg();
 		if (Base.pipeMerge == null) Base.makePipe();
 		if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
-		let empty = render_path_render_targets.get("empty_white").image;
+		let empty = render_path_render_targets.get("empty_white")._image;
 
 		// Clear export layer
 		g4_begin(Base.expa);
@@ -2143,8 +2143,8 @@ class Base {
 			let brushNode = ParserLogic.getLogicNode(node);
 			if (brushNode != null && brushNode.getCachedImage() != null) {
 				texpaint = brushNode.getCachedImage();
-				texpaint_nor = render_path_render_targets.get("texpaint_nor_empty").image;
-				texpaint_pack = render_path_render_targets.get("texpaint_pack_empty").image;
+				texpaint_nor = render_path_render_targets.get("texpaint_nor_empty")._image;
+				texpaint_pack = render_path_render_targets.get("texpaint_pack_empty")._image;
 			}
 		}
 
@@ -2153,11 +2153,11 @@ class Base {
 
 	static onLayersResized = () => {
 		image_unload(BrushOutputNode.inst.texpaint);
-		BrushOutputNode.inst.texpaint = render_path_render_targets.get("texpaint").image = image_create_render_target(Config.getTextureResX(), Config.getTextureResY());
+		BrushOutputNode.inst.texpaint = render_path_render_targets.get("texpaint")._image = image_create_render_target(Config.getTextureResX(), Config.getTextureResY());
 		image_unload(BrushOutputNode.inst.texpaint_nor);
-		BrushOutputNode.inst.texpaint_nor = render_path_render_targets.get("texpaint_nor").image = image_create_render_target(Config.getTextureResX(), Config.getTextureResY());
+		BrushOutputNode.inst.texpaint_nor = render_path_render_targets.get("texpaint_nor")._image = image_create_render_target(Config.getTextureResX(), Config.getTextureResY());
 		image_unload(BrushOutputNode.inst.texpaint_pack);
-		BrushOutputNode.inst.texpaint_pack = render_path_render_targets.get("texpaint_pack").image = image_create_render_target(Config.getTextureResX(), Config.getTextureResY());
+		BrushOutputNode.inst.texpaint_pack = render_path_render_targets.get("texpaint_pack")._image = image_create_render_target(Config.getTextureResX(), Config.getTextureResY());
 
 		if (InpaintNode.image != null) {
 			image_unload(InpaintNode.image);
@@ -2179,10 +2179,10 @@ class Base {
 			TilingNode.init();
 		}
 
-		image_unload(render_path_render_targets.get("texpaint_blend0").image);
-		render_path_render_targets.get("texpaint_blend0").image = image_create_render_target(Config.getTextureResX(), Config.getTextureResY(), tex_format_t.R8);
-		image_unload(render_path_render_targets.get("texpaint_blend1").image);
-		render_path_render_targets.get("texpaint_blend1").image = image_create_render_target(Config.getTextureResX(), Config.getTextureResY(), tex_format_t.R8);
+		image_unload(render_path_render_targets.get("texpaint_blend0")._image);
+		render_path_render_targets.get("texpaint_blend0")._image = image_create_render_target(Config.getTextureResX(), Config.getTextureResY(), tex_format_t.R8);
+		image_unload(render_path_render_targets.get("texpaint_blend1")._image);
+		render_path_render_targets.get("texpaint_blend1")._image = image_create_render_target(Config.getTextureResX(), Config.getTextureResY(), tex_format_t.R8);
 
 		if (render_path_render_targets.get("texpaint_node") != null) {
 			render_path_render_targets.delete("texpaint_node");

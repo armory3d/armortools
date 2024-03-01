@@ -53,7 +53,7 @@ class ImportEnvmap {
 				image_unload(_radianceCpu);
 			});
 		}
-		ImportEnvmap.radianceCpu = image_from_bytes(radiancePixels, ImportEnvmap.radiance.width, ImportEnvmap.radiance.height, tex_format_t.RGBA128, usage_t.DYNAMIC);
+		ImportEnvmap.radianceCpu = image_from_bytes(radiancePixels, ImportEnvmap.radiance.width, ImportEnvmap.radiance.height, tex_format_t.RGBA128);
 
 		// Radiance
 		if (ImportEnvmap.mipsCpu != null) {
@@ -69,23 +69,23 @@ class ImportEnvmap {
 		ImportEnvmap.mipsCpu = [];
 		for (let i = 0; i < ImportEnvmap.mips.length; ++i) {
 			ImportEnvmap.getRadianceMip(ImportEnvmap.mips[i], i, ImportEnvmap.radiance);
-			ImportEnvmap.mipsCpu.push(image_from_bytes(image_get_pixels(ImportEnvmap.mips[i]), ImportEnvmap.mips[i].width, ImportEnvmap.mips[i].height, tex_format_t.RGBA128, usage_t.DYNAMIC));
+			ImportEnvmap.mipsCpu.push(image_from_bytes(image_get_pixels(ImportEnvmap.mips[i]), ImportEnvmap.mips[i].width, ImportEnvmap.mips[i].height, tex_format_t.RGBA128));
 		}
 		image_set_mipmaps(ImportEnvmap.radianceCpu, ImportEnvmap.mipsCpu);
 
 		// Irradiance
-		scene_world._irradiance = ImportEnvmap.getSphericalHarmonics(radiancePixels, ImportEnvmap.radiance.width, ImportEnvmap.radiance.height);
+		scene_world._.irradiance = ImportEnvmap.getSphericalHarmonics(radiancePixels, ImportEnvmap.radiance.width, ImportEnvmap.radiance.height);
 
 		// World
 		scene_world.strength = 1.0;
 		scene_world.radiance_mipmaps = ImportEnvmap.mipsCpu.length - 2;
-		scene_world._envmap = image;
+		scene_world._.envmap = image;
 		scene_world.envmap = path;
-		scene_world._radiance = ImportEnvmap.radianceCpu;
-		scene_world._radiance_mipmaps = ImportEnvmap.mipsCpu;
+		scene_world._.radiance = ImportEnvmap.radianceCpu;
+		scene_world._.radiance_mipmaps = ImportEnvmap.mipsCpu;
 		Context.raw.savedEnvmap = image;
 		if (Context.raw.showEnvmapBlur) {
-			scene_world._envmap = scene_world._radiance_mipmaps[0];
+			scene_world._.envmap = scene_world._.radiance_mipmaps[0];
 		}
 		Context.raw.ddirty = 2;
 		Project.raw.envmap = path;

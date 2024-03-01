@@ -41,7 +41,7 @@ class UtilRender {
 		let _brushNodesScale = Context.raw.brushNodesScale;
 		Context.raw.brushNodesScale = 1.0;
 
-		scene_world._envmap = Context.raw.previewEnvmap;
+		scene_world._.envmap = Context.raw.previewEnvmap;
 		// No resize
 		_render_path_last_w = UtilRender.materialPreviewSize;
 		_render_path_last_h = UtilRender.materialPreviewSize;
@@ -73,7 +73,7 @@ class UtilRender {
 		Context.raw.envmapAngle = _envmapAngle;
 		Context.raw.brushScale = _brushScale;
 		Context.raw.brushNodesScale = _brushNodesScale;
-		scene_world._envmap = Context.raw.showEnvmap ? Context.raw.savedEnvmap : Context.raw.emptyEnvmap;
+		scene_world._.envmap = Context.raw.showEnvmap ? Context.raw.savedEnvmap : Context.raw.emptyEnvmap;
 		MakeMaterial.parseMeshMaterial();
 		Context.raw.ddirty = 0;
 	}
@@ -106,7 +106,7 @@ class UtilRender {
 		Viewport.updateCameraType(CameraType.CameraPerspective);
 		let light = scene_lights[0];
 		light.base.visible = false;
-		scene_world._envmap = Context.raw.previewEnvmap;
+		scene_world._.envmap = Context.raw.previewEnvmap;
 
 		// No resize
 		_render_path_last_w = UtilRender.decalPreviewSize;
@@ -136,7 +136,7 @@ class UtilRender {
 		camera_object_build_mat(scene_camera);
 		light = scene_lights[0];
 		light.base.visible = true;
-		scene_world._envmap = Context.raw.showEnvmap ? Context.raw.savedEnvmap : Context.raw.emptyEnvmap;
+		scene_world._.envmap = Context.raw.showEnvmap ? Context.raw.savedEnvmap : Context.raw.emptyEnvmap;
 
 		MakeMaterial.parseMeshMaterial();
 		Context.raw.ddirty = 1; // Refresh depth for decal paint
@@ -351,8 +351,8 @@ class UtilRender {
 		g2_end();
 
 		// Scale image preview down to to icon
-		render_path_render_targets.get("texpreview").image = Context.raw.brush.image;
-		render_path_render_targets.get("texpreview_icon").image = Context.raw.brush.imageIcon;
+		render_path_render_targets.get("texpreview")._image = Context.raw.brush.image;
+		render_path_render_targets.get("texpreview_icon")._image = Context.raw.brush.imageIcon;
 		render_path_set_target("texpreview_icon");
 		render_path_bind_target("texpreview", "tex");
 		render_path_draw_shader("shader_datas/supersample_resolve/supersample_resolve");
@@ -376,7 +376,7 @@ class UtilRender {
 		transform_build_matrix(Context.raw.paintObject.base.transform);
 
 		g4_begin(image);
-		g4_set_pipeline(res.scon._pipe_state);
+		g4_set_pipeline(res.scon._.pipe_state);
 		uniforms_set_context_consts(res.scon, [""]);
 		uniforms_set_obj_consts(res.scon, Context.raw.paintObject.base);
 		uniforms_set_material_consts(res.scon, res.mcon);

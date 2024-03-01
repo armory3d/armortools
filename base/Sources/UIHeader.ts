@@ -40,7 +40,7 @@ class UIHeader {
 		if (Context.raw.tool == WorkspaceTool.ToolColorId) {
 			zui_text(tr("Picked Color"));
 			if (Context.raw.colorIdPicked) {
-				zui_image(render_path_render_targets.get("texpaint_colorid").image, 0xffffffff, 64);
+				zui_image(render_path_render_targets.get("texpaint_colorid")._image, 0xffffffff, 64);
 			}
 			ui.enabled = Context.raw.colorIdPicked;
 			if (zui_button(tr("Clear"))) {
@@ -83,7 +83,7 @@ class UIHeader {
 					if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
 					g4_begin(m.texpaint);
 					g4_set_pipeline(Base.pipeColorIdToMask);
-					g4_set_tex(Base.texpaintColorId,render_path_render_targets.get("texpaint_colorid").image);
+					g4_set_tex(Base.texpaintColorId,render_path_render_targets.get("texpaint_colorid")._image);
 					g4_set_tex(Base.texColorId, Project.getImage(Project.assets[Context.raw.colorIdHandle.position]));
 					g4_set_vertex_buffer(const_data_screen_aligned_vb);
 					g4_set_index_buffer(const_data_screen_aligned_ib);

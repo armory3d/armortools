@@ -539,7 +539,7 @@ class RenderPathBase {
 
 	static makeGbufferCopyTextures = () => {
 		let copy = render_path_render_targets.get("gbuffer0_copy");
-		if (copy == null || copy.image.width != render_path_render_targets.get("gbuffer0").image.width || copy.image.height != render_path_render_targets.get("gbuffer0").image.height) {
+		if (copy == null || copy._image.width != render_path_render_targets.get("gbuffer0")._image.width || copy._image.height != render_path_render_targets.get("gbuffer0")._image.height) {
 			{
 				let t = render_target_create();
 				t.name = "gbuffer0_copy";

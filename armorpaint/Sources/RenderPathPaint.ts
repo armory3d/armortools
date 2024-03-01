@@ -151,8 +151,8 @@ class RenderPathPaint {
 					render_path_bind_target("gbuffer2", "gbuffer2");
 					render_path_bind_target("_main", "gbufferD");
 					render_path_draw_meshes("paint");
-					let texpaint_posnortex_picker0 = render_path_render_targets.get("texpaint_posnortex_picker0").image;
-					let texpaint_posnortex_picker1 = render_path_render_targets.get("texpaint_posnortex_picker1").image;
+					let texpaint_posnortex_picker0 = render_path_render_targets.get("texpaint_posnortex_picker0")._image;
+					let texpaint_posnortex_picker1 = render_path_render_targets.get("texpaint_posnortex_picker1")._image;
 					let a = new DataView(image_get_pixels(texpaint_posnortex_picker0));
 					let b = new DataView(image_get_pixels(texpaint_posnortex_picker1));
 					Context.raw.posXPicked = a.getFloat32(0, true);
@@ -178,10 +178,10 @@ class RenderPathPaint {
 					UIHeader.headerHandle.redraws = 2;
 					UIBase.hwnds[2].redraws = 2;
 
-					let texpaint_picker = render_path_render_targets.get("texpaint_picker").image;
-					let texpaint_nor_picker = render_path_render_targets.get("texpaint_nor_picker").image;
-					let texpaint_pack_picker = render_path_render_targets.get("texpaint_pack_picker").image;
-					let texpaint_uv_picker = render_path_render_targets.get("texpaint_uv_picker").image;
+					let texpaint_picker = render_path_render_targets.get("texpaint_picker")._image;
+					let texpaint_nor_picker = render_path_render_targets.get("texpaint_nor_picker")._image;
+					let texpaint_pack_picker = render_path_render_targets.get("texpaint_pack_picker")._image;
+					let texpaint_uv_picker = render_path_render_targets.get("texpaint_uv_picker")._image;
 					let a = new DataView(image_get_pixels(texpaint_picker));
 					let b = new DataView(image_get_pixels(texpaint_nor_picker));
 					let c = new DataView(image_get_pixels(texpaint_pack_picker));
@@ -506,7 +506,7 @@ class RenderPathPaint {
 		let decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutType.ShortcutDown);
 		let img = (decal && !decalMask) ? Context.raw.decalImage : Res.get("cursor.k");
 		g4_set_tex(Base.cursorTex, img);
-		let gbuffer0 = render_path_render_targets.get("gbuffer0").image;
+		let gbuffer0 = render_path_render_targets.get("gbuffer0")._image;
 		g4_set_tex_depth(Base.cursorGbufferD, gbuffer0);
 		g4_set_float2(Base.cursorMouse, mx, my);
 		g4_set_float2(Base.cursorTexStep, 1 / gbuffer0.width, 1 / gbuffer0.height);
@@ -521,9 +521,9 @@ class RenderPathPaint {
 		///if (krom_metal || krom_vulkan)
 		g4_set_vertex_buffer(mesh_data_get(geom, [{name: "tex", data: "short2norm"}]));
 		///else
-		g4_set_vertex_buffer(geom._vertex_buffer);
+		g4_set_vertex_buffer(geom._.vertex_buffer);
 		///end
-		g4_set_index_buffer(geom._index_buffers[0]);
+		g4_set_index_buffer(geom._.index_buffers[0]);
 		g4_draw();
 
 		g4_disable_scissor();

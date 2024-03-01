@@ -157,7 +157,7 @@ class UniformsExt {
 			case "_gbufferSize": {
 				vec4_set(UniformsExt.vec, 0, 0, 0);
 				let gbuffer2 = render_path_render_targets.get("gbuffer2");
-				vec4_set(UniformsExt.vec, gbuffer2.image.width, gbuffer2.image.height, 0);
+				vec4_set(UniformsExt.vec, gbuffer2._image.width, gbuffer2._image.height, 0);
 				return UniformsExt.vec;
 			}
 			case "_cloneDelta": {
@@ -341,7 +341,7 @@ class UniformsExt {
 			case "_texpaint_undo": {
 				///if (is_paint || is_sculpt)
 				let i = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
-				return render_path_render_targets.get("texpaint_undo" + i).image;
+				return render_path_render_targets.get("texpaint_undo" + i)._image;
 				///end
 
 				///if is_lab
@@ -351,7 +351,7 @@ class UniformsExt {
 			case "_texpaint_nor_undo": {
 				///if (is_paint || is_sculpt)
 				let i = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
-				return render_path_render_targets.get("texpaint_nor_undo" + i).image;
+				return render_path_render_targets.get("texpaint_nor_undo" + i)._image;
 				///end
 
 				///if is_lab
@@ -361,7 +361,7 @@ class UniformsExt {
 			case "_texpaint_pack_undo": {
 				///if (is_paint || is_sculpt)
 				let i = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
-				return render_path_render_targets.get("texpaint_pack_undo" + i).image;
+				return render_path_render_targets.get("texpaint_pack_undo" + i)._image;
 				///end
 
 				///if is_lab
@@ -380,7 +380,7 @@ class UniformsExt {
 
 			///if (is_paint || is_sculpt)
 			case "_texcolorid": {
-				if (Project.assets.length == 0) return render_path_render_targets.get("empty_white").image;
+				if (Project.assets.length == 0) return render_path_render_targets.get("empty_white")._image;
 				else return Project.getImage(Project.assets[Context.raw.colorIdHandle.position]);
 			}
 			case "_textexttool": { // Opacity map for text
@@ -393,7 +393,7 @@ class UniformsExt {
 				return Context.raw.brushStencilImage;
 			}
 			case "_texparticle": {
-				return render_path_render_targets.get("texparticle").image;
+				return render_path_render_targets.get("texparticle")._image;
 			}
 			///end
 
@@ -421,7 +421,7 @@ class UniformsExt {
 					UtilUV.cacheUVIslandMap();
 				}
 				app_notify_on_init(_init);
-				return UtilUV.uvislandmapCached ? UtilUV.uvislandmap :render_path_render_targets.get("empty_black").image;
+				return UtilUV.uvislandmapCached ? UtilUV.uvislandmap :render_path_render_targets.get("empty_black")._image;
 			}
 			case "_texdilatemap": {
 				return UtilUV.dilatemap;
@@ -431,7 +431,7 @@ class UniformsExt {
 
 		if (link.startsWith("_texpaint_pack_vert")) {
 			let tid = link.substr(link.length - 1);
-			return render_path_render_targets.get("texpaint_pack" + tid).image;
+			return render_path_render_targets.get("texpaint_pack" + tid)._image;
 		}
 
 		if (link.startsWith("_texpaint_vert")) {
@@ -478,15 +478,15 @@ class UniformsExt {
 		///if (is_paint || is_sculpt)
 		if (link.startsWith("_texblur_")) {
 			let id = link.substr(9);
-			return Context.raw.nodePreviews != null ? Context.raw.nodePreviews.get(id) :render_path_render_targets.get("empty_black").image;
+			return Context.raw.nodePreviews != null ? Context.raw.nodePreviews.get(id) :render_path_render_targets.get("empty_black")._image;
 		}
 		if (link.startsWith("_texwarp_")) {
 			let id = link.substr(9);
-			return Context.raw.nodePreviews != null ? Context.raw.nodePreviews.get(id) :render_path_render_targets.get("empty_black").image;
+			return Context.raw.nodePreviews != null ? Context.raw.nodePreviews.get(id) :render_path_render_targets.get("empty_black")._image;
 		}
 		if (link.startsWith("_texbake_")) {
 			let id = link.substr(9);
-			return Context.raw.nodePreviews != null ? Context.raw.nodePreviews.get(id) :render_path_render_targets.get("empty_black").image;
+			return Context.raw.nodePreviews != null ? Context.raw.nodePreviews.get(id) :render_path_render_targets.get("empty_black")._image;
 		}
 		///end
 

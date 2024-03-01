@@ -141,7 +141,7 @@ class ExportTexture {
 		Base.makeExportImg();
 		if (Base.pipeMerge == null) Base.makePipe();
 		if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
-		let empty = render_path_render_targets.get("empty_white").image;
+		let empty = render_path_render_targets.get("empty_white")._image;
 
 		// Append object mask name
 		let exportSelected = Context.raw.layersExport == ExportMode.ExportSelected;

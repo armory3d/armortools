@@ -60,10 +60,13 @@ class UtilParticle {
 			if (obj.name == ".Sphere") {
 				let particle: obj_t = JSON.parse(JSON.stringify(obj));
 				particle.name = ".Particle";
-				particle.is_particle = true;
+				if (particle.particles == null) {
+					particle.particles = {};
+				}
+				particle.particles.is_particle = true;
 				particle.material_refs = ["MaterialParticle"];
 				_scene_raw.objects.push(particle);
-				for (let i = 0; i < 16; ++i) particle.transform.values[i] *= 0.01;
+				for (let i = 0; i < 16; ++i) particle.transform[i] *= 0.01;
 				break;
 			}
 		}
@@ -72,7 +75,7 @@ class UtilParticle {
 		let mo: mesh_object_t = o.ext;
 		mo.base.name = ".ParticleEmitter";
 		mo.base.raw = JSON.parse(JSON.stringify(mo.base.raw));
-		mo.base.raw.particle_refs = particle_refs;
+		mo.base.raw.particles.refs = particle_refs;
 		///if arm_particles
 		mesh_object_setup_particle_system(mo, "Scene", particle_refs[0]);
 		///end

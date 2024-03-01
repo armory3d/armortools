@@ -113,10 +113,10 @@ class ImportMesh {
 		for (let i = 0; i < Project.paintObjects.length; ++i) {
 			let p = Project.paintObjects[i];
 			if (p == Context.raw.paintObject) continue;
-			data_delete_mesh(p.data._handle);
+			data_delete_mesh(p.data._.handle);
 			mesh_object_remove(p);
 		}
-		let handle = Context.raw.paintObject.data._handle;
+		let handle = Context.raw.paintObject.data._.handle;
 		if (handle != "SceneSphere" && handle != "ScenePlane") {
 			data_delete_mesh(handle);
 		}
@@ -125,8 +125,8 @@ class ImportMesh {
 		Context.raw.paintObject.base.name = mesh.name;
 		Project.paintObjects = [Context.raw.paintObject];
 
-		md._handle = raw.name;
-		data_cached_meshes.set(md._handle, md);
+		md._.handle = raw.name;
+		data_cached_meshes.set(md._.handle, md);
 
 		Context.raw.ddirty = 4;
 
@@ -194,15 +194,15 @@ class ImportMesh {
 		for (let p of Project.paintObjects) {
 			if (p.base.name == object.base.name) {
 				p.base.name += ".001";
-				p.data._handle += ".001";
-				data_cached_meshes.set(p.data._handle, p.data);
+				p.data._.handle += ".001";
+				data_cached_meshes.set(p.data._.handle, p.data);
 			}
 		}
 
 		Project.paintObjects.push(object);
 
-		md._handle = raw.name;
-		data_cached_meshes.set(md._handle, md);
+		md._.handle = raw.name;
+		data_cached_meshes.set(md._.handle, md);
 
 		Context.raw.ddirty = 4;
 

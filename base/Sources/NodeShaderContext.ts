@@ -102,7 +102,7 @@ class NodeShaderContext {
 			c.link = link;
 		}
 		if (is_image) {
-			c.is_image = is_image;
+			c.image_uniform = is_image;
 		}
 		raw.tunits.push(c);
 	}

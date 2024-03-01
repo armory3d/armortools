@@ -125,7 +125,7 @@ class TabMeshes {
 									transform_build_matrix(Project.paintObjects[0].base.transform);
 								}
 							}
-							data_delete_mesh(o.data._handle);
+							data_delete_mesh(o.data._.handle);
 							mesh_object_remove(o);
 							Context.raw.paintObject = Context.mainObject();
 							UtilMesh.mergeMesh();

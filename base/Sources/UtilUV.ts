@@ -134,9 +134,9 @@ class UtilUV {
 		///if (krom_metal || krom_vulkan)
 		g4_set_vertex_buffer(mesh_data_get(geom, [{name: "tex", data: "short2norm"}]));
 		///else
-		g4_set_vertex_buffer(geom._vertex_buffer);
+		g4_set_vertex_buffer(geom._.vertex_buffer);
 		///end
-		g4_set_index_buffer(geom._index_buffers[0]);
+		g4_set_index_buffer(geom._.index_buffers[0]);
 		g4_draw();
 		g4_end();
 		UtilUV.dilatemapCached = true;

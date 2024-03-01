@@ -8,7 +8,7 @@ class MakeVoxel {
 		g4_vertex_struct_add(structure, "nor", vertex_data_t.I16_2X_NORM);
 		g4_vertex_struct_add(structure, "tex", vertex_data_t.I16_2X_NORM);
 
-		let pipeState = data._pipe_state;
+		let pipeState = data._.pipe_state;
 		pipeState.input_layout = [structure];
 		data.vertex_elements = [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}];
 
@@ -28,9 +28,9 @@ class MakeVoxel {
 
 		g4_pipeline_compile(pipeState);
 		data.constants = [{ name: "W", type: "mat4", link: "_world_matrix" }, { name: "N", type: "mat3", link: "_normal_matrix" }];
-		data._constants = [g4_pipeline_get_const_loc(pipeState, "W"), g4_pipeline_get_const_loc(pipeState, "N")];
-		data.texture_units = [{ name: "texpaint_pack" }, { name: "voxels", is_image: true }];
-		data._tex_units = [g4_pipeline_get_tex_unit(pipeState, "texpaint_pack"), g4_pipeline_get_tex_unit(pipeState, "voxels")];
+		data._.constants = [g4_pipeline_get_const_loc(pipeState, "W"), g4_pipeline_get_const_loc(pipeState, "N")];
+		data.texture_units = [{ name: "texpaint_pack" }, { name: "voxels", image_uniform: true }];
+		data._.tex_units = [g4_pipeline_get_tex_unit(pipeState, "texpaint_pack"), g4_pipeline_get_tex_unit(pipeState, "voxels")];
 	}
 
 	static voxelSource = (): string => {

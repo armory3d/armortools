@@ -173,20 +173,20 @@ class ImportArm {
 		if (tex.width != Config.getTextureResX() || tex.height != Config.getTextureResY()) {
 			if (History.undoLayers != null) for (let l of History.undoLayers) SlotLayer.resizeAndSetBits(l);
 			let rts = render_path_render_targets;
-			let _texpaint_blend0 = rts.get("texpaint_blend0").image;
+			let _texpaint_blend0 = rts.get("texpaint_blend0")._image;
 			Base.notifyOnNextFrame(() => {
 				image_unload(_texpaint_blend0);
 			});
 			rts.get("texpaint_blend0").width = Config.getTextureResX();
 			rts.get("texpaint_blend0").height = Config.getTextureResY();
-			rts.get("texpaint_blend0").image = image_create_render_target(Config.getTextureResX(), Config.getTextureResY(), tex_format_t.R8, depth_format_t.NO_DEPTH);
-			let _texpaint_blend1 = rts.get("texpaint_blend1").image;
+			rts.get("texpaint_blend0")._image = image_create_render_target(Config.getTextureResX(), Config.getTextureResY(), tex_format_t.R8, depth_format_t.NO_DEPTH);
+			let _texpaint_blend1 = rts.get("texpaint_blend1")._image;
 			Base.notifyOnNextFrame(() => {
 				image_unload(_texpaint_blend1);
 			});
 			rts.get("texpaint_blend1").width = Config.getTextureResX();
 			rts.get("texpaint_blend1").height = Config.getTextureResY();
-			rts.get("texpaint_blend1").image = image_create_render_target(Config.getTextureResX(), Config.getTextureResY(), tex_format_t.R8, depth_format_t.NO_DEPTH);
+			rts.get("texpaint_blend1")._image = image_create_render_target(Config.getTextureResX(), Config.getTextureResY(), tex_format_t.R8, depth_format_t.NO_DEPTH);
 			Context.raw.brushBlendDirty = true;
 		}
 
@@ -367,8 +367,8 @@ class ImportArm {
 				object = scene_add_mesh_object(md, Context.raw.paintObject.materials, Context.raw.paintObject.base);
 				object.base.name = md.name;
 				object.skip_context = "paint";
-				md._handle = md.name;
-				data_cached_meshes.set(md._handle, md);
+				md._.handle = md.name;
+				data_cached_meshes.set(md._.handle, md);
 			}
 			vec4_set(object.base.transform.scale, 1, 1, 1);
 			transform_build_matrix(object.base.transform);

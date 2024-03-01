@@ -68,7 +68,7 @@ class SlotLayer {
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
 				t.format = format;
-				raw.texpaint = render_path_create_render_target(t).image;
+				raw.texpaint = render_path_create_render_target(t)._image;
 			}
 
 			///if is_paint
@@ -78,7 +78,7 @@ class SlotLayer {
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
 				t.format = format;
-				raw.texpaint_nor = render_path_create_render_target(t).image;
+				raw.texpaint_nor = render_path_create_render_target(t)._image;
 			}
 			{
 				let t = render_target_create();
@@ -86,7 +86,7 @@ class SlotLayer {
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
 				t.format = format;
-				raw.texpaint_pack = render_path_create_render_target(t).image;
+				raw.texpaint_pack = render_path_create_render_target(t)._image;
 			}
 
 			raw.texpaint_preview = image_create_render_target(UtilRender.layerPreviewSize, UtilRender.layerPreviewSize, tex_format_t.RGBA32);
@@ -105,7 +105,7 @@ class SlotLayer {
 				t.width = Config.getTextureResX();
 				t.height = Config.getTextureResY();
 				t.format = format;
-				raw.texpaint = render_path_create_render_target(t).image;
+				raw.texpaint = render_path_create_render_target(t)._image;
 			}
 
 			raw.texpaint_preview = image_create_render_target(UtilRender.layerPreviewSize, UtilRender.layerPreviewSize, tex_format_t.RGBA32);
@@ -170,8 +170,8 @@ class SlotLayer {
 
 	static swap = (raw: SlotLayerRaw, other: SlotLayerRaw) => {
 		if ((SlotLayer.isLayer(raw) || SlotLayer.isMask(raw)) && (SlotLayer.isLayer(other) || SlotLayer.isMask(other))) {
-			render_path_render_targets.get("texpaint" + raw.ext).image = other.texpaint;
-			render_path_render_targets.get("texpaint" + other.ext).image = raw.texpaint;
+			render_path_render_targets.get("texpaint" + raw.ext)._image = other.texpaint;
+			render_path_render_targets.get("texpaint" + other.ext)._image = raw.texpaint;
 			let _texpaint = raw.texpaint;
 			raw.texpaint = other.texpaint;
 			other.texpaint = _texpaint;
@@ -185,10 +185,10 @@ class SlotLayer {
 
 		///if is_paint
 		if (SlotLayer.isLayer(raw) && SlotLayer.isLayer(other)) {
-			render_path_render_targets.get("texpaint_nor" + raw.ext).image = other.texpaint_nor;
-			render_path_render_targets.get("texpaint_pack" + raw.ext).image = other.texpaint_pack;
-			render_path_render_targets.get("texpaint_nor" + other.ext).image = raw.texpaint_nor;
-			render_path_render_targets.get("texpaint_pack" + other.ext).image = raw.texpaint_pack;
+			render_path_render_targets.get("texpaint_nor" + raw.ext)._image = other.texpaint_nor;
+			render_path_render_targets.get("texpaint_pack" + raw.ext)._image = other.texpaint_pack;
+			render_path_render_targets.get("texpaint_nor" + other.ext)._image = raw.texpaint_nor;
+			render_path_render_targets.get("texpaint_pack" + other.ext)._image = raw.texpaint_pack;
 			let _texpaint_nor = raw.texpaint_nor;
 			let _texpaint_pack = raw.texpaint_pack;
 			raw.texpaint_nor = other.texpaint_nor;
@@ -237,7 +237,7 @@ class SlotLayer {
 			image_unload(_texpaint);
 		}
 		Base.notifyOnNextFrame(_next);
-		raw.texpaint = render_path_render_targets.get("texpaint" + raw.id).image = inverted;
+		raw.texpaint = render_path_render_targets.get("texpaint" + raw.id)._image = inverted;
 		Context.raw.layerPreviewDirty = true;
 		Context.raw.ddirty = 3;
 	}
@@ -376,10 +376,10 @@ class SlotLayer {
 			}
 			Base.notifyOnNextFrame(_next);
 
-			rts.get("texpaint" + raw.ext).image = raw.texpaint;
+			rts.get("texpaint" + raw.ext)._image = raw.texpaint;
 			///if is_paint
-			rts.get("texpaint_nor" + raw.ext).image = raw.texpaint_nor;
-			rts.get("texpaint_pack" + raw.ext).image = raw.texpaint_pack;
+			rts.get("texpaint_nor" + raw.ext)._image = raw.texpaint_nor;
+			rts.get("texpaint_pack" + raw.ext)._image = raw.texpaint_pack;
 			///end
 		}
 		else if (SlotLayer.isMask(raw)) {
@@ -397,7 +397,7 @@ class SlotLayer {
 			}
 			Base.notifyOnNextFrame(_next);
 
-			rts.get("texpaint" + raw.ext).image = raw.texpaint;
+			rts.get("texpaint" + raw.ext)._image = raw.texpaint;
 		}
 	}
 

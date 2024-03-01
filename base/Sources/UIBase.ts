@@ -191,11 +191,11 @@ class UIBase {
 		let world = scene_world;
 		if (Context.raw.savedEnvmap == null) {
 			// Context.raw.savedEnvmap = world._envmap;
-			Context.raw.defaultIrradiance = world._irradiance;
-			Context.raw.defaultRadiance = world._radiance;
-			Context.raw.defaultRadianceMipmaps = world._radiance_mipmaps;
+			Context.raw.defaultIrradiance = world._.irradiance;
+			Context.raw.defaultRadiance = world._.radiance;
+			Context.raw.defaultRadianceMipmaps = world._.radiance_mipmaps;
 		}
-		world._envmap = Context.raw.showEnvmap ? Context.raw.savedEnvmap : Context.raw.emptyEnvmap;
+		world._.envmap = Context.raw.showEnvmap ? Context.raw.savedEnvmap : Context.raw.emptyEnvmap;
 		Context.raw.ddirty = 1;
 
 		History.reset();

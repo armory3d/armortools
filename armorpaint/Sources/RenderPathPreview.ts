@@ -105,8 +105,8 @@ class RenderPathPreview {
 
 		let framebuffer = "texpreview";
 		let selectedMat = Context.raw.material;
-		render_path_render_targets.get("texpreview").image = selectedMat.image;
-		render_path_render_targets.get("texpreview_icon").image = selectedMat.imageIcon;
+		render_path_render_targets.get("texpreview")._image = selectedMat.image;
+		render_path_render_targets.get("texpreview_icon")._image = selectedMat.imageIcon;
 
 		render_path_set_target(framebuffer);
 		render_path_bind_target("mtex", "tex");
@@ -154,7 +154,7 @@ class RenderPathPreview {
 		///end
 
 		let framebuffer = "texpreview";
-		render_path_render_targets.get("texpreview").image = Context.raw.decalImage;
+		render_path_render_targets.get("texpreview")._image = Context.raw.decalImage;
 
 		render_path_set_target(framebuffer);
 

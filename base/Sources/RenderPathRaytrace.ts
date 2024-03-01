@@ -117,7 +117,7 @@ class RenderPathRaytrace {
 		RenderPathRaytrace.f32a[22] *= scene_meshes[0].data.scale_tex;
 		///end
 
-		let framebuffer = render_path_render_targets.get("buf").image;
+		let framebuffer = render_path_render_targets.get("buf")._image;
 		krom_raytrace_dispatch_rays(framebuffer.render_target_, RenderPathRaytrace.f32a.buffer);
 
 		if (Context.raw.ddirty == 1 || Context.raw.pdirty == 1) {

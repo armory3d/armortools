@@ -124,7 +124,7 @@ class Project {
 		///if (is_paint || is_sculpt)
 		if (Context.raw.mergedObject != null) {
 			mesh_object_remove(Context.raw.mergedObject);
-			data_delete_mesh(Context.raw.mergedObject.data._handle);
+			data_delete_mesh(Context.raw.mergedObject.data._.handle);
 			Context.raw.mergedObject = null;
 		}
 		Context.raw.layerPreviewDirty = true;
@@ -139,7 +139,7 @@ class Project {
 		for (let i = 1; i < Project.paintObjects.length; ++i) {
 			let p = Project.paintObjects[i];
 			if (p == Context.raw.paintObject) continue;
-			data_delete_mesh(p.data._handle);
+			data_delete_mesh(p.data._.handle);
 			mesh_object_remove(p);
 		}
 		let meshes = scene_meshes;
@@ -149,11 +149,11 @@ class Project {
 			if (Context.raw.projectObjects.indexOf(m) == -1 &&
 				m.base.name != ".ParticleEmitter" &&
 				m.base.name != ".Particle") {
-				data_delete_mesh(m.data._handle);
+				data_delete_mesh(m.data._.handle);
 				mesh_object_remove(m);
 			}
 		}
-		let handle = Context.raw.paintObject.data._handle;
+		let handle = Context.raw.paintObject.data._.handle;
 		if (handle != "SceneSphere" && handle != "ScenePlane") {
 			data_delete_mesh(handle);
 		}
@@ -289,12 +289,12 @@ class Project {
 
 		Context.raw.savedEnvmap = null;
 		Context.raw.envmapLoaded = false;
-		scene_world._envmap = Context.raw.emptyEnvmap;
+		scene_world._.envmap = Context.raw.emptyEnvmap;
 		scene_world.envmap = "World_radiance.k";
 		Context.raw.showEnvmapHandle.selected = Context.raw.showEnvmap = false;
-		scene_world._radiance = Context.raw.defaultRadiance;
-		scene_world._radiance_mipmaps = Context.raw.defaultRadianceMipmaps;
-		scene_world._irradiance = Context.raw.defaultIrradiance;
+		scene_world._.radiance = Context.raw.defaultRadiance;
+		scene_world._.radiance_mipmaps = Context.raw.defaultRadianceMipmaps;
+		scene_world._.irradiance = Context.raw.defaultIrradiance;
 		scene_world.strength = 4.0;
 
 		///if (is_paint || is_sculpt)

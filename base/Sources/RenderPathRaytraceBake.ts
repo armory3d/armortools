@@ -22,9 +22,9 @@ class RenderPathRaytraceBake {
 			RenderPathRaytraceBake.lastLayer = null;
 
 			if (render_path_render_targets.get("baketex0") != null) {
-				image_unload(render_path_render_targets.get("baketex0").image);
-				image_unload(render_path_render_targets.get("baketex1").image);
-				image_unload(render_path_render_targets.get("baketex2").image);
+				image_unload(render_path_render_targets.get("baketex0")._image);
+				image_unload(render_path_render_targets.get("baketex1")._image);
+				image_unload(render_path_render_targets.get("baketex2")._image);
 			}
 
 			{
@@ -80,12 +80,12 @@ class RenderPathRaytraceBake {
 			RenderPathRaytrace.lastEnvmap = savedEnvmap;
 			RenderPathRaytraceBake.lastLayer = Context.raw.layer.texpaint;
 
-			let baketex0 = render_path_render_targets.get("baketex0").image;
-			let baketex1 = render_path_render_targets.get("baketex1").image;
+			let baketex0 = render_path_render_targets.get("baketex0")._image;
+			let baketex1 = render_path_render_targets.get("baketex1")._image;
 			let bnoise_sobol = scene_embedded.get("bnoise_sobol.k");
 			let bnoise_scramble = scene_embedded.get("bnoise_scramble.k");
 			let bnoise_rank = scene_embedded.get("bnoise_rank.k");
-			let texpaint_undo = render_path_render_targets.get("texpaint_undo" + History.undoI).image;
+			let texpaint_undo = render_path_render_targets.get("texpaint_undo" + History.undoI)._image;
 			krom_raytrace_set_textures(baketex0, baketex1, texpaint_undo, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
 		}
 
@@ -104,7 +104,7 @@ class RenderPathRaytraceBake {
 			f32a[5] = Context.raw.bakeUpAxis;
 			f32a[6] = Context.raw.envmapAngle;
 
-			let framebuffer = render_path_render_targets.get("baketex2").image;
+			let framebuffer = render_path_render_targets.get("baketex2")._image;
 			krom_raytrace_dispatch_rays(framebuffer.render_target_, f32a.buffer);
 
 			render_path_set_target("texpaint" + Context.raw.layer.id);
