@@ -84,10 +84,10 @@ class RenderPathPaint {
 					render_path_draw_meshes("paint");
 					UIHeader.headerHandle.redraws = 2;
 
-					let texpaint_picker = render_path_render_targets.get("texpaint_picker").image;
-					let texpaint_nor_picker = render_path_render_targets.get("texpaint_nor_picker").image;
-					let texpaint_pack_picker = render_path_render_targets.get("texpaint_pack_picker").image;
-					let texpaint_uv_picker = render_path_render_targets.get("texpaint_uv_picker").image;
+					let texpaint_picker = render_path_render_targets.get("texpaint_picker")._image;
+					let texpaint_nor_picker = render_path_render_targets.get("texpaint_nor_picker")._image;
+					let texpaint_pack_picker = render_path_render_targets.get("texpaint_pack_picker")._image;
+					let texpaint_uv_picker = render_path_render_targets.get("texpaint_uv_picker")._image;
 					let a = image_get_pixels(texpaint_picker);
 					let b = image_get_pixels(texpaint_nor_picker);
 					let c = image_get_pixels(texpaint_pack_picker);
@@ -190,7 +190,7 @@ class RenderPathPaint {
 		g4_set_pipeline(Base.pipeCursor);
 		let img = Res.get("cursor.k");
 		g4_set_tex(Base.cursorTex, img);
-		let gbuffer0 = render_path_render_targets.get("gbuffer0").image;
+		let gbuffer0 = render_path_render_targets.get("gbuffer0")._image;
 		g4_set_tex_depth(Base.cursorGbufferD, gbuffer0);
 		g4_set_float2(Base.cursorMouse, mx, my);
 		g4_set_float2(Base.cursorTexStep, 1 / gbuffer0.width, 1 / gbuffer0.height);
@@ -278,7 +278,7 @@ class RenderPathPaint {
 				t.format = "RGBA32";
 				render_path_render_targets.set(t.name, t);
 			}
-			render_path_render_targets.get("texpaint_node").image = image;
+			render_path_render_targets.get("texpaint_node")._image = image;
 			render_path_bind_target("texpaint_node", "texpaint");
 			render_path_bind_target("texpaint_nor_empty", "texpaint_nor");
 			render_path_bind_target("texpaint_pack_empty", "texpaint_pack");
@@ -289,7 +289,7 @@ class RenderPathPaint {
 			let inpaint = node.type == "InpaintNode";
 			if (inpaint) {
 				let brushNode = ParserLogic.getLogicNode(node);
-				render_path_render_targets.get("texpaint_node_target").image = (brushNode as InpaintNode).getTarget();
+				render_path_render_targets.get("texpaint_node_target")._image = (brushNode as InpaintNode).getTarget();
 			}
 		}
 		else {

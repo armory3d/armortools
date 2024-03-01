@@ -47,7 +47,7 @@ class RenderPathRaytrace {
 		}
 
 		let probe = scene_world;
-		let savedEnvmap = Context.raw.showEnvmapBlur ? probe._radiance_mipmaps[0] : Context.raw.savedEnvmap;
+		let savedEnvmap = Context.raw.showEnvmapBlur ? probe._.radiance_mipmaps[0] : Context.raw.savedEnvmap;
 
 		if (RenderPathRaytrace.lastEnvmap != savedEnvmap) {
 			RenderPathRaytrace.lastEnvmap = savedEnvmap;
@@ -161,8 +161,8 @@ class RenderPathRaytrace {
 		let mo_scale = mo.base.transform.scale.x; // Uniform scale only
 		RenderPathRaytrace.vb_scale = md.scale_pos * mo_scale;
 		if (mo.base.parent != null) RenderPathRaytrace.vb_scale *= mo.base.parent.transform.scale.x;
-		RenderPathRaytrace.vb = md._vertex_buffer;
-		RenderPathRaytrace.ib = md._index_buffers[0];
+		RenderPathRaytrace.vb = md._.vertex_buffer;
+		RenderPathRaytrace.ib = md._.index_buffers[0];
 	}
 
 	static draw = (useLiveLayer: bool) => {

@@ -180,7 +180,7 @@ class Project {
 
 					let imgmesh = image_from_bytes(f32a.buffer, Config.getTextureResX(), Config.getTextureResY(), tex_format_t.RGBA128);
 					let texpaint = Project.layers[0].texpaint;
-					g2_begin(texpaint, false);
+					g2_begin(texpaint);
 					g2_set_pipeline(Base.pipeCopy128);
 					g2_draw_scaled_image(imgmesh, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 					g2_set_pipeline(null);

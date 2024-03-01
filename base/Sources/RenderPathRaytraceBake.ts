@@ -75,7 +75,7 @@ class RenderPathRaytraceBake {
 			Context.updateEnvmap();
 		}
 		let probe = scene_world;
-		let savedEnvmap = Context.raw.showEnvmapBlur ? probe._radiance_mipmaps[0] : Context.raw.savedEnvmap;
+		let savedEnvmap = Context.raw.showEnvmapBlur ? probe._.radiance_mipmaps[0] : Context.raw.savedEnvmap;
 		if (RenderPathRaytrace.lastEnvmap != savedEnvmap || RenderPathRaytraceBake.lastLayer != Context.raw.layer.texpaint) {
 			RenderPathRaytrace.lastEnvmap = savedEnvmap;
 			RenderPathRaytraceBake.lastLayer = Context.raw.layer.texpaint;

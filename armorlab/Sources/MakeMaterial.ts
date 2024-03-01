@@ -8,10 +8,10 @@ class MakeMaterial {
 	static parseMeshMaterial = () => {
 		let m = Project.materialData;
 
-		for (let c of m._shader.contexts) {
+		for (let c of m._.shader.contexts) {
 			if (c.name == "mesh") {
-				array_remove(m._shader.contexts, c);
-				array_remove(m._shader._contexts, c);
+				array_remove(m._.shader.contexts, c);
+				array_remove(m._.shader._.contexts, c);
 				MakeMaterial.deleteContext(c);
 				break;
 			}
@@ -19,17 +19,17 @@ class MakeMaterial {
 
 		let con = MakeMesh.run({ name: "Material", canvas: null });
 		let scon: shader_context_t = shader_context_create(con.data);
-		scon._override_context = {};
+		scon._.override_context = {};
 		if (con.frag.sharedSamplers.length > 0) {
 			let sampler = con.frag.sharedSamplers[0];
-			scon._override_context.shared_sampler = sampler.substr(sampler.lastIndexOf(" ") + 1);
+			scon._.override_context.shared_sampler = sampler.substr(sampler.lastIndexOf(" ") + 1);
 		}
 		if (!Context.raw.textureFilter) {
-			scon._override_context.filter = "point";
+			scon._.override_context.filter = "point";
 		}
-		scon._override_context.addressing = "repeat";
-		m._shader.contexts.push(scon);
-		m._shader._contexts.push(scon);
+		scon._.override_context.addressing = "repeat";
+		m._.shader.contexts.push(scon);
+		m._.shader._.contexts.push(scon);
 
 		Context.raw.ddirty = 2;
 
@@ -47,7 +47,7 @@ class MakeMaterial {
 		let rebuild = true; // heightUsed;
 		if (Config.raw.rp_gi != false && rebuild) {
 			let scon: shader_context_t = null;
-			for (let c of m._shader._contexts) {
+			for (let c of m._.shader._.contexts) {
 				if (c.name == "voxel") {
 					scon = c;
 					break;
@@ -62,10 +62,10 @@ class MakeMaterial {
 		let m = Project.materialData;
 		let scon: shader_context_t = null;
 		let mcon: material_context_t = null;
-		for (let c of m._shader.contexts) {
+		for (let c of m._.shader.contexts) {
 			if (c.name == "paint") {
-				array_remove(m._shader.contexts, c);
-				array_remove(m._shader._contexts, c);
+				array_remove(m._.shader.contexts, c);
+				array_remove(m._.shader._.contexts, c);
 				if (c != MakeMaterial.defaultScon) MakeMaterial.deleteContext(c);
 				break;
 			}
@@ -73,7 +73,7 @@ class MakeMaterial {
 		for (let c of m.contexts) {
 			if (c.name == "paint") {
 				array_remove(m.contexts, c);
-				array_remove(m._contexts, c);
+				array_remove(m._.contexts, c);
 				break;
 			}
 		}
@@ -89,14 +89,14 @@ class MakeMaterial {
 		scon2 = _scon;
 
 		if (compileError) return;
-		scon2._override_context = {};
-		scon2._override_context.addressing = "repeat";
+		scon2._.override_context = {};
+		scon2._.override_context.addressing = "repeat";
 		let mcon3: material_context_t = material_context_create(mcon2);
 
-		m._shader.contexts.push(scon2);
-		m._shader._contexts.push(scon2);
+		m._.shader.contexts.push(scon2);
+		m._.shader._.contexts.push(scon2);
 		m.contexts.push(mcon3);
-		m._contexts.push(mcon3);
+		m._.contexts.push(mcon3);
 
 		if (MakeMaterial.defaultScon == null) MakeMaterial.defaultScon = scon2;
 		if (MakeMaterial.defaultMcon == null) MakeMaterial.defaultMcon = mcon3;

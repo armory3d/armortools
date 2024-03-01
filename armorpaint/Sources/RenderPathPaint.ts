@@ -352,7 +352,7 @@ class RenderPathPaint {
 
 			let cc_context = shaderContexts[0];
 			if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
-			g4_set_pipeline(cc_context._pipe_state);
+			g4_set_pipeline(cc_context._.pipe_state);
 			uniforms_set_context_consts(cc_context,_render_path_bind_params);
 			uniforms_set_obj_consts(cc_context, Project.paintObjects[0].base);
 			uniforms_set_material_consts(cc_context, materialContexts[0]);

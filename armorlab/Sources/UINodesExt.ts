@@ -40,14 +40,14 @@ class UINodesExt {
 				BrushOutputNode.inst.getAsImage(ChannelType.ChannelHeight, (texheight: image_t) => {
 
 					if (texbase != null) {
-						let texpaint = render_path_render_targets.get("texpaint").image;
+						let texpaint = render_path_render_targets.get("texpaint")._image;
 						g2_begin(texpaint);
 						g2_draw_scaled_image(texbase, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 						g2_end();
 					}
 
 					if (texnor != null) {
-						let texpaint_nor = render_path_render_targets.get("texpaint_nor").image;
+						let texpaint_nor = render_path_render_targets.get("texpaint_nor")._image;
 						g2_begin(texpaint_nor);
 						g2_draw_scaled_image(texnor, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 						g2_end();
@@ -57,7 +57,7 @@ class UINodesExt {
 					if (Base.pipeCopyA == null) Base.makePipeCopyA();
 					if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
 
-					let texpaint_pack = render_path_render_targets.get("texpaint_pack").image;
+					let texpaint_pack = render_path_render_targets.get("texpaint_pack")._image;
 
 					if (texocc != null) {
 						g2_begin(texpaint_pack);
@@ -90,7 +90,7 @@ class UINodesExt {
 							// Make copy of vertices before displacement
 							let o = Project.paintObjects[0];
 							let g = o.data;
-							let vertices = g4_vertex_buffer_lock(g._vertex_buffer);
+							let vertices = g4_vertex_buffer_lock(g._.vertex_buffer);
 							if (UINodesExt.lastVertices == null || UINodesExt.lastVertices.byteLength != vertices.byteLength) {
 								UINodesExt.lastVertices = new DataView(new ArrayBuffer(vertices.byteLength));
 								for (let i = 0; i < Math.floor(vertices.byteLength / 2); ++i) {
@@ -102,7 +102,7 @@ class UINodesExt {
 									vertices.setInt16(i * 2, UINodesExt.lastVertices.getInt16(i * 2, true), true);
 								}
 							}
-							g4_vertex_buffer_unlock(g._vertex_buffer);
+							g4_vertex_buffer_unlock(g._.vertex_buffer);
 
 							// Apply displacement
 							if (Config.raw.displace_strength > 0) {
