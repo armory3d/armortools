@@ -201,7 +201,7 @@ class UIBase {
 		History.reset();
 
 		let scale = Config.raw.window_scale;
-		UIBase.ui = zui_create({ theme: Base.theme, font: Base.font, scaleFactor: scale, color_wheel: Base.colorWheel, black_white_gradient: Base.colorWheelGradient });
+		UIBase.ui = zui_create({ theme: Base.theme, font: Base.font, scale_factor: scale, color_wheel: Base.colorWheel, black_white_gradient: Base.colorWheelGradient });
 		zui_set_on_border_hover(UIBase.onBorderHover);
 		zui_set_on_text_hover(UIBase.onTextHover);
 		zui_set_on_deselect_text(UIBase.onDeselectText);
@@ -541,7 +541,7 @@ class UIBase {
 					UIMenu.draw((ui: zui_t) => {
 						let modeHandle = zui_handle("uibase_0");
 						modeHandle.position = Context.raw.viewportMode;
-						zui_text(tr("Viewport Mode"), Align.Right, ui.t.HIGHLIGHT_COL);
+						zui_text(tr("Viewport Mode"), zui_align_t.RIGHT, ui.t.HIGHLIGHT_COL);
 						let modes = [
 							tr("Lit"),
 							tr("Base Color"),
@@ -767,7 +767,7 @@ class UIBase {
 		let first = true;
 		UIMenu.draw((ui: zui_t) => {
 			zui_fill(0, 0, ui._w / zui_SCALE(ui), ui.t.ELEMENT_H * 8, ui.t.SEPARATOR_COL);
-			let search = zui_text_input(searchHandle, "", Align.Left, true, true);
+			let search = zui_text_input(searchHandle, "", zui_align_t.LEFT, true, true);
 			ui.changed = false;
 			if (first) {
 				first = false;
@@ -788,7 +788,7 @@ class UIBase {
 			for (let n in Config.keymap) {
 				if (n.indexOf(search) >= 0) {
 					ui.t.BUTTON_COL = count == UIBase.operatorSearchOffset ? ui.t.HIGHLIGHT_COL : ui.t.SEPARATOR_COL;
-					if (zui_button(n, Align.Left, Config.keymap[n]) || (enter && count == UIBase.operatorSearchOffset)) {
+					if (zui_button(n, zui_align_t.LEFT, Config.keymap[n]) || (enter && count == UIBase.operatorSearchOffset)) {
 						if (enter) {
 							ui.changed = true;
 							count = 6; // Trigger break

@@ -371,7 +371,7 @@ class UIMenu {
 				UIMenu.menuAlign(ui);
 				let cameraControlsHandle = zui_handle("uimenu_12");
 				cameraControlsHandle.position = Context.raw.cameraControls;
-				Context.raw.cameraControls = zui_inline_radio(cameraControlsHandle, [tr("Orbit"), tr("Rotate"), tr("Fly")], Align.Left);
+				Context.raw.cameraControls = zui_inline_radio(cameraControlsHandle, [tr("Orbit"), tr("Rotate"), tr("Fly")], zui_align_t.LEFT);
 
 				let orbitAndRotateTooltip = tr("Orbit and Rotate mode:\n{rotate_shortcut} or move right mouse button to rotate.\n{zoom_shortcut} or scroll to zoom.\n{pan_shortcut} or move middle mouse to pan.",
 					new Map([
@@ -385,7 +385,7 @@ class UIMenu {
 
 				UIMenu.menuFill(ui);
 				UIMenu.menuAlign(ui);
-				Context.raw.cameraType = zui_inline_radio(Context.raw.camHandle, [tr("Perspective"), tr("Orthographic")], Align.Left);
+				Context.raw.cameraType = zui_inline_radio(Context.raw.camHandle, [tr("Perspective"), tr("Orthographic")], zui_align_t.LEFT);
 				if (ui.is_hovered) zui_tooltip(tr("Camera Type") + ` (${Config.keymap.view_camera_type})`);
 				if (Context.raw.camHandle.changed) {
 					Viewport.updateCameraType(Context.raw.cameraType);
@@ -436,7 +436,7 @@ class UIMenu {
 							let updateVersion = Math.floor(update.version);
 							if (updateVersion > 0) {
 								let date = Config.getDate().substr(2); // 2019 -> 19
-								let dateInt = parseInt(date.replaceAll("-", ""));
+								let dateInt = parseInt(string_replace_all(date, "-", ""));
 								if (updateVersion > dateInt) {
 									UIBox.showMessage(tr("Update"), tr("Update is available!\nPlease visit {url}.", new Map([["url", manifest_url]])));
 								}
@@ -488,7 +488,7 @@ class UIMenu {
 							zui_image(img);
 							zui_end_element();
 
-							zui_text_area(zui_handle("uimenu_14", { text: msg }), Align.Left, false);
+							zui_text_area(zui_handle("uimenu_14", { text: msg }), zui_align_t.LEFT, false);
 
 							zui_row([1 / 3, 1 / 3, 1 / 3]);
 
@@ -512,7 +512,7 @@ class UIMenu {
 			}
 		}
 
-		UIMenu.hideMenu = ui.combo_selected_handle_ptr == null && !UIMenu.keepOpen && !UIMenu.showMenuFirst && (ui.changed || ui.input_released || ui.input_released_r || ui.is_escape_down);
+		UIMenu.hideMenu = ui.combo_selected_handle_ptr == 0 && !UIMenu.keepOpen && !UIMenu.showMenuFirst && (ui.changed || ui.input_released || ui.input_released_r || ui.is_escape_down);
 		UIMenu.showMenuFirst = false;
 		UIMenu.keepOpen = false;
 

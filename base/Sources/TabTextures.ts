@@ -63,7 +63,7 @@ class TabTextures {
 						let uix = ui._x;
 						let uiy = ui._y;
 						let sw = img.height < img.width ? img.height : 0;
-						if (zui_image(img, 0xffffffff, slotw, 0, 0, sw, sw) == State.Started && ui.input_y > ui._window_y) {
+						if (zui_image(img, 0xffffffff, slotw, 0, 0, sw, sw) == zui_state_t.STARTED && ui.input_y > ui._window_y) {
 							Base.dragOffX = -(mouse_x - uix - ui._window_x - 3);
 							Base.dragOffY = -(mouse_y - uiy - ui._window_y + 1);
 							Base.dragAsset = asset;
@@ -180,7 +180,7 @@ class TabTextures {
 						if (Config.raw.show_asset_names) {
 							ui._x = uix;
 							ui._y += slotw * 0.9;
-							zui_text(Project.assets[i].name, Align.Center);
+							zui_text(Project.assets[i].name, zui_align_t.CENTER);
 							if (ui.is_hovered) zui_tooltip(Project.assets[i].name);
 							ui._y -= slotw * 0.9;
 							if (i == Project.assets.length - 1) {

@@ -87,7 +87,7 @@ class TabLayers {
 		let ar = [tr("All")];
 		let filterHandle = zui_handle("tablayers_0");
 		filterHandle.position = Context.raw.layerFilter;
-		Context.raw.layerFilter = zui_combo(filterHandle, ar, tr("Filter"), false, Align.Left);
+		Context.raw.layerFilter = zui_combo(filterHandle, ar, tr("Filter"), false, zui_align_t.LEFT);
 	}
 
 	static remapLayerPointers = (nodes: zui_node_t[], pointerMap: Map<i32, i32>) => {
@@ -222,7 +222,7 @@ class TabLayers {
 		let parentHidden = l.parent != null && (!l.parent.visible || (l.parent.parent != null && !l.parent.parent.visible));
 		if (parentHidden) col -= 0x99000000;
 
-		if (zui_image(icons, col, null, r.x, r.y, r.w, r.h) == State.Released) {
+		if (zui_image(icons, col, -1.0, r.x, r.y, r.w, r.h) == zui_state_t.RELEASED) {
 			TabLayers.layerToggleVisible(l);
 		}
 		ui._x -= 2;
@@ -240,7 +240,7 @@ class TabLayers {
 			if (ui.text_selected_handle_ptr != TabLayers.layerNameHandle.ptr) TabLayers.layerNameEdit = -1;
 		}
 		else {
-			if (ui.enabled && ui.input_enabled && ui.combo_selected_handle_ptr == null &&
+			if (ui.enabled && ui.input_enabled && ui.combo_selected_handle_ptr == 0 &&
 				ui.input_x > ui._window_x + ui._x && ui.input_x < ui._window_x + ui._window_w &&
 				ui.input_y > ui._window_y + ui._y - center && ui.input_y < ui._window_y + ui._y - center + (step * zui_SCALE(ui)) * 2) {
 				if (ui.input_started) {
@@ -259,7 +259,7 @@ class TabLayers {
 			}
 
 			let state = zui_text(l.name);
-			if (state == State.Released) {
+			if (state == zui_state_t.RELEASED) {
 				let td = time_time() - Context.raw.selectTime;
 				if (td < 0.2 && td > 0.0) {
 					TabLayers.layerNameEdit = l.id;
@@ -339,7 +339,7 @@ class TabLayers {
 		let ar = [tr("Shared")];
 		let objectHandle = zui_nest(zui_handle("tablayers_2"), l.id);
 		objectHandle.position = l.objectMask;
-		l.objectMask = zui_combo(objectHandle, ar, tr("Object"), label, Align.Left);
+		l.objectMask = zui_combo(objectHandle, ar, tr("Object"), label, zui_align_t.LEFT);
 		return objectHandle;
 	}
 

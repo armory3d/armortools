@@ -100,10 +100,10 @@ class TabMaterials {
 				let uix = ui._x;
 				let uiy = ui._y;
 				let tile = zui_SCALE(ui) > 1 ? 100 : 50;
-				let imgh: Null<f32> = mini ? UIBase.defaultSidebarMiniW * 0.85 * zui_SCALE(ui) : null;
+				let imgh: f32 = mini ? UIBase.defaultSidebarMiniW * 0.85 * zui_SCALE(ui) : -1.0;
 				let state = Project.materials[i].previewReady ?
 					zui_image(img, 0xffffffff, imgh) :
-					zui_image(Res.get("icons.k"), 0xffffffff, null, tile, tile, tile, tile);
+					zui_image(Res.get("icons.k"), 0xffffffff, -1.0, tile, tile, tile, tile);
 
 				// Draw material numbers when selecting a material via keyboard shortcut
 				let isTyping = ui.is_typing || UIView2D.ui.is_typing || UINodes.ui.is_typing;
@@ -120,7 +120,7 @@ class TabMaterials {
 				}
 
 				// Select material
-				if (state == State.Started && ui.input_y > ui._window_y) {
+				if (state == zui_state_t.STARTED && ui.input_y > ui._window_y) {
 					if (Context.raw.material != Project.materials[i]) {
 						Context.selectMaterial(i);
 						///if is_paint
@@ -235,7 +235,7 @@ class TabMaterials {
 				if (Config.raw.show_asset_names) {
 					ui._x = uix;
 					ui._y += slotw * 0.9;
-					zui_text(Project.materials[i].canvas.name, Align.Center);
+					zui_text(Project.materials[i].canvas.name, zui_align_t.CENTER);
 					if (ui.is_hovered) {
 						if (i < 9) zui_tooltip(Project.materials[i].canvas.name + " - (" + Config.keymap.select_material + " " + (i + 1) + ")");
 						else zui_tooltip(Project.materials[i].canvas.name);

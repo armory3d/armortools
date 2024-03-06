@@ -127,7 +127,7 @@ class Path {
 	}
 
 	static checkExt = (p: string, exts: string[]): bool => {
-		p = p.replaceAll("-", "_");
+		p = string_replace_all(p, "-", "_");
 		for (let ext of exts) {
 			if (p.endsWith("_" + ext) ||
 				(p.indexOf("_" + ext + "_") >= 0 && !p.endsWith("_preview") && !p.endsWith("_icon"))) {
@@ -160,7 +160,7 @@ class Path {
 	}
 
 	static isFolder = (p: string): bool => {
-		return p.replaceAll("\\", "/").split("/").pop().indexOf(".") == -1;
+		return string_replace_all(p, "\\", "/").split("/").pop().indexOf(".") == -1;
 	}
 
 	static isProtected = (): bool => {

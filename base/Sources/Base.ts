@@ -163,8 +163,8 @@ class Base {
 		Base.colorWheelGradient = imageColorWheelGradient;
 		zui_set_enum_texts(Base.enumTexts);
 		zui_tr = tr;
-		Base.uiBox = zui_create({ theme: Base.theme, font: f, scaleFactor: Config.raw.window_scale, color_wheel: Base.colorWheel, black_white_gradient: Base.colorWheelGradient });
-		Base.uiMenu = zui_create({ theme: Base.theme, font: f, scaleFactor: Config.raw.window_scale, color_wheel: Base.colorWheel, black_white_gradient: Base.colorWheelGradient });
+		Base.uiBox = zui_create({ theme: Base.theme, font: f, scale_factor: Config.raw.window_scale, color_wheel: Base.colorWheel, black_white_gradient: Base.colorWheelGradient });
+		Base.uiMenu = zui_create({ theme: Base.theme, font: f, scale_factor: Config.raw.window_scale, color_wheel: Base.colorWheel, black_white_gradient: Base.colorWheelGradient });
 		Base.defaultElementH = Base.uiMenu.t.ELEMENT_H;
 
 		// Init plugins
@@ -859,7 +859,7 @@ class Base {
 	}
 
 	static isComboSelected = (): bool => {
-		for (let ui of Base.getUIs()) if (ui.combo_selected_handle_ptr != null) return true;
+		for (let ui of Base.getUIs()) if (ui.combo_selected_handle_ptr != 0) return true;
 		return false;
 	}
 

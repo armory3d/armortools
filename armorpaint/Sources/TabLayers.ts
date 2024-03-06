@@ -162,7 +162,7 @@ class TabLayers {
 		if (atlases != null) for (let a of atlases) ar.push(a);
 		let filterHandle = zui_handle("tablayers_0");
 		filterHandle.position = Context.raw.layerFilter;
-		Context.raw.layerFilter = zui_combo(filterHandle, ar, tr("Filter"), false, Align.Left);
+		Context.raw.layerFilter = zui_combo(filterHandle, ar, tr("Filter"), false, zui_align_t.LEFT);
 		if (filterHandle.changed) {
 			for (let p of Project.paintObjects) {
 				p.base.visible = Context.raw.layerFilter == 0 || p.base.name == ar[Context.raw.layerFilter] || Project.isAtlasObject(p);
@@ -317,7 +317,7 @@ class TabLayers {
 		let parentHidden = l.parent != null && (!l.parent.visible || (l.parent.parent != null && !l.parent.parent.visible));
 		if (parentHidden) col -= 0x99000000;
 
-		if (zui_image(icons, col, null, r.x, r.y, r.w, r.h) == State.Released) {
+		if (zui_image(icons, col, -1.0, r.x, r.y, r.w, r.h) == zui_state_t.RELEASED) {
 			TabLayers.layerToggleVisible(l);
 		}
 		ui._x -= 2;
@@ -360,7 +360,7 @@ class TabLayers {
 			if (ui.text_selected_handle_ptr != TabLayers.layerNameHandle.ptr) TabLayers.layerNameEdit = -1;
 		}
 		else {
-			if (ui.enabled && ui.input_enabled && ui.combo_selected_handle_ptr == null &&
+			if (ui.enabled && ui.input_enabled && ui.combo_selected_handle_ptr == 0 &&
 				ui.input_x > ui._window_x + ui._x && ui.input_x < ui._window_x + ui._window_w &&
 				ui.input_y > ui._window_y + ui._y - center && ui.input_y < ui._window_y + ui._y - center + (step * zui_SCALE(ui)) * 2) {
 				if (ui.input_started) {
@@ -374,7 +374,7 @@ class TabLayers {
 			}
 
 			let state = zui_text(l.name);
-			if (state == State.Released) {
+			if (state == zui_state_t.RELEASED) {
 				if (time_time() - Context.raw.selectTime < 0.25) {
 					TabLayers.layerNameEdit = l.id;
 					TabLayers.layerNameHandle.text = l.name;
@@ -453,7 +453,7 @@ class TabLayers {
 		if (atlases != null) for (let a of atlases) ar.push(a);
 		let objectHandle = zui_nest(zui_handle("tablayers_2"), l.id);
 		objectHandle.position = l.objectMask;
-		l.objectMask = zui_combo(objectHandle, ar, tr("Object"), label, Align.Left);
+		l.objectMask = zui_combo(objectHandle, ar, tr("Object"), label, zui_align_t.LEFT);
 		if (objectHandle.changed) {
 			Context.setLayer(l);
 			MakeMaterial.parseMeshMaterial();
@@ -528,7 +528,7 @@ class TabLayers {
 		}
 	}
 
-	static handleLayerIconState = (l: SlotLayerRaw, i: i32, state: State, uix: f32, uiy: f32) => {
+	static handleLayerIconState = (l: SlotLayerRaw, i: i32, state: zui_state_t, uix: f32, uiy: f32) => {
 		let ui = UIBase.ui;
 
 		///if is_paint
@@ -559,11 +559,11 @@ class TabLayers {
 			TabLayers.showContextMenu = true;
 		}
 
-		if (state == State.Started) {
+		if (state == zui_state_t.STARTED) {
 			Context.setLayer(l);
 			TabLayers.setDragLayer(Context.raw.layer, -(mouse_x - uix - ui._window_x - 3), -(mouse_y - uiy - ui._window_y + 1));
 		}
-		else if (state == State.Released) {
+		else if (state == zui_state_t.RELEASED) {
 			if (time_time() - Context.raw.selectTime < 0.2) {
 				UIBase.show2DView(View2DType.View2DLayer);
 			}
@@ -837,7 +837,7 @@ class TabLayers {
 				///end
 				let _y = ui._y;
 				Base.resHandle.value = Base.resHandle.position;
-				Base.resHandle.position = Math.floor(zui_slider(Base.resHandle, ar[Base.resHandle.position], 0, ar.length - 1, false, 1, false, Align.Left, false));
+				Base.resHandle.position = Math.floor(zui_slider(Base.resHandle, ar[Base.resHandle.position], 0, ar.length - 1, false, 1, false, zui_align_t.LEFT, false));
 				if (Base.resHandle.changed) {
 					UIMenu.keepOpen = true;
 				}
@@ -845,7 +845,7 @@ class TabLayers {
 					Base.onLayersResized();
 				}
 				ui._y = _y;
-				zui_draw_string(tr("Res"), null, 0, Align.Right);
+				zui_draw_string(tr("Res"), null, 0, zui_align_t.RIGHT);
 				zui_end_element();
 
 				UIMenu.menuFill(ui);
@@ -897,7 +897,7 @@ class TabLayers {
 				UIMenu.menuAlign(ui);
 				let uvTypeHandle = zui_nest(zui_handle("tablayers_8"), l.id);
 				uvTypeHandle.position = l.uvType;
-				l.uvType = zui_inline_radio(uvTypeHandle, [tr("UV Map"), tr("Triplanar"), tr("Project")], Align.Left);
+				l.uvType = zui_inline_radio(uvTypeHandle, [tr("UV Map"), tr("Triplanar"), tr("Project")], zui_align_t.LEFT);
 				if (uvTypeHandle.changed) {
 					Context.setMaterial(l.fill_layer);
 					Context.setLayer(l);

@@ -62,7 +62,7 @@ class TabFonts {
 
 					let uix = ui._x;
 					let tile = zui_SCALE(ui) > 1 ? 100 : 50;
-					let state = State.Idle;
+					let state = zui_state_t.IDLE;
 					if (Project.fonts[i].previewReady) {
 						// g2_set_pipeline(UIView2D.pipe); // L8
 						// ///if krom_opengl
@@ -73,10 +73,10 @@ class TabFonts {
 						// g2_set_pipeline(null);
 					}
 					else {
-						state = zui_image(Res.get("icons.k"), -1, null, tile * 6, tile, tile, tile);
+						state = zui_image(Res.get("icons.k"), -1, -1.0, tile * 6, tile, tile, tile);
 					}
 
-					if (state == State.Started) {
+					if (state == zui_state_t.STARTED) {
 						if (Context.raw.font != Project.fonts[i]) {
 							let _init = () => {
 								Context.selectFont(i);
@@ -114,7 +114,7 @@ class TabFonts {
 					if (Config.raw.show_asset_names) {
 						ui._x = uix;
 						ui._y += slotw * 0.9;
-						zui_text(Project.fonts[i].name, Align.Center);
+						zui_text(Project.fonts[i].name, zui_align_t.CENTER);
 						if (ui.is_hovered) zui_tooltip(Project.fonts[i].name);
 						ui._y -= slotw * 0.9;
 						if (i == Project.fonts.length - 1) {

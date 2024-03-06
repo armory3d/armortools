@@ -55,7 +55,7 @@ class UIToolbar {
 			// Properties icon
 			if (Config.raw.layout[LayoutSize.LayoutHeader] == 1) {
 				let rect = Res.tile50(img, 7, 1);
-				if (zui_image(img, light ? 0xff666666 : ui.t.BUTTON_COL, null, rect.x, rect.y, rect.w, rect.h) == State.Released) {
+				if (zui_image(img, light ? 0xff666666 : ui.t.BUTTON_COL, -1.0, rect.x, rect.y, rect.w, rect.h) == zui_state_t.RELEASED) {
 					Config.raw.layout[LayoutSize.LayoutHeader] = 0;
 				}
 			}
@@ -111,11 +111,11 @@ class UIToolbar {
 				let rect = Res.tile50(img, tileX, tileY);
 				let _y = ui._y;
 
-				let imageState = zui_image(img, iconAccent, null, rect.x, rect.y, rect.w, rect.h);
-				if (imageState == State.Started) {
+				let imageState = zui_image(img, iconAccent, -1.0, rect.x, rect.y, rect.w, rect.h);
+				if (imageState == zui_state_t.STARTED) {
 					Context.selectTool(i);
 				}
-				else if (imageState == State.Released && Config.raw.layout[LayoutSize.LayoutHeader] == 0) {
+				else if (imageState == zui_state_t.RELEASED && Config.raw.layout[LayoutSize.LayoutHeader] == 0) {
 					if (UIToolbar.lastTool == i) {
 						UIToolbar.toolPropertiesMenu();
 					}
@@ -180,7 +180,7 @@ class UIToolbar {
 				UIMenu.keepOpen = true;
 			}
 
-			if (zui_button(tr("Pin to Header"), Align.Left)) {
+			if (zui_button(tr("Pin to Header"), zui_align_t.LEFT)) {
 				Config.raw.layout[LayoutSize.LayoutHeader] = 1;
 			}
 

@@ -65,7 +65,7 @@ class TabBrowser {
 			if (zui_button(tr("Refresh")) || (inFocus && ui.is_key_pressed && ui.key == key_code_t.F5)) {
 				refresh = true;
 			}
-			TabBrowser.hsearch.text = zui_text_input(TabBrowser.hsearch, tr("Search"), Align.Left, true, true);
+			TabBrowser.hsearch.text = zui_text_input(TabBrowser.hsearch, tr("Search"), zui_align_t.LEFT, true, true);
 			if (ui.is_hovered) zui_tooltip(tr("ctrl+f to search") + "\n" + tr("esc to cancel"));
 			if (ui.is_ctrl_down && ui.is_key_pressed && ui.key == key_code_t.F) { // Start searching via ctrl+f
 				zui_start_text_edit(TabBrowser.hsearch);
@@ -176,11 +176,11 @@ class TabBrowser {
 			ui._y = _y;
 			ui._w = bookmarksW;
 
-			if (zui_button(tr("Cloud"), Align.Left)) {
+			if (zui_button(tr("Cloud"), zui_align_t.LEFT)) {
 				TabBrowser.hpath.text = "cloud";
 			}
 
-			if (zui_button(tr("Disk"), Align.Left)) {
+			if (zui_button(tr("Disk"), zui_align_t.LEFT)) {
 				///if krom_android
 				UIMenu.draw((ui: zui_t) => {
 					if (UIMenu.menuButton(ui, tr("Download"))) {
@@ -204,7 +204,7 @@ class TabBrowser {
 			for (let b of Config.raw.bookmarks) {
 				let folder = b.substr(b.lastIndexOf(Path.sep) + 1);
 
-				if (zui_button(folder, Align.Left)) {
+				if (zui_button(folder, zui_align_t.LEFT)) {
 					TabBrowser.hpath.text = b;
 				}
 

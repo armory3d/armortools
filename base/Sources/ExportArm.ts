@@ -241,7 +241,7 @@ class ExportArm {
 
 		let texture_files = ExportArm.assetsToFiles(path, assets);
 		let isCloud = path.endsWith("_cloud_.arm");
-		if (isCloud) path = path.replaceAll("_cloud_", "");
+		if (isCloud) path = string_replace_all(path, "_cloud_", "");
 		let packed_assets: TPackedAsset[] = null;
 		if (!Context.raw.packAssetsOnExport) {
 			packed_assets = ExportArm.getPackedAssets(path, texture_files);
@@ -301,7 +301,7 @@ class ExportArm {
 
 		let texture_files = ExportArm.assetsToFiles(path, assets);
 		let isCloud = path.endsWith("_cloud_.arm");
-		if (isCloud) path = path.replaceAll("_cloud_", "");
+		if (isCloud) path = string_replace_all(path, "_cloud_", "");
 		let packed_assets: TPackedAsset[] = null;
 		if (!Context.raw.packAssetsOnExport) {
 			packed_assets = ExportArm.getPackedAssets(path, texture_files);

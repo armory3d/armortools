@@ -37,26 +37,25 @@ function main_start() {
 	app_on_y = Base.y;
 
 	Config.init();
-	sys_start(Config.getOptions(), function() {
-		if (Config.raw.layout == null) Base.initLayout();
-		krom_set_app_name(manifest_title);
-		app_init(function() {
-			let o: object_t = scene_set_active("Scene");
-			UniformsExt.init();
-			RenderPathBase.init();
+	sys_start(Config.getOptions());
+	if (Config.raw.layout == null) Base.initLayout();
+	krom_set_app_name(manifest_title);
+	app_init(function() {
+		let o: object_t = scene_set_active("Scene");
+		UniformsExt.init();
+		RenderPathBase.init();
 
-			if (Context.raw.renderMode == RenderMode.RenderForward) {
-				RenderPathDeferred.init(); // Allocate gbuffer
-				RenderPathForward.init();
-				render_path_commands = RenderPathForward.commands;
-			}
-			else {
-				RenderPathDeferred.init();
-				render_path_commands = RenderPathDeferred.commands;
-			}
+		if (Context.raw.renderMode == RenderMode.RenderForward) {
+			RenderPathDeferred.init(); // Allocate gbuffer
+			RenderPathForward.init();
+			render_path_commands = RenderPathForward.commands;
+		}
+		else {
+			RenderPathDeferred.init();
+			render_path_commands = RenderPathDeferred.commands;
+		}
 
-			new Base();
-		});
+		new Base();
 	});
 }
 

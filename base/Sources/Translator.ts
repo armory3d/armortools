@@ -32,7 +32,7 @@ class Translator {
 
 		if (vars != null) {
 			for (let [key, value] of vars) {
-				translation = translation.replaceAll(`{${key}}`, String(value));
+				translation = string_replace_all(translation, `{${key}}`, String(value));
 			}
 		}
 

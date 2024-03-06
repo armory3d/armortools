@@ -73,7 +73,7 @@ class ImportBlendMaterial {
 				for (let list of NodesMaterial.list) {
 					let found = false;
 					for (let n of list) {
-						let s = n.type.replaceAll("_", "").toLowerCase();
+						let s = string_replace_all(n.type, "_", "").toLowerCase();
 						if (search == s) {
 							base = n;
 							found = true;

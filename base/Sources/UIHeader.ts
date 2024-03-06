@@ -3,7 +3,7 @@ class UIHeader {
 
 	static defaultHeaderH = 28;
 	static headerh = UIHeader.defaultHeaderH;
-	static headerHandle = zui_handle_create({ layout: Layout.Horizontal });
+	static headerHandle = zui_handle_create({ layout: zui_layout_t.HORIZONTAL });
 	static worktab = zui_handle_create();
 
 	constructor() {
@@ -120,7 +120,7 @@ class UIHeader {
 			color = color_set_bb(color, baseBPicked * 255);
 			h.color = color;
 			let state = zui_text("", 0, h.color);
-			if (state == State.Started) {
+			if (state == zui_state_t.STARTED) {
 				let uix = ui._x;
 				let uiy = ui._y;
 				Base.dragOffX = -(mouse_x - uix - ui._window_x - 3);
@@ -375,7 +375,7 @@ class UIHeader {
 					ui._w *= 3;
 				}
 
-				Context.raw.textToolText = zui_text_input(h, "", Align.Left, true, true);
+				Context.raw.textToolText = zui_text_input(h, "", zui_align_t.LEFT, true, true);
 				ui._w = w;
 
 				if (h.changed) {

@@ -2803,13 +2803,13 @@ class NodesMaterial {
 			if (val.length > 2) val.pop();
 		}
 		let ihandle = zui_nest(zui_nest(zui_nest(nhandle, 0), 2), axis, {position: 0});
-		let i = Math.floor(zui_slider(ihandle, "Index", 0, num - 1, false, 1, true, Align.Left));
+		let i = Math.floor(zui_slider(ihandle, "Index", 0, num - 1, false, 1, true, zui_align_t.LEFT));
 		if (i >= val.length || i < 0) ihandle.value = i = val.length - 1; // Stay in bounds
 		zui_row([1 / 2, 1 / 2]);
 		zui_nest(zui_nest(nhandle, 0), 3).value = val[i][0];
 		zui_nest(zui_nest(nhandle, 0), 4).value = val[i][1];
-		val[i][0] = zui_slider(zui_nest(zui_nest(nhandle, 0), 3, {value: 0}), "X", -1, 1, true, 100, true, Align.Left);
-		val[i][1] = zui_slider(zui_nest(zui_nest(nhandle, 0), 4, {value: 0}), "Y", -1, 1, true, 100, true, Align.Left);
+		val[i][0] = zui_slider(zui_nest(zui_nest(nhandle, 0), 3, {value: 0}), "X", -1, 1, true, 100, true, zui_align_t.LEFT);
+		val[i][1] = zui_slider(zui_nest(zui_nest(nhandle, 0), 4, {value: 0}), "Y", -1, 1, true, 100, true, zui_align_t.LEFT);
 	}
 
 	static colorRampButton = (ui: zui_t, nodes: zui_nodes_t, node: zui_node_t) => {
@@ -2848,18 +2848,18 @@ class NodesMaterial {
 		but.data = zui_combo(zui_nest(zui_nest(nhandle, 0), 1, {position: but.data}), [tr("Linear"), tr("Constant")], tr("Interpolate"));
 
 		zui_row([1 / 2, 1 / 2]);
-		let i = Math.floor(zui_slider(ihandle, "Index", 0, vals.length - 1, false, 1, true, Align.Left));
+		let i = Math.floor(zui_slider(ihandle, "Index", 0, vals.length - 1, false, 1, true, zui_align_t.LEFT));
 		if (i >= vals.length || i < 0) ihandle.value = i = vals.length - 1; // Stay in bounds
 
 		let val = vals[i];
 		zui_nest(zui_nest(nhandle, 0), 3).value = val[4];
-		val[4] = zui_slider(zui_nest(zui_nest(nhandle, 0), 3), "Pos", 0, 1, true, 100, true, Align.Left);
+		val[4] = zui_slider(zui_nest(zui_nest(nhandle, 0), 3), "Pos", 0, 1, true, 100, true, zui_align_t.LEFT);
 		if (val[4] > 1.0) val[4] = 1.0; // Stay in bounds
 		else if (val[4] < 0.0) val[4] = 0.0;
 
 		let chandle = zui_nest(zui_nest(nhandle, 0), 4);
 		chandle.color = color_from_floats(val[0], val[1], val[2], 1.0);
-		if (zui_text("", Align.Right, chandle.color) == State.Started) {
+		if (zui_text("", zui_align_t.RIGHT, chandle.color) == zui_state_t.STARTED) {
 			let rx = nx + ui._w - zui_nodes_p(37);
 			let ry = ny - zui_nodes_p(5);
 			nodes._inputStarted = ui.input_started = false;

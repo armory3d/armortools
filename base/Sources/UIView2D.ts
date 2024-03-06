@@ -47,7 +47,7 @@ class UIView2D {
 		///end
 
 		let scale = Config.raw.window_scale;
-		UIView2D.ui = zui_create({ theme: Base.theme, font: Base.font, color_wheel: Base.colorWheel, black_white_gradient: Base.colorWheelGradient, scaleFactor: scale });
+		UIView2D.ui = zui_create({ theme: Base.theme, font: Base.font, color_wheel: Base.colorWheel, black_white_gradient: Base.colorWheelGradient, scale_factor: scale });
 		UIView2D.ui.scroll_enabled = false;
 	}
 
@@ -397,8 +397,8 @@ class UIView2D {
 		}
 
 		let control = UINodes.getCanvasControl(UIView2D.ui, UIView2D);
-		UIView2D.panX += control.panX;
-		UIView2D.panY += control.panY;
+		UIView2D.panX += control.pan_x;
+		UIView2D.panY += control.pan_y;
 		if (control.zoom != 0) {
 			let _panX = UIView2D.panX / UIView2D.panScale;
 			let _panY = UIView2D.panY / UIView2D.panScale;

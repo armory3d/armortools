@@ -27,8 +27,8 @@ class UIFiles {
 		if (isSave) {
 			UIFiles.path = krom_save_dialog(filters, "");
 			if (UIFiles.path != null) {
-				while (UIFiles.path.indexOf(Path.sep + Path.sep) >= 0) UIFiles.path = UIFiles.path.replaceAll(Path.sep + Path.sep, Path.sep);
-				UIFiles.path = UIFiles.path.replaceAll("\r", "");
+				while (UIFiles.path.indexOf(Path.sep + Path.sep) >= 0) UIFiles.path = string_replace_all(UIFiles.path, Path.sep + Path.sep, Path.sep);
+				UIFiles.path = string_replace_all(UIFiles.path, "\r", "");
 				UIFiles.filename = UIFiles.path.substr(UIFiles.path.lastIndexOf(Path.sep) + 1);
 				UIFiles.path = UIFiles.path.substr(0, UIFiles.path.lastIndexOf(Path.sep));
 				filesDone(UIFiles.path);
@@ -38,8 +38,8 @@ class UIFiles {
 			let paths = krom_open_dialog(filters, "", openMultiple);
 			if (paths != null) {
 				for (let path of paths) {
-					while (path.indexOf(Path.sep + Path.sep) >= 0) path = path.replaceAll(Path.sep + Path.sep, Path.sep);
-					path = path.replaceAll("\r", "");
+					while (path.indexOf(Path.sep + Path.sep) >= 0) path = string_replace_all(path, Path.sep + Path.sep, Path.sep);
+					path = string_replace_all(path, "\r", "");
 					UIFiles.filename = path.substr(path.lastIndexOf(Path.sep) + 1);
 					filesDone(path);
 				}
@@ -156,7 +156,7 @@ class UIFiles {
 
 				let uix = ui._x;
 				let uiy = ui._y;
-				let state = State.Idle;
+				let state = zui_state_t.IDLE;
 				let generic = true;
 				let icon: image_t = null;
 
@@ -316,7 +316,7 @@ class UIFiles {
 					contextMenu(handle.text + Path.sep + f);
 				}
 
-				if (state == State.Started) {
+				if (state == zui_state_t.STARTED) {
 					if (f != ".." && dragFiles) {
 						Base.dragOffX = -(mouse_x - uix - ui._window_x - 3);
 						Base.dragOffY = -(mouse_y - uiy - ui._window_y + 1);
@@ -363,12 +363,12 @@ class UIFiles {
 					label0 = label0.substr(0, label0.length - 1);
 				}
 				if (label1 != "") ui.cur_ratio--;
-				zui_text(label0, Align.Center);
+				zui_text(label0, zui_align_t.CENTER);
 				if (ui.is_hovered) zui_tooltip(label0 + label1);
 				if (label1 != "") { // Second line
 					ui._x = _x;
 					ui._y += g2_font_height(ui.font, ui.font_size);
-					zui_text(label1, Align.Center);
+					zui_text(label1, zui_align_t.CENTER);
 					if (ui.is_hovered) zui_tooltip(label0 + label1);
 					ui._y -= g2_font_height(ui.font, ui.font_size);
 				}

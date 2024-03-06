@@ -2,8 +2,8 @@
 class UIMenubar {
 
 	static defaultMenubarW = 330;
-	static workspaceHandle = zui_handle_create({ layout: Layout.Horizontal });
-	static menuHandle = zui_handle_create({ layout: Layout.Horizontal });
+	static workspaceHandle = zui_handle_create({ layout: zui_layout_t.HORIZONTAL });
+	static menuHandle = zui_handle_create({ layout: zui_layout_t.HORIZONTAL });
 	static menubarw = UIMenubar.defaultMenubarW;
 
 	///if is_lab
@@ -182,6 +182,6 @@ class UIMenubar {
 		let iconAccent = light ? 0xff666666 : 0xffaaaaaa;
 		let img = Res.get("icons.k");
 		let rect = Res.tile50(img, i, j);
-		return zui_image(img, iconAccent, null, rect.x, rect.y, rect.w, rect.h) == State.Released;
+		return zui_image(img, iconAccent, -1.0, rect.x, rect.y, rect.w, rect.h) == zui_state_t.RELEASED;
 	}
 }

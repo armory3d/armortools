@@ -52,7 +52,7 @@ class ParserLogic {
 	}
 
 	static safe_src = (s: string): string => {
-		return s.replaceAll(" ", "");
+		return string_replace_all(s, " ", "");
 	}
 
 	static node_name = (node: zui_node_t): string => {

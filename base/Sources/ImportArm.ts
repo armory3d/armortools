@@ -90,9 +90,9 @@ class ImportArm {
 
 		for (let file of project.assets) {
 			///if krom_windows
-			file = file.replaceAll("/", "\\");
+			file = string_replace_all(file, "/", "\\");
 			///else
-			file = file.replaceAll("\\", "/");
+			file = string_replace_all(file, "\\", "/");
 			///end
 			// Convert image path from relative to absolute
 			let abs = data_is_abs(file) ? file : base + file;
@@ -111,9 +111,9 @@ class ImportArm {
 		if (project.font_assets != null) {
 			for (let file of project.font_assets) {
 				///if krom_windows
-				file = file.replaceAll("/", "\\");
+				file = string_replace_all(file, "/", "\\");
 				///else
-				file = file.replaceAll("\\", "/");
+				file = string_replace_all(file, "\\", "/");
 				///end
 				// Convert font path from relative to absolute
 				let abs = data_is_abs(file) ? file : base + file;
@@ -392,9 +392,9 @@ class ImportArm {
 		let base = Path.baseDir(path);
 		for (let file of project.assets) {
 			///if krom_windows
-			file = file.replaceAll("/", "\\");
+			file = string_replace_all(file, "/", "\\");
 			///else
-			file = file.replaceAll("\\", "/");
+			file = string_replace_all(file, "\\", "/");
 			///end
 			// Convert image path from relative to absolute
 			let abs = data_is_abs(file) ? file : base + file;
@@ -474,9 +474,9 @@ class ImportArm {
 		let base = Path.baseDir(path);
 		for (let file of project.assets) {
 			///if krom_windows
-			file = file.replaceAll("/", "\\");
+			file = string_replace_all(file, "/", "\\");
 			///else
-			file = file.replaceAll("\\", "/");
+			file = string_replace_all(file, "\\", "/");
 			///end
 			// Convert image path from relative to absolute
 			let abs = data_is_abs(file) ? file : base + file;
@@ -571,9 +571,9 @@ class ImportArm {
 		}
 		for (let pa of project.packed_assets) {
 			///if krom_windows
-			pa.name = pa.name.replaceAll("/", "\\");
+			pa.name = string_replace_all(pa.name, "/", "\\");
 			///else
-			pa.name = pa.name.replaceAll("\\", "/");
+			pa.name = string_replace_all(pa.name, "\\", "/");
 			///end
 			pa.name = Path.normalize(pa.name);
 			if (pa.name == file) pa.name = abs; // From relative to absolute

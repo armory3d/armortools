@@ -549,7 +549,7 @@ class BoxPreferences {
 				for (let key in Config.keymap) {
 					let h = zui_nest(zui_handle("boxpreferences_53"), i++);
 					h.text = Config.keymap[key];
-					let text = zui_text_input(h, key, Align.Left);
+					let text = zui_text_input(h, key, zui_align_t.LEFT);
 					Config.keymap[key] = text;
 				}
 				if (ui.changed) {

@@ -4,7 +4,7 @@ class Config {
 	static raw: TConfig = null;
 	static keymap: any;
 	static configLoaded = false;
-	static buttonAlign = Align.Left;
+	static buttonAlign = zui_align_t.LEFT;
 	static defaultButtonSpacing = "       ";
 	static buttonSpacing = Config.defaultButtonSpacing;
 
@@ -293,12 +293,12 @@ class Config {
 			Base.theme.ARROW_SIZE = 5 + 2;
 			Base.theme.CHECK_SIZE = 15 + 4;
 			Base.theme.CHECK_SELECT_SIZE = 8 + 2;
-			Config.buttonAlign = Align.Left;
+			Config.buttonAlign = zui_align_t.LEFT;
 			Config.buttonSpacing = "";
 		}
 		else {
 			Base.theme.FULL_TABS = false;
-			Config.buttonAlign = Align.Left;
+			Config.buttonAlign = zui_align_t.LEFT;
 			Config.buttonSpacing = Config.defaultButtonSpacing;
 		}
 	}

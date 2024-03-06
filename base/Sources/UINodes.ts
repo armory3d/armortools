@@ -44,7 +44,7 @@ class UINodes {
 		zui_set_on_canvas_control(UINodes.onCanvasControl);
 
 		let scale = Config.raw.window_scale;
-		UINodes.ui = zui_create({ theme: Base.theme, font: Base.font, color_wheel: Base.colorWheel, black_white_gradient: Base.colorWheelGradient, scaleFactor: scale });
+		UINodes.ui = zui_create({ theme: Base.theme, font: Base.font, color_wheel: Base.colorWheel, black_white_gradient: Base.colorWheelGradient, scale_factor: scale });
 		UINodes.ui.scroll_enabled = false;
 	}
 
@@ -352,8 +352,8 @@ class UINodes {
 		}
 		if (!parent.controlsDown) {
 			return {
-				panX: 0,
-				panY: 0,
+				pan_x: 0,
+				pan_y: 0,
 				zoom: 0
 			}
 		}
@@ -361,8 +361,8 @@ class UINodes {
 		let pan = ui.input_down_r || Operator.shortcut(Config.keymap.action_pan, ShortcutType.ShortcutDown);
 		let zoomDelta = Operator.shortcut(Config.keymap.action_zoom, ShortcutType.ShortcutDown) ? UINodes.getZoomDelta(ui) / 100.0 : 0.0;
 		let control = {
-			panX: pan ? ui.input_dx : 0.0,
-			panY: pan ? ui.input_dy : 0.0,
+			pan_x: pan ? ui.input_dx : 0.0,
+			pan_y: pan ? ui.input_dy : 0.0,
 			zoom: ui.input_wheel_delta != 0.0 ? -ui.input_wheel_delta / 10 : zoomDelta
 		};
 		if (Base.isComboSelected()) control.zoom = 0.0;
@@ -477,7 +477,7 @@ class UINodes {
 			zui_draw_rect(true, ui._x, ui._y, ui._w, zui_ELEMENT_H(ui) * 8);
 			g2_set_color(0xffffffff);
 
-			let search = zui_text_input(searchHandle, "", Align.Left, true, true).toLowerCase();
+			let search = zui_text_input(searchHandle, "", zui_align_t.LEFT, true, true).toLowerCase();
 			ui.changed = false;
 			if (first) {
 				first = false;
@@ -506,7 +506,7 @@ class UINodes {
 				for (let n of list) {
 					if (tr(n.name).toLowerCase().indexOf(search) >= 0) {
 						ui.t.BUTTON_COL = count == UINodes.nodeSearchOffset ? ui.t.HIGHLIGHT_COL : ui.t.SEPARATOR_COL;
-						if (zui_button(tr(n.name), Align.Left) || (enter && count == UINodes.nodeSearchOffset)) {
+						if (zui_button(tr(n.name), zui_align_t.LEFT) || (enter && count == UINodes.nodeSearchOffset)) {
 							UINodes.pushUndo();
 							let nodes = UINodes.getNodes();
 							let canvas = UINodes.getCanvas(true);
@@ -1055,7 +1055,7 @@ class UINodes {
 					UINodes.ui.enabled = UINodes.canPlaceGroup(g.canvas.name);
 					UIMenu.menuFill(UINodes.ui);
 					zui_row([5 / 6, 1 / 6]);
-					if (zui_button(Config.buttonSpacing + g.canvas.name, Align.Left)) {
+					if (zui_button(Config.buttonSpacing + g.canvas.name, zui_align_t.LEFT)) {
 						UINodes.pushUndo();
 						let canvas = UINodes.getCanvas(true);
 						let nodes = UINodes.getNodes();
@@ -1067,7 +1067,7 @@ class UINodes {
 
 					///if (is_paint || is_sculpt)
 					UINodes.ui.enabled = !Project.isMaterialGroupInUse(g);
-					if (zui_button("x", Align.Center)) {
+					if (zui_button("x", zui_align_t.CENTER)) {
 						History.deleteMaterialGroup(g);
 						array_remove(Project.materialGroups, g);
 					}
@@ -1077,7 +1077,7 @@ class UINodes {
 				}
 			}
 
-			UINodes.hideMenu = UINodes.ui.combo_selected_handle_ptr == null && !UINodes.showMenuFirst && (UINodes.ui.changed || UINodes.ui.input_released || UINodes.ui.input_released_r || UINodes.ui.is_escape_down);
+			UINodes.hideMenu = UINodes.ui.combo_selected_handle_ptr == 0 && !UINodes.showMenuFirst && (UINodes.ui.changed || UINodes.ui.input_released || UINodes.ui.input_released_r || UINodes.ui.is_escape_down);
 			UINodes.showMenuFirst = false;
 
 			UINodes.ui.t.BUTTON_COL = _BUTTON_COL;

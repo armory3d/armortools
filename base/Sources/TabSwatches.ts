@@ -107,18 +107,18 @@ class TabSwatches {
 
 					let state = zui_image(TabSwatches.empty, Project.raw.swatches[i].base, slotw);
 
-					if (state == State.Started) {
+					if (state == zui_state_t.STARTED) {
 						Context.setSwatch(Project.raw.swatches[i]);
 
 						Base.dragOffX = -(mouse_x - uix - ui._window_x - 2 * slotw);
 						Base.dragOffY = -(mouse_y - uiy - ui._window_y + 1);
 						Base.dragSwatch = Context.raw.swatch;
 					}
-					else if (state == State.Hovered) {
+					else if (state == zui_state_t.HOVERED) {
 						TabSwatches.dragPosition = (mouse_x > uix + ui._window_x + slotw / 2) ? i + 1 : i; // Switch to the next position if the mouse crosses the swatch rectangle center
 						dragPositionSet = true;
 					}
-					else if (state == State.Released) {
+					else if (state == zui_state_t.RELEASED) {
 						if (time_time() - Context.raw.selectTime < 0.25) {
 							UIMenu.draw((ui: zui_t) => {
 								ui.changed = false;

@@ -80,7 +80,8 @@ class UtilRender {
 
 	static makeDecalPreview = () => {
 		let current = _g2_current;
-		if (current != null) g2_end();
+		let g2_in_use = _g2_in_use;
+		if (g2_in_use) g2_end();
 
 		if (Context.raw.decalImage == null) {
 			Context.raw.decalImage = image_create_render_target(UtilRender.decalPreviewSize, UtilRender.decalPreviewSize);
@@ -141,7 +142,7 @@ class UtilRender {
 		MakeMaterial.parseMeshMaterial();
 		Context.raw.ddirty = 1; // Refresh depth for decal paint
 
-		if (current != null) g2_begin(current);
+		if (g2_in_use) g2_begin(current);
 	}
 
 	static makeTextPreview = () => {

@@ -20,7 +20,7 @@ class UIBox {
 	static render = () => {
 		if (!UIMenu.show) {
 			let ui = Base.uiBox;
-			let inUse = ui.combo_selected_handle_ptr != null;
+			let inUse = ui.combo_selected_handle_ptr != 0;
 			let isEscape = keyboard_started("escape");
 			if (UIBox.draws > 2 && (ui.input_released || isEscape) && !inUse && !ui.is_typing) {
 				let appw = sys_width();
@@ -69,7 +69,7 @@ class UIBox {
 					let htext = zui_handle("uibox_1");
 					htext.text = UIBox.boxText;
 					UIBox.copyable ?
-						zui_text_area(htext, Align.Left, false) :
+						zui_text_area(htext, zui_align_t.LEFT, false) :
 						zui_text(UIBox.boxText);
 					zui_end_element();
 

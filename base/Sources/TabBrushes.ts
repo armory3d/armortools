@@ -61,8 +61,8 @@ class TabBrushes {
 					let uix = ui._x;
 					//let uiy = ui._y;
 					let tile = zui_SCALE(ui) > 1 ? 100 : 50;
-					let state = Project.brushes[i].previewReady ? zui_image(img) : zui_image(Res.get("icons.k"), -1, null, tile * 5, tile, tile, tile);
-					if (state == State.Started) {
+					let state = Project.brushes[i].previewReady ? zui_image(img) : zui_image(Res.get("icons.k"), -1, -1.0, tile * 5, tile, tile, tile);
+					if (state == zui_state_t.STARTED) {
 						if (Context.raw.brush != Project.brushes[i]) Context.selectBrush(i);
 						if (time_time() - Context.raw.selectTime < 0.25) UIBase.showBrushNodes();
 						Context.raw.selectTime = time_time();
@@ -118,7 +118,7 @@ class TabBrushes {
 					if (Config.raw.show_asset_names) {
 						ui._x = uix;
 						ui._y += slotw * 0.9;
-						zui_text(Project.brushes[i].canvas.name, Align.Center);
+						zui_text(Project.brushes[i].canvas.name, zui_align_t.CENTER);
 						if (ui.is_hovered) zui_tooltip(Project.brushes[i].canvas.name);
 						ui._y -= slotw * 0.9;
 						if (i == Project.brushes.length - 1) {
