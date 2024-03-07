@@ -3,8 +3,8 @@
 
 class UtilParticle {
 
-	static initParticle = () => {
-		if (Context.raw.particleMaterial != null) return;
+	static init_particle = () => {
+		if (Context.raw.particle_material != null) return;
 
 		let raw: particle_data_t = {
 			name: "Particles",
@@ -35,12 +35,12 @@ class UtilParticle {
 		];
 
 		{
-			let t = render_target_create();
+			let t: render_target_t = render_target_create();
 			t.name = "texparticle";
 			t.width = 0;
 			t.height = 0;
 			t.format = "R8";
-			t.scale = RenderPathBase.getSuperSampling();
+			t.scale = RenderPathBase.get_super_sampling();
 			render_path_create_render_target(t);
 		}
 
@@ -54,7 +54,7 @@ class UtilParticle {
 		}
 
 		let md: material_data_t = data_get_material("Scene", "MaterialParticle");
-		Context.raw.particleMaterial = md;
+		Context.raw.particle_material = md;
 
 		for (let obj of _scene_raw.objects) {
 			if (obj.name == ".Sphere") {
@@ -66,7 +66,7 @@ class UtilParticle {
 				particle.particles.is_particle = true;
 				particle.material_refs = ["MaterialParticle"];
 				_scene_raw.objects.push(particle);
-				for (let i = 0; i < 16; ++i) particle.transform[i] *= 0.01;
+				for (let i: i32 = 0; i < 16; ++i) particle.transform[i] *= 0.01;
 				break;
 			}
 		}
@@ -83,31 +83,31 @@ class UtilParticle {
 
 	///if arm_physics
 
-	static initParticlePhysics = () => {
+	static init_particle_physics = () => {
 		if (PhysicsWorld.active != null) {
-			UtilParticle.initParticleMesh();
+			UtilParticle.init_particle_mesh();
 			return;
 		}
 
 		PhysicsWorld.load(() => {
 			PhysicsWorld.create();
-			UtilParticle.initParticleMesh();
+			UtilParticle.init_particle_mesh();
 		});
 	}
 
-	static initParticleMesh = () => {
-		if (Context.raw.paintBody != null) return;
+	static init_particle_mesh = () => {
+		if (Context.raw.paint_body != null) return;
 
-		let po = Context.raw.mergedObject != null ? Context.raw.mergedObject : Context.raw.paintObject;
+		let po: mesh_object_t = Context.raw.merged_object != null ? Context.raw.merged_object : Context.raw.paint_object;
 
 		po.base.transform.scale.x = po.base.parent.transform.scale.x;
 		po.base.transform.scale.y = po.base.parent.transform.scale.y;
 		po.base.transform.scale.z = po.base.parent.transform.scale.z;
 
-		Context.raw.paintBody = PhysicsBody.create();
-		Context.raw.paintBody.shape = ShapeType.ShapeMesh;
-		PhysicsBody.init(Context.raw.paintBody, po.base);
-		(po.base as any).physicsBody = Context.raw.paintBody;
+		Context.raw.paint_body = PhysicsBody.create();
+		Context.raw.paint_body.shape = shape_type_t.MESH;
+		PhysicsBody.init(Context.raw.paint_body, po.base);
+		(po.base as any).physicsBody = Context.raw.paint_body;
 	}
 
 	///end

@@ -2,7 +2,7 @@
 class VectorMathNode extends LogicNode {
 
 	operation: string;
-	v = vec4_create();
+	v: vec4_t = vec4_create();
 
 	constructor() {
 		super();
@@ -12,7 +12,7 @@ class VectorMathNode extends LogicNode {
 		this.inputs[0].get((v1: vec4_t) => {
 			this.inputs[1].get((v2: vec4_t) => {
 				vec4_set_from(this.v, v1);
-				let f = 0.0;
+				let f: f32 = 0.0;
 
 				switch (this.operation) {
 					case "Add":
@@ -60,7 +60,7 @@ class VectorMathNode extends LogicNode {
 						vec4_mult(this.v, vec4_dot(v1, v2) / vec4_dot(v2, v2));
 						break;
 					case "Reflect":
-						let tmp = vec4_create();
+						let tmp: vec4_t = vec4_create();
 						vec4_set_from(tmp, v2);
 						vec4_normalize(tmp);
 						vec4_reflect(this.v, tmp);

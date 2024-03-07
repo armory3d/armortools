@@ -2,10 +2,10 @@
 class UINodes {
 
 	///if (is_paint || is_sculpt)
-	static show = false;
+	static show: bool = false;
 	///end
 	///if is_lab
-	static show = true;
+	static show: bool = true;
 	///end
 
 	static wx: i32;
@@ -14,60 +14,60 @@ class UINodes {
 	static wh: i32;
 
 	static ui: zui_t;
-	static canvasType = CanvasType.CanvasMaterial;
-	static showMenu = false;
-	static showMenuFirst = true;
-	static hideMenu = false;
-	static menuCategory = 0;
-	static popupX = 0.0;
-	static popupY = 0.0;
+	static canvas_type = canvas_type_t.MATERIAL;
+	static show_menu: bool = false;
+	static show_menu_first: bool = true;
+	static hide_menu: bool = false;
+	static menu_category: i32 = 0;
+	static popup_x: f32 = 0.0;
+	static popup_y: f32 = 0.0;
 
-	static uichangedLast = false;
-	static recompileMat = false; // Mat preview
-	static recompileMatFinal = false;
-	static nodeSearchSpawn: zui_node_t = null;
-	static nodeSearchOffset = 0;
-	static lastCanvas: zui_node_canvas_t = null;
-	static lastNodeSelectedId = -1;
-	static releaseLink = false;
-	static isNodeMenuOperation = false;
+	static uichanged_last: bool = false;
+	static recompile_mat: bool = false; // Mat preview
+	static recompile_mat_final: bool = false;
+	static node_search_spawn: zui_node_t = null;
+	static node_search_offset: i32 = 0;
+	static last_canvas: zui_node_canvas_t = null;
+	static last_node_selected_id: i32 = -1;
+	static release_link: bool = false;
+	static is_node_menu_op: bool = false;
 
 	static grid: image_t = null;
-	static hwnd = zui_handle_create();
-	static groupStack: TNodeGroup[] = [];
-	static controlsDown = false;
+	static hwnd: zui_handle_t = zui_handle_create();
+	static group_stack: node_group_t[] = [];
+	static controls_down: bool = false;
 
 	constructor() {
-		zui_set_on_link_drag(UINodes.onLinkDrag);
-		zui_set_on_socket_released(UINodes.onSocketReleased);
-		zui_set_on_canvas_released(UINodes.onCanvasReleased);
-		zui_set_on_canvas_control(UINodes.onCanvasControl);
+		zui_set_on_link_drag(UINodes.on_link_drag);
+		zui_set_on_socket_released(UINodes.on_socket_released);
+		zui_set_on_canvas_released(UINodes.on_canvas_released);
+		zui_set_on_canvas_control(UINodes.on_canvas_control);
 
-		let scale = Config.raw.window_scale;
-		UINodes.ui = zui_create({ theme: Base.theme, font: Base.font, color_wheel: Base.colorWheel, black_white_gradient: Base.colorWheelGradient, scale_factor: scale });
+		let scale: f32 = Config.raw.window_scale;
+		UINodes.ui = zui_create({ theme: Base.theme, font: Base.font, color_wheel: Base.color_wheel, black_white_gradient: Base.color_wheel_gradient, scale_factor: scale });
 		UINodes.ui.scroll_enabled = false;
 	}
 
-	static onLinkDrag = (linkDragId: i32, isNewLink: bool) => {
+	static on_link_drag = (linkDragId: i32, isNewLink: bool) => {
 		if (isNewLink) {
-			let nodes = UINodes.getNodes();
-			let linkDrag = zui_get_link(UINodes.getCanvas(true).links, linkDragId);
-			let node = zui_get_node(UINodes.getCanvas(true).nodes, linkDrag.from_id > -1 ? linkDrag.from_id : linkDrag.to_id);
-			let linkX = UINodes.ui._window_x + zui_nodes_NODE_X(node);
-			let linkY = UINodes.ui._window_y + zui_nodes_NODE_Y(node);
+			let nodes: zui_nodes_t = UINodes.get_nodes();
+			let linkDrag: zui_node_link_t = zui_get_link(UINodes.get_canvas(true).links, linkDragId);
+			let node: zui_node_t = zui_get_node(UINodes.get_canvas(true).nodes, linkDrag.from_id > -1 ? linkDrag.from_id : linkDrag.to_id);
+			let linkX: i32 = UINodes.ui._window_x + zui_nodes_NODE_X(node);
+			let linkY: i32 = UINodes.ui._window_y + zui_nodes_NODE_Y(node);
 			if (linkDrag.from_id > -1) {
 				linkX += zui_nodes_NODE_W(node);
 				linkY += zui_nodes_OUTPUT_Y(node.outputs, linkDrag.from_socket);
 			}
 			else {
-				linkY += zui_nodes_INPUT_Y(UINodes.getCanvas(true), node.inputs, linkDrag.to_socket) + zui_nodes_OUTPUTS_H(node.outputs) + zui_nodes_BUTTONS_H(node);
+				linkY += zui_nodes_INPUT_Y(UINodes.get_canvas(true), node.inputs, linkDrag.to_socket) + zui_nodes_OUTPUTS_H(node.outputs) + zui_nodes_BUTTONS_H(node);
 			}
 			if (Math.abs(mouse_x - linkX) > 5 || Math.abs(mouse_y - linkY) > 5) { // Link length
-				UINodes.nodeSearch(-1, -1, () => {
-					let n = zui_get_node(UINodes.getCanvas(true).nodes, nodes.nodesSelectedId[0]);
+				UINodes.node_search(-1, -1, () => {
+					let n: zui_node_t = zui_get_node(UINodes.get_canvas(true).nodes, nodes.nodesSelectedId[0]);
 					if (linkDrag.to_id == -1 && n.inputs.length > 0) {
 						linkDrag.to_id = n.id;
-						let fromType = node.outputs[linkDrag.from_socket].type;
+						let fromType: string = node.outputs[linkDrag.from_socket].type;
 						// Connect to the first socket
 						linkDrag.to_socket = 0;
 						// Try to find the first type-matching socket and use it if present
@@ -77,47 +77,47 @@ class UINodes {
 								break;
 							}
 						}
-						UINodes.getCanvas(true).links.push(linkDrag);
+						UINodes.get_canvas(true).links.push(linkDrag);
 					}
 					else if (linkDrag.from_id == -1 && n.outputs.length > 0) {
 						linkDrag.from_id = n.id;
 						linkDrag.from_socket = 0;
-						UINodes.getCanvas(true).links.push(linkDrag);
+						UINodes.get_canvas(true).links.push(linkDrag);
 					}
 					///if is_lab
-					ParserLogic.parse(UINodes.getCanvas(true));
+					ParserLogic.parse(UINodes.get_canvas(true));
 					Context.raw.rdirty = 5;
 					///end
 				});
 			}
 			// Selecting which node socket to preview
 			else if (node.id == nodes.nodesSelectedId[0]) {
-				Context.raw.nodePreviewSocket = linkDrag.from_id > -1 ? linkDrag.from_socket : 0;
+				Context.raw.node_preview_socket = linkDrag.from_id > -1 ? linkDrag.from_socket : 0;
 				///if (is_paint || is_sculpt)
-				Context.raw.nodePreviewDirty = true;
+				Context.raw.node_preview_dirty = true;
 				///end
 			}
 		}
 	}
 
-	static onSocketReleased = (socket_id: i32) => {
-		let nodes = UINodes.getNodes();
-		let canvas = UINodes.getCanvas(true);
-		let socket = zui_get_socket(canvas.nodes, socket_id);
-		let node = zui_get_node(canvas.nodes, socket.node_id);
+	static on_socket_released = (socket_id: i32) => {
+		let nodes: zui_nodes_t = UINodes.get_nodes();
+		let canvas: zui_node_canvas_t = UINodes.get_canvas(true);
+		let socket: zui_node_socket_t = zui_get_socket(canvas.nodes, socket_id);
+		let node: zui_node_t = zui_get_node(canvas.nodes, socket.node_id);
 		if (UINodes.ui.input_released_r) {
 			if (node.type == "GROUP_INPUT" || node.type == "GROUP_OUTPUT") {
-				Base.notifyOnNextFrame(() => {
+				Base.notify_on_next_frame(() => {
 					UIMenu.draw((ui: zui_t) => {
-						if (UIMenu.menuButton(ui, tr("Edit"))) {
-							let htype = zui_handle("uinodes_0");
-							let hname = zui_handle("uinodes_1");
-							let hmin = zui_handle("uinodes_2");
-							let hmax = zui_handle("uinodes_3");
-							let hval0 = zui_handle("uinodes_4");
-							let hval1 = zui_handle("uinodes_5");
-							let hval2 = zui_handle("uinodes_6");
-							let hval3 = zui_handle("uinodes_7");
+						if (UIMenu.menu_button(ui, tr("Edit"))) {
+							let htype: zui_handle_t = zui_handle("uinodes_0");
+							let hname: zui_handle_t = zui_handle("uinodes_1");
+							let hmin: zui_handle_t = zui_handle("uinodes_2");
+							let hmax: zui_handle_t = zui_handle("uinodes_3");
+							let hval0: zui_handle_t = zui_handle("uinodes_4");
+							let hval1: zui_handle_t = zui_handle("uinodes_5");
+							let hval2: zui_handle_t = zui_handle("uinodes_6");
+							let hval3: zui_handle_t = zui_handle("uinodes_7");
 							htype.position = socket.type == "RGBA" ? 0 : socket.type == "VECTOR" ? 1 : 2;
 							hname.text = socket.name;
 							hmin.value = socket.min;
@@ -131,15 +131,15 @@ class UINodes {
 								}
 							}
 							else hval0.value = socket.default_value;
-							Base.notifyOnNextFrame(() => {
+							Base.notify_on_next_frame(() => {
 								zui_end_input();
-								UIBox.showCustom((ui: zui_t) => {
+								UIBox.show_custom((ui: zui_t) => {
 									if (zui_tab(zui_handle("uinodes_8"), tr("Socket"))) {
-										let type = zui_combo(htype, [tr("Color"), tr("Vector"), tr("Value")], tr("Type"), true);
+										let type: i32 = zui_combo(htype, [tr("Color"), tr("Vector"), tr("Value")], tr("Type"), true);
 										if (htype.changed) hname.text = type == 0 ? tr("Color") : type == 1 ? tr("Vector") : tr("Value");
-										let name = zui_text_input(hname, tr("Name"));
-										let min = zui_float_input(hmin, tr("Min"));
-										let max = zui_float_input(hmax, tr("Max"));
+										let name: string = zui_text_input(hname, tr("Name"));
+										let min: f32 = zui_float_input(hmin, tr("Min"));
+										let max: f32 = zui_float_input(hmax, tr("Max"));
 										let default_value: any = null;
 										if (type == 0) {
 											zui_row([1 / 4, 1 / 4, 1 / 4, 1 / 4]);
@@ -167,18 +167,18 @@ class UINodes {
 											socket.max = max;
 											socket.default_value = default_value;
 											UIBox.hide();
-											NodesMaterial.syncSockets(node);
+											NodesMaterial.sync_sockets(node);
 											UINodes.hwnd.redraws = 2;
 										}
 									}
 								}, 400, 250);
 							});
 						}
-						if (UIMenu.menuButton(ui, tr("Delete"))) {
-							let i = 0;
+						if (UIMenu.menu_button(ui, tr("Delete"))) {
+							let i: i32 = 0;
 							// Remove links connected to the socket
 							while (i < canvas.links.length) {
-								let l = canvas.links[i];
+								let l: zui_node_link_t = canvas.links[i];
 								if ((l.from_id == node.id && l.from_socket == node.outputs.indexOf(socket)) ||
 									(l.to_id == node.id && l.to_socket == node.inputs.indexOf(socket))) {
 									canvas.links.splice(i, 1);
@@ -188,30 +188,30 @@ class UINodes {
 							// Remove socket
 							array_remove(node.inputs, socket);
 							array_remove(node.outputs, socket);
-							NodesMaterial.syncSockets(node);
+							NodesMaterial.sync_sockets(node);
 						}
 					}, 2);
 				});
 			}
-			else UINodes.onCanvasReleased();
+			else UINodes.on_canvas_released();
 		}
 		// Selecting which node socket to preview
 		else if (node.id == nodes.nodesSelectedId[0]) {
-			let i = node.outputs.indexOf(socket);
+			let i: i32 = node.outputs.indexOf(socket);
 			if (i > -1) {
-				Context.raw.nodePreviewSocket = i;
+				Context.raw.node_preview_socket = i;
 				///if (is_paint || is_sculpt)
-				Context.raw.nodePreviewDirty = true;
+				Context.raw.node_preview_dirty = true;
 				///end
 			}
 		}
 	}
 
-	static onCanvasReleased = () => {
+	static on_canvas_released = () => {
 		if (UINodes.ui.input_released_r && Math.abs(UINodes.ui.input_x - UINodes.ui.input_started_x) < 2 && Math.abs(UINodes.ui.input_y - UINodes.ui.input_started_y) < 2) {
 			// Node selection
-			let nodes = UINodes.getNodes();
-			let canvas = UINodes.getCanvas(true);
+			let nodes: zui_nodes_t = UINodes.get_nodes();
+			let canvas: zui_node_canvas_t = UINodes.get_canvas(true);
 			let selected: zui_node_t = null;
 			for (let node of canvas.nodes) {
 				if (zui_get_input_in_rect(UINodes.ui._window_x + zui_nodes_NODE_X(node), UINodes.ui._window_y + zui_nodes_NODE_Y(node), zui_nodes_NODE_W(node), zui_nodes_NODE_H(canvas, node))) {
@@ -224,13 +224,13 @@ class UINodes {
 
 			// Node context menu
 			if (!zui_socket_released()) {
-				let numberOfEntries = 5;
-				if (UINodes.canvasType == CanvasType.CanvasMaterial) ++numberOfEntries;
+				let numberOfEntries: i32 = 5;
+				if (UINodes.canvas_type == canvas_type_t.MATERIAL) ++numberOfEntries;
 				if (selected != null && selected.type == "RGB") ++numberOfEntries;
 
 				UIMenu.draw((uiMenu: zui_t) => {
 					uiMenu._y += 1;
-					let isProtected = selected == null ||
+					let isProtected: bool = selected == null ||
 									///if (is_paint || is_sculpt)
 									selected.type == "OUTPUT_MATERIAL_PBR" ||
 									///end
@@ -238,58 +238,58 @@ class UINodes {
 									selected.type == "GROUP_OUTPUT" ||
 									selected.type == "BrushOutputNode";
 					uiMenu.enabled = !isProtected;
-					if (UIMenu.menuButton(uiMenu, tr("Cut"), "ctrl+x")) {
-						Base.notifyOnNextFrame(() => {
+					if (UIMenu.menu_button(uiMenu, tr("Cut"), "ctrl+x")) {
+						Base.notify_on_next_frame(() => {
 							UINodes.hwnd.redraws = 2;
 							zui_set_is_copy(true);
 							zui_set_is_cut(true);
-							UINodes.isNodeMenuOperation = true;
+							UINodes.is_node_menu_op = true;
 						});
 					}
-					if (UIMenu.menuButton(uiMenu, tr("Copy"), "ctrl+c")) {
-						Base.notifyOnNextFrame(() => {
+					if (UIMenu.menu_button(uiMenu, tr("Copy"), "ctrl+c")) {
+						Base.notify_on_next_frame(() => {
 							zui_set_is_copy(true);
-							UINodes.isNodeMenuOperation = true;
+							UINodes.is_node_menu_op = true;
 						});
 					}
 					uiMenu.enabled = zui_clipboard != "";
-					if (UIMenu.menuButton(uiMenu, tr("Paste"), "ctrl+v")) {
-						Base.notifyOnNextFrame(() => {
+					if (UIMenu.menu_button(uiMenu, tr("Paste"), "ctrl+v")) {
+						Base.notify_on_next_frame(() => {
 							UINodes.hwnd.redraws = 2;
 							zui_set_is_paste(true);
-							UINodes.isNodeMenuOperation = true;
+							UINodes.is_node_menu_op = true;
 						});
 					}
 					uiMenu.enabled = !isProtected;
-					if (UIMenu.menuButton(uiMenu, tr("Delete"), "delete")) {
-						Base.notifyOnNextFrame(() => {
+					if (UIMenu.menu_button(uiMenu, tr("Delete"), "delete")) {
+						Base.notify_on_next_frame(() => {
 							UINodes.hwnd.redraws = 2;
 							UINodes.ui.is_delete_down = true;
-							UINodes.isNodeMenuOperation = true;
+							UINodes.is_node_menu_op = true;
 						});
 					}
-					if (UIMenu.menuButton(uiMenu, tr("Duplicate"))) {
-						Base.notifyOnNextFrame(() => {
+					if (UIMenu.menu_button(uiMenu, tr("Duplicate"))) {
+						Base.notify_on_next_frame(() => {
 							UINodes.hwnd.redraws = 2;
 							zui_set_is_copy(true);
 							zui_set_is_paste(true);
-							UINodes.isNodeMenuOperation = true;
+							UINodes.is_node_menu_op = true;
 						});
 					}
 					if (selected != null && selected.type == "RGB") {
-						if (UIMenu.menuButton(uiMenu, tr("Add Swatch"))) {
-							let color = selected.outputs[0].default_value;
-							let newSwatch = Project.makeSwatch(color_from_floats(color[0], color[1], color[2], color[3]));
-							Context.setSwatch(newSwatch);
+						if (UIMenu.menu_button(uiMenu, tr("Add Swatch"))) {
+							let color: any = selected.outputs[0].default_value;
+							let newSwatch: swatch_color_t = Project.make_swatch(color_from_floats(color[0], color[1], color[2], color[3]));
+							Context.set_swatch(newSwatch);
 							Project.raw.swatches.push(newSwatch);
-							UIBase.hwnds[TabArea.TabStatus].redraws = 1;
+							UIBase.hwnds[tab_area_t.STATUS].redraws = 1;
 						}
 					}
 
-					if (UINodes.canvasType == CanvasType.CanvasMaterial) {
-						UIMenu.menuSeparator(uiMenu);
-						if (UIMenu.menuButton(uiMenu, tr("2D View"))) {
-							UIBase.show2DView(View2DType.View2DNode);
+					if (UINodes.canvas_type == canvas_type_t.MATERIAL) {
+						UIMenu.menu_separator(uiMenu);
+						if (UIMenu.menu_button(uiMenu, tr("2D View"))) {
+							UIBase.show_2d_view(view_2d_type_t.NODE);
 						}
 					}
 
@@ -299,14 +299,14 @@ class UINodes {
 		}
 
 		if (UINodes.ui.input_released) {
-			let nodes = UINodes.getNodes();
-			let canvas = UINodes.getCanvas(true);
+			let nodes: zui_nodes_t = UINodes.get_nodes();
+			let canvas: zui_node_canvas_t = UINodes.get_canvas(true);
 			for (let node of canvas.nodes) {
 				if (zui_get_input_in_rect(UINodes.ui._window_x + zui_nodes_NODE_X(node), UINodes.ui._window_y + zui_nodes_NODE_Y(node), zui_nodes_NODE_W(node), zui_nodes_NODE_H(canvas, node))) {
 					if (node.id == nodes.nodesSelectedId[0]) {
 						UIView2D.hwnd.redraws = 2;
-						if (time_time() - Context.raw.selectTime < 0.25) UIBase.show2DView(View2DType.View2DNode);
-						Context.raw.selectTime = time_time();
+						if (time_time() - Context.raw.select_time < 0.25) UIBase.show_2d_view(view_2d_type_t.NODE);
+						Context.raw.select_time = time_time();
 					}
 					break;
 				}
@@ -314,11 +314,11 @@ class UINodes {
 		}
 	}
 
-	static onCanvasControl = (): zui_canvas_control_t => {
-		return UINodes.getCanvasControl(UINodes.ui, UINodes);
+	static on_canvas_control = (): zui_canvas_control_t => {
+		return UINodes.get_canvas_control(UINodes.ui, UINodes);
 	}
 
-	static getCanvasControl = (ui: zui_t, parent: any): zui_canvas_control_t => {
+	static get_canvas_control = (ui: zui_t, parent: any): zui_canvas_control_t => {
 		if (Config.raw.wrap_mouse && parent.controlsDown) {
 			if (ui.input_x < ui._window_x) {
 				ui.input_x = ui._window_x + ui._window_w;
@@ -358,30 +358,30 @@ class UINodes {
 			}
 		}
 
-		let pan = ui.input_down_r || Operator.shortcut(Config.keymap.action_pan, ShortcutType.ShortcutDown);
-		let zoomDelta = Operator.shortcut(Config.keymap.action_zoom, ShortcutType.ShortcutDown) ? UINodes.getZoomDelta(ui) / 100.0 : 0.0;
-		let control = {
+		let pan: bool = ui.input_down_r || Operator.shortcut(Config.keymap.action_pan, ShortcutType.ShortcutDown);
+		let zoomDelta: f32 = Operator.shortcut(Config.keymap.action_zoom, ShortcutType.ShortcutDown) ? UINodes.get_zoom_delta(ui) / 100.0 : 0.0;
+		let control: any = {
 			pan_x: pan ? ui.input_dx : 0.0,
 			pan_y: pan ? ui.input_dy : 0.0,
 			zoom: ui.input_wheel_delta != 0.0 ? -ui.input_wheel_delta / 10 : zoomDelta
 		};
-		if (Base.isComboSelected()) control.zoom = 0.0;
+		if (Base.is_combo_selected()) control.zoom = 0.0;
 		return control;
 	}
 
-	static getZoomDelta = (ui: zui_t): f32 => {
-		return Config.raw.zoom_direction == ZoomDirection.ZoomVertical ? -ui.input_dy :
-			   Config.raw.zoom_direction == ZoomDirection.ZoomVerticalInverted ? -ui.input_dy :
-			   Config.raw.zoom_direction == ZoomDirection.ZoomHorizontal ? ui.input_dx :
-			   Config.raw.zoom_direction == ZoomDirection.ZoomHorizontalInverted ? ui.input_dx :
+	static get_zoom_delta = (ui: zui_t): f32 => {
+		return Config.raw.zoom_direction == zoom_direction_t.VERTICAL ? -ui.input_dy :
+			   Config.raw.zoom_direction == zoom_direction_t.VERTICAL_INVERTED ? -ui.input_dy :
+			   Config.raw.zoom_direction == zoom_direction_t.HORIZONTAL ? ui.input_dx :
+			   Config.raw.zoom_direction == zoom_direction_t.HORIZONTAL_INVERTED ? ui.input_dx :
 			   -(ui.input_dy - ui.input_dx);
 	}
 
-	static getCanvas = (groups = false): zui_node_canvas_t => {
+	static get_canvas = (groups: bool = false): zui_node_canvas_t => {
 		///if (is_paint || is_sculpt)
-		if (UINodes.canvasType == CanvasType.CanvasMaterial) {
-			if (groups && UINodes.groupStack.length > 0) return UINodes.groupStack[UINodes.groupStack.length - 1].canvas;
-			else return UINodes.getCanvasMaterial();
+		if (UINodes.canvas_type == canvas_type_t.MATERIAL) {
+			if (groups && UINodes.group_stack.length > 0) return UINodes.group_stack[UINodes.group_stack.length - 1].canvas;
+			else return UINodes.get_canvas_material();
 		}
 		else return Context.raw.brush.canvas;
 		///end
@@ -392,31 +392,31 @@ class UINodes {
 	}
 
 	///if (is_paint || is_sculpt)
-	static getCanvasMaterial = (): zui_node_canvas_t => {
+	static get_canvas_material = (): zui_node_canvas_t => {
 		return Context.raw.material.canvas;
 	}
 	///end
 
-	static getNodes = (): zui_nodes_t => {
+	static get_nodes = (): zui_nodes_t => {
 		///if (is_paint || is_sculpt)
-		if (UINodes.canvasType == CanvasType.CanvasMaterial) {
-			if (UINodes.groupStack.length > 0) return UINodes.groupStack[UINodes.groupStack.length - 1].nodes;
+		if (UINodes.canvas_type == canvas_type_t.MATERIAL) {
+			if (UINodes.group_stack.length > 0) return UINodes.group_stack[UINodes.group_stack.length - 1].nodes;
 			else return Context.raw.material.nodes;
 		}
 		else return Context.raw.brush.nodes;
 		///end
 
 		///if is_lab
-		if (UINodes.groupStack.length > 0) return UINodes.groupStack[UINodes.groupStack.length - 1].nodes;
+		if (UINodes.group_stack.length > 0) return UINodes.group_stack[UINodes.group_stack.length - 1].nodes;
 		else return Project.nodes;
 		///end
 	}
 
 	static update = () => {
-		if (!UINodes.show || !Base.uiEnabled) return;
+		if (!UINodes.show || !Base.ui_enabled) return;
 
 		///if (is_paint || is_sculpt)
-		UINodes.wx = Math.floor(app_w()) + UIToolbar.toolbarw;
+		UINodes.wx = Math.floor(app_w()) + UIToolbar.toolbar_w;
 		///end
 		///if is_lab
 		UINodes.wx = Math.floor(app_w());
@@ -424,37 +424,37 @@ class UINodes {
 		UINodes.wy = UIHeader.headerh * 2;
 
 		if (UIView2D.show) {
-			UINodes.wy += app_h() - Config.raw.layout[LayoutSize.LayoutNodesH];
+			UINodes.wy += app_h() - Config.raw.layout[layout_size_t.NODES_H];
 		}
 
-		let ww = Config.raw.layout[LayoutSize.LayoutNodesW];
+		let ww: i32 = Config.raw.layout[layout_size_t.NODES_W];
 		if (!UIBase.show) {
 			///if (is_paint || is_sculpt)
-			ww += Config.raw.layout[LayoutSize.LayoutSidebarW] + UIToolbar.toolbarw;
-			UINodes.wx -= UIToolbar.toolbarw;
+			ww += Config.raw.layout[layout_size_t.SIDEBAR_W] + UIToolbar.toolbar_w;
+			UINodes.wx -= UIToolbar.toolbar_w;
 			///end
 			UINodes.wy = 0;
 		}
 
-		let mx = mouse_x;
-		let my = mouse_y;
+		let mx: i32 = mouse_x;
+		let my: i32 = mouse_y;
 		if (mx < UINodes.wx || mx > UINodes.wx + ww || my < UINodes.wy) return;
 		if (UINodes.ui.is_typing || !UINodes.ui.input_enabled) return;
 
-		let nodes = UINodes.getNodes();
+		let nodes: zui_nodes_t = UINodes.get_nodes();
 		if (nodes.nodesSelectedId.length > 0 && UINodes.ui.is_key_pressed) {
-			if (UINodes.ui.key == key_code_t.LEFT) for (let n of nodes.nodesSelectedId) zui_get_node(UINodes.getCanvas(true).nodes, n).x -= 1;
-			else if (UINodes.ui.key == key_code_t.RIGHT) for (let n of nodes.nodesSelectedId) zui_get_node(UINodes.getCanvas(true).nodes, n).x += 1;
-			if (UINodes.ui.key == key_code_t.UP) for (let n of nodes.nodesSelectedId) zui_get_node(UINodes.getCanvas(true).nodes, n).y -= 1;
-			else if (UINodes.ui.key == key_code_t.DOWN) for (let n of nodes.nodesSelectedId) zui_get_node(UINodes.getCanvas(true).nodes, n).y += 1;
+			if (UINodes.ui.key == key_code_t.LEFT) for (let n of nodes.nodesSelectedId) zui_get_node(UINodes.get_canvas(true).nodes, n).x -= 1;
+			else if (UINodes.ui.key == key_code_t.RIGHT) for (let n of nodes.nodesSelectedId) zui_get_node(UINodes.get_canvas(true).nodes, n).x += 1;
+			if (UINodes.ui.key == key_code_t.UP) for (let n of nodes.nodesSelectedId) zui_get_node(UINodes.get_canvas(true).nodes, n).y -= 1;
+			else if (UINodes.ui.key == key_code_t.DOWN) for (let n of nodes.nodesSelectedId) zui_get_node(UINodes.get_canvas(true).nodes, n).y += 1;
 		}
 
 		// Node search popup
-		if (Operator.shortcut(Config.keymap.node_search)) UINodes.nodeSearch();
-		if (UINodes.nodeSearchSpawn != null) {
+		if (Operator.shortcut(Config.keymap.node_search)) UINodes.node_search();
+		if (UINodes.node_search_spawn != null) {
 			UINodes.ui.input_x = mouse_x; // Fix inputDX after popup removal
 			UINodes.ui.input_y = mouse_y;
-			UINodes.nodeSearchSpawn = null;
+			UINodes.node_search_spawn = null;
 		}
 
 		if (Operator.shortcut(Config.keymap.view_reset)) {
@@ -464,20 +464,20 @@ class UINodes {
 		}
 	}
 
-	static canvasChanged = () => {
-		UINodes.recompileMat = true;
-		UINodes.recompileMatFinal = true;
+	static canvas_changed = () => {
+		UINodes.recompile_mat = true;
+		UINodes.recompile_mat_final = true;
 	}
 
-	static nodeSearch = (x = -1, y = -1, done: ()=>void = null) => {
-		let searchHandle = zui_handle("uinodes_9");
-		let first = true;
+	static node_search = (x: i32 = -1, y: i32 = -1, done: ()=>void = null) => {
+		let searchHandle: zui_handle_t = zui_handle("uinodes_9");
+		let first: bool = true;
 		UIMenu.draw((ui: zui_t) => {
 			g2_set_color(ui.t.SEPARATOR_COL);
 			zui_draw_rect(true, ui._x, ui._y, ui._w, zui_ELEMENT_H(ui) * 8);
 			g2_set_color(0xffffffff);
 
-			let search = zui_text_input(searchHandle, "", zui_align_t.LEFT, true, true).toLowerCase();
+			let search: string = zui_text_input(searchHandle, "", zui_align_t.LEFT, true, true).toLowerCase();
 			ui.changed = false;
 			if (first) {
 				first = false;
@@ -485,34 +485,34 @@ class UINodes {
 				zui_start_text_edit(searchHandle); // Focus search bar
 			}
 
-			if (searchHandle.changed) UINodes.nodeSearchOffset = 0;
+			if (searchHandle.changed) UINodes.node_search_offset = 0;
 
 			if (ui.is_key_pressed) { // Move selection
-				if (ui.key == key_code_t.DOWN && UINodes.nodeSearchOffset < 6) UINodes.nodeSearchOffset++;
-				if (ui.key == key_code_t.UP && UINodes.nodeSearchOffset > 0) UINodes.nodeSearchOffset--;
+				if (ui.key == key_code_t.DOWN && UINodes.node_search_offset < 6) UINodes.node_search_offset++;
+				if (ui.key == key_code_t.UP && UINodes.node_search_offset > 0) UINodes.node_search_offset--;
 			}
-			let enter = keyboard_down("enter");
-			let count = 0;
-			let BUTTON_COL = ui.t.BUTTON_COL;
+			let enter: bool = keyboard_down("enter");
+			let count: i32 = 0;
+			let BUTTON_COL: i32 = ui.t.BUTTON_COL;
 
 			///if (is_paint || is_sculpt)
-			let nodeList = UINodes.canvasType == CanvasType.CanvasMaterial ? NodesMaterial.list : NodesBrush.list;
+			let nodeList: zui_node_t[][] = UINodes.canvas_type == canvas_type_t.MATERIAL ? NodesMaterial.list : NodesBrush.list;
 			///end
 			///if is_lab
-			let nodeList = NodesBrush.list;
+			let nodeList: zui_node_t[][] = NodesBrush.list;
 			///end
 
 			for (let list of nodeList) {
 				for (let n of list) {
 					if (tr(n.name).toLowerCase().indexOf(search) >= 0) {
-						ui.t.BUTTON_COL = count == UINodes.nodeSearchOffset ? ui.t.HIGHLIGHT_COL : ui.t.SEPARATOR_COL;
-						if (zui_button(tr(n.name), zui_align_t.LEFT) || (enter && count == UINodes.nodeSearchOffset)) {
-							UINodes.pushUndo();
-							let nodes = UINodes.getNodes();
-							let canvas = UINodes.getCanvas(true);
-							UINodes.nodeSearchSpawn = UINodes.makeNode(n, nodes, canvas); // Spawn selected node
-							canvas.nodes.push(UINodes.nodeSearchSpawn);
-							nodes.nodesSelectedId = [UINodes.nodeSearchSpawn.id];
+						ui.t.BUTTON_COL = count == UINodes.node_search_offset ? ui.t.HIGHLIGHT_COL : ui.t.SEPARATOR_COL;
+						if (zui_button(tr(n.name), zui_align_t.LEFT) || (enter && count == UINodes.node_search_offset)) {
+							UINodes.push_undo();
+							let nodes: zui_nodes_t = UINodes.get_nodes();
+							let canvas: zui_node_canvas_t = UINodes.get_canvas(true);
+							UINodes.node_search_spawn = UINodes.make_node(n, nodes, canvas); // Spawn selected node
+							canvas.nodes.push(UINodes.node_search_spawn);
+							nodes.nodesSelectedId = [UINodes.node_search_spawn.id];
 							nodes.nodesDrag = true;
 
 							///if is_lab
@@ -539,27 +539,27 @@ class UINodes {
 		}, 8, x, y);
 	}
 
-	static getNodeX = (): i32 => {
+	static get_node_x = (): i32 => {
 		return Math.floor((mouse_x - UINodes.wx - zui_nodes_PAN_X()) / zui_nodes_SCALE());
 	}
 
-	static getNodeY = (): i32 => {
+	static get_node_y = (): i32 => {
 		return Math.floor((mouse_y - UINodes.wy - zui_nodes_PAN_Y()) / zui_nodes_SCALE());
 	}
 
-	static drawGrid = () => {
-		let ww = Config.raw.layout[LayoutSize.LayoutNodesW];
+	static draw_grid = () => {
+		let ww: i32 = Config.raw.layout[layout_size_t.NODES_W];
 
 		///if (is_paint || is_sculpt)
 		if (!UIBase.show) {
-			ww += Config.raw.layout[LayoutSize.LayoutSidebarW] + UIToolbar.toolbarw;
+			ww += Config.raw.layout[layout_size_t.SIDEBAR_W] + UIToolbar.toolbar_w;
 		}
 		///end
 
-		let wh = app_h();
-		let step = 100 * zui_SCALE(UINodes.ui);
-		let w = Math.floor(ww + step * 3);
-		let h = Math.floor(wh + step * 3);
+		let wh: i32 = app_h();
+		let step: f32 = 100 * zui_SCALE(UINodes.ui);
+		let w: i32 = Math.floor(ww + step * 3);
+		let h: i32 = Math.floor(wh + step * 3);
 		if (w < 1) w = 1;
 		if (h < 1) h = 1;
 		UINodes.grid = image_create_render_target(w, h);
@@ -568,19 +568,19 @@ class UINodes {
 
 		g2_set_color(UINodes.ui.t.SEPARATOR_COL - 0x00050505);
 		step = 20 * zui_SCALE(UINodes.ui);
-		for (let i = 0; i < Math.floor(h / step) + 1; ++i) {
+		for (let i: i32 = 0; i < Math.floor(h / step) + 1; ++i) {
 			g2_draw_line(0, i * step, w, i * step);
 		}
-		for (let i = 0; i < Math.floor(w / step) + 1; ++i) {
+		for (let i: i32 = 0; i < Math.floor(w / step) + 1; ++i) {
 			g2_draw_line(i * step, 0, i * step, h);
 		}
 
 		g2_set_color(UINodes.ui.t.SEPARATOR_COL - 0x00090909);
 		step = 100 * zui_SCALE(UINodes.ui);
-		for (let i = 0; i < Math.floor(h / step) + 1; ++i) {
+		for (let i: i32 = 0; i < Math.floor(h / step) + 1; ++i) {
 			g2_draw_line(0, i * step, w, i * step);
 		}
-		for (let i = 0; i < Math.floor(w / step) + 1; ++i) {
+		for (let i: i32 = 0; i < Math.floor(w / step) + 1; ++i) {
 			g2_draw_line(i * step, 0, i * step, h);
 		}
 
@@ -588,83 +588,83 @@ class UINodes {
 	}
 
 	static render = () => {
-		if (UINodes.recompileMat) {
+		if (UINodes.recompile_mat) {
 			///if (is_paint || is_sculpt)
-			if (UINodes.canvasType == CanvasType.CanvasBrush) {
-				MakeMaterial.parseBrush();
-				UtilRender.makeBrushPreview();
-				UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
+			if (UINodes.canvas_type == canvas_type_t.BRUSH) {
+				MakeMaterial.parse_brush();
+				UtilRender.make_brush_preview();
+				UIBase.hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 			}
 			else {
-				Base.isFillMaterial() ? Base.updateFillLayers() : UtilRender.makeMaterialPreview();
-				if (UIView2D.show && UIView2D.type == View2DType.View2DNode) {
+				Base.is_fill_material() ? Base.update_fill_layers() : UtilRender.make_material_preview();
+				if (UIView2D.show && UIView2D.type == view_2d_type_t.NODE) {
 					UIView2D.hwnd.redraws = 2;
 				}
 			}
 
-			UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
-			if (Context.raw.splitView) Context.raw.ddirty = 2;
+			UIBase.hwnds[tab_area_t.SIDEBAR1].redraws = 2;
+			if (Context.raw.split_view) Context.raw.ddirty = 2;
 			///end
 
 			///if is_lab
 			ParserLogic.parse(Project.canvas);
 			///end
 
-			UINodes.recompileMat = false;
+			UINodes.recompile_mat = false;
 		}
-		else if (UINodes.recompileMatFinal) {
+		else if (UINodes.recompile_mat_final) {
 			///if (is_paint || is_sculpt)
-			MakeMaterial.parsePaintMaterial();
+			MakeMaterial.parse_paint_material();
 
-			if (UINodes.canvasType == CanvasType.CanvasMaterial && Base.isFillMaterial()) {
-				Base.updateFillLayers();
-				UtilRender.makeMaterialPreview();
+			if (UINodes.canvas_type == canvas_type_t.MATERIAL && Base.is_fill_material()) {
+				Base.update_fill_layers();
+				UtilRender.make_material_preview();
 			}
 
-			let decal = Context.raw.tool == WorkspaceTool.ToolDecal || Context.raw.tool == WorkspaceTool.ToolText;
-			if (decal) UtilRender.makeDecalPreview();
+			let decal: bool = Context.raw.tool == workspace_tool_t.DECAL || Context.raw.tool == workspace_tool_t.TEXT;
+			if (decal) UtilRender.make_decal_preview();
 
-			UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
-			Context.raw.nodePreviewDirty = true;
+			UIBase.hwnds[tab_area_t.SIDEBAR0].redraws = 2;
+			Context.raw.node_preview_dirty = true;
 			///end
 
-			UINodes.recompileMatFinal = false;
+			UINodes.recompile_mat_final = false;
 		}
 
-		let nodes = UINodes.getNodes();
-		if (nodes.nodesSelectedId.length > 0 && nodes.nodesSelectedId[0] != UINodes.lastNodeSelectedId) {
-			UINodes.lastNodeSelectedId = nodes.nodesSelectedId[0];
+		let nodes: zui_nodes_t = UINodes.get_nodes();
+		if (nodes.nodesSelectedId.length > 0 && nodes.nodesSelectedId[0] != UINodes.last_node_selected_id) {
+			UINodes.last_node_selected_id = nodes.nodesSelectedId[0];
 			///if (is_paint || is_sculpt)
-			Context.raw.nodePreviewDirty = true;
+			Context.raw.node_preview_dirty = true;
 			///end
 
 			///if is_lab
 			Context.raw.ddirty = 2; // Show selected node texture in viewport
-			UIHeader.headerHandle.redraws = 2;
+			UIHeader.header_handle.redraws = 2;
 			///end
 
-			Context.raw.nodePreviewSocket = 0;
+			Context.raw.node_preview_socket = 0;
 		}
 
 		// Remove dragged link when mouse is released out of the node viewport
-		let c = UINodes.getCanvas(true);
-		if (UINodes.releaseLink && nodes.linkDragId != -1) {
+		let c: zui_node_canvas_t = UINodes.get_canvas(true);
+		if (UINodes.release_link && nodes.linkDragId != -1) {
 			array_remove(c.links, zui_get_link(c.links, nodes.linkDragId));
 			nodes.linkDragId = -1;
 		}
-		UINodes.releaseLink = UINodes.ui.input_released;
+		UINodes.release_link = UINodes.ui.input_released;
 
 		if (!UINodes.show || sys_width() == 0 || sys_height() == 0) return;
 
-		UINodes.ui.input_enabled = Base.uiEnabled;
+		UINodes.ui.input_enabled = Base.ui_enabled;
 
 		g2_end();
 
-		if (UINodes.grid == null) UINodes.drawGrid();
+		if (UINodes.grid == null) UINodes.draw_grid();
 
 		///if (is_paint || is_sculpt)
-		if (Config.raw.node_preview && Context.raw.nodePreviewDirty) {
-			UINodes.makeNodePreview();
+		if (Config.raw.node_preview && Context.raw.node_preview_dirty) {
+			UINodes.make_node_preview();
 		}
 		///end
 
@@ -672,10 +672,10 @@ class UINodes {
 		zui_begin(UINodes.ui);
 
 		// Make window
-		UINodes.ww = Config.raw.layout[LayoutSize.LayoutNodesW];
+		UINodes.ww = Config.raw.layout[layout_size_t.NODES_W];
 
 		///if (is_paint || is_sculpt)
-		UINodes.wx = Math.floor(app_w()) + UIToolbar.toolbarw;
+		UINodes.wx = Math.floor(app_w()) + UIToolbar.toolbar_w;
 		///end
 		///if is_lab
 		UINodes.wx = Math.floor(app_w());
@@ -685,19 +685,19 @@ class UINodes {
 
 		///if (is_paint || is_sculpt)
 		if (!UIBase.show) {
-			UINodes.ww += Config.raw.layout[LayoutSize.LayoutSidebarW] + UIToolbar.toolbarw;
-			UINodes.wx -= UIToolbar.toolbarw;
+			UINodes.ww += Config.raw.layout[layout_size_t.SIDEBAR_W] + UIToolbar.toolbar_w;
+			UINodes.wx -= UIToolbar.toolbar_w;
 		}
 		///end
 
-		let ew = Math.floor(zui_ELEMENT_W(UINodes.ui) * 0.7);
+		let ew: i32 = Math.floor(zui_ELEMENT_W(UINodes.ui) * 0.7);
 		UINodes.wh = app_h() + UIHeader.headerh;
-		if (Config.raw.layout[LayoutSize.LayoutHeader] == 1) UINodes.wh += UIHeader.headerh;
+		if (Config.raw.layout[layout_size_t.HEADER] == 1) UINodes.wh += UIHeader.headerh;
 
 		if (UIView2D.show) {
-			UINodes.wh = Config.raw.layout[LayoutSize.LayoutNodesH];
-			UINodes.wy = app_h() - Config.raw.layout[LayoutSize.LayoutNodesH] + UIHeader.headerh;
-			if (Config.raw.layout[LayoutSize.LayoutHeader] == 1) UINodes.wy += UIHeader.headerh;
+			UINodes.wh = Config.raw.layout[layout_size_t.NODES_H];
+			UINodes.wy = app_h() - Config.raw.layout[layout_size_t.NODES_H] + UIHeader.headerh;
+			if (Config.raw.layout[layout_size_t.HEADER] == 1) UINodes.wy += UIHeader.headerh;
 			if (!UIBase.show) {
 				UINodes.wy -= UIHeader.headerh * 2;
 			}
@@ -709,42 +709,42 @@ class UINodes {
 
 			// Grid
 			g2_set_color(0xffffffff);
-			let step = 100 * zui_SCALE(UINodes.ui);
+			let step: f32 = 100 * zui_SCALE(UINodes.ui);
 			g2_draw_image(UINodes.grid, (nodes.panX * zui_nodes_SCALE()) % step - step, (nodes.panY * zui_nodes_SCALE()) % step - step);
 
 			// Undo
 			if (UINodes.ui.input_started || UINodes.ui.is_key_pressed) {
-				UINodes.lastCanvas = JSON.parse(JSON.stringify(UINodes.getCanvas(true)));
+				UINodes.last_canvas = JSON.parse(JSON.stringify(UINodes.get_canvas(true)));
 			}
 
 			// Nodes
-			let _inputEnabled = UINodes.ui.input_enabled;
-			UINodes.ui.input_enabled = _inputEnabled && !UINodes.showMenu;
+			let _inputEnabled: bool = UINodes.ui.input_enabled;
+			UINodes.ui.input_enabled = _inputEnabled && !UINodes.show_menu;
 			///if (is_paint || is_sculpt)
-			UINodes.ui.window_border_right = Config.raw.layout[LayoutSize.LayoutSidebarW];
+			UINodes.ui.window_border_right = Config.raw.layout[layout_size_t.SIDEBAR_W];
 			///end
 			UINodes.ui.window_border_top = UIHeader.headerh * 2;
-			UINodes.ui.window_border_bottom = Config.raw.layout[LayoutSize.LayoutStatusH];
+			UINodes.ui.window_border_bottom = Config.raw.layout[layout_size_t.STATUS_H];
 			zui_node_canvas(nodes, UINodes.ui, c);
 			UINodes.ui.input_enabled = _inputEnabled;
 
 			if (nodes.colorPickerCallback != null) {
-				Context.raw.colorPickerPreviousTool = Context.raw.tool;
-				Context.selectTool(WorkspaceTool.ToolPicker);
-				let tmp = nodes.colorPickerCallback;
-				Context.raw.colorPickerCallback = (color: TSwatchColor) => {
+				Context.raw.color_picker_previous_tool = Context.raw.tool;
+				Context.select_tool(workspace_tool_t.PICKER);
+				let tmp: (col: i32)=>void = nodes.colorPickerCallback;
+				Context.raw.color_picker_callback = (color: swatch_color_t) => {
 					tmp(color.base);
 					UINodes.hwnd.redraws = 2;
 
 					///if (is_paint || is_sculpt)
-					let material_live = Config.raw.material_live;
+					let material_live: bool = Config.raw.material_live;
 					///end
 					///if is_lab
-					let material_live = true;
+					let material_live: bool = true;
 					///end
 
 					if (material_live) {
-						UINodes.canvasChanged();
+						UINodes.canvas_changed();
 					}
 				};
 				nodes.colorPickerCallback = null;
@@ -753,19 +753,19 @@ class UINodes {
 			// Remove nodes with unknown id for this canvas type
 			if (zui_is_paste) {
 				///if (is_paint || is_sculpt)
-				let nodeList = UINodes.canvasType == CanvasType.CanvasMaterial ? NodesMaterial.list : NodesBrush.list;
+				let nodeList: zui_node_t[][] = UINodes.canvas_type == canvas_type_t.MATERIAL ? NodesMaterial.list : NodesBrush.list;
 				///end
 				///if is_lab
-				let nodeList = NodesBrush.list;
+				let nodeList: zui_node_t[][] = NodesBrush.list;
 				///end
 
-				let i = 0;
+				let i: i32 = 0;
 				while (i++ < c.nodes.length) {
-					let canvasNode = c.nodes[i - 1];
+					let canvasNode: zui_node_t = c.nodes[i - 1];
 					if (zui_exclude_remove.indexOf(canvasNode.type) >= 0) {
 						continue;
 					}
-					let found = false;
+					let found: bool = false;
 					for (let list of nodeList) {
 						for (let listNode of list) {
 							if (canvasNode.type == listNode.type) {
@@ -775,7 +775,7 @@ class UINodes {
 						}
 						if (found) break;
 					}
-					if (canvasNode.type == "GROUP" && !UINodes.canPlaceGroup(canvasNode.name)) {
+					if (canvasNode.type == "GROUP" && !UINodes.can_place_group(canvasNode.name)) {
 						found = false;
 					}
 					if (!found) {
@@ -786,7 +786,7 @@ class UINodes {
 				}
 			}
 
-			if (UINodes.isNodeMenuOperation) {
+			if (UINodes.is_node_menu_op) {
 				zui_set_is_copy(false);
 				zui_set_is_cut(false);
 				zui_set_is_paste(false);
@@ -796,28 +796,28 @@ class UINodes {
 			// Recompile material on change
 			if (UINodes.ui.changed) {
 				///if (is_paint || is_sculpt)
-				UINodes.recompileMat = (UINodes.ui.input_dx != 0 || UINodes.ui.input_dy != 0 || !UINodes.uichangedLast) && Config.raw.material_live; // Instant preview
+				UINodes.recompile_mat = (UINodes.ui.input_dx != 0 || UINodes.ui.input_dy != 0 || !UINodes.uichanged_last) && Config.raw.material_live; // Instant preview
 				///end
 				///if is_lab
-				UINodes.recompileMat = (UINodes.ui.input_dx != 0 || UINodes.ui.input_dy != 0 || !UINodes.uichangedLast); // Instant preview
+				UINodes.recompile_mat = (UINodes.ui.input_dx != 0 || UINodes.ui.input_dy != 0 || !UINodes.uichanged_last); // Instant preview
 				///end
 			}
-			else if (UINodes.uichangedLast) {
-				UINodes.canvasChanged();
-				UINodes.pushUndo(UINodes.lastCanvas);
+			else if (UINodes.uichanged_last) {
+				UINodes.canvas_changed();
+				UINodes.push_undo(UINodes.last_canvas);
 			}
-			UINodes.uichangedLast = UINodes.ui.changed;
+			UINodes.uichanged_last = UINodes.ui.changed;
 
 			// Node previews
 			if (Config.raw.node_preview && nodes.nodesSelectedId.length > 0) {
 				let img: image_t = null;
-				let sel = zui_get_node(c.nodes, nodes.nodesSelectedId[0]);
+				let sel: zui_node_t = zui_get_node(c.nodes, nodes.nodesSelectedId[0]);
 
 				///if (is_paint || is_sculpt)
 
-				let singleChannel = sel.type == "LAYER_MASK";
+				let singleChannel: bool = sel.type == "LAYER_MASK";
 				if (sel.type == "LAYER" || sel.type == "LAYER_MASK") {
-					let id = sel.buttons[0].default_value;
+					let id: any = sel.buttons[0].default_value;
 					if (id < Project.layers.length) {
 						///if is_paint
 						img = Project.layers[id].texpaint_preview;
@@ -825,7 +825,7 @@ class UINodes {
 					}
 				}
 				else if (sel.type == "MATERIAL") {
-					let id = sel.buttons[0].default_value;
+					let id: any = sel.buttons[0].default_value;
 					if (id < Project.materials.length) {
 						img = Project.materials[id].image;
 					}
@@ -836,29 +836,29 @@ class UINodes {
 				else if (sel.type == "BrushOutputNode") {
 					img = Context.raw.brush.image;
 				}
-				else if (UINodes.canvasType == CanvasType.CanvasMaterial) {
-					img = Context.raw.nodePreview;
+				else if (UINodes.canvas_type == canvas_type_t.MATERIAL) {
+					img = Context.raw.node_preview;
 				}
 
 				///else
 
-				let brushNode = ParserLogic.getLogicNode(sel);
+				let brushNode: LogicNode = ParserLogic.get_logic_node(sel);
 				if (brushNode != null) {
-					img = brushNode.getCachedImage();
+					img = brushNode.get_cached_image();
 				}
 
 				///end
 
 				if (img != null) {
-					let tw = 128 * zui_SCALE(UINodes.ui);
-					let th = tw * (img.height / img.width);
-					let tx = UINodes.ww - tw - 8 * zui_SCALE(UINodes.ui);
-					let ty = UINodes.wh - th - 8 * zui_SCALE(UINodes.ui);
+					let tw: f32 = 128 * zui_SCALE(UINodes.ui);
+					let th: f32 = tw * (img.height / img.width);
+					let tx: f32 = UINodes.ww - tw - 8 * zui_SCALE(UINodes.ui);
+					let ty: f32 = UINodes.wh - th - 8 * zui_SCALE(UINodes.ui);
 
 					///if krom_opengl
-					let invertY = sel.type == "MATERIAL";
+					let invertY: bool = sel.type == "MATERIAL";
 					///else
-					let invertY = false;
+					let invertY: bool = false;
 					///end
 
 					///if (is_paint || is_sculpt)
@@ -867,7 +867,7 @@ class UINodes {
 						///if krom_opengl
 						krom_g4_set_pipeline(UIView2D.pipe.pipeline_);
 						///end
-						krom_g4_set_int(UIView2D.channelLocation, 1);
+						krom_g4_set_int(UIView2D.channel_location, 1);
 					}
 					///end
 
@@ -889,34 +889,34 @@ class UINodes {
 			g2_fill_rect(0, zui_ELEMENT_H(UINodes.ui), UINodes.ww, zui_ELEMENT_H(UINodes.ui) + zui_ELEMENT_OFFSET(UINodes.ui) * 2);
 			g2_set_color(0xffffffff);
 
-			let startY = zui_ELEMENT_H(UINodes.ui) + zui_ELEMENT_OFFSET(UINodes.ui);
+			let startY: i32 = zui_ELEMENT_H(UINodes.ui) + zui_ELEMENT_OFFSET(UINodes.ui);
 			UINodes.ui._x = 0;
 			UINodes.ui._y = 2 + startY;
 			UINodes.ui._w = ew;
 
 			///if (is_paint || is_sculpt)
 			// Editable canvas name
-			let h = zui_handle("uinodes_11");
+			let h: zui_handle_t = zui_handle("uinodes_11");
 			h.text = c.name;
 			UINodes.ui._w = Math.floor(Math.min(g2_font_width(UINodes.ui.font, UINodes.ui.font_size, h.text) + 15 * zui_SCALE(UINodes.ui), 100 * zui_SCALE(UINodes.ui)));
-			let newName = zui_text_input(h, "");
+			let newName: string = zui_text_input(h, "");
 			UINodes.ui._x += UINodes.ui._w + 3;
 			UINodes.ui._y = 2 + startY;
 			UINodes.ui._w = ew;
 
 			if (h.changed) { // Check whether renaming is possible and update group links
-				if (UINodes.groupStack.length > 0) {
-					let canRename = true;
-					for (let m of Project.materialGroups) {
+				if (UINodes.group_stack.length > 0) {
+					let canRename: bool = true;
+					for (let m of Project.material_groups) {
 						if (m.canvas.name == newName) canRename = false; // Name already used
 					}
 
 					if (canRename) {
-						let oldName = c.name;
+						let oldName: string = c.name;
 						c.name = newName;
 						let canvases: zui_node_canvas_t[] = [];
 						for (let m of Project.materials) canvases.push(m.canvas);
-						for (let m of Project.materialGroups) canvases.push(m.canvas);
+						for (let m of Project.material_groups) canvases.push(m.canvas);
 						for (let canvas of canvases) {
 							for (let n of canvas.nodes) {
 								if (n.type == "GROUP" && n.name == oldName) {
@@ -937,47 +937,47 @@ class UINodes {
 			UINodesExt.drawButtons(ew, startY);
 			///end
 
-			let _BUTTON_COL = UINodes.ui.t.BUTTON_COL;
+			let _BUTTON_COL: i32 = UINodes.ui.t.BUTTON_COL;
 			UINodes.ui.t.BUTTON_COL = UINodes.ui.t.SEPARATOR_COL;
 
 			///if (is_paint || is_sculpt)
-			let cats = UINodes.canvasType == CanvasType.CanvasMaterial ? NodesMaterial.categories : NodesBrush.categories;
+			let cats: string[] = UINodes.canvas_type == canvas_type_t.MATERIAL ? NodesMaterial.categories : NodesBrush.categories;
 			///end
 			///if is_lab
-			let cats = NodesBrush.categories;
+			let cats: string[] = NodesBrush.categories;
 			///end
 
-			for (let i = 0; i < cats.length; ++i) {
-				if ((zui_menu_button(tr(cats[i]))) || (UINodes.ui.is_hovered && UINodes.showMenu)) {
-					UINodes.showMenu = true;
-					UINodes.menuCategory = i;
-					UINodes.popupX = UINodes.wx + UINodes.ui._x;
-					UINodes.popupY = UINodes.wy + UINodes.ui._y;
+			for (let i: i32 = 0; i < cats.length; ++i) {
+				if ((zui_menu_button(tr(cats[i]))) || (UINodes.ui.is_hovered && UINodes.show_menu)) {
+					UINodes.show_menu = true;
+					UINodes.menu_category = i;
+					UINodes.popup_x = UINodes.wx + UINodes.ui._x;
+					UINodes.popup_y = UINodes.wy + UINodes.ui._y;
 					if (Config.raw.touch_ui) {
-						UINodes.showMenuFirst = true;
-						let menuw = Math.floor(ew * 2.3);
-						UINodes.popupX -= menuw / 2;
-						UINodes.popupX += UINodes.ui._w / 2;
+						UINodes.show_menu_first = true;
+						let menuw: i32 = Math.floor(ew * 2.3);
+						UINodes.popup_x -= menuw / 2;
+						UINodes.popup_x += UINodes.ui._w / 2;
 					}
-					UIMenu.menuCategoryW = UINodes.ui._w;
-					UIMenu.menuCategoryH = Math.floor(zui_MENUBAR_H(UINodes.ui));
+					UIMenu.menu_category_w = UINodes.ui._w;
+					UIMenu.menu_category_h = Math.floor(zui_MENUBAR_H(UINodes.ui));
 				}
 				UINodes.ui._x += UINodes.ui._w + 3;
 				UINodes.ui._y = 2 + startY;
 			}
 
 			if (Config.raw.touch_ui) {
-				let _w = UINodes.ui._w;
+				let _w: i32 = UINodes.ui._w;
 				UINodes.ui._w = Math.floor(36 * zui_SCALE(UINodes.ui));
 				UINodes.ui._y = 4 * zui_SCALE(UINodes.ui) + startY;
-				if (UIMenubar.iconButton(UINodes.ui, 2, 3)) {
-					UINodes.nodeSearch(Math.floor(UINodes.ui._window_x + UINodes.ui._x), Math.floor(UINodes.ui._window_y + UINodes.ui._y));
+				if (UIMenubar.icon_button(UINodes.ui, 2, 3)) {
+					UINodes.node_search(Math.floor(UINodes.ui._window_x + UINodes.ui._x), Math.floor(UINodes.ui._window_y + UINodes.ui._y));
 				}
 				UINodes.ui._w = _w;
 			}
 			else {
 				if (zui_menu_button(tr("Search"))) {
-					UINodes.nodeSearch(Math.floor(UINodes.ui._window_x + UINodes.ui._x), Math.floor(UINodes.ui._window_y + UINodes.ui._y));
+					UINodes.node_search(Math.floor(UINodes.ui._window_x + UINodes.ui._x), Math.floor(UINodes.ui._window_y + UINodes.ui._y));
 				}
 			}
 			if (UINodes.ui.is_hovered) {
@@ -989,52 +989,52 @@ class UINodes {
 			UINodes.ui.t.BUTTON_COL = _BUTTON_COL;
 
 			// Close node group
-			if (UINodes.groupStack.length > 0 && zui_menu_button(tr("Close"))) {
-				UINodes.groupStack.pop();
+			if (UINodes.group_stack.length > 0 && zui_menu_button(tr("Close"))) {
+				UINodes.group_stack.pop();
 			}
 		}
 
-		zui_end(!UINodes.showMenu);
+		zui_end(!UINodes.show_menu);
 
 		g2_begin(null);
 
-		if (UINodes.showMenu) {
+		if (UINodes.show_menu) {
 			///if (is_paint || is_sculpt)
-			let list = UINodes.canvasType == CanvasType.CanvasMaterial ? NodesMaterial.list : NodesBrush.list;
+			let list:zui_node_t[][] = UINodes.canvas_type == canvas_type_t.MATERIAL ? NodesMaterial.list : NodesBrush.list;
 			///end
 			///if is_lab
-			let list = NodesBrush.list;
+			let list:zui_node_t[][] = NodesBrush.list;
 			///end
 
-			let numNodes = list[UINodes.menuCategory].length;
+			let numNodes: i32 = list[UINodes.menu_category].length;
 
 			///if (is_paint || is_sculpt)
-			let isGroupCategory = UINodes.canvasType == CanvasType.CanvasMaterial && NodesMaterial.categories[UINodes.menuCategory] == "Group";
+			let isGroupCategory: bool = UINodes.canvas_type == canvas_type_t.MATERIAL && NodesMaterial.categories[UINodes.menu_category] == "Group";
 			///end
 			///if is_lab
-			let isGroupCategory = NodesMaterial.categories[UINodes.menuCategory] == "Group";
+			let isGroupCategory: bool = NodesMaterial.categories[UINodes.menu_category] == "Group";
 			///end
 
-			if (isGroupCategory) numNodes += Project.materialGroups.length;
+			if (isGroupCategory) numNodes += Project.material_groups.length;
 
-			let py = UINodes.popupY;
-			let menuw = Math.floor(ew * 2.3);
-			zui_begin_region(UINodes.ui, Math.floor(UINodes.popupX), Math.floor(py), menuw);
-			let _BUTTON_COL = UINodes.ui.t.BUTTON_COL;
+			let py: i32 = UINodes.popup_y;
+			let menuw: i32 = Math.floor(ew * 2.3);
+			zui_begin_region(UINodes.ui, Math.floor(UINodes.popup_x), Math.floor(py), menuw);
+			let _BUTTON_COL: i32 = UINodes.ui.t.BUTTON_COL;
 			UINodes.ui.t.BUTTON_COL = UINodes.ui.t.SEPARATOR_COL;
-			let _ELEMENT_OFFSET = UINodes.ui.t.ELEMENT_OFFSET;
+			let _ELEMENT_OFFSET: i32 = UINodes.ui.t.ELEMENT_OFFSET;
 			UINodes.ui.t.ELEMENT_OFFSET = 0;
-			let _ELEMENT_H = UINodes.ui.t.ELEMENT_H;
+			let _ELEMENT_H: i32 = UINodes.ui.t.ELEMENT_H;
 			UINodes.ui.t.ELEMENT_H = Config.raw.touch_ui ? (28 + 2) : 28;
 
-			UIMenu.menuStart(UINodes.ui);
+			UIMenu.menu_start(UINodes.ui);
 
-			for (let n of list[UINodes.menuCategory]) {
-				if (UIMenu.menuButton(UINodes.ui, tr(n.name))) {
-					UINodes.pushUndo();
-					let canvas = UINodes.getCanvas(true);
-					let nodes = UINodes.getNodes();
-					let node = UINodes.makeNode(n, nodes, canvas);
+			for (let n of list[UINodes.menu_category]) {
+				if (UIMenu.menu_button(UINodes.ui, tr(n.name))) {
+					UINodes.push_undo();
+					let canvas: zui_node_canvas_t = UINodes.get_canvas(true);
+					let nodes: zui_nodes_t = UINodes.get_nodes();
+					let node: zui_node_t = UINodes.make_node(n, nodes, canvas);
 					canvas.nodes.push(node);
 					nodes.nodesSelectedId = [node.id];
 					nodes.nodesDrag = true;
@@ -1049,27 +1049,27 @@ class UINodes {
 				}
 			}
 			if (isGroupCategory) {
-				for (let g of Project.materialGroups) {
+				for (let g of Project.material_groups) {
 					zui_fill(0, 1, UINodes.ui._w / zui_SCALE(UINodes.ui), UINodes.ui.t.BUTTON_H + 2, UINodes.ui.t.ACCENT_SELECT_COL);
 					zui_fill(1, 1, UINodes.ui._w / zui_SCALE(UINodes.ui) - 2, UINodes.ui.t.BUTTON_H + 1, UINodes.ui.t.SEPARATOR_COL);
-					UINodes.ui.enabled = UINodes.canPlaceGroup(g.canvas.name);
-					UIMenu.menuFill(UINodes.ui);
+					UINodes.ui.enabled = UINodes.can_place_group(g.canvas.name);
+					UIMenu.menu_fill(UINodes.ui);
 					zui_row([5 / 6, 1 / 6]);
-					if (zui_button(Config.buttonSpacing + g.canvas.name, zui_align_t.LEFT)) {
-						UINodes.pushUndo();
-						let canvas = UINodes.getCanvas(true);
-						let nodes = UINodes.getNodes();
-						let node = UINodes.makeGroupNode(g.canvas, nodes, canvas);
+					if (zui_button(Config.button_spacing + g.canvas.name, zui_align_t.LEFT)) {
+						UINodes.push_undo();
+						let canvas: zui_node_canvas_t = UINodes.get_canvas(true);
+						let nodes: zui_nodes_t = UINodes.get_nodes();
+						let node: zui_node_t = UINodes.make_group_node(g.canvas, nodes, canvas);
 						canvas.nodes.push(node);
 						nodes.nodesSelectedId = [node.id];
 						nodes.nodesDrag = true;
 					}
 
 					///if (is_paint || is_sculpt)
-					UINodes.ui.enabled = !Project.isMaterialGroupInUse(g);
+					UINodes.ui.enabled = !Project.is_material_group_in_use(g);
 					if (zui_button("x", zui_align_t.CENTER)) {
-						History.deleteMaterialGroup(g);
-						array_remove(Project.materialGroups, g);
+						History.delete_material_group(g);
+						array_remove(Project.material_groups, g);
 					}
 					///end
 
@@ -1077,8 +1077,8 @@ class UINodes {
 				}
 			}
 
-			UINodes.hideMenu = UINodes.ui.combo_selected_handle_ptr == 0 && !UINodes.showMenuFirst && (UINodes.ui.changed || UINodes.ui.input_released || UINodes.ui.input_released_r || UINodes.ui.is_escape_down);
-			UINodes.showMenuFirst = false;
+			UINodes.hide_menu = UINodes.ui.combo_selected_handle_ptr == 0 && !UINodes.show_menu_first && (UINodes.ui.changed || UINodes.ui.input_released || UINodes.ui.input_released_r || UINodes.ui.is_escape_down);
+			UINodes.show_menu_first = false;
 
 			UINodes.ui.t.BUTTON_COL = _BUTTON_COL;
 			UINodes.ui.t.ELEMENT_OFFSET = _ELEMENT_OFFSET;
@@ -1086,20 +1086,20 @@ class UINodes {
 			zui_end_region();
 		}
 
-		if (UINodes.hideMenu) {
-			UINodes.showMenu = false;
-			UINodes.showMenuFirst = true;
+		if (UINodes.hide_menu) {
+			UINodes.show_menu = false;
+			UINodes.show_menu_first = true;
 		}
 	}
 
-	static containsNodeGroupRecursive = (group: TNodeGroup, groupName: string): bool => {
+	static contains_node_group_recursive = (group: node_group_t, groupName: string): bool => {
 		if (group.canvas.name == groupName) {
 			return true;
 		}
 		for (let n of group.canvas.nodes) {
 			if (n.type == "GROUP") {
-				let g = Project.getMaterialGroupByName(n.name);
-				if (g != null && UINodes.containsNodeGroupRecursive(g, groupName)) {
+				let g: node_group_t = Project.get_material_group_by_name(n.name);
+				if (g != null && UINodes.contains_node_group_recursive(g, groupName)) {
 					return true;
 				}
 			}
@@ -1107,17 +1107,17 @@ class UINodes {
 		return false;
 	}
 
-	static canPlaceGroup = (groupName: string): bool => {
+	static can_place_group = (groupName: string): bool => {
 		// Prevent Recursive node groups
 		// The group to place must not contain the current group or a group that contains the current group
-		if (UINodes.groupStack.length > 0) {
-			for (let g of UINodes.groupStack) {
-				if (UINodes.containsNodeGroupRecursive(Project.getMaterialGroupByName(groupName), g.canvas.name)) return false;
+		if (UINodes.group_stack.length > 0) {
+			for (let g of UINodes.group_stack) {
+				if (UINodes.contains_node_group_recursive(Project.get_material_group_by_name(groupName), g.canvas.name)) return false;
 			}
 		}
 		// Group was deleted / renamed
-		let groupExists = false;
-		for (let group of Project.materialGroups) {
+		let groupExists: bool = false;
+		for (let group of Project.material_groups) {
 			if (groupName == group.canvas.name) {
 				groupExists = true;
 			}
@@ -1126,31 +1126,31 @@ class UINodes {
 		return true;
 	}
 
-	static pushUndo = (lastCanvas: zui_node_canvas_t = null) => {
-		if (lastCanvas == null) lastCanvas = UINodes.getCanvas(true);
-		let canvasGroup = UINodes.groupStack.length > 0 ? Project.materialGroups.indexOf(UINodes.groupStack[UINodes.groupStack.length - 1]) : null;
+	static push_undo = (lastCanvas: zui_node_canvas_t = null) => {
+		if (lastCanvas == null) lastCanvas = UINodes.get_canvas(true);
+		let canvasGroup: i32 = UINodes.group_stack.length > 0 ? Project.material_groups.indexOf(UINodes.group_stack[UINodes.group_stack.length - 1]) : null;
 
 		///if (is_paint || is_sculpt)
-		UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
-		History.editNodes(lastCanvas, UINodes.canvasType, canvasGroup);
+		UIBase.hwnds[tab_area_t.SIDEBAR0].redraws = 2;
+		History.edit_nodes(lastCanvas, UINodes.canvas_type, canvasGroup);
 		///end
 		///if is_lab
-		History.editNodes(lastCanvas, canvasGroup);
+		History.edit_nodes(lastCanvas, canvasGroup);
 		///end
 	}
 
-	static acceptAssetDrag = (index: i32) => {
-		UINodes.pushUndo();
-		let g = UINodes.groupStack.length > 0 ? UINodes.groupStack[UINodes.groupStack.length - 1] : null;
+	static accept_asset_drag = (index: i32) => {
+		UINodes.push_undo();
+		let g: node_group_t = UINodes.group_stack.length > 0 ? UINodes.group_stack[UINodes.group_stack.length - 1] : null;
 		///if (is_paint || is_sculpt)
-		let n = UINodes.canvasType == CanvasType.CanvasMaterial ? NodesMaterial.createNode("TEX_IMAGE", g) : NodesBrush.createNode("TEX_IMAGE");
+		let n: zui_node_t = UINodes.canvas_type == canvas_type_t.MATERIAL ? NodesMaterial.create_node("TEX_IMAGE", g) : NodesBrush.create_node("TEX_IMAGE");
 		///end
 		///if is_lab
-		let n = NodesBrush.createNode("ImageTextureNode");
+		let n: zui_node_t = NodesBrush.create_node("ImageTextureNode");
 		///end
 
 		n.buttons[0].default_value = index;
-		UINodes.getNodes().nodesSelectedId = [n.id];
+		UINodes.get_nodes().nodesSelectedId = [n.id];
 
 		///if is_lab
 		ParserLogic.parse(Project.canvas);
@@ -1158,45 +1158,45 @@ class UINodes {
 	}
 
 	///if (is_paint || is_sculpt)
-	static acceptLayerDrag = (index: i32) => {
-		UINodes.pushUndo();
-		if (SlotLayer.isGroup(Project.layers[index])) return;
-		let g = UINodes.groupStack.length > 0 ? UINodes.groupStack[UINodes.groupStack.length - 1] : null;
-		let n = NodesMaterial.createNode(SlotLayer.isMask(Context.raw.layer) ? "LAYER_MASK" : "LAYER", g);
+	static accept_layer_drag = (index: i32) => {
+		UINodes.push_undo();
+		if (SlotLayer.is_group(Project.layers[index])) return;
+		let g: node_group_t = UINodes.group_stack.length > 0 ? UINodes.group_stack[UINodes.group_stack.length - 1] : null;
+		let n: zui_node_t = NodesMaterial.create_node(SlotLayer.is_mask(Context.raw.layer) ? "LAYER_MASK" : "LAYER", g);
 		n.buttons[0].default_value = index;
-		UINodes.getNodes().nodesSelectedId = [n.id];
+		UINodes.get_nodes().nodesSelectedId = [n.id];
 	}
 
-	static acceptMaterialDrag = (index: i32) => {
-		UINodes.pushUndo();
-		let g = UINodes.groupStack.length > 0 ? UINodes.groupStack[UINodes.groupStack.length - 1] : null;
-		let n = NodesMaterial.createNode("MATERIAL", g);
+	static accept_material_drag = (index: i32) => {
+		UINodes.push_undo();
+		let g: node_group_t = UINodes.group_stack.length > 0 ? UINodes.group_stack[UINodes.group_stack.length - 1] : null;
+		let n: zui_node_t = NodesMaterial.create_node("MATERIAL", g);
 		n.buttons[0].default_value = index;
-		UINodes.getNodes().nodesSelectedId = [n.id];
+		UINodes.get_nodes().nodesSelectedId = [n.id];
 	}
 	///end
 
-	static acceptSwatchDrag = (swatch: TSwatchColor) => {
+	static accept_swatch_drag = (swatch: swatch_color_t) => {
 		///if (is_paint || is_sculpt)
-		UINodes.pushUndo();
-		let g = UINodes.groupStack.length > 0 ? UINodes.groupStack[UINodes.groupStack.length - 1] : null;
-		let n = NodesMaterial.createNode("RGB", g);
+		UINodes.push_undo();
+		let g: node_group_t = UINodes.group_stack.length > 0 ? UINodes.group_stack[UINodes.group_stack.length - 1] : null;
+		let n: zui_node_t = NodesMaterial.create_node("RGB", g);
 		n.outputs[0].default_value = [
 			color_get_rb(swatch.base) / 255,
 			color_get_gb(swatch.base) / 255,
 			color_get_bb(swatch.base) / 255,
 			color_get_ab(swatch.base) / 255
 		];
-		UINodes.getNodes().nodesSelectedId = [n.id];
+		UINodes.get_nodes().nodesSelectedId = [n.id];
 		///end
 	}
 
-	static makeNode = (n: zui_node_t, nodes: zui_nodes_t, canvas: zui_node_canvas_t): zui_node_t => {
+	static make_node = (n: zui_node_t, nodes: zui_nodes_t, canvas: zui_node_canvas_t): zui_node_t => {
 		let node: zui_node_t = JSON.parse(JSON.stringify(n));
 		node.id = zui_get_node_id(canvas.nodes);
-		node.x = UINodes.getNodeX();
-		node.y = UINodes.getNodeY();
-		let count = 0;
+		node.x = UINodes.get_node_x();
+		node.y = UINodes.get_node_y();
+		let count: i32 = 0;
 		for (let soc of node.inputs) {
 			soc.id = zui_get_socket_id(canvas.nodes) + count;
 			soc.node_id = node.id;
@@ -1210,16 +1210,16 @@ class UINodes {
 		return node;
 	}
 
-	static makeGroupNode = (groupCanvas: zui_node_canvas_t, nodes: zui_nodes_t, canvas: zui_node_canvas_t): zui_node_t => {
-		let n = NodesMaterial.list[5][0];
+	static make_group_node = (groupCanvas: zui_node_canvas_t, nodes: zui_nodes_t, canvas: zui_node_canvas_t): zui_node_t => {
+		let n: zui_node_t = NodesMaterial.list[5][0];
 		let node: zui_node_t = JSON.parse(JSON.stringify(n));
 		node.name = groupCanvas.name;
 		node.id = zui_get_node_id(canvas.nodes);
-		node.x = UINodes.getNodeX();
-		node.y = UINodes.getNodeY();
+		node.x = UINodes.get_node_x();
+		node.y = UINodes.get_node_y();
 		let groupInput: zui_node_t = null;
 		let groupOutput: zui_node_t = null;
-		for (let g of Project.materialGroups) {
+		for (let g of Project.material_groups) {
 			if (g.canvas.name == node.name) {
 				for (let n of g.canvas.nodes) {
 					if (n.type == "GROUP_INPUT") groupInput = n;
@@ -1230,23 +1230,23 @@ class UINodes {
 		}
 		if (groupInput != null && groupOutput != null) {
 			for (let soc of groupInput.outputs) {
-				node.inputs.push(NodesMaterial.createSocket(nodes, node, soc.name, soc.type, canvas, soc.min, soc.max, soc.default_value));
+				node.inputs.push(NodesMaterial.create_socket(nodes, node, soc.name, soc.type, canvas, soc.min, soc.max, soc.default_value));
 			}
 			for (let soc of groupOutput.inputs) {
-				node.outputs.push(NodesMaterial.createSocket(nodes, node, soc.name, soc.type, canvas, soc.min, soc.max, soc.default_value));
+				node.outputs.push(NodesMaterial.create_socket(nodes, node, soc.name, soc.type, canvas, soc.min, soc.max, soc.default_value));
 			}
 		}
 		return node;
 	}
 
 	///if (is_paint || is_sculpt)
-	static makeNodePreview = () => {
-		let nodes = Context.raw.material.nodes;
+	static make_node_preview = () => {
+		let nodes: zui_nodes_t = Context.raw.material.nodes;
 		if (nodes.nodesSelectedId.length == 0) return;
 
-		let node = zui_get_node(Context.raw.material.canvas.nodes, nodes.nodesSelectedId[0]);
+		let node: zui_node_t = zui_get_node(Context.raw.material.canvas.nodes, nodes.nodesSelectedId[0]);
 		// if (node == null) return;
-		Context.raw.nodePreviewName = node.name;
+		Context.raw.node_preview_name = node.name;
 
 		if (node.type == "LAYER" ||
 			node.type == "LAYER_MASK" ||
@@ -1255,36 +1255,36 @@ class UINodes {
 
 		if (Context.raw.material.canvas.nodes.indexOf(node) == -1) return;
 
-		if (Context.raw.nodePreview == null) {
-			Context.raw.nodePreview = image_create_render_target(UtilRender.materialPreviewSize, UtilRender.materialPreviewSize);
+		if (Context.raw.node_preview == null) {
+			Context.raw.node_preview = image_create_render_target(UtilRender.material_preview_size, UtilRender.material_preview_size);
 		}
 
-		Context.raw.nodePreviewDirty = false;
+		Context.raw.node_preview_dirty = false;
 		UINodes.hwnd.redraws = 2;
-		UtilRender.makeNodePreview(Context.raw.material.canvas, node, Context.raw.nodePreview);
+		UtilRender.make_node_preview(Context.raw.material.canvas, node, Context.raw.node_preview);
 	}
 	///end
 
-	static hasGroup = (c: zui_node_canvas_t): bool => {
+	static has_group = (c: zui_node_canvas_t): bool => {
 		for (let n of c.nodes) if (n.type == "GROUP") return true;
 		return false;
 	}
 
-	static traverseGroup = (mgroups: zui_node_canvas_t[], c: zui_node_canvas_t) => {
+	static traverse_group = (mgroups: zui_node_canvas_t[], c: zui_node_canvas_t) => {
 		for (let n of c.nodes) {
 			if (n.type == "GROUP") {
-				if (UINodes.getGroup(mgroups, n.name) == null) {
+				if (UINodes.get_group(mgroups, n.name) == null) {
 					let canvases: zui_node_canvas_t[] = [];
-					for (let g of Project.materialGroups) canvases.push(g.canvas);
-					let group = UINodes.getGroup(canvases, n.name);
+					for (let g of Project.material_groups) canvases.push(g.canvas);
+					let group: zui_node_canvas_t = UINodes.get_group(canvases, n.name);
 					mgroups.push(JSON.parse(JSON.stringify(group)));
-					UINodes.traverseGroup(mgroups, group);
+					UINodes.traverse_group(mgroups, group);
 				}
 			}
 		}
 	}
 
-	static getGroup = (canvases: zui_node_canvas_t[], name: string): zui_node_canvas_t => {
+	static get_group = (canvases: zui_node_canvas_t[], name: string): zui_node_canvas_t => {
 		for (let c of canvases) if (c.name == name) return c;
 		return null;
 	}

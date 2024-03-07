@@ -5,10 +5,10 @@ class MakeBrush {
 
 		NodeShader.write(frag, 'float dist = 0.0;');
 
-		if (Context.raw.tool == WorkspaceTool.ToolParticle) return;
+		if (Context.raw.tool == workspace_tool_t.PARTICLE) return;
 
 		let fillLayer = Context.raw.layer.fill_layer != null;
-		let decal = Context.raw.tool == WorkspaceTool.ToolDecal || Context.raw.tool == WorkspaceTool.ToolText;
+		let decal = Context.raw.tool == workspace_tool_t.DECAL || Context.raw.tool == workspace_tool_t.TEXT;
 		if (decal && !fillLayer) NodeShader.write(frag, 'if (decalMask.z > 0.0) {');
 
 		if (Config.raw.brush_3d) {
@@ -25,7 +25,7 @@ class MakeBrush {
 			frag.wposition = true;
 
 			if (Config.raw.brush_angle_reject || Context.raw.xray) {
-				NodeShader.add_function(frag, ShaderFunctions.str_octahedronWrap);
+				NodeShader.add_function(frag, ShaderFunctions.str_octahedron_wrap);
 				NodeShader.add_uniform(frag, 'sampler2D gbuffer0');
 				///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 				NodeShader.write(frag, 'vec2 g0 = textureLod(gbuffer0, inp.xy, 0.0).rg;');
@@ -41,7 +41,7 @@ class MakeBrush {
 				if (Config.raw.brush_angle_reject && !Context.raw.xray) {
 					NodeShader.write(frag, 'if (planeDist < -0.01) discard;');
 					frag.n = true;
-					let angle = Context.raw.brushAngleRejectDot;
+					let angle = Context.raw.brush_angle_reject_dot;
 					NodeShader.write(frag, `if (dot(wn, n) < ${angle}) discard;`);
 				}
 			}
@@ -62,7 +62,7 @@ class MakeBrush {
 			}
 			NodeShader.write(frag, 'vec3 ba = winplast.xyz - winp.xyz;');
 
-			if (Context.raw.brushLazyRadius > 0 && Context.raw.brushLazyStep > 0) {
+			if (Context.raw.brush_lazy_radius > 0 && Context.raw.brush_lazy_step > 0) {
 				// Sphere
 				NodeShader.write(frag, 'dist = distance(wposition, winp.xyz);');
 			}

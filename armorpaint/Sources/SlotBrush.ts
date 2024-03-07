@@ -3,24 +3,24 @@ class SlotBrushRaw {
 	nodes = zui_nodes_create();
 	canvas: zui_node_canvas_t;
 	image: image_t = null; // 200px
-	imageIcon: image_t = null; // 50px
-	previewReady = false;
+	image_icon: image_t = null; // 50px
+	preview_ready = false;
 	id = 0;
 }
 
 class SlotBrush {
-	static defaultCanvas: ArrayBuffer = null;
+	static default_canvas: ArrayBuffer = null;
 
 	static create(c: zui_node_canvas_t = null): SlotBrushRaw {
 		let raw = new SlotBrushRaw();
 		for (let brush of Project.brushes) if (brush.id >= raw.id) raw.id = brush.id + 1;
 
 		if (c == null) {
-			if (SlotBrush.defaultCanvas == null) { // Synchronous
+			if (SlotBrush.default_canvas == null) { // Synchronous
 				let b: ArrayBuffer = data_get_blob("default_brush.arm")
-				SlotBrush.defaultCanvas = b;
+				SlotBrush.default_canvas = b;
 			}
-			raw.canvas = armpack_decode(SlotBrush.defaultCanvas);
+			raw.canvas = armpack_decode(SlotBrush.default_canvas);
 			raw.canvas.name = "Brush " + (raw.id + 1);
 		}
 		else {

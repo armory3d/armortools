@@ -8,32 +8,32 @@ class MakeMaterial {
 	static emisUsed = false;
 	static subsUsed = false;
 
-	static getMOut = (): bool => {
-		for (let n of UINodes.getCanvasMaterial().nodes) if (n.type == "OUTPUT_MATERIAL_PBR") return true;
+	static get_mout = (): bool => {
+		for (let n of UINodes.get_canvas_material().nodes) if (n.type == "OUTPUT_MATERIAL_PBR") return true;
 		return false;
 	}
 
-	static parseMeshMaterial = () => {
+	static parse_mesh_material = () => {
 		let m = Project.materials[0].data;
 
 		for (let c of m._.shader._.contexts) {
 			if (c.name == "mesh") {
 				array_remove(m._.shader.contexts, c);
 				array_remove(m._.shader._.contexts, c);
-				MakeMaterial.deleteContext(c);
+				MakeMaterial.delete_context(c);
 				break;
 			}
 		}
 
-		if (MakeMesh.layerPassCount > 1) {
+		if (MakeMesh.layer_pass_count > 1) {
 			let i = 0;
 			while (i < m._.shader._.contexts.length) {
 				let c = m._.shader._.contexts[i];
-				for (let j = 1; j < MakeMesh.layerPassCount; ++j) {
+				for (let j = 1; j < MakeMesh.layer_pass_count; ++j) {
 					if (c.name == "mesh" + j) {
 						array_remove(m._.shader.contexts, c);
 						array_remove(m._.shader._.contexts, c);
-						MakeMaterial.deleteContext(c);
+						MakeMaterial.delete_context(c);
 						i--;
 						break;
 					}
@@ -44,7 +44,7 @@ class MakeMaterial {
 			i = 0;
 			while (i < m._.contexts.length) {
 				let c = m._.contexts[i];
-				for (let j = 1; j < MakeMesh.layerPassCount; ++j) {
+				for (let j = 1; j < MakeMesh.layer_pass_count; ++j) {
 					if (c.name == "mesh" + j) {
 						array_remove(m.contexts, c);
 						array_remove(m._.contexts, c);
@@ -59,25 +59,25 @@ class MakeMaterial {
 		let con = MakeMesh.run({ name: "Material", canvas: null });
 		let scon: shader_context_t = shader_context_create(con.data);
 		scon._.override_context = {};
-		if (con.frag.sharedSamplers.length > 0) {
-			let sampler = con.frag.sharedSamplers[0];
+		if (con.frag.shared_samplers.length > 0) {
+			let sampler = con.frag.shared_samplers[0];
 			scon._.override_context.shared_sampler = sampler.substr(sampler.lastIndexOf(" ") + 1);
 		}
-		if (!Context.raw.textureFilter) {
+		if (!Context.raw.texture_filter) {
 			scon._.override_context.filter = "point";
 		}
 		m._.shader.contexts.push(scon);
 		m._.shader._.contexts.push(scon);
 
-		for (let i = 1; i < MakeMesh.layerPassCount; ++i) {
+		for (let i = 1; i < MakeMesh.layer_pass_count; ++i) {
 			let con = MakeMesh.run({ name: "Material", canvas: null }, i);
 			let scon: shader_context_t = shader_context_create(con.data);
 			scon._.override_context = {};
-			if (con.frag.sharedSamplers.length > 0) {
-				let sampler = con.frag.sharedSamplers[0];
+			if (con.frag.shared_samplers.length > 0) {
+				let sampler = con.frag.shared_samplers[0];
 				scon._.override_context.shared_sampler = sampler.substr(sampler.lastIndexOf(" ") + 1);
 			}
-			if (!Context.raw.textureFilter) {
+			if (!Context.raw.texture_filter) {
 				scon._.override_context.filter = "point";
 			}
 			m._.shader.contexts.push(scon);
@@ -92,7 +92,7 @@ class MakeMaterial {
 		Context.raw.ddirty = 2;
 
 		///if arm_voxels
-		MakeMaterial.makeVoxel(m);
+		MakeMaterial.make_voxel(m);
 		///end
 
 		///if (krom_direct3d12 || krom_vulkan || krom_metal)
@@ -100,8 +100,8 @@ class MakeMaterial {
 		///end
 	}
 
-	static parseParticleMaterial = () => {
-		let m = Context.raw.particleMaterial;
+	static parse_particle_material = () => {
+		let m = Context.raw.particle_material;
 		let sc: shader_context_t = null;
 		for (let c of m._.shader._.contexts) {
 			if (c.name == "mesh") {
@@ -114,14 +114,14 @@ class MakeMaterial {
 			array_remove(m._.shader._.contexts, sc);
 		}
 		let con = MakeParticle.run({ name: "MaterialParticle", canvas: null });
-		if (sc != null) MakeMaterial.deleteContext(sc);
+		if (sc != null) MakeMaterial.delete_context(sc);
 		sc = shader_context_create(con.data);
 		m._.shader.contexts.push(sc);
 		m._.shader._.contexts.push(sc);
 	}
 
-	static parseMeshPreviewMaterial = (md: material_data_t = null) => {
-		if (!MakeMaterial.getMOut()) return;
+	static parse_mesh_preview_material = (md: material_data_t = null) => {
+		if (!MakeMaterial.get_mout()) return;
 
 		let m = md == null ? Project.materials[0].data : md;
 		let scon: shader_context_t = null;
@@ -137,7 +137,7 @@ class MakeMaterial {
 
 		let mcon: material_context_t = { name: "mesh", bind_textures: [] };
 
-		let sd: TMaterial = { name: "Material", canvas: null };
+		let sd: material_t = { name: "Material", canvas: null };
 		let con = MakeMeshPreview.run(sd, mcon);
 
 		for (let i = 0; i < m._.contexts.length; ++i) {
@@ -147,7 +147,7 @@ class MakeMaterial {
 			}
 		}
 
-		if (scon != null) MakeMaterial.deleteContext(scon);
+		if (scon != null) MakeMaterial.delete_context(scon);
 
 		let compileError = false;
 		let _scon: shader_context_t = shader_context_create(con.data);
@@ -160,7 +160,7 @@ class MakeMaterial {
 	}
 
 	///if arm_voxels
-	static makeVoxel = (m: material_data_t) => {
+	static make_voxel = (m: material_data_t) => {
 		let rebuild = MakeMaterial.heightUsed;
 		if (Config.raw.rp_gi != false && rebuild) {
 			let scon: shader_context_t = null;
@@ -175,13 +175,13 @@ class MakeMaterial {
 	}
 	///end
 
-	static parsePaintMaterial = (bakePreviews = true) => {
-		if (!MakeMaterial.getMOut()) return;
+	static parse_paint_material = (bakePreviews = true) => {
+		if (!MakeMaterial.get_mout()) return;
 
 		if (bakePreviews) {
 			let current = _g2_current;
 			if (current != null) g2_end();
-			MakeMaterial.bakeNodePreviews();
+			MakeMaterial.bake_node_previews();
 			if (current != null) g2_begin(current);
 		}
 
@@ -192,7 +192,7 @@ class MakeMaterial {
 			if (c.name == "paint") {
 				array_remove(m._.shader.contexts, c);
 				array_remove(m._.shader._.contexts, c);
-				if (c != MakeMaterial.defaultScon) MakeMaterial.deleteContext(c);
+				if (c != MakeMaterial.defaultScon) MakeMaterial.delete_context(c);
 				break;
 			}
 		}
@@ -204,7 +204,7 @@ class MakeMaterial {
 			}
 		}
 
-		let sdata: TMaterial = { name: "Material", canvas: UINodes.getCanvasMaterial() };
+		let sdata: material_t = { name: "Material", canvas: UINodes.get_canvas_material() };
 		let tmcon: material_context_t = { name: "paint", bind_textures: [] };
 		let con = MakePaint.run(sdata, tmcon);
 
@@ -227,27 +227,27 @@ class MakeMaterial {
 		if (MakeMaterial.defaultMcon == null) MakeMaterial.defaultMcon = mcon;
 	}
 
-	static bakeNodePreviews = () => {
-		Context.raw.nodePreviewsUsed = [];
-		if (Context.raw.nodePreviews == null) Context.raw.nodePreviews = new Map();
-		MakeMaterial.traverseNodes(UINodes.getCanvasMaterial().nodes, null, []);
-		for (let key of Context.raw.nodePreviews.keys()) {
-			if (Context.raw.nodePreviewsUsed.indexOf(key) == -1) {
-				let image = Context.raw.nodePreviews.get(key);
-				Base.notifyOnNextFrame(function() { image_unload(image); });
-				Context.raw.nodePreviews.delete(key);
+	static bake_node_previews = () => {
+		Context.raw.node_previews_used = [];
+		if (Context.raw.node_previews == null) Context.raw.node_previews = new Map();
+		MakeMaterial.traverse_nodes(UINodes.get_canvas_material().nodes, null, []);
+		for (let key of Context.raw.node_previews.keys()) {
+			if (Context.raw.node_previews_used.indexOf(key) == -1) {
+				let image = Context.raw.node_previews.get(key);
+				Base.notify_on_next_frame(function() { image_unload(image); });
+				Context.raw.node_previews.delete(key);
 			}
 		}
 	}
 
-	static traverseNodes = (nodes: zui_node_t[], group: zui_node_canvas_t, parents: zui_node_t[]) => {
+	static traverse_nodes = (nodes: zui_node_t[], group: zui_node_canvas_t, parents: zui_node_t[]) => {
 		for (let node of nodes) {
-			MakeMaterial.bakeNodePreview(node, group, parents);
+			MakeMaterial.bake_node_preview(node, group, parents);
 			if (node.type == "GROUP") {
-				for (let g of Project.materialGroups) {
+				for (let g of Project.material_groups) {
 					if (g.canvas.name == node.name) {
 						parents.push(node);
-						MakeMaterial.traverseNodes(g.canvas.nodes, g.canvas, parents);
+						MakeMaterial.traverse_nodes(g.canvas.nodes, g.canvas, parents);
 						parents.pop();
 						break;
 					}
@@ -256,49 +256,49 @@ class MakeMaterial {
 		}
 	}
 
-	static bakeNodePreview = (node: zui_node_t, group: zui_node_canvas_t, parents: zui_node_t[]) => {
+	static bake_node_preview = (node: zui_node_t, group: zui_node_canvas_t, parents: zui_node_t[]) => {
 		if (node.type == "BLUR") {
 			let id = ParserMaterial.node_name(node, parents);
-			let image = Context.raw.nodePreviews.get(id);
-			Context.raw.nodePreviewsUsed.push(id);
-			let resX = Math.floor(Config.getTextureResX() / 4);
-			let resY = Math.floor(Config.getTextureResY() / 4);
+			let image = Context.raw.node_previews.get(id);
+			Context.raw.node_previews_used.push(id);
+			let resX = Math.floor(Config.get_texture_res_x() / 4);
+			let resY = Math.floor(Config.get_texture_res_y() / 4);
 			if (image == null || image.width != resX || image.height != resY) {
 				if (image != null) image_unload(image);
 				image = image_create_render_target(resX, resY);
-				Context.raw.nodePreviews.set(id, image);
+				Context.raw.node_previews.set(id, image);
 			}
 
 			ParserMaterial.blur_passthrough = true;
-			UtilRender.makeNodePreview(UINodes.getCanvasMaterial(), node, image, group, parents);
+			UtilRender.make_node_preview(UINodes.get_canvas_material(), node, image, group, parents);
 			ParserMaterial.blur_passthrough = false;
 		}
 		else if (node.type == "DIRECT_WARP") {
 			let id = ParserMaterial.node_name(node, parents);
-			let image = Context.raw.nodePreviews.get(id);
-			Context.raw.nodePreviewsUsed.push(id);
-			let resX = Math.floor(Config.getTextureResX());
-			let resY = Math.floor(Config.getTextureResY());
+			let image = Context.raw.node_previews.get(id);
+			Context.raw.node_previews_used.push(id);
+			let resX = Math.floor(Config.get_texture_res_x());
+			let resY = Math.floor(Config.get_texture_res_y());
 			if (image == null || image.width != resX || image.height != resY) {
 				if (image != null) image_unload(image);
 				image = image_create_render_target(resX, resY);
-				Context.raw.nodePreviews.set(id, image);
+				Context.raw.node_previews.set(id, image);
 			}
 
 			ParserMaterial.warp_passthrough = true;
-			UtilRender.makeNodePreview(UINodes.getCanvasMaterial(), node, image, group, parents);
+			UtilRender.make_node_preview(UINodes.get_canvas_material(), node, image, group, parents);
 			ParserMaterial.warp_passthrough = false;
 		}
 		else if (node.type == "BAKE_CURVATURE") {
 			let id = ParserMaterial.node_name(node, parents);
-			let image = Context.raw.nodePreviews.get(id);
-			Context.raw.nodePreviewsUsed.push(id);
-			let resX = Math.floor(Config.getTextureResX());
-			let resY = Math.floor(Config.getTextureResY());
+			let image = Context.raw.node_previews.get(id);
+			Context.raw.node_previews_used.push(id);
+			let resX = Math.floor(Config.get_texture_res_x());
+			let resY = Math.floor(Config.get_texture_res_y());
 			if (image == null || image.width != resX || image.height != resY) {
 				if (image != null) image_unload(image);
 				image = image_create_render_target(resX, resY, tex_format_t.R8);
-				Context.raw.nodePreviews.set(id, image);
+				Context.raw.node_previews.set(id, image);
 			}
 
 			if (RenderPathPaint.liveLayer == null) {
@@ -307,31 +307,31 @@ class MakeMaterial {
 
 			let _space = UIHeader.worktab.position;
 			let _tool = Context.raw.tool;
-			let _bakeType = Context.raw.bakeType;
-			UIHeader.worktab.position = SpaceType.Space3D;
-			Context.raw.tool = WorkspaceTool.ToolBake;
-			Context.raw.bakeType = BakeType.BakeCurvature;
+			let _bakeType = Context.raw.bake_type;
+			UIHeader.worktab.position = space_type_t.SPACE3D;
+			Context.raw.tool = workspace_tool_t.BAKE;
+			Context.raw.bake_type = bake_type_t.CURVATURE;
 
 			ParserMaterial.bake_passthrough = true;
 			ParserMaterial.start_node = node;
 			ParserMaterial.start_group = group;
 			ParserMaterial.start_parents = parents;
-			MakeMaterial.parsePaintMaterial(false);
+			MakeMaterial.parse_paint_material(false);
 			ParserMaterial.bake_passthrough = false;
 			ParserMaterial.start_node = null;
 			ParserMaterial.start_group = null;
 			ParserMaterial.start_parents = null;
 			Context.raw.pdirty = 1;
-			RenderPathPaint.useLiveLayer(true);
-			RenderPathPaint.commandsPaint(false);
+			RenderPathPaint.use_live_layer(true);
+			RenderPathPaint.commands_paint(false);
 			RenderPathPaint.dilate(true, false);
-			RenderPathPaint.useLiveLayer(false);
+			RenderPathPaint.use_live_layer(false);
 			Context.raw.pdirty = 0;
 
 			UIHeader.worktab.position = _space;
 			Context.raw.tool = _tool;
-			Context.raw.bakeType = _bakeType;
-			MakeMaterial.parsePaintMaterial(false);
+			Context.raw.bake_type = _bakeType;
+			MakeMaterial.parse_paint_material(false);
 
 			let rts = render_path_render_targets;
 			let texpaint_live = rts.get("texpaint_live");
@@ -342,9 +342,9 @@ class MakeMaterial {
 		}
 	}
 
-	static parseNodePreviewMaterial = (node: zui_node_t, group: zui_node_canvas_t = null, parents: zui_node_t[] = null): { scon: shader_context_t, mcon: material_context_t } => {
+	static parse_node_preview_material = (node: zui_node_t, group: zui_node_canvas_t = null, parents: zui_node_t[] = null): { scon: shader_context_t, mcon: material_context_t } => {
 		if (node.outputs.length == 0) return null;
-		let sdata: TMaterial = { name: "Material", canvas: UINodes.getCanvasMaterial() };
+		let sdata: material_t = { name: "Material", canvas: UINodes.get_canvas_material() };
 		let mcon_raw: material_context_t = { name: "mesh", bind_textures: [] };
 		let con = MakeNodePreview.run(sdata, mcon_raw, node, group, parents);
 		let compileError = false;
@@ -357,66 +357,66 @@ class MakeMaterial {
 		return { scon: scon, mcon: mcon };
 	}
 
-	static parseBrush = () => {
+	static parse_brush = () => {
 		ParserLogic.parse(Context.raw.brush.canvas);
 	}
 
-	static blendMode = (frag: NodeShaderRaw, blending: i32, cola: string, colb: string, opac: string): string => {
-		if (blending == BlendType.BlendMix) {
+	static blend_mode = (frag: NodeShaderRaw, blending: i32, cola: string, colb: string, opac: string): string => {
+		if (blending == blend_type_t.MIX) {
 			return `mix(${cola}, ${colb}, ${opac})`;
 		}
-		else if (blending == BlendType.BlendDarken) {
+		else if (blending == blend_type_t.DARKEN) {
 			return `mix(${cola}, min(${cola}, ${colb}), ${opac})`;
 		}
-		else if (blending == BlendType.BlendMultiply) {
+		else if (blending == blend_type_t.MULTIPLY) {
 			return `mix(${cola}, ${cola} * ${colb}, ${opac})`;
 		}
-		else if (blending == BlendType.BlendBurn) {
+		else if (blending == blend_type_t.BURN) {
 			return `mix(${cola}, vec3(1.0, 1.0, 1.0) - (vec3(1.0, 1.0, 1.0) - ${cola}) / ${colb}, ${opac})`;
 		}
-		else if (blending == BlendType.BlendLighten) {
+		else if (blending == blend_type_t.LIGHTEN) {
 			return `max(${cola}, ${colb} * ${opac})`;
 		}
-		else if (blending == BlendType.BlendScreen) {
+		else if (blending == blend_type_t.SCREEN) {
 			return `(vec3(1.0, 1.0, 1.0) - (vec3(1.0 - ${opac}, 1.0 - ${opac}, 1.0 - ${opac}) + ${opac} * (vec3(1.0, 1.0, 1.0) - ${colb})) * (vec3(1.0, 1.0, 1.0) - ${cola}))`;
 		}
-		else if (blending == BlendType.BlendDodge) {
+		else if (blending == blend_type_t.DODGE) {
 			return `mix(${cola}, ${cola} / (vec3(1.0, 1.0, 1.0) - ${colb}), ${opac})`;
 		}
-		else if (blending == BlendType.BlendAdd) {
+		else if (blending == blend_type_t.ADD) {
 			return `mix(${cola}, ${cola} + ${colb}, ${opac})`;
 		}
-		else if (blending == BlendType.BlendOverlay) {
+		else if (blending == blend_type_t.OVERLAY) {
 			return `mix(${cola}, vec3(
 				${cola}.r < 0.5 ? 2.0 * ${cola}.r * ${colb}.r : 1.0 - 2.0 * (1.0 - ${cola}.r) * (1.0 - ${colb}.r),
 				${cola}.g < 0.5 ? 2.0 * ${cola}.g * ${colb}.g : 1.0 - 2.0 * (1.0 - ${cola}.g) * (1.0 - ${colb}.g),
 				${cola}.b < 0.5 ? 2.0 * ${cola}.b * ${colb}.b : 1.0 - 2.0 * (1.0 - ${cola}.b) * (1.0 - ${colb}.b)
 			), ${opac})`;
 		}
-		else if (blending == BlendType.BlendSoftLight) {
+		else if (blending == blend_type_t.SOFT_LIGHT) {
 			return `((1.0 - ${opac}) * ${cola} + ${opac} * ((vec3(1.0, 1.0, 1.0) - ${cola}) * ${colb} * ${cola} + ${cola} * (vec3(1.0, 1.0, 1.0) - (vec3(1.0, 1.0, 1.0) - ${colb}) * (vec3(1.0, 1.0, 1.0) - ${cola}))))`;
 		}
-		else if (blending == BlendType.BlendLinearLight) {
+		else if (blending == blend_type_t.LINEAR_LIGHT) {
 			return `(${cola} + ${opac} * (vec3(2.0, 2.0, 2.0) * (${colb} - vec3(0.5, 0.5, 0.5))))`;
 		}
-		else if (blending == BlendType.BlendDifference) {
+		else if (blending == blend_type_t.DIFFERENCE) {
 			return `mix(${cola}, abs(${cola} - ${colb}), ${opac})`;
 		}
-		else if (blending == BlendType.BlendSubtract) {
+		else if (blending == blend_type_t.SUBTRACT) {
 			return `mix(${cola}, ${cola} - ${colb}, ${opac})`;
 		}
-		else if (blending == BlendType.BlendDivide) {
+		else if (blending == blend_type_t.DIVIDE) {
 			return `vec3(1.0 - ${opac}, 1.0 - ${opac}, 1.0 - ${opac}) * ${cola} + vec3(${opac}, ${opac}, ${opac}) * ${cola} / ${colb}`;
 		}
-		else if (blending == BlendType.BlendHue) {
+		else if (blending == blend_type_t.HUE) {
 			NodeShader.add_function(frag, ShaderFunctions.str_hue_sat);
 			return `mix(${cola}, hsv_to_rgb(vec3(rgb_to_hsv(${colb}).r, rgb_to_hsv(${cola}).g, rgb_to_hsv(${cola}).b)), ${opac})`;
 		}
-		else if (blending == BlendType.BlendSaturation) {
+		else if (blending == blend_type_t.SATURATION) {
 			NodeShader.add_function(frag, ShaderFunctions.str_hue_sat);
 			return `mix(${cola}, hsv_to_rgb(vec3(rgb_to_hsv(${cola}).r, rgb_to_hsv(${colb}).g, rgb_to_hsv(${cola}).b)), ${opac})`;
 		}
-		else if (blending == BlendType.BlendColor) {
+		else if (blending == blend_type_t.COLOR) {
 			NodeShader.add_function(frag, ShaderFunctions.str_hue_sat);
 			return `mix(${cola}, hsv_to_rgb(vec3(rgb_to_hsv(${colb}).r, rgb_to_hsv(${colb}).g, rgb_to_hsv(${cola}).b)), ${opac})`;
 		}
@@ -426,47 +426,47 @@ class MakeMaterial {
 		}
 	}
 
-	static blendModeMask = (frag: NodeShaderRaw, blending: i32, cola: string, colb: string, opac: string): string => {
-		if (blending == BlendType.BlendMix) {
+	static blend_mode_mask = (frag: NodeShaderRaw, blending: i32, cola: string, colb: string, opac: string): string => {
+		if (blending == blend_type_t.MIX) {
 			return `mix(${cola}, ${colb}, ${opac})`;
 		}
-		else if (blending == BlendType.BlendDarken) {
+		else if (blending == blend_type_t.DARKEN) {
 			return `mix(${cola}, min(${cola}, ${colb}), ${opac})`;
 		}
-		else if (blending == BlendType.BlendMultiply) {
+		else if (blending == blend_type_t.MULTIPLY) {
 			return `mix(${cola}, ${cola} * ${colb}, ${opac})`;
 		}
-		else if (blending == BlendType.BlendBurn) {
+		else if (blending == blend_type_t.BURN) {
 			return `mix(${cola}, 1.0 - (1.0 - ${cola}) / ${colb}, ${opac})`;
 		}
-		else if (blending == BlendType.BlendLighten) {
+		else if (blending == blend_type_t.LIGHTEN) {
 			return `max(${cola}, ${colb} * ${opac})`;
 		}
-		else if (blending == BlendType.BlendScreen) {
+		else if (blending == blend_type_t.SCREEN) {
 			return `(1.0 - ((1.0 - ${opac}) + ${opac} * (1.0 - ${colb})) * (1.0 - ${cola}))`;
 		}
-		else if (blending == BlendType.BlendDodge) {
+		else if (blending == blend_type_t.DODGE) {
 			return `mix(${cola}, ${cola} / (1.0 - ${colb}), ${opac})`;
 		}
-		else if (blending == BlendType.BlendAdd) {
+		else if (blending == blend_type_t.ADD) {
 			return `mix(${cola}, ${cola} + ${colb}, ${opac})`;
 		}
-		else if (blending == BlendType.BlendOverlay) {
+		else if (blending == blend_type_t.OVERLAY) {
 			return `mix(${cola}, ${cola} < 0.5 ? 2.0 * ${cola} * ${colb} : 1.0 - 2.0 * (1.0 - ${cola}) * (1.0 - ${colb}), ${opac})`;
 		}
-		else if (blending == BlendType.BlendSoftLight) {
+		else if (blending == blend_type_t.SOFT_LIGHT) {
 			return `((1.0 - ${opac}) * ${cola} + ${opac} * ((1.0 - ${cola}) * ${colb} * ${cola} + ${cola} * (1.0 - (1.0 - ${colb}) * (1.0 - ${cola}))))`;
 		}
-		else if (blending == BlendType.BlendLinearLight) {
+		else if (blending == blend_type_t.LINEAR_LIGHT) {
 			return `(${cola} + ${opac} * (2.0 * (${colb} - 0.5)))`;
 		}
-		else if (blending == BlendType.BlendDifference) {
+		else if (blending == blend_type_t.DIFFERENCE) {
 			return `mix(${cola}, abs(${cola} - ${colb}), ${opac})`;
 		}
-		else if (blending == BlendType.BlendSubtract) {
+		else if (blending == blend_type_t.SUBTRACT) {
 			return `mix(${cola}, ${cola} - ${colb}, ${opac})`;
 		}
-		else if (blending == BlendType.BlendDivide) {
+		else if (blending == blend_type_t.DIVIDE) {
 			return `(1.0 - ${opac}) * ${cola} + ${opac} * ${cola} / ${colb}`;
 		}
 		else { // BlendHue, BlendSaturation, BlendColor, BlendValue
@@ -474,18 +474,18 @@ class MakeMaterial {
 		}
 	}
 
-	static getDisplaceStrength = (): f32 => {
-		let sc = Context.mainObject().base.transform.scale.x;
+	static get_displace_strength = (): f32 => {
+		let sc = Context.main_object().base.transform.scale.x;
 		return Config.raw.displace_strength * 0.02 * sc;
 	}
 
-	static voxelgiHalfExtents = (): string => {
-		let ext = Context.raw.vxaoExt;
+	static voxelgi_half_extents = (): string => {
+		let ext = Context.raw.vxao_ext;
 		return `const vec3 voxelgiHalfExtents = vec3(${ext}, ${ext}, ${ext});`;
 	}
 
-	static deleteContext = (c: shader_context_t) => {
-		Base.notifyOnNextFrame(() => { // Ensure pipeline is no longer in use
+	static delete_context = (c: shader_context_t) => {
+		Base.notify_on_next_frame(() => { // Ensure pipeline is no longer in use
 			shader_context_delete(c);
 		});
 	}

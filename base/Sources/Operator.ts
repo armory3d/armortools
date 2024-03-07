@@ -1,7 +1,7 @@
 
 class Operator {
 
-	static ops = new Map<string, any>();
+	static ops: Map<string, any> = new Map();
 
 	static register = (name: string, call: any) => {
 		Operator.ops.set(name, call);
@@ -21,18 +21,18 @@ class Operator {
 
 	static shortcut = (s: string, type = ShortcutType.ShortcutStarted): bool => {
 		if (s == "") return false;
-		let shift = s.indexOf("shift") >= 0;
-		let ctrl = s.indexOf("ctrl") >= 0;
-		let alt = s.indexOf("alt") >= 0;
-		let flag = shift == keyboard_down("shift") &&
-				   ctrl == keyboard_down("control") &&
-				   alt == keyboard_down("alt");
+		let shift: bool = s.indexOf("shift") >= 0;
+		let ctrl: bool = s.indexOf("ctrl") >= 0;
+		let alt: bool = s.indexOf("alt") >= 0;
+		let flag: bool = shift == keyboard_down("shift") &&
+				   		 ctrl == keyboard_down("control") &&
+				   		 alt == keyboard_down("alt");
 		if (s.indexOf("+") > 0) {
 			s = s.substr(s.lastIndexOf("+") + 1);
 			if (s == "number") return flag;
 		}
 		else if (shift || ctrl || alt) return flag;
-		let key = (s == "left" || s == "right" || s == "middle") ?
+		let key: bool = (s == "left" || s == "right" || s == "middle") ?
 			// Mouse
 			(type == ShortcutType.ShortcutDown ? mouse_down(s) : mouse_started(s)) :
 			// Keyboard

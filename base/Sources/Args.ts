@@ -1,76 +1,75 @@
 
 class Args {
 
-	static useArgs = false;
-	static assetPath = "";
-	static background = false;
+	static use_args: bool = false;
+	static asset_path: string = "";
+	static background: bool = false;
 	///if (is_paint || is_lab)
-	static exportTextures = false;
-	static exportTexturesType = "";
-	static exportTexturesPreset = "";
-	static exportTexturesPath = "";
+	static export_textures: bool = false;
+	static export_textures_type: string = "";
+	static export_textures_preset: string = "";
+	static export_textures_path: string = "";
 	///end
 	///if (is_paint || is_sculpt)
-	static reimportMesh = false;
-	static exportMesh = false;
-	static exportMeshPath = "";
+	static reimport_mesh: bool = false;
+	static export_mesh: bool = false;
+	static export_mesh_path: string = "";
 	///end
 	///if is_paint
-	static exportMaterial = false;
-	static exportMaterialPath = "";
+	static export_material: bool = false;
+	static export_material_path: string = "";
 	///end
 
-	static parse = () => {
+	static parse() {
 		if (krom_get_arg_count() > 1) {
-			Args.useArgs = true;
+			Args.use_args = true;
 
-			let i = 0;
+			let i: i32 = 0;
 			while (i < krom_get_arg_count()) {
 				// Process each arg
-				let currentArg = krom_get_arg(i);
+				let current_arg: string = krom_get_arg(i);
 
-				if (Path.isProject(currentArg)) {
-					Project.filepath = currentArg;
+				if (Path.is_project(current_arg)) {
+					Project.filepath = current_arg;
 				}
-				else if (currentArg == "--b" || currentArg == "--background") {
+				else if (current_arg == "--b" || current_arg == "--background") {
 					Args.background = true;
 				}
 
 				///if (is_paint || is_lab)
-				else if (Path.isTexture(currentArg)) {
-					Args.assetPath = currentArg;
+				else if (Path.is_texture(current_arg)) {
+					Args.asset_path = current_arg;
 				}
-				else if (currentArg == "--export-textures" && (i + 3) <= krom_get_arg_count()) {
-					Args.exportTextures = true;
+				else if (current_arg == "--export-textures" && (i + 3) <= krom_get_arg_count()) {
+					Args.export_textures = true;
 					++i;
-					Args.exportTexturesType = krom_get_arg(i);
+					Args.export_textures_type = krom_get_arg(i);
 					++i;
-					Args.exportTexturesPreset = krom_get_arg(i);
+					Args.export_textures_preset = krom_get_arg(i);
 					++i;
-					Args.exportTexturesPath = krom_get_arg(i);
+					Args.export_textures_path = krom_get_arg(i);
 				}
 				///end
 
 				///if (is_paint || is_sculpt)
-				else if (currentArg == "--reload-mesh") {
-					Args.reimportMesh = true;
+				else if (current_arg == "--reload-mesh") {
+					Args.reimport_mesh = true;
 				}
-				else if (currentArg == "--export-mesh" && (i + 1) <= krom_get_arg_count()) {
-					Args.exportMesh = true;
+				else if (current_arg == "--export-mesh" && (i + 1) <= krom_get_arg_count()) {
+					Args.export_mesh = true;
 					++i;
-					Args.exportMeshPath = krom_get_arg(i);
+					Args.export_mesh_path = krom_get_arg(i);
 				}
-				else if (Path.isMesh(currentArg) ||
-						(i > 1 && !currentArg.startsWith("-") && Path.isFolder(currentArg))) {
-					Args.assetPath = currentArg;
+				else if (Path.is_mesh(current_arg) || (i > 1 && !current_arg.startsWith("-") && Path.is_folder(current_arg))) {
+					Args.asset_path = current_arg;
 				}
 				///end
 
 				///if is_paint
-				else if (currentArg == "--export-material" && (i + 1) <= krom_get_arg_count()) {
-					Args.exportMaterial = true;
+				else if (current_arg == "--export-material" && (i + 1) <= krom_get_arg_count()) {
+					Args.export_material = true;
 					++i;
-					Args.exportMaterialPath = krom_get_arg(i);
+					Args.export_material_path = krom_get_arg(i);
 				}
 				///end
 
@@ -79,69 +78,69 @@ class Args {
 		}
 	}
 
-	static run = () => {
-		if (Args.useArgs) {
+	static run() {
+		if (Args.use_args) {
 			app_notify_on_init(() => {
 				if (Project.filepath != "") {
-					ImportArm.runProject(Project.filepath);
+					ImportArm.run_project(Project.filepath);
 				}
-				else if (Args.assetPath != "") {
-					ImportAsset.run(Args.assetPath, -1, -1, false);
+				else if (Args.asset_path != "") {
+					ImportAsset.run(Args.asset_path, -1, -1, false);
 					///if is_paint
-					if (Path.isTexture(Args.assetPath)) {
-						UIBase.show2DView(View2DType.View2DAsset);
+					if (Path.is_texture(Args.asset_path)) {
+						UIBase.show_2d_view(view_2d_type_t.ASSET);
 					}
 					///end
 				}
 				///if (is_paint || is_sculpt)
-				else if (Args.reimportMesh) {
-					Project.reimportMesh();
+				else if (Args.reimport_mesh) {
+					Project.reimport_mesh();
 				}
 				///end
 
 				///if (is_paint || is_lab)
-				if (Args.exportTextures) {
-					if (Args.exportTexturesType == "png" ||
-						Args.exportTexturesType == "jpg" ||
-						Args.exportTexturesType == "exr16" ||
-						Args.exportTexturesType == "exr32") {
-						if (Path.isFolder(Args.exportTexturesPath)) {
+				if (Args.export_textures) {
+					if (Args.export_textures_type == "png" ||
+						Args.export_textures_type == "jpg" ||
+						Args.export_textures_type == "exr16" ||
+						Args.export_textures_type == "exr32") {
+						if (Path.is_folder(Args.export_textures_path)) {
 							// Applying the correct format type from args
-							if (Args.exportTexturesType == "png") {
+							if (Args.export_textures_type == "png") {
 								///if is_paint
-								Base.bitsHandle.position = TextureBits.Bits8;
+								Base.bits_handle.position = texture_bits_t.BITS8;
 								///end
-								Context.raw.formatType = TextureLdrFormat.FormatPng;
+								Context.raw.format_type = texture_ldr_format_t.PNG;
 							}
-							else if (Args.exportTexturesType == "jpg") {
+							else if (Args.export_textures_type == "jpg") {
 								///if is_paint
-								Base.bitsHandle.position = TextureBits.Bits8;
+								Base.bits_handle.position = texture_bits_t.BITS8;
 								///end
-								Context.raw.formatType = TextureLdrFormat.FormatJpg;
+								Context.raw.format_type = texture_ldr_format_t.JPG;
 							}
-							else if (Args.exportTexturesType == "exr16") {
+							else if (Args.export_textures_type == "exr16") {
 								///if is_paint
-								Base.bitsHandle.position = TextureBits.Bits16;
+								Base.bits_handle.position = texture_bits_t.BITS16;
 								///end
 							}
-							else if (Args.exportTexturesType == "exr32") {
+							else if (Args.export_textures_type == "exr32") {
 								///if is_paint
-								Base.bitsHandle.position = TextureBits.Bits32;
+								Base.bits_handle.position = texture_bits_t.BITS32;
 								///end
 							}
 
 							///if is_paint
-							Context.raw.layersExport = ExportMode.ExportVisible;
+							Context.raw.layers_export = export_mode_t.VISIBLE;
 							///end
 
 							// Get export preset and apply the correct one from args
-							BoxExport.files = File.readDirectory(Path.data() + Path.sep + "export_presets");
-							for (let i = 0; i < BoxExport.files.length; ++i) {
+							BoxExport.files = File.read_directory(Path.data() + Path.sep + "export_presets");
+							for (let i: i32 = 0; i < BoxExport.files.length; ++i) {
 								BoxExport.files[i] = BoxExport.files[i].substr(0, BoxExport.files[i].length - 5); // Strip .json
 							}
 
-							let file = "export_presets/" + BoxExport.files[0] + ".json";
-							for (let f of BoxExport.files) if (f == Args.exportTexturesPreset) {
+							let file: string = "export_presets/" + BoxExport.files[0] + ".json";
+							for (let f of BoxExport.files) if (f == Args.export_textures_preset) {
 								file = "export_presets/" + BoxExport.files[BoxExport.files.indexOf(f)] + ".json";
 							}
 
@@ -151,7 +150,7 @@ class Args {
 
 							// Export queue
 							app_notify_on_init(() => {
-								ExportTexture.run(Args.exportTexturesPath);
+								ExportTexture.run(Args.export_textures_path);
 							});
 						}
 						else {
@@ -165,11 +164,11 @@ class Args {
 				///end
 
 				///if (is_paint || is_sculpt)
-				else if (Args.exportMesh) {
-					if (Path.isFolder(Args.exportMeshPath)) {
-						let f = UIFiles.filename;
+				else if (Args.export_mesh) {
+					if (Path.is_folder(Args.export_mesh_path)) {
+						let f: string = UIFiles.filename;
 						if (f == "") f = tr("untitled");
-						ExportMesh.run(Args.exportMeshPath + Path.sep + f, null, false);
+						ExportMesh.run(Args.export_mesh_path + Path.sep + f, null, false);
 					}
 					else {
 						krom_log(tr("Invalid export directory"));
@@ -178,9 +177,9 @@ class Args {
 				///end
 
 				///if is_paint
-				else if (Args.exportMaterial) {
-					Context.raw.writeIconOnExport = true;
-					ExportArm.runMaterial(Args.exportMaterialPath);
+				else if (Args.export_material) {
+					Context.raw.write_icon_on_export = true;
+					ExportArm.run_material(Args.export_material_path);
 				}
 				///end
 

@@ -4,14 +4,14 @@
 
 class ParserExr {
 
-	static writeString = (out: i32[], str: string) => {
-		for (let i = 0; i < str.length; ++i) {
+	static write_string = (out: i32[], str: string) => {
+		for (let i: i32 = 0; i < str.length; ++i) {
 			out.push(str.charCodeAt(i));
 		}
 	}
 
-	static run = (width: i32, height: i32, src: ArrayBuffer, bits = 16, type = 1, off = 0): ArrayBuffer => {
-		let out = [];
+	static run = (width: i32, height: i32, src: ArrayBuffer, bits: i32 = 16, type: i32 = 1, off: i32 = 0): ArrayBuffer => {
+		let out: u8[] = [];
 		out.push(0x76); // magic
 		out.push(0x2f);
 		out.push(0x31);
@@ -20,9 +20,9 @@ class ParserExr {
 		out.push(0);
 		out.push(0);
 		out.push(0);
-		ParserExr.writeString(out, "channels");
+		ParserExr.write_string(out, "channels");
 		out.push(0);
-		ParserExr.writeString(out, "chlist");
+		ParserExr.write_string(out, "chlist");
 		out.push(0);
 
 		out.push(55);
@@ -30,7 +30,7 @@ class ParserExr {
 		out.push(0);
 		out.push(0);
 
-		let attrib = bits == 16 ? 1 : 2; // half, float
+		let attrib: i32 = bits == 16 ? 1 : 2; // half, float
 
 		out.push("B".charCodeAt(0)); // B
 		out.push(0);
@@ -103,9 +103,9 @@ class ParserExr {
 
 		out.push(0);
 
-		ParserExr.writeString(out, "compression");
+		ParserExr.write_string(out, "compression");
 		out.push(0);
-		ParserExr.writeString(out, "compression");
+		ParserExr.write_string(out, "compression");
 		out.push(0);
 
 		out.push(1);
@@ -114,42 +114,9 @@ class ParserExr {
 		out.push(0);
 		out.push(0); // no compression
 
-		ParserExr.writeString(out, "dataWindow");
+		ParserExr.write_string(out, "dataWindow");
 		out.push(0);
-		ParserExr.writeString(out, "box2i");
-		out.push(0);
-
-		out.push(16);
-		out.push(0);
-		out.push(0);
-		out.push(0);
-
-		out.push(0);
-		out.push(0);
-		out.push(0);
-		out.push(0);
-
-		out.push(0);
-		out.push(0);
-		out.push(0);
-		out.push(0);
-
-		let ww = width - 1;
-		let hh = height - 1;
-
-		out.push(ww & 0xff);
-		out.push((ww >> 8) & 0xff);
-		out.push((ww >> 16) & 0xff);
-		out.push((ww >> 24) & 0xff);
-
-		out.push(hh & 0xff);
-		out.push((hh >> 8) & 0xff);
-		out.push((hh >> 16) & 0xff);
-		out.push((hh >> 24) & 0xff);
-
-		ParserExr.writeString(out, "displayWindow");
-		out.push(0);
-		ParserExr.writeString(out, "box2i");
+		ParserExr.write_string(out, "box2i");
 		out.push(0);
 
 		out.push(16);
@@ -167,6 +134,9 @@ class ParserExr {
 		out.push(0);
 		out.push(0);
 
+		let ww: i32 = width - 1;
+		let hh: i32 = height - 1;
+
 		out.push(ww & 0xff);
 		out.push((ww >> 8) & 0xff);
 		out.push((ww >> 16) & 0xff);
@@ -177,9 +147,39 @@ class ParserExr {
 		out.push((hh >> 16) & 0xff);
 		out.push((hh >> 24) & 0xff);
 
-		ParserExr.writeString(out, "lineOrder");
+		ParserExr.write_string(out, "displayWindow");
 		out.push(0);
-		ParserExr.writeString(out, "lineOrder");
+		ParserExr.write_string(out, "box2i");
+		out.push(0);
+
+		out.push(16);
+		out.push(0);
+		out.push(0);
+		out.push(0);
+
+		out.push(0);
+		out.push(0);
+		out.push(0);
+		out.push(0);
+
+		out.push(0);
+		out.push(0);
+		out.push(0);
+		out.push(0);
+
+		out.push(ww & 0xff);
+		out.push((ww >> 8) & 0xff);
+		out.push((ww >> 16) & 0xff);
+		out.push((ww >> 24) & 0xff);
+
+		out.push(hh & 0xff);
+		out.push((hh >> 8) & 0xff);
+		out.push((hh >> 16) & 0xff);
+		out.push((hh >> 24) & 0xff);
+
+		ParserExr.write_string(out, "lineOrder");
+		out.push(0);
+		ParserExr.write_string(out, "lineOrder");
 		out.push(0);
 
 		out.push(1);
@@ -188,9 +188,9 @@ class ParserExr {
 		out.push(0);
 		out.push(0); // increasing Y
 
-		ParserExr.writeString(out, "pixelAspectRatio");
+		ParserExr.write_string(out, "pixelAspectRatio");
 		out.push(0);
-		ParserExr.writeString(out, "float");
+		ParserExr.write_string(out, "float");
 		out.push(0);
 
 		out.push(4);
@@ -203,10 +203,10 @@ class ParserExr {
 		out.push(0x80);
 		out.push(0x3f);
 
-		ParserExr.writeString(out, "screenWindowCenter");
+		ParserExr.write_string(out, "screenWindowCenter");
 		out.push(0);
 
-		ParserExr.writeString(out, "v2f");
+		ParserExr.write_string(out, "v2f");
 		out.push(0);
 
 		out.push(8);
@@ -224,10 +224,10 @@ class ParserExr {
 		out.push(0);
 		out.push(0);
 
-		ParserExr.writeString(out, "screenWindowWidth");
+		ParserExr.write_string(out, "screenWindowWidth");
 		out.push(0);
 
-		ParserExr.writeString(out, "float");
+		ParserExr.write_string(out, "float");
 		out.push(0);
 
 		out.push(4);
@@ -242,16 +242,16 @@ class ParserExr {
 
 		out.push(0); // end of header
 
-		let channels = 4;
-		let byteSize = bits == 16 ? 2 : 4;
-		let kHeaderSize = out.length;
-		let kScanlineTableSize = 8 * height;
-		let pixelRowSize = width * 3 * byteSize;
-		let fullRowSize = pixelRowSize + 8;
+		let channels: i32 = 4;
+		let byteSize: i32 = bits == 16 ? 2 : 4;
+		let kHeaderSize: i32 = out.length;
+		let kScanlineTableSize: i32 = 8 * height;
+		let pixelRowSize: i32 = width * 3 * byteSize;
+		let fullRowSize: i32 = pixelRowSize + 8;
 
 		// line offset table
-		let ofs = kHeaderSize + kScanlineTableSize;
-		for (let y = 0; y < height; ++y) {
+		let ofs: i32 = kHeaderSize + kScanlineTableSize;
+		for (let y: i32 = 0; y < height; ++y) {
 			out.push(ofs & 0xff);
 			out.push((ofs >> 8) & 0xff);
 			out.push((ofs >> 16) & 0xff);
@@ -264,12 +264,12 @@ class ParserExr {
 		}
 
 		// scanline data
-		let stride = channels * byteSize;
-		let pos = 0;
-		let srcView = new DataView(src);
+		let stride: i32 = channels * byteSize;
+		let pos: i32 = 0;
+		let srcView: DataView = new DataView(src);
 
 		let writeLine16 = (bytePos: i32) => {
-			for (let x = 0; x < width; ++x) {
+			for (let x: i32 = 0; x < width; ++x) {
 				out.push(srcView.getUint8(bytePos    ));
 				out.push(srcView.getUint8(bytePos + 1));
 				bytePos += stride;
@@ -277,7 +277,7 @@ class ParserExr {
 		}
 
 		let writeLine32 = (bytePos: i32) => {
-			for (let x = 0; x < width; ++x) {
+			for (let x: i32 = 0; x < width; ++x) {
 				out.push(srcView.getUint8(bytePos    ));
 				out.push(srcView.getUint8(bytePos + 1));
 				out.push(srcView.getUint8(bytePos + 2));
@@ -302,7 +302,7 @@ class ParserExr {
 
 		let writeData = type == 1 ? writeBGR : writeSingle;
 
-		for (let y = 0; y < height; ++y) {
+		for (let y: i32 = 0; y < height; ++y) {
 			// coordinate
 			out.push(y & 0xff);
 			out.push((y >> 8) & 0xff);

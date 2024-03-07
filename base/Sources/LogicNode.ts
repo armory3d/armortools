@@ -5,11 +5,11 @@ class LogicNode {
 
 	constructor() {}
 
-	addInput = (node: LogicNode, from: i32) => {
+	add_input = (node: LogicNode, from: i32) => {
 		this.inputs.push(new LogicNodeInput(node, from));
 	}
 
-	addOutputs = (nodes: LogicNode[]) => {
+	add_outputs = (nodes: LogicNode[]) => {
 		this.outputs.push(nodes);
 	}
 
@@ -17,11 +17,11 @@ class LogicNode {
 		done(null);
 	}
 
-	getAsImage = (from: i32, done: (img: image_t)=>void) => {
+	get_as_image = (from: i32, done: (img: image_t)=>void) => {
 		done(null);
 	}
 
-	getCachedImage = (): image_t => {
+	get_cached_image = (): image_t => {
 		return null;
 	}
 
@@ -41,8 +41,8 @@ class LogicNodeInput {
 		this.node.get(this.from, done);
 	}
 
-	getAsImage = (done: (img: image_t)=>void) => {
-		this.node.getAsImage(this.from, done);
+	get_as_image = (done: (img: image_t)=>void) => {
+		this.node.get_as_image(this.from, done);
 	}
 
 	set = (value: any) => {

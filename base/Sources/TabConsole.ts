@@ -2,13 +2,13 @@
 class TabConsole {
 
 	static draw = (htab: zui_handle_t) => {
-		let ui = UIBase.ui;
+		let ui: zui_t = UIBase.ui;
 
-		let title = Console.messageTimer > 0 ? Console.message + "        " : tr("Console");
-		let color = Console.messageTimer > 0 ? Console.messageColor : -1;
+		let title: string = Console.message_timer > 0 ? Console.message + "        " : tr("Console");
+		let color: i32 = Console.message_timer > 0 ? Console.message_color : -1;
 
-		let statush = Config.raw.layout[LayoutSize.LayoutStatusH];
-		if (zui_tab(htab, title, false, color) && statush > UIStatus.defaultStatusH * zui_SCALE(ui)) {
+		let statush: i32 = Config.raw.layout[layout_size_t.STATUS_H];
+		if (zui_tab(htab, title, false, color) && statush > UIStatus.default_status_h * zui_SCALE(ui)) {
 
 			zui_begin_sticky();
 			///if (krom_windows || krom_linux || krom_darwin) // Copy
@@ -28,12 +28,12 @@ class TabConsole {
 			///end
 
 			if (zui_button(tr("Clear"))) {
-				Console.lastTraces = [];
+				Console.last_traces = [];
 			}
 			if (zui_button(tr("Export"))) {
-				let str = Console.lastTraces.join("\n");
+				let str: string = Console.last_traces.join("\n");
 				UIFiles.show("txt", true, false, (path: string) => {
-					let f = UIFiles.filename;
+					let f: string = UIFiles.filename;
 					if (f == "") f = tr("untitled");
 					path = path + Path.sep + f;
 					if (!path.endsWith(".txt")) path += ".txt";
@@ -42,19 +42,19 @@ class TabConsole {
 			}
 			///if (krom_windows || krom_linux || krom_darwin)
 			if (zui_button(tr("Copy"))) {
-				let str = Console.lastTraces.join("\n");
+				let str: string = Console.last_traces.join("\n");
 				krom_copy_to_clipboard(str);
 			}
 			///end
 
 			zui_end_sticky();
 
-			let _font = ui.font;
-			let _fontSize = ui.font_size;
+			let _font: g2_font_t = ui.font;
+			let _fontSize: i32 = ui.font_size;
 			let f: g2_font_t = data_get_font("font_mono.ttf");
 			zui_set_font(ui, f);
 			ui.font_size = Math.floor(15 * zui_SCALE(ui));
-			for (let t of Console.lastTraces) {
+			for (let t of Console.last_traces) {
 				zui_text(t);
 			}
 			zui_set_font(ui, _font);

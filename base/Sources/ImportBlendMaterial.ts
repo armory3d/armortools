@@ -5,13 +5,13 @@ class ImportBlendMaterial {
 
 	static run = (path: string) => {
 		let b: ArrayBuffer = data_get_blob(path);
-		let bl = ParserBlend.init(b);
+		let bl: BlendRaw = ParserBlend.init(b);
 		if (bl.dna == null) {
 			Console.error(Strings.error3());
 			return;
 		}
 
-		let mats = ParserBlend.get(bl, "Material");
+		let mats: BlHandleRaw[] = ParserBlend.get(bl, "Material");
 		if (mats.length == 0) {
 			Console.error("Error: No materials found");
 			return;
@@ -24,8 +24,8 @@ class ImportBlendMaterial {
 			Context.raw.material = SlotMaterial.create(Project.materials[0].data);
 			Project.materials.push(Context.raw.material);
 			imported.push(Context.raw.material);
-			let nodes = Context.raw.material.nodes;
-			let canvas = Context.raw.material.canvas;
+			let nodes: zui_nodes_t = Context.raw.material.nodes;
+			let canvas: zui_node_canvas_t = Context.raw.material.canvas;
 			canvas.name = BlHandle.get(BlHandle.get(mat, "id"), "name").substr(2); // MAWood
 			let nout: zui_node_t = null;
 			for (let n of canvas.nodes) {
@@ -42,13 +42,13 @@ class ImportBlendMaterial {
 			}
 
 			// Parse nodetree
-			let nodetree = BlHandle.get(mat, "nodetree"); // bNodeTree
-			let blnodes = BlHandle.get(nodetree, "nodes"); // ListBase
-			let bllinks = BlHandle.get(nodetree, "links"); // bNodeLink
+			let nodetree: any = BlHandle.get(mat, "nodetree"); // bNodeTree
+			let blnodes: any = BlHandle.get(nodetree, "nodes"); // ListBase
+			let bllinks: any = BlHandle.get(nodetree, "links"); // bNodeLink
 
 			// Look for Principled BSDF node
 			let node: any = BlHandle.get(blnodes, "first", 0, "bNode");
-			let last = BlHandle.get(blnodes, "last", 0, "bNode");
+			let last: any = BlHandle.get(blnodes, "last", 0, "bNode");
 			while (true) {
 				if (BlHandle.get(node, "idname") == "ShaderNodeBsdfPrincipled") break;
 				if (BlHandle.get(node, "name") == BlHandle.get(last, "name")) break;
@@ -68,12 +68,12 @@ class ImportBlendMaterial {
 			node = BlHandle.get(blnodes, "first", 0, "bNode");
 			while (true) {
 				// Search for node in list
-				let search = BlHandle.get(node, "idname").substr(10).toLowerCase();
+				let search: string = BlHandle.get(node, "idname").substr(10).toLowerCase();
 				let base: zui_node_t = null;
 				for (let list of NodesMaterial.list) {
-					let found = false;
+					let found: bool = false;
 					for (let n of list) {
-						let s = string_replace_all(n.type, "_", "").toLowerCase();
+						let s: string = string_replace_all(n.type, "_", "").toLowerCase();
 						if (search == s) {
 							base = n;
 							found = true;
@@ -84,20 +84,20 @@ class ImportBlendMaterial {
 				}
 
 				if (base != null) {
-					let n = UINodes.makeNode(base, nodes, canvas);
+					let n: zui_node_t = UINodes.make_node(base, nodes, canvas);
 					n.x = BlHandle.get(node, "locx") + 400;
 					n.y = -BlHandle.get(node, "locy") + 400;
 					n.name = BlHandle.get(node, "name");
 
 					// Fill input socket values
-					let inputs = BlHandle.get(node, "inputs");
+					let inputs: any = BlHandle.get(node, "inputs");
 					let sock: any = BlHandle.get(inputs, "first", 0, "bNodeSocket");
-					let pos = 0;
+					let pos: i32 = 0;
 					while (true) {
 						if (pos >= n.inputs.length) break;
-						n.inputs[pos].default_value = ImportBlendMaterial.readBlendSocket(sock);
+						n.inputs[pos].default_value = ImportBlendMaterial.read_blend_socket(sock);
 
-						let last = sock;
+						let last: any = sock;
 						sock = BlHandle.get(sock, "next");
 						if (last.block == sock.block) break;
 						pos++;
@@ -105,19 +105,19 @@ class ImportBlendMaterial {
 
 					// Fill button values
 					if (search == "teximage") {
-						let img = BlHandle.get(node, "id", 0, "Image");
+						let img: any = BlHandle.get(node, "id", 0, "Image");
 						let file: string = BlHandle.get(img, "name").substr(2); // '//desktop\logo.png'
-						file = Path.baseDir(path) + file;
+						file = Path.base_dir(path) + file;
 						ImportTexture.run(file);
-						let ar = file.split(Path.sep);
-						let filename = ar[ar.length - 1];
-						n.buttons[0].default_value = Base.getAssetIndex(filename);
+						let ar: string[] = file.split(Path.sep);
+						let filename: string = ar[ar.length - 1];
+						n.buttons[0].default_value = Base.get_asset_index(filename);
 					}
 					else if (search == "valtorgb") {
 						let ramp: any = BlHandle.get(node, "storage", 0, "ColorBand");
 						n.buttons[0].data = BlHandle.get(ramp, "ipotype") == 0 ? 0 : 1; // Linear / Constant
 						let elems: f32[][] = n.buttons[0].default_value;
-						for (let i = 0; i < BlHandle.get(ramp, "tot"); ++i) {
+						for (let i: i32 = 0; i < BlHandle.get(ramp, "tot"); ++i) {
 							if (i >= elems.length) elems.push([1.0, 1.0, 1.0, 1.0, 0.0]);
 							let cbdata: any = BlHandle.get(ramp, "data", i, "CBData");
 							elems[i][0] = Math.floor(BlHandle.get(cbdata, "r") * 100) / 100;
@@ -132,11 +132,11 @@ class ImportBlendMaterial {
 						n.buttons[1].default_value = BlHandle.get(node, "custom2") & 2;
 					}
 					else if (search == "mapping") {
-						let storage = BlHandle.get(node, "storage", 0, "TexMapping");
+						let storage: any = BlHandle.get(node, "storage", 0, "TexMapping");
 						n.buttons[0].default_value = BlHandle.get(storage, "loc");
 						n.buttons[1].default_value = BlHandle.get(storage, "rot");
 						n.buttons[2].default_value = BlHandle.get(storage, "size");
-						// let mat = BlHandle.get(storage, "mat"); float[4][4]
+						// let mat: any = BlHandle.get(storage, "mat"); float[4][4]
 						// storage.flag & 1 // use_min
 						// storage.flag & 2 // use_max
 						// storage.min[0]
@@ -148,14 +148,14 @@ class ImportBlendMaterial {
 					}
 
 					// Fill output socket values
-					let outputs = BlHandle.get(node, "outputs");
+					let outputs: any = BlHandle.get(node, "outputs");
 					sock = BlHandle.get(outputs, "first", 0, "bNodeSocket");
 					pos = 0;
 					while (true) {
 						if (pos >= n.outputs.length) break;
-						n.outputs[pos].default_value = ImportBlendMaterial.readBlendSocket(sock);
+						n.outputs[pos].default_value = ImportBlendMaterial.read_blend_socket(sock);
 
-						let last = sock;
+						let last: any = sock;
 						sock = BlHandle.get(sock, "next");
 						if (last.block == sock.block) break;
 						pos++;
@@ -171,13 +171,13 @@ class ImportBlendMaterial {
 			// Place links
 			let link: any = BlHandle.get(bllinks, "first", 0, "bNodeLink");
 			while (true) {
-				let fromnode = BlHandle.get(BlHandle.get(link, "fromnode"), "name");
-				let tonode = BlHandle.get(BlHandle.get(link, "tonode"), "name");
-				let fromsock = BlHandle.get(link, "fromsock");
-				let tosock = BlHandle.get(link, "tosock");
+				let fromnode: any = BlHandle.get(BlHandle.get(link, "fromnode"), "name");
+				let tonode: any = BlHandle.get(BlHandle.get(link, "tonode"), "name");
+				let fromsock: any = BlHandle.get(link, "fromsock");
+				let tosock: any = BlHandle.get(link, "tosock");
 
-				let from_id = -1;
-				let to_id = -1;
+				let from_id: i32 = -1;
+				let to_id: i32 = -1;
 				for (let n of canvas.nodes) {
 					if (n.name == fromnode) {
 						from_id = n.id;
@@ -192,25 +192,25 @@ class ImportBlendMaterial {
 				}
 
 				if (from_id >= 0 && to_id >= 0) {
-					let from_socket = 0;
+					let from_socket: i32 = 0;
 					let sock: any = fromsock;
 					while (true) {
-						let last = sock;
+						let last: any = sock;
 						sock = BlHandle.get(sock, "prev");
 						if (last.block == sock.block) break;
 						from_socket++;
 					}
 
-					let to_socket = 0;
+					let to_socket: i32 = 0;
 					sock = tosock;
 					while (true) {
-						let last = sock;
+						let last: any = sock;
 						sock = BlHandle.get(sock, "prev");
 						if (last.block == sock.block) break;
 						to_socket++;
 					}
 
-					let valid = true;
+					let valid: bool = true;
 
 					// Remap principled
 					if (tonode == nout.name) {
@@ -236,28 +236,28 @@ class ImportBlendMaterial {
 					}
 				}
 
-				let last = link;
+				let last: any = link;
 				link = BlHandle.get(link, "next");
 				if (last.block == link.block) break;
 			}
-			History.newMaterial();
+			History.new_material();
 		}
 
 		let _init = () => {
 			for (let m of imported) {
-				Context.setMaterial(m);
-				MakeMaterial.parsePaintMaterial();
-				UtilRender.makeMaterialPreview();
+				Context.set_material(m);
+				MakeMaterial.parse_paint_material();
+				UtilRender.make_material_preview();
 			}
 		}
 		app_notify_on_init(_init);
 
-		UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
+		UIBase.hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 		data_delete_blob(path);
 	}
 
-	static readBlendSocket = (sock: any): any => {
-		let idname = BlHandle.get(sock, "idname");
+	static read_blend_socket = (sock: any): any => {
+		let idname: any = BlHandle.get(sock, "idname");
 		if (idname.startsWith("NodeSocketVector")) {
 			let v: any = BlHandle.get(BlHandle.get(sock, "default_value", 0, "bNodeSocketValueVector"), "value");
 			v[0] = Math.floor(v[0] * 100) / 100;

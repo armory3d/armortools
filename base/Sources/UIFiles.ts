@@ -1,7 +1,7 @@
 
 class UIFiles {
 
-	static defaultPath =
+	static default_path: string =
 		///if krom_windows
 		"C:\\Users"
 		///elseif krom_android
@@ -14,14 +14,14 @@ class UIFiles {
 	;
 
 	static filename: string;
-	static path = UIFiles.defaultPath;
-	static lastPath = "";
-	static lastSearch = "";
+	static path: string = UIFiles.default_path;
+	static last_path: string = "";
+	static last_search: string = "";
 	static files: string[] = null;
-	static iconMap: Map<string, image_t> = null;
-	static selected = -1;
-	static showExtensions = false;
-	static offline = false;
+	static icon_map: Map<string, image_t> = null;
+	static selected: i32 = -1;
+	static show_extensions: bool = false;
+	static offline: bool = false;
 
 	static show = (filters: string, isSave: bool, openMultiple: bool, filesDone: (s: string)=>void) => {
 		if (isSave) {
@@ -35,7 +35,7 @@ class UIFiles {
 			}
 		}
 		else {
-			let paths = krom_open_dialog(filters, "", openMultiple);
+			let paths: string[] = krom_open_dialog(filters, "", openMultiple);
 			if (paths != null) {
 				for (let path of paths) {
 					while (path.indexOf(Path.sep + Path.sep) >= 0) path = string_replace_all(path, Path.sep + Path.sep, Path.sep);
@@ -46,15 +46,15 @@ class UIFiles {
 			}
 		}
 
-		UIFiles.releaseKeys();
+		UIFiles.release_keys();
 	}
 
-	// static showCustom = (filters: string, isSave: bool, filesDone: (s: string)=>void) => {
-	// 	let known = false;
-	// 	UIBox.showCustom((ui: ZuiRaw) => {
+	// static show_custom = (filters: string, isSave: bool, filesDone: (s: string)=>void) => {
+	// 	let known: bool = false;
+	// 	UIBox.show_custom((ui: ZuiRaw) => {
 	// 		if (Zui.tab(Zui.handle(), tr("File Browser"))) {
-	// 			let pathHandle = Zui.handle();
-	// 			let fileHandle = Zui.handle();
+	// 			let pathHandle: zui_handle_t = Zui.handle();
+	// 			let fileHandle: zui_handle_t = Zui.handle();
 	// 			Zui.row([6 / 10, 2 / 10, 2 / 10]);
 	// 			filename = Zui.textInput(fileHandle, tr("File"));
 	// 			Zui.text("*." + filters, Center);
@@ -70,7 +70,7 @@ class UIFiles {
 	// 	}, 600, 500);
 	// }
 
-	static releaseKeys = () => {
+	static release_keys = () => {
 		// File dialog may prevent firing key up events
 		keyboard_up_listener(key_code_t.SHIFT);
 		keyboard_up_listener(key_code_t.CONTROL);
@@ -79,101 +79,101 @@ class UIFiles {
 		///end
 	}
 
-	static fileBrowser = (ui: zui_t, handle: zui_handle_t, foldersOnly = false, dragFiles = false, search = "", refresh = false, contextMenu: (s: string)=>void = null): string => {
+	static file_browser = (ui: zui_t, handle: zui_handle_t, foldersOnly: bool = false, dragFiles: bool = false, search: string = "", refresh: bool = false, contextMenu: (s: string)=>void = null): string => {
 
-		let icons = Res.get("icons.k");
-		let folder = Res.tile50(icons, 2, 1);
-		let file = Res.tile50(icons, 3, 1);
-		let isCloud = handle.text.startsWith("cloud");
+		let icons: image_t = Res.get("icons.k");
+		let folder: rect_t = Res.tile50(icons, 2, 1);
+		let file: rect_t = Res.tile50(icons, 3, 1);
+		let isCloud: bool = handle.text.startsWith("cloud");
 
-		if (isCloud && File.cloud == null) File.initCloud(() => { UIBase.hwnds[TabArea.TabStatus].redraws = 3; });
-		if (isCloud && File.readDirectory("cloud", false).length == 0) return handle.text;
+		if (isCloud && File.cloud == null) File.init_cloud(() => { UIBase.hwnds[tab_area_t.STATUS].redraws = 3; });
+		if (isCloud && File.read_directory("cloud", false).length == 0) return handle.text;
 
 		///if krom_ios
-		let documentDirectory = krom_save_dialog("", "");
+		let documentDirectory: string = krom_save_dialog("", "");
 		documentDirectory = documentDirectory.substr(0, documentDirectory.length - 8); // Strip /'untitled'
 		///end
 
-		if (handle.text == "") handle.text = UIFiles.defaultPath;
-		if (handle.text != UIFiles.lastPath || search != UIFiles.lastSearch || refresh) {
+		if (handle.text == "") handle.text = UIFiles.default_path;
+		if (handle.text != UIFiles.last_path || search != UIFiles.last_search || refresh) {
 			UIFiles.files = [];
 
 			// Up directory
-			let i1 = handle.text.indexOf(Path.sep);
-			let nested = i1 > -1 && handle.text.length - 1 > i1;
+			let i1: i32 = handle.text.indexOf(Path.sep);
+			let nested: bool = i1 > -1 && handle.text.length - 1 > i1;
 			///if krom_windows
 			// Server addresses like \\server are not nested
 			nested = nested && !(handle.text.length >= 2 && handle.text.charAt(0) == Path.sep && handle.text.charAt(1) == Path.sep && handle.text.lastIndexOf(Path.sep) == 1);
 			///end
 			if (nested) UIFiles.files.push("..");
 
-			let dirPath = handle.text;
+			let dirPath: string = handle.text;
 			///if krom_ios
 			if (!isCloud) dirPath = documentDirectory + dirPath;
 			///end
-			let filesAll = File.readDirectory(dirPath, foldersOnly);
+			let filesAll: string[] = File.read_directory(dirPath, foldersOnly);
 
 			for (let f of filesAll) {
 				if (f == "" || f.charAt(0) == ".") continue; // Skip hidden
-				if (f.indexOf(".") > 0 && !Path.isKnown(f)) continue; // Skip unknown extensions
+				if (f.indexOf(".") > 0 && !Path.is_known(f)) continue; // Skip unknown extensions
 				if (isCloud && f.indexOf("_icon.") >= 0) continue; // Skip thumbnails
 				if (f.toLowerCase().indexOf(search.toLowerCase()) < 0) continue; // Search filter
 				UIFiles.files.push(f);
 			}
 		}
-		UIFiles.lastPath = handle.text;
-		UIFiles.lastSearch = search;
+		UIFiles.last_path = handle.text;
+		UIFiles.last_search = search;
 		handle.changed = false;
 
-		let slotw = Math.floor(70 * zui_SCALE(ui));
-		let num = Math.floor(ui._w / slotw);
+		let slotw: i32 = Math.floor(70 * zui_SCALE(ui));
+		let num: i32 = Math.floor(ui._w / slotw);
 
 		ui._y += 4; // Don't cut off the border around selected materials
 		// Directory contents
-		for (let row = 0; row < Math.floor(Math.ceil(UIFiles.files.length / num)); ++row) {
-			let ar = [];
-			for (let i = 0; i < num * 2; ++i) ar.push(1 / num);
+		for (let row: i32 = 0; row < Math.floor(Math.ceil(UIFiles.files.length / num)); ++row) {
+			let ar: f32[] = [];
+			for (let i: i32 = 0; i < num * 2; ++i) ar.push(1 / num);
 			zui_row(ar);
 			if (row > 0) ui._y += zui_ELEMENT_OFFSET(ui) * 14.0;
 
-			for (let j = 0; j < num; ++j) {
-				let i = j + row * num;
+			for (let j: i32 = 0; j < num; ++j) {
+				let i: i32 = j + row * num;
 				if (i >= UIFiles.files.length) {
 					zui_end_element(slotw);
 					zui_end_element(slotw);
 					continue;
 				}
 
-				let f = UIFiles.files[i];
-				let _x = ui._x;
+				let f: string = UIFiles.files[i];
+				let _x: f32 = ui._x;
 
-				let rect = f.indexOf(".") > 0 ? file : folder;
-				let col = rect == file ? ui.t.LABEL_COL : ui.t.LABEL_COL - 0x00202020;
+				let rect: rect_t = f.indexOf(".") > 0 ? file : folder;
+				let col: i32 = rect == file ? ui.t.LABEL_COL : ui.t.LABEL_COL - 0x00202020;
 				if (UIFiles.selected == i) col = ui.t.HIGHLIGHT_COL;
 
-				let off = ui._w / 2 - 25 * zui_SCALE(ui);
+				let off: f32 = ui._w / 2 - 25 * zui_SCALE(ui);
 				ui._x += off;
 
-				let uix = ui._x;
-				let uiy = ui._y;
-				let state = zui_state_t.IDLE;
-				let generic = true;
+				let uix: f32 = ui._x;
+				let uiy: f32 = ui._y;
+				let state: zui_state_t = zui_state_t.IDLE;
+				let generic: bool = true;
 				let icon: image_t = null;
 
 				if (isCloud && f != ".." && !UIFiles.offline) {
-					if (UIFiles.iconMap == null) UIFiles.iconMap = new Map();
-					icon = UIFiles.iconMap.get(handle.text + Path.sep + f);
+					if (UIFiles.icon_map == null) UIFiles.icon_map = new Map();
+					icon = UIFiles.icon_map.get(handle.text + Path.sep + f);
 					if (icon == null) {
-						let filesAll = File.readDirectory(handle.text);
-						let iconFile = f.substr(0, f.lastIndexOf(".")) + "_icon.jpg";
+						let filesAll: string[] = File.read_directory(handle.text);
+						let iconFile: string = f.substr(0, f.lastIndexOf(".")) + "_icon.jpg";
 						if (filesAll.indexOf(iconFile) >= 0) {
-							let empty = render_path_render_targets.get("empty_black")._image;
-							UIFiles.iconMap.set(handle.text + Path.sep + f, empty);
-							File.cacheCloud(handle.text + Path.sep + iconFile, (abs: string) => {
+							let empty: image_t = render_path_render_targets.get("empty_black")._image;
+							UIFiles.icon_map.set(handle.text + Path.sep + f, empty);
+							File.cache_cloud(handle.text + Path.sep + iconFile, (abs: string) => {
 								if (abs != null) {
 									let image: image_t = data_get_image(abs);
 									app_notify_on_init(() => {
-										if (Base.pipeCopyRGB == null) Base.makePipeCopyRGB();
+										if (Base.pipe_copyRGB == null) Base.make_pipe_copy_rgb();
 										icon = image_create_render_target(image.width, image.height);
 										if (f.endsWith(".arm")) { // Used for material sphere alpha cutout
 											g2_begin(icon);
@@ -186,12 +186,12 @@ class UIFiles {
 											g2_begin(icon);
 											g2_clear(0xffffffff);
 										}
-										g2_set_pipeline(Base.pipeCopyRGB);
+										g2_set_pipeline(Base.pipe_copyRGB);
 										g2_draw_image(image, 0, 0);
 										g2_set_pipeline(null);
 										g2_end();
-										UIFiles.iconMap.set(handle.text + Path.sep + f, icon);
-										UIBase.hwnds[TabArea.TabStatus].redraws = 3;
+										UIFiles.icon_map.set(handle.text + Path.sep + f, icon);
+										UIBase.hwnds[tab_area_t.STATUS].redraws = 3;
 									});
 								}
 								else UIFiles.offline = true;
@@ -199,7 +199,7 @@ class UIFiles {
 						}
 					}
 					if (icon != null) {
-						let w = 50;
+						let w: i32 = 50;
 						if (i == UIFiles.selected) {
 							zui_fill(-2,        -2, w + 4,     2, ui.t.HIGHLIGHT_COL);
 							zui_fill(-2,     w + 2, w + 4,     2, ui.t.HIGHLIGHT_COL);
@@ -215,47 +215,47 @@ class UIFiles {
 					}
 				}
 				if (f.endsWith(".arm") && !isCloud) {
-					if (UIFiles.iconMap == null) UIFiles.iconMap = new Map();
-					let key = handle.text + Path.sep + f;
-					icon = UIFiles.iconMap.get(key);
-					if (!UIFiles.iconMap.has(key)) {
-						let blobPath = key;
+					if (UIFiles.icon_map == null) UIFiles.icon_map = new Map();
+					let key: string = handle.text + Path.sep + f;
+					icon = UIFiles.icon_map.get(key);
+					if (!UIFiles.icon_map.has(key)) {
+						let blobPath: string = key;
 
 						///if krom_ios
 						blobPath = documentDirectory + blobPath;
 						// TODO: implement native .arm parsing first
 						///else
 
-						let buffer = krom_load_blob(blobPath);
-						let raw = armpack_decode(buffer);
+						let buffer: buffer_t = krom_load_blob(blobPath);
+						let raw: any = armpack_decode(buffer);
 						if (raw.material_icons != null) {
-							let bytesIcon = raw.material_icons[0];
+							let bytesIcon: any = raw.material_icons[0];
 							icon = image_from_bytes(lz4_decode(bytesIcon, 256 * 256 * 4), 256, 256);
 						}
 
 						///if (is_paint || is_sculpt)
 						else if (raw.mesh_icons != null) {
-							let bytesIcon = raw.mesh_icons[0];
+							let bytesIcon: any = raw.mesh_icons[0];
 							icon = image_from_bytes(lz4_decode(bytesIcon, 256 * 256 * 4), 256, 256);
 						}
 						else if (raw.brush_icons != null) {
-							let bytesIcon = raw.brush_icons[0];
+							let bytesIcon: any = raw.brush_icons[0];
 							icon = image_from_bytes(lz4_decode(bytesIcon, 256 * 256 * 4), 256, 256);
 						}
 						///end
 
 						///if is_lab
 						if (raw.mesh_icon != null) {
-							let bytesIcon = raw.mesh_icon;
+							let bytesIcon: any = raw.mesh_icon;
 							icon = image_from_bytes(lz4_decode(bytesIcon, 256 * 256 * 4), 256, 256);
 						}
 						///end
 
-						UIFiles.iconMap.set(key, icon);
+						UIFiles.icon_map.set(key, icon);
 						///end
 					}
 					if (icon != null) {
-						let w = 50;
+						let w: i32 = 50;
 						if (i == UIFiles.selected) {
 							zui_fill(-2,        -2, w + 4,     2, ui.t.HIGHLIGHT_COL);
 							zui_fill(-2,     w + 2, w + 4,     2, ui.t.HIGHLIGHT_COL);
@@ -271,28 +271,28 @@ class UIFiles {
 					}
 				}
 
-				if (Path.isTexture(f) && !isCloud) {
-					let w = 50;
-					if (UIFiles.iconMap == null) UIFiles.iconMap = new Map();
-					let shandle = handle.text + Path.sep + f;
-					icon = UIFiles.iconMap.get(shandle);
+				if (Path.is_texture(f) && !isCloud) {
+					let w: i32 = 50;
+					if (UIFiles.icon_map == null) UIFiles.icon_map = new Map();
+					let shandle: string = handle.text + Path.sep + f;
+					icon = UIFiles.icon_map.get(shandle);
 					if (icon == null) {
-						let empty = render_path_render_targets.get("empty_black")._image;
-						UIFiles.iconMap.set(shandle, empty);
+						let empty: image_t = render_path_render_targets.get("empty_black")._image;
+						UIFiles.icon_map.set(shandle, empty);
 						let image: image_t = data_get_image(shandle);
 						app_notify_on_init(() => {
-							if (Base.pipeCopyRGB == null) Base.makePipeCopyRGB();
-							let sw = image.width > image.height ? w : Math.floor(1.0 * image.width / image.height * w);
-							let sh = image.width > image.height ? Math.floor(1.0 * image.height / image.width * w) : w;
+							if (Base.pipe_copyRGB == null) Base.make_pipe_copy_rgb();
+							let sw: i32 = image.width > image.height ? w : Math.floor(1.0 * image.width / image.height * w);
+							let sh: i32 = image.width > image.height ? Math.floor(1.0 * image.height / image.width * w) : w;
 							icon = image_create_render_target(sw, sh);
 							g2_begin(icon);
 							g2_clear(0xffffffff);
-							g2_set_pipeline(Base.pipeCopyRGB);
+							g2_set_pipeline(Base.pipe_copyRGB);
 							g2_draw_scaled_image(image, 0, 0, sw, sh);
 							g2_set_pipeline(null);
 							g2_end();
-							UIFiles.iconMap.set(shandle, icon);
-							UIBase.hwnds[TabArea.TabStatus].redraws = 3;
+							UIFiles.icon_map.set(shandle, icon);
+							UIBase.hwnds[tab_area_t.STATUS].redraws = 3;
 							data_delete_image(shandle); // The big image is not needed anymore
 						});
 					}
@@ -318,24 +318,24 @@ class UIFiles {
 
 				if (state == zui_state_t.STARTED) {
 					if (f != ".." && dragFiles) {
-						Base.dragOffX = -(mouse_x - uix - ui._window_x - 3);
-						Base.dragOffY = -(mouse_y - uiy - ui._window_y + 1);
-						Base.dragFile = handle.text;
+						Base.drag_off_x = -(mouse_x - uix - ui._window_x - 3);
+						Base.drag_off_y = -(mouse_y - uiy - ui._window_y + 1);
+						Base.drag_file = handle.text;
 						///if krom_ios
-						if (!isCloud) Base.dragFile = documentDirectory + Base.dragFile;
+						if (!isCloud) Base.drag_file = documentDirectory + Base.drag_file;
 						///end
-						if (Base.dragFile.charAt(Base.dragFile.length - 1) != Path.sep) {
-							Base.dragFile += Path.sep;
+						if (Base.drag_file.charAt(Base.drag_file.length - 1) != Path.sep) {
+							Base.drag_file += Path.sep;
 						}
-						Base.dragFile += f;
-						Base.dragFileIcon = icon;
+						Base.drag_file += f;
+						Base.drag_file_icon = icon;
 					}
 
 					UIFiles.selected = i;
-					if (time_time() - Context.raw.selectTime < 0.25) {
-						Base.dragFile = null;
-						Base.dragFileIcon = null;
-						Base.isDragging = false;
+					if (time_time() - Context.raw.select_time < 0.25) {
+						Base.drag_file = null;
+						Base.drag_file_icon = null;
+						Base.is_dragging = false;
 						handle.changed = ui.changed = true;
 						if (f == "..") { // Up
 							handle.text = handle.text.substring(0, handle.text.lastIndexOf(Path.sep));
@@ -350,14 +350,14 @@ class UIFiles {
 						}
 						UIFiles.selected = -1;
 					}
-					Context.raw.selectTime = time_time();
+					Context.raw.select_time = time_time();
 				}
 
 				// Label
 				ui._x = _x;
 				ui._y += slotw * 0.75;
-				let label0 = (UIFiles.showExtensions || f.indexOf(".") <= 0) ? f : f.substr(0, f.lastIndexOf("."));
-				let label1 = "";
+				let label0: string = (UIFiles.show_extensions || f.indexOf(".") <= 0) ? f : f.substr(0, f.lastIndexOf("."));
+				let label1: string = "";
 				while (label0.length > 0 && g2_font_width(ui.font, ui.font_size, label0) > ui._w - 6) { // 2 line split
 					label1 = label0.charAt(label0.length - 1) + label1;
 					label0 = label0.substr(0, label0.length - 1);

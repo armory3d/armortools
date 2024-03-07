@@ -1,25 +1,25 @@
 
 class History {
 
-	static steps: TStep[];
-	static undoI = 0; // Undo layer
-	static undos = 0; // Undos available
-	static redos = 0; // Redos available
+	static steps: step_t[];
+	static undo_i: i32 = 0; // Undo layer
+	static undos: i32 = 0; // Undos available
+	static redos: i32 = 0; // Redos available
 	///if (is_paint || is_sculpt)
-	static pushUndo = false; // Store undo on next paint
-	static undoLayers: SlotLayerRaw[] = null;
+	static push_undo: bool = false; // Store undo on next paint
+	static undo_layers: SlotLayerRaw[] = null;
 	///end
 	///if is_sculpt
-	static pushUndo2 = false;
+	static push_undo2: bool = false;
 	///end
 
 	static undo = () => {
 		if (History.undos > 0) {
-			let active = History.steps.length - 1 - History.redos;
-			let step = History.steps[active];
+			let active: i32 = History.steps.length - 1 - History.redos;
+			let step: step_t = History.steps[active];
 
 			if (step.name == tr("Edit Nodes")) {
-				History.swapCanvas(step);
+				History.swap_canvas(step);
 			}
 
 			///if (is_paint || is_sculpt)
@@ -36,24 +36,24 @@ class History {
 				Context.raw.layer = Project.layers[step.layer > 0 ? step.layer - 1 : 0];
 			}
 			else if (step.name == tr("Delete Layer")) {
-				let parent = step.layer_parent > 0 ? Project.layers[step.layer_parent - 1] : null;
-				let l = SlotLayer.create("", step.layer_type, parent);
+				let parent: SlotLayerRaw = step.layer_parent > 0 ? Project.layers[step.layer_parent - 1] : null;
+				let l: SlotLayerRaw = SlotLayer.create("", step.layer_type, parent);
 				Project.layers.splice(step.layer, 0, l);
-				Context.setLayer(l);
-				History.undoI = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
-				let lay = History.undoLayers[History.undoI];
+				Context.set_layer(l);
+				History.undo_i = History.undo_i - 1 < 0 ? Config.raw.undo_steps - 1 : History.undo_i - 1;
+				let lay: SlotLayerRaw = History.undo_layers[History.undo_i];
 				SlotLayer.swap(l, lay);
 				l.maskOpacity = step.layer_opacity;
 				l.blending = step.layer_blending;
 				l.objectMask = step.layer_object;
-				MakeMaterial.parseMeshMaterial();
+				MakeMaterial.parse_mesh_material();
 
 				// Undo at least second time in order to avoid empty groups
-				if (step.layer_type == LayerSlotType.SlotGroup) {
-					Base.notifyOnNextFrame(() => {
+				if (step.layer_type == layer_slot_type_t.GROUP) {
+					Base.notify_on_next_frame(() => {
 						// 1. Undo deleting group masks
-						let n = 1;
-						while (History.steps[active - n].layer_type == LayerSlotType.SlotMask) {
+						let n: i32 = 1;
+						while (History.steps[active - n].layer_type == layer_slot_type_t.MASK) {
 							History.undo();
 							++n;
 						}
@@ -63,14 +63,14 @@ class History {
 				}
 			}
 			else if (step.name == tr("Clear Layer")) {
-				History.undoI = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
-				let lay = History.undoLayers[History.undoI];
+				History.undo_i = History.undo_i - 1 < 0 ? Config.raw.undo_steps - 1 : History.undo_i - 1;
+				let lay: SlotLayerRaw = History.undo_layers[History.undo_i];
 				SlotLayer.swap(Context.raw.layer, lay);
-				Context.raw.layerPreviewDirty = true;
+				Context.raw.layer_preview_dirty = true;
 			}
 			else if (step.name == tr("Duplicate Layer")) {
-				let children = SlotLayer.getRecursiveChildren(Project.layers[step.layer]);
-				let position = step.layer + 1;
+				let children: SlotLayerRaw[] = SlotLayer.get_recursive_children(Project.layers[step.layer]);
+				let position: i32 = step.layer + 1;
 				if (children != null)
 					position += children.length;
 
@@ -78,7 +78,7 @@ class History {
 				SlotLayer.delete(Context.raw.layer);
 			}
 			else if (step.name == tr("Order Layers")) {
-				let target = Project.layers[step.prev_order];
+				let target: SlotLayerRaw = Project.layers[step.prev_order];
 				Project.layers[step.prev_order] = Project.layers[step.layer];
 				Project.layers[step.layer] = target;
 			}
@@ -86,103 +86,105 @@ class History {
 				Context.raw.layer = Project.layers[step.layer];
 				SlotLayer.delete(Context.raw.layer);
 
-				let parent = step.layer_parent > 0 ? Project.layers[step.layer_parent - 2] : null;
-				let l = SlotLayer.create("", step.layer_type, parent);
+				let parent: SlotLayerRaw = step.layer_parent > 0 ? Project.layers[step.layer_parent - 2] : null;
+				let l: SlotLayerRaw = SlotLayer.create("", step.layer_type, parent);
 				Project.layers.splice(step.layer, 0, l);
-				Context.setLayer(l);
+				Context.set_layer(l);
 
-				History.undoI = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
-				let lay = History.undoLayers[History.undoI];
+				History.undo_i = History.undo_i - 1 < 0 ? Config.raw.undo_steps - 1 : History.undo_i - 1;
+				let lay: SlotLayerRaw = History.undo_layers[History.undo_i];
 				SlotLayer.swap(Context.raw.layer, lay);
 
 				l = SlotLayer.create("", step.layer_type, parent);
 				Project.layers.splice(step.layer + 1, 0, l);
-				Context.setLayer(l);
+				Context.set_layer(l);
 
-				History.undoI = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
-				lay = History.undoLayers[History.undoI];
+				History.undo_i = History.undo_i - 1 < 0 ? Config.raw.undo_steps - 1 : History.undo_i - 1;
+				lay = History.undo_layers[History.undo_i];
 				SlotLayer.swap(Context.raw.layer, lay);
 
 				Context.raw.layer.maskOpacity = step.layer_opacity;
 				Context.raw.layer.blending = step.layer_blending;
 				Context.raw.layer.objectMask = step.layer_object;
-				Context.raw.layersPreviewDirty = true;
-				MakeMaterial.parseMeshMaterial();
+				Context.raw.layers_preview_dirty = true;
+				MakeMaterial.parse_mesh_material();
 			}
 			else if (step.name == tr("Apply Mask")) {
 				// First restore the layer(s)
-				let maskPosition = step.layer;
-				let currentLayer = null;
+				let maskPosition: i32 = step.layer;
+				let currentLayer: SlotLayerRaw = null;
 				// The layer at the old mask position is a mask, i.e. the layer had multiple masks before.
-				if (SlotLayer.isMask(Project.layers[maskPosition]))
+				if (SlotLayer.is_mask(Project.layers[maskPosition])) {
 					currentLayer = Project.layers[maskPosition].parent;
-				else if (SlotLayer.isLayer(Project.layers[maskPosition]) || SlotLayer.isGroup(Project.layers[maskPosition]))
+				}
+				else if (SlotLayer.is_layer(Project.layers[maskPosition]) || SlotLayer.is_group(Project.layers[maskPosition])) {
 					currentLayer = Project.layers[maskPosition];
+				}
 
-				let layersToRestore = SlotLayer.isGroup(currentLayer) ? SlotLayer.getChildren(currentLayer) : [currentLayer];
+				let layersToRestore: SlotLayerRaw[] = SlotLayer.is_group(currentLayer) ? SlotLayer.get_children(currentLayer) : [currentLayer];
 				layersToRestore.reverse();
 
 				for (let layer of layersToRestore) {
 					// Replace the current layer's content with the old one
 					Context.raw.layer = layer;
-					History.undoI = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
-					let oldLayer = History.undoLayers[History.undoI];
+					History.undo_i = History.undo_i - 1 < 0 ? Config.raw.undo_steps - 1 : History.undo_i - 1;
+					let oldLayer: SlotLayerRaw = History.undo_layers[History.undo_i];
 					SlotLayer.swap(Context.raw.layer, oldLayer);
 				}
 
 				// Now restore the applied mask
-				History.undoI = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
-				let mask = History.undoLayers[History.undoI];
-				Base.newMask(false, currentLayer, maskPosition);
+				History.undo_i = History.undo_i - 1 < 0 ? Config.raw.undo_steps - 1 : History.undo_i - 1;
+				let mask: SlotLayerRaw = History.undo_layers[History.undo_i];
+				Base.new_mask(false, currentLayer, maskPosition);
 				SlotLayer.swap(Context.raw.layer, mask);
-				Context.raw.layersPreviewDirty = true;
-				Context.setLayer(Context.raw.layer);
+				Context.raw.layers_preview_dirty = true;
+				Context.set_layer(Context.raw.layer);
 			}
 			else if (step.name == tr("Invert Mask")) {
 				let _next = () => {
 					Context.raw.layer = Project.layers[step.layer];
-					SlotLayer.invertMask(Context.raw.layer);
+					SlotLayer.invert_mask(Context.raw.layer);
 				}
 				app_notify_on_init(_next);
 			}
 			else if (step.name == "Apply Filter") {
-				History.undoI = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
-				let lay = History.undoLayers[History.undoI];
-				Context.setLayer(Project.layers[step.layer]);
+				History.undo_i = History.undo_i - 1 < 0 ? Config.raw.undo_steps - 1 : History.undo_i - 1;
+				let lay: SlotLayerRaw = History.undo_layers[History.undo_i];
+				Context.set_layer(Project.layers[step.layer]);
 				SlotLayer.swap(Context.raw.layer, lay);
-				Base.newMask(false, Context.raw.layer);
+				Base.new_mask(false, Context.raw.layer);
 				SlotLayer.swap(Context.raw.layer, lay);
-				Context.raw.layerPreviewDirty = true;
+				Context.raw.layer_preview_dirty = true;
 			}
 			else if (step.name == tr("To Fill Layer") || step.name == tr("To Fill Mask")) {
-				SlotLayer.toPaintLayer(Context.raw.layer);
-				History.undoI = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
-				let lay = History.undoLayers[History.undoI];
+				SlotLayer.to_paint_layer(Context.raw.layer);
+				History.undo_i = History.undo_i - 1 < 0 ? Config.raw.undo_steps - 1 : History.undo_i - 1;
+				let lay: SlotLayerRaw = History.undo_layers[History.undo_i];
 				SlotLayer.swap(Context.raw.layer, lay);
 			}
 			else if (step.name == tr("To Paint Layer") || step.name == tr("To Paint Mask")) {
-				History.undoI = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
-				let lay = History.undoLayers[History.undoI];
+				History.undo_i = History.undo_i - 1 < 0 ? Config.raw.undo_steps - 1 : History.undo_i - 1;
+				let lay: SlotLayerRaw = History.undo_layers[History.undo_i];
 				SlotLayer.swap(Context.raw.layer, lay);
 				Context.raw.layer.fill_layer = Project.materials[step.material];
 			}
 			else if (step.name == tr("Layer Opacity")) {
-				Context.setLayer(Project.layers[step.layer]);
-				let t = Context.raw.layer.maskOpacity;
+				Context.set_layer(Project.layers[step.layer]);
+				let t: f32 = Context.raw.layer.maskOpacity;
 				Context.raw.layer.maskOpacity = step.layer_opacity;
 				step.layer_opacity = t;
-				MakeMaterial.parseMeshMaterial();
+				MakeMaterial.parse_mesh_material();
 			}
 			else if (step.name == tr("Layer Blending")) {
-				Context.setLayer(Project.layers[step.layer]);
-				let t = Context.raw.layer.blending;
+				Context.set_layer(Project.layers[step.layer]);
+				let t: blend_type_t = Context.raw.layer.blending;
 				Context.raw.layer.blending = step.layer_blending;
 				step.layer_blending = t;
-				MakeMaterial.parseMeshMaterial();
+				MakeMaterial.parse_mesh_material();
 			}
 			else if (step.name == tr("Delete Node Group")) {
-				Project.materialGroups.splice(step.canvas_group, 0, { canvas: null, nodes: zui_nodes_create() });
-				History.swapCanvas(step);
+				Project.material_groups.splice(step.canvas_group, 0, { canvas: null, nodes: zui_nodes_create() });
+				History.swap_canvas(step);
 			}
 			else if (step.name == tr("New Material")) {
 				Context.raw.material = Project.materials[step.material];
@@ -193,7 +195,7 @@ class History {
 				Context.raw.material = SlotMaterial.create(Project.materials[0].data);
 				Project.materials.splice(step.material, 0, Context.raw.material);
 				Context.raw.material.canvas = step.canvas;
-				UINodes.canvasChanged();
+				UINodes.canvas_changed();
 				UINodes.hwnd.redraws = 2;
 			}
 			else if (step.name == tr("Duplicate Material")) {
@@ -202,12 +204,12 @@ class History {
 				SlotMaterial.delete(Context.raw.material);
 			}
 			else { // Paint operation
-				History.undoI = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
-				let lay = History.undoLayers[History.undoI];
-				Context.selectPaintObject(Project.paintObjects[step.object]);
-				Context.setLayer(Project.layers[step.layer]);
+				History.undo_i = History.undo_i - 1 < 0 ? Config.raw.undo_steps - 1 : History.undo_i - 1;
+				let lay: SlotLayerRaw = History.undo_layers[History.undo_i];
+				Context.select_paint_object(Project.paint_objects[step.object]);
+				Context.set_layer(Project.layers[step.layer]);
 				SlotLayer.swap(Context.raw.layer, lay);
-				Context.raw.layerPreviewDirty = true;
+				Context.raw.layer_preview_dirty = true;
 			}
 			///end
 
@@ -216,15 +218,15 @@ class History {
 			Context.raw.ddirty = 2;
 
 			///if (is_paint || is_sculpt)
-			UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
-			UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
+			UIBase.hwnds[tab_area_t.SIDEBAR0].redraws = 2;
+			UIBase.hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 			if (UIView2D.show) {
 				UIView2D.hwnd.redraws = 2;
 			}
 
 			if (Config.raw.touch_ui) {
 				// Refresh undo & redo buttons
-				UIMenubar.menuHandle.redraws = 2;
+				UIMenubar.menu_handle.redraws = 2;
 			}
 			///end
 		}
@@ -232,153 +234,153 @@ class History {
 
 	static redo = () => {
 		if (History.redos > 0) {
-			let active = History.steps.length - History.redos;
-			let step = History.steps[active];
+			let active: i32 = History.steps.length - History.redos;
+			let step: step_t = History.steps[active];
 
 			if (step.name == tr("Edit Nodes")) {
-				History.swapCanvas(step);
+				History.swap_canvas(step);
 			}
 
 			///if (is_paint || is_sculpt)
 			else if (step.name == tr("New Layer") || step.name == tr("New Black Mask") || step.name == tr("New White Mask") || step.name == tr("New Fill Mask")) {
-				let parent = step.layer_parent > 0 ? Project.layers[step.layer_parent - 1] : null;
-				let l = SlotLayer.create("", step.layer_type, parent);
+				let parent: SlotLayerRaw = step.layer_parent > 0 ? Project.layers[step.layer_parent - 1] : null;
+				let l: SlotLayerRaw = SlotLayer.create("", step.layer_type, parent);
 				Project.layers.splice(step.layer, 0, l);
 				if (step.name == tr("New Black Mask")) {
-					Base.notifyOnNextFrame(() => {
+					Base.notify_on_next_frame(() => {
 						SlotLayer.clear(l, 0x00000000);
 					});
 				}
 				else if (step.name == tr("New White Mask")) {
-					Base.notifyOnNextFrame(() => {
+					Base.notify_on_next_frame(() => {
 						SlotLayer.clear(l, 0xffffffff);
 					});
 				}
 				else if (step.name == tr("New Fill Mask")) {
-					Base.notifyOnNextFrame(() => {
+					Base.notify_on_next_frame(() => {
 						Context.raw.material = Project.materials[step.material];
-						SlotLayer.toFillLayer(l);
+						SlotLayer.to_fill_layer(l);
 					});
 				}
-				Context.raw.layerPreviewDirty = true;
-				Context.setLayer(l);
+				Context.raw.layer_preview_dirty = true;
+				Context.set_layer(l);
 			}
 			else if (step.name == tr("New Group")) {
-				let l = Project.layers[step.layer - 1];
-				let group = Base.newGroup();
+				let l: SlotLayerRaw = Project.layers[step.layer - 1];
+				let group: SlotLayerRaw = Base.new_group();
 				array_remove(Project.layers, group);
 				Project.layers.splice(step.layer, 0, group);
 				l.parent = group;
-				Context.setLayer(group);
+				Context.set_layer(group);
 			}
 			else if (step.name == tr("Delete Layer")) {
 				Context.raw.layer = Project.layers[step.layer];
-				History.swapActive();
+				History.swap_active();
 				SlotLayer.delete(Context.raw.layer);
 
 				// Redoing the last delete would result in an empty group
 				// Redo deleting all group masks + the group itself
-				if (step.layer_type == LayerSlotType.SlotLayer && History.steps.length >= active + 2 && (History.steps[active + 1].layer_type == LayerSlotType.SlotGroup || History.steps[active + 1].layer_type == LayerSlotType.SlotMask)) {
-					let n = 1;
-					while (History.steps[active + n].layer_type == LayerSlotType.SlotMask) {
+				if (step.layer_type == layer_slot_type_t.LAYER && History.steps.length >= active + 2 && (History.steps[active + 1].layer_type == layer_slot_type_t.GROUP || History.steps[active + 1].layer_type == layer_slot_type_t.MASK)) {
+					let n: i32 = 1;
+					while (History.steps[active + n].layer_type == layer_slot_type_t.MASK) {
 						++n;
 					}
-					Base.notifyOnNextFrame(() => {
-						for (let i = 0; i < n; ++i) History.redo();
+					Base.notify_on_next_frame(() => {
+						for (let i: i32 = 0; i < n; ++i) History.redo();
 					});
 				}
 			}
 			else if (step.name == tr("Clear Layer")) {
 				Context.raw.layer = Project.layers[step.layer];
-				History.swapActive();
+				History.swap_active();
 				SlotLayer.clear(Context.raw.layer);
-				Context.raw.layerPreviewDirty = true;
+				Context.raw.layer_preview_dirty = true;
 			}
 			else if (step.name == tr("Duplicate Layer")) {
 				Context.raw.layer = Project.layers[step.layer];
 				let _next = () => {
-					Base.duplicateLayer(Context.raw.layer);
+					Base.duplicate_layer(Context.raw.layer);
 				}
-				Base.notifyOnNextFrame(_next);
+				Base.notify_on_next_frame(_next);
 			}
 			else if (step.name == tr("Order Layers")) {
-				let target = Project.layers[step.prev_order];
+				let target: SlotLayerRaw = Project.layers[step.prev_order];
 				Project.layers[step.prev_order] = Project.layers[step.layer];
 				Project.layers[step.layer] = target;
 			}
 			else if (step.name == tr("Merge Layers")) {
 				Context.raw.layer = Project.layers[step.layer + 1];
-				app_notify_on_init(History.redoMergeLayers);
-				app_notify_on_init(Base.mergeDown);
+				app_notify_on_init(History.redo_merge_layers);
+				app_notify_on_init(Base.merge_down);
 			}
 			else if (step.name == tr("Apply Mask")) {
 				Context.raw.layer = Project.layers[step.layer];
-					if (SlotLayer.isGroupMask(Context.raw.layer)) {
-						let group = Context.raw.layer.parent;
-						let layers = SlotLayer.getChildren(group);
+					if (SlotLayer.is_group_mask(Context.raw.layer)) {
+						let group: SlotLayerRaw = Context.raw.layer.parent;
+						let layers: SlotLayerRaw[] = SlotLayer.get_children(group);
 						layers.splice(0, 0, Context.raw.layer);
-						History.copyMergingLayers2(layers);
+						History.copy_merging_layers2(layers);
 					}
-					else History.copyMergingLayers2([Context.raw.layer, Context.raw.layer.parent]);
+					else History.copy_merging_layers2([Context.raw.layer, Context.raw.layer.parent]);
 
 				let _next = () => {
-					SlotLayer.applyMask(Context.raw.layer);
-					Context.setLayer(Context.raw.layer);
-					Context.raw.layersPreviewDirty = true;
+					SlotLayer.apply_mask(Context.raw.layer);
+					Context.set_layer(Context.raw.layer);
+					Context.raw.layers_preview_dirty = true;
 				}
-				Base.notifyOnNextFrame(_next);
+				Base.notify_on_next_frame(_next);
 			}
 			else if (step.name == tr("Invert Mask")) {
 				let _next = () => {
 					Context.raw.layer = Project.layers[step.layer];
-					SlotLayer.invertMask(Context.raw.layer);
+					SlotLayer.invert_mask(Context.raw.layer);
 				}
 				app_notify_on_init(_next);
 			}
 			else if (step.name == tr("Apply Filter")) {
-				let lay = History.undoLayers[History.undoI];
-				Context.setLayer(Project.layers[step.layer]);
+				let lay: SlotLayerRaw = History.undo_layers[History.undo_i];
+				Context.set_layer(Project.layers[step.layer]);
 				SlotLayer.swap(Context.raw.layer, lay);
-				Base.newMask(false, lay);
+				Base.new_mask(false, lay);
 				SlotLayer.swap(Context.raw.layer, lay);
-				Context.raw.layerPreviewDirty = true;
-				History.undoI = (History.undoI + 1) % Config.raw.undo_steps;
+				Context.raw.layer_preview_dirty = true;
+				History.undo_i = (History.undo_i + 1) % Config.raw.undo_steps;
 			}
 			else if (step.name == tr("To Fill Layer") || step.name == tr("To Fill Mask")) {
-				let lay = History.undoLayers[History.undoI];
+				let lay: SlotLayerRaw = History.undo_layers[History.undo_i];
 				SlotLayer.swap(Context.raw.layer, lay);
 				Context.raw.layer.fill_layer = Project.materials[step.material];
-				History.undoI = (History.undoI + 1) % Config.raw.undo_steps;
+				History.undo_i = (History.undo_i + 1) % Config.raw.undo_steps;
 			}
 			else if (step.name == tr("To Paint Layer") || step.name == tr("To Paint Mask")) {
-				SlotLayer.toPaintLayer(Context.raw.layer);
-				let lay = History.undoLayers[History.undoI];
+				SlotLayer.to_paint_layer(Context.raw.layer);
+				let lay: SlotLayerRaw = History.undo_layers[History.undo_i];
 				SlotLayer.swap(Context.raw.layer, lay);
-				History.undoI = (History.undoI + 1) % Config.raw.undo_steps;
+				History.undo_i = (History.undo_i + 1) % Config.raw.undo_steps;
 			}
 			else if (step.name == tr("Layer Opacity")) {
-				Context.setLayer(Project.layers[step.layer]);
-				let t = Context.raw.layer.maskOpacity;
+				Context.set_layer(Project.layers[step.layer]);
+				let t: f32 = Context.raw.layer.maskOpacity;
 				Context.raw.layer.maskOpacity = step.layer_opacity;
 				step.layer_opacity = t;
-				MakeMaterial.parseMeshMaterial();
+				MakeMaterial.parse_mesh_material();
 			}
 			else if (step.name == tr("Layer Blending")) {
-				Context.setLayer(Project.layers[step.layer]);
-				let t = Context.raw.layer.blending;
+				Context.set_layer(Project.layers[step.layer]);
+				let t: blend_type_t = Context.raw.layer.blending;
 				Context.raw.layer.blending = step.layer_blending;
 				step.layer_blending = t;
-				MakeMaterial.parseMeshMaterial();
+				MakeMaterial.parse_mesh_material();
 			}
 			else if (step.name == tr("Delete Node Group")) {
-				History.swapCanvas(step);
-				array_remove(Project.materialGroups, Project.materialGroups[step.canvas_group]);
+				History.swap_canvas(step);
+				array_remove(Project.material_groups, Project.material_groups[step.canvas_group]);
 			}
 			else if (step.name == tr("New Material")) {
 				Context.raw.material = SlotMaterial.create(Project.materials[0].data);
 				Project.materials.splice(step.material, 0, Context.raw.material);
 				Context.raw.material.canvas = step.canvas;
-				UINodes.canvasChanged();
+				UINodes.canvas_changed();
 				UINodes.hwnd.redraws = 2;
 			}
 			else if (step.name == tr("Delete Material")) {
@@ -390,16 +392,16 @@ class History {
 				Context.raw.material = SlotMaterial.create(Project.materials[0].data);
 				Project.materials.splice(step.material, 0, Context.raw.material);
 				Context.raw.material.canvas = step.canvas;
-				UINodes.canvasChanged();
+				UINodes.canvas_changed();
 				UINodes.hwnd.redraws = 2;
 			}
 			else { // Paint operation
-				let lay = History.undoLayers[History.undoI];
-				Context.selectPaintObject(Project.paintObjects[step.object]);
-				Context.setLayer(Project.layers[step.layer]);
+				let lay: SlotLayerRaw = History.undo_layers[History.undo_i];
+				Context.select_paint_object(Project.paint_objects[step.object]);
+				Context.set_layer(Project.layers[step.layer]);
 				SlotLayer.swap(Context.raw.layer, lay);
-				Context.raw.layerPreviewDirty = true;
-				History.undoI = (History.undoI + 1) % Config.raw.undo_steps;
+				Context.raw.layer_preview_dirty = true;
+				History.undo_i = (History.undo_i + 1) % Config.raw.undo_steps;
 			}
 			///end
 
@@ -408,13 +410,13 @@ class History {
 			Context.raw.ddirty = 2;
 
 			///if (is_paint || is_sculpt)
-			UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
-			UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
+			UIBase.hwnds[tab_area_t.SIDEBAR0].redraws = 2;
+			UIBase.hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 			if (UIView2D.show) UIView2D.hwnd.redraws = 2;
 
 			if (Config.raw.touch_ui) {
 				// Refresh undo & redo buttons
-				UIMenubar.menuHandle.redraws = 2;
+				UIMenubar.menu_handle.redraws = 2;
 			}
 			///end
 		}
@@ -422,7 +424,7 @@ class History {
 
 	static reset = () => {
 		///if (is_paint || is_sculpt)
-		History.steps = [{name: tr("New"), layer: 0, layer_type: LayerSlotType.SlotLayer, layer_parent: -1, object: 0, material: 0, brush: 0}];
+		History.steps = [{name: tr("New"), layer: 0, layer_type: layer_slot_type_t.LAYER, layer_parent: -1, object: 0, material: 0, brush: 0}];
 		///end
 		///if is_lab
 		History.steps = [{name: tr("New")}];
@@ -430,16 +432,16 @@ class History {
 
 		History.undos = 0;
 		History.redos = 0;
-		History.undoI = 0;
+		History.undo_i = 0;
 	}
 
 	///if (is_paint || is_sculpt)
-	static editNodes = (canvas: zui_node_canvas_t, canvas_type: i32, canvas_group: Null<i32> = null) => {
+	static edit_nodes = (canvas: zui_node_canvas_t, canvas_type: i32, canvas_group: Null<i32> = null) => {
 	///end
 	///if is_lab
-	static editNodes = (canvas: zui_node_canvas_t, canvas_group: Null<i32> = null) => {
+	static edit_nodes = (canvas: zui_node_canvas_t, canvas_group: Null<i32> = null) => {
 	///end
-		let step = History.push(tr("Edit Nodes"));
+		let step: step_t = History.push(tr("Edit Nodes"));
 		step.canvas_group = canvas_group;
 		///if (is_paint || is_sculpt)
 		step.canvas_type = canvas_type;
@@ -449,171 +451,171 @@ class History {
 
 	///if (is_paint || is_sculpt)
 	static paint = () => {
-		let isMask = SlotLayer.isMask(Context.raw.layer);
-		History.copyToUndo(Context.raw.layer.id, History.undoI, isMask);
+		let isMask: bool = SlotLayer.is_mask(Context.raw.layer);
+		History.copy_to_undo(Context.raw.layer.id, History.undo_i, isMask);
 
-		History.pushUndo = false;
-		History.push(tr(UIToolbar.toolNames[Context.raw.tool]));
+		History.push_undo = false;
+		History.push(tr(UIToolbar.tool_names[Context.raw.tool]));
 	}
 
-	static newLayer = () => {
+	static new_layer = () => {
 		History.push(tr("New Layer"));
 	}
 
-	static newBlackMask = () => {
+	static new_black_mask = () => {
 		History.push(tr("New Black Mask"));
 	}
 
-	static newWhiteMask = () => {
+	static new_white_mask = () => {
 		History.push(tr("New White Mask"));
 	}
 
-	static newFillMask = () => {
+	static new_fill_mask = () => {
 		History.push(tr("New Fill Mask"));
 	}
 
-	static newGroup = () => {
+	static new_group = () => {
 		History.push(tr("New Group"));
 	}
 
-	static duplicateLayer = () => {
+	static duplicate_layer = () => {
 		History.push(tr("Duplicate Layer"));
 	}
 
-	static deleteLayer = () => {
-		History.swapActive();
+	static delete_layer = () => {
+		History.swap_active();
 		History.push(tr("Delete Layer"));
 	}
 
-	static clearLayer = () => {
-		History.swapActive();
+	static clear_layer = () => {
+		History.swap_active();
 		History.push(tr("Clear Layer"));
 	}
 
-	static orderLayers = (prevOrder: i32) => {
-		let step = History.push(tr("Order Layers"));
+	static order_layers = (prevOrder: i32) => {
+		let step: step_t = History.push(tr("Order Layers"));
 		step.prev_order = prevOrder;
 	}
 
-	static mergeLayers = () => {
-		History.copyMergingLayers();
+	static merge_layers = () => {
+		History.copy_merging_layers();
 
-		let step = History.push(tr("Merge Layers"));
+		let step: step_t = History.push(tr("Merge Layers"));
 		step.layer -= 1; // Merge down
-		if (SlotLayer.hasMasks(Context.raw.layer)) {
-			step.layer -= SlotLayer.getMasks(Context.raw.layer).length;
+		if (SlotLayer.has_masks(Context.raw.layer)) {
+			step.layer -= SlotLayer.get_masks(Context.raw.layer).length;
 		}
 		History.steps.shift(); // Merge consumes 2 steps
 		History.undos--;
 		// TODO: use undo layer in app_merge_down to save memory
 	}
 
-	static applyMask = () => {
-		if (SlotLayer.isGroupMask(Context.raw.layer)) {
-			let group = Context.raw.layer.parent;
-			let layers = SlotLayer.getChildren(group);
+	static apply_mask = () => {
+		if (SlotLayer.is_group_mask(Context.raw.layer)) {
+			let group: SlotLayerRaw = Context.raw.layer.parent;
+			let layers: SlotLayerRaw[] = SlotLayer.get_children(group);
 			layers.splice(0, 0, Context.raw.layer);
-			History.copyMergingLayers2(layers);
+			History.copy_merging_layers2(layers);
 		}
-		else History.copyMergingLayers2([Context.raw.layer, Context.raw.layer.parent]);
+		else History.copy_merging_layers2([Context.raw.layer, Context.raw.layer.parent]);
 		History.push(tr("Apply Mask"));
 	}
 
 
-	static invertMask = () => {
+	static invert_mask = () => {
 		History.push(tr("Invert Mask"));
 	}
 
-	static applyFilter = () => {
-		History.copyToUndo(Context.raw.layer.id, History.undoI, true);
+	static apply_filter = () => {
+		History.copy_to_undo(Context.raw.layer.id, History.undo_i, true);
 		History.push(tr("Apply Filter"));
 	}
 
-	static toFillLayer = () => {
-		History.copyToUndo(Context.raw.layer.id, History.undoI, false);
+	static to_fill_layer = () => {
+		History.copy_to_undo(Context.raw.layer.id, History.undo_i, false);
 		History.push(tr("To Fill Layer"));
 	}
 
-	static toFillMask = () => {
-		History.copyToUndo(Context.raw.layer.id, History.undoI, true);
+	static to_fill_mask = () => {
+		History.copy_to_undo(Context.raw.layer.id, History.undo_i, true);
 		History.push(tr("To Fill Mask"));
 	}
 
-	static toPaintLayer = () => {
-		History.copyToUndo(Context.raw.layer.id, History.undoI, false);
+	static to_paint_layer = () => {
+		History.copy_to_undo(Context.raw.layer.id, History.undo_i, false);
 		History.push(tr("To Paint Layer"));
 	}
 
-	static toPaintMask = () => {
-		History.copyToUndo(Context.raw.layer.id, History.undoI, true);
+	static to_paint_mask = () => {
+		History.copy_to_undo(Context.raw.layer.id, History.undo_i, true);
 		History.push(tr("To Paint Mask"));
 	}
 
-	static layerOpacity = () => {
+	static layer_opacity = () => {
 		History.push(tr("Layer Opacity"));
 	}
 
-	// static layerObject = () => {
+	// static layer_object = () => {
 	// 	History.push("Layer Object");
 	// }
 
-	static layerBlending = () => {
+	static layer_blending = () => {
 		History.push(tr("Layer Blending"));
 	}
 
-	static newMaterial = () => {
-		let step = History.push(tr("New Material"));
+	static new_material = () => {
+		let step: step_t = History.push(tr("New Material"));
 		step.canvas_type = 0;
 		step.canvas = JSON.parse(JSON.stringify(Context.raw.material.canvas));
 	}
 
-	static deleteMaterial = () => {
-		let step = History.push(tr("Delete Material"));
+	static delete_material = () => {
+		let step: step_t = History.push(tr("Delete Material"));
 		step.canvas_type = 0;
 		step.canvas = JSON.parse(JSON.stringify(Context.raw.material.canvas));
 	}
 
-	static duplicateMaterial = () => {
-		let step = History.push(tr("Duplicate Material"));
+	static duplicate_material = () => {
+		let step: step_t = History.push(tr("Duplicate Material"));
 		step.canvas_type = 0;
 		step.canvas = JSON.parse(JSON.stringify(Context.raw.material.canvas));
 	}
 
-	static deleteMaterialGroup = (group: TNodeGroup) => {
-		let step = History.push(tr("Delete Node Group"));
-		step.canvas_type = CanvasType.CanvasMaterial;
-		step.canvas_group = Project.materialGroups.indexOf(group);
+	static delete_material_group = (group: node_group_t) => {
+		let step: step_t = History.push(tr("Delete Node Group"));
+		step.canvas_type = canvas_type_t.MATERIAL;
+		step.canvas_group = Project.material_groups.indexOf(group);
 		step.canvas = JSON.parse(JSON.stringify(group.canvas));
 	}
 	///end
 
-	static push = (name: string): TStep => {
+	static push = (name: string): step_t => {
 		///if (krom_windows || krom_linux || krom_darwin)
-		let filename = Project.filepath == "" ? UIFiles.filename : Project.filepath.substring(Project.filepath.lastIndexOf(Path.sep) + 1, Project.filepath.length - 4);
+		let filename: string = Project.filepath == "" ? UIFiles.filename : Project.filepath.substring(Project.filepath.lastIndexOf(Path.sep) + 1, Project.filepath.length - 4);
 		sys_title_set(filename + "* - " + manifest_title);
 		///end
 
 		if (Config.raw.touch_ui) {
 			// Refresh undo & redo buttons
-			UIMenubar.menuHandle.redraws = 2;
+			UIMenubar.menu_handle.redraws = 2;
 		}
 
 		if (History.undos < Config.raw.undo_steps) History.undos++;
 		if (History.redos > 0) {
-			for (let i = 0; i < History.redos; ++i) History.steps.pop();
+			for (let i: i32 = 0; i < History.redos; ++i) History.steps.pop();
 			History.redos = 0;
 		}
 
 		///if (is_paint || is_sculpt)
-		let opos = Project.paintObjects.indexOf(Context.raw.paintObject);
-		let lpos = Project.layers.indexOf(Context.raw.layer);
-		let mpos = Project.materials.indexOf(Context.raw.material);
-		let bpos = Project.brushes.indexOf(Context.raw.brush);
+		let opos: i32 = Project.paint_objects.indexOf(Context.raw.paint_object);
+		let lpos: i32 = Project.layers.indexOf(Context.raw.layer);
+		let mpos: i32 = Project.materials.indexOf(Context.raw.material);
+		let bpos: i32 = Project.brushes.indexOf(Context.raw.brush);
 
 		History.steps.push({
 			name: name,
 			layer: lpos,
-			layer_type: SlotLayer.isMask(Context.raw.layer) ? LayerSlotType.SlotMask : SlotLayer.isGroup(Context.raw.layer) ? LayerSlotType.SlotGroup : LayerSlotType.SlotLayer,
+			layer_type: SlotLayer.is_mask(Context.raw.layer) ? layer_slot_type_t.MASK : SlotLayer.is_group(Context.raw.layer) ? layer_slot_type_t.GROUP : layer_slot_type_t.LAYER,
 			layer_parent: Context.raw.layer.parent == null ? -1 : Project.layers.indexOf(Context.raw.layer.parent),
 			object: opos,
 			material: mpos,
@@ -635,31 +637,31 @@ class History {
 	}
 
 	///if (is_paint || is_sculpt)
-	static redoMergeLayers = () => {
-		History.copyMergingLayers();
+	static redo_merge_layers = () => {
+		History.copy_merging_layers();
 	}
 
-	static copyMergingLayers = () => {
-		let lay = Context.raw.layer;
-		History.copyToUndo(lay.id, History.undoI, SlotLayer.isMask(Context.raw.layer));
+	static copy_merging_layers = () => {
+		let lay: SlotLayerRaw = Context.raw.layer;
+		History.copy_to_undo(lay.id, History.undo_i, SlotLayer.is_mask(Context.raw.layer));
 
-		let below = Project.layers.indexOf(lay) - 1;
+		let below: i32 = Project.layers.indexOf(lay) - 1;
 		lay = Project.layers[below];
-		History.copyToUndo(lay.id, History.undoI, SlotLayer.isMask(Context.raw.layer));
+		History.copy_to_undo(lay.id, History.undo_i, SlotLayer.is_mask(Context.raw.layer));
 	}
 
-	static copyMergingLayers2 = (layers: SlotLayerRaw[]) => {
+	static copy_merging_layers2 = (layers: SlotLayerRaw[]) => {
 		for (let layer of layers)
-		History.copyToUndo(layer.id, History.undoI, SlotLayer.isMask(layer));
+		History.copy_to_undo(layer.id, History.undo_i, SlotLayer.is_mask(layer));
 	}
 
-	static swapActive = () => {
-		let undoLayer = History.undoLayers[History.undoI];
+	static swap_active = () => {
+		let undoLayer: SlotLayerRaw = History.undo_layers[History.undo_i];
 		SlotLayer.swap(undoLayer, Context.raw.layer);
-		History.undoI = (History.undoI + 1) % Config.raw.undo_steps;
+		History.undo_i = (History.undo_i + 1) % Config.raw.undo_steps;
 	}
 
-	static copyToUndo = (fromId: i32, toId: i32, isMask: bool) => {
+	static copy_to_undo = (fromId: i32, toId: i32, isMask: bool) => {
 
 		///if is_sculpt
 		isMask = true;
@@ -678,15 +680,15 @@ class History {
 			render_path_bind_target("texpaint_pack" + fromId, "tex2");
 			render_path_draw_shader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
 		}
-		History.undoI = (History.undoI + 1) % Config.raw.undo_steps;
+		History.undo_i = (History.undo_i + 1) % Config.raw.undo_steps;
 	}
 	///end
 
-	static getCanvasOwner = (step: TStep): any => {
+	static get_canvas_owner = (step: step_t): any => {
 		///if (is_paint || is_sculpt)
 		return step.canvas_group == null ?
 			Project.materials[step.material] :
-			Project.materialGroups[step.canvas_group];
+			Project.material_groups[step.canvas_group];
 		///end
 
 		///if is_lab
@@ -694,16 +696,16 @@ class History {
 		///end
 	}
 
-	static swapCanvas = (step: TStep) => {
+	static swap_canvas = (step: step_t) => {
 		///if (is_paint || is_sculpt)
 		if (step.canvas_type == 0) {
-			let _canvas = History.getCanvasOwner(step).canvas;
-			History.getCanvasOwner(step).canvas = step.canvas;
+			let _canvas: zui_node_canvas_t = History.get_canvas_owner(step).canvas;
+			History.get_canvas_owner(step).canvas = step.canvas;
 			step.canvas = _canvas;
 			Context.raw.material = Project.materials[step.material];
 		}
 		else {
-			let _canvas = Project.brushes[step.brush].canvas;
+			let _canvas: zui_node_canvas_t = Project.brushes[step.brush].canvas;
 			Project.brushes[step.brush].canvas = step.canvas;
 			step.canvas = _canvas;
 			Context.raw.brush = Project.brushes[step.brush];
@@ -711,31 +713,31 @@ class History {
 		///end
 
 		///if is_lab
-		let _canvas = History.getCanvasOwner(step).canvas;
-		History.getCanvasOwner(step).canvas = step.canvas;
+		let _canvas: zui_node_canvas_t = History.get_canvas_owner(step).canvas;
+		History.get_canvas_owner(step).canvas = step.canvas;
 		step.canvas = _canvas;
 		///end
 
-		UINodes.canvasChanged();
+		UINodes.canvas_changed();
 		UINodes.hwnd.redraws = 2;
 	}
 }
 
-type TStep = {
-	name: string;
+type step_t = {
+	name?: string;
 	canvas?: zui_node_canvas_t; // Node history
 	canvas_group?: i32;
 	///if (is_paint || is_sculpt)
-	layer: i32;
-	layer_type: LayerSlotType;
-	layer_parent: i32;
-	object: i32;
-	material: i32;
-	brush: i32;
+	layer?: i32;
+	layer_type?: layer_slot_type_t;
+	layer_parent?: i32;
+	object?: i32;
+	material?: i32;
+	brush?: i32;
 	layer_opacity?: f32;
 	layer_object?: i32;
 	layer_blending?: i32;
 	prev_order?: i32; // Previous layer position
 	canvas_type?: i32;
 	///end
-}
+};

@@ -1,16 +1,16 @@
 
 class VectorNode extends LogicNode {
 
-	value = vec4_create();
+	value: vec4_t = vec4_create();
 	image: image_t = null;
 
 	constructor(x: Null<f32> = null, y: Null<f32> = null, z: Null<f32> = null) {
 		super();
 
 		if (x != null) {
-			this.addInput(new FloatNode(x), 0);
-			this.addInput(new FloatNode(y), 0);
-			this.addInput(new FloatNode(z), 0);
+			this.add_input(new FloatNode(x), 0);
+			this.add_input(new FloatNode(y), 0);
+			this.add_input(new FloatNode(z), 0);
 		}
 	}
 
@@ -27,13 +27,13 @@ class VectorNode extends LogicNode {
 		});
 	}
 
-	override getAsImage = (from: i32, done: (img: image_t)=>void) => {
+	override get_as_image = (from: i32, done: (img: image_t)=>void) => {
 		this.inputs[0].get((x: f32) => {
 			this.inputs[1].get((y: f32) => {
 				this.inputs[2].get((z: f32) => {
 					if (this.image != null) image_unload(this.image);
-					let b = new ArrayBuffer(16);
-					let v = new DataView(b);
+					let b: ArrayBuffer = new ArrayBuffer(16);
+					let v: DataView = new DataView(b);
 					v.setFloat32(0, (this.inputs[0].node as any).value, true);
 					v.setFloat32(4, (this.inputs[1].node as any).value, true);
 					v.setFloat32(8, (this.inputs[2].node as any).value, true);

@@ -4,9 +4,9 @@
 class TabFonts {
 
 	static draw = (htab: zui_handle_t) => {
-		let ui = UIBase.ui;
-		let statush = Config.raw.layout[LayoutSize.LayoutStatusH];
-		if (zui_tab(htab, tr("Fonts")) && statush > UIStatus.defaultStatusH * zui_SCALE(ui)) {
+		let ui: zui_t = UIBase.ui;
+		let statush: i32 = Config.raw.layout[layout_size_t.STATUS_H];
+		if (zui_tab(htab, tr("Fonts")) && statush > UIStatus.default_status_h * zui_SCALE(ui)) {
 
 			zui_begin_sticky();
 			if (Config.raw.touch_ui) {
@@ -16,43 +16,43 @@ class TabFonts {
 				zui_row([1 / 14, 1 / 14]);
 			}
 
-			if (zui_button(tr("Import"))) Project.importAsset("ttf,ttc,otf");
+			if (zui_button(tr("Import"))) Project.import_asset("ttf,ttc,otf");
 			if (ui.is_hovered) zui_tooltip(tr("Import font file"));
 
 			if (zui_button(tr("2D View"))) {
-				UIBase.show2DView(View2DType.View2DFont);
+				UIBase.show_2d_view(view_2d_type_t.FONT);
 			}
 			zui_end_sticky();
 			zui_separator(3, false);
 
-			let statusw = sys_width() - UIToolbar.toolbarw - Config.raw.layout[LayoutSize.LayoutSidebarW];
-			let slotw = Math.floor(51 * zui_SCALE(ui));
-			let num = Math.floor(statusw / slotw);
+			let statusw: i32 = sys_width() - UIToolbar.toolbar_w - Config.raw.layout[layout_size_t.SIDEBAR_W];
+			let slotw: i32 = Math.floor(51 * zui_SCALE(ui));
+			let num: i32 = Math.floor(statusw / slotw);
 
-			for (let row = 0; row < Math.floor(Math.ceil(Project.fonts.length / num)); ++row) {
-				let mult = Config.raw.show_asset_names ? 2 : 1;
-				let ar = [];
-				for (let i = 0; i < num * mult; ++i) ar.push(1 / num);
+			for (let row: i32 = 0; row < Math.floor(Math.ceil(Project.fonts.length / num)); ++row) {
+				let mult: i32 = Config.raw.show_asset_names ? 2 : 1;
+				let ar: f32[] = [];
+				for (let i: i32 = 0; i < num * mult; ++i) ar.push(1 / num);
 				zui_row(ar);
 
 				ui._x += 2;
-				let off = Config.raw.show_asset_names ? zui_ELEMENT_OFFSET(ui) * 10.0 : 6;
+				let off: f32 = Config.raw.show_asset_names ? zui_ELEMENT_OFFSET(ui) * 10.0 : 6;
 				if (row > 0) ui._y += off;
 
-				for (let j = 0; j < num; ++j) {
-					let imgw = Math.floor(50 * zui_SCALE(ui));
-					let i = j + row * num;
+				for (let j: i32 = 0; j < num; ++j) {
+					let imgw: i32 = Math.floor(50 * zui_SCALE(ui));
+					let i: i32 = j + row * num;
 					if (i >= Project.fonts.length) {
 						zui_end_element(imgw);
 						if (Config.raw.show_asset_names) zui_end_element(0);
 						continue;
 					}
-					let img = Project.fonts[i].image;
+					let img: image_t = Project.fonts[i].image;
 
 					if (Context.raw.font == Project.fonts[i]) {
 						// Zui.fill(1, -2, img.width + 3, img.height + 3, ui.t.HIGHLIGHT_COL); // TODO
-						let off = row % 2 == 1 ? 1 : 0;
-						let w = 50;
+						let off: i32 = row % 2 == 1 ? 1 : 0;
+						let w: i32 = 50;
 						if (Config.raw.window_scale > 1) w += Math.floor(Config.raw.window_scale * 2);
 						zui_fill(-1,         -2, w + 3,       2, ui.t.HIGHLIGHT_COL);
 						zui_fill(-1,    w - off, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
@@ -60,10 +60,10 @@ class TabFonts {
 						zui_fill(w + 1,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
 					}
 
-					let uix = ui._x;
-					let tile = zui_SCALE(ui) > 1 ? 100 : 50;
-					let state = zui_state_t.IDLE;
-					if (Project.fonts[i].previewReady) {
+					let uix: f32 = ui._x;
+					let tile: i32 = zui_SCALE(ui) > 1 ? 100 : 50;
+					let state: zui_state_t = zui_state_t.IDLE;
+					if (Project.fonts[i].preview_ready) {
 						// g2_set_pipeline(UIView2D.pipe); // L8
 						// ///if krom_opengl
 						// g4_set_pipeline(UIView2D.pipe);
@@ -79,29 +79,28 @@ class TabFonts {
 					if (state == zui_state_t.STARTED) {
 						if (Context.raw.font != Project.fonts[i]) {
 							let _init = () => {
-								Context.selectFont(i);
+								Context.select_font(i);
 							}
 							app_notify_on_init(_init);
 						}
-						if (time_time() - Context.raw.selectTime < 0.25) UIBase.show2DView(View2DType.View2DFont);
-						Context.raw.selectTime = time_time();
+						if (time_time() - Context.raw.select_time < 0.25) UIBase.show_2d_view(view_2d_type_t.FONT);
+						Context.raw.select_time = time_time();
 					}
 					if (ui.is_hovered && ui.input_released_r) {
-						Context.selectFont(i);
-						let add = Project.fonts.length > 1 ? 1 : 0;
-						let fontName = Project.fonts[i].name;
+						Context.select_font(i);
+						let add: i32 = Project.fonts.length > 1 ? 1 : 0;
 						UIMenu.draw((ui: zui_t) => {
-							if (Project.fonts.length > 1 && UIMenu.menuButton(ui, tr("Delete"), "delete") && Project.fonts[i].file != "") {
-								TabFonts.deleteFont(Project.fonts[i]);
+							if (Project.fonts.length > 1 && UIMenu.menu_button(ui, tr("Delete"), "delete") && Project.fonts[i].file != "") {
+								TabFonts.delete_font(Project.fonts[i]);
 							}
 						}, 0 + add);
 					}
 					if (ui.is_hovered) {
 						if (img == null) {
 							app_notify_on_init(() => {
-								let _font = Context.raw.font;
+								let _font: SlotFontRaw = Context.raw.font;
 								Context.raw.font = Project.fonts[i];
-								UtilRender.makeFontPreview();
+								UtilRender.make_font_preview();
 								Context.raw.font = _font;
 							});
 						}
@@ -126,19 +125,19 @@ class TabFonts {
 				ui._y += 6;
 			}
 
-			let inFocus = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
-						  ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
+			let inFocus: bool = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
+						  		ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
 			if (inFocus && ui.is_delete_down && Project.fonts.length > 1 && Context.raw.font.file != "") {
 				ui.is_delete_down = false;
-				TabFonts.deleteFont(Context.raw.font);
+				TabFonts.delete_font(Context.raw.font);
 			}
 		}
 	}
 
-	static deleteFont = (font: SlotFontRaw) => {
-		let i = Project.fonts.indexOf(font);
+	static delete_font = (font: SlotFontRaw) => {
+		let i: i32 = Project.fonts.indexOf(font);
 		let _init = () => {
-			Context.selectFont(i == Project.fonts.length - 1 ? i - 1 : i + 1);
+			Context.select_font(i == Project.fonts.length - 1 ? i - 1 : i + 1);
 			data_delete_font(Project.fonts[i].file);
 			Project.fonts.splice(i, 1);
 		}

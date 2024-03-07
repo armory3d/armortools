@@ -1,99 +1,99 @@
 
 class Project {
 
-	static raw: TProjectFormat = {};
-	static filepath = "";
-	static assets: TAsset[] = [];
-	static assetNames: string[] = [];
-	static assetId = 0;
-	static meshAssets: string[] = [];
-	static materialGroups: TNodeGroup[] = [];
-	static paintObjects: mesh_object_t[] = null;
-	static assetMap = new Map<i32, any>(); // ImageRaw | FontRaw
-	static meshList: string[] = null;
+	static raw: project_format_t = {};
+	static filepath: string = "";
+	static assets: asset_t[] = [];
+	static asset_names: string[] = [];
+	static asset_id: i32 = 0;
+	static mesh_assets: string[] = [];
+	static material_groups: node_group_t[] = [];
+	static paint_objects: mesh_object_t[] = null;
+	static asset_map: Map<i32, any> = new Map(); // ImageRaw | FontRaw
+	static mesh_list: string[] = null;
 	///if (is_paint || is_sculpt)
 	static materials: SlotMaterialRaw[] = null;
 	static brushes: SlotBrushRaw[] = null;
 	static layers: SlotLayerRaw[] = null;
 	static fonts: SlotFontRaw[] = null;
-	static atlasObjects: i32[] = null;
-	static atlasNames: string[] = null;
+	static atlas_objects: i32[] = null;
+	static atlas_names: string[] = null;
 	///end
 	///if is_lab
-	static materialData: material_data_t = null; ////
+	static material_data: material_data_t = null; ////
 	static materials: any[] = null; ////
 	static nodes: zui_nodes_t;
 	static canvas: zui_node_canvas_t;
-	static defaultCanvas: ArrayBuffer = null;
+	static default_canvas: ArrayBuffer = null;
 	///end
 
-	static projectOpen = () => {
+	static project_open = () => {
 		UIFiles.show("arm", false, false, (path: string) => {
 			if (!path.endsWith(".arm")) {
 				Console.error(Strings.error0());
 				return;
 			}
 
-			let current = _g2_current;
+			let current: image_t = _g2_current;
 			if (current != null) g2_end();
 
-			ImportArm.runProject(path);
+			ImportArm.run_project(path);
 
 			if (current != null) g2_begin(current);
 		});
 	}
 
-	static projectSave = (saveAndQuit = false) => {
+	static project_save = (saveAndQuit: bool = false) => {
 		if (Project.filepath == "") {
 			///if krom_ios
-			let documentDirectory = krom_save_dialog("", "");
+			let documentDirectory: string = krom_save_dialog("", "");
 			documentDirectory = documentDirectory.substr(0, documentDirectory.length - 8); // Strip /'untitled'
 			Project.filepath = documentDirectory + "/" + sys_title() + ".arm";
 			///elseif krom_android
 			Project.filepath = krom_save_path() + "/" + sys_title() + ".arm";
 			///else
-			Project.projectSaveAs(saveAndQuit);
+			Project.project_save_as(saveAndQuit);
 			return;
 			///end
 		}
 
 		///if (krom_windows || krom_linux || krom_darwin)
-		let filename = Project.filepath.substring(Project.filepath.lastIndexOf(Path.sep) + 1, Project.filepath.length - 4);
+		let filename: string = Project.filepath.substring(Project.filepath.lastIndexOf(Path.sep) + 1, Project.filepath.length - 4);
 		sys_title_set(filename + " - " + manifest_title);
 		///end
 
 		let _init = () => {
-			ExportArm.runProject();
+			ExportArm.run_project();
 			if (saveAndQuit) sys_stop();
 		}
 		app_notify_on_init(_init);
 	}
 
-	static projectSaveAs = (saveAndQuit = false) => {
+	static project_save_as = (saveAndQuit: bool = false) => {
 		UIFiles.show("arm", true, false, (path: string) => {
-			let f = UIFiles.filename;
+			let f: string = UIFiles.filename;
 			if (f == "") f = tr("untitled");
 			Project.filepath = path + Path.sep + f;
 			if (!Project.filepath.endsWith(".arm")) Project.filepath += ".arm";
-			Project.projectSave(saveAndQuit);
+			Project.project_save(saveAndQuit);
 		});
 	}
 
-	static projectNewBox = () => {
+	static project_new_box = () => {
 		///if (is_paint || is_sculpt)
-		UIBox.showCustom((ui: zui_t) => {
+		UIBox.show_custom((ui: zui_t) => {
 			if (zui_tab(zui_handle("project_0"), tr("New Project"))) {
-				if (Project.meshList == null) {
-					Project.meshList = File.readDirectory(Path.data() + Path.sep + "meshes");
-					for (let i = 0; i < Project.meshList.length; ++i) Project.meshList[i] = Project.meshList[i].substr(0, Project.meshList[i].length - 4); // Trim .arm
-					Project.meshList.unshift("plane");
-					Project.meshList.unshift("sphere");
-					Project.meshList.unshift("rounded_cube");
+				if (Project.mesh_list == null) {
+					Project.mesh_list = File.read_directory(Path.data() + Path.sep + "meshes");
+					for (let i: i32 = 0; i < Project.mesh_list.length; ++i) Project.mesh_list[i] = Project.mesh_list[i].substr(0, Project.mesh_list[i].length - 4); // Trim .arm
+					Project.mesh_list.unshift("plane");
+					Project.mesh_list.unshift("sphere");
+					Project.mesh_list.unshift("rounded_cube");
 				}
 
 				zui_row([0.5, 0.5]);
-				Context.raw.projectType = zui_combo(zui_handle("project_1", { position: Context.raw.projectType }), Project.meshList, tr("Template"), true);
-				Context.raw.projectAspectRatio = zui_combo(zui_handle("project_2", { position: Context.raw.projectAspectRatio }), ["1:1", "2:1", "1:2"], tr("Aspect Ratio"), true);
+				Context.raw.project_type = zui_combo(zui_handle("project_1", { position: Context.raw.project_type }), Project.mesh_list, tr("Template"), true);
+				Context.raw.project_aspect_ratio = zui_combo(zui_handle("project_2", { position: Context.raw.project_aspect_ratio }), ["1:1", "2:1", "1:2"], tr("Aspect Ratio"), true);
 
 				zui_end_element();
 				zui_row([0.5, 0.5]);
@@ -101,8 +101,8 @@ class Project {
 					UIBox.hide();
 				}
 				if (zui_button(tr("OK")) || ui.is_return_down) {
-					Project.projectNew();
-					Viewport.scaleToBounds();
+					Project.project_new();
+					Viewport.scale_to_bounds();
 					UIBox.hide();
 				}
 			}
@@ -110,112 +110,112 @@ class Project {
 		///end
 
 		///if is_lab
-		Project.projectNew();
-		Viewport.scaleToBounds();
+		Project.project_new();
+		Viewport.scale_to_bounds();
 		///end
 	}
 
-	static projectNew = (resetLayers = true) => {
+	static project_new = (resetLayers: bool = true) => {
 		///if (krom_windows || krom_linux || krom_darwin)
 		sys_title_set(manifest_title);
 		///end
 		Project.filepath = "";
 
 		///if (is_paint || is_sculpt)
-		if (Context.raw.mergedObject != null) {
-			mesh_object_remove(Context.raw.mergedObject);
-			data_delete_mesh(Context.raw.mergedObject.data._.handle);
-			Context.raw.mergedObject = null;
+		if (Context.raw.merged_object != null) {
+			mesh_object_remove(Context.raw.merged_object);
+			data_delete_mesh(Context.raw.merged_object.data._.handle);
+			Context.raw.merged_object = null;
 		}
-		Context.raw.layerPreviewDirty = true;
-		Context.raw.layerFilter = 0;
-		Project.meshAssets = [];
+		Context.raw.layer_preview_dirty = true;
+		Context.raw.layer_filter = 0;
+		Project.mesh_assets = [];
 		///end
 
 		Viewport.reset();
-		Context.raw.paintObject = Context.mainObject();
+		Context.raw.paint_object = Context.main_object();
 
-		Context.selectPaintObject(Context.mainObject());
-		for (let i = 1; i < Project.paintObjects.length; ++i) {
-			let p = Project.paintObjects[i];
-			if (p == Context.raw.paintObject) continue;
+		Context.select_paint_object(Context.main_object());
+		for (let i: i32 = 1; i < Project.paint_objects.length; ++i) {
+			let p: mesh_object_t = Project.paint_objects[i];
+			if (p == Context.raw.paint_object) continue;
 			data_delete_mesh(p.data._.handle);
 			mesh_object_remove(p);
 		}
-		let meshes = scene_meshes;
-		let len = meshes.length;
-		for (let i = 0; i < len; ++i) {
-			let m = meshes[len - i - 1];
-			if (Context.raw.projectObjects.indexOf(m) == -1 &&
+		let meshes: mesh_object_t[] = scene_meshes;
+		let len: i32 = meshes.length;
+		for (let i: i32 = 0; i < len; ++i) {
+			let m: mesh_object_t = meshes[len - i - 1];
+			if (Context.raw.project_objects.indexOf(m) == -1 &&
 				m.base.name != ".ParticleEmitter" &&
 				m.base.name != ".Particle") {
 				data_delete_mesh(m.data._.handle);
 				mesh_object_remove(m);
 			}
 		}
-		let handle = Context.raw.paintObject.data._.handle;
+		let handle: string = Context.raw.paint_object.data._.handle;
 		if (handle != "SceneSphere" && handle != "ScenePlane") {
 			data_delete_mesh(handle);
 		}
 
-		if (Context.raw.projectType != ProjectModel.ModelRoundedCube) {
+		if (Context.raw.project_type != project_model_t.ROUNDED_CUBE) {
 			let raw: mesh_data_t = null;
-			if (Context.raw.projectType == ProjectModel.ModelSphere || Context.raw.projectType == ProjectModel.ModelTessellatedPlane) {
-				let mesh: any = Context.raw.projectType == ProjectModel.ModelSphere ?
+			if (Context.raw.project_type == project_model_t.SPHERE || Context.raw.project_type == project_model_t.TESSELLATED_PLANE) {
+				let mesh: any = Context.raw.project_type == project_model_t.SPHERE ?
 					Geom.make_uv_sphere(1, 512, 256) :
 					Geom.make_plane(1, 1, 512, 512);
 				mesh.name = "Tessellated";
-				raw = ImportMesh.rawMesh(mesh);
+				raw = ImportMesh.raw_mesh(mesh);
 
 				///if is_sculpt
-				Base.notifyOnNextFrame(() => {
-					let f32a = new Float32Array(Config.getTextureResX() * Config.getTextureResY() * 4);
-					for (let i = 0; i < Math.floor(mesh.inda.length); ++i) {
-						let index = mesh.inda[i];
+				Base.notify_on_next_frame(() => {
+					let f32a: Float32Array = new Float32Array(Config.get_texture_res_x() * Config.get_texture_res_y() * 4);
+					for (let i: i32 = 0; i < Math.floor(mesh.inda.length); ++i) {
+						let index: i32 = mesh.inda[i];
 						f32a[i * 4]     = mesh.posa[index * 4]     / 32767;
 						f32a[i * 4 + 1] = mesh.posa[index * 4 + 1] / 32767;
 						f32a[i * 4 + 2] = mesh.posa[index * 4 + 2] / 32767;
 						f32a[i * 4 + 3] = 1.0;
 					}
 
-					let imgmesh = image_from_bytes(f32a.buffer, Config.getTextureResX(), Config.getTextureResY(), tex_format_t.RGBA128);
-					let texpaint = Project.layers[0].texpaint;
+					let imgmesh: image_t = image_from_bytes(f32a.buffer, Config.get_texture_res_x(), Config.get_texture_res_y(), tex_format_t.RGBA128);
+					let texpaint: image_t = Project.layers[0].texpaint;
 					g2_begin(texpaint);
-					g2_set_pipeline(Base.pipeCopy128);
-					g2_draw_scaled_image(imgmesh, 0, 0, Config.getTextureResX(), Config.getTextureResY());
+					g2_set_pipeline(Base.pipe_copy128);
+					g2_draw_scaled_image(imgmesh, 0, 0, Config.get_texture_res_x(), Config.get_texture_res_y());
 					g2_set_pipeline(null);
 					g2_end();
 				});
 				///end
 			}
 			else {
-				let b: ArrayBuffer = data_get_blob("meshes/" + Project.meshList[Context.raw.projectType] + ".arm");
+				let b: ArrayBuffer = data_get_blob("meshes/" + Project.mesh_list[Context.raw.project_type] + ".arm");
 				raw = armpack_decode(b).mesh_datas[0];
 			}
 
 			let md: mesh_data_t = mesh_data_create(raw);
 			data_cached_meshes.set("SceneTessellated", md);
 
-			if (Context.raw.projectType == ProjectModel.ModelTessellatedPlane) {
-				Viewport.setView(0, 0, 0.75, 0, 0, 0); // Top
+			if (Context.raw.project_type == project_model_t.TESSELLATED_PLANE) {
+				Viewport.set_view(0, 0, 0.75, 0, 0, 0); // Top
 			}
 		}
 
-		let n = Context.raw.projectType == ProjectModel.ModelRoundedCube ? ".Cube" : "Tessellated";
+		let n: string = Context.raw.project_type == project_model_t.ROUNDED_CUBE ? ".Cube" : "Tessellated";
 		let md: mesh_data_t = data_get_mesh("Scene", n);
 
-		let current = _g2_current;
+		let current: image_t = _g2_current;
 		if (current != null) g2_end();
 
 		///if is_paint
-		Context.raw.pickerMaskHandle.position = PickerMask.MaskNone;
+		Context.raw.picker_mask_handle.position = picker_mask_t.NONE;
 		///end
 
-		mesh_object_set_data(Context.raw.paintObject, md);
-		vec4_set(Context.raw.paintObject.base.transform.scale, 1, 1, 1);
-		transform_build_matrix(Context.raw.paintObject.base.transform);
-		Context.raw.paintObject.base.name = n;
-		Project.paintObjects = [Context.raw.paintObject];
+		mesh_object_set_data(Context.raw.paint_object, md);
+		vec4_set(Context.raw.paint_object.base.transform.scale, 1, 1, 1);
+		transform_build_matrix(Context.raw.paint_object.base.transform);
+		Context.raw.paint_object.base.name = n;
+		Project.paint_objects = [Context.raw.paint_object];
 		///if (is_paint || is_sculpt)
 		while (Project.materials.length > 0) SlotMaterial.unload(Project.materials.pop());
 		///end
@@ -224,7 +224,7 @@ class Project {
 		Project.materials.push(SlotMaterial.create(m));
 		///end
 		///if is_lab
-		Project.materialData = m;
+		Project.material_data = m;
 		///end
 
 		///if (is_paint || is_sculpt)
@@ -232,8 +232,8 @@ class Project {
 		///end
 
 		UINodes.hwnd.redraws = 2;
-		UINodes.groupStack = [];
-		Project.materialGroups = [];
+		UINodes.group_stack = [];
+		Project.material_groups = [];
 
 		///if (is_paint || is_sculpt)
 		Project.brushes = [SlotBrush.create()];
@@ -243,62 +243,62 @@ class Project {
 		Context.raw.font = Project.fonts[0];
 		///end
 
-		Project.setDefaultSwatches();
+		Project.set_default_swatches();
 		Context.raw.swatch = Project.raw.swatches[0];
 
-		Context.raw.pickedColor = Project.makeSwatch();
-		Context.raw.colorPickerCallback = null;
+		Context.raw.picked_color = Project.make_swatch();
+		Context.raw.color_picker_callback = null;
 		History.reset();
 
-		MakeMaterial.parsePaintMaterial();
+		MakeMaterial.parse_paint_material();
 
 		///if (is_paint || is_sculpt)
-		UtilRender.makeMaterialPreview();
+		UtilRender.make_material_preview();
 		///end
 
 		for (let a of Project.assets) data_delete_image(a.file);
 		Project.assets = [];
-		Project.assetNames = [];
-		Project.assetMap = new Map();
-		Project.assetId = 0;
+		Project.asset_names = [];
+		Project.asset_map = new Map();
+		Project.asset_id = 0;
 		Project.raw.packed_assets = [];
 		Context.raw.ddirty = 4;
 
 		///if (is_paint || is_sculpt)
-		UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
-		UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
+		UIBase.hwnds[tab_area_t.SIDEBAR0].redraws = 2;
+		UIBase.hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 		///end
 
 		if (resetLayers) {
 
 			///if (is_paint || is_sculpt)
-			let aspectRatioChanged = Project.layers[0].texpaint.width != Config.getTextureResX() || Project.layers[0].texpaint.height != Config.getTextureResY();
+			let aspectRatioChanged: bool = Project.layers[0].texpaint.width != Config.get_texture_res_x() || Project.layers[0].texpaint.height != Config.get_texture_res_y();
 			while (Project.layers.length > 0) SlotLayer.unload(Project.layers.pop());
-			let layer = SlotLayer.create();
+			let layer: SlotLayerRaw = SlotLayer.create();
 			Project.layers.push(layer);
-			Context.setLayer(layer);
+			Context.set_layer(layer);
 			if (aspectRatioChanged) {
-				app_notify_on_init(Base.resizeLayers);
+				app_notify_on_init(Base.resize_layers);
 			}
 			///end
 
-			app_notify_on_init(Base.initLayers);
+			app_notify_on_init(Base.init_layers);
 		}
 
 		if (current != null) g2_begin(current);
 
-		Context.raw.savedEnvmap = null;
-		Context.raw.envmapLoaded = false;
-		scene_world._.envmap = Context.raw.emptyEnvmap;
+		Context.raw.saved_envmap = null;
+		Context.raw.envmap_loaded = false;
+		scene_world._.envmap = Context.raw.empty_envmap;
 		scene_world.envmap = "World_radiance.k";
-		Context.raw.showEnvmapHandle.selected = Context.raw.showEnvmap = false;
-		scene_world._.radiance = Context.raw.defaultRadiance;
-		scene_world._.radiance_mipmaps = Context.raw.defaultRadianceMipmaps;
-		scene_world._.irradiance = Context.raw.defaultIrradiance;
+		Context.raw.show_envmap_handle.selected = Context.raw.show_envmap = false;
+		scene_world._.radiance = Context.raw.default_radiance;
+		scene_world._.radiance_mipmaps = Context.raw.default_radiance_mipmaps;
+		scene_world._.irradiance = Context.raw.default_irradiance;
 		scene_world.strength = 4.0;
 
 		///if (is_paint || is_sculpt)
-		Context.initTool();
+		Context.init_tool();
 		///end
 
 		///if (krom_direct3d12 || krom_vulkan || krom_metal)
@@ -307,22 +307,22 @@ class Project {
 	}
 
 	///if (is_paint || is_sculpt)
-	static importMaterial = () => {
+	static import_material = () => {
 		UIFiles.show("arm,blend", false, true, (path: string) => {
 			path.endsWith(".blend") ?
 				ImportBlendMaterial.run(path) :
-				ImportArm.runMaterial(path);
+				ImportArm.run_material(path);
 		});
 	}
 
-	static importBrush = () => {
-		UIFiles.show("arm," + Path.textureFormats.join(","), false, true, (path: string) => {
+	static import_brush = () => {
+		UIFiles.show("arm," + Path.texture_formats.join(","), false, true, (path: string) => {
 			// Create brush from texture
-			if (Path.isTexture(path)) {
+			if (Path.is_texture(path)) {
 				// Import texture
 				ImportAsset.run(path);
-				let assetIndex = 0;
-				for (let i = 0; i < Project.assets.length; ++i) {
+				let assetIndex: i32 = 0;
+				for (let i: i32 = 0; i < Project.assets.length; ++i) {
 					if (Project.assets[i].file == path) {
 						assetIndex = i;
 						break;
@@ -334,11 +334,11 @@ class Project {
 				Project.brushes.push(Context.raw.brush);
 
 				// Create and link image node
-				let n = NodesBrush.createNode("TEX_IMAGE");
+				let n: zui_node_t = NodesBrush.create_node("TEX_IMAGE");
 				n.x = 83;
 				n.y = 340;
 				n.buttons[0].default_value = assetIndex;
-				let links = Context.raw.brush.canvas.links;
+				let links: zui_node_link_t[] = Context.raw.brush.canvas.links;
 				links.push({
 					id: zui_get_link_id(links),
 					from_id: n.id,
@@ -348,40 +348,40 @@ class Project {
 				});
 
 				// Parse brush
-				MakeMaterial.parseBrush();
+				MakeMaterial.parse_brush();
 				UINodes.hwnd.redraws = 2;
 				let _init = () => {
-					UtilRender.makeBrushPreview();
+					UtilRender.make_brush_preview();
 				}
 				app_notify_on_init(_init);
 			}
 			// Import from project file
 			else {
-				ImportArm.runBrush(path);
+				ImportArm.run_brush(path);
 			}
 		});
 	}
 	///end
 
-	static importMesh = (replaceExisting = true, done: ()=>void = null) => {
-		UIFiles.show(Path.meshFormats.join(","), false, false, (path: string) => {
-			Project.importMeshBox(path, replaceExisting, true, done);
+	static import_mesh = (replaceExisting: bool = true, done: ()=>void = null) => {
+		UIFiles.show(Path.mesh_formats.join(","), false, false, (path: string) => {
+			Project.import_mesh_box(path, replaceExisting, true, done);
 		});
 	}
 
-	static importMeshBox = (path: string, replaceExisting = true, clearLayers = true, done: ()=>void = null) => {
+	static import_mesh_box = (path: string, replaceExisting: bool = true, clearLayers: bool = true, done: ()=>void = null) => {
 
 		///if krom_ios
 		// Import immediately while access to resource is unlocked
 		// data_get_blob(path, (b: Blob) => {});
 		///end
 
-		UIBox.showCustom((ui: zui_t) => {
-			let tabVertical = Config.raw.touch_ui;
+		UIBox.show_custom((ui: zui_t) => {
+			let tabVertical: bool = Config.raw.touch_ui;
 			if (zui_tab(zui_handle("project_3"), tr("Import Mesh"), tabVertical)) {
 
 				if (path.toLowerCase().endsWith(".obj")) {
-					Context.raw.splitBy = zui_combo(zui_handle("project_4"), [
+					Context.raw.split_by = zui_combo(zui_handle("project_4"), [
 						tr("Object"),
 						tr("Group"),
 						tr("Material"),
@@ -398,7 +398,7 @@ class Project {
 				///if (is_paint || is_sculpt)
 				// if (path.toLowerCase().endsWith(".fbx") || path.toLowerCase().endsWith(".blend")) {
 				if (path.toLowerCase().endsWith(".blend")) {
-					Context.raw.parseVCols = zui_check(zui_handle("project_6", { selected: Context.raw.parseVCols }), tr("Parse Vertex Colors"));
+					Context.raw.parse_vcols = zui_check(zui_handle("project_6", { selected: Context.raw.parse_vcols }), tr("Parse Vertex Colors"));
 					if (ui.is_hovered) zui_tooltip(tr("Import vertex color data"));
 				}
 				///end
@@ -419,46 +419,46 @@ class Project {
 						if (done != null) done();
 					}
 					///if (krom_android || krom_ios)
-					Base.notifyOnNextFrame(() => {
+					Base.notify_on_next_frame(() => {
 						Console.toast(tr("Importing mesh"));
-						Base.notifyOnNextFrame(doImport);
+						Base.notify_on_next_frame(doImport);
 					});
 					///else
 					doImport();
 					///end
 				}
 				if (zui_button(tr("?"))) {
-					File.loadUrl("https://github.com/armory3d/armorpaint_docs/blob/master/faq.md");
+					File.load_url("https://github.com/armory3d/armorpaint_docs/blob/master/faq.md");
 				}
 			}
 		});
-		UIBox.clickToHide = false; // Prevent closing when going back to window from file browser
+		UIBox.click_to_hide = false; // Prevent closing when going back to window from file browser
 	}
 
-	static reimportMesh = () => {
-		if (Project.meshAssets != null && Project.meshAssets.length > 0 && File.exists(Project.meshAssets[0])) {
-			Project.importMeshBox(Project.meshAssets[0], true, false);
+	static reimport_mesh = () => {
+		if (Project.mesh_assets != null && Project.mesh_assets.length > 0 && File.exists(Project.mesh_assets[0])) {
+			Project.import_mesh_box(Project.mesh_assets[0], true, false);
 		}
-		else Project.importAsset();
+		else Project.import_asset();
 	}
 
-	static unwrapMeshBox = (mesh: any, done: (a: any)=>void, skipUI = false) => {
-		UIBox.showCustom((ui: zui_t) => {
-			let tabVertical = Config.raw.touch_ui;
+	static unwrap_mesh_box = (mesh: any, done: (a: any)=>void, skipUI: bool = false) => {
+		UIBox.show_custom((ui: zui_t) => {
+			let tabVertical: bool = Config.raw.touch_ui;
 			if (zui_tab(zui_handle("project_7"), tr("Unwrap Mesh"), tabVertical)) {
 
 				let unwrapPlugins: string[] = [];
-				if (BoxPreferences.filesPlugin == null) {
-					BoxPreferences.fetchPlugins();
+				if (BoxPreferences.files_plugin == null) {
+					BoxPreferences.fetch_plugins();
 				}
-				for (let f of BoxPreferences.filesPlugin) {
+				for (let f of BoxPreferences.files_plugin) {
 					if (f.indexOf("uv_unwrap") >= 0 && f.endsWith(".js")) {
 						unwrapPlugins.push(f);
 					}
 				}
 				unwrapPlugins.push("equirect");
 
-				let unwrapBy = zui_combo(zui_handle("project_8"), unwrapPlugins, tr("Plugin"), true);
+				let unwrapBy: i32 = zui_combo(zui_handle("project_8"), unwrapPlugins, tr("Plugin"), true);
 
 				zui_row([0.5, 0.5]);
 				if (zui_button(tr("Cancel"))) {
@@ -468,12 +468,12 @@ class Project {
 					UIBox.hide();
 					let doUnwrap = () => {
 						if (unwrapBy == unwrapPlugins.length - 1) {
-							UtilMesh.equirectUnwrap(mesh);
+							UtilMesh.equirect_unwrap(mesh);
 						}
 						else {
-							let f = unwrapPlugins[unwrapBy];
+							let f: string = unwrapPlugins[unwrapBy];
 							if (Config.raw.plugins.indexOf(f) == -1) {
-								Config.enablePlugin(f);
+								Config.enable_plugin(f);
 								Console.info(f + " " + tr("plugin enabled"));
 							}
 							UtilMesh.unwrappers.get(f)(mesh);
@@ -481,9 +481,9 @@ class Project {
 						done(mesh);
 					}
 					///if (krom_android || krom_ios)
-					Base.notifyOnNextFrame(() => {
+					Base.notify_on_next_frame(() => {
 						Console.toast(tr("Unwrapping mesh"));
-						Base.notifyOnNextFrame(doUnwrap);
+						Base.notify_on_next_frame(doUnwrap);
 					});
 					///else
 					doUnwrap();
@@ -493,55 +493,55 @@ class Project {
 		});
 	}
 
-	static importAsset = (filters: string = null, hdrAsEnvmap = true) => {
-		if (filters == null) filters = Path.textureFormats.join(",") + "," + Path.meshFormats.join(",");
+	static import_asset = (filters: string = null, hdrAsEnvmap: bool = true) => {
+		if (filters == null) filters = Path.texture_formats.join(",") + "," + Path.mesh_formats.join(",");
 		UIFiles.show(filters, false, true, (path: string) => {
 			ImportAsset.run(path, -1.0, -1.0, true, hdrAsEnvmap);
 		});
 	}
 
-	static importSwatches = (replaceExisting = false) => {
+	static import_swatches = (replaceExisting: bool = false) => {
 		UIFiles.show("arm,gpl", false, false, (path: string) => {
-			if (Path.isGimpColorPalette(path)) ImportGpl.run(path, replaceExisting);
-			else ImportArm.runSwatches(path, replaceExisting);
+			if (Path.is_gimp_color_palette(path)) ImportGpl.run(path, replaceExisting);
+			else ImportArm.run_swatches(path, replaceExisting);
 		});
 	}
 
-	static reimportTextures = () => {
+	static reimport_textures = () => {
 		for (let asset of Project.assets) {
-			Project.reimportTexture(asset);
+			Project.reimport_texture(asset);
 		}
 	}
 
-	static reimportTexture = (asset: TAsset) => {
+	static reimport_texture = (asset: asset_t) => {
 		let load = (path: string) => {
 			asset.file = path;
-			let i = Project.assets.indexOf(asset);
+			let i: i32 = Project.assets.indexOf(asset);
 			data_delete_image(asset.file);
-			Project.assetMap.delete(asset.id);
-			let oldAsset = Project.assets[i];
+			Project.asset_map.delete(asset.id);
+			let oldAsset: asset_t = Project.assets[i];
 			Project.assets.splice(i, 1);
-			Project.assetNames.splice(i, 1);
+			Project.asset_names.splice(i, 1);
 			ImportTexture.run(asset.file);
 			Project.assets.splice(i, 0, Project.assets.pop());
-			Project.assetNames.splice(i, 0, Project.assetNames.pop());
+			Project.asset_names.splice(i, 0, Project.asset_names.pop());
 
 			///if (is_paint || is_sculpt)
 			if (Context.raw.texture == oldAsset) Context.raw.texture = Project.assets[i];
 			///end
 
 			let _next = () => {
-				MakeMaterial.parsePaintMaterial();
+				MakeMaterial.parse_paint_material();
 
 				///if (is_paint || is_sculpt)
-				UtilRender.makeMaterialPreview();
-				UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
+				UtilRender.make_material_preview();
+				UIBase.hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 				///end
 			}
-			Base.notifyOnNextFrame(_next);
+			Base.notify_on_next_frame(_next);
 		}
 		if (!File.exists(asset.file)) {
-			let filters = Path.textureFormats.join(",");
+			let filters: string = Path.texture_formats.join(",");
 			UIFiles.show(filters, false, false, (path: string) => {
 				load(path);
 			});
@@ -549,79 +549,79 @@ class Project {
 		else load(asset.file);
 	}
 
-	static getImage = (asset: TAsset): image_t => {
-		return asset != null ? Project.assetMap.get(asset.id) : null;
+	static get_image = (asset: asset_t): image_t => {
+		return asset != null ? Project.asset_map.get(asset.id) : null;
 	}
 
 	///if (is_paint || is_sculpt)
-	static getUsedAtlases = (): string[] => {
-		if (Project.atlasObjects == null) return null;
+	static get_used_atlases = (): string[] => {
+		if (Project.atlas_objects == null) return null;
 		let used: i32[] = [];
-		for (let i of Project.atlasObjects) if (used.indexOf(i) == -1) used.push(i);
+		for (let i of Project.atlas_objects) if (used.indexOf(i) == -1) used.push(i);
 		if (used.length > 1) {
 			let res: string[] = [];
-			for (let i of used) res.push(Project.atlasNames[i]);
+			for (let i of used) res.push(Project.atlas_names[i]);
 			return res;
 		}
 		else return null;
 	}
 
-	static isAtlasObject = (p: mesh_object_t): bool => {
-		if (Context.raw.layerFilter <= Project.paintObjects.length) return false;
-		let atlasName = Project.getUsedAtlases()[Context.raw.layerFilter - Project.paintObjects.length - 1];
-		let atlasI = Project.atlasNames.indexOf(atlasName);
-		return atlasI == Project.atlasObjects[Project.paintObjects.indexOf(p)];
+	static is_atlas_object = (p: mesh_object_t): bool => {
+		if (Context.raw.layer_filter <= Project.paint_objects.length) return false;
+		let atlasName: string = Project.get_used_atlases()[Context.raw.layer_filter - Project.paint_objects.length - 1];
+		let atlasI: i32 = Project.atlas_names.indexOf(atlasName);
+		return atlasI == Project.atlas_objects[Project.paint_objects.indexOf(p)];
 	}
 
-	static getAtlasObjects = (objectMask: i32): mesh_object_t[] => {
-		let atlasName = Project.getUsedAtlases()[objectMask - Project.paintObjects.length - 1];
-		let atlasI = Project.atlasNames.indexOf(atlasName);
+	static get_atlas_objects = (objectMask: i32): mesh_object_t[] => {
+		let atlasName: string = Project.get_used_atlases()[objectMask - Project.paint_objects.length - 1];
+		let atlasI: i32 = Project.atlas_names.indexOf(atlasName);
 		let visibles: mesh_object_t[] = [];
-		for (let i = 0; i < Project.paintObjects.length; ++i) if (Project.atlasObjects[i] == atlasI) visibles.push(Project.paintObjects[i]);
+		for (let i: i32 = 0; i < Project.paint_objects.length; ++i) if (Project.atlas_objects[i] == atlasI) visibles.push(Project.paint_objects[i]);
 		return visibles;
 	}
 	///end
 
-	static packedAssetExists = (packed_assets: TPackedAsset[], name: string): bool => {
+	static packed_asset_exists = (packed_assets: packed_asset_t[], name: string): bool => {
 		for (let pa of packed_assets) if (pa.name == name) return true;
 		return false;
 	}
 
-	static exportSwatches = () => {
+	static export_swatches = () => {
 		UIFiles.show("arm,gpl", true, false, (path: string) => {
-			let f = UIFiles.filename;
+			let f: string = UIFiles.filename;
 			if (f == "") f = tr("untitled");
-			if (Path.isGimpColorPalette(f)) ExportGpl.run(path + Path.sep + f, f.substring(0, f.lastIndexOf(".")), Project.raw.swatches);
-			else ExportArm.runSwatches(path + Path.sep + f);
+			if (Path.is_gimp_color_palette(f)) ExportGpl.run(path + Path.sep + f, f.substring(0, f.lastIndexOf(".")), Project.raw.swatches);
+			else ExportArm.run_swatches(path + Path.sep + f);
 		});
 	}
 
-	static makeSwatch = (base = 0xffffffff): TSwatchColor => {
+	static make_swatch = (base: i32 = 0xffffffff): swatch_color_t => {
 		return { base: base, opacity: 1.0, occlusion: 1.0, roughness: 0.0, metallic: 0.0, normal: 0xff8080ff, emission: 0.0, height: 0.0, subsurface: 0.0 };
 	}
 
-	static cloneSwatch = (swatch: TSwatchColor): TSwatchColor => {
+	static clone_swatch = (swatch: swatch_color_t): swatch_color_t => {
 		return { base: swatch.base, opacity: swatch.opacity, occlusion: swatch.occlusion, roughness: swatch.roughness, metallic: swatch.metallic, normal: swatch.normal, emission: swatch.emission, height: swatch.height, subsurface: swatch.subsurface };
 	}
 
-	static setDefaultSwatches = () => {
+	static set_default_swatches = () => {
 		// 32-Color Palette by Andrew Kensler
 		// http://eastfarthing.com/blog/2016-05-06-palette/
 		Project.raw.swatches = [];
-		let colors = [0xffffffff, 0xff000000, 0xffd6a090, 0xffa12c32, 0xfffa2f7a, 0xfffb9fda, 0xffe61cf7, 0xff992f7c, 0xff47011f, 0xff051155, 0xff4f02ec, 0xff2d69cb, 0xff00a6ee, 0xff6febff, 0xff08a29a, 0xff2a666a, 0xff063619, 0xff4a4957, 0xff8e7ba4, 0xffb7c0ff, 0xffacbe9c, 0xff827c70, 0xff5a3b1c, 0xffae6507, 0xfff7aa30, 0xfff4ea5c, 0xff9b9500, 0xff566204, 0xff11963b, 0xff51e113, 0xff08fdcc];
-		for (let c of colors) Project.raw.swatches.push(Project.makeSwatch(c));
+		let colors: i32[] = [0xffffffff, 0xff000000, 0xffd6a090, 0xffa12c32, 0xfffa2f7a, 0xfffb9fda, 0xffe61cf7, 0xff992f7c, 0xff47011f, 0xff051155, 0xff4f02ec, 0xff2d69cb, 0xff00a6ee, 0xff6febff, 0xff08a29a, 0xff2a666a, 0xff063619, 0xff4a4957, 0xff8e7ba4, 0xffb7c0ff, 0xffacbe9c, 0xff827c70, 0xff5a3b1c, 0xffae6507, 0xfff7aa30, 0xfff4ea5c, 0xff9b9500, 0xff566204, 0xff11963b, 0xff51e113, 0xff08fdcc];
+		for (let c of colors) Project.raw.swatches.push(Project.make_swatch(c));
 	}
 
-	static getMaterialGroupByName = (groupName: string): TNodeGroup => {
-		for (let g of Project.materialGroups) if (g.canvas.name == groupName) return g;
+	static get_material_group_by_name = (groupName: string): node_group_t => {
+		for (let g of Project.material_groups) if (g.canvas.name == groupName) return g;
 		return null;
 	}
 
 	///if (is_paint || is_sculpt)
-	static isMaterialGroupInUse = (group: TNodeGroup): bool => {
+	static is_material_group_in_use = (group: node_group_t): bool => {
 		let canvases: zui_node_canvas_t[] = [];
 		for (let m of Project.materials) canvases.push(m.canvas);
-		for (let m of Project.materialGroups) canvases.push(m.canvas);
+		for (let m of Project.material_groups) canvases.push(m.canvas);
 		for (let canvas of canvases) {
 			for (let n of canvas.nodes) {
 				if (n.type == "GROUP" && n.name == group.canvas.name) {
@@ -634,7 +634,7 @@ class Project {
 	///end
 }
 
-type TNodeGroup = {
-	nodes: zui_nodes_t;
-	canvas: zui_node_canvas_t;
-}
+type node_group_t = {
+	nodes?: zui_nodes_t;
+	canvas?: zui_node_canvas_t;
+};

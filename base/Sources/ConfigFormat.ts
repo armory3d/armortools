@@ -1,5 +1,5 @@
 
-type TConfig = {
+type config_t = {
 	// The locale should be specified in ISO 639-1 format: https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
 	// "system" is a special case that will use the system locale
 	locale?: string;
@@ -66,4 +66,4 @@ type TConfig = {
 	dilate_radius?: Null<i32>;
 
 	gpu_inference?: Null<bool>;
-}
+};

@@ -1,10 +1,10 @@
 
 class ColorNode extends LogicNode {
 
-	value = vec4_create();
+	value: vec4_t = vec4_create();
 	image: image_t = null;
 
-	constructor(r = 0.8, g = 0.8, b = 0.8, a = 1.0) {
+	constructor(r: f32 = 0.8, g: f32 = 0.8, b: f32 = 0.8, a: f32 = 1.0) {
 		super();
 		vec4_set(this.value, r, g, b, a);
 	}
@@ -14,11 +14,11 @@ class ColorNode extends LogicNode {
 		else done(this.value);
 	}
 
-	override getAsImage = (from: i32, done: (img: image_t)=>void) => {
-		if (this.inputs.length > 0) { this.inputs[0].getAsImage(done); return; }
+	override get_as_image = (from: i32, done: (img: image_t)=>void) => {
+		if (this.inputs.length > 0) { this.inputs[0].get_as_image(done); return; }
 		if (this.image != null) image_unload(this.image);
-		let b = new ArrayBuffer(16);
-		let v = new DataView(b);
+		let b: ArrayBuffer = new ArrayBuffer(16);
+		let v: DataView = new DataView(b);
 		v.setFloat32(0, this.value.x, true);
 		v.setFloat32(4, this.value.y, true);
 		v.setFloat32(8, this.value.z, true);

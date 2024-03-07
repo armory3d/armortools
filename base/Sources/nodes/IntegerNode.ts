@@ -3,7 +3,7 @@ class IntegerNode extends LogicNode {
 
 	value: i32;
 
-	constructor(value = 0) {
+	constructor(value: i32 = 0) {
 		super();
 		this.value = value;
 	}

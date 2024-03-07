@@ -1,18 +1,18 @@
 
 class Console {
 
-	static message = "";
-	static messageTimer = 0.0;
-	static messageColor = 0x00000000;
-	static lastTraces: string[] = [""];
-	static progressText: string = null;
+	static message: string = "";
+	static message_timer: f32 = 0.0;
+	static message_color: i32 = 0x00000000;
+	static last_traces: string[] = [""];
+	static progress_text: string = null;
 
-	static drawToast = (s: string) => {
+	static draw_toast = (s: string) => {
 		g2_set_color(0x55000000);
 		g2_fill_rect(0, 0, sys_width(), sys_height());
-		let scale = zui_SCALE(Base.getUIs()[0]);
-		let x = sys_width() / 2;
-		let y = sys_height() - 200 * scale;
+		let scale: f32 = zui_SCALE(Base.get_uis()[0]);
+		let x: f32 = sys_width() / 2;
+		let y: f32 = sys_height() - 200 * scale;
 		g2_fill_rect(x - 200 * scale, y, 400 * scale, 80 * scale);
 		g2_set_font(Base.font);
 		g2_set_font_size(Math.floor(22 * scale));
@@ -23,54 +23,54 @@ class Console {
 	static toast = (s: string) => {
 		// Show a popup message
 		let _render = () => {
-			Console.drawToast(s);
-			Base.notifyOnNextFrame(() => {
+			Console.draw_toast(s);
+			Base.notify_on_next_frame(() => {
 				app_remove_render_2d(_render);
 			});
 		}
 		app_notify_on_render_2d(_render);
-		Console.consoleTrace(s);
+		Console.console_trace(s);
 	}
 
-	static drawProgress = () => {
-		Console.drawToast(Console.progressText);
+	static draw_progress = () => {
+		Console.draw_toast(Console.progress_text);
 	}
 
 	static progress = (s: string) => {
 		// Keep popup message displayed until s == null
 		if (s == null) {
-			app_remove_render_2d(Console.drawProgress);
+			app_remove_render_2d(Console.draw_progress);
 		}
-		else if (Console.progressText == null) {
-			app_notify_on_render_2d(Console.drawProgress);
+		else if (Console.progress_text == null) {
+			app_notify_on_render_2d(Console.draw_progress);
 		}
-		if (s != null) Console.consoleTrace(s);
-		Console.progressText = s;
+		if (s != null) Console.console_trace(s);
+		Console.progress_text = s;
 	}
 
 	static info = (s: string) => {
-		Console.messageTimer = 5.0;
+		Console.message_timer = 5.0;
 		Console.message = s;
-		Console.messageColor = 0x00000000;
-		Base.redrawStatus();
-		Console.consoleTrace(s);
+		Console.message_color = 0x00000000;
+		Base.redraw_status();
+		Console.console_trace(s);
 	}
 
 	static error = (s: string) => {
-		Console.messageTimer = 8.0;
+		Console.message_timer = 8.0;
 		Console.message = s;
-		Console.messageColor = 0xffaa0000;
-		Base.redrawStatus();
-		Console.consoleTrace(s);
+		Console.message_color = 0xffaa0000;
+		Base.redraw_status();
+		Console.console_trace(s);
 	}
 
 	static log = (s: string) => {
-		Console.consoleTrace(s);
+		Console.console_trace(s);
 	}
 
-	static consoleTrace = (v: any) => {
-		Base.redrawConsole();
-		Console.lastTraces.unshift(String(v));
-		if (Console.lastTraces.length > 100) Console.lastTraces.pop();
+	static console_trace = (v: any) => {
+		Base.redraw_console();
+		Console.last_traces.unshift(String(v));
+		if (Console.last_traces.length > 100) Console.last_traces.pop();
 	}
 }

@@ -5,13 +5,13 @@ class BrushOutputNode extends LogicNode {
 
 	constructor() {
 		super();
-		Context.raw.runBrush = this.run;
-		Context.raw.parseBrushInputs = this.parseInputs;
+		Context.raw.run_brush = this.run;
+		Context.raw.parse_brush_inputs = this.parse_inputs;
 	}
 
-	parseInputs = () => {
-		let lastMask = Context.raw.brushMaskImage;
-		let lastStencil = Context.raw.brushStencilImage;
+	parse_inputs = () => {
+		let lastMask = Context.raw.brush_mask_image;
+		let lastStencil = Context.raw.brush_stencil_image;
 
 		let input0: any;
 		let input1: any;
@@ -33,47 +33,47 @@ class BrushOutputNode extends LogicNode {
 			return;
 		}
 
-		Context.raw.paintVec = input0;
-		Context.raw.brushNodesRadius = input1;
-		Context.raw.brushNodesScale = input2;
-		Context.raw.brushNodesAngle = input3;
+		Context.raw.paint_vec = input0;
+		Context.raw.brush_nodes_radius = input1;
+		Context.raw.brush_nodes_scale = input2;
+		Context.raw.brush_nodes_angle = input3;
 
 		let opac: any = input4; // Float or texture name
 		if (opac == null) opac = 1.0;
 		if (typeof opac == "string") {
-			Context.raw.brushMaskImageIsAlpha = opac.endsWith(".a");
+			Context.raw.brush_mask_image_is_alpha = opac.endsWith(".a");
 			opac = opac.substr(0, opac.lastIndexOf("."));
-			Context.raw.brushNodesOpacity = 1.0;
-			let index = Project.assetNames.indexOf(opac);
+			Context.raw.brush_nodes_opacity = 1.0;
+			let index = Project.asset_names.indexOf(opac);
 			let asset = Project.assets[index];
-			Context.raw.brushMaskImage = Project.getImage(asset);
+			Context.raw.brush_mask_image = Project.get_image(asset);
 		}
 		else {
-			Context.raw.brushNodesOpacity = opac;
-			Context.raw.brushMaskImage = null;
+			Context.raw.brush_nodes_opacity = opac;
+			Context.raw.brush_mask_image = null;
 		}
 
-		Context.raw.brushNodesHardness = input5;
+		Context.raw.brush_nodes_hardness = input5;
 
 		let stencil: any = input6; // Float or texture name
 		if (stencil == null) stencil = 1.0;
 		if (typeof stencil == "string") {
-			Context.raw.brushStencilImageIsAlpha = stencil.endsWith(".a");
+			Context.raw.brush_stencil_image_is_alpha = stencil.endsWith(".a");
 			stencil = stencil.substr(0, stencil.lastIndexOf("."));
-			let index = Project.assetNames.indexOf(stencil);
+			let index = Project.asset_names.indexOf(stencil);
 			let asset = Project.assets[index];
-			Context.raw.brushStencilImage = Project.getImage(asset);
+			Context.raw.brush_stencil_image = Project.get_image(asset);
 		}
 		else {
-			Context.raw.brushStencilImage = null;
+			Context.raw.brush_stencil_image = null;
 		}
 
-		if (lastMask != Context.raw.brushMaskImage ||
-			lastStencil != Context.raw.brushStencilImage) {
-			MakeMaterial.parsePaintMaterial();
+		if (lastMask != Context.raw.brush_mask_image ||
+			lastStencil != Context.raw.brush_stencil_image) {
+			MakeMaterial.parse_paint_material();
 		}
 
-		Context.raw.brushDirectional = this.Directional;
+		Context.raw.brush_directional = this.Directional;
 	}
 
 	run = (from: i32) => {
@@ -81,60 +81,60 @@ class BrushOutputNode extends LogicNode {
 		let right = 1.0;
 		if (Context.raw.paint2d) {
 			left = 1.0;
-			right = (Context.raw.splitView ? 2.0 : 1.0) + UIView2D.ww / Base.w();
+			right = (Context.raw.split_view ? 2.0 : 1.0) + UIView2D.ww / Base.w();
 		}
 
 		// First time init
-		if (Context.raw.lastPaintX < 0 || Context.raw.lastPaintY < 0) {
-			Context.raw.lastPaintVecX = Context.raw.paintVec.x;
-			Context.raw.lastPaintVecY = Context.raw.paintVec.y;
+		if (Context.raw.last_paint_x < 0 || Context.raw.last_paint_y < 0) {
+			Context.raw.last_paint_vec_x = Context.raw.paint_vec.x;
+			Context.raw.last_paint_vec_y = Context.raw.paint_vec.y;
 		}
 
 		// Do not paint over fill layer
-		let fillLayer = Context.raw.layer.fill_layer != null && Context.raw.tool != WorkspaceTool.ToolPicker && Context.raw.tool != WorkspaceTool.ToolMaterial && Context.raw.tool != WorkspaceTool.ToolColorId;
+		let fillLayer = Context.raw.layer.fill_layer != null && Context.raw.tool != workspace_tool_t.PICKER && Context.raw.tool != workspace_tool_t.MATERIAL && Context.raw.tool != workspace_tool_t.COLORID;
 
 		// Do not paint over groups
-		let groupLayer = SlotLayer.isGroup(Context.raw.layer);
+		let groupLayer = SlotLayer.is_group(Context.raw.layer);
 
 		// Paint bounds
-		if (Context.raw.paintVec.x > left &&
-			Context.raw.paintVec.x < right &&
-			Context.raw.paintVec.y > 0 &&
-			Context.raw.paintVec.y < 1 &&
+		if (Context.raw.paint_vec.x > left &&
+			Context.raw.paint_vec.x < right &&
+			Context.raw.paint_vec.y > 0 &&
+			Context.raw.paint_vec.y < 1 &&
 			!fillLayer &&
 			!groupLayer &&
-			(SlotLayer.isVisible(Context.raw.layer) || Context.raw.paint2d) &&
+			(SlotLayer.is_visible(Context.raw.layer) || Context.raw.paint2d) &&
 			!UIBase.ui.is_hovered &&
-			!Base.isDragging &&
-			!Base.isResizing &&
-			!Base.isScrolling() &&
-			!Base.isComboSelected()) {
+			!Base.is_dragging &&
+			!Base.is_resizing &&
+			!Base.is_scrolling() &&
+			!Base.is_combo_selected()) {
 
 			// Set color pick
 			let down = mouse_down() || pen_down();
-			if (down && Context.raw.tool == WorkspaceTool.ToolColorId && Project.assets.length > 0) {
-				Context.raw.colorIdPicked = true;
-				UIToolbar.toolbarHandle.redraws = 1;
+			if (down && Context.raw.tool == workspace_tool_t.COLORID && Project.assets.length > 0) {
+				Context.raw.colorid_picked = true;
+				UIToolbar.toolbar_handle.redraws = 1;
 			}
 
 			// Prevent painting the same spot
-			let sameSpot = Context.raw.paintVec.x == Context.raw.lastPaintX && Context.raw.paintVec.y == Context.raw.lastPaintY;
-			let lazy = Context.raw.tool == WorkspaceTool.ToolBrush && Context.raw.brushLazyRadius > 0;
+			let sameSpot = Context.raw.paint_vec.x == Context.raw.last_paint_x && Context.raw.paint_vec.y == Context.raw.last_paint_y;
+			let lazy = Context.raw.tool == workspace_tool_t.BRUSH && Context.raw.brush_lazy_radius > 0;
 			if (down && (sameSpot || lazy)) {
 				Context.raw.painted++;
 			}
 			else {
 				Context.raw.painted = 0;
 			}
-			Context.raw.lastPaintX = Context.raw.paintVec.x;
-			Context.raw.lastPaintY = Context.raw.paintVec.y;
+			Context.raw.last_paint_x = Context.raw.paint_vec.x;
+			Context.raw.last_paint_y = Context.raw.paint_vec.y;
 
-			if (Context.raw.tool == WorkspaceTool.ToolParticle) {
+			if (Context.raw.tool == workspace_tool_t.PARTICLE) {
 				Context.raw.painted = 0; // Always paint particles
 			}
 
 			if (Context.raw.painted == 0) {
-				this.parseInputs();
+				this.parse_inputs();
 			}
 
 			if (Context.raw.painted <= 1) {

@@ -3,7 +3,7 @@ class StringNode extends LogicNode {
 
 	value: string;
 
-	constructor(value = "") {
+	constructor(value: string = "") {
 		super();
 		this.value = value;
 	}

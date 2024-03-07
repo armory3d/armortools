@@ -15,7 +15,7 @@ class RandomNode extends LogicNode {
 
 	// Courtesy of https://github.com/Kode/Kha/blob/main/Sources/kha/math/Random.hx
 	static getInt = (): i32 => {
-		let t = (RandomNode.a + RandomNode.b | 0) + RandomNode.d | 0;
+		let t: i32 = (RandomNode.a + RandomNode.b | 0) + RandomNode.d | 0;
 		RandomNode.d = RandomNode.d + 1 | 0;
 		RandomNode.a = RandomNode.b ^ RandomNode.b >>> 9;
 		RandomNode.b = RandomNode.c + (RandomNode.c << 3) | 0;
@@ -30,7 +30,7 @@ class RandomNode extends LogicNode {
 		RandomNode.b = 0x21d4b3eb;
 		RandomNode.c = 0xf2517abf;
 		// Immediately skip a few possibly poor results the easy way
-		for (let i = 0; i < 15; ++i) {
+		for (let i: i32 = 0; i < 15; ++i) {
 			RandomNode.getInt();
 		}
 		return RandomNode.d;

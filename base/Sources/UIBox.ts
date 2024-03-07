@@ -1,39 +1,39 @@
 
 class UIBox {
 
-	static show = false;
-	static draggable = true;
-	static hwnd = zui_handle_create();
-	static boxTitle = "";
-	static boxText = "";
-	static boxCommands: (ui: zui_t)=>void = null;
-	static clickToHide = true;
-	static modalW = 400;
-	static modalH = 170;
-	static modalOnHide: ()=>void = null;
-	static draws = 0;
-	static copyable = false;
+	static show: bool = false;
+	static draggable: bool = true;
+	static hwnd: zui_handle_t = zui_handle_create();
+	static box_title: string = "";
+	static box_text: string = "";
+	static box_commands: (ui: zui_t)=>void = null;
+	static click_to_hide: bool = true;
+	static modalw: i32 = 400;
+	static modalh: i32 = 170;
+	static modal_on_hide: ()=>void = null;
+	static draws: i32 = 0;
+	static copyable: bool = false;
 	///if (krom_android || krom_ios)
-	static tweenAlpha = 0.0;
+	static tween_alpha: f32 = 0.0;
 	///end
 
 	static render = () => {
 		if (!UIMenu.show) {
-			let ui = Base.uiBox;
-			let inUse = ui.combo_selected_handle_ptr != 0;
-			let isEscape = keyboard_started("escape");
+			let ui: zui_t = Base.ui_box;
+			let inUse: bool = ui.combo_selected_handle_ptr != 0;
+			let isEscape: bool = keyboard_started("escape");
 			if (UIBox.draws > 2 && (ui.input_released || isEscape) && !inUse && !ui.is_typing) {
-				let appw = sys_width();
-				let apph = sys_height();
-				let mw = Math.floor(UIBox.modalW * zui_SCALE(ui));
-				let mh = Math.floor(UIBox.modalH * zui_SCALE(ui));
-				let left = (appw / 2 - mw / 2) + UIBox.hwnd.drag_x;
-				let right = (appw / 2 + mw / 2) + UIBox.hwnd.drag_x;
-				let top = (apph / 2 - mh / 2) + UIBox.hwnd.drag_y;
-				let bottom = (apph / 2 + mh / 2) + UIBox.hwnd.drag_y;
-				let mx = mouse_x;
-				let my = mouse_y;
-				if ((UIBox.clickToHide && (mx < left || mx > right || my < top || my > bottom)) || isEscape) {
+				let appw: i32 = sys_width();
+				let apph: i32 = sys_height();
+				let mw: i32 = Math.floor(UIBox.modalw * zui_SCALE(ui));
+				let mh: i32 = Math.floor(UIBox.modalh * zui_SCALE(ui));
+				let left: f32 = (appw / 2 - mw / 2) + UIBox.hwnd.drag_x;
+				let right: f32 = (appw / 2 + mw / 2) + UIBox.hwnd.drag_x;
+				let top: f32 = (apph / 2 - mh / 2) + UIBox.hwnd.drag_y;
+				let bottom: f32 = (apph / 2 + mh / 2) + UIBox.hwnd.drag_y;
+				let mx: i32 = mouse_x;
+				let my: i32 = mouse_y;
+				if ((UIBox.click_to_hide && (mx < left || mx > right || my < top || my > bottom)) || isEscape) {
 					UIBox.hide();
 				}
 			}
@@ -41,7 +41,7 @@ class UIBox {
 
 		if (Config.raw.touch_ui) { // Darken bg
 			///if (krom_android || krom_ios)
-			g2_set_color(color_from_floats(0, 0, 0, UIBox.tweenAlpha));
+			g2_set_color(color_from_floats(0, 0, 0, UIBox.tween_alpha));
 			///else
 			g2_set_color(color_from_floats(0, 0, 0, 0.5));
 			///end
@@ -50,27 +50,27 @@ class UIBox {
 
 		g2_end();
 
-		let ui = Base.uiBox;
-		let appw = sys_width();
-		let apph = sys_height();
-		let mw = Math.floor(UIBox.modalW * zui_SCALE(ui));
-		let mh = Math.floor(UIBox.modalH * zui_SCALE(ui));
+		let ui: zui_t = Base.ui_box;
+		let appw: i32 = sys_width();
+		let apph: i32 = sys_height();
+		let mw: i32 = Math.floor(UIBox.modalw * zui_SCALE(ui));
+		let mh: i32 = Math.floor(UIBox.modalh * zui_SCALE(ui));
 		if (mw > appw) mw = appw;
 		if (mh > apph) mh = apph;
-		let left = Math.floor(appw / 2 - mw / 2);
-		let top = Math.floor(apph / 2 - mh / 2);
+		let left: i32 = Math.floor(appw / 2 - mw / 2);
+		let top: i32 = Math.floor(apph / 2 - mh / 2);
 
-		if (UIBox.boxCommands == null) {
+		if (UIBox.box_commands == null) {
 			zui_begin(ui);
 			if (zui_window(UIBox.hwnd, left, top, mw, mh, UIBox.draggable)) {
 				ui._y += 10;
-				let tabVertical = Config.raw.touch_ui;
-				if (zui_tab(zui_handle("uibox_0"), UIBox.boxTitle, tabVertical)) {
-					let htext = zui_handle("uibox_1");
-					htext.text = UIBox.boxText;
+				let tabVertical: bool = Config.raw.touch_ui;
+				if (zui_tab(zui_handle("uibox_0"), UIBox.box_title, tabVertical)) {
+					let htext: zui_handle_t = zui_handle("uibox_1");
+					htext.text = UIBox.box_text;
 					UIBox.copyable ?
 						zui_text_area(htext, zui_align_t.LEFT, false) :
-						zui_text(UIBox.boxText);
+						zui_text(UIBox.box_text);
 					zui_end_element();
 
 					///if (krom_windows || krom_linux || krom_darwin)
@@ -84,14 +84,14 @@ class UIBox {
 
 					///if (krom_windows || krom_linux || krom_darwin)
 					if (UIBox.copyable && zui_button(tr("Copy"))) {
-						krom_copy_to_clipboard(UIBox.boxText);
+						krom_copy_to_clipboard(UIBox.box_text);
 					}
 					///end
 					if (zui_button(tr("OK"))) {
 						UIBox.hide();
 					}
 				}
-				UIBox.windowBorder(ui);
+				UIBox.window_border(ui);
 			}
 			zui_end();
 		}
@@ -99,8 +99,8 @@ class UIBox {
 			zui_begin(ui);
 			if (zui_window(UIBox.hwnd, left, top, mw, mh, UIBox.draggable)) {
 				ui._y += 10;
-				UIBox.boxCommands(ui);
-				UIBox.windowBorder(ui);
+				UIBox.box_commands(ui);
+				UIBox.window_border(ui);
 			}
 			zui_end();
 		}
@@ -110,56 +110,56 @@ class UIBox {
 		UIBox.draws++;
 	}
 
-	static showMessage = (title: string, text: string, copyable = false) => {
+	static show_message = (title: string, text: string, copyable: bool = false) => {
 		UIBox.init();
-		UIBox.modalW = 400;
-		UIBox.modalH = 210;
-		UIBox.boxTitle = title;
-		UIBox.boxText = text;
-		UIBox.boxCommands = null;
+		UIBox.modalw = 400;
+		UIBox.modalh = 210;
+		UIBox.box_title = title;
+		UIBox.box_text = text;
+		UIBox.box_commands = null;
 		UIBox.copyable = copyable;
 		UIBox.draggable = true;
 		///if (krom_android || krom_ios)
-		UIBox.tweenIn();
+		UIBox.tween_in();
 		///end
 	}
 
-	static showCustom = (commands: (ui: zui_t)=>void = null, mw = 400, mh = 200, onHide: ()=>void = null, draggable = true) => {
+	static show_custom = (commands: (ui: zui_t)=>void = null, mw: i32 = 400, mh: i32 = 200, onHide: ()=>void = null, draggable: bool = true) => {
 		UIBox.init();
-		UIBox.modalW = mw;
-		UIBox.modalH = mh;
-		UIBox.modalOnHide = onHide;
-		UIBox.boxCommands = commands;
+		UIBox.modalw = mw;
+		UIBox.modalh = mh;
+		UIBox.modal_on_hide = onHide;
+		UIBox.box_commands = commands;
 		UIBox.draggable = draggable;
 		///if (krom_android || krom_ios)
-		UIBox.tweenIn();
+		UIBox.tween_in();
 		///end
 	}
 
 	static hide = () => {
 		///if (krom_android || krom_ios)
-		UIBox.tweenOut();
+		UIBox.tween_out();
 		///else
-		UIBox.hideInternal();
+		UIBox.hide_internal();
 		///end
 	}
 
-	static hideInternal = () => {
-		if (UIBox.modalOnHide != null) UIBox.modalOnHide();
+	static hide_internal = () => {
+		if (UIBox.modal_on_hide != null) UIBox.modal_on_hide();
 		UIBox.show = false;
-		Base.redrawUI();
+		Base.redraw_ui();
 	}
 
 	///if (krom_android || krom_ios)
-	static tweenIn = () => {
+	static tween_in = () => {
 		tween_reset();
 		tween_to({target: UIBox, props: { tweenAlpha: 0.5 }, duration: 0.2, ease: ease_t.EXPO_OUT});
 		UIBox.hwnd.drag_y = Math.floor(sys_height() / 2);
-		tween_to({target: UIBox.hwnd, props: { dragY: 0 }, duration: 0.2, ease: ease_t.EXPO_OUT, tick: () => { Base.redrawUI(); }});
+		tween_to({target: UIBox.hwnd, props: { dragY: 0 }, duration: 0.2, ease: ease_t.EXPO_OUT, tick: () => { Base.redraw_ui(); }});
 	}
 
-	static tweenOut = () => {
-		tween_to({target: UIBox, props: { tweenAlpha: 0.0 }, duration: 0.2, ease: ease_t.EXPO_IN, done: UIBox.hideInternal});
+	static tween_out = () => {
+		tween_to({target: UIBox, props: { tweenAlpha: 0.0 }, duration: 0.2, ease: ease_t.EXPO_IN, done: UIBox.hide_internal});
 		tween_to({target: UIBox.hwnd, props: { dragY: sys_height() / 2 }, duration: 0.2, ease: ease_t.EXPO_IN});
 	}
 	///end
@@ -170,10 +170,10 @@ class UIBox {
 		UIBox.hwnd.drag_y = 0;
 		UIBox.show = true;
 		UIBox.draws = 0;
-		UIBox.clickToHide = true;
+		UIBox.click_to_hide = true;
 	}
 
-	static windowBorder = (ui: zui_t) => {
+	static window_border = (ui: zui_t) => {
 		if (ui.scissor) {
 			ui.scissor = false;
 			g2_disable_scissor();

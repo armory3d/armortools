@@ -6,12 +6,12 @@ class RenderPathForward {
 
 	static commands = () => {
 		///if is_paint
-		RenderPathPaint.liveBrushDirty();
+		RenderPathPaint.live_brush_dirty();
 		///end
-		RenderPathBase.commands(RenderPathForward.drawForward);
+		RenderPathBase.commands(RenderPathForward.draw_forward);
 	}
 
-	static drawForward = () => {
+	static draw_forward = () => {
 		render_path_set_depth_from("gbuffer1", "gbuffer0");
 		render_path_set_target("gbuffer1");
 		render_path_draw_skydome("shader_datas/world_pass/world_pass");
@@ -22,9 +22,9 @@ class RenderPathForward {
 		render_path_draw_shader("shader_datas/compositor_pass/compositor_pass");
 
 		render_path_set_target("buf");
-		RenderPathBase.drawCompass();
+		RenderPathBase.draw_compass();
 		render_path_draw_meshes("overlay");
 
-		RenderPathBase.drawTAA();
+		RenderPathBase.draw_taa();
 	}
 }

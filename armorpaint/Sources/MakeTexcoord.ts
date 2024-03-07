@@ -4,12 +4,12 @@ class MakeTexcoord {
 	static run = (vert: NodeShaderRaw, frag: NodeShaderRaw) => {
 
 		let fillLayer = Context.raw.layer.fill_layer != null;
-		let uvType = fillLayer ? Context.raw.layer.uvType : Context.raw.brushPaint;
-		let decal = Context.raw.tool == WorkspaceTool.ToolDecal || Context.raw.tool == WorkspaceTool.ToolText;
-		let angle = Context.raw.brushAngle + Context.raw.brushNodesAngle;
+		let uvType = fillLayer ? Context.raw.layer.uvType : Context.raw.brush_paint;
+		let decal = Context.raw.tool == workspace_tool_t.DECAL || Context.raw.tool == workspace_tool_t.TEXT;
+		let angle = Context.raw.brush_angle + Context.raw.brush_nodes_angle;
 		let uvAngle = fillLayer ? Context.raw.layer.angle : angle;
 
-		if (uvType == UVType.UVProject || decal) { // TexCoords - project
+		if (uvType == uv_type_t.PROJECT || decal) { // TexCoords - project
 			NodeShader.add_uniform(frag, 'float brushScale', '_brushScale');
 			NodeShader.write_attrib(frag, 'vec2 uvsp = sp.xy;');
 
@@ -23,7 +23,7 @@ class MakeTexcoord {
 
 				frag.n = true;
 				NodeShader.add_uniform(frag, 'vec3 decalLayerNor', '_decalLayerNor');
-				let dotAngle = Context.raw.brushAngleRejectDot;
+				let dotAngle = Context.raw.brush_angle_reject_dot;
 				NodeShader.write(frag, `if (abs(dot(n, decalLayerNor) - 1.0) > ${dotAngle}) discard;`);
 
 				frag.wposition = true;
@@ -37,7 +37,7 @@ class MakeTexcoord {
 				NodeShader.write_attrib(frag, 'uvsp.x *= aspectRatio;');
 				NodeShader.write_attrib(frag, 'uvsp *= 0.21 / (decalMask.w * 0.9);'); // Decal radius
 
-				if (Context.raw.brushDirectional) {
+				if (Context.raw.brush_directional) {
 					NodeShader.add_uniform(frag, 'vec3 brushDirection', '_brushDirection');
 					NodeShader.write_attrib(frag, 'if (brushDirection.z == 0.0) discard;');
 					NodeShader.write_attrib(frag, 'uvsp = vec2(uvsp.x * brushDirection.x - uvsp.y * brushDirection.y, uvsp.x * brushDirection.y + uvsp.y * brushDirection.x);');
@@ -66,7 +66,7 @@ class MakeTexcoord {
 
 			NodeShader.write_attrib(frag, 'vec2 texCoord = uvsp * brushScale;');
 		}
-		else if (uvType == UVType.UVMap) { // TexCoords - uvmap
+		else if (uvType == uv_type_t.UVMAP) { // TexCoords - uvmap
 			NodeShader.add_uniform(vert, 'float brushScale', '_brushScale');
 			NodeShader.add_out(vert, 'vec2 texCoord');
 			NodeShader.write(vert, 'texCoord = tex * brushScale;');

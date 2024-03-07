@@ -3,41 +3,41 @@ class SlotMaterialRaw {
 	nodes = zui_nodes_create();
 	canvas: zui_node_canvas_t;
 	image: image_t = null;
-	imageIcon: image_t = null;
-	previewReady = false;
+	image_icon: image_t = null;
+	preview_ready = false;
 	data: material_data_t;
 	id = 0;
 
-	paintBase = true;
-	paintOpac = true;
-	paintOcc = true;
-	paintRough = true;
-	paintMet = true;
-	paintNor = true;
-	paintHeight = true;
-	paintEmis = true;
-	paintSubs = true;
+	paint_base = true;
+	paint_opac = true;
+	paint_occ = true;
+	paint_rough = true;
+	paint_met = true;
+	paint_nor = true;
+	paint_height = true;
+	paint_emis = true;
+	paint_subs = true;
 }
 
 class SlotMaterial {
-	static defaultCanvas: ArrayBuffer = null;
+	static default_canvas: ArrayBuffer = null;
 
 	static create(m: material_data_t = null, c: zui_node_canvas_t = null): SlotMaterialRaw {
 		let raw = new SlotMaterialRaw();
 		for (let mat of Project.materials) if (mat.id >= raw.id) raw.id = mat.id + 1;
 		raw.data = m;
 
-		let w = UtilRender.materialPreviewSize;
+		let w = UtilRender.material_preview_size;
 		let wIcon = 50;
 		raw.image = image_create_render_target(w, w);
-		raw.imageIcon = image_create_render_target(wIcon, wIcon);
+		raw.image_icon = image_create_render_target(wIcon, wIcon);
 
 		if (c == null) {
-			if (SlotMaterial.defaultCanvas == null) { // Synchronous
+			if (SlotMaterial.default_canvas == null) { // Synchronous
 				let b: ArrayBuffer = data_get_blob("default_material.arm");
-				SlotMaterial.defaultCanvas = b;
+				SlotMaterial.default_canvas = b;
 			}
-			raw.canvas = armpack_decode(SlotMaterial.defaultCanvas);
+			raw.canvas = armpack_decode(SlotMaterial.default_canvas);
 			raw.canvas.name = "Material " + (raw.id + 1);
 		}
 		else {
@@ -54,9 +54,9 @@ class SlotMaterial {
 	static unload = (raw: SlotMaterialRaw) => {
 		let _next = () => {
 			image_unload(raw.image);
-			image_unload(raw.imageIcon);
+			image_unload(raw.image_icon);
 		}
-		Base.notifyOnNextFrame(_next);
+		Base.notify_on_next_frame(_next);
 	}
 
 	static delete = (raw: SlotMaterialRaw) => {
@@ -64,7 +64,7 @@ class SlotMaterial {
 		let mpos = Project.materials.indexOf(raw);
 		array_remove(Project.materials, this);
 		if (Project.materials.length > 0) {
-			Context.setMaterial(Project.materials[mpos > 0 ? mpos - 1 : 0]);
+			Context.set_material(Project.materials[mpos > 0 ? mpos - 1 : 0]);
 		}
 	}
 }

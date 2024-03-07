@@ -30,22 +30,22 @@ function kickstart() {
 }
 
 function main_start() {
-	app_on_resize = Base.onResize;
+	app_on_resize = Base.on_resize;
 	app_on_w = Base.w;
 	app_on_h = Base.h;
 	app_on_x = Base.x;
 	app_on_y = Base.y;
 
 	Config.init();
-	sys_start(Config.getOptions());
-	if (Config.raw.layout == null) Base.initLayout();
+	sys_start(Config.get_options());
+	if (Config.raw.layout == null) Base.init_layout();
 	krom_set_app_name(manifest_title);
 	app_init(function() {
 		let o: object_t = scene_set_active("Scene");
 		UniformsExt.init();
 		RenderPathBase.init();
 
-		if (Context.raw.renderMode == RenderMode.RenderForward) {
+		if (Context.raw.render_mode == render_mode_t.FORWARD) {
 			RenderPathDeferred.init(); // Allocate gbuffer
 			RenderPathForward.init();
 			render_path_commands = RenderPathForward.commands;
@@ -64,19 +64,19 @@ function main_start() {
 function main_embed(additional: string[]) {
 	let global: any = globalThis;
 
-	Res.embedRaw("Scene", "Scene.arm", global["data/Scene.arm"]);
+	Res.embed_raw("Scene", "Scene.arm", global["data/Scene.arm"]);
 	global["data/Scene.arm"] = null;
 
-	Res.embedRaw("shader_datas", "shader_datas.arm", global["data/shader_datas.arm"]);
+	Res.embed_raw("shader_datas", "shader_datas.arm", global["data/shader_datas.arm"]);
 	global["data/shader_datas.arm"] = null;
 
-	Res.embedFont("font.ttf", global["data/font.ttf"]);
+	Res.embed_font("font.ttf", global["data/font.ttf"]);
 	global["data/font.ttf"] = null;
 
-	Res.embedFont("font_mono.ttf", global["data/font_mono.ttf"]);
+	Res.embed_font("font_mono.ttf", global["data/font_mono.ttf"]);
 	global["data/font_mono.ttf"] = null;
 
-	let files = [
+	let files: string[] = [
 		"ltc_mag.arm",
 		"ltc_mat.arm",
 		"default_brush.arm",
@@ -106,7 +106,7 @@ function main_embed(additional: string[]) {
 	];
 	for (let add of additional) files.push(add);
 	for (let file of files) {
-		Res.embedBlob(file, global["data/" + file]);
+		Res.embed_blob(file, global["data/" + file]);
 		global["data/" + file] = null;
 	}
 }
@@ -115,7 +115,7 @@ function main_embed(additional: string[]) {
 
 function main_embed_raytrace() {
 	let global: any = globalThis;
-	let files = [
+	let files: string[] = [
 		"bnoise_rank.k",
 		"bnoise_scramble.k",
 		"bnoise_sobol.k",
@@ -123,21 +123,21 @@ function main_embed_raytrace() {
 		"raytrace_brute_full" + RenderPathRaytrace.ext
 	];
 	for (let file of files) {
-		Res.embedBlob(file, global["data/" + file]);
+		Res.embed_blob(file, global["data/" + file]);
 		global["data/" + file] = null;
 	}
 }
 
 function main_embed_raytrace_bake() {
 	let global: any = globalThis;
-	let files = [
+	let files: string[] = [
 		"raytrace_bake_ao" + RenderPathRaytrace.ext,
 		"raytrace_bake_bent" + RenderPathRaytrace.ext,
 		"raytrace_bake_light" + RenderPathRaytrace.ext,
 		"raytrace_bake_thick" + RenderPathRaytrace.ext
 	];
 	for (let file of files) {
-		Res.embedBlob(file, global["data/" + file]);
+		Res.embed_blob(file, global["data/" + file]);
 		global["data/" + file] = null;
 	}
 }

@@ -1,46 +1,46 @@
 
 class NodeShaderRaw {
 	context: NodeShaderContextRaw;
-	shader_type = '';
+	shader_type: string = '';
 	includes: string[] = [];
 	ins: string[] = [];
 	outs: string[] = [];
-	sharedSamplers: string[] = [];
+	shared_samplers: string[] = [];
 	uniforms: string[] = [];
-	functions = new Map<string, string>();
-	main = '';
-	main_init = '';
-	main_end = '';
-	main_normal = '';
-	main_textures = '';
-	main_attribs = '';
-	header = '';
-	write_pre = false;
-	write_normal = 0;
-	write_textures = 0;
-	vstruct_as_vsin = true;
-	lock = false;
+	functions: Map<string, string> = new Map();
+	main: string = '';
+	main_init: string = '';
+	main_end: string = '';
+	main_normal: string = '';
+	main_textures: string = '';
+	main_attribs: string = '';
+	header: string = '';
+	write_pre: bool = false;
+	write_normal: i32 = 0;
+	write_textures: i32 = 0;
+	vstruct_as_vsin: bool = true;
+	lock: bool = false;
 
 	// References
-	bposition = false;
-	wposition = false;
-	mposition = false;
-	vposition = false;
-	wvpposition = false;
-	ndcpos = false;
-	wtangent = false;
-	vVec = false;
-	vVecCam = false;
-	n = false;
-	nAttr = false;
-	dotNV = false;
-	invTBN = false;
+	bposition: bool = false;
+	wposition: bool = false;
+	mposition: bool = false;
+	vposition: bool = false;
+	wvpposition: bool = false;
+	ndcpos: bool = false;
+	wtangent: bool = false;
+	vvec: bool = false;
+	vvec_cam: bool = false;
+	n: bool = false;
+	nattr: bool = false;
+	dotnv: bool = false;
+	inv_tbn: bool = false;
 }
 
 class NodeShader {
 
 	static create(context: NodeShaderContextRaw, shader_type: string): NodeShaderRaw {
-		let raw = new NodeShaderRaw();
+		let raw: NodeShaderRaw = new NodeShaderRaw();
 		raw.context = context;
 		raw.shader_type = shader_type;
 		return raw;
@@ -58,13 +58,13 @@ class NodeShader {
 		raw.outs.push(s);
 	}
 
-	static add_uniform = (raw: NodeShaderRaw, s: string, link: string = null, included = false) => {
-		let ar = s.split(' ');
+	static add_uniform = (raw: NodeShaderRaw, s: string, link: string = null, included: bool = false) => {
+		let ar: string[] = s.split(' ');
 		// layout(RGBA8) image3D voxels
-		let utype = ar[ar.length - 2];
-		let uname = ar[ar.length - 1];
+		let utype: string = ar[ar.length - 2];
+		let uname: string = ar[ar.length - 1];
 		if (utype.startsWith('sampler') || utype.startsWith('image') || utype.startsWith('uimage')) {
-			let is_image = (utype.startsWith('image') || utype.startsWith('uimage')) ? true : false;
+			let is_image: bool = (utype.startsWith('image') || utype.startsWith('uimage')) ? true : false;
 			NodeShaderContext.add_texture_unit(raw.context, utype, uname, link, is_image);
 		}
 		else {
@@ -85,18 +85,18 @@ class NodeShader {
 	}
 
 	static add_shared_sampler = (raw: NodeShaderRaw, s: string) => {
-		if (raw.sharedSamplers.indexOf(s) == -1) {
-			raw.sharedSamplers.push(s);
-			let ar = s.split(' ');
+		if (raw.shared_samplers.indexOf(s) == -1) {
+			raw.shared_samplers.push(s);
+			let ar: string[] = s.split(' ');
 			// layout(RGBA8) sampler2D tex
-			let utype = ar[ar.length - 2];
-			let uname = ar[ar.length - 1];
+			let utype: string = ar[ar.length - 2];
+			let uname: string = ar[ar.length - 1];
 			NodeShaderContext.add_texture_unit(raw.context, utype, uname, null, false);
 		}
 	}
 
 	static add_function = (raw: NodeShaderRaw, s: string) => {
-		let fname = s.split('(')[0];
+		let fname: string = s.split('(')[0];
 		if (raw.functions.has(fname)) return;
 		raw.functions.set(fname, s);
 	}
@@ -155,7 +155,7 @@ class NodeShader {
 	static vstruct_to_vsin = (raw: NodeShaderRaw) => {
 		// if self.shader_type != 'vert' or self.ins != [] or not self.vstruct_as_vsin: # Vertex structure as vertex shader input
 			// return
-		let vs = raw.context.data.vertex_elements;
+		let vs: vertex_element_t[] = raw.context.data.vertex_elements;
 		for (let e of vs) {
 			NodeShader.add_in(raw, 'vec' + NodeShader.dataSize(raw, e.data) + ' ' + e.name);
 		}
@@ -163,7 +163,7 @@ class NodeShader {
 
 	///if (krom_direct3d11 || krom_direct3d12)
 	static get_hlsl(raw: NodeShaderRaw, sharedSampler: string): string {
-		let s = '#define HLSL\n';
+		let s: string = '#define HLSL\n';
 		s += '#define textureArg(tex) Texture2D tex,SamplerState tex ## _sampler\n';
 		s += '#define texturePass(tex) tex,tex ## _sampler\n';
 		s += '#define sampler2D Texture2D\n';
@@ -194,15 +194,15 @@ class NodeShader {
 
 		s += raw.header;
 
-		let in_ext = '';
-		let out_ext = '';
+		let in_ext: string = '';
+		let out_ext: string = '';
 
 		for (let a of raw.includes) {
 			s += '#include "' + a + '"\n';
 		}
 
 		// Input structure
-		let index = 0;
+		let index: i32 = 0;
 		if (raw.ins.length > 0) {
 			s += 'struct SPIRV_Cross_Input {\n';
 			index = 0;
@@ -227,7 +227,7 @@ class NodeShader {
 		}
 
 		// Output structure
-		let num = 0;
+		let num: i32 = 0;
 		if (raw.outs.length > 0 || raw.shader_type == 'vert') {
 			s += 'struct SPIRV_Cross_Output {\n';
 			raw.outs.sort((a, b): i32 => {
@@ -243,7 +243,7 @@ class NodeShader {
 				s += 'float4 svpos : SV_POSITION;\n';
 			}
 			else {
-				let out = raw.outs[0];
+				let out: string = raw.outs[0];
 				// Multiple render targets
 				if (out.charAt(out.length - 1) == ']') {
 					num = parseInt(out.charAt(out.length - 2));
@@ -263,8 +263,8 @@ class NodeShader {
 			}
 		}
 
-		if (raw.sharedSamplers.length > 0) {
-			for (let a of raw.sharedSamplers) {
+		if (raw.shared_samplers.length > 0) {
+			for (let a of raw.shared_samplers) {
 				s += 'uniform ' + a + ';\n';
 			}
 			s += `SamplerState ${sharedSampler};\n`;
@@ -294,7 +294,7 @@ class NodeShader {
 
 		// Declare inputs
 		for (let a of raw.ins) {
-			let b = a.substring(5); // Remove type 'vec4 '
+			let b: string = a.substring(5); // Remove type 'vec4 '
 			s += `${a} = stage_input.${b};\n`;
 		}
 
@@ -325,13 +325,13 @@ class NodeShader {
 				s += 'gl_Position.z = (gl_Position.z + gl_Position.w) * 0.5;\n';
 				s += 'stage_output.svpos = gl_Position;\n';
 				for (let a of raw.outs) {
-					let b = a.substring(5); // Remove type 'vec4 '
+					let b: string = a.substring(5); // Remove type 'vec4 '
 					s += `stage_output.${b} = ${b};\n`;
 				}
 			}
 			else {
 				if (num > 0) {
-					for (let i = 0; i < num; ++i) {
+					for (let i: i32 = 0; i < num; ++i) {
 						s += `stage_output.fragColor[${i}] = fragColor[${i}];\n`;
 					}
 				}
@@ -348,7 +348,7 @@ class NodeShader {
 
 	///if krom_metal
 	static get_msl(raw: NodeShaderRaw, sharedSampler: string): string {
-		let s = '#define METAL\n';
+		let s: string = '#define METAL\n';
 		s += '#include <metal_stdlib>\n';
 		s += '#include <simd/simd.h>\n';
 		s += 'using namespace metal;\n';
@@ -387,7 +387,7 @@ class NodeShader {
 		s += raw.header;
 
 		// Input structure
-		let index = 0;
+		let index: i32 = 0;
 		//if (ins.length > 0) {
 			s += 'struct main_in {\n';
 			index = 0;
@@ -411,7 +411,7 @@ class NodeShader {
 		//}
 
 		// Output structure
-		let num = 0;
+		let num: i32 = 0;
 		if (raw.outs.length > 0 || raw.shader_type == 'vert') {
 			s += 'struct main_out {\n';
 			raw.outs.sort((a, b): i32 => {
@@ -427,11 +427,11 @@ class NodeShader {
 				s += 'float4 svpos [[position]];\n';
 			}
 			else {
-				let out = raw.outs[0];
+				let out: string = raw.outs[0];
 				// Multiple render targets
 				if (out.charAt(out.length - 1) == ']') {
 					num = parseInt(out.charAt(out.length - 2));
-					for (let i = 0; i < num; ++i) {
+					for (let i: i32 = 0; i < num; ++i) {
 						s += `float4 fragColor_${i} [[color(${i})]];\n`;
 					}
 				}
@@ -473,21 +473,21 @@ class NodeShader {
 			s += 'main_in in [[stage_in]]';
 		//}
 		if (raw.uniforms.length > 0) {
-			let bufi = raw.shader_type == 'vert' ? 1 : 0;
+			let bufi: i32 = raw.shader_type == 'vert' ? 1 : 0;
 			s += `, constant main_uniforms& uniforms [[buffer(${bufi})]]`;
 		}
 
 		if (samplers.length > 0) {
-			for (let i = 0; i < samplers.length; ++i) {
+			for (let i: i32 = 0; i < samplers.length; ++i) {
 				s += `, ${samplers[i]} [[texture(${i})]]`;
 				s += ', sampler ' + samplers[i].split(' ')[1] + `_sampler [[sampler(${i})]]`;
 			}
 		}
 
-		if (raw.sharedSamplers.length > 0) {
-			for (let i = 0; i < raw.sharedSamplers.length; ++i) {
-				let index = samplers.length + i;
-				s += `, ${raw.sharedSamplers[i]} [[texture(${index})]]`;
+		if (raw.shared_samplers.length > 0) {
+			for (let i: i32 = 0; i < raw.shared_samplers.length; ++i) {
+				let index: i32 = samplers.length + i;
+				s += `, ${raw.shared_samplers[i]} [[texture(${index})]]`;
 			}
 			s += `, sampler ${sharedSampler} [[sampler(${samplers.length})]]`;
 		}
@@ -506,16 +506,16 @@ class NodeShader {
 
 		// Declare inputs
 		for (let a of raw.ins) {
-			let b = a.substring(5); // Remove type 'vec4 '
+			let b: string = a.substring(5); // Remove type 'vec4 '
 			s += `${a} = in.${b};\n`;
 		}
 
 		for (let a of raw.uniforms) {
 			if (!a.startsWith('sampler')) {
-				let b = a.split(" ")[1]; // Remove type 'vec4 '
+				let b: string = a.split(" ")[1]; // Remove type 'vec4 '
 				if (b.indexOf("[") >= 0) {
 					b = b.substring(0, b.indexOf("["));
-					let type = a.split(" ")[0];
+					let type: string = a.split(" ")[0];
 					s += `constant ${type} *${b} = uniforms.${b};\n`;
 				}
 				else {
@@ -551,13 +551,13 @@ class NodeShader {
 				s += 'gl_Position.z = (gl_Position.z + gl_Position.w) * 0.5;\n';
 				s += 'out.svpos = gl_Position;\n';
 				for (let a of raw.outs) {
-					let b = a.split(" ")[1]; // Remove type 'vec4 '
+					let b: string = a.split(" ")[1]; // Remove type 'vec4 '
 					s += `out.${b} = ${b};\n`;
 				}
 			}
 			else {
 				if (num > 0) {
-					for (let i = 0; i < num; ++i) {
+					for (let i: i32 = 0; i < num; ++i) {
 						s += `out.fragColor_${i} = fragColor[${i}];\n`;
 					}
 				}
@@ -574,7 +574,7 @@ class NodeShader {
 
 	///if (krom_opengl || krom_vulkan)
 	static get_glsl(raw: NodeShaderRaw, sharedSampler: string, version_header: string): string {
-		let s = version_header;
+		let s: string = version_header;
 		s += '#define textureArg(tex) sampler2D tex\n';
 		s += '#define texturePass(tex) tex\n';
 		s += '#define mul(a, b) b * a\n';
@@ -583,8 +583,8 @@ class NodeShader {
 		s += '#define atan2(x, y) atan(y, x)\n';
 		s += raw.header;
 
-		let in_ext = '';
-		let out_ext = '';
+		let in_ext: string = '';
+		let out_ext: string = '';
 
 		for (let a of raw.includes) {
 			s += '#include "' + a + '"\n';
@@ -598,7 +598,7 @@ class NodeShader {
 		for (let a of raw.uniforms) {
 			s += 'uniform ' + a + ';\n';
 		}
-		for (let a of raw.sharedSamplers) {
+		for (let a of raw.shared_samplers) {
 			s += 'uniform ' + a + ';\n';
 		}
 		for (let f of raw.functions.values()) {
@@ -622,28 +622,28 @@ class NodeShader {
 			NodeShader.vstruct_to_vsin(raw);
 		}
 
-		let sharedSampler = 'shared_sampler';
-		if (raw.sharedSamplers.length > 0) {
-			sharedSampler = raw.sharedSamplers[0].split(' ')[1] + '_sampler';
+		let sharedSampler: string = 'shared_sampler';
+		if (raw.shared_samplers.length > 0) {
+			sharedSampler = raw.shared_samplers[0].split(' ')[1] + '_sampler';
 		}
 
 		///if (krom_direct3d11 || krom_direct3d12)
-		let s = NodeShader.get_hlsl(raw, sharedSampler);
+		let s: string = NodeShader.get_hlsl(raw, sharedSampler);
 		///elseif krom_metal
-		let s = NodeShader.get_msl(raw, sharedSampler);
+		let s: string = NodeShader.get_msl(raw, sharedSampler);
 		///elseif krom_vulkan
-		let version_header = '#version 450\n';
-		let s = NodeShader.get_glsl(raw, sharedSampler, version_header);
+		let version_header: string = '#version 450\n';
+		let s: string = NodeShader.get_glsl(raw, sharedSampler, version_header);
 		///elseif krom_android
-		let version_header = '#version 300 es\n';
+		let version_header: string = '#version 300 es\n';
 		if (raw.shader_type == 'frag') {
 			version_header += 'precision highp float;\n';
 			version_header += 'precision mediump int;\n';
 		}
-		let s = NodeShader.get_glsl(raw, sharedSampler, version_header);
+		let s: string = NodeShader.get_glsl(raw, sharedSampler, version_header);
 		///elseif krom_opengl
-		let version_header = '#version 330\n';
-		let s = NodeShader.get_glsl(raw, sharedSampler, version_header);
+		let version_header: string = '#version 330\n';
+		let s: string = NodeShader.get_glsl(raw, sharedSampler, version_header);
 		///end
 
 		return s;

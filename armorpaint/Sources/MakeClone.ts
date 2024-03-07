@@ -25,10 +25,10 @@ class MakeClone {
 		NodeShader.write(frag, `float height = ${height};`);
 		NodeShader.write(frag, `float mat_opacity = ${opac};`);
 		NodeShader.write(frag, 'float opacity = mat_opacity * brushOpacity;');
-		if (Context.raw.material.paintEmis) {
+		if (Context.raw.material.paint_emis) {
 			NodeShader.write(frag, 'float emis = 0.0;');
 		}
-		if (Context.raw.material.paintSubs) {
+		if (Context.raw.material.paint_subs) {
 			NodeShader.write(frag, 'float subs = 0.0;');
 		}
 	}

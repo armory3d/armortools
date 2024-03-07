@@ -1,50 +1,50 @@
 
 class UIMenu {
 
-	static show = false;
-	static menuCategory = 0;
-	static menuCategoryW = 0;
-	static menuCategoryH = 0;
-	static menuX = 0;
-	static menuY = 0;
-	static menuElements = 0;
-	static keepOpen = false;
-	static menuCommands: (ui: zui_t)=>void = null;
-	static showMenuFirst = true;
-	static hideMenu = false;
+	static show: bool = false;
+	static menu_category: i32 = 0;
+	static menu_category_w: i32 = 0;
+	static menu_category_h: i32 = 0;
+	static menu_x: i32 = 0;
+	static menu_y: i32 = 0;
+	static menu_elements: i32 = 0;
+	static keep_open: bool = false;
+	static menu_commands: (ui: zui_t)=>void = null;
+	static show_menu_first: bool = true;
+	static hide_menu: bool = false;
 
 	static render = () => {
-		let ui = Base.uiMenu;
-		let menuW = UIMenu.menuCommands != null ? Math.floor(Base.defaultElementW * zui_SCALE(Base.uiMenu) * 2.3) : Math.floor(zui_ELEMENT_W(ui) * 2.3);
-		let _BUTTON_COL = ui.t.BUTTON_COL;
+		let ui: zui_t = Base.ui_menu;
+		let menuW: i32 = UIMenu.menu_commands != null ? Math.floor(Base.default_element_w * zui_SCALE(Base.ui_menu) * 2.3) : Math.floor(zui_ELEMENT_W(ui) * 2.3);
+		let _BUTTON_COL: i32 = ui.t.BUTTON_COL;
 		ui.t.BUTTON_COL = ui.t.SEPARATOR_COL;
-		let _ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
+		let _ELEMENT_OFFSET: i32 = ui.t.ELEMENT_OFFSET;
 		ui.t.ELEMENT_OFFSET = 0;
-		let _ELEMENT_H = ui.t.ELEMENT_H;
+		let _ELEMENT_H: i32 = ui.t.ELEMENT_H;
 		ui.t.ELEMENT_H = Config.raw.touch_ui ? (28 + 2) : 28;
 
-		zui_begin_region(ui, UIMenu.menuX, UIMenu.menuY, menuW);
+		zui_begin_region(ui, UIMenu.menu_x, UIMenu.menu_y, menuW);
 
-		if (UIMenu.menuCommands != null) {
+		if (UIMenu.menu_commands != null) {
 			g2_set_color(ui.t.ACCENT_SELECT_COL);
-			zui_draw_rect(true, ui._x + -1, ui._y + -1, ui._w + 2, zui_ELEMENT_H(ui) * UIMenu.menuElements + 2);
+			zui_draw_rect(true, ui._x + -1, ui._y + -1, ui._w + 2, zui_ELEMENT_H(ui) * UIMenu.menu_elements + 2);
 			g2_set_color(ui.t.SEPARATOR_COL);
-			zui_draw_rect(true, ui._x + 0, ui._y + 0, ui._w, zui_ELEMENT_H(ui) * UIMenu.menuElements);
+			zui_draw_rect(true, ui._x + 0, ui._y + 0, ui._w, zui_ELEMENT_H(ui) * UIMenu.menu_elements);
 			g2_set_color(0xffffffff);
 
-			UIMenu.menuCommands(ui);
+			UIMenu.menu_commands(ui);
 		}
 		else {
-			UIMenu.menuStart(ui);
-			if (UIMenu.menuCategory == MenuCategory.MenuFile) {
-				if (UIMenu.menuButton(ui, tr("New Project..."), Config.keymap.file_new)) Project.projectNewBox();
-				if (UIMenu.menuButton(ui, tr("Open..."), Config.keymap.file_open)) Project.projectOpen();
-				if (UIMenu.menuButton(ui, tr("Open Recent..."), Config.keymap.file_open_recent)) BoxProjects.show();
-				if (UIMenu.menuButton(ui, tr("Save"), Config.keymap.file_save)) Project.projectSave();
-				if (UIMenu.menuButton(ui, tr("Save As..."), Config.keymap.file_save_as)) Project.projectSaveAs();
-				UIMenu.menuSeparator(ui);
-				if (UIMenu.menuButton(ui, tr("Import Texture..."), Config.keymap.file_import_assets)) Project.importAsset(Path.textureFormats.join(","), false);
-				if (UIMenu.menuButton(ui, tr("Import Envmap..."))) {
+			UIMenu.menu_start(ui);
+			if (UIMenu.menu_category == menu_category_t.FILE) {
+				if (UIMenu.menu_button(ui, tr("New Project..."), Config.keymap.file_new)) Project.project_new_box();
+				if (UIMenu.menu_button(ui, tr("Open..."), Config.keymap.file_open)) Project.project_open();
+				if (UIMenu.menu_button(ui, tr("Open Recent..."), Config.keymap.file_open_recent)) BoxProjects.show();
+				if (UIMenu.menu_button(ui, tr("Save"), Config.keymap.file_save)) Project.project_save();
+				if (UIMenu.menu_button(ui, tr("Save As..."), Config.keymap.file_save_as)) Project.project_save_as();
+				UIMenu.menu_separator(ui);
+				if (UIMenu.menu_button(ui, tr("Import Texture..."), Config.keymap.file_import_assets)) Project.import_asset(Path.texture_formats.join(","), false);
+				if (UIMenu.menu_button(ui, tr("Import Envmap..."))) {
 					UIFiles.show("hdr", false, false, (path: string) => {
 						if (!path.endsWith(".hdr")) {
 							Console.error(tr("Error: .hdr file expected"));
@@ -55,42 +55,42 @@ class UIMenu {
 				}
 
 				///if (is_paint || is_sculpt)
-				if (UIMenu.menuButton(ui, tr("Import Font..."))) Project.importAsset("ttf,ttc,otf");
-				if (UIMenu.menuButton(ui, tr("Import Material..."))) Project.importMaterial();
-				if (UIMenu.menuButton(ui, tr("Import Brush..."))) Project.importBrush();
+				if (UIMenu.menu_button(ui, tr("Import Font..."))) Project.import_asset("ttf,ttc,otf");
+				if (UIMenu.menu_button(ui, tr("Import Material..."))) Project.import_material();
+				if (UIMenu.menu_button(ui, tr("Import Brush..."))) Project.import_brush();
 				///end
 
 				///if (is_paint || is_lab)
-				if (UIMenu.menuButton(ui, tr("Import Swatches..."))) Project.importSwatches();
+				if (UIMenu.menu_button(ui, tr("Import Swatches..."))) Project.import_swatches();
 				///end
-				if (UIMenu.menuButton(ui, tr("Import Mesh..."))) Project.importMesh();
-				if (UIMenu.menuButton(ui, tr("Reimport Mesh"), Config.keymap.file_reimport_mesh)) Project.reimportMesh();
-				if (UIMenu.menuButton(ui, tr("Reimport Textures"), Config.keymap.file_reimport_textures)) Project.reimportTextures();
-				UIMenu.menuSeparator(ui);
+				if (UIMenu.menu_button(ui, tr("Import Mesh..."))) Project.import_mesh();
+				if (UIMenu.menu_button(ui, tr("Reimport Mesh"), Config.keymap.file_reimport_mesh)) Project.reimport_mesh();
+				if (UIMenu.menu_button(ui, tr("Reimport Textures"), Config.keymap.file_reimport_textures)) Project.reimport_textures();
+				UIMenu.menu_separator(ui);
 				///if (is_paint || is_lab)
-				if (UIMenu.menuButton(ui, tr("Export Textures..."), Config.keymap.file_export_textures_as)) {
+				if (UIMenu.menu_button(ui, tr("Export Textures..."), Config.keymap.file_export_textures_as)) {
 					///if is_paint
-					Context.raw.layersExport = ExportMode.ExportVisible;
+					Context.raw.layers_export = export_mode_t.VISIBLE;
 					///end
-					BoxExport.showTextures();
+					BoxExport.show_textures();
 				}
-				if (UIMenu.menuButton(ui, tr("Export Swatches..."))) Project.exportSwatches();
+				if (UIMenu.menu_button(ui, tr("Export Swatches..."))) Project.export_swatches();
 				///end
-				if (UIMenu.menuButton(ui, tr("Export Mesh..."))) {
-					Context.raw.exportMeshIndex = 0; // All
-					BoxExport.showMesh();
+				if (UIMenu.menu_button(ui, tr("Export Mesh..."))) {
+					Context.raw.export_mesh_index = 0; // All
+					BoxExport.show_mesh();
 				}
 
 				///if is_paint
-				if (UIMenu.menuButton(ui, tr("Bake Material..."))) BoxExport.showBakeMaterial();
+				if (UIMenu.menu_button(ui, tr("Bake Material..."))) BoxExport.show_bake_material();
 				///end
 
-				UIMenu.menuSeparator(ui);
-				if (UIMenu.menuButton(ui, tr("Exit"))) sys_stop();
+				UIMenu.menu_separator(ui);
+				if (UIMenu.menu_button(ui, tr("Exit"))) sys_stop();
 			}
-			else if (UIMenu.menuCategory == MenuCategory.MenuEdit) {
-				let stepUndo = "";
-				let stepRedo = "";
+			else if (UIMenu.menu_category == menu_category_t.EDIT) {
+				let stepUndo: string = "";
+				let stepRedo: string = "";
 				if (History.undos > 0) {
 					stepUndo = History.steps[History.steps.length - 1 - History.redos].name;
 				}
@@ -98,169 +98,169 @@ class UIMenu {
 					stepRedo = History.steps[History.steps.length - History.redos].name;
 				}
 				ui.enabled = History.undos > 0;
-				if (UIMenu.menuButton(ui, tr("Undo {step}", new Map([["step", stepUndo]])), Config.keymap.edit_undo)) History.undo();
+				if (UIMenu.menu_button(ui, tr("Undo {step}", new Map([["step", stepUndo]])), Config.keymap.edit_undo)) History.undo();
 				ui.enabled = History.redos > 0;
-				if (UIMenu.menuButton(ui, tr("Redo {step}", new Map([["step", stepRedo]])), Config.keymap.edit_redo)) History.redo();
+				if (UIMenu.menu_button(ui, tr("Redo {step}", new Map([["step", stepRedo]])), Config.keymap.edit_redo)) History.redo();
 				ui.enabled = true;
-				UIMenu.menuSeparator(ui);
-				if (UIMenu.menuButton(ui, tr("Preferences..."), Config.keymap.edit_prefs)) BoxPreferences.show();
+				UIMenu.menu_separator(ui);
+				if (UIMenu.menu_button(ui, tr("Preferences..."), Config.keymap.edit_prefs)) BoxPreferences.show();
 			}
-			else if (UIMenu.menuCategory == MenuCategory.MenuViewport) {
-				if (UIMenu.menuButton(ui, tr("Distract Free"), Config.keymap.view_distract_free)) {
-					UIBase.toggleDistractFree();
+			else if (UIMenu.menu_category == menu_category_t.VIEWPORT) {
+				if (UIMenu.menu_button(ui, tr("Distract Free"), Config.keymap.view_distract_free)) {
+					UIBase.toggle_distract_free();
 					UIBase.ui.is_hovered = false;
 				}
 
 				///if !(krom_android || krom_ios)
-				if (UIMenu.menuButton(ui, tr("Toggle Fullscreen"), "alt+enter")) {
-					Base.toggleFullscreen();
+				if (UIMenu.menu_button(ui, tr("Toggle Fullscreen"), "alt+enter")) {
+					Base.toggle_fullscreen();
 				}
 				///end
 
 				ui.changed = false;
 
-				UIMenu.menuFill(ui);
-				let p = scene_world;
-				let envHandle = zui_handle("uimenu_0");
+				UIMenu.menu_fill(ui);
+				let p: world_data_t = scene_world;
+				let envHandle: zui_handle_t = zui_handle("uimenu_0");
 				envHandle.value = p.strength;
-				UIMenu.menuAlign(ui);
+				UIMenu.menu_align(ui);
 				p.strength = zui_slider(envHandle, tr("Environment"), 0.0, 8.0, true);
 				if (envHandle.changed) Context.raw.ddirty = 2;
 
-				UIMenu.menuFill(ui);
-				let envaHandle = zui_handle("uimenu_1");
-				envaHandle.value = Context.raw.envmapAngle / Math.PI * 180.0;
+				UIMenu.menu_fill(ui);
+				let envaHandle: zui_handle_t = zui_handle("uimenu_1");
+				envaHandle.value = Context.raw.envmap_angle / Math.PI * 180.0;
 				if (envaHandle.value < 0) {
 					envaHandle.value += (Math.floor(-envaHandle.value / 360) + 1) * 360;
 				}
 				else if (envaHandle.value > 360) {
 					envaHandle.value -= Math.floor(envaHandle.value / 360) * 360;
 				}
-				UIMenu.menuAlign(ui);
-				Context.raw.envmapAngle = zui_slider(envaHandle, tr("Environment Angle"), 0.0, 360.0, true, 1) / 180.0 * Math.PI;
+				UIMenu.menu_align(ui);
+				Context.raw.envmap_angle = zui_slider(envaHandle, tr("Environment Angle"), 0.0, 360.0, true, 1) / 180.0 * Math.PI;
 				if (ui.is_hovered) zui_tooltip(tr("{shortcut} and move mouse", new Map([["shortcut", Config.keymap.rotate_envmap]])));
 				if (envaHandle.changed) Context.raw.ddirty = 2;
 
 				if (scene_lights.length > 0) {
-					let light = scene_lights[0];
+					let light: light_object_t = scene_lights[0];
 
-					UIMenu.menuFill(ui);
-					let lhandle = zui_handle("uimenu_2");
-					let scale = 1333;
+					UIMenu.menu_fill(ui);
+					let lhandle: zui_handle_t = zui_handle("uimenu_2");
+					let scale: f32 = 1333;
 					lhandle.value = light.data.strength / scale;
 					lhandle.value = Math.floor(lhandle.value * 100) / 100;
-					UIMenu.menuAlign(ui);
+					UIMenu.menu_align(ui);
 					light.data.strength = zui_slider(lhandle, tr("Light"), 0.0, 4.0, true) * scale;
 					if (lhandle.changed) Context.raw.ddirty = 2;
 
-					UIMenu.menuFill(ui);
+					UIMenu.menu_fill(ui);
 					light = scene_lights[0];
-					let lahandle = zui_handle("uimenu_3");
-					lahandle.value = Context.raw.lightAngle / Math.PI * 180;
-					UIMenu.menuAlign(ui);
-					let newAngle = zui_slider(lahandle, tr("Light Angle"), 0.0, 360.0, true, 1) / 180 * Math.PI;
+					let lahandle: zui_handle_t = zui_handle("uimenu_3");
+					lahandle.value = Context.raw.light_angle / Math.PI * 180;
+					UIMenu.menu_align(ui);
+					let newAngle: f32 = zui_slider(lahandle, tr("Light Angle"), 0.0, 360.0, true, 1) / 180 * Math.PI;
 					if (ui.is_hovered) zui_tooltip(tr("{shortcut} and move mouse", new Map([["shortcut", Config.keymap.rotate_light]])));
-					let ldiff = newAngle - Context.raw.lightAngle;
+					let ldiff: f32 = newAngle - Context.raw.light_angle;
 					if (Math.abs(ldiff) > 0.005) {
 						if (newAngle < 0) newAngle += (Math.floor(-newAngle / (2 * Math.PI)) + 1) * 2 * Math.PI;
 						else if (newAngle > 2 * Math.PI) newAngle -= Math.floor(newAngle / (2 * Math.PI)) * 2 * Math.PI;
-						Context.raw.lightAngle = newAngle;
-						let m = mat4_rot_z(ldiff);
+						Context.raw.light_angle = newAngle;
+						let m: mat4_t = mat4_rot_z(ldiff);
 						mat4_mult_mat(light.base.transform.local, m);
 						transform_decompose(light.base.transform);
 						Context.raw.ddirty = 2;
 					}
 
-					UIMenu.menuFill(ui);
-					let sxhandle = zui_handle("uimenu_4");
+					UIMenu.menu_fill(ui);
+					let sxhandle: zui_handle_t = zui_handle("uimenu_4");
 					sxhandle.value = light.data.size;
-					UIMenu.menuAlign(ui);
+					UIMenu.menu_align(ui);
 					light.data.size = zui_slider(sxhandle, tr("Light Size"), 0.0, 4.0, true);
 					if (sxhandle.changed) Context.raw.ddirty = 2;
 				}
 
 				///if (is_paint || is_sculpt)
-				UIMenu.menuFill(ui);
-				let splitViewHandle = zui_handle("uimenu_5", { selected: Context.raw.splitView });
-				Context.raw.splitView = zui_check(splitViewHandle, " " + tr("Split View"));
+				UIMenu.menu_fill(ui);
+				let splitViewHandle: zui_handle_t = zui_handle("uimenu_5", { selected: Context.raw.split_view });
+				Context.raw.split_view = zui_check(splitViewHandle, " " + tr("Split View"));
 				if (splitViewHandle.changed) {
 					Base.resize();
 				}
 				///end
 
 				///if is_lab
-				UIMenu.menuFill(ui);
-				let brushScaleHandle = zui_handle("uimenu_6", { value: Context.raw.brushScale });
-				UIMenu.menuAlign(ui);
-				Context.raw.brushScale = zui_slider(brushScaleHandle, tr("UV Scale"), 0.01, 5.0, true);
+				UIMenu.menu_fill(ui);
+				let brushScaleHandle: zui_handle_t = zui_handle("uimenu_6", { value: Context.raw.brush_scale });
+				UIMenu.menu_align(ui);
+				Context.raw.brush_scale = zui_slider(brushScaleHandle, tr("UV Scale"), 0.01, 5.0, true);
 				if (brushScaleHandle.changed) {
-					MakeMaterial.parseMeshMaterial();
+					MakeMaterial.parse_mesh_material();
 					///if (krom_direct3d12 || krom_vulkan || krom_metal)
-					RenderPathRaytrace.uvScale = Context.raw.brushScale;
+					RenderPathRaytrace.uv_scale = Context.raw.brush_scale;
 					RenderPathRaytrace.ready = false;
 					///end
 				}
 				///end
 
-				UIMenu.menuFill(ui);
-				let cullHandle = zui_handle("uimenu_7", { selected: Context.raw.cullBackfaces });
-				Context.raw.cullBackfaces = zui_check(cullHandle, " " + tr("Cull Backfaces"));
+				UIMenu.menu_fill(ui);
+				let cullHandle: zui_handle_t = zui_handle("uimenu_7", { selected: Context.raw.cull_backfaces });
+				Context.raw.cull_backfaces = zui_check(cullHandle, " " + tr("Cull Backfaces"));
 				if (cullHandle.changed) {
-					MakeMaterial.parseMeshMaterial();
+					MakeMaterial.parse_mesh_material();
 				}
 
-				UIMenu.menuFill(ui);
-				let filterHandle = zui_handle("uimenu_8", { selected: Context.raw.textureFilter });
-				Context.raw.textureFilter = zui_check(filterHandle, " " + tr("Filter Textures"));
+				UIMenu.menu_fill(ui);
+				let filterHandle: zui_handle_t = zui_handle("uimenu_8", { selected: Context.raw.texture_filter });
+				Context.raw.texture_filter = zui_check(filterHandle, " " + tr("Filter Textures"));
 				if (filterHandle.changed) {
-					MakeMaterial.parsePaintMaterial();
-					MakeMaterial.parseMeshMaterial();
+					MakeMaterial.parse_paint_material();
+					MakeMaterial.parse_mesh_material();
 				}
 
 				///if (is_paint || is_sculpt)
-				UIMenu.menuFill(ui);
-				Context.raw.drawWireframe = zui_check(Context.raw.wireframeHandle, " " + tr("Wireframe"));
-				if (Context.raw.wireframeHandle.changed) {
-					let current = _g2_current;
+				UIMenu.menu_fill(ui);
+				Context.raw.draw_wireframe = zui_check(Context.raw.wireframe_handle, " " + tr("Wireframe"));
+				if (Context.raw.wireframe_handle.changed) {
+					let current: image_t = _g2_current;
 					g2_end();
-					UtilUV.cacheUVMap();
+					UtilUV.cache_uv_map();
 					g2_begin(current);
-					MakeMaterial.parseMeshMaterial();
+					MakeMaterial.parse_mesh_material();
 				}
 				///end
 
 				///if is_paint
-				UIMenu.menuFill(ui);
-				Context.raw.drawTexels = zui_check(Context.raw.texelsHandle, " " + tr("Texels"));
-				if (Context.raw.texelsHandle.changed) {
-					MakeMaterial.parseMeshMaterial();
+				UIMenu.menu_fill(ui);
+				Context.raw.draw_texels = zui_check(Context.raw.texels_handle, " " + tr("Texels"));
+				if (Context.raw.texels_handle.changed) {
+					MakeMaterial.parse_mesh_material();
 				}
 				///end
 
-				UIMenu.menuFill(ui);
-				let compassHandle = zui_handle("uimenu_9", { selected: Context.raw.showCompass });
-				Context.raw.showCompass = zui_check(compassHandle, " " + tr("Compass"));
+				UIMenu.menu_fill(ui);
+				let compassHandle: zui_handle_t = zui_handle("uimenu_9", { selected: Context.raw.show_compass });
+				Context.raw.show_compass = zui_check(compassHandle, " " + tr("Compass"));
 				if (compassHandle.changed) Context.raw.ddirty = 2;
 
-				UIMenu.menuFill(ui);
-				Context.raw.showEnvmap = zui_check(Context.raw.showEnvmapHandle, " " + tr("Envmap"));
-				if (Context.raw.showEnvmapHandle.changed) {
-					Context.loadEnvmap();
+				UIMenu.menu_fill(ui);
+				Context.raw.show_envmap = zui_check(Context.raw.show_envmap_handle, " " + tr("Envmap"));
+				if (Context.raw.show_envmap_handle.changed) {
+					Context.load_envmap();
 					Context.raw.ddirty = 2;
 				}
 
-				UIMenu.menuFill(ui);
-				Context.raw.showEnvmapBlur = zui_check(Context.raw.showEnvmapBlurHandle, " " + tr("Blur Envmap"));
-				if (Context.raw.showEnvmapBlurHandle.changed) Context.raw.ddirty = 2;
+				UIMenu.menu_fill(ui);
+				Context.raw.show_envmap_blur = zui_check(Context.raw.show_envmap_blur_handle, " " + tr("Blur Envmap"));
+				if (Context.raw.show_envmap_blur_handle.changed) Context.raw.ddirty = 2;
 
-				Context.updateEnvmap();
+				Context.update_envmap();
 
-				if (ui.changed) UIMenu.keepOpen = true;
+				if (ui.changed) UIMenu.keep_open = true;
 			}
-			else if (UIMenu.menuCategory == MenuCategory.MenuMode) {
-				let modeHandle = zui_handle("uimenu_10");
-				modeHandle.position = Context.raw.viewportMode;
-				let modes = [
+			else if (UIMenu.menu_category == menu_category_t.MODE) {
+				let modeHandle: zui_handle_t = zui_handle("uimenu_10");
+				modeHandle.position = Context.raw.viewport_mode;
+				let modes: string[] = [
 					tr("Lit"),
 					tr("Base Color"),
 					///if (is_paint || is_lab)
@@ -283,7 +283,7 @@ class UIMenu {
 					tr("Mask")
 					///end
 				];
-				let shortcuts = ["l", "b", "n", "o", "r", "m", "a", "h", "e", "s", "t", "1", "2", "3", "4"];
+				let shortcuts: string[] = ["l", "b", "n", "o", "r", "m", "a", "h", "e", "s", "t", "1", "2", "3", "4"];
 
 				///if (krom_direct3d12 || krom_vulkan || krom_metal)
 				if (krom_raytrace_supported()) {
@@ -292,185 +292,185 @@ class UIMenu {
 				}
 				///end
 
-				for (let i = 0; i < modes.length; ++i) {
-					UIMenu.menuFill(ui);
-					let shortcut = Config.raw.touch_ui ? "" : Config.keymap.viewport_mode + ", " + shortcuts[i];
+				for (let i: i32 = 0; i < modes.length; ++i) {
+					UIMenu.menu_fill(ui);
+					let shortcut: string = Config.raw.touch_ui ? "" : Config.keymap.viewport_mode + ", " + shortcuts[i];
 					zui_radio(modeHandle, i, modes[i], shortcut);
 				}
 
 				if (modeHandle.changed) {
-					Context.setViewportMode(modeHandle.position);
+					Context.set_viewport_mode(modeHandle.position);
 					// TODO: rotate mode is not supported for path tracing yet
-					if (modeHandle.position == ViewportMode.ViewPathTrace && Context.raw.cameraControls == CameraControls.ControlsRotate) {
-						Context.raw.cameraControls = CameraControls.ControlsOrbit;
+					if (modeHandle.position == viewport_mode_t.PATH_TRACE && Context.raw.camera_controls == camera_controls_t.ROTATE) {
+						Context.raw.camera_controls = camera_controls_t.ORBIT;
 						Viewport.reset();
 					}
 				}
 			}
-			else if (UIMenu.menuCategory == MenuCategory.MenuCamera) {
-				if (UIMenu.menuButton(ui, tr("Reset"), Config.keymap.view_reset)) {
+			else if (UIMenu.menu_category == menu_category_t.CAMERA) {
+				if (UIMenu.menu_button(ui, tr("Reset"), Config.keymap.view_reset)) {
 					Viewport.reset();
-					Viewport.scaleToBounds();
+					Viewport.scale_to_bounds();
 				}
-				UIMenu.menuSeparator(ui);
-				if (UIMenu.menuButton(ui, tr("Front"), Config.keymap.view_front)) {
-					Viewport.setView(0, -1, 0, Math.PI / 2, 0, 0);
+				UIMenu.menu_separator(ui);
+				if (UIMenu.menu_button(ui, tr("Front"), Config.keymap.view_front)) {
+					Viewport.set_view(0, -1, 0, Math.PI / 2, 0, 0);
 				}
-				if (UIMenu.menuButton(ui, tr("Back"), Config.keymap.view_back)) {
-					Viewport.setView(0, 1, 0, Math.PI / 2, 0, Math.PI);
+				if (UIMenu.menu_button(ui, tr("Back"), Config.keymap.view_back)) {
+					Viewport.set_view(0, 1, 0, Math.PI / 2, 0, Math.PI);
 				}
-				if (UIMenu.menuButton(ui, tr("Right"), Config.keymap.view_right)) {
-					Viewport.setView(1, 0, 0, Math.PI / 2, 0, Math.PI / 2);
+				if (UIMenu.menu_button(ui, tr("Right"), Config.keymap.view_right)) {
+					Viewport.set_view(1, 0, 0, Math.PI / 2, 0, Math.PI / 2);
 				}
-				if (UIMenu.menuButton(ui, tr("Left"), Config.keymap.view_left)) {
-					Viewport.setView(-1, 0, 0, Math.PI / 2, 0, -Math.PI / 2);
+				if (UIMenu.menu_button(ui, tr("Left"), Config.keymap.view_left)) {
+					Viewport.set_view(-1, 0, 0, Math.PI / 2, 0, -Math.PI / 2);
 				}
-				if (UIMenu.menuButton(ui, tr("Top"), Config.keymap.view_top)) {
-					Viewport.setView(0, 0, 1, 0, 0, 0);
+				if (UIMenu.menu_button(ui, tr("Top"), Config.keymap.view_top)) {
+					Viewport.set_view(0, 0, 1, 0, 0, 0);
 				}
-				if (UIMenu.menuButton(ui, tr("Bottom"), Config.keymap.view_bottom)) {
-					Viewport.setView(0, 0, -1, Math.PI, 0, Math.PI);
+				if (UIMenu.menu_button(ui, tr("Bottom"), Config.keymap.view_bottom)) {
+					Viewport.set_view(0, 0, -1, Math.PI, 0, Math.PI);
 				}
-				UIMenu.menuSeparator(ui);
+				UIMenu.menu_separator(ui);
 
 				ui.changed = false;
 
-				if (UIMenu.menuButton(ui, tr("Orbit Left"), Config.keymap.view_orbit_left)) {
+				if (UIMenu.menu_button(ui, tr("Orbit Left"), Config.keymap.view_orbit_left)) {
 					Viewport.orbit(-Math.PI / 12, 0);
 				}
-				if (UIMenu.menuButton(ui, tr("Orbit Right"), Config.keymap.view_orbit_right)) {
+				if (UIMenu.menu_button(ui, tr("Orbit Right"), Config.keymap.view_orbit_right)) {
 					Viewport.orbit(Math.PI / 12, 0);
 				}
-				if (UIMenu.menuButton(ui, tr("Orbit Up"), Config.keymap.view_orbit_up)) {
+				if (UIMenu.menu_button(ui, tr("Orbit Up"), Config.keymap.view_orbit_up)) {
 					Viewport.orbit(0, -Math.PI / 12);
 				}
-				if (UIMenu.menuButton(ui, tr("Orbit Down"), Config.keymap.view_orbit_down)) {
+				if (UIMenu.menu_button(ui, tr("Orbit Down"), Config.keymap.view_orbit_down)) {
 					Viewport.orbit(0, Math.PI / 12);
 				}
-				if (UIMenu.menuButton(ui, tr("Orbit Opposite"), Config.keymap.view_orbit_opposite)) {
-					Viewport.orbitOpposite();
+				if (UIMenu.menu_button(ui, tr("Orbit Opposite"), Config.keymap.view_orbit_opposite)) {
+					Viewport.orbit_opposite();
 				}
-				if (UIMenu.menuButton(ui, tr("Zoom In"), Config.keymap.view_zoom_in)) {
+				if (UIMenu.menu_button(ui, tr("Zoom In"), Config.keymap.view_zoom_in)) {
 					Viewport.zoom(0.2);
 				}
-				if (UIMenu.menuButton(ui, tr("Zoom Out"), Config.keymap.view_zoom_out)) {
+				if (UIMenu.menu_button(ui, tr("Zoom Out"), Config.keymap.view_zoom_out)) {
 					Viewport.zoom(-0.2);
 				}
 				// menuSeparator(ui);
 
-				UIMenu.menuFill(ui);
-				let cam = scene_camera;
-				Context.raw.fovHandle = zui_handle("uimenu_11", { value: Math.floor(cam.data.fov * 100) / 100 });
-				UIMenu.menuAlign(ui);
-				cam.data.fov = zui_slider(Context.raw.fovHandle, tr("FoV"), 0.3, 1.4, true);
-				if (Context.raw.fovHandle.changed) {
-					Viewport.updateCameraType(Context.raw.cameraType);
+				UIMenu.menu_fill(ui);
+				let cam: camera_object_t = scene_camera;
+				Context.raw.fov_handle = zui_handle("uimenu_11", { value: Math.floor(cam.data.fov * 100) / 100 });
+				UIMenu.menu_align(ui);
+				cam.data.fov = zui_slider(Context.raw.fov_handle, tr("FoV"), 0.3, 1.4, true);
+				if (Context.raw.fov_handle.changed) {
+					Viewport.update_camera_type(Context.raw.camera_type);
 				}
 
-				UIMenu.menuFill(ui);
-				UIMenu.menuAlign(ui);
-				let cameraControlsHandle = zui_handle("uimenu_12");
-				cameraControlsHandle.position = Context.raw.cameraControls;
-				Context.raw.cameraControls = zui_inline_radio(cameraControlsHandle, [tr("Orbit"), tr("Rotate"), tr("Fly")], zui_align_t.LEFT);
+				UIMenu.menu_fill(ui);
+				UIMenu.menu_align(ui);
+				let cameraControlsHandle: zui_handle_t = zui_handle("uimenu_12");
+				cameraControlsHandle.position = Context.raw.camera_controls;
+				Context.raw.camera_controls = zui_inline_radio(cameraControlsHandle, [tr("Orbit"), tr("Rotate"), tr("Fly")], zui_align_t.LEFT);
 
-				let orbitAndRotateTooltip = tr("Orbit and Rotate mode:\n{rotate_shortcut} or move right mouse button to rotate.\n{zoom_shortcut} or scroll to zoom.\n{pan_shortcut} or move middle mouse to pan.",
+				let orbitAndRotateTooltip: string = tr("Orbit and Rotate mode:\n{rotate_shortcut} or move right mouse button to rotate.\n{zoom_shortcut} or scroll to zoom.\n{pan_shortcut} or move middle mouse to pan.",
 					new Map([
 						["rotate_shortcut", Config.keymap.action_rotate],
 						["zoom_shortcut", Config.keymap.action_zoom],
 						["pan_shortcut", Config.keymap.action_pan]
 					])
 				);
-				let flyTooltip = tr("Fly mode:\nHold the right mouse button and one of the following commands:\nmove mouse to rotate.\nw, up or scroll up to move forward.\ns, down or scroll down to move backward.\na or left to move left.\nd or right to move right.\ne to move up.\nq to move down.\nHold shift to move faster or alt to move slower.");
+				let flyTooltip: string = tr("Fly mode:\nHold the right mouse button and one of the following commands:\nmove mouse to rotate.\nw, up or scroll up to move forward.\ns, down or scroll down to move backward.\na or left to move left.\nd or right to move right.\ne to move up.\nq to move down.\nHold shift to move faster or alt to move slower.");
 				if (ui.is_hovered) zui_tooltip(orbitAndRotateTooltip + "\n\n" + flyTooltip);
 
-				UIMenu.menuFill(ui);
-				UIMenu.menuAlign(ui);
-				Context.raw.cameraType = zui_inline_radio(Context.raw.camHandle, [tr("Perspective"), tr("Orthographic")], zui_align_t.LEFT);
+				UIMenu.menu_fill(ui);
+				UIMenu.menu_align(ui);
+				Context.raw.camera_type = zui_inline_radio(Context.raw.cam_handle, [tr("Perspective"), tr("Orthographic")], zui_align_t.LEFT);
 				if (ui.is_hovered) zui_tooltip(tr("Camera Type") + ` (${Config.keymap.view_camera_type})`);
-				if (Context.raw.camHandle.changed) {
-					Viewport.updateCameraType(Context.raw.cameraType);
+				if (Context.raw.cam_handle.changed) {
+					Viewport.update_camera_type(Context.raw.camera_type);
 				}
 
-				if (ui.changed) UIMenu.keepOpen = true;
+				if (ui.changed) UIMenu.keep_open = true;
 			}
-			else if (UIMenu.menuCategory == MenuCategory.MenuHelp) {
-				if (UIMenu.menuButton(ui, tr("Manual"))) {
-					File.loadUrl(manifest_url + "/manual");
+			else if (UIMenu.menu_category == menu_category_t.HELP) {
+				if (UIMenu.menu_button(ui, tr("Manual"))) {
+					File.load_url(manifest_url + "/manual");
 				}
-				if (UIMenu.menuButton(ui, tr("How To"))) {
-					File.loadUrl(manifest_url + "/howto");
+				if (UIMenu.menu_button(ui, tr("How To"))) {
+					File.load_url(manifest_url + "/howto");
 				}
-				if (UIMenu.menuButton(ui, tr("What's New"))) {
-					File.loadUrl(manifest_url + "/notes");
+				if (UIMenu.menu_button(ui, tr("What's New"))) {
+					File.load_url(manifest_url + "/notes");
 				}
-				if (UIMenu.menuButton(ui, tr("Issue Tracker"))) {
-					File.loadUrl("https://github.com/armory3d/armortools/issues");
+				if (UIMenu.menu_button(ui, tr("Issue Tracker"))) {
+					File.load_url("https://github.com/armory3d/armortools/issues");
 				}
-				if (UIMenu.menuButton(ui, tr("Report Bug"))) {
+				if (UIMenu.menu_button(ui, tr("Report Bug"))) {
 					///if (krom_darwin || krom_ios) // Limited url length
-					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" + manifest_version + "-" + Config.getSha() + ",%20" + sys_system_id());
+					File.load_url("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" + manifest_version + "-" + Config.get_sha() + ",%20" + sys_system_id());
 					///else
-					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" + manifest_version + "-" + Config.getSha() + ",%20" + sys_system_id() + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A");
+					File.load_url("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" + manifest_version + "-" + Config.get_sha() + ",%20" + sys_system_id() + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A");
 					///end
 				}
-				if (UIMenu.menuButton(ui, tr("Request Feature"))) {
+				if (UIMenu.menu_button(ui, tr("Request Feature"))) {
 					///if (krom_darwin || krom_ios) // Limited url length
-					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + Config.getSha() + ",%20" + sys_system_id());
+					File.load_url("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + Config.get_sha() + ",%20" + sys_system_id());
 					///else
-					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + Config.getSha() + ",%20" + sys_system_id() + "*%0A%0A**Feature description:**%0A%0A");
+					File.load_url("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + Config.get_sha() + ",%20" + sys_system_id() + "*%0A%0A**Feature description:**%0A%0A");
 					///end
 				}
-				UIMenu.menuSeparator(ui);
+				UIMenu.menu_separator(ui);
 
-				if (UIMenu.menuButton(ui, tr("Check for Updates..."))) {
+				if (UIMenu.menu_button(ui, tr("Check for Updates..."))) {
 					///if krom_android
-					File.loadUrl(manifest_url_android);
+					File.load_url(manifest_url_android);
 					///elseif krom_ios
-					File.loadUrl(manifest_url_ios);
+					File.load_url(manifest_url_ios);
 					///else
 					// Retrieve latest version number
-					File.downloadBytes("https://server.armorpaint.org/" + manifest_title.toLowerCase() + ".html", (buffer: ArrayBuffer) => {
+					File.download_bytes("https://server.armorpaint.org/" + manifest_title.toLowerCase() + ".html", (buffer: ArrayBuffer) => {
 						if (buffer != null)  {
 							// Compare versions
-							let update = JSON.parse(sys_buffer_to_string(buffer));
-							let updateVersion = Math.floor(update.version);
+							let update: any = json_parse(sys_buffer_to_string(buffer));
+							let updateVersion: i32 = Math.floor(update.version);
 							if (updateVersion > 0) {
-								let date = Config.getDate().substr(2); // 2019 -> 19
-								let dateInt = parseInt(string_replace_all(date, "-", ""));
+								let date: string = Config.get_date().substr(2); // 2019 -> 19
+								let dateInt: i32 = parseInt(string_replace_all(date, "-", ""));
 								if (updateVersion > dateInt) {
-									UIBox.showMessage(tr("Update"), tr("Update is available!\nPlease visit {url}.", new Map([["url", manifest_url]])));
+									UIBox.show_message(tr("Update"), tr("Update is available!\nPlease visit {url}.", new Map([["url", manifest_url]])));
 								}
 								else {
-									UIBox.showMessage(tr("Update"), tr("You are up to date!"));
+									UIBox.show_message(tr("Update"), tr("You are up to date!"));
 								}
 							}
 						}
 						else {
-							UIBox.showMessage(tr("Update"), tr("Unable to check for updates.\nPlease visit {url}.", new Map([["url", manifest_url]])));
+							UIBox.show_message(tr("Update"), tr("Unable to check for updates.\nPlease visit {url}.", new Map([["url", manifest_url]])));
 						}
 					});
 					///end
 				}
 
-				if (UIMenu.menuButton(ui, tr("About..."))) {
+				if (UIMenu.menu_button(ui, tr("About..."))) {
 
-					let msg = manifest_title + ".org - v" + manifest_version + " (" + Config.getDate() + ") - " + Config.getSha() + "\n";
+					let msg: string = manifest_title + ".org - v" + manifest_version + " (" + Config.get_date() + ") - " + Config.get_sha() + "\n";
 					msg += sys_system_id() + " - " + Strings.graphics_api;
 
 					///if krom_windows
-					let save = (Path.isProtected() ? krom_save_path() : Path.data()) + Path.sep + "tmp.txt";
+					let save: string = (Path.is_protected() ? krom_save_path() : Path.data()) + Path.sep + "tmp.txt";
 					krom_sys_command('wmic path win32_VideoController get name > "' + save + '"');
-					let blob = krom_load_blob(save);
-					let u8 = new Uint8Array(blob);
-					let gpuRaw = "";
-					for (let i = 0; i < Math.floor(u8.length / 2); ++i) {
-						let c = String.fromCharCode(u8[i * 2]);
+					let blob: buffer_t = krom_load_blob(save);
+					let u8: Uint8Array = new Uint8Array(blob);
+					let gpuRaw: string = "";
+					for (let i: i32 = 0; i < Math.floor(u8.length / 2); ++i) {
+						let c: string = String.fromCharCode(u8[i * 2]);
 						gpuRaw += c;
 					}
 
-					let gpus = gpuRaw.split("\n");
+					let gpus: string[] = gpuRaw.split("\n");
 					gpus = gpus.splice(1, gpus.length - 2);
-					let gpu = "";
+					let gpu: string = "";
 					for (let g of gpus) {
 						gpu += trim_end(g) + ", ";
 					}
@@ -480,8 +480,8 @@ class UIMenu {
 					// { lshw -C display }
 					///end
 
-					UIBox.showCustom((ui: zui_t) => {
-						let tabVertical = Config.raw.touch_ui;
+					UIBox.show_custom((ui: zui_t) => {
+						let tabVertical: bool = Config.raw.touch_ui;
 						if (zui_tab(zui_handle("uimenu_13"), tr("About"), tabVertical)) {
 
 							let img: image_t = data_get_image("badge.k");
@@ -501,7 +501,7 @@ class UIMenu {
 							///end
 
 							if (zui_button(tr("Contributors"))) {
-								File.loadUrl("https://github.com/armory3d/armortools/graphs/contributors");
+								File.load_url("https://github.com/armory3d/armortools/graphs/contributors");
 							}
 							if (zui_button(tr("OK"))) {
 								UIBox.hide();
@@ -512,61 +512,61 @@ class UIMenu {
 			}
 		}
 
-		UIMenu.hideMenu = ui.combo_selected_handle_ptr == 0 && !UIMenu.keepOpen && !UIMenu.showMenuFirst && (ui.changed || ui.input_released || ui.input_released_r || ui.is_escape_down);
-		UIMenu.showMenuFirst = false;
-		UIMenu.keepOpen = false;
+		UIMenu.hide_menu = ui.combo_selected_handle_ptr == 0 && !UIMenu.keep_open && !UIMenu.show_menu_first && (ui.changed || ui.input_released || ui.input_released_r || ui.is_escape_down);
+		UIMenu.show_menu_first = false;
+		UIMenu.keep_open = false;
 
 		ui.t.BUTTON_COL = _BUTTON_COL;
 		ui.t.ELEMENT_OFFSET = _ELEMENT_OFFSET;
 		ui.t.ELEMENT_H = _ELEMENT_H;
 		zui_end_region();
 
-		if (UIMenu.hideMenu) {
+		if (UIMenu.hide_menu) {
 			UIMenu.hide();
-			UIMenu.showMenuFirst = true;
-			UIMenu.menuCommands = null;
+			UIMenu.show_menu_first = true;
+			UIMenu.menu_commands = null;
 		}
 	}
 
 	static hide = () => {
 		UIMenu.show = false;
-		Base.redrawUI();
+		Base.redraw_ui();
 	}
 
-	static draw = (commands: (ui: zui_t)=>void = null, elements: i32, x = -1, y = -1) => {
+	static draw = (commands: (ui: zui_t)=>void = null, elements: i32, x: i32 = -1, y: i32 = -1) => {
 		zui_end_input();
 		UIMenu.show = true;
-		UIMenu.menuCommands = commands;
-		UIMenu.menuElements = elements;
-		UIMenu.menuX = x > -1 ? x : Math.floor(mouse_x + 1);
-		UIMenu.menuY = y > -1 ? y : Math.floor(mouse_y + 1);
-		UIMenu.fitToScreen();
+		UIMenu.menu_commands = commands;
+		UIMenu.menu_elements = elements;
+		UIMenu.menu_x = x > -1 ? x : Math.floor(mouse_x + 1);
+		UIMenu.menu_y = y > -1 ? y : Math.floor(mouse_y + 1);
+		UIMenu.fit_to_screen();
 	}
 
-	static fitToScreen = () => {
+	static fit_to_screen = () => {
 		// Prevent the menu going out of screen
-		let menuW = Base.defaultElementW * zui_SCALE(Base.uiMenu) * 2.3;
-		if (UIMenu.menuX + menuW > sys_width()) {
-			if (UIMenu.menuX - menuW > 0) {
-				UIMenu.menuX = Math.floor(UIMenu.menuX - menuW);
+		let menuW: f32 = Base.default_element_w * zui_SCALE(Base.ui_menu) * 2.3;
+		if (UIMenu.menu_x + menuW > sys_width()) {
+			if (UIMenu.menu_x - menuW > 0) {
+				UIMenu.menu_x = Math.floor(UIMenu.menu_x - menuW);
 			}
 			else {
-				UIMenu.menuX = Math.floor(sys_width() - menuW);
+				UIMenu.menu_x = Math.floor(sys_width() - menuW);
 			}
 		}
-		let menuH = Math.floor(UIMenu.menuElements * 30 * zui_SCALE(Base.uiMenu)); // ui.t.ELEMENT_H
-		if (UIMenu.menuY + menuH > sys_height()) {
-			if (UIMenu.menuY - menuH > 0) {
-				UIMenu.menuY = Math.floor(UIMenu.menuY - menuH);
+		let menuH: f32 = Math.floor(UIMenu.menu_elements * 30 * zui_SCALE(Base.ui_menu)); // ui.t.ELEMENT_H
+		if (UIMenu.menu_y + menuH > sys_height()) {
+			if (UIMenu.menu_y - menuH > 0) {
+				UIMenu.menu_y = Math.floor(UIMenu.menu_y - menuH);
 			}
 			else {
-				UIMenu.menuY = sys_height() - menuH;
+				UIMenu.menu_y = sys_height() - menuH;
 			}
-			UIMenu.menuX += 1; // Move out of mouse focus
+			UIMenu.menu_x += 1; // Move out of mouse focus
 		}
 	}
 
-	static menuFill = (ui: zui_t) => {
+	static menu_fill = (ui: zui_t) => {
 		g2_set_color(ui.t.ACCENT_SELECT_COL);
 		g2_fill_rect(ui._x - 1, ui._y, ui._w + 2, zui_ELEMENT_H(ui) + 1 + 1);
 		g2_set_color(ui.t.SEPARATOR_COL);
@@ -574,7 +574,7 @@ class UIMenu {
 		g2_set_color(0xffffffff);
 	}
 
-	static menuSeparator = (ui: zui_t) => {
+	static menu_separator = (ui: zui_t) => {
 		ui._y++;
 		if (Config.raw.touch_ui) {
 			zui_fill(0, 0, ui._w / zui_SCALE(ui), 1, ui.t.ACCENT_SELECT_COL);
@@ -584,41 +584,41 @@ class UIMenu {
 		}
 	}
 
-	static menuButton = (ui: zui_t, text: string, label = ""/*, icon = -1*/): bool => {
-		UIMenu.menuFill(ui);
+	static menu_button = (ui: zui_t, text: string, label: string = ""/*, icon: i32 = -1*/): bool => {
+		UIMenu.menu_fill(ui);
 		if (Config.raw.touch_ui) {
 			label = "";
 		}
 
-		// let icons = icon > -1 ? Res.get("icons.k") : null;
-		// let r = Res.tile25(icons, icon, 8);
+		// let icons: image_t = icon > -1 ? Res.get("icons.k") : null;
+		// let r: rect_t = Res.tile25(icons, icon, 8);
 		// return Zui.button(Config.buttonSpacing + text, Config.buttonAlign, label, icons, r.x, r.y, r.w, r.h);
 
-		return zui_button(Config.buttonSpacing + text, Config.buttonAlign, label);
+		return zui_button(Config.button_spacing + text, Config.button_align, label);
 	}
 
-	static menuAlign = (ui: zui_t) => {
+	static menu_align = (ui: zui_t) => {
 		if (!Config.raw.touch_ui) {
 			zui_row([12 / 100, 88 / 100]);
 			zui_end_element();
 		}
 	}
 
-	static menuStart = (ui: zui_t) => {
+	static menu_start = (ui: zui_t) => {
 		// Draw top border
 		g2_set_color(ui.t.ACCENT_SELECT_COL);
 		if (Config.raw.touch_ui) {
-			g2_fill_rect(ui._x + ui._w / 2 + UIMenu.menuCategoryW / 2, ui._y - 1, ui._w / 2 - UIMenu.menuCategoryW / 2 + 1, 1);
-			g2_fill_rect(ui._x - 1, ui._y - 1, ui._w / 2 - UIMenu.menuCategoryW / 2 + 1, 1);
-			g2_fill_rect(ui._x + ui._w / 2 - UIMenu.menuCategoryW / 2, ui._y - UIMenu.menuCategoryH, UIMenu.menuCategoryW, 1);
-			g2_fill_rect(ui._x + ui._w / 2 - UIMenu.menuCategoryW / 2, ui._y - UIMenu.menuCategoryH, 1, UIMenu.menuCategoryH);
-			g2_fill_rect(ui._x + ui._w / 2 + UIMenu.menuCategoryW / 2, ui._y - UIMenu.menuCategoryH, 1, UIMenu.menuCategoryH);
+			g2_fill_rect(ui._x + ui._w / 2 + UIMenu.menu_category_w / 2, ui._y - 1, ui._w / 2 - UIMenu.menu_category_w / 2 + 1, 1);
+			g2_fill_rect(ui._x - 1, ui._y - 1, ui._w / 2 - UIMenu.menu_category_w / 2 + 1, 1);
+			g2_fill_rect(ui._x + ui._w / 2 - UIMenu.menu_category_w / 2, ui._y - UIMenu.menu_category_h, UIMenu.menu_category_w, 1);
+			g2_fill_rect(ui._x + ui._w / 2 - UIMenu.menu_category_w / 2, ui._y - UIMenu.menu_category_h, 1, UIMenu.menu_category_h);
+			g2_fill_rect(ui._x + ui._w / 2 + UIMenu.menu_category_w / 2, ui._y - UIMenu.menu_category_h, 1, UIMenu.menu_category_h);
 		}
 		else {
-			g2_fill_rect(ui._x - 1 + UIMenu.menuCategoryW, ui._y - 1, ui._w + 2 - UIMenu.menuCategoryW, 1);
-			g2_fill_rect(ui._x - 1, ui._y - UIMenu.menuCategoryH, UIMenu.menuCategoryW, 1);
-			g2_fill_rect(ui._x - 1, ui._y - UIMenu.menuCategoryH, 1, UIMenu.menuCategoryH);
-			g2_fill_rect(ui._x - 1 + UIMenu.menuCategoryW, ui._y - UIMenu.menuCategoryH, 1, UIMenu.menuCategoryH);
+			g2_fill_rect(ui._x - 1 + UIMenu.menu_category_w, ui._y - 1, ui._w + 2 - UIMenu.menu_category_w, 1);
+			g2_fill_rect(ui._x - 1, ui._y - UIMenu.menu_category_h, UIMenu.menu_category_w, 1);
+			g2_fill_rect(ui._x - 1, ui._y - UIMenu.menu_category_h, 1, UIMenu.menu_category_h);
+			g2_fill_rect(ui._x - 1 + UIMenu.menu_category_w, ui._y - UIMenu.menu_category_h, 1, UIMenu.menu_category_h);
 		}
 		g2_set_color(0xffffffff);
 	}

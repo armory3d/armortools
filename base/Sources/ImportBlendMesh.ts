@@ -1,20 +1,20 @@
 
 class ImportBlendMesh {
 
-	static eps = 1.0 / 32767;
+	static eps: f32 = 1.0 / 32767;
 
-	static run = (path: string, replaceExisting = true) => {
+	static run = (path: string, replaceExisting: bool = true) => {
 		let b: ArrayBuffer = data_get_blob(path);
-		let bl = ParserBlend.init(b);
+		let bl: BlendRaw = ParserBlend.init(b);
 		if (bl.dna == null) {
 			Console.error(Strings.error3());
 			return;
 		}
 
-		let obs = ParserBlend.get(bl, "Object");
-		if (obs == null || obs.length == 0) { ImportMesh.makeMesh(null, path); return; }
+		let obs: BlHandleRaw[] = ParserBlend.get(bl, "Object");
+		if (obs == null || obs.length == 0) { ImportMesh.make_mesh(null, path); return; }
 
-		let first = true;
+		let first: bool = true;
 		for (let ob of obs) {
 			if (BlHandle.get(ob, "type") != 1) continue;
 
@@ -24,28 +24,28 @@ class ImportBlendMesh {
 			let m: any = BlHandle.get(ob, "data", 0, "Mesh");
 			if (m == null) continue;
 
-			let totpoly = BlHandle.get(m, "totpoly");
+			let totpoly: i32 = BlHandle.get(m, "totpoly");
 			if (totpoly == 0) continue;
 
-			let numtri = 0;
-			for (let i = 0; i < totpoly; ++i) {
-				let poly = BlHandle.get(m, "mpoly", i);
-				let totloop = BlHandle.get(poly, "totloop");
+			let numtri: i32 = 0;
+			for (let i: i32 = 0; i < totpoly; ++i) {
+				let poly: any = BlHandle.get(m, "mpoly", i);
+				let totloop: i32 = BlHandle.get(poly, "totloop");
 				numtri += totloop - 2;
 			}
-			let inda = new Uint32Array(numtri * 3);
-			for (let i = 0; i < inda.length; ++i) inda[i] = i;
+			let inda: Uint32Array = new Uint32Array(numtri * 3);
+			for (let i: i32 = 0; i < inda.length; ++i) inda[i] = i;
 
-			let posa32 = new Float32Array(numtri * 3 * 4);
-			let posa = new Int16Array(numtri * 3 * 4);
-			let nora = new Int16Array(numtri * 3 * 2);
+			let posa32: Float32Array = new Float32Array(numtri * 3 * 4);
+			let posa: Int16Array = new Int16Array(numtri * 3 * 4);
+			let nora: Int16Array = new Int16Array(numtri * 3 * 2);
 
 			// pdata, 25 == CD_MPOLY
 			// let vdata: any = BlHandle.get(m, "vdata");
 			// let codata: any = null;
-			// let codata_pos = 0;
-			// for (let i = 0; i < BlHandle.get(vdata, "totlayer"); ++i) {
-			// 	let l = BlHandle.get(vdata, "layers", i);
+			// let codata_pos: i32 = 0;
+			// for (let i: i32 = 0; i < BlHandle.get(vdata, "totlayer"); ++i) {
+			// 	let l: any = BlHandle.get(vdata, "layers", i);
 			// 	if (BlHandle.get(l, "type") == 0) { // CD_MVERT
 			// 		let ptr: any = BlHandle.get(l, "data");
 			// 		codata_pos = bl.BlHandle.get(map, ptr).pos;
@@ -55,12 +55,12 @@ class ImportBlendMesh {
 
 			let ldata: any = BlHandle.get(m, "ldata");
 			let uvdata: any = null;
-			let uvdata_pos = 0;
+			let uvdata_pos: i32 = 0;
 			let coldata: any = null;
-			let coldata_pos = 0;
+			let coldata_pos: i32 = 0;
 
-			for (let i = 0; i < BlHandle.get(ldata, "totlayer"); ++i) {
-				let l = BlHandle.get(ldata, "layers", i);
+			for (let i: i32 = 0; i < BlHandle.get(ldata, "totlayer"); ++i) {
+				let l: any = BlHandle.get(ldata, "layers", i);
 				if (BlHandle.get(l, "type") == 16) { // CD_MLOOPUV
 					let ptr: any = BlHandle.get(l, "data");
 					uvdata_pos = bl.map.get(ptr).pos;
@@ -74,28 +74,28 @@ class ImportBlendMesh {
 				// CD_MLOOP == 26
 			}
 
-			let hasuv = uvdata != null;
-			let texa = hasuv ? new Int16Array(numtri * 3 * 2) : null;
-			let hascol = Context.raw.parseVCols && coldata != null;
-			let cola = hascol ? new Int16Array(numtri * 3 * 4) : null;
+			let hasuv: bool = uvdata != null;
+			let texa: Int16Array = hasuv ? new Int16Array(numtri * 3 * 2) : null;
+			let hascol: bool = Context.raw.parse_vcols && coldata != null;
+			let cola: Int16Array = hascol ? new Int16Array(numtri * 3 * 4) : null;
 
-			let tri = 0;
-			let vec0 = vec4_create();
-			let vec1 = vec4_create();
-			let vec2 = vec4_create();
-			for (let i = 0; i < totpoly; ++i) {
-				let poly = BlHandle.get(m, "mpoly", i);
-				// let smooth = BlHandle.get(poly, "flag") & 1 == 1; // ME_SMOOTH
-				let smooth = false; // TODO: fetch smooth normals
-				let loopstart = BlHandle.get(poly, "loopstart");
-				let totloop = BlHandle.get(poly, "totloop");
+			let tri: i32 = 0;
+			let vec0: vec4_t = vec4_create();
+			let vec1: vec4_t = vec4_create();
+			let vec2: vec4_t = vec4_create();
+			for (let i: i32 = 0; i < totpoly; ++i) {
+				let poly: any = BlHandle.get(m, "mpoly", i);
+				// let smooth: bool = BlHandle.get(poly, "flag") & 1 == 1; // ME_SMOOTH
+				let smooth: bool = false; // TODO: fetch smooth normals
+				let loopstart: i32 = BlHandle.get(poly, "loopstart");
+				let totloop: i32 = BlHandle.get(poly, "totloop");
 				if (totloop <= 4) { // Convex, fan triangulation
-					let v0 = ImportBlendMesh.get_mvert_v(m, loopstart + totloop - 1);
-					let v1 = ImportBlendMesh.get_mvert_v(m, loopstart);
-					let co0 = BlHandle.get(v0, "co");
-					let co1 = BlHandle.get(v1, "co");
-					let no0 = BlHandle.get(v0, "no");
-					let no1 = BlHandle.get(v1, "no");
+					let v0: BlHandleRaw = ImportBlendMesh.get_mvert_v(m, loopstart + totloop - 1);
+					let v1: BlHandleRaw = ImportBlendMesh.get_mvert_v(m, loopstart);
+					let co0: any = BlHandle.get(v0, "co");
+					let co1: any = BlHandle.get(v1, "co");
+					let no0: any = BlHandle.get(v0, "no");
+					let no1: any = BlHandle.get(v1, "no");
 					if (smooth) {
 						vec4_normalize(vec4_set(vec0, no0[0] / 32767, no0[1] / 32767, no0[2] / 32767)); // shortmax
 						vec4_normalize(vec4_set(vec1, no1[0] / 32767, no1[1] / 32767, no1[2] / 32767));
@@ -105,11 +105,11 @@ class ImportBlendMesh {
 					let uv2: Float32Array = null;
 					if (hasuv) {
 						bl.pos = uvdata_pos + (loopstart + totloop - 1) * 4 * 3; // * 3 = x, y, flag
-						uv0 = ParserBlend.readf32array(bl, 2);
+						uv0 = ParserBlend.read_f32array(bl, 2);
 						if (uv0[0] > 1.0 + ImportBlendMesh.eps) uv0[0] = uv0[0] - Math.floor(uv0[0]);
 						if (uv0[1] > 1.0 + ImportBlendMesh.eps) uv0[1] = uv0[1] - Math.floor(uv0[1]);
 						bl.pos = uvdata_pos + (loopstart) * 4 * 3;
-						uv1 = ParserBlend.readf32array(bl, 2);
+						uv1 = ParserBlend.read_f32array(bl, 2);
 						if (uv1[0] > 1.0 + ImportBlendMesh.eps) uv1[0] = uv1[0] - Math.floor(uv1[0]);
 						if (uv1[1] > 1.0 + ImportBlendMesh.eps) uv1[1] = uv1[1] - Math.floor(uv1[1]);
 					}
@@ -124,18 +124,18 @@ class ImportBlendMesh {
 					let col2b: i32 = 0;
 					if (hascol) {
 						bl.pos = coldata_pos + (loopstart + totloop - 1) * 1 * 4; // * 4 = r, g, b, a
-						col0r = ParserBlend.read8(bl);
-						col0g = ParserBlend.read8(bl);
-						col0b = ParserBlend.read8(bl);
+						col0r = ParserBlend.read_i8(bl);
+						col0g = ParserBlend.read_i8(bl);
+						col0b = ParserBlend.read_i8(bl);
 						bl.pos = coldata_pos + (loopstart) * 1 * 4;
-						col1r = ParserBlend.read8(bl);
-						col1g = ParserBlend.read8(bl);
-						col1b = ParserBlend.read8(bl);
+						col1r = ParserBlend.read_i8(bl);
+						col1g = ParserBlend.read_i8(bl);
+						col1b = ParserBlend.read_i8(bl);
 					}
-					for (let j = 0; j < totloop - 2; ++j) {
-						let v2 = ImportBlendMesh.get_mvert_v(m, loopstart + j + 1);
-						let co2 = BlHandle.get(v2, "co");
-						let no2 = BlHandle.get(v2, "no");
+					for (let j: i32 = 0; j < totloop - 2; ++j) {
+						let v2: BlHandleRaw = ImportBlendMesh.get_mvert_v(m, loopstart + j + 1);
+						let co2: any = BlHandle.get(v2, "co");
+						let no2: any = BlHandle.get(v2, "no");
 						if (smooth) {
 							vec4_normalize(vec4_set(vec2, no2[0] / 32767, no2[1] / 32767, no2[2] / 32767));
 						}
@@ -171,7 +171,7 @@ class ImportBlendMesh {
 						vec4_set_from(vec1, vec2);
 						if (hasuv) {
 							bl.pos = uvdata_pos + (loopstart + j + 1) * 4 * 3;
-							uv2 = ParserBlend.readf32array(bl, 2);
+							uv2 = ParserBlend.read_f32array(bl, 2);
 							if (uv2[0] > 1.0 + ImportBlendMesh.eps) uv2[0] = uv2[0] - Math.floor(uv2[0]);
 							if (uv2[1] > 1.0 + ImportBlendMesh.eps) uv2[1] = uv2[1] - Math.floor(uv2[1]);
 							texa[tri * 6    ] = Math.floor(uv0[0] * 32767);
@@ -184,9 +184,9 @@ class ImportBlendMesh {
 						}
 						if (hascol) {
 							bl.pos = coldata_pos + (loopstart + j + 1) * 1 * 4;
-							col2r = ParserBlend.read8(bl);
-							col2g = ParserBlend.read8(bl);
-							col2b = ParserBlend.read8(bl);
+							col2r = ParserBlend.read_i8(bl);
+							col2g = ParserBlend.read_i8(bl);
+							col2b = ParserBlend.read_i8(bl);
 							cola[tri * 12    ] = col0r * 128;
 							cola[tri * 12 + 1] = col0g * 128;
 							cola[tri * 12 + 2] = col0b * 128;
@@ -205,13 +205,13 @@ class ImportBlendMesh {
 				}
 				else { // Convex or concave, ear clipping
 					let va: i32[] = [];
-					for (let i = 0; i < totloop; ++i) va.push(loopstart + i);
-					let v0 = ImportBlendMesh.get_mvert_v(m, loopstart);
-					let v1 = ImportBlendMesh.get_mvert_v(m, loopstart + 1);
-					let v2 = ImportBlendMesh.get_mvert_v(m, loopstart + 2);
-					let co0 = BlHandle.get(v0, "co");
-					let co1 = BlHandle.get(v1, "co");
-					let co2 = BlHandle.get(v2, "co");
+					for (let i: i32 = 0; i < totloop; ++i) va.push(loopstart + i);
+					let v0: BlHandleRaw = ImportBlendMesh.get_mvert_v(m, loopstart);
+					let v1: BlHandleRaw = ImportBlendMesh.get_mvert_v(m, loopstart + 1);
+					let v2: BlHandleRaw = ImportBlendMesh.get_mvert_v(m, loopstart + 2);
+					let co0: any = BlHandle.get(v0, "co");
+					let co1: any = BlHandle.get(v1, "co");
+					let co2: any = BlHandle.get(v2, "co");
 					vec4_set(vec2, co2[0], co2[1], co2[2]);
 					vec4_set(vec1, co1[0], co1[1], co1[2]);
 					vec4_sub_vecs(vec0, vec2, vec1);
@@ -220,63 +220,63 @@ class ImportBlendMesh {
 					vec4_cross(vec0, vec1);
 					vec4_normalize(vec0, );
 
-					let nx = vec0.x;
-					let ny = vec0.y;
-					let nz = vec0.z;
-					let nxabs = Math.abs(nx);
-					let nyabs = Math.abs(ny);
-					let nzabs = Math.abs(nz);
-					let flip = nx + ny + nz > 0;
-					let axis = nxabs > nyabs && nxabs > nzabs ? 0 : nyabs > nxabs && nyabs > nzabs ? 1 : 2;
-					let axis0 = axis == 0 ? (flip ? 2 : 1) : axis == 1 ? (flip ? 0 : 2) : (flip ? 1 : 0);
-					let axis1 = axis == 0 ? (flip ? 1 : 2) : axis == 1 ? (flip ? 2 : 0) : (flip ? 0 : 1);
+					let nx: f32 = vec0.x;
+					let ny: f32 = vec0.y;
+					let nz: f32 = vec0.z;
+					let nxabs: f32 = Math.abs(nx);
+					let nyabs: f32 = Math.abs(ny);
+					let nzabs: f32 = Math.abs(nz);
+					let flip: bool = nx + ny + nz > 0;
+					let axis: i32 = nxabs > nyabs && nxabs > nzabs ? 0 : nyabs > nxabs && nyabs > nzabs ? 1 : 2;
+					let axis0: i32 = axis == 0 ? (flip ? 2 : 1) : axis == 1 ? (flip ? 0 : 2) : (flip ? 1 : 0);
+					let axis1: i32 = axis == 0 ? (flip ? 1 : 2) : axis == 1 ? (flip ? 2 : 0) : (flip ? 0 : 1);
 
-					let winding = 0.0;
-					for (let i = 0; i < totloop; ++i) {
-						let v0 = ImportBlendMesh.get_mvert_v(m, loopstart + i);
-						let v1 = ImportBlendMesh.get_mvert_v(m, loopstart + ((i + 1) % totloop));
-						let co0 = BlHandle.get(v0, "co");
-						let co1 = BlHandle.get(v1, "co");
+					let winding: f32 = 0.0;
+					for (let i: i32 = 0; i < totloop; ++i) {
+						let v0: BlHandleRaw = ImportBlendMesh.get_mvert_v(m, loopstart + i);
+						let v1: BlHandleRaw = ImportBlendMesh.get_mvert_v(m, loopstart + ((i + 1) % totloop));
+						let co0: any = BlHandle.get(v0, "co");
+						let co1: any = BlHandle.get(v1, "co");
 						winding += (co1[axis0] - co0[axis0]) * (co1[axis1] + co0[axis1]);
 					}
 					flip = winding > 0 ? nx + ny + nz > 0 : nx + ny + nz < 0;
 					axis0 = axis == 0 ? (flip ? 2 : 1) : axis == 1 ? (flip ? 0 : 2) : (flip ? 1 : 0);
 					axis1 = axis == 0 ? (flip ? 1 : 2) : axis == 1 ? (flip ? 2 : 0) : (flip ? 0 : 1);
 
-					let vi = totloop;
-					let loops = 0;
-					let i = -1;
+					let vi: i32 = totloop;
+					let loops: i32 = 0;
+					let i: i32 = -1;
 					while (vi > 2 && loops++ < vi) {
 						i = (i + 1) % vi;
-						let i1 = (i + 1) % vi;
-						let i2 = (i + 2) % vi;
-						let v0 = ImportBlendMesh.get_mvert_v(m, va[i ]);
-						let v1 = ImportBlendMesh.get_mvert_v(m, va[i1]);
-						let v2 = ImportBlendMesh.get_mvert_v(m, va[i2]);
-						let co0 = BlHandle.get(v0, "co");
-						let co1 = BlHandle.get(v1, "co");
-						let co2 = BlHandle.get(v2, "co");
-						let v0x = co0[axis0];
-						let v0y = co0[axis1];
-						let v1x = co1[axis0];
-						let v1y = co1[axis1];
-						let v2x = co2[axis0];
-						let v2y = co2[axis1];
+						let i1: i32 = (i + 1) % vi;
+						let i2: i32 = (i + 2) % vi;
+						let v0: BlHandleRaw = ImportBlendMesh.get_mvert_v(m, va[i ]);
+						let v1: BlHandleRaw = ImportBlendMesh.get_mvert_v(m, va[i1]);
+						let v2: BlHandleRaw = ImportBlendMesh.get_mvert_v(m, va[i2]);
+						let co0: any = BlHandle.get(v0, "co");
+						let co1: any = BlHandle.get(v1, "co");
+						let co2: any = BlHandle.get(v2, "co");
+						let v0x: f32 = co0[axis0];
+						let v0y: f32 = co0[axis1];
+						let v1x: f32 = co1[axis0];
+						let v1y: f32 = co1[axis1];
+						let v2x: f32 = co2[axis0];
+						let v2y: f32 = co2[axis1];
 
-						let e0x = v0x - v1x; // Not an interior vertex
-						let e0y = v0y - v1y;
-						let e1x = v2x - v1x;
-						let e1y = v2y - v1y;
-						let cross = e0x * e1y - e0y * e1x;
+						let e0x: f32 = v0x - v1x; // Not an interior vertex
+						let e0y: f32 = v0y - v1y;
+						let e1x: f32 = v2x - v1x;
+						let e1y: f32 = v2y - v1y;
+						let cross: f32 = e0x * e1y - e0y * e1x;
 						if (cross <= 0) continue;
 
-						let overlap = false; // Other vertex found inside this triangle
-						for (let j = 0; j < vi - 3; ++j) {
-							let j0 = (i + 3 + j) % vi;
-							let v = ImportBlendMesh.get_mvert_v(m, va[j0]);
-							let co = BlHandle.get(v, "co");
-							let px = co[axis0];
-							let py = co[axis1];
+						let overlap: bool = false; // Other vertex found inside this triangle
+						for (let j: i32 = 0; j < vi - 3; ++j) {
+							let j0: i32 = (i + 3 + j) % vi;
+							let v: BlHandleRaw = ImportBlendMesh.get_mvert_v(m, va[j0]);
+							let co: any = BlHandle.get(v, "co");
+							let px: f32 = co[axis0];
+							let py: f32 = co[axis1];
 
 							if (UtilMesh.pnpoly(v0x, v0y, v1x, v1y, v2x, v2y, px, py)) {
 								overlap = true;
@@ -287,9 +287,9 @@ class ImportBlendMesh {
 
 						// Found ear
 						{
-							let no0 = BlHandle.get(v0, "no");
-							let no1 = BlHandle.get(v1, "no");
-							let no2 = BlHandle.get(v2, "no");
+							let no0: any = BlHandle.get(v0, "no");
+							let no1: any = BlHandle.get(v1, "no");
+							let no2: any = BlHandle.get(v2, "no");
 							if (smooth) {
 								vec4_normalize(vec4_set(vec0, no0[0] / 32767, no0[1] / 32767, no0[2] / 32767)); // shortmax
 								vec4_normalize(vec4_set(vec1, no1[0] / 32767, no1[1] / 32767, no1[2] / 32767));
@@ -309,15 +309,15 @@ class ImportBlendMesh {
 							let uv2: Float32Array = null;
 							if (hasuv) {
 								bl.pos = uvdata_pos + (va[i ]) * 4 * 3;
-								uv0 = ParserBlend.readf32array(bl, 2);
+								uv0 = ParserBlend.read_f32array(bl, 2);
 								if (uv0[0] > 1.0 + ImportBlendMesh.eps) uv0[0] = uv0[0] - Math.floor(uv0[0]);
 								if (uv0[1] > 1.0 + ImportBlendMesh.eps) uv0[1] = uv0[1] - Math.floor(uv0[1]);
 								bl.pos = uvdata_pos + (va[i1]) * 4 * 3;
-								uv1 = ParserBlend.readf32array(bl, 2);
+								uv1 = ParserBlend.read_f32array(bl, 2);
 								if (uv1[0] > 1.0 + ImportBlendMesh.eps) uv1[0] = uv1[0] - Math.floor(uv1[0]);
 								if (uv1[1] > 1.0 + ImportBlendMesh.eps) uv1[1] = uv1[1] - Math.floor(uv1[1]);
 								bl.pos = uvdata_pos + (va[i2]) * 4 * 3;
-								uv2 = ParserBlend.readf32array(bl, 2);
+								uv2 = ParserBlend.read_f32array(bl, 2);
 								if (uv2[0] > 1.0 + ImportBlendMesh.eps) uv2[0] = uv2[0] - Math.floor(uv2[0]);
 								if (uv2[1] > 1.0 + ImportBlendMesh.eps) uv2[1] = uv2[1] - Math.floor(uv2[1]);
 							}
@@ -332,17 +332,17 @@ class ImportBlendMesh {
 							let col2b: i32 = 0;
 							if (hascol) {
 								bl.pos = coldata_pos + (va[i ]) * 1 * 4;
-								col0r = ParserBlend.read8(bl);
-								col0g = ParserBlend.read8(bl);
-								col0b = ParserBlend.read8(bl);
+								col0r = ParserBlend.read_i8(bl);
+								col0g = ParserBlend.read_i8(bl);
+								col0b = ParserBlend.read_i8(bl);
 								bl.pos = coldata_pos + (va[i1]) * 1 * 4;
-								col1r = ParserBlend.read8(bl);
-								col1g = ParserBlend.read8(bl);
-								col1b = ParserBlend.read8(bl);
+								col1r = ParserBlend.read_i8(bl);
+								col1g = ParserBlend.read_i8(bl);
+								col1b = ParserBlend.read_i8(bl);
 								bl.pos = coldata_pos + (va[i2]) * 1 * 4;
-								col2r = ParserBlend.read8(bl);
-								col2g = ParserBlend.read8(bl);
-								col2b = ParserBlend.read8(bl);
+								col2r = ParserBlend.read_i8(bl);
+								col2g = ParserBlend.read_i8(bl);
+								col2b = ParserBlend.read_i8(bl);
 							}
 							posa32[tri * 9    ] = co0[0];
 							posa32[tri * 9 + 1] = co0[1];
@@ -384,7 +384,7 @@ class ImportBlendMesh {
 							tri++;
 						}
 
-						for (let j = ((i + 1) % vi); j < vi - 1; ++j) { // Consume vertex
+						for (let j: i32 = ((i + 1) % vi); j < vi - 1; ++j) { // Consume vertex
 							va[j] = va[j + 1];
 						}
 						vi--;
@@ -395,10 +395,10 @@ class ImportBlendMesh {
 			}
 
 			// Apply world matrix
-			let obmat = BlHandle.get(ob, "obmat", 0, "float", 16);
-			let mat = mat4_transpose(mat4_from_f32_array(obmat));
-			let v = vec4_create();
-			for (let i = 0; i < Math.floor(posa32.length / 3); ++i) {
+			let obmat: any = BlHandle.get(ob, "obmat", 0, "float", 16);
+			let mat: mat4_t = mat4_transpose(mat4_from_f32_array(obmat));
+			let v: vec4_t = vec4_create();
+			for (let i: i32 = 0; i < Math.floor(posa32.length / 3); ++i) {
 				vec4_set(v, posa32[i * 3], posa32[i * 3 + 1], posa32[i * 3 + 2]);
 				vec4_apply_mat4(v, mat);
 				posa32[i * 3    ] = v.x;
@@ -408,7 +408,7 @@ class ImportBlendMesh {
 			mat4_get_inv(mat, mat);
 			mat4_transpose3x3(mat);
 			mat.m[12] = mat.m[13] = mat.m[14] = mat.m[15] = 0;
-			for (let i = 0; i < Math.floor(nora.length / 2); ++i) {
+			for (let i: i32 = 0; i < Math.floor(nora.length / 2); ++i) {
 				vec4_set(v, nora[i * 2] / 32767, nora[i * 2 + 1] / 32767, posa[i * 4 + 3] / 32767);
 				vec4_apply_mat(v, mat);
 				vec4_normalize(v);
@@ -418,21 +418,30 @@ class ImportBlendMesh {
 			}
 
 			// Pack positions to (-1, 1) range
-			let scalePos = 0.0;
-			for (let i = 0; i < posa32.length; ++i) {
-				let f = Math.abs(posa32[i]);
+			let scalePos: f32 = 0.0;
+			for (let i: i32 = 0; i < posa32.length; ++i) {
+				let f: f32 = Math.abs(posa32[i]);
 				if (scalePos < f) scalePos = f;
 			}
-			let inv = 1 / scalePos;
-			for (let i = 0; i < Math.floor(posa32.length / 3); ++i) {
+			let inv: f32 = 1 / scalePos;
+			for (let i: i32 = 0; i < Math.floor(posa32.length / 3); ++i) {
 				posa[i * 4    ] = Math.floor(posa32[i * 3    ] * 32767 * inv);
 				posa[i * 4 + 1] = Math.floor(posa32[i * 3 + 1] * 32767 * inv);
 				posa[i * 4 + 2] = Math.floor(posa32[i * 3 + 2] * 32767 * inv);
 			}
 
-			let obj = {posa: posa, nora: nora, texa: texa, cola: cola, inda: inda, name: name, scalePos: scalePos, scaleTes: 1.0};
+			let obj: any = {
+				posa: posa,
+				nora: nora,
+				texa: texa,
+				cola: cola,
+				inda: inda,
+				name: name,
+				scalePos: scalePos,
+				scaleTes: 1.0
+			};
 
-			(first && replaceExisting) ? ImportMesh.makeMesh(obj, path) : ImportMesh.addMesh(obj);
+			(first && replaceExisting) ? ImportMesh.make_mesh(obj, path) : ImportMesh.add_mesh(obj);
 			first = false;
 		}
 

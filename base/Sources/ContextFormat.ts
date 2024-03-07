@@ -3,304 +3,305 @@
 
 // type TContext = {
 class TContext {
-	texture?: TAsset = null;
-	paintObject?: mesh_object_t;
-	mergedObject?: mesh_object_t = null; // For object mask
-	mergedObjectIsAtlas? = false; // Only objects referenced by atlas are merged
 
-	ddirty? = 0; // depth
-	pdirty? = 0; // paint
-	rdirty? = 0; // render
-	brushBlendDirty? = true;
-	nodePreviewSocket? = 0;
+	texture?: asset_t = null;
+	paint_object?: mesh_object_t;
+	merged_object?: mesh_object_t = null; // For object mask
+	merged_object_is_atlas?: bool = false; // Only objects referenced by atlas are merged
 
-	splitView? = false;
-	viewIndex? = -1;
-	viewIndexLast? = -1;
+	ddirty?: i32 = 0; // depth
+	pdirty?: i32 = 0; // paint
+	rdirty?: i32 = 0; // render
+	brush_blend_dirty?: bool = true;
+	node_preview_socket?: i32 = 0;
 
-	swatch?: TSwatchColor;
-	pickedColor?: TSwatchColor = Project.makeSwatch();
-	colorPickerCallback?: (sc: TSwatchColor)=>void = null;
+	split_view?: bool = false;
+	view_index?: i32 = -1;
+	view_index_last?: i32 = -1;
 
-	defaultIrradiance?: Float32Array = null;
-	defaultRadiance?: image_t = null;
-	defaultRadianceMipmaps?: image_t[] = null;
-	savedEnvmap?: image_t = null;
-	emptyEnvmap?: image_t = null;
-	previewEnvmap?: image_t = null;
-	envmapLoaded? = false;
-	showEnvmap? = false;
-	showEnvmapHandle? = zui_handle_create({ selected: false });
-	showEnvmapBlur? = false;
-	showEnvmapBlurHandle? = zui_handle_create({ selected: false });
-	envmapAngle? = 0.0;
-	lightAngle? = 0.0;
-	cullBackfaces? = true;
-	textureFilter? = true;
+	swatch?: swatch_color_t;
+	picked_color?: swatch_color_t = Project.make_swatch();
+	color_picker_callback?: (sc: swatch_color_t)=>void = null;
 
-	formatType? = TextureLdrFormat.FormatPng;
-	formatQuality? = 100.0;
-	layersDestination? = ExportDestination.DestinationDisk;
-	splitBy? = SplitType.SplitObject;
-	parseTransform? = true;
-	parseVCols? = false;
+	default_irradiance?: Float32Array = null;
+	default_radiance?: image_t = null;
+	default_radiance_mipmaps?: image_t[] = null;
+	saved_envmap?: image_t = null;
+	empty_envmap?: image_t = null;
+	preview_envmap?: image_t = null;
+	envmap_loaded?: bool = false;
+	show_envmap?: bool = false;
+	show_envmap_handle?: zui_handle_t = zui_handle_create({ selected: false });
+	show_envmap_blur?: bool = false;
+	show_envmap_blur_handle? = zui_handle_create({ selected: false });
+	envmap_angle?: f32 = 0.0;
+	light_angle?: f32 = 0.0;
+	cull_backfaces?: bool = true;
+	texture_filter?: bool = true;
 
-	selectTime? = 0.0;
+	format_type?: texture_ldr_format_t = texture_ldr_format_t.PNG;
+	format_quality?: f32 = 100.0;
+	layers_destination? = export_destination_t.DISK;
+	split_by?: split_type_t = split_type_t.OBJECT;
+	parse_transform?: bool = true;
+	parse_vcols?: bool = false;
+
+	select_time?: f32 = 0.0;
 	///if (krom_direct3d12 || krom_vulkan || krom_metal)
-	pathTraceMode? = PathTraceMode.TraceCore;
+	pathtrace_mode?: path_trace_mode_t = path_trace_mode_t.CORE;
 	///end
 	///if (krom_direct3d12 || krom_vulkan) // || krom_metal)
-	viewportMode? = ViewportMode.ViewPathTrace;
+	viewport_mode?: viewport_mode_t = viewport_mode_t.PATH_TRACE;
 	///else
-	viewportMode? = ViewportMode.ViewLit;
+	viewport_mode?: viewport_mode_t = viewport_mode_t.LIT;
 	///end
 	///if (krom_android || krom_ios)
-	renderMode? = RenderMode.RenderForward;
+	render_mode?: render_mode_t = render_mode_t.FORWARD;
 	///else
-	renderMode? = RenderMode.RenderDeferred;
+	render_mode?: render_mode_t = render_mode_t.DEFERRED;
 	///end
 
-	viewportShader?: (ns: NodeShaderRaw)=>string = null;
-	hscaleWasChanged? = false;
-	exportMeshFormat? = MeshFormat.FormatObj;
-	exportMeshIndex? = 0;
-	packAssetsOnExport? = true;
+	viewport_shader?: (ns: NodeShaderRaw)=>string = null;
+	hscale_was_changed?: bool = false;
+	export_mesh_format?: mesh_format_t = mesh_format_t.OBJ;
+	export_mesh_index?: i32 = 0;
+	pack_assets_on_export?: bool = true;
 
-	paintVec? = vec4_create();
-	lastPaintX? = -1.0;
-	lastPaintY? = -1.0;
-	foregroundEvent? = false;
-	painted? = 0;
-	brushTime? = 0.0;
-	cloneStartX? = -1.0;
-	cloneStartY? = -1.0;
-	cloneDeltaX? = 0.0;
-	cloneDeltaY? = 0.0;
+	paint_vec?: vec4_t = vec4_create();
+	last_paint_x?: f32 = -1.0;
+	last_paint_y?: f32 = -1.0;
+	foreground_event?: bool = false;
+	painted?: i32 = 0;
+	brush_time?: f32 = 0.0;
+	clone_start_x?: f32 = -1.0;
+	clone_start_y?: f32 = -1.0;
+	clone_delta_x?: f32 = 0.0;
+	clone_delta_y?: f32 = 0.0;
 
-	showCompass? = true;
-	projectType? = ProjectModel.ModelRoundedCube;
-	projectAspectRatio? = 0; // 1:1, 2:1, 1:2
-	projectObjects?: mesh_object_t[];
+	show_compass?: bool = true;
+	project_type?: project_model_t = project_model_t.ROUNDED_CUBE;
+	project_aspect_ratio?: i32 = 0; // 1:1, 2:1, 1:2
+	project_objects?: mesh_object_t[];
 
-	lastPaintVecX? = -1.0;
-	lastPaintVecY? = -1.0;
-	prevPaintVecX? = -1.0;
-	prevPaintVecY? = -1.0;
-	frame? = 0;
-	paint2dView? = false;
+	last_paint_vec_x?: f32 = -1.0;
+	last_paint_vec_y?: f32 = -1.0;
+	prev_paint_vec_x?: f32 = -1.0;
+	prev_paint_vec_y?: f32 = -1.0;
+	frame?: i32 = 0;
+	paint2d_view?: bool = false;
 
-	lockStartedX? = -1.0;
-	lockStartedY? = -1.0;
-	brushLocked? = false;
-	brushCanLock? = false;
-	brushCanUnlock? = false;
-	cameraType? = CameraType.CameraPerspective;
-	camHandle? = zui_handle_create();
-	fovHandle?: zui_handle_t = null;
-	undoHandle?: zui_handle_t = null;
+	lock_started_x?: f32 = -1.0;
+	lock_started_y?: f32 = -1.0;
+	brush_locked?: bool = false;
+	brush_can_lock?: bool = false;
+	brush_can_unlock?: bool = false;
+	camera_type?: camera_type_t = camera_type_t.PERSPECTIVE;
+	cam_handle?: zui_handle_t = zui_handle_create();
+	fov_handle?: zui_handle_t = null;
+	undo_handle?: zui_handle_t = null;
 	hssao?: zui_handle_t = null;
 	hssr?: zui_handle_t = null;
 	hbloom?: zui_handle_t = null;
 	hsupersample?: zui_handle_t = null;
 	hvxao?: zui_handle_t = null;
 	///if is_forge
-	vxaoExt? = 2.0;
+	vxao_ext?: f32 = 2.0;
 	///else
-	vxaoExt? = 1.0;
+	vxao_ext?: f32 = 1.0;
 	///end
-	vxaoOffset? = 1.5;
-	vxaoAperture? = 1.2;
-	textureExportPath? = "";
-	lastStatusPosition? = 0;
-	cameraControls? = CameraControls.ControlsOrbit;
-	penPaintingOnly? = false; // Reject painting with finger when using pen
+	vxao_offset?: f32 = 1.5;
+	vxao_aperture?: f32 = 1.2;
+	texture_export_path?: string = "";
+	last_status_position?: i32 = 0;
+	camera_controls?: camera_controls_t = camera_controls_t.ORBIT;
+	pen_painting_only?: bool = false; // Reject painting with finger when using pen
 
 	///if (is_paint || is_sculpt)
 	material?: SlotMaterialRaw;
 	layer?: SlotLayerRaw;
 	brush?: SlotBrushRaw;
 	font?: SlotFontRaw;
-	tool? = WorkspaceTool.ToolBrush;
+	tool?: workspace_tool_t = workspace_tool_t.BRUSH;
 
-	layerPreviewDirty? = true;
-	layersPreviewDirty? = false;
-	nodePreviewDirty? = false;
-	nodePreview?: image_t = null;
-	nodePreviews?: Map<string, image_t> = null;
-	nodePreviewsUsed?: string[] = null;
-	nodePreviewName? = "";
-	maskPreviewRgba32?: image_t = null;
-	maskPreviewLast?: SlotLayerRaw = null;
+	layer_preview_dirty?: bool = true;
+	layers_preview_dirty?: bool = false;
+	node_preview_dirty?: bool = false;
+	node_preview?: image_t = null;
+	node_previews?: Map<string, image_t> = null;
+	node_previews_used?: string[] = null;
+	node_preview_name?: string = "";
+	mask_preview_rgba32?: image_t = null;
+	mask_preview_last?: SlotLayerRaw = null;
 
-	colorIdPicked? = false;
-	materialPreview? = false; // Drawing material previews
-	savedCamera? = mat4_identity();
+	colorid_picked?: bool = false;
+	material_preview?: bool = false; // Drawing material previews
+	saved_camera?: mat4_t = mat4_identity();
 
-	colorPickerPreviousTool? = WorkspaceTool.ToolBrush;
-	materialIdPicked? = 0;
-	uvxPicked? = 0.0;
-	uvyPicked? = 0.0;
-	pickerSelectMaterial? = true;
-	pickerMaskHandle? = zui_handle_create();
-	pickPosNorTex? = false;
-	posXPicked? = 0.0;
-	posYPicked? = 0.0;
-	posZPicked? = 0.0;
-	norXPicked? = 0.0;
-	norYPicked? = 0.0;
-	norZPicked? = 0.0;
+	color_picker_previous_tool? = workspace_tool_t.BRUSH;
+	materialid_picked?: i32 = 0;
+	uvx_picked?: f32 = 0.0;
+	uvy_picked?: f32 = 0.0;
+	picker_select_material?: bool = true;
+	picker_mask_handle?: zui_handle_t = zui_handle_create();
+	pick_pos_nor_tex?: bool = false;
+	posx_picked?: f32 = 0.0;
+	posy_picked?: f32 = 0.0;
+	posz_picked?: f32 = 0.0;
+	norx_picked?: f32 = 0.0;
+	nory_picked?: f32 = 0.0;
+	norz_picked?: f32 = 0.0;
 
-	drawWireframe? = false;
-	wireframeHandle? = zui_handle_create({ selected: false });
-	drawTexels? = false;
-	texelsHandle? = zui_handle_create({ selected: false });
+	draw_wireframe?: bool = false;
+	wireframe_handle?: zui_handle_t = zui_handle_create({ selected: false });
+	draw_texels?: bool = false;
+	texels_handle?: zui_handle_t = zui_handle_create({ selected: false });
 
-	colorIdHandle? = zui_handle_create();
-	layersExport? = ExportMode.ExportVisible;
+	colorid_handle?: zui_handle_t = zui_handle_create();
+	layers_export?: export_mode_t = export_mode_t.VISIBLE;
 
-	decalImage?: image_t = null;
-	decalPreview? = false;
-	decalX? = 0.0;
-	decalY? = 0.0;
+	decal_image?: image_t = null;
+	decal_preview?: bool = false;
+	decal_x?: f32 = 0.0;
+	decal_y?: f32 = 0.0;
 
-	cacheDraws? = false;
-	writeIconOnExport? = false;
+	cache_draws?: bool = false;
+	write_icon_on_export?: bool = false;
 
-	textToolImage?: image_t = null;
-	textToolText?: string;
-	particleMaterial?: material_data_t = null;
+	text_tool_image?: image_t = null;
+	text_tool_text?: string;
+	particle_material?: material_data_t = null;
 	///if arm_physics
-	particlePhysics? = false;
-	particleHitX? = 0.0;
-	particleHitY? = 0.0;
-	particleHitZ? = 0.0;
-	lastParticleHitX? = 0.0;
-	lastParticleHitY? = 0.0;
-	lastParticleHitZ? = 0.0;
-	particleTimer?: tween_anim_t = null;
-	paintBody?: PhysicsBodyRaw = null;
+	particle_physics?: bool = false;
+	particle_hit_x?: f32 = 0.0;
+	particle_hit_y?: f32 = 0.0;
+	particle_hit_z?: f32 = 0.0;
+	last_particle_hit_x?: f32 = 0.0;
+	last_particle_hit_y?: f32 = 0.0;
+	last_particle_hit_z?: f32 = 0.0;
+	particle_timer?: tween_anim_t = null;
+	paint_body?: PhysicsBodyRaw = null;
 	///end
 
-	layerFilter? = 0;
-	runBrush?: (i: i32)=>void = null;
-	parseBrushInputs?: ()=>void = null;
+	layer_filter?: i32 = 0;
+	run_brush?: (i: i32)=>void = null;
+	parse_brush_inputs?: ()=>void = null;
 
 	gizmo?: object_t = null;
-	gizmoTranslateX?: object_t = null;
-	gizmoTranslateY?: object_t = null;
-	gizmoTranslateZ?: object_t = null;
-	gizmoScaleX?: object_t = null;
-	gizmoScaleY?: object_t = null;
-	gizmoScaleZ?: object_t = null;
-	gizmoRotateX?: object_t = null;
-	gizmoRotateY?: object_t = null;
-	gizmoRotateZ?: object_t = null;
-	gizmoStarted? = false;
-	gizmoOffset? = 0.0;
-	gizmoDrag? = 0.0;
-	gizmoDragLast? = 0.0;
-	translateX? = false;
-	translateY? = false;
-	translateZ? = false;
-	scaleX? = false;
-	scaleY? = false;
-	scaleZ? = false;
-	rotateX? = false;
-	rotateY? = false;
-	rotateZ? = false;
+	gizmo_translate_x?: object_t = null;
+	gizmo_translate_y?: object_t = null;
+	gizmo_translate_z?: object_t = null;
+	gizmo_scale_x?: object_t = null;
+	gizmo_scale_y?: object_t = null;
+	gizmo_scale_z?: object_t = null;
+	gizmo_rotate_x?: object_t = null;
+	gizmo_rotate_y?: object_t = null;
+	gizmo_rotate_z?: object_t = null;
+	gizmo_started?: bool = false;
+	gizmo_offset?: f32 = 0.0;
+	gizmo_drag?: f32 = 0.0;
+	gizmo_drag_last?: f32 = 0.0;
+	translate_x?: bool = false;
+	translate_y?: bool = false;
+	translate_z?: bool = false;
+	scale_x?: bool = false;
+	scale_y?: bool = false;
+	scale_z?: bool = false;
+	rotate_x?: bool = false;
+	rotate_y?: bool = false;
+	rotate_z?: bool = false;
 
-	brushNodesRadius? = 1.0;
-	brushNodesOpacity? = 1.0;
-	brushMaskImage?: image_t = null;
-	brushMaskImageIsAlpha? = false;
-	brushStencilImage?: image_t = null;
-	brushStencilImageIsAlpha? = false;
-	brushStencilX? = 0.02;
-	brushStencilY? = 0.02;
-	brushStencilScale? = 0.9;
-	brushStencilScaling? = false;
-	brushStencilAngle? = 0.0;
-	brushStencilRotating? = false;
-	brushNodesScale? = 1.0;
-	brushNodesAngle? = 0.0;
-	brushNodesHardness? = 1.0;
-	brushDirectional? = false;
+	brush_nodes_radius?: f32 = 1.0;
+	brush_nodes_opacity?: f32 = 1.0;
+	brush_mask_image?: image_t = null;
+	brush_mask_image_is_alpha?: bool = false;
+	brush_stencil_image?: image_t = null;
+	brush_stencil_image_is_alpha?: bool = false;
+	brush_stencil_x?: f32 = 0.02;
+	brush_stencil_y?: f32 = 0.02;
+	brush_stencil_scale?: f32 = 0.9;
+	brush_stencil_scaling?: bool = false;
+	brush_stencil_angle?: f32 = 0.0;
+	brush_stencil_rotating?: bool = false;
+	brush_nodes_scale?: f32 = 1.0;
+	brush_nodes_angle?: f32 = 0.0;
+	brush_nodes_hardness?: f32 = 1.0;
+	brush_directional?: bool = false;
 
-	brushRadius? = 0.5;
-	brushRadiusHandle? = zui_handle_create({ value: 0.5 });
-	brushScaleX? = 1.0;
-	brushDecalMaskRadius? = 0.5;
-	brushDecalMaskRadiusHandle? = zui_handle_create({ value: 0.5 });
-	brushScaleXHandle? = zui_handle_create({ value: 1.0 });
-	brushBlending? = BlendType.BlendMix;
-	brushOpacity? = 1.0;
-	brushOpacityHandle? = zui_handle_create({ value: 1.0 });
-	brushScale? = 1.0;
-	brushAngle? = 0.0;
-	brushAngleHandle? = zui_handle_create({ value: 0.0 });
+	brush_radius?: f32 = 0.5;
+	brush_radius_handle?: zui_handle_t = zui_handle_create({ value: 0.5 });
+	brush_scale_x?: f32 = 1.0;
+	brush_decal_mask_radius?: f32 = 0.5;
+	brush_decal_mask_radius_handle?: zui_handle_t = zui_handle_create({ value: 0.5 });
+	brush_scale_x_handle?: zui_handle_t = zui_handle_create({ value: 1.0 });
+	brush_blending?: blend_type_t = blend_type_t.MIX;
+	brush_opacity?: f32 = 1.0;
+	brush_opacity_handle?: zui_handle_t = zui_handle_create({ value: 1.0 });
+	brush_scale?: f32 = 1.0;
+	brush_angle?: f32 = 0.0;
+	brush_angle_handle?: zui_handle_t = zui_handle_create({ value: 0.0 });
 	///if is_paint
-	brushHardness? = 0.8;
+	brush_hardness?: f32 = 0.8;
 	///end
 	///if is_sculpt
-	brushHardness? = 0.05;
+	brush_hardness?: f32 = 0.05;
 	///end
-	brushLazyRadius? = 0.0;
-	brushLazyStep? = 0.0;
-	brushLazyX? = 0.0;
-	brushLazyY? = 0.0;
-	brushPaint? = UVType.UVMap;
-	brushAngleRejectDot? = 0.5;
-	bakeType? = BakeType.BakeAO;
-	bakeAxis? = BakeAxis.BakeXYZ;
-	bakeUpAxis? = BakeUpAxis.BakeUpZ;
-	bakeSamples? = 128;
-	bakeAoStrength? = 1.0;
-	bakeAoRadius? = 1.0;
-	bakeAoOffset? = 1.0;
-	bakeCurvStrength? = 1.0;
-	bakeCurvRadius? = 1.0;
-	bakeCurvOffset? = 0.0;
-	bakeCurvSmooth? = 1;
-	bakeHighPoly? = 0;
+	brush_lazy_radius?: f32 = 0.0;
+	brush_lazy_step?: f32 = 0.0;
+	brush_lazy_x?: f32 = 0.0;
+	brush_lazy_y?: f32 = 0.0;
+	brush_paint?: uv_type_t = uv_type_t.UVMAP;
+	brush_angle_reject_dot?: f32 = 0.5;
+	bake_type?: bake_type_t = bake_type_t.AO;
+	bake_axis?: bake_axis_t = bake_axis_t.XYZ;
+	bake_up_axis?: bake_up_axis_t = bake_up_axis_t.Z;
+	bake_samples?: i32 = 128;
+	bake_ao_strength?: f32 = 1.0;
+	bake_ao_radius?: f32 = 1.0;
+	bake_ao_offset?: f32 = 1.0;
+	bake_curv_strength?: f32 = 1.0;
+	bake_curv_radius?: f32 = 1.0;
+	bake_curv_offset?: f32 = 0.0;
+	bake_curv_smooth?: i32 = 1;
+	bake_high_poly?: i32 = 0;
 
-	xray? = false;
-	symX? = false;
-	symY? = false;
-	symZ? = false;
-	fillTypeHandle? = zui_handle_create();
+	xray?: bool = false;
+	sym_x?: bool = false;
+	sym_y?: bool = false;
+	sym_z?: bool = false;
+	fill_type_handle?: zui_handle_t = zui_handle_create();
 
-	paint2d? = false;
+	paint2d?: bool = false;
 
-	lastHtab0Position? = 0;
-	maximizedSidebarWidth? = 0;
-	dragDestination? = 0;
+	last_htab0_pos?: i32 = 0;
+	maximized_sidebar_width?: i32 = 0;
+	drag_dest?: i32 = 0;
 	///end
 
 	///if is_lab
 	material?: any; ////
 	layer?: any; ////
-	tool? = WorkspaceTool.ToolEraser;
+	tool?: workspace_tool_t = workspace_tool_t.ERASER;
 
-	colorPickerPreviousTool? = WorkspaceTool.ToolEraser;
+	color_picker_previous_tool?: workspace_tool_t = workspace_tool_t.ERASER;
 
-	brushRadius? = 0.25;
-	brushRadiusHandle? = zui_handle_create({ value: 0.25 });
-	brushScale? = 1.0;
+	brush_radius?: f32 = 0.25;
+	brush_radius_handle?: zui_handle_t = zui_handle_create({ value: 0.25 });
+	brush_scale?: f32 = 1.0;
 
-	coords? = vec4_create();
-	startX? = 0.0;
-	startY? = 0.0;
+	coords?: vec4_t = vec4_create();
+	start_x?: f32 = 0.0;
+	start_y?: f32 = 0.0;
 
 	// Brush ruler
-	lockBegin? = false;
-	lockX? = false;
-	lockY? = false;
-	lockStartX? = 0.0;
-	lockStartY? = 0.0;
-	registered? = false;
+	lock_begin?: bool = false;
+	lock_x?: bool = false;
+	lock_y?: bool = false;
+	lock_start_x?: f32 = 0.0;
+	lock_start_y?: f32 = 0.0;
+	registered?: bool = false;
 	///end
 
 	///if is_forge
-	selectedObject?: object_t = null;
+	selected_object?: object_t = null;
 	///end
 }

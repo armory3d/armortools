@@ -1,7 +1,7 @@
 
 class ShaderFunctions {
 
-	static str_tex_checker = `
+	static str_tex_checker: string = `
 vec3 tex_checker(const vec3 co, const vec3 col1, const vec3 col2, const float scale) {
 	// Prevent precision issues on unit coordinates
 	vec3 p = (co + 0.000001 * 0.999999) * scale;
@@ -22,7 +22,7 @@ float tex_checker_f(const vec3 co, const float scale) {
 
 	// Created by inigo quilez - iq/2013
 	// License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License
-	static str_tex_voronoi = `
+	static str_tex_voronoi: string = `
 vec4 tex_voronoi(const vec3 x, textureArg(snoise256)) {
 	vec3 p = floor(x);
 	vec3 f = fract(x);
@@ -47,7 +47,7 @@ vec4 tex_voronoi(const vec3 x, textureArg(snoise256)) {
 
 	// By Morgan McGuire @morgan3d, http://graphicscodex.com Reuse permitted under the BSD license.
 	// https://www.shadertoy.com/view/4dS3Wd
-	static str_tex_noise = `
+	static str_tex_noise: string = `
 float hash(float n) { return fract(sin(n) * 1e4); }
 float tex_noise_f(vec3 x) {
     const vec3 step = vec3(110, 241, 171);
@@ -72,7 +72,7 @@ float tex_noise(vec3 p) {
 
 	// Based on noise created by Nikita Miropolskiy, nikat/2013
 	// Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License
-	static str_tex_musgrave = `
+	static str_tex_musgrave: string = `
 vec3 random3(const vec3 c) {
 	float j = 4096.0 * sin(dot(c, vec3(17.0, 59.4, 15.0)));
 	vec3 r;
@@ -111,7 +111,7 @@ float tex_musgrave_f(const vec3 p) {
 }
 `;
 
-	static str_hue_sat = `
+	static str_hue_sat: string = `
 vec3 hsv_to_rgb(const vec3 c) {
 	const vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
 	vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
@@ -135,14 +135,14 @@ vec3 hue_sat(const vec3 col, const vec4 shift) {
 `;
 
 	// https://twitter.com/Donzanoid/status/903424376707657730
-	static str_wavelength_to_rgb = `
+	static str_wavelength_to_rgb: string = `
 vec3 wavelength_to_rgb(const float t) {
 	vec3 r = t * 2.1 - vec3(1.8, 1.14, 0.3);
 	return 1.0 - r * r;
 }
 `;
 
-	static str_tex_magic = `
+	static str_tex_magic: string = `
 vec3 tex_magic(const vec3 p) {
 	float a = 1.0 - (sin(p.x) + sin(p.y));
 	float b = 1.0 - sin(p.x - p.y);
@@ -155,7 +155,7 @@ float tex_magic_f(const vec3 p) {
 }
 `;
 
-	static str_tex_brick = `
+	static str_tex_brick: string = `
 float tex_brick_noise(int n) { /* fast integer noise */
 	int nn;
 	n = (n >> 13) ^ n;
@@ -183,13 +183,13 @@ float tex_brick_f(vec3 p) {
 }
 `;
 
-	static str_tex_wave = `
+	static str_tex_wave: string = `
 float tex_wave_f(const vec3 p) {
 	return 1.0 - sin((p.x + p.y) * 10.0);
 }
 `;
 
-	static str_brightcontrast = `
+	static str_brightcontrast: string = `
 vec3 brightcontrast(const vec3 col, const float bright, const float contr) {
 	float a = 1.0 + contr;
 	float b = bright - contr * 0.5;
@@ -200,7 +200,7 @@ vec3 brightcontrast(const vec3 col, const float bright, const float contr) {
 //
 
 	///if arm_voxels
-	static str_traceAO = `
+	static str_trace_ao: string = `
 float traceConeAO(sampler3D voxels, const vec3 origin, vec3 dir, const float aperture, const float maxDist, const float offset) {
 	const ivec3 voxelgiResolution = ivec3(256, 256, 256);
 	const float voxelgiStep = 1.0;
@@ -252,7 +252,7 @@ float traceAO(const vec3 origin, const vec3 normal, const float vrange, const fl
 `;
 	///end
 
-	static str_cotangentFrame = `
+	static str_cotangent_frame: string = `
 mat3 cotangentFrame(const vec3 n, const vec3 p, const vec2 duv1, const vec2 duv2) {
 	vec3 dp1 = dFdx(p);
 	vec3 dp2 = dFdy(p);
@@ -268,13 +268,13 @@ mat3 cotangentFrame(const vec3 n, const vec3 p, const vec2 texCoord) {
 }
 `;
 
-	static str_octahedronWrap = `
+	static str_octahedron_wrap: string = `
 vec2 octahedronWrap(const vec2 v) {
 	return (1.0 - abs(v.yx)) * (vec2(v.x >= 0.0 ? 1.0 : -1.0, v.y >= 0.0 ? 1.0 : -1.0));
 }
 `;
 
-	static str_packFloatInt16 = `
+	static str_pack_float_int16: string = `
 float packFloatInt16(const float f, const uint i) {
 	const float prec = float(1 << 16);
 	const float maxi = float(1 << 4);
@@ -286,7 +286,7 @@ float packFloatInt16(const float f, const uint i) {
 `;
 
 	///if arm_skin
-	static str_getSkinningDualQuat = `
+	static str_get_skinning_dual_quat: string = `
 void getSkinningDualQuat(const ivec4 bone, vec4 weight, out vec4 A, inout vec4 B) {
 	ivec4 bonei = bone * 2;
 	mat4 matA = mat4(
@@ -309,14 +309,14 @@ void getSkinningDualQuat(const ivec4 bone, vec4 weight, out vec4 A, inout vec4 B
 `;
 	///end
 
-	static str_createBasis = `
+	static str_create_basis: string = `
 void createBasis(vec3 normal, out vec3 tangent, out vec3 binormal) {
 	tangent = normalize(cameraRight - normal * dot(cameraRight, normal));
 	binormal = cross(tangent, normal);
 }
 `;
 
-	static get str_shIrradiance(): string {
+	static get str_sh_irradiance(): string {
 		///if krom_metal
 		return `vec3 shIrradiance(const vec3 nor, constant vec4 shirr[7]) {
 	const float c1 = 0.429043;
@@ -380,7 +380,7 @@ void createBasis(vec3 normal, out vec3 tangent, out vec3 binormal) {
 ///end
 	}
 
-	static str_envMapEquirect = `
+	static str_envmap_equirect: string = `
 vec2 envMapEquirect(const vec3 normal, const float angle) {
 	const float PI = 3.1415926535;
 	const float PI2 = PI * 2.0;
@@ -392,7 +392,7 @@ vec2 envMapEquirect(const vec3 normal, const float angle) {
 
 	// Linearly Transformed Cosines
 	// https://eheitzresearch.wordpress.com/415-2/
-	static str_ltcEvaluate = `
+	static str_ltc_evaluate: string = `
 float integrateEdge(vec3 v1, vec3 v2) {
 	float cosTheta = dot(v1, v2);
 	float theta = acos(cosTheta);
@@ -500,7 +500,7 @@ float ltcEvaluate(vec3 N, vec3 V, float dotNV, vec3 P, mat3 Minv, vec3 points0, 
 }
 `;
 
-	static str_get_pos_from_depth = `
+	static str_get_pos_from_depth: string = `
 vec3 get_pos_from_depth(vec2 uv, mat4 invVP, textureArg(gbufferD)) {
 	#if defined(HLSL) || defined(METAL) || defined(SPIRV)
 	float depth = textureLod(gbufferD, vec2(uv.x, 1.0 - uv.y), 0.0).r;
@@ -513,7 +513,7 @@ vec3 get_pos_from_depth(vec2 uv, mat4 invVP, textureArg(gbufferD)) {
 }
 `;
 
-	static str_get_nor_from_depth = `
+	static str_get_nor_from_depth: string = `
 vec3 get_nor_from_depth(vec3 p0, vec2 uv, mat4 invVP, vec2 texStep, textureArg(gbufferD)) {
 	vec3 p1 = get_pos_from_depth(uv + vec2(texStep.x * 4.0, 0.0), invVP, texturePass(gbufferD));
 	vec3 p2 = get_pos_from_depth(uv + vec2(0.0, texStep.y * 4.0), invVP, texturePass(gbufferD));

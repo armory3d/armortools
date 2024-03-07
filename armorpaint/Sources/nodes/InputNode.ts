@@ -25,14 +25,14 @@ class InputNode extends LogicNode {
 	}
 
 	update = () => {
-		if (Context.raw.splitView) {
-			Context.raw.viewIndex = mouse_view_x() > Base.w() / 2 ? 1 : 0;
+		if (Context.raw.split_view) {
+			Context.raw.view_index = mouse_view_x() > Base.w() / 2 ? 1 : 0;
 		}
 
-		let decal = Context.raw.tool == WorkspaceTool.ToolDecal || Context.raw.tool == WorkspaceTool.ToolText;
+		let decal = Context.raw.tool == workspace_tool_t.DECAL || Context.raw.tool == workspace_tool_t.TEXT;
 		let decalMask = decal && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
 
-		let lazyPaint = Context.raw.brushLazyRadius > 0 &&
+		let lazyPaint = Context.raw.brush_lazy_radius > 0 &&
 			(Operator.shortcut(Config.keymap.action_paint, ShortcutType.ShortcutDown) ||
 			 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown) ||
 			 decalMask);
@@ -58,17 +58,17 @@ class InputNode extends LogicNode {
 			if (InputNode.lockY) paintY = InputNode.startY;
 		}
 
-		if (Context.raw.brushLazyRadius > 0) {
-			Context.raw.brushLazyX = paintX;
-			Context.raw.brushLazyY = paintY;
+		if (Context.raw.brush_lazy_radius > 0) {
+			Context.raw.brush_lazy_x = paintX;
+			Context.raw.brush_lazy_y = paintY;
 		}
 		if (!lazyPaint) {
 			InputNode.coords.x = paintX;
 			InputNode.coords.y = paintY;
 		}
 
-		if (Context.raw.splitView) {
-			Context.raw.viewIndex = -1;
+		if (Context.raw.split_view) {
+			Context.raw.view_index = -1;
 		}
 
 		if (InputNode.lockBegin) {
@@ -89,16 +89,16 @@ class InputNode extends LogicNode {
 			InputNode.lockX = InputNode.lockY = InputNode.lockBegin = false;
 		}
 
-		if (Context.raw.brushLazyRadius > 0) {
-			let v1 = vec4_create(Context.raw.brushLazyX * app_w(), Context.raw.brushLazyY * app_h(), 0.0);
+		if (Context.raw.brush_lazy_radius > 0) {
+			let v1 = vec4_create(Context.raw.brush_lazy_x * app_w(), Context.raw.brush_lazy_y * app_h(), 0.0);
 			let v2 = vec4_create(InputNode.coords.x * app_w(), InputNode.coords.y * app_h(), 0.0);
 			let d = vec4_dist(v1, v2);
-			let r = Context.raw.brushLazyRadius * 85;
+			let r = Context.raw.brush_lazy_radius * 85;
 			if (d > r) {
 				let v3 = vec4_create();
 				vec4_sub_vecs(v3, v2, v1);
 				vec4_normalize(v3, );
-				vec4_mult(v3, 1.0 - Context.raw.brushLazyStep);
+				vec4_mult(v3, 1.0 - Context.raw.brush_lazy_step);
 				vec4_mult(v3, r);
 				vec4_add_vecs(v2, v1, v3);
 				InputNode.coords.x = v2.x / app_w();
@@ -106,18 +106,18 @@ class InputNode extends LogicNode {
 				// Parse brush inputs once on next draw
 				Context.raw.painted = -1;
 			}
-			Context.raw.lastPaintX = -1;
-			Context.raw.lastPaintY = -1;
+			Context.raw.last_paint_x = -1;
+			Context.raw.last_paint_y = -1;
 		}
 
-		Context.raw.parseBrushInputs();
+		Context.raw.parse_brush_inputs();
 	}
 
 	override get = (from: i32, done: (a: any)=>void) => {
 		this.inputs[0].get((value) => {
-			Context.raw.brushLazyRadius = value;
+			Context.raw.brush_lazy_radius = value;
 			this.inputs[1].get((value) => {
-				Context.raw.brushLazyStep = value;
+				Context.raw.brush_lazy_step = value;
 				done(InputNode.coords);
 			});
 		});

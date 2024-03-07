@@ -26,13 +26,13 @@ class NodesBrush {
 		]
 	];
 
-	static createNode = (nodeType: string): zui_node_t => {
+	static create_node = (nodeType: string): zui_node_t => {
 		for (let c of NodesBrush.list) {
 			for (let n of c) {
 				if (n.type == nodeType) {
 					let canvas = Context.raw.brush.canvas;
 					let nodes = Context.raw.brush.nodes;
-					let node = UINodes.makeNode(n, nodes, canvas);
+					let node = UINodes.make_node(n, nodes, canvas);
 					canvas.nodes.push(node);
 					return node;
 				}

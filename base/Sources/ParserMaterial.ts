@@ -29,52 +29,55 @@ class ParserMaterial {
 	static nodes: zui_node_t[];
 	static links: zui_node_link_t[];
 
-	static cotangentFrameWritten: bool;
-	static tex_coord = "texCoord";
-	static eps = 0.000001;
+	static cotangent_frame_written: bool;
+	static tex_coord: string = "texCoord";
+	static eps: f32 = 0.000001;
 
-	static customNodes = new Map();
-	static parse_surface = true;
-	static parse_opacity = true;
-	static parse_height = false;
-	static parse_height_as_channel = false;
-	static parse_emission = false;
-	static parse_subsurface = false;
-	static parsing_basecolor = false;
-	static triplanar = false; // Sample using texCoord/1/2 & texCoordBlend
-	static sample_keep_aspect = false; // Adjust uvs to preserve texture aspect ratio
-	static sample_uv_scale = `1.0`;
-	static transform_color_space = true;
+	static custom_nodes: Map<any, any> = new Map();
+	static parse_surface: bool = true;
+	static parse_opacity: bool = true;
+	static parse_height: bool = false;
+	static parse_height_as_channel: bool = false;
+	static parse_emission: bool = false;
+	static parse_subsurface: bool = false;
+	static parsing_basecolor: bool = false;
+	static triplanar: bool = false; // Sample using texCoord/1/2 & texCoordBlend
+	static sample_keep_aspect: bool = false; // Adjust uvs to preserve texture aspect ratio
+	static sample_uv_scale: string = "1.0";
+	static transform_color_space: bool = true;
 
-	static blur_passthrough = false;
-	static warp_passthrough = false;
-	static bake_passthrough = false;
-	static bake_passthrough_strength = "0.0";
-	static bake_passthrough_radius = "0.0";
-	static bake_passthrough_offset = "0.0";
+	static blur_passthrough: bool = false;
+	static warp_passthrough: bool = false;
+	static bake_passthrough: bool = false;
+	static bake_passthrough_strength: string = "0.0";
+	static bake_passthrough_radius: string = "0.0";
+	static bake_passthrough_offset: string = "0.0";
 	static start_group: zui_node_canvas_t = null;
 	static start_parents: zui_node_t[] = null;
 	static start_node: zui_node_t = null;
 
-	static arm_export_tangents = true;
+	static arm_export_tangents: bool = true;
 	static out_normaltan: string; // Raw tangent space normal parsed from normal map
 
 	static script_links: Map<string, string> = null;
 
-	static getNode = (id: i32): zui_node_t => {
+	static parsedMap: Map<string, string> = new Map();
+	static textureMap: Map<string, string> = new Map();
+
+	static get_node = (id: i32): zui_node_t => {
 		for (let n of ParserMaterial.nodes) if (n.id == id) return n;
 		return null;
 	}
 
-	static getLink = (id: i32): zui_node_link_t => {
+	static get_link = (id: i32): zui_node_link_t => {
 		for (let l of ParserMaterial.links) if (l.id == id) return l;
 		return null;
 	}
 
-	static getInputLink = (inp: zui_node_socket_t): zui_node_link_t => {
+	static get_input_link = (inp: zui_node_socket_t): zui_node_link_t => {
 		for (let l of ParserMaterial.links) {
 			if (l.to_id == inp.node_id) {
-				let node = ParserMaterial.getNode(inp.node_id);
+				let node: zui_node_t = ParserMaterial.get_node(inp.node_id);
 				if (node.inputs.length <= l.to_socket) return null;
 				if (node.inputs[l.to_socket] == inp) return l;
 			}
@@ -82,11 +85,11 @@ class ParserMaterial {
 		return null;
 	}
 
-	static getOutputLinks = (out: zui_node_socket_t): zui_node_link_t[] => {
+	static get_output_links = (out: zui_node_socket_t): zui_node_link_t[] => {
 		let ls: zui_node_link_t[] = null;
 		for (let l of ParserMaterial.links) {
 			if (l.from_id == out.node_id) {
-				let node = ParserMaterial.getNode(out.node_id);
+				let node: zui_node_t = ParserMaterial.get_node(out.node_id);
 				if (node.outputs.length <= l.from_socket) continue;
 				if (node.outputs[l.from_socket] == out) {
 					if (ls == null) ls = [];
@@ -100,13 +103,13 @@ class ParserMaterial {
 	static init = () => {
 		ParserMaterial.parsed = [];
 		ParserMaterial.parents = [];
-		ParserMaterial.cotangentFrameWritten = false;
+		ParserMaterial.cotangent_frame_written = false;
 		ParserMaterial.out_normaltan = "vec3(0.5, 0.5, 1.0)";
 		ParserMaterial.script_links = null;
 		ParserMaterial.parsing_basecolor = false;
 	}
 
-	static parse = (canvas: zui_node_canvas_t, _con: NodeShaderContextRaw, _vert: NodeShaderRaw, _frag: NodeShaderRaw, _matcon: material_context_t): TShaderOut => {
+	static parse = (canvas: zui_node_canvas_t, _con: NodeShaderContextRaw, _vert: NodeShaderRaw, _frag: NodeShaderRaw, _matcon: material_context_t): shader_out_t => {
 		zui_nodes_update_canvas_format(canvas);
 		ParserMaterial.init();
 		ParserMaterial.canvases = [canvas];
@@ -138,7 +141,7 @@ class ParserMaterial {
 			}
 		}
 
-		let output_node = ParserMaterial.node_by_type(ParserMaterial.nodes, "OUTPUT_MATERIAL");
+		let output_node: zui_node_t = ParserMaterial.node_by_type(ParserMaterial.nodes, "OUTPUT_MATERIAL");
 		if (output_node != null) {
 			return ParserMaterial.parse_output(output_node);
 		}
@@ -150,14 +153,14 @@ class ParserMaterial {
 	}
 
 	static finalize = (con: NodeShaderContextRaw) => {
-		let vert = con.vert;
-		let frag = con.frag;
+		let vert: NodeShaderRaw = con.vert;
+		let frag: NodeShaderRaw = con.frag;
 
-		if (frag.dotNV) {
-			frag.vVec = true;
+		if (frag.dotnv) {
+			frag.vvec = true;
 			frag.n = true;
 		}
-		if (frag.vVec) {
+		if (frag.vvec) {
 			vert.wposition = true;
 		}
 
@@ -209,13 +212,13 @@ class ParserMaterial {
 			// NodeShader.write_attrib(vert, `wtangent = normalize(mul(tang.xyz, N));`);
 			NodeShader.write_attrib(vert, `wtangent = vec3(0.0, 0.0, 0.0);`);
 		}
-		if (frag.vVecCam) {
+		if (frag.vvec_cam) {
 			NodeShader.add_uniform(vert, "mat4 WV", "_world_view_matrix");
 			NodeShader.add_out(vert, "vec3 eyeDirCam");
 			NodeShader.write_attrib(vert, `eyeDirCam = vec4(mul(vec4(pos.xyz, 1.0), WV)).xyz; eyeDirCam.z *= -1.0;`);
 			NodeShader.write_attrib(frag, `vec3 vVecCam = normalize(eyeDirCam);`);
 		}
-		if (frag.vVec) {
+		if (frag.vvec) {
 			NodeShader.add_uniform(vert, "vec3 eye", "_camera_pos");
 			NodeShader.add_out(vert, "vec3 eyeDir");
 			NodeShader.write_attrib(vert, `eyeDir = eye - wposition;`);
@@ -231,11 +234,11 @@ class ParserMaterial {
 			NodeShader.add_uniform(vert, "mat3 N", "_normal_matrix");
 			NodeShader.write_attrib(vert, `vec3 wnormal = normalize(mul(vec3(nor.xy, pos.w), N));`);
 		}
-		if (frag.nAttr) {
+		if (frag.nattr) {
 			NodeShader.add_out(vert, "vec3 nAttr");
 			NodeShader.write_attrib(vert, `nAttr = vec3(nor.xy, pos.w);`);
 		}
-		if (frag.dotNV) {
+		if (frag.dotnv) {
 			NodeShader.write_attrib(frag, `float dotNV = max(dot(n, vVec), 0.0);`);
 		}
 		if (frag.wvpposition) {
@@ -248,7 +251,7 @@ class ParserMaterial {
 		}
 	}
 
-	static parse_output = (node: zui_node_t): TShaderOut => {
+	static parse_output = (node: zui_node_t): shader_out_t => {
 		if (ParserMaterial.parse_surface || ParserMaterial.parse_opacity) {
 			return ParserMaterial.parse_shader_input(node.inputs[0]);
 		}
@@ -256,7 +259,7 @@ class ParserMaterial {
 		// Parse volume, displacement..
 	}
 
-	static parse_output_pbr = (node: zui_node_t): TShaderOut => {
+	static parse_output_pbr = (node: zui_node_t): shader_out_t => {
 		if (ParserMaterial.parse_surface || ParserMaterial.parse_opacity) {
 			return ParserMaterial.parse_shader(node, null);
 		}
@@ -265,7 +268,7 @@ class ParserMaterial {
 	}
 
 	static get_group = (name: string): zui_node_canvas_t => {
-		for (let g of Project.materialGroups) if (g.canvas.name == name) return g.canvas;
+		for (let g of Project.material_groups) if (g.canvas.name == name) return g.canvas;
 		return null;
 	}
 
@@ -277,7 +280,7 @@ class ParserMaterial {
 
 	static pop_group = () => {
 		ParserMaterial.canvases.pop();
-		let g = ParserMaterial.canvases[ParserMaterial.canvases.length - 1];
+		let g: zui_node_canvas_t = ParserMaterial.canvases[ParserMaterial.canvases.length - 1];
 		ParserMaterial.nodes = g.nodes;
 		ParserMaterial.links = g.links;
 	}
@@ -285,22 +288,22 @@ class ParserMaterial {
 	static parse_group = (node: zui_node_t, socket: zui_node_socket_t): string => { // Entering group
 		ParserMaterial.parents.push(node);
 		ParserMaterial.push_group(ParserMaterial.get_group(node.name));
-		let output_node = ParserMaterial.node_by_type(ParserMaterial.nodes, `GROUP_OUTPUT`);
+		let output_node: zui_node_t = ParserMaterial.node_by_type(ParserMaterial.nodes, "GROUP_OUTPUT");
 		if (output_node == null) return null;
-		let index = ParserMaterial.socket_index(node, socket);
-		let inp = output_node.inputs[index];
-		let out_group = ParserMaterial.parse_input(inp);
+		let index: i32 = ParserMaterial.socket_index(node, socket);
+		let inp: zui_node_socket_t = output_node.inputs[index];
+		let out_group: string = ParserMaterial.parse_input(inp);
 		ParserMaterial.parents.pop();
 		ParserMaterial.pop_group();
 		return out_group;
 	}
 
 	static parse_group_input = (node: zui_node_t, socket: zui_node_socket_t): string => {
-		let parent = ParserMaterial.parents.pop(); // Leaving group
+		let parent: zui_node_t = ParserMaterial.parents.pop(); // Leaving group
 		ParserMaterial.pop_group();
-		let index = ParserMaterial.socket_index(node, socket);
-		let inp = parent.inputs[index];
-		let res = ParserMaterial.parse_input(inp);
+		let index: i32 = ParserMaterial.socket_index(node, socket);
+		let inp: zui_node_socket_t = parent.inputs[index];
+		let res: string = ParserMaterial.parse_input(inp);
 		ParserMaterial.parents.push(parent); // Return to group
 		ParserMaterial.push_group(ParserMaterial.get_group(parent.name));
 		return res;
@@ -322,9 +325,9 @@ class ParserMaterial {
 		return null;
 	}
 
-	static parse_shader_input = (inp: zui_node_socket_t): TShaderOut => {
-		let l = ParserMaterial.getInputLink(inp);
-		let from_node = l != null ? ParserMaterial.getNode(l.from_id) : null;
+	static parse_shader_input = (inp: zui_node_socket_t): shader_out_t => {
+		let l: zui_node_link_t = ParserMaterial.get_input_link(inp);
+		let from_node: zui_node_t = l != null ? ParserMaterial.get_node(l.from_id) : null;
 		if (from_node != null) {
 			if (from_node.type == "REROUTE") {
 				return ParserMaterial.parse_shader_input(from_node.inputs[0]);
@@ -345,8 +348,8 @@ class ParserMaterial {
 		}
 	}
 
-	static parse_shader = (node: zui_node_t, socket: zui_node_socket_t): TShaderOut => {
-		let sout: TShaderOut = {
+	static parse_shader = (node: zui_node_t, socket: zui_node_socket_t): shader_out_t => {
+		let sout: shader_out_t = {
 			out_basecol: "vec3(0.8, 0.8, 0.8)",
 			out_roughness: "0.0",
 			out_metallic: "0.0",
@@ -397,15 +400,15 @@ class ParserMaterial {
 	}
 
 	static parse_vector_input = (inp: zui_node_socket_t): string => {
-		let l = ParserMaterial.getInputLink(inp);
-		let from_node = l != null ? ParserMaterial.getNode(l.from_id) : null;
+		let l: zui_node_link_t = ParserMaterial.get_input_link(inp);
+		let from_node: zui_node_t = l != null ? ParserMaterial.get_node(l.from_id) : null;
 		if (from_node != null) {
 			if (from_node.type == "REROUTE") {
 				return ParserMaterial.parse_vector_input(from_node.inputs[0]);
 			}
 
-			let res_var = ParserMaterial.write_result(l);
-			let st = from_node.outputs[l.from_socket].type;
+			let res_var: string = ParserMaterial.write_result(l);
+			let st: string = from_node.outputs[l.from_socket].type;
 			if (st == "RGB" || st == "RGBA" || st == "VECTOR") {
 				return res_var;
 			}
@@ -460,74 +463,74 @@ class ParserMaterial {
 		}
 		else if (node.type == "TEX_BRICK") {
 			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_tex_brick);
-			let co = ParserMaterial.getCoord(node);
-			let col1 = ParserMaterial.parse_vector_input(node.inputs[1]);
-			let col2 = ParserMaterial.parse_vector_input(node.inputs[2]);
-			let col3 = ParserMaterial.parse_vector_input(node.inputs[3]);
-			let scale = ParserMaterial.parse_value_input(node.inputs[4]);
-			let res = `tex_brick(${co} * ${scale}, ${col1}, ${col2}, ${col3})`;
+			let co: string = ParserMaterial.get_coord(node);
+			let col1: string = ParserMaterial.parse_vector_input(node.inputs[1]);
+			let col2: string = ParserMaterial.parse_vector_input(node.inputs[2]);
+			let col3: string = ParserMaterial.parse_vector_input(node.inputs[3]);
+			let scale: string = ParserMaterial.parse_value_input(node.inputs[4]);
+			let res: string = `tex_brick(${co} * ${scale}, ${col1}, ${col2}, ${col3})`;
 			return res;
 		}
 		else if (node.type == "TEX_CHECKER") {
 			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_tex_checker);
-			let co = ParserMaterial.getCoord(node);
-			let col1 = ParserMaterial.parse_vector_input(node.inputs[1]);
-			let col2 = ParserMaterial.parse_vector_input(node.inputs[2]);
-			let scale = ParserMaterial.parse_value_input(node.inputs[3]);
-			let res = `tex_checker(${co}, ${col1}, ${col2}, ${scale})`;
+			let co: string = ParserMaterial.get_coord(node);
+			let col1: string = ParserMaterial.parse_vector_input(node.inputs[1]);
+			let col2: string = ParserMaterial.parse_vector_input(node.inputs[2]);
+			let scale: string = ParserMaterial.parse_value_input(node.inputs[3]);
+			let res: string = `tex_checker(${co}, ${col1}, ${col2}, ${scale})`;
 			return res;
 		}
 		else if (node.type == "TEX_GRADIENT") {
-			let co = ParserMaterial.getCoord(node);
-			let but = node.buttons[0]; //gradient_type;
+			let co: string = ParserMaterial.get_coord(node);
+			let but: zui_node_button_t = node.buttons[0]; //gradient_type;
 			let grad: string = but.data[but.default_value].toUpperCase();
 			grad = string_replace_all(grad, " ", "_");
-			let f = ParserMaterial.getGradient(grad, co);
-			let res = ParserMaterial.to_vec3(`clamp(${f}, 0.0, 1.0)`);
+			let f: string = ParserMaterial.get_gradient(grad, co);
+			let res: string = ParserMaterial.to_vec3(`clamp(${f}, 0.0, 1.0)`);
 			return res;
 		}
 		else if (node.type == "TEX_IMAGE") {
 			// Already fetched
 			if (ParserMaterial.parsed.indexOf(ParserMaterial.res_var_name(node, node.outputs[1])) >= 0) { // TODO: node.outputs[0]
-				let varname = ParserMaterial.store_var_name(node);
+				let varname: string = ParserMaterial.store_var_name(node);
 				return `${varname}.rgb`;
 			}
-			let tex_name = ParserMaterial.node_name(node);
-			let tex = ParserMaterial.make_texture(node, tex_name);
+			let tex_name: string = ParserMaterial.node_name(node);
+			let tex: bind_tex_t = ParserMaterial.make_texture(node, tex_name);
 			if (tex != null) {
-				let color_space = node.buttons[1].default_value;
-				let texstore = ParserMaterial.texture_store(node, tex, tex_name, color_space);
+				let color_space: i32 = node.buttons[1].default_value;
+				let texstore: string = ParserMaterial.texture_store(node, tex, tex_name, color_space);
 				return `${texstore}.rgb`;
 			}
 			else {
-				let tex_store = ParserMaterial.store_var_name(node); // Pink color for missing texture
+				let tex_store: string = ParserMaterial.store_var_name(node); // Pink color for missing texture
 				NodeShader.write(ParserMaterial.curshader, `vec4 ${tex_store} = vec4(1.0, 0.0, 1.0, 1.0);`);
 				return `${tex_store}.rgb`;
 			}
 		}
 		else if (node.type == "TEX_MAGIC") {
 			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_tex_magic);
-			let co = ParserMaterial.getCoord(node);
-			let scale = ParserMaterial.parse_value_input(node.inputs[1]);
-			let res = `tex_magic(${co} * ${scale} * 4.0)`;
+			let co: string = ParserMaterial.get_coord(node);
+			let scale: string = ParserMaterial.parse_value_input(node.inputs[1]);
+			let res: string = `tex_magic(${co} * ${scale} * 4.0)`;
 			return res;
 		}
 		else if (node.type == "TEX_NOISE") {
 			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_tex_noise);
-			let co = ParserMaterial.getCoord(node);
-			let scale = ParserMaterial.parse_value_input(node.inputs[1]);
-			let res = `vec3(tex_noise(${co} * ${scale}), tex_noise(${co} * ${scale} + 0.33), tex_noise(${co} * ${scale} + 0.66))`;
+			let co: string = ParserMaterial.get_coord(node);
+			let scale: string = ParserMaterial.parse_value_input(node.inputs[1]);
+			let res: string = `vec3(tex_noise(${co} * ${scale}), tex_noise(${co} * ${scale} + 0.33), tex_noise(${co} * ${scale} + 0.66))`;
 			return res;
 		}
 		else if (node.type == "TEX_VORONOI") {
 			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_tex_voronoi);
 			NodeShader.add_uniform(ParserMaterial.curshader, "sampler2D snoise256", "$noise256.k");
-			let co = ParserMaterial.getCoord(node);
-			let scale = ParserMaterial.parse_value_input(node.inputs[1]);
-			let but = node.buttons[0]; //coloring;
+			let co: string = ParserMaterial.get_coord(node);
+			let scale: string = ParserMaterial.parse_value_input(node.inputs[1]);
+			let but: zui_node_button_t = node.buttons[0]; //coloring;
 			let coloring: string = but.data[but.default_value].toUpperCase();
 			coloring = string_replace_all(coloring, " ", "_");
-			let res = "";
+			let res: string = "";
 			if (coloring == "INTENSITY") {
 				res = ParserMaterial.to_vec3(`tex_voronoi(${co} * ${scale}, texturePass(snoise256)).a`);
 			}
@@ -538,30 +541,30 @@ class ParserMaterial {
 		}
 		else if (node.type == "TEX_WAVE") {
 			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_tex_wave);
-			let co = ParserMaterial.getCoord(node);
-			let scale = ParserMaterial.parse_value_input(node.inputs[1]);
-			let res = ParserMaterial.to_vec3(`tex_wave_f(${co} * ${scale})`);
+			let co: string = ParserMaterial.get_coord(node);
+			let scale: string = ParserMaterial.parse_value_input(node.inputs[1]);
+			let res: string = ParserMaterial.to_vec3(`tex_wave_f(${co} * ${scale})`);
 			return res;
 		}
 		else if (node.type == "BRIGHTCONTRAST") {
-			let out_col = ParserMaterial.parse_vector_input(node.inputs[0]);
-			let bright = ParserMaterial.parse_value_input(node.inputs[1]);
-			let contr = ParserMaterial.parse_value_input(node.inputs[2]);
+			let out_col: string = ParserMaterial.parse_vector_input(node.inputs[0]);
+			let bright: string = ParserMaterial.parse_value_input(node.inputs[1]);
+			let contr: string = ParserMaterial.parse_value_input(node.inputs[2]);
 			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_brightcontrast);
 			return `brightcontrast(${out_col}, ${bright}, ${contr})`;
 		}
 		else if (node.type == "GAMMA") {
-			let out_col = ParserMaterial.parse_vector_input(node.inputs[0]);
-			let gamma = ParserMaterial.parse_value_input(node.inputs[1]);
+			let out_col: string = ParserMaterial.parse_vector_input(node.inputs[0]);
+			let gamma: string = ParserMaterial.parse_value_input(node.inputs[1]);
 			return `pow(${out_col}, ` + ParserMaterial.to_vec3(`${gamma}`) + ")";
 		}
 		else if (node.type == "DIRECT_WARP") {
 			if (ParserMaterial.warp_passthrough) return ParserMaterial.parse_vector_input(node.inputs[0]);
-			let angle = ParserMaterial.parse_value_input(node.inputs[1], true);
-			let mask = ParserMaterial.parse_value_input(node.inputs[2], true);
-			let tex_name = "texwarp_" + ParserMaterial.node_name(node);
+			let angle: string = ParserMaterial.parse_value_input(node.inputs[1], true);
+			let mask: string = ParserMaterial.parse_value_input(node.inputs[2], true);
+			let tex_name: string = "texwarp_" + ParserMaterial.node_name(node);
 			NodeShader.add_uniform(ParserMaterial.curshader, "sampler2D " + tex_name, "_" + tex_name);
-			let store = ParserMaterial.store_var_name(node);
+			let store: string = ParserMaterial.store_var_name(node);
 			NodeShader.write(ParserMaterial.curshader, `float ${store}_rad = ${angle} * (${Math.PI} / 180);`);
 			NodeShader.write(ParserMaterial.curshader, `float ${store}_x = cos(${store}_rad);`);
 			NodeShader.write(ParserMaterial.curshader, `float ${store}_y = sin(${store}_rad);`);
@@ -569,46 +572,46 @@ class ParserMaterial {
 		}
 		else if (node.type == "BLUR") {
 			if (ParserMaterial.blur_passthrough) return ParserMaterial.parse_vector_input(node.inputs[0]);
-			let strength = ParserMaterial.parse_value_input(node.inputs[1]);
+			let strength: string = ParserMaterial.parse_value_input(node.inputs[1]);
 			if (strength == "0.0") return "vec3(0.0, 0.0, 0.0)";
-			let steps = `int(${strength} * 10 + 1)`;
-			let tex_name = "texblur_" + ParserMaterial.node_name(node);
+			let steps: string = `int(${strength} * 10 + 1)`;
+			let tex_name: string = "texblur_" + ParserMaterial.node_name(node);
 			NodeShader.add_uniform(ParserMaterial.curshader, "sampler2D " + tex_name, "_" + tex_name);
-			let store = ParserMaterial.store_var_name(node);
+			let store: string = ParserMaterial.store_var_name(node);
 			NodeShader.write(ParserMaterial.curshader, `vec3 ${store}_res = vec3(0.0, 0.0, 0.0);`);
-			NodeShader.write(ParserMaterial.curshader, `for (int i = -$steps; i <= $steps; ++i) {`);
-			NodeShader.write(ParserMaterial.curshader, `for (int j = -$steps; j <= $steps; ++j) {`);
+			NodeShader.write(ParserMaterial.curshader, `for (int i = -${steps}; i <= ${steps}; ++i) {`);
+			NodeShader.write(ParserMaterial.curshader, `for (int j = -${steps}; j <= ${steps}; ++j) {`);
 			NodeShader.write(ParserMaterial.curshader, `${store}_res += texture(${tex_name}, texCoord + vec2(i, j) / vec2(textureSize(${tex_name}, 0))).rgb;`);
 			NodeShader.write(ParserMaterial.curshader, `}`);
 			NodeShader.write(ParserMaterial.curshader, `}`);
-			NodeShader.write(ParserMaterial.curshader, `${store}_res /= ($steps * 2 + 1) * ($steps * 2 + 1);`);
+			NodeShader.write(ParserMaterial.curshader, `${store}_res /= (${steps} * 2 + 1) * (${steps} * 2 + 1);`);
 			return `${store}_res`;
 		}
 		else if (node.type == "HUE_SAT") {
 			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_hue_sat);
-			let hue = ParserMaterial.parse_value_input(node.inputs[0]);
-			let sat = ParserMaterial.parse_value_input(node.inputs[1]);
-			let val = ParserMaterial.parse_value_input(node.inputs[2]);
-			let fac = ParserMaterial.parse_value_input(node.inputs[3]);
-			let col = ParserMaterial.parse_vector_input(node.inputs[4]);
+			let hue: string = ParserMaterial.parse_value_input(node.inputs[0]);
+			let sat: string = ParserMaterial.parse_value_input(node.inputs[1]);
+			let val: string = ParserMaterial.parse_value_input(node.inputs[2]);
+			let fac: string = ParserMaterial.parse_value_input(node.inputs[3]);
+			let col: string = ParserMaterial.parse_vector_input(node.inputs[4]);
 			return `hue_sat(${col}, vec4(${hue}-0.5, ${sat}, ${val}, 1.0-${fac}))`;
 		}
 		else if (node.type == "INVERT") {
-			let fac = ParserMaterial.parse_value_input(node.inputs[0]);
-			let out_col = ParserMaterial.parse_vector_input(node.inputs[1]);
+			let fac: string = ParserMaterial.parse_value_input(node.inputs[0]);
+			let out_col: string = ParserMaterial.parse_vector_input(node.inputs[1]);
 			return `mix(${out_col}, vec3(1.0, 1.0, 1.0) - (${out_col}), ${fac})`;
 		}
 		else if (node.type == "MIX_RGB") {
-			let fac = ParserMaterial.parse_value_input(node.inputs[0]);
-			let fac_var = ParserMaterial.node_name(node) + "_fac";
+			let fac: string = ParserMaterial.parse_value_input(node.inputs[0]);
+			let fac_var: string = ParserMaterial.node_name(node) + "_fac";
 			NodeShader.write(ParserMaterial.curshader, `float ${fac_var} = ${fac};`);
-			let col1 = ParserMaterial.parse_vector_input(node.inputs[1]);
-			let col2 = ParserMaterial.parse_vector_input(node.inputs[2]);
-			let but = node.buttons[0]; // blend_type
+			let col1: string = ParserMaterial.parse_vector_input(node.inputs[1]);
+			let col2: string = ParserMaterial.parse_vector_input(node.inputs[2]);
+			let but: zui_node_button_t = node.buttons[0]; // blend_type
 			let blend: string = but.data[but.default_value].toUpperCase();
 			blend = string_replace_all(blend, " ", "_");
-			let use_clamp = node.buttons[1].default_value == true;
-			let out_col = "";
+			let use_clamp: bool = node.buttons[1].default_value == true;
+			let out_col: string = "";
 			if (blend == "MIX") {
 				out_col = `mix(${col1}, ${col2}, ${fac_var})`;
 			}
@@ -653,7 +656,7 @@ class ParserMaterial {
 				out_col = `mix(${col1}, ${col1} - ${col2}, ${fac_var})`;
 			}
 			else if (blend == "DIVIDE") {
-				let eps = 0.000001;
+				let eps: f32 = 0.000001;
 				col2 = `max(${col2}, vec3(${eps}, ${eps}, ${eps}))`;
 				out_col = "(" + ParserMaterial.to_vec3(`(1.0 - ${fac_var}) * ${col1} + ${fac_var} * ${col1} / ${col2}`) + ")";
 			}
@@ -677,41 +680,41 @@ class ParserMaterial {
 			else return out_col;
 		}
 		else if (node.type == "QUANTIZE") {
-			let strength = ParserMaterial.parse_value_input(node.inputs[0]);
-			let col = ParserMaterial.parse_vector_input(node.inputs[1]);
+			let strength: string = ParserMaterial.parse_value_input(node.inputs[0]);
+			let col: string = ParserMaterial.parse_vector_input(node.inputs[1]);
 			return `(floor(100.0 * ${strength} * ${col}) / (100.0 * ${strength}))`;
 		}
 		else if (node.type == "VALTORGB") { // ColorRamp
-			let fac = ParserMaterial.parse_value_input(node.inputs[0]);
-			let interp = node.buttons[0].data == 0 ? "LINEAR" : "CONSTANT";
+			let fac: string = ParserMaterial.parse_value_input(node.inputs[0]);
+			let interp: string = node.buttons[0].data == 0 ? "LINEAR" : "CONSTANT";
 			let elems: f32[][] = node.buttons[0].default_value;
 			if (elems.length == 1) {
 				return ParserMaterial.vec3(elems[0]);
 			}
 			// Write cols array
-			let cols_var = ParserMaterial.node_name(node) + "_cols";
+			let cols_var: string = ParserMaterial.node_name(node) + "_cols";
 			NodeShader.write(ParserMaterial.curshader, `vec3 ${cols_var}[${elems.length}];`); // TODO: Make const
-			for (let i = 0; i < elems.length; ++i) {
+			for (let i: i32 = 0; i < elems.length; ++i) {
 				NodeShader.write(ParserMaterial.curshader, `${cols_var}[${i}] = ${ParserMaterial.vec3(elems[i])};`);
 			}
 			// Get index
-			let fac_var = ParserMaterial.node_name(node) + "_fac";
+			let fac_var: string = ParserMaterial.node_name(node) + "_fac";
 			NodeShader.write(ParserMaterial.curshader, `float ${fac_var} = ${fac};`);
-			let index = "0";
-			for (let i = 1; i < elems.length; ++i) {
+			let index: string = "0";
+			for (let i: i32 = 1; i < elems.length; ++i) {
 				index += ` + (${fac_var} > ${elems[i][4]} ? 1 : 0)`;
 			}
 			// Write index
-			let index_var = ParserMaterial.node_name(node) + "_i";
+			let index_var: string = ParserMaterial.node_name(node) + "_i";
 			NodeShader.write(ParserMaterial.curshader, `int ${index_var} = ${index};`);
 			if (interp == "CONSTANT") {
 				return `${cols_var}[${index_var}]`;
 			}
 			else { // Linear
 				// Write facs array
-				let facs_var = ParserMaterial.node_name(node) + "_facs";
+				let facs_var: string = ParserMaterial.node_name(node) + "_facs";
 				NodeShader.write(ParserMaterial.curshader, `float ${facs_var}[${elems.length}];`); // TODO: Make const
-				for (let i = 0; i < elems.length; ++i) {
+				for (let i: i32 = 0; i < elems.length; ++i) {
 					NodeShader.write(ParserMaterial.curshader, `${facs_var}[${i}] = ${elems[i][4]};`);
 				}
 				// Mix color
@@ -720,55 +723,55 @@ class ParserMaterial {
 			}
 		}
 		else if (node.type == "CURVE_VEC") {
-			let fac = ParserMaterial.parse_value_input(node.inputs[0]);
-			let vec = ParserMaterial.parse_vector_input(node.inputs[1]);
-			let curves = node.buttons[0].default_value;
-			let name = ParserMaterial.node_name(node);
-			let vc0 = ParserMaterial.vector_curve(name + "0", vec + ".x", curves[0]);
-			let vc1 = ParserMaterial.vector_curve(name + "1", vec + ".y", curves[1]);
-			let vc2 = ParserMaterial.vector_curve(name + "2", vec + ".z", curves[2]);
+			let fac: string = ParserMaterial.parse_value_input(node.inputs[0]);
+			let vec: string = ParserMaterial.parse_vector_input(node.inputs[1]);
+			let curves: any = node.buttons[0].default_value;
+			let name: string = ParserMaterial.node_name(node);
+			let vc0: string = ParserMaterial.vector_curve(name + "0", vec + ".x", curves[0]);
+			let vc1: string = ParserMaterial.vector_curve(name + "1", vec + ".y", curves[1]);
+			let vc2: string = ParserMaterial.vector_curve(name + "2", vec + ".z", curves[2]);
 			// mapping.curves[0].points[0].handle_type // bezier curve
 			return `(vec3(${vc0}, ${vc1}, ${vc2}) * ${fac})`;
 		}
 		else if (node.type == "CURVE_RGB") { // RGB Curves
-			let fac = ParserMaterial.parse_value_input(node.inputs[0]);
-			let vec = ParserMaterial.parse_vector_input(node.inputs[1]);
-			let curves = node.buttons[0].default_value;
-			let name = ParserMaterial.node_name(node);
+			let fac: string = ParserMaterial.parse_value_input(node.inputs[0]);
+			let vec: string = ParserMaterial.parse_vector_input(node.inputs[1]);
+			let curves: any = node.buttons[0].default_value;
+			let name: string = ParserMaterial.node_name(node);
 			// mapping.curves[0].points[0].handle_type
-			let vc0 = ParserMaterial.vector_curve(name + "0", vec + ".x", curves[0]);
-			let vc1 = ParserMaterial.vector_curve(name + "1", vec + ".y", curves[1]);
-			let vc2 = ParserMaterial.vector_curve(name + "2", vec + ".z", curves[2]);
-			let vc3a = ParserMaterial.vector_curve(name + "3a", vec + ".x", curves[3]);
-			let vc3b = ParserMaterial.vector_curve(name + "3b", vec + ".y", curves[3]);
-			let vc3c = ParserMaterial.vector_curve(name + "3c", vec + ".z", curves[3]);
+			let vc0: string = ParserMaterial.vector_curve(name + "0", vec + ".x", curves[0]);
+			let vc1: string = ParserMaterial.vector_curve(name + "1", vec + ".y", curves[1]);
+			let vc2: string = ParserMaterial.vector_curve(name + "2", vec + ".z", curves[2]);
+			let vc3a: string = ParserMaterial.vector_curve(name + "3a", vec + ".x", curves[3]);
+			let vc3b: string = ParserMaterial.vector_curve(name + "3b", vec + ".y", curves[3]);
+			let vc3c: string = ParserMaterial.vector_curve(name + "3c", vec + ".z", curves[3]);
 			return `(sqrt(vec3(${vc0}, ${vc1}, ${vc2}) * vec3(${vc3a}, ${vc3b}, ${vc3c})) * ${fac})`;
 		}
 		else if (node.type == "COMBHSV") {
 			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_hue_sat);
-			let h = ParserMaterial.parse_value_input(node.inputs[0]);
-			let s = ParserMaterial.parse_value_input(node.inputs[1]);
-			let v = ParserMaterial.parse_value_input(node.inputs[2]);
+			let h: string = ParserMaterial.parse_value_input(node.inputs[0]);
+			let s: string = ParserMaterial.parse_value_input(node.inputs[1]);
+			let v: string = ParserMaterial.parse_value_input(node.inputs[2]);
 			return `hsv_to_rgb(vec3(${h}, ${s}, ${v}))`;
 		}
 		else if (node.type == "COMBRGB") {
-			let r = ParserMaterial.parse_value_input(node.inputs[0]);
-			let g = ParserMaterial.parse_value_input(node.inputs[1]);
-			let b = ParserMaterial.parse_value_input(node.inputs[2]);
+			let r: string = ParserMaterial.parse_value_input(node.inputs[0]);
+			let g: string = ParserMaterial.parse_value_input(node.inputs[1]);
+			let b: string = ParserMaterial.parse_value_input(node.inputs[2]);
 			return `vec3(${r}, ${g}, ${b})`;
 		}
 		else if (node.type == "WAVELENGTH") {
 			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_wavelength_to_rgb);
-			let wl = ParserMaterial.parse_value_input(node.inputs[0]);
+			let wl: string = ParserMaterial.parse_value_input(node.inputs[0]);
 			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_wavelength_to_rgb);
 			return `wavelength_to_rgb((${wl} - 450.0) / 150.0)`;
 		}
 		else if (node.type == "CAMERA") {
-			ParserMaterial.curshader.vVecCam = true;
+			ParserMaterial.curshader.vvec_cam = true;
 			return "vVecCam";
 		}
 		else if (node.type == "LAYER") {
-			let l = node.buttons[0].default_value;
+			let l: any = node.buttons[0].default_value;
 			if (socket == node.outputs[0]) { // Base
 				NodeShader.add_uniform(ParserMaterial.curshader, "sampler2D texpaint" + l, "_texpaint" + l);
 				return "texture(texpaint" + l + ", texCoord).rgb";
@@ -779,16 +782,16 @@ class ParserMaterial {
 			}
 		}
 		else if (node.type == "MATERIAL") {
-			let result = "vec3(0.0, 0.0, 0.0)";
-			let mi = node.buttons[0].default_value;
+			let result: string = "vec3(0.0, 0.0, 0.0)";
+			let mi: any = node.buttons[0].default_value;
 			if (mi >= Project.materials.length) return result;
-			let m = Project.materials[mi];
-			let _nodes = ParserMaterial.nodes;
-			let _links = ParserMaterial.links;
+			let m: SlotMaterialRaw = Project.materials[mi];
+			let _nodes: zui_node_t[] = ParserMaterial.nodes;
+			let _links: zui_node_link_t[] = ParserMaterial.links;
 			ParserMaterial.nodes = m.canvas.nodes;
 			ParserMaterial.links = m.canvas.links;
 			ParserMaterial.parents.push(node);
-			let output_node = ParserMaterial.node_by_type(ParserMaterial.nodes, "OUTPUT_MATERIAL_PBR");
+			let output_node: zui_node_t = ParserMaterial.node_by_type(ParserMaterial.nodes, "OUTPUT_MATERIAL_PBR");
 			if (socket == node.outputs[0]) { // Base
 				result = ParserMaterial.parse_vector_input(output_node.inputs[0]);
 			}
@@ -828,7 +831,7 @@ class ParserMaterial {
 				return "n";
 			}
 			else if (socket == node.outputs[4]) { // Incoming
-				ParserMaterial.curshader.vVec = true;
+				ParserMaterial.curshader.vvec = true;
 				return "vVec";
 			}
 			else if (socket == node.outputs[5]) { // Parametric
@@ -894,26 +897,26 @@ class ParserMaterial {
 			return "vec3(texCoord.x, texCoord.y, 0.0)";
 		}
 		else if (node.type == "BUMP") {
-			let strength = ParserMaterial.parse_value_input(node.inputs[0]);
-			// let distance = ParserMaterial.parse_value_input(node.inputs[1]);
-			let height = ParserMaterial.parse_value_input(node.inputs[2]);
-			let nor = ParserMaterial.parse_vector_input(node.inputs[3]);
-			let sample_bump_res = ParserMaterial.store_var_name(node) + "_bump";
+			let strength: string = ParserMaterial.parse_value_input(node.inputs[0]);
+			// let distance: string = ParserMaterial.parse_value_input(node.inputs[1]);
+			let height: string = ParserMaterial.parse_value_input(node.inputs[2]);
+			let nor: string = ParserMaterial.parse_vector_input(node.inputs[3]);
+			let sample_bump_res: string = ParserMaterial.store_var_name(node) + "_bump";
 			NodeShader.write(ParserMaterial.curshader, `float ${sample_bump_res}_x = dFdx(float(${height})) * (${strength}) * 16.0;`);
 			NodeShader.write(ParserMaterial.curshader, `float ${sample_bump_res}_y = dFdy(float(${height})) * (${strength}) * 16.0;`);
 			return `(normalize(vec3(${sample_bump_res}_x, ${sample_bump_res}_y, 1.0) + ${nor}) * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5))`;
 		}
 		else if (node.type == "MAPPING") {
-			let out = ParserMaterial.parse_vector_input(node.inputs[0]);
-			let node_translation = ParserMaterial.parse_vector_input(node.inputs[1]);
-			let node_rotation = ParserMaterial.parse_vector_input(node.inputs[2]);
-			let node_scale = ParserMaterial.parse_vector_input(node.inputs[3]);
+			let out: string = ParserMaterial.parse_vector_input(node.inputs[0]);
+			let node_translation: string = ParserMaterial.parse_vector_input(node.inputs[1]);
+			let node_rotation: string = ParserMaterial.parse_vector_input(node.inputs[2]);
+			let node_scale: string = ParserMaterial.parse_vector_input(node.inputs[3]);
 			if (node_scale != `vec3(1, 1, 1)`) {
 				out = `(${out} * ${node_scale})`;
 			}
 			if (node_rotation != `vec3(0, 0, 0)`) {
 				// ZYX rotation, Z axis for now..
-				let a = `${node_rotation}.z * (3.1415926535 / 180)`;
+				let a: string = `${node_rotation}.z * (3.1415926535 / 180)`;
 				// x * cos(theta) - y * sin(theta)
 				// x * sin(theta) + y * cos(theta)
 				out = `vec3(${out}.x * cos(${a}) - ${out}.y * sin(${a}), ${out}.x * sin(${a}) + ${out}.y * cos(${a}), 0.0)`;
@@ -938,16 +941,16 @@ class ParserMaterial {
 				return ParserMaterial.vec3(node.outputs[0].default_value);
 			}
 			else if (socket == node.outputs[1]) {
-				let nor = ParserMaterial.parse_vector_input(node.inputs[0]);
-				let norout = ParserMaterial.vec3(node.outputs[0].default_value);
+				let nor: string = ParserMaterial.parse_vector_input(node.inputs[0]);
+				let norout: string = ParserMaterial.vec3(node.outputs[0].default_value);
 				return ParserMaterial.to_vec3(`dot(${norout}, ${nor})`);
 			}
 		}
 		else if (node.type == "NORMAL_MAP") {
-			let strength = ParserMaterial.parse_value_input(node.inputs[0]);
-			let norm = ParserMaterial.parse_vector_input(node.inputs[1]);
+			let strength: string = ParserMaterial.parse_value_input(node.inputs[0]);
+			let norm: string = ParserMaterial.parse_vector_input(node.inputs[1]);
 
-			let store = ParserMaterial.store_var_name(node);
+			let store: string = ParserMaterial.store_var_name(node);
 			NodeShader.write(ParserMaterial.curshader, `vec3 ${store}_texn = ${norm} * 2.0 - 1.0;`);
 			NodeShader.write(ParserMaterial.curshader, `${store}_texn.xy = ${strength} * ${store}_texn.xy;`);
 			NodeShader.write(ParserMaterial.curshader, `${store}_texn = normalize(${store}_texn);`);
@@ -955,12 +958,12 @@ class ParserMaterial {
 			return `(0.5 * ${store}_texn + 0.5)`;
 		}
 		else if (node.type == "MIX_NORMAL_MAP") {
-			let nm1 = ParserMaterial.parse_vector_input(node.inputs[0]);
-			let nm2 = ParserMaterial.parse_vector_input(node.inputs[1]);
-			let but = node.buttons[0];
+			let nm1: string = ParserMaterial.parse_vector_input(node.inputs[0]);
+			let nm2: string = ParserMaterial.parse_vector_input(node.inputs[1]);
+			let but: zui_node_button_t = node.buttons[0];
 			let blend: string = but.data[but.default_value].toUpperCase(); // blend_type
 			blend = string_replace_all(blend, " ", "_");
-			let store = ParserMaterial.store_var_name(node);
+			let store: string = ParserMaterial.store_var_name(node);
 
 			// The blending algorithms are based on the paper `Blending in Detail` by Colin Barré-Brisebois and Stephen Hill 2012
 			// https://blog.selfshadow.com/publications/blending-in-detail/
@@ -988,15 +991,15 @@ class ParserMaterial {
 		// 	return ParserMaterial.parse_vector_input(node.inputs[0])
 		}
 		else if (node.type == "COMBXYZ") {
-			let x = ParserMaterial.parse_value_input(node.inputs[0]);
-			let y = ParserMaterial.parse_value_input(node.inputs[1]);
-			let z = ParserMaterial.parse_value_input(node.inputs[2]);
+			let x: string = ParserMaterial.parse_value_input(node.inputs[0]);
+			let y: string = ParserMaterial.parse_value_input(node.inputs[1]);
+			let z: string = ParserMaterial.parse_value_input(node.inputs[2]);
 			return `vec3(${x}, ${y}, ${z})`;
 		}
 		else if (node.type == "VECT_MATH") {
-			let vec1 = ParserMaterial.parse_vector_input(node.inputs[0]);
-			let vec2 = ParserMaterial.parse_vector_input(node.inputs[1]);
-			let but = node.buttons[0]; //operation;
+			let vec1: string = ParserMaterial.parse_vector_input(node.inputs[0]);
+			let vec2: string = ParserMaterial.parse_vector_input(node.inputs[1]);
+			let but: zui_node_button_t = node.buttons[0]; //operation;
 			let op: string = but.data[but.default_value].toUpperCase();
 			op = string_replace_all(op, " ", "_");
 			if (op == "ADD") {
@@ -1073,11 +1076,11 @@ class ParserMaterial {
 			}
 		}
 		else if (node.type == "Displacement") {
-			let height = ParserMaterial.parse_value_input(node.inputs[0]);
+			let height: string = ParserMaterial.parse_value_input(node.inputs[0]);
 			return ParserMaterial.to_vec3(`${height}`);
 		}
-		else if (ParserMaterial.customNodes.get(node.type) != null) {
-			return ParserMaterial.customNodes.get(node.type)(node, socket);
+		else if (ParserMaterial.custom_nodes.get(node.type) != null) {
+			return ParserMaterial.custom_nodes.get(node.type)(node, socket);
 		}
 		return "vec3(0.0, 0.0, 0.0)";
 	}
@@ -1088,9 +1091,9 @@ class ParserMaterial {
 		if (!ParserMaterial.arm_export_tangents) {
 			NodeShader.write(ParserMaterial.frag, `vec3 texn = (${ParserMaterial.out_normaltan}) * 2.0 - 1.0;`);
 			NodeShader.write(ParserMaterial.frag, `texn.y = -texn.y;`);
-			if (!ParserMaterial.cotangentFrameWritten) {
-				ParserMaterial.cotangentFrameWritten = true;
-				NodeShader.add_function(ParserMaterial.frag, ShaderFunctions.str_cotangentFrame);
+			if (!ParserMaterial.cotangent_frame_written) {
+				ParserMaterial.cotangent_frame_written = true;
+				NodeShader.add_function(ParserMaterial.frag, ShaderFunctions.str_cotangent_frame);
 			}
 			ParserMaterial.frag.n = true;
 			///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
@@ -1105,15 +1108,15 @@ class ParserMaterial {
 	}
 
 	static parse_value_input = (inp: zui_node_socket_t, vector_as_grayscale = false) : string => {
-		let l = ParserMaterial.getInputLink(inp);
-		let from_node = l != null ? ParserMaterial.getNode(l.from_id) : null;
+		let l: zui_node_link_t = ParserMaterial.get_input_link(inp);
+		let from_node: zui_node_t = l != null ? ParserMaterial.get_node(l.from_id) : null;
 		if (from_node != null) {
 			if (from_node.type == "REROUTE") {
 				return ParserMaterial.parse_value_input(from_node.inputs[0]);
 			}
 
-			let res_var = ParserMaterial.write_result(l);
-			let st = from_node.outputs[l.from_socket].type;
+			let res_var: string = ParserMaterial.write_result(l);
+			let st: string = from_node.outputs[l.from_socket].type;
 			if (st == "RGB" || st == "RGBA" || st == "VECTOR") {
 				if (vector_as_grayscale) {
 					return `dot(${res_var}.rbg, vec3(0.299, 0.587, 0.114))`;
@@ -1147,8 +1150,8 @@ class ParserMaterial {
 		}
 		else if (node.type == "WIREFRAME") {
 			NodeShader.add_uniform(ParserMaterial.curshader, `sampler2D texuvmap`, `_texuvmap`);
-			let use_pixel_size = node.buttons[0].default_value == "true";
-			let pixel_size = ParserMaterial.parse_value_input(node.inputs[0]);
+			// let use_pixel_size: bool = node.buttons[0].default_value == "true";
+			// let pixel_size: f32 = ParserMaterial.parse_value_input(node.inputs[0]);
 			return "textureLod(texuvmap, texCoord, 0.0).r";
 		}
 		else if (node.type == "CAMERA") {
@@ -1168,7 +1171,7 @@ class ParserMaterial {
 			}
 		}
 		else if (node.type == "LAYER") {
-			let l = node.buttons[0].default_value;
+			let l: any = node.buttons[0].default_value;
 			if (socket == node.outputs[1]) { // Opac
 				NodeShader.add_uniform(ParserMaterial.curshader, "sampler2D texpaint" + l, "_texpaint" + l);
 				return "texture(texpaint" + l + ", texCoord).a";
@@ -1192,22 +1195,22 @@ class ParserMaterial {
 		}
 		else if (node.type == "LAYER_MASK") {
 			if (socket == node.outputs[0]) {
-				let l = node.buttons[0].default_value;
+				let l: any = node.buttons[0].default_value;
 				NodeShader.add_uniform(ParserMaterial.curshader, "sampler2D texpaint" + l, "_texpaint" + l);
 				return "texture(texpaint" + l + ", texCoord).r";
 			}
 		}
 		else if (node.type == "MATERIAL") {
-			let result = "0.0";
-			let mi = node.buttons[0].default_value;
+			let result: string = "0.0";
+			let mi: any = node.buttons[0].default_value;
 			if (mi >= Project.materials.length) return result;
-			let m = Project.materials[mi];
-			let _nodes = ParserMaterial.nodes;
-			let _links = ParserMaterial.links;
+			let m: SlotMaterialRaw = Project.materials[mi];
+			let _nodes: zui_node_t[] = ParserMaterial.nodes;
+			let _links: zui_node_link_t[] = ParserMaterial.links;
 			ParserMaterial.nodes = m.canvas.nodes;
 			ParserMaterial.links = m.canvas.links;
 			ParserMaterial.parents.push(node);
-			let output_node = ParserMaterial.node_by_type(ParserMaterial.nodes, "OUTPUT_MATERIAL_PBR");
+			let output_node: zui_node_t = ParserMaterial.node_by_type(ParserMaterial.nodes, "OUTPUT_MATERIAL_PBR");
 			if (socket == node.outputs[1]) { // Opac
 				result = ParserMaterial.parse_value_input(output_node.inputs[1]);
 			}
@@ -1251,8 +1254,8 @@ class ParserMaterial {
 			}
 		}
 		else if (node.type == "FRESNEL") {
-			let ior = ParserMaterial.parse_value_input(node.inputs[0]);
-			ParserMaterial.curshader.dotNV = true;
+			let ior: string = ParserMaterial.parse_value_input(node.inputs[0]);
+			ParserMaterial.curshader.dotnv = true;
 			return `pow(1.0 - dotNV, 7.25 / ${ior})`;
 		}
 		else if (node.type == "NEW_GEOMETRY") {
@@ -1264,10 +1267,10 @@ class ParserMaterial {
 				///end
 			}
 			else if (socket == node.outputs[7]) { // Pointiness
-				let strength = 1.0;
-				let radius = 1.0;
-				let offset = 0.0;
-				let store = ParserMaterial.store_var_name(node);
+				let strength: f32 = 1.0;
+				let radius: f32 = 1.0;
+				let offset: f32 = 0.0;
+				let store: string = ParserMaterial.store_var_name(node);
 				ParserMaterial.curshader.n = true;
 				NodeShader.write(ParserMaterial.curshader, `vec3 ${store}_dx = dFdx(n);`);
 				NodeShader.write(ParserMaterial.curshader, `vec3 ${store}_dy = dFdy(n);`);
@@ -1283,13 +1286,13 @@ class ParserMaterial {
 			return "0.5";
 		}
 		else if (node.type == "LAYER_WEIGHT") {
-			let blend = ParserMaterial.parse_value_input(node.inputs[0]);
+			let blend: string = ParserMaterial.parse_value_input(node.inputs[0]);
 			if (socket == node.outputs[0]) { // Fresnel
-				ParserMaterial.curshader.dotNV = true;
+				ParserMaterial.curshader.dotnv = true;
 				return `clamp(pow(1.0 - dotNV, (1.0 - ${blend}) * 10.0), 0.0, 1.0)`;
 			}
 			else if (socket == node.outputs[1]) { // Facing
-				ParserMaterial.curshader.dotNV = true;
+				ParserMaterial.curshader.dotnv = true;
 				return `((1.0 - dotNV) * ${blend})`;
 			}
 		}
@@ -1312,71 +1315,71 @@ class ParserMaterial {
 		}
 		else if (node.type == "TEX_BRICK") {
 			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_tex_brick);
-			let co = ParserMaterial.getCoord(node);
-			let scale = ParserMaterial.parse_value_input(node.inputs[4]);
-			let res = `tex_brick_f(${co} * ${scale})`;
+			let co: string = ParserMaterial.get_coord(node);
+			let scale: string = ParserMaterial.parse_value_input(node.inputs[4]);
+			let res: string = `tex_brick_f(${co} * ${scale})`;
 			return res;
 		}
 		else if (node.type == "TEX_CHECKER") {
 			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_tex_checker);
-			let co = ParserMaterial.getCoord(node);
-			let scale = ParserMaterial.parse_value_input(node.inputs[3]);
-			let res = `tex_checker_f(${co}, ${scale})`;
+			let co: string = ParserMaterial.get_coord(node);
+			let scale: string = ParserMaterial.parse_value_input(node.inputs[3]);
+			let res: string = `tex_checker_f(${co}, ${scale})`;
 			return res;
 		}
 		else if (node.type == "TEX_GRADIENT") {
-			let co = ParserMaterial.getCoord(node);
-			let but = node.buttons[0]; //gradient_type;
+			let co: string = ParserMaterial.get_coord(node);
+			let but: zui_node_button_t = node.buttons[0]; //gradient_type;
 			let grad: string = but.data[but.default_value].toUpperCase();
 			grad = string_replace_all(grad, " ", "_");
-			let f = ParserMaterial.getGradient(grad, co);
-			let res = `(clamp(${f}, 0.0, 1.0))`;
+			let f: string = ParserMaterial.get_gradient(grad, co);
+			let res: string = `(clamp(${f}, 0.0, 1.0))`;
 			return res;
 		}
 		else if (node.type == "TEX_IMAGE") {
 			// Already fetched
 			if (ParserMaterial.parsed.indexOf(ParserMaterial.res_var_name(node, node.outputs[0])) >= 0) { // TODO: node.outputs[1]
-				let varname = ParserMaterial.store_var_name(node);
+				let varname: string = ParserMaterial.store_var_name(node);
 				return `${varname}.a`;
 			}
-			let tex_name = ParserMaterial.node_name(node);
-			let tex = ParserMaterial.make_texture(node, tex_name);
+			let tex_name: string = ParserMaterial.node_name(node);
+			let tex: bind_tex_t = ParserMaterial.make_texture(node, tex_name);
 			if (tex != null) {
-				let color_space = node.buttons[1].default_value;
-				let texstore = ParserMaterial.texture_store(node, tex, tex_name, color_space);
+				let color_space: i32 = node.buttons[1].default_value;
+				let texstore: string = ParserMaterial.texture_store(node, tex, tex_name, color_space);
 				return `${texstore}.a`;
 			}
 		}
 		else if (node.type == "TEX_MAGIC") {
 			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_tex_magic);
-			let co = ParserMaterial.getCoord(node);
-			let scale = ParserMaterial.parse_value_input(node.inputs[1]);
-			let res = `tex_magic_f(${co} * ${scale} * 4.0)`;
+			let co: string = ParserMaterial.get_coord(node);
+			let scale: string = ParserMaterial.parse_value_input(node.inputs[1]);
+			let res: string = `tex_magic_f(${co} * ${scale} * 4.0)`;
 			return res;
 		}
 		else if (node.type == "TEX_MUSGRAVE") {
 			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_tex_musgrave);
-			let co = ParserMaterial.getCoord(node);
-			let scale = ParserMaterial.parse_value_input(node.inputs[1]);
-			let res = `tex_musgrave_f(${co} * ${scale} * 0.5)`;
+			let co: string = ParserMaterial.get_coord(node);
+			let scale: string = ParserMaterial.parse_value_input(node.inputs[1]);
+			let res: string = `tex_musgrave_f(${co} * ${scale} * 0.5)`;
 			return res;
 		}
 		else if (node.type == "TEX_NOISE") {
 			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_tex_noise);
-			let co = ParserMaterial.getCoord(node);
-			let scale = ParserMaterial.parse_value_input(node.inputs[1]);
-			let res = `tex_noise(${co} * ${scale})`;
+			let co: string = ParserMaterial.get_coord(node);
+			let scale: string = ParserMaterial.parse_value_input(node.inputs[1]);
+			let res: string = `tex_noise(${co} * ${scale})`;
 			return res;
 		}
 		else if (node.type == "TEX_VORONOI") {
 			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_tex_voronoi);
 			NodeShader.add_uniform(ParserMaterial.curshader, "sampler2D snoise256", "$noise256.k");
-			let co = ParserMaterial.getCoord(node);
-			let scale = ParserMaterial.parse_value_input(node.inputs[1]);
-			let but = node.buttons[0]; // coloring
+			let co: string = ParserMaterial.get_coord(node);
+			let scale: string = ParserMaterial.parse_value_input(node.inputs[1]);
+			let but: zui_node_button_t = node.buttons[0]; // coloring
 			let coloring: string = but.data[but.default_value].toUpperCase();
 			coloring = string_replace_all(coloring, " ", "_");
-			let res = "";
+			let res: string = "";
 			if (coloring == "INTENSITY") {
 				res = `tex_voronoi(${co} * ${scale}, texturePass(snoise256)).a`;
 			}
@@ -1387,9 +1390,9 @@ class ParserMaterial {
 		}
 		else if (node.type == "TEX_WAVE") {
 			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_tex_wave);
-			let co = ParserMaterial.getCoord(node);
-			let scale = ParserMaterial.parse_value_input(node.inputs[1]);
-			let res = `tex_wave_f(${co} * ${scale})`;
+			let co: string = ParserMaterial.get_coord(node);
+			let scale: string = ParserMaterial.parse_value_input(node.inputs[1]);
+			let res: string = `tex_wave_f(${co} * ${scale})`;
 			return res;
 		}
 		else if (node.type == "BAKE_CURVATURE") {
@@ -1399,32 +1402,32 @@ class ParserMaterial {
 				ParserMaterial.bake_passthrough_offset = ParserMaterial.parse_value_input(node.inputs[2]);
 				return "0.0";
 			}
-			let tex_name = "texbake_" + ParserMaterial.node_name(node);
+			let tex_name: string = "texbake_" + ParserMaterial.node_name(node);
 			NodeShader.add_uniform(ParserMaterial.curshader, "sampler2D " + tex_name, "_" + tex_name);
-			let store = ParserMaterial.store_var_name(node);
+			let store: string = ParserMaterial.store_var_name(node);
 			NodeShader.write(ParserMaterial.curshader, `float ${store}_res = texture(${tex_name}, texCoord).r;`);
 			return `${store}_res`;
 		}
 		else if (node.type == "NORMAL") {
-			let nor = ParserMaterial.parse_vector_input(node.inputs[0]);
-			let norout = ParserMaterial.vec3(node.outputs[0].default_value);
+			let nor: string = ParserMaterial.parse_vector_input(node.inputs[0]);
+			let norout: string = ParserMaterial.vec3(node.outputs[0].default_value);
 			return `dot(${norout}, ${nor})`;
 		}
 		else if (node.type == "COLMASK") {
-			let inputColor = ParserMaterial.parse_vector_input(node.inputs[0]);
-			let maskColor = ParserMaterial.parse_vector_input(node.inputs[1]);
-			let radius = ParserMaterial.parse_value_input(node.inputs[2]);
-			let fuzziness = ParserMaterial.parse_value_input(node.inputs[3]);
+			let inputColor: string = ParserMaterial.parse_vector_input(node.inputs[0]);
+			let maskColor: string = ParserMaterial.parse_vector_input(node.inputs[1]);
+			let radius: string = ParserMaterial.parse_value_input(node.inputs[2]);
+			let fuzziness: string = ParserMaterial.parse_value_input(node.inputs[3]);
 			return `clamp(1.0 - (distance(${inputColor}, ${maskColor}) - ${radius}) / max(${fuzziness}, ${ParserMaterial.eps}), 0.0, 1.0)`;
 		}
 		else if (node.type == "MATH") {
-			let val1 = ParserMaterial.parse_value_input(node.inputs[0]);
-			let val2 = ParserMaterial.parse_value_input(node.inputs[1]);
-			let but = node.buttons[0]; // operation
+			let val1: string = ParserMaterial.parse_value_input(node.inputs[0]);
+			let val2: string = ParserMaterial.parse_value_input(node.inputs[1]);
+			let but: zui_node_button_t = node.buttons[0]; // operation
 			let op: string = but.data[but.default_value].toUpperCase();
 			op = string_replace_all(op, " ", "_");
-			let use_clamp = node.buttons[1].default_value == true;
-			let out_val = "";
+			let use_clamp: bool = node.buttons[1].default_value == true;
+			let out_val: string = "";
 			if (op == "ADD") {
 				out_val = `(${val1} + ${val2})`;
 			}
@@ -1540,23 +1543,23 @@ class ParserMaterial {
 		}
 		else if (node.type == "SCRIPT_CPU") {
 			if (ParserMaterial.script_links == null) ParserMaterial.script_links = new Map();
-			let script = node.buttons[0].default_value;
-			let link = ParserMaterial.node_name(node);
+			let script: any = node.buttons[0].default_value;
+			let link: string = ParserMaterial.node_name(node);
 			ParserMaterial.script_links.set(link, script);
 			NodeShader.add_uniform(ParserMaterial.curshader, "float " + link, "_" + link);
 			return link;
 		}
 		else if (node.type == "SHADER_GPU") {
-			let shader = node.buttons[0].default_value;
+			let shader: any = node.buttons[0].default_value;
 			return shader == "" ? "0.0" : shader;
 		}
 		else if (node.type == "RGBTOBW") {
-			let col = ParserMaterial.parse_vector_input(node.inputs[0]);
+			let col: string = ParserMaterial.parse_vector_input(node.inputs[0]);
 			return `(((${col}.r * 0.3 + ${col}.g * 0.59 + ${col}.b * 0.11) / 3.0) * 2.5)`;
 		}
 		else if (node.type == "SEPHSV") {
 			NodeShader.add_function(ParserMaterial.curshader, ShaderFunctions.str_hue_sat);
-			let col = ParserMaterial.parse_vector_input(node.inputs[0]);
+			let col: string = ParserMaterial.parse_vector_input(node.inputs[0]);
 			if (socket == node.outputs[0]) {
 				return `rgb_to_hsv(${col}).r`;
 			}
@@ -1568,7 +1571,7 @@ class ParserMaterial {
 			}
 		}
 		else if (node.type == "SEPRGB") {
-			let col = ParserMaterial.parse_vector_input(node.inputs[0]);
+			let col: string = ParserMaterial.parse_vector_input(node.inputs[0]);
 			if (socket == node.outputs[0]) {
 				return `${col}.r`;
 			}
@@ -1580,7 +1583,7 @@ class ParserMaterial {
 			}
 		}
 		else if (node.type == "SEPXYZ") {
-			let vec = ParserMaterial.parse_vector_input(node.inputs[0]);
+			let vec: string = ParserMaterial.parse_vector_input(node.inputs[0]);
 			if (socket == node.outputs[0]) {
 				return `${vec}.x`;
 			}
@@ -1592,9 +1595,9 @@ class ParserMaterial {
 			}
 		}
 		else if (node.type == "VECT_MATH") {
-			let vec1 = ParserMaterial.parse_vector_input(node.inputs[0]);
-			let vec2 = ParserMaterial.parse_vector_input(node.inputs[1]);
-			let but = node.buttons[0]; //operation;
+			let vec1: string = ParserMaterial.parse_vector_input(node.inputs[0]);
+			let vec2: string = ParserMaterial.parse_vector_input(node.inputs[1]);
+			let but: zui_node_button_t = node.buttons[0]; //operation;
 			let op: string = but.data[but.default_value].toUpperCase();
 			op = string_replace_all(op, " ", "_");
 			if (op == "DOT_PRODUCT") {
@@ -1611,10 +1614,10 @@ class ParserMaterial {
 			}
 		}
 		else if (node.type == "CLAMP") {
-			let val = ParserMaterial.parse_value_input(node.inputs[0]);
-			let min = ParserMaterial.parse_value_input(node.inputs[1]);
-			let max = ParserMaterial.parse_value_input(node.inputs[2]);
-			let but = node.buttons[0]; //operation;
+			let val: string = ParserMaterial.parse_value_input(node.inputs[0]);
+			let min: string = ParserMaterial.parse_value_input(node.inputs[1]);
+			let max: string = ParserMaterial.parse_value_input(node.inputs[2]);
+			let but: zui_node_button_t = node.buttons[0]; //operation;
 			let op: string = but.data[but.default_value].toUpperCase();
 			op = string_replace_all(op, " ", "_");
 
@@ -1626,16 +1629,16 @@ class ParserMaterial {
 			}
 		}
 		else if (node.type == "MAPRANGE") {
-			let val = ParserMaterial.parse_value_input(node.inputs[0]);
-			let fmin = ParserMaterial.parse_value_input(node.inputs[1]);
-			let fmax = ParserMaterial.parse_value_input(node.inputs[2]);
-			let tmin = ParserMaterial.parse_value_input(node.inputs[3]);
-			let tmax = ParserMaterial.parse_value_input(node.inputs[4]);
+			let val: string = ParserMaterial.parse_value_input(node.inputs[0]);
+			let fmin: string = ParserMaterial.parse_value_input(node.inputs[1]);
+			let fmax: string = ParserMaterial.parse_value_input(node.inputs[2]);
+			let tmin: string = ParserMaterial.parse_value_input(node.inputs[3]);
+			let tmax: string = ParserMaterial.parse_value_input(node.inputs[4]);
 
-			let use_clamp = node.buttons[0].default_value == true;
+			let use_clamp: bool = node.buttons[0].default_value == true;
 
-			let a = `((${tmin} - ${tmax}) / (${fmin} - ${fmax}))`;
-			let out_val = `(${a} * ${val} + ${tmin} - ${a} * ${fmin})`;
+			let a: string = `((${tmin} - ${tmax}) / (${fmin} - ${fmax}))`;
+			let out_val: string = `(${a} * ${val} + ${tmin} - ${a} * ${fmin})`;
 			if (use_clamp) {
 				return `(clamp(${out_val}, ${tmin}, ${tmax}))`;
 			}
@@ -1643,14 +1646,14 @@ class ParserMaterial {
 				return out_val;
 			}
 		}
-		else if (ParserMaterial.customNodes.get(node.type) != null) {
-			return ParserMaterial.customNodes.get(node.type)(node, socket);
+		else if (ParserMaterial.custom_nodes.get(node.type) != null) {
+			return ParserMaterial.custom_nodes.get(node.type)(node, socket);
 		}
 		return "0.0";
 	}
 
-	static getCoord = (node: zui_node_t): string => {
-		if (ParserMaterial.getInputLink(node.inputs[0]) != null) {
+	static get_coord = (node: zui_node_t): string => {
+		if (ParserMaterial.get_input_link(node.inputs[0]) != null) {
 			return ParserMaterial.parse_vector_input(node.inputs[0]);
 		}
 		else {
@@ -1659,7 +1662,7 @@ class ParserMaterial {
 		}
 	}
 
-	static getGradient = (grad: string, co: string): string => {
+	static get_gradient = (grad: string, co: string): string => {
 		if (grad == "LINEAR") {
 			return `${co}.x`;
 		}
@@ -1685,27 +1688,27 @@ class ParserMaterial {
 
 	static vector_curve = (name: string, fac: string, points: Float32Array[]): string => {
 		// Write Ys array
-		let ys_var = name + "_ys";
-		let num = points.length;
+		let ys_var: string = name + "_ys";
+		let num: i32 = points.length;
 		NodeShader.write(ParserMaterial.curshader, `float ${ys_var}[${num}];`); // TODO: Make const
-		for (let i = 0; i < num; ++i) {
+		for (let i: i32 = 0; i < num; ++i) {
 			NodeShader.write(ParserMaterial.curshader, `${ys_var}[${i}] = ${points[i][1]};`);
 		}
 		// Get index
-		let fac_var = name + "_fac";
+		let fac_var: string = name + "_fac";
 		NodeShader.write(ParserMaterial.curshader, `float ${fac_var} = ${fac};`);
-		let index = "0";
-		for (let i = 1; i < num; ++i) {
+		let index: string = "0";
+		for (let i: i32 = 1; i < num; ++i) {
 			index += ` + (${fac_var} > ${points[i][0]} ? 1 : 0)`;
 		}
 		// Write index
-		let index_var = name + "_i";
+		let index_var: string = name + "_i";
 		NodeShader.write(ParserMaterial.curshader, `int ${index_var} = ${index};`);
 		// Linear
 		// Write Xs array
-		let facs_var = name + "_xs";
+		let facs_var: string = name + "_xs";
 		NodeShader.write(ParserMaterial.curshader, `float ${facs_var}[${num}];`); // TODO: Make const
-		for (let i = 0; i < num; ++i) {
+		for (let i: i32 = 0; i < num; ++i) {
 			NodeShader.write(ParserMaterial.curshader, `${facs_var}[${i}] = ${points[i][0]};`);
 		}
 		// Map vector
@@ -1716,18 +1719,15 @@ class ParserMaterial {
 		return ParserMaterial.node_name(node) + "_" + ParserMaterial.safesrc(socket.name) + "_res";
 	}
 
-	static parsedMap = new Map<string, string>();
-	static textureMap = new Map<string, string>();
-
 	static write_result = (l: zui_node_link_t): string => {
-		let from_node = ParserMaterial.getNode(l.from_id);
-		let from_socket = from_node.outputs[l.from_socket];
-		let res_var = ParserMaterial.res_var_name(from_node, from_socket);
-		let st = from_socket.type;
+		let from_node: zui_node_t = ParserMaterial.get_node(l.from_id);
+		let from_socket: zui_node_socket_t = from_node.outputs[l.from_socket];
+		let res_var: string = ParserMaterial.res_var_name(from_node, from_socket);
+		let st: string = from_socket.type;
 		if (ParserMaterial.parsed.indexOf(res_var) < 0) {
 			ParserMaterial.parsed.push(res_var);
 			if (st == "RGB" || st == "RGBA" || st == "VECTOR") {
-				let res = ParserMaterial.parse_vector(from_node, from_socket);
+				let res: string = ParserMaterial.parse_vector(from_node, from_socket);
 				if (res == null) {
 					return null;
 				}
@@ -1735,7 +1735,7 @@ class ParserMaterial {
 				NodeShader.write(ParserMaterial.curshader, `vec3 ${res_var} = ${res};`);
 			}
 			else if (st == "VALUE") {
-				let res = ParserMaterial.parse_value(from_node, from_socket);
+				let res: string = ParserMaterial.parse_value(from_node, from_socket);
 				if (res == null) {
 					return null;
 				}
@@ -1754,14 +1754,14 @@ class ParserMaterial {
 		ParserMaterial.matcon.bind_textures.push(tex);
 		NodeShaderContext.add_elem(ParserMaterial.curshader.context, "tex", "short2norm");
 		NodeShader.add_uniform(ParserMaterial.curshader, "sampler2D " + tex_name);
-		let uv_name = "";
-		if (ParserMaterial.getInputLink(node.inputs[0]) != null) {
+		let uv_name: string = "";
+		if (ParserMaterial.get_input_link(node.inputs[0]) != null) {
 			uv_name = ParserMaterial.parse_vector_input(node.inputs[0]);
 		}
 		else {
 			uv_name = ParserMaterial.tex_coord;
 		}
-		let tex_store = ParserMaterial.store_var_name(node);
+		let tex_store: string = ParserMaterial.store_var_name(node);
 
 		if (ParserMaterial.sample_keep_aspect) {
 			NodeShader.write(ParserMaterial.curshader, `vec2 ${tex_store}_size = vec2(textureSize(${tex_name}, 0));`);
@@ -1795,13 +1795,13 @@ class ParserMaterial {
 
 		if (ParserMaterial.transform_color_space) {
 			// Base color socket auto-converts from sRGB to linear
-			if (color_space == ColorSpace.SpaceLinear && ParserMaterial.parsing_basecolor) { // Linear to sRGB
+			if (color_space == color_space_t.LINEAR && ParserMaterial.parsing_basecolor) { // Linear to sRGB
 				NodeShader.write(ParserMaterial.curshader, `${tex_store}.rgb = pow(${tex_store}.rgb, vec3(2.2, 2.2, 2.2));`);
 			}
-			else if (color_space == ColorSpace.SpaceSRGB && !ParserMaterial.parsing_basecolor) { // sRGB to linear
+			else if (color_space == color_space_t.SRGB && !ParserMaterial.parsing_basecolor) { // sRGB to linear
 				NodeShader.write(ParserMaterial.curshader, `${tex_store}.rgb = pow(${tex_store}.rgb, vec3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));`);
 			}
-			else if (color_space == ColorSpace.SpaceDirectXNormalMap) { // DirectX normal map to OpenGL normal map
+			else if (color_space == color_space_t.DIRECTX_NORMAL_MAP) { // DirectX normal map to OpenGL normal map
 				NodeShader.write(ParserMaterial.curshader, `${tex_store}.y = 1.0 - ${tex_store}.y;`);
 			}
 		}
@@ -1838,23 +1838,23 @@ class ParserMaterial {
 	}
 
 	static socket_index = (node: zui_node_t, socket: zui_node_socket_t): i32 => {
-		for (let i = 0; i < node.outputs.length; ++i) if (node.outputs[i] == socket) return i;
+		for (let i: i32 = 0; i < node.outputs.length; ++i) if (node.outputs[i] == socket) return i;
 		return -1;
 	}
 
 	static node_name = (node: zui_node_t, _parents: zui_node_t[] = null): string => {
 		if (_parents == null) _parents = ParserMaterial.parents;
-		let s = node.name;
+		let s: string = node.name;
 		for (let p of _parents) s = p.name + p.id + `_` + s;
 		s = ParserMaterial.safesrc(s) + node.id;
 		return s;
 	}
 
 	static safesrc = (s: string): string => {
-		for (let i = 0; i < s.length; ++i) {
-			let code = s.charCodeAt(i);
-			let letter = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
-			let digit = code >= 48 && code <= 57;
+		for (let i: i32 = 0; i < s.length; ++i) {
+			let code: i32 = s.charCodeAt(i);
+			let letter: bool = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+			let digit: bool = code >= 48 && code <= 57;
 			if (!letter && !digit) s = string_replace_all(s, s.charAt(i), "_");
 			if (i == 0 && digit) s = "_" + s;
 		}
@@ -1864,14 +1864,13 @@ class ParserMaterial {
 		return s;
 	}
 
-	static enumData = (s: string): string => {
+	static enum_data = (s: string): string => {
 		for (let a of Project.assets) if (a.name == s) return a.file;
 		return "";
 	}
 
 	static make_texture = (image_node: zui_node_t, tex_name: string, matname: string = null): bind_tex_t => {
-
-		let filepath = ParserMaterial.enumData(Base.enumTexts(image_node.type)[image_node.buttons[0].default_value]);
+		let filepath: string = ParserMaterial.enum_data(Base.enum_texts(image_node.type)[image_node.buttons[0].default_value]);
 		if (filepath == "" || filepath.indexOf(".") == -1) {
 			return null;
 		}
@@ -1881,7 +1880,7 @@ class ParserMaterial {
 			file: filepath
 		};
 
-		if (Context.raw.textureFilter) {
+		if (Context.raw.texture_filter) {
 			tex.min_filter = "anisotropic";
 			tex.mag_filter = "linear";
 			tex.mipmap_filter = "linear";
@@ -1907,7 +1906,7 @@ class ParserMaterial {
 	}
 
 	static extract_filename = (s: string): string => {
-		let ar = s.split(".");
+		let ar: string[] = s.split(".");
 		return ar[ar.length - 2] + "." + ar[ar.length - 1];
 	}
 
@@ -1916,20 +1915,20 @@ class ParserMaterial {
 	}
 }
 
-type TShaderOut = {
-	out_basecol: string;
-	out_roughness: string;
-	out_metallic: string;
-	out_occlusion: string;
-	out_opacity: string;
-	out_height: string;
-	out_emission: string;
-	out_subsurface: string;
-}
+type shader_out_t = {
+	out_basecol?: string;
+	out_roughness?: string;
+	out_metallic?: string;
+	out_occlusion?: string;
+	out_opacity?: string;
+	out_height?: string;
+	out_emission?: string;
+	out_subsurface?: string;
+};
 
-enum ColorSpace {
-	SpaceAuto, // sRGB for base color, otherwise linear
-	SpaceLinear,
-	SpaceSRGB,
-	SpaceDirectXNormalMap,
+enum color_space_t {
+	AUTO, // sRGB for base color, otherwise linear
+	LINEAR,
+	SRGB,
+	DIRECTX_NORMAL_MAP,
 }

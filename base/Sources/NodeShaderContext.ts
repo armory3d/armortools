@@ -3,16 +3,16 @@ class NodeShaderContextRaw {
 	vert: NodeShaderRaw;
 	frag: NodeShaderRaw;
 	data: shader_context_t;
-	allow_vcols = false;
-	material: TMaterial;
+	allow_vcols: bool = false;
+	material: material_t;
 	constants: shader_const_t[];
 	tunits: tex_unit_t[];
 }
 
 class NodeShaderContext {
 
-	static create(material: TMaterial, props: any): NodeShaderContextRaw {
-		let raw = new NodeShaderContextRaw();
+	static create(material: material_t, props: any): NodeShaderContextRaw {
+		let raw: NodeShaderContextRaw = new NodeShaderContextRaw();
 		raw.material = material;
 		raw.data = {
 			name: props.name,
@@ -90,7 +90,7 @@ class NodeShaderContext {
 		raw.constants.push(c);
 	}
 
-	static add_texture_unit = (raw: NodeShaderContextRaw, ctype: string, name: string, link: string = null, is_image = false) => {
+	static add_texture_unit = (raw: NodeShaderContextRaw, ctype: string, name: string, link: string = null, is_image: bool = false) => {
 		for (let c of raw.tunits) {
 			if (c.name == name) {
 				return;
@@ -120,7 +120,7 @@ class NodeShaderContext {
 	}
 }
 
-type TMaterial = {
-	name: string;
-	canvas: zui_node_canvas_t;
-}
+type material_t = {
+	name?: string;
+	canvas?: zui_node_canvas_t;
+};

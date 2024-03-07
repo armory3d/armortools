@@ -1,13 +1,13 @@
 
 class TabScript {
 
-	static hscript = zui_handle_create();
-	static textColoring: zui_text_coloring_t = null;
+	static hscript: zui_handle_t = zui_handle_create();
+	static text_coloring: zui_text_coloring_t = null;
 
 	static draw = (htab: zui_handle_t) => {
-		let ui = UIBase.ui;
-		let statush = Config.raw.layout[LayoutSize.LayoutStatusH];
-		if (zui_tab(htab, tr("Script")) && statush > UIStatus.defaultStatusH * zui_SCALE(ui)) {
+		let ui: zui_t = UIBase.ui;
+		let statush: i32 = Config.raw.layout[layout_size_t.STATUS_H];
+		if (zui_tab(htab, tr("Script")) && statush > UIStatus.default_status_h * zui_SCALE(ui)) {
 
 			zui_begin_sticky();
 			if (Config.raw.touch_ui) {
@@ -35,9 +35,9 @@ class TabScript {
 				});
 			}
 			if (zui_button(tr("Export"))) {
-				let str = TabScript.hscript.text;
+				let str: string = TabScript.hscript.text;
 				UIFiles.show("js", true, false, (path: string) => {
-					let f = UIFiles.filename;
+					let f: string = UIFiles.filename;
 					if (f == "") f = tr("untitled");
 					path = path + Path.sep + f;
 					if (!path.endsWith(".js")) path += ".js";
@@ -46,14 +46,14 @@ class TabScript {
 			}
 			zui_end_sticky();
 
-			let _font = ui.font;
-			let _fontSize = ui.font_size;
+			let _font: g2_font_t = ui.font;
+			let _fontSize: i32 = ui.font_size;
 			let f: g2_font_t = data_get_font("font_mono.ttf");
 			zui_set_font(ui, f);
 			ui.font_size = Math.floor(15 * zui_SCALE(ui));
 			zui_set_text_area_line_numbers(true);
 			zui_set_text_area_scroll_past_end(true);
-			zui_set_text_area_coloring(TabScript.getTextColoring());
+			zui_set_text_area_coloring(TabScript.get_text_coloring());
 			zui_text_area(TabScript.hscript);
 			zui_set_text_area_line_numbers(false);
 			zui_set_text_area_scroll_past_end(false);
@@ -63,15 +63,15 @@ class TabScript {
 		}
 	}
 
-	static getTextColoring = (): zui_text_coloring_t => {
-		if (TabScript.textColoring == null) {
+	static get_text_coloring = (): zui_text_coloring_t => {
+		if (TabScript.text_coloring == null) {
 			let blob: ArrayBuffer = data_get_blob("text_coloring.json");
-			TabScript.textColoring = JSON.parse(sys_buffer_to_string(blob));
-			TabScript.textColoring.default_color = Math.floor(TabScript.textColoring.default_color);
-			for (let coloring of TabScript.textColoring.colorings) {
+			TabScript.text_coloring = JSON.parse(sys_buffer_to_string(blob));
+			TabScript.text_coloring.default_color = Math.floor(TabScript.text_coloring.default_color);
+			for (let coloring of TabScript.text_coloring.colorings) {
 				coloring.color = Math.floor(coloring.color);
 			}
 		}
-		return TabScript.textColoring;
+		return TabScript.text_coloring;
 	}
 }

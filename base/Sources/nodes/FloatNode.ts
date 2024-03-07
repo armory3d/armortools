@@ -4,7 +4,7 @@ class FloatNode extends LogicNode {
 	value: f32;
 	image: image_t = null;
 
-	constructor(value = 0.0) {
+	constructor(value: f32 = 0.0) {
 		super();
 		this.value = value;
 	}
@@ -14,11 +14,11 @@ class FloatNode extends LogicNode {
 		else done(this.value);
 	}
 
-	override getAsImage = (from: i32, done: (img: image_t)=>void) => {
-		if (this.inputs.length > 0) { this.inputs[0].getAsImage(done); return; }
+	override get_as_image = (from: i32, done: (img: image_t)=>void) => {
+		if (this.inputs.length > 0) { this.inputs[0].get_as_image(done); return; }
 		if (this.image != null) image_unload(this.image);
-		let b = new ArrayBuffer(16);
-		let v = new DataView(b);
+		let b: ArrayBuffer = new ArrayBuffer(16);
+		let v: DataView = new DataView(b);
 		v.setFloat32(0, this.value, true);
 		v.setFloat32(4, this.value, true);
 		v.setFloat32(8, this.value, true);

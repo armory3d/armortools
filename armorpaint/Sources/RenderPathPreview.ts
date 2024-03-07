@@ -25,10 +25,10 @@ class RenderPathPreview {
 		{
 			let t = render_target_create();
 			t.name = "mtex";
-			t.width = Math.floor(UtilRender.materialPreviewSize * 2.0);
-			t.height = Math.floor(UtilRender.materialPreviewSize * 2.0);
+			t.width = Math.floor(UtilRender.material_preview_size * 2.0);
+			t.height = Math.floor(UtilRender.material_preview_size * 2.0);
 			t.format = "RGBA64";
-			t.scale = RenderPathBase.getSuperSampling();
+			t.scale = RenderPathBase.get_super_sampling();
 			///if krom_opengl
 			t.depth_buffer = "mmain";
 			///end
@@ -38,10 +38,10 @@ class RenderPathPreview {
 		{
 			let t = render_target_create();
 			t.name = "mgbuffer0";
-			t.width = Math.floor(UtilRender.materialPreviewSize * 2.0);
-			t.height = Math.floor(UtilRender.materialPreviewSize * 2.0);
+			t.width = Math.floor(UtilRender.material_preview_size * 2.0);
+			t.height = Math.floor(UtilRender.material_preview_size * 2.0);
 			t.format = "RGBA64";
-			t.scale = RenderPathBase.getSuperSampling();
+			t.scale = RenderPathBase.get_super_sampling();
 			t.depth_buffer = "mmain";
 			render_path_create_render_target(t);
 		}
@@ -49,25 +49,25 @@ class RenderPathPreview {
 		{
 			let t = render_target_create();
 			t.name = "mgbuffer1";
-			t.width = Math.floor(UtilRender.materialPreviewSize * 2.0);
-			t.height = Math.floor(UtilRender.materialPreviewSize * 2.0);
+			t.width = Math.floor(UtilRender.material_preview_size * 2.0);
+			t.height = Math.floor(UtilRender.material_preview_size * 2.0);
 			t.format = "RGBA64";
-			t.scale = RenderPathBase.getSuperSampling();
+			t.scale = RenderPathBase.get_super_sampling();
 			render_path_create_render_target(t);
 		}
 
 		{
 			let t = render_target_create();
 			t.name = "mgbuffer2";
-			t.width = Math.floor(UtilRender.materialPreviewSize * 2.0);
-			t.height = Math.floor(UtilRender.materialPreviewSize * 2.0);
+			t.width = Math.floor(UtilRender.material_preview_size * 2.0);
+			t.height = Math.floor(UtilRender.material_preview_size * 2.0);
 			t.format = "RGBA64";
-			t.scale = RenderPathBase.getSuperSampling();
+			t.scale = RenderPathBase.get_super_sampling();
 			render_path_create_render_target(t);
 		}
 	}
 
-	static commandsPreview = () => {
+	static commands_preview = () => {
 		render_path_set_target("mgbuffer2");
 		render_path_clear_target(0xff000000);
 
@@ -100,7 +100,7 @@ class RenderPathPreview {
 		let framebuffer = "texpreview";
 		let selectedMat = Context.raw.material;
 		render_path_render_targets.get("texpreview")._image = selectedMat.image;
-		render_path_render_targets.get("texpreview_icon")._image = selectedMat.imageIcon;
+		render_path_render_targets.get("texpreview_icon")._image = selectedMat.image_icon;
 
 		render_path_set_target(framebuffer);
 		render_path_bind_target("mtex", "tex");
@@ -111,7 +111,7 @@ class RenderPathPreview {
 		render_path_draw_shader("shader_datas/supersample_resolve/supersample_resolve");
 	}
 
-	static commandsDecal = () => {
+	static commands_decal = () => {
 		render_path_set_target("gbuffer2");
 		render_path_clear_target(0xff000000);
 
@@ -142,7 +142,7 @@ class RenderPathPreview {
 		///end
 
 		let framebuffer = "texpreview";
-		render_path_render_targets.get("texpreview")._image = Context.raw.decalImage;
+		render_path_render_targets.get("texpreview")._image = Context.raw.decal_image;
 
 		render_path_set_target(framebuffer);
 

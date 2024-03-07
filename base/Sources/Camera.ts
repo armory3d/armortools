@@ -3,24 +3,24 @@ class Camera {
 
 	static origins: vec4_t[];
 	static views: mat4_t[];
-	static redraws = 0;
-	static dir = vec4_create();
-	static ease = 1.0;
-	static controlsDown = false;
+	static redraws: i32 = 0;
+	static dir: vec4_t = vec4_create();
+	static ease: f32 = 1.0;
+	static controls_down: bool = false;
 
 	constructor() {
 		Camera.reset();
 	}
 
 	static update = () => {
-		let camera = scene_camera;
+		let camera: camera_object_t = scene_camera;
 
 		if (mouse_view_x() < 0 ||
 			mouse_view_x() > app_w() ||
 			mouse_view_y() < 0 ||
 			mouse_view_y() > app_h()) {
 
-			if (Config.raw.wrap_mouse && Camera.controlsDown) {
+			if (Config.raw.wrap_mouse && Camera.controls_down) {
 				if (mouse_view_x() < 0) {
 					mouse_x = mouse_last_x = app_x() + app_w();
 					krom_set_mouse_position(Math.floor(mouse_x), Math.floor(mouse_y));
@@ -43,9 +43,9 @@ class Camera {
 			}
 		}
 
-		let modifKey = keyboard_down("alt") || keyboard_down("shift") || keyboard_down("control");
-		let modif = modifKey || Config.keymap.action_rotate == "middle";
-		let defaultKeymap = Config.raw.keymap == "default.json";
+		let modifKey: bool = keyboard_down("alt") || keyboard_down("shift") || keyboard_down("control");
+		let modif: bool = modifKey || Config.keymap.action_rotate == "middle";
+		let defaultKeymap: bool = Config.raw.keymap == "default.json";
 
 		if (Operator.shortcut(Config.keymap.action_rotate, ShortcutType.ShortcutStarted) ||
 			Operator.shortcut(Config.keymap.action_zoom, ShortcutType.ShortcutStarted) ||
@@ -55,7 +55,7 @@ class Camera {
 			(mouse_started("right") && !modif) ||
 			(mouse_started("middle") && !modif) ||
 			(mouse_wheel_delta != 0 && !modifKey)) {
-			Camera.controlsDown = true;
+			Camera.controls_down = true;
 		}
 		else if (!Operator.shortcut(Config.keymap.action_rotate, ShortcutType.ShortcutDown) &&
 			!Operator.shortcut(Config.keymap.action_zoom, ShortcutType.ShortcutDown) &&
@@ -65,17 +65,17 @@ class Camera {
 			!(mouse_down("right") && !modif) &&
 			!(mouse_down("middle") && !modif) &&
 			(mouse_wheel_delta == 0 && !modifKey)) {
-			Camera.controlsDown = false;
+			Camera.controls_down = false;
 		}
 
-		if (_input_occupied || !Base.uiEnabled || Base.isDragging || Base.isScrolling() || Base.isComboSelected() || !Camera.controlsDown) {
+		if (_input_occupied || !Base.ui_enabled || Base.is_dragging || Base.is_scrolling() || Base.is_combo_selected() || !Camera.controls_down) {
 			return;
 		}
 
-		let controls = Context.raw.cameraControls;
-		if (controls == CameraControls.ControlsOrbit && (Operator.shortcut(Config.keymap.action_rotate, ShortcutType.ShortcutDown) || (mouse_down("right") && !modif && defaultKeymap))) {
+		let controls: camera_controls_t = Context.raw.camera_controls;
+		if (controls == camera_controls_t.ORBIT && (Operator.shortcut(Config.keymap.action_rotate, ShortcutType.ShortcutDown) || (mouse_down("right") && !modif && defaultKeymap))) {
 			Camera.redraws = 2;
-			let dist = Camera.distance();
+			let dist: f32 = Camera.distance();
 			transform_move(camera.base.transform, camera_object_look_world(camera), dist);
 			transform_rotate(camera.base.transform, vec4_z_axis(), -mouse_movement_x / 100 * Config.raw.camera_rotation_speed);
 			transform_rotate(camera.base.transform, camera_object_right_world(camera), -mouse_movement_y / 100 * Config.raw.camera_rotation_speed);
@@ -84,12 +84,12 @@ class Camera {
 			}
 			transform_move(camera.base.transform, camera_object_look_world(camera), -dist);
 		}
-		else if (controls == CameraControls.ControlsRotate && (Operator.shortcut(Config.keymap.action_rotate, ShortcutType.ShortcutDown) || (mouse_down("right") && !modif && defaultKeymap))) {
+		else if (controls == camera_controls_t.ROTATE && (Operator.shortcut(Config.keymap.action_rotate, ShortcutType.ShortcutDown) || (mouse_down("right") && !modif && defaultKeymap))) {
 			Camera.redraws = 2;
-			let t = Context.mainObject().base.transform;
-			let up = vec4_normalize(transform_up(t));
+			let t: transform_t = Context.main_object().base.transform;
+			let up: vec4_t = vec4_normalize(transform_up(t));
 			transform_rotate(t, up, mouse_movement_x / 100 * Config.raw.camera_rotation_speed);
-			let right = vec4_normalize(camera_object_right_world(camera));
+			let right: vec4_t = vec4_normalize(camera_object_right_world(camera));
 			transform_rotate(t, right, mouse_movement_y / 100 * Config.raw.camera_rotation_speed);
 			transform_build_matrix(t);
 			if (transform_up(t).z < 0) {
@@ -97,31 +97,31 @@ class Camera {
 			}
 		}
 
-		if (controls == CameraControls.ControlsRotate || controls == CameraControls.ControlsOrbit) {
-			Camera.panAction(modif, defaultKeymap);
+		if (controls == camera_controls_t.ROTATE || controls == camera_controls_t.ORBIT) {
+			Camera.pan_action(modif, defaultKeymap);
 
 			if (Operator.shortcut(Config.keymap.action_zoom, ShortcutType.ShortcutDown)) {
 				Camera.redraws = 2;
-				let f = Camera.getZoomDelta() / 150;
-				f *= Camera.getCameraZoomSpeed();
+				let f: f32 = Camera.get_zoom_delta() / 150;
+				f *= Camera.get_camera_zoom_speed();
 				transform_move(camera.base.transform, camera_object_look(camera), f);
 			}
 
 			if (mouse_wheel_delta != 0 && !modifKey) {
 				Camera.redraws = 2;
-				let f = mouse_wheel_delta * (-0.1);
-				f *= Camera.getCameraZoomSpeed();
+				let f: f32 = mouse_wheel_delta * (-0.1);
+				f *= Camera.get_camera_zoom_speed();
 				transform_move(camera.base.transform, camera_object_look(camera), f);
 			}
 		}
-		else if (controls == CameraControls.ControlsFly && mouse_down("right")) {
-			let moveForward = keyboard_down("w") || keyboard_down("up") || mouse_wheel_delta < 0;
-			let moveBackward = keyboard_down("s") || keyboard_down("down") || mouse_wheel_delta > 0;
-			let strafeLeft = keyboard_down("a") || keyboard_down("left");
-			let strafeRight = keyboard_down("d") || keyboard_down("right");
-			let strafeUp = keyboard_down("e");
-			let strafeDown = keyboard_down("q");
-			let fast = keyboard_down("shift") ? 2.0 : (keyboard_down("alt") ? 0.5 : 1.0);
+		else if (controls == camera_controls_t.FLY && mouse_down("right")) {
+			let moveForward: bool = keyboard_down("w") || keyboard_down("up") || mouse_wheel_delta < 0;
+			let moveBackward: bool = keyboard_down("s") || keyboard_down("down") || mouse_wheel_delta > 0;
+			let strafeLeft: bool = keyboard_down("a") || keyboard_down("left");
+			let strafeRight: bool = keyboard_down("d") || keyboard_down("right");
+			let strafeUp: bool = keyboard_down("e");
+			let strafeDown: bool = keyboard_down("q");
+			let fast: f32 = keyboard_down("shift") ? 2.0 : (keyboard_down("alt") ? 0.5 : 1.0);
 			if (mouse_wheel_delta != 0) {
 				fast *= Math.abs(mouse_wheel_delta) * 4.0;
 			}
@@ -143,11 +143,11 @@ class Camera {
 			}
 
 
-			let d = time_delta() * fast * Camera.ease * 2.0 * ((moveForward || moveBackward) ? Config.raw.camera_zoom_speed : Config.raw.camera_pan_speed);
+			let d: f32 = time_delta() * fast * Camera.ease * 2.0 * ((moveForward || moveBackward) ? Config.raw.camera_zoom_speed : Config.raw.camera_pan_speed);
 			if (d > 0.0) {
 				transform_move(camera.base.transform, Camera.dir, d);
-				if (Context.raw.cameraType == CameraType.CameraOrthographic) {
-					Viewport.updateCameraType(Context.raw.cameraType);
+				if (Context.raw.camera_type == camera_type_t.ORTHOGRAPHIC) {
+					Viewport.update_camera_type(Context.raw.camera_type);
 				}
 			}
 
@@ -158,46 +158,46 @@ class Camera {
 
 		if (Operator.shortcut(Config.keymap.rotate_light, ShortcutType.ShortcutDown)) {
 			Camera.redraws = 2;
-			let light = scene_lights[0];
-			Context.raw.lightAngle = (Context.raw.lightAngle + ((mouse_movement_x / 100) % (2 * Math.PI) + 2 * Math.PI)) % (2 * Math.PI);
-			let m = mat4_rot_z(mouse_movement_x / 100);
+			let light: light_object_t = scene_lights[0];
+			Context.raw.light_angle = (Context.raw.light_angle + ((mouse_movement_x / 100) % (2 * Math.PI) + 2 * Math.PI)) % (2 * Math.PI);
+			let m: mat4_t = mat4_rot_z(mouse_movement_x / 100);
 			mat4_mult_mat(light.base.transform.local, m);
 			transform_decompose(light.base.transform);
 		}
 
 		if (Operator.shortcut(Config.keymap.rotate_envmap, ShortcutType.ShortcutDown)) {
 			Camera.redraws = 2;
-			Context.raw.envmapAngle -= mouse_movement_x / 100;
+			Context.raw.envmap_angle -= mouse_movement_x / 100;
 		}
 
 		if (Camera.redraws > 0) {
 			Camera.redraws--;
 			Context.raw.ddirty = 2;
 
-			if (Context.raw.cameraType == CameraType.CameraOrthographic) {
-				Viewport.updateCameraType(Context.raw.cameraType);
+			if (Context.raw.camera_type == camera_type_t.ORTHOGRAPHIC) {
+				Viewport.update_camera_type(Context.raw.camera_type);
 			}
 		}
 	}
 
 	static distance = (): f32 => {
-		let camera = scene_camera;
+		let camera: camera_object_t = scene_camera;
 		return vec4_dist(Camera.origins[Camera.index()], camera.base.transform.loc);
 	}
 
 	static index = (): i32 => {
-		return Context.raw.viewIndexLast > 0 ? 1 : 0;
+		return Context.raw.view_index_last > 0 ? 1 : 0;
 	}
 
-	static getCameraZoomSpeed = (): f32 => {
-		let sign = Config.raw.zoom_direction == ZoomDirection.ZoomVerticalInverted ||
-				   Config.raw.zoom_direction == ZoomDirection.ZoomHorizontalInverted ||
-				   Config.raw.zoom_direction == ZoomDirection.ZoomVerticalAndHorizontalInverted ? -1 : 1;
+	static get_camera_zoom_speed = (): f32 => {
+		let sign: i32 = Config.raw.zoom_direction == zoom_direction_t.VERTICAL_INVERTED ||
+						Config.raw.zoom_direction == zoom_direction_t.HORIZONTAL_INVERTED ||
+				   		Config.raw.zoom_direction == zoom_direction_t.VERTICAL_HORIZONTAL_INVERTED ? -1 : 1;
 		return Config.raw.camera_zoom_speed * sign;
 	}
 
-	static reset = (viewIndex = -1) => {
-		let camera = scene_camera;
+	static reset = (viewIndex: i32 = -1) => {
+		let camera: camera_object_t = scene_camera;
 		if (viewIndex == -1) {
 			Camera.origins = [vec4_create(0, 0, 0), vec4_create(0, 0, 0)];
 			Camera.views = [mat4_clone(camera.base.transform.local), mat4_clone(camera.base.transform.local)];
@@ -208,12 +208,12 @@ class Camera {
 		}
 	}
 
-	static panAction = (modif: bool, defaultKeymap: bool) => {
-		let camera = scene_camera;
+	static pan_action = (modif: bool, defaultKeymap: bool) => {
+		let camera: camera_object_t = scene_camera;
 		if (Operator.shortcut(Config.keymap.action_pan, ShortcutType.ShortcutDown) || (mouse_down("middle") && !modif && defaultKeymap)) {
 			Camera.redraws = 2;
-			let look = vec4_mult(vec4_normalize(transform_look(camera.base.transform)), mouse_movement_y / 150 * Config.raw.camera_pan_speed);
-			let right = vec4_mult(vec4_normalize(transform_right(camera.base.transform)), -mouse_movement_x / 150 * Config.raw.camera_pan_speed);
+			let look: vec4_t = vec4_mult(vec4_normalize(transform_look(camera.base.transform)), mouse_movement_y / 150 * Config.raw.camera_pan_speed);
+			let right: vec4_t = vec4_mult(vec4_normalize(transform_right(camera.base.transform)), -mouse_movement_x / 150 * Config.raw.camera_pan_speed);
 			vec4_add(camera.base.transform.loc, look);
 			vec4_add(camera.base.transform.loc, right);
 			vec4_add(Camera.origins[Camera.index()], look);
@@ -222,11 +222,11 @@ class Camera {
 		}
 	}
 
-	static getZoomDelta = (): f32 => {
-		return Config.raw.zoom_direction == ZoomDirection.ZoomVertical ? -mouse_movement_y :
-			   Config.raw.zoom_direction == ZoomDirection.ZoomVerticalInverted ? -mouse_movement_y :
-			   Config.raw.zoom_direction == ZoomDirection.ZoomHorizontal ? mouse_movement_x :
-			   Config.raw.zoom_direction == ZoomDirection.ZoomHorizontalInverted ? mouse_movement_x :
+	static get_zoom_delta = (): f32 => {
+		return Config.raw.zoom_direction == zoom_direction_t.VERTICAL ? -mouse_movement_y :
+			   Config.raw.zoom_direction == zoom_direction_t.VERTICAL_INVERTED ? -mouse_movement_y :
+			   Config.raw.zoom_direction == zoom_direction_t.HORIZONTAL ? mouse_movement_x :
+			   Config.raw.zoom_direction == zoom_direction_t.HORIZONTAL_INVERTED ? mouse_movement_x :
 			   -(mouse_movement_y - mouse_movement_x);
 	}
 }

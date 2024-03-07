@@ -1,56 +1,56 @@
 
 class BoxProjects {
 
-	static htab = zui_handle_create();
-	static hsearch = zui_handle_create();
-	static iconMap: Map<string, image_t> = null;
+	static htab: zui_handle_t = zui_handle_create();
+	static hsearch: zui_handle_t = zui_handle_create();
+	static icon_map: Map<string, image_t> = null;
 
 	static show = () => {
-		if (BoxProjects.iconMap != null) {
-			for (let handle of BoxProjects.iconMap.keys()) {
+		if (BoxProjects.icon_map != null) {
+			for (let handle of BoxProjects.icon_map.keys()) {
 				data_delete_image(handle);
 			}
-			BoxProjects.iconMap = null;
+			BoxProjects.icon_map = null;
 		}
 
-		let draggable;
+		let draggable: bool;
 		///if (krom_android || krom_ios)
 		draggable = false;
 		///else
 		draggable = true;
 		///end
 
-		UIBox.showCustom((ui: zui_t) => {
+		UIBox.show_custom((ui: zui_t) => {
 			///if (krom_android || krom_ios)
-			BoxProjects.alignToFullScreen();
+			BoxProjects.align_to_fullscreen();
 			///end
 
 			///if (krom_android || krom_ios)
-			BoxProjects.projectsTab(ui);
-			BoxProjects.getStartedTab(ui);
+			BoxProjects.projects_tab(ui);
+			BoxProjects.get_started_tab(ui);
 			///else
-			BoxProjects.recentProjectsTab(ui);
+			BoxProjects.recent_projects_tab(ui);
 			///end
 
 		}, 600, 400, null, draggable);
 	}
 
-	static projectsTab = (ui: zui_t) => {
+	static projects_tab = (ui: zui_t) => {
 		if (zui_tab(BoxProjects.htab, tr("Projects"), true)) {
 			zui_begin_sticky();
 
-			BoxProjects.drawBadge(ui);
+			BoxProjects.draw_badge(ui);
 
 			if (zui_button(tr("New"))) {
-				Project.projectNew();
-				Viewport.scaleToBounds();
+				Project.project_new();
+				Viewport.scale_to_bounds();
 				UIBox.hide();
 				// Pick unique name
-				let i = 0;
-				let j = 0;
-				let title = tr("untitled") + i;
+				let i: i32 = 0;
+				let j: i32 = 0;
+				let title: string = tr("untitled") + i;
 				while (j < Config.raw.recent_projects.length) {
-					let base = Config.raw.recent_projects[j];
+					let base: string = Config.raw.recent_projects[j];
 					base = base.substring(base.lastIndexOf(Path.sep) + 1, base.lastIndexOf("."));
 					j++;
 					if (title == base) {
@@ -64,83 +64,83 @@ class BoxProjects {
 			zui_end_sticky();
 			zui_separator(3, false);
 
-			let slotw = Math.floor(150 * zui_SCALE(ui));
-			let num = Math.floor(sys_width() / slotw);
-			let recent_projects = Config.raw.recent_projects;
-			let show_asset_names = true;
+			let slotw: i32 = Math.floor(150 * zui_SCALE(ui));
+			let num: i32 = Math.floor(sys_width() / slotw);
+			let recent_projects: string[] = Config.raw.recent_projects;
+			let show_asset_names: bool = true;
 
-			for (let row = 0; row < Math.ceil(recent_projects.length / num); ++row) {
+			for (let row: i32 = 0; row < Math.ceil(recent_projects.length / num); ++row) {
 				let mult = show_asset_names ? 2 : 1;
-				let ar = [];
-				for (let i = 0; i < num * mult; ++i) ar.push(1 / num);
+				let ar: f32[] = [];
+				for (let i: i32 = 0; i < num * mult; ++i) ar.push(1 / num);
 				zui_row(ar);
 
 				ui._x += 2;
-				let off = show_asset_names ? zui_ELEMENT_OFFSET(ui) * 16.0 : 6;
+				let off: f32 = show_asset_names ? zui_ELEMENT_OFFSET(ui) * 16.0 : 6;
 				if (row > 0) ui._y += off;
 
-				for (let j = 0; j < num; ++j) {
-					let imgw = Math.floor(128 * zui_SCALE(ui));
-					let i = j + row * num;
+				for (let j: i32 = 0; j < num; ++j) {
+					let imgw: i32 = Math.floor(128 * zui_SCALE(ui));
+					let i: i32 = j + row * num;
 					if (i >= recent_projects.length) {
 						zui_end_element(imgw);
 						if (show_asset_names) zui_end_element(0);
 						continue;
 					}
 
-					let path = recent_projects[i];
+					let path: string = recent_projects[i];
 
 					///if krom_ios
-					let documentDirectory = krom_save_dialog("", "");
+					let documentDirectory: string = krom_save_dialog("", "");
 					documentDirectory = documentDirectory.substr(0, documentDirectory.length - 8); // Strip /'untitled'
 					path = documentDirectory + path;
 					///end
 
-					let iconPath = path.substr(0, path.length - 4) + "_icon.png";
-					if (BoxProjects.iconMap == null) BoxProjects.iconMap = new Map();
-					let icon = BoxProjects.iconMap.get(iconPath);
+					let iconPath: string = path.substr(0, path.length - 4) + "_icon.png";
+					if (BoxProjects.icon_map == null) BoxProjects.icon_map = new Map();
+					let icon: image_t = BoxProjects.icon_map.get(iconPath);
 					if (icon == null) {
 						let image: image_t = data_get_image(iconPath);
 						icon = image;
-						BoxProjects.iconMap.set(iconPath, icon);
+						BoxProjects.icon_map.set(iconPath, icon);
 					}
 
-					let uix = ui._x;
+					let uix: i32 = ui._x;
 					if (icon != null) {
 						zui_fill(0, 0, 128, 128, ui.t.SEPARATOR_COL);
 
-						let state = zui_image(icon, 0xffffffff, 128  * zui_SCALE(ui));
+						let state: i32 = zui_image(icon, 0xffffffff, 128  * zui_SCALE(ui));
 						if (state == zui_state_t.RELEASED) {
-							let _uix = ui._x;
+							let _uix: i32 = ui._x;
 							ui._x = uix;
 							zui_fill(0, 0, 128, 128, 0x66000000);
 							ui._x = _uix;
 							let doImport = () => {
 								app_notify_on_init(() => {
 									UIBox.hide();
-									ImportArm.runProject(path);
+									ImportArm.run_project(path);
 								});
 							}
 
 							///if (krom_android || krom_ios)
-							Base.notifyOnNextFrame(() => {
+							Base.notify_on_next_frame(() => {
 								Console.toast(tr("Opening project"));
-								Base.notifyOnNextFrame(doImport);
+								Base.notify_on_next_frame(doImport);
 							});
 							///else
 							doImport();
 							///end
 						}
 
-						let name = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
+						let name: string = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
 						if (ui.is_hovered && ui.input_released_r) {
 							UIMenu.draw((ui: zui_t) => {
 								// if (UIMenu.menuButton(ui, tr("Duplicate"))) {}
-								if (UIMenu.menuButton(ui, tr("Delete"))) {
+								if (UIMenu.menu_button(ui, tr("Delete"))) {
 									app_notify_on_init(() => {
 										File.delete(path);
 										File.delete(iconPath);
-										let dataPath = path.substr(0, path.length - 4);
+										let dataPath: string = path.substr(0, path.length - 4);
 										File.delete(dataPath);
 										recent_projects.splice(i, 1);
 									});
@@ -171,17 +171,17 @@ class BoxProjects {
 		}
 	}
 
-	static recentProjectsTab = (ui: zui_t) => {
+	static recent_projects_tab = (ui: zui_t) => {
 		if (zui_tab(BoxProjects.htab, tr("Recent"), true)) {
 
-			BoxProjects.drawBadge(ui);
+			BoxProjects.draw_badge(ui);
 
 			ui.enabled = Config.raw.recent_projects.length > 0;
 			BoxProjects.hsearch.text = zui_text_input(BoxProjects.hsearch, tr("Search"), zui_align_t.LEFT, true, true);
 			ui.enabled = true;
 
 			for (let path of Config.raw.recent_projects) {
-				let file = path;
+				let file: string = path;
 				///if krom_windows
 				file = string_replace_all(path, "/", "\\");
 				///else
@@ -192,10 +192,10 @@ class BoxProjects {
 				if (file.toLowerCase().indexOf(BoxProjects.hsearch.text.toLowerCase()) < 0) continue; // Search filter
 
 				if (zui_button(file, zui_align_t.LEFT) && File.exists(path)) {
-					let current = _g2_current;
+					let current: image_t = _g2_current;
 					if (current != null) g2_end();
 
-					ImportArm.runProject(path);
+					ImportArm.run_project(path);
 
 					if (current != null) g2_begin(current);
 					UIBox.hide();
@@ -211,38 +211,38 @@ class BoxProjects {
 			ui.enabled = true;
 
 			zui_end_element();
-			if (zui_button(tr("New Project..."), zui_align_t.LEFT)) Project.projectNewBox();
-			if (zui_button(tr("Open..."), zui_align_t.LEFT)) Project.projectOpen();
+			if (zui_button(tr("New Project..."), zui_align_t.LEFT)) Project.project_new_box();
+			if (zui_button(tr("Open..."), zui_align_t.LEFT)) Project.project_open();
 		}
 	}
 
-	static drawBadge = (ui: zui_t) => {
+	static draw_badge = (ui: zui_t) => {
 		let img: image_t = data_get_image("badge.k");
 		zui_image(img);
 		zui_end_element();
 	}
 
-	static getStartedTab = (ui: zui_t) => {
+	static get_started_tab = (ui: zui_t) => {
 		if (zui_tab(BoxProjects.htab, tr("Get Started"), true)) {
 			if (zui_button(tr("Manual"))) {
-				File.loadUrl(manifest_url + "/manual");
+				File.load_url(manifest_url + "/manual");
 			}
 			if (zui_button(tr("How To"))) {
-				File.loadUrl(manifest_url + "/howto");
+				File.load_url(manifest_url + "/howto");
 			}
 			if (zui_button(tr("What's New"))) {
-				File.loadUrl(manifest_url + "/notes");
+				File.load_url(manifest_url + "/notes");
 			}
 		}
 	}
 
-	static alignToFullScreen = () => {
-		UIBox.modalW = Math.floor(sys_width() / zui_SCALE(Base.uiBox));
-		UIBox.modalH = Math.floor(sys_height() / zui_SCALE(Base.uiBox));
-		let appw = sys_width();
-		let apph = sys_height();
-		let mw = appw;
-		let mh = apph;
+	static align_to_fullscreen = () => {
+		UIBox.modalw = Math.floor(sys_width() / zui_SCALE(Base.ui_box));
+		UIBox.modalh = Math.floor(sys_height() / zui_SCALE(Base.ui_box));
+		let appw: i32 = sys_width();
+		let apph: i32 = sys_height();
+		let mw: i32 = appw;
+		let mh: i32 = apph;
 		UIBox.hwnd.drag_x = Math.floor(-appw / 2 + mw / 2);
 		UIBox.hwnd.drag_y = Math.floor(-apph / 2 + mh / 2);
 	}

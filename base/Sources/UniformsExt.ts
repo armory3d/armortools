@@ -1,43 +1,43 @@
 
 class UniformsExt {
 
-	static vec = vec4_create();
-	static orthoP = mat4_ortho(-0.5, 0.5, -0.5, 0.5, -0.5, 0.5);
+	static vec: vec4_t = vec4_create();
+	static ortho_p: mat4_t = mat4_ortho(-0.5, 0.5, -0.5, 0.5, -0.5, 0.5);
 
 	static init = () => {
-		uniforms_i32_links = UniformsExt.linkInt;
-		uniforms_f32_links = UniformsExt.linkFloat;
-		uniforms_vec2_links = UniformsExt.linkVec2;
-		uniforms_vec3_links = UniformsExt.linkVec3;
-		uniforms_vec4_links = UniformsExt.linkVec4;
-		uniforms_mat4_links = UniformsExt.linkMat4;
-		uniforms_tex_links = UniformsExt.linkTex;
+		uniforms_i32_links = UniformsExt.link_int;
+		uniforms_f32_links = UniformsExt.link_float;
+		uniforms_vec2_links = UniformsExt.link_vec2;
+		uniforms_vec3_links = UniformsExt.link_vec3;
+		uniforms_vec4_links = UniformsExt.link_vec4;
+		uniforms_mat4_links = UniformsExt.link_mat4;
+		uniforms_tex_links = UniformsExt.link_tex;
 	}
 
-	static linkInt = (object: object_t, mat: material_data_t, link: string): Null<i32> => {
-		if (link == "_bloomCurrentMip") return RenderPathBase.bloomCurrentMip;
+	static link_int = (object: object_t, mat: material_data_t, link: string): Null<i32> => {
+		if (link == "_bloomCurrentMip") return RenderPathBase.bloom_current_mip;
 		return null;
 	}
 
-	static linkFloat = (object: object_t, mat: material_data_t, link: string): Null<f32> => {
+	static link_float = (object: object_t, mat: material_data_t, link: string): Null<f32> => {
 		switch (link) {
 			case "_brushRadius": {
 				///if (is_paint || is_sculpt)
-				let decal = Context.raw.tool == WorkspaceTool.ToolDecal || Context.raw.tool == WorkspaceTool.ToolText;
-				let decalMask = decal && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
-				let brushDecalMaskRadius = Context.raw.brushDecalMaskRadius;
+				let decal: bool = Context.raw.tool == workspace_tool_t.DECAL || Context.raw.tool == workspace_tool_t.TEXT;
+				let decalMask: bool = decal && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
+				let brushDecalMaskRadius: f32 = Context.raw.brush_decal_mask_radius;
 				if (Config.raw.brush_3d) {
-					brushDecalMaskRadius *= Context.raw.paint2d ? 0.55 * UIView2D.panScale : 2.0;
+					brushDecalMaskRadius *= Context.raw.paint2d ? 0.55 * UIView2D.pan_scale : 2.0;
 				}
-				let radius = decalMask ? brushDecalMaskRadius : Context.raw.brushRadius;
-				let val = (radius * Context.raw.brushNodesRadius) / 15.0;
+				let radius: f32 = decalMask ? brushDecalMaskRadius : Context.raw.brush_radius;
+				let val: f32 = (radius * Context.raw.brush_nodes_radius) / 15.0;
 				if (Config.raw.pressure_radius && pen_down()) {
 					val *= pen_pressure * Config.raw.pressure_sensitivity;
 				}
-				let scale2d = (900 / Base.h()) * Config.raw.window_scale;
+				let scale2d: f32 = (900 / Base.h()) * Config.raw.window_scale;
 
 				if (Config.raw.brush_3d && !decal) {
-					val *= Context.raw.paint2d ? 0.55 * scale2d * UIView2D.panScale : 2;
+					val *= Context.raw.paint2d ? 0.55 * scale2d * UIView2D.pan_scale : 2;
 				}
 				else {
 					val *= scale2d; // Projection ratio
@@ -45,8 +45,8 @@ class UniformsExt {
 				///end
 
 				///if is_lab
-				let radius = Context.raw.brushRadius;
-				let val = radius / 15.0;
+				let radius: f32 = Context.raw.brush_radius;
+				let val: f32 = radius / 15.0;
 				if (Config.raw.pressure_radius && pen_down()) {
 					val *= pen_pressure * Config.raw.pressure_sensitivity;
 				}
@@ -62,37 +62,36 @@ class UniformsExt {
 				return Config.raw.rp_grain;
 			}
 			case "_coneOffset": {
-				return Context.raw.vxaoOffset;
+				return Context.raw.vxao_offset;
 			}
 			case "_coneAperture": {
-				return Context.raw.vxaoAperture;
+				return Context.raw.vxao_aperture;
 			}
 			case "_bloomSampleScale": {
-				return RenderPathBase.bloomSampleScale;
+				return RenderPathBase.bloom_sample_scale;
 			}
 
 			///if (is_paint || is_sculpt)
 			case "_brushScaleX": {
-				return 1 / Context.raw.brushScaleX;
+				return 1 / Context.raw.brush_scale_x;
 			}
 			case "_brushOpacity": {
-				let val = Context.raw.brushOpacity * Context.raw.brushNodesOpacity;
+				let val: f32 = Context.raw.brush_opacity * Context.raw.brush_nodes_opacity;
 				if (Config.raw.pressure_opacity && pen_down()) {
 					val *= pen_pressure * Config.raw.pressure_sensitivity;
 				}
 				return val;
 			}
 			case "_brushHardness": {
-				let decal = Context.raw.tool == WorkspaceTool.ToolDecal || Context.raw.tool == WorkspaceTool.ToolText;
-				let decalMask = Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
-				if (Context.raw.tool != WorkspaceTool.ToolBrush && Context.raw.tool != WorkspaceTool.ToolEraser && Context.raw.tool != WorkspaceTool.ToolClone && !decalMask) return 1.0;
-				let val = Context.raw.brushHardness * Context.raw.brushNodesHardness;
+				let decalMask: bool = Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
+				if (Context.raw.tool != workspace_tool_t.BRUSH && Context.raw.tool != workspace_tool_t.ERASER && Context.raw.tool != workspace_tool_t.CLONE && !decalMask) return 1.0;
+				let val: f32 = Context.raw.brush_hardness * Context.raw.brush_nodes_hardness;
 				if (Config.raw.pressure_hardness && pen_down()) {
 					val *= pen_pressure * Config.raw.pressure_sensitivity;
 				}
 				if (Config.raw.brush_3d) {
 					if (Context.raw.paint2d) {
-						val *= 1.0 / UIView2D.panScale;
+						val *= 1.0 / UIView2D.pan_scale;
 					}
 					else {
 						val *= val;
@@ -101,12 +100,12 @@ class UniformsExt {
 				return val;
 			}
 			case "_brushScale": {
-				let fill = Context.raw.layer.fill_layer != null;
-				let val = (fill ? Context.raw.layer.scale : Context.raw.brushScale) * Context.raw.brushNodesScale;
+				let fill: bool = Context.raw.layer.fill_layer != null;
+				let val: f32 = (fill ? Context.raw.layer.scale : Context.raw.brush_scale) * Context.raw.brush_nodes_scale;
 				return val;
 			}
 			case "_objectId": {
-				return Project.paintObjects.indexOf(object.ext);
+				return Project.paint_objects.indexOf(object.ext);
 			}
 			///if is_paint
 			case "_dilateRadius": {
@@ -117,27 +116,27 @@ class UniformsExt {
 				return mat4_get_scale(Context.raw.layer.decalMat).z * 0.5;
 			}
 			case "_pickerOpacity": {
-				return Context.raw.pickedColor.opacity;
+				return Context.raw.picked_color.opacity;
 			}
 			case "_pickerOcclusion": {
-				return Context.raw.pickedColor.occlusion;
+				return Context.raw.picked_color.occlusion;
 			}
 			case "_pickerRoughness": {
-				return Context.raw.pickedColor.roughness;
+				return Context.raw.picked_color.roughness;
 			}
 			case "_pickerMetallic": {
-				return Context.raw.pickedColor.metallic;
+				return Context.raw.picked_color.metallic;
 			}
 			case "_pickerHeight": {
-				return Context.raw.pickedColor.height;
+				return Context.raw.picked_color.height;
 			}
 			///end
 		}
 		if (ParserMaterial.script_links != null) {
 			for (let key of ParserMaterial.script_links.keys()) {
 				let asciprt_links: any = ParserMaterial.script_links;
-				let script = asciprt_links[key];
-				let result = 0.0;
+				let script: string = asciprt_links[key];
+				let result: f32 = 0.0;
 				if (script != "") {
 					try {
 						result = eval(script);
@@ -152,26 +151,26 @@ class UniformsExt {
 		return null;
 	}
 
-	static linkVec2 = (object: object_t, mat: material_data_t, link: string): vec4_t => {
+	static link_vec2 = (object: object_t, mat: material_data_t, link: string): vec4_t => {
 		switch (link) {
 			case "_gbufferSize": {
 				vec4_set(UniformsExt.vec, 0, 0, 0);
-				let gbuffer2 = render_path_render_targets.get("gbuffer2");
+				let gbuffer2: render_target_t = render_path_render_targets.get("gbuffer2");
 				vec4_set(UniformsExt.vec, gbuffer2._image.width, gbuffer2._image.height, 0);
 				return UniformsExt.vec;
 			}
 			case "_cloneDelta": {
-				vec4_set(UniformsExt.vec, Context.raw.cloneDeltaX, Context.raw.cloneDeltaY, 0);
+				vec4_set(UniformsExt.vec, Context.raw.clone_delta_x, Context.raw.clone_delta_y, 0);
 				return UniformsExt.vec;
 			}
 			case "_texpaintSize": {
-				vec4_set(UniformsExt.vec, Config.getTextureResX(), Config.getTextureResY(), 0);
+				vec4_set(UniformsExt.vec, Config.get_texture_res_x(), Config.get_texture_res_y(), 0);
 				return UniformsExt.vec;
 			}
 			///if (is_paint || is_sculpt)
 			case "_brushAngle": {
-				let brushAngle = Context.raw.brushAngle + Context.raw.brushNodesAngle;
-				let angle = Context.raw.layer.fill_layer != null ? Context.raw.layer.angle : brushAngle;
+				let brushAngle: f32 = Context.raw.brush_angle + Context.raw.brush_nodes_angle;
+				let angle: f32 = Context.raw.layer.fill_layer != null ? Context.raw.layer.angle : brushAngle;
 				angle *= (Math.PI / 180);
 				if (Config.raw.pressure_angle && pen_down()) {
 					angle *= pen_pressure * Config.raw.pressure_sensitivity;
@@ -184,29 +183,29 @@ class UniformsExt {
 		return null;
 	}
 
-	static linkVec3 = (object: object_t, mat: material_data_t, link: string): vec4_t => {
+	static link_vec3 = (object: object_t, mat: material_data_t, link: string): vec4_t => {
 		let v: vec4_t = null;
 		switch (link) {
 			///if (is_paint || is_sculpt)
 			case "_brushDirection": {
 				v = _uniforms_vec;
 				// Discard first paint for directional brush
-				let allowPaint = Context.raw.prevPaintVecX != Context.raw.lastPaintVecX &&
-								 Context.raw.prevPaintVecY != Context.raw.lastPaintVecY &&
-								 Context.raw.prevPaintVecX > 0 &&
-								 Context.raw.prevPaintVecY > 0;
-				let x = Context.raw.paintVec.x;
-				let y = Context.raw.paintVec.y;
-				let lastx = Context.raw.prevPaintVecX;
-				let lasty = Context.raw.prevPaintVecY;
+				let allowPaint: bool = Context.raw.prev_paint_vec_x != Context.raw.last_paint_vec_x &&
+								 	   Context.raw.prev_paint_vec_y != Context.raw.last_paint_vec_y &&
+								 	   Context.raw.prev_paint_vec_x > 0 &&
+								 	   Context.raw.prev_paint_vec_y > 0;
+				let x: f32 = Context.raw.paint_vec.x;
+				let y: f32 = Context.raw.paint_vec.y;
+				let lastx: f32 = Context.raw.prev_paint_vec_x;
+				let lasty: f32 = Context.raw.prev_paint_vec_y;
 				if (Context.raw.paint2d) {
 					x = UniformsExt.vec2d(x);
 					lastx = UniformsExt.vec2d(lastx);
 				}
-				let angle = Math.atan2(-y + lasty, x - lastx) - Math.PI / 2;
+				let angle: f32 = Math.atan2(-y + lasty, x - lastx) - Math.PI / 2;
 				vec4_set(v, Math.cos(angle), Math.sin(angle), allowPaint ? 1 : 0);
-				Context.raw.prevPaintVecX = Context.raw.lastPaintVecX;
-				Context.raw.prevPaintVecY = Context.raw.lastPaintVecY;
+				Context.raw.prev_paint_vec_x = Context.raw.last_paint_vec_x;
+				Context.raw.prev_paint_vec_y = Context.raw.last_paint_vec_y;
 				return v;
 			}
 			case "_decalLayerLoc": {
@@ -222,30 +221,30 @@ class UniformsExt {
 			case "_pickerBase": {
 				v = _uniforms_vec;
 				vec4_set(v,
-					color_get_rb(Context.raw.pickedColor.base) / 255,
-					color_get_gb(Context.raw.pickedColor.base) / 255,
-					color_get_bb(Context.raw.pickedColor.base) / 255
+					color_get_rb(Context.raw.picked_color.base) / 255,
+					color_get_gb(Context.raw.picked_color.base) / 255,
+					color_get_bb(Context.raw.picked_color.base) / 255
 				);
 				return v;
 			}
 			case "_pickerNormal": {
 				v = _uniforms_vec;
 				vec4_set(v,
-					color_get_rb(Context.raw.pickedColor.normal) / 255,
-					color_get_gb(Context.raw.pickedColor.normal) / 255,
-					color_get_bb(Context.raw.pickedColor.normal) / 255
+					color_get_rb(Context.raw.picked_color.normal) / 255,
+					color_get_gb(Context.raw.picked_color.normal) / 255,
+					color_get_bb(Context.raw.picked_color.normal) / 255
 				);
 				return v;
 			}
 			///if arm_physics
 			case "_particleHit": {
 				v = _uniforms_vec;
-				vec4_set(v, Context.raw.particleHitX, Context.raw.particleHitY, Context.raw.particleHitZ);
+				vec4_set(v, Context.raw.particle_hit_x, Context.raw.particle_hit_y, Context.raw.particle_hit_z);
 				return v;
 			}
 			case "_particleHitLast": {
 				v = _uniforms_vec;
-				vec4_set(v, Context.raw.lastParticleHitX, Context.raw.lastParticleHitY, Context.raw.lastParticleHitZ);
+				vec4_set(v, Context.raw.last_particle_hit_x, Context.raw.last_particle_hit_y, Context.raw.last_particle_hit_z);
 				return v;
 			}
 			///end
@@ -258,18 +257,18 @@ class UniformsExt {
 	///if (is_paint || is_sculpt)
 	static vec2d = (x: f32) => {
 		// Transform from 3d viewport coord to 2d view coord
-		Context.raw.paint2dView = false;
-		let res = (x * Base.w() - Base.w()) / UIView2D.ww;
-		Context.raw.paint2dView = true;
+		Context.raw.paint2d_view = false;
+		let res: f32 = (x * Base.w() - Base.w()) / UIView2D.ww;
+		Context.raw.paint2d_view = true;
 		return res;
 	}
 	///end
 
-	static linkVec4 = (object: object_t, mat: material_data_t, link: string): vec4_t => {
+	static link_vec4 = (object: object_t, mat: material_data_t, link: string): vec4_t => {
 		switch (link) {
 			case "_inputBrush": {
-				let down = mouse_down() || pen_down();
-				vec4_set(UniformsExt.vec, Context.raw.paintVec.x, Context.raw.paintVec.y, down ? 1.0 : 0.0, 0.0);
+				let down: bool = mouse_down() || pen_down();
+				vec4_set(UniformsExt.vec, Context.raw.paint_vec.x, Context.raw.paint_vec.y, down ? 1.0 : 0.0, 0.0);
 
 				///if (is_paint || is_sculpt)
 				if (Context.raw.paint2d) {
@@ -280,8 +279,8 @@ class UniformsExt {
 				return UniformsExt.vec;
 			}
 			case "_inputBrushLast": {
-				let down = mouse_down() || pen_down();
-				vec4_set(UniformsExt.vec, Context.raw.lastPaintVecX, Context.raw.lastPaintVecY, down ? 1.0 : 0.0, 0.0);
+				let down: bool = mouse_down() || pen_down();
+				vec4_set(UniformsExt.vec, Context.raw.last_paint_vec_x, Context.raw.last_paint_vec_y, down ? 1.0 : 0.0, 0.0);
 
 				///if (is_paint || is_sculpt)
 				if (Context.raw.paint2d) {
@@ -292,26 +291,25 @@ class UniformsExt {
 				return UniformsExt.vec;
 			}
 			case "_envmapData": {
-				vec4_set(UniformsExt.vec, Context.raw.envmapAngle, Math.sin(-Context.raw.envmapAngle), Math.cos(-Context.raw.envmapAngle), scene_world.strength);
+				vec4_set(UniformsExt.vec, Context.raw.envmap_angle, Math.sin(-Context.raw.envmap_angle), Math.cos(-Context.raw.envmap_angle), scene_world.strength);
 				return UniformsExt.vec;
 			}
 			case "_envmapDataWorld": {
-				vec4_set(UniformsExt.vec, Context.raw.envmapAngle, Math.sin(-Context.raw.envmapAngle), Math.cos(-Context.raw.envmapAngle), Context.raw.showEnvmap ? scene_world.strength : 1.0);
+				vec4_set(UniformsExt.vec, Context.raw.envmap_angle, Math.sin(-Context.raw.envmap_angle), Math.cos(-Context.raw.envmap_angle), Context.raw.show_envmap ? scene_world.strength : 1.0);
 				return UniformsExt.vec;
 			}
 			///if (is_paint || is_sculpt)
 			case "_stencilTransform": {
-				vec4_set(UniformsExt.vec, Context.raw.brushStencilX, Context.raw.brushStencilY, Context.raw.brushStencilScale, Context.raw.brushStencilAngle);
+				vec4_set(UniformsExt.vec, Context.raw.brush_stencil_x, Context.raw.brush_stencil_y, Context.raw.brush_stencil_scale, Context.raw.brush_stencil_angle);
 				if (Context.raw.paint2d) UniformsExt.vec.x = UniformsExt.vec2d(UniformsExt.vec.x);
 				return UniformsExt.vec;
 			}
 			case "_decalMask": {
-				let decal = Context.raw.tool == WorkspaceTool.ToolDecal || Context.raw.tool == WorkspaceTool.ToolText;
-				let decalMask = Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
-				let val = (Context.raw.brushRadius * Context.raw.brushNodesRadius) / 15.0;
-				let scale2d = (900 / Base.h()) * Config.raw.window_scale;
+				let decalMask: bool = Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
+				let val: f32 = (Context.raw.brush_radius * Context.raw.brush_nodes_radius) / 15.0;
+				let scale2d: f32 = (900 / Base.h()) * Config.raw.window_scale;
 				val *= scale2d; // Projection ratio
-				vec4_set(UniformsExt.vec, Context.raw.decalX, Context.raw.decalY, decalMask ? 1 : 0, val);
+				vec4_set(UniformsExt.vec, Context.raw.decal_x, Context.raw.decal_y, decalMask ? 1 : 0, val);
 				if (Context.raw.paint2d) UniformsExt.vec.x = UniformsExt.vec2d(UniformsExt.vec.x);
 				return UniformsExt.vec;
 			}
@@ -320,15 +318,14 @@ class UniformsExt {
 		return null;
 	}
 
-	static linkMat4 = (object: object_t, mat: material_data_t, link: string): mat4_t => {
+	static link_mat4 = (object: object_t, mat: material_data_t, link: string): mat4_t => {
 		switch (link) {
 			///if (is_paint || is_sculpt)
 			case "_decalLayerMatrix": { // Decal layer
-				let camera = scene_camera;
-				let m = _uniforms_mat;
+				let m: mat4_t = _uniforms_mat;
 				mat4_set_from(m, Context.raw.layer.decalMat);
 				mat4_get_inv(m, m);
-				mat4_mult_mat(m, UniformsExt.orthoP);
+				mat4_mult_mat(m, UniformsExt.ortho_p);
 				return m;
 			}
 			///end
@@ -336,11 +333,11 @@ class UniformsExt {
 		return null;
 	}
 
-	static linkTex = (object: object_t, mat: material_data_t, link: string): image_t => {
+	static link_tex = (object: object_t, mat: material_data_t, link: string): image_t => {
 		switch (link) {
 			case "_texpaint_undo": {
 				///if (is_paint || is_sculpt)
-				let i = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
+				let i: i32 = History.undo_i - 1 < 0 ? Config.raw.undo_steps - 1 : History.undo_i - 1;
 				return render_path_render_targets.get("texpaint_undo" + i)._image;
 				///end
 
@@ -350,7 +347,7 @@ class UniformsExt {
 			}
 			case "_texpaint_nor_undo": {
 				///if (is_paint || is_sculpt)
-				let i = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
+				let i: i32 = History.undo_i - 1 < 0 ? Config.raw.undo_steps - 1 : History.undo_i - 1;
 				return render_path_render_targets.get("texpaint_nor_undo" + i)._image;
 				///end
 
@@ -360,7 +357,7 @@ class UniformsExt {
 			}
 			case "_texpaint_pack_undo": {
 				///if (is_paint || is_sculpt)
-				let i = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
+				let i: i32 = History.undo_i - 1 < 0 ? Config.raw.undo_steps - 1 : History.undo_i - 1;
 				return render_path_render_targets.get("texpaint_pack_undo" + i)._image;
 				///end
 
@@ -381,16 +378,16 @@ class UniformsExt {
 			///if (is_paint || is_sculpt)
 			case "_texcolorid": {
 				if (Project.assets.length == 0) return render_path_render_targets.get("empty_white")._image;
-				else return Project.getImage(Project.assets[Context.raw.colorIdHandle.position]);
+				else return Project.get_image(Project.assets[Context.raw.colorid_handle.position]);
 			}
 			case "_textexttool": { // Opacity map for text
-				return Context.raw.textToolImage;
+				return Context.raw.text_tool_image;
 			}
 			case "_texbrushmask": {
-				return Context.raw.brushMaskImage;
+				return Context.raw.brush_mask_image;
 			}
 			case "_texbrushstencil": {
-				return Context.raw.brushStencilImage;
+				return Context.raw.brush_stencil_image;
 			}
 			case "_texparticle": {
 				return render_path_render_targets.get("texparticle")._image;
@@ -399,18 +396,18 @@ class UniformsExt {
 
 			///if is_paint
 			case "_texuvmap": {
-				if (!UtilUV.uvmapCached) {
+				if (!UtilUV.uvmap_cached) {
 					let _init = () => {
-						UtilUV.cacheUVMap();
+						UtilUV.cache_uv_map();
 					}
 					app_notify_on_init(_init);
 				}
 				return UtilUV.uvmap;
 			}
 			case "_textrianglemap": {
-				if (!UtilUV.trianglemapCached) {
+				if (!UtilUV.trianglemap_cached) {
 					let _init = () => {
-						UtilUV.cacheTriangleMap();
+						UtilUV.cache_triangle_map();
 					}
 					app_notify_on_init(_init);
 				}
@@ -418,10 +415,10 @@ class UniformsExt {
 			}
 			case "_texuvislandmap": {
 				let _init = () => {
-					UtilUV.cacheUVIslandMap();
+					UtilUV.cache_uv_island_map();
 				}
 				app_notify_on_init(_init);
-				return UtilUV.uvislandmapCached ? UtilUV.uvislandmap :render_path_render_targets.get("empty_black")._image;
+				return UtilUV.uvislandmap_cached ? UtilUV.uvislandmap :render_path_render_targets.get("empty_black")._image;
 			}
 			case "_texdilatemap": {
 				return UtilUV.dilatemap;
@@ -430,13 +427,13 @@ class UniformsExt {
 		}
 
 		if (link.startsWith("_texpaint_pack_vert")) {
-			let tid = link.substr(link.length - 1);
+			let tid: string = link.substr(link.length - 1);
 			return render_path_render_targets.get("texpaint_pack" + tid)._image;
 		}
 
 		if (link.startsWith("_texpaint_vert")) {
 			///if (is_paint || is_sculpt)
-			let tid = Number(link.substr(link.length - 1));
+			let tid: i32 = Number(link.substr(link.length - 1));
 			return tid < Project.layers.length ? Project.layers[tid].texpaint : null;
 			///end
 
@@ -446,7 +443,7 @@ class UniformsExt {
 		}
 		if (link.startsWith("_texpaint_nor")) {
 			///if is_paint
-			let tid = Number(link.substr(link.length - 1));
+			let tid: i32 = Number(link.substr(link.length - 1));
 			return tid < Project.layers.length ? Project.layers[tid].texpaint_nor : null;
 			///end
 
@@ -456,7 +453,7 @@ class UniformsExt {
 		}
 		if (link.startsWith("_texpaint_pack")) {
 			///if is_paint
-			let tid = Number(link.substr(link.length - 1));
+			let tid: i32 = Number(link.substr(link.length - 1));
 			return tid < Project.layers.length ? Project.layers[tid].texpaint_pack : null;
 			///end
 
@@ -466,7 +463,7 @@ class UniformsExt {
 		}
 		if (link.startsWith("_texpaint")) {
 			///if (is_paint || is_sculpt)
-			let tid = Number(link.substr(link.length - 1));
+			let tid: i32 = Number(link.substr(link.length - 1));
 			return tid < Project.layers.length ? Project.layers[tid].texpaint : null;
 			///end
 
@@ -477,16 +474,16 @@ class UniformsExt {
 
 		///if (is_paint || is_sculpt)
 		if (link.startsWith("_texblur_")) {
-			let id = link.substr(9);
-			return Context.raw.nodePreviews != null ? Context.raw.nodePreviews.get(id) :render_path_render_targets.get("empty_black")._image;
+			let id: string = link.substr(9);
+			return Context.raw.node_previews != null ? Context.raw.node_previews.get(id) :render_path_render_targets.get("empty_black")._image;
 		}
 		if (link.startsWith("_texwarp_")) {
-			let id = link.substr(9);
-			return Context.raw.nodePreviews != null ? Context.raw.nodePreviews.get(id) :render_path_render_targets.get("empty_black")._image;
+			let id: string = link.substr(9);
+			return Context.raw.node_previews != null ? Context.raw.node_previews.get(id) :render_path_render_targets.get("empty_black")._image;
 		}
 		if (link.startsWith("_texbake_")) {
-			let id = link.substr(9);
-			return Context.raw.nodePreviews != null ? Context.raw.nodePreviews.get(id) :render_path_render_targets.get("empty_black")._image;
+			let id: string = link.substr(9);
+			return Context.raw.node_previews != null ? Context.raw.node_previews.get(id) :render_path_render_targets.get("empty_black")._image;
 		}
 		///end
 

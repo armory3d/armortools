@@ -1,9 +1,9 @@
 
 class MakeMeshPreview {
 
-	static opacityDiscardDecal = 0.05;
+	static opacity_discard_decal: f32 = 0.05;
 
-	static run = (data: TMaterial, matcon: material_context_t): NodeShaderContextRaw => {
+	static run = (data: material_t, matcon: material_context_t): NodeShaderContextRaw => {
 		let context_id = "mesh";
 		let con_mesh = NodeShaderContext.create(data, {
 			name: context_id,
@@ -21,12 +21,12 @@ class MakeMeshPreview {
 		let pos = "pos";
 
 		///if arm_skin
-		let skin = mesh_data_get_vertex_array(Context.raw.paintObject.data, "bone") != null;
+		let skin = mesh_data_get_vertex_array(Context.raw.paint_object.data, "bone") != null;
 		if (skin) {
 			pos = "spos";
 			NodeShaderContext.add_elem(con_mesh, "bone", 'short4norm');
 			NodeShaderContext.add_elem(con_mesh, "weight", 'short4norm');
-			NodeShader.add_function(vert, ShaderFunctions.str_getSkinningDualQuat);
+			NodeShader.add_function(vert, ShaderFunctions.str_get_skinning_dual_quat);
 			NodeShader.add_uniform(vert, 'vec4 skinBones[128 * 2]', '_skin_bones');
 			NodeShader.add_uniform(vert, 'float posUnpack', '_pos_unpack');
 			NodeShader.write_attrib(vert, 'vec4 skinA;');
@@ -43,16 +43,16 @@ class MakeMeshPreview {
 		NodeShader.add_uniform(vert, 'mat4 WVP', '_world_view_proj_matrix');
 		NodeShader.write_attrib(vert, `gl_Position = mul(vec4(${pos}.xyz, 1.0), WVP);`);
 
-		let brushScale = (Context.raw.brushScale * Context.raw.brushNodesScale) + "";
+		let brushScale = (Context.raw.brush_scale * Context.raw.brush_nodes_scale) + "";
 		NodeShader.add_out(vert, 'vec2 texCoord');
 		NodeShader.write_attrib(vert, `texCoord = tex * float(${brushScale});`);
 
-		let decal = Context.raw.decalPreview;
+		let decal = Context.raw.decal_preview;
 		ParserMaterial.sample_keep_aspect = decal;
 		ParserMaterial.sample_uv_scale = brushScale;
 		ParserMaterial.parse_height = MakeMaterial.heightUsed;
 		ParserMaterial.parse_height_as_channel = true;
-		let sout = ParserMaterial.parse(UINodes.getCanvasMaterial(), con_mesh, vert, frag, matcon);
+		let sout = ParserMaterial.parse(UINodes.get_canvas_material(), con_mesh, vert, frag, matcon);
 		ParserMaterial.parse_height = false;
 		ParserMaterial.parse_height_as_channel = false;
 		ParserMaterial.sample_keep_aspect = false;
@@ -82,22 +82,22 @@ class MakeMeshPreview {
 		// }
 
 		if (decal) {
-			if (Context.raw.tool == WorkspaceTool.ToolText) {
+			if (Context.raw.tool == workspace_tool_t.TEXT) {
 				NodeShader.add_uniform(frag, 'sampler2D textexttool', '_textexttool');
 				NodeShader.write(frag, `opacity *= textureLod(textexttool, texCoord / float(${brushScale}), 0.0).r;`);
 			}
 		}
 		if (decal) {
-			let opac = MakeMeshPreview.opacityDiscardDecal;
+			let opac = MakeMeshPreview.opacity_discard_decal;
 			NodeShader.write(frag, `if (opacity < ${opac}) discard;`);
 		}
 
 		NodeShader.add_out(frag, 'vec4 fragColor[3]');
 		frag.n = true;
 
-		NodeShader.add_function(frag, ShaderFunctions.str_packFloatInt16);
-		NodeShader.add_function(frag, ShaderFunctions.str_cotangentFrame);
-		NodeShader.add_function(frag, ShaderFunctions.str_octahedronWrap);
+		NodeShader.add_function(frag, ShaderFunctions.str_pack_float_int16);
+		NodeShader.add_function(frag, ShaderFunctions.str_cotangent_frame);
+		NodeShader.add_function(frag, ShaderFunctions.str_octahedron_wrap);
 
 		if (MakeMaterial.heightUsed) {
 			NodeShader.write(frag, 'if (height > 0.0) {');
@@ -117,7 +117,7 @@ class MakeMeshPreview {
 			// TODO
 		}
 		else {
-			frag.vVec = true;
+			frag.vvec = true;
 			///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 			NodeShader.write(frag, 'mat3 TBN = cotangentFrame(n, vVec, texCoord);');
 			///else

@@ -1,8 +1,8 @@
 
 class ExportGpl {
 
-	static run = (path: string, name: string, swatches: TSwatchColor[]) => {
-		let o = "";
+	static run = (path: string, name: string, swatches: swatch_color_t[]) => {
+		let o: string = "";
 		o += "GIMP Palette\n";
 		o += "Name: " + name + "\n";
 		o += "# armorpaint.org\n";

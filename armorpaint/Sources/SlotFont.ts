@@ -1,7 +1,7 @@
 
 class SlotFontRaw {
 	image: image_t = null; // 200px
-	previewReady = false;
+	preview_ready = false;
 	id = 0;
 	font: g2_font_t;
 	name: string;

@@ -1,7 +1,7 @@
 
 class MakeDiscard {
 
-	static colorId = (vert: NodeShaderRaw, frag: NodeShaderRaw) => {
+	static color_id = (vert: NodeShaderRaw, frag: NodeShaderRaw) => {
 		NodeShader.add_uniform(frag, 'sampler2D texpaint_colorid'); // 1x1 picker
 		NodeShader.add_uniform(frag, 'sampler2D texcolorid', '_texcolorid'); // color map
 		NodeShader.write(frag, 'vec3 colorid_c1 = texelFetch(texpaint_colorid, ivec2(0, 0), 0).rgb;');
@@ -32,19 +32,19 @@ class MakeDiscard {
 		///end
 	}
 
-	static uvIsland = (vert: NodeShaderRaw, frag: NodeShaderRaw) => {
+	static uv_island = (vert: NodeShaderRaw, frag: NodeShaderRaw) => {
 		NodeShader.add_uniform(frag, 'sampler2D texuvislandmap', '_texuvislandmap');
 		NodeShader.write(frag, 'if (textureLod(texuvislandmap, texCoordPick, 0).r == 0.0) discard;');
 	}
 
-	static materialId = (vert: NodeShaderRaw, frag: NodeShaderRaw) => {
+	static material_id = (vert: NodeShaderRaw, frag: NodeShaderRaw) => {
 		frag.wvpposition = true;
 		NodeShader.write(frag, 'vec2 picker_sample_tc = vec2(wvpposition.x / wvpposition.w, wvpposition.y / wvpposition.w) * 0.5 + 0.5;');
 		///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 		NodeShader.write(frag, 'picker_sample_tc.y = 1.0 - picker_sample_tc.y;');
 		///end
 		NodeShader.add_uniform(frag, 'sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
-		let matid = Context.raw.materialIdPicked / 255;
+		let matid = Context.raw.materialid_picked / 255;
 		NodeShader.write(frag, `if (${matid} != textureLod(texpaint_nor_undo, picker_sample_tc, 0.0).a) discard;`);
 	}
 }

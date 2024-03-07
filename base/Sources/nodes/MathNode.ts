@@ -11,7 +11,7 @@ class MathNode extends LogicNode {
 	override get = (from: i32, done: (a: any)=>void) => {
 		this.inputs[0].get((v1: f32) => {
 			this.inputs[1].get((v2: f32) => {
-				let f = 0.0;
+				let f: f32 = 0.0;
 				switch (this.operation) {
 					case "Add":
 						f = v1 + v2;

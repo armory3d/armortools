@@ -4,16 +4,16 @@
 class TabHistory {
 
 	static draw = (htab: zui_handle_t) => {
-		let ui = UIBase.ui;
+		let ui: zui_t = UIBase.ui;
 		if (zui_tab(htab, tr("History"))) {
-			for (let i = 0; i < History.steps.length; ++i) {
-				let active = History.steps.length - 1 - History.redos;
+			for (let i: i32 = 0; i < History.steps.length; ++i) {
+				let active: i32 = History.steps.length - 1 - History.redos;
 				if (i == active) {
 					zui_fill(0, 0, ui._window_w, ui.t.ELEMENT_H, ui.t.HIGHLIGHT_COL);
 				}
 				zui_text(History.steps[i].name);
 				if (ui.is_released) { // Jump to undo step
-					let diff = i - active;
+					let diff: i32 = i - active;
 					while (diff > 0) {
 						diff--;
 						History.redo();

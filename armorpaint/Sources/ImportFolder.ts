@@ -2,7 +2,7 @@
 class ImportFolder {
 
 	static run = (path: string) => {
-		let files = File.readDirectory(path);
+		let files = File.read_directory(path);
 		let mapbase = "";
 		let mapopac = "";
 		let mapnor = "";
@@ -14,37 +14,37 @@ class ImportFolder {
 		let foundTexture = false;
 		// Import maps
 		for (let f of files) {
-			if (!Path.isTexture(f)) continue;
+			if (!Path.is_texture(f)) continue;
 
 			// TODO: handle -albedo
 
 			let base = f.substr(0, f.lastIndexOf(".")).toLowerCase();
 			let valid = false;
-			if (mapbase == "" && Path.isBaseColorTex(base)) {
+			if (mapbase == "" && Path.is_base_color_tex(base)) {
 				mapbase = f;
 				valid = true;
 			}
-			if (mapopac == "" && Path.isOpacityTex(base)) {
+			if (mapopac == "" && Path.is_opacity_tex(base)) {
 				mapopac = f;
 				valid = true;
 			}
-			if (mapnor == "" && Path.isNormalMapTex(base)) {
+			if (mapnor == "" && Path.is_normal_map_tex(base)) {
 				mapnor = f;
 				valid = true;
 			}
-			if (mapocc == "" && Path.isOcclusionTex(base)) {
+			if (mapocc == "" && Path.is_occlusion_tex(base)) {
 				mapocc = f;
 				valid = true;
 			}
-			if (maprough == "" && Path.isRoughnessTex(base)) {
+			if (maprough == "" && Path.is_roughness_tex(base)) {
 				maprough = f;
 				valid = true;
 			}
-			if (mapmet == "" && Path.isMetallicTex(base)) {
+			if (mapmet == "" && Path.is_metallic_tex(base)) {
 				mapmet = f;
 				valid = true;
 			}
-			if (mapheight == "" && Path.isDisplacementTex(base)) {
+			if (mapheight == "" && Path.is_displacement_tex(base)) {
 				mapheight = f;
 				valid = true;
 			}
@@ -86,43 +86,43 @@ class ImportFolder {
 		let startY = 100;
 		let nodeH = 164;
 		if (mapbase != "") {
-			ImportFolder.placeImageNode(nodes, canvas, mapbase, startY + nodeH * pos, nout.id, 0);
+			ImportFolder.place_image_node(nodes, canvas, mapbase, startY + nodeH * pos, nout.id, 0);
 			pos++;
 		}
 		if (mapopac != "") {
-			ImportFolder.placeImageNode(nodes, canvas, mapopac, startY + nodeH * pos, nout.id, 1);
+			ImportFolder.place_image_node(nodes, canvas, mapopac, startY + nodeH * pos, nout.id, 1);
 			pos++;
 		}
 		if (mapocc != "") {
-			ImportFolder.placeImageNode(nodes, canvas, mapocc, startY + nodeH * pos, nout.id, 2);
+			ImportFolder.place_image_node(nodes, canvas, mapocc, startY + nodeH * pos, nout.id, 2);
 			pos++;
 		}
 		if (maprough != "") {
-			ImportFolder.placeImageNode(nodes, canvas, maprough, startY + nodeH * pos, nout.id, 3);
+			ImportFolder.place_image_node(nodes, canvas, maprough, startY + nodeH * pos, nout.id, 3);
 			pos++;
 		}
 		if (mapmet != "") {
-			ImportFolder.placeImageNode(nodes, canvas, mapmet, startY + nodeH * pos, nout.id, 4);
+			ImportFolder.place_image_node(nodes, canvas, mapmet, startY + nodeH * pos, nout.id, 4);
 			pos++;
 		}
 		if (mapnor != "") {
-			ImportFolder.placeImageNode(nodes, canvas, mapnor, startY + nodeH * pos, nout.id, 5);
+			ImportFolder.place_image_node(nodes, canvas, mapnor, startY + nodeH * pos, nout.id, 5);
 			pos++;
 		}
 		if (mapheight != "") {
-			ImportFolder.placeImageNode(nodes, canvas, mapheight, startY + nodeH * pos, nout.id, 7);
+			ImportFolder.place_image_node(nodes, canvas, mapheight, startY + nodeH * pos, nout.id, 7);
 			pos++;
 		}
 
-		MakeMaterial.parsePaintMaterial();
-		UtilRender.makeMaterialPreview();
+		MakeMaterial.parse_paint_material();
+		UtilRender.make_material_preview();
 		UIBase.hwnds[1].redraws = 2;
-		History.newMaterial();
+		History.new_material();
 	}
 
-	static placeImageNode = (nodes: zui_nodes_t, canvas: zui_node_canvas_t, asset: string, ny: i32, to_id: i32, to_socket: i32) => {
-		let n = NodesMaterial.createNode("TEX_IMAGE");
-		n.buttons[0].default_value = Base.getAssetIndex(asset);
+	static place_image_node = (nodes: zui_nodes_t, canvas: zui_node_canvas_t, asset: string, ny: i32, to_id: i32, to_socket: i32) => {
+		let n = NodesMaterial.create_node("TEX_IMAGE");
+		n.buttons[0].default_value = Base.get_asset_index(asset);
 		n.x = 72;
 		n.y = ny;
 		let l: zui_node_link_t = { id: zui_get_link_id(canvas.links), from_id: n.id, from_socket: 0, to_id: to_id, to_socket: to_socket };

@@ -1,22 +1,22 @@
 
 class PluginRaw {
-	drawUI: (ui: zui_t)=>void = null;
+	draw_ui: (ui: zui_t)=>void = null;
 	draw: ()=>void = null;
 	update: ()=>void = null;
 	delete: ()=>void = null;
-	version = "0.1";
-	apiversion = "0.1";
+	version: string = "0.1";
+	apiversion: string = "0.1";
 	name: string;
 }
 
 class Plugin {
 
 	static plugins: Map<string, PluginRaw> = new Map();
-	static pluginName: string;
+	static plugin_name: string;
 
 	static create(): PluginRaw {
-		let p = new PluginRaw();
-		p.name = Plugin.pluginName;
+		let p: PluginRaw = new PluginRaw();
+		p.name = Plugin.plugin_name;
 		Plugin.plugins.set(p.name, p);
 		return p;
 	}
@@ -24,7 +24,7 @@ class Plugin {
 	static start = (plugin: string) => {
 		try {
 			let blob: ArrayBuffer = data_get_blob("plugins/" + plugin);
-			Plugin.pluginName = plugin;
+			Plugin.plugin_name = plugin;
 			// (1, eval)(sys_buffer_to_string(blob)); // Global scope
 			eval(sys_buffer_to_string(blob)); // Local scope
 			data_delete_blob("plugins/" + plugin);
@@ -36,7 +36,7 @@ class Plugin {
 	}
 
 	static stop = (plugin: string) => {
-		let p = Plugin.plugins.get(plugin);
+		let p: PluginRaw = Plugin.plugins.get(plugin);
 		if (p != null && p.delete != null) p.delete();
 		Plugin.plugins.delete(plugin);
 	}
