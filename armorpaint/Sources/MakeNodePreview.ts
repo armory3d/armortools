@@ -2,8 +2,8 @@
 class MakeNodePreview {
 
 	static run = (data: material_t, matcon: material_context_t, node: zui_node_t, group: zui_node_canvas_t, parents: zui_node_t[]): NodeShaderContextRaw => {
-		let context_id = "mesh";
-		let con_mesh = NodeShaderContext.create(data, {
+		let context_id: string = "mesh";
+		let con_mesh: NodeShaderContextRaw = NodeShaderContext.create(data, {
 			name: context_id,
 			depth_write: false,
 			compare_mode: "always",
@@ -13,8 +13,8 @@ class MakeNodePreview {
 		});
 
 		con_mesh.allow_vcols = true;
-		let vert = NodeShaderContext.make_vert(con_mesh);
-		let frag = NodeShaderContext.make_frag(con_mesh);
+		let vert: NodeShaderRaw = NodeShaderContext.make_vert(con_mesh);
+		let frag: NodeShaderRaw = NodeShaderContext.make_frag(con_mesh);
 		frag.ins = vert.outs;
 
 		NodeShader.write_attrib(vert, 'gl_Position = vec4(pos.xy * 3.0, 0.0, 1.0);'); // Pos unpack
@@ -33,9 +33,7 @@ class MakeNodePreview {
 			ParserMaterial.push_group(group);
 			ParserMaterial.parents = parents;
 		}
-		let links = ParserMaterial.links;
-		let nodes = Context.raw.material.nodes;
-
+		let links: zui_node_link_t[] = ParserMaterial.links;
 		let link: zui_node_link_t = { id: zui_get_link_id(links), from_id: node.id, from_socket: Context.raw.node_preview_socket, to_id: -1, to_socket: -1 };
 		links.push(link);
 
@@ -46,9 +44,9 @@ class MakeNodePreview {
 		ParserMaterial.matcon = matcon;
 
 		ParserMaterial.transform_color_space = false;
-		let res = ParserMaterial.write_result(link);
+		let res: string = ParserMaterial.write_result(link);
 		ParserMaterial.transform_color_space = true;
-		let st = node.outputs[link.from_socket].type;
+		let st: string = node.outputs[link.from_socket].type;
 		if (st != "RGB" && st != "RGBA" && st != "VECTOR") {
 			res = ParserMaterial.to_vec3(res);
 		}

@@ -5,64 +5,64 @@ class ExportTexture {
 
 	static gamma: f32 = 1.0 / 2.2;
 
-	static run = (path: string, bakeMaterial: bool = false) => {
+	static run = (path: string, bake_material: bool = false) => {
 
 		///if is_paint
-		if (bakeMaterial) {
+		if (bake_material) {
 			ExportTexture.run_bake_material(path);
 		}
 		else if (Context.raw.layers_export == export_mode_t.PER_UDIM_TILE) {
-			let udimTiles: string[] = [];
+			let udim_tiles: string[] = [];
 			for (let l of Project.layers) {
 				if (SlotLayer.get_object_mask(l) > 0) {
 					let name: string = Project.paint_objects[SlotLayer.get_object_mask(l) - 1].base.name;
 					if (name.substr(name.length - 5, 2) == ".1") { // tile.1001
-						udimTiles.push(name.substr(name.length - 5));
+						udim_tiles.push(name.substr(name.length - 5));
 					}
 				}
 			}
-			if (udimTiles.length > 0) {
-				for (let udimTile of udimTiles) ExportTexture.run_layers(path, Project.layers, udimTile);
+			if (udim_tiles.length > 0) {
+				for (let udim_tile of udim_tiles) ExportTexture.run_layers(path, Project.layers, udim_tile);
 			}
 			else ExportTexture.run_layers(path, Project.layers);
 		}
 		else if (Context.raw.layers_export == export_mode_t.PER_OBJECT) {
-			let objectNames: string[] = [];
+			let object_names: string[] = [];
 			for (let l of Project.layers) {
 				if (SlotLayer.get_object_mask(l) > 0) {
 					let name: string = Project.paint_objects[SlotLayer.get_object_mask(l) - 1].base.name;
-					if (objectNames.indexOf(name) == -1) {
-						objectNames.push(name);
+					if (object_names.indexOf(name) == -1) {
+						object_names.push(name);
 					}
 				}
 			}
-			if (objectNames.length > 0) {
-				for (let name of objectNames) ExportTexture.run_layers(path, Project.layers, name);
+			if (object_names.length > 0) {
+				for (let name of object_names) ExportTexture.run_layers(path, Project.layers, name);
 			}
 			else ExportTexture.run_layers(path, Project.layers);
 		}
 		else { // Visible or selected
-			let atlasExport: bool = false;
+			let atlas_export: bool = false;
 			if (Project.atlas_objects != null) {
 				for (let i: i32 = 1; i < Project.atlas_objects.length; ++i) {
 					if (Project.atlas_objects[i - 1] != Project.atlas_objects[i]) {
-						atlasExport = true;
+						atlas_export = true;
 						break;
 					}
 				}
 			}
-			if (atlasExport) {
-				for (let atlasIndex: i32 = 0; atlasIndex < Project.atlas_objects.length; ++atlasIndex) {
+			if (atlas_export) {
+				for (let atlas_index: i32 = 0; atlas_index < Project.atlas_objects.length; ++atlas_index) {
 					let layers: SlotLayerRaw[] = [];
-					for (let objectIndex: i32 = 0; objectIndex < Project.atlas_objects.length; ++objectIndex) {
-						if (Project.atlas_objects[objectIndex] == atlasIndex) {
+					for (let object_index: i32 = 0; object_index < Project.atlas_objects.length; ++object_index) {
+						if (Project.atlas_objects[object_index] == atlas_index) {
 							for (let l of Project.layers) {
-								if (SlotLayer.get_object_mask(l) == 0 /* shared object */ || SlotLayer.get_object_mask(l) - 1 == objectIndex) layers.push(l);
+								if (SlotLayer.get_object_mask(l) == 0 /* shared object */ || SlotLayer.get_object_mask(l) - 1 == object_index) layers.push(l);
 							}
 						}
 					}
 					if (layers.length > 0) {
-						ExportTexture.run_layers(path, layers, Project.atlas_names[atlasIndex]);
+						ExportTexture.run_layers(path, layers, Project.atlas_names[atlas_index]);
 					}
 				}
 			}
@@ -86,14 +86,14 @@ class ExportTexture {
 
 	///if is_paint
 	static run_bake_material = (path: string) => {
-		if (RenderPathPaint.liveLayer == null) {
-			RenderPathPaint.liveLayer = SlotLayer.create("_live");
+		if (RenderPathPaint.live_layer == null) {
+			RenderPathPaint.live_layer = SlotLayer.create("_live");
 		}
 
 		let _tool: workspace_tool_t = Context.raw.tool;
 		Context.raw.tool = workspace_tool_t.FILL;
 		MakeMaterial.parse_paint_material();
-		let _paintObject: mesh_object_t = Context.raw.paint_object;
+		let _paint_object: mesh_object_t = Context.raw.paint_object;
 		let planeo: mesh_object_t = scene_get_child(".Plane").ext;
 		planeo.base.visible = true;
 		Context.raw.paint_object = planeo;
@@ -105,166 +105,166 @@ class ExportTexture {
 		MakeMaterial.parse_paint_material();
 		Context.raw.pdirty = 0;
 		planeo.base.visible = false;
-		Context.raw.paint_object = _paintObject;
+		Context.raw.paint_object = _paint_object;
 
-		ExportTexture.run_layers(path, [RenderPathPaint.liveLayer], "", true);
+		ExportTexture.run_layers(path, [RenderPathPaint.live_layer], "", true);
 	}
 	///end
 
 	///if is_paint
-	static run_layers = (path: string, layers: SlotLayerRaw[], objectName: string = "", bakeMaterial: bool = false) => {
+	static run_layers = (path: string, layers: SlotLayerRaw[], object_name: string = "", bake_material: bool = false) => {
 	///end
 
 	///if is_lab
-	static run_layers = (path: string, layers: any[], objectName: string = "") => {
+	static run_layers = (path: string, layers: any[], object_name: string = "") => {
 	///end
 
-		let textureSizeX: i32 = Config.get_texture_res_x();
-		let textureSizeY: i32 = Config.get_texture_res_y();
+		let texture_size_x: i32 = Config.get_texture_res_x();
+		let texture_size_y: i32 = Config.get_texture_res_y();
 		///if (krom_android || krom_ios)
 		let f: string = sys_title();
 		///else
 		let f: string = UIFiles.filename;
 		///end
 		if (f == "") f = tr("untitled");
-		let formatType: texture_ldr_format_t = Context.raw.format_type;
-		let bits: i32 = Base.bits_handle.position == texture_bits_t.BITS8 ? 8 : 16;
-		let ext: string = bits == 16 ? ".exr" : formatType == texture_ldr_format_t.PNG ? ".png" : ".jpg";
+		let format_type: texture_ldr_format_t = Context.raw.format_type;
+		let bits: i32 = base_bits_handle.position == texture_bits_t.BITS8 ? 8 : 16;
+		let ext: string = bits == 16 ? ".exr" : format_type == texture_ldr_format_t.PNG ? ".png" : ".jpg";
 		if (f.endsWith(ext)) f = f.substr(0, f.length - 4);
 
 		///if is_paint
-		let isUdim: bool = Context.raw.layers_export == export_mode_t.PER_UDIM_TILE;
-		if (isUdim) ext = objectName + ext;
+		let is_udim: bool = Context.raw.layers_export == export_mode_t.PER_UDIM_TILE;
+		if (is_udim) ext = object_name + ext;
 
-		Base.make_temp_img();
-		Base.make_export_img();
-		if (Base.pipe_merge == null) Base.make_pipe();
+		base_make_temp_img();
+		base_make_export_img();
+		if (base_pipe_merge == null) base_make_pipe();
 		if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
 		let empty: image_t = render_path_render_targets.get("empty_white")._image;
 
 		// Append object mask name
-		let exportSelected: bool = Context.raw.layers_export == export_mode_t.SELECTED;
-		if (exportSelected && SlotLayer.get_object_mask(layers[0]) > 0) {
+		let export_selected: bool = Context.raw.layers_export == export_mode_t.SELECTED;
+		if (export_selected && SlotLayer.get_object_mask(layers[0]) > 0) {
 			f += "_" + Project.paint_objects[SlotLayer.get_object_mask(layers[0]) - 1].base.name;
 		}
-		if (!isUdim && !exportSelected && objectName != "") {
-			f += "_" + objectName;
+		if (!is_udim && !export_selected && object_name != "") {
+			f += "_" + object_name;
 		}
 
 		// Clear export layer
-		g4_begin(Base.expa);
+		g4_begin(base_expa);
 		g4_clear(color_from_floats(0.0, 0.0, 0.0, 0.0));
 		g4_end();
-		g4_begin(Base.expb);
+		g4_begin(base_expb);
 		g4_clear(color_from_floats(0.5, 0.5, 1.0, 0.0));
 		g4_end();
-		g4_begin(Base.expc);
+		g4_begin(base_expc);
 		g4_clear(color_from_floats(1.0, 0.0, 0.0, 0.0));
 		g4_end();
 
 		// Flatten layers
 		for (let l1 of layers) {
-			if (!exportSelected && !SlotLayer.is_visible(l1)) continue;
+			if (!export_selected && !SlotLayer.is_visible(l1)) continue;
 			if (!SlotLayer.is_layer(l1)) continue;
 
-			if (objectName != "" && SlotLayer.get_object_mask(l1) > 0) {
-				if (isUdim && !Project.paint_objects[SlotLayer.get_object_mask(l1) - 1].base.name.endsWith(objectName)) continue;
-				let perObject: bool = Context.raw.layers_export == export_mode_t.PER_OBJECT;
-				if (perObject && Project.paint_objects[SlotLayer.get_object_mask(l1) - 1].base.name != objectName) continue;
+			if (object_name != "" && SlotLayer.get_object_mask(l1) > 0) {
+				if (is_udim && !Project.paint_objects[SlotLayer.get_object_mask(l1) - 1].base.name.endsWith(object_name)) continue;
+				let per_object: bool = Context.raw.layers_export == export_mode_t.PER_OBJECT;
+				if (per_object && Project.paint_objects[SlotLayer.get_object_mask(l1) - 1].base.name != object_name) continue;
 			}
 
 			let mask: image_t = empty;
 			let l1masks: SlotLayerRaw[] = SlotLayer.get_masks(l1);
-			if (l1masks != null && !bakeMaterial) {
+			if (l1masks != null && !bake_material) {
 				if (l1masks.length > 1) {
-					Base.make_temp_mask_img();
-					g2_begin(Base.temp_mask_image);
+					base_make_temp_mask_img();
+					g2_begin(base_temp_mask_image);
 					g2_clear(0x00000000);
 					g2_end();
-					let l1: any = { texpaint: Base.temp_mask_image };
+					let l1: any = { texpaint: base_temp_mask_image };
 					for (let i: i32 = 0; i < l1masks.length; ++i) {
-						Base.merge_layer(l1, l1masks[i]);
+						base_merge_layer(l1, l1masks[i]);
 					}
-					mask = Base.temp_mask_image;
+					mask = base_temp_mask_image;
 				}
 				else mask = l1masks[0].texpaint;
 			}
 
-			if (l1.paintBase) {
-				g2_begin(Base.temp_image); // Copy to temp
-				g2_set_pipeline(Base.pipe_copy);
-				g2_draw_image(Base.expa, 0, 0);
+			if (l1.paint_base) {
+				g2_begin(base_temp_image); // Copy to temp
+				g2_set_pipeline(base_pipe_copy);
+				g2_draw_image(base_expa, 0, 0);
 				g2_set_pipeline(null);
 				g2_end();
 
-				g4_begin(Base.expa);
-				g4_set_pipeline(Base.pipe_merge);
-				g4_set_tex(Base.tex0, l1.texpaint);
-				g4_set_tex(Base.tex1, empty);
-				g4_set_tex(Base.texmask, mask);
-				g4_set_tex(Base.texa, Base.temp_image);
-				g4_set_float(Base.opac, SlotLayer.get_opacity(l1));
-				g4_set_int(Base.blending, layers.length > 1 ? l1.blending : 0);
+				g4_begin(base_expa);
+				g4_set_pipeline(base_pipe_merge);
+				g4_set_tex(base_tex0, l1.texpaint);
+				g4_set_tex(base_tex1, empty);
+				g4_set_tex(base_texmask, mask);
+				g4_set_tex(base_texa, base_temp_image);
+				g4_set_float(base_opac, SlotLayer.get_opacity(l1));
+				g4_set_int(base_blending, layers.length > 1 ? l1.blending : 0);
 				g4_set_vertex_buffer(const_data_screen_aligned_vb);
 				g4_set_index_buffer(const_data_screen_aligned_ib);
 				g4_draw();
 				g4_end();
 			}
 
-			if (l1.paintNor) {
-				g2_begin(Base.temp_image);
-				g2_set_pipeline(Base.pipe_copy);
-				g2_draw_image(Base.expb, 0, 0);
+			if (l1.paint_nor) {
+				g2_begin(base_temp_image);
+				g2_set_pipeline(base_pipe_copy);
+				g2_draw_image(base_expb, 0, 0);
 				g2_set_pipeline(null);
 				g2_end();
 
-				g4_begin(Base.expb);
-				g4_set_pipeline(Base.pipe_merge);
-				g4_set_tex(Base.tex0, l1.texpaint);
-				g4_set_tex(Base.tex1, l1.texpaint_nor);
-				g4_set_tex(Base.texmask, mask);
-				g4_set_tex(Base.texa, Base.temp_image);
-				g4_set_float(Base.opac, SlotLayer.get_opacity(l1));
-				g4_set_int(Base.blending, l1.paintNorBlend ? -2 : -1);
+				g4_begin(base_expb);
+				g4_set_pipeline(base_pipe_merge);
+				g4_set_tex(base_tex0, l1.texpaint);
+				g4_set_tex(base_tex1, l1.texpaint_nor);
+				g4_set_tex(base_texmask, mask);
+				g4_set_tex(base_texa, base_temp_image);
+				g4_set_float(base_opac, SlotLayer.get_opacity(l1));
+				g4_set_int(base_blending, l1.paint_nor_blend ? -2 : -1);
 				g4_set_vertex_buffer(const_data_screen_aligned_vb);
 				g4_set_index_buffer(const_data_screen_aligned_ib);
 				g4_draw();
 				g4_end();
 			}
 
-			if (l1.paintOcc || l1.paintRough || l1.paintMet || l1.paintHeight) {
-				g2_begin(Base.temp_image);
-				g2_set_pipeline(Base.pipe_copy);
-				g2_draw_image(Base.expc, 0, 0);
+			if (l1.paint_occ || l1.paint_rough || l1.paint_met || l1.paint_height) {
+				g2_begin(base_temp_image);
+				g2_set_pipeline(base_pipe_copy);
+				g2_draw_image(base_expc, 0, 0);
 				g2_set_pipeline(null);
 				g2_end();
 
-				if (l1.paintOcc && l1.paintRough && l1.paintMet && l1.paintHeight) {
-					Base.commands_merge_pack(Base.pipe_merge, Base.expc, l1.texpaint, l1.texpaint_pack, SlotLayer.get_opacity(l1), mask, l1.paintHeightBlend ? -3 : -1);
+				if (l1.paint_occ && l1.paint_rough && l1.paint_met && l1.paint_height) {
+					base_commands_merge_pack(base_pipe_merge, base_expc, l1.texpaint, l1.texpaint_pack, SlotLayer.get_opacity(l1), mask, l1.paint_height_blend ? -3 : -1);
 				}
 				else {
-					if (l1.paintOcc) Base.commands_merge_pack(Base.pipe_merge_r, Base.expc, l1.texpaint, l1.texpaint_pack, SlotLayer.get_opacity(l1), mask);
-					if (l1.paintRough) Base.commands_merge_pack(Base.pipe_merge_g, Base.expc, l1.texpaint, l1.texpaint_pack, SlotLayer.get_opacity(l1), mask);
-					if (l1.paintMet) Base.commands_merge_pack(Base.pipe_merge_b, Base.expc, l1.texpaint, l1.texpaint_pack, SlotLayer.get_opacity(l1), mask);
+					if (l1.paint_occ) base_commands_merge_pack(base_pipe_merge_r, base_expc, l1.texpaint, l1.texpaint_pack, SlotLayer.get_opacity(l1), mask);
+					if (l1.paint_rough) base_commands_merge_pack(base_pipe_merge_g, base_expc, l1.texpaint, l1.texpaint_pack, SlotLayer.get_opacity(l1), mask);
+					if (l1.paint_met) base_commands_merge_pack(base_pipe_merge_b, base_expc, l1.texpaint, l1.texpaint_pack, SlotLayer.get_opacity(l1), mask);
 				}
 			}
 		}
 
 		///if krom_metal
 		// Flush command list
-		g2_begin(Base.expa);
+		g2_begin(base_expa);
 		g2_end();
-		g2_begin(Base.expb);
+		g2_begin(base_expb);
 		g2_end();
-		g2_begin(Base.expc);
+		g2_begin(base_expc);
 		g2_end();
 		///end
 		///end
 
 		///if is_paint
-		let texpaint: image_t = Base.expa;
-		let texpaint_nor: image_t = Base.expb;
-		let texpaint_pack: image_t = Base.expc;
+		let texpaint: image_t = base_expa;
+		let texpaint_nor: image_t = base_expb;
+		let texpaint_pack: image_t = base_expc;
 		///end
 
 		///if is_lab
@@ -290,7 +290,7 @@ class ExportTexture {
 		for (let t of preset.textures) {
 			let c: string[] = t.channels;
 			let tex_name = t.name != "" ? "_" + t.name : "";
-			let singleChannel: bool = c[0] == c[1] && c[1] == c[2] && c[3] == "1.0";
+			let single_channel: bool = c[0] == c[1] && c[1] == c[2] && c[3] == "1.0";
 			if (c[0] == "base_r" && c[1] == "base_g" && c[2] == "base_b" && c[3] == "1.0" && t.color_space == "linear") {
 				ExportTexture.write_texture(path + Path.sep + f + tex_name + ext, pixpaint, 1);
 			}
@@ -300,23 +300,23 @@ class ExportTexture {
 			else if (c[0] == "occ" && c[1] == "rough" && c[2] == "metal" && c[3] == "1.0" && t.color_space == "linear") {
 				ExportTexture.write_texture(path + Path.sep + f + tex_name + ext, pixpaint_pack, 1);
 			}
-			else if (singleChannel && c[0] == "occ" && t.color_space == "linear") {
+			else if (single_channel && c[0] == "occ" && t.color_space == "linear") {
 				ExportTexture.write_texture(path + Path.sep + f + tex_name + ext, pixpaint_pack, 2, 0);
 			}
-			else if (singleChannel && c[0] == "rough" && t.color_space == "linear") {
+			else if (single_channel && c[0] == "rough" && t.color_space == "linear") {
 				ExportTexture.write_texture(path + Path.sep + f + tex_name + ext, pixpaint_pack, 2, 1);
 			}
-			else if (singleChannel && c[0] == "metal" && t.color_space == "linear") {
+			else if (single_channel && c[0] == "metal" && t.color_space == "linear") {
 				ExportTexture.write_texture(path + Path.sep + f + tex_name + ext, pixpaint_pack, 2, 2);
 			}
-			else if (singleChannel && c[0] == "height" && t.color_space == "linear") {
+			else if (single_channel && c[0] == "height" && t.color_space == "linear") {
 				ExportTexture.write_texture(path + Path.sep + f + tex_name + ext, pixpaint_pack, 2, 3);
 			}
-			else if (singleChannel && c[0] == "opac" && t.color_space == "linear") {
+			else if (single_channel && c[0] == "opac" && t.color_space == "linear") {
 				ExportTexture.write_texture(path + Path.sep + f + tex_name + ext, pixpaint, 2, 3);
 			}
 			else {
-				if (pix == null) pix = new ArrayBuffer(textureSizeX * textureSizeY * 4 * Math.floor(bits / 8));
+				if (pix == null) pix = new ArrayBuffer(texture_size_x * texture_size_y * 4 * Math.floor(bits / 8));
 				for (let i: i32 = 0; i < 4; ++i) {
 					let c: string = t.channels[i];
 					if      (c == "base_r") ExportTexture.copy_channel(new DataView(pixpaint), 0, new DataView(pix), i, t.color_space == "linear");
@@ -348,10 +348,10 @@ class ExportTexture {
 	}
 
 	static write_texture = (file: string, pixels: ArrayBuffer, type: i32 = 1, off: i32 = 0) => {
-		let resX: i32 = Config.get_texture_res_x();
-		let resY: i32 = Config.get_texture_res_y();
-		let bitsHandle: i32 = Base.bits_handle.position;
-		let bits: i32 = bitsHandle == texture_bits_t.BITS8 ? 8 : bitsHandle == texture_bits_t.BITS16 ? 16 : 32;
+		let res_x: i32 = Config.get_texture_res_x();
+		let res_y: i32 = Config.get_texture_res_y();
+		let bits_handle: i32 = base_bits_handle.position;
+		let bits: i32 = bits_handle == texture_bits_t.BITS8 ? 8 : bits_handle == texture_bits_t.BITS16 ? 16 : 32;
 		let format: i32 = 0; // RGBA
 		if (type == 1) format = 2; // RGB1
 		if (type == 2 && off == 0) format = 3; // RRR1
@@ -360,7 +360,7 @@ class ExportTexture {
 		if (type == 2 && off == 3) format = 6; // AAA1
 
 		if (Context.raw.layers_destination == export_destination_t.PACKED) {
-			let image: image_t = image_from_bytes(pixels, resX, resY);
+			let image: image_t = image_from_bytes(pixels, res_x, res_y);
 			data_cached_images.set(file, image);
 			let ar: string[] = file.split(Path.sep);
 			let name: string = ar[ar.length - 1];
@@ -375,13 +375,13 @@ class ExportTexture {
 		}
 
 		if (bits == 8 && Context.raw.format_type == texture_ldr_format_t.PNG) {
-			krom_write_png(file, pixels, resX, resY, format);
+			krom_write_png(file, pixels, res_x, res_y, format);
 		}
 		else if (bits == 8 && Context.raw.format_type == texture_ldr_format_t.JPG) {
-			krom_write_jpg(file, pixels, resX, resY, format, Math.floor(Context.raw.format_quality));
+			krom_write_jpg(file, pixels, res_x, res_y, format, Math.floor(Context.raw.format_quality));
 		}
 		else { // Exr
-			let b: ArrayBuffer = ParserExr.run(resX, resY, pixels, bits, type, off);
+			let b: ArrayBuffer = ParserExr.run(res_x, res_y, pixels, bits, type, off);
 			krom_file_save_bytes(file, b, b.byteLength);
 		}
 	}

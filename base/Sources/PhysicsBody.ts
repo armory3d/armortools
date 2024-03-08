@@ -109,49 +109,49 @@ class PhysicsBody {
 			pb.btshape = new Ammo.btSphereShape(PhysicsBody.with_margin(pb, transform.dim.x / 2));
 		}
 		else if (pb.shape == shape_type_t.CONVEX_HULL) {
-			let shapeConvex: Ammo.btConvexHullShape = PhysicsBody.fill_convex_hull(pb, transform.scale, pb.collision_margin);
-			pb.btshape = shapeConvex;
+			let shape_convex: Ammo.btConvexHullShape = PhysicsBody.fill_convex_hull(pb, transform.scale, pb.collision_margin);
+			pb.btshape = shape_convex;
 		}
 		else if (pb.shape == shape_type_t.CONE) {
-			let coneZ: Ammo.btConeShapeZ = new Ammo.btConeShapeZ(
+			let cone_z: Ammo.btConeShapeZ = new Ammo.btConeShapeZ(
 				PhysicsBody.with_margin(pb, transform.dim.x / 2), // Radius
 				PhysicsBody.with_margin(pb, transform.dim.z));	 // Height
-			let cone: Ammo.btConeShape = coneZ;
+			let cone: Ammo.btConeShape = cone_z;
 			pb.btshape = cone;
 		}
 		else if (pb.shape == shape_type_t.CYLINDER) {
 			PhysicsWorld.vec1.setX(PhysicsBody.with_margin(pb, transform.dim.x / 2));
 			PhysicsWorld.vec1.setY(PhysicsBody.with_margin(pb, transform.dim.y / 2));
 			PhysicsWorld.vec1.setZ(PhysicsBody.with_margin(pb, transform.dim.z / 2));
-			let cylZ: Ammo.btCylinderShapeZ = new Ammo.btCylinderShapeZ(PhysicsWorld.vec1);
-			let cyl: Ammo.btCylinderShape = cylZ;
+			let cyl_z: Ammo.btCylinderShapeZ = new Ammo.btCylinderShapeZ(PhysicsWorld.vec1);
+			let cyl: Ammo.btCylinderShape = cyl_z;
 			pb.btshape = cyl;
 		}
 		else if (pb.shape == shape_type_t.CAPSULE) {
 			let r: f32 = transform.dim.x / 2;
-			let capsZ: Ammo.btCapsuleShapeZ = new Ammo.btCapsuleShapeZ(
+			let caps_z: Ammo.btCapsuleShapeZ = new Ammo.btCapsuleShapeZ(
 				PhysicsBody.with_margin(pb, r), // Radius
 				PhysicsBody.with_margin(pb, transform.dim.z - r * 2)); // Distance between 2 sphere centers
-			let caps: Ammo.btCapsuleShape = capsZ;
+			let caps: Ammo.btCapsuleShape = caps_z;
 			pb.btshape = caps;
 		}
 		else if (pb.shape == shape_type_t.MESH) {
-			let meshInterface: Ammo.btTriangleMesh = PhysicsBody.fill_triangle_mesh(pb, transform.scale);
+			let mesh_interface: Ammo.btTriangleMesh = PhysicsBody.fill_triangle_mesh(pb, transform.scale);
 			if (pb.mass > 0) {
-				let shapeGImpact: Ammo.btGImpactMeshShape = new Ammo.btGImpactMeshShape(meshInterface);
-				shapeGImpact.updateBound();
-				let shapeConcave: Ammo.btConcaveShape = shapeGImpact;
-				pb.btshape = shapeConcave;
+				let shape_gimpact: Ammo.btGImpactMeshShape = new Ammo.btGImpactMeshShape(mesh_interface);
+				shape_gimpact.updateBound();
+				let shape_concave: Ammo.btConcaveShape = shape_gimpact;
+				pb.btshape = shape_concave;
 				if (!PhysicsBody.gimpact_registered) {
 					PhysicsBody.gimpact_registered = true;
 					new Ammo.GImpactCollisionAlgorithm().registerAlgorithm(physics.dispatcher);
 				}
 			}
 			else {
-				let shapeBvh: Ammo.btBvhTriangleMeshShape = new Ammo.btBvhTriangleMeshShape(meshInterface, true, true);
-				let shapeTri: Ammo.btTriangleMeshShape = shapeBvh;
-				let shapeConcave: Ammo.btConcaveShape = shapeTri;
-				pb.btshape = shapeConcave;
+				let shape_bvh: Ammo.btBvhTriangleMeshShape = new Ammo.btBvhTriangleMeshShape(mesh_interface, true, true);
+				let shape_tri: Ammo.btTriangleMeshShape = shape_bvh;
+				let shape_concave: Ammo.btConcaveShape = shape_tri;
+				pb.btshape = shape_concave;
 			}
 		}
 		else if (pb.shape == shape_type_t.TERRAIN) {
@@ -165,8 +165,8 @@ class PhysicsBody {
 			}
 			let slice: i32 = Math.floor(Math.sqrt(length)); // Assuming square terrain data
 			let axis: i32 = 2; // z
-			let dataType: i32 = 5; // u8
-			pb.btshape = new Ammo.btHeightfieldTerrainShape(slice, slice, PhysicsBody.ammo_array, 1 / 255, 0, 1, axis, dataType, false);
+			let data_type: i32 = 5; // u8
+			pb.btshape = new Ammo.btHeightfieldTerrainShape(slice, slice, PhysicsBody.ammo_array, 1 / 255, 0, 1, axis, data_type, false);
 			PhysicsBody.vec1.setX(transform.dim.x / slice);
 			PhysicsBody.vec1.setY(transform.dim.y / slice);
 			PhysicsBody.vec1.setZ(transform.dim.z);
@@ -192,8 +192,8 @@ class PhysicsBody {
 		if (pb.mass > 0) {
 			pb.btshape.calculateLocalInertia(pb.mass, inertia);
 		}
-		let bodyCI: Ammo.btRigidBodyConstructionInfo = new Ammo.btRigidBodyConstructionInfo(pb.mass, pb.motion_state, pb.btshape, inertia);
-		pb.body = new Ammo.btRigidBody(bodyCI);
+		let body_ci: Ammo.btRigidBodyConstructionInfo = new Ammo.btRigidBodyConstructionInfo(pb.mass, pb.motion_state, pb.btshape, inertia);
+		pb.body = new Ammo.btRigidBody(body_ci);
 
 		pb.body.setFriction(pb.friction);
 		if (pb.shape == shape_type_t.SPHERE || pb.shape == shape_type_t.CYLINDER || pb.shape == shape_type_t.CONE || pb.shape == shape_type_t.CAPSULE) {
@@ -226,7 +226,7 @@ class PhysicsBody {
 
 		// notifyOnRemove(removeFromWorld);
 
-		Ammo.destroy(bodyCI);
+		Ammo.destroy(body_ci);
 	}
 
 	static physics_update = (pb: PhysicsBodyRaw) => {
@@ -343,9 +343,9 @@ class PhysicsBody {
 		PhysicsBody.vec1.setY(v.y / pb.body_scale_y);
 		PhysicsBody.vec1.setZ(v.z / pb.body_scale_z);
 		pb.btshape.setLocalScaling(PhysicsBody.vec1);
-		let worldDyn: Ammo.btDynamicsWorld = PhysicsWorld.active.world;
-		let worldCol: Ammo.btCollisionWorld = worldDyn;
-		worldCol.updateSingleAabb(pb.body);
+		let world_dyn: Ammo.btDynamicsWorld = PhysicsWorld.active.world;
+		let world_col: Ammo.btCollisionWorld = world_dyn;
+		world_col.updateSingleAabb(pb.body);
 	}
 
 	static sync_transform = (pb: PhysicsBodyRaw) => {
@@ -403,14 +403,14 @@ class PhysicsBody {
 	static fill_triangle_mesh = (pb: PhysicsBodyRaw, scale: vec4_t): Ammo.btTriangleMesh => {
 		// Check whether shape already exists
 		let data: any = pb.object.ext.data;
-		let triangleMesh: Ammo.btTriangleMesh = PhysicsBody.triangle_mesh_cache.get(data);
-		if (triangleMesh != null) {
+		let triangle_mesh: Ammo.btTriangleMesh = PhysicsBody.triangle_mesh_cache.get(data);
+		if (triangle_mesh != null) {
 			PhysicsBody.users_cache.set(data, PhysicsBody.users_cache.get(data) + 1);
-			return triangleMesh;
+			return triangle_mesh;
 		}
 
-		triangleMesh = new Ammo.btTriangleMesh(true, true);
-		PhysicsBody.triangle_mesh_cache.set(data, triangleMesh);
+		triangle_mesh = new Ammo.btTriangleMesh(true, true);
+		PhysicsBody.triangle_mesh_cache.set(data, triangle_mesh);
 		PhysicsBody.users_cache.set(data, 1);
 
 		let positions: i16_array_t = mesh_data_get_vertex_array(data, 'pos').values;
@@ -435,10 +435,10 @@ class PhysicsBody {
 				PhysicsBody.vec3.setX(positions[ar[i * 3 + 2] * 4    ] * sx);
 				PhysicsBody.vec3.setY(positions[ar[i * 3 + 2] * 4 + 1] * sy);
 				PhysicsBody.vec3.setZ(positions[ar[i * 3 + 2] * 4 + 2] * sz);
-				triangleMesh.addTriangle(PhysicsBody.vec1, PhysicsBody.vec2, PhysicsBody.vec3);
+				triangle_mesh.addTriangle(PhysicsBody.vec1, PhysicsBody.vec2, PhysicsBody.vec3);
 			}
 		}
-		return triangleMesh;
+		return triangle_mesh;
 	}
 
 	static delete = (pb: PhysicsBodyRaw) => {

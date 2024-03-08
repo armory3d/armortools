@@ -418,12 +418,12 @@ class ImportBlendMesh {
 			}
 
 			// Pack positions to (-1, 1) range
-			let scalePos: f32 = 0.0;
+			let scale_pos: f32 = 0.0;
 			for (let i: i32 = 0; i < posa32.length; ++i) {
 				let f: f32 = Math.abs(posa32[i]);
-				if (scalePos < f) scalePos = f;
+				if (scale_pos < f) scale_pos = f;
 			}
-			let inv: f32 = 1 / scalePos;
+			let inv: f32 = 1 / scale_pos;
 			for (let i: i32 = 0; i < Math.floor(posa32.length / 3); ++i) {
 				posa[i * 4    ] = Math.floor(posa32[i * 3    ] * 32767 * inv);
 				posa[i * 4 + 1] = Math.floor(posa32[i * 3 + 1] * 32767 * inv);
@@ -437,7 +437,7 @@ class ImportBlendMesh {
 				cola: cola,
 				inda: inda,
 				name: name,
-				scalePos: scalePos,
+				scalePos: scale_pos,
 				scaleTes: 1.0
 			};
 

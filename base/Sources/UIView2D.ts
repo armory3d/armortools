@@ -47,7 +47,7 @@ class UIView2D {
 		///end
 
 		let scale: f32 = Config.raw.window_scale;
-		UIView2D.ui = zui_create({ theme: Base.theme, font: Base.font, color_wheel: Base.color_wheel, black_white_gradient: Base.color_wheel_gradient, scale_factor: scale });
+		UIView2D.ui = zui_create({ theme: base_theme, font: base_font, color_wheel: base_color_wheel, black_white_gradient: base_color_wheel_gradient, scale_factor: scale });
 		UIView2D.ui.scroll_enabled = false;
 	}
 
@@ -132,11 +132,11 @@ class UIView2D {
 				///else
 
 				let nodes: zui_nodes_t = UINodes.get_nodes();
-				if (nodes.nodesSelectedId.length > 0) {
-					let sel: zui_node_t = zui_get_node(UINodes.get_canvas(true).nodes, nodes.nodesSelectedId[0]);
-					let brushNode: LogicNode = ParserLogic.get_logic_node(sel);
-					if (brushNode != null) {
-						tex = brushNode.get_cached_image();
+				if (nodes.nodes_selected_id.length > 0) {
+					let sel: zui_node_t = zui_get_node(UINodes.get_canvas(true).nodes, nodes.nodes_selected_id[0]);
+					let brush_node: LogicNode = ParserLogic.get_logic_node(sel);
+					if (brush_node != null) {
+						tex = brush_node.get_cached_image();
 					}
 				}
 
@@ -146,20 +146,20 @@ class UIView2D {
 			else if (UIView2D.type == view_2d_type_t.LAYER) {
 				let layer: SlotLayerRaw = l;
 
-				if (Config.raw.brush_live && RenderPathPaint.liveLayerDrawn > 0) {
-					layer = RenderPathPaint.liveLayer;
+				if (Config.raw.brush_live && RenderPathPaint.live_layer_drawn > 0) {
+					layer = RenderPathPaint.live_layer;
 				}
 
 				if (UIView2D.layer_mode == view_2d_layer_mode_t.VISIBLE) {
 					let current: image_t = _g2_current;
 					if (current != null) g2_end();
-					layer = Base.flatten();
+					layer = base_flatten();
 					if (current != null) g2_begin(current);
 				}
 				else if (SlotLayer.is_group(layer)) {
 					let current: image_t = _g2_current;
 					if (current != null) g2_end();
-					layer = Base.flatten(false, SlotLayer.get_children(layer));
+					layer = base_flatten(false, SlotLayer.get_children(layer));
 					if (current != null) g2_begin(current);
 				}
 
@@ -230,7 +230,7 @@ class UIView2D {
 				if ((Context.in_2d_view(view_2d_type_t.ASSET) || Context.in_2d_view(view_2d_type_t.NODE)) && Context.raw.tool == workspace_tool_t.PICKER && UIView2D.ui.input_down) {
 					let x: f32 = UIView2D.ui.input_x - tx - UIView2D.wx;
 					let y: f32 = UIView2D.ui.input_y - ty - UIView2D.wy;
-					Base.notify_on_next_frame(() => {
+					base_notify_on_next_frame(() => {
 						let texpaint_picker: image_t = render_path_render_targets.get("texpaint_picker")._image;
 						g2_begin(texpaint_picker);
 						g2_draw_scaled_image(tex, -x, -y, tw, th);
@@ -268,9 +268,9 @@ class UIView2D {
 			g2_fill_rect(0, zui_ELEMENT_H(UIView2D.ui), UIView2D.ww, zui_ELEMENT_H(UIView2D.ui) + zui_ELEMENT_OFFSET(UIView2D.ui) * 2);
 			g2_set_color(0xffffffff);
 
-			let startY: f32 = zui_ELEMENT_H(UIView2D.ui) + zui_ELEMENT_OFFSET(UIView2D.ui);
+			let start_y: f32 = zui_ELEMENT_H(UIView2D.ui) + zui_ELEMENT_OFFSET(UIView2D.ui);
 			UIView2D.ui._x = 2;
-			UIView2D.ui._y = 2 + startY;
+			UIView2D.ui._y = 2 + start_y;
 			UIView2D.ui._w = ew;
 
 			// Editable layer name
@@ -302,8 +302,8 @@ class UIView2D {
 				///else
 
 				let nodes: zui_nodes_t = UINodes.get_nodes();
-				if (nodes.nodesSelectedId.length > 0) {
-					zui_text(zui_get_node(UINodes.get_canvas(true).nodes, nodes.nodesSelectedId[0]).name);
+				if (nodes.nodes_selected_id.length > 0) {
+					zui_text(zui_get_node(UINodes.get_canvas(true).nodes, nodes.nodes_selected_id[0]).name);
 				}
 
 				///end
@@ -322,7 +322,7 @@ class UIView2D {
 
 			if (h.changed) UIBase.hwnds[0].redraws = 2;
 			UIView2D.ui._x += UIView2D.ui._w + 3;
-			UIView2D.ui._y = 2 + startY;
+			UIView2D.ui._y = 2 + start_y;
 			UIView2D.ui._w = ew;
 
 			///if (is_paint || is_sculpt)
@@ -332,7 +332,7 @@ class UIView2D {
 					tr("Selected"),
 				], tr("Layers"));
 				UIView2D.ui._x += ew + 3;
-				UIView2D.ui._y = 2 + startY;
+				UIView2D.ui._y = 2 + start_y;
 
 				if (!SlotLayer.is_mask(Context.raw.layer)) {
 					UIView2D.tex_type = zui_combo(zui_handle("uiview2d_3", { position: UIView2D.tex_type }), [
@@ -345,19 +345,19 @@ class UIView2D {
 						tr("Height"),
 					], tr("Texture"));
 					UIView2D.ui._x += ew + 3;
-					UIView2D.ui._y = 2 + startY;
+					UIView2D.ui._y = 2 + start_y;
 				}
 
 				UIView2D.ui._w = Math.floor(ew * 0.7 + 3);
 				UIView2D.uvmap_show = zui_check(zui_handle("uiview2d_4", { selected: UIView2D.uvmap_show }), tr("UV Map"));
 				UIView2D.ui._x += ew * 0.7 + 3;
-				UIView2D.ui._y = 2 + startY;
+				UIView2D.ui._y = 2 + start_y;
 			}
 			///end
 
 			UIView2D.tiled_show = zui_check(zui_handle("uiview2d_5", { selected: UIView2D.tiled_show }), tr("Tiled"));
 			UIView2D.ui._x += ew * 0.7 + 3;
-			UIView2D.ui._y = 2 + startY;
+			UIView2D.ui._y = 2 + start_y;
 
 			if (UIView2D.type == view_2d_type_t.ASSET && tex != null) { // Texture resolution
 				zui_text(tex.width + "x" + tex.height);
@@ -366,10 +366,10 @@ class UIView2D {
 			// Picked position
 			///if (is_paint || is_sculpt)
 			if (Context.raw.tool == workspace_tool_t.PICKER && (UIView2D.type == view_2d_type_t.LAYER || UIView2D.type == view_2d_type_t.ASSET)) {
-				let cursorImg: image_t = Res.get("cursor.k");
+				let cursor_img: image_t = Res.get("cursor.k");
 				let hsize: f32 = 16 * zui_SCALE(UIView2D.ui);
 				let size: f32 = hsize * 2;
-				g2_draw_scaled_image(cursorImg, tx + tw * Context.raw.uvx_picked - hsize, ty + th * Context.raw.uvy_picked - hsize, size, size);
+				g2_draw_scaled_image(cursor_img, tx + tw * Context.raw.uvx_picked - hsize, ty + th * Context.raw.uvy_picked - hsize, size, size);
 			}
 			///end
 		}
@@ -384,7 +384,7 @@ class UIView2D {
 		Context.raw.paint2d = false;
 		///end
 
-		if (!Base.ui_enabled ||
+		if (!base_ui_enabled ||
 			!UIView2D.show ||
 			mouse_x < UIView2D.wx ||
 			mouse_x > UIView2D.wx + UIView2D.ww ||
@@ -400,13 +400,13 @@ class UIView2D {
 		UIView2D.pan_x += control.pan_x;
 		UIView2D.pan_y += control.pan_y;
 		if (control.zoom != 0) {
-			let _panX: f32 = UIView2D.pan_x / UIView2D.pan_scale;
-			let _panY: f32 = UIView2D.pan_y / UIView2D.pan_scale;
+			let _pan_x: f32 = UIView2D.pan_x / UIView2D.pan_scale;
+			let _pan_y: f32 = UIView2D.pan_y / UIView2D.pan_scale;
 			UIView2D.pan_scale += control.zoom;
 			if (UIView2D.pan_scale < 0.1) UIView2D.pan_scale = 0.1;
 			if (UIView2D.pan_scale > 6.0) UIView2D.pan_scale = 6.0;
-			UIView2D.pan_x = _panX * UIView2D.pan_scale;
-			UIView2D.pan_y = _panY * UIView2D.pan_scale;
+			UIView2D.pan_x = _pan_x * UIView2D.pan_scale;
+			UIView2D.pan_y = _pan_y * UIView2D.pan_scale;
 
 			if (zui_touch_scroll()) {
 				// Zoom to finger location
@@ -417,15 +417,15 @@ class UIView2D {
 
 		///if (is_paint || is_sculpt)
 		let decal: bool = Context.raw.tool == workspace_tool_t.DECAL || Context.raw.tool == workspace_tool_t.TEXT;
-		let decalMask: bool = decal && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
-		let setCloneSource: bool = Context.raw.tool == workspace_tool_t.CLONE && Operator.shortcut(Config.keymap.set_clone_source + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
+		let decal_mask: bool = decal && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
+		let set_clone_source: bool = Context.raw.tool == workspace_tool_t.CLONE && Operator.shortcut(Config.keymap.set_clone_source + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
 
 		if (UIView2D.type == view_2d_type_t.LAYER &&
 			!UIView2D.text_input_hover &&
 			(Operator.shortcut(Config.keymap.action_paint, ShortcutType.ShortcutDown) ||
 			 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown) ||
-			 decalMask ||
-			 setCloneSource ||
+			 decal_mask ||
+			 set_clone_source ||
 			 Config.raw.brush_live)) {
 			Context.raw.paint2d = true;
 		}

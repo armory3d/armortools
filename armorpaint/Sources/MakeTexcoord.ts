@@ -3,17 +3,17 @@ class MakeTexcoord {
 
 	static run = (vert: NodeShaderRaw, frag: NodeShaderRaw) => {
 
-		let fillLayer = Context.raw.layer.fill_layer != null;
-		let uvType = fillLayer ? Context.raw.layer.uvType : Context.raw.brush_paint;
-		let decal = Context.raw.tool == workspace_tool_t.DECAL || Context.raw.tool == workspace_tool_t.TEXT;
-		let angle = Context.raw.brush_angle + Context.raw.brush_nodes_angle;
-		let uvAngle = fillLayer ? Context.raw.layer.angle : angle;
+		let fill_layer: bool = Context.raw.layer.fill_layer != null;
+		let uv_type: uv_type_t = fill_layer ? Context.raw.layer.uv_type : Context.raw.brush_paint;
+		let decal: bool = Context.raw.tool == workspace_tool_t.DECAL || Context.raw.tool == workspace_tool_t.TEXT;
+		let angle: f32 = Context.raw.brush_angle + Context.raw.brush_nodes_angle;
+		let uvAngle: f32 = fill_layer ? Context.raw.layer.angle : angle;
 
-		if (uvType == uv_type_t.PROJECT || decal) { // TexCoords - project
+		if (uv_type == uv_type_t.PROJECT || decal) { // TexCoords - project
 			NodeShader.add_uniform(frag, 'float brushScale', '_brushScale');
 			NodeShader.write_attrib(frag, 'vec2 uvsp = sp.xy;');
 
-			if (fillLayer) { // Decal layer
+			if (fill_layer) { // Decal layer
 				NodeShader.write_attrib(frag, 'if (uvsp.x < 0.0 || uvsp.y < 0.0 || uvsp.x > 1.0 || uvsp.y > 1.0) discard;');
 
 				if (uvAngle != 0.0) {
@@ -23,8 +23,8 @@ class MakeTexcoord {
 
 				frag.n = true;
 				NodeShader.add_uniform(frag, 'vec3 decalLayerNor', '_decalLayerNor');
-				let dotAngle = Context.raw.brush_angle_reject_dot;
-				NodeShader.write(frag, `if (abs(dot(n, decalLayerNor) - 1.0) > ${dotAngle}) discard;`);
+				let dot_angle: f32 = Context.raw.brush_angle_reject_dot;
+				NodeShader.write(frag, `if (abs(dot(n, decalLayerNor) - 1.0) > ${dot_angle}) discard;`);
 
 				frag.wposition = true;
 				NodeShader.add_uniform(frag, 'vec3 decalLayerLoc', '_decalLayerLoc');
@@ -66,7 +66,7 @@ class MakeTexcoord {
 
 			NodeShader.write_attrib(frag, 'vec2 texCoord = uvsp * brushScale;');
 		}
-		else if (uvType == uv_type_t.UVMAP) { // TexCoords - uvmap
+		else if (uv_type == uv_type_t.UVMAP) { // TexCoords - uvmap
 			NodeShader.add_uniform(vert, 'float brushScale', '_brushScale');
 			NodeShader.add_out(vert, 'vec2 texCoord');
 			NodeShader.write(vert, 'texCoord = tex * brushScale;');

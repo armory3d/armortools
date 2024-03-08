@@ -243,14 +243,14 @@ class ParserExr {
 		out.push(0); // end of header
 
 		let channels: i32 = 4;
-		let byteSize: i32 = bits == 16 ? 2 : 4;
-		let kHeaderSize: i32 = out.length;
-		let kScanlineTableSize: i32 = 8 * height;
-		let pixelRowSize: i32 = width * 3 * byteSize;
-		let fullRowSize: i32 = pixelRowSize + 8;
+		let byte_size: i32 = bits == 16 ? 2 : 4;
+		let k_header_size: i32 = out.length;
+		let k_scanline_table_size: i32 = 8 * height;
+		let pixel_row_size: i32 = width * 3 * byte_size;
+		let full_row_size: i32 = pixel_row_size + 8;
 
 		// line offset table
-		let ofs: i32 = kHeaderSize + kScanlineTableSize;
+		let ofs: i32 = k_header_size + k_scanline_table_size;
 		for (let y: i32 = 0; y < height; ++y) {
 			out.push(ofs & 0xff);
 			out.push((ofs >> 8) & 0xff);
@@ -260,15 +260,15 @@ class ParserExr {
 			out.push(0);
 			out.push(0);
 			out.push(0);
-			ofs += fullRowSize;
+			ofs += full_row_size;
 		}
 
 		// scanline data
-		let stride: i32 = channels * byteSize;
+		let stride: i32 = channels * byte_size;
 		let pos: i32 = 0;
 		let srcView: DataView = new DataView(src);
 
-		let writeLine16 = (bytePos: i32) => {
+		let write_line16 = (bytePos: i32) => {
 			for (let x: i32 = 0; x < width; ++x) {
 				out.push(srcView.getUint8(bytePos    ));
 				out.push(srcView.getUint8(bytePos + 1));
@@ -276,7 +276,7 @@ class ParserExr {
 			}
 		}
 
-		let writeLine32 = (bytePos: i32) => {
+		let write_line32 = (bytePos: i32) => {
 			for (let x: i32 = 0; x < width; ++x) {
 				out.push(srcView.getUint8(bytePos    ));
 				out.push(srcView.getUint8(bytePos + 1));
@@ -286,21 +286,21 @@ class ParserExr {
 			}
 		}
 
-		let writeLine = bits == 16 ? writeLine16 : writeLine32;
+		let write_line = bits == 16 ? write_line16 : write_line32;
 
-		let writeBGR = (off: i32) => {
-			writeLine(pos + byteSize * 2);
-			writeLine(pos + byteSize);
-			writeLine(pos);
+		let write_bgr = (off: i32) => {
+			write_line(pos + byte_size * 2);
+			write_line(pos + byte_size);
+			write_line(pos);
 		}
 
-		let writeSingle = (off: i32) => {
-			writeLine(pos + off * byteSize);
-			writeLine(pos + off * byteSize);
-			writeLine(pos + off * byteSize);
+		let write_single = (off: i32) => {
+			write_line(pos + off * byte_size);
+			write_line(pos + off * byte_size);
+			write_line(pos + off * byte_size);
 		}
 
-		let writeData = type == 1 ? writeBGR : writeSingle;
+		let write_data = type == 1 ? write_bgr : write_single;
 
 		for (let y: i32 = 0; y < height; ++y) {
 			// coordinate
@@ -309,12 +309,12 @@ class ParserExr {
 			out.push((y >> 16) & 0xff);
 			out.push((y >> 24) & 0xff);
 			// data size
-			out.push(pixelRowSize & 0xff);
-			out.push((pixelRowSize >> 8) & 0xff);
-			out.push((pixelRowSize >> 16) & 0xff);
-			out.push((pixelRowSize >> 24) & 0xff);
+			out.push(pixel_row_size & 0xff);
+			out.push((pixel_row_size >> 8) & 0xff);
+			out.push((pixel_row_size >> 16) & 0xff);
+			out.push((pixel_row_size >> 24) & 0xff);
 			// data
-			writeData(off);
+			write_data(off);
 			pos += width * stride;
 		}
 

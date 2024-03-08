@@ -3,31 +3,31 @@ class UtilMesh {
 
 	static unwrappers: Map<string, ((a: any)=>void)> = new Map();
 
-	static merge_mesh = (paintObjects: mesh_object_t[] = null) => {
-		if (paintObjects == null) paintObjects = Project.paint_objects;
-		if (paintObjects.length == 0) return;
-		Context.raw.merged_object_is_atlas = paintObjects.length < Project.paint_objects.length;
+	static merge_mesh = (paint_objects: mesh_object_t[] = null) => {
+		if (paint_objects == null) paint_objects = Project.paint_objects;
+		if (paint_objects.length == 0) return;
+		Context.raw.merged_object_is_atlas = paint_objects.length < Project.paint_objects.length;
 		let vlen: i32 = 0;
 		let ilen: i32 = 0;
-		let maxScale: f32 = 0.0;
-		for (let i: i32 = 0; i < paintObjects.length; ++i) {
-			vlen += paintObjects[i].data.vertex_arrays[0].values.length;
-			ilen += paintObjects[i].data.index_arrays[0].values.length;
-			if (paintObjects[i].data.scale_pos > maxScale) maxScale = paintObjects[i].data.scale_pos;
+		let max_scale: f32 = 0.0;
+		for (let i: i32 = 0; i < paint_objects.length; ++i) {
+			vlen += paint_objects[i].data.vertex_arrays[0].values.length;
+			ilen += paint_objects[i].data.index_arrays[0].values.length;
+			if (paint_objects[i].data.scale_pos > max_scale) max_scale = paint_objects[i].data.scale_pos;
 		}
 		vlen = Math.floor(vlen / 4);
 		let va0: Int16Array = new Int16Array(vlen * 4);
 		let va1: Int16Array = new Int16Array(vlen * 2);
 		let va2: Int16Array = new Int16Array(vlen * 2);
-		let va3: Int16Array = paintObjects[0].data.vertex_arrays.length > 3 ? new Int16Array(vlen * 4) : null;
+		let va3: Int16Array = paint_objects[0].data.vertex_arrays.length > 3 ? new Int16Array(vlen * 4) : null;
 		let ia: Uint32Array = new Uint32Array(ilen);
 
 		let voff: i32 = 0;
 		let ioff: i32 = 0;
-		for (let i: i32 = 0; i < paintObjects.length; ++i) {
-			let vas: vertex_array_t[] = paintObjects[i].data.vertex_arrays;
-			let ias: index_array_t[] = paintObjects[i].data.index_arrays;
-			let scale: f32 = paintObjects[i].data.scale_pos;
+		for (let i: i32 = 0; i < paint_objects.length; ++i) {
+			let vas: vertex_array_t[] = paint_objects[i].data.vertex_arrays;
+			let ias: index_array_t[] = paint_objects[i].data.index_arrays;
+			let scale: f32 = paint_objects[i].data.scale_pos;
 
 			// Pos
 			for (let j: i32 = 0; j < vas[0].values.length; ++j) va0[j + voff * 4] = vas[0].values[j];
@@ -35,17 +35,17 @@ class UtilMesh {
 			// Translate
 			///if is_forge
 			for (let j: i32 = 0; j < Math.floor(va0.length / 4); ++j) {
-				va0[j * 4     + voff * 4] += Math.floor(transform_world_x(paintObjects[i].base.transform) * 32767);
-				va0[j * 4 + 1 + voff * 4] += Math.floor(transform_world_y(paintObjects[i].base.transform) * 32767);
-				va0[j * 4 + 2 + voff * 4] += Math.floor(transform_world_z(paintObjects[i].base.transform) * 32767);
+				va0[j * 4     + voff * 4] += Math.floor(transform_world_x(paint_objects[i].base.transform) * 32767);
+				va0[j * 4 + 1 + voff * 4] += Math.floor(transform_world_y(paint_objects[i].base.transform) * 32767);
+				va0[j * 4 + 2 + voff * 4] += Math.floor(transform_world_z(paint_objects[i].base.transform) * 32767);
 			}
 			///end
 
 			// Re-scale
 			for (let j: i32 = 0; j < Math.floor(va0.length / 4); ++j) {
-				va0[j * 4     + voff * 4] = Math.floor((va0[j * 4     + voff * 4] * scale) / maxScale);
-				va0[j * 4 + 1 + voff * 4] = Math.floor((va0[j * 4 + 1 + voff * 4] * scale) / maxScale);
-				va0[j * 4 + 2 + voff * 4] = Math.floor((va0[j * 4 + 2 + voff * 4] * scale) / maxScale);
+				va0[j * 4     + voff * 4] = Math.floor((va0[j * 4     + voff * 4] * scale) / max_scale);
+				va0[j * 4 + 1 + voff * 4] = Math.floor((va0[j * 4 + 1 + voff * 4] * scale) / max_scale);
+				va0[j * 4 + 2 + voff * 4] = Math.floor((va0[j * 4 + 2 + voff * 4] * scale) / max_scale);
 			}
 			// Nor
 			for (let j: i32 = 0; j < vas[1].values.length; ++j) va1[j + voff * 2] = vas[1].values[j];
@@ -70,7 +70,7 @@ class UtilMesh {
 			index_arrays: [
 				{ values: ia, material: 0 }
 			],
-			scale_pos: maxScale,
+			scale_pos: max_scale,
 			scale_tex: 1.0
 		};
 		if (va3 != null) raw.vertex_arrays.push({ values: va3, attrib: "col", data: "short4norm" });
@@ -290,19 +290,19 @@ class UtilMesh {
 			let g: mesh_data_t = o.data;
 			let sc: f32 = o.data.scale_pos / 32767;
 			let va: i16_array_t = o.data.vertex_arrays[0].values;
-			let maxScale: f32 = 0.0;
+			let max_scale: f32 = 0.0;
 			for (let i: i32 = 0; i < Math.floor(va.length / 4); ++i) {
-				if (Math.abs(va[i * 4    ] * sc - dx) > maxScale) maxScale = Math.abs(va[i * 4    ] * sc - dx);
-				if (Math.abs(va[i * 4 + 1] * sc - dy) > maxScale) maxScale = Math.abs(va[i * 4 + 1] * sc - dy);
-				if (Math.abs(va[i * 4 + 2] * sc - dz) > maxScale) maxScale = Math.abs(va[i * 4 + 2] * sc - dz);
+				if (Math.abs(va[i * 4    ] * sc - dx) > max_scale) max_scale = Math.abs(va[i * 4    ] * sc - dx);
+				if (Math.abs(va[i * 4 + 1] * sc - dy) > max_scale) max_scale = Math.abs(va[i * 4 + 1] * sc - dy);
+				if (Math.abs(va[i * 4 + 2] * sc - dz) > max_scale) max_scale = Math.abs(va[i * 4 + 2] * sc - dz);
 			}
-			o.base.transform.scale_world = o.data.scale_pos = o.data.scale_pos = maxScale;
+			o.base.transform.scale_world = o.data.scale_pos = o.data.scale_pos = max_scale;
 			transform_build_matrix(o.base.transform);
 
 			for (let i: i32 = 0; i < Math.floor(va.length / 4); ++i) {
-				va[i * 4    ] = Math.floor((va[i * 4    ] * sc - dx) / maxScale * 32767);
-				va[i * 4 + 1] = Math.floor((va[i * 4 + 1] * sc - dy) / maxScale * 32767);
-				va[i * 4 + 2] = Math.floor((va[i * 4 + 2] * sc - dz) / maxScale * 32767);
+				va[i * 4    ] = Math.floor((va[i * 4    ] * sc - dx) / max_scale * 32767);
+				va[i * 4 + 1] = Math.floor((va[i * 4 + 1] * sc - dy) / max_scale * 32767);
+				va[i * 4 + 2] = Math.floor((va[i * 4 + 2] * sc - dz) / max_scale * 32767);
 			}
 
 			let l: i32 = g4_vertex_struct_byte_size(g._.structure) / 2;
@@ -320,7 +320,7 @@ class UtilMesh {
 
 	static apply_displacement = (texpaint_pack: image_t, strength: f32 = 0.1, uvScale: f32 = 1.0) => {
 		let height: buffer_t = image_get_pixels(texpaint_pack);
-		let heightView: buffer_view_t = new DataView(height);
+		let height_view: buffer_view_t = new DataView(height);
 		let res: i32 = texpaint_pack.width;
 		let o: mesh_object_t = Project.paint_objects[0];
 		let g: mesh_data_t = o.data;
@@ -331,7 +331,7 @@ class UtilMesh {
 			let y: i32 = Math.floor(vertices.getInt16((i * l + 7) * 2, true) / 32767 * res);
 			let xx: i32 = Math.floor(x * uvScale) % res;
 			let yy: i32 = Math.floor(y * uvScale) % res;
-			let h: f32 = (1.0 - heightView.getUint8((yy * res + xx) * 4 + 3) / 255) * strength;
+			let h: f32 = (1.0 - height_view.getUint8((yy * res + xx) * 4 + 3) / 255) * strength;
 			vertices.setInt16((i * l    ) * 2, vertices.getInt16((i * l    ) * 2, true) - Math.floor(vertices.getInt16((i * l + 4) * 2, true) * h), true);
 			vertices.setInt16((i * l + 1) * 2, vertices.getInt16((i * l + 1) * 2, true) - Math.floor(vertices.getInt16((i * l + 5) * 2, true) * h), true);
 			vertices.setInt16((i * l + 2) * 2, vertices.getInt16((i * l + 2) * 2, true) - Math.floor(vertices.getInt16((i * l + 3) * 2, true) * h), true);

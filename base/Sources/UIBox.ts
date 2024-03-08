@@ -19,10 +19,10 @@ class UIBox {
 
 	static render = () => {
 		if (!UIMenu.show) {
-			let ui: zui_t = Base.ui_box;
-			let inUse: bool = ui.combo_selected_handle_ptr != 0;
-			let isEscape: bool = keyboard_started("escape");
-			if (UIBox.draws > 2 && (ui.input_released || isEscape) && !inUse && !ui.is_typing) {
+			let ui: zui_t = base_ui_box;
+			let in_use: bool = ui.combo_selected_handle_ptr != 0;
+			let is_escape: bool = keyboard_started("escape");
+			if (UIBox.draws > 2 && (ui.input_released || is_escape) && !in_use && !ui.is_typing) {
 				let appw: i32 = sys_width();
 				let apph: i32 = sys_height();
 				let mw: i32 = Math.floor(UIBox.modalw * zui_SCALE(ui));
@@ -33,7 +33,7 @@ class UIBox {
 				let bottom: f32 = (apph / 2 + mh / 2) + UIBox.hwnd.drag_y;
 				let mx: i32 = mouse_x;
 				let my: i32 = mouse_y;
-				if ((UIBox.click_to_hide && (mx < left || mx > right || my < top || my > bottom)) || isEscape) {
+				if ((UIBox.click_to_hide && (mx < left || mx > right || my < top || my > bottom)) || is_escape) {
 					UIBox.hide();
 				}
 			}
@@ -50,7 +50,7 @@ class UIBox {
 
 		g2_end();
 
-		let ui: zui_t = Base.ui_box;
+		let ui: zui_t = base_ui_box;
 		let appw: i32 = sys_width();
 		let apph: i32 = sys_height();
 		let mw: i32 = Math.floor(UIBox.modalw * zui_SCALE(ui));
@@ -64,8 +64,8 @@ class UIBox {
 			zui_begin(ui);
 			if (zui_window(UIBox.hwnd, left, top, mw, mh, UIBox.draggable)) {
 				ui._y += 10;
-				let tabVertical: bool = Config.raw.touch_ui;
-				if (zui_tab(zui_handle("uibox_0"), UIBox.box_title, tabVertical)) {
+				let tab_vertical: bool = Config.raw.touch_ui;
+				if (zui_tab(zui_handle("uibox_0"), UIBox.box_title, tab_vertical)) {
 					let htext: zui_handle_t = zui_handle("uibox_1");
 					htext.text = UIBox.box_text;
 					UIBox.copyable ?
@@ -147,7 +147,7 @@ class UIBox {
 	static hide_internal = () => {
 		if (UIBox.modal_on_hide != null) UIBox.modal_on_hide();
 		UIBox.show = false;
-		Base.redraw_ui();
+		base_redraw_ui();
 	}
 
 	///if (krom_android || krom_ios)
@@ -155,7 +155,7 @@ class UIBox {
 		tween_reset();
 		tween_to({target: UIBox, props: { tweenAlpha: 0.5 }, duration: 0.2, ease: ease_t.EXPO_OUT});
 		UIBox.hwnd.drag_y = Math.floor(sys_height() / 2);
-		tween_to({target: UIBox.hwnd, props: { dragY: 0 }, duration: 0.2, ease: ease_t.EXPO_OUT, tick: () => { Base.redraw_ui(); }});
+		tween_to({target: UIBox.hwnd, props: { dragY: 0 }, duration: 0.2, ease: ease_t.EXPO_OUT, tick: () => { base_redraw_ui(); }});
 	}
 
 	static tween_out = () => {

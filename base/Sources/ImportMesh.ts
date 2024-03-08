@@ -144,15 +144,15 @@ class ImportMesh {
 				let l: SlotLayerRaw = Project.layers.pop();
 				SlotLayer.unload(l);
 			}
-			Base.new_layer(false);
-			app_notify_on_init(Base.init_layers);
+			base_new_layer(false);
+			app_notify_on_init(base_init_layers);
 			History.reset();
 		}
 		///end
 
 		// Wait for addMesh calls to finish
 		if (ImportMesh.meshes_to_unwrap != null) {
-			Base.notify_on_next_frame(ImportMesh.finish_import);
+			base_notify_on_next_frame(ImportMesh.finish_import);
 		}
 		else {
 			app_notify_on_init(ImportMesh.finish_import);
@@ -169,11 +169,11 @@ class ImportMesh {
 			if (ImportMesh.meshes_to_unwrap == null) {
 				ImportMesh.meshes_to_unwrap = [];
 			}
-			let firstUnwrapDone = (mesh: any) => {
+			let first_unwrap_done = (mesh: any) => {
 				ImportMesh._make_mesh(mesh);
 				for (let mesh of ImportMesh.meshes_to_unwrap) Project.unwrap_mesh_box(mesh, ImportMesh._add_mesh, true);
 			}
-			Project.unwrap_mesh_box(mesh, firstUnwrapDone);
+			Project.unwrap_mesh_box(mesh, first_unwrap_done);
 		}
 		else {
 			ImportMesh._make_mesh(mesh);

@@ -25,20 +25,20 @@ class UtilRender {
 		mat4_set_from(Context.raw.saved_camera, scene_camera.base.transform.local);
 		let m: mat4_t = mat4_create(0.9146286343879498, -0.0032648027153306235, 0.404281837254303, 0.4659988049397712, 0.404295023959927, 0.007367569133732468, -0.9145989516155143, -1.0687517188018691, 0.000007410128652369705, 0.9999675337275382, 0.008058532943908717, 0.015935682577325486, 0, 0, 0, 1);
 		transform_set_matrix(scene_camera.base.transform, m);
-		let savedFov: f32 = scene_camera.data.fov;
+		let saved_fov: f32 = scene_camera.data.fov;
 		scene_camera.data.fov = 0.92;
 		Viewport.update_camera_type(camera_type_t.PERSPECTIVE);
 		let light: light_object_t = scene_lights[0];
-		let _lightStrength: f32 = light.data.strength;
+		let _light_strength: f32 = light.data.strength;
 		let probe: world_data_t = scene_world;
-		let _probeStrength: f32 = probe.strength;
+		let _probe_strength: f32 = probe.strength;
 		light.data.strength = 0;
 		probe.strength = 7;
-		let _envmapAngle: f32 = Context.raw.envmap_angle;
+		let _envmap_angle: f32 = Context.raw.envmap_angle;
 		Context.raw.envmap_angle = 6.0;
-		let _brushScale: f32 = Context.raw.brush_scale;
+		let _brush_scale: f32 = Context.raw.brush_scale;
 		Context.raw.brush_scale = 1.5;
-		let _brushNodesScale: f32 = Context.raw.brush_nodes_scale;
+		let _brush_nodes_scale: f32 = Context.raw.brush_nodes_scale;
 		Context.raw.brush_nodes_scale = 1.0;
 
 		scene_world._.envmap = Context.raw.preview_envmap;
@@ -65,14 +65,14 @@ class UtilRender {
 
 		transform_set_matrix(scene_camera.base.transform, Context.raw.saved_camera);
 		Viewport.update_camera_type(Context.raw.camera_type);
-		scene_camera.data.fov = savedFov;
+		scene_camera.data.fov = saved_fov;
 		camera_object_build_proj(scene_camera);
 		camera_object_build_mat(scene_camera);
-		light.data.strength = _lightStrength;
-		probe.strength = _probeStrength;
-		Context.raw.envmap_angle = _envmapAngle;
-		Context.raw.brush_scale = _brushScale;
-		Context.raw.brush_nodes_scale = _brushNodesScale;
+		light.data.strength = _light_strength;
+		probe.strength = _probe_strength;
+		Context.raw.envmap_angle = _envmap_angle;
+		Context.raw.brush_scale = _brush_scale;
+		Context.raw.brush_nodes_scale = _brush_nodes_scale;
 		scene_world._.envmap = Context.raw.show_envmap ? Context.raw.saved_envmap : Context.raw.empty_envmap;
 		MakeMaterial.parse_mesh_material();
 		Context.raw.ddirty = 0;
@@ -102,7 +102,7 @@ class UtilRender {
 		let m: mat4_t = mat4_identity();
 		mat4_translate(m, 0, 0, 1);
 		transform_set_matrix(scene_camera.base.transform, m);
-		let savedFov: f32 = scene_camera.data.fov;
+		let saved_fov: f32 = scene_camera.data.fov;
 		scene_camera.data.fov = 0.92;
 		Viewport.update_camera_type(camera_type_t.PERSPECTIVE);
 		let light: light_object_t = scene_lights[0];
@@ -131,7 +131,7 @@ class UtilRender {
 		Context.raw.paint_object = painto;
 
 		transform_set_matrix(scene_camera.base.transform, Context.raw.saved_camera);
-		scene_camera.data.fov = savedFov;
+		scene_camera.data.fov = saved_fov;
 		Viewport.update_camera_type(Context.raw.camera_type);
 		camera_object_build_proj(scene_camera);
 		camera_object_build_mat(scene_camera);
@@ -151,10 +151,10 @@ class UtilRender {
 
 		let text: string = Context.raw.text_tool_text;
 		let font: g2_font_t = Context.raw.font.font;
-		let fontSize: i32 = 200;
-		let textW: i32 = Math.floor(g2_font_width(font, fontSize, text));
-		let textH: i32 = Math.floor(g2_font_height(font, fontSize));
-		let texW: i32 = textW + 32;
+		let font_size: i32 = 200;
+		let text_w: i32 = Math.floor(g2_font_width(font, font_size, text));
+		let text_h: i32 = Math.floor(g2_font_height(font, font_size));
+		let texW: i32 = text_w + 32;
 		if (texW < 512) texW = 512;
 		if (Context.raw.text_tool_image != null && Context.raw.text_tool_image.width < texW) {
 			image_unload(Context.raw.text_tool_image);
@@ -170,9 +170,9 @@ class UtilRender {
 		g2_begin(Context.raw.text_tool_image);
 		g2_clear(0xff000000);
 		g2_set_font(font);
-		g2_set_font_size(fontSize);
+		g2_set_font_size(font_size);
 		g2_set_color(0xffffffff);
-		g2_draw_string(text, texW / 2 - textW / 2, texW / 2 - textH / 2);
+		g2_draw_string(text, texW / 2 - text_w / 2, texW / 2 - text_h / 2);
 		g2_end();
 
 		if (current != null) g2_begin(current);
@@ -184,18 +184,18 @@ class UtilRender {
 
 		let text: string = "Abg";
 		let font: g2_font_t = Context.raw.font.font;
-		let fontSize: i32 = 318;
-		let textW: i32 = Math.floor(g2_font_width(font, fontSize, text)) + 8;
-		let textH: i32 = Math.floor(g2_font_height(font, fontSize)) + 8;
+		let font_size: i32 = 318;
+		let text_w: i32 = Math.floor(g2_font_width(font, font_size, text)) + 8;
+		let text_h: i32 = Math.floor(g2_font_height(font, font_size)) + 8;
 		if (Context.raw.font.image == null) {
 			Context.raw.font.image = image_create_render_target(512, 512, tex_format_t.RGBA32);
 		}
 		g2_begin(Context.raw.font.image);
 		g2_clear(0x00000000);
 		g2_set_font(font);
-		g2_set_font_size(fontSize);
+		g2_set_font_size(font_size);
 		g2_set_color(0xffffffff);
-		g2_draw_string(text, 512 / 2 - textW / 2, 512 / 2 - textH / 2);
+		g2_draw_string(text, 512 / 2 - text_w / 2, 512 / 2 - text_h / 2);
 		g2_end();
 		Context.raw.font.preview_ready = true;
 
@@ -203,18 +203,18 @@ class UtilRender {
 	}
 
 	static make_brush_preview = () => {
-		if (RenderPathPaint.liveLayerLocked) return;
+		if (RenderPathPaint.live_layer_locked) return;
 		Context.raw.material_preview = true;
 
 		let current: image_t = _g2_current;
 		if (current != null) g2_end();
 
 		// Prepare layers
-		if (RenderPathPaint.liveLayer == null) {
-			RenderPathPaint.liveLayer = SlotLayer.create("_live");
+		if (RenderPathPaint.live_layer == null) {
+			RenderPathPaint.live_layer = SlotLayer.create("_live");
 		}
 
-		let l: SlotLayerRaw = RenderPathPaint.liveLayer;
+		let l: SlotLayerRaw = RenderPathPaint.live_layer;
 		SlotLayer.clear(l);
 
 		if (Context.raw.brush.image == null) {
@@ -248,15 +248,15 @@ class UtilRender {
 			visibles.push(p.base.visible);
 			p.base.visible = false;
 		}
-		let mergedObjectVisible: bool = false;
+		let merged_object_visible: bool = false;
 		if (Context.raw.merged_object != null) {
-			mergedObjectVisible = Context.raw.merged_object.base.visible;
+			merged_object_visible = Context.raw.merged_object.base.visible;
 			Context.raw.merged_object.base.visible = false;
 		}
 
 		let cam: camera_object_t = scene_camera;
 		mat4_set_from(Context.raw.saved_camera, cam.base.transform.local);
-		let savedFov: f32 = cam.data.fov;
+		let saved_fov: f32 = cam.data.fov;
 		Viewport.update_camera_type(camera_type_t.PERSPECTIVE);
 		let m: mat4_t = mat4_identity();
 		mat4_translate(m, 0, 0, 0.5);
@@ -277,40 +277,40 @@ class UtilRender {
 		vec4_set(planeo.base.transform.loc, m.m[12], -m.m[13], 0.0);
 		transform_build_matrix(planeo.base.transform);
 
-		RenderPathPaint.liveLayerDrawn = 0;
+		RenderPathPaint.live_layer_drawn = 0;
 		RenderPathBase.draw_gbuffer();
 
 		// Paint brush preview
-		let _brushRadius: f32 = Context.raw.brush_radius;
-		let _brushOpacity: f32 = Context.raw.brush_opacity;
-		let _brushHardness: f32 = Context.raw.brush_hardness;
+		let _brush_radius: f32 = Context.raw.brush_radius;
+		let _brush_opacity: f32 = Context.raw.brush_opacity;
+		let _brush_hardness: f32 = Context.raw.brush_hardness;
 		Context.raw.brush_radius = 0.33;
 		Context.raw.brush_opacity = 1.0;
 		Context.raw.brush_hardness = 0.8;
 		let _x: f32 = Context.raw.paint_vec.x;
 		let _y: f32 = Context.raw.paint_vec.y;
-		let _lastX: f32 = Context.raw.last_paint_vec_x;
-		let _lastY: f32 = Context.raw.last_paint_vec_y;
+		let _last_x: f32 = Context.raw.last_paint_vec_x;
+		let _last_y: f32 = Context.raw.last_paint_vec_y;
 		let _pdirty: i32 = Context.raw.pdirty;
 		Context.raw.pdirty = 2;
 
-		let pointsX: f32[] = [0.2, 0.2,  0.35, 0.5,  0.5, 0.5,  0.65, 0.8,  0.8, 0.8];
-		let pointsY: f32[] = [0.5, 0.5,  0.35 - 0.04, 0.2 - 0.08,  0.4 + 0.015, 0.6 + 0.03,  0.45 - 0.025, 0.3 - 0.05,  0.5 + 0.025, 0.7 + 0.05];
-		for (let i: i32 = 1; i < pointsX.length; ++i) {
-			Context.raw.last_paint_vec_x = pointsX[i - 1];
-			Context.raw.last_paint_vec_y = pointsY[i - 1];
-			Context.raw.paint_vec.x = pointsX[i];
-			Context.raw.paint_vec.y = pointsY[i];
+		let points_x: f32[] = [0.2, 0.2,  0.35, 0.5,  0.5, 0.5,  0.65, 0.8,  0.8, 0.8];
+		let points_y: f32[] = [0.5, 0.5,  0.35 - 0.04, 0.2 - 0.08,  0.4 + 0.015, 0.6 + 0.03,  0.45 - 0.025, 0.3 - 0.05,  0.5 + 0.025, 0.7 + 0.05];
+		for (let i: i32 = 1; i < points_x.length; ++i) {
+			Context.raw.last_paint_vec_x = points_x[i - 1];
+			Context.raw.last_paint_vec_y = points_y[i - 1];
+			Context.raw.paint_vec.x = points_x[i];
+			Context.raw.paint_vec.y = points_y[i];
 			RenderPathPaint.commands_paint(false);
 		}
 
-		Context.raw.brush_radius = _brushRadius;
-		Context.raw.brush_opacity = _brushOpacity;
-		Context.raw.brush_hardness = _brushHardness;
+		Context.raw.brush_radius = _brush_radius;
+		Context.raw.brush_opacity = _brush_opacity;
+		Context.raw.brush_hardness = _brush_hardness;
 		Context.raw.paint_vec.x = _x;
 		Context.raw.paint_vec.y = _y;
-		Context.raw.last_paint_vec_x = _lastX;
-		Context.raw.last_paint_vec_y = _lastY;
+		Context.raw.last_paint_vec_x = _last_x;
+		Context.raw.last_paint_vec_y = _last_y;
 		Context.raw.prev_paint_vec_x = -1;
 		Context.raw.prev_paint_vec_y = -1;
 		Context.raw.pdirty = _pdirty;
@@ -331,22 +331,22 @@ class UtilRender {
 			Project.paint_objects[i].base.visible = visibles[i];
 		}
 		if (Context.raw.merged_object != null) {
-			Context.raw.merged_object.base.visible = mergedObjectVisible;
+			Context.raw.merged_object.base.visible = merged_object_visible;
 		}
 		Context.raw.paint_object = painto;
 		transform_set_matrix(scene_camera.base.transform, Context.raw.saved_camera);
-		scene_camera.data.fov = savedFov;
+		scene_camera.data.fov = saved_fov;
 		Viewport.update_camera_type(Context.raw.camera_type);
 		camera_object_build_proj(scene_camera);
 		camera_object_build_mat(scene_camera);
 
 		// Scale layer down to to image preview
-		if (Base.pipe_merge == null) Base.make_pipe();
-		l = RenderPathPaint.liveLayer;
+		if (base_pipe_merge == null) base_make_pipe();
+		l = RenderPathPaint.live_layer;
 		let target: image_t = Context.raw.brush.image;
 		g2_begin(target);
 		g2_clear(0x00000000);
-		g2_set_pipeline(Base.pipe_copy);
+		g2_set_pipeline(base_pipe_copy);
 		g2_draw_scaled_image(l.texpaint, 0, 0, target.width, target.height);
 		g2_set_pipeline(null);
 		g2_end();
@@ -372,7 +372,7 @@ class UtilRender {
 			UtilRender.create_screen_aligned_full_data();
 		}
 
-		let _scaleWorld: f32 = Context.raw.paint_object.base.transform.scale_world;
+		let _scale_world: f32 = Context.raw.paint_object.base.transform.scale_world;
 		Context.raw.paint_object.base.transform.scale_world = 3.0;
 		transform_build_matrix(Context.raw.paint_object.base.transform);
 
@@ -386,7 +386,7 @@ class UtilRender {
 		g4_draw();
 		g4_end();
 
-		Context.raw.paint_object.base.transform.scale_world = _scaleWorld;
+		Context.raw.paint_object.base.transform.scale_world = _scale_world;
 		transform_build_matrix(Context.raw.paint_object.base.transform);
 	}
 
@@ -415,12 +415,12 @@ class UtilRender {
 
 	static get_decal_mat = (): mat4_t => {
 		UtilRender.pick_pos_nor_tex();
-		let decalMat: mat4_t = mat4_identity();
+		let decal_mat: mat4_t = mat4_identity();
 		let loc: vec4_t = vec4_create(Context.raw.posx_picked, Context.raw.posy_picked, Context.raw.posz_picked);
 		let rot: quat_t = quat_from_to(quat_create(), vec4_create(0.0, 0.0, -1.0), vec4_create(Context.raw.norx_picked, Context.raw.nory_picked, Context.raw.norz_picked));
 		let scale: vec4_t = vec4_create(Context.raw.brush_radius * 0.5, Context.raw.brush_radius * 0.5, Context.raw.brush_radius * 0.5);
-		mat4_compose(decalMat, loc, rot, scale);
-		return decalMat;
+		mat4_compose(decal_mat, loc, rot, scale);
+		return decal_mat;
 	}
 
 	static create_screen_aligned_full_data = () => {

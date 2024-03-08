@@ -4,7 +4,7 @@ class ImportAsset {
 	static run = (path: string, dropX: f32 = -1.0, dropY: f32 = -1.0, showBox: bool = true, hdrAsEnvmap: bool = true, done: ()=>void = null) => {
 
 		if (path.startsWith("cloud")) {
-			let doCacheCloud = () => {
+			let do_cache_cloud = () => {
 				File.cache_cloud(path, (abs: string) => {
 					if (abs == null) return;
 					ImportAsset.run(abs, dropX, dropY, showBox, hdrAsEnvmap, done);
@@ -12,12 +12,12 @@ class ImportAsset {
 			}
 
 			///if (krom_android || krom_ios)
-			Base.notify_on_next_frame(() => {
+			base_notify_on_next_frame(() => {
 				Console.toast(tr("Downloading"));
-				Base.notify_on_next_frame(doCacheCloud);
+				base_notify_on_next_frame(do_cache_cloud);
 			});
 			///else
-			doCacheCloud();
+			do_cache_cloud();
 			///end
 
 			return;
@@ -33,14 +33,14 @@ class ImportAsset {
 			let x0: i32 = UINodes.wx;
 			let x1: i32 = UINodes.wx + UINodes.ww;
 			if (UINodes.show && dropX > x0 && dropX < x1) {
-				let assetIndex: i32 = 0;
+				let asset_index: i32 = 0;
 				for (let i: i32 = 0; i < Project.assets.length; ++i) {
 					if (Project.assets[i].file == path) {
-						assetIndex = i;
+						asset_index = i;
 						break;
 					}
 				}
-				UINodes.accept_asset_drag(assetIndex);
+				UINodes.accept_asset_drag(asset_index);
 				UINodes.get_nodes().nodesDrag = false;
 				UINodes.hwnd.redraws = 2;
 			}

@@ -41,25 +41,25 @@ class ImportEnvmap {
 
 		// Down-scale to 1024x512
 		g2_begin(ImportEnvmap.radiance);
-		g2_set_pipeline(Base.pipe_copy128);
+		g2_set_pipeline(base_pipe_copy128);
 		g2_draw_scaled_image(image, 0, 0, 1024, 512);
 		g2_set_pipeline(null);
 		g2_end();
 
-		let radiancePixels: buffer_t = image_get_pixels(ImportEnvmap.radiance);
+		let radiance_pixels: buffer_t = image_get_pixels(ImportEnvmap.radiance);
 		if (ImportEnvmap.radiance_cpu != null) {
-			let _radianceCpu: image_t = ImportEnvmap.radiance_cpu;
-			Base.notify_on_next_frame(() => {
-				image_unload(_radianceCpu);
+			let _radiance_cpu: image_t = ImportEnvmap.radiance_cpu;
+			base_notify_on_next_frame(() => {
+				image_unload(_radiance_cpu);
 			});
 		}
-		ImportEnvmap.radiance_cpu = image_from_bytes(radiancePixels, ImportEnvmap.radiance.width, ImportEnvmap.radiance.height, tex_format_t.RGBA128);
+		ImportEnvmap.radiance_cpu = image_from_bytes(radiance_pixels, ImportEnvmap.radiance.width, ImportEnvmap.radiance.height, tex_format_t.RGBA128);
 
 		// Radiance
 		if (ImportEnvmap.mips_cpu != null) {
 			for (let mip of ImportEnvmap.mips_cpu) {
 				let _mip: image_t = mip;
-				Base.notify_on_next_frame(() => {
+				base_notify_on_next_frame(() => {
 					///if (!krom_direct3d12) // TODO: crashes after 50+ imports
 					image_unload(_mip);
 					///end
@@ -74,7 +74,7 @@ class ImportEnvmap {
 		image_set_mipmaps(ImportEnvmap.radiance_cpu, ImportEnvmap.mips_cpu);
 
 		// Irradiance
-		scene_world._.irradiance = ImportEnvmap.get_spherical_harmonics(radiancePixels, ImportEnvmap.radiance.width, ImportEnvmap.radiance.height);
+		scene_world._.irradiance = ImportEnvmap.get_spherical_harmonics(radiance_pixels, ImportEnvmap.radiance.width, ImportEnvmap.radiance.height);
 
 		// World
 		scene_world.strength = 1.0;

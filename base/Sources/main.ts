@@ -30,15 +30,15 @@ function kickstart() {
 }
 
 function main_start() {
-	app_on_resize = Base.on_resize;
-	app_on_w = Base.w;
-	app_on_h = Base.h;
-	app_on_x = Base.x;
-	app_on_y = Base.y;
+	app_on_resize = base_on_resize;
+	app_on_w = base_w;
+	app_on_h = base_h;
+	app_on_x = base_x;
+	app_on_y = base_y;
 
 	Config.init();
 	sys_start(Config.get_options());
-	if (Config.raw.layout == null) Base.init_layout();
+	if (Config.raw.layout == null) base_init_layout();
 	krom_set_app_name(manifest_title);
 	app_init(function() {
 		let o: object_t = scene_set_active("Scene");
@@ -55,7 +55,7 @@ function main_start() {
 			render_path_commands = RenderPathDeferred.commands;
 		}
 
-		new Base();
+		base_init();
 	});
 }
 

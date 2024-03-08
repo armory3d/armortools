@@ -1,7 +1,7 @@
 
 class ImportTexture {
 
-	static run = (path: string, hdrAsEnvmap: bool = true) => {
+	static run = (path: string, hdr_as_envmap: bool = true) => {
 		if (!Path.is_texture(path)) {
 			if (!Context.enable_import_plugin(path)) {
 				Console.error(Strings.error1());
@@ -13,9 +13,9 @@ class ImportTexture {
 			// Already imported
 			if (a.file == path) {
 				// Set as envmap
-				if (hdrAsEnvmap && path.toLowerCase().endsWith(".hdr")) {
+				if (hdr_as_envmap && path.toLowerCase().endsWith(".hdr")) {
 					let image: image_t = data_get_image(path);
-					Base.notify_on_next_frame(() => { // Make sure file browser process did finish
+					base_notify_on_next_frame(() => { // Make sure file browser process did finish
 						ImportEnvmap.run(path, image);
 					});
 				}
@@ -42,8 +42,8 @@ class ImportTexture {
 			Console.info(tr("Texture imported:") + " " + name);
 
 			// Set as envmap
-			if (hdrAsEnvmap && path.toLowerCase().endsWith(".hdr")) {
-				Base.notify_on_next_frame(() => { // Make sure file browser process did finish
+			if (hdr_as_envmap && path.toLowerCase().endsWith(".hdr")) {
+				base_notify_on_next_frame(() => { // Make sure file browser process did finish
 					ImportEnvmap.run(path, image);
 				});
 			}

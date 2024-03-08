@@ -167,7 +167,7 @@ class RenderPathPaint {
 		let canvas = UINodes.getCanvas(true);
 		let inpaint = nodes.nodesSelectedId.length > 0 && zui_get_node(canvas.nodes, nodes.nodesSelectedId[0]).type == "InpaintNode";
 
-		if (!Base.uiEnabled || Base.isDragging || !inpaint) {
+		if (!base_uiEnabled || base_isDragging || !inpaint) {
 			return;
 		}
 
@@ -184,24 +184,24 @@ class RenderPathPaint {
 	static drawCursor = (mx: f32, my: f32, radius: f32, tintR = 1.0, tintG = 1.0, tintB = 1.0) => {
 		let plane = scene_get_child(".Plane").ext;
 		let geom = plane.data;
-		if (Base.pipeCursor == null) Base.makeCursorPipe();
+		if (base_pipeCursor == null) base_makeCursorPipe();
 
 		render_path_set_target("");
-		g4_set_pipeline(Base.pipeCursor);
+		g4_set_pipeline(base_pipeCursor);
 		let img = Res.get("cursor.k");
-		g4_set_tex(Base.cursorTex, img);
+		g4_set_tex(base_cursorTex, img);
 		let gbuffer0 = render_path_render_targets.get("gbuffer0")._image;
-		g4_set_tex_depth(Base.cursorGbufferD, gbuffer0);
-		g4_set_float2(Base.cursorMouse, mx, my);
-		g4_set_float2(Base.cursorTexStep, 1 / gbuffer0.width, 1 / gbuffer0.height);
-		g4_set_float(Base.cursorRadius, radius);
+		g4_set_tex_depth(base_cursorGbufferD, gbuffer0);
+		g4_set_float2(base_cursorMouse, mx, my);
+		g4_set_float2(base_cursorTexStep, 1 / gbuffer0.width, 1 / gbuffer0.height);
+		g4_set_float(base_cursorRadius, radius);
 		let right = vec4_normalize(camera_object_right_world(scene_camera));
-		g4_set_float3(Base.cursorCameraRight, right.x, right.y, right.z);
-		g4_set_float3(Base.cursorTint, tintR, tintG, tintB);
-		g4_set_mat(Base.cursorVP, scene_camera.vp);
+		g4_set_float3(base_cursorCameraRight, right.x, right.y, right.z);
+		g4_set_float3(base_cursorTint, tintR, tintG, tintB);
+		g4_set_mat(base_cursorVP, scene_camera.vp);
 		let helpMat = mat4_identity();
 		mat4_get_inv(helpMat, scene_camera.vp);
-		g4_set_mat(Base.cursorInvVP, helpMat);
+		g4_set_mat(base_cursorInvVP, helpMat);
 		///if (krom_metal || krom_vulkan)
 		g4_set_vertex_buffer(mesh_data_get(geom, [{name: "tex", data: "short2norm"}]));
 		///else

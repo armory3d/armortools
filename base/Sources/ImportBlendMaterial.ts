@@ -111,7 +111,7 @@ class ImportBlendMaterial {
 						ImportTexture.run(file);
 						let ar: string[] = file.split(Path.sep);
 						let filename: string = ar[ar.length - 1];
-						n.buttons[0].default_value = Base.get_asset_index(filename);
+						n.buttons[0].default_value = base_get_asset_index(filename);
 					}
 					else if (search == "valtorgb") {
 						let ramp: any = BlHandle.get(node, "storage", 0, "ColorBand");

@@ -10,20 +10,20 @@ class Geom {
 		mesh.hasNext = false;
 
 		// Pack positions to (-1, 1) range
-		let halfX: f32 = size_x / 2;
-		let halfY: f32 = size_y / 2;
-		mesh.scalePos = Math.max(halfX, halfY);
+		let half_x: f32 = size_x / 2;
+		let half_y: f32 = size_y / 2;
+		mesh.scalePos = Math.max(half_x, half_y);
 		let inv: f32 = (1 / mesh.scalePos) * 32767;
 
 		mesh.posa = new Int16Array(verts_x * verts_y * 4);
 		mesh.nora = new Int16Array(verts_x * verts_y * 2);
 		mesh.texa = new Int16Array(verts_x * verts_y * 2);
 		mesh.inda = new Uint32Array((verts_x - 1) * (verts_y - 1) * 6);
-		let stepX: f32 = size_x / (verts_x - 1);
-		let stepY: f32 = size_y / (verts_y - 1);
+		let step_x: f32 = size_x / (verts_x - 1);
+		let step_y: f32 = size_y / (verts_y - 1);
 		for (let i: i32 = 0; i < verts_x * verts_y; ++i) {
-			let x: f32 = (i % verts_x) * stepX - halfX;
-			let y: f32 = Math.floor(i / verts_x) * stepY - halfY;
+			let x: f32 = (i % verts_x) * step_x - half_x;
+			let y: f32 = Math.floor(i / verts_x) * step_y - half_y;
 			mesh.posa[i * 4    ] = Math.floor(x * inv);
 			mesh.posa[i * 4 + 1] = Math.floor(y * inv);
 			mesh.posa[i * 4 + 2] = 0;
@@ -49,7 +49,7 @@ class Geom {
 		return mesh;
 	}
 
-	static make_uv_sphere(radius: f32 = 1.0, widthSegments: i32 = 32, heightSegments: i32 = 16, stretchUV: bool = true, uvScale: f32 = 1.0): raw_mesh_t {
+	static make_uv_sphere(radius: f32 = 1.0, widthSegments: i32 = 32, heightSegments: i32 = 16, stretch_uv: bool = true, uvScale: f32 = 1.0): raw_mesh_t {
 
 		let mesh: raw_mesh_t = {};
 		mesh.scalePos = 1.0;
@@ -63,28 +63,28 @@ class Geom {
 		let inv: f32 = (1 / mesh.scalePos) * 32767;
 		let pi2: f32 = Math.PI * 2;
 
-		let widthVerts: i32 = widthSegments + 1;
-		let heightVerts: i32 = heightSegments + 1;
-		mesh.posa = new Int16Array(widthVerts * heightVerts * 4);
-		mesh.nora = new Int16Array(widthVerts * heightVerts * 2);
-		mesh.texa = new Int16Array(widthVerts * heightVerts * 2);
+		let width_verts: i32 = widthSegments + 1;
+		let height_verts: i32 = heightSegments + 1;
+		mesh.posa = new Int16Array(width_verts * height_verts * 4);
+		mesh.nora = new Int16Array(width_verts * height_verts * 2);
+		mesh.texa = new Int16Array(width_verts * height_verts * 2);
 		mesh.inda = new Uint32Array(widthSegments * heightSegments * 6 - widthSegments * 6);
 
 		let nor: vec4_t = vec4_create();
 		let pos: i32 = 0;
-		for (let y: i32 = 0; y < heightVerts; ++y) {
+		for (let y: i32 = 0; y < height_verts; ++y) {
 			let v: f32 = y / heightSegments;
-			let vFlip: f32 = 1.0 - v;
-			if (!stretchUV) vFlip /= 2;
-			let uOff: f32 = y == 0 ? 0.5 / widthSegments : y == heightSegments ? -0.5 / widthSegments : 0.0;
-			for (let x: i32 = 0; x < widthVerts; ++x) {
+			let v_flip: f32 = 1.0 - v;
+			if (!stretch_uv) v_flip /= 2;
+			let u_off: f32 = y == 0 ? 0.5 / widthSegments : y == heightSegments ? -0.5 / widthSegments : 0.0;
+			for (let x: i32 = 0; x < width_verts; ++x) {
 				let u: f32 = x / widthSegments;
-				let uPI2: f32 = u * pi2;
-				let vPI: f32  = v * Math.PI;
-				let vPIsin: f32 = Math.sin(vPI);
-				let vx: f32 = -radius * Math.cos(uPI2) * vPIsin;
-				let vy: f32 =  radius * Math.sin(uPI2) * vPIsin;
-				let vz: f32 = -radius * Math.cos(vPI);
+				let u_pi2: f32 = u * pi2;
+				let v_pi: f32  = v * Math.PI;
+				let v_pi_sin: f32 = Math.sin(v_pi);
+				let vx: f32 = -radius * Math.cos(u_pi2) * v_pi_sin;
+				let vy: f32 =  radius * Math.sin(u_pi2) * v_pi_sin;
+				let vz: f32 = -radius * Math.cos(v_pi);
 				let i4: i32 = pos * 4;
 				let i2: i32 = pos * 2;
 				mesh.posa[i4    ] = Math.floor(vx * inv);
@@ -94,28 +94,28 @@ class Geom {
 				mesh.posa[i4 + 3] = Math.floor(nor.z * 32767);
 				mesh.nora[i2    ] = Math.floor(nor.x * 32767);
 				mesh.nora[i2 + 1] = Math.floor(nor.y * 32767);
-				mesh.texa[i2    ] = (Math.floor((u + uOff) * 32767) - 1) % 32767;
-				mesh.texa[i2 + 1] = (Math.floor(vFlip      * 32767) - 1) % 32767;
+				mesh.texa[i2    ] = (Math.floor((u + u_off) * 32767) - 1) % 32767;
+				mesh.texa[i2 + 1] = (Math.floor(v_flip      * 32767) - 1) % 32767;
 				pos++;
 			}
 		}
 
 		pos = 0;
-		let heightSegments1: i32 = heightSegments - 1;
+		let height_segments1: i32 = heightSegments - 1;
 		for (let y: i32 = 0; y < heightSegments; ++y) {
 			for (let x: i32 = 0; x < widthSegments; ++x) {
 				let x1: i32 = x + 1;
 				let y1: i32 = y + 1;
-				let a: f32 = y  * widthVerts + x1;
-				let b: f32 = y  * widthVerts + x;
-				let c: f32 = y1 * widthVerts + x;
-				let d: f32 = y1 * widthVerts + x1;
+				let a: f32 = y  * width_verts + x1;
+				let b: f32 = y  * width_verts + x;
+				let c: f32 = y1 * width_verts + x;
+				let d: f32 = y1 * width_verts + x1;
 				if (y > 0) {
 					mesh.inda[pos++] = a;
 					mesh.inda[pos++] = b;
 					mesh.inda[pos++] = d;
 				}
-				if (y < heightSegments1) {
+				if (y < height_segments1) {
 					mesh.inda[pos++] = b;
 					mesh.inda[pos++] = c;
 					mesh.inda[pos++] = d;

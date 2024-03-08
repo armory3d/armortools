@@ -24,7 +24,7 @@ class InpaintNode extends LogicNode {
 
 		if (InpaintNode.mask == null) {
 			InpaintNode.mask = image_create_render_target(Config.getTextureResX(), Config.getTextureResY(), tex_format_t.R8);
-			Base.notifyOnNextFrame(() => {
+			base_notifyOnNextFrame(() => {
 				g4_begin(InpaintNode.mask);
 				g4_clear(color_from_floats(1.0, 1.0, 1.0, 1.0));
 				g4_end();
@@ -54,7 +54,7 @@ class InpaintNode extends LogicNode {
 		this.inputs[0].getAsImage((source: image_t) => {
 
 			Console.progress(tr("Processing") + " - " + tr("Inpaint"));
-			Base.notifyOnNextFrame(() => {
+			base_notifyOnNextFrame(() => {
 				g2_begin(InpaintNode.image);
 				g2_draw_scaled_image(source, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 				g2_end();
@@ -65,14 +65,14 @@ class InpaintNode extends LogicNode {
 	}
 
 	override getCachedImage = (): image_t => {
-		Base.notifyOnNextFrame(() => {
+		base_notifyOnNextFrame(() => {
 			this.inputs[0].getAsImage((source: image_t) => {
-				if (Base.pipeCopy == null) Base.makePipe();
+				if (base_pipeCopy == null) base_makePipe();
 				if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
 				g4_begin(InpaintNode.image);
-				g4_set_pipeline(Base.pipeInpaintPreview);
-				g4_set_tex(Base.tex0InpaintPreview, source);
-				g4_set_tex(Base.texaInpaintPreview, InpaintNode.mask);
+				g4_set_pipeline(base_pipeInpaintPreview);
+				g4_set_tex(base_tex0InpaintPreview, source);
+				g4_set_tex(base_texaInpaintPreview, InpaintNode.mask);
 				g4_set_vertex_buffer(const_data_screen_aligned_vb);
 				g4_set_index_buffer(const_data_screen_aligned_ib);
 				g4_draw();

@@ -46,9 +46,9 @@ class Project {
 	static project_save = (saveAndQuit: bool = false) => {
 		if (Project.filepath == "") {
 			///if krom_ios
-			let documentDirectory: string = krom_save_dialog("", "");
-			documentDirectory = documentDirectory.substr(0, documentDirectory.length - 8); // Strip /'untitled'
-			Project.filepath = documentDirectory + "/" + sys_title() + ".arm";
+			let document_directory: string = krom_save_dialog("", "");
+			document_directory = document_directory.substr(0, document_directory.length - 8); // Strip /'untitled'
+			Project.filepath = document_directory + "/" + sys_title() + ".arm";
 			///elseif krom_android
 			Project.filepath = krom_save_path() + "/" + sys_title() + ".arm";
 			///else
@@ -168,7 +168,7 @@ class Project {
 				raw = ImportMesh.raw_mesh(mesh);
 
 				///if is_sculpt
-				Base.notify_on_next_frame(() => {
+				base_notify_on_next_frame(() => {
 					let f32a: Float32Array = new Float32Array(Config.get_texture_res_x() * Config.get_texture_res_y() * 4);
 					for (let i: i32 = 0; i < Math.floor(mesh.inda.length); ++i) {
 						let index: i32 = mesh.inda[i];
@@ -181,7 +181,7 @@ class Project {
 					let imgmesh: image_t = image_from_bytes(f32a.buffer, Config.get_texture_res_x(), Config.get_texture_res_y(), tex_format_t.RGBA128);
 					let texpaint: image_t = Project.layers[0].texpaint;
 					g2_begin(texpaint);
-					g2_set_pipeline(Base.pipe_copy128);
+					g2_set_pipeline(base_pipe_copy128);
 					g2_draw_scaled_image(imgmesh, 0, 0, Config.get_texture_res_x(), Config.get_texture_res_y());
 					g2_set_pipeline(null);
 					g2_end();
@@ -239,7 +239,7 @@ class Project {
 		Project.brushes = [SlotBrush.create()];
 		Context.raw.brush = Project.brushes[0];
 
-		Project.fonts = [SlotFont.create("default.ttf", Base.font)];
+		Project.fonts = [SlotFont.create("default.ttf", base_font)];
 		Context.raw.font = Project.fonts[0];
 		///end
 
@@ -272,17 +272,17 @@ class Project {
 		if (resetLayers) {
 
 			///if (is_paint || is_sculpt)
-			let aspectRatioChanged: bool = Project.layers[0].texpaint.width != Config.get_texture_res_x() || Project.layers[0].texpaint.height != Config.get_texture_res_y();
+			let aspect_ratio_changed: bool = Project.layers[0].texpaint.width != Config.get_texture_res_x() || Project.layers[0].texpaint.height != Config.get_texture_res_y();
 			while (Project.layers.length > 0) SlotLayer.unload(Project.layers.pop());
 			let layer: SlotLayerRaw = SlotLayer.create();
 			Project.layers.push(layer);
 			Context.set_layer(layer);
-			if (aspectRatioChanged) {
-				app_notify_on_init(Base.resize_layers);
+			if (aspect_ratio_changed) {
+				app_notify_on_init(base_resize_layers);
 			}
 			///end
 
-			app_notify_on_init(Base.init_layers);
+			app_notify_on_init(base_init_layers);
 		}
 
 		if (current != null) g2_begin(current);
@@ -321,10 +321,10 @@ class Project {
 			if (Path.is_texture(path)) {
 				// Import texture
 				ImportAsset.run(path);
-				let assetIndex: i32 = 0;
+				let asset_index: i32 = 0;
 				for (let i: i32 = 0; i < Project.assets.length; ++i) {
 					if (Project.assets[i].file == path) {
-						assetIndex = i;
+						asset_index = i;
 						break;
 					}
 				}
@@ -337,7 +337,7 @@ class Project {
 				let n: zui_node_t = NodesBrush.create_node("TEX_IMAGE");
 				n.x = 83;
 				n.y = 340;
-				n.buttons[0].default_value = assetIndex;
+				n.buttons[0].default_value = asset_index;
 				let links: zui_node_link_t[] = Context.raw.brush.canvas.links;
 				links.push({
 					id: zui_get_link_id(links),
@@ -377,8 +377,8 @@ class Project {
 		///end
 
 		UIBox.show_custom((ui: zui_t) => {
-			let tabVertical: bool = Config.raw.touch_ui;
-			if (zui_tab(zui_handle("project_3"), tr("Import Mesh"), tabVertical)) {
+			let tab_vertical: bool = Config.raw.touch_ui;
+			if (zui_tab(zui_handle("project_3"), tr("Import Mesh"), tab_vertical)) {
 
 				if (path.toLowerCase().endsWith(".obj")) {
 					Context.raw.split_by = zui_combo(zui_handle("project_4"), [
@@ -409,7 +409,7 @@ class Project {
 				}
 				if (zui_button(tr("Import")) || ui.is_return_down) {
 					UIBox.hide();
-					let doImport = () => {
+					let do_import = () => {
 						///if (is_paint || is_sculpt)
 						ImportMesh.run(path, clearLayers, replaceExisting);
 						///end
@@ -419,12 +419,12 @@ class Project {
 						if (done != null) done();
 					}
 					///if (krom_android || krom_ios)
-					Base.notify_on_next_frame(() => {
+					base_notify_on_next_frame(() => {
 						Console.toast(tr("Importing mesh"));
-						Base.notify_on_next_frame(doImport);
+						base_notify_on_next_frame(do_import);
 					});
 					///else
-					doImport();
+					do_import();
 					///end
 				}
 				if (zui_button(tr("?"))) {
@@ -444,8 +444,8 @@ class Project {
 
 	static unwrap_mesh_box = (mesh: any, done: (a: any)=>void, skipUI: bool = false) => {
 		UIBox.show_custom((ui: zui_t) => {
-			let tabVertical: bool = Config.raw.touch_ui;
-			if (zui_tab(zui_handle("project_7"), tr("Unwrap Mesh"), tabVertical)) {
+			let tab_vertical: bool = Config.raw.touch_ui;
+			if (zui_tab(zui_handle("project_7"), tr("Unwrap Mesh"), tab_vertical)) {
 
 				let unwrapPlugins: string[] = [];
 				if (BoxPreferences.files_plugin == null) {
@@ -458,7 +458,7 @@ class Project {
 				}
 				unwrapPlugins.push("equirect");
 
-				let unwrapBy: i32 = zui_combo(zui_handle("project_8"), unwrapPlugins, tr("Plugin"), true);
+				let unwrap_by: i32 = zui_combo(zui_handle("project_8"), unwrapPlugins, tr("Plugin"), true);
 
 				zui_row([0.5, 0.5]);
 				if (zui_button(tr("Cancel"))) {
@@ -466,12 +466,12 @@ class Project {
 				}
 				if (zui_button(tr("Unwrap")) || ui.is_return_down || skipUI) {
 					UIBox.hide();
-					let doUnwrap = () => {
-						if (unwrapBy == unwrapPlugins.length - 1) {
+					let do_unwrap = () => {
+						if (unwrap_by == unwrapPlugins.length - 1) {
 							UtilMesh.equirect_unwrap(mesh);
 						}
 						else {
-							let f: string = unwrapPlugins[unwrapBy];
+							let f: string = unwrapPlugins[unwrap_by];
 							if (Config.raw.plugins.indexOf(f) == -1) {
 								Config.enable_plugin(f);
 								Console.info(f + " " + tr("plugin enabled"));
@@ -481,12 +481,12 @@ class Project {
 						done(mesh);
 					}
 					///if (krom_android || krom_ios)
-					Base.notify_on_next_frame(() => {
+					base_notify_on_next_frame(() => {
 						Console.toast(tr("Unwrapping mesh"));
-						Base.notify_on_next_frame(doUnwrap);
+						base_notify_on_next_frame(do_unwrap);
 					});
 					///else
-					doUnwrap();
+					do_unwrap();
 					///end
 				}
 			}
@@ -519,7 +519,7 @@ class Project {
 			let i: i32 = Project.assets.indexOf(asset);
 			data_delete_image(asset.file);
 			Project.asset_map.delete(asset.id);
-			let oldAsset: asset_t = Project.assets[i];
+			let old_asset: asset_t = Project.assets[i];
 			Project.assets.splice(i, 1);
 			Project.asset_names.splice(i, 1);
 			ImportTexture.run(asset.file);
@@ -527,7 +527,7 @@ class Project {
 			Project.asset_names.splice(i, 0, Project.asset_names.pop());
 
 			///if (is_paint || is_sculpt)
-			if (Context.raw.texture == oldAsset) Context.raw.texture = Project.assets[i];
+			if (Context.raw.texture == old_asset) Context.raw.texture = Project.assets[i];
 			///end
 
 			let _next = () => {
@@ -538,7 +538,7 @@ class Project {
 				UIBase.hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 				///end
 			}
-			Base.notify_on_next_frame(_next);
+			base_notify_on_next_frame(_next);
 		}
 		if (!File.exists(asset.file)) {
 			let filters: string = Path.texture_formats.join(",");
@@ -568,16 +568,16 @@ class Project {
 
 	static is_atlas_object = (p: mesh_object_t): bool => {
 		if (Context.raw.layer_filter <= Project.paint_objects.length) return false;
-		let atlasName: string = Project.get_used_atlases()[Context.raw.layer_filter - Project.paint_objects.length - 1];
-		let atlasI: i32 = Project.atlas_names.indexOf(atlasName);
-		return atlasI == Project.atlas_objects[Project.paint_objects.indexOf(p)];
+		let atlas_name: string = Project.get_used_atlases()[Context.raw.layer_filter - Project.paint_objects.length - 1];
+		let atlas_i: i32 = Project.atlas_names.indexOf(atlas_name);
+		return atlas_i == Project.atlas_objects[Project.paint_objects.indexOf(p)];
 	}
 
 	static get_atlas_objects = (objectMask: i32): mesh_object_t[] => {
-		let atlasName: string = Project.get_used_atlases()[objectMask - Project.paint_objects.length - 1];
-		let atlasI: i32 = Project.atlas_names.indexOf(atlasName);
+		let atlas_name: string = Project.get_used_atlases()[objectMask - Project.paint_objects.length - 1];
+		let atlas_i: i32 = Project.atlas_names.indexOf(atlas_name);
 		let visibles: mesh_object_t[] = [];
-		for (let i: i32 = 0; i < Project.paint_objects.length; ++i) if (Project.atlas_objects[i] == atlasI) visibles.push(Project.paint_objects[i]);
+		for (let i: i32 = 0; i < Project.paint_objects.length; ++i) if (Project.atlas_objects[i] == atlas_i) visibles.push(Project.paint_objects[i]);
 		return visibles;
 	}
 	///end

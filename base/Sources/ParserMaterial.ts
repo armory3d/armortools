@@ -1870,7 +1870,7 @@ class ParserMaterial {
 	}
 
 	static make_texture = (image_node: zui_node_t, tex_name: string, matname: string = null): bind_tex_t => {
-		let filepath: string = ParserMaterial.enum_data(Base.enum_texts(image_node.type)[image_node.buttons[0].default_value]);
+		let filepath: string = ParserMaterial.enum_data(base_enum_texts(image_node.type)[image_node.buttons[0].default_value]);
 		if (filepath == "" || filepath.indexOf(".") == -1) {
 			return null;
 		}

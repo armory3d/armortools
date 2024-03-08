@@ -16,7 +16,7 @@ class File {
 	// static let internal: Map<string, string[]> = null; // .apk contents
 	// ///end
 
-	static read_directory = (path: string, foldersOnly: bool = false): string[] => {
+	static read_directory = (path: string, folders_only: bool = false): string[] => {
 		if (path.startsWith("cloud")) {
 			let files: string[] = File.cloud != null ? File.cloud.get(string_replace_all(path, "\\", "/")) : null;
 			return files != null ? files : [];
@@ -34,15 +34,15 @@ class File {
 		// }
 		// if (internal.exists(path)) return internal.get(path);
 		// ///end
-		return krom_read_directory(path, foldersOnly).split("\n");
+		return krom_read_directory(path, folders_only).split("\n");
 	}
 
 	static create_directory = (path: string) => {
 		krom_sys_command(File.cmd_mkdir + ' "' + path + '"');
 	}
 
-	static copy = (srcPath: string, dstPath: string) => {
-		krom_sys_command(File.cmd_copy + ' "' + srcPath + '" "' + dstPath + '"');
+	static copy = (srcPath: string, dst_path: string) => {
+		krom_sys_command(File.cmd_copy + ' "' + srcPath + '" "' + dst_path + '"');
 	}
 
 	static start = (path: string) => {
@@ -110,9 +110,9 @@ class File {
 			return;
 		}
 
-		let fileDir: string = dest.substr(0, dest.lastIndexOf(Path.sep));
-		if (File.read_directory(fileDir)[0] == "") {
-			File.create_directory(fileDir);
+		let file_dir: string = dest.substr(0, dest.lastIndexOf(Path.sep));
+		if (File.read_directory(file_dir)[0] == "") {
+			File.create_directory(file_dir);
 		}
 		///if krom_windows
 		path = string_replace_all(path, "\\", "/");
@@ -180,8 +180,8 @@ class File {
 				}
 			}
 
-			let isTruncated: bool = str.indexOf("<IsTruncated>true") > -1;
-			if (isTruncated) {
+			let is_truncated: bool = str.indexOf("<IsTruncated>true") > -1;
+			if (is_truncated) {
 				let pos_start: i32 = str.indexOf("<NextContinuationToken>");
 				pos_start += 23;
 				let pos_end: i32 = str.indexOf("</NextContinuationToken>", pos_start);

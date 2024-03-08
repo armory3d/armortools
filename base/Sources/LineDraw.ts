@@ -136,14 +136,14 @@ class LineDraw {
 		LineDraw.camera_look = mat4_get_loc(camera.base.transform.world);
 		vec4_sub(LineDraw.camera_look, LineDraw.mid_point);
 
-		let lineWidth: vec4_t = vec4_cross(LineDraw.camera_look, LineDraw.mid_line);
-		vec4_normalize(lineWidth);
-		vec4_mult(lineWidth, LineDraw.strength);
+		let line_width: vec4_t = vec4_cross(LineDraw.camera_look, LineDraw.mid_line);
+		vec4_normalize(line_width);
+		vec4_mult(line_width, LineDraw.strength);
 
-		vec4_add(vec4_set(LineDraw.corner1, x1, y1, z1), lineWidth);
-		vec4_sub(vec4_set(LineDraw.corner2, x1, y1, z1), lineWidth);
-		vec4_sub(vec4_set(LineDraw.corner3, x2, y2, z2), lineWidth);
-		vec4_add(vec4_set(LineDraw.corner4, x2, y2, z2), lineWidth);
+		vec4_add(vec4_set(LineDraw.corner1, x1, y1, z1), line_width);
+		vec4_sub(vec4_set(LineDraw.corner2, x1, y1, z1), line_width);
+		vec4_sub(vec4_set(LineDraw.corner3, x2, y2, z2), line_width);
+		vec4_add(vec4_set(LineDraw.corner4, x2, y2, z2), line_width);
 
 		let i: i32 = LineDraw.lines * 24; // 4 * 6 (structure len)
 		LineDraw.add_vb_data(i, [LineDraw.corner1.x, LineDraw.corner1.y, LineDraw.corner1.z, color_get_rb(LineDraw.color) / 255, color_get_gb(LineDraw.color) / 255, color_get_ab(LineDraw.color) / 255]);

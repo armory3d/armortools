@@ -71,7 +71,7 @@ class TabSwatches {
 
 			let slotw: i32 = Math.floor(26 * zui_SCALE(ui));
 			let num: i32 = Math.floor(ui._w / (slotw + 3));
-			let dragPositionSet: bool = false;
+			let drag_pos_set: bool = false;
 
 			let uix: f32 = 0.0;
 			let uiy: f32 = 0.0;
@@ -99,7 +99,7 @@ class TabSwatches {
 					uiy = ui._y;
 
 					// Draw the drag position indicator
-					if (Base.drag_swatch != null && TabSwatches.drag_pos == i) {
+					if (base_drag_swatch != null && TabSwatches.drag_pos == i) {
 						zui_fill(-1, -2 , 2, 32, ui.t.HIGHLIGHT_COL);
 					}
 
@@ -108,13 +108,13 @@ class TabSwatches {
 					if (state == zui_state_t.STARTED) {
 						Context.set_swatch(Project.raw.swatches[i]);
 
-						Base.drag_off_x = -(mouse_x - uix - ui._window_x - 2 * slotw);
-						Base.drag_off_y = -(mouse_y - uiy - ui._window_y + 1);
-						Base.drag_swatch = Context.raw.swatch;
+						base_drag_off_x = -(mouse_x - uix - ui._window_x - 2 * slotw);
+						base_drag_off_y = -(mouse_y - uiy - ui._window_y + 1);
+						base_drag_swatch = Context.raw.swatch;
 					}
 					else if (state == zui_state_t.HOVERED) {
 						TabSwatches.drag_pos = (mouse_x > uix + ui._window_x + slotw / 2) ? i + 1 : i; // Switch to the next position if the mouse crosses the swatch rectangle center
-						dragPositionSet = true;
+						drag_pos_set = true;
 					}
 					else if (state == zui_state_t.RELEASED) {
 						if (time_time() - Context.raw.select_time < 0.25) {
@@ -191,7 +191,7 @@ class TabSwatches {
 							else if (UIMenu.menu_button(ui, tr("Create Color Layer"))) {
 								let color: i32 = Project.raw.swatches[i].base;
 								color = color_set_ab(color, Project.raw.swatches[i].opacity * 255);
-								Base.create_color_layer(color, Project.raw.swatches[i].occlusion, Project.raw.swatches[i].roughness, Project.raw.swatches[i].metallic);
+								base_create_color_layer(color, Project.raw.swatches[i].occlusion, Project.raw.swatches[i].roughness, Project.raw.swatches[i].metallic);
 							}
 							///end
 						}, add);
@@ -207,20 +207,20 @@ class TabSwatches {
 			}
 
 			// Draw the rightmost line next to the last swatch
-			if (Base.drag_swatch != null && TabSwatches.drag_pos == Project.raw.swatches.length) {
+			if (base_drag_swatch != null && TabSwatches.drag_pos == Project.raw.swatches.length) {
 				ui._x = uix; // Reset the position because otherwise it would start in the row below
 				ui._y = uiy;
 				zui_fill(28, -2, 2, 32, ui.t.HIGHLIGHT_COL);
 			}
 
 			// Currently there is no valid dragPosition so reset it
-			if (!dragPositionSet) {
+			if (!drag_pos_set) {
 				TabSwatches.drag_pos = -1;
 			}
 
-			let inFocus: bool = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
-						  		ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
-			if (inFocus && ui.is_delete_down && Project.raw.swatches.length > 1) {
+			let in_focus: bool = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
+								 ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
+			if (in_focus && ui.is_delete_down && Project.raw.swatches.length > 1) {
 				ui.is_delete_down = false;
 				TabSwatches.delete_swatch(Context.raw.swatch);
 			}
@@ -231,16 +231,16 @@ class TabSwatches {
 		// No valid position available
 		if (TabSwatches.drag_pos == -1) return;
 
-		let swatchPosition: i32 = Project.raw.swatches.indexOf(swatch);
+		let swatch_pos: i32 = Project.raw.swatches.indexOf(swatch);
 		// A new swatch from color picker
-		if (swatchPosition == -1) {
+		if (swatch_pos == -1) {
 			Project.raw.swatches.splice(TabSwatches.drag_pos, 0, swatch);
 		}
-		else if (Math.abs(swatchPosition - TabSwatches.drag_pos) > 0) { // Existing swatch is reordered
+		else if (Math.abs(swatch_pos - TabSwatches.drag_pos) > 0) { // Existing swatch is reordered
 			array_remove(Project.raw.swatches, swatch);
 			// If the new position is after the old one, decrease by one because the swatch has been deleted
-			let newPosition: i32 = TabSwatches.drag_pos - swatchPosition > 0 ? TabSwatches.drag_pos -1 : TabSwatches.drag_pos;
-			Project.raw.swatches.splice(newPosition, 0, swatch);
+			let new_pos: i32 = TabSwatches.drag_pos - swatch_pos > 0 ? TabSwatches.drag_pos -1 : TabSwatches.drag_pos;
+			Project.raw.swatches.splice(new_pos, 0, swatch);
 		}
 	}
 

@@ -2,8 +2,8 @@
 class MakeParticle {
 
 	static run = (data: material_t): NodeShaderContextRaw => {
-		let context_id = "mesh";
-		let con_part = NodeShaderContext.create(data, {
+		let context_id: string = "mesh";
+		let con_part: NodeShaderContextRaw = NodeShaderContext.create(data, {
 			name: context_id,
 			depth_write: false,
 			compare_mode: "always",
@@ -12,8 +12,8 @@ class MakeParticle {
 			color_attachments: ["R8"]
 		});
 
-		let vert = NodeShaderContext.make_vert(con_part);
-		let frag = NodeShaderContext.make_frag(con_part);
+		let vert: NodeShaderRaw = NodeShaderContext.make_vert(con_part);
+		let frag: NodeShaderRaw = NodeShaderContext.make_frag(con_part);
 		frag.ins = vert.outs;
 
 		NodeShader.write_attrib(vert, 'vec4 spos = vec4(pos.xyz, 1.0);');
@@ -25,7 +25,7 @@ class MakeParticle {
 
 		NodeShader.add_uniform(vert, 'mat4 pd', '_particle_data');
 
-		let str_tex_hash = "float fhash(int n) { return fract(sin(float(n)) * 43758.5453); }\n";
+		let str_tex_hash: string = "float fhash(int n) { return fract(sin(float(n)) * 43758.5453); }\n";
 		NodeShader.add_function(vert, str_tex_hash);
 		NodeShader.add_out(vert, 'float p_age');
 		NodeShader.write(vert, 'p_age = pd[3][3] - float(gl_InstanceID) * pd[0][1];');

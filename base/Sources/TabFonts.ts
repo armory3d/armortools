@@ -125,9 +125,9 @@ class TabFonts {
 				ui._y += 6;
 			}
 
-			let inFocus: bool = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
-						  		ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
-			if (inFocus && ui.is_delete_down && Project.fonts.length > 1 && Context.raw.font.file != "") {
+			let in_focus: bool = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
+						    	 ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
+			if (in_focus && ui.is_delete_down && Project.fonts.length > 1 && Context.raw.font.file != "") {
 				ui.is_delete_down = false;
 				TabFonts.delete_font(Context.raw.font);
 			}

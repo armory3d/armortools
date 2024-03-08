@@ -15,8 +15,8 @@ class MakeBlur {
 		NodeShader.write(frag, 'vec3 nortan = vec3(0.0, 0.0, 0.0);');
 		NodeShader.write(frag, 'float height = 0.0;');
 		NodeShader.write(frag, 'float mat_opacity = 1.0;');
-		let isMask = SlotLayer.is_mask(Context.raw.layer);
-		if (isMask) {
+		let is_mask: bool = SlotLayer.is_mask(Context.raw.layer);
+		if (is_mask) {
 			NodeShader.write(frag, 'float opacity = 1.0;');
 		}
 		else {

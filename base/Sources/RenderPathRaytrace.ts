@@ -47,21 +47,21 @@ class RenderPathRaytrace {
 		}
 
 		let probe: world_data_t = scene_world;
-		let savedEnvmap: image_t = Context.raw.show_envmap_blur ? probe._.radiance_mipmaps[0] : Context.raw.saved_envmap;
+		let saved_envmap: image_t = Context.raw.show_envmap_blur ? probe._.radiance_mipmaps[0] : Context.raw.saved_envmap;
 
-		if (RenderPathRaytrace.last_envmap != savedEnvmap) {
-			RenderPathRaytrace.last_envmap = savedEnvmap;
+		if (RenderPathRaytrace.last_envmap != saved_envmap) {
+			RenderPathRaytrace.last_envmap = saved_envmap;
 
 			let bnoise_sobol: image_t = scene_embedded.get("bnoise_sobol.k");
 			let bnoise_scramble: image_t = scene_embedded.get("bnoise_scramble.k");
 			let bnoise_rank: image_t = scene_embedded.get("bnoise_rank.k");
 
-			let l: any = Base.flatten(true);
-			krom_raytrace_set_textures(l.texpaint, l.texpaint_nor, l.texpaint_pack, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
+			let l: any = base_flatten(true);
+			krom_raytrace_set_textures(l.texpaint, l.texpaint_nor, l.texpaint_pack, saved_envmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
 		}
 
 		///if is_lab
-		let l: any = Base.flatten(true);
+		let l: any = base_flatten(true);
 		if (l.texpaint != RenderPathRaytrace.last_texpaint) {
 			RenderPathRaytrace.last_texpaint = l.texpaint;
 
@@ -69,12 +69,12 @@ class RenderPathRaytrace {
 			let bnoise_scramble: image_t = scene_embedded.get("bnoise_scramble.k");
 			let bnoise_rank: image_t = scene_embedded.get("bnoise_rank.k");
 
-			krom_raytrace_set_textures(l.texpaint, l.texpaint_nor, l.texpaint_pack, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
+			krom_raytrace_set_textures(l.texpaint, l.texpaint_nor, l.texpaint_pack, saved_envmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
 		}
 		///end
 
 		if (Context.raw.pdirty > 0 || RenderPathRaytrace.dirty > 0) {
-			Base.flatten(true);
+			base_flatten(true);
 		}
 
 		let cam: camera_object_t = scene_camera;
@@ -163,8 +163,8 @@ class RenderPathRaytrace {
 	}
 
 	static draw = (useLiveLayer: bool) => {
-		let isLive: bool = Config.raw.brush_live && RenderPathPaint.liveLayerDrawn > 0;
-		if (Context.raw.ddirty > 1 || Context.raw.pdirty > 0 || isLive) RenderPathRaytrace.frame = 0;
+		let is_live: bool = Config.raw.brush_live && RenderPathPaint.live_layer_drawn > 0;
+		if (Context.raw.ddirty > 1 || Context.raw.pdirty > 0 || is_live) RenderPathRaytrace.frame = 0;
 
 		///if krom_metal
 		// Delay path tracing additional samples while painting

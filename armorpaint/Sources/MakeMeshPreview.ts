@@ -4,8 +4,8 @@ class MakeMeshPreview {
 	static opacity_discard_decal: f32 = 0.05;
 
 	static run = (data: material_t, matcon: material_context_t): NodeShaderContextRaw => {
-		let context_id = "mesh";
-		let con_mesh = NodeShaderContext.create(data, {
+		let context_id: string = "mesh";
+		let con_mesh: NodeShaderContextRaw = NodeShaderContext.create(data, {
 			name: context_id,
 			depth_write: true,
 			compare_mode: "less",
@@ -15,13 +15,13 @@ class MakeMeshPreview {
 			depth_attachment: "DEPTH32"
 		});
 
-		let vert = NodeShaderContext.make_vert(con_mesh);
-		let frag = NodeShaderContext.make_frag(con_mesh);
+		let vert: NodeShaderRaw = NodeShaderContext.make_vert(con_mesh);
+		let frag: NodeShaderRaw = NodeShaderContext.make_frag(con_mesh);
 		frag.ins = vert.outs;
-		let pos = "pos";
+		let pos: string = "pos";
 
 		///if arm_skin
-		let skin = mesh_data_get_vertex_array(Context.raw.paint_object.data, "bone") != null;
+		let skin: bool = mesh_data_get_vertex_array(Context.raw.paint_object.data, "bone") != null;
 		if (skin) {
 			pos = "spos";
 			NodeShaderContext.add_elem(con_mesh, "bone", 'short4norm');
@@ -43,26 +43,26 @@ class MakeMeshPreview {
 		NodeShader.add_uniform(vert, 'mat4 WVP', '_world_view_proj_matrix');
 		NodeShader.write_attrib(vert, `gl_Position = mul(vec4(${pos}.xyz, 1.0), WVP);`);
 
-		let brushScale = (Context.raw.brush_scale * Context.raw.brush_nodes_scale) + "";
+		let brush_scale: string = (Context.raw.brush_scale * Context.raw.brush_nodes_scale) + "";
 		NodeShader.add_out(vert, 'vec2 texCoord');
-		NodeShader.write_attrib(vert, `texCoord = tex * float(${brushScale});`);
+		NodeShader.write_attrib(vert, `texCoord = tex * float(${brush_scale});`);
 
-		let decal = Context.raw.decal_preview;
+		let decal: bool = Context.raw.decal_preview;
 		ParserMaterial.sample_keep_aspect = decal;
-		ParserMaterial.sample_uv_scale = brushScale;
-		ParserMaterial.parse_height = MakeMaterial.heightUsed;
+		ParserMaterial.sample_uv_scale = brush_scale;
+		ParserMaterial.parse_height = MakeMaterial.height_used;
 		ParserMaterial.parse_height_as_channel = true;
-		let sout = ParserMaterial.parse(UINodes.get_canvas_material(), con_mesh, vert, frag, matcon);
+		let sout: shader_out_t = ParserMaterial.parse(UINodes.get_canvas_material(), con_mesh, vert, frag, matcon);
 		ParserMaterial.parse_height = false;
 		ParserMaterial.parse_height_as_channel = false;
 		ParserMaterial.sample_keep_aspect = false;
-		let base = sout.out_basecol;
-		let rough = sout.out_roughness;
-		let met = sout.out_metallic;
-		let occ = sout.out_occlusion;
-		let opac = sout.out_opacity;
-		let height = sout.out_height;
-		let nortan = ParserMaterial.out_normaltan;
+		let base: string = sout.out_basecol;
+		let rough: string = sout.out_roughness;
+		let met: string = sout.out_metallic;
+		let occ: string = sout.out_occlusion;
+		let opac: string = sout.out_opacity;
+		let height: string = sout.out_height;
+		let nortan: string = ParserMaterial.out_normaltan;
 		NodeShader.write(frag, `vec3 basecol = pow(${base}, vec3(2.2, 2.2, 2.2));`);
 		NodeShader.write(frag, `float roughness = ${rough};`);
 		NodeShader.write(frag, `float metallic = ${met};`);
@@ -75,7 +75,7 @@ class MakeMeshPreview {
 		// NodeShader.write(vert, `float vheight = ${height};`);
 		// NodeShader.add_out(vert, 'float height');
 		// NodeShader.write(vert, 'height = vheight;');
-		// let displaceStrength = 0.1;
+		// let displaceStrength: f32 = 0.1;
 		// if (MakeMaterial.heightUsed && displaceStrength > 0.0) {
 		// 	NodeShader.write(vert, `vec3 pos2 = ${pos}.xyz + vec3(nor.xy, pos.w) * vec3(${height}, ${height}, ${height}) * vec3(${displaceStrength}, ${displaceStrength}, ${displaceStrength});`);
 		// 	NodeShader.write(vert, 'gl_Position = mul(vec4(pos2.xyz, 1.0), WVP);');
@@ -84,11 +84,11 @@ class MakeMeshPreview {
 		if (decal) {
 			if (Context.raw.tool == workspace_tool_t.TEXT) {
 				NodeShader.add_uniform(frag, 'sampler2D textexttool', '_textexttool');
-				NodeShader.write(frag, `opacity *= textureLod(textexttool, texCoord / float(${brushScale}), 0.0).r;`);
+				NodeShader.write(frag, `opacity *= textureLod(textexttool, texCoord / float(${brush_scale}), 0.0).r;`);
 			}
 		}
 		if (decal) {
-			let opac = MakeMeshPreview.opacity_discard_decal;
+			let opac: f32 = MakeMeshPreview.opacity_discard_decal;
 			NodeShader.write(frag, `if (opacity < ${opac}) discard;`);
 		}
 
@@ -99,7 +99,7 @@ class MakeMeshPreview {
 		NodeShader.add_function(frag, ShaderFunctions.str_cotangent_frame);
 		NodeShader.add_function(frag, ShaderFunctions.str_octahedron_wrap);
 
-		if (MakeMaterial.heightUsed) {
+		if (MakeMaterial.height_used) {
 			NodeShader.write(frag, 'if (height > 0.0) {');
 			NodeShader.write(frag, 'float height_dx = dFdx(height * 2.0);');
 			NodeShader.write(frag, 'float height_dy = dFdy(height * 2.0);');

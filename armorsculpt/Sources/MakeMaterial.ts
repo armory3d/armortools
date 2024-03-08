@@ -229,7 +229,7 @@ class MakeMaterial {
 		for (let key of Context.raw.nodePreviews.keys()) {
 			if (Context.raw.nodePreviewsUsed.indexOf(key) == -1) {
 				let image = Context.raw.nodePreviews.get(key);
-				Base.notifyOnNextFrame(function() { image_unload(image); });
+				base_notifyOnNextFrame(function() { image_unload(image); });
 				Context.raw.nodePreviews.delete(key);
 			}
 		}
@@ -317,7 +317,7 @@ class MakeMaterial {
 	}
 
 	static deleteContext = (c: shader_context_t) => {
-		Base.notifyOnNextFrame(() => { // Ensure pipeline is no longer in use
+		base_notifyOnNextFrame(() => { // Ensure pipeline is no longer in use
 			shader_context_delete(c);
 		});
 	}

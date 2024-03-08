@@ -52,18 +52,18 @@ class RenderPathRaytraceBake {
 				render_path_create_render_target(t);
 			}
 
-			let _bakeType: bake_type_t = Context.raw.bake_type;
+			let _bake_type: bake_type_t = Context.raw.bake_type;
 			Context.raw.bake_type = bake_type_t.INIT;
 			parsePaintMaterial();
 			render_path_set_target("baketex0");
 			render_path_clear_target(0x00000000); // Pixels with alpha of 0.0 are skipped during raytracing
 			render_path_set_target("baketex0", ["baketex1"]);
 			render_path_draw_meshes("paint");
-			Context.raw.bake_type = _bakeType;
+			Context.raw.bake_type = _bake_type;
 			let _next = () => {
 				parsePaintMaterial();
 			}
-			Base.notify_on_next_frame(_next);
+			base_notify_on_next_frame(_next);
 
 			RenderPathRaytrace.raytrace_init(RenderPathRaytraceBake.get_bake_shader_name(), rebuild);
 
@@ -75,9 +75,9 @@ class RenderPathRaytraceBake {
 			Context.update_envmap();
 		}
 		let probe: world_data_t = scene_world;
-		let savedEnvmap: image_t = Context.raw.show_envmap_blur ? probe._.radiance_mipmaps[0] : Context.raw.saved_envmap;
-		if (RenderPathRaytrace.last_envmap != savedEnvmap || RenderPathRaytraceBake.last_layer != Context.raw.layer.texpaint) {
-			RenderPathRaytrace.last_envmap = savedEnvmap;
+		let saved_envmap: image_t = Context.raw.show_envmap_blur ? probe._.radiance_mipmaps[0] : Context.raw.saved_envmap;
+		if (RenderPathRaytrace.last_envmap != saved_envmap || RenderPathRaytraceBake.last_layer != Context.raw.layer.texpaint) {
+			RenderPathRaytrace.last_envmap = saved_envmap;
 			RenderPathRaytraceBake.last_layer = Context.raw.layer.texpaint;
 
 			let baketex0: image_t = render_path_render_targets.get("baketex0")._image;
@@ -86,7 +86,7 @@ class RenderPathRaytraceBake {
 			let bnoise_scramble: image_t = scene_embedded.get("bnoise_scramble.k");
 			let bnoise_rank: image_t = scene_embedded.get("bnoise_rank.k");
 			let texpaint_undo: image_t = render_path_render_targets.get("texpaint_undo" + History.undo_i)._image;
-			krom_raytrace_set_textures(baketex0, baketex1, texpaint_undo, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
+			krom_raytrace_set_textures(baketex0, baketex1, texpaint_undo, saved_envmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
 		}
 
 		if (Context.raw.brush_time > 0) {
@@ -112,13 +112,13 @@ class RenderPathRaytraceBake {
 			render_path_draw_shader("shader_datas/copy_pass/copy_pass");
 
 			///if krom_metal
-			let samplesPerFrame: i32 = 4;
+			let samples_per_frame: i32 = 4;
 			///else
-			let samplesPerFrame: i32 = 64;
+			let samples_per_frame: i32 = 64;
 			///end
 
-			RenderPathRaytraceBake.rays_pix = RenderPathRaytrace.frame * samplesPerFrame;
-			RenderPathRaytraceBake.rays_counter += samplesPerFrame;
+			RenderPathRaytraceBake.rays_pix = RenderPathRaytrace.frame * samples_per_frame;
+			RenderPathRaytraceBake.rays_counter += samples_per_frame;
 			RenderPathRaytraceBake.rays_timer += time_real_delta();
 			if (RenderPathRaytraceBake.rays_timer >= 1) {
 				RenderPathRaytraceBake.rays_sec = RenderPathRaytraceBake.rays_counter;

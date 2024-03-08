@@ -4,7 +4,7 @@ class RenderPathPreview {
 	static init = () => {
 
 		{
-			let t = render_target_create();
+			let t: render_target_t = render_target_create();
 			t.name = "texpreview";
 			t.width = 1;
 			t.height = 1;
@@ -12,7 +12,7 @@ class RenderPathPreview {
 			render_path_create_render_target(t);
 		}
 		{
-			let t = render_target_create();
+			let t: render_target_t = render_target_create();
 			t.name = "texpreview_icon";
 			t.width = 1;
 			t.height = 1;
@@ -23,7 +23,7 @@ class RenderPathPreview {
 		render_path_create_depth_buffer("mmain", "DEPTH24");
 
 		{
-			let t = render_target_create();
+			let t: render_target_t = render_target_create();
 			t.name = "mtex";
 			t.width = Math.floor(UtilRender.material_preview_size * 2.0);
 			t.height = Math.floor(UtilRender.material_preview_size * 2.0);
@@ -36,7 +36,7 @@ class RenderPathPreview {
 		}
 
 		{
-			let t = render_target_create();
+			let t: render_target_t = render_target_create();
 			t.name = "mgbuffer0";
 			t.width = Math.floor(UtilRender.material_preview_size * 2.0);
 			t.height = Math.floor(UtilRender.material_preview_size * 2.0);
@@ -47,7 +47,7 @@ class RenderPathPreview {
 		}
 
 		{
-			let t = render_target_create();
+			let t: render_target_t = render_target_create();
 			t.name = "mgbuffer1";
 			t.width = Math.floor(UtilRender.material_preview_size * 2.0);
 			t.height = Math.floor(UtilRender.material_preview_size * 2.0);
@@ -57,7 +57,7 @@ class RenderPathPreview {
 		}
 
 		{
-			let t = render_target_create();
+			let t: render_target_t = render_target_create();
 			t.name = "mgbuffer2";
 			t.width = Math.floor(UtilRender.material_preview_size * 2.0);
 			t.height = Math.floor(UtilRender.material_preview_size * 2.0);
@@ -97,10 +97,10 @@ class RenderPathPreview {
 		render_path_set_depth_from("mtex", "mgbuffer1"); // Unbind depth
 		///end
 
-		let framebuffer = "texpreview";
-		let selectedMat = Context.raw.material;
-		render_path_render_targets.get("texpreview")._image = selectedMat.image;
-		render_path_render_targets.get("texpreview_icon")._image = selectedMat.image_icon;
+		let framebuffer: string = "texpreview";
+		let selected_mat: SlotMaterialRaw = Context.raw.material;
+		render_path_render_targets.get("texpreview")._image = selected_mat.image;
+		render_path_render_targets.get("texpreview_icon")._image = selected_mat.image_icon;
 
 		render_path_set_target(framebuffer);
 		render_path_bind_target("mtex", "tex");
@@ -141,7 +141,7 @@ class RenderPathPreview {
 		render_path_set_depth_from("tex", "gbuffer1"); // Unbind depth
 		///end
 
-		let framebuffer = "texpreview";
+		let framebuffer: string = "texpreview";
 		render_path_render_targets.get("texpreview")._image = Context.raw.decal_image;
 
 		render_path_set_target(framebuffer);

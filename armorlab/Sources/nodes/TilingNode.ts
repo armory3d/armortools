@@ -35,7 +35,7 @@ class TilingNode extends LogicNode {
 			g2_end();
 
 			Console.progress(tr("Processing") + " - " + tr("Tiling"));
-			Base.notifyOnNextFrame(() => {
+			base_notifyOnNextFrame(() => {
 				let _done = (image: image_t) => {
 					this.result = image;
 					done(image);

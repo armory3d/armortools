@@ -43,14 +43,14 @@ class History {
 				History.undo_i = History.undo_i - 1 < 0 ? Config.raw.undo_steps - 1 : History.undo_i - 1;
 				let lay: SlotLayerRaw = History.undo_layers[History.undo_i];
 				SlotLayer.swap(l, lay);
-				l.maskOpacity = step.layer_opacity;
+				l.mask_opacity = step.layer_opacity;
 				l.blending = step.layer_blending;
-				l.objectMask = step.layer_object;
+				l.object_mask = step.layer_object;
 				MakeMaterial.parse_mesh_material();
 
 				// Undo at least second time in order to avoid empty groups
 				if (step.layer_type == layer_slot_type_t.GROUP) {
-					Base.notify_on_next_frame(() => {
+					base_notify_on_next_frame(() => {
 						// 1. Undo deleting group masks
 						let n: i32 = 1;
 						while (History.steps[active - n].layer_type == layer_slot_type_t.MASK) {
@@ -103,39 +103,39 @@ class History {
 				lay = History.undo_layers[History.undo_i];
 				SlotLayer.swap(Context.raw.layer, lay);
 
-				Context.raw.layer.maskOpacity = step.layer_opacity;
+				Context.raw.layer.mask_opacity = step.layer_opacity;
 				Context.raw.layer.blending = step.layer_blending;
-				Context.raw.layer.objectMask = step.layer_object;
+				Context.raw.layer.object_mask = step.layer_object;
 				Context.raw.layers_preview_dirty = true;
 				MakeMaterial.parse_mesh_material();
 			}
 			else if (step.name == tr("Apply Mask")) {
 				// First restore the layer(s)
-				let maskPosition: i32 = step.layer;
-				let currentLayer: SlotLayerRaw = null;
+				let mask_pos: i32 = step.layer;
+				let current_layer: SlotLayerRaw = null;
 				// The layer at the old mask position is a mask, i.e. the layer had multiple masks before.
-				if (SlotLayer.is_mask(Project.layers[maskPosition])) {
-					currentLayer = Project.layers[maskPosition].parent;
+				if (SlotLayer.is_mask(Project.layers[mask_pos])) {
+					current_layer = Project.layers[mask_pos].parent;
 				}
-				else if (SlotLayer.is_layer(Project.layers[maskPosition]) || SlotLayer.is_group(Project.layers[maskPosition])) {
-					currentLayer = Project.layers[maskPosition];
+				else if (SlotLayer.is_layer(Project.layers[mask_pos]) || SlotLayer.is_group(Project.layers[mask_pos])) {
+					current_layer = Project.layers[mask_pos];
 				}
 
-				let layersToRestore: SlotLayerRaw[] = SlotLayer.is_group(currentLayer) ? SlotLayer.get_children(currentLayer) : [currentLayer];
-				layersToRestore.reverse();
+				let layers_to_restore: SlotLayerRaw[] = SlotLayer.is_group(current_layer) ? SlotLayer.get_children(current_layer) : [current_layer];
+				layers_to_restore.reverse();
 
-				for (let layer of layersToRestore) {
+				for (let layer of layers_to_restore) {
 					// Replace the current layer's content with the old one
 					Context.raw.layer = layer;
 					History.undo_i = History.undo_i - 1 < 0 ? Config.raw.undo_steps - 1 : History.undo_i - 1;
-					let oldLayer: SlotLayerRaw = History.undo_layers[History.undo_i];
-					SlotLayer.swap(Context.raw.layer, oldLayer);
+					let old_layer: SlotLayerRaw = History.undo_layers[History.undo_i];
+					SlotLayer.swap(Context.raw.layer, old_layer);
 				}
 
 				// Now restore the applied mask
 				History.undo_i = History.undo_i - 1 < 0 ? Config.raw.undo_steps - 1 : History.undo_i - 1;
 				let mask: SlotLayerRaw = History.undo_layers[History.undo_i];
-				Base.new_mask(false, currentLayer, maskPosition);
+				base_new_mask(false, current_layer, mask_pos);
 				SlotLayer.swap(Context.raw.layer, mask);
 				Context.raw.layers_preview_dirty = true;
 				Context.set_layer(Context.raw.layer);
@@ -152,7 +152,7 @@ class History {
 				let lay: SlotLayerRaw = History.undo_layers[History.undo_i];
 				Context.set_layer(Project.layers[step.layer]);
 				SlotLayer.swap(Context.raw.layer, lay);
-				Base.new_mask(false, Context.raw.layer);
+				base_new_mask(false, Context.raw.layer);
 				SlotLayer.swap(Context.raw.layer, lay);
 				Context.raw.layer_preview_dirty = true;
 			}
@@ -170,8 +170,8 @@ class History {
 			}
 			else if (step.name == tr("Layer Opacity")) {
 				Context.set_layer(Project.layers[step.layer]);
-				let t: f32 = Context.raw.layer.maskOpacity;
-				Context.raw.layer.maskOpacity = step.layer_opacity;
+				let t: f32 = Context.raw.layer.mask_opacity;
+				Context.raw.layer.mask_opacity = step.layer_opacity;
 				step.layer_opacity = t;
 				MakeMaterial.parse_mesh_material();
 			}
@@ -247,17 +247,17 @@ class History {
 				let l: SlotLayerRaw = SlotLayer.create("", step.layer_type, parent);
 				Project.layers.splice(step.layer, 0, l);
 				if (step.name == tr("New Black Mask")) {
-					Base.notify_on_next_frame(() => {
+					base_notify_on_next_frame(() => {
 						SlotLayer.clear(l, 0x00000000);
 					});
 				}
 				else if (step.name == tr("New White Mask")) {
-					Base.notify_on_next_frame(() => {
+					base_notify_on_next_frame(() => {
 						SlotLayer.clear(l, 0xffffffff);
 					});
 				}
 				else if (step.name == tr("New Fill Mask")) {
-					Base.notify_on_next_frame(() => {
+					base_notify_on_next_frame(() => {
 						Context.raw.material = Project.materials[step.material];
 						SlotLayer.to_fill_layer(l);
 					});
@@ -267,7 +267,7 @@ class History {
 			}
 			else if (step.name == tr("New Group")) {
 				let l: SlotLayerRaw = Project.layers[step.layer - 1];
-				let group: SlotLayerRaw = Base.new_group();
+				let group: SlotLayerRaw = base_new_group();
 				array_remove(Project.layers, group);
 				Project.layers.splice(step.layer, 0, group);
 				l.parent = group;
@@ -285,7 +285,7 @@ class History {
 					while (History.steps[active + n].layer_type == layer_slot_type_t.MASK) {
 						++n;
 					}
-					Base.notify_on_next_frame(() => {
+					base_notify_on_next_frame(() => {
 						for (let i: i32 = 0; i < n; ++i) History.redo();
 					});
 				}
@@ -299,9 +299,9 @@ class History {
 			else if (step.name == tr("Duplicate Layer")) {
 				Context.raw.layer = Project.layers[step.layer];
 				let _next = () => {
-					Base.duplicate_layer(Context.raw.layer);
+					base_duplicate_layer(Context.raw.layer);
 				}
-				Base.notify_on_next_frame(_next);
+				base_notify_on_next_frame(_next);
 			}
 			else if (step.name == tr("Order Layers")) {
 				let target: SlotLayerRaw = Project.layers[step.prev_order];
@@ -311,7 +311,7 @@ class History {
 			else if (step.name == tr("Merge Layers")) {
 				Context.raw.layer = Project.layers[step.layer + 1];
 				app_notify_on_init(History.redo_merge_layers);
-				app_notify_on_init(Base.merge_down);
+				app_notify_on_init(base_merge_down);
 			}
 			else if (step.name == tr("Apply Mask")) {
 				Context.raw.layer = Project.layers[step.layer];
@@ -328,7 +328,7 @@ class History {
 					Context.set_layer(Context.raw.layer);
 					Context.raw.layers_preview_dirty = true;
 				}
-				Base.notify_on_next_frame(_next);
+				base_notify_on_next_frame(_next);
 			}
 			else if (step.name == tr("Invert Mask")) {
 				let _next = () => {
@@ -341,7 +341,7 @@ class History {
 				let lay: SlotLayerRaw = History.undo_layers[History.undo_i];
 				Context.set_layer(Project.layers[step.layer]);
 				SlotLayer.swap(Context.raw.layer, lay);
-				Base.new_mask(false, lay);
+				base_new_mask(false, lay);
 				SlotLayer.swap(Context.raw.layer, lay);
 				Context.raw.layer_preview_dirty = true;
 				History.undo_i = (History.undo_i + 1) % Config.raw.undo_steps;
@@ -360,8 +360,8 @@ class History {
 			}
 			else if (step.name == tr("Layer Opacity")) {
 				Context.set_layer(Project.layers[step.layer]);
-				let t: f32 = Context.raw.layer.maskOpacity;
-				Context.raw.layer.maskOpacity = step.layer_opacity;
+				let t: f32 = Context.raw.layer.mask_opacity;
+				Context.raw.layer.mask_opacity = step.layer_opacity;
 				step.layer_opacity = t;
 				MakeMaterial.parse_mesh_material();
 			}
@@ -451,8 +451,8 @@ class History {
 
 	///if (is_paint || is_sculpt)
 	static paint = () => {
-		let isMask: bool = SlotLayer.is_mask(Context.raw.layer);
-		History.copy_to_undo(Context.raw.layer.id, History.undo_i, isMask);
+		let is_mask: bool = SlotLayer.is_mask(Context.raw.layer);
+		History.copy_to_undo(Context.raw.layer.id, History.undo_i, is_mask);
 
 		History.push_undo = false;
 		History.push(tr(UIToolbar.tool_names[Context.raw.tool]));
@@ -620,8 +620,8 @@ class History {
 			object: opos,
 			material: mpos,
 			brush: bpos,
-			layer_opacity: Context.raw.layer.maskOpacity,
-			layer_object: Context.raw.layer.objectMask,
+			layer_opacity: Context.raw.layer.mask_opacity,
+			layer_object: Context.raw.layer.object_mask,
 			layer_blending: Context.raw.layer.blending
 		});
 		///end
@@ -656,8 +656,8 @@ class History {
 	}
 
 	static swap_active = () => {
-		let undoLayer: SlotLayerRaw = History.undo_layers[History.undo_i];
-		SlotLayer.swap(undoLayer, Context.raw.layer);
+		let undo_layer: SlotLayerRaw = History.undo_layers[History.undo_i];
+		SlotLayer.swap(undo_layer, Context.raw.layer);
 		History.undo_i = (History.undo_i + 1) % Config.raw.undo_steps;
 	}
 

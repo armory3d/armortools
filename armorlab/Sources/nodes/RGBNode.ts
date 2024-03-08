@@ -9,7 +9,7 @@ class RGBNode extends LogicNode {
 
 	override getAsImage = (from: i32, done: (img: image_t)=>void) => {
 		if (this.image != null) {
-			Base.notifyOnNextFrame(() => {
+			base_notifyOnNextFrame(() => {
 				image_unload(this.image);
 			});
 		}

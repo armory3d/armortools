@@ -91,18 +91,18 @@ class BoxProjects {
 					let path: string = recent_projects[i];
 
 					///if krom_ios
-					let documentDirectory: string = krom_save_dialog("", "");
-					documentDirectory = documentDirectory.substr(0, documentDirectory.length - 8); // Strip /'untitled'
-					path = documentDirectory + path;
+					let document_directory: string = krom_save_dialog("", "");
+					document_directory = document_directory.substr(0, document_directory.length - 8); // Strip /'untitled'
+					path = document_directory + path;
 					///end
 
-					let iconPath: string = path.substr(0, path.length - 4) + "_icon.png";
+					let icon_path: string = path.substr(0, path.length - 4) + "_icon.png";
 					if (BoxProjects.icon_map == null) BoxProjects.icon_map = new Map();
-					let icon: image_t = BoxProjects.icon_map.get(iconPath);
+					let icon: image_t = BoxProjects.icon_map.get(icon_path);
 					if (icon == null) {
-						let image: image_t = data_get_image(iconPath);
+						let image: image_t = data_get_image(icon_path);
 						icon = image;
-						BoxProjects.icon_map.set(iconPath, icon);
+						BoxProjects.icon_map.set(icon_path, icon);
 					}
 
 					let uix: i32 = ui._x;
@@ -123,9 +123,9 @@ class BoxProjects {
 							}
 
 							///if (krom_android || krom_ios)
-							Base.notify_on_next_frame(() => {
+							base_notify_on_next_frame(() => {
 								Console.toast(tr("Opening project"));
-								Base.notify_on_next_frame(doImport);
+								base_notify_on_next_frame(doImport);
 							});
 							///else
 							doImport();
@@ -139,9 +139,9 @@ class BoxProjects {
 								if (UIMenu.menu_button(ui, tr("Delete"))) {
 									app_notify_on_init(() => {
 										File.delete(path);
-										File.delete(iconPath);
-										let dataPath: string = path.substr(0, path.length - 4);
-										File.delete(dataPath);
+										File.delete(icon_path);
+										let data_path: string = path.substr(0, path.length - 4);
+										File.delete(data_path);
 										recent_projects.splice(i, 1);
 									});
 								}
@@ -237,8 +237,8 @@ class BoxProjects {
 	}
 
 	static align_to_fullscreen = () => {
-		UIBox.modalw = Math.floor(sys_width() / zui_SCALE(Base.ui_box));
-		UIBox.modalh = Math.floor(sys_height() / zui_SCALE(Base.ui_box));
+		UIBox.modalw = Math.floor(sys_width() / zui_SCALE(base_ui_box));
+		UIBox.modalh = Math.floor(sys_height() / zui_SCALE(base_ui_box));
 		let appw: i32 = sys_width();
 		let apph: i32 = sys_height();
 		let mw: i32 = appw;

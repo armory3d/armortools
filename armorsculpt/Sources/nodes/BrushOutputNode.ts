@@ -75,7 +75,7 @@ class BrushOutputNode extends LogicNode {
 		let right = 1.0;
 		if (Context.raw.paint2d) {
 			left = 1.0;
-			right = (Context.raw.splitView ? 2.0 : 1.0) + UIView2D.ww / Base.w();
+			right = (Context.raw.splitView ? 2.0 : 1.0) + UIView2D.ww / base_w();
 		}
 
 		// First time init
@@ -99,10 +99,10 @@ class BrushOutputNode extends LogicNode {
 			!groupLayer &&
 			(SlotLayer.isVisible(Context.raw.layer) || Context.raw.paint2d) &&
 			!UIBase.ui.is_hovered &&
-			!Base.isDragging &&
-			!Base.isResizing &&
-			!Base.isScrolling() &&
-			!Base.isComboSelected()) {
+			!base_isDragging &&
+			!base_isResizing &&
+			!base_isScrolling() &&
+			!base_isComboSelected()) {
 
 			let down = mouse_down() || pen_down();
 

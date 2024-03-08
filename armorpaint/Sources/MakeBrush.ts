@@ -7,9 +7,9 @@ class MakeBrush {
 
 		if (Context.raw.tool == workspace_tool_t.PARTICLE) return;
 
-		let fillLayer = Context.raw.layer.fill_layer != null;
-		let decal = Context.raw.tool == workspace_tool_t.DECAL || Context.raw.tool == workspace_tool_t.TEXT;
-		if (decal && !fillLayer) NodeShader.write(frag, 'if (decalMask.z > 0.0) {');
+		let fill_layer: bool = Context.raw.layer.fill_layer != null;
+		let decal: bool = Context.raw.tool == workspace_tool_t.DECAL || Context.raw.tool == workspace_tool_t.TEXT;
+		if (decal && !fill_layer) NodeShader.write(frag, 'if (decalMask.z > 0.0) {');
 
 		if (Config.raw.brush_3d) {
 			///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
@@ -41,7 +41,7 @@ class MakeBrush {
 				if (Config.raw.brush_angle_reject && !Context.raw.xray) {
 					NodeShader.write(frag, 'if (planeDist < -0.01) discard;');
 					frag.n = true;
-					let angle = Context.raw.brush_angle_reject_dot;
+					let angle: f32 = Context.raw.brush_angle_reject_dot;
 					NodeShader.write(frag, `if (dot(wn, n) < ${angle}) discard;`);
 				}
 			}
@@ -89,6 +89,6 @@ class MakeBrush {
 
 		NodeShader.write(frag, 'if (dist > brushRadius) discard;');
 
-		if (decal && !fillLayer) NodeShader.write(frag, '}');
+		if (decal && !fill_layer) NodeShader.write(frag, '}');
 	}
 }

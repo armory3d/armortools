@@ -75,7 +75,7 @@ class TabLayers {
 			UIMenu.draw((ui: zui_t) => {
 				let l = Context.raw.layer;
 				if (UIMenu.menu_button(ui, tr("Paint Layer"))) {
-					Base.new_layer();
+					base_base_new_layer();
 					History.new_layer();
 				}
 			}, 1);
@@ -114,9 +114,9 @@ class TabLayers {
 	}
 
 	static setDragLayer = (layer: SlotLayerRaw, offX: f32, offY: f32) => {
-		Base.drag_off_x = offX;
-		Base.drag_off_y = offY;
-		Base.drag_layer = layer;
+		base_base_drag_off_x = offX;
+		base_base_drag_off_y = offY;
+		base_base_drag_layer = layer;
 		Context.raw.drag_dest = Project.layers.indexOf(layer);
 	}
 
@@ -141,15 +141,15 @@ class TabLayers {
 
 		// Highlight drag destination
 		let absy = ui._window_y + ui._y;
-		if (Base.is_dragging && Base.drag_layer != null && Context.in_layers()) {
+		if (base_base_is_dragging && base_base_drag_layer != null && Context.in_layers()) {
 			if (mouse_y > absy + step && mouse_y < absy + step * 3) {
-				let down = Project.layers.indexOf(Base.drag_layer) >= i;
+				let down = Project.layers.indexOf(base_base_drag_layer) >= i;
 				Context.raw.drag_dest = down ? i : i - 1;
 
 				let ls = Project.layers;
 				let dest = Context.raw.drag_dest;
 				let toGroup = down ? dest > 0 && ls[dest - 1].parent != null && ls[dest - 1].parent.show_panel : dest < ls.length && ls[dest].parent != null && ls[dest].parent.show_panel;
-				let nestedGroup = SlotLayer.is_group(Base.drag_layer) && toGroup;
+				let nestedGroup = SlotLayer.is_group(base_base_drag_layer) && toGroup;
 				if (!nestedGroup) {
 					if (SlotLayer.can_move(Context.raw.layer, Context.raw.drag_dest)) {
 						zui_fill(checkw, step * 2, (ui._window_w / zui_SCALE(ui) - 2) - checkw, 2 * zui_SCALE(ui), ui.t.HIGHLIGHT_COL);
@@ -163,7 +163,7 @@ class TabLayers {
 				}
 			}
 		}
-		if (Base.is_dragging && (Base.drag_material != null || Base.drag_swatch != null) && Context.in_layers()) {
+		if (base_base_is_dragging && (base_base_drag_material != null || base_base_drag_swatch != null) && Context.in_layers()) {
 			if (mouse_y > absy + step && mouse_y < absy + step * 3) {
 				Context.raw.drag_dest = i;
 				if (TabLayers.can_drop_new_layer(i))
@@ -338,8 +338,8 @@ class TabLayers {
 	static comboObject = (ui: zui_t, l: SlotLayerRaw, label = false): zui_handle_t => {
 		let ar = [tr("Shared")];
 		let objectHandle = zui_nest(zui_handle("tablayers_2"), l.id);
-		objectHandle.position = l.objectMask;
-		l.objectMask = zui_combo(objectHandle, ar, tr("Object"), label, zui_align_t.LEFT);
+		objectHandle.position = l.object_mask;
+		l.object_mask = zui_combo(objectHandle, ar, tr("Object"), label, zui_align_t.LEFT);
 		return objectHandle;
 	}
 

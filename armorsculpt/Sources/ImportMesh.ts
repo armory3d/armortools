@@ -99,8 +99,8 @@ class ImportMesh {
 					let l = Project.layers.pop();
 					SlotLayer.unload(l);
 				}
-				Base.newLayer(false);
-				app_notify_on_init(Base.initLayers);
+				base_newLayer(false);
+				app_notify_on_init(base_initLayers);
 				History.reset();
 			}
 
@@ -118,7 +118,7 @@ class ImportMesh {
 			// Wait for addMesh calls to finish
 			app_notify_on_init(ImportMesh.finishImport);
 
-			Base.notifyOnNextFrame(() => {
+			base_notifyOnNextFrame(() => {
 				let f32 = new Float32Array(Config.getTextureResX() * Config.getTextureResY() * 4);
 				for (let i = 0; i < Math.floor(mesh.inda.length); ++i) {
 					let index = mesh.inda[i];
@@ -130,7 +130,7 @@ class ImportMesh {
 				let imgmesh = image_from_bytes(f32.buffer, Config.getTextureResX(), Config.getTextureResY(), tex_format_t.RGBA128);
 				let texpaint = Project.layers[0].texpaint;
 				g2_begin(texpaint);
-				g2_set_pipeline(Base.pipeCopy128);
+				g2_set_pipeline(base_pipeCopy128);
 				g2_draw_scaled_image(imgmesh, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 				g2_set_pipeline(null);
 				g2_end();

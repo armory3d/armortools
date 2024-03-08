@@ -28,7 +28,7 @@ class UINodesExt {
 				}
 			}
 
-			Base.notifyOnNextFrame(() => {
+			base_notifyOnNextFrame(() => {
 				let timer = time_time();
 				ParserLogic.parse(Project.canvas);
 
@@ -53,15 +53,15 @@ class UINodesExt {
 						g2_end();
 					}
 
-					if (Base.pipeCopy == null) Base.makePipe();
-					if (Base.pipeCopyA == null) Base.makePipeCopyA();
+					if (base_pipeCopy == null) base_makePipe();
+					if (base_pipeCopyA == null) base_makePipeCopyA();
 					if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
 
 					let texpaint_pack = render_path_render_targets.get("texpaint_pack")._image;
 
 					if (texocc != null) {
 						g2_begin(texpaint_pack);
-						g2_set_pipeline(Base.pipeCopyR);
+						g2_set_pipeline(base_pipeCopyR);
 						g2_draw_scaled_image(texocc, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 						g2_set_pipeline(null);
 						g2_end();
@@ -69,7 +69,7 @@ class UINodesExt {
 
 					if (texrough != null) {
 						g2_begin(texpaint_pack);
-						g2_set_pipeline(Base.pipeCopyG);
+						g2_set_pipeline(base_pipeCopyG);
 						g2_draw_scaled_image(texrough, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 						g2_set_pipeline(null);
 						g2_end();
@@ -77,8 +77,8 @@ class UINodesExt {
 
 					if (texheight != null) {
 						g4_begin(texpaint_pack);
-						g4_set_pipeline(Base.pipeCopyA);
-						g4_set_tex(Base.pipeCopyATex, texheight);
+						g4_set_pipeline(base_pipeCopyA);
+						g4_set_tex(base_pipeCopyATex, texheight);
 						g4_set_vertex_buffer(const_data_screen_aligned_vb);
 						g4_set_index_buffer(const_data_screen_aligned_ib);
 						g4_draw();
@@ -107,9 +107,9 @@ class UINodesExt {
 							// Apply displacement
 							if (Config.raw.displace_strength > 0) {
 								tasks++;
-								Base.notifyOnNextFrame(() => {
+								base_notifyOnNextFrame(() => {
 									Console.progress(tr("Apply Displacement"));
-									Base.notifyOnNextFrame(() => {
+									base_notifyOnNextFrame(() => {
 										let uv_scale = scene_meshes[0].data.scale_tex * Context.raw.brushScale;
 										UtilMesh.applyDisplacement(texpaint_pack, 0.05 * Config.raw.displace_strength, uv_scale);
 										UtilMesh.calcNormals();
@@ -135,12 +135,12 @@ class UINodesExt {
 		ui._y = 2 + startY;
 
 		///if (krom_android || krom_ios)
-		zui_combo(Base.resHandle, ["2K", "4K"], tr("Resolution"));
+		zui_combo(base_resHandle, ["2K", "4K"], tr("Resolution"));
 		///else
-		zui_combo(Base.resHandle, ["2K", "4K", "8K", "16K"], tr("Resolution"));
+		zui_combo(base_resHandle, ["2K", "4K", "8K", "16K"], tr("Resolution"));
 		///end
-		if (Base.resHandle.changed) {
-			Base.onLayersResized();
+		if (base_resHandle.changed) {
+			base_onLayersResized();
 		}
 		ui._x += ew + 3;
 		ui._y = 2 + startY;

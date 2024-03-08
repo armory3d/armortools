@@ -45,7 +45,7 @@ class TabBrushes {
 						continue;
 					}
 					let img: image_t = zui_SCALE(ui) > 1 ? Project.brushes[i].image : Project.brushes[i].image_icon;
-					let imgFull: image_t = Project.brushes[i].image;
+					let img_full: image_t = Project.brushes[i].image;
 
 					if (Context.raw.brush == Project.brushes[i]) {
 						// Zui.fill(1, -2, img.width + 3, img.height + 3, ui.t.HIGHLIGHT_COL); // TODO
@@ -100,7 +100,7 @@ class TabBrushes {
 					}
 
 					if (ui.is_hovered) {
-						if (imgFull == null) {
+						if (img_full == null) {
 							app_notify_on_init(() => {
 								let _brush: SlotBrushRaw = Context.raw.brush;
 								Context.raw.brush = Project.brushes[i];
@@ -110,7 +110,7 @@ class TabBrushes {
 							});
 						}
 						else {
-							zui_tooltip_image(imgFull);
+							zui_tooltip_image(img_full);
 							zui_tooltip(Project.brushes[i].canvas.name);
 						}
 					}
@@ -130,9 +130,9 @@ class TabBrushes {
 				ui._y += 6;
 			}
 
-			let inFocus: bool = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
-						  		ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
-			if (inFocus && ui.is_delete_down && Project.brushes.length > 1) {
+			let in_focus: bool = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
+						  		 ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
+			if (in_focus && ui.is_delete_down && Project.brushes.length > 1) {
 				ui.is_delete_down = false;
 				TabBrushes.delete_brush(Context.raw.brush);
 			}

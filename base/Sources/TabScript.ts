@@ -47,7 +47,7 @@ class TabScript {
 			zui_end_sticky();
 
 			let _font: g2_font_t = ui.font;
-			let _fontSize: i32 = ui.font_size;
+			let _font_size: i32 = ui.font_size;
 			let f: g2_font_t = data_get_font("font_mono.ttf");
 			zui_set_font(ui, f);
 			ui.font_size = Math.floor(15 * zui_SCALE(ui));
@@ -59,7 +59,7 @@ class TabScript {
 			zui_set_text_area_scroll_past_end(false);
 			zui_set_text_area_coloring(null);
 			zui_set_font(ui, _font);
-			ui.font_size = _fontSize;
+			ui.font_size = _font_size;
 		}
 	}
 

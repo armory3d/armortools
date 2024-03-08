@@ -19,12 +19,12 @@ class BoxPreferences {
 					BoxPreferences.locales = Translator.get_supported_locales();
 				}
 
-				let localeHandle: zui_handle_t = zui_handle("boxpreferences_0", { position: BoxPreferences.locales.indexOf(Config.raw.locale) });
-				zui_combo(localeHandle, BoxPreferences.locales, tr("Language"), true);
-				if (localeHandle.changed) {
-					let localeCode: string = BoxPreferences.locales[localeHandle.position];
-					Config.raw.locale = localeCode;
-					Translator.load_translations(localeCode);
+				let locale_handle: zui_handle_t = zui_handle("boxpreferences_0", { position: BoxPreferences.locales.indexOf(Config.raw.locale) });
+				zui_combo(locale_handle, BoxPreferences.locales, tr("Language"), true);
+				if (locale_handle.changed) {
+					let locale_code: string = BoxPreferences.locales[locale_handle.position];
+					Config.raw.locale = locale_code;
+					Translator.load_translations(locale_code);
 					UIBase.tag_ui_redraw();
 				}
 
@@ -47,10 +47,10 @@ class BoxPreferences {
 				hspeed = zui_handle("boxpreferences_4", { value: Config.raw.camera_pan_speed });
 				Config.raw.camera_pan_speed = zui_slider(hspeed, tr("Camera Pan Speed"), 0.1, 4.0, true);
 
-				let zoomDirectionHandle: zui_handle_t = zui_handle("boxpreferences_5", { position: Config.raw.zoom_direction });
-				zui_combo(zoomDirectionHandle, [tr("Vertical"), tr("Vertical Inverted"), tr("Horizontal"), tr("Horizontal Inverted"), tr("Vertical and Horizontal"), tr("Vertical and Horizontal Inverted")], tr("Direction to Zoom"), true);
-				if (zoomDirectionHandle.changed) {
-					Config.raw.zoom_direction = zoomDirectionHandle.position;
+				let zoom_direction_handle: zui_handle_t = zui_handle("boxpreferences_5", { position: Config.raw.zoom_direction });
+				zui_combo(zoom_direction_handle, [tr("Vertical"), tr("Vertical Inverted"), tr("Horizontal"), tr("Horizontal Inverted"), tr("Vertical and Horizontal"), tr("Vertical and Horizontal Inverted")], tr("Direction to Zoom"), true);
+				if (zoom_direction_handle.changed) {
+					Config.raw.zoom_direction = zoom_direction_handle.position;
 				}
 
 				Config.raw.wrap_mouse = zui_check(zui_handle("boxpreferences_6", { selected: Config.raw.wrap_mouse }), tr("Wrap Mouse"));
@@ -80,7 +80,7 @@ class BoxPreferences {
 				Config.raw.splash_screen = zui_check(zui_handle("boxpreferences_10", { selected: Config.raw.splash_screen }), tr("Splash Screen"));
 
 				// Zui.text("Node Editor");
-				// let gridSnap: bool = Zui.check(Zui.handle("boxpreferences_11", { selected: false }), "Grid Snap");
+				// let grid_snap: bool = Zui.check(Zui.handle("boxpreferences_11", { selected: false }), "Grid Snap");
 
 				zui_end_element();
 				zui_row([0.5, 0.5]);
@@ -88,7 +88,7 @@ class BoxPreferences {
 					UIMenu.draw((ui: zui_t) => {
 						if (UIMenu.menu_button(ui, tr("Confirm"))) {
 							app_notify_on_init(() => {
-								ui.t.ELEMENT_H = Base.default_element_h;
+								ui.t.ELEMENT_H = base_default_element_h;
 								Config.restore();
 								BoxPreferences.set_scale();
 								if (BoxPreferences.files_plugin != null) for (let f of BoxPreferences.files_plugin) Plugin.stop(f);
@@ -103,7 +103,7 @@ class BoxPreferences {
 								let b: ArrayBuffer = data_get_blob(path);
 								let raw: config_t = JSON.parse(sys_buffer_to_string(b));
 								app_notify_on_init(() => {
-									ui.t.ELEMENT_H = Base.default_element_h;
+									ui.t.ELEMENT_H = base_default_element_h;
 									Config.import_from(raw);
 									BoxPreferences.set_scale();
 									MakeMaterial.parse_mesh_material();
@@ -116,7 +116,7 @@ class BoxPreferences {
 				if (zui_button(tr("Reset Layout")) && !UIMenu.show) {
 					UIMenu.draw((ui: zui_t) => {
 						if (UIMenu.menu_button(ui, tr("Confirm"))) {
-							Base.init_layout();
+							base_init_layout();
 							Config.save();
 						}
 					}, 1);
@@ -143,14 +143,14 @@ class BoxPreferences {
 					UIBox.show_custom((ui: zui_t) => {
 						if (zui_tab(zui_handle("boxpreferences_13"), tr("New Theme"))) {
 							zui_row([0.5, 0.5]);
-							let themeName: string = zui_text_input(zui_handle("boxpreferences_14", { text: "new_theme" }), tr("Name"));
+							let theme_name: string = zui_text_input(zui_handle("boxpreferences_14", { text: "new_theme" }), tr("Name"));
 							if (zui_button(tr("OK")) || ui.is_return_down) {
-								let template: string = JSON.stringify(Base.theme);
-								if (!themeName.endsWith(".json")) themeName += ".json";
-								let path: string = Path.data() + Path.sep + "themes" + Path.sep + themeName;
+								let template: string = JSON.stringify(base_theme);
+								if (!theme_name.endsWith(".json")) theme_name += ".json";
+								let path: string = Path.data() + Path.sep + "themes" + Path.sep + theme_name;
 								krom_file_save_bytes(path, sys_string_to_buffer(template));
 								BoxPreferences.fetch_themes(); // Refresh file list
-								Config.raw.theme = themeName;
+								Config.raw.theme = theme_name;
 								BoxPreferences.theme_handle.position = BoxPreferences.get_theme_index();
 								UIBox.hide();
 								BoxPreferences.htab.position = 1; // Themes
@@ -170,14 +170,14 @@ class BoxPreferences {
 					UIFiles.show("json", true, false, (path: string) => {
 						path += Path.sep + UIFiles.filename;
 						if (!path.endsWith(".json")) path += ".json";
-						krom_file_save_bytes(path, sys_string_to_buffer(JSON.stringify(Base.theme)));
+						krom_file_save_bytes(path, sys_string_to_buffer(JSON.stringify(base_theme)));
 					});
 				}
 
 				zui_end_sticky();
 
 				let i: i32 = 0;
-				let theme: any = Base.theme;
+				let theme: any = base_theme;
 				let hlist: zui_handle_t = zui_handle("boxpreferences_15");
 
 				// Viewport color
@@ -256,7 +256,7 @@ class BoxPreferences {
 					}
 
 					if (ui.changed) {
-						for (let ui of Base.get_uis()) {
+						for (let ui of base_get_uis()) {
 							ui.elements_baked = false;
 						}
 					}
@@ -292,81 +292,81 @@ class BoxPreferences {
 				Config.raw.dilate_radius = Math.floor(zui_slider(zui_handle("boxpreferences_17", { value: Config.raw.dilate_radius }), tr("Dilate Radius"), 0.0, 16.0, true, 1));
 				if (ui.is_hovered) zui_tooltip(tr("Dilate painted textures to prevent seams"));
 
-				let dilateHandle: zui_handle_t = zui_handle("boxpreferences_18", { position: Config.raw.dilate });
-				zui_combo(dilateHandle, [tr("Instant"), tr("Delayed")], tr("Dilate"), true);
-				if (dilateHandle.changed) {
-					Config.raw.dilate = dilateHandle.position;
+				let dilate_handle: zui_handle_t = zui_handle("boxpreferences_18", { position: Config.raw.dilate });
+				zui_combo(dilate_handle, [tr("Instant"), tr("Delayed")], tr("Dilate"), true);
+				if (dilate_handle.changed) {
+					Config.raw.dilate = dilate_handle.position;
 				}
 				///end
 
 				///if is_lab
-				let workspaceHandle: zui_handle_t = zui_handle("boxpreferences_19", { position: Config.raw.workspace });
-				zui_combo(workspaceHandle, [tr("3D View"), tr("2D View")], tr("Default Workspace"), true);
-				if (workspaceHandle.changed) {
-					Config.raw.workspace = workspaceHandle.position;
+				let workspace_handle: zui_handle_t = zui_handle("boxpreferences_19", { position: Config.raw.workspace });
+				zui_combo(workspace_handle, [tr("3D View"), tr("2D View")], tr("Default Workspace"), true);
+				if (workspace_handle.changed) {
+					Config.raw.workspace = workspace_handle.position;
 				}
 				///end
 
-				let cameraControlsHandle: zui_handle_t = zui_handle("boxpreferences_20", { position: Config.raw.camera_controls });
-				zui_combo(cameraControlsHandle, [tr("Orbit"), tr("Rotate"), tr("Fly")], tr("Default Camera Controls"), true);
-				if (cameraControlsHandle.changed) {
-					Config.raw.camera_controls = cameraControlsHandle.position;
+				let camera_controls_handle: zui_handle_t = zui_handle("boxpreferences_20", { position: Config.raw.camera_controls });
+				zui_combo(camera_controls_handle, [tr("Orbit"), tr("Rotate"), tr("Fly")], tr("Default Camera Controls"), true);
+				if (camera_controls_handle.changed) {
+					Config.raw.camera_controls = camera_controls_handle.position;
 				}
 
-				let layerResHandle: zui_handle_t = zui_handle("boxpreferences_21", { position: Config.raw.layer_res });
+				let layer_res_handle: zui_handle_t = zui_handle("boxpreferences_21", { position: Config.raw.layer_res });
 
 				///if is_paint
 				///if (krom_android || krom_ios)
-				zui_combo(layerResHandle, ["128", "256", "512", "1K", "2K", "4K"], tr("Default Layer Resolution"), true);
+				zui_combo(layer_res_handle, ["128", "256", "512", "1K", "2K", "4K"], tr("Default Layer Resolution"), true);
 				///else
-				zui_combo(layerResHandle, ["128", "256", "512", "1K", "2K", "4K", "8K"], tr("Default Layer Resolution"), true);
+				zui_combo(layer_res_handle, ["128", "256", "512", "1K", "2K", "4K", "8K"], tr("Default Layer Resolution"), true);
 				///end
 				///end
 
 				///if is_lab
 				///if (krom_android || krom_ios)
-				zui_combo(layerResHandle, ["2K", "4K"], tr("Default Layer Resolution"), true);
+				zui_combo(layer_res_handle, ["2K", "4K"], tr("Default Layer Resolution"), true);
 				///else
-				zui_combo(layerResHandle, ["2K", "4K", "8K", "16K"], tr("Default Layer Resolution"), true);
+				zui_combo(layer_res_handle, ["2K", "4K", "8K", "16K"], tr("Default Layer Resolution"), true);
 				///end
 				///end
 
-				if (layerResHandle.changed) {
-					Config.raw.layer_res = layerResHandle.position;
+				if (layer_res_handle.changed) {
+					Config.raw.layer_res = layer_res_handle.position;
 				}
 
-				let serverHandle: zui_handle_t = zui_handle("boxpreferences_22", { text: Config.raw.server });
-				Config.raw.server = zui_text_input(serverHandle, tr("Cloud Server"));
+				let server_handle: zui_handle_t = zui_handle("boxpreferences_22", { text: Config.raw.server });
+				Config.raw.server = zui_text_input(server_handle, tr("Cloud Server"));
 
 				///if (is_paint || is_sculpt)
-				let materialLiveHandle: zui_handle_t = zui_handle("boxpreferences_23", {selected: Config.raw.material_live });
-				Config.raw.material_live = zui_check(materialLiveHandle, tr("Live Material Preview"));
+				let material_live_handle: zui_handle_t = zui_handle("boxpreferences_23", {selected: Config.raw.material_live });
+				Config.raw.material_live = zui_check(material_live_handle, tr("Live Material Preview"));
 				if (ui.is_hovered) zui_tooltip(tr("Instantly update material preview on node change"));
 
-				let brushLiveHandle: zui_handle_t = zui_handle("boxpreferences_24", { selected: Config.raw.brush_live });
-				Config.raw.brush_live = zui_check(brushLiveHandle, tr("Live Brush Preview"));
+				let brush_live_handle: zui_handle_t = zui_handle("boxpreferences_24", { selected: Config.raw.brush_live });
+				Config.raw.brush_live = zui_check(brush_live_handle, tr("Live Brush Preview"));
 				if (ui.is_hovered) zui_tooltip(tr("Draw live brush preview in viewport"));
-				if (brushLiveHandle.changed) Context.raw.ddirty = 2;
+				if (brush_live_handle.changed) Context.raw.ddirty = 2;
 
-				let brush3dHandle: zui_handle_t = zui_handle("boxpreferences_25", { selected: Config.raw.brush_3d });
-				Config.raw.brush_3d = zui_check(brush3dHandle, tr("3D Cursor"));
-				if (brush3dHandle.changed) MakeMaterial.parse_paint_material();
+				let brush_3d_handle: zui_handle_t = zui_handle("boxpreferences_25", { selected: Config.raw.brush_3d });
+				Config.raw.brush_3d = zui_check(brush_3d_handle, tr("3D Cursor"));
+				if (brush_3d_handle.changed) MakeMaterial.parse_paint_material();
 
 				ui.enabled = Config.raw.brush_3d;
-				let brushDepthRejectHandle: zui_handle_t = zui_handle("boxpreferences_26", { selected: Config.raw.brush_depth_reject });
-				Config.raw.brush_depth_reject = zui_check(brushDepthRejectHandle, tr("Depth Reject"));
-				if (brushDepthRejectHandle.changed) MakeMaterial.parse_paint_material();
+				let brush_depth_reject_handle: zui_handle_t = zui_handle("boxpreferences_26", { selected: Config.raw.brush_depth_reject });
+				Config.raw.brush_depth_reject = zui_check(brush_depth_reject_handle, tr("Depth Reject"));
+				if (brush_depth_reject_handle.changed) MakeMaterial.parse_paint_material();
 
 				zui_row([0.5, 0.5]);
 
-				let brushAngleRejectHandle: zui_handle_t = zui_handle("boxpreferences_27", { selected: Config.raw.brush_angle_reject });
-				Config.raw.brush_angle_reject = zui_check(brushAngleRejectHandle, tr("Angle Reject"));
-				if (brushAngleRejectHandle.changed) MakeMaterial.parse_paint_material();
+				let brush_angle_reject_handle: zui_handle_t = zui_handle("boxpreferences_27", { selected: Config.raw.brush_angle_reject });
+				Config.raw.brush_angle_reject = zui_check(brush_angle_reject_handle, tr("Angle Reject"));
+				if (brush_angle_reject_handle.changed) MakeMaterial.parse_paint_material();
 
 				if (!Config.raw.brush_angle_reject) ui.enabled = false;
-				let angleDotHandle: zui_handle_t = zui_handle("boxpreferences_28", { value: Context.raw.brush_angle_reject_dot });
-				Context.raw.brush_angle_reject_dot = zui_slider(angleDotHandle, tr("Angle"), 0.0, 1.0, true);
-				if (angleDotHandle.changed) {
+				let angle_dot_handle: zui_handle_t = zui_handle("boxpreferences_28", { value: Context.raw.brush_angle_reject_dot });
+				Context.raw.brush_angle_reject_dot = zui_slider(angle_dot_handle, tr("Angle"), 0.0, 1.0, true);
+				if (angle_dot_handle.changed) {
 					MakeMaterial.parse_paint_material();
 				}
 				ui.enabled = true;
@@ -378,14 +378,14 @@ class BoxPreferences {
 				///end
 			}
 
-			let penName: string;
+			let pen_name: string;
 			///if krom_ios
-			penName = tr("Pencil");
+			pen_name = tr("Pencil");
 			///else
-			penName = tr("Pen");
+			pen_name = tr("Pen");
 			///end
 
-			if (zui_tab(BoxPreferences.htab, penName, true)) {
+			if (zui_tab(BoxPreferences.htab, pen_name, true)) {
 				zui_text(tr("Pressure controls"));
 				Config.raw.pressure_radius = zui_check(zui_handle("boxpreferences_30", { selected: Config.raw.pressure_radius }), tr("Brush Radius"));
 				Config.raw.pressure_sensitivity = zui_slider(zui_handle("boxpreferences_31", { value: Config.raw.pressure_sensitivity }), tr("Sensitivity"), 0.0, 10.0, true);
@@ -415,17 +415,17 @@ class BoxPreferences {
 			if (zui_tab(BoxPreferences.htab, tr("Viewport"), true)) {
 				///if (krom_direct3d12 || krom_vulkan || krom_metal)
 
-				let hpathtracemode: zui_handle_t = zui_handle("boxpreferences_40", { position: Context.raw.pathtrace_mode });
-				Context.raw.pathtrace_mode = zui_combo(hpathtracemode, [tr("Core"), tr("Full")], tr("Path Tracer"), true);
-				if (hpathtracemode.changed) {
+				let hpathtrace_mode: zui_handle_t = zui_handle("boxpreferences_40", { position: Context.raw.pathtrace_mode });
+				Context.raw.pathtrace_mode = zui_combo(hpathtrace_mode, [tr("Core"), tr("Full")], tr("Path Tracer"), true);
+				if (hpathtrace_mode.changed) {
 					RenderPathRaytrace.ready = false;
 				}
 
 				///end
 
-				let hrendermode: zui_handle_t = zui_handle("boxpreferences_41", { position: Context.raw.render_mode });
-				Context.raw.render_mode = zui_combo(hrendermode, [tr("Full"), tr("Mobile")], tr("Renderer"), true);
-				if (hrendermode.changed) {
+				let hrender_mode: zui_handle_t = zui_handle("boxpreferences_41", { position: Context.raw.render_mode });
+				Context.raw.render_mode = zui_combo(hrender_mode, [tr("Full"), tr("Mobile")], tr("Renderer"), true);
+				if (hrender_mode.changed) {
 					Context.set_render_path();
 				}
 
@@ -471,20 +471,20 @@ class BoxPreferences {
 				// if (h.changed) Context.raw.ddirty = 2;
 
 				let cam: camera_object_t = scene_camera;
-				let camRaw: camera_data_t = cam.data;
+				let cam_raw: camera_data_t = cam.data;
 				let near_handle: zui_handle_t = zui_handle("boxpreferences_47");
 				let far_handle: zui_handle_t = zui_handle("boxpreferences_48");
-				near_handle.value = Math.floor(camRaw.near_plane * 1000) / 1000;
-				far_handle.value = Math.floor(camRaw.far_plane * 100) / 100;
-				camRaw.near_plane = zui_slider(near_handle, tr("Clip Start"), 0.001, 1.0, true);
-				camRaw.far_plane = zui_slider(far_handle, tr("Clip End"), 50.0, 100.0, true);
+				near_handle.value = Math.floor(cam_raw.near_plane * 1000) / 1000;
+				far_handle.value = Math.floor(cam_raw.far_plane * 100) / 100;
+				cam_raw.near_plane = zui_slider(near_handle, tr("Clip Start"), 0.001, 1.0, true);
+				cam_raw.far_plane = zui_slider(far_handle, tr("Clip End"), 50.0, 100.0, true);
 				if (near_handle.changed || far_handle.changed) {
 					camera_object_build_proj(cam);
 				}
 
-				let dispHandle: zui_handle_t = zui_handle("boxpreferences_49", { value: Config.raw.displace_strength });
-				Config.raw.displace_strength = zui_slider(dispHandle, tr("Displacement Strength"), 0.0, 10.0, true);
-				if (dispHandle.changed) {
+				let disp_handle: zui_handle_t = zui_handle("boxpreferences_49", { value: Config.raw.displace_strength });
+				Config.raw.displace_strength = zui_slider(disp_handle, tr("Displacement Strength"), 0.0, 10.0, true);
+				if (disp_handle.changed) {
 					Context.raw.ddirty = 2;
 					MakeMaterial.parse_mesh_material();
 				}
@@ -510,14 +510,14 @@ class BoxPreferences {
 					UIBox.show_custom((ui: zui_t) => {
 						if (zui_tab(zui_handle("boxpreferences_51"), tr("New Keymap"))) {
 							zui_row([0.5, 0.5]);
-							let keymapName: string = zui_text_input(zui_handle("boxpreferences_52", { text: "new_keymap" }), tr("Name"));
+							let keymap_name: string = zui_text_input(zui_handle("boxpreferences_52", { text: "new_keymap" }), tr("Name"));
 							if (zui_button(tr("OK")) || ui.is_return_down) {
-								let template: string = JSON.stringify(Base.default_keymap);
-								if (!keymapName.endsWith(".json")) keymapName += ".json";
-								let path: string = Path.data() + Path.sep + "keymap_presets" + Path.sep + keymapName;
+								let template: string = JSON.stringify(base_default_keymap);
+								if (!keymap_name.endsWith(".json")) keymap_name += ".json";
+								let path: string = Path.data() + Path.sep + "keymap_presets" + Path.sep + keymap_name;
 								krom_file_save_bytes(path, sys_string_to_buffer(template));
 								BoxPreferences.fetch_keymaps(); // Refresh file list
-								Config.raw.keymap = keymapName;
+								Config.raw.keymap = keymap_name;
 								BoxPreferences.preset_handle.position = BoxPreferences.get_preset_index();
 								UIBox.hide();
 								BoxPreferences.htab.position = 5; // Keymap
@@ -564,7 +564,7 @@ class BoxPreferences {
 					UIBox.show_custom((ui: zui_t) => {
 						if (zui_tab(zui_handle("boxpreferences_54"), tr("New Plugin"))) {
 							zui_row([0.5, 0.5]);
-							let pluginName: string = zui_text_input(zui_handle("boxpreferences_55", { text: "new_plugin" }), tr("Name"));
+							let plugin_name: string = zui_text_input(zui_handle("boxpreferences_55", { text: "new_plugin" }), tr("Name"));
 							if (zui_button(tr("OK")) || ui.is_return_down) {
 								let template: string =
 `let plugin = Plugin.create();
@@ -577,8 +577,8 @@ plugin.drawUI = (ui) { =>
 	}
 }
 `;
-								if (!pluginName.endsWith(".js")) pluginName += ".js";
-								let path: string = Path.data() + Path.sep + "plugins" + Path.sep + pluginName;
+								if (!plugin_name.endsWith(".js")) plugin_name += ".js";
+								let path: string = Path.data() + Path.sep + "plugins" + Path.sep + plugin_name;
 								krom_file_save_bytes(path, sys_string_to_buffer(template));
 								BoxPreferences.files_plugin = null; // Refresh file list
 								UIBox.hide();
@@ -602,15 +602,15 @@ plugin.drawUI = (ui) { =>
 				if (Config.raw.plugins == null) Config.raw.plugins = [];
 				let h: zui_handle_t = zui_handle("boxpreferences_56", { selected: false });
 				for (let f of BoxPreferences.files_plugin) {
-					let isJs: bool = f.endsWith(".js");
-					if (!isJs) continue;
+					let is_js: bool = f.endsWith(".js");
+					if (!is_js) continue;
 					let enabled: bool = Config.raw.plugins.indexOf(f) >= 0;
 					h.selected = enabled;
-					let tag: string = isJs ? f.split(".")[0] : f;
+					let tag: string = is_js ? f.split(".")[0] : f;
 					zui_check(h, tag);
 					if (h.changed && h.selected != enabled) {
 						h.selected ? Config.enable_plugin(f) : Config.disable_plugin(f);
-						Base.redraw_ui();
+						base_redraw_ui();
 					}
 					if (ui.is_hovered && ui.input_released_r) {
 						UIMenu.draw((ui: zui_t) => {
@@ -681,9 +681,9 @@ plugin.drawUI = (ui) { =>
 		UIBase.set_icon_scale();
 		zui_set_scale(UINodes.ui, scale);
 		zui_set_scale(UIView2D.ui, scale);
-		zui_set_scale(Base.ui_box, scale);
-		zui_set_scale(Base.ui_menu, scale);
-		Base.resize();
+		zui_set_scale(base_ui_box, scale);
+		zui_set_scale(base_ui_menu, scale);
+		base_resize();
 		///if (is_paint || is_sculpt)
 		Config.raw.layout[layout_size_t.SIDEBAR_W] = Math.floor(UIBase.default_sidebar_w * scale);
 		UIToolbar.toolbar_w = Math.floor(UIToolbar.default_toolbar_w * scale);

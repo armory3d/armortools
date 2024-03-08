@@ -113,7 +113,7 @@ class MakeMaterial {
 	}
 
 	static deleteContext = (c: shader_context_t) => {
-		Base.notifyOnNextFrame(() => { // Ensure pipeline is no longer in use
+		base_notifyOnNextFrame(() => { // Ensure pipeline is no longer in use
 			shader_context_delete(c);
 		});
 	}

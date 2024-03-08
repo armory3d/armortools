@@ -34,7 +34,7 @@ class Context {
 			let _next = () => {
 				UtilRender.make_decal_preview();
 			}
-			Base.notify_on_next_frame(_next);
+			base_notify_on_next_frame(_next);
 		}
 	}
 
@@ -78,7 +78,7 @@ class Context {
 		let current: image_t = _g2_current;
 		if (current != null) g2_end();
 
-		Base.set_object_mask();
+		base_set_object_mask();
 		MakeMaterial.parse_mesh_material();
 		MakeMaterial.parse_paint_material();
 
@@ -94,9 +94,9 @@ class Context {
 		MakeMaterial.parse_paint_material();
 		MakeMaterial.parse_mesh_material();
 		Context.raw.ddirty = 3;
-		let _viewportMode: viewport_mode_t = Context.raw.viewport_mode;
+		let _viewport_mode: viewport_mode_t = Context.raw.viewport_mode;
 		Context.raw.viewport_mode = -1 as viewport_mode_t;
-		Context.set_viewport_mode(_viewportMode);
+		Context.set_viewport_mode(_viewport_mode);
 
 		///if (is_paint || is_sculpt)
 		Context.init_tool();
@@ -130,7 +130,7 @@ class Context {
 		}
 
 		else if (Context.raw.tool == workspace_tool_t.MATERIAL) {
-			Base.update_fill_layers();
+			base_update_fill_layers();
 			Context.main_object().skip_context = null;
 		}
 
@@ -339,7 +339,7 @@ class Context {
 
 		let nodes: zui_nodes_t = UINodes.get_nodes();
 		let canvas: zui_node_canvas_t = UINodes.get_canvas(true);
-		let inpaint: bool = nodes.nodesSelectedId.length > 0 && zui_get_node(canvas.nodes, nodes.nodesSelectedId[0]).type == "InpaintNode";
+		let inpaint: bool = nodes.nodes_selected_id.length > 0 && zui_get_node(canvas.nodes, nodes.nodes_selected_id[0]).type == "InpaintNode";
 
 		// Paint bounds
 		if (inpaint &&
@@ -347,16 +347,16 @@ class Context {
 			Context.raw.paint_vec.x < right &&
 			Context.raw.paint_vec.y > 0 &&
 			Context.raw.paint_vec.y < 1 &&
-			!Base.is_dragging &&
-			!Base.is_resizing &&
-			!Base.is_scrolling() &&
-			!Base.is_combo_selected()) {
+			!base_is_dragging &&
+			!base_is_resizing &&
+			!base_is_scrolling() &&
+			!base_is_combo_selected()) {
 
 			let down: bool = mouse_down() || pen_down();
 
 			// Prevent painting the same spot
-			let sameSpot: bool = Context.raw.paint_vec.x == Context.raw.last_paint_x && Context.raw.paint_vec.y == Context.raw.last_paint_y;
-			if (down && sameSpot) {
+			let same_spot: bool = Context.raw.paint_vec.x == Context.raw.last_paint_x && Context.raw.paint_vec.y == Context.raw.last_paint_y;
+			if (down && same_spot) {
 				Context.raw.painted++;
 			}
 			else {
@@ -386,16 +386,16 @@ class Context {
 	}
 
 	static update = () => {
-		let paintX: f32 = mouse_view_x() / app_w();
-		let paintY: f32 = mouse_view_y() / app_h();
+		let paint_x: f32 = mouse_view_x() / app_w();
+		let paint_y: f32 = mouse_view_y() / app_h();
 		if (mouse_started()) {
 			Context.raw.start_x = mouse_view_x() / app_w();
 			Context.raw.start_y = mouse_view_y() / app_h();
 		}
 
 		if (pen_down()) {
-			paintX = pen_view_x() / app_w();
-			paintY = pen_view_y() / app_h();
+			paint_x = pen_view_x() / app_w();
+			paint_y = pen_view_y() / app_h();
 		}
 		if (pen_started()) {
 			Context.raw.start_x = pen_view_x() / app_w();
@@ -403,12 +403,12 @@ class Context {
 		}
 
 		if (Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown)) {
-			if (Context.raw.lock_x) paintX = Context.raw.start_x;
-			if (Context.raw.lock_y) paintY = Context.raw.start_y;
+			if (Context.raw.lock_x) paint_x = Context.raw.start_x;
+			if (Context.raw.lock_y) paint_y = Context.raw.start_y;
 		}
 
-		Context.raw.coords.x = paintX;
-		Context.raw.coords.y = paintY;
+		Context.raw.coords.x = paint_x;
+		Context.raw.coords.y = paint_y;
 
 		if (Context.raw.lock_begin) {
 			let dx: i32 = Math.abs(Context.raw.lock_start_x - mouse_view_x());

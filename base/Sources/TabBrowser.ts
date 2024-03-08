@@ -21,19 +21,19 @@ class TabBrowser {
 				Config.raw.bookmarks = [];
 			}
 
-			let bookmarksW: i32 = Math.floor(100 * zui_SCALE(ui));
+			let bookmarks_w: i32 = Math.floor(100 * zui_SCALE(ui));
 
 			if (TabBrowser.hpath.text == "" && Config.raw.bookmarks.length > 0) { // Init to first bookmark
 				TabBrowser.hpath.text = Config.raw.bookmarks[0];
 			}
 
 			zui_begin_sticky();
-			let step: i32 = (1 - bookmarksW / ui._w);
+			let step: i32 = (1 - bookmarks_w / ui._w);
 			if (TabBrowser.hsearch.text != "") {
-				zui_row([bookmarksW / ui._w, step * 0.73, step * 0.07, step * 0.17, step * 0.03]);
+				zui_row([bookmarks_w / ui._w, step * 0.73, step * 0.07, step * 0.17, step * 0.03]);
 			}
 			else {
-				zui_row([bookmarksW / ui._w, step * 0.73, step * 0.07, step * 0.2]);
+				zui_row([bookmarks_w / ui._w, step * 0.73, step * 0.07, step * 0.2]);
 			}
 
 			if (zui_button("+")) {
@@ -60,9 +60,9 @@ class TabBrowser {
 			///end
 
 			let refresh: bool = false;
-			let inFocus: bool = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
+			let in_focus: bool = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
 						  ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
-			if (zui_button(tr("Refresh")) || (inFocus && ui.is_key_pressed && ui.key == key_code_t.F5)) {
+			if (zui_button(tr("Refresh")) || (in_focus && ui.is_key_pressed && ui.key == key_code_t.F5)) {
 				refresh = true;
 			}
 			TabBrowser.hsearch.text = zui_text_input(TabBrowser.hsearch, tr("Search"), zui_align_t.LEFT, true, true);
@@ -81,11 +81,11 @@ class TabBrowser {
 			TabBrowser.last_path = TabBrowser.hpath.text;
 
 			let _y: f32 = ui._y;
-			ui._x = bookmarksW;
-			ui._w -= bookmarksW;
+			ui._x = bookmarks_w;
+			ui._w -= bookmarks_w;
 			UIFiles.file_browser(ui, TabBrowser.hpath, false, true, TabBrowser.hsearch.text, refresh, (file: string) => {
-				let fileName: string = file.substr(file.lastIndexOf(Path.sep) + 1);
-				if (fileName != "..") {
+				let file_name: string = file.substr(file.lastIndexOf(Path.sep) + 1);
+				if (file_name != "..") {
 					UIMenu.draw((ui: zui_t) => {
 						if (UIMenu.menu_button(ui, tr("Import"))) {
 							ImportAsset.run(file);
@@ -93,16 +93,16 @@ class TabBrowser {
 						if (Path.is_texture(file)) {
 							if (UIMenu.menu_button(ui, tr("Set as Envmap"))) {
 								ImportAsset.run(file, -1.0, -1.0, true, true, () => {
-									Base.notify_on_next_frame(() => {
-										let assetIndex: i32 = -1;
+									base_notify_on_next_frame(() => {
+										let asset_index: i32 = -1;
 										for (let i: i32 = 0; i < Project.assets.length; ++i) {
 											if (Project.assets[i].file == file) {
-												assetIndex = i;
+												asset_index = i;
 												break;
 											}
 										}
-										if (assetIndex != -1) {
-											ImportEnvmap.run(file, Project.get_image(Project.assets[assetIndex]));
+										if (asset_index != -1) {
+											ImportEnvmap.run(file, Project.get_image(Project.assets[asset_index]));
 										}
 									});
 								});
@@ -111,16 +111,16 @@ class TabBrowser {
 							///if (is_paint || is_sculpt)
 							if (UIMenu.menu_button(ui, tr("Set as Mask"))) {
 								ImportAsset.run(file, -1.0, -1.0, true, true, () => {
-									Base.notify_on_next_frame(() => {
-										let assetIndex: i32 = -1;
+									base_notify_on_next_frame(() => {
+										let asset_index: i32 = -1;
 										for (let i: i32 = 0; i < Project.assets.length; ++i) {
 											if (Project.assets[i].file == file) {
-												assetIndex = i;
+												asset_index = i;
 												break;
 											}
 										}
-										if (assetIndex != -1) {
-											Base.create_image_mask(Project.assets[assetIndex]);
+										if (asset_index != -1) {
+											base_create_image_mask(Project.assets[asset_index]);
 										}
 									});
 								});
@@ -130,16 +130,16 @@ class TabBrowser {
 							///if is_paint
 							if (UIMenu.menu_button(ui, tr("Set as Color ID Map"))) {
 								ImportAsset.run(file, -1.0, -1.0, true, true, () => {
-									Base.notify_on_next_frame(() => {
-										let assetIndex: i32 = -1;
+									base_notify_on_next_frame(() => {
+										let asset_index: i32 = -1;
 										for (let i: i32 = 0; i < Project.assets.length; ++i) {
 											if (Project.assets[i].file == file) {
-												assetIndex = i;
+												asset_index = i;
 												break;
 											}
 										}
-										if (assetIndex != -1) {
-											Context.raw.colorid_handle.position = assetIndex;
+										if (asset_index != -1) {
+											Context.raw.colorid_handle.position = asset_index;
 											Context.raw.colorid_picked = false;
 											UIToolbar.toolbar_handle.redraws = 1;
 											if (Context.raw.tool == workspace_tool_t.COLORID) {
@@ -171,10 +171,10 @@ class TabBrowser {
 			if (TabBrowser.hpath.text.endsWith("." + manifest_title.toLowerCase())) TabBrowser.known = false;
 			///end
 
-			let bottomY: i32 = ui._y;
+			let bottom_y: i32 = ui._y;
 			ui._x = 0;
 			ui._y = _y;
-			ui._w = bookmarksW;
+			ui._w = bookmarks_w;
 
 			if (zui_button(tr("Cloud"), zui_align_t.LEFT)) {
 				TabBrowser.hpath.text = "cloud";
@@ -218,7 +218,7 @@ class TabBrowser {
 				}
 			}
 
-			if (ui._y < bottomY) ui._y = bottomY;
+			if (ui._y < bottom_y) ui._y = bottom_y;
 		}
 	}
 }

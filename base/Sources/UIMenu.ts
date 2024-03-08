@@ -14,8 +14,8 @@ class UIMenu {
 	static hide_menu: bool = false;
 
 	static render = () => {
-		let ui: zui_t = Base.ui_menu;
-		let menuW: i32 = UIMenu.menu_commands != null ? Math.floor(Base.default_element_w * zui_SCALE(Base.ui_menu) * 2.3) : Math.floor(zui_ELEMENT_W(ui) * 2.3);
+		let ui: zui_t = base_ui_menu;
+		let menu_w: i32 = UIMenu.menu_commands != null ? Math.floor(base_default_element_w * zui_SCALE(base_ui_menu) * 2.3) : Math.floor(zui_ELEMENT_W(ui) * 2.3);
 		let _BUTTON_COL: i32 = ui.t.BUTTON_COL;
 		ui.t.BUTTON_COL = ui.t.SEPARATOR_COL;
 		let _ELEMENT_OFFSET: i32 = ui.t.ELEMENT_OFFSET;
@@ -23,7 +23,7 @@ class UIMenu {
 		let _ELEMENT_H: i32 = ui.t.ELEMENT_H;
 		ui.t.ELEMENT_H = Config.raw.touch_ui ? (28 + 2) : 28;
 
-		zui_begin_region(ui, UIMenu.menu_x, UIMenu.menu_y, menuW);
+		zui_begin_region(ui, UIMenu.menu_x, UIMenu.menu_y, menu_w);
 
 		if (UIMenu.menu_commands != null) {
 			g2_set_color(ui.t.ACCENT_SELECT_COL);
@@ -89,18 +89,18 @@ class UIMenu {
 				if (UIMenu.menu_button(ui, tr("Exit"))) sys_stop();
 			}
 			else if (UIMenu.menu_category == menu_category_t.EDIT) {
-				let stepUndo: string = "";
-				let stepRedo: string = "";
+				let step_undo: string = "";
+				let step_redo: string = "";
 				if (History.undos > 0) {
-					stepUndo = History.steps[History.steps.length - 1 - History.redos].name;
+					step_undo = History.steps[History.steps.length - 1 - History.redos].name;
 				}
 				if (History.redos > 0) {
-					stepRedo = History.steps[History.steps.length - History.redos].name;
+					step_redo = History.steps[History.steps.length - History.redos].name;
 				}
 				ui.enabled = History.undos > 0;
-				if (UIMenu.menu_button(ui, tr("Undo {step}", new Map([["step", stepUndo]])), Config.keymap.edit_undo)) History.undo();
+				if (UIMenu.menu_button(ui, tr("Undo {step}", new Map([["step", step_undo]])), Config.keymap.edit_undo)) History.undo();
 				ui.enabled = History.redos > 0;
-				if (UIMenu.menu_button(ui, tr("Redo {step}", new Map([["step", stepRedo]])), Config.keymap.edit_redo)) History.redo();
+				if (UIMenu.menu_button(ui, tr("Redo {step}", new Map([["step", step_redo]])), Config.keymap.edit_redo)) History.redo();
 				ui.enabled = true;
 				UIMenu.menu_separator(ui);
 				if (UIMenu.menu_button(ui, tr("Preferences..."), Config.keymap.edit_prefs)) BoxPreferences.show();
@@ -113,7 +113,7 @@ class UIMenu {
 
 				///if !(krom_android || krom_ios)
 				if (UIMenu.menu_button(ui, tr("Toggle Fullscreen"), "alt+enter")) {
-					Base.toggle_fullscreen();
+					base_toggle_fullscreen();
 				}
 				///end
 
@@ -121,25 +121,25 @@ class UIMenu {
 
 				UIMenu.menu_fill(ui);
 				let p: world_data_t = scene_world;
-				let envHandle: zui_handle_t = zui_handle("uimenu_0");
-				envHandle.value = p.strength;
+				let env_handle: zui_handle_t = zui_handle("uimenu_0");
+				env_handle.value = p.strength;
 				UIMenu.menu_align(ui);
-				p.strength = zui_slider(envHandle, tr("Environment"), 0.0, 8.0, true);
-				if (envHandle.changed) Context.raw.ddirty = 2;
+				p.strength = zui_slider(env_handle, tr("Environment"), 0.0, 8.0, true);
+				if (env_handle.changed) Context.raw.ddirty = 2;
 
 				UIMenu.menu_fill(ui);
-				let envaHandle: zui_handle_t = zui_handle("uimenu_1");
-				envaHandle.value = Context.raw.envmap_angle / Math.PI * 180.0;
-				if (envaHandle.value < 0) {
-					envaHandle.value += (Math.floor(-envaHandle.value / 360) + 1) * 360;
+				let enva_handle: zui_handle_t = zui_handle("uimenu_1");
+				enva_handle.value = Context.raw.envmap_angle / Math.PI * 180.0;
+				if (enva_handle.value < 0) {
+					enva_handle.value += (Math.floor(-enva_handle.value / 360) + 1) * 360;
 				}
-				else if (envaHandle.value > 360) {
-					envaHandle.value -= Math.floor(envaHandle.value / 360) * 360;
+				else if (enva_handle.value > 360) {
+					enva_handle.value -= Math.floor(enva_handle.value / 360) * 360;
 				}
 				UIMenu.menu_align(ui);
-				Context.raw.envmap_angle = zui_slider(envaHandle, tr("Environment Angle"), 0.0, 360.0, true, 1) / 180.0 * Math.PI;
+				Context.raw.envmap_angle = zui_slider(enva_handle, tr("Environment Angle"), 0.0, 360.0, true, 1) / 180.0 * Math.PI;
 				if (ui.is_hovered) zui_tooltip(tr("{shortcut} and move mouse", new Map([["shortcut", Config.keymap.rotate_envmap]])));
-				if (envaHandle.changed) Context.raw.ddirty = 2;
+				if (enva_handle.changed) Context.raw.ddirty = 2;
 
 				if (scene_lights.length > 0) {
 					let light: light_object_t = scene_lights[0];
@@ -158,13 +158,13 @@ class UIMenu {
 					let lahandle: zui_handle_t = zui_handle("uimenu_3");
 					lahandle.value = Context.raw.light_angle / Math.PI * 180;
 					UIMenu.menu_align(ui);
-					let newAngle: f32 = zui_slider(lahandle, tr("Light Angle"), 0.0, 360.0, true, 1) / 180 * Math.PI;
+					let new_angle: f32 = zui_slider(lahandle, tr("Light Angle"), 0.0, 360.0, true, 1) / 180 * Math.PI;
 					if (ui.is_hovered) zui_tooltip(tr("{shortcut} and move mouse", new Map([["shortcut", Config.keymap.rotate_light]])));
-					let ldiff: f32 = newAngle - Context.raw.light_angle;
+					let ldiff: f32 = new_angle - Context.raw.light_angle;
 					if (Math.abs(ldiff) > 0.005) {
-						if (newAngle < 0) newAngle += (Math.floor(-newAngle / (2 * Math.PI)) + 1) * 2 * Math.PI;
-						else if (newAngle > 2 * Math.PI) newAngle -= Math.floor(newAngle / (2 * Math.PI)) * 2 * Math.PI;
-						Context.raw.light_angle = newAngle;
+						if (new_angle < 0) new_angle += (Math.floor(-new_angle / (2 * Math.PI)) + 1) * 2 * Math.PI;
+						else if (new_angle > 2 * Math.PI) new_angle -= Math.floor(new_angle / (2 * Math.PI)) * 2 * Math.PI;
+						Context.raw.light_angle = new_angle;
 						let m: mat4_t = mat4_rot_z(ldiff);
 						mat4_mult_mat(light.base.transform.local, m);
 						transform_decompose(light.base.transform);
@@ -181,19 +181,19 @@ class UIMenu {
 
 				///if (is_paint || is_sculpt)
 				UIMenu.menu_fill(ui);
-				let splitViewHandle: zui_handle_t = zui_handle("uimenu_5", { selected: Context.raw.split_view });
-				Context.raw.split_view = zui_check(splitViewHandle, " " + tr("Split View"));
-				if (splitViewHandle.changed) {
-					Base.resize();
+				let split_view_handle: zui_handle_t = zui_handle("uimenu_5", { selected: Context.raw.split_view });
+				Context.raw.split_view = zui_check(split_view_handle, " " + tr("Split View"));
+				if (split_view_handle.changed) {
+					base_resize();
 				}
 				///end
 
 				///if is_lab
 				UIMenu.menu_fill(ui);
-				let brushScaleHandle: zui_handle_t = zui_handle("uimenu_6", { value: Context.raw.brush_scale });
+				let brush_scale_handle: zui_handle_t = zui_handle("uimenu_6", { value: Context.raw.brush_scale });
 				UIMenu.menu_align(ui);
-				Context.raw.brush_scale = zui_slider(brushScaleHandle, tr("UV Scale"), 0.01, 5.0, true);
-				if (brushScaleHandle.changed) {
+				Context.raw.brush_scale = zui_slider(brush_scale_handle, tr("UV Scale"), 0.01, 5.0, true);
+				if (brush_scale_handle.changed) {
 					MakeMaterial.parse_mesh_material();
 					///if (krom_direct3d12 || krom_vulkan || krom_metal)
 					RenderPathRaytrace.uv_scale = Context.raw.brush_scale;
@@ -203,16 +203,16 @@ class UIMenu {
 				///end
 
 				UIMenu.menu_fill(ui);
-				let cullHandle: zui_handle_t = zui_handle("uimenu_7", { selected: Context.raw.cull_backfaces });
-				Context.raw.cull_backfaces = zui_check(cullHandle, " " + tr("Cull Backfaces"));
-				if (cullHandle.changed) {
+				let cull_handle: zui_handle_t = zui_handle("uimenu_7", { selected: Context.raw.cull_backfaces });
+				Context.raw.cull_backfaces = zui_check(cull_handle, " " + tr("Cull Backfaces"));
+				if (cull_handle.changed) {
 					MakeMaterial.parse_mesh_material();
 				}
 
 				UIMenu.menu_fill(ui);
-				let filterHandle: zui_handle_t = zui_handle("uimenu_8", { selected: Context.raw.texture_filter });
-				Context.raw.texture_filter = zui_check(filterHandle, " " + tr("Filter Textures"));
-				if (filterHandle.changed) {
+				let filter_handle: zui_handle_t = zui_handle("uimenu_8", { selected: Context.raw.texture_filter });
+				Context.raw.texture_filter = zui_check(filter_handle, " " + tr("Filter Textures"));
+				if (filter_handle.changed) {
 					MakeMaterial.parse_paint_material();
 					MakeMaterial.parse_mesh_material();
 				}
@@ -238,9 +238,9 @@ class UIMenu {
 				///end
 
 				UIMenu.menu_fill(ui);
-				let compassHandle: zui_handle_t = zui_handle("uimenu_9", { selected: Context.raw.show_compass });
-				Context.raw.show_compass = zui_check(compassHandle, " " + tr("Compass"));
-				if (compassHandle.changed) Context.raw.ddirty = 2;
+				let compass_handle: zui_handle_t = zui_handle("uimenu_9", { selected: Context.raw.show_compass });
+				Context.raw.show_compass = zui_check(compass_handle, " " + tr("Compass"));
+				if (compass_handle.changed) Context.raw.ddirty = 2;
 
 				UIMenu.menu_fill(ui);
 				Context.raw.show_envmap = zui_check(Context.raw.show_envmap_handle, " " + tr("Envmap"));
@@ -258,8 +258,8 @@ class UIMenu {
 				if (ui.changed) UIMenu.keep_open = true;
 			}
 			else if (UIMenu.menu_category == menu_category_t.MODE) {
-				let modeHandle: zui_handle_t = zui_handle("uimenu_10");
-				modeHandle.position = Context.raw.viewport_mode;
+				let mode_handle: zui_handle_t = zui_handle("uimenu_10");
+				mode_handle.position = Context.raw.viewport_mode;
 				let modes: string[] = [
 					tr("Lit"),
 					tr("Base Color"),
@@ -295,13 +295,13 @@ class UIMenu {
 				for (let i: i32 = 0; i < modes.length; ++i) {
 					UIMenu.menu_fill(ui);
 					let shortcut: string = Config.raw.touch_ui ? "" : Config.keymap.viewport_mode + ", " + shortcuts[i];
-					zui_radio(modeHandle, i, modes[i], shortcut);
+					zui_radio(mode_handle, i, modes[i], shortcut);
 				}
 
-				if (modeHandle.changed) {
-					Context.set_viewport_mode(modeHandle.position);
+				if (mode_handle.changed) {
+					Context.set_viewport_mode(mode_handle.position);
 					// TODO: rotate mode is not supported for path tracing yet
-					if (modeHandle.position == viewport_mode_t.PATH_TRACE && Context.raw.camera_controls == camera_controls_t.ROTATE) {
+					if (mode_handle.position == viewport_mode_t.PATH_TRACE && Context.raw.camera_controls == camera_controls_t.ROTATE) {
 						Context.raw.camera_controls = camera_controls_t.ORBIT;
 						Viewport.reset();
 					}
@@ -369,19 +369,19 @@ class UIMenu {
 
 				UIMenu.menu_fill(ui);
 				UIMenu.menu_align(ui);
-				let cameraControlsHandle: zui_handle_t = zui_handle("uimenu_12");
-				cameraControlsHandle.position = Context.raw.camera_controls;
-				Context.raw.camera_controls = zui_inline_radio(cameraControlsHandle, [tr("Orbit"), tr("Rotate"), tr("Fly")], zui_align_t.LEFT);
+				let camera_controls_handle: zui_handle_t = zui_handle("uimenu_12");
+				camera_controls_handle.position = Context.raw.camera_controls;
+				Context.raw.camera_controls = zui_inline_radio(camera_controls_handle, [tr("Orbit"), tr("Rotate"), tr("Fly")], zui_align_t.LEFT);
 
-				let orbitAndRotateTooltip: string = tr("Orbit and Rotate mode:\n{rotate_shortcut} or move right mouse button to rotate.\n{zoom_shortcut} or scroll to zoom.\n{pan_shortcut} or move middle mouse to pan.",
+				let orbit_and_rotate_tooltip: string = tr("Orbit and Rotate mode:\n{rotate_shortcut} or move right mouse button to rotate.\n{zoom_shortcut} or scroll to zoom.\n{pan_shortcut} or move middle mouse to pan.",
 					new Map([
 						["rotate_shortcut", Config.keymap.action_rotate],
 						["zoom_shortcut", Config.keymap.action_zoom],
 						["pan_shortcut", Config.keymap.action_pan]
 					])
 				);
-				let flyTooltip: string = tr("Fly mode:\nHold the right mouse button and one of the following commands:\nmove mouse to rotate.\nw, up or scroll up to move forward.\ns, down or scroll down to move backward.\na or left to move left.\nd or right to move right.\ne to move up.\nq to move down.\nHold shift to move faster or alt to move slower.");
-				if (ui.is_hovered) zui_tooltip(orbitAndRotateTooltip + "\n\n" + flyTooltip);
+				let fly_tooltip: string = tr("Fly mode:\nHold the right mouse button and one of the following commands:\nmove mouse to rotate.\nw, up or scroll up to move forward.\ns, down or scroll down to move backward.\na or left to move left.\nd or right to move right.\ne to move up.\nq to move down.\nHold shift to move faster or alt to move slower.");
+				if (ui.is_hovered) zui_tooltip(orbit_and_rotate_tooltip + "\n\n" + fly_tooltip);
 
 				UIMenu.menu_fill(ui);
 				UIMenu.menu_align(ui);
@@ -433,11 +433,11 @@ class UIMenu {
 						if (buffer != null)  {
 							// Compare versions
 							let update: any = json_parse(sys_buffer_to_string(buffer));
-							let updateVersion: i32 = Math.floor(update.version);
-							if (updateVersion > 0) {
+							let update_version: i32 = Math.floor(update.version);
+							if (update_version > 0) {
 								let date: string = Config.get_date().substr(2); // 2019 -> 19
-								let dateInt: i32 = parseInt(string_replace_all(date, "-", ""));
-								if (updateVersion > dateInt) {
+								let date_int: i32 = parseInt(string_replace_all(date, "-", ""));
+								if (update_version > date_int) {
 									UIBox.show_message(tr("Update"), tr("Update is available!\nPlease visit {url}.", new Map([["url", manifest_url]])));
 								}
 								else {
@@ -462,13 +462,13 @@ class UIMenu {
 					krom_sys_command('wmic path win32_VideoController get name > "' + save + '"');
 					let blob: buffer_t = krom_load_blob(save);
 					let u8: Uint8Array = new Uint8Array(blob);
-					let gpuRaw: string = "";
+					let gpu_raw: string = "";
 					for (let i: i32 = 0; i < Math.floor(u8.length / 2); ++i) {
 						let c: string = String.fromCharCode(u8[i * 2]);
-						gpuRaw += c;
+						gpu_raw += c;
 					}
 
-					let gpus: string[] = gpuRaw.split("\n");
+					let gpus: string[] = gpu_raw.split("\n");
 					gpus = gpus.splice(1, gpus.length - 2);
 					let gpu: string = "";
 					for (let g of gpus) {
@@ -481,8 +481,8 @@ class UIMenu {
 					///end
 
 					UIBox.show_custom((ui: zui_t) => {
-						let tabVertical: bool = Config.raw.touch_ui;
-						if (zui_tab(zui_handle("uimenu_13"), tr("About"), tabVertical)) {
+						let tab_vertical: bool = Config.raw.touch_ui;
+						if (zui_tab(zui_handle("uimenu_13"), tr("About"), tab_vertical)) {
 
 							let img: image_t = data_get_image("badge.k");
 							zui_image(img);
@@ -530,7 +530,7 @@ class UIMenu {
 
 	static hide = () => {
 		UIMenu.show = false;
-		Base.redraw_ui();
+		base_redraw_ui();
 	}
 
 	static draw = (commands: (ui: zui_t)=>void = null, elements: i32, x: i32 = -1, y: i32 = -1) => {
@@ -545,22 +545,22 @@ class UIMenu {
 
 	static fit_to_screen = () => {
 		// Prevent the menu going out of screen
-		let menuW: f32 = Base.default_element_w * zui_SCALE(Base.ui_menu) * 2.3;
-		if (UIMenu.menu_x + menuW > sys_width()) {
-			if (UIMenu.menu_x - menuW > 0) {
-				UIMenu.menu_x = Math.floor(UIMenu.menu_x - menuW);
+		let menu_w: f32 = base_default_element_w * zui_SCALE(base_ui_menu) * 2.3;
+		if (UIMenu.menu_x + menu_w > sys_width()) {
+			if (UIMenu.menu_x - menu_w > 0) {
+				UIMenu.menu_x = Math.floor(UIMenu.menu_x - menu_w);
 			}
 			else {
-				UIMenu.menu_x = Math.floor(sys_width() - menuW);
+				UIMenu.menu_x = Math.floor(sys_width() - menu_w);
 			}
 		}
-		let menuH: f32 = Math.floor(UIMenu.menu_elements * 30 * zui_SCALE(Base.ui_menu)); // ui.t.ELEMENT_H
-		if (UIMenu.menu_y + menuH > sys_height()) {
-			if (UIMenu.menu_y - menuH > 0) {
-				UIMenu.menu_y = Math.floor(UIMenu.menu_y - menuH);
+		let menu_h: f32 = Math.floor(UIMenu.menu_elements * 30 * zui_SCALE(base_ui_menu)); // ui.t.ELEMENT_H
+		if (UIMenu.menu_y + menu_h > sys_height()) {
+			if (UIMenu.menu_y - menu_h > 0) {
+				UIMenu.menu_y = Math.floor(UIMenu.menu_y - menu_h);
 			}
 			else {
-				UIMenu.menu_y = sys_height() - menuH;
+				UIMenu.menu_y = sys_height() - menu_h;
 			}
 			UIMenu.menu_x += 1; // Move out of mouse focus
 		}

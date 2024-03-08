@@ -7,21 +7,20 @@ assignees: ''
 
 ---
 
-<!-- Please search existing issues for potential duplicates before filing yours:
+<!-- Please search existing issues first:
 https://github.com/armory3d/armortools/issues?q=is%3Aissue
 -->
 
 **ArmorPaint version:**
-<!-- Specify commit hash if using non-official build. -->
+<!-- Specify commit hash if using git build. -->
 
 
-**OS/device including version:**
-<!-- Specify GPU model, drivers, and the backend (non-DXR or DXR) if graphics-related. -->
+**OS / GPU model:**
 
 
 **Issue description:**
-<!-- What happened, and what was expected. -->
 
 
 **Steps to reproduce:**
 <!-- If needed, include screenshots by drag and dropping them. -->
+

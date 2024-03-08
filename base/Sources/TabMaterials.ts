@@ -104,8 +104,8 @@ class TabMaterials {
 					zui_image(Res.get("icons.k"), 0xffffffff, -1.0, tile, tile, tile, tile);
 
 				// Draw material numbers when selecting a material via keyboard shortcut
-				let isTyping: bool = ui.is_typing || UIView2D.ui.is_typing || UINodes.ui.is_typing;
-				if (!isTyping) {
+				let is_typing: bool = ui.is_typing || UIView2D.ui.is_typing || UINodes.ui.is_typing;
+				if (!is_typing) {
 					if (i < 9 && Operator.shortcut(Config.keymap.select_material, ShortcutType.ShortcutDown)) {
 						let number: string = String(i + 1);
 						let width: i32 = g2_font_width(ui.font, ui.font_size, number) + 10;
@@ -124,20 +124,20 @@ class TabMaterials {
 						///if is_paint
 						if (Context.raw.tool == workspace_tool_t.MATERIAL) {
 							let _init = () => {
-								Base.update_fill_layers();
+								base_update_fill_layers();
 							}
 							app_notify_on_init(_init);
 						}
 						///end
 					}
-					Base.drag_off_x = -(mouse_x - uix - ui._window_x - 3);
-					Base.drag_off_y = -(mouse_y - uiy - ui._window_y + 1);
-					Base.drag_material = Context.raw.material;
+					base_drag_off_x = -(mouse_x - uix - ui._window_x - 3);
+					base_drag_off_y = -(mouse_y - uiy - ui._window_y + 1);
+					base_drag_material = Context.raw.material;
 					// Double click to show nodes
 					if (time_time() - Context.raw.select_time < 0.25) {
 						UIBase.show_material_nodes();
-						Base.drag_material = null;
-						Base.is_dragging = false;
+						base_drag_material = null;
+						base_is_dragging = false;
 					}
 					Context.raw.select_time = time_time();
 				}
@@ -152,7 +152,7 @@ class TabMaterials {
 
 						if (UIMenu.menu_button(ui, tr("To Fill Layer"))) {
 							Context.select_material(i);
-							Base.create_fill_layer();
+							base_create_fill_layer();
 						}
 
 						if (UIMenu.menu_button(ui, tr("Export"))) {
@@ -183,42 +183,42 @@ class TabMaterials {
 							TabMaterials.delete_material(m);
 						}
 
-						let baseHandle: zui_handle_t = zui_nest(zui_handle("tabmaterials_0"), m.id, {selected: m.paint_base});
-						let opacHandle: zui_handle_t = zui_nest(zui_handle("tabmaterials_1"), m.id, {selected: m.paint_opac});
-						let norHandle: zui_handle_t = zui_nest(zui_handle("tabmaterials_2"), m.id, {selected: m.paint_nor});
-						let occHandle: zui_handle_t = zui_nest(zui_handle("tabmaterials_3"), m.id, {selected: m.paint_occ});
-						let roughHandle: zui_handle_t = zui_nest(zui_handle("tabmaterials_4"), m.id, {selected: m.paint_rough});
-						let metHandle: zui_handle_t = zui_nest(zui_handle("tabmaterials_5"), m.id, {selected: m.paint_met});
-						let heightHandle: zui_handle_t = zui_nest(zui_handle("tabmaterials_6"), m.id, {selected: m.paint_height});
-						let emisHandle: zui_handle_t = zui_nest(zui_handle("tabmaterials_7"), m.id, {selected: m.paint_emis});
-						let subsHandle: zui_handle_t = zui_nest(zui_handle("tabmaterials_8"), m.id, {selected: m.paint_subs});
+						let base_handle: zui_handle_t = zui_nest(zui_handle("tabmaterials_0"), m.id, {selected: m.paint_base});
+						let opac_handle: zui_handle_t = zui_nest(zui_handle("tabmaterials_1"), m.id, {selected: m.paint_opac});
+						let nor_handle: zui_handle_t = zui_nest(zui_handle("tabmaterials_2"), m.id, {selected: m.paint_nor});
+						let occ_handle: zui_handle_t = zui_nest(zui_handle("tabmaterials_3"), m.id, {selected: m.paint_occ});
+						let rough_handle: zui_handle_t = zui_nest(zui_handle("tabmaterials_4"), m.id, {selected: m.paint_rough});
+						let met_handle: zui_handle_t = zui_nest(zui_handle("tabmaterials_5"), m.id, {selected: m.paint_met});
+						let height_handle: zui_handle_t = zui_nest(zui_handle("tabmaterials_6"), m.id, {selected: m.paint_height});
+						let emis_handle: zui_handle_t = zui_nest(zui_handle("tabmaterials_7"), m.id, {selected: m.paint_emis});
+						let subs_handle: zui_handle_t = zui_nest(zui_handle("tabmaterials_8"), m.id, {selected: m.paint_subs});
 						UIMenu.menu_fill(ui);
-						m.paint_base = zui_check(baseHandle, tr("Base Color"));
+						m.paint_base = zui_check(base_handle, tr("Base Color"));
 						UIMenu.menu_fill(ui);
-						m.paint_opac = zui_check(opacHandle, tr("Opacity"));
+						m.paint_opac = zui_check(opac_handle, tr("Opacity"));
 						UIMenu.menu_fill(ui);
-						m.paint_nor = zui_check(norHandle, tr("Normal"));
+						m.paint_nor = zui_check(nor_handle, tr("Normal"));
 						UIMenu.menu_fill(ui);
-						m.paint_occ = zui_check(occHandle, tr("Occlusion"));
+						m.paint_occ = zui_check(occ_handle, tr("Occlusion"));
 						UIMenu.menu_fill(ui);
-						m.paint_rough = zui_check(roughHandle, tr("Roughness"));
+						m.paint_rough = zui_check(rough_handle, tr("Roughness"));
 						UIMenu.menu_fill(ui);
-						m.paint_met = zui_check(metHandle, tr("Metallic"));
+						m.paint_met = zui_check(met_handle, tr("Metallic"));
 						UIMenu.menu_fill(ui);
-						m.paint_height = zui_check(heightHandle, tr("Height"));
+						m.paint_height = zui_check(height_handle, tr("Height"));
 						UIMenu.menu_fill(ui);
-						m.paint_emis = zui_check(emisHandle, tr("Emission"));
+						m.paint_emis = zui_check(emis_handle, tr("Emission"));
 						UIMenu.menu_fill(ui);
-						m.paint_subs = zui_check(subsHandle, tr("Subsurface"));
-						if (baseHandle.changed ||
-							opacHandle.changed ||
-							norHandle.changed ||
-							occHandle.changed ||
-							roughHandle.changed ||
-							metHandle.changed ||
-							heightHandle.changed ||
-							emisHandle.changed ||
-							subsHandle.changed) {
+						m.paint_subs = zui_check(subs_handle, tr("Subsurface"));
+						if (base_handle.changed ||
+							opac_handle.changed ||
+							nor_handle.changed ||
+							occ_handle.changed ||
+							rough_handle.changed ||
+							met_handle.changed ||
+							height_handle.changed ||
+							emis_handle.changed ||
+							subs_handle.changed) {
 							MakeMaterial.parse_paint_material();
 							UIMenu.keep_open = true;
 						}
@@ -252,9 +252,9 @@ class TabMaterials {
 			///end
 		}
 
-		let inFocus: bool = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
-					  		ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
-		if (inFocus && ui.is_delete_down && Project.materials.length > 1) {
+		let in_focus: bool = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
+					    	 ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
+		if (in_focus && ui.is_delete_down && Project.materials.length > 1) {
 			ui.is_delete_down = false;
 			TabMaterials.delete_material(Context.raw.material);
 		}

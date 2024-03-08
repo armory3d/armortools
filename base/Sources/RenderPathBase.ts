@@ -95,7 +95,7 @@ class RenderPathBase {
 			}
 			else {
 				// Set current viewport
-				Context.raw.view_index = mouse_view_x() > Base.w() / 2 ? 1 : 0;
+				Context.raw.view_index = mouse_view_x() > base_w() / 2 ? 1 : 0;
 			}
 
 			let cam: camera_object_t = scene_camera;
@@ -117,8 +117,8 @@ class RenderPathBase {
 		}
 
 		// Match projection matrix jitter
-		let skipTaa: bool = Context.raw.split_view || ((Context.raw.tool == workspace_tool_t.CLONE || Context.raw.tool == workspace_tool_t.BLUR || Context.raw.tool == workspace_tool_t.SMUDGE) && Context.raw.pdirty > 0);
-		scene_camera.frame = skipTaa ? 0 : RenderPathBase.taa_frame;
+		let skip_taa: bool = Context.raw.split_view || ((Context.raw.tool == workspace_tool_t.CLONE || Context.raw.tool == workspace_tool_t.BLUR || Context.raw.tool == workspace_tool_t.SMUDGE) && Context.raw.pdirty > 0);
+		scene_camera.frame = skip_taa ? 0 : RenderPathBase.taa_frame;
 		camera_object_proj_jitter(scene_camera);
 		camera_object_build_mat(scene_camera);
 	}
@@ -181,11 +181,11 @@ class RenderPathBase {
 		///if (krom_direct3d12 || krom_vulkan || krom_metal)
 		if (Context.raw.viewport_mode ==  viewport_mode_t.PATH_TRACE) {
 			///if is_paint
-			let useLiveLayer: bool = Context.raw.tool == workspace_tool_t.MATERIAL;
+			let use_live_layer: bool = Context.raw.tool == workspace_tool_t.MATERIAL;
 			///else
-			let useLiveLayer: bool = false;
+			let use_live_layer: bool = false;
 			///end
-			RenderPathRaytrace.draw(useLiveLayer);
+			RenderPathRaytrace.draw(use_live_layer);
 			return;
 		}
 		///end
@@ -200,13 +200,13 @@ class RenderPathBase {
 			if (RenderPathBase.bloom_mipmaps == null) {
 				RenderPathBase.bloom_mipmaps = [];
 
-				let prevScale: f32 = 1.0;
+				let prev_scale: f32 = 1.0;
 				for (let i: i32 = 0; i < 10; ++i) {
 					let t: render_target_t = render_target_create();
 					t.name = "bloom_mip_" + i;
 					t.width = 0;
 					t.height = 0;
-					t.scale = (prevScale *= 0.5);
+					t.scale = (prev_scale *= 0.5);
 					t.format = "RGBA64";
 					RenderPathBase.bloom_mipmaps.push(render_path_create_render_target(t));
 				}
@@ -215,24 +215,24 @@ class RenderPathBase {
 				render_path_load_shader("shader_datas/bloom_pass/bloom_upsample_pass");
 			}
 
-			let bloomRadius: f32 = 6.5;
-			let minDim: f32 = Math.min(render_path_current_w,render_path_current_h);
-			let logMinDim: f32 = Math.max(1.0, Math.log2(minDim) + (bloomRadius - 8.0));
-			let numMips: i32 = Math.floor(logMinDim);
-			RenderPathBase.bloom_sample_scale = 0.5 + logMinDim - numMips;
+			let bloom_radius: f32 = 6.5;
+			let min_dim: f32 = Math.min(render_path_current_w,render_path_current_h);
+			let log_min_dim: f32 = Math.max(1.0, Math.log2(min_dim) + (bloom_radius - 8.0));
+			let num_mips: i32 = Math.floor(log_min_dim);
+			RenderPathBase.bloom_sample_scale = 0.5 + log_min_dim - num_mips;
 
-			for (let i: i32 = 0; i < numMips; ++i) {
+			for (let i: i32 = 0; i < num_mips; ++i) {
 				RenderPathBase.bloom_current_mip = i;
 				render_path_set_target(RenderPathBase.bloom_mipmaps[i].name);
 				render_path_clear_target();
 				render_path_bind_target(i == 0 ? tex : RenderPathBase.bloom_mipmaps[i - 1].name, "tex");
 				render_path_draw_shader("shader_datas/bloom_pass/bloom_downsample_pass");
 			}
-			for (let i: i32 = 0; i < numMips; ++i) {
-				let mipLevel: i32 = numMips - 1 - i;
-				RenderPathBase.bloom_current_mip = mipLevel;
-				render_path_set_target(mipLevel == 0 ? tex : RenderPathBase.bloom_mipmaps[mipLevel - 1].name);
-				render_path_bind_target(RenderPathBase.bloom_mipmaps[mipLevel].name, "tex");
+			for (let i: i32 = 0; i < num_mips; ++i) {
+				let mip_level: i32 = num_mips - 1 - i;
+				RenderPathBase.bloom_current_mip = mip_level;
+				render_path_set_target(mip_level == 0 ? tex : RenderPathBase.bloom_mipmaps[mip_level - 1].name);
+				render_path_bind_target(RenderPathBase.bloom_mipmaps[mip_level].name, "tex");
 				render_path_draw_shader("shader_datas/bloom_pass/bloom_upsample_pass");
 			}
 		}
@@ -252,11 +252,11 @@ class RenderPathBase {
 
 			///if (krom_direct3d12 || krom_vulkan || krom_metal)
 			///if is_paint
-			let useLiveLayer: bool = Context.raw.tool == workspace_tool_t.MATERIAL;
+			let use_live_layer: bool = Context.raw.tool == workspace_tool_t.MATERIAL;
 			///else
-			let useLiveLayer: bool = false;
+			let use_live_layer: bool = false;
 			///end
-			Context.raw.viewport_mode == viewport_mode_t.PATH_TRACE ? RenderPathRaytrace.draw(useLiveLayer) : drawCommands();
+			Context.raw.viewport_mode == viewport_mode_t.PATH_TRACE ? RenderPathRaytrace.draw(use_live_layer) : drawCommands();
 			///else
 			drawCommands();
 			///end
@@ -277,7 +277,7 @@ class RenderPathBase {
 				render_path_set_target("");
 				render_path_set_viewport(RenderPathBase.voxels_res, RenderPathBase.voxels_res);
 				render_path_bind_target("voxels", "voxels");
-				if (MakeMaterial.heightUsed) {
+				if (MakeMaterial.height_used) {
 					let tid: i32 = 0; // Project.layers[0].id;
 					render_path_bind_target("texpaint_pack" + tid, "texpaint_pack");
 				}
@@ -469,8 +469,8 @@ class RenderPathBase {
 		render_path_bind_target("gbuffer2", "sveloc");
 		render_path_draw_shader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
 
-		let skipTaa: bool = Context.raw.split_view;
-		if (skipTaa) {
+		let skip_taa: bool = Context.raw.split_view;
+		if (skip_taa) {
 			render_path_set_target("taa");
 			render_path_bind_target(current, "tex");
 			render_path_draw_shader("shader_datas/copy_pass/copy_pass");
@@ -533,8 +533,8 @@ class RenderPathBase {
 		}
 
 		let hide: bool = Operator.shortcut(Config.keymap.stencil_hide, ShortcutType.ShortcutDown) || keyboard_down("control");
-		let isDecal: bool = Base.is_decal_layer();
-		if (isDecal && !hide) LineDraw.render(Context.raw.layer.decalMat);
+		let is_decal: bool = base_is_decal_layer();
+		if (is_decal && !hide) LineDraw.render(Context.raw.layer.decal_mat);
 	}
 
 	static make_gbuffer_copy_textures = () => {

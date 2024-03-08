@@ -43,9 +43,9 @@ class Camera {
 			}
 		}
 
-		let modifKey: bool = keyboard_down("alt") || keyboard_down("shift") || keyboard_down("control");
-		let modif: bool = modifKey || Config.keymap.action_rotate == "middle";
-		let defaultKeymap: bool = Config.raw.keymap == "default.json";
+		let modif_key: bool = keyboard_down("alt") || keyboard_down("shift") || keyboard_down("control");
+		let modif: bool = modif_key || Config.keymap.action_rotate == "middle";
+		let default_keymap: bool = Config.raw.keymap == "default.json";
 
 		if (Operator.shortcut(Config.keymap.action_rotate, ShortcutType.ShortcutStarted) ||
 			Operator.shortcut(Config.keymap.action_zoom, ShortcutType.ShortcutStarted) ||
@@ -54,7 +54,7 @@ class Camera {
 			Operator.shortcut(Config.keymap.rotate_light, ShortcutType.ShortcutStarted) ||
 			(mouse_started("right") && !modif) ||
 			(mouse_started("middle") && !modif) ||
-			(mouse_wheel_delta != 0 && !modifKey)) {
+			(mouse_wheel_delta != 0 && !modif_key)) {
 			Camera.controls_down = true;
 		}
 		else if (!Operator.shortcut(Config.keymap.action_rotate, ShortcutType.ShortcutDown) &&
@@ -64,16 +64,16 @@ class Camera {
 			!Operator.shortcut(Config.keymap.rotate_light, ShortcutType.ShortcutDown) &&
 			!(mouse_down("right") && !modif) &&
 			!(mouse_down("middle") && !modif) &&
-			(mouse_wheel_delta == 0 && !modifKey)) {
+			(mouse_wheel_delta == 0 && !modif_key)) {
 			Camera.controls_down = false;
 		}
 
-		if (_input_occupied || !Base.ui_enabled || Base.is_dragging || Base.is_scrolling() || Base.is_combo_selected() || !Camera.controls_down) {
+		if (_input_occupied || !base_ui_enabled || base_is_dragging || base_is_scrolling() || base_is_combo_selected() || !Camera.controls_down) {
 			return;
 		}
 
 		let controls: camera_controls_t = Context.raw.camera_controls;
-		if (controls == camera_controls_t.ORBIT && (Operator.shortcut(Config.keymap.action_rotate, ShortcutType.ShortcutDown) || (mouse_down("right") && !modif && defaultKeymap))) {
+		if (controls == camera_controls_t.ORBIT && (Operator.shortcut(Config.keymap.action_rotate, ShortcutType.ShortcutDown) || (mouse_down("right") && !modif && default_keymap))) {
 			Camera.redraws = 2;
 			let dist: f32 = Camera.distance();
 			transform_move(camera.base.transform, camera_object_look_world(camera), dist);
@@ -84,7 +84,7 @@ class Camera {
 			}
 			transform_move(camera.base.transform, camera_object_look_world(camera), -dist);
 		}
-		else if (controls == camera_controls_t.ROTATE && (Operator.shortcut(Config.keymap.action_rotate, ShortcutType.ShortcutDown) || (mouse_down("right") && !modif && defaultKeymap))) {
+		else if (controls == camera_controls_t.ROTATE && (Operator.shortcut(Config.keymap.action_rotate, ShortcutType.ShortcutDown) || (mouse_down("right") && !modif && default_keymap))) {
 			Camera.redraws = 2;
 			let t: transform_t = Context.main_object().base.transform;
 			let up: vec4_t = vec4_normalize(transform_up(t));
@@ -98,7 +98,7 @@ class Camera {
 		}
 
 		if (controls == camera_controls_t.ROTATE || controls == camera_controls_t.ORBIT) {
-			Camera.pan_action(modif, defaultKeymap);
+			Camera.pan_action(modif, default_keymap);
 
 			if (Operator.shortcut(Config.keymap.action_zoom, ShortcutType.ShortcutDown)) {
 				Camera.redraws = 2;
@@ -107,7 +107,7 @@ class Camera {
 				transform_move(camera.base.transform, camera_object_look(camera), f);
 			}
 
-			if (mouse_wheel_delta != 0 && !modifKey) {
+			if (mouse_wheel_delta != 0 && !modif_key) {
 				Camera.redraws = 2;
 				let f: f32 = mouse_wheel_delta * (-0.1);
 				f *= Camera.get_camera_zoom_speed();
@@ -115,27 +115,27 @@ class Camera {
 			}
 		}
 		else if (controls == camera_controls_t.FLY && mouse_down("right")) {
-			let moveForward: bool = keyboard_down("w") || keyboard_down("up") || mouse_wheel_delta < 0;
-			let moveBackward: bool = keyboard_down("s") || keyboard_down("down") || mouse_wheel_delta > 0;
-			let strafeLeft: bool = keyboard_down("a") || keyboard_down("left");
-			let strafeRight: bool = keyboard_down("d") || keyboard_down("right");
-			let strafeUp: bool = keyboard_down("e");
-			let strafeDown: bool = keyboard_down("q");
+			let move_forward: bool = keyboard_down("w") || keyboard_down("up") || mouse_wheel_delta < 0;
+			let move_backward: bool = keyboard_down("s") || keyboard_down("down") || mouse_wheel_delta > 0;
+			let strafe_left: bool = keyboard_down("a") || keyboard_down("left");
+			let strafe_right: bool = keyboard_down("d") || keyboard_down("right");
+			let strafe_up: bool = keyboard_down("e");
+			let strafe_down: bool = keyboard_down("q");
 			let fast: f32 = keyboard_down("shift") ? 2.0 : (keyboard_down("alt") ? 0.5 : 1.0);
 			if (mouse_wheel_delta != 0) {
 				fast *= Math.abs(mouse_wheel_delta) * 4.0;
 			}
 
-			if (moveForward || moveBackward || strafeRight || strafeLeft || strafeUp || strafeDown) {
+			if (move_forward || move_backward || strafe_right || strafe_left || strafe_up || strafe_down) {
 				Camera.ease += time_delta() * 15;
 				if (Camera.ease > 1.0) Camera.ease = 1.0;
 				vec4_set(Camera.dir, 0, 0, 0);
-				if (moveForward) vec4_add_f(Camera.dir, camera_object_look(camera).x, camera_object_look(camera).y, camera_object_look(camera).z);
-				if (moveBackward) vec4_add_f(Camera.dir, -camera_object_look(camera).x, -camera_object_look(camera).y, -camera_object_look(camera).z);
-				if (strafeRight) vec4_add_f(Camera.dir, camera_object_right(camera).x, camera_object_right(camera).y, camera_object_right(camera).z);
-				if (strafeLeft) vec4_add_f(Camera.dir, -camera_object_right(camera).x, -camera_object_right(camera).y, -camera_object_right(camera).z);
-				if (strafeUp) vec4_add_f(Camera.dir, 0, 0, 1);
-				if (strafeDown) vec4_add_f(Camera.dir, 0, 0, -1);
+				if (move_forward) vec4_add_f(Camera.dir, camera_object_look(camera).x, camera_object_look(camera).y, camera_object_look(camera).z);
+				if (move_backward) vec4_add_f(Camera.dir, -camera_object_look(camera).x, -camera_object_look(camera).y, -camera_object_look(camera).z);
+				if (strafe_right) vec4_add_f(Camera.dir, camera_object_right(camera).x, camera_object_right(camera).y, camera_object_right(camera).z);
+				if (strafe_left) vec4_add_f(Camera.dir, -camera_object_right(camera).x, -camera_object_right(camera).y, -camera_object_right(camera).z);
+				if (strafe_up) vec4_add_f(Camera.dir, 0, 0, 1);
+				if (strafe_down) vec4_add_f(Camera.dir, 0, 0, -1);
 			}
 			else {
 				Camera.ease -= time_delta() * 20.0 * Camera.ease;
@@ -143,7 +143,7 @@ class Camera {
 			}
 
 
-			let d: f32 = time_delta() * fast * Camera.ease * 2.0 * ((moveForward || moveBackward) ? Config.raw.camera_zoom_speed : Config.raw.camera_pan_speed);
+			let d: f32 = time_delta() * fast * Camera.ease * 2.0 * ((move_forward || move_backward) ? Config.raw.camera_zoom_speed : Config.raw.camera_pan_speed);
 			if (d > 0.0) {
 				transform_move(camera.base.transform, Camera.dir, d);
 				if (Context.raw.camera_type == camera_type_t.ORTHOGRAPHIC) {

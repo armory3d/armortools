@@ -2,24 +2,24 @@
 class ImportFolder {
 
 	static run = (path: string) => {
-		let files = File.read_directory(path);
-		let mapbase = "";
-		let mapopac = "";
-		let mapnor = "";
-		let mapocc = "";
-		let maprough = "";
-		let mapmet = "";
-		let mapheight = "";
+		let files: string[] = File.read_directory(path);
+		let mapbase: string = "";
+		let mapopac: string = "";
+		let mapnor: string = "";
+		let mapocc: string = "";
+		let maprough: string = "";
+		let mapmet: string = "";
+		let mapheight: string = "";
 
-		let foundTexture = false;
+		let found_texture: bool = false;
 		// Import maps
 		for (let f of files) {
 			if (!Path.is_texture(f)) continue;
 
 			// TODO: handle -albedo
 
-			let base = f.substr(0, f.lastIndexOf(".")).toLowerCase();
-			let valid = false;
+			let base: string = f.substr(0, f.lastIndexOf(".")).toLowerCase();
+			let valid: bool = false;
 			if (mapbase == "" && Path.is_base_color_tex(base)) {
 				mapbase = f;
 				valid = true;
@@ -51,11 +51,11 @@ class ImportFolder {
 
 			if (valid) {
 				ImportTexture.run(path + Path.sep + f, false);
-				foundTexture = true;
+				found_texture = true;
 			}
 		}
 
-		if (!foundTexture) {
+		if (!found_texture) {
 			Console.info(tr("Folder does not contain textures"));
 			return;
 		}
@@ -63,9 +63,9 @@ class ImportFolder {
 		// Create material
 		Context.raw.material = SlotMaterial.create(Project.materials[0].data);
 		Project.materials.push(Context.raw.material);
-		let nodes = Context.raw.material.nodes;
-		let canvas = Context.raw.material.canvas;
-		let dirs = path.split(Path.sep);
+		let nodes: zui_nodes_t = Context.raw.material.nodes;
+		let canvas: zui_node_canvas_t = Context.raw.material.canvas;
+		let dirs: string[] = path.split(Path.sep);
 		canvas.name = dirs[dirs.length - 1];
 		let nout: zui_node_t = null;
 		for (let n of canvas.nodes) {
@@ -82,35 +82,35 @@ class ImportFolder {
 		}
 
 		// Place nodes
-		let pos = 0;
-		let startY = 100;
-		let nodeH = 164;
+		let pos: i32 = 0;
+		let start_y: i32 = 100;
+		let node_h: i32 = 164;
 		if (mapbase != "") {
-			ImportFolder.place_image_node(nodes, canvas, mapbase, startY + nodeH * pos, nout.id, 0);
+			ImportFolder.place_image_node(nodes, canvas, mapbase, start_y + node_h * pos, nout.id, 0);
 			pos++;
 		}
 		if (mapopac != "") {
-			ImportFolder.place_image_node(nodes, canvas, mapopac, startY + nodeH * pos, nout.id, 1);
+			ImportFolder.place_image_node(nodes, canvas, mapopac, start_y + node_h * pos, nout.id, 1);
 			pos++;
 		}
 		if (mapocc != "") {
-			ImportFolder.place_image_node(nodes, canvas, mapocc, startY + nodeH * pos, nout.id, 2);
+			ImportFolder.place_image_node(nodes, canvas, mapocc, start_y + node_h * pos, nout.id, 2);
 			pos++;
 		}
 		if (maprough != "") {
-			ImportFolder.place_image_node(nodes, canvas, maprough, startY + nodeH * pos, nout.id, 3);
+			ImportFolder.place_image_node(nodes, canvas, maprough, start_y + node_h * pos, nout.id, 3);
 			pos++;
 		}
 		if (mapmet != "") {
-			ImportFolder.place_image_node(nodes, canvas, mapmet, startY + nodeH * pos, nout.id, 4);
+			ImportFolder.place_image_node(nodes, canvas, mapmet, start_y + node_h * pos, nout.id, 4);
 			pos++;
 		}
 		if (mapnor != "") {
-			ImportFolder.place_image_node(nodes, canvas, mapnor, startY + nodeH * pos, nout.id, 5);
+			ImportFolder.place_image_node(nodes, canvas, mapnor, start_y + node_h * pos, nout.id, 5);
 			pos++;
 		}
 		if (mapheight != "") {
-			ImportFolder.place_image_node(nodes, canvas, mapheight, startY + nodeH * pos, nout.id, 7);
+			ImportFolder.place_image_node(nodes, canvas, mapheight, start_y + node_h * pos, nout.id, 7);
 			pos++;
 		}
 
@@ -121,8 +121,8 @@ class ImportFolder {
 	}
 
 	static place_image_node = (nodes: zui_nodes_t, canvas: zui_node_canvas_t, asset: string, ny: i32, to_id: i32, to_socket: i32) => {
-		let n = NodesMaterial.create_node("TEX_IMAGE");
-		n.buttons[0].default_value = Base.get_asset_index(asset);
+		let n: zui_node_t = NodesMaterial.create_node("TEX_IMAGE");
+		n.buttons[0].default_value = base_get_asset_index(asset);
 		n.x = 72;
 		n.y = ny;
 		let l: zui_node_link_t = { id: zui_get_link_id(canvas.links), from_id: n.id, from_socket: 0, to_id: to_id, to_socket: to_socket };

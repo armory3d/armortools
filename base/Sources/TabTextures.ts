@@ -64,9 +64,9 @@ class TabTextures {
 						let uiy: f32 = ui._y;
 						let sw: i32 = img.height < img.width ? img.height : 0;
 						if (zui_image(img, 0xffffffff, slotw, 0, 0, sw, sw) == zui_state_t.STARTED && ui.input_y > ui._window_y) {
-							Base.drag_off_x = -(mouse_x - uix - ui._window_x - 3);
-							Base.drag_off_y = -(mouse_y - uiy - ui._window_y + 1);
-							Base.drag_asset = asset;
+							base_drag_off_x = -(mouse_x - uix - ui._window_x - 3);
+							base_drag_off_y = -(mouse_y - uiy - ui._window_y + 1);
+							base_drag_asset = asset;
 							Context.raw.texture = asset;
 
 							if (time_time() - Context.raw.select_time < 0.25) UIBase.show_2d_view(view_2d_type_t.ASSET);
@@ -89,11 +89,11 @@ class TabTextures {
 							ui._y = _uiy;
 						}
 
-						let isPacked: bool = Project.raw.packed_assets != null && Project.packed_asset_exists(Project.raw.packed_assets, asset.file);
+						let is_packed: bool = Project.raw.packed_assets != null && Project.packed_asset_exists(Project.raw.packed_assets, asset.file);
 
 						if (ui.is_hovered) {
 							zui_tooltip_image(img, 256);
-							zui_tooltip(asset.name + (isPacked ? " " + tr("(packed)") : ""));
+							zui_tooltip(asset.name + (is_packed ? " " + tr("(packed)") : ""));
 						}
 
 						if (ui.is_hovered && ui.input_released_r) {
@@ -102,30 +102,30 @@ class TabTextures {
 							let count: i32 = 0;
 
 							///if (is_paint || is_sculpt)
-							count = isPacked ? 6 : 8;
+							count = is_packed ? 6 : 8;
 							///end
 							///if is_lab
-							count = isPacked ? 6 : 6;
+							count = is_packed ? 6 : 6;
 							///end
 
 							UIMenu.draw((ui: zui_t) => {
 								if (UIMenu.menu_button(ui, tr("Export"))) {
 									UIFiles.show("png", true, false, (path: string) => {
-										Base.notify_on_next_frame(() => {
+										base_notify_on_next_frame(() => {
 											///if (is_paint || is_sculpt)
-											if (Base.pipe_merge == null) Base.make_pipe();
+											if (base_pipe_merge == null) base_make_pipe();
 											///end
 											///if is_lab
-											if (Base.pipe_copy == null) Base.make_pipe();
+											if (base_pipe_copy == null) base_make_pipe();
 											///end
 
 											let target: image_t = image_create_render_target(TabTextures.to_pow2(img.width), TabTextures.to_pow2(img.height));
 											g2_begin(target);
-											g2_set_pipeline(Base.pipe_copy);
+											g2_set_pipeline(base_pipe_copy);
 											g2_draw_scaled_image(img, 0, 0, target.width, target.height);
 											g2_set_pipeline(null);
 											g2_end();
-											Base.notify_on_next_frame(() => {
+											base_notify_on_next_frame(() => {
 												let f: string = UIFiles.filename;
 												if (f == "") f = tr("untitled");
 												if (!f.endsWith(".png")) f += ".png";
@@ -141,14 +141,14 @@ class TabTextures {
 
 								///if (is_paint || is_sculpt)
 								if (UIMenu.menu_button(ui, tr("To Mask"))) {
-									Base.notify_on_next_frame(() => {
-										Base.create_image_mask(asset);
+									base_notify_on_next_frame(() => {
+										base_create_image_mask(asset);
 									});
 								}
 								///end
 
 								if (UIMenu.menu_button(ui, tr("Set as Envmap"))) {
-									Base.notify_on_next_frame(() => {
+									base_notify_on_next_frame(() => {
 										ImportEnvmap.run(asset.file, img);
 									});
 								}
@@ -168,10 +168,10 @@ class TabTextures {
 								if (UIMenu.menu_button(ui, tr("Delete"), "delete")) {
 									TabTextures.delete_texture(asset);
 								}
-								if (!isPacked && UIMenu.menu_button(ui, tr("Open Containing Directory..."))) {
+								if (!is_packed && UIMenu.menu_button(ui, tr("Open Containing Directory..."))) {
 									File.start(asset.file.substr(0, asset.file.lastIndexOf(Path.sep)));
 								}
-								if (!isPacked && UIMenu.menu_button(ui, tr("Open in Browser"))) {
+								if (!is_packed && UIMenu.menu_button(ui, tr("Open in Browser"))) {
 									TabBrowser.show_directory(asset.file.substr(0, asset.file.lastIndexOf(Path.sep)));
 								}
 							}, count);
@@ -197,9 +197,9 @@ class TabTextures {
 				if (ui.is_hovered) zui_tooltip(tr("Drag and drop files here"));
 			}
 
-			let inFocus: bool = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
-						 	 	ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
-			if (inFocus && ui.is_delete_down && Project.assets.length > 0 && Project.assets.indexOf(Context.raw.texture) >= 0) {
+			let in_focus: bool = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
+						 	 	 ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
+			if (in_focus && ui.is_delete_down && Project.assets.length > 0 && Project.assets.indexOf(Context.raw.texture) >= 0) {
 				ui.is_delete_down = false;
 				TabTextures.delete_texture(Context.raw.texture);
 			}
@@ -258,7 +258,7 @@ class TabTextures {
 			UIBase.hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 			///end
 		}
-		Base.notify_on_next_frame(_next);
+		base_notify_on_next_frame(_next);
 
 		for (let m of Project.materials) TabTextures.update_texture_pointers(m.canvas.nodes, i);
 		///if (is_paint || is_sculpt)

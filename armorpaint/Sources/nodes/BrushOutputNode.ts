@@ -1,7 +1,7 @@
 
 class BrushOutputNode extends LogicNode {
 
-	Directional = false; // button 0
+	Directional: bool = false; // button 0
 
 	constructor() {
 		super();
@@ -10,8 +10,8 @@ class BrushOutputNode extends LogicNode {
 	}
 
 	parse_inputs = () => {
-		let lastMask = Context.raw.brush_mask_image;
-		let lastStencil = Context.raw.brush_stencil_image;
+		let last_mask: image_t = Context.raw.brush_mask_image;
+		let last_stencil: image_t = Context.raw.brush_stencil_image;
 
 		let input0: any;
 		let input1: any;
@@ -44,8 +44,8 @@ class BrushOutputNode extends LogicNode {
 			Context.raw.brush_mask_image_is_alpha = opac.endsWith(".a");
 			opac = opac.substr(0, opac.lastIndexOf("."));
 			Context.raw.brush_nodes_opacity = 1.0;
-			let index = Project.asset_names.indexOf(opac);
-			let asset = Project.assets[index];
+			let index: i32 = Project.asset_names.indexOf(opac);
+			let asset: asset_t = Project.assets[index];
 			Context.raw.brush_mask_image = Project.get_image(asset);
 		}
 		else {
@@ -60,16 +60,16 @@ class BrushOutputNode extends LogicNode {
 		if (typeof stencil == "string") {
 			Context.raw.brush_stencil_image_is_alpha = stencil.endsWith(".a");
 			stencil = stencil.substr(0, stencil.lastIndexOf("."));
-			let index = Project.asset_names.indexOf(stencil);
-			let asset = Project.assets[index];
+			let index: i32 = Project.asset_names.indexOf(stencil);
+			let asset: asset_t = Project.assets[index];
 			Context.raw.brush_stencil_image = Project.get_image(asset);
 		}
 		else {
 			Context.raw.brush_stencil_image = null;
 		}
 
-		if (lastMask != Context.raw.brush_mask_image ||
-			lastStencil != Context.raw.brush_stencil_image) {
+		if (last_mask != Context.raw.brush_mask_image ||
+			last_stencil != Context.raw.brush_stencil_image) {
 			MakeMaterial.parse_paint_material();
 		}
 
@@ -77,11 +77,11 @@ class BrushOutputNode extends LogicNode {
 	}
 
 	run = (from: i32) => {
-		let left = 0.0;
-		let right = 1.0;
+		let left: f32 = 0.0;
+		let right: f32 = 1.0;
 		if (Context.raw.paint2d) {
 			left = 1.0;
-			right = (Context.raw.split_view ? 2.0 : 1.0) + UIView2D.ww / Base.w();
+			right = (Context.raw.split_view ? 2.0 : 1.0) + UIView2D.ww / base_w();
 		}
 
 		// First time init
@@ -91,36 +91,36 @@ class BrushOutputNode extends LogicNode {
 		}
 
 		// Do not paint over fill layer
-		let fillLayer = Context.raw.layer.fill_layer != null && Context.raw.tool != workspace_tool_t.PICKER && Context.raw.tool != workspace_tool_t.MATERIAL && Context.raw.tool != workspace_tool_t.COLORID;
+		let fill_layer: bool = Context.raw.layer.fill_layer != null && Context.raw.tool != workspace_tool_t.PICKER && Context.raw.tool != workspace_tool_t.MATERIAL && Context.raw.tool != workspace_tool_t.COLORID;
 
 		// Do not paint over groups
-		let groupLayer = SlotLayer.is_group(Context.raw.layer);
+		let group_layer: bool = SlotLayer.is_group(Context.raw.layer);
 
 		// Paint bounds
 		if (Context.raw.paint_vec.x > left &&
 			Context.raw.paint_vec.x < right &&
 			Context.raw.paint_vec.y > 0 &&
 			Context.raw.paint_vec.y < 1 &&
-			!fillLayer &&
-			!groupLayer &&
+			!fill_layer &&
+			!group_layer &&
 			(SlotLayer.is_visible(Context.raw.layer) || Context.raw.paint2d) &&
 			!UIBase.ui.is_hovered &&
-			!Base.is_dragging &&
-			!Base.is_resizing &&
-			!Base.is_scrolling() &&
-			!Base.is_combo_selected()) {
+			!base_is_dragging &&
+			!base_is_resizing &&
+			!base_is_scrolling() &&
+			!base_is_combo_selected()) {
 
 			// Set color pick
-			let down = mouse_down() || pen_down();
+			let down: bool = mouse_down() || pen_down();
 			if (down && Context.raw.tool == workspace_tool_t.COLORID && Project.assets.length > 0) {
 				Context.raw.colorid_picked = true;
 				UIToolbar.toolbar_handle.redraws = 1;
 			}
 
 			// Prevent painting the same spot
-			let sameSpot = Context.raw.paint_vec.x == Context.raw.last_paint_x && Context.raw.paint_vec.y == Context.raw.last_paint_y;
-			let lazy = Context.raw.tool == workspace_tool_t.BRUSH && Context.raw.brush_lazy_radius > 0;
-			if (down && (sameSpot || lazy)) {
+			let same_spot: bool = Context.raw.paint_vec.x == Context.raw.last_paint_x && Context.raw.paint_vec.y == Context.raw.last_paint_y;
+			let lazy: bool = Context.raw.tool == workspace_tool_t.BRUSH && Context.raw.brush_lazy_radius > 0;
+			if (down && (same_spot || lazy)) {
 				Context.raw.painted++;
 			}
 			else {

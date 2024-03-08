@@ -45,7 +45,7 @@ class TextToPhotoNode extends LogicNode {
 
 	static textEncoder = (prompt: string, inpaintLatents: Float32Array, done: (a: Float32Array, b: Float32Array)=>void) => {
 		Console.progress(tr("Processing") + " - " + tr("Text to Photo"));
-		Base.notifyOnNextFrame(() => {
+		base_notifyOnNextFrame(() => {
 			let words = prompt.replaceAll("\n", " ").replaceAll(",", " , ").replaceAll("  ", " ").trim().split(" ");
 			for (let i = 0; i < words.length; ++i) {
 				TextToPhotoNode.text_input_ids[i + 1] = TextToPhotoNode.vocab[words[i].toLowerCase() + "</w>"];
@@ -194,7 +194,7 @@ class TextToPhotoNode extends LogicNode {
 
 	static vaeDecoder = (latents: Float32Array, upscale: bool, done: (img: image_t)=>void) => {
 		Console.progress(tr("Processing") + " - " + tr("Text to Photo"));
-		Base.notifyOnNextFrame(() => {
+		base_notifyOnNextFrame(() => {
 			for (let i = 0; i < latents.length; ++i) {
 				latents[i] = 1.0 / 0.18215 * latents[i];
 			}

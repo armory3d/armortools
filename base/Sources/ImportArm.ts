@@ -22,16 +22,16 @@ class ImportArm {
 			return;
 		}
 
-		let importAsMesh: bool = project.version == null;
+		let import_as_mesh: bool = project.version == null;
 		Context.raw.layers_preview_dirty = true;
 		Context.raw.layer_filter = 0;
 		///end
 
 		///if is_lab
-		let importAsMesh: bool = true;
+		let import_as_mesh: bool = true;
 		///end
 
-		Project.project_new(importAsMesh);
+		Project.project_new(import_as_mesh);
 		Project.filepath = path;
 		UIFiles.filename = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
 		///if (krom_android || krom_ios)
@@ -42,7 +42,7 @@ class ImportArm {
 
 		///if (is_paint || is_sculpt)
 		// Import as mesh instead
-		if (importAsMesh) {
+		if (import_as_mesh) {
 			ImportArm.run_mesh(project);
 			return;
 		}
@@ -63,10 +63,10 @@ class ImportArm {
 
 		///if (is_paint || is_sculpt)
 		let l0: layer_data_t = project.layer_datas[0];
-		Base.res_handle.position = Config.get_texture_res_pos(l0.res);
-		let bitsPos: texture_bits_t = l0.bpp == 8 ? texture_bits_t.BITS8 : l0.bpp == 16 ? texture_bits_t.BITS16 : texture_bits_t.BITS32;
-		Base.bits_handle.position = bitsPos;
-		let bytesPerPixel: i32 = Math.floor(l0.bpp / 8);
+		base_res_handle.position = Config.get_texture_res_pos(l0.res);
+		let bits_pos: texture_bits_t = l0.bpp == 8 ? texture_bits_t.BITS8 : l0.bpp == 16 ? texture_bits_t.BITS16 : texture_bits_t.BITS32;
+		base_bits_handle.position = bits_pos;
+		let bytes_per_pixel: i32 = Math.floor(l0.bpp / 8);
 		let format: tex_format_t = l0.bpp == 8 ? tex_format_t.RGBA32 : l0.bpp == 16 ? tex_format_t.RGBA64 : tex_format_t.RGBA128;
 		///end
 
@@ -103,8 +103,8 @@ class ImportArm {
 			if (data_cached_images.get(abs) == null && !File.exists(abs)) {
 				ImportArm.make_pink(abs);
 			}
-			let hdrAsEnvmap: bool = abs.endsWith(".hdr") && Project.raw.envmap == abs;
-			ImportTexture.run(abs, hdrAsEnvmap);
+			let hdr_as_envmap: bool = abs.endsWith(".hdr") && Project.raw.envmap == abs;
+			ImportTexture.run(abs, hdr_as_envmap);
 		}
 
 		///if (is_paint || is_sculpt)
@@ -174,14 +174,14 @@ class ImportArm {
 			if (History.undo_layers != null) for (let l of History.undo_layers) SlotLayer.resize_and_set_bits(l);
 			let rts: map_t<string, render_target_t> = render_path_render_targets;
 			let _texpaint_blend0: image_t = rts.get("texpaint_blend0")._image;
-			Base.notify_on_next_frame(() => {
+			base_notify_on_next_frame(() => {
 				image_unload(_texpaint_blend0);
 			});
 			rts.get("texpaint_blend0").width = Config.get_texture_res_x();
 			rts.get("texpaint_blend0").height = Config.get_texture_res_y();
 			rts.get("texpaint_blend0")._image = image_create_render_target(Config.get_texture_res_x(), Config.get_texture_res_y(), tex_format_t.R8, depth_format_t.NO_DEPTH);
 			let _texpaint_blend1: image_t = rts.get("texpaint_blend1")._image;
-			Base.notify_on_next_frame(() => {
+			base_notify_on_next_frame(() => {
 				image_unload(_texpaint_blend1);
 			});
 			rts.get("texpaint_blend1").width = Config.get_texture_res_x();
@@ -194,22 +194,22 @@ class ImportArm {
 		Project.layers = [];
 		for (let i: i32 = 0; i < project.layer_datas.length; ++i) {
 			let ld: layer_data_t = project.layer_datas[i];
-			let isGroup: bool = ld.texpaint == null;
+			let is_group: bool = ld.texpaint == null;
 
 			///if is_paint
-			let isMask: bool = ld.texpaint != null && ld.texpaint_nor == null;
+			let is_mask: bool = ld.texpaint != null && ld.texpaint_nor == null;
 			///end
 			///if is_sculpt
-			let isMask: bool = false;
+			let is_mask: bool = false;
 			///end
 
-			let l: SlotLayerRaw = SlotLayer.create("", isGroup ? layer_slot_type_t.GROUP : isMask ? layer_slot_type_t.MASK : layer_slot_type_t.LAYER);
+			let l: SlotLayerRaw = SlotLayer.create("", is_group ? layer_slot_type_t.GROUP : is_mask ? layer_slot_type_t.MASK : layer_slot_type_t.LAYER);
 			if (ld.name != null) l.name = ld.name;
 			l.visible = ld.visible;
 			Project.layers.push(l);
 
-			if (!isGroup) {
-				if (Base.pipe_merge == null) Base.make_pipe();
+			if (!is_group) {
+				if (base_pipe_merge == null) base_make_pipe();
 
 				let _texpaint: image_t = null;
 
@@ -218,35 +218,35 @@ class ImportArm {
 				let _texpaint_pack: image_t = null;
 				///end
 
-				if (isMask) {
+				if (is_mask) {
 					_texpaint = image_from_bytes(lz4_decode(ld.texpaint, ld.res * ld.res * 4), ld.res, ld.res, tex_format_t.RGBA32);
 					g2_begin(l.texpaint);
-					// g2_set_pipeline(Base.pipeCopy8);
-					g2_set_pipeline(project.is_bgra ? Base.pipe_copyBGRA : Base.pipe_copy); // Full bits for undo support, R8 is used
+					// g2_set_pipeline(base_pipe_copy8);
+					g2_set_pipeline(project.is_bgra ? base_pipe_copy_bgra : base_pipe_copy); // Full bits for undo support, R8 is used
 					g2_draw_image(_texpaint, 0, 0);
 					g2_set_pipeline(null);
 					g2_end();
 				}
 				else { // Layer
 					// TODO: create render target from bytes
-					_texpaint = image_from_bytes(lz4_decode(ld.texpaint, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
+					_texpaint = image_from_bytes(lz4_decode(ld.texpaint, ld.res * ld.res * 4 * bytes_per_pixel), ld.res, ld.res, format);
 					g2_begin(l.texpaint);
-					g2_set_pipeline(project.is_bgra ? Base.pipe_copyBGRA : Base.pipe_copy);
+					g2_set_pipeline(project.is_bgra ? base_pipe_copy_bgra : base_pipe_copy);
 					g2_draw_image(_texpaint, 0, 0);
 					g2_set_pipeline(null);
 					g2_end();
 
 					///if is_paint
-					_texpaint_nor = image_from_bytes(lz4_decode(ld.texpaint_nor, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
+					_texpaint_nor = image_from_bytes(lz4_decode(ld.texpaint_nor, ld.res * ld.res * 4 * bytes_per_pixel), ld.res, ld.res, format);
 					g2_begin(l.texpaint_nor);
-					g2_set_pipeline(project.is_bgra ? Base.pipe_copyBGRA : Base.pipe_copy);
+					g2_set_pipeline(project.is_bgra ? base_pipe_copy_bgra : base_pipe_copy);
 					g2_draw_image(_texpaint_nor, 0, 0);
 					g2_set_pipeline(null);
 					g2_end();
 
-					_texpaint_pack = image_from_bytes(lz4_decode(ld.texpaint_pack, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
+					_texpaint_pack = image_from_bytes(lz4_decode(ld.texpaint_pack, ld.res * ld.res * 4 * bytes_per_pixel), ld.res, ld.res, format);
 					g2_begin(l.texpaint_pack);
-					g2_set_pipeline(project.is_bgra ? Base.pipe_copyBGRA : Base.pipe_copy);
+					g2_set_pipeline(project.is_bgra ? base_pipe_copy_bgra : base_pipe_copy);
 					g2_draw_image(_texpaint_pack, 0, 0);
 					g2_set_pipeline(null);
 					g2_end();
@@ -255,27 +255,27 @@ class ImportArm {
 
 				l.scale = ld.uv_scale;
 				l.angle = ld.uv_rot;
-				l.uvType = ld.uv_type;
-				if (ld.decal_mat != null) l.decalMat = mat4_from_f32_array(ld.decal_mat);
-				l.maskOpacity = ld.opacity_mask;
-				l.objectMask = ld.object_mask;
+				l.uv_type = ld.uv_type;
+				if (ld.decal_mat != null) l.decal_mat = mat4_from_f32_array(ld.decal_mat);
+				l.mask_opacity = ld.opacity_mask;
+				l.object_mask = ld.object_mask;
 				l.blending = ld.blending;
 
 				///if is_paint
-				l.paintBase = ld.paint_base;
-				l.paintOpac = ld.paint_opac;
-				l.paintOcc = ld.paint_occ;
-				l.paintRough = ld.paint_rough;
-				l.paintMet = ld.paint_met;
-				l.paintNor = ld.paint_nor;
-				l.paintNorBlend = ld.paint_nor_blend != null ? ld.paint_nor_blend : true; // TODO: deprecated
-				l.paintHeight = ld.paint_height;
-				l.paintHeightBlend = ld.paint_height_blend != null ? ld.paint_height_blend : true; // TODO: deprecated
-				l.paintEmis = ld.paint_emis;
-				l.paintSubs = ld.paint_subs;
+				l.paint_base = ld.paint_base;
+				l.paint_opac = ld.paint_opac;
+				l.paint_occ = ld.paint_occ;
+				l.paint_rough = ld.paint_rough;
+				l.paint_met = ld.paint_met;
+				l.paint_nor = ld.paint_nor;
+				l.paint_nor_blend = ld.paint_nor_blend != null ? ld.paint_nor_blend : true; // TODO: deprecated
+				l.paint_height = ld.paint_height;
+				l.paint_height_blend = ld.paint_height_blend != null ? ld.paint_height_blend : true; // TODO: deprecated
+				l.paint_emis = ld.paint_emis;
+				l.paint_subs = ld.paint_subs;
 				///end
 
-				Base.notify_on_next_frame(() => {
+				base_notify_on_next_frame(() => {
 					image_unload(_texpaint);
 					///if is_paint
 					if (_texpaint_nor != null) image_unload(_texpaint_nor);
@@ -333,8 +333,8 @@ class ImportArm {
 		for (let i: i32 = 0; i < project.layer_datas.length; ++i) {
 			let ld: layer_data_t = project.layer_datas[i];
 			let l: SlotLayerRaw = Project.layers[i];
-			let isGroup: bool = ld.texpaint == null;
-			if (!isGroup) {
+			let is_group: bool = ld.texpaint == null;
+			if (!is_group) {
 				l.fill_layer = ld.fill_layer > -1 ? Project.materials[ld.fill_layer] : null;
 			}
 		}
@@ -377,7 +377,7 @@ class ImportArm {
 			UtilMesh.merge_mesh();
 			Viewport.scale_to_bounds();
 		}
-		app_notify_on_init(Base.init_layers);
+		app_notify_on_init(base_init_layers);
 		History.reset();
 	}
 
@@ -559,7 +559,7 @@ class ImportArm {
 	static init_nodes = (nodes: zui_node_t[]) => {
 		for (let node of nodes) {
 			if (node.type == ImportArm.texture_node_name()) {
-				node.buttons[0].default_value = Base.get_asset_index(node.buttons[0].data);
+				node.buttons[0].default_value = base_get_asset_index(node.buttons[0].data);
 				node.buttons[0].data = "";
 			}
 		}

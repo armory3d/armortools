@@ -49,7 +49,7 @@ class UIToolbar {
 			let col: i32 = ui.t.WINDOW_BG_COL;
 			if (col < 0) col += 4294967296;
 			let light: bool = col > (0xff666666 + 4294967296);
-			let iconAccent: i32 = light ? 0xff666666 : -1;
+			let icon_accent: i32 = light ? 0xff666666 : -1;
 
 			// Properties icon
 			if (Config.raw.layout[layout_size_t.HEADER] == 1) {
@@ -67,8 +67,8 @@ class UIToolbar {
 				ui.t.ELEMENT_H = Math.floor(ui.t.ELEMENT_H * 1.5);
 				ui.t.BUTTON_H = ui.t.ELEMENT_H;
 				ui.t.BUTTON_COL = ui.t.WINDOW_BG_COL;
-				let fontHeight: i32 = g2_font_height(ui.font, ui.font_size);
-				ui.font_offset_y = (zui_ELEMENT_H(ui) - fontHeight) / 2;
+				let font_height: i32 = g2_font_height(ui.font, ui.font_size);
+				ui.font_offset_y = (zui_ELEMENT_H(ui) - font_height) / 2;
 				let _w: i32 = ui._w;
 				ui._w = UIToolbar.toolbar_w;
 
@@ -102,19 +102,19 @@ class UIToolbar {
 				"(" + Config.keymap.tool_material + ")",
 			];
 
-			let drawTool = (i: i32) => {
+			let draw_tool = (i: i32) => {
 				ui._x += 2;
 				if (Context.raw.tool == i) UIToolbar.draw_highlight();
-				let tileY: i32 = Math.floor(i / 12);
-				let tileX: i32 = tileY % 2 == 0 ? i % 12 : (11 - (i % 12));
-				let rect: rect_t = Res.tile50(img, tileX, tileY);
+				let tile_y: i32 = Math.floor(i / 12);
+				let tile_x: i32 = tile_y % 2 == 0 ? i % 12 : (11 - (i % 12));
+				let rect: rect_t = Res.tile50(img, tile_x, tile_y);
 				let _y: i32 = ui._y;
 
-				let imageState: zui_state_t = zui_image(img, iconAccent, -1.0, rect.x, rect.y, rect.w, rect.h);
-				if (imageState == zui_state_t.STARTED) {
+				let image_state: zui_state_t = zui_image(img, icon_accent, -1.0, rect.x, rect.y, rect.w, rect.h);
+				if (image_state == zui_state_t.STARTED) {
 					Context.select_tool(i);
 				}
-				else if (imageState == zui_state_t.RELEASED && Config.raw.layout[layout_size_t.HEADER] == 0) {
+				else if (image_state == zui_state_t.RELEASED && Config.raw.layout[layout_size_t.HEADER] == 0) {
 					if (UIToolbar.last_tool == i) {
 						UIToolbar.tool_properties_menu();
 					}
@@ -132,24 +132,24 @@ class UIToolbar {
 				ui._y += 2;
 			}
 
-			drawTool(workspace_tool_t.BRUSH);
+			draw_tool(workspace_tool_t.BRUSH);
 			///if is_paint
-			drawTool(workspace_tool_t.ERASER);
-			drawTool(workspace_tool_t.FILL);
-			drawTool(workspace_tool_t.DECAL);
-			drawTool(workspace_tool_t.TEXT);
-			drawTool(workspace_tool_t.CLONE);
-			drawTool(workspace_tool_t.BLUR);
-			drawTool(workspace_tool_t.SMUDGE);
-			drawTool(workspace_tool_t.PARTICLE);
-			drawTool(workspace_tool_t.COLORID);
-			drawTool(workspace_tool_t.PICKER);
-			drawTool(workspace_tool_t.BAKE);
-			drawTool(workspace_tool_t.MATERIAL);
+			draw_tool(workspace_tool_t.ERASER);
+			draw_tool(workspace_tool_t.FILL);
+			draw_tool(workspace_tool_t.DECAL);
+			draw_tool(workspace_tool_t.TEXT);
+			draw_tool(workspace_tool_t.CLONE);
+			draw_tool(workspace_tool_t.BLUR);
+			draw_tool(workspace_tool_t.SMUDGE);
+			draw_tool(workspace_tool_t.PARTICLE);
+			draw_tool(workspace_tool_t.COLORID);
+			draw_tool(workspace_tool_t.PICKER);
+			draw_tool(workspace_tool_t.BAKE);
+			draw_tool(workspace_tool_t.MATERIAL);
 			///end
 
 			///if is_forge
-			drawTool(workspace_tool_t.GIZMO);
+			draw_tool(workspace_tool_t.GIZMO);
 			///end
 
 			ui.image_scroll_align = true;
@@ -170,7 +170,7 @@ class UIToolbar {
 		let _y: i32 = ui._y;
 		let _w: i32 = ui._w;
 		UIMenu.draw((ui: zui_t) => {
-			let startY: i32 = ui._y;
+			let start_y: i32 = ui._y;
 			ui.changed = false;
 
 			UIHeader.draw_tool_properties(ui);
@@ -183,7 +183,7 @@ class UIToolbar {
 				Config.raw.layout[layout_size_t.HEADER] = 1;
 			}
 
-			let h: i32 = ui._y - startY;
+			let h: i32 = ui._y - start_y;
 			UIMenu.menu_elements = Math.floor(h / zui_ELEMENT_H(ui));
 			UIMenu.menu_x = Math.floor(_x + _w + 2);
 			UIMenu.menu_y = Math.floor(_y - 6 * zui_SCALE(ui));

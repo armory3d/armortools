@@ -23,12 +23,12 @@ class MakeBake {
 			NodeShader.add_uniform(frag, 'sampler3D voxels');
 			NodeShader.add_function(frag, ShaderFunctions.str_trace_ao);
 			frag.n = true;
-			let strength = Context.raw.bake_ao_strength;
-			let radius = Context.raw.bake_ao_radius;
-			let offset = Context.raw.bake_ao_offset;
+			let strength: f32 = Context.raw.bake_ao_strength;
+			let radius: f32 = Context.raw.bake_ao_radius;
+			let offset: f32 = Context.raw.bake_ao_offset;
 			NodeShader.write(frag, `float ao = traceAO(voxpos, n, ${radius}, ${offset}) * ${strength};`);
 			if (Context.raw.bake_axis != bake_axis_t.XYZ) {
-				let axis = MakeBake.axis_string(Context.raw.bake_axis);
+				let axis: string = MakeBake.axis_string(Context.raw.bake_axis);
 				NodeShader.write(frag, `ao *= dot(n, ${axis});`);
 			}
 			NodeShader.write(frag, 'ao = 1.0 - ao;');
@@ -36,10 +36,10 @@ class MakeBake {
 			///end
 		}
 		else if (Context.raw.bake_type == bake_type_t.CURVATURE) {
-			let pass = ParserMaterial.bake_passthrough;
-			let strength = pass ? ParserMaterial.bake_passthrough_strength : Context.raw.bake_curv_strength + "";
-			let radius = pass ? ParserMaterial.bake_passthrough_radius : Context.raw.bake_curv_radius + "";
-			let offset = pass ? ParserMaterial.bake_passthrough_offset : Context.raw.bake_curv_offset + "";
+			let pass: bool = ParserMaterial.bake_passthrough;
+			let strength: string = pass ? ParserMaterial.bake_passthrough_strength : Context.raw.bake_curv_strength + "";
+			let radius: string = pass ? ParserMaterial.bake_passthrough_radius : Context.raw.bake_curv_radius + "";
+			let offset: string = pass ? ParserMaterial.bake_passthrough_offset : Context.raw.bake_curv_offset + "";
 			strength = `float(${strength})`;
 			radius = `float(${radius})`;
 			offset = `float(${offset})`;
@@ -49,7 +49,7 @@ class MakeBake {
 			NodeShader.write(frag, 'float curvature = max(dot(dx, dx), dot(dy, dy));');
 			NodeShader.write(frag, 'curvature = clamp(pow(curvature, (1.0 / ' + radius + ') * 0.25) * ' + strength + ' * 2.0 + ' + offset + ' / 10.0, 0.0, 1.0);');
 			if (Context.raw.bake_axis != bake_axis_t.XYZ) {
-				let axis = MakeBake.axis_string(Context.raw.bake_axis);
+				let axis: string = MakeBake.axis_string(Context.raw.bake_axis);
 				NodeShader.write(frag, `curvature *= dot(n, ${axis});`);
 			}
 			NodeShader.write(frag, 'fragColor[0] = vec4(curvature, curvature, curvature, 1.0);');

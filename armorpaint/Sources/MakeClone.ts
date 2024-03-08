@@ -10,13 +10,13 @@ class MakeClone {
 		///end
 
 		NodeShader.write(frag, 'vec3 texpaint_pack_sample = textureLod(texpaint_pack_undo, texCoordInp, 0.0).rgb;');
-		let base = 'textureLod(texpaint_undo, texCoordInp, 0.0).rgb';
-		let rough = 'texpaint_pack_sample.g';
-		let met = 'texpaint_pack_sample.b';
-		let occ = 'texpaint_pack_sample.r';
-		let nortan = 'textureLod(texpaint_nor_undo, texCoordInp, 0.0).rgb';
-		let height = '0.0';
-		let opac = '1.0';
+		let base: string = 'textureLod(texpaint_undo, texCoordInp, 0.0).rgb';
+		let rough: string = 'texpaint_pack_sample.g';
+		let met: string = 'texpaint_pack_sample.b';
+		let occ: string = 'texpaint_pack_sample.r';
+		let nortan: string = 'textureLod(texpaint_nor_undo, texCoordInp, 0.0).rgb';
+		let height: string = '0.0';
+		let opac: string = '1.0';
 		NodeShader.write(frag, `vec3 basecol = ${base};`);
 		NodeShader.write(frag, `float roughness = ${rough};`);
 		NodeShader.write(frag, `float metallic = ${met};`);

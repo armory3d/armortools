@@ -44,7 +44,7 @@ class UIMenubar {
 					Console.toast(tr("Saving project"));
 					Project.project_save();
 					///end
-					Base.notify_on_next_frame(() => {
+					base_notify_on_next_frame(() => {
 						BoxProjects.show();
 					});
 				}
@@ -137,8 +137,8 @@ class UIMenubar {
 							scale_tex: mesh.scaleTex
 						};
 						let md: mesh_data_t = mesh_data_create(raw);
-						let dotPlane: mesh_object_t = scene_get_child(".Plane").ext;
-						UIMenubar._plane = mesh_object_create(md, dotPlane.materials);
+						let dot_plane: mesh_object_t = scene_get_child(".Plane").ext;
+						UIMenubar._plane = mesh_object_create(md, dot_plane.materials);
 						array_remove(scene_meshes, UIMenubar._plane);
 					}
 
@@ -167,10 +167,10 @@ class UIMenubar {
 		UIMenu.menu_x = Math.floor(ui._x - ui._w);
 		UIMenu.menu_y = Math.floor(zui_MENUBAR_H(ui));
 		if (Config.raw.touch_ui) {
-			let menuW: i32 = Math.floor(Base.default_element_w * zui_SCALE(Base.ui_menu) * 2.0);
+			let menuW: i32 = Math.floor(base_default_element_w * zui_SCALE(base_ui_menu) * 2.0);
 			UIMenu.menu_x -= Math.floor((menuW - ui._w) / 2) + Math.floor(UIHeader.headerh / 2);
-			UIMenu.menu_x += Math.floor(2 * zui_SCALE(Base.ui_menu));
-			UIMenu.menu_y -= Math.floor(2 * zui_SCALE(Base.ui_menu));
+			UIMenu.menu_x += Math.floor(2 * zui_SCALE(base_ui_menu));
+			UIMenu.menu_y -= Math.floor(2 * zui_SCALE(base_ui_menu));
 			UIMenu.keep_open = true;
 		}
 	}
@@ -179,9 +179,9 @@ class UIMenubar {
 		let col: i32 = ui.t.WINDOW_BG_COL;
 		if (col < 0) col += 4294967296;
 		let light: bool = col > (0xff666666 + 4294967296);
-		let iconAccent: i32 = light ? 0xff666666 : 0xffaaaaaa;
+		let icon_accent: i32 = light ? 0xff666666 : 0xffaaaaaa;
 		let img: image_t = Res.get("icons.k");
 		let rect: rect_t = Res.tile50(img, i, j);
-		return zui_image(img, iconAccent, -1.0, rect.x, rect.y, rect.w, rect.h) == zui_state_t.RELEASED;
+		return zui_image(img, icon_accent, -1.0, rect.x, rect.y, rect.w, rect.h) == zui_state_t.RELEASED;
 	}
 }

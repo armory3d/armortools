@@ -1,21 +1,21 @@
 
 class ParserLogic {
 
-	static customNodes: Map<any, any> = new Map();
+	static custom_nodes: Map<any, any> = new Map();
 	static nodes: zui_node_t[];
 	static links: zui_node_link_t[];
 
 	static parsed_nodes: string[] = null;
 	static parsed_labels: Map<string, string> = null;
-	static nodeMap: Map<string, LogicNode>;
-	static rawMap: Map<LogicNode, zui_node_t>;
+	static node_map: Map<string, LogicNode>;
+	static raw_map: Map<LogicNode, zui_node_t>;
 
 	static get_logic_node = (node: zui_node_t): LogicNode => {
-		return ParserLogic.nodeMap.get(ParserLogic.node_name(node));
+		return ParserLogic.node_map.get(ParserLogic.node_name(node));
 	}
 
 	static get_raw_node = (node: LogicNode): zui_node_t => {
-		return ParserLogic.rawMap.get(node);
+		return ParserLogic.raw_map.get(node);
 	}
 
 	static get_node = (id: i32): zui_node_t => {
@@ -66,8 +66,8 @@ class ParserLogic {
 
 		ParserLogic.parsed_nodes = [];
 		ParserLogic.parsed_labels = new Map();
-		ParserLogic.nodeMap = new Map();
-		ParserLogic.rawMap = new Map();
+		ParserLogic.node_map = new Map();
+		ParserLogic.raw_map = new Map();
 		let root_nodes: zui_node_t[] = ParserLogic.get_root_nodes(canvas);
 
 		for (let node of root_nodes) ParserLogic.build_node(node);
@@ -86,15 +86,15 @@ class ParserLogic {
 
 		// Create node
 		let v: any = ParserLogic.create_class_instance(node.type, []);
-		ParserLogic.nodeMap.set(name, v);
-		ParserLogic.rawMap.set(v, node);
+		ParserLogic.node_map.set(name, v);
+		ParserLogic.raw_map.set(v, node);
 
 		// Expose button values in node class
 		for (let b of node.buttons) {
 			if (b.type == "ENUM") {
 				// let arrayData: bool = Array.isArray(b.data);
-				let arrayData: bool = b.data.length > 1;
-				let texts: string[] = arrayData ? b.data : zui_enum_texts_js(node.type);
+				let array_data: bool = b.data.length > 1;
+				let texts: string[] = array_data ? b.data : zui_enum_texts_js(node.type);
 				v[b.name] = texts[b.default_value];
 			}
 			else {
@@ -110,7 +110,7 @@ class ParserLogic {
 			// Is linked - find node
 			let l: zui_node_link_t = ParserLogic.get_input_link(inp);
 			if (l != null) {
-				inp_node = ParserLogic.nodeMap.get(ParserLogic.build_node(ParserLogic.get_node(l.from_id)));
+				inp_node = ParserLogic.node_map.get(ParserLogic.build_node(ParserLogic.get_node(l.from_id)));
 				inp_from = l.from_socket;
 			}
 			// Not linked - create node with default values
@@ -124,21 +124,21 @@ class ParserLogic {
 
 		// Create outputss
 		for (let out of node.outputs) {
-			let outNodes: LogicNode[] = [];
+			let out_nodes: LogicNode[] = [];
 			let ls: zui_node_link_t[] = ParserLogic.get_output_links(out);
 			if (ls != null && ls.length > 0) {
 				for (let l of ls) {
 					let n: zui_node_t = ParserLogic.get_node(l.to_id);
 					let out_name: string = ParserLogic.build_node(n);
-					outNodes.push(ParserLogic.nodeMap.get(out_name));
+					out_nodes.push(ParserLogic.node_map.get(out_name));
 				}
 			}
 			// Not linked - create node with default values
 			else {
-				outNodes.push(ParserLogic.build_default_node(out));
+				out_nodes.push(ParserLogic.build_default_node(out));
 			}
 			// Add outputs
-			v.add_outputs(outNodes);
+			v.add_outputs(out_nodes);
 		}
 
 		return name;
@@ -196,9 +196,9 @@ class ParserLogic {
 	}
 
 	static create_class_instance = (className: string, args: any[]): any => {
-		if (ParserLogic.customNodes.get(className) != null) {
+		if (ParserLogic.custom_nodes.get(className) != null) {
 			let node: LogicNode = new LogicNode();
-			node.get = (from: i32) => { return ParserLogic.customNodes.get(className)(node, from); }
+			node.get = (from: i32) => { return ParserLogic.custom_nodes.get(className)(node, from); }
 			return node;
 		}
 		let dynamic_class: any = eval(`${className}`);

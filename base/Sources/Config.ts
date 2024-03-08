@@ -84,7 +84,7 @@ class Config {
 			Config.raw.rp_supersample = 1.0;
 			Config.raw.version = manifest_version;
 			Config.raw.sha = Config.get_sha();
-			Base.init_config();
+			base_init_config();
 		}
 		else {
 			// Upgrade config format created by older ArmorPaint build
@@ -102,7 +102,7 @@ class Config {
 		zui_set_touch_scroll(Config.raw.touch_ui);
 		zui_set_touch_hold(Config.raw.touch_ui);
 		zui_set_touch_tooltip(Config.raw.touch_ui);
-		Base.res_handle.position = Config.raw.layer_res;
+		base_res_handle.position = Config.raw.layer_res;
 		Config.load_keymap();
 	}
 
@@ -121,11 +121,11 @@ class Config {
 	}
 
 	static get_options = (): kinc_sys_ops_t => {
-		let windowMode: window_mode_t = Config.raw.window_mode == 0 ? window_mode_t.WINDOWED : window_mode_t.FULLSCREEN;
-		let windowFeatures: window_features_t = window_features_t.NONE;
-		if (Config.raw.window_resizable) windowFeatures |= window_features_t.RESIZABLE;
-		if (Config.raw.window_maximizable) windowFeatures |= window_features_t.MAXIMIZABLE;
-		if (Config.raw.window_minimizable) windowFeatures |= window_features_t.MINIMIZABLE;
+		let window_mode: window_mode_t = Config.raw.window_mode == 0 ? window_mode_t.WINDOWED : window_mode_t.FULLSCREEN;
+		let window_features: window_features_t = window_features_t.NONE;
+		if (Config.raw.window_resizable) window_features |= window_features_t.RESIZABLE;
+		if (Config.raw.window_maximizable) window_features |= window_features_t.MAXIMIZABLE;
+		if (Config.raw.window_minimizable) window_features |= window_features_t.MINIMIZABLE;
 		let title: string = "untitled - " + manifest_title;
 		return {
 			title: title,
@@ -133,8 +133,8 @@ class Config {
 			height: Config.raw.window_h,
 			x: Config.raw.window_x,
 			y: Config.raw.window_y,
-			mode: windowMode,
-			features: windowFeatures,
+			mode: window_mode,
+			features: window_features,
 			vsync: Config.raw.window_vsync,
 			frequency: Config.raw.window_frequency
 		};
@@ -146,7 +146,7 @@ class Config {
 		let _layout: i32[] = Config.raw.layout;
 		Config.init();
 		Config.raw.layout = _layout;
-		Base.init_layout();
+		base_init_layout();
 		Translator.load_translations(Config.raw.locale);
 		Config.apply_config();
 		Config.load_theme(Config.raw.theme);
@@ -160,7 +160,7 @@ class Config {
 		Config.raw.version = _version;
 		zui_children = new Map(); // Reset ui handles
 		Config.load_keymap();
-		Base.init_layout();
+		base_init_layout();
 		Translator.load_translations(Config.raw.locale);
 		Config.apply_config();
 		Config.load_theme(Config.raw.theme);
@@ -183,16 +183,16 @@ class Config {
 
 	static load_keymap = () => {
 		if (Config.raw.keymap == "default.json") { // Built-in default
-			Config.keymap = Base.default_keymap;
+			Config.keymap = base_default_keymap;
 		}
 		else {
 			let blob: ArrayBuffer = data_get_blob("keymap_presets/" + Config.raw.keymap);
 			Config.keymap = JSON.parse(sys_buffer_to_string(blob));
 			// Fill in undefined keys with defaults
-			for (let field in Base.default_keymap) {
+			for (let field in base_default_keymap) {
 				if (!(field in Config.keymap)) {
-					let adefaultKeymap: any = Base.default_keymap;
-					Config.keymap[field] = adefaultKeymap[field];
+					let adefault_keymap: any = base_default_keymap;
+					Config.keymap[field] = adefault_keymap[field];
 				}
 			}
 		}
@@ -222,7 +222,7 @@ class Config {
 	}
 
 	static get_texture_res = (): i32 => {
-		let res: i32 = Base.res_handle.position;
+		let res: i32 = base_res_handle.position;
 		return res == texture_res_t.RES128 ? 128 :
 			   res == texture_res_t.RES256 ? 256 :
 			   res == texture_res_t.RES512 ? 512 :
@@ -254,39 +254,39 @@ class Config {
 
 	static load_theme = (theme: string, tagRedraw: bool = true) => {
 		if (theme == "default.json") { // Built-in default
-			Base.theme = zui_theme_create();
+			base_theme = zui_theme_create();
 		}
 		else {
 			let b: ArrayBuffer = data_get_blob("themes/" + theme);
 			let parsed: any = JSON.parse(sys_buffer_to_string(b));
-			Base.theme = zui_theme_create();
-			for (let key in Base.theme) {
+			base_theme = zui_theme_create();
+			for (let key in base_theme) {
 				if (key == "theme_") continue;
 				if (key.startsWith("set_")) continue;
 				if (key.startsWith("get_")) key = key.substr(4);
-				let atheme: any = Base.theme;
+				let atheme: any = base_theme;
 				atheme[key] = parsed[key];
 			}
 		}
-		Base.theme.FILL_WINDOW_BG = true;
+		base_theme.FILL_WINDOW_BG = true;
 		if (tagRedraw) {
-			for (let ui of Base.get_uis()) ui.t = Base.theme;
+			for (let ui of base_get_uis()) ui.t = base_theme;
 			UIBase.tag_ui_redraw();
 		}
 		if (Config.raw.touch_ui) {
 			// Enlarge elements
-			Base.theme.FULL_TABS = true;
-			Base.theme.ELEMENT_H = 24 + 6;
-			Base.theme.BUTTON_H = 22 + 6;
-			Base.theme.FONT_SIZE = 13 + 2;
-			Base.theme.ARROW_SIZE = 5 + 2;
-			Base.theme.CHECK_SIZE = 15 + 4;
-			Base.theme.CHECK_SELECT_SIZE = 8 + 2;
+			base_theme.FULL_TABS = true;
+			base_theme.ELEMENT_H = 24 + 6;
+			base_theme.BUTTON_H = 22 + 6;
+			base_theme.FONT_SIZE = 13 + 2;
+			base_theme.ARROW_SIZE = 5 + 2;
+			base_theme.CHECK_SIZE = 15 + 4;
+			base_theme.CHECK_SELECT_SIZE = 8 + 2;
 			Config.button_align = zui_align_t.LEFT;
 			Config.button_spacing = "";
 		}
 		else {
-			Base.theme.FULL_TABS = false;
+			base_theme.FULL_TABS = false;
 			Config.button_align = zui_align_t.LEFT;
 			Config.button_spacing = Config.default_button_spacing;
 		}

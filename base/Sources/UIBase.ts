@@ -135,7 +135,7 @@ class UIBase {
 
 		if (Project.fonts == null) {
 			Project.fonts = [];
-			Project.fonts.push(SlotFont.create("default.ttf", Base.font));
+			Project.fonts.push(SlotFont.create("default.ttf", base_font));
 			Context.raw.font = Project.fonts[0];
 		}
 
@@ -201,7 +201,7 @@ class UIBase {
 		History.reset();
 
 		let scale: f32 = Config.raw.window_scale;
-		UIBase.ui = zui_create({ theme: Base.theme, font: Base.font, scale_factor: scale, color_wheel: Base.color_wheel, black_white_gradient: Base.color_wheel_gradient });
+		UIBase.ui = zui_create({ theme: base_theme, font: base_font, scale_factor: scale, color_wheel: base_color_wheel, black_white_gradient: base_color_wheel_gradient });
 		zui_set_on_border_hover(UIBase.on_border_hover);
 		zui_set_on_text_hover(UIBase.on_text_hover);
 		zui_set_on_deselect_text(UIBase.on_deselect_text);
@@ -235,7 +235,7 @@ class UIBase {
 		Project.paint_objects = [Context.raw.paint_object];
 
 		if (Project.filepath == "") {
-			app_notify_on_init(Base.init_layers);
+			app_notify_on_init(base_init_layers);
 		}
 
 		Context.raw.project_objects = [];
@@ -250,7 +250,7 @@ class UIBase {
 
 		for (let p of Plugin.plugins.values()) if (p.update != null) p.update();
 
-		if (!Base.ui_enabled) return;
+		if (!base_ui_enabled) return;
 
 		if (!UINodes.ui.is_typing && !UIBase.ui.is_typing) {
 			if (Operator.shortcut(Config.keymap.toggle_node_editor)) {
@@ -313,19 +313,19 @@ class UIBase {
 
 		///if krom_linux
 		if (Operator.shortcut("alt+enter", ShortcutType.ShortcutStarted)) {
-			Base.toggle_fullscreen();
+			base_toggle_fullscreen();
 		}
 		///end
 
 		///if (is_paint || is_sculpt)
 		let decal: bool = Context.raw.tool == workspace_tool_t.DECAL || Context.raw.tool == workspace_tool_t.TEXT;
-		let decalMask: bool = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutType.ShortcutDown);
+		let decal_mask: bool = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutType.ShortcutDown);
 
 		if ((Context.raw.brush_can_lock || Context.raw.brush_locked) && mouse_moved) {
 			if (Operator.shortcut(Config.keymap.brush_radius, ShortcutType.ShortcutDown) ||
 				Operator.shortcut(Config.keymap.brush_opacity, ShortcutType.ShortcutDown) ||
 				Operator.shortcut(Config.keymap.brush_angle, ShortcutType.ShortcutDown) ||
-				(decalMask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius, ShortcutType.ShortcutDown))) {
+				(decal_mask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius, ShortcutType.ShortcutDown))) {
 				if (Context.raw.brush_locked) {
 					if (Operator.shortcut(Config.keymap.brush_opacity, ShortcutType.ShortcutDown)) {
 						Context.raw.brush_opacity += mouse_movement_x / 500;
@@ -340,7 +340,7 @@ class UIBase {
 						Context.raw.brush_angle_handle.value = Context.raw.brush_angle;
 						MakeMaterial.parse_paint_material();
 					}
-					else if (decalMask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius, ShortcutType.ShortcutDown)) {
+					else if (decal_mask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius, ShortcutType.ShortcutDown)) {
 						Context.raw.brush_decal_mask_radius += mouse_movement_x / 150;
 						Context.raw.brush_decal_mask_radius = Math.max(0.01, Math.min(4.0, Context.raw.brush_decal_mask_radius));
 						Context.raw.brush_decal_mask_radius = Math.round(Context.raw.brush_decal_mask_radius * 100) / 100;
@@ -380,10 +380,10 @@ class UIBase {
 		}
 		///end
 
-		let isTyping: bool = UIBase.ui.is_typing || UIView2D.ui.is_typing || UINodes.ui.is_typing;
+		let is_typing: bool = UIBase.ui.is_typing || UIView2D.ui.is_typing || UINodes.ui.is_typing;
 
 		///if (is_paint || is_sculpt)
-		if (!isTyping) {
+		if (!is_typing) {
 			if (Operator.shortcut(Config.keymap.select_material, ShortcutType.ShortcutDown)) {
 				UIBase.hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 				for (let i: i32 = 1; i < 10; ++i) if (keyboard_started(i + "")) Context.select_material(i - 1);
@@ -396,7 +396,7 @@ class UIBase {
 		///end
 
 		// Viewport shortcuts
-		if (Context.in_paint_area() && !isTyping) {
+		if (Context.in_paint_area() && !is_typing) {
 
 			///if is_paint
 			if (!mouse_down("right")) { // Fly mode off
@@ -429,7 +429,7 @@ class UIBase {
 				if (Operator.shortcut(Config.keymap.brush_radius) ||
 					Operator.shortcut(Config.keymap.brush_opacity) ||
 					Operator.shortcut(Config.keymap.brush_angle) ||
-					(decalMask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius))) {
+					(decal_mask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius))) {
 					Context.raw.brush_can_lock = true;
 					if (!pen_connected) mouse_lock();
 					Context.raw.lock_started_x = mouse_x;
@@ -447,7 +447,7 @@ class UIBase {
 					Context.raw.brush_radius_handle.value = Context.raw.brush_radius;
 					UIHeader.header_handle.redraws = 2;
 				}
-				else if (decalMask) {
+				else if (decal_mask) {
 					if (Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius_decrease, ShortcutType.ShortcutRepeat)) {
 						Context.raw.brush_decal_mask_radius -= UIBase.get_radius_increment();
 						Context.raw.brush_decal_mask_radius = Math.max(Math.round(Context.raw.brush_decal_mask_radius * 100) / 100, 0.01);
@@ -463,7 +463,7 @@ class UIBase {
 				}
 			}
 
-			if (decalMask && (Operator.shortcut(Config.keymap.decal_mask, ShortcutType.ShortcutStarted) || Operator.shortcut(Config.keymap.decal_mask, ShortcutType.ShortcutReleased))) {
+			if (decal_mask && (Operator.shortcut(Config.keymap.decal_mask, ShortcutType.ShortcutStarted) || Operator.shortcut(Config.keymap.decal_mask, ShortcutType.ShortcutReleased))) {
 				UIHeader.header_handle.redraws = 2;
 			}
 			///end
@@ -539,8 +539,8 @@ class UIBase {
 					///end
 
 					UIMenu.draw((ui: zui_t) => {
-						let modeHandle: zui_handle_t = zui_handle("uibase_0");
-						modeHandle.position = Context.raw.viewport_mode;
+						let mode_handle: zui_handle_t = zui_handle("uibase_0");
+						mode_handle.position = Context.raw.viewport_mode;
 						zui_text(tr("Viewport Mode"), zui_align_t.RIGHT, ui.t.HIGHLIGHT_COL);
 						let modes: string[] = [
 							tr("Lit"),
@@ -572,17 +572,17 @@ class UIBase {
 						///end
 
 						for (let i: i32 = 0; i < modes.length; ++i) {
-							zui_radio(modeHandle, i, modes[i], shortcuts[i]);
+							zui_radio(mode_handle, i, modes[i], shortcuts[i]);
 						}
 
 						let index: i32 = shortcuts.indexOf(keyboard_key_code(ui.key));
 						if (ui.is_key_pressed && index != -1) {
-							modeHandle.position = index;
+							mode_handle.position = index;
 							ui.changed = true;
-							Context.set_viewport_mode(modeHandle.position);
+							Context.set_viewport_mode(mode_handle.position);
 						}
-						else if (modeHandle.changed) {
-							Context.set_viewport_mode(modeHandle.position);
+						else if (mode_handle.changed) {
+							Context.set_viewport_mode(mode_handle.position);
 							ui.changed = true;
 						}
 					}, count);
@@ -603,7 +603,7 @@ class UIBase {
 				!Operator.shortcut(Config.keymap.brush_radius, ShortcutType.ShortcutDown) &&
 				!Operator.shortcut(Config.keymap.brush_opacity, ShortcutType.ShortcutDown) &&
 				!Operator.shortcut(Config.keymap.brush_angle, ShortcutType.ShortcutDown) &&
-				!(decalMask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius, ShortcutType.ShortcutDown));
+				!(decal_mask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius, ShortcutType.ShortcutDown));
 			///end
 			///if is_lab
 			let b: bool = (Context.raw.brush_can_lock || Context.raw.brush_locked) &&
@@ -689,7 +689,7 @@ class UIBase {
 
 		if (!mouse_down()) {
 			UIBase.border_handle_ptr = 0;
-			Base.is_resizing = false;
+			base_is_resizing = false;
 		}
 
 		///if arm_physics
@@ -738,12 +738,12 @@ class UIBase {
 			let pairs: pair_t[] = PhysicsWorld.get_contact_pairs(world, Context.raw.paint_body);
 			if (pairs != null) {
 				for (let p of pairs) {
-					Context.raw.last_particle_hit_x = Context.raw.particle_hit_x != 0 ? Context.raw.particle_hit_x : p.posA.x;
-					Context.raw.last_particle_hit_y = Context.raw.particle_hit_y != 0 ? Context.raw.particle_hit_y : p.posA.y;
-					Context.raw.last_particle_hit_z = Context.raw.particle_hit_z != 0 ? Context.raw.particle_hit_z : p.posA.z;
-					Context.raw.particle_hit_x = p.posA.x;
-					Context.raw.particle_hit_y = p.posA.y;
-					Context.raw.particle_hit_z = p.posA.z;
+					Context.raw.last_particle_hit_x = Context.raw.particle_hit_x != 0 ? Context.raw.particle_hit_x : p.pos_a.x;
+					Context.raw.last_particle_hit_y = Context.raw.particle_hit_y != 0 ? Context.raw.particle_hit_y : p.pos_a.y;
+					Context.raw.last_particle_hit_z = Context.raw.particle_hit_z != 0 ? Context.raw.particle_hit_z : p.pos_a.z;
+					Context.raw.particle_hit_x = p.pos_a.x;
+					Context.raw.particle_hit_y = p.pos_a.y;
+					Context.raw.particle_hit_z = p.pos_a.z;
 					Context.raw.pdirty = 1;
 					break; // 1 pair for now
 				}
@@ -753,9 +753,9 @@ class UIBase {
 	}
 
 	static view_top = () => {
-		let isTyping: bool = UIBase.ui.is_typing || UIView2D.ui.is_typing || UINodes.ui.is_typing;
+		let is_typing: bool = UIBase.ui.is_typing || UIView2D.ui.is_typing || UINodes.ui.is_typing;
 
-		if (Context.in_paint_area() && !isTyping) {
+		if (Context.in_paint_area() && !is_typing) {
 			if (mouse_view_x() < app_w()) {
 				Viewport.set_view(0, 0, 1, 0, 0, 0);
 			}
@@ -763,19 +763,19 @@ class UIBase {
 	}
 
 	static operator_search = () => {
-		let searchHandle: zui_handle_t = zui_handle("uibase_1");
+		let search_handle: zui_handle_t = zui_handle("uibase_1");
 		let first: bool = true;
 		UIMenu.draw((ui: zui_t) => {
 			zui_fill(0, 0, ui._w / zui_SCALE(ui), ui.t.ELEMENT_H * 8, ui.t.SEPARATOR_COL);
-			let search: string = zui_text_input(searchHandle, "", zui_align_t.LEFT, true, true);
+			let search: string = zui_text_input(search_handle, "", zui_align_t.LEFT, true, true);
 			ui.changed = false;
 			if (first) {
 				first = false;
-				searchHandle.text = "";
-				zui_start_text_edit(searchHandle); // Focus search bar
+				search_handle.text = "";
+				zui_start_text_edit(search_handle); // Focus search bar
 			}
 
-			if (searchHandle.changed) UIBase.operator_search_offset = 0;
+			if (search_handle.changed) UIBase.operator_search_offset = 0;
 
 			if (ui.is_key_pressed) { // Move selection
 				if (ui.key == key_code_t.DOWN && UIBase.operator_search_offset < 6) UIBase.operator_search_offset++;
@@ -801,7 +801,7 @@ class UIBase {
 
 			if (enter && count == 0) { // Hide popup on enter when command is not found
 				ui.changed = true;
-				searchHandle.text = "";
+				search_handle.text = "";
 			}
 			ui.t.BUTTON_COL = BUTTON_COL;
 		}, 8, -1, -1);
@@ -809,7 +809,7 @@ class UIBase {
 
 	static toggle_distract_free = () => {
 		UIBase.show = !UIBase.show;
-		Base.resize();
+		base_resize();
 	}
 
 	static get_radius_increment = (): f32 => {
@@ -822,10 +822,10 @@ class UIBase {
 
 	///if (is_paint || is_sculpt)
 	static get_brush_stencil_rect = (): rect_t => {
-		let w: i32 = Math.floor(Context.raw.brush_stencil_image.width * (Base.h() / Context.raw.brush_stencil_image.height) * Context.raw.brush_stencil_scale);
-		let h: i32 = Math.floor(Base.h() * Context.raw.brush_stencil_scale);
-		let x: i32 = Math.floor(Base.x() + Context.raw.brush_stencil_x * Base.w());
-		let y: i32 = Math.floor(Base.y() + Context.raw.brush_stencil_y * Base.h());
+		let w: i32 = Math.floor(Context.raw.brush_stencil_image.width * (base_h() / Context.raw.brush_stencil_image.height) * Context.raw.brush_stencil_scale);
+		let h: i32 = Math.floor(base_h() * Context.raw.brush_stencil_scale);
+		let x: i32 = Math.floor(base_x() + Context.raw.brush_stencil_x * base_w());
+		let y: i32 = Math.floor(base_y() + Context.raw.brush_stencil_y * base_h());
 		return { w: w, h: h, x: x, y: y };
 	}
 	///end
@@ -840,7 +840,7 @@ class UIBase {
 		UIBase.sidebar_mini_w = Math.floor(UIBase.default_sidebar_mini_w * zui_SCALE(UIBase.ui));
 		///end
 
-		if (!Base.ui_enabled) return;
+		if (!base_ui_enabled) return;
 
 		///if (is_paint || is_sculpt)
 		// Same mapping for paint and rotate (predefined in touch keymap)
@@ -848,17 +848,17 @@ class UIBase {
 			if (mouse_started() && Config.keymap.action_paint == Config.keymap.action_rotate) {
 				UIBase.action_paint_remap = Config.keymap.action_paint;
 				UtilRender.pick_pos_nor_tex();
-				let isMesh: bool = Math.abs(Context.raw.posx_picked) < 50 && Math.abs(Context.raw.posy_picked) < 50 && Math.abs(Context.raw.posz_picked) < 50;
+				let is_mesh: bool = Math.abs(Context.raw.posx_picked) < 50 && Math.abs(Context.raw.posy_picked) < 50 && Math.abs(Context.raw.posz_picked) < 50;
 				///if krom_android
 				// Allow rotating with both pen and touch, because hovering a pen prevents touch input on android
-				let penOnly: bool = false;
+				let pen_only: bool = false;
 				///else
-				let penOnly: bool = Context.raw.pen_painting_only;
+				let pen_only: bool = Context.raw.pen_painting_only;
 				///end
-				let isPen: bool = penOnly && pen_down();
+				let is_pen: bool = pen_only && pen_down();
 				// Mesh picked - disable rotate
 				// Pen painting only - rotate with touch, paint with pen
-				if ((isMesh && !penOnly) || isPen) {
+				if ((is_mesh && !pen_only) || is_pen) {
 					Config.keymap.action_rotate = "";
 					Config.keymap.action_paint = UIBase.action_paint_remap;
 				}
@@ -901,13 +901,13 @@ class UIBase {
 					Context.raw.brush_stencil_scale += mouse_movement_x / 400 * mult;
 				}
 				else if (Context.raw.brush_stencil_rotating) {
-					let gizmoX: f32 = r.x + r.w / 2;
-					let gizmoY: f32 = r.y + r.h / 2;
-					Context.raw.brush_stencil_angle = -Math.atan2(mouse_y - gizmoY, mouse_x - gizmoX) - Math.PI / 2;
+					let gizmo_x: f32 = r.x + r.w / 2;
+					let gizmo_y: f32 = r.y + r.h / 2;
+					Context.raw.brush_stencil_angle = -Math.atan2(mouse_y - gizmo_y, mouse_x - gizmo_x) - Math.PI / 2;
 				}
 				else {
-					Context.raw.brush_stencil_x += mouse_movement_x / Base.w();
-					Context.raw.brush_stencil_y += mouse_movement_y / Base.h();
+					Context.raw.brush_stencil_x += mouse_movement_x / base_w();
+					Context.raw.brush_stencil_y += mouse_movement_y / base_h();
 				}
 			}
 			else Context.raw.brush_stencil_scaling = false;
@@ -915,30 +915,30 @@ class UIBase {
 				Context.raw.brush_stencil_scale -= mouse_wheel_delta / 10;
 			}
 			// Center after scale
-			let ratio: f32 = Base.h() / Context.raw.brush_stencil_image.height;
-			let oldW: f32 = _scale * Context.raw.brush_stencil_image.width * ratio;
-			let newW: f32 = Context.raw.brush_stencil_scale * Context.raw.brush_stencil_image.width * ratio;
-			let oldH: f32 = _scale * Base.h();
-			let newH: f32 = Context.raw.brush_stencil_scale * Base.h();
-			Context.raw.brush_stencil_x += (oldW - newW) / Base.w() / 2;
-			Context.raw.brush_stencil_y += (oldH - newH) / Base.h() / 2;
+			let ratio: f32 = base_h() / Context.raw.brush_stencil_image.height;
+			let old_w: f32 = _scale * Context.raw.brush_stencil_image.width * ratio;
+			let new_w: f32 = Context.raw.brush_stencil_scale * Context.raw.brush_stencil_image.width * ratio;
+			let old_h: f32 = _scale * base_h();
+			let new_h: f32 = Context.raw.brush_stencil_scale * base_h();
+			Context.raw.brush_stencil_x += (old_w - new_w) / base_w() / 2;
+			Context.raw.brush_stencil_y += (old_h - new_h) / base_h() / 2;
 		}
 		///end
 
-		let setCloneSource: bool = Context.raw.tool == workspace_tool_t.CLONE && Operator.shortcut(Config.keymap.set_clone_source + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
+		let set_clone_source: bool = Context.raw.tool == workspace_tool_t.CLONE && Operator.shortcut(Config.keymap.set_clone_source + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
 
 		///if (is_paint || is_sculpt)
 		let decal: bool = Context.raw.tool == workspace_tool_t.DECAL || Context.raw.tool == workspace_tool_t.TEXT;
-		let decalMask: bool = decal && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
+		let decal_mask: bool = decal && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
 		let down: bool = Operator.shortcut(Config.keymap.action_paint, ShortcutType.ShortcutDown) ||
-				   		 decalMask ||
-				   		 setCloneSource ||
+				   		 decal_mask ||
+				   		 set_clone_source ||
 				   		 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown) ||
 				   		 (pen_down() && !keyboard_down("alt"));
 		///end
 		///if is_lab
 		let down: bool = Operator.shortcut(Config.keymap.action_paint, ShortcutType.ShortcutDown) ||
-				   		 setCloneSource ||
+				   		 set_clone_source ||
 				   		 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown) ||
 				   		 (pen_down() && !keyboard_down("alt"));
 		///end
@@ -987,15 +987,15 @@ class UIBase {
 				my < app_h() &&
 				my > app_y()) {
 
-				if (setCloneSource) {
+				if (set_clone_source) {
 					Context.raw.clone_start_x = mx;
 					Context.raw.clone_start_y = my;
 				}
 				else {
 					if (Context.raw.brush_time == 0 &&
-						!Base.is_dragging &&
-						!Base.is_resizing &&
-						!Base.is_combo_selected()) { // Paint started
+						!base_is_dragging &&
+						!base_is_resizing &&
+						!base_is_combo_selected()) { // Paint started
 
 						// Draw line
 						if (Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown)) {
@@ -1058,8 +1058,8 @@ class UIBase {
 			///if is_paint
 			// New color id picked, update fill layer
 			if (Context.raw.tool == workspace_tool_t.COLORID && Context.raw.layer.fill_layer != null) {
-				Base.notify_on_next_frame(() => {
-					Base.update_fill_layer();
+				base_notify_on_next_frame(() => {
+					base_update_fill_layer();
 					MakeMaterial.parse_paint_material(false);
 				});
 			}
@@ -1071,7 +1071,7 @@ class UIBase {
 			Context.raw.layers_preview_dirty = false;
 			Context.raw.layer_preview_dirty = false;
 			Context.raw.mask_preview_last = null;
-			if (Base.pipe_merge == null) Base.make_pipe();
+			if (base_pipe_merge == null) base_make_pipe();
 			// Update all layer previews
 			for (let l of Project.layers) {
 				if (SlotLayer.is_group(l)) continue;
@@ -1079,8 +1079,8 @@ class UIBase {
 				let source: image_t = l.texpaint;
 				g2_begin(target);
 				g2_clear(0x00000000);
-				// g2_set_pipeline(l.isMask() ? Base.pipeCopy8 : Base.pipeCopy);
-				g2_set_pipeline(Base.pipe_copy); // texpaint_preview is always RGBA32 for now
+				// g2_set_pipeline(l.isMask() ? base_pipe_copy8 : base_pipe_copy);
+				g2_set_pipeline(base_pipe_copy); // texpaint_preview is always RGBA32 for now
 				g2_draw_scaled_image(source, 0, 0, target.width, target.height);
 				g2_set_pipeline(null);
 				g2_end();
@@ -1090,15 +1090,15 @@ class UIBase {
 		if (Context.raw.layer_preview_dirty && !SlotLayer.is_group(Context.raw.layer)) {
 			Context.raw.layer_preview_dirty = false;
 			Context.raw.mask_preview_last = null;
-			if (Base.pipe_merge == null) Base.make_pipe();
+			if (base_pipe_merge == null) base_make_pipe();
 			// Update layer preview
 			let l: SlotLayerRaw = Context.raw.layer;
 			let target: image_t = l.texpaint_preview;
 			let source: image_t = l.texpaint;
 			g2_begin(target);
 			g2_clear(0x00000000);
-			// g2_set_pipeline(Context.raw.layer.isMask() ? Base.pipeCopy8 : Base.pipeCopy);
-			g2_set_pipeline(Base.pipe_copy); // texpaint_preview is always RGBA32 for now
+			// g2_set_pipeline(Context.raw.layer.isMask() ? base_pipe_copy8 : base_pipe_copy);
+			g2_set_pipeline(base_pipe_copy); // texpaint_preview is always RGBA32 for now
 			g2_draw_scaled_image(source, 0, 0, target.width, target.height);
 			g2_set_pipeline(null);
 			g2_end();
@@ -1106,20 +1106,20 @@ class UIBase {
 		}
 		///end
 
-		let undoPressed: bool = Operator.shortcut(Config.keymap.edit_undo);
-		let redoPressed: bool = Operator.shortcut(Config.keymap.edit_redo) ||
+		let undo_pressed: bool = Operator.shortcut(Config.keymap.edit_undo);
+		let redo_pressed: bool = Operator.shortcut(Config.keymap.edit_redo) ||
 						  		(keyboard_down("control") && keyboard_started("y"));
 
 		// Two-finger tap to undo, three-finger tap to redo
 		if (Context.in_viewport() && Config.raw.touch_ui) {
 			if (mouse_started("middle")) { UIBase.redo_tap_time = time_time(); }
 			else if (mouse_started("right")) { UIBase.undo_tap_time = time_time(); }
-			else if (mouse_released("middle") && time_time() - UIBase.redo_tap_time < 0.1) { UIBase.redo_tap_time = UIBase.undo_tap_time = 0; redoPressed = true; }
-			else if (mouse_released("right") && time_time() - UIBase.undo_tap_time < 0.1) { UIBase.redo_tap_time = UIBase.undo_tap_time = 0; undoPressed = true; }
+			else if (mouse_released("middle") && time_time() - UIBase.redo_tap_time < 0.1) { UIBase.redo_tap_time = UIBase.undo_tap_time = 0; redo_pressed = true; }
+			else if (mouse_released("right") && time_time() - UIBase.undo_tap_time < 0.1) { UIBase.redo_tap_time = UIBase.undo_tap_time = 0; undo_pressed = true; }
 		}
 
-		if (undoPressed) History.undo();
-		else if (redoPressed) History.redo();
+		if (undo_pressed) History.undo();
+		else if (redo_pressed) History.redo();
 
 		///if (is_paint || is_sculpt)
 		Gizmo.update();
@@ -1142,7 +1142,7 @@ class UIBase {
 
 		if (!UIBase.show || sys_width() == 0 || sys_height() == 0) return;
 
-		UIBase.ui.input_enabled = Base.ui_enabled;
+		UIBase.ui.input_enabled = base_ui_enabled;
 
 		// Remember last tab positions
 		for (let i: i32 = 0; i < UIBase.htabs.length; ++i) {
@@ -1179,7 +1179,7 @@ class UIBase {
 	static draw_sidebar = () => {
 		// Tabs
 		let mini: bool = Config.raw.layout[layout_size_t.SIDEBAR_W] <= UIBase.sidebar_mini_w;
-		let expandButtonOffset: i32 = Config.raw.touch_ui ? Math.floor(zui_ELEMENT_H(UIBase.ui) + zui_ELEMENT_OFFSET(UIBase.ui)) : 0;
+		let expand_button_offset: i32 = Config.raw.touch_ui ? Math.floor(zui_ELEMENT_H(UIBase.ui) + zui_ELEMENT_OFFSET(UIBase.ui)) : 0;
 		UIBase.tabx = sys_width() - Config.raw.layout[layout_size_t.SIDEBAR_W];
 
 		let _SCROLL_W: i32 = UIBase.ui.t.SCROLL_W;
@@ -1188,7 +1188,7 @@ class UIBase {
 		if (zui_window(UIBase.hwnds[tab_area_t.SIDEBAR0], UIBase.tabx, 0, Config.raw.layout[layout_size_t.SIDEBAR_W], Config.raw.layout[layout_size_t.SIDEBAR_H0])) {
 			for (let i: i32 = 0; i < (mini ? 1 : UIBase.hwnd_tabs[tab_area_t.SIDEBAR0].length); ++i) UIBase.hwnd_tabs[tab_area_t.SIDEBAR0][i](UIBase.htabs[tab_area_t.SIDEBAR0]);
 		}
-		if (zui_window(UIBase.hwnds[tab_area_t.SIDEBAR1], UIBase.tabx, Config.raw.layout[layout_size_t.SIDEBAR_H0], Config.raw.layout[layout_size_t.SIDEBAR_W], Config.raw.layout[layout_size_t.SIDEBAR_H1] - expandButtonOffset)) {
+		if (zui_window(UIBase.hwnds[tab_area_t.SIDEBAR1], UIBase.tabx, Config.raw.layout[layout_size_t.SIDEBAR_H0], Config.raw.layout[layout_size_t.SIDEBAR_W], Config.raw.layout[layout_size_t.SIDEBAR_H1] - expand_button_offset)) {
 			for (let i: i32 = 0; i < (mini ? 1 : UIBase.hwnd_tabs[tab_area_t.SIDEBAR1].length); ++i) UIBase.hwnd_tabs[tab_area_t.SIDEBAR1][i](UIBase.htabs[tab_area_t.SIDEBAR1]);
 		}
 
@@ -1242,7 +1242,7 @@ class UIBase {
 	}
 
 	static render_cursor = () => {
-		if (!Base.ui_enabled) return;
+		if (!base_ui_enabled) return;
 
 		///if is_paint
 		if (Context.raw.tool == workspace_tool_t.MATERIAL || Context.raw.tool == workspace_tool_t.BAKE) return;
@@ -1251,8 +1251,8 @@ class UIBase {
 		g2_set_color(0xffffffff);
 
 		Context.raw.view_index = Context.raw.view_index_last;
-		let mx: i32 = Base.x() + Context.raw.paint_vec.x * Base.w();
-		let my: i32 = Base.y() + Context.raw.paint_vec.y * Base.h();
+		let mx: i32 = base_x() + Context.raw.paint_vec.x * base_w();
+		let my: i32 = base_y() + Context.raw.paint_vec.y * base_h();
 		Context.raw.view_index = -1;
 
 		// Radius being scaled
@@ -1315,31 +1315,31 @@ class UIBase {
 			g2_draw_sub_image(img, mx + 10, my + 10, rect.x, rect.y, rect.w, rect.h);
 		}
 
-		let cursorImg: image_t = Res.get("cursor.k");
-		let psize: i32 = Math.floor(cursorImg.width * (Context.raw.brush_radius * Context.raw.brush_nodes_radius) * zui_SCALE(UIBase.ui));
+		let cursor_img: image_t = Res.get("cursor.k");
+		let psize: i32 = Math.floor(cursor_img.width * (Context.raw.brush_radius * Context.raw.brush_nodes_radius) * zui_SCALE(UIBase.ui));
 
 		// Clone source cursor
 		if (Context.raw.tool == workspace_tool_t.CLONE && !keyboard_down("alt") && (mouse_down() || pen_down())) {
 			g2_set_color(0x66ffffff);
-			g2_draw_scaled_image(cursorImg, mx + Context.raw.clone_delta_x * app_w() - psize / 2, my + Context.raw.clone_delta_y * app_h() - psize / 2, psize, psize);
+			g2_draw_scaled_image(cursor_img, mx + Context.raw.clone_delta_x * app_w() - psize / 2, my + Context.raw.clone_delta_y * app_h() - psize / 2, psize, psize);
 			g2_set_color(0xffffffff);
 		}
 
 		let decal: bool = Context.raw.tool == workspace_tool_t.DECAL || Context.raw.tool == workspace_tool_t.TEXT;
 
 		if (!Config.raw.brush_3d || Context.in_2d_view() || decal) {
-			let decalMask: bool = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutType.ShortcutDown);
+			let decal_mask: bool = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutType.ShortcutDown);
 			if (decal && !Context.in_nodes()) {
-				let decalAlpha: f32 = 0.5;
-				if (!decalMask) {
+				let decal_alpha: f32 = 0.5;
+				if (!decal_mask) {
 					Context.raw.decal_x = Context.raw.paint_vec.x;
 					Context.raw.decal_y = Context.raw.paint_vec.y;
-					decalAlpha = Context.raw.brush_opacity;
+					decal_alpha = Context.raw.brush_opacity;
 
 					// Radius being scaled
 					if (Context.raw.brush_locked) {
-						Context.raw.decal_x += (Context.raw.lock_started_x - sys_width() / 2) / Base.w();
-						Context.raw.decal_y += (Context.raw.lock_started_y - sys_height() / 2) / Base.h();
+						Context.raw.decal_x += (Context.raw.lock_started_x - sys_width() / 2) / base_w();
+						Context.raw.decal_y += (Context.raw.lock_started_y - sys_height() / 2) / base_h();
 					}
 				}
 
@@ -1348,19 +1348,19 @@ class UIBase {
 					let psizey: i32 = Math.floor(256 * zui_SCALE(UIBase.ui) * (Context.raw.brush_radius * Context.raw.brush_nodes_radius));
 
 					Context.raw.view_index = Context.raw.view_index_last;
-					let decalX: f32 = Base.x() + Context.raw.decal_x * Base.w() - psizex / 2;
-					let decalY: f32 = Base.y() + Context.raw.decal_y * Base.h() - psizey / 2;
+					let decalx: f32 = base_x() + Context.raw.decal_x * base_w() - psizex / 2;
+					let decaly: f32 = base_y() + Context.raw.decal_y * base_h() - psizey / 2;
 					Context.raw.view_index = -1;
 
-					g2_set_color(color_from_floats(1, 1, 1, decalAlpha));
+					g2_set_color(color_from_floats(1, 1, 1, decal_alpha));
 					let angle: f32 = (Context.raw.brush_angle + Context.raw.brush_nodes_angle) * (Math.PI / 180);
-					let cx: f32 = decalX + psizex / 2;
-					let cy: f32 = decalY + psizey / 2;
+					let cx: f32 = decalx + psizex / 2;
+					let cy: f32 = decaly + psizey / 2;
 					g2_set_transformation(mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(angle)), mat3_translation(-cx, -cy)));
 					///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
-					g2_draw_scaled_image(Context.raw.decal_image, decalX, decalY, psizex, psizey);
+					g2_draw_scaled_image(Context.raw.decal_image, decalx, decaly, psizex, psizey);
 					///else
-					g2_draw_scaled_image(Context.raw.decal_image, decalX, decalY + psizey, psizex, -psizey);
+					g2_draw_scaled_image(Context.raw.decal_image, decalx, decaly + psizey, psizex, -psizey);
 					///end
 					g2_set_transformation(null);
 					g2_set_color(0xffffffff);
@@ -1372,15 +1372,15 @@ class UIBase {
 				Context.raw.tool == workspace_tool_t.BLUR   ||
 				Context.raw.tool == workspace_tool_t.SMUDGE   ||
 				Context.raw.tool == workspace_tool_t.PARTICLE ||
-				(decalMask && !Config.raw.brush_3d) ||
-				(decalMask && Context.in_2d_view())) {
-				if (decalMask) {
-					psize = Math.floor(cursorImg.width * (Context.raw.brush_decal_mask_radius * Context.raw.brush_nodes_radius) * zui_SCALE(UIBase.ui));
+				(decal_mask && !Config.raw.brush_3d) ||
+				(decal_mask && Context.in_2d_view())) {
+				if (decal_mask) {
+					psize = Math.floor(cursor_img.width * (Context.raw.brush_decal_mask_radius * Context.raw.brush_nodes_radius) * zui_SCALE(UIBase.ui));
 				}
 				if (Config.raw.brush_3d && Context.in_2d_view()) {
 					psize = Math.floor(psize * UIView2D.pan_scale);
 				}
-				g2_draw_scaled_image(cursorImg, mx - psize / 2, my - psize / 2, psize, psize);
+				g2_draw_scaled_image(cursor_img, mx - psize / 2, my - psize / 2, psize, psize);
 			}
 		}
 
@@ -1394,11 +1394,11 @@ class UIBase {
 			 Context.raw.tool == workspace_tool_t.SMUDGE ||
 			 Context.raw.tool == workspace_tool_t.PARTICLE)) {
 			g2_fill_rect(mx - 1, my - 1, 2, 2);
-			mx = Context.raw.brush_lazy_x * Base.w() + Base.x();
-			my = Context.raw.brush_lazy_y * Base.h() + Base.y();
+			mx = Context.raw.brush_lazy_x * base_w() + base_x();
+			my = Context.raw.brush_lazy_y * base_h() + base_y();
 			let radius: f32 = Context.raw.brush_lazy_radius * 180;
 			g2_set_color(0xff666666);
-			g2_draw_scaled_image(cursorImg, mx - radius / 2, my - radius / 2, radius, radius);
+			g2_draw_scaled_image(cursor_img, mx - radius / 2, my - radius / 2, radius, radius);
 			g2_set_color(0xffffffff);
 		}
 	}
@@ -1416,7 +1416,7 @@ class UIBase {
 		UINodes.show = !UINodes.show;
 		///end
 
-		Base.resize();
+		base_resize();
 	}
 
 	///if (is_paint || is_sculpt)
@@ -1425,7 +1425,7 @@ class UIBase {
 		zui_end_input();
 		UINodes.show = !UINodes.show || UINodes.canvas_type != canvas_type_t.BRUSH;
 		UINodes.canvas_type = canvas_type_t.BRUSH;
-		Base.resize();
+		base_resize();
 	}
 	///end
 
@@ -1436,7 +1436,7 @@ class UIBase {
 		else UIView2D.show = !UIView2D.show;
 		UIView2D.type = type;
 		UIView2D.hwnd.redraws = 2;
-		Base.resize();
+		base_resize();
 	}
 
 	static toggle_browser = () => {
@@ -1457,7 +1457,7 @@ class UIBase {
 	}
 
 	static on_border_hover = (handle_ptr: i32, side: i32) => {
-		if (!Base.ui_enabled) return;
+		if (!base_ui_enabled) return;
 
 		///if (is_paint || is_sculpt)
 		if (handle_ptr != UIBase.hwnds[tab_area_t.SIDEBAR0].ptr &&
@@ -1489,7 +1489,7 @@ class UIBase {
 		if (zui_current.input_started) {
 			UIBase.border_started = side;
 			UIBase.border_handle_ptr = handle_ptr;
-			Base.is_resizing = true;
+			base_is_resizing = true;
 		}
 	}
 

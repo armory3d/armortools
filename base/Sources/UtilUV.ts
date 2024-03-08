@@ -23,10 +23,10 @@ class UtilUV {
 
 		if (UtilUV.uvmap_cached) return;
 
-		let resX: i32 = Config.get_texture_res_x();
-		let resY: i32 = Config.get_texture_res_y();
+		let res_x: i32 = Config.get_texture_res_x();
+		let res_y: i32 = Config.get_texture_res_y();
 		if (UtilUV.uvmap == null) {
-			UtilUV.uvmap = image_create_render_target(resX, resY);
+			UtilUV.uvmap = image_create_render_target(res_x, res_y);
 		}
 
 		UtilUV.uvmap_cached = true;
@@ -39,7 +39,7 @@ class UtilUV {
 		g2_begin(UtilUV.uvmap);
 		g2_clear(0x00000000);
 		g2_set_color(0xffcccccc);
-		let strength: f32 = resX > 2048 ? 2.0 : 1.0;
+		let strength: f32 = res_x > 2048 ? 2.0 : 1.0;
 		let f: f32 = (1 / 32767) * UtilUV.uvmap.width;
 		for (let i: i32 = 0; i < Math.floor(inda.length / 3); ++i) {
 			let x1: f32 = (texa[inda[i * 3    ] * 2    ]) * f;
@@ -161,8 +161,8 @@ class UtilUV {
 		let check = (c: coord_t) => {
 			if (c.x < 0 || c.x >= w || c.y < 0 || c.y >= h) return;
 			if (view.getUint8(c.y * w + c.x) == 255) return;
-			let dilateView: DataView = new DataView(UtilUV.dilate_bytes);
-			if (dilateView.getUint8(c.y * r * UtilUV.dilatemap.width + c.x * r) == 0) return;
+			let dilate_view: DataView = new DataView(UtilUV.dilate_bytes);
+			if (dilate_view.getUint8(c.y * r * UtilUV.dilatemap.width + c.x * r) == 0) return;
 			view.setUint8(c.y * w + c.x, 255);
 			coords.push({ x: c.x + 1, y: c.y });
 			coords.push({ x: c.x - 1, y: c.y });

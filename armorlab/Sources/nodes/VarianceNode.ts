@@ -41,7 +41,7 @@ class VarianceNode extends LogicNode {
 			}
 
 			Console.progress(tr("Processing") + " - " + tr("Variance"));
-			Base.notifyOnNextFrame(() => {
+			base_notifyOnNextFrame(() => {
 				let vae_encoder_blob: ArrayBuffer = data_get_blob("models/sd_vae_encoder.quant.onnx");
 				let latents_buf = krom_ml_inference(vae_encoder_blob, [f32a.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], Config.raw.gpu_inference);
 				let latents = new Float32Array(latents_buf);

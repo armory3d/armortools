@@ -40,8 +40,8 @@ class Translator {
 	}
 
 	// (Re)loads translations for the specified locale
-	static load_translations = (newLocale: string) => {
-		if (newLocale == "system") {
+	static load_translations = (new_locale: string) => {
+		if (new_locale == "system") {
 			Config.raw.locale = krom_language();
 		}
 
@@ -63,9 +63,9 @@ class Translator {
 
 		if (Config.raw.locale != "en") {
 			// Load the translation file
-			let translationJson: string = sys_buffer_to_string(krom_load_blob(`data/locale/${Config.raw.locale}.json`));
+			let translation_json: string = sys_buffer_to_string(krom_load_blob(`data/locale/${Config.raw.locale}.json`));
 
-			let data: any = json_parse(translationJson);
+			let data: any = json_parse(translation_json);
 			for (let field in data) {
 				let atranslations: any = Translator.translations as any;
 				atranslations[field] = data[field];
@@ -91,21 +91,21 @@ class Translator {
 		}
 
 		if (cjk) {
-			let cjkFontPath: string = (Path.is_protected() ? krom_save_path() : "") + "font_cjk.ttc";
-			let cjkFontDiskPath: string = (Path.is_protected() ? krom_save_path() : Path.data() + Path.sep) + "font_cjk.ttc";
-			if (!File.exists(cjkFontDiskPath)) {
-				File.download("https://github.com/armory3d/armorbase/raw/main/Assets/common/extra/font_cjk.ttc", cjkFontDiskPath, () => {
-					if (!File.exists(cjkFontDiskPath)) {
+			let cjk_font_path: string = (Path.is_protected() ? krom_save_path() : "") + "font_cjk.ttc";
+			let cjk_font_disk_path: string = (Path.is_protected() ? krom_save_path() : Path.data() + Path.sep) + "font_cjk.ttc";
+			if (!File.exists(cjk_font_disk_path)) {
+				File.download("https://github.com/armory3d/armorbase/raw/main/Assets/common/extra/font_cjk.ttc", cjk_font_disk_path, () => {
+					if (!File.exists(cjk_font_disk_path)) {
 						// Fall back to English
 						Config.raw.locale = "en";
 						Translator.extended_glyphs();
 						Translator.translations.clear();
 						Translator.init_font(false, "font.ttf", 1.0);
 					}
-					else Translator.init_font(true, cjkFontPath, 1.4);
+					else Translator.init_font(true, cjk_font_path, 1.4);
 				}, 20332392);
 			}
-			else Translator.init_font(true, cjkFontPath, 1.4);
+			else Translator.init_font(true, cjk_font_path, 1.4);
 		}
 		else Translator.init_font(false, "font.ttf", 1.0);
 	}
@@ -116,15 +116,15 @@ class Translator {
 		app_notify_on_init(() => {
 			let f: g2_font_t = data_get_font(fontPath);
 			if (cjk) {
-				let acjkFontIndices: any = Translator.cjk_font_indices as any;
-				let fontIndex: i32 = Translator.cjk_font_indices.has(Config.raw.locale) ? acjkFontIndices[Config.raw.locale] : 0;
-				g2_font_set_font_index(f, fontIndex);
+				let acjk_font_indices: any = Translator.cjk_font_indices as any;
+				let font_index: i32 = Translator.cjk_font_indices.has(Config.raw.locale) ? acjk_font_indices[Config.raw.locale] : 0;
+				g2_font_set_font_index(f, font_index);
 			}
-			Base.font = f;
+			base_font = f;
 			// Scale up the font size and elements width a bit
-			Base.theme.FONT_SIZE = Math.floor(Base.default_font_size * fontScale);
-			Base.theme.ELEMENT_W = Math.floor(Base.default_element_w * (Config.raw.locale != "en" ? 1.4 : 1.0));
-			let uis: zui_t[] = Base.get_uis();
+			base_theme.FONT_SIZE = Math.floor(base_default_font_size * fontScale);
+			base_theme.ELEMENT_W = Math.floor(base_default_element_w * (Config.raw.locale != "en" ? 1.4 : 1.0));
+			let uis: zui_t[] = base_get_uis();
 			for (let ui of uis) {
 				zui_set_font(ui, f);
 				zui_set_scale(ui, zui_SCALE(ui));
@@ -144,9 +144,9 @@ class Translator {
 	// Returns a list of supported locales (plus English and the automatically detected system locale)
 	static get_supported_locales = (): string[] => {
 		let locales: string[] = ["system", "en"];
-		for (let localeFilename of File.read_directory(Path.data() + Path.sep + "locale")) {
+		for (let locale_filename of File.read_directory(Path.data() + Path.sep + "locale")) {
 			// Trim the `.json` file extension from file names
-			locales.push(localeFilename.substr(0, -5));
+			locales.push(locale_filename.substr(0, -5));
 		}
 		return locales;
 	}

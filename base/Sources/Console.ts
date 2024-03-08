@@ -10,11 +10,11 @@ class Console {
 	static draw_toast = (s: string) => {
 		g2_set_color(0x55000000);
 		g2_fill_rect(0, 0, sys_width(), sys_height());
-		let scale: f32 = zui_SCALE(Base.get_uis()[0]);
+		let scale: f32 = zui_SCALE(base_get_uis()[0]);
 		let x: f32 = sys_width() / 2;
 		let y: f32 = sys_height() - 200 * scale;
 		g2_fill_rect(x - 200 * scale, y, 400 * scale, 80 * scale);
-		g2_set_font(Base.font);
+		g2_set_font(base_font);
 		g2_set_font_size(Math.floor(22 * scale));
 		g2_set_color(0xffffffff);
 		g2_draw_string(s, x - g2_font_width(_g2_font, _g2_font_size, s) / 2, y + 40 * scale - g2_font_height(_g2_font, _g2_font_size) / 2);
@@ -24,7 +24,7 @@ class Console {
 		// Show a popup message
 		let _render = () => {
 			Console.draw_toast(s);
-			Base.notify_on_next_frame(() => {
+			base_notify_on_next_frame(() => {
 				app_remove_render_2d(_render);
 			});
 		}
@@ -52,7 +52,7 @@ class Console {
 		Console.message_timer = 5.0;
 		Console.message = s;
 		Console.message_color = 0x00000000;
-		Base.redraw_status();
+		base_redraw_status();
 		Console.console_trace(s);
 	}
 
@@ -60,7 +60,7 @@ class Console {
 		Console.message_timer = 8.0;
 		Console.message = s;
 		Console.message_color = 0xffaa0000;
-		Base.redraw_status();
+		base_redraw_status();
 		Console.console_trace(s);
 	}
 
@@ -69,7 +69,7 @@ class Console {
 	}
 
 	static console_trace = (v: any) => {
-		Base.redraw_console();
+		base_redraw_console();
 		Console.last_traces.unshift(String(v));
 		if (Console.last_traces.length > 100) Console.last_traces.pop();
 	}

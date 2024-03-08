@@ -39,7 +39,7 @@ class PhotoToPBRNode extends LogicNode {
 			PhotoToPBRNode.cachedSource = source;
 
 			Console.progress(tr("Processing") + " - " + tr("Photo to PBR"));
-			Base.notifyOnNextFrame(() => {
+			base_notifyOnNextFrame(() => {
 				let tileFloats: Float32Array[] = [];
 				let tilesX = Math.floor(Config.getTextureResX() / PhotoToPBRNode.tileW);
 				let tilesY = Math.floor(Config.getTextureResY() / PhotoToPBRNode.tileW);
@@ -145,7 +145,7 @@ class PhotoToPBRNode extends LogicNode {
 					g2_begin(PhotoToPBRNode.images[from]);
 					g2_draw_image(temp2, x * PhotoToPBRNode.tileW, y * PhotoToPBRNode.tileW);
 					g2_end();
-					Base.notifyOnNextFrame(() => {
+					base_notifyOnNextFrame(() => {
 						image_unload(temp2);
 					});
 				}

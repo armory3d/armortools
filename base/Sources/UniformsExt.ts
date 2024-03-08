@@ -24,17 +24,17 @@ class UniformsExt {
 			case "_brushRadius": {
 				///if (is_paint || is_sculpt)
 				let decal: bool = Context.raw.tool == workspace_tool_t.DECAL || Context.raw.tool == workspace_tool_t.TEXT;
-				let decalMask: bool = decal && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
-				let brushDecalMaskRadius: f32 = Context.raw.brush_decal_mask_radius;
+				let decal_mask: bool = decal && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
+				let brush_decal_mask_radius: f32 = Context.raw.brush_decal_mask_radius;
 				if (Config.raw.brush_3d) {
-					brushDecalMaskRadius *= Context.raw.paint2d ? 0.55 * UIView2D.pan_scale : 2.0;
+					brush_decal_mask_radius *= Context.raw.paint2d ? 0.55 * UIView2D.pan_scale : 2.0;
 				}
-				let radius: f32 = decalMask ? brushDecalMaskRadius : Context.raw.brush_radius;
+				let radius: f32 = decal_mask ? brush_decal_mask_radius : Context.raw.brush_radius;
 				let val: f32 = (radius * Context.raw.brush_nodes_radius) / 15.0;
 				if (Config.raw.pressure_radius && pen_down()) {
 					val *= pen_pressure * Config.raw.pressure_sensitivity;
 				}
-				let scale2d: f32 = (900 / Base.h()) * Config.raw.window_scale;
+				let scale2d: f32 = (900 / base_h()) * Config.raw.window_scale;
 
 				if (Config.raw.brush_3d && !decal) {
 					val *= Context.raw.paint2d ? 0.55 * scale2d * UIView2D.pan_scale : 2;
@@ -83,8 +83,8 @@ class UniformsExt {
 				return val;
 			}
 			case "_brushHardness": {
-				let decalMask: bool = Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
-				if (Context.raw.tool != workspace_tool_t.BRUSH && Context.raw.tool != workspace_tool_t.ERASER && Context.raw.tool != workspace_tool_t.CLONE && !decalMask) return 1.0;
+				let decal_mask: bool = Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
+				if (Context.raw.tool != workspace_tool_t.BRUSH && Context.raw.tool != workspace_tool_t.ERASER && Context.raw.tool != workspace_tool_t.CLONE && !decal_mask) return 1.0;
 				let val: f32 = Context.raw.brush_hardness * Context.raw.brush_nodes_hardness;
 				if (Config.raw.pressure_hardness && pen_down()) {
 					val *= pen_pressure * Config.raw.pressure_sensitivity;
@@ -113,7 +113,7 @@ class UniformsExt {
 			}
 			///end
 			case "_decalLayerDim": {
-				return mat4_get_scale(Context.raw.layer.decalMat).z * 0.5;
+				return mat4_get_scale(Context.raw.layer.decal_mat).z * 0.5;
 			}
 			case "_pickerOpacity": {
 				return Context.raw.picked_color.opacity;
@@ -169,8 +169,8 @@ class UniformsExt {
 			}
 			///if (is_paint || is_sculpt)
 			case "_brushAngle": {
-				let brushAngle: f32 = Context.raw.brush_angle + Context.raw.brush_nodes_angle;
-				let angle: f32 = Context.raw.layer.fill_layer != null ? Context.raw.layer.angle : brushAngle;
+				let brush_angle: f32 = Context.raw.brush_angle + Context.raw.brush_nodes_angle;
+				let angle: f32 = Context.raw.layer.fill_layer != null ? Context.raw.layer.angle : brush_angle;
 				angle *= (Math.PI / 180);
 				if (Config.raw.pressure_angle && pen_down()) {
 					angle *= pen_pressure * Config.raw.pressure_sensitivity;
@@ -190,7 +190,7 @@ class UniformsExt {
 			case "_brushDirection": {
 				v = _uniforms_vec;
 				// Discard first paint for directional brush
-				let allowPaint: bool = Context.raw.prev_paint_vec_x != Context.raw.last_paint_vec_x &&
+				let allow_paint: bool = Context.raw.prev_paint_vec_x != Context.raw.last_paint_vec_x &&
 								 	   Context.raw.prev_paint_vec_y != Context.raw.last_paint_vec_y &&
 								 	   Context.raw.prev_paint_vec_x > 0 &&
 								 	   Context.raw.prev_paint_vec_y > 0;
@@ -203,19 +203,19 @@ class UniformsExt {
 					lastx = UniformsExt.vec2d(lastx);
 				}
 				let angle: f32 = Math.atan2(-y + lasty, x - lastx) - Math.PI / 2;
-				vec4_set(v, Math.cos(angle), Math.sin(angle), allowPaint ? 1 : 0);
+				vec4_set(v, Math.cos(angle), Math.sin(angle), allow_paint ? 1 : 0);
 				Context.raw.prev_paint_vec_x = Context.raw.last_paint_vec_x;
 				Context.raw.prev_paint_vec_y = Context.raw.last_paint_vec_y;
 				return v;
 			}
 			case "_decalLayerLoc": {
 				v = _uniforms_vec;
-				vec4_set(v, Context.raw.layer.decalMat.m[12], Context.raw.layer.decalMat.m[13], Context.raw.layer.decalMat.m[14]);
+				vec4_set(v, Context.raw.layer.decal_mat.m[12], Context.raw.layer.decal_mat.m[13], Context.raw.layer.decal_mat.m[14]);
 				return v;
 			}
 			case "_decalLayerNor": {
 				v = _uniforms_vec;
-				vec4_normalize(vec4_set(v, Context.raw.layer.decalMat.m[8], Context.raw.layer.decalMat.m[9], Context.raw.layer.decalMat.m[10]));
+				vec4_normalize(vec4_set(v, Context.raw.layer.decal_mat.m[8], Context.raw.layer.decal_mat.m[9], Context.raw.layer.decal_mat.m[10]));
 				return v;
 			}
 			case "_pickerBase": {
@@ -258,7 +258,7 @@ class UniformsExt {
 	static vec2d = (x: f32) => {
 		// Transform from 3d viewport coord to 2d view coord
 		Context.raw.paint2d_view = false;
-		let res: f32 = (x * Base.w() - Base.w()) / UIView2D.ww;
+		let res: f32 = (x * base_w() - base_w()) / UIView2D.ww;
 		Context.raw.paint2d_view = true;
 		return res;
 	}
@@ -305,11 +305,11 @@ class UniformsExt {
 				return UniformsExt.vec;
 			}
 			case "_decalMask": {
-				let decalMask: bool = Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
+				let decal_mask: bool = Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
 				let val: f32 = (Context.raw.brush_radius * Context.raw.brush_nodes_radius) / 15.0;
-				let scale2d: f32 = (900 / Base.h()) * Config.raw.window_scale;
+				let scale2d: f32 = (900 / base_h()) * Config.raw.window_scale;
 				val *= scale2d; // Projection ratio
-				vec4_set(UniformsExt.vec, Context.raw.decal_x, Context.raw.decal_y, decalMask ? 1 : 0, val);
+				vec4_set(UniformsExt.vec, Context.raw.decal_x, Context.raw.decal_y, decal_mask ? 1 : 0, val);
 				if (Context.raw.paint2d) UniformsExt.vec.x = UniformsExt.vec2d(UniformsExt.vec.x);
 				return UniformsExt.vec;
 			}
@@ -323,7 +323,7 @@ class UniformsExt {
 			///if (is_paint || is_sculpt)
 			case "_decalLayerMatrix": { // Decal layer
 				let m: mat4_t = _uniforms_mat;
-				mat4_set_from(m, Context.raw.layer.decalMat);
+				mat4_set_from(m, Context.raw.layer.decal_mat);
 				mat4_get_inv(m, m);
 				mat4_mult_mat(m, UniformsExt.ortho_p);
 				return m;

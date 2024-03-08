@@ -14,7 +14,7 @@ class UpscaleNode extends LogicNode {
 			UpscaleNode.image = _image;
 
 			Console.progress(tr("Processing") + " - " + tr("Upscale"));
-			Base.notifyOnNextFrame(() => {
+			base_notifyOnNextFrame(() => {
 				UpscaleNode.loadBlob(() => {
 					if (UpscaleNode.image.width < Config.getTextureResX()) {
 						UpscaleNode.image = UpscaleNode.esrgan(UpscaleNode.image);

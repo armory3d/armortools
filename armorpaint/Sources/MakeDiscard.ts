@@ -44,7 +44,7 @@ class MakeDiscard {
 		NodeShader.write(frag, 'picker_sample_tc.y = 1.0 - picker_sample_tc.y;');
 		///end
 		NodeShader.add_uniform(frag, 'sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
-		let matid = Context.raw.materialid_picked / 255;
+		let matid: i32 = Context.raw.materialid_picked / 255;
 		NodeShader.write(frag, `if (${matid} != textureLod(texpaint_nor_undo, picker_sample_tc, 0.0).a) discard;`);
 	}
 }

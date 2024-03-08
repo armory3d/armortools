@@ -12,9 +12,9 @@ class MakePaint {
 	}
 
 	static run = (data: material_t, matcon: material_context_t): NodeShaderContextRaw => {
-		let context_id = "paint";
+		let context_id: string = "paint";
 
-		let con_paint = NodeShaderContext.create(data, {
+		let con_paint: NodeShaderContextRaw = NodeShaderContext.create(data, {
 			name: context_id,
 			depth_write: false,
 			compare_mode: "always", // TODO: align texcoords winding order
@@ -35,8 +35,8 @@ class MakePaint {
 		con_paint.data.color_writes_alpha = [true, true, true, true];
 		con_paint.allow_vcols = mesh_data_get_vertex_array(Context.raw.paint_object.data, 'col') != null;
 
-		let vert = NodeShaderContext.make_vert(con_paint);
-		let frag = NodeShaderContext.make_frag(con_paint);
+		let vert: NodeShaderRaw = NodeShaderContext.make_vert(con_paint);
+		let frag: NodeShaderRaw = NodeShaderContext.make_frag(con_paint);
 		frag.ins = vert.outs;
 
 		///if (krom_direct3d12 || krom_vulkan || krom_metal)
@@ -62,9 +62,9 @@ class MakePaint {
 			return con_paint;
 		}
 
-		let faceFill = Context.raw.tool == workspace_tool_t.FILL && Context.raw.fill_type_handle.position == fill_type_t.FACE;
-		let uvIslandFill = Context.raw.tool == workspace_tool_t.FILL && Context.raw.fill_type_handle.position == fill_type_t.UV_ISLAND;
-		let decal = Context.raw.tool == workspace_tool_t.DECAL || Context.raw.tool == workspace_tool_t.TEXT;
+		let face_fill: bool = Context.raw.tool == workspace_tool_t.FILL && Context.raw.fill_type_handle.position == fill_type_t.FACE;
+		let uv_island_fill: bool = Context.raw.tool == workspace_tool_t.FILL && Context.raw.fill_type_handle.position == fill_type_t.UV_ISLAND;
+		let decal: bool = Context.raw.tool == workspace_tool_t.DECAL || Context.raw.tool == workspace_tool_t.TEXT;
 
 		///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 		NodeShader.write(vert, 'vec2 tpos = vec2(tex.x * 2.0 - 1.0, (1.0 - tex.y) * 2.0 - 1.0);');
@@ -74,8 +74,8 @@ class MakePaint {
 
 		NodeShader.write(vert, 'gl_Position = vec4(tpos, 0.0, 1.0);');
 
-		let decalLayer = Context.raw.layer.fill_layer != null && Context.raw.layer.uvType == uv_type_t.PROJECT;
-		if (decalLayer) {
+		let decal_layer: bool = Context.raw.layer.fill_layer != null && Context.raw.layer.uv_type == uv_type_t.PROJECT;
+		if (decal_layer) {
 			NodeShader.add_uniform(vert, 'mat4 WVP', '_decalLayerMatrix');
 		}
 		else {
@@ -89,8 +89,8 @@ class MakePaint {
 		NodeShader.write_attrib(frag, 'sp.y = 1.0 - sp.y;');
 		NodeShader.write_attrib(frag, 'sp.z -= 0.0001;'); // small bias
 
-		let uvType = Context.raw.layer.fill_layer != null ? Context.raw.layer.uvType : Context.raw.brush_paint;
-		if (uvType == uv_type_t.PROJECT) frag.ndcpos = true;
+		let uv_type: uv_type_t = Context.raw.layer.fill_layer != null ? Context.raw.layer.uv_type : Context.raw.brush_paint;
+		if (uv_type == uv_type_t.PROJECT) frag.ndcpos = true;
 
 		NodeShader.add_uniform(frag, 'vec4 inp', '_inputBrush');
 		NodeShader.add_uniform(frag, 'vec4 inplast', '_inputBrushLast');
@@ -115,16 +115,16 @@ class MakePaint {
 			Context.raw.tool == workspace_tool_t.PARTICLE ||
 			decal) {
 
-			let depthReject = !Context.raw.xray;
-			if (Config.raw.brush_3d && !Config.raw.brush_depth_reject) depthReject = false;
+			let depth_reject: bool = !Context.raw.xray;
+			if (Config.raw.brush_3d && !Config.raw.brush_depth_reject) depth_reject = false;
 
 			// TODO: sp.z needs to take height channel into account
-			let particle = Context.raw.tool == workspace_tool_t.PARTICLE;
+			let particle: bool = Context.raw.tool == workspace_tool_t.PARTICLE;
 			if (Config.raw.brush_3d && !decal && !particle) {
-				if (MakeMaterial.heightUsed || Context.raw.sym_x || Context.raw.sym_y || Context.raw.sym_z) depthReject = false;
+				if (MakeMaterial.height_used || Context.raw.sym_x || Context.raw.sym_y || Context.raw.sym_z) depth_reject = false;
 			}
 
-			if (depthReject) {
+			if (depth_reject) {
 				///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 				NodeShader.write(frag, 'if (sp.z > textureLod(gbufferD, sp.xy, 0.0).r + 0.0005) discard;');
 				///else
@@ -136,8 +136,8 @@ class MakePaint {
 		}
 		else { // Fill, Bake
 			NodeShader.write(frag, 'float dist = 0.0;');
-			let angleFill = Context.raw.tool == workspace_tool_t.FILL && Context.raw.fill_type_handle.position == fill_type_t.ANGLE;
-			if (angleFill) {
+			let angle_fill: bool = Context.raw.tool == workspace_tool_t.FILL && Context.raw.fill_type_handle.position == fill_type_t.ANGLE;
+			if (angle_fill) {
 				NodeShader.add_function(frag, ShaderFunctions.str_octahedron_wrap);
 				NodeShader.add_uniform(frag, 'sampler2D gbuffer0');
 				NodeShader.write(frag, 'vec2 g0 = textureLod(gbuffer0, inp.xy, 0.0).rg;');
@@ -146,11 +146,11 @@ class MakePaint {
 				NodeShader.write(frag, 'wn.xy = wn.z >= 0.0 ? g0.xy : octahedronWrap(g0.xy);');
 				NodeShader.write(frag, 'wn = normalize(wn);');
 				frag.n = true;
-				let angle = Context.raw.brush_angle_reject_dot;
+				let angle: f32 = Context.raw.brush_angle_reject_dot;
 				NodeShader.write(frag, `if (dot(wn, n) < ${angle}) discard;`);
 			}
-			let stencilFill = Context.raw.tool == workspace_tool_t.FILL && Context.raw.brush_stencil_image != null;
-			if (stencilFill) {
+			let stencil_fill: bool = Context.raw.tool == workspace_tool_t.FILL && Context.raw.brush_stencil_image != null;
+			if (stencil_fill) {
 				///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 				NodeShader.write(frag, 'if (sp.z > textureLod(gbufferD, sp.xy, 0.0).r + 0.0005) discard;');
 				///else
@@ -159,16 +159,16 @@ class MakePaint {
 			}
 		}
 
-		if (Context.raw.colorid_picked || faceFill || uvIslandFill) {
+		if (Context.raw.colorid_picked || face_fill || uv_island_fill) {
 			NodeShader.add_out(vert, 'vec2 texCoordPick');
 			NodeShader.write(vert, 'texCoordPick = tex;');
 			if (Context.raw.colorid_picked) {
 				MakeDiscard.color_id(vert, frag);
 			}
-			if (faceFill) {
+			if (face_fill) {
 				MakeDiscard.face(vert, frag);
 			}
-			else if (uvIslandFill) {
+			else if (uv_island_fill) {
 				MakeDiscard.uv_island(vert, frag);
 			}
 		}
@@ -198,24 +198,24 @@ class MakePaint {
 			ParserMaterial.parse_subsurface = Context.raw.material.paint_subs;
 			ParserMaterial.parse_height = Context.raw.material.paint_height;
 			ParserMaterial.parse_height_as_channel = true;
-			let uvType = Context.raw.layer.fill_layer != null ? Context.raw.layer.uvType : Context.raw.brush_paint;
-			ParserMaterial.triplanar = uvType == uv_type_t.TRIPLANAR && !decal;
+			let uv_type: uv_type_t = Context.raw.layer.fill_layer != null ? Context.raw.layer.uv_type : Context.raw.brush_paint;
+			ParserMaterial.triplanar = uv_type == uv_type_t.TRIPLANAR && !decal;
 			ParserMaterial.sample_keep_aspect = decal;
 			ParserMaterial.sample_uv_scale = 'brushScale';
-			let sout = ParserMaterial.parse(UINodes.get_canvas_material(), con_paint, vert, frag, matcon);
+			let sout: shader_out_t = ParserMaterial.parse(UINodes.get_canvas_material(), con_paint, vert, frag, matcon);
 			ParserMaterial.parse_emission = false;
 			ParserMaterial.parse_subsurface = false;
 			ParserMaterial.parse_height_as_channel = false;
 			ParserMaterial.parse_height = false;
-			let base = sout.out_basecol;
-			let rough = sout.out_roughness;
-			let met = sout.out_metallic;
-			let occ = sout.out_occlusion;
-			let nortan = ParserMaterial.out_normaltan;
-			let height = sout.out_height;
-			let opac = sout.out_opacity;
-			let emis = sout.out_emission;
-			let subs = sout.out_subsurface;
+			let base: string = sout.out_basecol;
+			let rough: string = sout.out_roughness;
+			let met: string = sout.out_metallic;
+			let occ: string = sout.out_occlusion;
+			let nortan: string = ParserMaterial.out_normaltan;
+			let height: string = sout.out_height;
+			let opac: string = sout.out_opacity;
+			let emis: string = sout.out_emission;
+			let subs: string = sout.out_subsurface;
 			NodeShader.write(frag, `vec3 basecol = ${base};`);
 			NodeShader.write(frag, `float roughness = ${rough};`);
 			NodeShader.write(frag, `float metallic = ${met};`);
@@ -233,13 +233,13 @@ class MakePaint {
 			if (Context.raw.material.paint_subs) {
 				NodeShader.write(frag, `float subs = ${subs};`);
 			}
-			if (parseFloat(height) != 0.0 && !MakeMaterial.heightUsed) {
-				MakeMaterial.heightUsed = true;
+			if (parseFloat(height) != 0.0 && !MakeMaterial.height_used) {
+				MakeMaterial.height_used = true;
 				// Height used for the first time, also rebuild vertex shader
 				return MakePaint.run(data, matcon);
 			}
-			if (parseFloat(emis) != 0.0) MakeMaterial.emisUsed = true;
-			if (parseFloat(subs) != 0.0) MakeMaterial.subsUsed = true;
+			if (parseFloat(emis) != 0.0) MakeMaterial.emis_used = true;
+			if (parseFloat(subs) != 0.0) MakeMaterial.subs_used = true;
 		}
 
 		if (Context.raw.brush_mask_image != null && Context.raw.tool == workspace_tool_t.DECAL) {
@@ -297,7 +297,7 @@ class MakePaint {
 				NodeShader.write(frag, 'if (brushDirection.z == 0.0) discard;');
 				NodeShader.write(frag, 'pa_mask = vec2(pa_mask.x * brushDirection.x - pa_mask.y * brushDirection.y, pa_mask.x * brushDirection.y + pa_mask.y * brushDirection.x);');
 			}
-			let angle = Context.raw.brush_angle + Context.raw.brush_nodes_angle;
+			let angle: f32 = Context.raw.brush_angle + Context.raw.brush_nodes_angle;
 			if (angle != 0.0) {
 				NodeShader.add_uniform(frag, 'vec2 brushAngle', '_brushAngle');
 				NodeShader.write(frag, 'pa_mask.xy = vec2(pa_mask.x * brushAngle.x - pa_mask.y * brushAngle.y, pa_mask.x * brushAngle.y + pa_mask.y * brushAngle.x);');
@@ -340,12 +340,12 @@ class MakePaint {
 		NodeShader.add_uniform(frag, 'sampler2D texpaint_undo', '_texpaint_undo');
 		NodeShader.write(frag, 'vec4 sample_undo = textureLod(texpaint_undo, sample_tc, 0.0);');
 
-		let matid = Context.raw.material.id / 255;
+		let matid: f32 = Context.raw.material.id / 255;
 		if (Context.raw.picker_mask_handle.position == picker_mask_t.MATERIAL) {
 			matid = Context.raw.materialid_picked / 255; // Keep existing material id in place when mask is set
 		}
-		let matidString = ParserMaterial.vec1(matid * 3.0);
-		NodeShader.write(frag, `float matid = ${matidString};`);
+		let matid_string: string = ParserMaterial.vec1(matid * 3.0);
+		NodeShader.write(frag, `float matid = ${matid_string};`);
 
 		// matid % 3 == 0 - normal, 1 - emission, 2 - subsurface
 		if (Context.raw.material.paint_emis) {
@@ -361,9 +361,9 @@ class MakePaint {
 			NodeShader.write(frag, '}');
 		}
 
-		let isMask = SlotLayer.is_mask(Context.raw.layer);
-		let layered = Context.raw.layer != Project.layers[0];
-		if (layered && !isMask) {
+		let is_mask: bool = SlotLayer.is_mask(Context.raw.layer);
+		let layered: bool = Context.raw.layer != Project.layers[0];
+		if (layered && !is_mask) {
 			if (Context.raw.tool == workspace_tool_t.ERASER) {
 				NodeShader.write(frag, 'fragColor[0] = vec4(mix(sample_undo.rgb, vec3(0.0, 0.0, 0.0), str), sample_undo.a - str);');
 				NodeShader.write(frag, 'nortan = vec3(0.5, 0.5, 1.0);');
@@ -385,8 +385,8 @@ class MakePaint {
 			}
 			NodeShader.write(frag, 'fragColor[1] = vec4(nortan, matid);');
 
-			let height = "0.0";
-			if (Context.raw.material.paint_height && MakeMaterial.heightUsed) {
+			let height: string = "0.0";
+			if (Context.raw.material.paint_height && MakeMaterial.height_used) {
 				height = "height";
 			}
 
@@ -412,7 +412,7 @@ class MakePaint {
 				NodeShader.write(frag, 'vec4 sample_pack_undo = textureLod(texpaint_pack_undo, sample_tc, 0.0);');
 				NodeShader.write(frag, 'fragColor[0] = vec4(' + MakeMaterial.blend_mode(frag, Context.raw.brush_blending, 'sample_undo.rgb', 'basecol', 'str') + ', max(str, sample_undo.a));');
 				NodeShader.write(frag, 'fragColor[1] = vec4(mix(sample_nor_undo.rgb, nortan, str), matid);');
-				if (Context.raw.material.paint_height && MakeMaterial.heightUsed) {
+				if (Context.raw.material.paint_height && MakeMaterial.height_used) {
 					NodeShader.write(frag, 'fragColor[2] = mix(sample_pack_undo, vec4(occlusion, roughness, metallic, height), str);');
 				}
 				else {
@@ -449,7 +449,7 @@ class MakePaint {
 		}
 
 		// Base color only as mask
-		if (isMask) {
+		if (is_mask) {
 			// TODO: Apply opacity into base
 			// NodeShader.write(frag, 'fragColor[0].rgb *= fragColor[0].a;');
 			con_paint.data.color_writes_green[0] = false;

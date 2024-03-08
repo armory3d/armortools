@@ -39,14 +39,14 @@ class ParserBlend {
 
 	static dir = (raw: BlendRaw, type: string): string[] => {
 		// Return structure fields
-		let typeIndex: i32 = ParserBlend.get_type_index(raw.dna, type);
-		if (typeIndex == -1) return null;
-		let ds: DnaStruct = ParserBlend.get_struct(raw.dna, typeIndex);
+		let type_index: i32 = ParserBlend.get_type_index(raw.dna, type);
+		if (type_index == -1) return null;
+		let ds: DnaStruct = ParserBlend.get_struct(raw.dna, type_index);
 		let fields: string[] = [];
 		for (let i: i32 = 0; i < ds.field_names.length; ++i) {
-			let nameIndex: i32 = ds.field_names[i];
-			let typeIndex: i32 = ds.field_types[i];
-			fields.push(raw.dna.types[typeIndex] + " " + raw.dna.names[nameIndex]);
+			let name_index: i32 = ds.field_names[i];
+			let type_index: i32 = ds.field_types[i];
+			fields.push(raw.dna.types[type_index] + " " + raw.dna.names[name_index]);
 		}
 		return fields;
 	}
@@ -54,12 +54,12 @@ class ParserBlend {
 	static get = (raw: BlendRaw, type: string): BlHandleRaw[] => {
 		if (raw.dna == null) return null;
 		// Return all structures of type
-		let typeIndex: i32 = ParserBlend.get_type_index(raw.dna, type);
-		if (typeIndex == -1) return null;
-		let ds: DnaStruct = ParserBlend.get_struct(raw.dna, typeIndex);
+		let type_index: i32 = ParserBlend.get_type_index(raw.dna, type);
+		if (type_index == -1) return null;
+		let ds: DnaStruct = ParserBlend.get_struct(raw.dna, type_index);
 		let handles: BlHandleRaw[] = [];
 		for (let b of raw.blocks) {
-			if (raw.dna.structs[b.sdna_index].type == typeIndex) {
+			if (raw.dna.structs[b.sdna_index].type == type_index) {
 				let h: BlHandleRaw = new BlHandleRaw();
 				handles.push(h);
 				h.block = b;
@@ -122,37 +122,37 @@ class ParserBlend {
 
 				ParserBlend.read_chars(raw, 4); // SDNA
 				ParserBlend.read_chars(raw, 4); // NAME
-				let namesCount: i32 = ParserBlend.read_i32(raw);
-				for (let i: i32 = 0; i < namesCount; ++i) {
+				let names_count: i32 = ParserBlend.read_i32(raw);
+				for (let i: i32 = 0; i < names_count; ++i) {
 					raw.dna.names.push(ParserBlend.read_string(raw));
 				}
 				ParserBlend.align(raw);
 
 				ParserBlend.read_chars(raw, 4); // TYPE
-				let typesCount: i32 = ParserBlend.read_i32(raw);
-				for (let i: i32 = 0; i < typesCount; ++i) {
+				let types_count: i32 = ParserBlend.read_i32(raw);
+				for (let i: i32 = 0; i < types_count; ++i) {
 					raw.dna.types.push(ParserBlend.read_string(raw));
 				}
 				ParserBlend.align(raw);
 
 				ParserBlend.read_chars(raw, 4); // TLEN
-				for (let i: i32 = 0; i < typesCount; ++i) {
+				for (let i: i32 = 0; i < types_count; ++i) {
 					raw.dna.types_length.push(ParserBlend.read_i16(raw));
 				}
 				ParserBlend.align(raw);
 
 				ParserBlend.read_chars(raw, 4); // STRC
-				let structCount: i32 = ParserBlend.read_i32(raw);
-				for (let i: i32 = 0; i < structCount; ++i) {
+				let struct_count: i32 = ParserBlend.read_i32(raw);
+				for (let i: i32 = 0; i < struct_count; ++i) {
 					let ds: DnaStruct = new DnaStruct();
 					raw.dna.structs.push(ds);
 					ds.dna = raw.dna;
 					ds.type = ParserBlend.read_i16(raw);
-					let fieldCount: i32 = ParserBlend.read_i16(raw);
-					if (fieldCount > 0) {
+					let field_count: i32 = ParserBlend.read_i16(raw);
+					if (field_count > 0) {
 						ds.field_types = [];
 						ds.field_names = [];
-						for (let j: i32 = 0; j < fieldCount; ++j) {
+						for (let j: i32 = 0; j < field_count; ++j) {
 							ds.field_types.push(ParserBlend.read_i16(raw));
 							ds.field_names.push(ParserBlend.read_i16(raw));
 						}
@@ -282,13 +282,13 @@ class BlHandleRaw {
 
 class BlHandle {
 	static get_size = (raw: BlHandleRaw, index: i32): i32 => {
-		let nameIndex: i32 = raw.ds.field_names[index];
-		let typeIndex: i32 = raw.ds.field_types[index];
+		let name_index: i32 = raw.ds.field_names[index];
+		let type_index: i32 = raw.ds.field_types[index];
 		let dna: Dna = raw.ds.dna;
-		let n: string = dna.names[nameIndex];
+		let n: string = dna.names[name_index];
 		let size: i32 = 0;
 		if (n.indexOf("*") >= 0) size = raw.block.blend.pointer_size;
-		else size = dna.types_length[typeIndex];
+		else size = dna.types_length[type_index];
 		if (n.indexOf("[") > 0) size *= BlHandle.get_array_len(n);
 		return size;
 	}
@@ -307,49 +307,49 @@ class BlHandle {
 		// Return raw type or structure
 		let dna: Dna = raw.ds.dna;
 		for (let i: i32 = 0; i < raw.ds.field_names.length; ++i) {
-			let nameIndex: i32 = raw.ds.field_names[i];
-			let dnaName: string = dna.names[nameIndex];
-			if (name == BlHandle.base_name(dnaName)) {
-				let typeIndex: i32 = raw.ds.field_types[i];
-				let type: string = dna.types[typeIndex];
-				let newOffset: i32 = raw.offset;
-				for (let j: i32 = 0; j < i; ++j) newOffset += BlHandle.get_size(raw, j);
+			let name_index: i32 = raw.ds.field_names[i];
+			let dna_name: string = dna.names[name_index];
+			if (name == BlHandle.base_name(dna_name)) {
+				let type_index: i32 = raw.ds.field_types[i];
+				let type: string = dna.types[type_index];
+				let new_offset: i32 = raw.offset;
+				for (let j: i32 = 0; j < i; ++j) new_offset += BlHandle.get_size(raw, j);
 				// Cast void * to type
 				if (asType != null) {
 					for (let i: i32 = 0; i < dna.types.length; ++i) {
 						if (dna.types[i] == asType) {
-							typeIndex = i;
+							type_index = i;
 							break;
 						}
 					}
 				}
 				// Raw type
-				if (typeIndex < 12) {
+				if (type_index < 12) {
 					let blend: BlendRaw = raw.block.blend;
-					blend.pos = raw.block.pos + newOffset;
-					let isArray: bool = dnaName.charAt(dnaName.length - 1) == "]";
-					let len: i32 = isArray ? (arrayLen > 0 ? arrayLen : this.get_array_len(dnaName)) : 1;
+					blend.pos = raw.block.pos + new_offset;
+					let is_array: bool = dna_name.charAt(dna_name.length - 1) == "]";
+					let len: i32 = is_array ? (arrayLen > 0 ? arrayLen : this.get_array_len(dna_name)) : 1;
 					switch (type) {
-						case "int": return isArray ? ParserBlend.read_i32array(blend, len) : ParserBlend.read_i32(blend);
-						case "char": return isArray ? ParserBlend.read_string(blend) : ParserBlend.read_i8(blend);
-						case "uchar": return isArray ? ParserBlend.read_i8array(blend, len) : ParserBlend.read_i8(blend);
-						case "short": return isArray ? ParserBlend.read_i16array(blend, len) : ParserBlend.read_i16(blend);
-						case "ushort": return isArray ? ParserBlend.read_i16array(blend, len) : ParserBlend.read_i16(blend);
-						case "float": return isArray ? ParserBlend.read_f32array(blend, len) : ParserBlend.read_f32(blend);
+						case "int": return is_array ? ParserBlend.read_i32array(blend, len) : ParserBlend.read_i32(blend);
+						case "char": return is_array ? ParserBlend.read_string(blend) : ParserBlend.read_i8(blend);
+						case "uchar": return is_array ? ParserBlend.read_i8array(blend, len) : ParserBlend.read_i8(blend);
+						case "short": return is_array ? ParserBlend.read_i16array(blend, len) : ParserBlend.read_i16(blend);
+						case "ushort": return is_array ? ParserBlend.read_i16array(blend, len) : ParserBlend.read_i16(blend);
+						case "float": return is_array ? ParserBlend.read_f32array(blend, len) : ParserBlend.read_f32(blend);
 						case "double": return 0; //ParserBlend.readf64(blend);
-						case "long": return isArray ? ParserBlend.read_i32array(blend, len) : ParserBlend.read_i32(blend);
-						case "ulong": return isArray ? ParserBlend.read_i32array(blend, len) : ParserBlend.read_i32(blend);
+						case "long": return is_array ? ParserBlend.read_i32array(blend, len) : ParserBlend.read_i32(blend);
+						case "ulong": return is_array ? ParserBlend.read_i32array(blend, len) : ParserBlend.read_i32(blend);
 						case "int64_t": return ParserBlend.read_i64(blend);
 						case "uint64_t": return ParserBlend.read_i64(blend);
-						case "void": if (dnaName.charAt(0) == "*") { return ParserBlend.read_i64(blend); };
+						case "void": if (dna_name.charAt(0) == "*") { return ParserBlend.read_i64(blend); };
 					}
 				}
 				// Structure
 				let h: BlHandleRaw = new BlHandleRaw();
-				h.ds = ParserBlend.get_struct(dna, typeIndex);
-				let isPointer: bool = dnaName.charAt(0) == "*";
-				if (isPointer) {
-					raw.block.blend.pos = raw.block.pos + newOffset;
+				h.ds = ParserBlend.get_struct(dna, type_index);
+				let is_pointer: bool = dna_name.charAt(0) == "*";
+				if (is_pointer) {
+					raw.block.blend.pos = raw.block.pos + new_offset;
 					let addr: any = ParserBlend.read_pointer(raw.block.blend);
 					if (raw.block.blend.map.has(addr)) {
 						h.block = raw.block.blend.map.get(addr);
@@ -359,9 +359,9 @@ class BlHandle {
 				}
 				else {
 					h.block = raw.block;
-					h.offset = newOffset;
+					h.offset = new_offset;
 				}
-				h.offset += dna.types_length[typeIndex] * index;
+				h.offset += dna.types_length[type_index] * index;
 				return h;
 			}
 		}

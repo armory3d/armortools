@@ -25,7 +25,7 @@ class Viewport {
 			if (o.type == "camera_object") {
 				mat4_set_from_f32_array(cam.base.transform.local, o.transform);
 				transform_decompose(cam.base.transform);
-				if (Context.raw.fov_handle != null) Context.raw.fov_handle.value = cam.data.fov = Base.default_fov;
+				if (Context.raw.fov_handle != null) Context.raw.fov_handle.value = cam.data.fov = base_default_fov;
 				Context.raw.cam_handle.position = 0;
 				cam.data.ortho = null;
 				camera_object_build_proj(cam);
