@@ -4,9 +4,9 @@ class UtilMesh {
 	static unwrappers: Map<string, ((a: any)=>void)> = new Map();
 
 	static merge_mesh = (paint_objects: mesh_object_t[] = null) => {
-		if (paint_objects == null) paint_objects = Project.paint_objects;
+		if (paint_objects == null) paint_objects = project_paint_objects;
 		if (paint_objects.length == 0) return;
-		Context.raw.merged_object_is_atlas = paint_objects.length < Project.paint_objects.length;
+		context_raw.merged_object_is_atlas = paint_objects.length < project_paint_objects.length;
 		let vlen: i32 = 0;
 		let ilen: i32 = 0;
 		let max_scale: f32 = 0.0;
@@ -61,7 +61,7 @@ class UtilMesh {
 		}
 
 		let raw: mesh_data_t = {
-			name: Context.raw.paint_object.base.name,
+			name: context_raw.paint_object.base.name,
 			vertex_arrays: [
 				{ values: va0, attrib: "pos", data: "short4norm" },
 				{ values: va1, attrib: "nor", data: "short2norm" },
@@ -77,10 +77,10 @@ class UtilMesh {
 
 		UtilMesh.remove_merged_mesh();
 		let md: mesh_data_t = mesh_data_create(raw);
-		Context.raw.merged_object = mesh_object_create(md, Context.raw.paint_object.materials);
-		Context.raw.merged_object.base.name = Context.raw.paint_object.base.name + "_merged";
-		Context.raw.merged_object.force_context = "paint";
-		object_set_parent(Context.raw.merged_object.base, Context.main_object().base);
+		context_raw.merged_object = mesh_object_create(md, context_raw.paint_object.materials);
+		context_raw.merged_object.base.name = context_raw.paint_object.base.name + "_merged";
+		context_raw.merged_object.force_context = "paint";
+		object_set_parent(context_raw.merged_object.base, context_main_object().base);
 
 		///if (krom_direct3d12 || krom_vulkan || krom_metal)
 		RenderPathRaytrace.ready = false;
@@ -88,15 +88,15 @@ class UtilMesh {
 	}
 
 	static remove_merged_mesh = () => {
-		if (Context.raw.merged_object != null) {
-			mesh_data_delete(Context.raw.merged_object.data);
-			mesh_object_remove(Context.raw.merged_object);
-			Context.raw.merged_object = null;
+		if (context_raw.merged_object != null) {
+			mesh_data_delete(context_raw.merged_object.data);
+			mesh_object_remove(context_raw.merged_object);
+			context_raw.merged_object = null;
 		}
 	}
 
 	static swap_axis = (a: i32, b: i32) => {
-		let objects: mesh_object_t[] = Project.paint_objects;
+		let objects: mesh_object_t[] = project_paint_objects;
 		for (let o of objects) {
 			// Remapping vertices, buckle up
 			// 0 - x, 1 - y, 2 - z
@@ -137,7 +137,7 @@ class UtilMesh {
 	}
 
 	static flip_normals = () => {
-		let objects: mesh_object_t[] = Project.paint_objects;
+		let objects: mesh_object_t[] = project_paint_objects;
 		for (let o of objects) {
 			let vas: vertex_array_t[] = o.data.vertex_arrays;
 			let va0: i16_array_t = vas[0].values;
@@ -167,7 +167,7 @@ class UtilMesh {
 		let vc: vec4_t = vec4_create();
 		let cb: vec4_t = vec4_create();
 		let ab: vec4_t = vec4_create();
-		let objects: mesh_object_t[] = Project.paint_objects;
+		let objects: mesh_object_t[] = project_paint_objects;
 		for (let o of objects) {
 			let g: mesh_data_t = o.data;
 			let l: i32 = g4_vertex_struct_byte_size(g._.structure) / 2;
@@ -260,7 +260,7 @@ class UtilMesh {
 		let dx: f32 = 0.0;
 		let dy: f32 = 0.0;
 		let dz: f32 = 0.0;
-		for (let o of Project.paint_objects) {
+		for (let o of project_paint_objects) {
 			let l: i32 = 4;
 			let sc: f32 = o.data.scale_pos / 32767;
 			let va: i16_array_t = o.data.vertex_arrays[0].values;
@@ -282,11 +282,11 @@ class UtilMesh {
 			dy += (miny + maxy) / 2 * sc;
 			dz += (minz + maxz) / 2 * sc;
 		}
-		dx /= Project.paint_objects.length;
-		dy /= Project.paint_objects.length;
-		dz /= Project.paint_objects.length;
+		dx /= project_paint_objects.length;
+		dy /= project_paint_objects.length;
+		dz /= project_paint_objects.length;
 
-		for (let o of Project.paint_objects) {
+		for (let o of project_paint_objects) {
 			let g: mesh_data_t = o.data;
 			let sc: f32 = o.data.scale_pos / 32767;
 			let va: i16_array_t = o.data.vertex_arrays[0].values;
@@ -322,7 +322,7 @@ class UtilMesh {
 		let height: buffer_t = image_get_pixels(texpaint_pack);
 		let height_view: buffer_view_t = new DataView(height);
 		let res: i32 = texpaint_pack.width;
-		let o: mesh_object_t = Project.paint_objects[0];
+		let o: mesh_object_t = project_paint_objects[0];
 		let g: mesh_data_t = o.data;
 		let l: i32 = g4_vertex_struct_byte_size(g._.structure) / 2;
 		let vertices: buffer_view_t = g4_vertex_buffer_lock(g._.vertex_buffer); // posnortex

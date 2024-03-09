@@ -11,7 +11,7 @@ class UIHeader {
 
 	static render_ui = () => {
 		let ui: zui_t = UIBase.ui;
-		if (Config.raw.touch_ui) {
+		if (config_raw.touch_ui) {
 			UIHeader.headerh = UIHeader.default_header_h + 6;
 		}
 		else {
@@ -19,13 +19,13 @@ class UIHeader {
 		}
 		UIHeader.headerh = Math.floor(UIHeader.headerh * zui_SCALE(ui));
 
-		if (Config.raw.layout[layout_size_t.HEADER] == 0) return;
+		if (config_raw.layout[layout_size_t.HEADER] == 0) return;
 
-		let nodesw: i32 = (UINodes.show || UIView2D.show) ? Config.raw.layout[layout_size_t.NODES_W] : 0;
+		let nodesw: i32 = (UINodes.show || UIView2D.show) ? config_raw.layout[layout_size_t.NODES_W] : 0;
 		///if is_lab
 		let ww: i32 = sys_width() - nodesw;
 		///else
-		let ww: i32 = sys_width() - UIToolbar.toolbar_w - Config.raw.layout[layout_size_t.SIDEBAR_W] - nodesw;
+		let ww: i32 = sys_width() - UIToolbar.toolbar_w - config_raw.layout[layout_size_t.SIDEBAR_W] - nodesw;
 		///end
 
 		if (zui_window(UIHeader.header_handle, app_x(), UIHeader.headerh, ww, UIHeader.headerh)) {
@@ -37,81 +37,81 @@ class UIHeader {
 	///if is_paint
 
 	static draw_tool_properties = (ui: zui_t) => {
-		if (Context.raw.tool == workspace_tool_t.COLORID) {
+		if (context_raw.tool == workspace_tool_t.COLORID) {
 			zui_text(tr("Picked Color"));
-			if (Context.raw.colorid_picked) {
+			if (context_raw.colorid_picked) {
 				zui_image(render_path_render_targets.get("texpaint_colorid")._image, 0xffffffff, 64);
 			}
-			ui.enabled = Context.raw.colorid_picked;
+			ui.enabled = context_raw.colorid_picked;
 			if (zui_button(tr("Clear"))) {
-				Context.raw.colorid_picked = false;
+				context_raw.colorid_picked = false;
 				UIToolbar.toolbar_handle.redraws = 1;
 			}
 			ui.enabled = true;
 			zui_text(tr("Color ID Map"));
-			if (Project.asset_names.length > 0) {
-				let cid: i32 = zui_combo(Context.raw.colorid_handle, base_enum_texts("TEX_IMAGE"), tr("Color ID"));
-				if (Context.raw.colorid_handle.changed) {
-					Context.raw.ddirty = 2;
-					Context.raw.colorid_picked = false;
+			if (project_asset_names.length > 0) {
+				let cid: i32 = zui_combo(context_raw.colorid_handle, base_enum_texts("TEX_IMAGE"), tr("Color ID"));
+				if (context_raw.colorid_handle.changed) {
+					context_raw.ddirty = 2;
+					context_raw.colorid_picked = false;
 					UIToolbar.toolbar_handle.redraws = 1;
 				}
-				zui_image(Project.get_image(Project.assets[cid]));
-				if (ui.is_hovered) zui_tooltip_image(Project.get_image(Project.assets[cid]), 256);
+				zui_image(project_get_image(project_assets[cid]));
+				if (ui.is_hovered) zui_tooltip_image(project_get_image(project_assets[cid]), 256);
 			}
 			if (zui_button(tr("Import"))) {
-				UIFiles.show(Path.texture_formats.join(","), false, true, (path: string) => {
+				UIFiles.show(path_texture_formats.join(","), false, true, (path: string) => {
 					ImportAsset.run(path, -1.0, -1.0, true, false);
 
-					Context.raw.colorid_handle.position = Project.asset_names.length - 1;
-					for (let a of Project.assets) {
+					context_raw.colorid_handle.position = project_asset_names.length - 1;
+					for (let a of project_assets) {
 						// Already imported
-						if (a.file == path) Context.raw.colorid_handle.position = Project.assets.indexOf(a);
+						if (a.file == path) context_raw.colorid_handle.position = project_assets.indexOf(a);
 					}
-					Context.raw.ddirty = 2;
-					Context.raw.colorid_picked = false;
+					context_raw.ddirty = 2;
+					context_raw.colorid_picked = false;
 					UIToolbar.toolbar_handle.redraws = 1;
 					UIBase.hwnds[2].redraws = 2;
 				});
 			}
-			ui.enabled = Context.raw.colorid_picked;
+			ui.enabled = context_raw.colorid_picked;
 			if (zui_button(tr("To Mask"))) {
-				if (SlotLayer.is_mask(Context.raw.layer)) Context.set_layer(Context.raw.layer.parent);
-				let m: SlotLayerRaw = base_new_mask(false, Context.raw.layer);
+				if (SlotLayer.is_mask(context_raw.layer)) context_set_layer(context_raw.layer.parent);
+				let m: SlotLayerRaw = base_new_mask(false, context_raw.layer);
 				let _next = () => {
 					if (base_pipe_merge == null) base_make_pipe();
 					if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
 					g4_begin(m.texpaint);
 					g4_set_pipeline(base_pipe_colorid_to_mask);
 					g4_set_tex(base_texpaint_colorid,render_path_render_targets.get("texpaint_colorid")._image);
-					g4_set_tex(base_tex_colorid, Project.get_image(Project.assets[Context.raw.colorid_handle.position]));
+					g4_set_tex(base_tex_colorid, project_get_image(project_assets[context_raw.colorid_handle.position]));
 					g4_set_vertex_buffer(const_data_screen_aligned_vb);
 					g4_set_index_buffer(const_data_screen_aligned_ib);
 					g4_draw();
 					g4_end();
-					Context.raw.colorid_picked = false;
+					context_raw.colorid_picked = false;
 					UIToolbar.toolbar_handle.redraws = 1;
 					UIHeader.header_handle.redraws = 1;
-					Context.raw.layer_preview_dirty = true;
+					context_raw.layer_preview_dirty = true;
 					base_update_fill_layers();
 				}
 				base_notify_on_next_frame(_next);
-				History.new_white_mask();
+				history_new_white_mask();
 			}
 			ui.enabled = true;
 		}
-		else if (Context.raw.tool == workspace_tool_t.PICKER || Context.raw.tool == workspace_tool_t.MATERIAL) {
-			let base_r_picked: f32 = Math.round(color_get_rb(Context.raw.picked_color.base) / 255 * 10) / 10;
-			let base_g_picked: f32 = Math.round(color_get_gb(Context.raw.picked_color.base) / 255 * 10) / 10;
-			let base_b_picked: f32 = Math.round(color_get_bb(Context.raw.picked_color.base) / 255 * 10) / 10;
-			let normal_r_picked: f32 = Math.round(color_get_rb(Context.raw.picked_color.normal) / 255 * 10) / 10;
-			let normal_g_picked: f32 = Math.round(color_get_gb(Context.raw.picked_color.normal) / 255 * 10) / 10;
-			let normal_b_picked: f32 = Math.round(color_get_bb(Context.raw.picked_color.normal) / 255 * 10) / 10;
-			let occlusion_picked: f32 = Math.round(Context.raw.picked_color.occlusion * 100) / 100;
-			let roughness_picked: f32 = Math.round(Context.raw.picked_color.roughness * 100) / 100;
-			let metallic_picked: f32 = Math.round(Context.raw.picked_color.metallic * 100) / 100;
-			let height_picked: f32 = Math.round(Context.raw.picked_color.height * 100) / 100;
-			let opacity_picked: f32 = Math.round(Context.raw.picked_color.opacity * 100) / 100;
+		else if (context_raw.tool == workspace_tool_t.PICKER || context_raw.tool == workspace_tool_t.MATERIAL) {
+			let base_r_picked: f32 = Math.round(color_get_rb(context_raw.picked_color.base) / 255 * 10) / 10;
+			let base_g_picked: f32 = Math.round(color_get_gb(context_raw.picked_color.base) / 255 * 10) / 10;
+			let base_b_picked: f32 = Math.round(color_get_bb(context_raw.picked_color.base) / 255 * 10) / 10;
+			let normal_r_picked: f32 = Math.round(color_get_rb(context_raw.picked_color.normal) / 255 * 10) / 10;
+			let normal_g_picked: f32 = Math.round(color_get_gb(context_raw.picked_color.normal) / 255 * 10) / 10;
+			let normal_b_picked: f32 = Math.round(color_get_bb(context_raw.picked_color.normal) / 255 * 10) / 10;
+			let occlusion_picked: f32 = Math.round(context_raw.picked_color.occlusion * 100) / 100;
+			let roughness_picked: f32 = Math.round(context_raw.picked_color.roughness * 100) / 100;
+			let metallic_picked: f32 = Math.round(context_raw.picked_color.metallic * 100) / 100;
+			let height_picked: f32 = Math.round(context_raw.picked_color.height * 100) / 100;
+			let opacity_picked: f32 = Math.round(context_raw.picked_color.opacity * 100) / 100;
 
 			let h: zui_handle_t = zui_handle("uiheader_0");
 			let color: color_t = 0xffffffff;
@@ -125,7 +125,7 @@ class UIHeader {
 				let uiy: i32 = ui._y;
 				base_drag_off_x = -(mouse_x - uix - ui._window_x - 3);
 				base_drag_off_y = -(mouse_y - uiy - ui._window_y + 1);
-				base_drag_swatch = Project.clone_swatch(Context.raw.picked_color);
+				base_drag_swatch = project_clone_swatch(context_raw.picked_color);
 			}
 			if (ui.is_hovered) zui_tooltip(tr("Drag and drop picked color to swatches, materials, layers or to the node editor"));
 			if (ui.is_hovered && ui.input_released) {
@@ -137,9 +137,9 @@ class UIHeader {
 				}, 10);
 			}
 			if (zui_button(tr("Add Swatch"))) {
-				let new_swatch: swatch_color_t = Project.clone_swatch(Context.raw.picked_color);
-				Context.set_swatch(new_swatch);
-				Project.raw.swatches.push(new_swatch);
+				let new_swatch: swatch_color_t = project_clone_swatch(context_raw.picked_color);
+				context_set_swatch(new_swatch);
+				project_raw.swatches.push(new_swatch);
 				UIBase.hwnds[2].redraws = 1;
 			}
 			if (ui.is_hovered) zui_tooltip(tr("Add picked color to swatches"));
@@ -151,21 +151,21 @@ class UIHeader {
 			zui_text(tr("Metallic") + ` (${metallic_picked})`);
 			zui_text(tr("Height") + ` (${height_picked})`);
 			zui_text(tr("Opacity") + ` (${opacity_picked})`);
-			Context.raw.picker_select_material = zui_check(zui_handle("uiheader_1", { selected: Context.raw.picker_select_material }), tr("Select Material"));
-			zui_combo(Context.raw.picker_mask_handle, [tr("None"), tr("Material")], tr("Mask"), true);
-			if (Context.raw.picker_mask_handle.changed) {
+			context_raw.picker_select_material = zui_check(zui_handle("uiheader_1", { selected: context_raw.picker_select_material }), tr("Select Material"));
+			zui_combo(context_raw.picker_mask_handle, [tr("None"), tr("Material")], tr("Mask"), true);
+			if (context_raw.picker_mask_handle.changed) {
 				MakeMaterial.parse_paint_material();
 			}
 		}
-		else if (Context.raw.tool == workspace_tool_t.BAKE) {
+		else if (context_raw.tool == workspace_tool_t.BAKE) {
 			ui.changed = false;
 
 			///if (krom_direct3d12 || krom_vulkan || krom_metal)
-			let baking: bool = Context.raw.pdirty > 0;
-			let rt_bake: bool = Context.raw.bake_type == bake_type_t.AO || Context.raw.bake_type == bake_type_t.LIGHTMAP || Context.raw.bake_type == bake_type_t.BENT_NORMAL || Context.raw.bake_type == bake_type_t.THICKNESS;
+			let baking: bool = context_raw.pdirty > 0;
+			let rt_bake: bool = context_raw.bake_type == bake_type_t.AO || context_raw.bake_type == bake_type_t.LIGHTMAP || context_raw.bake_type == bake_type_t.BENT_NORMAL || context_raw.bake_type == bake_type_t.THICKNESS;
 			if (baking && zui_button(tr("Stop"))) {
-				Context.raw.pdirty = 0;
-				Context.raw.rdirty = 2;
+				context_raw.pdirty = 0;
+				context_raw.rdirty = 2;
 			}
 			///else
 			let baking: bool = false;
@@ -173,19 +173,19 @@ class UIHeader {
 			///end
 
 			if (!baking && zui_button(tr("Bake"))) {
-				Context.raw.pdirty = rt_bake ? Context.raw.bake_samples : 1;
-				Context.raw.rdirty = 3;
+				context_raw.pdirty = rt_bake ? context_raw.bake_samples : 1;
+				context_raw.rdirty = 3;
 				base_notify_on_next_frame(() => {
-					Context.raw.layer_preview_dirty = true;
+					context_raw.layer_preview_dirty = true;
 				});
 				UIBase.hwnds[0].redraws = 2;
-				History.push_undo = true;
+				history_push_undo = true;
 				///if (krom_direct3d12 || krom_vulkan || krom_metal)
 				RenderPathRaytraceBake.current_sample = 0;
 				///end
 			}
 
-			let bake_handle: zui_handle_t = zui_handle("uiheader_2", { position: Context.raw.bake_type });
+			let bake_handle: zui_handle_t = zui_handle("uiheader_2", { position: context_raw.bake_type });
 			let bakes: string[] = [
 				tr("AO"),
 				tr("Curvature"),
@@ -210,40 +210,40 @@ class UIHeader {
 			}
 			///end
 
-			Context.raw.bake_type = zui_combo(bake_handle, bakes, tr("Bake"));
+			context_raw.bake_type = zui_combo(bake_handle, bakes, tr("Bake"));
 
 			///if (krom_direct3d12 || krom_vulkan || krom_metal)
 			if (!krom_raytrace_supported()) {
-				Context.raw.bake_type += 1; // Offset for removed AO
+				context_raw.bake_type += 1; // Offset for removed AO
 			}
 			///end
 
 			///if (krom_direct3d12 || krom_vulkan || krom_metal)
 			if (rt_bake) {
-				let samples_handle: zui_handle_t = zui_handle("uiheader_3", { value: Context.raw.bake_samples });
-				Context.raw.bake_samples = Math.floor(zui_slider(samples_handle, tr("Samples"), 1, 512, true, 1));
+				let samples_handle: zui_handle_t = zui_handle("uiheader_3", { value: context_raw.bake_samples });
+				context_raw.bake_samples = Math.floor(zui_slider(samples_handle, tr("Samples"), 1, 512, true, 1));
 			}
 			///end
 
-			if (Context.raw.bake_type == bake_type_t.NORMAL_OBJECT || Context.raw.bake_type == bake_type_t.POSITION || Context.raw.bake_type == bake_type_t.BENT_NORMAL) {
-				let bake_up_axis_handle: zui_handle_t = zui_handle("uiheader_4", { position: Context.raw.bake_up_axis });
-				Context.raw.bake_up_axis = zui_combo(bake_up_axis_handle, [tr("Z"), tr("Y")], tr("Up Axis"), true);
+			if (context_raw.bake_type == bake_type_t.NORMAL_OBJECT || context_raw.bake_type == bake_type_t.POSITION || context_raw.bake_type == bake_type_t.BENT_NORMAL) {
+				let bake_up_axis_handle: zui_handle_t = zui_handle("uiheader_4", { position: context_raw.bake_up_axis });
+				context_raw.bake_up_axis = zui_combo(bake_up_axis_handle, [tr("Z"), tr("Y")], tr("Up Axis"), true);
 			}
-			if (Context.raw.bake_type == bake_type_t.AO || Context.raw.bake_type == bake_type_t.CURVATURE) {
-				let bake_axis_handle: zui_handle_t = zui_handle("uiheader_5", { position: Context.raw.bake_axis });
-				Context.raw.bake_axis = zui_combo(bake_axis_handle, [tr("XYZ"), tr("X"), tr("Y"), tr("Z"), tr("-X"), tr("-Y"), tr("-Z")], tr("Axis"), true);
+			if (context_raw.bake_type == bake_type_t.AO || context_raw.bake_type == bake_type_t.CURVATURE) {
+				let bake_axis_handle: zui_handle_t = zui_handle("uiheader_5", { position: context_raw.bake_axis });
+				context_raw.bake_axis = zui_combo(bake_axis_handle, [tr("XYZ"), tr("X"), tr("Y"), tr("Z"), tr("-X"), tr("-Y"), tr("-Z")], tr("Axis"), true);
 			}
-			if (Context.raw.bake_type == bake_type_t.AO) {
-				let strength_handle: zui_handle_t = zui_handle("uiheader_6", { value: Context.raw.bake_ao_strength });
-				Context.raw.bake_ao_strength = zui_slider(strength_handle, tr("Strength"), 0.0, 2.0, true);
-				let radius_handle: zui_handle_t = zui_handle("uiheader_7", { value: Context.raw.bake_ao_radius });
-				Context.raw.bake_ao_radius = zui_slider(radius_handle, tr("Radius"), 0.0, 2.0, true);
-				let offset_handle: zui_handle_t = zui_handle("uiheader_8", { value: Context.raw.bake_ao_offset });
-				Context.raw.bake_ao_offset = zui_slider(offset_handle, tr("Offset"), 0.0, 2.0, true);
+			if (context_raw.bake_type == bake_type_t.AO) {
+				let strength_handle: zui_handle_t = zui_handle("uiheader_6", { value: context_raw.bake_ao_strength });
+				context_raw.bake_ao_strength = zui_slider(strength_handle, tr("Strength"), 0.0, 2.0, true);
+				let radius_handle: zui_handle_t = zui_handle("uiheader_7", { value: context_raw.bake_ao_radius });
+				context_raw.bake_ao_radius = zui_slider(radius_handle, tr("Radius"), 0.0, 2.0, true);
+				let offset_handle: zui_handle_t = zui_handle("uiheader_8", { value: context_raw.bake_ao_offset });
+				context_raw.bake_ao_offset = zui_slider(offset_handle, tr("Offset"), 0.0, 2.0, true);
 			}
 			///if (krom_direct3d12 || krom_vulkan || krom_metal)
 			if (rt_bake) {
-				let progress: f32 = RenderPathRaytraceBake.current_sample / Context.raw.bake_samples;
+				let progress: f32 = RenderPathRaytraceBake.current_sample / context_raw.bake_samples;
 				if (progress > 1.0) progress = 1.0;
 				// Progress bar
 				g2_set_color(ui.t.SEPARATOR_COL);
@@ -256,61 +256,61 @@ class UIHeader {
 				zui_text(tr("Rays/second" + ": ") + RenderPathRaytraceBake.rays_sec);
 			}
 			///end
-			if (Context.raw.bake_type == bake_type_t.CURVATURE) {
-				let strength_handle: zui_handle_t = zui_handle("uiheader_9", { value: Context.raw.bake_curv_strength });
-				Context.raw.bake_curv_strength = zui_slider(strength_handle, tr("Strength"), 0.0, 2.0, true);
-				let radius_handle: zui_handle_t = zui_handle("uiheader_10", { value: Context.raw.bake_curv_radius });
-				Context.raw.bake_curv_radius = zui_slider(radius_handle, tr("Radius"), 0.0, 2.0, true);
-				let offset_handle: zui_handle_t = zui_handle("uiheader_11", { value: Context.raw.bake_curv_offset });
-				Context.raw.bake_curv_offset = zui_slider(offset_handle, tr("Offset"), -2.0, 2.0, true);
-				let smooth_handle: zui_handle_t = zui_handle("uiheader_12", { value: Context.raw.bake_curv_smooth });
-				Context.raw.bake_curv_smooth = Math.floor(zui_slider(smooth_handle, tr("Smooth"), 0, 5, false, 1));
+			if (context_raw.bake_type == bake_type_t.CURVATURE) {
+				let strength_handle: zui_handle_t = zui_handle("uiheader_9", { value: context_raw.bake_curv_strength });
+				context_raw.bake_curv_strength = zui_slider(strength_handle, tr("Strength"), 0.0, 2.0, true);
+				let radius_handle: zui_handle_t = zui_handle("uiheader_10", { value: context_raw.bake_curv_radius });
+				context_raw.bake_curv_radius = zui_slider(radius_handle, tr("Radius"), 0.0, 2.0, true);
+				let offset_handle: zui_handle_t = zui_handle("uiheader_11", { value: context_raw.bake_curv_offset });
+				context_raw.bake_curv_offset = zui_slider(offset_handle, tr("Offset"), -2.0, 2.0, true);
+				let smooth_handle: zui_handle_t = zui_handle("uiheader_12", { value: context_raw.bake_curv_smooth });
+				context_raw.bake_curv_smooth = Math.floor(zui_slider(smooth_handle, tr("Smooth"), 0, 5, false, 1));
 			}
-			if (Context.raw.bake_type == bake_type_t.NORMAL || Context.raw.bake_type == bake_type_t.HEIGHT || Context.raw.bake_type == bake_type_t.DERIVATIVE) {
+			if (context_raw.bake_type == bake_type_t.NORMAL || context_raw.bake_type == bake_type_t.HEIGHT || context_raw.bake_type == bake_type_t.DERIVATIVE) {
 				let ar: string[] = [];
-				for (let p of Project.paint_objects) ar.push(p.base.name);
-				let poly_handle: zui_handle_t = zui_handle("uiheader_13", { position: Context.raw.bake_high_poly });
-				Context.raw.bake_high_poly = zui_combo(poly_handle, ar, tr("High Poly"));
+				for (let p of project_paint_objects) ar.push(p.base.name);
+				let poly_handle: zui_handle_t = zui_handle("uiheader_13", { position: context_raw.bake_high_poly });
+				context_raw.bake_high_poly = zui_combo(poly_handle, ar, tr("High Poly"));
 			}
 			if (ui.changed) {
 				MakeMaterial.parse_paint_material();
 			}
 		}
-		else if (Context.raw.tool == workspace_tool_t.BRUSH ||
-				 Context.raw.tool == workspace_tool_t.ERASER ||
-				 Context.raw.tool == workspace_tool_t.FILL ||
-				 Context.raw.tool == workspace_tool_t.DECAL ||
-				 Context.raw.tool == workspace_tool_t.TEXT ||
-				 Context.raw.tool == workspace_tool_t.CLONE ||
-				 Context.raw.tool == workspace_tool_t.BLUR ||
-				 Context.raw.tool == workspace_tool_t.SMUDGE ||
-				 Context.raw.tool == workspace_tool_t.PARTICLE) {
+		else if (context_raw.tool == workspace_tool_t.BRUSH ||
+				 context_raw.tool == workspace_tool_t.ERASER ||
+				 context_raw.tool == workspace_tool_t.FILL ||
+				 context_raw.tool == workspace_tool_t.DECAL ||
+				 context_raw.tool == workspace_tool_t.TEXT ||
+				 context_raw.tool == workspace_tool_t.CLONE ||
+				 context_raw.tool == workspace_tool_t.BLUR ||
+				 context_raw.tool == workspace_tool_t.SMUDGE ||
+				 context_raw.tool == workspace_tool_t.PARTICLE) {
 
-			let decal: bool = Context.raw.tool == workspace_tool_t.DECAL || Context.raw.tool == workspace_tool_t.TEXT;
-			let decal_mask: bool = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutType.ShortcutDown);
-			if (Context.raw.tool != workspace_tool_t.FILL) {
+			let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
+			let decal_mask: bool = decal && operator_shortcut(config_keymap.decal_mask, shortcut_type_t.DOWN);
+			if (context_raw.tool != workspace_tool_t.FILL) {
 				if (decal_mask) {
-					Context.raw.brush_decal_mask_radius = zui_slider(Context.raw.brush_decal_mask_radius_handle, tr("Radius"), 0.01, 2.0, true);
-					if (ui.is_hovered) zui_tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", new Map([["brush_radius", Config.keymap.brush_radius], ["brush_radius_decrease", Config.keymap.brush_radius_decrease], ["brush_radius_increase", Config.keymap.brush_radius_increase]])));
+					context_raw.brush_decal_mask_radius = zui_slider(context_raw.brush_decal_mask_radius_handle, tr("Radius"), 0.01, 2.0, true);
+					if (ui.is_hovered) zui_tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", new Map([["brush_radius", config_keymap.brush_radius], ["brush_radius_decrease", config_keymap.brush_radius_decrease], ["brush_radius_increase", config_keymap.brush_radius_increase]])));
 				}
 				else {
-					Context.raw.brush_radius = zui_slider(Context.raw.brush_radius_handle, tr("Radius"), 0.01, 2.0, true);
-					if (ui.is_hovered) zui_tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", new Map([["brush_radius", Config.keymap.brush_radius], ["brush_radius_decrease", Config.keymap.brush_radius_decrease], ["brush_radius_increase", Config.keymap.brush_radius_increase]])));
+					context_raw.brush_radius = zui_slider(context_raw.brush_radius_handle, tr("Radius"), 0.01, 2.0, true);
+					if (ui.is_hovered) zui_tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", new Map([["brush_radius", config_keymap.brush_radius], ["brush_radius_decrease", config_keymap.brush_radius_decrease], ["brush_radius_increase", config_keymap.brush_radius_increase]])));
 				}
 			}
 
-			if (Context.raw.tool == workspace_tool_t.DECAL || Context.raw.tool == workspace_tool_t.TEXT) {
-				Context.raw.brush_scale_x = zui_slider(Context.raw.brush_scale_x_handle, tr("Scale X"), 0.01, 2.0, true);
+			if (context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT) {
+				context_raw.brush_scale_x = zui_slider(context_raw.brush_scale_x_handle, tr("Scale X"), 0.01, 2.0, true);
 			}
 
-			if (Context.raw.tool == workspace_tool_t.BRUSH  ||
-				Context.raw.tool == workspace_tool_t.FILL   ||
-				Context.raw.tool == workspace_tool_t.DECAL  ||
-				Context.raw.tool == workspace_tool_t.TEXT) {
-				let brush_scale_handle: zui_handle_t = zui_handle("uiheader_14", { value: Context.raw.brush_scale });
-				Context.raw.brush_scale = zui_slider(brush_scale_handle, tr("UV Scale"), 0.01, 5.0, true);
+			if (context_raw.tool == workspace_tool_t.BRUSH  ||
+				context_raw.tool == workspace_tool_t.FILL   ||
+				context_raw.tool == workspace_tool_t.DECAL  ||
+				context_raw.tool == workspace_tool_t.TEXT) {
+				let brush_scale_handle: zui_handle_t = zui_handle("uiheader_14", { value: context_raw.brush_scale });
+				context_raw.brush_scale = zui_slider(brush_scale_handle, tr("UV Scale"), 0.01, 5.0, true);
 				if (brush_scale_handle.changed) {
-					if (Context.raw.tool == workspace_tool_t.DECAL || Context.raw.tool == workspace_tool_t.TEXT) {
+					if (context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT) {
 						let current: image_t = _g2_current;
 						g2_end();
 						UtilRender.make_decal_preview();
@@ -318,24 +318,24 @@ class UIHeader {
 					}
 				}
 
-				Context.raw.brush_angle = zui_slider(Context.raw.brush_angle_handle, tr("Angle"), 0.0, 360.0, true, 1);
-				if (ui.is_hovered) zui_tooltip(tr("Hold {brush_angle} and move mouse to the left to decrease the angle\nHold {brush_angle} and move mouse to the right to increase the angle", new Map([["brush_angle", Config.keymap.brush_angle]])));
+				context_raw.brush_angle = zui_slider(context_raw.brush_angle_handle, tr("Angle"), 0.0, 360.0, true, 1);
+				if (ui.is_hovered) zui_tooltip(tr("Hold {brush_angle} and move mouse to the left to decrease the angle\nHold {brush_angle} and move mouse to the right to increase the angle", new Map([["brush_angle", config_keymap.brush_angle]])));
 
-				if (Context.raw.brush_angle_handle.changed) {
+				if (context_raw.brush_angle_handle.changed) {
 					MakeMaterial.parse_paint_material();
 				}
 			}
 
-			Context.raw.brush_opacity = zui_slider(Context.raw.brush_opacity_handle, tr("Opacity"), 0.0, 1.0, true);
-			if (ui.is_hovered) zui_tooltip(tr("Hold {brush_opacity} and move mouse to the left to decrease the opacity\nHold {brush_opacity} and move mouse to the right to increase the opacity", new Map([["brush_opacity", Config.keymap.brush_opacity]])));
+			context_raw.brush_opacity = zui_slider(context_raw.brush_opacity_handle, tr("Opacity"), 0.0, 1.0, true);
+			if (ui.is_hovered) zui_tooltip(tr("Hold {brush_opacity} and move mouse to the left to decrease the opacity\nHold {brush_opacity} and move mouse to the right to increase the opacity", new Map([["brush_opacity", config_keymap.brush_opacity]])));
 
-			if (Context.raw.tool == workspace_tool_t.BRUSH || Context.raw.tool == workspace_tool_t.ERASER || Context.raw.tool == workspace_tool_t.CLONE || decal_mask) {
-				Context.raw.brush_hardness = zui_slider(zui_handle("uiheader_15", { value: Context.raw.brush_hardness }), tr("Hardness"), 0.0, 1.0, true);
+			if (context_raw.tool == workspace_tool_t.BRUSH || context_raw.tool == workspace_tool_t.ERASER || context_raw.tool == workspace_tool_t.CLONE || decal_mask) {
+				context_raw.brush_hardness = zui_slider(zui_handle("uiheader_15", { value: context_raw.brush_hardness }), tr("Hardness"), 0.0, 1.0, true);
 			}
 
-			if (Context.raw.tool != workspace_tool_t.ERASER) {
-				let brush_blending_handle: zui_handle_t = zui_handle("uiheader_16", { value: Context.raw.brush_blending });
-				Context.raw.brush_blending = zui_combo(brush_blending_handle, [
+			if (context_raw.tool != workspace_tool_t.ERASER) {
+				let brush_blending_handle: zui_handle_t = zui_handle("uiheader_16", { value: context_raw.brush_blending });
+				context_raw.brush_blending = zui_combo(brush_blending_handle, [
 					tr("Mix"),
 					tr("Darken"),
 					tr("Multiply"),
@@ -360,22 +360,22 @@ class UIHeader {
 				}
 			}
 
-			if (Context.raw.tool == workspace_tool_t.BRUSH || Context.raw.tool == workspace_tool_t.FILL) {
+			if (context_raw.tool == workspace_tool_t.BRUSH || context_raw.tool == workspace_tool_t.FILL) {
 				let paint_handle: zui_handle_t = zui_handle("uiheader_17");
-				Context.raw.brush_paint = zui_combo(paint_handle, [tr("UV Map"), tr("Triplanar"), tr("Project")], tr("TexCoord"));
+				context_raw.brush_paint = zui_combo(paint_handle, [tr("UV Map"), tr("Triplanar"), tr("Project")], tr("TexCoord"));
 				if (paint_handle.changed) {
 					MakeMaterial.parse_paint_material();
 				}
 			}
-			if (Context.raw.tool == workspace_tool_t.TEXT) {
+			if (context_raw.tool == workspace_tool_t.TEXT) {
 				let h: zui_handle_t = zui_handle("uiheader_18");
-				h.text = Context.raw.text_tool_text;
+				h.text = context_raw.text_tool_text;
 				let w: i32 = ui._w;
 				if (ui.text_selected_handle_ptr == h.ptr || ui.submit_text_handle_ptr == h.ptr) {
 					ui._w *= 3;
 				}
 
-				Context.raw.text_tool_text = zui_text_input(h, "", zui_align_t.LEFT, true, true);
+				context_raw.text_tool_text = zui_text_input(h, "", zui_align_t.LEFT, true, true);
 				ui._w = w;
 
 				if (h.changed) {
@@ -387,10 +387,10 @@ class UIHeader {
 				}
 			}
 
-			if (Context.raw.tool == workspace_tool_t.FILL) {
-				zui_combo(Context.raw.fill_type_handle, [tr("Object"), tr("Face"), tr("Angle"), tr("UV Island")], tr("Fill Mode"));
-				if (Context.raw.fill_type_handle.changed) {
-					if (Context.raw.fill_type_handle.position == fill_type_t.FACE) {
+			if (context_raw.tool == workspace_tool_t.FILL) {
+				zui_combo(context_raw.fill_type_handle, [tr("Object"), tr("Face"), tr("Angle"), tr("UV Island")], tr("Fill Mode"));
+				if (context_raw.fill_type_handle.changed) {
+					if (context_raw.fill_type_handle.position == fill_type_t.FACE) {
 						let current: image_t = _g2_current;
 						g2_end();
 						// UtilUV.cacheUVMap();
@@ -405,12 +405,12 @@ class UIHeader {
 			else {
 				let _w: i32 = ui._w;
 				let sc: f32 = zui_SCALE(ui);
-				let touch_header: bool = (Config.raw.touch_ui && Config.raw.layout[layout_size_t.HEADER] == 1);
+				let touch_header: bool = (config_raw.touch_ui && config_raw.layout[layout_size_t.HEADER] == 1);
 				if (touch_header) ui._x -= 4 * sc;
 				ui._w = Math.floor((touch_header ? 54 : 60) * sc);
 
-				let xray_handle: zui_handle_t = zui_handle("uiheader_19", { selected: Context.raw.xray });
-				Context.raw.xray = zui_check(xray_handle, tr("X-Ray"));
+				let xray_handle: zui_handle_t = zui_handle("uiheader_19", { selected: context_raw.xray });
+				context_raw.xray = zui_check(xray_handle, tr("X-Ray"));
 				if (xray_handle.changed) {
 					MakeMaterial.parse_paint_material();
 				}
@@ -419,14 +419,14 @@ class UIHeader {
 				let sym_y_handle: zui_handle_t = zui_handle("uiheader_21", { selected: false });
 				let sym_z_handle: zui_handle_t = zui_handle("uiheader_22", { selected: false });
 
-				if (Config.raw.layout[layout_size_t.HEADER] == 1) {
-					if (Config.raw.touch_ui) {
+				if (config_raw.layout[layout_size_t.HEADER] == 1) {
+					if (config_raw.touch_ui) {
 						ui._w = Math.floor(19 * sc);
-						Context.raw.sym_x = zui_check(sym_x_handle, "");
+						context_raw.sym_x = zui_check(sym_x_handle, "");
 						ui._x -= 4 * sc;
-						Context.raw.sym_y = zui_check(sym_y_handle, "");
+						context_raw.sym_y = zui_check(sym_y_handle, "");
 						ui._x -= 4 * sc;
-						Context.raw.sym_z = zui_check(sym_z_handle, "");
+						context_raw.sym_z = zui_check(sym_z_handle, "");
 						ui._x -= 4 * sc;
 						ui._w = Math.floor(40 * sc);
 						zui_text(tr("X") + tr("Y") + tr("Z"));
@@ -435,18 +435,18 @@ class UIHeader {
 						ui._w = Math.floor(56 * sc);
 						zui_text(tr("Symmetry"));
 						ui._w = Math.floor(25 * sc);
-						Context.raw.sym_x = zui_check(sym_x_handle, tr("X"));
-						Context.raw.sym_y = zui_check(sym_y_handle, tr("Y"));
-						Context.raw.sym_z = zui_check(sym_z_handle, tr("Z"));
+						context_raw.sym_x = zui_check(sym_x_handle, tr("X"));
+						context_raw.sym_y = zui_check(sym_y_handle, tr("Y"));
+						context_raw.sym_z = zui_check(sym_z_handle, tr("Z"));
 					}
 					ui._w = _w;
 				}
 				else {
 					// Popup
 					ui._w = _w;
-					Context.raw.sym_x = zui_check(sym_x_handle, tr("Symmetry") + " " + tr("X"));
-					Context.raw.sym_y = zui_check(sym_y_handle, tr("Symmetry") + " " + tr("Y"));
-					Context.raw.sym_z = zui_check(sym_z_handle, tr("Symmetry") + " " + tr("Z"));
+					context_raw.sym_x = zui_check(sym_x_handle, tr("Symmetry") + " " + tr("X"));
+					context_raw.sym_y = zui_check(sym_y_handle, tr("Symmetry") + " " + tr("Y"));
+					context_raw.sym_z = zui_check(sym_z_handle, tr("Symmetry") + " " + tr("Z"));
 				}
 
 				if (sym_x_handle.changed || sym_y_handle.changed || sym_z_handle.changed) {
@@ -455,10 +455,10 @@ class UIHeader {
 			}
 
 			///if arm_physics
-			if (Context.raw.tool == workspace_tool_t.PARTICLE) {
+			if (context_raw.tool == workspace_tool_t.PARTICLE) {
 				ui._x += 10 * zui_SCALE(ui);
 				let phys_handle: zui_handle_t = zui_handle("uiheader_23", { selected: false });
-				Context.raw.particle_physics = zui_check(phys_handle, tr("Physics"));
+				context_raw.particle_physics = zui_check(phys_handle, tr("Physics"));
 				if (phys_handle.changed) {
 					UtilParticle.init_particle_physics();
 					MakeMaterial.parse_paint_material();
@@ -472,29 +472,29 @@ class UIHeader {
 
 	///if is_sculpt
 	static draw_tool_properties = (ui: zui_t) => {
-		if (Context.raw.tool == workspace_tool_t.BRUSH) {
-			Context.raw.brush_radius = zui_slider(Context.raw.brush_radius_handle, tr("Radius"), 0.01, 2.0, true);
-			if (ui.is_hovered) zui_tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", new Map([["brush_radius", Config.keymap.brush_radius], ["brush_radius_decrease", Config.keymap.brush_radius_decrease], ["brush_radius_increase", Config.keymap.brush_radius_increase]])));
+		if (context_raw.tool == workspace_tool_t.BRUSH) {
+			context_raw.brush_radius = zui_slider(context_raw.brush_radius_handle, tr("Radius"), 0.01, 2.0, true);
+			if (ui.is_hovered) zui_tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", new Map([["brush_radius", config_keymap.brush_radius], ["brush_radius_decrease", config_keymap.brush_radius_decrease], ["brush_radius_increase", config_keymap.brush_radius_increase]])));
 		}
 	}
 	///end
 
 	///if is_lab
 	static draw_tool_properties = (ui: zui_t) => {
-		if (Context.raw.tool == workspace_tool_t.PICKER) {
+		if (context_raw.tool == workspace_tool_t.PICKER) {
 
 		}
-		else if (Context.raw.tool == workspace_tool_t.ERASER ||
-				 Context.raw.tool == workspace_tool_t.CLONE  ||
-				 Context.raw.tool == workspace_tool_t.BLUR   ||
-				 Context.raw.tool == workspace_tool_t.SMUDGE) {
+		else if (context_raw.tool == workspace_tool_t.ERASER ||
+				 context_raw.tool == workspace_tool_t.CLONE  ||
+				 context_raw.tool == workspace_tool_t.BLUR   ||
+				 context_raw.tool == workspace_tool_t.SMUDGE) {
 
 			let nodes: zui_nodes_t = UINodes.get_nodes();
 			let canvas: zui_node_canvas_t = UINodes.get_canvas(true);
 			let inpaint: bool = nodes.nodes_selected_id.length > 0 && zui_get_node(canvas.nodes, nodes.nodes_selected_id[0]).type == "InpaintNode";
 			if (inpaint) {
-				Context.raw.brush_radius = zui_slider(Context.raw.brush_radius_handle, tr("Radius"), 0.01, 2.0, true);
-				if (ui.is_hovered) zui_tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", new Map([["brush_radius", Config.keymap.brush_radius], ["brush_radius_decrease", Config.keymap.brush_radius_decrease], ["brush_radius_increase", Config.keymap.brush_radius_increase]])));
+				context_raw.brush_radius = zui_slider(context_raw.brush_radius_handle, tr("Radius"), 0.01, 2.0, true);
+				if (ui.is_hovered) zui_tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", new Map([["brush_radius", config_keymap.brush_radius], ["brush_radius_decrease", config_keymap.brush_radius_decrease], ["brush_radius_increase", config_keymap.brush_radius_increase]])));
 			}
 		}
 	}

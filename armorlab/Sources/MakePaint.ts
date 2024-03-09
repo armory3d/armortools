@@ -2,7 +2,7 @@
 class MakePaint {
 
 	static run = (data: TMaterial, matcon: material_context_t): NodeShaderContextRaw => {
-		let con_paint = NodeShaderContext.create(data, {
+		let con_paint = NodeShadercontext_create(data, {
 			name: "paint",
 			depth_write: false,
 			compare_mode: "always", // TODO: align texcoords winding order
@@ -10,7 +10,7 @@ class MakePaint {
 			cull_mode: "none",
 			vertex_elements: [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}],
 			color_attachments:
-				Context.raw.tool == WorkspaceTool.ToolPicker ? ["RGBA32", "RGBA32", "RGBA32", "RGBA32"] :
+				context_raw.tool == WorkspaceTool.ToolPicker ? ["RGBA32", "RGBA32", "RGBA32", "RGBA32"] :
 					["RGBA32", "RGBA32", "RGBA32", "R8"]
 		});
 
@@ -18,13 +18,13 @@ class MakePaint {
 		con_paint.data.color_writes_green = [true, true, true, true];
 		con_paint.data.color_writes_blue = [true, true, true, true];
 		con_paint.data.color_writes_alpha = [true, true, true, true];
-		con_paint.allow_vcols = mesh_data_get_vertex_array(Context.raw.paintObject.data, "col") != null;
+		con_paint.allow_vcols = mesh_data_get_vertex_array(context_raw.paintObject.data, "col") != null;
 
-		let vert = NodeShaderContext.make_vert(con_paint);
-		let frag = NodeShaderContext.make_frag(con_paint);
+		let vert = NodeShadercontext_make_vert(con_paint);
+		let frag = NodeShadercontext_make_frag(con_paint);
 		frag.ins = vert.outs;
 
-		if (Context.raw.tool == WorkspaceTool.ToolPicker) {
+		if (context_raw.tool == WorkspaceTool.ToolPicker) {
 			// Mangle vertices to form full screen triangle
 			NodeShader.write(vert, 'gl_Position = vec4(-1.0 + float((gl_VertexID & 1) << 2), -1.0 + float((gl_VertexID & 2) << 1), 0.0, 1.0);');
 
@@ -85,10 +85,10 @@ class MakePaint {
 		NodeShader.add_uniform(frag, 'float brushOpacity', '_brushOpacity');
 		NodeShader.add_uniform(frag, 'float brushHardness', '_brushHardness');
 
-		if (Context.raw.tool == WorkspaceTool.ToolEraser ||
-			Context.raw.tool == WorkspaceTool.ToolClone  ||
-			Context.raw.tool == WorkspaceTool.ToolBlur   ||
-			Context.raw.tool == WorkspaceTool.ToolSmudge) {
+		if (context_raw.tool == WorkspaceTool.ToolEraser ||
+			context_raw.tool == WorkspaceTool.ToolClone  ||
+			context_raw.tool == WorkspaceTool.ToolBlur   ||
+			context_raw.tool == WorkspaceTool.ToolSmudge) {
 
 			NodeShader.write(frag, 'float dist = 0.0;');
 
@@ -129,14 +129,14 @@ class MakePaint {
 		// NodeShader.add_out(vert, 'vec2 texCoord');
 		// NodeShader.write(vert, 'texCoord = tex * brushScale * texScale;');
 
-		if (Context.raw.tool == WorkspaceTool.ToolClone || Context.raw.tool == WorkspaceTool.ToolBlur || Context.raw.tool == WorkspaceTool.ToolSmudge) {
+		if (context_raw.tool == WorkspaceTool.ToolClone || context_raw.tool == WorkspaceTool.ToolBlur || context_raw.tool == WorkspaceTool.ToolSmudge) {
 			NodeShader.add_uniform(frag, 'sampler2D gbuffer2');
 			NodeShader.add_uniform(frag, 'vec2 gbufferSize', '_gbufferSize');
 			NodeShader.add_uniform(frag, 'sampler2D texpaint_undo', '_texpaint_undo');
 			NodeShader.add_uniform(frag, 'sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
 			NodeShader.add_uniform(frag, 'sampler2D texpaint_pack_undo', '_texpaint_pack_undo');
 
-			if (Context.raw.tool == WorkspaceTool.ToolClone) {
+			if (context_raw.tool == WorkspaceTool.ToolClone) {
 				// NodeShader.add_uniform(frag, 'vec2 cloneDelta', '_cloneDelta');
 				// ///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 				// NodeShader.write(frag, 'vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.xy + cloneDelta) * gbufferSize), 0).ba;');
@@ -179,7 +179,7 @@ class MakePaint {
 
 				// NodeShader.add_uniform(frag, 'vec2 texpaintSize', '_texpaintSize');
 				// NodeShader.write(frag, 'float blur_step = 1.0 / texpaintSize.x;');
-				// if (Context.raw.blurDirectional) {
+				// if (context_raw.blurDirectional) {
 				// 	///if (krom_direct3d11 || krom_direct3d12 || krom_metal)
 				// 	NodeShader.write(frag, 'const float blur_weight[7] = {1.0 / 28.0, 2.0 / 28.0, 3.0 / 28.0, 4.0 / 28.0, 5.0 / 28.0, 6.0 / 28.0, 7.0 / 28.0};');
 				// 	///else
@@ -257,7 +257,7 @@ class MakePaint {
 		NodeShader.add_uniform(frag, 'sampler2D texpaint_undo', '_texpaint_undo');
 		NodeShader.write(frag, 'vec4 sample_undo = textureLod(texpaint_undo, sample_tc, 0.0);');
 
-		if (Context.raw.tool == WorkspaceTool.ToolEraser) {
+		if (context_raw.tool == WorkspaceTool.ToolEraser) {
 			// NodeShader.write(frag, 'fragColor[0] = vec4(mix(sample_undo.rgb, vec3(0.0, 0.0, 0.0), str), sample_undo.a - str);');
 			NodeShader.write(frag, 'fragColor[0] = vec4(0.0, 0.0, 0.0, 0.0);');
 			NodeShader.write(frag, 'fragColor[1] = vec4(0.5, 0.5, 1.0, 0.0);');

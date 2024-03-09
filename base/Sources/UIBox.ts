@@ -39,7 +39,7 @@ class UIBox {
 			}
 		}
 
-		if (Config.raw.touch_ui) { // Darken bg
+		if (config_raw.touch_ui) { // Darken bg
 			///if (krom_android || krom_ios)
 			g2_set_color(color_from_floats(0, 0, 0, UIBox.tween_alpha));
 			///else
@@ -64,7 +64,7 @@ class UIBox {
 			zui_begin(ui);
 			if (zui_window(UIBox.hwnd, left, top, mw, mh, UIBox.draggable)) {
 				ui._y += 10;
-				let tab_vertical: bool = Config.raw.touch_ui;
+				let tab_vertical: bool = config_raw.touch_ui;
 				if (zui_tab(zui_handle("uibox_0"), UIBox.box_title, tab_vertical)) {
 					let htext: zui_handle_t = zui_handle("uibox_1");
 					htext.text = UIBox.box_text;

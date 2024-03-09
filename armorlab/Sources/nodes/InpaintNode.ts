@@ -19,11 +19,11 @@ class InpaintNode extends LogicNode {
 
 	static init = () => {
 		if (InpaintNode.image == null) {
-			InpaintNode.image = image_create_render_target(Config.getTextureResX(), Config.getTextureResY());
+			InpaintNode.image = image_create_render_target(config_getTextureResX(), config_getTextureResY());
 		}
 
 		if (InpaintNode.mask == null) {
-			InpaintNode.mask = image_create_render_target(Config.getTextureResX(), Config.getTextureResY(), tex_format_t.R8);
+			InpaintNode.mask = image_create_render_target(config_getTextureResX(), config_getTextureResY(), tex_format_t.R8);
 			base_notifyOnNextFrame(() => {
 				g4_begin(InpaintNode.mask);
 				g4_clear(color_from_floats(1.0, 1.0, 1.0, 1.0));
@@ -36,7 +36,7 @@ class InpaintNode extends LogicNode {
 		}
 
 		if (InpaintNode.result == null) {
-			InpaintNode.result = image_create_render_target(Config.getTextureResX(), Config.getTextureResY());
+			InpaintNode.result = image_create_render_target(config_getTextureResX(), config_getTextureResY());
 		}
 	}
 
@@ -53,10 +53,10 @@ class InpaintNode extends LogicNode {
 	override getAsImage = (from: i32, done: (img: image_t)=>void) => {
 		this.inputs[0].getAsImage((source: image_t) => {
 
-			Console.progress(tr("Processing") + " - " + tr("Inpaint"));
+			console_progress(tr("Processing") + " - " + tr("Inpaint"));
 			base_notifyOnNextFrame(() => {
 				g2_begin(InpaintNode.image);
-				g2_draw_scaled_image(source, 0, 0, Config.getTextureResX(), Config.getTextureResY());
+				g2_draw_scaled_image(source, 0, 0, config_getTextureResX(), config_getTextureResY());
 				g2_end();
 
 				InpaintNode.auto ? InpaintNode.texsynthInpaint(InpaintNode.image, false, InpaintNode.mask, done) : InpaintNode.sdInpaint(InpaintNode.image, InpaintNode.mask, done);
@@ -87,8 +87,8 @@ class InpaintNode extends LogicNode {
 	}
 
 	static texsynthInpaint = (image: image_t, tiling: bool, mask: image_t/* = null*/, done: (img: image_t)=>void) => {
-		let w = Config.getTextureResX();
-		let h = Config.getTextureResY();
+		let w = config_getTextureResX();
+		let h = config_getTextureResY();
 
 		let bytes_img = image_get_pixels(image);
 		let bytes_mask = mask != null ? image_get_pixels(mask) : new ArrayBuffer(w * h);
@@ -141,7 +141,7 @@ class InpaintNode extends LogicNode {
 					f32a[i + 512 * 512 * 2] = (u8a[i * 4 + 2] / 255.0) * 2.0 - 1.0;
 				}
 
-				let latents_buf = krom_ml_inference(vae_encoder_blob, [f32a.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], Config.raw.gpu_inference);
+				let latents_buf = krom_ml_inference(vae_encoder_blob, [f32a.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], config_raw.gpu_inference);
 				let latents = new Float32Array(latents_buf);
 				for (let i = 0; i < latents.length; ++i) {
 					latents[i] = 0.18215 * latents[i];

@@ -11,62 +11,62 @@ class ExportTexture {
 		if (bake_material) {
 			ExportTexture.run_bake_material(path);
 		}
-		else if (Context.raw.layers_export == export_mode_t.PER_UDIM_TILE) {
+		else if (context_raw.layers_export == export_mode_t.PER_UDIM_TILE) {
 			let udim_tiles: string[] = [];
-			for (let l of Project.layers) {
+			for (let l of project_layers) {
 				if (SlotLayer.get_object_mask(l) > 0) {
-					let name: string = Project.paint_objects[SlotLayer.get_object_mask(l) - 1].base.name;
+					let name: string = project_paint_objects[SlotLayer.get_object_mask(l) - 1].base.name;
 					if (name.substr(name.length - 5, 2) == ".1") { // tile.1001
 						udim_tiles.push(name.substr(name.length - 5));
 					}
 				}
 			}
 			if (udim_tiles.length > 0) {
-				for (let udim_tile of udim_tiles) ExportTexture.run_layers(path, Project.layers, udim_tile);
+				for (let udim_tile of udim_tiles) ExportTexture.run_layers(path, project_layers, udim_tile);
 			}
-			else ExportTexture.run_layers(path, Project.layers);
+			else ExportTexture.run_layers(path, project_layers);
 		}
-		else if (Context.raw.layers_export == export_mode_t.PER_OBJECT) {
+		else if (context_raw.layers_export == export_mode_t.PER_OBJECT) {
 			let object_names: string[] = [];
-			for (let l of Project.layers) {
+			for (let l of project_layers) {
 				if (SlotLayer.get_object_mask(l) > 0) {
-					let name: string = Project.paint_objects[SlotLayer.get_object_mask(l) - 1].base.name;
+					let name: string = project_paint_objects[SlotLayer.get_object_mask(l) - 1].base.name;
 					if (object_names.indexOf(name) == -1) {
 						object_names.push(name);
 					}
 				}
 			}
 			if (object_names.length > 0) {
-				for (let name of object_names) ExportTexture.run_layers(path, Project.layers, name);
+				for (let name of object_names) ExportTexture.run_layers(path, project_layers, name);
 			}
-			else ExportTexture.run_layers(path, Project.layers);
+			else ExportTexture.run_layers(path, project_layers);
 		}
 		else { // Visible or selected
 			let atlas_export: bool = false;
-			if (Project.atlas_objects != null) {
-				for (let i: i32 = 1; i < Project.atlas_objects.length; ++i) {
-					if (Project.atlas_objects[i - 1] != Project.atlas_objects[i]) {
+			if (project_atlas_objects != null) {
+				for (let i: i32 = 1; i < project_atlas_objects.length; ++i) {
+					if (project_atlas_objects[i - 1] != project_atlas_objects[i]) {
 						atlas_export = true;
 						break;
 					}
 				}
 			}
 			if (atlas_export) {
-				for (let atlas_index: i32 = 0; atlas_index < Project.atlas_objects.length; ++atlas_index) {
+				for (let atlas_index: i32 = 0; atlas_index < project_atlas_objects.length; ++atlas_index) {
 					let layers: SlotLayerRaw[] = [];
-					for (let object_index: i32 = 0; object_index < Project.atlas_objects.length; ++object_index) {
-						if (Project.atlas_objects[object_index] == atlas_index) {
-							for (let l of Project.layers) {
+					for (let object_index: i32 = 0; object_index < project_atlas_objects.length; ++object_index) {
+						if (project_atlas_objects[object_index] == atlas_index) {
+							for (let l of project_layers) {
 								if (SlotLayer.get_object_mask(l) == 0 /* shared object */ || SlotLayer.get_object_mask(l) - 1 == object_index) layers.push(l);
 							}
 						}
 					}
 					if (layers.length > 0) {
-						ExportTexture.run_layers(path, layers, Project.atlas_names[atlas_index]);
+						ExportTexture.run_layers(path, layers, project_atlas_names[atlas_index]);
 					}
 				}
 			}
-			else ExportTexture.run_layers(path, Context.raw.layers_export == export_mode_t.SELECTED ? (SlotLayer.is_group(Context.raw.layer) ? SlotLayer.get_children(Context.raw.layer) : [Context.raw.layer]) : Project.layers);
+			else ExportTexture.run_layers(path, context_raw.layers_export == export_mode_t.SELECTED ? (SlotLayer.is_group(context_raw.layer) ? SlotLayer.get_children(context_raw.layer) : [context_raw.layer]) : project_layers);
 		}
 		///end
 
@@ -75,11 +75,11 @@ class ExportTexture {
 		///end
 
 		///if krom_ios
-		Console.info(tr("Textures exported") + " ('Files/On My iPad/" + manifest_title + "')");
+		console_info(tr("Textures exported") + " ('Files/On My iPad/" + manifest_title + "')");
 		///elseif krom_android
-		Console.info(tr("Textures exported") + " ('Files/Internal storage/Pictures/" + manifest_title + "')");
+		console_info(tr("Textures exported") + " ('Files/Internal storage/Pictures/" + manifest_title + "')");
 		///else
-		Console.info(tr("Textures exported"));
+		console_info(tr("Textures exported"));
 		///end
 		UIFiles.last_path = "";
 	}
@@ -90,22 +90,22 @@ class ExportTexture {
 			RenderPathPaint.live_layer = SlotLayer.create("_live");
 		}
 
-		let _tool: workspace_tool_t = Context.raw.tool;
-		Context.raw.tool = workspace_tool_t.FILL;
+		let _tool: workspace_tool_t = context_raw.tool;
+		context_raw.tool = workspace_tool_t.FILL;
 		MakeMaterial.parse_paint_material();
-		let _paint_object: mesh_object_t = Context.raw.paint_object;
+		let _paint_object: mesh_object_t = context_raw.paint_object;
 		let planeo: mesh_object_t = scene_get_child(".Plane").ext;
 		planeo.base.visible = true;
-		Context.raw.paint_object = planeo;
-		Context.raw.pdirty = 1;
+		context_raw.paint_object = planeo;
+		context_raw.pdirty = 1;
 		RenderPathPaint.use_live_layer(true);
 		RenderPathPaint.commands_paint(false);
 		RenderPathPaint.use_live_layer(false);
-		Context.raw.tool = _tool;
+		context_raw.tool = _tool;
 		MakeMaterial.parse_paint_material();
-		Context.raw.pdirty = 0;
+		context_raw.pdirty = 0;
 		planeo.base.visible = false;
-		Context.raw.paint_object = _paint_object;
+		context_raw.paint_object = _paint_object;
 
 		ExportTexture.run_layers(path, [RenderPathPaint.live_layer], "", true);
 	}
@@ -119,21 +119,21 @@ class ExportTexture {
 	static run_layers = (path: string, layers: any[], object_name: string = "") => {
 	///end
 
-		let texture_size_x: i32 = Config.get_texture_res_x();
-		let texture_size_y: i32 = Config.get_texture_res_y();
+		let texture_size_x: i32 = config_get_texture_res_x();
+		let texture_size_y: i32 = config_get_texture_res_y();
 		///if (krom_android || krom_ios)
 		let f: string = sys_title();
 		///else
 		let f: string = UIFiles.filename;
 		///end
 		if (f == "") f = tr("untitled");
-		let format_type: texture_ldr_format_t = Context.raw.format_type;
+		let format_type: texture_ldr_format_t = context_raw.format_type;
 		let bits: i32 = base_bits_handle.position == texture_bits_t.BITS8 ? 8 : 16;
 		let ext: string = bits == 16 ? ".exr" : format_type == texture_ldr_format_t.PNG ? ".png" : ".jpg";
 		if (f.endsWith(ext)) f = f.substr(0, f.length - 4);
 
 		///if is_paint
-		let is_udim: bool = Context.raw.layers_export == export_mode_t.PER_UDIM_TILE;
+		let is_udim: bool = context_raw.layers_export == export_mode_t.PER_UDIM_TILE;
 		if (is_udim) ext = object_name + ext;
 
 		base_make_temp_img();
@@ -143,9 +143,9 @@ class ExportTexture {
 		let empty: image_t = render_path_render_targets.get("empty_white")._image;
 
 		// Append object mask name
-		let export_selected: bool = Context.raw.layers_export == export_mode_t.SELECTED;
+		let export_selected: bool = context_raw.layers_export == export_mode_t.SELECTED;
 		if (export_selected && SlotLayer.get_object_mask(layers[0]) > 0) {
-			f += "_" + Project.paint_objects[SlotLayer.get_object_mask(layers[0]) - 1].base.name;
+			f += "_" + project_paint_objects[SlotLayer.get_object_mask(layers[0]) - 1].base.name;
 		}
 		if (!is_udim && !export_selected && object_name != "") {
 			f += "_" + object_name;
@@ -168,9 +168,9 @@ class ExportTexture {
 			if (!SlotLayer.is_layer(l1)) continue;
 
 			if (object_name != "" && SlotLayer.get_object_mask(l1) > 0) {
-				if (is_udim && !Project.paint_objects[SlotLayer.get_object_mask(l1) - 1].base.name.endsWith(object_name)) continue;
-				let per_object: bool = Context.raw.layers_export == export_mode_t.PER_OBJECT;
-				if (per_object && Project.paint_objects[SlotLayer.get_object_mask(l1) - 1].base.name != object_name) continue;
+				if (is_udim && !project_paint_objects[SlotLayer.get_object_mask(l1) - 1].base.name.endsWith(object_name)) continue;
+				let per_object: bool = context_raw.layers_export == export_mode_t.PER_OBJECT;
+				if (per_object && project_paint_objects[SlotLayer.get_object_mask(l1) - 1].base.name != object_name) continue;
 			}
 
 			let mask: image_t = empty;
@@ -292,28 +292,28 @@ class ExportTexture {
 			let tex_name = t.name != "" ? "_" + t.name : "";
 			let single_channel: bool = c[0] == c[1] && c[1] == c[2] && c[3] == "1.0";
 			if (c[0] == "base_r" && c[1] == "base_g" && c[2] == "base_b" && c[3] == "1.0" && t.color_space == "linear") {
-				ExportTexture.write_texture(path + Path.sep + f + tex_name + ext, pixpaint, 1);
+				ExportTexture.write_texture(path + path_sep + f + tex_name + ext, pixpaint, 1);
 			}
 			else if (c[0] == "nor_r" && c[1] == "nor_g" && c[2] == "nor_b" && c[3] == "1.0" && t.color_space == "linear") {
-				ExportTexture.write_texture(path + Path.sep + f + tex_name + ext, pixpaint_nor, 1);
+				ExportTexture.write_texture(path + path_sep + f + tex_name + ext, pixpaint_nor, 1);
 			}
 			else if (c[0] == "occ" && c[1] == "rough" && c[2] == "metal" && c[3] == "1.0" && t.color_space == "linear") {
-				ExportTexture.write_texture(path + Path.sep + f + tex_name + ext, pixpaint_pack, 1);
+				ExportTexture.write_texture(path + path_sep + f + tex_name + ext, pixpaint_pack, 1);
 			}
 			else if (single_channel && c[0] == "occ" && t.color_space == "linear") {
-				ExportTexture.write_texture(path + Path.sep + f + tex_name + ext, pixpaint_pack, 2, 0);
+				ExportTexture.write_texture(path + path_sep + f + tex_name + ext, pixpaint_pack, 2, 0);
 			}
 			else if (single_channel && c[0] == "rough" && t.color_space == "linear") {
-				ExportTexture.write_texture(path + Path.sep + f + tex_name + ext, pixpaint_pack, 2, 1);
+				ExportTexture.write_texture(path + path_sep + f + tex_name + ext, pixpaint_pack, 2, 1);
 			}
 			else if (single_channel && c[0] == "metal" && t.color_space == "linear") {
-				ExportTexture.write_texture(path + Path.sep + f + tex_name + ext, pixpaint_pack, 2, 2);
+				ExportTexture.write_texture(path + path_sep + f + tex_name + ext, pixpaint_pack, 2, 2);
 			}
 			else if (single_channel && c[0] == "height" && t.color_space == "linear") {
-				ExportTexture.write_texture(path + Path.sep + f + tex_name + ext, pixpaint_pack, 2, 3);
+				ExportTexture.write_texture(path + path_sep + f + tex_name + ext, pixpaint_pack, 2, 3);
 			}
 			else if (single_channel && c[0] == "opac" && t.color_space == "linear") {
-				ExportTexture.write_texture(path + Path.sep + f + tex_name + ext, pixpaint, 2, 3);
+				ExportTexture.write_texture(path + path_sep + f + tex_name + ext, pixpaint, 2, 3);
 			}
 			else {
 				if (pix == null) pix = new ArrayBuffer(texture_size_x * texture_size_y * 4 * Math.floor(bits / 8));
@@ -337,7 +337,7 @@ class ExportTexture {
 					else if (c == "0.0") ExportTexture.set_channel(0, new DataView(pix), i);
 					else if (c == "1.0") ExportTexture.set_channel(255, new DataView(pix), i);
 				}
-				ExportTexture.write_texture(path + Path.sep + f + tex_name + ext, pix, 3);
+				ExportTexture.write_texture(path + path_sep + f + tex_name + ext, pix, 3);
 			}
 		}
 
@@ -348,8 +348,8 @@ class ExportTexture {
 	}
 
 	static write_texture = (file: string, pixels: ArrayBuffer, type: i32 = 1, off: i32 = 0) => {
-		let res_x: i32 = Config.get_texture_res_x();
-		let res_y: i32 = Config.get_texture_res_y();
+		let res_x: i32 = config_get_texture_res_x();
+		let res_y: i32 = config_get_texture_res_y();
 		let bits_handle: i32 = base_bits_handle.position;
 		let bits: i32 = bits_handle == texture_bits_t.BITS8 ? 8 : bits_handle == texture_bits_t.BITS16 ? 16 : 32;
 		let format: i32 = 0; // RGBA
@@ -359,26 +359,26 @@ class ExportTexture {
 		if (type == 2 && off == 2) format = 5; // BBB1
 		if (type == 2 && off == 3) format = 6; // AAA1
 
-		if (Context.raw.layers_destination == export_destination_t.PACKED) {
+		if (context_raw.layers_destination == export_destination_t.PACKED) {
 			let image: image_t = image_from_bytes(pixels, res_x, res_y);
 			data_cached_images.set(file, image);
-			let ar: string[] = file.split(Path.sep);
+			let ar: string[] = file.split(path_sep);
 			let name: string = ar[ar.length - 1];
-			let asset: asset_t = {name: name, file: file, id: Project.asset_id++};
-			Project.assets.push(asset);
-			if (Project.raw.assets == null) Project.raw.assets = [];
-			Project.raw.assets.push(asset.file);
-			Project.asset_names.push(asset.name);
-			Project.asset_map.set(asset.id, image);
-			ExportArm.pack_assets(Project.raw, [asset]);
+			let asset: asset_t = {name: name, file: file, id: project_asset_id++};
+			project_assets.push(asset);
+			if (project_raw.assets == null) project_raw.assets = [];
+			project_raw.assets.push(asset.file);
+			project_asset_names.push(asset.name);
+			project_asset_map.set(asset.id, image);
+			ExportArm.pack_assets(project_raw, [asset]);
 			return;
 		}
 
-		if (bits == 8 && Context.raw.format_type == texture_ldr_format_t.PNG) {
+		if (bits == 8 && context_raw.format_type == texture_ldr_format_t.PNG) {
 			krom_write_png(file, pixels, res_x, res_y, format);
 		}
-		else if (bits == 8 && Context.raw.format_type == texture_ldr_format_t.JPG) {
-			krom_write_jpg(file, pixels, res_x, res_y, format, Math.floor(Context.raw.format_quality));
+		else if (bits == 8 && context_raw.format_type == texture_ldr_format_t.JPG) {
+			krom_write_jpg(file, pixels, res_x, res_y, format, Math.floor(context_raw.format_quality));
 		}
 		else { // Exr
 			let b: ArrayBuffer = ParserExr.run(res_x, res_y, pixels, bits, type, off);

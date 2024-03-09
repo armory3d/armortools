@@ -15,14 +15,14 @@ class MakeColorIdPicker {
 		NodeShader.write(frag, 'vec2 texCoordInp = texelFetch(gbuffer2, ivec2(inp.x * gbufferSize.x, (1.0 - inp.y) * gbufferSize.y), 0).ba;');
 		///end
 
-		if (Context.raw.tool == workspace_tool_t.COLORID) {
+		if (context_raw.tool == workspace_tool_t.COLORID) {
 			NodeShader.add_out(frag, 'vec4 fragColor');
 			NodeShader.add_uniform(frag, 'sampler2D texcolorid', '_texcolorid');
 			NodeShader.write(frag, 'vec3 idcol = textureLod(texcolorid, texCoordInp, 0.0).rgb;');
 			NodeShader.write(frag, 'fragColor = vec4(idcol, 1.0);');
 		}
-		else if (Context.raw.tool == workspace_tool_t.PICKER || Context.raw.tool == workspace_tool_t.MATERIAL) {
-			if (Context.raw.pick_pos_nor_tex) {
+		else if (context_raw.tool == workspace_tool_t.PICKER || context_raw.tool == workspace_tool_t.MATERIAL) {
+			if (context_raw.pick_pos_nor_tex) {
 				NodeShader.add_out(frag, 'vec4 fragColor[2]');
 				NodeShader.add_uniform(frag, 'sampler2D gbufferD');
 				NodeShader.add_uniform(frag, 'mat4 invVP', '_inv_view_proj_matrix');

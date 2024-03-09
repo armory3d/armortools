@@ -3,7 +3,7 @@ class MakeSculpt {
 
 	static run = (data: TMaterial, matcon: material_context_t): NodeShaderContextRaw => {
 		let context_id = "paint";
-		let con_paint = NodeShaderContext.create(data, {
+		let con_paint = NodeShadercontext_create(data, {
 			name: context_id,
 			depth_write: false,
 			compare_mode: "always", // TODO: align texcoords winding order
@@ -17,14 +17,14 @@ class MakeSculpt {
 		con_paint.data.color_writes_green = [true, true, true, true];
 		con_paint.data.color_writes_blue = [true, true, true, true];
 		con_paint.data.color_writes_alpha = [true, true, true, true];
-		con_paint.allow_vcols = mesh_data_get_vertex_array(Context.raw.paintObject.data, "col") != null;
+		con_paint.allow_vcols = mesh_data_get_vertex_array(context_raw.paintObject.data, "col") != null;
 
-		let vert = NodeShaderContext.make_vert(con_paint);
-		let frag = NodeShaderContext.make_frag(con_paint);
+		let vert = NodeShadercontext_make_vert(con_paint);
+		let frag = NodeShadercontext_make_frag(con_paint);
 		frag.ins = vert.outs;
 
-		let faceFill = Context.raw.tool == WorkspaceTool.ToolFill && Context.raw.fillTypeHandle.position == FillType.FillFace;
-		let decal = Context.raw.tool == WorkspaceTool.ToolDecal || Context.raw.tool == WorkspaceTool.ToolText;
+		let faceFill = context_raw.tool == WorkspaceTool.ToolFill && context_raw.fillTypeHandle.position == FillType.FillFace;
+		let decal = context_raw.tool == WorkspaceTool.ToolDecal || context_raw.tool == WorkspaceTool.ToolText;
 
 		NodeShader.add_out(vert, 'vec2 texCoord');
 		NodeShader.write(vert, 'const vec2 madd = vec2(0.5, 0.5);');
@@ -45,15 +45,15 @@ class MakeSculpt {
 		NodeShader.add_uniform(frag, 'float brushOpacity', '_brushOpacity');
 		NodeShader.add_uniform(frag, 'float brushHardness', '_brushHardness');
 
-		if (Context.raw.tool == WorkspaceTool.ToolBrush  ||
-			Context.raw.tool == WorkspaceTool.ToolEraser ||
-			Context.raw.tool == WorkspaceTool.ToolClone  ||
-			Context.raw.tool == WorkspaceTool.ToolBlur   ||
-			Context.raw.tool == WorkspaceTool.ToolSmudge   ||
-			Context.raw.tool == WorkspaceTool.ToolParticle ||
+		if (context_raw.tool == WorkspaceTool.ToolBrush  ||
+			context_raw.tool == WorkspaceTool.ToolEraser ||
+			context_raw.tool == WorkspaceTool.ToolClone  ||
+			context_raw.tool == WorkspaceTool.ToolBlur   ||
+			context_raw.tool == WorkspaceTool.ToolSmudge   ||
+			context_raw.tool == WorkspaceTool.ToolParticle ||
 			decal) {
 
-			let depthReject = !Context.raw.xray;
+			let depthReject = !context_raw.xray;
 
 			MakeBrush.run(vert, frag);
 		}

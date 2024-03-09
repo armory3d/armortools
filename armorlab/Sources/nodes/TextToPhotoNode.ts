@@ -44,7 +44,7 @@ class TextToPhotoNode extends LogicNode {
 	}
 
 	static textEncoder = (prompt: string, inpaintLatents: Float32Array, done: (a: Float32Array, b: Float32Array)=>void) => {
-		Console.progress(tr("Processing") + " - " + tr("Text to Photo"));
+		console_progress(tr("Processing") + " - " + tr("Text to Photo"));
 		base_notifyOnNextFrame(() => {
 			let words = prompt.replaceAll("\n", " ").replaceAll(",", " , ").replaceAll("  ", " ").trim().split(" ");
 			for (let i = 0; i < words.length; ++i) {
@@ -55,11 +55,11 @@ class TextToPhotoNode extends LogicNode {
 			}
 
 			let i32a = new Int32Array(TextToPhotoNode.text_input_ids);
-			let text_embeddings_buf = krom_ml_inference(TextToPhotoNode.text_encoder_blob, [i32a.buffer], [[1, 77]], [1, 77, 768], Config.raw.gpu_inference);
+			let text_embeddings_buf = krom_ml_inference(TextToPhotoNode.text_encoder_blob, [i32a.buffer], [[1, 77]], [1, 77, 768], config_raw.gpu_inference);
 			let text_embeddings = new Float32Array(text_embeddings_buf);
 
 			i32a = new Int32Array(TextToPhotoNode.uncond_input_ids);
-			let uncond_embeddings_buf = krom_ml_inference(TextToPhotoNode.text_encoder_blob, [i32a.buffer], [[1, 77]], [1, 77, 768], Config.raw.gpu_inference);
+			let uncond_embeddings_buf = krom_ml_inference(TextToPhotoNode.text_encoder_blob, [i32a.buffer], [[1, 77]], [1, 77, 768], config_raw.gpu_inference);
 			let uncond_embeddings = new Float32Array(uncond_embeddings_buf);
 
 			let f32a = new Float32Array(uncond_embeddings.length + text_embeddings.length);
@@ -93,7 +93,7 @@ class TextToPhotoNode extends LogicNode {
 		let counter = 0;
 
 		let processing = () => {
-			Console.progress(tr("Processing") + " - " + tr("Text to Photo") + " (" + (counter + 1) + "/" + (50 - offset) + ")");
+			console_progress(tr("Processing") + " - " + tr("Text to Photo") + " (" + (counter + 1) + "/" + (50 - offset) + ")");
 
 			let timestep = TextToPhotoNode.timesteps[counter + offset];
 			for (let i = 0; i < latents.length; ++i) latent_model_input[i] = latents[i];
@@ -101,7 +101,7 @@ class TextToPhotoNode extends LogicNode {
 
 			let t32 = new Int32Array(2);
 			t32[0] = timestep;
-			let noise_pred_buf = krom_ml_inference(TextToPhotoNode.unet_blob, [latent_model_input.buffer, t32.buffer, text_embeddings.buffer], [[2, 4, 64, 64], [1], [2, 77, 768]], [2, 4, 64, 64], Config.raw.gpu_inference);
+			let noise_pred_buf = krom_ml_inference(TextToPhotoNode.unet_blob, [latent_model_input.buffer, t32.buffer, text_embeddings.buffer], [[2, 4, 64, 64], [1], [2, 77, 768]], [2, 4, 64, 64], config_raw.gpu_inference);
 			let noise_pred = new Float32Array(noise_pred_buf);
 
 			for (let i = 0; i < noise_pred_uncond.length; ++i) noise_pred_uncond[i] = noise_pred[i];
@@ -193,13 +193,13 @@ class TextToPhotoNode extends LogicNode {
 	}
 
 	static vaeDecoder = (latents: Float32Array, upscale: bool, done: (img: image_t)=>void) => {
-		Console.progress(tr("Processing") + " - " + tr("Text to Photo"));
+		console_progress(tr("Processing") + " - " + tr("Text to Photo"));
 		base_notifyOnNextFrame(() => {
 			for (let i = 0; i < latents.length; ++i) {
 				latents[i] = 1.0 / 0.18215 * latents[i];
 			}
 
-			let pyimage_buf = krom_ml_inference(TextToPhotoNode.vae_decoder_blob, [latents.buffer], [[1, 4, 64, 64]], [1, 3, 512, 512], Config.raw.gpu_inference);
+			let pyimage_buf = krom_ml_inference(TextToPhotoNode.vae_decoder_blob, [latents.buffer], [[1, 4, 64, 64]], [1, 3, 512, 512], config_raw.gpu_inference);
 			let pyimage = new Float32Array(pyimage_buf);
 
 			for (let i = 0; i < pyimage.length; ++i) {
@@ -225,7 +225,7 @@ class TextToPhotoNode extends LogicNode {
 			else {
 				if (upscale) {
 					UpscaleNode.loadBlob(() => {
-						while (image.width < Config.getTextureResX()) {
+						while (image.width < config_getTextureResX()) {
 							let lastImage = image;
 							image = UpscaleNode.esrgan(image);
 							image_unload(lastImage);

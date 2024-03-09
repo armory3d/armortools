@@ -41,7 +41,7 @@ class SlotLayer {
 		let raw: SlotLayerRaw = new SlotLayerRaw();
 		if (ext == "") {
 			raw.id = 0;
-			for (let l of Project.layers) if (l.id >= raw.id) raw.id = l.id + 1;
+			for (let l of project_layers) if (l.id >= raw.id) raw.id = l.id + 1;
 			ext = raw.id + "";
 		}
 		raw.ext = ext;
@@ -65,8 +65,8 @@ class SlotLayer {
 			{
 				let t: render_target_t = render_target_create();
 				t.name = "texpaint" + ext;
-				t.width = Config.get_texture_res_x();
-				t.height = Config.get_texture_res_y();
+				t.width = config_get_texture_res_x();
+				t.height = config_get_texture_res_y();
 				t.format = format;
 				raw.texpaint = render_path_create_render_target(t)._image;
 			}
@@ -75,16 +75,16 @@ class SlotLayer {
 			{
 				let t: render_target_t = render_target_create();
 				t.name = "texpaint_nor" + ext;
-				t.width = Config.get_texture_res_x();
-				t.height = Config.get_texture_res_y();
+				t.width = config_get_texture_res_x();
+				t.height = config_get_texture_res_y();
 				t.format = format;
 				raw.texpaint_nor = render_path_create_render_target(t)._image;
 			}
 			{
 				let t: render_target_t = render_target_create();
 				t.name = "texpaint_pack" + ext;
-				t.width = Config.get_texture_res_x();
-				t.height = Config.get_texture_res_y();
+				t.width = config_get_texture_res_x();
+				t.height = config_get_texture_res_y();
 				t.format = format;
 				raw.texpaint_pack = render_path_create_render_target(t)._image;
 			}
@@ -102,8 +102,8 @@ class SlotLayer {
 			{
 				let t: render_target_t = render_target_create();
 				t.name = "texpaint" + ext;
-				t.width = Config.get_texture_res_x();
-				t.height = Config.get_texture_res_y();
+				t.width = config_get_texture_res_x();
+				t.height = config_get_texture_res_y();
 				t.format = format;
 				raw.texpaint = render_path_create_render_target(t)._image;
 			}
@@ -129,11 +129,11 @@ class SlotLayer {
 			if (masks != null) for (let m of masks) SlotLayer.delete(m);
 		}
 
-		let lpos: i32 = Project.layers.indexOf(raw);
-		array_remove(Project.layers, raw);
+		let lpos: i32 = project_layers.indexOf(raw);
+		array_remove(project_layers, raw);
 		// Undo can remove base layer and then restore it from undo layers
-		if (Project.layers.length > 0) {
-			Context.set_layer(Project.layers[lpos > 0 ? lpos - 1 : 0]);
+		if (project_layers.length > 0) {
+			context_set_layer(project_layers[lpos > 0 ? lpos - 1 : 0]);
 		}
 
 		// Do not remove empty groups if the last layer is deleted as this prevents redo from working properly
@@ -220,8 +220,8 @@ class SlotLayer {
 		}
 		///end
 
-		Context.raw.layer_preview_dirty = true;
-		Context.raw.ddirty = 3;
+		context_raw.layer_preview_dirty = true;
+		context_raw.ddirty = 3;
 	}
 
 	static invert_mask = (raw: SlotLayerRaw) => {
@@ -238,8 +238,8 @@ class SlotLayer {
 		}
 		base_notify_on_next_frame(_next);
 		raw.texpaint = render_path_render_targets.get("texpaint" + raw.id)._image = inverted;
-		Context.raw.layer_preview_dirty = true;
-		Context.raw.ddirty = 3;
+		context_raw.layer_preview_dirty = true;
+		context_raw.ddirty = 3;
 	}
 
 	static apply_mask = (raw: SlotLayerRaw) => {
@@ -258,7 +258,7 @@ class SlotLayer {
 	}
 
 	static duplicate = (raw: SlotLayerRaw): SlotLayerRaw => {
-		let layers: SlotLayerRaw[] = Project.layers;
+		let layers: SlotLayerRaw[] = project_layers;
 		let i: i32 = layers.indexOf(raw) + 1;
 		let l: SlotLayerRaw = SlotLayer.create("", SlotLayer.is_layer(raw) ? layer_slot_type_t.LAYER : SlotLayer.is_mask(raw) ? layer_slot_type_t.MASK : layer_slot_type_t.GROUP, raw.parent);
 		layers.splice(i, 0, l);
@@ -324,8 +324,8 @@ class SlotLayer {
 	}
 
 	static resize_and_set_bits = (raw: SlotLayerRaw) => {
-		let res_x: i32 = Config.get_texture_res_x();
-		let res_y: i32 = Config.get_texture_res_y();
+		let res_x: i32 = config_get_texture_res_x();
+		let res_y: i32 = config_get_texture_res_y();
 		let rts: map_t<string, render_target_t> = render_path_render_targets;
 		if (base_pipe_merge == null) base_make_pipe();
 
@@ -402,22 +402,22 @@ class SlotLayer {
 	}
 
 	static to_fill_layer = (raw: SlotLayerRaw) => {
-		Context.set_layer(raw);
-		raw.fill_layer = Context.raw.material;
+		context_set_layer(raw);
+		raw.fill_layer = context_raw.material;
 		base_update_fill_layer();
 		let _next = () => {
 			MakeMaterial.parse_paint_material();
-			Context.raw.layer_preview_dirty = true;
+			context_raw.layer_preview_dirty = true;
 			UIBase.hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 		}
 		base_notify_on_next_frame(_next);
 	}
 
 	static to_paint_layer = (raw: SlotLayerRaw) => {
-		Context.set_layer(raw);
+		context_set_layer(raw);
 		raw.fill_layer = null;
 		MakeMaterial.parse_paint_material();
-		Context.raw.layer_preview_dirty = true;
+		context_raw.layer_preview_dirty = true;
 		UIBase.hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 	}
 
@@ -427,7 +427,7 @@ class SlotLayer {
 
 	static get_children = (raw: SlotLayerRaw): SlotLayerRaw[] => {
 		let children: SlotLayerRaw[] = null; // Child layers of a group
-		for (let l of Project.layers) {
+		for (let l of project_layers) {
 			if (l.parent == raw && SlotLayer.is_layer(l)) {
 				if (children == null) children = [];
 				children.push(l);
@@ -438,7 +438,7 @@ class SlotLayer {
 
 	static get_recursive_children = (raw: SlotLayerRaw): SlotLayerRaw[] => {
 		let children: SlotLayerRaw[] = null;
-		for (let l of Project.layers) {
+		for (let l of project_layers) {
 			if (l.parent == raw) { // Child layers and group masks
 				if (children == null) children = [];
 				children.push(l);
@@ -456,7 +456,7 @@ class SlotLayer {
 
 		let children: SlotLayerRaw[] = null;
 		// Child masks of a layer
-		for (let l of Project.layers) {
+		for (let l of project_layers) {
 			if (l.parent == raw && SlotLayer.is_mask(l)) {
 				if (children == null) children = [];
 				children.push(l);
@@ -465,7 +465,7 @@ class SlotLayer {
 		// Child masks of a parent group
 		if (includeGroupMasks) {
 			if (raw.parent != null && SlotLayer.is_group(raw.parent)) {
-				for (let l of Project.layers) {
+				for (let l of project_layers) {
 					if (l.parent == raw.parent && SlotLayer.is_mask(l)) {
 						if (children == null) children = [];
 						children.push(l);
@@ -478,14 +478,14 @@ class SlotLayer {
 
 	static has_masks = (raw: SlotLayerRaw, includeGroupMasks = true): bool => {
 		// Layer mask
-		for (let l of Project.layers) {
+		for (let l of project_layers) {
 			if (l.parent == raw && SlotLayer.is_mask(l)) {
 				return true;
 			}
 		}
 		// Group mask
 		if (includeGroupMasks && raw.parent != null && SlotLayer.is_group(raw.parent)) {
-			for (let l of Project.layers) {
+			for (let l of project_layers) {
 				if (l.parent == raw.parent && SlotLayer.is_mask(l)) {
 					return true;
 				}
@@ -557,25 +557,25 @@ class SlotLayer {
 	}
 
 	static can_move = (raw: SlotLayerRaw, to: i32): bool => {
-		let old_index: i32 = Project.layers.indexOf(raw);
+		let old_index: i32 = project_layers.indexOf(raw);
 
 		let delta: i32 = to - old_index; // If delta > 0 the layer is moved up, otherwise down
-		if (to < 0 || to > Project.layers.length - 1 || delta == 0) return false;
+		if (to < 0 || to > project_layers.length - 1 || delta == 0) return false;
 
 		// If the layer is moved up, all layers between the old position and the new one move one down.
 		// The layers above the new position stay where they are.
 		// If the new position is on top or on bottom no upper resp. lower layer exists.
-		let new_upper_layer: SlotLayerRaw = delta > 0 ? (to < Project.layers.length - 1 ? Project.layers[to + 1] : null) : Project.layers[to];
+		let new_upper_layer: SlotLayerRaw = delta > 0 ? (to < project_layers.length - 1 ? project_layers[to + 1] : null) : project_layers[to];
 
 		// Group or layer is collapsed so we check below and update the upper layer.
 		if (new_upper_layer != null && !new_upper_layer.show_panel) {
 			let children: SlotLayerRaw[] = SlotLayer.get_recursive_children(new_upper_layer);
 			to -= children != null ? children.length : 0;
 			delta = to - old_index;
-			new_upper_layer = delta > 0 ? (to < Project.layers.length - 1 ? Project.layers[to + 1] : null) : Project.layers[to];
+			new_upper_layer = delta > 0 ? (to < project_layers.length - 1 ? project_layers[to + 1] : null) : project_layers[to];
 		}
 
-		let new_lower_layer: SlotLayerRaw = delta > 0 ? Project.layers[to] : (to > 0 ? Project.layers[to - 1] : null);
+		let new_lower_layer: SlotLayerRaw = delta > 0 ? project_layers[to] : (to > 0 ? project_layers[to - 1] : null);
 
 		if (SlotLayer.is_mask(raw)) {
 			// Masks can not be on top.
@@ -617,24 +617,24 @@ class SlotLayer {
 		}
 
 		let pointers: map_t<SlotLayerRaw, i32> = TabLayers.init_layer_map();
-		let old_index: i32 = Project.layers.indexOf(raw);
+		let old_index: i32 = project_layers.indexOf(raw);
 		let delta: i32 = to - old_index;
-		let new_upper_layer: SlotLayerRaw = delta > 0 ? (to < Project.layers.length - 1 ? Project.layers[to + 1] : null) : Project.layers[to];
+		let new_upper_layer: SlotLayerRaw = delta > 0 ? (to < project_layers.length - 1 ? project_layers[to + 1] : null) : project_layers[to];
 
 		// Group or layer is collapsed so we check below and update the upper layer.
 		if (new_upper_layer != null && !new_upper_layer.show_panel) {
 			let children: SlotLayerRaw[] = SlotLayer.get_recursive_children(new_upper_layer);
 			to -= children != null ? children.length : 0;
 			delta = to - old_index;
-			new_upper_layer = delta > 0 ? (to < Project.layers.length - 1 ? Project.layers[to + 1] : null) : Project.layers[to];
+			new_upper_layer = delta > 0 ? (to < project_layers.length - 1 ? project_layers[to + 1] : null) : project_layers[to];
 		}
 
-		Context.set_layer(raw);
-		History.order_layers(to);
+		context_set_layer(raw);
+		history_order_layers(to);
 		UIBase.hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 
-		array_remove(Project.layers, raw);
-		Project.layers.splice(to, 0, raw);
+		array_remove(project_layers, raw);
+		project_layers.splice(to, 0, raw);
 
 		if (SlotLayer.is_layer(raw)) {
 			let old_parent: SlotLayerRaw = raw.parent;
@@ -657,9 +657,9 @@ class SlotLayer {
 			if (layer_masks != null) {
 				for (let idx: i32 = 0; idx < layer_masks.length; ++idx) {
 					let mask: SlotLayerRaw = layer_masks[idx];
-					array_remove(Project.layers, mask);
+					array_remove(project_layers, mask);
 					// If the masks are moved down each step increases the index below the layer by one.
-					Project.layers.splice(delta > 0 ? old_index + delta - 1 : old_index + delta + idx, 0, mask);
+					project_layers.splice(delta > 0 ? old_index + delta - 1 : old_index + delta + idx, 0, mask);
 				}
 			}
 
@@ -680,13 +680,13 @@ class SlotLayer {
 			if (children != null) {
 				for (let idx: i32 = 0; idx < children.length; ++idx) {
 					let child: SlotLayerRaw = children[idx];
-					array_remove(Project.layers, child);
+					array_remove(project_layers, child);
 					// If the children are moved down each step increases the index below the layer by one.
-					Project.layers.splice(delta > 0 ? old_index + delta - 1 : old_index + delta + idx, 0, child);
+					project_layers.splice(delta > 0 ? old_index + delta - 1 : old_index + delta + idx, 0, child);
 				}
 			}
 		}
 
-		for (let m of Project.materials) TabLayers.remap_layer_pointers(m.canvas.nodes, TabLayers.fill_layer_map(pointers));
+		for (let m of project_materials) TabLayers.remap_layer_pointers(m.canvas.nodes, TabLayers.fill_layer_map(pointers));
 	}
 }

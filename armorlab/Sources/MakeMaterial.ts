@@ -6,7 +6,7 @@ class MakeMaterial {
 	static heightUsed = false;
 
 	static parseMeshMaterial = () => {
-		let m = Project.materialData;
+		let m = project_materialData;
 
 		for (let c of m._.shader.contexts) {
 			if (c.name == "mesh") {
@@ -24,14 +24,14 @@ class MakeMaterial {
 			let sampler = con.frag.sharedSamplers[0];
 			scon._.override_context.shared_sampler = sampler.substr(sampler.lastIndexOf(" ") + 1);
 		}
-		if (!Context.raw.textureFilter) {
+		if (!context_raw.textureFilter) {
 			scon._.override_context.filter = "point";
 		}
 		scon._.override_context.addressing = "repeat";
 		m._.shader.contexts.push(scon);
 		m._.shader._.contexts.push(scon);
 
-		Context.raw.ddirty = 2;
+		context_raw.ddirty = 2;
 
 		///if arm_voxels
 		MakeMaterial.makeVoxel(m);
@@ -45,7 +45,7 @@ class MakeMaterial {
 	///if arm_voxels
 	static makeVoxel = (m: material_data_t) => {
 		let rebuild = true; // heightUsed;
-		if (Config.raw.rp_gi != false && rebuild) {
+		if (config_raw.rp_gi != false && rebuild) {
 			let scon: shader_context_t = null;
 			for (let c of m._.shader._.contexts) {
 				if (c.name == "voxel") {
@@ -53,13 +53,13 @@ class MakeMaterial {
 					break;
 				}
 			}
-			if (scon != null) MakeVoxel.run(scon);
+			if (scon != null) make_voxel_run(scon);
 		}
 	}
 	///end
 
 	static parsePaintMaterial = () => {
-		let m = Project.materialData;
+		let m = project_materialData;
 		let scon: shader_context_t = null;
 		let mcon: material_context_t = null;
 		for (let c of m._.shader.contexts) {
@@ -103,12 +103,12 @@ class MakeMaterial {
 	}
 
 	static getDisplaceStrength = (): f32 => {
-		let sc = Context.mainObject().base.transform.scale.x;
-		return Config.raw.displace_strength * 0.02 * sc;
+		let sc = context_mainObject().base.transform.scale.x;
+		return config_raw.displace_strength * 0.02 * sc;
 	}
 
 	static voxelgiHalfExtents = (): string => {
-		let ext = Context.raw.vxaoExt;
+		let ext = context_raw.vxaoExt;
 		return `const vec3 voxelgiHalfExtents = vec3(${ext}, ${ext}, ${ext});`;
 	}
 

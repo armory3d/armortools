@@ -6,11 +6,11 @@ class TabScript {
 
 	static draw = (htab: zui_handle_t) => {
 		let ui: zui_t = UIBase.ui;
-		let statush: i32 = Config.raw.layout[layout_size_t.STATUS_H];
+		let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
 		if (zui_tab(htab, tr("Script")) && statush > UIStatus.default_status_h * zui_SCALE(ui)) {
 
 			zui_begin_sticky();
-			if (Config.raw.touch_ui) {
+			if (config_raw.touch_ui) {
 				zui_row([1 / 4, 1 / 4, 1 / 4, 1 / 4]);
 			}
 			else {
@@ -21,7 +21,7 @@ class TabScript {
 					eval(TabScript.hscript.text);
 				}
 				catch(e: any) {
-					Console.log(e);
+					console_log(e);
 				}
 			}
 			if (zui_button(tr("Clear"))) {
@@ -39,7 +39,7 @@ class TabScript {
 				UIFiles.show("js", true, false, (path: string) => {
 					let f: string = UIFiles.filename;
 					if (f == "") f = tr("untitled");
-					path = path + Path.sep + f;
+					path = path + path_sep + f;
 					if (!path.endsWith(".js")) path += ".js";
 					krom_file_save_bytes(path, sys_string_to_buffer(str));
 				});

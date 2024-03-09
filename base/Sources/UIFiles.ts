@@ -27,10 +27,10 @@ class UIFiles {
 		if (isSave) {
 			UIFiles.path = krom_save_dialog(filters, "");
 			if (UIFiles.path != null) {
-				while (UIFiles.path.indexOf(Path.sep + Path.sep) >= 0) UIFiles.path = string_replace_all(UIFiles.path, Path.sep + Path.sep, Path.sep);
+				while (UIFiles.path.indexOf(path_sep + path_sep) >= 0) UIFiles.path = string_replace_all(UIFiles.path, path_sep + path_sep, path_sep);
 				UIFiles.path = string_replace_all(UIFiles.path, "\r", "");
-				UIFiles.filename = UIFiles.path.substr(UIFiles.path.lastIndexOf(Path.sep) + 1);
-				UIFiles.path = UIFiles.path.substr(0, UIFiles.path.lastIndexOf(Path.sep));
+				UIFiles.filename = UIFiles.path.substr(UIFiles.path.lastIndexOf(path_sep) + 1);
+				UIFiles.path = UIFiles.path.substr(0, UIFiles.path.lastIndexOf(path_sep));
 				filesDone(UIFiles.path);
 			}
 		}
@@ -38,9 +38,9 @@ class UIFiles {
 			let paths: string[] = krom_open_dialog(filters, "", openMultiple);
 			if (paths != null) {
 				for (let path of paths) {
-					while (path.indexOf(Path.sep + Path.sep) >= 0) path = string_replace_all(path, Path.sep + Path.sep, Path.sep);
+					while (path.indexOf(path_sep + path_sep) >= 0) path = string_replace_all(path, path_sep + path_sep, path_sep);
 					path = string_replace_all(path, "\r", "");
-					UIFiles.filename = path.substr(path.lastIndexOf(Path.sep) + 1);
+					UIFiles.filename = path.substr(path.lastIndexOf(path_sep) + 1);
 					filesDone(path);
 				}
 			}
@@ -60,10 +60,10 @@ class UIFiles {
 	// 			Zui.text("*." + filters, Center);
 	// 			if (Zui.button(isSave ? tr("Save") : tr("Open")) || known || ui.isReturnDown) {
 	// 				UIBox.hide();
-	// 				filesDone((known || isSave) ? path : path + Path.sep + filename);
-	// 				if (known) path_handle.text = path_handle.text.substr(0, path_handle.text.lastIndexOf(Path.sep));
+	// 				filesDone((known || isSave) ? path : path + sep + filename);
+	// 				if (known) path_handle.text = path_handle.text.substr(0, path_handle.text.lastIndexOf(sep));
 	// 			}
-	// 			known = Path.isTexture(path) || Path.isMesh(path) || Path.isProject(path);
+	// 			known = isTexture(path) || isMesh(path) || isProject(path);
 	// 			path = fileBrowser(ui, path_handle, false);
 	// 			if (path_handle.changed) ui.currentWindow.redraws = 3;
 	// 		}
@@ -81,13 +81,13 @@ class UIFiles {
 
 	static file_browser = (ui: zui_t, handle: zui_handle_t, foldersOnly: bool = false, dragFiles: bool = false, search: string = "", refresh: bool = false, contextMenu: (s: string)=>void = null): string => {
 
-		let icons: image_t = Res.get("icons.k");
-		let folder: rect_t = Res.tile50(icons, 2, 1);
-		let file: rect_t = Res.tile50(icons, 3, 1);
+		let icons: image_t = resource_get("icons.k");
+		let folder: rect_t = resource_tile50(icons, 2, 1);
+		let file: rect_t = resource_tile50(icons, 3, 1);
 		let is_cloud: bool = handle.text.startsWith("cloud");
 
-		if (is_cloud && File.cloud == null) File.init_cloud(() => { UIBase.hwnds[tab_area_t.STATUS].redraws = 3; });
-		if (is_cloud && File.read_directory("cloud", false).length == 0) return handle.text;
+		if (is_cloud && file_cloud == null) file_init_cloud(() => { UIBase.hwnds[tab_area_t.STATUS].redraws = 3; });
+		if (is_cloud && file_read_directory("cloud", false).length == 0) return handle.text;
 
 		///if krom_ios
 		let document_directory: string = krom_save_dialog("", "");
@@ -99,11 +99,11 @@ class UIFiles {
 			UIFiles.files = [];
 
 			// Up directory
-			let i1: i32 = handle.text.indexOf(Path.sep);
+			let i1: i32 = handle.text.indexOf(path_sep);
 			let nested: bool = i1 > -1 && handle.text.length - 1 > i1;
 			///if krom_windows
 			// Server addresses like \\server are not nested
-			nested = nested && !(handle.text.length >= 2 && handle.text.charAt(0) == Path.sep && handle.text.charAt(1) == Path.sep && handle.text.lastIndexOf(Path.sep) == 1);
+			nested = nested && !(handle.text.length >= 2 && handle.text.charAt(0) == path_sep && handle.text.charAt(1) == path_sep && handle.text.lastIndexOf(path_sep) == 1);
 			///end
 			if (nested) UIFiles.files.push("..");
 
@@ -111,11 +111,11 @@ class UIFiles {
 			///if krom_ios
 			if (!is_cloud) dir_path = document_directory + dir_path;
 			///end
-			let files_all: string[] = File.read_directory(dir_path, foldersOnly);
+			let files_all: string[] = file_read_directory(dir_path, foldersOnly);
 
 			for (let f of files_all) {
 				if (f == "" || f.charAt(0) == ".") continue; // Skip hidden
-				if (f.indexOf(".") > 0 && !Path.is_known(f)) continue; // Skip unknown extensions
+				if (f.indexOf(".") > 0 && !path_is_known(f)) continue; // Skip unknown extensions
 				if (is_cloud && f.indexOf("_icon.") >= 0) continue; // Skip thumbnails
 				if (f.toLowerCase().indexOf(search.toLowerCase()) < 0) continue; // Search filter
 				UIFiles.files.push(f);
@@ -162,14 +162,14 @@ class UIFiles {
 
 				if (is_cloud && f != ".." && !UIFiles.offline) {
 					if (UIFiles.icon_map == null) UIFiles.icon_map = new Map();
-					icon = UIFiles.icon_map.get(handle.text + Path.sep + f);
+					icon = UIFiles.icon_map.get(handle.text + path_sep + f);
 					if (icon == null) {
-						let files_all: string[] = File.read_directory(handle.text);
+						let files_all: string[] = file_read_directory(handle.text);
 						let icon_file: string = f.substr(0, f.lastIndexOf(".")) + "_icon.jpg";
 						if (files_all.indexOf(icon_file) >= 0) {
 							let empty: image_t = render_path_render_targets.get("empty_black")._image;
-							UIFiles.icon_map.set(handle.text + Path.sep + f, empty);
-							File.cache_cloud(handle.text + Path.sep + icon_file, (abs: string) => {
+							UIFiles.icon_map.set(handle.text + path_sep + f, empty);
+							file_cache_cloud(handle.text + path_sep + icon_file, (abs: string) => {
 								if (abs != null) {
 									let image: image_t = data_get_image(abs);
 									app_notify_on_init(() => {
@@ -179,7 +179,7 @@ class UIFiles {
 											g2_begin(icon);
 
 											///if (is_paint || is_sculpt)
-											g2_draw_image(Project.materials[0].image, 0, 0);
+											g2_draw_image(project_materials[0].image, 0, 0);
 											///end
 										}
 										else {
@@ -190,7 +190,7 @@ class UIFiles {
 										g2_draw_image(image, 0, 0);
 										g2_set_pipeline(null);
 										g2_end();
-										UIFiles.icon_map.set(handle.text + Path.sep + f, icon);
+										UIFiles.icon_map.set(handle.text + path_sep + f, icon);
 										UIBase.hwnds[tab_area_t.STATUS].redraws = 3;
 									});
 								}
@@ -216,7 +216,7 @@ class UIFiles {
 				}
 				if (f.endsWith(".arm") && !is_cloud) {
 					if (UIFiles.icon_map == null) UIFiles.icon_map = new Map();
-					let key: string = handle.text + Path.sep + f;
+					let key: string = handle.text + path_sep + f;
 					icon = UIFiles.icon_map.get(key);
 					if (!UIFiles.icon_map.has(key)) {
 						let blob_path: string = key;
@@ -271,10 +271,10 @@ class UIFiles {
 					}
 				}
 
-				if (Path.is_texture(f) && !is_cloud) {
+				if (path_is_texture(f) && !is_cloud) {
 					let w: i32 = 50;
 					if (UIFiles.icon_map == null) UIFiles.icon_map = new Map();
-					let shandle: string = handle.text + Path.sep + f;
+					let shandle: string = handle.text + path_sep + f;
 					icon = UIFiles.icon_map.get(shandle);
 					if (icon == null) {
 						let empty: image_t = render_path_render_targets.get("empty_black")._image;
@@ -313,7 +313,7 @@ class UIFiles {
 				}
 
 				if (ui.is_hovered && ui.input_released_r && contextMenu != null) {
-					contextMenu(handle.text + Path.sep + f);
+					contextMenu(handle.text + path_sep + f);
 				}
 
 				if (state == zui_state_t.STARTED) {
@@ -324,33 +324,33 @@ class UIFiles {
 						///if krom_ios
 						if (!is_cloud) base_drag_file = document_directory + base_drag_file;
 						///end
-						if (base_drag_file.charAt(base_drag_file.length - 1) != Path.sep) {
-							base_drag_file += Path.sep;
+						if (base_drag_file.charAt(base_drag_file.length - 1) != path_sep) {
+							base_drag_file += path_sep;
 						}
 						base_drag_file += f;
 						base_drag_file_icon = icon;
 					}
 
 					UIFiles.selected = i;
-					if (time_time() - Context.raw.select_time < 0.25) {
+					if (time_time() - context_raw.select_time < 0.25) {
 						base_drag_file = null;
 						base_drag_file_icon = null;
 						base_is_dragging = false;
 						handle.changed = ui.changed = true;
 						if (f == "..") { // Up
-							handle.text = handle.text.substring(0, handle.text.lastIndexOf(Path.sep));
+							handle.text = handle.text.substring(0, handle.text.lastIndexOf(path_sep));
 							// Drive root
-							if (handle.text.length == 2 && handle.text.charAt(1) == ":") handle.text += Path.sep;
+							if (handle.text.length == 2 && handle.text.charAt(1) == ":") handle.text += path_sep;
 						}
 						else {
-							if (handle.text.charAt(handle.text.length - 1) != Path.sep) {
-								handle.text += Path.sep;
+							if (handle.text.charAt(handle.text.length - 1) != path_sep) {
+								handle.text += path_sep;
 							}
 							handle.text += f;
 						}
 						UIFiles.selected = -1;
 					}
-					Context.raw.select_time = time_time();
+					context_raw.select_time = time_time();
 				}
 
 				// Label

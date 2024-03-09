@@ -2,7 +2,7 @@
 class ImportFolder {
 
 	static run = (path: string) => {
-		let files: string[] = File.read_directory(path);
+		let files: string[] = file_read_directory(path);
 		let mapbase: string = "";
 		let mapopac: string = "";
 		let mapnor: string = "";
@@ -14,58 +14,58 @@ class ImportFolder {
 		let found_texture: bool = false;
 		// Import maps
 		for (let f of files) {
-			if (!Path.is_texture(f)) continue;
+			if (!path_is_texture(f)) continue;
 
 			// TODO: handle -albedo
 
 			let base: string = f.substr(0, f.lastIndexOf(".")).toLowerCase();
 			let valid: bool = false;
-			if (mapbase == "" && Path.is_base_color_tex(base)) {
+			if (mapbase == "" && path_is_base_color_tex(base)) {
 				mapbase = f;
 				valid = true;
 			}
-			if (mapopac == "" && Path.is_opacity_tex(base)) {
+			if (mapopac == "" && path_is_opacity_tex(base)) {
 				mapopac = f;
 				valid = true;
 			}
-			if (mapnor == "" && Path.is_normal_map_tex(base)) {
+			if (mapnor == "" && path_is_normal_map_tex(base)) {
 				mapnor = f;
 				valid = true;
 			}
-			if (mapocc == "" && Path.is_occlusion_tex(base)) {
+			if (mapocc == "" && path_is_occlusion_tex(base)) {
 				mapocc = f;
 				valid = true;
 			}
-			if (maprough == "" && Path.is_roughness_tex(base)) {
+			if (maprough == "" && path_is_roughness_tex(base)) {
 				maprough = f;
 				valid = true;
 			}
-			if (mapmet == "" && Path.is_metallic_tex(base)) {
+			if (mapmet == "" && path_is_metallic_tex(base)) {
 				mapmet = f;
 				valid = true;
 			}
-			if (mapheight == "" && Path.is_displacement_tex(base)) {
+			if (mapheight == "" && path_is_displacement_tex(base)) {
 				mapheight = f;
 				valid = true;
 			}
 
 			if (valid) {
-				ImportTexture.run(path + Path.sep + f, false);
+				ImportTexture.run(path + path_sep + f, false);
 				found_texture = true;
 			}
 		}
 
 		if (!found_texture) {
-			Console.info(tr("Folder does not contain textures"));
+			console_info(tr("Folder does not contain textures"));
 			return;
 		}
 
 		// Create material
-		Context.raw.material = SlotMaterial.create(Project.materials[0].data);
-		Project.materials.push(Context.raw.material);
-		let nodes: zui_nodes_t = Context.raw.material.nodes;
-		let canvas: zui_node_canvas_t = Context.raw.material.canvas;
-		let dirs: string[] = path.split(Path.sep);
+		context_raw.material = SlotMaterial.create(project_materials[0].data);
+		project_materials.push(context_raw.material);
+		let nodes: zui_nodes_t = context_raw.material.nodes;
+		let canvas: zui_node_canvas_t = context_raw.material.canvas;
+		let dirs: string[] = path.split(path_sep);
 		canvas.name = dirs[dirs.length - 1];
 		let nout: zui_node_t = null;
 		for (let n of canvas.nodes) {
@@ -117,7 +117,7 @@ class ImportFolder {
 		MakeMaterial.parse_paint_material();
 		UtilRender.make_material_preview();
 		UIBase.hwnds[1].redraws = 2;
-		History.new_material();
+		history_new_material();
 	}
 
 	static place_image_node = (nodes: zui_nodes_t, canvas: zui_node_canvas_t, asset: string, ny: i32, to_id: i32, to_socket: i32) => {

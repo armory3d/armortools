@@ -14,8 +14,8 @@ class TabObjects {
 			zui_begin_sticky();
 			zui_row([1 / 4]);
 			if (zui_button("Import")) {
-				Project.import_mesh(false, () => {
-					object_set_parent(Project.paint_objects.pop().base, null);
+				project_import_mesh(false, () => {
+					object_set_parent(project_paint_objects.pop().base, null);
 				});
 			}
 			zui_end_sticky();
@@ -40,7 +40,7 @@ class TabObjects {
 					}
 
 					// Highlight selected line
-					if (currentObject == Context.raw.selected_object) {
+					if (currentObject == context_context_raw.selected_object) {
 						g2_set_color(0xff205d9c);
 						g2_fill_rect(0, ui._y, ui._window_w, zui_ELEMENT_H(ui));
 						g2_set_color(0xffffffff);
@@ -68,7 +68,7 @@ class TabObjects {
 					ui._y -= zui_ELEMENT_OFFSET(ui);
 
 					if (ui.is_released) {
-						Context.raw.selected_object = currentObject;
+						context_context_raw.selected_object = currentObject;
 					}
 
 					if (ui.is_hovered && ui.input_released_r) {
@@ -127,12 +127,12 @@ class TabObjects {
 			if (zui_panel(zui_handle("tabobjects_2", {selected: true}), 'Properties')) {
 				// ui.indent();
 
-				if (Context.raw.selected_object != null) {
+				if (context_context_raw.selected_object != null) {
 					let h = zui_handle("tabobjects_3");
-					h.selected = Context.raw.selected_object.visible;
-					Context.raw.selected_object.visible = zui_check(h, "Visible");
+					h.selected = context_context_raw.selected_object.visible;
+					context_context_raw.selected_object.visible = zui_check(h, "Visible");
 
-					let t = Context.raw.selected_object.transform;
+					let t = context_context_raw.selected_object.transform;
 					let localPos = t.loc;
 					let worldPos = vec4_create(transform_world_x(t), transform_world_y(t), transform_world_z(t), 1.0);
 					let scale = t.scale;
@@ -178,10 +178,10 @@ class TabObjects {
 					f = parseFloat(zui_text_input(h, "Z"));
 					if (h.changed) { changed = true; rot.z = f; }
 
-					if (changed && Context.raw.selected_object.name != "Scene") {
+					if (changed && context_context_raw.selected_object.name != "Scene") {
 						vec4_mult(rot, 3.141592 / 180);
-						quat_from_euler(Context.raw.selected_object.transform.rot, rot.x, rot.y, rot.z);
-						transform_build_matrix(Context.raw.selected_object.transform);
+						quat_from_euler(context_context_raw.selected_object.transform.rot, rot.x, rot.y, rot.z);
+						transform_build_matrix(context_context_raw.selected_object.transform);
 						// ///if arm_physics
 						// if (rb != null) rb.syncTransform();
 						// ///end
@@ -223,20 +223,20 @@ class TabObjects {
 					f = parseFloat(zui_text_input(h, "Z"));
 					if (h.changed) dim.z = f;
 
-					Context.raw.selected_object.transform.dirty = true;
+					context_context_raw.selected_object.transform.dirty = true;
 
-					if (Context.raw.selected_object.name == "Scene") {
+					if (context_context_raw.selected_object.name == "Scene") {
 						let p = scene_world;
 						p.strength = zui_slider(zui_handle("tabobjects_16", {value: p.strength}), "Environment", 0.0, 5.0, true);
 					}
-					else if (Context.raw.selected_object.ext_type == "light_object_t") {
-						let light = Context.raw.selected_object.ext;
+					else if (context_context_raw.selected_object.ext_type == "light_object_t") {
+						let light = context_context_raw.selected_object.ext;
 						let lightHandle = zui_handle("tabobjects_17");
 						lightHandle.value = light.data.strength / 10;
 						light.data.strength = zui_slider(lightHandle, "Strength", 0.0, 5.0, true) * 10;
 					}
-					else if (Context.raw.selected_object.ext_type == "camera_object_t") {
-						let cam = Context.raw.selected_object.ext;
+					else if (context_context_raw.selected_object.ext_type == "camera_object_t") {
+						let cam = context_context_raw.selected_object.ext;
 						let fovHandle = zui_handle("tabobjects_18");
 						fovHandle.value = Math.floor(cam.data.fov * 100) / 100;
 						cam.data.fov = zui_slider(fovHandle, "FoV", 0.3, 2.0, true);

@@ -9,7 +9,7 @@ class MakeMesh {
 			name: context_id,
 			depth_write: layerPass == 0 ? true : false,
 			compare_mode: layerPass == 0 ? "less" : "equal",
-			cull_mode: (Context.raw.cull_backfaces || layerPass > 0) ? "clockwise" : "none",
+			cull_mode: (context_raw.cull_backfaces || layerPass > 0) ? "clockwise" : "none",
 			vertex_elements: [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}],
 			color_attachments: ["RGBA64", "RGBA64", "RGBA64"],
 			depth_attachment: "DEPTH32"
@@ -32,7 +32,7 @@ class MakeMesh {
 			vert.n = true;
 			NodeShader.write(vert, 'float height = 0.0;');
 			let num_layers: i32 = 0;
-			for (let l of Project.layers) {
+			for (let l of project_layers) {
 				if (!SlotLayer.is_visible(l) || !l.paint_height || !SlotLayer.is_layer(l)) continue;
 				if (num_layers > 16) break;
 				num_layers++;
@@ -66,7 +66,7 @@ class MakeMesh {
 		frag.n = true;
 		NodeShader.add_function(frag, ShaderFunctions.str_pack_float_int16);
 
-		if (Context.raw.tool == workspace_tool_t.COLORID) {
+		if (context_raw.tool == workspace_tool_t.COLORID) {
 			texture_count++;
 			NodeShader.add_uniform(frag, 'sampler2D texcolorid', '_texcolorid');
 			NodeShader.write(frag, 'fragColor[0] = vec4(n.xy, 1.0, packFloatInt16(0.0, uint(0)));');
@@ -118,20 +118,20 @@ class MakeMesh {
 				NodeShader.write(frag, 'float height3 = 0.0;');
 			}
 
-			if (Context.raw.draw_wireframe) {
+			if (context_raw.draw_wireframe) {
 				texture_count++;
 				NodeShader.add_uniform(frag, 'sampler2D texuvmap', '_texuvmap');
 			}
 
-			if (Context.raw.viewport_mode == viewport_mode_t.MASK && SlotLayer.get_masks(Context.raw.layer) != null) {
-				for (let m of SlotLayer.get_masks(Context.raw.layer)) {
+			if (context_raw.viewport_mode == viewport_mode_t.MASK && SlotLayer.get_masks(context_raw.layer) != null) {
+				for (let m of SlotLayer.get_masks(context_raw.layer)) {
 					if (!SlotLayer.is_visible(m)) continue;
 					texture_count++;
-					NodeShader.add_uniform(frag, 'sampler2D texpaint_view_mask' + m.id, '_texpaint' + Project.layers.indexOf(m));
+					NodeShader.add_uniform(frag, 'sampler2D texpaint_view_mask' + m.id, '_texpaint' + project_layers.indexOf(m));
 				}
 			}
 
-			if (Context.raw.viewport_mode == viewport_mode_t.LIT && Context.raw.render_mode == render_mode_t.FORWARD) {
+			if (context_raw.viewport_mode == viewport_mode_t.LIT && context_raw.render_mode == render_mode_t.FORWARD) {
 				texture_count += 4;
 				NodeShader.add_uniform(frag, 'sampler2D senvmapBrdf', "$brdf.k");
 				NodeShader.add_uniform(frag, 'sampler2D senvmapRadiance', '_envmap_radiance');
@@ -143,9 +143,9 @@ class MakeMesh {
 			MakeMesh.layer_pass_count = 1;
 			let layers: SlotLayerRaw[] = [];
 			let start_count: i32 = texture_count;
-			let is_material_tool: bool = Context.raw.tool == workspace_tool_t.MATERIAL;
-			for (let l of Project.layers) {
-				if (is_material_tool && l != Context.raw.layer) continue;
+			let is_material_tool: bool = context_raw.tool == workspace_tool_t.MATERIAL;
+			for (let l of project_layers) {
+				if (is_material_tool && l != context_raw.layer) continue;
 				if (!SlotLayer.is_layer(l) || !SlotLayer.is_visible(l)) continue;
 
 				let count: i32 = 3;
@@ -166,8 +166,8 @@ class MakeMesh {
 			for (let l of layers) {
 				if (SlotLayer.get_object_mask(l) > 0) {
 					NodeShader.add_uniform(frag, 'int uid', '_uid');
-					if (SlotLayer.get_object_mask(l) > Project.paint_objects.length) { // Atlas
-						let visibles: mesh_object_t[] = Project.get_atlas_objects(SlotLayer.get_object_mask(l));
+					if (SlotLayer.get_object_mask(l) > project_paint_objects.length) { // Atlas
+						let visibles: mesh_object_t[] = project_get_atlas_objects(SlotLayer.get_object_mask(l));
 						NodeShader.write(frag, 'if (');
 						for (let i: i32 = 0; i < visibles.length; ++i) {
 							if (i > 0) NodeShader.write(frag, ' || ');
@@ -176,7 +176,7 @@ class MakeMesh {
 						NodeShader.write(frag, ') {');
 					}
 					else { // Object mask
-						let uid: i32 = Project.paint_objects[SlotLayer.get_object_mask(l) - 1].base.uid;
+						let uid: i32 = project_paint_objects[SlotLayer.get_object_mask(l) - 1].base.uid;
 						NodeShader.write(frag, `if (${uid} == uid) {`);
 					}
 				}
@@ -185,7 +185,7 @@ class MakeMesh {
 				NodeShader.write(frag, 'texpaint_sample = textureLodShared(texpaint' + l.id + ', texCoord, 0.0);');
 				NodeShader.write(frag, 'texpaint_opac = texpaint_sample.a;');
 				// ///if (krom_direct3d12 || krom_vulkan)
-				// if (Context.raw.viewportMode == ViewLit) {
+				// if (raw.viewportMode == ViewLit) {
 				// 	NodeShader.write(frag, 'if (texpaint_opac < 0.1) discard;');
 				// }
 				// ///end
@@ -219,7 +219,7 @@ class MakeMesh {
 				}
 
 				if (l.paint_base) {
-					if (l == Project.layers[0]) {
+					if (l == project_layers[0]) {
 						NodeShader.write(frag, 'basecol = texpaint_sample.rgb * texpaint_opac;');
 					}
 					else {
@@ -282,7 +282,7 @@ class MakeMesh {
 				}
 			}
 
-			if (last_pass && Context.raw.draw_texels) {
+			if (last_pass && context_raw.draw_texels) {
 				NodeShader.add_uniform(frag, 'vec2 texpaintSize', '_texpaintSize');
 				NodeShader.write(frag, 'vec2 texel0 = texCoord * texpaintSize * 0.01;');
 				NodeShader.write(frag, 'vec2 texel1 = texCoord * texpaintSize * 0.1;');
@@ -292,7 +292,7 @@ class MakeMesh {
 				NodeShader.write(frag, 'basecol *= max(float(mod(int(texel2.x), 2.0) == mod(int(texel2.y), 2.0)), 0.9);');
 			}
 
-			if (last_pass && Context.raw.draw_wireframe) {
+			if (last_pass && context_raw.draw_wireframe) {
 				NodeShader.write(frag, 'basecol *= 1.0 - textureLod(texuvmap, texCoord, 0.0).r;');
 			}
 
@@ -330,14 +330,14 @@ class MakeMesh {
 			NodeShader.write(frag, 'n.y = -n.y;');
 			NodeShader.write(frag, 'n = normalize(mul(n, TBN));');
 
-			if (Context.raw.viewport_mode == viewport_mode_t.LIT || Context.raw.viewport_mode == viewport_mode_t.PATH_TRACE) {
+			if (context_raw.viewport_mode == viewport_mode_t.LIT || context_raw.viewport_mode == viewport_mode_t.PATH_TRACE) {
 				NodeShader.write(frag, 'basecol = pow(basecol, vec3(2.2, 2.2, 2.2));');
 
-				if (Context.raw.viewport_shader != null) {
-					let color: string = Context.raw.viewport_shader(frag);
+				if (context_raw.viewport_shader != null) {
+					let color: string = context_raw.viewport_shader(frag);
 					NodeShader.write(frag, `fragColor[1] = vec4(${color}, 1.0);`);
 				}
-				else if (Context.raw.render_mode == render_mode_t.FORWARD && Context.raw.viewport_mode != viewport_mode_t.PATH_TRACE) {
+				else if (context_raw.render_mode == render_mode_t.FORWARD && context_raw.viewport_mode != viewport_mode_t.PATH_TRACE) {
 					frag.wposition = true;
 					NodeShader.write(frag, 'vec3 albedo = mix(basecol, vec3(0.0, 0.0, 0.0), metallic);');
 					NodeShader.write(frag, 'vec3 f0 = mix(vec3(0.04, 0.04, 0.04), basecol, metallic);');
@@ -387,52 +387,52 @@ class MakeMesh {
 					NodeShader.write(frag, 'fragColor[1] = vec4(basecol, occlusion);');
 				}
 			}
-			else if (Context.raw.viewport_mode == viewport_mode_t.BASE_COLOR && Context.raw.layer.paint_base) {
+			else if (context_raw.viewport_mode == viewport_mode_t.BASE_COLOR && context_raw.layer.paint_base) {
 				NodeShader.write(frag, 'fragColor[1] = vec4(basecol, 1.0);');
 			}
-			else if (Context.raw.viewport_mode == viewport_mode_t.NORMAL_MAP && Context.raw.layer.paint_nor) {
+			else if (context_raw.viewport_mode == viewport_mode_t.NORMAL_MAP && context_raw.layer.paint_nor) {
 				NodeShader.write(frag, 'fragColor[1] = vec4(ntex.rgb, 1.0);');
 			}
-			else if (Context.raw.viewport_mode == viewport_mode_t.OCCLUSION && Context.raw.layer.paint_occ) {
+			else if (context_raw.viewport_mode == viewport_mode_t.OCCLUSION && context_raw.layer.paint_occ) {
 				NodeShader.write(frag, 'fragColor[1] = vec4(vec3(occlusion, occlusion, occlusion), 1.0);');
 			}
-			else if (Context.raw.viewport_mode == viewport_mode_t.ROUGHNESS && Context.raw.layer.paint_rough) {
+			else if (context_raw.viewport_mode == viewport_mode_t.ROUGHNESS && context_raw.layer.paint_rough) {
 				NodeShader.write(frag, 'fragColor[1] = vec4(vec3(roughness, roughness, roughness), 1.0);');
 			}
-			else if (Context.raw.viewport_mode == viewport_mode_t.METALLIC && Context.raw.layer.paint_met) {
+			else if (context_raw.viewport_mode == viewport_mode_t.METALLIC && context_raw.layer.paint_met) {
 				NodeShader.write(frag, 'fragColor[1] = vec4(vec3(metallic, metallic, metallic), 1.0);');
 			}
-			else if (Context.raw.viewport_mode == viewport_mode_t.OPACITY && Context.raw.layer.paint_opac) {
+			else if (context_raw.viewport_mode == viewport_mode_t.OPACITY && context_raw.layer.paint_opac) {
 				NodeShader.write(frag, 'fragColor[1] = vec4(vec3(texpaint_sample.a, texpaint_sample.a, texpaint_sample.a), 1.0);');
 			}
-			else if (Context.raw.viewport_mode == viewport_mode_t.HEIGHT && Context.raw.layer.paint_height) {
+			else if (context_raw.viewport_mode == viewport_mode_t.HEIGHT && context_raw.layer.paint_height) {
 				NodeShader.write(frag, 'fragColor[1] = vec4(vec3(height, height, height), 1.0);');
 			}
-			else if (Context.raw.viewport_mode == viewport_mode_t.EMISSION) {
+			else if (context_raw.viewport_mode == viewport_mode_t.EMISSION) {
 				NodeShader.write(frag, 'float emis = int(matid * 255.0) % 3 == 1 ? 1.0 : 0.0;');
 				NodeShader.write(frag, 'fragColor[1] = vec4(vec3(emis, emis, emis), 1.0);');
 			}
-			else if (Context.raw.viewport_mode == viewport_mode_t.SUBSURFACE) {
+			else if (context_raw.viewport_mode == viewport_mode_t.SUBSURFACE) {
 				NodeShader.write(frag, 'float subs = int(matid * 255.0) % 3 == 2 ? 1.0 : 0.0;');
 				NodeShader.write(frag, 'fragColor[1] = vec4(vec3(subs, subs, subs), 1.0);');
 			}
-			else if (Context.raw.viewport_mode == viewport_mode_t.TEXCOORD) {
+			else if (context_raw.viewport_mode == viewport_mode_t.TEXCOORD) {
 				NodeShader.write(frag, 'fragColor[1] = vec4(texCoord, 0.0, 1.0);');
 			}
-			else if (Context.raw.viewport_mode == viewport_mode_t.OBJECT_NORMAL) {
+			else if (context_raw.viewport_mode == viewport_mode_t.OBJECT_NORMAL) {
 				frag.nattr = true;
 				NodeShader.write(frag, 'fragColor[1] = vec4(nAttr, 1.0);');
 			}
-			else if (Context.raw.viewport_mode == viewport_mode_t.MATERIAL_ID) {
-				NodeShader.add_shared_sampler(frag, 'sampler2D texpaint_nor' + Context.raw.layer.id);
+			else if (context_raw.viewport_mode == viewport_mode_t.MATERIAL_ID) {
+				NodeShader.add_shared_sampler(frag, 'sampler2D texpaint_nor' + context_raw.layer.id);
 				NodeShader.add_uniform(frag, 'vec2 texpaintSize', '_texpaintSize');
-				NodeShader.write(frag, 'float sample_matid = texelFetch(texpaint_nor' + Context.raw.layer.id + ', ivec2(texCoord * texpaintSize), 0).a + 1.0 / 255.0;');
+				NodeShader.write(frag, 'float sample_matid = texelFetch(texpaint_nor' + context_raw.layer.id + ', ivec2(texCoord * texpaintSize), 0).a + 1.0 / 255.0;');
 				NodeShader.write(frag, 'float matid_r = fract(sin(dot(vec2(sample_matid, sample_matid * 20.0), vec2(12.9898, 78.233))) * 43758.5453);');
 				NodeShader.write(frag, 'float matid_g = fract(sin(dot(vec2(sample_matid * 20.0, sample_matid), vec2(12.9898, 78.233))) * 43758.5453);');
 				NodeShader.write(frag, 'float matid_b = fract(sin(dot(vec2(sample_matid, sample_matid * 40.0), vec2(12.9898, 78.233))) * 43758.5453);');
 				NodeShader.write(frag, 'fragColor[1] = vec4(matid_r, matid_g, matid_b, 1.0);');
 			}
-			else if (Context.raw.viewport_mode == viewport_mode_t.OBJECT_ID) {
+			else if (context_raw.viewport_mode == viewport_mode_t.OBJECT_ID) {
 				NodeShader.add_uniform(frag, 'float objectId', '_objectId');
 				NodeShader.write(frag, 'float obid = objectId + 1.0 / 255.0;');
 				NodeShader.write(frag, 'float id_r = fract(sin(dot(vec2(obid, obid * 20.0), vec2(12.9898, 78.233))) * 43758.5453);');
@@ -440,13 +440,13 @@ class MakeMesh {
 				NodeShader.write(frag, 'float id_b = fract(sin(dot(vec2(obid, obid * 40.0), vec2(12.9898, 78.233))) * 43758.5453);');
 				NodeShader.write(frag, 'fragColor[1] = vec4(id_r, id_g, id_b, 1.0);');
 			}
-			else if (Context.raw.viewport_mode == viewport_mode_t.MASK && (SlotLayer.get_masks(Context.raw.layer) != null || SlotLayer.is_mask(Context.raw.layer))) {
-				if (SlotLayer.is_mask(Context.raw.layer)) {
-					NodeShader.write(frag, 'float mask_view = textureLodShared(texpaint' + Context.raw.layer.id + ', texCoord, 0.0).r;');
+			else if (context_raw.viewport_mode == viewport_mode_t.MASK && (SlotLayer.get_masks(context_raw.layer) != null || SlotLayer.is_mask(context_raw.layer))) {
+				if (SlotLayer.is_mask(context_raw.layer)) {
+					NodeShader.write(frag, 'float mask_view = textureLodShared(texpaint' + context_raw.layer.id + ', texCoord, 0.0).r;');
 				}
 				else {
 					NodeShader.write(frag, 'float mask_view = 0.0;');
-					for (let m of SlotLayer.get_masks(Context.raw.layer)) {
+					for (let m of SlotLayer.get_masks(context_raw.layer)) {
 						if (!SlotLayer.is_visible(m)) continue;
 						NodeShader.write(frag, 'float mask_sample' + m.id + ' = textureLodShared(texpaint_view_mask' + m.id + ', texCoord, 0.0).r;');
 						NodeShader.write(frag, 'mask_view = ' + MakeMaterial.blend_mode_mask(frag, m.blending, 'mask_view', 'mask_sample' + m.id, 'float(' + SlotLayer.get_opacity(m) + ')') + ';');
@@ -458,7 +458,7 @@ class MakeMesh {
 				NodeShader.write(frag, 'fragColor[1] = vec4(1.0, 0.0, 1.0, 1.0);'); // Pink
 			}
 
-			if (Context.raw.viewport_mode != viewport_mode_t.LIT && Context.raw.viewport_mode != viewport_mode_t.PATH_TRACE) {
+			if (context_raw.viewport_mode != viewport_mode_t.LIT && context_raw.viewport_mode != viewport_mode_t.PATH_TRACE) {
 				NodeShader.write(frag, 'fragColor[1].rgb = pow(fragColor[1].rgb, vec3(2.2, 2.2, 2.2));');
 			}
 

@@ -46,14 +46,14 @@ class UIView2D {
 		UIView2D.channel_location = g4_pipeline_get_const_loc(UIView2D.pipe, "channel");
 		///end
 
-		let scale: f32 = Config.raw.window_scale;
+		let scale: f32 = config_raw.window_scale;
 		UIView2D.ui = zui_create({ theme: base_theme, font: base_font, color_wheel: base_color_wheel, black_white_gradient: base_color_wheel_gradient, scale_factor: scale });
 		UIView2D.ui.scroll_enabled = false;
 	}
 
 	static render = () => {
 
-		UIView2D.ww = Config.raw.layout[layout_size_t.NODES_W];
+		UIView2D.ww = config_raw.layout[layout_size_t.NODES_W];
 
 		///if (is_paint || is_sculpt)
 		UIView2D.wx = Math.floor(app_w()) + UIToolbar.toolbar_w;
@@ -65,7 +65,7 @@ class UIView2D {
 
 		///if (is_paint || is_sculpt)
 		if (!UIBase.show) {
-			UIView2D.ww += Config.raw.layout[layout_size_t.SIDEBAR_W] + UIToolbar.toolbar_w;
+			UIView2D.ww += config_raw.layout[layout_size_t.SIDEBAR_W] + UIToolbar.toolbar_w;
 			UIView2D.wx -= UIToolbar.toolbar_w;
 		}
 		///end
@@ -73,7 +73,7 @@ class UIView2D {
 		if (!UIView2D.show) return;
 		if (sys_width() == 0 || sys_height() == 0) return;
 
-		if (Context.raw.pdirty >= 0) UIView2D.hwnd.redraws = 2; // Paint was active
+		if (context_raw.pdirty >= 0) UIView2D.hwnd.redraws = 2; // Paint was active
 
 		g2_end();
 
@@ -87,18 +87,18 @@ class UIView2D {
 
 		// Ensure font image is drawn
 		///if (is_paint || is_sculpt)
-		if (Context.raw.font.image == null) UtilRender.make_font_preview();
+		if (context_raw.font.image == null) UtilRender.make_font_preview();
 		///end
 
 		zui_begin(UIView2D.ui);
 
-		let headerh: i32 = Config.raw.layout[layout_size_t.HEADER] == 1 ? UIHeader.headerh * 2 : UIHeader.headerh;
-		let apph: i32 = sys_height() - Config.raw.layout[layout_size_t.STATUS_H] + headerh;
-		UIView2D.wh = sys_height() - Config.raw.layout[layout_size_t.STATUS_H];
+		let headerh: i32 = config_raw.layout[layout_size_t.HEADER] == 1 ? UIHeader.headerh * 2 : UIHeader.headerh;
+		let apph: i32 = sys_height() - config_raw.layout[layout_size_t.STATUS_H] + headerh;
+		UIView2D.wh = sys_height() - config_raw.layout[layout_size_t.STATUS_H];
 
 		if (UINodes.show) {
-			UIView2D.wh -= Config.raw.layout[layout_size_t.NODES_H];
-			if (Config.raw.touch_ui) UIView2D.wh += UIHeader.headerh;
+			UIView2D.wh -= config_raw.layout[layout_size_t.NODES_H];
+			if (config_raw.touch_ui) UIView2D.wh += UIHeader.headerh;
 		}
 
 		if (zui_window(UIView2D.hwnd, UIView2D.wx, UIView2D.wy, UIView2D.ww, UIView2D.wh)) {
@@ -113,7 +113,7 @@ class UIView2D {
 			let tex: image_t = null;
 
 			///if (is_paint || is_sculpt)
-			let l: SlotLayerRaw = Context.raw.layer;
+			let l: SlotLayerRaw = context_raw.layer;
 			let channel: i32 = 0;
 			///end
 
@@ -122,12 +122,12 @@ class UIView2D {
 			let ty: f32 = apph / 2 - tw / 2 + UIView2D.pan_y;
 
 			if (UIView2D.type == view_2d_type_t.ASSET) {
-				tex = Project.get_image(Context.raw.texture);
+				tex = project_get_image(context_raw.texture);
 			}
 			else if (UIView2D.type == view_2d_type_t.NODE) {
 				///if (is_paint || is_sculpt)
 
-				tex = Context.raw.node_preview;
+				tex = context_raw.node_preview;
 
 				///else
 
@@ -146,7 +146,7 @@ class UIView2D {
 			else if (UIView2D.type == view_2d_type_t.LAYER) {
 				let layer: SlotLayerRaw = l;
 
-				if (Config.raw.brush_live && RenderPathPaint.live_layer_drawn > 0) {
+				if (config_raw.brush_live && RenderPathPaint.live_layer_drawn > 0) {
 					layer = RenderPathPaint.live_layer;
 				}
 
@@ -164,14 +164,14 @@ class UIView2D {
 				}
 
 				tex =
-					SlotLayer.is_mask(Context.raw.layer) ? layer.texpaint :
+					SlotLayer.is_mask(context_raw.layer) ? layer.texpaint :
 					UIView2D.tex_type == paint_tex_t.BASE     ? layer.texpaint :
 					UIView2D.tex_type == paint_tex_t.OPACITY  ? layer.texpaint :
 					UIView2D.tex_type == paint_tex_t.NORMAL   ? layer.texpaint_nor :
 														   layer.texpaint_pack;
 
 				channel =
-					SlotLayer.is_mask(Context.raw.layer)  ? 1 :
+					SlotLayer.is_mask(context_raw.layer)  ? 1 :
 					UIView2D.tex_type == paint_tex_t.OCCLUSION ? 1 :
 					UIView2D.tex_type == paint_tex_t.ROUGHNESS ? 2 :
 					UIView2D.tex_type == paint_tex_t.METALLIC  ? 3 :
@@ -181,7 +181,7 @@ class UIView2D {
 															0;
 			}
 			else if (UIView2D.type == view_2d_type_t.FONT) {
-				tex = Context.raw.font.image;
+				tex = context_raw.font.image;
 			}
 			///end
 
@@ -195,7 +195,7 @@ class UIView2D {
 					///if (!krom_opengl)
 					g2_set_pipeline(UIView2D.pipe);
 					///end
-					if (!Context.raw.texture_filter) {
+					if (!context_raw.texture_filter) {
 						g2_set_bilinear_filter(false);
 					}
 					///if krom_opengl
@@ -221,13 +221,13 @@ class UIView2D {
 				///if (is_paint || is_sculpt)
 				if (UIView2D.type == view_2d_type_t.LAYER) {
 					g2_set_pipeline(null);
-					if (!Context.raw.texture_filter) {
+					if (!context_raw.texture_filter) {
 						g2_set_bilinear_filter(true);
 					}
 				}
 
 				// Texture and node preview color picking
-				if ((Context.in_2d_view(view_2d_type_t.ASSET) || Context.in_2d_view(view_2d_type_t.NODE)) && Context.raw.tool == workspace_tool_t.PICKER && UIView2D.ui.input_down) {
+				if ((context_in_2d_view(view_2d_type_t.ASSET) || context_in_2d_view(view_2d_type_t.NODE)) && context_raw.tool == workspace_tool_t.PICKER && UIView2D.ui.input_down) {
 					let x: f32 = UIView2D.ui.input_x - tx - UIView2D.wx;
 					let y: f32 = UIView2D.ui.input_y - ty - UIView2D.wy;
 					base_notify_on_next_frame(() => {
@@ -246,9 +246,9 @@ class UIView2D {
 						let i2: i32 = 2;
 						///end
 
-						Context.raw.picked_color.base = color_set_rb(Context.raw.picked_color.base, a.getUint8(i0));
-						Context.raw.picked_color.base = color_set_gb(Context.raw.picked_color.base, a.getUint8(i1));
-						Context.raw.picked_color.base = color_set_bb(Context.raw.picked_color.base, a.getUint8(i2));
+						context_raw.picked_color.base = color_set_rb(context_raw.picked_color.base, a.getUint8(i0));
+						context_raw.picked_color.base = color_set_gb(context_raw.picked_color.base, a.getUint8(i1));
+						context_raw.picked_color.base = color_set_bb(context_raw.picked_color.base, a.getUint8(i2));
 						UIHeader.header_handle.redraws = 2;
 					});
 				}
@@ -277,7 +277,7 @@ class UIView2D {
 			let h: zui_handle_t = zui_handle("uiview2d_1");
 
 			///if (is_paint || is_sculpt)
-			let text: string = UIView2D.type == view_2d_type_t.NODE ? Context.raw.node_preview_name : h.text;
+			let text: string = UIView2D.type == view_2d_type_t.NODE ? context_raw.node_preview_name : h.text;
 			///else
 			let text: string = h.text;
 			///end
@@ -285,9 +285,9 @@ class UIView2D {
 			UIView2D.ui._w = Math.floor(Math.min(g2_font_width(UIView2D.ui.font, UIView2D.ui.font_size, text) + 15 * zui_SCALE(UIView2D.ui), 100 * zui_SCALE(UIView2D.ui)));
 
 			if (UIView2D.type == view_2d_type_t.ASSET) {
-				let asset: asset_t = Context.raw.texture;
+				let asset: asset_t = context_raw.texture;
 				if (asset != null) {
-					let assetNames: string[] = Project.asset_names;
+					let assetNames: string[] = project_asset_names;
 					let i: i32 = assetNames.indexOf(asset.name);
 					h.text = asset.name;
 					asset.name = zui_text_input(h, "");
@@ -297,7 +297,7 @@ class UIView2D {
 			else if (UIView2D.type == view_2d_type_t.NODE) {
 				///if (is_paint || is_sculpt)
 
-				zui_text(Context.raw.node_preview_name);
+				zui_text(context_raw.node_preview_name);
 
 				///else
 
@@ -315,8 +315,8 @@ class UIView2D {
 				UIView2D.text_input_hover = UIView2D.ui.is_hovered;
 			}
 			else if (UIView2D.type == view_2d_type_t.FONT) {
-				h.text = Context.raw.font.name;
-				Context.raw.font.name = zui_text_input(h, "");
+				h.text = context_raw.font.name;
+				context_raw.font.name = zui_text_input(h, "");
 			}
 			///end
 
@@ -334,7 +334,7 @@ class UIView2D {
 				UIView2D.ui._x += ew + 3;
 				UIView2D.ui._y = 2 + start_y;
 
-				if (!SlotLayer.is_mask(Context.raw.layer)) {
+				if (!SlotLayer.is_mask(context_raw.layer)) {
 					UIView2D.tex_type = zui_combo(zui_handle("uiview2d_3", { position: UIView2D.tex_type }), [
 						tr("Base Color"),
 						tr("Normal Map"),
@@ -365,11 +365,11 @@ class UIView2D {
 
 			// Picked position
 			///if (is_paint || is_sculpt)
-			if (Context.raw.tool == workspace_tool_t.PICKER && (UIView2D.type == view_2d_type_t.LAYER || UIView2D.type == view_2d_type_t.ASSET)) {
-				let cursor_img: image_t = Res.get("cursor.k");
+			if (context_raw.tool == workspace_tool_t.PICKER && (UIView2D.type == view_2d_type_t.LAYER || UIView2D.type == view_2d_type_t.ASSET)) {
+				let cursor_img: image_t = resource_get("cursor.k");
 				let hsize: f32 = 16 * zui_SCALE(UIView2D.ui);
 				let size: f32 = hsize * 2;
-				g2_draw_scaled_image(cursor_img, tx + tw * Context.raw.uvx_picked - hsize, ty + th * Context.raw.uvy_picked - hsize, size, size);
+				g2_draw_scaled_image(cursor_img, tx + tw * context_raw.uvx_picked - hsize, ty + th * context_raw.uvy_picked - hsize, size, size);
 			}
 			///end
 		}
@@ -381,7 +381,7 @@ class UIView2D {
 		let headerh: f32 = zui_ELEMENT_H(UIView2D.ui) * 1.4;
 
 		///if (is_paint || is_sculpt)
-		Context.raw.paint2d = false;
+		context_raw.paint2d = false;
 		///end
 
 		if (!base_ui_enabled ||
@@ -416,18 +416,18 @@ class UIView2D {
 		}
 
 		///if (is_paint || is_sculpt)
-		let decal: bool = Context.raw.tool == workspace_tool_t.DECAL || Context.raw.tool == workspace_tool_t.TEXT;
-		let decal_mask: bool = decal && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
-		let set_clone_source: bool = Context.raw.tool == workspace_tool_t.CLONE && Operator.shortcut(Config.keymap.set_clone_source + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
+		let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
+		let decal_mask: bool = decal && operator_shortcut(config_keymap.decal_mask + "+" + config_keymap.action_paint, shortcut_type_t.DOWN);
+		let set_clone_source: bool = context_raw.tool == workspace_tool_t.CLONE && operator_shortcut(config_keymap.set_clone_source + "+" + config_keymap.action_paint, shortcut_type_t.DOWN);
 
 		if (UIView2D.type == view_2d_type_t.LAYER &&
 			!UIView2D.text_input_hover &&
-			(Operator.shortcut(Config.keymap.action_paint, ShortcutType.ShortcutDown) ||
-			 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown) ||
+			(operator_shortcut(config_keymap.action_paint, shortcut_type_t.DOWN) ||
+			 operator_shortcut(config_keymap.brush_ruler + "+" + config_keymap.action_paint, shortcut_type_t.DOWN) ||
 			 decal_mask ||
 			 set_clone_source ||
-			 Config.raw.brush_live)) {
-			Context.raw.paint2d = true;
+			 config_raw.brush_live)) {
+			context_raw.paint2d = true;
 		}
 		///end
 
@@ -450,7 +450,7 @@ class UIView2D {
 		if      (ty + border >  hh) UIView2D.pan_y =  hh / 2 + tw / 2 - border;
 		else if (ty - border < -tw) UIView2D.pan_y = -tw / 2 - hh / 2 + border;
 
-		if (Operator.shortcut(Config.keymap.view_reset)) {
+		if (operator_shortcut(config_keymap.view_reset)) {
 			UIView2D.pan_x = 0.0;
 			UIView2D.pan_y = 0.0;
 			UIView2D.pan_scale = 1.0;

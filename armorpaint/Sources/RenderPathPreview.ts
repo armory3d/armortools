@@ -98,7 +98,7 @@ class RenderPathPreview {
 		///end
 
 		let framebuffer: string = "texpreview";
-		let selected_mat: SlotMaterialRaw = Context.raw.material;
+		let selected_mat: SlotMaterialRaw = context_raw.material;
 		render_path_render_targets.get("texpreview")._image = selected_mat.image;
 		render_path_render_targets.get("texpreview_icon")._image = selected_mat.image_icon;
 
@@ -142,7 +142,7 @@ class RenderPathPreview {
 		///end
 
 		let framebuffer: string = "texpreview";
-		render_path_render_targets.get("texpreview")._image = Context.raw.decal_image;
+		render_path_render_targets.get("texpreview")._image = context_raw.decal_image;
 
 		render_path_set_target(framebuffer);
 

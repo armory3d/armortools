@@ -30,8 +30,8 @@ class NodesBrush {
 		for (let c of NodesBrush.list) {
 			for (let n of c) {
 				if (n.type == nodeType) {
-					let canvas = Project.canvas;
-					let nodes = Project.nodes;
+					let canvas = project_canvas;
+					let nodes = project_nodes;
 					let node = UINodes.makeNode(n, nodes, canvas);
 					canvas.nodes.push(node);
 					return node;

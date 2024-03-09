@@ -135,7 +135,7 @@ class RenderPathDeferred {
 		}
 		///end
 
-		if (Config.raw.rp_ssao) {
+		if (config_raw.rp_ssao) {
 			RenderPathBase.init_ssao();
 		}
 

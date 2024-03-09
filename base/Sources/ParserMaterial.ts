@@ -206,7 +206,7 @@ class ParserMaterial {
 			}
 		}
 		if (frag.wtangent) {
-			// NodeShaderContext.add_elem(con, "tang", "short4norm");
+			// NodeShaderadd_elem(con, "tang", "short4norm");
 			// NodeShader.add_uniform(vert, "mat3 N", "_normal_matrix");
 			NodeShader.add_out(vert, "vec3 wtangent");
 			// NodeShader.write_attrib(vert, `wtangent = normalize(mul(tang.xyz, N));`);
@@ -268,7 +268,7 @@ class ParserMaterial {
 	}
 
 	static get_group = (name: string): zui_node_canvas_t => {
-		for (let g of Project.material_groups) if (g.canvas.name == name) return g.canvas;
+		for (let g of project_material_groups) if (g.canvas.name == name) return g.canvas;
 		return null;
 	}
 
@@ -784,8 +784,8 @@ class ParserMaterial {
 		else if (node.type == "MATERIAL") {
 			let result: string = "vec3(0.0, 0.0, 0.0)";
 			let mi: any = node.buttons[0].default_value;
-			if (mi >= Project.materials.length) return result;
-			let m: SlotMaterialRaw = Project.materials[mi];
+			if (mi >= project_materials.length) return result;
+			let m: SlotMaterialRaw = project_materials[mi];
 			let _nodes: zui_node_t[] = ParserMaterial.nodes;
 			let _links: zui_node_link_t[] = ParserMaterial.links;
 			ParserMaterial.nodes = m.canvas.nodes;
@@ -1203,8 +1203,8 @@ class ParserMaterial {
 		else if (node.type == "MATERIAL") {
 			let result: string = "0.0";
 			let mi: any = node.buttons[0].default_value;
-			if (mi >= Project.materials.length) return result;
-			let m: SlotMaterialRaw = Project.materials[mi];
+			if (mi >= project_materials.length) return result;
+			let m: SlotMaterialRaw = project_materials[mi];
 			let _nodes: zui_node_t[] = ParserMaterial.nodes;
 			let _links: zui_node_link_t[] = ParserMaterial.links;
 			ParserMaterial.nodes = m.canvas.nodes;
@@ -1865,7 +1865,7 @@ class ParserMaterial {
 	}
 
 	static enum_data = (s: string): string => {
-		for (let a of Project.assets) if (a.name == s) return a.file;
+		for (let a of project_assets) if (a.name == s) return a.file;
 		return "";
 	}
 
@@ -1880,7 +1880,7 @@ class ParserMaterial {
 			file: filepath
 		};
 
-		if (Context.raw.texture_filter) {
+		if (context_raw.texture_filter) {
 			tex.min_filter = "anisotropic";
 			tex.mag_filter = "linear";
 			tex.mipmap_filter = "linear";

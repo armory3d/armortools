@@ -14,7 +14,7 @@ class TilingNode extends LogicNode {
 
 	static init = () => {
 		if (TilingNode.image == null) {
-			TilingNode.image = image_create_render_target(Config.getTextureResX(), Config.getTextureResY());
+			TilingNode.image = image_create_render_target(config_getTextureResX(), config_getTextureResY());
 		}
 	}
 
@@ -31,10 +31,10 @@ class TilingNode extends LogicNode {
 	override getAsImage = (from: i32, done: (img: image_t)=>void) => {
 		this.inputs[0].getAsImage((source: image_t) => {
 			g2_begin(TilingNode.image);
-			g2_draw_scaled_image(source, 0, 0, Config.getTextureResX(), Config.getTextureResY());
+			g2_draw_scaled_image(source, 0, 0, config_getTextureResX(), config_getTextureResY());
 			g2_end();
 
-			Console.progress(tr("Processing") + " - " + tr("Tiling"));
+			console_progress(tr("Processing") + " - " + tr("Tiling"));
 			base_notifyOnNextFrame(() => {
 				let _done = (image: image_t) => {
 					this.result = image;

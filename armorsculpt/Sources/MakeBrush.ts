@@ -5,7 +5,7 @@ class MakeBrush {
 
 		NodeShader.write(frag, 'float dist = 0.0;');
 
-		if (Config.raw.brush_3d) {
+		if (config_raw.brush_3d) {
 			///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 			NodeShader.write(frag, 'float depth = textureLod(gbufferD, inp.xy, 0.0).r;');
 			///else

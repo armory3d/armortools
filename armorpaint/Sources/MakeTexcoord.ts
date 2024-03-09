@@ -3,11 +3,11 @@ class MakeTexcoord {
 
 	static run = (vert: NodeShaderRaw, frag: NodeShaderRaw) => {
 
-		let fill_layer: bool = Context.raw.layer.fill_layer != null;
-		let uv_type: uv_type_t = fill_layer ? Context.raw.layer.uv_type : Context.raw.brush_paint;
-		let decal: bool = Context.raw.tool == workspace_tool_t.DECAL || Context.raw.tool == workspace_tool_t.TEXT;
-		let angle: f32 = Context.raw.brush_angle + Context.raw.brush_nodes_angle;
-		let uvAngle: f32 = fill_layer ? Context.raw.layer.angle : angle;
+		let fill_layer: bool = context_raw.layer.fill_layer != null;
+		let uv_type: uv_type_t = fill_layer ? context_raw.layer.uv_type : context_raw.brush_paint;
+		let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
+		let angle: f32 = context_raw.brush_angle + context_raw.brush_nodes_angle;
+		let uvAngle: f32 = fill_layer ? context_raw.layer.angle : angle;
 
 		if (uv_type == uv_type_t.PROJECT || decal) { // TexCoords - project
 			NodeShader.add_uniform(frag, 'float brushScale', '_brushScale');
@@ -23,7 +23,7 @@ class MakeTexcoord {
 
 				frag.n = true;
 				NodeShader.add_uniform(frag, 'vec3 decalLayerNor', '_decalLayerNor');
-				let dot_angle: f32 = Context.raw.brush_angle_reject_dot;
+				let dot_angle: f32 = context_raw.brush_angle_reject_dot;
 				NodeShader.write(frag, `if (abs(dot(n, decalLayerNor) - 1.0) > ${dot_angle}) discard;`);
 
 				frag.wposition = true;
@@ -37,7 +37,7 @@ class MakeTexcoord {
 				NodeShader.write_attrib(frag, 'uvsp.x *= aspectRatio;');
 				NodeShader.write_attrib(frag, 'uvsp *= 0.21 / (decalMask.w * 0.9);'); // Decal radius
 
-				if (Context.raw.brush_directional) {
+				if (context_raw.brush_directional) {
 					NodeShader.add_uniform(frag, 'vec3 brushDirection', '_brushDirection');
 					NodeShader.write_attrib(frag, 'if (brushDirection.z == 0.0) discard;');
 					NodeShader.write_attrib(frag, 'uvsp = vec2(uvsp.x * brushDirection.x - uvsp.y * brushDirection.y, uvsp.x * brushDirection.y + uvsp.y * brushDirection.x);');

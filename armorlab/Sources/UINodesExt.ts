@@ -6,7 +6,7 @@ class UINodesExt {
 	static drawButtons = (ew: f32, startY: f32) => {
 		let ui = UINodes.ui;
 		if (zui_button(tr("Run"))) {
-			Console.progress(tr("Processing"));
+			console_progress(tr("Processing"));
 
 			let delayIdleSleep = () => {
 				krom_delay_idle_sleep();
@@ -18,8 +18,8 @@ class UINodesExt {
 			let taskDone = () => {
 				tasks--;
 				if (tasks == 0) {
-					Console.progress(null);
-					Context.raw.ddirty = 2;
+					console_progress(null);
+					context_raw.ddirty = 2;
 					app_remove_render_2d(delayIdleSleep);
 
 					///if (krom_direct3d12 || krom_vulkan || krom_metal)
@@ -30,7 +30,7 @@ class UINodesExt {
 
 			base_notifyOnNextFrame(() => {
 				let timer = time_time();
-				ParserLogic.parse(Project.canvas);
+				ParserLogic.parse(project_canvas);
 
 				PhotoToPBRNode.cachedSource = null;
 				BrushOutputNode.inst.getAsImage(ChannelType.ChannelBaseColor, (texbase: image_t) => {
@@ -42,14 +42,14 @@ class UINodesExt {
 					if (texbase != null) {
 						let texpaint = render_path_render_targets.get("texpaint")._image;
 						g2_begin(texpaint);
-						g2_draw_scaled_image(texbase, 0, 0, Config.getTextureResX(), Config.getTextureResY());
+						g2_draw_scaled_image(texbase, 0, 0, config_getTextureResX(), config_getTextureResY());
 						g2_end();
 					}
 
 					if (texnor != null) {
 						let texpaint_nor = render_path_render_targets.get("texpaint_nor")._image;
 						g2_begin(texpaint_nor);
-						g2_draw_scaled_image(texnor, 0, 0, Config.getTextureResX(), Config.getTextureResY());
+						g2_draw_scaled_image(texnor, 0, 0, config_getTextureResX(), config_getTextureResY());
 						g2_end();
 					}
 
@@ -62,7 +62,7 @@ class UINodesExt {
 					if (texocc != null) {
 						g2_begin(texpaint_pack);
 						g2_set_pipeline(base_pipeCopyR);
-						g2_draw_scaled_image(texocc, 0, 0, Config.getTextureResX(), Config.getTextureResY());
+						g2_draw_scaled_image(texocc, 0, 0, config_getTextureResX(), config_getTextureResY());
 						g2_set_pipeline(null);
 						g2_end();
 					}
@@ -70,7 +70,7 @@ class UINodesExt {
 					if (texrough != null) {
 						g2_begin(texpaint_pack);
 						g2_set_pipeline(base_pipeCopyG);
-						g2_draw_scaled_image(texrough, 0, 0, Config.getTextureResX(), Config.getTextureResY());
+						g2_draw_scaled_image(texrough, 0, 0, config_getTextureResX(), config_getTextureResY());
 						g2_set_pipeline(null);
 						g2_end();
 					}
@@ -88,7 +88,7 @@ class UINodesExt {
 							BrushOutputNode.inst.inputs[ChannelType.ChannelHeight].node.constructor != FloatNode) {
 
 							// Make copy of vertices before displacement
-							let o = Project.paintObjects[0];
+							let o = project_paintObjects[0];
 							let g = o.data;
 							let vertices = g4_vertex_buffer_lock(g._.vertex_buffer);
 							if (UINodesExt.lastVertices == null || UINodesExt.lastVertices.byteLength != vertices.byteLength) {
@@ -105,13 +105,13 @@ class UINodesExt {
 							g4_vertex_buffer_unlock(g._.vertex_buffer);
 
 							// Apply displacement
-							if (Config.raw.displace_strength > 0) {
+							if (config_raw.displace_strength > 0) {
 								tasks++;
 								base_notifyOnNextFrame(() => {
-									Console.progress(tr("Apply Displacement"));
+									console_progress(tr("Apply Displacement"));
 									base_notifyOnNextFrame(() => {
-										let uv_scale = scene_meshes[0].data.scale_tex * Context.raw.brushScale;
-										UtilMesh.applyDisplacement(texpaint_pack, 0.05 * Config.raw.displace_strength, uv_scale);
+										let uv_scale = scene_meshes[0].data.scale_tex * context_raw.brushScale;
+										UtilMesh.applyDisplacement(texpaint_pack, 0.05 * config_raw.displace_strength, uv_scale);
 										UtilMesh.calcNormals();
 										taskDone();
 									});
@@ -120,7 +120,7 @@ class UINodesExt {
 						}
 					}
 
-					Console.log("Processing finished in " + (time_time() - timer));
+					console_log("Processing finished in " + (time_time() - timer));
 					krom_ml_unload();
 
 					taskDone();

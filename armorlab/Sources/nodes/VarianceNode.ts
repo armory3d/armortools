@@ -40,10 +40,10 @@ class VarianceNode extends LogicNode {
 				f32a[i + 512 * 512 * 2] = (u8a[i * 4 + 2] / 255) * 2.0 - 1.0;
 			}
 
-			Console.progress(tr("Processing") + " - " + tr("Variance"));
+			console_progress(tr("Processing") + " - " + tr("Variance"));
 			base_notifyOnNextFrame(() => {
 				let vae_encoder_blob: ArrayBuffer = data_get_blob("models/sd_vae_encoder.quant.onnx");
-				let latents_buf = krom_ml_inference(vae_encoder_blob, [f32a.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], Config.raw.gpu_inference);
+				let latents_buf = krom_ml_inference(vae_encoder_blob, [f32a.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], config_raw.gpu_inference);
 				let latents = new Float32Array(latents_buf);
 				for (let i = 0; i < latents.length; ++i) {
 					latents[i] = 0.18215 * latents[i];

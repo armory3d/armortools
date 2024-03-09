@@ -1,8 +1,8 @@
-/// <reference path='./Project.ts'/>
-/// <reference path='./Enums.ts'/>
+/// <reference path='./project.ts'/>
+/// <reference path='./enums.ts'/>
 
-// type TContext = {
-class TContext {
+// type context_t = {
+class context_t {
 
 	texture?: asset_t = null;
 	paint_object?: mesh_object_t;
@@ -20,7 +20,7 @@ class TContext {
 	view_index_last?: i32 = -1;
 
 	swatch?: swatch_color_t;
-	picked_color?: swatch_color_t = Project.make_swatch();
+	picked_color?: swatch_color_t = make_swatch();
 	color_picker_callback?: (sc: swatch_color_t)=>void = null;
 
 	default_irradiance?: Float32Array = null;

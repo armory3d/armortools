@@ -26,15 +26,15 @@ class MakeNodePreview {
 		///end
 
 		ParserMaterial.init();
-		ParserMaterial.canvases = [Context.raw.material.canvas];
-		ParserMaterial.nodes = Context.raw.material.canvas.nodes;
-		ParserMaterial.links = Context.raw.material.canvas.links;
+		ParserMaterial.canvases = [context_raw.material.canvas];
+		ParserMaterial.nodes = context_raw.material.canvas.nodes;
+		ParserMaterial.links = context_raw.material.canvas.links;
 		if (group != null) {
 			ParserMaterial.push_group(group);
 			ParserMaterial.parents = parents;
 		}
 		let links: zui_node_link_t[] = ParserMaterial.links;
-		let link: zui_node_link_t = { id: zui_get_link_id(links), from_id: node.id, from_socket: Context.raw.node_preview_socket, to_id: -1, to_socket: -1 };
+		let link: zui_node_link_t = { id: zui_get_link_id(links), from_id: node.id, from_socket: context_raw.node_preview_socket, to_id: -1, to_socket: -1 };
 		links.push(link);
 
 		ParserMaterial.con = con_mesh;

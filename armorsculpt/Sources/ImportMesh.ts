@@ -4,74 +4,74 @@ class ImportMesh {
 	static clearLayers = true;
 
 	static run = (path: string, _clearLayers = true, replaceExisting = true) => {
-		if (!Path.isMesh(path)) {
-			if (!Context.enableImportPlugin(path)) {
-				Console.error(Strings.error1());
+		if (!path_isMesh(path)) {
+			if (!context_enableImportPlugin(path)) {
+				console_error(Strings.error1());
 				return;
 			}
 		}
 
 		ImportMesh.clearLayers = _clearLayers;
-		Context.raw.layerFilter = 0;
+		context_raw.layerFilter = 0;
 
 		let p = path.toLowerCase();
 		if (p.endsWith(".obj")) ImportObj.run(path, replaceExisting);
 		else if (p.endsWith(".blend")) ImportBlendMesh.run(path, replaceExisting);
 		else {
 			let ext = path.substr(path.lastIndexOf(".") + 1);
-			let importer = Path.meshImporters.get(ext);
+			let importer = path_meshImporters.get(ext);
 			importer(path, (mesh: any) => {
 				replaceExisting ? ImportMesh.makeMesh(mesh, path) : ImportMesh.addMesh(mesh);
 			});
 		}
 
-		Project.meshAssets = [path];
+		project_meshAssets = [path];
 
 		///if (krom_android || krom_ios)
-		sys_title_set(path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf(".")));
+		sys_title_set(path.substring(path.lastIndexOf(path_sep) + 1, path.lastIndexOf(".")));
 		///end
 	}
 
 	static finishImport = () => {
-		if (Context.raw.mergedObject != null) {
-			mesh_object_remove(Context.raw.mergedObject);
-			data_delete_mesh(Context.raw.mergedObject.data._.handle);
-			Context.raw.mergedObject = null;
+		if (context_raw.mergedObject != null) {
+			mesh_object_remove(context_raw.mergedObject);
+			data_delete_mesh(context_raw.mergedObject.data._.handle);
+			context_raw.mergedObject = null;
 		}
 
-		Context.selectPaintObject(Context.mainObject());
+		context_selectPaintObject(context_mainObject());
 
-		if (Project.paintObjects.length > 1) {
+		if (project_paintObjects.length > 1) {
 			// Sort by name
-			Project.paintObjects.sort((a, b): i32 => {
+			project_paintObjects.sort((a, b): i32 => {
 				if (a.base.name < b.base.name) return -1;
 				else if (a.base.name > b.base.name) return 1;
 				return 0;
 			});
 
 			// No mask by default
-			for (let p of Project.paintObjects) p.base.visible = true;
-			if (Context.raw.mergedObject == null) UtilMesh.mergeMesh();
-			Context.raw.paintObject.skip_context = "paint";
-			Context.raw.mergedObject.base.visible = true;
+			for (let p of project_paintObjects) p.base.visible = true;
+			if (context_raw.mergedObject == null) UtilMesh.mergeMesh();
+			context_raw.paintObject.skip_context = "paint";
+			context_raw.mergedObject.base.visible = true;
 		}
 
 		Viewport.scaleToBounds();
 
-		if (Context.raw.paintObject.base.name == "") Context.raw.paintObject.base.name = "Object";
+		if (context_raw.paintObject.base.name == "") context_raw.paintObject.base.name = "Object";
 		MakeMaterial.parsePaintMaterial();
 		MakeMaterial.parseMeshMaterial();
 
 		UIView2D.hwnd.redraws = 2;
 
 		///if arm_physics
-		Context.raw.paintBody = null;
+		context_raw.paintBody = null;
 		///end
 	}
 
 	static makeMesh = (mesh: any, path: string) => {
 		if (mesh == null || mesh.posa == null || mesh.nora == null || mesh.inda == null || mesh.posa.length == 0) {
-			Console.error(Strings.error3());
+			console_error(Strings.error3());
 			return;
 		}
 
@@ -80,38 +80,38 @@ class ImportMesh {
 			if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm" });
 
 			let md: mesh_data_t = mesh_data_create(raw);
-			Context.raw.paintObject = Context.mainObject();
+			context_raw.paintObject = context_mainObject();
 
-			Context.selectPaintObject(Context.mainObject());
-			for (let i = 0; i < Project.paintObjects.length; ++i) {
-				let p = Project.paintObjects[i];
-				if (p == Context.raw.paintObject) continue;
+			context_selectPaintObject(context_mainObject());
+			for (let i = 0; i < project_paintObjects.length; ++i) {
+				let p = project_paintObjects[i];
+				if (p == context_raw.paintObject) continue;
 				data_delete_mesh(p.data._.handle);
 				mesh_object_remove(p);
 			}
-			let handle = Context.raw.paintObject.data._.handle;
+			let handle = context_raw.paintObject.data._.handle;
 			if (handle != "SceneSphere" && handle != "ScenePlane") {
 				data_delete_mesh(handle);
 			}
 
 			if (ImportMesh.clearLayers) {
-				while (Project.layers.length > 0) {
-					let l = Project.layers.pop();
+				while (project_layers.length > 0) {
+					let l = project_layers.pop();
 					SlotLayer.unload(l);
 				}
 				base_newLayer(false);
 				app_notify_on_init(base_initLayers);
-				History.reset();
+				history_reset();
 			}
 
-			mesh_object_set_data(Context.raw.paintObject, md);
-			Context.raw.paintObject.base.name = mesh.name;
-			Project.paintObjects = [Context.raw.paintObject];
+			mesh_object_set_data(context_raw.paintObject, md);
+			context_raw.paintObject.base.name = mesh.name;
+			project_paintObjects = [context_raw.paintObject];
 
 			md._.handle = raw.name;
 			data_cached_meshes.set(md._.handle, md);
 
-			Context.raw.ddirty = 4;
+			context_raw.ddirty = 4;
 			UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
 			UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
 
@@ -119,7 +119,7 @@ class ImportMesh {
 			app_notify_on_init(ImportMesh.finishImport);
 
 			base_notifyOnNextFrame(() => {
-				let f32 = new Float32Array(Config.getTextureResX() * Config.getTextureResY() * 4);
+				let f32 = new Float32Array(config_getTextureResX() * config_getTextureResY() * 4);
 				for (let i = 0; i < Math.floor(mesh.inda.length); ++i) {
 					let index = mesh.inda[i];
 					f32[i * 4]     = mesh.posa[index * 4]     / 32767;
@@ -127,11 +127,11 @@ class ImportMesh {
 					f32[i * 4 + 2] = mesh.posa[index * 4 + 2] / 32767;
 					f32[i * 4 + 3] = 1.0;
 				}
-				let imgmesh = image_from_bytes(f32.buffer, Config.getTextureResX(), Config.getTextureResY(), tex_format_t.RGBA128);
-				let texpaint = Project.layers[0].texpaint;
+				let imgmesh = image_from_bytes(f32.buffer, config_getTextureResX(), config_getTextureResY(), tex_format_t.RGBA128);
+				let texpaint = project_layers[0].texpaint;
 				g2_begin(texpaint);
 				g2_set_pipeline(base_pipeCopy128);
-				g2_draw_scaled_image(imgmesh, 0, 0, Config.getTextureResX(), Config.getTextureResY());
+				g2_draw_scaled_image(imgmesh, 0, 0, config_getTextureResX(), config_getTextureResY());
 				g2_set_pipeline(null);
 				g2_end();
 			});
@@ -148,12 +148,12 @@ class ImportMesh {
 
 			let md: mesh_data_t = mesh_data_create(raw);
 
-			let object = scene_add_mesh_object(md, Context.raw.paintObject.materials, Context.raw.paintObject.base);
+			let object = scene_add_mesh_object(md, context_raw.paintObject.materials, context_raw.paintObject.base);
 			object.base.name = mesh.base.name;
 			object.skip_context = "paint";
 
 			// Ensure unique names
-			for (let p of Project.paintObjects) {
+			for (let p of project_paintObjects) {
 				if (p.base.name == object.base.name) {
 					p.base.name += ".001";
 					p.data._.handle += ".001";
@@ -161,12 +161,12 @@ class ImportMesh {
 				}
 			}
 
-			Project.paintObjects.push(object);
+			project_paintObjects.push(object);
 
 			md._.handle = raw.name;
 			data_cached_meshes.set(md._.handle, md);
 
-			Context.raw.ddirty = 4;
+			context_raw.ddirty = 4;
 			UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
 		}
 

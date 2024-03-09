@@ -5,13 +5,13 @@ class MakeBrush {
 
 		NodeShader.write(frag, 'float dist = 0.0;');
 
-		if (Context.raw.tool == workspace_tool_t.PARTICLE) return;
+		if (context_raw.tool == workspace_tool_t.PARTICLE) return;
 
-		let fill_layer: bool = Context.raw.layer.fill_layer != null;
-		let decal: bool = Context.raw.tool == workspace_tool_t.DECAL || Context.raw.tool == workspace_tool_t.TEXT;
+		let fill_layer: bool = context_raw.layer.fill_layer != null;
+		let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
 		if (decal && !fill_layer) NodeShader.write(frag, 'if (decalMask.z > 0.0) {');
 
-		if (Config.raw.brush_3d) {
+		if (config_raw.brush_3d) {
 			///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 			NodeShader.write(frag, 'float depth = textureLod(gbufferD, inp.xy, 0.0).r;');
 			///else
@@ -24,7 +24,7 @@ class MakeBrush {
 			NodeShader.write(frag, 'winp.xyz /= winp.w;');
 			frag.wposition = true;
 
-			if (Config.raw.brush_angle_reject || Context.raw.xray) {
+			if (config_raw.brush_angle_reject || context_raw.xray) {
 				NodeShader.add_function(frag, ShaderFunctions.str_octahedron_wrap);
 				NodeShader.add_uniform(frag, 'sampler2D gbuffer0');
 				///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
@@ -38,10 +38,10 @@ class MakeBrush {
 				NodeShader.write(frag, 'wn = normalize(wn);');
 				NodeShader.write(frag, 'float planeDist = dot(wn, winp.xyz - wposition);');
 
-				if (Config.raw.brush_angle_reject && !Context.raw.xray) {
+				if (config_raw.brush_angle_reject && !context_raw.xray) {
 					NodeShader.write(frag, 'if (planeDist < -0.01) discard;');
 					frag.n = true;
-					let angle: f32 = Context.raw.brush_angle_reject_dot;
+					let angle: f32 = context_raw.brush_angle_reject_dot;
 					NodeShader.write(frag, `if (dot(wn, n) < ${angle}) discard;`);
 				}
 			}
@@ -57,12 +57,12 @@ class MakeBrush {
 			NodeShader.write(frag, 'winplast.xyz /= winplast.w;');
 
 			NodeShader.write(frag, 'vec3 pa = wposition - winp.xyz;');
-			if (Context.raw.xray) {
+			if (context_raw.xray) {
 				NodeShader.write(frag, 'pa += wn * vec3(planeDist, planeDist, planeDist);');
 			}
 			NodeShader.write(frag, 'vec3 ba = winplast.xyz - winp.xyz;');
 
-			if (Context.raw.brush_lazy_radius > 0 && Context.raw.brush_lazy_step > 0) {
+			if (context_raw.brush_lazy_radius > 0 && context_raw.brush_lazy_step > 0) {
 				// Sphere
 				NodeShader.write(frag, 'dist = distance(wposition, winp.xyz);');
 			}

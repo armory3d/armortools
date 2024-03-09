@@ -7,7 +7,7 @@ class ImportBlendMesh {
 		let b: ArrayBuffer = data_get_blob(path);
 		let bl: BlendRaw = ParserBlend.init(b);
 		if (bl.dna == null) {
-			Console.error(Strings.error3());
+			console_error(strings_error3());
 			return;
 		}
 
@@ -76,7 +76,7 @@ class ImportBlendMesh {
 
 			let hasuv: bool = uvdata != null;
 			let texa: Int16Array = hasuv ? new Int16Array(numtri * 3 * 2) : null;
-			let hascol: bool = Context.raw.parse_vcols && coldata != null;
+			let hascol: bool = context_raw.parse_vcols && coldata != null;
 			let cola: Int16Array = hascol ? new Int16Array(numtri * 3 * 4) : null;
 
 			let tri: i32 = 0;
@@ -437,8 +437,8 @@ class ImportBlendMesh {
 				cola: cola,
 				inda: inda,
 				name: name,
-				scalePos: scale_pos,
-				scaleTes: 1.0
+				scale_pos: scale_pos,
+				scale_tex: 1.0
 			};
 
 			(first && replaceExisting) ? ImportMesh.make_mesh(obj, path) : ImportMesh.add_mesh(obj);

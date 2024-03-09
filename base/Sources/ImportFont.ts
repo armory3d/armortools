@@ -4,9 +4,9 @@
 class ImportFont {
 
 	static run = (path: string) => {
-		for (let f of Project.fonts) {
+		for (let f of project_fonts) {
 			if (f.file == path) {
-				Console.info(Strings.info0());
+				console_info(strings_info0());
 				return;
 			}
 		}
@@ -15,7 +15,7 @@ class ImportFont {
 		let count: i32 = krom_g2_font_count(font.font_);
 		let font_slots: SlotFontRaw[] = [];
 		for (let i: i32 = 0; i < count; ++i) {
-			let ar: string[] = path.split(Path.sep);
+			let ar: string[] = path.split(path_sep);
 			let name: string = ar[ar.length - 1];
 			let f: g2_font_t = g2_font_clone(font);
 			g2_font_set_font_index(f, i);
@@ -25,8 +25,8 @@ class ImportFont {
 
 		let _init = () => {
 			for (let f of font_slots) {
-				Context.raw.font = f;
-				Project.fonts.push(f);
+				context_raw.font = f;
+				project_fonts.push(f);
 				UtilRender.make_font_preview();
 			}
 		}

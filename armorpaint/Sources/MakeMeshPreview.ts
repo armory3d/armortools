@@ -21,7 +21,7 @@ class MakeMeshPreview {
 		let pos: string = "pos";
 
 		///if arm_skin
-		let skin: bool = mesh_data_get_vertex_array(Context.raw.paint_object.data, "bone") != null;
+		let skin: bool = mesh_data_get_vertex_array(context_raw.paint_object.data, "bone") != null;
 		if (skin) {
 			pos = "spos";
 			NodeShaderContext.add_elem(con_mesh, "bone", 'short4norm');
@@ -43,11 +43,11 @@ class MakeMeshPreview {
 		NodeShader.add_uniform(vert, 'mat4 WVP', '_world_view_proj_matrix');
 		NodeShader.write_attrib(vert, `gl_Position = mul(vec4(${pos}.xyz, 1.0), WVP);`);
 
-		let brush_scale: string = (Context.raw.brush_scale * Context.raw.brush_nodes_scale) + "";
+		let brush_scale: string = (context_raw.brush_scale * context_raw.brush_nodes_scale) + "";
 		NodeShader.add_out(vert, 'vec2 texCoord');
 		NodeShader.write_attrib(vert, `texCoord = tex * float(${brush_scale});`);
 
-		let decal: bool = Context.raw.decal_preview;
+		let decal: bool = context_raw.decal_preview;
 		ParserMaterial.sample_keep_aspect = decal;
 		ParserMaterial.sample_uv_scale = brush_scale;
 		ParserMaterial.parse_height = MakeMaterial.height_used;
@@ -82,7 +82,7 @@ class MakeMeshPreview {
 		// }
 
 		if (decal) {
-			if (Context.raw.tool == workspace_tool_t.TEXT) {
+			if (context_raw.tool == workspace_tool_t.TEXT) {
 				NodeShader.add_uniform(frag, 'sampler2D textexttool', '_textexttool');
 				NodeShader.write(frag, `opacity *= textureLod(textexttool, texCoord / float(${brush_scale}), 0.0).r;`);
 			}

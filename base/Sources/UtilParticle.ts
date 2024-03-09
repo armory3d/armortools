@@ -4,7 +4,7 @@
 class UtilParticle {
 
 	static init_particle = () => {
-		if (Context.raw.particle_material != null) return;
+		if (context_raw.particle_material != null) return;
 
 		let raw: particle_data_t = {
 			name: "Particles",
@@ -54,7 +54,7 @@ class UtilParticle {
 		}
 
 		let md: material_data_t = data_get_material("Scene", "MaterialParticle");
-		Context.raw.particle_material = md;
+		context_raw.particle_material = md;
 
 		for (let obj of _scene_raw.objects) {
 			if (obj.name == ".Sphere") {
@@ -96,18 +96,18 @@ class UtilParticle {
 	}
 
 	static init_particle_mesh = () => {
-		if (Context.raw.paint_body != null) return;
+		if (context_raw.paint_body != null) return;
 
-		let po: mesh_object_t = Context.raw.merged_object != null ? Context.raw.merged_object : Context.raw.paint_object;
+		let po: mesh_object_t = context_raw.merged_object != null ? context_raw.merged_object : context_raw.paint_object;
 
 		po.base.transform.scale.x = po.base.parent.transform.scale.x;
 		po.base.transform.scale.y = po.base.parent.transform.scale.y;
 		po.base.transform.scale.z = po.base.parent.transform.scale.z;
 
-		Context.raw.paint_body = PhysicsBody.create();
-		Context.raw.paint_body.shape = shape_type_t.MESH;
-		PhysicsBody.init(Context.raw.paint_body, po.base);
-		(po.base as any).physicsBody = Context.raw.paint_body;
+		context_raw.paint_body = PhysicsBody.create();
+		context_raw.paint_body.shape = shape_type_t.MESH;
+		PhysicsBody.init(context_raw.paint_body, po.base);
+		(po.base as any).physicsBody = context_raw.paint_body;
 	}
 
 	///end

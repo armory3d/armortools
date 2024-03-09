@@ -5,7 +5,7 @@ class MakeMeshPreview {
 
 	static run = (data: TMaterial, matcon: material_context_t): NodeShaderContextRaw => {
 		let context_id = "mesh";
-		let con_mesh = NodeShaderContext.create(data, {
+		let con_mesh = NodeShadercontext_create(data, {
 			name: context_id,
 			depth_write: true,
 			compare_mode: "less",
@@ -15,17 +15,17 @@ class MakeMeshPreview {
 			depth_attachment: "DEPTH32"
 		});
 
-		let vert = NodeShaderContext.make_vert(con_mesh);
-		let frag = NodeShaderContext.make_frag(con_mesh);
+		let vert = NodeShadercontext_make_vert(con_mesh);
+		let frag = NodeShadercontext_make_frag(con_mesh);
 		frag.ins = vert.outs;
 		let pos = "pos";
 
 		///if arm_skin
-		let skin = mesh_data_get_vertex_array(Context.raw.paintObject.data, "bone") != null;
+		let skin = mesh_data_get_vertex_array(context_raw.paintObject.data, "bone") != null;
 		if (skin) {
 			pos = "spos";
-			NodeShaderContext.add_elem(con_mesh, "bone", 'short4norm');
-			NodeShaderContext.add_elem(con_mesh, "weight", 'short4norm');
+			NodeShadercontext_add_elem(con_mesh, "bone", 'short4norm');
+			NodeShadercontext_add_elem(con_mesh, "weight", 'short4norm');
 			NodeShader.add_function(vert, ShaderFunctions.str_getSkinningDualQuat);
 			NodeShader.add_uniform(vert, 'vec4 skinBones[128 * 2]', '_skin_bones');
 			NodeShader.add_uniform(vert, 'float posUnpack', '_pos_unpack');
@@ -43,11 +43,11 @@ class MakeMeshPreview {
 		NodeShader.add_uniform(vert, 'mat4 WVP', '_world_view_proj_matrix');
 		NodeShader.write_attrib(vert, `gl_Position = mul(vec4(${pos}.xyz, 1.0), WVP);`);
 
-		let brushScale = (Context.raw.brushScale * Context.raw.brushNodesScale) + "";
+		let brushScale = (context_raw.brushScale * context_raw.brushNodesScale) + "";
 		NodeShader.add_out(vert, 'vec2 texCoord');
 		NodeShader.write_attrib(vert, `texCoord = tex * float(${brushScale});`);
 
-		let decal = Context.raw.decalPreview;
+		let decal = context_raw.decalPreview;
 		ParserMaterial.sample_keep_aspect = decal;
 		ParserMaterial.sample_uv_scale = brushScale;
 		ParserMaterial.parse_height = MakeMaterial.heightUsed;
@@ -82,7 +82,7 @@ class MakeMeshPreview {
 		// }
 
 		if (decal) {
-			if (Context.raw.tool == WorkspaceTool.ToolText) {
+			if (context_raw.tool == WorkspaceTool.ToolText) {
 				NodeShader.add_uniform(frag, 'sampler2D textexttool', '_textexttool');
 				NodeShader.write(frag, `opacity *= textureLod(textexttool, texCoord / float(${brushScale}), 0.0).r;`);
 			}

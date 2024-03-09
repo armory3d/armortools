@@ -24,7 +24,7 @@ class SlotMaterial {
 
 	static create(m: material_data_t = null, c: zui_node_canvas_t = null): SlotMaterialRaw {
 		let raw: SlotMaterialRaw = new SlotMaterialRaw();
-		for (let mat of Project.materials) if (mat.id >= raw.id) raw.id = mat.id + 1;
+		for (let mat of project_materials) if (mat.id >= raw.id) raw.id = mat.id + 1;
 		raw.data = m;
 
 		let w: i32 = UtilRender.material_preview_size;
@@ -61,10 +61,10 @@ class SlotMaterial {
 
 	static delete = (raw: SlotMaterialRaw) => {
 		SlotMaterial.unload(raw);
-		let mpos: i32 = Project.materials.indexOf(raw);
-		array_remove(Project.materials, this);
-		if (Project.materials.length > 0) {
-			Context.set_material(Project.materials[mpos > 0 ? mpos - 1 : 0]);
+		let mpos: i32 = project_materials.indexOf(raw);
+		array_remove(project_materials, this);
+		if (project_materials.length > 0) {
+			context_set_material(project_materials[mpos > 0 ? mpos - 1 : 0]);
 		}
 	}
 }

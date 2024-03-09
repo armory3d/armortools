@@ -7,13 +7,13 @@ class ImportBlendMaterial {
 		let b: ArrayBuffer = data_get_blob(path);
 		let bl: BlendRaw = ParserBlend.init(b);
 		if (bl.dna == null) {
-			Console.error(Strings.error3());
+			console_error(strings_error3());
 			return;
 		}
 
 		let mats: BlHandleRaw[] = ParserBlend.get(bl, "Material");
 		if (mats.length == 0) {
-			Console.error("Error: No materials found");
+			console_error("Error: No materials found");
 			return;
 		}
 
@@ -21,11 +21,11 @@ class ImportBlendMaterial {
 
 		for (let mat of mats) {
 			// Material slot
-			Context.raw.material = SlotMaterial.create(Project.materials[0].data);
-			Project.materials.push(Context.raw.material);
-			imported.push(Context.raw.material);
-			let nodes: zui_nodes_t = Context.raw.material.nodes;
-			let canvas: zui_node_canvas_t = Context.raw.material.canvas;
+			context_raw.material = SlotMaterial.create(project_materials[0].data);
+			project_materials.push(context_raw.material);
+			imported.push(context_raw.material);
+			let nodes: zui_nodes_t = context_raw.material.nodes;
+			let canvas: zui_node_canvas_t = context_raw.material.canvas;
 			canvas.name = BlHandle.get(BlHandle.get(mat, "id"), "name").substr(2); // MAWood
 			let nout: zui_node_t = null;
 			for (let n of canvas.nodes) {
@@ -55,7 +55,7 @@ class ImportBlendMaterial {
 				node = BlHandle.get(node, "next");
 			}
 			if (BlHandle.get(node, "idname") != "ShaderNodeBsdfPrincipled") {
-				Console.error("Error: No Principled BSDF node found");
+				console_error("Error: No Principled BSDF node found");
 				continue;
 			}
 
@@ -107,9 +107,9 @@ class ImportBlendMaterial {
 					if (search == "teximage") {
 						let img: any = BlHandle.get(node, "id", 0, "Image");
 						let file: string = BlHandle.get(img, "name").substr(2); // '//desktop\logo.png'
-						file = Path.base_dir(path) + file;
+						file = path_base_dir(path) + file;
 						ImportTexture.run(file);
-						let ar: string[] = file.split(Path.sep);
+						let ar: string[] = file.split(path_sep);
 						let filename: string = ar[ar.length - 1];
 						n.buttons[0].default_value = base_get_asset_index(filename);
 					}
@@ -240,12 +240,12 @@ class ImportBlendMaterial {
 				link = BlHandle.get(link, "next");
 				if (last.block == link.block) break;
 			}
-			History.new_material();
+			history_new_material();
 		}
 
 		let _init = () => {
 			for (let m of imported) {
-				Context.set_material(m);
+				context_set_material(m);
 				MakeMaterial.parse_paint_material();
 				UtilRender.make_material_preview();
 			}

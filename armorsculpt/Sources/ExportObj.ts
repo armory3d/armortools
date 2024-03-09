@@ -11,7 +11,7 @@ class ExportObj {
 		let o: i32[] = [];
 		ExportObj.writeString(o, "# armorsculpt.org\n");
 
-		let texpaint = Project.layers[0].texpaint;
+		let texpaint = project_layers[0].texpaint;
 		let pixels = image_get_pixels(texpaint);
 		let pixelsView = new DataView(pixels);
 		let mesh = paintObjects[0].data;

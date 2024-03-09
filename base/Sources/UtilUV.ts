@@ -15,7 +15,7 @@ class UtilUV {
 	static pipe_dilate: pipeline_t = null;
 
 	static cache_uv_map = () => {
-		if (UtilUV.uvmap != null && (UtilUV.uvmap.width != Config.get_texture_res_x() || UtilUV.uvmap.height != Config.get_texture_res_y())) {
+		if (UtilUV.uvmap != null && (UtilUV.uvmap.width != config_get_texture_res_x() || UtilUV.uvmap.height != config_get_texture_res_y())) {
 			image_unload(UtilUV.uvmap);
 			UtilUV.uvmap = null;
 			UtilUV.uvmap_cached = false;
@@ -23,16 +23,16 @@ class UtilUV {
 
 		if (UtilUV.uvmap_cached) return;
 
-		let res_x: i32 = Config.get_texture_res_x();
-		let res_y: i32 = Config.get_texture_res_y();
+		let res_x: i32 = config_get_texture_res_x();
+		let res_y: i32 = config_get_texture_res_y();
 		if (UtilUV.uvmap == null) {
 			UtilUV.uvmap = image_create_render_target(res_x, res_y);
 		}
 
 		UtilUV.uvmap_cached = true;
-		let merged: mesh_object_t = Context.raw.merged_object;
-		let mesh: mesh_data_t = (Context.raw.layer_filter == 0 && merged != null) ?
-					merged.data : Context.raw.paint_object.data;
+		let merged: mesh_object_t = context_raw.merged_object;
+		let mesh: mesh_data_t = (context_raw.layer_filter == 0 && merged != null) ?
+					merged.data : context_raw.paint_object.data;
 
 		let texa: i16_array_t = mesh.vertex_arrays[2].values;
 		let inda: u32_array_t = mesh.index_arrays[0].values;
@@ -56,7 +56,7 @@ class UtilUV {
 	}
 
 	static cache_triangle_map = () => {
-		if (UtilUV.trianglemap != null && (UtilUV.trianglemap.width != Config.get_texture_res_x() || UtilUV.trianglemap.height != Config.get_texture_res_y())) {
+		if (UtilUV.trianglemap != null && (UtilUV.trianglemap.width != config_get_texture_res_x() || UtilUV.trianglemap.height != config_get_texture_res_y())) {
 			image_unload(UtilUV.trianglemap);
 			UtilUV.trianglemap = null;
 			UtilUV.trianglemap_cached = false;
@@ -65,11 +65,11 @@ class UtilUV {
 		if (UtilUV.trianglemap_cached) return;
 
 		if (UtilUV.trianglemap == null) {
-			UtilUV.trianglemap = image_create_render_target(Config.get_texture_res_x(), Config.get_texture_res_y());
+			UtilUV.trianglemap = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
 		}
 
 		UtilUV.trianglemap_cached = true;
-		let merged: mesh_data_t = Context.raw.merged_object != null ? Context.raw.merged_object.data : Context.raw.paint_object.data;
+		let merged: mesh_data_t = context_raw.merged_object != null ? context_raw.merged_object.data : context_raw.paint_object.data;
 		let mesh: mesh_data_t = merged;
 		let texa: i16_array_t = mesh.vertex_arrays[2].values;
 		let inda: u32_array_t = mesh.index_arrays[0].values;
@@ -93,7 +93,7 @@ class UtilUV {
 	}
 
 	static cache_dilate_map = () => {
-		if (UtilUV.dilatemap != null && (UtilUV.dilatemap.width != Config.get_texture_res_x() || UtilUV.dilatemap.height != Config.get_texture_res_y())) {
+		if (UtilUV.dilatemap != null && (UtilUV.dilatemap.width != config_get_texture_res_x() || UtilUV.dilatemap.height != config_get_texture_res_y())) {
 			image_unload(UtilUV.dilatemap);
 			UtilUV.dilatemap = null;
 			UtilUV.dilatemap_cached = false;
@@ -102,7 +102,7 @@ class UtilUV {
 		if (UtilUV.dilatemap_cached) return;
 
 		if (UtilUV.dilatemap == null) {
-			UtilUV.dilatemap = image_create_render_target(Config.get_texture_res_x(), Config.get_texture_res_y(), tex_format_t.R8);
+			UtilUV.dilatemap = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
 		}
 
 		if (UtilUV.pipe_dilate == null) {
@@ -125,9 +125,9 @@ class UtilUV {
 			// dilateTexUnpack = getConstantLocation(UtilUV.pipeDilate, "texUnpack");
 		}
 
-		let mask: i32 = Context.object_mask_used() ? SlotLayer.get_object_mask(Context.raw.layer) : 0;
-		if (Context.layer_filter_used()) mask = Context.raw.layer_filter;
-		let geom: mesh_data_t = mask == 0 && Context.raw.merged_object != null ? Context.raw.merged_object.data : Context.raw.paint_object.data;
+		let mask: i32 = context_object_mask_used() ? SlotLayer.get_object_mask(context_raw.layer) : 0;
+		if (context_layer_filter_used()) mask = context_raw.layer_filter;
+		let geom: mesh_data_t = mask == 0 && context_raw.merged_object != null ? context_raw.merged_object.data : context_raw.paint_object.data;
 		g4_begin(UtilUV.dilatemap);
 		g4_clear(0x00000000);
 		g4_set_pipeline(UtilUV.pipe_dilate);
@@ -149,10 +149,10 @@ class UtilUV {
 			UtilUV.dilate_bytes = image_get_pixels(UtilUV.dilatemap);
 		}
 		UtilRender.pick_pos_nor_tex();
-		let w: i32 = 2048; // Config.getTextureResX()
-		let h: i32 = 2048; // Config.getTextureResY()
-		let x: i32 = Math.floor(Context.raw.uvx_picked * w);
-		let y: i32 = Math.floor(Context.raw.uvy_picked * h);
+		let w: i32 = 2048; // config_get_texture_res_x()
+		let h: i32 = 2048; // config_get_texture_res_y()
+		let x: i32 = Math.floor(context_raw.uvx_picked * w);
+		let y: i32 = Math.floor(context_raw.uvy_picked * h);
 		let bytes: ArrayBuffer = new ArrayBuffer(w * h);
 		let view: DataView = new DataView(bytes);
 		let coords: coord_t[] = [{ x: x, y: y }];

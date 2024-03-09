@@ -11,7 +11,7 @@ class ImportGpl {
 		// let view: DataView = new DataView(b);
 		// // GIMP's color palette importer: https://gitlab.gnome.org/GNOME/gimp/-/blob/gimp-2-10/app/core/gimppalette-load.c#L39
 		// if (!lines[0].startsWith("GIMP Palette")) {
-		// 	Console.error(tr("Not a valid GIMP color palette"));
+		// 	console_error(tr("Not a valid GIMP color palette"));
 		// 	return;
 		// }
 
@@ -23,22 +23,22 @@ class ImportGpl {
 		// 	else {
 		// 		let tokens: string[] = delimiter.split(line);
 		// 		if (tokens.length < 3) continue;
-		// 		let swatch: TSwatchColor = Project.makeSwatch(Color.fromBytes(String(tokens[0]), String(tokens[1]), String(tokens[2])));
+		// 		let swatch: TSwatchColor = makeSwatch(Color.fromBytes(String(tokens[0]), String(tokens[1]), String(tokens[2])));
 		// 		swatches.push(swatch);
 		// 	}
 		// }
 
 		// if (replaceExisting) {
-		// 	Project.raw.swatches = [];
+		// 	raw.swatches = [];
 
 		// 	if (swatches.length == 0) { // No swatches contained
-		// 		Project.raw.swatches.push(Project.makeSwatch());
+		// 		raw.swatches.push(makeSwatch());
 		// 	}
 		// }
 
 		// if (swatches.length > 0) {
 		// 	for (let s of swatches) {
-		// 		Project.raw.swatches.push(s);
+		// 		raw.swatches.push(s);
 		// 	}
 		// }
 	}

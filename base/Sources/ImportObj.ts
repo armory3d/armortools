@@ -2,7 +2,7 @@
 class ImportObj {
 
 	static run = (path: string, replace_existing: bool = true) => {
-		let i: split_type_t = Context.raw.split_by;
+		let i: split_type_t = context_raw.split_by;
 		let is_udim: bool = i == split_type_t.UDIM;
 		let split_code: i32 =
 			(i == split_type_t.OBJECT || is_udim) ? "o".charCodeAt(0) :
@@ -35,7 +35,7 @@ class ImportObj {
 				}
 				parts.push(part);
 			}
-			if (Context.raw.split_by == split_type_t.MATERIAL) {
+			if (context_raw.split_by == split_type_t.MATERIAL) {
 				let posa0: Int16Array;
 				let posa1: Int16Array;
 				let nora0: Int16Array;
@@ -61,21 +61,21 @@ class ImportObj {
 							// Repack merged positions
 							let posa32: Float32Array = new Float32Array(Math.floor(posa0.length / 4) * 3 + Math.floor(posa1.length / 4) * 3);
 							for (let k: i32 = 0; k < Math.floor(posa0.length / 4); ++k) {
-								posa32[k * 3    ] = posa0[k * 4    ] / 32767 * parts[i].scalePos;
-								posa32[k * 3 + 1] = posa0[k * 4 + 1] / 32767 * parts[i].scalePos;
-								posa32[k * 3 + 2] = posa0[k * 4 + 2] / 32767 * parts[i].scalePos;
+								posa32[k * 3    ] = posa0[k * 4    ] / 32767 * parts[i].scale_pos;
+								posa32[k * 3 + 1] = posa0[k * 4 + 1] / 32767 * parts[i].scale_pos;
+								posa32[k * 3 + 2] = posa0[k * 4 + 2] / 32767 * parts[i].scale_pos;
 							}
 							for (let k: i32 = 0; k < Math.floor(posa1.length / 4); ++k) {
-								posa32[voff * 3 + k * 3    ] = posa1[k * 4    ] / 32767 * parts[j].scalePos;
-								posa32[voff * 3 + k * 3 + 1] = posa1[k * 4 + 1] / 32767 * parts[j].scalePos;
-								posa32[voff * 3 + k * 3 + 2] = posa1[k * 4 + 2] / 32767 * parts[j].scalePos;
+								posa32[voff * 3 + k * 3    ] = posa1[k * 4    ] / 32767 * parts[j].scale_pos;
+								posa32[voff * 3 + k * 3 + 1] = posa1[k * 4 + 1] / 32767 * parts[j].scale_pos;
+								posa32[voff * 3 + k * 3 + 2] = posa1[k * 4 + 2] / 32767 * parts[j].scale_pos;
 							}
-							let scalePos: f32 = 0.0;
+							let scale_pos: f32 = 0.0;
 							for (let k: i32 = 0; k < posa32.length; ++k) {
 								let f: f32 = Math.abs(posa32[k]);
-								if (scalePos < f) scalePos = f;
+								if (scale_pos < f) scale_pos = f;
 							}
-							let inv: f32 = 32767 * (1 / scalePos);
+							let inv: f32 = 32767 * (1 / scale_pos);
 							let posa: Int16Array = new Int16Array(posa0.length + posa1.length);
 							for (let k: i32 = 0; k < Math.floor(posa.length / 4); ++k) {
 								posa[k * 4    ] = Math.floor(posa32[k * 3    ] * inv);
@@ -100,7 +100,7 @@ class ImportObj {
 							parts[i].nora = nora;
 							parts[i].texa = texa;
 							parts[i].inda = inda;
-							parts[i].scalePos = scalePos;
+							parts[i].scale_pos = scale_pos;
 							parts.splice(j, 1);
 						}
 						else j++;

@@ -1,4 +1,3 @@
-/// <reference path='./tr.ts'/>
 
 class NodesMaterial {
 
@@ -2876,7 +2875,7 @@ class NodesMaterial {
 				node.name = tr("Group") + " " + i;
 
 				let found: bool = false;
-				for (let g of Project.material_groups) {
+				for (let g of project_material_groups) {
 					if (g.canvas.name == node.name) {
 						found = true;
 						break;
@@ -2927,11 +2926,11 @@ class NodesMaterial {
 				],
 				links: []
 			};
-			Project.material_groups.push({ canvas: canvas, nodes: zui_nodes_create() });
+			project_material_groups.push({ canvas: canvas, nodes: zui_nodes_create() });
 		}
 
 		let group: node_group_t = null;
-		for (let g of Project.material_groups) {
+		for (let g of project_material_groups) {
 			if (g.canvas.name == node.name) {
 				group = g;
 				break;
@@ -2975,8 +2974,8 @@ class NodesMaterial {
 	static sync_sockets = (node: zui_node_t) => {
 		let groupStack: node_group_t[] = UINodes.group_stack;
 		let c: zui_node_canvas_t = groupStack[groupStack.length - 1].canvas;
-		for (let m of Project.materials) NodesMaterial.sync_group_sockets(m.canvas, c.name, node);
-		for (let g of Project.material_groups) NodesMaterial.sync_group_sockets(g.canvas, c.name, node);
+		for (let m of project_materials) NodesMaterial.sync_group_sockets(m.canvas, c.name, node);
+		for (let g of project_material_groups) NodesMaterial.sync_group_sockets(g.canvas, c.name, node);
 		zui_node_replace.push(node);
 	}
 
@@ -3031,8 +3030,8 @@ class NodesMaterial {
 	static create_node = (nodeType: string, group: node_group_t = null): zui_node_t => {
 		let n: zui_node_t = NodesMaterial.get_node_t(nodeType);
 		if (n == null) return null;
-		let canvas: zui_node_canvas_t = group != null ? group.canvas : Context.raw.material.canvas;
-		let nodes: zui_nodes_t = group != null ? group.nodes : Context.raw.material.nodes;
+		let canvas: zui_node_canvas_t = group != null ? group.canvas : context_raw.material.canvas;
+		let nodes: zui_nodes_t = group != null ? group.nodes : context_raw.material.nodes;
 		let node: zui_node_t = UINodes.make_node(n, nodes, canvas);
 		canvas.nodes.push(node);
 		return node;

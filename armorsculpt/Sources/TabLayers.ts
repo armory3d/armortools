@@ -6,7 +6,7 @@ class TabLayers {
 	static showContextMenu = false;
 
 	static draw = (htab: zui_handle_t) => {
-		let mini = Config.raw.layout[layout_size_t.SIDEBAR_W] <= UIBase.sidebar_mini_w;
+		let mini = config_config_raw.layout[layout_size_t.SIDEBAR_W] <= UIBase.sidebar_mini_w;
 		mini ? TabLayers.draw_mini(htab) : TabLayers.draw_full(htab);
 	}
 
@@ -50,10 +50,10 @@ class TabLayers {
 	}
 
 	static drawSlots = (mini: bool) => {
-		for (let i = 0; i < Project.layers.length; ++i) {
-			if (i >= Project.layers.length) break; // Layer was deleted
-			let j = Project.layers.length - 1 - i;
-			let l = Project.layers[j];
+		for (let i = 0; i < project_project_layers.length; ++i) {
+			if (i >= project_project_layers.length) break; // Layer was deleted
+			let j = project_project_layers.length - 1 - i;
+			let l = project_project_layers[j];
 			TabLayers.draw_layer_slot(l, j, mini);
 		}
 	}
@@ -73,10 +73,10 @@ class TabLayers {
 		let ui = UIBase.ui;
 		if (zui_button(text)) {
 			UIMenu.draw((ui: zui_t) => {
-				let l = Context.raw.layer;
+				let l = context_context_raw.layer;
 				if (UIMenu.menu_button(ui, tr("Paint Layer"))) {
 					base_base_new_layer();
-					History.new_layer();
+					history_new_layer();
 				}
 			}, 1);
 		}
@@ -86,8 +86,8 @@ class TabLayers {
 		let ui = UIBase.ui;
 		let ar = [tr("All")];
 		let filterHandle = zui_handle("tablayers_0");
-		filterHandle.position = Context.raw.layer_filter;
-		Context.raw.layer_filter = zui_combo(filterHandle, ar, tr("Filter"), false, zui_align_t.LEFT);
+		filterHandle.position = context_context_raw.layer_filter;
+		context_context_raw.layer_filter = zui_combo(filterHandle, ar, tr("Filter"), false, zui_align_t.LEFT);
 	}
 
 	static remapLayerPointers = (nodes: zui_node_t[], pointerMap: Map<i32, i32>) => {
@@ -103,13 +103,13 @@ class TabLayers {
 
 	static initLayerMap = (): Map<SlotLayerRaw, i32> => {
 		let res: Map<SlotLayerRaw, i32> = new Map();
-		for (let i = 0; i < Project.layers.length; ++i) res.set(Project.layers[i], i);
+		for (let i = 0; i < project_project_layers.length; ++i) res.set(project_project_layers[i], i);
 		return res;
 	}
 
 	static fillLayerMap = (map: Map<SlotLayerRaw, i32>): Map<i32, i32> => {
 		let res: Map<i32, i32> = new Map();
-		for (let l of map.keys()) res.set(map.get(l), Project.layers.indexOf(l) > -1 ? Project.layers.indexOf(l) : 9999);
+		for (let l of map.keys()) res.set(map.get(l), project_project_layers.indexOf(l) > -1 ? project_project_layers.indexOf(l) : 9999);
 		return res;
 	}
 
@@ -117,15 +117,15 @@ class TabLayers {
 		base_base_drag_off_x = offX;
 		base_base_drag_off_y = offY;
 		base_base_drag_layer = layer;
-		Context.raw.drag_dest = Project.layers.indexOf(layer);
+		context_context_raw.drag_dest = project_project_layers.indexOf(layer);
 	}
 
 	static drawLayerSlot = (l: SlotLayerRaw, i: i32, mini: bool) => {
 		let ui = UIBase.ui;
 
-		if (Context.raw.layer_filter > 0 &&
+		if (context_context_raw.layer_filter > 0 &&
 			SlotLayer.get_object_mask(l) > 0 &&
-			SlotLayer.get_object_mask(l) != Context.raw.layer_filter) {
+			SlotLayer.get_object_mask(l) != context_context_raw.layer_filter) {
 			return;
 		}
 
@@ -141,37 +141,37 @@ class TabLayers {
 
 		// Highlight drag destination
 		let absy = ui._window_y + ui._y;
-		if (base_base_is_dragging && base_base_drag_layer != null && Context.in_layers()) {
+		if (base_base_is_dragging && base_base_drag_layer != null && context_context_in_layers()) {
 			if (mouse_y > absy + step && mouse_y < absy + step * 3) {
-				let down = Project.layers.indexOf(base_base_drag_layer) >= i;
-				Context.raw.drag_dest = down ? i : i - 1;
+				let down = project_project_layers.indexOf(base_base_drag_layer) >= i;
+				context_context_raw.drag_dest = down ? i : i - 1;
 
-				let ls = Project.layers;
-				let dest = Context.raw.drag_dest;
+				let ls = project_project_layers;
+				let dest = context_context_raw.drag_dest;
 				let toGroup = down ? dest > 0 && ls[dest - 1].parent != null && ls[dest - 1].parent.show_panel : dest < ls.length && ls[dest].parent != null && ls[dest].parent.show_panel;
 				let nestedGroup = SlotLayer.is_group(base_base_drag_layer) && toGroup;
 				if (!nestedGroup) {
-					if (SlotLayer.can_move(Context.raw.layer, Context.raw.drag_dest)) {
+					if (SlotLayer.can_move(context_context_raw.layer, context_context_raw.drag_dest)) {
 						zui_fill(checkw, step * 2, (ui._window_w / zui_SCALE(ui) - 2) - checkw, 2 * zui_SCALE(ui), ui.t.HIGHLIGHT_COL);
 					}
 				}
 			}
-			else if (i == Project.layers.length - 1 && mouse_y < absy + step) {
-				Context.raw.drag_dest = Project.layers.length - 1;
-				if (SlotLayer.can_move(Context.raw.layer, Context.raw.drag_dest)) {
+			else if (i == project_project_layers.length - 1 && mouse_y < absy + step) {
+				context_context_raw.drag_dest = project_project_layers.length - 1;
+				if (SlotLayer.can_move(context_context_raw.layer, context_context_raw.drag_dest)) {
 					zui_fill(checkw, 0, (ui._window_w / zui_SCALE(ui) - 2) - checkw, 2 * zui_SCALE(ui), ui.t.HIGHLIGHT_COL);
 				}
 			}
 		}
-		if (base_base_is_dragging && (base_base_drag_material != null || base_base_drag_swatch != null) && Context.in_layers()) {
+		if (base_base_is_dragging && (base_base_drag_material != null || base_base_drag_swatch != null) && context_context_in_layers()) {
 			if (mouse_y > absy + step && mouse_y < absy + step * 3) {
-				Context.raw.drag_dest = i;
+				context_context_raw.drag_dest = i;
 				if (TabLayers.can_drop_new_layer(i))
 					zui_fill(checkw, 2 * step, (ui._window_w / zui_SCALE(ui) - 2) - checkw, 2 * zui_SCALE(ui), ui.t.HIGHLIGHT_COL);
 			}
-			else if (i == Project.layers.length - 1 && mouse_y < absy + step) {
-				Context.raw.drag_dest = Project.layers.length;
-				if (TabLayers.can_drop_new_layer(Project.layers.length))
+			else if (i == project_project_layers.length - 1 && mouse_y < absy + step) {
+				context_context_raw.drag_dest = project_project_layers.length;
+				if (TabLayers.can_drop_new_layer(project_project_layers.length))
 					zui_fill(checkw, 0, (ui._window_w / zui_SCALE(ui) - 2) - checkw, 2 * zui_SCALE(ui), ui.t.HIGHLIGHT_COL);
 			}
 		}
@@ -212,8 +212,8 @@ class TabLayers {
 		}
 
 		// Draw eye icon
-		let icons = Res.get("icons.k");
-		let r = Res.tile18(icons, l.visible ? 0 : 1, 0);
+		let icons = resource_get("icons.k");
+		let r = resource_tile18(icons, l.visible ? 0 : 1, 0);
 		let center = (step / 2) * zui_SCALE(ui);
 		ui._x += 2;
 		ui._y += 3;
@@ -244,23 +244,23 @@ class TabLayers {
 				ui.input_x > ui._window_x + ui._x && ui.input_x < ui._window_x + ui._window_w &&
 				ui.input_y > ui._window_y + ui._y - center && ui.input_y < ui._window_y + ui._y - center + (step * zui_SCALE(ui)) * 2) {
 				if (ui.input_started) {
-					Context.set_layer(l);
-					TabLayers.set_drag_layer(Context.raw.layer, -(mouse_x - uix - ui._window_x - 3), -(mouse_y - uiy - ui._window_y + 1));
+					context_context_set_layer(l);
+					TabLayers.set_drag_layer(context_context_raw.layer, -(mouse_x - uix - ui._window_x - 3), -(mouse_y - uiy - ui._window_y + 1));
 				}
 				else if (ui.input_released) {
-					if (time_time() - Context.raw.select_time > 0.2) {
-						Context.raw.select_time = time_time();
+					if (time_time() - context_context_raw.select_time > 0.2) {
+						context_context_raw.select_time = time_time();
 					}
 				}
 				else if (ui.input_released_r) {
-					Context.set_layer(l);
+					context_context_set_layer(l);
 					TabLayers.show_context_menu = true;
 				}
 			}
 
 			let state = zui_text(l.name);
 			if (state == zui_state_t.RELEASED) {
-				let td = time_time() - Context.raw.select_time;
+				let td = time_time() - context_context_raw.select_time;
 				if (td < 0.2 && td > 0.0) {
 					TabLayers.layer_name_edit = l.id;
 					TabLayers.layer_name_handle.text = l.name;
@@ -270,10 +270,10 @@ class TabLayers {
 
 			// let inFocus = ui.inputX > ui._windowX && ui.inputX < ui._windowX + ui._windowW &&
 			// 			  ui.inputY > ui._windowY && ui.inputY < ui._windowY + ui._windowH;
-			// if (inFocus && ui.isDeleteDown && canDelete(Context.raw.layer)) {
+			// if (inFocus && ui.isDeleteDown && canDelete(context_raw.layer)) {
 			// 	ui.isDeleteDown = false;
 			// 	let _init() = () => {
-			// 		deleteLayer(Context.raw.layer);
+			// 		deleteLayer(context_raw.layer);
 			// 	}
 			// 	app_notify_on_init(_init);
 			// }
@@ -321,7 +321,7 @@ class TabLayers {
 			zui_end_element();
 			zui_end_element();
 
-			if (Config.raw.touch_ui) {
+			if (config_config_raw.touch_ui) {
 				ui._x += 12 * zui_SCALE(ui);
 			}
 
@@ -357,7 +357,7 @@ class TabLayers {
 		zui_fill(0, 0, (ui._w / zui_SCALE(ui) - 2), 1 * zui_SCALE(ui), ui.t.SEPARATOR_COL);
 
 		// Highlight selected
-		if (Context.raw.layer == l) {
+		if (context_context_raw.layer == l) {
 			if (mini) {
 				zui_rect(1, -step * 2, ui._w / zui_SCALE(ui) - 1, step * 2 + (mini ? -1 : 1), ui.t.HIGHLIGHT_COL, 3);
 			}
@@ -368,15 +368,15 @@ class TabLayers {
 	}
 
 	static canMergeDown = (l: SlotLayerRaw) : bool => {
-		let index = Project.layers.indexOf(l);
+		let index = project_project_layers.indexOf(l);
 		// Lowest layer
 		if (index == 0) return false;
 		// Lowest layer that has masks
-		if (SlotLayer.is_layer(l) && SlotLayer.is_mask(Project.layers[0]) && Project.layers[0].parent == l) return false;
+		if (SlotLayer.is_layer(l) && SlotLayer.is_mask(project_project_layers[0]) && project_project_layers[0].parent == l) return false;
 		// The lowest toplevel layer is a group
-		if (SlotLayer.is_group(l) && SlotLayer.is_in_group(Project.layers[0]) && SlotLayer.get_containing_group(Project.layers[0]) == l) return false;
+		if (SlotLayer.is_group(l) && SlotLayer.is_in_group(project_project_layers[0]) && SlotLayer.get_containing_group(project_project_layers[0]) == l) return false;
 		// Masks must be merged down to masks
-		if (SlotLayer.is_mask(l) && !SlotLayer.is_mask(Project.layers[index - 1])) return false;
+		if (SlotLayer.is_mask(l) && !SlotLayer.is_mask(project_project_layers[index - 1])) return false;
 		return true;
 	}
 
@@ -385,7 +385,7 @@ class TabLayers {
 	}
 
 	static canDropNewLayer = (position: i32) => {
-		if (position > 0 && position < Project.layers.length && SlotLayer.is_mask(Project.layers[position - 1])) {
+		if (position > 0 && position < project_project_layers.length && SlotLayer.is_mask(project_project_layers[position - 1])) {
 			// 1. The layer to insert is inserted in the middle
 			// 2. The layer below is a mask, i.e. the layer would have to be a (group) mask, too.
 			return false;

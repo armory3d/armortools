@@ -89,8 +89,8 @@ class ExportObj {
 			}
 
 			if (applyDisplacement) {
-				// let height: buffer_t = Project.layers[0].texpaint_pack.getPixels();
-				// let res: i32 = Project.layers[0].texpaint_pack.width;
+				// let height: buffer_t = layers[0].texpaint_pack.getPixels();
+				// let res: i32 = layers[0].texpaint_pack.width;
 				// let strength: f32 = 0.1;
 				// for (let i: i32 = 0; i < len; ++i) {
 				// 	let x: i32 = Math.floor(texa2[i * 2    ] / 32767 * res);

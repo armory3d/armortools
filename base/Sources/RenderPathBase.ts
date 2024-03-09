@@ -14,12 +14,12 @@ class RenderPathBase {
 	///end
 
 	static init = () => {
-		RenderPathBase.super_sample = Config.raw.rp_supersample;
+		RenderPathBase.super_sample = config_raw.rp_supersample;
 	}
 
 	///if arm_voxels
 	static init_voxels = (targetName: string = "voxels") => {
-		if (Config.raw.rp_gi != true || RenderPathBase.voxels_created) return;
+		if (config_raw.rp_gi != true || RenderPathBase.voxels_created) return;
 		RenderPathBase.voxels_created = true;
 
 		{
@@ -37,8 +37,8 @@ class RenderPathBase {
 	///end
 
 	static apply_config = () => {
-		if (RenderPathBase.super_sample != Config.raw.rp_supersample) {
-			RenderPathBase.super_sample = Config.raw.rp_supersample;
+		if (RenderPathBase.super_sample != config_raw.rp_supersample) {
+			RenderPathBase.super_sample = config_raw.rp_supersample;
 			for (let rt of render_path_render_targets.values()) {
 				if (rt.width == 0 && rt.scale != null) {
 					rt.scale = RenderPathBase.super_sample;
@@ -56,7 +56,7 @@ class RenderPathBase {
 	}
 
 	static draw_compass = () => {
-		if (Context.raw.show_compass) {
+		if (context_raw.show_compass) {
 			let cam: camera_object_t = scene_camera;
 			let compass: mesh_object_t = scene_get_child(".Compass").ext;
 
@@ -88,36 +88,36 @@ class RenderPathBase {
 
 	static begin = () => {
 		// Begin split
-		if (Context.raw.split_view && !Context.raw.paint2d_view) {
-			if (Context.raw.view_index_last == -1 && Context.raw.view_index == -1) {
+		if (context_raw.split_view && !context_raw.paint2d_view) {
+			if (context_raw.view_index_last == -1 && context_raw.view_index == -1) {
 				// Begin split, draw right viewport first
-				Context.raw.view_index = 1;
+				context_raw.view_index = 1;
 			}
 			else {
 				// Set current viewport
-				Context.raw.view_index = mouse_view_x() > base_w() / 2 ? 1 : 0;
+				context_raw.view_index = mouse_view_x() > base_w() / 2 ? 1 : 0;
 			}
 
 			let cam: camera_object_t = scene_camera;
-			if (Context.raw.view_index_last > -1) {
+			if (context_raw.view_index_last > -1) {
 				// Save current viewport camera
-				mat4_set_from(Camera.views[Context.raw.view_index_last], cam.base.transform.local);
+				mat4_set_from(camera_views[context_raw.view_index_last], cam.base.transform.local);
 			}
 
-			let decal: bool = Context.raw.tool == workspace_tool_t.DECAL || Context.raw.tool == workspace_tool_t.TEXT;
+			let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
 
-			if (Context.raw.view_index_last != Context.raw.view_index || decal || !Config.raw.brush_3d) {
+			if (context_raw.view_index_last != context_raw.view_index || decal || !config_raw.brush_3d) {
 				// Redraw on current viewport change
-				Context.raw.ddirty = 1;
+				context_raw.ddirty = 1;
 			}
 
-			transform_set_matrix(cam.base.transform, Camera.views[Context.raw.view_index]);
+			transform_set_matrix(cam.base.transform, camera_views[context_raw.view_index]);
 			camera_object_build_mat(cam);
 			camera_object_build_proj(cam);
 		}
 
 		// Match projection matrix jitter
-		let skip_taa: bool = Context.raw.split_view || ((Context.raw.tool == workspace_tool_t.CLONE || Context.raw.tool == workspace_tool_t.BLUR || Context.raw.tool == workspace_tool_t.SMUDGE) && Context.raw.pdirty > 0);
+		let skip_taa: bool = context_raw.split_view || ((context_raw.tool == workspace_tool_t.CLONE || context_raw.tool == workspace_tool_t.BLUR || context_raw.tool == workspace_tool_t.SMUDGE) && context_raw.pdirty > 0);
 		scene_camera.frame = skip_taa ? 0 : RenderPathBase.taa_frame;
 		camera_object_proj_jitter(scene_camera);
 		camera_object_build_mat(scene_camera);
@@ -125,19 +125,19 @@ class RenderPathBase {
 
 	static end = () => {
 		// End split
-		Context.raw.view_index_last = Context.raw.view_index;
-		Context.raw.view_index = -1;
+		context_raw.view_index_last = context_raw.view_index;
+		context_raw.view_index = -1;
 
-		if (Context.raw.foreground_event && !mouse_down()) {
-			Context.raw.foreground_event = false;
-			Context.raw.pdirty = 0;
+		if (context_raw.foreground_event && !mouse_down()) {
+			context_raw.foreground_event = false;
+			context_raw.pdirty = 0;
 		}
 
 		RenderPathBase.taa_frame++;
 	}
 
 	static ssaa4 = (): bool => {
-		return Config.raw.rp_supersample == 4;
+		return config_raw.rp_supersample == 4;
 	}
 
 	static is_cached = (): bool => {
@@ -148,12 +148,12 @@ class RenderPathBase {
 		RenderPathBase.last_x = mouse_view_x();
 		RenderPathBase.last_y = mouse_view_y();
 
-		if (Context.raw.ddirty <= 0 && Context.raw.rdirty <= 0 && Context.raw.pdirty <= 0) {
-			if (mx != RenderPathBase.last_x || my != RenderPathBase.last_y || mouse_locked) Context.raw.ddirty = 0;
+		if (context_raw.ddirty <= 0 && context_raw.rdirty <= 0 && context_raw.pdirty <= 0) {
+			if (mx != RenderPathBase.last_x || my != RenderPathBase.last_y || mouse_locked) context_raw.ddirty = 0;
 			///if (krom_metal || krom_android)
-			if (Context.raw.ddirty > -6) {
+			if (context_raw.ddirty > -6) {
 			///else
-			if (Context.raw.ddirty > -2) {
+			if (context_raw.ddirty > -2) {
 			///end
 				render_path_set_target("");
 				render_path_bind_target("taa", "tex");
@@ -161,7 +161,7 @@ class RenderPathBase {
 					render_path_draw_shader("shader_datas/supersample_resolve/supersample_resolve") :
 					render_path_draw_shader("shader_datas/copy_pass/copy_pass");
 				RenderPathPaint.commands_cursor();
-				if (Context.raw.ddirty <= 0) Context.raw.ddirty--;
+				if (context_raw.ddirty <= 0) context_raw.ddirty--;
 			}
 			RenderPathBase.end();
 			return true;
@@ -179,9 +179,9 @@ class RenderPathBase {
 		RenderPathPaint.draw();
 
 		///if (krom_direct3d12 || krom_vulkan || krom_metal)
-		if (Context.raw.viewport_mode ==  viewport_mode_t.PATH_TRACE) {
+		if (context_raw.viewport_mode ==  viewport_mode_t.PATH_TRACE) {
 			///if is_paint
-			let use_live_layer: bool = Context.raw.tool == workspace_tool_t.MATERIAL;
+			let use_live_layer: bool = context_raw.tool == workspace_tool_t.MATERIAL;
 			///else
 			let use_live_layer: bool = false;
 			///end
@@ -196,7 +196,7 @@ class RenderPathBase {
 	}
 
 	static draw_bloom = (tex: string = "tex") => {
-		if (Config.raw.rp_bloom != false) {
+		if (config_raw.rp_bloom != false) {
 			if (RenderPathBase.bloom_mipmaps == null) {
 				RenderPathBase.bloom_mipmaps = [];
 
@@ -239,12 +239,12 @@ class RenderPathBase {
 	}
 
 	static draw_split = (drawCommands: ()=>void) => {
-		if (Context.raw.split_view && !Context.raw.paint2d_view) {
-			Context.raw.ddirty = 2;
+		if (context_raw.split_view && !context_raw.paint2d_view) {
+			context_raw.ddirty = 2;
 			let cam: camera_object_t = scene_camera;
 
-			Context.raw.view_index = Context.raw.view_index == 0 ? 1 : 0;
-			transform_set_matrix(cam.base.transform, Camera.views[Context.raw.view_index]);
+			context_raw.view_index = context_raw.view_index == 0 ? 1 : 0;
+			transform_set_matrix(cam.base.transform, camera_views[context_raw.view_index]);
 			camera_object_build_mat(cam);
 			camera_object_build_proj(cam);
 
@@ -252,17 +252,17 @@ class RenderPathBase {
 
 			///if (krom_direct3d12 || krom_vulkan || krom_metal)
 			///if is_paint
-			let use_live_layer: bool = Context.raw.tool == workspace_tool_t.MATERIAL;
+			let use_live_layer: bool = context_raw.tool == workspace_tool_t.MATERIAL;
 			///else
 			let use_live_layer: bool = false;
 			///end
-			Context.raw.viewport_mode == viewport_mode_t.PATH_TRACE ? RenderPathRaytrace.draw(use_live_layer) : drawCommands();
+			context_raw.viewport_mode == viewport_mode_t.PATH_TRACE ? RenderPathRaytrace.draw(use_live_layer) : drawCommands();
 			///else
 			drawCommands();
 			///end
 
-			Context.raw.view_index = Context.raw.view_index == 0 ? 1 : 0;
-			transform_set_matrix(cam.base.transform, Camera.views[Context.raw.view_index]);
+			context_raw.view_index = context_raw.view_index == 0 ? 1 : 0;
+			transform_set_matrix(cam.base.transform, camera_views[context_raw.view_index]);
 			camera_object_build_mat(cam);
 			camera_object_build_proj(cam);
 		}
@@ -270,15 +270,15 @@ class RenderPathBase {
 
 	///if arm_voxels
 	static draw_voxels = () => {
-		if (Config.raw.rp_gi != false) {
-			let voxelize: bool = Context.raw.ddirty > 0 && RenderPathBase.taa_frame > 0;
+		if (config_raw.rp_gi != false) {
+			let voxelize: bool = context_raw.ddirty > 0 && RenderPathBase.taa_frame > 0;
 			if (voxelize) {
 				render_path_clear_image("voxels", 0x00000000);
 				render_path_set_target("");
 				render_path_set_viewport(RenderPathBase.voxels_res, RenderPathBase.voxels_res);
 				render_path_bind_target("voxels", "voxels");
 				if (MakeMaterial.height_used) {
-					let tid: i32 = 0; // Project.layers[0].id;
+					let tid: i32 = 0; // layers[0].id;
 					render_path_bind_target("texpaint_pack" + tid, "texpaint_pack");
 				}
 				render_path_draw_meshes("voxel");
@@ -313,8 +313,8 @@ class RenderPathBase {
 	}
 
 	static draw_ssao = () => {
-		let ssao: bool = Config.raw.rp_ssao != false && Context.raw.camera_type == camera_type_t.PERSPECTIVE;
-		if (ssao && Context.raw.ddirty > 0 && RenderPathBase.taa_frame > 0) {
+		let ssao: bool = config_raw.rp_ssao != false && context_raw.camera_type == camera_type_t.PERSPECTIVE;
+		if (ssao && context_raw.ddirty > 0 && RenderPathBase.taa_frame > 0) {
 			if (render_path_render_targets.get("singlea") == null) {
 				RenderPathBase.init_ssao();
 			}
@@ -341,7 +341,7 @@ class RenderPathBase {
 		render_path_bind_target("_main", "gbufferD");
 		render_path_bind_target("gbuffer0", "gbuffer0");
 		render_path_bind_target("gbuffer1", "gbuffer1");
-		let ssao: bool = Config.raw.rp_ssao != false && Context.raw.camera_type == camera_type_t.PERSPECTIVE;
+		let ssao: bool = config_raw.rp_ssao != false && context_raw.camera_type == camera_type_t.PERSPECTIVE;
 		if (ssao && RenderPathBase.taa_frame > 0) {
 			render_path_bind_target("singlea", "ssaotex");
 		}
@@ -351,7 +351,7 @@ class RenderPathBase {
 
 		let voxelao_pass: bool = false;
 		///if arm_voxels
-		if (Config.raw.rp_gi != false) {
+		if (config_raw.rp_gi != false) {
 			voxelao_pass = true;
 			render_path_bind_target("voxels", "voxels");
 		}
@@ -374,7 +374,7 @@ class RenderPathBase {
 	}
 
 	static draw_ssr = () => {
-		if (Config.raw.rp_ssr != false) {
+		if (config_raw.rp_ssr != false) {
 			if (_render_path_cached_shader_contexts.get("shader_datas/ssr_pass/ssr_pass") == null) {
 				{
 					let t: render_target_t = render_target_create();
@@ -411,7 +411,7 @@ class RenderPathBase {
 	}
 
 	// static draw_motion_blur = () => {
-	// 	if (Config.raw.rp_motionblur != false) {
+	// 	if (config_raw.rp_motionblur != false) {
 	// 		render_path_set_target("buf");
 	// 		render_path_bind_target("tex", "tex");
 	// 		render_path_bind_target("gbuffer0", "gbuffer0");
@@ -469,7 +469,7 @@ class RenderPathBase {
 		render_path_bind_target("gbuffer2", "sveloc");
 		render_path_draw_shader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
 
-		let skip_taa: bool = Context.raw.split_view;
+		let skip_taa: bool = context_raw.split_view;
 		if (skip_taa) {
 			render_path_set_target("taa");
 			render_path_bind_target(current, "tex");
@@ -532,9 +532,9 @@ class RenderPathBase {
 			}
 		}
 
-		let hide: bool = Operator.shortcut(Config.keymap.stencil_hide, ShortcutType.ShortcutDown) || keyboard_down("control");
+		let hide: bool = operator_shortcut(config_keymap.stencil_hide, shortcut_type_t.DOWN) || keyboard_down("control");
 		let is_decal: bool = base_is_decal_layer();
-		if (is_decal && !hide) LineDraw.render(Context.raw.layer.decal_mat);
+		if (is_decal && !hide) line_draw_render(context_raw.layer.decal_mat);
 	}
 
 	static make_gbuffer_copy_textures = () => {

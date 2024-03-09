@@ -13,7 +13,7 @@ class SlotBrush {
 
 	static create(c: zui_node_canvas_t = null): SlotBrushRaw {
 		let raw: SlotBrushRaw = new SlotBrushRaw();
-		for (let brush of Project.brushes) if (brush.id >= raw.id) raw.id = brush.id + 1;
+		for (let brush of project_brushes) if (brush.id >= raw.id) raw.id = brush.id + 1;
 
 		if (c == null) {
 			if (SlotBrush.default_canvas == null) { // Synchronous

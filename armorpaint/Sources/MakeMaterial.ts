@@ -14,7 +14,7 @@ class MakeMaterial {
 	}
 
 	static parse_mesh_material = () => {
-		let m: material_data_t = Project.materials[0].data;
+		let m: material_data_t = project_materials[0].data;
 
 		for (let c of m._.shader._.contexts) {
 			if (c.name == "mesh") {
@@ -63,7 +63,7 @@ class MakeMaterial {
 			let sampler: string = con.frag.shared_samplers[0];
 			scon._.override_context.shared_sampler = sampler.substr(sampler.lastIndexOf(" ") + 1);
 		}
-		if (!Context.raw.texture_filter) {
+		if (!context_raw.texture_filter) {
 			scon._.override_context.filter = "point";
 		}
 		m._.shader.contexts.push(scon);
@@ -77,7 +77,7 @@ class MakeMaterial {
 				let sampler: string = con.frag.shared_samplers[0];
 				scon._.override_context.shared_sampler = sampler.substr(sampler.lastIndexOf(" ") + 1);
 			}
-			if (!Context.raw.texture_filter) {
+			if (!context_raw.texture_filter) {
 				scon._.override_context.filter = "point";
 			}
 			m._.shader.contexts.push(scon);
@@ -89,7 +89,7 @@ class MakeMaterial {
 			m._.contexts.push(mcon);
 		}
 
-		Context.raw.ddirty = 2;
+		context_raw.ddirty = 2;
 
 		///if arm_voxels
 		MakeMaterial.make_voxel(m);
@@ -101,7 +101,7 @@ class MakeMaterial {
 	}
 
 	static parse_particle_material = () => {
-		let m: material_data_t = Context.raw.particle_material;
+		let m: material_data_t = context_raw.particle_material;
 		let sc: shader_context_t = null;
 		for (let c of m._.shader._.contexts) {
 			if (c.name == "mesh") {
@@ -123,7 +123,7 @@ class MakeMaterial {
 	static parse_mesh_preview_material = (md: material_data_t = null) => {
 		if (!MakeMaterial.get_mout()) return;
 
-		let m: material_data_t = md == null ? Project.materials[0].data : md;
+		let m: material_data_t = md == null ? project_materials[0].data : md;
 		let scon: shader_context_t = null;
 		for (let c of m._.shader._.contexts) {
 			if (c.name == "mesh") {
@@ -162,7 +162,7 @@ class MakeMaterial {
 	///if arm_voxels
 	static make_voxel = (m: material_data_t) => {
 		let rebuild: bool = MakeMaterial.height_used;
-		if (Config.raw.rp_gi != false && rebuild) {
+		if (config_raw.rp_gi != false && rebuild) {
 			let scon: shader_context_t = null;
 			for (let c of m._.shader._.contexts) {
 				if (c.name == "voxel") {
@@ -170,7 +170,7 @@ class MakeMaterial {
 					break;
 				}
 			}
-			if (scon != null) MakeVoxel.run(scon);
+			if (scon != null) make_voxel_run(scon);
 		}
 	}
 	///end
@@ -185,7 +185,7 @@ class MakeMaterial {
 			if (current != null) g2_begin(current);
 		}
 
-		let m: material_data_t = Project.materials[0].data;
+		let m: material_data_t = project_materials[0].data;
 		// let scon: TShaderContext = null;
 		// let mcon: TMaterialContext = null;
 		for (let c of m._.shader._.contexts) {
@@ -228,14 +228,14 @@ class MakeMaterial {
 	}
 
 	static bake_node_previews = () => {
-		Context.raw.node_previews_used = [];
-		if (Context.raw.node_previews == null) Context.raw.node_previews = new Map();
+		context_raw.node_previews_used = [];
+		if (context_raw.node_previews == null) context_raw.node_previews = new Map();
 		MakeMaterial.traverse_nodes(UINodes.get_canvas_material().nodes, null, []);
-		for (let key of Context.raw.node_previews.keys()) {
-			if (Context.raw.node_previews_used.indexOf(key) == -1) {
-				let image: image_t = Context.raw.node_previews.get(key);
+		for (let key of context_raw.node_previews.keys()) {
+			if (context_raw.node_previews_used.indexOf(key) == -1) {
+				let image: image_t = context_raw.node_previews.get(key);
 				base_notify_on_next_frame(function() { image_unload(image); });
-				Context.raw.node_previews.delete(key);
+				context_raw.node_previews.delete(key);
 			}
 		}
 	}
@@ -244,7 +244,7 @@ class MakeMaterial {
 		for (let node of nodes) {
 			MakeMaterial.bake_node_preview(node, group, parents);
 			if (node.type == "GROUP") {
-				for (let g of Project.material_groups) {
+				for (let g of project_material_groups) {
 					if (g.canvas.name == node.name) {
 						parents.push(node);
 						MakeMaterial.traverse_nodes(g.canvas.nodes, g.canvas, parents);
@@ -259,14 +259,14 @@ class MakeMaterial {
 	static bake_node_preview = (node: zui_node_t, group: zui_node_canvas_t, parents: zui_node_t[]) => {
 		if (node.type == "BLUR") {
 			let id: string = ParserMaterial.node_name(node, parents);
-			let image: image_t = Context.raw.node_previews.get(id);
-			Context.raw.node_previews_used.push(id);
-			let resX: i32 = Math.floor(Config.get_texture_res_x() / 4);
-			let resY: i32 = Math.floor(Config.get_texture_res_y() / 4);
+			let image: image_t = context_raw.node_previews.get(id);
+			context_raw.node_previews_used.push(id);
+			let resX: i32 = Math.floor(config_get_texture_res_x() / 4);
+			let resY: i32 = Math.floor(config_get_texture_res_y() / 4);
 			if (image == null || image.width != resX || image.height != resY) {
 				if (image != null) image_unload(image);
 				image = image_create_render_target(resX, resY);
-				Context.raw.node_previews.set(id, image);
+				context_raw.node_previews.set(id, image);
 			}
 
 			ParserMaterial.blur_passthrough = true;
@@ -275,14 +275,14 @@ class MakeMaterial {
 		}
 		else if (node.type == "DIRECT_WARP") {
 			let id: string = ParserMaterial.node_name(node, parents);
-			let image: image_t = Context.raw.node_previews.get(id);
-			Context.raw.node_previews_used.push(id);
-			let resX: i32 = Math.floor(Config.get_texture_res_x());
-			let resY: i32 = Math.floor(Config.get_texture_res_y());
+			let image: image_t = context_raw.node_previews.get(id);
+			context_raw.node_previews_used.push(id);
+			let resX: i32 = Math.floor(config_get_texture_res_x());
+			let resY: i32 = Math.floor(config_get_texture_res_y());
 			if (image == null || image.width != resX || image.height != resY) {
 				if (image != null) image_unload(image);
 				image = image_create_render_target(resX, resY);
-				Context.raw.node_previews.set(id, image);
+				context_raw.node_previews.set(id, image);
 			}
 
 			ParserMaterial.warp_passthrough = true;
@@ -291,14 +291,14 @@ class MakeMaterial {
 		}
 		else if (node.type == "BAKE_CURVATURE") {
 			let id: string = ParserMaterial.node_name(node, parents);
-			let image: image_t = Context.raw.node_previews.get(id);
-			Context.raw.node_previews_used.push(id);
-			let resX: i32 = Math.floor(Config.get_texture_res_x());
-			let resY: i32 = Math.floor(Config.get_texture_res_y());
+			let image: image_t = context_raw.node_previews.get(id);
+			context_raw.node_previews_used.push(id);
+			let resX: i32 = Math.floor(config_get_texture_res_x());
+			let resY: i32 = Math.floor(config_get_texture_res_y());
 			if (image == null || image.width != resX || image.height != resY) {
 				if (image != null) image_unload(image);
 				image = image_create_render_target(resX, resY, tex_format_t.R8);
-				Context.raw.node_previews.set(id, image);
+				context_raw.node_previews.set(id, image);
 			}
 
 			if (RenderPathPaint.live_layer == null) {
@@ -306,11 +306,11 @@ class MakeMaterial {
 			}
 
 			let _space: i32 = UIHeader.worktab.position;
-			let _tool: workspace_tool_t = Context.raw.tool;
-			let _bake_type: bake_type_t = Context.raw.bake_type;
+			let _tool: workspace_tool_t = context_raw.tool;
+			let _bake_type: bake_type_t = context_raw.bake_type;
 			UIHeader.worktab.position = space_type_t.SPACE3D;
-			Context.raw.tool = workspace_tool_t.BAKE;
-			Context.raw.bake_type = bake_type_t.CURVATURE;
+			context_raw.tool = workspace_tool_t.BAKE;
+			context_raw.bake_type = bake_type_t.CURVATURE;
 
 			ParserMaterial.bake_passthrough = true;
 			ParserMaterial.start_node = node;
@@ -321,16 +321,16 @@ class MakeMaterial {
 			ParserMaterial.start_node = null;
 			ParserMaterial.start_group = null;
 			ParserMaterial.start_parents = null;
-			Context.raw.pdirty = 1;
+			context_raw.pdirty = 1;
 			RenderPathPaint.use_live_layer(true);
 			RenderPathPaint.commands_paint(false);
 			RenderPathPaint.dilate(true, false);
 			RenderPathPaint.use_live_layer(false);
-			Context.raw.pdirty = 0;
+			context_raw.pdirty = 0;
 
 			UIHeader.worktab.position = _space;
-			Context.raw.tool = _tool;
-			Context.raw.bake_type = _bake_type;
+			context_raw.tool = _tool;
+			context_raw.bake_type = _bake_type;
 			MakeMaterial.parse_paint_material(false);
 
 			let rts: Map<string, render_target_t> = render_path_render_targets;
@@ -358,7 +358,7 @@ class MakeMaterial {
 	}
 
 	static parse_brush = () => {
-		ParserLogic.parse(Context.raw.brush.canvas);
+		ParserLogic.parse(context_raw.brush.canvas);
 	}
 
 	static blend_mode = (frag: NodeShaderRaw, blending: i32, cola: string, colb: string, opac: string): string => {
@@ -475,12 +475,12 @@ class MakeMaterial {
 	}
 
 	static get_displace_strength = (): f32 => {
-		let sc: f32 = Context.main_object().base.transform.scale.x;
-		return Config.raw.displace_strength * 0.02 * sc;
+		let sc: f32 = context_main_object().base.transform.scale.x;
+		return config_raw.displace_strength * 0.02 * sc;
 	}
 
 	static voxelgi_half_extents = (): string => {
-		let ext: f32 = Context.raw.vxao_ext;
+		let ext: f32 = context_raw.vxao_ext;
 		return `const vec3 voxelgiHalfExtents = vec3(${ext}, ${ext}, ${ext});`;
 	}
 

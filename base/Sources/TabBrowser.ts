@@ -14,17 +14,17 @@ class TabBrowser {
 
 	static draw = (htab: zui_handle_t) => {
 		let ui: zui_t = UIBase.ui;
-		let statush: i32 = Config.raw.layout[layout_size_t.STATUS_H];
+		let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
 		if (zui_tab(htab, tr("Browser")) && statush > UIStatus.default_status_h * zui_SCALE(ui)) {
 
-			if (Config.raw.bookmarks == null) {
-				Config.raw.bookmarks = [];
+			if (config_raw.bookmarks == null) {
+				config_raw.bookmarks = [];
 			}
 
 			let bookmarks_w: i32 = Math.floor(100 * zui_SCALE(ui));
 
-			if (TabBrowser.hpath.text == "" && Config.raw.bookmarks.length > 0) { // Init to first bookmark
-				TabBrowser.hpath.text = Config.raw.bookmarks[0];
+			if (TabBrowser.hpath.text == "" && config_raw.bookmarks.length > 0) { // Init to first bookmark
+				TabBrowser.hpath.text = config_raw.bookmarks[0];
 			}
 
 			zui_begin_sticky();
@@ -37,8 +37,8 @@ class TabBrowser {
 			}
 
 			if (zui_button("+")) {
-				Config.raw.bookmarks.push(TabBrowser.hpath.text);
-				Config.save();
+				config_raw.bookmarks.push(TabBrowser.hpath.text);
+				config_save();
 			}
 			if (ui.is_hovered) zui_tooltip(tr("Add bookmark"));
 
@@ -84,25 +84,25 @@ class TabBrowser {
 			ui._x = bookmarks_w;
 			ui._w -= bookmarks_w;
 			UIFiles.file_browser(ui, TabBrowser.hpath, false, true, TabBrowser.hsearch.text, refresh, (file: string) => {
-				let file_name: string = file.substr(file.lastIndexOf(Path.sep) + 1);
+				let file_name: string = file.substr(file.lastIndexOf(path_sep) + 1);
 				if (file_name != "..") {
 					UIMenu.draw((ui: zui_t) => {
 						if (UIMenu.menu_button(ui, tr("Import"))) {
 							ImportAsset.run(file);
 						}
-						if (Path.is_texture(file)) {
+						if (path_is_texture(file)) {
 							if (UIMenu.menu_button(ui, tr("Set as Envmap"))) {
 								ImportAsset.run(file, -1.0, -1.0, true, true, () => {
 									base_notify_on_next_frame(() => {
 										let asset_index: i32 = -1;
-										for (let i: i32 = 0; i < Project.assets.length; ++i) {
-											if (Project.assets[i].file == file) {
+										for (let i: i32 = 0; i < project_assets.length; ++i) {
+											if (project_assets[i].file == file) {
 												asset_index = i;
 												break;
 											}
 										}
 										if (asset_index != -1) {
-											ImportEnvmap.run(file, Project.get_image(Project.assets[asset_index]));
+											ImportEnvmap.run(file, project_get_image(project_assets[asset_index]));
 										}
 									});
 								});
@@ -113,14 +113,14 @@ class TabBrowser {
 								ImportAsset.run(file, -1.0, -1.0, true, true, () => {
 									base_notify_on_next_frame(() => {
 										let asset_index: i32 = -1;
-										for (let i: i32 = 0; i < Project.assets.length; ++i) {
-											if (Project.assets[i].file == file) {
+										for (let i: i32 = 0; i < project_assets.length; ++i) {
+											if (project_assets[i].file == file) {
 												asset_index = i;
 												break;
 											}
 										}
 										if (asset_index != -1) {
-											base_create_image_mask(Project.assets[asset_index]);
+											base_create_image_mask(project_assets[asset_index]);
 										}
 									});
 								});
@@ -132,19 +132,19 @@ class TabBrowser {
 								ImportAsset.run(file, -1.0, -1.0, true, true, () => {
 									base_notify_on_next_frame(() => {
 										let asset_index: i32 = -1;
-										for (let i: i32 = 0; i < Project.assets.length; ++i) {
-											if (Project.assets[i].file == file) {
+										for (let i: i32 = 0; i < project_assets.length; ++i) {
+											if (project_assets[i].file == file) {
 												asset_index = i;
 												break;
 											}
 										}
 										if (asset_index != -1) {
-											Context.raw.colorid_handle.position = asset_index;
-											Context.raw.colorid_picked = false;
+											context_raw.colorid_handle.position = asset_index;
+											context_raw.colorid_picked = false;
 											UIToolbar.toolbar_handle.redraws = 1;
-											if (Context.raw.tool == workspace_tool_t.COLORID) {
+											if (context_raw.tool == workspace_tool_t.COLORID) {
 												UIHeader.header_handle.redraws = 2;
-												Context.raw.ddirty = 2;
+												context_raw.ddirty = 2;
 											}
 										}
 									});
@@ -153,9 +153,9 @@ class TabBrowser {
 							///end
 						}
 						if (UIMenu.menu_button(ui, tr("Open Externally"))) {
-							File.start(file);
+							file_start(file);
 						}
-					}, Path.is_texture(file) ? 5 : 2);
+					}, path_is_texture(file) ? 5 : 2);
 				}
 			});
 
@@ -164,9 +164,9 @@ class TabBrowser {
 				app_notify_on_init(() => {
 					ImportAsset.run(path);
 				});
-				TabBrowser.hpath.text = TabBrowser.hpath.text.substr(0, TabBrowser.hpath.text.lastIndexOf(Path.sep));
+				TabBrowser.hpath.text = TabBrowser.hpath.text.substr(0, TabBrowser.hpath.text.lastIndexOf(path_sep));
 			}
-			TabBrowser.known = TabBrowser.hpath.text.substr(TabBrowser.hpath.text.lastIndexOf(Path.sep)).indexOf(".") > 0;
+			TabBrowser.known = TabBrowser.hpath.text.substr(TabBrowser.hpath.text.lastIndexOf(path_sep)).indexOf(".") > 0;
 			///if krom_android
 			if (TabBrowser.hpath.text.endsWith("." + manifest_title.toLowerCase())) TabBrowser.known = false;
 			///end
@@ -201,8 +201,8 @@ class TabBrowser {
 				///end
 			}
 
-			for (let b of Config.raw.bookmarks) {
-				let folder: string = b.substr(b.lastIndexOf(Path.sep) + 1);
+			for (let b of config_raw.bookmarks) {
+				let folder: string = b.substr(b.lastIndexOf(path_sep) + 1);
 
 				if (zui_button(folder, zui_align_t.LEFT)) {
 					TabBrowser.hpath.text = b;
@@ -211,8 +211,8 @@ class TabBrowser {
 				if (ui.is_hovered && ui.input_released_r) {
 					UIMenu.draw((ui: zui_t) => {
 						if (UIMenu.menu_button(ui, tr("Delete"))) {
-							array_remove(Config.raw.bookmarks, b);
-							Config.save();
+							array_remove(config_raw.bookmarks, b);
+							config_save();
 						}
 					}, 1);
 				}

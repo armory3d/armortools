@@ -36,18 +36,18 @@ class RenderPathRaytrace {
 		if (!RenderPathRaytrace.ready || RenderPathRaytrace.is_bake) {
 			RenderPathRaytrace.ready = true;
 			RenderPathRaytrace.is_bake = false;
-			let mode: string = Context.raw.pathtrace_mode == path_trace_mode_t.CORE ? "core" : "full";
+			let mode: string = context_raw.pathtrace_mode == path_trace_mode_t.CORE ? "core" : "full";
 			RenderPathRaytrace.raytrace_init("raytrace_brute_" + mode + RenderPathRaytrace.ext);
 			RenderPathRaytrace.last_envmap = null;
 		}
 
-		if (!Context.raw.envmap_loaded) {
-			Context.load_envmap();
-			Context.update_envmap();
+		if (!context_raw.envmap_loaded) {
+			context_load_envmap();
+			context_update_envmap();
 		}
 
 		let probe: world_data_t = scene_world;
-		let saved_envmap: image_t = Context.raw.show_envmap_blur ? probe._.radiance_mipmaps[0] : Context.raw.saved_envmap;
+		let saved_envmap: image_t = context_raw.show_envmap_blur ? probe._.radiance_mipmaps[0] : context_raw.saved_envmap;
 
 		if (RenderPathRaytrace.last_envmap != saved_envmap) {
 			RenderPathRaytrace.last_envmap = saved_envmap;
@@ -73,7 +73,7 @@ class RenderPathRaytrace {
 		}
 		///end
 
-		if (Context.raw.pdirty > 0 || RenderPathRaytrace.dirty > 0) {
+		if (context_raw.pdirty > 0 || RenderPathRaytrace.dirty > 0) {
 			base_flatten(true);
 		}
 
@@ -110,8 +110,8 @@ class RenderPathRaytrace {
 		RenderPathRaytrace.f32a[18] = RenderPathRaytrace.help_mat.m[14];
 		RenderPathRaytrace.f32a[19] = RenderPathRaytrace.help_mat.m[15];
 		RenderPathRaytrace.f32a[20] = scene_world.strength * 1.5;
-		if (!Context.raw.show_envmap) RenderPathRaytrace.f32a[20] = -RenderPathRaytrace.f32a[20];
-		RenderPathRaytrace.f32a[21] = Context.raw.envmap_angle;
+		if (!context_raw.show_envmap) RenderPathRaytrace.f32a[20] = -RenderPathRaytrace.f32a[20];
+		RenderPathRaytrace.f32a[21] = context_raw.envmap_angle;
 		RenderPathRaytrace.f32a[22] = RenderPathRaytrace.uv_scale;
 		///if is_lab
 		RenderPathRaytrace.f32a[22] *= scene_meshes[0].data.scale_tex;
@@ -120,18 +120,18 @@ class RenderPathRaytrace {
 		let framebuffer: image_t = render_path_render_targets.get("buf")._image;
 		krom_raytrace_dispatch_rays(framebuffer.render_target_, RenderPathRaytrace.f32a.buffer);
 
-		if (Context.raw.ddirty == 1 || Context.raw.pdirty == 1) {
+		if (context_raw.ddirty == 1 || context_raw.pdirty == 1) {
 			///if krom_metal
-			Context.raw.rdirty = 128;
+			context_raw.rdirty = 128;
 			///else
-			Context.raw.rdirty = 4;
+			context_raw.rdirty = 4;
 			///end
 		}
-		Context.raw.ddirty--;
-		Context.raw.pdirty--;
-		Context.raw.rdirty--;
+		context_raw.ddirty--;
+		context_raw.pdirty--;
+		context_raw.rdirty--;
 
-		// Context.raw.ddirty = 1; // _RENDER
+		// raw.ddirty = 1; // _RENDER
 	}
 
 	static raytrace_init = (shaderName: string, build: bool = true) => {
@@ -148,9 +148,9 @@ class RenderPathRaytrace {
 	}
 
 	static build_data = () => {
-		if (Context.raw.merged_object == null) UtilMesh.merge_mesh();
+		if (context_raw.merged_object == null) UtilMesh.merge_mesh();
 		///if is_paint
-		let mo: mesh_object_t = !Context.layer_filter_used() ? Context.raw.merged_object : Context.raw.paint_object;
+		let mo: mesh_object_t = !context_layer_filter_used() ? context_raw.merged_object : context_raw.paint_object;
 		///else
 		let mo: mesh_object_t = scene_meshes[0];
 		///end
@@ -163,18 +163,18 @@ class RenderPathRaytrace {
 	}
 
 	static draw = (useLiveLayer: bool) => {
-		let is_live: bool = Config.raw.brush_live && RenderPathPaint.live_layer_drawn > 0;
-		if (Context.raw.ddirty > 1 || Context.raw.pdirty > 0 || is_live) RenderPathRaytrace.frame = 0;
+		let is_live: bool = config_raw.brush_live && RenderPathPaint.live_layer_drawn > 0;
+		if (context_raw.ddirty > 1 || context_raw.pdirty > 0 || is_live) RenderPathRaytrace.frame = 0;
 
 		///if krom_metal
 		// Delay path tracing additional samples while painting
 		let down: bool = mouse_down() || pen_down();
-		if (Context.in_viewport() && down) RenderPathRaytrace.frame = 0;
+		if (context_in_viewport() && down) RenderPathRaytrace.frame = 0;
 		///end
 
 		RenderPathRaytrace.commands(useLiveLayer);
 
-		if (Config.raw.rp_bloom != false) {
+		if (config_raw.rp_bloom != false) {
 			RenderPathBase.draw_bloom("buf");
 		}
 		render_path_set_target("buf");
@@ -187,7 +187,7 @@ class RenderPathRaytrace {
 		render_path_set_target("");
 		render_path_bind_target("taa", "tex");
 		render_path_draw_shader("shader_datas/copy_pass/copy_pass");
-		if (Config.raw.brush_3d) {
+		if (config_raw.brush_3d) {
 			RenderPathPaint.commands_cursor();
 		}
 	}

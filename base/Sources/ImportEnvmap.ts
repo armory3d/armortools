@@ -83,12 +83,12 @@ class ImportEnvmap {
 		scene_world.envmap = path;
 		scene_world._.radiance = ImportEnvmap.radiance_cpu;
 		scene_world._.radiance_mipmaps = ImportEnvmap.mips_cpu;
-		Context.raw.saved_envmap = image;
-		if (Context.raw.show_envmap_blur) {
+		context_raw.saved_envmap = image;
+		if (context_raw.show_envmap_blur) {
 			scene_world._.envmap = scene_world._.radiance_mipmaps[0];
 		}
-		Context.raw.ddirty = 2;
-		Project.raw.envmap = path;
+		context_raw.ddirty = 2;
+		project_raw.envmap = path;
 	}
 
 	static get_radiance_mip = (mip: image_t, level: i32, radiance: image_t) => {

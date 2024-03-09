@@ -10,38 +10,38 @@ class UtilRender {
 	static screen_aligned_full_ib: index_buffer_t = null;
 
 	static make_material_preview = () => {
-		Context.raw.material_preview = true;
+		context_raw.material_preview = true;
 
 		let sphere: mesh_object_t = scene_get_child(".Sphere").ext;
 		sphere.base.visible = true;
 		let meshes: mesh_object_t[] = scene_meshes;
 		scene_meshes = [sphere];
-		let painto: mesh_object_t = Context.raw.paint_object;
-		Context.raw.paint_object = sphere;
+		let painto: mesh_object_t = context_raw.paint_object;
+		context_raw.paint_object = sphere;
 
-		sphere.materials[0] = Project.materials[0].data;
-		Context.raw.material.preview_ready = true;
+		sphere.materials[0] = project_materials[0].data;
+		context_raw.material.preview_ready = true;
 
-		mat4_set_from(Context.raw.saved_camera, scene_camera.base.transform.local);
+		mat4_set_from(context_raw.saved_camera, scene_camera.base.transform.local);
 		let m: mat4_t = mat4_create(0.9146286343879498, -0.0032648027153306235, 0.404281837254303, 0.4659988049397712, 0.404295023959927, 0.007367569133732468, -0.9145989516155143, -1.0687517188018691, 0.000007410128652369705, 0.9999675337275382, 0.008058532943908717, 0.015935682577325486, 0, 0, 0, 1);
 		transform_set_matrix(scene_camera.base.transform, m);
 		let saved_fov: f32 = scene_camera.data.fov;
 		scene_camera.data.fov = 0.92;
-		Viewport.update_camera_type(camera_type_t.PERSPECTIVE);
+		viewport_update_camera_type(camera_type_t.PERSPECTIVE);
 		let light: light_object_t = scene_lights[0];
 		let _light_strength: f32 = light.data.strength;
 		let probe: world_data_t = scene_world;
 		let _probe_strength: f32 = probe.strength;
 		light.data.strength = 0;
 		probe.strength = 7;
-		let _envmap_angle: f32 = Context.raw.envmap_angle;
-		Context.raw.envmap_angle = 6.0;
-		let _brush_scale: f32 = Context.raw.brush_scale;
-		Context.raw.brush_scale = 1.5;
-		let _brush_nodes_scale: f32 = Context.raw.brush_nodes_scale;
-		Context.raw.brush_nodes_scale = 1.0;
+		let _envmap_angle: f32 = context_raw.envmap_angle;
+		context_raw.envmap_angle = 6.0;
+		let _brush_scale: f32 = context_raw.brush_scale;
+		context_raw.brush_scale = 1.5;
+		let _brush_nodes_scale: f32 = context_raw.brush_nodes_scale;
+		context_raw.brush_nodes_scale = 1.0;
 
-		scene_world._.envmap = Context.raw.preview_envmap;
+		scene_world._.envmap = context_raw.preview_envmap;
 		// No resize
 		_render_path_last_w = UtilRender.material_preview_size;
 		_render_path_last_h = UtilRender.material_preview_size;
@@ -54,28 +54,28 @@ class UtilRender {
 		render_path_render_frame();
 		render_path_commands = _commands;
 
-		Context.raw.material_preview = false;
+		context_raw.material_preview = false;
 		_render_path_last_w = app_w();
 		_render_path_last_h = app_h();
 
 		// Restore
 		sphere.base.visible = false;
 		scene_meshes = meshes;
-		Context.raw.paint_object = painto;
+		context_raw.paint_object = painto;
 
-		transform_set_matrix(scene_camera.base.transform, Context.raw.saved_camera);
-		Viewport.update_camera_type(Context.raw.camera_type);
+		transform_set_matrix(scene_camera.base.transform, context_raw.saved_camera);
+		viewport_update_camera_type(context_raw.camera_type);
 		scene_camera.data.fov = saved_fov;
 		camera_object_build_proj(scene_camera);
 		camera_object_build_mat(scene_camera);
 		light.data.strength = _light_strength;
 		probe.strength = _probe_strength;
-		Context.raw.envmap_angle = _envmap_angle;
-		Context.raw.brush_scale = _brush_scale;
-		Context.raw.brush_nodes_scale = _brush_nodes_scale;
-		scene_world._.envmap = Context.raw.show_envmap ? Context.raw.saved_envmap : Context.raw.empty_envmap;
+		context_raw.envmap_angle = _envmap_angle;
+		context_raw.brush_scale = _brush_scale;
+		context_raw.brush_nodes_scale = _brush_nodes_scale;
+		scene_world._.envmap = context_raw.show_envmap ? context_raw.saved_envmap : context_raw.empty_envmap;
 		MakeMaterial.parse_mesh_material();
-		Context.raw.ddirty = 0;
+		context_raw.ddirty = 0;
 	}
 
 	static make_decal_preview = () => {
@@ -83,10 +83,10 @@ class UtilRender {
 		let g2_in_use: bool = _g2_in_use;
 		if (g2_in_use) g2_end();
 
-		if (Context.raw.decal_image == null) {
-			Context.raw.decal_image = image_create_render_target(UtilRender.decal_preview_size, UtilRender.decal_preview_size);
+		if (context_raw.decal_image == null) {
+			context_raw.decal_image = image_create_render_target(UtilRender.decal_preview_size, UtilRender.decal_preview_size);
 		}
-		Context.raw.decal_preview = true;
+		context_raw.decal_preview = true;
 
 		let plane: mesh_object_t = scene_get_child(".Plane").ext;
 		vec4_set(plane.base.transform.scale, 1, 1, 1);
@@ -95,19 +95,19 @@ class UtilRender {
 		plane.base.visible = true;
 		let meshes: mesh_object_t[] = scene_meshes;
 		scene_meshes = [plane];
-		let painto: mesh_object_t = Context.raw.paint_object;
-		Context.raw.paint_object = plane;
+		let painto: mesh_object_t = context_raw.paint_object;
+		context_raw.paint_object = plane;
 
-		mat4_set_from(Context.raw.saved_camera, scene_camera.base.transform.local);
+		mat4_set_from(context_raw.saved_camera, scene_camera.base.transform.local);
 		let m: mat4_t = mat4_identity();
 		mat4_translate(m, 0, 0, 1);
 		transform_set_matrix(scene_camera.base.transform, m);
 		let saved_fov: f32 = scene_camera.data.fov;
 		scene_camera.data.fov = 0.92;
-		Viewport.update_camera_type(camera_type_t.PERSPECTIVE);
+		viewport_update_camera_type(camera_type_t.PERSPECTIVE);
 		let light: light_object_t = scene_lights[0];
 		light.base.visible = false;
-		scene_world._.envmap = Context.raw.preview_envmap;
+		scene_world._.envmap = context_raw.preview_envmap;
 
 		// No resize
 		_render_path_last_w = UtilRender.decal_preview_size;
@@ -121,26 +121,26 @@ class UtilRender {
 		render_path_render_frame();
 		render_path_commands = _commands;
 
-		Context.raw.decal_preview = false;
+		context_raw.decal_preview = false;
 		_render_path_last_w = app_w();
 		_render_path_last_h = app_h();
 
 		// Restore
 		plane.base.visible = false;
 		scene_meshes = meshes;
-		Context.raw.paint_object = painto;
+		context_raw.paint_object = painto;
 
-		transform_set_matrix(scene_camera.base.transform, Context.raw.saved_camera);
+		transform_set_matrix(scene_camera.base.transform, context_raw.saved_camera);
 		scene_camera.data.fov = saved_fov;
-		Viewport.update_camera_type(Context.raw.camera_type);
+		viewport_update_camera_type(context_raw.camera_type);
 		camera_object_build_proj(scene_camera);
 		camera_object_build_mat(scene_camera);
 		light = scene_lights[0];
 		light.base.visible = true;
-		scene_world._.envmap = Context.raw.show_envmap ? Context.raw.saved_envmap : Context.raw.empty_envmap;
+		scene_world._.envmap = context_raw.show_envmap ? context_raw.saved_envmap : context_raw.empty_envmap;
 
 		MakeMaterial.parse_mesh_material();
-		Context.raw.ddirty = 1; // Refresh depth for decal paint
+		context_raw.ddirty = 1; // Refresh depth for decal paint
 
 		if (g2_in_use) g2_begin(current);
 	}
@@ -149,25 +149,25 @@ class UtilRender {
 		let current: image_t = _g2_current;
 		if (current != null) g2_end();
 
-		let text: string = Context.raw.text_tool_text;
-		let font: g2_font_t = Context.raw.font.font;
+		let text: string = context_raw.text_tool_text;
+		let font: g2_font_t = context_raw.font.font;
 		let font_size: i32 = 200;
 		let text_w: i32 = Math.floor(g2_font_width(font, font_size, text));
 		let text_h: i32 = Math.floor(g2_font_height(font, font_size));
 		let texW: i32 = text_w + 32;
 		if (texW < 512) texW = 512;
-		if (Context.raw.text_tool_image != null && Context.raw.text_tool_image.width < texW) {
-			image_unload(Context.raw.text_tool_image);
-			Context.raw.text_tool_image = null;
+		if (context_raw.text_tool_image != null && context_raw.text_tool_image.width < texW) {
+			image_unload(context_raw.text_tool_image);
+			context_raw.text_tool_image = null;
 		}
-		if (Context.raw.text_tool_image == null) {
+		if (context_raw.text_tool_image == null) {
 			///if krom_metal
-			Context.raw.text_tool_image = image_create_render_target(texW, texW, tex_format_t.RGBA32);
+			context_raw.text_tool_image = image_create_render_target(texW, texW, tex_format_t.RGBA32);
 			///else
-			Context.raw.text_tool_image = image_create_render_target(texW, texW, tex_format_t.R8);
+			context_raw.text_tool_image = image_create_render_target(texW, texW, tex_format_t.R8);
 			///end
 		}
-		g2_begin(Context.raw.text_tool_image);
+		g2_begin(context_raw.text_tool_image);
 		g2_clear(0xff000000);
 		g2_set_font(font);
 		g2_set_font_size(font_size);
@@ -183,28 +183,28 @@ class UtilRender {
 		if (current != null) g2_end();
 
 		let text: string = "Abg";
-		let font: g2_font_t = Context.raw.font.font;
+		let font: g2_font_t = context_raw.font.font;
 		let font_size: i32 = 318;
 		let text_w: i32 = Math.floor(g2_font_width(font, font_size, text)) + 8;
 		let text_h: i32 = Math.floor(g2_font_height(font, font_size)) + 8;
-		if (Context.raw.font.image == null) {
-			Context.raw.font.image = image_create_render_target(512, 512, tex_format_t.RGBA32);
+		if (context_raw.font.image == null) {
+			context_raw.font.image = image_create_render_target(512, 512, tex_format_t.RGBA32);
 		}
-		g2_begin(Context.raw.font.image);
+		g2_begin(context_raw.font.image);
 		g2_clear(0x00000000);
 		g2_set_font(font);
 		g2_set_font_size(font_size);
 		g2_set_color(0xffffffff);
 		g2_draw_string(text, 512 / 2 - text_w / 2, 512 / 2 - text_h / 2);
 		g2_end();
-		Context.raw.font.preview_ready = true;
+		context_raw.font.preview_ready = true;
 
 		if (current != null) g2_begin(current);
 	}
 
 	static make_brush_preview = () => {
 		if (RenderPathPaint.live_layer_locked) return;
-		Context.raw.material_preview = true;
+		context_raw.material_preview = true;
 
 		let current: image_t = _g2_current;
 		if (current != null) g2_end();
@@ -217,47 +217,47 @@ class UtilRender {
 		let l: SlotLayerRaw = RenderPathPaint.live_layer;
 		SlotLayer.clear(l);
 
-		if (Context.raw.brush.image == null) {
-			Context.raw.brush.image = image_create_render_target(UtilRender.material_preview_size, UtilRender.material_preview_size);
-			Context.raw.brush.image_icon = image_create_render_target(50, 50);
+		if (context_raw.brush.image == null) {
+			context_raw.brush.image = image_create_render_target(UtilRender.material_preview_size, UtilRender.material_preview_size);
+			context_raw.brush.image_icon = image_create_render_target(50, 50);
 		}
 
-		let _material: SlotMaterialRaw = Context.raw.material;
-		Context.raw.material = SlotMaterial.create();
-		let _tool: workspace_tool_t = Context.raw.tool;
-		Context.raw.tool = workspace_tool_t.BRUSH;
+		let _material: SlotMaterialRaw = context_raw.material;
+		context_raw.material = SlotMaterial.create();
+		let _tool: workspace_tool_t = context_raw.tool;
+		context_raw.tool = workspace_tool_t.BRUSH;
 
-		let _layer: SlotLayerRaw = Context.raw.layer;
-		if (SlotLayer.is_mask(Context.raw.layer)) {
-			Context.raw.layer = Context.raw.layer.parent;
+		let _layer: SlotLayerRaw = context_raw.layer;
+		if (SlotLayer.is_mask(context_raw.layer)) {
+			context_raw.layer = context_raw.layer.parent;
 		}
 
-		let _fill_layer: SlotMaterialRaw = Context.raw.layer.fill_layer;
-		Context.raw.layer.fill_layer = null;
+		let _fill_layer: SlotMaterialRaw = context_raw.layer.fill_layer;
+		context_raw.layer.fill_layer = null;
 
 		RenderPathPaint.use_live_layer(true);
 		MakeMaterial.parse_paint_material(false);
 
-		let hid: i32 = History.undo_i - 1 < 0 ? Config.raw.undo_steps - 1 : History.undo_i - 1;
+		let hid: i32 = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
 		render_path_render_targets.set("texpaint_undo" + hid,render_path_render_targets.get("empty_black"));
 
 		// Set plane mesh
-		let painto: mesh_object_t = Context.raw.paint_object;
+		let painto: mesh_object_t = context_raw.paint_object;
 		let visibles: bool[] = [];
-		for (let p of Project.paint_objects) {
+		for (let p of project_paint_objects) {
 			visibles.push(p.base.visible);
 			p.base.visible = false;
 		}
 		let merged_object_visible: bool = false;
-		if (Context.raw.merged_object != null) {
-			merged_object_visible = Context.raw.merged_object.base.visible;
-			Context.raw.merged_object.base.visible = false;
+		if (context_raw.merged_object != null) {
+			merged_object_visible = context_raw.merged_object.base.visible;
+			context_raw.merged_object.base.visible = false;
 		}
 
 		let cam: camera_object_t = scene_camera;
-		mat4_set_from(Context.raw.saved_camera, cam.base.transform.local);
+		mat4_set_from(context_raw.saved_camera, cam.base.transform.local);
 		let saved_fov: f32 = cam.data.fov;
-		Viewport.update_camera_type(camera_type_t.PERSPECTIVE);
+		viewport_update_camera_type(camera_type_t.PERSPECTIVE);
 		let m: mat4_t = mat4_identity();
 		mat4_translate(m, 0, 0, 0.5);
 		transform_set_matrix(cam.base.transform, m);
@@ -268,7 +268,7 @@ class UtilRender {
 
 		let planeo: mesh_object_t = scene_get_child(".Plane").ext;
 		planeo.base.visible = true;
-		Context.raw.paint_object = planeo;
+		context_raw.paint_object = planeo;
 
 		let v: vec4_t = vec4_create();
 		let sx: f32 = vec4_len(vec4_set(v, m.m[0], m.m[1], m.m[2]));
@@ -281,69 +281,69 @@ class UtilRender {
 		RenderPathBase.draw_gbuffer();
 
 		// Paint brush preview
-		let _brush_radius: f32 = Context.raw.brush_radius;
-		let _brush_opacity: f32 = Context.raw.brush_opacity;
-		let _brush_hardness: f32 = Context.raw.brush_hardness;
-		Context.raw.brush_radius = 0.33;
-		Context.raw.brush_opacity = 1.0;
-		Context.raw.brush_hardness = 0.8;
-		let _x: f32 = Context.raw.paint_vec.x;
-		let _y: f32 = Context.raw.paint_vec.y;
-		let _last_x: f32 = Context.raw.last_paint_vec_x;
-		let _last_y: f32 = Context.raw.last_paint_vec_y;
-		let _pdirty: i32 = Context.raw.pdirty;
-		Context.raw.pdirty = 2;
+		let _brush_radius: f32 = context_raw.brush_radius;
+		let _brush_opacity: f32 = context_raw.brush_opacity;
+		let _brush_hardness: f32 = context_raw.brush_hardness;
+		context_raw.brush_radius = 0.33;
+		context_raw.brush_opacity = 1.0;
+		context_raw.brush_hardness = 0.8;
+		let _x: f32 = context_raw.paint_vec.x;
+		let _y: f32 = context_raw.paint_vec.y;
+		let _last_x: f32 = context_raw.last_paint_vec_x;
+		let _last_y: f32 = context_raw.last_paint_vec_y;
+		let _pdirty: i32 = context_raw.pdirty;
+		context_raw.pdirty = 2;
 
 		let points_x: f32[] = [0.2, 0.2,  0.35, 0.5,  0.5, 0.5,  0.65, 0.8,  0.8, 0.8];
 		let points_y: f32[] = [0.5, 0.5,  0.35 - 0.04, 0.2 - 0.08,  0.4 + 0.015, 0.6 + 0.03,  0.45 - 0.025, 0.3 - 0.05,  0.5 + 0.025, 0.7 + 0.05];
 		for (let i: i32 = 1; i < points_x.length; ++i) {
-			Context.raw.last_paint_vec_x = points_x[i - 1];
-			Context.raw.last_paint_vec_y = points_y[i - 1];
-			Context.raw.paint_vec.x = points_x[i];
-			Context.raw.paint_vec.y = points_y[i];
+			context_raw.last_paint_vec_x = points_x[i - 1];
+			context_raw.last_paint_vec_y = points_y[i - 1];
+			context_raw.paint_vec.x = points_x[i];
+			context_raw.paint_vec.y = points_y[i];
 			RenderPathPaint.commands_paint(false);
 		}
 
-		Context.raw.brush_radius = _brush_radius;
-		Context.raw.brush_opacity = _brush_opacity;
-		Context.raw.brush_hardness = _brush_hardness;
-		Context.raw.paint_vec.x = _x;
-		Context.raw.paint_vec.y = _y;
-		Context.raw.last_paint_vec_x = _last_x;
-		Context.raw.last_paint_vec_y = _last_y;
-		Context.raw.prev_paint_vec_x = -1;
-		Context.raw.prev_paint_vec_y = -1;
-		Context.raw.pdirty = _pdirty;
+		context_raw.brush_radius = _brush_radius;
+		context_raw.brush_opacity = _brush_opacity;
+		context_raw.brush_hardness = _brush_hardness;
+		context_raw.paint_vec.x = _x;
+		context_raw.paint_vec.y = _y;
+		context_raw.last_paint_vec_x = _last_x;
+		context_raw.last_paint_vec_y = _last_y;
+		context_raw.prev_paint_vec_x = -1;
+		context_raw.prev_paint_vec_y = -1;
+		context_raw.pdirty = _pdirty;
 		RenderPathPaint.use_live_layer(false);
-		Context.raw.layer.fill_layer = _fill_layer;
-		Context.raw.layer = _layer;
-		Context.raw.material = _material;
-		Context.raw.tool = _tool;
+		context_raw.layer.fill_layer = _fill_layer;
+		context_raw.layer = _layer;
+		context_raw.material = _material;
+		context_raw.tool = _tool;
 		let _init = () => {
 			MakeMaterial.parse_paint_material(false);
 		}
 		app_notify_on_init(_init);
 
 		// Restore paint mesh
-		Context.raw.material_preview = false;
+		context_raw.material_preview = false;
 		planeo.base.visible = false;
-		for (let i: i32 = 0; i < Project.paint_objects.length; ++i) {
-			Project.paint_objects[i].base.visible = visibles[i];
+		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+			project_paint_objects[i].base.visible = visibles[i];
 		}
-		if (Context.raw.merged_object != null) {
-			Context.raw.merged_object.base.visible = merged_object_visible;
+		if (context_raw.merged_object != null) {
+			context_raw.merged_object.base.visible = merged_object_visible;
 		}
-		Context.raw.paint_object = painto;
-		transform_set_matrix(scene_camera.base.transform, Context.raw.saved_camera);
+		context_raw.paint_object = painto;
+		transform_set_matrix(scene_camera.base.transform, context_raw.saved_camera);
 		scene_camera.data.fov = saved_fov;
-		Viewport.update_camera_type(Context.raw.camera_type);
+		viewport_update_camera_type(context_raw.camera_type);
 		camera_object_build_proj(scene_camera);
 		camera_object_build_mat(scene_camera);
 
 		// Scale layer down to to image preview
 		if (base_pipe_merge == null) base_make_pipe();
 		l = RenderPathPaint.live_layer;
-		let target: image_t = Context.raw.brush.image;
+		let target: image_t = context_raw.brush.image;
 		g2_begin(target);
 		g2_clear(0x00000000);
 		g2_set_pipeline(base_pipe_copy);
@@ -352,14 +352,14 @@ class UtilRender {
 		g2_end();
 
 		// Scale image preview down to to icon
-		render_path_render_targets.get("texpreview")._image = Context.raw.brush.image;
-		render_path_render_targets.get("texpreview_icon")._image = Context.raw.brush.image_icon;
+		render_path_render_targets.get("texpreview")._image = context_raw.brush.image;
+		render_path_render_targets.get("texpreview_icon")._image = context_raw.brush.image_icon;
 		render_path_set_target("texpreview_icon");
 		render_path_bind_target("texpreview", "tex");
 		render_path_draw_shader("shader_datas/supersample_resolve/supersample_resolve");
 
-		Context.raw.brush.preview_ready = true;
-		Context.raw.brush_blend_dirty = true;
+		context_raw.brush.preview_ready = true;
+		context_raw.brush_blend_dirty = true;
 
 		if (current != null) g2_begin(current);
 	}
@@ -372,31 +372,31 @@ class UtilRender {
 			UtilRender.create_screen_aligned_full_data();
 		}
 
-		let _scale_world: f32 = Context.raw.paint_object.base.transform.scale_world;
-		Context.raw.paint_object.base.transform.scale_world = 3.0;
-		transform_build_matrix(Context.raw.paint_object.base.transform);
+		let _scale_world: f32 = context_raw.paint_object.base.transform.scale_world;
+		context_raw.paint_object.base.transform.scale_world = 3.0;
+		transform_build_matrix(context_raw.paint_object.base.transform);
 
 		g4_begin(image);
 		g4_set_pipeline(res.scon._.pipe_state);
 		uniforms_set_context_consts(res.scon, [""]);
-		uniforms_set_obj_consts(res.scon, Context.raw.paint_object.base);
+		uniforms_set_obj_consts(res.scon, context_raw.paint_object.base);
 		uniforms_set_material_consts(res.scon, res.mcon);
 		g4_set_vertex_buffer(UtilRender.screen_aligned_full_vb);
 		g4_set_index_buffer(UtilRender.screen_aligned_full_ib);
 		g4_draw();
 		g4_end();
 
-		Context.raw.paint_object.base.transform.scale_world = _scale_world;
-		transform_build_matrix(Context.raw.paint_object.base.transform);
+		context_raw.paint_object.base.transform.scale_world = _scale_world;
+		transform_build_matrix(context_raw.paint_object.base.transform);
 	}
 
 	static pick_pos_nor_tex = () => {
-		Context.raw.pick_pos_nor_tex = true;
-		Context.raw.pdirty = 1;
-		let _tool: workspace_tool_t = Context.raw.tool;
-		Context.raw.tool = workspace_tool_t.PICKER;
+		context_raw.pick_pos_nor_tex = true;
+		context_raw.pdirty = 1;
+		let _tool: workspace_tool_t = context_raw.tool;
+		context_raw.tool = workspace_tool_t.PICKER;
 		MakeMaterial.parse_paint_material();
-		if (Context.raw.paint2d) {
+		if (context_raw.paint2d) {
 			RenderPathPaint.set_plane_mesh();
 		}
 		RenderPathPaint.commands_paint(false);
@@ -404,21 +404,21 @@ class UtilRender {
 		// Flush command list
 		RenderPathPaint.commands_paint(false);
 		///end
-		if (Context.raw.paint2d) {
+		if (context_raw.paint2d) {
 			RenderPathPaint.restore_plane_mesh();
 		}
-		Context.raw.tool = _tool;
-		Context.raw.pick_pos_nor_tex = false;
+		context_raw.tool = _tool;
+		context_raw.pick_pos_nor_tex = false;
 		MakeMaterial.parse_paint_material();
-		Context.raw.pdirty = 0;
+		context_raw.pdirty = 0;
 	}
 
 	static get_decal_mat = (): mat4_t => {
 		UtilRender.pick_pos_nor_tex();
 		let decal_mat: mat4_t = mat4_identity();
-		let loc: vec4_t = vec4_create(Context.raw.posx_picked, Context.raw.posy_picked, Context.raw.posz_picked);
-		let rot: quat_t = quat_from_to(quat_create(), vec4_create(0.0, 0.0, -1.0), vec4_create(Context.raw.norx_picked, Context.raw.nory_picked, Context.raw.norz_picked));
-		let scale: vec4_t = vec4_create(Context.raw.brush_radius * 0.5, Context.raw.brush_radius * 0.5, Context.raw.brush_radius * 0.5);
+		let loc: vec4_t = vec4_create(context_raw.posx_picked, context_raw.posy_picked, context_raw.posz_picked);
+		let rot: quat_t = quat_from_to(quat_create(), vec4_create(0.0, 0.0, -1.0), vec4_create(context_raw.norx_picked, context_raw.nory_picked, context_raw.norz_picked));
+		let scale: vec4_t = vec4_create(context_raw.brush_radius * 0.5, context_raw.brush_radius * 0.5, context_raw.brush_radius * 0.5);
 		mat4_compose(decal_mat, loc, rot, scale);
 		return decal_mat;
 	}

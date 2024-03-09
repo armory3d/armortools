@@ -107,100 +107,100 @@ class UIBase {
 	constructor() {
 		///if (is_paint || is_sculpt)
 		new UIToolbar();
-		UIToolbar.toolbar_w = Math.floor(UIToolbar.default_toolbar_w * Config.raw.window_scale);
-		Context.raw.text_tool_text = tr("Text");
+		UIToolbar.toolbar_w = Math.floor(UIToolbar.default_toolbar_w * config_raw.window_scale);
+		context_raw.text_tool_text = tr("Text");
 		///end
 
 		new UIHeader();
 		new UIStatus();
 		new UIMenubar();
 
-		UIHeader.headerh = Math.floor(UIHeader.default_header_h * Config.raw.window_scale);
-		UIMenubar.menubarw = Math.floor(UIMenubar.default_menubar_w * Config.raw.window_scale);
+		UIHeader.headerh = Math.floor(UIHeader.default_header_h * config_raw.window_scale);
+		UIMenubar.menubarw = Math.floor(UIMenubar.default_menubar_w * config_raw.window_scale);
 
 		///if (is_paint || is_sculpt)
-		if (Project.materials == null) {
-			Project.materials = [];
+		if (project_materials == null) {
+			project_materials = [];
 			let m: material_data_t = data_get_material("Scene", "Material");
-			Project.materials.push(SlotMaterial.create(m));
-			Context.raw.material = Project.materials[0];
+			project_materials.push(SlotMaterial.create(m));
+			context_raw.material = project_materials[0];
 		}
 
-		if (Project.brushes == null) {
-			Project.brushes = [];
-			Project.brushes.push(SlotBrush.create());
-			Context.raw.brush = Project.brushes[0];
+		if (project_brushes == null) {
+			project_brushes = [];
+			project_brushes.push(SlotBrush.create());
+			context_raw.brush = project_brushes[0];
 			MakeMaterial.parse_brush();
 		}
 
-		if (Project.fonts == null) {
-			Project.fonts = [];
-			Project.fonts.push(SlotFont.create("default.ttf", base_font));
-			Context.raw.font = Project.fonts[0];
+		if (project_fonts == null) {
+			project_fonts = [];
+			project_fonts.push(SlotFont.create("default.ttf", base_font));
+			context_raw.font = project_fonts[0];
 		}
 
-		if (Project.layers == null) {
-			Project.layers = [];
-			Project.layers.push(SlotLayer.create());
-			Context.raw.layer = Project.layers[0];
+		if (project_layers == null) {
+			project_layers = [];
+			project_layers.push(SlotLayer.create());
+			context_raw.layer = project_layers[0];
 		}
 		///end
 
 		///if is_lab
-		if (Project.material_data == null) {
+		if (project_material_data == null) {
 			let m: material_data_t = data_get_material("Scene", "Material");
-			Project.material_data = m;
+			project_material_data = m;
 		}
 
-		if (Project.default_canvas == null) { // Synchronous
+		if (project_default_canvas == null) { // Synchronous
 			let b: ArrayBuffer = data_get_blob("default_brush.arm");
-			Project.default_canvas = b;
+			project_default_canvas = b;
 		}
 
-		Project.nodes = zui_nodes_create();
-		Project.canvas = armpack_decode(Project.default_canvas);
-		Project.canvas.name = "Brush 1";
+		project_nodes = zui_nodes_create();
+		project_canvas = armpack_decode(project_default_canvas);
+		project_canvas.name = "Brush 1";
 
-		Context.parse_brush_inputs();
+		context_parse_brush_inputs();
 
-		ParserLogic.parse(Project.canvas);
+		ParserLogic.parse(project_canvas);
 		///end
 
-		if (Project.raw.swatches == null) {
-			Project.set_default_swatches();
-			Context.raw.swatch = Project.raw.swatches[0];
+		if (project_raw.swatches == null) {
+			project_set_default_swatches();
+			context_raw.swatch = project_raw.swatches[0];
 		}
 
-		if (Context.raw.empty_envmap == null) {
+		if (context_raw.empty_envmap == null) {
 			let b: Uint8Array = new Uint8Array(4);
 			b[0] = 8;
 			b[1] = 8;
 			b[2] = 8;
 			b[3] = 255;
-			Context.raw.empty_envmap = image_from_bytes(b.buffer, 1, 1);
+			context_raw.empty_envmap = image_from_bytes(b.buffer, 1, 1);
 		}
-		if (Context.raw.preview_envmap == null) {
+		if (context_raw.preview_envmap == null) {
 			let b: Uint8Array = new Uint8Array(4);
 			b[0] = 0;
 			b[1] = 0;
 			b[2] = 0;
 			b[3] = 255;
-			Context.raw.preview_envmap = image_from_bytes(b.buffer, 1, 1);
+			context_raw.preview_envmap = image_from_bytes(b.buffer, 1, 1);
 		}
 
 		let world: world_data_t = scene_world;
-		if (Context.raw.saved_envmap == null) {
-			// Context.raw.savedEnvmap = world._envmap;
-			Context.raw.default_irradiance = world._.irradiance;
-			Context.raw.default_radiance = world._.radiance;
-			Context.raw.default_radiance_mipmaps = world._.radiance_mipmaps;
+		if (context_raw.saved_envmap == null) {
+			// raw.savedEnvmap = world._envmap;
+			context_raw.default_irradiance = world._.irradiance;
+			context_raw.default_radiance = world._.radiance;
+			context_raw.default_radiance_mipmaps = world._.radiance_mipmaps;
 		}
-		world._.envmap = Context.raw.show_envmap ? Context.raw.saved_envmap : Context.raw.empty_envmap;
-		Context.raw.ddirty = 1;
+		world._.envmap = context_raw.show_envmap ? context_raw.saved_envmap : context_raw.empty_envmap;
+		context_raw.ddirty = 1;
 
-		History.reset();
+		history_reset();
 
-		let scale: f32 = Config.raw.window_scale;
+		let scale: f32 = config_raw.window_scale;
 		UIBase.ui = zui_create({ theme: base_theme, font: base_font, scale_factor: scale, color_wheel: base_color_wheel, black_white_gradient: base_color_wheel_gradient });
 		zui_set_on_border_hover(UIBase.on_border_hover);
 		zui_set_on_text_hover(UIBase.on_text_hover);
@@ -215,45 +215,45 @@ class UIBase {
 		///end
 
 		///if (is_paint || is_sculpt)
-		Context.raw.gizmo = scene_get_child(".Gizmo");
-		Context.raw.gizmo_translate_x = object_get_child(Context.raw.gizmo, ".TranslateX");
-		Context.raw.gizmo_translate_y = object_get_child(Context.raw.gizmo, ".TranslateY");
-		Context.raw.gizmo_translate_z = object_get_child(Context.raw.gizmo, ".TranslateZ");
-		Context.raw.gizmo_scale_x = object_get_child(Context.raw.gizmo, ".ScaleX");
-		Context.raw.gizmo_scale_y = object_get_child(Context.raw.gizmo, ".ScaleY");
-		Context.raw.gizmo_scale_z = object_get_child(Context.raw.gizmo, ".ScaleZ");
-		Context.raw.gizmo_rotate_x = object_get_child(Context.raw.gizmo, ".RotateX");
-		Context.raw.gizmo_rotate_y = object_get_child(Context.raw.gizmo, ".RotateY");
-		Context.raw.gizmo_rotate_z = object_get_child(Context.raw.gizmo, ".RotateZ");
+		context_raw.gizmo = scene_get_child(".Gizmo");
+		context_raw.gizmo_translate_x = object_get_child(context_raw.gizmo, ".TranslateX");
+		context_raw.gizmo_translate_y = object_get_child(context_raw.gizmo, ".TranslateY");
+		context_raw.gizmo_translate_z = object_get_child(context_raw.gizmo, ".TranslateZ");
+		context_raw.gizmo_scale_x = object_get_child(context_raw.gizmo, ".ScaleX");
+		context_raw.gizmo_scale_y = object_get_child(context_raw.gizmo, ".ScaleY");
+		context_raw.gizmo_scale_z = object_get_child(context_raw.gizmo, ".ScaleZ");
+		context_raw.gizmo_rotate_x = object_get_child(context_raw.gizmo, ".RotateX");
+		context_raw.gizmo_rotate_y = object_get_child(context_raw.gizmo, ".RotateY");
+		context_raw.gizmo_rotate_z = object_get_child(context_raw.gizmo, ".RotateZ");
 		///end
 
-		Res.load(resources, () => {});
+		resource_load(resources, () => {});
 
 		if (zui_SCALE(UIBase.ui) > 1) UIBase.set_icon_scale();
 
-		Context.raw.paint_object = scene_get_child(".Cube").ext;
-		Project.paint_objects = [Context.raw.paint_object];
+		context_raw.paint_object = scene_get_child(".Cube").ext;
+		project_paint_objects = [context_raw.paint_object];
 
-		if (Project.filepath == "") {
+		if (project_filepath == "") {
 			app_notify_on_init(base_init_layers);
 		}
 
-		Context.raw.project_objects = [];
-		for (let m of scene_meshes) Context.raw.project_objects.push(m);
+		context_raw.project_objects = [];
+		for (let m of scene_meshes) context_raw.project_objects.push(m);
 
-		Operator.register("view_top", UIBase.view_top);
+		operator_register("view_top", UIBase.view_top);
 	}
 
 	static update = () => {
 		UIBase.update_ui();
-		Operator.update();
+		operator_update();
 
-		for (let p of Plugin.plugins.values()) if (p.update != null) p.update();
+		for (let p of plugin_map.values()) if (p.update != null) p.update();
 
 		if (!base_ui_enabled) return;
 
 		if (!UINodes.ui.is_typing && !UIBase.ui.is_typing) {
-			if (Operator.shortcut(Config.keymap.toggle_node_editor)) {
+			if (operator_shortcut(config_keymap.toggle_node_editor)) {
 				///if (is_paint || is_sculpt)
 				UINodes.canvas_type == canvas_type_t.MATERIAL ? UIBase.show_material_nodes() : UIBase.show_brush_nodes();
 				///end
@@ -261,11 +261,11 @@ class UIBase {
 				UIBase.show_material_nodes();
 				///end
 			}
-			else if (Operator.shortcut(Config.keymap.toggle_browser)) {
+			else if (operator_shortcut(config_keymap.toggle_browser)) {
 				UIBase.toggle_browser();
 			}
 
-			else if (Operator.shortcut(Config.keymap.toggle_2d_view)) {
+			else if (operator_shortcut(config_keymap.toggle_2d_view)) {
 				///if (is_paint || is_sculpt)
 				UIBase.show_2d_view(view_2d_type_t.LAYER);
 				///else
@@ -274,107 +274,107 @@ class UIBase {
 			}
 		}
 
-		if (Operator.shortcut(Config.keymap.file_save_as)) Project.project_save_as();
-		else if (Operator.shortcut(Config.keymap.file_save)) Project.project_save();
-		else if (Operator.shortcut(Config.keymap.file_open)) Project.project_open();
-		else if (Operator.shortcut(Config.keymap.file_open_recent)) BoxProjects.show();
-		else if (Operator.shortcut(Config.keymap.file_reimport_mesh)) Project.reimport_mesh();
-		else if (Operator.shortcut(Config.keymap.file_reimport_textures)) Project.reimport_textures();
-		else if (Operator.shortcut(Config.keymap.file_new)) Project.project_new_box();
+		if (operator_shortcut(config_keymap.file_save_as)) project_save_as();
+		else if (operator_shortcut(config_keymap.file_save)) project_save();
+		else if (operator_shortcut(config_keymap.file_open)) project_open();
+		else if (operator_shortcut(config_keymap.file_open_recent)) BoxProjects.show();
+		else if (operator_shortcut(config_keymap.file_reimport_mesh)) project_reimport_mesh();
+		else if (operator_shortcut(config_keymap.file_reimport_textures)) project_reimport_textures();
+		else if (operator_shortcut(config_keymap.file_new)) project_new_box();
 		///if (is_paint || is_lab)
-		else if (Operator.shortcut(Config.keymap.file_export_textures)) {
-			if (Context.raw.texture_export_path == "") { // First export, ask for path
+		else if (operator_shortcut(config_keymap.file_export_textures)) {
+			if (context_raw.texture_export_path == "") { // First export, ask for path
 				///if is_paint
-				Context.raw.layers_export = export_mode_t.VISIBLE;
+				context_raw.layers_export = export_mode_t.VISIBLE;
 				///end
 				BoxExport.show_textures();
 			}
 			else {
 				let _init = () => {
-					ExportTexture.run(Context.raw.texture_export_path);
+					ExportTexture.run(context_raw.texture_export_path);
 				}
 				app_notify_on_init(_init);
 			}
 		}
-		else if (Operator.shortcut(Config.keymap.file_export_textures_as)) {
+		else if (operator_shortcut(config_keymap.file_export_textures_as)) {
 			///if (is_paint || is_sculpt)
-			Context.raw.layers_export = export_mode_t.VISIBLE;
+			context_raw.layers_export = export_mode_t.VISIBLE;
 			///end
 			BoxExport.show_textures();
 		}
 		///end
-		else if (Operator.shortcut(Config.keymap.file_import_assets)) Project.import_asset();
-		else if (Operator.shortcut(Config.keymap.edit_prefs)) BoxPreferences.show();
+		else if (operator_shortcut(config_keymap.file_import_assets)) project_import_asset();
+		else if (operator_shortcut(config_keymap.edit_prefs)) BoxPreferences.show();
 
-		if (keyboard_started(Config.keymap.view_distract_free) ||
+		if (keyboard_started(config_keymap.view_distract_free) ||
 		   (keyboard_started("escape") && !UIBase.show && !UIBox.show)) {
 			UIBase.toggle_distract_free();
 		}
 
 		///if krom_linux
-		if (Operator.shortcut("alt+enter", ShortcutType.ShortcutStarted)) {
+		if (operator_shortcut("alt+enter", shortcut_type_t.STARTED)) {
 			base_toggle_fullscreen();
 		}
 		///end
 
 		///if (is_paint || is_sculpt)
-		let decal: bool = Context.raw.tool == workspace_tool_t.DECAL || Context.raw.tool == workspace_tool_t.TEXT;
-		let decal_mask: bool = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutType.ShortcutDown);
+		let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
+		let decal_mask: bool = decal && operator_shortcut(config_keymap.decal_mask, shortcut_type_t.DOWN);
 
-		if ((Context.raw.brush_can_lock || Context.raw.brush_locked) && mouse_moved) {
-			if (Operator.shortcut(Config.keymap.brush_radius, ShortcutType.ShortcutDown) ||
-				Operator.shortcut(Config.keymap.brush_opacity, ShortcutType.ShortcutDown) ||
-				Operator.shortcut(Config.keymap.brush_angle, ShortcutType.ShortcutDown) ||
-				(decal_mask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius, ShortcutType.ShortcutDown))) {
-				if (Context.raw.brush_locked) {
-					if (Operator.shortcut(Config.keymap.brush_opacity, ShortcutType.ShortcutDown)) {
-						Context.raw.brush_opacity += mouse_movement_x / 500;
-						Context.raw.brush_opacity = Math.max(0.0, Math.min(1.0, Context.raw.brush_opacity));
-						Context.raw.brush_opacity = Math.round(Context.raw.brush_opacity * 100) / 100;
-						Context.raw.brush_opacity_handle.value = Context.raw.brush_opacity;
+		if ((context_raw.brush_can_lock || context_raw.brush_locked) && mouse_moved) {
+			if (operator_shortcut(config_keymap.brush_radius, shortcut_type_t.DOWN) ||
+				operator_shortcut(config_keymap.brush_opacity, shortcut_type_t.DOWN) ||
+				operator_shortcut(config_keymap.brush_angle, shortcut_type_t.DOWN) ||
+				(decal_mask && operator_shortcut(config_keymap.decal_mask + "+" + config_keymap.brush_radius, shortcut_type_t.DOWN))) {
+				if (context_raw.brush_locked) {
+					if (operator_shortcut(config_keymap.brush_opacity, shortcut_type_t.DOWN)) {
+						context_raw.brush_opacity += mouse_movement_x / 500;
+						context_raw.brush_opacity = Math.max(0.0, Math.min(1.0, context_raw.brush_opacity));
+						context_raw.brush_opacity = Math.round(context_raw.brush_opacity * 100) / 100;
+						context_raw.brush_opacity_handle.value = context_raw.brush_opacity;
 					}
-					else if (Operator.shortcut(Config.keymap.brush_angle, ShortcutType.ShortcutDown)) {
-						Context.raw.brush_angle += mouse_movement_x / 5;
-						Context.raw.brush_angle = Math.floor(Context.raw.brush_angle) % 360;
-						if (Context.raw.brush_angle < 0) Context.raw.brush_angle += 360;
-						Context.raw.brush_angle_handle.value = Context.raw.brush_angle;
+					else if (operator_shortcut(config_keymap.brush_angle, shortcut_type_t.DOWN)) {
+						context_raw.brush_angle += mouse_movement_x / 5;
+						context_raw.brush_angle = Math.floor(context_raw.brush_angle) % 360;
+						if (context_raw.brush_angle < 0) context_raw.brush_angle += 360;
+						context_raw.brush_angle_handle.value = context_raw.brush_angle;
 						MakeMaterial.parse_paint_material();
 					}
-					else if (decal_mask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius, ShortcutType.ShortcutDown)) {
-						Context.raw.brush_decal_mask_radius += mouse_movement_x / 150;
-						Context.raw.brush_decal_mask_radius = Math.max(0.01, Math.min(4.0, Context.raw.brush_decal_mask_radius));
-						Context.raw.brush_decal_mask_radius = Math.round(Context.raw.brush_decal_mask_radius * 100) / 100;
-						Context.raw.brush_decal_mask_radius_handle.value = Context.raw.brush_decal_mask_radius;
+					else if (decal_mask && operator_shortcut(config_keymap.decal_mask + "+" + config_keymap.brush_radius, shortcut_type_t.DOWN)) {
+						context_raw.brush_decal_mask_radius += mouse_movement_x / 150;
+						context_raw.brush_decal_mask_radius = Math.max(0.01, Math.min(4.0, context_raw.brush_decal_mask_radius));
+						context_raw.brush_decal_mask_radius = Math.round(context_raw.brush_decal_mask_radius * 100) / 100;
+						context_raw.brush_decal_mask_radius_handle.value = context_raw.brush_decal_mask_radius;
 					}
 					else {
-						Context.raw.brush_radius += mouse_movement_x / 150;
-						Context.raw.brush_radius = Math.max(0.01, Math.min(4.0, Context.raw.brush_radius));
-						Context.raw.brush_radius = Math.round(Context.raw.brush_radius * 100) / 100;
-						Context.raw.brush_radius_handle.value = Context.raw.brush_radius;
+						context_raw.brush_radius += mouse_movement_x / 150;
+						context_raw.brush_radius = Math.max(0.01, Math.min(4.0, context_raw.brush_radius));
+						context_raw.brush_radius = Math.round(context_raw.brush_radius * 100) / 100;
+						context_raw.brush_radius_handle.value = context_raw.brush_radius;
 					}
 					UIHeader.header_handle.redraws = 2;
 				}
-				else if (Context.raw.brush_can_lock) {
-					Context.raw.brush_can_lock = false;
-					Context.raw.brush_locked = true;
+				else if (context_raw.brush_can_lock) {
+					context_raw.brush_can_lock = false;
+					context_raw.brush_locked = true;
 				}
 			}
 		}
 		///end
 
 		///if is_lab
-		if ((Context.raw.brush_can_lock || Context.raw.brush_locked) && mouse_moved) {
-			if (Operator.shortcut(Config.keymap.brush_radius, ShortcutType.ShortcutDown)) {
-				if (Context.raw.brush_locked) {
-					Context.raw.brush_radius += mouse_movement_x / 150;
-					Context.raw.brush_radius = Math.max(0.01, Math.min(4.0, Context.raw.brush_radius));
-					Context.raw.brush_radius = Math.round(Context.raw.brush_radius * 100) / 100;
-					Context.raw.brush_radius_handle.value = Context.raw.brush_radius;
+		if ((context_raw.brush_can_lock || context_raw.brush_locked) && mouse_moved) {
+			if (operator_shortcut(config_keymap.brush_radius, shortcut_type_t.DOWN)) {
+				if (context_raw.brush_locked) {
+					context_raw.brush_radius += mouse_movement_x / 150;
+					context_raw.brush_radius = Math.max(0.01, Math.min(4.0, context_raw.brush_radius));
+					context_raw.brush_radius = Math.round(context_raw.brush_radius * 100) / 100;
+					context_raw.brush_radius_handle.value = context_raw.brush_radius;
 					UIHeader.header_handle.redraws = 2;
 				}
-				else if (Context.raw.brush_can_lock) {
-					Context.raw.brush_can_lock = false;
-					Context.raw.brush_locked = true;
+				else if (context_raw.brush_can_lock) {
+					context_raw.brush_can_lock = false;
+					context_raw.brush_locked = true;
 				}
 			}
 		}
@@ -384,86 +384,86 @@ class UIBase {
 
 		///if (is_paint || is_sculpt)
 		if (!is_typing) {
-			if (Operator.shortcut(Config.keymap.select_material, ShortcutType.ShortcutDown)) {
+			if (operator_shortcut(config_keymap.select_material, shortcut_type_t.DOWN)) {
 				UIBase.hwnds[tab_area_t.SIDEBAR1].redraws = 2;
-				for (let i: i32 = 1; i < 10; ++i) if (keyboard_started(i + "")) Context.select_material(i - 1);
+				for (let i: i32 = 1; i < 10; ++i) if (keyboard_started(i + "")) context_select_material(i - 1);
 			}
-			else if (Operator.shortcut(Config.keymap.select_layer, ShortcutType.ShortcutDown)) {
+			else if (operator_shortcut(config_keymap.select_layer, shortcut_type_t.DOWN)) {
 				UIBase.hwnds[tab_area_t.SIDEBAR0].redraws = 2;
-				for (let i: i32 = 1; i < 10; ++i) if (keyboard_started(i + "")) Context.select_layer(i - 1);
+				for (let i: i32 = 1; i < 10; ++i) if (keyboard_started(i + "")) context_select_layer(i - 1);
 			}
 		}
 		///end
 
 		// Viewport shortcuts
-		if (Context.in_paint_area() && !is_typing) {
+		if (context_in_paint_area() && !is_typing) {
 
 			///if is_paint
 			if (!mouse_down("right")) { // Fly mode off
-				if (Operator.shortcut(Config.keymap.tool_brush)) Context.select_tool(workspace_tool_t.BRUSH);
-				else if (Operator.shortcut(Config.keymap.tool_eraser)) Context.select_tool(workspace_tool_t.ERASER);
-				else if (Operator.shortcut(Config.keymap.tool_fill)) Context.select_tool(workspace_tool_t.FILL);
-				else if (Operator.shortcut(Config.keymap.tool_colorid)) Context.select_tool(workspace_tool_t.COLORID);
-				else if (Operator.shortcut(Config.keymap.tool_decal)) Context.select_tool(workspace_tool_t.DECAL);
-				else if (Operator.shortcut(Config.keymap.tool_text)) Context.select_tool(workspace_tool_t.TEXT);
-				else if (Operator.shortcut(Config.keymap.tool_clone)) Context.select_tool(workspace_tool_t.CLONE);
-				else if (Operator.shortcut(Config.keymap.tool_blur)) Context.select_tool(workspace_tool_t.BLUR);
-				else if (Operator.shortcut(Config.keymap.tool_smudge)) Context.select_tool(workspace_tool_t.SMUDGE);
-				else if (Operator.shortcut(Config.keymap.tool_particle)) Context.select_tool(workspace_tool_t.PARTICLE);
-				else if (Operator.shortcut(Config.keymap.tool_picker)) Context.select_tool(workspace_tool_t.PICKER);
-				else if (Operator.shortcut(Config.keymap.tool_bake)) Context.select_tool(workspace_tool_t.BAKE);
-				else if (Operator.shortcut(Config.keymap.tool_gizmo)) Context.select_tool(workspace_tool_t.GIZMO);
-				else if (Operator.shortcut(Config.keymap.tool_material)) Context.select_tool(workspace_tool_t.MATERIAL);
-				else if (Operator.shortcut(Config.keymap.swap_brush_eraser)) Context.select_tool(Context.raw.tool == workspace_tool_t.BRUSH ? workspace_tool_t.ERASER : workspace_tool_t.BRUSH);
+				if (operator_shortcut(config_keymap.tool_brush)) context_select_tool(workspace_tool_t.BRUSH);
+				else if (operator_shortcut(config_keymap.tool_eraser)) context_select_tool(workspace_tool_t.ERASER);
+				else if (operator_shortcut(config_keymap.tool_fill)) context_select_tool(workspace_tool_t.FILL);
+				else if (operator_shortcut(config_keymap.tool_colorid)) context_select_tool(workspace_tool_t.COLORID);
+				else if (operator_shortcut(config_keymap.tool_decal)) context_select_tool(workspace_tool_t.DECAL);
+				else if (operator_shortcut(config_keymap.tool_text)) context_select_tool(workspace_tool_t.TEXT);
+				else if (operator_shortcut(config_keymap.tool_clone)) context_select_tool(workspace_tool_t.CLONE);
+				else if (operator_shortcut(config_keymap.tool_blur)) context_select_tool(workspace_tool_t.BLUR);
+				else if (operator_shortcut(config_keymap.tool_smudge)) context_select_tool(workspace_tool_t.SMUDGE);
+				else if (operator_shortcut(config_keymap.tool_particle)) context_select_tool(workspace_tool_t.PARTICLE);
+				else if (operator_shortcut(config_keymap.tool_picker)) context_select_tool(workspace_tool_t.PICKER);
+				else if (operator_shortcut(config_keymap.tool_bake)) context_select_tool(workspace_tool_t.BAKE);
+				else if (operator_shortcut(config_keymap.tool_gizmo)) context_select_tool(workspace_tool_t.GIZMO);
+				else if (operator_shortcut(config_keymap.tool_material)) context_select_tool(workspace_tool_t.MATERIAL);
+				else if (operator_shortcut(config_keymap.swap_brush_eraser)) context_select_tool(context_raw.tool == workspace_tool_t.BRUSH ? workspace_tool_t.ERASER : workspace_tool_t.BRUSH);
 			}
 
 			// Radius
-			if (Context.raw.tool == workspace_tool_t.BRUSH  ||
-				Context.raw.tool == workspace_tool_t.ERASER ||
-				Context.raw.tool == workspace_tool_t.DECAL  ||
-				Context.raw.tool == workspace_tool_t.TEXT   ||
-				Context.raw.tool == workspace_tool_t.CLONE  ||
-				Context.raw.tool == workspace_tool_t.BLUR   ||
-				Context.raw.tool == workspace_tool_t.SMUDGE   ||
-				Context.raw.tool == workspace_tool_t.PARTICLE) {
-				if (Operator.shortcut(Config.keymap.brush_radius) ||
-					Operator.shortcut(Config.keymap.brush_opacity) ||
-					Operator.shortcut(Config.keymap.brush_angle) ||
-					(decal_mask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius))) {
-					Context.raw.brush_can_lock = true;
+			if (context_raw.tool == workspace_tool_t.BRUSH  ||
+				context_raw.tool == workspace_tool_t.ERASER ||
+				context_raw.tool == workspace_tool_t.DECAL  ||
+				context_raw.tool == workspace_tool_t.TEXT   ||
+				context_raw.tool == workspace_tool_t.CLONE  ||
+				context_raw.tool == workspace_tool_t.BLUR   ||
+				context_raw.tool == workspace_tool_t.SMUDGE   ||
+				context_raw.tool == workspace_tool_t.PARTICLE) {
+				if (operator_shortcut(config_keymap.brush_radius) ||
+					operator_shortcut(config_keymap.brush_opacity) ||
+					operator_shortcut(config_keymap.brush_angle) ||
+					(decal_mask && operator_shortcut(config_keymap.decal_mask + "+" + config_keymap.brush_radius))) {
+					context_raw.brush_can_lock = true;
 					if (!pen_connected) mouse_lock();
-					Context.raw.lock_started_x = mouse_x;
-					Context.raw.lock_started_y = mouse_y;
+					context_raw.lock_started_x = mouse_x;
+					context_raw.lock_started_y = mouse_y;
 				}
-				else if (Operator.shortcut(Config.keymap.brush_radius_decrease, ShortcutType.ShortcutRepeat)) {
-					Context.raw.brush_radius -= UIBase.get_radius_increment();
-					Context.raw.brush_radius = Math.max(Math.round(Context.raw.brush_radius * 100) / 100, 0.01);
-					Context.raw.brush_radius_handle.value = Context.raw.brush_radius;
+				else if (operator_shortcut(config_keymap.brush_radius_decrease, shortcut_type_t.REPEAT)) {
+					context_raw.brush_radius -= UIBase.get_radius_increment();
+					context_raw.brush_radius = Math.max(Math.round(context_raw.brush_radius * 100) / 100, 0.01);
+					context_raw.brush_radius_handle.value = context_raw.brush_radius;
 					UIHeader.header_handle.redraws = 2;
 				}
-				else if (Operator.shortcut(Config.keymap.brush_radius_increase, ShortcutType.ShortcutRepeat)) {
-					Context.raw.brush_radius += UIBase.get_radius_increment();
-					Context.raw.brush_radius = Math.round(Context.raw.brush_radius * 100) / 100;
-					Context.raw.brush_radius_handle.value = Context.raw.brush_radius;
+				else if (operator_shortcut(config_keymap.brush_radius_increase, shortcut_type_t.REPEAT)) {
+					context_raw.brush_radius += UIBase.get_radius_increment();
+					context_raw.brush_radius = Math.round(context_raw.brush_radius * 100) / 100;
+					context_raw.brush_radius_handle.value = context_raw.brush_radius;
 					UIHeader.header_handle.redraws = 2;
 				}
 				else if (decal_mask) {
-					if (Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius_decrease, ShortcutType.ShortcutRepeat)) {
-						Context.raw.brush_decal_mask_radius -= UIBase.get_radius_increment();
-						Context.raw.brush_decal_mask_radius = Math.max(Math.round(Context.raw.brush_decal_mask_radius * 100) / 100, 0.01);
-						Context.raw.brush_decal_mask_radius_handle.value = Context.raw.brush_decal_mask_radius;
+					if (operator_shortcut(config_keymap.decal_mask + "+" + config_keymap.brush_radius_decrease, shortcut_type_t.REPEAT)) {
+						context_raw.brush_decal_mask_radius -= UIBase.get_radius_increment();
+						context_raw.brush_decal_mask_radius = Math.max(Math.round(context_raw.brush_decal_mask_radius * 100) / 100, 0.01);
+						context_raw.brush_decal_mask_radius_handle.value = context_raw.brush_decal_mask_radius;
 						UIHeader.header_handle.redraws = 2;
 					}
-					else if (Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius_increase, ShortcutType.ShortcutRepeat)) {
-						Context.raw.brush_decal_mask_radius += UIBase.get_radius_increment();
-						Context.raw.brush_decal_mask_radius = Math.round(Context.raw.brush_decal_mask_radius * 100) / 100;
-						Context.raw.brush_decal_mask_radius_handle.value = Context.raw.brush_decal_mask_radius;
+					else if (operator_shortcut(config_keymap.decal_mask + "+" + config_keymap.brush_radius_increase, shortcut_type_t.REPEAT)) {
+						context_raw.brush_decal_mask_radius += UIBase.get_radius_increment();
+						context_raw.brush_decal_mask_radius = Math.round(context_raw.brush_decal_mask_radius * 100) / 100;
+						context_raw.brush_decal_mask_radius_handle.value = context_raw.brush_decal_mask_radius;
 						UIHeader.header_handle.redraws = 2;
 					}
 				}
 			}
 
-			if (decal_mask && (Operator.shortcut(Config.keymap.decal_mask, ShortcutType.ShortcutStarted) || Operator.shortcut(Config.keymap.decal_mask, ShortcutType.ShortcutReleased))) {
+			if (decal_mask && (operator_shortcut(config_keymap.decal_mask, shortcut_type_t.STARTED) || operator_shortcut(config_keymap.decal_mask, shortcut_type_t.RELEASED))) {
 				UIHeader.header_handle.redraws = 2;
 			}
 			///end
@@ -471,26 +471,26 @@ class UIBase {
 			///if is_lab
 			if (UIHeader.worktab.position == space_type_t.SPACE3D) {
 				// Radius
-				if (Context.raw.tool == workspace_tool_t.ERASER ||
-					Context.raw.tool == workspace_tool_t.CLONE  ||
-					Context.raw.tool == workspace_tool_t.BLUR   ||
-					Context.raw.tool == workspace_tool_t.SMUDGE) {
-					if (Operator.shortcut(Config.keymap.brush_radius)) {
-						Context.raw.brush_can_lock = true;
+				if (context_raw.tool == workspace_tool_t.ERASER ||
+					context_raw.tool == workspace_tool_t.CLONE  ||
+					context_raw.tool == workspace_tool_t.BLUR   ||
+					context_raw.tool == workspace_tool_t.SMUDGE) {
+					if (operator_shortcut(config_keymap.brush_radius)) {
+						context_raw.brush_can_lock = true;
 						if (!pen_connected) mouse_lock();
-						Context.raw.lock_started_x = mouse_x;
-						Context.raw.lock_started_y = mouse_y;
+						context_raw.lock_started_x = mouse_x;
+						context_raw.lock_started_y = mouse_y;
 					}
-					else if (Operator.shortcut(Config.keymap.brush_radius_decrease, ShortcutType.ShortcutRepeat)) {
-						Context.raw.brush_radius -= UIBase.get_radius_increment();
-						Context.raw.brush_radius = Math.max(Math.round(Context.raw.brush_radius * 100) / 100, 0.01);
-						Context.raw.brush_radius_handle.value = Context.raw.brush_radius;
+					else if (operator_shortcut(config_keymap.brush_radius_decrease, shortcut_type_t.REPEAT)) {
+						context_raw.brush_radius -= UIBase.get_radius_increment();
+						context_raw.brush_radius = Math.max(Math.round(context_raw.brush_radius * 100) / 100, 0.01);
+						context_raw.brush_radius_handle.value = context_raw.brush_radius;
 						UIHeader.header_handle.redraws = 2;
 					}
-					else if (Operator.shortcut(Config.keymap.brush_radius_increase, ShortcutType.ShortcutRepeat)) {
-						Context.raw.brush_radius += UIBase.get_radius_increment();
-						Context.raw.brush_radius = Math.round(Context.raw.brush_radius * 100) / 100;
-						Context.raw.brush_radius_handle.value = Context.raw.brush_radius;
+					else if (operator_shortcut(config_keymap.brush_radius_increase, shortcut_type_t.REPEAT)) {
+						context_raw.brush_radius += UIBase.get_radius_increment();
+						context_raw.brush_radius = Math.round(context_raw.brush_radius * 100) / 100;
+						context_raw.brush_radius_handle.value = context_raw.brush_radius;
 						UIHeader.header_handle.redraws = 2;
 					}
 				}
@@ -499,28 +499,28 @@ class UIBase {
 
 			// Viewpoint
 			if (mouse_view_x() < app_w()) {
-				if (Operator.shortcut(Config.keymap.view_reset)) {
-					Viewport.reset();
-					Viewport.scale_to_bounds();
+				if (operator_shortcut(config_keymap.view_reset)) {
+					viewport_reset();
+					viewport_scale_to_bounds();
 				}
-				else if (Operator.shortcut(Config.keymap.view_back)) Viewport.set_view(0, 1, 0, Math.PI / 2, 0, Math.PI);
-				else if (Operator.shortcut(Config.keymap.view_front)) Viewport.set_view(0, -1, 0, Math.PI / 2, 0, 0);
-				else if (Operator.shortcut(Config.keymap.view_left)) Viewport.set_view(-1, 0, 0, Math.PI / 2, 0, -Math.PI / 2);
-				else if (Operator.shortcut(Config.keymap.view_right)) Viewport.set_view(1, 0, 0, Math.PI / 2, 0, Math.PI / 2);
-				else if (Operator.shortcut(Config.keymap.view_bottom)) Viewport.set_view(0, 0, -1, Math.PI, 0, Math.PI);
-				else if (Operator.shortcut(Config.keymap.view_camera_type)) {
-					Context.raw.camera_type = Context.raw.camera_type == camera_type_t.PERSPECTIVE ? camera_type_t.ORTHOGRAPHIC : camera_type_t.PERSPECTIVE;
-					Context.raw.cam_handle.position = Context.raw.camera_type;
-					Viewport.update_camera_type(Context.raw.camera_type);
+				else if (operator_shortcut(config_keymap.view_back)) viewport_set_view(0, 1, 0, Math.PI / 2, 0, Math.PI);
+				else if (operator_shortcut(config_keymap.view_front)) viewport_set_view(0, -1, 0, Math.PI / 2, 0, 0);
+				else if (operator_shortcut(config_keymap.view_left)) viewport_set_view(-1, 0, 0, Math.PI / 2, 0, -Math.PI / 2);
+				else if (operator_shortcut(config_keymap.view_right)) viewport_set_view(1, 0, 0, Math.PI / 2, 0, Math.PI / 2);
+				else if (operator_shortcut(config_keymap.view_bottom)) viewport_set_view(0, 0, -1, Math.PI, 0, Math.PI);
+				else if (operator_shortcut(config_keymap.view_camera_type)) {
+					context_raw.camera_type = context_raw.camera_type == camera_type_t.PERSPECTIVE ? camera_type_t.ORTHOGRAPHIC : camera_type_t.PERSPECTIVE;
+					context_raw.cam_handle.position = context_raw.camera_type;
+					viewport_update_camera_type(context_raw.camera_type);
 				}
-				else if (Operator.shortcut(Config.keymap.view_orbit_left, ShortcutType.ShortcutRepeat)) Viewport.orbit(-Math.PI / 12, 0);
-				else if (Operator.shortcut(Config.keymap.view_orbit_right, ShortcutType.ShortcutRepeat)) Viewport.orbit(Math.PI / 12, 0);
-				else if (Operator.shortcut(Config.keymap.view_orbit_up, ShortcutType.ShortcutRepeat)) Viewport.orbit(0, -Math.PI / 12);
-				else if (Operator.shortcut(Config.keymap.view_orbit_down, ShortcutType.ShortcutRepeat)) Viewport.orbit(0, Math.PI / 12);
-				else if (Operator.shortcut(Config.keymap.view_orbit_opposite)) Viewport.orbit_opposite();
-				else if (Operator.shortcut(Config.keymap.view_zoom_in, ShortcutType.ShortcutRepeat)) Viewport.zoom(0.2);
-				else if (Operator.shortcut(Config.keymap.view_zoom_out, ShortcutType.ShortcutRepeat)) Viewport.zoom(-0.2);
-				else if (Operator.shortcut(Config.keymap.viewport_mode)) {
+				else if (operator_shortcut(config_keymap.view_orbit_left, shortcut_type_t.REPEAT)) viewport_orbit(-Math.PI / 12, 0);
+				else if (operator_shortcut(config_keymap.view_orbit_right, shortcut_type_t.REPEAT)) viewport_orbit(Math.PI / 12, 0);
+				else if (operator_shortcut(config_keymap.view_orbit_up, shortcut_type_t.REPEAT)) viewport_orbit(0, -Math.PI / 12);
+				else if (operator_shortcut(config_keymap.view_orbit_down, shortcut_type_t.REPEAT)) viewport_orbit(0, Math.PI / 12);
+				else if (operator_shortcut(config_keymap.view_orbit_opposite)) viewport_orbit_opposite();
+				else if (operator_shortcut(config_keymap.view_zoom_in, shortcut_type_t.REPEAT)) viewport_zoom(0.2);
+				else if (operator_shortcut(config_keymap.view_zoom_out, shortcut_type_t.REPEAT)) viewport_zoom(-0.2);
+				else if (operator_shortcut(config_keymap.viewport_mode)) {
 
 					let count: i32;
 
@@ -540,7 +540,7 @@ class UIBase {
 
 					UIMenu.draw((ui: zui_t) => {
 						let mode_handle: zui_handle_t = zui_handle("uibase_0");
-						mode_handle.position = Context.raw.viewport_mode;
+						mode_handle.position = context_raw.viewport_mode;
 						zui_text(tr("Viewport Mode"), zui_align_t.RIGHT, ui.t.HIGHLIGHT_COL);
 						let modes: string[] = [
 							tr("Lit"),
@@ -579,48 +579,48 @@ class UIBase {
 						if (ui.is_key_pressed && index != -1) {
 							mode_handle.position = index;
 							ui.changed = true;
-							Context.set_viewport_mode(mode_handle.position);
+							context_set_viewport_mode(mode_handle.position);
 						}
 						else if (mode_handle.changed) {
-							Context.set_viewport_mode(mode_handle.position);
+							context_set_viewport_mode(mode_handle.position);
 							ui.changed = true;
 						}
 					}, count);
 				}
 			}
 
-			if (Operator.shortcut(Config.keymap.operator_search)) UIBase.operator_search();
+			if (operator_shortcut(config_keymap.operator_search)) UIBase.operator_search();
 		}
 
-		if (Context.raw.brush_can_lock || Context.raw.brush_locked) {
-			if (mouse_moved && Context.raw.brush_can_unlock) {
-				Context.raw.brush_locked = false;
-				Context.raw.brush_can_unlock = false;
+		if (context_raw.brush_can_lock || context_raw.brush_locked) {
+			if (mouse_moved && context_raw.brush_can_unlock) {
+				context_raw.brush_locked = false;
+				context_raw.brush_can_unlock = false;
 			}
 
 			///if (is_paint || is_sculpt)
-			let b: bool = (Context.raw.brush_can_lock || Context.raw.brush_locked) &&
-				!Operator.shortcut(Config.keymap.brush_radius, ShortcutType.ShortcutDown) &&
-				!Operator.shortcut(Config.keymap.brush_opacity, ShortcutType.ShortcutDown) &&
-				!Operator.shortcut(Config.keymap.brush_angle, ShortcutType.ShortcutDown) &&
-				!(decal_mask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius, ShortcutType.ShortcutDown));
+			let b: bool = (context_raw.brush_can_lock || context_raw.brush_locked) &&
+				!operator_shortcut(config_keymap.brush_radius, shortcut_type_t.DOWN) &&
+				!operator_shortcut(config_keymap.brush_opacity, shortcut_type_t.DOWN) &&
+				!operator_shortcut(config_keymap.brush_angle, shortcut_type_t.DOWN) &&
+				!(decal_mask && operator_shortcut(config_keymap.decal_mask + "+" + config_keymap.brush_radius, shortcut_type_t.DOWN));
 			///end
 			///if is_lab
-			let b: bool = (Context.raw.brush_can_lock || Context.raw.brush_locked) &&
-				!Operator.shortcut(Config.keymap.brush_radius, ShortcutType.ShortcutDown);
+			let b: bool = (context_raw.brush_can_lock || context_raw.brush_locked) &&
+				!operator_shortcut(config_keymap.brush_radius, shortcut_type_t.DOWN);
 			///end
 
 			if (b) {
 				mouse_unlock();
-				Context.raw.last_paint_x = -1;
-				Context.raw.last_paint_y = -1;
-				if (Context.raw.brush_can_lock) {
-					Context.raw.brush_can_lock = false;
-					Context.raw.brush_can_unlock = false;
-					Context.raw.brush_locked = false;
+				context_raw.last_paint_x = -1;
+				context_raw.last_paint_y = -1;
+				if (context_raw.brush_can_lock) {
+					context_raw.brush_can_lock = false;
+					context_raw.brush_can_unlock = false;
+					context_raw.brush_locked = false;
 				}
 				else {
-					Context.raw.brush_can_unlock = true;
+					context_raw.brush_can_unlock = true;
 				}
 			}
 		}
@@ -629,34 +629,34 @@ class UIBase {
 		if (UIBase.border_handle_ptr != 0) {
 			if (UIBase.border_handle_ptr == UINodes.hwnd.ptr || UIBase.border_handle_ptr == UIView2D.hwnd.ptr) {
 				if (UIBase.border_started == border_side_t.LEFT) {
-					Config.raw.layout[layout_size_t.NODES_W] -= Math.floor(mouse_movement_x);
-					if (Config.raw.layout[layout_size_t.NODES_W] < 32) Config.raw.layout[layout_size_t.NODES_W] = 32;
-					else if (Config.raw.layout[layout_size_t.NODES_W] > sys_width() * 0.7) Config.raw.layout[layout_size_t.NODES_W] = Math.floor(sys_width() * 0.7);
+					config_raw.layout[layout_size_t.NODES_W] -= Math.floor(mouse_movement_x);
+					if (config_raw.layout[layout_size_t.NODES_W] < 32) config_raw.layout[layout_size_t.NODES_W] = 32;
+					else if (config_raw.layout[layout_size_t.NODES_W] > sys_width() * 0.7) config_raw.layout[layout_size_t.NODES_W] = Math.floor(sys_width() * 0.7);
 				}
 				else { // UINodes / UIView2D ratio
-					Config.raw.layout[layout_size_t.NODES_H] -= Math.floor(mouse_movement_y);
-					if (Config.raw.layout[layout_size_t.NODES_H] < 32) Config.raw.layout[layout_size_t.NODES_H] = 32;
-					else if (Config.raw.layout[layout_size_t.NODES_H] > app_h() * 0.95) Config.raw.layout[layout_size_t.NODES_H] = Math.floor(app_h() * 0.95);
+					config_raw.layout[layout_size_t.NODES_H] -= Math.floor(mouse_movement_y);
+					if (config_raw.layout[layout_size_t.NODES_H] < 32) config_raw.layout[layout_size_t.NODES_H] = 32;
+					else if (config_raw.layout[layout_size_t.NODES_H] > app_h() * 0.95) config_raw.layout[layout_size_t.NODES_H] = Math.floor(app_h() * 0.95);
 				}
 			}
 			else if (UIBase.border_handle_ptr == UIBase.hwnds[tab_area_t.STATUS].ptr) {
 				let my: i32 = Math.floor(mouse_movement_y);
-				if (Config.raw.layout[layout_size_t.STATUS_H] - my >= UIStatus.default_status_h * Config.raw.window_scale && Config.raw.layout[layout_size_t.STATUS_H] - my < sys_height() * 0.7) {
-					Config.raw.layout[layout_size_t.STATUS_H] -= my;
+				if (config_raw.layout[layout_size_t.STATUS_H] - my >= UIStatus.default_status_h * config_raw.window_scale && config_raw.layout[layout_size_t.STATUS_H] - my < sys_height() * 0.7) {
+					config_raw.layout[layout_size_t.STATUS_H] -= my;
 				}
 			}
 			else {
 				if (UIBase.border_started == border_side_t.LEFT) {
-					Config.raw.layout[layout_size_t.SIDEBAR_W] -= Math.floor(mouse_movement_x);
-					if (Config.raw.layout[layout_size_t.SIDEBAR_W] < UIBase.sidebar_mini_w) Config.raw.layout[layout_size_t.SIDEBAR_W] = UIBase.sidebar_mini_w;
-					else if (Config.raw.layout[layout_size_t.SIDEBAR_W] > sys_width() - UIBase.sidebar_mini_w) Config.raw.layout[layout_size_t.SIDEBAR_W] = sys_width() - UIBase.sidebar_mini_w;
+					config_raw.layout[layout_size_t.SIDEBAR_W] -= Math.floor(mouse_movement_x);
+					if (config_raw.layout[layout_size_t.SIDEBAR_W] < UIBase.sidebar_mini_w) config_raw.layout[layout_size_t.SIDEBAR_W] = UIBase.sidebar_mini_w;
+					else if (config_raw.layout[layout_size_t.SIDEBAR_W] > sys_width() - UIBase.sidebar_mini_w) config_raw.layout[layout_size_t.SIDEBAR_W] = sys_width() - UIBase.sidebar_mini_w;
 				}
 				else {
 					let my: i32 = Math.floor(mouse_movement_y);
 					if (UIBase.border_handle_ptr == UIBase.hwnds[tab_area_t.SIDEBAR1].ptr && UIBase.border_started == border_side_t.TOP) {
-						if (Config.raw.layout[layout_size_t.SIDEBAR_H0] + my > 32 && Config.raw.layout[layout_size_t.SIDEBAR_H1] - my > 32) {
-							Config.raw.layout[layout_size_t.SIDEBAR_H0] += my;
-							Config.raw.layout[layout_size_t.SIDEBAR_H1] -= my;
+						if (config_raw.layout[layout_size_t.SIDEBAR_H0] + my > 32 && config_raw.layout[layout_size_t.SIDEBAR_H1] - my > 32) {
+							config_raw.layout[layout_size_t.SIDEBAR_H0] += my;
+							config_raw.layout[layout_size_t.SIDEBAR_H1] -= my;
 						}
 					}
 				}
@@ -668,20 +668,20 @@ class UIBase {
 		if (UIBase.border_handle_ptr != 0) {
 			if (UIBase.border_handle_ptr == UINodes.hwnd.ptr || UIBase.border_handle_ptr == UIView2D.hwnd.ptr) {
 				if (UIBase.border_started == border_side_t.LEFT) {
-					Config.raw.layout[layout_size_t.NODES_W] -= Math.floor(mouse_movement_x);
-					if (Config.raw.layout[layout_size_t.NODES_W] < 32) Config.raw.layout[layout_size_t.NODES_W] = 32;
-					else if (Config.raw.layout[layout_size_t.NODES_W] > sys_width() * 0.7) Config.raw.layout[layout_size_t.NODES_W] = Math.floor(sys_width() * 0.7);
+					config_raw.layout[layout_size_t.NODES_W] -= Math.floor(mouse_movement_x);
+					if (config_raw.layout[layout_size_t.NODES_W] < 32) config_raw.layout[layout_size_t.NODES_W] = 32;
+					else if (config_raw.layout[layout_size_t.NODES_W] > sys_width() * 0.7) config_raw.layout[layout_size_t.NODES_W] = Math.floor(sys_width() * 0.7);
 				}
 				else { // UINodes / UIView2D ratio
-					Config.raw.layout[layout_size_t.NODES_H] -= Math.floor(mouse_movement_y);
-					if (Config.raw.layout[layout_size_t.NODES_H] < 32) Config.raw.layout[layout_size_t.NODES_H] = 32;
-					else if (Config.raw.layout[layout_size_t.NODES_H] > app_h() * 0.95) Config.raw.layout[layout_size_t.NODES_H] = Math.floor(app_h() * 0.95);
+					config_raw.layout[layout_size_t.NODES_H] -= Math.floor(mouse_movement_y);
+					if (config_raw.layout[layout_size_t.NODES_H] < 32) config_raw.layout[layout_size_t.NODES_H] = 32;
+					else if (config_raw.layout[layout_size_t.NODES_H] > app_h() * 0.95) config_raw.layout[layout_size_t.NODES_H] = Math.floor(app_h() * 0.95);
 				}
 			}
 			else if (UIBase.border_handle_ptr == UIBase.hwnds[tab_area_t.STATUS].ptr) {
 				let my: i32 = Math.floor(mouse_movement_y);
-				if (Config.raw.layout[layout_size_t.STATUS_H] - my >= UIStatus.default_status_h * Config.raw.window_scale && Config.raw.layout[layout_size_t.STATUS_H] - my < sys_height() * 0.7) {
-					Config.raw.layout[layout_size_t.STATUS_H] -= my;
+				if (config_raw.layout[layout_size_t.STATUS_H] - my >= UIStatus.default_status_h * config_raw.window_scale && config_raw.layout[layout_size_t.STATUS_H] - my < sys_height() * 0.7) {
+					config_raw.layout[layout_size_t.STATUS_H] -= my;
 				}
 			}
 		}
@@ -693,20 +693,20 @@ class UIBase {
 		}
 
 		///if arm_physics
-		if (Context.raw.tool == workspace_tool_t.PARTICLE && Context.raw.particle_physics && Context.in_paint_area() && !Context.raw.paint2d) {
+		if (context_raw.tool == workspace_tool_t.PARTICLE && context_raw.particle_physics && context_in_paint_area() && !context_raw.paint2d) {
 			UtilParticle.init_particle_physics();
 			let world: PhysicsWorldRaw = PhysicsWorld.active;
 			PhysicsWorld.late_update(world);
-			Context.raw.ddirty = 2;
-			Context.raw.rdirty = 2;
+			context_raw.ddirty = 2;
+			context_raw.rdirty = 2;
 			if (mouse_started()) {
-				if (Context.raw.particle_timer != null) {
-					tween_stop(Context.raw.particle_timer);
-					Context.raw.particle_timer.done();
-					Context.raw.particle_timer = null;
+				if (context_raw.particle_timer != null) {
+					tween_stop(context_raw.particle_timer);
+					context_raw.particle_timer.done();
+					context_raw.particle_timer = null;
 				}
-				History.push_undo = true;
-				Context.raw.particle_hit_x = Context.raw.particle_hit_y = Context.raw.particle_hit_z = 0;
+				history_push_undo = true;
+				context_raw.particle_hit_x = context_raw.particle_hit_y = context_raw.particle_hit_z = 0;
 				let o: object_t = scene_spawn_object(".Sphere");
 				let md: material_data_t = data_get_material("Scene", ".Gizmo");
 				let mo: mesh_object_t = o.ext;
@@ -717,7 +717,7 @@ class UIBase {
 				let camera: camera_object_t = scene_camera;
 				let ct: transform_t = camera.base.transform;
 				vec4_set(mo.base.transform.loc, transform_world_x(ct), transform_world_y(ct), transform_world_z(ct));
-				vec4_set(mo.base.transform.scale, Context.raw.brush_radius * 0.2, Context.raw.brush_radius * 0.2, Context.raw.brush_radius * 0.2);
+				vec4_set(mo.base.transform.scale, context_raw.brush_radius * 0.2, context_raw.brush_radius * 0.2, context_raw.brush_radius * 0.2);
 				transform_build_matrix(mo.base.transform);
 
 				let body: PhysicsBodyRaw = PhysicsBody.create();
@@ -732,19 +732,19 @@ class UIBase {
 				let ray: ray_t = raycast_get_ray(mouse_view_x(), mouse_view_y(), camera);
 				PhysicsBody.apply_impulse(body, vec4_mult(ray.dir, 0.15));
 
-				Context.raw.particle_timer = tween_timer(5, function() { mesh_object_remove(mo); });
+				context_raw.particle_timer = tween_timer(5, function() { mesh_object_remove(mo); });
 			}
 
-			let pairs: pair_t[] = PhysicsWorld.get_contact_pairs(world, Context.raw.paint_body);
+			let pairs: pair_t[] = PhysicsWorld.get_contact_pairs(world, context_raw.paint_body);
 			if (pairs != null) {
 				for (let p of pairs) {
-					Context.raw.last_particle_hit_x = Context.raw.particle_hit_x != 0 ? Context.raw.particle_hit_x : p.pos_a.x;
-					Context.raw.last_particle_hit_y = Context.raw.particle_hit_y != 0 ? Context.raw.particle_hit_y : p.pos_a.y;
-					Context.raw.last_particle_hit_z = Context.raw.particle_hit_z != 0 ? Context.raw.particle_hit_z : p.pos_a.z;
-					Context.raw.particle_hit_x = p.pos_a.x;
-					Context.raw.particle_hit_y = p.pos_a.y;
-					Context.raw.particle_hit_z = p.pos_a.z;
-					Context.raw.pdirty = 1;
+					context_raw.last_particle_hit_x = context_raw.particle_hit_x != 0 ? context_raw.particle_hit_x : p.pos_a.x;
+					context_raw.last_particle_hit_y = context_raw.particle_hit_y != 0 ? context_raw.particle_hit_y : p.pos_a.y;
+					context_raw.last_particle_hit_z = context_raw.particle_hit_z != 0 ? context_raw.particle_hit_z : p.pos_a.z;
+					context_raw.particle_hit_x = p.pos_a.x;
+					context_raw.particle_hit_y = p.pos_a.y;
+					context_raw.particle_hit_z = p.pos_a.z;
+					context_raw.pdirty = 1;
 					break; // 1 pair for now
 				}
 			}
@@ -755,9 +755,9 @@ class UIBase {
 	static view_top = () => {
 		let is_typing: bool = UIBase.ui.is_typing || UIView2D.ui.is_typing || UINodes.ui.is_typing;
 
-		if (Context.in_paint_area() && !is_typing) {
+		if (context_in_paint_area() && !is_typing) {
 			if (mouse_view_x() < app_w()) {
-				Viewport.set_view(0, 0, 1, 0, 0, 0);
+				viewport_set_view(0, 0, 1, 0, 0, 0);
 			}
 		}
 	}
@@ -785,15 +785,15 @@ class UIBase {
 			let count: i32 = 0;
 			let BUTTON_COL: i32 = ui.t.BUTTON_COL;
 
-			for (let n in Config.keymap) {
+			for (let n in config_keymap) {
 				if (n.indexOf(search) >= 0) {
 					ui.t.BUTTON_COL = count == UIBase.operator_search_offset ? ui.t.HIGHLIGHT_COL : ui.t.SEPARATOR_COL;
-					if (zui_button(n, zui_align_t.LEFT, Config.keymap[n]) || (enter && count == UIBase.operator_search_offset)) {
+					if (zui_button(n, zui_align_t.LEFT, config_keymap[n]) || (enter && count == UIBase.operator_search_offset)) {
 						if (enter) {
 							ui.changed = true;
 							count = 6; // Trigger break
 						}
-						Operator.run(n);
+						operator_run(n);
 					}
 					if (++count > 6) break;
 				}
@@ -822,18 +822,18 @@ class UIBase {
 
 	///if (is_paint || is_sculpt)
 	static get_brush_stencil_rect = (): rect_t => {
-		let w: i32 = Math.floor(Context.raw.brush_stencil_image.width * (base_h() / Context.raw.brush_stencil_image.height) * Context.raw.brush_stencil_scale);
-		let h: i32 = Math.floor(base_h() * Context.raw.brush_stencil_scale);
-		let x: i32 = Math.floor(base_x() + Context.raw.brush_stencil_x * base_w());
-		let y: i32 = Math.floor(base_y() + Context.raw.brush_stencil_y * base_h());
+		let w: i32 = Math.floor(context_raw.brush_stencil_image.width * (base_h() / context_raw.brush_stencil_image.height) * context_raw.brush_stencil_scale);
+		let h: i32 = Math.floor(base_h() * context_raw.brush_stencil_scale);
+		let x: i32 = Math.floor(base_x() + context_raw.brush_stencil_x * base_w());
+		let y: i32 = Math.floor(base_y() + context_raw.brush_stencil_y * base_h());
 		return { w: w, h: h, x: x, y: y };
 	}
 	///end
 
 	static update_ui = () => {
-		if (Console.message_timer > 0) {
-			Console.message_timer -= time_delta();
-			if (Console.message_timer <= 0) UIBase.hwnds[tab_area_t.STATUS].redraws = 2;
+		if (console_message_timer > 0) {
+			console_message_timer -= time_delta();
+			if (console_message_timer <= 0) UIBase.hwnds[tab_area_t.STATUS].redraws = 2;
 		}
 
 		///if (is_paint || is_sculpt)
@@ -844,116 +844,116 @@ class UIBase {
 
 		///if (is_paint || is_sculpt)
 		// Same mapping for paint and rotate (predefined in touch keymap)
-		if (Context.in_viewport()) {
-			if (mouse_started() && Config.keymap.action_paint == Config.keymap.action_rotate) {
-				UIBase.action_paint_remap = Config.keymap.action_paint;
+		if (context_in_viewport()) {
+			if (mouse_started() && config_keymap.action_paint == config_keymap.action_rotate) {
+				UIBase.action_paint_remap = config_keymap.action_paint;
 				UtilRender.pick_pos_nor_tex();
-				let is_mesh: bool = Math.abs(Context.raw.posx_picked) < 50 && Math.abs(Context.raw.posy_picked) < 50 && Math.abs(Context.raw.posz_picked) < 50;
+				let is_mesh: bool = Math.abs(context_raw.posx_picked) < 50 && Math.abs(context_raw.posy_picked) < 50 && Math.abs(context_raw.posz_picked) < 50;
 				///if krom_android
 				// Allow rotating with both pen and touch, because hovering a pen prevents touch input on android
 				let pen_only: bool = false;
 				///else
-				let pen_only: bool = Context.raw.pen_painting_only;
+				let pen_only: bool = context_raw.pen_painting_only;
 				///end
 				let is_pen: bool = pen_only && pen_down();
 				// Mesh picked - disable rotate
 				// Pen painting only - rotate with touch, paint with pen
 				if ((is_mesh && !pen_only) || is_pen) {
-					Config.keymap.action_rotate = "";
-					Config.keymap.action_paint = UIBase.action_paint_remap;
+					config_keymap.action_rotate = "";
+					config_keymap.action_paint = UIBase.action_paint_remap;
 				}
 				// World sphere picked - disable paint
 				else {
-					Config.keymap.action_paint = "";
-					Config.keymap.action_rotate = UIBase.action_paint_remap;
+					config_keymap.action_paint = "";
+					config_keymap.action_rotate = UIBase.action_paint_remap;
 				}
 			}
 			else if (!mouse_down() && UIBase.action_paint_remap != "") {
-				Config.keymap.action_rotate = UIBase.action_paint_remap;
-				Config.keymap.action_paint = UIBase.action_paint_remap;
+				config_keymap.action_rotate = UIBase.action_paint_remap;
+				config_keymap.action_paint = UIBase.action_paint_remap;
 				UIBase.action_paint_remap = "";
 			}
 		}
 
-		if (Context.raw.brush_stencil_image != null && Operator.shortcut(Config.keymap.stencil_transform, ShortcutType.ShortcutDown)) {
+		if (context_raw.brush_stencil_image != null && operator_shortcut(config_keymap.stencil_transform, shortcut_type_t.DOWN)) {
 			let r: rect_t = UIBase.get_brush_stencil_rect();
 			if (mouse_started("left")) {
-				Context.raw.brush_stencil_scaling =
+				context_raw.brush_stencil_scaling =
 					UIBase.hit_rect(mouse_x, mouse_y, r.x - 8,       r.y - 8,       16, 16) ||
 					UIBase.hit_rect(mouse_x, mouse_y, r.x - 8,       r.h + r.y - 8, 16, 16) ||
 					UIBase.hit_rect(mouse_x, mouse_y, r.w + r.x - 8, r.y - 8,       16, 16) ||
 					UIBase.hit_rect(mouse_x, mouse_y, r.w + r.x - 8, r.h + r.y - 8, 16, 16);
-				let cosa: f32 = Math.cos(-Context.raw.brush_stencil_angle);
-				let sina: f32 = Math.sin(-Context.raw.brush_stencil_angle);
+				let cosa: f32 = Math.cos(-context_raw.brush_stencil_angle);
+				let sina: f32 = Math.sin(-context_raw.brush_stencil_angle);
 				let ox: f32 = 0;
 				let oy: f32 = -r.h / 2;
 				let x: f32 = ox * cosa - oy * sina;
 				let y: f32 = ox * sina + oy * cosa;
 				x += r.x + r.w / 2;
 				y += r.y + r.h / 2;
-				Context.raw.brush_stencil_rotating =
+				context_raw.brush_stencil_rotating =
 					UIBase.hit_rect(mouse_x, mouse_y, Math.floor(x - 16), Math.floor(y - 16), 32, 32);
 			}
-			let _scale: f32 = Context.raw.brush_stencil_scale;
+			let _scale: f32 = context_raw.brush_stencil_scale;
 			if (mouse_down("left")) {
-				if (Context.raw.brush_stencil_scaling) {
+				if (context_raw.brush_stencil_scaling) {
 					let mult: i32 = mouse_x > r.x + r.w / 2 ? 1 : -1;
-					Context.raw.brush_stencil_scale += mouse_movement_x / 400 * mult;
+					context_raw.brush_stencil_scale += mouse_movement_x / 400 * mult;
 				}
-				else if (Context.raw.brush_stencil_rotating) {
+				else if (context_raw.brush_stencil_rotating) {
 					let gizmo_x: f32 = r.x + r.w / 2;
 					let gizmo_y: f32 = r.y + r.h / 2;
-					Context.raw.brush_stencil_angle = -Math.atan2(mouse_y - gizmo_y, mouse_x - gizmo_x) - Math.PI / 2;
+					context_raw.brush_stencil_angle = -Math.atan2(mouse_y - gizmo_y, mouse_x - gizmo_x) - Math.PI / 2;
 				}
 				else {
-					Context.raw.brush_stencil_x += mouse_movement_x / base_w();
-					Context.raw.brush_stencil_y += mouse_movement_y / base_h();
+					context_raw.brush_stencil_x += mouse_movement_x / base_w();
+					context_raw.brush_stencil_y += mouse_movement_y / base_h();
 				}
 			}
-			else Context.raw.brush_stencil_scaling = false;
+			else context_raw.brush_stencil_scaling = false;
 			if (mouse_wheel_delta != 0) {
-				Context.raw.brush_stencil_scale -= mouse_wheel_delta / 10;
+				context_raw.brush_stencil_scale -= mouse_wheel_delta / 10;
 			}
 			// Center after scale
-			let ratio: f32 = base_h() / Context.raw.brush_stencil_image.height;
-			let old_w: f32 = _scale * Context.raw.brush_stencil_image.width * ratio;
-			let new_w: f32 = Context.raw.brush_stencil_scale * Context.raw.brush_stencil_image.width * ratio;
+			let ratio: f32 = base_h() / context_raw.brush_stencil_image.height;
+			let old_w: f32 = _scale * context_raw.brush_stencil_image.width * ratio;
+			let new_w: f32 = context_raw.brush_stencil_scale * context_raw.brush_stencil_image.width * ratio;
 			let old_h: f32 = _scale * base_h();
-			let new_h: f32 = Context.raw.brush_stencil_scale * base_h();
-			Context.raw.brush_stencil_x += (old_w - new_w) / base_w() / 2;
-			Context.raw.brush_stencil_y += (old_h - new_h) / base_h() / 2;
+			let new_h: f32 = context_raw.brush_stencil_scale * base_h();
+			context_raw.brush_stencil_x += (old_w - new_w) / base_w() / 2;
+			context_raw.brush_stencil_y += (old_h - new_h) / base_h() / 2;
 		}
 		///end
 
-		let set_clone_source: bool = Context.raw.tool == workspace_tool_t.CLONE && Operator.shortcut(Config.keymap.set_clone_source + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
+		let set_clone_source: bool = context_raw.tool == workspace_tool_t.CLONE && operator_shortcut(config_keymap.set_clone_source + "+" + config_keymap.action_paint, shortcut_type_t.DOWN);
 
 		///if (is_paint || is_sculpt)
-		let decal: bool = Context.raw.tool == workspace_tool_t.DECAL || Context.raw.tool == workspace_tool_t.TEXT;
-		let decal_mask: bool = decal && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown);
-		let down: bool = Operator.shortcut(Config.keymap.action_paint, ShortcutType.ShortcutDown) ||
+		let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
+		let decal_mask: bool = decal && operator_shortcut(config_keymap.decal_mask + "+" + config_keymap.action_paint, shortcut_type_t.DOWN);
+		let down: bool = operator_shortcut(config_keymap.action_paint, shortcut_type_t.DOWN) ||
 				   		 decal_mask ||
 				   		 set_clone_source ||
-				   		 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown) ||
+				   		 operator_shortcut(config_keymap.brush_ruler + "+" + config_keymap.action_paint, shortcut_type_t.DOWN) ||
 				   		 (pen_down() && !keyboard_down("alt"));
 		///end
 		///if is_lab
-		let down: bool = Operator.shortcut(Config.keymap.action_paint, ShortcutType.ShortcutDown) ||
+		let down: bool = operator_shortcut(config_keymap.action_paint, shortcut_type_t.DOWN) ||
 				   		 set_clone_source ||
-				   		 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown) ||
+				   		 operator_shortcut(config_keymap.brush_ruler + "+" + config_keymap.action_paint, shortcut_type_t.DOWN) ||
 				   		 (pen_down() && !keyboard_down("alt"));
 		///end
 
-		if (Config.raw.touch_ui) {
+		if (config_raw.touch_ui) {
 			if (pen_down()) {
-				Context.raw.pen_painting_only = true;
+				context_raw.pen_painting_only = true;
 			}
-			else if (Context.raw.pen_painting_only) {
+			else if (context_raw.pen_painting_only) {
 				down = false;
 			}
 		}
 
 		///if arm_physics
-		if (Context.raw.tool == workspace_tool_t.PARTICLE && Context.raw.particle_physics) {
+		if (context_raw.tool == workspace_tool_t.PARTICLE && context_raw.particle_physics) {
 			down = false;
 		}
 		///end
@@ -963,7 +963,7 @@ class UIBase {
 		// No hover on iPad, decals are painted by pen release
 		if (decal) {
 			down = pen_released();
-			if (!Context.raw.pen_painting_only) {
+			if (!context_raw.pen_painting_only) {
 				down = down || mouse_released();
 			}
 		}
@@ -976,7 +976,7 @@ class UIBase {
 			let ww: i32 = app_w();
 
 			///if (is_paint || is_sculpt)
-			if (Context.raw.paint2d) {
+			if (context_raw.paint2d) {
 				mx -= app_w();
 				ww = UIView2D.ww;
 			}
@@ -988,30 +988,30 @@ class UIBase {
 				my > app_y()) {
 
 				if (set_clone_source) {
-					Context.raw.clone_start_x = mx;
-					Context.raw.clone_start_y = my;
+					context_raw.clone_start_x = mx;
+					context_raw.clone_start_y = my;
 				}
 				else {
-					if (Context.raw.brush_time == 0 &&
+					if (context_raw.brush_time == 0 &&
 						!base_is_dragging &&
 						!base_is_resizing &&
 						!base_is_combo_selected()) { // Paint started
 
 						// Draw line
-						if (Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutType.ShortcutDown)) {
-							Context.raw.last_paint_vec_x = Context.raw.last_paint_x;
-							Context.raw.last_paint_vec_y = Context.raw.last_paint_y;
+						if (operator_shortcut(config_keymap.brush_ruler + "+" + config_keymap.action_paint, shortcut_type_t.DOWN)) {
+							context_raw.last_paint_vec_x = context_raw.last_paint_x;
+							context_raw.last_paint_vec_y = context_raw.last_paint_y;
 						}
 
 						///if (is_paint || is_sculpt)
-						History.push_undo = true;
+						history_push_undo = true;
 
-						if (Context.raw.tool == workspace_tool_t.CLONE && Context.raw.clone_start_x >= 0.0) { // Clone delta
-							Context.raw.clone_delta_x = (Context.raw.clone_start_x - mx) / ww;
-							Context.raw.clone_delta_y = (Context.raw.clone_start_y - my) / app_h();
-							Context.raw.clone_start_x = -1;
+						if (context_raw.tool == workspace_tool_t.CLONE && context_raw.clone_start_x >= 0.0) { // Clone delta
+							context_raw.clone_delta_x = (context_raw.clone_start_x - mx) / ww;
+							context_raw.clone_delta_y = (context_raw.clone_start_y - my) / app_h();
+							context_raw.clone_start_x = -1;
 						}
-						else if (Context.raw.tool == workspace_tool_t.PARTICLE) {
+						else if (context_raw.tool == workspace_tool_t.PARTICLE) {
 							// Reset particles
 							///if arm_particles
 							let emitter: mesh_object_t = scene_get_child(".ParticleEmitter").ext;
@@ -1021,43 +1021,43 @@ class UIBase {
 							// psys.seed++;
 							///end
 						}
-						else if (Context.raw.tool == workspace_tool_t.FILL && Context.raw.fill_type_handle.position == fill_type_t.UV_ISLAND) {
+						else if (context_raw.tool == workspace_tool_t.FILL && context_raw.fill_type_handle.position == fill_type_t.UV_ISLAND) {
 							UtilUV.uvislandmap_cached = false;
 						}
 						///end
 					}
 
-					Context.raw.brush_time += time_delta();
+					context_raw.brush_time += time_delta();
 
 					///if (is_paint || is_sculpt)
-					if (Context.raw.run_brush != null) {
-						Context.raw.run_brush(0);
+					if (context_raw.run_brush != null) {
+						context_raw.run_brush(0);
 					}
 					///end
 					///if is_lab
-					if (Context.run_brush != null) {
-						Context.run_brush(0);
+					if (context_run_brush != null) {
+						context_run_brush(0);
 					}
 					///end
 				}
 			}
 		}
-		else if (Context.raw.brush_time > 0) { // Brush released
-			Context.raw.brush_time = 0;
-			Context.raw.prev_paint_vec_x = -1;
-			Context.raw.prev_paint_vec_y = -1;
+		else if (context_raw.brush_time > 0) { // Brush released
+			context_raw.brush_time = 0;
+			context_raw.prev_paint_vec_x = -1;
+			context_raw.prev_paint_vec_y = -1;
 			///if (!krom_direct3d12 && !krom_vulkan && !krom_metal) // Keep accumulated samples for D3D12
-			Context.raw.ddirty = 3;
+			context_raw.ddirty = 3;
 			///end
-			Context.raw.brush_blend_dirty = true; // Update brush mask
+			context_raw.brush_blend_dirty = true; // Update brush mask
 
 			///if (is_paint || is_sculpt)
-			Context.raw.layer_preview_dirty = true; // Update layer preview
+			context_raw.layer_preview_dirty = true; // Update layer preview
 			///end
 
 			///if is_paint
 			// New color id picked, update fill layer
-			if (Context.raw.tool == workspace_tool_t.COLORID && Context.raw.layer.fill_layer != null) {
+			if (context_raw.tool == workspace_tool_t.COLORID && context_raw.layer.fill_layer != null) {
 				base_notify_on_next_frame(() => {
 					base_update_fill_layer();
 					MakeMaterial.parse_paint_material(false);
@@ -1067,13 +1067,13 @@ class UIBase {
 		}
 
 		///if is_paint
-		if (Context.raw.layers_preview_dirty) {
-			Context.raw.layers_preview_dirty = false;
-			Context.raw.layer_preview_dirty = false;
-			Context.raw.mask_preview_last = null;
+		if (context_raw.layers_preview_dirty) {
+			context_raw.layers_preview_dirty = false;
+			context_raw.layer_preview_dirty = false;
+			context_raw.mask_preview_last = null;
 			if (base_pipe_merge == null) base_make_pipe();
 			// Update all layer previews
-			for (let l of Project.layers) {
+			for (let l of project_layers) {
 				if (SlotLayer.is_group(l)) continue;
 				let target: image_t = l.texpaint_preview;
 				let source: image_t = l.texpaint;
@@ -1087,17 +1087,17 @@ class UIBase {
 			}
 			UIBase.hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 		}
-		if (Context.raw.layer_preview_dirty && !SlotLayer.is_group(Context.raw.layer)) {
-			Context.raw.layer_preview_dirty = false;
-			Context.raw.mask_preview_last = null;
+		if (context_raw.layer_preview_dirty && !SlotLayer.is_group(context_raw.layer)) {
+			context_raw.layer_preview_dirty = false;
+			context_raw.mask_preview_last = null;
 			if (base_pipe_merge == null) base_make_pipe();
 			// Update layer preview
-			let l: SlotLayerRaw = Context.raw.layer;
+			let l: SlotLayerRaw = context_raw.layer;
 			let target: image_t = l.texpaint_preview;
 			let source: image_t = l.texpaint;
 			g2_begin(target);
 			g2_clear(0x00000000);
-			// g2_set_pipeline(Context.raw.layer.isMask() ? base_pipe_copy8 : base_pipe_copy);
+			// g2_set_pipeline(raw.layer.isMask() ? base_pipe_copy8 : base_pipe_copy);
 			g2_set_pipeline(base_pipe_copy); // texpaint_preview is always RGBA32 for now
 			g2_draw_scaled_image(source, 0, 0, target.width, target.height);
 			g2_set_pipeline(null);
@@ -1106,28 +1106,28 @@ class UIBase {
 		}
 		///end
 
-		let undo_pressed: bool = Operator.shortcut(Config.keymap.edit_undo);
-		let redo_pressed: bool = Operator.shortcut(Config.keymap.edit_redo) ||
+		let undo_pressed: bool = operator_shortcut(config_keymap.edit_undo);
+		let redo_pressed: bool = operator_shortcut(config_keymap.edit_redo) ||
 						  		(keyboard_down("control") && keyboard_started("y"));
 
 		// Two-finger tap to undo, three-finger tap to redo
-		if (Context.in_viewport() && Config.raw.touch_ui) {
+		if (context_in_viewport() && config_raw.touch_ui) {
 			if (mouse_started("middle")) { UIBase.redo_tap_time = time_time(); }
 			else if (mouse_started("right")) { UIBase.undo_tap_time = time_time(); }
 			else if (mouse_released("middle") && time_time() - UIBase.redo_tap_time < 0.1) { UIBase.redo_tap_time = UIBase.undo_tap_time = 0; redo_pressed = true; }
 			else if (mouse_released("right") && time_time() - UIBase.undo_tap_time < 0.1) { UIBase.redo_tap_time = UIBase.undo_tap_time = 0; undo_pressed = true; }
 		}
 
-		if (undo_pressed) History.undo();
-		else if (redo_pressed) History.redo();
+		if (undo_pressed) history_undo();
+		else if (redo_pressed) history_redo();
 
 		///if (is_paint || is_sculpt)
-		Gizmo.update();
+		gizmo_update();
 		///end
 	}
 
 	static render = () => {
-		if (!UIBase.show && Config.raw.touch_ui) {
+		if (!UIBase.show && config_raw.touch_ui) {
 			UIBase.ui.input_enabled = true;
 			g2_end();
 			zui_begin(UIBase.ui);
@@ -1147,14 +1147,14 @@ class UIBase {
 		// Remember last tab positions
 		for (let i: i32 = 0; i < UIBase.htabs.length; ++i) {
 			if (UIBase.htabs[i].changed) {
-				Config.raw.layout_tabs[i] = UIBase.htabs[i].position;
-				Config.save();
+				config_raw.layout_tabs[i] = UIBase.htabs[i].position;
+				config_save();
 			}
 		}
 
 		// Set tab positions
 		for (let i: i32 = 0; i < UIBase.htabs.length; ++i) {
-			UIBase.htabs[i].position = Config.raw.layout_tabs[i];
+			UIBase.htabs[i].position = config_raw.layout_tabs[i];
 		}
 
 		g2_end();
@@ -1178,17 +1178,17 @@ class UIBase {
 	///if (is_paint || is_sculpt)
 	static draw_sidebar = () => {
 		// Tabs
-		let mini: bool = Config.raw.layout[layout_size_t.SIDEBAR_W] <= UIBase.sidebar_mini_w;
-		let expand_button_offset: i32 = Config.raw.touch_ui ? Math.floor(zui_ELEMENT_H(UIBase.ui) + zui_ELEMENT_OFFSET(UIBase.ui)) : 0;
-		UIBase.tabx = sys_width() - Config.raw.layout[layout_size_t.SIDEBAR_W];
+		let mini: bool = config_raw.layout[layout_size_t.SIDEBAR_W] <= UIBase.sidebar_mini_w;
+		let expand_button_offset: i32 = config_raw.touch_ui ? Math.floor(zui_ELEMENT_H(UIBase.ui) + zui_ELEMENT_OFFSET(UIBase.ui)) : 0;
+		UIBase.tabx = sys_width() - config_raw.layout[layout_size_t.SIDEBAR_W];
 
 		let _SCROLL_W: i32 = UIBase.ui.t.SCROLL_W;
 		if (mini) UIBase.ui.t.SCROLL_W = UIBase.ui.t.SCROLL_MINI_W;
 
-		if (zui_window(UIBase.hwnds[tab_area_t.SIDEBAR0], UIBase.tabx, 0, Config.raw.layout[layout_size_t.SIDEBAR_W], Config.raw.layout[layout_size_t.SIDEBAR_H0])) {
+		if (zui_window(UIBase.hwnds[tab_area_t.SIDEBAR0], UIBase.tabx, 0, config_raw.layout[layout_size_t.SIDEBAR_W], config_raw.layout[layout_size_t.SIDEBAR_H0])) {
 			for (let i: i32 = 0; i < (mini ? 1 : UIBase.hwnd_tabs[tab_area_t.SIDEBAR0].length); ++i) UIBase.hwnd_tabs[tab_area_t.SIDEBAR0][i](UIBase.htabs[tab_area_t.SIDEBAR0]);
 		}
-		if (zui_window(UIBase.hwnds[tab_area_t.SIDEBAR1], UIBase.tabx, Config.raw.layout[layout_size_t.SIDEBAR_H0], Config.raw.layout[layout_size_t.SIDEBAR_W], Config.raw.layout[layout_size_t.SIDEBAR_H1] - expand_button_offset)) {
+		if (zui_window(UIBase.hwnds[tab_area_t.SIDEBAR1], UIBase.tabx, config_raw.layout[layout_size_t.SIDEBAR_H0], config_raw.layout[layout_size_t.SIDEBAR_W], config_raw.layout[layout_size_t.SIDEBAR_H1] - expand_button_offset)) {
 			for (let i: i32 = 0; i < (mini ? 1 : UIBase.hwnd_tabs[tab_area_t.SIDEBAR1].length); ++i) UIBase.hwnd_tabs[tab_area_t.SIDEBAR1][i](UIBase.htabs[tab_area_t.SIDEBAR1]);
 		}
 
@@ -1196,8 +1196,8 @@ class UIBase {
 		UIBase.ui.t.SCROLL_W = _SCROLL_W;
 
 		// Collapse / expand button for mini sidebar
-		if (Config.raw.touch_ui) {
-			let width: i32 = Config.raw.layout[layout_size_t.SIDEBAR_W];
+		if (config_raw.touch_ui) {
+			let width: i32 = config_raw.layout[layout_size_t.SIDEBAR_W];
 			let height: i32 = Math.floor(zui_ELEMENT_H(UIBase.ui) + zui_ELEMENT_OFFSET(UIBase.ui));
 			if (zui_window(zui_handle("uibase_3"), sys_width() - width, sys_height() - height, width, height + 1)) {
 				UIBase.ui._w = width;
@@ -1206,8 +1206,8 @@ class UIBase {
 				UIBase.ui.t.BUTTON_H = UIBase.ui.t.ELEMENT_H;
 				UIBase.ui.t.BUTTON_COL = UIBase.ui.t.WINDOW_BG_COL;
 				if (zui_button(mini ? "<<" : ">>")) {
-					Config.raw.layout[layout_size_t.SIDEBAR_W] = mini ? UIBase.default_sidebar_full_w : UIBase.default_sidebar_mini_w;
-					Config.raw.layout[layout_size_t.SIDEBAR_W] = Math.floor(Config.raw.layout[layout_size_t.SIDEBAR_W] * zui_SCALE(UIBase.ui));
+					config_raw.layout[layout_size_t.SIDEBAR_W] = mini ? UIBase.default_sidebar_full_w : UIBase.default_sidebar_mini_w;
+					config_raw.layout[layout_size_t.SIDEBAR_W] = Math.floor(config_raw.layout[layout_size_t.SIDEBAR_W] * zui_SCALE(UIBase.ui));
 				}
 				UIBase.ui.t.BUTTON_H = _BUTTON_H;
 				UIBase.ui.t.BUTTON_COL = _BUTTON_COL;
@@ -1215,7 +1215,7 @@ class UIBase {
 		}
 
 		// Expand button
-		if (Config.raw.layout[layout_size_t.SIDEBAR_W] == 0) {
+		if (config_raw.layout[layout_size_t.SIDEBAR_W] == 0) {
 			let width: i32 = Math.floor(g2_font_width(UIBase.ui.font, UIBase.ui.font_size, "<<") + 25 * zui_SCALE(UIBase.ui));
 			if (zui_window(UIBase.hminimized, sys_width() - width, 0, width, Math.floor(zui_ELEMENT_H(UIBase.ui) + zui_ELEMENT_OFFSET(UIBase.ui) + 1))) {
 				UIBase.ui._w = width;
@@ -1225,62 +1225,62 @@ class UIBase {
 				UIBase.ui.t.BUTTON_COL = UIBase.ui.t.SEPARATOR_COL;
 
 				if (zui_button("<<")) {
-					Config.raw.layout[layout_size_t.SIDEBAR_W] = Context.raw.maximized_sidebar_width != 0 ? Context.raw.maximized_sidebar_width : Math.floor(UIBase.default_sidebar_w * Config.raw.window_scale);
+					config_raw.layout[layout_size_t.SIDEBAR_W] = context_raw.maximized_sidebar_width != 0 ? context_raw.maximized_sidebar_width : Math.floor(UIBase.default_sidebar_w * config_raw.window_scale);
 				}
 				UIBase.ui.t.BUTTON_H = _BUTTON_H;
 				UIBase.ui.t.BUTTON_COL = _BUTTON_COL;
 			}
 		}
-		else if (UIBase.htabs[tab_area_t.SIDEBAR0].changed && UIBase.htabs[tab_area_t.SIDEBAR0].position == Context.raw.last_htab0_pos) {
-			if (time_time() - Context.raw.select_time < 0.25) {
-				Context.raw.maximized_sidebar_width = Config.raw.layout[layout_size_t.SIDEBAR_W];
-				Config.raw.layout[layout_size_t.SIDEBAR_W] = 0;
+		else if (UIBase.htabs[tab_area_t.SIDEBAR0].changed && UIBase.htabs[tab_area_t.SIDEBAR0].position == context_raw.last_htab0_pos) {
+			if (time_time() - context_raw.select_time < 0.25) {
+				context_raw.maximized_sidebar_width = config_raw.layout[layout_size_t.SIDEBAR_W];
+				config_raw.layout[layout_size_t.SIDEBAR_W] = 0;
 			}
-			Context.raw.select_time = time_time();
+			context_raw.select_time = time_time();
 		}
-		Context.raw.last_htab0_pos = UIBase.htabs[tab_area_t.SIDEBAR0].position;
+		context_raw.last_htab0_pos = UIBase.htabs[tab_area_t.SIDEBAR0].position;
 	}
 
 	static render_cursor = () => {
 		if (!base_ui_enabled) return;
 
 		///if is_paint
-		if (Context.raw.tool == workspace_tool_t.MATERIAL || Context.raw.tool == workspace_tool_t.BAKE) return;
+		if (context_raw.tool == workspace_tool_t.MATERIAL || context_raw.tool == workspace_tool_t.BAKE) return;
 		///end
 
 		g2_set_color(0xffffffff);
 
-		Context.raw.view_index = Context.raw.view_index_last;
-		let mx: i32 = base_x() + Context.raw.paint_vec.x * base_w();
-		let my: i32 = base_y() + Context.raw.paint_vec.y * base_h();
-		Context.raw.view_index = -1;
+		context_raw.view_index = context_raw.view_index_last;
+		let mx: i32 = base_x() + context_raw.paint_vec.x * base_w();
+		let my: i32 = base_y() + context_raw.paint_vec.y * base_h();
+		context_raw.view_index = -1;
 
 		// Radius being scaled
-		if (Context.raw.brush_locked) {
-			mx += Context.raw.lock_started_x - sys_width() / 2;
-			my += Context.raw.lock_started_y - sys_height() / 2;
+		if (context_raw.brush_locked) {
+			mx += context_raw.lock_started_x - sys_width() / 2;
+			my += context_raw.lock_started_y - sys_height() / 2;
 		}
 
-		let tool: workspace_tool_t = Context.raw.tool as workspace_tool_t;
+		let tool: workspace_tool_t = context_raw.tool as workspace_tool_t;
 
 		///if is_paint
-		if (Context.raw.brush_stencil_image != null &&
+		if (context_raw.brush_stencil_image != null &&
 			tool != workspace_tool_t.BAKE &&
 			tool != workspace_tool_t.PICKER &&
 			tool != workspace_tool_t.MATERIAL &&
 			tool != workspace_tool_t.COLORID) {
 			let r: rect_t = UIBase.get_brush_stencil_rect();
-			if (!Operator.shortcut(Config.keymap.stencil_hide, ShortcutType.ShortcutDown)) {
+			if (!operator_shortcut(config_keymap.stencil_hide, shortcut_type_t.DOWN)) {
 				g2_set_color(0x88ffffff);
-				let angle: f32 = Context.raw.brush_stencil_angle;
+				let angle: f32 = context_raw.brush_stencil_angle;
 				let cx: f32 = r.x + r.w / 2;
 				let cy: f32 = r.y + r.h / 2;
 				g2_set_transformation(mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(-angle)), mat3_translation(-cx, -cy)));
-				g2_draw_scaled_image(Context.raw.brush_stencil_image, r.x, r.y, r.w, r.h);
+				g2_draw_scaled_image(context_raw.brush_stencil_image, r.x, r.y, r.w, r.h);
 				g2_set_transformation(null);
 				g2_set_color(0xffffffff);
 			}
-			let transform: bool = Operator.shortcut(Config.keymap.stencil_transform, ShortcutType.ShortcutDown);
+			let transform: bool = operator_shortcut(config_keymap.stencil_transform, shortcut_type_t.DOWN);
 			if (transform) {
 				// Outline
 				g2_draw_rect(r.x, r.y, r.w, r.h);
@@ -1290,7 +1290,7 @@ class UIBase {
 				g2_draw_rect(r.x - 8,       r.y - 8 + r.h, 16, 16);
 				g2_draw_rect(r.x - 8 + r.w, r.y - 8 + r.h, 16, 16);
 				// Rotate
-				let angle: f32 = Context.raw.brush_stencil_angle;
+				let angle: f32 = context_raw.brush_stencil_angle;
 				let cx: f32 = r.x + r.w / 2;
 				let cy: f32 = r.y + r.h / 2;
 				g2_set_transformation(mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(-angle)), mat3_translation(-cx, -cy)));
@@ -1301,102 +1301,102 @@ class UIBase {
 		///end
 
 		// Show picked material next to cursor
-		if (Context.raw.tool == workspace_tool_t.PICKER && Context.raw.picker_select_material && Context.raw.color_picker_callback == null) {
-			let img: image_t = Context.raw.material.image_icon;
+		if (context_raw.tool == workspace_tool_t.PICKER && context_raw.picker_select_material && context_raw.color_picker_callback == null) {
+			let img: image_t = context_raw.material.image_icon;
 			///if krom_opengl
 			g2_draw_scaled_image(img, mx + 10, my + 10 + img.height, img.width, -img.height);
 			///else
 			g2_draw_image(img, mx + 10, my + 10);
 			///end
 		}
-		if (Context.raw.tool == workspace_tool_t.PICKER && Context.raw.color_picker_callback != null) {
-			let img: image_t = Res.get("icons.k");
-			let rect: rect_t = Res.tile50(img, workspace_tool_t.PICKER, 0);
+		if (context_raw.tool == workspace_tool_t.PICKER && context_raw.color_picker_callback != null) {
+			let img: image_t = resource_get("icons.k");
+			let rect: rect_t = resource_tile50(img, workspace_tool_t.PICKER, 0);
 			g2_draw_sub_image(img, mx + 10, my + 10, rect.x, rect.y, rect.w, rect.h);
 		}
 
-		let cursor_img: image_t = Res.get("cursor.k");
-		let psize: i32 = Math.floor(cursor_img.width * (Context.raw.brush_radius * Context.raw.brush_nodes_radius) * zui_SCALE(UIBase.ui));
+		let cursor_img: image_t = resource_get("cursor.k");
+		let psize: i32 = Math.floor(cursor_img.width * (context_raw.brush_radius * context_raw.brush_nodes_radius) * zui_SCALE(UIBase.ui));
 
 		// Clone source cursor
-		if (Context.raw.tool == workspace_tool_t.CLONE && !keyboard_down("alt") && (mouse_down() || pen_down())) {
+		if (context_raw.tool == workspace_tool_t.CLONE && !keyboard_down("alt") && (mouse_down() || pen_down())) {
 			g2_set_color(0x66ffffff);
-			g2_draw_scaled_image(cursor_img, mx + Context.raw.clone_delta_x * app_w() - psize / 2, my + Context.raw.clone_delta_y * app_h() - psize / 2, psize, psize);
+			g2_draw_scaled_image(cursor_img, mx + context_raw.clone_delta_x * app_w() - psize / 2, my + context_raw.clone_delta_y * app_h() - psize / 2, psize, psize);
 			g2_set_color(0xffffffff);
 		}
 
-		let decal: bool = Context.raw.tool == workspace_tool_t.DECAL || Context.raw.tool == workspace_tool_t.TEXT;
+		let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
 
-		if (!Config.raw.brush_3d || Context.in_2d_view() || decal) {
-			let decal_mask: bool = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutType.ShortcutDown);
-			if (decal && !Context.in_nodes()) {
+		if (!config_raw.brush_3d || context_in_2d_view() || decal) {
+			let decal_mask: bool = decal && operator_shortcut(config_keymap.decal_mask, shortcut_type_t.DOWN);
+			if (decal && !context_in_nodes()) {
 				let decal_alpha: f32 = 0.5;
 				if (!decal_mask) {
-					Context.raw.decal_x = Context.raw.paint_vec.x;
-					Context.raw.decal_y = Context.raw.paint_vec.y;
-					decal_alpha = Context.raw.brush_opacity;
+					context_raw.decal_x = context_raw.paint_vec.x;
+					context_raw.decal_y = context_raw.paint_vec.y;
+					decal_alpha = context_raw.brush_opacity;
 
 					// Radius being scaled
-					if (Context.raw.brush_locked) {
-						Context.raw.decal_x += (Context.raw.lock_started_x - sys_width() / 2) / base_w();
-						Context.raw.decal_y += (Context.raw.lock_started_y - sys_height() / 2) / base_h();
+					if (context_raw.brush_locked) {
+						context_raw.decal_x += (context_raw.lock_started_x - sys_width() / 2) / base_w();
+						context_raw.decal_y += (context_raw.lock_started_y - sys_height() / 2) / base_h();
 					}
 				}
 
-				if (!Config.raw.brush_live) {
-					let psizex: i32 = Math.floor(256 * zui_SCALE(UIBase.ui) * (Context.raw.brush_radius * Context.raw.brush_nodes_radius * Context.raw.brush_scale_x));
-					let psizey: i32 = Math.floor(256 * zui_SCALE(UIBase.ui) * (Context.raw.brush_radius * Context.raw.brush_nodes_radius));
+				if (!config_raw.brush_live) {
+					let psizex: i32 = Math.floor(256 * zui_SCALE(UIBase.ui) * (context_raw.brush_radius * context_raw.brush_nodes_radius * context_raw.brush_scale_x));
+					let psizey: i32 = Math.floor(256 * zui_SCALE(UIBase.ui) * (context_raw.brush_radius * context_raw.brush_nodes_radius));
 
-					Context.raw.view_index = Context.raw.view_index_last;
-					let decalx: f32 = base_x() + Context.raw.decal_x * base_w() - psizex / 2;
-					let decaly: f32 = base_y() + Context.raw.decal_y * base_h() - psizey / 2;
-					Context.raw.view_index = -1;
+					context_raw.view_index = context_raw.view_index_last;
+					let decalx: f32 = base_x() + context_raw.decal_x * base_w() - psizex / 2;
+					let decaly: f32 = base_y() + context_raw.decal_y * base_h() - psizey / 2;
+					context_raw.view_index = -1;
 
 					g2_set_color(color_from_floats(1, 1, 1, decal_alpha));
-					let angle: f32 = (Context.raw.brush_angle + Context.raw.brush_nodes_angle) * (Math.PI / 180);
+					let angle: f32 = (context_raw.brush_angle + context_raw.brush_nodes_angle) * (Math.PI / 180);
 					let cx: f32 = decalx + psizex / 2;
 					let cy: f32 = decaly + psizey / 2;
 					g2_set_transformation(mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(angle)), mat3_translation(-cx, -cy)));
 					///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
-					g2_draw_scaled_image(Context.raw.decal_image, decalx, decaly, psizex, psizey);
+					g2_draw_scaled_image(context_raw.decal_image, decalx, decaly, psizex, psizey);
 					///else
-					g2_draw_scaled_image(Context.raw.decal_image, decalx, decaly + psizey, psizex, -psizey);
+					g2_draw_scaled_image(context_raw.decal_image, decalx, decaly + psizey, psizex, -psizey);
 					///end
 					g2_set_transformation(null);
 					g2_set_color(0xffffffff);
 				}
 			}
-			if (Context.raw.tool == workspace_tool_t.BRUSH  ||
-				Context.raw.tool == workspace_tool_t.ERASER ||
-				Context.raw.tool == workspace_tool_t.CLONE  ||
-				Context.raw.tool == workspace_tool_t.BLUR   ||
-				Context.raw.tool == workspace_tool_t.SMUDGE   ||
-				Context.raw.tool == workspace_tool_t.PARTICLE ||
-				(decal_mask && !Config.raw.brush_3d) ||
-				(decal_mask && Context.in_2d_view())) {
+			if (context_raw.tool == workspace_tool_t.BRUSH  ||
+				context_raw.tool == workspace_tool_t.ERASER ||
+				context_raw.tool == workspace_tool_t.CLONE  ||
+				context_raw.tool == workspace_tool_t.BLUR   ||
+				context_raw.tool == workspace_tool_t.SMUDGE   ||
+				context_raw.tool == workspace_tool_t.PARTICLE ||
+				(decal_mask && !config_raw.brush_3d) ||
+				(decal_mask && context_in_2d_view())) {
 				if (decal_mask) {
-					psize = Math.floor(cursor_img.width * (Context.raw.brush_decal_mask_radius * Context.raw.brush_nodes_radius) * zui_SCALE(UIBase.ui));
+					psize = Math.floor(cursor_img.width * (context_raw.brush_decal_mask_radius * context_raw.brush_nodes_radius) * zui_SCALE(UIBase.ui));
 				}
-				if (Config.raw.brush_3d && Context.in_2d_view()) {
+				if (config_raw.brush_3d && context_in_2d_view()) {
 					psize = Math.floor(psize * UIView2D.pan_scale);
 				}
 				g2_draw_scaled_image(cursor_img, mx - psize / 2, my - psize / 2, psize, psize);
 			}
 		}
 
-		if (Context.raw.brush_lazy_radius > 0 && !Context.raw.brush_locked &&
-			(Context.raw.tool == workspace_tool_t.BRUSH ||
-			 Context.raw.tool == workspace_tool_t.ERASER ||
-			 Context.raw.tool == workspace_tool_t.DECAL ||
-			 Context.raw.tool == workspace_tool_t.TEXT ||
-			 Context.raw.tool == workspace_tool_t.CLONE ||
-			 Context.raw.tool == workspace_tool_t.BLUR ||
-			 Context.raw.tool == workspace_tool_t.SMUDGE ||
-			 Context.raw.tool == workspace_tool_t.PARTICLE)) {
+		if (context_raw.brush_lazy_radius > 0 && !context_raw.brush_locked &&
+			(context_raw.tool == workspace_tool_t.BRUSH ||
+			 context_raw.tool == workspace_tool_t.ERASER ||
+			 context_raw.tool == workspace_tool_t.DECAL ||
+			 context_raw.tool == workspace_tool_t.TEXT ||
+			 context_raw.tool == workspace_tool_t.CLONE ||
+			 context_raw.tool == workspace_tool_t.BLUR ||
+			 context_raw.tool == workspace_tool_t.SMUDGE ||
+			 context_raw.tool == workspace_tool_t.PARTICLE)) {
 			g2_fill_rect(mx - 1, my - 1, 2, 2);
-			mx = Context.raw.brush_lazy_x * base_w() + base_x();
-			my = Context.raw.brush_lazy_y * base_h() + base_y();
-			let radius: f32 = Context.raw.brush_lazy_radius * 180;
+			mx = context_raw.brush_lazy_x * base_w() + base_x();
+			my = context_raw.brush_lazy_y * base_h() + base_y();
+			let radius: f32 = context_raw.brush_lazy_radius * 180;
 			g2_set_color(0xff666666);
 			g2_draw_scaled_image(cursor_img, mx - radius / 2, my - radius / 2, radius, radius);
 			g2_set_color(0xffffffff);
@@ -1440,19 +1440,19 @@ class UIBase {
 	}
 
 	static toggle_browser = () => {
-		let minimized: bool = Config.raw.layout[layout_size_t.STATUS_H] <= (UIStatus.default_status_h * Config.raw.window_scale);
-		Config.raw.layout[layout_size_t.STATUS_H] = minimized ? 240 : UIStatus.default_status_h;
-		Config.raw.layout[layout_size_t.STATUS_H] = Math.floor(Config.raw.layout[layout_size_t.STATUS_H] * Config.raw.window_scale);
+		let minimized: bool = config_raw.layout[layout_size_t.STATUS_H] <= (UIStatus.default_status_h * config_raw.window_scale);
+		config_raw.layout[layout_size_t.STATUS_H] = minimized ? 240 : UIStatus.default_status_h;
+		config_raw.layout[layout_size_t.STATUS_H] = Math.floor(config_raw.layout[layout_size_t.STATUS_H] * config_raw.window_scale);
 	}
 
 	static set_icon_scale = () => {
 		if (zui_SCALE(UIBase.ui) > 1) {
-			Res.load(["icons2x.k"], () => {
-				Res.bundled.set("icons.k", Res.get("icons2x.k"));
+			resource_load(["icons2x.k"], () => {
+				resource_bundled.set("icons.k", resource_get("icons2x.k"));
 			});
 		}
 		else {
-			Res.load(["icons.k"], () => {});
+			resource_load(["icons.k"], () => {});
 		}
 	}
 

@@ -26,7 +26,7 @@ function main() {
 function kickstart() {
 	// Used to locate external application data folder
 	krom_set_app_name(manifest_title);
-	Config.load(main_start);
+	config_load(main_start);
 }
 
 function main_start() {
@@ -36,16 +36,16 @@ function main_start() {
 	app_on_x = base_x;
 	app_on_y = base_y;
 
-	Config.init();
-	sys_start(Config.get_options());
-	if (Config.raw.layout == null) base_init_layout();
+	config_init();
+	sys_start(config_get_options());
+	if (config_raw.layout == null) base_init_layout();
 	krom_set_app_name(manifest_title);
 	app_init(function() {
 		let o: object_t = scene_set_active("Scene");
-		UniformsExt.init();
+		uniforms_ext_init();
 		RenderPathBase.init();
 
-		if (Context.raw.render_mode == render_mode_t.FORWARD) {
+		if (context_raw.render_mode == render_mode_t.FORWARD) {
 			RenderPathDeferred.init(); // Allocate gbuffer
 			RenderPathForward.init();
 			render_path_commands = RenderPathForward.commands;
@@ -64,16 +64,16 @@ function main_start() {
 function main_embed(additional: string[]) {
 	let global: any = globalThis;
 
-	Res.embed_raw("Scene", "Scene.arm", global["data/Scene.arm"]);
+	resource_embed_raw("Scene", "Scene.arm", global["data/Scene.arm"]);
 	global["data/Scene.arm"] = null;
 
-	Res.embed_raw("shader_datas", "shader_datas.arm", global["data/shader_datas.arm"]);
+	resource_embed_raw("shader_datas", "shader_datas.arm", global["data/shader_datas.arm"]);
 	global["data/shader_datas.arm"] = null;
 
-	Res.embed_font("font.ttf", global["data/font.ttf"]);
+	resource_embed_font("font.ttf", global["data/font.ttf"]);
 	global["data/font.ttf"] = null;
 
-	Res.embed_font("font_mono.ttf", global["data/font_mono.ttf"]);
+	resource_embed_font("font_mono.ttf", global["data/font_mono.ttf"]);
 	global["data/font_mono.ttf"] = null;
 
 	let files: string[] = [
@@ -106,7 +106,7 @@ function main_embed(additional: string[]) {
 	];
 	for (let add of additional) files.push(add);
 	for (let file of files) {
-		Res.embed_blob(file, global["data/" + file]);
+		resource_embed_blob(file, global["data/" + file]);
 		global["data/" + file] = null;
 	}
 }
@@ -123,7 +123,7 @@ function main_embed_raytrace() {
 		"raytrace_brute_full" + RenderPathRaytrace.ext
 	];
 	for (let file of files) {
-		Res.embed_blob(file, global["data/" + file]);
+		resource_embed_blob(file, global["data/" + file]);
 		global["data/" + file] = null;
 	}
 }
@@ -137,7 +137,7 @@ function main_embed_raytrace_bake() {
 		"raytrace_bake_thick" + RenderPathRaytrace.ext
 	];
 	for (let file of files) {
-		Res.embed_blob(file, global["data/" + file]);
+		resource_embed_blob(file, global["data/" + file]);
 		global["data/" + file] = null;
 	}
 }

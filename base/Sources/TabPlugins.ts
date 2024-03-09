@@ -21,7 +21,7 @@ class TabPlugins {
 			zui_end_sticky();
 
 			// Draw plugins
-			for (let p of Plugin.plugins.values()) if (p.draw_ui != null) p.draw_ui(ui);
+			for (let p of plugin_map.values()) if (p.draw_ui != null) p.draw_ui(ui);
 		}
 	}
 }

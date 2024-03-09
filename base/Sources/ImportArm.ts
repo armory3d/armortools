@@ -23,17 +23,17 @@ class ImportArm {
 		}
 
 		let import_as_mesh: bool = project.version == null;
-		Context.raw.layers_preview_dirty = true;
-		Context.raw.layer_filter = 0;
+		context_raw.layers_preview_dirty = true;
+		context_raw.layer_filter = 0;
 		///end
 
 		///if is_lab
 		let import_as_mesh: bool = true;
 		///end
 
-		Project.project_new(import_as_mesh);
-		Project.filepath = path;
-		UIFiles.filename = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
+		project_new(import_as_mesh);
+		project_filepath = path;
+		UIFiles.filename = path.substring(path.lastIndexOf(path_sep) + 1, path.lastIndexOf("."));
 		///if (krom_android || krom_ios)
 		sys_title_set(UIFiles.filename);
 		///else
@@ -54,38 +54,38 @@ class ImportArm {
 		///else
 		let recent_path: string = path;
 		///end
-		let recent: string[] = Config.raw.recent_projects;
+		let recent: string[] = config_raw.recent_projects;
 		array_remove(recent, recent_path);
 		recent.unshift(recent_path);
-		Config.save();
+		config_save();
 
-		Project.raw = project;
+		project_raw = project;
 
 		///if (is_paint || is_sculpt)
 		let l0: layer_data_t = project.layer_datas[0];
-		base_res_handle.position = Config.get_texture_res_pos(l0.res);
+		base_res_handle.position = config_get_texture_res_pos(l0.res);
 		let bits_pos: texture_bits_t = l0.bpp == 8 ? texture_bits_t.BITS8 : l0.bpp == 16 ? texture_bits_t.BITS16 : texture_bits_t.BITS32;
 		base_bits_handle.position = bits_pos;
 		let bytes_per_pixel: i32 = Math.floor(l0.bpp / 8);
 		let format: tex_format_t = l0.bpp == 8 ? tex_format_t.RGBA32 : l0.bpp == 16 ? tex_format_t.RGBA64 : tex_format_t.RGBA128;
 		///end
 
-		let base: string = Path.base_dir(path);
-		if (Project.raw.envmap != null) {
-			Project.raw.envmap = data_is_abs(Project.raw.envmap) ? Project.raw.envmap : base + Project.raw.envmap;
+		let base: string = path_base_dir(path);
+		if (project_raw.envmap != null) {
+			project_raw.envmap = data_is_abs(project_raw.envmap) ? project_raw.envmap : base + project_raw.envmap;
 		}
-		if (Project.raw.envmap_strength != null) {
-			scene_world.strength = Project.raw.envmap_strength;
+		if (project_raw.envmap_strength != null) {
+			scene_world.strength = project_raw.envmap_strength;
 		}
-		if (Project.raw.camera_world != null) {
-			scene_camera.base.transform.local = mat4_from_f32_array(Project.raw.camera_world);
+		if (project_raw.camera_world != null) {
+			scene_camera.base.transform.local = mat4_from_f32_array(project_raw.camera_world);
 			transform_decompose(scene_camera.base.transform);
-			scene_camera.data.fov = Project.raw.camera_fov;
+			scene_camera.data.fov = project_raw.camera_fov;
 			camera_object_build_proj(scene_camera);
-			let origin: Float32Array = Project.raw.camera_origin;
-			Camera.origins[0].x = origin[0];
-			Camera.origins[0].y = origin[1];
-			Camera.origins[0].z = origin[2];
+			let origin: Float32Array = project_raw.camera_origin;
+			camera_origins[0].x = origin[0];
+			camera_origins[0].y = origin[1];
+			camera_origins[0].z = origin[2];
 		}
 
 		for (let file of project.assets) {
@@ -97,13 +97,13 @@ class ImportArm {
 			// Convert image path from relative to absolute
 			let abs: string = data_is_abs(file) ? file : base + file;
 			if (project.packed_assets != null) {
-				abs = Path.normalize(abs);
+				abs = path_normalize(abs);
 				ImportArm.unpack_asset(project, abs, file);
 			}
-			if (data_cached_images.get(abs) == null && !File.exists(abs)) {
+			if (data_cached_images.get(abs) == null && !file_exists(abs)) {
 				ImportArm.make_pink(abs);
 			}
-			let hdr_as_envmap: bool = abs.endsWith(".hdr") && Project.raw.envmap == abs;
+			let hdr_as_envmap: bool = abs.endsWith(".hdr") && project_raw.envmap == abs;
 			ImportTexture.run(abs, hdr_as_envmap);
 		}
 
@@ -117,7 +117,7 @@ class ImportArm {
 				///end
 				// Convert font path from relative to absolute
 				let abs: string = data_is_abs(file) ? file : base + file;
-				if (File.exists(abs)) {
+				if (file_exists(abs)) {
 					ImportFont.run(abs);
 				}
 			}
@@ -132,66 +132,66 @@ class ImportArm {
 		let md: mesh_data_t = mesh_data_create(project.mesh_data);
 		///end
 
-		mesh_object_set_data(Context.raw.paint_object, md);
-		vec4_set(Context.raw.paint_object.base.transform.scale, 1, 1, 1);
-		transform_build_matrix(Context.raw.paint_object.base.transform);
-		Context.raw.paint_object.base.name = md.name;
-		Project.paint_objects = [Context.raw.paint_object];
+		mesh_object_set_data(context_raw.paint_object, md);
+		vec4_set(context_raw.paint_object.base.transform.scale, 1, 1, 1);
+		transform_build_matrix(context_raw.paint_object.base.transform);
+		context_raw.paint_object.base.name = md.name;
+		project_paint_objects = [context_raw.paint_object];
 
 		///if (is_paint || is_sculpt)
 		for (let i: i32 = 1; i < project.mesh_datas.length; ++i) {
 			let raw: mesh_data_t = project.mesh_datas[i];
 			let md: mesh_data_t = mesh_data_create(raw);
-			let object: mesh_object_t = scene_add_mesh_object(md, Context.raw.paint_object.materials, Context.raw.paint_object.base);
+			let object: mesh_object_t = scene_add_mesh_object(md, context_raw.paint_object.materials, context_raw.paint_object.base);
 			object.base.name = md.name;
 			object.skip_context = "paint";
-			Project.paint_objects.push(object);
+			project_paint_objects.push(object);
 		}
 
 		if (project.mesh_assets != null && project.mesh_assets.length > 0) {
 			let file: string = project.mesh_assets[0];
 			let abs: string = data_is_abs(file) ? file : base + file;
-			Project.mesh_assets = [abs];
+			project_mesh_assets = [abs];
 		}
 
 		///if is_paint
-		if (project.atlas_objects != null) Project.atlas_objects = project.atlas_objects;
-		if (project.atlas_names != null) Project.atlas_names = project.atlas_names;
+		if (project.atlas_objects != null) project_atlas_objects = project.atlas_objects;
+		if (project.atlas_names != null) project_atlas_names = project.atlas_names;
 		///end
 
 		// No mask by default
-		if (Context.raw.merged_object == null) UtilMesh.merge_mesh();
+		if (context_raw.merged_object == null) UtilMesh.merge_mesh();
 		///end
 
-		Context.select_paint_object(Context.main_object());
-		Viewport.scale_to_bounds();
-		Context.raw.paint_object.skip_context = "paint";
-		Context.raw.merged_object.base.visible = true;
+		context_select_paint_object(context_main_object());
+		viewport_scale_to_bounds();
+		context_raw.paint_object.skip_context = "paint";
+		context_raw.merged_object.base.visible = true;
 
 		///if (is_paint || is_sculpt)
-		let tex: image_t = Project.layers[0].texpaint;
-		if (tex.width != Config.get_texture_res_x() || tex.height != Config.get_texture_res_y()) {
-			if (History.undo_layers != null) for (let l of History.undo_layers) SlotLayer.resize_and_set_bits(l);
+		let tex: image_t = project_layers[0].texpaint;
+		if (tex.width != config_get_texture_res_x() || tex.height != config_get_texture_res_y()) {
+			if (history_undo_layers != null) for (let l of history_undo_layers) SlotLayer.resize_and_set_bits(l);
 			let rts: map_t<string, render_target_t> = render_path_render_targets;
 			let _texpaint_blend0: image_t = rts.get("texpaint_blend0")._image;
 			base_notify_on_next_frame(() => {
 				image_unload(_texpaint_blend0);
 			});
-			rts.get("texpaint_blend0").width = Config.get_texture_res_x();
-			rts.get("texpaint_blend0").height = Config.get_texture_res_y();
-			rts.get("texpaint_blend0")._image = image_create_render_target(Config.get_texture_res_x(), Config.get_texture_res_y(), tex_format_t.R8, depth_format_t.NO_DEPTH);
+			rts.get("texpaint_blend0").width = config_get_texture_res_x();
+			rts.get("texpaint_blend0").height = config_get_texture_res_y();
+			rts.get("texpaint_blend0")._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8, depth_format_t.NO_DEPTH);
 			let _texpaint_blend1: image_t = rts.get("texpaint_blend1")._image;
 			base_notify_on_next_frame(() => {
 				image_unload(_texpaint_blend1);
 			});
-			rts.get("texpaint_blend1").width = Config.get_texture_res_x();
-			rts.get("texpaint_blend1").height = Config.get_texture_res_y();
-			rts.get("texpaint_blend1")._image = image_create_render_target(Config.get_texture_res_x(), Config.get_texture_res_y(), tex_format_t.R8, depth_format_t.NO_DEPTH);
-			Context.raw.brush_blend_dirty = true;
+			rts.get("texpaint_blend1").width = config_get_texture_res_x();
+			rts.get("texpaint_blend1").height = config_get_texture_res_y();
+			rts.get("texpaint_blend1")._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8, depth_format_t.NO_DEPTH);
+			context_raw.brush_blend_dirty = true;
 		}
 
-		for (let l of Project.layers) SlotLayer.unload(l);
-		Project.layers = [];
+		for (let l of project_layers) SlotLayer.unload(l);
+		project_layers = [];
 		for (let i: i32 = 0; i < project.layer_datas.length; ++i) {
 			let ld: layer_data_t = project.layer_datas[i];
 			let is_group: bool = ld.texpaint == null;
@@ -206,7 +206,7 @@ class ImportArm {
 			let l: SlotLayerRaw = SlotLayer.create("", is_group ? layer_slot_type_t.GROUP : is_mask ? layer_slot_type_t.MASK : layer_slot_type_t.LAYER);
 			if (ld.name != null) l.name = ld.name;
 			l.visible = ld.visible;
-			Project.layers.push(l);
+			project_layers.push(l);
 
 			if (!is_group) {
 				if (base_pipe_merge == null) base_make_pipe();
@@ -289,42 +289,42 @@ class ImportArm {
 		for (let i: i32 = 0; i < project.layer_datas.length; ++i) {
 			let ld: layer_data_t = project.layer_datas[i];
 			if (ld.parent >= 0) {
-				Project.layers[i].parent = Project.layers[ld.parent];
+				project_layers[i].parent = project_layers[ld.parent];
 			}
 		}
 
-		Context.set_layer(Project.layers[0]);
+		context_set_layer(project_layers[0]);
 
 		// Materials
 		let m0: material_data_t = data_get_material("Scene", "Material");
 
-		Project.materials = [];
+		project_materials = [];
 		for (let n of project.material_nodes) {
 			ImportArm.init_nodes(n.nodes);
-			Context.raw.material = SlotMaterial.create(m0, n);
-			Project.materials.push(Context.raw.material);
+			context_raw.material = SlotMaterial.create(m0, n);
+			project_materials.push(context_raw.material);
 		}
 		///end
 
 		UINodes.hwnd.redraws = 2;
 		UINodes.group_stack = [];
-		Project.material_groups = [];
+		project_material_groups = [];
 		if (project.material_groups != null) {
-			for (let g of project.material_groups) Project.material_groups.push({ canvas: g, nodes: zui_nodes_create() });
+			for (let g of project.material_groups) project_material_groups.push({ canvas: g, nodes: zui_nodes_create() });
 		}
 
 		///if (is_paint || is_sculpt)
-		for (let m of Project.materials) {
-			Context.raw.material = m;
+		for (let m of project_materials) {
+			context_raw.material = m;
 			MakeMaterial.parse_paint_material();
 			UtilRender.make_material_preview();
 		}
 
-		Project.brushes = [];
+		project_brushes = [];
 		for (let n of project.brush_nodes) {
 			ImportArm.init_nodes(n.nodes);
-			Context.raw.brush = SlotBrush.create(n);
-			Project.brushes.push(Context.raw.brush);
+			context_raw.brush = SlotBrush.create(n);
+			project_brushes.push(context_raw.brush);
 			MakeMaterial.parse_brush();
 			UtilRender.make_brush_preview();
 		}
@@ -332,10 +332,10 @@ class ImportArm {
 		// Fill layers
 		for (let i: i32 = 0; i < project.layer_datas.length; ++i) {
 			let ld: layer_data_t = project.layer_datas[i];
-			let l: SlotLayerRaw = Project.layers[i];
+			let l: SlotLayerRaw = project_layers[i];
 			let is_group: bool = ld.texpaint == null;
 			if (!is_group) {
-				l.fill_layer = ld.fill_layer > -1 ? Project.materials[ld.fill_layer] : null;
+				l.fill_layer = ld.fill_layer > -1 ? project_materials[ld.fill_layer] : null;
 			}
 		}
 
@@ -345,26 +345,26 @@ class ImportArm {
 
 		///if is_lab
 		ImportArm.init_nodes(project.material.nodes);
-		Project.canvas = project.material;
-		ParserLogic.parse(Project.canvas);
+		project_canvas = project.material;
+		ParserLogic.parse(project_canvas);
 		///end
 
-		Context.raw.ddirty = 4;
+		context_raw.ddirty = 4;
 		data_delete_blob(path);
 	}
 
 	///if (is_paint || is_sculpt)
 	static run_mesh = (raw: scene_t) => {
-		Project.paint_objects = [];
+		project_paint_objects = [];
 		for (let i: i32 = 0; i < raw.mesh_datas.length; ++i) {
 			let md: mesh_data_t = mesh_data_create(raw.mesh_datas[i]);
 			let object: mesh_object_t = null;
 			if (i == 0) {
-				mesh_object_set_data(Context.raw.paint_object, md);
-				object = Context.raw.paint_object;
+				mesh_object_set_data(context_raw.paint_object, md);
+				object = context_raw.paint_object;
 			}
 			else {
-				object = scene_add_mesh_object(md, Context.raw.paint_object.materials, Context.raw.paint_object.base);
+				object = scene_add_mesh_object(md, context_raw.paint_object.materials, context_raw.paint_object.base);
 				object.base.name = md.name;
 				object.skip_context = "paint";
 				md._.handle = md.name;
@@ -373,12 +373,12 @@ class ImportArm {
 			vec4_set(object.base.transform.scale, 1, 1, 1);
 			transform_build_matrix(object.base.transform);
 			object.base.name = md.name;
-			Project.paint_objects.push(object);
+			project_paint_objects.push(object);
 			UtilMesh.merge_mesh();
-			Viewport.scale_to_bounds();
+			viewport_scale_to_bounds();
 		}
 		app_notify_on_init(base_init_layers);
-		History.reset();
+		history_reset();
 	}
 
 	static run_material = (path: string) => {
@@ -389,7 +389,7 @@ class ImportArm {
 	}
 
 	static run_material_from_project = (project: project_format_t, path: string) => {
-		let base: string = Path.base_dir(path);
+		let base: string = path_base_dir(path);
 		for (let file of project.assets) {
 			///if krom_windows
 			file = string_replace_all(file, "/", "\\");
@@ -399,10 +399,10 @@ class ImportArm {
 			// Convert image path from relative to absolute
 			let abs: string = data_is_abs(file) ? file : base + file;
 			if (project.packed_assets != null) {
-				abs = Path.normalize(abs);
+				abs = path_normalize(abs);
 				ImportArm.unpack_asset(project, abs, file);
 			}
-			if (data_cached_images.get(abs) == null && !File.exists(abs)) {
+			if (data_cached_images.get(abs) == null && !file_exists(abs)) {
 				ImportArm.make_pink(abs);
 			}
 			ImportTexture.run(abs);
@@ -414,23 +414,23 @@ class ImportArm {
 
 		for (let c of project.material_nodes) {
 			ImportArm.init_nodes(c.nodes);
-			Context.raw.material = SlotMaterial.create(m0, c);
-			Project.materials.push(Context.raw.material);
-			imported.push(Context.raw.material);
-			History.new_material();
+			context_raw.material = SlotMaterial.create(m0, c);
+			project_materials.push(context_raw.material);
+			imported.push(context_raw.material);
+			history_new_material();
 		}
 
 		if (project.material_groups != null) {
 			for (let c of project.material_groups) {
 				while (ImportArm.group_exists(c)) ImportArm.rename_group(c.name, imported, project.material_groups); // Ensure unique group name
 				ImportArm.init_nodes(c.nodes);
-				Project.material_groups.push({ canvas: c, nodes: zui_nodes_create() });
+				project_material_groups.push({ canvas: c, nodes: zui_nodes_create() });
 			}
 		}
 
 		let _init = () => {
 			for (let m of imported) {
-				Context.set_material(m);
+				context_set_material(m);
 				MakeMaterial.parse_paint_material();
 				UtilRender.make_material_preview();
 			}
@@ -443,7 +443,7 @@ class ImportArm {
 	}
 
 	static group_exists = (c: zui_node_canvas_t): bool => {
-		for (let g of Project.material_groups) {
+		for (let g of project_material_groups) {
 			if (g.canvas.name == c.name) return true;
 		}
 		return false;
@@ -471,7 +471,7 @@ class ImportArm {
 	}
 
 	static run_brush_from_project = (project: project_format_t, path: string) => {
-		let base: string = Path.base_dir(path);
+		let base: string = path_base_dir(path);
 		for (let file of project.assets) {
 			///if krom_windows
 			file = string_replace_all(file, "/", "\\");
@@ -481,10 +481,10 @@ class ImportArm {
 			// Convert image path from relative to absolute
 			let abs: string = data_is_abs(file) ? file : base + file;
 			if (project.packed_assets != null) {
-				abs = Path.normalize(abs);
+				abs = path_normalize(abs);
 				ImportArm.unpack_asset(project, abs, file);
 			}
-			if (data_cached_images.get(abs) == null && !File.exists(abs)) {
+			if (data_cached_images.get(abs) == null && !file_exists(abs)) {
 				ImportArm.make_pink(abs);
 			}
 			ImportTexture.run(abs);
@@ -494,14 +494,14 @@ class ImportArm {
 
 		for (let n of project.brush_nodes) {
 			ImportArm.init_nodes(n.nodes);
-			Context.raw.brush = SlotBrush.create(n);
-			Project.brushes.push(Context.raw.brush);
-			imported.push(Context.raw.brush);
+			context_raw.brush = SlotBrush.create(n);
+			project_brushes.push(context_raw.brush);
+			imported.push(context_raw.brush);
 		}
 
 		let _init = () => {
 			for (let b of imported) {
-				Context.set_brush(b);
+				context_set_brush(b);
 				UtilRender.make_brush_preview();
 			}
 		}
@@ -521,16 +521,16 @@ class ImportArm {
 
 	static run_swatches_from_project = (project: project_format_t, path: string, replaceExisting: bool = false) => {
 		if (replaceExisting) {
-			Project.raw.swatches = [];
+			project_raw.swatches = [];
 
 			if (project.swatches == null) { // No swatches contained
-				Project.raw.swatches.push(Project.make_swatch());
+				project_raw.swatches.push(make_swatch());
 			}
 		}
 
 		if (project.swatches != null) {
 			for (let s of project.swatches) {
-				Project.raw.swatches.push(s);
+				project_raw.swatches.push(s);
 			}
 		}
 		UIBase.hwnds[tab_area_t.STATUS].redraws = 2;
@@ -538,7 +538,7 @@ class ImportArm {
 	}
 
 	static make_pink = (abs: string) => {
-		Console.error(Strings.error2() + " " + abs);
+		console_error(strings_error2() + " " + abs);
 		let b: Uint8Array = new Uint8Array(4);
 		b[0] = 255;
 		b[1] = 0;
@@ -566,8 +566,8 @@ class ImportArm {
 	}
 
 	static unpack_asset = (project: project_format_t, abs: string, file: string) => {
-		if (Project.raw.packed_assets == null) {
-			Project.raw.packed_assets = [];
+		if (project_raw.packed_assets == null) {
+			project_raw.packed_assets = [];
 		}
 		for (let pa of project.packed_assets) {
 			///if krom_windows
@@ -575,11 +575,11 @@ class ImportArm {
 			///else
 			pa.name = string_replace_all(pa.name, "\\", "/");
 			///end
-			pa.name = Path.normalize(pa.name);
+			pa.name = path_normalize(pa.name);
 			if (pa.name == file) pa.name = abs; // From relative to absolute
 			if (pa.name == abs) {
-				if (!Project.packed_asset_exists(Project.raw.packed_assets, pa.name)) {
-					Project.raw.packed_assets.push(pa);
+				if (!project_packed_asset_exists(project_raw.packed_assets, pa.name)) {
+					project_raw.packed_assets.push(pa);
 				}
 				let image: image_t = image_from_encoded_bytes(pa.bytes, pa.name.endsWith(".jpg") ? ".jpg" : ".png");
 				data_cached_images.set(abs, image);

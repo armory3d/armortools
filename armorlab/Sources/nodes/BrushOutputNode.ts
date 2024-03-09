@@ -17,24 +17,24 @@ class BrushOutputNode extends LogicNode {
 			{
 				let t = render_target_create();
 				t.name = "texpaint";
-				t.width = Config.getTextureResX();
-				t.height = Config.getTextureResY();
+				t.width = config_getTextureResX();
+				t.height = config_getTextureResY();
 				t.format = "RGBA32";
 				this.texpaint = render_path_create_render_target(t)._image;
 			}
 			{
 				let t = render_target_create();
 				t.name = "texpaint_nor";
-				t.width = Config.getTextureResX();
-				t.height = Config.getTextureResY();
+				t.width = config_getTextureResX();
+				t.height = config_getTextureResY();
 				t.format = "RGBA32";
 				this.texpaint_nor = render_path_create_render_target(t)._image;
 			}
 			{
 				let t = render_target_create();
 				t.name = "texpaint_pack";
-				t.width = Config.getTextureResX();
-				t.height = Config.getTextureResY();
+				t.width = config_getTextureResX();
+				t.height = config_getTextureResY();
 				t.format = "RGBA32";
 				this.texpaint_pack = render_path_create_render_target(t)._image;
 			}

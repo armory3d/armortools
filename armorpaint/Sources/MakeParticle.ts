@@ -87,7 +87,7 @@ class MakeParticle {
 
 	static mask = (vert: NodeShaderRaw, frag: NodeShaderRaw) => {
 		///if arm_physics
-		if (Context.raw.particle_physics) {
+		if (context_raw.particle_physics) {
 			NodeShader.add_out(vert, 'vec4 wpos');
 			NodeShader.add_uniform(vert, 'mat4 W', '_world_matrix');
 			NodeShader.write_attrib(vert, 'wpos = mul(vec4(pos.xyz, 1.0), W);');

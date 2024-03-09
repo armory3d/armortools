@@ -32,7 +32,7 @@ class UIToolbar {
 	static render_ui = () => {
 		let ui: zui_t = UIBase.ui;
 
-		if (Config.raw.touch_ui) {
+		if (config_raw.touch_ui) {
 			UIToolbar.toolbar_w = UIToolbar.default_toolbar_w + 6;
 		}
 		else {
@@ -44,7 +44,7 @@ class UIToolbar {
 			ui._y -= 4 * zui_SCALE(ui);
 
 			ui.image_scroll_align = false;
-			let img: image_t = Res.get("icons.k");
+			let img: image_t = resource_get("icons.k");
 
 			let col: i32 = ui.t.WINDOW_BG_COL;
 			if (col < 0) col += 4294967296;
@@ -52,10 +52,10 @@ class UIToolbar {
 			let icon_accent: i32 = light ? 0xff666666 : -1;
 
 			// Properties icon
-			if (Config.raw.layout[layout_size_t.HEADER] == 1) {
-				let rect: rect_t = Res.tile50(img, 7, 1);
+			if (config_raw.layout[layout_size_t.HEADER] == 1) {
+				let rect: rect_t = resource_tile50(img, 7, 1);
 				if (zui_image(img, light ? 0xff666666 : ui.t.BUTTON_COL, -1.0, rect.x, rect.y, rect.w, rect.h) == zui_state_t.RELEASED) {
-					Config.raw.layout[layout_size_t.HEADER] = 0;
+					config_raw.layout[layout_size_t.HEADER] = 0;
 				}
 			}
 			// Draw ">>" button if header is hidden
@@ -86,35 +86,35 @@ class UIToolbar {
 			ui._y -= 4 * zui_SCALE(ui);
 
 			let keys: string[] = [
-				"(" + Config.keymap.tool_brush + ") - " + tr("Hold {action_paint} to paint\nHold {key} and press {action_paint} to paint a straight line (ruler mode)", new Map([["key", Config.keymap.brush_ruler], ["action_paint", Config.keymap.action_paint]])),
-				"(" + Config.keymap.tool_eraser + ") - " + tr("Hold {action_paint} to erase\nHold {key} and press {action_paint} to erase a straight line (ruler mode)", new Map([["key", Config.keymap.brush_ruler], ["action_paint", Config.keymap.action_paint]])),
-				"(" + Config.keymap.tool_fill + ")",
-				"(" + Config.keymap.tool_decal + ") - " + tr("Hold {key} to paint on a decal mask", new Map([["key", Config.keymap.decal_mask]])),
-				"(" + Config.keymap.tool_text + ") - " + tr("Hold {key} to use the text as a mask", new Map([["key", Config.keymap.decal_mask]])),
-				"(" + Config.keymap.tool_clone + ") - " + tr("Hold {key} to set source", new Map([["key", Config.keymap.set_clone_source]])),
-				"(" + Config.keymap.tool_blur + ")",
-				"(" + Config.keymap.tool_smudge + ")",
-				"(" + Config.keymap.tool_particle + ")",
-				"(" + Config.keymap.tool_colorid + ")",
-				"(" + Config.keymap.tool_picker + ")",
-				"(" + Config.keymap.tool_bake + ")",
-				"(" + Config.keymap.tool_gizmo + ")",
-				"(" + Config.keymap.tool_material + ")",
+				"(" + config_keymap.tool_brush + ") - " + tr("Hold {action_paint} to paint\nHold {key} and press {action_paint} to paint a straight line (ruler mode)", new Map([["key", config_keymap.brush_ruler], ["action_paint", config_keymap.action_paint]])),
+				"(" + config_keymap.tool_eraser + ") - " + tr("Hold {action_paint} to erase\nHold {key} and press {action_paint} to erase a straight line (ruler mode)", new Map([["key", config_keymap.brush_ruler], ["action_paint", config_keymap.action_paint]])),
+				"(" + config_keymap.tool_fill + ")",
+				"(" + config_keymap.tool_decal + ") - " + tr("Hold {key} to paint on a decal mask", new Map([["key", config_keymap.decal_mask]])),
+				"(" + config_keymap.tool_text + ") - " + tr("Hold {key} to use the text as a mask", new Map([["key", config_keymap.decal_mask]])),
+				"(" + config_keymap.tool_clone + ") - " + tr("Hold {key} to set source", new Map([["key", config_keymap.set_clone_source]])),
+				"(" + config_keymap.tool_blur + ")",
+				"(" + config_keymap.tool_smudge + ")",
+				"(" + config_keymap.tool_particle + ")",
+				"(" + config_keymap.tool_colorid + ")",
+				"(" + config_keymap.tool_picker + ")",
+				"(" + config_keymap.tool_bake + ")",
+				"(" + config_keymap.tool_gizmo + ")",
+				"(" + config_keymap.tool_material + ")",
 			];
 
 			let draw_tool = (i: i32) => {
 				ui._x += 2;
-				if (Context.raw.tool == i) UIToolbar.draw_highlight();
+				if (context_raw.tool == i) UIToolbar.draw_highlight();
 				let tile_y: i32 = Math.floor(i / 12);
 				let tile_x: i32 = tile_y % 2 == 0 ? i % 12 : (11 - (i % 12));
-				let rect: rect_t = Res.tile50(img, tile_x, tile_y);
+				let rect: rect_t = resource_tile50(img, tile_x, tile_y);
 				let _y: i32 = ui._y;
 
 				let image_state: zui_state_t = zui_image(img, icon_accent, -1.0, rect.x, rect.y, rect.w, rect.h);
 				if (image_state == zui_state_t.STARTED) {
-					Context.select_tool(i);
+					context_select_tool(i);
 				}
-				else if (image_state == zui_state_t.RELEASED && Config.raw.layout[layout_size_t.HEADER] == 0) {
+				else if (image_state == zui_state_t.RELEASED && config_raw.layout[layout_size_t.HEADER] == 0) {
 					if (UIToolbar.last_tool == i) {
 						UIToolbar.tool_properties_menu();
 					}
@@ -122,7 +122,7 @@ class UIToolbar {
 				}
 
 				///if is_paint
-				if (i == workspace_tool_t.COLORID && Context.raw.colorid_picked) {
+				if (i == workspace_tool_t.COLORID && context_raw.colorid_picked) {
 					g2_draw_scaled_sub_image(render_path_render_targets.get("texpaint_colorid")._image, 0, 0, 1, 1, 0, _y + 1.5 * zui_SCALE(ui), 5 * zui_SCALE(ui), 34 * zui_SCALE(ui));
 				}
 				///end
@@ -155,7 +155,7 @@ class UIToolbar {
 			ui.image_scroll_align = true;
 		}
 
-		if (Config.raw.touch_ui) {
+		if (config_raw.touch_ui) {
 			// Hide scrollbar
 			let _SCROLL_W: i32 = ui.t.SCROLL_W;
 			ui.t.SCROLL_W = 0;
@@ -180,7 +180,7 @@ class UIToolbar {
 			}
 
 			if (zui_button(tr("Pin to Header"), zui_align_t.LEFT)) {
-				Config.raw.layout[layout_size_t.HEADER] = 1;
+				config_raw.layout[layout_size_t.HEADER] = 1;
 			}
 
 			let h: i32 = ui._y - start_y;

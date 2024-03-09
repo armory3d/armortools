@@ -14,7 +14,7 @@ class MakeMaterial {
 	}
 
 	static parseMeshMaterial = () => {
-		let m = Project.materials[0].data;
+		let m = project_materials[0].data;
 
 		for (let c of m._.shader._.contexts) {
 			if (c.name == "mesh") {
@@ -63,7 +63,7 @@ class MakeMaterial {
 			let sampler = con.frag.sharedSamplers[0];
 			scon._.override_context.shared_sampler = sampler.substr(sampler.lastIndexOf(" ") + 1);
 		}
-		if (!Context.raw.textureFilter) {
+		if (!context_raw.textureFilter) {
 			scon._.override_context.filter = "point";
 		}
 		m._.shader.contexts.push(scon);
@@ -77,7 +77,7 @@ class MakeMaterial {
 				let sampler = con.frag.sharedSamplers[0];
 				scon._.override_context.shared_sampler = sampler.substr(sampler.lastIndexOf(" ") + 1);
 			}
-			if (!Context.raw.textureFilter) {
+			if (!context_raw.textureFilter) {
 				scon._.override_context.filter = "point";
 			}
 			m._.shader.contexts.push(scon);
@@ -88,7 +88,7 @@ class MakeMaterial {
 			m._.contexts.push(mcon);
 		}
 
-		Context.raw.ddirty = 2;
+		context_raw.ddirty = 2;
 
 		///if arm_voxels
 		MakeMaterial.makeVoxel(m);
@@ -96,7 +96,7 @@ class MakeMaterial {
 	}
 
 	static parseParticleMaterial = () => {
-		let m = Context.raw.particleMaterial;
+		let m = context_raw.particleMaterial;
 		let sc: shader_context_t = null;
 		for (let c of m._.shader._.contexts) {
 			if (c.name == "mesh") {
@@ -118,7 +118,7 @@ class MakeMaterial {
 	static parseMeshPreviewMaterial = () => {
 		if (!MakeMaterial.getMOut()) return;
 
-		let m = Project.materials[0].data;
+		let m = project_materials[0].data;
 		let scon: shader_context_t = null;
 		for (let c of m._.shader._.contexts) {
 			if (c.name == "mesh") {
@@ -156,7 +156,7 @@ class MakeMaterial {
 	///if arm_voxels
 	static makeVoxel = (m: material_data_t) => {
 		let rebuild = MakeMaterial.heightUsed;
-		if (Config.raw.rp_gi != false && rebuild) {
+		if (config_raw.rp_gi != false && rebuild) {
 			let scon: shader_context_t = null;
 			for (let c of m._.shader._.contexts) {
 				if (c.name == "voxel") {
@@ -164,7 +164,7 @@ class MakeMaterial {
 					break;
 				}
 			}
-			if (scon != null) MakeVoxel.run(scon);
+			if (scon != null) make_voxel_run(scon);
 		}
 	}
 	///end
@@ -179,7 +179,7 @@ class MakeMaterial {
 			if (current != null) g2_begin(current);
 		}
 
-		let m = Project.materials[0].data;
+		let m = project_materials[0].data;
 		let scon: shader_context_t = null;
 		let mcon: material_context_t = null;
 		for (let c of m._.shader._.contexts) {
@@ -223,14 +223,14 @@ class MakeMaterial {
 	}
 
 	static bakeNodePreviews = () => {
-		Context.raw.nodePreviewsUsed = [];
-		if (Context.raw.nodePreviews == null) Context.raw.nodePreviews = new Map();
+		context_raw.nodePreviewsUsed = [];
+		if (context_raw.nodePreviews == null) context_raw.nodePreviews = new Map();
 		MakeMaterial.traverseNodes(UINodes.getCanvasMaterial().nodes, null, []);
-		for (let key of Context.raw.nodePreviews.keys()) {
-			if (Context.raw.nodePreviewsUsed.indexOf(key) == -1) {
-				let image = Context.raw.nodePreviews.get(key);
+		for (let key of context_raw.nodePreviews.keys()) {
+			if (context_raw.nodePreviewsUsed.indexOf(key) == -1) {
+				let image = context_raw.nodePreviews.get(key);
 				base_notifyOnNextFrame(function() { image_unload(image); });
-				Context.raw.nodePreviews.delete(key);
+				context_raw.nodePreviews.delete(key);
 			}
 		}
 	}
@@ -239,7 +239,7 @@ class MakeMaterial {
 		for (let node of nodes) {
 			MakeMaterial.bakeNodePreview(node, group, parents);
 			if (node.type == "GROUP") {
-				for (let g of Project.materialGroups) {
+				for (let g of project_materialGroups) {
 					if (g.canvas.name == node.name) {
 						parents.push(node);
 						MakeMaterial.traverseNodes(g.canvas.nodes, g.canvas, parents);
@@ -254,14 +254,14 @@ class MakeMaterial {
 	static bakeNodePreview = (node: zui_node_t, group: zui_node_canvas_t, parents: zui_node_t[]) => {
 		if (node.type == "BLUR") {
 			let id = ParserMaterial.node_name(node, parents);
-			let image = Context.raw.nodePreviews.get(id);
-			Context.raw.nodePreviewsUsed.push(id);
-			let resX = Math.floor(Config.getTextureResX() / 4);
-			let resY = Math.floor(Config.getTextureResY() / 4);
+			let image = context_raw.nodePreviews.get(id);
+			context_raw.nodePreviewsUsed.push(id);
+			let resX = Math.floor(config_getTextureResX() / 4);
+			let resY = Math.floor(config_getTextureResY() / 4);
 			if (image == null || image.width != resX || image.height != resY) {
 				if (image != null) image_unload(image);
 				image = image_create_render_target(resX, resY);
-				Context.raw.nodePreviews.set(id, image);
+				context_raw.nodePreviews.set(id, image);
 			}
 
 			ParserMaterial.blur_passthrough = true;
@@ -270,14 +270,14 @@ class MakeMaterial {
 		}
 		else if (node.type == "DIRECT_WARP") {
 			let id = ParserMaterial.node_name(node, parents);
-			let image = Context.raw.nodePreviews.get(id);
-			Context.raw.nodePreviewsUsed.push(id);
-			let resX = Math.floor(Config.getTextureResX());
-			let resY = Math.floor(Config.getTextureResY());
+			let image = context_raw.nodePreviews.get(id);
+			context_raw.nodePreviewsUsed.push(id);
+			let resX = Math.floor(config_getTextureResX());
+			let resY = Math.floor(config_getTextureResY());
 			if (image == null || image.width != resX || image.height != resY) {
 				if (image != null) image_unload(image);
 				image = image_create_render_target(resX, resY);
-				Context.raw.nodePreviews.set(id, image);
+				context_raw.nodePreviews.set(id, image);
 			}
 
 			ParserMaterial.warp_passthrough = true;
@@ -303,16 +303,16 @@ class MakeMaterial {
 	}
 
 	static parseBrush = () => {
-		ParserLogic.parse(Context.raw.brush.canvas);
+		ParserLogic.parse(context_raw.brush.canvas);
 	}
 
 	static getDisplaceStrength = (): f32 => {
-		let sc = Context.mainObject().base.transform.scale.x;
-		return Config.raw.displace_strength * 0.02 * sc;
+		let sc = context_mainObject().base.transform.scale.x;
+		return config_raw.displace_strength * 0.02 * sc;
 	}
 
 	static voxelgiHalfExtents = (): string => {
-		let ext = Context.raw.vxaoExt;
+		let ext = context_raw.vxaoExt;
 		return `const vec3 voxelgiHalfExtents = vec3(${ext}, ${ext}, ${ext});`;
 	}
 

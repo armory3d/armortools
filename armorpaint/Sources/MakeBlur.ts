@@ -15,23 +15,23 @@ class MakeBlur {
 		NodeShader.write(frag, 'vec3 nortan = vec3(0.0, 0.0, 0.0);');
 		NodeShader.write(frag, 'float height = 0.0;');
 		NodeShader.write(frag, 'float mat_opacity = 1.0;');
-		let is_mask: bool = SlotLayer.is_mask(Context.raw.layer);
+		let is_mask: bool = SlotLayer.is_mask(context_raw.layer);
 		if (is_mask) {
 			NodeShader.write(frag, 'float opacity = 1.0;');
 		}
 		else {
 			NodeShader.write(frag, 'float opacity = 0.0;');
 		}
-		if (Context.raw.material.paint_emis) {
+		if (context_raw.material.paint_emis) {
 			NodeShader.write(frag, 'float emis = 0.0;');
 		}
-		if (Context.raw.material.paint_subs) {
+		if (context_raw.material.paint_subs) {
 			NodeShader.write(frag, 'float subs = 0.0;');
 		}
 
 		NodeShader.add_uniform(frag, 'vec2 texpaintSize', '_texpaintSize');
 		NodeShader.write(frag, 'float blur_step = 1.0 / texpaintSize.x;');
-		if (Context.raw.tool == workspace_tool_t.SMUDGE) {
+		if (context_raw.tool == workspace_tool_t.SMUDGE) {
 			///if (krom_direct3d11 || krom_direct3d12 || krom_metal)
 			NodeShader.write(frag, 'const float blur_weight[7] = {1.0 / 28.0, 2.0 / 28.0, 3.0 / 28.0, 4.0 / 28.0, 5.0 / 28.0, 6.0 / 28.0, 7.0 / 28.0};');
 			///else

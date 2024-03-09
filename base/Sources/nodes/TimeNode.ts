@@ -8,7 +8,7 @@ class TimeNode extends LogicNode {
 	override get = (from: i32, done: (a: any)=>void) => {
 		if (from == 0) done(time_time());
 		else if (from == 1) done(time_delta());
-		else done(Context.raw.brush_time);
+		else done(context_raw.brush_time);
 	}
 
 	static def: zui_node_t = {

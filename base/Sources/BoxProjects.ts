@@ -42,16 +42,16 @@ class BoxProjects {
 			BoxProjects.draw_badge(ui);
 
 			if (zui_button(tr("New"))) {
-				Project.project_new();
-				Viewport.scale_to_bounds();
+				project_new();
+				viewport_scale_to_bounds();
 				UIBox.hide();
 				// Pick unique name
 				let i: i32 = 0;
 				let j: i32 = 0;
 				let title: string = tr("untitled") + i;
-				while (j < Config.raw.recent_projects.length) {
-					let base: string = Config.raw.recent_projects[j];
-					base = base.substring(base.lastIndexOf(Path.sep) + 1, base.lastIndexOf("."));
+				while (j < config_raw.recent_projects.length) {
+					let base: string = config_raw.recent_projects[j];
+					base = base.substring(base.lastIndexOf(path_sep) + 1, base.lastIndexOf("."));
 					j++;
 					if (title == base) {
 						i++;
@@ -66,7 +66,7 @@ class BoxProjects {
 
 			let slotw: i32 = Math.floor(150 * zui_SCALE(ui));
 			let num: i32 = Math.floor(sys_width() / slotw);
-			let recent_projects: string[] = Config.raw.recent_projects;
+			let recent_projects: string[] = config_raw.recent_projects;
 			let show_asset_names: bool = true;
 
 			for (let row: i32 = 0; row < Math.ceil(recent_projects.length / num); ++row) {
@@ -124,7 +124,7 @@ class BoxProjects {
 
 							///if (krom_android || krom_ios)
 							base_notify_on_next_frame(() => {
-								Console.toast(tr("Opening project"));
+								console_toast(tr("Opening project"));
 								base_notify_on_next_frame(doImport);
 							});
 							///else
@@ -132,16 +132,16 @@ class BoxProjects {
 							///end
 						}
 
-						let name: string = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
+						let name: string = path.substring(path.lastIndexOf(path_sep) + 1, path.lastIndexOf("."));
 						if (ui.is_hovered && ui.input_released_r) {
 							UIMenu.draw((ui: zui_t) => {
 								// if (UIMenu.menuButton(ui, tr("Duplicate"))) {}
 								if (UIMenu.menu_button(ui, tr("Delete"))) {
 									app_notify_on_init(() => {
-										File.delete(path);
-										File.delete(icon_path);
+										file_delete(path);
+										file_delete(icon_path);
 										let data_path: string = path.substr(0, path.length - 4);
-										File.delete(data_path);
+										file_delete(data_path);
 										recent_projects.splice(i, 1);
 									});
 								}
@@ -176,22 +176,22 @@ class BoxProjects {
 
 			BoxProjects.draw_badge(ui);
 
-			ui.enabled = Config.raw.recent_projects.length > 0;
+			ui.enabled = config_raw.recent_projects.length > 0;
 			BoxProjects.hsearch.text = zui_text_input(BoxProjects.hsearch, tr("Search"), zui_align_t.LEFT, true, true);
 			ui.enabled = true;
 
-			for (let path of Config.raw.recent_projects) {
+			for (let path of config_raw.recent_projects) {
 				let file: string = path;
 				///if krom_windows
 				file = string_replace_all(path, "/", "\\");
 				///else
 				file = string_replace_all(path, "\\", "/");
 				///end
-				file = file.substr(file.lastIndexOf(Path.sep) + 1);
+				file = file.substr(file.lastIndexOf(path_sep) + 1);
 
 				if (file.toLowerCase().indexOf(BoxProjects.hsearch.text.toLowerCase()) < 0) continue; // Search filter
 
-				if (zui_button(file, zui_align_t.LEFT) && File.exists(path)) {
+				if (zui_button(file, zui_align_t.LEFT) && file_exists(path)) {
 					let current: image_t = _g2_current;
 					if (current != null) g2_end();
 
@@ -203,16 +203,16 @@ class BoxProjects {
 				if (ui.is_hovered) zui_tooltip(path);
 			}
 
-			ui.enabled = Config.raw.recent_projects.length > 0;
+			ui.enabled = config_raw.recent_projects.length > 0;
 			if (zui_button(tr("Clear"), zui_align_t.LEFT)) {
-				Config.raw.recent_projects = [];
-				Config.save();
+				config_raw.recent_projects = [];
+				config_save();
 			}
 			ui.enabled = true;
 
 			zui_end_element();
-			if (zui_button(tr("New Project..."), zui_align_t.LEFT)) Project.project_new_box();
-			if (zui_button(tr("Open..."), zui_align_t.LEFT)) Project.project_open();
+			if (zui_button(tr("New .."), zui_align_t.LEFT)) project_new_box();
+			if (zui_button(tr("Open..."), zui_align_t.LEFT)) project_open();
 		}
 	}
 
@@ -225,13 +225,13 @@ class BoxProjects {
 	static get_started_tab = (ui: zui_t) => {
 		if (zui_tab(BoxProjects.htab, tr("Get Started"), true)) {
 			if (zui_button(tr("Manual"))) {
-				File.load_url(manifest_url + "/manual");
+				file_load_url(manifest_url + "/manual");
 			}
 			if (zui_button(tr("How To"))) {
-				File.load_url(manifest_url + "/howto");
+				file_load_url(manifest_url + "/howto");
 			}
 			if (zui_button(tr("What's New"))) {
-				File.load_url(manifest_url + "/notes");
+				file_load_url(manifest_url + "/notes");
 			}
 		}
 	}

@@ -8,16 +8,16 @@ class RenderPathPaint {
 		{
 			let t = render_target_create();
 			t.name = "texpaint_blend0";
-			t.width = Config.getTextureResX();
-			t.height = Config.getTextureResY();
+			t.width = config_getTextureResX();
+			t.height = config_getTextureResY();
 			t.format = "R8";
 			render_path_create_render_target(t);
 		}
 		{
 			let t = render_target_create();
 			t.name = "texpaint_blend1";
-			t.width = Config.getTextureResX();
-			t.height = Config.getTextureResY();
+			t.width = config_getTextureResX();
+			t.height = config_getTextureResY();
 			t.format = "R8";
 			render_path_create_render_target(t);
 		}
@@ -60,9 +60,9 @@ class RenderPathPaint {
 	static commandsPaint = (dilation = true) => {
 		let tid = "";
 
-		if (Context.raw.pdirty > 0) {
+		if (context_raw.pdirty > 0) {
 
-			if (Context.raw.tool == WorkspaceTool.ToolPicker) {
+			if (context_raw.tool == WorkspaceTool.ToolPicker) {
 
 					///if krom_metal
 					// render_path_set_target("texpaint_picker");
@@ -77,7 +77,7 @@ class RenderPathPaint {
 					// render_path_clear_target(0xff000000);
 					///end
 					render_path_bind_target("gbuffer2", "gbuffer2");
-					// tid = Context.raw.layer.id;
+					// tid = context_raw.layer.id;
 					render_path_bind_target("texpaint" + tid, "texpaint");
 					render_path_bind_target("texpaint_nor" + tid, "texpaint_nor");
 					render_path_bind_target("texpaint_pack" + tid, "texpaint_pack");
@@ -93,39 +93,39 @@ class RenderPathPaint {
 					let c = image_get_pixels(texpaint_pack_picker);
 					let d = image_get_pixels(texpaint_uv_picker);
 
-					if (Context.raw.colorPickerCallback != null) {
-						Context.raw.colorPickerCallback(Context.raw.pickedColor);
+					if (context_raw.colorPickerCallback != null) {
+						context_raw.colorPickerCallback(context_raw.pickedColor);
 					}
 
 					// Picked surface values
 					// ///if (krom_metal || krom_vulkan)
-					// Context.raw.pickedColor.base.Rb = a.get(2);
-					// Context.raw.pickedColor.base.Gb = a.get(1);
-					// Context.raw.pickedColor.base.Bb = a.get(0);
-					// Context.raw.pickedColor.normal.Rb = b.get(2);
-					// Context.raw.pickedColor.normal.Gb = b.get(1);
-					// Context.raw.pickedColor.normal.Bb = b.get(0);
-					// Context.raw.pickedColor.occlusion = c.get(2) / 255;
-					// Context.raw.pickedColor.roughness = c.get(1) / 255;
-					// Context.raw.pickedColor.metallic = c.get(0) / 255;
-					// Context.raw.pickedColor.height = c.get(3) / 255;
-					// Context.raw.pickedColor.opacity = a.get(3) / 255;
-					// Context.raw.uvxPicked = d.get(2) / 255;
-					// Context.raw.uvyPicked = d.get(1) / 255;
+					// context_raw.pickedColor.base.Rb = a.get(2);
+					// context_raw.pickedColor.base.Gb = a.get(1);
+					// context_raw.pickedColor.base.Bb = a.get(0);
+					// context_raw.pickedColor.normal.Rb = b.get(2);
+					// context_raw.pickedColor.normal.Gb = b.get(1);
+					// context_raw.pickedColor.normal.Bb = b.get(0);
+					// context_raw.pickedColor.occlusion = c.get(2) / 255;
+					// context_raw.pickedColor.roughness = c.get(1) / 255;
+					// context_raw.pickedColor.metallic = c.get(0) / 255;
+					// context_raw.pickedColor.height = c.get(3) / 255;
+					// context_raw.pickedColor.opacity = a.get(3) / 255;
+					// context_raw.uvxPicked = d.get(2) / 255;
+					// context_raw.uvyPicked = d.get(1) / 255;
 					// ///else
-					// Context.raw.pickedColor.base.Rb = a.get(0);
-					// Context.raw.pickedColor.base.Gb = a.get(1);
-					// Context.raw.pickedColor.base.Bb = a.get(2);
-					// Context.raw.pickedColor.normal.Rb = b.get(0);
-					// Context.raw.pickedColor.normal.Gb = b.get(1);
-					// Context.raw.pickedColor.normal.Bb = b.get(2);
-					// Context.raw.pickedColor.occlusion = c.get(0) / 255;
-					// Context.raw.pickedColor.roughness = c.get(1) / 255;
-					// Context.raw.pickedColor.metallic = c.get(2) / 255;
-					// Context.raw.pickedColor.height = c.get(3) / 255;
-					// Context.raw.pickedColor.opacity = a.get(3) / 255;
-					// Context.raw.uvxPicked = d.get(0) / 255;
-					// Context.raw.uvyPicked = d.get(1) / 255;
+					// context_raw.pickedColor.base.Rb = a.get(0);
+					// context_raw.pickedColor.base.Gb = a.get(1);
+					// context_raw.pickedColor.base.Bb = a.get(2);
+					// context_raw.pickedColor.normal.Rb = b.get(0);
+					// context_raw.pickedColor.normal.Gb = b.get(1);
+					// context_raw.pickedColor.normal.Bb = b.get(2);
+					// context_raw.pickedColor.occlusion = c.get(0) / 255;
+					// context_raw.pickedColor.roughness = c.get(1) / 255;
+					// context_raw.pickedColor.metallic = c.get(2) / 255;
+					// context_raw.pickedColor.height = c.get(3) / 255;
+					// context_raw.pickedColor.opacity = a.get(3) / 255;
+					// context_raw.uvxPicked = d.get(0) / 255;
+					// context_raw.uvyPicked = d.get(1) / 255;
 					// ///end
 			}
 			else {
@@ -142,9 +142,9 @@ class RenderPathPaint {
 				render_path_bind_target("texpaint_blend1", "paintmask");
 
 				// Read texcoords from gbuffer
-				let readTC = Context.raw.tool == WorkspaceTool.ToolClone ||
-							 Context.raw.tool == WorkspaceTool.ToolBlur ||
-							 Context.raw.tool == WorkspaceTool.ToolSmudge;
+				let readTC = context_raw.tool == WorkspaceTool.ToolClone ||
+							 context_raw.tool == WorkspaceTool.ToolBlur ||
+							 context_raw.tool == WorkspaceTool.ToolSmudge;
 				if (readTC) {
 					render_path_bind_target("gbuffer2", "gbuffer2");
 				}
@@ -155,7 +155,7 @@ class RenderPathPaint {
 	}
 
 	static commandsCursor = () => {
-		let tool = Context.raw.tool;
+		let tool = context_raw.tool;
 		if (tool != WorkspaceTool.ToolEraser &&
 			tool != WorkspaceTool.ToolClone &&
 			tool != WorkspaceTool.ToolBlur &&
@@ -171,13 +171,13 @@ class RenderPathPaint {
 			return;
 		}
 
-		let mx = Context.raw.paintVec.x;
-		let my = 1.0 - Context.raw.paintVec.y;
-		if (Context.raw.brushLocked) {
-			mx = (Context.raw.lockStartedX - app_x()) / app_w();
-			my = 1.0 - (Context.raw.lockStartedY - app_y()) / app_h();
+		let mx = context_raw.paintVec.x;
+		let my = 1.0 - context_raw.paintVec.y;
+		if (context_raw.brushLocked) {
+			mx = (context_raw.lockStartedX - app_x()) / app_w();
+			my = 1.0 - (context_raw.lockStartedY - app_y()) / app_h();
 		}
-		let radius = Context.raw.brushRadius;
+		let radius = context_raw.brushRadius;
 		RenderPathPaint.drawCursor(mx, my, radius / 3.4);
 	}
 
@@ -188,7 +188,7 @@ class RenderPathPaint {
 
 		render_path_set_target("");
 		g4_set_pipeline(base_pipeCursor);
-		let img = Res.get("cursor.k");
+		let img = resource_get("cursor.k");
 		g4_set_tex(base_cursorTex, img);
 		let gbuffer0 = render_path_render_targets.get("gbuffer0")._image;
 		g4_set_tex_depth(base_cursorGbufferD, gbuffer0);
@@ -215,7 +215,7 @@ class RenderPathPaint {
 	}
 
 	static paintEnabled = (): bool => {
-		return !Context.raw.foregroundEvent;
+		return !context_raw.foregroundEvent;
 	}
 
 	static begin = () => {
@@ -224,11 +224,11 @@ class RenderPathPaint {
 
 	static end = () => {
 		RenderPathPaint.commandsCursor();
-		Context.raw.ddirty--;
-		Context.raw.rdirty--;
+		context_raw.ddirty--;
+		context_raw.rdirty--;
 
 		if (!RenderPathPaint.paintEnabled()) return;
-		Context.raw.pdirty--;
+		context_raw.pdirty--;
 	}
 
 	static draw = () => {
@@ -236,8 +236,8 @@ class RenderPathPaint {
 
 		RenderPathPaint.commandsPaint();
 
-		if (Context.raw.brushBlendDirty) {
-			Context.raw.brushBlendDirty = false;
+		if (context_raw.brushBlendDirty) {
+			context_raw.brushBlendDirty = false;
 			///if krom_metal
 			render_path_set_target("texpaint_blend0");
 			render_path_clear_target(0x00000000);
@@ -265,16 +265,16 @@ class RenderPathPaint {
 			if (render_path_render_targets.get("texpaint_node") == null) {
 				let t = render_target_create();
 				t.name = "texpaint_node";
-				t.width = Config.getTextureResX();
-				t.height = Config.getTextureResY();
+				t.width = config_getTextureResX();
+				t.height = config_getTextureResY();
 				t.format = "RGBA32";
 				render_path_render_targets.set(t.name, t);
 			}
 			if (render_path_render_targets.get("texpaint_node_target") == null) {
 				let t = render_target_create();
 				t.name = "texpaint_node_target";
-				t.width = Config.getTextureResX();
-				t.height = Config.getTextureResY();
+				t.width = config_getTextureResX();
+				t.height = config_getTextureResY();
 				t.format = "RGBA32";
 				render_path_render_targets.set(t.name, t);
 			}

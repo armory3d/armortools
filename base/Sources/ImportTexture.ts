@@ -2,14 +2,14 @@
 class ImportTexture {
 
 	static run = (path: string, hdr_as_envmap: bool = true) => {
-		if (!Path.is_texture(path)) {
-			if (!Context.enable_import_plugin(path)) {
-				Console.error(Strings.error1());
+		if (!path_is_texture(path)) {
+			if (!context_enable_import_plugin(path)) {
+				console_error(strings_error1());
 				return;
 			}
 		}
 
-		for (let a of Project.assets) {
+		for (let a of project_assets) {
 			// Already imported
 			if (a.file == path) {
 				// Set as envmap
@@ -19,27 +19,27 @@ class ImportTexture {
 						ImportEnvmap.run(path, image);
 					});
 				}
-				Console.info(Strings.info0());
+				console_info(strings_info0());
 				return;
 			}
 		}
 
 		let ext: string = path.substr(path.lastIndexOf(".") + 1);
-		let importer: (s: string, f: (img: image_t)=>void)=>void = Path.texture_importers.get(ext);
+		let importer: (s: string, f: (img: image_t)=>void)=>void = path_texture_importers.get(ext);
 		let cached: bool = data_cached_images.get(path) != null; // Already loaded or pink texture for missing file
 		if (importer == null || cached) importer = ImportTexture.default_importer;
 
 		importer(path, (image: image_t) => {
 			data_cached_images.set(path, image);
-			let ar: string[] = path.split(Path.sep);
+			let ar: string[] = path.split(path_sep);
 			let name: string = ar[ar.length - 1];
-			let asset: asset_t = {name: name, file: path, id: Project.asset_id++};
-			Project.assets.push(asset);
-			if (Context.raw.texture == null) Context.raw.texture = asset;
-			Project.asset_names.push(name);
-			Project.asset_map.set(asset.id, image);
+			let asset: asset_t = {name: name, file: path, id: project_asset_id++};
+			project_assets.push(asset);
+			if (context_raw.texture == null) context_raw.texture = asset;
+			project_asset_names.push(name);
+			project_asset_map.set(asset.id, image);
 			UIBase.hwnds[tab_area_t.STATUS].redraws = 2;
-			Console.info(tr("Texture imported:") + " " + name);
+			console_info(tr("Texture imported:") + " " + name);
 
 			// Set as envmap
 			if (hdr_as_envmap && path.toLowerCase().endsWith(".hdr")) {

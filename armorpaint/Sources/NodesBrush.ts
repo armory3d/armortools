@@ -30,8 +30,8 @@ class NodesBrush {
 		for (let c of NodesBrush.list) {
 			for (let n of c) {
 				if (n.type == nodeType) {
-					let canvas: zui_node_canvas_t = Context.raw.brush.canvas;
-					let nodes: zui_nodes_t = Context.raw.brush.nodes;
+					let canvas: zui_node_canvas_t = context_raw.brush.canvas;
+					let nodes: zui_nodes_t = context_raw.brush.nodes;
 					let node: zui_node_t = UINodes.make_node(n, nodes, canvas);
 					canvas.nodes.push(node);
 					return node;

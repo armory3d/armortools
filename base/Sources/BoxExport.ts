@@ -61,7 +61,7 @@ class BoxExport {
 
 	///if (is_paint || is_lab)
 	static tab_export_textures = (ui: zui_t, title: string, bake_material: bool = false) => {
-		let tab_vertical: bool = Config.raw.touch_ui;
+		let tab_vertical: bool = config_raw.touch_ui;
 		if (zui_tab(BoxExport.htab, title, tab_vertical)) {
 
 			zui_row([0.5, 0.5]);
@@ -100,22 +100,22 @@ class BoxExport {
 
 			zui_row([0.5, 0.5]);
 			if (base_bits_handle.position == texture_bits_t.BITS8) {
-				Context.raw.format_type = zui_combo(zui_handle("boxexport_0", { position: Context.raw.format_type }), ["png", "jpg"], tr("Format"), true);
+				context_raw.format_type = zui_combo(zui_handle("boxexport_0", { position: context_raw.format_type }), ["png", "jpg"], tr("Format"), true);
 			}
 			else {
-				Context.raw.format_type = zui_combo(zui_handle("boxexport_1", { position: Context.raw.format_type }), ["exr"], tr("Format"), true);
+				context_raw.format_type = zui_combo(zui_handle("boxexport_1", { position: context_raw.format_type }), ["exr"], tr("Format"), true);
 			}
 
-			ui.enabled = Context.raw.format_type == texture_ldr_format_t.JPG && base_bits_handle.position == texture_bits_t.BITS8;
-			Context.raw.format_quality = zui_slider(zui_handle("boxexport_2", { value: Context.raw.format_quality }), tr("Quality"), 0.0, 100.0, true, 1);
+			ui.enabled = context_raw.format_type == texture_ldr_format_t.JPG && base_bits_handle.position == texture_bits_t.BITS8;
+			context_raw.format_quality = zui_slider(zui_handle("boxexport_2", { value: context_raw.format_quality }), tr("Quality"), 0.0, 100.0, true, 1);
 			ui.enabled = true;
 
 			///if is_paint
 			zui_row([0.5, 0.5]);
 			ui.enabled = !bake_material;
 			let layers_export_handle: zui_handle_t = zui_handle("boxexport_3");
-			layers_export_handle.position = Context.raw.layers_export;
-			Context.raw.layers_export = zui_combo(layers_export_handle, [tr("Visible"), tr("Selected"), tr("Per Object"), tr("Per Udim Tile")], tr("Layers"), true);
+			layers_export_handle.position = context_raw.layers_export;
+			context_raw.layers_export = zui_combo(layers_export_handle, [tr("Visible"), tr("Selected"), tr("Per Object"), tr("Per Udim Tile")], tr("Layers"), true);
 			ui.enabled = true;
 			///end
 
@@ -123,8 +123,8 @@ class BoxExport {
 			if (BoxExport.hpreset.changed) BoxExport.preset = null;
 
 			let layers_destination_handle: zui_handle_t = zui_handle("boxexport_4");
-			layers_destination_handle.position = Context.raw.layers_destination;
-			Context.raw.layers_destination = zui_combo(layers_destination_handle, [tr("Disk"), tr("Packed")], tr("Destination"), true);
+			layers_destination_handle.position = context_raw.layers_destination;
+			context_raw.layers_destination = zui_combo(layers_destination_handle, [tr("Disk"), tr("Packed")], tr("Destination"), true);
 
 			zui_end_element();
 
@@ -134,36 +134,36 @@ class BoxExport {
 			}
 			if (zui_button(tr("Export"))) {
 				UIBox.hide();
-				if (Context.raw.layers_destination == export_destination_t.PACKED) {
-					Context.raw.texture_export_path = "/";
+				if (context_raw.layers_destination == export_destination_t.PACKED) {
+					context_raw.texture_export_path = "/";
 					let _init = () => {
 						///if is_paint
-						ExportTexture.run(Context.raw.texture_export_path, bake_material);
+						ExportTexture.run(context_raw.texture_export_path, bake_material);
 						///end
 						///if is_lab
-						ExportTexture.run(Context.raw.texture_export_path);
+						ExportTexture.run(context_raw.texture_export_path);
 						///end
 					}
 					app_notify_on_init(_init);
 				}
 				else {
-					let filters = base_bits_handle.position != texture_bits_t.BITS8 ? "exr" : Context.raw.format_type == texture_ldr_format_t.PNG ? "png" : "jpg";
+					let filters = base_bits_handle.position != texture_bits_t.BITS8 ? "exr" : context_raw.format_type == texture_ldr_format_t.PNG ? "png" : "jpg";
 					UIFiles.show(filters, true, false, (path: string) => {
-						Context.raw.texture_export_path = path;
+						context_raw.texture_export_path = path;
 						let doExport = () => {
 							let _init = () => {
 								///if is_paint
-								ExportTexture.run(Context.raw.texture_export_path, bake_material);
+								ExportTexture.run(context_raw.texture_export_path, bake_material);
 								///end
 								///if is_lab
-								ExportTexture.run(Context.raw.texture_export_path);
+								ExportTexture.run(context_raw.texture_export_path);
 								///end
 							}
 							app_notify_on_init(_init);
 						}
 						///if (krom_android || krom_ios)
 						base_notify_on_next_frame(() => {
-							Console.toast(tr("Exporting textures"));
+							console_toast(tr("Exporting textures"));
 							base_notify_on_next_frame(doExport);
 						});
 						///else
@@ -172,12 +172,12 @@ class BoxExport {
 					});
 				}
 			}
-			if (ui.is_hovered) zui_tooltip(tr("Export texture files") + ` (${Config.keymap.file_export_textures})`);
+			if (ui.is_hovered) zui_tooltip(tr("Export texture files") + ` (${config_keymap.file_export_textures})`);
 		}
 	}
 
 	static tab_presets = (ui: zui_t) => {
-		let tab_vertical: bool = Config.raw.touch_ui;
+		let tab_vertical: bool = config_raw.touch_ui;
 		if (zui_tab(BoxExport.htab, tr("Presets"), tab_vertical)) {
 			zui_row([3 / 5, 1 / 5, 1 / 5]);
 
@@ -186,7 +186,7 @@ class BoxExport {
 
 			if (zui_button(tr("New"))) {
 				UIBox.show_custom((ui: zui_t) => {
-					let tab_vertical: bool = Config.raw.touch_ui;
+					let tab_vertical: bool = config_raw.touch_ui;
 					if (zui_tab(zui_handle("boxexport_5"), tr("New Preset"), tab_vertical)) {
 						zui_row([0.5, 0.5]);
 						let preset_name: string = zui_text_input(zui_handle("boxexport_6", { text: "new_preset" }), tr("Name"));
@@ -207,15 +207,15 @@ class BoxExport {
 				UIFiles.show("json", false, false, (path: string) => {
 					path = path.toLowerCase();
 					if (path.endsWith(".json")) {
-						let filename: string = path.substr(path.lastIndexOf(Path.sep) + 1);
-						let dst_path: string = Path.data() + Path.sep + "export_presets" + Path.sep + filename;
-						File.copy(path, dst_path); // Copy to presets folder
+						let filename: string = path.substr(path.lastIndexOf(path_sep) + 1);
+						let dst_path: string = path_data() + path_sep + "export_presets" + path_sep + filename;
+						file_copy(path, dst_path); // Copy to presets folder
 						BoxExport.fetch_presets();
 						BoxExport.preset = null;
 						BoxExport.hpreset.position = BoxExport.files.indexOf(filename.substr(0, filename.length - 5)); // Strip .json
-						Console.info(tr("Preset imported:") + " " + filename);
+						console_info(tr("Preset imported:") + " " + filename);
 					}
-					else Console.error(Strings.error1());
+					else console_error(strings_error1());
 				});
 			}
 
@@ -290,29 +290,29 @@ class BoxExport {
 
 	///if is_paint
 	static tab_atlases = (ui: zui_t) => {
-		let tab_vertical: bool = Config.raw.touch_ui;
+		let tab_vertical: bool = config_raw.touch_ui;
 		if (zui_tab(BoxExport.htab, tr("Atlases"), tab_vertical)) {
-			if (Project.atlas_objects == null || Project.atlas_objects.length != Project.paint_objects.length) {
-				Project.atlas_objects = [];
-				Project.atlas_names = [];
-				for (let i: i32 = 0; i < Project.paint_objects.length; ++i) {
-					Project.atlas_objects.push(0);
-					Project.atlas_names.push(tr("Atlas") + " " + (i + 1));
+			if (project_atlas_objects == null || project_atlas_objects.length != project_paint_objects.length) {
+				project_atlas_objects = [];
+				project_atlas_names = [];
+				for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+					project_atlas_objects.push(0);
+					project_atlas_names.push(tr("Atlas") + " " + (i + 1));
 				}
 			}
-			for (let i: i32 = 0; i < Project.paint_objects.length; ++i) {
+			for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 				zui_row([1 / 2, 1 / 2]);
-				zui_text(Project.paint_objects[i].base.name);
+				zui_text(project_paint_objects[i].base.name);
 				let hatlas: zui_handle_t = zui_nest(zui_handle("boxexport_7"), i);
-				hatlas.position = Project.atlas_objects[i];
-				Project.atlas_objects[i] = zui_combo(hatlas, Project.atlas_names, tr("Atlas"));
+				hatlas.position = project_atlas_objects[i];
+				project_atlas_objects[i] = zui_combo(hatlas, project_atlas_names, tr("Atlas"));
 			}
 		}
 	}
 	///end
 
 	static show_mesh = () => {
-		BoxExport.export_mesh_handle.position = Context.raw.export_mesh_index;
+		BoxExport.export_mesh_handle.position = context_raw.export_mesh_index;
 		UIBox.show_custom((ui: zui_t) => {
 			let htab: zui_handle_t = zui_handle("boxexport_8");
 			BoxExport.tab_export_mesh(ui, htab);
@@ -320,22 +320,22 @@ class BoxExport {
 	}
 
 	static tab_export_mesh = (ui: zui_t, htab: zui_handle_t) => {
-		let tab_vertical: bool = Config.raw.touch_ui;
+		let tab_vertical: bool = config_raw.touch_ui;
 		if (zui_tab(htab, tr("Export Mesh"), tab_vertical)) {
 
 			zui_row([1 / 2, 1 / 2]);
 
-			Context.raw.export_mesh_format = zui_combo(zui_handle("boxexport_9", { position: Context.raw.export_mesh_format }), ["obj", "arm"], tr("Format"), true);
+			context_raw.export_mesh_format = zui_combo(zui_handle("boxexport_9", { position: context_raw.export_mesh_format }), ["obj", "arm"], tr("Format"), true);
 
 			let ar: string[] = [tr("All")];
-			for (let p of Project.paint_objects) ar.push(p.base.name);
+			for (let p of project_paint_objects) ar.push(p.base.name);
 			zui_combo(BoxExport.export_mesh_handle, ar, tr("Meshes"), true);
 
 			let apply_displacement: bool = zui_check(zui_handle("boxexport_10"), tr("Apply Displacement"));
 
 			let tris: i32 = 0;
 			let pos: i32 = BoxExport.export_mesh_handle.position;
-			let paint_objects: mesh_object_t[] = pos == 0 ? Project.paint_objects : [Project.paint_objects[pos - 1]];
+			let paint_objects: mesh_object_t[] = pos == 0 ? project_paint_objects : [project_paint_objects[pos - 1]];
 			for (let po of paint_objects) {
 				for (let inda of po.data.index_arrays) {
 					tris += Math.floor(inda.values.length / 3);
@@ -349,7 +349,7 @@ class BoxExport {
 			}
 			if (zui_button(tr("Export"))) {
 				UIBox.hide();
-				UIFiles.show(Context.raw.export_mesh_format == mesh_format_t.OBJ ? "obj" : "arm", true, false, (path: string) => {
+				UIFiles.show(context_raw.export_mesh_format == mesh_format_t.OBJ ? "obj" : "arm", true, false, (path: string) => {
 					///if (krom_android || krom_ios)
 					let f: string = sys_title();
 					///else
@@ -357,11 +357,11 @@ class BoxExport {
 					///end
 					if (f == "") f = tr("untitled");
 					let doExport = () => {
-						ExportMesh.run(path + Path.sep + f, BoxExport.export_mesh_handle.position == 0 ? null : [Project.paint_objects[BoxExport.export_mesh_handle.position - 1]], apply_displacement);
+						ExportMesh.run(path + path_sep + f, BoxExport.export_mesh_handle.position == 0 ? null : [project_paint_objects[BoxExport.export_mesh_handle.position - 1]], apply_displacement);
 					}
 					///if (krom_android || krom_ios)
 					base_notify_on_next_frame(() => {
-						Console.toast(tr("Exporting mesh"));
+						console_toast(tr("Exporting mesh"));
 						base_notify_on_next_frame(doExport);
 					});
 					///else
@@ -376,14 +376,14 @@ class BoxExport {
 	static show_material = () => {
 		UIBox.show_custom((ui: zui_t) => {
 			let htab: zui_handle_t = zui_handle("boxexport_11");
-			let tab_vertical: bool = Config.raw.touch_ui;
+			let tab_vertical: bool = config_raw.touch_ui;
 			if (zui_tab(htab, tr("Export Material"), tab_vertical)) {
 				let h1: zui_handle_t = zui_handle("boxexport_12");
 				let h2: zui_handle_t = zui_handle("boxexport_13");
-				h1.selected = Context.raw.pack_assets_on_export;
-				h2.selected = Context.raw.write_icon_on_export;
-				Context.raw.pack_assets_on_export = zui_check(h1, tr("Pack Assets"));
-				Context.raw.write_icon_on_export = zui_check(h2, tr("Export Icon"));
+				h1.selected = context_raw.pack_assets_on_export;
+				h2.selected = context_raw.write_icon_on_export;
+				context_raw.pack_assets_on_export = zui_check(h1, tr("Pack Assets"));
+				context_raw.write_icon_on_export = zui_check(h2, tr("Export Icon"));
 				zui_row([0.5, 0.5]);
 				if (zui_button(tr("Cancel"))) {
 					UIBox.hide();
@@ -394,7 +394,7 @@ class BoxExport {
 						let f: string = UIFiles.filename;
 						if (f == "") f = tr("untitled");
 						app_notify_on_init(() => {
-							ExportArm.run_material(path + Path.sep + f);
+							ExportArm.run_material(path + path_sep + f);
 						});
 					});
 				}
@@ -405,14 +405,14 @@ class BoxExport {
 	static show_brush = () => {
 		UIBox.show_custom((ui: zui_t) => {
 			let htab: zui_handle_t = zui_handle("boxexport_14");
-			let tab_vertical: bool = Config.raw.touch_ui;
+			let tab_vertical: bool = config_raw.touch_ui;
 			if (zui_tab(htab, tr("Export Brush"), tab_vertical)) {
 				let h1: zui_handle_t = zui_handle("boxexport_15");
 				let h2: zui_handle_t = zui_handle("boxexport_16");
-				h1.selected = Context.raw.pack_assets_on_export;
-				h2.selected = Context.raw.write_icon_on_export;
-				Context.raw.pack_assets_on_export = zui_check(h1, tr("Pack Assets"));
-				Context.raw.write_icon_on_export = zui_check(h2, tr("Export Icon"));
+				h1.selected = context_raw.pack_assets_on_export;
+				h2.selected = context_raw.write_icon_on_export;
+				context_raw.pack_assets_on_export = zui_check(h1, tr("Pack Assets"));
+				context_raw.write_icon_on_export = zui_check(h2, tr("Export Icon"));
 				zui_row([0.5, 0.5]);
 				if (zui_button(tr("Cancel"))) {
 					UIBox.hide();
@@ -423,7 +423,7 @@ class BoxExport {
 						let f: string = UIFiles.filename;
 						if (f == "") f = tr("untitled");
 						app_notify_on_init(() => {
-							ExportArm.run_brush(path + Path.sep + f);
+							ExportArm.run_brush(path + path_sep + f);
 						});
 					});
 				}
@@ -434,7 +434,7 @@ class BoxExport {
 
 	///if (is_paint || is_lab)
 	static fetch_presets = () => {
-		BoxExport.files = File.read_directory(Path.data() + Path.sep + "export_presets");
+		BoxExport.files = file_read_directory(path_data() + path_sep + "export_presets");
 		for (let i: i32 = 0; i < BoxExport.files.length; ++i) {
 			BoxExport.files[i] = BoxExport.files[i].substr(0, BoxExport.files[i].length - 5); // Strip .json
 		}
@@ -456,14 +456,14 @@ class BoxExport {
 }
 `;
 		if (!name.endsWith(".json")) name += ".json";
-		let path: string = Path.data() + Path.sep + "export_presets" + Path.sep + name;
+		let path: string = path_data() + path_sep + "export_presets" + path_sep + name;
 		krom_file_save_bytes(path, sys_string_to_buffer(template));
 	}
 
 	static save_preset = () => {
 		let name: string = BoxExport.files[BoxExport.hpreset.position];
 		if (name == "generic") return; // generic is const
-		let path: string = Path.data() + Path.sep + "export_presets" + Path.sep + name + ".json";
+		let path: string = path_data() + path_sep + "export_presets" + path_sep + name + ".json";
 		krom_file_save_bytes(path, sys_string_to_buffer(JSON.stringify(BoxExport.preset)));
 	}
 	///end

@@ -9,9 +9,9 @@ class ImageTextureNode extends LogicNode {
 	}
 
 	override getAsImage = (from: i32, done: (img: image_t)=>void) => {
-		let index = Project.assetNames.indexOf(this.file);
-		let asset = Project.assets[index];
-		done(Project.getImage(asset));
+		let index = project_assetNames.indexOf(this.file);
+		let asset = project_assets[index];
+		done(project_getImage(asset));
 	}
 
 	override getCachedImage = (): image_t => {
