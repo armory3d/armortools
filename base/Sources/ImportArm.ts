@@ -33,11 +33,11 @@ class ImportArm {
 
 		project_new(import_as_mesh);
 		project_filepath = path;
-		UIFiles.filename = path.substring(path.lastIndexOf(path_sep) + 1, path.lastIndexOf("."));
+		ui_files_filename = path.substring(path.lastIndexOf(path_sep) + 1, path.lastIndexOf("."));
 		///if (krom_android || krom_ios)
-		sys_title_set(UIFiles.filename);
+		sys_title_set(ui_files_filename);
 		///else
-		sys_title_set(UIFiles.filename + " - " + manifest_title);
+		sys_title_set(ui_files_filename + " - " + manifest_title);
 		///end
 
 		///if (is_paint || is_sculpt)
@@ -66,7 +66,7 @@ class ImportArm {
 		base_res_handle.position = config_get_texture_res_pos(l0.res);
 		let bits_pos: texture_bits_t = l0.bpp == 8 ? texture_bits_t.BITS8 : l0.bpp == 16 ? texture_bits_t.BITS16 : texture_bits_t.BITS32;
 		base_bits_handle.position = bits_pos;
-		let bytes_per_pixel: i32 = Math.floor(l0.bpp / 8);
+		let bytes_per_pixel: i32 = math_floor(l0.bpp / 8);
 		let format: tex_format_t = l0.bpp == 8 ? tex_format_t.RGBA32 : l0.bpp == 16 ? tex_format_t.RGBA64 : tex_format_t.RGBA128;
 		///end
 
@@ -160,7 +160,7 @@ class ImportArm {
 		///end
 
 		// No mask by default
-		if (context_raw.merged_object == null) UtilMesh.merge_mesh();
+		if (context_raw.merged_object == null) util_mesh_merge();
 		///end
 
 		context_select_paint_object(context_main_object());
@@ -306,8 +306,8 @@ class ImportArm {
 		}
 		///end
 
-		UINodes.hwnd.redraws = 2;
-		UINodes.group_stack = [];
+		ui_nodes_hwnd.redraws = 2;
+		ui_nodes_group_stack = [];
 		project_material_groups = [];
 		if (project.material_groups != null) {
 			for (let g of project.material_groups) project_material_groups.push({ canvas: g, nodes: zui_nodes_create() });
@@ -317,7 +317,7 @@ class ImportArm {
 		for (let m of project_materials) {
 			context_raw.material = m;
 			MakeMaterial.parse_paint_material();
-			UtilRender.make_material_preview();
+			util_render_make_material_preview();
 		}
 
 		project_brushes = [];
@@ -326,7 +326,7 @@ class ImportArm {
 			context_raw.brush = SlotBrush.create(n);
 			project_brushes.push(context_raw.brush);
 			MakeMaterial.parse_brush();
-			UtilRender.make_brush_preview();
+			util_render_make_brush_preview();
 		}
 
 		// Fill layers
@@ -339,8 +339,8 @@ class ImportArm {
 			}
 		}
 
-		UIBase.hwnds[tab_area_t.SIDEBAR0].redraws = 2;
-		UIBase.hwnds[tab_area_t.SIDEBAR1].redraws = 2;
+		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
+		ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 		///end
 
 		///if is_lab
@@ -374,7 +374,7 @@ class ImportArm {
 			transform_build_matrix(object.base.transform);
 			object.base.name = md.name;
 			project_paint_objects.push(object);
-			UtilMesh.merge_mesh();
+			util_mesh_merge();
 			viewport_scale_to_bounds();
 		}
 		app_notify_on_init(base_init_layers);
@@ -432,13 +432,13 @@ class ImportArm {
 			for (let m of imported) {
 				context_set_material(m);
 				MakeMaterial.parse_paint_material();
-				UtilRender.make_material_preview();
+				util_render_make_material_preview();
 			}
 		}
 		app_notify_on_init(_init);
 
-		UINodes.group_stack = [];
-		UIBase.hwnds[tab_area_t.SIDEBAR1].redraws = 2;
+		ui_nodes_group_stack = [];
+		ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 		data_delete_blob(path);
 	}
 
@@ -502,12 +502,12 @@ class ImportArm {
 		let _init = () => {
 			for (let b of imported) {
 				context_set_brush(b);
-				UtilRender.make_brush_preview();
+				util_render_make_brush_preview();
 			}
 		}
 		app_notify_on_init(_init);
 
-		UIBase.hwnds[tab_area_t.SIDEBAR1].redraws = 2;
+		ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 		data_delete_blob(path);
 	}
 	///end
@@ -533,7 +533,7 @@ class ImportArm {
 				project_raw.swatches.push(s);
 			}
 		}
-		UIBase.hwnds[tab_area_t.STATUS].redraws = 2;
+		ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
 		data_delete_blob(path);
 	}
 

@@ -14,7 +14,7 @@ class ExportArm {
 		///if (is_paint || is_sculpt)
 		let mnodes: zui_node_canvas_t[] = [];
 		for (let m of project_materials) {
-			let c: zui_node_canvas_t = JSON.parse(JSON.stringify(m.canvas));
+			let c: zui_node_canvas_t = json_parse(json_stringify(m.canvas));
 			for (let n of c.nodes) ExportArm.export_node(n);
 			mnodes.push(c);
 		}
@@ -24,7 +24,7 @@ class ExportArm {
 		///end
 
 		///if is_lab
-		let c: zui_node_canvas_t = JSON.parse(JSON.stringify(project_canvas));
+		let c: zui_node_canvas_t = json_parse(json_stringify(project_canvas));
 		for (let n of c.nodes) ExportArm.export_node(n);
 		///end
 
@@ -32,7 +32,7 @@ class ExportArm {
 		if (project_material_groups.length > 0) {
 			mgroups = [];
 			for (let g of project_material_groups) {
-				let c: zui_node_canvas_t = JSON.parse(JSON.stringify(g.canvas));
+				let c: zui_node_canvas_t = json_parse(json_stringify(g.canvas));
 				for (let n of c.nodes) ExportArm.export_node(n);
 				mgroups.push(c);
 			}
@@ -156,7 +156,7 @@ class ExportArm {
 		let mesh_icon_pixels: buffer_t = image_get_pixels(mesh_icon);
 		let u8a: Uint8Array = new Uint8Array(mesh_icon_pixels);
 		for (let i: i32 = 0; i < 256 * 256 * 4; ++i) {
-			u8a[i] = Math.floor(Math.pow(u8a[i] / 255, 1.0 / 2.2) * 255);
+			u8a[i] = math_floor(math_pow(u8a[i] / 255, 1.0 / 2.2) * 255);
 		}
 		///if (krom_metal || krom_vulkan)
 		ExportArm.bgra_swap(mesh_icon_pixels);
@@ -229,11 +229,11 @@ class ExportArm {
 		let mnodes: zui_node_canvas_t[] = [];
 		let mgroups: zui_node_canvas_t[] = null;
 		let m: SlotMaterialRaw = context_raw.material;
-		let c: zui_node_canvas_t = JSON.parse(JSON.stringify(m.canvas));
+		let c: zui_node_canvas_t = json_parse(json_stringify(m.canvas));
 		let assets: asset_t[] = [];
-		if (UINodes.has_group(c)) {
+		if (ui_nodes_has_group(c)) {
 			mgroups = [];
-			UINodes.traverse_group(mgroups, c);
+			ui_nodes_traverse_group(mgroups, c);
 			for (let gc of mgroups) for (let n of gc.nodes) ExportArm.export_node(n, assets);
 		}
 		for (let n of c.nodes) ExportArm.export_node(n, assets);
@@ -280,7 +280,7 @@ class ExportArm {
 	///if (krom_metal || krom_vulkan)
 	static bgra_swap = (buffer: ArrayBuffer) => {
 		let view: DataView = new DataView(buffer);
-		for (let i: i32 = 0; i < Math.floor(buffer.byteLength / 4); ++i) {
+		for (let i: i32 = 0; i < math_floor(buffer.byteLength / 4); ++i) {
 			let r: i32 = view.getUint8(i * 4);
 			view.setUint8(i * 4, view.getUint8(i * 4 + 2));
 			view.setUint8(i * 4 + 2, r);
@@ -294,7 +294,7 @@ class ExportArm {
 		if (!path.endsWith(".arm")) path += ".arm";
 		let bnodes: zui_node_canvas_t[] = [];
 		let b: SlotBrushRaw = context_raw.brush;
-		let c: zui_node_canvas_t = JSON.parse(JSON.stringify(b.canvas));
+		let c: zui_node_canvas_t = json_parse(json_stringify(b.canvas));
 		let assets: asset_t[] = [];
 		for (let n of c.nodes) ExportArm.export_node(n, assets);
 		bnodes.push(c);

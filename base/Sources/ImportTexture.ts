@@ -38,7 +38,7 @@ class ImportTexture {
 			if (context_raw.texture == null) context_raw.texture = asset;
 			project_asset_names.push(name);
 			project_asset_map.set(asset.id, image);
-			UIBase.hwnds[tab_area_t.STATUS].redraws = 2;
+			ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
 			console_info(tr("Texture imported:") + " " + name);
 
 			// Set as envmap

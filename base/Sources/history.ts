@@ -193,8 +193,8 @@ function history_undo() {
 			context_raw.material = SlotMaterial.create(project_materials[0].data);
 			project_materials.splice(step.material, 0, context_raw.material);
 			context_raw.material.canvas = step.canvas;
-			UINodes.canvas_changed();
-			UINodes.hwnd.redraws = 2;
+			ui_nodes_canvas_changed();
+			ui_nodes_hwnd.redraws = 2;
 		}
 		else if (step.name == tr("Duplicate Material")) {
 			context_raw.material = project_materials[step.material];
@@ -216,15 +216,15 @@ function history_undo() {
 		context_raw.ddirty = 2;
 
 		///if (is_paint || is_sculpt)
-		UIBase.hwnds[tab_area_t.SIDEBAR0].redraws = 2;
-		UIBase.hwnds[tab_area_t.SIDEBAR1].redraws = 2;
-		if (UIView2D.show) {
-			UIView2D.hwnd.redraws = 2;
+		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
+		ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
+		if (ui_view2d_show) {
+			ui_view2d_hwnd.redraws = 2;
 		}
 
 		if (config_raw.touch_ui) {
 			// Refresh undo & redo buttons
-			UIMenubar.menu_handle.redraws = 2;
+			ui_menubar_menu_handle.redraws = 2;
 		}
 		///end
 	}
@@ -378,8 +378,8 @@ function history_redo() {
 			context_raw.material = SlotMaterial.create(project_materials[0].data);
 			project_materials.splice(step.material, 0, context_raw.material);
 			context_raw.material.canvas = step.canvas;
-			UINodes.canvas_changed();
-			UINodes.hwnd.redraws = 2;
+			ui_nodes_canvas_changed();
+			ui_nodes_hwnd.redraws = 2;
 		}
 		else if (step.name == tr("Delete Material")) {
 			context_raw.material = project_materials[step.material];
@@ -390,8 +390,8 @@ function history_redo() {
 			context_raw.material = SlotMaterial.create(project_materials[0].data);
 			project_materials.splice(step.material, 0, context_raw.material);
 			context_raw.material.canvas = step.canvas;
-			UINodes.canvas_changed();
-			UINodes.hwnd.redraws = 2;
+			ui_nodes_canvas_changed();
+			ui_nodes_hwnd.redraws = 2;
 		}
 		else { // Paint operation
 			let lay: SlotLayerRaw = history_undo_layers[history_undo_i];
@@ -408,13 +408,13 @@ function history_redo() {
 		context_raw.ddirty = 2;
 
 		///if (is_paint || is_sculpt)
-		UIBase.hwnds[tab_area_t.SIDEBAR0].redraws = 2;
-		UIBase.hwnds[tab_area_t.SIDEBAR1].redraws = 2;
-		if (UIView2D.show) UIView2D.hwnd.redraws = 2;
+		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
+		ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
+		if (ui_view2d_show) ui_view2d_hwnd.redraws = 2;
 
 		if (config_raw.touch_ui) {
 			// Refresh undo & redo buttons
-			UIMenubar.menu_handle.redraws = 2;
+			ui_menubar_menu_handle.redraws = 2;
 		}
 		///end
 	}
@@ -444,7 +444,7 @@ function history_edit_nodes(canvas: zui_node_canvas_t, canvas_group: Null<i32> =
 	///if (is_paint || is_sculpt)
 	step.canvas_type = canvas_type;
 	///end
-	step.canvas = JSON.parse(JSON.stringify(canvas));
+	step.canvas = json_parse(json_stringify(canvas));
 }
 
 ///if (is_paint || is_sculpt)
@@ -453,7 +453,7 @@ function history_paint() {
 	history_copy_to_undo(context_raw.layer.id, history_undo_i, is_mask);
 
 	history_push_undo = false;
-	history_push(tr(UIToolbar.tool_names[context_raw.tool]));
+	history_push(tr(ui_toolbar_tool_names[context_raw.tool]));
 }
 
 function history_new_layer() {
@@ -564,38 +564,38 @@ function history_layer_blending() {
 function history_new_material() {
 	let step: step_t = history_push(tr("New Material"));
 	step.canvas_type = 0;
-	step.canvas = JSON.parse(JSON.stringify(context_raw.material.canvas));
+	step.canvas = json_parse(json_stringify(context_raw.material.canvas));
 }
 
 function history_delete_material() {
 	let step: step_t = history_push(tr("Delete Material"));
 	step.canvas_type = 0;
-	step.canvas = JSON.parse(JSON.stringify(context_raw.material.canvas));
+	step.canvas = json_parse(json_stringify(context_raw.material.canvas));
 }
 
 function history_duplicate_material() {
 	let step: step_t = history_push(tr("Duplicate Material"));
 	step.canvas_type = 0;
-	step.canvas = JSON.parse(JSON.stringify(context_raw.material.canvas));
+	step.canvas = json_parse(json_stringify(context_raw.material.canvas));
 }
 
 function history_delete_material_group(group: node_group_t) {
 	let step: step_t = history_push(tr("Delete Node Group"));
 	step.canvas_type = canvas_type_t.MATERIAL;
 	step.canvas_group = project_material_groups.indexOf(group);
-	step.canvas = JSON.parse(JSON.stringify(group.canvas));
+	step.canvas = json_parse(json_stringify(group.canvas));
 }
 ///end
 
 function history_push(name: string): step_t {
 	///if (krom_windows || krom_linux || krom_darwin)
-	let filename: string = project_filepath == "" ? UIFiles.filename : project_filepath.substring(project_filepath.lastIndexOf(path_sep) + 1, project_filepath.length - 4);
+	let filename: string = project_filepath == "" ? ui_files_filename : project_filepath.substring(project_filepath.lastIndexOf(path_sep) + 1, project_filepath.length - 4);
 	sys_title_set(filename + "* - " + manifest_title);
 	///end
 
 	if (config_raw.touch_ui) {
 		// Refresh undo & redo buttons
-		UIMenubar.menu_handle.redraws = 2;
+		ui_menubar_menu_handle.redraws = 2;
 	}
 
 	if (history_undos < config_raw.undo_steps) history_undos++;
@@ -716,8 +716,8 @@ function history_swap_canvas(step: step_t) {
 	step.canvas = _canvas;
 	///end
 
-	UINodes.canvas_changed();
-	UINodes.hwnd.redraws = 2;
+	ui_nodes_canvas_changed();
+	ui_nodes_hwnd.redraws = 2;
 }
 
 type step_t = {

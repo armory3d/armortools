@@ -3,7 +3,7 @@ function viewport_scale_to_bounds() {
 	let po: mesh_object_t = context_raw.merged_object == null ? context_main_object() : context_raw.merged_object;
 	let md: mesh_data_t = po.data;
 	let aabb: vec4_t = mesh_data_calculate_aabb(md);
-	let r: f32 = Math.sqrt(aabb.x * aabb.x + aabb.y * aabb.y + aabb.z * aabb.z);
+	let r: f32 = math_sqrt(aabb.x * aabb.x + aabb.y * aabb.y + aabb.z * aabb.z);
 	po = context_main_object();
 	po.base.transform.dim.x = aabb.x;
 	po.base.transform.dim.y = aabb.y;
@@ -60,8 +60,8 @@ function viewport_orbit(x: f32, y: f32) {
 
 function viewport_orbit_opposite() {
 	let cam: camera_object_t = scene_camera;
-	let z: f32 = Math.abs(camera_object_look(cam).z) - 1.0;
-	(z < 0.0001 && z > -0.0001) ? viewport_orbit(0, Math.PI) : viewport_orbit(Math.PI, 0);
+	let z: f32 = math_abs(camera_object_look(cam).z) - 1.0;
+	(z < 0.0001 && z > -0.0001) ? viewport_orbit(0, math_pi()) : viewport_orbit(math_pi(), 0);
 }
 
 function viewport_zoom(f: f32) {

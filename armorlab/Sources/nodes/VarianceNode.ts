@@ -50,13 +50,13 @@ class VarianceNode extends LogicNode {
 				}
 
 				let noise = new Float32Array(latents.length);
-				for (let i = 0; i < noise.length; ++i) noise[i] = Math.cos(2.0 * 3.14 * RandomNode.getFloat()) * Math.sqrt(-2.0 * Math.log(RandomNode.getFloat()));
+				for (let i = 0; i < noise.length; ++i) noise[i] = math_cos(2.0 * 3.14 * RandomNode.getFloat()) * math_sqrt(-2.0 * math_log(RandomNode.getFloat()));
 				let num_inference_steps = 50;
-				let init_timestep = Math.floor(num_inference_steps * strength);
+				let init_timestep = math_floor(num_inference_steps * strength);
 				let timesteps = TextToPhotoNode.timesteps[num_inference_steps - init_timestep];
 				let alphas_cumprod = TextToPhotoNode.alphas_cumprod;
-				let sqrt_alpha_prod = Math.pow(alphas_cumprod[timesteps], 0.5);
-				let sqrt_one_minus_alpha_prod = Math.pow(1.0 - alphas_cumprod[timesteps], 0.5);
+				let sqrt_alpha_prod = math_pow(alphas_cumprod[timesteps], 0.5);
+				let sqrt_one_minus_alpha_prod = math_pow(1.0 - alphas_cumprod[timesteps], 0.5);
 				for (let i = 0; i < latents.length; ++i) {
 					latents[i] = sqrt_alpha_prod * latents[i] + sqrt_one_minus_alpha_prod * noise[i];
 				}

@@ -7,11 +7,11 @@ let file_cmd_mkdir: string = "mkdir -p";
 let file_cmd_copy: string = "cp";
 ///end
 
-let file_cloud: Map<string, string[]> = null;
-let file_cloud_sizes: Map<string, i32> = null;
+let file_cloud: map_t<string, string[]> = null;
+let file_cloud_sizes: map_t<string, i32> = null;
 
 // ///if krom_android
-// let let file_internal: Map<string, string[]> = null; // .apk contents
+// let let file_internal: map_t<string, string[]> = null; // .apk contents
 // ///end
 
 function file_read_directory(path: string, folders_only: bool = false): string[] {
@@ -190,7 +190,7 @@ function file_init_cloud_bytes(done: ()=>void, append: string = "") {
 }
 
 function file_init_cloud(done: ()=>void) {
-	file_cloud = new Map();
-	file_cloud_sizes = new Map();
+	file_cloud = map_create();
+	file_cloud_sizes = map_create();
 	file_init_cloud_bytes(done);
 }

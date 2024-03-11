@@ -78,7 +78,7 @@ class ImportMesh {
 
 			// No mask by default
 			for (let p of project_paint_objects) p.base.visible = true;
-			if (context_raw.merged_object == null) UtilMesh.merge_mesh();
+			if (context_raw.merged_object == null) util_mesh_merge();
 			context_raw.paint_object.skip_context = "paint";
 			context_raw.merged_object.base.visible = true;
 		}
@@ -90,7 +90,7 @@ class ImportMesh {
 		MakeMaterial.parse_mesh_material();
 
 		///if (is_paint || is_sculpt)
-		UIView2D.hwnd.redraws = 2;
+		ui_view2d_hwnd.redraws = 2;
 		///end
 
 		///if (krom_direct3d12 || krom_vulkan || krom_metal)
@@ -131,11 +131,11 @@ class ImportMesh {
 		context_raw.ddirty = 4;
 
 		///if (is_paint || is_sculpt)
-		UIBase.hwnds[tab_area_t.SIDEBAR0].redraws = 2;
-		UIBase.hwnds[tab_area_t.SIDEBAR1].redraws = 2;
-		UtilUV.uvmap_cached = false;
-		UtilUV.trianglemap_cached = false;
-		UtilUV.dilatemap_cached = false;
+		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
+		ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
+		util_uv_uvmap_cached = false;
+		util_uv_trianglemap_cached = false;
+		util_uv_dilatemap_cached = false;
 		///end
 
 		///if (is_paint || is_sculpt)
@@ -207,10 +207,10 @@ class ImportMesh {
 		context_raw.ddirty = 4;
 
 		///if (is_paint || is_sculpt)
-		UIBase.hwnds[tab_area_t.SIDEBAR0].redraws = 2;
-		UtilUV.uvmap_cached = false;
-		UtilUV.trianglemap_cached = false;
-		UtilUV.dilatemap_cached = false;
+		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
+		util_uv_uvmap_cached = false;
+		util_uv_trianglemap_cached = false;
+		util_uv_dilatemap_cached = false;
 		///end
 	}
 

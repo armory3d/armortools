@@ -51,7 +51,7 @@ class ImportMesh {
 
 			// No mask by default
 			for (let p of project_paintObjects) p.base.visible = true;
-			if (context_raw.mergedObject == null) UtilMesh.mergeMesh();
+			if (context_raw.mergedObject == null) util_mesh_mergeMesh();
 			context_raw.paintObject.skip_context = "paint";
 			context_raw.mergedObject.base.visible = true;
 		}
@@ -62,7 +62,7 @@ class ImportMesh {
 		MakeMaterial.parsePaintMaterial();
 		MakeMaterial.parseMeshMaterial();
 
-		UIView2D.hwnd.redraws = 2;
+		ui_view2d_hwnd.redraws = 2;
 
 		///if arm_physics
 		context_raw.paintBody = null;
@@ -112,15 +112,15 @@ class ImportMesh {
 			data_cached_meshes.set(md._.handle, md);
 
 			context_raw.ddirty = 4;
-			UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
-			UIBase.hwnds[TabArea.TabSidebar1].redraws = 2;
+			ui_base_hwnds[TabArea.TabSidebar0].redraws = 2;
+			ui_base_hwnds[TabArea.TabSidebar1].redraws = 2;
 
 			// Wait for addMesh calls to finish
 			app_notify_on_init(ImportMesh.finishImport);
 
 			base_notifyOnNextFrame(() => {
 				let f32 = new Float32Array(config_getTextureResX() * config_getTextureResY() * 4);
-				for (let i = 0; i < Math.floor(mesh.inda.length); ++i) {
+				for (let i = 0; i < math_floor(mesh.inda.length); ++i) {
 					let index = mesh.inda[i];
 					f32[i * 4]     = mesh.posa[index * 4]     / 32767;
 					f32[i * 4 + 1] = mesh.posa[index * 4 + 1] / 32767;
@@ -167,14 +167,14 @@ class ImportMesh {
 			data_cached_meshes.set(md._.handle, md);
 
 			context_raw.ddirty = 4;
-			UIBase.hwnds[TabArea.TabSidebar0].redraws = 2;
+			ui_base_hwnds[TabArea.TabSidebar0].redraws = 2;
 		}
 
 		_addMesh();
 	}
 
 	static rawMesh = (mesh: any): mesh_data_t => {
-		let posa = new Int16Array(Math.floor(mesh.inda.length * 4));
+		let posa = new Int16Array(math_floor(mesh.inda.length * 4));
 		for (let i = 0; i < posa.length; ++i) posa[i] = 32767;
 		let inda = new Uint32Array(mesh.inda.length);
 		for (let i = 0; i < inda.length; ++i) inda[i] = i;

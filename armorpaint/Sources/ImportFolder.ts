@@ -115,8 +115,8 @@ class ImportFolder {
 		}
 
 		MakeMaterial.parse_paint_material();
-		UtilRender.make_material_preview();
-		UIBase.hwnds[1].redraws = 2;
+		util_render_make_material_preview();
+		ui_base_hwnds[1].redraws = 2;
 		history_new_material();
 	}
 

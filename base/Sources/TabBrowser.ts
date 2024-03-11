@@ -9,19 +9,19 @@ class TabBrowser {
 	static show_directory = (directory: string) => {
 		TabBrowser.hpath.text = directory;
 		TabBrowser.hsearch.text = "";
-		UIBase.htabs[tab_area_t.STATUS].position = 0;
+		ui_base_htabs[tab_area_t.STATUS].position = 0;
 	}
 
 	static draw = (htab: zui_handle_t) => {
-		let ui: zui_t = UIBase.ui;
+		let ui: zui_t = ui_base_ui;
 		let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-		if (zui_tab(htab, tr("Browser")) && statush > UIStatus.default_status_h * zui_SCALE(ui)) {
+		if (zui_tab(htab, tr("Browser")) && statush > ui_status_default_status_h * zui_SCALE(ui)) {
 
 			if (config_raw.bookmarks == null) {
 				config_raw.bookmarks = [];
 			}
 
-			let bookmarks_w: i32 = Math.floor(100 * zui_SCALE(ui));
+			let bookmarks_w: i32 = math_floor(100 * zui_SCALE(ui));
 
 			if (TabBrowser.hpath.text == "" && config_raw.bookmarks.length > 0) { // Init to first bookmark
 				TabBrowser.hpath.text = config_raw.bookmarks[0];
@@ -83,15 +83,15 @@ class TabBrowser {
 			let _y: f32 = ui._y;
 			ui._x = bookmarks_w;
 			ui._w -= bookmarks_w;
-			UIFiles.file_browser(ui, TabBrowser.hpath, false, true, TabBrowser.hsearch.text, refresh, (file: string) => {
+			ui_files_file_browser(ui, TabBrowser.hpath, false, true, TabBrowser.hsearch.text, refresh, (file: string) => {
 				let file_name: string = file.substr(file.lastIndexOf(path_sep) + 1);
 				if (file_name != "..") {
-					UIMenu.draw((ui: zui_t) => {
-						if (UIMenu.menu_button(ui, tr("Import"))) {
+					ui_menu_draw((ui: zui_t) => {
+						if (ui_menu_button(ui, tr("Import"))) {
 							ImportAsset.run(file);
 						}
 						if (path_is_texture(file)) {
-							if (UIMenu.menu_button(ui, tr("Set as Envmap"))) {
+							if (ui_menu_button(ui, tr("Set as Envmap"))) {
 								ImportAsset.run(file, -1.0, -1.0, true, true, () => {
 									base_notify_on_next_frame(() => {
 										let asset_index: i32 = -1;
@@ -109,7 +109,7 @@ class TabBrowser {
 							}
 
 							///if (is_paint || is_sculpt)
-							if (UIMenu.menu_button(ui, tr("Set as Mask"))) {
+							if (ui_menu_button(ui, tr("Set as Mask"))) {
 								ImportAsset.run(file, -1.0, -1.0, true, true, () => {
 									base_notify_on_next_frame(() => {
 										let asset_index: i32 = -1;
@@ -128,7 +128,7 @@ class TabBrowser {
 							///end
 
 							///if is_paint
-							if (UIMenu.menu_button(ui, tr("Set as Color ID Map"))) {
+							if (ui_menu_button(ui, tr("Set as Color ID Map"))) {
 								ImportAsset.run(file, -1.0, -1.0, true, true, () => {
 									base_notify_on_next_frame(() => {
 										let asset_index: i32 = -1;
@@ -141,9 +141,9 @@ class TabBrowser {
 										if (asset_index != -1) {
 											context_raw.colorid_handle.position = asset_index;
 											context_raw.colorid_picked = false;
-											UIToolbar.toolbar_handle.redraws = 1;
+											ui_toolbar_handle.redraws = 1;
 											if (context_raw.tool == workspace_tool_t.COLORID) {
-												UIHeader.header_handle.redraws = 2;
+												ui_header_handle.redraws = 2;
 												context_raw.ddirty = 2;
 											}
 										}
@@ -152,7 +152,7 @@ class TabBrowser {
 							}
 							///end
 						}
-						if (UIMenu.menu_button(ui, tr("Open Externally"))) {
+						if (ui_menu_button(ui, tr("Open Externally"))) {
 							file_start(file);
 						}
 					}, path_is_texture(file) ? 5 : 2);
@@ -182,22 +182,22 @@ class TabBrowser {
 
 			if (zui_button(tr("Disk"), zui_align_t.LEFT)) {
 				///if krom_android
-				UIMenu.draw((ui: zui_t) => {
-					if (UIMenu.menu_button(ui, tr("Download"))) {
-						TabBrowser.hpath.text = UIFiles.default_path;
+				ui_menu_draw((ui: zui_t) => {
+					if (ui_menu_button(ui, tr("Download"))) {
+						TabBrowser.hpath.text = ui_files_default_path;
 					}
-					if (UIMenu.menu_button(ui, tr("Pictures"))) {
+					if (ui_menu_button(ui, tr("Pictures"))) {
 						TabBrowser.hpath.text = "/storage/emulated/0/Pictures";
 					}
-					if (UIMenu.menu_button(ui, tr("Camera"))) {
+					if (ui_menu_button(ui, tr("Camera"))) {
 						TabBrowser.hpath.text = "/storage/emulated/0/DCIM/Camera";
 					}
-					if (UIMenu.menu_button(ui, tr("Projects"))) {
+					if (ui_menu_button(ui, tr("Projects"))) {
 						TabBrowser.hpath.text = krom_save_path();
 					}
 				}, 4);
 				///else
-				TabBrowser.hpath.text = UIFiles.default_path;
+				TabBrowser.hpath.text = ui_files_default_path;
 				///end
 			}
 
@@ -209,8 +209,8 @@ class TabBrowser {
 				}
 
 				if (ui.is_hovered && ui.input_released_r) {
-					UIMenu.draw((ui: zui_t) => {
-						if (UIMenu.menu_button(ui, tr("Delete"))) {
+					ui_menu_draw((ui: zui_t) => {
+						if (ui_menu_button(ui, tr("Delete"))) {
 							array_remove(config_raw.bookmarks, b);
 							config_save();
 						}

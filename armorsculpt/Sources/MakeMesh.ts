@@ -53,9 +53,9 @@ class MakeMesh {
 		NodeShader.write_attrib(vert, 'wnormal = mul(meshnor, N);');
 		NodeShader.write_attrib(frag, 'vec3 n = normalize(wnormal);');
 
-		NodeShader.add_function(frag, ShaderFunctions.str_packFloatInt16);
-		NodeShader.add_function(frag, ShaderFunctions.str_octahedronWrap);
-		NodeShader.add_function(frag, ShaderFunctions.str_cotangentFrame);
+		NodeShader.add_function(frag, str_packFloatInt16);
+		NodeShader.add_function(frag, str_octahedronWrap);
+		NodeShader.add_function(frag, str_cotangentFrame);
 		if (layerPass > 0) {
 			NodeShader.add_uniform(frag, 'sampler2D gbuffer0');
 			NodeShader.add_uniform(frag, 'sampler2D gbuffer1');
@@ -255,13 +255,13 @@ class MakeMesh {
 					NodeShader.add_uniform(frag, 'vec4 envmapData', '_envmapData'); // angle, sin(angle), cos(angle), strength
 					NodeShader.write(frag, 'vec3 wreflect = reflect(-vVec, n);');
 					NodeShader.write(frag, 'float envlod = roughness * float(envmapNumMipmaps);');
-					NodeShader.add_function(frag, ShaderFunctions.str_envMapEquirect);
+					NodeShader.add_function(frag, str_envMapEquirect);
 					NodeShader.write(frag, 'vec3 prefilteredColor = textureLod(senvmapRadiance, envMapEquirect(wreflect, envmapData.x), envlod).rgb;');
 					NodeShader.add_uniform(frag, 'vec3 lightArea0', '_light_area0');
 					NodeShader.add_uniform(frag, 'vec3 lightArea1', '_light_area1');
 					NodeShader.add_uniform(frag, 'vec3 lightArea2', '_light_area2');
 					NodeShader.add_uniform(frag, 'vec3 lightArea3', '_light_area3');
-					NodeShader.add_function(frag, ShaderFunctions.str_ltcEvaluate);
+					NodeShader.add_function(frag, str_ltcEvaluate);
 					NodeShader.add_uniform(frag, 'vec3 lightPos', '_point_pos');
 					NodeShader.add_uniform(frag, 'vec3 lightColor', '_point_color');
 					NodeShader.write(frag, 'float ldist = distance(wposition, lightPos);');
@@ -281,7 +281,7 @@ class MakeMesh {
 					NodeShader.write(frag, 'direct *= lightColor * (1.0 / (ldist * ldist));');
 
 					NodeShader.add_uniform(frag, 'vec4 shirr[7]', '_envmap_irradiance');
-					NodeShader.add_function(frag, ShaderFunctions.str_shIrradiance);
+					NodeShader.add_function(frag, str_shIrradiance);
 					NodeShader.write(frag, 'vec3 indirect = albedo * (shIrradiance(vec3(n.x * envmapData.z - n.y * envmapData.y, n.x * envmapData.y + n.y * envmapData.z, n.z), shirr) / 3.14159265);');
 					NodeShader.write(frag, 'indirect += prefilteredColor * (f0 * envBRDF.x + envBRDF.y) * 1.5;');
 					NodeShader.write(frag, 'indirect *= envmapData.w * occlusion;');

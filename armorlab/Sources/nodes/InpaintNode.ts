@@ -107,16 +107,16 @@ class InpaintNode extends LogicNode {
 		let f32mask = new Float32Array(4 * 64 * 64);
 
 		let vae_encoder_blob: ArrayBuffer = data_get_blob("models/sd_vae_encoder.quant.onnx");
-		// for (let x = 0; x < Math.floor(image.width / 512); ++x) {
-			// for (let y = 0; y < Math.floor(image.height / 512); ++y) {
+		// for (let x = 0; x < math_floor(image.width / 512); ++x) {
+			// for (let y = 0; y < math_floor(image.height / 512); ++y) {
 				let x = 0;
 				let y = 0;
 
 				for (let xx = 0; xx < 64; ++xx) {
 					for (let yy = 0; yy < 64; ++yy) {
-						// let step = Math.floor(512 / 64);
+						// let step = math_floor(512 / 64);
 						// let j = (yy * step * mask.width + xx * step) + (y * 512 * mask.width + x * 512);
-						let step = Math.floor(mask.width / 64);
+						let step = math_floor(mask.width / 64);
 						let j = (yy * step * mask.width + xx * step);
 						let f = u8[j] / 255.0;
 						let i = yy * 64 + xx;
@@ -149,14 +149,14 @@ class InpaintNode extends LogicNode {
 				let latents_orig = latents.slice(0);
 
 				let noise = new Float32Array(latents.length);
-				for (let i = 0; i < noise.length; ++i) noise[i] = Math.cos(2.0 * 3.14 * RandomNode.getFloat()) * Math.sqrt(-2.0 * Math.log(RandomNode.getFloat()));
+				for (let i = 0; i < noise.length; ++i) noise[i] = math_cos(2.0 * 3.14 * RandomNode.getFloat()) * math_sqrt(-2.0 * math_log(RandomNode.getFloat()));
 
 				let num_inference_steps = 50;
-				let init_timestep = Math.floor(num_inference_steps * InpaintNode.strength);
+				let init_timestep = math_floor(num_inference_steps * InpaintNode.strength);
 				let timestep = TextToPhotoNode.timesteps[num_inference_steps - init_timestep];
 				let alphas_cumprod = TextToPhotoNode.alphas_cumprod;
-				let sqrt_alpha_prod = Math.pow(alphas_cumprod[timestep], 0.5);
-				let sqrt_one_minus_alpha_prod = Math.pow(1.0 - alphas_cumprod[timestep], 0.5);
+				let sqrt_alpha_prod = math_pow(alphas_cumprod[timestep], 0.5);
+				let sqrt_one_minus_alpha_prod = math_pow(1.0 - alphas_cumprod[timestep], 0.5);
 				for (let i = 0; i < latents.length; ++i) {
 					latents[i] = sqrt_alpha_prod * latents[i] + sqrt_one_minus_alpha_prod * noise[i];
 				}

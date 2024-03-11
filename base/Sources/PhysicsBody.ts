@@ -64,9 +64,9 @@ class PhysicsBody {
 	static trans2: Ammo.btTransform;
 	static quat: quat_t = quat_create();
 
-	static convex_hull_cache: Map<mesh_data_t, Ammo.btConvexHullShape> = new Map();
-	static triangle_mesh_cache: Map<mesh_data_t, Ammo.btTriangleMesh> = new Map();
-	static users_cache: Map<mesh_data_t, i32> = new Map();
+	static convex_hull_cache: map_t<mesh_data_t, Ammo.btConvexHullShape> = map_create();
+	static triangle_mesh_cache: map_t<mesh_data_t, Ammo.btTriangleMesh> = map_create();
+	static users_cache: map_t<mesh_data_t, i32> = map_create();
 
 	static create(): PhysicsBodyRaw {
 		if (PhysicsBody.first) {
@@ -163,7 +163,7 @@ class PhysicsBody {
 			for (let i: i32 = 0; i < length; ++i) {
 				Ammo.HEAPU8[PhysicsBody.ammo_array + i] = pb.height_data[i];
 			}
-			let slice: i32 = Math.floor(Math.sqrt(length)); // Assuming square terrain data
+			let slice: i32 = math_floor(math_sqrt(length)); // Assuming square terrain data
 			let axis: i32 = 2; // z
 			let data_type: i32 = 5; // u8
 			pb.btshape = new Ammo.btHeightfieldTerrainShape(slice, slice, PhysicsBody.ammo_array, 1 / 255, 0, 1, axis, data_type, false);
@@ -391,7 +391,7 @@ class PhysicsBody {
 		sy *= data.scale_pos;
 		sz *= data.scale_pos;
 
-		for (let i: i32 = 0; i < Math.floor(positions.length / 4); ++i) {
+		for (let i: i32 = 0; i < math_floor(positions.length / 4); ++i) {
 			PhysicsBody.vec1.setX(positions[i * 4    ] * sx);
 			PhysicsBody.vec1.setY(positions[i * 4 + 1] * sy);
 			PhysicsBody.vec1.setZ(positions[i * 4 + 2] * sz);
@@ -425,7 +425,7 @@ class PhysicsBody {
 		sz *= data.scale_pos;
 
 		for (let ar of indices) {
-			for (let i: i32 = 0; i < Math.floor(ar.length / 3); ++i) {
+			for (let i: i32 = 0; i < math_floor(ar.length / 3); ++i) {
 				PhysicsBody.vec1.setX(positions[ar[i * 3    ] * 4    ] * sx);
 				PhysicsBody.vec1.setY(positions[ar[i * 3    ] * 4 + 1] * sy);
 				PhysicsBody.vec1.setZ(positions[ar[i * 3    ] * 4 + 2] * sz);

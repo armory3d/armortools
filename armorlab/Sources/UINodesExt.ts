@@ -4,7 +4,7 @@ class UINodesExt {
 	static lastVertices: DataView = null; // Before displacement
 
 	static drawButtons = (ew: f32, startY: f32) => {
-		let ui = UINodes.ui;
+		let ui = ui_nodes_ui;
 		if (zui_button(tr("Run"))) {
 			console_progress(tr("Processing"));
 
@@ -84,7 +84,7 @@ class UINodesExt {
 						g4_draw();
 						g4_end();
 
-						if (UIHeader.worktab.position == SpaceType.Space3D &&
+						if (ui_header_worktab.position == SpaceType.Space3D &&
 							BrushOutputNode.inst.inputs[ChannelType.ChannelHeight].node.constructor != FloatNode) {
 
 							// Make copy of vertices before displacement
@@ -93,12 +93,12 @@ class UINodesExt {
 							let vertices = g4_vertex_buffer_lock(g._.vertex_buffer);
 							if (UINodesExt.lastVertices == null || UINodesExt.lastVertices.byteLength != vertices.byteLength) {
 								UINodesExt.lastVertices = new DataView(new ArrayBuffer(vertices.byteLength));
-								for (let i = 0; i < Math.floor(vertices.byteLength / 2); ++i) {
+								for (let i = 0; i < math_floor(vertices.byteLength / 2); ++i) {
 									UINodesExt.lastVertices.setInt16(i * 2, vertices.getInt16(i * 2, true), true);
 								}
 							}
 							else {
-								for (let i = 0; i < Math.floor(vertices.byteLength / 2); ++i) {
+								for (let i = 0; i < math_floor(vertices.byteLength / 2); ++i) {
 									vertices.setInt16(i * 2, UINodesExt.lastVertices.getInt16(i * 2, true), true);
 								}
 							}
@@ -111,8 +111,8 @@ class UINodesExt {
 									console_progress(tr("Apply Displacement"));
 									base_notifyOnNextFrame(() => {
 										let uv_scale = scene_meshes[0].data.scale_tex * context_raw.brushScale;
-										UtilMesh.applyDisplacement(texpaint_pack, 0.05 * config_raw.displace_strength, uv_scale);
-										UtilMesh.calcNormals();
+										util_mesh_applyDisplacement(texpaint_pack, 0.05 * config_raw.displace_strength, uv_scale);
+										util_mesh_calcNormals();
 										taskDone();
 									});
 								});

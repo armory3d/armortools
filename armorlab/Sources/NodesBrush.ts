@@ -32,7 +32,7 @@ class NodesBrush {
 				if (n.type == nodeType) {
 					let canvas = project_canvas;
 					let nodes = project_nodes;
-					let node = UINodes.makeNode(n, nodes, canvas);
+					let node = ui_nodes_makeNode(n, nodes, canvas);
 					canvas.nodes.push(node);
 					return node;
 				}

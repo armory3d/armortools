@@ -27,7 +27,7 @@ class SlotMaterial {
 		for (let mat of project_materials) if (mat.id >= raw.id) raw.id = mat.id + 1;
 		raw.data = m;
 
-		let w: i32 = UtilRender.material_preview_size;
+		let w: i32 = util_render_material_preview_size;
 		let w_icon: i32 = 50;
 		raw.image = image_create_render_target(w, w);
 		raw.image_icon = image_create_render_target(w_icon, w_icon);

@@ -9,7 +9,7 @@ class MakeMaterial {
 	static subs_used = false;
 
 	static get_mout = (): bool => {
-		for (let n of UINodes.get_canvas_material().nodes) if (n.type == "OUTPUT_MATERIAL_PBR") return true;
+		for (let n of ui_nodes_get_canvas_material().nodes) if (n.type == "OUTPUT_MATERIAL_PBR") return true;
 		return false;
 	}
 
@@ -180,9 +180,10 @@ class MakeMaterial {
 
 		if (bake_previews) {
 			let current: image_t = _g2_current;
-			if (current != null) g2_end();
+			let g2_in_use: bool = _g2_in_use;
+			if (g2_in_use) g2_end();
 			MakeMaterial.bake_node_previews();
-			if (current != null) g2_begin(current);
+			if (g2_in_use) g2_begin(current);
 		}
 
 		let m: material_data_t = project_materials[0].data;
@@ -204,7 +205,7 @@ class MakeMaterial {
 			}
 		}
 
-		let sdata: material_t = { name: "Material", canvas: UINodes.get_canvas_material() };
+		let sdata: material_t = { name: "Material", canvas: ui_nodes_get_canvas_material() };
 		let tmcon: material_context_t = { name: "paint", bind_textures: [] };
 		let con: NodeShaderContextRaw = MakePaint.run(sdata, tmcon);
 
@@ -229,8 +230,8 @@ class MakeMaterial {
 
 	static bake_node_previews = () => {
 		context_raw.node_previews_used = [];
-		if (context_raw.node_previews == null) context_raw.node_previews = new Map();
-		MakeMaterial.traverse_nodes(UINodes.get_canvas_material().nodes, null, []);
+		if (context_raw.node_previews == null) context_raw.node_previews = map_create();
+		MakeMaterial.traverse_nodes(ui_nodes_get_canvas_material().nodes, null, []);
 		for (let key of context_raw.node_previews.keys()) {
 			if (context_raw.node_previews_used.indexOf(key) == -1) {
 				let image: image_t = context_raw.node_previews.get(key);
@@ -261,8 +262,8 @@ class MakeMaterial {
 			let id: string = ParserMaterial.node_name(node, parents);
 			let image: image_t = context_raw.node_previews.get(id);
 			context_raw.node_previews_used.push(id);
-			let resX: i32 = Math.floor(config_get_texture_res_x() / 4);
-			let resY: i32 = Math.floor(config_get_texture_res_y() / 4);
+			let resX: i32 = math_floor(config_get_texture_res_x() / 4);
+			let resY: i32 = math_floor(config_get_texture_res_y() / 4);
 			if (image == null || image.width != resX || image.height != resY) {
 				if (image != null) image_unload(image);
 				image = image_create_render_target(resX, resY);
@@ -270,15 +271,15 @@ class MakeMaterial {
 			}
 
 			ParserMaterial.blur_passthrough = true;
-			UtilRender.make_node_preview(UINodes.get_canvas_material(), node, image, group, parents);
+			util_render_make_node_preview(ui_nodes_get_canvas_material(), node, image, group, parents);
 			ParserMaterial.blur_passthrough = false;
 		}
 		else if (node.type == "DIRECT_WARP") {
 			let id: string = ParserMaterial.node_name(node, parents);
 			let image: image_t = context_raw.node_previews.get(id);
 			context_raw.node_previews_used.push(id);
-			let resX: i32 = Math.floor(config_get_texture_res_x());
-			let resY: i32 = Math.floor(config_get_texture_res_y());
+			let resX: i32 = math_floor(config_get_texture_res_x());
+			let resY: i32 = math_floor(config_get_texture_res_y());
 			if (image == null || image.width != resX || image.height != resY) {
 				if (image != null) image_unload(image);
 				image = image_create_render_target(resX, resY);
@@ -286,15 +287,15 @@ class MakeMaterial {
 			}
 
 			ParserMaterial.warp_passthrough = true;
-			UtilRender.make_node_preview(UINodes.get_canvas_material(), node, image, group, parents);
+			util_render_make_node_preview(ui_nodes_get_canvas_material(), node, image, group, parents);
 			ParserMaterial.warp_passthrough = false;
 		}
 		else if (node.type == "BAKE_CURVATURE") {
 			let id: string = ParserMaterial.node_name(node, parents);
 			let image: image_t = context_raw.node_previews.get(id);
 			context_raw.node_previews_used.push(id);
-			let resX: i32 = Math.floor(config_get_texture_res_x());
-			let resY: i32 = Math.floor(config_get_texture_res_y());
+			let resX: i32 = math_floor(config_get_texture_res_x());
+			let resY: i32 = math_floor(config_get_texture_res_y());
 			if (image == null || image.width != resX || image.height != resY) {
 				if (image != null) image_unload(image);
 				image = image_create_render_target(resX, resY, tex_format_t.R8);
@@ -305,10 +306,10 @@ class MakeMaterial {
 				RenderPathPaint.live_layer = SlotLayer.create("_live");
 			}
 
-			let _space: i32 = UIHeader.worktab.position;
+			let _space: i32 = ui_header_worktab.position;
 			let _tool: workspace_tool_t = context_raw.tool;
 			let _bake_type: bake_type_t = context_raw.bake_type;
-			UIHeader.worktab.position = space_type_t.SPACE3D;
+			ui_header_worktab.position = space_type_t.SPACE3D;
 			context_raw.tool = workspace_tool_t.BAKE;
 			context_raw.bake_type = bake_type_t.CURVATURE;
 
@@ -328,12 +329,12 @@ class MakeMaterial {
 			RenderPathPaint.use_live_layer(false);
 			context_raw.pdirty = 0;
 
-			UIHeader.worktab.position = _space;
+			ui_header_worktab.position = _space;
 			context_raw.tool = _tool;
 			context_raw.bake_type = _bake_type;
 			MakeMaterial.parse_paint_material(false);
 
-			let rts: Map<string, render_target_t> = render_path_render_targets;
+			let rts: map_t<string, render_target_t> = render_path_render_targets;
 			let texpaint_live: render_target_t = rts.get("texpaint_live");
 
 			g2_begin(image);
@@ -344,7 +345,7 @@ class MakeMaterial {
 
 	static parse_node_preview_material = (node: zui_node_t, group: zui_node_canvas_t = null, parents: zui_node_t[] = null): { scon: shader_context_t, mcon: material_context_t } => {
 		if (node.outputs.length == 0) return null;
-		let sdata: material_t = { name: "Material", canvas: UINodes.get_canvas_material() };
+		let sdata: material_t = { name: "Material", canvas: ui_nodes_get_canvas_material() };
 		let mcon_raw: material_context_t = { name: "mesh", bind_textures: [] };
 		let con: NodeShaderContextRaw = MakeNodePreview.run(sdata, mcon_raw, node, group, parents);
 		let compile_error: bool = false;
@@ -409,19 +410,19 @@ class MakeMaterial {
 			return `vec3(1.0 - ${opac}, 1.0 - ${opac}, 1.0 - ${opac}) * ${cola} + vec3(${opac}, ${opac}, ${opac}) * ${cola} / ${colb}`;
 		}
 		else if (blending == blend_type_t.HUE) {
-			NodeShader.add_function(frag, ShaderFunctions.str_hue_sat);
+			NodeShader.add_function(frag, str_hue_sat);
 			return `mix(${cola}, hsv_to_rgb(vec3(rgb_to_hsv(${colb}).r, rgb_to_hsv(${cola}).g, rgb_to_hsv(${cola}).b)), ${opac})`;
 		}
 		else if (blending == blend_type_t.SATURATION) {
-			NodeShader.add_function(frag, ShaderFunctions.str_hue_sat);
+			NodeShader.add_function(frag, str_hue_sat);
 			return `mix(${cola}, hsv_to_rgb(vec3(rgb_to_hsv(${cola}).r, rgb_to_hsv(${colb}).g, rgb_to_hsv(${cola}).b)), ${opac})`;
 		}
 		else if (blending == blend_type_t.COLOR) {
-			NodeShader.add_function(frag, ShaderFunctions.str_hue_sat);
+			NodeShader.add_function(frag, str_hue_sat);
 			return `mix(${cola}, hsv_to_rgb(vec3(rgb_to_hsv(${colb}).r, rgb_to_hsv(${colb}).g, rgb_to_hsv(${cola}).b)), ${opac})`;
 		}
 		else { // BlendValue
-			NodeShader.add_function(frag, ShaderFunctions.str_hue_sat);
+			NodeShader.add_function(frag, str_hue_sat);
 			return `mix(${cola}, hsv_to_rgb(vec3(rgb_to_hsv(${cola}).r, rgb_to_hsv(${cola}).g, rgb_to_hsv(${colb}).b)), ${opac})`;
 		}
 	}

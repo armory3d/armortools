@@ -22,15 +22,15 @@ function context_set_material(m: SlotMaterialRaw) {
 	if (project_materials.indexOf(m) == -1) return;
 	context_raw.material = m;
 	MakeMaterial.parse_paint_material();
-	UIBase.hwnds[tab_area_t.SIDEBAR1].redraws = 2;
-	UIHeader.header_handle.redraws = 2;
-	UINodes.hwnd.redraws = 2;
-	UINodes.group_stack = [];
+	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
+	ui_header_handle.redraws = 2;
+	ui_nodes_hwnd.redraws = 2;
+	ui_nodes_group_stack = [];
 
 	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
 	if (decal) {
 		let _next = function() {
-			UtilRender.make_decal_preview();
+			util_render_make_decal_preview();
 		}
 		base_notify_on_next_frame(_next);
 	}
@@ -45,8 +45,8 @@ function context_set_brush(b: SlotBrushRaw) {
 	if (project_brushes.indexOf(b) == -1) return;
 	context_raw.brush = b;
 	MakeMaterial.parse_brush();
-	UIBase.hwnds[tab_area_t.SIDEBAR1].redraws = 2;
-	UINodes.hwnd.redraws = 2;
+	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
+	ui_nodes_hwnd.redraws = 2;
 }
 
 function context_select_font(i: i32) {
@@ -57,10 +57,10 @@ function context_select_font(i: i32) {
 function context_set_font(f: SlotFontRaw) {
 	if (project_fonts.indexOf(f) == -1) return;
 	context_raw.font = f;
-	UtilRender.make_text_preview();
-	UtilRender.make_decal_preview();
-	UIBase.hwnds[tab_area_t.STATUS].redraws = 2;
-	UIView2D.hwnd.redraws = 2;
+	util_render_make_text_preview();
+	util_render_make_decal_preview();
+	ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
+	ui_view2d_hwnd.redraws = 2;
 }
 
 function context_select_layer(i: i32) {
@@ -71,19 +71,20 @@ function context_select_layer(i: i32) {
 function context_set_layer(l: SlotLayerRaw) {
 	if (l == context_raw.layer) return;
 	context_raw.layer = l;
-	UIHeader.header_handle.redraws = 2;
+	ui_header_handle.redraws = 2;
 
 	let current: image_t = _g2_current;
-	if (current != null) g2_end();
+	let g2_in_use: bool = _g2_in_use;
+	if (g2_in_use) g2_end();
 
 	base_set_object_mask();
 	MakeMaterial.parse_mesh_material();
 	MakeMaterial.parse_paint_material();
 
-	if (current != null) g2_begin(current);
+	if (g2_in_use) g2_begin(current);
 
-	UIBase.hwnds[tab_area_t.SIDEBAR0].redraws = 2;
-	UIView2D.hwnd.redraws = 2;
+	ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
+	ui_view2d_hwnd.redraws = 2;
 }
 ///end
 
@@ -98,8 +99,8 @@ function context_select_tool(i: i32) {
 
 	///if (is_paint || is_sculpt)
 	context_init_tool();
-	UIHeader.header_handle.redraws = 2;
-	UIToolbar.toolbar_handle.redraws = 2;
+	ui_header_handle.redraws = 2;
+	ui_toolbar_handle.redraws = 2;
 	///end
 }
 
@@ -108,13 +109,13 @@ function context_init_tool() {
 	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
 	if (decal) {
 		if (context_raw.tool == workspace_tool_t.TEXT) {
-			UtilRender.make_text_preview();
+			util_render_make_text_preview();
 		}
-		UtilRender.make_decal_preview();
+		util_render_make_decal_preview();
 	}
 
 	else if (context_raw.tool == workspace_tool_t.PARTICLE) {
-		UtilParticle.init_particle();
+		util_particle_init();
 		MakeMaterial.parse_particle_material();
 	}
 
@@ -141,7 +142,7 @@ function context_init_tool() {
 
 function context_select_paint_object(o: mesh_object_t) {
 	///if (is_paint || is_sculpt)
-	UIHeader.header_handle.redraws = 2;
+	ui_header_handle.redraws = 2;
 	for (let p of project_paint_objects) p.skip_context = "paint";
 	context_raw.paint_object = o;
 
@@ -151,9 +152,9 @@ function context_select_paint_object(o: mesh_object_t) {
 	if (context_raw.merged_object == null || mask > 0) {
 		context_raw.paint_object.skip_context = "";
 	}
-	UtilUV.uvmap_cached = false;
-	UtilUV.trianglemap_cached = false;
-	UtilUV.dilatemap_cached = false;
+	util_uv_uvmap_cached = false;
+	util_uv_trianglemap_cached = false;
+	util_uv_dilatemap_cached = false;
 	///end
 
 	///if is_lab
@@ -200,7 +201,7 @@ function context_in_viewport(): bool {
 function context_in_paint_area(): bool {
 	///if (is_paint || is_sculpt)
 	let right: i32 = app_w();
-	if (UIView2D.show) right += UIView2D.ww;
+	if (ui_view2d_show) right += ui_view2d_ww;
 	return mouse_view_x() > 0 && mouse_view_x() < right &&
 			mouse_view_y() > 0 && mouse_view_y() < app_h();
 	///end
@@ -220,16 +221,16 @@ function context_in_materials(): bool {
 
 ///if (is_paint || is_sculpt)
 function context_in_2d_view(type: view_2d_type_t = view_2d_type_t.LAYER): bool {
-	return UIView2D.show && UIView2D.type == type &&
-			mouse_x > UIView2D.wx && mouse_x < UIView2D.wx + UIView2D.ww &&
-			mouse_y > UIView2D.wy && mouse_y < UIView2D.wy + UIView2D.wh;
+	return ui_view2d_show && ui_view2d_type == type &&
+			mouse_x > ui_view2d_wx && mouse_x < ui_view2d_wx + ui_view2d_ww &&
+			mouse_y > ui_view2d_wy && mouse_y < ui_view2d_wy + ui_view2d_wh;
 }
 ///end
 
 function context_in_nodes(): bool {
-	return UINodes.show &&
-			mouse_x > UINodes.wx && mouse_x < UINodes.wx + UINodes.ww &&
-			mouse_y > UINodes.wy && mouse_y < UINodes.wy + UINodes.wh;
+	return ui_nodes_show &&
+			mouse_x > ui_nodes_wx && mouse_x < ui_nodes_wx + ui_nodes_ww &&
+			mouse_y > ui_nodes_wy && mouse_y < ui_nodes_wy + ui_nodes_wh;
 }
 
 function context_in_swatches(): bool {
@@ -262,10 +263,10 @@ function context_set_viewport_mode(mode: viewport_mode_t) {
 	else {
 		render_path_commands = RenderPathForward.commands;
 	}
-	let _workspace: i32 = UIHeader.worktab.position;
-	UIHeader.worktab.position = 0;
+	let _workspace: i32 = ui_header_worktab.position;
+	ui_header_worktab.position = 0;
 	MakeMaterial.parse_mesh_material();
-	UIHeader.worktab.position = _workspace;
+	ui_header_worktab.position = _workspace;
 }
 
 function context_load_envmap() {
@@ -335,8 +336,8 @@ function context_run_brush(from: i32) {
 		context_raw.last_paint_vec_y = context_raw.paint_vec.y;
 	}
 
-	let nodes: zui_nodes_t = UINodes.get_nodes();
-	let canvas: zui_node_canvas_t = UINodes.get_canvas(true);
+	let nodes: zui_nodes_t = ui_nodes_get_nodes();
+	let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
 	let inpaint: bool = nodes.nodes_selected_id.length > 0 && zui_get_node(canvas.nodes, nodes.nodes_selected_id[0]).type == "InpaintNode";
 
 	// Paint bounds
@@ -409,8 +410,8 @@ function context_update() {
 	context_raw.coords.y = paint_y;
 
 	if (context_raw.lock_begin) {
-		let dx: i32 = Math.abs(context_raw.lock_start_x - mouse_view_x());
-		let dy: i32 = Math.abs(context_raw.lock_start_y - mouse_view_y());
+		let dx: i32 = math_abs(context_raw.lock_start_x - mouse_view_x());
+		let dy: i32 = math_abs(context_raw.lock_start_y - mouse_view_y());
 		if (dx > 1 || dy > 1) {
 			context_raw.lock_begin = false;
 			dx > dy ? context_raw.lock_y = true : context_raw.lock_x = true;

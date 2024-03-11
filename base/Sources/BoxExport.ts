@@ -14,7 +14,7 @@ class BoxExport {
 
 	///if (is_paint || is_lab)
 	static show_textures = () => {
-		UIBox.show_custom((ui: zui_t) => {
+		ui_box_show_custom((ui: zui_t) => {
 
 			if (BoxExport.files == null) {
 				BoxExport.fetch_presets();
@@ -41,7 +41,7 @@ class BoxExport {
 
 	///if is_paint
 	static show_bake_material = () => {
-		UIBox.show_custom((ui: zui_t) => {
+		ui_box_show_custom((ui: zui_t) => {
 
 			if (BoxExport.files == null) {
 				BoxExport.fetch_presets();
@@ -130,10 +130,10 @@ class BoxExport {
 
 			zui_row([0.5, 0.5]);
 			if (zui_button(tr("Cancel"))) {
-				UIBox.hide();
+				ui_box_hide();
 			}
 			if (zui_button(tr("Export"))) {
-				UIBox.hide();
+				ui_box_hide();
 				if (context_raw.layers_destination == export_destination_t.PACKED) {
 					context_raw.texture_export_path = "/";
 					let _init = () => {
@@ -148,7 +148,7 @@ class BoxExport {
 				}
 				else {
 					let filters = base_bits_handle.position != texture_bits_t.BITS8 ? "exr" : context_raw.format_type == texture_ldr_format_t.PNG ? "png" : "jpg";
-					UIFiles.show(filters, true, false, (path: string) => {
+					ui_files_show(filters, true, false, (path: string) => {
 						context_raw.texture_export_path = path;
 						let doExport = () => {
 							let _init = () => {
@@ -185,7 +185,7 @@ class BoxExport {
 			if (BoxExport.hpreset.changed) BoxExport.preset = null;
 
 			if (zui_button(tr("New"))) {
-				UIBox.show_custom((ui: zui_t) => {
+				ui_box_show_custom((ui: zui_t) => {
 					let tab_vertical: bool = config_raw.touch_ui;
 					if (zui_tab(zui_handle("boxexport_5"), tr("New Preset"), tab_vertical)) {
 						zui_row([0.5, 0.5]);
@@ -195,7 +195,7 @@ class BoxExport {
 							BoxExport.fetch_presets();
 							BoxExport.preset = null;
 							BoxExport.hpreset.position = BoxExport.files.indexOf(preset_name);
-							UIBox.hide();
+							ui_box_hide();
 							BoxExport.htab.position = 1; // Presets
 							BoxExport.show_textures();
 						}
@@ -204,7 +204,7 @@ class BoxExport {
 			}
 
 			if (zui_button(tr("Import"))) {
-				UIFiles.show("json", false, false, (path: string) => {
+				ui_files_show("json", false, false, (path: string) => {
 					path = path.toLowerCase();
 					if (path.endsWith(".json")) {
 						let filename: string = path.substr(path.lastIndexOf(path_sep) + 1);
@@ -242,8 +242,8 @@ class BoxExport {
 				t.name = zui_text_input(htex);
 
 				if (ui.is_hovered && ui.input_released_r) {
-					UIMenu.draw((ui: zui_t) => {
-						if (UIMenu.menu_button(ui, tr("Delete"))) {
+					ui_menu_draw((ui: zui_t) => {
+						if (ui_menu_button(ui, tr("Delete"))) {
 							array_remove(BoxExport.preset.textures, t);
 							BoxExport.save_preset();
 						}
@@ -313,7 +313,7 @@ class BoxExport {
 
 	static show_mesh = () => {
 		BoxExport.export_mesh_handle.position = context_raw.export_mesh_index;
-		UIBox.show_custom((ui: zui_t) => {
+		ui_box_show_custom((ui: zui_t) => {
 			let htab: zui_handle_t = zui_handle("boxexport_8");
 			BoxExport.tab_export_mesh(ui, htab);
 		});
@@ -338,22 +338,22 @@ class BoxExport {
 			let paint_objects: mesh_object_t[] = pos == 0 ? project_paint_objects : [project_paint_objects[pos - 1]];
 			for (let po of paint_objects) {
 				for (let inda of po.data.index_arrays) {
-					tris += Math.floor(inda.values.length / 3);
+					tris += math_floor(inda.values.length / 3);
 				}
 			}
 			zui_text(tris + " " + tr("triangles"));
 
 			zui_row([0.5, 0.5]);
 			if (zui_button(tr("Cancel"))) {
-				UIBox.hide();
+				ui_box_hide();
 			}
 			if (zui_button(tr("Export"))) {
-				UIBox.hide();
-				UIFiles.show(context_raw.export_mesh_format == mesh_format_t.OBJ ? "obj" : "arm", true, false, (path: string) => {
+				ui_box_hide();
+				ui_files_show(context_raw.export_mesh_format == mesh_format_t.OBJ ? "obj" : "arm", true, false, (path: string) => {
 					///if (krom_android || krom_ios)
 					let f: string = sys_title();
 					///else
-					let f: string = UIFiles.filename;
+					let f: string = ui_files_filename;
 					///end
 					if (f == "") f = tr("untitled");
 					let doExport = () => {
@@ -374,7 +374,7 @@ class BoxExport {
 
 	///if (is_paint || is_sculpt)
 	static show_material = () => {
-		UIBox.show_custom((ui: zui_t) => {
+		ui_box_show_custom((ui: zui_t) => {
 			let htab: zui_handle_t = zui_handle("boxexport_11");
 			let tab_vertical: bool = config_raw.touch_ui;
 			if (zui_tab(htab, tr("Export Material"), tab_vertical)) {
@@ -386,12 +386,12 @@ class BoxExport {
 				context_raw.write_icon_on_export = zui_check(h2, tr("Export Icon"));
 				zui_row([0.5, 0.5]);
 				if (zui_button(tr("Cancel"))) {
-					UIBox.hide();
+					ui_box_hide();
 				}
 				if (zui_button(tr("Export"))) {
-					UIBox.hide();
-					UIFiles.show("arm", true, false, (path: string) => {
-						let f: string = UIFiles.filename;
+					ui_box_hide();
+					ui_files_show("arm", true, false, (path: string) => {
+						let f: string = ui_files_filename;
 						if (f == "") f = tr("untitled");
 						app_notify_on_init(() => {
 							ExportArm.run_material(path + path_sep + f);
@@ -403,7 +403,7 @@ class BoxExport {
 	}
 
 	static show_brush = () => {
-		UIBox.show_custom((ui: zui_t) => {
+		ui_box_show_custom((ui: zui_t) => {
 			let htab: zui_handle_t = zui_handle("boxexport_14");
 			let tab_vertical: bool = config_raw.touch_ui;
 			if (zui_tab(htab, tr("Export Brush"), tab_vertical)) {
@@ -415,12 +415,12 @@ class BoxExport {
 				context_raw.write_icon_on_export = zui_check(h2, tr("Export Icon"));
 				zui_row([0.5, 0.5]);
 				if (zui_button(tr("Cancel"))) {
-					UIBox.hide();
+					ui_box_hide();
 				}
 				if (zui_button(tr("Export"))) {
-					UIBox.hide();
-					UIFiles.show("arm", true, false, (path: string) => {
-						let f: string = UIFiles.filename;
+					ui_box_hide();
+					ui_files_show("arm", true, false, (path: string) => {
+						let f: string = ui_files_filename;
 						if (f == "") f = tr("untitled");
 						app_notify_on_init(() => {
 							ExportArm.run_brush(path + path_sep + f);
@@ -443,7 +443,7 @@ class BoxExport {
 	static parse_preset = () => {
 		let file: string = "export_presets/" + BoxExport.files[BoxExport.hpreset.position] + ".json";
 		let blob: ArrayBuffer = data_get_blob(file);
-		BoxExport.preset = JSON.parse(sys_buffer_to_string(blob));
+		BoxExport.preset = json_parse(sys_buffer_to_string(blob));
 		data_delete_blob("export_presets/" + file);
 	}
 
@@ -464,7 +464,7 @@ class BoxExport {
 		let name: string = BoxExport.files[BoxExport.hpreset.position];
 		if (name == "generic") return; // generic is const
 		let path: string = path_data() + path_sep + "export_presets" + path_sep + name + ".json";
-		krom_file_save_bytes(path, sys_string_to_buffer(JSON.stringify(BoxExport.preset)));
+		krom_file_save_bytes(path, sys_string_to_buffer(json_stringify(BoxExport.preset)));
 	}
 	///end
 }

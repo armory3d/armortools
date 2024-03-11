@@ -12,7 +12,7 @@ class BoxPreferences {
 
 	static show = () => {
 
-		UIBox.show_custom((ui: zui_t) => {
+		ui_box_show_custom((ui: zui_t) => {
 			if (zui_tab(BoxPreferences.htab, tr("Interface"), true)) {
 
 				if (BoxPreferences.locales == null) {
@@ -25,7 +25,7 @@ class BoxPreferences {
 					let locale_code: string = BoxPreferences.locales[locale_handle.position];
 					config_raw.locale = locale_code;
 					translator_load_translations(locale_code);
-					UIBase.tag_ui_redraw();
+					ui_base_tag_ui_redraw();
 				}
 
 				let hscale: zui_handle_t = zui_handle("boxpreferences_1", { value: config_raw.window_scale });
@@ -61,7 +61,7 @@ class BoxPreferences {
 				ui.changed = false;
 				config_raw.show_asset_names = zui_check(zui_handle("boxpreferences_8", { selected: config_raw.show_asset_names }), tr("Show Asset Names"));
 				if (ui.changed) {
-					UIBase.tag_ui_redraw();
+					ui_base_tag_ui_redraw();
 				}
 
 				///if !(krom_android || krom_ios)
@@ -73,7 +73,7 @@ class BoxPreferences {
 					zui_set_touch_tooltip(config_raw.touch_ui);
 					config_load_theme(config_raw.theme);
 					BoxPreferences.set_scale();
-					UIBase.tag_ui_redraw();
+					ui_base_tag_ui_redraw();
 				}
 				///end
 
@@ -84,9 +84,9 @@ class BoxPreferences {
 
 				zui_end_element();
 				zui_row([0.5, 0.5]);
-				if (zui_button(tr("Restore")) && !UIMenu.show) {
-					UIMenu.draw((ui: zui_t) => {
-						if (UIMenu.menu_button(ui, tr("Confirm"))) {
+				if (zui_button(tr("Restore")) && !ui_menu_show) {
+					ui_menu_draw((ui: zui_t) => {
+						if (ui_menu_button(ui, tr("Confirm"))) {
 							app_notify_on_init(() => {
 								ui.t.ELEMENT_H = base_default_element_h;
 								config_restore();
@@ -98,10 +98,10 @@ class BoxPreferences {
 								MakeMaterial.parse_paint_material();
 							});
 						}
-						if (UIMenu.menu_button(ui, tr("Import..."))) {
-							UIFiles.show("json", false, false, (path: string) => {
+						if (ui_menu_button(ui, tr("Import..."))) {
+							ui_files_show("json", false, false, (path: string) => {
 								let b: ArrayBuffer = data_get_blob(path);
-								let raw: config_t = JSON.parse(sys_buffer_to_string(b));
+								let raw: config_t = json_parse(sys_buffer_to_string(b));
 								app_notify_on_init(() => {
 									ui.t.ELEMENT_H = base_default_element_h;
 									config_import_from(raw);
@@ -113,9 +113,9 @@ class BoxPreferences {
 						}
 					}, 2);
 				}
-				if (zui_button(tr("Reset Layout")) && !UIMenu.show) {
-					UIMenu.draw((ui: zui_t) => {
-						if (UIMenu.menu_button(ui, tr("Confirm"))) {
+				if (zui_button(tr("Reset Layout")) && !ui_menu_show) {
+					ui_menu_draw((ui: zui_t) => {
+						if (ui_menu_button(ui, tr("Confirm"))) {
 							base_init_layout();
 							config_save();
 						}
@@ -140,19 +140,19 @@ class BoxPreferences {
 				}
 
 				if (zui_button(tr("New"))) {
-					UIBox.show_custom((ui: zui_t) => {
+					ui_box_show_custom((ui: zui_t) => {
 						if (zui_tab(zui_handle("boxpreferences_13"), tr("New Theme"))) {
 							zui_row([0.5, 0.5]);
 							let theme_name: string = zui_text_input(zui_handle("boxpreferences_14", { text: "new_theme" }), tr("Name"));
 							if (zui_button(tr("OK")) || ui.is_return_down) {
-								let template: string = JSON.stringify(base_theme);
+								let template: string = json_stringify(base_theme);
 								if (!theme_name.endsWith(".json")) theme_name += ".json";
 								let path: string = path_data() + path_sep + "themes" + path_sep + theme_name;
 								krom_file_save_bytes(path, sys_string_to_buffer(template));
 								BoxPreferences.fetch_themes(); // Refresh file list
 								config_raw.theme = theme_name;
 								BoxPreferences.theme_handle.position = BoxPreferences.get_theme_index();
-								UIBox.hide();
+								ui_box_hide();
 								BoxPreferences.htab.position = 1; // Themes
 								BoxPreferences.show();
 							}
@@ -161,16 +161,16 @@ class BoxPreferences {
 				}
 
 				if (zui_button(tr("Import"))) {
-					UIFiles.show("json", false, false, (path: string) => {
+					ui_files_show("json", false, false, (path: string) => {
 						ImportTheme.run(path);
 					});
 				}
 
 				if (zui_button(tr("Export"))) {
-					UIFiles.show("json", true, false, (path: string) => {
-						path += path_sep + UIFiles.filename;
+					ui_files_show("json", true, false, (path: string) => {
+						path += path_sep + ui_files_filename;
 						if (!path.endsWith(".json")) path += ".json";
-						krom_file_save_bytes(path, sys_string_to_buffer(JSON.stringify(base_theme)));
+						krom_file_save_bytes(path, sys_string_to_buffer(json_stringify(base_theme)));
 					});
 				}
 
@@ -185,10 +185,10 @@ class BoxPreferences {
 				zui_row([1 / 8, 7 / 8]);
 				zui_text("", 0, h.color);
 				if (ui.is_hovered && ui.input_released) {
-					UIMenu.draw((ui) => {
+					ui_menu_draw((ui) => {
 						ui.changed = false;
 						zui_color_wheel(h, false, null, 11 * ui.t.ELEMENT_H * zui_SCALE(ui), true);
-						if (ui.changed) UIMenu.keep_open = true;
+						if (ui.changed) ui_menu_keep_open = true;
 					}, 11);
 				}
 				let val: i32 = h.color;
@@ -226,11 +226,11 @@ class BoxPreferences {
 						zui_text("", 0, val);
 						if (ui.is_hovered && ui.input_released) {
 							h.color = theme[key];
-							UIMenu.draw((ui) => {
+							ui_menu_draw((ui) => {
 								ui.changed = false;
 								let color: i32 = zui_color_wheel(h, false, null, 11 * ui.t.ELEMENT_H * zui_SCALE(ui), true);
 								theme[key] = color;
-								if (ui.changed) UIMenu.keep_open = true;
+								if (ui.changed) ui_menu_keep_open = true;
 							}, 11);
 						}
 					}
@@ -265,9 +265,9 @@ class BoxPreferences {
 
 			if (zui_tab(BoxPreferences.htab, tr("Usage"), true)) {
 				context_raw.undo_handle = zui_handle("boxpreferences_16", { value: config_raw.undo_steps });
-				config_raw.undo_steps = Math.floor(zui_slider(context_raw.undo_handle, tr("Undo Steps"), 1, 64, false, 1));
+				config_raw.undo_steps = math_floor(zui_slider(context_raw.undo_handle, tr("Undo Steps"), 1, 64, false, 1));
 				if (config_raw.undo_steps < 1) {
-					config_raw.undo_steps = Math.floor(context_raw.undo_handle.value = 1);
+					config_raw.undo_steps = math_floor(context_raw.undo_handle.value = 1);
 				}
 				if (context_raw.undo_handle.changed) {
 					let current: image_t = _g2_current;
@@ -289,7 +289,7 @@ class BoxPreferences {
 				}
 
 				///if is_paint
-				config_raw.dilate_radius = Math.floor(zui_slider(zui_handle("boxpreferences_17", { value: config_raw.dilate_radius }), tr("Dilate Radius"), 0.0, 16.0, true, 1));
+				config_raw.dilate_radius = math_floor(zui_slider(zui_handle("boxpreferences_17", { value: config_raw.dilate_radius }), tr("Dilate Radius"), 0.0, 16.0, true, 1));
 				if (ui.is_hovered) zui_tooltip(tr("Dilate painted textures to prevent seams"));
 
 				let dilate_handle: zui_handle_t = zui_handle("boxpreferences_18", { position: config_raw.dilate });
@@ -474,8 +474,8 @@ class BoxPreferences {
 				let cam_raw: camera_data_t = cam.data;
 				let near_handle: zui_handle_t = zui_handle("boxpreferences_47");
 				let far_handle: zui_handle_t = zui_handle("boxpreferences_48");
-				near_handle.value = Math.floor(cam_raw.near_plane * 1000) / 1000;
-				far_handle.value = Math.floor(cam_raw.far_plane * 100) / 100;
+				near_handle.value = math_floor(cam_raw.near_plane * 1000) / 1000;
+				far_handle.value = math_floor(cam_raw.far_plane * 100) / 100;
 				cam_raw.near_plane = zui_slider(near_handle, tr("Clip Start"), 0.001, 1.0, true);
 				cam_raw.far_plane = zui_slider(far_handle, tr("Clip End"), 50.0, 100.0, true);
 				if (near_handle.changed || far_handle.changed) {
@@ -507,19 +507,19 @@ class BoxPreferences {
 				}
 
 				if (zui_button(tr("New"))) {
-					UIBox.show_custom((ui: zui_t) => {
+					ui_box_show_custom((ui: zui_t) => {
 						if (zui_tab(zui_handle("boxpreferences_51"), tr("New Keymap"))) {
 							zui_row([0.5, 0.5]);
 							let keymap_name: string = zui_text_input(zui_handle("boxpreferences_52", { text: "new_keymap" }), tr("Name"));
 							if (zui_button(tr("OK")) || ui.is_return_down) {
-								let template: string = JSON.stringify(base_default_keymap);
+								let template: string = json_stringify(base_default_keymap);
 								if (!keymap_name.endsWith(".json")) keymap_name += ".json";
 								let path: string = path_data() + path_sep + "keymap_presets" + path_sep + keymap_name;
 								krom_file_save_bytes(path, sys_string_to_buffer(template));
 								BoxPreferences.fetch_keymaps(); // Refresh file list
 								config_raw.keymap = keymap_name;
 								BoxPreferences.preset_handle.position = BoxPreferences.get_preset_index();
-								UIBox.hide();
+								ui_box_hide();
 								BoxPreferences.htab.position = 5; // Keymap
 								BoxPreferences.show();
 							}
@@ -528,15 +528,15 @@ class BoxPreferences {
 				}
 
 				if (zui_button(tr("Import"))) {
-					UIFiles.show("json", false, false, (path: string) => {
+					ui_files_show("json", false, false, (path: string) => {
 						ImportKeymap.run(path);
 					});
 				}
 				if (zui_button(tr("Export"))) {
-					UIFiles.show("json", true, false, (dest: string) => {
-						if (!UIFiles.filename.endsWith(".json")) UIFiles.filename += ".json";
+					ui_files_show("json", true, false, (dest: string) => {
+						if (!ui_files_filename.endsWith(".json")) ui_files_filename += ".json";
 						let path: string = path_data() + path_sep + "keymap_presets" + path_sep + config_raw.keymap;
-						file_copy(path, dest + path_sep + UIFiles.filename);
+						file_copy(path, dest + path_sep + ui_files_filename);
 					});
 				}
 
@@ -561,7 +561,7 @@ class BoxPreferences {
 				zui_begin_sticky();
 				zui_row([1 / 4, 1 / 4]);
 				if (zui_button(tr("New"))) {
-					UIBox.show_custom((ui: zui_t) => {
+					ui_box_show_custom((ui: zui_t) => {
 						if (zui_tab(zui_handle("boxpreferences_54"), tr("New Plugin"))) {
 							zui_row([0.5, 0.5]);
 							let plugin_name: string = zui_text_input(zui_handle("boxpreferences_55", { text: "new_plugin" }), tr("Name"));
@@ -581,7 +581,7 @@ plugin.drawUI = (ui) { =>
 								let path: string = path_data() + path_sep + "plugins" + path_sep + plugin_name;
 								krom_file_save_bytes(path, sys_string_to_buffer(template));
 								BoxPreferences.files_plugin = null; // Refresh file list
-								UIBox.hide();
+								ui_box_hide();
 								BoxPreferences.htab.position = 6; // Plugins
 								BoxPreferences.show();
 							}
@@ -589,7 +589,7 @@ plugin.drawUI = (ui) { =>
 					});
 				}
 				if (zui_button(tr("Import"))) {
-					UIFiles.show("js,zip", false, false, (path: string) => {
+					ui_files_show("js,zip", false, false, (path: string) => {
 						ImportPlugin.run(path);
 					});
 				}
@@ -613,24 +613,24 @@ plugin.drawUI = (ui) { =>
 						base_redraw_ui();
 					}
 					if (ui.is_hovered && ui.input_released_r) {
-						UIMenu.draw((ui: zui_t) => {
+						ui_menu_draw((ui: zui_t) => {
 							let path: string = path_data() + path_sep + "plugins" + path_sep + f;
-							if (UIMenu.menu_button(ui, tr("Edit in Text Editor"))) {
+							if (ui_menu_button(ui, tr("Edit in Text Editor"))) {
 								file_start(path);
 							}
-							if (UIMenu.menu_button(ui, tr("Edit in Script Tab"))) {
+							if (ui_menu_button(ui, tr("Edit in Script Tab"))) {
 								let blob: ArrayBuffer = data_get_blob("plugins/" + f);
 								TabScript.hscript.text = sys_buffer_to_string(blob);
 								data_delete_blob("plugins/" + f);
 								console_info(tr("Script opened"));
 							}
-							if (UIMenu.menu_button(ui, tr("Export"))) {
-								UIFiles.show("js", true, false, (dest: string) => {
-									if (!UIFiles.filename.endsWith(".js")) UIFiles.filename += ".js";
-									file_copy(path, dest + path_sep + UIFiles.filename);
+							if (ui_menu_button(ui, tr("Export"))) {
+								ui_files_show("js", true, false, (dest: string) => {
+									if (!ui_files_filename.endsWith(".js")) ui_files_filename += ".js";
+									file_copy(path, dest + path_sep + ui_files_filename);
 								});
 							}
-							if (UIMenu.menu_button(ui, tr("Delete"))) {
+							if (ui_menu_button(ui, tr("Delete"))) {
 								if (config_raw.plugins.indexOf(f) >= 0) {
 									array_remove(config_raw.plugins, f);
 									plugin_stop(f);
@@ -674,19 +674,19 @@ plugin.drawUI = (ui) { =>
 
 	static set_scale = () => {
 		let scale: f32 = config_raw.window_scale;
-		zui_set_scale(UIBase.ui, scale);
-		UIHeader.headerh = Math.floor(UIHeader.default_header_h * scale);
-		config_raw.layout[layout_size_t.STATUS_H] = Math.floor(UIStatus.default_status_h * scale);
-		UIMenubar.menubarw = Math.floor(UIMenubar.default_menubar_w * scale);
-		UIBase.set_icon_scale();
-		zui_set_scale(UINodes.ui, scale);
-		zui_set_scale(UIView2D.ui, scale);
+		zui_set_scale(ui_base_ui, scale);
+		ui_header_h = math_floor(ui_header_default_h * scale);
+		config_raw.layout[layout_size_t.STATUS_H] = math_floor(ui_status_default_status_h * scale);
+		ui_menubar_w = math_floor(ui_menubar_default_w * scale);
+		ui_base_set_icon_scale();
+		zui_set_scale(ui_nodes_ui, scale);
+		zui_set_scale(ui_view2d_ui, scale);
 		zui_set_scale(base_ui_box, scale);
 		zui_set_scale(base_ui_menu, scale);
 		base_resize();
 		///if (is_paint || is_sculpt)
-		config_raw.layout[layout_size_t.SIDEBAR_W] = Math.floor(UIBase.default_sidebar_w * scale);
-		UIToolbar.toolbar_w = Math.floor(UIToolbar.default_toolbar_w * scale);
+		config_raw.layout[layout_size_t.SIDEBAR_W] = math_floor(ui_base_default_sidebar_w * scale);
+		ui_toolbar_w = math_floor(ui_toolbar_default_w * scale);
 		///end
 	}
 }

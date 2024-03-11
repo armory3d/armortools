@@ -32,8 +32,8 @@ class ImportEnvmap {
 			ImportEnvmap.mips = [];
 			let w: i32 = 512;
 			for (let i: i32 = 0; i < 10; ++i) {
-				ImportEnvmap.mips.push(image_create_render_target(w, w > 1 ? Math.floor(w / 2) : 1, tex_format_t.RGBA128));
-				w = Math.floor(w / 2);
+				ImportEnvmap.mips.push(image_create_render_target(w, w > 1 ? math_floor(w / 2) : 1, tex_format_t.RGBA128));
+				w = math_floor(w / 2);
 			}
 
 			if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
@@ -104,10 +104,10 @@ class ImportEnvmap {
 	}
 
 	static reverse_equirect = (x: f32, y: f32): vec4_t => {
-		let theta: f32 = x * Math.PI * 2 - Math.PI;
-		let phi: f32 = y * Math.PI;
-		// return n.set(Math.sin(phi) * Math.cos(theta), -(Math.sin(phi) * Math.sin(theta)), Math.cos(phi));
-		return vec4_set(ImportEnvmap.n, -Math.cos(phi), Math.sin(phi) * Math.cos(theta), -(Math.sin(phi) * Math.sin(theta)));
+		let theta: f32 = x * math_pi() * 2 - math_pi();
+		let phi: f32 = y * math_pi();
+		// return n.set(math_sin(phi) * math_cos(theta), -(math_sin(phi) * math_sin(theta)), math_cos(phi));
+		return vec4_set(ImportEnvmap.n, -math_cos(phi), math_sin(phi) * math_cos(theta), -(math_sin(phi) * math_sin(theta)));
 	}
 
 	// https://ndotl.wordpress.com/2015/03/07/pbr-cubemap-filtering
@@ -129,7 +129,7 @@ class ImportEnvmap {
 
 				for (let i: i32 = 0; i < 3; ++i) {
 					let value: f32 = view.getFloat32(((x + y * sourceWidth) * 16 + i * 4), true);
-					value = Math.pow(value, 1.0 / 2.2);
+					value = math_pow(value, 1.0 / 2.2);
 
 					sh[0 + i] += value * weight1;
 					sh[3 + i] += value * weight2 * ImportEnvmap.n.x;

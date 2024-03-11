@@ -41,12 +41,12 @@ class PhotoToPBRNode extends LogicNode {
 			console_progress(tr("Processing") + " - " + tr("Photo to PBR"));
 			base_notifyOnNextFrame(() => {
 				let tileFloats: Float32Array[] = [];
-				let tilesX = Math.floor(config_getTextureResX() / PhotoToPBRNode.tileW);
-				let tilesY = Math.floor(config_getTextureResY() / PhotoToPBRNode.tileW);
+				let tilesX = math_floor(config_getTextureResX() / PhotoToPBRNode.tileW);
+				let tilesY = math_floor(config_getTextureResY() / PhotoToPBRNode.tileW);
 				let numTiles = tilesX * tilesY;
 				for (let i = 0; i < numTiles; ++i) {
 					let x = i % tilesX;
-					let y = Math.floor(i / tilesX);
+					let y = math_floor(i / tilesX);
 
 					g2_begin(PhotoToPBRNode.temp);
 					g2_draw_scaled_image(source, PhotoToPBRNode.borderW - x * PhotoToPBRNode.tileW, PhotoToPBRNode.borderW - y * PhotoToPBRNode.tileW, -config_getTextureResX(), config_getTextureResY());
@@ -75,10 +75,10 @@ class PhotoToPBRNode extends LogicNode {
 					let offsetB = (from == ChannelType.ChannelBaseColor || from == ChannelType.ChannelNormalMap) ? PhotoToPBRNode.tileWithBorderW * PhotoToPBRNode.tileWithBorderW * 2 : 0;
 					for (let i = 0; i < (PhotoToPBRNode.tileW * PhotoToPBRNode.tileW); ++i) {
 						let x = PhotoToPBRNode.borderW + i % PhotoToPBRNode.tileW;
-						let y = PhotoToPBRNode.borderW + Math.floor(i / PhotoToPBRNode.tileW);
-						u8a[i * 4    ] = Math.floor((ar[y * PhotoToPBRNode.tileWithBorderW + x          ] * 0.5 + 0.5) * 255);
-						u8a[i * 4 + 1] = Math.floor((ar[y * PhotoToPBRNode.tileWithBorderW + x + offsetG] * 0.5 + 0.5) * 255);
-						u8a[i * 4 + 2] = Math.floor((ar[y * PhotoToPBRNode.tileWithBorderW + x + offsetB] * 0.5 + 0.5) * 255);
+						let y = PhotoToPBRNode.borderW + math_floor(i / PhotoToPBRNode.tileW);
+						u8a[i * 4    ] = math_floor((ar[y * PhotoToPBRNode.tileWithBorderW + x          ] * 0.5 + 0.5) * 255);
+						u8a[i * 4 + 1] = math_floor((ar[y * PhotoToPBRNode.tileWithBorderW + x + offsetG] * 0.5 + 0.5) * 255);
+						u8a[i * 4 + 2] = math_floor((ar[y * PhotoToPBRNode.tileWithBorderW + x + offsetB] * 0.5 + 0.5) * 255);
 						u8a[i * 4 + 3] = 255;
 					}
 					tileFloats.push(ar);
@@ -94,15 +94,15 @@ class PhotoToPBRNode extends LogicNode {
 									let b = u8a[i * 4 + 1];
 									let c = u8a[i * 4 + 2];
 
-									let aa = Math.floor((ar[(PhotoToPBRNode.borderW + yy) * PhotoToPBRNode.tileWithBorderW + PhotoToPBRNode.borderW + PhotoToPBRNode.tileW + xx          ] * 0.5 + 0.5) * 255);
-									let bb = Math.floor((ar[(PhotoToPBRNode.borderW + yy) * PhotoToPBRNode.tileWithBorderW + PhotoToPBRNode.borderW + PhotoToPBRNode.tileW + xx + offsetG] * 0.5 + 0.5) * 255);
-									let cc = Math.floor((ar[(PhotoToPBRNode.borderW + yy) * PhotoToPBRNode.tileWithBorderW + PhotoToPBRNode.borderW + PhotoToPBRNode.tileW + xx + offsetB] * 0.5 + 0.5) * 255);
+									let aa = math_floor((ar[(PhotoToPBRNode.borderW + yy) * PhotoToPBRNode.tileWithBorderW + PhotoToPBRNode.borderW + PhotoToPBRNode.tileW + xx          ] * 0.5 + 0.5) * 255);
+									let bb = math_floor((ar[(PhotoToPBRNode.borderW + yy) * PhotoToPBRNode.tileWithBorderW + PhotoToPBRNode.borderW + PhotoToPBRNode.tileW + xx + offsetG] * 0.5 + 0.5) * 255);
+									let cc = math_floor((ar[(PhotoToPBRNode.borderW + yy) * PhotoToPBRNode.tileWithBorderW + PhotoToPBRNode.borderW + PhotoToPBRNode.tileW + xx + offsetB] * 0.5 + 0.5) * 255);
 
 									let f = xx / PhotoToPBRNode.borderW;
 									let invf = 1.0 - f;
-									a = Math.floor(a * f + aa * invf);
-									b = Math.floor(b * f + bb * invf);
-									c = Math.floor(c * f + cc * invf);
+									a = math_floor(a * f + aa * invf);
+									b = math_floor(b * f + bb * invf);
+									c = math_floor(c * f + cc * invf);
 
 									u8a[i * 4    ] = a;
 									u8a[i * 4 + 1] = b;
@@ -119,15 +119,15 @@ class PhotoToPBRNode extends LogicNode {
 									let b = u8a[i * 4 + 1];
 									let c = u8a[i * 4 + 2];
 
-									let aa = Math.floor((ar[(PhotoToPBRNode.borderW + PhotoToPBRNode.tileW + yy) * PhotoToPBRNode.tileWithBorderW + PhotoToPBRNode.borderW + xx          ] * 0.5 + 0.5) * 255);
-									let bb = Math.floor((ar[(PhotoToPBRNode.borderW + PhotoToPBRNode.tileW + yy) * PhotoToPBRNode.tileWithBorderW + PhotoToPBRNode.borderW + xx + offsetG] * 0.5 + 0.5) * 255);
-									let cc = Math.floor((ar[(PhotoToPBRNode.borderW + PhotoToPBRNode.tileW + yy) * PhotoToPBRNode.tileWithBorderW + PhotoToPBRNode.borderW + xx + offsetB] * 0.5 + 0.5) * 255);
+									let aa = math_floor((ar[(PhotoToPBRNode.borderW + PhotoToPBRNode.tileW + yy) * PhotoToPBRNode.tileWithBorderW + PhotoToPBRNode.borderW + xx          ] * 0.5 + 0.5) * 255);
+									let bb = math_floor((ar[(PhotoToPBRNode.borderW + PhotoToPBRNode.tileW + yy) * PhotoToPBRNode.tileWithBorderW + PhotoToPBRNode.borderW + xx + offsetG] * 0.5 + 0.5) * 255);
+									let cc = math_floor((ar[(PhotoToPBRNode.borderW + PhotoToPBRNode.tileW + yy) * PhotoToPBRNode.tileWithBorderW + PhotoToPBRNode.borderW + xx + offsetB] * 0.5 + 0.5) * 255);
 
 									let f = yy / PhotoToPBRNode.borderW;
 									let invf = 1.0 - f;
-									a = Math.floor(a * f + aa * invf);
-									b = Math.floor(b * f + bb * invf);
-									c = Math.floor(c * f + cc * invf);
+									a = math_floor(a * f + aa * invf);
+									b = math_floor(b * f + bb * invf);
+									c = math_floor(c * f + cc * invf);
 
 									u8a[i * 4    ] = a;
 									u8a[i * 4 + 1] = b;
@@ -158,7 +158,7 @@ class PhotoToPBRNode extends LogicNode {
 	///if (krom_metal || krom_vulkan)
 	static bgraSwap = (buffer: ArrayBuffer) => {
 		let u8a = new Uint8Array(buffer);
-		for (let i = 0; i < Math.floor(buffer.byteLength / 4); ++i) {
+		for (let i = 0; i < math_floor(buffer.byteLength / 4); ++i) {
 			let r = u8a[i * 4];
 			u8a[i * 4] = u8a[i * 4 + 2];
 			u8a[i * 4 + 2] = r;

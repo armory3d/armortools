@@ -21,19 +21,19 @@ function camera_update() {
 		if (config_raw.wrap_mouse && camera_controls_down) {
 			if (mouse_view_x() < 0) {
 				mouse_x = mouse_last_x = app_x() + app_w();
-				krom_set_mouse_position(Math.floor(mouse_x), Math.floor(mouse_y));
+				krom_set_mouse_position(math_floor(mouse_x), math_floor(mouse_y));
 			}
 			else if (mouse_view_x() > app_w()) {
 				mouse_x = mouse_last_x = app_x();
-				krom_set_mouse_position(Math.floor(mouse_x), Math.floor(mouse_y));
+				krom_set_mouse_position(math_floor(mouse_x), math_floor(mouse_y));
 			}
 			else if (mouse_view_y() < 0) {
 				mouse_y = mouse_last_y = app_y() + app_h();
-				krom_set_mouse_position(Math.floor(mouse_x), Math.floor(mouse_y));
+				krom_set_mouse_position(math_floor(mouse_x), math_floor(mouse_y));
 			}
 			else if (mouse_view_y() > app_h()) {
 				mouse_y = mouse_last_y = app_y();
-				krom_set_mouse_position(Math.floor(mouse_x), Math.floor(mouse_y));
+				krom_set_mouse_position(math_floor(mouse_x), math_floor(mouse_y));
 			}
 		}
 		else {
@@ -121,7 +121,7 @@ function camera_update() {
 		let strafe_down: bool = keyboard_down("q");
 		let fast: f32 = keyboard_down("shift") ? 2.0 : (keyboard_down("alt") ? 0.5 : 1.0);
 		if (mouse_wheel_delta != 0) {
-			fast *= Math.abs(mouse_wheel_delta) * 4.0;
+			fast *= math_abs(mouse_wheel_delta) * 4.0;
 		}
 
 		if (move_forward || move_backward || strafe_right || strafe_left || strafe_up || strafe_down) {
@@ -157,7 +157,7 @@ function camera_update() {
 	if (operator_shortcut(config_keymap.rotate_light, shortcut_type_t.DOWN)) {
 		camera_redraws = 2;
 		let light: light_object_t = scene_lights[0];
-		context_raw.light_angle = (context_raw.light_angle + ((mouse_movement_x / 100) % (2 * Math.PI) + 2 * Math.PI)) % (2 * Math.PI);
+		context_raw.light_angle = (context_raw.light_angle + ((mouse_movement_x / 100) % (2 * math_pi()) + 2 * math_pi())) % (2 * math_pi());
 		let m: mat4_t = mat4_rot_z(mouse_movement_x / 100);
 		mat4_mult_mat(light.base.transform.local, m);
 		transform_decompose(light.base.transform);

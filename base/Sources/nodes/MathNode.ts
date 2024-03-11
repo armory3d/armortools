@@ -20,19 +20,19 @@ class MathNode extends LogicNode {
 						f = v1 * v2;
 						break;
 					case "Sine":
-						f = Math.sin(v1);
+						f = math_sin(v1);
 						break;
 					case "Cosine":
-						f = Math.cos(v1);
+						f = math_cos(v1);
 						break;
 					case "Max":
-						f = Math.max(v1, v2);
+						f = math_max(v1, v2);
 						break;
 					case "Min":
-						f = Math.min(v1, v2);
+						f = math_min(v1, v2);
 						break;
 					case "Absolute":
-						f = Math.abs(v1);
+						f = math_abs(v1);
 						break;
 					case "Subtract":
 						f = v1 - v2;
@@ -41,40 +41,40 @@ class MathNode extends LogicNode {
 						f = v1 / (v2 == 0.0 ? 0.000001 : v2);
 						break;
 					case "Tangent":
-						f = Math.tan(v1);
+						f = math_tan(v1);
 						break;
 					case "Arcsine":
-						f = Math.asin(v1);
+						f = math_asin(v1);
 						break;
 					case "Arccosine":
-						f = Math.acos(v1);
+						f = math_acos(v1);
 						break;
 					case "Arctangent":
-						f = Math.atan(v1);
+						f = math_atan(v1);
 						break;
 					case "Arctan2":
-					    f = Math.atan2(v2, v1);
+					    f = math_atan2(v2, v1);
 						break;
 					case "Power":
-						f = Math.pow(v1, v2);
+						f = math_pow(v1, v2);
 						break;
 					case "Logarithm":
-						f = Math.log(v1);
+						f = math_log(v1);
 						break;
 					case "Round":
-						f = Math.round(v1);
+						f = math_round(v1);
 						break;
 					case "Floor":
-					    f = Math.floor(v1);
+					    f = math_floor(v1);
 						break;
 					case "Ceil":
-					    f = Math.ceil(v1);
+					    f = math_ceil(v1);
 						break;
 					case "Truncate":
-						f = Math.floor(v1);
+						f = math_floor(v1);
 						break;
 					case "Fraction":
-					    f = v1 - Math.floor(v1);
+					    f = v1 - math_floor(v1);
 						break;
 					case "Less Than":
 						f = v1 < v2 ? 1.0 : 0.0;
@@ -86,37 +86,37 @@ class MathNode extends LogicNode {
 						f = v1 % v2;
 						break;
 					case "Snap":
-						f = Math.floor(v1 / v2) * v2;
+						f = math_floor(v1 / v2) * v2;
 						break;
 					case "Square Root":
-					    f = Math.sqrt(v1);
+					    f = math_sqrt(v1);
 						break;
 					case "Inverse Square Root":
-						f = 1.0 / Math.sqrt(v1);
+						f = 1.0 / math_sqrt(v1);
 						break;
 					case "Exponent":
-						f = Math.exp(v1);
+						f = math_exp(v1);
 						break;
 					case "Sign":
 						f = v1 > 0 ? 1.0 : (v1 < 0 ? -1.0 : 0);
 						break;
 					case "Ping-Pong":
-					    f = (v2 != 0.0) ? v2 - Math.abs((Math.abs(v1) % (2 * v2)) - v2) : 0.0;
+					    f = (v2 != 0.0) ? v2 - math_abs((math_abs(v1) % (2 * v2)) - v2) : 0.0;
 						break;
 					case "Hyperbolic Sine":
-						f = (Math.exp(v1) - Math.exp(-v1)) / 2.0;
+						f = (math_exp(v1) - math_exp(-v1)) / 2.0;
 						break;
 					case "Hyperbolic Cosine":
-						f = (Math.exp(v1) + Math.exp(-v1)) / 2.0;
+						f = (math_exp(v1) + math_exp(-v1)) / 2.0;
 						break;
 					case "Hyperbolic Tangent":
-						f = 1.0 - (2.0 / (Math.exp(2 * v1) + 1));
+						f = 1.0 - (2.0 / (math_exp(2 * v1) + 1));
 						break;
 					case "To Radians":
-						f = v1 / 180.0 * Math.PI;
+						f = v1 / 180.0 * math_pi();
 						break;
 					case "To Degrees":
-						f = v1 / Math.PI * 180.0;
+						f = v1 / math_pi() * 180.0;
 						break;
 				}
 

@@ -21,15 +21,15 @@ class ExportObj {
 			let posa: i16_array_t = mesh.vertex_arrays[0].values;
 			let nora: i16_array_t = mesh.vertex_arrays[1].values;
 			let texa: i16_array_t = mesh.vertex_arrays[2].values;
-			let len: i32 = Math.floor(posa.length / 4);
+			let len: i32 = math_floor(posa.length / 4);
 
 			// Merge shared vertices and remap indices
 			let posa2: Int16Array = new Int16Array(len * 3);
 			let nora2: Int16Array = new Int16Array(len * 3);
 			let texa2: Int16Array = new Int16Array(len * 2);
-			let posmap: Map<i32, i32> = new Map();
-			let normap: Map<i32, i32> = new Map();
-			let texmap: Map<i32, i32> = new Map();
+			let posmap: map_t<i32, i32> = map_create();
+			let normap: map_t<i32, i32> = map_create();
+			let texmap: map_t<i32, i32> = map_create();
 
 			let pi: i32 = 0;
 			let ni: i32 = 0;
@@ -93,12 +93,12 @@ class ExportObj {
 				// let res: i32 = layers[0].texpaint_pack.width;
 				// let strength: f32 = 0.1;
 				// for (let i: i32 = 0; i < len; ++i) {
-				// 	let x: i32 = Math.floor(texa2[i * 2    ] / 32767 * res);
-				// 	let y: i32 = Math.floor((1.0 - texa2[i * 2 + 1] / 32767) * res);
+				// 	let x: i32 = math_floor(texa2[i * 2    ] / 32767 * res);
+				// 	let y: i32 = math_floor((1.0 - texa2[i * 2 + 1] / 32767) * res);
 				// 	let h: f32 = (1.0 - height.get((y * res + x) * 4 + 3) / 255) * strength;
-				// 	posa2[i * 3    ] -= Math.floor(nora2[i * 3    ] * inv * h / sc);
-				// 	posa2[i * 3 + 1] -= Math.floor(nora2[i * 3 + 1] * inv * h / sc);
-				// 	posa2[i * 3 + 2] -= Math.floor(nora2[i * 3 + 2] * inv * h / sc);
+				// 	posa2[i * 3    ] -= math_floor(nora2[i * 3    ] * inv * h / sc);
+				// 	posa2[i * 3 + 1] -= math_floor(nora2[i * 3 + 1] * inv * h / sc);
+				// 	posa2[i * 3 + 2] -= math_floor(nora2[i * 3 + 2] * inv * h / sc);
 				// }
 			}
 
@@ -130,7 +130,7 @@ class ExportObj {
 			}
 
 			let inda: u32_array_t = mesh.index_arrays[0].values;
-			for (let i: i32 = 0; i < Math.floor(inda.length / 3); ++i) {
+			for (let i: i32 = 0; i < math_floor(inda.length / 3); ++i) {
 				let pi1: i32 = posmap.get(inda[i * 3    ]) + 1 + poff;
 				let pi2: i32 = posmap.get(inda[i * 3 + 1]) + 1 + poff;
 				let pi3: i32 = posmap.get(inda[i * 3 + 2]) + 1 + poff;

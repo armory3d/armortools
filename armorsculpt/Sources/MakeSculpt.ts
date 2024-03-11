@@ -69,7 +69,7 @@ class MakeSculpt {
 
 		NodeShader.write(frag, 'if (sample_undo.r == 0 && sample_undo.g == 0 && sample_undo.b == 0) discard;');
 
-		NodeShader.add_function(frag, ShaderFunctions.str_octahedronWrap);
+		NodeShader.add_function(frag, str_octahedronWrap);
 		NodeShader.add_uniform(frag, 'sampler2D gbuffer0_undo');
 		NodeShader.write(frag, 'vec2 g0_undo = textureLod(gbuffer0_undo, inp.xy, 0.0).rg;');
 		NodeShader.write(frag, 'vec3 wn;');

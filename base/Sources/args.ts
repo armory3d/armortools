@@ -86,7 +86,7 @@ function args_run() {
 				ImportAsset.run(args_asset_path, -1, -1, false);
 				///if is_paint
 				if (path_is_texture(args_asset_path)) {
-					UIBase.show_2d_view(view_2d_type_t.ASSET);
+					ui_base_show_2d_view(view_2d_type_t.ASSET);
 				}
 				///end
 			}
@@ -143,7 +143,7 @@ function args_run() {
 						}
 
 						let blob: ArrayBuffer = data_get_blob(file);
-						BoxExport.preset = JSON.parse(sys_buffer_to_string(blob));
+						BoxExport.preset = json_parse(sys_buffer_to_string(blob));
 						data_delete_blob("export_presets/" + file);
 
 						// Export queue
@@ -164,7 +164,7 @@ function args_run() {
 			///if (is_paint || is_sculpt)
 			else if (args_export_mesh) {
 				if (path_is_folder(args_export_mesh_path)) {
-					let f: string = UIFiles.filename;
+					let f: string = ui_files_filename;
 					if (f == "") f = tr("untitled");
 					ExportMesh.run(args_export_mesh_path + path_sep + f, null, false);
 				}

@@ -138,7 +138,7 @@ class MakePaint {
 			NodeShader.write(frag, 'float dist = 0.0;');
 			let angle_fill: bool = context_raw.tool == workspace_tool_t.FILL && context_raw.fill_type_handle.position == fill_type_t.ANGLE;
 			if (angle_fill) {
-				NodeShader.add_function(frag, ShaderFunctions.str_octahedron_wrap);
+				NodeShader.add_function(frag, str_octahedron_wrap);
 				NodeShader.add_uniform(frag, 'sampler2D gbuffer0');
 				NodeShader.write(frag, 'vec2 g0 = textureLod(gbuffer0, inp.xy, 0.0).rg;');
 				NodeShader.write(frag, 'vec3 wn;');
@@ -202,7 +202,7 @@ class MakePaint {
 			ParserMaterial.triplanar = uv_type == uv_type_t.TRIPLANAR && !decal;
 			ParserMaterial.sample_keep_aspect = decal;
 			ParserMaterial.sample_uv_scale = 'brushScale';
-			let sout: shader_out_t = ParserMaterial.parse(UINodes.get_canvas_material(), con_paint, vert, frag, matcon);
+			let sout: shader_out_t = ParserMaterial.parse(ui_nodes_get_canvas_material(), con_paint, vert, frag, matcon);
 			ParserMaterial.parse_emission = false;
 			ParserMaterial.parse_subsurface = false;
 			ParserMaterial.parse_height_as_channel = false;

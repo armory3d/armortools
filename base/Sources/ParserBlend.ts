@@ -19,7 +19,7 @@ class BlendRaw {
 	// Data
 	blocks: Block[] = [];
 	dna: Dna = null;
-	map: Map<any, Block> = new Map(); // Map blocks by memory address
+	map: map_t<any, Block> = map_create(); // Map blocks by memory address
 }
 
 class ParserBlend {

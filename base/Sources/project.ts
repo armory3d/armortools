@@ -7,7 +7,7 @@ let project_asset_id: i32 = 0;
 let project_mesh_assets: string[] = [];
 let project_material_groups: node_group_t[] = [];
 let project_paint_objects: mesh_object_t[] = null;
-let project_asset_map: Map<i32, any> = new Map(); // image_t | font_t
+let project_asset_map: map_t<i32, any> = map_create(); // image_t | font_t
 let project_mesh_list: string[] = null;
 ///if (is_paint || is_sculpt)
 let project_materials: SlotMaterialRaw[] = null;
@@ -26,18 +26,19 @@ let project_default_canvas: ArrayBuffer = null;
 ///end
 
 function project_open() {
-	UIFiles.show("arm", false, false, function (path: string) {
+	ui_files_show("arm", false, false, function (path: string) {
 		if (!path.endsWith(".arm")) {
 			console_error(strings_error0());
 			return;
 		}
 
 		let current: image_t = _g2_current;
-		if (current != null) g2_end();
+		let g2_in_use: bool = _g2_in_use;
+		if (g2_in_use) g2_end();
 
 		ImportArm.run_project(path);
 
-		if (current != null) g2_begin(current);
+		if (g2_in_use) g2_begin(current);
 	});
 }
 
@@ -68,8 +69,8 @@ function project_save(saveAndQuit: bool = false) {
 }
 
 function project_save_as(saveAndQuit: bool = false) {
-	UIFiles.show("arm", true, false, function (path: string) {
-		let f: string = UIFiles.filename;
+	ui_files_show("arm", true, false, function (path: string) {
+		let f: string = ui_files_filename;
 		if (f == "") f = tr("untitled");
 		project_filepath = path + path_sep + f;
 		if (!project_filepath.endsWith(".arm")) project_filepath += ".arm";
@@ -79,7 +80,7 @@ function project_save_as(saveAndQuit: bool = false) {
 
 function project_new_box() {
 	///if (is_paint || is_sculpt)
-	UIBox.show_custom(function (ui: zui_t) {
+	ui_box_show_custom(function (ui: zui_t) {
 		if (zui_tab(zui_handle("project_0"), tr("New Project"))) {
 			if (project_mesh_list == null) {
 				project_mesh_list = file_read_directory(path_data() + path_sep + "meshes");
@@ -96,12 +97,12 @@ function project_new_box() {
 			zui_end_element();
 			zui_row([0.5, 0.5]);
 			if (zui_button(tr("Cancel"))) {
-				UIBox.hide();
+				ui_box_hide();
 			}
 			if (zui_button(tr("OK")) || ui.is_return_down) {
 				project_new();
 				viewport_scale_to_bounds();
-				UIBox.hide();
+				ui_box_hide();
 			}
 		}
 	});
@@ -168,7 +169,7 @@ function project_new(resetLayers: bool = true) {
 			///if is_sculpt
 			base_notify_on_next_frame(function () {
 				let f32a: Float32Array = new Float32Array(config_get_texture_res_x() * config_get_texture_res_y() * 4);
-				for (let i: i32 = 0; i < Math.floor(mesh.inda.length); ++i) {
+				for (let i: i32 = 0; i < math_floor(mesh.inda.length); ++i) {
 					let index: i32 = mesh.inda[i];
 					f32a[i * 4]     = mesh.posa[index * 4]     / 32767;
 					f32a[i * 4 + 1] = mesh.posa[index * 4 + 1] / 32767;
@@ -203,7 +204,8 @@ function project_new(resetLayers: bool = true) {
 	let md: mesh_data_t = data_get_mesh("Scene", n);
 
 	let current: image_t = _g2_current;
-	if (current != null) g2_end();
+	let g2_in_use: bool = _g2_in_use;
+	if (g2_in_use) g2_end();
 
 	///if is_paint
 	context_raw.picker_mask_handle.position = picker_mask_t.NONE;
@@ -229,8 +231,8 @@ function project_new(resetLayers: bool = true) {
 	context_raw.material = project_materials[0];
 	///end
 
-	UINodes.hwnd.redraws = 2;
-	UINodes.group_stack = [];
+	ui_nodes_hwnd.redraws = 2;
+	ui_nodes_group_stack = [];
 	project_material_groups = [];
 
 	///if (is_paint || is_sculpt)
@@ -251,20 +253,20 @@ function project_new(resetLayers: bool = true) {
 	MakeMaterial.parse_paint_material();
 
 	///if (is_paint || is_sculpt)
-	UtilRender.make_material_preview();
+	util_render_make_material_preview();
 	///end
 
 	for (let a of project_assets) data_delete_image(a.file);
 	project_assets = [];
 	project_asset_names = [];
-	project_asset_map = new Map();
+	project_asset_map = map_create();
 	project_asset_id = 0;
 	project_raw.packed_assets = [];
 	context_raw.ddirty = 4;
 
 	///if (is_paint || is_sculpt)
-	UIBase.hwnds[tab_area_t.SIDEBAR0].redraws = 2;
-	UIBase.hwnds[tab_area_t.SIDEBAR1].redraws = 2;
+	ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
+	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 	///end
 
 	if (resetLayers) {
@@ -283,7 +285,7 @@ function project_new(resetLayers: bool = true) {
 		app_notify_on_init(base_init_layers);
 	}
 
-	if (current != null) g2_begin(current);
+	if (g2_in_use) g2_begin(current);
 
 	context_raw.saved_envmap = null;
 	context_raw.envmap_loaded = false;
@@ -306,7 +308,7 @@ function project_new(resetLayers: bool = true) {
 
 ///if (is_paint || is_sculpt)
 function project_import_material() {
-	UIFiles.show("arm,blend", false, true, function (path: string) {
+	ui_files_show("arm,blend", false, true, function (path: string) {
 		path.endsWith(".blend") ?
 			ImportBlendMaterial.run(path) :
 			ImportArm.run_material(path);
@@ -314,7 +316,7 @@ function project_import_material() {
 }
 
 function project_import_brush() {
-	UIFiles.show("arm," + path_texture_formats.join(","), false, true, function (path: string) {
+	ui_files_show("arm," + path_texture_formats.join(","), false, true, function (path: string) {
 		// Create brush from texture
 		if (path_is_texture(path)) {
 			// Import texture
@@ -347,9 +349,9 @@ function project_import_brush() {
 
 			// Parse brush
 			MakeMaterial.parse_brush();
-			UINodes.hwnd.redraws = 2;
+			ui_nodes_hwnd.redraws = 2;
 			let _init = function () {
-				UtilRender.make_brush_preview();
+				util_render_make_brush_preview();
 			}
 			app_notify_on_init(_init);
 		}
@@ -362,7 +364,7 @@ function project_import_brush() {
 ///end
 
 function project_import_mesh(replaceExisting: bool = true, done: ()=>void = null) {
-	UIFiles.show(path_mesh_formats.join(","), false, false, function (path: string) {
+	ui_files_show(path_mesh_formats.join(","), false, false, function (path: string) {
 		project_import_mesh_box(path, replaceExisting, true, done);
 	});
 }
@@ -374,7 +376,7 @@ function project_import_mesh_box(path: string, replaceExisting: bool = true, cle
 	// data_get_blob(path);
 	///end
 
-	UIBox.show_custom(function (ui: zui_t) {
+	ui_box_show_custom(function (ui: zui_t) {
 		let tab_vertical: bool = config_raw.touch_ui;
 		if (zui_tab(zui_handle("project_3"), tr("Import Mesh"), tab_vertical)) {
 
@@ -403,10 +405,10 @@ function project_import_mesh_box(path: string, replaceExisting: bool = true, cle
 
 			zui_row([0.45, 0.45, 0.1]);
 			if (zui_button(tr("Cancel"))) {
-				UIBox.hide();
+				ui_box_hide();
 			}
 			if (zui_button(tr("Import")) || ui.is_return_down) {
-				UIBox.hide();
+				ui_box_hide();
 				let do_import = function () {
 					///if (is_paint || is_sculpt)
 					ImportMesh.run(path, clearLayers, replaceExisting);
@@ -430,7 +432,7 @@ function project_import_mesh_box(path: string, replaceExisting: bool = true, cle
 			}
 		}
 	});
-	UIBox.click_to_hide = false; // Prevent closing when going back to window from file browser
+	ui_box_click_to_hide = false; // Prevent closing when going back to window from file browser
 }
 
 function project_reimport_mesh() {
@@ -441,7 +443,7 @@ function project_reimport_mesh() {
 }
 
 function project_unwrap_mesh_box(mesh: any, done: (a: any)=>void, skipUI: bool = false) {
-	UIBox.show_custom(function (ui: zui_t) {
+	ui_box_show_custom(function (ui: zui_t) {
 		let tab_vertical: bool = config_raw.touch_ui;
 		if (zui_tab(zui_handle("project_7"), tr("Unwrap Mesh"), tab_vertical)) {
 
@@ -460,13 +462,13 @@ function project_unwrap_mesh_box(mesh: any, done: (a: any)=>void, skipUI: bool =
 
 			zui_row([0.5, 0.5]);
 			if (zui_button(tr("Cancel"))) {
-				UIBox.hide();
+				ui_box_hide();
 			}
 			if (zui_button(tr("Unwrap")) || ui.is_return_down || skipUI) {
-				UIBox.hide();
+				ui_box_hide();
 				let do_unwrap = function () {
 					if (unwrap_by == unwrapPlugins.length - 1) {
-						UtilMesh.equirect_unwrap(mesh);
+						util_mesh_equirect_unwrap(mesh);
 					}
 					else {
 						let f: string = unwrapPlugins[unwrap_by];
@@ -474,7 +476,7 @@ function project_unwrap_mesh_box(mesh: any, done: (a: any)=>void, skipUI: bool =
 							config_enable_plugin(f);
 							console_info(f + " " + tr("plugin enabled"));
 						}
-						UtilMesh.unwrappers.get(f)(mesh);
+						util_mesh_unwrappers.get(f)(mesh);
 					}
 					done(mesh);
 				}
@@ -493,13 +495,13 @@ function project_unwrap_mesh_box(mesh: any, done: (a: any)=>void, skipUI: bool =
 
 function project_import_asset(filters: string = null, hdrAsEnvmap: bool = true) {
 	if (filters == null) filters = path_texture_formats.join(",") + "," + path_mesh_formats.join(",");
-	UIFiles.show(filters, false, true, function (path: string) {
+	ui_files_show(filters, false, true, function (path: string) {
 		ImportAsset.run(path, -1.0, -1.0, true, hdrAsEnvmap);
 	});
 }
 
 function project_import_swatches(replaceExisting: bool = false) {
-	UIFiles.show("arm,gpl", false, false, function (path: string) {
+	ui_files_show("arm,gpl", false, false, function (path: string) {
 		if (path_is_gimp_color_palette(path)) ImportGpl.run(path, replaceExisting);
 		else ImportArm.run_swatches(path, replaceExisting);
 	});
@@ -532,15 +534,15 @@ function project_reimport_texture(asset: asset_t) {
 			MakeMaterial.parse_paint_material();
 
 			///if (is_paint || is_sculpt)
-			UtilRender.make_material_preview();
-			UIBase.hwnds[tab_area_t.SIDEBAR1].redraws = 2;
+			util_render_make_material_preview();
+			ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 			///end
 		}
 		base_notify_on_next_frame(_next);
 	}
 	if (!file_exists(asset.file)) {
 		let filters: string = path_texture_formats.join(",");
-		UIFiles.show(filters, false, false, function (path: string) {
+		ui_files_show(filters, false, false, function (path: string) {
 			load(path);
 		});
 	}
@@ -586,8 +588,8 @@ function project_packed_asset_exists(packed_assets: packed_asset_t[], name: stri
 }
 
 function project_export_swatches() {
-	UIFiles.show("arm,gpl", true, false, function (path: string) {
-		let f: string = UIFiles.filename;
+	ui_files_show("arm,gpl", true, false, function (path: string) {
+		let f: string = ui_files_filename;
 		if (f == "") f = tr("untitled");
 		if (path_is_gimp_color_palette(f)) ExportGpl.run(path + path_sep + f, f.substring(0, f.lastIndexOf(".")), project_raw.swatches);
 		else ExportArm.run_swatches(path + path_sep + f);

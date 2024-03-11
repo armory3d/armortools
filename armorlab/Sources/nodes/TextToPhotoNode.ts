@@ -69,9 +69,9 @@ class TextToPhotoNode extends LogicNode {
 
 			let width = 512;
 			let height = 512;
-			let latents = new Float32Array(1 * 4 * Math.floor(height / 8) * Math.floor(width / 8));
+			let latents = new Float32Array(1 * 4 * math_floor(height / 8) * math_floor(width / 8));
 			if (inpaintLatents == null) {
-				for (let i = 0; i < latents.length; ++i) latents[i] = Math.cos(2.0 * 3.14 * RandomNode.getFloat()) * Math.sqrt(-2.0 * Math.log(RandomNode.getFloat()));
+				for (let i = 0; i < latents.length; ++i) latents[i] = math_cos(2.0 * 3.14 * RandomNode.getFloat()) * math_sqrt(-2.0 * math_log(RandomNode.getFloat()));
 			}
 			else {
 				for (let i = 0; i < latents.length; ++i) latents[i] = inpaintLatents[i];
@@ -113,14 +113,14 @@ class TextToPhotoNode extends LogicNode {
 				noise_pred[i] = noise_pred_uncond[i] + guidance_scale * (noise_pred_text[i] - noise_pred_uncond[i]);
 			}
 
-			let prev_timestep = Math.floor(Math.max(timestep - Math.floor(num_train_timesteps / num_inference_steps), 0));
+			let prev_timestep = math_floor(math_max(timestep - math_floor(num_train_timesteps / num_inference_steps), 0));
 
 			if (counter != 1) {
 				ets.push(noise_pred);
 			}
 			else {
 				prev_timestep = timestep;
-				timestep = timestep + Math.floor(num_train_timesteps / num_inference_steps);
+				timestep = timestep + math_floor(num_train_timesteps / num_inference_steps);
 			}
 
 			if (ets.length == 1 && counter == 0) {
@@ -161,8 +161,8 @@ class TextToPhotoNode extends LogicNode {
 			let alpha_prod_t_prev = TextToPhotoNode.alphas_cumprod[prev_timestep + 1];
 			let beta_prod_t = 1 - alpha_prod_t;
 			let beta_prod_t_prev = 1 - alpha_prod_t_prev;
-			let latents_coeff = Math.pow(alpha_prod_t_prev / alpha_prod_t, (0.5));
-			let noise_pred_denom_coeff = alpha_prod_t * Math.pow(beta_prod_t_prev, (0.5)) + Math.pow(alpha_prod_t * beta_prod_t * alpha_prod_t_prev, (0.5));
+			let latents_coeff = math_pow(alpha_prod_t_prev / alpha_prod_t, (0.5));
+			let noise_pred_denom_coeff = alpha_prod_t * math_pow(beta_prod_t_prev, (0.5)) + math_pow(alpha_prod_t * beta_prod_t * alpha_prod_t_prev, (0.5));
 			for (let i = 0; i < latents.length; ++i) {
 				latents[i] = (latents_coeff * latents[i] - (alpha_prod_t_prev - alpha_prod_t) * noise_pred[i] / noise_pred_denom_coeff);
 			}
@@ -170,9 +170,9 @@ class TextToPhotoNode extends LogicNode {
 
 			if (mask != null) {
 				let noise = new Float32Array(latents.length);
-				for (let i = 0; i < noise.length; ++i) noise[i] = Math.cos(2.0 * 3.14 * RandomNode.getFloat()) * Math.sqrt(-2.0 * Math.log(RandomNode.getFloat()));
-				let sqrt_alpha_prod = Math.pow(TextToPhotoNode.alphas_cumprod[timestep], 0.5);
-				let sqrt_one_minus_alpha_prod = Math.pow(1.0 - TextToPhotoNode.alphas_cumprod[timestep], 0.5);
+				for (let i = 0; i < noise.length; ++i) noise[i] = math_cos(2.0 * 3.14 * RandomNode.getFloat()) * math_sqrt(-2.0 * math_log(RandomNode.getFloat()));
+				let sqrt_alpha_prod = math_pow(TextToPhotoNode.alphas_cumprod[timestep], 0.5);
+				let sqrt_one_minus_alpha_prod = math_pow(1.0 - TextToPhotoNode.alphas_cumprod[timestep], 0.5);
 
 				let init_latents_proper = new Float32Array(latents.length);
 				for (let i = 0; i < init_latents_proper.length; ++i) {
@@ -210,9 +210,9 @@ class TextToPhotoNode extends LogicNode {
 
 			let u8a = new Uint8Array(4 * 512 * 512);
 			for (let i = 0; i < (512 * 512); ++i) {
-				u8a[i * 4    ] = Math.floor(pyimage[i                ] * 255);
-				u8a[i * 4 + 1] = Math.floor(pyimage[i + 512 * 512    ] * 255);
-				u8a[i * 4 + 2] = Math.floor(pyimage[i + 512 * 512 * 2] * 255);
+				u8a[i * 4    ] = math_floor(pyimage[i                ] * 255);
+				u8a[i * 4 + 1] = math_floor(pyimage[i + 512 * 512    ] * 255);
+				u8a[i * 4 + 2] = math_floor(pyimage[i + 512 * 512 * 2] * 255);
 				u8a[i * 4 + 3] = 255;
 			}
 			let image = image_from_bytes(u8a.buffer, 512, 512);

@@ -10,7 +10,7 @@ function config_load(done: ()=>void) {
 	try {
 		let blob: ArrayBuffer = data_get_blob((path_is_protected() ? krom_save_path() : "") + "config.json");
 		config_loaded = true;
-		config_raw = JSON.parse(sys_buffer_to_string(blob));
+		config_raw = json_parse(sys_buffer_to_string(blob));
 		done();
 	}
 	catch (e: any) {
@@ -18,7 +18,7 @@ function config_load(done: ()=>void) {
 		try { // Protected directory
 			let blob: ArrayBuffer = data_get_blob(krom_save_path() + "config.json");
 			config_loaded = true;
-			config_raw = JSON.parse(sys_buffer_to_string(blob));
+			config_raw = json_parse(sys_buffer_to_string(blob));
 			done();
 		}
 		catch (e: any) {
@@ -35,7 +35,7 @@ function config_save() {
 	// Use system application data folder
 	// when running from protected path like "Program Files"
 	let path: string = (path_is_protected() ? krom_save_path() : path_data() + path_sep) + "config.json";
-	let buffer: buffer_t = sys_string_to_buffer(JSON.stringify(config_raw));
+	let buffer: buffer_t = sys_string_to_buffer(json_stringify(config_raw));
 	krom_file_save_bytes(path, buffer);
 
 	///if krom_linux // Protected directory
@@ -107,14 +107,14 @@ function config_init() {
 function config_get_sha(): string {
 	let sha: string = "";
 	let blob: ArrayBuffer = data_get_blob("version.json");
-	sha = JSON.parse(sys_buffer_to_string(blob)).sha;
+	sha = json_parse(sys_buffer_to_string(blob)).sha;
 	return sha;
 }
 
 function config_get_date(): string {
 	let date: string = "";
 	let blob: ArrayBuffer = data_get_blob("version.json");
-	date = JSON.parse(sys_buffer_to_string(blob)).date;
+	date = json_parse(sys_buffer_to_string(blob)).date;
 	return date;
 }
 
@@ -139,7 +139,7 @@ function config_get_options(): kinc_sys_ops_t {
 }
 
 function config_restore() {
-	zui_children = new Map(); // Reset ui handles
+	zui_children = map_create(); // Reset ui handles
 	config_loaded = false;
 	let _layout: i32[] = config_raw.layout;
 	config_init();
@@ -156,7 +156,7 @@ function config_import_from(from: config_t) {
 	config_raw = from;
 	config_raw.sha = _sha;
 	config_raw.version = _version;
-	zui_children = new Map(); // Reset ui handles
+	zui_children = map_create(); // Reset ui handles
 	config_load_keymap();
 	base_init_layout();
 	translator_load_translations(config_raw.locale);
@@ -174,9 +174,10 @@ function config_apply() {
 	context_raw.ddirty = 2;
 
 	let current: image_t = _g2_current;
-	if (current != null) g2_end();
+	let g2_in_use: bool = _g2_in_use;
+	if (g2_in_use) g2_end();
 	RenderPathBase.apply_config();
-	if (current != null) g2_begin(current);
+	if (g2_in_use) g2_begin(current);
 }
 
 function config_load_keymap() {
@@ -185,7 +186,7 @@ function config_load_keymap() {
 	}
 	else {
 		let blob: ArrayBuffer = data_get_blob("keymap_presets/" + config_raw.keymap);
-		config_keymap = JSON.parse(sys_buffer_to_string(blob));
+		config_keymap = json_parse(sys_buffer_to_string(blob));
 		// Fill in undefined keys with defaults
 		for (let field in base_default_keymap) {
 			if (!(field in config_keymap)) {
@@ -199,7 +200,7 @@ function config_load_keymap() {
 function config_save_keymap() {
 	if (config_raw.keymap == "default.json") return;
 	let path: string = data_path() + "keymap_presets/" + config_raw.keymap;
-	let buffer: buffer_t = sys_string_to_buffer(JSON.stringify(config_keymap));
+	let buffer: buffer_t = sys_string_to_buffer(json_stringify(config_keymap));
 	krom_file_save_bytes(path, buffer);
 }
 
@@ -232,11 +233,11 @@ function config_get_texture_res(): i32 {
 }
 
 function config_get_texture_res_x(): i32 {
-	return context_raw.project_aspect_ratio == 2 ? Math.floor(config_get_texture_res() / 2) : config_get_texture_res();
+	return context_raw.project_aspect_ratio == 2 ? math_floor(config_get_texture_res() / 2) : config_get_texture_res();
 }
 
 function config_get_texture_res_y(): i32 {
-	return context_raw.project_aspect_ratio == 1 ? Math.floor(config_get_texture_res() / 2) : config_get_texture_res();
+	return context_raw.project_aspect_ratio == 1 ? math_floor(config_get_texture_res() / 2) : config_get_texture_res();
 }
 
 function config_get_texture_res_pos(i: i32): i32 {
@@ -256,7 +257,7 @@ function config_load_theme(theme: string, tagRedraw: bool = true) {
 	}
 	else {
 		let b: ArrayBuffer = data_get_blob("themes/" + theme);
-		let parsed: any = JSON.parse(sys_buffer_to_string(b));
+		let parsed: any = json_parse(sys_buffer_to_string(b));
 		base_theme = zui_theme_create();
 		for (let key in base_theme) {
 			if (key == "theme_") continue;
@@ -269,7 +270,7 @@ function config_load_theme(theme: string, tagRedraw: bool = true) {
 	base_theme.FILL_WINDOW_BG = true;
 	if (tagRedraw) {
 		for (let ui of base_get_uis()) ui.t = base_theme;
-		UIBase.tag_ui_redraw();
+		ui_base_tag_ui_redraw();
 	}
 	if (config_raw.touch_ui) {
 		// Enlarge elements

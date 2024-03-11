@@ -9,7 +9,7 @@ class MakeMaterial {
 	static subsUsed = false;
 
 	static getMOut = (): bool => {
-		for (let n of UINodes.getCanvasMaterial().nodes) if (n.type == "OUTPUT_MATERIAL_PBR") return true;
+		for (let n of ui_nodes_getCanvasMaterial().nodes) if (n.type == "OUTPUT_MATERIAL_PBR") return true;
 		return false;
 	}
 
@@ -174,9 +174,10 @@ class MakeMaterial {
 
 		if (bakePreviews) {
 			let current = _g2_current;
-			if (current != null) g2_end();
+			let g2_in_use: bool = _g2_in_use;
+			if (g2_in_use) g2_end();
 			MakeMaterial.bakeNodePreviews();
-			if (current != null) g2_begin(current);
+			if (g2_in_use) g2_begin(current);
 		}
 
 		let m = project_materials[0].data;
@@ -198,7 +199,7 @@ class MakeMaterial {
 			}
 		}
 
-		let sdata: TMaterial = { name: "Material", canvas: UINodes.getCanvasMaterial() };
+		let sdata: TMaterial = { name: "Material", canvas: ui_nodes_getCanvasMaterial() };
 		let mcon2: material_context_t = { name: "paint", bind_textures: [] };
 		let con = MakeSculpt.run(sdata, mcon2);
 
@@ -224,8 +225,8 @@ class MakeMaterial {
 
 	static bakeNodePreviews = () => {
 		context_raw.nodePreviewsUsed = [];
-		if (context_raw.nodePreviews == null) context_raw.nodePreviews = new Map();
-		MakeMaterial.traverseNodes(UINodes.getCanvasMaterial().nodes, null, []);
+		if (context_raw.nodePreviews == null) context_raw.nodePreviews = map_create();
+		MakeMaterial.traverseNodes(ui_nodes_getCanvasMaterial().nodes, null, []);
 		for (let key of context_raw.nodePreviews.keys()) {
 			if (context_raw.nodePreviewsUsed.indexOf(key) == -1) {
 				let image = context_raw.nodePreviews.get(key);
@@ -256,8 +257,8 @@ class MakeMaterial {
 			let id = ParserMaterial.node_name(node, parents);
 			let image = context_raw.nodePreviews.get(id);
 			context_raw.nodePreviewsUsed.push(id);
-			let resX = Math.floor(config_getTextureResX() / 4);
-			let resY = Math.floor(config_getTextureResY() / 4);
+			let resX = math_floor(config_getTextureResX() / 4);
+			let resY = math_floor(config_getTextureResY() / 4);
 			if (image == null || image.width != resX || image.height != resY) {
 				if (image != null) image_unload(image);
 				image = image_create_render_target(resX, resY);
@@ -265,15 +266,15 @@ class MakeMaterial {
 			}
 
 			ParserMaterial.blur_passthrough = true;
-			UtilRender.makeNodePreview(UINodes.getCanvasMaterial(), node, image, group, parents);
+			UtilRender.makeNodePreview(ui_nodes_getCanvasMaterial(), node, image, group, parents);
 			ParserMaterial.blur_passthrough = false;
 		}
 		else if (node.type == "DIRECT_WARP") {
 			let id = ParserMaterial.node_name(node, parents);
 			let image = context_raw.nodePreviews.get(id);
 			context_raw.nodePreviewsUsed.push(id);
-			let resX = Math.floor(config_getTextureResX());
-			let resY = Math.floor(config_getTextureResY());
+			let resX = math_floor(config_getTextureResX());
+			let resY = math_floor(config_getTextureResY());
 			if (image == null || image.width != resX || image.height != resY) {
 				if (image != null) image_unload(image);
 				image = image_create_render_target(resX, resY);
@@ -281,14 +282,14 @@ class MakeMaterial {
 			}
 
 			ParserMaterial.warp_passthrough = true;
-			UtilRender.makeNodePreview(UINodes.getCanvasMaterial(), node, image, group, parents);
+			UtilRender.makeNodePreview(ui_nodes_getCanvasMaterial(), node, image, group, parents);
 			ParserMaterial.warp_passthrough = false;
 		}
 	}
 
 	static parseNodePreviewMaterial = (node: zui_node_t, group: zui_node_canvas_t = null, parents: zui_node_t[] = null): { scon: shader_context_t, mcon: material_context_t } => {
 		if (node.outputs.length == 0) return null;
-		let sdata: TMaterial = { name: "Material", canvas: UINodes.getCanvasMaterial() };
+		let sdata: TMaterial = { name: "Material", canvas: ui_nodes_getCanvasMaterial() };
 		let mcon_raw: material_context_t = { name: "mesh", bind_textures: [] };
 		let con = MakeNodePreview.run(sdata, mcon_raw, node, group, parents);
 		let compileError = false;

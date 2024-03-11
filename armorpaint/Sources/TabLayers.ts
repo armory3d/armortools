@@ -6,16 +6,16 @@ class TabLayers {
 	static show_context_menu: bool = false;
 
 	static draw = (htab: zui_handle_t) => {
-		let mini: bool = config_raw.layout[layout_size_t.SIDEBAR_W] <= UIBase.sidebar_mini_w;
+		let mini: bool = config_raw.layout[layout_size_t.SIDEBAR_W] <= ui_base_sidebar_mini_w;
 		mini ? TabLayers.draw_mini(htab) : TabLayers.draw_full(htab);
 	}
 
 	static draw_mini = (htab: zui_handle_t) => {
-		let ui: zui_t = UIBase.ui;
+		let ui: zui_t = ui_base_ui;
 		zui_set_hovered_tab_name(tr("Layers"));
 
 		let _ELEMENT_H: i32 = ui.t.ELEMENT_H;
-		ui.t.ELEMENT_H = Math.floor(UIBase.sidebar_mini_w / 2 / zui_SCALE(ui));
+		ui.t.ELEMENT_H = math_floor(ui_base_sidebar_mini_w / 2 / zui_SCALE(ui));
 
 		zui_begin_sticky();
 		zui_separator(5);
@@ -34,7 +34,7 @@ class TabLayers {
 	}
 
 	static draw_full = (htab: zui_handle_t) => {
-		let ui: zui_t = UIBase.ui;
+		let ui: zui_t = ui_base_ui;
 		if (zui_tab(htab, tr("Layers"))) {
 			zui_begin_sticky();
 			zui_row([1 / 4, 1 / 4, 1 / 2]);
@@ -52,9 +52,9 @@ class TabLayers {
 	}
 
 	static button_2d_view = () => {
-		let ui: zui_t = UIBase.ui;
+		let ui: zui_t = ui_base_ui;
 		if (zui_button(tr("2D View"))) {
-			UIBase.show_2d_view(view_2d_type_t.LAYER);
+			ui_base_show_2d_view(view_2d_type_t.LAYER);
 		}
 		else if (ui.is_hovered) zui_tooltip(tr("Show 2D View") + ` (${config_keymap.toggle_2d_view})`);
 	}
@@ -69,10 +69,10 @@ class TabLayers {
 	}
 
 	static highlight_odd_lines = () => {
-		let ui: zui_t = UIBase.ui;
+		let ui: zui_t = ui_base_ui;
 		let step: i32 = ui.t.ELEMENT_H * 2;
-		let full_h: i32 = ui._window_h - UIBase.hwnds[0].scroll_offset;
-		for (let i: i32 = 0; i < Math.floor(full_h / step); ++i) {
+		let full_h: i32 = ui._window_h - ui_base_hwnds[0].scroll_offset;
+		for (let i: i32 = 0; i < math_floor(full_h / step); ++i) {
 			if (i % 2 == 0) {
 				zui_fill(0, i * step, (ui._w / zui_SCALE(ui) - 2), step, ui.t.WINDOW_BG_COL - 0x00040404);
 			}
@@ -81,19 +81,19 @@ class TabLayers {
 
 	static button_new = (text: string) => {
 		if (zui_button(text)) {
-			UIMenu.draw((ui: zui_t) => {
+			ui_menu_draw((ui: zui_t) => {
 				let l: SlotLayerRaw = context_raw.layer;
-				if (UIMenu.menu_button(ui, tr("Paint Layer"))) {
+				if (ui_menu_button(ui, tr("Paint Layer"))) {
 					base_new_layer();
 					history_new_layer();
 				}
-				if (UIMenu.menu_button(ui, tr("Fill Layer"))) {
+				if (ui_menu_button(ui, tr("Fill Layer"))) {
 					base_create_fill_layer(uv_type_t.UVMAP);
 				}
-				if (UIMenu.menu_button(ui, tr("Decal Layer"))) {
+				if (ui_menu_button(ui, tr("Decal Layer"))) {
 					base_create_fill_layer(uv_type_t.PROJECT);
 				}
-				if (UIMenu.menu_button(ui, tr("Black Mask"))) {
+				if (ui_menu_button(ui, tr("Black Mask"))) {
 					if (SlotLayer.is_mask(l)) context_set_layer(l.parent);
 					// let l: SlotLayerRaw = raw.layer;
 
@@ -106,7 +106,7 @@ class TabLayers {
 					history_new_black_mask();
 					base_update_fill_layers();
 				}
-				if (UIMenu.menu_button(ui, tr("White Mask"))) {
+				if (ui_menu_button(ui, tr("White Mask"))) {
 					if (SlotLayer.is_mask(l)) context_set_layer(l.parent);
 					// let l: SlotLayerRaw = raw.layer;
 
@@ -119,7 +119,7 @@ class TabLayers {
 					history_new_white_mask();
 					base_update_fill_layers();
 				}
-				if (UIMenu.menu_button(ui, tr("Fill Mask"))) {
+				if (ui_menu_button(ui, tr("Fill Mask"))) {
 					if (SlotLayer.is_mask(l)) context_set_layer(l.parent);
 					// let l: SlotLayerRaw = raw.layer;
 
@@ -133,7 +133,7 @@ class TabLayers {
 					base_update_fill_layers();
 				}
 				ui.enabled = !SlotLayer.is_group(context_raw.layer) && !SlotLayer.is_in_group(context_raw.layer);
-				if (UIMenu.menu_button(ui, tr("Group"))) {
+				if (ui_menu_button(ui, tr("Group"))) {
 					if (SlotLayer.is_group(l) || SlotLayer.is_in_group(l)) return;
 
 					if (SlotLayer.is_layer_mask(l)) l = l.parent;
@@ -166,15 +166,15 @@ class TabLayers {
 				p.base.visible = context_raw.layer_filter == 0 || p.base.name == ar[context_raw.layer_filter] || project_is_atlas_object(p);
 			}
 			if (context_raw.layer_filter == 0 && context_raw.merged_object_is_atlas) { // All
-				UtilMesh.merge_mesh();
+				util_mesh_merge();
 			}
 			else if (context_raw.layer_filter > project_paint_objects.length) { // Atlas
 				let visibles: mesh_object_t[] = [];
 				for (let p of project_paint_objects) if (p.base.visible) visibles.push(p);
-				UtilMesh.merge_mesh(visibles);
+				util_mesh_merge(visibles);
 			}
 			base_set_object_mask();
-			UtilUV.uvmap_cached = false;
+			util_uv_uvmap_cached = false;
 			context_raw.ddirty = 2;
 			///if (krom_direct3d12 || krom_vulkan || krom_metal)
 			RenderPathRaytrace.ready = false;
@@ -182,7 +182,7 @@ class TabLayers {
 		}
 	}
 
-	static remap_layer_pointers = (nodes: zui_node_t[], pointerMap: Map<i32, i32>) => {
+	static remap_layer_pointers = (nodes: zui_node_t[], pointerMap: map_t<i32, i32>) => {
 		for (let n of nodes) {
 			if (n.type == "LAYER" || n.type == "LAYER_MASK") {
 				let i: any = n.buttons[0].default_value;
@@ -193,14 +193,14 @@ class TabLayers {
 		}
 	}
 
-	static init_layer_map = (): Map<SlotLayerRaw, i32> => {
-		let res: Map<SlotLayerRaw, i32> = new Map();
+	static init_layer_map = (): map_t<SlotLayerRaw, i32> => {
+		let res: map_t<SlotLayerRaw, i32> = map_create();
 		for (let i: i32 = 0; i < project_layers.length; ++i) res.set(project_layers[i], i);
 		return res;
 	}
 
-	static fill_layer_map = (map: Map<SlotLayerRaw, i32>): Map<i32, i32> => {
-		let res: Map<i32, i32> = new Map();
+	static fill_layer_map = (map: map_t<SlotLayerRaw, i32>): map_t<i32, i32> => {
+		let res: map_t<i32, i32> = map_create();
 		for (let l of map.keys()) res.set(map.get(l), project_layers.indexOf(l) > -1 ? project_layers.indexOf(l) : 9999);
 		return res;
 	}
@@ -213,7 +213,7 @@ class TabLayers {
 	}
 
 	static draw_layer_slot = (l: SlotLayerRaw, i: i32, mini: bool) => {
-		let ui: zui_t = UIBase.ui;
+		let ui: zui_t = ui_base_ui;
 
 		if (context_raw.layer_filter > 0 &&
 			SlotLayer.get_object_mask(l) > 0 &&
@@ -278,7 +278,7 @@ class TabLayers {
 	}
 
 	static draw_layer_slot_mini = (l: SlotLayerRaw, i: i32) => {
-		let ui = UIBase.ui;
+		let ui = ui_base_ui;
 
 		zui_row([1, 1]);
 		let uix: f32 = ui._x;
@@ -292,7 +292,7 @@ class TabLayers {
 	}
 
 	static draw_layer_slot_full = (l: SlotLayerRaw, i: i32) => {
-		let ui: zui_t = UIBase.ui;
+		let ui: zui_t = ui_base_ui;
 
 		let step: i32 = ui.t.ELEMENT_H;
 
@@ -504,12 +504,12 @@ class TabLayers {
 
 	static layer_toggle_visible = (l: SlotLayerRaw) => {
 		l.visible = !l.visible;
-		UIView2D.hwnd.redraws = 2;
+		ui_view2d_hwnd.redraws = 2;
 		MakeMaterial.parse_mesh_material();
 	}
 
 	static draw_layer_highlight = (l: SlotLayerRaw, mini: bool) => {
-		let ui: zui_t = UIBase.ui;
+		let ui: zui_t = ui_base_ui;
 		let step: i32 = ui.t.ELEMENT_H;
 
 		// Separator line
@@ -527,7 +527,7 @@ class TabLayers {
 	}
 
 	static handle_layer_icon_state = (l: SlotLayerRaw, i: i32, state: zui_state_t, uix: f32, uiy: f32) => {
-		let ui: zui_t = UIBase.ui;
+		let ui: zui_t = ui_base_ui;
 
 		///if is_paint
 		let texpaint_preview: image_t = l.texpaint_preview;
@@ -563,7 +563,7 @@ class TabLayers {
 		}
 		else if (state == zui_state_t.RELEASED) {
 			if (time_time() - context_raw.select_time < 0.2) {
-				UIBase.show_2d_view(view_2d_type_t.LAYER);
+				ui_base_show_2d_view(view_2d_type_t.LAYER);
 			}
 			if (time_time() - context_raw.select_time > 0.2) {
 				context_raw.select_time = time_time();
@@ -573,7 +573,7 @@ class TabLayers {
 	}
 
 	static draw_layer_icon = (l: SlotLayerRaw, i: i32, uix: f32, uiy: f32, mini: bool) => {
-		let ui: zui_t = UIBase.ui;
+		let ui: zui_t = ui_base_ui;
 		let icons: image_t = resource_get("icons.k");
 		let icon_h: i32 = (zui_ELEMENT_H(ui) - (mini ? 2 : 3)) * 2;
 
@@ -612,11 +612,11 @@ class TabLayers {
 				ui._w = _w;
 			}
 			if (l.fill_layer == null && SlotLayer.is_mask(l)) {
-				g2_set_pipeline(UIView2D.pipe);
+				g2_set_pipeline(ui_view2d_pipe);
 				///if krom_opengl
-				krom_g4_set_pipeline(UIView2D.pipe.pipeline_);
+				krom_g4_set_pipeline(ui_view2d_pipe.pipeline_);
 				///end
-				krom_g4_set_int(UIView2D.channel_location, 1);
+				krom_g4_set_int(ui_view2d_channel_loc, 1);
 			}
 
 			let state: zui_state_t = zui_image(icon, 0xffffffff, icon_h);
@@ -626,7 +626,7 @@ class TabLayers {
 			}
 
 			// Draw layer numbers when selecting a layer via keyboard shortcut
-			let is_typing: bool = ui.is_typing || UIView2D.ui.is_typing || UINodes.ui.is_typing;
+			let is_typing: bool = ui.is_typing || ui_view2d_ui.is_typing || ui_nodes_ui.is_typing;
 			if (!is_typing) {
 				if (i < 9 && operator_shortcut(config_keymap.select_layer, shortcut_type_t.DOWN)) {
 					let number: string = String(i + 1) ;
@@ -676,36 +676,36 @@ class TabLayers {
 		}
 		let menu_elements: i32 = SlotLayer.is_group(l) ? 7 : (19 + add);
 
-		UIMenu.draw((ui: zui_t) => {
+		ui_menu_draw((ui: zui_t) => {
 
 			if (mini) {
 				let visible_handle: zui_handle_t = zui_handle("tablayers_4");
 				visible_handle.selected = l.visible;
-				UIMenu.menu_fill(ui);
+				ui_menu_fill(ui);
 				zui_check(visible_handle, tr("Visible"));
 				if (visible_handle.changed) {
 					TabLayers.layer_toggle_visible(l);
-					UIMenu.keep_open = true;
+					ui_menu_keep_open = true;
 				}
 
 				if (!SlotLayer.is_group(l)) {
-					UIMenu.menu_fill(ui);
+					ui_menu_fill(ui);
 					if (TabLayers.combo_blending(ui, l, true).changed) {
-						UIMenu.keep_open = true;
+						ui_menu_keep_open = true;
 					}
 				}
 				if (SlotLayer.is_layer(l)) {
-					UIMenu.menu_fill(ui);
+					ui_menu_fill(ui);
 					if (TabLayers.combo_object(ui, l, true).changed) {
-						UIMenu.keep_open = true;
+						ui_menu_keep_open = true;
 					}
 				}
 			}
 
-			if (UIMenu.menu_button(ui, tr("Export"))) {
+			if (ui_menu_button(ui, tr("Export"))) {
 				if (SlotLayer.is_mask(l)) {
-					UIFiles.show("png", true, false, (path: string) => {
-						let f: string = UIFiles.filename;
+					ui_files_show("png", true, false, (path: string) => {
+						let f: string = ui_files_filename;
 						if (f == "") f = tr("untitled");
 						if (!f.endsWith(".png")) f += ".png";
 						krom_write_png(path + path_sep + f, image_get_pixels(l.texpaint), l.texpaint.width, l.texpaint.height, 3); // RRR1
@@ -723,14 +723,14 @@ class TabLayers {
 				let to_fill_string: string = SlotLayer.is_layer(l) ? tr("To Fill Layer") : tr("To Fill Mask");
 				let to_paint_string: string = SlotLayer.is_layer(l) ? tr("To Paint Layer") : tr("To Paint Mask");
 
-				if (l.fill_layer == null && UIMenu.menu_button(ui, to_fill_string)) {
+				if (l.fill_layer == null && ui_menu_button(ui, to_fill_string)) {
 					let _init = () => {
 						SlotLayer.is_layer(l) ? history_to_fill_layer() : history_to_fill_mask();
 						SlotLayer.to_fill_layer(l);
 					}
 					app_notify_on_init(_init);
 				}
-				if (l.fill_layer != null && UIMenu.menu_button(ui, to_paint_string)) {
+				if (l.fill_layer != null && ui_menu_button(ui, to_paint_string)) {
 					let _init = () => {
 						SlotLayer.is_layer(l) ? history_to_paint_layer() : history_to_paint_mask();
 						SlotLayer.to_paint_layer(l);
@@ -740,7 +740,7 @@ class TabLayers {
 			}
 
 			ui.enabled = TabLayers.can_delete(l);
-			if (UIMenu.menu_button(ui, tr("Delete"), "delete")) {
+			if (ui_menu_button(ui, tr("Delete"), "delete")) {
 				let _init = () => {
 					TabLayers.delete_layer(context_raw.layer);
 				}
@@ -748,7 +748,7 @@ class TabLayers {
 			}
 			ui.enabled = true;
 
-			if (l.fill_layer == null && UIMenu.menu_button(ui, tr("Clear"))) {
+			if (l.fill_layer == null && ui_menu_button(ui, tr("Clear"))) {
 				context_set_layer(l);
 				let _init = () => {
 					if (!SlotLayer.is_group(l)) {
@@ -767,7 +767,7 @@ class TabLayers {
 				}
 				app_notify_on_init(_init);
 			}
-			if (SlotLayer.is_mask(l) && l.fill_layer == null && UIMenu.menu_button(ui, tr("Invert"))) {
+			if (SlotLayer.is_mask(l) && l.fill_layer == null && ui_menu_button(ui, tr("Invert"))) {
 				let _init = () => {
 					context_set_layer(l);
 					history_invert_mask();
@@ -775,7 +775,7 @@ class TabLayers {
 				}
 				app_notify_on_init(_init);
 			}
-			if (SlotLayer.is_mask(l) && UIMenu.menu_button(ui, tr("Apply"))) {
+			if (SlotLayer.is_mask(l) && ui_menu_button(ui, tr("Apply"))) {
 				let _init = () => {
 					context_raw.layer = l;
 					history_apply_mask();
@@ -786,14 +786,14 @@ class TabLayers {
 				}
 				app_notify_on_init(_init);
 			}
-			if (SlotLayer.is_group(l) && UIMenu.menu_button(ui, tr("Merge Group"))) {
+			if (SlotLayer.is_group(l) && ui_menu_button(ui, tr("Merge Group"))) {
 				let _init = () => {
 					base_merge_group(l);
 				}
 				app_notify_on_init(_init);
 			}
 			ui.enabled = TabLayers.can_merge_down(l);
-			if (UIMenu.menu_button(ui, tr("Merge Down"))) {
+			if (ui_menu_button(ui, tr("Merge Down"))) {
 				let _init = () => {
 					context_set_layer(l);
 					history_merge_layers();
@@ -803,7 +803,7 @@ class TabLayers {
 				app_notify_on_init(_init);
 			}
 			ui.enabled = true;
-			if (UIMenu.menu_button(ui, tr("Duplicate"))) {
+			if (ui_menu_button(ui, tr("Duplicate"))) {
 				let _init = () => {
 					context_set_layer(l);
 					history_duplicate_layer();
@@ -812,8 +812,8 @@ class TabLayers {
 				app_notify_on_init(_init);
 			}
 
-			UIMenu.menu_fill(ui);
-			UIMenu.menu_align(ui);
+			ui_menu_fill(ui);
+			ui_menu_align(ui);
 			let layer_opac_handle: zui_handle_t = zui_nest(zui_handle("tablayers_5"), l.id);
 			layer_opac_handle.value = l.mask_opacity;
 			zui_slider(layer_opac_handle, tr("Opacity"), 0.0, 1.0, true);
@@ -821,12 +821,12 @@ class TabLayers {
 				if (ui.input_started) history_layer_opacity();
 				l.mask_opacity = layer_opac_handle.value;
 				MakeMaterial.parse_mesh_material();
-				UIMenu.keep_open = true;
+				ui_menu_keep_open = true;
 			}
 
 			if (!SlotLayer.is_group(l)) {
-				UIMenu.menu_fill(ui);
-				UIMenu.menu_align(ui);
+				ui_menu_fill(ui);
+				ui_menu_align(ui);
 				let res_handle_changed_last: bool = base_res_handle.changed;
 				///if (krom_android || krom_ios)
 				let ar: string[] = ["128", "256", "512", "1K", "2K", "4K"];
@@ -835,9 +835,9 @@ class TabLayers {
 				///end
 				let _y: i32 = ui._y;
 				base_res_handle.value = base_res_handle.position;
-				base_res_handle.position = Math.floor(zui_slider(base_res_handle, ar[base_res_handle.position], 0, ar.length - 1, false, 1, false, zui_align_t.LEFT, false));
+				base_res_handle.position = math_floor(zui_slider(base_res_handle, ar[base_res_handle.position], 0, ar.length - 1, false, 1, false, zui_align_t.LEFT, false));
 				if (base_res_handle.changed) {
-					UIMenu.keep_open = true;
+					ui_menu_keep_open = true;
 				}
 				if (res_handle_changed_last && !base_res_handle.changed) {
 					base_on_layers_resized();
@@ -846,8 +846,8 @@ class TabLayers {
 				zui_draw_string(tr("Res"), null, 0, zui_align_t.RIGHT);
 				zui_end_element();
 
-				UIMenu.menu_fill(ui);
-				UIMenu.menu_align(ui);
+				ui_menu_fill(ui);
+				ui_menu_align(ui);
 				///if (krom_android || krom_ios)
 				zui_inline_radio(base_bits_handle, ["8bit"]);
 				///else
@@ -855,13 +855,13 @@ class TabLayers {
 				///end
 				if (base_bits_handle.changed) {
 					app_notify_on_init(base_set_layer_bits);
-					UIMenu.keep_open = true;
+					ui_menu_keep_open = true;
 				}
 			}
 
 			if (l.fill_layer != null) {
-				UIMenu.menu_fill(ui);
-				UIMenu.menu_align(ui);
+				ui_menu_fill(ui);
+				ui_menu_align(ui);
 				let scale_handle: zui_handle_t = zui_nest(zui_handle("tablayers_6"), l.id);
 				scale_handle.value = l.scale;
 				l.scale = zui_slider(scale_handle, tr("UV Scale"), 0.0, 5.0, true);
@@ -872,11 +872,11 @@ class TabLayers {
 						base_update_fill_layers();
 					}
 					app_notify_on_init(_init);
-					UIMenu.keep_open = true;
+					ui_menu_keep_open = true;
 				}
 
-				UIMenu.menu_fill(ui);
-				UIMenu.menu_align(ui);
+				ui_menu_fill(ui);
+				ui_menu_align(ui);
 				let angle_handle: zui_handle_t = zui_nest(zui_handle("tablayers_7"), l.id);
 				angle_handle.value = l.angle;
 				l.angle = zui_slider(angle_handle, tr("Angle"), 0.0, 360, true, 1);
@@ -888,11 +888,11 @@ class TabLayers {
 						base_update_fill_layers();
 					}
 					app_notify_on_init(_init);
-					UIMenu.keep_open = true;
+					ui_menu_keep_open = true;
 				}
 
-				UIMenu.menu_fill(ui);
-				UIMenu.menu_align(ui);
+				ui_menu_fill(ui);
+				ui_menu_align(ui);
 				let uv_type_handle: zui_handle_t = zui_nest(zui_handle("tablayers_8"), l.id);
 				uv_type_handle.position = l.uv_type;
 				l.uv_type = zui_inline_radio(uv_type_handle, [tr("UV Map"), tr("Triplanar"), tr("Project")], zui_align_t.LEFT);
@@ -904,7 +904,7 @@ class TabLayers {
 						base_update_fill_layers();
 					}
 					app_notify_on_init(_init);
-					UIMenu.keep_open = true;
+					ui_menu_keep_open = true;
 				}
 			}
 
@@ -931,27 +931,27 @@ class TabLayers {
 				height_blend_handle.selected = l.paint_height_blend;
 				emis_handle.selected = l.paint_emis;
 				subs_handle.selected = l.paint_subs;
-				UIMenu.menu_fill(ui);
+				ui_menu_fill(ui);
 				l.paint_base = zui_check(base_handle, tr("Base Color"));
-				UIMenu.menu_fill(ui);
+				ui_menu_fill(ui);
 				l.paint_opac = zui_check(opac_handle, tr("Opacity"));
-				UIMenu.menu_fill(ui);
+				ui_menu_fill(ui);
 				l.paint_nor = zui_check(nor_handle, tr("Normal"));
-				UIMenu.menu_fill(ui);
+				ui_menu_fill(ui);
 				l.paint_nor_blend = zui_check(nor_blend_handle, tr("Normal Blending"));
-				UIMenu.menu_fill(ui);
+				ui_menu_fill(ui);
 				l.paint_occ = zui_check(occ_handle, tr("Occlusion"));
-				UIMenu.menu_fill(ui);
+				ui_menu_fill(ui);
 				l.paint_rough = zui_check(rough_handle, tr("Roughness"));
-				UIMenu.menu_fill(ui);
+				ui_menu_fill(ui);
 				l.paint_met = zui_check(met_handle, tr("Metallic"));
-				UIMenu.menu_fill(ui);
+				ui_menu_fill(ui);
 				l.paint_height = zui_check(height_handle, tr("Height"));
-				UIMenu.menu_fill(ui);
+				ui_menu_fill(ui);
 				l.paint_height_blend = zui_check(height_blend_handle, tr("Height Blending"));
-				UIMenu.menu_fill(ui);
+				ui_menu_fill(ui);
 				l.paint_emis = zui_check(emis_handle, tr("Emission"));
-				UIMenu.menu_fill(ui);
+				ui_menu_fill(ui);
 				l.paint_subs = zui_check(subs_handle, tr("Subsurface"));
 				if (base_handle.changed ||
 					opac_handle.changed ||
@@ -965,7 +965,7 @@ class TabLayers {
 					emis_handle.changed ||
 					subs_handle.changed) {
 					MakeMaterial.parse_mesh_material();
-					UIMenu.keep_open = true;
+					ui_menu_keep_open = true;
 				}
 			}
 		}, menu_elements);
@@ -974,15 +974,15 @@ class TabLayers {
 	static make_mask_preview_rgba32 = (l: SlotLayerRaw) => {
 		///if is_paint
 		if (context_raw.mask_preview_rgba32 == null) {
-			context_raw.mask_preview_rgba32 = image_create_render_target(UtilRender.layer_preview_size, UtilRender.layer_preview_size);
+			context_raw.mask_preview_rgba32 = image_create_render_target(util_render_layer_preview_size, util_render_layer_preview_size);
 		}
 		// Convert from R8 to RGBA32 for tooltip display
 		if (context_raw.mask_preview_last != l) {
 			context_raw.mask_preview_last = l;
 			app_notify_on_init(() => {
 				g2_begin(context_raw.mask_preview_rgba32);
-				g2_set_pipeline(UIView2D.pipe);
-				g4_set_int(UIView2D.channel_location, 1);
+				g2_set_pipeline(ui_view2d_pipe);
+				g4_set_int(ui_view2d_channel_loc, 1);
 				g2_draw_image(l.texpaint_preview, 0, 0);
 				g2_end();
 				g2_set_pipeline(null);

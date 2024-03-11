@@ -89,7 +89,7 @@ class SlotLayer {
 				raw.texpaint_pack = render_path_create_render_target(t)._image;
 			}
 
-			raw.texpaint_preview = image_create_render_target(UtilRender.layer_preview_size, UtilRender.layer_preview_size, tex_format_t.RGBA32);
+			raw.texpaint_preview = image_create_render_target(util_render_layer_preview_size, util_render_layer_preview_size, tex_format_t.RGBA32);
 			///end
 		}
 
@@ -108,7 +108,7 @@ class SlotLayer {
 				raw.texpaint = render_path_create_render_target(t)._image;
 			}
 
-			raw.texpaint_preview = image_create_render_target(UtilRender.layer_preview_size, UtilRender.layer_preview_size, tex_format_t.RGBA32);
+			raw.texpaint_preview = image_create_render_target(util_render_layer_preview_size, util_render_layer_preview_size, tex_format_t.RGBA32);
 		}
 		///end
 
@@ -408,7 +408,7 @@ class SlotLayer {
 		let _next = () => {
 			MakeMaterial.parse_paint_material();
 			context_raw.layer_preview_dirty = true;
-			UIBase.hwnds[tab_area_t.SIDEBAR0].redraws = 2;
+			ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 		}
 		base_notify_on_next_frame(_next);
 	}
@@ -418,7 +418,7 @@ class SlotLayer {
 		raw.fill_layer = null;
 		MakeMaterial.parse_paint_material();
 		context_raw.layer_preview_dirty = true;
-		UIBase.hwnds[tab_area_t.SIDEBAR0].redraws = 2;
+		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 	}
 
 	static is_visible = (raw: SlotLayerRaw): bool => {
@@ -631,7 +631,7 @@ class SlotLayer {
 
 		context_set_layer(raw);
 		history_order_layers(to);
-		UIBase.hwnds[tab_area_t.SIDEBAR0].redraws = 2;
+		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 
 		array_remove(project_layers, raw);
 		project_layers.splice(to, 0, raw);

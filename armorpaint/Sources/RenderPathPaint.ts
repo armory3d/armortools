@@ -139,7 +139,7 @@ class RenderPathPaint {
 				render_path_clear_target(0xff000000);
 				render_path_bind_target("gbuffer2", "gbuffer2");
 				render_path_draw_meshes("paint");
-				UIHeader.header_handle.redraws = 2;
+				ui_header_handle.redraws = 2;
 			}
 			else if (context_raw.tool == workspace_tool_t.PICKER || context_raw.tool == workspace_tool_t.MATERIAL) {
 				if (context_raw.pick_pos_nor_tex) {
@@ -175,8 +175,8 @@ class RenderPathPaint {
 					render_path_bind_target("texpaint_pack" + tid, "texpaint_pack");
 					render_path_draw_meshes("paint");
 					if (use_live_layer) RenderPathPaint.use_live_layer(false);
-					UIHeader.header_handle.redraws = 2;
-					UIBase.hwnds[2].redraws = 2;
+					ui_header_handle.redraws = 2;
+					ui_base_hwnds[2].redraws = 2;
 
 					let texpaint_picker: image_t = render_path_render_targets.get("texpaint_picker")._image;
 					let texpaint_nor_picker: image_t = render_path_render_targets.get("texpaint_nor_picker")._image;
@@ -218,7 +218,7 @@ class RenderPathPaint {
 					// Pick material
 					if (context_raw.picker_select_material && context_raw.color_picker_callback == null) {
 						// matid % 3 == 0 - normal, 1 - emission, 2 - subsurface
-						let matid: i32 = Math.floor((b.getUint8(3) - (b.getUint8(3) % 3)) / 3);
+						let matid: i32 = math_floor((b.getUint8(3) - (b.getUint8(3) % 3)) / 3);
 						for (let m of project_materials) {
 							if (m.id == matid) {
 								context_set_material(m);
@@ -301,12 +301,12 @@ class RenderPathPaint {
 					if (render_path_render_targets.get("texpaint_blur") == null) {
 						let t = render_target_create();
 						t.name = "texpaint_blur";
-						t.width = Math.floor(config_get_texture_res_x() * 0.95);
-						t.height = Math.floor(config_get_texture_res_y() * 0.95);
+						t.width = math_floor(config_get_texture_res_x() * 0.95);
+						t.height = math_floor(config_get_texture_res_y() * 0.95);
 						t.format = "RGBA32";
 						render_path_create_render_target(t);
 					}
-					let blurs: i32 = Math.round(context_raw.bake_curv_smooth);
+					let blurs: i32 = math_round(context_raw.bake_curv_smooth);
 					for (let i: i32 = 0; i < blurs; ++i) {
 						render_path_set_target("texpaint_blur");
 						render_path_bind_target(texpaint, "tex");
@@ -432,7 +432,7 @@ class RenderPathPaint {
 
 		RenderPathPaint.live_layer_drawn = 2;
 
-		UIView2D.hwnd.redraws = 2;
+		ui_view2d_hwnd.redraws = 2;
 		let _x: f32 = context_raw.paint_vec.x;
 		let _y: f32 = context_raw.paint_vec.y;
 		if (context_raw.brush_locked) {
@@ -741,7 +741,7 @@ class RenderPathPaint {
 				///if (krom_direct3d12 || krom_vulkan || krom_metal)
 				else if (is_raytraced_bake) {
 					let dirty: bool = RenderPathRaytraceBake.commands(MakeMaterial.parse_paint_material);
-					if (dirty) UIHeader.header_handle.redraws = 2;
+					if (dirty) ui_header_handle.redraws = 2;
 					if (config_raw.dilate == dilate_type_t.INSTANT) { // && raw.pdirty == 1
 						RenderPathPaint.dilate(true, false);
 					}
@@ -803,9 +803,9 @@ class RenderPathPaint {
 		camera_object_build_proj(cam);
 		camera_object_build_mat(cam);
 
-		let tw: f32 = 0.95 * UIView2D.pan_scale;
-		let tx: f32 = UIView2D.pan_x / UIView2D.ww;
-		let ty: f32 = UIView2D.pan_y / app_h();
+		let tw: f32 = 0.95 * ui_view2d_pan_scale;
+		let tx: f32 = ui_view2d_pan_x / ui_view2d_ww;
+		let ty: f32 = ui_view2d_pan_y / app_h();
 		mat4_set_identity(m);
 		mat4_scale(m, vec4_create(tw, tw, 1));
 		mat4_set_loc(m, vec4_create(tx, ty, 0));
@@ -813,7 +813,7 @@ class RenderPathPaint {
 		mat4_get_inv(m2, scene_camera.vp);
 		mat4_mult_mat(m, m2);
 
-		let tiled: bool = UIView2D.tiled_show;
+		let tiled: bool = ui_view2d_tiled_show;
 		if (tiled && scene_get_child(".PlaneTiled") == null) {
 			// 3x3 planes
 			let posa: i32[] = [32767,0,-32767,0,10922,0,-10922,0,10922,0,-32767,0,10922,0,-10922,0,-10922,0,10922,0,-10922,0,-10922,0,-10922,0,10922,0,-32767,0,32767,0,-32767,0,10922,0,10922,0,10922,0,-10922,0,32767,0,-10922,0,10922,0,32767,0,10922,0,10922,0,32767,0,10922,0,10922,0,-10922,0,-10922,0,-32767,0,10922,0,-32767,0,-10922,0,32767,0,-10922,0,10922,0,10922,0,10922,0,-10922,0,-10922,0,-32767,0,-32767,0,-10922,0,-32767,0,-32767,0,10922,0,-32767,0,-10922,0,-10922,0,-10922,0,-32767,0,32767,0,-32767,0,32767,0,-10922,0,10922,0,-10922,0,10922,0,-10922,0,10922,0,10922,0,-10922,0,10922,0,-10922,0,10922,0,-10922,0,32767,0,-32767,0,32767,0,10922,0,10922,0,10922,0,32767,0,-10922,0,32767,0,32767,0,10922,0,32767,0,32767,0,10922,0,32767,0,-10922,0,-10922,0,-10922,0,10922,0,-32767,0,10922,0,32767,0,-10922,0,32767,0,10922,0,10922,0,10922,0,-10922,0,-32767,0,-10922,0,-10922,0,-32767,0,-10922,0,10922,0,-32767,0,10922,0,-10922,0,-10922,0,-10922,0];
@@ -845,7 +845,7 @@ class RenderPathPaint {
 
 		let v: vec4_t = vec4_create();
 		let sx: f32 = vec4_len(vec4_set(v, m.m[0], m.m[1], m.m[2]));
-		quat_from_euler(RenderPathPaint.planeo.base.transform.rot, -Math.PI / 2, 0, 0);
+		quat_from_euler(RenderPathPaint.planeo.base.transform.rot, -math_pi() / 2, 0, 0);
 		vec4_set(RenderPathPaint.planeo.base.transform.scale, sx, 1.0, sx);
 		RenderPathPaint.planeo.base.transform.scale.z *= config_get_texture_res_y() / config_get_texture_res_x();
 		vec4_set(RenderPathPaint.planeo.base.transform.loc, m.m[12], -m.m[13], 0.0);
@@ -903,7 +903,7 @@ class RenderPathPaint {
 	static dilate = (base: bool, nor_pack: bool) => {
 		///if is_paint
 		if (config_raw.dilate_radius > 0 && !context_raw.paint2d) {
-			UtilUV.cache_dilate_map();
+			util_uv_cache_dilate_map();
 			base_make_temp_img();
 			let tid: i32 = context_raw.layer.id;
 			if (base) {

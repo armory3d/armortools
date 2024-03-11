@@ -25,7 +25,7 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 			let decal_mask: bool = decal && operator_shortcut(config_keymap.decal_mask + "+" + config_keymap.action_paint, shortcut_type_t.DOWN);
 			let brush_decal_mask_radius: f32 = context_raw.brush_decal_mask_radius;
 			if (config_raw.brush_3d) {
-				brush_decal_mask_radius *= context_raw.paint2d ? 0.55 * UIView2D.pan_scale : 2.0;
+				brush_decal_mask_radius *= context_raw.paint2d ? 0.55 * ui_view2d_pan_scale : 2.0;
 			}
 			let radius: f32 = decal_mask ? brush_decal_mask_radius : context_raw.brush_radius;
 			let val: f32 = (radius * context_raw.brush_nodes_radius) / 15.0;
@@ -35,7 +35,7 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 			let scale2d: f32 = (900 / base_h()) * config_raw.window_scale;
 
 			if (config_raw.brush_3d && !decal) {
-				val *= context_raw.paint2d ? 0.55 * scale2d * UIView2D.pan_scale : 2;
+				val *= context_raw.paint2d ? 0.55 * scale2d * ui_view2d_pan_scale : 2;
 			}
 			else {
 				val *= scale2d; // Projection ratio
@@ -89,7 +89,7 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 			}
 			if (config_raw.brush_3d) {
 				if (context_raw.paint2d) {
-					val *= 1.0 / UIView2D.pan_scale;
+					val *= 1.0 / ui_view2d_pan_scale;
 				}
 				else {
 					val *= val;
@@ -107,7 +107,7 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 		}
 		///if is_paint
 		case "_dilateRadius": {
-			return UtilUV.dilatemap != null ? config_raw.dilate_radius : 0.0;
+			return util_uv_dilatemap != null ? config_raw.dilate_radius : 0.0;
 		}
 		///end
 		case "_decalLayerDim": {
@@ -169,11 +169,11 @@ function uniforms_ext_vec2_link(object: object_t, mat: material_data_t, link: st
 		case "_brushAngle": {
 			let brush_angle: f32 = context_raw.brush_angle + context_raw.brush_nodes_angle;
 			let angle: f32 = context_raw.layer.fill_layer != null ? context_raw.layer.angle : brush_angle;
-			angle *= (Math.PI / 180);
+			angle *= (math_pi() / 180);
 			if (config_raw.pressure_angle && pen_down()) {
 				angle *= pen_pressure * config_raw.pressure_sensitivity;
 			}
-			vec4_set(uniforms_ext_vec, Math.cos(-angle), Math.sin(-angle), 0);
+			vec4_set(uniforms_ext_vec, math_cos(-angle), math_sin(-angle), 0);
 			return uniforms_ext_vec;
 		}
 		///end
@@ -200,8 +200,8 @@ function uniforms_ext_vec3_link(object: object_t, mat: material_data_t, link: st
 				x = vec2d(x);
 				lastx = vec2d(lastx);
 			}
-			let angle: f32 = Math.atan2(-y + lasty, x - lastx) - Math.PI / 2;
-			vec4_set(v, Math.cos(angle), Math.sin(angle), allow_paint ? 1 : 0);
+			let angle: f32 = math_atan2(-y + lasty, x - lastx) - math_pi() / 2;
+			vec4_set(v, math_cos(angle), math_sin(angle), allow_paint ? 1 : 0);
 			context_raw.prev_paint_vec_x = context_raw.last_paint_vec_x;
 			context_raw.prev_paint_vec_y = context_raw.last_paint_vec_y;
 			return v;
@@ -256,7 +256,7 @@ function uniforms_ext_vec3_link(object: object_t, mat: material_data_t, link: st
 function vec2d(x: f32) {
 	// Transform from 3d viewport coord to 2d view coord
 	context_raw.paint2d_view = false;
-	let res: f32 = (x * base_w() - base_w()) / UIView2D.ww;
+	let res: f32 = (x * base_w() - base_w()) / ui_view2d_ww;
 	context_raw.paint2d_view = true;
 	return res;
 }
@@ -289,11 +289,11 @@ function uniforms_ext_vec4_link(object: object_t, mat: material_data_t, link: st
 			return uniforms_ext_vec;
 		}
 		case "_envmapData": {
-			vec4_set(uniforms_ext_vec, context_raw.envmap_angle, Math.sin(-context_raw.envmap_angle), Math.cos(-context_raw.envmap_angle), scene_world.strength);
+			vec4_set(uniforms_ext_vec, context_raw.envmap_angle, math_sin(-context_raw.envmap_angle), math_cos(-context_raw.envmap_angle), scene_world.strength);
 			return uniforms_ext_vec;
 		}
 		case "_envmapDataWorld": {
-			vec4_set(uniforms_ext_vec, context_raw.envmap_angle, Math.sin(-context_raw.envmap_angle), Math.cos(-context_raw.envmap_angle), context_raw.show_envmap ? scene_world.strength : 1.0);
+			vec4_set(uniforms_ext_vec, context_raw.envmap_angle, math_sin(-context_raw.envmap_angle), math_cos(-context_raw.envmap_angle), context_raw.show_envmap ? scene_world.strength : 1.0);
 			return uniforms_ext_vec;
 		}
 		///if (is_paint || is_sculpt)
@@ -394,32 +394,32 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 
 		///if is_paint
 		case "_texuvmap": {
-			if (!UtilUV.uvmap_cached) {
+			if (!util_uv_uvmap_cached) {
 				let _init = () => {
-					UtilUV.cache_uv_map();
+					util_uv_cache_uv_map();
 				}
 				app_notify_on_init(_init);
 			}
-			return UtilUV.uvmap;
+			return util_uv_uvmap;
 		}
 		case "_textrianglemap": {
-			if (!UtilUV.trianglemap_cached) {
+			if (!util_uv_trianglemap_cached) {
 				let _init = () => {
-					UtilUV.cache_triangle_map();
+					util_uv_cache_triangle_map();
 				}
 				app_notify_on_init(_init);
 			}
-			return UtilUV.trianglemap;
+			return util_uv_trianglemap;
 		}
 		case "_texuvislandmap": {
 			let _init = () => {
-				UtilUV.cache_uv_island_map();
+				util_uv_cache_uv_island_map();
 			}
 			app_notify_on_init(_init);
-			return UtilUV.uvislandmap_cached ? UtilUV.uvislandmap :render_path_render_targets.get("empty_black")._image;
+			return util_uv_uvislandmap_cached ? util_uv_uvislandmap :render_path_render_targets.get("empty_black")._image;
 		}
 		case "_texdilatemap": {
-			return UtilUV.dilatemap;
+			return util_uv_dilatemap;
 		}
 		///end
 	}

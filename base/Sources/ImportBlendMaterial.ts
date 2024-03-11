@@ -84,7 +84,7 @@ class ImportBlendMaterial {
 				}
 
 				if (base != null) {
-					let n: zui_node_t = UINodes.make_node(base, nodes, canvas);
+					let n: zui_node_t = ui_nodes_make_node(base, nodes, canvas);
 					n.x = BlHandle.get(node, "locx") + 400;
 					n.y = -BlHandle.get(node, "locy") + 400;
 					n.name = BlHandle.get(node, "name");
@@ -120,11 +120,11 @@ class ImportBlendMaterial {
 						for (let i: i32 = 0; i < BlHandle.get(ramp, "tot"); ++i) {
 							if (i >= elems.length) elems.push([1.0, 1.0, 1.0, 1.0, 0.0]);
 							let cbdata: any = BlHandle.get(ramp, "data", i, "CBData");
-							elems[i][0] = Math.floor(BlHandle.get(cbdata, "r") * 100) / 100;
-							elems[i][1] = Math.floor(BlHandle.get(cbdata, "g") * 100) / 100;
-							elems[i][2] = Math.floor(BlHandle.get(cbdata, "b") * 100) / 100;
-							elems[i][3] = Math.floor(BlHandle.get(cbdata, "a") * 100) / 100;
-							elems[i][4] = Math.floor(BlHandle.get(cbdata, "pos") * 100) / 100;
+							elems[i][0] = math_floor(BlHandle.get(cbdata, "r") * 100) / 100;
+							elems[i][1] = math_floor(BlHandle.get(cbdata, "g") * 100) / 100;
+							elems[i][2] = math_floor(BlHandle.get(cbdata, "b") * 100) / 100;
+							elems[i][3] = math_floor(BlHandle.get(cbdata, "a") * 100) / 100;
+							elems[i][4] = math_floor(BlHandle.get(cbdata, "pos") * 100) / 100;
 						}
 					}
 					else if (search == "mixrgb" || search == "math") {
@@ -247,12 +247,12 @@ class ImportBlendMaterial {
 			for (let m of imported) {
 				context_set_material(m);
 				MakeMaterial.parse_paint_material();
-				UtilRender.make_material_preview();
+				util_render_make_material_preview();
 			}
 		}
 		app_notify_on_init(_init);
 
-		UIBase.hwnds[tab_area_t.SIDEBAR1].redraws = 2;
+		ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 		data_delete_blob(path);
 	}
 
@@ -260,22 +260,22 @@ class ImportBlendMaterial {
 		let idname: any = BlHandle.get(sock, "idname");
 		if (idname.startsWith("NodeSocketVector")) {
 			let v: any = BlHandle.get(BlHandle.get(sock, "default_value", 0, "bNodeSocketValueVector"), "value");
-			v[0] = Math.floor(v[0] * 100) / 100;
-			v[1] = Math.floor(v[1] * 100) / 100;
-			v[2] = Math.floor(v[2] * 100) / 100;
+			v[0] = math_floor(v[0] * 100) / 100;
+			v[1] = math_floor(v[1] * 100) / 100;
+			v[2] = math_floor(v[2] * 100) / 100;
 			return v;
 		}
 		else if (idname.startsWith("NodeSocketColor")) {
 			let v: any = BlHandle.get(BlHandle.get(sock, "default_value", 0, "bNodeSocketValueRGBA"), "value");
-			v[0] = Math.floor(v[0] * 100) / 100;
-			v[1] = Math.floor(v[1] * 100) / 100;
-			v[2] = Math.floor(v[2] * 100) / 100;
-			v[3] = Math.floor(v[3] * 100) / 100;
+			v[0] = math_floor(v[0] * 100) / 100;
+			v[1] = math_floor(v[1] * 100) / 100;
+			v[2] = math_floor(v[2] * 100) / 100;
+			v[3] = math_floor(v[3] * 100) / 100;
 			return v;
 		}
 		else if (idname.startsWith("NodeSocketFloat")) {
 			let v: any = BlHandle.get(BlHandle.get(sock, "default_value", 0, "bNodeSocketValueFloat"), "value");
-			v = Math.floor(v * 100) / 100;
+			v = math_floor(v * 100) / 100;
 			return v;
 		}
 		else if (idname.startsWith("NodeSocketInt")) {

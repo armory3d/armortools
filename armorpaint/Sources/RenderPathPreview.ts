@@ -25,8 +25,8 @@ class RenderPathPreview {
 		{
 			let t: render_target_t = render_target_create();
 			t.name = "mtex";
-			t.width = Math.floor(UtilRender.material_preview_size * 2.0);
-			t.height = Math.floor(UtilRender.material_preview_size * 2.0);
+			t.width = math_floor(util_render_material_preview_size * 2.0);
+			t.height = math_floor(util_render_material_preview_size * 2.0);
 			t.format = "RGBA64";
 			t.scale = RenderPathBase.get_super_sampling();
 			///if krom_opengl
@@ -38,8 +38,8 @@ class RenderPathPreview {
 		{
 			let t: render_target_t = render_target_create();
 			t.name = "mgbuffer0";
-			t.width = Math.floor(UtilRender.material_preview_size * 2.0);
-			t.height = Math.floor(UtilRender.material_preview_size * 2.0);
+			t.width = math_floor(util_render_material_preview_size * 2.0);
+			t.height = math_floor(util_render_material_preview_size * 2.0);
 			t.format = "RGBA64";
 			t.scale = RenderPathBase.get_super_sampling();
 			t.depth_buffer = "mmain";
@@ -49,8 +49,8 @@ class RenderPathPreview {
 		{
 			let t: render_target_t = render_target_create();
 			t.name = "mgbuffer1";
-			t.width = Math.floor(UtilRender.material_preview_size * 2.0);
-			t.height = Math.floor(UtilRender.material_preview_size * 2.0);
+			t.width = math_floor(util_render_material_preview_size * 2.0);
+			t.height = math_floor(util_render_material_preview_size * 2.0);
 			t.format = "RGBA64";
 			t.scale = RenderPathBase.get_super_sampling();
 			render_path_create_render_target(t);
@@ -59,8 +59,8 @@ class RenderPathPreview {
 		{
 			let t: render_target_t = render_target_create();
 			t.name = "mgbuffer2";
-			t.width = Math.floor(UtilRender.material_preview_size * 2.0);
-			t.height = Math.floor(UtilRender.material_preview_size * 2.0);
+			t.width = math_floor(util_render_material_preview_size * 2.0);
+			t.height = math_floor(util_render_material_preview_size * 2.0);
 			t.format = "RGBA64";
 			t.scale = RenderPathBase.get_super_sampling();
 			render_path_create_render_target(t);

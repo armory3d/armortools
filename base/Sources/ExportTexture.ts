@@ -81,7 +81,7 @@ class ExportTexture {
 		///else
 		console_info(tr("Textures exported"));
 		///end
-		UIFiles.last_path = "";
+		ui_files_last_path = "";
 	}
 
 	///if is_paint
@@ -124,7 +124,7 @@ class ExportTexture {
 		///if (krom_android || krom_ios)
 		let f: string = sys_title();
 		///else
-		let f: string = UIFiles.filename;
+		let f: string = ui_files_filename;
 		///end
 		if (f == "") f = tr("untitled");
 		let format_type: texture_ldr_format_t = context_raw.format_type;
@@ -316,7 +316,7 @@ class ExportTexture {
 				ExportTexture.write_texture(path + path_sep + f + tex_name + ext, pixpaint, 2, 3);
 			}
 			else {
-				if (pix == null) pix = new ArrayBuffer(texture_size_x * texture_size_y * 4 * Math.floor(bits / 8));
+				if (pix == null) pix = new ArrayBuffer(texture_size_x * texture_size_y * 4 * math_floor(bits / 8));
 				for (let i: i32 = 0; i < 4; ++i) {
 					let c: string = t.channels[i];
 					if      (c == "base_r") ExportTexture.copy_channel(new DataView(pixpaint), 0, new DataView(pix), i, t.color_space == "linear");
@@ -378,7 +378,7 @@ class ExportTexture {
 			krom_write_png(file, pixels, res_x, res_y, format);
 		}
 		else if (bits == 8 && context_raw.format_type == texture_ldr_format_t.JPG) {
-			krom_write_jpg(file, pixels, res_x, res_y, format, Math.floor(context_raw.format_quality));
+			krom_write_jpg(file, pixels, res_x, res_y, format, math_floor(context_raw.format_quality));
 		}
 		else { // Exr
 			let b: ArrayBuffer = ParserExr.run(res_x, res_y, pixels, bits, type, off);
@@ -387,36 +387,36 @@ class ExportTexture {
 	}
 
 	static copy_channel = (from: DataView, fromChannel: i32, to: DataView, toChannel: i32, linear: bool = true) => {
-		for (let i: i32 = 0; i < Math.floor(to.byteLength / 4); ++i) {
+		for (let i: i32 = 0; i < math_floor(to.byteLength / 4); ++i) {
 			to.setUint8(i * 4 + toChannel, from.getUint8(i * 4 + fromChannel));
 		}
 		if (!linear) ExportTexture.to_srgb(to, toChannel);
 	}
 
 	static copy_channel_inv = (from: DataView, fromChannel: i32, to: DataView, toChannel: i32, linear: bool = true) => {
-		for (let i: i32 = 0; i < Math.floor(to.byteLength / 4); ++i) {
+		for (let i: i32 = 0; i < math_floor(to.byteLength / 4); ++i) {
 			to.setUint8(i * 4 + toChannel, 255 - from.getUint8(i * 4 + fromChannel));
 		}
 		if (!linear) ExportTexture.to_srgb(to, toChannel);
 	}
 
 	static extract_channel = (from: DataView, fromChannel: i32, to: DataView, toChannel: i32, step: i32, mask: i32, linear: bool = true) => {
-		for (let i: i32 = 0; i < Math.floor(to.byteLength / 4); ++i) {
+		for (let i: i32 = 0; i < math_floor(to.byteLength / 4); ++i) {
 			to.setUint8(i * 4 + toChannel, from.getUint8(i * 4 + fromChannel) % step == mask ? 255 : 0);
 		}
 		if (!linear) ExportTexture.to_srgb(to, toChannel);
 	}
 
 	static set_channel = (value: i32, to: DataView, toChannel: i32, linear: bool = true) => {
-		for (let i: i32 = 0; i < Math.floor(to.byteLength / 4); ++i) {
+		for (let i: i32 = 0; i < math_floor(to.byteLength / 4); ++i) {
 			to.setUint8(i * 4 + toChannel, value);
 		}
 		if (!linear) ExportTexture.to_srgb(to, toChannel);
 	}
 
 	static to_srgb = (to: DataView, toChannel: i32) => {
-		for (let i: i32 = 0; i < Math.floor(to.byteLength / 4); ++i) {
-			to.setUint8(i * 4 + toChannel, Math.floor(Math.pow(to.getUint8(i * 4 + toChannel) / 255, ExportTexture.gamma) * 255));
+		for (let i: i32 = 0; i < math_floor(to.byteLength / 4); ++i) {
+			to.setUint8(i * 4 + toChannel, math_floor(math_pow(to.getUint8(i * 4 + toChannel) / 255, ExportTexture.gamma) * 255));
 		}
 	}
 }

@@ -7,7 +7,7 @@ class NodeShaderRaw {
 	outs: string[] = [];
 	shared_samplers: string[] = [];
 	uniforms: string[] = [];
-	functions: Map<string, string> = new Map();
+	functions: map_t<string, string> = map_create();
 	main: string = '';
 	main_init: string = '';
 	main_end: string = '';

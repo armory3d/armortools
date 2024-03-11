@@ -6,16 +6,16 @@ class TabLayers {
 	static showContextMenu = false;
 
 	static draw = (htab: zui_handle_t) => {
-		let mini = config_config_raw.layout[layout_size_t.SIDEBAR_W] <= UIBase.sidebar_mini_w;
+		let mini = config_config_raw.layout[layout_size_t.SIDEBAR_W] <= ui_base_ui_base_sidebar_mini_w;
 		mini ? TabLayers.draw_mini(htab) : TabLayers.draw_full(htab);
 	}
 
 	static drawMini = (htab: zui_handle_t) => {
-		let ui = UIBase.ui;
+		let ui = ui_base_ui_base_ui;
 		zui_set_hovered_tab_name(tr("Layers"));
 
 		let _ELEMENT_H = ui.t.ELEMENT_H;
-		ui.t.ELEMENT_H = Math.floor(UIBase.sidebar_mini_w / 2 / zui_SCALE(ui));
+		ui.t.ELEMENT_H = math_floor(ui_base_ui_base_sidebar_mini_w / 2 / zui_SCALE(ui));
 
 		zui_begin_sticky();
 		zui_separator(5);
@@ -33,7 +33,7 @@ class TabLayers {
 	}
 
 	static drawFull = (htab: zui_handle_t) => {
-		let ui = UIBase.ui;
+		let ui = ui_base_ui_base_ui;
 		if (zui_tab(htab, tr("Layers"))) {
 			zui_begin_sticky();
 			zui_row([1 / 4, 3 / 4]);
@@ -59,10 +59,10 @@ class TabLayers {
 	}
 
 	static highlightOddLines = () => {
-		let ui = UIBase.ui;
+		let ui = ui_base_ui_base_ui;
 		let step = ui.t.ELEMENT_H * 2;
-		let fullH = ui._window_h - UIBase.hwnds[0].scroll_offset;
-		for (let i = 0; i < Math.floor(fullH / step); ++i) {
+		let fullH = ui._window_h - ui_base_ui_base_hwnds[0].scroll_offset;
+		for (let i = 0; i < math_floor(fullH / step); ++i) {
 			if (i % 2 == 0) {
 				zui_fill(0, i * step, (ui._w / zui_SCALE(ui) - 2), step, ui.t.WINDOW_BG_COL - 0x00040404);
 			}
@@ -70,11 +70,11 @@ class TabLayers {
 	}
 
 	static buttonNew = (text: string) => {
-		let ui = UIBase.ui;
+		let ui = ui_base_ui_base_ui;
 		if (zui_button(text)) {
-			UIMenu.draw((ui: zui_t) => {
+			ui_menu_draw((ui: zui_t) => {
 				let l = context_context_raw.layer;
-				if (UIMenu.menu_button(ui, tr("Paint Layer"))) {
+				if (ui_menu_button(ui, tr("Paint Layer"))) {
 					base_base_new_layer();
 					history_new_layer();
 				}
@@ -83,14 +83,14 @@ class TabLayers {
 	}
 
 	static comboFilter = () => {
-		let ui = UIBase.ui;
+		let ui = ui_base_ui_base_ui;
 		let ar = [tr("All")];
 		let filterHandle = zui_handle("tablayers_0");
 		filterHandle.position = context_context_raw.layer_filter;
 		context_context_raw.layer_filter = zui_combo(filterHandle, ar, tr("Filter"), false, zui_align_t.LEFT);
 	}
 
-	static remapLayerPointers = (nodes: zui_node_t[], pointerMap: Map<i32, i32>) => {
+	static remapLayerPointers = (nodes: zui_node_t[], pointerMap: map_t<i32, i32>) => {
 		for (let n of nodes) {
 			if (n.type == "LAYER" || n.type == "LAYER_MASK") {
 				let i = n.buttons[0].default_value;
@@ -101,14 +101,14 @@ class TabLayers {
 		}
 	}
 
-	static initLayerMap = (): Map<SlotLayerRaw, i32> => {
-		let res: Map<SlotLayerRaw, i32> = new Map();
+	static initLayerMap = (): map_t<SlotLayerRaw, i32> => {
+		let res: map_t<SlotLayerRaw, i32> = map_create();
 		for (let i = 0; i < project_project_layers.length; ++i) res.set(project_project_layers[i], i);
 		return res;
 	}
 
-	static fillLayerMap = (map: Map<SlotLayerRaw, i32>): Map<i32, i32> => {
-		let res: Map<i32, i32> = new Map();
+	static fillLayerMap = (map: map_t<SlotLayerRaw, i32>): map_t<i32, i32> => {
+		let res: map_t<i32, i32> = map_create();
 		for (let l of map.keys()) res.set(map.get(l), project_project_layers.indexOf(l) > -1 ? project_project_layers.indexOf(l) : 9999);
 		return res;
 	}
@@ -121,7 +121,7 @@ class TabLayers {
 	}
 
 	static drawLayerSlot = (l: SlotLayerRaw, i: i32, mini: bool) => {
-		let ui = UIBase.ui;
+		let ui = ui_base_ui_base_ui;
 
 		if (context_context_raw.layer_filter > 0 &&
 			SlotLayer.get_object_mask(l) > 0 &&
@@ -186,7 +186,7 @@ class TabLayers {
 	}
 
 	static drawLayerSlotMini = (l: SlotLayerRaw, i: i32) => {
-		let ui = UIBase.ui;
+		let ui = ui_base_ui_base_ui;
 
 		zui_row([1, 1]);
 		let uix = ui._x;
@@ -199,7 +199,7 @@ class TabLayers {
 	}
 
 	static drawLayerSlotFull = (l: SlotLayerRaw, i: i32) => {
-		let ui = UIBase.ui;
+		let ui = ui_base_ui_base_ui;
 
 		let step = ui.t.ELEMENT_H;
 
@@ -345,12 +345,12 @@ class TabLayers {
 
 	static layerToggleVisible = (l: SlotLayerRaw) => {
 		l.visible = !l.visible;
-		UIView2D.hwnd.redraws = 2;
+		ui_view2d_ui_view2d_hwnd.redraws = 2;
 		MakeMaterial.parse_mesh_material();
 	}
 
 	static drawLayerHighlight = (l: SlotLayerRaw, mini: bool) => {
-		let ui = UIBase.ui;
+		let ui = ui_base_ui_base_ui;
 		let step = ui.t.ELEMENT_H;
 
 		// Separator line

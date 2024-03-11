@@ -8,7 +8,7 @@ class MakeBake {
 			frag.wposition = true;
 			frag.n = true;
 			frag.vvec = true;
-			NodeShader.add_function(frag, ShaderFunctions.str_cotangent_frame);
+			NodeShader.add_function(frag, str_cotangent_frame);
 			///if krom_direct3d11
 			NodeShader.write(frag, 'mat3 TBN = cotangentFrame(n, vVec, texCoord);');
 			///else
@@ -21,7 +21,7 @@ class MakeBake {
 			NodeShader.write(frag, MakeMaterial.voxelgi_half_extents());
 			NodeShader.write(frag, 'vec3 voxpos = wposition / voxelgiHalfExtents;');
 			NodeShader.add_uniform(frag, 'sampler3D voxels');
-			NodeShader.add_function(frag, ShaderFunctions.str_trace_ao);
+			NodeShader.add_function(frag, str_trace_ao);
 			frag.n = true;
 			let strength: f32 = context_raw.bake_ao_strength;
 			let radius: f32 = context_raw.bake_ao_radius;
@@ -58,7 +58,7 @@ class MakeBake {
 			frag.n = true;
 			NodeShader.add_uniform(frag, 'sampler2D texpaint_undo', '_texpaint_undo'); // Baked high-poly normals
 			NodeShader.write(frag, 'vec3 n0 = textureLod(texpaint_undo, texCoord, 0.0).rgb * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0);');
-			NodeShader.add_function(frag, ShaderFunctions.str_cotangent_frame);
+			NodeShader.add_function(frag, str_cotangent_frame);
 			NodeShader.write(frag, 'mat3 invTBN = transpose(cotangentFrame(n, n, texCoord));');
 			NodeShader.write(frag, 'vec3 res = normalize(mul(n0, invTBN)) * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5);');
 			NodeShader.write(frag, 'fragColor[0] = vec4(res, 1.0);');

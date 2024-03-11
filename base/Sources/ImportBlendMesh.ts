@@ -106,12 +106,12 @@ class ImportBlendMesh {
 					if (hasuv) {
 						bl.pos = uvdata_pos + (loopstart + totloop - 1) * 4 * 3; // * 3 = x, y, flag
 						uv0 = ParserBlend.read_f32array(bl, 2);
-						if (uv0[0] > 1.0 + ImportBlendMesh.eps) uv0[0] = uv0[0] - Math.floor(uv0[0]);
-						if (uv0[1] > 1.0 + ImportBlendMesh.eps) uv0[1] = uv0[1] - Math.floor(uv0[1]);
+						if (uv0[0] > 1.0 + ImportBlendMesh.eps) uv0[0] = uv0[0] - math_floor(uv0[0]);
+						if (uv0[1] > 1.0 + ImportBlendMesh.eps) uv0[1] = uv0[1] - math_floor(uv0[1]);
 						bl.pos = uvdata_pos + (loopstart) * 4 * 3;
 						uv1 = ParserBlend.read_f32array(bl, 2);
-						if (uv1[0] > 1.0 + ImportBlendMesh.eps) uv1[0] = uv1[0] - Math.floor(uv1[0]);
-						if (uv1[1] > 1.0 + ImportBlendMesh.eps) uv1[1] = uv1[1] - Math.floor(uv1[1]);
+						if (uv1[0] > 1.0 + ImportBlendMesh.eps) uv1[0] = uv1[0] - math_floor(uv1[0]);
+						if (uv1[1] > 1.0 + ImportBlendMesh.eps) uv1[1] = uv1[1] - math_floor(uv1[1]);
 					}
 					let col0r: i32 = 0;
 					let col0g: i32 = 0;
@@ -157,29 +157,29 @@ class ImportBlendMesh {
 						posa32[tri * 9 + 6] = co2[0];
 						posa32[tri * 9 + 7] = co2[1];
 						posa32[tri * 9 + 8] = co2[2];
-						posa[tri * 12 + 3] = Math.floor(vec0.z * 32767);
-						posa[tri * 12 + 7] = Math.floor((smooth ? vec1.z : vec0.z) * 32767);
-						posa[tri * 12 + 11] = Math.floor((smooth ? vec2.z : vec0.z) * 32767);
-						nora[tri * 6    ] = Math.floor(vec0.x * 32767);
-						nora[tri * 6 + 1] = Math.floor(vec0.y * 32767);
-						nora[tri * 6 + 2] = Math.floor((smooth ? vec1.x : vec0.x) * 32767);
-						nora[tri * 6 + 3] = Math.floor((smooth ? vec1.y : vec0.y) * 32767);
-						nora[tri * 6 + 4] = Math.floor((smooth ? vec2.x : vec0.x) * 32767);
-						nora[tri * 6 + 5] = Math.floor((smooth ? vec2.y : vec0.y) * 32767);
+						posa[tri * 12 + 3] = math_floor(vec0.z * 32767);
+						posa[tri * 12 + 7] = math_floor((smooth ? vec1.z : vec0.z) * 32767);
+						posa[tri * 12 + 11] = math_floor((smooth ? vec2.z : vec0.z) * 32767);
+						nora[tri * 6    ] = math_floor(vec0.x * 32767);
+						nora[tri * 6 + 1] = math_floor(vec0.y * 32767);
+						nora[tri * 6 + 2] = math_floor((smooth ? vec1.x : vec0.x) * 32767);
+						nora[tri * 6 + 3] = math_floor((smooth ? vec1.y : vec0.y) * 32767);
+						nora[tri * 6 + 4] = math_floor((smooth ? vec2.x : vec0.x) * 32767);
+						nora[tri * 6 + 5] = math_floor((smooth ? vec2.y : vec0.y) * 32767);
 						co1 = co2;
 						no1 = no2;
 						vec4_set_from(vec1, vec2);
 						if (hasuv) {
 							bl.pos = uvdata_pos + (loopstart + j + 1) * 4 * 3;
 							uv2 = ParserBlend.read_f32array(bl, 2);
-							if (uv2[0] > 1.0 + ImportBlendMesh.eps) uv2[0] = uv2[0] - Math.floor(uv2[0]);
-							if (uv2[1] > 1.0 + ImportBlendMesh.eps) uv2[1] = uv2[1] - Math.floor(uv2[1]);
-							texa[tri * 6    ] = Math.floor(uv0[0] * 32767);
-							texa[tri * 6 + 1] = Math.floor((1.0 - uv0[1]) * 32767);
-							texa[tri * 6 + 2] = Math.floor(uv1[0] * 32767);
-							texa[tri * 6 + 3] = Math.floor((1.0 - uv1[1]) * 32767);
-							texa[tri * 6 + 4] = Math.floor(uv2[0] * 32767);
-							texa[tri * 6 + 5] = Math.floor((1.0 - uv2[1]) * 32767);
+							if (uv2[0] > 1.0 + ImportBlendMesh.eps) uv2[0] = uv2[0] - math_floor(uv2[0]);
+							if (uv2[1] > 1.0 + ImportBlendMesh.eps) uv2[1] = uv2[1] - math_floor(uv2[1]);
+							texa[tri * 6    ] = math_floor(uv0[0] * 32767);
+							texa[tri * 6 + 1] = math_floor((1.0 - uv0[1]) * 32767);
+							texa[tri * 6 + 2] = math_floor(uv1[0] * 32767);
+							texa[tri * 6 + 3] = math_floor((1.0 - uv1[1]) * 32767);
+							texa[tri * 6 + 4] = math_floor(uv2[0] * 32767);
+							texa[tri * 6 + 5] = math_floor((1.0 - uv2[1]) * 32767);
 							uv1 = uv2;
 						}
 						if (hascol) {
@@ -223,9 +223,9 @@ class ImportBlendMesh {
 					let nx: f32 = vec0.x;
 					let ny: f32 = vec0.y;
 					let nz: f32 = vec0.z;
-					let nxabs: f32 = Math.abs(nx);
-					let nyabs: f32 = Math.abs(ny);
-					let nzabs: f32 = Math.abs(nz);
+					let nxabs: f32 = math_abs(nx);
+					let nyabs: f32 = math_abs(ny);
+					let nzabs: f32 = math_abs(nz);
 					let flip: bool = nx + ny + nz > 0;
 					let axis: i32 = nxabs > nyabs && nxabs > nzabs ? 0 : nyabs > nxabs && nyabs > nzabs ? 1 : 2;
 					let axis0: i32 = axis == 0 ? (flip ? 2 : 1) : axis == 1 ? (flip ? 0 : 2) : (flip ? 1 : 0);
@@ -278,7 +278,7 @@ class ImportBlendMesh {
 							let px: f32 = co[axis0];
 							let py: f32 = co[axis1];
 
-							if (UtilMesh.pnpoly(v0x, v0y, v1x, v1y, v2x, v2y, px, py)) {
+							if (util_mesh_pnpoly(v0x, v0y, v1x, v1y, v2x, v2y, px, py)) {
 								overlap = true;
 								break;
 							}
@@ -310,16 +310,16 @@ class ImportBlendMesh {
 							if (hasuv) {
 								bl.pos = uvdata_pos + (va[i ]) * 4 * 3;
 								uv0 = ParserBlend.read_f32array(bl, 2);
-								if (uv0[0] > 1.0 + ImportBlendMesh.eps) uv0[0] = uv0[0] - Math.floor(uv0[0]);
-								if (uv0[1] > 1.0 + ImportBlendMesh.eps) uv0[1] = uv0[1] - Math.floor(uv0[1]);
+								if (uv0[0] > 1.0 + ImportBlendMesh.eps) uv0[0] = uv0[0] - math_floor(uv0[0]);
+								if (uv0[1] > 1.0 + ImportBlendMesh.eps) uv0[1] = uv0[1] - math_floor(uv0[1]);
 								bl.pos = uvdata_pos + (va[i1]) * 4 * 3;
 								uv1 = ParserBlend.read_f32array(bl, 2);
-								if (uv1[0] > 1.0 + ImportBlendMesh.eps) uv1[0] = uv1[0] - Math.floor(uv1[0]);
-								if (uv1[1] > 1.0 + ImportBlendMesh.eps) uv1[1] = uv1[1] - Math.floor(uv1[1]);
+								if (uv1[0] > 1.0 + ImportBlendMesh.eps) uv1[0] = uv1[0] - math_floor(uv1[0]);
+								if (uv1[1] > 1.0 + ImportBlendMesh.eps) uv1[1] = uv1[1] - math_floor(uv1[1]);
 								bl.pos = uvdata_pos + (va[i2]) * 4 * 3;
 								uv2 = ParserBlend.read_f32array(bl, 2);
-								if (uv2[0] > 1.0 + ImportBlendMesh.eps) uv2[0] = uv2[0] - Math.floor(uv2[0]);
-								if (uv2[1] > 1.0 + ImportBlendMesh.eps) uv2[1] = uv2[1] - Math.floor(uv2[1]);
+								if (uv2[0] > 1.0 + ImportBlendMesh.eps) uv2[0] = uv2[0] - math_floor(uv2[0]);
+								if (uv2[1] > 1.0 + ImportBlendMesh.eps) uv2[1] = uv2[1] - math_floor(uv2[1]);
 							}
 							let col0r: i32 = 0;
 							let col0g: i32 = 0;
@@ -353,22 +353,22 @@ class ImportBlendMesh {
 							posa32[tri * 9 + 6] = co2[0];
 							posa32[tri * 9 + 7] = co2[1];
 							posa32[tri * 9 + 8] = co2[2];
-							posa[tri * 12 + 3] = Math.floor(vec0.z * 32767);
-							posa[tri * 12 + 7] = Math.floor((smooth ? vec1.z : vec0.z) * 32767);
-							posa[tri * 12 + 11] = Math.floor((smooth ? vec2.z : vec0.z) * 32767);
-							nora[tri * 6    ] = Math.floor(vec0.x * 32767);
-							nora[tri * 6 + 1] = Math.floor(vec0.y * 32767);
-							nora[tri * 6 + 2] = Math.floor((smooth ? vec1.x : vec0.x) * 32767);
-							nora[tri * 6 + 3] = Math.floor((smooth ? vec1.y : vec0.y) * 32767);
-							nora[tri * 6 + 4] = Math.floor((smooth ? vec2.x : vec0.x) * 32767);
-							nora[tri * 6 + 5] = Math.floor((smooth ? vec2.y : vec0.y) * 32767);
+							posa[tri * 12 + 3] = math_floor(vec0.z * 32767);
+							posa[tri * 12 + 7] = math_floor((smooth ? vec1.z : vec0.z) * 32767);
+							posa[tri * 12 + 11] = math_floor((smooth ? vec2.z : vec0.z) * 32767);
+							nora[tri * 6    ] = math_floor(vec0.x * 32767);
+							nora[tri * 6 + 1] = math_floor(vec0.y * 32767);
+							nora[tri * 6 + 2] = math_floor((smooth ? vec1.x : vec0.x) * 32767);
+							nora[tri * 6 + 3] = math_floor((smooth ? vec1.y : vec0.y) * 32767);
+							nora[tri * 6 + 4] = math_floor((smooth ? vec2.x : vec0.x) * 32767);
+							nora[tri * 6 + 5] = math_floor((smooth ? vec2.y : vec0.y) * 32767);
 							if (hasuv) {
-								texa[tri * 6    ] = Math.floor(uv0[0] * 32767);
-								texa[tri * 6 + 1] = Math.floor((1.0 - uv0[1]) * 32767);
-								texa[tri * 6 + 2] = Math.floor(uv1[0] * 32767);
-								texa[tri * 6 + 3] = Math.floor((1.0 - uv1[1]) * 32767);
-								texa[tri * 6 + 4] = Math.floor(uv2[0] * 32767);
-								texa[tri * 6 + 5] = Math.floor((1.0 - uv2[1]) * 32767);
+								texa[tri * 6    ] = math_floor(uv0[0] * 32767);
+								texa[tri * 6 + 1] = math_floor((1.0 - uv0[1]) * 32767);
+								texa[tri * 6 + 2] = math_floor(uv1[0] * 32767);
+								texa[tri * 6 + 3] = math_floor((1.0 - uv1[1]) * 32767);
+								texa[tri * 6 + 4] = math_floor(uv2[0] * 32767);
+								texa[tri * 6 + 5] = math_floor((1.0 - uv2[1]) * 32767);
 							}
 							if (hascol) {
 								cola[tri * 12    ] = col0r * 128;
@@ -398,7 +398,7 @@ class ImportBlendMesh {
 			let obmat: any = BlHandle.get(ob, "obmat", 0, "float", 16);
 			let mat: mat4_t = mat4_transpose(mat4_from_f32_array(obmat));
 			let v: vec4_t = vec4_create();
-			for (let i: i32 = 0; i < Math.floor(posa32.length / 3); ++i) {
+			for (let i: i32 = 0; i < math_floor(posa32.length / 3); ++i) {
 				vec4_set(v, posa32[i * 3], posa32[i * 3 + 1], posa32[i * 3 + 2]);
 				vec4_apply_mat4(v, mat);
 				posa32[i * 3    ] = v.x;
@@ -408,26 +408,26 @@ class ImportBlendMesh {
 			mat4_get_inv(mat, mat);
 			mat4_transpose3x3(mat);
 			mat.m[12] = mat.m[13] = mat.m[14] = mat.m[15] = 0;
-			for (let i: i32 = 0; i < Math.floor(nora.length / 2); ++i) {
+			for (let i: i32 = 0; i < math_floor(nora.length / 2); ++i) {
 				vec4_set(v, nora[i * 2] / 32767, nora[i * 2 + 1] / 32767, posa[i * 4 + 3] / 32767);
 				vec4_apply_mat(v, mat);
 				vec4_normalize(v);
-				nora[i * 2    ] = Math.floor(v.x * 32767);
-				nora[i * 2 + 1] = Math.floor(v.y * 32767);
-				posa[i * 4 + 3] = Math.floor(v.z * 32767);
+				nora[i * 2    ] = math_floor(v.x * 32767);
+				nora[i * 2 + 1] = math_floor(v.y * 32767);
+				posa[i * 4 + 3] = math_floor(v.z * 32767);
 			}
 
 			// Pack positions to (-1, 1) range
 			let scale_pos: f32 = 0.0;
 			for (let i: i32 = 0; i < posa32.length; ++i) {
-				let f: f32 = Math.abs(posa32[i]);
+				let f: f32 = math_abs(posa32[i]);
 				if (scale_pos < f) scale_pos = f;
 			}
 			let inv: f32 = 1 / scale_pos;
-			for (let i: i32 = 0; i < Math.floor(posa32.length / 3); ++i) {
-				posa[i * 4    ] = Math.floor(posa32[i * 3    ] * 32767 * inv);
-				posa[i * 4 + 1] = Math.floor(posa32[i * 3 + 1] * 32767 * inv);
-				posa[i * 4 + 2] = Math.floor(posa32[i * 3 + 2] * 32767 * inv);
+			for (let i: i32 = 0; i < math_floor(posa32.length / 3); ++i) {
+				posa[i * 4    ] = math_floor(posa32[i * 3    ] * 32767 * inv);
+				posa[i * 4 + 1] = math_floor(posa32[i * 3 + 1] * 32767 * inv);
+				posa[i * 4 + 2] = math_floor(posa32[i * 3 + 2] * 32767 * inv);
 			}
 
 			let obj: any = {

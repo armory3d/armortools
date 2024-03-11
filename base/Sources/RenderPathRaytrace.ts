@@ -148,7 +148,7 @@ class RenderPathRaytrace {
 	}
 
 	static build_data = () => {
-		if (context_raw.merged_object == null) UtilMesh.merge_mesh();
+		if (context_raw.merged_object == null) util_mesh_merge();
 		///if is_paint
 		let mo: mesh_object_t = !context_layer_filter_used() ? context_raw.merged_object : context_raw.paint_object;
 		///else

@@ -26,7 +26,7 @@ class MakeMeshPreview {
 			pos = "spos";
 			NodeShaderContext.add_elem(con_mesh, "bone", 'short4norm');
 			NodeShaderContext.add_elem(con_mesh, "weight", 'short4norm');
-			NodeShader.add_function(vert, ShaderFunctions.str_get_skinning_dual_quat);
+			NodeShader.add_function(vert, str_get_skinning_dual_quat);
 			NodeShader.add_uniform(vert, 'vec4 skinBones[128 * 2]', '_skin_bones');
 			NodeShader.add_uniform(vert, 'float posUnpack', '_pos_unpack');
 			NodeShader.write_attrib(vert, 'vec4 skinA;');
@@ -52,7 +52,7 @@ class MakeMeshPreview {
 		ParserMaterial.sample_uv_scale = brush_scale;
 		ParserMaterial.parse_height = MakeMaterial.height_used;
 		ParserMaterial.parse_height_as_channel = true;
-		let sout: shader_out_t = ParserMaterial.parse(UINodes.get_canvas_material(), con_mesh, vert, frag, matcon);
+		let sout: shader_out_t = ParserMaterial.parse(ui_nodes_get_canvas_material(), con_mesh, vert, frag, matcon);
 		ParserMaterial.parse_height = false;
 		ParserMaterial.parse_height_as_channel = false;
 		ParserMaterial.sample_keep_aspect = false;
@@ -95,9 +95,9 @@ class MakeMeshPreview {
 		NodeShader.add_out(frag, 'vec4 fragColor[3]');
 		frag.n = true;
 
-		NodeShader.add_function(frag, ShaderFunctions.str_pack_float_int16);
-		NodeShader.add_function(frag, ShaderFunctions.str_cotangent_frame);
-		NodeShader.add_function(frag, ShaderFunctions.str_octahedron_wrap);
+		NodeShader.add_function(frag, str_pack_float_int16);
+		NodeShader.add_function(frag, str_cotangent_frame);
+		NodeShader.add_function(frag, str_octahedron_wrap);
 
 		if (MakeMaterial.height_used) {
 			NodeShader.write(frag, 'if (height > 0.0) {');

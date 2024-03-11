@@ -1,14 +1,14 @@
 
 class ParserLogic {
 
-	static custom_nodes: Map<any, any> = new Map();
+	static custom_nodes: map_t<any, any> = map_create();
 	static nodes: zui_node_t[];
 	static links: zui_node_link_t[];
 
 	static parsed_nodes: string[] = null;
-	static parsed_labels: Map<string, string> = null;
-	static node_map: Map<string, LogicNode>;
-	static raw_map: Map<LogicNode, zui_node_t>;
+	static parsed_labels: map_t<string, string> = null;
+	static node_map: map_t<string, LogicNode>;
+	static raw_map: map_t<LogicNode, zui_node_t>;
 
 	static get_logic_node = (node: zui_node_t): LogicNode => {
 		return ParserLogic.node_map.get(ParserLogic.node_name(node));
@@ -65,9 +65,9 @@ class ParserLogic {
 		ParserLogic.links = canvas.links;
 
 		ParserLogic.parsed_nodes = [];
-		ParserLogic.parsed_labels = new Map();
-		ParserLogic.node_map = new Map();
-		ParserLogic.raw_map = new Map();
+		ParserLogic.parsed_labels = map_create();
+		ParserLogic.node_map = map_create();
+		ParserLogic.raw_map = map_create();
 		let root_nodes: zui_node_t[] = ParserLogic.get_root_nodes(canvas);
 
 		for (let node of root_nodes) ParserLogic.build_node(node);

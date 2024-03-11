@@ -5,7 +5,7 @@ class PhysicsWorldRaw {
 	world: Ammo.btDiscreteDynamicsWorld;
 	dispatcher: Ammo.btCollisionDispatcher;
 	contacts: pair_t[] = [];
-	body_map: Map<i32, PhysicsBodyRaw> = new Map();
+	body_map: map_t<i32, PhysicsBodyRaw> = map_create();
 	time_scale: f32 = 1.0;
 	time_step: f32 = 1 / 60;
 	max_steps: i32 = 1;

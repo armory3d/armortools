@@ -2802,7 +2802,7 @@ class NodesMaterial {
 			if (val.length > 2) val.pop();
 		}
 		let ihandle: zui_handle_t = zui_nest(zui_nest(zui_nest(nhandle, 0), 2), axis, {position: 0});
-		let i: i32 = Math.floor(zui_slider(ihandle, "Index", 0, num - 1, false, 1, true, zui_align_t.LEFT));
+		let i: i32 = math_floor(zui_slider(ihandle, "Index", 0, num - 1, false, 1, true, zui_align_t.LEFT));
 		if (i >= val.length || i < 0) ihandle.value = i = val.length - 1; // Stay in bounds
 		zui_row([1 / 2, 1 / 2]);
 		zui_nest(zui_nest(nhandle, 0), 3).value = val[i][0];
@@ -2847,7 +2847,7 @@ class NodesMaterial {
 		but.data = zui_combo(zui_nest(zui_nest(nhandle, 0), 1, {position: but.data}), [tr("Linear"), tr("Constant")], tr("Interpolate"));
 
 		zui_row([1 / 2, 1 / 2]);
-		let i: i32 = Math.floor(zui_slider(ihandle, "Index", 0, vals.length - 1, false, 1, true, zui_align_t.LEFT));
+		let i: i32 = math_floor(zui_slider(ihandle, "Index", 0, vals.length - 1, false, 1, true, zui_align_t.LEFT));
 		if (i >= vals.length || i < 0) ihandle.value = i = vals.length - 1; // Stay in bounds
 
 		let val: Float32Array = vals[i];
@@ -2862,7 +2862,7 @@ class NodesMaterial {
 			let rx: f32 = nx + ui._w - zui_nodes_p(37);
 			let ry: f32 = ny - zui_nodes_p(5);
 			nodes._inputStarted = ui.input_started = false;
-			zui_nodes_rgba_popup(ui, chandle, val, Math.floor(rx), Math.floor(ry + zui_ELEMENT_H(ui)));
+			zui_nodes_rgba_popup(ui, chandle, val, math_floor(rx), math_floor(ry + zui_ELEMENT_H(ui)));
 		}
 		val[0] = color_get_rb(chandle.color) / 255;
 		val[1] = color_get_gb(chandle.color) / 255;
@@ -2938,7 +2938,7 @@ class NodesMaterial {
 		}
 
 		if (zui_button(tr("Nodes"))) {
-			UINodes.group_stack.push(group);
+			ui_nodes_group_stack.push(group);
 		}
 	}
 
@@ -2952,18 +2952,18 @@ class NodesMaterial {
 
 	static add_socket_button = (ui: zui_t, nodes: zui_nodes_t, node: zui_node_t, sockets: zui_node_socket_t[]) => {
 		if (zui_button(tr("Add"))) {
-			UIMenu.draw((ui: zui_t) => {
-				let groupStack: node_group_t[] = UINodes.group_stack;
+			ui_menu_draw((ui: zui_t) => {
+				let groupStack: node_group_t[] = ui_nodes_group_stack;
 				let c: zui_node_canvas_t = groupStack[groupStack.length - 1].canvas;
-				if (UIMenu.menu_button(ui, tr("RGBA"))) {
+				if (ui_menu_button(ui, tr("RGBA"))) {
 					sockets.push(NodesMaterial.create_socket(nodes, node, null, "RGBA", c));
 					NodesMaterial.sync_sockets(node);
 				}
-				if (UIMenu.menu_button(ui, tr("Vector"))) {
+				if (ui_menu_button(ui, tr("Vector"))) {
 					sockets.push(NodesMaterial.create_socket(nodes, node, null, "VECTOR", c));
 					NodesMaterial.sync_sockets(node);
 				}
-				if (UIMenu.menu_button(ui, tr("Value"))) {
+				if (ui_menu_button(ui, tr("Value"))) {
 					sockets.push(NodesMaterial.create_socket(nodes, node, null, "VALUE", c));
 					NodesMaterial.sync_sockets(node);
 				}
@@ -2972,7 +2972,7 @@ class NodesMaterial {
 	}
 
 	static sync_sockets = (node: zui_node_t) => {
-		let groupStack: node_group_t[] = UINodes.group_stack;
+		let groupStack: node_group_t[] = ui_nodes_group_stack;
 		let c: zui_node_canvas_t = groupStack[groupStack.length - 1].canvas;
 		for (let m of project_materials) NodesMaterial.sync_group_sockets(m.canvas, c.name, node);
 		for (let g of project_material_groups) NodesMaterial.sync_group_sockets(g.canvas, c.name, node);
@@ -3032,7 +3032,7 @@ class NodesMaterial {
 		if (n == null) return null;
 		let canvas: zui_node_canvas_t = group != null ? group.canvas : context_raw.material.canvas;
 		let nodes: zui_nodes_t = group != null ? group.nodes : context_raw.material.nodes;
-		let node: zui_node_t = UINodes.make_node(n, nodes, canvas);
+		let node: zui_node_t = ui_nodes_make_node(n, nodes, canvas);
 		canvas.nodes.push(node);
 		return node;
 	}

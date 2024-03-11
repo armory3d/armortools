@@ -3,7 +3,7 @@ class BoxProjects {
 
 	static htab: zui_handle_t = zui_handle_create();
 	static hsearch: zui_handle_t = zui_handle_create();
-	static icon_map: Map<string, image_t> = null;
+	static icon_map: map_t<string, image_t> = null;
 
 	static show = () => {
 		if (BoxProjects.icon_map != null) {
@@ -20,7 +20,7 @@ class BoxProjects {
 		draggable = true;
 		///end
 
-		UIBox.show_custom((ui: zui_t) => {
+		ui_box_show_custom((ui: zui_t) => {
 			///if (krom_android || krom_ios)
 			BoxProjects.align_to_fullscreen();
 			///end
@@ -44,7 +44,7 @@ class BoxProjects {
 			if (zui_button(tr("New"))) {
 				project_new();
 				viewport_scale_to_bounds();
-				UIBox.hide();
+				ui_box_hide();
 				// Pick unique name
 				let i: i32 = 0;
 				let j: i32 = 0;
@@ -64,12 +64,12 @@ class BoxProjects {
 			zui_end_sticky();
 			zui_separator(3, false);
 
-			let slotw: i32 = Math.floor(150 * zui_SCALE(ui));
-			let num: i32 = Math.floor(sys_width() / slotw);
+			let slotw: i32 = math_floor(150 * zui_SCALE(ui));
+			let num: i32 = math_floor(sys_width() / slotw);
 			let recent_projects: string[] = config_raw.recent_projects;
 			let show_asset_names: bool = true;
 
-			for (let row: i32 = 0; row < Math.ceil(recent_projects.length / num); ++row) {
+			for (let row: i32 = 0; row < math_ceil(recent_projects.length / num); ++row) {
 				let mult = show_asset_names ? 2 : 1;
 				let ar: f32[] = [];
 				for (let i: i32 = 0; i < num * mult; ++i) ar.push(1 / num);
@@ -80,7 +80,7 @@ class BoxProjects {
 				if (row > 0) ui._y += off;
 
 				for (let j: i32 = 0; j < num; ++j) {
-					let imgw: i32 = Math.floor(128 * zui_SCALE(ui));
+					let imgw: i32 = math_floor(128 * zui_SCALE(ui));
 					let i: i32 = j + row * num;
 					if (i >= recent_projects.length) {
 						zui_end_element(imgw);
@@ -97,7 +97,7 @@ class BoxProjects {
 					///end
 
 					let icon_path: string = path.substr(0, path.length - 4) + "_icon.png";
-					if (BoxProjects.icon_map == null) BoxProjects.icon_map = new Map();
+					if (BoxProjects.icon_map == null) BoxProjects.icon_map = map_create();
 					let icon: image_t = BoxProjects.icon_map.get(icon_path);
 					if (icon == null) {
 						let image: image_t = data_get_image(icon_path);
@@ -117,7 +117,7 @@ class BoxProjects {
 							ui._x = _uix;
 							let doImport = () => {
 								app_notify_on_init(() => {
-									UIBox.hide();
+									ui_box_hide();
 									ImportArm.run_project(path);
 								});
 							}
@@ -134,9 +134,9 @@ class BoxProjects {
 
 						let name: string = path.substring(path.lastIndexOf(path_sep) + 1, path.lastIndexOf("."));
 						if (ui.is_hovered && ui.input_released_r) {
-							UIMenu.draw((ui: zui_t) => {
-								// if (UIMenu.menuButton(ui, tr("Duplicate"))) {}
-								if (UIMenu.menu_button(ui, tr("Delete"))) {
+							ui_menu_draw((ui: zui_t) => {
+								// if (menuButton(ui, tr("Duplicate"))) {}
+								if (ui_menu_button(ui, tr("Delete"))) {
 									app_notify_on_init(() => {
 										file_delete(path);
 										file_delete(icon_path);
@@ -193,12 +193,13 @@ class BoxProjects {
 
 				if (zui_button(file, zui_align_t.LEFT) && file_exists(path)) {
 					let current: image_t = _g2_current;
-					if (current != null) g2_end();
+					let g2_in_use: bool = _g2_in_use;
+					if (g2_in_use) g2_end();
 
 					ImportArm.run_project(path);
 
-					if (current != null) g2_begin(current);
-					UIBox.hide();
+					if (g2_in_use) g2_begin(current);
+					ui_box_hide();
 				}
 				if (ui.is_hovered) zui_tooltip(path);
 			}
@@ -237,13 +238,13 @@ class BoxProjects {
 	}
 
 	static align_to_fullscreen = () => {
-		UIBox.modalw = Math.floor(sys_width() / zui_SCALE(base_ui_box));
-		UIBox.modalh = Math.floor(sys_height() / zui_SCALE(base_ui_box));
+		ui_box_modalw = math_floor(sys_width() / zui_SCALE(base_ui_box));
+		ui_box_modalh = math_floor(sys_height() / zui_SCALE(base_ui_box));
 		let appw: i32 = sys_width();
 		let apph: i32 = sys_height();
 		let mw: i32 = appw;
 		let mh: i32 = apph;
-		UIBox.hwnd.drag_x = Math.floor(-appw / 2 + mw / 2);
-		UIBox.hwnd.drag_y = Math.floor(-apph / 2 + mh / 2);
+		ui_box_hwnd.drag_x = math_floor(-appw / 2 + mw / 2);
+		ui_box_hwnd.drag_y = math_floor(-apph / 2 + mh / 2);
 	}
 }

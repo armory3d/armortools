@@ -64,7 +64,7 @@ class MakeMesh {
 
 		NodeShader.add_out(frag, 'vec4 fragColor[3]');
 		frag.n = true;
-		NodeShader.add_function(frag, ShaderFunctions.str_pack_float_int16);
+		NodeShader.add_function(frag, str_pack_float_int16);
 
 		if (context_raw.tool == workspace_tool_t.COLORID) {
 			texture_count++;
@@ -74,8 +74,8 @@ class MakeMesh {
 			NodeShader.write(frag, 'fragColor[1] = vec4(idcol.rgb, 1.0);'); // occ
 		}
 		else {
-			NodeShader.add_function(frag, ShaderFunctions.str_octahedron_wrap);
-			NodeShader.add_function(frag, ShaderFunctions.str_cotangent_frame);
+			NodeShader.add_function(frag, str_octahedron_wrap);
+			NodeShader.add_function(frag, str_cotangent_frame);
 			if (layerPass > 0) {
 				NodeShader.add_uniform(frag, 'sampler2D gbuffer0');
 				NodeShader.add_uniform(frag, 'sampler2D gbuffer1');
@@ -348,13 +348,13 @@ class MakeMesh {
 					NodeShader.add_uniform(frag, 'vec4 envmapData', '_envmapData'); // angle, sin(angle), cos(angle), strength
 					NodeShader.write(frag, 'vec3 wreflect = reflect(-vVec, n);');
 					NodeShader.write(frag, 'float envlod = roughness * float(envmapNumMipmaps);');
-					NodeShader.add_function(frag, ShaderFunctions.str_envmap_equirect);
+					NodeShader.add_function(frag, str_envmap_equirect);
 					NodeShader.write(frag, 'vec3 prefilteredColor = textureLod(senvmapRadiance, envMapEquirect(wreflect, envmapData.x), envlod).rgb;');
 					NodeShader.add_uniform(frag, 'vec3 lightArea0', '_light_area0');
 					NodeShader.add_uniform(frag, 'vec3 lightArea1', '_light_area1');
 					NodeShader.add_uniform(frag, 'vec3 lightArea2', '_light_area2');
 					NodeShader.add_uniform(frag, 'vec3 lightArea3', '_light_area3');
-					NodeShader.add_function(frag, ShaderFunctions.str_ltc_evaluate);
+					NodeShader.add_function(frag, str_ltc_evaluate);
 					NodeShader.add_uniform(frag, 'vec3 lightPos', '_point_pos');
 					NodeShader.add_uniform(frag, 'vec3 lightColor', '_point_color');
 					// NodeShader.write(frag, 'float dotNL = max(dot(n, normalize(lightPos - wposition)), 0.0);');
@@ -376,7 +376,7 @@ class MakeMesh {
 					NodeShader.write(frag, 'direct *= lightColor * (1.0 / (ldist * ldist));');
 
 					NodeShader.add_uniform(frag, 'vec4 shirr[7]', '_envmap_irradiance');
-					NodeShader.add_function(frag, ShaderFunctions.str_sh_irradiance);
+					NodeShader.add_function(frag, str_sh_irradiance());
 					NodeShader.write(frag, 'vec3 indirect = albedo * (shIrradiance(vec3(n.x * envmapData.z - n.y * envmapData.y, n.x * envmapData.y + n.y * envmapData.z, n.z), shirr) / 3.14159265);');
 					NodeShader.write(frag, 'indirect += prefilteredColor * (f0 * envBRDF.x + envBRDF.y) * 1.5;');
 					NodeShader.write(frag, 'indirect *= envmapData.w * occlusion;');

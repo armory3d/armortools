@@ -81,7 +81,7 @@ class BrushOutputNode extends LogicNode {
 		let right: f32 = 1.0;
 		if (context_raw.paint2d) {
 			left = 1.0;
-			right = (context_raw.split_view ? 2.0 : 1.0) + UIView2D.ww / base_w();
+			right = (context_raw.split_view ? 2.0 : 1.0) + ui_view2d_ww / base_w();
 		}
 
 		// First time init
@@ -104,7 +104,7 @@ class BrushOutputNode extends LogicNode {
 			!fill_layer &&
 			!group_layer &&
 			(SlotLayer.is_visible(context_raw.layer) || context_raw.paint2d) &&
-			!UIBase.ui.is_hovered &&
+			!ui_base_ui.is_hovered &&
 			!base_is_dragging &&
 			!base_is_resizing &&
 			!base_is_scrolling() &&
@@ -114,7 +114,7 @@ class BrushOutputNode extends LogicNode {
 			let down: bool = mouse_down() || pen_down();
 			if (down && context_raw.tool == workspace_tool_t.COLORID && project_assets.length > 0) {
 				context_raw.colorid_picked = true;
-				UIToolbar.toolbar_handle.redraws = 1;
+				ui_toolbar_handle.redraws = 1;
 			}
 
 			// Prevent painting the same spot

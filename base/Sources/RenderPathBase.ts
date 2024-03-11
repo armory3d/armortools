@@ -18,13 +18,13 @@ class RenderPathBase {
 	}
 
 	///if arm_voxels
-	static init_voxels = (targetName: string = "voxels") => {
+	static init_voxels = (target_name: string = "voxels") => {
 		if (config_raw.rp_gi != true || RenderPathBase.voxels_created) return;
 		RenderPathBase.voxels_created = true;
 
 		{
 			let t: render_target_t = render_target_create();
-			t.name = targetName;
+			t.name = target_name;
 			t.format = "R8";
 			t.width = RenderPathBase.voxels_res;
 			t.height = RenderPathBase.voxels_res;
@@ -216,9 +216,9 @@ class RenderPathBase {
 			}
 
 			let bloom_radius: f32 = 6.5;
-			let min_dim: f32 = Math.min(render_path_current_w,render_path_current_h);
-			let log_min_dim: f32 = Math.max(1.0, Math.log2(min_dim) + (bloom_radius - 8.0));
-			let num_mips: i32 = Math.floor(log_min_dim);
+			let min_dim: f32 = math_min(render_path_current_w, render_path_current_h);
+			let log_min_dim: f32 = math_max(1.0, math_log2(min_dim) + (bloom_radius - 8.0));
+			let num_mips: i32 = math_floor(log_min_dim);
 			RenderPathBase.bloom_sample_scale = 0.5 + log_min_dim - num_mips;
 
 			for (let i: i32 = 0; i < num_mips; ++i) {

@@ -20,9 +20,9 @@ class ExportObj {
 		let posa = new Int16Array(inda.length * 4);
 		for (let i = 0; i < inda.length; ++i) {
 			let index = inda[i];
-			posa[index * 4    ] = Math.floor(pixelsView.getFloat32(i * 16    , true) * 32767);
-			posa[index * 4 + 1] = Math.floor(pixelsView.getFloat32(i * 16 + 4, true) * 32767);
-			posa[index * 4 + 2] = Math.floor(pixelsView.getFloat32(i * 16 + 8, true) * 32767);
+			posa[index * 4    ] = math_floor(pixelsView.getFloat32(i * 16    , true) * 32767);
+			posa[index * 4 + 1] = math_floor(pixelsView.getFloat32(i * 16 + 4, true) * 32767);
+			posa[index * 4 + 2] = math_floor(pixelsView.getFloat32(i * 16 + 8, true) * 32767);
 		}
 
 		let poff = 0;
@@ -32,12 +32,12 @@ class ExportObj {
 			let inv = 1 / 32767;
 			let sc = p.data.scale_pos * inv;
 			// let posa = mesh.vertex_arrays[0].values;
-			let len = Math.floor(posa.length / 4);
-			// let len = Math.floor(inda.length);
+			let len = math_floor(posa.length / 4);
+			// let len = math_floor(inda.length);
 
 			// Merge shared vertices and remap indices
 			let posa2 = new Int16Array(len * 3);
-			let posmap = new Map<i32, i32>();
+			let posmap = new map_t<i32, i32>();
 
 			let pi = 0;
 			for (let i = 0; i < len; ++i) {
@@ -75,7 +75,7 @@ class ExportObj {
 			}
 
 			// let inda = mesh.index_arrays[0].values;
-			for (let i = 0; i < Math.floor(inda.length / 3); ++i) {
+			for (let i = 0; i < math_floor(inda.length / 3); ++i) {
 				let pi1 = posmap.get(inda[i * 3    ]) + 1 + poff;
 				let pi2 = posmap.get(inda[i * 3 + 1]) + 1 + poff;
 				let pi3 = posmap.get(inda[i * 3 + 2]) + 1 + poff;

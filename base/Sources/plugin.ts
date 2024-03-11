@@ -8,7 +8,7 @@ class PluginRaw {
 	name: string;
 }
 
-let plugin_map: Map<string, PluginRaw> = new Map();
+let plugin_map: map_t<string, PluginRaw> = map_create();
 let _plugin_name: string;
 
 function plugin_create(): PluginRaw {

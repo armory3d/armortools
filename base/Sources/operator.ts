@@ -1,5 +1,5 @@
 
-let operator_ops: Map<string, any> = new Map();
+let operator_ops: map_t<string, any> = map_create();
 
 function operator_register(name: string, call: any) {
 	operator_ops.set(name, call);

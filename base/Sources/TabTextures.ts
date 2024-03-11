@@ -2,9 +2,9 @@
 class TabTextures {
 
 	static draw = (htab: zui_handle_t) => {
-		let ui: zui_t = UIBase.ui;
+		let ui: zui_t = ui_base_ui;
 		let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-		if (zui_tab(htab, tr("Textures")) && statush > UIStatus.default_status_h * zui_SCALE(ui)) {
+		if (zui_tab(htab, tr("Textures")) && statush > ui_status_default_status_h * zui_SCALE(ui)) {
 
 			zui_begin_sticky();
 
@@ -16,30 +16,30 @@ class TabTextures {
 			}
 
 			if (zui_button(tr("Import"))) {
-				UIFiles.show(path_texture_formats.join(","), false, true, (path: string) => {
+				ui_files_show(path_texture_formats.join(","), false, true, (path: string) => {
 					ImportAsset.run(path, -1.0, -1.0, true, false);
-					UIBase.hwnds[tab_area_t.STATUS].redraws = 2;
+					ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
 				});
 			}
 			if (ui.is_hovered) zui_tooltip(tr("Import texture file") + ` (${config_keymap.file_import_assets})`);
 
-			if (zui_button(tr("2D View"))) UIBase.show_2d_view(view_2d_type_t.ASSET);
+			if (zui_button(tr("2D View"))) ui_base_show_2d_view(view_2d_type_t.ASSET);
 
 			zui_end_sticky();
 
 			if (project_assets.length > 0) {
 
 				///if (is_paint || is_sculpt)
-				let statusw: i32 = sys_width() - UIToolbar.toolbar_w - config_raw.layout[layout_size_t.SIDEBAR_W];
+				let statusw: i32 = sys_width() - ui_toolbar_w - config_raw.layout[layout_size_t.SIDEBAR_W];
 				///end
 				///if is_lab
 				let statusw: i32 = sys_width();
 				///end
 
-				let slotw: i32 = Math.floor(52 * zui_SCALE(ui));
-				let num: i32 = Math.floor(statusw / slotw);
+				let slotw: i32 = math_floor(52 * zui_SCALE(ui));
+				let num: i32 = math_floor(statusw / slotw);
 
-				for (let row: i32 = 0; row < Math.floor(Math.ceil(project_assets.length / num)); ++row) {
+				for (let row: i32 = 0; row < math_floor(math_ceil(project_assets.length / num)); ++row) {
 					let mult: i32 = config_raw.show_asset_names ? 2 : 1;
 					let ar: f32[] = [];
 					for (let i: i32 = 0; i < num * mult; ++i) ar.push(1 / num);
@@ -50,7 +50,7 @@ class TabTextures {
 					if (row > 0) ui._y += off;
 
 					for (let j: i32 = 0; j < num; ++j) {
-						let imgw: i32 = Math.floor(50 * zui_SCALE(ui));
+						let imgw: i32 = math_floor(50 * zui_SCALE(ui));
 						let i: i32 = j + row * num;
 						if (i >= project_assets.length) {
 							zui_end_element(imgw);
@@ -69,9 +69,9 @@ class TabTextures {
 							base_drag_asset = asset;
 							context_raw.texture = asset;
 
-							if (time_time() - context_raw.select_time < 0.25) UIBase.show_2d_view(view_2d_type_t.ASSET);
+							if (time_time() - context_raw.select_time < 0.25) ui_base_show_2d_view(view_2d_type_t.ASSET);
 							context_raw.select_time = time_time();
-							UIView2D.hwnd.redraws = 2;
+							ui_view2d_hwnd.redraws = 2;
 						}
 
 						if (asset == context_raw.texture) {
@@ -108,9 +108,9 @@ class TabTextures {
 							count = is_packed ? 6 : 6;
 							///end
 
-							UIMenu.draw((ui: zui_t) => {
-								if (UIMenu.menu_button(ui, tr("Export"))) {
-									UIFiles.show("png", true, false, (path: string) => {
+							ui_menu_draw((ui: zui_t) => {
+								if (ui_menu_button(ui, tr("Export"))) {
+									ui_files_show("png", true, false, (path: string) => {
 										base_notify_on_next_frame(() => {
 											///if (is_paint || is_sculpt)
 											if (base_pipe_merge == null) base_make_pipe();
@@ -126,7 +126,7 @@ class TabTextures {
 											g2_set_pipeline(null);
 											g2_end();
 											base_notify_on_next_frame(() => {
-												let f: string = UIFiles.filename;
+												let f: string = ui_files_filename;
 												if (f == "") f = tr("untitled");
 												if (!f.endsWith(".png")) f += ".png";
 												krom_write_png(path + path_sep + f, image_get_pixels(target), target.width, target.height, 0);
@@ -135,43 +135,43 @@ class TabTextures {
 										});
 									});
 								}
-								if (UIMenu.menu_button(ui, tr("Reimport"))) {
+								if (ui_menu_button(ui, tr("Reimport"))) {
 									project_reimport_texture(asset);
 								}
 
 								///if (is_paint || is_sculpt)
-								if (UIMenu.menu_button(ui, tr("To Mask"))) {
+								if (ui_menu_button(ui, tr("To Mask"))) {
 									base_notify_on_next_frame(() => {
 										base_create_image_mask(asset);
 									});
 								}
 								///end
 
-								if (UIMenu.menu_button(ui, tr("Set as Envmap"))) {
+								if (ui_menu_button(ui, tr("Set as Envmap"))) {
 									base_notify_on_next_frame(() => {
 										ImportEnvmap.run(asset.file, img);
 									});
 								}
 
 								///if is_paint
-								if (UIMenu.menu_button(ui, tr("Set as Color ID Map"))) {
+								if (ui_menu_button(ui, tr("Set as Color ID Map"))) {
 									context_raw.colorid_handle.position = i;
 									context_raw.colorid_picked = false;
-									UIToolbar.toolbar_handle.redraws = 1;
+									ui_toolbar_handle.redraws = 1;
 									if (context_raw.tool == workspace_tool_t.COLORID) {
-										UIHeader.header_handle.redraws = 2;
+										ui_header_handle.redraws = 2;
 										context_raw.ddirty = 2;
 									}
 								}
 								///end
 
-								if (UIMenu.menu_button(ui, tr("Delete"), "delete")) {
+								if (ui_menu_button(ui, tr("Delete"), "delete")) {
 									TabTextures.delete_texture(asset);
 								}
-								if (!is_packed && UIMenu.menu_button(ui, tr("Open Containing Directory..."))) {
+								if (!is_packed && ui_menu_button(ui, tr("Open Containing Directory..."))) {
 									file_start(asset.file.substr(0, asset.file.lastIndexOf(path_sep)));
 								}
-								if (!is_packed && UIMenu.menu_button(ui, tr("Open in Browser"))) {
+								if (!is_packed && ui_menu_button(ui, tr("Open in Browser"))) {
 									TabBrowser.show_directory(asset.file.substr(0, asset.file.lastIndexOf(path_sep)));
 								}
 							}, count);
@@ -235,14 +235,14 @@ class TabTextures {
 		if (project_assets.length > 1) {
 			context_raw.texture = project_assets[i == project_assets.length - 1 ? i - 1 : i + 1];
 		}
-		UIBase.hwnds[tab_area_t.STATUS].redraws = 2;
+		ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
 
 		///if is_paint
 		if (context_raw.tool == workspace_tool_t.COLORID && i == context_raw.colorid_handle.position) {
-			UIHeader.header_handle.redraws = 2;
+			ui_header_handle.redraws = 2;
 			context_raw.ddirty = 2;
 			context_raw.colorid_picked = false;
-			UIToolbar.toolbar_handle.redraws = 1;
+			ui_toolbar_handle.redraws = 1;
 		}
 		///end
 
@@ -254,8 +254,8 @@ class TabTextures {
 			MakeMaterial.parse_paint_material();
 
 			///if (is_paint || is_sculpt)
-			UtilRender.make_material_preview();
-			UIBase.hwnds[tab_area_t.SIDEBAR1].redraws = 2;
+			util_render_make_material_preview();
+			ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 			///end
 		}
 		base_notify_on_next_frame(_next);

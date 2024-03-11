@@ -21,9 +21,9 @@ class TabSwatches {
 	}
 
 	static draw = (htab: zui_handle_t) => {
-		let ui: zui_t = UIBase.ui;
+		let ui: zui_t = ui_base_ui;
 		let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-		if (zui_tab(htab, tr("Swatches")) && statush > UIStatus.default_status_h * zui_SCALE(ui)) {
+		if (zui_tab(htab, tr("Swatches")) && statush > ui_status_default_status_h * zui_SCALE(ui)) {
 
 			zui_begin_sticky();
 			if (config_raw.touch_ui) {
@@ -40,12 +40,12 @@ class TabSwatches {
 			if (ui.is_hovered) zui_tooltip(tr("Add new swatch"));
 
 			if (zui_button(tr("Import"))) {
-				UIMenu.draw((ui: zui_t) => {
-					if (UIMenu.menu_button(ui, tr("Replace Existing"))) {
+				ui_menu_draw((ui: zui_t) => {
+					if (ui_menu_button(ui, tr("Replace Existing"))) {
 						project_import_swatches(true);
 						context_set_swatch(project_raw.swatches[0]);
 					}
-					if (UIMenu.menu_button(ui, tr("Append"))) {
+					if (ui_menu_button(ui, tr("Append"))) {
 						project_import_swatches(false);
 					}
 				}, 2);
@@ -69,13 +69,13 @@ class TabSwatches {
 			zui_end_sticky();
 			zui_separator(3, false);
 
-			let slotw: i32 = Math.floor(26 * zui_SCALE(ui));
-			let num: i32 = Math.floor(ui._w / (slotw + 3));
+			let slotw: i32 = math_floor(26 * zui_SCALE(ui));
+			let num: i32 = math_floor(ui._w / (slotw + 3));
 			let drag_pos_set: bool = false;
 
 			let uix: f32 = 0.0;
 			let uiy: f32 = 0.0;
-			for (let row: i32 = 0; row < Math.floor(Math.ceil(project_raw.swatches.length / num)); ++row) {
+			for (let row: i32 = 0; row < math_floor(math_ceil(project_raw.swatches.length / num)); ++row) {
 				let ar: f32[] = [];
 				for (let i: i32 = 0; i < num; ++i) ar.push(1 / num);
 				zui_row(ar);
@@ -118,7 +118,7 @@ class TabSwatches {
 					}
 					else if (state == zui_state_t.RELEASED) {
 						if (time_time() - context_raw.select_time < 0.25) {
-							UIMenu.draw((ui: zui_t) => {
+							ui_menu_draw((ui: zui_t) => {
 								ui.changed = false;
 								let h: zui_handle_t = zui_handle("tabswatches_0");
 								h.color = context_raw.swatch.base;
@@ -146,9 +146,9 @@ class TabSwatches {
 								hheight.value = context_raw.swatch.height;
 								context_raw.swatch.height = zui_slider(hheight, "Height", 0, 1, true);
 
-								if (ui.changed || ui.is_typing) UIMenu.keep_open = true;
+								if (ui.changed || ui.is_typing) ui_menu_keep_open = true;
 								if (ui.input_released) context_set_swatch(context_raw.swatch); // Trigger material preview update
-							}, 16, Math.floor(mouse_x - 200 * zui_SCALE(ui)), Math.floor(mouse_y - 250 * zui_SCALE(ui)));
+							}, 16, math_floor(mouse_x - 200 * zui_SCALE(ui)), math_floor(mouse_y - 250 * zui_SCALE(ui)));
 						}
 
 						context_raw.select_time = time_time();
@@ -167,13 +167,13 @@ class TabSwatches {
 						add += 1;
 						///end
 
-						UIMenu.draw((ui: zui_t) => {
-							if (UIMenu.menu_button(ui, tr("Duplicate"))) {
+						ui_menu_draw((ui: zui_t) => {
+							if (ui_menu_button(ui, tr("Duplicate"))) {
 								context_set_swatch(project_clone_swatch(context_raw.swatch));
 								project_raw.swatches.push(context_raw.swatch);
 							}
 							///if (krom_windows || krom_linux || krom_darwin)
-							else if (UIMenu.menu_button(ui, tr("Copy Hex Code"))) {
+							else if (ui_menu_button(ui, tr("Copy Hex Code"))) {
 								let color: i32 = context_raw.swatch.base;
 								color = color_set_ab(color, context_raw.swatch.opacity * 255);
 								let val: i32 = color;
@@ -181,14 +181,14 @@ class TabSwatches {
 								krom_copy_to_clipboard(val.toString(16));
 							}
 							///end
-							else if (project_raw.swatches.length > 1 && UIMenu.menu_button(ui, tr("Delete"), "delete")) {
+							else if (project_raw.swatches.length > 1 && ui_menu_button(ui, tr("Delete"), "delete")) {
 								TabSwatches.delete_swatch(project_raw.swatches[i]);
 							}
 							///if (is_paint || is_sculpt)
-							else if (UIMenu.menu_button(ui, tr("Create Material"))) {
+							else if (ui_menu_button(ui, tr("Create Material"))) {
 								TabMaterials.accept_swatch_drag(project_raw.swatches[i]);
 							}
-							else if (UIMenu.menu_button(ui, tr("Create Color Layer"))) {
+							else if (ui_menu_button(ui, tr("Create Color Layer"))) {
 								let color: i32 = project_raw.swatches[i].base;
 								color = color_set_ab(color, project_raw.swatches[i].opacity * 255);
 								base_create_color_layer(color, project_raw.swatches[i].occlusion, project_raw.swatches[i].roughness, project_raw.swatches[i].metallic);
@@ -236,7 +236,7 @@ class TabSwatches {
 		if (swatch_pos == -1) {
 			project_raw.swatches.splice(TabSwatches.drag_pos, 0, swatch);
 		}
-		else if (Math.abs(swatch_pos - TabSwatches.drag_pos) > 0) { // Existing swatch is reordered
+		else if (math_abs(swatch_pos - TabSwatches.drag_pos) > 0) { // Existing swatch is reordered
 			array_remove(project_raw.swatches, swatch);
 			// If the new position is after the old one, decrease by one because the swatch has been deleted
 			let new_pos: i32 = TabSwatches.drag_pos - swatch_pos > 0 ? TabSwatches.drag_pos -1 : TabSwatches.drag_pos;
@@ -248,6 +248,6 @@ class TabSwatches {
 		let i: i32 = project_raw.swatches.indexOf(swatch);
 		context_set_swatch(project_raw.swatches[i == project_raw.swatches.length - 1 ? i - 1 : i + 1]);
 		project_raw.swatches.splice(i, 1);
-		UIBase.hwnds[tab_area_t.STATUS].redraws = 2;
+		ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
 	}
 }

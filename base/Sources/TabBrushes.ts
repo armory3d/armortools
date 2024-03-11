@@ -4,7 +4,7 @@
 class TabBrushes {
 
 	static draw = (htab: zui_handle_t) => {
-		let ui: zui_t = UIBase.ui;
+		let ui: zui_t = ui_base_ui;
 		if (zui_tab(htab, tr("Brushes"))) {
 			zui_begin_sticky();
 			zui_row([1 / 4, 1 / 4, 1 / 4]);
@@ -12,21 +12,21 @@ class TabBrushes {
 				context_raw.brush = SlotBrush.create();
 				project_brushes.push(context_raw.brush);
 				MakeMaterial.parse_brush();
-				UINodes.hwnd.redraws = 2;
+				ui_nodes_hwnd.redraws = 2;
 			}
 			if (zui_button(tr("Import"))) {
 				project_import_brush();
 			}
 			if (zui_button(tr("Nodes"))) {
-				UIBase.show_brush_nodes();
+				ui_base_show_brush_nodes();
 			}
 			zui_end_sticky();
 			zui_separator(3, false);
 
-			let slotw: i32 = Math.floor(51 * zui_SCALE(ui));
-			let num: i32 = Math.floor(config_raw.layout[layout_size_t.SIDEBAR_W] / slotw);
+			let slotw: i32 = math_floor(51 * zui_SCALE(ui));
+			let num: i32 = math_floor(config_raw.layout[layout_size_t.SIDEBAR_W] / slotw);
 
-			for (let row: i32 = 0; row < Math.floor(Math.ceil(project_brushes.length / num)); ++row) {
+			for (let row: i32 = 0; row < math_floor(math_ceil(project_brushes.length / num)); ++row) {
 				let mult: i32 = config_raw.show_asset_names ? 2 : 1;
 				let ar: f32[] = [];
 				for (let i: i32 = 0; i < num * mult; ++i) ar.push(1 / num);
@@ -37,7 +37,7 @@ class TabBrushes {
 				if (row > 0) ui._y += off;
 
 				for (let j: i32 = 0; j < num; ++j) {
-					let imgw: i32 = Math.floor(50 * zui_SCALE(ui));
+					let imgw: i32 = math_floor(50 * zui_SCALE(ui));
 					let i: i32 = j + row * num;
 					if (i >= project_brushes.length) {
 						zui_end_element(imgw);
@@ -51,7 +51,7 @@ class TabBrushes {
 						// Zui.fill(1, -2, img.width + 3, img.height + 3, ui.t.HIGHLIGHT_COL); // TODO
 						let off: i32 = row % 2 == 1 ? 1 : 0;
 						let w: i32 = 50;
-						if (config_raw.window_scale > 1) w += Math.floor(config_raw.window_scale * 2);
+						if (config_raw.window_scale > 1) w += math_floor(config_raw.window_scale * 2);
 						zui_fill(-1,         -2, w + 3,       2, ui.t.HIGHLIGHT_COL);
 						zui_fill(-1,    w - off, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
 						zui_fill(-1,         -2,     2,   w + 3, ui.t.HIGHLIGHT_COL);
@@ -64,7 +64,7 @@ class TabBrushes {
 					let state: zui_state_t = project_brushes[i].preview_ready ? zui_image(img) : zui_image(resource_get("icons.k"), -1, -1.0, tile * 5, tile, tile, tile);
 					if (state == zui_state_t.STARTED) {
 						if (context_raw.brush != project_brushes[i]) context_select_brush(i);
-						if (time_time() - context_raw.select_time < 0.25) UIBase.show_brush_nodes();
+						if (time_time() - context_raw.select_time < 0.25) ui_base_show_brush_nodes();
 						context_raw.select_time = time_time();
 						// app_drag_off_x = -(mouse_x - uix - ui._windowX - 3);
 						// app_drag_off_y = -(mouse_y - uiy - ui._windowY + 1);
@@ -73,27 +73,27 @@ class TabBrushes {
 					if (ui.is_hovered && ui.input_released_r) {
 						context_select_brush(i);
 						let add: i32 = project_brushes.length > 1 ? 1 : 0;
-						UIMenu.draw((ui: zui_t) => {
+						ui_menu_draw((ui: zui_t) => {
 							//let b: SlotBrushRaw = brushes[i];
 
-							if (UIMenu.menu_button(ui, tr("Export"))) {
+							if (ui_menu_button(ui, tr("Export"))) {
 								context_select_brush(i);
 								BoxExport.show_brush();
 							}
 
-							if (UIMenu.menu_button(ui, tr("Duplicate"))) {
+							if (ui_menu_button(ui, tr("Duplicate"))) {
 								let _init = () => {
 									context_raw.brush = SlotBrush.create();
 									project_brushes.push(context_raw.brush);
 									let cloned: any = json_parse(json_stringify(project_brushes[i].canvas));
 									context_raw.brush.canvas = cloned;
 									context_set_brush(context_raw.brush);
-									UtilRender.make_brush_preview();
+									util_render_make_brush_preview();
 								}
 								app_notify_on_init(_init);
 							}
 
-							if (project_brushes.length > 1 && UIMenu.menu_button(ui, tr("Delete"), "delete")) {
+							if (project_brushes.length > 1 && ui_menu_button(ui, tr("Delete"), "delete")) {
 								TabBrushes.delete_brush(project_brushes[i]);
 							}
 						}, 2 + add);
@@ -105,7 +105,7 @@ class TabBrushes {
 								let _brush: SlotBrushRaw = context_raw.brush;
 								context_raw.brush = project_brushes[i];
 								MakeMaterial.parse_brush();
-								UtilRender.make_brush_preview();
+								util_render_make_brush_preview();
 								context_raw.brush = _brush;
 							});
 						}
@@ -143,7 +143,7 @@ class TabBrushes {
 		let i: i32 = project_brushes.indexOf(b);
 		context_select_brush(i == project_brushes.length - 1 ? i - 1 : i + 1);
 		project_brushes.splice(i, 1);
-		UIBase.hwnds[1].redraws = 2;
+		ui_base_hwnds[1].redraws = 2;
 	}
 }
 

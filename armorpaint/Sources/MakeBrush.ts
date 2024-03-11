@@ -25,7 +25,7 @@ class MakeBrush {
 			frag.wposition = true;
 
 			if (config_raw.brush_angle_reject || context_raw.xray) {
-				NodeShader.add_function(frag, ShaderFunctions.str_octahedron_wrap);
+				NodeShader.add_function(frag, str_octahedron_wrap);
 				NodeShader.add_uniform(frag, 'sampler2D gbuffer0');
 				///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 				NodeShader.write(frag, 'vec2 g0 = textureLod(gbuffer0, inp.xy, 0.0).rg;');

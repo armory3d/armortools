@@ -218,7 +218,7 @@ function base_init() {
 	base_default_element_w = base_theme.ELEMENT_W;
 	base_default_font_size = base_theme.FONT_SIZE;
 	translator_load_translations(config_raw.locale);
-	UIFiles.filename = tr("untitled");
+	ui_files_filename = tr("untitled");
 	///if (krom_android || krom_ios)
 	sys_title_set(tr("untitled"));
 	///end
@@ -248,38 +248,38 @@ function base_init() {
 	args_parse();
 
 	camera_init();
-	new UIBase();
-	new UINodes();
-	new UIView2D();
+	ui_base_init();
+	ui_nodes_init();
+	ui_view2d_init();
 
 	///if is_lab
-	RandomNode.setSeed(Math.floor(time_time() * 4294967295));
+	RandomNode.setSeed(math_floor(time_time() * 4294967295));
 	///end
 
 	app_notify_on_update(base_update);
-	app_notify_on_render_2d(UIView2D.render);
-	app_notify_on_update(UIView2D.update);
+	app_notify_on_render_2d(ui_view2d_render);
+	app_notify_on_update(ui_view2d_update);
 	///if (is_paint || is_sculpt)
-	app_notify_on_render_2d(UIBase.render_cursor);
+	app_notify_on_render_2d(ui_base_render_cursor);
 	///end
-	app_notify_on_update(UINodes.update);
-	app_notify_on_render_2d(UINodes.render);
-	app_notify_on_update(UIBase.update);
-	app_notify_on_render_2d(UIBase.render);
+	app_notify_on_update(ui_nodes_update);
+	app_notify_on_render_2d(ui_nodes_render);
+	app_notify_on_update(ui_base_update);
+	app_notify_on_render_2d(ui_base_render);
 	app_notify_on_update(camera_update);
 	app_notify_on_render_2d(base_render);
 
 	///if (is_paint || is_sculpt)
-	base_appx = UIToolbar.toolbar_w;
+	base_appx = ui_toolbar_w;
 	///end
 	///if is_lab
 	base_appx = 0;
 	///end
 
-	base_appy = UIHeader.headerh;
-	if (config_raw.layout[layout_size_t.HEADER] == 1) base_appy += UIHeader.headerh;
+	base_appy = ui_header_h;
+	if (config_raw.layout[layout_size_t.HEADER] == 1) base_appy += ui_header_h;
 	let cam: camera_object_t = scene_camera;
-	cam.data.fov = Math.floor(cam.data.fov * 100) / 100;
+	cam.data.fov = math_floor(cam.data.fov * 100) / 100;
 	camera_object_build_proj(cam);
 
 	args_run();
@@ -305,33 +305,33 @@ function base_save_and_quit_callback(save: bool) {
 function base_w(): i32 {
 	// Drawing material preview
 	if (context_raw.material_preview) {
-		return UtilRender.material_preview_size;
+		return util_render_material_preview_size;
 	}
 
 	// Drawing decal preview
 	if (context_raw.decal_preview) {
-		return UtilRender.decal_preview_size;
+		return util_render_decal_preview_size;
 	}
 
 	let res: i32 = 0;
 	if (config_raw.layout == null) {
-		let sidebarw: i32 = UIBase.default_sidebar_w;
-		res = sys_width() - sidebarw - UIToolbar.default_toolbar_w;
+		let sidebarw: i32 = ui_base_default_sidebar_w;
+		res = sys_width() - sidebarw - ui_toolbar_default_w;
 	}
-	else if (UINodes.show || UIView2D.show) {
-		res = sys_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - config_raw.layout[layout_size_t.NODES_W] - UIToolbar.toolbar_w;
+	else if (ui_nodes_show || ui_view2d_show) {
+		res = sys_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - config_raw.layout[layout_size_t.NODES_W] - ui_toolbar_w;
 	}
-	else if (UIBase.show) {
-		res = sys_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - UIToolbar.toolbar_w;
+	else if (ui_base_show) {
+		res = sys_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - ui_toolbar_w;
 	}
 	else { // Distract free
 		res = sys_width();
 	}
 	if (context_raw.view_index > -1) {
-		res = Math.floor(res / 2);
+		res = math_floor(res / 2);
 	}
 	if (context_raw.paint2d_view) {
-		res = UIView2D.ww;
+		res = ui_view2d_ww;
 	}
 
 	return res > 0 ? res : 1; // App was minimized, force render path resize
@@ -340,18 +340,18 @@ function base_w(): i32 {
 function base_h(): i32 {
 	// Drawing material preview
 	if (context_raw.material_preview) {
-		return UtilRender.material_preview_size;
+		return util_render_material_preview_size;
 	}
 
 	// Drawing decal preview
 	if (context_raw.decal_preview) {
-		return UtilRender.decal_preview_size;
+		return util_render_decal_preview_size;
 	}
 
 	let res: i32 = sys_height();
 
 	if (config_raw.layout == null) {
-		res -= UIHeader.default_header_h * 2 + UIStatus.default_status_h;
+		res -= ui_header_default_h * 2 + ui_status_default_status_h;
 
 		///if (krom_android || krom_ios)
 		let layout_header: i32 = 0;
@@ -359,15 +359,15 @@ function base_h(): i32 {
 		let layout_header: i32 = 1;
 		///end
 		if (layout_header == 0) {
-			res += UIHeader.headerh;
+			res += ui_header_h;
 		}
 	}
-	else if (UIBase.show && res > 0) {
+	else if (ui_base_show && res > 0) {
 		let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-		res -= Math.floor(UIHeader.default_header_h * 2 * config_raw.window_scale) + statush;
+		res -= math_floor(ui_header_default_h * 2 * config_raw.window_scale) + statush;
 
 		if (config_raw.layout[layout_size_t.HEADER] == 0) {
-			res += UIHeader.headerh;
+			res += ui_header_h;
 		}
 	}
 
@@ -381,7 +381,7 @@ function base_w(): i32 {
 	if (UINodes == null) {
 		res = sys_width();
 	}
-	else if (UINodes.show || UIView2D.show) {
+	else if (ui_nodes_show || ui_view2d_show) {
 		res = sys_width() - config_raw.layout[layout_size_t.NODES_W];
 	}
 	else { // Distract free
@@ -394,11 +394,11 @@ function base_w(): i32 {
 function base_h(): i32 {
 	let res: i32 = sys_height();
 	if (UIBase == null) {
-		res -= UIHeader.default_header_h * 2 + UIStatus.default_status_h;
+		res -= ui_header_default_h * 2 + ui_status_default_status_h;
 	}
 	else if (res > 0) {
 		let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-		res -= Math.floor(UIHeader.default_header_h * 2 * config_raw.window_scale) + statush;
+		res -= math_floor(ui_header_default_h * 2 * config_raw.window_scale) + statush;
 	}
 
 	return res > 0 ? res : 1; // App was minimized, force render path resize
@@ -426,9 +426,9 @@ function base_on_resize() {
 	let ratio_h: f32 = sys_height() / base_last_window_height;
 	base_last_window_height = sys_height();
 
-	config_raw.layout[layout_size_t.NODES_W] = Math.floor(config_raw.layout[layout_size_t.NODES_W] * ratio_w);
+	config_raw.layout[layout_size_t.NODES_W] = math_floor(config_raw.layout[layout_size_t.NODES_W] * ratio_w);
 	///if (is_paint || is_sculpt)
-	config_raw.layout[layout_size_t.SIDEBAR_H0] = Math.floor(config_raw.layout[layout_size_t.SIDEBAR_H0] * ratio_h);
+	config_raw.layout[layout_size_t.SIDEBAR_H0] = math_floor(config_raw.layout[layout_size_t.SIDEBAR_H0] * ratio_h);
 	config_raw.layout[layout_size_t.SIDEBAR_H1] = sys_height() - config_raw.layout[layout_size_t.SIDEBAR_H0];
 	///end
 
@@ -465,16 +465,16 @@ function base_resize() {
 
 	context_raw.ddirty = 2;
 
-	if (UIBase.show) {
+	if (ui_base_show) {
 		///if (is_paint || is_sculpt)
-		base_appx = UIToolbar.toolbar_w;
+		base_appx = ui_toolbar_w;
 		///end
 		///if is_lab
 		base_appx = 0;
 		///end
-		base_appy = UIHeader.headerh * 2;
+		base_appy = ui_header_h * 2;
 		if (config_raw.layout[layout_size_t.HEADER] == 0) {
-			base_appy -= UIHeader.headerh;
+			base_appy -= ui_header_h;
 		}
 	}
 	else {
@@ -482,31 +482,31 @@ function base_resize() {
 		base_appy = 0;
 	}
 
-	if (UINodes.grid != null) {
-		let _grid: image_t = UINodes.grid;
+	if (ui_nodes_grid != null) {
+		let _grid: image_t = ui_nodes_grid;
 		let _next = function() {
 			image_unload(_grid);
 		}
 		base_notify_on_next_frame(_next);
-		UINodes.grid = null;
+		ui_nodes_grid = null;
 	}
 
 	base_redraw_ui();
 }
 
 function base_redraw_ui() {
-	UIHeader.header_handle.redraws = 2;
-	UIBase.hwnds[tab_area_t.STATUS].redraws = 2;
-	UIMenubar.menu_handle.redraws = 2;
-	UIMenubar.workspace_handle.redraws = 2;
-	UINodes.hwnd.redraws = 2;
-	UIBox.hwnd.redraws = 2;
-	UIView2D.hwnd.redraws = 2;
+	ui_header_handle.redraws = 2;
+	ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
+	ui_menubar_menu_handle.redraws = 2;
+	ui_menubar_workspace_handle.redraws = 2;
+	ui_nodes_hwnd.redraws = 2;
+	ui_box_hwnd.redraws = 2;
+	ui_view2d_hwnd.redraws = 2;
 	if (context_raw.ddirty < 0) context_raw.ddirty = 0; // Redraw viewport
 	///if (is_paint || is_sculpt)
-	UIBase.hwnds[tab_area_t.SIDEBAR0].redraws = 2;
-	UIBase.hwnds[tab_area_t.SIDEBAR1].redraws = 2;
-	UIToolbar.toolbar_handle.redraws = 2;
+	ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
+	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
+	ui_toolbar_handle.redraws = 2;
 	if (context_raw.split_view) context_raw.ddirty = 1;
 	///end
 }
@@ -533,7 +533,7 @@ function base_update() {
 		if (mouse_released()) {
 			base_drag_start = 0;
 		}
-		let moved: bool = Math.abs(mouse_movement_x) > 1 && Math.abs(mouse_movement_y) > 1;
+		let moved: bool = math_abs(mouse_movement_x) > 1 && math_abs(mouse_movement_y) > 1;
 		if ((mouse_released() || moved) && !has_drag) {
 			base_drag_asset = null;
 			base_drag_swatch = null;
@@ -555,7 +555,7 @@ function base_update() {
 	if (mouse_released() && has_drag) {
 		if (base_drag_asset != null) {
 			if (context_in_nodes()) { // Create image texture
-				UINodes.accept_asset_drag(project_assets.indexOf(base_drag_asset));
+				ui_nodes_accept_asset_drag(project_assets.indexOf(base_drag_asset));
 			}
 			else if (context_in_viewport()) {
 				if (base_drag_asset.file.toLowerCase().endsWith(".hdr")) {
@@ -572,7 +572,7 @@ function base_update() {
 		}
 		else if (base_drag_swatch != null) {
 			if (context_in_nodes()) { // Create RGB node
-				UINodes.accept_swatch_drag(base_drag_swatch);
+				ui_nodes_accept_swatch_drag(base_drag_swatch);
 			}
 			else if (context_in_swatches()) {
 				TabSwatches.accept_swatch_drag(base_drag_swatch);
@@ -624,7 +624,7 @@ function base_update() {
 		}
 		else if (base_drag_layer != null) {
 			if (context_in_nodes()) {
-				UINodes.accept_layer_drag(project_layers.indexOf(base_drag_layer));
+				ui_nodes_accept_layer_drag(project_layers.indexOf(base_drag_layer));
 			}
 			else if (context_in_layers() && base_is_dragging) {
 				SlotLayer.move(base_drag_layer, context_raw.drag_dest);
@@ -649,12 +649,12 @@ function base_update() {
 	let is_picker: bool = context_raw.tool == workspace_tool_t.PICKER || context_raw.tool == workspace_tool_t.MATERIAL;
 	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
 	zui_set_always_redraw_window(!context_raw.cache_draws ||
-		UIMenu.show ||
-		UIBox.show ||
+		ui_menu_show ||
+		ui_box_show ||
 		base_is_dragging ||
 		is_picker ||
 		decal ||
-		UIView2D.show ||
+		ui_view2d_show ||
 		!config_raw.brush_3d ||
 		context_raw.frame < 3);
 	///end
@@ -668,16 +668,16 @@ function base_material_dropped() {
 	// Material drag and dropped onto viewport or layers tab
 	if (context_in_viewport()) {
 		let uv_type: uv_type_t = keyboard_down("control") ? uv_type_t.PROJECT : uv_type_t.UVMAP;
-		let decal_mat: mat4_t = uv_type == uv_type_t.PROJECT ? UtilRender.get_decal_mat() : null;
+		let decal_mat: mat4_t = uv_type == uv_type_t.PROJECT ? util_render_get_decal_mat() : null;
 		base_create_fill_layer(uv_type, decal_mat);
 	}
 	if (context_in_layers() && TabLayers.can_drop_new_layer(context_raw.drag_dest)) {
 		let uv_type: uv_type_t = keyboard_down("control") ? uv_type_t.PROJECT : uv_type_t.UVMAP;
-		let decal_mat: mat4_t = uv_type == uv_type_t.PROJECT ? UtilRender.get_decal_mat() : null;
+		let decal_mat: mat4_t = uv_type == uv_type_t.PROJECT ? util_render_get_decal_mat() : null;
 		base_create_fill_layer(uv_type, decal_mat, context_raw.drag_dest);
 	}
 	else if (context_in_nodes()) {
-		UINodes.accept_material_drag(project_materials.indexOf(base_drag_material));
+		ui_nodes_accept_material_drag(project_materials.indexOf(base_drag_material));
 	}
 	base_drag_material = null;
 }
@@ -725,7 +725,7 @@ function base_get_drag_image(): image_t {
 		if (base_drag_file_icon != null) return base_drag_file_icon;
 		let icons: image_t = resource_get("icons.k");
 		base_drag_rect = base_drag_file.indexOf(".") > 0 ? resource_tile50(icons, 3, 1) : resource_tile50(icons, 2, 1);
-		base_drag_tint = UIBase.ui.t.HIGHLIGHT_COL;
+		base_drag_tint = ui_base_ui.t.HIGHLIGHT_COL;
 		return icons;
 	}
 
@@ -738,7 +738,7 @@ function base_get_drag_image(): image_t {
 		let folder_closed: rect_t = resource_tile50(icons, 2, 1);
 		let folder_open: rect_t = resource_tile50(icons, 8, 1);
 		base_drag_rect = base_drag_layer.show_panel ? folder_open : folder_closed;
-		base_drag_tint = UIBase.ui.t.LABEL_COL - 0x00202020;
+		base_drag_tint = ui_base_ui.t.LABEL_COL - 0x00202020;
 		return icons;
 	}
 	if (base_drag_layer != null && SlotLayer.is_mask(base_drag_layer) && base_drag_layer.fill_layer == null) {
@@ -758,8 +758,8 @@ function base_render() {
 
 	if (context_raw.frame == 2) {
 		///if (is_paint || is_sculpt)
-		UtilRender.make_material_preview();
-		UIBase.hwnds[tab_area_t.SIDEBAR1].redraws = 2;
+		util_render_make_material_preview();
+		ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 		///end
 
 		MakeMaterial.parse_mesh_material();
@@ -778,9 +778,9 @@ function base_render() {
 
 		// Default workspace
 		if (config_raw.workspace != 0) {
-			UIHeader.worktab.position = config_raw.workspace;
-			UIMenubar.workspace_handle.redraws = 2;
-			UIHeader.worktab.changed = true;
+			ui_header_worktab.position = config_raw.workspace;
+			ui_menubar_workspace_handle.redraws = 2;
+			ui_header_worktab.changed = true;
 		}
 
 		// Default camera controls
@@ -813,7 +813,7 @@ function base_render() {
 		let img: image_t = base_get_drag_image();
 
 		///if (is_paint || is_sculpt)
-		let scale_factor: f32 = zui_SCALE(UIBase.ui);
+		let scale_factor: f32 = zui_SCALE(ui_base_ui);
 		///end
 		///if is_lab
 		let scale_factor: f32 = zui_SCALE(base_ui_box);
@@ -844,10 +844,10 @@ function base_render() {
 		g2_set_color(0xffffffff);
 	}
 
-	let using_menu: bool = UIMenu.show && mouse_y > UIHeader.headerh;
-	base_ui_enabled = !UIBox.show && !using_menu && !base_is_combo_selected();
-	if (UIBox.show) UIBox.render();
-	if (UIMenu.show) UIMenu.render();
+	let using_menu: bool = ui_menu_show && mouse_y > ui_header_h;
+	base_ui_enabled = !ui_box_show && !using_menu && !base_is_combo_selected();
+	if (ui_box_show) ui_box_render();
+	if (ui_menu_show) ui_menu_render();
 
 	// Save last pos for continuos paint
 	context_raw.last_paint_vec_x = context_raw.paint_vec.x;
@@ -935,7 +935,7 @@ function base_is_combo_selected(): bool {
 }
 
 function base_get_uis(): zui_t[] {
-	return [base_ui_box, base_ui_menu, UIBase.ui, UINodes.ui, UIView2D.ui];
+	return [base_ui_box, base_ui_menu, ui_base_ui, ui_nodes_ui, ui_view2d_ui];
 }
 
 function base_is_decal_layer(): bool {
@@ -950,37 +950,37 @@ function base_is_decal_layer(): bool {
 }
 
 function base_redraw_status() {
-	UIBase.hwnds[tab_area_t.STATUS].redraws = 2;
+	ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
 }
 
 function base_redraw_console() {
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-	if (UIBase.ui != null && statush > UIStatus.default_status_h * zui_SCALE(UIBase.ui)) {
-		UIBase.hwnds[tab_area_t.STATUS].redraws = 2;
+	if (ui_base_ui != null && statush > ui_status_default_status_h * zui_SCALE(ui_base_ui)) {
+		ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
 	}
 }
 
 function base_init_layout() {
-	let show2d: bool = (UINodes != null && UINodes.show) || (UIView2D != null && UIView2D.show);
+	let show2d: bool = ui_nodes_show || ui_view2d_show;
 
 	let raw: config_t = config_raw;
 	raw.layout = [
 		///if (is_paint || is_sculpt)
-		Math.floor(UIBase.default_sidebar_w * raw.window_scale), // LayoutSidebarW
-		Math.floor(sys_height() / 2), // LayoutSidebarH0
-		Math.floor(sys_height() / 2), // LayoutSidebarH1
+		math_floor(ui_base_default_sidebar_w * raw.window_scale), // LayoutSidebarW
+		math_floor(sys_height() / 2), // LayoutSidebarH0
+		math_floor(sys_height() / 2), // LayoutSidebarH1
 		///end
 
 		///if krom_ios
-		show2d ? Math.floor((app_w() + raw.layout[layout_size_t.NODES_W]) * 0.473) : Math.floor(app_w() * 0.473), // LayoutNodesW
+		show2d ? math_floor((app_w() + raw.layout[layout_size_t.NODES_W]) * 0.473) : math_floor(app_w() * 0.473), // LayoutNodesW
 		///elseif krom_android
-		show2d ? Math.floor((app_w() + raw.layout[layout_size_t.NODES_W]) * 0.473) : Math.floor(app_w() * 0.473),
+		show2d ? math_floor((app_w() + raw.layout[layout_size_t.NODES_W]) * 0.473) : math_floor(app_w() * 0.473),
 		///else
-		show2d ? Math.floor((app_w() + raw.layout[layout_size_t.NODES_W]) * 0.515) : Math.floor(app_w() * 0.515), // Align with ui header controls
+		show2d ? math_floor((app_w() + raw.layout[layout_size_t.NODES_W]) * 0.515) : math_floor(app_w() * 0.515), // Align with ui header controls
 		///end
 
-		Math.floor(app_h() / 2), // LayoutNodesH
-		Math.floor(UIStatus.default_status_h * raw.window_scale), // LayoutStatusH
+		math_floor(app_h() / 2), // LayoutNodesH
+		math_floor(ui_status_default_status_h * raw.window_scale), // LayoutStatusH
 
 		///if (krom_android || krom_ios)
 		0, // LayoutHeader
@@ -1109,7 +1109,7 @@ function base_init_layers() {
 ///if (is_paint || is_sculpt)
 function base_resize_layers() {
 	let conf: config_t = config_raw;
-	if (base_res_handle.position >= Math.floor(texture_res_t.RES16384)) { // Save memory for >=16k
+	if (base_res_handle.position >= math_floor(texture_res_t.RES16384)) { // Save memory for >=16k
 		conf.undo_steps = 1;
 		if (context_raw.undo_handle != null) {
 			context_raw.undo_handle.value = conf.undo_steps;
@@ -1144,8 +1144,8 @@ function base_resize_layers() {
 		base_notify_on_next_frame(function() {
 			image_unload(_texpaint_blur);
 		});
-		let size_x: f32 = Math.floor(config_get_texture_res_x() * 0.95);
-		let size_y: f32 = Math.floor(config_get_texture_res_y() * 0.95);
+		let size_x: f32 = math_floor(config_get_texture_res_x() * 0.95);
+		let size_y: f32 = math_floor(config_get_texture_res_y() * 0.95);
 		rts.get("texpaint_blur").width = size_x;
 		rts.get("texpaint_blur").height = size_y;
 		rts.get("texpaint_blur")._image = image_create_render_target(size_x, size_y);
@@ -2038,7 +2038,8 @@ function base_update_fill_layers() {
 
 function base_update_fill_layer(parse_paint: bool = true) {
 	let current: image_t = _g2_current;
-	if (current != null) g2_end();
+	let g2_in_use: bool = _g2_in_use;
+	if (g2_in_use) g2_end();
 
 	let _tool: workspace_tool_t = context_raw.tool;
 	let _fill_type: i32 = context_raw.fill_type_handle.position;
@@ -2055,7 +2056,7 @@ function base_update_fill_layer(parse_paint: bool = true) {
 	context_raw.rdirty = 2;
 	context_raw.tool = _tool;
 	context_raw.fill_type_handle.position = _fill_type;
-	if (current != null) g2_begin(current);
+	if (g2_in_use) g2_begin(current);
 }
 
 function base_set_object_mask() {
@@ -2085,13 +2086,13 @@ function base_set_object_mask() {
 		let is_atlas: bool = SlotLayer.get_object_mask(context_raw.layer) > 0 && SlotLayer.get_object_mask(context_raw.layer) <= project_paint_objects.length;
 		if (context_raw.merged_object == null || is_atlas || context_raw.merged_object_is_atlas) {
 			let visibles: mesh_object_t[] = is_atlas ? project_get_atlas_objects(SlotLayer.get_object_mask(context_raw.layer)) : null;
-			UtilMesh.merge_mesh(visibles);
+			util_mesh_merge(visibles);
 		}
 		context_select_paint_object(context_main_object());
 		context_raw.paint_object.skip_context = "paint";
 		context_raw.merged_object.base.visible = true;
 	}
-	UtilUV.dilatemap_cached = false;
+	util_uv_dilatemap_cached = false;
 }
 
 function base_new_layer(clear: bool = true, position: i32 = -1): SlotLayerRaw {
@@ -2190,11 +2191,11 @@ function base_on_layers_resized() {
 		context_raw.material = _material;
 		MakeMaterial.parse_paint_material();
 	});
-	UtilUV.uvmap = null;
-	UtilUV.uvmap_cached = false;
-	UtilUV.trianglemap = null;
-	UtilUV.trianglemap_cached = false;
-	UtilUV.dilatemap_cached = false;
+	util_uv_uvmap = null;
+	util_uv_uvmap_cached = false;
+	util_uv_trianglemap = null;
+	util_uv_trianglemap_cached = false;
+	util_uv_dilatemap_cached = false;
 	///if (krom_direct3d12 || krom_vulkan || krom_metal)
 	RenderPathRaytrace.ready = false;
 	///end
@@ -2207,8 +2208,8 @@ function base_flatten(heightToNormal: bool = false): any {
 	let texpaint_nor: image_t = BrushOutputNode.inst.texpaint_nor;
 	let texpaint_pack: image_t = BrushOutputNode.inst.texpaint_pack;
 
-	let nodes: zui_nodes_t = UINodes.get_nodes();
-	let canvas: zui_node_canvas_t = UINodes.get_canvas(true);
+	let nodes: zui_nodes_t = ui_nodes_get_nodes();
+	let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
 	if (nodes.nodes_selected_id.length > 0) {
 		let node: zui_node_t = zui_get_node(canvas.nodes, nodes.nodes_selected_id[0]);
 		let brush_node: LogicNode = ParserLogic.get_logic_node(node);

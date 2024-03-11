@@ -62,7 +62,7 @@ class TilingNode extends LogicNode {
 		let u8a = new Uint8Array(512 * 512);
 		for (let i = 0; i < 512 * 512; ++i) {
 			let x = i % 512;
-			let y = Math.floor(i / 512);
+			let y = math_floor(i / 512);
 			let l = y < 256 ? y : (511 - y);
 			u8a[i] = (x > 256 - l && x < 256 + l) ? 0 : 255;
 		}

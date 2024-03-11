@@ -25,14 +25,14 @@ class ImportAsset {
 
 		if (path_is_mesh(path)) {
 			showBox ? project_import_mesh_box(path) : ImportMesh.run(path);
-			if (dropX > 0) UIBox.click_to_hide = false; // Prevent closing when going back to window after drag and drop
+			if (dropX > 0) ui_box_click_to_hide = false; // Prevent closing when going back to window after drag and drop
 		}
 		else if (path_is_texture(path)) {
 			ImportTexture.run(path, hdrAsEnvmap);
 			// Place image node
-			let x0: i32 = UINodes.wx;
-			let x1: i32 = UINodes.wx + UINodes.ww;
-			if (UINodes.show && dropX > x0 && dropX < x1) {
+			let x0: i32 = ui_nodes_wx;
+			let x1: i32 = ui_nodes_wx + ui_nodes_ww;
+			if (ui_nodes_show && dropX > x0 && dropX < x1) {
 				let asset_index: i32 = 0;
 				for (let i: i32 = 0; i < project_assets.length; ++i) {
 					if (project_assets[i].file == path) {
@@ -40,14 +40,14 @@ class ImportAsset {
 						break;
 					}
 				}
-				UINodes.accept_asset_drag(asset_index);
-				UINodes.get_nodes().nodesDrag = false;
-				UINodes.hwnd.redraws = 2;
+				ui_nodes_accept_asset_drag(asset_index);
+				ui_nodes_get_nodes().nodesDrag = false;
+				ui_nodes_hwnd.redraws = 2;
 			}
 
 			///if is_paint
 			if (context_raw.tool == workspace_tool_t.COLORID && project_asset_names.length == 1) {
-				UIHeader.header_handle.redraws = 2;
+				ui_header_handle.redraws = 2;
 				context_raw.ddirty = 2;
 			}
 			///end

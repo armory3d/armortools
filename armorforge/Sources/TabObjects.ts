@@ -4,12 +4,12 @@ class TabObjects {
 	static materialId = 0;
 
 	static roundfp = (f: f32, precision = 2): f32 => {
-		f *= Math.pow(10, precision);
-		return Math.round(f) / Math.pow(10, precision);
+		f *= math_pow(10, precision);
+		return math_round(f) / math_pow(10, precision);
 	}
 
 	static draw = (htab: zui_handle_t) => {
-		let ui = UIBase.ui;
+		let ui = ui_base_ui;
 		if (zui_tab(htab, tr("Objects"))) {
 			zui_begin_sticky();
 			zui_row([1 / 4]);
@@ -72,13 +72,13 @@ class TabObjects {
 					}
 
 					if (ui.is_hovered && ui.input_released_r) {
-						UIMenu.draw((ui: zui_t) => {
-							if (UIMenu.menu_button(ui, "Assign Material")) {
+						ui_menu_draw((ui: zui_t) => {
+							if (ui_menu_button(ui, "Assign Material")) {
 								TabObjects.materialId++;
 
 								for (let sh of _scene_raw.shader_datas) {
 									if (sh.name == "Material_data") {
-										let s: shader_data_t = JSON.parse(JSON.stringify(sh));
+										let s: shader_data_t = json_parse(json_stringify(sh));
 										s.name = "TempMaterial_data" + TabObjects.materialId;
 										_scene_raw.shader_datas.push(s);
 										break;
@@ -87,7 +87,7 @@ class TabObjects {
 
 								for (let mat of _scene_raw.material_datas) {
 									if (mat.name == "Material") {
-										let m: material_data_t = JSON.parse(JSON.stringify(mat));
+										let m: material_data_t = json_parse(json_stringify(mat));
 										m.name = "TempMaterial" + TabObjects.materialId;
 										m.shader = "TempMaterial_data" + TabObjects.materialId;
 										_scene_raw.material_datas.push(m);
@@ -238,7 +238,7 @@ class TabObjects {
 					else if (context_context_raw.selected_object.ext_type == "camera_object_t") {
 						let cam = context_context_raw.selected_object.ext;
 						let fovHandle = zui_handle("tabobjects_18");
-						fovHandle.value = Math.floor(cam.data.fov * 100) / 100;
+						fovHandle.value = math_floor(cam.data.fov * 100) / 100;
 						cam.data.fov = zui_slider(fovHandle, "FoV", 0.3, 2.0, true);
 						if (fovHandle.changed) {
 							camera_object_build_proj(cam);

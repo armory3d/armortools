@@ -1,7 +1,7 @@
 
-let translator_translations: Map<string, string> = new Map();
+let translator_translations: map_t<string, string> = map_create();
 // The font index is a value specific to font_cjk.ttc.
-let translator_cjk_font_indices: Map<string, i32> = new Map([
+let translator_cjk_font_indices: map_t<string, i32> = new Map([
 	["ja", 0],
 	["ko", 1],
 	["zh_cn", 2],
@@ -19,7 +19,7 @@ function _tr(s: string) {
 
 // Localizes a string with the given placeholders replaced (format is `{placeholderName}`).
 // If the string isn't available in the translation, this method will return the source English string.
-function tr(id: string, vars: Map<string, string> = null): string {
+function tr(id: string, vars: map_t<string, string> = null): string {
 	let translation: string = id;
 
 	// English is the source language
@@ -120,8 +120,8 @@ function translator_init_font(cjk: bool, fontPath: string, fontScale: f32) {
 		}
 		base_font = f;
 		// Scale up the font size and elements width a bit
-		base_theme.FONT_SIZE = Math.floor(base_default_font_size * fontScale);
-		base_theme.ELEMENT_W = Math.floor(base_default_element_w * (config_raw.locale != "en" ? 1.4 : 1.0));
+		base_theme.FONT_SIZE = math_floor(base_default_font_size * fontScale);
+		base_theme.ELEMENT_W = math_floor(base_default_element_w * (config_raw.locale != "en" ? 1.4 : 1.0));
 		let uis: zui_t[] = base_get_uis();
 		for (let ui of uis) {
 			zui_set_font(ui, f);

@@ -14,8 +14,8 @@ let path_pwd: string = "echo $PWD";
 let path_mesh_formats: string[] = ["obj", "blend"];
 let path_texture_formats: string[] = ["jpg", "jpeg", "png", "tga", "bmp", "psd", "gif", "hdr", "k"];
 
-let path_mesh_importers: Map<string, (s: string, f: (a: any)=>void)=>void> = new Map();
-let path_texture_importers: Map<string, (s: string, f: (img: image_t)=>void)=>void> = new Map();
+let path_mesh_importers: map_t<string, (s: string, f: (a: any)=>void)=>void> = map_create();
+let path_texture_importers: map_t<string, (s: string, f: (img: image_t)=>void)=>void> = map_create();
 
 let path_base_color_ext: string[] = ["albedo", "alb", "basecol", "basecolor", "diffuse", "diff", "base", "bc", "d", "color", "col"];
 let path_opacity_ext: string[] = ["opac", "opacity", "alpha"];

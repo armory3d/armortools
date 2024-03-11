@@ -27,12 +27,12 @@ class ImportFont {
 			for (let f of font_slots) {
 				context_raw.font = f;
 				project_fonts.push(f);
-				UtilRender.make_font_preview();
+				util_render_make_font_preview();
 			}
 		}
 		app_notify_on_init(_init);
 
-		UIBase.hwnds[tab_area_t.STATUS].redraws = 2;
+		ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
 	}
 }
 

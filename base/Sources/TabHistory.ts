@@ -4,7 +4,7 @@
 class TabHistory {
 
 	static draw = (htab: zui_handle_t) => {
-		let ui: zui_t = UIBase.ui;
+		let ui: zui_t = ui_base_ui;
 		if (zui_tab(htab, tr("History"))) {
 			for (let i: i32 = 0; i < history_steps.length; ++i) {
 				let active: i32 = history_steps.length - 1 - history_redos;

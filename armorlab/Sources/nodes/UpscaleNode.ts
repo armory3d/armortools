@@ -44,8 +44,8 @@ class UpscaleNode extends LogicNode {
 		let result: image_t = null;
 		let size1w = source.width;
 		let size1h = source.height;
-		let size2w = Math.floor(size1w * 2);
-		let size2h = Math.floor(size1h * 2);
+		let size2w = math_floor(size1w * 2);
+		let size2h = math_floor(size1h * 2);
 		if (UpscaleNode.temp != null) {
 			image_unload(UpscaleNode.temp);
 		}
@@ -72,9 +72,9 @@ class UpscaleNode extends LogicNode {
 
 		u8a = new Uint8Array(4 * size2w * size2h);
 		for (let i = 0; i < (size2w * size2h); ++i) {
-			u8a[i * 4    ] = Math.floor(esrgan2x[i                      ] * 255);
-			u8a[i * 4 + 1] = Math.floor(esrgan2x[i + size2w * size2w    ] * 255);
-			u8a[i * 4 + 2] = Math.floor(esrgan2x[i + size2w * size2w * 2] * 255);
+			u8a[i * 4    ] = math_floor(esrgan2x[i                      ] * 255);
+			u8a[i * 4 + 1] = math_floor(esrgan2x[i + size2w * size2w    ] * 255);
+			u8a[i * 4 + 2] = math_floor(esrgan2x[i + size2w * size2w * 2] * 255);
 			u8a[i * 4 + 3] = 255;
 		}
 
@@ -87,15 +87,15 @@ class UpscaleNode extends LogicNode {
 		let size1w = source.width;
 		let size1h = source.height;
 		let tileSize = 512;
-		let tileSize2x = Math.floor(tileSize * 2);
+		let tileSize2x = math_floor(tileSize * 2);
 
 		if (size1w >= tileSize2x || size1h >= tileSize2x) { // Split into tiles
-			let size2w = Math.floor(size1w * 2);
-			let size2h = Math.floor(size1h * 2);
+			let size2w = math_floor(size1w * 2);
+			let size2h = math_floor(size1h * 2);
 			result = image_create_render_target(size2w, size2h);
 			let tileSource = image_create_render_target(tileSize + 32 * 2, tileSize + 32 * 2);
-			for (let x = 0; x < Math.floor(size1w / tileSize); ++x) {
-				for (let y = 0; y < Math.floor(size1h / tileSize); ++y) {
+			for (let x = 0; x < math_floor(size1w / tileSize); ++x) {
+				for (let y = 0; y < math_floor(size1h / tileSize); ++y) {
 					g2_begin(tileSource);
 					g2_draw_scaled_image(source, 32 - x * tileSize, 32 - y * tileSize, -source.width, source.height);
 					g2_draw_scaled_image(source, 32 - x * tileSize, 32 - y * tileSize, source.width, -source.height);

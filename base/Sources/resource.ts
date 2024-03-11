@@ -1,13 +1,10 @@
 
-let resource_bundled: Map<string, image_t> = new Map();
+let resource_bundled: map_t<string, image_t> = map_create();
 
-function resource_load(names: string[], done: ()=>void) {
-	let loaded: i32 = 0;
+function resource_load(names: string[]) {
 	for (let s of names) {
 		let image: image_t = data_get_image(s);
 		resource_bundled.set(s, image);
-		loaded++;
-		if (loaded == names.length) done();
 	}
 }
 

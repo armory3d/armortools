@@ -127,7 +127,7 @@ class context_t {
 	layers_preview_dirty?: bool = false;
 	node_preview_dirty?: bool = false;
 	node_preview?: image_t = null;
-	node_previews?: Map<string, image_t> = null;
+	node_previews?: map_t<string, image_t> = null;
 	node_previews_used?: string[] = null;
 	node_preview_name?: string = "";
 	mask_preview_rgba32?: image_t = null;

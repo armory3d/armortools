@@ -5,9 +5,9 @@ class TabScript {
 	static text_coloring: zui_text_coloring_t = null;
 
 	static draw = (htab: zui_handle_t) => {
-		let ui: zui_t = UIBase.ui;
+		let ui: zui_t = ui_base_ui;
 		let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-		if (zui_tab(htab, tr("Script")) && statush > UIStatus.default_status_h * zui_SCALE(ui)) {
+		if (zui_tab(htab, tr("Script")) && statush > ui_status_default_status_h * zui_SCALE(ui)) {
 
 			zui_begin_sticky();
 			if (config_raw.touch_ui) {
@@ -28,7 +28,7 @@ class TabScript {
 				TabScript.hscript.text = "";
 			}
 			if (zui_button(tr("Import"))) {
-				UIFiles.show("js", false, false, (path: string) => {
+				ui_files_show("js", false, false, (path: string) => {
 					let b: ArrayBuffer = data_get_blob(path);
 					TabScript.hscript.text = sys_buffer_to_string(b);
 					data_delete_blob(path);
@@ -36,8 +36,8 @@ class TabScript {
 			}
 			if (zui_button(tr("Export"))) {
 				let str: string = TabScript.hscript.text;
-				UIFiles.show("js", true, false, (path: string) => {
-					let f: string = UIFiles.filename;
+				ui_files_show("js", true, false, (path: string) => {
+					let f: string = ui_files_filename;
 					if (f == "") f = tr("untitled");
 					path = path + path_sep + f;
 					if (!path.endsWith(".js")) path += ".js";
@@ -50,7 +50,7 @@ class TabScript {
 			let _font_size: i32 = ui.font_size;
 			let f: g2_font_t = data_get_font("font_mono.ttf");
 			zui_set_font(ui, f);
-			ui.font_size = Math.floor(15 * zui_SCALE(ui));
+			ui.font_size = math_floor(15 * zui_SCALE(ui));
 			zui_set_text_area_line_numbers(true);
 			zui_set_text_area_scroll_past_end(true);
 			zui_set_text_area_coloring(TabScript.get_text_coloring());
@@ -66,10 +66,10 @@ class TabScript {
 	static get_text_coloring = (): zui_text_coloring_t => {
 		if (TabScript.text_coloring == null) {
 			let blob: ArrayBuffer = data_get_blob("text_coloring.json");
-			TabScript.text_coloring = JSON.parse(sys_buffer_to_string(blob));
-			TabScript.text_coloring.default_color = Math.floor(TabScript.text_coloring.default_color);
+			TabScript.text_coloring = json_parse(sys_buffer_to_string(blob));
+			TabScript.text_coloring.default_color = math_floor(TabScript.text_coloring.default_color);
 			for (let coloring of TabScript.text_coloring.colorings) {
-				coloring.color = Math.floor(coloring.color);
+				coloring.color = math_floor(coloring.color);
 			}
 		}
 		return TabScript.text_coloring;

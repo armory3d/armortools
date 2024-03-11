@@ -71,34 +71,34 @@ class VectorMathNode extends LogicNode {
 						this.v.z *= v2.x;
 						break;
 					case "Absolute":
-						this.v.x = Math.abs(this.v.x);
-						this.v.y = Math.abs(this.v.y);
-						this.v.z = Math.abs(this.v.z);
+						this.v.x = math_abs(this.v.x);
+						this.v.y = math_abs(this.v.y);
+						this.v.z = math_abs(this.v.z);
 						break;
 					case "Minimum":
-						this.v.x = Math.min(v1.x, v2.x);
-						this.v.y = Math.min(v1.y, v2.y);
-						this.v.z = Math.min(v1.z, v2.z);
+						this.v.x = math_min(v1.x, v2.x);
+						this.v.y = math_min(v1.y, v2.y);
+						this.v.z = math_min(v1.z, v2.z);
 						break;
 					case "Maximum":
-						this.v.x = Math.max(v1.x, v2.x);
-						this.v.y = Math.max(v1.y, v2.y);
-						this.v.z = Math.max(v1.z, v2.z);
+						this.v.x = math_max(v1.x, v2.x);
+						this.v.y = math_max(v1.y, v2.y);
+						this.v.z = math_max(v1.z, v2.z);
 						break;
 					case "Floor":
-						this.v.x = Math.floor(v1.x);
-						this.v.y = Math.floor(v1.y);
-						this.v.z = Math.floor(v1.z);
+						this.v.x = math_floor(v1.x);
+						this.v.y = math_floor(v1.y);
+						this.v.z = math_floor(v1.z);
 						break;
 					case "Ceil":
-						this.v.x = Math.ceil(v1.x);
-						this.v.y = Math.ceil(v1.y);
-						this.v.z = Math.ceil(v1.z);
+						this.v.x = math_ceil(v1.x);
+						this.v.y = math_ceil(v1.y);
+						this.v.z = math_ceil(v1.z);
 						break;
 					case "Fraction":
-						this.v.x = v1.x - Math.floor(v1.x);
-						this.v.y = v1.y - Math.floor(v1.y);
-						this.v.z = v1.z - Math.floor(v1.z);
+						this.v.x = v1.x - math_floor(v1.x);
+						this.v.y = v1.y - math_floor(v1.y);
+						this.v.z = v1.z - math_floor(v1.z);
 						break;
 					case "Modulo":
 						this.v.x = v1.x % v2.x;
@@ -106,24 +106,24 @@ class VectorMathNode extends LogicNode {
 						this.v.z = v1.z % v2.z;
 						break;
 					case "Snap":
-						this.v.x = Math.floor(v1.x / v2.x) * v2.x;
-						this.v.y = Math.floor(v1.y / v2.y) * v2.y;
-						this.v.z = Math.floor(v1.z / v2.z) * v2.z;
+						this.v.x = math_floor(v1.x / v2.x) * v2.x;
+						this.v.y = math_floor(v1.y / v2.y) * v2.y;
+						this.v.z = math_floor(v1.z / v2.z) * v2.z;
 						break;
 					case "Sine":
-						this.v.x = Math.sin(v1.x);
-						this.v.y = Math.sin(v1.y);
-						this.v.z = Math.sin(v1.z);
+						this.v.x = math_sin(v1.x);
+						this.v.y = math_sin(v1.y);
+						this.v.z = math_sin(v1.z);
 						break;
 					case "Cosine":
-						this.v.x = Math.cos(v1.x);
-						this.v.y = Math.cos(v1.y);
-						this.v.z = Math.cos(v1.z);
+						this.v.x = math_cos(v1.x);
+						this.v.y = math_cos(v1.y);
+						this.v.z = math_cos(v1.z);
 						break;
 					case "Tangent":
-						this.v.x = Math.tan(v1.x);
-						this.v.y = Math.tan(v1.y);
-						this.v.z = Math.tan(v1.z);
+						this.v.x = math_tan(v1.x);
+						this.v.y = math_tan(v1.y);
+						this.v.z = math_tan(v1.z);
 						break;
 				}
 

@@ -2,7 +2,7 @@
 class TabPlugins {
 
 	static draw = (htab: zui_handle_t) => {
-		let ui: zui_t = UIBase.ui;
+		let ui: zui_t = ui_base_ui;
 		if (zui_tab(htab, tr("Plugins"))) {
 
 			zui_begin_sticky();

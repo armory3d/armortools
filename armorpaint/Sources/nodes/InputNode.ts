@@ -72,8 +72,8 @@ class InputNode extends LogicNode {
 		}
 
 		if (InputNode.lock_begin) {
-			let dx: f32 = Math.abs(InputNode.lock_start_x - mouse_view_x());
-			let dy: f32 = Math.abs(InputNode.lock_start_y - mouse_view_y());
+			let dx: f32 = math_abs(InputNode.lock_start_x - mouse_view_x());
+			let dy: f32 = math_abs(InputNode.lock_start_y - mouse_view_y());
 			if (dx > 1 || dy > 1) {
 				InputNode.lock_begin = false;
 				dx > dy ? InputNode.lock_y = true : InputNode.lock_x = true;
