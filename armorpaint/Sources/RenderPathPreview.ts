@@ -1,7 +1,7 @@
 
 class RenderPathPreview {
 
-	static init = () => {
+	static render_path_preview_init = () => {
 
 		{
 			let t: render_target_t = render_target_create();
@@ -28,7 +28,7 @@ class RenderPathPreview {
 			t.width = math_floor(util_render_material_preview_size * 2.0);
 			t.height = math_floor(util_render_material_preview_size * 2.0);
 			t.format = "RGBA64";
-			t.scale = RenderPathBase.get_super_sampling();
+			t.scale = render_path_base_get_super_sampling();
 			///if krom_opengl
 			t.depth_buffer = "mmain";
 			///end
@@ -41,7 +41,7 @@ class RenderPathPreview {
 			t.width = math_floor(util_render_material_preview_size * 2.0);
 			t.height = math_floor(util_render_material_preview_size * 2.0);
 			t.format = "RGBA64";
-			t.scale = RenderPathBase.get_super_sampling();
+			t.scale = render_path_base_get_super_sampling();
 			t.depth_buffer = "mmain";
 			render_path_create_render_target(t);
 		}
@@ -52,7 +52,7 @@ class RenderPathPreview {
 			t.width = math_floor(util_render_material_preview_size * 2.0);
 			t.height = math_floor(util_render_material_preview_size * 2.0);
 			t.format = "RGBA64";
-			t.scale = RenderPathBase.get_super_sampling();
+			t.scale = render_path_base_get_super_sampling();
 			render_path_create_render_target(t);
 		}
 
@@ -62,12 +62,12 @@ class RenderPathPreview {
 			t.width = math_floor(util_render_material_preview_size * 2.0);
 			t.height = math_floor(util_render_material_preview_size * 2.0);
 			t.format = "RGBA64";
-			t.scale = RenderPathBase.get_super_sampling();
+			t.scale = render_path_base_get_super_sampling();
 			render_path_create_render_target(t);
 		}
 	}
 
-	static commands_preview = () => {
+	static render_path_preview_commands_preview = () => {
 		render_path_set_target("mgbuffer2");
 		render_path_clear_target(0xff000000);
 
@@ -111,7 +111,7 @@ class RenderPathPreview {
 		render_path_draw_shader("shader_datas/supersample_resolve/supersample_resolve");
 	}
 
-	static commands_decal = () => {
+	static render_path_preview_commands_decal = () => {
 		render_path_set_target("gbuffer2");
 		render_path_clear_target(0xff000000);
 

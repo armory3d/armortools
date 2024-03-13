@@ -20,9 +20,9 @@ class SlotMaterialRaw {
 }
 
 class SlotMaterial {
-	static default_canvas: ArrayBuffer = null;
+	static slot_material_default_canvas: ArrayBuffer = null;
 
-	static create(m: material_data_t = null, c: zui_node_canvas_t = null): SlotMaterialRaw {
+	static slot_material_create(m: material_data_t = null, c: zui_node_canvas_t = null): SlotMaterialRaw {
 		let raw: SlotMaterialRaw = new SlotMaterialRaw();
 		for (let mat of project_materials) if (mat.id >= raw.id) raw.id = mat.id + 1;
 		raw.data = m;
@@ -33,11 +33,11 @@ class SlotMaterial {
 		raw.image_icon = image_create_render_target(w_icon, w_icon);
 
 		if (c == null) {
-			if (SlotMaterial.default_canvas == null) { // Synchronous
+			if (SlotMaterial.slot_material_default_canvas == null) { // Synchronous
 				let b: ArrayBuffer = data_get_blob("default_material.arm");
-				SlotMaterial.default_canvas = b;
+				SlotMaterial.slot_material_default_canvas = b;
 			}
-			raw.canvas = armpack_decode(SlotMaterial.default_canvas);
+			raw.canvas = armpack_decode(SlotMaterial.slot_material_default_canvas);
 			raw.canvas.name = "Material " + (raw.id + 1);
 		}
 		else {
@@ -51,7 +51,7 @@ class SlotMaterial {
 		return raw;
 	}
 
-	static unload = (raw: SlotMaterialRaw) => {
+	static slot_material_unload = (raw: SlotMaterialRaw) => {
 		let _next = () => {
 			image_unload(raw.image);
 			image_unload(raw.image_icon);
@@ -59,8 +59,8 @@ class SlotMaterial {
 		base_notify_on_next_frame(_next);
 	}
 
-	static delete = (raw: SlotMaterialRaw) => {
-		SlotMaterial.unload(raw);
+	static slot_material_delete = (raw: SlotMaterialRaw) => {
+		SlotMaterial.slot_material_unload(raw);
 		let mpos: i32 = project_materials.indexOf(raw);
 		array_remove(project_materials, this);
 		if (project_materials.length > 0) {

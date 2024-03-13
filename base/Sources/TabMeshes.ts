@@ -1,7 +1,7 @@
 
 class TabMeshes {
 
-	static draw = (htab: zui_handle_t) => {
+	static tab_meshes_draw = (htab: zui_handle_t) => {
 		let ui: zui_t = ui_base_ui;
 		let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
 		if (zui_tab(htab, tr("Meshes")) && statush > ui_status_default_status_h * zui_SCALE(ui)) {
@@ -41,10 +41,10 @@ class TabMeshes {
 			///if is_lab
 			if (zui_button(tr("Set Default"))) {
 				ui_menu_draw((ui: zui_t) => {
-					if (ui_menu_button(ui, tr("Cube"))) TabMeshes.set_default_mesh(".Cube");
-					if (ui_menu_button(ui, tr("Plane"))) TabMeshes.set_default_mesh(".Plane");
-					if (ui_menu_button(ui, tr("Sphere"))) TabMeshes.set_default_mesh(".Sphere");
-					if (ui_menu_button(ui, tr("Cylinder"))) TabMeshes.set_default_mesh(".Cylinder");
+					if (ui_menu_button(ui, tr("Cube"))) TabMeshes.tab_meshes_set_default_mesh(".Cube");
+					if (ui_menu_button(ui, tr("Plane"))) TabMeshes.tab_meshes_set_default_mesh(".Plane");
+					if (ui_menu_button(ui, tr("Sphere"))) TabMeshes.tab_meshes_set_default_mesh(".Sphere");
+					if (ui_menu_button(ui, tr("Cylinder"))) TabMeshes.tab_meshes_set_default_mesh(".Cylinder");
 				}, 4);
 			}
 			///end
@@ -110,7 +110,7 @@ class TabMeshes {
 					ui_menu_draw((ui: zui_t) => {
 						if (ui_menu_button(ui, tr("Export"))) {
 							context_raw.export_mesh_index = i + 1;
-							BoxExport.show_mesh();
+							box_export_show_mesh();
 						}
 						if (project_paint_objects.length > 1 && ui_menu_button(ui, tr("Delete"))) {
 							array_remove(project_paint_objects, o);
@@ -144,7 +144,7 @@ class TabMeshes {
 	}
 
 	///if is_lab
-	static set_default_mesh = (name: string) => {
+	static tab_meshes_set_default_mesh = (name: string) => {
 		let mo: mesh_object_t = null;
 		if (name == ".Plane" || name == ".Sphere") {
 			let res: i32 = config_raw.rp_supersample > 1.0 ? 2048 : 1024;
@@ -180,7 +180,7 @@ class TabMeshes {
 		}
 
 		///if (krom_direct3d12 || krom_vulkan || krom_metal)
-		RenderPathRaytrace.ready = false;
+		render_path_raytrace_ready = false;
 		///end
 	}
 	///end

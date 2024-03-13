@@ -3,15 +3,15 @@
 
 class TabBrushes {
 
-	static draw = (htab: zui_handle_t) => {
+	static tab_brushes_draw = (htab: zui_handle_t) => {
 		let ui: zui_t = ui_base_ui;
 		if (zui_tab(htab, tr("Brushes"))) {
 			zui_begin_sticky();
 			zui_row([1 / 4, 1 / 4, 1 / 4]);
 			if (zui_button(tr("New"))) {
-				context_raw.brush = SlotBrush.create();
+				context_raw.brush = SlotBrush.slot_brush_create();
 				project_brushes.push(context_raw.brush);
-				MakeMaterial.parse_brush();
+				MakeMaterial.make_material_parse_brush();
 				ui_nodes_hwnd.redraws = 2;
 			}
 			if (zui_button(tr("Import"))) {
@@ -78,12 +78,12 @@ class TabBrushes {
 
 							if (ui_menu_button(ui, tr("Export"))) {
 								context_select_brush(i);
-								BoxExport.show_brush();
+								box_export_show_brush();
 							}
 
 							if (ui_menu_button(ui, tr("Duplicate"))) {
 								let _init = () => {
-									context_raw.brush = SlotBrush.create();
+									context_raw.brush = SlotBrush.slot_brush_create();
 									project_brushes.push(context_raw.brush);
 									let cloned: any = json_parse(json_stringify(project_brushes[i].canvas));
 									context_raw.brush.canvas = cloned;
@@ -94,7 +94,7 @@ class TabBrushes {
 							}
 
 							if (project_brushes.length > 1 && ui_menu_button(ui, tr("Delete"), "delete")) {
-								TabBrushes.delete_brush(project_brushes[i]);
+								TabBrushes.tab_brushes_delete_brush(project_brushes[i]);
 							}
 						}, 2 + add);
 					}
@@ -104,7 +104,7 @@ class TabBrushes {
 							app_notify_on_init(() => {
 								let _brush: SlotBrushRaw = context_raw.brush;
 								context_raw.brush = project_brushes[i];
-								MakeMaterial.parse_brush();
+								MakeMaterial.make_material_parse_brush();
 								util_render_make_brush_preview();
 								context_raw.brush = _brush;
 							});
@@ -134,12 +134,12 @@ class TabBrushes {
 						  		 ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
 			if (in_focus && ui.is_delete_down && project_brushes.length > 1) {
 				ui.is_delete_down = false;
-				TabBrushes.delete_brush(context_raw.brush);
+				TabBrushes.tab_brushes_delete_brush(context_raw.brush);
 			}
 		}
 	}
 
-	static delete_brush = (b: SlotBrushRaw) => {
+	static tab_brushes_delete_brush = (b: SlotBrushRaw) => {
 		let i: i32 = project_brushes.indexOf(b);
 		context_select_brush(i == project_brushes.length - 1 ? i - 1 : i + 1);
 		project_brushes.splice(i, 1);

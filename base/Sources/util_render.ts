@@ -46,9 +46,9 @@ function util_render_make_material_preview() {
 	camera_object_build_proj(scene_camera);
 	camera_object_build_mat(scene_camera);
 
-	MakeMaterial.parse_mesh_preview_material();
+	MakeMaterial.make_material_parse_mesh_preview_material();
 	let _commands: ()=>void = render_path_commands;
-	render_path_commands = RenderPathPreview.commands_preview;
+	render_path_commands = RenderPathPreview.render_path_preview_commands_preview;
 	render_path_render_frame();
 	render_path_commands = _commands;
 
@@ -72,7 +72,7 @@ function util_render_make_material_preview() {
 	context_raw.brush_scale = _brush_scale;
 	context_raw.brush_nodes_scale = _brush_nodes_scale;
 	scene_world._.envmap = context_raw.show_envmap ? context_raw.saved_envmap : context_raw.empty_envmap;
-	MakeMaterial.parse_mesh_material();
+	MakeMaterial.make_material_parse_mesh_material();
 	context_raw.ddirty = 0;
 }
 
@@ -113,9 +113,9 @@ function util_render_make_decal_preview() {
 	camera_object_build_proj(scene_camera);
 	camera_object_build_mat(scene_camera);
 
-	MakeMaterial.parse_mesh_preview_material();
+	MakeMaterial.make_material_parse_mesh_preview_material();
 	let _commands: ()=>void = render_path_commands;
-	render_path_commands = RenderPathPreview.commands_decal;
+	render_path_commands = RenderPathPreview.render_path_preview_commands_decal;
 	render_path_render_frame();
 	render_path_commands = _commands;
 
@@ -137,7 +137,7 @@ function util_render_make_decal_preview() {
 	light.base.visible = true;
 	scene_world._.envmap = context_raw.show_envmap ? context_raw.saved_envmap : context_raw.empty_envmap;
 
-	MakeMaterial.parse_mesh_material();
+	MakeMaterial.make_material_parse_mesh_material();
 	context_raw.ddirty = 1; // Refresh depth for decal paint
 
 	if (g2_in_use) g2_begin(current);
@@ -203,7 +203,7 @@ function util_render_make_font_preview() {
 }
 
 function util_render_make_brush_preview() {
-	if (RenderPathPaint.live_layer_locked) return;
+	if (RenderPathPaint.render_path_paint_live_layer_locked) return;
 	context_raw.material_preview = true;
 
 	let current: image_t = _g2_current;
@@ -211,12 +211,12 @@ function util_render_make_brush_preview() {
 	if (g2_in_use) g2_end();
 
 	// Prepare layers
-	if (RenderPathPaint.live_layer == null) {
-		RenderPathPaint.live_layer = SlotLayer.create("_live");
+	if (RenderPathPaint.render_path_paint_live_layer == null) {
+		RenderPathPaint.render_path_paint_live_layer = SlotLayer.slot_layer_create("_live");
 	}
 
-	let l: SlotLayerRaw = RenderPathPaint.live_layer;
-	SlotLayer.clear(l);
+	let l: SlotLayerRaw = RenderPathPaint.render_path_paint_live_layer;
+	SlotLayer.slot_layer_clear(l);
 
 	if (context_raw.brush.image == null) {
 		context_raw.brush.image = image_create_render_target(util_render_material_preview_size, util_render_material_preview_size);
@@ -224,20 +224,20 @@ function util_render_make_brush_preview() {
 	}
 
 	let _material: SlotMaterialRaw = context_raw.material;
-	context_raw.material = SlotMaterial.create();
+	context_raw.material = SlotMaterial.slot_material_create();
 	let _tool: workspace_tool_t = context_raw.tool;
 	context_raw.tool = workspace_tool_t.BRUSH;
 
 	let _layer: SlotLayerRaw = context_raw.layer;
-	if (SlotLayer.is_mask(context_raw.layer)) {
+	if (SlotLayer.slot_layer_is_mask(context_raw.layer)) {
 		context_raw.layer = context_raw.layer.parent;
 	}
 
 	let _fill_layer: SlotMaterialRaw = context_raw.layer.fill_layer;
 	context_raw.layer.fill_layer = null;
 
-	RenderPathPaint.use_live_layer(true);
-	MakeMaterial.parse_paint_material(false);
+	RenderPathPaint.render_path_paint_use_live_layer(true);
+	MakeMaterial.make_material_parse_paint_material(false);
 
 	let hid: i32 = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
 	render_path_render_targets.set("texpaint_undo" + hid,render_path_render_targets.get("empty_black"));
@@ -278,8 +278,8 @@ function util_render_make_brush_preview() {
 	vec4_set(planeo.base.transform.loc, m.m[12], -m.m[13], 0.0);
 	transform_build_matrix(planeo.base.transform);
 
-	RenderPathPaint.live_layer_drawn = 0;
-	RenderPathBase.draw_gbuffer();
+	RenderPathPaint.render_path_paint_live_layer_drawn = 0;
+	render_path_base_draw_gbuffer();
 
 	// Paint brush preview
 	let _brush_radius: f32 = context_raw.brush_radius;
@@ -302,7 +302,7 @@ function util_render_make_brush_preview() {
 		context_raw.last_paint_vec_y = points_y[i - 1];
 		context_raw.paint_vec.x = points_x[i];
 		context_raw.paint_vec.y = points_y[i];
-		RenderPathPaint.commands_paint(false);
+		RenderPathPaint.render_path_paint_commands_paint(false);
 	}
 
 	context_raw.brush_radius = _brush_radius;
@@ -315,13 +315,13 @@ function util_render_make_brush_preview() {
 	context_raw.prev_paint_vec_x = -1;
 	context_raw.prev_paint_vec_y = -1;
 	context_raw.pdirty = _pdirty;
-	RenderPathPaint.use_live_layer(false);
+	RenderPathPaint.render_path_paint_use_live_layer(false);
 	context_raw.layer.fill_layer = _fill_layer;
 	context_raw.layer = _layer;
 	context_raw.material = _material;
 	context_raw.tool = _tool;
 	let _init = function () {
-		MakeMaterial.parse_paint_material(false);
+		MakeMaterial.make_material_parse_paint_material(false);
 	}
 	app_notify_on_init(_init);
 
@@ -343,7 +343,7 @@ function util_render_make_brush_preview() {
 
 	// Scale layer down to to image preview
 	if (base_pipe_merge == null) base_make_pipe();
-	l = RenderPathPaint.live_layer;
+	l = RenderPathPaint.render_path_paint_live_layer;
 	let target: image_t = context_raw.brush.image;
 	g2_begin(target);
 	g2_clear(0x00000000);
@@ -366,7 +366,7 @@ function util_render_make_brush_preview() {
 }
 
 function util_render_make_node_preview(canvas: zui_node_canvas_t, node: zui_node_t, image: image_t, group: zui_node_canvas_t = null, parents: zui_node_t[] = null) {
-	let res: any = MakeMaterial.parse_node_preview_material(node, group, parents);
+	let res: any = MakeMaterial.make_material_parse_node_preview_material(node, group, parents);
 	if (res == null || res.scon == null) return;
 
 	if (util_render_screen_aligned_full_vb == null) {
@@ -396,21 +396,21 @@ function util_render_pick_pos_nor_tex() {
 	context_raw.pdirty = 1;
 	let _tool: workspace_tool_t = context_raw.tool;
 	context_raw.tool = workspace_tool_t.PICKER;
-	MakeMaterial.parse_paint_material();
+	MakeMaterial.make_material_parse_paint_material();
 	if (context_raw.paint2d) {
-		RenderPathPaint.set_plane_mesh();
+		RenderPathPaint.render_path_paint_set_plane_mesh();
 	}
-	RenderPathPaint.commands_paint(false);
+	RenderPathPaint.render_path_paint_commands_paint(false);
 	///if krom_metal
 	// Flush command list
-	RenderPathPaint.commands_paint(false);
+	RenderPathPaint.render_path_paint_commands_paint(false);
 	///end
 	if (context_raw.paint2d) {
-		RenderPathPaint.restore_plane_mesh();
+		RenderPathPaint.render_path_paint_restore_plane_mesh();
 	}
 	context_raw.tool = _tool;
 	context_raw.pick_pos_nor_tex = false;
-	MakeMaterial.parse_paint_material();
+	MakeMaterial.make_material_parse_paint_material();
 	context_raw.pdirty = 0;
 }
 

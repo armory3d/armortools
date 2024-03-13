@@ -13,7 +13,7 @@ function uniforms_ext_init() {
 }
 
 function uniforms_ext_i32_link(object: object_t, mat: material_data_t, link: string): Null<i32> {
-	if (link == "_bloomCurrentMip") return RenderPathBase.bloom_current_mip;
+	if (link == "_bloomCurrentMip") return render_path_base_bloom_current_mip;
 	return null;
 }
 
@@ -66,7 +66,7 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 			return context_raw.vxao_aperture;
 		}
 		case "_bloomSampleScale": {
-			return RenderPathBase.bloom_sample_scale;
+			return render_path_base_bloom_sample_scale;
 		}
 
 		///if (is_paint || is_sculpt)
@@ -130,9 +130,9 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 		}
 		///end
 	}
-	if (ParserMaterial.script_links != null) {
-		for (let key of ParserMaterial.script_links.keys()) {
-			let asciprt_links: any = ParserMaterial.script_links;
+	if (parser_material_script_links != null) {
+		for (let key of parser_material_script_links.keys()) {
+			let asciprt_links: any = parser_material_script_links;
 			let script: string = asciprt_links[key];
 			let result: f32 = 0.0;
 			if (script != "") {

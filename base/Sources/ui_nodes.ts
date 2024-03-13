@@ -83,7 +83,7 @@ function ui_nodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
 					ui_nodes_get_canvas(true).links.push(link_drag);
 				}
 				///if is_lab
-				ParserLogic.parse(ui_nodes_get_canvas(true));
+				parser_logic_parse(ui_nodes_get_canvas(true));
 				context_raw.rdirty = 5;
 				///end
 			});
@@ -160,12 +160,12 @@ function ui_nodes_on_socket_released(socket_id: i32) {
 									if (zui_button(tr("OK"))) { // || ui.isReturnDown
 										socket.name = name;
 										socket.type = type == 0 ? "RGBA" : type == 1 ? "VECTOR" : "VALUE";
-										socket.color = NodesMaterial.get_socket_color(socket.type);
+										socket.color = nodes_material_get_socket_color(socket.type);
 										socket.min = min;
 										socket.max = max;
 										socket.default_value = default_value;
 										ui_box_hide();
-										NodesMaterial.sync_sockets(node);
+										nodes_material_sync_sockets(node);
 										ui_nodes_hwnd.redraws = 2;
 									}
 								}
@@ -186,7 +186,7 @@ function ui_nodes_on_socket_released(socket_id: i32) {
 						// Remove socket
 						array_remove(node.inputs, socket);
 						array_remove(node.outputs, socket);
-						NodesMaterial.sync_sockets(node);
+						nodes_material_sync_sockets(node);
 					}
 				}, 2);
 			});
@@ -498,10 +498,10 @@ function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
 		let BUTTON_COL: i32 = ui.t.BUTTON_COL;
 
 		///if (is_paint || is_sculpt)
-		let node_list: zui_node_t[][] = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? NodesMaterial.list : NodesBrush.list;
+		let node_list: zui_node_t[][] = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_list : NodesBrush.nodes_brush_list;
 		///end
 		///if is_lab
-		let node_list: zui_node_t[][] = NodesBrush.list;
+		let node_list: zui_node_t[][] = NodesBrush.nodes_brush_list;
 		///end
 
 		for (let list of node_list) {
@@ -518,7 +518,7 @@ function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
 						nodes.nodesDrag = true;
 
 						///if is_lab
-						ParserLogic.parse(canvas);
+						parser_logic_parse(canvas);
 						///end
 
 						ui_nodes_hwnd.redraws = 2;
@@ -593,7 +593,7 @@ function ui_nodes_render() {
 	if (ui_nodes_recompile_mat) {
 		///if (is_paint || is_sculpt)
 		if (ui_nodes_canvas_type == canvas_type_t.BRUSH) {
-			MakeMaterial.parse_brush();
+			MakeMaterial.make_material_parse_brush();
 			util_render_make_brush_preview();
 			ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 		}
@@ -609,14 +609,14 @@ function ui_nodes_render() {
 		///end
 
 		///if is_lab
-		ParserLogic.parse(project_canvas);
+		parser_logic_parse(project_canvas);
 		///end
 
 		ui_nodes_recompile_mat = false;
 	}
 	else if (ui_nodes_recompile_mat_final) {
 		///if (is_paint || is_sculpt)
-		MakeMaterial.parse_paint_material();
+		MakeMaterial.make_material_parse_paint_material();
 
 		if (ui_nodes_canvas_type == canvas_type_t.MATERIAL && base_is_fill_material()) {
 			base_update_fill_layers();
@@ -755,10 +755,10 @@ function ui_nodes_render() {
 		// Remove nodes with unknown id for this canvas type
 		if (zui_is_paste) {
 			///if (is_paint || is_sculpt)
-			let node_list: zui_node_t[][] = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? NodesMaterial.list : NodesBrush.list;
+			let node_list: zui_node_t[][] = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_list : NodesBrush.nodes_brush_list;
 			///end
 			///if is_lab
-			let node_list: zui_node_t[][] = NodesBrush.list;
+			let node_list: zui_node_t[][] = NodesBrush.nodes_brush_list;
 			///end
 
 			let i: i32 = 0;
@@ -844,7 +844,7 @@ function ui_nodes_render() {
 
 			///else
 
-			let brush_node: LogicNode = ParserLogic.get_logic_node(sel);
+			let brush_node: LogicNode = parser_logic_get_logic_node(sel);
 			if (brush_node != null) {
 				img = brush_node.get_cached_image();
 			}
@@ -943,10 +943,10 @@ function ui_nodes_render() {
 		ui_nodes_ui.t.BUTTON_COL = ui_nodes_ui.t.SEPARATOR_COL;
 
 		///if (is_paint || is_sculpt)
-		let cats: string[] = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? NodesMaterial.categories : NodesBrush.categories;
+		let cats: string[] = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_categories : NodesBrush.nodes_brush_categories;
 		///end
 		///if is_lab
-		let cats: string[] = NodesBrush.categories;
+		let cats: string[] = NodesBrush.nodes_brush_categories;
 		///end
 
 		for (let i: i32 = 0; i < cats.length; ++i) {
@@ -1002,19 +1002,19 @@ function ui_nodes_render() {
 
 	if (ui_nodes_show_menu) {
 		///if (is_paint || is_sculpt)
-		let list:zui_node_t[][] = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? NodesMaterial.list : NodesBrush.list;
+		let list:zui_node_t[][] = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_list : NodesBrush.nodes_brush_list;
 		///end
 		///if is_lab
-		let list:zui_node_t[][] = NodesBrush.list;
+		let list:zui_node_t[][] = NodesBrush.nodes_brush_list;
 		///end
 
 		let num_nodes: i32 = list[ui_nodes_menu_category].length;
 
 		///if (is_paint || is_sculpt)
-		let is_group_category: bool = ui_nodes_canvas_type == canvas_type_t.MATERIAL && NodesMaterial.categories[ui_nodes_menu_category] == "Group";
+		let is_group_category: bool = ui_nodes_canvas_type == canvas_type_t.MATERIAL && nodes_material_categories[ui_nodes_menu_category] == "Group";
 		///end
 		///if is_lab
-		let is_group_category: bool = NodesMaterial.categories[ui_nodes_menu_category] == "Group";
+		let is_group_category: bool = nodes_material_categories[ui_nodes_menu_category] == "Group";
 		///end
 
 		if (is_group_category) num_nodes += project_material_groups.length;
@@ -1041,7 +1041,7 @@ function ui_nodes_render() {
 				nodes.nodes_selected_id = [node.id];
 				nodes.nodesDrag = true;
 				///if is_lab
-				ParserLogic.parse(canvas);
+				parser_logic_parse(canvas);
 				///end
 			}
 			// Next column
@@ -1145,26 +1145,26 @@ function ui_nodes_accept_asset_drag(index: i32) {
 	ui_nodes_push_undo();
 	let g: node_group_t = ui_nodes_group_stack.length > 0 ? ui_nodes_group_stack[ui_nodes_group_stack.length - 1] : null;
 	///if (is_paint || is_sculpt)
-	let n: zui_node_t = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? NodesMaterial.create_node("TEX_IMAGE", g) : NodesBrush.create_node("TEX_IMAGE");
+	let n: zui_node_t = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_create_node("TEX_IMAGE", g) : NodesBrush.nodes_brush_create_node("TEX_IMAGE");
 	///end
 	///if is_lab
-	let n: zui_node_t = NodesBrush.create_node("ImageTextureNode");
+	let n: zui_node_t = NodesBrush.nodes_brush_create_node("ImageTextureNode");
 	///end
 
 	n.buttons[0].default_value = index;
 	ui_nodes_get_nodes().nodes_selected_id = [n.id];
 
 	///if is_lab
-	ParserLogic.parse(project_canvas);
+	parser_logic_parse(project_canvas);
 	///end
 }
 
 ///if (is_paint || is_sculpt)
 function ui_nodes_accept_layer_drag(index: i32) {
 	ui_nodes_push_undo();
-	if (SlotLayer.is_group(project_layers[index])) return;
+	if (SlotLayer.slot_layer_is_group(project_layers[index])) return;
 	let g: node_group_t = ui_nodes_group_stack.length > 0 ? ui_nodes_group_stack[ui_nodes_group_stack.length - 1] : null;
-	let n: zui_node_t = NodesMaterial.create_node(SlotLayer.is_mask(context_raw.layer) ? "LAYER_MASK" : "LAYER", g);
+	let n: zui_node_t = nodes_material_create_node(SlotLayer.slot_layer_is_mask(context_raw.layer) ? "LAYER_MASK" : "LAYER", g);
 	n.buttons[0].default_value = index;
 	ui_nodes_get_nodes().nodes_selected_id = [n.id];
 }
@@ -1172,7 +1172,7 @@ function ui_nodes_accept_layer_drag(index: i32) {
 function ui_nodes_accept_material_drag(index: i32) {
 	ui_nodes_push_undo();
 	let g: node_group_t = ui_nodes_group_stack.length > 0 ? ui_nodes_group_stack[ui_nodes_group_stack.length - 1] : null;
-	let n: zui_node_t = NodesMaterial.create_node("MATERIAL", g);
+	let n: zui_node_t = nodes_material_create_node("MATERIAL", g);
 	n.buttons[0].default_value = index;
 	ui_nodes_get_nodes().nodes_selected_id = [n.id];
 }
@@ -1182,7 +1182,7 @@ function ui_nodes_accept_swatch_drag(swatch: swatch_color_t) {
 	///if (is_paint || is_sculpt)
 	ui_nodes_push_undo();
 	let g: node_group_t = ui_nodes_group_stack.length > 0 ? ui_nodes_group_stack[ui_nodes_group_stack.length - 1] : null;
-	let n: zui_node_t = NodesMaterial.create_node("RGB", g);
+	let n: zui_node_t = nodes_material_create_node("RGB", g);
 	n.outputs[0].default_value = [
 		color_get_rb(swatch.base) / 255,
 		color_get_gb(swatch.base) / 255,
@@ -1213,7 +1213,7 @@ function ui_nodes_make_node(n: zui_node_t, nodes: zui_nodes_t, canvas: zui_node_
 }
 
 function ui_nodes_make_group_node(group_canvas: zui_node_canvas_t, nodes: zui_nodes_t, canvas: zui_node_canvas_t): zui_node_t {
-	let n: zui_node_t = NodesMaterial.list[5][0];
+	let n: zui_node_t = nodes_material_list[5][0];
 	let node: zui_node_t = json_parse(json_stringify(n));
 	node.name = group_canvas.name;
 	node.id = zui_get_node_id(canvas.nodes);
@@ -1232,10 +1232,10 @@ function ui_nodes_make_group_node(group_canvas: zui_node_canvas_t, nodes: zui_no
 	}
 	if (group_input != null && group_output != null) {
 		for (let soc of group_input.outputs) {
-			node.inputs.push(NodesMaterial.create_socket(nodes, node, soc.name, soc.type, canvas, soc.min, soc.max, soc.default_value));
+			node.inputs.push(nodes_material_create_socket(nodes, node, soc.name, soc.type, canvas, soc.min, soc.max, soc.default_value));
 		}
 		for (let soc of group_output.inputs) {
-			node.outputs.push(NodesMaterial.create_socket(nodes, node, soc.name, soc.type, canvas, soc.min, soc.max, soc.default_value));
+			node.outputs.push(nodes_material_create_socket(nodes, node, soc.name, soc.type, canvas, soc.min, soc.max, soc.default_value));
 		}
 	}
 	return node;

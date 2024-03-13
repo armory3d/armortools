@@ -176,7 +176,7 @@ function config_apply() {
 	let current: image_t = _g2_current;
 	let g2_in_use: bool = _g2_in_use;
 	if (g2_in_use) g2_end();
-	RenderPathBase.apply_config();
+	render_path_base_apply_config();
 	if (g2_in_use) g2_begin(current);
 }
 

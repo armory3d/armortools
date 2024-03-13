@@ -1,7 +1,7 @@
 
 class TabTextures {
 
-	static draw = (htab: zui_handle_t) => {
+	static tab_textures_draw = (htab: zui_handle_t) => {
 		let ui: zui_t = ui_base_ui;
 		let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
 		if (zui_tab(htab, tr("Textures")) && statush > ui_status_default_status_h * zui_SCALE(ui)) {
@@ -17,7 +17,7 @@ class TabTextures {
 
 			if (zui_button(tr("Import"))) {
 				ui_files_show(path_texture_formats.join(","), false, true, (path: string) => {
-					ImportAsset.run(path, -1.0, -1.0, true, false);
+					import_asset_run(path, -1.0, -1.0, true, false);
 					ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
 				});
 			}
@@ -119,7 +119,7 @@ class TabTextures {
 											if (base_pipe_copy == null) base_make_pipe();
 											///end
 
-											let target: image_t = image_create_render_target(TabTextures.to_pow2(img.width), TabTextures.to_pow2(img.height));
+											let target: image_t = image_create_render_target(TabTextures.tab_textures_to_pow2(img.width), TabTextures.tab_textures_to_pow2(img.height));
 											g2_begin(target);
 											g2_set_pipeline(base_pipe_copy);
 											g2_draw_scaled_image(img, 0, 0, target.width, target.height);
@@ -149,7 +149,7 @@ class TabTextures {
 
 								if (ui_menu_button(ui, tr("Set as Envmap"))) {
 									base_notify_on_next_frame(() => {
-										ImportEnvmap.run(asset.file, img);
+										import_envmap_run(asset.file, img);
 									});
 								}
 
@@ -166,13 +166,13 @@ class TabTextures {
 								///end
 
 								if (ui_menu_button(ui, tr("Delete"), "delete")) {
-									TabTextures.delete_texture(asset);
+									TabTextures.tab_textures_delete_texture(asset);
 								}
 								if (!is_packed && ui_menu_button(ui, tr("Open Containing Directory..."))) {
 									file_start(asset.file.substr(0, asset.file.lastIndexOf(path_sep)));
 								}
 								if (!is_packed && ui_menu_button(ui, tr("Open in Browser"))) {
-									TabBrowser.show_directory(asset.file.substr(0, asset.file.lastIndexOf(path_sep)));
+									TabBrowser.tab_browser_show_directory(asset.file.substr(0, asset.file.lastIndexOf(path_sep)));
 								}
 							}, count);
 						}
@@ -201,12 +201,12 @@ class TabTextures {
 						 	 	 ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
 			if (in_focus && ui.is_delete_down && project_assets.length > 0 && project_assets.indexOf(context_raw.texture) >= 0) {
 				ui.is_delete_down = false;
-				TabTextures.delete_texture(context_raw.texture);
+				TabTextures.tab_textures_delete_texture(context_raw.texture);
 			}
 		}
 	}
 
-	static to_pow2 = (i: i32): i32 => {
+	static tab_textures_to_pow2 = (i: i32): i32 => {
 		i--;
 		i |= i >> 1;
 		i |= i >> 2;
@@ -217,7 +217,7 @@ class TabTextures {
 		return i;
 	}
 
-	static update_texture_pointers = (nodes: zui_node_t[], i: i32) => {
+	static tab_textures_update_texture_pointers = (nodes: zui_node_t[], i: i32) => {
 		for (let n of nodes) {
 			if (n.type == "TEX_IMAGE") {
 				if (n.buttons[0].default_value == i) {
@@ -230,7 +230,7 @@ class TabTextures {
 		}
 	}
 
-	static delete_texture = (asset: asset_t) => {
+	static tab_textures_delete_texture = (asset: asset_t) => {
 		let i: i32 = project_assets.indexOf(asset);
 		if (project_assets.length > 1) {
 			context_raw.texture = project_assets[i == project_assets.length - 1 ? i - 1 : i + 1];
@@ -251,7 +251,7 @@ class TabTextures {
 		project_assets.splice(i, 1);
 		project_asset_names.splice(i, 1);
 		let _next = () => {
-			MakeMaterial.parse_paint_material();
+			MakeMaterial.make_material_parse_paint_material();
 
 			///if (is_paint || is_sculpt)
 			util_render_make_material_preview();
@@ -260,9 +260,9 @@ class TabTextures {
 		}
 		base_notify_on_next_frame(_next);
 
-		for (let m of project_materials) TabTextures.update_texture_pointers(m.canvas.nodes, i);
+		for (let m of project_materials) TabTextures.tab_textures_update_texture_pointers(m.canvas.nodes, i);
 		///if (is_paint || is_sculpt)
-		for (let b of project_brushes) TabTextures.update_texture_pointers(b.canvas.nodes, i);
+		for (let b of project_brushes) TabTextures.tab_textures_update_texture_pointers(b.canvas.nodes, i);
 		///end
 	}
 }

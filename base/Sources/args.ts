@@ -80,10 +80,10 @@ function args_run() {
 	if (args_use) {
 		app_notify_on_init(() => {
 			if (project_filepath != "") {
-				ImportArm.run_project(project_filepath);
+				import_arm_run_project(project_filepath);
 			}
 			else if (args_asset_path != "") {
-				ImportAsset.run(args_asset_path, -1, -1, false);
+				import_asset_run(args_asset_path, -1, -1, false);
 				///if is_paint
 				if (path_is_texture(args_asset_path)) {
 					ui_base_show_2d_view(view_2d_type_t.ASSET);
@@ -132,23 +132,23 @@ function args_run() {
 						///end
 
 						// Get export preset and apply the correct one from args
-						BoxExport.files = file_read_directory(path_data() + path_sep + "export_presets");
-						for (let i: i32 = 0; i < BoxExport.files.length; ++i) {
-							BoxExport.files[i] = BoxExport.files[i].substr(0, BoxExport.files[i].length - 5); // Strip .json
+						box_export_files = file_read_directory(path_data() + path_sep + "export_presets");
+						for (let i: i32 = 0; i < box_export_files.length; ++i) {
+							box_export_files[i] = box_export_files[i].substr(0, box_export_files[i].length - 5); // Strip .json
 						}
 
-						let file: string = "export_presets/" + BoxExport.files[0] + ".json";
-						for (let f of BoxExport.files) if (f == args_export_textures_preset) {
-							file = "export_presets/" + BoxExport.files[BoxExport.files.indexOf(f)] + ".json";
+						let file: string = "export_presets/" + box_export_files[0] + ".json";
+						for (let f of box_export_files) if (f == args_export_textures_preset) {
+							file = "export_presets/" + box_export_files[box_export_files.indexOf(f)] + ".json";
 						}
 
 						let blob: ArrayBuffer = data_get_blob(file);
-						BoxExport.preset = json_parse(sys_buffer_to_string(blob));
+						box_export_preset = json_parse(sys_buffer_to_string(blob));
 						data_delete_blob("export_presets/" + file);
 
 						// Export queue
 						app_notify_on_init(() => {
-							ExportTexture.run(args_export_textures_path);
+							export_texture_run(args_export_textures_path);
 						});
 					}
 					else {
@@ -166,7 +166,7 @@ function args_run() {
 				if (path_is_folder(args_export_mesh_path)) {
 					let f: string = ui_files_filename;
 					if (f == "") f = tr("untitled");
-					ExportMesh.run(args_export_mesh_path + path_sep + f, null, false);
+					export_mesh_run(args_export_mesh_path + path_sep + f, null, false);
 				}
 				else {
 					krom_log(tr("Invalid export directory"));
@@ -177,7 +177,7 @@ function args_run() {
 			///if is_paint
 			else if (args_export_material) {
 				context_raw.write_icon_on_export = true;
-				ExportArm.run_material(args_export_material_path);
+				export_arm_run_material(args_export_material_path);
 			}
 			///end
 

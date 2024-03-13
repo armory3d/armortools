@@ -1,28 +1,28 @@
 
 class RenderPathPaint {
 
-	static live_layer: SlotLayerRaw = null;
-	static live_layer_drawn: i32 = 0;
-	static live_layer_locked: bool = false;
-	static dilated: bool = true;
-	static init_voxels: bool = true; // Bake AO
-	static push_undo_last: bool;
-	static painto: mesh_object_t = null;
-	static planeo: mesh_object_t = null;
-	static visibles: bool[] = null;
-	static merged_object_visible: bool = false;
-	static saved_fov: f32 = 0.0;
-	static baking: bool = false;
-	static _texpaint: render_target_t;
-	static _texpaint_nor: render_target_t;
-	static _texpaint_pack: render_target_t;
-	static _texpaint_undo: render_target_t;
-	static _texpaint_nor_undo: render_target_t;
-	static _texpaint_pack_undo: render_target_t;
-	static last_x: f32 = -1.0;
-	static last_y: f32 = -1.0;
+	static render_path_paint_live_layer: SlotLayerRaw = null;
+	static render_path_paint_live_layer_drawn: i32 = 0;
+	static render_path_paint_live_layer_locked: bool = false;
+	static render_path_paint_dilated: bool = true;
+	static render_path_paint_init_voxels: bool = true; // Bake AO
+	static render_path_paint_push_undo_last: bool;
+	static render_path_paint_painto: mesh_object_t = null;
+	static render_path_paint_planeo: mesh_object_t = null;
+	static render_path_paint_visibles: bool[] = null;
+	static render_path_paint_merged_object_visible: bool = false;
+	static render_path_paint_saved_fov: f32 = 0.0;
+	static render_path_paint_baking: bool = false;
+	static _render_path_paint_texpaint: render_target_t;
+	static _render_path_paint_texpaint_nor: render_target_t;
+	static _render_path_paint_texpaint_pack: render_target_t;
+	static _render_path_paint_texpaint_undo: render_target_t;
+	static _render_path_paint_texpaint_nor_undo: render_target_t;
+	static _render_path_paint_texpaint_pack_undo: render_target_t;
+	static render_path_paint_last_x: f32 = -1.0;
+	static render_path_paint_last_y: f32 = -1.0;
 
-	static init = () => {
+	static render_path_paint_init = () => {
 
 		{
 			let t: render_target_t = render_target_create();
@@ -104,7 +104,7 @@ class RenderPathPaint {
 		///end
 	}
 
-	static commands_paint = (dilation = true) => {
+	static render_path_paint_commands_paint = (dilation = true) => {
 		let tid: i32 = context_raw.layer.id;
 
 		if (context_raw.pdirty > 0) {
@@ -169,12 +169,12 @@ class RenderPathPaint {
 					render_path_bind_target("gbuffer2", "gbuffer2");
 					tid = context_raw.layer.id;
 					let use_live_layer: bool = context_raw.tool == workspace_tool_t.MATERIAL;
-					if (use_live_layer) RenderPathPaint.use_live_layer(true);
+					if (use_live_layer) RenderPathPaint.render_path_paint_use_live_layer(true);
 					render_path_bind_target("texpaint" + tid, "texpaint");
 					render_path_bind_target("texpaint_nor" + tid, "texpaint_nor");
 					render_path_bind_target("texpaint_pack" + tid, "texpaint_pack");
 					render_path_draw_meshes("paint");
-					if (use_live_layer) RenderPathPaint.use_live_layer(false);
+					if (use_live_layer) RenderPathPaint.render_path_paint_use_live_layer(false);
 					ui_header_handle.redraws = 2;
 					ui_base_hwnds[2].redraws = 2;
 
@@ -232,11 +232,11 @@ class RenderPathPaint {
 			else {
 				///if arm_voxels
 				if (context_raw.tool == workspace_tool_t.BAKE && context_raw.bake_type == bake_type_t.AO) {
-					if (RenderPathPaint.init_voxels) {
-						RenderPathPaint.init_voxels = false;
+					if (RenderPathPaint.render_path_paint_init_voxels) {
+						RenderPathPaint.render_path_paint_init_voxels = false;
 						let _rp_gi: bool = config_raw.rp_gi;
 						config_raw.rp_gi = true;
-						RenderPathBase.init_voxels();
+						render_path_base_init_voxels();
 						config_raw.rp_gi = _rp_gi;
 					}
 					render_path_clear_image("voxels", 0x00000000);
@@ -258,11 +258,11 @@ class RenderPathPaint {
 				render_path_set_target("texpaint_blend1");
 				render_path_bind_target("texpaint_blend0", "tex");
 				render_path_draw_shader("shader_datas/copy_pass/copyR8_pass");
-				let is_mask: bool = SlotLayer.is_mask(context_raw.layer);
+				let is_mask: bool = SlotLayer.slot_layer_is_mask(context_raw.layer);
 				if (is_mask) {
 					let ptid: i32 = context_raw.layer.parent.id;
-					if (SlotLayer.is_group(context_raw.layer.parent)) { // Group mask
-						for (let c of SlotLayer.get_children(context_raw.layer.parent)) {
+					if (SlotLayer.slot_layer_is_group(context_raw.layer.parent)) { // Group mask
+						for (let c of SlotLayer.slot_layer_get_children(context_raw.layer.parent)) {
 							ptid = c.id;
 							break;
 						}
@@ -318,7 +318,7 @@ class RenderPathPaint {
 				}
 
 				if (dilation && config_raw.dilate == dilate_type_t.INSTANT) {
-					RenderPathPaint.dilate(true, false);
+					RenderPathPaint.render_path_paint_dilate(true, false);
 				}
 			}
 			///end
@@ -364,19 +364,19 @@ class RenderPathPaint {
 		}
 	}
 
-	static use_live_layer = (use: bool) => {
+	static render_path_paint_use_live_layer = (use: bool) => {
 		let tid: i32 = context_raw.layer.id;
 		let hid: i32 = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
 		if (use) {
-			RenderPathPaint._texpaint = render_path_render_targets.get("texpaint" + tid);
-			RenderPathPaint._texpaint_undo = render_path_render_targets.get("texpaint_undo" + hid);
-			RenderPathPaint._texpaint_nor_undo = render_path_render_targets.get("texpaint_nor_undo" + hid);
-			RenderPathPaint._texpaint_pack_undo = render_path_render_targets.get("texpaint_pack_undo" + hid);
-			RenderPathPaint._texpaint_nor = render_path_render_targets.get("texpaint_nor" + tid);
-			RenderPathPaint._texpaint_pack = render_path_render_targets.get("texpaint_pack" + tid);
+			RenderPathPaint._render_path_paint_texpaint = render_path_render_targets.get("texpaint" + tid);
+			RenderPathPaint._render_path_paint_texpaint_undo = render_path_render_targets.get("texpaint_undo" + hid);
+			RenderPathPaint._render_path_paint_texpaint_nor_undo = render_path_render_targets.get("texpaint_nor_undo" + hid);
+			RenderPathPaint._render_path_paint_texpaint_pack_undo = render_path_render_targets.get("texpaint_pack_undo" + hid);
+			RenderPathPaint._render_path_paint_texpaint_nor = render_path_render_targets.get("texpaint_nor" + tid);
+			RenderPathPaint._render_path_paint_texpaint_pack = render_path_render_targets.get("texpaint_pack" + tid);
 			render_path_render_targets.set("texpaint_undo" + hid,render_path_render_targets.get("texpaint" + tid));
 			render_path_render_targets.set("texpaint" + tid,render_path_render_targets.get("texpaint_live"));
-			if (SlotLayer.is_layer(context_raw.layer)) {
+			if (SlotLayer.slot_layer_is_layer(context_raw.layer)) {
 				render_path_render_targets.set("texpaint_nor_undo" + hid,render_path_render_targets.get("texpaint_nor" + tid));
 				render_path_render_targets.set("texpaint_pack_undo" + hid,render_path_render_targets.get("texpaint_pack" + tid));
 				render_path_render_targets.set("texpaint_nor" + tid,render_path_render_targets.get("texpaint_nor_live"));
@@ -384,19 +384,19 @@ class RenderPathPaint {
 			}
 		}
 		else {
-			render_path_render_targets.set("texpaint" + tid, RenderPathPaint._texpaint);
-			render_path_render_targets.set("texpaint_undo" + hid, RenderPathPaint._texpaint_undo);
-			if (SlotLayer.is_layer(context_raw.layer)) {
-				render_path_render_targets.set("texpaint_nor_undo" + hid, RenderPathPaint._texpaint_nor_undo);
-				render_path_render_targets.set("texpaint_pack_undo" + hid, RenderPathPaint._texpaint_pack_undo);
-				render_path_render_targets.set("texpaint_nor" + tid, RenderPathPaint._texpaint_nor);
-				render_path_render_targets.set("texpaint_pack" + tid, RenderPathPaint._texpaint_pack);
+			render_path_render_targets.set("texpaint" + tid, RenderPathPaint._render_path_paint_texpaint);
+			render_path_render_targets.set("texpaint_undo" + hid, RenderPathPaint._render_path_paint_texpaint_undo);
+			if (SlotLayer.slot_layer_is_layer(context_raw.layer)) {
+				render_path_render_targets.set("texpaint_nor_undo" + hid, RenderPathPaint._render_path_paint_texpaint_nor_undo);
+				render_path_render_targets.set("texpaint_pack_undo" + hid, RenderPathPaint._render_path_paint_texpaint_pack_undo);
+				render_path_render_targets.set("texpaint_nor" + tid, RenderPathPaint._render_path_paint_texpaint_nor);
+				render_path_render_targets.set("texpaint_pack" + tid, RenderPathPaint._render_path_paint_texpaint_pack);
 			}
 		}
-		RenderPathPaint.live_layer_locked = use;
+		RenderPathPaint.render_path_paint_live_layer_locked = use;
 	}
 
-	static commands_live_brush = () => {
+	static render_path_paint_commands_live_brush = () => {
 		let tool: workspace_tool_t = context_raw.tool;
 		if (tool != workspace_tool_t.BRUSH &&
 			tool != workspace_tool_t.ERASER &&
@@ -408,14 +408,14 @@ class RenderPathPaint {
 				return;
 		}
 
-		if (RenderPathPaint.live_layer_locked) return;
+		if (RenderPathPaint.render_path_paint_live_layer_locked) return;
 
-		if (RenderPathPaint.live_layer == null) {
-			RenderPathPaint.live_layer = SlotLayer.create("_live");
+		if (RenderPathPaint.render_path_paint_live_layer == null) {
+			RenderPathPaint.render_path_paint_live_layer = SlotLayer.slot_layer_create("_live");
 		}
 
 		let tid: i32 = context_raw.layer.id;
-		if (SlotLayer.is_mask(context_raw.layer)) {
+		if (SlotLayer.slot_layer_is_mask(context_raw.layer)) {
 			render_path_set_target("texpaint_live");
 			render_path_bind_target("texpaint" + tid, "tex");
 			render_path_draw_shader("shader_datas/copy_pass/copy_pass");
@@ -428,9 +428,9 @@ class RenderPathPaint {
 			render_path_draw_shader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
 		}
 
-		RenderPathPaint.use_live_layer(true);
+		RenderPathPaint.render_path_paint_use_live_layer(true);
 
-		RenderPathPaint.live_layer_drawn = 2;
+		RenderPathPaint.render_path_paint_live_layer_drawn = 2;
 
 		ui_view2d_hwnd.redraws = 2;
 		let _x: f32 = context_raw.paint_vec.x;
@@ -450,10 +450,10 @@ class RenderPathPaint {
 		}
 		context_raw.pdirty = 2;
 
-		RenderPathPaint.commands_symmetry();
-		RenderPathPaint.commands_paint();
+		RenderPathPaint.render_path_paint_commands_symmetry();
+		RenderPathPaint.render_path_paint_commands_paint();
 
-		RenderPathPaint.use_live_layer(false);
+		RenderPathPaint.render_path_paint_use_live_layer(false);
 
 		context_raw.paint_vec.x = _x;
 		context_raw.paint_vec.y = _y;
@@ -463,7 +463,7 @@ class RenderPathPaint {
 		context_raw.brush_blend_dirty = true;
 	}
 
-	static commands_cursor = () => {
+	static render_path_paint_commands_cursor = () => {
 		if (!config_raw.brush_3d) return;
 		let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
 		let decal_mask: bool = decal && operator_shortcut(config_keymap.decal_mask, shortcut_type_t.DOWN);
@@ -479,7 +479,7 @@ class RenderPathPaint {
 		}
 
 		let fill_layer: bool = context_raw.layer.fill_layer != null;
-		let group_layer: bool = SlotLayer.is_group(context_raw.layer);
+		let group_layer: bool = SlotLayer.slot_layer_is_group(context_raw.layer);
 		if (!base_ui_enabled || base_is_dragging || fill_layer || group_layer) {
 			return;
 		}
@@ -491,10 +491,10 @@ class RenderPathPaint {
 			my = 1.0 - (context_raw.lock_started_y - app_y()) / app_h();
 		}
 		let radius: f32 = decal_mask ? context_raw.brush_decal_mask_radius : context_raw.brush_radius;
-		RenderPathPaint.draw_cursor(mx, my, context_raw.brush_nodes_radius * radius / 3.4);
+		RenderPathPaint.render_path_paint_draw_cursor(mx, my, context_raw.brush_nodes_radius * radius / 3.4);
 	}
 
-	static draw_cursor = (mx: f32, my: f32, radius: f32, tintR = 1.0, tintG = 1.0, tintB = 1.0) => {
+	static render_path_paint_draw_cursor = (mx: f32, my: f32, radius: f32, tint_r: f32 = 1.0, tint_g: f32 = 1.0, tint_b: f32 = 1.0) => {
 		let plane: mesh_object_t = scene_get_child(".Plane").ext;
 		let geom: mesh_data_t = plane.data;
 
@@ -513,7 +513,7 @@ class RenderPathPaint {
 		g4_set_float(base_cursor_radius, radius);
 		let right: vec4_t = vec4_normalize(camera_object_right_world(scene_camera));
 		g4_set_float3(base_cursor_camera_right, right.x, right.y, right.z);
-		g4_set_float3(base_cursor_tint, tintR, tintG, tintB);
+		g4_set_float3(base_cursor_tint, tint_r, tint_g, tint_b);
 		g4_set_mat(base_cursor_vp, scene_camera.vp);
 		let help_mat: mat4_t = mat4_identity();
 		mat4_get_inv(help_mat, scene_camera.vp);
@@ -530,7 +530,7 @@ class RenderPathPaint {
 		render_path_end();
 	}
 
-	static commands_symmetry = () => {
+	static render_path_paint_commands_symmetry = () => {
 		if (context_raw.sym_x || context_raw.sym_y || context_raw.sym_z) {
 			context_raw.ddirty = 2;
 			let t: transform_t = context_raw.paint_object.base.transform;
@@ -540,44 +540,44 @@ class RenderPathPaint {
 			if (context_raw.sym_x) {
 				vec4_set(t.scale, -sx, sy, sz);
 				transform_build_matrix(t);
-				RenderPathPaint.commands_paint(false);
+				RenderPathPaint.render_path_paint_commands_paint(false);
 			}
 			if (context_raw.sym_y) {
 				vec4_set(t.scale, sx, -sy, sz);
 				transform_build_matrix(t);
-				RenderPathPaint.commands_paint(false);
+				RenderPathPaint.render_path_paint_commands_paint(false);
 			}
 			if (context_raw.sym_z) {
 				vec4_set(t.scale, sx, sy, -sz);
 				transform_build_matrix(t);
-				RenderPathPaint.commands_paint(false);
+				RenderPathPaint.render_path_paint_commands_paint(false);
 			}
 			if (context_raw.sym_x && context_raw.sym_y) {
 				vec4_set(t.scale, -sx, -sy, sz);
 				transform_build_matrix(t);
-				RenderPathPaint.commands_paint(false);
+				RenderPathPaint.render_path_paint_commands_paint(false);
 			}
 			if (context_raw.sym_x && context_raw.sym_z) {
 				vec4_set(t.scale, -sx, sy, -sz);
 				transform_build_matrix(t);
-				RenderPathPaint.commands_paint(false);
+				RenderPathPaint.render_path_paint_commands_paint(false);
 			}
 			if (context_raw.sym_y && context_raw.sym_z) {
 				vec4_set(t.scale, sx, -sy, -sz);
 				transform_build_matrix(t);
-				RenderPathPaint.commands_paint(false);
+				RenderPathPaint.render_path_paint_commands_paint(false);
 			}
 			if (context_raw.sym_x && context_raw.sym_y && context_raw.sym_z) {
 				vec4_set(t.scale, -sx, -sy, -sz);
 				transform_build_matrix(t);
-				RenderPathPaint.commands_paint(false);
+				RenderPathPaint.render_path_paint_commands_paint(false);
 			}
 			vec4_set(t.scale, sx, sy, sz);
 			transform_build_matrix(t);
 		}
 	}
 
-	static paint_enabled = (): bool => {
+	static render_path_paint_paint_enabled = (): bool => {
 		///if is_paint
 		let fill_layer: bool = context_raw.layer.fill_layer != null && context_raw.tool != workspace_tool_t.PICKER && context_raw.tool != workspace_tool_t.MATERIAL && context_raw.tool != workspace_tool_t.COLORID;
 		///end
@@ -586,36 +586,36 @@ class RenderPathPaint {
 		let fill_layer: bool = context_raw.layer.fill_layer != null && context_raw.tool != workspace_tool_t.PICKER && context_raw.tool != workspace_tool_t.MATERIAL;
 		///end
 
-		let group_layer: bool = SlotLayer.is_group(context_raw.layer);
+		let group_layer: bool = SlotLayer.slot_layer_is_group(context_raw.layer);
 		return !fill_layer && !group_layer && !context_raw.foreground_event;
 	}
 
-	static live_brush_dirty = () => {
-		let mx: f32 = RenderPathPaint.last_x;
-		let my: f32 = RenderPathPaint.last_y;
-		RenderPathPaint.last_x = mouse_view_x();
-		RenderPathPaint.last_y = mouse_view_y();
+	static render_path_paint_live_brush_dirty = () => {
+		let mx: f32 = RenderPathPaint.render_path_paint_last_x;
+		let my: f32 = RenderPathPaint.render_path_paint_last_y;
+		RenderPathPaint.render_path_paint_last_x = mouse_view_x();
+		RenderPathPaint.render_path_paint_last_y = mouse_view_y();
 		if (config_raw.brush_live && context_raw.pdirty <= 0) {
-			let moved: bool = (mx != RenderPathPaint.last_x || my != RenderPathPaint.last_y) && (context_in_viewport() || context_in_2d_view());
+			let moved: bool = (mx != RenderPathPaint.render_path_paint_last_x || my != RenderPathPaint.render_path_paint_last_y) && (context_in_viewport() || context_in_2d_view());
 			if (moved || context_raw.brush_locked) {
 				context_raw.rdirty = 2;
 			}
 		}
 	}
 
-	static begin = () => {
+	static render_path_paint_begin = () => {
 
 		///if is_paint
-		if (!RenderPathPaint.dilated) {
-			RenderPathPaint.dilate(config_raw.dilate == dilate_type_t.DELAYED, true);
-			RenderPathPaint.dilated = true;
+		if (!RenderPathPaint.render_path_paint_dilated) {
+			RenderPathPaint.render_path_paint_dilate(config_raw.dilate == dilate_type_t.DELAYED, true);
+			RenderPathPaint.render_path_paint_dilated = true;
 		}
 		///end
 
-		if (!RenderPathPaint.paint_enabled()) return;
+		if (!RenderPathPaint.render_path_paint_paint_enabled()) return;
 
 		///if is_paint
-		RenderPathPaint.push_undo_last = history_push_undo;
+		RenderPathPaint.render_path_paint_push_undo_last = history_push_undo;
 		///end
 
 		if (history_push_undo && history_undo_layers != null) {
@@ -639,40 +639,40 @@ class RenderPathPaint {
 		///end
 
 		if (context_raw.paint2d) {
-			RenderPathPaint.set_plane_mesh();
+			RenderPathPaint.render_path_paint_set_plane_mesh();
 		}
 
-		if (RenderPathPaint.live_layer_drawn > 0) RenderPathPaint.live_layer_drawn--;
+		if (RenderPathPaint.render_path_paint_live_layer_drawn > 0) RenderPathPaint.render_path_paint_live_layer_drawn--;
 
 		if (config_raw.brush_live && context_raw.pdirty <= 0 && context_raw.ddirty <= 0 && context_raw.brush_time == 0) {
 			// Depth is unchanged, draw before gbuffer gets updated
-			RenderPathPaint.commands_live_brush();
+			RenderPathPaint.render_path_paint_commands_live_brush();
 		}
 	}
 
-	static end = () => {
-		RenderPathPaint.commands_cursor();
+	static render_path_paint_end = () => {
+		RenderPathPaint.render_path_paint_commands_cursor();
 		context_raw.ddirty--;
 		context_raw.rdirty--;
 
-		if (!RenderPathPaint.paint_enabled()) return;
+		if (!RenderPathPaint.render_path_paint_paint_enabled()) return;
 		context_raw.pdirty--;
 	}
 
-	static draw = () => {
-		if (!RenderPathPaint.paint_enabled()) return;
+	static render_path_paint_draw = () => {
+		if (!RenderPathPaint.render_path_paint_paint_enabled()) return;
 
 		///if (!krom_ios) // No hover on iPad, decals are painted by pen release
 		if (config_raw.brush_live && context_raw.pdirty <= 0 && context_raw.ddirty > 0 && context_raw.brush_time == 0) {
 			// gbuffer has been updated now but brush will lag 1 frame
-			RenderPathPaint.commands_live_brush();
+			RenderPathPaint.render_path_paint_commands_live_brush();
 		}
 		///end
 
 		if (history_undo_layers != null) {
-			RenderPathPaint.commands_symmetry();
+			RenderPathPaint.render_path_paint_commands_symmetry();
 
-			if (context_raw.pdirty > 0) RenderPathPaint.dilated = false;
+			if (context_raw.pdirty > 0) RenderPathPaint.render_path_paint_dilated = false;
 
 			///if is_paint
 			if (context_raw.tool == workspace_tool_t.BAKE) {
@@ -685,36 +685,36 @@ class RenderPathPaint {
 				///end
 
 				if (context_raw.bake_type == bake_type_t.NORMAL || context_raw.bake_type == bake_type_t.HEIGHT || context_raw.bake_type == bake_type_t.DERIVATIVE) {
-					if (!RenderPathPaint.baking && context_raw.pdirty > 0) {
-						RenderPathPaint.baking = true;
+					if (!RenderPathPaint.render_path_paint_baking && context_raw.pdirty > 0) {
+						RenderPathPaint.render_path_paint_baking = true;
 						let _bake_type: bake_type_t = context_raw.bake_type;
 						context_raw.bake_type = context_raw.bake_type == bake_type_t.NORMAL ? bake_type_t.NORMAL_OBJECT : bake_type_t.POSITION; // Bake high poly data
-						MakeMaterial.parse_paint_material();
+						MakeMaterial.make_material_parse_paint_material();
 						let _paint_object: mesh_object_t = context_raw.paint_object;
 						let high_poly: mesh_object_t = project_paint_objects[context_raw.bake_high_poly];
 						let _visible: bool = high_poly.base.visible;
 						high_poly.base.visible = true;
 						context_select_paint_object(high_poly);
-						RenderPathPaint.commands_paint();
+						RenderPathPaint.render_path_paint_commands_paint();
 						high_poly.base.visible = _visible;
-						if (RenderPathPaint.push_undo_last) history_paint();
+						if (RenderPathPaint.render_path_paint_push_undo_last) history_paint();
 						context_select_paint_object(_paint_object);
 
 						let _render_final = () => {
 							context_raw.bake_type = _bake_type;
-							MakeMaterial.parse_paint_material();
+							MakeMaterial.make_material_parse_paint_material();
 							context_raw.pdirty = 1;
-							RenderPathPaint.commands_paint();
+							RenderPathPaint.render_path_paint_commands_paint();
 							context_raw.pdirty = 0;
-							RenderPathPaint.baking = false;
+							RenderPathPaint.render_path_paint_baking = false;
 						}
 						let _render_deriv = () => {
 							context_raw.bake_type = bake_type_t.HEIGHT;
-							MakeMaterial.parse_paint_material();
+							MakeMaterial.make_material_parse_paint_material();
 							context_raw.pdirty = 1;
-							RenderPathPaint.commands_paint();
+							RenderPathPaint.render_path_paint_commands_paint();
 							context_raw.pdirty = 0;
-							if (RenderPathPaint.push_undo_last) history_paint();
+							if (RenderPathPaint.render_path_paint_push_undo_last) history_paint();
 							app_notify_on_init(_render_final);
 						}
 						let bake_type: bake_type_t = context_raw.bake_type as bake_type_t;
@@ -731,7 +731,7 @@ class RenderPathPaint {
 
 					for (let p of project_paint_objects) {
 						context_select_paint_object(p);
-						RenderPathPaint.commands_paint();
+						RenderPathPaint.render_path_paint_commands_paint();
 					}
 
 					context_raw.layer_filter = _layer_filter;
@@ -740,24 +740,24 @@ class RenderPathPaint {
 				}
 				///if (krom_direct3d12 || krom_vulkan || krom_metal)
 				else if (is_raytraced_bake) {
-					let dirty: bool = RenderPathRaytraceBake.commands(MakeMaterial.parse_paint_material);
+					let dirty: bool = render_path_raytrace_bake_commands(MakeMaterial.make_material_parse_paint_material);
 					if (dirty) ui_header_handle.redraws = 2;
 					if (config_raw.dilate == dilate_type_t.INSTANT) { // && raw.pdirty == 1
-						RenderPathPaint.dilate(true, false);
+						RenderPathPaint.render_path_paint_dilate(true, false);
 					}
 				}
 				///end
 				else {
-					RenderPathPaint.commands_paint();
+					RenderPathPaint.render_path_paint_commands_paint();
 				}
 			}
 			else { // Paint
-				RenderPathPaint.commands_paint();
+				RenderPathPaint.render_path_paint_commands_paint();
 			}
 			///end
 
 			///if is_sculpt
-			RenderPathPaint.commands_paint();
+			RenderPathPaint.render_path_paint_commands_paint();
 			///end
 		}
 
@@ -775,26 +775,26 @@ class RenderPathPaint {
 		}
 
 		if (context_raw.paint2d) {
-			RenderPathPaint.restore_plane_mesh();
+			RenderPathPaint.render_path_paint_restore_plane_mesh();
 		}
 	}
 
-	static set_plane_mesh = () => {
+	static render_path_paint_set_plane_mesh = () => {
 		context_raw.paint2d_view = true;
-		RenderPathPaint.painto = context_raw.paint_object;
-		RenderPathPaint.visibles = [];
+		RenderPathPaint.render_path_paint_painto = context_raw.paint_object;
+		RenderPathPaint.render_path_paint_visibles = [];
 		for (let p of project_paint_objects) {
-			RenderPathPaint.visibles.push(p.base.visible);
+			RenderPathPaint.render_path_paint_visibles.push(p.base.visible);
 			p.base.visible = false;
 		}
 		if (context_raw.merged_object != null) {
-			RenderPathPaint.merged_object_visible = context_raw.merged_object.base.visible;
+			RenderPathPaint.render_path_paint_merged_object_visible = context_raw.merged_object.base.visible;
 			context_raw.merged_object.base.visible = false;
 		}
 
 		let cam: camera_object_t = scene_camera;
 		mat4_set_from(context_raw.saved_camera, cam.base.transform.local);
-		RenderPathPaint.saved_fov = cam.data.fov;
+		RenderPathPaint.render_path_paint_saved_fov = cam.data.fov;
 		viewport_update_camera_type(camera_type_t.PERSPECTIVE);
 		let m: mat4_t = mat4_identity();
 		mat4_translate(m, 0, 0, 0.5);
@@ -839,44 +839,44 @@ class RenderPathPaint {
 			o.base.name = ".PlaneTiled";
 		}
 
-		RenderPathPaint.planeo = scene_get_child(tiled ? ".PlaneTiled" : ".Plane").ext;
-		RenderPathPaint.planeo.base.visible = true;
-		context_raw.paint_object = RenderPathPaint.planeo;
+		RenderPathPaint.render_path_paint_planeo = scene_get_child(tiled ? ".PlaneTiled" : ".Plane").ext;
+		RenderPathPaint.render_path_paint_planeo.base.visible = true;
+		context_raw.paint_object = RenderPathPaint.render_path_paint_planeo;
 
 		let v: vec4_t = vec4_create();
 		let sx: f32 = vec4_len(vec4_set(v, m.m[0], m.m[1], m.m[2]));
-		quat_from_euler(RenderPathPaint.planeo.base.transform.rot, -math_pi() / 2, 0, 0);
-		vec4_set(RenderPathPaint.planeo.base.transform.scale, sx, 1.0, sx);
-		RenderPathPaint.planeo.base.transform.scale.z *= config_get_texture_res_y() / config_get_texture_res_x();
-		vec4_set(RenderPathPaint.planeo.base.transform.loc, m.m[12], -m.m[13], 0.0);
-		transform_build_matrix(RenderPathPaint.planeo.base.transform);
+		quat_from_euler(RenderPathPaint.render_path_paint_planeo.base.transform.rot, -math_pi() / 2, 0, 0);
+		vec4_set(RenderPathPaint.render_path_paint_planeo.base.transform.scale, sx, 1.0, sx);
+		RenderPathPaint.render_path_paint_planeo.base.transform.scale.z *= config_get_texture_res_y() / config_get_texture_res_x();
+		vec4_set(RenderPathPaint.render_path_paint_planeo.base.transform.loc, m.m[12], -m.m[13], 0.0);
+		transform_build_matrix(RenderPathPaint.render_path_paint_planeo.base.transform);
 	}
 
-	static restore_plane_mesh = () => {
+	static render_path_paint_restore_plane_mesh = () => {
 		context_raw.paint2d_view = false;
-		RenderPathPaint.planeo.base.visible = false;
-		vec4_set(RenderPathPaint.planeo.base.transform.loc, 0.0, 0.0, 0.0);
+		RenderPathPaint.render_path_paint_planeo.base.visible = false;
+		vec4_set(RenderPathPaint.render_path_paint_planeo.base.transform.loc, 0.0, 0.0, 0.0);
 		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
-			project_paint_objects[i].base.visible = RenderPathPaint.visibles[i];
+			project_paint_objects[i].base.visible = RenderPathPaint.render_path_paint_visibles[i];
 		}
 		if (context_raw.merged_object != null) {
-			context_raw.merged_object.base.visible = RenderPathPaint.merged_object_visible;
+			context_raw.merged_object.base.visible = RenderPathPaint.render_path_paint_merged_object_visible;
 		}
-		context_raw.paint_object = RenderPathPaint.painto;
+		context_raw.paint_object = RenderPathPaint.render_path_paint_painto;
 		transform_set_matrix(scene_camera.base.transform, context_raw.saved_camera);
-		scene_camera.data.fov = RenderPathPaint.saved_fov;
+		scene_camera.data.fov = RenderPathPaint.render_path_paint_saved_fov;
 		viewport_update_camera_type(context_raw.camera_type);
 		camera_object_build_proj(scene_camera);
 		camera_object_build_mat(scene_camera);
 
-		RenderPathBase.draw_gbuffer();
+		render_path_base_draw_gbuffer();
 	}
 
-	static bind_layers = () => {
+	static render_path_paint_bind_layers = () => {
 		///if is_paint
-		let is_live: bool = config_raw.brush_live && RenderPathPaint.live_layer_drawn > 0;
+		let is_live: bool = config_raw.brush_live && RenderPathPaint.render_path_paint_live_layer_drawn > 0;
 		let is_material_tool: bool = context_raw.tool == workspace_tool_t.MATERIAL;
-		if (is_live || is_material_tool) RenderPathPaint.use_live_layer(true);
+		if (is_live || is_material_tool) RenderPathPaint.render_path_paint_use_live_layer(true);
 		///end
 
 		for (let i: i32 = 0; i < project_layers.length; ++i) {
@@ -884,7 +884,7 @@ class RenderPathPaint {
 			render_path_bind_target("texpaint" + l.id, "texpaint" + l.id);
 
 			///if is_paint
-			if (SlotLayer.is_layer(l)) {
+			if (SlotLayer.slot_layer_is_layer(l)) {
 				render_path_bind_target("texpaint_nor" + l.id, "texpaint_nor" + l.id);
 				render_path_bind_target("texpaint_pack" + l.id, "texpaint_pack" + l.id);
 			}
@@ -892,15 +892,15 @@ class RenderPathPaint {
 		}
 	}
 
-	static unbind_layers = () => {
+	static render_path_paint_unbind_layers = () => {
 		///if is_paint
-		let is_live: bool = config_raw.brush_live && RenderPathPaint.live_layer_drawn > 0;
+		let is_live: bool = config_raw.brush_live && RenderPathPaint.render_path_paint_live_layer_drawn > 0;
 		let is_material_tool: bool = context_raw.tool == workspace_tool_t.MATERIAL;
-		if (is_live || is_material_tool) RenderPathPaint.use_live_layer(false);
+		if (is_live || is_material_tool) RenderPathPaint.render_path_paint_use_live_layer(false);
 		///end
 	}
 
-	static dilate = (base: bool, nor_pack: bool) => {
+	static render_path_paint_dilate = (base: bool, nor_pack: bool) => {
 		///if is_paint
 		if (config_raw.dilate_radius > 0 && !context_raw.paint2d) {
 			util_uv_cache_dilate_map();
@@ -915,7 +915,7 @@ class RenderPathPaint {
 				render_path_bind_target("temptex0", "tex");
 				render_path_draw_shader("shader_datas/dilate_pass/dilate_pass");
 			}
-			if (nor_pack && !SlotLayer.is_mask(context_raw.layer)) {
+			if (nor_pack && !SlotLayer.slot_layer_is_mask(context_raw.layer)) {
 				render_path_set_target("temptex0");
 				render_path_bind_target("texpaint_nor" + tid, "tex");
 				render_path_draw_shader("shader_datas/copy_pass/copy_pass");

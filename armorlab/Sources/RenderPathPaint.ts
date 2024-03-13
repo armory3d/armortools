@@ -256,7 +256,7 @@ class RenderPathPaint {
 		let canvas = ui_nodes_getCanvas(true);
 		if (nodes.nodesSelectedId.length > 0) {
 			let node = zui_get_node(canvas.nodes, nodes.nodesSelectedId[0]);
-			let brushNode = ParserLogic.getLogicNode(node);
+			let brushNode = parser_logic_getLogicNode(node);
 			if (brushNode != null) {
 				image = brushNode.getCachedImage();
 			}
@@ -288,7 +288,7 @@ class RenderPathPaint {
 			let node = zui_get_node(canvas.nodes, nodes.nodesSelectedId[0]);
 			let inpaint = node.type == "InpaintNode";
 			if (inpaint) {
-				let brushNode = ParserLogic.getLogicNode(node);
+				let brushNode = parser_logic_getLogicNode(node);
 				render_path_render_targets.get("texpaint_node_target")._image = (brushNode as InpaintNode).getTarget();
 			}
 		}

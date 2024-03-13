@@ -3,7 +3,7 @@
 
 class TabParticles {
 
-	static draw = (htab: zui_handle_t) => {
+	static tab_particles_draw = (htab: zui_handle_t) => {
 		if (zui_tab(htab, tr("Particles"))) {
 			zui_begin_sticky();
 			zui_row([1 / 4, 1 / 4, 1 / 4]);

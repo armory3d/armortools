@@ -254,7 +254,7 @@ class MakeMaterial {
 
 	static bakeNodePreview = (node: zui_node_t, group: zui_node_canvas_t, parents: zui_node_t[]) => {
 		if (node.type == "BLUR") {
-			let id = ParserMaterial.node_name(node, parents);
+			let id = parser_material_node_name(node, parents);
 			let image = context_raw.nodePreviews.get(id);
 			context_raw.nodePreviewsUsed.push(id);
 			let resX = math_floor(config_getTextureResX() / 4);
@@ -265,12 +265,12 @@ class MakeMaterial {
 				context_raw.nodePreviews.set(id, image);
 			}
 
-			ParserMaterial.blur_passthrough = true;
+			parser_material_blur_passthrough = true;
 			UtilRender.makeNodePreview(ui_nodes_getCanvasMaterial(), node, image, group, parents);
-			ParserMaterial.blur_passthrough = false;
+			parser_material_blur_passthrough = false;
 		}
 		else if (node.type == "DIRECT_WARP") {
-			let id = ParserMaterial.node_name(node, parents);
+			let id = parser_material_node_name(node, parents);
 			let image = context_raw.nodePreviews.get(id);
 			context_raw.nodePreviewsUsed.push(id);
 			let resX = math_floor(config_getTextureResX());
@@ -281,9 +281,9 @@ class MakeMaterial {
 				context_raw.nodePreviews.set(id, image);
 			}
 
-			ParserMaterial.warp_passthrough = true;
+			parser_material_warp_passthrough = true;
 			UtilRender.makeNodePreview(ui_nodes_getCanvasMaterial(), node, image, group, parents);
-			ParserMaterial.warp_passthrough = false;
+			parser_material_warp_passthrough = false;
 		}
 	}
 
@@ -304,7 +304,7 @@ class MakeMaterial {
 	}
 
 	static parseBrush = () => {
-		ParserLogic.parse(context_raw.brush.canvas);
+		parser_logic_parse(context_raw.brush.canvas);
 	}
 
 	static getDisplaceStrength = (): f32 => {

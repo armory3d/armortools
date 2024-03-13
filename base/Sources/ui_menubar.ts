@@ -36,19 +36,19 @@ function ui_menubar_render_ui() {
 			ui._w = 36;
 			///end
 
-			if (ui_menubar_icon_button(ui, 0, 2)) BoxPreferences.show();
+			if (ui_menubar_icon_button(ui, 0, 2)) box_preferences_show();
 			if (ui_menubar_icon_button(ui, 0, 3)) {
 				///if (krom_android || krom_ios)
 				console_toast(tr("Saving project"));
 				project_save();
 				///end
 				base_notify_on_next_frame(function () {
-					BoxProjects.show();
+					box_projects_show();
 				});
 			}
 			if (ui_menubar_icon_button(ui, 4, 2)) project_import_asset();
 			///if (is_paint || is_lab)
-			if (ui_menubar_icon_button(ui, 5, 2)) BoxExport.show_textures();
+			if (ui_menubar_icon_button(ui, 5, 2)) box_export_show_textures();
 			///end
 			let size: i32 = math_floor(ui._w / zui_SCALE(ui));
 			if (ui_menu_show && ui_menu_category == menu_category_t.VIEWPORT) zui_fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
@@ -149,7 +149,7 @@ function ui_menubar_render_ui() {
 				transform_set_matrix(scene_camera.base.transform, m);
 			}
 			///if (krom_direct3d12 || krom_vulkan || krom_metal)
-			RenderPathRaytrace.ready = false;
+			render_path_raytrace_ready = false;
 			///end
 		}
 		///end

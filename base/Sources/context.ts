@@ -21,7 +21,7 @@ function context_select_material(i: i32) {
 function context_set_material(m: SlotMaterialRaw) {
 	if (project_materials.indexOf(m) == -1) return;
 	context_raw.material = m;
-	MakeMaterial.parse_paint_material();
+	MakeMaterial.make_material_parse_paint_material();
 	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 	ui_header_handle.redraws = 2;
 	ui_nodes_hwnd.redraws = 2;
@@ -44,7 +44,7 @@ function context_select_brush(i: i32) {
 function context_set_brush(b: SlotBrushRaw) {
 	if (project_brushes.indexOf(b) == -1) return;
 	context_raw.brush = b;
-	MakeMaterial.parse_brush();
+	MakeMaterial.make_material_parse_brush();
 	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 	ui_nodes_hwnd.redraws = 2;
 }
@@ -78,8 +78,8 @@ function context_set_layer(l: SlotLayerRaw) {
 	if (g2_in_use) g2_end();
 
 	base_set_object_mask();
-	MakeMaterial.parse_mesh_material();
-	MakeMaterial.parse_paint_material();
+	MakeMaterial.make_material_parse_mesh_material();
+	MakeMaterial.make_material_parse_paint_material();
 
 	if (g2_in_use) g2_begin(current);
 
@@ -90,8 +90,8 @@ function context_set_layer(l: SlotLayerRaw) {
 
 function context_select_tool(i: i32) {
 	context_raw.tool = i;
-	MakeMaterial.parse_paint_material();
-	MakeMaterial.parse_mesh_material();
+	MakeMaterial.make_material_parse_paint_material();
+	MakeMaterial.make_material_parse_mesh_material();
 	context_raw.ddirty = 3;
 	let _viewport_mode: viewport_mode_t = context_raw.viewport_mode;
 	context_raw.viewport_mode = -1 as viewport_mode_t;
@@ -116,7 +116,7 @@ function context_init_tool() {
 
 	else if (context_raw.tool == workspace_tool_t.PARTICLE) {
 		util_particle_init();
-		MakeMaterial.parse_particle_material();
+		MakeMaterial.make_material_parse_particle_material();
 	}
 
 	else if (context_raw.tool == workspace_tool_t.BAKE) {
@@ -146,7 +146,7 @@ function context_select_paint_object(o: mesh_object_t) {
 	for (let p of project_paint_objects) p.skip_context = "paint";
 	context_raw.paint_object = o;
 
-	let mask: i32 = SlotLayer.get_object_mask(context_raw.layer);
+	let mask: i32 = SlotLayer.slot_layer_get_object_mask(context_raw.layer);
 	if (context_layer_filter_used()) mask = context_raw.layer_filter;
 
 	if (context_raw.merged_object == null || mask > 0) {
@@ -185,7 +185,7 @@ function context_layer_filter_used(): bool {
 
 function context_object_mask_used(): bool {
 	///if (is_paint || is_sculpt)
-	return SlotLayer.get_object_mask(context_raw.layer) > 0 && SlotLayer.get_object_mask(context_raw.layer) <= project_paint_objects.length;
+	return SlotLayer.slot_layer_get_object_mask(context_raw.layer) > 0 && SlotLayer.slot_layer_get_object_mask(context_raw.layer) <= project_paint_objects.length;
 	///end
 
 	///if is_lab
@@ -258,14 +258,14 @@ function context_set_viewport_mode(mode: viewport_mode_t) {
 
 	context_raw.viewport_mode = mode;
 	if (context_use_deferred()) {
-		render_path_commands = RenderPathDeferred.commands;
+		render_path_commands = render_path_deferred_commands;
 	}
 	else {
-		render_path_commands = RenderPathForward.commands;
+		render_path_commands = render_path_forward_commands;
 	}
 	let _workspace: i32 = ui_header_worktab.position;
 	ui_header_worktab.position = 0;
-	MakeMaterial.parse_mesh_material();
+	MakeMaterial.make_material_parse_mesh_material();
 	ui_header_worktab.position = _workspace;
 }
 
@@ -295,23 +295,23 @@ function context_set_viewport_shader(viewportShader: (ns: NodeShaderRaw)=>string
 
 function context_set_render_path() {
 	if (context_raw.render_mode == render_mode_t.FORWARD || context_raw.viewport_shader != null) {
-		render_path_commands = RenderPathForward.commands;
+		render_path_commands = render_path_forward_commands;
 	}
 	else {
-		render_path_commands = RenderPathDeferred.commands;
+		render_path_commands = render_path_deferred_commands;
 	}
 	app_notify_on_init(function() {
-		MakeMaterial.parse_mesh_material();
+		MakeMaterial.make_material_parse_mesh_material();
 	});
 }
 
 function context_enable_import_plugin(file: string): bool {
 	// Return plugin name suitable for importing the specified file
-	if (BoxPreferences.files_plugin == null) {
-		BoxPreferences.fetch_plugins();
+	if (box_preferences_files_plugin == null) {
+		box_preferences_fetch_plugins();
 	}
 	let ext: string = file.substr(file.lastIndexOf(".") + 1);
-	for (let f of BoxPreferences.files_plugin) {
+	for (let f of box_preferences_files_plugin) {
 		if (f.startsWith("import_") && f.indexOf(ext) >= 0) {
 			config_enable_plugin(f);
 			console_info(f + " " + tr("plugin enabled"));

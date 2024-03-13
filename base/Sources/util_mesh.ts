@@ -81,7 +81,7 @@ function util_mesh_merge(paint_objects: mesh_object_t[] = null) {
 	object_set_parent(context_raw.merged_object.base, context_main_object().base);
 
 	///if (krom_direct3d12 || krom_vulkan || krom_metal)
-	RenderPathRaytrace.ready = false;
+	render_path_raytrace_ready = false;
 	///end
 }
 
@@ -155,7 +155,7 @@ function util_mesh_flip_normals() {
 	}
 
 	///if (krom_direct3d12 || krom_vulkan || krom_metal)
-	RenderPathRaytrace.ready = false;
+	render_path_raytrace_ready = false;
 	///end
 }
 
@@ -250,7 +250,7 @@ function util_mesh_calc_normals(smooth: bool = false) {
 
 	///if (krom_direct3d12 || krom_vulkan || krom_metal)
 	util_mesh_merge();
-	RenderPathRaytrace.ready = false;
+	render_path_raytrace_ready = false;
 	///end
 }
 

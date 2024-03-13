@@ -37,7 +37,7 @@ function ui_menu_render() {
 		if (ui_menu_category == menu_category_t.FILE) {
 			if (ui_menu_button(ui, tr("New .."), config_keymap.file_new)) project_new_box();
 			if (ui_menu_button(ui, tr("Open..."), config_keymap.file_open)) project_open();
-			if (ui_menu_button(ui, tr("Open Recent..."), config_keymap.file_open_recent)) BoxProjects.show();
+			if (ui_menu_button(ui, tr("Open Recent..."), config_keymap.file_open_recent)) box_projects_show();
 			if (ui_menu_button(ui, tr("Save"), config_keymap.file_save)) project_save();
 			if (ui_menu_button(ui, tr("Save As..."), config_keymap.file_save_as)) project_save_as();
 			ui_menu_separator(ui);
@@ -48,7 +48,7 @@ function ui_menu_render() {
 						console_error(tr("Error: .hdr file expected"));
 						return;
 					}
-					ImportAsset.run(path);
+					import_asset_run(path);
 				});
 			}
 
@@ -70,17 +70,17 @@ function ui_menu_render() {
 				///if is_paint
 				context_raw.layers_export = export_mode_t.VISIBLE;
 				///end
-				BoxExport.show_textures();
+				box_export_show_textures();
 			}
 			if (ui_menu_button(ui, tr("Export Swatches..."))) project_export_swatches();
 			///end
 			if (ui_menu_button(ui, tr("Export Mesh..."))) {
 				context_raw.export_mesh_index = 0; // All
-				BoxExport.show_mesh();
+				box_export_show_mesh();
 			}
 
 			///if is_paint
-			if (ui_menu_button(ui, tr("Bake Material..."))) BoxExport.show_bake_material();
+			if (ui_menu_button(ui, tr("Bake Material..."))) box_export_show_bake_material();
 			///end
 
 			ui_menu_separator(ui);
@@ -101,7 +101,7 @@ function ui_menu_render() {
 			if (ui_menu_button(ui, tr("Redo {step}", new Map([["step", step_redo]])), config_keymap.edit_redo)) history_redo();
 			ui.enabled = true;
 			ui_menu_separator(ui);
-			if (ui_menu_button(ui, tr("Preferences..."), config_keymap.edit_prefs)) BoxPreferences.show();
+			if (ui_menu_button(ui, tr("Preferences..."), config_keymap.edit_prefs)) box_preferences_show();
 		}
 		else if (ui_menu_category == menu_category_t.VIEWPORT) {
 			if (ui_menu_button(ui, tr("Distract Free"), config_keymap.view_distract_free)) {
@@ -192,10 +192,10 @@ function ui_menu_render() {
 			ui_menu_align(ui);
 			context_raw.brush_scale = zui_slider(brush_scale_handle, tr("UV Scale"), 0.01, 5.0, true);
 			if (brush_scale_handle.changed) {
-				MakeMaterial.parse_mesh_material();
+				MakeMaterial.make_material_parse_mesh_material();
 				///if (krom_direct3d12 || krom_vulkan || krom_metal)
-				RenderPathRaytrace.uv_scale = context_raw.brush_scale;
-				RenderPathRaytrace.ready = false;
+				render_path_raytrace_uv_scale = context_raw.brush_scale;
+				render_path_raytrace_ready = false;
 				///end
 			}
 			///end
@@ -204,15 +204,15 @@ function ui_menu_render() {
 			let cull_handle: zui_handle_t = zui_handle("uimenu_7", { selected: context_raw.cull_backfaces });
 			context_raw.cull_backfaces = zui_check(cull_handle, " " + tr("Cull Backfaces"));
 			if (cull_handle.changed) {
-				MakeMaterial.parse_mesh_material();
+				MakeMaterial.make_material_parse_mesh_material();
 			}
 
 			ui_menu_fill(ui);
 			let filter_handle: zui_handle_t = zui_handle("uimenu_8", { selected: context_raw.texture_filter });
 			context_raw.texture_filter = zui_check(filter_handle, " " + tr("Filter Textures"));
 			if (filter_handle.changed) {
-				MakeMaterial.parse_paint_material();
-				MakeMaterial.parse_mesh_material();
+				MakeMaterial.make_material_parse_paint_material();
+				MakeMaterial.make_material_parse_mesh_material();
 			}
 
 			///if (is_paint || is_sculpt)
@@ -223,7 +223,7 @@ function ui_menu_render() {
 				g2_end();
 				util_uv_cache_uv_map();
 				g2_begin(current);
-				MakeMaterial.parse_mesh_material();
+				MakeMaterial.make_material_parse_mesh_material();
 			}
 			///end
 
@@ -231,7 +231,7 @@ function ui_menu_render() {
 			ui_menu_fill(ui);
 			context_raw.draw_texels = zui_check(context_raw.texels_handle, " " + tr("Texels"));
 			if (context_raw.texels_handle.changed) {
-				MakeMaterial.parse_mesh_material();
+				MakeMaterial.make_material_parse_mesh_material();
 			}
 			///end
 

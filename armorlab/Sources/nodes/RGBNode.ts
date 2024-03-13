@@ -15,7 +15,7 @@ class RGBNode extends LogicNode {
 		}
 
 		let f32a = new Float32Array(4);
-		let raw = ParserLogic.getRawNode(this);
+		let raw = parser_logic_getRawNode(this);
 		let default_value = raw.outputs[0].default_value;
 		f32a[0] = default_value[0];
 		f32a[1] = default_value[1];

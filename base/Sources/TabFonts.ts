@@ -3,7 +3,7 @@
 
 class TabFonts {
 
-	static draw = (htab: zui_handle_t) => {
+	static tab_fonts_draw = (htab: zui_handle_t) => {
 		let ui: zui_t = ui_base_ui;
 		let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
 		if (zui_tab(htab, tr("Fonts")) && statush > ui_status_default_status_h * zui_SCALE(ui)) {
@@ -91,7 +91,7 @@ class TabFonts {
 						let add: i32 = project_fonts.length > 1 ? 1 : 0;
 						ui_menu_draw((ui: zui_t) => {
 							if (project_fonts.length > 1 && ui_menu_button(ui, tr("Delete"), "delete") && project_fonts[i].file != "") {
-								TabFonts.delete_font(project_fonts[i]);
+								TabFonts.tab_fonts_delete_font(project_fonts[i]);
 							}
 						}, 0 + add);
 					}
@@ -129,12 +129,12 @@ class TabFonts {
 						    	 ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
 			if (in_focus && ui.is_delete_down && project_fonts.length > 1 && context_raw.font.file != "") {
 				ui.is_delete_down = false;
-				TabFonts.delete_font(context_raw.font);
+				TabFonts.tab_fonts_delete_font(context_raw.font);
 			}
 		}
 	}
 
-	static delete_font = (font: SlotFontRaw) => {
+	static tab_fonts_delete_font = (font: SlotFontRaw) => {
 		let i: i32 = project_fonts.indexOf(font);
 		let _init = () => {
 			context_select_font(i == project_fonts.length - 1 ? i - 1 : i + 1);

@@ -7,7 +7,7 @@ class TabLayers {
 
 	static draw = (htab: zui_handle_t) => {
 		let mini = config_config_raw.layout[layout_size_t.SIDEBAR_W] <= ui_base_ui_base_sidebar_mini_w;
-		mini ? TabLayers.draw_mini(htab) : TabLayers.draw_full(htab);
+		mini ? TabLayers.tab_layers_draw_mini(htab) : TabLayers.tab_layers_draw_full(htab);
 	}
 
 	static drawMini = (htab: zui_handle_t) => {
@@ -20,14 +20,14 @@ class TabLayers {
 		zui_begin_sticky();
 		zui_separator(5);
 
-		TabLayers.combo_filter();
-		TabLayers.button_new("+");
+		TabLayers.tab_layers_combo_filter();
+		TabLayers.tab_layers_button_new("+");
 
 		zui_end_sticky();
 		ui._y += 2;
 
-		TabLayers.highlight_odd_lines();
-		TabLayers.draw_slots(true);
+		TabLayers.tab_layers_highlight_odd_lines();
+		TabLayers.tab_layers_draw_slots(true);
 
 		ui.t.ELEMENT_H = _ELEMENT_H;
 	}
@@ -38,14 +38,14 @@ class TabLayers {
 			zui_begin_sticky();
 			zui_row([1 / 4, 3 / 4]);
 
-			TabLayers.button_new(tr("New"));
-			TabLayers.combo_filter();
+			TabLayers.tab_layers_button_new(tr("New"));
+			TabLayers.tab_layers_combo_filter();
 
 			zui_end_sticky();
 			ui._y += 2;
 
-			TabLayers.highlight_odd_lines();
-			TabLayers.draw_slots(false);
+			TabLayers.tab_layers_highlight_odd_lines();
+			TabLayers.tab_layers_draw_slots(false);
 		}
 	}
 
@@ -54,7 +54,7 @@ class TabLayers {
 			if (i >= project_project_layers.length) break; // Layer was deleted
 			let j = project_project_layers.length - 1 - i;
 			let l = project_project_layers[j];
-			TabLayers.draw_layer_slot(l, j, mini);
+			TabLayers.tab_layers_draw_layer_slot(l, j, mini);
 		}
 	}
 
@@ -124,8 +124,8 @@ class TabLayers {
 		let ui = ui_base_ui_base_ui;
 
 		if (context_context_raw.layer_filter > 0 &&
-			SlotLayer.get_object_mask(l) > 0 &&
-			SlotLayer.get_object_mask(l) != context_context_raw.layer_filter) {
+			SlotLayer.slot_layer_get_object_mask(l) > 0 &&
+			SlotLayer.slot_layer_get_object_mask(l) != context_context_raw.layer_filter) {
 			return;
 		}
 
@@ -149,16 +149,16 @@ class TabLayers {
 				let ls = project_project_layers;
 				let dest = context_context_raw.drag_dest;
 				let toGroup = down ? dest > 0 && ls[dest - 1].parent != null && ls[dest - 1].parent.show_panel : dest < ls.length && ls[dest].parent != null && ls[dest].parent.show_panel;
-				let nestedGroup = SlotLayer.is_group(base_base_drag_layer) && toGroup;
+				let nestedGroup = SlotLayer.slot_layer_is_group(base_base_drag_layer) && toGroup;
 				if (!nestedGroup) {
-					if (SlotLayer.can_move(context_context_raw.layer, context_context_raw.drag_dest)) {
+					if (SlotLayer.slot_layer_can_move(context_context_raw.layer, context_context_raw.drag_dest)) {
 						zui_fill(checkw, step * 2, (ui._window_w / zui_SCALE(ui) - 2) - checkw, 2 * zui_SCALE(ui), ui.t.HIGHLIGHT_COL);
 					}
 				}
 			}
 			else if (i == project_project_layers.length - 1 && mouse_y < absy + step) {
 				context_context_raw.drag_dest = project_project_layers.length - 1;
-				if (SlotLayer.can_move(context_context_raw.layer, context_context_raw.drag_dest)) {
+				if (SlotLayer.slot_layer_can_move(context_context_raw.layer, context_context_raw.drag_dest)) {
 					zui_fill(checkw, 0, (ui._window_w / zui_SCALE(ui) - 2) - checkw, 2 * zui_SCALE(ui), ui.t.HIGHLIGHT_COL);
 				}
 			}
@@ -166,22 +166,22 @@ class TabLayers {
 		if (base_base_is_dragging && (base_base_drag_material != null || base_base_drag_swatch != null) && context_context_in_layers()) {
 			if (mouse_y > absy + step && mouse_y < absy + step * 3) {
 				context_context_raw.drag_dest = i;
-				if (TabLayers.can_drop_new_layer(i))
+				if (TabLayers.tab_layers_can_drop_new_layer(i))
 					zui_fill(checkw, 2 * step, (ui._window_w / zui_SCALE(ui) - 2) - checkw, 2 * zui_SCALE(ui), ui.t.HIGHLIGHT_COL);
 			}
 			else if (i == project_project_layers.length - 1 && mouse_y < absy + step) {
 				context_context_raw.drag_dest = project_project_layers.length;
-				if (TabLayers.can_drop_new_layer(project_project_layers.length))
+				if (TabLayers.tab_layers_can_drop_new_layer(project_project_layers.length))
 					zui_fill(checkw, 0, (ui._window_w / zui_SCALE(ui) - 2) - checkw, 2 * zui_SCALE(ui), ui.t.HIGHLIGHT_COL);
 			}
 		}
 
-		mini ? TabLayers.draw_layer_slot_mini(l, i) : TabLayers.draw_layer_slot_full(l, i);
+		mini ? TabLayers.tab_layers_draw_layer_slot_mini(l, i) : TabLayers.tab_layers_draw_layer_slot_full(l, i);
 
-		TabLayers.draw_layer_highlight(l, mini);
+		TabLayers.tab_layers_draw_layer_highlight(l, mini);
 
-		if (TabLayers.show_context_menu) {
-			TabLayers.draw_layer_context_menu(l, mini);
+		if (TabLayers.tab_layers_show_context_menu) {
+			TabLayers.tab_layers_draw_layer_context_menu(l, mini);
 		}
 	}
 
@@ -203,7 +203,7 @@ class TabLayers {
 
 		let step = ui.t.ELEMENT_H;
 
-		let hasPanel = SlotLayer.is_group(l) || (SlotLayer.is_layer(l) && SlotLayer.get_masks(l, false) != null);
+		let hasPanel = SlotLayer.slot_layer_is_group(l) || (SlotLayer.slot_layer_is_layer(l) && SlotLayer.slot_layer_get_masks(l, false) != null);
 		if (hasPanel) {
 			zui_row([8 / 100, 52 / 100, 30 / 100, 10 / 100]);
 		}
@@ -223,7 +223,7 @@ class TabLayers {
 		if (parentHidden) col -= 0x99000000;
 
 		if (zui_image(icons, col, -1.0, r.x, r.y, r.w, r.h) == zui_state_t.RELEASED) {
-			TabLayers.layer_toggle_visible(l);
+			TabLayers.tab_layers_layer_toggle_visible(l);
 		}
 		ui._x -= 2;
 		ui._y -= 3;
@@ -234,10 +234,10 @@ class TabLayers {
 
 		// Draw layer name
 		ui._y += center;
-		if (TabLayers.layer_name_edit == l.id) {
-			TabLayers.layer_name_handle.text = l.name;
-			l.name = zui_text_input(TabLayers.layer_name_handle);
-			if (ui.text_selected_handle_ptr != TabLayers.layer_name_handle.ptr) TabLayers.layer_name_edit = -1;
+		if (TabLayers.tab_layers_layer_name_edit == l.id) {
+			TabLayers.tab_layers_layer_name_handle.text = l.name;
+			l.name = zui_text_input(TabLayers.tab_layers_layer_name_handle);
+			if (ui.text_selected_handle_ptr != TabLayers.tab_layers_layer_name_handle.ptr) TabLayers.tab_layers_layer_name_edit = -1;
 		}
 		else {
 			if (ui.enabled && ui.input_enabled && ui.combo_selected_handle_ptr == 0 &&
@@ -245,7 +245,7 @@ class TabLayers {
 				ui.input_y > ui._window_y + ui._y - center && ui.input_y < ui._window_y + ui._y - center + (step * zui_SCALE(ui)) * 2) {
 				if (ui.input_started) {
 					context_context_set_layer(l);
-					TabLayers.set_drag_layer(context_context_raw.layer, -(mouse_x - uix - ui._window_x - 3), -(mouse_y - uiy - ui._window_y + 1));
+					TabLayers.tab_layers_set_drag_layer(context_context_raw.layer, -(mouse_x - uix - ui._window_x - 3), -(mouse_y - uiy - ui._window_y + 1));
 				}
 				else if (ui.input_released) {
 					if (time_time() - context_context_raw.select_time > 0.2) {
@@ -254,7 +254,7 @@ class TabLayers {
 				}
 				else if (ui.input_released_r) {
 					context_context_set_layer(l);
-					TabLayers.show_context_menu = true;
+					TabLayers.tab_layers_show_context_menu = true;
 				}
 			}
 
@@ -262,9 +262,9 @@ class TabLayers {
 			if (state == zui_state_t.RELEASED) {
 				let td = time_time() - context_context_raw.select_time;
 				if (td < 0.2 && td > 0.0) {
-					TabLayers.layer_name_edit = l.id;
-					TabLayers.layer_name_handle.text = l.name;
-					zui_start_text_edit(TabLayers.layer_name_handle);
+					TabLayers.tab_layers_layer_name_edit = l.id;
+					TabLayers.tab_layers_layer_name_handle.text = l.name;
+					zui_start_text_edit(TabLayers.tab_layers_layer_name_handle);
 				}
 			}
 
@@ -285,18 +285,18 @@ class TabLayers {
 			if (l.parent.parent != null) ui._x -= 10 * zui_SCALE(ui);
 		}
 
-		if (SlotLayer.is_group(l)) {
+		if (SlotLayer.slot_layer_is_group(l)) {
 			zui_end_element();
 		}
 		else {
-			if (SlotLayer.is_mask(l)) {
+			if (SlotLayer.slot_layer_is_mask(l)) {
 				ui._y += center;
 			}
 
 			// comboBlending(ui, l);
 			zui_end_element();
 
-			if (SlotLayer.is_mask(l)) {
+			if (SlotLayer.slot_layer_is_mask(l)) {
 				ui._y -= center;
 			}
 		}
@@ -309,7 +309,7 @@ class TabLayers {
 			ui._y -= center;
 		}
 
-		if (SlotLayer.is_group(l) || SlotLayer.is_mask(l)) {
+		if (SlotLayer.slot_layer_is_group(l) || SlotLayer.slot_layer_is_mask(l)) {
 			ui._y -= zui_ELEMENT_OFFSET(ui);
 			zui_end_element();
 		}
@@ -326,7 +326,7 @@ class TabLayers {
 			}
 
 			ui._y -= center;
-			TabLayers.combo_object(ui, l);
+			TabLayers.tab_layers_combo_object(ui, l);
 			ui._y += center;
 
 			zui_end_element();
@@ -346,7 +346,7 @@ class TabLayers {
 	static layerToggleVisible = (l: SlotLayerRaw) => {
 		l.visible = !l.visible;
 		ui_view2d_ui_view2d_hwnd.redraws = 2;
-		MakeMaterial.parse_mesh_material();
+		MakeMaterial.make_material_parse_mesh_material();
 	}
 
 	static drawLayerHighlight = (l: SlotLayerRaw, mini: bool) => {
@@ -372,11 +372,11 @@ class TabLayers {
 		// Lowest layer
 		if (index == 0) return false;
 		// Lowest layer that has masks
-		if (SlotLayer.is_layer(l) && SlotLayer.is_mask(project_project_layers[0]) && project_project_layers[0].parent == l) return false;
+		if (SlotLayer.slot_layer_is_layer(l) && SlotLayer.slot_layer_is_mask(project_project_layers[0]) && project_project_layers[0].parent == l) return false;
 		// The lowest toplevel layer is a group
-		if (SlotLayer.is_group(l) && SlotLayer.is_in_group(project_project_layers[0]) && SlotLayer.get_containing_group(project_project_layers[0]) == l) return false;
+		if (SlotLayer.slot_layer_is_group(l) && SlotLayer.slot_layer_is_in_group(project_project_layers[0]) && SlotLayer.slot_layer_get_containing_group(project_project_layers[0]) == l) return false;
 		// Masks must be merged down to masks
-		if (SlotLayer.is_mask(l) && !SlotLayer.is_mask(project_project_layers[index - 1])) return false;
+		if (SlotLayer.slot_layer_is_mask(l) && !SlotLayer.slot_layer_is_mask(project_project_layers[index - 1])) return false;
 		return true;
 	}
 
@@ -385,7 +385,7 @@ class TabLayers {
 	}
 
 	static canDropNewLayer = (position: i32) => {
-		if (position > 0 && position < project_project_layers.length && SlotLayer.is_mask(project_project_layers[position - 1])) {
+		if (position > 0 && position < project_project_layers.length && SlotLayer.slot_layer_is_mask(project_project_layers[position - 1])) {
 			// 1. The layer to insert is inserted in the middle
 			// 2. The layer below is a mask, i.e. the layer would have to be a (group) mask, too.
 			return false;

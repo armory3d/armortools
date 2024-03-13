@@ -36,7 +36,7 @@ function project_open() {
 		let g2_in_use: bool = _g2_in_use;
 		if (g2_in_use) g2_end();
 
-		ImportArm.run_project(path);
+		import_arm_run_project(path);
 
 		if (g2_in_use) g2_begin(current);
 	});
@@ -62,7 +62,7 @@ function project_save(saveAndQuit: bool = false) {
 	///end
 
 	let _init = function () {
-		ExportArm.run_project();
+		export_arm_run_project();
 		if (saveAndQuit) sys_stop();
 	}
 	app_notify_on_init(_init);
@@ -164,7 +164,7 @@ function project_new(resetLayers: bool = true) {
 				geom_make_uv_sphere(1, 512, 256) :
 				geom_make_plane(1, 1, 512, 512);
 			mesh.name = "Tessellated";
-			raw = ImportMesh.raw_mesh(mesh);
+			raw = import_mesh_raw_mesh(mesh);
 
 			///if is_sculpt
 			base_notify_on_next_frame(function () {
@@ -217,11 +217,11 @@ function project_new(resetLayers: bool = true) {
 	context_raw.paint_object.base.name = n;
 	project_paint_objects = [context_raw.paint_object];
 	///if (is_paint || is_sculpt)
-	while (project_materials.length > 0) SlotMaterial.unload(project_materials.pop());
+	while (project_materials.length > 0) SlotMaterial.slot_material_unload(project_materials.pop());
 	///end
 	let m: material_data_t = data_get_material("Scene", "Material");
 	///if (is_paint || is_sculpt)
-	project_materials.push(SlotMaterial.create(m));
+	project_materials.push(SlotMaterial.slot_material_create(m));
 	///end
 	///if is_lab
 	project_material_data = m;
@@ -236,10 +236,10 @@ function project_new(resetLayers: bool = true) {
 	project_material_groups = [];
 
 	///if (is_paint || is_sculpt)
-	project_brushes = [SlotBrush.create()];
+	project_brushes = [SlotBrush.slot_brush_create()];
 	context_raw.brush = project_brushes[0];
 
-	project_fonts = [SlotFont.create("default.ttf", base_font)];
+	project_fonts = [SlotFont.slot_font_create("default.ttf", base_font)];
 	context_raw.font = project_fonts[0];
 	///end
 
@@ -250,7 +250,7 @@ function project_new(resetLayers: bool = true) {
 	context_raw.color_picker_callback = null;
 	history_reset();
 
-	MakeMaterial.parse_paint_material();
+	MakeMaterial.make_material_parse_paint_material();
 
 	///if (is_paint || is_sculpt)
 	util_render_make_material_preview();
@@ -273,8 +273,8 @@ function project_new(resetLayers: bool = true) {
 
 		///if (is_paint || is_sculpt)
 		let aspect_ratio_changed: bool = project_layers[0].texpaint.width != config_get_texture_res_x() || project_layers[0].texpaint.height != config_get_texture_res_y();
-		while (project_layers.length > 0) SlotLayer.unload(project_layers.pop());
-		let layer: SlotLayerRaw = SlotLayer.create();
+		while (project_layers.length > 0) SlotLayer.slot_layer_unload(project_layers.pop());
+		let layer: SlotLayerRaw = SlotLayer.slot_layer_create();
 		project_layers.push(layer);
 		context_set_layer(layer);
 		if (aspect_ratio_changed) {
@@ -302,7 +302,7 @@ function project_new(resetLayers: bool = true) {
 	///end
 
 	///if (krom_direct3d12 || krom_vulkan || krom_metal)
-	RenderPathRaytrace.ready = false;
+	render_path_raytrace_ready = false;
 	///end
 }
 
@@ -310,8 +310,8 @@ function project_new(resetLayers: bool = true) {
 function project_import_material() {
 	ui_files_show("arm,blend", false, true, function (path: string) {
 		path.endsWith(".blend") ?
-			ImportBlendMaterial.run(path) :
-			ImportArm.run_material(path);
+			import_blend_material_run(path) :
+			import_arm_run_material(path);
 	});
 }
 
@@ -320,7 +320,7 @@ function project_import_brush() {
 		// Create brush from texture
 		if (path_is_texture(path)) {
 			// Import texture
-			ImportAsset.run(path);
+			import_asset_run(path);
 			let asset_index: i32 = 0;
 			for (let i: i32 = 0; i < project_assets.length; ++i) {
 				if (project_assets[i].file == path) {
@@ -330,11 +330,11 @@ function project_import_brush() {
 			}
 
 			// Create a new brush
-			context_raw.brush = SlotBrush.create();
+			context_raw.brush = SlotBrush.slot_brush_create();
 			project_brushes.push(context_raw.brush);
 
 			// Create and link image node
-			let n: zui_node_t = NodesBrush.create_node("TEX_IMAGE");
+			let n: zui_node_t = NodesBrush.nodes_brush_create_node("TEX_IMAGE");
 			n.x = 83;
 			n.y = 340;
 			n.buttons[0].default_value = asset_index;
@@ -348,7 +348,7 @@ function project_import_brush() {
 			});
 
 			// Parse brush
-			MakeMaterial.parse_brush();
+			MakeMaterial.make_material_parse_brush();
 			ui_nodes_hwnd.redraws = 2;
 			let _init = function () {
 				util_render_make_brush_preview();
@@ -357,7 +357,7 @@ function project_import_brush() {
 		}
 		// Import from project file
 		else {
-			ImportArm.run_brush(path);
+			import_arm_run_brush(path);
 		}
 	});
 }
@@ -411,10 +411,10 @@ function project_import_mesh_box(path: string, replaceExisting: bool = true, cle
 				ui_box_hide();
 				let do_import = function () {
 					///if (is_paint || is_sculpt)
-					ImportMesh.run(path, clearLayers, replaceExisting);
+					import_mesh_run(path, clearLayers, replaceExisting);
 					///end
 					///if is_lab
-					ImportMesh.run(path, replaceExisting);
+					import_mesh_run(path, replaceExisting);
 					///end
 					if (done != null) done();
 				}
@@ -448,10 +448,10 @@ function project_unwrap_mesh_box(mesh: any, done: (a: any)=>void, skipUI: bool =
 		if (zui_tab(zui_handle("project_7"), tr("Unwrap Mesh"), tab_vertical)) {
 
 			let unwrapPlugins: string[] = [];
-			if (BoxPreferences.files_plugin == null) {
-				BoxPreferences.fetch_plugins();
+			if (box_preferences_files_plugin == null) {
+				box_preferences_fetch_plugins();
 			}
-			for (let f of BoxPreferences.files_plugin) {
+			for (let f of box_preferences_files_plugin) {
 				if (f.indexOf("uv_unwrap") >= 0 && f.endsWith(".js")) {
 					unwrapPlugins.push(f);
 				}
@@ -496,14 +496,14 @@ function project_unwrap_mesh_box(mesh: any, done: (a: any)=>void, skipUI: bool =
 function project_import_asset(filters: string = null, hdrAsEnvmap: bool = true) {
 	if (filters == null) filters = path_texture_formats.join(",") + "," + path_mesh_formats.join(",");
 	ui_files_show(filters, false, true, function (path: string) {
-		ImportAsset.run(path, -1.0, -1.0, true, hdrAsEnvmap);
+		import_asset_run(path, -1.0, -1.0, true, hdrAsEnvmap);
 	});
 }
 
 function project_import_swatches(replaceExisting: bool = false) {
 	ui_files_show("arm,gpl", false, false, function (path: string) {
-		if (path_is_gimp_color_palette(path)) ImportGpl.run(path, replaceExisting);
-		else ImportArm.run_swatches(path, replaceExisting);
+		if (path_is_gimp_color_palette(path)) import_gpl_run(path, replaceExisting);
+		else import_arm_run_swatches(path, replaceExisting);
 	});
 }
 
@@ -522,7 +522,7 @@ function project_reimport_texture(asset: asset_t) {
 		let old_asset: asset_t = project_assets[i];
 		project_assets.splice(i, 1);
 		project_asset_names.splice(i, 1);
-		ImportTexture.run(asset.file);
+		import_texture_run(asset.file);
 		project_assets.splice(i, 0, project_assets.pop());
 		project_asset_names.splice(i, 0, project_asset_names.pop());
 
@@ -531,7 +531,7 @@ function project_reimport_texture(asset: asset_t) {
 		///end
 
 		let _next = function () {
-			MakeMaterial.parse_paint_material();
+			MakeMaterial.make_material_parse_paint_material();
 
 			///if (is_paint || is_sculpt)
 			util_render_make_material_preview();
@@ -591,8 +591,8 @@ function project_export_swatches() {
 	ui_files_show("arm,gpl", true, false, function (path: string) {
 		let f: string = ui_files_filename;
 		if (f == "") f = tr("untitled");
-		if (path_is_gimp_color_palette(f)) ExportGpl.run(path + path_sep + f, f.substring(0, f.lastIndexOf(".")), project_raw.swatches);
-		else ExportArm.run_swatches(path + path_sep + f);
+		if (path_is_gimp_color_palette(f)) export_gpl_run(path + path_sep + f, f.substring(0, f.lastIndexOf(".")), project_raw.swatches);
+		else export_arm_run_swatches(path + path_sep + f);
 	});
 }
 

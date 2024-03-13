@@ -43,16 +43,16 @@ function main_start() {
 	app_init(function() {
 		let o: object_t = scene_set_active("Scene");
 		uniforms_ext_init();
-		RenderPathBase.init();
+		render_path_base_init();
 
 		if (context_raw.render_mode == render_mode_t.FORWARD) {
-			RenderPathDeferred.init(); // Allocate gbuffer
-			RenderPathForward.init();
-			render_path_commands = RenderPathForward.commands;
+			render_path_deferred_init(); // Allocate gbuffer
+			render_path_forward_init();
+			render_path_commands = render_path_forward_commands;
 		}
 		else {
-			RenderPathDeferred.init();
-			render_path_commands = RenderPathDeferred.commands;
+			render_path_deferred_init();
+			render_path_commands = render_path_deferred_commands;
 		}
 
 		base_init();
@@ -119,8 +119,8 @@ function main_embed_raytrace() {
 		"bnoise_rank.k",
 		"bnoise_scramble.k",
 		"bnoise_sobol.k",
-		"raytrace_brute_core" + RenderPathRaytrace.ext,
-		"raytrace_brute_full" + RenderPathRaytrace.ext
+		"raytrace_brute_core" + render_path_raytrace_ext,
+		"raytrace_brute_full" + render_path_raytrace_ext
 	];
 	for (let file of files) {
 		resource_embed_blob(file, global["data/" + file]);
@@ -131,10 +131,10 @@ function main_embed_raytrace() {
 function main_embed_raytrace_bake() {
 	let global: any = globalThis;
 	let files: string[] = [
-		"raytrace_bake_ao" + RenderPathRaytrace.ext,
-		"raytrace_bake_bent" + RenderPathRaytrace.ext,
-		"raytrace_bake_light" + RenderPathRaytrace.ext,
-		"raytrace_bake_thick" + RenderPathRaytrace.ext
+		"raytrace_bake_ao" + render_path_raytrace_ext,
+		"raytrace_bake_bent" + render_path_raytrace_ext,
+		"raytrace_bake_light" + render_path_raytrace_ext,
+		"raytrace_bake_thick" + render_path_raytrace_ext
 	];
 	for (let file of files) {
 		resource_embed_blob(file, global["data/" + file]);

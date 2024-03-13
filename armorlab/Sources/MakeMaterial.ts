@@ -38,7 +38,7 @@ class MakeMaterial {
 		///end
 
 		///if (krom_direct3d12 || krom_vulkan)
-		RenderPathRaytrace.dirty = 1;
+		render_path_raytrace_dirty = 1;
 		///end
 	}
 

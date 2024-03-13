@@ -75,29 +75,29 @@ function ui_base_init_htabs(): zui_handle_t[] {
 function ui_base_init_hwnd_tabs(): any[] {
 	///if is_paint
 	return [
-		[TabLayers.draw, TabHistory.draw, TabPlugins.draw
+		[TabLayers.tab_layers_draw, TabHistory.tab_history_draw, TabPlugins.tab_plugins_draw
 			///if is_forge
 			, TabObjects.draw
 			///end
 		],
-		[TabMaterials.draw, TabBrushes.draw, TabParticles.draw],
-		[TabBrowser.draw, TabTextures.draw, TabMeshes.draw, TabFonts.draw, TabSwatches.draw, TabScript.draw, TabConsole.draw, ui_status_draw_version_tab]
+		[TabMaterials.tab_materials_draw, TabBrushes.tab_brushes_draw, TabParticles.tab_particles_draw],
+		[TabBrowser.tab_browser_draw, TabTextures.tab_textures_draw, TabMeshes.tab_meshes_draw, TabFonts.tab_fonts_draw, TabSwatches.tab_swatches_draw, TabScript.tab_script_draw, TabConsole.tab_console_draw, ui_status_draw_version_tab]
 	];
 	///end
 	///if is_sculpt
 	return [
-		[TabLayers.draw, TabHistory.draw, TabPlugins.draw
+		[TabLayers.tab_layers_draw, TabHistory.tab_history_draw, TabPlugins.tab_plugins_draw
 			///if is_forge
 			, TabObjects.draw
 			///end
 		],
-		[TabMaterials.draw, TabBrushes.draw, TabParticles.draw],
-		[TabBrowser.draw, TabTextures.draw, TabMeshes.draw, TabFonts.draw, TabScript.draw, TabConsole.draw, ui_status_draw_version_tab]
+		[TabMaterials.tab_materials_draw, TabBrushes.tab_brushes_draw, TabParticles.tab_particles_draw],
+		[TabBrowser.tab_browser_draw, TabTextures.tab_textures_draw, TabMeshes.tab_meshes_draw, TabFonts.tab_fonts_draw, TabScript.tab_script_draw, TabConsole.tab_console_draw, ui_status_draw_version_tab]
 	];
 	///end
 	///if is_lab
 	return [
-		[TabBrowser.draw, TabTextures.draw, TabMeshes.draw, TabSwatches.draw, TabPlugins.draw, TabScript.draw, TabConsole.draw, ui_status_draw_version_tab]
+		[TabBrowser.tab_browser_draw, TabTextures.tab_textures_draw, TabMeshes.tab_meshes_draw, TabSwatches.tab_swatches_draw, TabPlugins.tab_plugins_draw, TabScript.tab_script_draw, TabConsole.tab_console_draw, ui_status_draw_version_tab]
 	];
 	///end
 }
@@ -120,26 +120,26 @@ function ui_base_init() {
 	if (project_materials == null) {
 		project_materials = [];
 		let m: material_data_t = data_get_material("Scene", "Material");
-		project_materials.push(SlotMaterial.create(m));
+		project_materials.push(SlotMaterial.slot_material_create(m));
 		context_raw.material = project_materials[0];
 	}
 
 	if (project_brushes == null) {
 		project_brushes = [];
-		project_brushes.push(SlotBrush.create());
+		project_brushes.push(SlotBrush.slot_brush_create());
 		context_raw.brush = project_brushes[0];
-		MakeMaterial.parse_brush();
+		MakeMaterial.make_material_parse_brush();
 	}
 
 	if (project_fonts == null) {
 		project_fonts = [];
-		project_fonts.push(SlotFont.create("default.ttf", base_font));
+		project_fonts.push(SlotFont.slot_font_create("default.ttf", base_font));
 		context_raw.font = project_fonts[0];
 	}
 
 	if (project_layers == null) {
 		project_layers = [];
-		project_layers.push(SlotLayer.create());
+		project_layers.push(SlotLayer.slot_layer_create());
 		context_raw.layer = project_layers[0];
 	}
 	///end
@@ -161,7 +161,7 @@ function ui_base_init() {
 
 	context_parse_brush_inputs();
 
-	ParserLogic.parse(project_canvas);
+	parser_logic_parse(project_canvas);
 	///end
 
 	if (project_raw.swatches == null) {
@@ -275,7 +275,7 @@ function ui_base_update() {
 	if (operator_shortcut(config_keymap.file_save_as)) project_save_as();
 	else if (operator_shortcut(config_keymap.file_save)) project_save();
 	else if (operator_shortcut(config_keymap.file_open)) project_open();
-	else if (operator_shortcut(config_keymap.file_open_recent)) BoxProjects.show();
+	else if (operator_shortcut(config_keymap.file_open_recent)) box_projects_show();
 	else if (operator_shortcut(config_keymap.file_reimport_mesh)) project_reimport_mesh();
 	else if (operator_shortcut(config_keymap.file_reimport_textures)) project_reimport_textures();
 	else if (operator_shortcut(config_keymap.file_new)) project_new_box();
@@ -285,11 +285,11 @@ function ui_base_update() {
 			///if is_paint
 			context_raw.layers_export = export_mode_t.VISIBLE;
 			///end
-			BoxExport.show_textures();
+			box_export_show_textures();
 		}
 		else {
 			let _init = function () {
-				ExportTexture.run(context_raw.texture_export_path);
+				export_texture_run(context_raw.texture_export_path);
 			}
 			app_notify_on_init(_init);
 		}
@@ -298,11 +298,11 @@ function ui_base_update() {
 		///if (is_paint || is_sculpt)
 		context_raw.layers_export = export_mode_t.VISIBLE;
 		///end
-		BoxExport.show_textures();
+		box_export_show_textures();
 	}
 	///end
 	else if (operator_shortcut(config_keymap.file_import_assets)) project_import_asset();
-	else if (operator_shortcut(config_keymap.edit_prefs)) BoxPreferences.show();
+	else if (operator_shortcut(config_keymap.edit_prefs)) box_preferences_show();
 
 	if (keyboard_started(config_keymap.view_distract_free) ||
 		(keyboard_started("escape") && !ui_base_show && !ui_box_show)) {
@@ -336,7 +336,7 @@ function ui_base_update() {
 					context_raw.brush_angle = math_floor(context_raw.brush_angle) % 360;
 					if (context_raw.brush_angle < 0) context_raw.brush_angle += 360;
 					context_raw.brush_angle_handle.value = context_raw.brush_angle;
-					MakeMaterial.parse_paint_material();
+					MakeMaterial.make_material_parse_paint_material();
 				}
 				else if (decal_mask && operator_shortcut(config_keymap.decal_mask + "+" + config_keymap.brush_radius, shortcut_type_t.DOWN)) {
 					context_raw.brush_decal_mask_radius += mouse_movement_x / 150;
@@ -693,8 +693,8 @@ function ui_base_update() {
 	///if arm_physics
 	if (context_raw.tool == workspace_tool_t.PARTICLE && context_raw.particle_physics && context_in_paint_area() && !context_raw.paint2d) {
 		util_particle_init_physics();
-		let world: PhysicsWorldRaw = PhysicsWorld.active;
-		PhysicsWorld.late_update(world);
+		let world: PhysicsWorldRaw = physics_world_active;
+		physics_world_late_update(world);
 		context_raw.ddirty = 2;
 		context_raw.rdirty = 2;
 		if (mouse_started()) {
@@ -718,22 +718,22 @@ function ui_base_update() {
 			vec4_set(mo.base.transform.scale, context_raw.brush_radius * 0.2, context_raw.brush_radius * 0.2, context_raw.brush_radius * 0.2);
 			transform_build_matrix(mo.base.transform);
 
-			let body: PhysicsBodyRaw = PhysicsBody.create();
+			let body: PhysicsBodyRaw = physics_body_create();
 			body.shape = shape_type_t.SPHERE;
 			body.mass = 1.0;
 			body.ccd = true;
 			mo.base.transform.radius /= 10; // Lower ccd radius
-			PhysicsBody.init(body, mo.base);
+			physics_body_init(body, mo.base);
 			(mo.base as any).physicsBody = body;
 			mo.base.transform.radius *= 10;
 
 			let ray: ray_t = raycast_get_ray(mouse_view_x(), mouse_view_y(), camera);
-			PhysicsBody.apply_impulse(body, vec4_mult(ray.dir, 0.15));
+			physics_body_apply_impulse(body, vec4_mult(ray.dir, 0.15));
 
 			context_raw.particle_timer = tween_timer(5, function() { mesh_object_remove(mo); });
 		}
 
-		let pairs: pair_t[] = PhysicsWorld.get_contact_pairs(world, context_raw.paint_body);
+		let pairs: pair_t[] = physics_world_get_contact_pairs(world, context_raw.paint_body);
 		if (pairs != null) {
 			for (let p of pairs) {
 				context_raw.last_particle_hit_x = context_raw.particle_hit_x != 0 ? context_raw.particle_hit_x : p.pos_a.x;
@@ -1058,7 +1058,7 @@ function ui_base_update_ui() {
 		if (context_raw.tool == workspace_tool_t.COLORID && context_raw.layer.fill_layer != null) {
 			base_notify_on_next_frame(function () {
 				base_update_fill_layer();
-				MakeMaterial.parse_paint_material(false);
+				MakeMaterial.make_material_parse_paint_material(false);
 			});
 		}
 		///end
@@ -1072,7 +1072,7 @@ function ui_base_update_ui() {
 		if (base_pipe_merge == null) base_make_pipe();
 		// Update all layer previews
 		for (let l of project_layers) {
-			if (SlotLayer.is_group(l)) continue;
+			if (SlotLayer.slot_layer_is_group(l)) continue;
 			let target: image_t = l.texpaint_preview;
 			let source: image_t = l.texpaint;
 			g2_begin(target);
@@ -1085,7 +1085,7 @@ function ui_base_update_ui() {
 		}
 		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 	}
-	if (context_raw.layer_preview_dirty && !SlotLayer.is_group(context_raw.layer)) {
+	if (context_raw.layer_preview_dirty && !SlotLayer.slot_layer_is_group(context_raw.layer)) {
 		context_raw.layer_preview_dirty = false;
 		context_raw.mask_preview_last = null;
 		if (base_pipe_merge == null) base_make_pipe();

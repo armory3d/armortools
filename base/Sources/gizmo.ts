@@ -255,7 +255,7 @@ function gizmo_update() {
 
 		///if is_forge
 		util_mesh_remove_merged();
-		RenderPathRaytrace.ready = false;
+		render_path_raytrace_ready = false;
 		///end
 	}
 

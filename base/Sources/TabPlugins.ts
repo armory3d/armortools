@@ -1,7 +1,7 @@
 
 class TabPlugins {
 
-	static draw = (htab: zui_handle_t) => {
+	static tab_plugins_draw = (htab: zui_handle_t) => {
 		let ui: zui_t = ui_base_ui;
 		if (zui_tab(htab, tr("Plugins"))) {
 
@@ -15,8 +15,8 @@ class TabPlugins {
 			///end
 
 			if (zui_button(tr("Manager"))) {
-				BoxPreferences.htab.position = 6; // Plugins
-				BoxPreferences.show();
+				box_preferences_htab.position = 6; // Plugins
+				box_preferences_show();
 			}
 			zui_end_sticky();
 

@@ -3,43 +3,43 @@
 
 class TabMaterials {
 
-	static draw = (htab: zui_handle_t) => {
+	static tab_materials_draw = (htab: zui_handle_t) => {
 		let mini: bool = config_raw.layout[layout_size_t.SIDEBAR_W] <= ui_base_sidebar_mini_w;
-		mini ? TabMaterials.draw_mini(htab) : TabMaterials.draw_full(htab);
+		mini ? TabMaterials.tab_materials_draw_mini(htab) : TabMaterials.tab_materials_draw_full(htab);
 	}
 
-	static draw_mini = (htab: zui_handle_t) => {
+	static tab_materials_draw_mini = (htab: zui_handle_t) => {
 		zui_set_hovered_tab_name(tr("Materials"));
 
 		zui_begin_sticky();
 		zui_separator(5);
 
-		TabMaterials.button_nodes();
-		TabMaterials.button_new("+");
+		TabMaterials.tab_materials_button_nodes();
+		TabMaterials.tab_materials_button_new("+");
 
 		zui_end_sticky();
 		zui_separator(3, false);
-		TabMaterials.draw_slots(true);
+		TabMaterials.tab_materials_draw_slots(true);
 	}
 
-	static draw_full = (htab: zui_handle_t) => {
+	static tab_materials_draw_full = (htab: zui_handle_t) => {
 		if (zui_tab(htab, tr("Materials"))) {
 			zui_begin_sticky();
 			zui_row([1 / 4, 1 / 4, 1 / 4]);
 
-			TabMaterials.button_new(tr("New"));
+			TabMaterials.tab_materials_button_new(tr("New"));
 			if (zui_button(tr("Import"))) {
 				project_import_material();
 			}
-			TabMaterials.button_nodes();
+			TabMaterials.tab_materials_button_nodes();
 
 			zui_end_sticky();
 			zui_separator(3, false);
-			TabMaterials.draw_slots(false);
+			TabMaterials.tab_materials_draw_slots(false);
 		}
 	}
 
-	static button_nodes = () => {
+	static tab_materials_button_nodes = () => {
 		let ui: zui_t = ui_base_ui;
 		if (zui_button(tr("Nodes"))) {
 			ui_base_show_material_nodes();
@@ -47,7 +47,7 @@ class TabMaterials {
 		else if (ui.is_hovered) zui_tooltip(tr("Show Node Editor") + ` (${config_keymap.toggle_node_editor})`);
 	}
 
-	static draw_slots = (mini: bool) => {
+	static tab_materials_draw_slots = (mini: bool) => {
 		let ui: zui_t = ui_base_ui;
 		let slotw: i32 = math_floor(51 * zui_SCALE(ui));
 		let num: i32 = math_floor(config_raw.layout[layout_size_t.SIDEBAR_W] / slotw);
@@ -157,30 +157,30 @@ class TabMaterials {
 
 						if (ui_menu_button(ui, tr("Export"))) {
 							context_select_material(i);
-							BoxExport.show_material();
+							box_export_show_material();
 						}
 
 						///if is_paint
 						if (ui_menu_button(ui, tr("Bake"))) {
 							context_select_material(i);
-							BoxExport.show_bake_material();
+							box_export_show_bake_material();
 						}
 						///end
 
 						if (ui_menu_button(ui, tr("Duplicate"))) {
 							let _init = () => {
-								context_raw.material = SlotMaterial.create(project_materials[0].data);
+								context_raw.material = SlotMaterial.slot_material_create(project_materials[0].data);
 								project_materials.push(context_raw.material);
 								let cloned: zui_node_canvas_t = json_parse(json_stringify(project_materials[i].canvas));
 								context_raw.material.canvas = cloned;
-								TabMaterials.update_material();
+								TabMaterials.tab_materials_update_material();
 								history_duplicate_material();
 							}
 							app_notify_on_init(_init);
 						}
 
 						if (project_materials.length > 1 && ui_menu_button(ui, tr("Delete"), "delete")) {
-							TabMaterials.delete_material(m);
+							TabMaterials.tab_materials_delete_material(m);
 						}
 
 						let base_handle: zui_handle_t = zui_nest(zui_handle("tabmaterials_0"), m.id, {selected: m.paint_base});
@@ -219,7 +219,7 @@ class TabMaterials {
 							height_handle.changed ||
 							emis_handle.changed ||
 							subs_handle.changed) {
-							MakeMaterial.parse_paint_material();
+							MakeMaterial.make_material_parse_paint_material();
 							ui_menu_keep_open = true;
 						}
 					}, 13 + add);
@@ -256,33 +256,33 @@ class TabMaterials {
 					    	 ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
 		if (in_focus && ui.is_delete_down && project_materials.length > 1) {
 			ui.is_delete_down = false;
-			TabMaterials.delete_material(context_raw.material);
+			TabMaterials.tab_materials_delete_material(context_raw.material);
 		}
 	}
 
-	static button_new = (text: string) => {
+	static tab_materials_button_new = (text: string) => {
 		if (zui_button(text)) {
 			let current: image_t = _g2_current;
 			g2_end();
-			context_raw.material = SlotMaterial.create(project_materials[0].data);
+			context_raw.material = SlotMaterial.slot_material_create(project_materials[0].data);
 			project_materials.push(context_raw.material);
-			TabMaterials.update_material();
+			TabMaterials.tab_materials_update_material();
 			g2_begin(current);
 			history_new_material();
 		}
 	}
 
-	static update_material = () => {
+	static tab_materials_update_material = () => {
 		ui_header_handle.redraws = 2;
 		ui_nodes_hwnd.redraws = 2;
 		ui_nodes_group_stack = [];
-		MakeMaterial.parse_paint_material();
+		MakeMaterial.make_material_parse_paint_material();
 		util_render_make_material_preview();
 		let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
 		if (decal) util_render_make_decal_preview();
 	}
 
-	static update_material_pointers = (nodes: zui_node_t[], i: i32) => {
+	static tab_materials_update_material_pointers = (nodes: zui_node_t[], i: i32) => {
 		for (let n of nodes) {
 			if (n.type == "MATERIAL") {
 				if (n.buttons[0].default_value == i) {
@@ -295,8 +295,8 @@ class TabMaterials {
 		}
 	}
 
-	static accept_swatch_drag = (swatch: swatch_color_t) => {
-		context_raw.material = SlotMaterial.create(project_materials[0].data);
+	static tab_materials_accept_swatch_drag = (swatch: swatch_color_t) => {
+		context_raw.material = SlotMaterial.slot_material_create(project_materials[0].data);
 		for (let node of context_raw.material.canvas.nodes) {
 			if (node.type == "RGB" ) {
 				node.outputs[0].default_value = [
@@ -315,18 +315,18 @@ class TabMaterials {
 			}
 		}
 		project_materials.push(context_raw.material);
-		TabMaterials.update_material();
+		TabMaterials.tab_materials_update_material();
 		history_new_material();
 	}
 
-	static delete_material = (m: SlotMaterialRaw) => {
+	static tab_materials_delete_material = (m: SlotMaterialRaw) => {
 		let i: i32 = project_materials.indexOf(m);
 		for (let l of project_layers) if (l.fill_layer == m) l.fill_layer = null;
 		history_delete_material();
 		context_select_material(i == project_materials.length - 1 ? i - 1 : i + 1);
 		project_materials.splice(i, 1);
 		ui_base_hwnds[1].redraws = 2;
-		for (let m of project_materials) TabMaterials.update_material_pointers(m.canvas.nodes, i);
+		for (let m of project_materials) TabMaterials.tab_materials_update_material_pointers(m.canvas.nodes, i);
 	}
 }
 

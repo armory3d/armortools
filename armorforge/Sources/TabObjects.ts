@@ -98,7 +98,7 @@ class TabObjects {
 								let md: material_data_t = data_get_material("Scene", "TempMaterial" + TabObjects.materialId);
 								let mo: mesh_object_t = currentObject.ext;
 								mo.materials = [md];
-								MakeMaterial.parse_mesh_preview_material(md);
+								MakeMaterial.make_material_parse_mesh_preview_material(md);
 							}
 						}, 1);
 					}

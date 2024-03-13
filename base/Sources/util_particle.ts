@@ -38,7 +38,7 @@ function util_particle_init() {
 		t.width = 0;
 		t.height = 0;
 		t.format = "R8";
-		t.scale = RenderPathBase.get_super_sampling();
+		t.scale = render_path_base_get_super_sampling();
 		render_path_create_render_target(t);
 	}
 
@@ -82,13 +82,13 @@ function util_particle_init() {
 ///if arm_physics
 
 function util_particle_init_physics() {
-	if (PhysicsWorld.active != null) {
+	if (physics_world_active != null) {
 		util_particle_init_mesh();
 		return;
 	}
 
-	PhysicsWorld.load(function () {
-		PhysicsWorld.create();
+	physics_world_load(function () {
+		physics_world_create();
 		util_particle_init_mesh();
 	});
 }
@@ -102,9 +102,9 @@ function util_particle_init_mesh() {
 	po.base.transform.scale.y = po.base.parent.transform.scale.y;
 	po.base.transform.scale.z = po.base.parent.transform.scale.z;
 
-	context_raw.paint_body = PhysicsBody.create();
+	context_raw.paint_body = physics_body_create();
 	context_raw.paint_body.shape = shape_type_t.MESH;
-	PhysicsBody.init(context_raw.paint_body, po.base);
+	physics_body_init(context_raw.paint_body, po.base);
 	(po.base as any).physicsBody = context_raw.paint_body;
 }
 

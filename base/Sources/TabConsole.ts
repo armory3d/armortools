@@ -1,7 +1,7 @@
 
 class TabConsole {
 
-	static draw = (htab: zui_handle_t) => {
+	static tab_console_draw = (htab: zui_handle_t) => {
 		let ui: zui_t = ui_base_ui;
 
 		let title: string = console_message_timer > 0 ? console_message + "        " : tr("Console");

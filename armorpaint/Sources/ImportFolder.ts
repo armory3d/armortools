@@ -1,7 +1,7 @@
 
 class ImportFolder {
 
-	static run = (path: string) => {
+	static import_folder_run = (path: string) => {
 		let files: string[] = file_read_directory(path);
 		let mapbase: string = "";
 		let mapopac: string = "";
@@ -50,7 +50,7 @@ class ImportFolder {
 			}
 
 			if (valid) {
-				ImportTexture.run(path + path_sep + f, false);
+				import_texture_run(path + path_sep + f, false);
 				found_texture = true;
 			}
 		}
@@ -61,7 +61,7 @@ class ImportFolder {
 		}
 
 		// Create material
-		context_raw.material = SlotMaterial.create(project_materials[0].data);
+		context_raw.material = SlotMaterial.slot_material_create(project_materials[0].data);
 		project_materials.push(context_raw.material);
 		let nodes: zui_nodes_t = context_raw.material.nodes;
 		let canvas: zui_node_canvas_t = context_raw.material.canvas;
@@ -86,42 +86,42 @@ class ImportFolder {
 		let start_y: i32 = 100;
 		let node_h: i32 = 164;
 		if (mapbase != "") {
-			ImportFolder.place_image_node(nodes, canvas, mapbase, start_y + node_h * pos, nout.id, 0);
+			ImportFolder.import_folder_place_image_node(nodes, canvas, mapbase, start_y + node_h * pos, nout.id, 0);
 			pos++;
 		}
 		if (mapopac != "") {
-			ImportFolder.place_image_node(nodes, canvas, mapopac, start_y + node_h * pos, nout.id, 1);
+			ImportFolder.import_folder_place_image_node(nodes, canvas, mapopac, start_y + node_h * pos, nout.id, 1);
 			pos++;
 		}
 		if (mapocc != "") {
-			ImportFolder.place_image_node(nodes, canvas, mapocc, start_y + node_h * pos, nout.id, 2);
+			ImportFolder.import_folder_place_image_node(nodes, canvas, mapocc, start_y + node_h * pos, nout.id, 2);
 			pos++;
 		}
 		if (maprough != "") {
-			ImportFolder.place_image_node(nodes, canvas, maprough, start_y + node_h * pos, nout.id, 3);
+			ImportFolder.import_folder_place_image_node(nodes, canvas, maprough, start_y + node_h * pos, nout.id, 3);
 			pos++;
 		}
 		if (mapmet != "") {
-			ImportFolder.place_image_node(nodes, canvas, mapmet, start_y + node_h * pos, nout.id, 4);
+			ImportFolder.import_folder_place_image_node(nodes, canvas, mapmet, start_y + node_h * pos, nout.id, 4);
 			pos++;
 		}
 		if (mapnor != "") {
-			ImportFolder.place_image_node(nodes, canvas, mapnor, start_y + node_h * pos, nout.id, 5);
+			ImportFolder.import_folder_place_image_node(nodes, canvas, mapnor, start_y + node_h * pos, nout.id, 5);
 			pos++;
 		}
 		if (mapheight != "") {
-			ImportFolder.place_image_node(nodes, canvas, mapheight, start_y + node_h * pos, nout.id, 7);
+			ImportFolder.import_folder_place_image_node(nodes, canvas, mapheight, start_y + node_h * pos, nout.id, 7);
 			pos++;
 		}
 
-		MakeMaterial.parse_paint_material();
+		MakeMaterial.make_material_parse_paint_material();
 		util_render_make_material_preview();
 		ui_base_hwnds[1].redraws = 2;
 		history_new_material();
 	}
 
-	static place_image_node = (nodes: zui_nodes_t, canvas: zui_node_canvas_t, asset: string, ny: i32, to_id: i32, to_socket: i32) => {
-		let n: zui_node_t = NodesMaterial.create_node("TEX_IMAGE");
+	static import_folder_place_image_node = (nodes: zui_nodes_t, canvas: zui_node_canvas_t, asset: string, ny: i32, to_id: i32, to_socket: i32) => {
+		let n: zui_node_t = nodes_material_create_node("TEX_IMAGE");
 		n.buttons[0].default_value = base_get_asset_index(asset);
 		n.x = 72;
 		n.y = ny;

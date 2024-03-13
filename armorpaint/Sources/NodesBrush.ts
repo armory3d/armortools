@@ -10,9 +10,9 @@
 
 class NodesBrush {
 
-	static categories = [_tr("Nodes")];
+	static nodes_brush_categories = [_tr("Nodes")];
 
-	static list: zui_node_t[][] = [
+	static nodes_brush_list: zui_node_t[][] = [
 		[ // Category 0
 			TEX_IMAGE.def,
 			InputNode.def,
@@ -26,8 +26,8 @@ class NodesBrush {
 		]
 	];
 
-	static create_node = (nodeType: string): zui_node_t => {
-		for (let c of NodesBrush.list) {
+	static nodes_brush_create_node = (nodeType: string): zui_node_t => {
+		for (let c of NodesBrush.nodes_brush_list) {
 			for (let n of c) {
 				if (n.type == nodeType) {
 					let canvas: zui_node_canvas_t = context_raw.brush.canvas;

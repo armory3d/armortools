@@ -10,7 +10,7 @@ class SlotFontRaw {
 
 class SlotFont {
 
-	static create(name: string, font: g2_font_t, file = ""): SlotFontRaw {
+	static slot_font_create(name: string, font: g2_font_t, file = ""): SlotFontRaw {
 		let raw: SlotFontRaw = new SlotFontRaw();
 		for (let slot of project_fonts) if (slot.id >= raw.id) raw.id = slot.id + 1;
 		raw.name = name;

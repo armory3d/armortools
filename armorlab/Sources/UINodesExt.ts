@@ -23,14 +23,14 @@ class UINodesExt {
 					app_remove_render_2d(delayIdleSleep);
 
 					///if (krom_direct3d12 || krom_vulkan || krom_metal)
-					RenderPathRaytrace.ready = false;
+					render_path_raytrace_ready = false;
 					///end
 				}
 			}
 
 			base_notifyOnNextFrame(() => {
 				let timer = time_time();
-				ParserLogic.parse(project_canvas);
+				parser_logic_parse(project_canvas);
 
 				PhotoToPBRNode.cachedSource = null;
 				BrushOutputNode.inst.getAsImage(ChannelType.ChannelBaseColor, (texbase: image_t) => {

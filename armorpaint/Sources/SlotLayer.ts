@@ -37,7 +37,7 @@ class SlotLayerRaw {
 
 class SlotLayer {
 
-	static create(ext = "", type = layer_slot_type_t.LAYER, parent: SlotLayerRaw = null): SlotLayerRaw {
+	static slot_layer_create(ext = "", type = layer_slot_type_t.LAYER, parent: SlotLayerRaw = null): SlotLayerRaw {
 		let raw: SlotLayerRaw = new SlotLayerRaw();
 		if (ext == "") {
 			raw.id = 0;
@@ -115,18 +115,18 @@ class SlotLayer {
 		return raw;
 	}
 
-	static delete = (raw: SlotLayerRaw) => {
-		SlotLayer.unload(raw);
+	static slot_layer_delete = (raw: SlotLayerRaw) => {
+		SlotLayer.slot_layer_unload(raw);
 
-		if (SlotLayer.is_layer(raw)) {
-			let masks: SlotLayerRaw[] = SlotLayer.get_masks(raw, false); // Prevents deleting group masks
-			if (masks != null) for (let m of masks) SlotLayer.delete(m);
+		if (SlotLayer.slot_layer_is_layer(raw)) {
+			let masks: SlotLayerRaw[] = SlotLayer.slot_layer_get_masks(raw, false); // Prevents deleting group masks
+			if (masks != null) for (let m of masks) SlotLayer.slot_layer_delete(m);
 		}
-		else if (SlotLayer.is_group(raw)) {
-			let children: SlotLayerRaw[] = SlotLayer.get_children(raw);
-			if (children != null) for (let c of children) SlotLayer.delete(c);
-			let masks: SlotLayerRaw[] = SlotLayer.get_masks(raw);
-			if (masks != null) for (let m of masks) SlotLayer.delete(m);
+		else if (SlotLayer.slot_layer_is_group(raw)) {
+			let children: SlotLayerRaw[] = SlotLayer.slot_layer_get_children(raw);
+			if (children != null) for (let c of children) SlotLayer.slot_layer_delete(c);
+			let masks: SlotLayerRaw[] = SlotLayer.slot_layer_get_masks(raw);
+			if (masks != null) for (let m of masks) SlotLayer.slot_layer_delete(m);
 		}
 
 		let lpos: i32 = project_layers.indexOf(raw);
@@ -139,8 +139,8 @@ class SlotLayer {
 		// Do not remove empty groups if the last layer is deleted as this prevents redo from working properly
 	}
 
-	static unload = (raw: SlotLayerRaw) => {
-		if (SlotLayer.is_group(raw)) return;
+	static slot_layer_unload = (raw: SlotLayerRaw) => {
+		if (SlotLayer.slot_layer_is_group(raw)) return;
 
 		let _texpaint: image_t = raw.texpaint;
 		///if is_paint
@@ -161,15 +161,15 @@ class SlotLayer {
 
 		render_path_render_targets.delete("texpaint" + raw.ext);
 		///if is_paint
-		if (SlotLayer.is_layer(raw)) {
+		if (SlotLayer.slot_layer_is_layer(raw)) {
 			render_path_render_targets.delete("texpaint_nor" + raw.ext);
 			render_path_render_targets.delete("texpaint_pack" + raw.ext);
 		}
 		///end
 	}
 
-	static swap = (raw: SlotLayerRaw, other: SlotLayerRaw) => {
-		if ((SlotLayer.is_layer(raw) || SlotLayer.is_mask(raw)) && (SlotLayer.is_layer(other) || SlotLayer.is_mask(other))) {
+	static slot_layer_swap = (raw: SlotLayerRaw, other: SlotLayerRaw) => {
+		if ((SlotLayer.slot_layer_is_layer(raw) || SlotLayer.slot_layer_is_mask(raw)) && (SlotLayer.slot_layer_is_layer(other) || SlotLayer.slot_layer_is_mask(other))) {
 			render_path_render_targets.get("texpaint" + raw.ext)._image = other.texpaint;
 			render_path_render_targets.get("texpaint" + other.ext)._image = raw.texpaint;
 			let _texpaint: image_t = raw.texpaint;
@@ -184,7 +184,7 @@ class SlotLayer {
 		}
 
 		///if is_paint
-		if (SlotLayer.is_layer(raw) && SlotLayer.is_layer(other)) {
+		if (SlotLayer.slot_layer_is_layer(raw) && SlotLayer.slot_layer_is_layer(other)) {
 			render_path_render_targets.get("texpaint_nor" + raw.ext)._image = other.texpaint_nor;
 			render_path_render_targets.get("texpaint_pack" + raw.ext)._image = other.texpaint_pack;
 			render_path_render_targets.get("texpaint_nor" + other.ext)._image = raw.texpaint_nor;
@@ -199,7 +199,7 @@ class SlotLayer {
 		///end
 	}
 
-	static clear = (raw: SlotLayerRaw, baseColor = 0x00000000, baseImage: image_t = null, occlusion = 1.0, roughness = base_default_rough, metallic = 0.0) => {
+	static slot_layer_clear = (raw: SlotLayerRaw, baseColor = 0x00000000, baseImage: image_t = null, occlusion = 1.0, roughness = base_default_rough, metallic = 0.0) => {
 		g4_begin(raw.texpaint);
 		g4_clear(baseColor); // Base
 		g4_end();
@@ -210,7 +210,7 @@ class SlotLayer {
 		}
 
 		///if is_paint
-		if (SlotLayer.is_layer(raw)) {
+		if (SlotLayer.slot_layer_is_layer(raw)) {
 			g4_begin(raw.texpaint_nor);
 			g4_clear(color_from_floats(0.5, 0.5, 1.0, 0.0)); // Nor
 			g4_end();
@@ -224,7 +224,7 @@ class SlotLayer {
 		context_raw.ddirty = 3;
 	}
 
-	static invert_mask = (raw: SlotLayerRaw) => {
+	static slot_layer_invert_mask = (raw: SlotLayerRaw) => {
 		if (base_pipe_invert8 == null) base_make_pipe();
 		let inverted: image_t = image_create_render_target(raw.texpaint.width, raw.texpaint.height, tex_format_t.RGBA32);
 		g2_begin(inverted);
@@ -242,29 +242,29 @@ class SlotLayer {
 		context_raw.ddirty = 3;
 	}
 
-	static apply_mask = (raw: SlotLayerRaw) => {
+	static slot_layer_apply_mask = (raw: SlotLayerRaw) => {
 		if (raw.parent.fill_layer != null) {
-			SlotLayer.to_paint_layer(raw.parent);
+			SlotLayer.slot_layer_to_paint_layer(raw.parent);
 		}
-		if (SlotLayer.is_group(raw.parent)) {
-			for (let c of SlotLayer.get_children(raw.parent)) {
+		if (SlotLayer.slot_layer_is_group(raw.parent)) {
+			for (let c of SlotLayer.slot_layer_get_children(raw.parent)) {
 				base_apply_mask(c, raw);
 			}
 		}
 		else {
 			base_apply_mask(raw.parent, raw);
 		}
-		SlotLayer.delete(raw);
+		SlotLayer.slot_layer_delete(raw);
 	}
 
-	static duplicate = (raw: SlotLayerRaw): SlotLayerRaw => {
+	static slot_layer_duplicate = (raw: SlotLayerRaw): SlotLayerRaw => {
 		let layers: SlotLayerRaw[] = project_layers;
 		let i: i32 = layers.indexOf(raw) + 1;
-		let l: SlotLayerRaw = SlotLayer.create("", SlotLayer.is_layer(raw) ? layer_slot_type_t.LAYER : SlotLayer.is_mask(raw) ? layer_slot_type_t.MASK : layer_slot_type_t.GROUP, raw.parent);
+		let l: SlotLayerRaw = SlotLayer.slot_layer_create("", SlotLayer.slot_layer_is_layer(raw) ? layer_slot_type_t.LAYER : SlotLayer.slot_layer_is_mask(raw) ? layer_slot_type_t.MASK : layer_slot_type_t.GROUP, raw.parent);
 		layers.splice(i, 0, l);
 
 		if (base_pipe_merge == null) base_make_pipe();
-		if (SlotLayer.is_layer(raw)) {
+		if (SlotLayer.slot_layer_is_layer(raw)) {
 			g2_begin(l.texpaint);
 			g2_set_pipeline(base_pipe_copy);
 			g2_draw_image(raw.texpaint, 0, 0);
@@ -283,7 +283,7 @@ class SlotLayer {
 			g2_end();
 			///end
 		}
-		else if (SlotLayer.is_mask(raw)) {
+		else if (SlotLayer.slot_layer_is_mask(raw)) {
 			g2_begin(l.texpaint);
 			g2_set_pipeline(base_pipe_copy8);
 			g2_draw_image(raw.texpaint, 0, 0);
@@ -323,13 +323,13 @@ class SlotLayer {
 		return l;
 	}
 
-	static resize_and_set_bits = (raw: SlotLayerRaw) => {
+	static slot_layer_resize_and_set_bits = (raw: SlotLayerRaw) => {
 		let res_x: i32 = config_get_texture_res_x();
 		let res_y: i32 = config_get_texture_res_y();
 		let rts: map_t<string, render_target_t> = render_path_render_targets;
 		if (base_pipe_merge == null) base_make_pipe();
 
-		if (SlotLayer.is_layer(raw)) {
+		if (SlotLayer.slot_layer_is_layer(raw)) {
 			///if is_paint
 			let format: tex_format_t = base_bits_handle.position == texture_bits_t.BITS8  ? tex_format_t.RGBA32 :
 				base_bits_handle.position == texture_bits_t.BITS16 ? tex_format_t.RGBA64 :
@@ -382,7 +382,7 @@ class SlotLayer {
 			rts.get("texpaint_pack" + raw.ext)._image = raw.texpaint_pack;
 			///end
 		}
-		else if (SlotLayer.is_mask(raw)) {
+		else if (SlotLayer.slot_layer_is_mask(raw)) {
 			let _texpaint: image_t = raw.texpaint;
 			raw.texpaint = image_create_render_target(res_x, res_y, tex_format_t.RGBA32);
 
@@ -401,34 +401,34 @@ class SlotLayer {
 		}
 	}
 
-	static to_fill_layer = (raw: SlotLayerRaw) => {
+	static slot_layer_to_fill_layer = (raw: SlotLayerRaw) => {
 		context_set_layer(raw);
 		raw.fill_layer = context_raw.material;
 		base_update_fill_layer();
 		let _next = () => {
-			MakeMaterial.parse_paint_material();
+			MakeMaterial.make_material_parse_paint_material();
 			context_raw.layer_preview_dirty = true;
 			ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 		}
 		base_notify_on_next_frame(_next);
 	}
 
-	static to_paint_layer = (raw: SlotLayerRaw) => {
+	static slot_layer_to_paint_layer = (raw: SlotLayerRaw) => {
 		context_set_layer(raw);
 		raw.fill_layer = null;
-		MakeMaterial.parse_paint_material();
+		MakeMaterial.make_material_parse_paint_material();
 		context_raw.layer_preview_dirty = true;
 		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 	}
 
-	static is_visible = (raw: SlotLayerRaw): bool => {
+	static slot_layer_is_visible = (raw: SlotLayerRaw): bool => {
 		return raw.visible && (raw.parent == null || raw.parent.visible);
 	}
 
-	static get_children = (raw: SlotLayerRaw): SlotLayerRaw[] => {
+	static slot_layer_get_children = (raw: SlotLayerRaw): SlotLayerRaw[] => {
 		let children: SlotLayerRaw[] = null; // Child layers of a group
 		for (let l of project_layers) {
-			if (l.parent == raw && SlotLayer.is_layer(l)) {
+			if (l.parent == raw && SlotLayer.slot_layer_is_layer(l)) {
 				if (children == null) children = [];
 				children.push(l);
 			}
@@ -436,7 +436,7 @@ class SlotLayer {
 		return children;
 	}
 
-	static get_recursive_children = (raw: SlotLayerRaw): SlotLayerRaw[] => {
+	static slot_layer_get_recursive_children = (raw: SlotLayerRaw): SlotLayerRaw[] => {
 		let children: SlotLayerRaw[] = null;
 		for (let l of project_layers) {
 			if (l.parent == raw) { // Child layers and group masks
@@ -451,22 +451,22 @@ class SlotLayer {
 		return children;
 	}
 
-	static get_masks = (raw: SlotLayerRaw, includeGroupMasks = true): SlotLayerRaw[] => {
-		if (SlotLayer.is_mask(raw)) return null;
+	static slot_layer_get_masks = (raw: SlotLayerRaw, includeGroupMasks = true): SlotLayerRaw[] => {
+		if (SlotLayer.slot_layer_is_mask(raw)) return null;
 
 		let children: SlotLayerRaw[] = null;
 		// Child masks of a layer
 		for (let l of project_layers) {
-			if (l.parent == raw && SlotLayer.is_mask(l)) {
+			if (l.parent == raw && SlotLayer.slot_layer_is_mask(l)) {
 				if (children == null) children = [];
 				children.push(l);
 			}
 		}
 		// Child masks of a parent group
 		if (includeGroupMasks) {
-			if (raw.parent != null && SlotLayer.is_group(raw.parent)) {
+			if (raw.parent != null && SlotLayer.slot_layer_is_group(raw.parent)) {
 				for (let l of project_layers) {
-					if (l.parent == raw.parent && SlotLayer.is_mask(l)) {
+					if (l.parent == raw.parent && SlotLayer.slot_layer_is_mask(l)) {
 						if (children == null) children = [];
 						children.push(l);
 					}
@@ -476,17 +476,17 @@ class SlotLayer {
 		return children;
 	}
 
-	static has_masks = (raw: SlotLayerRaw, includeGroupMasks = true): bool => {
+	static slot_layer_has_masks = (raw: SlotLayerRaw, includeGroupMasks = true): bool => {
 		// Layer mask
 		for (let l of project_layers) {
-			if (l.parent == raw && SlotLayer.is_mask(l)) {
+			if (l.parent == raw && SlotLayer.slot_layer_is_mask(l)) {
 				return true;
 			}
 		}
 		// Group mask
-		if (includeGroupMasks && raw.parent != null && SlotLayer.is_group(raw.parent)) {
+		if (includeGroupMasks && raw.parent != null && SlotLayer.slot_layer_is_group(raw.parent)) {
 			for (let l of project_layers) {
-				if (l.parent == raw.parent && SlotLayer.is_mask(l)) {
+				if (l.parent == raw.parent && SlotLayer.slot_layer_is_mask(l)) {
 					return true;
 				}
 			}
@@ -494,17 +494,17 @@ class SlotLayer {
 		return false;
 	}
 
-	static get_opacity = (raw: SlotLayerRaw): f32 => {
+	static slot_layer_get_opacity = (raw: SlotLayerRaw): f32 => {
 		let f: f32 = raw.mask_opacity;
-		if (SlotLayer.is_layer(raw) && raw.parent != null) f *= raw.parent.mask_opacity;
+		if (SlotLayer.slot_layer_is_layer(raw) && raw.parent != null) f *= raw.parent.mask_opacity;
 		return f;
 	}
 
-	static get_object_mask = (raw: SlotLayerRaw): i32 => {
-		return SlotLayer.is_mask(raw) ? raw.parent.object_mask : raw.object_mask;
+	static slot_layer_get_object_mask = (raw: SlotLayerRaw): i32 => {
+		return SlotLayer.slot_layer_is_mask(raw) ? raw.parent.object_mask : raw.object_mask;
 	}
 
-	static is_layer = (raw: SlotLayerRaw): bool => {
+	static slot_layer_is_layer = (raw: SlotLayerRaw): bool => {
 		///if is_paint
 		return raw.texpaint != null && raw.texpaint_nor != null;
 		///end
@@ -513,19 +513,19 @@ class SlotLayer {
 		///end
 	}
 
-	static is_group = (raw: SlotLayerRaw): bool => {
+	static slot_layer_is_group = (raw: SlotLayerRaw): bool => {
 		return raw.texpaint == null;
 	}
 
-	static get_containing_group = (raw: SlotLayerRaw): SlotLayerRaw => {
-		if (raw.parent != null && SlotLayer.is_group(raw.parent))
+	static slot_layer_get_containing_group = (raw: SlotLayerRaw): SlotLayerRaw => {
+		if (raw.parent != null && SlotLayer.slot_layer_is_group(raw.parent))
 			return raw.parent;
-		else if (raw.parent != null && raw.parent.parent != null && SlotLayer.is_group(raw.parent.parent))
+		else if (raw.parent != null && raw.parent.parent != null && SlotLayer.slot_layer_is_group(raw.parent.parent))
 			return raw.parent.parent;
 		else return null;
 	}
 
-	static is_mask = (raw: SlotLayerRaw): bool => {
+	static slot_layer_is_mask = (raw: SlotLayerRaw): bool => {
 		///if is_paint
 		return raw.texpaint != null && raw.texpaint_nor == null;
 		///end
@@ -534,29 +534,29 @@ class SlotLayer {
 		///end
 	}
 
-	static is_group_mask = (raw: SlotLayerRaw): bool => {
+	static slot_layer_is_group_mask = (raw: SlotLayerRaw): bool => {
 		///if is_paint
-		return raw.texpaint != null && raw.texpaint_nor == null && SlotLayer.is_group(raw.parent);
+		return raw.texpaint != null && raw.texpaint_nor == null && SlotLayer.slot_layer_is_group(raw.parent);
 		///end
 		///if is_sculpt
 		return false;
 		///end
 	}
 
-	static is_layer_mask = (raw: SlotLayerRaw): bool => {
+	static slot_layer_is_layer_mask = (raw: SlotLayerRaw): bool => {
 		///if is_paint
-		return raw.texpaint != null && raw.texpaint_nor == null && SlotLayer.is_layer(raw.parent);
+		return raw.texpaint != null && raw.texpaint_nor == null && SlotLayer.slot_layer_is_layer(raw.parent);
 		///end
 		///if is_sculpt
 		return false;
 		///end
 	}
 
-	static is_in_group = (raw: SlotLayerRaw): bool => {
-		return raw.parent != null && (SlotLayer.is_group(raw.parent) || (raw.parent.parent != null && SlotLayer.is_group(raw.parent.parent)));
+	static slot_layer_is_in_group = (raw: SlotLayerRaw): bool => {
+		return raw.parent != null && (SlotLayer.slot_layer_is_group(raw.parent) || (raw.parent.parent != null && SlotLayer.slot_layer_is_group(raw.parent.parent)));
 	}
 
-	static can_move = (raw: SlotLayerRaw, to: i32): bool => {
+	static slot_layer_can_move = (raw: SlotLayerRaw, to: i32): bool => {
 		let old_index: i32 = project_layers.indexOf(raw);
 
 		let delta: i32 = to - old_index; // If delta > 0 the layer is moved up, otherwise down
@@ -569,7 +569,7 @@ class SlotLayer {
 
 		// Group or layer is collapsed so we check below and update the upper layer.
 		if (new_upper_layer != null && !new_upper_layer.show_panel) {
-			let children: SlotLayerRaw[] = SlotLayer.get_recursive_children(new_upper_layer);
+			let children: SlotLayerRaw[] = SlotLayer.slot_layer_get_recursive_children(new_upper_layer);
 			to -= children != null ? children.length : 0;
 			delta = to - old_index;
 			new_upper_layer = delta > 0 ? (to < project_layers.length - 1 ? project_layers[to + 1] : null) : project_layers[to];
@@ -577,53 +577,53 @@ class SlotLayer {
 
 		let new_lower_layer: SlotLayerRaw = delta > 0 ? project_layers[to] : (to > 0 ? project_layers[to - 1] : null);
 
-		if (SlotLayer.is_mask(raw)) {
+		if (SlotLayer.slot_layer_is_mask(raw)) {
 			// Masks can not be on top.
 			if (new_upper_layer == null) return false;
 			// Masks should not be placed below a collapsed group. This condition can be savely removed.
-			if (SlotLayer.is_in_group(new_upper_layer) && !SlotLayer.get_containing_group(new_upper_layer).show_panel) return false;
+			if (SlotLayer.slot_layer_is_in_group(new_upper_layer) && !SlotLayer.slot_layer_get_containing_group(new_upper_layer).show_panel) return false;
 			// Masks should not be placed below a collapsed layer. This condition can be savely removed.
-			if (SlotLayer.is_mask(new_upper_layer) && !new_upper_layer.parent.show_panel) return false;
+			if (SlotLayer.slot_layer_is_mask(new_upper_layer) && !new_upper_layer.parent.show_panel) return false;
 		}
 
-		if (SlotLayer.is_layer(raw)) {
+		if (SlotLayer.slot_layer_is_layer(raw)) {
 			// Layers can not be moved directly below its own mask(s).
-			if (new_upper_layer != null && SlotLayer.is_mask(new_upper_layer) && new_upper_layer.parent == raw) return false;
+			if (new_upper_layer != null && SlotLayer.slot_layer_is_mask(new_upper_layer) && new_upper_layer.parent == raw) return false;
 			// Layers can not be placed above a mask as the mask would be reparented.
-			if (new_lower_layer != null && SlotLayer.is_mask(new_lower_layer)) return false;
+			if (new_lower_layer != null && SlotLayer.slot_layer_is_mask(new_lower_layer)) return false;
 		}
 
 		// Currently groups can not be nested. Thus valid positions for groups are:
-		if (SlotLayer.is_group(raw)) {
+		if (SlotLayer.slot_layer_is_group(raw)) {
 			// At the top.
 			if (new_upper_layer == null) return true;
 			// NOT below its own children.
-			if (SlotLayer.get_containing_group(new_upper_layer) == raw) return false;
+			if (SlotLayer.slot_layer_get_containing_group(new_upper_layer) == raw) return false;
 			// At the bottom.
 			if (new_lower_layer == null) return true;
 			// Above a group.
-			if (SlotLayer.is_group(new_lower_layer)) return true;
+			if (SlotLayer.slot_layer_is_group(new_lower_layer)) return true;
 			// Above a non-grouped layer.
-			if (SlotLayer.is_layer(new_lower_layer) && !SlotLayer.is_in_group(new_lower_layer)) return true;
+			if (SlotLayer.slot_layer_is_layer(new_lower_layer) && !SlotLayer.slot_layer_is_in_group(new_lower_layer)) return true;
 			else return false;
 		}
 
 		return true;
 	}
 
-	static move = (raw: SlotLayerRaw, to: i32) => {
-		if (!SlotLayer.can_move(raw, to)) {
+	static slot_layer_move = (raw: SlotLayerRaw, to: i32) => {
+		if (!SlotLayer.slot_layer_can_move(raw, to)) {
 			return;
 		}
 
-		let pointers: map_t<SlotLayerRaw, i32> = TabLayers.init_layer_map();
+		let pointers: map_t<SlotLayerRaw, i32> = TabLayers.tab_layers_init_layer_map();
 		let old_index: i32 = project_layers.indexOf(raw);
 		let delta: i32 = to - old_index;
 		let new_upper_layer: SlotLayerRaw = delta > 0 ? (to < project_layers.length - 1 ? project_layers[to + 1] : null) : project_layers[to];
 
 		// Group or layer is collapsed so we check below and update the upper layer.
 		if (new_upper_layer != null && !new_upper_layer.show_panel) {
-			let children: SlotLayerRaw[] = SlotLayer.get_recursive_children(new_upper_layer);
+			let children: SlotLayerRaw[] = SlotLayer.slot_layer_get_recursive_children(new_upper_layer);
 			to -= children != null ? children.length : 0;
 			delta = to - old_index;
 			new_upper_layer = delta > 0 ? (to < project_layers.length - 1 ? project_layers[to + 1] : null) : project_layers[to];
@@ -636,24 +636,24 @@ class SlotLayer {
 		array_remove(project_layers, raw);
 		project_layers.splice(to, 0, raw);
 
-		if (SlotLayer.is_layer(raw)) {
+		if (SlotLayer.slot_layer_is_layer(raw)) {
 			let old_parent: SlotLayerRaw = raw.parent;
 
 			if (new_upper_layer == null)
 				raw.parent = null; // Placed on top.
-			else if (SlotLayer.is_in_group(new_upper_layer) && !SlotLayer.get_containing_group(new_upper_layer).show_panel)
+			else if (SlotLayer.slot_layer_is_in_group(new_upper_layer) && !SlotLayer.slot_layer_get_containing_group(new_upper_layer).show_panel)
 				raw.parent = null; // Placed below a collapsed group.
-			else if (SlotLayer.is_layer(new_upper_layer))
+			else if (SlotLayer.slot_layer_is_layer(new_upper_layer))
 				raw.parent = new_upper_layer.parent; // Placed below a layer, use the same parent.
-			else if (SlotLayer.is_group(new_upper_layer))
+			else if (SlotLayer.slot_layer_is_group(new_upper_layer))
 				raw.parent = new_upper_layer; // Placed as top layer in a group.
-			else if (SlotLayer.is_group_mask(new_upper_layer))
+			else if (SlotLayer.slot_layer_is_group_mask(new_upper_layer))
 				raw.parent = new_upper_layer.parent; // Placed in a group below the lowest group mask.
-			else if (SlotLayer.is_layer_mask(new_upper_layer))
-				raw.parent = SlotLayer.get_containing_group(new_upper_layer); // Either the group the mask belongs to or null.
+			else if (SlotLayer.slot_layer_is_layer_mask(new_upper_layer))
+				raw.parent = SlotLayer.slot_layer_get_containing_group(new_upper_layer); // Either the group the mask belongs to or null.
 
 			// Layers can have masks as children. These have to be moved, too.
-			let layer_masks: SlotLayerRaw[] = SlotLayer.get_masks(raw, false);
+			let layer_masks: SlotLayerRaw[] = SlotLayer.slot_layer_get_masks(raw, false);
 			if (layer_masks != null) {
 				for (let idx: i32 = 0; idx < layer_masks.length; ++idx) {
 					let mask: SlotLayerRaw = layer_masks[idx];
@@ -664,19 +664,19 @@ class SlotLayer {
 			}
 
 			// The layer is the last layer in the group, remove it. Notice that this might remove group masks.
-			if (old_parent != null && SlotLayer.get_children(old_parent) == null)
-				SlotLayer.delete(old_parent);
+			if (old_parent != null && SlotLayer.slot_layer_get_children(old_parent) == null)
+				SlotLayer.slot_layer_delete(old_parent);
 		}
-		else if (SlotLayer.is_mask(raw)) {
+		else if (SlotLayer.slot_layer_is_mask(raw)) {
 			// Precondition newUpperLayer != null, ensured in canMove.
-			if (SlotLayer.is_layer(new_upper_layer) || SlotLayer.is_group(new_upper_layer))
+			if (SlotLayer.slot_layer_is_layer(new_upper_layer) || SlotLayer.slot_layer_is_group(new_upper_layer))
 				raw.parent = new_upper_layer;
-			else if (SlotLayer.is_mask(new_upper_layer)) { // Group mask or layer mask.
+			else if (SlotLayer.slot_layer_is_mask(new_upper_layer)) { // Group mask or layer mask.
 				raw.parent = new_upper_layer.parent;
 			}
 		}
-		else if (SlotLayer.is_group(raw)) {
-			let children: SlotLayerRaw[] = SlotLayer.get_recursive_children(raw);
+		else if (SlotLayer.slot_layer_is_group(raw)) {
+			let children: SlotLayerRaw[] = SlotLayer.slot_layer_get_recursive_children(raw);
 			if (children != null) {
 				for (let idx: i32 = 0; idx < children.length; ++idx) {
 					let child: SlotLayerRaw = children[idx];
@@ -687,6 +687,6 @@ class SlotLayer {
 			}
 		}
 
-		for (let m of project_materials) TabLayers.remap_layer_pointers(m.canvas.nodes, TabLayers.fill_layer_map(pointers));
+		for (let m of project_materials) TabLayers.tab_layers_remap_layer_pointers(m.canvas.nodes, TabLayers.tab_layers_fill_layer_map(pointers));
 	}
 }
