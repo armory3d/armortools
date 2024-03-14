@@ -14,6 +14,8 @@ function config_load(done: ()=>void) {
 		done();
 	}
 	catch (e: any) {
+		krom_log(e);
+
 		///if krom_linux
 		try { // Protected directory
 			let blob: ArrayBuffer = data_get_blob(krom_save_path() + "config.json");

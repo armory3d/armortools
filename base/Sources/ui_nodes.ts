@@ -234,7 +234,7 @@ function ui_nodes_on_canvas_released() {
 								///end
 								selected.type == "GROUP_INPUT" ||
 								selected.type == "GROUP_OUTPUT" ||
-								selected.type == "BrushOutputNode";
+								selected.type == "brush_output_node";
 				ui_menu.enabled = !is_protected;
 				if (ui_menu_button(ui_menu, tr("Cut"), "ctrl+x")) {
 					base_notify_on_next_frame(function () {
@@ -460,8 +460,8 @@ function ui_nodes_update() {
 	}
 
 	if (operator_shortcut(config_keymap.view_reset)) {
-		nodes.panX = 0.0;
-		nodes.panY = 0.0;
+		nodes.pan_x = 0.0;
+		nodes.pan_y = 0.0;
 		nodes.zoom = 1.0;
 	}
 }
@@ -515,7 +515,7 @@ function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
 						ui_nodes_node_search_spawn = ui_nodes_make_node(n, nodes, canvas); // Spawn selected node
 						canvas.nodes.push(ui_nodes_node_search_spawn);
 						nodes.nodes_selected_id = [ui_nodes_node_search_spawn.id];
-						nodes.nodesDrag = true;
+						nodes.nodes_drag = true;
 
 						///if is_lab
 						parser_logic_parse(canvas);
@@ -650,9 +650,9 @@ function ui_nodes_render() {
 
 	// Remove dragged link when mouse is released out of the node viewport
 	let c: zui_node_canvas_t = ui_nodes_get_canvas(true);
-	if (ui_nodes_release_link && nodes.linkDragId != -1) {
-		array_remove(c.links, zui_get_link(c.links, nodes.linkDragId));
-		nodes.linkDragId = -1;
+	if (ui_nodes_release_link && nodes.link_drag_id != -1) {
+		array_remove(c.links, zui_get_link(c.links, nodes.link_drag_id));
+		nodes.link_drag_id = -1;
 	}
 	ui_nodes_release_link = ui_nodes_ui.input_released;
 
@@ -712,7 +712,7 @@ function ui_nodes_render() {
 		// Grid
 		g2_set_color(0xffffffff);
 		let step: f32 = 100 * zui_SCALE(ui_nodes_ui);
-		g2_draw_image(ui_nodes_grid, (nodes.panX * zui_nodes_SCALE()) % step - step, (nodes.panY * zui_nodes_SCALE()) % step - step);
+		g2_draw_image(ui_nodes_grid, (nodes.pan_x * zui_nodes_SCALE()) % step - step, (nodes.pan_y * zui_nodes_SCALE()) % step - step);
 
 		// Undo
 		if (ui_nodes_ui.input_started || ui_nodes_ui.is_key_pressed) {
@@ -727,13 +727,14 @@ function ui_nodes_render() {
 		///end
 		ui_nodes_ui.window_border_top = ui_header_h * 2;
 		ui_nodes_ui.window_border_bottom = config_raw.layout[layout_size_t.STATUS_H];
+
 		zui_node_canvas(nodes, ui_nodes_ui, c);
 		ui_nodes_ui.input_enabled = _input_enabled;
 
-		if (nodes.colorPickerCallback != null) {
+		if (nodes.color_picker_callback != null) {
 			context_raw.color_picker_previous_tool = context_raw.tool;
 			context_select_tool(workspace_tool_t.PICKER);
-			let tmp: (col: i32)=>void = nodes.colorPickerCallback;
+			let tmp: (col: i32)=>void = nodes.color_picker_callback;
 			context_raw.color_picker_callback = function (color: swatch_color_t) {
 				tmp(color.base);
 				ui_nodes_hwnd.redraws = 2;
@@ -749,11 +750,11 @@ function ui_nodes_render() {
 					ui_nodes_canvas_changed();
 				}
 			};
-			nodes.colorPickerCallback = null;
+			nodes.color_picker_callback = null;
 		}
 
 		// Remove nodes with unknown id for this canvas type
-		if (zui_is_paste) {
+		if (zui_is_paste()) {
 			///if (is_paint || is_sculpt)
 			let node_list: zui_node_t[][] = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_list : nodes_brush_list;
 			///end
@@ -835,7 +836,7 @@ function ui_nodes_render() {
 			else if (sel.type == "OUTPUT_MATERIAL_PBR") {
 				img = context_raw.material.image;
 			}
-			else if (sel.type == "BrushOutputNode") {
+			else if (sel.type == "brush_output_node") {
 				img = context_raw.brush.image;
 			}
 			else if (ui_nodes_canvas_type == canvas_type_t.MATERIAL) {
@@ -1039,7 +1040,7 @@ function ui_nodes_render() {
 				let node: zui_node_t = ui_nodes_make_node(n, nodes, canvas);
 				canvas.nodes.push(node);
 				nodes.nodes_selected_id = [node.id];
-				nodes.nodesDrag = true;
+				nodes.nodes_drag = true;
 				///if is_lab
 				parser_logic_parse(canvas);
 				///end
@@ -1064,7 +1065,7 @@ function ui_nodes_render() {
 					let node: zui_node_t = ui_nodes_make_group_node(g.canvas, nodes, canvas);
 					canvas.nodes.push(node);
 					nodes.nodes_selected_id = [node.id];
-					nodes.nodesDrag = true;
+					nodes.nodes_drag = true;
 				}
 
 				///if (is_paint || is_sculpt)

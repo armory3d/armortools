@@ -69,7 +69,7 @@ function export_texture_run(path: string, bake_material: bool = false) {
 	///end
 
 	///if is_lab
-	export_texture_run_layers(path, [BrushOutputNode.inst]);
+	export_texture_run_layers(path, [brush_output_node_inst]);
 	///end
 
 	///if krom_ios
@@ -266,9 +266,9 @@ function export_texture_run_layers(path: string, layers: any[], object_name: str
 	///end
 
 	///if is_lab
-	let texpaint: image_t = BrushOutputNode.inst.texpaint;
-	let texpaint_nor: image_t = BrushOutputNode.inst.texpaint_nor;
-	let texpaint_pack: image_t = BrushOutputNode.inst.texpaint_pack;
+	let texpaint: image_t = brush_output_node_inst.texpaint;
+	let texpaint_nor: image_t = brush_output_node_inst.texpaint_nor;
+	let texpaint_pack: image_t = brush_output_node_inst.texpaint_pack;
 	///end
 
 	let pixpaint: ArrayBuffer = null;

@@ -159,15 +159,15 @@ function ui_box_hide_internal() {
 
 ///if (krom_android || krom_ios)
 function ui_box_tween_in() {
-	tween_reset();
-	tween_to({target: UIBox, props: { ui_box_tween_alpha: 0.5 }, duration: 0.2, ease: ease_t.EXPO_OUT});
-	ui_box_hwnd.drag_y = math_floor(sys_height() / 2);
-	tween_to({target: ui_box_hwnd, props: { dragY: 0 }, duration: 0.2, ease: ease_t.EXPO_OUT, tick: () => { base_redraw_ui(); }});
+	// tween_reset();
+	// tween_to({target: UIBox, props: { ui_box_tween_alpha: 0.5 }, duration: 0.2, ease: ease_t.EXPO_OUT});
+	// ui_box_hwnd.drag_y = math_floor(sys_height() / 2);
+	// tween_to({target: ui_box_hwnd, props: { dragY: 0 }, duration: 0.2, ease: ease_t.EXPO_OUT, tick: () => { base_redraw_ui(); }});
 }
 
 function ui_box_tween_out() {
-	tween_to({target: UIBox, props: { ui_box_tween_alpha: 0.0 }, duration: 0.2, ease: ease_t.EXPO_IN, done: ui_box_hide_internal});
-	tween_to({target: ui_box_hwnd, props: { dragY: sys_height() / 2 }, duration: 0.2, ease: ease_t.EXPO_IN});
+	// tween_to({target: UIBox, props: { ui_box_tween_alpha: 0.0 }, duration: 0.2, ease: ease_t.EXPO_IN, done: ui_box_hide_internal});
+	// tween_to({target: ui_box_hwnd, props: { dragY: sys_height() / 2 }, duration: 0.2, ease: ease_t.EXPO_IN});
 }
 ///end
 

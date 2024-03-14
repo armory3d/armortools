@@ -71,7 +71,7 @@ function tab_meshes_draw(htab: zui_handle_t) {
 			///if is_lab
 			let displace_strength: f32 = config_raw.displace_strength > 0 ? config_raw.displace_strength : 1.0;
 			let uv_scale: f32 = scene_meshes[0].data.scale_tex * context_raw.brush_scale;
-			util_mesh_apply_displacement(BrushOutputNode.inst.texpaint_pack, 0.05 * displace_strength, uv_scale);
+			util_mesh_apply_displacement(brush_output_node_inst.texpaint_pack, 0.05 * displace_strength, uv_scale);
 			///end
 
 			util_mesh_calc_normals();

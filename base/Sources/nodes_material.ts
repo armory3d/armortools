@@ -2859,7 +2859,7 @@ function nodes_material_color_ramp_button(ui: zui_t, nodes: zui_nodes_t, node: z
 	if (zui_text("", zui_align_t.RIGHT, chandle.color) == zui_state_t.STARTED) {
 		let rx: f32 = nx + ui._w - zui_nodes_p(37);
 		let ry: f32 = ny - zui_nodes_p(5);
-		nodes._inputStarted = ui.input_started = false;
+		nodes._input_started = ui.input_started = false;
 		zui_nodes_rgba_popup(ui, chandle, val, math_floor(rx), math_floor(ry + zui_ELEMENT_H(ui)));
 	}
 	val[0] = color_get_rb(chandle.color) / 255;

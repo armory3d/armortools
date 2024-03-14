@@ -253,7 +253,7 @@ function base_init() {
 	ui_view2d_init();
 
 	///if is_lab
-	RandomNode.setSeed(math_floor(time_time() * 4294967295));
+	random_node_set_seed(math_floor(time_time() * 4294967295));
 	///end
 
 	app_notify_on_update(base_update);
@@ -1421,7 +1421,7 @@ function base_make_temp_img() {
 	let l: SlotLayerRaw = project_layers[0];
 	///end
 	///if is_lab
-	let l: any = BrushOutputNode.inst;
+	let l: any = brush_output_node_inst;
 	///end
 
 	if (base_temp_image != null && (base_temp_image.width != l.texpaint.width || base_temp_image.height != l.texpaint.height || base_temp_image.format != l.texpaint.format)) {
@@ -1472,7 +1472,7 @@ function base_make_export_img() {
 	let l: SlotLayerRaw = project_layers[0];
 	///end
 	///if is_lab
-	let l: any = BrushOutputNode.inst;
+	let l: any = brush_output_node_inst;
 	///end
 
 	if (base_expa != null && (base_expa.width != l.texpaint.width || base_expa.height != l.texpaint.height || base_expa.format != l.texpaint.format)) {
@@ -2198,9 +2198,9 @@ function base_on_layers_resized() {
 
 ///if is_lab
 function base_flatten(heightToNormal: bool = false): any {
-	let texpaint: image_t = BrushOutputNode.inst.texpaint;
-	let texpaint_nor: image_t = BrushOutputNode.inst.texpaint_nor;
-	let texpaint_pack: image_t = BrushOutputNode.inst.texpaint_pack;
+	let texpaint: image_t = brush_output_node_inst.texpaint;
+	let texpaint_nor: image_t = brush_output_node_inst.texpaint_nor;
+	let texpaint_pack: image_t = brush_output_node_inst.texpaint_pack;
 
 	let nodes: zui_nodes_t = ui_nodes_get_nodes();
 	let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
@@ -2218,12 +2218,12 @@ function base_flatten(heightToNormal: bool = false): any {
 }
 
 function base_on_layers_resized() {
-	image_unload(BrushOutputNode.inst.texpaint);
-	BrushOutputNode.inst.texpaint = render_path_render_targets.get("texpaint")._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
-	image_unload(BrushOutputNode.inst.texpaint_nor);
-	BrushOutputNode.inst.texpaint_nor = render_path_render_targets.get("texpaint_nor")._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
-	image_unload(BrushOutputNode.inst.texpaint_pack);
-	BrushOutputNode.inst.texpaint_pack = render_path_render_targets.get("texpaint_pack")._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
+	image_unload(brush_output_node_inst.texpaint);
+	brush_output_node_inst.texpaint = render_path_render_targets.get("texpaint")._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
+	image_unload(brush_output_node_inst.texpaint_nor);
+	brush_output_node_inst.texpaint_nor = render_path_render_targets.get("texpaint_nor")._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
+	image_unload(brush_output_node_inst.texpaint_pack);
+	brush_output_node_inst.texpaint_pack = render_path_render_targets.get("texpaint_pack")._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
 
 	if (InpaintNode.image != null) {
 		image_unload(InpaintNode.image);

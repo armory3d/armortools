@@ -39,7 +39,7 @@ function import_asset_run(path: string, drop_x: f32 = -1.0, drop_y: f32 = -1.0, 
 				}
 			}
 			ui_nodes_accept_asset_drag(asset_index);
-			ui_nodes_get_nodes().nodesDrag = false;
+			ui_nodes_get_nodes().nodes_drag = false;
 			ui_nodes_hwnd.redraws = 2;
 		}
 

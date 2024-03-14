@@ -179,8 +179,9 @@ type context_t = {
 	///end
 
 	layer_filter?: i32;
-	run_brush?: (i: i32)=>void;
-	parse_brush_inputs?: ()=>void;
+	brush_output_node_inst?: brush_output_node_t;
+	run_brush?: (self: any, i: i32)=>void;
+	parse_brush_inputs?: (self: any)=>void;
 
 	gizmo?: object_t;
 	gizmo_translate_x?: object_t;
