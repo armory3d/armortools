@@ -4,7 +4,7 @@ function render_path_forward_init() {
 
 function render_path_forward_commands() {
 	///if is_paint
-	RenderPathPaint.render_path_paint_live_brush_dirty();
+	render_path_paint_live_brush_dirty();
 	///end
 	render_path_base_commands(render_path_forward_draw_forward);
 }

@@ -1929,3 +1929,7 @@ enum color_space_t {
 	SRGB,
 	DIRECTX_NORMAL_MAP,
 }
+
+///if is_lab
+type SlotMaterialRaw = any;
+///end

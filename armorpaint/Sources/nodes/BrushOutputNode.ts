@@ -70,7 +70,7 @@ class BrushOutputNode extends LogicNode {
 
 		if (last_mask != context_raw.brush_mask_image ||
 			last_stencil != context_raw.brush_stencil_image) {
-			MakeMaterial.make_material_parse_paint_material();
+			make_material_parse_paint_material();
 		}
 
 		context_raw.brush_directional = this.Directional;
@@ -94,7 +94,7 @@ class BrushOutputNode extends LogicNode {
 		let fill_layer: bool = context_raw.layer.fill_layer != null && context_raw.tool != workspace_tool_t.PICKER && context_raw.tool != workspace_tool_t.MATERIAL && context_raw.tool != workspace_tool_t.COLORID;
 
 		// Do not paint over groups
-		let group_layer: bool = SlotLayer.slot_layer_is_group(context_raw.layer);
+		let group_layer: bool = slot_layer_is_group(context_raw.layer);
 
 		// Paint bounds
 		if (context_raw.paint_vec.x > left &&
@@ -103,7 +103,7 @@ class BrushOutputNode extends LogicNode {
 			context_raw.paint_vec.y < 1 &&
 			!fill_layer &&
 			!group_layer &&
-			(SlotLayer.slot_layer_is_visible(context_raw.layer) || context_raw.paint2d) &&
+			(slot_layer_is_visible(context_raw.layer) || context_raw.paint2d) &&
 			!ui_base_ui.is_hovered &&
 			!base_is_dragging &&
 			!base_is_resizing &&

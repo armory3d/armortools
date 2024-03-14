@@ -84,8 +84,8 @@ function import_mesh_finish_import() {
 	viewport_scale_to_bounds();
 
 	if (context_raw.paint_object.base.name == "") context_raw.paint_object.base.name = "Object";
-	MakeMaterial.make_material_parse_paint_material();
-	MakeMaterial.make_material_parse_mesh_material();
+	make_material_parse_paint_material();
+	make_material_parse_mesh_material();
 
 	///if (is_paint || is_sculpt)
 	ui_view2d_hwnd.redraws = 2;
@@ -140,7 +140,7 @@ function _import_mesh_make_mesh(mesh: any) {
 	if (import_mesh_clear_layers) {
 		while (project_layers.length > 0) {
 			let l: SlotLayerRaw = project_layers.pop();
-			SlotLayer.slot_layer_unload(l);
+			slot_layer_unload(l);
 		}
 		base_new_layer(false);
 		app_notify_on_init(base_init_layers);

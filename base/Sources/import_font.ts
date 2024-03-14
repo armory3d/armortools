@@ -17,7 +17,7 @@ function import_font_run(path: string) {
 		let name: string = ar[ar.length - 1];
 		let f: g2_font_t = g2_font_clone(font);
 		g2_font_set_font_index(f, i);
-		let font_slot: SlotFontRaw = SlotFont.slot_font_create(name, f, path);
+		let font_slot: SlotFontRaw = slot_font_create(name, f, path);
 		font_slots.push(font_slot);
 	}
 

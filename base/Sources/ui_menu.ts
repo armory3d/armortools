@@ -192,7 +192,7 @@ function ui_menu_render() {
 			ui_menu_align(ui);
 			context_raw.brush_scale = zui_slider(brush_scale_handle, tr("UV Scale"), 0.01, 5.0, true);
 			if (brush_scale_handle.changed) {
-				MakeMaterial.make_material_parse_mesh_material();
+				make_material_parse_mesh_material();
 				///if (krom_direct3d12 || krom_vulkan || krom_metal)
 				render_path_raytrace_uv_scale = context_raw.brush_scale;
 				render_path_raytrace_ready = false;
@@ -204,15 +204,15 @@ function ui_menu_render() {
 			let cull_handle: zui_handle_t = zui_handle("uimenu_7", { selected: context_raw.cull_backfaces });
 			context_raw.cull_backfaces = zui_check(cull_handle, " " + tr("Cull Backfaces"));
 			if (cull_handle.changed) {
-				MakeMaterial.make_material_parse_mesh_material();
+				make_material_parse_mesh_material();
 			}
 
 			ui_menu_fill(ui);
 			let filter_handle: zui_handle_t = zui_handle("uimenu_8", { selected: context_raw.texture_filter });
 			context_raw.texture_filter = zui_check(filter_handle, " " + tr("Filter Textures"));
 			if (filter_handle.changed) {
-				MakeMaterial.make_material_parse_paint_material();
-				MakeMaterial.make_material_parse_mesh_material();
+				make_material_parse_paint_material();
+				make_material_parse_mesh_material();
 			}
 
 			///if (is_paint || is_sculpt)
@@ -223,7 +223,7 @@ function ui_menu_render() {
 				g2_end();
 				util_uv_cache_uv_map();
 				g2_begin(current);
-				MakeMaterial.make_material_parse_mesh_material();
+				make_material_parse_mesh_material();
 			}
 			///end
 
@@ -231,7 +231,7 @@ function ui_menu_render() {
 			ui_menu_fill(ui);
 			context_raw.draw_texels = zui_check(context_raw.texels_handle, " " + tr("Texels"));
 			if (context_raw.texels_handle.changed) {
-				MakeMaterial.make_material_parse_mesh_material();
+				make_material_parse_mesh_material();
 			}
 			///end
 

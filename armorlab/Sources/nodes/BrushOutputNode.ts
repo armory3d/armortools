@@ -17,24 +17,24 @@ class BrushOutputNode extends LogicNode {
 			{
 				let t = render_target_create();
 				t.name = "texpaint";
-				t.width = config_getTextureResX();
-				t.height = config_getTextureResY();
+				t.width = config_get_texture_res_x();
+				t.height = config_get_texture_res_y();
 				t.format = "RGBA32";
 				this.texpaint = render_path_create_render_target(t)._image;
 			}
 			{
 				let t = render_target_create();
 				t.name = "texpaint_nor";
-				t.width = config_getTextureResX();
-				t.height = config_getTextureResY();
+				t.width = config_get_texture_res_x();
+				t.height = config_get_texture_res_y();
 				t.format = "RGBA32";
 				this.texpaint_nor = render_path_create_render_target(t)._image;
 			}
 			{
 				let t = render_target_create();
 				t.name = "texpaint_pack";
-				t.width = config_getTextureResX();
-				t.height = config_getTextureResY();
+				t.width = config_get_texture_res_x();
+				t.height = config_get_texture_res_y();
 				t.format = "RGBA32";
 				this.texpaint_pack = render_path_create_render_target(t)._image;
 			}
@@ -64,7 +64,7 @@ class BrushOutputNode extends LogicNode {
 		BrushOutputNode.inst = this;
 	}
 
-	override getAsImage = (from: i32, done: (img: image_t)=>void) => {
-		this.inputs[from].getAsImage(done);
+	override get_as_image = (from: i32, done: (img: image_t)=>void) => {
+		this.inputs[from].get_as_image(done);
 	}
 }

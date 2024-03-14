@@ -9,16 +9,16 @@ class UpscaleNode extends LogicNode {
 		super();
 	}
 
-	override getAsImage = (from: i32, done: (img: image_t)=>void) => {
-		this.inputs[0].getAsImage((_image: image_t) => {
+	override get_as_image = (from: i32, done: (img: image_t)=>void) => {
+		this.inputs[0].get_as_image((_image: image_t) => {
 			UpscaleNode.image = _image;
 
 			console_progress(tr("Processing") + " - " + tr("Upscale"));
-			base_notifyOnNextFrame(() => {
-				UpscaleNode.loadBlob(() => {
-					if (UpscaleNode.image.width < config_getTextureResX()) {
+			base_notify_on_next_frame(() => {
+				UpscaleNode.load_blob(() => {
+					if (UpscaleNode.image.width < config_get_texture_res_x()) {
 						UpscaleNode.image = UpscaleNode.esrgan(UpscaleNode.image);
-						while (UpscaleNode.image.width < config_getTextureResX()) {
+						while (UpscaleNode.image.width < config_get_texture_res_x()) {
 							let lastImage = UpscaleNode.image;
 							UpscaleNode.image = UpscaleNode.esrgan(UpscaleNode.image);
 							image_unload(lastImage);
@@ -30,17 +30,17 @@ class UpscaleNode extends LogicNode {
 		});
 	}
 
-	static loadBlob = (done: ()=>void) => {
+	static load_blob = (done: ()=>void) => {
 		let _esrgan_blob: ArrayBuffer = data_get_blob("models/esrgan.quant.onnx");
 		UpscaleNode.esrgan_blob = _esrgan_blob;
 		done();
 	}
 
-	override getCachedImage = (): image_t => {
+	override get_cached_image = (): image_t => {
 		return UpscaleNode.image;
 	}
 
-	static doTile = (source: image_t) => {
+	static do_tile = (source: image_t) => {
 		let result: image_t = null;
 		let size1w = source.width;
 		let size1h = source.height;
@@ -105,7 +105,7 @@ class UpscaleNode extends LogicNode {
 					g2_draw_scaled_image(source, 32 - x * tileSize + tileSize, 32 - y * tileSize + tileSize, source.width, -source.height);
 					g2_draw_scaled_image(source, 32 - x * tileSize, 32 - y * tileSize, source.width, source.height);
 					g2_end();
-					let tileResult = UpscaleNode.doTile(tileSource);
+					let tileResult = UpscaleNode.do_tile(tileSource);
 					g2_begin(result);
 					g2_draw_sub_image(tileResult, x * tileSize2x, y * tileSize2x, 64, 64, tileSize2x, tileSize2x);
 					g2_end();
@@ -114,7 +114,7 @@ class UpscaleNode extends LogicNode {
 			}
 			image_unload(tileSource);
 		}
-		else result = UpscaleNode.doTile(source); // Single tile
+		else result = UpscaleNode.do_tile(source); // Single tile
 		return result;
 	}
 

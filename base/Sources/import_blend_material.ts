@@ -19,7 +19,7 @@ function import_blend_material_run(path: string) {
 
 	for (let mat of mats) {
 		// Material slot
-		context_raw.material = SlotMaterial.slot_material_create(project_materials[0].data);
+		context_raw.material = slot_material_create(project_materials[0].data);
 		project_materials.push(context_raw.material);
 		imported.push(context_raw.material);
 		let nodes: zui_nodes_t = context_raw.material.nodes;
@@ -244,7 +244,7 @@ function import_blend_material_run(path: string) {
 	let _init = () => {
 		for (let m of imported) {
 			context_set_material(m);
-			MakeMaterial.make_material_parse_paint_material();
+			make_material_parse_paint_material();
 			util_render_make_material_preview();
 		}
 	}

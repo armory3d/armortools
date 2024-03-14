@@ -8,15 +8,15 @@ class ImageTextureNode extends LogicNode {
 		super();
 	}
 
-	override getAsImage = (from: i32, done: (img: image_t)=>void) => {
-		let index = project_assetNames.indexOf(this.file);
+	override get_as_image = (from: i32, done: (img: image_t)=>void) => {
+		let index = project_asset_names.indexOf(this.file);
 		let asset = project_assets[index];
-		done(project_getImage(asset));
+		done(project_get_image(asset));
 	}
 
-	override getCachedImage = (): image_t => {
+	override get_cached_image = (): image_t => {
 		let image: image_t;
-		this.getAsImage(0, (img: image_t) => { image = img; });
+		this.get_as_image(0, (img: image_t) => { image = img; });
 		return image;
 	}
 

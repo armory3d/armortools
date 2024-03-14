@@ -161,7 +161,7 @@ function render_path_raytrace_build_data() {
 }
 
 function render_path_raytrace_draw(useLiveLayer: bool) {
-	let is_live: bool = config_raw.brush_live && RenderPathPaint.render_path_paint_live_layer_drawn > 0;
+	let is_live: bool = config_raw.brush_live && render_path_paint_live_layer_drawn > 0;
 	if (context_raw.ddirty > 1 || context_raw.pdirty > 0 || is_live) render_path_raytrace_frame = 0;
 
 	///if krom_metal
@@ -186,7 +186,7 @@ function render_path_raytrace_draw(useLiveLayer: bool) {
 	render_path_bind_target("taa", "tex");
 	render_path_draw_shader("shader_datas/copy_pass/copy_pass");
 	if (config_raw.brush_3d) {
-		RenderPathPaint.render_path_paint_commands_cursor();
+		render_path_paint_commands_cursor();
 	}
 }
 

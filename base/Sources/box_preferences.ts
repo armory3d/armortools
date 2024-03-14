@@ -91,8 +91,8 @@ function box_preferences_show() {
 							if (box_preferences_files_plugin != null) for (let f of box_preferences_files_plugin) plugin_stop(f);
 							box_preferences_files_plugin = null;
 							box_preferences_files_keymap = null;
-							MakeMaterial.make_material_parse_mesh_material();
-							MakeMaterial.make_material_parse_paint_material();
+							make_material_parse_mesh_material();
+							make_material_parse_paint_material();
 						});
 					}
 					if (ui_menu_button(ui, tr("Import..."))) {
@@ -103,8 +103,8 @@ function box_preferences_show() {
 								ui.t.ELEMENT_H = base_default_element_h;
 								config_import_from(raw);
 								box_preferences_set_scale();
-								MakeMaterial.make_material_parse_mesh_material();
-								MakeMaterial.make_material_parse_paint_material();
+								make_material_parse_mesh_material();
+								make_material_parse_paint_material();
 							});
 						});
 					}
@@ -272,12 +272,12 @@ function box_preferences_show() {
 
 				///if (is_paint || is_sculpt)
 				while (history_undo_layers.length < config_raw.undo_steps) {
-					let l: SlotLayerRaw = SlotLayer.slot_layer_create("_undo" + history_undo_layers.length);
+					let l: SlotLayerRaw = slot_layer_create("_undo" + history_undo_layers.length);
 					history_undo_layers.push(l);
 				}
 				while (history_undo_layers.length > config_raw.undo_steps) {
 					let l: SlotLayerRaw = history_undo_layers.pop();
-					SlotLayer.slot_layer_unload(l);
+					slot_layer_unload(l);
 				}
 				///end
 
@@ -347,24 +347,24 @@ function box_preferences_show() {
 
 			let brush_3d_handle: zui_handle_t = zui_handle("boxpreferences_25", { selected: config_raw.brush_3d });
 			config_raw.brush_3d = zui_check(brush_3d_handle, tr("3D Cursor"));
-			if (brush_3d_handle.changed) MakeMaterial.make_material_parse_paint_material();
+			if (brush_3d_handle.changed) make_material_parse_paint_material();
 
 			ui.enabled = config_raw.brush_3d;
 			let brush_depth_reject_handle: zui_handle_t = zui_handle("boxpreferences_26", { selected: config_raw.brush_depth_reject });
 			config_raw.brush_depth_reject = zui_check(brush_depth_reject_handle, tr("Depth Reject"));
-			if (brush_depth_reject_handle.changed) MakeMaterial.make_material_parse_paint_material();
+			if (brush_depth_reject_handle.changed) make_material_parse_paint_material();
 
 			zui_row([0.5, 0.5]);
 
 			let brush_angle_reject_handle: zui_handle_t = zui_handle("boxpreferences_27", { selected: config_raw.brush_angle_reject });
 			config_raw.brush_angle_reject = zui_check(brush_angle_reject_handle, tr("Angle Reject"));
-			if (brush_angle_reject_handle.changed) MakeMaterial.make_material_parse_paint_material();
+			if (brush_angle_reject_handle.changed) make_material_parse_paint_material();
 
 			if (!config_raw.brush_angle_reject) ui.enabled = false;
 			let angle_dot_handle: zui_handle_t = zui_handle("boxpreferences_28", { value: context_raw.brush_angle_reject_dot });
 			context_raw.brush_angle_reject_dot = zui_slider(angle_dot_handle, tr("Angle"), 0.0, 1.0, true);
 			if (angle_dot_handle.changed) {
-				MakeMaterial.make_material_parse_paint_material();
+				make_material_parse_paint_material();
 			}
 			ui.enabled = true;
 			///end
@@ -483,7 +483,7 @@ function box_preferences_show() {
 			config_raw.displace_strength = zui_slider(disp_handle, tr("Displacement Strength"), 0.0, 10.0, true);
 			if (disp_handle.changed) {
 				context_raw.ddirty = 2;
-				MakeMaterial.make_material_parse_mesh_material();
+				make_material_parse_mesh_material();
 			}
 		}
 		if (zui_tab(box_preferences_htab, tr("Keymap"), true)) {
@@ -617,7 +617,7 @@ if (Zui.panel(h1, 'New Plugin')) {
 						}
 						if (ui_menu_button(ui, tr("Edit in Script Tab"))) {
 							let blob: ArrayBuffer = data_get_blob("plugins/" + f);
-							TabScript.tab_script_hscript.text = sys_buffer_to_string(blob);
+							tab_script_hscript.text = sys_buffer_to_string(blob);
 							data_delete_blob("plugins/" + f);
 							console_info(tr("Script opened"));
 						}

@@ -378,10 +378,7 @@ function base_h(): i32 {
 ///if is_lab
 function base_w(): i32 {
 	let res: i32 = 0;
-	if (UINodes == null) {
-		res = sys_width();
-	}
-	else if (ui_nodes_show || ui_view2d_show) {
+	if (ui_nodes_show || ui_view2d_show) {
 		res = sys_width() - config_raw.layout[layout_size_t.NODES_W];
 	}
 	else { // Distract free
@@ -393,10 +390,7 @@ function base_w(): i32 {
 
 function base_h(): i32 {
 	let res: i32 = sys_height();
-	if (UIBase == null) {
-		res -= ui_header_default_h * 2 + ui_status_default_status_h;
-	}
-	else if (res > 0) {
+	if (res > 0) {
 		let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
 		res -= math_floor(ui_header_default_h * 2 * config_raw.window_scale) + statush;
 	}
@@ -575,18 +569,18 @@ function base_update() {
 				ui_nodes_accept_swatch_drag(base_drag_swatch);
 			}
 			else if (context_in_swatches()) {
-				TabSwatches.tab_swatches_accept_swatch_drag(base_drag_swatch);
+				tab_swatches_accept_swatch_drag(base_drag_swatch);
 			}
 			///if (is_paint || is_sculpt)
 			else if (context_in_materials()) {
-				TabMaterials.tab_materials_accept_swatch_drag(base_drag_swatch);
+				tab_materials_accept_swatch_drag(base_drag_swatch);
 			}
 			else if (context_in_viewport()) {
 				let color: i32 = base_drag_swatch.base;
 				color = color_set_ab(color, base_drag_swatch.opacity * 255);
 				base_create_color_layer(color, base_drag_swatch.occlusion, base_drag_swatch.roughness, base_drag_swatch.metallic);
 			}
-			else if (context_in_layers() && TabLayers.tab_layers_can_drop_new_layer(context_raw.drag_dest)) {
+			else if (context_in_layers() && tab_layers_can_drop_new_layer(context_raw.drag_dest)) {
 				let color: i32 = base_drag_swatch.base;
 				color = color_set_ab(color, base_drag_swatch.opacity * 255);
 				base_create_color_layer(color, base_drag_swatch.occlusion, base_drag_swatch.roughness, base_drag_swatch.metallic, context_raw.drag_dest);
@@ -627,8 +621,8 @@ function base_update() {
 				ui_nodes_accept_layer_drag(project_layers.indexOf(base_drag_layer));
 			}
 			else if (context_in_layers() && base_is_dragging) {
-				SlotLayer.slot_layer_move(base_drag_layer, context_raw.drag_dest);
-				MakeMaterial.make_material_parse_mesh_material();
+				slot_layer_move(base_drag_layer, context_raw.drag_dest);
+				make_material_parse_mesh_material();
 			}
 			base_drag_layer = null;
 		}
@@ -671,7 +665,7 @@ function base_material_dropped() {
 		let decal_mat: mat4_t = uv_type == uv_type_t.PROJECT ? util_render_get_decal_mat() : null;
 		base_create_fill_layer(uv_type, decal_mat);
 	}
-	if (context_in_layers() && TabLayers.tab_layers_can_drop_new_layer(context_raw.drag_dest)) {
+	if (context_in_layers() && tab_layers_can_drop_new_layer(context_raw.drag_dest)) {
 		let uv_type: uv_type_t = keyboard_down("control") ? uv_type_t.PROJECT : uv_type_t.UVMAP;
 		let decal_mat: mat4_t = uv_type == uv_type_t.PROJECT ? util_render_get_decal_mat() : null;
 		base_create_fill_layer(uv_type, decal_mat, context_raw.drag_dest);
@@ -702,7 +696,7 @@ function base_handle_drop_paths() {
 ///if (is_paint || is_sculpt)
 function base_get_drag_background(): rect_t {
 	let icons: image_t = resource_get("icons.k");
-	if (base_drag_layer != null && !SlotLayer.slot_layer_is_group(base_drag_layer) && base_drag_layer.fill_layer == null) {
+	if (base_drag_layer != null && !slot_layer_is_group(base_drag_layer) && base_drag_layer.fill_layer == null) {
 		return resource_tile50(icons, 4, 1);
 	}
 	return null;
@@ -719,7 +713,7 @@ function base_get_drag_image(): image_t {
 	if (base_drag_swatch != null) {
 		base_drag_tint = base_drag_swatch.base;
 		base_drag_size = 26;
-		return TabSwatches.tab_swatches_empty;
+		return tab_swatches_empty_get()
 	}
 	if (base_drag_file != null) {
 		if (base_drag_file_icon != null) return base_drag_file_icon;
@@ -733,7 +727,7 @@ function base_get_drag_image(): image_t {
 	if (base_drag_material != null) {
 		return base_drag_material.image_icon;
 	}
-	if (base_drag_layer != null && SlotLayer.slot_layer_is_group(base_drag_layer)) {
+	if (base_drag_layer != null && slot_layer_is_group(base_drag_layer)) {
 		let icons: image_t = resource_get("icons.k");
 		let folder_closed: rect_t = resource_tile50(icons, 2, 1);
 		let folder_open: rect_t = resource_tile50(icons, 8, 1);
@@ -741,8 +735,8 @@ function base_get_drag_image(): image_t {
 		base_drag_tint = ui_base_ui.t.LABEL_COL - 0x00202020;
 		return icons;
 	}
-	if (base_drag_layer != null && SlotLayer.slot_layer_is_mask(base_drag_layer) && base_drag_layer.fill_layer == null) {
-		TabLayers.tab_layers_make_mask_preview_rgba32(base_drag_layer);
+	if (base_drag_layer != null && slot_layer_is_mask(base_drag_layer) && base_drag_layer.fill_layer == null) {
+		tab_layers_make_mask_preview_rgba32(base_drag_layer);
 		return context_raw.mask_preview_rgba32;
 	}
 	if (base_drag_layer != null) {
@@ -762,15 +756,15 @@ function base_render() {
 		ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 		///end
 
-		MakeMaterial.make_material_parse_mesh_material();
-		MakeMaterial.make_material_parse_paint_material();
+		make_material_parse_mesh_material();
+		make_material_parse_paint_material();
 		context_raw.ddirty = 0;
 
 		///if (is_paint || is_sculpt)
 		if (history_undo_layers == null) {
 			history_undo_layers = [];
 			for (let i: i32 = 0; i < config_raw.undo_steps; ++i) {
-				let l: SlotLayerRaw = SlotLayer.slot_layer_create("_undo" + history_undo_layers.length);
+				let l: SlotLayerRaw = slot_layer_create("_undo" + history_undo_layers.length);
 				history_undo_layers.push(l);
 			}
 		}
@@ -789,7 +783,7 @@ function base_render() {
 		///if is_lab
 		base_notify_on_next_frame(function() {
 			base_notify_on_next_frame(function() {
-				TabMeshes.tab_meshes_set_default_mesh(".Sphere");
+				tab_meshes_set_default_mesh(".Sphere");
 			});
 		});
 		///end
@@ -1079,7 +1073,7 @@ function base_init_config() {
 
 function base_init_layers() {
 	///if (is_paint || is_sculpt)
-	SlotLayer.slot_layer_clear(project_layers[0], color_from_floats(base_default_base, base_default_base, base_default_base, 1.0));
+	slot_layer_clear(project_layers[0], color_from_floats(base_default_base, base_default_base, base_default_base, 1.0));
 	///end
 
 	///if is_lab
@@ -1117,12 +1111,12 @@ function base_resize_layers() {
 		while (history_undo_layers.length > conf.undo_steps) {
 			let l: SlotLayerRaw = history_undo_layers.pop();
 			base_notify_on_next_frame(function() {
-				SlotLayer.slot_layer_unload(l);
+				slot_layer_unload(l);
 			});
 		}
 	}
-	for (let l of project_layers) SlotLayer.slot_layer_resize_and_set_bits(l);
-	for (let l of history_undo_layers) SlotLayer.slot_layer_resize_and_set_bits(l);
+	for (let l of project_layers) slot_layer_resize_and_set_bits(l);
+	for (let l of history_undo_layers) slot_layer_resize_and_set_bits(l);
 	let rts: map_t<string, render_target_t> = render_path_render_targets;
 	let _texpaint_blend0: image_t = rts.get("texpaint_blend0")._image;
 	base_notify_on_next_frame(function() {
@@ -1150,7 +1144,7 @@ function base_resize_layers() {
 		rts.get("texpaint_blur").height = size_y;
 		rts.get("texpaint_blur")._image = image_create_render_target(size_x, size_y);
 	}
-	if (RenderPathPaint.render_path_paint_live_layer != null) SlotLayer.slot_layer_resize_and_set_bits(RenderPathPaint.render_path_paint_live_layer);
+	if (render_path_paint_live_layer != null) slot_layer_resize_and_set_bits(render_path_paint_live_layer);
 	///if (krom_direct3d12 || krom_vulkan || krom_metal)
 	render_path_raytrace_ready = false; // Rebuild baketex
 	///end
@@ -1158,8 +1152,8 @@ function base_resize_layers() {
 }
 
 function base_set_layer_bits() {
-	for (let l of project_layers) SlotLayer.slot_layer_resize_and_set_bits(l);
-	for (let l of history_undo_layers) SlotLayer.slot_layer_resize_and_set_bits(l);
+	for (let l of project_layers) slot_layer_resize_and_set_bits(l);
+	for (let l of history_undo_layers) slot_layer_resize_and_set_bits(l);
 }
 
 function base_make_merge_pipe(red: bool, green: bool, blue: bool, alpha: bool): pipeline_t {
@@ -1541,13 +1535,13 @@ function base_make_export_img() {
 
 ///if (is_paint || is_sculpt)
 function base_duplicate_layer(l: SlotLayerRaw) {
-	if (!SlotLayer.slot_layer_is_group(l)) {
-		let new_layer: SlotLayerRaw = SlotLayer.slot_layer_duplicate(l);
+	if (!slot_layer_is_group(l)) {
+		let new_layer: SlotLayerRaw = slot_layer_duplicate(l);
 		context_set_layer(new_layer);
-		let masks: SlotLayerRaw[] = SlotLayer.slot_layer_get_masks(l, false);
+		let masks: SlotLayerRaw[] = slot_layer_get_masks(l, false);
 		if (masks != null) {
 			for (let m of masks) {
-				m = SlotLayer.slot_layer_duplicate(m);
+				m = slot_layer_duplicate(m);
 				m.parent = new_layer;
 				array_remove(project_layers, m);
 				project_layers.splice(project_layers.indexOf(new_layer), 0, m);
@@ -1560,25 +1554,25 @@ function base_duplicate_layer(l: SlotLayerRaw) {
 		array_remove(project_layers, new_group);
 		project_layers.splice(project_layers.indexOf(l) + 1, 0, new_group);
 		// group.show_panel = true;
-		for (let c of SlotLayer.slot_layer_get_children(l)) {
-			let masks: SlotLayerRaw[] = SlotLayer.slot_layer_get_masks(c, false);
-			let new_layer: SlotLayerRaw = SlotLayer.slot_layer_duplicate(c);
+		for (let c of slot_layer_get_children(l)) {
+			let masks: SlotLayerRaw[] = slot_layer_get_masks(c, false);
+			let new_layer: SlotLayerRaw = slot_layer_duplicate(c);
 			new_layer.parent = new_group;
 			array_remove(project_layers, new_layer);
 			project_layers.splice(project_layers.indexOf(new_group), 0, new_layer);
 			if (masks != null) {
 				for (let m of masks) {
-					let new_mask: SlotLayerRaw = SlotLayer.slot_layer_duplicate(m);
+					let new_mask: SlotLayerRaw = slot_layer_duplicate(m);
 					new_mask.parent = new_layer;
 					array_remove(project_layers, new_mask);
 					project_layers.splice(project_layers.indexOf(new_layer), 0, new_mask);
 				}
 			}
 		}
-		let group_masks: SlotLayerRaw[] = SlotLayer.slot_layer_get_masks(l);
+		let group_masks: SlotLayerRaw[] = slot_layer_get_masks(l);
 		if (group_masks != null) {
 			for (let m of group_masks) {
-				let new_mask: SlotLayerRaw = SlotLayer.slot_layer_duplicate(m);
+				let new_mask: SlotLayerRaw = slot_layer_duplicate(m);
 				new_mask.parent = new_group;
 				array_remove(project_layers, new_mask);
 				project_layers.splice(project_layers.indexOf(new_group), 0, new_mask);
@@ -1589,14 +1583,14 @@ function base_duplicate_layer(l: SlotLayerRaw) {
 }
 
 function base_apply_masks(l: SlotLayerRaw) {
-	let masks: SlotLayerRaw[] = SlotLayer.slot_layer_get_masks(l);
+	let masks: SlotLayerRaw[] = slot_layer_get_masks(l);
 
 	if (masks != null) {
 		for (let i: i32 = 0; i < masks.length - 1; ++i) {
 			base_merge_layer(masks[i + 1], masks[i]);
-			SlotLayer.slot_layer_delete(masks[i]);
+			slot_layer_delete(masks[i]);
 		}
-		SlotLayer.slot_layer_apply_mask(masks[masks.length - 1]);
+		slot_layer_apply_mask(masks[masks.length - 1]);
 		context_raw.layer_preview_dirty = true;
 	}
 }
@@ -1604,36 +1598,36 @@ function base_apply_masks(l: SlotLayerRaw) {
 function base_merge_down() {
 	let l1: SlotLayerRaw = context_raw.layer;
 
-	if (SlotLayer.slot_layer_is_group(l1)) {
+	if (slot_layer_is_group(l1)) {
 		l1 = base_merge_group(l1);
 	}
-	else if (SlotLayer.slot_layer_has_masks(l1)) { // It is a layer
+	else if (slot_layer_has_masks(l1)) { // It is a layer
 		base_apply_masks(l1);
 		context_set_layer(l1);
 	}
 
 	let l0: SlotLayerRaw = project_layers[project_layers.indexOf(l1) - 1];
 
-	if (SlotLayer.slot_layer_is_group(l0)) {
+	if (slot_layer_is_group(l0)) {
 		l0 = base_merge_group(l0);
 	}
-	else if (SlotLayer.slot_layer_has_masks(l0)) { // It is a layer
+	else if (slot_layer_has_masks(l0)) { // It is a layer
 		base_apply_masks(l0);
 		context_set_layer(l0);
 	}
 
 	base_merge_layer(l0, l1);
-	SlotLayer.slot_layer_delete(l1);
+	slot_layer_delete(l1);
 	context_set_layer(l0);
 	context_raw.layer_preview_dirty = true;
 }
 
 function base_merge_group(l: SlotLayerRaw) {
-	if (!SlotLayer.slot_layer_is_group(l)) return null;
+	if (!slot_layer_is_group(l)) return null;
 
-	let children: SlotLayerRaw[] = SlotLayer.slot_layer_get_children(l);
+	let children: SlotLayerRaw[] = slot_layer_get_children(l);
 
-	if (children.length == 1 && SlotLayer.slot_layer_has_masks(children[0], false)) {
+	if (children.length == 1 && slot_layer_has_masks(children[0], false)) {
 		base_apply_masks(children[0]);
 	}
 
@@ -1644,24 +1638,24 @@ function base_merge_group(l: SlotLayerRaw) {
 	}
 
 	// Now apply the group masks
-	let masks: SlotLayerRaw[] = SlotLayer.slot_layer_get_masks(l);
+	let masks: SlotLayerRaw[] = slot_layer_get_masks(l);
 	if (masks != null) {
 		for (let i: i32 = 0; i < masks.length - 1; ++i) {
 			base_merge_layer(masks[i + 1], masks[i]);
-			SlotLayer.slot_layer_delete(masks[i]);
+			slot_layer_delete(masks[i]);
 		}
 		base_apply_mask(children[0], masks[masks.length - 1]);
 	}
 
 	children[0].parent = null;
 	children[0].name = l.name;
-	if (children[0].fill_layer != null) SlotLayer.slot_layer_to_paint_layer(children[0]);
-	SlotLayer.slot_layer_delete(l);
+	if (children[0].fill_layer != null) slot_layer_to_paint_layer(children[0]);
+	slot_layer_delete(l);
 	return children[0];
 }
 
 function base_merge_layer(l0 : SlotLayerRaw, l1: SlotLayerRaw, use_mask: bool = false) {
-	if (!l1.visible || SlotLayer.slot_layer_is_group(l1)) return;
+	if (!l1.visible || slot_layer_is_group(l1)) return;
 
 	if (base_pipe_merge == null) base_make_pipe();
 	base_make_temp_img();
@@ -1675,7 +1669,7 @@ function base_merge_layer(l0 : SlotLayerRaw, l1: SlotLayerRaw, use_mask: bool = 
 
 	let empty: image_t = render_path_render_targets.get("empty_white")._image;
 	let mask: image_t = empty;
-	let l1masks: SlotLayerRaw[] =  use_mask ? SlotLayer.slot_layer_get_masks(l1) : null;
+	let l1masks: SlotLayerRaw[] =  use_mask ? slot_layer_get_masks(l1) : null;
 	if (l1masks != null) {
 		// for (let i: i32 = 1; i < l1masks.length - 1; ++i) {
 		// 	mergeLayer(l1masks[i + 1], l1masks[i]);
@@ -1683,12 +1677,12 @@ function base_merge_layer(l0 : SlotLayerRaw, l1: SlotLayerRaw, use_mask: bool = 
 		mask = l1masks[0].texpaint;
 	}
 
-	if (SlotLayer.slot_layer_is_mask(l1)) {
+	if (slot_layer_is_mask(l1)) {
 		g4_begin(l0.texpaint);
 		g4_set_pipeline(base_pipe_merge_mask);
 		g4_set_tex(base_tex0_merge_mask, l1.texpaint);
 		g4_set_tex(base_texa_merge_mask, base_temp_image);
-		g4_set_float(base_opac_merge_mask, SlotLayer.slot_layer_get_opacity(l1));
+		g4_set_float(base_opac_merge_mask, slot_layer_get_opacity(l1));
 		g4_set_int(base_blending_merge_mask, l1.blending);
 		g4_set_vertex_buffer(const_data_screen_aligned_vb);
 		g4_set_index_buffer(const_data_screen_aligned_ib);
@@ -1696,7 +1690,7 @@ function base_merge_layer(l0 : SlotLayerRaw, l1: SlotLayerRaw, use_mask: bool = 
 		g4_end();
 	}
 
-	if (SlotLayer.slot_layer_is_layer(l1)) {
+	if (slot_layer_is_layer(l1)) {
 		if (l1.paint_base) {
 			g4_begin(l0.texpaint);
 			g4_set_pipeline(base_pipe_merge);
@@ -1704,7 +1698,7 @@ function base_merge_layer(l0 : SlotLayerRaw, l1: SlotLayerRaw, use_mask: bool = 
 			g4_set_tex(base_tex1, empty);
 			g4_set_tex(base_texmask, mask);
 			g4_set_tex(base_texa, base_temp_image);
-			g4_set_float(base_opac, SlotLayer.slot_layer_get_opacity(l1));
+			g4_set_float(base_opac, slot_layer_get_opacity(l1));
 			g4_set_int(base_blending, l1.blending);
 			g4_set_vertex_buffer(const_data_screen_aligned_vb);
 			g4_set_index_buffer(const_data_screen_aligned_ib);
@@ -1726,7 +1720,7 @@ function base_merge_layer(l0 : SlotLayerRaw, l1: SlotLayerRaw, use_mask: bool = 
 			g4_set_tex(base_tex1, l1.texpaint_nor);
 			g4_set_tex(base_texmask, mask);
 			g4_set_tex(base_texa, base_temp_image);
-			g4_set_float(base_opac, SlotLayer.slot_layer_get_opacity(l1));
+			g4_set_float(base_opac, slot_layer_get_opacity(l1));
 			g4_set_int(base_blending, l1.paint_nor_blend ? -2 : -1);
 			g4_set_vertex_buffer(const_data_screen_aligned_vb);
 			g4_set_index_buffer(const_data_screen_aligned_ib);
@@ -1742,12 +1736,12 @@ function base_merge_layer(l0 : SlotLayerRaw, l1: SlotLayerRaw, use_mask: bool = 
 
 		if (l1.paint_occ || l1.paint_rough || l1.paint_met || l1.paint_height) {
 			if (l1.paint_occ && l1.paint_rough && l1.paint_met && l1.paint_height) {
-				base_commands_merge_pack(base_pipe_merge, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, SlotLayer.slot_layer_get_opacity(l1), mask, l1.paint_height_blend ? -3 : -1);
+				base_commands_merge_pack(base_pipe_merge, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask, l1.paint_height_blend ? -3 : -1);
 			}
 			else {
-				if (l1.paint_occ) base_commands_merge_pack(base_pipe_merge_r, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, SlotLayer.slot_layer_get_opacity(l1), mask);
-				if (l1.paint_rough) base_commands_merge_pack(base_pipe_merge_g, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, SlotLayer.slot_layer_get_opacity(l1), mask);
-				if (l1.paint_met) base_commands_merge_pack(base_pipe_merge_b, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, SlotLayer.slot_layer_get_opacity(l1), mask);
+				if (l1.paint_occ) base_commands_merge_pack(base_pipe_merge_r, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask);
+				if (l1.paint_rough) base_commands_merge_pack(base_pipe_merge_g, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask);
+				if (l1.paint_met) base_commands_merge_pack(base_pipe_merge_b, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask);
 			}
 		}
 		///end
@@ -1775,11 +1769,11 @@ function base_flatten(height_to_normal: bool = false, layers: SlotLayerRaw[] = n
 
 	// Flatten layers
 	for (let l1 of layers) {
-		if (!SlotLayer.slot_layer_is_visible(l1)) continue;
-		if (!SlotLayer.slot_layer_is_layer(l1)) continue;
+		if (!slot_layer_is_visible(l1)) continue;
+		if (!slot_layer_is_layer(l1)) continue;
 
 		let mask: image_t = empty;
-		let l1masks: SlotLayerRaw[] = SlotLayer.slot_layer_get_masks(l1);
+		let l1masks: SlotLayerRaw[] = slot_layer_get_masks(l1);
 		if (l1masks != null) {
 			if (l1masks.length > 1) {
 				base_make_temp_mask_img();
@@ -1808,7 +1802,7 @@ function base_flatten(height_to_normal: bool = false, layers: SlotLayerRaw[] = n
 			g4_set_tex(base_tex1, empty);
 			g4_set_tex(base_texmask, mask);
 			g4_set_tex(base_texa, base_temp_image);
-			g4_set_float(base_opac, SlotLayer.slot_layer_get_opacity(l1));
+			g4_set_float(base_opac, slot_layer_get_opacity(l1));
 			g4_set_int(base_blending, layers.length > 1 ? l1.blending : 0);
 			g4_set_vertex_buffer(const_data_screen_aligned_vb);
 			g4_set_index_buffer(const_data_screen_aligned_ib);
@@ -1830,7 +1824,7 @@ function base_flatten(height_to_normal: bool = false, layers: SlotLayerRaw[] = n
 			g4_set_tex(base_tex1, l1.texpaint_nor);
 			g4_set_tex(base_texmask, mask);
 			g4_set_tex(base_texa, base_temp_image);
-			g4_set_float(base_opac, SlotLayer.slot_layer_get_opacity(l1));
+			g4_set_float(base_opac, slot_layer_get_opacity(l1));
 			g4_set_int(base_blending, l1.paint_nor_blend ? -2 : -1);
 			g4_set_vertex_buffer(const_data_screen_aligned_vb);
 			g4_set_index_buffer(const_data_screen_aligned_ib);
@@ -1846,12 +1840,12 @@ function base_flatten(height_to_normal: bool = false, layers: SlotLayerRaw[] = n
 			g2_end();
 
 			if (l1.paint_occ && l1.paint_rough && l1.paint_met && l1.paint_height) {
-				base_commands_merge_pack(base_pipe_merge, base_expc, l1.texpaint, l1.texpaint_pack, SlotLayer.slot_layer_get_opacity(l1), mask, l1.paint_height_blend ? -3 : -1);
+				base_commands_merge_pack(base_pipe_merge, base_expc, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask, l1.paint_height_blend ? -3 : -1);
 			}
 			else {
-				if (l1.paint_occ) base_commands_merge_pack(base_pipe_merge_r, base_expc, l1.texpaint, l1.texpaint_pack, SlotLayer.slot_layer_get_opacity(l1), mask);
-				if (l1.paint_rough) base_commands_merge_pack(base_pipe_merge_g, base_expc, l1.texpaint, l1.texpaint_pack, SlotLayer.slot_layer_get_opacity(l1), mask);
-				if (l1.paint_met) base_commands_merge_pack(base_pipe_merge_b, base_expc, l1.texpaint, l1.texpaint_pack, SlotLayer.slot_layer_get_opacity(l1), mask);
+				if (l1.paint_occ) base_commands_merge_pack(base_pipe_merge_r, base_expc, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask);
+				if (l1.paint_rough) base_commands_merge_pack(base_pipe_merge_g, base_expc, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask);
+				if (l1.paint_met) base_commands_merge_pack(base_pipe_merge_b, base_expc, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask);
 			}
 		}
 		///end
@@ -1870,7 +1864,7 @@ function base_flatten(height_to_normal: bool = false, layers: SlotLayerRaw[] = n
 	let l0: any = { texpaint: base_expa, texpaint_nor: base_expb, texpaint_pack: base_expc };
 
 	// Merge height map into normal map
-	if (height_to_normal && MakeMaterial.make_material_height_used) {
+	if (height_to_normal && make_material_height_used) {
 
 		g2_begin(base_temp_image);
 		g2_set_pipeline(base_pipe_copy);
@@ -1896,7 +1890,7 @@ function base_flatten(height_to_normal: bool = false, layers: SlotLayerRaw[] = n
 }
 
 function base_apply_mask(l: SlotLayerRaw, m: SlotLayerRaw) {
-	if (!SlotLayer.slot_layer_is_layer(l) || !SlotLayer.slot_layer_is_mask(m)) return;
+	if (!slot_layer_is_layer(l) || !slot_layer_is_mask(m)) return;
 
 	if (base_pipe_merge == null) base_make_pipe();
 	base_make_temp_img();
@@ -1953,8 +1947,8 @@ function base_update_fill_layers() {
 
 	///if is_paint
 	if (context_raw.tool == workspace_tool_t.MATERIAL) {
-		if (RenderPathPaint.render_path_paint_live_layer == null) {
-			RenderPathPaint.render_path_paint_live_layer = SlotLayer.slot_layer_create("_live");
+		if (render_path_paint_live_layer == null) {
+			render_path_paint_live_layer = slot_layer_create("_live");
 		}
 
 		current = _g2_current;
@@ -1962,12 +1956,12 @@ function base_update_fill_layers() {
 
 		context_raw.tool = workspace_tool_t.FILL;
 		context_raw.fill_type_handle.position = fill_type_t.OBJECT;
-		MakeMaterial.make_material_parse_paint_material(false);
+		make_material_parse_paint_material(false);
 		context_raw.pdirty = 1;
-		RenderPathPaint.render_path_paint_use_live_layer(true);
-		RenderPathPaint.render_path_paint_commands_paint(false);
-		RenderPathPaint.render_path_paint_dilate(true, true);
-		RenderPathPaint.render_path_paint_use_live_layer(false);
+		render_path_paint_use_live_layer(true);
+		render_path_paint_commands_paint(false);
+		render_path_paint_dilate(true, true);
+		render_path_paint_use_live_layer(false);
 		context_raw.tool = _tool;
 		context_raw.fill_type_handle.position = _fill_type;
 		context_raw.pdirty = 0;
@@ -1980,8 +1974,8 @@ function base_update_fill_layers() {
 
 	let has_fill_layer: bool = false;
 	let has_fill_mask: bool = false;
-	for (let l of project_layers) if (SlotLayer.slot_layer_is_layer(l) && l.fill_layer == context_raw.material) has_fill_layer = true;
-	for (let l of project_layers) if (SlotLayer.slot_layer_is_mask(l) && l.fill_layer == context_raw.material) has_fill_mask = true;
+	for (let l of project_layers) if (slot_layer_is_layer(l) && l.fill_layer == context_raw.material) has_fill_layer = true;
+	for (let l of project_layers) if (slot_layer_is_mask(l) && l.fill_layer == context_raw.material) has_fill_mask = true;
 
 	if (has_fill_layer || has_fill_mask) {
 		current = _g2_current;
@@ -1993,32 +1987,32 @@ function base_update_fill_layers() {
 		if (has_fill_layer) {
 			let first: bool = true;
 			for (let l of project_layers) {
-				if (SlotLayer.slot_layer_is_layer(l) && l.fill_layer == context_raw.material) {
+				if (slot_layer_is_layer(l) && l.fill_layer == context_raw.material) {
 					context_raw.layer = l;
 					if (first) {
 						first = false;
-						MakeMaterial.make_material_parse_paint_material(false);
+						make_material_parse_paint_material(false);
 					}
 					base_set_object_mask();
-					SlotLayer.slot_layer_clear(l);
-					RenderPathPaint.render_path_paint_commands_paint(false);
-					RenderPathPaint.render_path_paint_dilate(true, true);
+					slot_layer_clear(l);
+					render_path_paint_commands_paint(false);
+					render_path_paint_dilate(true, true);
 				}
 			}
 		}
 		if (has_fill_mask) {
 			let first: bool = true;
 			for (let l of project_layers) {
-				if (SlotLayer.slot_layer_is_mask(l) && l.fill_layer == context_raw.material) {
+				if (slot_layer_is_mask(l) && l.fill_layer == context_raw.material) {
 					context_raw.layer = l;
 					if (first) {
 						first = false;
-						MakeMaterial.make_material_parse_paint_material(false);
+						make_material_parse_paint_material(false);
 					}
 					base_set_object_mask();
-					SlotLayer.slot_layer_clear(l);
-					RenderPathPaint.render_path_paint_commands_paint(false);
-					RenderPathPaint.render_path_paint_dilate(true, true);
+					slot_layer_clear(l);
+					render_path_paint_commands_paint(false);
+					render_path_paint_dilate(true, true);
 				}
 			}
 		}
@@ -2032,7 +2026,7 @@ function base_update_fill_layers() {
 		base_set_object_mask();
 		context_raw.tool = _tool;
 		context_raw.fill_type_handle.position = _fill_type;
-		MakeMaterial.make_material_parse_paint_material(false);
+		make_material_parse_paint_material(false);
 	}
 }
 
@@ -2047,11 +2041,11 @@ function base_update_fill_layer(parse_paint: bool = true) {
 	context_raw.fill_type_handle.position = fill_type_t.OBJECT;
 	context_raw.pdirty = 1;
 
-	SlotLayer.slot_layer_clear(context_raw.layer);
+	slot_layer_clear(context_raw.layer);
 
-	if (parse_paint) MakeMaterial.make_material_parse_paint_material(false);
-	RenderPathPaint.render_path_paint_commands_paint(false);
-	RenderPathPaint.render_path_paint_dilate(true, true);
+	if (parse_paint) make_material_parse_paint_material(false);
+	render_path_paint_commands_paint(false);
+	render_path_paint_dilate(true, true);
 
 	context_raw.rdirty = 2;
 	context_raw.tool = _tool;
@@ -2067,7 +2061,7 @@ function base_set_object_mask() {
 	let ar: string[] = [tr("None")];
 	for (let p of project_paint_objects) ar.push(p.base.name);
 
-	let mask: i32 = context_object_mask_used() ? SlotLayer.slot_layer_get_object_mask(context_raw.layer) : 0;
+	let mask: i32 = context_object_mask_used() ? slot_layer_get_object_mask(context_raw.layer) : 0;
 	if (context_layer_filter_used()) mask = context_raw.layer_filter;
 	if (mask > 0) {
 		if (context_raw.merged_object != null) {
@@ -2083,9 +2077,9 @@ function base_set_object_mask() {
 		context_select_paint_object(o);
 	}
 	else {
-		let is_atlas: bool = SlotLayer.slot_layer_get_object_mask(context_raw.layer) > 0 && SlotLayer.slot_layer_get_object_mask(context_raw.layer) <= project_paint_objects.length;
+		let is_atlas: bool = slot_layer_get_object_mask(context_raw.layer) > 0 && slot_layer_get_object_mask(context_raw.layer) <= project_paint_objects.length;
 		if (context_raw.merged_object == null || is_atlas || context_raw.merged_object_is_atlas) {
-			let visibles: mesh_object_t[] = is_atlas ? project_get_atlas_objects(SlotLayer.slot_layer_get_object_mask(context_raw.layer)) : null;
+			let visibles: mesh_object_t[] = is_atlas ? project_get_atlas_objects(slot_layer_get_object_mask(context_raw.layer)) : null;
 			util_mesh_merge(visibles);
 		}
 		context_select_paint_object(context_main_object());
@@ -2097,10 +2091,10 @@ function base_set_object_mask() {
 
 function base_new_layer(clear: bool = true, position: i32 = -1): SlotLayerRaw {
 	if (project_layers.length > base_max_layers) return null;
-	let l: SlotLayerRaw = SlotLayer.slot_layer_create();
+	let l: SlotLayerRaw = slot_layer_create();
 	l.object_mask = context_raw.layer_filter;
 	if (position == -1) {
-		if (SlotLayer.slot_layer_is_mask(context_raw.layer)) context_set_layer(context_raw.layer.parent);
+		if (slot_layer_is_mask(context_raw.layer)) context_set_layer(context_raw.layer.parent);
 		project_layers.splice(project_layers.indexOf(context_raw.layer) + 1, 0, l);
 	}
 	else {
@@ -2111,29 +2105,29 @@ function base_new_layer(clear: bool = true, position: i32 = -1): SlotLayerRaw {
 	let li: i32 = project_layers.indexOf(context_raw.layer);
 	if (li > 0) {
 		let below: SlotLayerRaw = project_layers[li - 1];
-		if (SlotLayer.slot_layer_is_layer(below)) {
+		if (slot_layer_is_layer(below)) {
 			context_raw.layer.parent = below.parent;
 		}
 	}
-	if (clear) app_notify_on_init(function() { SlotLayer.slot_layer_clear(l); });
+	if (clear) app_notify_on_init(function() { slot_layer_clear(l); });
 	context_raw.layer_preview_dirty = true;
 	return l;
 }
 
 function base_new_mask(clear: bool = true, parent: SlotLayerRaw, position: i32 = -1): SlotLayerRaw {
 	if (project_layers.length > base_max_layers) return null;
-	let l: SlotLayerRaw = SlotLayer.slot_layer_create("", layer_slot_type_t.MASK, parent);
+	let l: SlotLayerRaw = slot_layer_create("", layer_slot_type_t.MASK, parent);
 	if (position == -1) position = project_layers.indexOf(parent);
 	project_layers.splice(position, 0, l);
 	context_set_layer(l);
-	if (clear) app_notify_on_init(function() { SlotLayer.slot_layer_clear(l); });
+	if (clear) app_notify_on_init(function() { slot_layer_clear(l); });
 	context_raw.layer_preview_dirty = true;
 	return l;
 }
 
 function base_new_group(): SlotLayerRaw {
 	if (project_layers.length > base_max_layers) return null;
-	let l: SlotLayerRaw = SlotLayer.slot_layer_create("", layer_slot_type_t.GROUP);
+	let l: SlotLayerRaw = slot_layer_create("", layer_slot_type_t.GROUP);
 	project_layers.push(l);
 	context_set_layer(l);
 	return l;
@@ -2147,20 +2141,20 @@ function base_create_fill_layer(uv_type: uv_type_t = uv_type_t.UVMAP, decal_mat:
 		if (decal_mat != null) l.decal_mat = decal_mat;
 		l.object_mask = context_raw.layer_filter;
 		history_to_fill_layer();
-		SlotLayer.slot_layer_to_fill_layer(l);
+		slot_layer_to_fill_layer(l);
 	}
 	app_notify_on_init(_init);
 }
 
 function base_create_image_mask(asset: asset_t) {
 	let l: SlotLayerRaw = context_raw.layer;
-	if (SlotLayer.slot_layer_is_mask(l) || SlotLayer.slot_layer_is_group(l)) {
+	if (slot_layer_is_mask(l) || slot_layer_is_group(l)) {
 		return;
 	}
 
 	history_new_layer();
 	let m: SlotLayerRaw = base_new_mask(false, l);
-	SlotLayer.slot_layer_clear(m, 0x00000000, project_get_image(asset));
+	slot_layer_clear(m, 0x00000000, project_get_image(asset));
 	context_raw.layer_preview_dirty = true;
 }
 
@@ -2170,7 +2164,7 @@ function base_create_color_layer(baseColor: i32, occlusion: f32 = 1.0, roughness
 		history_new_layer();
 		l.uv_type = uv_type_t.UVMAP;
 		l.object_mask = context_raw.layer_filter;
-		SlotLayer.slot_layer_clear(l, baseColor, null, occlusion, roughness, metallic);
+		slot_layer_clear(l, baseColor, null, occlusion, roughness, metallic);
 	}
 	app_notify_on_init(_init);
 }
@@ -2189,7 +2183,7 @@ function base_on_layers_resized() {
 		}
 		context_raw.layer = _layer;
 		context_raw.material = _material;
-		MakeMaterial.make_material_parse_paint_material();
+		make_material_parse_paint_material();
 	});
 	util_uv_uvmap = null;
 	util_uv_uvmap_cached = false;

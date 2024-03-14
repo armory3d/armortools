@@ -12,8 +12,8 @@ function export_texture_run(path: string, bake_material: bool = false) {
 	else if (context_raw.layers_export == export_mode_t.PER_UDIM_TILE) {
 		let udim_tiles: string[] = [];
 		for (let l of project_layers) {
-			if (SlotLayer.slot_layer_get_object_mask(l) > 0) {
-				let name: string = project_paint_objects[SlotLayer.slot_layer_get_object_mask(l) - 1].base.name;
+			if (slot_layer_get_object_mask(l) > 0) {
+				let name: string = project_paint_objects[slot_layer_get_object_mask(l) - 1].base.name;
 				if (name.substr(name.length - 5, 2) == ".1") { // tile.1001
 					udim_tiles.push(name.substr(name.length - 5));
 				}
@@ -27,8 +27,8 @@ function export_texture_run(path: string, bake_material: bool = false) {
 	else if (context_raw.layers_export == export_mode_t.PER_OBJECT) {
 		let object_names: string[] = [];
 		for (let l of project_layers) {
-			if (SlotLayer.slot_layer_get_object_mask(l) > 0) {
-				let name: string = project_paint_objects[SlotLayer.slot_layer_get_object_mask(l) - 1].base.name;
+			if (slot_layer_get_object_mask(l) > 0) {
+				let name: string = project_paint_objects[slot_layer_get_object_mask(l) - 1].base.name;
 				if (object_names.indexOf(name) == -1) {
 					object_names.push(name);
 				}
@@ -55,7 +55,7 @@ function export_texture_run(path: string, bake_material: bool = false) {
 				for (let object_index: i32 = 0; object_index < project_atlas_objects.length; ++object_index) {
 					if (project_atlas_objects[object_index] == atlas_index) {
 						for (let l of project_layers) {
-							if (SlotLayer.slot_layer_get_object_mask(l) == 0 /* shared object */ || SlotLayer.slot_layer_get_object_mask(l) - 1 == object_index) layers.push(l);
+							if (slot_layer_get_object_mask(l) == 0 /* shared object */ || slot_layer_get_object_mask(l) - 1 == object_index) layers.push(l);
 						}
 					}
 				}
@@ -64,7 +64,7 @@ function export_texture_run(path: string, bake_material: bool = false) {
 				}
 			}
 		}
-		else export_texture_run_layers(path, context_raw.layers_export == export_mode_t.SELECTED ? (SlotLayer.slot_layer_is_group(context_raw.layer) ? SlotLayer.slot_layer_get_children(context_raw.layer) : [context_raw.layer]) : project_layers);
+		else export_texture_run_layers(path, context_raw.layers_export == export_mode_t.SELECTED ? (slot_layer_is_group(context_raw.layer) ? slot_layer_get_children(context_raw.layer) : [context_raw.layer]) : project_layers);
 	}
 	///end
 
@@ -84,28 +84,28 @@ function export_texture_run(path: string, bake_material: bool = false) {
 
 ///if is_paint
 function export_texture_run_bake_material(path: string) {
-	if (RenderPathPaint.render_path_paint_live_layer == null) {
-		RenderPathPaint.render_path_paint_live_layer = SlotLayer.slot_layer_create("_live");
+	if (render_path_paint_live_layer == null) {
+		render_path_paint_live_layer = slot_layer_create("_live");
 	}
 
 	let _tool: workspace_tool_t = context_raw.tool;
 	context_raw.tool = workspace_tool_t.FILL;
-	MakeMaterial.make_material_parse_paint_material();
+	make_material_parse_paint_material();
 	let _paint_object: mesh_object_t = context_raw.paint_object;
 	let planeo: mesh_object_t = scene_get_child(".Plane").ext;
 	planeo.base.visible = true;
 	context_raw.paint_object = planeo;
 	context_raw.pdirty = 1;
-	RenderPathPaint.render_path_paint_use_live_layer(true);
-	RenderPathPaint.render_path_paint_commands_paint(false);
-	RenderPathPaint.render_path_paint_use_live_layer(false);
+	render_path_paint_use_live_layer(true);
+	render_path_paint_commands_paint(false);
+	render_path_paint_use_live_layer(false);
 	context_raw.tool = _tool;
-	MakeMaterial.make_material_parse_paint_material();
+	make_material_parse_paint_material();
 	context_raw.pdirty = 0;
 	planeo.base.visible = false;
 	context_raw.paint_object = _paint_object;
 
-	export_texture_run_layers(path, [RenderPathPaint.render_path_paint_live_layer], "", true);
+	export_texture_run_layers(path, [render_path_paint_live_layer], "", true);
 }
 ///end
 
@@ -142,8 +142,8 @@ function export_texture_run_layers(path: string, layers: any[], object_name: str
 
 	// Append object mask name
 	let export_selected: bool = context_raw.layers_export == export_mode_t.SELECTED;
-	if (export_selected && SlotLayer.slot_layer_get_object_mask(layers[0]) > 0) {
-		f += "_" + project_paint_objects[SlotLayer.slot_layer_get_object_mask(layers[0]) - 1].base.name;
+	if (export_selected && slot_layer_get_object_mask(layers[0]) > 0) {
+		f += "_" + project_paint_objects[slot_layer_get_object_mask(layers[0]) - 1].base.name;
 	}
 	if (!is_udim && !export_selected && object_name != "") {
 		f += "_" + object_name;
@@ -162,17 +162,17 @@ function export_texture_run_layers(path: string, layers: any[], object_name: str
 
 	// Flatten layers
 	for (let l1 of layers) {
-		if (!export_selected && !SlotLayer.slot_layer_is_visible(l1)) continue;
-		if (!SlotLayer.slot_layer_is_layer(l1)) continue;
+		if (!export_selected && !slot_layer_is_visible(l1)) continue;
+		if (!slot_layer_is_layer(l1)) continue;
 
-		if (object_name != "" && SlotLayer.slot_layer_get_object_mask(l1) > 0) {
-			if (is_udim && !project_paint_objects[SlotLayer.slot_layer_get_object_mask(l1) - 1].base.name.endsWith(object_name)) continue;
+		if (object_name != "" && slot_layer_get_object_mask(l1) > 0) {
+			if (is_udim && !project_paint_objects[slot_layer_get_object_mask(l1) - 1].base.name.endsWith(object_name)) continue;
 			let per_object: bool = context_raw.layers_export == export_mode_t.PER_OBJECT;
-			if (per_object && project_paint_objects[SlotLayer.slot_layer_get_object_mask(l1) - 1].base.name != object_name) continue;
+			if (per_object && project_paint_objects[slot_layer_get_object_mask(l1) - 1].base.name != object_name) continue;
 		}
 
 		let mask: image_t = empty;
-		let l1masks: SlotLayerRaw[] = SlotLayer.slot_layer_get_masks(l1);
+		let l1masks: SlotLayerRaw[] = slot_layer_get_masks(l1);
 		if (l1masks != null && !bake_material) {
 			if (l1masks.length > 1) {
 				base_make_temp_mask_img();
@@ -201,7 +201,7 @@ function export_texture_run_layers(path: string, layers: any[], object_name: str
 			g4_set_tex(base_tex1, empty);
 			g4_set_tex(base_texmask, mask);
 			g4_set_tex(base_texa, base_temp_image);
-			g4_set_float(base_opac, SlotLayer.slot_layer_get_opacity(l1));
+			g4_set_float(base_opac, slot_layer_get_opacity(l1));
 			g4_set_int(base_blending, layers.length > 1 ? l1.blending : 0);
 			g4_set_vertex_buffer(const_data_screen_aligned_vb);
 			g4_set_index_buffer(const_data_screen_aligned_ib);
@@ -222,7 +222,7 @@ function export_texture_run_layers(path: string, layers: any[], object_name: str
 			g4_set_tex(base_tex1, l1.texpaint_nor);
 			g4_set_tex(base_texmask, mask);
 			g4_set_tex(base_texa, base_temp_image);
-			g4_set_float(base_opac, SlotLayer.slot_layer_get_opacity(l1));
+			g4_set_float(base_opac, slot_layer_get_opacity(l1));
 			g4_set_int(base_blending, l1.paint_nor_blend ? -2 : -1);
 			g4_set_vertex_buffer(const_data_screen_aligned_vb);
 			g4_set_index_buffer(const_data_screen_aligned_ib);
@@ -238,12 +238,12 @@ function export_texture_run_layers(path: string, layers: any[], object_name: str
 			g2_end();
 
 			if (l1.paint_occ && l1.paint_rough && l1.paint_met && l1.paint_height) {
-				base_commands_merge_pack(base_pipe_merge, base_expc, l1.texpaint, l1.texpaint_pack, SlotLayer.slot_layer_get_opacity(l1), mask, l1.paint_height_blend ? -3 : -1);
+				base_commands_merge_pack(base_pipe_merge, base_expc, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask, l1.paint_height_blend ? -3 : -1);
 			}
 			else {
-				if (l1.paint_occ) base_commands_merge_pack(base_pipe_merge_r, base_expc, l1.texpaint, l1.texpaint_pack, SlotLayer.slot_layer_get_opacity(l1), mask);
-				if (l1.paint_rough) base_commands_merge_pack(base_pipe_merge_g, base_expc, l1.texpaint, l1.texpaint_pack, SlotLayer.slot_layer_get_opacity(l1), mask);
-				if (l1.paint_met) base_commands_merge_pack(base_pipe_merge_b, base_expc, l1.texpaint, l1.texpaint_pack, SlotLayer.slot_layer_get_opacity(l1), mask);
+				if (l1.paint_occ) base_commands_merge_pack(base_pipe_merge_r, base_expc, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask);
+				if (l1.paint_rough) base_commands_merge_pack(base_pipe_merge_g, base_expc, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask);
+				if (l1.paint_met) base_commands_merge_pack(base_pipe_merge_b, base_expc, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask);
 			}
 		}
 	}

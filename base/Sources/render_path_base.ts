@@ -158,7 +158,7 @@ function render_path_base_is_cached(): bool {
 			render_path_base_ssaa4() ?
 				render_path_draw_shader("shader_datas/supersample_resolve/supersample_resolve") :
 				render_path_draw_shader("shader_datas/copy_pass/copy_pass");
-			RenderPathPaint.render_path_paint_commands_cursor();
+			render_path_paint_commands_cursor();
 			if (context_raw.ddirty <= 0) context_raw.ddirty--;
 		}
 		render_path_base_end();
@@ -171,10 +171,10 @@ function render_path_base_commands(draw_commands: ()=>void) {
 	if (render_path_base_is_cached()) return;
 	render_path_base_begin();
 
-	RenderPathPaint.render_path_paint_begin();
+	render_path_paint_begin();
 	render_path_base_draw_split(draw_commands);
 	render_path_base_draw_gbuffer();
-	RenderPathPaint.render_path_paint_draw();
+	render_path_paint_draw();
 
 	///if (krom_direct3d12 || krom_vulkan || krom_metal)
 	if (context_raw.viewport_mode ==  viewport_mode_t.PATH_TRACE) {
@@ -189,7 +189,7 @@ function render_path_base_commands(draw_commands: ()=>void) {
 	///end
 
 	draw_commands();
-	RenderPathPaint.render_path_paint_end();
+	render_path_paint_end();
 	render_path_base_end();
 }
 
@@ -275,7 +275,7 @@ function render_path_base_draw_voxels() {
 			render_path_set_target("");
 			render_path_set_viewport(render_path_base_voxels_res, render_path_base_voxels_res);
 			render_path_bind_target("voxels", "voxels");
-			if (MakeMaterial.make_material_height_used) {
+			if (make_material_height_used) {
 				let tid: i32 = 0; // layers[0].id;
 				render_path_bind_target("texpaint_pack" + tid, "texpaint_pack");
 			}
@@ -500,20 +500,20 @@ function render_path_base_draw_gbuffer() {
 	///else
 	render_path_clear_target(null, 1.0, clear_flag_t.DEPTH);
 	///end
-	if (MakeMesh.make_mesh_layer_pass_count == 1) {
+	if (make_mesh_layer_pass_count == 1) {
 		render_path_set_target("gbuffer2");
 		render_path_clear_target(0xff000000);
 	}
 	render_path_set_target("gbuffer0", ["gbuffer1", "gbuffer2"]);
-	RenderPathPaint.render_path_paint_bind_layers();
+	render_path_paint_bind_layers();
 	render_path_draw_meshes("mesh");
-	RenderPathPaint.render_path_paint_unbind_layers();
-	if (MakeMesh.make_mesh_layer_pass_count > 1) {
+	render_path_paint_unbind_layers();
+	if (make_mesh_layer_pass_count > 1) {
 		render_path_base_make_gbuffer_copy_textures();
-		for (let i: i32 = 1; i < MakeMesh.make_mesh_layer_pass_count; ++i) {
+		for (let i: i32 = 1; i < make_mesh_layer_pass_count; ++i) {
 			let ping: string = i % 2 == 1 ? "_copy" : "";
 			let pong: string = i % 2 == 1 ? "" : "_copy";
-			if (i == MakeMesh.make_mesh_layer_pass_count - 1) {
+			if (i == make_mesh_layer_pass_count - 1) {
 				render_path_set_target("gbuffer2" + ping);
 				render_path_clear_target(0xff000000);
 			}
@@ -521,11 +521,11 @@ function render_path_base_draw_gbuffer() {
 			render_path_bind_target("gbuffer0" + pong, "gbuffer0");
 			render_path_bind_target("gbuffer1" + pong, "gbuffer1");
 			render_path_bind_target("gbuffer2" + pong, "gbuffer2");
-			RenderPathPaint.render_path_paint_bind_layers();
+			render_path_paint_bind_layers();
 			render_path_draw_meshes("mesh" + i);
-			RenderPathPaint.render_path_paint_unbind_layers();
+			render_path_paint_unbind_layers();
 		}
-		if (MakeMesh.make_mesh_layer_pass_count % 2 == 0) {
+		if (make_mesh_layer_pass_count % 2 == 0) {
 			render_path_base_copy_to_gbuffer();
 		}
 	}

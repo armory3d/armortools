@@ -14,7 +14,7 @@ class TilingNode extends LogicNode {
 
 	static init = () => {
 		if (TilingNode.image == null) {
-			TilingNode.image = image_create_render_target(config_getTextureResX(), config_getTextureResY());
+			TilingNode.image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
 		}
 	}
 
@@ -22,34 +22,34 @@ class TilingNode extends LogicNode {
 		TilingNode.auto = node.buttons[0].default_value == 0 ? false : true;
 		if (!TilingNode.auto) {
 			TilingNode.strength = zui_slider(zui_handle("tilingnode_0", { value: TilingNode.strength }), tr("strength"), 0, 1, true);
-			TilingNode.prompt = zui_text_area(zui_handle("tilingnode_1"), Align.Left, true, tr("prompt"), true);
+			TilingNode.prompt = zui_text_area(zui_handle("tilingnode_1"), zui_align_t.LEFT, true, tr("prompt"), true);
 			node.buttons[1].height = 1 + TilingNode.prompt.split("\n").length;
 		}
 		else node.buttons[1].height = 0;
 	}
 
-	override getAsImage = (from: i32, done: (img: image_t)=>void) => {
-		this.inputs[0].getAsImage((source: image_t) => {
+	override get_as_image = (from: i32, done: (img: image_t)=>void) => {
+		this.inputs[0].get_as_image((source: image_t) => {
 			g2_begin(TilingNode.image);
-			g2_draw_scaled_image(source, 0, 0, config_getTextureResX(), config_getTextureResY());
+			g2_draw_scaled_image(source, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
 			g2_end();
 
 			console_progress(tr("Processing") + " - " + tr("Tiling"));
-			base_notifyOnNextFrame(() => {
+			base_notify_on_next_frame(() => {
 				let _done = (image: image_t) => {
 					this.result = image;
 					done(image);
 				}
-				TilingNode.auto ? InpaintNode.texsynthInpaint(TilingNode.image, true, null, _done) : TilingNode.sdTiling(TilingNode.image, -1, _done);
+				TilingNode.auto ? InpaintNode.texsynthInpaint(TilingNode.image, true, null, _done) : TilingNode.sd_tiling(TilingNode.image, -1, _done);
 			});
 		});
 	}
 
-	override getCachedImage = (): image_t => {
+	override get_cached_image = (): image_t => {
 		return this.result;
 	}
 
-	static sdTiling = (image: image_t, seed: i32/* = -1*/, done: (img: image_t)=>void) => {
+	static sd_tiling = (image: image_t, seed: i32/* = -1*/, done: (img: image_t)=>void) => {
 		TextToPhotoNode.tiling = false;
 		let tile = image_create_render_target(512, 512);
 		g2_begin(tile);

@@ -64,7 +64,7 @@ function import_asset_run(path: string, drop_x: f32 = -1.0, drop_y: f32 = -1.0, 
 		import_font_run(path);
 	}
 	else if (path_is_folder(path)) {
-		ImportFolder.import_folder_run(path);
+		import_folder_run(path);
 	}
 	///end
 	else {

@@ -19,12 +19,12 @@ class InpaintNode extends LogicNode {
 
 	static init = () => {
 		if (InpaintNode.image == null) {
-			InpaintNode.image = image_create_render_target(config_getTextureResX(), config_getTextureResY());
+			InpaintNode.image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
 		}
 
 		if (InpaintNode.mask == null) {
-			InpaintNode.mask = image_create_render_target(config_getTextureResX(), config_getTextureResY(), tex_format_t.R8);
-			base_notifyOnNextFrame(() => {
+			InpaintNode.mask = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
+			base_notify_on_next_frame(() => {
 				g4_begin(InpaintNode.mask);
 				g4_clear(color_from_floats(1.0, 1.0, 1.0, 1.0));
 				g4_end();
@@ -36,7 +36,7 @@ class InpaintNode extends LogicNode {
 		}
 
 		if (InpaintNode.result == null) {
-			InpaintNode.result = image_create_render_target(config_getTextureResX(), config_getTextureResY());
+			InpaintNode.result = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
 		}
 	}
 
@@ -44,19 +44,19 @@ class InpaintNode extends LogicNode {
 		InpaintNode.auto = node.buttons[0].default_value == 0 ? false : true;
 		if (!InpaintNode.auto) {
 			InpaintNode.strength = zui_slider(zui_handle("inpaintnode_0", { value: InpaintNode.strength }), tr("strength"), 0, 1, true);
-			InpaintNode.prompt = zui_text_area(zui_handle("inpaintnode_1"), Align.Left, true, tr("prompt"), true);
+			InpaintNode.prompt = zui_text_area(zui_handle("inpaintnode_1"), zui_align_t.LEFT, true, tr("prompt"), true);
 			node.buttons[1].height = 1 + InpaintNode.prompt.split("\n").length;
 		}
 		else node.buttons[1].height = 0;
 	}
 
-	override getAsImage = (from: i32, done: (img: image_t)=>void) => {
-		this.inputs[0].getAsImage((source: image_t) => {
+	override get_as_image = (from: i32, done: (img: image_t)=>void) => {
+		this.inputs[0].get_as_image((source: image_t) => {
 
 			console_progress(tr("Processing") + " - " + tr("Inpaint"));
-			base_notifyOnNextFrame(() => {
+			base_notify_on_next_frame(() => {
 				g2_begin(InpaintNode.image);
-				g2_draw_scaled_image(source, 0, 0, config_getTextureResX(), config_getTextureResY());
+				g2_draw_scaled_image(source, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
 				g2_end();
 
 				InpaintNode.auto ? InpaintNode.texsynthInpaint(InpaintNode.image, false, InpaintNode.mask, done) : InpaintNode.sdInpaint(InpaintNode.image, InpaintNode.mask, done);
@@ -64,15 +64,15 @@ class InpaintNode extends LogicNode {
 		});
 	}
 
-	override getCachedImage = (): image_t => {
-		base_notifyOnNextFrame(() => {
-			this.inputs[0].getAsImage((source: image_t) => {
-				if (base_pipeCopy == null) base_makePipe();
+	override get_cached_image = (): image_t => {
+		base_notify_on_next_frame(() => {
+			this.inputs[0].get_as_image((source: image_t) => {
+				if (base_pipe_copy == null) base_make_pipe();
 				if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
 				g4_begin(InpaintNode.image);
-				g4_set_pipeline(base_pipeInpaintPreview);
-				g4_set_tex(base_tex0InpaintPreview, source);
-				g4_set_tex(base_texaInpaintPreview, InpaintNode.mask);
+				g4_set_pipeline(base_pipe_inpaint_preview);
+				g4_set_tex(base_tex0_inpaint_preview, source);
+				g4_set_tex(base_texa_inpaint_preview, InpaintNode.mask);
 				g4_set_vertex_buffer(const_data_screen_aligned_vb);
 				g4_set_index_buffer(const_data_screen_aligned_ib);
 				g4_draw();
@@ -87,8 +87,8 @@ class InpaintNode extends LogicNode {
 	}
 
 	static texsynthInpaint = (image: image_t, tiling: bool, mask: image_t/* = null*/, done: (img: image_t)=>void) => {
-		let w = config_getTextureResX();
-		let h = config_getTextureResY();
+		let w = config_get_texture_res_x();
+		let h = config_get_texture_res_y();
 
 		let bytes_img = image_get_pixels(image);
 		let bytes_mask = mask != null ? image_get_pixels(mask) : new ArrayBuffer(w * h);
@@ -163,7 +163,7 @@ class InpaintNode extends LogicNode {
 
 				let start = num_inference_steps - init_timestep;
 
-				TextToPhotoNode.stableDiffusion(InpaintNode.prompt, (img: image_t) => {
+				TextToPhotoNode.stable_diffusion(InpaintNode.prompt, (img: image_t) => {
 					// result.g2_begin();
 					// result.g2_draw_image(img, x * 512, y * 512);
 					// result.g2_end();

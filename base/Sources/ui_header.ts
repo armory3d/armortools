@@ -75,7 +75,7 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 		}
 		ui.enabled = context_raw.colorid_picked;
 		if (zui_button(tr("To Mask"))) {
-			if (SlotLayer.slot_layer_is_mask(context_raw.layer)) context_set_layer(context_raw.layer.parent);
+			if (slot_layer_is_mask(context_raw.layer)) context_set_layer(context_raw.layer.parent);
 			let m: SlotLayerRaw = base_new_mask(false, context_raw.layer);
 			let _next = function () {
 				if (base_pipe_merge == null) base_make_pipe();
@@ -153,7 +153,7 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 		context_raw.picker_select_material = zui_check(zui_handle("uiheader_1", { selected: context_raw.picker_select_material }), tr("Select Material"));
 		zui_combo(context_raw.picker_mask_handle, [tr("None"), tr("Material")], tr("Mask"), true);
 		if (context_raw.picker_mask_handle.changed) {
-			MakeMaterial.make_material_parse_paint_material();
+			make_material_parse_paint_material();
 		}
 	}
 	else if (context_raw.tool == workspace_tool_t.BAKE) {
@@ -272,7 +272,7 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 			context_raw.bake_high_poly = zui_combo(poly_handle, ar, tr("High Poly"));
 		}
 		if (ui.changed) {
-			MakeMaterial.make_material_parse_paint_material();
+			make_material_parse_paint_material();
 		}
 	}
 	else if (context_raw.tool == workspace_tool_t.BRUSH ||
@@ -321,7 +321,7 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 			if (ui.is_hovered) zui_tooltip(tr("Hold {brush_angle} and move mouse to the left to decrease the angle\nHold {brush_angle} and move mouse to the right to increase the angle", new Map([["brush_angle", config_keymap.brush_angle]])));
 
 			if (context_raw.brush_angle_handle.changed) {
-				MakeMaterial.make_material_parse_paint_material();
+				make_material_parse_paint_material();
 			}
 		}
 
@@ -355,7 +355,7 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 				tr("Value"),
 			], tr("Blending"));
 			if (brush_blending_handle.changed) {
-				MakeMaterial.make_material_parse_paint_material();
+				make_material_parse_paint_material();
 			}
 		}
 
@@ -363,7 +363,7 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 			let paint_handle: zui_handle_t = zui_handle("uiheader_17");
 			context_raw.brush_paint = zui_combo(paint_handle, [tr("UV Map"), tr("Triplanar"), tr("Project")], tr("TexCoord"));
 			if (paint_handle.changed) {
-				MakeMaterial.make_material_parse_paint_material();
+				make_material_parse_paint_material();
 			}
 		}
 		if (context_raw.tool == workspace_tool_t.TEXT) {
@@ -397,8 +397,8 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 					g2_begin(current);
 					// wireframeHandle.selected = drawWireframe = true;
 				}
-				MakeMaterial.make_material_parse_paint_material();
-				MakeMaterial.make_material_parse_mesh_material();
+				make_material_parse_paint_material();
+				make_material_parse_mesh_material();
 			}
 		}
 		else {
@@ -411,7 +411,7 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 			let xray_handle: zui_handle_t = zui_handle("uiheader_19", { selected: context_raw.xray });
 			context_raw.xray = zui_check(xray_handle, tr("X-Ray"));
 			if (xray_handle.changed) {
-				MakeMaterial.make_material_parse_paint_material();
+				make_material_parse_paint_material();
 			}
 
 			let sym_x_handle: zui_handle_t = zui_handle("uiheader_20", { selected: false });
@@ -449,7 +449,7 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 			}
 
 			if (sym_x_handle.changed || sym_y_handle.changed || sym_z_handle.changed) {
-				MakeMaterial.make_material_parse_paint_material();
+				make_material_parse_paint_material();
 			}
 		}
 
@@ -460,7 +460,7 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 			context_raw.particle_physics = zui_check(phys_handle, tr("Physics"));
 			if (phys_handle.changed) {
 				util_particle_init_physics();
-				MakeMaterial.make_material_parse_paint_material();
+				make_material_parse_paint_material();
 			}
 		}
 		///end

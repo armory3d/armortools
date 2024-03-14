@@ -123,7 +123,7 @@ function util_uv_cache_dilate_map() {
 		// dilateTexUnpack = getConstantLocation(pipeDilate, "texUnpack");
 	}
 
-	let mask: i32 = context_object_mask_used() ? SlotLayer.slot_layer_get_object_mask(context_raw.layer) : 0;
+	let mask: i32 = context_object_mask_used() ? slot_layer_get_object_mask(context_raw.layer) : 0;
 	if (context_layer_filter_used()) mask = context_raw.layer_filter;
 	let geom: mesh_data_t = mask == 0 && context_raw.merged_object != null ? context_raw.merged_object.data : context_raw.paint_object.data;
 	g4_begin(util_uv_dilatemap);

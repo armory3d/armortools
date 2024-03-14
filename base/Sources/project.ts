@@ -217,11 +217,11 @@ function project_new(resetLayers: bool = true) {
 	context_raw.paint_object.base.name = n;
 	project_paint_objects = [context_raw.paint_object];
 	///if (is_paint || is_sculpt)
-	while (project_materials.length > 0) SlotMaterial.slot_material_unload(project_materials.pop());
+	while (project_materials.length > 0) slot_material_unload(project_materials.pop());
 	///end
 	let m: material_data_t = data_get_material("Scene", "Material");
 	///if (is_paint || is_sculpt)
-	project_materials.push(SlotMaterial.slot_material_create(m));
+	project_materials.push(slot_material_create(m));
 	///end
 	///if is_lab
 	project_material_data = m;
@@ -236,10 +236,10 @@ function project_new(resetLayers: bool = true) {
 	project_material_groups = [];
 
 	///if (is_paint || is_sculpt)
-	project_brushes = [SlotBrush.slot_brush_create()];
+	project_brushes = [slot_brush_create()];
 	context_raw.brush = project_brushes[0];
 
-	project_fonts = [SlotFont.slot_font_create("default.ttf", base_font)];
+	project_fonts = [slot_font_create("default.ttf", base_font)];
 	context_raw.font = project_fonts[0];
 	///end
 
@@ -250,7 +250,7 @@ function project_new(resetLayers: bool = true) {
 	context_raw.color_picker_callback = null;
 	history_reset();
 
-	MakeMaterial.make_material_parse_paint_material();
+	make_material_parse_paint_material();
 
 	///if (is_paint || is_sculpt)
 	util_render_make_material_preview();
@@ -273,8 +273,8 @@ function project_new(resetLayers: bool = true) {
 
 		///if (is_paint || is_sculpt)
 		let aspect_ratio_changed: bool = project_layers[0].texpaint.width != config_get_texture_res_x() || project_layers[0].texpaint.height != config_get_texture_res_y();
-		while (project_layers.length > 0) SlotLayer.slot_layer_unload(project_layers.pop());
-		let layer: SlotLayerRaw = SlotLayer.slot_layer_create();
+		while (project_layers.length > 0) slot_layer_unload(project_layers.pop());
+		let layer: SlotLayerRaw = slot_layer_create();
 		project_layers.push(layer);
 		context_set_layer(layer);
 		if (aspect_ratio_changed) {
@@ -330,11 +330,11 @@ function project_import_brush() {
 			}
 
 			// Create a new brush
-			context_raw.brush = SlotBrush.slot_brush_create();
+			context_raw.brush = slot_brush_create();
 			project_brushes.push(context_raw.brush);
 
 			// Create and link image node
-			let n: zui_node_t = NodesBrush.nodes_brush_create_node("TEX_IMAGE");
+			let n: zui_node_t = nodes_brush_create_node("TEX_IMAGE");
 			n.x = 83;
 			n.y = 340;
 			n.buttons[0].default_value = asset_index;
@@ -348,7 +348,7 @@ function project_import_brush() {
 			});
 
 			// Parse brush
-			MakeMaterial.make_material_parse_brush();
+			make_material_parse_brush();
 			ui_nodes_hwnd.redraws = 2;
 			let _init = function () {
 				util_render_make_brush_preview();
@@ -531,7 +531,7 @@ function project_reimport_texture(asset: asset_t) {
 		///end
 
 		let _next = function () {
-			MakeMaterial.make_material_parse_paint_material();
+			make_material_parse_paint_material();
 
 			///if (is_paint || is_sculpt)
 			util_render_make_material_preview();
@@ -637,3 +637,98 @@ type node_group_t = {
 	nodes?: zui_nodes_t;
 	canvas?: zui_node_canvas_t;
 };
+
+type project_format_t = {
+	version?: string;
+	assets?: string[]; // texture_assets
+	is_bgra?: Null<bool>; // Swapped red and blue channels for layer textures
+	packed_assets?: packed_asset_t[];
+	envmap?: string; // Asset name
+	envmap_strength?: Null<f32>;
+	camera_world?: Float32Array;
+	camera_origin?: Float32Array;
+	camera_fov?: Null<f32>;
+	swatches?: swatch_color_t[];
+
+	///if (is_paint || is_sculpt)
+	brush_nodes?: zui_node_canvas_t[];
+	brush_icons?: ArrayBuffer[];
+	material_nodes?: zui_node_canvas_t[];
+	material_groups?: zui_node_canvas_t[];
+	material_icons?: ArrayBuffer[];
+	font_assets?: string[];
+	layer_datas?: layer_data_t[];
+	mesh_datas?: mesh_data_t[];
+	mesh_assets?: string[];
+	mesh_icons?: ArrayBuffer[];
+	///end
+
+	///if is_paint
+	atlas_objects?: i32[];
+	atlas_names?: string[];
+	///end
+
+	///if is_lab
+	material?: zui_node_canvas_t;
+	material_groups?: zui_node_canvas_t[];
+	mesh_data?: mesh_data_t;
+	mesh_icon?: ArrayBuffer;
+	///end
+};
+
+type asset_t = {
+	id?: i32;
+	name?: string;
+	file?: string;
+};
+
+type packed_asset_t = {
+	name?: string;
+	bytes?: ArrayBuffer;
+};
+
+type swatch_color_t = {
+	base?: color_t;
+	opacity?: f32;
+	occlusion?: f32;
+	roughness?: f32;
+	metallic?: f32;
+	normal?: color_t;
+	emission?: f32;
+	height?: f32;
+	subsurface?: f32;
+};
+
+///if (is_paint || is_sculpt)
+type layer_data_t = {
+	name?: string;
+	res?: i32; // Width pixels
+	bpp?: i32; // Bits per pixel
+	texpaint?: ArrayBuffer;
+	uv_scale?: f32;
+	uv_rot?: f32;
+	uv_type?: i32;
+	decal_mat?: Float32Array;
+	opacity_mask?: f32;
+	fill_layer?: i32;
+	object_mask?: i32;
+	blending?: i32;
+	parent?: i32;
+	visible?: bool;
+	///if is_paint
+	texpaint_nor?: ArrayBuffer;
+	texpaint_pack?: ArrayBuffer;
+	paint_base?: bool;
+	paint_opac?: bool;
+	paint_occ?: bool;
+	paint_rough?: bool;
+	paint_met?: bool;
+	paint_nor?: bool;
+	paint_nor_blend?: bool;
+	paint_height?: bool;
+	paint_height_blend?: bool;
+	paint_emis?: bool;
+	paint_subs?: bool;
+	///end
+};
+///end

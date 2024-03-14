@@ -144,8 +144,8 @@ function ui_view2d_render() {
 		else if (ui_view2d_type == view_2d_type_t.LAYER) {
 			let layer: SlotLayerRaw = l;
 
-			if (config_raw.brush_live && RenderPathPaint.render_path_paint_live_layer_drawn > 0) {
-				layer = RenderPathPaint.render_path_paint_live_layer;
+			if (config_raw.brush_live && render_path_paint_live_layer_drawn > 0) {
+				layer = render_path_paint_live_layer;
 			}
 
 			if (ui_view2d_layer_mode == view_2d_layer_mode_t.VISIBLE) {
@@ -155,23 +155,23 @@ function ui_view2d_render() {
 				layer = base_flatten();
 				if (g2_in_use) g2_begin(current);
 			}
-			else if (SlotLayer.slot_layer_is_group(layer)) {
+			else if (slot_layer_is_group(layer)) {
 				let current: image_t = _g2_current;
 				let g2_in_use: bool = _g2_in_use;
 				if (g2_in_use) g2_end();
-				layer = base_flatten(false, SlotLayer.slot_layer_get_children(layer));
+				layer = base_flatten(false, slot_layer_get_children(layer));
 				if (g2_in_use) g2_begin(current);
 			}
 
 			tex =
-				SlotLayer.slot_layer_is_mask(context_raw.layer) ? layer.texpaint :
+				slot_layer_is_mask(context_raw.layer) ? layer.texpaint :
 				ui_view2d_tex_type == paint_tex_t.BASE     ? layer.texpaint :
 				ui_view2d_tex_type == paint_tex_t.OPACITY  ? layer.texpaint :
 				ui_view2d_tex_type == paint_tex_t.NORMAL   ? layer.texpaint_nor :
 														layer.texpaint_pack;
 
 			channel =
-				SlotLayer.slot_layer_is_mask(context_raw.layer)  ? 1 :
+				slot_layer_is_mask(context_raw.layer)  ? 1 :
 				ui_view2d_tex_type == paint_tex_t.OCCLUSION ? 1 :
 				ui_view2d_tex_type == paint_tex_t.ROUGHNESS ? 2 :
 				ui_view2d_tex_type == paint_tex_t.METALLIC  ? 3 :
@@ -334,7 +334,7 @@ function ui_view2d_render() {
 			ui_view2d_ui._x += ew + 3;
 			ui_view2d_ui._y = 2 + start_y;
 
-			if (!SlotLayer.slot_layer_is_mask(context_raw.layer)) {
+			if (!slot_layer_is_mask(context_raw.layer)) {
 				ui_view2d_tex_type = zui_combo(zui_handle("uiview2d_3", { position: ui_view2d_tex_type }), [
 					tr("Base Color"),
 					tr("Normal Map"),

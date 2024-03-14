@@ -12,41 +12,41 @@ class TextToPhotoNode extends LogicNode {
 		super();
 	}
 
-	override getAsImage = (from: i32, done: (img: image_t)=>void) => {
-		TextToPhotoNode.stableDiffusion(TextToPhotoNode.prompt, (_image: image_t) => {
+	override get_as_image = (from: i32, done: (img: image_t)=>void) => {
+		TextToPhotoNode.stable_diffusion(TextToPhotoNode.prompt, (_image: image_t) => {
 			TextToPhotoNode.image = _image;
 			done(TextToPhotoNode.image);
 		});
 	}
 
-	override getCachedImage = (): image_t => {
+	override get_cached_image = (): image_t => {
 		return TextToPhotoNode.image;
 	}
 
 	static buttons = (ui: zui_t, nodes: zui_nodes_t, node: zui_node_t) => {
 		TextToPhotoNode.tiling = node.buttons[0].default_value == 0 ? false : true;
-		TextToPhotoNode.prompt = zui_text_area(zui_handle("texttophotonode_0"), Align.Left, true, tr("prompt"), true);
+		TextToPhotoNode.prompt = zui_text_area(zui_handle("texttophotonode_0"), zui_align_t.LEFT, true, tr("prompt"), true);
 		node.buttons[1].height = TextToPhotoNode.prompt.split("\n").length;
 	}
 
-	static stableDiffusion = (prompt: string, done: (img: image_t)=>void, inpaintLatents: Float32Array = null, offset = 0, upscale = true, mask: Float32Array = null, latents_orig: Float32Array = null) => {
+	static stable_diffusion = (prompt: string, done: (img: image_t)=>void, inpaintLatents: Float32Array = null, offset = 0, upscale = true, mask: Float32Array = null, latents_orig: Float32Array = null) => {
 		let _text_encoder_blob: ArrayBuffer = data_get_blob("models/sd_text_encoder.quant.onnx");
 		let _unet_blob: ArrayBuffer = data_get_blob("models/sd_unet.quant.onnx");
 		let _vae_decoder_blob: ArrayBuffer = data_get_blob("models/sd_vae_decoder.quant.onnx");
 		TextToPhotoNode.text_encoder_blob = _text_encoder_blob;
 		TextToPhotoNode.unet_blob = _unet_blob;
 		TextToPhotoNode.vae_decoder_blob = _vae_decoder_blob;
-		TextToPhotoNode.textEncoder(prompt, inpaintLatents, (latents: Float32Array, text_embeddings: Float32Array) => {
+		TextToPhotoNode.text_encoder(prompt, inpaintLatents, (latents: Float32Array, text_embeddings: Float32Array) => {
 			TextToPhotoNode.unet(latents, text_embeddings, mask, latents_orig, offset, (latents: Float32Array) => {
-				TextToPhotoNode.vaeDecoder(latents, upscale, done);
+				TextToPhotoNode.vae_decoder(latents, upscale, done);
 			});
 		});
 	}
 
-	static textEncoder = (prompt: string, inpaintLatents: Float32Array, done: (a: Float32Array, b: Float32Array)=>void) => {
+	static text_encoder = (prompt: string, inpaintLatents: Float32Array, done: (a: Float32Array, b: Float32Array)=>void) => {
 		console_progress(tr("Processing") + " - " + tr("Text to Photo"));
-		base_notifyOnNextFrame(() => {
-			let words = prompt.replaceAll("\n", " ").replaceAll(",", " , ").replaceAll("  ", " ").trim().split(" ");
+		base_notify_on_next_frame(() => {
+			let words = string_replace_all(string_replace_all(string_replace_all(prompt, "\n", " "), ",", " , "), "  ", " ").trim().split(" ");
 			for (let i = 0; i < words.length; ++i) {
 				TextToPhotoNode.text_input_ids[i + 1] = TextToPhotoNode.vocab[words[i].toLowerCase() + "</w>"];
 			}
@@ -192,9 +192,9 @@ class TextToPhotoNode extends LogicNode {
 		app_notify_on_render_2d(processing);
 	}
 
-	static vaeDecoder = (latents: Float32Array, upscale: bool, done: (img: image_t)=>void) => {
+	static vae_decoder = (latents: Float32Array, upscale: bool, done: (img: image_t)=>void) => {
 		console_progress(tr("Processing") + " - " + tr("Text to Photo"));
-		base_notifyOnNextFrame(() => {
+		base_notify_on_next_frame(() => {
 			for (let i = 0; i < latents.length; ++i) {
 				latents[i] = 1.0 / 0.18215 * latents[i];
 			}
@@ -220,12 +220,12 @@ class TextToPhotoNode extends LogicNode {
 			if (TextToPhotoNode.tiling) {
 				TilingNode.prompt = TextToPhotoNode.prompt;
 				let seed = RandomNode.getSeed();
-				TilingNode.sdTiling(image, seed, done);
+				TilingNode.sd_tiling(image, seed, done);
 			}
 			else {
 				if (upscale) {
-					UpscaleNode.loadBlob(() => {
-						while (image.width < config_getTextureResX()) {
+					UpscaleNode.load_blob(() => {
+						while (image.width < config_get_texture_res_x()) {
 							let lastImage = image;
 							image = UpscaleNode.esrgan(image);
 							image_unload(lastImage);

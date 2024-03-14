@@ -19,14 +19,14 @@ class VarianceNode extends LogicNode {
 	}
 
 	static buttons = (ui: zui_t, nodes: zui_nodes_t, node: zui_node_t) => {
-		VarianceNode.prompt = zui_text_area(zui_handle("variancenode_0"), Align.Left, true, tr("prompt"), true);
+		VarianceNode.prompt = zui_text_area(zui_handle("variancenode_0"), zui_align_t.LEFT, true, tr("prompt"), true);
 		node.buttons[0].height = VarianceNode.prompt.split("\n").length;
 	}
 
-	override getAsImage = (from: i32, done: (img: image_t)=>void) => {
+	override get_as_image = (from: i32, done: (img: image_t)=>void) => {
 		let strength = (VarianceNode.inst.inputs[1].node as any).value;
 
-		VarianceNode.inst.inputs[0].getAsImage((source: image_t) => {
+		VarianceNode.inst.inputs[0].get_as_image((source: image_t) => {
 			g2_begin(VarianceNode.temp);
 			g2_draw_scaled_image(source, 0, 0, 512, 512);
 			g2_end();
@@ -41,7 +41,7 @@ class VarianceNode extends LogicNode {
 			}
 
 			console_progress(tr("Processing") + " - " + tr("Variance"));
-			base_notifyOnNextFrame(() => {
+			base_notify_on_next_frame(() => {
 				let vae_encoder_blob: ArrayBuffer = data_get_blob("models/sd_vae_encoder.quant.onnx");
 				let latents_buf = krom_ml_inference(vae_encoder_blob, [f32a.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], config_raw.gpu_inference);
 				let latents = new Float32Array(latents_buf);
@@ -62,7 +62,7 @@ class VarianceNode extends LogicNode {
 				}
 				let t_start = num_inference_steps - init_timestep;
 
-				TextToPhotoNode.stableDiffusion(VarianceNode.prompt, (_image: image_t) => {
+				TextToPhotoNode.stable_diffusion(VarianceNode.prompt, (_image: image_t) => {
 					VarianceNode.image = _image;
 					done(VarianceNode.image);
 				}, latents, t_start);
@@ -70,7 +70,7 @@ class VarianceNode extends LogicNode {
 		});
 	}
 
-	override getCachedImage = (): image_t => {
+	override get_cached_image = (): image_t => {
 		return VarianceNode.image;
 	}
 

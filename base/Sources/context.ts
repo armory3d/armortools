@@ -1,6 +1,532 @@
-/// <reference path='./ContextFormat.ts'/>
 
-let context_raw: context_t = new context_t(); //{};
+type context_t = {
+	texture?: asset_t;
+	paint_object?: mesh_object_t;
+	merged_object?: mesh_object_t;
+	merged_object_is_atlas?: bool;
+
+	ddirty?: i32;
+	pdirty?: i32;
+	rdirty?: i32;
+	brush_blend_dirty?: bool;
+	node_preview_socket?: i32;
+
+	split_view?: bool;
+	view_index?: i32;
+	view_index_last?: i32;
+
+	swatch?: swatch_color_t;
+	picked_color?: swatch_color_t;
+	color_picker_callback?: (sc: swatch_color_t)=>void;
+
+	default_irradiance?: Float32Array;
+	default_radiance?: image_t;
+	default_radiance_mipmaps?: image_t[];
+	saved_envmap?: image_t;
+	empty_envmap?: image_t;
+	preview_envmap?: image_t;
+	envmap_loaded?: bool;
+	show_envmap?: bool;
+	show_envmap_handle?: zui_handle_t;
+	show_envmap_blur?: bool;
+	show_envmap_blur_handle?: zui_handle_t;
+	envmap_angle?: f32;
+	light_angle?: f32;
+	cull_backfaces?: bool;
+	texture_filter?: bool;
+
+	format_type?: texture_ldr_format_t;
+	format_quality?: f32;
+	layers_destination?: export_destination_t;
+	split_by?: split_type_t;
+	parse_transform?: bool;
+	parse_vcols?: bool;
+
+	select_time?: f32;
+	///if (krom_direct3d12 || krom_vulkan || krom_metal)
+	pathtrace_mode?: path_trace_mode_t;
+	///end
+	///if (krom_direct3d12 || krom_vulkan) // || krom_metal)
+	viewport_mode?: viewport_mode_t;
+	///else
+	viewport_mode?: viewport_mode_t;
+	///end
+	///if (krom_android || krom_ios)
+	render_mode?: render_mode_t;
+	///else
+	render_mode?: render_mode_t;
+	///end
+
+	viewport_shader?: (ns: NodeShaderRaw)=>string;
+	hscale_was_changed?: bool;
+	export_mesh_format?: mesh_format_t;
+	export_mesh_index?: i32;
+	pack_assets_on_export?: bool;
+
+	paint_vec?: vec4_t;
+	last_paint_x?: f32;
+	last_paint_y?: f32;
+	foreground_event?: bool;
+	painted?: i32;
+	brush_time?: f32;
+	clone_start_x?: f32;
+	clone_start_y?: f32;
+	clone_delta_x?: f32;
+	clone_delta_y?: f32;
+
+	show_compass?: bool;
+	project_type?: project_model_t;
+	project_aspect_ratio?: i32;
+	project_objects?: mesh_object_t[];
+
+	last_paint_vec_x?: f32;
+	last_paint_vec_y?: f32;
+	prev_paint_vec_x?: f32;
+	prev_paint_vec_y?: f32;
+	frame?: i32;
+	paint2d_view?: bool;
+
+	lock_started_x?: f32;
+	lock_started_y?: f32;
+	brush_locked?: bool;
+	brush_can_lock?: bool;
+	brush_can_unlock?: bool;
+	camera_type?: camera_type_t;
+	cam_handle?: zui_handle_t;
+	fov_handle?: zui_handle_t;
+	undo_handle?: zui_handle_t;
+	hssao?: zui_handle_t;
+	hssr?: zui_handle_t;
+	hbloom?: zui_handle_t;
+	hsupersample?: zui_handle_t;
+	hvxao?: zui_handle_t;
+	///if is_forge
+	vxao_ext?: f32;
+	///else
+	vxao_ext?: f32;
+	///end
+	vxao_offset?: f32;
+	vxao_aperture?: f32;
+	texture_export_path?: string;
+	last_status_position?: i32;
+	camera_controls?: camera_controls_t;
+	pen_painting_only?: bool;
+
+	///if (is_paint || is_sculpt)
+	material?: SlotMaterialRaw;
+	layer?: SlotLayerRaw;
+	brush?: SlotBrushRaw;
+	font?: SlotFontRaw;
+	tool?: workspace_tool_t;
+
+	layer_preview_dirty?: bool;
+	layers_preview_dirty?: bool;
+	node_preview_dirty?: bool;
+	node_preview?: image_t;
+	node_previews?: map_t<string, image_t>;
+	node_previews_used?: string[];
+	node_preview_name?: string;
+	mask_preview_rgba32?: image_t;
+	mask_preview_last?: SlotLayerRaw;
+
+	colorid_picked?: bool;
+	material_preview?: bool;
+	saved_camera?: mat4_t;
+
+	color_picker_previous_tool?: workspace_tool_t;
+	materialid_picked?: i32;
+	uvx_picked?: f32;
+	uvy_picked?: f32;
+	picker_select_material?: bool;
+	picker_mask_handle?: zui_handle_t;
+	pick_pos_nor_tex?: bool;
+	posx_picked?: f32;
+	posy_picked?: f32;
+	posz_picked?: f32;
+	norx_picked?: f32;
+	nory_picked?: f32;
+	norz_picked?: f32;
+
+	draw_wireframe?: bool;
+	wireframe_handle?: zui_handle_t;
+	draw_texels?: bool;
+	texels_handle?: zui_handle_t;
+
+	colorid_handle?: zui_handle_t;
+	layers_export?: export_mode_t;
+
+	decal_image?: image_t;
+	decal_preview?: bool;
+	decal_x?: f32;
+	decal_y?: f32;
+
+	cache_draws?: bool;
+	write_icon_on_export?: bool;
+
+	text_tool_image?: image_t;
+	text_tool_text?: string;
+	particle_material?: material_data_t;
+	///if arm_physics
+	particle_physics?: bool;
+	particle_hit_x?: f32;
+	particle_hit_y?: f32;
+	particle_hit_z?: f32;
+	last_particle_hit_x?: f32;
+	last_particle_hit_y?: f32;
+	last_particle_hit_z?: f32;
+	particle_timer?: tween_anim_t;
+	paint_body?: PhysicsBodyRaw;
+	///end
+
+	layer_filter?: i32;
+	run_brush?: (i: i32)=>void;
+	parse_brush_inputs?: ()=>void;
+
+	gizmo?: object_t;
+	gizmo_translate_x?: object_t;
+	gizmo_translate_y?: object_t;
+	gizmo_translate_z?: object_t;
+	gizmo_scale_x?: object_t;
+	gizmo_scale_y?: object_t;
+	gizmo_scale_z?: object_t;
+	gizmo_rotate_x?: object_t;
+	gizmo_rotate_y?: object_t;
+	gizmo_rotate_z?: object_t;
+	gizmo_started?: bool;
+	gizmo_offset?: f32;
+	gizmo_drag?: f32;
+	gizmo_drag_last?: f32;
+	translate_x?: bool;
+	translate_y?: bool;
+	translate_z?: bool;
+	scale_x?: bool;
+	scale_y?: bool;
+	scale_z?: bool;
+	rotate_x?: bool;
+	rotate_y?: bool;
+	rotate_z?: bool;
+
+	brush_nodes_radius?: f32;
+	brush_nodes_opacity?: f32;
+	brush_mask_image?: image_t;
+	brush_mask_image_is_alpha?: bool;
+	brush_stencil_image?: image_t;
+	brush_stencil_image_is_alpha?: bool;
+	brush_stencil_x?: f32;
+	brush_stencil_y?: f32;
+	brush_stencil_scale?: f32;
+	brush_stencil_scaling?: bool;
+	brush_stencil_angle?: f32;
+	brush_stencil_rotating?: bool;
+	brush_nodes_scale?: f32;
+	brush_nodes_angle?: f32;
+	brush_nodes_hardness?: f32;
+	brush_directional?: bool;
+
+	brush_radius?: f32;
+	brush_radius_handle?: zui_handle_t;
+	brush_scale_x?: f32;
+	brush_decal_mask_radius?: f32;
+	brush_decal_mask_radius_handle?: zui_handle_t;
+	brush_scale_x_handle?: zui_handle_t;
+	brush_blending?: blend_type_t;
+	brush_opacity?: f32;
+	brush_opacity_handle?: zui_handle_t;
+	brush_scale?: f32;
+	brush_angle?: f32;
+	brush_angle_handle?: zui_handle_t;
+	///if is_paint
+	brush_hardness?: f32;
+	///end
+	///if is_sculpt
+	brush_hardness?: f32;
+	///end
+	brush_lazy_radius?: f32;
+	brush_lazy_step?: f32;
+	brush_lazy_x?: f32;
+	brush_lazy_y?: f32;
+	brush_paint?: uv_type_t;
+	brush_angle_reject_dot?: f32;
+	bake_type?: bake_type_t;
+	bake_axis?: bake_axis_t;
+	bake_up_axis?: bake_up_axis_t;
+	bake_samples?: i32;
+	bake_ao_strength?: f32;
+	bake_ao_radius?: f32;
+	bake_ao_offset?: f32;
+	bake_curv_strength?: f32;
+	bake_curv_radius?: f32;
+	bake_curv_offset?: f32;
+	bake_curv_smooth?: i32;
+	bake_high_poly?: i32;
+
+	xray?: bool;
+	sym_x?: bool;
+	sym_y?: bool;
+	sym_z?: bool;
+	fill_type_handle?: zui_handle_t;
+
+	paint2d?: bool;
+
+	last_htab0_pos?: i32;
+	maximized_sidebar_width?: i32;
+	drag_dest?: i32;
+	///end
+
+	///if is_lab
+	material?: any; ////
+	layer?: any; ////
+	tool?: workspace_tool_t;
+
+	color_picker_previous_tool?: workspace_tool_t;
+
+	brush_radius?: f32;
+	brush_radius_handle?: zui_handle_t;
+	brush_scale?: f32;
+
+	coords?: vec4_t;
+	start_x?: f32;
+	start_y?: f32;
+
+	// Brush ruler
+	lock_begin?: bool;
+	lock_x?: bool;
+	lock_y?: bool;
+	lock_start_x?: f32;
+	lock_start_y?: f32;
+	registered?: bool;
+	///end
+
+	///if is_forge
+	selected_object?: object_t;
+	///end
+}
+
+function context_create(): context_t {
+	let c: context_t = {};
+	c.merged_object_is_atlas = false; // Only objects referenced by atlas are merged
+	c.ddirty = 0; // depth
+	c.pdirty = 0; // paint
+	c.rdirty = 0; // render
+	c.brush_blend_dirty = true;
+	c.node_preview_socket = 0;
+	c.split_view = false;
+	c.view_index = -1;
+	c.view_index_last = -1;
+	c.picked_color = make_swatch();
+	c.envmap_loaded = false;
+	c.show_envmap = false;
+	c.show_envmap_handle = zui_handle_create({ selected: false });
+	c.show_envmap_blur = false;
+	c.show_envmap_blur_handle = zui_handle_create({ selected: false });
+	c.envmap_angle = 0.0;
+	c.light_angle = 0.0;
+	c.cull_backfaces = true;
+	c.texture_filter = true;
+	c.format_type = texture_ldr_format_t.PNG;
+	c.format_quality = 100.0;
+	c.layers_destination = export_destination_t.DISK;
+	c.split_by = split_type_t.OBJECT;
+	c.parse_transform = true;
+	c.parse_vcols = false;
+	c.select_time = 0.0;
+	///if (krom_direct3d12 || krom_vulkan || krom_metal)
+	c.pathtrace_mode = path_trace_mode_t.CORE;
+	///end
+	///if (krom_direct3d12 || krom_vulkan) // || krom_metal)
+	c.viewport_mode = viewport_mode_t.PATH_TRACE;
+	///else
+	c.viewport_mode = viewport_mode_t.LIT;
+	///end
+	///if (krom_android || krom_ios)
+	c.render_mode = render_mode_t.FORWARD;
+	///else
+	c.render_mode = render_mode_t.DEFERRED;
+	///end
+	c.hscale_was_changed = false;
+	c.export_mesh_format = mesh_format_t.OBJ;
+	c.export_mesh_index = 0;
+	c.pack_assets_on_export = true;
+	c.paint_vec = vec4_create();
+	c.last_paint_x = -1.0;
+	c.last_paint_y = -1.0;
+	c.foreground_event = false;
+	c.painted = 0;
+	c.brush_time = 0.0;
+	c.clone_start_x = -1.0;
+	c.clone_start_y = -1.0;
+	c.clone_delta_x = 0.0;
+	c.clone_delta_y = 0.0;
+	c.show_compass = true;
+	c.project_type = project_model_t.ROUNDED_CUBE;
+	c.project_aspect_ratio = 0; // 1:1, 2:1, 1:2
+	c.last_paint_vec_x = -1.0;
+	c.last_paint_vec_y = -1.0;
+	c.prev_paint_vec_x = -1.0;
+	c.prev_paint_vec_y = -1.0;
+	c.frame = 0;
+	c.paint2d_view = false;
+	c.lock_started_x = -1.0;
+	c.lock_started_y = -1.0;
+	c.brush_locked = false;
+	c.brush_can_lock = false;
+	c.brush_can_unlock = false;
+	c.camera_type = camera_type_t.PERSPECTIVE;
+	c.cam_handle = zui_handle_create();
+	///if is_forge
+	c.vxao_ext = 2.0;
+	///else
+	c.vxao_ext = 1.0;
+	///end
+	c.vxao_offset = 1.5;
+	c.vxao_aperture = 1.2;
+	c.texture_export_path = "";
+	c.last_status_position = 0;
+	c.camera_controls = camera_controls_t.ORBIT;
+	c.pen_painting_only = false; // Reject painting with finger when using pen
+
+	///if (is_paint || is_sculpt)
+	c.tool = workspace_tool_t.BRUSH;
+	c.layer_preview_dirty = true;
+	c.layers_preview_dirty = false;
+	c.node_preview_dirty = false;
+	c.node_preview_name = "";
+	c.colorid_picked = false;
+	c.material_preview = false; // Drawing material previews
+	c.saved_camera = mat4_identity();
+	c.color_picker_previous_tool = workspace_tool_t.BRUSH;
+	c.materialid_picked = 0;
+	c.uvx_picked = 0.0;
+	c.uvy_picked = 0.0;
+	c.picker_select_material = true;
+	c.picker_mask_handle = zui_handle_create();
+	c.pick_pos_nor_tex = false;
+	c.posx_picked = 0.0;
+	c.posy_picked = 0.0;
+	c.posz_picked = 0.0;
+	c.norx_picked = 0.0;
+	c.nory_picked = 0.0;
+	c.norz_picked = 0.0;
+	c.draw_wireframe = false;
+	c.wireframe_handle = zui_handle_create({ selected: false });
+	c.draw_texels = false;
+	c.texels_handle = zui_handle_create({ selected: false });
+	c.colorid_handle = zui_handle_create();
+	c.layers_export = export_mode_t.VISIBLE;
+	c.decal_preview = false;
+	c.decal_x = 0.0;
+	c.decal_y = 0.0;
+	c.cache_draws = false;
+	c.write_icon_on_export = false;
+	///if arm_physics
+	c.particle_physics = false;
+	c.particle_hit_x = 0.0;
+	c.particle_hit_y = 0.0;
+	c.particle_hit_z = 0.0;
+	c.last_particle_hit_x = 0.0;
+	c.last_particle_hit_y = 0.0;
+	c.last_particle_hit_z = 0.0;
+	///end
+	c.layer_filter = 0;
+	c.gizmo_started = false;
+	c.gizmo_offset = 0.0;
+	c.gizmo_drag = 0.0;
+	c.gizmo_drag_last = 0.0;
+	c.translate_x = false;
+	c.translate_y = false;
+	c.translate_z = false;
+	c.scale_x = false;
+	c.scale_y = false;
+	c.scale_z = false;
+	c.rotate_x = false;
+	c.rotate_y = false;
+	c.rotate_z = false;
+	c.brush_nodes_radius = 1.0;
+	c.brush_nodes_opacity = 1.0;
+	c.brush_mask_image_is_alpha = false;
+	c.brush_stencil_image_is_alpha = false;
+	c.brush_stencil_x = 0.02;
+	c.brush_stencil_y = 0.02;
+	c.brush_stencil_scale = 0.9;
+	c.brush_stencil_scaling = false;
+	c.brush_stencil_angle = 0.0;
+	c.brush_stencil_rotating = false;
+	c.brush_nodes_scale = 1.0;
+	c.brush_nodes_angle = 0.0;
+	c.brush_nodes_hardness = 1.0;
+	c.brush_directional = false;
+	c.brush_radius = 0.5;
+	c.brush_radius_handle = zui_handle_create({ value: 0.5 });
+	c.brush_scale_x = 1.0;
+	c.brush_decal_mask_radius = 0.5;
+	c.brush_decal_mask_radius_handle = zui_handle_create({ value: 0.5 });
+	c.brush_scale_x_handle = zui_handle_create({ value: 1.0 });
+	c.brush_blending = blend_type_t.MIX;
+	c.brush_opacity = 1.0;
+	c.brush_opacity_handle = zui_handle_create({ value: 1.0 });
+	c.brush_scale = 1.0;
+	c.brush_angle = 0.0;
+	c.brush_angle_handle = zui_handle_create({ value: 0.0 });
+	///if is_paint
+	c.brush_hardness = 0.8;
+	///end
+	///if is_sculpt
+	c.brush_hardness = 0.05;
+	///end
+	c.brush_lazy_radius = 0.0;
+	c.brush_lazy_step = 0.0;
+	c.brush_lazy_x = 0.0;
+	c.brush_lazy_y = 0.0;
+	c.brush_paint = uv_type_t.UVMAP;
+	c.brush_angle_reject_dot = 0.5;
+	c.bake_type = bake_type_t.AO;
+	c.bake_axis = bake_axis_t.XYZ;
+	c.bake_up_axis = bake_up_axis_t.Z;
+	c.bake_samples = 128;
+	c.bake_ao_strength = 1.0;
+	c.bake_ao_radius = 1.0;
+	c.bake_ao_offset = 1.0;
+	c.bake_curv_strength = 1.0;
+	c.bake_curv_radius = 1.0;
+	c.bake_curv_offset = 0.0;
+	c.bake_curv_smooth = 1;
+	c.bake_high_poly = 0;
+	c.xray = false;
+	c.sym_x = false;
+	c.sym_y = false;
+	c.sym_z = false;
+	c.fill_type_handle = zui_handle_create();
+	c.paint2d = false;
+	c.last_htab0_pos = 0;
+	c.maximized_sidebar_width = 0;
+	c.drag_dest = 0;
+	///end
+
+	///if is_lab
+	c.tool = workspace_tool_t.ERASER;
+	c.color_picker_previous_tool = workspace_tool_t.ERASER;
+	c.brush_radius = 0.25;
+	c.brush_radius_handle = zui_handle_create({ value: 0.25 });
+	c.brush_scale = 1.0;
+	c.coords = vec4_create();
+	c.start_x = 0.0;
+	c.start_y = 0.0;
+	c.lock_begin = false;
+	c.lock_x = false;
+	c.lock_y = false;
+	c.lock_start_x = 0.0;
+	c.lock_start_y = 0.0;
+	c.registered = false;
+	///end
+
+	return c;
+}
+
+let context_raw: context_t;
+
+function context_init() {
+	context_raw = context_create();
+}
 
 function context_use_deferred(): bool {
 	///if is_paint
@@ -21,7 +547,7 @@ function context_select_material(i: i32) {
 function context_set_material(m: SlotMaterialRaw) {
 	if (project_materials.indexOf(m) == -1) return;
 	context_raw.material = m;
-	MakeMaterial.make_material_parse_paint_material();
+	make_material_parse_paint_material();
 	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 	ui_header_handle.redraws = 2;
 	ui_nodes_hwnd.redraws = 2;
@@ -44,7 +570,7 @@ function context_select_brush(i: i32) {
 function context_set_brush(b: SlotBrushRaw) {
 	if (project_brushes.indexOf(b) == -1) return;
 	context_raw.brush = b;
-	MakeMaterial.make_material_parse_brush();
+	make_material_parse_brush();
 	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 	ui_nodes_hwnd.redraws = 2;
 }
@@ -78,8 +604,8 @@ function context_set_layer(l: SlotLayerRaw) {
 	if (g2_in_use) g2_end();
 
 	base_set_object_mask();
-	MakeMaterial.make_material_parse_mesh_material();
-	MakeMaterial.make_material_parse_paint_material();
+	make_material_parse_mesh_material();
+	make_material_parse_paint_material();
 
 	if (g2_in_use) g2_begin(current);
 
@@ -90,8 +616,8 @@ function context_set_layer(l: SlotLayerRaw) {
 
 function context_select_tool(i: i32) {
 	context_raw.tool = i;
-	MakeMaterial.make_material_parse_paint_material();
-	MakeMaterial.make_material_parse_mesh_material();
+	make_material_parse_paint_material();
+	make_material_parse_mesh_material();
 	context_raw.ddirty = 3;
 	let _viewport_mode: viewport_mode_t = context_raw.viewport_mode;
 	context_raw.viewport_mode = -1 as viewport_mode_t;
@@ -116,7 +642,7 @@ function context_init_tool() {
 
 	else if (context_raw.tool == workspace_tool_t.PARTICLE) {
 		util_particle_init();
-		MakeMaterial.make_material_parse_particle_material();
+		make_material_parse_particle_material();
 	}
 
 	else if (context_raw.tool == workspace_tool_t.BAKE) {
@@ -146,7 +672,7 @@ function context_select_paint_object(o: mesh_object_t) {
 	for (let p of project_paint_objects) p.skip_context = "paint";
 	context_raw.paint_object = o;
 
-	let mask: i32 = SlotLayer.slot_layer_get_object_mask(context_raw.layer);
+	let mask: i32 = slot_layer_get_object_mask(context_raw.layer);
 	if (context_layer_filter_used()) mask = context_raw.layer_filter;
 
 	if (context_raw.merged_object == null || mask > 0) {
@@ -185,7 +711,7 @@ function context_layer_filter_used(): bool {
 
 function context_object_mask_used(): bool {
 	///if (is_paint || is_sculpt)
-	return SlotLayer.slot_layer_get_object_mask(context_raw.layer) > 0 && SlotLayer.slot_layer_get_object_mask(context_raw.layer) <= project_paint_objects.length;
+	return slot_layer_get_object_mask(context_raw.layer) > 0 && slot_layer_get_object_mask(context_raw.layer) <= project_paint_objects.length;
 	///end
 
 	///if is_lab
@@ -265,7 +791,7 @@ function context_set_viewport_mode(mode: viewport_mode_t) {
 	}
 	let _workspace: i32 = ui_header_worktab.position;
 	ui_header_worktab.position = 0;
-	MakeMaterial.make_material_parse_mesh_material();
+	make_material_parse_mesh_material();
 	ui_header_worktab.position = _workspace;
 }
 
@@ -301,7 +827,7 @@ function context_set_render_path() {
 		render_path_commands = render_path_deferred_commands;
 	}
 	app_notify_on_init(function() {
-		MakeMaterial.make_material_parse_mesh_material();
+		make_material_parse_mesh_material();
 	});
 }
 

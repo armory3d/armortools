@@ -156,10 +156,10 @@ function render_path_deferred_init() {
 	}
 	///end
 
-	RenderPathPaint.render_path_paint_init();
+	render_path_paint_init();
 
 	///if (is_paint || is_sculpt)
-	RenderPathPreview.render_path_preview_init();
+	render_path_preview_init();
 	///end
 
 	///if (krom_direct3d12 || krom_vulkan || krom_metal)
@@ -169,7 +169,7 @@ function render_path_deferred_init() {
 
 function render_path_deferred_commands() {
 	///if is_paint
-	RenderPathPaint.render_path_paint_live_brush_dirty();
+	render_path_paint_live_brush_dirty();
 	///end
 	render_path_base_commands(render_path_deferred_draw_deferred);
 }

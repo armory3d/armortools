@@ -1,27 +1,4 @@
 
-///if is_paint
-/// <reference path='../../armorpaint/Sources/TabLayers.ts'/>
-///end
-///if is_sculpt
-/// <reference path='../../armorsculpt/Sources/TabLayers.ts'/>
-///end
-///if is_forge
-/// <reference path='../../armorforge/Sources/TabObjects.ts'/>
-///end
-/// <reference path='./TabHistory.ts'/>
-/// <reference path='./TabPlugins.ts'/>
-/// <reference path='./TabMaterials.ts'/>
-/// <reference path='./TabBrushes.ts'/>
-/// <reference path='./TabParticles.ts'/>
-/// <reference path='./TabBrowser.ts'/>
-/// <reference path='./TabTextures.ts'/>
-/// <reference path='./TabMeshes.ts'/>
-/// <reference path='./TabFonts.ts'/>
-/// <reference path='./TabSwatches.ts'/>
-/// <reference path='./TabScript.ts'/>
-/// <reference path='./TabConsole.ts'/>
-/// <reference path='./ui_status.ts'/>
-
 let ui_base_show: bool = true;
 let ui_base_ui: zui_t;
 let ui_base_border_started: i32 = 0;
@@ -75,29 +52,29 @@ function ui_base_init_htabs(): zui_handle_t[] {
 function ui_base_init_hwnd_tabs(): any[] {
 	///if is_paint
 	return [
-		[TabLayers.tab_layers_draw, TabHistory.tab_history_draw, TabPlugins.tab_plugins_draw
+		[tab_layers_draw, tab_history_draw, tab_plugins_draw
 			///if is_forge
-			, TabObjects.draw
+			, tab_objects_draw
 			///end
 		],
-		[TabMaterials.tab_materials_draw, TabBrushes.tab_brushes_draw, TabParticles.tab_particles_draw],
-		[TabBrowser.tab_browser_draw, TabTextures.tab_textures_draw, TabMeshes.tab_meshes_draw, TabFonts.tab_fonts_draw, TabSwatches.tab_swatches_draw, TabScript.tab_script_draw, TabConsole.tab_console_draw, ui_status_draw_version_tab]
+		[tab_materials_draw, tab_brushes_draw, tab_particles_draw],
+		[tab_browser_draw, tab_textures_draw, tab_meshes_draw, tab_fonts_draw, tab_swatches_draw, tab_script_draw, tab_console_draw, ui_status_draw_version_tab]
 	];
 	///end
 	///if is_sculpt
 	return [
-		[TabLayers.tab_layers_draw, TabHistory.tab_history_draw, TabPlugins.tab_plugins_draw
+		[tab_layers_draw, tab_history_draw, tab_plugins_draw
 			///if is_forge
-			, TabObjects.draw
+			, tab_objects_draw
 			///end
 		],
-		[TabMaterials.tab_materials_draw, TabBrushes.tab_brushes_draw, TabParticles.tab_particles_draw],
-		[TabBrowser.tab_browser_draw, TabTextures.tab_textures_draw, TabMeshes.tab_meshes_draw, TabFonts.tab_fonts_draw, TabScript.tab_script_draw, TabConsole.tab_console_draw, ui_status_draw_version_tab]
+		[tab_materials_draw, tab_brushes_draw, tab_particles_draw],
+		[tab_browser_draw, tab_textures_draw, tab_meshes_draw, tab_fonts_draw, tab_script_draw, tab_console_draw, ui_status_draw_version_tab]
 	];
 	///end
 	///if is_lab
 	return [
-		[TabBrowser.tab_browser_draw, TabTextures.tab_textures_draw, TabMeshes.tab_meshes_draw, TabSwatches.tab_swatches_draw, TabPlugins.tab_plugins_draw, TabScript.tab_script_draw, TabConsole.tab_console_draw, ui_status_draw_version_tab]
+		[tab_browser_draw, tab_textures_draw, tab_meshes_draw, tab_swatches_draw, tab_plugins_draw, tab_script_draw, tab_console_draw, ui_status_draw_version_tab]
 	];
 	///end
 }
@@ -120,26 +97,26 @@ function ui_base_init() {
 	if (project_materials == null) {
 		project_materials = [];
 		let m: material_data_t = data_get_material("Scene", "Material");
-		project_materials.push(SlotMaterial.slot_material_create(m));
+		project_materials.push(slot_material_create(m));
 		context_raw.material = project_materials[0];
 	}
 
 	if (project_brushes == null) {
 		project_brushes = [];
-		project_brushes.push(SlotBrush.slot_brush_create());
+		project_brushes.push(slot_brush_create());
 		context_raw.brush = project_brushes[0];
-		MakeMaterial.make_material_parse_brush();
+		make_material_parse_brush();
 	}
 
 	if (project_fonts == null) {
 		project_fonts = [];
-		project_fonts.push(SlotFont.slot_font_create("default.ttf", base_font));
+		project_fonts.push(slot_font_create("default.ttf", base_font));
 		context_raw.font = project_fonts[0];
 	}
 
 	if (project_layers == null) {
 		project_layers = [];
-		project_layers.push(SlotLayer.slot_layer_create());
+		project_layers.push(slot_layer_create());
 		context_raw.layer = project_layers[0];
 	}
 	///end
@@ -336,7 +313,7 @@ function ui_base_update() {
 					context_raw.brush_angle = math_floor(context_raw.brush_angle) % 360;
 					if (context_raw.brush_angle < 0) context_raw.brush_angle += 360;
 					context_raw.brush_angle_handle.value = context_raw.brush_angle;
-					MakeMaterial.make_material_parse_paint_material();
+					make_material_parse_paint_material();
 				}
 				else if (decal_mask && operator_shortcut(config_keymap.decal_mask + "+" + config_keymap.brush_radius, shortcut_type_t.DOWN)) {
 					context_raw.brush_decal_mask_radius += mouse_movement_x / 150;
@@ -1058,7 +1035,7 @@ function ui_base_update_ui() {
 		if (context_raw.tool == workspace_tool_t.COLORID && context_raw.layer.fill_layer != null) {
 			base_notify_on_next_frame(function () {
 				base_update_fill_layer();
-				MakeMaterial.make_material_parse_paint_material(false);
+				make_material_parse_paint_material(false);
 			});
 		}
 		///end
@@ -1072,7 +1049,7 @@ function ui_base_update_ui() {
 		if (base_pipe_merge == null) base_make_pipe();
 		// Update all layer previews
 		for (let l of project_layers) {
-			if (SlotLayer.slot_layer_is_group(l)) continue;
+			if (slot_layer_is_group(l)) continue;
 			let target: image_t = l.texpaint_preview;
 			let source: image_t = l.texpaint;
 			g2_begin(target);
@@ -1085,7 +1062,7 @@ function ui_base_update_ui() {
 		}
 		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 	}
-	if (context_raw.layer_preview_dirty && !SlotLayer.slot_layer_is_group(context_raw.layer)) {
+	if (context_raw.layer_preview_dirty && !slot_layer_is_group(context_raw.layer)) {
 		context_raw.layer_preview_dirty = false;
 		context_raw.mask_preview_last = null;
 		if (base_pipe_merge == null) base_make_pipe();

@@ -169,7 +169,7 @@ function import_arm_run_project(path: string) {
 	///if (is_paint || is_sculpt)
 	let tex: image_t = project_layers[0].texpaint;
 	if (tex.width != config_get_texture_res_x() || tex.height != config_get_texture_res_y()) {
-		if (history_undo_layers != null) for (let l of history_undo_layers) SlotLayer.slot_layer_resize_and_set_bits(l);
+		if (history_undo_layers != null) for (let l of history_undo_layers) slot_layer_resize_and_set_bits(l);
 		let rts: map_t<string, render_target_t> = render_path_render_targets;
 		let _texpaint_blend0: image_t = rts.get("texpaint_blend0")._image;
 		base_notify_on_next_frame(() => {
@@ -188,7 +188,7 @@ function import_arm_run_project(path: string) {
 		context_raw.brush_blend_dirty = true;
 	}
 
-	for (let l of project_layers) SlotLayer.slot_layer_unload(l);
+	for (let l of project_layers) slot_layer_unload(l);
 	project_layers = [];
 	for (let i: i32 = 0; i < project.layer_datas.length; ++i) {
 		let ld: layer_data_t = project.layer_datas[i];
@@ -201,7 +201,7 @@ function import_arm_run_project(path: string) {
 		let is_mask: bool = false;
 		///end
 
-		let l: SlotLayerRaw = SlotLayer.slot_layer_create("", is_group ? layer_slot_type_t.GROUP : is_mask ? layer_slot_type_t.MASK : layer_slot_type_t.LAYER);
+		let l: SlotLayerRaw = slot_layer_create("", is_group ? layer_slot_type_t.GROUP : is_mask ? layer_slot_type_t.MASK : layer_slot_type_t.LAYER);
 		if (ld.name != null) l.name = ld.name;
 		l.visible = ld.visible;
 		project_layers.push(l);
@@ -299,7 +299,7 @@ function import_arm_run_project(path: string) {
 	project_materials = [];
 	for (let n of project.material_nodes) {
 		import_arm_init_nodes(n.nodes);
-		context_raw.material = SlotMaterial.slot_material_create(m0, n);
+		context_raw.material = slot_material_create(m0, n);
 		project_materials.push(context_raw.material);
 	}
 	///end
@@ -314,16 +314,16 @@ function import_arm_run_project(path: string) {
 	///if (is_paint || is_sculpt)
 	for (let m of project_materials) {
 		context_raw.material = m;
-		MakeMaterial.make_material_parse_paint_material();
+		make_material_parse_paint_material();
 		util_render_make_material_preview();
 	}
 
 	project_brushes = [];
 	for (let n of project.brush_nodes) {
 		import_arm_init_nodes(n.nodes);
-		context_raw.brush = SlotBrush.slot_brush_create(n);
+		context_raw.brush = slot_brush_create(n);
 		project_brushes.push(context_raw.brush);
-		MakeMaterial.make_material_parse_brush();
+		make_material_parse_brush();
 		util_render_make_brush_preview();
 	}
 
@@ -412,7 +412,7 @@ function import_arm_run_material_from_project(project: project_format_t, path: s
 
 	for (let c of project.material_nodes) {
 		import_arm_init_nodes(c.nodes);
-		context_raw.material = SlotMaterial.slot_material_create(m0, c);
+		context_raw.material = slot_material_create(m0, c);
 		project_materials.push(context_raw.material);
 		imported.push(context_raw.material);
 		history_new_material();
@@ -429,7 +429,7 @@ function import_arm_run_material_from_project(project: project_format_t, path: s
 	let _init = () => {
 		for (let m of imported) {
 			context_set_material(m);
-			MakeMaterial.make_material_parse_paint_material();
+			make_material_parse_paint_material();
 			util_render_make_material_preview();
 		}
 	}
@@ -492,7 +492,7 @@ function import_arm_run_brush_from_project(project: project_format_t, path: stri
 
 	for (let n of project.brush_nodes) {
 		import_arm_init_nodes(n.nodes);
-		context_raw.brush = SlotBrush.slot_brush_create(n);
+		context_raw.brush = slot_brush_create(n);
 		project_brushes.push(context_raw.brush);
 		imported.push(context_raw.brush);
 	}

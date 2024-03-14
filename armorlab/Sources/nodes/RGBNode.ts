@@ -7,15 +7,15 @@ class RGBNode extends LogicNode {
 		super();
 	}
 
-	override getAsImage = (from: i32, done: (img: image_t)=>void) => {
+	override get_as_image = (from: i32, done: (img: image_t)=>void) => {
 		if (this.image != null) {
-			base_notifyOnNextFrame(() => {
+			base_notify_on_next_frame(() => {
 				image_unload(this.image);
 			});
 		}
 
 		let f32a = new Float32Array(4);
-		let raw = parser_logic_getRawNode(this);
+		let raw = parser_logic_get_raw_node(this);
 		let default_value = raw.outputs[0].default_value;
 		f32a[0] = default_value[0];
 		f32a[1] = default_value[1];
@@ -25,8 +25,8 @@ class RGBNode extends LogicNode {
 		done(this.image);
 	}
 
-	override getCachedImage = (): image_t => {
-		this.getAsImage(0, (img: image_t) => {});
+	override get_cached_image = (): image_t => {
+		this.get_as_image(0, (img: image_t) => {});
 		return this.image;
 	}
 

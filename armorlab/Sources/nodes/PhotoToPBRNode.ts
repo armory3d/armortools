@@ -3,18 +3,18 @@ class PhotoToPBRNode extends LogicNode {
 
 	static temp: image_t = null;
 	static images: image_t[] = null;
-	static modelNames = ["base", "occlusion", "roughness", "metallic", "normal", "height"];
+	static model_names = ["base", "occlusion", "roughness", "metallic", "normal", "height"];
 
-	static cachedSource: image_t = null;
-	static borderW = 64;
-	static tileW = 2048;
-	static tileWithBorderW = PhotoToPBRNode.tileW + PhotoToPBRNode.borderW * 2;
+	static cached_source: image_t = null;
+	static border_w = 64;
+	static tile_w = 2048;
+	static tile_with_border_w = PhotoToPBRNode.tile_w + PhotoToPBRNode.border_w * 2;
 
 	constructor() {
 		super();
 
 		if (PhotoToPBRNode.temp == null) {
-			PhotoToPBRNode.temp = image_create_render_target(PhotoToPBRNode.tileWithBorderW, PhotoToPBRNode.tileWithBorderW);
+			PhotoToPBRNode.temp = image_create_render_target(PhotoToPBRNode.tile_with_border_w, PhotoToPBRNode.tile_with_border_w);
 		}
 
 		PhotoToPBRNode.init();
@@ -23,82 +23,82 @@ class PhotoToPBRNode extends LogicNode {
 	static init = () => {
 		if (PhotoToPBRNode.images == null) {
 			PhotoToPBRNode.images = [];
-			for (let i = 0; i < PhotoToPBRNode.modelNames.length; ++i) {
-				PhotoToPBRNode.images.push(image_create_render_target(config_getTextureResX(), config_getTextureResY()));
+			for (let i = 0; i < PhotoToPBRNode.model_names.length; ++i) {
+				PhotoToPBRNode.images.push(image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y()));
 			}
 		}
 	}
 
-	override getAsImage = (from: i32, done: (img: image_t)=>void) => {
+	override get_as_image = (from: i32, done: (img: image_t)=>void) => {
 		let getSource = (done: (img: image_t)=>void) => {
-			if (PhotoToPBRNode.cachedSource != null) done(PhotoToPBRNode.cachedSource);
-			else this.inputs[0].getAsImage(done);
+			if (PhotoToPBRNode.cached_source != null) done(PhotoToPBRNode.cached_source);
+			else this.inputs[0].get_as_image(done);
 		}
 
 		getSource((source: image_t) => {
-			PhotoToPBRNode.cachedSource = source;
+			PhotoToPBRNode.cached_source = source;
 
 			console_progress(tr("Processing") + " - " + tr("Photo to PBR"));
-			base_notifyOnNextFrame(() => {
-				let tileFloats: Float32Array[] = [];
-				let tilesX = math_floor(config_getTextureResX() / PhotoToPBRNode.tileW);
-				let tilesY = math_floor(config_getTextureResY() / PhotoToPBRNode.tileW);
-				let numTiles = tilesX * tilesY;
-				for (let i = 0; i < numTiles; ++i) {
-					let x = i % tilesX;
-					let y = math_floor(i / tilesX);
+			base_notify_on_next_frame(() => {
+				let tile_floats: Float32Array[] = [];
+				let tiles_x = math_floor(config_get_texture_res_x() / PhotoToPBRNode.tile_w);
+				let tiles_y = math_floor(config_get_texture_res_y() / PhotoToPBRNode.tile_w);
+				let num_tiles = tiles_x * tiles_y;
+				for (let i = 0; i < num_tiles; ++i) {
+					let x = i % tiles_x;
+					let y = math_floor(i / tiles_x);
 
 					g2_begin(PhotoToPBRNode.temp);
-					g2_draw_scaled_image(source, PhotoToPBRNode.borderW - x * PhotoToPBRNode.tileW, PhotoToPBRNode.borderW - y * PhotoToPBRNode.tileW, -config_getTextureResX(), config_getTextureResY());
-					g2_draw_scaled_image(source, PhotoToPBRNode.borderW - x * PhotoToPBRNode.tileW, PhotoToPBRNode.borderW - y * PhotoToPBRNode.tileW, config_getTextureResX(), -config_getTextureResY());
-					g2_draw_scaled_image(source, PhotoToPBRNode.borderW - x * PhotoToPBRNode.tileW, PhotoToPBRNode.borderW - y * PhotoToPBRNode.tileW, -config_getTextureResX(), -config_getTextureResY());
-					g2_draw_scaled_image(source, PhotoToPBRNode.borderW - x * PhotoToPBRNode.tileW + PhotoToPBRNode.tileW, PhotoToPBRNode.borderW - y * PhotoToPBRNode.tileW + PhotoToPBRNode.tileW, config_getTextureResX(), config_getTextureResY());
-					g2_draw_scaled_image(source, PhotoToPBRNode.borderW - x * PhotoToPBRNode.tileW + PhotoToPBRNode.tileW, PhotoToPBRNode.borderW - y * PhotoToPBRNode.tileW + PhotoToPBRNode.tileW, -config_getTextureResX(), config_getTextureResY());
-					g2_draw_scaled_image(source, PhotoToPBRNode.borderW - x * PhotoToPBRNode.tileW + PhotoToPBRNode.tileW, PhotoToPBRNode.borderW - y * PhotoToPBRNode.tileW + PhotoToPBRNode.tileW, config_getTextureResX(), -config_getTextureResY());
-					g2_draw_scaled_image(source, PhotoToPBRNode.borderW - x * PhotoToPBRNode.tileW, PhotoToPBRNode.borderW - y * PhotoToPBRNode.tileW, config_getTextureResX(), config_getTextureResY());
+					g2_draw_scaled_image(source, PhotoToPBRNode.border_w - x * PhotoToPBRNode.tile_w, PhotoToPBRNode.border_w - y * PhotoToPBRNode.tile_w, -config_get_texture_res_x(), config_get_texture_res_y());
+					g2_draw_scaled_image(source, PhotoToPBRNode.border_w - x * PhotoToPBRNode.tile_w, PhotoToPBRNode.border_w - y * PhotoToPBRNode.tile_w, config_get_texture_res_x(), -config_get_texture_res_y());
+					g2_draw_scaled_image(source, PhotoToPBRNode.border_w - x * PhotoToPBRNode.tile_w, PhotoToPBRNode.border_w - y * PhotoToPBRNode.tile_w, -config_get_texture_res_x(), -config_get_texture_res_y());
+					g2_draw_scaled_image(source, PhotoToPBRNode.border_w - x * PhotoToPBRNode.tile_w + PhotoToPBRNode.tile_w, PhotoToPBRNode.border_w - y * PhotoToPBRNode.tile_w + PhotoToPBRNode.tile_w, config_get_texture_res_x(), config_get_texture_res_y());
+					g2_draw_scaled_image(source, PhotoToPBRNode.border_w - x * PhotoToPBRNode.tile_w + PhotoToPBRNode.tile_w, PhotoToPBRNode.border_w - y * PhotoToPBRNode.tile_w + PhotoToPBRNode.tile_w, -config_get_texture_res_x(), config_get_texture_res_y());
+					g2_draw_scaled_image(source, PhotoToPBRNode.border_w - x * PhotoToPBRNode.tile_w + PhotoToPBRNode.tile_w, PhotoToPBRNode.border_w - y * PhotoToPBRNode.tile_w + PhotoToPBRNode.tile_w, config_get_texture_res_x(), -config_get_texture_res_y());
+					g2_draw_scaled_image(source, PhotoToPBRNode.border_w - x * PhotoToPBRNode.tile_w, PhotoToPBRNode.border_w - y * PhotoToPBRNode.tile_w, config_get_texture_res_x(), config_get_texture_res_y());
 					g2_end();
 
 					let bytes_img = image_get_pixels(PhotoToPBRNode.temp);
 					let u8a = new Uint8Array(bytes_img);
-					let f32a = new Float32Array(3 * PhotoToPBRNode.tileWithBorderW * PhotoToPBRNode.tileWithBorderW);
-					for (let i = 0; i < (PhotoToPBRNode.tileWithBorderW * PhotoToPBRNode.tileWithBorderW); ++i) {
+					let f32a = new Float32Array(3 * PhotoToPBRNode.tile_with_border_w * PhotoToPBRNode.tile_with_border_w);
+					for (let i = 0; i < (PhotoToPBRNode.tile_with_border_w * PhotoToPBRNode.tile_with_border_w); ++i) {
 						f32a[i                                        ] = (u8a[i * 4    ] / 255 - 0.5) / 0.5;
-						f32a[i + PhotoToPBRNode.tileWithBorderW * PhotoToPBRNode.tileWithBorderW    ] = (u8a[i * 4 + 1] / 255 - 0.5) / 0.5;
-						f32a[i + PhotoToPBRNode.tileWithBorderW * PhotoToPBRNode.tileWithBorderW * 2] = (u8a[i * 4 + 2] / 255 - 0.5) / 0.5;
+						f32a[i + PhotoToPBRNode.tile_with_border_w * PhotoToPBRNode.tile_with_border_w    ] = (u8a[i * 4 + 1] / 255 - 0.5) / 0.5;
+						f32a[i + PhotoToPBRNode.tile_with_border_w * PhotoToPBRNode.tile_with_border_w * 2] = (u8a[i * 4 + 2] / 255 - 0.5) / 0.5;
 					}
 
-					let model_blob: ArrayBuffer = data_get_blob("models/photo_to_" + PhotoToPBRNode.modelNames[from] + ".quant.onnx");
+					let model_blob: ArrayBuffer = data_get_blob("models/photo_to_" + PhotoToPBRNode.model_names[from] + ".quant.onnx");
 					let buf = krom_ml_inference(model_blob, [f32a.buffer], null, null, config_raw.gpu_inference);
 					let ar = new Float32Array(buf);
-					u8a = new Uint8Array(4 * PhotoToPBRNode.tileW * PhotoToPBRNode.tileW);
-					let offsetG = (from == ChannelType.ChannelBaseColor || from == ChannelType.ChannelNormalMap) ? PhotoToPBRNode.tileWithBorderW * PhotoToPBRNode.tileWithBorderW : 0;
-					let offsetB = (from == ChannelType.ChannelBaseColor || from == ChannelType.ChannelNormalMap) ? PhotoToPBRNode.tileWithBorderW * PhotoToPBRNode.tileWithBorderW * 2 : 0;
-					for (let i = 0; i < (PhotoToPBRNode.tileW * PhotoToPBRNode.tileW); ++i) {
-						let x = PhotoToPBRNode.borderW + i % PhotoToPBRNode.tileW;
-						let y = PhotoToPBRNode.borderW + math_floor(i / PhotoToPBRNode.tileW);
-						u8a[i * 4    ] = math_floor((ar[y * PhotoToPBRNode.tileWithBorderW + x          ] * 0.5 + 0.5) * 255);
-						u8a[i * 4 + 1] = math_floor((ar[y * PhotoToPBRNode.tileWithBorderW + x + offsetG] * 0.5 + 0.5) * 255);
-						u8a[i * 4 + 2] = math_floor((ar[y * PhotoToPBRNode.tileWithBorderW + x + offsetB] * 0.5 + 0.5) * 255);
+					u8a = new Uint8Array(4 * PhotoToPBRNode.tile_w * PhotoToPBRNode.tile_w);
+					let offset_g = (from == channel_type_t.BASE_COLOR || from == channel_type_t.NORMAL_MAP) ? PhotoToPBRNode.tile_with_border_w * PhotoToPBRNode.tile_with_border_w : 0;
+					let offset_b = (from == channel_type_t.BASE_COLOR || from == channel_type_t.NORMAL_MAP) ? PhotoToPBRNode.tile_with_border_w * PhotoToPBRNode.tile_with_border_w * 2 : 0;
+					for (let i = 0; i < (PhotoToPBRNode.tile_w * PhotoToPBRNode.tile_w); ++i) {
+						let x = PhotoToPBRNode.border_w + i % PhotoToPBRNode.tile_w;
+						let y = PhotoToPBRNode.border_w + math_floor(i / PhotoToPBRNode.tile_w);
+						u8a[i * 4    ] = math_floor((ar[y * PhotoToPBRNode.tile_with_border_w + x          ] * 0.5 + 0.5) * 255);
+						u8a[i * 4 + 1] = math_floor((ar[y * PhotoToPBRNode.tile_with_border_w + x + offset_g] * 0.5 + 0.5) * 255);
+						u8a[i * 4 + 2] = math_floor((ar[y * PhotoToPBRNode.tile_with_border_w + x + offset_b] * 0.5 + 0.5) * 255);
 						u8a[i * 4 + 3] = 255;
 					}
-					tileFloats.push(ar);
+					tile_floats.push(ar);
 
 					// Use border pixels to blend seams
 					if (i > 0) {
 						if (x > 0) {
-							let ar = tileFloats[i - 1];
-							for (let yy = 0; yy < PhotoToPBRNode.tileW; ++yy) {
-								for (let xx = 0; xx < PhotoToPBRNode.borderW; ++xx) {
-									let i = yy * PhotoToPBRNode.tileW + xx;
+							let ar = tile_floats[i - 1];
+							for (let yy = 0; yy < PhotoToPBRNode.tile_w; ++yy) {
+								for (let xx = 0; xx < PhotoToPBRNode.border_w; ++xx) {
+									let i = yy * PhotoToPBRNode.tile_w + xx;
 									let a = u8a[i * 4];
 									let b = u8a[i * 4 + 1];
 									let c = u8a[i * 4 + 2];
 
-									let aa = math_floor((ar[(PhotoToPBRNode.borderW + yy) * PhotoToPBRNode.tileWithBorderW + PhotoToPBRNode.borderW + PhotoToPBRNode.tileW + xx          ] * 0.5 + 0.5) * 255);
-									let bb = math_floor((ar[(PhotoToPBRNode.borderW + yy) * PhotoToPBRNode.tileWithBorderW + PhotoToPBRNode.borderW + PhotoToPBRNode.tileW + xx + offsetG] * 0.5 + 0.5) * 255);
-									let cc = math_floor((ar[(PhotoToPBRNode.borderW + yy) * PhotoToPBRNode.tileWithBorderW + PhotoToPBRNode.borderW + PhotoToPBRNode.tileW + xx + offsetB] * 0.5 + 0.5) * 255);
+									let aa = math_floor((ar[(PhotoToPBRNode.border_w + yy) * PhotoToPBRNode.tile_with_border_w + PhotoToPBRNode.border_w + PhotoToPBRNode.tile_w + xx          ] * 0.5 + 0.5) * 255);
+									let bb = math_floor((ar[(PhotoToPBRNode.border_w + yy) * PhotoToPBRNode.tile_with_border_w + PhotoToPBRNode.border_w + PhotoToPBRNode.tile_w + xx + offset_g] * 0.5 + 0.5) * 255);
+									let cc = math_floor((ar[(PhotoToPBRNode.border_w + yy) * PhotoToPBRNode.tile_with_border_w + PhotoToPBRNode.border_w + PhotoToPBRNode.tile_w + xx + offset_b] * 0.5 + 0.5) * 255);
 
-									let f = xx / PhotoToPBRNode.borderW;
+									let f = xx / PhotoToPBRNode.border_w;
 									let invf = 1.0 - f;
 									a = math_floor(a * f + aa * invf);
 									b = math_floor(b * f + bb * invf);
@@ -111,19 +111,19 @@ class PhotoToPBRNode extends LogicNode {
 							}
 						}
 						if (y > 0) {
-							let ar = tileFloats[i - tilesX];
-							for (let xx = 0; xx < PhotoToPBRNode.tileW; ++xx) {
-								for (let yy = 0; yy < PhotoToPBRNode.borderW; ++yy) {
-									let i = yy * PhotoToPBRNode.tileW + xx;
+							let ar = tile_floats[i - tiles_x];
+							for (let xx = 0; xx < PhotoToPBRNode.tile_w; ++xx) {
+								for (let yy = 0; yy < PhotoToPBRNode.border_w; ++yy) {
+									let i = yy * PhotoToPBRNode.tile_w + xx;
 									let a = u8a[i * 4];
 									let b = u8a[i * 4 + 1];
 									let c = u8a[i * 4 + 2];
 
-									let aa = math_floor((ar[(PhotoToPBRNode.borderW + PhotoToPBRNode.tileW + yy) * PhotoToPBRNode.tileWithBorderW + PhotoToPBRNode.borderW + xx          ] * 0.5 + 0.5) * 255);
-									let bb = math_floor((ar[(PhotoToPBRNode.borderW + PhotoToPBRNode.tileW + yy) * PhotoToPBRNode.tileWithBorderW + PhotoToPBRNode.borderW + xx + offsetG] * 0.5 + 0.5) * 255);
-									let cc = math_floor((ar[(PhotoToPBRNode.borderW + PhotoToPBRNode.tileW + yy) * PhotoToPBRNode.tileWithBorderW + PhotoToPBRNode.borderW + xx + offsetB] * 0.5 + 0.5) * 255);
+									let aa = math_floor((ar[(PhotoToPBRNode.border_w + PhotoToPBRNode.tile_w + yy) * PhotoToPBRNode.tile_with_border_w + PhotoToPBRNode.border_w + xx          ] * 0.5 + 0.5) * 255);
+									let bb = math_floor((ar[(PhotoToPBRNode.border_w + PhotoToPBRNode.tile_w + yy) * PhotoToPBRNode.tile_with_border_w + PhotoToPBRNode.border_w + xx + offset_g] * 0.5 + 0.5) * 255);
+									let cc = math_floor((ar[(PhotoToPBRNode.border_w + PhotoToPBRNode.tile_w + yy) * PhotoToPBRNode.tile_with_border_w + PhotoToPBRNode.border_w + xx + offset_b] * 0.5 + 0.5) * 255);
 
-									let f = yy / PhotoToPBRNode.borderW;
+									let f = yy / PhotoToPBRNode.border_w;
 									let invf = 1.0 - f;
 									a = math_floor(a * f + aa * invf);
 									b = math_floor(b * f + bb * invf);
@@ -138,14 +138,14 @@ class PhotoToPBRNode extends LogicNode {
 					}
 
 					///if (krom_metal || krom_vulkan)
-					if (from == ChannelType.ChannelBaseColor) PhotoToPBRNode.bgraSwap(u8a.buffer);
+					if (from == channel_type_t.BASE_COLOR) PhotoToPBRNode.bgra_swap(u8a.buffer);
 					///end
 
-					let temp2 = image_from_bytes(u8a.buffer, PhotoToPBRNode.tileW, PhotoToPBRNode.tileW);
+					let temp2 = image_from_bytes(u8a.buffer, PhotoToPBRNode.tile_w, PhotoToPBRNode.tile_w);
 					g2_begin(PhotoToPBRNode.images[from]);
-					g2_draw_image(temp2, x * PhotoToPBRNode.tileW, y * PhotoToPBRNode.tileW);
+					g2_draw_image(temp2, x * PhotoToPBRNode.tile_w, y * PhotoToPBRNode.tile_w);
 					g2_end();
-					base_notifyOnNextFrame(() => {
+					base_notify_on_next_frame(() => {
 						image_unload(temp2);
 					});
 				}
@@ -156,7 +156,7 @@ class PhotoToPBRNode extends LogicNode {
 	}
 
 	///if (krom_metal || krom_vulkan)
-	static bgraSwap = (buffer: ArrayBuffer) => {
+	static bgra_swap = (buffer: ArrayBuffer) => {
 		let u8a = new Uint8Array(buffer);
 		for (let i = 0; i < math_floor(buffer.byteLength / 4); ++i) {
 			let r = u8a[i * 4];
