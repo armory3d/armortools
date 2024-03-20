@@ -9,7 +9,7 @@ let util_uv_dilatemap: image_t = null;
 let util_uv_dilatemap_cached: bool = false;
 let util_uv_uvislandmap: image_t = null;
 let util_uv_uvislandmap_cached: bool = false;
-let util_uv_dilate_bytes: ArrayBuffer = null;
+let util_uv_dilate_bytes: buffer_t = null;
 let util_uv_pipe_dilate: pipeline_t = null;
 
 function util_uv_cache_uv_map() {
@@ -19,7 +19,9 @@ function util_uv_cache_uv_map() {
 		util_uv_uvmap_cached = false;
 	}
 
-	if (util_uv_uvmap_cached) return;
+	if (util_uv_uvmap_cached) {
+		return;
+	}
 
 	let res_x: i32 = config_get_texture_res_x();
 	let res_y: i32 = config_get_texture_res_y();
@@ -60,7 +62,9 @@ function util_uv_cache_triangle_map() {
 		util_uv_trianglemap_cached = false;
 	}
 
-	if (util_uv_trianglemap_cached) return;
+	if (util_uv_trianglemap_cached) {
+		return;
+	}
 
 	if (util_uv_trianglemap == null) {
 		util_uv_trianglemap = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
@@ -124,7 +128,9 @@ function util_uv_cache_dilate_map() {
 	}
 
 	let mask: i32 = context_object_mask_used() ? slot_layer_get_object_mask(context_raw.layer) : 0;
-	if (context_layer_filter_used()) mask = context_raw.layer_filter;
+	if (context_layer_filter_used()) {
+		mask = context_raw.layer_filter;
+	}
 	let geom: mesh_data_t = mask == 0 && context_raw.merged_object != null ? context_raw.merged_object.data : context_raw.paint_object.data;
 	g4_begin(util_uv_dilatemap);
 	g4_clear(0x00000000);
@@ -151,21 +157,27 @@ function util_uv_cache_uv_island_map() {
 	let h: i32 = 2048; // config_get_texture_res_y()
 	let x: i32 = math_floor(context_raw.uvx_picked * w);
 	let y: i32 = math_floor(context_raw.uvy_picked * h);
-	let bytes: ArrayBuffer = new ArrayBuffer(w * h);
-	let view: DataView = new DataView(bytes);
+	let bytes: buffer_t = buffer_create(w * h);
+	let view: buffer_view_t = buffer_view_create(bytes);
 	let coords: coord_t[] = [{ x: x, y: y }];
 	let r: i32 = math_floor(util_uv_dilatemap.width / w);
 
 	let check = function (c: coord_t) {
-		if (c.x < 0 || c.x >= w || c.y < 0 || c.y >= h) return;
-		if (view.getUint8(c.y * w + c.x) == 255) return;
-		let dilate_view: DataView = new DataView(util_uv_dilate_bytes);
-		if (dilate_view.getUint8(c.y * r * util_uv_dilatemap.width + c.x * r) == 0) return;
-		view.setUint8(c.y * w + c.x, 255);
-		coords.push({ x: c.x + 1, y: c.y });
-		coords.push({ x: c.x - 1, y: c.y });
-		coords.push({ x: c.x, y: c.y + 1 });
-		coords.push({ x: c.x, y: c.y - 1 });
+		if (c.x < 0 || c.x >= w || c.y < 0 || c.y >= h) {
+			return;
+		}
+		if (buffer_view_get_u8(view, c.y * w + c.x) == 255) {
+			return;
+		}
+		let dilate_view: buffer_view_t = buffer_view_create(util_uv_dilate_bytes);
+		if (buffer_view_get_u8(dilate_view, c.y * r * util_uv_dilatemap.width + c.x * r) == 0) {
+			return;
+		}
+		buffer_view_set_u8(view, c.y * w + c.x, 255);
+		array_push(coords, { x: c.x + 1, y: c.y });
+		array_push(coords, { x: c.x - 1, y: c.y });
+		array_push(coords, { x: c.x, y: c.y + 1 });
+		array_push(coords, { x: c.x, y: c.y - 1 });
 	}
 
 	while (coords.length > 0) {

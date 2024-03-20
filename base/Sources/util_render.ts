@@ -154,7 +154,9 @@ function util_render_make_text_preview() {
 	let text_w: i32 = math_floor(g2_font_width(font, font_size, text));
 	let text_h: i32 = math_floor(g2_font_height(font, font_size));
 	let texW: i32 = text_w + 32;
-	if (texW < 512) texW = 512;
+	if (texW < 512) {
+		texW = 512;
+	}
 	if (context_raw.text_tool_image != null && context_raw.text_tool_image.width < texW) {
 		image_unload(context_raw.text_tool_image);
 		context_raw.text_tool_image = null;
@@ -203,7 +205,9 @@ function util_render_make_font_preview() {
 }
 
 function util_render_make_brush_preview() {
-	if (render_path_paint_live_layer_locked) return;
+	if (render_path_paint_live_layer_locked) {
+		return;
+	}
 	context_raw.material_preview = true;
 
 	let current: image_t = _g2_current;
@@ -215,7 +219,7 @@ function util_render_make_brush_preview() {
 		render_path_paint_live_layer = slot_layer_create("_live");
 	}
 
-	let l: SlotLayerRaw = render_path_paint_live_layer;
+	let l: slot_layer_t = render_path_paint_live_layer;
 	slot_layer_clear(l);
 
 	if (context_raw.brush.image == null) {
@@ -223,30 +227,30 @@ function util_render_make_brush_preview() {
 		context_raw.brush.image_icon = image_create_render_target(50, 50);
 	}
 
-	let _material: SlotMaterialRaw = context_raw.material;
+	let _material: slot_material_t = context_raw.material;
 	context_raw.material = slot_material_create();
 	let _tool: workspace_tool_t = context_raw.tool;
 	context_raw.tool = workspace_tool_t.BRUSH;
 
-	let _layer: SlotLayerRaw = context_raw.layer;
+	let _layer: slot_layer_t = context_raw.layer;
 	if (slot_layer_is_mask(context_raw.layer)) {
 		context_raw.layer = context_raw.layer.parent;
 	}
 
-	let _fill_layer: SlotMaterialRaw = context_raw.layer.fill_layer;
+	let _fill_layer: slot_material_t = context_raw.layer.fill_layer;
 	context_raw.layer.fill_layer = null;
 
 	render_path_paint_use_live_layer(true);
 	make_material_parse_paint_material(false);
 
 	let hid: i32 = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
-	render_path_render_targets.set("texpaint_undo" + hid,render_path_render_targets.get("empty_black"));
+	map_set(render_path_render_targets, "texpaint_undo" + hid, map_get(render_path_render_targets, "empty_black"));
 
 	// Set plane mesh
 	let painto: mesh_object_t = context_raw.paint_object;
 	let visibles: bool[] = [];
 	for (let p of project_paint_objects) {
-		visibles.push(p.base.visible);
+		array_push(visibles, p.base.visible);
 		p.base.visible = false;
 	}
 	let merged_object_visible: bool = false;
@@ -342,7 +346,9 @@ function util_render_make_brush_preview() {
 	camera_object_build_mat(scene_camera);
 
 	// Scale layer down to to image preview
-	if (base_pipe_merge == null) base_make_pipe();
+	if (base_pipe_merge == null) {
+		base_make_pipe();
+	}
 	l = render_path_paint_live_layer;
 	let target: image_t = context_raw.brush.image;
 	g2_begin(target);
@@ -353,8 +359,8 @@ function util_render_make_brush_preview() {
 	g2_end();
 
 	// Scale image preview down to to icon
-	render_path_render_targets.get("texpreview")._image = context_raw.brush.image;
-	render_path_render_targets.get("texpreview_icon")._image = context_raw.brush.image_icon;
+	map_get(render_path_render_targets, "texpreview")._image = context_raw.brush.image;
+	map_get(render_path_render_targets, "texpreview_icon")._image = context_raw.brush.image_icon;
 	render_path_set_target("texpreview_icon");
 	render_path_bind_target("texpreview", "tex");
 	render_path_draw_shader("shader_datas/supersample_resolve/supersample_resolve");
@@ -367,7 +373,9 @@ function util_render_make_brush_preview() {
 
 function util_render_make_node_preview(canvas: zui_node_canvas_t, node: zui_node_t, image: image_t, group: zui_node_canvas_t = null, parents: zui_node_t[] = null) {
 	let res: any = make_material_parse_node_preview_material(node, group, parents);
-	if (res == null || res.scon == null) return;
+	if (res == null || res.scon == null) {
+		return;
+	}
 
 	if (util_render_screen_aligned_full_vb == null) {
 		util_render_create_screen_aligned_full_data();
@@ -439,7 +447,9 @@ function util_render_create_screen_aligned_full_data() {
 	g4_vertex_struct_add(structure, "col", vertex_data_t.I16_4X_NORM);
 	util_render_screen_aligned_full_vb = g4_vertex_buffer_create(math_floor(data.length / math_floor(g4_vertex_struct_byte_size(structure) / 4)), structure, usage_t.STATIC);
 	let vertices: buffer_view_t = g4_vertex_buffer_lock(util_render_screen_aligned_full_vb);
-	for (let i: i32 = 0; i < math_floor(vertices.byteLength / 2); ++i) vertices.setInt16(i * 2, data[i], true);
+	for (let i: i32 = 0; i < math_floor(buffer_view_size(vertices) / 2); ++i) {
+		buffer_view_set_i16(vertices, i * 2, data[i]);
+	}
 	g4_vertex_buffer_unlock(util_render_screen_aligned_full_vb);
 
 	util_render_screen_aligned_full_ib = g4_index_buffer_create(indices.length);

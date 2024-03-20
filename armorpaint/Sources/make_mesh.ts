@@ -1,9 +1,9 @@
 
 let make_mesh_layer_pass_count = 1;
 
-function make_mesh_run(data: material_t, layerPass = 0): NodeShaderContextRaw {
+function make_mesh_run(data: material_t, layerPass = 0): node_shader_context_t {
 	let context_id: string = layerPass == 0 ? "mesh" : "mesh" + layerPass;
-	let con_mesh: NodeShaderContextRaw = node_shader_context_create(data, {
+	let con_mesh: node_shader_context_t = node_shader_context_create(data, {
 		name: context_id,
 		depth_write: layerPass == 0 ? true : false,
 		compare_mode: layerPass == 0 ? "less" : "equal",
@@ -13,8 +13,8 @@ function make_mesh_run(data: material_t, layerPass = 0): NodeShaderContextRaw {
 		depth_attachment: "DEPTH32"
 	});
 
-	let vert: NodeShaderRaw = node_shader_context_make_vert(con_mesh);
-	let frag: NodeShaderRaw = node_shader_context_make_frag(con_mesh);
+	let vert: node_shader_t = node_shader_context_make_vert(con_mesh);
+	let frag: node_shader_t = node_shader_context_make_frag(con_mesh);
 	frag.ins = vert.outs;
 
 	node_shader_add_out(vert, 'vec2 texCoord');
@@ -31,16 +31,22 @@ function make_mesh_run(data: material_t, layerPass = 0): NodeShaderContextRaw {
 		node_shader_write(vert, 'float height = 0.0;');
 		let num_layers: i32 = 0;
 		for (let l of project_layers) {
-			if (!slot_layer_is_visible(l) || !l.paint_height || !slot_layer_is_layer(l)) continue;
-			if (num_layers > 16) break;
+			if (!slot_layer_is_visible(l) || !l.paint_height || !slot_layer_is_layer(l)) {
+				continue;
+			}
+			if (num_layers > 16) {
+				break;
+			}
 			num_layers++;
 			texture_count++;
 			node_shader_add_uniform(vert, 'sampler2D texpaint_pack_vert' + l.id, '_texpaint_pack_vert' + l.id);
 			node_shader_write(vert, 'height += textureLod(texpaint_pack_vert' + l.id + ', tex, 0.0).a;');
-			let masks: SlotLayerRaw[] = slot_layer_get_masks(l);
+			let masks: slot_layer_t[] = slot_layer_get_masks(l);
 			if (masks != null) {
 				for (let m of masks) {
-					if (!slot_layer_is_visible(m)) continue;
+					if (!slot_layer_is_visible(m)) {
+						continue;
+					}
 					texture_count++;
 					node_shader_add_uniform(vert, 'sampler2D texpaint_vert' + m.id, '_texpaint_vert' + m.id);
 					node_shader_write(vert, 'height *= textureLod(texpaint_vert' + m.id + ', tex, 0.0).r;');
@@ -123,9 +129,11 @@ function make_mesh_run(data: material_t, layerPass = 0): NodeShaderContextRaw {
 
 		if (context_raw.viewport_mode == viewport_mode_t.MASK && slot_layer_get_masks(context_raw.layer) != null) {
 			for (let m of slot_layer_get_masks(context_raw.layer)) {
-				if (!slot_layer_is_visible(m)) continue;
+				if (!slot_layer_is_visible(m)) {
+					continue;
+				}
 				texture_count++;
-				node_shader_add_uniform(frag, 'sampler2D texpaint_view_mask' + m.id, '_texpaint' + project_layers.indexOf(m));
+				node_shader_add_uniform(frag, 'sampler2D texpaint_view_mask' + m.id, '_texpaint' + array_index_of(project_layers, m));
 			}
 		}
 
@@ -139,23 +147,29 @@ function make_mesh_run(data: material_t, layerPass = 0): NodeShaderContextRaw {
 
 		// Get layers for this pass
 		make_mesh_layer_pass_count = 1;
-		let layers: SlotLayerRaw[] = [];
+		let layers: slot_layer_t[] = [];
 		let start_count: i32 = texture_count;
 		let is_material_tool: bool = context_raw.tool == workspace_tool_t.MATERIAL;
 		for (let l of project_layers) {
-			if (is_material_tool && l != context_raw.layer) continue;
-			if (!slot_layer_is_layer(l) || !slot_layer_is_visible(l)) continue;
+			if (is_material_tool && l != context_raw.layer) {
+				continue;
+			}
+			if (!slot_layer_is_layer(l) || !slot_layer_is_visible(l)) {
+				continue;
+			}
 
 			let count: i32 = 3;
-			let masks: SlotLayerRaw[] = slot_layer_get_masks(l);
-			if (masks != null) count += masks.length;
+			let masks: slot_layer_t[] = slot_layer_get_masks(l);
+			if (masks != null) {
+				count += masks.length;
+			}
 			texture_count += count;
 			if (texture_count >= make_mesh_get_max_textures()) {
 				texture_count = start_count + count + 3; // gbuffer0_copy, gbuffer1_copy, gbuffer2_copy
 				make_mesh_layer_pass_count++;
 			}
 			if (layerPass == make_mesh_layer_pass_count - 1) {
-				layers.push(l);
+				array_push(layers, l);
 			}
 		}
 
@@ -168,7 +182,9 @@ function make_mesh_run(data: material_t, layerPass = 0): NodeShaderContextRaw {
 					let visibles: mesh_object_t[] = project_get_atlas_objects(slot_layer_get_object_mask(l));
 					node_shader_write(frag, 'if (');
 					for (let i: i32 = 0; i < visibles.length; ++i) {
-						if (i > 0) node_shader_write(frag, ' || ');
+						if (i > 0) {
+							node_shader_write(frag, ' || ');
+						}
 						node_shader_write(frag, `${visibles[i].base.uid} == uid`);
 					}
 					node_shader_write(frag, ') {');
@@ -188,7 +204,7 @@ function make_mesh_run(data: material_t, layerPass = 0): NodeShaderContextRaw {
 			// }
 			// ///end
 
-			let masks: SlotLayerRaw[] = slot_layer_get_masks(l);
+			let masks: slot_layer_t[] = slot_layer_get_masks(l);
 			if (masks != null) {
 				let has_visible: bool = false;
 				for (let m of masks) {
@@ -201,7 +217,9 @@ function make_mesh_run(data: material_t, layerPass = 0): NodeShaderContextRaw {
 					let texpaint_mask: string = 'texpaint_mask' + l.id;
 					node_shader_write(frag, `float ${texpaint_mask} = 0.0;`);
 					for (let m of masks) {
-						if (!slot_layer_is_visible(m)) continue;
+						if (!slot_layer_is_visible(m)) {
+							continue;
+						}
 						node_shader_add_shared_sampler(frag, 'sampler2D texpaint' + m.id);
 						node_shader_write(frag, '{'); // Group mask is sampled across multiple layers
 						node_shader_write(frag, 'float texpaint_mask_sample' + m.id + ' = textureLodShared(texpaint' + m.id + ', texCoord, 0.0).r;');
@@ -381,7 +399,9 @@ function make_mesh_run(data: material_t, layerPass = 0): NodeShaderContextRaw {
 				node_shader_write(frag, 'fragColor[1] = vec4(direct + indirect, 1.0);');
 			}
 			else { // Deferred, Pathtraced
-				if (make_material_emis_used) node_shader_write(frag, 'if (int(matid * 255.0) % 3 == 1) basecol *= 10.0;'); // Boost for bloom
+				if (make_material_emis_used) {
+					node_shader_write(frag, 'if (int(matid * 255.0) % 3 == 1) basecol *= 10.0;'); // Boost for bloom
+				}
 				node_shader_write(frag, 'fragColor[1] = vec4(basecol, occlusion);');
 			}
 		}

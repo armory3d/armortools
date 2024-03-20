@@ -13,8 +13,12 @@ function tex_image_node_create(): tex_image_node_t {
 }
 
 function tex_image_node_get(self: tex_image_node_t, from: i32, done: (a: any)=>void) {
-	if (from == 0) done(self.file + ".rgb");
-	else done(self.file + ".a");
+	if (from == 0) {
+		done(self.file + ".rgb");
+	}
+	else {
+		done(self.file + ".a");
+	}
 }
 
 let tex_image_node_def: zui_node_t = {
@@ -31,7 +35,7 @@ let tex_image_node_def: zui_node_t = {
 			name: _tr("Vector"),
 			type: "VECTOR",
 			color: 0xff6363c7,
-			default_value: new Float32Array([0.0, 0.0, 0.0])
+			default_value: new f32_array_t([0.0, 0.0, 0.0])
 		}
 	],
 	outputs: [
@@ -41,7 +45,7 @@ let tex_image_node_def: zui_node_t = {
 			name: _tr("Color"),
 			type: "VALUE", // Match brush output socket type
 			color: 0xffc7c729,
-			default_value: new Float32Array([0.0, 0.0, 0.0, 1.0])
+			default_value: new f32_array_t([0.0, 0.0, 0.0, 1.0])
 		},
 		{
 			id: 0,

@@ -13,10 +13,10 @@ function geom_make_plane(size_x: f32 = 1.0, size_y: f32 = 1.0, verts_x: i32 = 2,
 	mesh.scale_pos = math_max(half_x, half_y);
 	let inv: f32 = (1 / mesh.scale_pos) * 32767;
 
-	mesh.posa = new Int16Array(verts_x * verts_y * 4);
-	mesh.nora = new Int16Array(verts_x * verts_y * 2);
-	mesh.texa = new Int16Array(verts_x * verts_y * 2);
-	mesh.inda = new Uint32Array((verts_x - 1) * (verts_y - 1) * 6);
+	mesh.posa = i16_array_create(verts_x * verts_y * 4);
+	mesh.nora = i16_array_create(verts_x * verts_y * 2);
+	mesh.texa = i16_array_create(verts_x * verts_y * 2);
+	mesh.inda = u32_array_create((verts_x - 1) * (verts_y - 1) * 6);
 	let step_x: f32 = size_x / (verts_x - 1);
 	let step_y: f32 = size_y / (verts_y - 1);
 	for (let i: i32 = 0; i < verts_x * verts_y; ++i) {
@@ -63,17 +63,19 @@ function geom_make_uv_sphere(radius: f32 = 1.0, widthSegments: i32 = 32, heightS
 
 	let width_verts: i32 = widthSegments + 1;
 	let height_verts: i32 = heightSegments + 1;
-	mesh.posa = new Int16Array(width_verts * height_verts * 4);
-	mesh.nora = new Int16Array(width_verts * height_verts * 2);
-	mesh.texa = new Int16Array(width_verts * height_verts * 2);
-	mesh.inda = new Uint32Array(widthSegments * heightSegments * 6 - widthSegments * 6);
+	mesh.posa = i16_array_create(width_verts * height_verts * 4);
+	mesh.nora = i16_array_create(width_verts * height_verts * 2);
+	mesh.texa = i16_array_create(width_verts * height_verts * 2);
+	mesh.inda = u32_array_create(widthSegments * heightSegments * 6 - widthSegments * 6);
 
 	let nor: vec4_t = vec4_create();
 	let pos: i32 = 0;
 	for (let y: i32 = 0; y < height_verts; ++y) {
 		let v: f32 = y / heightSegments;
 		let v_flip: f32 = 1.0 - v;
-		if (!stretch_uv) v_flip /= 2;
+		if (!stretch_uv) {
+			v_flip /= 2;
+		}
 		let u_off: f32 = y == 0 ? 0.5 / widthSegments : y == heightSegments ? -0.5 / widthSegments : 0.0;
 		for (let x: i32 = 0; x < width_verts; ++x) {
 			let u: f32 = x / widthSegments;
@@ -125,10 +127,10 @@ function geom_make_uv_sphere(radius: f32 = 1.0, widthSegments: i32 = 32, heightS
 }
 
 type raw_mesh_t = {
-	posa?: Int16Array;
-	nora?: Int16Array;
-	texa?: Int16Array;
-	inda?: Uint32Array;
+	posa?: i16_array_t;
+	nora?: i16_array_t;
+	texa?: i16_array_t;
+	inda?: u32_array_t;
 	scale_pos?: f32;
 	scale_tex?: f32;
 	name?: string;

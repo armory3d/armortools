@@ -192,7 +192,7 @@ float tex_magic_f(const vec3 p) {
 `;
 
 let str_tex_brick: string = `
-float tex_brick_noise(int n) { /* fast integer noise */
+float tex_brick_noise(int n) {
 	int nn;
 	n = (n >> 13) ^ n;
 	nn = (n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff;

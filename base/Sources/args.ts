@@ -58,7 +58,7 @@ function args_parse() {
 				++i;
 				args_export_mesh_path = krom_get_arg(i);
 			}
-			else if (path_is_mesh(current_arg) || (i > 1 && !current_arg.startsWith("-") && path_is_folder(current_arg))) {
+			else if (path_is_mesh(current_arg) || (i > 1 && !starts_with(current_arg, "-") && path_is_folder(current_arg))) {
 				args_asset_path = current_arg;
 			}
 			///end
@@ -78,7 +78,7 @@ function args_parse() {
 
 function args_run() {
 	if (args_use) {
-		app_notify_on_init(() => {
+		app_notify_on_init(function () {
 			if (project_filepath != "") {
 				import_arm_run_project(project_filepath);
 			}
@@ -134,20 +134,22 @@ function args_run() {
 						// Get export preset and apply the correct one from args
 						box_export_files = file_read_directory(path_data() + path_sep + "export_presets");
 						for (let i: i32 = 0; i < box_export_files.length; ++i) {
-							box_export_files[i] = box_export_files[i].substr(0, box_export_files[i].length - 5); // Strip .json
+							box_export_files[i] = substring(box_export_files[i], 0, box_export_files[i].length - 5); // Strip .json
 						}
 
 						let file: string = "export_presets/" + box_export_files[0] + ".json";
-						for (let f of box_export_files) if (f == args_export_textures_preset) {
-							file = "export_presets/" + box_export_files[box_export_files.indexOf(f)] + ".json";
+						for (let f of box_export_files) {
+							if (f == args_export_textures_preset) {
+								file = "export_presets/" + box_export_files[array_index_of(box_export_files, f)] + ".json";
+							}
 						}
 
-						let blob: ArrayBuffer = data_get_blob(file);
+						let blob: buffer_t = data_get_blob(file);
 						box_export_preset = json_parse(sys_buffer_to_string(blob));
 						data_delete_blob("export_presets/" + file);
 
 						// Export queue
-						app_notify_on_init(() => {
+						app_notify_on_init(function () {
 							export_texture_run(args_export_textures_path);
 						});
 					}
@@ -165,7 +167,9 @@ function args_run() {
 			else if (args_export_mesh) {
 				if (path_is_folder(args_export_mesh_path)) {
 					let f: string = ui_files_filename;
-					if (f == "") f = tr("untitled");
+					if (f == "") {
+						f = tr("untitled");
+					}
 					export_mesh_run(args_export_mesh_path + path_sep + f, null, false);
 				}
 				else {
@@ -181,7 +185,9 @@ function args_run() {
 			}
 			///end
 
-			if (args_background) sys_stop();
+			if (args_background) {
+				sys_stop();
+			}
 		});
 	}
 }

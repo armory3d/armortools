@@ -71,16 +71,16 @@ function ui_nodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
 					// Try to find the first type-matching socket and use it if present
 					for (let socket of n.inputs) {
 						if (socket.type == from_type) {
-							link_drag.to_socket = n.inputs.indexOf(socket);
+							link_drag.to_socket = array_index_of(n.inputs, socket);
 							break;
 						}
 					}
-					ui_nodes_get_canvas(true).links.push(link_drag);
+					array_push(ui_nodes_get_canvas(true).links, link_drag);
 				}
 				else if (link_drag.from_id == -1 && n.outputs.length > 0) {
 					link_drag.from_id = n.id;
 					link_drag.from_socket = 0;
-					ui_nodes_get_canvas(true).links.push(link_drag);
+					array_push(ui_nodes_get_canvas(true).links, link_drag);
 				}
 				///if is_lab
 				parser_logic_parse(ui_nodes_get_canvas(true));
@@ -128,13 +128,17 @@ function ui_nodes_on_socket_released(socket_id: i32) {
 								hval3.value = socket.default_value[3];
 							}
 						}
-						else hval0.value = socket.default_value;
+						else {
+							hval0.value = socket.default_value;
+						}
 						base_notify_on_next_frame(function () {
 							zui_end_input();
 							ui_box_show_custom(function (ui: zui_t) {
 								if (zui_tab(zui_handle("uinodes_8"), tr("Socket"))) {
 									let type: i32 = zui_combo(htype, [tr("Color"), tr("Vector"), tr("Value")], tr("Type"), true);
-									if (htype.changed) hname.text = type == 0 ? tr("Color") : type == 1 ? tr("Vector") : tr("Value");
+									if (htype.changed) {
+										hname.text = type == 0 ? tr("Color") : type == 1 ? tr("Vector") : tr("Value");
+									}
 									let name: string = zui_text_input(hname, tr("Name"));
 									let min: f32 = zui_float_input(hmin, tr("Min"));
 									let max: f32 = zui_float_input(hmax, tr("Max"));
@@ -145,14 +149,14 @@ function ui_nodes_on_socket_released(socket_id: i32) {
 										zui_float_input(hval1, tr("G"));
 										zui_float_input(hval2, tr("B"));
 										zui_float_input(hval3, tr("A"));
-										default_value = new Float32Array([hval0.value, hval1.value, hval2.value, hval3.value]);
+										default_value = new f32_array_t([hval0.value, hval1.value, hval2.value, hval3.value]);
 									}
 									else if (type == 1) {
 										zui_row([1 / 3, 1 / 3, 1 / 3]);
 										hval0.value = zui_float_input(hval0, tr("X"));
 										hval1.value = zui_float_input(hval1, tr("Y"));
 										hval2.value = zui_float_input(hval2, tr("Z"));
-										default_value = new Float32Array([hval0.value, hval1.value, hval2.value]);
+										default_value = new f32_array_t([hval0.value, hval1.value, hval2.value]);
 									}
 									else {
 										default_value = zui_float_input(hval0, tr("default_value"));
@@ -177,11 +181,13 @@ function ui_nodes_on_socket_released(socket_id: i32) {
 						// Remove links connected to the socket
 						while (i < canvas.links.length) {
 							let l: zui_node_link_t = canvas.links[i];
-							if ((l.from_id == node.id && l.from_socket == node.outputs.indexOf(socket)) ||
-								(l.to_id == node.id && l.to_socket == node.inputs.indexOf(socket))) {
-								canvas.links.splice(i, 1);
+							if ((l.from_id == node.id && l.from_socket == array_index_of(node.outputs, socket)) ||
+								(l.to_id == node.id && l.to_socket == array_index_of(node.inputs, socket))) {
+								array_splice(canvas.links, i, 1);
 							}
-							else i++;
+							else {
+								i++;
+							}
 						}
 						// Remove socket
 						array_remove(node.inputs, socket);
@@ -195,7 +201,7 @@ function ui_nodes_on_socket_released(socket_id: i32) {
 	}
 	// Selecting which node socket to preview
 	else if (node.id == nodes.nodes_selected_id[0]) {
-		let i: i32 = node.outputs.indexOf(socket);
+		let i: i32 = array_index_of(node.outputs, socket);
 		if (i > -1) {
 			context_raw.node_preview_socket = i;
 			///if (is_paint || is_sculpt)
@@ -217,14 +223,22 @@ function ui_nodes_on_canvas_released() {
 				break;
 			}
 		}
-		if (selected == null) nodes.nodes_selected_id = [];
-		else if (nodes.nodes_selected_id.indexOf(selected.id) == -1) nodes.nodes_selected_id = [selected.id];
+		if (selected == null) {
+			nodes.nodes_selected_id = [];
+		}
+		else if (array_index_of(nodes.nodes_selected_id, selected.id) == -1) {
+			nodes.nodes_selected_id = [selected.id];
+		}
 
 		// Node context menu
 		if (!zui_socket_released()) {
 			let number_of_entries: i32 = 5;
-			if (ui_nodes_canvas_type == canvas_type_t.MATERIAL) ++number_of_entries;
-			if (selected != null && selected.type == "RGB") ++number_of_entries;
+			if (ui_nodes_canvas_type == canvas_type_t.MATERIAL) {
+				++number_of_entries;
+			}
+			if (selected != null && selected.type == "RGB") {
+				++number_of_entries;
+			}
 
 			ui_menu_draw(function (ui_menu: zui_t) {
 				ui_menu._y += 1;
@@ -279,7 +293,7 @@ function ui_nodes_on_canvas_released() {
 						let color: any = selected.outputs[0].default_value;
 						let new_swatch: swatch_color_t = make_swatch(color_from_floats(color[0], color[1], color[2], color[3]));
 						context_set_swatch(new_swatch);
-						project_raw.swatches.push(new_swatch);
+						array_push(project_raw.swatches, new_swatch);
 						ui_base_hwnds[tab_area_t.STATUS].redraws = 1;
 					}
 				}
@@ -367,25 +381,33 @@ function ui_nodes_get_canvas_control(ui: zui_t, controls_down: bool): zui_canvas
 		zoom: ui.input_wheel_delta != 0.0 ? -ui.input_wheel_delta / 10 : zoom_delta,
 		controls_down: controls_down
 	};
-	if (base_is_combo_selected()) control.zoom = 0.0;
+	if (base_is_combo_selected()) {
+		control.zoom = 0.0;
+	}
 	return control;
 }
 
 function ui_nodes_get_zoom_delta(ui: zui_t): f32 {
 	return config_raw.zoom_direction == zoom_direction_t.VERTICAL ? -ui.input_dy :
-			config_raw.zoom_direction == zoom_direction_t.VERTICAL_INVERTED ? -ui.input_dy :
-			config_raw.zoom_direction == zoom_direction_t.HORIZONTAL ? ui.input_dx :
-			config_raw.zoom_direction == zoom_direction_t.HORIZONTAL_INVERTED ? ui.input_dx :
-			-(ui.input_dy - ui.input_dx);
+		   config_raw.zoom_direction == zoom_direction_t.VERTICAL_INVERTED ? -ui.input_dy :
+		   config_raw.zoom_direction == zoom_direction_t.HORIZONTAL ? ui.input_dx :
+		   config_raw.zoom_direction == zoom_direction_t.HORIZONTAL_INVERTED ? ui.input_dx :
+		   -(ui.input_dy - ui.input_dx);
 }
 
 function ui_nodes_get_canvas(groups: bool = false): zui_node_canvas_t {
 	///if (is_paint || is_sculpt)
 	if (ui_nodes_canvas_type == canvas_type_t.MATERIAL) {
-		if (groups && ui_nodes_group_stack.length > 0) return ui_nodes_group_stack[ui_nodes_group_stack.length - 1].canvas;
-		else return ui_nodes_get_canvas_material();
+		if (groups && ui_nodes_group_stack.length > 0) {
+			return ui_nodes_group_stack[ui_nodes_group_stack.length - 1].canvas;
+		}
+		else {
+			return ui_nodes_get_canvas_material();
+		}
 	}
-	else return context_raw.brush.canvas;
+	else {
+		return context_raw.brush.canvas;
+	}
 	///end
 
 	///if is_lab
@@ -402,20 +424,32 @@ function ui_nodes_get_canvas_material(): zui_node_canvas_t {
 function ui_nodes_get_nodes(): zui_nodes_t {
 	///if (is_paint || is_sculpt)
 	if (ui_nodes_canvas_type == canvas_type_t.MATERIAL) {
-		if (ui_nodes_group_stack.length > 0) return ui_nodes_group_stack[ui_nodes_group_stack.length - 1].nodes;
-		else return context_raw.material.nodes;
+		if (ui_nodes_group_stack.length > 0) {
+			return ui_nodes_group_stack[ui_nodes_group_stack.length - 1].nodes;
+		}
+		else {
+			return context_raw.material.nodes;
+		}
 	}
-	else return context_raw.brush.nodes;
+	else {
+		return context_raw.brush.nodes;
+	}
 	///end
 
 	///if is_lab
-	if (ui_nodes_group_stack.length > 0) return ui_nodes_group_stack[ui_nodes_group_stack.length - 1].nodes;
-	else return project_nodes;
+	if (ui_nodes_group_stack.length > 0) {
+		return ui_nodes_group_stack[ui_nodes_group_stack.length - 1].nodes;
+	}
+	else {
+		return project_nodes;
+	}
 	///end
 }
 
 function ui_nodes_update() {
-	if (!ui_nodes_show || !base_ui_enabled) return;
+	if (!ui_nodes_show || !base_ui_enabled) {
+		return;
+	}
 
 	///if (is_paint || is_sculpt)
 	ui_nodes_wx = math_floor(app_w()) + ui_toolbar_w;
@@ -440,15 +474,35 @@ function ui_nodes_update() {
 
 	let mx: i32 = mouse_x;
 	let my: i32 = mouse_y;
-	if (mx < ui_nodes_wx || mx > ui_nodes_wx + ww || my < ui_nodes_wy) return;
-	if (ui_nodes_ui.is_typing || !ui_nodes_ui.input_enabled) return;
+	if (mx < ui_nodes_wx || mx > ui_nodes_wx + ww || my < ui_nodes_wy) {
+		return;
+	}
+	if (ui_nodes_ui.is_typing || !ui_nodes_ui.input_enabled) {
+		return;
+	}
 
 	let nodes: zui_nodes_t = ui_nodes_get_nodes();
 	if (nodes.nodes_selected_id.length > 0 && ui_nodes_ui.is_key_pressed) {
-		if (ui_nodes_ui.key == key_code_t.LEFT) for (let n of nodes.nodes_selected_id) zui_get_node(ui_nodes_get_canvas(true).nodes, n).x -= 1;
-		else if (ui_nodes_ui.key == key_code_t.RIGHT) for (let n of nodes.nodes_selected_id) zui_get_node(ui_nodes_get_canvas(true).nodes, n).x += 1;
-		if (ui_nodes_ui.key == key_code_t.UP) for (let n of nodes.nodes_selected_id) zui_get_node(ui_nodes_get_canvas(true).nodes, n).y -= 1;
-		else if (ui_nodes_ui.key == key_code_t.DOWN) for (let n of nodes.nodes_selected_id) zui_get_node(ui_nodes_get_canvas(true).nodes, n).y += 1;
+		if (ui_nodes_ui.key == key_code_t.LEFT) {
+			for (let n of nodes.nodes_selected_id) {
+				zui_get_node(ui_nodes_get_canvas(true).nodes, n).x -= 1;
+			}
+		}
+		else if (ui_nodes_ui.key == key_code_t.RIGHT) {
+			for (let n of nodes.nodes_selected_id) {
+				zui_get_node(ui_nodes_get_canvas(true).nodes, n).x += 1;
+			}
+		}
+		if (ui_nodes_ui.key == key_code_t.UP) {
+			for (let n of nodes.nodes_selected_id) {
+				zui_get_node(ui_nodes_get_canvas(true).nodes, n).y -= 1;
+			}
+		}
+		else if (ui_nodes_ui.key == key_code_t.DOWN) {
+			for (let n of nodes.nodes_selected_id) {
+				zui_get_node(ui_nodes_get_canvas(true).nodes, n).y += 1;
+			}
+		}
 	}
 
 	// Node search popup
@@ -479,7 +533,7 @@ function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
 		zui_draw_rect(true, ui._x, ui._y, ui._w, zui_ELEMENT_H(ui) * 8);
 		g2_set_color(0xffffffff);
 
-		let search: string = zui_text_input(search_handle, "", zui_align_t.LEFT, true, true).toLowerCase();
+		let search: string = to_lower_case(zui_text_input(search_handle, "", zui_align_t.LEFT, true, true));
 		ui.changed = false;
 		if (first) {
 			first = false;
@@ -487,11 +541,17 @@ function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
 			zui_start_text_edit(search_handle); // Focus search bar
 		}
 
-		if (search_handle.changed) ui_nodes_node_search_offset = 0;
+		if (search_handle.changed) {
+			ui_nodes_node_search_offset = 0;
+		}
 
 		if (ui.is_key_pressed) { // Move selection
-			if (ui.key == key_code_t.DOWN && ui_nodes_node_search_offset < 6) ui_nodes_node_search_offset++;
-			if (ui.key == key_code_t.UP && ui_nodes_node_search_offset > 0) ui_nodes_node_search_offset--;
+			if (ui.key == key_code_t.DOWN && ui_nodes_node_search_offset < 6) {
+				ui_nodes_node_search_offset++;
+			}
+			if (ui.key == key_code_t.UP && ui_nodes_node_search_offset > 0) {
+				ui_nodes_node_search_offset--;
+			}
 		}
 		let enter: bool = keyboard_down("enter");
 		let count: i32 = 0;
@@ -506,14 +566,14 @@ function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
 
 		for (let list of node_list) {
 			for (let n of list) {
-				if (tr(n.name).toLowerCase().indexOf(search) >= 0) {
+				if (string_index_of(to_lower_case(tr(n.name)), search) >= 0) {
 					ui.t.BUTTON_COL = count == ui_nodes_node_search_offset ? ui.t.HIGHLIGHT_COL : ui.t.SEPARATOR_COL;
 					if (zui_button(tr(n.name), zui_align_t.LEFT) || (enter && count == ui_nodes_node_search_offset)) {
 						ui_nodes_push_undo();
 						let nodes: zui_nodes_t = ui_nodes_get_nodes();
 						let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
 						ui_nodes_node_search_spawn = ui_nodes_make_node(n, nodes, canvas); // Spawn selected node
-						canvas.nodes.push(ui_nodes_node_search_spawn);
+						array_push(canvas.nodes, ui_nodes_node_search_spawn);
 						nodes.nodes_selected_id = [ui_nodes_node_search_spawn.id];
 						nodes.nodes_drag = true;
 
@@ -526,12 +586,18 @@ function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
 							ui.changed = true;
 							count = 6; // Trigger break
 						}
-						if (done != null) done();
+						if (done != null) {
+							done();
+						}
 					}
-					if (++count > 6) break;
+					if (++count > 6) {
+						break;
+					}
 				}
 			}
-			if (count > 6) break;
+			if (count > 6) {
+				break;
+			}
 		}
 		if (enter && count == 0) { // Hide popup on enter when node is not found
 			ui.changed = true;
@@ -562,8 +628,12 @@ function ui_nodes_draw_grid() {
 	let step: f32 = 100 * zui_SCALE(ui_nodes_ui);
 	let w: i32 = math_floor(ww + step * 3);
 	let h: i32 = math_floor(wh + step * 3);
-	if (w < 1) w = 1;
-	if (h < 1) h = 1;
+	if (w < 1) {
+		w = 1;
+	}
+	if (h < 1) {
+		h = 1;
+	}
 	ui_nodes_grid = image_create_render_target(w, h);
 	g2_begin(ui_nodes_grid);
 	g2_clear(ui_nodes_ui.t.SEPARATOR_COL);
@@ -605,7 +675,9 @@ function ui_nodes_render() {
 		}
 
 		ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
-		if (context_raw.split_view) context_raw.ddirty = 2;
+		if (context_raw.split_view) {
+			context_raw.ddirty = 2;
+		}
 		///end
 
 		///if is_lab
@@ -624,7 +696,9 @@ function ui_nodes_render() {
 		}
 
 		let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
-		if (decal) util_render_make_decal_preview();
+		if (decal) {
+			util_render_make_decal_preview();
+		}
 
 		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 		context_raw.node_preview_dirty = true;
@@ -656,13 +730,17 @@ function ui_nodes_render() {
 	}
 	ui_nodes_release_link = ui_nodes_ui.input_released;
 
-	if (!ui_nodes_show || sys_width() == 0 || sys_height() == 0) return;
+	if (!ui_nodes_show || sys_width() == 0 || sys_height() == 0) {
+		return;
+	}
 
 	ui_nodes_ui.input_enabled = base_ui_enabled;
 
 	g2_end();
 
-	if (ui_nodes_grid == null) ui_nodes_draw_grid();
+	if (ui_nodes_grid == null) {
+		ui_nodes_draw_grid();
+	}
 
 	///if (is_paint || is_sculpt)
 	if (config_raw.node_preview && context_raw.node_preview_dirty) {
@@ -694,12 +772,16 @@ function ui_nodes_render() {
 
 	let ew: i32 = math_floor(zui_ELEMENT_W(ui_nodes_ui) * 0.7);
 	ui_nodes_wh = app_h() + ui_header_h;
-	if (config_raw.layout[layout_size_t.HEADER] == 1) ui_nodes_wh += ui_header_h;
+	if (config_raw.layout[layout_size_t.HEADER] == 1) {
+		ui_nodes_wh += ui_header_h;
+	}
 
 	if (ui_view2d_show) {
 		ui_nodes_wh = config_raw.layout[layout_size_t.NODES_H];
 		ui_nodes_wy = app_h() - config_raw.layout[layout_size_t.NODES_H] + ui_header_h;
-		if (config_raw.layout[layout_size_t.HEADER] == 1) ui_nodes_wy += ui_header_h;
+		if (config_raw.layout[layout_size_t.HEADER] == 1) {
+			ui_nodes_wy += ui_header_h;
+		}
 		if (!ui_base_show) {
 			ui_nodes_wy -= ui_header_h * 2;
 		}
@@ -765,7 +847,7 @@ function ui_nodes_render() {
 			let i: i32 = 0;
 			while (i++ < c.nodes.length) {
 				let canvas_node: zui_node_t = c.nodes[i - 1];
-				if (zui_exclude_remove.indexOf(canvas_node.type) >= 0) {
+				if (array_index_of(zui_exclude_remove, canvas_node.type) >= 0) {
 					continue;
 				}
 				let found: bool = false;
@@ -776,7 +858,9 @@ function ui_nodes_render() {
 							break;
 						}
 					}
-					if (found) break;
+					if (found) {
+						break;
+					}
 				}
 				if (canvas_node.type == "GROUP" && !ui_nodes_can_place_group(canvas_node.name)) {
 					found = false;
@@ -911,15 +995,21 @@ function ui_nodes_render() {
 			if (ui_nodes_group_stack.length > 0) {
 				let can_rename: bool = true;
 				for (let m of project_material_groups) {
-					if (m.canvas.name == new_name) can_rename = false; // Name already used
+					if (m.canvas.name == new_name) {
+						can_rename = false; // Name already used
+					}
 				}
 
 				if (can_rename) {
 					let old_name: string = c.name;
 					c.name = new_name;
 					let canvases: zui_node_canvas_t[] = [];
-					for (let m of project_materials) canvases.push(m.canvas);
-					for (let m of project_material_groups) canvases.push(m.canvas);
+					for (let m of project_materials) {
+						array_push(canvases, m.canvas);
+					}
+					for (let m of project_material_groups) {
+						array_push(canvases, m.canvas);
+					}
 					for (let canvas of canvases) {
 						for (let n of canvas.nodes) {
 							if (n.type == "GROUP" && n.name == old_name) {
@@ -1038,7 +1128,7 @@ function ui_nodes_render() {
 				let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
 				let nodes: zui_nodes_t = ui_nodes_get_nodes();
 				let node: zui_node_t = ui_nodes_make_node(n, nodes, canvas);
-				canvas.nodes.push(node);
+				array_push(canvas.nodes, node);
 				nodes.nodes_selected_id = [node.id];
 				nodes.nodes_drag = true;
 				///if is_lab
@@ -1063,7 +1153,7 @@ function ui_nodes_render() {
 					let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
 					let nodes: zui_nodes_t = ui_nodes_get_nodes();
 					let node: zui_node_t = ui_nodes_make_group_node(g.canvas, nodes, canvas);
-					canvas.nodes.push(node);
+					array_push(canvas.nodes, node);
 					nodes.nodes_selected_id = [node.id];
 					nodes.nodes_drag = true;
 				}
@@ -1125,13 +1215,17 @@ function ui_nodes_can_place_group(group_name: string): bool {
 			group_exists = true;
 		}
 	}
-	if (!group_exists) return false;
+	if (!group_exists) {
+		return false;
+	}
 	return true;
 }
 
 function ui_nodes_push_undo(last_canvas: zui_node_canvas_t = null) {
-	if (last_canvas == null) last_canvas = ui_nodes_get_canvas(true);
-	let canvas_group: i32 = ui_nodes_group_stack.length > 0 ? project_material_groups.indexOf(ui_nodes_group_stack[ui_nodes_group_stack.length - 1]) : null;
+	if (last_canvas == null) {
+		last_canvas = ui_nodes_get_canvas(true);
+	}
+	let canvas_group: i32 = ui_nodes_group_stack.length > 0 ? array_index_of(project_material_groups, ui_nodes_group_stack[ui_nodes_group_stack.length - 1]) : null;
 
 	///if (is_paint || is_sculpt)
 	ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
@@ -1163,7 +1257,9 @@ function ui_nodes_accept_asset_drag(index: i32) {
 ///if (is_paint || is_sculpt)
 function ui_nodes_accept_layer_drag(index: i32) {
 	ui_nodes_push_undo();
-	if (slot_layer_is_group(project_layers[index])) return;
+	if (slot_layer_is_group(project_layers[index])) {
+		return;
+	}
 	let g: node_group_t = ui_nodes_group_stack.length > 0 ? ui_nodes_group_stack[ui_nodes_group_stack.length - 1] : null;
 	let n: zui_node_t = nodes_material_create_node(slot_layer_is_mask(context_raw.layer) ? "LAYER_MASK" : "LAYER", g);
 	n.buttons[0].default_value = index;
@@ -1225,18 +1321,22 @@ function ui_nodes_make_group_node(group_canvas: zui_node_canvas_t, nodes: zui_no
 	for (let g of project_material_groups) {
 		if (g.canvas.name == node.name) {
 			for (let n of g.canvas.nodes) {
-				if (n.type == "GROUP_INPUT") group_input = n;
-				else if (n.type == "GROUP_OUTPUT") group_output = n;
+				if (n.type == "GROUP_INPUT") {
+					group_input = n;
+				}
+				else if (n.type == "GROUP_OUTPUT") {
+					group_output = n;
+				}
 			}
 			break;
 		}
 	}
 	if (group_input != null && group_output != null) {
 		for (let soc of group_input.outputs) {
-			node.inputs.push(nodes_material_create_socket(nodes, node, soc.name, soc.type, canvas, soc.min, soc.max, soc.default_value));
+			array_push(node.inputs, nodes_material_create_socket(nodes, node, soc.name, soc.type, canvas, soc.min, soc.max, soc.default_value));
 		}
 		for (let soc of group_output.inputs) {
-			node.outputs.push(nodes_material_create_socket(nodes, node, soc.name, soc.type, canvas, soc.min, soc.max, soc.default_value));
+			array_push(node.outputs, nodes_material_create_socket(nodes, node, soc.name, soc.type, canvas, soc.min, soc.max, soc.default_value));
 		}
 	}
 	return node;
@@ -1245,7 +1345,9 @@ function ui_nodes_make_group_node(group_canvas: zui_node_canvas_t, nodes: zui_no
 ///if (is_paint || is_sculpt)
 function ui_nodes_make_node_preview() {
 	let nodes: zui_nodes_t = context_raw.material.nodes;
-	if (nodes.nodes_selected_id.length == 0) return;
+	if (nodes.nodes_selected_id.length == 0) {
+		return;
+	}
 
 	let node: zui_node_t = zui_get_node(context_raw.material.canvas.nodes, nodes.nodes_selected_id[0]);
 	// if (node == null) return;
@@ -1254,9 +1356,13 @@ function ui_nodes_make_node_preview() {
 	if (node.type == "LAYER" ||
 		node.type == "LAYER_MASK" ||
 		node.type == "MATERIAL" ||
-		node.type == "OUTPUT_MATERIAL_PBR") return;
+		node.type == "OUTPUT_MATERIAL_PBR") {
+		return;
+	}
 
-	if (context_raw.material.canvas.nodes.indexOf(node) == -1) return;
+	if (array_index_of(context_raw.material.canvas.nodes, node) == -1) {
+		return;
+	}
 
 	if (context_raw.node_preview == null) {
 		context_raw.node_preview = image_create_render_target(util_render_material_preview_size, util_render_material_preview_size);
@@ -1269,7 +1375,11 @@ function ui_nodes_make_node_preview() {
 ///end
 
 function ui_nodes_has_group(c: zui_node_canvas_t): bool {
-	for (let n of c.nodes) if (n.type == "GROUP") return true;
+	for (let n of c.nodes) {
+		if (n.type == "GROUP") {
+			return true;
+		}
+	}
 	return false;
 }
 
@@ -1278,9 +1388,11 @@ function ui_nodes_traverse_group(mgroups: zui_node_canvas_t[], c: zui_node_canva
 		if (n.type == "GROUP") {
 			if (ui_nodes_get_group(mgroups, n.name) == null) {
 				let canvases: zui_node_canvas_t[] = [];
-				for (let g of project_material_groups) canvases.push(g.canvas);
+				for (let g of project_material_groups) {
+					array_push(canvases, g.canvas);
+				}
 				let group: zui_node_canvas_t = ui_nodes_get_group(canvases, n.name);
-				mgroups.push(json_parse(json_stringify(group)));
+				array_push(mgroups, json_parse(json_stringify(group)));
 				ui_nodes_traverse_group(mgroups, group);
 			}
 		}
@@ -1288,6 +1400,10 @@ function ui_nodes_traverse_group(mgroups: zui_node_canvas_t[], c: zui_node_canva
 }
 
 function ui_nodes_get_group(canvases: zui_node_canvas_t[], name: string): zui_node_canvas_t {
-	for (let c of canvases) if (c.name == name) return c;
+	for (let c of canvases) {
+		if (c.name == name) {
+			return c;
+		}
+	}
 	return null;
 }

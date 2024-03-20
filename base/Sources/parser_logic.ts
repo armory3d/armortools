@@ -9,20 +9,28 @@ let parser_logic_node_map: map_t<string, logic_node_t>;
 let parser_logic_raw_map: map_t<logic_node_t, zui_node_t>;
 
 function parser_logic_get_logic_node(node: zui_node_t): logic_node_t {
-	return parser_logic_node_map.get(parser_logic_node_name(node));
+	return map_get(parser_logic_node_map, parser_logic_node_name(node));
 }
 
 function parser_logic_get_raw_node(node: logic_node_t): zui_node_t {
-	return parser_logic_raw_map.get(node);
+	return map_get(parser_logic_raw_map, node);
 }
 
 function parser_logic_get_node(id: i32): zui_node_t {
-	for (let n of parser_logic_nodes) if (n.id == id) return n;
+	for (let n of parser_logic_nodes) {
+		if (n.id == id) {
+			return n;
+		}
+	}
 	return null;
 }
 
 function parser_logic_get_link(id: i32): zui_node_link_t {
-	for (let l of parser_logic_links) if (l.id == id) return l;
+	for (let l of parser_logic_links) {
+		if (l.id == id) {
+			return l;
+		}
+	}
 	return null;
 }
 
@@ -30,8 +38,12 @@ function parser_logic_get_input_link(inp: zui_node_socket_t): zui_node_link_t {
 	for (let l of parser_logic_links) {
 		if (l.to_id == inp.node_id) {
 			let node: zui_node_t = parser_logic_get_node(inp.node_id);
-			if (node.inputs.length <= l.to_socket) return null;
-			if (node.inputs[l.to_socket] == inp) return l;
+			if (node.inputs.length <= l.to_socket) {
+				return null;
+			}
+			if (node.inputs[l.to_socket] == inp) {
+				return l;
+			}
 		}
 	}
 	return null;
@@ -42,8 +54,12 @@ function parser_logic_get_output_links(out: zui_node_socket_t): zui_node_link_t[
 	for (let l of parser_logic_links) {
 		if (l.from_id == out.node_id) {
 			let node: zui_node_t = parser_logic_get_node(out.node_id);
-			if (node.outputs.length <= l.from_socket) continue;
-			if (node.outputs[l.from_socket] == out) res.push(l);
+			if (node.outputs.length <= l.from_socket) {
+				continue;
+			}
+			if (node.outputs[l.from_socket] == out) {
+				array_push(res, l);
+			}
 		}
 	}
 	return res;
@@ -68,7 +84,9 @@ function parser_logic_parse(canvas: zui_node_canvas_t) {
 	parser_logic_raw_map = map_create();
 	let root_nodes: zui_node_t[] = parser_logic_get_root_nodes(canvas);
 
-	for (let node of root_nodes) parser_logic_build_node(node);
+	for (let node of root_nodes) {
+		parser_logic_build_node(node);
+	}
 }
 
 function parser_logic_build_node(node: zui_node_t): string {
@@ -76,21 +94,21 @@ function parser_logic_build_node(node: zui_node_t): string {
 	let name: string = parser_logic_node_name(node);
 
 	// Check if node already exists
-	if (parser_logic_parsed_nodes.indexOf(name) != -1) {
+	if (array_index_of(parser_logic_parsed_nodes, name) != -1) {
 		return name;
 	}
 
-	parser_logic_parsed_nodes.push(name);
+	array_push(parser_logic_parsed_nodes, name);
 
 	// Create node
 	let v: any = parser_logic_create_node_instance(node.type, []);
-	parser_logic_node_map.set(name, v);
-	parser_logic_raw_map.set(v, node);
+	map_set(parser_logic_node_map, name, v);
+	map_set(parser_logic_raw_map, v, node);
 
 	// Expose button values in node class
 	for (let b of node.buttons) {
 		if (b.type == "ENUM") {
-			// let array_data: bool = Array.isArray(b.data);
+			// let array_data: bool = is_array(b.data);
 			let array_data: bool = b.data.length > 1;
 			let texts: string[] = array_data ? b.data : zui_enum_texts_js(node.type);
 			v[b.name] = texts[b.default_value];
@@ -108,7 +126,7 @@ function parser_logic_build_node(node: zui_node_t): string {
 		// Is linked - find node
 		let l: zui_node_link_t = parser_logic_get_input_link(inp);
 		if (l != null) {
-			inp_node = parser_logic_node_map.get(parser_logic_build_node(parser_logic_get_node(l.from_id)));
+			inp_node = map_get(parser_logic_node_map, parser_logic_build_node(parser_logic_get_node(l.from_id)));
 			inp_from = l.from_socket;
 		}
 		// Not linked - create node with default values
@@ -128,12 +146,12 @@ function parser_logic_build_node(node: zui_node_t): string {
 			for (let l of ls) {
 				let n: zui_node_t = parser_logic_get_node(l.to_id);
 				let out_name: string = parser_logic_build_node(n);
-				out_nodes.push(parser_logic_node_map.get(out_name));
+				array_push(out_nodes, map_get(parser_logic_node_map, out_name));
 			}
 		}
 		// Not linked - create node with default values
 		else {
-			out_nodes.push(parser_logic_build_default_node(out));
+			array_push(out_nodes, parser_logic_build_default_node(out));
 		}
 		// Add outputs
 		logic_node_add_outputs(v.base, out_nodes);
@@ -154,7 +172,7 @@ function parser_logic_get_root_nodes(node_group: zui_node_canvas_t): zui_node_t[
 			}
 		}
 		if (!linked) { // Assume node with no connected outputs as roots
-			roots.push(node);
+			array_push(roots, node);
 		}
 	}
 	return roots;
@@ -164,15 +182,21 @@ function parser_logic_build_default_node(inp: zui_node_socket_t): logic_node_t {
 	let v: logic_node_t = null;
 
 	if (inp.type == "VECTOR") {
-		if (inp.default_value == null) inp.default_value = [0, 0, 0]; // TODO
+		if (inp.default_value == null) {
+			inp.default_value = [0, 0, 0]; // TODO
+		}
 		v = parser_logic_create_node_instance("vector_node", [inp.default_value[0], inp.default_value[1], inp.default_value[2]]);
 	}
 	else if (inp.type == "RGBA") {
-		if (inp.default_value == null) inp.default_value = [0, 0, 0, 0]; // TODO
+		if (inp.default_value == null) {
+			inp.default_value = [0, 0, 0, 0]; // TODO
+		}
 		v = parser_logic_create_node_instance("color_node", [inp.default_value[0], inp.default_value[1], inp.default_value[2], inp.default_value[3]]);
 	}
 	else if (inp.type == "RGB") {
-		if (inp.default_value == null) inp.default_value = [0, 0, 0, 0]; // TODO
+		if (inp.default_value == null) {
+			inp.default_value = [0, 0, 0, 0]; // TODO
+		}
 		v = parser_logic_create_node_instance("color_node", [inp.default_value[0], inp.default_value[1], inp.default_value[2], inp.default_value[3]]);
 	}
 	else if (inp.type == "VALUE") {
@@ -194,9 +218,11 @@ function parser_logic_build_default_node(inp: zui_node_socket_t): logic_node_t {
 }
 
 function parser_logic_create_node_instance(node_type: string, args: any[]): any {
-	if (parser_logic_custom_nodes.get(node_type) != null) {
+	if (map_get(parser_logic_custom_nodes, node_type) != null) {
 		let node: logic_node_t = logic_node_create();
-		node.get = (from: i32) => { return parser_logic_custom_nodes.get(node_type)(node, from); }
+		node.get = function (from: i32) {
+			return map_get(parser_logic_custom_nodes, node_type)(node, from);
+		}
 		return node;
 	}
 

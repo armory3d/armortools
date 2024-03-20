@@ -6,9 +6,9 @@ type text_to_photo_node_t = {
 let text_to_photo_node_prompt: string = "";
 let text_to_photo_node_image: image_t = null;
 let text_to_photo_node_tiling: bool = false;
-let text_to_photo_node_text_encoder_blob : ArrayBuffer;
-let text_to_photo_node_unet_blob : ArrayBuffer;
-let text_to_photo_node_vae_decoder_blob : ArrayBuffer;
+let text_to_photo_node_text_encoder_blob : buffer_t;
+let text_to_photo_node_unet_blob : buffer_t;
+let text_to_photo_node_vae_decoder_blob : buffer_t;
 
 function text_to_photo_node_create(): text_to_photo_node_t {
 	let n: text_to_photo_node_t = {};
@@ -19,7 +19,7 @@ function text_to_photo_node_create(): text_to_photo_node_t {
 }
 
 function text_to_photo_node_get_as_image(self: text_to_photo_node_t, from: i32, done: (img: image_t)=>void) {
-	text_to_photo_node_stable_diffusion(text_to_photo_node_prompt, (_image: image_t) => {
+	text_to_photo_node_stable_diffusion(text_to_photo_node_prompt, function (_image: image_t) {
 		text_to_photo_node_image = _image;
 		done(text_to_photo_node_image);
 	});
@@ -32,52 +32,52 @@ function text_to_photo_node_get_cached_image(self: text_to_photo_node_t): image_
 function text_to_photo_node_buttons(ui: zui_t, nodes: zui_nodes_t, node: zui_node_t) {
 	text_to_photo_node_tiling = node.buttons[0].default_value == 0 ? false : true;
 	text_to_photo_node_prompt = zui_text_area(zui_handle("texttophotonode_0"), zui_align_t.LEFT, true, tr("prompt"), true);
-	node.buttons[1].height = text_to_photo_node_prompt.split("\n").length;
+	node.buttons[1].height = string_split(text_to_photo_node_prompt, "\n").length;
 }
 
-function stable_diffusion(prompt: string, done: (img: image_t)=>void, inpaint_latents: Float32Array = null, offset: i32 = 0, upscale: bool = true, mask: Float32Array = null, latents_orig: Float32Array = null) {
-	let _text_encoder_blob: ArrayBuffer = data_get_blob("models/sd_text_encoder.quant.onnx");
-	let _unet_blob: ArrayBuffer = data_get_blob("models/sd_unet.quant.onnx");
-	let _vae_decoder_blob: ArrayBuffer = data_get_blob("models/sd_vae_decoder.quant.onnx");
+function stable_diffusion(prompt: string, done: (img: image_t)=>void, inpaint_latents: f32_array_t = null, offset: i32 = 0, upscale: bool = true, mask: f32_array_t = null, latents_orig: f32_array_t = null) {
+	let _text_encoder_blob: buffer_t = data_get_blob("models/sd_text_encoder.quant.onnx");
+	let _unet_blob: buffer_t = data_get_blob("models/sd_unet.quant.onnx");
+	let _vae_decoder_blob: buffer_t = data_get_blob("models/sd_vae_decoder.quant.onnx");
 	text_to_photo_node_text_encoder_blob = _text_encoder_blob;
 	text_to_photo_node_unet_blob = _unet_blob;
 	text_to_photo_node_vae_decoder_blob = _vae_decoder_blob;
-	text_to_photo_node_text_encoder(prompt, inpaint_latents, (latents: Float32Array, text_embeddings: Float32Array) => {
-		text_to_photo_node_unet(latents, text_embeddings, mask, latents_orig, offset, (latents: Float32Array) => {
+	text_to_photo_node_text_encoder(prompt, inpaint_latents, function (latents: f32_array_t, text_embeddings: f32_array_t) {
+		text_to_photo_node_unet(latents, text_embeddings, mask, latents_orig, offset, function (latents: f32_array_t) {
 			text_to_photo_node_vae_decoder(latents, upscale, done);
 		});
 	});
 }
 
-function text_to_photo_node_text_encoder(prompt: string, inpaint_latents: Float32Array, done: (a: Float32Array, b: Float32Array)=>void) {
+function text_to_photo_node_text_encoder(prompt: string, inpaint_latents: f32_array_t, done: (a: f32_array_t, b: f32_array_t)=>void) {
 	console_progress(tr("Processing") + " - " + tr("Text to Photo"));
-	base_notify_on_next_frame(() => {
-		let words = string_replace_all(string_replace_all(string_replace_all(prompt, "\n", " "), ",", " , "), "  ", " ").trim().split(" ");
+	base_notify_on_next_frame(function () {
+		let words = string_split(string_replace_all(string_replace_all(string_replace_all(prompt, "\n", " "), ",", " , "), "  ", " ").trim(), " ");
 		for (let i = 0; i < words.length; ++i) {
-			text_to_photo_node_text_input_ids[i + 1] = text_to_photo_node_vocab[words[i].toLowerCase() + "</w>"];
+			text_to_photo_node_text_input_ids[i + 1] = to_lower_case(text_to_photo_node_vocab[words[i]) + "</w>"];
 		}
 		for (let i = words.length; i < (text_to_photo_node_text_input_ids.length - 1); ++i) {
 			text_to_photo_node_text_input_ids[i + 1] = 49407; // <|endoftext|>
 		}
 
-		let i32a = new Int32Array(text_to_photo_node_text_input_ids);
+		let i32a = new i32_array_t(text_to_photo_node_text_input_ids);
 		let text_embeddings_buf = krom_ml_inference(text_to_photo_node_text_encoder_blob, [i32a.buffer], [[1, 77]], [1, 77, 768], config_raw.gpu_inference);
-		let text_embeddings = new Float32Array(text_embeddings_buf);
+		let text_embeddings = new f32_array_t(text_embeddings_buf);
 
-		i32a = new Int32Array(text_to_photo_node_uncond_input_ids);
+		i32a = new i32_array_t(text_to_photo_node_uncond_input_ids);
 		let uncond_embeddings_buf = krom_ml_inference(text_to_photo_node_text_encoder_blob, [i32a.buffer], [[1, 77]], [1, 77, 768], config_raw.gpu_inference);
-		let uncond_embeddings = new Float32Array(uncond_embeddings_buf);
+		let uncond_embeddings = new f32_array_t(uncond_embeddings_buf);
 
-		let f32a = new Float32Array(uncond_embeddings.length + text_embeddings.length);
+		let f32a = f32_array_create(uncond_embeddings.length + text_embeddings.length);
 		for (let i = 0; i < uncond_embeddings.length; ++i) f32a[i] = uncond_embeddings[i];
 		for (let i = 0; i < text_embeddings.length; ++i) f32a[i + uncond_embeddings.length] = text_embeddings[i];
 		text_embeddings = f32a;
 
 		let width = 512;
 		let height = 512;
-		let latents = new Float32Array(1 * 4 * math_floor(height / 8) * math_floor(width / 8));
+		let latents = f32_array_create(1 * 4 * math_floor(height / 8) * math_floor(width / 8));
 		if (inpaint_latents == null) {
-			for (let i = 0; i < latents.length; ++i) latents[i] = math_cos(2.0 * 3.14 * RandomNode.getFloat()) * math_sqrt(-2.0 * math_log(RandomNode.getFloat()));
+			for (let i = 0; i < latents.length; ++i) latents[i] = math_cos(2.0 * 3.14 * random_node_get_float()) * math_sqrt(-2.0 * math_log(random_node_get_float()));
 		}
 		else {
 			for (let i = 0; i < latents.length; ++i) latents[i] = inpaint_latents[i];
@@ -87,34 +87,34 @@ function text_to_photo_node_text_encoder(prompt: string, inpaint_latents: Float3
 	});
 }
 
-function text_to_photo_node_unet(latents: Float32Array, text_embeddings: Float32Array, mask: Float32Array, latents_orig: Float32Array, offset: i32, done: (ar: Float32Array)=>void) {
-	let latent_model_input = new Float32Array(latents.length * 2);
-	let noise_pred_uncond = new Float32Array(latents.length);
-	let noise_pred_text = new Float32Array(latents.length);
+function text_to_photo_node_unet(latents: f32_array_t, text_embeddings: f32_array_t, mask: f32_array_t, latents_orig: f32_array_t, offset: i32, done: (ar: f32_array_t)=>void) {
+	let latent_model_input = f32_array_create(latents.length * 2);
+	let noise_pred_uncond = f32_array_create(latents.length);
+	let noise_pred_text = f32_array_create(latents.length);
 
-	let cur_latents: Float32Array = null;
+	let cur_latents: f32_array_t = null;
 	let num_train_timesteps = 1000;
 	let num_inference_steps = 50;
-	let ets: Float32Array[] = [];
+	let ets: f32_array_t[] = [];
 	let counter = 0;
 
-	let processing = () => {
+	let processing = function () {
 		console_progress(tr("Processing") + " - " + tr("Text to Photo") + " (" + (counter + 1) + "/" + (50 - offset) + ")");
 
 		let timestep = text_to_photo_node_timesteps[counter + offset];
 		for (let i = 0; i < latents.length; ++i) latent_model_input[i] = latents[i];
 		for (let i = 0; i < latents.length; ++i) latent_model_input[i + latents.length] = latents[i];
 
-		let t32 = new Int32Array(2);
+		let t32 = i32_array_create(2);
 		t32[0] = timestep;
 		let noise_pred_buf = krom_ml_inference(text_to_photo_node_unet_blob, [latent_model_input.buffer, t32.buffer, text_embeddings.buffer], [[2, 4, 64, 64], [1], [2, 77, 768]], [2, 4, 64, 64], config_raw.gpu_inference);
-		let noise_pred = new Float32Array(noise_pred_buf);
+		let noise_pred = new f32_array_t(noise_pred_buf);
 
 		for (let i = 0; i < noise_pred_uncond.length; ++i) noise_pred_uncond[i] = noise_pred[i];
 		for (let i = 0; i < noise_pred_text.length; ++i) noise_pred_text[i] = noise_pred[noise_pred_uncond.length + i];
 
 		let guidance_scale = 7.5;
-		noise_pred = new Float32Array(noise_pred_uncond.length);
+		noise_pred = f32_array_create(noise_pred_uncond.length);
 		for (let i = 0; i < noise_pred_uncond.length; ++i) {
 			noise_pred[i] = noise_pred_uncond[i] + guidance_scale * (noise_pred_text[i] - noise_pred_uncond[i]);
 		}
@@ -122,7 +122,7 @@ function text_to_photo_node_unet(latents: Float32Array, text_embeddings: Float32
 		let prev_timestep = math_floor(math_max(timestep - math_floor(num_train_timesteps / num_inference_steps), 0));
 
 		if (counter != 1) {
-			ets.push(noise_pred);
+			array_push(ets, noise_pred);
 		}
 		else {
 			prev_timestep = timestep;
@@ -133,7 +133,7 @@ function text_to_photo_node_unet(latents: Float32Array, text_embeddings: Float32
 			cur_latents = latents;
 		}
 		else if (ets.length == 1 && counter == 1) {
-			let _noise_pred = new Float32Array(noise_pred.length);
+			let _noise_pred = f32_array_create(noise_pred.length);
 			for (let i = 0; i < noise_pred.length; ++i) {
 				_noise_pred[i] = (noise_pred[i] + ets[ets.length - 1][i]) / 2;
 			}
@@ -142,21 +142,21 @@ function text_to_photo_node_unet(latents: Float32Array, text_embeddings: Float32
 			cur_latents = null;
 		}
 		else if (ets.length == 2) {
-			let _noise_pred = new Float32Array(noise_pred.length);
+			let _noise_pred = f32_array_create(noise_pred.length);
 			for (let i = 0; i < noise_pred.length; ++i) {
 				_noise_pred[i] = (3 * ets[ets.length - 1][i] - ets[ets.length - 2][i]) / 2;
 			}
 			noise_pred = _noise_pred;
 		}
 		else if (ets.length == 3) {
-			let _noise_pred = new Float32Array(noise_pred.length);
+			let _noise_pred = f32_array_create(noise_pred.length);
 			for (let i = 0; i < noise_pred.length; ++i) {
 				_noise_pred[i] = (23 * ets[ets.length - 1][i] - 16 * ets[ets.length - 2][i] + 5 * ets[ets.length - 3][i]) / 12;
 			}
 			noise_pred = _noise_pred;
 		}
 		else {
-			let _noise_pred = new Float32Array(noise_pred.length);
+			let _noise_pred = f32_array_create(noise_pred.length);
 			for (let i = 0; i < noise_pred.length; ++i) {
 				_noise_pred[i] = (1 / 24) * (55 * ets[ets.length - 1][i] - 59 * ets[ets.length - 2][i] + 37 * ets[ets.length - 3][i] - 9 * ets[ets.length - 4][i]);
 			}
@@ -175,12 +175,14 @@ function text_to_photo_node_unet(latents: Float32Array, text_embeddings: Float32
 		counter += 1;
 
 		if (mask != null) {
-			let noise = new Float32Array(latents.length);
-			for (let i = 0; i < noise.length; ++i) noise[i] = math_cos(2.0 * 3.14 * RandomNode.getFloat()) * math_sqrt(-2.0 * math_log(RandomNode.getFloat()));
+			let noise = f32_array_create(latents.length);
+			for (let i = 0; i < noise.length; ++i) {
+				noise[i] = math_cos(2.0 * 3.14 * random_node_get_float()) * math_sqrt(-2.0 * math_log(random_node_get_float()));
+			}
 			let sqrt_alpha_prod = math_pow(text_to_photo_node_alphas_cumprod[timestep], 0.5);
 			let sqrt_one_minus_alpha_prod = math_pow(1.0 - text_to_photo_node_alphas_cumprod[timestep], 0.5);
 
-			let init_latents_proper = new Float32Array(latents.length);
+			let init_latents_proper = f32_array_create(latents.length);
 			for (let i = 0; i < init_latents_proper.length; ++i) {
 				init_latents_proper[i] = sqrt_alpha_prod * latents_orig[i] + sqrt_one_minus_alpha_prod * noise[i];
 			}
@@ -198,15 +200,15 @@ function text_to_photo_node_unet(latents: Float32Array, text_embeddings: Float32
 	app_notify_on_render_2d(processing);
 }
 
-function text_to_photo_node_vae_decoder(latents: Float32Array, upscale: bool, done: (img: image_t)=>void) {
+function text_to_photo_node_vae_decoder(latents: f32_array_t, upscale: bool, done: (img: image_t)=>void) {
 	console_progress(tr("Processing") + " - " + tr("Text to Photo"));
-	base_notify_on_next_frame(() => {
+	base_notify_on_next_frame(function () {
 		for (let i = 0; i < latents.length; ++i) {
 			latents[i] = 1.0 / 0.18215 * latents[i];
 		}
 
 		let pyimage_buf = krom_ml_inference(text_to_photo_node_vae_decoder_blob, [latents.buffer], [[1, 4, 64, 64]], [1, 3, 512, 512], config_raw.gpu_inference);
-		let pyimage = new Float32Array(pyimage_buf);
+		let pyimage = new f32_array_t(pyimage_buf);
 
 		for (let i = 0; i < pyimage.length; ++i) {
 			pyimage[i] = pyimage[i] / 2.0 + 0.5;
@@ -214,7 +216,7 @@ function text_to_photo_node_vae_decoder(latents: Float32Array, upscale: bool, do
 			else if (pyimage[i] > 1) pyimage[i] = 1;
 		}
 
-		let u8a = new Uint8Array(4 * 512 * 512);
+		let u8a = u8_array_create(4 * 512 * 512);
 		for (let i = 0; i < (512 * 512); ++i) {
 			u8a[i * 4    ] = math_floor(pyimage[i                ] * 255);
 			u8a[i * 4 + 1] = math_floor(pyimage[i + 512 * 512    ] * 255);
@@ -230,7 +232,7 @@ function text_to_photo_node_vae_decoder(latents: Float32Array, upscale: bool, do
 		}
 		else {
 			if (upscale) {
-				UpscaleNode.load_blob(() => {
+				UpscaleNode.load_blob(function () {
 					while (image.width < config_get_texture_res_x()) {
 						let lastImage = image;
 						image = UpscaleNode.esrgan(image);
@@ -239,7 +241,9 @@ function text_to_photo_node_vae_decoder(latents: Float32Array, upscale: bool, do
 					done(image);
 				});
 			}
-			else done(image);
+			else {
+				done(image);
+			}
 		}
 	});
 }
@@ -259,7 +263,7 @@ let text_to_photo_node_def: zui_node_t = {
 			name: _tr("Color"),
 			type: "RGBA",
 			color: 0xffc7c729,
-			default_value: new Float32Array([0.0, 0.0, 0.0, 1.0])
+			default_value: new f32_array_t([0.0, 0.0, 0.0, 1.0])
 		}
 	],
 	buttons: [

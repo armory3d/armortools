@@ -1,7 +1,7 @@
 
 function import_asset_run(path: string, drop_x: f32 = -1.0, drop_y: f32 = -1.0, show_box: bool = true, hdr_as_envmap: bool = true, done: ()=>void = null) {
 
-	if (path.startsWith("cloud")) {
+	if (starts_with(path, "cloud")) {
 		let do_cache_cloud = function () {
 			file_cache_cloud(path, function (abs: string) {
 				if (abs == null) return;
@@ -23,7 +23,9 @@ function import_asset_run(path: string, drop_x: f32 = -1.0, drop_y: f32 = -1.0, 
 
 	if (path_is_mesh(path)) {
 		show_box ? project_import_mesh_box(path) : import_mesh_run(path);
-		if (drop_x > 0) ui_box_click_to_hide = false; // Prevent closing when going back to window after drag and drop
+		if (drop_x > 0) {
+			ui_box_click_to_hide = false; // Prevent closing when going back to window after drag and drop
+		}
 	}
 	else if (path_is_texture(path)) {
 		import_texture_run(path, hdr_as_envmap);
@@ -76,5 +78,7 @@ function import_asset_run(path: string, drop_x: f32 = -1.0, drop_y: f32 = -1.0, 
 		}
 	}
 
-	if (done != null) done();
+	if (done != null) {
+		done();
+	}
 }

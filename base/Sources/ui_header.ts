@@ -18,7 +18,9 @@ function ui_header_render_ui() {
 	}
 	ui_header_h = math_floor(ui_header_h * zui_SCALE(ui));
 
-	if (config_raw.layout[layout_size_t.HEADER] == 0) return;
+	if (config_raw.layout[layout_size_t.HEADER] == 0) {
+		return;
+	}
 
 	let nodesw: i32 = (ui_nodes_show || ui_view2d_show) ? config_raw.layout[layout_size_t.NODES_W] : 0;
 	///if is_lab
@@ -39,7 +41,7 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 	if (context_raw.tool == workspace_tool_t.COLORID) {
 		zui_text(tr("Picked Color"));
 		if (context_raw.colorid_picked) {
-			zui_image(render_path_render_targets.get("texpaint_colorid")._image, 0xffffffff, 64);
+			zui_image(map_get(render_path_render_targets, "texpaint_colorid")._image, 0xffffffff, 64);
 		}
 		ui.enabled = context_raw.colorid_picked;
 		if (zui_button(tr("Clear"))) {
@@ -56,7 +58,9 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 				ui_toolbar_handle.redraws = 1;
 			}
 			zui_image(project_get_image(project_assets[cid]));
-			if (ui.is_hovered) zui_tooltip_image(project_get_image(project_assets[cid]), 256);
+			if (ui.is_hovered) {
+				zui_tooltip_image(project_get_image(project_assets[cid]), 256);
+			}
 		}
 		if (zui_button(tr("Import"))) {
 			ui_files_show(path_texture_formats.join(","), false, true, function (path: string) {
@@ -65,7 +69,9 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 				context_raw.colorid_handle.position = project_asset_names.length - 1;
 				for (let a of project_assets) {
 					// Already imported
-					if (a.file == path) context_raw.colorid_handle.position = project_assets.indexOf(a);
+					if (a.file == path) {
+						context_raw.colorid_handle.position = array_index_of(project_assets, a);
+					}
 				}
 				context_raw.ddirty = 2;
 				context_raw.colorid_picked = false;
@@ -75,14 +81,20 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 		}
 		ui.enabled = context_raw.colorid_picked;
 		if (zui_button(tr("To Mask"))) {
-			if (slot_layer_is_mask(context_raw.layer)) context_set_layer(context_raw.layer.parent);
-			let m: SlotLayerRaw = base_new_mask(false, context_raw.layer);
+			if (slot_layer_is_mask(context_raw.layer)) {
+				context_set_layer(context_raw.layer.parent);
+			}
+			let m: slot_layer_t = base_new_mask(false, context_raw.layer);
 			let _next = function () {
-				if (base_pipe_merge == null) base_make_pipe();
-				if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
+				if (base_pipe_merge == null) {
+					base_make_pipe();
+				}
+				if (const_data_screen_aligned_vb == null) {
+					const_data_create_screen_aligned_data();
+				}
 				g4_begin(m.texpaint);
 				g4_set_pipeline(base_pipe_colorid_to_mask);
-				g4_set_tex(base_texpaint_colorid,render_path_render_targets.get("texpaint_colorid")._image);
+				g4_set_tex(base_texpaint_colorid,map_get(render_path_render_targets, "texpaint_colorid")._image);
 				g4_set_tex(base_tex_colorid, project_get_image(project_assets[context_raw.colorid_handle.position]));
 				g4_set_vertex_buffer(const_data_screen_aligned_vb);
 				g4_set_index_buffer(const_data_screen_aligned_ib);
@@ -126,22 +138,28 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 			base_drag_off_y = -(mouse_y - uiy - ui._window_y + 1);
 			base_drag_swatch = project_clone_swatch(context_raw.picked_color);
 		}
-		if (ui.is_hovered) zui_tooltip(tr("Drag and drop picked color to swatches, materials, layers or to the node editor"));
+		if (ui.is_hovered) {
+			zui_tooltip(tr("Drag and drop picked color to swatches, materials, layers or to the node editor"));
+		}
 		if (ui.is_hovered && ui.input_released) {
 			ui_menu_draw(function (ui: zui_t) {
 				zui_fill(0, 0, ui._w / zui_SCALE(ui), ui.t.ELEMENT_H * 9, ui.t.SEPARATOR_COL);
 				ui.changed = false;
 				zui_color_wheel(h, false, null, 10 * ui.t.ELEMENT_H * zui_SCALE(ui), false);
-				if (ui.changed) ui_menu_keep_open = true;
+				if (ui.changed) {
+					ui_menu_keep_open = true;
+				}
 			}, 10);
 		}
 		if (zui_button(tr("Add Swatch"))) {
 			let new_swatch: swatch_color_t = project_clone_swatch(context_raw.picked_color);
 			context_set_swatch(new_swatch);
-			project_raw.swatches.push(new_swatch);
+			array_push(project_raw.swatches, new_swatch);
 			ui_base_hwnds[2].redraws = 1;
 		}
-		if (ui.is_hovered) zui_tooltip(tr("Add picked color to swatches"));
+		if (ui.is_hovered) {
+			zui_tooltip(tr("Add picked color to swatches"));
+		}
 
 		zui_text(tr("Base") + ` (${base_r_picked},${base_g_picked},${base_b_picked})`);
 		zui_text(tr("Normal") + ` (${normal_r_picked},${normal_g_picked},${normal_b_picked})`);
@@ -200,9 +218,9 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 		];
 		///if (krom_direct3d12 || krom_vulkan || krom_metal)
 		if (krom_raytrace_supported()) {
-			bakes.push(tr("Lightmap"));
-			bakes.push(tr("Bent Normal"));
-			bakes.push(tr("Thickness"));
+			array_push(bakes, tr("Lightmap"));
+			array_push(bakes, tr("Bent Normal"));
+			array_push(bakes, tr("Thickness"));
 		}
 		else {
 			bakes.shift(); // Remove AO
@@ -267,7 +285,9 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 		}
 		if (context_raw.bake_type == bake_type_t.NORMAL || context_raw.bake_type == bake_type_t.HEIGHT || context_raw.bake_type == bake_type_t.DERIVATIVE) {
 			let ar: string[] = [];
-			for (let p of project_paint_objects) ar.push(p.base.name);
+			for (let p of project_paint_objects) {
+				array_push(ar, p.base.name);
+			}
 			let poly_handle: zui_handle_t = zui_handle("uiheader_13", { position: context_raw.bake_high_poly });
 			context_raw.bake_high_poly = zui_combo(poly_handle, ar, tr("High Poly"));
 		}
@@ -276,25 +296,29 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 		}
 	}
 	else if (context_raw.tool == workspace_tool_t.BRUSH ||
-				context_raw.tool == workspace_tool_t.ERASER ||
-				context_raw.tool == workspace_tool_t.FILL ||
-				context_raw.tool == workspace_tool_t.DECAL ||
-				context_raw.tool == workspace_tool_t.TEXT ||
-				context_raw.tool == workspace_tool_t.CLONE ||
-				context_raw.tool == workspace_tool_t.BLUR ||
-				context_raw.tool == workspace_tool_t.SMUDGE ||
-				context_raw.tool == workspace_tool_t.PARTICLE) {
+			 context_raw.tool == workspace_tool_t.ERASER ||
+			 context_raw.tool == workspace_tool_t.FILL ||
+			 context_raw.tool == workspace_tool_t.DECAL ||
+			 context_raw.tool == workspace_tool_t.TEXT ||
+			 context_raw.tool == workspace_tool_t.CLONE ||
+			 context_raw.tool == workspace_tool_t.BLUR ||
+			 context_raw.tool == workspace_tool_t.SMUDGE ||
+			 context_raw.tool == workspace_tool_t.PARTICLE) {
 
 		let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
 		let decal_mask: bool = decal && operator_shortcut(config_keymap.decal_mask, shortcut_type_t.DOWN);
 		if (context_raw.tool != workspace_tool_t.FILL) {
 			if (decal_mask) {
 				context_raw.brush_decal_mask_radius = zui_slider(context_raw.brush_decal_mask_radius_handle, tr("Radius"), 0.01, 2.0, true);
-				if (ui.is_hovered) zui_tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", new Map([["brush_radius", config_keymap.brush_radius], ["brush_radius_decrease", config_keymap.brush_radius_decrease], ["brush_radius_increase", config_keymap.brush_radius_increase]])));
+				if (ui.is_hovered) {
+					zui_tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", new map_t([["brush_radius", config_keymap.brush_radius], ["brush_radius_decrease", config_keymap.brush_radius_decrease], ["brush_radius_increase", config_keymap.brush_radius_increase]])));
+				}
 			}
 			else {
 				context_raw.brush_radius = zui_slider(context_raw.brush_radius_handle, tr("Radius"), 0.01, 2.0, true);
-				if (ui.is_hovered) zui_tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", new Map([["brush_radius", config_keymap.brush_radius], ["brush_radius_decrease", config_keymap.brush_radius_decrease], ["brush_radius_increase", config_keymap.brush_radius_increase]])));
+				if (ui.is_hovered) {
+					zui_tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", new map_t([["brush_radius", config_keymap.brush_radius], ["brush_radius_decrease", config_keymap.brush_radius_decrease], ["brush_radius_increase", config_keymap.brush_radius_increase]])));
+				}
 			}
 		}
 
@@ -318,7 +342,9 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 			}
 
 			context_raw.brush_angle = zui_slider(context_raw.brush_angle_handle, tr("Angle"), 0.0, 360.0, true, 1);
-			if (ui.is_hovered) zui_tooltip(tr("Hold {brush_angle} and move mouse to the left to decrease the angle\nHold {brush_angle} and move mouse to the right to increase the angle", new Map([["brush_angle", config_keymap.brush_angle]])));
+			if (ui.is_hovered) {
+				zui_tooltip(tr("Hold {brush_angle} and move mouse to the left to decrease the angle\nHold {brush_angle} and move mouse to the right to increase the angle", new map_t([["brush_angle", config_keymap.brush_angle]])));
+			}
 
 			if (context_raw.brush_angle_handle.changed) {
 				make_material_parse_paint_material();
@@ -326,7 +352,9 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 		}
 
 		context_raw.brush_opacity = zui_slider(context_raw.brush_opacity_handle, tr("Opacity"), 0.0, 1.0, true);
-		if (ui.is_hovered) zui_tooltip(tr("Hold {brush_opacity} and move mouse to the left to decrease the opacity\nHold {brush_opacity} and move mouse to the right to increase the opacity", new Map([["brush_opacity", config_keymap.brush_opacity]])));
+		if (ui.is_hovered) {
+			zui_tooltip(tr("Hold {brush_opacity} and move mouse to the left to decrease the opacity\nHold {brush_opacity} and move mouse to the right to increase the opacity", new map_t([["brush_opacity", config_keymap.brush_opacity]])));
+		}
 
 		if (context_raw.tool == workspace_tool_t.BRUSH || context_raw.tool == workspace_tool_t.ERASER || context_raw.tool == workspace_tool_t.CLONE || decal_mask) {
 			context_raw.brush_hardness = zui_slider(zui_handle("uiheader_15", { value: context_raw.brush_hardness }), tr("Hardness"), 0.0, 1.0, true);
@@ -405,7 +433,9 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 			let _w: i32 = ui._w;
 			let sc: f32 = zui_SCALE(ui);
 			let touch_header: bool = (config_raw.touch_ui && config_raw.layout[layout_size_t.HEADER] == 1);
-			if (touch_header) ui._x -= 4 * sc;
+			if (touch_header) {
+				ui._x -= 4 * sc;
+			}
 			ui._w = math_floor((touch_header ? 54 : 60) * sc);
 
 			let xray_handle: zui_handle_t = zui_handle("uiheader_19", { selected: context_raw.xray });
@@ -473,7 +503,9 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 function ui_header_draw_tool_properties(ui: zui_t) {
 	if (context_raw.tool == workspace_tool_t.BRUSH) {
 		context_raw.brush_radius = zui_slider(context_raw.brush_radius_handle, tr("Radius"), 0.01, 2.0, true);
-		if (ui.is_hovered) zui_tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", new Map([["brush_radius", config_keymap.brush_radius], ["brush_radius_decrease", config_keymap.brush_radius_decrease], ["brush_radius_increase", config_keymap.brush_radius_increase]])));
+		if (ui.is_hovered) {
+			zui_tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", new map_t([["brush_radius", config_keymap.brush_radius], ["brush_radius_decrease", config_keymap.brush_radius_decrease], ["brush_radius_increase", config_keymap.brush_radius_increase]])));
+		}
 	}
 }
 ///end
@@ -484,16 +516,18 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 
 	}
 	else if (context_raw.tool == workspace_tool_t.ERASER ||
-				context_raw.tool == workspace_tool_t.CLONE  ||
-				context_raw.tool == workspace_tool_t.BLUR   ||
-				context_raw.tool == workspace_tool_t.SMUDGE) {
+			 context_raw.tool == workspace_tool_t.CLONE  ||
+			 context_raw.tool == workspace_tool_t.BLUR   ||
+			 context_raw.tool == workspace_tool_t.SMUDGE) {
 
 		let nodes: zui_nodes_t = ui_nodes_get_nodes();
 		let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
 		let inpaint: bool = nodes.nodes_selected_id.length > 0 && zui_get_node(canvas.nodes, nodes.nodes_selected_id[0]).type == "InpaintNode";
 		if (inpaint) {
 			context_raw.brush_radius = zui_slider(context_raw.brush_radius_handle, tr("Radius"), 0.01, 2.0, true);
-			if (ui.is_hovered) zui_tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", new Map([["brush_radius", config_keymap.brush_radius], ["brush_radius_decrease", config_keymap.brush_radius_decrease], ["brush_radius_increase", config_keymap.brush_radius_increase]])));
+			if (ui.is_hovered) {
+				zui_tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", new map_t([["brush_radius", config_keymap.brush_radius], ["brush_radius_decrease", config_keymap.brush_radius_decrease], ["brush_radius_increase", config_keymap.brush_radius_increase]])));
+			}
 		}
 	}
 }

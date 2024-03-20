@@ -82,10 +82,10 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 				render_path_draw_meshes("paint");
 				ui_header_handle.redraws = 2;
 
-				let texpaint_picker = render_path_render_targets.get("texpaint_picker")._image;
-				let texpaint_nor_picker = render_path_render_targets.get("texpaint_nor_picker")._image;
-				let texpaint_pack_picker = render_path_render_targets.get("texpaint_pack_picker")._image;
-				let texpaint_uv_picker = render_path_render_targets.get("texpaint_uv_picker")._image;
+				let texpaint_picker = map_get(render_path_render_targets, "texpaint_picker")._image;
+				let texpaint_nor_picker = map_get(render_path_render_targets, "texpaint_nor_picker")._image;
+				let texpaint_pack_picker = map_get(render_path_render_targets, "texpaint_pack_picker")._image;
+				let texpaint_uv_picker = map_get(render_path_render_targets, "texpaint_uv_picker")._image;
 				let a = image_get_pixels(texpaint_picker);
 				let b = image_get_pixels(texpaint_nor_picker);
 				let c = image_get_pixels(texpaint_pack_picker);
@@ -182,13 +182,15 @@ function render_path_paint_commands_cursor() {
 function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f32 = 1.0, tint_g: f32 = 1.0, tint_b: f32 = 1.0) {
 	let plane = scene_get_child(".Plane").ext;
 	let geom = plane.data;
-	if (base_pipe_cursor == null) base_make_cursor_pipe();
+	if (base_pipe_cursor == null) {
+		base_make_cursor_pipe();
+	}
 
 	render_path_set_target("");
 	g4_set_pipeline(base_pipe_cursor);
 	let img = resource_get("cursor.k");
 	g4_set_tex(base_cursor_tex, img);
-	let gbuffer0 = render_path_render_targets.get("gbuffer0")._image;
+	let gbuffer0 = map_get(render_path_render_targets, "gbuffer0")._image;
 	g4_set_tex_depth(base_cursor_gbufferd, gbuffer0);
 	g4_set_float2(base_cursor_mouse, mx, my);
 	g4_set_float2(base_cursor_tex_step, 1 / gbuffer0.width, 1 / gbuffer0.height);
@@ -217,7 +219,9 @@ function render_path_paint_paint_enabled(): bool {
 }
 
 function render_path_paint_begin() {
-	if (!render_path_paint_paint_enabled()) return;
+	if (!render_path_paint_paint_enabled()) {
+		return;
+	}
 }
 
 function render_path_paint_end() {
@@ -225,12 +229,16 @@ function render_path_paint_end() {
 	context_raw.ddirty--;
 	context_raw.rdirty--;
 
-	if (!render_path_paint_paint_enabled()) return;
+	if (!render_path_paint_paint_enabled()) {
+		return;
+	}
 	context_raw.pdirty--;
 }
 
 function render_path_paint_draw() {
-	if (!render_path_paint_paint_enabled()) return;
+	if (!render_path_paint_paint_enabled()) {
+		return;
+	}
 
 	render_path_paint_commands_paint();
 
@@ -260,23 +268,23 @@ function render_path_paint_bind_layers() {
 		}
 	}
 	if (image != null) {
-		if (render_path_render_targets.get("texpaint_node") == null) {
+		if (map_get(render_path_render_targets, "texpaint_node") == null) {
 			let t = render_target_create();
 			t.name = "texpaint_node";
 			t.width = config_get_texture_res_x();
 			t.height = config_get_texture_res_y();
 			t.format = "RGBA32";
-			render_path_render_targets.set(t.name, t);
+			map_set(render_path_render_targets, t.name, t);
 		}
-		if (render_path_render_targets.get("texpaint_node_target") == null) {
+		if (map_get(render_path_render_targets, "texpaint_node_target") == null) {
 			let t = render_target_create();
 			t.name = "texpaint_node_target";
 			t.width = config_get_texture_res_x();
 			t.height = config_get_texture_res_y();
 			t.format = "RGBA32";
-			render_path_render_targets.set(t.name, t);
+			map_set(render_path_render_targets, t.name, t);
 		}
-		render_path_render_targets.get("texpaint_node")._image = image;
+		map_get(render_path_render_targets, "texpaint_node")._image = image;
 		render_path_bind_target("texpaint_node", "texpaint");
 		render_path_bind_target("texpaint_nor_empty", "texpaint_nor");
 		render_path_bind_target("texpaint_pack_empty", "texpaint_pack");
@@ -287,7 +295,7 @@ function render_path_paint_bind_layers() {
 		let inpaint = node.type == "InpaintNode";
 		if (inpaint) {
 			let brushNode = parser_logic_get_logic_node(node);
-			render_path_render_targets.get("texpaint_node_target")._image = (brushNode as InpaintNode).getTarget();
+			map_get(render_path_render_targets, "texpaint_node_target")._image = (brushNode as InpaintNode).getTarget();
 		}
 	}
 	else {

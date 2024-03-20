@@ -129,8 +129,8 @@ function list_folder(path: string) {
 			if (is_file) {
 				storage.file = abs;
 				let bytes: buffer_t = krom_load_blob(storage.file);
-				storage.text = f.endsWith(".arm") ? json_stringify(armpack_decode(bytes)) : sys_buffer_to_string(bytes);
-				storage.text = storage.text.replaceAll("\r", "");
+				storage.text = ends_with(f, ".arm") ? json_stringify(armpack_decode(bytes)) : sys_buffer_to_string(bytes);
+				storage.text = string_replace_all(storage.text, "\r", "");
 				text_handle.text = storage.text;
 				editor_handle.redraws = 1;
 				krom_set_window_title(abs);
@@ -180,7 +180,7 @@ function render() {
 	if (zui_window(editor_handle, storage.sidebar_w + 1, 0, sys_width() - storage.sidebar_w - minimap_w, sys_height(), false)) {
 		editor_updated = true;
 		let htab: zui_handle_t = zui_handle("main_0", { position: 0 });
-		let file_name: string = storage.file.substring(storage.file.lastIndexOf("/") + 1);
+		let file_name: string = substring(storage.file, string_last_index_of(storage.file, "/") + 1);
 		let file_names: string[] = [file_name];
 
 		for (let file_name of file_names) {
@@ -260,7 +260,7 @@ function save_file() {
 	text_handle.text = storage.text;
 	// Write bytes
 	let bytes = ends_with(storage.file, ".arm") ? armpack_encode(json_parse(storage.text)) : sys_string_to_buffer(storage.text);
-	krom_file_save_bytes(storage.file, bytes, bytes.byteLength);
+	krom_file_save_bytes(storage.file, bytes, buffer_size(bytes));
 	storage.modified = false;
 }
 

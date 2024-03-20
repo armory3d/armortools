@@ -29,11 +29,13 @@ function import_envmap_run(path: string, image: image_t) {
 		import_envmap_mips = [];
 		let w: i32 = 512;
 		for (let i: i32 = 0; i < 10; ++i) {
-			import_envmap_mips.push(image_create_render_target(w, w > 1 ? math_floor(w / 2) : 1, tex_format_t.RGBA128));
+			array_push(import_envmap_mips, image_create_render_target(w, w > 1 ? math_floor(w / 2) : 1, tex_format_t.RGBA128));
 			w = math_floor(w / 2);
 		}
 
-		if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
+		if (const_data_screen_aligned_vb == null) {
+			const_data_create_screen_aligned_data();
+		}
 	}
 
 	// Down-scale to 1024x512
@@ -46,7 +48,7 @@ function import_envmap_run(path: string, image: image_t) {
 	let radiance_pixels: buffer_t = image_get_pixels(import_envmap_radiance);
 	if (import_envmap_radiance_cpu != null) {
 		let _radiance_cpu: image_t = import_envmap_radiance_cpu;
-		base_notify_on_next_frame(() => {
+		base_notify_on_next_frame(function () {
 			image_unload(_radiance_cpu);
 		});
 	}
@@ -56,7 +58,7 @@ function import_envmap_run(path: string, image: image_t) {
 	if (import_envmap_mips_cpu != null) {
 		for (let mip of import_envmap_mips_cpu) {
 			let _mip: image_t = mip;
-			base_notify_on_next_frame(() => {
+			base_notify_on_next_frame(function () {
 				///if (!krom_direct3d12) // TODO: crashes after 50+ imports
 				image_unload(_mip);
 				///end
@@ -66,7 +68,7 @@ function import_envmap_run(path: string, image: image_t) {
 	import_envmap_mips_cpu = [];
 	for (let i: i32 = 0; i < import_envmap_mips.length; ++i) {
 		import_envmap_get_radiance_mip(import_envmap_mips[i], i, import_envmap_radiance);
-		import_envmap_mips_cpu.push(image_from_bytes(image_get_pixels(import_envmap_mips[i]), import_envmap_mips[i].width, import_envmap_mips[i].height, tex_format_t.RGBA128));
+		array_push(import_envmap_mips_cpu, image_from_bytes(image_get_pixels(import_envmap_mips[i]), import_envmap_mips[i].width, import_envmap_mips[i].height, tex_format_t.RGBA128));
 	}
 	image_set_mipmaps(import_envmap_radiance_cpu, import_envmap_mips_cpu);
 
@@ -109,8 +111,8 @@ function import_envmap_reverse_equirect(x: f32, y: f32): vec4_t {
 
 // https://ndotl.wordpress.com/2015/03/07/pbr-cubemap-filtering
 // https://seblagarde.wordpress.com/2012/06/10/amd-cubemapgen-for-physically-based-rendering
-function import_envmap_get_spherical_harmonics(source: ArrayBuffer, source_width: i32, source_height: i32): Float32Array {
-	let sh: Float32Array = new Float32Array(9 * 3 + 1); // Align to mult of 4 - 27->28
+function import_envmap_get_spherical_harmonics(source: buffer_t, source_width: i32, source_height: i32): f32_array_t {
+	let sh: f32_array_t = f32_array_create(9 * 3 + 1); // Align to mult of 4 - 27->28
 	let accum: f32 = 0.0;
 	let weight: f32 = 1.0;
 	let weight1: f32 = weight * 4 / 17;
@@ -118,14 +120,14 @@ function import_envmap_get_spherical_harmonics(source: ArrayBuffer, source_width
 	let weight3: f32 = weight * 15 / 17;
 	let weight4: f32 = weight * 5 / 68;
 	let weight5: f32 = weight * 15 / 68;
-	let view: DataView = new DataView(source);
+	let view: buffer_view_t = buffer_view_create(source);
 
 	for (let x: i32 = 0; x < source_width; ++x) {
 		for (let y: i32 = 0; y < source_height; ++y) {
 			import_envmap_n = import_envmap_reverse_equirect(x / source_width, y / source_height);
 
 			for (let i: i32 = 0; i < 3; ++i) {
-				let value: f32 = view.getFloat32(((x + y * source_width) * 16 + i * 4), true);
+				let value: f32 = buffer_view_get_f32(view, ((x + y * source_width) * 16 + i * 4));
 				value = math_pow(value, 1.0 / 2.2);
 
 				sh[0 + i] += value * weight1;

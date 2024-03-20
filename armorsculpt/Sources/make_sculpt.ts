@@ -51,7 +51,7 @@ function make_sculpt_run(data: material_t, matcon: material_context_t): NodeShad
 		context_raw.tool == workspace_tool_t.PARTICLE ||
 		decal) {
 
-		let depthReject = !context_raw.xray;
+		let depth_reject = !context_raw.xray;
 
 		make_brush_run(vert, frag);
 	}

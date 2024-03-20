@@ -126,18 +126,34 @@ function camera_update() {
 
 		if (move_forward || move_backward || strafe_right || strafe_left || strafe_up || strafe_down) {
 			camera_ease += time_delta() * 15;
-			if (camera_ease > 1.0) camera_ease = 1.0;
+			if (camera_ease > 1.0) {
+				camera_ease = 1.0;
+			}
 			vec4_set(camera_dir, 0, 0, 0);
-			if (move_forward) vec4_add_f(camera_dir, camera_object_look(camera).x, camera_object_look(camera).y, camera_object_look(camera).z);
-			if (move_backward) vec4_add_f(camera_dir, -camera_object_look(camera).x, -camera_object_look(camera).y, -camera_object_look(camera).z);
-			if (strafe_right) vec4_add_f(camera_dir, camera_object_right(camera).x, camera_object_right(camera).y, camera_object_right(camera).z);
-			if (strafe_left) vec4_add_f(camera_dir, -camera_object_right(camera).x, -camera_object_right(camera).y, -camera_object_right(camera).z);
-			if (strafe_up) vec4_add_f(camera_dir, 0, 0, 1);
-			if (strafe_down) vec4_add_f(camera_dir, 0, 0, -1);
+			if (move_forward) {
+				vec4_add_f(camera_dir, camera_object_look(camera).x, camera_object_look(camera).y, camera_object_look(camera).z);
+			}
+			if (move_backward) {
+				vec4_add_f(camera_dir, -camera_object_look(camera).x, -camera_object_look(camera).y, -camera_object_look(camera).z);
+			}
+			if (strafe_right) {
+				vec4_add_f(camera_dir, camera_object_right(camera).x, camera_object_right(camera).y, camera_object_right(camera).z);
+			}
+			if (strafe_left) {
+				vec4_add_f(camera_dir, -camera_object_right(camera).x, -camera_object_right(camera).y, -camera_object_right(camera).z);
+			}
+			if (strafe_up) {
+				vec4_add_f(camera_dir, 0, 0, 1);
+			}
+			if (strafe_down) {
+				vec4_add_f(camera_dir, 0, 0, -1);
+			}
 		}
 		else {
 			camera_ease -= time_delta() * 20.0 * camera_ease;
-			if (camera_ease < 0.0) camera_ease = 0.0;
+			if (camera_ease < 0.0) {
+				camera_ease = 0.0;
+			}
 		}
 
 
@@ -194,21 +210,21 @@ function camera_get_zoom_speed(): f32 {
 	return config_raw.camera_zoom_speed * sign;
 }
 
-function camera_reset(viewIndex: i32 = -1) {
+function camera_reset(view_index: i32 = -1) {
 	let camera: camera_object_t = scene_camera;
-	if (viewIndex == -1) {
+	if (view_index == -1) {
 		camera_origins = [vec4_create(0, 0, 0), vec4_create(0, 0, 0)];
 		camera_views = [mat4_clone(camera.base.transform.local), mat4_clone(camera.base.transform.local)];
 	}
 	else {
-		camera_origins[viewIndex] = vec4_create(0, 0, 0);
-		camera_views[viewIndex] = mat4_clone(camera.base.transform.local);
+		camera_origins[view_index] = vec4_create(0, 0, 0);
+		camera_views[view_index] = mat4_clone(camera.base.transform.local);
 	}
 }
 
-function camera_pan_action(modif: bool, defaultKeymap: bool) {
+function camera_pan_action(modif: bool, default_keymap: bool) {
 	let camera: camera_object_t = scene_camera;
-	if (operator_shortcut(config_keymap.action_pan, shortcut_type_t.DOWN) || (mouse_down("middle") && !modif && defaultKeymap)) {
+	if (operator_shortcut(config_keymap.action_pan, shortcut_type_t.DOWN) || (mouse_down("middle") && !modif && default_keymap)) {
 		camera_redraws = 2;
 		let look: vec4_t = vec4_mult(vec4_normalize(transform_look(camera.base.transform)), mouse_movement_y / 150 * config_raw.camera_pan_speed);
 		let right: vec4_t = vec4_mult(vec4_normalize(transform_right(camera.base.transform)), -mouse_movement_x / 150 * config_raw.camera_pan_speed);
@@ -222,8 +238,8 @@ function camera_pan_action(modif: bool, defaultKeymap: bool) {
 
 function camera_get_zoom_delta(): f32 {
 	return config_raw.zoom_direction == zoom_direction_t.VERTICAL ? -mouse_movement_y :
-			config_raw.zoom_direction == zoom_direction_t.VERTICAL_INVERTED ? -mouse_movement_y :
-			config_raw.zoom_direction == zoom_direction_t.HORIZONTAL ? mouse_movement_x :
-			config_raw.zoom_direction == zoom_direction_t.HORIZONTAL_INVERTED ? mouse_movement_x :
-			-(mouse_movement_y - mouse_movement_x);
+		   config_raw.zoom_direction == zoom_direction_t.VERTICAL_INVERTED ? -mouse_movement_y :
+		   config_raw.zoom_direction == zoom_direction_t.HORIZONTAL ? mouse_movement_x :
+		   config_raw.zoom_direction == zoom_direction_t.HORIZONTAL_INVERTED ? mouse_movement_x :
+		   -(mouse_movement_y - mouse_movement_x);
 }

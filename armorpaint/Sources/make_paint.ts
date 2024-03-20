@@ -9,10 +9,10 @@ function make_paint_is_raytraced_bake(): bool {
 	///end
 }
 
-function make_paint_run(data: material_t, matcon: material_context_t): NodeShaderContextRaw {
+function make_paint_run(data: material_t, matcon: material_context_t): node_shader_context_t {
 	let context_id: string = "paint";
 
-	let con_paint: NodeShaderContextRaw = node_shader_context_create(data, {
+	let con_paint: node_shader_context_t = node_shader_context_create(data, {
 		name: context_id,
 		depth_write: false,
 		compare_mode: "always", // TODO: align texcoords winding order
@@ -33,8 +33,8 @@ function make_paint_run(data: material_t, matcon: material_context_t): NodeShade
 	con_paint.data.color_writes_alpha = [true, true, true, true];
 	con_paint.allow_vcols = mesh_data_get_vertex_array(context_raw.paint_object.data, 'col') != null;
 
-	let vert: NodeShaderRaw = node_shader_context_make_vert(con_paint);
-	let frag: NodeShaderRaw = node_shader_context_make_frag(con_paint);
+	let vert: node_shader_t = node_shader_context_make_vert(con_paint);
+	let frag: node_shader_t = node_shader_context_make_frag(con_paint);
 	frag.ins = vert.outs;
 
 	///if (krom_direct3d12 || krom_vulkan || krom_metal)
@@ -88,7 +88,9 @@ function make_paint_run(data: material_t, matcon: material_context_t): NodeShade
 	node_shader_write_attrib(frag, 'sp.z -= 0.0001;'); // small bias
 
 	let uv_type: uv_type_t = context_raw.layer.fill_layer != null ? context_raw.layer.uv_type : context_raw.brush_paint;
-	if (uv_type == uv_type_t.PROJECT) frag.ndcpos = true;
+	if (uv_type == uv_type_t.PROJECT) {
+		frag.ndcpos = true;
+	}
 
 	node_shader_add_uniform(frag, 'vec4 inp', '_inputBrush');
 	node_shader_add_uniform(frag, 'vec4 inplast', '_inputBrushLast');
@@ -114,12 +116,16 @@ function make_paint_run(data: material_t, matcon: material_context_t): NodeShade
 		decal) {
 
 		let depth_reject: bool = !context_raw.xray;
-		if (config_raw.brush_3d && !config_raw.brush_depth_reject) depth_reject = false;
+		if (config_raw.brush_3d && !config_raw.brush_depth_reject) {
+			depth_reject = false;
+		}
 
 		// TODO: sp.z needs to take height channel into account
 		let particle: bool = context_raw.tool == workspace_tool_t.PARTICLE;
 		if (config_raw.brush_3d && !decal && !particle) {
-			if (make_material_height_used || context_raw.sym_x || context_raw.sym_y || context_raw.sym_z) depth_reject = false;
+			if (make_material_height_used || context_raw.sym_x || context_raw.sym_y || context_raw.sym_z) {
+				depth_reject = false;
+			}
 		}
 
 		if (depth_reject) {
@@ -236,8 +242,12 @@ function make_paint_run(data: material_t, matcon: material_context_t): NodeShade
 			// Height used for the first time, also rebuild vertex shader
 			return make_paint_run(data, matcon);
 		}
-		if (parseFloat(emis) != 0.0) make_material_emis_used = true;
-		if (parseFloat(subs) != 0.0) make_material_subs_used = true;
+		if (parseFloat(emis) != 0.0) {
+			make_material_emis_used = true;
+		}
+		if (parseFloat(subs) != 0.0) {
+			make_material_subs_used = true;
+		}
 	}
 
 	if (context_raw.brush_mask_image != null && context_raw.tool == workspace_tool_t.DECAL) {

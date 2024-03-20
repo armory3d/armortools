@@ -14,12 +14,12 @@ function rgb_node_create(): rgb_node_t {
 
 function rgb_node_get_as_image(self: rgb_node_t, from: i32, done: (img: image_t)=>void) {
 	if (self.image != null) {
-		base_notify_on_next_frame(() => {
+		base_notify_on_next_frame(function () {
 			image_unload(self.image);
 		});
 	}
 
-	let f32a = new Float32Array(4);
+	let f32a = f32_array_create(4);
 	let raw = parser_logic_get_raw_node(self);
 	let default_value = raw.outputs[0].default_value;
 	f32a[0] = default_value[0];
@@ -31,7 +31,7 @@ function rgb_node_get_as_image(self: rgb_node_t, from: i32, done: (img: image_t)
 }
 
 function rgb_node_get_cached_image(self: rgb_node_t): image_t {
-	self.base.get_as_image(self, 0, (img: image_t) => {});
+	self.base.get_as_image(self, 0, function (img: image_t) {});
 	return self.image;
 }
 
@@ -50,7 +50,7 @@ let rgb_node_def: zui_node_t = {
 			name: _tr("Color"),
 			type: "RGBA",
 			color: 0xffc7c729,
-			default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+			default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 		}
 	],
 	buttons: [
@@ -58,7 +58,7 @@ let rgb_node_def: zui_node_t = {
 			name: _tr("default_value"),
 			type: "RGBA",
 			output: 0,
-			default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+			default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 		}
 	]
 };

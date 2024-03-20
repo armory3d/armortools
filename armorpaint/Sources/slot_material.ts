@@ -1,5 +1,5 @@
 
-class SlotMaterialRaw {
+class slot_material_t {
 	nodes: zui_nodes_t = zui_nodes_create();
 	canvas: zui_node_canvas_t;
 	image: image_t = null;
@@ -19,11 +19,15 @@ class SlotMaterialRaw {
 	paint_subs: bool = true;
 }
 
-let slot_material_default_canvas: ArrayBuffer = null;
+let slot_material_default_canvas: buffer_t = null;
 
-function slot_material_create(m: material_data_t = null, c: zui_node_canvas_t = null): SlotMaterialRaw {
-	let raw: SlotMaterialRaw = new SlotMaterialRaw();
-	for (let mat of project_materials) if (mat.id >= raw.id) raw.id = mat.id + 1;
+function slot_material_create(m: material_data_t = null, c: zui_node_canvas_t = null): slot_material_t {
+	let raw: slot_material_t = new slot_material_t();
+	for (let mat of project_materials) {
+		if (mat.id >= raw.id) {
+			raw.id = mat.id + 1;
+		}
+	}
 	raw.data = m;
 
 	let w: i32 = util_render_material_preview_size;
@@ -33,7 +37,7 @@ function slot_material_create(m: material_data_t = null, c: zui_node_canvas_t = 
 
 	if (c == null) {
 		if (slot_material_default_canvas == null) { // Synchronous
-			let b: ArrayBuffer = data_get_blob("default_material.arm");
+			let b: buffer_t = data_get_blob("default_material.arm");
 			slot_material_default_canvas = b;
 		}
 		raw.canvas = armpack_decode(slot_material_default_canvas);
@@ -44,24 +48,24 @@ function slot_material_create(m: material_data_t = null, c: zui_node_canvas_t = 
 	}
 
 	///if (krom_android || krom_ios)
-	raw.nodes.panX -= 50; // Center initial position
+	raw.nodes.pan_x -= 50; // Center initial position
 	///end
 
 	return raw;
 }
 
-function slot_material_unload(raw: SlotMaterialRaw) {
-	let _next = () => {
+function slot_material_unload(raw: slot_material_t) {
+	let _next = function () {
 		image_unload(raw.image);
 		image_unload(raw.image_icon);
 	}
 	base_notify_on_next_frame(_next);
 }
 
-function slot_material_delete(raw: SlotMaterialRaw) {
+function slot_material_delete(raw: slot_material_t) {
 	slot_material_unload(raw);
-	let mpos: i32 = project_materials.indexOf(raw);
-	array_remove(project_materials, this);
+	let mpos: i32 = array_index_of(project_materials, raw);
+	array_remove(project_materials, raw);
 	if (project_materials.length > 0) {
 		context_set_material(project_materials[mpos > 0 ? mpos - 1 : 0]);
 	}

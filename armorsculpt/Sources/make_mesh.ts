@@ -24,7 +24,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): NodeShaderContext
 	node_shader_add_uniform(vert, 'mat4 prevWVP', '_prev_world_view_proj_matrix');
 	vert.wposition = true;
 
-	let textureCount = 0;
+	let texture_count: i32 = 0;
 
 	node_shader_add_uniform(vert, 'mat4 WVP', '_world_view_proj_matrix');
 	node_shader_add_uniform(vert, 'sampler2D texpaint_vert', '_texpaint_vert' + project_layers[0].id);
@@ -97,12 +97,12 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): NodeShaderContext
 	}
 
 	if (context_raw.draw_wireframe) {
-		textureCount++;
+		texture_count++;
 		node_shader_add_uniform(frag, 'sampler2D texuvmap', '_texuvmap');
 	}
 
 	if (context_raw.viewport_mode == viewport_mode_t.LIT && context_raw.render_mode == render_mode_t.FORWARD) {
-		textureCount += 4;
+		texture_count += 4;
 		node_shader_add_uniform(frag, 'sampler2D senvmapBrdf', "$brdf.k");
 		node_shader_add_uniform(frag, 'sampler2D senvmapRadiance', '_envmap_radiance');
 		node_shader_add_uniform(frag, 'sampler2D sltcMat', '_ltcMat');
@@ -112,20 +112,24 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): NodeShaderContext
 	// Get layers for this pass
 	make_mesh_layer_pass_count = 1;
 	let layers: SlotLayerRaw[] = [];
-	let startCount = textureCount;
+	let startCount = texture_count;
 	for (let l of project_layers) {
-		if (!slot_layer_is_layer(l) || !slot_layer_is_visible(l)) continue;
+		if (!slot_layer_is_layer(l) || !slot_layer_is_visible(l)) {
+			continue;
+		}
 
 		let count = 3;
 		let masks = slot_layer_get_masks(l);
-		if (masks != null) count += masks.length;
-		textureCount += count;
-		if (textureCount >= make_mesh_get_max_textures()) {
-			textureCount = startCount + count + 3; // gbuffer0_copy, gbuffer1_copy, gbuffer2_copy
+		if (masks != null) {
+			count += masks.length;
+		}
+		texture_count += count;
+		if (texture_count >= make_mesh_get_max_textures()) {
+			texture_count = startCount + count + 3; // gbuffer0_copy, gbuffer1_copy, gbuffer2_copy
 			make_mesh_layer_pass_count++;
 		}
 		if (layer_pass == make_mesh_layer_pass_count - 1) {
-			layers.push(l);
+			array_push(layers, l);
 		}
 	}
 
@@ -138,7 +142,9 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): NodeShaderContext
 				let visibles = project_get_atlas_objects(slot_layer_get_object_mask(l));
 				node_shader_write(frag, 'if (');
 				for (let i = 0; i < visibles.length; ++i) {
-					if (i > 0) node_shader_write(frag, ' || ');
+					if (i > 0) {
+						node_shader_write(frag, ' || ');
+					}
 					node_shader_write(frag, `${visibles[i].base.uid} == uid`);
 				}
 				node_shader_write(frag, ') {');
@@ -286,7 +292,9 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): NodeShaderContext
 				node_shader_write(frag, 'fragColor[1] = vec4(direct + indirect, 1.0);');
 			}
 			else { // Deferred, Pathtraced
-				if (make_material_emis_used) node_shader_write(frag, 'if (int(matid * 255.0) % 3 == 1) basecol *= 10.0;'); // Boost for bloom
+				if (make_material_emis_used) {
+					node_shader_write(frag, 'if (int(matid * 255.0) % 3 == 1) basecol *= 10.0;'); // Boost for bloom
+				}
 				node_shader_write(frag, 'fragColor[1] = vec4(basecol, occlusion);');
 			}
 		}

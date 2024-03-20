@@ -35,16 +35,18 @@ function tab_browser_draw(htab: zui_handle_t) {
 		}
 
 		if (zui_button("+")) {
-			config_raw.bookmarks.push(tab_browser_hpath.text);
+			array_push(config_raw.bookmarks, tab_browser_hpath.text);
 			config_save();
 		}
-		if (ui.is_hovered) zui_tooltip(tr("Add bookmark"));
+		if (ui.is_hovered) {
+			zui_tooltip(tr("Add bookmark"));
+		}
 
 		///if krom_android
 		let stripped: bool = false;
 		let strip: string = "/storage/emulated/0/";
-		if (tab_browser_hpath.text.startsWith(strip)) {
-			tab_browser_hpath.text = tab_browser_hpath.text.substr(strip.length - 1);
+		if (starts_with(tab_browser_hpath.text, strip)) {
+			tab_browser_hpath.text = substring(tab_browser_hpath.text, strip.length - 1, tab_browser_hpath.text.length);
 			stripped = true;
 		}
 		///end
@@ -59,12 +61,14 @@ function tab_browser_draw(htab: zui_handle_t) {
 
 		let refresh: bool = false;
 		let in_focus: bool = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
-						ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
+							 ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
 		if (zui_button(tr("Refresh")) || (in_focus && ui.is_key_pressed && ui.key == key_code_t.F5)) {
 			refresh = true;
 		}
 		tab_browser_hsearch.text = zui_text_input(tab_browser_hsearch, tr("Search"), zui_align_t.LEFT, true, true);
-		if (ui.is_hovered) zui_tooltip(tr("ctrl+f to search") + "\n" + tr("esc to cancel"));
+		if (ui.is_hovered) {
+			zui_tooltip(tr("ctrl+f to search") + "\n" + tr("esc to cancel"));
+		}
 		if (ui.is_ctrl_down && ui.is_key_pressed && ui.key == key_code_t.F) { // Start searching via ctrl+f
 			zui_start_text_edit(tab_browser_hsearch);
 		}
@@ -81,17 +85,17 @@ function tab_browser_draw(htab: zui_handle_t) {
 		let _y: f32 = ui._y;
 		ui._x = bookmarks_w;
 		ui._w -= bookmarks_w;
-		ui_files_file_browser(ui, tab_browser_hpath, false, true, tab_browser_hsearch.text, refresh, (file: string) => {
-			let file_name: string = file.substr(file.lastIndexOf(path_sep) + 1);
+		ui_files_file_browser(ui, tab_browser_hpath, false, true, tab_browser_hsearch.text, refresh, function (file: string) {
+			let file_name: string = substring(file, string_last_index_of(file, path_sep) + 1, file.length);
 			if (file_name != "..") {
-				ui_menu_draw((ui: zui_t) => {
+				ui_menu_draw(function (ui: zui_t) {
 					if (ui_menu_button(ui, tr("Import"))) {
 						import_asset_run(file);
 					}
 					if (path_is_texture(file)) {
 						if (ui_menu_button(ui, tr("Set as Envmap"))) {
-							import_asset_run(file, -1.0, -1.0, true, true, () => {
-								base_notify_on_next_frame(() => {
+							import_asset_run(file, -1.0, -1.0, true, true, function () {
+								base_notify_on_next_frame(function () {
 									let asset_index: i32 = -1;
 									for (let i: i32 = 0; i < project_assets.length; ++i) {
 										if (project_assets[i].file == file) {
@@ -108,8 +112,8 @@ function tab_browser_draw(htab: zui_handle_t) {
 
 						///if (is_paint || is_sculpt)
 						if (ui_menu_button(ui, tr("Set as Mask"))) {
-							import_asset_run(file, -1.0, -1.0, true, true, () => {
-								base_notify_on_next_frame(() => {
+							import_asset_run(file, -1.0, -1.0, true, true, function () {
+								base_notify_on_next_frame(function () {
 									let asset_index: i32 = -1;
 									for (let i: i32 = 0; i < project_assets.length; ++i) {
 										if (project_assets[i].file == file) {
@@ -127,8 +131,8 @@ function tab_browser_draw(htab: zui_handle_t) {
 
 						///if is_paint
 						if (ui_menu_button(ui, tr("Set as Color ID Map"))) {
-							import_asset_run(file, -1.0, -1.0, true, true, () => {
-								base_notify_on_next_frame(() => {
+							import_asset_run(file, -1.0, -1.0, true, true, function () {
+								base_notify_on_next_frame(function () {
 									let asset_index: i32 = -1;
 									for (let i: i32 = 0; i < project_assets.length; ++i) {
 										if (project_assets[i].file == file) {
@@ -159,14 +163,16 @@ function tab_browser_draw(htab: zui_handle_t) {
 
 		if (tab_browser_known) {
 			let path: string = tab_browser_hpath.text;
-			app_notify_on_init(() => {
+			app_notify_on_init(function () {
 				import_asset_run(path);
 			});
-			tab_browser_hpath.text = tab_browser_hpath.text.substr(0, tab_browser_hpath.text.lastIndexOf(path_sep));
+			tab_browser_hpath.text = substring(tab_browser_hpath.text, 0, string_last_index_of(tab_browser_hpath.text, path_sep));
 		}
-		tab_browser_known = tab_browser_hpath.text.substr(tab_browser_hpath.text.lastIndexOf(path_sep)).indexOf(".") > 0;
+		tab_browser_known = string_index_of(substring(tab_browser_hpath.text, string_last_index_of(tab_browser_hpath.text, path_sep), tab_browser_hpath.text.length), ".") > 0;
 		///if krom_android
-		if (tab_browser_hpath.text.endsWith("." + manifest_title.toLowerCase())) tab_browser_known = false;
+		if (ends_with(tab_browser_hpath.text, "." + to_lower_case(manifest_title))) {
+			tab_browser_known = false;
+		}
 		///end
 
 		let bottom_y: i32 = ui._y;
@@ -180,7 +186,7 @@ function tab_browser_draw(htab: zui_handle_t) {
 
 		if (zui_button(tr("Disk"), zui_align_t.LEFT)) {
 			///if krom_android
-			ui_menu_draw((ui: zui_t) => {
+			ui_menu_draw(function (ui: zui_t) {
 				if (ui_menu_button(ui, tr("Download"))) {
 					tab_browser_hpath.text = ui_files_default_path;
 				}
@@ -200,14 +206,14 @@ function tab_browser_draw(htab: zui_handle_t) {
 		}
 
 		for (let b of config_raw.bookmarks) {
-			let folder: string = b.substr(b.lastIndexOf(path_sep) + 1);
+			let folder: string = substring(b, string_last_index_of(b, path_sep) + 1, b.length);
 
 			if (zui_button(folder, zui_align_t.LEFT)) {
 				tab_browser_hpath.text = b;
 			}
 
 			if (ui.is_hovered && ui.input_released_r) {
-				ui_menu_draw((ui: zui_t) => {
+				ui_menu_draw(function (ui: zui_t) {
 					if (ui_menu_button(ui, tr("Delete"))) {
 						array_remove(config_raw.bookmarks, b);
 						config_save();
@@ -216,6 +222,8 @@ function tab_browser_draw(htab: zui_handle_t) {
 			}
 		}
 
-		if (ui._y < bottom_y) ui._y = bottom_y;
+		if (ui._y < bottom_y) {
+			ui._y = bottom_y;
+		}
 	}
 }

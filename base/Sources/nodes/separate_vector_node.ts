@@ -11,10 +11,16 @@ function separate_vector_node_create(): separate_vector_node_t {
 }
 
 function separate_vector_node_get(self: separate_vector_node_t, from: i32, done: (a: any)=>void) {
-	logic_node_input_get(self.base.inputs[0], (vector: vec4_t) => {
-		if (from == 0) done(vector.x);
-		else if (from == 1) done(vector.y);
-		else done(vector.z);
+	logic_node_input_get(self.base.inputs[0], function (vector: vec4_t) {
+		if (from == 0) {
+			done(vector.x);
+		}
+		else if (from == 1) {
+			done(vector.y);
+		}
+		else {
+			done(vector.z);
+		}
 	});
 }
 
@@ -32,7 +38,7 @@ let separate_vector_node_def: zui_node_t = {
 			name: _tr("Vector"),
 			type: "VECTOR",
 			color: 0xff6363c7,
-			default_value: new Float32Array([0.0, 0.0, 0.0])
+			default_value: new f32_array_t([0.0, 0.0, 0.0])
 		}
 	],
 	outputs: [

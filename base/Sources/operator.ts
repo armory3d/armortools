@@ -2,12 +2,12 @@
 let operator_ops: map_t<string, any> = map_create();
 
 function operator_register(name: string, call: any) {
-	operator_ops.set(name, call);
+	map_set(operator_ops, name, call);
 }
 
 function operator_run(name: string) {
-	if (operator_ops.get(name) != null) {
-		operator_ops.get(name)();
+	if (map_get(operator_ops, name) != null) {
+		map_get(operator_ops, name)();
 	}
 }
 
@@ -25,13 +25,13 @@ function operator_shortcut(s: string, type = shortcut_type_t.STARTED): bool {
 	if (s == "") {
 		return false;
 	}
-	let shift: bool = s.indexOf("shift") >= 0;
-	let ctrl: bool = s.indexOf("ctrl") >= 0;
-	let alt: bool = s.indexOf("alt") >= 0;
+	let shift: bool = string_index_of(s, "shift") >= 0;
+	let ctrl: bool = string_index_of(s, "ctrl") >= 0;
+	let alt: bool = string_index_of(s, "alt") >= 0;
 	let flag: bool = shift == keyboard_down("shift") && ctrl == keyboard_down("control") && alt == keyboard_down("alt");
 
-	if (s.indexOf("+") > 0) {
-		s = s.substr(s.lastIndexOf("+") + 1);
+	if (string_index_of(s, "+") > 0) {
+		s = substring(s, string_last_index_of(s, "+") + 1, s.length);
 		if (s == "number") {
 			return flag;
 		}

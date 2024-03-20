@@ -46,23 +46,47 @@ function ui_menubar_render_ui() {
 					box_projects_show();
 				});
 			}
-			if (ui_menubar_icon_button(ui, 4, 2)) project_import_asset();
+			if (ui_menubar_icon_button(ui, 4, 2)) {
+				project_import_asset();
+			}
 			///if (is_paint || is_lab)
-			if (ui_menubar_icon_button(ui, 5, 2)) box_export_show_textures();
+			if (ui_menubar_icon_button(ui, 5, 2)) {
+				box_export_show_textures();
+			}
 			///end
 			let size: i32 = math_floor(ui._w / zui_SCALE(ui));
-			if (ui_menu_show && ui_menu_category == menu_category_t.VIEWPORT) zui_fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
-			if (ui_menubar_icon_button(ui, 8, 2)) ui_menubar_show_menu(ui, menu_category_t.VIEWPORT);
-			if (ui_menu_show && ui_menu_category == menu_category_t.MODE) zui_fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
-			if (ui_menubar_icon_button(ui, 9, 2)) ui_menubar_show_menu(ui, menu_category_t.MODE);
-			if (ui_menu_show && ui_menu_category == menu_category_t.CAMERA) zui_fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
-			if (ui_menubar_icon_button(ui, 10, 2)) ui_menubar_show_menu(ui, menu_category_t.CAMERA);
-			if (ui_menu_show && ui_menu_category == menu_category_t.HELP) zui_fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
-			if (ui_menubar_icon_button(ui, 11, 2)) ui_menubar_show_menu(ui, menu_category_t.HELP);
+			if (ui_menu_show && ui_menu_category == menu_category_t.VIEWPORT) {
+				zui_fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
+			}
+			if (ui_menubar_icon_button(ui, 8, 2)) {
+				ui_menubar_show_menu(ui, menu_category_t.VIEWPORT);
+			}
+			if (ui_menu_show && ui_menu_category == menu_category_t.MODE) {
+				zui_fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
+			}
+			if (ui_menubar_icon_button(ui, 9, 2)) {
+				ui_menubar_show_menu(ui, menu_category_t.MODE);
+			}
+			if (ui_menu_show && ui_menu_category == menu_category_t.CAMERA) {
+				zui_fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
+			}
+			if (ui_menubar_icon_button(ui, 10, 2)) {
+				ui_menubar_show_menu(ui, menu_category_t.CAMERA);
+			}
+			if (ui_menu_show && ui_menu_category == menu_category_t.HELP) {
+				zui_fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
+			}
+			if (ui_menubar_icon_button(ui, 11, 2)) {
+				ui_menubar_show_menu(ui, menu_category_t.HELP);
+			}
 			ui.enabled = history_undos > 0;
-			if (ui_menubar_icon_button(ui, 6, 2)) history_undo();
+			if (ui_menubar_icon_button(ui, 6, 2)) {
+				history_undo();
+			}
 			ui.enabled = history_redos > 0;
-			if (ui_menubar_icon_button(ui, 7, 2)) history_redo();
+			if (ui_menubar_icon_button(ui, 7, 2)) {
+				history_redo();
+			}
 			ui.enabled = true;
 		}
 		else {
@@ -175,7 +199,9 @@ function ui_menubar_show_menu(ui: zui_t, category: i32) {
 
 function ui_menubar_icon_button(ui: zui_t, i: i32, j: i32): bool {
 	let col: i32 = ui.t.WINDOW_BG_COL;
-	if (col < 0) col += 4294967296;
+	if (col < 0) {
+		col += 4294967296;
+	}
 	let light: bool = col > (0xff666666 + 4294967296);
 	let icon_accent: i32 = light ? 0xff666666 : 0xffaaaaaa;
 	let img: image_t = resource_get("icons.k");

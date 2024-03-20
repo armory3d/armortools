@@ -15,24 +15,24 @@ let file_cloud_sizes: map_t<string, i32> = null;
 // ///end
 
 function file_read_directory(path: string, folders_only: bool = false): string[] {
-	if (path.startsWith("cloud")) {
-		let files: string[] = file_cloud != null ? file_cloud.get(string_replace_all(path, "\\", "/")) : null;
+	if (starts_with(path, "cloud")) {
+		let files: string[] = file_cloud != null ? map_get(file_cloud, string_replace_all(path, "\\", "/")) : null;
 		return files != null ? files : [];
 	}
 	// ///if krom_android
 	// path = string_replace_all(path, "//", "/");
 	// if (file_internal == null) {
 	// 	file_internal = [];
-	// 	file_internal.set("/data/plugins", BuildMacros.readDirectory("krom/data/plugins"));
-	// 	file_internal.set("/data/export_presets", BuildMacros.readDirectory("krom/data/export_presets"));
-	// 	file_internal.set("/data/keymap_presets", BuildMacros.readDirectory("krom/data/keymap_presets"));
-	// 	file_internal.set("/data/locale", BuildMacros.readDirectory("krom/data/locale"));
-	// 	file_internal.set("/data/meshes", BuildMacros.readDirectory("krom/data/meshes"));
-	// 	file_internal.set("/data/themes", BuildMacros.readDirectory("krom/data/themes"));
+	// 	map_set(file_internal, "/data/plugins", BuildMacros.readDirectory("krom/data/plugins"));
+	// 	map_set(file_internal, "/data/export_presets", BuildMacros.readDirectory("krom/data/export_presets"));
+	// 	map_set(file_internal, "/data/keymap_presets", BuildMacros.readDirectory("krom/data/keymap_presets"));
+	// 	map_set(file_internal, "/data/locale", BuildMacros.readDirectory("krom/data/locale"));
+	// 	map_set(file_internal, "/data/meshes", BuildMacros.readDirectory("krom/data/meshes"));
+	// 	map_set(file_internal, "/data/themes", BuildMacros.readDirectory("krom/data/themes"));
 	// }
-	// if (file_internal.exists(path)) return file_internal.get(path);
+	// if (file_internal.exists(path)) return map_get(file_internal, path);
 	// ///end
-	return krom_read_directory(path, folders_only).split("\n");
+	return string_split(krom_read_directory(path, folders_only), "\n");
 }
 
 function file_create_directory(path: string) {
@@ -67,8 +67,10 @@ function file_exists(path: string): bool {
 
 function file_download(url: string, dstPath: string, done: ()=>void, size: i32 = 0) {
 	///if (krom_windows || krom_darwin || krom_ios || krom_android)
-	krom_http_request(url, size, function (ab: ArrayBuffer) {
-		if (ab != null) krom_file_save_bytes(dstPath, ab);
+	krom_http_request(url, size, function (ab: buffer_t) {
+		if (ab != null) {
+			krom_file_save_bytes(dstPath, ab);
+		}
 		done();
 	});
 	///elseif krom_linux
@@ -80,10 +82,10 @@ function file_download(url: string, dstPath: string, done: ()=>void, size: i32 =
 	///end
 }
 
-function file_download_bytes(url: string, done: (ab: ArrayBuffer)=>void) {
+function file_download_bytes(url: string, done: (ab: buffer_t)=>void) {
 	let save: string = (path_is_protected() ? krom_save_path() : path_data() + path_sep) + "download.bin";
 	file_download(url, save, function() {
-		let buffer: ArrayBuffer = null;
+		let buffer: buffer_t = null;
 		try {
 			buffer = krom_load_blob(save);
 		}
@@ -108,7 +110,7 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 		return;
 	}
 
-	let file_dir: string = dest.substr(0, dest.lastIndexOf(path_sep));
+	let file_dir: string = substring(dest, 0, string_last_index_of(dest, path_sep));
 	if (file_read_directory(file_dir)[0] == "") {
 		file_create_directory(file_dir);
 	}
@@ -127,13 +129,13 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 		///else
 		done((path_is_protected() ? krom_save_path() : path_working_dir() + path_sep) + path);
 		///end
-	}, file_cloud_sizes.get(path));
+	}, map_get(file_cloud_sizes, path));
 }
 
 function file_init_cloud_bytes(done: ()=>void, append: string = "") {
-	file_download_bytes(config_raw.server + "/?list-type=2" + append, function (buffer: ArrayBuffer) {
+	file_download_bytes(config_raw.server + "/?list-type=2" + append, function (buffer: buffer_t) {
 		if (buffer == null) {
-			file_cloud.set("cloud", []);
+			map_set(file_cloud, "cloud", []);
 			console_error(strings_error5());
 			return;
 		}
@@ -145,45 +147,47 @@ function file_init_cloud_bytes(done: ()=>void, append: string = "") {
 		let pos_end: i32 = 0;
 
 		while (true) {
-			pos_start = str.indexOf("<Key>", pos_start);
-			if (pos_start == -1) break;
+			pos_start = string_index_of_pos(str, "<Key>", pos_start);
+			if (pos_start == -1) {
+				break;
+			}
 			pos_start += 5; // <Key>
-			pos_end = str.indexOf("</Key>", pos_start);
+			pos_end = string_index_of_pos(str, "</Key>", pos_start);
 
-			files.push(str.substring(pos_start, pos_end));
+			array_push(files, substring(str, pos_start, pos_end));
 
-			pos_start = str.indexOf("<Size>", pos_end);
+			pos_start = string_index_of_pos(str, "<Size>", pos_end);
 			pos_start += 6; //<Size>
-			pos_end = str.indexOf("</Size>", pos_start);
+			pos_end = string_index_of_pos(str, "</Size>", pos_start);
 
-			sizes.push(Number(str.substring(pos_start, pos_end)));
+			array_push(sizes, Number(substring(str, pos_start, pos_end)));
 		}
 
 		for (let file of files) {
 			if (path_is_folder(file)) {
-				file_cloud.set(file.substr(0, file.length - 1), []);
+				map_set(file_cloud, substring(file, 0, file.length - 1), []);
 			}
 		}
 		for (let i: i32 = 0; i < files.length; ++i) {
 			let file: string = files[i];
-			let nested: bool = file.indexOf("/") != file.lastIndexOf("/");
+			let nested: bool = string_index_of(file, "/") != string_last_index_of(file, "/");
 			if (nested) {
-				let delim: i32 = path_is_folder(file) ? file.substr(0, file.length - 1).lastIndexOf("/") : file.lastIndexOf("/");
-				let parent: string = file.substr(0, delim);
-				let child: string = path_is_folder(file) ? file.substring(delim + 1, file.length - 1) : file.substr(delim + 1);
-				file_cloud.get(parent).push(child);
+				let delim: i32 = path_is_folder(file) ? string_last_index_of(substring(file, 0, file.length - 1), "/") : string_last_index_of(file, "/");
+				let parent: string = substring(file, 0, delim);
+				let child: string = path_is_folder(file) ? substring(file, delim + 1, file.length - 1) : substring(file, delim + 1, file.length);
+				array_push(map_get(file_cloud, parent), child);
 				if (!path_is_folder(file)) {
-					file_cloud_sizes.set(file, sizes[i]);
+					map_set(file_cloud_sizes, file, sizes[i]);
 				}
 			}
 		}
 
-		let is_truncated: bool = str.indexOf("<IsTruncated>true") > -1;
+		let is_truncated: bool = string_index_of(str, "<IsTruncated>true") > -1;
 		if (is_truncated) {
-			let pos_start: i32 = str.indexOf("<NextContinuationToken>");
+			let pos_start: i32 = string_index_of(str, "<NextContinuationToken>");
 			pos_start += 23;
-			let pos_end: i32 = str.indexOf("</NextContinuationToken>", pos_start);
-			file_init_cloud_bytes(done, "&start-after=" + str.substring(pos_start, pos_end));
+			let pos_end: i32 = string_index_of_pos(str, "</NextContinuationToken>", pos_start);
+			file_init_cloud_bytes(done, "&start-after=" + substring(str, pos_start, pos_end));
 		}
 		else done();
 	});

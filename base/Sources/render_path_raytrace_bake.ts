@@ -19,10 +19,10 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 		render_path_raytrace_last_envmap = null;
 		render_path_raytrace_bake_last_layer = null;
 
-		if (render_path_render_targets.get("baketex0") != null) {
-			image_unload(render_path_render_targets.get("baketex0")._image);
-			image_unload(render_path_render_targets.get("baketex1")._image);
-			image_unload(render_path_render_targets.get("baketex2")._image);
+		if (map_get(render_path_render_targets, "baketex0") != null) {
+			image_unload(map_get(render_path_render_targets, "baketex0")._image);
+			image_unload(map_get(render_path_render_targets, "baketex1")._image);
+			image_unload(map_get(render_path_render_targets, "baketex2")._image);
 		}
 
 		{
@@ -58,7 +58,7 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 		render_path_set_target("baketex0", ["baketex1"]);
 		render_path_draw_meshes("paint");
 		context_raw.bake_type = _bake_type;
-		let _next = () => {
+		let _next = function () {
 			parse_paint_material();
 		}
 		base_notify_on_next_frame(_next);
@@ -78,12 +78,12 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 		render_path_raytrace_last_envmap = saved_envmap;
 		render_path_raytrace_bake_last_layer = context_raw.layer.texpaint;
 
-		let baketex0: image_t = render_path_render_targets.get("baketex0")._image;
-		let baketex1: image_t = render_path_render_targets.get("baketex1")._image;
-		let bnoise_sobol: image_t = scene_embedded.get("bnoise_sobol.k");
-		let bnoise_scramble: image_t = scene_embedded.get("bnoise_scramble.k");
-		let bnoise_rank: image_t = scene_embedded.get("bnoise_rank.k");
-		let texpaint_undo: image_t = render_path_render_targets.get("texpaint_undo" + history_undo_i)._image;
+		let baketex0: image_t = map_get(render_path_render_targets, "baketex0")._image;
+		let baketex1: image_t = map_get(render_path_render_targets, "baketex1")._image;
+		let bnoise_sobol: image_t = map_get(scene_embedded, "bnoise_sobol.k");
+		let bnoise_scramble: image_t = map_get(scene_embedded, "bnoise_scramble.k");
+		let bnoise_rank: image_t = map_get(scene_embedded, "bnoise_rank.k");
+		let texpaint_undo: image_t = map_get(render_path_render_targets, "texpaint_undo" + history_undo_i)._image;
 		krom_raytrace_set_textures(baketex0, baketex1, texpaint_undo, saved_envmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
 	}
 
@@ -93,7 +93,7 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 	}
 
 	if (context_raw.pdirty > 0) {
-		let f32a: Float32Array = render_path_raytrace_f32a;
+		let f32a: f32_array_t = render_path_raytrace_f32a;
 		f32a[0] = render_path_raytrace_frame++;
 		f32a[1] = context_raw.bake_ao_strength;
 		f32a[2] = context_raw.bake_ao_radius;
@@ -102,7 +102,7 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 		f32a[5] = context_raw.bake_up_axis;
 		f32a[6] = context_raw.envmap_angle;
 
-		let framebuffer: image_t = render_path_render_targets.get("baketex2")._image;
+		let framebuffer: image_t = map_get(render_path_render_targets, "baketex2")._image;
 		krom_raytrace_dispatch_rays(framebuffer.render_target_, f32a.buffer);
 
 		render_path_set_target("texpaint" + context_raw.layer.id);
@@ -138,9 +138,9 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 
 function render_path_raytrace_bake_get_bake_shader_name(): string {
 	return context_raw.bake_type == bake_type_t.AO  		? "raytrace_bake_ao" + render_path_raytrace_ext :
-			context_raw.bake_type == bake_type_t.LIGHTMAP 	? "raytrace_bake_light" + render_path_raytrace_ext :
-			context_raw.bake_type == bake_type_t.BENT_NORMAL  ? "raytrace_bake_bent" + render_path_raytrace_ext :
-																"raytrace_bake_thick" + render_path_raytrace_ext;
+		   context_raw.bake_type == bake_type_t.LIGHTMAP 	? "raytrace_bake_light" + render_path_raytrace_ext :
+		   context_raw.bake_type == bake_type_t.BENT_NORMAL ? "raytrace_bake_bent" + render_path_raytrace_ext :
+															  "raytrace_bake_thick" + render_path_raytrace_ext;
 }
 
 ///end

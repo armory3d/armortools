@@ -1,19 +1,19 @@
 
-let ui_nodes_ext_last_vertices: DataView = null; // Before displacement
+let ui_nodes_ext_last_vertices: buffer_view_t = null; // Before displacement
 
 function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 	let ui = ui_nodes_ui;
 	if (zui_button(tr("Run"))) {
 		console_progress(tr("Processing"));
 
-		let delay_idle_sleep = () => {
+		let delay_idle_sleep = function () {
 			krom_delay_idle_sleep();
 		}
 		app_notify_on_render_2d(delay_idle_sleep);
 
 		let tasks: i32 = 1;
 
-		let task_done = () => {
+		let task_done = function () {
 			tasks--;
 			if (tasks == 0) {
 				console_progress(null);
@@ -26,36 +26,42 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 			}
 		}
 
-		base_notify_on_next_frame(() => {
+		base_notify_on_next_frame(function () {
 			let timer = time_time();
 			parser_logic_parse(project_canvas);
 
-			PhotoToPBRNode.cached_source = null;
-			BrushOutputNode.inst.get_as_image(channel_type_t.BASE_COLOR, (texbase: image_t) => {
-			BrushOutputNode.inst.get_as_image(channel_type_t.OCCLUSION, (texocc: image_t) => {
-			BrushOutputNode.inst.get_as_image(channel_type_t.ROUGHNESS, (texrough: image_t) => {
-			BrushOutputNode.inst.get_as_image(channel_type_t.NORMAL_MAP, (texnor: image_t) => {
-			BrushOutputNode.inst.get_as_image(channel_type_t.HEIGHT, (texheight: image_t) => {
+			photo_to_pbr_node_cached_source = null;
+			brush_output_node_inst.get_as_image(channel_type_t.BASE_COLOR, function (texbase: image_t) {
+			brush_output_node_inst.get_as_image(channel_type_t.OCCLUSION, function (texocc: image_t) {
+			brush_output_node_inst.get_as_image(channel_type_t.ROUGHNESS, function (texrough: image_t) {
+			brush_output_node_inst.get_as_image(channel_type_t.NORMAL_MAP, function (texnor: image_t) {
+			brush_output_node_inst.get_as_image(channel_type_t.HEIGHT, function (texheight: image_t) {
 
 				if (texbase != null) {
-					let texpaint = render_path_render_targets.get("texpaint")._image;
+					let texpaint = map_get(render_path_render_targets, "texpaint")._image;
 					g2_begin(texpaint);
 					g2_draw_scaled_image(texbase, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
 					g2_end();
 				}
 
 				if (texnor != null) {
-					let texpaint_nor = render_path_render_targets.get("texpaint_nor")._image;
+					let texpaint_nor = map_get(render_path_render_targets, "texpaint_nor")._image;
 					g2_begin(texpaint_nor);
 					g2_draw_scaled_image(texnor, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
 					g2_end();
 				}
 
-				if (base_pipe_copy == null) base_make_pipe();
-				if (base_pipe_copy_a == null) base_make_pipe_copy_a();
-				if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
+				if (base_pipe_copy == null) {
+					base_make_pipe();
+				}
+				if (base_pipe_copy_a == null) {
+					base_make_pipe_copy_a();
+				}
+				if (const_data_screen_aligned_vb == null) {
+					const_data_create_screen_aligned_data();
+				}
 
-				let texpaint_pack = render_path_render_targets.get("texpaint_pack")._image;
+				let texpaint_pack = map_get(render_path_render_targets, "texpaint_pack")._image;
 
 				if (texocc != null) {
 					g2_begin(texpaint_pack);
@@ -89,15 +95,15 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 						let o = project_paint_objects[0];
 						let g = o.data;
 						let vertices = g4_vertex_buffer_lock(g._.vertex_buffer);
-						if (ui_nodes_ext_last_vertices == null || ui_nodes_ext_last_vertices.byteLength != vertices.byteLength) {
-							ui_nodes_ext_last_vertices = new DataView(new ArrayBuffer(vertices.byteLength));
-							for (let i = 0; i < math_floor(vertices.byteLength / 2); ++i) {
-								ui_nodes_ext_last_vertices.setInt16(i * 2, vertices.getInt16(i * 2, true), true);
+						if (ui_nodes_ext_last_vertices == null || buffer_view_size(ui_nodes_ext_last_vertices) != buffer_view_size(vertices)) {
+							ui_nodes_ext_last_vertices = buffer_view_create(buffer_create(buffer_view_size(vertices)));
+							for (let i = 0; i < math_floor(buffer_view_size(vertices) / 2); ++i) {
+								buffer_view_set_i16(ui_nodes_ext_last_vertices, i * 2, buffer_view_get_i16(vertices, i * 2));
 							}
 						}
 						else {
-							for (let i = 0; i < math_floor(vertices.byteLength / 2); ++i) {
-								vertices.setInt16(i * 2, ui_nodes_ext_last_vertices.getInt16(i * 2, true), true);
+							for (let i = 0; i < math_floor(buffer_view_size(vertices) / 2); ++i) {
+								buffer_view_set_i16(vertices, i * 2, buffer_view_get_i16(ui_nodes_ext_last_vertices, i * 2));
 							}
 						}
 						g4_vertex_buffer_unlock(g._.vertex_buffer);
@@ -105,9 +111,9 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 						// Apply displacement
 						if (config_raw.displace_strength > 0) {
 							tasks++;
-							base_notify_on_next_frame(() => {
+							base_notify_on_next_frame(function () {
 								console_progress(tr("Apply Displacement"));
-								base_notify_on_next_frame(() => {
+								base_notify_on_next_frame(function () {
 									let uv_scale = scene_meshes[0].data.scale_tex * context_raw.brush_scale;
 									util_mesh_apply_displacement(texpaint_pack, 0.05 * config_raw.displace_strength, uv_scale);
 									util_mesh_calc_normals();

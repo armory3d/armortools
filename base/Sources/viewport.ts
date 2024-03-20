@@ -23,7 +23,9 @@ function viewport_reset() {
 		if (o.type == "camera_object") {
 			mat4_set_from_f32_array(cam.base.transform.local, o.transform);
 			transform_decompose(cam.base.transform);
-			if (context_raw.fov_handle != null) context_raw.fov_handle.value = cam.data.fov = base_default_fov;
+			if (context_raw.fov_handle != null) {
+				context_raw.fov_handle.value = cam.data.fov = base_default_fov;
+			}
 			context_raw.cam_handle.position = 0;
 			cam.data.ortho = null;
 			camera_object_build_proj(cam);
@@ -78,7 +80,7 @@ function viewport_update_camera_type(camera_type: i32) {
 		light.base.visible = true;
 	}
 	else {
-		let f32a: Float32Array = new Float32Array(4);
+		let f32a: f32_array_t = f32_array_create(4);
 		let f: f32 = cam.data.fov * vec4_len(mat4_get_loc(cam.base.transform.world)) / 2.5;
 		f32a[0] = -2 * f;
 		f32a[1] =  2 * f;

@@ -97,26 +97,26 @@ function ui_base_init() {
 	if (project_materials == null) {
 		project_materials = [];
 		let m: material_data_t = data_get_material("Scene", "Material");
-		project_materials.push(slot_material_create(m));
+		array_push(project_materials, slot_material_create(m));
 		context_raw.material = project_materials[0];
 	}
 
 	if (project_brushes == null) {
 		project_brushes = [];
-		project_brushes.push(slot_brush_create());
+		array_push(project_brushes, slot_brush_create());
 		context_raw.brush = project_brushes[0];
 		make_material_parse_brush();
 	}
 
 	if (project_fonts == null) {
 		project_fonts = [];
-		project_fonts.push(slot_font_create("default.ttf", base_font));
+		array_push(project_fonts, slot_font_create("default.ttf", base_font));
 		context_raw.font = project_fonts[0];
 	}
 
 	if (project_layers == null) {
 		project_layers = [];
-		project_layers.push(slot_layer_create());
+		array_push(project_layers, slot_layer_create());
 		context_raw.layer = project_layers[0];
 	}
 	///end
@@ -128,7 +128,7 @@ function ui_base_init() {
 	}
 
 	if (project_default_canvas == null) { // Synchronous
-		let b: ArrayBuffer = data_get_blob("default_brush.arm");
+		let b: buffer_t = data_get_blob("default_brush.arm");
 		project_default_canvas = b;
 	}
 
@@ -147,7 +147,7 @@ function ui_base_init() {
 	}
 
 	if (context_raw.empty_envmap == null) {
-		let b: Uint8Array = new Uint8Array(4);
+		let b: u8_array_t = u8_array_create(4);
 		b[0] = 8;
 		b[1] = 8;
 		b[2] = 8;
@@ -155,7 +155,7 @@ function ui_base_init() {
 		context_raw.empty_envmap = image_from_bytes(b.buffer, 1, 1);
 	}
 	if (context_raw.preview_envmap == null) {
-		let b: Uint8Array = new Uint8Array(4);
+		let b: u8_array_t = u8_array_create(4);
 		b[0] = 0;
 		b[1] = 0;
 		b[2] = 0;
@@ -204,7 +204,9 @@ function ui_base_init() {
 
 	resource_load(resources);
 
-	if (zui_SCALE(ui_base_ui) > 1) ui_base_set_icon_scale();
+	if (zui_SCALE(ui_base_ui) > 1) {
+		ui_base_set_icon_scale();
+	}
 
 	context_raw.paint_object = scene_get_child(".Cube").ext;
 	project_paint_objects = [context_raw.paint_object];
@@ -214,7 +216,9 @@ function ui_base_init() {
 	}
 
 	context_raw.project_objects = [];
-	for (let m of scene_meshes) context_raw.project_objects.push(m);
+	for (let m of scene_meshes) {
+		array_push(context_raw.project_objects, m);
+	}
 
 	operator_register("view_top", ui_base_view_top);
 }
@@ -223,9 +227,15 @@ function ui_base_update() {
 	ui_base_update_ui();
 	operator_update();
 
-	for (let p of plugin_map.values()) if (p.update != null) p.update();
+	for (let p of plugin_map.values()) {
+		if (p.update != null) {
+			p.update();
+		}
+	}
 
-	if (!base_ui_enabled) return;
+	if (!base_ui_enabled) {
+		return;
+	}
 
 	if (!ui_nodes_ui.is_typing && !ui_base_ui.is_typing) {
 		if (operator_shortcut(config_keymap.toggle_node_editor)) {
@@ -249,13 +259,27 @@ function ui_base_update() {
 		}
 	}
 
-	if (operator_shortcut(config_keymap.file_save_as)) project_save_as();
-	else if (operator_shortcut(config_keymap.file_save)) project_save();
-	else if (operator_shortcut(config_keymap.file_open)) project_open();
-	else if (operator_shortcut(config_keymap.file_open_recent)) box_projects_show();
-	else if (operator_shortcut(config_keymap.file_reimport_mesh)) project_reimport_mesh();
-	else if (operator_shortcut(config_keymap.file_reimport_textures)) project_reimport_textures();
-	else if (operator_shortcut(config_keymap.file_new)) project_new_box();
+	if (operator_shortcut(config_keymap.file_save_as)) {
+		project_save_as();
+	}
+	else if (operator_shortcut(config_keymap.file_save)) {
+		project_save();
+	}
+	else if (operator_shortcut(config_keymap.file_open)) {
+		project_open();
+	}
+	else if (operator_shortcut(config_keymap.file_open_recent)) {
+		box_projects_show();
+	}
+	else if (operator_shortcut(config_keymap.file_reimport_mesh)) {
+		project_reimport_mesh();
+	}
+	else if (operator_shortcut(config_keymap.file_reimport_textures)) {
+		project_reimport_textures();
+	}
+	else if (operator_shortcut(config_keymap.file_new)) {
+		project_new_box();
+	}
 	///if (is_paint || is_lab)
 	else if (operator_shortcut(config_keymap.file_export_textures)) {
 		if (context_raw.texture_export_path == "") { // First export, ask for path
@@ -278,11 +302,14 @@ function ui_base_update() {
 		box_export_show_textures();
 	}
 	///end
-	else if (operator_shortcut(config_keymap.file_import_assets)) project_import_asset();
-	else if (operator_shortcut(config_keymap.edit_prefs)) box_preferences_show();
+	else if (operator_shortcut(config_keymap.file_import_assets)) {
+		project_import_asset();
+	}
+	else if (operator_shortcut(config_keymap.edit_prefs)) {
+		box_preferences_show();
+	}
 
-	if (keyboard_started(config_keymap.view_distract_free) ||
-		(keyboard_started("escape") && !ui_base_show && !ui_box_show)) {
+	if (keyboard_started(config_keymap.view_distract_free) || (keyboard_started("escape") && !ui_base_show && !ui_box_show)) {
 		ui_base_toggle_distract_free();
 	}
 
@@ -361,11 +388,19 @@ function ui_base_update() {
 	if (!is_typing) {
 		if (operator_shortcut(config_keymap.select_material, shortcut_type_t.DOWN)) {
 			ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
-			for (let i: i32 = 1; i < 10; ++i) if (keyboard_started(i + "")) context_select_material(i - 1);
+			for (let i: i32 = 1; i < 10; ++i) {
+				if (keyboard_started(i + "")) {
+					context_select_material(i - 1);
+				}
+			}
 		}
 		else if (operator_shortcut(config_keymap.select_layer, shortcut_type_t.DOWN)) {
 			ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
-			for (let i: i32 = 1; i < 10; ++i) if (keyboard_started(i + "")) context_select_layer(i - 1);
+			for (let i: i32 = 1; i < 10; ++i) {
+				if (keyboard_started(i + "")) {
+					context_select_layer(i - 1);
+				}
+			}
 		}
 	}
 	///end
@@ -375,21 +410,51 @@ function ui_base_update() {
 
 		///if is_paint
 		if (!mouse_down("right")) { // Fly mode off
-			if (operator_shortcut(config_keymap.tool_brush)) context_select_tool(workspace_tool_t.BRUSH);
-			else if (operator_shortcut(config_keymap.tool_eraser)) context_select_tool(workspace_tool_t.ERASER);
-			else if (operator_shortcut(config_keymap.tool_fill)) context_select_tool(workspace_tool_t.FILL);
-			else if (operator_shortcut(config_keymap.tool_colorid)) context_select_tool(workspace_tool_t.COLORID);
-			else if (operator_shortcut(config_keymap.tool_decal)) context_select_tool(workspace_tool_t.DECAL);
-			else if (operator_shortcut(config_keymap.tool_text)) context_select_tool(workspace_tool_t.TEXT);
-			else if (operator_shortcut(config_keymap.tool_clone)) context_select_tool(workspace_tool_t.CLONE);
-			else if (operator_shortcut(config_keymap.tool_blur)) context_select_tool(workspace_tool_t.BLUR);
-			else if (operator_shortcut(config_keymap.tool_smudge)) context_select_tool(workspace_tool_t.SMUDGE);
-			else if (operator_shortcut(config_keymap.tool_particle)) context_select_tool(workspace_tool_t.PARTICLE);
-			else if (operator_shortcut(config_keymap.tool_picker)) context_select_tool(workspace_tool_t.PICKER);
-			else if (operator_shortcut(config_keymap.tool_bake)) context_select_tool(workspace_tool_t.BAKE);
-			else if (operator_shortcut(config_keymap.tool_gizmo)) context_select_tool(workspace_tool_t.GIZMO);
-			else if (operator_shortcut(config_keymap.tool_material)) context_select_tool(workspace_tool_t.MATERIAL);
-			else if (operator_shortcut(config_keymap.swap_brush_eraser)) context_select_tool(context_raw.tool == workspace_tool_t.BRUSH ? workspace_tool_t.ERASER : workspace_tool_t.BRUSH);
+			if (operator_shortcut(config_keymap.tool_brush)) {
+				context_select_tool(workspace_tool_t.BRUSH);
+			}
+			else if (operator_shortcut(config_keymap.tool_eraser)) {
+				context_select_tool(workspace_tool_t.ERASER);
+			}
+			else if (operator_shortcut(config_keymap.tool_fill)) {
+				context_select_tool(workspace_tool_t.FILL);
+			}
+			else if (operator_shortcut(config_keymap.tool_colorid)) {
+				context_select_tool(workspace_tool_t.COLORID);
+			}
+			else if (operator_shortcut(config_keymap.tool_decal)) {
+				context_select_tool(workspace_tool_t.DECAL);
+			}
+			else if (operator_shortcut(config_keymap.tool_text)) {
+				context_select_tool(workspace_tool_t.TEXT);
+			}
+			else if (operator_shortcut(config_keymap.tool_clone)) {
+				context_select_tool(workspace_tool_t.CLONE);
+			}
+			else if (operator_shortcut(config_keymap.tool_blur)) {
+				context_select_tool(workspace_tool_t.BLUR);
+			}
+			else if (operator_shortcut(config_keymap.tool_smudge)) {
+				context_select_tool(workspace_tool_t.SMUDGE);
+			}
+			else if (operator_shortcut(config_keymap.tool_particle)) {
+				context_select_tool(workspace_tool_t.PARTICLE);
+			}
+			else if (operator_shortcut(config_keymap.tool_picker)) {
+				context_select_tool(workspace_tool_t.PICKER);
+			}
+			else if (operator_shortcut(config_keymap.tool_bake)) {
+				context_select_tool(workspace_tool_t.BAKE);
+			}
+			else if (operator_shortcut(config_keymap.tool_gizmo)) {
+				context_select_tool(workspace_tool_t.GIZMO);
+			}
+			else if (operator_shortcut(config_keymap.tool_material)) {
+				context_select_tool(workspace_tool_t.MATERIAL);
+			}
+			else if (operator_shortcut(config_keymap.swap_brush_eraser)) {
+				context_select_tool(context_raw.tool == workspace_tool_t.BRUSH ? workspace_tool_t.ERASER : workspace_tool_t.BRUSH);
+			}
 		}
 
 		// Radius
@@ -406,7 +471,9 @@ function ui_base_update() {
 				operator_shortcut(config_keymap.brush_angle) ||
 				(decal_mask && operator_shortcut(config_keymap.decal_mask + "+" + config_keymap.brush_radius))) {
 				context_raw.brush_can_lock = true;
-				if (!pen_connected) mouse_lock();
+				if (!pen_connected) {
+					mouse_lock();
+				}
 				context_raw.lock_started_x = mouse_x;
 				context_raw.lock_started_y = mouse_y;
 			}
@@ -452,7 +519,9 @@ function ui_base_update() {
 				context_raw.tool == workspace_tool_t.SMUDGE) {
 				if (operator_shortcut(config_keymap.brush_radius)) {
 					context_raw.brush_can_lock = true;
-					if (!pen_connected) mouse_lock();
+					if (!pen_connected) {
+						mouse_lock();
+					}
 					context_raw.lock_started_x = mouse_x;
 					context_raw.lock_started_y = mouse_y;
 				}
@@ -478,23 +547,47 @@ function ui_base_update() {
 				viewport_reset();
 				viewport_scale_to_bounds();
 			}
-			else if (operator_shortcut(config_keymap.view_back)) viewport_set_view(0, 1, 0, math_pi() / 2, 0, math_pi());
-			else if (operator_shortcut(config_keymap.view_front)) viewport_set_view(0, -1, 0, math_pi() / 2, 0, 0);
-			else if (operator_shortcut(config_keymap.view_left)) viewport_set_view(-1, 0, 0, math_pi() / 2, 0, -math_pi() / 2);
-			else if (operator_shortcut(config_keymap.view_right)) viewport_set_view(1, 0, 0, math_pi() / 2, 0, math_pi() / 2);
-			else if (operator_shortcut(config_keymap.view_bottom)) viewport_set_view(0, 0, -1, math_pi(), 0, math_pi());
+			else if (operator_shortcut(config_keymap.view_back)) {
+				viewport_set_view(0, 1, 0, math_pi() / 2, 0, math_pi());
+			}
+			else if (operator_shortcut(config_keymap.view_front)) {
+				viewport_set_view(0, -1, 0, math_pi() / 2, 0, 0);
+			}
+			else if (operator_shortcut(config_keymap.view_left)) {
+				viewport_set_view(-1, 0, 0, math_pi() / 2, 0, -math_pi() / 2);
+			}
+			else if (operator_shortcut(config_keymap.view_right)) {
+				viewport_set_view(1, 0, 0, math_pi() / 2, 0, math_pi() / 2);
+			}
+			else if (operator_shortcut(config_keymap.view_bottom)) {
+				viewport_set_view(0, 0, -1, math_pi(), 0, math_pi());
+			}
 			else if (operator_shortcut(config_keymap.view_camera_type)) {
 				context_raw.camera_type = context_raw.camera_type == camera_type_t.PERSPECTIVE ? camera_type_t.ORTHOGRAPHIC : camera_type_t.PERSPECTIVE;
 				context_raw.cam_handle.position = context_raw.camera_type;
 				viewport_update_camera_type(context_raw.camera_type);
 			}
-			else if (operator_shortcut(config_keymap.view_orbit_left, shortcut_type_t.REPEAT)) viewport_orbit(-math_pi() / 12, 0);
-			else if (operator_shortcut(config_keymap.view_orbit_right, shortcut_type_t.REPEAT)) viewport_orbit(math_pi() / 12, 0);
-			else if (operator_shortcut(config_keymap.view_orbit_up, shortcut_type_t.REPEAT)) viewport_orbit(0, -math_pi() / 12);
-			else if (operator_shortcut(config_keymap.view_orbit_down, shortcut_type_t.REPEAT)) viewport_orbit(0, math_pi() / 12);
-			else if (operator_shortcut(config_keymap.view_orbit_opposite)) viewport_orbit_opposite();
-			else if (operator_shortcut(config_keymap.view_zoom_in, shortcut_type_t.REPEAT)) viewport_zoom(0.2);
-			else if (operator_shortcut(config_keymap.view_zoom_out, shortcut_type_t.REPEAT)) viewport_zoom(-0.2);
+			else if (operator_shortcut(config_keymap.view_orbit_left, shortcut_type_t.REPEAT)) {
+				viewport_orbit(-math_pi() / 12, 0);
+			}
+			else if (operator_shortcut(config_keymap.view_orbit_right, shortcut_type_t.REPEAT)) {
+				viewport_orbit(math_pi() / 12, 0);
+			}
+			else if (operator_shortcut(config_keymap.view_orbit_up, shortcut_type_t.REPEAT)) {
+				viewport_orbit(0, -math_pi() / 12);
+			}
+			else if (operator_shortcut(config_keymap.view_orbit_down, shortcut_type_t.REPEAT)) {
+				viewport_orbit(0, math_pi() / 12);
+			}
+			else if (operator_shortcut(config_keymap.view_orbit_opposite)) {
+				viewport_orbit_opposite();
+			}
+			else if (operator_shortcut(config_keymap.view_zoom_in, shortcut_type_t.REPEAT)) {
+				viewport_zoom(0.2);
+			}
+			else if (operator_shortcut(config_keymap.view_zoom_out, shortcut_type_t.REPEAT)) {
+				viewport_zoom(-0.2);
+			}
 			else if (operator_shortcut(config_keymap.viewport_mode)) {
 
 				let count: i32;
@@ -541,8 +634,8 @@ function ui_base_update() {
 
 					///if (krom_direct3d12 || krom_vulkan || krom_metal)
 					if (krom_raytrace_supported()) {
-						modes.push(tr("Path Traced"));
-						shortcuts.push("p");
+						array_push(modes, tr("Path Traced"));
+						array_push(shortcuts, "p");
 					}
 					///end
 
@@ -550,7 +643,7 @@ function ui_base_update() {
 						zui_radio(mode_handle, i, modes[i], shortcuts[i]);
 					}
 
-					let index: i32 = shortcuts.indexOf(keyboard_key_code(ui.key));
+					let index: i32 = array_index_of(shortcuts, keyboard_key_code(ui.key));
 					if (ui.is_key_pressed && index != -1) {
 						mode_handle.position = index;
 						ui.changed = true;
@@ -605,13 +698,21 @@ function ui_base_update() {
 		if (ui_base_border_handle_ptr == ui_nodes_hwnd.ptr || ui_base_border_handle_ptr == ui_view2d_hwnd.ptr) {
 			if (ui_base_border_started == border_side_t.LEFT) {
 				config_raw.layout[layout_size_t.NODES_W] -= math_floor(mouse_movement_x);
-				if (config_raw.layout[layout_size_t.NODES_W] < 32) config_raw.layout[layout_size_t.NODES_W] = 32;
-				else if (config_raw.layout[layout_size_t.NODES_W] > sys_width() * 0.7) config_raw.layout[layout_size_t.NODES_W] = math_floor(sys_width() * 0.7);
+				if (config_raw.layout[layout_size_t.NODES_W] < 32) {
+					config_raw.layout[layout_size_t.NODES_W] = 32;
+				}
+				else if (config_raw.layout[layout_size_t.NODES_W] > sys_width() * 0.7) {
+					config_raw.layout[layout_size_t.NODES_W] = math_floor(sys_width() * 0.7);
+				}
 			}
 			else { // UINodes / UIView2D ratio
 				config_raw.layout[layout_size_t.NODES_H] -= math_floor(mouse_movement_y);
-				if (config_raw.layout[layout_size_t.NODES_H] < 32) config_raw.layout[layout_size_t.NODES_H] = 32;
-				else if (config_raw.layout[layout_size_t.NODES_H] > app_h() * 0.95) config_raw.layout[layout_size_t.NODES_H] = math_floor(app_h() * 0.95);
+				if (config_raw.layout[layout_size_t.NODES_H] < 32) {
+					config_raw.layout[layout_size_t.NODES_H] = 32;
+				}
+				else if (config_raw.layout[layout_size_t.NODES_H] > app_h() * 0.95) {
+					config_raw.layout[layout_size_t.NODES_H] = math_floor(app_h() * 0.95);
+				}
 			}
 		}
 		else if (ui_base_border_handle_ptr == ui_base_hwnds[tab_area_t.STATUS].ptr) {
@@ -623,8 +724,12 @@ function ui_base_update() {
 		else {
 			if (ui_base_border_started == border_side_t.LEFT) {
 				config_raw.layout[layout_size_t.SIDEBAR_W] -= math_floor(mouse_movement_x);
-				if (config_raw.layout[layout_size_t.SIDEBAR_W] < ui_base_sidebar_mini_w) config_raw.layout[layout_size_t.SIDEBAR_W] = ui_base_sidebar_mini_w;
-				else if (config_raw.layout[layout_size_t.SIDEBAR_W] > sys_width() - ui_base_sidebar_mini_w) config_raw.layout[layout_size_t.SIDEBAR_W] = sys_width() - ui_base_sidebar_mini_w;
+				if (config_raw.layout[layout_size_t.SIDEBAR_W] < ui_base_sidebar_mini_w) {
+					config_raw.layout[layout_size_t.SIDEBAR_W] = ui_base_sidebar_mini_w;
+				}
+				else if (config_raw.layout[layout_size_t.SIDEBAR_W] > sys_width() - ui_base_sidebar_mini_w) {
+					config_raw.layout[layout_size_t.SIDEBAR_W] = sys_width() - ui_base_sidebar_mini_w;
+				}
 			}
 			else {
 				let my: i32 = math_floor(mouse_movement_y);
@@ -644,13 +749,21 @@ function ui_base_update() {
 		if (ui_base_border_handle_ptr == ui_nodes_hwnd.ptr || ui_base_border_handle_ptr == ui_view2d_hwnd.ptr) {
 			if (ui_base_border_started == border_side_t.LEFT) {
 				config_raw.layout[layout_size_t.NODES_W] -= math_floor(mouse_movement_x);
-				if (config_raw.layout[layout_size_t.NODES_W] < 32) config_raw.layout[layout_size_t.NODES_W] = 32;
-				else if (config_raw.layout[layout_size_t.NODES_W] > sys_width() * 0.7) config_raw.layout[layout_size_t.NODES_W] = math_floor(sys_width() * 0.7);
+				if (config_raw.layout[layout_size_t.NODES_W] < 32) {
+					config_raw.layout[layout_size_t.NODES_W] = 32;
+				}
+				else if (config_raw.layout[layout_size_t.NODES_W] > sys_width() * 0.7) {
+					config_raw.layout[layout_size_t.NODES_W] = math_floor(sys_width() * 0.7);
+				}
 			}
 			else { // UINodes / UIView2D ratio
 				config_raw.layout[layout_size_t.NODES_H] -= math_floor(mouse_movement_y);
-				if (config_raw.layout[layout_size_t.NODES_H] < 32) config_raw.layout[layout_size_t.NODES_H] = 32;
-				else if (config_raw.layout[layout_size_t.NODES_H] > app_h() * 0.95) config_raw.layout[layout_size_t.NODES_H] = math_floor(app_h() * 0.95);
+				if (config_raw.layout[layout_size_t.NODES_H] < 32) {
+					config_raw.layout[layout_size_t.NODES_H] = 32;
+				}
+				else if (config_raw.layout[layout_size_t.NODES_H] > app_h() * 0.95) {
+					config_raw.layout[layout_size_t.NODES_H] = math_floor(app_h() * 0.95);
+				}
 			}
 		}
 		else if (ui_base_border_handle_ptr == ui_base_hwnds[tab_area_t.STATUS].ptr) {
@@ -750,18 +863,24 @@ function ui_base_operator_search() {
 			zui_start_text_edit(search_handle); // Focus search bar
 		}
 
-		if (search_handle.changed) ui_base_operator_search_offset = 0;
+		if (search_handle.changed) {
+			ui_base_operator_search_offset = 0;
+		}
 
 		if (ui.is_key_pressed) { // Move selection
-			if (ui.key == key_code_t.DOWN && ui_base_operator_search_offset < 6) ui_base_operator_search_offset++;
-			if (ui.key == key_code_t.UP && ui_base_operator_search_offset > 0) ui_base_operator_search_offset--;
+			if (ui.key == key_code_t.DOWN && ui_base_operator_search_offset < 6) {
+				ui_base_operator_search_offset++;
+			}
+			if (ui.key == key_code_t.UP && ui_base_operator_search_offset > 0) {
+				ui_base_operator_search_offset--;
+			}
 		}
 		let enter: bool = keyboard_down("enter");
 		let count: i32 = 0;
 		let BUTTON_COL: i32 = ui.t.BUTTON_COL;
 
 		for (let n in config_keymap) {
-			if (n.indexOf(search) >= 0) {
+			if (string_index_of(n, search) >= 0) {
 				ui.t.BUTTON_COL = count == ui_base_operator_search_offset ? ui.t.HIGHLIGHT_COL : ui.t.SEPARATOR_COL;
 				if (zui_button(n, zui_align_t.LEFT, config_keymap[n]) || (enter && count == ui_base_operator_search_offset)) {
 					if (enter) {
@@ -770,7 +889,9 @@ function ui_base_operator_search() {
 					}
 					operator_run(n);
 				}
-				if (++count > 6) break;
+				if (++count > 6) {
+					break;
+				}
 			}
 		}
 
@@ -808,14 +929,18 @@ function ui_base_get_brush_stencil_rect(): rect_t {
 function ui_base_update_ui() {
 	if (console_message_timer > 0) {
 		console_message_timer -= time_delta();
-		if (console_message_timer <= 0) ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
+		if (console_message_timer <= 0) {
+			ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
+		}
 	}
 
 	///if (is_paint || is_sculpt)
 	ui_base_sidebar_mini_w = math_floor(ui_base_default_sidebar_mini_w * zui_SCALE(ui_base_ui));
 	///end
 
-	if (!base_ui_enabled) return;
+	if (!base_ui_enabled) {
+		return;
+	}
 
 	///if (is_paint || is_sculpt)
 	// Same mapping for paint and rotate (predefined in touch keymap)
@@ -885,7 +1010,9 @@ function ui_base_update_ui() {
 				context_raw.brush_stencil_y += mouse_movement_y / base_h();
 			}
 		}
-		else context_raw.brush_stencil_scaling = false;
+		else {
+			context_raw.brush_stencil_scaling = false;
+		}
 		if (mouse_wheel_delta != 0) {
 			context_raw.brush_stencil_scale -= mouse_wheel_delta / 10;
 		}
@@ -906,16 +1033,16 @@ function ui_base_update_ui() {
 	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
 	let decal_mask: bool = decal && operator_shortcut(config_keymap.decal_mask + "+" + config_keymap.action_paint, shortcut_type_t.DOWN);
 	let down: bool = operator_shortcut(config_keymap.action_paint, shortcut_type_t.DOWN) ||
-						decal_mask ||
-						set_clone_source ||
-						operator_shortcut(config_keymap.brush_ruler + "+" + config_keymap.action_paint, shortcut_type_t.DOWN) ||
-						(pen_down() && !keyboard_down("alt"));
+					 decal_mask ||
+					 set_clone_source ||
+					 operator_shortcut(config_keymap.brush_ruler + "+" + config_keymap.action_paint, shortcut_type_t.DOWN) ||
+					 (pen_down() && !keyboard_down("alt"));
 	///end
 	///if is_lab
 	let down: bool = operator_shortcut(config_keymap.action_paint, shortcut_type_t.DOWN) ||
-						set_clone_source ||
-						operator_shortcut(config_keymap.brush_ruler + "+" + config_keymap.action_paint, shortcut_type_t.DOWN) ||
-						(pen_down() && !keyboard_down("alt"));
+					 set_clone_source ||
+					 operator_shortcut(config_keymap.brush_ruler + "+" + config_keymap.action_paint, shortcut_type_t.DOWN) ||
+					 (pen_down() && !keyboard_down("alt"));
 	///end
 
 	if (config_raw.touch_ui) {
@@ -1046,10 +1173,14 @@ function ui_base_update_ui() {
 		context_raw.layers_preview_dirty = false;
 		context_raw.layer_preview_dirty = false;
 		context_raw.mask_preview_last = null;
-		if (base_pipe_merge == null) base_make_pipe();
+		if (base_pipe_merge == null) {
+			base_make_pipe();
+		}
 		// Update all layer previews
 		for (let l of project_layers) {
-			if (slot_layer_is_group(l)) continue;
+			if (slot_layer_is_group(l)) {
+				continue;
+			}
 			let target: image_t = l.texpaint_preview;
 			let source: image_t = l.texpaint;
 			g2_begin(target);
@@ -1065,9 +1196,11 @@ function ui_base_update_ui() {
 	if (context_raw.layer_preview_dirty && !slot_layer_is_group(context_raw.layer)) {
 		context_raw.layer_preview_dirty = false;
 		context_raw.mask_preview_last = null;
-		if (base_pipe_merge == null) base_make_pipe();
+		if (base_pipe_merge == null) {
+			base_make_pipe();
+		}
 		// Update layer preview
-		let l: SlotLayerRaw = context_raw.layer;
+		let l: slot_layer_t = context_raw.layer;
 		let target: image_t = l.texpaint_preview;
 		let source: image_t = l.texpaint;
 		g2_begin(target);
@@ -1083,18 +1216,32 @@ function ui_base_update_ui() {
 
 	let undo_pressed: bool = operator_shortcut(config_keymap.edit_undo);
 	let redo_pressed: bool = operator_shortcut(config_keymap.edit_redo) ||
-							(keyboard_down("control") && keyboard_started("y"));
+							 (keyboard_down("control") && keyboard_started("y"));
 
 	// Two-finger tap to undo, three-finger tap to redo
 	if (context_in_viewport() && config_raw.touch_ui) {
-		if (mouse_started("middle")) { ui_base_redo_tap_time = time_time(); }
-		else if (mouse_started("right")) { ui_base_undo_tap_time = time_time(); }
-		else if (mouse_released("middle") && time_time() - ui_base_redo_tap_time < 0.1) { ui_base_redo_tap_time = ui_base_undo_tap_time = 0; redo_pressed = true; }
-		else if (mouse_released("right") && time_time() - ui_base_undo_tap_time < 0.1) { ui_base_redo_tap_time = ui_base_undo_tap_time = 0; undo_pressed = true; }
+		if (mouse_started("middle")) {
+			ui_base_redo_tap_time = time_time();
+		}
+		else if (mouse_started("right")) {
+			ui_base_undo_tap_time = time_time();
+		}
+		else if (mouse_released("middle") && time_time() - ui_base_redo_tap_time < 0.1) {
+			ui_base_redo_tap_time = ui_base_undo_tap_time = 0;
+			redo_pressed = true;
+		}
+		else if (mouse_released("right") && time_time() - ui_base_undo_tap_time < 0.1) {
+			ui_base_redo_tap_time = ui_base_undo_tap_time = 0;
+			undo_pressed = true;
+		}
 	}
 
-	if (undo_pressed) history_undo();
-	else if (redo_pressed) history_redo();
+	if (undo_pressed) {
+		history_undo();
+	}
+	else if (redo_pressed) {
+		history_redo();
+	}
 
 	///if (is_paint || is_sculpt)
 	gizmo_update();
@@ -1115,7 +1262,9 @@ function ui_base_render() {
 		g2_begin(null);
 	}
 
-	if (!ui_base_show || sys_width() == 0 || sys_height() == 0) return;
+	if (!ui_base_show || sys_width() == 0 || sys_height() == 0) {
+		return;
+	}
 
 	ui_base_ui.input_enabled = base_ui_enabled;
 
@@ -1158,13 +1307,19 @@ function ui_base_draw_sidebar() {
 	ui_base_tabx = sys_width() - config_raw.layout[layout_size_t.SIDEBAR_W];
 
 	let _SCROLL_W: i32 = ui_base_ui.t.SCROLL_W;
-	if (mini) ui_base_ui.t.SCROLL_W = ui_base_ui.t.SCROLL_MINI_W;
+	if (mini) {
+		ui_base_ui.t.SCROLL_W = ui_base_ui.t.SCROLL_MINI_W;
+	}
 
 	if (zui_window(ui_base_hwnds[tab_area_t.SIDEBAR0], ui_base_tabx, 0, config_raw.layout[layout_size_t.SIDEBAR_W], config_raw.layout[layout_size_t.SIDEBAR_H0])) {
-		for (let i: i32 = 0; i < (mini ? 1 : ui_base_hwnd_tabs[tab_area_t.SIDEBAR0].length); ++i) ui_base_hwnd_tabs[tab_area_t.SIDEBAR0][i](ui_base_htabs[tab_area_t.SIDEBAR0]);
+		for (let i: i32 = 0; i < (mini ? 1 : ui_base_hwnd_tabs[tab_area_t.SIDEBAR0].length); ++i) {
+			ui_base_hwnd_tabs[tab_area_t.SIDEBAR0][i](ui_base_htabs[tab_area_t.SIDEBAR0]);
+		}
 	}
 	if (zui_window(ui_base_hwnds[tab_area_t.SIDEBAR1], ui_base_tabx, config_raw.layout[layout_size_t.SIDEBAR_H0], config_raw.layout[layout_size_t.SIDEBAR_W], config_raw.layout[layout_size_t.SIDEBAR_H1] - expand_button_offset)) {
-		for (let i: i32 = 0; i < (mini ? 1 : ui_base_hwnd_tabs[tab_area_t.SIDEBAR1].length); ++i) ui_base_hwnd_tabs[tab_area_t.SIDEBAR1][i](ui_base_htabs[tab_area_t.SIDEBAR1]);
+		for (let i: i32 = 0; i < (mini ? 1 : ui_base_hwnd_tabs[tab_area_t.SIDEBAR1].length); ++i) {
+			ui_base_hwnd_tabs[tab_area_t.SIDEBAR1][i](ui_base_htabs[tab_area_t.SIDEBAR1]);
+		}
 	}
 
 	zui_end_window();
@@ -1217,10 +1372,14 @@ function ui_base_draw_sidebar() {
 }
 
 function ui_base_render_cursor() {
-	if (!base_ui_enabled) return;
+	if (!base_ui_enabled) {
+		return;
+	}
 
 	///if is_paint
-	if (context_raw.tool == workspace_tool_t.MATERIAL || context_raw.tool == workspace_tool_t.BAKE) return;
+	if (context_raw.tool == workspace_tool_t.MATERIAL || context_raw.tool == workspace_tool_t.BAKE) {
+		return;
+	}
 	///end
 
 	g2_set_color(0xffffffff);
@@ -1407,8 +1566,12 @@ function ui_base_show_brush_nodes() {
 function ui_base_show_2d_view(type: view_2d_type_t) {
 	// Clear input state as ui receives input events even when not drawn
 	zui_end_input();
-	if (ui_view2d_type != type) ui_view2d_show = true;
-	else ui_view2d_show = !ui_view2d_show;
+	if (ui_view2d_type != type) {
+		ui_view2d_show = true;
+	}
+	else {
+		ui_view2d_show = !ui_view2d_show;
+	}
 	ui_view2d_type = type;
 	ui_view2d_hwnd.redraws = 2;
 	base_resize();
@@ -1423,7 +1586,7 @@ function ui_base_toggle_browser() {
 function ui_base_set_icon_scale() {
 	if (zui_SCALE(ui_base_ui) > 1) {
 		resource_load(["icons2x.k"]);
-		resource_bundled.set("icons.k", resource_get("icons2x.k"));
+		map_set(resource_bundled, "icons.k", resource_get("icons2x.k"));
 	}
 	else {
 		resource_load(["icons.k"]);
@@ -1438,23 +1601,41 @@ function ui_base_on_border_hover(handle_ptr: i32, side: i32) {
 		handle_ptr != ui_base_hwnds[tab_area_t.SIDEBAR1].ptr &&
 		handle_ptr != ui_base_hwnds[tab_area_t.STATUS].ptr &&
 		handle_ptr != ui_nodes_hwnd.ptr &&
-		handle_ptr != ui_view2d_hwnd.ptr) return; // Scalable handles
-	if (handle_ptr == ui_view2d_hwnd.ptr && side != border_side_t.LEFT) return;
-	if (handle_ptr == ui_nodes_hwnd.ptr && side == border_side_t.TOP && !ui_view2d_show) return;
-	if (handle_ptr == ui_base_hwnds[tab_area_t.SIDEBAR0].ptr && side == border_side_t.TOP) return;
+		handle_ptr != ui_view2d_hwnd.ptr) {
+		return; // Scalable handles
+	}
+	if (handle_ptr == ui_view2d_hwnd.ptr && side != border_side_t.LEFT) {
+		return;
+	}
+	if (handle_ptr == ui_nodes_hwnd.ptr && side == border_side_t.TOP && !ui_view2d_show) {
+		return;
+	}
+	if (handle_ptr == ui_base_hwnds[tab_area_t.SIDEBAR0].ptr && side == border_side_t.TOP) {
+		return;
+	}
 	///end
 
 	///if is_lab
 	if (handle_ptr != ui_base_hwnds[tab_area_t.STATUS].ptr &&
 		handle_ptr != ui_nodes_hwnd.ptr &&
 		handle_ptr != ui_view2d_hwnd.ptr) return; // Scalable handles
-	if (handle_ptr == ui_view2d_hwnd.ptr && side != border_side_t.LEFT) return;
-	if (handle_ptr == ui_nodes_hwnd.ptr && side == border_side_t.TOP && !ui_view2d_show) return;
+	if (handle_ptr == ui_view2d_hwnd.ptr && side != border_side_t.LEFT) {
+		return;
+	}
+	if (handle_ptr == ui_nodes_hwnd.ptr && side == border_side_t.TOP && !ui_view2d_show) {
+		return;
+	}
 	///end
 
-	if (handle_ptr == ui_nodes_hwnd.ptr && side != border_side_t.LEFT && side != border_side_t.TOP) return;
-	if (handle_ptr == ui_base_hwnds[tab_area_t.STATUS].ptr && side != border_side_t.TOP) return;
-	if (side == border_side_t.RIGHT) return; // UI is snapped to the right side
+	if (handle_ptr == ui_nodes_hwnd.ptr && side != border_side_t.LEFT && side != border_side_t.TOP) {
+		return;
+	}
+	if (handle_ptr == ui_base_hwnds[tab_area_t.STATUS].ptr && side != border_side_t.TOP) {
+		return;
+	}
+	if (side == border_side_t.RIGHT) {
+		return; // UI is snapped to the right side
+	}
 
 	side == border_side_t.LEFT || side == border_side_t.RIGHT ?
 		krom_set_mouse_cursor(3) : // Horizontal
@@ -1477,17 +1658,21 @@ function ui_base_on_deselect_text() {
 	///end
 }
 
-function ui_base_on_tab_drop(to_ptr: i32, toPosition: i32, from_ptr: i32, fromPosition: i32) {
+function ui_base_on_tab_drop(to_ptr: i32, to_position: i32, from_ptr: i32, from_position: i32) {
 	let i: i32 = -1;
 	let j: i32 = -1;
 	for (let k: i32 = 0; k < ui_base_htabs.length; ++k) {
-		if (ui_base_htabs[k].ptr == to_ptr) i = k;
-		if (ui_base_htabs[k].ptr == from_ptr) j = k;
+		if (ui_base_htabs[k].ptr == to_ptr) {
+			i = k;
+		}
+		if (ui_base_htabs[k].ptr == from_ptr) {
+			j = k;
+		}
 	}
 	if (i > -1 && j > -1) {
-		let element: any = ui_base_hwnd_tabs[j][fromPosition];
-		ui_base_hwnd_tabs[j].splice(fromPosition, 1);
-		ui_base_hwnd_tabs[i].splice(toPosition, 0, element);
+		let element: any = ui_base_hwnd_tabs[j][from_position];
+		array_splice(ui_base_hwnd_tabs[j], from_position, 1);
+		array_insert(ui_base_hwnd_tabs[i], to_position, element);
 		ui_base_hwnds[i].redraws = 2;
 		ui_base_hwnds[j].redraws = 2;
 	}

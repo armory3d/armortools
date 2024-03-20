@@ -11,20 +11,20 @@ function import_font_run(path: string) {
 	let font: g2_font_t = data_get_font(path);
 	g2_font_init(font); // Make sure font_ is ready
 	let count: i32 = krom_g2_font_count(font.font_);
-	let font_slots: SlotFontRaw[] = [];
+	let font_slots: slot_font_t[] = [];
 	for (let i: i32 = 0; i < count; ++i) {
-		let ar: string[] = path.split(path_sep);
+		let ar: string[] = string_split(path, path_sep);
 		let name: string = ar[ar.length - 1];
 		let f: g2_font_t = g2_font_clone(font);
 		g2_font_set_font_index(f, i);
-		let font_slot: SlotFontRaw = slot_font_create(name, f, path);
-		font_slots.push(font_slot);
+		let font_slot: slot_font_t = slot_font_create(name, f, path);
+		array_push(font_slots, font_slot);
 	}
 
 	let _init = function () {
 		for (let f of font_slots) {
 			context_raw.font = f;
-			project_fonts.push(f);
+			array_push(project_fonts, f);
 			util_render_make_font_preview();
 		}
 	}

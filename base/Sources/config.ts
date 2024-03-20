@@ -8,7 +8,7 @@ let config_button_spacing: string = config_default_button_spacing;
 
 function config_load(done: ()=>void) {
 	try {
-		let blob: ArrayBuffer = data_get_blob((path_is_protected() ? krom_save_path() : "") + "config.json");
+		let blob: buffer_t = data_get_blob((path_is_protected() ? krom_save_path() : "") + "config.json");
 		config_loaded = true;
 		config_raw = json_parse(sys_buffer_to_string(blob));
 		done();
@@ -18,7 +18,7 @@ function config_load(done: ()=>void) {
 
 		///if krom_linux
 		try { // Protected directory
-			let blob: ArrayBuffer = data_get_blob(krom_save_path() + "config.json");
+			let blob: buffer_t = data_get_blob(krom_save_path() + "config.json");
 			config_loaded = true;
 			config_raw = json_parse(sys_buffer_to_string(blob));
 			done();
@@ -41,7 +41,9 @@ function config_save() {
 	krom_file_save_bytes(path, buffer);
 
 	///if krom_linux // Protected directory
-	if (!file_exists(path)) krom_file_save_bytes(krom_save_path() + "config.json", buffer);
+	if (!file_exists(path)) {
+		krom_file_save_bytes(krom_save_path() + "config.json", buffer);
+	}
 	///end
 }
 
@@ -108,14 +110,14 @@ function config_init() {
 
 function config_get_sha(): string {
 	let sha: string = "";
-	let blob: ArrayBuffer = data_get_blob("version.json");
+	let blob: buffer_t = data_get_blob("version.json");
 	sha = json_parse(sys_buffer_to_string(blob)).sha;
 	return sha;
 }
 
 function config_get_date(): string {
 	let date: string = "";
-	let blob: ArrayBuffer = data_get_blob("version.json");
+	let blob: buffer_t = data_get_blob("version.json");
 	date = json_parse(sys_buffer_to_string(blob)).date;
 	return date;
 }
@@ -123,9 +125,15 @@ function config_get_date(): string {
 function config_get_options(): kinc_sys_ops_t {
 	let window_mode: window_mode_t = config_raw.window_mode == 0 ? window_mode_t.WINDOWED : window_mode_t.FULLSCREEN;
 	let window_features: window_features_t = window_features_t.NONE;
-	if (config_raw.window_resizable) window_features |= window_features_t.RESIZABLE;
-	if (config_raw.window_maximizable) window_features |= window_features_t.MAXIMIZABLE;
-	if (config_raw.window_minimizable) window_features |= window_features_t.MINIMIZABLE;
+	if (config_raw.window_resizable) {
+		window_features |= window_features_t.RESIZABLE;
+	}
+	if (config_raw.window_maximizable) {
+		window_features |= window_features_t.MAXIMIZABLE;
+	}
+	if (config_raw.window_minimizable) {
+		window_features |= window_features_t.MINIMIZABLE;
+	}
 	let title: string = "untitled - " + manifest_title;
 	return {
 		title: title,
@@ -187,7 +195,7 @@ function config_load_keymap() {
 		config_keymap = base_default_keymap;
 	}
 	else {
-		let blob: ArrayBuffer = data_get_blob("keymap_presets/" + config_raw.keymap);
+		let blob: buffer_t = data_get_blob("keymap_presets/" + config_raw.keymap);
 		config_keymap = json_parse(sys_buffer_to_string(blob));
 		// Fill in undefined keys with defaults
 		for (let field in base_default_keymap) {
@@ -200,7 +208,9 @@ function config_load_keymap() {
 }
 
 function config_save_keymap() {
-	if (config_raw.keymap == "default.json") return;
+	if (config_raw.keymap == "default.json") {
+		return;
+	}
 	let path: string = data_path() + "keymap_presets/" + config_raw.keymap;
 	let buffer: buffer_t = sys_string_to_buffer(json_stringify(config_keymap));
 	krom_file_save_bytes(path, buffer);
@@ -208,30 +218,30 @@ function config_save_keymap() {
 
 function config_get_super_sample_quality(f: f32): i32 {
 	return f == 0.25 ? 0 :
-			f == 0.5 ? 1 :
-			f == 1.0 ? 2 :
-			f == 1.5 ? 3 :
-			f == 2.0 ? 4 : 5;
+		   f == 0.5 ? 1 :
+		   f == 1.0 ? 2 :
+		   f == 1.5 ? 3 :
+		   f == 2.0 ? 4 : 5;
 }
 
 function config_get_super_sample_size(i: i32): f32 {
 	return i == 0 ? 0.25 :
-			i == 1 ? 0.5 :
-			i == 2 ? 1.0 :
-			i == 3 ? 1.5 :
-			i == 4 ? 2.0 : 4.0;
+		   i == 1 ? 0.5 :
+		   i == 2 ? 1.0 :
+		   i == 3 ? 1.5 :
+		   i == 4 ? 2.0 : 4.0;
 }
 
 function config_get_texture_res(): i32 {
 	let res: i32 = base_res_handle.position;
 	return res == texture_res_t.RES128 ? 128 :
-			res == texture_res_t.RES256 ? 256 :
-			res == texture_res_t.RES512 ? 512 :
-			res == texture_res_t.RES1024 ? 1024 :
-			res == texture_res_t.RES2048 ? 2048 :
-			res == texture_res_t.RES4096 ? 4096 :
-			res == texture_res_t.RES8192 ? 8192 :
-			res == texture_res_t.RES16384 ? 16384 : 0;
+		   res == texture_res_t.RES256 ? 256 :
+		   res == texture_res_t.RES512 ? 512 :
+		   res == texture_res_t.RES1024 ? 1024 :
+		   res == texture_res_t.RES2048 ? 2048 :
+		   res == texture_res_t.RES4096 ? 4096 :
+		   res == texture_res_t.RES8192 ? 8192 :
+		   res == texture_res_t.RES16384 ? 16384 : 0;
 }
 
 function config_get_texture_res_x(): i32 {
@@ -244,13 +254,13 @@ function config_get_texture_res_y(): i32 {
 
 function config_get_texture_res_pos(i: i32): i32 {
 	return i == 128 ? texture_res_t.RES128 :
-			i == 256 ? texture_res_t.RES256 :
-			i == 512 ? texture_res_t.RES512 :
-			i == 1024 ? texture_res_t.RES1024 :
-			i == 2048 ? texture_res_t.RES2048 :
-			i == 4096 ? texture_res_t.RES4096 :
-			i == 8192 ? texture_res_t.RES8192 :
-			i == 16384 ? texture_res_t.RES16384 : 0;
+		   i == 256 ? texture_res_t.RES256 :
+		   i == 512 ? texture_res_t.RES512 :
+		   i == 1024 ? texture_res_t.RES1024 :
+		   i == 2048 ? texture_res_t.RES2048 :
+		   i == 4096 ? texture_res_t.RES4096 :
+		   i == 8192 ? texture_res_t.RES8192 :
+		   i == 16384 ? texture_res_t.RES16384 : 0;
 }
 
 function config_load_theme(theme: string, tagRedraw: bool = true) {
@@ -258,20 +268,28 @@ function config_load_theme(theme: string, tagRedraw: bool = true) {
 		base_theme = zui_theme_create();
 	}
 	else {
-		let b: ArrayBuffer = data_get_blob("themes/" + theme);
+		let b: buffer_t = data_get_blob("themes/" + theme);
 		let parsed: any = json_parse(sys_buffer_to_string(b));
 		base_theme = zui_theme_create();
 		for (let key in base_theme) {
-			if (key == "theme_") continue;
-			if (key.startsWith("set_")) continue;
-			if (key.startsWith("get_")) key = key.substr(4);
+			if (key == "theme_") {
+				continue;
+			}
+			if (starts_with(key, "set_")) {
+				continue;
+			}
+			if (starts_with(key, "get_")) {
+				key = substring(key, 4, key.length);
+			}
 			let atheme: any = base_theme;
 			atheme[key] = parsed[key];
 		}
 	}
 	base_theme.FILL_WINDOW_BG = true;
 	if (tagRedraw) {
-		for (let ui of base_get_uis()) ui.t = base_theme;
+		for (let ui of base_get_uis()) {
+			ui.t = base_theme;
+		}
 		ui_base_tag_ui_redraw();
 	}
 	if (config_raw.touch_ui) {
@@ -294,7 +312,7 @@ function config_load_theme(theme: string, tagRedraw: bool = true) {
 }
 
 function config_enable_plugin(f: string) {
-	config_raw.plugins.push(f);
+	array_push(config_raw.plugins, f);
 	plugin_start(f);
 }
 

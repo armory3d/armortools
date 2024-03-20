@@ -16,26 +16,39 @@ function float_node_create(value: f32 = 0.0): float_node_t {
 }
 
 function float_node_get(self: float_node_t, from: i32, done: (a: any)=>void) {
-	if (self.base.inputs.length > 0) logic_node_input_get(self.base.inputs[0], done);
-	else done(self.value);
+	if (self.base.inputs.length > 0) {
+		logic_node_input_get(self.base.inputs[0], done);
+	}
+	else {
+		done(self.value);
+	}
 }
 
 function float_node_get_as_image(self: float_node_t, from: i32, done: (img: image_t)=>void) {
-	if (self.base.inputs.length > 0) { logic_node_input_get_as_image(self.base.inputs[0], done); return; }
-	if (self.image != null) image_unload(self.image);
-	let b: ArrayBuffer = new ArrayBuffer(16);
-	let v: DataView = new DataView(b);
-	v.setFloat32(0, self.value, true);
-	v.setFloat32(4, self.value, true);
-	v.setFloat32(8, self.value, true);
-	v.setFloat32(12, 1.0, true);
+	if (self.base.inputs.length > 0) {
+		logic_node_input_get_as_image(self.base.inputs[0], done);
+		return;
+	}
+	if (self.image != null) {
+		image_unload(self.image);
+	}
+	let b: buffer_t = buffer_create(16);
+	let v: buffer_view_t = buffer_view_create(b);
+	buffer_view_set_f32(v, 0, self.value);
+	buffer_view_set_f32(v, 4, self.value);
+	buffer_view_set_f32(v, 8, self.value);
+	buffer_view_set_f32(v, 12, 1.0);
 	self.image = image_from_bytes(b, 1, 1, tex_format_t.RGBA128);
 	done(self.image);
 }
 
 function float_node_set(self: float_node_t, value: any) {
-	if (self.base.inputs.length > 0) logic_node_input_set(self.base.inputs[0], value);
-	else self.value = value;
+	if (self.base.inputs.length > 0) {
+		logic_node_input_set(self.base.inputs[0], value);
+	}
+	else {
+		self.value = value;
+	}
 }
 
 let float_node_def: zui_node_t = {

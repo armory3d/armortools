@@ -5,7 +5,7 @@ type upscale_node_t = {
 
 let upscale_node_temp: image_t = null;
 let upscale_node_image: image_t = null;
-let upscale_node_esrgan_blob: ArrayBuffer;
+let upscale_node_esrgan_blob: buffer_t;
 
 function upscale_node_create(): upscale_node_t {
 	let n: float_node_t = {};
@@ -16,7 +16,7 @@ function upscale_node_create(): upscale_node_t {
 }
 
 function upscale_node_get_as_image(self: upscale_node_t, from: i32, done: (img: image_t)=>void) {
-	self.base.inputs[0].get_as_image((_image: image_t) => {
+	self.base.inputs[0].get_as_image(function (_image: image_t) {
 		upscale_node_image = _image;
 
 		console_progress(tr("Processing") + " - " + tr("Upscale"));
@@ -37,7 +37,7 @@ function upscale_node_get_as_image(self: upscale_node_t, from: i32, done: (img: 
 }
 
 function upscale_node_load_blob(done: ()=>void) {
-	let _esrgan_blob: ArrayBuffer = data_get_blob("models/esrgan.quant.onnx");
+	let _esrgan_blob: buffer_t = data_get_blob("models/esrgan.quant.onnx");
 	upscale_node_esrgan_blob = _esrgan_blob;
 	done();
 }
@@ -61,8 +61,8 @@ function upscale_node_do_tile(source: image_t) {
 	g2_end();
 
 	let bytes_img = image_get_pixels(upscale_node_temp);
-	let u8a = new Uint8Array(bytes_img);
-	let f32a = new Float32Array(3 * size1w * size1h);
+	let u8a = new u8_array_t(bytes_img);
+	let f32a = f32_array_create(3 * size1w * size1h);
 	for (let i = 0; i < (size1w * size1h); ++i) {
 		f32a[i                      ] = (u8a[i * 4    ] / 255);
 		f32a[i + size1w * size1w    ] = (u8a[i * 4 + 1] / 255);
@@ -70,13 +70,17 @@ function upscale_node_do_tile(source: image_t) {
 	}
 
 	let esrgan2x_buf = krom_ml_inference(upscale_node_esrgan_blob, [f32a.buffer], [[1, 3, size1w, size1h]], [1, 3, size2w, size2h], config_raw.gpu_inference);
-	let esrgan2x = new Float32Array(esrgan2x_buf);
+	let esrgan2x = new f32_array_t(esrgan2x_buf);
 	for (let i = 0; i < esrgan2x.length; ++i) {
-		if (esrgan2x[i] < 0) esrgan2x[i] = 0;
-		else if (esrgan2x[i] > 1) esrgan2x[i] = 1;
+		if (esrgan2x[i] < 0) {
+			esrgan2x[i] = 0;
+		}
+		else if (esrgan2x[i] > 1) {
+			esrgan2x[i] = 1;
+		}
 	}
 
-	u8a = new Uint8Array(4 * size2w * size2h);
+	u8a = u8_array_create(4 * size2w * size2h);
 	for (let i = 0; i < (size2w * size2h); ++i) {
 		u8a[i * 4    ] = math_floor(esrgan2x[i                      ] * 255);
 		u8a[i * 4 + 1] = math_floor(esrgan2x[i + size2w * size2w    ] * 255);
@@ -120,7 +124,9 @@ function upscale_node_esrgan(source: image_t): image_t {
 		}
 		image_unload(tile_source);
 	}
-	else result = upscale_node_do_tile(source); // Single tile
+	else {
+		result = upscale_node_do_tile(source); // Single tile
+	}
 	return result;
 }
 
@@ -138,7 +144,7 @@ let upscale_node_def: zui_node_t = {
 			name: _tr("Color"),
 			type: "RGBA",
 			color: 0xffc7c729,
-			default_value: new Float32Array([0.0, 0.0, 0.0, 1.0])
+			default_value: new f32_array_t([0.0, 0.0, 0.0, 1.0])
 		}
 	],
 	outputs: [
@@ -148,7 +154,7 @@ let upscale_node_def: zui_node_t = {
 			name: _tr("Color"),
 			type: "RGBA",
 			color: 0xffc7c729,
-			default_value: new Float32Array([0.0, 0.0, 0.0, 1.0])
+			default_value: new f32_array_t([0.0, 0.0, 0.0, 1.0])
 		}
 	],
 	buttons: []

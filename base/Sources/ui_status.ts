@@ -27,7 +27,9 @@ function ui_status_render_ui() {
 		g2_fill_rect(ui._window_w - 1, 0, 1, ui._window_h);
 
 		// Draw tabs
-		for (let draw of ui_base_hwnd_tabs[tab_area_t.STATUS]) draw(ui_base_htabs[tab_area_t.STATUS]);
+		for (let draw of ui_base_hwnd_tabs[tab_area_t.STATUS]) {
+			draw(ui_base_htabs[tab_area_t.STATUS]);
+		}
 
 		let minimized: bool = statush <= ui_status_default_status_h * config_raw.window_scale;
 		if (ui_base_htabs[tab_area_t.STATUS].changed && (ui_base_htabs[tab_area_t.STATUS].position == context_raw.last_status_position || minimized)) {

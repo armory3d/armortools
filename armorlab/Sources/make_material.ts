@@ -20,14 +20,14 @@ function make_material_parse_mesh_material() {
 	scon._.override_context = {};
 	if (con.frag.shared_samplers.length > 0) {
 		let sampler = con.frag.shared_samplers[0];
-		scon._.override_context.shared_sampler = sampler.substr(sampler.lastIndexOf(" ") + 1);
+		scon._.override_context.shared_sampler = substring(sampler, string_last_index_of(sampler, " ") + 1, sampler.length);
 	}
 	if (!context_raw.texture_filter) {
 		scon._.override_context.filter = "point";
 	}
 	scon._.override_context.addressing = "repeat";
-	m._.shader.contexts.push(scon);
-	m._.shader._.contexts.push(scon);
+	array_push(m._.shader.contexts, scon);
+	array_push(m._.shader._.contexts, scon);
 
 	context_raw.ddirty = 2;
 
@@ -83,21 +83,29 @@ function make_material_parse_paint_material() {
 	let compileError = false;
 	let scon2: shader_context_t;
 	let _scon: shader_context_t = shader_context_create(con.data);
-	if (_scon == null) compileError = true;
+	if (_scon == null) {
+		compileError = true;
+	}
 	scon2 = _scon;
 
-	if (compileError) return;
+	if (compileError) {
+		return;
+	}
 	scon2._.override_context = {};
 	scon2._.override_context.addressing = "repeat";
 	let mcon3: material_context_t = material_context_create(mcon2);
 
-	m._.shader.contexts.push(scon2);
-	m._.shader._.contexts.push(scon2);
-	m.contexts.push(mcon3);
-	m._.contexts.push(mcon3);
+	array_push(m._.shader.contexts, scon2);
+	array_push(m._.shader._.contexts, scon2);
+	array_push(m.contexts, mcon3);
+	array_push(m._.contexts, mcon3);
 
-	if (make_material_default_scon == null) make_material_default_scon = scon2;
-	if (make_material_default_mcon == null) make_material_default_mcon = mcon3;
+	if (make_material_default_scon == null) {
+		make_material_default_scon = scon2;
+	}
+	if (make_material_default_mcon == null) {
+		make_material_default_mcon = mcon3;
+	}
 }
 
 function make_material_get_displace_strength(): f32 {
@@ -111,7 +119,7 @@ function make_material_voxelgi_half_extents(): string {
 }
 
 function make_material_delete_context(c: shader_context_t) {
-	base_notify_on_next_frame(() => { // Ensure pipeline is no longer in use
+	base_notify_on_next_frame(function () { // Ensure pipeline is no longer in use
 		shader_context_delete(c);
 	});
 }

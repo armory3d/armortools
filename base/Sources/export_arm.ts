@@ -1,11 +1,11 @@
 
 function export_arm_run_mesh(path: string, paint_objects: mesh_object_t[]) {
 	let mesh_datas: mesh_data_t[] = [];
-	for (let p of paint_objects) mesh_datas.push(p.data);
+	for (let p of paint_objects) array_push(mesh_datas, p.data);
 	let raw: scene_t = { mesh_datas: mesh_datas };
 	let b: buffer_t = armpack_encode(raw);
-	if (!path.endsWith(".arm")) path += ".arm";
-	krom_file_save_bytes(path, b, b.byteLength + 1);
+	if (!ends_with(path, ".arm")) path += ".arm";
+	krom_file_save_bytes(path, b, buffer_size(b) + 1);
 }
 
 function export_arm_run_project() {
@@ -14,11 +14,11 @@ function export_arm_run_project() {
 	for (let m of project_materials) {
 		let c: zui_node_canvas_t = json_parse(json_stringify(m.canvas));
 		for (let n of c.nodes) export_arm_export_node(n);
-		mnodes.push(c);
+		array_push(mnodes, c);
 	}
 
 	let bnodes: zui_node_canvas_t[] = [];
-	for (let b of project_brushes) bnodes.push(b.canvas);
+	for (let b of project_brushes) array_push(bnodes, b.canvas);
 	///end
 
 	///if is_lab
@@ -32,13 +32,13 @@ function export_arm_run_project() {
 		for (let g of project_material_groups) {
 			let c: zui_node_canvas_t = json_parse(json_stringify(g.canvas));
 			for (let n of c.nodes) export_arm_export_node(n);
-			mgroups.push(c);
+			array_push(mgroups, c);
 		}
 	}
 
 	///if (is_paint || is_sculpt)
 	let md: mesh_data_t[] = [];
-	for (let p of project_paint_objects) md.push(p.data);
+	for (let p of project_paint_objects) array_push(md, p.data);
 	///end
 
 	///if is_lab
@@ -56,7 +56,7 @@ function export_arm_run_project() {
 
 	let ld: layer_data_t[] = [];
 	for (let l of project_layers) {
-		ld.push({
+		array_push(ld, {
 			name: l.name,
 			res: l.texpaint != null ? l.texpaint.width : project_layers[0].texpaint.width,
 			bpp: bpp,
@@ -66,10 +66,10 @@ function export_arm_run_project() {
 			uv_type: l.uv_type,
 			decal_mat: l.uv_type == uv_type_t.PROJECT ? mat4_to_f32_array(l.decal_mat) : null,
 			opacity_mask: l.mask_opacity,
-			fill_layer: l.fill_layer != null ? project_materials.indexOf(l.fill_layer) : -1,
+			fill_layer: l.fill_layer != null ? array_index_of(project_materials, l.fill_layer) : -1,
 			object_mask: l.object_mask,
 			blending: l.blending,
-			parent: l.parent != null ? project_layers.indexOf(l.parent) : -1,
+			parent: l.parent != null ? array_index_of(project_layers, l.parent) : -1,
 			visible: l.visible,
 			///if is_paint
 			texpaint_nor: l.texpaint_nor != null ? lz4_encode(image_get_pixels(l.texpaint_nor)) : null,
@@ -94,7 +94,7 @@ function export_arm_run_project() {
 	///if krom_ios
 	let same_drive: bool = false;
 	///else
-	let same_drive: bool = project_raw.envmap != null ? project_filepath.charAt(0) == project_raw.envmap.charAt(0) : true;
+	let same_drive: bool = project_raw.envmap != null ? char_at(project_filepath, 0) == char_at(project_raw.envmap, 0) : true;
 	///end
 
 	project_raw = {
@@ -136,7 +136,7 @@ function export_arm_run_project() {
 	};
 
 	///if (krom_android || krom_ios)
-	let tex: image_t = render_path_render_targets.get(context_raw.render_mode == render_mode_t.FORWARD ? "buf" : "tex")._image;
+	let tex: image_t = map_get(render_path_render_targets, context_raw.render_mode == render_mode_t.FORWARD ? "buf" : "tex")._image;
 	let mesh_icon: image_t = image_create_render_target(256, 256);
 	let r: f32 = app_w() / app_h();
 	g2_begin(mesh_icon);
@@ -152,14 +152,14 @@ function export_arm_run_project() {
 	g2_end();
 	///end
 	let mesh_icon_pixels: buffer_t = image_get_pixels(mesh_icon);
-	let u8a: Uint8Array = new Uint8Array(mesh_icon_pixels);
+	let u8a: u8_array_t = new u8_array_t(mesh_icon_pixels);
 	for (let i: i32 = 0; i < 256 * 256 * 4; ++i) {
 		u8a[i] = math_floor(math_pow(u8a[i] / 255, 1.0 / 2.2) * 255);
 	}
 	///if (krom_metal || krom_vulkan)
 	export_arm_bgra_swap(mesh_icon_pixels);
 	///end
-	base_notify_on_next_frame(() => {
+	base_notify_on_next_frame(function () {
 		image_unload(mesh_icon);
 	});
 	// raw.mesh_icons =
@@ -168,22 +168,22 @@ function export_arm_run_project() {
 	// 	///else
 	// 	[encode(mesh_icon_pixels)];
 	// 	///end
-	krom_write_png(project_filepath.substr(0, project_filepath.length - 4) + "_icon.png", mesh_icon_pixels, 256, 256, 0);
+	krom_write_png(substring(project_filepath, 0, project_filepath.length - 4) + "_icon.png", mesh_icon_pixels, 256, 256, 0);
 	///end
 
 	///if (is_paint || is_sculpt)
-	let is_packed: bool = project_filepath.endsWith("_packed_.arm");
+	let is_packed: bool = ends_with(project_filepath, "_packed_.arm");
 	if (is_packed) { // Pack textures
 		export_arm_pack_assets(project_raw, project_assets);
 	}
 	///end
 
 	let buffer: buffer_t = armpack_encode(project_raw);
-	krom_file_save_bytes(project_filepath, buffer, buffer.byteLength + 1);
+	krom_file_save_bytes(project_filepath, buffer, buffer_size(buffer) + 1);
 
 	// Save to recent
 	///if krom_ios
-	let recent_path: string = project_filepath.substr(project_filepath.lastIndexOf("/") + 1);
+	let recent_path: string = substring(project_filepath, string_last_index_of(project_filepath, "/") + 1, project_filepath.length);
 	///else
 	let recent_path: string = project_filepath;
 	///end
@@ -210,8 +210,8 @@ function export_arm_export_node(n: zui_node_t, assets: asset_t[] = null) {
 
 		if (assets != null) {
 			let asset: asset_t = project_assets[index];
-			if (assets.indexOf(asset) == -1) {
-				assets.push(asset);
+			if (array_index_of(assets, asset) == -1) {
+				array_push(assets, asset);
 			}
 		}
 	}
@@ -223,10 +223,10 @@ function export_arm_export_node(n: zui_node_t, assets: asset_t[] = null) {
 
 ///if (is_paint || is_sculpt)
 function export_arm_run_material(path: string) {
-	if (!path.endsWith(".arm")) path += ".arm";
+	if (!ends_with(path, ".arm")) path += ".arm";
 	let mnodes: zui_node_canvas_t[] = [];
 	let mgroups: zui_node_canvas_t[] = null;
-	let m: SlotMaterialRaw = context_raw.material;
+	let m: slot_material_t = context_raw.material;
 	let c: zui_node_canvas_t = json_parse(json_stringify(m.canvas));
 	let assets: asset_t[] = [];
 	if (ui_nodes_has_group(c)) {
@@ -235,10 +235,10 @@ function export_arm_run_material(path: string) {
 		for (let gc of mgroups) for (let n of gc.nodes) export_arm_export_node(n, assets);
 	}
 	for (let n of c.nodes) export_arm_export_node(n, assets);
-	mnodes.push(c);
+	array_push(mnodes, c);
 
 	let texture_files: string[] = export_arm_assets_to_files(path, assets);
-	let is_cloud: bool = path.endsWith("_cloud_.arm");
+	let is_cloud: bool = ends_with(path, "_cloud_.arm");
 	if (is_cloud) path = string_replace_all(path, "_cloud_", "");
 	let packed_assets: packed_asset_t[] = null;
 	if (!context_raw.pack_assets_on_export) {
@@ -260,9 +260,9 @@ function export_arm_run_material(path: string) {
 	};
 
 	if (context_raw.write_icon_on_export) { // Separate icon files
-		krom_write_png(path.substr(0, path.length - 4) + "_icon.png", image_get_pixels(m.image), m.image.width, m.image.height, 0);
+		krom_write_png(substring(path, 0, path.length - 4) + "_icon.png", image_get_pixels(m.image), m.image.width, m.image.height, 0);
 		if (is_cloud) {
-			krom_write_jpg(path.substr(0, path.length - 4) + "_icon.jpg", image_get_pixels(m.image), m.image.width, m.image.height, 0, 50);
+			krom_write_jpg(substring(path, 0, path.length - 4) + "_icon.jpg", image_get_pixels(m.image), m.image.width, m.image.height, 0, 50);
 		}
 	}
 
@@ -271,17 +271,17 @@ function export_arm_run_material(path: string) {
 	}
 
 	let buffer: buffer_t = armpack_encode(raw);
-	krom_file_save_bytes(path, buffer, buffer.byteLength + 1);
+	krom_file_save_bytes(path, buffer, buffer_size(buffer) + 1);
 }
 ///end
 
 ///if (krom_metal || krom_vulkan)
-function export_arm_bgra_swap(buffer: ArrayBuffer) {
-	let view: DataView = new DataView(buffer);
-	for (let i: i32 = 0; i < math_floor(buffer.byteLength / 4); ++i) {
-		let r: i32 = view.getUint8(i * 4);
-		view.setUint8(i * 4, view.getUint8(i * 4 + 2));
-		view.setUint8(i * 4 + 2, r);
+function export_arm_bgra_swap(buffer: buffer_t) {
+	let view: buffer_view_t = buffer_view_create(buffer);
+	for (let i: i32 = 0; i < math_floor(buffer_size(buffer) / 4); ++i) {
+		let r: i32 = buffer_view_get_u8(view, i * 4);
+		buffer_view_set_u8(view, i * 4, buffer_view_get_u8(view, i * 4 + 2));
+		buffer_view_set_u8(view, i * 4 + 2, r);
 	}
 	return buffer;
 }
@@ -289,17 +289,23 @@ function export_arm_bgra_swap(buffer: ArrayBuffer) {
 
 ///if (is_paint || is_sculpt)
 function export_arm_run_brush(path: string) {
-	if (!path.endsWith(".arm")) path += ".arm";
+	if (!ends_with(path, ".arm")) {
+		path += ".arm";
+	}
 	let bnodes: zui_node_canvas_t[] = [];
-	let b: SlotBrushRaw = context_raw.brush;
+	let b: slot_brush_t = context_raw.brush;
 	let c: zui_node_canvas_t = json_parse(json_stringify(b.canvas));
 	let assets: asset_t[] = [];
-	for (let n of c.nodes) export_arm_export_node(n, assets);
-	bnodes.push(c);
+	for (let n of c.nodes) {
+		export_arm_export_node(n, assets);
+	}
+	array_push(bnodes, c);
 
 	let texture_files: string[] = export_arm_assets_to_files(path, assets);
-	let is_cloud: bool = path.endsWith("_cloud_.arm");
-	if (is_cloud) path = string_replace_all(path, "_cloud_", "");
+	let is_cloud: bool = ends_with(path, "_cloud_.arm");
+	if (is_cloud) {
+		path = string_replace_all(path, "_cloud_", "");
+	}
 	let packed_assets: packed_asset_t[] = null;
 	if (!context_raw.pack_assets_on_export) {
 		packed_assets = export_arm_get_packed_assets(path, texture_files);
@@ -319,7 +325,7 @@ function export_arm_run_brush(path: string) {
 	};
 
 	if (context_raw.write_icon_on_export) { // Separate icon file
-		krom_write_png(path.substr(0, path.length - 4) + "_icon.png", image_get_pixels(b.image), b.image.width, b.image.height, 0);
+		krom_write_png(substring(path, 0, path.length - 4) + "_icon.png", image_get_pixels(b.image), b.image.width, b.image.height, 0);
 	}
 
 	if (context_raw.pack_assets_on_export) { // Pack textures
@@ -327,24 +333,24 @@ function export_arm_run_brush(path: string) {
 	}
 
 	let buffer: buffer_t = armpack_encode(raw);
-	krom_file_save_bytes(path, buffer, buffer.byteLength + 1);
+	krom_file_save_bytes(path, buffer, buffer_size(buffer) + 1);
 }
 ///end
 
-function export_arm_assets_to_files(projectPath: string, assets: asset_t[]): string[] {
+function export_arm_assets_to_files(project_path: string, assets: asset_t[]): string[] {
 	let texture_files: string[] = [];
 	for (let a of assets) {
 		///if krom_ios
 		let same_drive: bool = false;
 		///else
-		let same_drive: bool = projectPath.charAt(0) == a.file.charAt(0);
+		let same_drive: bool = char_at(project_path, 0) == char_at(a.file, 0);
 		///end
 		// Convert image path from absolute to relative
 		if (same_drive) {
-			texture_files.push(path_to_relative(projectPath, a.file));
+			array_push(texture_files, path_to_relative(project_path, a.file));
 		}
 		else {
-			texture_files.push(a.file);
+			array_push(texture_files, a.file);
 		}
 	}
 	return texture_files;
@@ -357,34 +363,34 @@ function export_arm_meshes_to_files(project_path: string): string[] {
 		///if krom_ios
 		let same_drive: bool = false;
 		///else
-		let same_drive: bool = project_path.charAt(0) == file.charAt(0);
+		let same_drive: bool = char_at(project_path, 0) == char_at(file, 0);
 		///end
 		// Convert mesh path from absolute to relative
 		if (same_drive) {
-			mesh_files.push(path_to_relative(project_path, file));
+			array_push(mesh_files, path_to_relative(project_path, file));
 		}
 		else {
-			mesh_files.push(file);
+			array_push(mesh_files, file);
 		}
 	}
 	return mesh_files;
 }
 
-function export_arm_fonts_to_files(project_path: string, fonts: SlotFontRaw[]): string[] {
+function export_arm_fonts_to_files(project_path: string, fonts: slot_font_t[]): string[] {
 	let font_files: string[] = [];
 	for (let i = 1; i <fonts.length; ++i) {
-		let f: SlotFontRaw = fonts[i];
+		let f: slot_font_t = fonts[i];
 		///if krom_ios
 		let same_drive: bool = false;
 		///else
-		let same_drive: bool = project_path.charAt(0) == f.file.charAt(0);
+		let same_drive: bool = char_at(project_path, 0) == char_at(f.file, 0);
 		///end
 		// Convert font path from absolute to relative
 		if (same_drive) {
-			font_files.push(path_to_relative(project_path, f.file));
+			array_push(font_files, path_to_relative(project_path, f.file));
 		}
 		else {
-			font_files.push(f.file);
+			array_push(font_files, f.file);
 		}
 	}
 	return font_files;
@@ -398,7 +404,7 @@ function export_arm_get_packed_assets(project_path: string, texture_files: strin
 			///if krom_ios
 			let same_drive: bool = false;
 			///else
-			let same_drive: bool = project_path.charAt(0) == pa.name.charAt(0);
+			let same_drive: bool = char_at(project_path, 0) == char_at(pa.name, 0);
 			///end
 			// Convert path from absolute to relative
 			pa.name = same_drive ? path_to_relative(project_path, pa.name) : pa.name;
@@ -407,7 +413,7 @@ function export_arm_get_packed_assets(project_path: string, texture_files: strin
 					if (packed_assets == null) {
 						packed_assets = [];
 					}
-					packed_assets.push(pa);
+					array_push(packed_assets, pa);
 					break;
 				}
 			}
@@ -428,32 +434,36 @@ function export_arm_pack_assets(raw: project_format_t, assets: asset_t[]) {
 			g2_begin(temp);
 			g2_draw_image(image, 0, 0);
 			g2_end();
-			temp_images.push(temp);
-			raw.packed_assets.push({
+			array_push(temp_images, temp);
+			array_push(raw.packed_assets, {
 				name: assets[i].file,
-				bytes: assets[i].file.endsWith(".jpg") ?
+				bytes: ends_with(assets[i].file, ".jpg") ?
 					krom_encode_jpg(image_get_pixels(temp), temp.width, temp.height, 0, 80) :
 					krom_encode_png(image_get_pixels(temp), temp.width, temp.height, 0)
 			});
 		}
 	}
-	base_notify_on_next_frame(() => {
-		for (let image of temp_images) image_unload(image);
+	base_notify_on_next_frame(function () {
+		for (let image of temp_images) {
+			image_unload(image);
+		}
 	});
 }
 
 function export_arm_run_swatches(path: string) {
-	if (!path.endsWith(".arm")) path += ".arm";
+	if (!ends_with(path, ".arm")) {
+		path += ".arm";
+	}
 	let raw: any = {
 		version: manifest_version,
 		swatches: project_raw.swatches
 	};
 	let buffer: buffer_t = armpack_encode(raw);
-	krom_file_save_bytes(path, buffer, buffer.byteLength + 1);
+	krom_file_save_bytes(path, buffer, buffer_size(buffer) + 1);
 }
 
-function export_arm_vec3f32(v: vec4_t): Float32Array {
-	let res: Float32Array = new Float32Array(3);
+function export_arm_vec3f32(v: vec4_t): f32_array_t {
+	let res: f32_array_t = f32_array_create(3);
 	res[0] = v.x;
 	res[1] = v.y;
 	res[2] = v.z;

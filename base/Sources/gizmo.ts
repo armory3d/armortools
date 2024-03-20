@@ -13,7 +13,9 @@ function gizmo_update() {
 	let gizmo: object_t = context_raw.gizmo;
 	let hide: bool = operator_shortcut(config_keymap.stencil_hide, shortcut_type_t.DOWN);
 	gizmo.visible = (is_object || is_decal) && !hide;
-	if (!gizmo.visible) return;
+	if (!gizmo.visible) {
+		return;
+	}
 
 	let paint_object: object_t = context_raw.paint_object.base;
 	///if is_forge
@@ -81,7 +83,9 @@ function gizmo_update() {
 			transform_build_matrix(paint_object.transform);
 			///if arm_physics
 			let pb: any = (paint_object as any).physicsBody;
-			if (pb != null) pb.syncTransform();
+			if (pb != null) {
+				pb.syncTransform();
+			}
 			///end
 		}
 	}
@@ -152,12 +156,24 @@ function gizmo_update() {
 		];
 		let hit: transform_t = raycast_closest_box_intersect(trs, mouse_view_x(), mouse_view_y(), scene_camera);
 		if (hit != null) {
-			if (hit.object == context_raw.gizmo_translate_x) context_raw.translate_x = true;
-			else if (hit.object == context_raw.gizmo_translate_y) context_raw.translate_y = true;
-			else if (hit.object == context_raw.gizmo_translate_z) context_raw.translate_z = true;
-			else if (hit.object == context_raw.gizmo_scale_x) context_raw.scale_x = true;
-			else if (hit.object == context_raw.gizmo_scale_y) context_raw.scale_y = true;
-			else if (hit.object == context_raw.gizmo_scale_z) context_raw.scale_z = true;
+			if (hit.object == context_raw.gizmo_translate_x) {
+				context_raw.translate_x = true;
+			}
+			else if (hit.object == context_raw.gizmo_translate_y) {
+				context_raw.translate_y = true;
+			}
+			else if (hit.object == context_raw.gizmo_translate_z) {
+				context_raw.translate_z = true;
+			}
+			else if (hit.object == context_raw.gizmo_scale_x) {
+				context_raw.scale_x = true;
+			}
+			else if (hit.object == context_raw.gizmo_scale_y) {
+				context_raw.scale_y = true;
+			}
+			else if (hit.object == context_raw.gizmo_scale_z) {
+				context_raw.scale_z = true;
+			}
 			if (context_raw.translate_x || context_raw.translate_y || context_raw.translate_z || context_raw.scale_x || context_raw.scale_y || context_raw.scale_z) {
 				context_raw.gizmo_offset = 0.0;
 				context_raw.gizmo_started = true;
@@ -172,9 +188,15 @@ function gizmo_update() {
 			];
 			let hit: transform_t = raycast_closest_box_intersect(trs, mouse_view_x(), mouse_view_y(), scene_camera);
 			if (hit != null) {
-				if (hit.object == context_raw.gizmo_rotate_x) context_raw.rotate_x = true;
-				else if (hit.object == context_raw.gizmo_rotate_y) context_raw.rotate_y = true;
-				else if (hit.object == context_raw.gizmo_rotate_z) context_raw.rotate_z = true;
+				if (hit.object == context_raw.gizmo_rotate_x) {
+					context_raw.rotate_x = true;
+				}
+				else if (hit.object == context_raw.gizmo_rotate_y) {
+					context_raw.rotate_y = true;
+				}
+				else if (hit.object == context_raw.gizmo_rotate_z) {
+					context_raw.rotate_z = true;
+				}
 				if (context_raw.rotate_x || context_raw.rotate_y || context_raw.rotate_z) {
 					context_raw.gizmo_offset = 0.0;
 					context_raw.gizmo_started = true;
@@ -202,21 +224,27 @@ function gizmo_update() {
 		if (context_raw.translate_x || context_raw.scale_x) {
 			let hit: vec4_t = raycast_plane_intersect(vec4_y_axis(), gizmo_v, mouse_view_x(), mouse_view_y(), scene_camera);
 			if (hit != null) {
-				if (context_raw.gizmo_started) context_raw.gizmo_offset = hit.x - gizmo_v.x;
+				if (context_raw.gizmo_started) {
+					context_raw.gizmo_offset = hit.x - gizmo_v.x;
+				}
 				context_raw.gizmo_drag = hit.x - context_raw.gizmo_offset;
 			}
 		}
 		else if (context_raw.translate_y || context_raw.scale_y) {
 			let hit: vec4_t = raycast_plane_intersect(vec4_x_axis(), gizmo_v, mouse_view_x(), mouse_view_y(), scene_camera);
 			if (hit != null) {
-				if (context_raw.gizmo_started) context_raw.gizmo_offset = hit.y - gizmo_v.y;
+				if (context_raw.gizmo_started) {
+					context_raw.gizmo_offset = hit.y - gizmo_v.y;
+				}
 				context_raw.gizmo_drag = hit.y - context_raw.gizmo_offset;
 			}
 		}
 		else if (context_raw.translate_z || context_raw.scale_z) {
 			let hit: vec4_t = raycast_plane_intersect(vec4_x_axis(), gizmo_v, mouse_view_x(), mouse_view_y(), scene_camera);
 			if (hit != null) {
-				if (context_raw.gizmo_started) context_raw.gizmo_offset = hit.z - gizmo_v.z;
+				if (context_raw.gizmo_started) {
+					context_raw.gizmo_offset = hit.z - gizmo_v.z;
+				}
 				context_raw.gizmo_drag = hit.z - context_raw.gizmo_offset;
 			}
 		}
@@ -251,7 +279,9 @@ function gizmo_update() {
 			}
 		}
 
-		if (context_raw.gizmo_started) context_raw.gizmo_drag_last = context_raw.gizmo_drag;
+		if (context_raw.gizmo_started) {
+			context_raw.gizmo_drag_last = context_raw.gizmo_drag;
+		}
 
 		///if is_forge
 		util_mesh_remove_merged();

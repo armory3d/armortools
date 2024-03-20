@@ -25,10 +25,12 @@ function ui_files_show(filters: string, is_save: bool, open_multiple: bool, file
 	if (is_save) {
 		ui_files_path = krom_save_dialog(filters, "");
 		if (ui_files_path != null) {
-			while (ui_files_path.indexOf(path_sep + path_sep) >= 0) ui_files_path = string_replace_all(ui_files_path, path_sep + path_sep, path_sep);
+			while (string_index_of(ui_files_path, path_sep + path_sep) >= 0) {
+				ui_files_path = string_replace_all(ui_files_path, path_sep + path_sep, path_sep);
+			}
 			ui_files_path = string_replace_all(ui_files_path, "\r", "");
-			ui_files_filename = ui_files_path.substr(ui_files_path.lastIndexOf(path_sep) + 1);
-			ui_files_path = ui_files_path.substr(0, ui_files_path.lastIndexOf(path_sep));
+			ui_files_filename = substring(ui_files_path, string_last_index_of(ui_files_path, path_sep) + 1, ui_files_path.length);
+			ui_files_path = substring(ui_files_path, 0, string_last_index_of(ui_files_path, path_sep));
 			files_done(ui_files_path);
 		}
 	}
@@ -36,9 +38,11 @@ function ui_files_show(filters: string, is_save: bool, open_multiple: bool, file
 		let paths: string[] = krom_open_dialog(filters, "", open_multiple);
 		if (paths != null) {
 			for (let path of paths) {
-				while (path.indexOf(path_sep + path_sep) >= 0) path = string_replace_all(path, path_sep + path_sep, path_sep);
+				while (string_index_of(path, path_sep + path_sep) >= 0) {
+					path = string_replace_all(path, path_sep + path_sep, path_sep);
+				}
 				path = string_replace_all(path, "\r", "");
-				ui_files_filename = path.substr(path.lastIndexOf(path_sep) + 1);
+				ui_files_filename = substring(path, string_last_index_of(path, path_sep) + 1, path.length);
 				files_done(path);
 			}
 		}
@@ -56,19 +60,25 @@ function ui_files_release_keys() {
 	///end
 }
 
-function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, foldersOnly: bool = false, dragFiles: bool = false, search: string = "", refresh: bool = false, contextMenu: (s: string)=>void = null): string {
+function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bool = false, drag_files: bool = false, search: string = "", refresh: bool = false, context_menu: (s: string)=>void = null): string {
 
 	let icons: image_t = resource_get("icons.k");
 	let folder: rect_t = resource_tile50(icons, 2, 1);
 	let file: rect_t = resource_tile50(icons, 3, 1);
-	let is_cloud: bool = handle.text.startsWith("cloud");
+	let is_cloud: bool = starts_with(handle.text, "cloud");
 
-	if (is_cloud && file_cloud == null) file_init_cloud(function () { ui_base_hwnds[tab_area_t.STATUS].redraws = 3; });
-	if (is_cloud && file_read_directory("cloud", false).length == 0) return handle.text;
+	if (is_cloud && file_cloud == null) {
+		file_init_cloud(function () {
+			ui_base_hwnds[tab_area_t.STATUS].redraws = 3;
+		});
+	}
+	if (is_cloud && file_read_directory("cloud", false).length == 0) {
+		return handle.text;
+	}
 
 	///if krom_ios
 	let document_directory: string = krom_save_dialog("", "");
-	document_directory = document_directory.substr(0, document_directory.length - 8); // Strip /'untitled'
+	document_directory = substring(document_directory, 0, document_directory.length - 8); // Strip /'untitled'
 	///end
 
 	if (handle.text == "") handle.text = ui_files_default_path;
@@ -76,26 +86,38 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, foldersOnly: boo
 		ui_files_files = [];
 
 		// Up directory
-		let i1: i32 = handle.text.indexOf(path_sep);
+		let i1: i32 = string_index_of(handle.text, path_sep);
 		let nested: bool = i1 > -1 && handle.text.length - 1 > i1;
 		///if krom_windows
 		// Server addresses like \\server are not nested
-		nested = nested && !(handle.text.length >= 2 && handle.text.charAt(0) == path_sep && handle.text.charAt(1) == path_sep && handle.text.lastIndexOf(path_sep) == 1);
+		nested = nested && !(handle.text.length >= 2 && char_at(handle.text, 0) == path_sep && char_at(handle.text, 1) == path_sep && string_last_index_of(handle.text, path_sep) == 1);
 		///end
-		if (nested) ui_files_files.push("..");
+		if (nested) {
+			array_push(ui_files_files, "..");
+		}
 
 		let dir_path: string = handle.text;
 		///if krom_ios
-		if (!is_cloud) dir_path = document_directory + dir_path;
+		if (!is_cloud) {
+			dir_path = document_directory + dir_path;
+		}
 		///end
-		let files_all: string[] = file_read_directory(dir_path, foldersOnly);
+		let files_all: string[] = file_read_directory(dir_path, folders_only);
 
 		for (let f of files_all) {
-			if (f == "" || f.charAt(0) == ".") continue; // Skip hidden
-			if (f.indexOf(".") > 0 && !path_is_known(f)) continue; // Skip unknown extensions
-			if (is_cloud && f.indexOf("_icon.") >= 0) continue; // Skip thumbnails
-			if (f.toLowerCase().indexOf(search.toLowerCase()) < 0) continue; // Search filter
-			ui_files_files.push(f);
+			if (f == "" || char_at(f, 0) == ".") {
+				continue; // Skip hidden
+			}
+			if (string_index_of(f, ".") > 0 && !path_is_known(f)) {
+				continue; // Skip unknown extensions
+			}
+			if (is_cloud && string_index_of(f, "_icon.") >= 0) {
+				continue; // Skip thumbnails
+			}
+			if (string_index_of(to_lower_case(f), to_lower_case(search)) < 0) {
+				continue; // Search filter
+			}
+			array_push(ui_files_files, f);
 		}
 	}
 	ui_files_last_path = handle.text;
@@ -109,9 +131,13 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, foldersOnly: boo
 	// Directory contents
 	for (let row: i32 = 0; row < math_floor(math_ceil(ui_files_files.length / num)); ++row) {
 		let ar: f32[] = [];
-		for (let i: i32 = 0; i < num * 2; ++i) ar.push(1 / num);
+		for (let i: i32 = 0; i < num * 2; ++i) {
+			array_push(ar, 1 / num);
+		}
 		zui_row(ar);
-		if (row > 0) ui._y += zui_ELEMENT_OFFSET(ui) * 14.0;
+		if (row > 0) {
+			ui._y += zui_ELEMENT_OFFSET(ui) * 14.0;
+		}
 
 		for (let j: i32 = 0; j < num; ++j) {
 			let i: i32 = j + row * num;
@@ -124,7 +150,7 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, foldersOnly: boo
 			let f: string = ui_files_files[i];
 			let _x: f32 = ui._x;
 
-			let rect: rect_t = f.indexOf(".") > 0 ? file : folder;
+			let rect: rect_t = string_index_of(f, ".") > 0 ? file : folder;
 			let col: i32 = rect == file ? ui.t.LABEL_COL : ui.t.LABEL_COL - 0x00202020;
 			if (ui_files_selected == i) col = ui.t.HIGHLIGHT_COL;
 
@@ -138,21 +164,25 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, foldersOnly: boo
 			let icon: image_t = null;
 
 			if (is_cloud && f != ".." && !ui_files_offline) {
-				if (ui_files_icon_map == null) ui_files_icon_map = map_create();
-				icon = ui_files_icon_map.get(handle.text + path_sep + f);
+				if (ui_files_icon_map == null) {
+					ui_files_icon_map = map_create();
+				}
+				icon = map_get(ui_files_icon_map, handle.text + path_sep + f);
 				if (icon == null) {
 					let files_all: string[] = file_read_directory(handle.text);
-					let icon_file: string = f.substr(0, f.lastIndexOf(".")) + "_icon.jpg";
-					if (files_all.indexOf(icon_file) >= 0) {
-						let empty: image_t = render_path_render_targets.get("empty_black")._image;
-						ui_files_icon_map.set(handle.text + path_sep + f, empty);
+					let icon_file: string = substring(f, 0, string_last_index_of(f, ".")) + "_icon.jpg";
+					if (array_index_of(files_all, icon_file) >= 0) {
+						let empty: image_t = map_get(render_path_render_targets, "empty_black")._image;
+						map_set(ui_files_icon_map, handle.text + path_sep + f, empty);
 						file_cache_cloud(handle.text + path_sep + icon_file, function (abs: string) {
 							if (abs != null) {
 								let image: image_t = data_get_image(abs);
 								app_notify_on_init(function () {
-									if (base_pipe_copy_rgb == null) base_make_pipe_copy_rgb();
+									if (base_pipe_copy_rgb == null) {
+										base_make_pipe_copy_rgb();
+									}
 									icon = image_create_render_target(image.width, image.height);
-									if (f.endsWith(".arm")) { // Used for material sphere alpha cutout
+									if (ends_with(f, ".arm")) { // Used for material sphere alpha cutout
 										g2_begin(icon);
 
 										///if (is_paint || is_sculpt)
@@ -167,11 +197,13 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, foldersOnly: boo
 									g2_draw_image(image, 0, 0);
 									g2_set_pipeline(null);
 									g2_end();
-									ui_files_icon_map.set(handle.text + path_sep + f, icon);
+									map_set(ui_files_icon_map, handle.text + path_sep + f, icon);
 									ui_base_hwnds[tab_area_t.STATUS].redraws = 3;
 								});
 							}
-							else ui_files_offline = true;
+							else {
+								ui_files_offline = true;
+							}
 						});
 					}
 				}
@@ -191,10 +223,12 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, foldersOnly: boo
 					generic = false;
 				}
 			}
-			if (f.endsWith(".arm") && !is_cloud) {
-				if (ui_files_icon_map == null) ui_files_icon_map = map_create();
+			if (ends_with(f, ".arm") && !is_cloud) {
+				if (ui_files_icon_map == null) {
+					ui_files_icon_map = map_create();
+				}
 				let key: string = handle.text + path_sep + f;
-				icon = ui_files_icon_map.get(key);
+				icon = map_get(ui_files_icon_map, key);
 				if (!ui_files_icon_map.has(key)) {
 					let blob_path: string = key;
 
@@ -228,7 +262,7 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, foldersOnly: boo
 					}
 					///end
 
-					ui_files_icon_map.set(key, icon);
+					map_set(ui_files_icon_map, key, icon);
 					///end
 				}
 				if (icon != null) {
@@ -250,12 +284,14 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, foldersOnly: boo
 
 			if (path_is_texture(f) && !is_cloud) {
 				let w: i32 = 50;
-				if (ui_files_icon_map == null) ui_files_icon_map = map_create();
+				if (ui_files_icon_map == null) {
+					ui_files_icon_map = map_create();
+				}
 				let shandle: string = handle.text + path_sep + f;
-				icon = ui_files_icon_map.get(shandle);
+				icon = map_get(ui_files_icon_map, shandle);
 				if (icon == null) {
-					let empty: image_t = render_path_render_targets.get("empty_black")._image;
-					ui_files_icon_map.set(shandle, empty);
+					let empty: image_t = map_get(render_path_render_targets, "empty_black")._image;
+					map_set(ui_files_icon_map, shandle, empty);
 					let image: image_t = data_get_image(shandle);
 					app_notify_on_init(function () {
 						if (base_pipe_copy_rgb == null) base_make_pipe_copy_rgb();
@@ -268,7 +304,7 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, foldersOnly: boo
 						g2_draw_scaled_image(image, 0, 0, sw, sh);
 						g2_set_pipeline(null);
 						g2_end();
-						ui_files_icon_map.set(shandle, icon);
+						map_set(ui_files_icon_map, shandle, icon);
 						ui_base_hwnds[tab_area_t.STATUS].redraws = 3;
 						data_delete_image(shandle); // The big image is not needed anymore
 					});
@@ -289,19 +325,21 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, foldersOnly: boo
 				state = zui_image(icons, col, 50 * zui_SCALE(ui), rect.x, rect.y, rect.w, rect.h);
 			}
 
-			if (ui.is_hovered && ui.input_released_r && contextMenu != null) {
-				contextMenu(handle.text + path_sep + f);
+			if (ui.is_hovered && ui.input_released_r && context_menu != null) {
+				context_menu(handle.text + path_sep + f);
 			}
 
 			if (state == zui_state_t.STARTED) {
-				if (f != ".." && dragFiles) {
+				if (f != ".." && drag_files) {
 					base_drag_off_x = -(mouse_x - uix - ui._window_x - 3);
 					base_drag_off_y = -(mouse_y - uiy - ui._window_y + 1);
 					base_drag_file = handle.text;
 					///if krom_ios
-					if (!is_cloud) base_drag_file = document_directory + base_drag_file;
+					if (!is_cloud) {
+						base_drag_file = document_directory + base_drag_file;
+					}
 					///end
-					if (base_drag_file.charAt(base_drag_file.length - 1) != path_sep) {
+					if (char_at(base_drag_file, base_drag_file.length - 1) != path_sep) {
 						base_drag_file += path_sep;
 					}
 					base_drag_file += f;
@@ -315,12 +353,14 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, foldersOnly: boo
 					base_is_dragging = false;
 					handle.changed = ui.changed = true;
 					if (f == "..") { // Up
-						handle.text = handle.text.substring(0, handle.text.lastIndexOf(path_sep));
+						handle.text = substring(handle.text, 0, string_last_index_of(handle.text, path_sep));
 						// Drive root
-						if (handle.text.length == 2 && handle.text.charAt(1) == ":") handle.text += path_sep;
+						if (handle.text.length == 2 && char_at(handle.text, 1) == ":") {
+							handle.text += path_sep;
+						}
 					}
 					else {
-						if (handle.text.charAt(handle.text.length - 1) != path_sep) {
+						if (char_at(handle.text, handle.text.length - 1) != path_sep) {
 							handle.text += path_sep;
 						}
 						handle.text += f;
@@ -333,29 +373,39 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, foldersOnly: boo
 			// Label
 			ui._x = _x;
 			ui._y += slotw * 0.75;
-			let label0: string = (ui_files_show_extensions || f.indexOf(".") <= 0) ? f : f.substr(0, f.lastIndexOf("."));
+			let label0: string = (ui_files_show_extensions || string_index_of(f, ".") <= 0) ? f : substring(f, 0, string_last_index_of(f, "."));
 			let label1: string = "";
 			while (label0.length > 0 && g2_font_width(ui.font, ui.font_size, label0) > ui._w - 6) { // 2 line split
-				label1 = label0.charAt(label0.length - 1) + label1;
-				label0 = label0.substr(0, label0.length - 1);
+				label1 = char_at(label0, label0.length - 1) + label1;
+				label0 = substring(label0, 0, label0.length - 1);
 			}
-			if (label1 != "") ui.cur_ratio--;
+			if (label1 != "") {
+				ui.cur_ratio--;
+			}
 			zui_text(label0, zui_align_t.CENTER);
-			if (ui.is_hovered) zui_tooltip(label0 + label1);
+			if (ui.is_hovered) {
+				zui_tooltip(label0 + label1);
+			}
 			if (label1 != "") { // Second line
 				ui._x = _x;
 				ui._y += g2_font_height(ui.font, ui.font_size);
 				zui_text(label1, zui_align_t.CENTER);
-				if (ui.is_hovered) zui_tooltip(label0 + label1);
+				if (ui.is_hovered) {
+					zui_tooltip(label0 + label1);
+				}
 				ui._y -= g2_font_height(ui.font, ui.font_size);
 			}
 
 			ui._y -= slotw * 0.75;
 
-			if (handle.changed) break;
+			if (handle.changed) {
+				break;
+			}
 		}
 
-		if (handle.changed) break;
+		if (handle.changed) {
+			break;
+		}
 	}
 	ui._y += slotw * 0.8;
 

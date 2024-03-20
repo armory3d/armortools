@@ -35,16 +35,28 @@ function ui_menu_render() {
 	else {
 		ui_menu_start(ui);
 		if (ui_menu_category == menu_category_t.FILE) {
-			if (ui_menu_button(ui, tr("New .."), config_keymap.file_new)) project_new_box();
-			if (ui_menu_button(ui, tr("Open..."), config_keymap.file_open)) project_open();
-			if (ui_menu_button(ui, tr("Open Recent..."), config_keymap.file_open_recent)) box_projects_show();
-			if (ui_menu_button(ui, tr("Save"), config_keymap.file_save)) project_save();
-			if (ui_menu_button(ui, tr("Save As..."), config_keymap.file_save_as)) project_save_as();
+			if (ui_menu_button(ui, tr("New .."), config_keymap.file_new)) {
+				project_new_box();
+			}
+			if (ui_menu_button(ui, tr("Open..."), config_keymap.file_open)) {
+				project_open();
+			}
+			if (ui_menu_button(ui, tr("Open Recent..."), config_keymap.file_open_recent)) {
+				box_projects_show();
+			}
+			if (ui_menu_button(ui, tr("Save"), config_keymap.file_save)) {
+				project_save();
+			}
+			if (ui_menu_button(ui, tr("Save As..."), config_keymap.file_save_as)) {
+				project_save_as();
+			}
 			ui_menu_separator(ui);
-			if (ui_menu_button(ui, tr("Import Texture..."), config_keymap.file_import_assets)) project_import_asset(path_texture_formats.join(","), false);
+			if (ui_menu_button(ui, tr("Import Texture..."), config_keymap.file_import_assets)) {
+				project_import_asset(path_texture_formats.join(","), false);
+			}
 			if (ui_menu_button(ui, tr("Import Envmap..."))) {
 				ui_files_show("hdr", false, false, function (path: string) {
-					if (!path.endsWith(".hdr")) {
+					if (!ends_with(path, ".hdr")) {
 						console_error(tr("Error: .hdr file expected"));
 						return;
 					}
@@ -53,17 +65,31 @@ function ui_menu_render() {
 			}
 
 			///if (is_paint || is_sculpt)
-			if (ui_menu_button(ui, tr("Import Font..."))) project_import_asset("ttf,ttc,otf");
-			if (ui_menu_button(ui, tr("Import Material..."))) project_import_material();
-			if (ui_menu_button(ui, tr("Import Brush..."))) project_import_brush();
+			if (ui_menu_button(ui, tr("Import Font..."))) {
+				project_import_asset("ttf,ttc,otf");
+			}
+			if (ui_menu_button(ui, tr("Import Material..."))) {
+				project_import_material();
+			}
+			if (ui_menu_button(ui, tr("Import Brush..."))) {
+				project_import_brush();
+			}
 			///end
 
 			///if (is_paint || is_lab)
-			if (ui_menu_button(ui, tr("Import Swatches..."))) project_import_swatches();
+			if (ui_menu_button(ui, tr("Import Swatches..."))) {
+				project_import_swatches();
+			}
 			///end
-			if (ui_menu_button(ui, tr("Import Mesh..."))) project_import_mesh();
-			if (ui_menu_button(ui, tr("Reimport Mesh"), config_keymap.file_reimport_mesh)) project_reimport_mesh();
-			if (ui_menu_button(ui, tr("Reimport Textures"), config_keymap.file_reimport_textures)) project_reimport_textures();
+			if (ui_menu_button(ui, tr("Import Mesh..."))) {
+				project_import_mesh();
+			}
+			if (ui_menu_button(ui, tr("Reimport Mesh"), config_keymap.file_reimport_mesh)) {
+				project_reimport_mesh();
+			}
+			if (ui_menu_button(ui, tr("Reimport Textures"), config_keymap.file_reimport_textures)) {
+				project_reimport_textures();
+			}
 			ui_menu_separator(ui);
 			///if (is_paint || is_lab)
 			if (ui_menu_button(ui, tr("Export Textures..."), config_keymap.file_export_textures_as)) {
@@ -72,7 +98,9 @@ function ui_menu_render() {
 				///end
 				box_export_show_textures();
 			}
-			if (ui_menu_button(ui, tr("Export Swatches..."))) project_export_swatches();
+			if (ui_menu_button(ui, tr("Export Swatches..."))) {
+				project_export_swatches();
+			}
 			///end
 			if (ui_menu_button(ui, tr("Export Mesh..."))) {
 				context_raw.export_mesh_index = 0; // All
@@ -80,11 +108,15 @@ function ui_menu_render() {
 			}
 
 			///if is_paint
-			if (ui_menu_button(ui, tr("Bake Material..."))) box_export_show_bake_material();
+			if (ui_menu_button(ui, tr("Bake Material..."))) {
+				box_export_show_bake_material();
+			}
 			///end
 
 			ui_menu_separator(ui);
-			if (ui_menu_button(ui, tr("Exit"))) sys_stop();
+			if (ui_menu_button(ui, tr("Exit"))) {
+				sys_stop();
+			}
 		}
 		else if (ui_menu_category == menu_category_t.EDIT) {
 			let step_undo: string = "";
@@ -96,12 +128,18 @@ function ui_menu_render() {
 				step_redo = history_steps[history_steps.length - history_redos].name;
 			}
 			ui.enabled = history_undos > 0;
-			if (ui_menu_button(ui, tr("Undo {step}", new Map([["step", step_undo]])), config_keymap.edit_undo)) history_undo();
+			if (ui_menu_button(ui, tr("Undo {step}", new map_t([["step", step_undo]])), config_keymap.edit_undo)) {
+				history_undo();
+			}
 			ui.enabled = history_redos > 0;
-			if (ui_menu_button(ui, tr("Redo {step}", new Map([["step", step_redo]])), config_keymap.edit_redo)) history_redo();
+			if (ui_menu_button(ui, tr("Redo {step}", new map_t([["step", step_redo]])), config_keymap.edit_redo)) {
+				history_redo();
+			}
 			ui.enabled = true;
 			ui_menu_separator(ui);
-			if (ui_menu_button(ui, tr("Preferences..."), config_keymap.edit_prefs)) box_preferences_show();
+			if (ui_menu_button(ui, tr("Preferences..."), config_keymap.edit_prefs)) {
+				box_preferences_show();
+			}
 		}
 		else if (ui_menu_category == menu_category_t.VIEWPORT) {
 			if (ui_menu_button(ui, tr("Distract Free"), config_keymap.view_distract_free)) {
@@ -123,7 +161,9 @@ function ui_menu_render() {
 			env_handle.value = p.strength;
 			ui_menu_align(ui);
 			p.strength = zui_slider(env_handle, tr("Environment"), 0.0, 8.0, true);
-			if (env_handle.changed) context_raw.ddirty = 2;
+			if (env_handle.changed) {
+				context_raw.ddirty = 2;
+			}
 
 			ui_menu_fill(ui);
 			let enva_handle: zui_handle_t = zui_handle("uimenu_1");
@@ -136,8 +176,12 @@ function ui_menu_render() {
 			}
 			ui_menu_align(ui);
 			context_raw.envmap_angle = zui_slider(enva_handle, tr("Environment Angle"), 0.0, 360.0, true, 1) / 180.0 * math_pi();
-			if (ui.is_hovered) zui_tooltip(tr("{shortcut} and move mouse", new Map([["shortcut", config_keymap.rotate_envmap]])));
-			if (enva_handle.changed) context_raw.ddirty = 2;
+			if (ui.is_hovered) {
+				zui_tooltip(tr("{shortcut} and move mouse", new map_t([["shortcut", config_keymap.rotate_envmap]])));
+			}
+			if (enva_handle.changed) {
+				context_raw.ddirty = 2;
+			}
 
 			if (scene_lights.length > 0) {
 				let light: light_object_t = scene_lights[0];
@@ -149,7 +193,9 @@ function ui_menu_render() {
 				lhandle.value = math_floor(lhandle.value * 100) / 100;
 				ui_menu_align(ui);
 				light.data.strength = zui_slider(lhandle, tr("Light"), 0.0, 4.0, true) * scale;
-				if (lhandle.changed) context_raw.ddirty = 2;
+				if (lhandle.changed) {
+					context_raw.ddirty = 2;
+				}
 
 				ui_menu_fill(ui);
 				light = scene_lights[0];
@@ -157,11 +203,17 @@ function ui_menu_render() {
 				lahandle.value = context_raw.light_angle / math_pi() * 180;
 				ui_menu_align(ui);
 				let new_angle: f32 = zui_slider(lahandle, tr("Light Angle"), 0.0, 360.0, true, 1) / 180 * math_pi();
-				if (ui.is_hovered) zui_tooltip(tr("{shortcut} and move mouse", new Map([["shortcut", config_keymap.rotate_light]])));
+				if (ui.is_hovered) {
+					zui_tooltip(tr("{shortcut} and move mouse", new map_t([["shortcut", config_keymap.rotate_light]])));
+				}
 				let ldiff: f32 = new_angle - context_raw.light_angle;
 				if (math_abs(ldiff) > 0.005) {
-					if (new_angle < 0) new_angle += (math_floor(-new_angle / (2 * math_pi())) + 1) * 2 * math_pi();
-					else if (new_angle > 2 * math_pi()) new_angle -= math_floor(new_angle / (2 * math_pi())) * 2 * math_pi();
+					if (new_angle < 0) {
+						new_angle += (math_floor(-new_angle / (2 * math_pi())) + 1) * 2 * math_pi();
+					}
+					else if (new_angle > 2 * math_pi()) {
+						new_angle -= math_floor(new_angle / (2 * math_pi())) * 2 * math_pi();
+					}
 					context_raw.light_angle = new_angle;
 					let m: mat4_t = mat4_rot_z(ldiff);
 					mat4_mult_mat(light.base.transform.local, m);
@@ -174,7 +226,9 @@ function ui_menu_render() {
 				sxhandle.value = light.data.size;
 				ui_menu_align(ui);
 				light.data.size = zui_slider(sxhandle, tr("Light Size"), 0.0, 4.0, true);
-				if (sxhandle.changed) context_raw.ddirty = 2;
+				if (sxhandle.changed) {
+					context_raw.ddirty = 2;
+				}
 			}
 
 			///if (is_paint || is_sculpt)
@@ -238,7 +292,9 @@ function ui_menu_render() {
 			ui_menu_fill(ui);
 			let compass_handle: zui_handle_t = zui_handle("uimenu_9", { selected: context_raw.show_compass });
 			context_raw.show_compass = zui_check(compass_handle, " " + tr("Compass"));
-			if (compass_handle.changed) context_raw.ddirty = 2;
+			if (compass_handle.changed) {
+				context_raw.ddirty = 2;
+			}
 
 			ui_menu_fill(ui);
 			context_raw.show_envmap = zui_check(context_raw.show_envmap_handle, " " + tr("Envmap"));
@@ -249,11 +305,15 @@ function ui_menu_render() {
 
 			ui_menu_fill(ui);
 			context_raw.show_envmap_blur = zui_check(context_raw.show_envmap_blur_handle, " " + tr("Blur Envmap"));
-			if (context_raw.show_envmap_blur_handle.changed) context_raw.ddirty = 2;
+			if (context_raw.show_envmap_blur_handle.changed) {
+				context_raw.ddirty = 2;
+			}
 
 			context_update_envmap();
 
-			if (ui.changed) ui_menu_keep_open = true;
+			if (ui.changed) {
+				ui_menu_keep_open = true;
+			}
 		}
 		else if (ui_menu_category == menu_category_t.MODE) {
 			let mode_handle: zui_handle_t = zui_handle("uimenu_10");
@@ -285,8 +345,8 @@ function ui_menu_render() {
 
 			///if (krom_direct3d12 || krom_vulkan || krom_metal)
 			if (krom_raytrace_supported()) {
-				modes.push(tr("Path Traced"));
-				shortcuts.push("p");
+				array_push(modes, tr("Path Traced"));
+				array_push(shortcuts, "p");
 			}
 			///end
 
@@ -372,24 +432,30 @@ function ui_menu_render() {
 			context_raw.camera_controls = zui_inline_radio(camera_controls_handle, [tr("Orbit"), tr("Rotate"), tr("Fly")], zui_align_t.LEFT);
 
 			let orbit_and_rotate_tooltip: string = tr("Orbit and Rotate mode:\n{rotate_shortcut} or move right mouse button to rotate.\n{zoom_shortcut} or scroll to zoom.\n{pan_shortcut} or move middle mouse to pan.",
-				new Map([
+				new map_t([
 					["rotate_shortcut", config_keymap.action_rotate],
 					["zoom_shortcut", config_keymap.action_zoom],
 					["pan_shortcut", config_keymap.action_pan]
 				])
 			);
 			let fly_tooltip: string = tr("Fly mode:\nHold the right mouse button and one of the following commands:\nmove mouse to rotate.\nw, up or scroll up to move forward.\ns, down or scroll down to move backward.\na or left to move left.\nd or right to move right.\ne to move up.\nq to move down.\nHold shift to move faster or alt to move slower.");
-			if (ui.is_hovered) zui_tooltip(orbit_and_rotate_tooltip + "\n\n" + fly_tooltip);
+			if (ui.is_hovered) {
+				zui_tooltip(orbit_and_rotate_tooltip + "\n\n" + fly_tooltip);
+			}
 
 			ui_menu_fill(ui);
 			ui_menu_align(ui);
 			context_raw.camera_type = zui_inline_radio(context_raw.cam_handle, [tr("Perspective"), tr("Orthographic")], zui_align_t.LEFT);
-			if (ui.is_hovered) zui_tooltip(tr("Camera Type") + ` (${config_keymap.view_camera_type})`);
+			if (ui.is_hovered) {
+				zui_tooltip(tr("Camera Type") + ` (${config_keymap.view_camera_type})`);
+			}
 			if (context_raw.cam_handle.changed) {
 				viewport_update_camera_type(context_raw.camera_type);
 			}
 
-			if (ui.changed) ui_menu_keep_open = true;
+			if (ui.changed) {
+				ui_menu_keep_open = true;
+			}
 		}
 		else if (ui_menu_category == menu_category_t.HELP) {
 			if (ui_menu_button(ui, tr("Manual"))) {
@@ -427,16 +493,17 @@ function ui_menu_render() {
 				file_load_url(manifest_url_ios);
 				///else
 				// Retrieve latest version number
-				file_download_bytes("https://server.armorpaint.org/" + manifest_title.toLowerCase() + ".html", function (buffer: ArrayBuffer) {
+				file_download_bytes("https://server.armorpaint.org/" + to_lower_case(manifest_title) + ".html", function (buffer: buffer_t) {
 					if (buffer != null)  {
 						// Compare versions
 						let update: any = json_parse(sys_buffer_to_string(buffer));
 						let update_version: i32 = math_floor(update.version);
 						if (update_version > 0) {
-							let date: string = config_get_date().substr(2); // 2019 -> 19
+							let date: string = config_get_date(); // 2019 -> 19
+							date = substring(date, 2, date.length);
 							let date_int: i32 = parseInt(string_replace_all(date, "-", ""));
 							if (update_version > date_int) {
-								ui_box_show_message(tr("Update"), tr("Update is available!\nPlease visit {url}.", new Map([["url", manifest_url]])));
+								ui_box_show_message(tr("Update"), tr("Update is available!\nPlease visit {url}.", new map_t([["url", manifest_url]])));
 							}
 							else {
 								ui_box_show_message(tr("Update"), tr("You are up to date!"));
@@ -444,7 +511,7 @@ function ui_menu_render() {
 						}
 					}
 					else {
-						ui_box_show_message(tr("Update"), tr("Unable to check for updates.\nPlease visit {url}.", new Map([["url", manifest_url]])));
+						ui_box_show_message(tr("Update"), tr("Unable to check for updates.\nPlease visit {url}.", new map_t([["url", manifest_url]])));
 					}
 				});
 				///end
@@ -459,20 +526,20 @@ function ui_menu_render() {
 				let save: string = (path_is_protected() ? krom_save_path() : path_data()) + path_sep + "tmp.txt";
 				krom_sys_command('wmic path win32_VideoController get name > "' + save + '"');
 				let blob: buffer_t = krom_load_blob(save);
-				let u8: Uint8Array = new Uint8Array(blob);
+				let u8: u8_array_t = new u8_array_t(blob);
 				let gpu_raw: string = "";
 				for (let i: i32 = 0; i < math_floor(u8.length / 2); ++i) {
-					let c: string = String.fromCharCode(u8[i * 2]);
+					let c: string = string_from_char_code(u8[i * 2]);
 					gpu_raw += c;
 				}
 
-				let gpus: string[] = gpu_raw.split("\n");
-				gpus = gpus.splice(1, gpus.length - 2);
+				let gpus: string[] = string_split(gpu_raw, "\n");
+				array_splice(gpus, 1, gpus.length - 2);
 				let gpu: string = "";
 				for (let g of gpus) {
 					gpu += trim_end(g) + ", ";
 				}
-				gpu = gpu.substr(0, gpu.length - 2);
+				gpu = substring(gpu, 0, gpu.length - 2);
 				msg += `\n${gpu}`;
 				///else
 				// { lshw -C display }
@@ -582,7 +649,7 @@ function ui_menu_separator(ui: zui_t) {
 	}
 }
 
-function ui_menu_button(ui: zui_t, text: string, label: string = ""/*, icon: i32 = -1*/): bool {
+function ui_menu_button(ui: zui_t, text: string, label: string = ""): bool {
 	ui_menu_fill(ui);
 	if (config_raw.touch_ui) {
 		label = "";

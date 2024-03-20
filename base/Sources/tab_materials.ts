@@ -42,7 +42,9 @@ function tab_materials_button_nodes() {
 	if (zui_button(tr("Nodes"))) {
 		ui_base_show_material_nodes();
 	}
-	else if (ui.is_hovered) zui_tooltip(tr("Show Node Editor") + ` (${config_keymap.toggle_node_editor})`);
+	else if (ui.is_hovered) {
+		zui_tooltip(tr("Show Node Editor") + ` (${config_keymap.toggle_node_editor})`);
+	}
 }
 
 function tab_materials_draw_slots(mini: bool) {
@@ -53,19 +55,25 @@ function tab_materials_draw_slots(mini: bool) {
 	for (let row: i32 = 0; row < math_floor(math_ceil(project_materials.length / num)); ++row) {
 		let mult: i32 = config_raw.show_asset_names ? 2 : 1;
 		let ar: f32[] = [];
-		for (let i = 0; i < num * mult; ++i) ar.push(1 / num);
+		for (let i = 0; i < num * mult; ++i) {
+			array_push(ar, 1 / num);
+		}
 		zui_row(ar);
 
 		ui._x += 2;
 		let off: f32 = config_raw.show_asset_names ? zui_ELEMENT_OFFSET(ui) * 10.0 : 6;
-		if (row > 0) ui._y += off;
+		if (row > 0) {
+			ui._y += off;
+		}
 
 		for (let j: i32 = 0; j < num; ++j) {
 			let imgw: i32 = math_floor(50 * zui_SCALE(ui));
 			let i: i32 = j + row * num;
 			if (i >= project_materials.length) {
 				zui_end_element(imgw);
-				if (config_raw.show_asset_names) zui_end_element(0);
+				if (config_raw.show_asset_names) {
+					zui_end_element(0);
+				}
 				continue;
 			}
 			let img: image_t = zui_SCALE(ui) > 1 ? project_materials[i].image : project_materials[i].image_icon;
@@ -80,7 +88,9 @@ function tab_materials_draw_slots(mini: bool) {
 				else {
 					let off: i32 = row % 2 == 1 ? 1 : 0;
 					let w: i32 = 50;
-					if (config_raw.window_scale > 1) w += math_floor(config_raw.window_scale * 2);
+					if (config_raw.window_scale > 1) {
+						w += math_floor(config_raw.window_scale * 2);
+					}
 					zui_fill(-1,         -2, w + 3,       2, ui.t.HIGHLIGHT_COL);
 					zui_fill(-1,    w - off, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
 					zui_fill(-1,         -2,     2,   w + 3, ui.t.HIGHLIGHT_COL);
@@ -105,7 +115,7 @@ function tab_materials_draw_slots(mini: bool) {
 			let is_typing: bool = ui.is_typing || ui_view2d_ui.is_typing || ui_nodes_ui.is_typing;
 			if (!is_typing) {
 				if (i < 9 && operator_shortcut(config_keymap.select_material, shortcut_type_t.DOWN)) {
-					let number: string = String(i + 1);
+					let number: string = any_to_string(i + 1);
 					let width: i32 = g2_font_width(ui.font, ui.font_size, number) + 10;
 					let height: i32 = g2_font_height(ui.font, ui.font_size);
 					g2_set_color(ui.t.TEXT_COL);
@@ -121,7 +131,7 @@ function tab_materials_draw_slots(mini: bool) {
 					context_select_material(i);
 					///if is_paint
 					if (context_raw.tool == workspace_tool_t.MATERIAL) {
-						let _init = () => {
+						let _init = function () {
 							base_update_fill_layers();
 						}
 						app_notify_on_init(_init);
@@ -145,8 +155,8 @@ function tab_materials_draw_slots(mini: bool) {
 				context_select_material(i);
 				let add: i32 = project_materials.length > 1 ? 1 : 0;
 
-				ui_menu_draw((ui: zui_t) => {
-					let m: SlotMaterialRaw = project_materials[i];
+				ui_menu_draw(function (ui: zui_t) {
+					let m: slot_material_t = project_materials[i];
 
 					if (ui_menu_button(ui, tr("To Fill Layer"))) {
 						context_select_material(i);
@@ -166,9 +176,9 @@ function tab_materials_draw_slots(mini: bool) {
 					///end
 
 					if (ui_menu_button(ui, tr("Duplicate"))) {
-						let _init = () => {
+						let _init = function () {
 							context_raw.material = slot_material_create(project_materials[0].data);
-							project_materials.push(context_raw.material);
+							array_push(project_materials, context_raw.material);
 							let cloned: zui_node_canvas_t = json_parse(json_stringify(project_materials[i].canvas));
 							context_raw.material.canvas = cloned;
 							tab_materials_update_material();
@@ -224,8 +234,12 @@ function tab_materials_draw_slots(mini: bool) {
 			}
 			if (ui.is_hovered) {
 				zui_tooltip_image(imgFull);
-				if (i < 9) zui_tooltip(project_materials[i].canvas.name + " - (" + config_keymap.select_material + " " + (i + 1) + ")");
-				else zui_tooltip(project_materials[i].canvas.name);
+				if (i < 9) {
+					zui_tooltip(project_materials[i].canvas.name + " - (" + config_keymap.select_material + " " + (i + 1) + ")");
+				}
+				else {
+					zui_tooltip(project_materials[i].canvas.name);
+				}
 			}
 
 			if (config_raw.show_asset_names) {
@@ -233,8 +247,12 @@ function tab_materials_draw_slots(mini: bool) {
 				ui._y += slotw * 0.9;
 				zui_text(project_materials[i].canvas.name, zui_align_t.CENTER);
 				if (ui.is_hovered) {
-					if (i < 9) zui_tooltip(project_materials[i].canvas.name + " - (" + config_keymap.select_material + " " + (i + 1) + ")");
-					else zui_tooltip(project_materials[i].canvas.name);
+					if (i < 9) {
+						zui_tooltip(project_materials[i].canvas.name + " - (" + config_keymap.select_material + " " + (i + 1) + ")");
+					}
+					else {
+						zui_tooltip(project_materials[i].canvas.name);
+					}
 				}
 				ui._y -= slotw * 0.9;
 				if (i == project_materials.length - 1) {
@@ -251,7 +269,7 @@ function tab_materials_draw_slots(mini: bool) {
 	}
 
 	let in_focus: bool = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
-							ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
+						 ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
 	if (in_focus && ui.is_delete_down && project_materials.length > 1) {
 		ui.is_delete_down = false;
 		tab_materials_delete_material(context_raw.material);
@@ -263,7 +281,7 @@ function tab_materials_button_new(text: string) {
 		let current: image_t = _g2_current;
 		g2_end();
 		context_raw.material = slot_material_create(project_materials[0].data);
-		project_materials.push(context_raw.material);
+		array_push(project_materials, context_raw.material);
 		tab_materials_update_material();
 		g2_begin(current);
 		history_new_material();
@@ -277,7 +295,9 @@ function tab_materials_update_material() {
 	make_material_parse_paint_material();
 	util_render_make_material_preview();
 	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
-	if (decal) util_render_make_decal_preview();
+	if (decal) {
+		util_render_make_decal_preview();
+	}
 }
 
 function tab_materials_update_material_pointers(nodes: zui_node_t[], i: i32) {
@@ -312,19 +332,25 @@ function tab_materials_accept_swatch_drag(swatch: swatch_color_t) {
 			node.inputs[7].default_value = swatch.height;
 		}
 	}
-	project_materials.push(context_raw.material);
+	array_push(project_materials, context_raw.material);
 	tab_materials_update_material();
 	history_new_material();
 }
 
-function tab_materials_delete_material(m: SlotMaterialRaw) {
-	let i: i32 = project_materials.indexOf(m);
-	for (let l of project_layers) if (l.fill_layer == m) l.fill_layer = null;
+function tab_materials_delete_material(m: slot_material_t) {
+	let i: i32 = array_index_of(project_materials, m);
+	for (let l of project_layers) {
+		if (l.fill_layer == m) {
+			l.fill_layer = null;
+		}
+	}
 	history_delete_material();
 	context_select_material(i == project_materials.length - 1 ? i - 1 : i + 1);
-	project_materials.splice(i, 1);
+	array_splice(project_materials, i, 1);
 	ui_base_hwnds[1].redraws = 2;
-	for (let m of project_materials) tab_materials_update_material_pointers(m.canvas.nodes, i);
+	for (let m of project_materials) {
+		tab_materials_update_material_pointers(m.canvas.nodes, i);
+	}
 }
 
 ///end

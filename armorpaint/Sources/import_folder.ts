@@ -12,11 +12,13 @@ function import_folder_run(path: string) {
 	let found_texture: bool = false;
 	// Import maps
 	for (let f of files) {
-		if (!path_is_texture(f)) continue;
+		if (!path_is_texture(f)) {
+			continue;
+		}
 
 		// TODO: handle -albedo
 
-		let base: string = f.substr(0, f.lastIndexOf(".")).toLowerCase();
+		let base: string = to_lower_case(substring(f, 0, string_last_index_of(f, ".")));
 		let valid: bool = false;
 		if (mapbase == "" && path_is_base_color_tex(base)) {
 			mapbase = f;
@@ -60,10 +62,10 @@ function import_folder_run(path: string) {
 
 	// Create material
 	context_raw.material = slot_material_create(project_materials[0].data);
-	project_materials.push(context_raw.material);
+	array_push(project_materials, context_raw.material);
 	let nodes: zui_nodes_t = context_raw.material.nodes;
 	let canvas: zui_node_canvas_t = context_raw.material.canvas;
-	let dirs: string[] = path.split(path_sep);
+	let dirs: string[] = string_split(path, path_sep);
 	canvas.name = dirs[dirs.length - 1];
 	let nout: zui_node_t = null;
 	for (let n of canvas.nodes) {
@@ -124,5 +126,5 @@ function import_folder_place_image_node(nodes: zui_nodes_t, canvas: zui_node_can
 	n.x = 72;
 	n.y = ny;
 	let l: zui_node_link_t = { id: zui_get_link_id(canvas.links), from_id: n.id, from_socket: 0, to_id: to_id, to_socket: to_socket };
-	canvas.links.push(l);
+	array_push(canvas.links, l);
 }

@@ -23,9 +23,9 @@ function vector_node_create(x: Null<f32> = null, y: Null<f32> = null, z: Null<f3
 }
 
 function vector_node_get(self: vector_node_t, from: i32, done: (a: any)=>void) {
-	logic_node_input_get(self.base.inputs[0], (x: f32) => {
-		logic_node_input_get(self.base.inputs[1], (y: f32) => {
-			logic_node_input_get(self.base.inputs[2], (z: f32) => {
+	logic_node_input_get(self.base.inputs[0], function (x: f32) {
+		logic_node_input_get(self.base.inputs[1], function (y: f32) {
+			logic_node_input_get(self.base.inputs[2], function (z: f32) {
 				self.value.x = x;
 				self.value.y = y;
 				self.value.z = z;
@@ -36,16 +36,18 @@ function vector_node_get(self: vector_node_t, from: i32, done: (a: any)=>void) {
 }
 
 function vector_node_get_as_image(self: vector_node_t, from: i32, done: (img: image_t)=>void) {
-	logic_node_input_get(self.base.inputs[0], (x: f32) => {
-		logic_node_input_get(self.base.inputs[1], (y: f32) => {
-			logic_node_input_get(self.base.inputs[2], (z: f32) => {
-				if (self.image != null) image_unload(self.image);
-				let b: ArrayBuffer = new ArrayBuffer(16);
-				let v: DataView = new DataView(b);
-				v.setFloat32(0, (self.base.inputs[0].node as any).value, true);
-				v.setFloat32(4, (self.base.inputs[1].node as any).value, true);
-				v.setFloat32(8, (self.base.inputs[2].node as any).value, true);
-				v.setFloat32(12, 1.0, true);
+	logic_node_input_get(self.base.inputs[0], function (x: f32) {
+		logic_node_input_get(self.base.inputs[1], function (y: f32) {
+			logic_node_input_get(self.base.inputs[2], function (z: f32) {
+				if (self.image != null) {
+					image_unload(self.image);
+				}
+				let b: buffer_t = buffer_create(16);
+				let v: buffer_view_t = buffer_view_create(b);
+				buffer_view_set_f32(v, 0, (self.base.inputs[0].node as any).value);
+				buffer_view_set_f32(v, 4, (self.base.inputs[1].node as any).value);
+				buffer_view_set_f32(v, 8, (self.base.inputs[2].node as any).value);
+				buffer_view_set_f32(v, 12, 1.0);
 				self.image = image_from_bytes(b, 1, 1, tex_format_t.RGBA128);
 				done(self.image);
 			});
@@ -99,7 +101,7 @@ let vector_node_def: zui_node_t = {
 			name: _tr("Vector"),
 			type: "VECTOR",
 			color: 0xff6363c7,
-			default_value: new Float32Array([0.0, 0.0, 0.0])
+			default_value: new f32_array_t([0.0, 0.0, 0.0])
 		}
 	],
 	buttons: []

@@ -14,7 +14,7 @@ function util_particle_init() {
 		lifetime: 400,
 		lifetime_random: 0.5,
 		emit_from: 1,
-		object_align_factor: new Float32Array([0, 0, -40]),
+		object_align_factor: new f32_array_t([0, 0, -40]),
 		factor_random: 2.0,
 		physics_type: 0,
 		particle_size: 1.0,
@@ -46,7 +46,7 @@ function util_particle_init() {
 		if (mat.name == "Material2") {
 			let m: material_data_t = json_parse(json_stringify(mat));
 			m.name = "MaterialParticle";
-			_scene_raw.material_datas.push(m);
+			array_push(_scene_raw.material_datas, m);
 			break;
 		}
 	}
@@ -63,8 +63,10 @@ function util_particle_init() {
 			}
 			particle.particles.is_particle = true;
 			particle.material_refs = ["MaterialParticle"];
-			_scene_raw.objects.push(particle);
-			for (let i: i32 = 0; i < 16; ++i) particle.transform[i] *= 0.01;
+			array_push(_scene_raw.objects, particle);
+			for (let i: i32 = 0; i < 16; ++i) {
+				particle.transform[i] *= 0.01;
+			}
 			break;
 		}
 	}
@@ -94,7 +96,9 @@ function util_particle_init_physics() {
 }
 
 function util_particle_init_mesh() {
-	if (context_raw.paint_body != null) return;
+	if (context_raw.paint_body != null) {
+		return;
+	}
 
 	let po: mesh_object_t = context_raw.merged_object != null ? context_raw.merged_object : context_raw.paint_object;
 

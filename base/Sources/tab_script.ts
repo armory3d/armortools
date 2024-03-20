@@ -26,19 +26,23 @@ function tab_script_draw(htab: zui_handle_t) {
 			tab_script_hscript.text = "";
 		}
 		if (zui_button(tr("Import"))) {
-			ui_files_show("js", false, false, (path: string) => {
-				let b: ArrayBuffer = data_get_blob(path);
+			ui_files_show("js", false, false, function (path: string) {
+				let b: buffer_t = data_get_blob(path);
 				tab_script_hscript.text = sys_buffer_to_string(b);
 				data_delete_blob(path);
 			});
 		}
 		if (zui_button(tr("Export"))) {
 			let str: string = tab_script_hscript.text;
-			ui_files_show("js", true, false, (path: string) => {
+			ui_files_show("js", true, false, function (path: string) {
 				let f: string = ui_files_filename;
-				if (f == "") f = tr("untitled");
+				if (f == "") {
+					f = tr("untitled");
+				}
 				path = path + path_sep + f;
-				if (!path.endsWith(".js")) path += ".js";
+				if (!ends_with(path, ".js")) {
+					path += ".js";
+				}
 				krom_file_save_bytes(path, sys_string_to_buffer(str));
 			});
 		}
@@ -63,7 +67,7 @@ function tab_script_draw(htab: zui_handle_t) {
 
 function tab_script_get_text_coloring(): zui_text_coloring_t {
 	if (tab_script_text_coloring == null) {
-		let blob: ArrayBuffer = data_get_blob("text_coloring.json");
+		let blob: buffer_t = data_get_blob("text_coloring.json");
 		tab_script_text_coloring = json_parse(sys_buffer_to_string(blob));
 		tab_script_text_coloring.default_color = math_floor(tab_script_text_coloring.default_color);
 		for (let coloring of tab_script_text_coloring.colorings) {

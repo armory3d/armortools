@@ -7,7 +7,11 @@ let make_material_emis_used = false;
 let make_material_subs_used = false;
 
 function make_material_get_mout(): bool {
-	for (let n of ui_nodes_get_canvas_material().nodes) if (n.type == "OUTPUT_MATERIAL_PBR") return true;
+	for (let n of ui_nodes_get_canvas_material().nodes) {
+		if (n.type == "OUTPUT_MATERIAL_PBR") {
+			return true;
+		}
+	}
 	return false;
 }
 
@@ -54,37 +58,37 @@ function make_material_parse_mesh_material() {
 		}
 	}
 
-	let con: NodeShaderContextRaw = make_mesh_run({ name: "Material", canvas: null });
+	let con: node_shader_context_t = make_mesh_run({ name: "Material", canvas: null });
 	let scon: shader_context_t = shader_context_create(con.data);
 	scon._.override_context = {};
 	if (con.frag.shared_samplers.length > 0) {
 		let sampler: string = con.frag.shared_samplers[0];
-		scon._.override_context.shared_sampler = sampler.substr(sampler.lastIndexOf(" ") + 1);
+		scon._.override_context.shared_sampler = substring(sampler, string_last_index_of(sampler, " ") + 1, sampler.length);
 	}
 	if (!context_raw.texture_filter) {
 		scon._.override_context.filter = "point";
 	}
-	m._.shader.contexts.push(scon);
-	m._.shader._.contexts.push(scon);
+	array_push(m._.shader.contexts, scon);
+	array_push(m._.shader._.contexts, scon);
 
 	for (let i: i32 = 1; i < make_mesh_layer_pass_count; ++i) {
-		let con: NodeShaderContextRaw = make_mesh_run({ name: "Material", canvas: null }, i);
+		let con: node_shader_context_t = make_mesh_run({ name: "Material", canvas: null }, i);
 		let scon: shader_context_t = shader_context_create(con.data);
 		scon._.override_context = {};
 		if (con.frag.shared_samplers.length > 0) {
 			let sampler: string = con.frag.shared_samplers[0];
-			scon._.override_context.shared_sampler = sampler.substr(sampler.lastIndexOf(" ") + 1);
+			scon._.override_context.shared_sampler = substring(sampler, string_last_index_of(sampler, " ") + 1, sampler.length);
 		}
 		if (!context_raw.texture_filter) {
 			scon._.override_context.filter = "point";
 		}
-		m._.shader.contexts.push(scon);
-		m._.shader._.contexts.push(scon);
+		array_push(m._.shader.contexts, scon);
+		array_push(m._.shader._.contexts, scon);
 
 		let mcon: material_context_t;
 		mcon = material_context_create({ name: "mesh" + i, bind_textures: [] });
-		m.contexts.push(mcon);
-		m._.contexts.push(mcon);
+		array_push(m.contexts, mcon);
+		array_push(m._.contexts, mcon);
 	}
 
 	context_raw.ddirty = 2;
@@ -111,11 +115,13 @@ function make_material_parse_particle_material() {
 		array_remove(m._.shader.contexts, sc);
 		array_remove(m._.shader._.contexts, sc);
 	}
-	let con: NodeShaderContextRaw = make_particle_run({ name: "MaterialParticle", canvas: null });
-	if (sc != null) make_material_delete_context(sc);
+	let con: node_shader_context_t = make_particle_run({ name: "MaterialParticle", canvas: null });
+	if (sc != null) {
+		make_material_delete_context(sc);
+	}
 	sc = shader_context_create(con.data);
-	m._.shader.contexts.push(sc);
-	m._.shader._.contexts.push(sc);
+	array_push(m._.shader.contexts, sc);
+	array_push(m._.shader._.contexts, sc);
 }
 
 function make_material_parse_mesh_preview_material(md: material_data_t = null) {
@@ -136,7 +142,7 @@ function make_material_parse_mesh_preview_material(md: material_data_t = null) {
 	let mcon: material_context_t = { name: "mesh", bind_textures: [] };
 
 	let sd: material_t = { name: "Material", canvas: null };
-	let con: NodeShaderContextRaw = make_mesh_preview_run(sd, mcon);
+	let con: node_shader_context_t = make_mesh_preview_run(sd, mcon);
 
 	for (let i: i32 = 0; i < m._.contexts.length; ++i) {
 		if (m._.contexts[i].name == "mesh") {
@@ -145,16 +151,22 @@ function make_material_parse_mesh_preview_material(md: material_data_t = null) {
 		}
 	}
 
-	if (scon != null) make_material_delete_context(scon);
+	if (scon != null) {
+		make_material_delete_context(scon);
+	}
 
 	let compile_error: bool = false;
 	let _scon: shader_context_t = shader_context_create(con.data);
-	if (_scon == null) compile_error = true;
+	if (_scon == null) {
+		compile_error = true;
+	}
 	scon = _scon;
-	if (compile_error) return;
+	if (compile_error) {
+		return;
+	}
 
-	m._.shader.contexts.push(scon);
-	m._.shader._.contexts.push(scon);
+	array_push(m._.shader.contexts, scon);
+	array_push(m._.shader._.contexts, scon);
 }
 
 ///if arm_voxels
@@ -168,7 +180,9 @@ function make_material_make_voxel(m: material_data_t) {
 				break;
 			}
 		}
-		if (scon != null) make_voxel_run(scon);
+		if (scon != null) {
+			make_voxel_run(scon);
+		}
 	}
 }
 ///end
@@ -205,25 +219,33 @@ function make_material_parse_paint_material(bake_previews = true) {
 
 	let sdata: material_t = { name: "Material", canvas: ui_nodes_get_canvas_material() };
 	let tmcon: material_context_t = { name: "paint", bind_textures: [] };
-	let con: NodeShaderContextRaw = make_paint_run(sdata, tmcon);
+	let con: node_shader_context_t = make_paint_run(sdata, tmcon);
 
 	let compile_error: bool = false;
 	let scon: shader_context_t;
 	let _scon: shader_context_t = shader_context_create(con.data);
-	if (_scon == null) compile_error = true;
+	if (_scon == null) {
+		compile_error = true;
+	}
 	scon = _scon;
-	if (compile_error) return;
+	if (compile_error) {
+		return;
+	}
 	scon._.override_context = {};
 	scon._.override_context.addressing = "repeat";
 	let mcon: material_context_t = material_context_create(tmcon);
 
-	m._.shader.contexts.push(scon);
-	m._.shader._.contexts.push(scon);
-	m.contexts.push(mcon);
-	m._.contexts.push(mcon);
+	array_push(m._.shader.contexts, scon);
+	array_push(m._.shader._.contexts, scon);
+	array_push(m.contexts, mcon);
+	array_push(m._.contexts, mcon);
 
-	if (make_material_default_scon == null) make_material_default_scon = scon;
-	if (make_material_default_mcon == null) make_material_default_mcon = mcon;
+	if (make_material_default_scon == null) {
+		make_material_default_scon = scon;
+	}
+	if (make_material_default_mcon == null) {
+		make_material_default_mcon = mcon;
+	}
 }
 
 function make_material_bake_node_previews() {
@@ -231,10 +253,10 @@ function make_material_bake_node_previews() {
 	if (context_raw.node_previews == null) context_raw.node_previews = map_create();
 	make_material_traverse_nodes(ui_nodes_get_canvas_material().nodes, null, []);
 	for (let key of context_raw.node_previews.keys()) {
-		if (context_raw.node_previews_used.indexOf(key) == -1) {
-			let image: image_t = context_raw.node_previews.get(key);
+		if (array_index_of(context_raw.node_previews_used, key) == -1) {
+			let image: image_t = map_get(context_raw.node_previews, key);
 			base_notify_on_next_frame(function() { image_unload(image); });
-			context_raw.node_previews.delete(key);
+			map_delete(context_raw.node_previews, key);
 		}
 	}
 }
@@ -245,7 +267,7 @@ function make_material_traverse_nodes(nodes: zui_node_t[], group: zui_node_canva
 		if (node.type == "GROUP") {
 			for (let g of project_material_groups) {
 				if (g.canvas.name == node.name) {
-					parents.push(node);
+					array_push(parents, node);
 					make_material_traverse_nodes(g.canvas.nodes, g.canvas, parents);
 					parents.pop();
 					break;
@@ -258,14 +280,16 @@ function make_material_traverse_nodes(nodes: zui_node_t[], group: zui_node_canva
 function make_material_bake_node_preview(node: zui_node_t, group: zui_node_canvas_t, parents: zui_node_t[]) {
 	if (node.type == "BLUR") {
 		let id: string = parser_material_node_name(node, parents);
-		let image: image_t = context_raw.node_previews.get(id);
-		context_raw.node_previews_used.push(id);
+		let image: image_t = map_get(context_raw.node_previews, id);
+		array_push(context_raw.node_previews_used, id);
 		let resX: i32 = math_floor(config_get_texture_res_x() / 4);
 		let resY: i32 = math_floor(config_get_texture_res_y() / 4);
 		if (image == null || image.width != resX || image.height != resY) {
-			if (image != null) image_unload(image);
+			if (image != null) {
+				image_unload(image);
+			}
 			image = image_create_render_target(resX, resY);
-			context_raw.node_previews.set(id, image);
+			map_set(context_raw.node_previews, id, image);
 		}
 
 		parser_material_blur_passthrough = true;
@@ -274,14 +298,14 @@ function make_material_bake_node_preview(node: zui_node_t, group: zui_node_canva
 	}
 	else if (node.type == "DIRECT_WARP") {
 		let id: string = parser_material_node_name(node, parents);
-		let image: image_t = context_raw.node_previews.get(id);
-		context_raw.node_previews_used.push(id);
+		let image: image_t = map_get(context_raw.node_previews, id);
+		array_push(context_raw.node_previews_used, id);
 		let resX: i32 = math_floor(config_get_texture_res_x());
 		let resY: i32 = math_floor(config_get_texture_res_y());
 		if (image == null || image.width != resX || image.height != resY) {
 			if (image != null) image_unload(image);
 			image = image_create_render_target(resX, resY);
-			context_raw.node_previews.set(id, image);
+			map_set(context_raw.node_previews, id, image);
 		}
 
 		parser_material_warp_passthrough = true;
@@ -290,14 +314,14 @@ function make_material_bake_node_preview(node: zui_node_t, group: zui_node_canva
 	}
 	else if (node.type == "BAKE_CURVATURE") {
 		let id: string = parser_material_node_name(node, parents);
-		let image: image_t = context_raw.node_previews.get(id);
-		context_raw.node_previews_used.push(id);
+		let image: image_t = map_get(context_raw.node_previews, id);
+		array_push(context_raw.node_previews_used, id);
 		let resX: i32 = math_floor(config_get_texture_res_x());
 		let resY: i32 = math_floor(config_get_texture_res_y());
 		if (image == null || image.width != resX || image.height != resY) {
 			if (image != null) image_unload(image);
 			image = image_create_render_target(resX, resY, tex_format_t.R8);
-			context_raw.node_previews.set(id, image);
+			map_set(context_raw.node_previews, id, image);
 		}
 
 		if (render_path_paint_live_layer == null) {
@@ -333,7 +357,7 @@ function make_material_bake_node_preview(node: zui_node_t, group: zui_node_canva
 		make_material_parse_paint_material(false);
 
 		let rts: map_t<string, render_target_t> = render_path_render_targets;
-		let texpaint_live: render_target_t = rts.get("texpaint_live");
+		let texpaint_live: render_target_t = map_get(rts, "texpaint_live");
 
 		g2_begin(image);
 		g2_draw_image(texpaint_live._image, 0, 0);
@@ -342,16 +366,22 @@ function make_material_bake_node_preview(node: zui_node_t, group: zui_node_canva
 }
 
 function make_material_parse_node_preview_material(node: zui_node_t, group: zui_node_canvas_t = null, parents: zui_node_t[] = null): { scon: shader_context_t, mcon: material_context_t } {
-	if (node.outputs.length == 0) return null;
+	if (node.outputs.length == 0) {
+		return null;
+	}
 	let sdata: material_t = { name: "Material", canvas: ui_nodes_get_canvas_material() };
 	let mcon_raw: material_context_t = { name: "mesh", bind_textures: [] };
-	let con: NodeShaderContextRaw = make_node_preview_run(sdata, mcon_raw, node, group, parents);
+	let con: node_shader_context_t = make_node_preview_run(sdata, mcon_raw, node, group, parents);
 	let compile_error: bool = false;
 	let scon: shader_context_t;
 	let _scon: shader_context_t = shader_context_create(con.data);
-	if (_scon == null) compile_error = true;
+	if (_scon == null) {
+		compile_error = true;
+	}
 	scon = _scon;
-	if (compile_error) return null;
+	if (compile_error) {
+		return null;
+	}
 	let mcon: material_context_t = material_context_create(mcon_raw);
 	return { scon: scon, mcon: mcon };
 }
@@ -360,7 +390,7 @@ function make_material_parse_brush() {
 	parser_logic_parse(context_raw.brush.canvas);
 }
 
-function make_material_blend_mode(frag: NodeShaderRaw, blending: i32, cola: string, colb: string, opac: string): string {
+function make_material_blend_mode(frag: node_shader_t, blending: i32, cola: string, colb: string, opac: string): string {
 	if (blending == blend_type_t.MIX) {
 		return `mix(${cola}, ${colb}, ${opac})`;
 	}
@@ -425,7 +455,7 @@ function make_material_blend_mode(frag: NodeShaderRaw, blending: i32, cola: stri
 	}
 }
 
-function make_material_blend_mode_mask(frag: NodeShaderRaw, blending: i32, cola: string, colb: string, opac: string): string {
+function make_material_blend_mode_mask(frag: node_shader_t, blending: i32, cola: string, colb: string, opac: string): string {
 	if (blending == blend_type_t.MIX) {
 		return `mix(${cola}, ${colb}, ${opac})`;
 	}
@@ -484,7 +514,7 @@ function make_material_voxelgi_half_extents(): string {
 }
 
 function make_material_delete_context(c: shader_context_t) {
-	base_notify_on_next_frame(() => { // Ensure pipeline is no longer in use
+	base_notify_on_next_frame(function () { // Ensure pipeline is no longer in use
 		shader_context_delete(c);
 	});
 }

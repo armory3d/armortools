@@ -14,14 +14,18 @@ function tab_textures_draw(htab: zui_handle_t) {
 		}
 
 		if (zui_button(tr("Import"))) {
-			ui_files_show(path_texture_formats.join(","), false, true, (path: string) => {
+			ui_files_show(path_texture_formats.join(","), false, true, function (path: string) {
 				import_asset_run(path, -1.0, -1.0, true, false);
 				ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
 			});
 		}
-		if (ui.is_hovered) zui_tooltip(tr("Import texture file") + ` (${config_keymap.file_import_assets})`);
+		if (ui.is_hovered) {
+			zui_tooltip(tr("Import texture file") + ` (${config_keymap.file_import_assets})`);
+		}
 
-		if (zui_button(tr("2D View"))) ui_base_show_2d_view(view_2d_type_t.ASSET);
+		if (zui_button(tr("2D View"))) {
+			ui_base_show_2d_view(view_2d_type_t.ASSET);
+		}
 
 		zui_end_sticky();
 
@@ -40,19 +44,25 @@ function tab_textures_draw(htab: zui_handle_t) {
 			for (let row: i32 = 0; row < math_floor(math_ceil(project_assets.length / num)); ++row) {
 				let mult: i32 = config_raw.show_asset_names ? 2 : 1;
 				let ar: f32[] = [];
-				for (let i: i32 = 0; i < num * mult; ++i) ar.push(1 / num);
+				for (let i: i32 = 0; i < num * mult; ++i) {
+					array_push(ar, 1 / num);
+				}
 				zui_row(ar);
 
 				ui._x += 2;
 				let off: f32 = config_raw.show_asset_names ? zui_ELEMENT_OFFSET(ui) * 10.0 : 6;
-				if (row > 0) ui._y += off;
+				if (row > 0) {
+					ui._y += off;
+				}
 
 				for (let j: i32 = 0; j < num; ++j) {
 					let imgw: i32 = math_floor(50 * zui_SCALE(ui));
 					let i: i32 = j + row * num;
 					if (i >= project_assets.length) {
 						zui_end_element(imgw);
-						if (config_raw.show_asset_names) zui_end_element(0);
+						if (config_raw.show_asset_names) {
+							zui_end_element(0);
+						}
 						continue;
 					}
 
@@ -67,7 +77,9 @@ function tab_textures_draw(htab: zui_handle_t) {
 						base_drag_asset = asset;
 						context_raw.texture = asset;
 
-						if (time_time() - context_raw.select_time < 0.25) ui_base_show_2d_view(view_2d_type_t.ASSET);
+						if (time_time() - context_raw.select_time < 0.25) {
+							ui_base_show_2d_view(view_2d_type_t.ASSET);
+						}
 						context_raw.select_time = time_time();
 						ui_view2d_hwnd.redraws = 2;
 					}
@@ -106,10 +118,10 @@ function tab_textures_draw(htab: zui_handle_t) {
 						count = is_packed ? 6 : 6;
 						///end
 
-						ui_menu_draw((ui: zui_t) => {
+						ui_menu_draw(function (ui: zui_t) {
 							if (ui_menu_button(ui, tr("Export"))) {
-								ui_files_show("png", true, false, (path: string) => {
-									base_notify_on_next_frame(() => {
+								ui_files_show("png", true, false, function (path: string) {
+									base_notify_on_next_frame(function () {
 										///if (is_paint || is_sculpt)
 										if (base_pipe_merge == null) base_make_pipe();
 										///end
@@ -123,10 +135,14 @@ function tab_textures_draw(htab: zui_handle_t) {
 										g2_draw_scaled_image(img, 0, 0, target.width, target.height);
 										g2_set_pipeline(null);
 										g2_end();
-										base_notify_on_next_frame(() => {
+										base_notify_on_next_frame(function () {
 											let f: string = ui_files_filename;
-											if (f == "") f = tr("untitled");
-											if (!f.endsWith(".png")) f += ".png";
+											if (f == "") {
+												f = tr("untitled");
+											}
+											if (!ends_with(f, ".png")) {
+												f += ".png";
+											}
 											krom_write_png(path + path_sep + f, image_get_pixels(target), target.width, target.height, 0);
 											image_unload(target);
 										});
@@ -139,14 +155,14 @@ function tab_textures_draw(htab: zui_handle_t) {
 
 							///if (is_paint || is_sculpt)
 							if (ui_menu_button(ui, tr("To Mask"))) {
-								base_notify_on_next_frame(() => {
+								base_notify_on_next_frame(function () {
 									base_create_image_mask(asset);
 								});
 							}
 							///end
 
 							if (ui_menu_button(ui, tr("Set as Envmap"))) {
-								base_notify_on_next_frame(() => {
+								base_notify_on_next_frame(function () {
 									import_envmap_run(asset.file, img);
 								});
 							}
@@ -167,10 +183,10 @@ function tab_textures_draw(htab: zui_handle_t) {
 								tab_textures_delete_texture(asset);
 							}
 							if (!is_packed && ui_menu_button(ui, tr("Open Containing Directory..."))) {
-								file_start(asset.file.substr(0, asset.file.lastIndexOf(path_sep)));
+								file_start(substring(asset.file, 0, string_last_index_of(asset.file, path_sep)));
 							}
 							if (!is_packed && ui_menu_button(ui, tr("Open in Browser"))) {
-								tab_browser_show_directory(asset.file.substr(0, asset.file.lastIndexOf(path_sep)));
+								tab_browser_show_directory(substring(asset.file, 0, string_last_index_of(asset.file, path_sep)));
 							}
 						}, count);
 					}
@@ -179,7 +195,9 @@ function tab_textures_draw(htab: zui_handle_t) {
 						ui._x = uix;
 						ui._y += slotw * 0.9;
 						zui_text(project_assets[i].name, zui_align_t.CENTER);
-						if (ui.is_hovered) zui_tooltip(project_assets[i].name);
+						if (ui.is_hovered) {
+							zui_tooltip(project_assets[i].name);
+						}
 						ui._y -= slotw * 0.9;
 						if (i == project_assets.length - 1) {
 							ui._y += j == num - 1 ? imgw : imgw + zui_ELEMENT_H(ui) + zui_ELEMENT_OFFSET(ui);
@@ -192,12 +210,14 @@ function tab_textures_draw(htab: zui_handle_t) {
 			let img: image_t = resource_get("icons.k");
 			let r: rect_t = resource_tile50(img, 0, 1);
 			zui_image(img, ui.t.BUTTON_COL, r.h, r.x, r.y, r.w, r.h);
-			if (ui.is_hovered) zui_tooltip(tr("Drag and drop files here"));
+			if (ui.is_hovered) {
+				zui_tooltip(tr("Drag and drop files here"));
+			}
 		}
 
 		let in_focus: bool = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
-								ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
-		if (in_focus && ui.is_delete_down && project_assets.length > 0 && project_assets.indexOf(context_raw.texture) >= 0) {
+							 ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
+		if (in_focus && ui.is_delete_down && project_assets.length > 0 && array_index_of(project_assets, context_raw.texture) >= 0) {
 			ui.is_delete_down = false;
 			tab_textures_delete_texture(context_raw.texture);
 		}
@@ -229,7 +249,7 @@ function tab_textures_update_texture_pointers(nodes: zui_node_t[], i: i32) {
 }
 
 function tab_textures_delete_texture(asset: asset_t) {
-	let i: i32 = project_assets.indexOf(asset);
+	let i: i32 = array_index_of(project_assets, asset);
 	if (project_assets.length > 1) {
 		context_raw.texture = project_assets[i == project_assets.length - 1 ? i - 1 : i + 1];
 	}
@@ -245,10 +265,10 @@ function tab_textures_delete_texture(asset: asset_t) {
 	///end
 
 	data_delete_image(asset.file);
-	project_asset_map.delete(asset.id);
-	project_assets.splice(i, 1);
-	project_asset_names.splice(i, 1);
-	let _next = () => {
+	map_delete(project_asset_map, asset.id);
+	array_splice(project_assets, i, 1);
+	array_splice(project_asset_names, i, 1);
+	let _next = function () {
 		make_material_parse_paint_material();
 
 		///if (is_paint || is_sculpt)
@@ -258,8 +278,12 @@ function tab_textures_delete_texture(asset: asset_t) {
 	}
 	base_notify_on_next_frame(_next);
 
-	for (let m of project_materials) tab_textures_update_texture_pointers(m.canvas.nodes, i);
+	for (let m of project_materials) {
+		tab_textures_update_texture_pointers(m.canvas.nodes, i);
+	}
 	///if (is_paint || is_sculpt)
-	for (let b of project_brushes) tab_textures_update_texture_pointers(b.canvas.nodes, i);
+	for (let b of project_brushes) {
+		tab_textures_update_texture_pointers(b.canvas.nodes, i);
+	}
 	///end
 }

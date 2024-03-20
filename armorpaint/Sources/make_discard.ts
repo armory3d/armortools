@@ -1,5 +1,5 @@
 
-function make_discard_color_id(vert: NodeShaderRaw, frag: NodeShaderRaw) {
+function make_discard_color_id(vert: node_shader_t, frag: node_shader_t) {
 	node_shader_add_uniform(frag, 'sampler2D texpaint_colorid'); // 1x1 picker
 	node_shader_add_uniform(frag, 'sampler2D texcolorid', '_texcolorid'); // color map
 	node_shader_write(frag, 'vec3 colorid_c1 = texelFetch(texpaint_colorid, ivec2(0, 0), 0).rgb;');
@@ -11,7 +11,7 @@ function make_discard_color_id(vert: NodeShaderRaw, frag: NodeShaderRaw) {
 	///end
 }
 
-function make_discard_face(vert: NodeShaderRaw, frag: NodeShaderRaw) {
+function make_discard_face(vert: node_shader_t, frag: node_shader_t) {
 	node_shader_add_uniform(frag, 'sampler2D gbuffer2');
 	node_shader_add_uniform(frag, 'sampler2D textrianglemap', '_textrianglemap');
 	node_shader_add_uniform(frag, 'vec2 textrianglemapSize', '_texpaintSize');
@@ -30,12 +30,12 @@ function make_discard_face(vert: NodeShaderRaw, frag: NodeShaderRaw) {
 	///end
 }
 
-function make_discard_uv_island(vert: NodeShaderRaw, frag: NodeShaderRaw) {
+function make_discard_uv_island(vert: node_shader_t, frag: node_shader_t) {
 	node_shader_add_uniform(frag, 'sampler2D texuvislandmap', '_texuvislandmap');
 	node_shader_write(frag, 'if (textureLod(texuvislandmap, texCoordPick, 0).r == 0.0) discard;');
 }
 
-function make_discard_material_id(vert: NodeShaderRaw, frag: NodeShaderRaw) {
+function make_discard_material_id(vert: node_shader_t, frag: node_shader_t) {
 	frag.wvpposition = true;
 	node_shader_write(frag, 'vec2 picker_sample_tc = vec2(wvpposition.x / wvpposition.w, wvpposition.y / wvpposition.w) * 0.5 + 0.5;');
 	///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)

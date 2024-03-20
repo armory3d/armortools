@@ -16,7 +16,7 @@ function box_export_show_textures() {
 
 		if (box_export_files == null) {
 			box_export_fetch_presets();
-			box_export_hpreset.position = box_export_files.indexOf("generic");
+			box_export_hpreset.position = array_index_of(box_export_files, "generic");
 		}
 		if (box_export_preset == null) {
 			box_export_parse_preset();
@@ -43,7 +43,7 @@ function box_export_show_bake_material() {
 
 		if (box_export_files == null) {
 			box_export_fetch_presets();
-			box_export_hpreset.position = box_export_files.indexOf("generic");
+			box_export_hpreset.position = array_index_of(box_export_files, "generic");
 		}
 		if (box_export_preset == null) {
 			box_export_parse_preset();
@@ -134,7 +134,7 @@ function box_export_tab_export_textures(ui: zui_t, title: string, bake_material:
 			ui_box_hide();
 			if (context_raw.layers_destination == export_destination_t.PACKED) {
 				context_raw.texture_export_path = "/";
-				let _init = () => {
+				let _init = function () {
 					///if is_paint
 					export_texture_run(context_raw.texture_export_path, bake_material);
 					///end
@@ -146,10 +146,10 @@ function box_export_tab_export_textures(ui: zui_t, title: string, bake_material:
 			}
 			else {
 				let filters = base_bits_handle.position != texture_bits_t.BITS8 ? "exr" : context_raw.format_type == texture_ldr_format_t.PNG ? "png" : "jpg";
-				ui_files_show(filters, true, false, (path: string) => {
+				ui_files_show(filters, true, false, function (path: string) {
 					context_raw.texture_export_path = path;
-					let doExport = () => {
-						let _init = () => {
+					let do_export = function () {
+						let _init = function () {
 							///if is_paint
 							export_texture_run(context_raw.texture_export_path, bake_material);
 							///end
@@ -160,17 +160,19 @@ function box_export_tab_export_textures(ui: zui_t, title: string, bake_material:
 						app_notify_on_init(_init);
 					}
 					///if (krom_android || krom_ios)
-					base_notify_on_next_frame(() => {
+					base_notify_on_next_frame(function () {
 						console_toast(tr("Exporting textures"));
-						base_notify_on_next_frame(doExport);
+						base_notify_on_next_frame(do_export);
 					});
 					///else
-					doExport();
+					do_export();
 					///end
 				});
 			}
 		}
-		if (ui.is_hovered) zui_tooltip(tr("Export texture files") + ` (${config_keymap.file_export_textures})`);
+		if (ui.is_hovered) {
+			zui_tooltip(tr("Export texture files") + ` (${config_keymap.file_export_textures})`);
+		}
 	}
 }
 
@@ -180,10 +182,12 @@ function box_export_tab_presets(ui: zui_t) {
 		zui_row([3 / 5, 1 / 5, 1 / 5]);
 
 		zui_combo(box_export_hpreset, box_export_files, tr("Preset"));
-		if (box_export_hpreset.changed) box_export_preset = null;
+		if (box_export_hpreset.changed) {
+			box_export_preset = null;
+		}
 
 		if (zui_button(tr("New"))) {
-			ui_box_show_custom((ui: zui_t) => {
+			ui_box_show_custom(function (ui: zui_t) {
 				let tab_vertical: bool = config_raw.touch_ui;
 				if (zui_tab(zui_handle("boxexport_5"), tr("New Preset"), tab_vertical)) {
 					zui_row([0.5, 0.5]);
@@ -192,7 +196,7 @@ function box_export_tab_presets(ui: zui_t) {
 						box_export_new_preset(preset_name);
 						box_export_fetch_presets();
 						box_export_preset = null;
-						box_export_hpreset.position = box_export_files.indexOf(preset_name);
+						box_export_hpreset.position = array_index_of(box_export_files, preset_name);
 						ui_box_hide();
 						box_export_htab.position = 1; // Presets
 						box_export_show_textures();
@@ -202,18 +206,20 @@ function box_export_tab_presets(ui: zui_t) {
 		}
 
 		if (zui_button(tr("Import"))) {
-			ui_files_show("json", false, false, (path: string) => {
-				path = path.toLowerCase();
-				if (path.endsWith(".json")) {
-					let filename: string = path.substr(path.lastIndexOf(path_sep) + 1);
+			ui_files_show("json", false, false, function (path: string) {
+				path = to_lower_case(path);
+				if (ends_with(path, ".json")) {
+					let filename: string = substring(path, string_last_index_of(path, path_sep) + 1, path.length);
 					let dst_path: string = path_data() + path_sep + "export_presets" + path_sep + filename;
 					file_copy(path, dst_path); // Copy to presets folder
 					box_export_fetch_presets();
 					box_export_preset = null;
-					box_export_hpreset.position = box_export_files.indexOf(filename.substr(0, filename.length - 5)); // Strip .json
+					box_export_hpreset.position = array_index_of(box_export_files, substring(filename, 0, filename.length - 5)); // Strip .json
 					console_info(tr("Preset imported:") + " " + filename);
 				}
-				else console_error(strings_error1());
+				else {
+					console_error(strings_error1());
+				}
 			});
 		}
 
@@ -240,7 +246,7 @@ function box_export_tab_presets(ui: zui_t) {
 			t.name = zui_text_input(htex);
 
 			if (ui.is_hovered && ui.input_released_r) {
-				ui_menu_draw((ui: zui_t) => {
+				ui_menu_draw(function (ui: zui_t) {
 					if (ui_menu_button(ui, tr("Delete"))) {
 						array_remove(box_export_preset.textures, t);
 						box_export_save_preset();
@@ -249,27 +255,37 @@ function box_export_tab_presets(ui: zui_t) {
 			}
 
 			let hr: zui_handle_t = zui_nest(htex, 0);
-			hr.position = box_export_channels.indexOf(t.channels[0]);
+			hr.position = array_index_of(box_export_channels, t.channels[0]);
 			let hg: zui_handle_t = zui_nest(htex, 1);
-			hg.position = box_export_channels.indexOf(t.channels[1]);
+			hg.position = array_index_of(box_export_channels, t.channels[1]);
 			let hb: zui_handle_t = zui_nest(htex, 2);
-			hb.position = box_export_channels.indexOf(t.channels[2]);
+			hb.position = array_index_of(box_export_channels, t.channels[2]);
 			let ha: zui_handle_t = zui_nest(htex, 3);
-			ha.position = box_export_channels.indexOf(t.channels[3]);
+			ha.position = array_index_of(box_export_channels, t.channels[3]);
 
 			zui_combo(hr, box_export_channels, tr("R"));
-			if (hr.changed) t.channels[0] = box_export_channels[hr.position];
+			if (hr.changed) {
+				t.channels[0] = box_export_channels[hr.position];
+			}
 			zui_combo(hg, box_export_channels, tr("G"));
-			if (hg.changed) t.channels[1] = box_export_channels[hg.position];
+			if (hg.changed) {
+				t.channels[1] = box_export_channels[hg.position];
+			}
 			zui_combo(hb, box_export_channels, tr("B"));
-			if (hb.changed) t.channels[2] = box_export_channels[hb.position];
+			if (hb.changed) {
+				t.channels[2] = box_export_channels[hb.position];
+			}
 			zui_combo(ha, box_export_channels, tr("A"));
-			if (ha.changed) t.channels[3] = box_export_channels[ha.position];
+			if (ha.changed) {
+				t.channels[3] = box_export_channels[ha.position];
+			}
 
 			let hspace: zui_handle_t = zui_nest(htex, 4);
-			hspace.position = box_export_color_spaces.indexOf(t.color_space);
+			hspace.position = array_index_of(box_export_color_spaces, t.color_space);
 			zui_combo(hspace, box_export_color_spaces, tr("Color Space"));
-			if (hspace.changed) t.color_space = box_export_color_spaces[hspace.position];
+			if (hspace.changed) {
+				t.color_space = box_export_color_spaces[hspace.position];
+			}
 		}
 
 		if (ui.changed) {
@@ -278,7 +294,7 @@ function box_export_tab_presets(ui: zui_t) {
 
 		zui_row([1 / 8]);
 		if (zui_button(tr("Add"))) {
-			box_export_preset.textures.push({ name: "base", channels: ["base_r", "base_g", "base_b", "1.0"], color_space: "linear" });
+			array_push(box_export_preset.textures, { name: "base", channels: ["base_r", "base_g", "base_b", "1.0"], color_space: "linear" });
 			box_export_hpreset.children = null;
 			box_export_save_preset();
 		}
@@ -294,8 +310,8 @@ function box_export_tab_atlases(ui: zui_t) {
 			project_atlas_objects = [];
 			project_atlas_names = [];
 			for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
-				project_atlas_objects.push(0);
-				project_atlas_names.push(tr("Atlas") + " " + (i + 1));
+				array_push(project_atlas_objects, 0);
+				array_push(project_atlas_names, tr("Atlas") + " " + (i + 1));
 			}
 		}
 		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
@@ -311,7 +327,7 @@ function box_export_tab_atlases(ui: zui_t) {
 
 function box_export_show_mesh() {
 	box_export_mesh_handle.position = context_raw.export_mesh_index;
-	ui_box_show_custom((ui: zui_t) => {
+	ui_box_show_custom(function (ui: zui_t) {
 		let htab: zui_handle_t = zui_handle("boxexport_8");
 		box_export_tab_export_mesh(ui, htab);
 	});
@@ -326,7 +342,9 @@ function box_export_tab_export_mesh(ui: zui_t, htab: zui_handle_t) {
 		context_raw.export_mesh_format = zui_combo(zui_handle("boxexport_9", { position: context_raw.export_mesh_format }), ["obj", "arm"], tr("Format"), true);
 
 		let ar: string[] = [tr("All")];
-		for (let p of project_paint_objects) ar.push(p.base.name);
+		for (let p of project_paint_objects) {
+			array_push(ar, p.base.name);
+		}
 		zui_combo(box_export_mesh_handle, ar, tr("Meshes"), true);
 
 		let apply_displacement: bool = zui_check(zui_handle("boxexport_10"), tr("Apply Displacement"));
@@ -347,23 +365,23 @@ function box_export_tab_export_mesh(ui: zui_t, htab: zui_handle_t) {
 		}
 		if (zui_button(tr("Export"))) {
 			ui_box_hide();
-			ui_files_show(context_raw.export_mesh_format == mesh_format_t.OBJ ? "obj" : "arm", true, false, (path: string) => {
+			ui_files_show(context_raw.export_mesh_format == mesh_format_t.OBJ ? "obj" : "arm", true, false, function (path: string) {
 				///if (krom_android || krom_ios)
 				let f: string = sys_title();
 				///else
 				let f: string = ui_files_filename;
 				///end
 				if (f == "") f = tr("untitled");
-				let doExport = () => {
+				let do_export = function () {
 					export_mesh_run(path + path_sep + f, box_export_mesh_handle.position == 0 ? null : [project_paint_objects[box_export_mesh_handle.position - 1]], apply_displacement);
 				}
 				///if (krom_android || krom_ios)
-				base_notify_on_next_frame(() => {
+				base_notify_on_next_frame(function () {
 					console_toast(tr("Exporting mesh"));
-					base_notify_on_next_frame(doExport);
+					base_notify_on_next_frame(do_export);
 				});
 				///else
-				doExport();
+				do_export();
 				///end
 			});
 		}
@@ -388,10 +406,12 @@ function box_export_show_material() {
 			}
 			if (zui_button(tr("Export"))) {
 				ui_box_hide();
-				ui_files_show("arm", true, false, (path: string) => {
+				ui_files_show("arm", true, false, function (path: string) {
 					let f: string = ui_files_filename;
-					if (f == "") f = tr("untitled");
-					app_notify_on_init(() => {
+					if (f == "") {
+						f = tr("untitled");
+					}
+					app_notify_on_init(function () {
 						export_arm_run_material(path + path_sep + f);
 					});
 				});
@@ -417,10 +437,10 @@ function box_export_show_brush() {
 			}
 			if (zui_button(tr("Export"))) {
 				ui_box_hide();
-				ui_files_show("arm", true, false, (path: string) => {
+				ui_files_show("arm", true, false, function (path: string) {
 					let f: string = ui_files_filename;
 					if (f == "") f = tr("untitled");
-					app_notify_on_init(() => {
+					app_notify_on_init(function () {
 						export_arm_run_brush(path + path_sep + f);
 					});
 				});
@@ -434,13 +454,13 @@ function box_export_show_brush() {
 function box_export_fetch_presets() {
 	box_export_files = file_read_directory(path_data() + path_sep + "export_presets");
 	for (let i: i32 = 0; i < box_export_files.length; ++i) {
-		box_export_files[i] = box_export_files[i].substr(0, box_export_files[i].length - 5); // Strip .json
+		box_export_files[i] = substring(box_export_files[i], 0, box_export_files[i].length - 5); // Strip .json
 	}
 }
 
 function box_export_parse_preset() {
 	let file: string = "export_presets/" + box_export_files[box_export_hpreset.position] + ".json";
-	let blob: ArrayBuffer = data_get_blob(file);
+	let blob: buffer_t = data_get_blob(file);
 	box_export_preset = json_parse(sys_buffer_to_string(blob));
 	data_delete_blob("export_presets/" + file);
 }
@@ -453,14 +473,18 @@ function box_export_new_preset(name: string) {
 ]
 }
 `;
-	if (!name.endsWith(".json")) name += ".json";
+	if (!ends_with(name, ".json")) {
+		name += ".json";
+	}
 	let path: string = path_data() + path_sep + "export_presets" + path_sep + name;
 	krom_file_save_bytes(path, sys_string_to_buffer(template));
 }
 
 function box_export_save_preset() {
 	let name: string = box_export_files[box_export_hpreset.position];
-	if (name == "generic") return; // generic is const
+	if (name == "generic") {
+		return; // generic is const
+	}
 	let path: string = path_data() + path_sep + "export_presets" + path_sep + name + ".json";
 	krom_file_save_bytes(path, sys_string_to_buffer(json_stringify(box_export_preset)));
 }

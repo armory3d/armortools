@@ -1,26 +1,26 @@
-/// <reference path='./nodes/ImageTextureNode.ts'/>
-/// <reference path='./nodes/RGBNode.ts'/>
-/// <reference path='./nodes/InpaintNode.ts'/>
-/// <reference path='./nodes/PhotoToPBRNode.ts'/>
-/// <reference path='./nodes/TextToPhotoNode.ts'/>
-/// <reference path='./nodes/TilingNode.ts'/>
-/// <reference path='./nodes/UpscaleNode.ts'/>
-/// <reference path='./nodes/VarianceNode.ts'/>
+/// <reference path='./nodes/image_texture_node.ts'/>
+/// <reference path='./nodes/rgb_node.ts'/>
+/// <reference path='./nodes/inpaint_node.ts'/>
+/// <reference path='./nodes/photo_to_pbr_node.ts'/>
+/// <reference path='./nodes/text_to_photo_node.ts'/>
+/// <reference path='./nodes/tiling_node.ts'/>
+/// <reference path='./nodes/upscale_node.ts'/>
+/// <reference path='./nodes/variance_node.ts'/>
 
 let nodes_brush_categories: string[] = [_tr("Input"), _tr("Model")];
 
 let nodes_brush_list: zui_node_t[][] = [
 	[ // Input
-		ImageTextureNode.def,
-		RGBNode.def,
+		image_texture_node.def,
+		rgb_node.def,
 	],
 	[ // Model
-		InpaintNode.def,
-		PhotoToPBRNode.def,
-		TextToPhotoNode.def,
-		TilingNode.def,
-		UpscaleNode.def,
-		VarianceNode.def,
+		inpaint_node.def,
+		photo_to_pbr_node.def,
+		text_to_photo_node.def,
+		tiling_node.def,
+		upscale_node.def,
+		variance_node.def,
 	]
 ];
 
@@ -31,7 +31,7 @@ function nodes_brush_create_node(nodeType: string): zui_node_t {
 				let canvas = project_canvas;
 				let nodes = project_nodes;
 				let node = ui_nodes_make_node(n, nodes, canvas);
-				canvas.nodes.push(node);
+				array_push(canvas.nodes, node);
 				return node;
 			}
 		}

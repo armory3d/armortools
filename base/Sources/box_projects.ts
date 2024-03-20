@@ -49,7 +49,7 @@ function box_projects_tab(ui: zui_t) {
 			let title: string = tr("untitled") + i;
 			while (j < config_raw.recent_projects.length) {
 				let base: string = config_raw.recent_projects[j];
-				base = base.substring(base.lastIndexOf(path_sep) + 1, base.lastIndexOf("."));
+				base = substring(base, string_last_index_of(base, path_sep) + 1, string_last_index_of(base, "."));
 				j++;
 				if (title == base) {
 					i++;
@@ -70,19 +70,25 @@ function box_projects_tab(ui: zui_t) {
 		for (let row: i32 = 0; row < math_ceil(recent_projects.length / num); ++row) {
 			let mult = show_asset_names ? 2 : 1;
 			let ar: f32[] = [];
-			for (let i: i32 = 0; i < num * mult; ++i) ar.push(1 / num);
+			for (let i: i32 = 0; i < num * mult; ++i) {
+				array_push(ar, 1 / num);
+			}
 			zui_row(ar);
 
 			ui._x += 2;
 			let off: f32 = show_asset_names ? zui_ELEMENT_OFFSET(ui) * 16.0 : 6;
-			if (row > 0) ui._y += off;
+			if (row > 0) {
+				ui._y += off;
+			}
 
 			for (let j: i32 = 0; j < num; ++j) {
 				let imgw: i32 = math_floor(128 * zui_SCALE(ui));
 				let i: i32 = j + row * num;
 				if (i >= recent_projects.length) {
 					zui_end_element(imgw);
-					if (show_asset_names) zui_end_element(0);
+					if (show_asset_names) {
+						zui_end_element(0);
+					}
 					continue;
 				}
 
@@ -90,17 +96,19 @@ function box_projects_tab(ui: zui_t) {
 
 				///if krom_ios
 				let document_directory: string = krom_save_dialog("", "");
-				document_directory = document_directory.substr(0, document_directory.length - 8); // Strip /'untitled'
+				document_directory = substring(document_directory, 0, document_directory.length - 8); // Strip /'untitled'
 				path = document_directory + path;
 				///end
 
-				let icon_path: string = path.substr(0, path.length - 4) + "_icon.png";
-				if (box_projects_icon_map == null) box_projects_icon_map = map_create();
-				let icon: image_t = box_projects_icon_map.get(icon_path);
+				let icon_path: string = substring(path, 0, path.length - 4) + "_icon.png";
+				if (box_projects_icon_map == null) {
+					box_projects_icon_map = map_create();
+				}
+				let icon: image_t = map_get(box_projects_icon_map, icon_path);
 				if (icon == null) {
 					let image: image_t = data_get_image(icon_path);
 					icon = image;
-					box_projects_icon_map.set(icon_path, icon);
+					map_set(box_projects_icon_map, icon_path, icon);
 				}
 
 				let uix: i32 = ui._x;
@@ -113,7 +121,7 @@ function box_projects_tab(ui: zui_t) {
 						ui._x = uix;
 						zui_fill(0, 0, 128, 128, 0x66000000);
 						ui._x = _uix;
-						let doImport = function () {
+						let do_import = function () {
 							app_notify_on_init(function () {
 								ui_box_hide();
 								import_arm_run_project(path);
@@ -123,14 +131,14 @@ function box_projects_tab(ui: zui_t) {
 						///if (krom_android || krom_ios)
 						base_notify_on_next_frame(function () {
 							console_toast(tr("Opening project"));
-							base_notify_on_next_frame(doImport);
+							base_notify_on_next_frame(do_import);
 						});
 						///else
-						doImport();
+						do_import();
 						///end
 					}
 
-					let name: string = path.substring(path.lastIndexOf(path_sep) + 1, path.lastIndexOf("."));
+					let name: string = substring(path, string_last_index_of(path, path_sep) + 1, string_last_index_of(path, "."));
 					if (ui.is_hovered && ui.input_released_r) {
 						ui_menu_draw(function (ui: zui_t) {
 							// if (menuButton(ui, tr("Duplicate"))) {}
@@ -138,9 +146,9 @@ function box_projects_tab(ui: zui_t) {
 								app_notify_on_init(function () {
 									file_delete(path);
 									file_delete(icon_path);
-									let data_path: string = path.substr(0, path.length - 4);
+									let data_path: string = substring(path, 0, path.length - 4);
 									file_delete(data_path);
-									recent_projects.splice(i, 1);
+									array_splice(recent_projects, i, 1);
 								});
 							}
 						}, 1);
@@ -150,7 +158,9 @@ function box_projects_tab(ui: zui_t) {
 						ui._x = uix - (150 - 128) / 2;
 						ui._y += slotw * 0.9;
 						zui_text(name, zui_align_t.CENTER);
-						if (ui.is_hovered) zui_tooltip(name);
+						if (ui.is_hovered) {
+							zui_tooltip(name);
+						}
 						ui._y -= slotw * 0.9;
 						if (i == recent_projects.length - 1) {
 							ui._y += j == num - 1 ? imgw : imgw + zui_ELEMENT_H(ui) + zui_ELEMENT_OFFSET(ui);
@@ -159,7 +169,9 @@ function box_projects_tab(ui: zui_t) {
 				}
 				else {
 					zui_end_element(0);
-					if (show_asset_names) zui_end_element(0);
+					if (show_asset_names) {
+						zui_end_element(0);
+					}
 					ui._x = uix;
 				}
 			}
@@ -185,9 +197,11 @@ function box_projects_recent_tab(ui: zui_t) {
 			///else
 			file = string_replace_all(path, "\\", "/");
 			///end
-			file = file.substr(file.lastIndexOf(path_sep) + 1);
+			file = substring(file, string_last_index_of(file, path_sep) + 1, file.length);
 
-			if (file.toLowerCase().indexOf(box_projects_hsearch.text.toLowerCase()) < 0) continue; // Search filter
+			if (string_index_of(to_lower_case(file), to_lower_case(box_projects_hsearch.text)) < 0) {
+				continue; // Search filter
+			}
 
 			if (zui_button(file, zui_align_t.LEFT) && file_exists(path)) {
 				let current: image_t = _g2_current;
@@ -199,7 +213,9 @@ function box_projects_recent_tab(ui: zui_t) {
 				if (g2_in_use) g2_begin(current);
 				ui_box_hide();
 			}
-			if (ui.is_hovered) zui_tooltip(path);
+			if (ui.is_hovered) {
+				zui_tooltip(path);
+			}
 		}
 
 		ui.enabled = config_raw.recent_projects.length > 0;
@@ -210,8 +226,12 @@ function box_projects_recent_tab(ui: zui_t) {
 		ui.enabled = true;
 
 		zui_end_element();
-		if (zui_button(tr("New .."), zui_align_t.LEFT)) project_new_box();
-		if (zui_button(tr("Open..."), zui_align_t.LEFT)) project_open();
+		if (zui_button(tr("New .."), zui_align_t.LEFT)) {
+			project_new_box();
+		}
+		if (zui_button(tr("Open..."), zui_align_t.LEFT)) {
+			project_open();
+		}
 	}
 }
 

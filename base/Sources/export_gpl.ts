@@ -7,7 +7,7 @@ function export_gpl_run(path: string, name: string, swatches: swatch_color_t[]) 
 	o += "#\n";
 
 	for (let swatch of swatches) {
-		o += String(color_get_rb(swatch.base)) + " " + String(color_get_gb(swatch.base)) + " " + String(color_get_bb(swatch.base)) + "\n";
+		o += any_to_string(color_get_rb(swatch.base)) + " " + any_to_string(color_get_gb(swatch.base)) + " " + any_to_string(color_get_bb(swatch.base)) + "\n";
 	}
 
 	krom_file_save_bytes(path, sys_string_to_buffer(o), o.length);

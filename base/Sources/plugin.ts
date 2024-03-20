@@ -14,13 +14,13 @@ let _plugin_name: string;
 function plugin_create(): PluginRaw {
 	let p: PluginRaw = new PluginRaw();
 	p.name = _plugin_name;
-	plugin_map.set(p.name, p);
+	map_set(plugin_map, p.name, p);
 	return p;
 }
 
 function plugin_start(plugin: string) {
 	try {
-		let blob: ArrayBuffer = data_get_blob("plugins/" + plugin);
+		let blob: buffer_t = data_get_blob("plugins/" + plugin);
 		_plugin_name = plugin;
 		// (1, eval)(sys_buffer_to_string(blob)); // Global scope
 		eval(sys_buffer_to_string(blob)); // Local scope
@@ -33,9 +33,9 @@ function plugin_start(plugin: string) {
 }
 
 function plugin_stop(plugin: string) {
-	let p: PluginRaw = plugin_map.get(plugin);
+	let p: PluginRaw = map_get(plugin_map, plugin);
 	if (p != null && p.delete != null) {
 		p.delete();
 	}
-	plugin_map.delete(plugin);
+	map_delete(plugin_map, plugin);
 }

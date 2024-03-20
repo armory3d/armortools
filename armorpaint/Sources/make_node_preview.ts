@@ -1,7 +1,7 @@
 
-function make_node_preview_run(data: material_t, matcon: material_context_t, node: zui_node_t, group: zui_node_canvas_t, parents: zui_node_t[]): NodeShaderContextRaw {
+function make_node_preview_run(data: material_t, matcon: material_context_t, node: zui_node_t, group: zui_node_canvas_t, parents: zui_node_t[]): node_shader_context_t {
 	let context_id: string = "mesh";
-	let con_mesh: NodeShaderContextRaw = node_shader_context_create(data, {
+	let con_mesh: node_shader_context_t = node_shader_context_create(data, {
 		name: context_id,
 		depth_write: false,
 		compare_mode: "always",
@@ -11,8 +11,8 @@ function make_node_preview_run(data: material_t, matcon: material_context_t, nod
 	});
 
 	con_mesh.allow_vcols = true;
-	let vert: NodeShaderRaw = node_shader_context_make_vert(con_mesh);
-	let frag: NodeShaderRaw = node_shader_context_make_frag(con_mesh);
+	let vert: node_shader_t = node_shader_context_make_vert(con_mesh);
+	let frag: node_shader_t = node_shader_context_make_frag(con_mesh);
 	frag.ins = vert.outs;
 
 	node_shader_write_attrib(vert, 'gl_Position = vec4(pos.xy * 3.0, 0.0, 1.0);'); // Pos unpack
@@ -33,7 +33,7 @@ function make_node_preview_run(data: material_t, matcon: material_context_t, nod
 	}
 	let links: zui_node_link_t[] = parser_material_links;
 	let link: zui_node_link_t = { id: zui_get_link_id(links), from_id: node.id, from_socket: context_raw.node_preview_socket, to_id: -1, to_socket: -1 };
-	links.push(link);
+	array_push(links, link);
 
 	parser_material_con = con_mesh;
 	parser_material_vert = vert;

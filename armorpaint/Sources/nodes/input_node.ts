@@ -57,8 +57,12 @@ function input_node_update(self: float_node_t) {
 	}
 
 	if (operator_shortcut(config_keymap.brush_ruler + "+" + config_keymap.action_paint, shortcut_type_t.DOWN)) {
-		if (input_node_lock_x) paint_x = input_node_start_x;
-		if (input_node_lock_y) paint_y = input_node_start_y;
+		if (input_node_lock_x) {
+			paint_x = input_node_start_x;
+		}
+		if (input_node_lock_y) {
+			paint_y = input_node_start_y;
+		}
 	}
 
 	if (context_raw.brush_lazy_radius > 0) {
@@ -117,9 +121,9 @@ function input_node_update(self: float_node_t) {
 }
 
 function input_node_get(self: input_node_t, from: i32, done: (a: any)=>void) {
-	logic_node_input_get(self.base.inputs[0], (value) => {
+	logic_node_input_get(self.base.inputs[0], function (value) {
 		context_raw.brush_lazy_radius = value;
-		logic_node_input_get(self.base.inputs[1], (value) => {
+		logic_node_input_get(self.base.inputs[1], function (value) {
 			context_raw.brush_lazy_step = value;
 			done(input_node_coords);
 		});

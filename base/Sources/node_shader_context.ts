@@ -1,7 +1,7 @@
 
-class NodeShaderContextRaw {
-	vert: NodeShaderRaw;
-	frag: NodeShaderRaw;
+class node_shader_context_t {
+	vert: node_shader_t;
+	frag: node_shader_t;
 	data: shader_context_t;
 	allow_vcols: bool = false;
 	material: material_t;
@@ -9,8 +9,8 @@ class NodeShaderContextRaw {
 	tunits: tex_unit_t[];
 }
 
-function node_shader_context_create(material: material_t, props: any): NodeShaderContextRaw {
-	let raw: NodeShaderContextRaw = new NodeShaderContextRaw();
+function node_shader_context_create(material: material_t, props: any): node_shader_context_t {
+	let raw: node_shader_context_t = new node_shader_context_t();
 	raw.material = material;
 	raw.data = {
 		name: props.name,
@@ -48,15 +48,17 @@ function node_shader_context_create(material: material_t, props: any): NodeShade
 	return raw;
 }
 
-function node_shader_context_add_elem(raw: NodeShaderContextRaw, name: string, data_type: string) {
+function node_shader_context_add_elem(raw: node_shader_context_t, name: string, data_type: string) {
 	for (let e of raw.data.vertex_elements) {
-		if (e.name == name) return;
+		if (e.name == name) {
+			return;
+		}
 	}
 	let elem: vertex_element_t = { name: name, data: data_type };
-	raw.data.vertex_elements.push(elem);
+	array_push(raw.data.vertex_elements, elem);
 }
 
-function node_shader_context_is_elem(raw: NodeShaderContextRaw, name: string): bool {
+function node_shader_context_is_elem(raw: node_shader_context_t, name: string): bool {
 	for (let elem of raw.data.vertex_elements) {
 		if (elem.name == name) {
 			return true;
@@ -65,7 +67,7 @@ function node_shader_context_is_elem(raw: NodeShaderContextRaw, name: string): b
 	return false;
 }
 
-function node_shader_context_get_elem(raw: NodeShaderContextRaw, name: string): vertex_element_t {
+function node_shader_context_get_elem(raw: node_shader_context_t, name: string): vertex_element_t {
 	for (let elem of raw.data.vertex_elements) {
 		if (elem.name == name) {
 			return elem;
@@ -74,7 +76,7 @@ function node_shader_context_get_elem(raw: NodeShaderContextRaw, name: string): 
 	return null;
 }
 
-function node_shader_context_add_constant(raw: NodeShaderContextRaw, ctype: string, name: string, link: string = null) {
+function node_shader_context_add_constant(raw: node_shader_context_t, ctype: string, name: string, link: string = null) {
 	for (let c of raw.constants) {
 		if (c.name == name) {
 			return;
@@ -85,10 +87,10 @@ function node_shader_context_add_constant(raw: NodeShaderContextRaw, ctype: stri
 	if (link != null) {
 		c.link = link;
 	}
-	raw.constants.push(c);
+	array_push(raw.constants, c);
 }
 
-function node_shader_context_add_texture_unit(raw: NodeShaderContextRaw, ctype: string, name: string, link: string = null, is_image: bool = false) {
+function node_shader_context_add_texture_unit(raw: node_shader_context_t, ctype: string, name: string, link: string = null, is_image: bool = false) {
 	for (let c of raw.tunits) {
 		if (c.name == name) {
 			return;
@@ -102,16 +104,16 @@ function node_shader_context_add_texture_unit(raw: NodeShaderContextRaw, ctype: 
 	if (is_image) {
 		c.image_uniform = is_image;
 	}
-	raw.tunits.push(c);
+	array_push(raw.tunits, c);
 }
 
-function node_shader_context_make_vert(raw: NodeShaderContextRaw): NodeShaderRaw {
+function node_shader_context_make_vert(raw: node_shader_context_t): node_shader_t {
 	raw.data.vertex_shader = raw.material.name + '_' + raw.data.name + '.vert';
 	raw.vert = node_shader_create(raw, 'vert');
 	return raw.vert;
 }
 
-function node_shader_context_make_frag(raw: NodeShaderContextRaw): NodeShaderRaw {
+function node_shader_context_make_frag(raw: node_shader_context_t): node_shader_t {
 	raw.data.fragment_shader = raw.material.name + '_' + raw.data.name + '.frag';
 	raw.frag = node_shader_create(raw, 'frag');
 	return raw.frag;

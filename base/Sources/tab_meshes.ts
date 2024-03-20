@@ -25,7 +25,7 @@ function tab_meshes_draw(htab: zui_handle_t) {
 		///end
 
 		if (zui_button(tr("Import"))) {
-			ui_menu_draw((ui: zui_t) => {
+			ui_menu_draw(function (ui: zui_t) {
 				if (ui_menu_button(ui, tr("Replace Existing"), `${config_keymap.file_import_assets}`)) {
 					project_import_mesh(true);
 				}
@@ -38,11 +38,19 @@ function tab_meshes_draw(htab: zui_handle_t) {
 
 		///if is_lab
 		if (zui_button(tr("Set Default"))) {
-			ui_menu_draw((ui: zui_t) => {
-				if (ui_menu_button(ui, tr("Cube"))) tab_meshes_set_default_mesh(".Cube");
-				if (ui_menu_button(ui, tr("Plane"))) tab_meshes_set_default_mesh(".Plane");
-				if (ui_menu_button(ui, tr("Sphere"))) tab_meshes_set_default_mesh(".Sphere");
-				if (ui_menu_button(ui, tr("Cylinder"))) tab_meshes_set_default_mesh(".Cylinder");
+			ui_menu_draw(function (ui: zui_t) {
+				if (ui_menu_button(ui, tr("Cube"))) {
+					tab_meshes_set_default_mesh(".Cube");
+				}
+				if (ui_menu_button(ui, tr("Plane"))) {
+					tab_meshes_set_default_mesh(".Plane");
+				}
+				if (ui_menu_button(ui, tr("Sphere"))) {
+					tab_meshes_set_default_mesh(".Sphere");
+				}
+				if (ui_menu_button(ui, tr("Cylinder"))) {
+					tab_meshes_set_default_mesh(".Cylinder");
+				}
 			}, 4);
 		}
 		///end
@@ -53,9 +61,15 @@ function tab_meshes_draw(htab: zui_handle_t) {
 		}
 
 		if (zui_button(tr("Calculate Normals"))) {
-			ui_menu_draw((ui: zui_t) => {
-				if (ui_menu_button(ui, tr("Smooth"))) { util_mesh_calc_normals(true); context_raw.ddirty = 2; }
-				if (ui_menu_button(ui, tr("Flat"))) { util_mesh_calc_normals(false); context_raw.ddirty = 2; }
+			ui_menu_draw(function (ui: zui_t) {
+				if (ui_menu_button(ui, tr("Smooth"))) {
+					util_mesh_calc_normals(true);
+					context_raw.ddirty = 2;
+				}
+				if (ui_menu_button(ui, tr("Flat"))) {
+					util_mesh_calc_normals(false);
+					context_raw.ddirty = 2;
+				}
 			}, 2);
 		}
 
@@ -79,7 +93,7 @@ function tab_meshes_draw(htab: zui_handle_t) {
 		}
 
 		if (zui_button(tr("Rotate"))) {
-			ui_menu_draw((ui: zui_t) => {
+			ui_menu_draw(function (ui: zui_t) {
 				if (ui_menu_button(ui, tr("Rotate X"))) {
 					util_mesh_swap_axis(1, 2);
 					context_raw.ddirty = 2;
@@ -105,7 +119,7 @@ function tab_meshes_draw(htab: zui_handle_t) {
 			h.selected = o.base.visible;
 			o.base.visible = zui_check(h, o.base.name);
 			if (ui.is_hovered && ui.input_released_r) {
-				ui_menu_draw((ui: zui_t) => {
+				ui_menu_draw(function (ui: zui_t) {
 					if (ui_menu_button(ui, tr("Export"))) {
 						context_raw.export_mesh_index = i + 1;
 						box_export_show_mesh();
@@ -133,7 +147,11 @@ function tab_meshes_draw(htab: zui_handle_t) {
 			}
 			if (h.changed) {
 				let visibles: mesh_object_t[] = [];
-				for (let p of project_paint_objects) if (p.base.visible) visibles.push(p);
+				for (let p of project_paint_objects) {
+					if (p.base.visible) {
+						array_push(visibles, p);
+					}
+				}
 				util_mesh_merge(visibles);
 				context_raw.ddirty = 2;
 			}

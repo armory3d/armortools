@@ -25,11 +25,11 @@ function logic_node_create(): logic_node_t {
 }
 
 function logic_node_add_input(self: logic_node_t, node: logic_node_t, from: i32) {
-	self.inputs.push(logic_node_input_create(node, from));
+	array_push(self.inputs, logic_node_input_create(node, from));
 }
 
 function logic_node_add_outputs(self: logic_node_t, nodes: logic_node_t[]) {
-	self.outputs.push(nodes);
+	array_push(self.outputs, nodes);
 }
 
 function logic_node_get(self: logic_node_t, from: i32, done: (a: any)=>void) {

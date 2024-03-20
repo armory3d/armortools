@@ -20,8 +20,8 @@ function make_voxel_run(data: shader_context_t) {
 	// if (skin) {
 	// 	g4_vertex_structure_add(structure, "bone", vertex_data_t.I16_4X_Normalized);
 	// 	g4_vertex_structure_add(structure, "weight", vertex_data_t.I16_4X_Normalized);
-	// 	data.raw.vertex_elements.push({ name: "bone", data: 'short4norm' });
-	// 	data.raw.vertex_elements.push({ name: "weight", data: 'short4norm' });
+	// 	array_push(data.raw.vertex_elements, { name: "bone", data: 'short4norm' });
+	// 	array_push(data.raw.vertex_elements, { name: "weight", data: 'short4norm' });
 	// }
 	// ///end
 

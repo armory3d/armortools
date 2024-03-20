@@ -6,7 +6,7 @@ let render_path_raytrace_ready: bool = false;
 let render_path_raytrace_dirty: i32 = 0;
 let render_path_raytrace_uv_scale: f32 = 1.0;
 let render_path_raytrace_first: bool = true;
-let render_path_raytrace_f32a: Float32Array = new Float32Array(24);
+let render_path_raytrace_f32a: f32_array_t = f32_array_create(24);
 let render_path_raytrace_help_mat: mat4_t = mat4_identity();
 let render_path_raytrace_vb_scale: f32 = 1.0;
 let render_path_raytrace_vb: vertex_buffer_t;
@@ -50,9 +50,9 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 	if (render_path_raytrace_last_envmap != saved_envmap) {
 		render_path_raytrace_last_envmap = saved_envmap;
 
-		let bnoise_sobol: image_t = scene_embedded.get("bnoise_sobol.k");
-		let bnoise_scramble: image_t = scene_embedded.get("bnoise_scramble.k");
-		let bnoise_rank: image_t = scene_embedded.get("bnoise_rank.k");
+		let bnoise_sobol: image_t = map_get(scene_embedded, "bnoise_sobol.k");
+		let bnoise_scramble: image_t = map_get(scene_embedded, "bnoise_scramble.k");
+		let bnoise_rank: image_t = map_get(scene_embedded, "bnoise_rank.k");
 
 		let l: any = base_flatten(true);
 		krom_raytrace_set_textures(l.texpaint, l.texpaint_nor, l.texpaint_pack, saved_envmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
@@ -63,9 +63,9 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 	if (l.texpaint != render_path_raytrace_last_texpaint) {
 		render_path_raytrace_last_texpaint = l.texpaint;
 
-		let bnoise_sobol: image_t = scene_embedded.get("bnoise_sobol.k");
-		let bnoise_scramble: image_t = scene_embedded.get("bnoise_scramble.k");
-		let bnoise_rank: image_t = scene_embedded.get("bnoise_rank.k");
+		let bnoise_sobol: image_t = map_get(scene_embedded, "bnoise_sobol.k");
+		let bnoise_scramble: image_t = map_get(scene_embedded, "bnoise_scramble.k");
+		let bnoise_rank: image_t = map_get(scene_embedded, "bnoise_rank.k");
 
 		krom_raytrace_set_textures(l.texpaint, l.texpaint_nor, l.texpaint_pack, saved_envmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
 	}
@@ -108,14 +108,16 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 	render_path_raytrace_f32a[18] = render_path_raytrace_help_mat.m[14];
 	render_path_raytrace_f32a[19] = render_path_raytrace_help_mat.m[15];
 	render_path_raytrace_f32a[20] = scene_world.strength * 1.5;
-	if (!context_raw.show_envmap) render_path_raytrace_f32a[20] = -render_path_raytrace_f32a[20];
+	if (!context_raw.show_envmap) {
+		render_path_raytrace_f32a[20] = -render_path_raytrace_f32a[20];
+	}
 	render_path_raytrace_f32a[21] = context_raw.envmap_angle;
 	render_path_raytrace_f32a[22] = render_path_raytrace_uv_scale;
 	///if is_lab
 	render_path_raytrace_f32a[22] *= scene_meshes[0].data.scale_tex;
 	///end
 
-	let framebuffer: image_t = render_path_render_targets.get("buf")._image;
+	let framebuffer: image_t = map_get(render_path_render_targets, "buf")._image;
 	krom_raytrace_dispatch_rays(framebuffer.render_target_, render_path_raytrace_f32a.buffer);
 
 	if (context_raw.ddirty == 1 || context_raw.pdirty == 1) {
@@ -132,7 +134,7 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 	// raw.ddirty = 1; // _RENDER
 }
 
-function render_path_raytrace_raytrace_init(shaderName: string, build: bool = true) {
+function render_path_raytrace_raytrace_init(shader_name: string, build: bool = true) {
 	if (render_path_raytrace_first) {
 		render_path_raytrace_first = false;
 		scene_embed_data("bnoise_sobol.k");
@@ -140,13 +142,17 @@ function render_path_raytrace_raytrace_init(shaderName: string, build: bool = tr
 		scene_embed_data("bnoise_rank.k");
 	}
 
-	let shader: ArrayBuffer = data_get_blob(shaderName);
-	if (build) render_path_raytrace_build_data();
+	let shader: buffer_t = data_get_blob(shader_name);
+	if (build) {
+		render_path_raytrace_build_data();
+	}
 	krom_raytrace_init(shader, render_path_raytrace_vb.buffer_, render_path_raytrace_ib.buffer_, render_path_raytrace_vb_scale);
 }
 
 function render_path_raytrace_build_data() {
-	if (context_raw.merged_object == null) util_mesh_merge();
+	if (context_raw.merged_object == null) {
+		util_mesh_merge();
+	}
 	///if is_paint
 	let mo: mesh_object_t = !context_layer_filter_used() ? context_raw.merged_object : context_raw.paint_object;
 	///else
@@ -155,19 +161,25 @@ function render_path_raytrace_build_data() {
 	let md: mesh_data_t = mo.data;
 	let mo_scale: f32 = mo.base.transform.scale.x; // Uniform scale only
 	render_path_raytrace_vb_scale = md.scale_pos * mo_scale;
-	if (mo.base.parent != null) render_path_raytrace_vb_scale *= mo.base.parent.transform.scale.x;
+	if (mo.base.parent != null) {
+		render_path_raytrace_vb_scale *= mo.base.parent.transform.scale.x;
+	}
 	render_path_raytrace_vb = md._.vertex_buffer;
 	render_path_raytrace_ib = md._.index_buffers[0];
 }
 
 function render_path_raytrace_draw(useLiveLayer: bool) {
 	let is_live: bool = config_raw.brush_live && render_path_paint_live_layer_drawn > 0;
-	if (context_raw.ddirty > 1 || context_raw.pdirty > 0 || is_live) render_path_raytrace_frame = 0;
+	if (context_raw.ddirty > 1 || context_raw.pdirty > 0 || is_live) {
+		render_path_raytrace_frame = 0;
+	}
 
 	///if krom_metal
 	// Delay path tracing additional samples while painting
 	let down: bool = mouse_down() || pen_down();
-	if (context_in_viewport() && down) render_path_raytrace_frame = 0;
+	if (context_in_viewport() && down) {
+		render_path_raytrace_frame = 0;
+	}
 	///end
 
 	render_path_raytrace_commands(useLiveLayer);

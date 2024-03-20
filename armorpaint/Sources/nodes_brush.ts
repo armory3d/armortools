@@ -24,7 +24,7 @@ function nodes_brush_create_node(node_type: string): zui_node_t {
 				let canvas: zui_node_canvas_t = context_raw.brush.canvas;
 				let nodes: zui_nodes_t = context_raw.brush.nodes;
 				let node: zui_node_t = ui_nodes_make_node(n, nodes, canvas);
-				canvas.nodes.push(node);
+				array_push(canvas.nodes, node);
 				return node;
 			}
 		}

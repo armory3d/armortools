@@ -1,5 +1,5 @@
 
-function make_blur_run(vert: NodeShaderRaw, frag: NodeShaderRaw) {
+function make_blur_run(vert: node_shader_t, frag: node_shader_t) {
 	///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 	node_shader_write(frag, 'vec2 texCoordInp = texelFetch(gbuffer2, ivec2(sp.x * gbufferSize.x, sp.y * gbufferSize.y), 0).ba;');
 	///else

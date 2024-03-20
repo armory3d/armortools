@@ -47,7 +47,7 @@ class PhysicsBodyRaw {
 	btshape: Ammo.btCollisionShape;
 	ready: bool = false;
 	id: i32 = 0;
-	height_data: Uint8Array = null;
+	height_data: u8_array_t = null;
 }
 
 let physics_body_next_id: i32 = 0;
@@ -369,15 +369,15 @@ function physics_body_set_ccd(pb: PhysicsBodyRaw, sphereRadius: f32, motionThres
 function physics_body_fill_convex_hull(pb: PhysicsBodyRaw, scale: vec4_t, margin: f32): Ammo.btConvexHullShape {
 	// Check whether shape already exists
 	let data: any = pb.object.ext.data;
-	let shape: Ammo.btConvexHullShape = physics_body_convex_hull_cache.get(data);
+	let shape: Ammo.btConvexHullShape = map_get(physics_body_convex_hull_cache, data);
 	if (shape != null) {
-		physics_body_users_cache.set(data, physics_body_users_cache.get(data) + 1);
+		map_set(physics_body_users_cache, data, map_get(physics_body_users_cache, data) + 1);
 		return shape;
 	}
 
 	shape = new Ammo.btConvexHullShape();
-	physics_body_convex_hull_cache.set(data, shape);
-	physics_body_users_cache.set(data, 1);
+	map_set(physics_body_convex_hull_cache, data, shape);
+	map_set(physics_body_users_cache, data, 1);
 
 	let positions: i16_array_t = mesh_data_get_vertex_array(data, 'pos').values;
 
@@ -401,15 +401,15 @@ function physics_body_fill_convex_hull(pb: PhysicsBodyRaw, scale: vec4_t, margin
 function physics_body_fill_triangle_mesh(pb: PhysicsBodyRaw, scale: vec4_t): Ammo.btTriangleMesh {
 	// Check whether shape already exists
 	let data: any = pb.object.ext.data;
-	let triangle_mesh: Ammo.btTriangleMesh = physics_body_triangle_mesh_cache.get(data);
+	let triangle_mesh: Ammo.btTriangleMesh = map_get(physics_body_triangle_mesh_cache, data);
 	if (triangle_mesh != null) {
-		physics_body_users_cache.set(data, physics_body_users_cache.get(data) + 1);
+		map_set(physics_body_users_cache, data, map_get(physics_body_users_cache, data) + 1);
 		return triangle_mesh;
 	}
 
 	triangle_mesh = new Ammo.btTriangleMesh(true, true);
-	physics_body_triangle_mesh_cache.set(data, triangle_mesh);
-	physics_body_users_cache.set(data, 1);
+	map_set(physics_body_triangle_mesh_cache, data, triangle_mesh);
+	map_set(physics_body_users_cache, data, 1);
 
 	let positions: i16_array_t = mesh_data_get_vertex_array(data, 'pos').values;
 	let indices: any = data._indices;
@@ -446,13 +446,13 @@ function physics_body_delete(pb: PhysicsBodyRaw) {
 	// Delete shape if no other user is found
 	if (pb.shape == shape_type_t.CONVEX_HULL || pb.shape == shape_type_t.MESH) {
 		let data: any = pb.object.ext.data;
-		let i: i32 = physics_body_users_cache.get(data) - 1;
-		physics_body_users_cache.set(data, i);
+		let i: i32 = map_get(physics_body_users_cache, data) - 1;
+		map_set(physics_body_users_cache, data, i);
 		if (i <= 0) {
 			Ammo.destroy(pb.btshape);
 			pb.shape == shape_type_t.CONVEX_HULL ?
-				physics_body_convex_hull_cache.delete(data) :
-				physics_body_triangle_mesh_cache.delete(data);
+				map_delete(physics_body_convex_hull_cache, data) :
+				map_delete(physics_body_triangle_mesh_cache, data);
 		}
 	}
 	else Ammo.destroy(pb.btshape);

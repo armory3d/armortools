@@ -32,34 +32,40 @@ function path_data(): string {
 }
 
 function path_to_relative(from: string, to: string): string {
-	let a: string[] = from.split(path_sep);
-	let b: string[] = to.split(path_sep);
+	let a: string[] = string_split(from, path_sep);
+	let b: string[] = string_split(to, path_sep);
 	while (a[0] == b[0]) {
 		a.shift();
 		b.shift();
-		if (a.length == 0 || b.length == 0) break;
+		if (a.length == 0 || b.length == 0) {
+			break;
+		}
 	}
 	let base: string = "";
-	for (let i: i32 = 0; i < a.length - 1; ++i) base += ".." + path_sep;
+	for (let i: i32 = 0; i < a.length - 1; ++i) {
+		base += ".." + path_sep;
+	}
 	base += b.join(path_sep);
 	return base;
 }
 
 function path_normalize(path: string): string {
-	let ar: string[] = path.split(path_sep);
+	let ar: string[] = string_split(path, path_sep);
 	let i: i32 = 0;
 	while (i < ar.length) {
 		if (i > 0 && ar[i] == ".." && ar[i - 1] != "..") {
-			ar.splice(i - 1, 2);
+			array_splice(ar, i - 1, 2);
 			i--;
 		}
-		else i++;
+		else {
+			i++;
+		}
 	}
 	return ar.join(path_sep);
 }
 
 function path_base_dir(path: string): string {
-	return path.substr(0, path.lastIndexOf(path_sep) + 1);
+	return substring(path, 0, string_last_index_of(path, path_sep) + 1);
 }
 
 function path_working_dir(): string {
@@ -73,47 +79,55 @@ function path_working_dir(): string {
 }
 
 function path_is_mesh(path: string): bool {
-	let p: string = path.toLowerCase();
-	for (let s of path_mesh_formats) if (p.endsWith("." + s)) return true;
+	let p: string = to_lower_case(path);
+	for (let s of path_mesh_formats) {
+		if (ends_with(p, "." + s)) {
+			return true;
+		}
+	}
 	return false;
 }
 
 function path_is_texture(path: string): bool {
-	let p: string = path.toLowerCase();
-	for (let s of path_texture_formats) if (p.endsWith("." + s)) return true;
+	let p: string = to_lower_case(path);
+	for (let s of path_texture_formats) {
+		if (ends_with(p, "." + s)) {
+			return true;
+		}
+	}
 	return false;
 }
 
 function path_is_font(path: string): bool {
-	let p: string = path.toLowerCase();
-	return p.endsWith(".ttf") ||
-			p.endsWith(".ttc") ||
-			p.endsWith(".otf");
+	let p: string = to_lower_case(path);
+	return ends_with(p, ".ttf") ||
+		   ends_with(p, ".ttc") ||
+		   ends_with(p, ".otf");
 }
 
 function path_is_project(path: string): bool {
-	let p: string = path.toLowerCase();
-	return p.endsWith(".arm");
+	let p: string = to_lower_case(path);
+	return ends_with(p, ".arm");
 }
 
 function path_is_plugin(path: string): bool {
-	let p: string = path.toLowerCase();
-	return p.endsWith(".js");
+	let p: string = to_lower_case(path);
+	return ends_with(p, ".js");
 }
 
 function path_is_json(path: string): bool {
-	let p: string = path.toLowerCase();
-	return p.endsWith(".json");
+	let p: string = to_lower_case(path);
+	return ends_with(p, ".json");
 }
 
 function path_is_text(path: string): bool {
-	let p: string = path.toLowerCase();
-	return p.endsWith(".txt");
+	let p: string = to_lower_case(path);
+	return ends_with(p, ".txt");
 }
 
 function path_is_gimp_color_palette(path: string): bool {
-	let p: string = path.toLowerCase();
-	return p.endsWith(".gpl");
+	let p: string = to_lower_case(path);
+	return ends_with(p, ".gpl");
 }
 
 function path_is_known(path: string): bool {
@@ -123,8 +137,8 @@ function path_is_known(path: string): bool {
 function path_check_ext(p: string, exts: string[]): bool {
 	p = string_replace_all(p, "-", "_");
 	for (let ext of exts) {
-		if (p.endsWith("_" + ext) ||
-			(p.indexOf("_" + ext + "_") >= 0 && !p.endsWith("_preview") && !p.endsWith("_icon"))) {
+		if (ends_with(p, "_" + ext) ||
+			(string_index_of(p, "_" + ext + "_") >= 0 && !ends_with(p, "_preview") && !ends_with(p, "_icon"))) {
 			return true;
 		}
 	}
@@ -154,12 +168,12 @@ function path_is_displacement_tex(p: string): bool {
 }
 
 function path_is_folder(p: string): bool {
-	return string_replace_all(p, "\\", "/").split("/").pop().indexOf(".") == -1;
+	return string_index_of(string_split(string_replace_all(p, "\\", "/"), "/").pop(), ".") == -1;
 }
 
 function path_is_protected(): bool {
 	///if krom_windows
-	return krom_get_files_location().indexOf("Program Files") >= 0;
+	return string_index_of(krom_get_files_location(), "Program Files") >= 0;
 	///elseif krom_android
 	return true;
 	///elseif krom_ios

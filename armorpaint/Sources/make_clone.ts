@@ -1,5 +1,5 @@
 
-function make_clone_run(vert: NodeShaderRaw, frag: NodeShaderRaw) {
+function make_clone_run(vert: node_shader_t, frag: node_shader_t) {
 	node_shader_add_uniform(frag, 'vec2 cloneDelta', '_cloneDelta');
 	///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 	node_shader_write(frag, 'vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.xy + cloneDelta) * gbufferSize), 0).ba;');

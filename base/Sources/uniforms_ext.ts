@@ -13,7 +13,9 @@ function uniforms_ext_init() {
 }
 
 function uniforms_ext_i32_link(object: object_t, mat: material_data_t, link: string): Null<i32> {
-	if (link == "_bloomCurrentMip") return render_path_base_bloom_current_mip;
+	if (link == "_bloomCurrentMip") {
+		return render_path_base_bloom_current_mip;
+	}
 	return null;
 }
 
@@ -82,7 +84,9 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 		}
 		case "_brushHardness": {
 			let decal_mask: bool = operator_shortcut(config_keymap.decal_mask + "+" + config_keymap.action_paint, shortcut_type_t.DOWN);
-			if (context_raw.tool != workspace_tool_t.BRUSH && context_raw.tool != workspace_tool_t.ERASER && context_raw.tool != workspace_tool_t.CLONE && !decal_mask) return 1.0;
+			if (context_raw.tool != workspace_tool_t.BRUSH && context_raw.tool != workspace_tool_t.ERASER && context_raw.tool != workspace_tool_t.CLONE && !decal_mask) {
+				return 1.0;
+			}
 			let val: f32 = context_raw.brush_hardness * context_raw.brush_nodes_hardness;
 			if (config_raw.pressure_hardness && pen_down()) {
 				val *= pen_pressure * config_raw.pressure_sensitivity;
@@ -103,7 +107,7 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 			return val;
 		}
 		case "_objectId": {
-			return project_paint_objects.indexOf(object.ext);
+			return array_index_of(project_paint_objects, object.ext);
 		}
 		///if is_paint
 		case "_dilateRadius": {
@@ -153,7 +157,7 @@ function uniforms_ext_vec2_link(object: object_t, mat: material_data_t, link: st
 	switch (link) {
 		case "_gbufferSize": {
 			vec4_set(uniforms_ext_vec, 0, 0, 0);
-			let gbuffer2: render_target_t = render_path_render_targets.get("gbuffer2");
+			let gbuffer2: render_target_t = map_get(render_path_render_targets, "gbuffer2");
 			vec4_set(uniforms_ext_vec, gbuffer2._image.width, gbuffer2._image.height, 0);
 			return uniforms_ext_vec;
 		}
@@ -308,7 +312,9 @@ function uniforms_ext_vec4_link(object: object_t, mat: material_data_t, link: st
 			let scale2d: f32 = (900 / base_h()) * config_raw.window_scale;
 			val *= scale2d; // Projection ratio
 			vec4_set(uniforms_ext_vec, context_raw.decal_x, context_raw.decal_y, decal_mask ? 1 : 0, val);
-			if (context_raw.paint2d) uniforms_ext_vec.x = vec2d(uniforms_ext_vec.x);
+			if (context_raw.paint2d) {
+				uniforms_ext_vec.x = vec2d(uniforms_ext_vec.x);
+			}
 			return uniforms_ext_vec;
 		}
 		///end
@@ -336,7 +342,7 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 		case "_texpaint_undo": {
 			///if (is_paint || is_sculpt)
 			let i: i32 = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
-			return render_path_render_targets.get("texpaint_undo" + i)._image;
+			return map_get(render_path_render_targets, "texpaint_undo" + i)._image;
 			///end
 
 			///if is_lab
@@ -346,7 +352,7 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 		case "_texpaint_nor_undo": {
 			///if (is_paint || is_sculpt)
 			let i: i32 = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
-			return render_path_render_targets.get("texpaint_nor_undo" + i)._image;
+			return map_get(render_path_render_targets, "texpaint_nor_undo" + i)._image;
 			///end
 
 			///if is_lab
@@ -356,7 +362,7 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 		case "_texpaint_pack_undo": {
 			///if (is_paint || is_sculpt)
 			let i: i32 = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
-			return render_path_render_targets.get("texpaint_pack_undo" + i)._image;
+			return map_get(render_path_render_targets, "texpaint_pack_undo" + i)._image;
 			///end
 
 			///if is_lab
@@ -365,18 +371,26 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 		}
 
 		case "_ltcMat": {
-			if (const_data_ltc_mat_tex == null) const_data_init_ltc();
+			if (const_data_ltc_mat_tex == null) {
+				const_data_init_ltc();
+			}
 			return const_data_ltc_mat_tex;
 		}
 		case "_ltcMag": {
-			if (const_data_ltc_mag_tex == null) const_data_init_ltc();
+			if (const_data_ltc_mag_tex == null) {
+				const_data_init_ltc();
+			}
 			return const_data_ltc_mag_tex;
 		}
 
 		///if (is_paint || is_sculpt)
 		case "_texcolorid": {
-			if (project_assets.length == 0) return render_path_render_targets.get("empty_white")._image;
-			else return project_get_image(project_assets[context_raw.colorid_handle.position]);
+			if (project_assets.length == 0) {
+				return map_get(render_path_render_targets, "empty_white")._image;
+			}
+			else {
+				return project_get_image(project_assets[context_raw.colorid_handle.position]);
+			}
 		}
 		case "_textexttool": { // Opacity map for text
 			return context_raw.text_tool_image;
@@ -388,14 +402,14 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 			return context_raw.brush_stencil_image;
 		}
 		case "_texparticle": {
-			return render_path_render_targets.get("texparticle")._image;
+			return map_get(render_path_render_targets, "texparticle")._image;
 		}
 		///end
 
 		///if is_paint
 		case "_texuvmap": {
 			if (!util_uv_uvmap_cached) {
-				let _init = () => {
+				let _init = function () {
 					util_uv_cache_uv_map();
 				}
 				app_notify_on_init(_init);
@@ -404,7 +418,7 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 		}
 		case "_textrianglemap": {
 			if (!util_uv_trianglemap_cached) {
-				let _init = () => {
+				let _init = function () {
 					util_uv_cache_triangle_map();
 				}
 				app_notify_on_init(_init);
@@ -412,11 +426,11 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 			return util_uv_trianglemap;
 		}
 		case "_texuvislandmap": {
-			let _init = () => {
+			let _init = function () {
 				util_uv_cache_uv_island_map();
 			}
 			app_notify_on_init(_init);
-			return util_uv_uvislandmap_cached ? util_uv_uvislandmap :render_path_render_targets.get("empty_black")._image;
+			return util_uv_uvislandmap_cached ? util_uv_uvislandmap :map_get(render_path_render_targets, "empty_black")._image;
 		}
 		case "_texdilatemap": {
 			return util_uv_dilatemap;
@@ -424,14 +438,14 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 		///end
 	}
 
-	if (link.startsWith("_texpaint_pack_vert")) {
-		let tid: string = link.substr(link.length - 1);
-		return render_path_render_targets.get("texpaint_pack" + tid)._image;
+	if (starts_with(link, "_texpaint_pack_vert")) {
+		let tid: string = substring(link, link.length - 1, link.length);
+		return map_get(render_path_render_targets, "texpaint_pack" + tid)._image;
 	}
 
-	if (link.startsWith("_texpaint_vert")) {
+	if (starts_with(link, "_texpaint_vert")) {
 		///if (is_paint || is_sculpt)
-		let tid: i32 = Number(link.substr(link.length - 1));
+		let tid: i32 = Number(substring(link, link.length - 1, link.length));
 		return tid < project_layers.length ? project_layers[tid].texpaint : null;
 		///end
 
@@ -439,9 +453,9 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 		return brush_output_node_inst.texpaint;
 		///end
 	}
-	if (link.startsWith("_texpaint_nor")) {
+	if (starts_with(link, "_texpaint_nor")) {
 		///if is_paint
-		let tid: i32 = Number(link.substr(link.length - 1));
+		let tid: i32 = Number(substring(link, link.length - 1, link.length));
 		return tid < project_layers.length ? project_layers[tid].texpaint_nor : null;
 		///end
 
@@ -449,9 +463,9 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 		return brush_output_node_inst.texpaint_nor;
 		///end
 	}
-	if (link.startsWith("_texpaint_pack")) {
+	if (starts_with(link, "_texpaint_pack")) {
 		///if is_paint
-		let tid: i32 = Number(link.substr(link.length - 1));
+		let tid: i32 = Number(substring(link, link.length - 1, link.length));
 		return tid < project_layers.length ? project_layers[tid].texpaint_pack : null;
 		///end
 
@@ -459,9 +473,9 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 		return brush_output_node_inst.texpaint_pack;
 		///end
 	}
-	if (link.startsWith("_texpaint")) {
+	if (starts_with(link, "_texpaint")) {
 		///if (is_paint || is_sculpt)
-		let tid: i32 = Number(link.substr(link.length - 1));
+		let tid: i32 = Number(substring(link, link.length - 1, link.length));
 		return tid < project_layers.length ? project_layers[tid].texpaint : null;
 		///end
 
@@ -471,17 +485,17 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 	}
 
 	///if (is_paint || is_sculpt)
-	if (link.startsWith("_texblur_")) {
-		let id: string = link.substr(9);
-		return context_raw.node_previews != null ? context_raw.node_previews.get(id) :render_path_render_targets.get("empty_black")._image;
+	if (starts_with(link, "_texblur_")) {
+		let id: string = substring(link, 9, link.length);
+		return context_raw.node_previews != null ? map_get(context_raw.node_previews, id) :map_get(render_path_render_targets, "empty_black")._image;
 	}
-	if (link.startsWith("_texwarp_")) {
-		let id: string = link.substr(9);
-		return context_raw.node_previews != null ? context_raw.node_previews.get(id) :render_path_render_targets.get("empty_black")._image;
+	if (starts_with(link, "_texwarp_")) {
+		let id: string = substring(link, 9, link.length);
+		return context_raw.node_previews != null ? map_get(context_raw.node_previews, id) :map_get(render_path_render_targets, "empty_black")._image;
 	}
-	if (link.startsWith("_texbake_")) {
-		let id: string = link.substr(9);
-		return context_raw.node_previews != null ? context_raw.node_previews.get(id) :render_path_render_targets.get("empty_black")._image;
+	if (starts_with(link, "_texbake_")) {
+		let id: string = substring(link, 9, link.length);
+		return context_raw.node_previews != null ? map_get(context_raw.node_previews, id) :map_get(render_path_render_targets, "empty_black")._image;
 	}
 	///end
 

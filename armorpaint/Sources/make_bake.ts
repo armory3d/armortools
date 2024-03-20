@@ -1,5 +1,5 @@
 
-function make_bake_run(con: NodeShaderContextRaw, vert: NodeShaderRaw, frag: NodeShaderRaw) {
+function make_bake_run(con: node_shader_context_t, vert: node_shader_t, frag: node_shader_t) {
 	if (context_raw.bake_type == bake_type_t.AO) { // Voxel
 		///if arm_voxels
 		// Apply normal channel
@@ -121,7 +121,7 @@ function make_bake_run(con: NodeShaderContextRaw, vert: NodeShaderRaw, frag: Nod
 	}
 }
 
-function make_bake_position_normal(vert: NodeShaderRaw, frag: NodeShaderRaw) {
+function make_bake_position_normal(vert: node_shader_t, frag: node_shader_t) {
 	node_shader_add_out(vert, 'vec3 position');
 	node_shader_add_out(vert, 'vec3 normal');
 	node_shader_add_uniform(vert, 'mat4 W', '_world_matrix');
@@ -134,7 +134,7 @@ function make_bake_position_normal(vert: NodeShaderRaw, frag: NodeShaderRaw) {
 	node_shader_write(frag, 'fragColor[1] = vec4(normal, 1.0);');
 }
 
-function make_bake_set_color_writes(con_paint: NodeShaderContextRaw) {
+function make_bake_set_color_writes(con_paint: node_shader_context_t) {
 	// Bake into base color, disable other slots
 	con_paint.data.color_writes_red[1] = false;
 	con_paint.data.color_writes_green[1] = false;

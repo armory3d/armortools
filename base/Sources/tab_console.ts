@@ -30,11 +30,15 @@ function tab_console_draw(htab: zui_handle_t) {
 		}
 		if (zui_button(tr("Export"))) {
 			let str: string = console_last_traces.join("\n");
-			ui_files_show("txt", true, false, (path: string) => {
+			ui_files_show("txt", true, false, function (path: string) {
 				let f: string = ui_files_filename;
-				if (f == "") f = tr("untitled");
+				if (f == "") {
+					f = tr("untitled");
+				}
 				path = path + path_sep + f;
-				if (!path.endsWith(".txt")) path += ".txt";
+				if (!ends_with(path, ".txt")) {
+					path += ".txt";
+				}
 				krom_file_save_bytes(path, sys_string_to_buffer(str));
 			});
 		}

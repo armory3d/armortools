@@ -20,9 +20,9 @@ function console_draw_toast(s: string) {
 
 function console_toast(s: string) {
 	// Show a popup message
-	let _render = () => {
+	let _render = function () {
 		console_draw_toast(s);
-		base_notify_on_next_frame(() => {
+		base_notify_on_next_frame(function () {
 			app_remove_render_2d(_render);
 		});
 	}
@@ -42,7 +42,9 @@ function console_progress(s: string) {
 	else if (console_progress_text == null) {
 		app_notify_on_render_2d(console_draw_progress);
 	}
-	if (s != null) console_trace(s);
+	if (s != null) {
+		console_trace(s);
+	}
 	console_progress_text = s;
 }
 
@@ -68,6 +70,8 @@ function console_log(s: string) {
 
 function console_trace(v: any) {
 	base_redraw_console();
-	console_last_traces.unshift(String(v));
-	if (console_last_traces.length > 100) console_last_traces.pop();
+	console_last_traces.unshift(any_to_string(v));
+	if (console_last_traces.length > 100) {
+		console_last_traces.pop();
+	}
 }

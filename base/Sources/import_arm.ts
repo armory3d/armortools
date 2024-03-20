@@ -1,6 +1,6 @@
 
 function import_arm_run_project(path: string) {
-	let b: ArrayBuffer = data_get_blob(path);
+	let b: buffer_t = data_get_blob(path);
 	let project: project_format_t = armpack_decode(b);
 
 	///if (is_paint || is_sculpt)
@@ -31,7 +31,7 @@ function import_arm_run_project(path: string) {
 
 	project_new(import_as_mesh);
 	project_filepath = path;
-	ui_files_filename = path.substring(path.lastIndexOf(path_sep) + 1, path.lastIndexOf("."));
+	ui_files_filename = substring(path, string_last_index_of(path, path_sep) + 1, string_last_index_of(path, "."));
 	///if (krom_android || krom_ios)
 	sys_title_set(ui_files_filename);
 	///else
@@ -48,7 +48,7 @@ function import_arm_run_project(path: string) {
 
 	// Save to recent
 	///if krom_ios
-	let recent_path: string = path.substr(path.lastIndexOf("/") + 1);
+	let recent_path: string = substring(path, string_last_index_of(path, "/") + 1);
 	///else
 	let recent_path: string = path;
 	///end
@@ -80,7 +80,7 @@ function import_arm_run_project(path: string) {
 		transform_decompose(scene_camera.base.transform);
 		scene_camera.data.fov = project_raw.camera_fov;
 		camera_object_build_proj(scene_camera);
-		let origin: Float32Array = project_raw.camera_origin;
+		let origin: f32_array_t = project_raw.camera_origin;
 		camera_origins[0].x = origin[0];
 		camera_origins[0].y = origin[1];
 		camera_origins[0].z = origin[2];
@@ -98,10 +98,10 @@ function import_arm_run_project(path: string) {
 			abs = path_normalize(abs);
 			import_arm_unpack_asset(project, abs, file);
 		}
-		if (data_cached_images.get(abs) == null && !file_exists(abs)) {
+		if (map_get(data_cached_images, abs) == null && !file_exists(abs)) {
 			import_arm_make_pink(abs);
 		}
-		let hdr_as_envmap: bool = abs.endsWith(".hdr") && project_raw.envmap == abs;
+		let hdr_as_envmap: bool = ends_with(abs, ".hdr") && project_raw.envmap == abs;
 		import_texture_run(abs, hdr_as_envmap);
 	}
 
@@ -143,7 +143,7 @@ function import_arm_run_project(path: string) {
 		let object: mesh_object_t = scene_add_mesh_object(md, context_raw.paint_object.materials, context_raw.paint_object.base);
 		object.base.name = md.name;
 		object.skip_context = "paint";
-		project_paint_objects.push(object);
+		array_push(project_paint_objects, object);
 	}
 
 	if (project.mesh_assets != null && project.mesh_assets.length > 0) {
@@ -153,12 +153,18 @@ function import_arm_run_project(path: string) {
 	}
 
 	///if is_paint
-	if (project.atlas_objects != null) project_atlas_objects = project.atlas_objects;
-	if (project.atlas_names != null) project_atlas_names = project.atlas_names;
+	if (project.atlas_objects != null) {
+		project_atlas_objects = project.atlas_objects;
+	}
+	if (project.atlas_names != null) {
+		project_atlas_names = project.atlas_names;
+	}
 	///end
 
 	// No mask by default
-	if (context_raw.merged_object == null) util_mesh_merge();
+	if (context_raw.merged_object == null) {
+		util_mesh_merge();
+	}
 	///end
 
 	context_select_paint_object(context_main_object());
@@ -169,26 +175,32 @@ function import_arm_run_project(path: string) {
 	///if (is_paint || is_sculpt)
 	let tex: image_t = project_layers[0].texpaint;
 	if (tex.width != config_get_texture_res_x() || tex.height != config_get_texture_res_y()) {
-		if (history_undo_layers != null) for (let l of history_undo_layers) slot_layer_resize_and_set_bits(l);
+		if (history_undo_layers != null) {
+			for (let l of history_undo_layers) {
+				slot_layer_resize_and_set_bits(l);
+			}
+		}
 		let rts: map_t<string, render_target_t> = render_path_render_targets;
-		let _texpaint_blend0: image_t = rts.get("texpaint_blend0")._image;
-		base_notify_on_next_frame(() => {
+		let _texpaint_blend0: image_t = map_get(rts, "texpaint_blend0")._image;
+		base_notify_on_next_frame(function () {
 			image_unload(_texpaint_blend0);
 		});
-		rts.get("texpaint_blend0").width = config_get_texture_res_x();
-		rts.get("texpaint_blend0").height = config_get_texture_res_y();
-		rts.get("texpaint_blend0")._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8, depth_format_t.NO_DEPTH);
-		let _texpaint_blend1: image_t = rts.get("texpaint_blend1")._image;
-		base_notify_on_next_frame(() => {
+		map_get(rts, "texpaint_blend0").width = config_get_texture_res_x();
+		map_get(rts, "texpaint_blend0").height = config_get_texture_res_y();
+		map_get(rts, "texpaint_blend0")._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8, depth_format_t.NO_DEPTH);
+		let _texpaint_blend1: image_t = map_get(rts, "texpaint_blend1")._image;
+		base_notify_on_next_frame(function () {
 			image_unload(_texpaint_blend1);
 		});
-		rts.get("texpaint_blend1").width = config_get_texture_res_x();
-		rts.get("texpaint_blend1").height = config_get_texture_res_y();
-		rts.get("texpaint_blend1")._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8, depth_format_t.NO_DEPTH);
+		map_get(rts, "texpaint_blend1").width = config_get_texture_res_x();
+		map_get(rts, "texpaint_blend1").height = config_get_texture_res_y();
+		map_get(rts, "texpaint_blend1")._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8, depth_format_t.NO_DEPTH);
 		context_raw.brush_blend_dirty = true;
 	}
 
-	for (let l of project_layers) slot_layer_unload(l);
+	for (let l of project_layers) {
+		slot_layer_unload(l);
+	}
 	project_layers = [];
 	for (let i: i32 = 0; i < project.layer_datas.length; ++i) {
 		let ld: layer_data_t = project.layer_datas[i];
@@ -201,13 +213,17 @@ function import_arm_run_project(path: string) {
 		let is_mask: bool = false;
 		///end
 
-		let l: SlotLayerRaw = slot_layer_create("", is_group ? layer_slot_type_t.GROUP : is_mask ? layer_slot_type_t.MASK : layer_slot_type_t.LAYER);
-		if (ld.name != null) l.name = ld.name;
+		let l: slot_layer_t = slot_layer_create("", is_group ? layer_slot_type_t.GROUP : is_mask ? layer_slot_type_t.MASK : layer_slot_type_t.LAYER);
+		if (ld.name != null) {
+			l.name = ld.name;
+		}
 		l.visible = ld.visible;
-		project_layers.push(l);
+		array_push(project_layers, l);
 
 		if (!is_group) {
-			if (base_pipe_merge == null) base_make_pipe();
+			if (base_pipe_merge == null) {
+				base_make_pipe();
+			}
 
 			let _texpaint: image_t = null;
 
@@ -254,7 +270,9 @@ function import_arm_run_project(path: string) {
 			l.scale = ld.uv_scale;
 			l.angle = ld.uv_rot;
 			l.uv_type = ld.uv_type;
-			if (ld.decal_mat != null) l.decal_mat = mat4_from_f32_array(ld.decal_mat);
+			if (ld.decal_mat != null) {
+				l.decal_mat = mat4_from_f32_array(ld.decal_mat);
+			}
 			l.mask_opacity = ld.opacity_mask;
 			l.object_mask = ld.object_mask;
 			l.blending = ld.blending;
@@ -273,11 +291,15 @@ function import_arm_run_project(path: string) {
 			l.paint_subs = ld.paint_subs;
 			///end
 
-			base_notify_on_next_frame(() => {
+			base_notify_on_next_frame(function () {
 				image_unload(_texpaint);
 				///if is_paint
-				if (_texpaint_nor != null) image_unload(_texpaint_nor);
-				if (_texpaint_pack != null) image_unload(_texpaint_pack);
+				if (_texpaint_nor != null) {
+					image_unload(_texpaint_nor);
+				}
+				if (_texpaint_pack != null) {
+					image_unload(_texpaint_pack);
+				}
 				///end
 			});
 		}
@@ -300,7 +322,7 @@ function import_arm_run_project(path: string) {
 	for (let n of project.material_nodes) {
 		import_arm_init_nodes(n.nodes);
 		context_raw.material = slot_material_create(m0, n);
-		project_materials.push(context_raw.material);
+		array_push(project_materials, context_raw.material);
 	}
 	///end
 
@@ -308,7 +330,9 @@ function import_arm_run_project(path: string) {
 	ui_nodes_group_stack = [];
 	project_material_groups = [];
 	if (project.material_groups != null) {
-		for (let g of project.material_groups) project_material_groups.push({ canvas: g, nodes: zui_nodes_create() });
+		for (let g of project.material_groups) {
+			array_push(project_material_groups, { canvas: g, nodes: zui_nodes_create() });
+		}
 	}
 
 	///if (is_paint || is_sculpt)
@@ -322,7 +346,7 @@ function import_arm_run_project(path: string) {
 	for (let n of project.brush_nodes) {
 		import_arm_init_nodes(n.nodes);
 		context_raw.brush = slot_brush_create(n);
-		project_brushes.push(context_raw.brush);
+		array_push(project_brushes, context_raw.brush);
 		make_material_parse_brush();
 		util_render_make_brush_preview();
 	}
@@ -330,7 +354,7 @@ function import_arm_run_project(path: string) {
 	// Fill layers
 	for (let i: i32 = 0; i < project.layer_datas.length; ++i) {
 		let ld: layer_data_t = project.layer_datas[i];
-		let l: SlotLayerRaw = project_layers[i];
+		let l: slot_layer_t = project_layers[i];
 		let is_group: bool = ld.texpaint == null;
 		if (!is_group) {
 			l.fill_layer = ld.fill_layer > -1 ? project_materials[ld.fill_layer] : null;
@@ -366,12 +390,12 @@ function import_arm_run_mesh(raw: scene_t) {
 			object.base.name = md.name;
 			object.skip_context = "paint";
 			md._.handle = md.name;
-			data_cached_meshes.set(md._.handle, md);
+			map_set(data_cached_meshes, md._.handle, md);
 		}
 		vec4_set(object.base.transform.scale, 1, 1, 1);
 		transform_build_matrix(object.base.transform);
 		object.base.name = md.name;
-		project_paint_objects.push(object);
+		array_push(project_paint_objects, object);
 		util_mesh_merge();
 		viewport_scale_to_bounds();
 	}
@@ -380,9 +404,12 @@ function import_arm_run_mesh(raw: scene_t) {
 }
 
 function import_arm_run_material(path: string) {
-	let b: ArrayBuffer = data_get_blob(path);
+	let b: buffer_t = data_get_blob(path);
 	let project: project_format_t = armpack_decode(b);
-	if (project.version == null) { data_delete_blob(path); return; }
+	if (project.version == null) {
+		data_delete_blob(path);
+		return;
+	}
 	import_arm_run_material_from_project(project, path);
 }
 
@@ -400,7 +427,7 @@ function import_arm_run_material_from_project(project: project_format_t, path: s
 			abs = path_normalize(abs);
 			import_arm_unpack_asset(project, abs, file);
 		}
-		if (data_cached_images.get(abs) == null && !file_exists(abs)) {
+		if (map_get(data_cached_images, abs) == null && !file_exists(abs)) {
 			import_arm_make_pink(abs);
 		}
 		import_texture_run(abs);
@@ -408,25 +435,27 @@ function import_arm_run_material_from_project(project: project_format_t, path: s
 
 	let m0: material_data_t = data_get_material("Scene", "Material");
 
-	let imported: SlotMaterialRaw[] = [];
+	let imported: slot_material_t[] = [];
 
 	for (let c of project.material_nodes) {
 		import_arm_init_nodes(c.nodes);
 		context_raw.material = slot_material_create(m0, c);
-		project_materials.push(context_raw.material);
-		imported.push(context_raw.material);
+		array_push(project_materials, context_raw.material);
+		array_push(imported, context_raw.material);
 		history_new_material();
 	}
 
 	if (project.material_groups != null) {
 		for (let c of project.material_groups) {
-			while (import_arm_group_exists(c)) import_arm_rename_group(c.name, imported, project.material_groups); // Ensure unique group name
+			while (import_arm_group_exists(c)) {
+				import_arm_rename_group(c.name, imported, project.material_groups); // Ensure unique group name
+			}
 			import_arm_init_nodes(c.nodes);
-			project_material_groups.push({ canvas: c, nodes: zui_nodes_create() });
+			array_push(project_material_groups, { canvas: c, nodes: zui_nodes_create() });
 		}
 	}
 
-	let _init = () => {
+	let _init = function () {
 		for (let m of imported) {
 			context_set_material(m);
 			make_material_parse_paint_material();
@@ -442,29 +471,40 @@ function import_arm_run_material_from_project(project: project_format_t, path: s
 
 function import_arm_group_exists(c: zui_node_canvas_t): bool {
 	for (let g of project_material_groups) {
-		if (g.canvas.name == c.name) return true;
+		if (g.canvas.name == c.name) {
+			return true;
+		}
 	}
 	return false;
 }
 
-function import_arm_rename_group(name: string, materials: SlotMaterialRaw[], groups: zui_node_canvas_t[]) {
+function import_arm_rename_group(name: string, materials: slot_material_t[], groups: zui_node_canvas_t[]) {
 	for (let m of materials) {
 		for (let n of m.canvas.nodes) {
-			if (n.type == "GROUP" && n.name == name) n.name += ".1";
+			if (n.type == "GROUP" && n.name == name) {
+				n.name += ".1";
+			}
 		}
 	}
 	for (let c of groups) {
-		if (c.name == name) c.name += ".1";
+		if (c.name == name) {
+			c.name += ".1";
+		}
 		for (let n of c.nodes) {
-			if (n.type == "GROUP" && n.name == name) n.name += ".1";
+			if (n.type == "GROUP" && n.name == name) {
+				n.name += ".1";
+			}
 		}
 	}
 }
 
 function import_arm_run_brush(path: string) {
-	let b: ArrayBuffer = data_get_blob(path);
+	let b: buffer_t = data_get_blob(path);
 	let project: project_format_t = armpack_decode(b);
-	if (project.version == null) { data_delete_blob(path); return; }
+	if (project.version == null) {
+		data_delete_blob(path);
+		return;
+	}
 	import_arm_run_brush_from_project(project, path);
 }
 
@@ -482,22 +522,22 @@ function import_arm_run_brush_from_project(project: project_format_t, path: stri
 			abs = path_normalize(abs);
 			import_arm_unpack_asset(project, abs, file);
 		}
-		if (data_cached_images.get(abs) == null && !file_exists(abs)) {
+		if (map_get(data_cached_images, abs) == null && !file_exists(abs)) {
 			import_arm_make_pink(abs);
 		}
 		import_texture_run(abs);
 	}
 
-	let imported: SlotBrushRaw[] = [];
+	let imported: slot_brush_t[] = [];
 
 	for (let n of project.brush_nodes) {
 		import_arm_init_nodes(n.nodes);
 		context_raw.brush = slot_brush_create(n);
-		project_brushes.push(context_raw.brush);
-		imported.push(context_raw.brush);
+		array_push(project_brushes, context_raw.brush);
+		array_push(imported, context_raw.brush);
 	}
 
-	let _init = () => {
+	let _init = function () {
 		for (let b of imported) {
 			context_set_brush(b);
 			util_render_make_brush_preview();
@@ -511,9 +551,12 @@ function import_arm_run_brush_from_project(project: project_format_t, path: stri
 ///end
 
 function import_arm_run_swatches(path: string, replace_existing: bool = false) {
-	let b: ArrayBuffer = data_get_blob(path);
+	let b: buffer_t = data_get_blob(path);
 	let project: project_format_t = armpack_decode(b);
-	if (project.version == null) { data_delete_blob(path); return; }
+	if (project.version == null) {
+		data_delete_blob(path);
+		return;
+	}
 	import_arm_run_swatches_from_project(project, path, replace_existing);
 }
 
@@ -522,13 +565,13 @@ function import_arm_run_swatches_from_project(project: project_format_t, path: s
 		project_raw.swatches = [];
 
 		if (project.swatches == null) { // No swatches contained
-			project_raw.swatches.push(make_swatch());
+			array_push(project_raw.swatches, make_swatch());
 		}
 	}
 
 	if (project.swatches != null) {
 		for (let s of project.swatches) {
-			project_raw.swatches.push(s);
+			array_push(project_raw.swatches, s);
 		}
 	}
 	ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
@@ -537,13 +580,13 @@ function import_arm_run_swatches_from_project(project: project_format_t, path: s
 
 function import_arm_make_pink(abs: string) {
 	console_error(strings_error2() + " " + abs);
-	let b: Uint8Array = new Uint8Array(4);
+	let b: u8_array_t = u8_array_create(4);
 	b[0] = 255;
 	b[1] = 0;
 	b[2] = 255;
 	b[3] = 255;
 	let pink: image_t = image_from_bytes(b.buffer, 1, 1);
-	data_cached_images.set(abs, pink);
+	map_set(data_cached_images, abs, pink);
 }
 
 function import_arm_texture_node_name(): string {
@@ -574,13 +617,15 @@ function import_arm_unpack_asset(project: project_format_t, abs: string, file: s
 		pa.name = string_replace_all(pa.name, "\\", "/");
 		///end
 		pa.name = path_normalize(pa.name);
-		if (pa.name == file) pa.name = abs; // From relative to absolute
+		if (pa.name == file) {
+			pa.name = abs; // From relative to absolute
+		}
 		if (pa.name == abs) {
 			if (!project_packed_asset_exists(project_raw.packed_assets, pa.name)) {
-				project_raw.packed_assets.push(pa);
+				array_push(project_raw.packed_assets, pa);
 			}
-			let image: image_t = image_from_encoded_bytes(pa.bytes, pa.name.endsWith(".jpg") ? ".jpg" : ".png");
-			data_cached_images.set(abs, image);
+			let image: image_t = image_from_encoded_bytes(pa.bytes, ends_with(pa.name, ".jpg") ? ".jpg" : ".png");
+			map_set(data_cached_images, abs, image);
 			break;
 		}
 	}

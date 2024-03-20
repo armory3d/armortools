@@ -12,13 +12,17 @@ function import_mesh_run(path: string, _clear_layers = true, replace_existing = 
 	import_mesh_clear_layers = _clear_layers;
 	context_raw.layer_filter = 0;
 
-	let p = path.toLowerCase();
-	if (p.endsWith(".obj")) import_obj_run(path, replace_existing);
-	else if (p.endsWith(".blend")) import_blend_mesh_run(path, replace_existing);
+	let p = to_lower_case(path);
+	if (ends_with(p, ".obj")) {
+		import_obj_run(path, replace_existing);
+	}
+	else if (ends_with(p, ".blend")) {
+		import_blend_mesh_run(path, replace_existing);
+	}
 	else {
-		let ext = path.substr(path.lastIndexOf(".") + 1);
-		let importer = path_mesh_importers.get(ext);
-		importer(path, (mesh: any) => {
+		let ext = substring(path, string_last_index_of(path, ".") + 1, path.length);
+		let importer = map_get(path_mesh_importers, ext);
+		importer(path, function (mesh: any) {
 			replace_existing ? import_mesh_make_mesh(mesh, path) : import_mesh_add_mesh(mesh);
 		});
 	}
@@ -26,7 +30,7 @@ function import_mesh_run(path: string, _clear_layers = true, replace_existing = 
 	project_mesh_assets = [path];
 
 	///if (krom_android || krom_ios)
-	sys_title_set(path.substring(path.lastIndexOf(path_sep) + 1, path.lastIndexOf(".")));
+	sys_title_set(substring(path, string_last_index_of(path, path_sep) + 1, string_last_index_of(path, ".")));
 	///end
 }
 
@@ -41,22 +45,32 @@ function import_mesh_finish_import() {
 
 	if (project_paint_objects.length > 1) {
 		// Sort by name
-		project_paint_objects.sort((a, b): i32 => {
-			if (a.base.name < b.base.name) return -1;
-			else if (a.base.name > b.base.name) return 1;
+		array_sort(project_paint_objects, function (a, b): i32 {
+			if (a.base.name < b.base.name) {
+				return -1;
+			}
+			else if (a.base.name > b.base.name) {
+				return 1;
+			}
 			return 0;
 		});
 
 		// No mask by default
-		for (let p of project_paint_objects) p.base.visible = true;
-		if (context_raw.merged_object == null) util_mesh_merge();
+		for (let p of project_paint_objects) {
+			p.base.visible = true;
+		}
+		if (context_raw.merged_object == null) {
+			util_mesh_merge();
+		}
 		context_raw.paint_object.skip_context = "paint";
 		context_raw.merged_object.base.visible = true;
 	}
 
 	viewport_scale_to_bounds();
 
-	if (context_raw.paint_object.base.name == "") context_raw.paint_object.base.name = "Object";
+	if (context_raw.paint_object.base.name == "") {
+		context_raw.paint_object.base.name = "Object";
+	}
 	make_material_parse_paint_material();
 	make_material_parse_mesh_material();
 
@@ -73,9 +87,11 @@ function import_mesh_make_mesh(mesh: any, path: string) {
 		return;
 	}
 
-	let _makeMesh = () => {
+	let _make_mesh = function() {
 		let raw = import_mesh_raw_mesh(mesh);
-		if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm" });
+		if (mesh.cola != null) {
+			array_push(raw.vertex_arrays, { values: mesh.cola, attrib: "col", data: "short4norm" });
+		}
 
 		let md: mesh_data_t = mesh_data_create(raw);
 		context_raw.paint_object = context_main_object();
@@ -83,7 +99,9 @@ function import_mesh_make_mesh(mesh: any, path: string) {
 		context_select_paint_object(context_main_object());
 		for (let i = 0; i < project_paint_objects.length; ++i) {
 			let p = project_paint_objects[i];
-			if (p == context_raw.paint_object) continue;
+			if (p == context_raw.paint_object) {
+				continue;
+			}
 			data_delete_mesh(p.data._.handle);
 			mesh_object_remove(p);
 		}
@@ -107,7 +125,7 @@ function import_mesh_make_mesh(mesh: any, path: string) {
 		project_paint_objects = [context_raw.paint_object];
 
 		md._.handle = raw.name;
-		data_cached_meshes.set(md._.handle, md);
+		map_set(data_cached_meshes, md._.handle, md);
 
 		context_raw.ddirty = 4;
 		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
@@ -116,8 +134,8 @@ function import_mesh_make_mesh(mesh: any, path: string) {
 		// Wait for addMesh calls to finish
 		app_notify_on_init(import_mesh_finish_import);
 
-		base_notify_on_next_frame(() => {
-			let f32 = new Float32Array(config_get_texture_res_x() * config_get_texture_res_y() * 4);
+		base_notify_on_next_frame(function () {
+			let f32 = f32_array_create(config_get_texture_res_x() * config_get_texture_res_y() * 4);
 			for (let i = 0; i < math_floor(mesh.inda.length); ++i) {
 				let index = mesh.inda[i];
 				f32[i * 4]     = mesh.posa[index * 4]     / 32767;
@@ -135,14 +153,16 @@ function import_mesh_make_mesh(mesh: any, path: string) {
 		});
 	}
 
-	_makeMesh();
+	_make_mesh();
 }
 
 function import_mesh_add_mesh(mesh: any) {
 
-	let _addMesh = () => {
+	let _addMesh = function () {
 		let raw = import_mesh_raw_mesh(mesh);
-		if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm" });
+		if (mesh.cola != null) {
+			array_push(raw.vertex_arrays, { values: mesh.cola, attrib: "col", data: "short4norm" });
+		}
 
 		let md: mesh_data_t = mesh_data_create(raw);
 
@@ -155,14 +175,14 @@ function import_mesh_add_mesh(mesh: any) {
 			if (p.base.name == object.base.name) {
 				p.base.name += ".001";
 				p.data._.handle += ".001";
-				data_cached_meshes.set(p.data._.handle, p.data);
+				map_set(data_cached_meshes, p.data._.handle, p.data);
 			}
 		}
 
-		project_paint_objects.push(object);
+		array_push(project_paint_objects, object);
 
 		md._.handle = raw.name;
-		data_cached_meshes.set(md._.handle, md);
+		map_set(data_cached_meshes, md._.handle, md);
 
 		context_raw.ddirty = 4;
 		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
@@ -172,10 +192,14 @@ function import_mesh_add_mesh(mesh: any) {
 }
 
 function import_mesh_raw_mesh(mesh: any): mesh_data_t {
-	let posa = new Int16Array(math_floor(mesh.inda.length * 4));
-	for (let i = 0; i < posa.length; ++i) posa[i] = 32767;
-	let inda = new Uint32Array(mesh.inda.length);
-	for (let i = 0; i < inda.length; ++i) inda[i] = i;
+	let posa: i16_array_t = i16_array_create(math_floor(mesh.inda.length * 4));
+	for (let i: i32 = 0; i < posa.length; ++i) {
+		posa[i] = 32767;
+	}
+	let inda: u32_array_t = u32_array_create(mesh.inda.length);
+	for (let i: i32 = 0; i < inda.length; ++i) {
+		inda[i] = i;
+	}
 	return {
 		name: mesh.name,
 		vertex_arrays: [

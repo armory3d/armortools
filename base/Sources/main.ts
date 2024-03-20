@@ -39,7 +39,9 @@ function main_start() {
 	context_init();
 	config_init();
 	sys_start(config_get_options());
-	if (config_raw.layout == null) base_init_layout();
+	if (config_raw.layout == null) {
+		base_init_layout();
+	}
 	krom_set_app_name(manifest_title);
 	app_init(function() {
 		let o: object_t = scene_set_active("Scene");
@@ -105,7 +107,9 @@ function main_embed(additional: string[]) {
 		"text_coloring.json",
 		"version.json"
 	];
-	for (let add of additional) files.push(add);
+	for (let add of additional) {
+		array_push(files, add);
+	}
 	for (let file of files) {
 		resource_embed_blob(file, global["data/" + file]);
 		global["data/" + file] = null;

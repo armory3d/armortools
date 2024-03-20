@@ -1,13 +1,17 @@
 
-function make_brush_run(vert: NodeShaderRaw, frag: NodeShaderRaw) {
+function make_brush_run(vert: node_shader_t, frag: node_shader_t) {
 
 	node_shader_write(frag, 'float dist = 0.0;');
 
-	if (context_raw.tool == workspace_tool_t.PARTICLE) return;
+	if (context_raw.tool == workspace_tool_t.PARTICLE) {
+		return;
+	}
 
 	let fill_layer: bool = context_raw.layer.fill_layer != null;
 	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
-	if (decal && !fill_layer) node_shader_write(frag, 'if (decalMask.z > 0.0) {');
+	if (decal && !fill_layer) {
+		node_shader_write(frag, 'if (decalMask.z > 0.0) {');
+	}
 
 	if (config_raw.brush_3d) {
 		///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
@@ -87,5 +91,7 @@ function make_brush_run(vert: NodeShaderRaw, frag: NodeShaderRaw) {
 
 	node_shader_write(frag, 'if (dist > brushRadius) discard;');
 
-	if (decal && !fill_layer) node_shader_write(frag, '}');
+	if (decal && !fill_layer) {
+		node_shader_write(frag, '}');
+	}
 }

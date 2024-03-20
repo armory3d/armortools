@@ -14,30 +14,38 @@ function export_texture_run(path: string, bake_material: bool = false) {
 		for (let l of project_layers) {
 			if (slot_layer_get_object_mask(l) > 0) {
 				let name: string = project_paint_objects[slot_layer_get_object_mask(l) - 1].base.name;
-				if (name.substr(name.length - 5, 2) == ".1") { // tile.1001
-					udim_tiles.push(name.substr(name.length - 5));
+				if (substring(name, name.length - 5, 2) == ".1") { // tile.1001
+					array_push(udim_tiles, substring(name, name.length - 5, name.length));
 				}
 			}
 		}
 		if (udim_tiles.length > 0) {
-			for (let udim_tile of udim_tiles) export_texture_run_layers(path, project_layers, udim_tile);
+			for (let udim_tile of udim_tiles) {
+				export_texture_run_layers(path, project_layers, udim_tile);
+			}
 		}
-		else export_texture_run_layers(path, project_layers);
+		else {
+			export_texture_run_layers(path, project_layers);
+		}
 	}
 	else if (context_raw.layers_export == export_mode_t.PER_OBJECT) {
 		let object_names: string[] = [];
 		for (let l of project_layers) {
 			if (slot_layer_get_object_mask(l) > 0) {
 				let name: string = project_paint_objects[slot_layer_get_object_mask(l) - 1].base.name;
-				if (object_names.indexOf(name) == -1) {
-					object_names.push(name);
+				if (array_index_of(object_names, name) == -1) {
+					array_push(object_names, name);
 				}
 			}
 		}
 		if (object_names.length > 0) {
-			for (let name of object_names) export_texture_run_layers(path, project_layers, name);
+			for (let name of object_names) {
+				export_texture_run_layers(path, project_layers, name);
+			}
 		}
-		else export_texture_run_layers(path, project_layers);
+		else {
+			export_texture_run_layers(path, project_layers);
+		}
 	}
 	else { // Visible or selected
 		let atlas_export: bool = false;
@@ -51,11 +59,14 @@ function export_texture_run(path: string, bake_material: bool = false) {
 		}
 		if (atlas_export) {
 			for (let atlas_index: i32 = 0; atlas_index < project_atlas_objects.length; ++atlas_index) {
-				let layers: SlotLayerRaw[] = [];
+				let layers: slot_layer_t[] = [];
 				for (let object_index: i32 = 0; object_index < project_atlas_objects.length; ++object_index) {
 					if (project_atlas_objects[object_index] == atlas_index) {
 						for (let l of project_layers) {
-							if (slot_layer_get_object_mask(l) == 0 /* shared object */ || slot_layer_get_object_mask(l) - 1 == object_index) layers.push(l);
+							if (slot_layer_get_object_mask(l) == 0 || // shared object
+								slot_layer_get_object_mask(l) - 1 == object_index) {
+								array_push(layers, l);
+							}
 						}
 					}
 				}
@@ -64,7 +75,9 @@ function export_texture_run(path: string, bake_material: bool = false) {
 				}
 			}
 		}
-		else export_texture_run_layers(path, context_raw.layers_export == export_mode_t.SELECTED ? (slot_layer_is_group(context_raw.layer) ? slot_layer_get_children(context_raw.layer) : [context_raw.layer]) : project_layers);
+		else {
+			export_texture_run_layers(path, context_raw.layers_export == export_mode_t.SELECTED ? (slot_layer_is_group(context_raw.layer) ? slot_layer_get_children(context_raw.layer) : [context_raw.layer]) : project_layers);
+		}
 	}
 	///end
 
@@ -110,7 +123,7 @@ function export_texture_run_bake_material(path: string) {
 ///end
 
 ///if is_paint
-function export_texture_run_layers(path: string, layers: SlotLayerRaw[], object_name: string = "", bake_material: bool = false) {
+function export_texture_run_layers(path: string, layers: slot_layer_t[], object_name: string = "", bake_material: bool = false) {
 ///end
 
 ///if is_lab
@@ -124,21 +137,31 @@ function export_texture_run_layers(path: string, layers: any[], object_name: str
 	///else
 	let f: string = ui_files_filename;
 	///end
-	if (f == "") f = tr("untitled");
+	if (f == "") {
+		f = tr("untitled");
+	}
 	let format_type: texture_ldr_format_t = context_raw.format_type;
 	let bits: i32 = base_bits_handle.position == texture_bits_t.BITS8 ? 8 : 16;
 	let ext: string = bits == 16 ? ".exr" : format_type == texture_ldr_format_t.PNG ? ".png" : ".jpg";
-	if (f.endsWith(ext)) f = f.substr(0, f.length - 4);
+	if (ends_with(f, ext)) {
+		f = substring(f, 0, f.length - 4);
+	}
 
 	///if is_paint
 	let is_udim: bool = context_raw.layers_export == export_mode_t.PER_UDIM_TILE;
-	if (is_udim) ext = object_name + ext;
+	if (is_udim) {
+		ext = object_name + ext;
+	}
 
 	base_make_temp_img();
 	base_make_export_img();
-	if (base_pipe_merge == null) base_make_pipe();
-	if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
-	let empty: image_t = render_path_render_targets.get("empty_white")._image;
+	if (base_pipe_merge == null) {
+		base_make_pipe();
+	}
+	if (const_data_screen_aligned_vb == null) {
+		const_data_create_screen_aligned_data();
+	}
+	let empty: image_t = map_get(render_path_render_targets, "empty_white")._image;
 
 	// Append object mask name
 	let export_selected: bool = context_raw.layers_export == export_mode_t.SELECTED;
@@ -162,17 +185,25 @@ function export_texture_run_layers(path: string, layers: any[], object_name: str
 
 	// Flatten layers
 	for (let l1 of layers) {
-		if (!export_selected && !slot_layer_is_visible(l1)) continue;
-		if (!slot_layer_is_layer(l1)) continue;
+		if (!export_selected && !slot_layer_is_visible(l1)) {
+			continue;
+		}
+		if (!slot_layer_is_layer(l1)) {
+			continue;
+		}
 
 		if (object_name != "" && slot_layer_get_object_mask(l1) > 0) {
-			if (is_udim && !project_paint_objects[slot_layer_get_object_mask(l1) - 1].base.name.endsWith(object_name)) continue;
+			if (is_udim && !ends_with(project_paint_objects[slot_layer_get_object_mask(l1) - 1].base.name, object_name)) {
+				continue;
+			}
 			let per_object: bool = context_raw.layers_export == export_mode_t.PER_OBJECT;
-			if (per_object && project_paint_objects[slot_layer_get_object_mask(l1) - 1].base.name != object_name) continue;
+			if (per_object && project_paint_objects[slot_layer_get_object_mask(l1) - 1].base.name != object_name) {
+				continue;
+			}
 		}
 
 		let mask: image_t = empty;
-		let l1masks: SlotLayerRaw[] = slot_layer_get_masks(l1);
+		let l1masks: slot_layer_t[] = slot_layer_get_masks(l1);
 		if (l1masks != null && !bake_material) {
 			if (l1masks.length > 1) {
 				base_make_temp_mask_img();
@@ -185,7 +216,9 @@ function export_texture_run_layers(path: string, layers: any[], object_name: str
 				}
 				mask = base_temp_mask_image;
 			}
-			else mask = l1masks[0].texpaint;
+			else {
+				mask = l1masks[0].texpaint;
+			}
 		}
 
 		if (l1.paint_base) {
@@ -271,17 +304,23 @@ function export_texture_run_layers(path: string, layers: any[], object_name: str
 	let texpaint_pack: image_t = brush_output_node_inst.texpaint_pack;
 	///end
 
-	let pixpaint: ArrayBuffer = null;
-	let pixpaint_nor: ArrayBuffer = null;
-	let pixpaint_pack: ArrayBuffer = null;
+	let pixpaint: buffer_t = null;
+	let pixpaint_nor: buffer_t = null;
+	let pixpaint_pack: buffer_t = null;
 	let preset: export_preset_t = box_export_preset;
-	let pix: ArrayBuffer = null;
+	let pix: buffer_t = null;
 
 	for (let t of preset.textures) {
 		for (let c of t.channels) {
-			if      ((c == "base_r" || c == "base_g" || c == "base_b" || c == "opac") && pixpaint == null) pixpaint = image_get_pixels(texpaint);
-			else if ((c == "nor_r" || c == "nor_g" || c == "nor_g_directx" || c == "nor_b" || c == "emis" || c == "subs") && pixpaint_nor == null) pixpaint_nor = image_get_pixels(texpaint_nor);
-			else if ((c == "occ" || c == "rough" || c == "metal" || c == "height" || c == "smooth") && pixpaint_pack == null) pixpaint_pack = image_get_pixels(texpaint_pack);
+			if ((c == "base_r" || c == "base_g" || c == "base_b" || c == "opac") && pixpaint == null) {
+				pixpaint = image_get_pixels(texpaint);
+			}
+			else if ((c == "nor_r" || c == "nor_g" || c == "nor_g_directx" || c == "nor_b" || c == "emis" || c == "subs") && pixpaint_nor == null) {
+				pixpaint_nor = image_get_pixels(texpaint_nor);
+			}
+			else if ((c == "occ" || c == "rough" || c == "metal" || c == "height" || c == "smooth") && pixpaint_pack == null) {
+				pixpaint_pack = image_get_pixels(texpaint_pack);
+			}
 		}
 	}
 
@@ -314,26 +353,62 @@ function export_texture_run_layers(path: string, layers: any[], object_name: str
 			export_texture_write_texture(path + path_sep + f + tex_name + ext, pixpaint, 2, 3);
 		}
 		else {
-			if (pix == null) pix = new ArrayBuffer(texture_size_x * texture_size_y * 4 * math_floor(bits / 8));
+			if (pix == null) {
+				pix = buffer_create(texture_size_x * texture_size_y * 4 * math_floor(bits / 8));
+			}
 			for (let i: i32 = 0; i < 4; ++i) {
 				let c: string = t.channels[i];
-				if      (c == "base_r") export_texture_copy_channel(new DataView(pixpaint), 0, new DataView(pix), i, t.color_space == "linear");
-				else if (c == "base_g") export_texture_copy_channel(new DataView(pixpaint), 1, new DataView(pix), i, t.color_space == "linear");
-				else if (c == "base_b") export_texture_copy_channel(new DataView(pixpaint), 2, new DataView(pix), i, t.color_space == "linear");
-				else if (c == "height") export_texture_copy_channel(new DataView(pixpaint_pack), 3, new DataView(pix), i, t.color_space == "linear");
-				else if (c == "metal") export_texture_copy_channel(new DataView(pixpaint_pack), 2, new DataView(pix), i, t.color_space == "linear");
-				else if (c == "nor_r") export_texture_copy_channel(new DataView(pixpaint_nor), 0, new DataView(pix), i, t.color_space == "linear");
-				else if (c == "nor_g") export_texture_copy_channel(new DataView(pixpaint_nor), 1, new DataView(pix), i, t.color_space == "linear");
-				else if (c == "nor_g_directx") export_texture_copy_channel_inv(new DataView(pixpaint_nor), 1, new DataView(pix), i, t.color_space == "linear");
-				else if (c == "nor_b") export_texture_copy_channel(new DataView(pixpaint_nor), 2, new DataView(pix), i, t.color_space == "linear");
-				else if (c == "occ") export_texture_copy_channel(new DataView(pixpaint_pack), 0, new DataView(pix), i, t.color_space == "linear");
-				else if (c == "opac") export_texture_copy_channel(new DataView(pixpaint), 3, new DataView(pix), i, t.color_space == "linear");
-				else if (c == "rough") export_texture_copy_channel(new DataView(pixpaint_pack), 1, new DataView(pix), i, t.color_space == "linear");
-				else if (c == "smooth") export_texture_copy_channel_inv(new DataView(pixpaint_pack), 1, new DataView(pix), i, t.color_space == "linear");
-				else if (c == "emis") export_texture_extract_channel(new DataView(pixpaint_nor), 3, new DataView(pix), i, 3, 1, t.color_space == "linear");
-				else if (c == "subs") export_texture_extract_channel(new DataView(pixpaint_nor), 3, new DataView(pix), i, 3, 2, t.color_space == "linear");
-				else if (c == "0.0") export_texture_set_channel(0, new DataView(pix), i);
-				else if (c == "1.0") export_texture_set_channel(255, new DataView(pix), i);
+				if (c == "base_r") {
+					export_texture_copy_channel(buffer_view_create(pixpaint), 0, buffer_view_create(pix), i, t.color_space == "linear");
+				}
+				else if (c == "base_g") {
+					export_texture_copy_channel(buffer_view_create(pixpaint), 1, buffer_view_create(pix), i, t.color_space == "linear");
+				}
+				else if (c == "base_b") {
+					export_texture_copy_channel(buffer_view_create(pixpaint), 2, buffer_view_create(pix), i, t.color_space == "linear");
+				}
+				else if (c == "height") {
+					export_texture_copy_channel(buffer_view_create(pixpaint_pack), 3, buffer_view_create(pix), i, t.color_space == "linear");
+				}
+				else if (c == "metal") {
+					export_texture_copy_channel(buffer_view_create(pixpaint_pack), 2, buffer_view_create(pix), i, t.color_space == "linear");
+				}
+				else if (c == "nor_r") {
+					export_texture_copy_channel(buffer_view_create(pixpaint_nor), 0, buffer_view_create(pix), i, t.color_space == "linear");
+				}
+				else if (c == "nor_g") {
+					export_texture_copy_channel(buffer_view_create(pixpaint_nor), 1, buffer_view_create(pix), i, t.color_space == "linear");
+				}
+				else if (c == "nor_g_directx") {
+					export_texture_copy_channel_inv(buffer_view_create(pixpaint_nor), 1, buffer_view_create(pix), i, t.color_space == "linear");
+				}
+				else if (c == "nor_b") {
+					export_texture_copy_channel(buffer_view_create(pixpaint_nor), 2, buffer_view_create(pix), i, t.color_space == "linear");
+				}
+				else if (c == "occ") {
+					export_texture_copy_channel(buffer_view_create(pixpaint_pack), 0, buffer_view_create(pix), i, t.color_space == "linear");
+				}
+				else if (c == "opac") {
+					export_texture_copy_channel(buffer_view_create(pixpaint), 3, buffer_view_create(pix), i, t.color_space == "linear");
+				}
+				else if (c == "rough") {
+					export_texture_copy_channel(buffer_view_create(pixpaint_pack), 1, buffer_view_create(pix), i, t.color_space == "linear");
+				}
+				else if (c == "smooth") {
+					export_texture_copy_channel_inv(buffer_view_create(pixpaint_pack), 1, buffer_view_create(pix), i, t.color_space == "linear");
+				}
+				else if (c == "emis") {
+					export_texture_extract_channel(buffer_view_create(pixpaint_nor), 3, buffer_view_create(pix), i, 3, 1, t.color_space == "linear");
+				}
+				else if (c == "subs") {
+					export_texture_extract_channel(buffer_view_create(pixpaint_nor), 3, buffer_view_create(pix), i, 3, 2, t.color_space == "linear");
+				}
+				else if (c == "0.0") {
+					export_texture_set_channel(0, buffer_view_create(pix), i);
+				}
+				else if (c == "1.0") {
+					export_texture_set_channel(255, buffer_view_create(pix), i);
+				}
 			}
 			export_texture_write_texture(path + path_sep + f + tex_name + ext, pix, 3);
 		}
@@ -345,29 +420,41 @@ function export_texture_run_layers(path: string, layers: any[], object_name: str
 	texpaint_pack.pixels = null;
 }
 
-function export_texture_write_texture(file: string, pixels: ArrayBuffer, type: i32 = 1, off: i32 = 0) {
+function export_texture_write_texture(file: string, pixels: buffer_t, type: i32 = 1, off: i32 = 0) {
 	let res_x: i32 = config_get_texture_res_x();
 	let res_y: i32 = config_get_texture_res_y();
 	let bits_handle: i32 = base_bits_handle.position;
 	let bits: i32 = bits_handle == texture_bits_t.BITS8 ? 8 : bits_handle == texture_bits_t.BITS16 ? 16 : 32;
 	let format: i32 = 0; // RGBA
-	if (type == 1) format = 2; // RGB1
-	if (type == 2 && off == 0) format = 3; // RRR1
-	if (type == 2 && off == 1) format = 4; // GGG1
-	if (type == 2 && off == 2) format = 5; // BBB1
-	if (type == 2 && off == 3) format = 6; // AAA1
+	if (type == 1) {
+		format = 2; // RGB1
+	}
+	if (type == 2 && off == 0) {
+		format = 3; // RRR1
+	}
+	if (type == 2 && off == 1) {
+		format = 4; // GGG1
+	}
+	if (type == 2 && off == 2) {
+		format = 5; // BBB1
+	}
+	if (type == 2 && off == 3) {
+		format = 6; // AAA1
+	}
 
 	if (context_raw.layers_destination == export_destination_t.PACKED) {
 		let image: image_t = image_from_bytes(pixels, res_x, res_y);
-		data_cached_images.set(file, image);
-		let ar: string[] = file.split(path_sep);
+		map_set(data_cached_images, file, image);
+		let ar: string[] = string_split(file, path_sep);
 		let name: string = ar[ar.length - 1];
 		let asset: asset_t = {name: name, file: file, id: project_asset_id++};
-		project_assets.push(asset);
-		if (project_raw.assets == null) project_raw.assets = [];
-		project_raw.assets.push(asset.file);
-		project_asset_names.push(asset.name);
-		project_asset_map.set(asset.id, image);
+		array_push(project_assets, asset);
+		if (project_raw.assets == null) {
+			project_raw.assets = [];
+		}
+		array_push(project_raw.assets, asset.file);
+		array_push(project_asset_names, asset.name);
+		map_set(project_asset_map, asset.id, image);
 		export_arm_pack_assets(project_raw, [asset]);
 		return;
 	}
@@ -379,42 +466,50 @@ function export_texture_write_texture(file: string, pixels: ArrayBuffer, type: i
 		krom_write_jpg(file, pixels, res_x, res_y, format, math_floor(context_raw.format_quality));
 	}
 	else { // Exr
-		let b: ArrayBuffer = parser_exr_run(res_x, res_y, pixels, bits, type, off);
-		krom_file_save_bytes(file, b, b.byteLength);
+		let b: buffer_t = parser_exr_run(res_x, res_y, pixels, bits, type, off);
+		krom_file_save_bytes(file, b, buffer_size(b));
 	}
 }
 
-function export_texture_copy_channel(from: DataView, from_channel: i32, to: DataView, to_channel: i32, linear: bool = true) {
-	for (let i: i32 = 0; i < math_floor(to.byteLength / 4); ++i) {
-		to.setUint8(i * 4 + to_channel, from.getUint8(i * 4 + from_channel));
+function export_texture_copy_channel(from: buffer_view_t, from_channel: i32, to: buffer_view_t, to_channel: i32, linear: bool = true) {
+	for (let i: i32 = 0; i < math_floor(buffer_view_size(to) / 4); ++i) {
+		buffer_view_set_u8(to, i * 4 + to_channel, buffer_view_get_u8(from, i * 4 + from_channel));
 	}
-	if (!linear) export_texture_to_srgb(to, to_channel);
+	if (!linear) {
+		export_texture_to_srgb(to, to_channel);
+	}
 }
 
-function export_texture_copy_channel_inv(from: DataView, from_channel: i32, to: DataView, to_channel: i32, linear: bool = true) {
-	for (let i: i32 = 0; i < math_floor(to.byteLength / 4); ++i) {
-		to.setUint8(i * 4 + to_channel, 255 - from.getUint8(i * 4 + from_channel));
+function export_texture_copy_channel_inv(from: buffer_view_t, from_channel: i32, to: buffer_view_t, to_channel: i32, linear: bool = true) {
+	for (let i: i32 = 0; i < math_floor(buffer_view_size(to) / 4); ++i) {
+		buffer_view_set_u8(to, i * 4 + to_channel, 255 - buffer_view_get_u8(from, i * 4 + from_channel));
 	}
-	if (!linear) export_texture_to_srgb(to, to_channel);
+	if (!linear) {
+		export_texture_to_srgb(to, to_channel);
+	}
 }
 
-function export_texture_extract_channel(from: DataView, from_channel: i32, to: DataView, to_channel: i32, step: i32, mask: i32, linear: bool = true) {
-	for (let i: i32 = 0; i < math_floor(to.byteLength / 4); ++i) {
-		to.setUint8(i * 4 + to_channel, from.getUint8(i * 4 + from_channel) % step == mask ? 255 : 0);
+function export_texture_extract_channel(from: buffer_view_t, from_channel: i32, to: buffer_view_t, to_channel: i32, step: i32, mask: i32, linear: bool = true) {
+	for (let i: i32 = 0; i < math_floor(buffer_view_size(to) / 4); ++i) {
+		buffer_view_set_u8(to, i * 4 + to_channel, buffer_view_get_u8(from, i * 4 + from_channel) % step == mask ? 255 : 0);
 	}
-	if (!linear) export_texture_to_srgb(to, to_channel);
+	if (!linear) {
+		export_texture_to_srgb(to, to_channel);
+	}
 }
 
-function export_texture_set_channel(value: i32, to: DataView, to_channel: i32, linear: bool = true) {
-	for (let i: i32 = 0; i < math_floor(to.byteLength / 4); ++i) {
-		to.setUint8(i * 4 + to_channel, value);
+function export_texture_set_channel(value: i32, to: buffer_view_t, to_channel: i32, linear: bool = true) {
+	for (let i: i32 = 0; i < math_floor(buffer_view_size(to) / 4); ++i) {
+		buffer_view_set_u8(to, i * 4 + to_channel, value);
 	}
-	if (!linear) export_texture_to_srgb(to, to_channel);
+	if (!linear) {
+		export_texture_to_srgb(to, to_channel);
+	}
 }
 
-function export_texture_to_srgb(to: DataView, to_channel: i32) {
-	for (let i: i32 = 0; i < math_floor(to.byteLength / 4); ++i) {
-		to.setUint8(i * 4 + to_channel, math_floor(math_pow(to.getUint8(i * 4 + to_channel) / 255, export_texture_gamma) * 255));
+function export_texture_to_srgb(to: buffer_view_t, to_channel: i32) {
+	for (let i: i32 = 0; i < math_floor(buffer_view_size(to) / 4); ++i) {
+		buffer_view_set_u8(to, i * 4 + to_channel, math_floor(math_pow(buffer_view_get_u8(to, i * 4 + to_channel) / 255, export_texture_gamma) * 255));
 	}
 }
 

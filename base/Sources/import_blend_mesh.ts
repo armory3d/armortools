@@ -2,7 +2,7 @@
 let import_blend_mesh_eps: f32 = 1.0 / 32767;
 
 function import_blend_mesh_run(path: string, replace_existing: bool = true) {
-	let b: ArrayBuffer = data_get_blob(path);
+	let b: buffer_t = data_get_blob(path);
 	let bl: BlendRaw = parser_blend_init(b);
 	if (bl.dna == null) {
 		console_error(strings_error3());
@@ -10,20 +10,29 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 	}
 
 	let obs: BlHandleRaw[] = parser_blend_get(bl, "Object");
-	if (obs == null || obs.length == 0) { import_mesh_make_mesh(null, path); return; }
+	if (obs == null || obs.length == 0) {
+		import_mesh_make_mesh(null, path);
+		return;
+	}
 
 	let first: bool = true;
 	for (let ob of obs) {
-		if (bl_handle_get(ob, "type") != 1) continue;
+		if (bl_handle_get(ob, "type") != 1) {
+			continue;
+		}
 
 		let name: string = bl_handle_get(bl_handle_get(ob, "id"), "name");
-		name = name.substring(2, name.length);
+		name = substring(name, 2, name.length);
 
 		let m: any = bl_handle_get(ob, "data", 0, "Mesh");
-		if (m == null) continue;
+		if (m == null) {
+			continue;
+		}
 
 		let totpoly: i32 = bl_handle_get(m, "totpoly");
-		if (totpoly == 0) continue;
+		if (totpoly == 0) {
+			continue;
+		}
 
 		let numtri: i32 = 0;
 		for (let i: i32 = 0; i < totpoly; ++i) {
@@ -31,12 +40,14 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 			let totloop: i32 = bl_handle_get(poly, "totloop");
 			numtri += totloop - 2;
 		}
-		let inda: Uint32Array = new Uint32Array(numtri * 3);
-		for (let i: i32 = 0; i < inda.length; ++i) inda[i] = i;
+		let inda: u32_array_t = u32_array_create(numtri * 3);
+		for (let i: i32 = 0; i < inda.length; ++i) {
+			inda[i] = i;
+		}
 
-		let posa32: Float32Array = new Float32Array(numtri * 3 * 4);
-		let posa: Int16Array = new Int16Array(numtri * 3 * 4);
-		let nora: Int16Array = new Int16Array(numtri * 3 * 2);
+		let posa32: f32_array_t = f32_array_create(numtri * 3 * 4);
+		let posa: i16_array_t = i16_array_create(numtri * 3 * 4);
+		let nora: i16_array_t = i16_array_create(numtri * 3 * 2);
 
 		// pdata, 25 == CD_MPOLY
 		// let vdata: any = get(m, "vdata");
@@ -61,21 +72,21 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 			let l: any = bl_handle_get(ldata, "layers", i);
 			if (bl_handle_get(l, "type") == 16) { // CD_MLOOPUV
 				let ptr: any = bl_handle_get(l, "data");
-				uvdata_pos = bl.map.get(ptr).pos;
+				uvdata_pos = map_get(bl.map, ptr).pos;
 				uvdata = l;
 			}
 			else if (bl_handle_get(l, "type") == 17) { // CD_PROP_BYTE_COLOR
 				let ptr: any = bl_handle_get(l, "data");
-				coldata_pos = bl.map.get(ptr).pos;
+				coldata_pos = map_get(bl.map, ptr).pos;
 				coldata = l;
 			}
 			// CD_MLOOP == 26
 		}
 
 		let hasuv: bool = uvdata != null;
-		let texa: Int16Array = hasuv ? new Int16Array(numtri * 3 * 2) : null;
+		let texa: i16_array_t = hasuv ? i16_array_create(numtri * 3 * 2) : null;
 		let hascol: bool = context_raw.parse_vcols && coldata != null;
-		let cola: Int16Array = hascol ? new Int16Array(numtri * 3 * 4) : null;
+		let cola: i16_array_t = hascol ? i16_array_create(numtri * 3 * 4) : null;
 
 		let tri: i32 = 0;
 		let vec0: vec4_t = vec4_create();
@@ -98,18 +109,26 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 					vec4_normalize(vec4_set(vec0, no0[0] / 32767, no0[1] / 32767, no0[2] / 32767)); // shortmax
 					vec4_normalize(vec4_set(vec1, no1[0] / 32767, no1[1] / 32767, no1[2] / 32767));
 				}
-				let uv0: Float32Array = null;
-				let uv1: Float32Array = null;
-				let uv2: Float32Array = null;
+				let uv0: f32_array_t = null;
+				let uv1: f32_array_t = null;
+				let uv2: f32_array_t = null;
 				if (hasuv) {
 					bl.pos = uvdata_pos + (loopstart + totloop - 1) * 4 * 3; // * 3 = x, y, flag
 					uv0 = parser_blend_read_f32array(bl, 2);
-					if (uv0[0] > 1.0 + import_blend_mesh_eps) uv0[0] = uv0[0] - math_floor(uv0[0]);
-					if (uv0[1] > 1.0 + import_blend_mesh_eps) uv0[1] = uv0[1] - math_floor(uv0[1]);
+					if (uv0[0] > 1.0 + import_blend_mesh_eps) {
+						uv0[0] = uv0[0] - math_floor(uv0[0]);
+					}
+					if (uv0[1] > 1.0 + import_blend_mesh_eps) {
+						uv0[1] = uv0[1] - math_floor(uv0[1]);
+					}
 					bl.pos = uvdata_pos + (loopstart) * 4 * 3;
 					uv1 = parser_blend_read_f32array(bl, 2);
-					if (uv1[0] > 1.0 + import_blend_mesh_eps) uv1[0] = uv1[0] - math_floor(uv1[0]);
-					if (uv1[1] > 1.0 + import_blend_mesh_eps) uv1[1] = uv1[1] - math_floor(uv1[1]);
+					if (uv1[0] > 1.0 + import_blend_mesh_eps) {
+						uv1[0] = uv1[0] - math_floor(uv1[0]);
+					}
+					if (uv1[1] > 1.0 + import_blend_mesh_eps) {
+						uv1[1] = uv1[1] - math_floor(uv1[1]);
+					}
 				}
 				let col0r: i32 = 0;
 				let col0g: i32 = 0;
@@ -170,8 +189,12 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 					if (hasuv) {
 						bl.pos = uvdata_pos + (loopstart + j + 1) * 4 * 3;
 						uv2 = parser_blend_read_f32array(bl, 2);
-						if (uv2[0] > 1.0 + import_blend_mesh_eps) uv2[0] = uv2[0] - math_floor(uv2[0]);
-						if (uv2[1] > 1.0 + import_blend_mesh_eps) uv2[1] = uv2[1] - math_floor(uv2[1]);
+						if (uv2[0] > 1.0 + import_blend_mesh_eps) {
+							uv2[0] = uv2[0] - math_floor(uv2[0]);
+						}
+						if (uv2[1] > 1.0 + import_blend_mesh_eps) {
+							uv2[1] = uv2[1] - math_floor(uv2[1]);
+						}
 						texa[tri * 6    ] = math_floor(uv0[0] * 32767);
 						texa[tri * 6 + 1] = math_floor((1.0 - uv0[1]) * 32767);
 						texa[tri * 6 + 2] = math_floor(uv1[0] * 32767);
@@ -203,7 +226,9 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 			}
 			else { // Convex or concave, ear clipping
 				let va: i32[] = [];
-				for (let i: i32 = 0; i < totloop; ++i) va.push(loopstart + i);
+				for (let i: i32 = 0; i < totloop; ++i) {
+					array_push(va, loopstart + i);
+				}
 				let v0: BlHandleRaw = import_blend_mesh_get_mvert_v(m, loopstart);
 				let v1: BlHandleRaw = import_blend_mesh_get_mvert_v(m, loopstart + 1);
 				let v2: BlHandleRaw = import_blend_mesh_get_mvert_v(m, loopstart + 2);
@@ -266,7 +291,9 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 					let e1x: f32 = v2x - v1x;
 					let e1y: f32 = v2y - v1y;
 					let cross: f32 = e0x * e1y - e0y * e1x;
-					if (cross <= 0) continue;
+					if (cross <= 0) {
+						continue;
+					}
 
 					let overlap: bool = false; // Other vertex found inside this triangle
 					for (let j: i32 = 0; j < vi - 3; ++j) {
@@ -281,7 +308,9 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 							break;
 						}
 					}
-					if (overlap) continue;
+					if (overlap) {
+						continue;
+					}
 
 					// Found ear
 					{
@@ -302,22 +331,34 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 							vec4_cross(vec0, vec1);
 							vec4_normalize(vec0, );
 						}
-						let uv0: Float32Array = null;
-						let uv1: Float32Array = null;
-						let uv2: Float32Array = null;
+						let uv0: f32_array_t = null;
+						let uv1: f32_array_t = null;
+						let uv2: f32_array_t = null;
 						if (hasuv) {
 							bl.pos = uvdata_pos + (va[i ]) * 4 * 3;
 							uv0 = parser_blend_read_f32array(bl, 2);
-							if (uv0[0] > 1.0 + import_blend_mesh_eps) uv0[0] = uv0[0] - math_floor(uv0[0]);
-							if (uv0[1] > 1.0 + import_blend_mesh_eps) uv0[1] = uv0[1] - math_floor(uv0[1]);
+							if (uv0[0] > 1.0 + import_blend_mesh_eps) {
+								uv0[0] = uv0[0] - math_floor(uv0[0]);
+							}
+							if (uv0[1] > 1.0 + import_blend_mesh_eps) {
+								uv0[1] = uv0[1] - math_floor(uv0[1]);
+							}
 							bl.pos = uvdata_pos + (va[i1]) * 4 * 3;
 							uv1 = parser_blend_read_f32array(bl, 2);
-							if (uv1[0] > 1.0 + import_blend_mesh_eps) uv1[0] = uv1[0] - math_floor(uv1[0]);
-							if (uv1[1] > 1.0 + import_blend_mesh_eps) uv1[1] = uv1[1] - math_floor(uv1[1]);
+							if (uv1[0] > 1.0 + import_blend_mesh_eps) {
+								uv1[0] = uv1[0] - math_floor(uv1[0]);
+							}
+							if (uv1[1] > 1.0 + import_blend_mesh_eps) {
+								uv1[1] = uv1[1] - math_floor(uv1[1]);
+							}
 							bl.pos = uvdata_pos + (va[i2]) * 4 * 3;
 							uv2 = parser_blend_read_f32array(bl, 2);
-							if (uv2[0] > 1.0 + import_blend_mesh_eps) uv2[0] = uv2[0] - math_floor(uv2[0]);
-							if (uv2[1] > 1.0 + import_blend_mesh_eps) uv2[1] = uv2[1] - math_floor(uv2[1]);
+							if (uv2[0] > 1.0 + import_blend_mesh_eps) {
+								uv2[0] = uv2[0] - math_floor(uv2[0]);
+							}
+							if (uv2[1] > 1.0 + import_blend_mesh_eps) {
+								uv2[1] = uv2[1] - math_floor(uv2[1]);
+							}
 						}
 						let col0r: i32 = 0;
 						let col0g: i32 = 0;
@@ -419,7 +460,9 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 		let scale_pos: f32 = 0.0;
 		for (let i: i32 = 0; i < posa32.length; ++i) {
 			let f: f32 = math_abs(posa32[i]);
-			if (scale_pos < f) scale_pos = f;
+			if (scale_pos < f) {
+				scale_pos = f;
+			}
 		}
 		let inv: f32 = 1 / scale_pos;
 		for (let i: i32 = 0; i < math_floor(posa32.length / 3); ++i) {
@@ -439,7 +482,12 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 			scale_tex: 1.0
 		};
 
-		(first && replace_existing) ? import_mesh_make_mesh(obj, path) : import_mesh_add_mesh(obj);
+		if (first && replace_existing) {
+			import_mesh_make_mesh(obj, path);
+		}
+		else {
+			import_mesh_add_mesh(obj);
+		}
 		first = false;
 	}
 

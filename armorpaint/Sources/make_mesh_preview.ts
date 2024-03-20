@@ -1,9 +1,9 @@
 
 let make_mesh_preview_opacity_discard_decal: f32 = 0.05;
 
-function make_mesh_preview_run(data: material_t, matcon: material_context_t): NodeShaderContextRaw {
+function make_mesh_preview_run(data: material_t, matcon: material_context_t): node_shader_context_t {
 	let context_id: string = "mesh";
-	let con_mesh: NodeShaderContextRaw = node_shader_context_create(data, {
+	let con_mesh: node_shader_context_t = node_shader_context_create(data, {
 		name: context_id,
 		depth_write: true,
 		compare_mode: "less",
@@ -13,8 +13,8 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): No
 		depth_attachment: "DEPTH32"
 	});
 
-	let vert: NodeShaderRaw = node_shader_context_make_vert(con_mesh);
-	let frag: NodeShaderRaw = node_shader_context_make_frag(con_mesh);
+	let vert: node_shader_t = node_shader_context_make_vert(con_mesh);
+	let frag: node_shader_t = node_shader_context_make_frag(con_mesh);
 	frag.ins = vert.outs;
 	let pos: string = "pos";
 

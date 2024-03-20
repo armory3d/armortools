@@ -16,7 +16,7 @@ function box_preferences_show() {
 				box_preferences_locales = translator_get_supported_locales();
 			}
 
-			let locale_handle: zui_handle_t = zui_handle("boxpreferences_0", { position: box_preferences_locales.indexOf(config_raw.locale) });
+			let locale_handle: zui_handle_t = zui_handle("boxpreferences_0", { position: array_index_of(box_preferences_locales, config_raw.locale) });
 			zui_combo(locale_handle, box_preferences_locales, tr("Language"), true);
 			if (locale_handle.changed) {
 				let locale_code: string = box_preferences_locales[locale_handle.position];
@@ -33,7 +33,9 @@ function box_preferences_show() {
 				config_raw.window_scale = hscale.value;
 				box_preferences_set_scale();
 			}
-			if (hscale.changed) context_raw.hscale_was_changed = true;
+			if (hscale.changed) {
+				context_raw.hscale_was_changed = true;
+			}
 
 			let hspeed: zui_handle_t = zui_handle("boxpreferences_2", { value: config_raw.camera_zoom_speed });
 			config_raw.camera_zoom_speed = zui_slider(hspeed, tr("Camera Zoom Speed"), 0.1, 4.0, true);
@@ -51,7 +53,9 @@ function box_preferences_show() {
 			}
 
 			config_raw.wrap_mouse = zui_check(zui_handle("boxpreferences_6", { selected: config_raw.wrap_mouse }), tr("Wrap Mouse"));
-			if (ui.is_hovered) zui_tooltip(tr("Wrap mouse around view boundaries during camera control"));
+			if (ui.is_hovered) {
+				zui_tooltip(tr("Wrap mouse around view boundaries during camera control"));
+			}
 
 			config_raw.node_preview = zui_check(zui_handle("boxpreferences_7", { selected: config_raw.node_preview }), tr("Show Node Preview"));
 
@@ -88,7 +92,11 @@ function box_preferences_show() {
 							ui.t.ELEMENT_H = base_default_element_h;
 							config_restore();
 							box_preferences_set_scale();
-							if (box_preferences_files_plugin != null) for (let f of box_preferences_files_plugin) plugin_stop(f);
+							if (box_preferences_files_plugin != null) {
+								for (let f of box_preferences_files_plugin) {
+									plugin_stop(f);
+								}
+							}
 							box_preferences_files_plugin = null;
 							box_preferences_files_keymap = null;
 							make_material_parse_mesh_material();
@@ -97,7 +105,7 @@ function box_preferences_show() {
 					}
 					if (ui_menu_button(ui, tr("Import..."))) {
 						ui_files_show("json", false, false, function (path: string) {
-							let b: ArrayBuffer = data_get_blob(path);
+							let b: buffer_t = data_get_blob(path);
 							let raw: config_t = json_parse(sys_buffer_to_string(b));
 							app_notify_on_init(function () {
 								ui.t.ELEMENT_H = base_default_element_h;
@@ -143,7 +151,9 @@ function box_preferences_show() {
 						let theme_name: string = zui_text_input(zui_handle("boxpreferences_14", { text: "new_theme" }), tr("Name"));
 						if (zui_button(tr("OK")) || ui.is_return_down) {
 							let template: string = json_stringify(base_theme);
-							if (!theme_name.endsWith(".json")) theme_name += ".json";
+							if (!ends_with(theme_name, ".json")) {
+								theme_name += ".json";
+							}
 							let path: string = path_data() + path_sep + "themes" + path_sep + theme_name;
 							krom_file_save_bytes(path, sys_string_to_buffer(template));
 							box_preferences_fetch_themes(); // Refresh file list
@@ -166,7 +176,9 @@ function box_preferences_show() {
 			if (zui_button(tr("Export"))) {
 				ui_files_show("json", true, false, function (path: string) {
 					path += path_sep + ui_files_filename;
-					if (!path.endsWith(".json")) path += ".json";
+					if (!ends_with(path, ".json")) {
+						path += ".json";
+					}
 					krom_file_save_bytes(path, sys_string_to_buffer(json_stringify(base_theme)));
 				});
 			}
@@ -185,18 +197,22 @@ function box_preferences_show() {
 				ui_menu_draw(function (ui: zui_t) {
 					ui.changed = false;
 					zui_color_wheel(h, false, null, 11 * ui.t.ELEMENT_H * zui_SCALE(ui), true);
-					if (ui.changed) ui_menu_keep_open = true;
+					if (ui.changed) {
+						ui_menu_keep_open = true;
+					}
 				}, 11);
 			}
 			let val: i32 = h.color;
-			if (val < 0) val += 4294967296;
+			if (val < 0) {
+				val += 4294967296;
+			}
 			h.text = val.toString(16);
 			zui_text_input(h, "VIEWPORT_COL");
 			h.color = parseInt(h.text, 16);
 
 			if (box_preferences_world_color != h.color) {
 				box_preferences_world_color = h.color;
-				let b: Uint8Array = new Uint8Array(4);
+				let b: u8_array_t = u8_array_create(4);
 				b[0] = color_get_rb(box_preferences_world_color);
 				b[1] = color_get_gb(box_preferences_world_color);
 				b[2] = color_get_bb(box_preferences_world_color);
@@ -210,13 +226,17 @@ function box_preferences_show() {
 
 			// Theme fields
 			for (let key of Object.getOwnPropertyNames(theme_t.prototype)) {
-				if (key == "constructor") continue;
+				if (key == "constructor") {
+					continue;
+				}
 
 				let h: zui_handle_t = zui_nest(hlist, i++);
 				let val: any = theme[key];
 
-				let isHex: bool = key.endsWith("_COL");
-				if (isHex && val < 0) val += 4294967296;
+				let isHex: bool = ends_with(key, "_COL");
+				if (isHex && val < 0) {
+					val += 4294967296;
+				}
 
 				if (isHex) {
 					zui_row([1 / 8, 7 / 8]);
@@ -227,7 +247,9 @@ function box_preferences_show() {
 							ui.changed = false;
 							let color: i32 = zui_color_wheel(h, false, null, 11 * ui.t.ELEMENT_H * zui_SCALE(ui), true);
 							theme[key] = color;
-							if (ui.changed) ui_menu_keep_open = true;
+							if (ui.changed) {
+								ui_menu_keep_open = true;
+							}
 						}, 11);
 					}
 				}
@@ -248,8 +270,12 @@ function box_preferences_show() {
 				else {
 					h.text = isHex ? val.toString(16) : val.toString();
 					zui_text_input(h, key);
-					if (isHex) theme[key] = parseInt(h.text, 16);
-					else theme[key] = parseInt(h.text);
+					if (isHex) {
+						theme[key] = parseInt(h.text, 16);
+					}
+					else {
+						theme[key] = parseInt(h.text);
+					}
 				}
 
 				if (ui.changed) {
@@ -272,11 +298,11 @@ function box_preferences_show() {
 
 				///if (is_paint || is_sculpt)
 				while (history_undo_layers.length < config_raw.undo_steps) {
-					let l: SlotLayerRaw = slot_layer_create("_undo" + history_undo_layers.length);
-					history_undo_layers.push(l);
+					let l: slot_layer_t = slot_layer_create("_undo" + history_undo_layers.length);
+					array_push(history_undo_layers, l);
 				}
 				while (history_undo_layers.length > config_raw.undo_steps) {
-					let l: SlotLayerRaw = history_undo_layers.pop();
+					let l: slot_layer_t = history_undo_layers.pop();
 					slot_layer_unload(l);
 				}
 				///end
@@ -287,7 +313,9 @@ function box_preferences_show() {
 
 			///if is_paint
 			config_raw.dilate_radius = math_floor(zui_slider(zui_handle("boxpreferences_17", { value: config_raw.dilate_radius }), tr("Dilate Radius"), 0.0, 16.0, true, 1));
-			if (ui.is_hovered) zui_tooltip(tr("Dilate painted textures to prevent seams"));
+			if (ui.is_hovered) {
+				zui_tooltip(tr("Dilate painted textures to prevent seams"));
+			}
 
 			let dilate_handle: zui_handle_t = zui_handle("boxpreferences_18", { position: config_raw.dilate });
 			zui_combo(dilate_handle, [tr("Instant"), tr("Delayed")], tr("Dilate"), true);
@@ -338,27 +366,39 @@ function box_preferences_show() {
 			///if (is_paint || is_sculpt)
 			let material_live_handle: zui_handle_t = zui_handle("boxpreferences_23", {selected: config_raw.material_live });
 			config_raw.material_live = zui_check(material_live_handle, tr("Live Material Preview"));
-			if (ui.is_hovered) zui_tooltip(tr("Instantly update material preview on node change"));
+			if (ui.is_hovered) {
+				zui_tooltip(tr("Instantly update material preview on node change"));
+			}
 
 			let brush_live_handle: zui_handle_t = zui_handle("boxpreferences_24", { selected: config_raw.brush_live });
 			config_raw.brush_live = zui_check(brush_live_handle, tr("Live Brush Preview"));
-			if (ui.is_hovered) zui_tooltip(tr("Draw live brush preview in viewport"));
-			if (brush_live_handle.changed) context_raw.ddirty = 2;
+			if (ui.is_hovered) {
+				zui_tooltip(tr("Draw live brush preview in viewport"));
+			}
+			if (brush_live_handle.changed) {
+				context_raw.ddirty = 2;
+			}
 
 			let brush_3d_handle: zui_handle_t = zui_handle("boxpreferences_25", { selected: config_raw.brush_3d });
 			config_raw.brush_3d = zui_check(brush_3d_handle, tr("3D Cursor"));
-			if (brush_3d_handle.changed) make_material_parse_paint_material();
+			if (brush_3d_handle.changed) {
+				make_material_parse_paint_material();
+			}
 
 			ui.enabled = config_raw.brush_3d;
 			let brush_depth_reject_handle: zui_handle_t = zui_handle("boxpreferences_26", { selected: config_raw.brush_depth_reject });
 			config_raw.brush_depth_reject = zui_check(brush_depth_reject_handle, tr("Depth Reject"));
-			if (brush_depth_reject_handle.changed) make_material_parse_paint_material();
+			if (brush_depth_reject_handle.changed) {
+				make_material_parse_paint_material();
+			}
 
 			zui_row([0.5, 0.5]);
 
 			let brush_angle_reject_handle: zui_handle_t = zui_handle("boxpreferences_27", { selected: config_raw.brush_angle_reject });
 			config_raw.brush_angle_reject = zui_check(brush_angle_reject_handle, tr("Angle Reject"));
-			if (brush_angle_reject_handle.changed) make_material_parse_paint_material();
+			if (brush_angle_reject_handle.changed) {
+				make_material_parse_paint_material();
+			}
 
 			if (!config_raw.brush_angle_reject) ui.enabled = false;
 			let angle_dot_handle: zui_handle_t = zui_handle("boxpreferences_28", { value: context_raw.brush_angle_reject_dot });
@@ -371,7 +411,9 @@ function box_preferences_show() {
 
 			///if is_lab
 			config_raw.gpu_inference = zui_check(zui_handle("boxpreferences_29", { selected: config_raw.gpu_inference }), tr("Use GPU"));
-			if (ui.is_hovered) zui_tooltip(tr("Use GPU to accelerate node graph processing"));
+			if (ui.is_hovered) {
+				zui_tooltip(tr("Use GPU to accelerate node graph processing"));
+			}
 			///end
 		}
 
@@ -427,12 +469,16 @@ function box_preferences_show() {
 			}
 
 			zui_combo(context_raw.hsupersample, ["0.25x", "0.5x", "1.0x", "1.5x", "2.0x", "4.0x"], tr("Super Sample"), true);
-			if (context_raw.hsupersample.changed) config_apply();
+			if (context_raw.hsupersample.changed) {
+				config_apply();
+			}
 
 			if (context_raw.render_mode == render_mode_t.DEFERRED) {
 				///if arm_voxels
 				zui_check(context_raw.hvxao, tr("Voxel AO"));
-				if (ui.is_hovered) zui_tooltip(tr("Cone-traced AO and shadows"));
+				if (ui.is_hovered) {
+					zui_tooltip(tr("Cone-traced AO and shadows"));
+				}
 				if (context_raw.hvxao.changed) {
 					config_apply();
 				}
@@ -440,28 +486,42 @@ function box_preferences_show() {
 				ui.enabled = context_raw.hvxao.selected;
 				let h: zui_handle_t = zui_handle("boxpreferences_42", { value: context_raw.vxao_offset });
 				context_raw.vxao_offset = zui_slider(h, tr("Cone Offset"), 1.0, 4.0, true);
-				if (h.changed) context_raw.ddirty = 2;
+				if (h.changed) {
+					context_raw.ddirty = 2;
+				}
 				h = zui_handle("boxpreferences_43", { value: context_raw.vxao_aperture });
 				context_raw.vxao_aperture = zui_slider(h, tr("Aperture"), 1.0, 4.0, true);
-				if (h.changed) context_raw.ddirty = 2;
+				if (h.changed) {
+					context_raw.ddirty = 2;
+				}
 				ui.enabled = true;
 				///end
 
 				zui_check(context_raw.hssao, tr("SSAO"));
-				if (context_raw.hssao.changed) config_apply();
+				if (context_raw.hssao.changed) {
+					config_apply();
+				}
 				zui_check(context_raw.hssr, tr("SSR"));
-				if (context_raw.hssr.changed) config_apply();
+				if (context_raw.hssr.changed) {
+					config_apply();
+				}
 				zui_check(context_raw.hbloom, tr("Bloom"));
-				if (context_raw.hbloom.changed) config_apply();
+				if (context_raw.hbloom.changed) {
+					config_apply();
+				}
 			}
 
 			let h: zui_handle_t = zui_handle("boxpreferences_44", { value: config_raw.rp_vignette });
 			config_raw.rp_vignette = zui_slider(h, tr("Vignette"), 0.0, 1.0, true);
-			if (h.changed) context_raw.ddirty = 2;
+			if (h.changed) {
+				context_raw.ddirty = 2;
+			}
 
 			h = zui_handle("boxpreferences_45", { value: config_raw.rp_grain });
 			config_raw.rp_grain = zui_slider(h, tr("Noise Grain"), 0.0, 1.0, true);
-			if (h.changed) context_raw.ddirty = 2;
+			if (h.changed) {
+				context_raw.ddirty = 2;
+			}
 
 			// let h: zui_handle_t = Zui.handle("boxpreferences_46", { value: raw.autoExposureStrength });
 			// raw.autoExposureStrength = Zui.slider(h, "Auto Exposure", 0.0, 2.0, true);
@@ -510,7 +570,9 @@ function box_preferences_show() {
 						let keymap_name: string = zui_text_input(zui_handle("boxpreferences_52", { text: "new_keymap" }), tr("Name"));
 						if (zui_button(tr("OK")) || ui.is_return_down) {
 							let template: string = json_stringify(base_default_keymap);
-							if (!keymap_name.endsWith(".json")) keymap_name += ".json";
+							if (!ends_with(keymap_name, ".json")) {
+								keymap_name += ".json";
+							}
 							let path: string = path_data() + path_sep + "keymap_presets" + path_sep + keymap_name;
 							krom_file_save_bytes(path, sys_string_to_buffer(template));
 							box_preferences_fetch_keymaps(); // Refresh file list
@@ -531,7 +593,9 @@ function box_preferences_show() {
 			}
 			if (zui_button(tr("Export"))) {
 				ui_files_show("json", true, false, function (dest: string) {
-					if (!ui_files_filename.endsWith(".json")) ui_files_filename += ".json";
+					if (!ends_with(ui_files_filename, ".json")) {
+						ui_files_filename += ".json";
+					}
 					let path: string = path_data() + path_sep + "keymap_presets" + path_sep + config_raw.keymap;
 					file_copy(path, dest + path_sep + ui_files_filename);
 				});
@@ -574,7 +638,9 @@ if (Zui.panel(h1, 'New Plugin')) {
 }
 }
 `;
-							if (!plugin_name.endsWith(".js")) plugin_name += ".js";
+							if (!ends_with(plugin_name, ".js")) {
+								plugin_name += ".js";
+							}
 							let path: string = path_data() + path_sep + "plugins" + path_sep + plugin_name;
 							krom_file_save_bytes(path, sys_string_to_buffer(template));
 							box_preferences_files_plugin = null; // Refresh file list
@@ -586,7 +652,7 @@ if (Zui.panel(h1, 'New Plugin')) {
 				});
 			}
 			if (zui_button(tr("Import"))) {
-				ui_files_show("js,zip", false, false, (path: string) => {
+				ui_files_show("js,zip", false, false, function (path: string) {
 					import_plugin_run(path);
 				});
 			}
@@ -596,14 +662,18 @@ if (Zui.panel(h1, 'New Plugin')) {
 				box_preferences_fetch_plugins();
 			}
 
-			if (config_raw.plugins == null) config_raw.plugins = [];
+			if (config_raw.plugins == null) {
+				config_raw.plugins = [];
+			}
 			let h: zui_handle_t = zui_handle("boxpreferences_56", { selected: false });
 			for (let f of box_preferences_files_plugin) {
-				let is_js: bool = f.endsWith(".js");
-				if (!is_js) continue;
-				let enabled: bool = config_raw.plugins.indexOf(f) >= 0;
+				let is_js: bool = ends_with(f, ".js");
+				if (!is_js) {
+					continue;
+				}
+				let enabled: bool = array_index_of(config_raw.plugins, f) >= 0;
 				h.selected = enabled;
-				let tag: string = is_js ? f.split(".")[0] : f;
+				let tag: string = is_js ? string_split(f, ".")[0] : f;
 				zui_check(h, tag);
 				if (h.changed && h.selected != enabled) {
 					h.selected ? config_enable_plugin(f) : config_disable_plugin(f);
@@ -616,19 +686,19 @@ if (Zui.panel(h1, 'New Plugin')) {
 							file_start(path);
 						}
 						if (ui_menu_button(ui, tr("Edit in Script Tab"))) {
-							let blob: ArrayBuffer = data_get_blob("plugins/" + f);
+							let blob: buffer_t = data_get_blob("plugins/" + f);
 							tab_script_hscript.text = sys_buffer_to_string(blob);
 							data_delete_blob("plugins/" + f);
 							console_info(tr("Script opened"));
 						}
 						if (ui_menu_button(ui, tr("Export"))) {
 							ui_files_show("js", true, false, function (dest: string) {
-								if (!ui_files_filename.endsWith(".js")) ui_files_filename += ".js";
+								if (!ends_with(ui_files_filename, ".js")) ui_files_filename += ".js";
 								file_copy(path, dest + path_sep + ui_files_filename);
 							});
 						}
 						if (ui_menu_button(ui, tr("Delete"))) {
-							if (config_raw.plugins.indexOf(f) >= 0) {
+							if (array_index_of(config_raw.plugins, f) >= 0) {
 								array_remove(config_raw.plugins, f);
 								plugin_stop(f);
 							}
@@ -645,14 +715,16 @@ if (Zui.panel(h1, 'New Plugin')) {
 
 function box_preferences_fetch_themes() {
 	box_preferences_themes = file_read_directory(path_data() + path_sep + "themes");
-	for (let i: i32 = 0; i < box_preferences_themes.length; ++i) box_preferences_themes[i] = box_preferences_themes[i].substr(0, box_preferences_themes[i].length - 5); // Strip .json
+	for (let i: i32 = 0; i < box_preferences_themes.length; ++i) {
+		box_preferences_themes[i] = substring(box_preferences_themes[i], 0, box_preferences_themes[i].length - 5); // Strip .json
+	}
 	box_preferences_themes.unshift("default");
 }
 
 function box_preferences_fetch_keymaps() {
 	box_preferences_files_keymap = file_read_directory(path_data() + path_sep + "keymap_presets");
 	for (let i: i32 = 0; i < box_preferences_files_keymap.length; ++i) {
-		box_preferences_files_keymap[i] = box_preferences_files_keymap[i].substr(0, box_preferences_files_keymap[i].length - 5); // Strip .json
+		box_preferences_files_keymap[i] = substring(box_preferences_files_keymap[i], 0, box_preferences_files_keymap[i].length - 5); // Strip .json
 	}
 	box_preferences_files_keymap.unshift("default");
 }
@@ -662,11 +734,11 @@ function box_preferences_fetch_plugins() {
 }
 
 function box_preferences_get_theme_index(): i32 {
-	return box_preferences_themes.indexOf(config_raw.theme.substr(0, config_raw.theme.length - 5)); // Strip .json
+	return array_index_of(box_preferences_themes, substring(config_raw.theme, 0, config_raw.theme.length - 5)); // Strip .json
 }
 
 function box_preferences_get_preset_index(): i32 {
-	return box_preferences_files_keymap.indexOf(config_raw.keymap.substr(0, config_raw.keymap.length - 5)); // Strip .json
+	return array_index_of(box_preferences_files_keymap, substring(config_raw.keymap, 0, config_raw.keymap.length - 5)); // Strip .json
 }
 
 function box_preferences_set_scale() {

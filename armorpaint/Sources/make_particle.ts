@@ -1,7 +1,7 @@
 
-function make_particle_run(data: material_t): NodeShaderContextRaw {
+function make_particle_run(data: material_t): node_shader_context_t {
 	let context_id: string = "mesh";
-	let con_part: NodeShaderContextRaw = node_shader_context_create(data, {
+	let con_part: node_shader_context_t = node_shader_context_create(data, {
 		name: context_id,
 		depth_write: false,
 		compare_mode: "always",
@@ -10,8 +10,8 @@ function make_particle_run(data: material_t): NodeShaderContextRaw {
 		color_attachments: ["R8"]
 	});
 
-	let vert: NodeShaderRaw = node_shader_context_make_vert(con_part);
-	let frag: NodeShaderRaw = node_shader_context_make_frag(con_part);
+	let vert: node_shader_t = node_shader_context_make_vert(con_part);
+	let frag: node_shader_t = node_shader_context_make_frag(con_part);
 	frag.ins = vert.outs;
 
 	node_shader_write_attrib(vert, 'vec4 spos = vec4(pos.xyz, 1.0);');
@@ -83,7 +83,7 @@ function make_particle_run(data: material_t): NodeShaderContextRaw {
 	return con_part;
 }
 
-function make_particle_mask(vert: NodeShaderRaw, frag: NodeShaderRaw) {
+function make_particle_mask(vert: node_shader_t, frag: node_shader_t) {
 	///if arm_physics
 	if (context_raw.particle_physics) {
 		node_shader_add_out(vert, 'vec4 wpos');

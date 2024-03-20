@@ -20,7 +20,9 @@ let physics_world_v2: vec4_t = vec4_create();
 function physics_world_load(done: ()=>void) {
 	let b: buffer_t = krom_load_blob("data/plugins/ammo.js");
 	globalThis.eval(sys_buffer_to_string(b));
-	let print = (s: string) => { krom_log(s); };
+	let print = function (s: string) {
+		krom_log(s);
+	};
 	Ammo({print: print}).then(done);
 }
 
@@ -34,7 +36,9 @@ function physics_world_create(): PhysicsWorldRaw {
 }
 
 function physics_world_reset(pw: PhysicsWorldRaw) {
-	for (let body of pw.body_map.values()) physics_world_remove_body(pw, body);
+	for (let body of pw.body_map.values()) {
+		physics_world_remove_body(pw, body);
+	}
 }
 
 function physics_world_init(pw: PhysicsWorldRaw) {
@@ -53,48 +57,70 @@ function physics_world_set_gravity(pw: PhysicsWorldRaw, v: vec4_t) {
 
 function physics_world_add_body(pw: PhysicsWorldRaw, pb: PhysicsBodyRaw) {
 	pw.world.addRigidBody(pb.body, pb.group, pb.mask);
-	pw.body_map.set(pb.id, pb);
+	map_set(pw.body_map, pb.id, pb);
 }
 
 function physics_world_remove_body(pw: PhysicsWorldRaw, pb: PhysicsBodyRaw) {
-	if (pb.destroyed) return;
+	if (pb.destroyed) {
+		return;
+	}
 	pb.destroyed = true;
-	if (pw.world != null) pw.world.removeRigidBody(pb.body);
-	pw.body_map.delete(pb.id);
+	if (pw.world != null) {
+		pw.world.removeRigidBody(pb.body);
+	}
+	map_delete(pw.body_map, pb.id);
 	physics_body_delete(pb);
 }
 
 function physics_world_get_contacts(pw: PhysicsWorldRaw, pb: PhysicsBodyRaw): PhysicsBodyRaw[] {
-	if (pw.contacts.length == 0) return null;
+	if (pw.contacts.length == 0) {
+		return null;
+	}
 	let res: PhysicsBodyRaw[] = [];
 	for (let i: i32 = 0; i < pw.contacts.length; ++i) {
 		let c: pair_t = pw.contacts[i];
 		let pb: PhysicsBodyRaw = null;
-		if (c.a == pb.body.userIndex) pb = pw.body_map.get(c.b);
-		else if (c.b == pb.body.userIndex) pb = pw.body_map.get(c.a);
-		if (pb != null && res.indexOf(pb) == -1) res.push(pb);
+		if (c.a == pb.body.userIndex) {
+			pb = map_get(pw.body_map, c.b);
+		}
+		else if (c.b == pb.body.userIndex) {
+			pb = map_get(pw.body_map, c.a);
+		}
+		if (pb != null && array_index_of(res, pb) == -1) {
+			array_push(res, pb);
+		}
 	}
 	return res;
 }
 
 function physics_world_get_contact_pairs(pw: PhysicsWorldRaw, pb: PhysicsBodyRaw): pair_t[] {
-	if (pw.contacts.length == 0) return null;
+	if (pw.contacts.length == 0) {
+		return null;
+	}
 	let res: pair_t[] = [];
 	for (let i: i32 = 0; i < pw.contacts.length; ++i) {
 		let c: pair_t = pw.contacts[i];
-		if (c.a == pb.body.userIndex) res.push(c);
-		else if (c.b == pb.body.userIndex) res.push(c);
+		if (c.a == pb.body.userIndex) {
+			array_push(res, c);
+		}
+		else if (c.b == pb.body.userIndex) {
+			array_push(res, c);
+		}
 	}
 	return res;
 }
 
 function physics_world_late_update(pw: PhysicsWorldRaw) {
 	let t: f32 = time_delta() * pw.time_scale;
-	if (t == 0.0) return; // Simulation paused
+	if (t == 0.0) {
+		return; // Simulation paused
+	}
 
 	pw.world.stepSimulation(pw.time_step, pw.max_steps, t);
 	physics_world_update_contacts(pw);
-	for (let body of pw.body_map.values()) physics_body_physics_update(body);
+	for (let body of pw.body_map.values()) {
+		physics_body_physics_update(body);
+	}
 }
 
 function physics_world_update_contacts(pw: PhysicsWorldRaw) {
@@ -126,7 +152,7 @@ function physics_world_update_contacts(pw: PhysicsWorldRaw) {
 				impulse: pt.getAppliedImpulse(),
 				distance: pt.getDistance()
 			};
-			pw.contacts.push(cp);
+			array_push(pw.contacts, cp);
 		}
 	}
 }
@@ -166,7 +192,7 @@ function physics_world_ray_cast(pw: PhysicsWorldRaw, from: vec4_t, to: vec4_t, g
 		vec4_set(physics_world_v1, hit.x(), hit.y(), hit.z());
 		let norm: Ammo.btVector3 = ray_callback.get_m_hitNormalWorld();
 		vec4_set(physics_world_v2, norm.x(), norm.y(), norm.z());
-		pb = pw.body_map.get(body.userIndex);
+		pb = map_get(pw.body_map, body.userIndex);
 		hit_info = {
 			body: pb,
 			pos: physics_world_v1,

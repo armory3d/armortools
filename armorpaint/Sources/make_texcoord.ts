@@ -1,11 +1,11 @@
 
-function make_texcoord_run(vert: NodeShaderRaw, frag: NodeShaderRaw) {
+function make_texcoord_run(vert: node_shader_t, frag: node_shader_t) {
 
 	let fill_layer: bool = context_raw.layer.fill_layer != null;
 	let uv_type: uv_type_t = fill_layer ? context_raw.layer.uv_type : context_raw.brush_paint;
 	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
 	let angle: f32 = context_raw.brush_angle + context_raw.brush_nodes_angle;
-	let uvAngle: f32 = fill_layer ? context_raw.layer.angle : angle;
+	let uv_angle: f32 = fill_layer ? context_raw.layer.angle : angle;
 
 	if (uv_type == uv_type_t.PROJECT || decal) { // TexCoords - project
 		node_shader_add_uniform(frag, 'float brushScale', '_brushScale');
@@ -14,7 +14,7 @@ function make_texcoord_run(vert: NodeShaderRaw, frag: NodeShaderRaw) {
 		if (fill_layer) { // Decal layer
 			node_shader_write_attrib(frag, 'if (uvsp.x < 0.0 || uvsp.y < 0.0 || uvsp.x > 1.0 || uvsp.y > 1.0) discard;');
 
-			if (uvAngle != 0.0) {
+			if (uv_angle != 0.0) {
 				node_shader_add_uniform(frag, 'vec2 brushAngle', '_brushAngle');
 				node_shader_write_attrib(frag, 'uvsp = vec2(uvsp.x * brushAngle.x - uvsp.y * brushAngle.y, uvsp.x * brushAngle.y + uvsp.y * brushAngle.x);');
 			}
@@ -41,7 +41,7 @@ function make_texcoord_run(vert: NodeShaderRaw, frag: NodeShaderRaw) {
 				node_shader_write_attrib(frag, 'uvsp = vec2(uvsp.x * brushDirection.x - uvsp.y * brushDirection.y, uvsp.x * brushDirection.y + uvsp.y * brushDirection.x);');
 			}
 
-			if (uvAngle != 0.0) {
+			if (uv_angle != 0.0) {
 				node_shader_add_uniform(frag, 'vec2 brushAngle', '_brushAngle');
 				node_shader_write_attrib(frag, 'uvsp = vec2(uvsp.x * brushAngle.x - uvsp.y * brushAngle.y, uvsp.x * brushAngle.y + uvsp.y * brushAngle.x);');
 			}
@@ -56,7 +56,7 @@ function make_texcoord_run(vert: NodeShaderRaw, frag: NodeShaderRaw) {
 		else {
 			node_shader_write_attrib(frag, 'uvsp.x *= aspectRatio;');
 
-			if (uvAngle != 0.0) {
+			if (uv_angle != 0.0) {
 				node_shader_add_uniform(frag, 'vec2 brushAngle', '_brushAngle');
 				node_shader_write_attrib(frag, 'uvsp = vec2(uvsp.x * brushAngle.x - uvsp.y * brushAngle.y, uvsp.x * brushAngle.y + uvsp.y * brushAngle.x);');
 			}
@@ -69,7 +69,7 @@ function make_texcoord_run(vert: NodeShaderRaw, frag: NodeShaderRaw) {
 		node_shader_add_out(vert, 'vec2 texCoord');
 		node_shader_write(vert, 'texCoord = tex * brushScale;');
 
-		if (uvAngle > 0.0) {
+		if (uv_angle > 0.0) {
 			node_shader_add_uniform(vert, 'vec2 brushAngle', '_brushAngle');
 			node_shader_write(vert, 'texCoord = vec2(texCoord.x * brushAngle.x - texCoord.y * brushAngle.y, texCoord.x * brushAngle.y + texCoord.y * brushAngle.x);');
 		}
@@ -86,7 +86,7 @@ function make_texcoord_run(vert: NodeShaderRaw, frag: NodeShaderRaw) {
 		node_shader_write_attrib(frag, 'vec2 texCoord1 = wposition.xz * brushScale * 0.5;');
 		node_shader_write_attrib(frag, 'vec2 texCoord2 = wposition.xy * brushScale * 0.5;');
 
-		if (uvAngle != 0.0) {
+		if (uv_angle != 0.0) {
 			node_shader_add_uniform(frag, 'vec2 brushAngle', '_brushAngle');
 			node_shader_write_attrib(frag, 'texCoord = vec2(texCoord.x * brushAngle.x - texCoord.y * brushAngle.y, texCoord.x * brushAngle.y + texCoord.y * brushAngle.x);');
 			node_shader_write_attrib(frag, 'texCoord1 = vec2(texCoord1.x * brushAngle.x - texCoord1.y * brushAngle.y, texCoord1.x * brushAngle.y + texCoord1.y * brushAngle.x);');

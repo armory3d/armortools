@@ -29,13 +29,15 @@ function tiling_node_buttons(ui: zui_t, nodes: zui_nodes_t, node: zui_node_t) {
 	if (!tiling_node_auto) {
 		tiling_node_strength = zui_slider(zui_handle("tilingnode_0", { value: tiling_node_strength }), tr("strength"), 0, 1, true);
 		tiling_node_prompt = zui_text_area(zui_handle("tilingnode_1"), zui_align_t.LEFT, true, tr("prompt"), true);
-		node.buttons[1].height = 1 + tiling_node_prompt.split("\n").length;
+		node.buttons[1].height = 1 + string_split(tiling_node_prompt, "\n").length;
 	}
-	else node.buttons[1].height = 0;
+	else {
+		node.buttons[1].height = 0;
+	}
 }
 
 function tiling_node_get_as_image(self: tiling_node_t, from: i32, done: (img: image_t)=>void) {
-	self.base.inputs[0].get_as_image((source: image_t) => {
+	self.base.inputs[0].get_as_image(function (source: image_t) {
 		g2_begin(tiling_node_image);
 		g2_draw_scaled_image(source, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
 		g2_end();
@@ -51,11 +53,11 @@ function tiling_node_get_as_image(self: tiling_node_t, from: i32, done: (img: im
 	});
 }
 
-function tiling_node_get_cached_image(self: tiling_node_t): image_t => {
+function tiling_node_get_cached_image(self: tiling_node_t): image_t {
 	return self.result;
 }
 
-function tiling_node_sd_tiling(image: image_t, seed: i32/* = -1*/, done: (img: image_t)=>void) {
+function tiling_node_sd_tiling(image: image_t, seed: i32, done: (img: image_t)=>void) {
 	text_to_photo_node_tiling = false;
 	let tile = image_create_render_target(512, 512);
 	g2_begin(tile);
@@ -65,7 +67,7 @@ function tiling_node_sd_tiling(image: image_t, seed: i32/* = -1*/, done: (img: i
 	g2_draw_scaled_image(image, 256, 256, 512, 512);
 	g2_end();
 
-	let u8a = new Uint8Array(512 * 512);
+	let u8a = u8_array_create(512 * 512);
 	for (let i = 0; i < 512 * 512; ++i) {
 		let x = i % 512;
 		let y = math_floor(i / 512);
@@ -87,7 +89,9 @@ function tiling_node_sd_tiling(image: image_t, seed: i32/* = -1*/, done: (img: i
 
 	inpaint_node_prompt = tiling_node_prompt;
 	inpaint_node_strength = tiling_node_strength;
-	if (seed >= 0) random_node_set_seed(seed);
+	if (seed >= 0) {
+		random_node_set_seed(seed);
+	}
 	inpaint_node_sd_inpaint(tile, mask, done);
 }
 
@@ -105,7 +109,7 @@ let tiling_node_def: zui_node_t = {
 			name: _tr("Color"),
 			type: "RGBA",
 			color: 0xffc7c729,
-			default_value: new Float32Array([0.0, 0.0, 0.0, 1.0])
+			default_value: new f32_array_t([0.0, 0.0, 0.0, 1.0])
 		}
 	],
 	outputs: [
@@ -115,7 +119,7 @@ let tiling_node_def: zui_node_t = {
 			name: _tr("Color"),
 			type: "RGBA",
 			color: 0xffc7c729,
-			default_value: new Float32Array([0.0, 0.0, 0.0, 1.0])
+			default_value: new f32_array_t([0.0, 0.0, 0.0, 1.0])
 		}
 	],
 	buttons: [

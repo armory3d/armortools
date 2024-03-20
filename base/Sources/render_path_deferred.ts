@@ -90,11 +90,11 @@ function render_path_deferred_init() {
 		t.width = 1;
 		t.height = 1;
 		t.format = "R8";
-		let b: ArrayBuffer = new ArrayBuffer(1);
-		let v: DataView = new DataView(b);
-		v.setUint8(0, 255);
+		let b: buffer_t = buffer_create(1);
+		let v: buffer_view_t = buffer_view_create(b);
+		buffer_view_set_u8(v, 0, 255);
 		t._image = image_from_bytes(b, t.width, t.height, tex_format_t.R8);
-		render_path_render_targets.set(t.name, t);
+		map_set(render_path_render_targets, t.name, t);
 	}
 	{
 		let t: render_target_t = render_target_create();
@@ -102,14 +102,14 @@ function render_path_deferred_init() {
 		t.width = 1;
 		t.height = 1;
 		t.format = "RGBA32";
-		let b: ArrayBuffer = new ArrayBuffer(4);
-		let v: DataView = new DataView(b);
-		v.setUint8(0, 0);
-		v.setUint8(1, 0);
-		v.setUint8(2, 0);
-		v.setUint8(3, 0);
+		let b: buffer_t = buffer_create(4);
+		let v: buffer_view_t = buffer_view_create(b);
+		buffer_view_set_u8(v, 0, 0);
+		buffer_view_set_u8(v, 1, 0);
+		buffer_view_set_u8(v, 2, 0);
+		buffer_view_set_u8(v, 3, 0);
 		t._image = image_from_bytes(b, t.width, t.height, tex_format_t.RGBA32);
-		render_path_render_targets.set(t.name, t);
+		map_set(render_path_render_targets, t.name, t);
 	}
 
 	///if is_sculpt

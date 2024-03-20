@@ -17,7 +17,10 @@ function render_path_base_init() {
 
 ///if arm_voxels
 function render_path_base_init_voxels(target_name: string = "voxels") {
-	if (config_raw.rp_gi != true || render_path_base_voxels_created) return;
+	if (config_raw.rp_gi != true || render_path_base_voxels_created) {
+		return;
+	}
+
 	render_path_base_voxels_created = true;
 
 	{
@@ -45,7 +48,9 @@ function render_path_base_apply_config() {
 		render_path_resize();
 	}
 	///if arm_voxels
-	if (!render_path_base_voxels_created) render_path_base_init_voxels();
+	if (!render_path_base_voxels_created) {
+		render_path_base_init_voxels();
+	}
 	///end
 }
 
@@ -139,7 +144,9 @@ function render_path_base_ssaa4(): bool {
 }
 
 function render_path_base_is_cached(): bool {
-	if (sys_width() == 0 || sys_height() == 0) return true;
+	if (sys_width() == 0 || sys_height() == 0) {
+		return true;
+	}
 
 	let mx: f32 = render_path_base_last_x;
 	let my: f32 = render_path_base_last_y;
@@ -147,7 +154,9 @@ function render_path_base_is_cached(): bool {
 	render_path_base_last_y = mouse_view_y();
 
 	if (context_raw.ddirty <= 0 && context_raw.rdirty <= 0 && context_raw.pdirty <= 0) {
-		if (mx != render_path_base_last_x || my != render_path_base_last_y || mouse_locked) context_raw.ddirty = 0;
+		if (mx != render_path_base_last_x || my != render_path_base_last_y || mouse_locked) {
+			context_raw.ddirty = 0;
+		}
 		///if (krom_metal || krom_android)
 		if (context_raw.ddirty > -6) {
 		///else
@@ -159,7 +168,9 @@ function render_path_base_is_cached(): bool {
 				render_path_draw_shader("shader_datas/supersample_resolve/supersample_resolve") :
 				render_path_draw_shader("shader_datas/copy_pass/copy_pass");
 			render_path_paint_commands_cursor();
-			if (context_raw.ddirty <= 0) context_raw.ddirty--;
+			if (context_raw.ddirty <= 0) {
+				context_raw.ddirty--;
+			}
 		}
 		render_path_base_end();
 		return true;
@@ -168,7 +179,9 @@ function render_path_base_is_cached(): bool {
 }
 
 function render_path_base_commands(draw_commands: ()=>void) {
-	if (render_path_base_is_cached()) return;
+	if (render_path_base_is_cached()) {
+		return;
+	}
 	render_path_base_begin();
 
 	render_path_paint_begin();
@@ -206,7 +219,7 @@ function render_path_base_draw_bloom(tex: string = "tex") {
 				t.height = 0;
 				t.scale = (prev_scale *= 0.5);
 				t.format = "RGBA64";
-				render_path_base_bloom_mipmaps.push(render_path_create_render_target(t));
+				array_push(render_path_base_bloom_mipmaps, render_path_create_render_target(t));
 			}
 
 			render_path_load_shader("shader_datas/bloom_pass/bloom_downsample_pass");
@@ -313,7 +326,7 @@ function render_path_base_init_ssao() {
 function render_path_base_draw_ssao() {
 	let ssao: bool = config_raw.rp_ssao != false && context_raw.camera_type == camera_type_t.PERSPECTIVE;
 	if (ssao && context_raw.ddirty > 0 && render_path_base_taa_frame > 0) {
-		if (render_path_render_targets.get("singlea") == null) {
+		if (map_get(render_path_render_targets, "singlea") == null) {
 			render_path_base_init_ssao();
 		}
 
@@ -373,7 +386,7 @@ function render_path_base_draw_deferred_light() {
 
 function render_path_base_draw_ssr() {
 	if (config_raw.rp_ssr != false) {
-		if (_render_path_cached_shader_contexts.get("shader_datas/ssr_pass/ssr_pass") == null) {
+		if (map_get(_render_path_cached_shader_contexts, "shader_datas/ssr_pass/ssr_pass") == null) {
 			{
 				let t: render_target_t = render_target_create();
 				t.name = "bufb";
@@ -532,12 +545,14 @@ function render_path_base_draw_gbuffer() {
 
 	let hide: bool = operator_shortcut(config_keymap.stencil_hide, shortcut_type_t.DOWN) || keyboard_down("control");
 	let is_decal: bool = base_is_decal_layer();
-	if (is_decal && !hide) line_draw_render(context_raw.layer.decal_mat);
+	if (is_decal && !hide) {
+		line_draw_render(context_raw.layer.decal_mat);
+	}
 }
 
 function render_path_base_make_gbuffer_copy_textures() {
-	let copy: render_target_t = render_path_render_targets.get("gbuffer0_copy");
-	if (copy == null || copy._image.width != render_path_render_targets.get("gbuffer0")._image.width || copy._image.height != render_path_render_targets.get("gbuffer0")._image.height) {
+	let copy: render_target_t = map_get(render_path_render_targets, "gbuffer0_copy");
+	if (copy == null || copy._image.width != map_get(render_path_render_targets, "gbuffer0")._image.width || copy._image.height != map_get(render_path_render_targets, "gbuffer0")._image.height) {
 		{
 			let t: render_target_t = render_target_create();
 			t.name = "gbuffer0_copy";

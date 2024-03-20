@@ -47,10 +47,10 @@ function brush_output_node_parse_inputs(self: brush_output_node_t) {
 	let opac: any = input4; // Float or texture name
 	if (opac == null) opac = 1.0;
 	if (typeof opac == "string") {
-		context_raw.brush_mask_image_is_alpha = opac.endsWith(".a");
-		opac = opac.substr(0, opac.lastIndexOf("."));
+		context_raw.brush_mask_image_is_alpha = ends_with(opac, ".a");
+		opac = substring(opac, 0, string_last_index_of(opac, "."));
 		context_raw.brush_nodes_opacity = 1.0;
-		let index: i32 = project_asset_names.indexOf(opac);
+		let index: i32 = array_index_of(project_asset_names, opac);
 		let asset: asset_t = project_assets[index];
 		context_raw.brush_mask_image = project_get_image(asset);
 	}
@@ -62,11 +62,13 @@ function brush_output_node_parse_inputs(self: brush_output_node_t) {
 	context_raw.brush_nodes_hardness = input5;
 
 	let stencil: any = input6; // Float or texture name
-	if (stencil == null) stencil = 1.0;
+	if (stencil == null) {
+		stencil = 1.0;
+	}
 	if (typeof stencil == "string") {
-		context_raw.brush_stencil_image_is_alpha = stencil.endsWith(".a");
-		stencil = stencil.substr(0, stencil.lastIndexOf("."));
-		let index: i32 = project_asset_names.indexOf(stencil);
+		context_raw.brush_stencil_image_is_alpha = ends_with(stencil, ".a");
+		stencil = substring(stencil, 0, string_last_index_of(stencil, "."));
+		let index: i32 = array_index_of(project_asset_names, stencil);
 		let asset: asset_t = project_assets[index];
 		context_raw.brush_stencil_image = project_get_image(asset);
 	}

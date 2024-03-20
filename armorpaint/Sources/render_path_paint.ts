@@ -1,5 +1,5 @@
 
-let render_path_paint_live_layer: SlotLayerRaw = null;
+let render_path_paint_live_layer: slot_layer_t = null;
 let render_path_paint_live_layer_drawn: i32 = 0;
 let render_path_paint_live_layer_locked: bool = false;
 let render_path_paint_dilated: bool = true;
@@ -149,41 +149,45 @@ function render_path_paint_commands_paint(dilation = true) {
 				render_path_bind_target("gbuffer2", "gbuffer2");
 				render_path_bind_target("_main", "gbufferD");
 				render_path_draw_meshes("paint");
-				let texpaint_posnortex_picker0: image_t = render_path_render_targets.get("texpaint_posnortex_picker0")._image;
-				let texpaint_posnortex_picker1: image_t = render_path_render_targets.get("texpaint_posnortex_picker1")._image;
-				let a: DataView = new DataView(image_get_pixels(texpaint_posnortex_picker0));
-				let b: DataView = new DataView(image_get_pixels(texpaint_posnortex_picker1));
-				context_raw.posx_picked = a.getFloat32(0, true);
-				context_raw.posy_picked = a.getFloat32(4, true);
-				context_raw.posz_picked = a.getFloat32(8, true);
-				context_raw.uvx_picked = a.getFloat32(12, true);
-				context_raw.norx_picked = b.getFloat32(0, true);
-				context_raw.nory_picked = b.getFloat32(4, true);
-				context_raw.norz_picked = b.getFloat32(8, true);
-				context_raw.uvy_picked = b.getFloat32(12, true);
+				let texpaint_posnortex_picker0: image_t = map_get(render_path_render_targets, "texpaint_posnortex_picker0")._image;
+				let texpaint_posnortex_picker1: image_t = map_get(render_path_render_targets, "texpaint_posnortex_picker1")._image;
+				let a: buffer_view_t = buffer_view_create(image_get_pixels(texpaint_posnortex_picker0));
+				let b: buffer_view_t = buffer_view_create(image_get_pixels(texpaint_posnortex_picker1));
+				context_raw.posx_picked = buffer_view_get_f32(a, 0);
+				context_raw.posy_picked = buffer_view_get_f32(a, 4);
+				context_raw.posz_picked = buffer_view_get_f32(a, 8);
+				context_raw.uvx_picked = buffer_view_get_f32(a, 12);
+				context_raw.norx_picked = buffer_view_get_f32(b, 0);
+				context_raw.nory_picked = buffer_view_get_f32(b, 4);
+				context_raw.norz_picked = buffer_view_get_f32(b, 8);
+				context_raw.uvy_picked = buffer_view_get_f32(b, 12);
 			}
 			else {
 				render_path_set_target("texpaint_picker", ["texpaint_nor_picker", "texpaint_pack_picker", "texpaint_uv_picker"]);
 				render_path_bind_target("gbuffer2", "gbuffer2");
 				tid = context_raw.layer.id;
 				let use_live_layer: bool = context_raw.tool == workspace_tool_t.MATERIAL;
-				if (use_live_layer) render_path_paint_use_live_layer(true);
+				if (use_live_layer) {
+					render_path_paint_use_live_layer(true);
+				}
 				render_path_bind_target("texpaint" + tid, "texpaint");
 				render_path_bind_target("texpaint_nor" + tid, "texpaint_nor");
 				render_path_bind_target("texpaint_pack" + tid, "texpaint_pack");
 				render_path_draw_meshes("paint");
-				if (use_live_layer) render_path_paint_use_live_layer(false);
+				if (use_live_layer) {
+					render_path_paint_use_live_layer(false);
+				}
 				ui_header_handle.redraws = 2;
 				ui_base_hwnds[2].redraws = 2;
 
-				let texpaint_picker: image_t = render_path_render_targets.get("texpaint_picker")._image;
-				let texpaint_nor_picker: image_t = render_path_render_targets.get("texpaint_nor_picker")._image;
-				let texpaint_pack_picker: image_t = render_path_render_targets.get("texpaint_pack_picker")._image;
-				let texpaint_uv_picker: image_t = render_path_render_targets.get("texpaint_uv_picker")._image;
-				let a: DataView = new DataView(image_get_pixels(texpaint_picker));
-				let b: DataView = new DataView(image_get_pixels(texpaint_nor_picker));
-				let c: DataView = new DataView(image_get_pixels(texpaint_pack_picker));
-				let d: DataView = new DataView(image_get_pixels(texpaint_uv_picker));
+				let texpaint_picker: image_t = map_get(render_path_render_targets, "texpaint_picker")._image;
+				let texpaint_nor_picker: image_t = map_get(render_path_render_targets, "texpaint_nor_picker")._image;
+				let texpaint_pack_picker: image_t = map_get(render_path_render_targets, "texpaint_pack_picker")._image;
+				let texpaint_uv_picker: image_t = map_get(render_path_render_targets, "texpaint_uv_picker")._image;
+				let a: buffer_view_t = buffer_view_create(image_get_pixels(texpaint_picker));
+				let b: buffer_view_t = buffer_view_create(image_get_pixels(texpaint_nor_picker));
+				let c: buffer_view_t = buffer_view_create(image_get_pixels(texpaint_pack_picker));
+				let d: buffer_view_t = buffer_view_create(image_get_pixels(texpaint_uv_picker));
 
 				if (context_raw.color_picker_callback != null) {
 					context_raw.color_picker_callback(context_raw.picked_color);
@@ -200,23 +204,23 @@ function render_path_paint_commands_paint(dilation = true) {
 				let i2: i32 = 2;
 				///end
 				let i3: i32 = 3;
-				context_raw.picked_color.base = color_set_rb(context_raw.picked_color.base, a.getUint8(i0));
-				context_raw.picked_color.base = color_set_gb(context_raw.picked_color.base, a.getUint8(i1));
-				context_raw.picked_color.base = color_set_bb(context_raw.picked_color.base, a.getUint8(i2));
-				context_raw.picked_color.normal = color_set_rb(context_raw.picked_color.normal, b.getUint8(i0));
-				context_raw.picked_color.normal = color_set_gb(context_raw.picked_color.normal, b.getUint8(i1));
-				context_raw.picked_color.normal = color_set_bb(context_raw.picked_color.normal, b.getUint8(i2));
-				context_raw.picked_color.occlusion = c.getUint8(i0) / 255;
-				context_raw.picked_color.roughness = c.getUint8(i1) / 255;
-				context_raw.picked_color.metallic = c.getUint8(i2) / 255;
-				context_raw.picked_color.height = c.getUint8(i3) / 255;
-				context_raw.picked_color.opacity = a.getUint8(i3) / 255;
-				context_raw.uvx_picked = d.getUint8(i0) / 255;
-				context_raw.uvy_picked = d.getUint8(i1) / 255;
+				context_raw.picked_color.base = color_set_rb(context_raw.picked_color.base, buffer_view_get_u8(a, i0));
+				context_raw.picked_color.base = color_set_gb(context_raw.picked_color.base, buffer_view_get_u8(a, i1));
+				context_raw.picked_color.base = color_set_bb(context_raw.picked_color.base, buffer_view_get_u8(a, i2));
+				context_raw.picked_color.normal = color_set_rb(context_raw.picked_color.normal, buffer_view_get_u8(b, i0));
+				context_raw.picked_color.normal = color_set_gb(context_raw.picked_color.normal, buffer_view_get_u8(b, i1));
+				context_raw.picked_color.normal = color_set_bb(context_raw.picked_color.normal, buffer_view_get_u8(b, i2));
+				context_raw.picked_color.occlusion = buffer_view_get_u8(c, i0) / 255;
+				context_raw.picked_color.roughness = buffer_view_get_u8(c, i1) / 255;
+				context_raw.picked_color.metallic = buffer_view_get_u8(c, i2) / 255;
+				context_raw.picked_color.height = buffer_view_get_u8(c, i3) / 255;
+				context_raw.picked_color.opacity = buffer_view_get_u8(a, i3) / 255;
+				context_raw.uvx_picked = buffer_view_get_u8(d, i0) / 255;
+				context_raw.uvy_picked = buffer_view_get_u8(d, i1) / 255;
 				// Pick material
 				if (context_raw.picker_select_material && context_raw.color_picker_callback == null) {
 					// matid % 3 == 0 - normal, 1 - emission, 2 - subsurface
-					let matid: i32 = math_floor((b.getUint8(3) - (b.getUint8(3) % 3)) / 3);
+					let matid: i32 = math_floor((buffer_view_get_u8(b, 3) - (buffer_view_get_u8(b, 3) % 3)) / 3);
 					for (let m of project_materials) {
 						if (m.id == matid) {
 							context_set_material(m);
@@ -296,7 +300,7 @@ function render_path_paint_commands_paint(dilation = true) {
 			render_path_draw_meshes("paint");
 
 			if (context_raw.tool == workspace_tool_t.BAKE && context_raw.bake_type == bake_type_t.CURVATURE && context_raw.bake_curv_smooth > 0) {
-				if (render_path_render_targets.get("texpaint_blur") == null) {
+				if (map_get(render_path_render_targets, "texpaint_blur") == null) {
 					let t = render_target_create();
 					t.name = "texpaint_blur";
 					t.width = math_floor(config_get_texture_res_x() * 0.95);
@@ -349,7 +353,9 @@ function render_path_paint_commands_paint(dilation = true) {
 		mesh_object_get_contexts(project_paint_objects[0], "paint", mats, material_contexts, shader_contexts);
 
 		let cc_context: shader_context_t = shader_contexts[0];
-		if (const_data_screen_aligned_vb == null) const_data_create_screen_aligned_data();
+		if (const_data_screen_aligned_vb == null) {
+			const_data_create_screen_aligned_data();
+		}
 		g4_set_pipeline(cc_context._.pipe_state);
 		uniforms_set_context_consts(cc_context,_render_path_bind_params);
 		uniforms_set_obj_consts(cc_context, project_paint_objects[0].base);
@@ -366,29 +372,29 @@ function render_path_paint_use_live_layer(use: bool) {
 	let tid: i32 = context_raw.layer.id;
 	let hid: i32 = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
 	if (use) {
-		_render_path_paint_texpaint = render_path_render_targets.get("texpaint" + tid);
-		_render_path_paint_texpaint_undo = render_path_render_targets.get("texpaint_undo" + hid);
-		_render_path_paint_texpaint_nor_undo = render_path_render_targets.get("texpaint_nor_undo" + hid);
-		_render_path_paint_texpaint_pack_undo = render_path_render_targets.get("texpaint_pack_undo" + hid);
-		_render_path_paint_texpaint_nor = render_path_render_targets.get("texpaint_nor" + tid);
-		_render_path_paint_texpaint_pack = render_path_render_targets.get("texpaint_pack" + tid);
-		render_path_render_targets.set("texpaint_undo" + hid,render_path_render_targets.get("texpaint" + tid));
-		render_path_render_targets.set("texpaint" + tid,render_path_render_targets.get("texpaint_live"));
+		_render_path_paint_texpaint = map_get(render_path_render_targets, "texpaint" + tid);
+		_render_path_paint_texpaint_undo = map_get(render_path_render_targets, "texpaint_undo" + hid);
+		_render_path_paint_texpaint_nor_undo = map_get(render_path_render_targets, "texpaint_nor_undo" + hid);
+		_render_path_paint_texpaint_pack_undo = map_get(render_path_render_targets, "texpaint_pack_undo" + hid);
+		_render_path_paint_texpaint_nor = map_get(render_path_render_targets, "texpaint_nor" + tid);
+		_render_path_paint_texpaint_pack = map_get(render_path_render_targets, "texpaint_pack" + tid);
+		map_set(render_path_render_targets, "texpaint_undo" + hid,map_get(render_path_render_targets, "texpaint" + tid));
+		map_set(render_path_render_targets, "texpaint" + tid,map_get(render_path_render_targets, "texpaint_live"));
 		if (slot_layer_is_layer(context_raw.layer)) {
-			render_path_render_targets.set("texpaint_nor_undo" + hid,render_path_render_targets.get("texpaint_nor" + tid));
-			render_path_render_targets.set("texpaint_pack_undo" + hid,render_path_render_targets.get("texpaint_pack" + tid));
-			render_path_render_targets.set("texpaint_nor" + tid,render_path_render_targets.get("texpaint_nor_live"));
-			render_path_render_targets.set("texpaint_pack" + tid,render_path_render_targets.get("texpaint_pack_live"));
+			map_set(render_path_render_targets, "texpaint_nor_undo" + hid,map_get(render_path_render_targets, "texpaint_nor" + tid));
+			map_set(render_path_render_targets, "texpaint_pack_undo" + hid,map_get(render_path_render_targets, "texpaint_pack" + tid));
+			map_set(render_path_render_targets, "texpaint_nor" + tid,map_get(render_path_render_targets, "texpaint_nor_live"));
+			map_set(render_path_render_targets, "texpaint_pack" + tid,map_get(render_path_render_targets, "texpaint_pack_live"));
 		}
 	}
 	else {
-		render_path_render_targets.set("texpaint" + tid, _render_path_paint_texpaint);
-		render_path_render_targets.set("texpaint_undo" + hid, _render_path_paint_texpaint_undo);
+		map_set(render_path_render_targets, "texpaint" + tid, _render_path_paint_texpaint);
+		map_set(render_path_render_targets, "texpaint_undo" + hid, _render_path_paint_texpaint_undo);
 		if (slot_layer_is_layer(context_raw.layer)) {
-			render_path_render_targets.set("texpaint_nor_undo" + hid, _render_path_paint_texpaint_nor_undo);
-			render_path_render_targets.set("texpaint_pack_undo" + hid, _render_path_paint_texpaint_pack_undo);
-			render_path_render_targets.set("texpaint_nor" + tid, _render_path_paint_texpaint_nor);
-			render_path_render_targets.set("texpaint_pack" + tid, _render_path_paint_texpaint_pack);
+			map_set(render_path_render_targets, "texpaint_nor_undo" + hid, _render_path_paint_texpaint_nor_undo);
+			map_set(render_path_render_targets, "texpaint_pack_undo" + hid, _render_path_paint_texpaint_pack_undo);
+			map_set(render_path_render_targets, "texpaint_nor" + tid, _render_path_paint_texpaint_nor);
+			map_set(render_path_render_targets, "texpaint_pack" + tid, _render_path_paint_texpaint_pack);
 		}
 	}
 	render_path_paint_live_layer_locked = use;
@@ -406,7 +412,9 @@ function render_path_paint_commands_live_brush() {
 			return;
 	}
 
-	if (render_path_paint_live_layer_locked) return;
+	if (render_path_paint_live_layer_locked) {
+		return;
+	}
 
 	if (render_path_paint_live_layer == null) {
 		render_path_paint_live_layer = slot_layer_create("_live");
@@ -496,7 +504,9 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 	let plane: mesh_object_t = scene_get_child(".Plane").ext;
 	let geom: mesh_data_t = plane.data;
 
-	if (base_pipe_cursor == null) base_make_cursor_pipe();
+	if (base_pipe_cursor == null) {
+		base_make_cursor_pipe();
+	}
 
 	render_path_set_target("");
 	g4_set_pipeline(base_pipe_cursor);
@@ -504,7 +514,7 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 	let decal_mask: bool = decal && operator_shortcut(config_keymap.decal_mask, shortcut_type_t.DOWN);
 	let img: image_t = (decal && !decal_mask) ? context_raw.decal_image : resource_get("cursor.k");
 	g4_set_tex(base_cursor_tex, img);
-	let gbuffer0: image_t = render_path_render_targets.get("gbuffer0")._image;
+	let gbuffer0: image_t = map_get(render_path_render_targets, "gbuffer0")._image;
 	g4_set_tex_depth(base_cursor_gbufferd, gbuffer0);
 	g4_set_float2(base_cursor_mouse, mx, my);
 	g4_set_float2(base_cursor_tex_step, 1 / gbuffer0.width, 1 / gbuffer0.height);
@@ -610,7 +620,9 @@ function render_path_paint_begin() {
 	}
 	///end
 
-	if (!render_path_paint_paint_enabled()) return;
+	if (!render_path_paint_paint_enabled()) {
+		return;
+	}
 
 	///if is_paint
 	render_path_paint_push_undo_last = history_push_undo;
@@ -653,12 +665,16 @@ function render_path_paint_end() {
 	context_raw.ddirty--;
 	context_raw.rdirty--;
 
-	if (!render_path_paint_paint_enabled()) return;
+	if (!render_path_paint_paint_enabled()) {
+		return;
+	}
 	context_raw.pdirty--;
 }
 
 function render_path_paint_draw() {
-	if (!render_path_paint_paint_enabled()) return;
+	if (!render_path_paint_paint_enabled()) {
+		return;
+	}
 
 	///if (!krom_ios) // No hover on iPad, decals are painted by pen release
 	if (config_raw.brush_live && context_raw.pdirty <= 0 && context_raw.ddirty > 0 && context_raw.brush_time == 0) {
@@ -670,7 +686,9 @@ function render_path_paint_draw() {
 	if (history_undo_layers != null) {
 		render_path_paint_commands_symmetry();
 
-		if (context_raw.pdirty > 0) render_path_paint_dilated = false;
+		if (context_raw.pdirty > 0) {
+			render_path_paint_dilated = false;
+		}
 
 		///if is_paint
 		if (context_raw.tool == workspace_tool_t.BAKE) {
@@ -695,10 +713,12 @@ function render_path_paint_draw() {
 					context_select_paint_object(high_poly);
 					render_path_paint_commands_paint();
 					high_poly.base.visible = _visible;
-					if (render_path_paint_push_undo_last) history_paint();
+					if (render_path_paint_push_undo_last) {
+						history_paint();
+					}
 					context_select_paint_object(_paint_object);
 
-					let _render_final = () => {
+					let _render_final = function () {
 						context_raw.bake_type = _bake_type;
 						make_material_parse_paint_material();
 						context_raw.pdirty = 1;
@@ -706,13 +726,15 @@ function render_path_paint_draw() {
 						context_raw.pdirty = 0;
 						render_path_paint_baking = false;
 					}
-					let _render_deriv = () => {
+					let _render_deriv = function () {
 						context_raw.bake_type = bake_type_t.HEIGHT;
 						make_material_parse_paint_material();
 						context_raw.pdirty = 1;
 						render_path_paint_commands_paint();
 						context_raw.pdirty = 0;
-						if (render_path_paint_push_undo_last) history_paint();
+						if (render_path_paint_push_undo_last) {
+							history_paint();
+						}
 						app_notify_on_init(_render_final);
 					}
 					let bake_type: bake_type_t = context_raw.bake_type as bake_type_t;
@@ -725,7 +747,9 @@ function render_path_paint_draw() {
 				let is_merged: bool = context_raw.merged_object != null;
 				let _visible: bool = is_merged && context_raw.merged_object.base.visible;
 				context_raw.layer_filter = 1;
-				if (is_merged) context_raw.merged_object.base.visible = false;
+				if (is_merged) {
+					context_raw.merged_object.base.visible = false;
+				}
 
 				for (let p of project_paint_objects) {
 					context_select_paint_object(p);
@@ -782,7 +806,7 @@ function render_path_paint_set_plane_mesh() {
 	render_path_paint_painto = context_raw.paint_object;
 	render_path_paint_visibles = [];
 	for (let p of project_paint_objects) {
-		render_path_paint_visibles.push(p.base.visible);
+		array_push(render_path_paint_visibles, p.base.visible);
 		p.base.visible = false;
 	}
 	if (context_raw.merged_object != null) {
@@ -821,12 +845,12 @@ function render_path_paint_set_plane_mesh() {
 		let raw: mesh_data_t = {
 			name: ".PlaneTiled",
 			vertex_arrays: [
-				{ attrib: "pos", values: new Int16Array(posa), data: "short4norm" },
-				{ attrib: "nor", values: new Int16Array(nora), data: "short2norm" },
-				{ attrib: "tex", values: new Int16Array(texa), data: "short2norm" }
+				{ attrib: "pos", values: new i16_array_t(posa), data: "short4norm" },
+				{ attrib: "nor", values: new i16_array_t(nora), data: "short2norm" },
+				{ attrib: "tex", values: new i16_array_t(texa), data: "short2norm" }
 			],
 			index_arrays: [
-				{ values: new Uint32Array(inda), material: 0 }
+				{ values: new u32_array_t(inda), material: 0 }
 			],
 			scale_pos: 1.5,
 			scale_tex: 1.0
@@ -874,11 +898,13 @@ function render_path_paint_bind_layers() {
 	///if is_paint
 	let is_live: bool = config_raw.brush_live && render_path_paint_live_layer_drawn > 0;
 	let is_material_tool: bool = context_raw.tool == workspace_tool_t.MATERIAL;
-	if (is_live || is_material_tool) render_path_paint_use_live_layer(true);
+	if (is_live || is_material_tool) {
+		render_path_paint_use_live_layer(true);
+	}
 	///end
 
 	for (let i: i32 = 0; i < project_layers.length; ++i) {
-		let l: SlotLayerRaw = project_layers[i];
+		let l: slot_layer_t = project_layers[i];
 		render_path_bind_target("texpaint" + l.id, "texpaint" + l.id);
 
 		///if is_paint
@@ -894,7 +920,9 @@ function render_path_paint_unbind_layers() {
 	///if is_paint
 	let is_live: bool = config_raw.brush_live && render_path_paint_live_layer_drawn > 0;
 	let is_material_tool: bool = context_raw.tool == workspace_tool_t.MATERIAL;
-	if (is_live || is_material_tool) render_path_paint_use_live_layer(false);
+	if (is_live || is_material_tool) {
+		render_path_paint_use_live_layer(false);
+	}
 	///end
 }
 

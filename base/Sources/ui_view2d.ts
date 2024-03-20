@@ -68,24 +68,36 @@ function ui_view2d_render() {
 	}
 	///end
 
-	if (!ui_view2d_show) return;
-	if (sys_width() == 0 || sys_height() == 0) return;
+	if (!ui_view2d_show) {
+		return;
+	}
+	if (sys_width() == 0 || sys_height() == 0) {
+		return;
+	}
 
-	if (context_raw.pdirty >= 0) ui_view2d_hwnd.redraws = 2; // Paint was active
+	if (context_raw.pdirty >= 0) {
+		ui_view2d_hwnd.redraws = 2; // Paint was active
+	}
 
 	g2_end();
 
 	// Cache grid
-	if (ui_nodes_grid == null) ui_nodes_draw_grid();
+	if (ui_nodes_grid == null) {
+		ui_nodes_draw_grid();
+	}
 
 	// Ensure UV map is drawn
 	///if (is_paint || is_sculpt)
-	if (ui_view2d_uvmap_show) util_uv_cache_uv_map();
+	if (ui_view2d_uvmap_show) {
+		util_uv_cache_uv_map();
+	}
 	///end
 
 	// Ensure font image is drawn
 	///if (is_paint || is_sculpt)
-	if (context_raw.font.image == null) util_render_make_font_preview();
+	if (context_raw.font.image == null) {
+		util_render_make_font_preview();
+	}
 	///end
 
 	zui_begin(ui_view2d_ui);
@@ -111,7 +123,7 @@ function ui_view2d_render() {
 		let tex: image_t = null;
 
 		///if (is_paint || is_sculpt)
-		let l: SlotLayerRaw = context_raw.layer;
+		let l: slot_layer_t = context_raw.layer;
 		let channel: i32 = 0;
 		///end
 
@@ -142,7 +154,7 @@ function ui_view2d_render() {
 		}
 		///if is_paint
 		else if (ui_view2d_type == view_2d_type_t.LAYER) {
-			let layer: SlotLayerRaw = l;
+			let layer: slot_layer_t = l;
 
 			if (config_raw.brush_live && render_path_paint_live_layer_drawn > 0) {
 				layer = render_path_paint_live_layer;
@@ -231,11 +243,11 @@ function ui_view2d_render() {
 				let x: f32 = ui_view2d_ui.input_x - tx - ui_view2d_wx;
 				let y: f32 = ui_view2d_ui.input_y - ty - ui_view2d_wy;
 				base_notify_on_next_frame(function() {
-					let texpaint_picker: image_t = render_path_render_targets.get("texpaint_picker")._image;
+					let texpaint_picker: image_t = map_get(render_path_render_targets, "texpaint_picker")._image;
 					g2_begin(texpaint_picker);
 					g2_draw_scaled_image(tex, -x, -y, tw, th);
 					g2_end();
-					let a: DataView = new DataView(image_get_pixels(texpaint_picker));
+					let a: buffer_view_t = buffer_view_create(image_get_pixels(texpaint_picker));
 					///if (krom_metal || krom_vulkan)
 					let i0: i32 = 2;
 					let i1: i32 = 1;
@@ -246,9 +258,9 @@ function ui_view2d_render() {
 					let i2: i32 = 2;
 					///end
 
-					context_raw.picked_color.base = color_set_rb(context_raw.picked_color.base, a.getUint8(i0));
-					context_raw.picked_color.base = color_set_gb(context_raw.picked_color.base, a.getUint8(i1));
-					context_raw.picked_color.base = color_set_bb(context_raw.picked_color.base, a.getUint8(i2));
+					context_raw.picked_color.base = color_set_rb(context_raw.picked_color.base, buffer_view_get_u8(a, i0));
+					context_raw.picked_color.base = color_set_gb(context_raw.picked_color.base, buffer_view_get_u8(a, i1));
+					context_raw.picked_color.base = color_set_bb(context_raw.picked_color.base, buffer_view_get_u8(a, i2));
 					ui_header_handle.redraws = 2;
 				});
 			}
@@ -287,11 +299,11 @@ function ui_view2d_render() {
 		if (ui_view2d_type == view_2d_type_t.ASSET) {
 			let asset: asset_t = context_raw.texture;
 			if (asset != null) {
-				let assetNames: string[] = project_asset_names;
-				let i: i32 = assetNames.indexOf(asset.name);
+				let asset_names: string[] = project_asset_names;
+				let i: i32 = array_index_of(asset_names, asset.name);
 				h.text = asset.name;
 				asset.name = zui_text_input(h, "");
-				assetNames[i] = asset.name;
+				asset_names[i] = asset.name;
 			}
 		}
 		else if (ui_view2d_type == view_2d_type_t.NODE) {
@@ -320,7 +332,9 @@ function ui_view2d_render() {
 		}
 		///end
 
-		if (h.changed) ui_base_hwnds[0].redraws = 2;
+		if (h.changed) {
+			ui_base_hwnds[0].redraws = 2;
+		}
 		ui_view2d_ui._x += ui_view2d_ui._w + 3;
 		ui_view2d_ui._y = 2 + start_y;
 		ui_view2d_ui._w = ew;
@@ -405,8 +419,12 @@ function ui_view2d_update() {
 		let _pan_x: f32 = ui_view2d_pan_x / ui_view2d_pan_scale;
 		let _pan_y: f32 = ui_view2d_pan_y / ui_view2d_pan_scale;
 		ui_view2d_pan_scale += control.zoom;
-		if (ui_view2d_pan_scale < 0.1) ui_view2d_pan_scale = 0.1;
-		if (ui_view2d_pan_scale > 6.0) ui_view2d_pan_scale = 6.0;
+		if (ui_view2d_pan_scale < 0.1) {
+			ui_view2d_pan_scale = 0.1;
+		}
+		if (ui_view2d_pan_scale > 6.0) {
+			ui_view2d_pan_scale = 6.0;
+		}
 		ui_view2d_pan_x = _pan_x * ui_view2d_pan_scale;
 		ui_view2d_pan_y = _pan_y * ui_view2d_pan_scale;
 
@@ -433,12 +451,22 @@ function ui_view2d_update() {
 	}
 	///end
 
-	if (ui_view2d_ui.is_typing) return;
+	if (ui_view2d_ui.is_typing) {
+		return;
+	}
 
-	if (keyboard_started("left")) ui_view2d_pan_x -= 5;
-	else if (keyboard_started("right")) ui_view2d_pan_x += 5;
-	if (keyboard_started("up")) ui_view2d_pan_y -= 5;
-	else if (keyboard_started("down")) ui_view2d_pan_y += 5;
+	if (keyboard_started("left")) {
+		ui_view2d_pan_x -= 5;
+	}
+	else if (keyboard_started("right")) {
+		ui_view2d_pan_x += 5;
+	}
+	if (keyboard_started("up")) {
+		ui_view2d_pan_y -= 5;
+	}
+	else if (keyboard_started("down")) {
+		ui_view2d_pan_y += 5;
+	}
 
 	// Limit panning to keep texture in viewport
 	let border: i32 = 32;
@@ -447,10 +475,18 @@ function ui_view2d_update() {
 	let hh: f32 = app_h();
 	let ty: f32 = hh / 2 - tw / 2 + ui_view2d_pan_y;
 
-	if      (tx + border >  ui_view2d_ww) ui_view2d_pan_x =  ui_view2d_ww / 2 + tw / 2 - border;
-	else if (tx - border < -tw) ui_view2d_pan_x = -tw / 2 - ui_view2d_ww / 2 + border;
-	if      (ty + border >  hh) ui_view2d_pan_y =  hh / 2 + tw / 2 - border;
-	else if (ty - border < -tw) ui_view2d_pan_y = -tw / 2 - hh / 2 + border;
+	if (tx + border >  ui_view2d_ww) {
+		ui_view2d_pan_x =  ui_view2d_ww / 2 + tw / 2 - border;
+	}
+	else if (tx - border < -tw) {
+		ui_view2d_pan_x = -tw / 2 - ui_view2d_ww / 2 + border;
+	}
+	if (ty + border >  hh) {
+		ui_view2d_pan_y =  hh / 2 + tw / 2 - border;
+	}
+	else if (ty - border < -tw) {
+		ui_view2d_pan_y = -tw / 2 - hh / 2 + border;
+	}
 
 	if (operator_shortcut(config_keymap.view_reset)) {
 		ui_view2d_pan_x = 0.0;

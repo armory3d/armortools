@@ -13,8 +13,8 @@ function math_node_create(): math_node_t {
 }
 
 function math_node_get(self: math_node_t, from: i32, done: (a: any)=>void) {
-	logic_node_input_get(self.base.inputs[0], (v1: f32) => {
-		logic_node_input_get(self.base.inputs[1], (v2: f32) => {
+	logic_node_input_get(self.base.inputs[0], function (v1: f32) {
+		logic_node_input_get(self.base.inputs[1], function (v2: f32) {
 			let f: f32 = 0.0;
 			switch (self.operation) {
 				case "Add":
@@ -124,7 +124,9 @@ function math_node_get(self: math_node_t, from: i32, done: (a: any)=>void) {
 					break;
 			}
 
-			if (self.use_clamp) f = f < 0.0 ? 0.0 : (f > 1.0 ? 1.0 : f);
+			if (self.use_clamp) {
+				f = f < 0.0 ? 0.0 : (f > 1.0 ? 1.0 : f);
+			}
 
 			done(f);
 		});

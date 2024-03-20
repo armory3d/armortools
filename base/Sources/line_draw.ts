@@ -11,8 +11,8 @@ let line_draw_pipeline: pipeline_t = null;
 let line_draw_vp: mat4_t;
 let line_draw_vp_loc: kinc_const_loc_t;
 
-let line_draw_vb_data: DataView;
-let line_draw_ib_data: Uint32Array;
+let line_draw_vb_data: buffer_view_t;
+let line_draw_ib_data: u32_array_t;
 
 let line_draw_max_lines: i32 = 300;
 let line_draw_max_vertices: i32 = line_draw_max_lines * 4;
@@ -185,6 +185,6 @@ function line_draw_end() {
 
 function line_draw_add_vb_data(i: i32, data: f32[]) {
 	for (let offset: i32 = 0; offset < 6; ++offset) {
-		line_draw_vb_data.setFloat32((i + offset) * 4, data[offset], true);
+		buffer_view_set_f32(line_draw_vb_data, (i + offset) * 4, data[offset]);
 	}
 }

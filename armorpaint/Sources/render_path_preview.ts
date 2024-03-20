@@ -96,9 +96,9 @@ function render_path_preview_commands_preview() {
 	///end
 
 	let framebuffer: string = "texpreview";
-	let selected_mat: SlotMaterialRaw = context_raw.material;
-	render_path_render_targets.get("texpreview")._image = selected_mat.image;
-	render_path_render_targets.get("texpreview_icon")._image = selected_mat.image_icon;
+	let selected_mat: slot_material_t = context_raw.material;
+	map_get(render_path_render_targets, "texpreview")._image = selected_mat.image;
+	map_get(render_path_render_targets, "texpreview_icon")._image = selected_mat.image_icon;
 
 	render_path_set_target(framebuffer);
 	render_path_bind_target("mtex", "tex");
@@ -140,7 +140,7 @@ function render_path_preview_commands_decal() {
 	///end
 
 	let framebuffer: string = "texpreview";
-	render_path_render_targets.get("texpreview")._image = context_raw.decal_image;
+	map_get(render_path_render_targets, "texpreview")._image = context_raw.decal_image;
 
 	render_path_set_target(framebuffer);
 

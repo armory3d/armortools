@@ -2,7 +2,7 @@
 ///if (is_paint || is_sculpt)
 
 function import_blend_material_run(path: string) {
-	let b: ArrayBuffer = data_get_blob(path);
+	let b: buffer_t = data_get_blob(path);
 	let bl: BlendRaw = parser_blend_init(b);
 	if (bl.dna == null) {
 		console_error(strings_error3());
@@ -15,16 +15,17 @@ function import_blend_material_run(path: string) {
 		return;
 	}
 
-	let imported: SlotMaterialRaw[] = [];
+	let imported: slot_material_t[] = [];
 
 	for (let mat of mats) {
 		// Material slot
 		context_raw.material = slot_material_create(project_materials[0].data);
-		project_materials.push(context_raw.material);
-		imported.push(context_raw.material);
+		array_push(project_materials, context_raw.material);
+		array_push(imported, context_raw.material);
 		let nodes: zui_nodes_t = context_raw.material.nodes;
 		let canvas: zui_node_canvas_t = context_raw.material.canvas;
-		canvas.name = bl_handle_get(bl_handle_get(mat, "id"), "name").substr(2); // MAWood
+		canvas.name = bl_handle_get(bl_handle_get(mat, "id"), "name"); // MAWood
+		canvas.name = substring(canvas.name, 2, canvas.name.length);
 		let nout: zui_node_t = null;
 		for (let n of canvas.nodes) {
 			if (n.type == "OUTPUT_MATERIAL_PBR") {
@@ -48,8 +49,12 @@ function import_blend_material_run(path: string) {
 		let node: any = bl_handle_get(blnodes, "first", 0, "bNode");
 		let last: any = bl_handle_get(blnodes, "last", 0, "bNode");
 		while (true) {
-			if (bl_handle_get(node, "idname") == "ShaderNodeBsdfPrincipled") break;
-			if (bl_handle_get(node, "name") == bl_handle_get(last, "name")) break;
+			if (bl_handle_get(node, "idname") == "ShaderNodeBsdfPrincipled") {
+				break;
+			}
+			if (bl_handle_get(node, "name") == bl_handle_get(last, "name")) {
+				break;
+			}
 			node = bl_handle_get(node, "next");
 		}
 		if (bl_handle_get(node, "idname") != "ShaderNodeBsdfPrincipled") {
@@ -66,19 +71,22 @@ function import_blend_material_run(path: string) {
 		node = bl_handle_get(blnodes, "first", 0, "bNode");
 		while (true) {
 			// Search for node in list
-			let search: string = bl_handle_get(node, "idname").substr(10).toLowerCase();
+			let search: string = bl_handle_get(node, "idname");
+			search = to_lower_case(substring(search, 10, search.length));
 			let base: zui_node_t = null;
 			for (let list of nodes_material_list) {
 				let found: bool = false;
 				for (let n of list) {
-					let s: string = string_replace_all(n.type, "_", "").toLowerCase();
+					let s: string = to_lower_case(string_replace_all(n.type, "_", ""));
 					if (search == s) {
 						base = n;
 						found = true;
 						break;
 					}
 				}
-				if (found) break;
+				if (found) {
+					break;
+				}
 			}
 
 			if (base != null) {
@@ -92,22 +100,27 @@ function import_blend_material_run(path: string) {
 				let sock: any = bl_handle_get(inputs, "first", 0, "bNodeSocket");
 				let pos: i32 = 0;
 				while (true) {
-					if (pos >= n.inputs.length) break;
+					if (pos >= n.inputs.length) {
+						break;
+					}
 					n.inputs[pos].default_value = import_blend_material_read_blend_socket(sock);
 
 					let last: any = sock;
 					sock = bl_handle_get(sock, "next");
-					if (last.block == sock.block) break;
+					if (last.block == sock.block) {
+						break;
+					}
 					pos++;
 				}
 
 				// Fill button values
 				if (search == "teximage") {
 					let img: any = bl_handle_get(node, "id", 0, "Image");
-					let file: string = bl_handle_get(img, "name").substr(2); // '//desktop\logo.png'
+					let file: string = bl_handle_get(img, "name"); // '//desktop\logo.png'
+					file = substring(file, 2, file.length);
 					file = path_base_dir(path) + file;
 					import_texture_run(file);
-					let ar: string[] = file.split(path_sep);
+					let ar: string[] = string_split(file, path_sep);
 					let filename: string = ar[ar.length - 1];
 					n.buttons[0].default_value = base_get_asset_index(filename);
 				}
@@ -116,7 +129,9 @@ function import_blend_material_run(path: string) {
 					n.buttons[0].data = bl_handle_get(ramp, "ipotype") == 0 ? 0 : 1; // Linear / Constant
 					let elems: f32[][] = n.buttons[0].default_value;
 					for (let i: i32 = 0; i < bl_handle_get(ramp, "tot"); ++i) {
-						if (i >= elems.length) elems.push([1.0, 1.0, 1.0, 1.0, 0.0]);
+						if (i >= elems.length) {
+							array_push(elems, [1.0, 1.0, 1.0, 1.0, 0.0]);
+						}
 						let cbdata: any = bl_handle_get(ramp, "data", i, "CBData");
 						elems[i][0] = math_floor(bl_handle_get(cbdata, "r") * 100) / 100;
 						elems[i][1] = math_floor(bl_handle_get(cbdata, "g") * 100) / 100;
@@ -150,19 +165,25 @@ function import_blend_material_run(path: string) {
 				sock = bl_handle_get(outputs, "first", 0, "bNodeSocket");
 				pos = 0;
 				while (true) {
-					if (pos >= n.outputs.length) break;
+					if (pos >= n.outputs.length) {
+						break;
+					}
 					n.outputs[pos].default_value = import_blend_material_read_blend_socket(sock);
 
 					let last: any = sock;
 					sock = bl_handle_get(sock, "next");
-					if (last.block == sock.block) break;
+					if (last.block == sock.block) {
+						break;
+					}
 					pos++;
 				}
 
-				canvas.nodes.push(n);
+				array_push(canvas.nodes, n);
 			}
 
-			if (bl_handle_get(node, "name") == bl_handle_get(last, "name")) break;
+			if (bl_handle_get(node, "name") == bl_handle_get(last, "name")) {
+				break;
+			}
 			node = bl_handle_get(node, "next");
 		}
 
@@ -195,7 +216,9 @@ function import_blend_material_run(path: string) {
 				while (true) {
 					let last: any = sock;
 					sock = bl_handle_get(sock, "prev");
-					if (last.block == sock.block) break;
+					if (last.block == sock.block) {
+						break;
+					}
 					from_socket++;
 				}
 
@@ -204,7 +227,9 @@ function import_blend_material_run(path: string) {
 				while (true) {
 					let last: any = sock;
 					sock = bl_handle_get(sock, "prev");
-					if (last.block == sock.block) break;
+					if (last.block == sock.block) {
+						break;
+					}
 					to_socket++;
 				}
 
@@ -212,14 +237,30 @@ function import_blend_material_run(path: string) {
 
 				// Remap principled
 				if (tonode == nout.name) {
-					if (to_socket == 0) to_socket = 0; // Base
-					else if (to_socket == 18) to_socket = 1; // Opac
-					else if (to_socket == 7) to_socket = 3; // Rough
-					else if (to_socket == 4) to_socket = 4; // Met
-					else if (to_socket == 19) to_socket = 5; // TODO: auto-remove normal_map node
-					else if (to_socket == 17) to_socket = 6; // Emis
-					else if (to_socket == 1) to_socket = 8; // Subs
-					else valid = false;
+					if (to_socket == 0) {
+						to_socket = 0; // Base
+					}
+					else if (to_socket == 18) {
+						to_socket = 1; // Opac
+					}
+					else if (to_socket == 7) {
+						to_socket = 3; // Rough
+					}
+					else if (to_socket == 4) {
+						to_socket = 4; // Met
+					}
+					else if (to_socket == 19) {
+						to_socket = 5; // TODO: auto-remove normal_map node
+					}
+					else if (to_socket == 17) {
+						to_socket = 6; // Emis
+					}
+					else if (to_socket == 1) {
+						to_socket = 8; // Subs
+					}
+					else {
+						valid = false;
+					}
 				}
 
 				if (valid) {
@@ -230,18 +271,20 @@ function import_blend_material_run(path: string) {
 						to_id: to_id,
 						to_socket: to_socket
 					};
-					canvas.links.push(raw);
+					array_push(canvas.links, raw);
 				}
 			}
 
 			let last: any = link;
 			link = bl_handle_get(link, "next");
-			if (last.block == link.block) break;
+			if (last.block == link.block) {
+				break;
+			}
 		}
 		history_new_material();
 	}
 
-	let _init = () => {
+	let _init = function () {
 		for (let m of imported) {
 			context_set_material(m);
 			make_material_parse_paint_material();
@@ -256,14 +299,14 @@ function import_blend_material_run(path: string) {
 
 function import_blend_material_read_blend_socket(sock: any): any {
 	let idname: any = bl_handle_get(sock, "idname");
-	if (idname.startsWith("NodeSocketVector")) {
+	if (starts_with(idname, "NodeSocketVector")) {
 		let v: any = bl_handle_get(bl_handle_get(sock, "default_value", 0, "bNodeSocketValueVector"), "value");
 		v[0] = math_floor(v[0] * 100) / 100;
 		v[1] = math_floor(v[1] * 100) / 100;
 		v[2] = math_floor(v[2] * 100) / 100;
 		return v;
 	}
-	else if (idname.startsWith("NodeSocketColor")) {
+	else if (starts_with(idname, "NodeSocketColor")) {
 		let v: any = bl_handle_get(bl_handle_get(sock, "default_value", 0, "bNodeSocketValueRGBA"), "value");
 		v[0] = math_floor(v[0] * 100) / 100;
 		v[1] = math_floor(v[1] * 100) / 100;
@@ -271,18 +314,18 @@ function import_blend_material_read_blend_socket(sock: any): any {
 		v[3] = math_floor(v[3] * 100) / 100;
 		return v;
 	}
-	else if (idname.startsWith("NodeSocketFloat")) {
+	else if (starts_with(idname, "NodeSocketFloat")) {
 		let v: any = bl_handle_get(bl_handle_get(sock, "default_value", 0, "bNodeSocketValueFloat"), "value");
 		v = math_floor(v * 100) / 100;
 		return v;
 	}
-	else if (idname.startsWith("NodeSocketInt")) {
+	else if (starts_with(idname, "NodeSocketInt")) {
 		return bl_handle_get(bl_handle_get(sock, "default_value", 0, "bNodeSocketValueInt"), "value");
 	}
-	else if (idname.startsWith("NodeSocketBoolean")) {
+	else if (starts_with(idname, "NodeSocketBoolean")) {
 		return bl_handle_get(bl_handle_get(sock, "default_value", 0, "bNodeSocketValueBoolean"), "value");
 	}
-	else if (idname.startsWith("NodeSocketString")) {
+	else if (starts_with(idname, "NodeSocketString")) {
 		return bl_handle_get(bl_handle_get(sock, "default_value", 0, "bNodeSocketValueString"), "value");
 	}
 	return null;

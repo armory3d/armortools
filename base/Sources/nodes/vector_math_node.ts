@@ -14,8 +14,8 @@ function vector_math_node_create(): vector_math_node_t {
 }
 
 function vector_math_node_get(self: vector_math_node_t, from: i32, done: (a: any)=>void) {
-	logic_node_input_get(self.base.inputs[0], (v1: vec4_t) => {
-		logic_node_input_get(self.base.inputs[1], (v2: vec4_t) => {
+	logic_node_input_get(self.base.inputs[0], function (v1: vec4_t) {
+		logic_node_input_get(self.base.inputs[1], function (v2: vec4_t) {
 			vec4_set_from(self.v, v1);
 			let f: f32 = 0.0;
 
@@ -132,8 +132,12 @@ function vector_math_node_get(self: vector_math_node_t, from: i32, done: (a: any
 					break;
 			}
 
-			if (from == 0) done(self.v);
-			else done(f);
+			if (from == 0) {
+				done(self.v);
+			}
+			else {
+				done(f);
+			}
 		});
 	});
 }
@@ -152,7 +156,7 @@ let vector_math_node_def: zui_node_t = {
 			name: _tr("Vector"),
 			type: "VECTOR",
 			color: 0xff6363c7,
-			default_value: new Float32Array([0.0, 0.0, 0.0])
+			default_value: new f32_array_t([0.0, 0.0, 0.0])
 		},
 		{
 			id: 0,
@@ -160,7 +164,7 @@ let vector_math_node_def: zui_node_t = {
 			name: _tr("Vector"),
 			type: "VECTOR",
 			color: 0xff6363c7,
-			default_value: new Float32Array([0.0, 0.0, 0.0])
+			default_value: new f32_array_t([0.0, 0.0, 0.0])
 		}
 	],
 	outputs: [
@@ -170,7 +174,7 @@ let vector_math_node_def: zui_node_t = {
 			name: _tr("Vector"),
 			type: "VECTOR",
 			color: 0xff6363c7,
-			default_value: new Float32Array([0.0, 0.0, 0.0])
+			default_value: new f32_array_t([0.0, 0.0, 0.0])
 		},
 		{
 			id: 0,

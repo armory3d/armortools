@@ -1,5 +1,5 @@
 
-function make_colorid_picker_run(vert: NodeShaderRaw, frag: NodeShaderRaw) {
+function make_colorid_picker_run(vert: node_shader_t, frag: node_shader_t) {
 	// Mangle vertices to form full screen triangle
 	node_shader_write(vert, 'gl_Position = vec4(-1.0 + float((gl_VertexID & 1) << 2), -1.0 + float((gl_VertexID & 2) << 1), 0.0, 1.0);');
 

@@ -1,5 +1,12 @@
 
-let nodes_material_categories: string[] = [_tr("Input"), _tr("Texture"), _tr("Color"), _tr("Vector"), _tr("Converter"), _tr("Group")];
+let nodes_material_categories: string[] = [
+	_tr("Input"),
+	_tr("Texture"),
+	_tr("Color"),
+	_tr("Vector"),
+	_tr("Converter"),
+	_tr("Group")
+];
 
 let nodes_material_list: zui_node_t[][] = [
 	[ // Input
@@ -18,7 +25,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+					default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 				},
 				{
 					id: 0,
@@ -26,7 +33,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Vector"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				},
 				{
 					id: 0,
@@ -59,7 +66,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("View Vector"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				},
 				{
 					id: 0,
@@ -104,7 +111,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Normal"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				}
 			],
 			outputs: [
@@ -134,7 +141,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Position"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				},
 				{
 					id: 0,
@@ -142,7 +149,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Normal"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				},
 				{
 					id: 0,
@@ -150,7 +157,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Tangent"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				},
 				{
 					id: 0,
@@ -158,7 +165,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("True Normal"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				},
 				{
 					id: 0,
@@ -166,7 +173,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Incoming"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				},
 				{
 					id: 0,
@@ -174,7 +181,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Parametric"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				},
 				{
 					id: 0,
@@ -218,7 +225,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Base Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.0, 0.0, 0.0, 1.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0, 1.0])
 				},
 				{
 					id: 0,
@@ -258,7 +265,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Normal Map"),
 					type: "VECTOR",
 					color: -10238109,
-					default_value: new Float32Array([0.5, 0.5, 1.0])
+					default_value: new f32_array_t([0.5, 0.5, 1.0])
 				},
 				{
 					id: 0,
@@ -343,7 +350,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Normal"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				}
 			],
 			outputs: [
@@ -381,7 +388,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Base Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.0, 0.0, 0.0, 1.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0, 1.0])
 				},
 				{
 					id: 0,
@@ -421,7 +428,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Normal Map"),
 					type: "VECTOR",
 					color: -10238109,
-					default_value: new Float32Array([0.5, 0.5, 1.0])
+					default_value: new f32_array_t([0.5, 0.5, 1.0])
 				},
 				{
 					id: 0,
@@ -472,7 +479,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Location"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				},
 				{
 					id: 0,
@@ -480,7 +487,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.0, 0.0, 0.0, 1.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0, 1.0])
 				},
 				{
 					id: 0,
@@ -524,7 +531,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Base Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.0, 0.0, 0.0, 1.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0, 1.0])
 				},
 				{
 					id: 0,
@@ -564,7 +571,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Normal Map"),
 					type: "VECTOR",
 					color: -10238109,
-					default_value: new Float32Array([0.5, 0.5, 1.0])
+					default_value: new f32_array_t([0.5, 0.5, 1.0])
 				},
 				{
 					id: 0,
@@ -608,7 +615,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.5, 0.5, 0.5, 1.0])
+					default_value: new f32_array_t([0.5, 0.5, 0.5, 1.0])
 				}
 			],
 			buttons: [
@@ -686,7 +693,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Tangent"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				}
 			],
 			buttons: []
@@ -706,7 +713,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Generated"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				},
 				{
 					id: 0,
@@ -714,7 +721,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Normal"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				},
 				{
 					id: 0,
@@ -722,7 +729,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("UV"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				},
 				{
 					id: 0,
@@ -730,7 +737,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Object"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				},
 				{
 					id: 0,
@@ -738,7 +745,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Camera"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				},
 				{
 					id: 0,
@@ -746,7 +753,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Window"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				},
 				{
 					id: 0,
@@ -754,7 +761,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Reflection"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				}
 			],
 			buttons: []
@@ -774,7 +781,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("UV"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				}
 			],
 			buttons: []
@@ -822,7 +829,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+					default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 				},
 				{
 					id: 0,
@@ -888,7 +895,7 @@ let nodes_material_list: zui_node_t[][] = [
 	// 				name: _tr("Base Color"),
 	// 				type: "RGBA",
 	// 				color: 0xffc7c729,
-	// 				default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+	// 				default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 	// 			},
 	// 			{
 	// 				id: 0,
@@ -928,7 +935,7 @@ let nodes_material_list: zui_node_t[][] = [
 	// 				name: _tr("Normal Map"),
 	// 				type: "VECTOR",
 	// 				color: -10238109,
-	// 				default_value: new Float32Array([0.5, 0.5, 1.0])
+	// 				default_value: new f32_array_t([0.5, 0.5, 1.0])
 	// 			},
 	// 			{
 	// 				id: 0,
@@ -974,7 +981,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Vector"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				},
 				{
 					id: 0,
@@ -982,7 +989,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color 1"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8])
+					default_value: new f32_array_t([0.8, 0.8, 0.8])
 				},
 				{
 					id: 0,
@@ -990,7 +997,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color 2"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.2, 0.2, 0.2])
+					default_value: new f32_array_t([0.2, 0.2, 0.2])
 				},
 				{
 					id: 0,
@@ -998,7 +1005,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Mortar"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				},
 				{
 					id: 0,
@@ -1018,7 +1025,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+					default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 				},
 				{
 					id: 0,
@@ -1045,7 +1052,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Vector"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				},
 				{
 					id: 0,
@@ -1053,7 +1060,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color 1"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8])
+					default_value: new f32_array_t([0.8, 0.8, 0.8])
 				},
 				{
 					id: 0,
@@ -1061,7 +1068,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color 2"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.2, 0.2, 0.2])
+					default_value: new f32_array_t([0.2, 0.2, 0.2])
 				},
 				{
 					id: 0,
@@ -1081,7 +1088,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+					default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 				},
 				{
 					id: 0,
@@ -1159,7 +1166,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Vector"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				}
 			],
 			outputs: [
@@ -1169,7 +1176,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+					default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 				},
 				{
 					id: 0,
@@ -1205,7 +1212,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Vector"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				}
 			],
 			outputs: [
@@ -1215,7 +1222,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.0, 0.0, 0.0, 1.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0, 1.0])
 				},
 				{
 					id: 0,
@@ -1255,7 +1262,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Vector"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				},
 				{
 					id: 0,
@@ -1275,7 +1282,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+					default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 				},
 				{
 					id: 0,
@@ -1302,7 +1309,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Vector"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				},
 				{
 					id: 0,
@@ -1341,7 +1348,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Vector"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				},
 				{
 					id: 0,
@@ -1361,7 +1368,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+					default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 				},
 				{
 					id: 0,
@@ -1388,7 +1395,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Vector"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				},
 				{
 					id: 0,
@@ -1408,7 +1415,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+					default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 				},
 				{
 					id: 0,
@@ -1443,7 +1450,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Vector"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				},
 				{
 					id: 0,
@@ -1463,7 +1470,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+					default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 				},
 				{
 					id: 0,
@@ -1492,7 +1499,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+					default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 				},
 				{
 					id: 0,
@@ -1510,7 +1517,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+					default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 				}
 			],
 			buttons: []
@@ -1529,7 +1536,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+					default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 				},
 				{
 					id: 0,
@@ -1555,7 +1562,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+					default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 				}
 			],
 			buttons: []
@@ -1574,7 +1581,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+					default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 				},
 				{
 					id: 0,
@@ -1592,7 +1599,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+					default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 				}
 			],
 			buttons: []
@@ -1643,7 +1650,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+					default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 				}
 			],
 			outputs: [
@@ -1653,7 +1660,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+					default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 				}
 			],
 			buttons: []
@@ -1680,7 +1687,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.0, 0.0, 0.0, 1.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0, 1.0])
 				}
 			],
 			outputs: [
@@ -1690,7 +1697,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+					default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 				}
 			],
 			buttons: []
@@ -1717,7 +1724,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color 1"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.5, 0.5, 0.5, 1.0])
+					default_value: new f32_array_t([0.5, 0.5, 0.5, 1.0])
 				},
 				{
 					id: 0,
@@ -1725,7 +1732,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color 2"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.5, 0.5, 0.5, 1.0])
+					default_value: new f32_array_t([0.5, 0.5, 0.5, 1.0])
 				}
 			],
 			outputs: [
@@ -1735,7 +1742,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+					default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 				}
 			],
 			buttons: [
@@ -1778,7 +1785,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.0, 0.0, 0.0, 1.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0, 1.0])
 				}
 			],
 			outputs: [
@@ -1788,7 +1795,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+					default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 				}
 			],
 			buttons: []
@@ -1807,7 +1814,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+					default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 				},
 				{
 					id: 0,
@@ -1837,7 +1844,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+					default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 				}
 			],
 			buttons: []
@@ -1882,7 +1889,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Normal"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				}
 			],
 			outputs: [
@@ -1892,7 +1899,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Normal Map"),
 					type: "VECTOR",
 					color: -10238109,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				}
 			],
 			buttons: []
@@ -1911,7 +1918,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Vector"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				},
 				{
 					id: 0,
@@ -1919,7 +1926,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Location"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0]),
+					default_value: new f32_array_t([0.0, 0.0, 0.0]),
 					display: 1
 				},
 				{
@@ -1928,7 +1935,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Rotation"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0]),
+					default_value: new f32_array_t([0.0, 0.0, 0.0]),
 					max: 360.0,
 					display: 1
 				},
@@ -1938,7 +1945,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Scale"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([1.0, 1.0, 1.0]),
+					default_value: new f32_array_t([1.0, 1.0, 1.0]),
 					display: 1
 				}
 			],
@@ -1949,7 +1956,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Vector"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				}
 			],
 			buttons: []
@@ -1968,7 +1975,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Normal Map 1"),
 					type: "VECTOR",
 					color: -10238109,
-					default_value: new Float32Array([0.5, 0.5, 1.0])
+					default_value: new f32_array_t([0.5, 0.5, 1.0])
 				},
 				{
 					id: 0,
@@ -1976,7 +1983,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Normal Map 2"),
 					type: "VECTOR",
 					color: -10238109,
-					default_value: new Float32Array([0.5, 0.5, 1.0])
+					default_value: new f32_array_t([0.5, 0.5, 1.0])
 				}
 			],
 			outputs: [
@@ -1986,7 +1993,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Normal Map"),
 					type: "VECTOR",
 					color: -10238109,
-					default_value: new Float32Array([0.5, 0.5, 1.0])
+					default_value: new f32_array_t([0.5, 0.5, 1.0])
 				}
 			],
 			buttons: [
@@ -2013,7 +2020,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Normal"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				}
 			],
 			outputs: [
@@ -2023,7 +2030,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Normal"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				},
 				{
 					id: 0,
@@ -2038,7 +2045,7 @@ let nodes_material_list: zui_node_t[][] = [
 				{
 					name: _tr("Vector"),
 					type: "VECTOR",
-					default_value: new Float32Array([0.0, 0.0, 0.0]),
+					default_value: new f32_array_t([0.0, 0.0, 0.0]),
 					output: 0
 				}
 			]
@@ -2067,7 +2074,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Normal Map"),
 					type: "VECTOR",
 					color: -10238109,
-					default_value: new Float32Array([0.5, 0.5, 1.0])
+					default_value: new f32_array_t([0.5, 0.5, 1.0])
 				}
 			],
 			outputs: [
@@ -2077,7 +2084,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Normal Map"),
 					type: "VECTOR",
 					color: -10238109,
-					default_value: new Float32Array([0.5, 0.5, 1.0])
+					default_value: new f32_array_t([0.5, 0.5, 1.0])
 				}
 			],
 			buttons: []
@@ -2104,7 +2111,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Vector"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				}
 			],
 			outputs: [
@@ -2114,14 +2121,14 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Vector"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				}
 			],
 			buttons: [
 				{
 					name: "nodes_material_vector_curves_button",
 					type: "CUSTOM",
-					default_value: [[new Float32Array([0.0, 0.0]), new Float32Array([0.0, 0.0])], [new Float32Array([0.0, 0.0]), new Float32Array([0.0, 0.0])], [new Float32Array([0.0, 0.0]), new Float32Array([0.0, 0.0])]],
+					default_value: [[new f32_array_t([0.0, 0.0]), new f32_array_t([0.0, 0.0])], [new f32_array_t([0.0, 0.0]), new f32_array_t([0.0, 0.0])], [new f32_array_t([0.0, 0.0]), new f32_array_t([0.0, 0.0])]],
 					output: 0,
 					height: 8.5
 				}
@@ -2206,7 +2213,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.0, 0.0, 0.0, 1.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0, 1.0])
 				},
 				{
 					id: 0,
@@ -2221,7 +2228,7 @@ let nodes_material_list: zui_node_t[][] = [
 				{
 					name: "nodes_material_color_ramp_button",
 					type: "CUSTOM",
-					default_value: [new Float32Array([1.0, 1.0, 1.0, 1.0, 0.0])],
+					default_value: [new f32_array_t([1.0, 1.0, 1.0, 1.0, 0.0])],
 					data: 0,
 					output: 0,
 					height: 4.5
@@ -2242,7 +2249,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+					default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 				},
 				{
 					id: 0,
@@ -2250,7 +2257,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Mask Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+					default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 				},
 				{
 					id: 0,
@@ -2323,7 +2330,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+					default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 				}
 			],
 			buttons: []
@@ -2368,7 +2375,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+					default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 				}
 			],
 			buttons: []
@@ -2413,7 +2420,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Vector"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				}
 			],
 			buttons: []
@@ -2551,7 +2558,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.0, 0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0, 0.0])
 				}
 			],
 			outputs: [
@@ -2580,7 +2587,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.5, 0.5, 0.5, 1.0])
+					default_value: new f32_array_t([0.5, 0.5, 0.5, 1.0])
 				}
 			],
 			outputs: [
@@ -2625,7 +2632,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Color"),
 					type: "RGBA",
 					color: 0xffc7c729,
-					default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+					default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
 				}
 			],
 			outputs: [
@@ -2670,7 +2677,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Vector"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				}
 			],
 			outputs: [
@@ -2715,7 +2722,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Vector"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				},
 				{
 					id: 0,
@@ -2723,7 +2730,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Vector"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				}
 			],
 			outputs: [
@@ -2733,7 +2740,7 @@ let nodes_material_list: zui_node_t[][] = [
 					name: _tr("Vector"),
 					type: "VECTOR",
 					color: 0xff6363c7,
-					default_value: new Float32Array([0.0, 0.0, 0.0])
+					default_value: new f32_array_t([0.0, 0.0, 0.0])
 				},
 				{
 					id: 0,
@@ -2785,23 +2792,27 @@ function nodes_material_vector_curves_button(ui: zui_t, nodes: zui_nodes_t, node
 	zui_radio(zui_nest(zui_nest(nhandle, 0), 1), 2, "Z");
 	// Preview
 	let axis: i32 = zui_nest(zui_nest(nhandle, 0), 1).position;
-	let val: Float32Array[] = but.default_value[axis]; // [ [[x, y], [x, y], ..], [[x, y]], ..]
+	let val: f32_array_t[] = but.default_value[axis]; // [ [[x, y], [x, y], ..], [[x, y]], ..]
 	let num: i32 = val.length;
 	// for (let i: i32 = 0; i < num; ++i) { ui.line(); }
 	ui._y += zui_nodes_LINE_H() * 5;
 	// Edit
 	zui_row([1 / 5, 1 / 5, 3 / 5]);
 	if (zui_button("+")) {
-		let f32a: Float32Array = new Float32Array(2);
+		let f32a: f32_array_t = f32_array_create(2);
 		f32a[0] = 0; f32a[1] = 0;
-		val.push(f32a);
+		array_push(val, f32a);
 	}
 	if (zui_button("-")) {
-		if (val.length > 2) val.pop();
+		if (val.length > 2) {
+			val.pop();
+		}
 	}
 	let ihandle: zui_handle_t = zui_nest(zui_nest(zui_nest(nhandle, 0), 2), axis, {position: 0});
 	let i: i32 = math_floor(zui_slider(ihandle, "Index", 0, num - 1, false, 1, true, zui_align_t.LEFT));
-	if (i >= val.length || i < 0) ihandle.value = i = val.length - 1; // Stay in bounds
+	if (i >= val.length || i < 0) {
+		ihandle.value = i = val.length - 1; // Stay in bounds
+	}
 	zui_row([1 / 2, 1 / 2]);
 	zui_nest(zui_nest(nhandle, 0), 3).value = val[i][0];
 	zui_nest(zui_nest(nhandle, 0), 4).value = val[i][1];
@@ -2816,7 +2827,7 @@ function nodes_material_color_ramp_button(ui: zui_t, nodes: zui_nodes_t, node: z
 	let ny: f32 = ui._y;
 
 	// Preview
-	let vals: Float32Array[] = but.default_value; // [[r, g, b, a, pos], ..]
+	let vals: f32_array_t[] = but.default_value; // [[r, g, b, a, pos], ..]
 	let sw: f32 = ui._w / zui_nodes_SCALE();
 	for (let val of vals) {
 		let pos: f32 = val[4];
@@ -2828,14 +2839,14 @@ function nodes_material_color_ramp_button(ui: zui_t, nodes: zui_nodes_t, node: z
 	let ihandle: zui_handle_t = zui_nest(zui_nest(nhandle, 0), 2);
 	zui_row([1 / 4, 1 / 4, 2 / 4]);
 	if (zui_button("+")) {
-		let last: Float32Array = vals[vals.length - 1];
-		let f32a: Float32Array = new Float32Array(5);
+		let last: f32_array_t = vals[vals.length - 1];
+		let f32a: f32_array_t = f32_array_create(5);
 		f32a[0] = last[0];
 		f32a[1] = last[1];
 		f32a[2] = last[2];
 		f32a[3] = last[3];
 		f32a[4] = 1.0;
-		vals.push(f32a);
+		array_push(vals, f32a);
 		ihandle.value += 1;
 	}
 	if (zui_button("-") && vals.length > 1) {
@@ -2846,13 +2857,19 @@ function nodes_material_color_ramp_button(ui: zui_t, nodes: zui_nodes_t, node: z
 
 	zui_row([1 / 2, 1 / 2]);
 	let i: i32 = math_floor(zui_slider(ihandle, "Index", 0, vals.length - 1, false, 1, true, zui_align_t.LEFT));
-	if (i >= vals.length || i < 0) ihandle.value = i = vals.length - 1; // Stay in bounds
+	if (i >= vals.length || i < 0) {
+		ihandle.value = i = vals.length - 1; // Stay in bounds
+	}
 
-	let val: Float32Array = vals[i];
+	let val: f32_array_t = vals[i];
 	zui_nest(zui_nest(nhandle, 0), 3).value = val[4];
 	val[4] = zui_slider(zui_nest(zui_nest(nhandle, 0), 3), "Pos", 0, 1, true, 100, true, zui_align_t.LEFT);
-	if (val[4] > 1.0) val[4] = 1.0; // Stay in bounds
-	else if (val[4] < 0.0) val[4] = 0.0;
+	if (val[4] > 1.0) {
+		val[4] = 1.0; // Stay in bounds
+	}
+	else if (val[4] < 0.0) {
+		val[4] = 0.0;
+	}
 
 	let chandle: zui_handle_t = zui_nest(zui_nest(nhandle, 0), 4);
 	chandle.color = color_from_floats(val[0], val[1], val[2], 1.0);
@@ -2879,10 +2896,12 @@ function nodes_material_new_group_button(ui: zui_t, nodes: zui_nodes_t, node: zu
 					break;
 				}
 			}
-			if (!found) break;
+			if (!found) {
+				break;
+			}
 		}
 
-		zui_node_replace.push(node);
+		array_push(zui_node_replace, node);
 
 		let canvas: zui_node_canvas_t = {
 			name: node.name,
@@ -2924,7 +2943,7 @@ function nodes_material_new_group_button(ui: zui_t, nodes: zui_nodes_t, node: zu
 			],
 			links: []
 		};
-		project_material_groups.push({ canvas: canvas, nodes: zui_nodes_create() });
+		array_push(project_material_groups, { canvas: canvas, nodes: zui_nodes_create() });
 	}
 
 	let group: node_group_t = null;
@@ -2936,7 +2955,7 @@ function nodes_material_new_group_button(ui: zui_t, nodes: zui_nodes_t, node: zu
 	}
 
 	if (zui_button(tr("Nodes"))) {
-		ui_nodes_group_stack.push(group);
+		array_push(ui_nodes_group_stack, group);
 	}
 }
 
@@ -2950,19 +2969,19 @@ function nodes_material_group_output_button(ui: zui_t, nodes: zui_nodes_t, node:
 
 function nodes_material_add_socket_button(ui: zui_t, nodes: zui_nodes_t, node: zui_node_t, sockets: zui_node_socket_t[]) {
 	if (zui_button(tr("Add"))) {
-		ui_menu_draw((ui: zui_t) => {
-			let groupStack: node_group_t[] = ui_nodes_group_stack;
-			let c: zui_node_canvas_t = groupStack[groupStack.length - 1].canvas;
+		ui_menu_draw(function (ui: zui_t) {
+			let group_stack: node_group_t[] = ui_nodes_group_stack;
+			let c: zui_node_canvas_t = group_stack[group_stack.length - 1].canvas;
 			if (ui_menu_button(ui, tr("RGBA"))) {
-				sockets.push(nodes_material_create_socket(nodes, node, null, "RGBA", c));
+				array_push(sockets, nodes_material_create_socket(nodes, node, null, "RGBA", c));
 				nodes_material_sync_sockets(node);
 			}
 			if (ui_menu_button(ui, tr("Vector"))) {
-				sockets.push(nodes_material_create_socket(nodes, node, null, "VECTOR", c));
+				array_push(sockets, nodes_material_create_socket(nodes, node, null, "VECTOR", c));
 				nodes_material_sync_sockets(node);
 			}
 			if (ui_menu_button(ui, tr("Value"))) {
-				sockets.push(nodes_material_create_socket(nodes, node, null, "VALUE", c));
+				array_push(sockets, nodes_material_create_socket(nodes, node, null, "VALUE", c));
 				nodes_material_sync_sockets(node);
 			}
 		}, 3);
@@ -2970,11 +2989,15 @@ function nodes_material_add_socket_button(ui: zui_t, nodes: zui_nodes_t, node: z
 }
 
 function nodes_material_sync_sockets(node: zui_node_t) {
-	let groupStack: node_group_t[] = ui_nodes_group_stack;
-	let c: zui_node_canvas_t = groupStack[groupStack.length - 1].canvas;
-	for (let m of project_materials) nodes_material_sync_group_sockets(m.canvas, c.name, node);
-	for (let g of project_material_groups) nodes_material_sync_group_sockets(g.canvas, c.name, node);
-	zui_node_replace.push(node);
+	let group_stack: node_group_t[] = ui_nodes_group_stack;
+	let c: zui_node_canvas_t = group_stack[group_stack.length - 1].canvas;
+	for (let m of project_materials) {
+		nodes_material_sync_group_sockets(m.canvas, c.name, node);
+	}
+	for (let g of project_material_groups) {
+		nodes_material_sync_group_sockets(g.canvas, c.name, node);
+	}
+	array_push(zui_node_replace, node);
 }
 
 function nodes_material_sync_group_sockets(canvas: zui_node_canvas_t, groupName: string, node: zui_node_t) {
@@ -2984,7 +3007,9 @@ function nodes_material_sync_group_sockets(canvas: zui_node_canvas_t, groupName:
 			let oldSockets: zui_node_socket_t[] = isInputs ? n.inputs : n.outputs;
 			let sockets: zui_node_socket_t[] = json_parse(json_stringify(isInputs ? node.outputs : node.inputs));
 			isInputs ? n.inputs = sockets : n.outputs = sockets;
-			for (let s of sockets) s.node_id = n.id;
+			for (let s of sockets) {
+				s.node_id = n.id;
+			}
 			let numSockets: i32 = sockets.length < oldSockets.length ? sockets.length : oldSockets.length;
 			for (let i: i32 = 0; i < numSockets; ++i) {
 				if (sockets[i].type == oldSockets[i].type) {
@@ -3000,7 +3025,7 @@ function nodes_material_get_socket_color(type: string): i32 {
 }
 
 function nodes_material_get_socket_default_value(type: string): any {
-	return type == "RGBA" ? new Float32Array([0.8, 0.8, 0.8, 1.0]) : type == "VECTOR" ? new Float32Array([0.0, 0.0, 0.0]) : 0.0;
+	return type == "RGBA" ? new f32_array_t([0.8, 0.8, 0.8, 1.0]) : type == "VECTOR" ? new f32_array_t([0.0, 0.0, 0.0]) : 0.0;
 }
 
 function nodes_material_get_socket_name(type: string): string {
@@ -3021,16 +3046,24 @@ function nodes_material_create_socket(nodes: zui_nodes_t, node: zui_node_t, name
 }
 
 function nodes_material_get_node_t(nodeType: string): zui_node_t {
-	for (let c of nodes_material_list) for (let n of c) if (n.type == nodeType) return n;
+	for (let c of nodes_material_list) {
+		for (let n of c) {
+			if (n.type == nodeType) {
+				return n;
+			}
+		}
+	}
 	return null;
 }
 
 function nodes_material_create_node(nodeType: string, group: node_group_t = null): zui_node_t {
 	let n: zui_node_t = nodes_material_get_node_t(nodeType);
-	if (n == null) return null;
+	if (n == null) {
+		return null;
+	}
 	let canvas: zui_node_canvas_t = group != null ? group.canvas : context_raw.material.canvas;
 	let nodes: zui_nodes_t = group != null ? group.nodes : context_raw.material.nodes;
 	let node: zui_node_t = ui_nodes_make_node(n, nodes, canvas);
-	canvas.nodes.push(node);
+	array_push(canvas.nodes, node);
 	return node;
 }

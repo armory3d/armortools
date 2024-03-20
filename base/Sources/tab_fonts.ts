@@ -14,8 +14,12 @@ function tab_fonts_draw(htab: zui_handle_t) {
 			zui_row([1 / 14, 1 / 14]);
 		}
 
-		if (zui_button(tr("Import"))) project_import_asset("ttf,ttc,otf");
-		if (ui.is_hovered) zui_tooltip(tr("Import font file"));
+		if (zui_button(tr("Import"))) {
+			project_import_asset("ttf,ttc,otf");
+		}
+		if (ui.is_hovered) {
+			zui_tooltip(tr("Import font file"));
+		}
 
 		if (zui_button(tr("2D View"))) {
 			ui_base_show_2d_view(view_2d_type_t.FONT);
@@ -30,19 +34,25 @@ function tab_fonts_draw(htab: zui_handle_t) {
 		for (let row: i32 = 0; row < math_floor(math_ceil(project_fonts.length / num)); ++row) {
 			let mult: i32 = config_raw.show_asset_names ? 2 : 1;
 			let ar: f32[] = [];
-			for (let i: i32 = 0; i < num * mult; ++i) ar.push(1 / num);
+			for (let i: i32 = 0; i < num * mult; ++i) {
+				array_push(ar, 1 / num);
+			}
 			zui_row(ar);
 
 			ui._x += 2;
 			let off: f32 = config_raw.show_asset_names ? zui_ELEMENT_OFFSET(ui) * 10.0 : 6;
-			if (row > 0) ui._y += off;
+			if (row > 0) {
+				ui._y += off;
+			}
 
 			for (let j: i32 = 0; j < num; ++j) {
 				let imgw: i32 = math_floor(50 * zui_SCALE(ui));
 				let i: i32 = j + row * num;
 				if (i >= project_fonts.length) {
 					zui_end_element(imgw);
-					if (config_raw.show_asset_names) zui_end_element(0);
+					if (config_raw.show_asset_names) {
+						zui_end_element(0);
+					}
 					continue;
 				}
 				let img: image_t = project_fonts[i].image;
@@ -51,7 +61,9 @@ function tab_fonts_draw(htab: zui_handle_t) {
 					// Zui.fill(1, -2, img.width + 3, img.height + 3, ui.t.HIGHLIGHT_COL); // TODO
 					let off: i32 = row % 2 == 1 ? 1 : 0;
 					let w: i32 = 50;
-					if (config_raw.window_scale > 1) w += math_floor(config_raw.window_scale * 2);
+					if (config_raw.window_scale > 1) {
+						w += math_floor(config_raw.window_scale * 2);
+					}
 					zui_fill(-1,         -2, w + 3,       2, ui.t.HIGHLIGHT_COL);
 					zui_fill(-1,    w - off, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
 					zui_fill(-1,         -2,     2,   w + 3, ui.t.HIGHLIGHT_COL);
@@ -76,18 +88,20 @@ function tab_fonts_draw(htab: zui_handle_t) {
 
 				if (state == zui_state_t.STARTED) {
 					if (context_raw.font != project_fonts[i]) {
-						let _init = () => {
+						let _init = function () {
 							context_select_font(i);
 						}
 						app_notify_on_init(_init);
 					}
-					if (time_time() - context_raw.select_time < 0.25) ui_base_show_2d_view(view_2d_type_t.FONT);
+					if (time_time() - context_raw.select_time < 0.25) {
+						ui_base_show_2d_view(view_2d_type_t.FONT);
+					}
 					context_raw.select_time = time_time();
 				}
 				if (ui.is_hovered && ui.input_released_r) {
 					context_select_font(i);
 					let add: i32 = project_fonts.length > 1 ? 1 : 0;
-					ui_menu_draw((ui: zui_t) => {
+					ui_menu_draw(function (ui: zui_t) {
 						if (project_fonts.length > 1 && ui_menu_button(ui, tr("Delete"), "delete") && project_fonts[i].file != "") {
 							tab_fonts_delete_font(project_fonts[i]);
 						}
@@ -95,8 +109,8 @@ function tab_fonts_draw(htab: zui_handle_t) {
 				}
 				if (ui.is_hovered) {
 					if (img == null) {
-						app_notify_on_init(() => {
-							let _font: SlotFontRaw = context_raw.font;
+						app_notify_on_init(function() {
+							let _font: slot_font_t = context_raw.font;
 							context_raw.font = project_fonts[i];
 							util_render_make_font_preview();
 							context_raw.font = _font;
@@ -112,7 +126,9 @@ function tab_fonts_draw(htab: zui_handle_t) {
 					ui._x = uix;
 					ui._y += slotw * 0.9;
 					zui_text(project_fonts[i].name, zui_align_t.CENTER);
-					if (ui.is_hovered) zui_tooltip(project_fonts[i].name);
+					if (ui.is_hovered) {
+						zui_tooltip(project_fonts[i].name);
+					}
 					ui._y -= slotw * 0.9;
 					if (i == project_fonts.length - 1) {
 						ui._y += j == num - 1 ? imgw : imgw + zui_ELEMENT_H(ui) + zui_ELEMENT_OFFSET(ui);
@@ -124,7 +140,7 @@ function tab_fonts_draw(htab: zui_handle_t) {
 		}
 
 		let in_focus: bool = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
-								ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
+							 ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
 		if (in_focus && ui.is_delete_down && project_fonts.length > 1 && context_raw.font.file != "") {
 			ui.is_delete_down = false;
 			tab_fonts_delete_font(context_raw.font);
@@ -132,12 +148,12 @@ function tab_fonts_draw(htab: zui_handle_t) {
 	}
 }
 
-function tab_fonts_delete_font(font: SlotFontRaw) {
-	let i: i32 = project_fonts.indexOf(font);
-	let _init = () => {
+function tab_fonts_delete_font(font: slot_font_t) {
+	let i: i32 = array_index_of(project_fonts, font);
+	let _init = function () {
 		context_select_font(i == project_fonts.length - 1 ? i - 1 : i + 1);
 		data_delete_font(project_fonts[i].file);
-		project_fonts.splice(i, 1);
+		array_splice(project_fonts, i, 1);
 	}
 	app_notify_on_init(_init);
 	ui_base_hwnds[2].redraws = 2;

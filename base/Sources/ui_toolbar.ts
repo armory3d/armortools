@@ -45,7 +45,9 @@ function ui_toolbar_render_ui() {
 		let img: image_t = resource_get("icons.k");
 
 		let col: i32 = ui.t.WINDOW_BG_COL;
-		if (col < 0) col += 4294967296;
+		if (col < 0) {
+			col += 4294967296;
+		}
 		let light: bool = col > (0xff666666 + 4294967296);
 		let icon_accent: i32 = light ? 0xff666666 : -1;
 
@@ -80,16 +82,18 @@ function ui_toolbar_render_ui() {
 			ui.t.BUTTON_COL = _BUTTON_COL;
 			ui.font_offset_y = _fontOffsetY;
 		}
-		if (ui.is_hovered) zui_tooltip(tr("Toggle header"));
+		if (ui.is_hovered) {
+			zui_tooltip(tr("Toggle header"));
+		}
 		ui._y -= 4 * zui_SCALE(ui);
 
 		let keys: string[] = [
-			"(" + config_keymap.tool_brush + ") - " + tr("Hold {action_paint} to paint\nHold {key} and press {action_paint} to paint a straight line (ruler mode)", new Map([["key", config_keymap.brush_ruler], ["action_paint", config_keymap.action_paint]])),
-			"(" + config_keymap.tool_eraser + ") - " + tr("Hold {action_paint} to erase\nHold {key} and press {action_paint} to erase a straight line (ruler mode)", new Map([["key", config_keymap.brush_ruler], ["action_paint", config_keymap.action_paint]])),
+			"(" + config_keymap.tool_brush + ") - " + tr("Hold {action_paint} to paint\nHold {key} and press {action_paint} to paint a straight line (ruler mode)", new map_t([["key", config_keymap.brush_ruler], ["action_paint", config_keymap.action_paint]])),
+			"(" + config_keymap.tool_eraser + ") - " + tr("Hold {action_paint} to erase\nHold {key} and press {action_paint} to erase a straight line (ruler mode)", new map_t([["key", config_keymap.brush_ruler], ["action_paint", config_keymap.action_paint]])),
 			"(" + config_keymap.tool_fill + ")",
-			"(" + config_keymap.tool_decal + ") - " + tr("Hold {key} to paint on a decal mask", new Map([["key", config_keymap.decal_mask]])),
-			"(" + config_keymap.tool_text + ") - " + tr("Hold {key} to use the text as a mask", new Map([["key", config_keymap.decal_mask]])),
-			"(" + config_keymap.tool_clone + ") - " + tr("Hold {key} to set source", new Map([["key", config_keymap.set_clone_source]])),
+			"(" + config_keymap.tool_decal + ") - " + tr("Hold {key} to paint on a decal mask", new map_t([["key", config_keymap.decal_mask]])),
+			"(" + config_keymap.tool_text + ") - " + tr("Hold {key} to use the text as a mask", new map_t([["key", config_keymap.decal_mask]])),
+			"(" + config_keymap.tool_clone + ") - " + tr("Hold {key} to set source", new map_t([["key", config_keymap.set_clone_source]])),
 			"(" + config_keymap.tool_blur + ")",
 			"(" + config_keymap.tool_smudge + ")",
 			"(" + config_keymap.tool_particle + ")",
@@ -102,7 +106,9 @@ function ui_toolbar_render_ui() {
 
 		let draw_tool = function (i: i32) {
 			ui._x += 2;
-			if (context_raw.tool == i) ui_toolbar_draw_highlight();
+			if (context_raw.tool == i) {
+				ui_toolbar_draw_highlight();
+			}
 			let tile_y: i32 = math_floor(i / 12);
 			let tile_x: i32 = tile_y % 2 == 0 ? i % 12 : (11 - (i % 12));
 			let rect: rect_t = resource_tile50(img, tile_x, tile_y);
@@ -121,11 +127,13 @@ function ui_toolbar_render_ui() {
 
 			///if is_paint
 			if (i == workspace_tool_t.COLORID && context_raw.colorid_picked) {
-				g2_draw_scaled_sub_image(render_path_render_targets.get("texpaint_colorid")._image, 0, 0, 1, 1, 0, _y + 1.5 * zui_SCALE(ui), 5 * zui_SCALE(ui), 34 * zui_SCALE(ui));
+				g2_draw_scaled_sub_image(map_get(render_path_render_targets, "texpaint_colorid")._image, 0, 0, 1, 1, 0, _y + 1.5 * zui_SCALE(ui), 5 * zui_SCALE(ui), 34 * zui_SCALE(ui));
 			}
 			///end
 
-			if (ui.is_hovered) zui_tooltip(tr(ui_toolbar_tool_names[i]) + " " + keys[i]);
+			if (ui.is_hovered) {
+				zui_tooltip(tr(ui_toolbar_tool_names[i]) + " " + keys[i]);
+			}
 			ui._x -= 2;
 			ui._y += 2;
 		}
