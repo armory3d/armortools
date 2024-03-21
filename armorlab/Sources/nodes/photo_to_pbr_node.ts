@@ -12,7 +12,7 @@ let photo_to_pbr_node_border_w: i32 = 64;
 let photo_to_pbr_node_tile_w: i32 = 2048;
 let photo_to_pbr_node_tile_with_border_w: i32 = photo_to_pbr_node_tile_w + photo_to_pbr_node_border_w * 2;
 
-function photo_to_pbr_node_create(): photo_to_pbr_node_t {
+function photo_to_pbr_node_create(arg: any): photo_to_pbr_node_t {
 	let n: photo_to_pbr_node_t = {};
 	n.base = logic_node_create();
 	n.base.get_as_image = photo_to_pbr_node_get_as_image;
@@ -29,7 +29,7 @@ function photo_to_pbr_node_create(): photo_to_pbr_node_t {
 function photo_to_pbr_node_init() {
 	if (photo_to_pbr_node_images == null) {
 		photo_to_pbr_node_images = [];
-		for (let i = 0; i < photo_to_pbr_node_model_names.length; ++i) {
+		for (let i: i32 = 0; i < photo_to_pbr_node_model_names.length; ++i) {
 			array_push(photo_to_pbr_node_images, image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y()));
 		}
 	}
@@ -54,7 +54,7 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32, do
 			let tiles_x = math_floor(config_get_texture_res_x() / photo_to_pbr_node_tile_w);
 			let tiles_y = math_floor(config_get_texture_res_y() / photo_to_pbr_node_tile_w);
 			let num_tiles = tiles_x * tiles_y;
-			for (let i = 0; i < num_tiles; ++i) {
+			for (let i: i32 = 0; i < num_tiles; ++i) {
 				let x = i % tiles_x;
 				let y = math_floor(i / tiles_x);
 
@@ -71,7 +71,7 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32, do
 				let bytes_img = image_get_pixels(photo_to_pbr_node_temp);
 				let u8a = new u8_array_t(bytes_img);
 				let f32a = f32_array_create(3 * photo_to_pbr_node_tile_with_border_w * photo_to_pbr_node_tile_with_border_w);
-				for (let i = 0; i < (photo_to_pbr_node_tile_with_border_w * photo_to_pbr_node_tile_with_border_w); ++i) {
+				for (let i: i32 = 0; i < (photo_to_pbr_node_tile_with_border_w * photo_to_pbr_node_tile_with_border_w); ++i) {
 					f32a[i                                        ] = (u8a[i * 4    ] / 255 - 0.5) / 0.5;
 					f32a[i + photo_to_pbr_node_tile_with_border_w * photo_to_pbr_node_tile_with_border_w    ] = (u8a[i * 4 + 1] / 255 - 0.5) / 0.5;
 					f32a[i + photo_to_pbr_node_tile_with_border_w * photo_to_pbr_node_tile_with_border_w * 2] = (u8a[i * 4 + 2] / 255 - 0.5) / 0.5;
@@ -83,7 +83,7 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32, do
 				u8a = u8_array_create(4 * photo_to_pbr_node_tile_w * photo_to_pbr_node_tile_w);
 				let offset_g = (from == channel_type_t.BASE_COLOR || from == channel_type_t.NORMAL_MAP) ? photo_to_pbr_node_tile_with_border_w * photo_to_pbr_node_tile_with_border_w : 0;
 				let offset_b = (from == channel_type_t.BASE_COLOR || from == channel_type_t.NORMAL_MAP) ? photo_to_pbr_node_tile_with_border_w * photo_to_pbr_node_tile_with_border_w * 2 : 0;
-				for (let i = 0; i < (photo_to_pbr_node_tile_w * photo_to_pbr_node_tile_w); ++i) {
+				for (let i: i32 = 0; i < (photo_to_pbr_node_tile_w * photo_to_pbr_node_tile_w); ++i) {
 					let x = photo_to_pbr_node_border_w + i % photo_to_pbr_node_tile_w;
 					let y = photo_to_pbr_node_border_w + math_floor(i / photo_to_pbr_node_tile_w);
 					u8a[i * 4    ] = math_floor((ar[y * photo_to_pbr_node_tile_with_border_w + x          ] * 0.5 + 0.5) * 255);
@@ -97,8 +97,8 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32, do
 				if (i > 0) {
 					if (x > 0) {
 						let ar = tile_floats[i - 1];
-						for (let yy = 0; yy < photo_to_pbr_node_tile_w; ++yy) {
-							for (let xx = 0; xx < photo_to_pbr_node_border_w; ++xx) {
+						for (let yy: i32 = 0; yy < photo_to_pbr_node_tile_w; ++yy) {
+							for (let xx: i32 = 0; xx < photo_to_pbr_node_border_w; ++xx) {
 								let i = yy * photo_to_pbr_node_tile_w + xx;
 								let a = u8a[i * 4];
 								let b = u8a[i * 4 + 1];
@@ -122,8 +122,8 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32, do
 					}
 					if (y > 0) {
 						let ar = tile_floats[i - tiles_x];
-						for (let xx = 0; xx < photo_to_pbr_node_tile_w; ++xx) {
-							for (let yy = 0; yy < photo_to_pbr_node_border_w; ++yy) {
+						for (let xx: i32 = 0; xx < photo_to_pbr_node_tile_w; ++xx) {
+							for (let yy: i32 = 0; yy < photo_to_pbr_node_border_w; ++yy) {
 								let i = yy * photo_to_pbr_node_tile_w + xx;
 								let a = u8a[i * 4];
 								let b = u8a[i * 4 + 1];
@@ -170,7 +170,7 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32, do
 ///if (krom_metal || krom_vulkan)
 function photo_to_pbr_node_bgra_swap(buffer: buffer_t) {
 	let u8a = new u8_array_t(buffer);
-	for (let i = 0; i < math_floor(buffer_size(buffer) / 4); ++i) {
+	for (let i: i32 = 0; i < math_floor(buffer_size(buffer) / 4); ++i) {
 		let r = u8a[i * 4];
 		u8a[i * 4] = u8a[i * 4 + 2];
 		u8a[i * 4 + 2] = r;

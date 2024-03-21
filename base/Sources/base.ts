@@ -242,7 +242,8 @@ function base_init() {
 
 	// Init plugins
 	if (config_raw.plugins != null) {
-		for (let plugin of config_raw.plugins) {
+		for (let i: i32 = 0; i < config_raw.plugins.length; ++i) {
+			let plugin: string = config_raw.plugins[i];
 			plugin_start(plugin);
 		}
 	}
@@ -881,14 +882,16 @@ function base_enum_texts(node_type: string): string[] {
 	}
 	if (node_type == "LAYER" || node_type == "LAYER_MASK") {
 		let layer_names: string[] = [];
-		for (let l of project_layers) {
+		for (let i: i32 = 0; i < project_layers.length; ++i) {
+			let l: slot_layer_t = project_layers[i];
 			array_push(layer_names, l.name);
 		}
 		return layer_names;
 	}
 	if (node_type == "MATERIAL") {
 		let material_names: string[] = [];
-		for (let m of project_materials) {
+		for (let i: i32 = 0; i < project_materials.length; ++i) {
+			let m: slot_material_t = project_materials[i];
 			array_push(material_names, m.canvas.name);
 		}
 		return material_names;
@@ -941,7 +944,8 @@ function base_toggle_fullscreen() {
 }
 
 function base_is_scrolling(): bool {
-	for (let ui of base_get_uis()) {
+	for (let i: i32 = 0; i < base_get_uis().length; ++i) {
+		let ui: zui_t = base_get_uis()[i];
 		if (ui.is_scrolling) {
 			return true;
 		}
@@ -950,7 +954,8 @@ function base_is_scrolling(): bool {
 }
 
 function base_is_combo_selected(): bool {
-	for (let ui of base_get_uis()) {
+	for (let i: i32 = 0; i < base_get_uis().length; ++i) {
+		let ui: zui_t = base_get_uis()[i];
 		if (ui.combo_selected_handle_ptr != 0) {
 			return true;
 		}
@@ -1145,8 +1150,14 @@ function base_resize_layers() {
 			});
 		}
 	}
-	for (let l of project_layers) slot_layer_resize_and_set_bits(l);
-	for (let l of history_undo_layers) slot_layer_resize_and_set_bits(l);
+	for (let i: i32 = 0; i < project_layers.length; ++i) {
+		let l: slot_layer_t = project_layers[i];
+		slot_layer_resize_and_set_bits(l);
+	}
+	for (let i: i32 = 0; i < history_undo_layers.length; ++i) {
+		let l: slot_layer_t = history_undo_layers[i];
+		slot_layer_resize_and_set_bits(l);
+	}
 	let rts: map_t<string, render_target_t> = render_path_render_targets;
 	let _texpaint_blend0: image_t = map_get(rts, "texpaint_blend0")._image;
 	base_notify_on_next_frame(function() {
@@ -1182,10 +1193,12 @@ function base_resize_layers() {
 }
 
 function base_set_layer_bits() {
-	for (let l of project_layers) {
+	for (let i: i32 = 0; i < project_layers.length; ++i) {
+		let l: slot_layer_t = project_layers[i];
 		slot_layer_resize_and_set_bits(l);
 	}
-	for (let l of history_undo_layers) {
+	for (let i: i32 = 0; i < history_undo_layers.length; ++i) {
+		let l: slot_layer_t = history_undo_layers[i];
 		slot_layer_resize_and_set_bits(l);
 	}
 }
@@ -1574,7 +1587,8 @@ function base_duplicate_layer(l: slot_layer_t) {
 		context_set_layer(new_layer);
 		let masks: slot_layer_t[] = slot_layer_get_masks(l, false);
 		if (masks != null) {
-			for (let m of masks) {
+			for (let i: i32 = 0; i < masks.length; ++i) {
+				let m: slot_layer_t = masks[i];
 				m = slot_layer_duplicate(m);
 				m.parent = new_layer;
 				array_remove(project_layers, m);
@@ -1588,14 +1602,16 @@ function base_duplicate_layer(l: slot_layer_t) {
 		array_remove(project_layers, new_group);
 		array_insert(project_layers, array_index_of(project_layers, l) + 1, new_group);
 		// group.show_panel = true;
-		for (let c of slot_layer_get_children(l)) {
+		for (let i: i32 = 0; i < slot_layer_get_children(l).length; ++i) {
+			let c: slot_layer_t = slot_layer_get_children(l)[i];
 			let masks: slot_layer_t[] = slot_layer_get_masks(c, false);
 			let new_layer: slot_layer_t = slot_layer_duplicate(c);
 			new_layer.parent = new_group;
 			array_remove(project_layers, new_layer);
 			array_insert(project_layers, array_index_of(project_layers, new_group), new_layer);
 			if (masks != null) {
-				for (let m of masks) {
+				for (let i: i32 = 0; i < masks.length; ++i) {
+					let m: slot_layer_t = masks[i];
 					let new_mask: slot_layer_t = slot_layer_duplicate(m);
 					new_mask.parent = new_layer;
 					array_remove(project_layers, new_mask);
@@ -1605,7 +1621,8 @@ function base_duplicate_layer(l: slot_layer_t) {
 		}
 		let group_masks: slot_layer_t[] = slot_layer_get_masks(l);
 		if (group_masks != null) {
-			for (let m of group_masks) {
+			for (let i: i32 = 0; i < group_masks.length; ++i) {
+				let m: slot_layer_t = group_masks[i];
 				let new_mask: slot_layer_t = slot_layer_duplicate(m);
 				new_mask.parent = new_group;
 				array_remove(project_layers, new_mask);
@@ -1824,7 +1841,8 @@ function base_flatten(height_to_normal: bool = false, layers: slot_layer_t[] = n
 	g4_end();
 
 	// Flatten layers
-	for (let l1 of layers) {
+	for (let i: i32 = 0; i < layers.length; ++i) {
+		let l1: slot_layer_t = layers[i];
 		if (!slot_layer_is_visible(l1)) {
 			continue;
 		}
@@ -2011,7 +2029,8 @@ function base_is_fill_material(): bool {
 	///end
 
 	let m: slot_material_t = context_raw.material;
-	for (let l of project_layers) {
+	for (let i: i32 = 0; i < project_layers.length; ++i) {
+		let l: slot_layer_t = project_layers[i];
 		if (l.fill_layer == m) {
 			return true;
 		}
@@ -2054,12 +2073,14 @@ function base_update_fill_layers() {
 
 	let has_fill_layer: bool = false;
 	let has_fill_mask: bool = false;
-	for (let l of project_layers) {
+	for (let i: i32 = 0; i < project_layers.length; ++i) {
+		let l: slot_layer_t = project_layers[i];
 		if (slot_layer_is_layer(l) && l.fill_layer == context_raw.material) {
 			has_fill_layer = true;
 		}
 	}
-	for (let l of project_layers) {
+	for (let i: i32 = 0; i < project_layers.length; ++i) {
+		let l: slot_layer_t = project_layers[i];
 		if (slot_layer_is_mask(l) && l.fill_layer == context_raw.material) {
 			has_fill_mask = true;
 		}
@@ -2076,7 +2097,8 @@ function base_update_fill_layers() {
 
 		if (has_fill_layer) {
 			let first: bool = true;
-			for (let l of project_layers) {
+			for (let i: i32 = 0; i < project_layers.length; ++i) {
+				let l: slot_layer_t = project_layers[i];
 				if (slot_layer_is_layer(l) && l.fill_layer == context_raw.material) {
 					context_raw.layer = l;
 					if (first) {
@@ -2092,7 +2114,8 @@ function base_update_fill_layers() {
 		}
 		if (has_fill_mask) {
 			let first: bool = true;
-			for (let l of project_layers) {
+			for (let i: i32 = 0; i < project_layers.length; ++i) {
+				let l: slot_layer_t = project_layers[i];
 				if (slot_layer_is_mask(l) && l.fill_layer == context_raw.material) {
 					context_raw.layer = l;
 					if (first) {
@@ -2151,7 +2174,8 @@ function base_set_object_mask() {
 	///end
 
 	let ar: string[] = [tr("None")];
-	for (let p of project_paint_objects) {
+	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+		let p: mesh_object_t = project_paint_objects[i];
 		array_push(ar, p.base.name);
 	}
 
@@ -2164,7 +2188,8 @@ function base_set_object_mask() {
 			context_raw.merged_object.base.visible = false;
 		}
 		let o: mesh_object_t = project_paint_objects[0];
-		for (let p of project_paint_objects) {
+		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+			let p: mesh_object_t = project_paint_objects[i];
 			if (p.base.name == ar[mask]) {
 				o = p;
 				break;
@@ -2282,7 +2307,8 @@ function base_on_layers_resized() {
 		base_resize_layers();
 		let _layer: slot_layer_t = context_raw.layer;
 		let _material: slot_material_t = context_raw.material;
-		for (let l of project_layers) {
+		for (let i: i32 = 0; i < project_layers.length; ++i) {
+			let l: slot_layer_t = project_layers[i];
 			if (l.fill_layer != null) {
 				context_raw.layer = l;
 				context_raw.material = l.fill_layer;
@@ -2341,11 +2367,12 @@ function base_on_layers_resized() {
 		InpaintNode.init();
 	}
 
-	if (PhotoToPBRNode.images != null) {
-		for (let image of PhotoToPBRNode.images) {
+	if (photo_to_pbr_node_images != null) {
+		for (let i: i32 = 0; i < photo_to_pbr_node_images.length; ++i) {
+			let image: image_t = photo_to_pbr_node_images[i];
 			image_unload(image);
 		}
-		PhotoToPBRNode.images = null;
+		photo_to_pbr_node_images = null;
 		PhotoToPBRNode.init();
 	}
 

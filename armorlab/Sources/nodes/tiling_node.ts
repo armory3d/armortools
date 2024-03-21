@@ -9,7 +9,7 @@ let tiling_node_prompt: string = "";
 let tiling_node_strength: f32 = 0.5;
 let tiling_node_auto: bool = true;
 
-function tiling_node_create(): tiling_node_t {
+function tiling_node_create(arg: any): tiling_node_t {
 	let n: float_node_t = {};
 	n.base = logic_node_create();
 	n.base.get_as_image = tiling_node_get_as_image;
@@ -68,20 +68,20 @@ function tiling_node_sd_tiling(image: image_t, seed: i32, done: (img: image_t)=>
 	g2_end();
 
 	let u8a = u8_array_create(512 * 512);
-	for (let i = 0; i < 512 * 512; ++i) {
+	for (let i: i32 = 0; i < 512 * 512; ++i) {
 		let x = i % 512;
 		let y = math_floor(i / 512);
 		let l = y < 256 ? y : (511 - y);
 		u8a[i] = (x > 256 - l && x < 256 + l) ? 0 : 255;
 	}
-	// for (let i = 0; i < 512 * 512; ++i) u8a[i] = 255;
-	// for (let x = (256 - 32); x < (256 + 32); ++x) {
-	// 	for (let y = 0; y < 512; ++y) {
+	// for (let i: i32 = 0; i < 512 * 512; ++i) u8a[i] = 255;
+	// for (let x: i32 = (256 - 32); x < (256 + 32); ++x) {
+	// 	for (let y: i32 = 0; y < 512; ++y) {
 	// 		u8a[y * 512 + x] = 0;
 	// 	}
 	// }
-	// for (let x = 0; x < 512; ++x) {
-	// 	for (let y = (256 - 32); y < 256 + 32); ++y) {
+	// for (let x: i32 = 0; x < 512; ++x) {
+	// 	for (let y: i32 = (256 - 32); y < 256 + 32); ++y) {
 	// 		u8a[y * 512 + x] = 0;
 	// 	}
 	// }

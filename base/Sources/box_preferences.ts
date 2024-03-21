@@ -93,7 +93,8 @@ function box_preferences_show() {
 							config_restore();
 							box_preferences_set_scale();
 							if (box_preferences_files_plugin != null) {
-								for (let f of box_preferences_files_plugin) {
+								for (let i: i32 = 0; i < box_preferences_files_plugin.length; ++i) {
+									let f: string = box_preferences_files_plugin[i];
 									plugin_stop(f);
 								}
 							}
@@ -208,7 +209,7 @@ function box_preferences_show() {
 			}
 			h.text = val.toString(16);
 			zui_text_input(h, "VIEWPORT_COL");
-			h.color = parseInt(h.text, 16);
+			h.color = parse_int_hex(h.text);
 
 			if (box_preferences_world_color != h.color) {
 				box_preferences_world_color = h.color;
@@ -225,7 +226,9 @@ function box_preferences_show() {
 			}
 
 			// Theme fields
-			for (let key of Object.getOwnPropertyNames(theme_t.prototype)) {
+			let props: string[] = Object.getOwnPropertyNames(theme_t.prototype);
+			for (let i: i32 = 0; i < props.length; ++i) {
+				let key: string = props[i];
 				if (key == "constructor") {
 					continue;
 				}
@@ -233,12 +236,12 @@ function box_preferences_show() {
 				let h: zui_handle_t = zui_nest(hlist, i++);
 				let val: any = theme[key];
 
-				let isHex: bool = ends_with(key, "_COL");
-				if (isHex && val < 0) {
+				let is_hex: bool = ends_with(key, "_COL");
+				if (is_hex && val < 0) {
 					val += 4294967296;
 				}
 
-				if (isHex) {
+				if (is_hex) {
 					zui_row([1 / 8, 7 / 8]);
 					zui_text("", 0, val);
 					if (ui.is_hovered && ui.input_released) {
@@ -268,18 +271,19 @@ function box_preferences_show() {
 					theme[key] = i;
 				}
 				else {
-					h.text = isHex ? val.toString(16) : val.toString();
+					h.text = is_hex ? val.toString(16) : val.toString();
 					zui_text_input(h, key);
-					if (isHex) {
-						theme[key] = parseInt(h.text, 16);
+					if (is_hex) {
+						theme[key] = parse_int_hex(h.text);
 					}
 					else {
-						theme[key] = parseInt(h.text);
+						theme[key] = parse_int(h.text);
 					}
 				}
 
 				if (ui.changed) {
-					for (let ui of base_get_uis()) {
+					for (let i: i32 = 0; i < base_get_uis().length; ++i) {
+						let ui: zui_t = base_get_uis()[i];
 						ui.elements_baked = false;
 					}
 				}
@@ -629,13 +633,13 @@ function box_preferences_show() {
 						if (zui_button(tr("OK")) || ui.is_return_down) {
 							let template: string =
 `let plugin = create();
-let h1 = new Handle();
-plugin.drawUI = function (ui) {
-if (Zui.panel(h1, 'New Plugin')) {
-	if (Zui.button('Button')) {
-		console.error('Hello');
+let h1 = zui_handle_create();
+plugin.draw_ui = function (ui) {
+	if (zui_panel(h1, 'New Plugin')) {
+		if (zui_button('Button')) {
+			console.error('Hello');
+		}
 	}
-}
 }
 `;
 							if (!ends_with(plugin_name, ".js")) {
@@ -666,7 +670,8 @@ if (Zui.panel(h1, 'New Plugin')) {
 				config_raw.plugins = [];
 			}
 			let h: zui_handle_t = zui_handle("boxpreferences_56", { selected: false });
-			for (let f of box_preferences_files_plugin) {
+			for (let i: i32 = 0; i < box_preferences_files_plugin.length; ++i) {
+				let f: string = box_preferences_files_plugin[i];
 				let is_js: bool = ends_with(f, ".js");
 				if (!is_js) {
 					continue;

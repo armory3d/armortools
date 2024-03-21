@@ -87,13 +87,23 @@ function ui_toolbar_render_ui() {
 		}
 		ui._y -= 4 * zui_SCALE(ui);
 
+		let vars_brush: map_t<string, string> = map_create();
+		map_set(vars_brush, "key", config_keymap.brush_ruler);
+		map_set(vars_brush, "action_paint", config_keymap.action_paint);
+
+		let vars_decal: map_t<string, string> = map_create();
+		map_set(vars_decal, "key", config_keymap.decal_mask);
+
+		let vars_clone: map_t<string, string> = map_create();
+		map_set(vars_clone, "key", config_keymap.set_clone_source);
+
 		let keys: string[] = [
-			"(" + config_keymap.tool_brush + ") - " + tr("Hold {action_paint} to paint\nHold {key} and press {action_paint} to paint a straight line (ruler mode)", new map_t([["key", config_keymap.brush_ruler], ["action_paint", config_keymap.action_paint]])),
-			"(" + config_keymap.tool_eraser + ") - " + tr("Hold {action_paint} to erase\nHold {key} and press {action_paint} to erase a straight line (ruler mode)", new map_t([["key", config_keymap.brush_ruler], ["action_paint", config_keymap.action_paint]])),
+			"(" + config_keymap.tool_brush + ") - " + tr("Hold {action_paint} to paint\nHold {key} and press {action_paint} to paint a straight line (ruler mode)", vars_brush),
+			"(" + config_keymap.tool_eraser + ") - " + tr("Hold {action_paint} to erase\nHold {key} and press {action_paint} to erase a straight line (ruler mode)", vars_brush),
 			"(" + config_keymap.tool_fill + ")",
-			"(" + config_keymap.tool_decal + ") - " + tr("Hold {key} to paint on a decal mask", new map_t([["key", config_keymap.decal_mask]])),
-			"(" + config_keymap.tool_text + ") - " + tr("Hold {key} to use the text as a mask", new map_t([["key", config_keymap.decal_mask]])),
-			"(" + config_keymap.tool_clone + ") - " + tr("Hold {key} to set source", new map_t([["key", config_keymap.set_clone_source]])),
+			"(" + config_keymap.tool_decal + ") - " + tr("Hold {key} to paint on a decal mask", vars_decal),
+			"(" + config_keymap.tool_text + ") - " + tr("Hold {key} to use the text as a mask", vars_decal),
+			"(" + config_keymap.tool_clone + ") - " + tr("Hold {key} to set source", vars_clone),
 			"(" + config_keymap.tool_blur + ")",
 			"(" + config_keymap.tool_smudge + ")",
 			"(" + config_keymap.tool_particle + ")",

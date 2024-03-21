@@ -48,7 +48,7 @@ function tab_layers_draw_full(htab: zui_handle_t) {
 }
 
 function tab_layers_draw_slots(mini: bool) {
-	for (let i = 0; i < project_layers.length; ++i) {
+	for (let i: i32 = 0; i < project_layers.length; ++i) {
 		if (i >= project_layers.length) {
 			break; // Layer was deleted
 		}
@@ -61,8 +61,8 @@ function tab_layers_draw_slots(mini: bool) {
 function tab_layers_highlight_odd_lines() {
 	let ui = ui_base_ui;
 	let step = ui.t.ELEMENT_H * 2;
-	let fullH = ui._window_h - ui_base_hwnds[0].scroll_offset;
-	for (let i = 0; i < math_floor(fullH / step); ++i) {
+	let full_h = ui._window_h - ui_base_hwnds[0].scroll_offset;
+	for (let i: i32 = 0; i < math_floor(full_h / step); ++i) {
 		if (i % 2 == 0) {
 			zui_fill(0, i * step, (ui._w / zui_SCALE(ui) - 2), step, ui.t.WINDOW_BG_COL - 0x00040404);
 		}
@@ -90,41 +90,44 @@ function tab_layers_combo_filter() {
 	context_raw.layer_filter = zui_combo(filter_handle, ar, tr("Filter"), false, zui_align_t.LEFT);
 }
 
-function tab_layers_remap_layer_pointers(nodes: zui_node_t[], pointerMap: map_t<i32, i32>) {
-	for (let n of nodes) {
+function tab_layers_remap_layer_pointers(nodes: zui_node_t[], pointer_map: map_t<i32, i32>) {
+	for (let i: i32 = 0; i < nodes.length; ++i) {
+		let n = nodes[i];
 		if (n.type == "LAYER" || n.type == "LAYER_MASK") {
 			let i = n.buttons[0].default_value;
-			if (pointerMap.has(i)) {
-				n.buttons[0].default_value = map_get(pointerMap, i);
+			if (pointer_map.has(i)) {
+				n.buttons[0].default_value = map_get(pointer_map, i);
 			}
 		}
 	}
 }
 
-function tab_layers_init_layer_map(): map_t<SlotLayerRaw, i32> {
-	let res: map_t<SlotLayerRaw, i32> = map_create();
-	for (let i = 0; i < project_layers.length; ++i) {
+function tab_layers_init_layer_map(): map_t<slot_layer_t, i32> {
+	let res: map_t<slot_layer_t, i32> = map_create();
+	for (let i: i32 = 0; i < project_layers.length; ++i) {
 		map_set(res, project_layers[i], i);
 	}
 	return res;
 }
 
-function tab_layers_fill_layer_map(map: map_t<SlotLayerRaw, i32>): map_t<i32, i32> {
+function tab_layers_fill_layer_map(map: map_t<slot_layer_t, i32>): map_t<i32, i32> {
 	let res: map_t<i32, i32> = map_create();
-	for (let l of map.keys()) {
+	let keys: string[] = map_keys_to_array(map);
+	for (let i: i32 = 0; i < keys.length; ++i) {
+		let l = keys[i];
 		map_set(res, map_get(map, l), array_index_of(project_layers, l) > -1 ? array_index_of(project_layers, l) : 9999);
 	}
 	return res;
 }
 
-function tab_layers_set_drag_layer(layer: SlotLayerRaw, off_x: f32, off_y: f32) {
+function tab_layers_set_drag_layer(layer: slot_layer_t, off_x: f32, off_y: f32) {
 	base_drag_off_x = off_x;
 	base_drag_off_y = off_y;
 	base_drag_layer = layer;
 	context_raw.drag_dest = array_index_of(project_layers, layer);
 }
 
-function tab_layers_draw_layer_slot(l: SlotLayerRaw, i: i32, mini: bool) {
+function tab_layers_draw_layer_slot(l: slot_layer_t, i: i32, mini: bool) {
 	let ui = ui_base_ui;
 
 	if (context_raw.layer_filter > 0 &&
@@ -191,7 +194,7 @@ function tab_layers_draw_layer_slot(l: SlotLayerRaw, i: i32, mini: bool) {
 	}
 }
 
-function tab_layers_draw_layer_slot_mini(l: SlotLayerRaw, i: i32) {
+function tab_layers_draw_layer_slot_mini(l: slot_layer_t, i: i32) {
 	let ui = ui_base_ui;
 
 	zui_row([1, 1]);
@@ -204,7 +207,7 @@ function tab_layers_draw_layer_slot_mini(l: SlotLayerRaw, i: i32) {
 	ui._y -= zui_ELEMENT_OFFSET(ui);
 }
 
-function tab_layers_draw_layer_slot_full(l: SlotLayerRaw, i: i32) {
+function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	let ui = ui_base_ui;
 
 	let step = ui.t.ELEMENT_H;
@@ -347,7 +350,7 @@ function tab_layers_draw_layer_slot_full(l: SlotLayerRaw, i: i32) {
 	ui._y -= zui_ELEMENT_OFFSET(ui);
 }
 
-function tab_layers_combo_object(ui: zui_t, l: SlotLayerRaw, label: bool = false): zui_handle_t {
+function tab_layers_combo_object(ui: zui_t, l: slot_layer_t, label: bool = false): zui_handle_t {
 	let ar = [tr("Shared")];
 	let objectHandle = zui_nest(zui_handle("tablayers_2"), l.id);
 	objectHandle.position = l.object_mask;
@@ -355,13 +358,13 @@ function tab_layers_combo_object(ui: zui_t, l: SlotLayerRaw, label: bool = false
 	return objectHandle;
 }
 
-function tab_layers_layer_toggle_visible(l: SlotLayerRaw) {
+function tab_layers_layer_toggle_visible(l: slot_layer_t) {
 	l.visible = !l.visible;
 	ui_view2d_hwnd.redraws = 2;
 	make_material_parse_mesh_material();
 }
 
-function tab_layers_draw_layer_highlight(l: SlotLayerRaw, mini: bool) {
+function tab_layers_draw_layer_highlight(l: slot_layer_t, mini: bool) {
 	let ui = ui_base_ui;
 	let step = ui.t.ELEMENT_H;
 
@@ -379,7 +382,7 @@ function tab_layers_draw_layer_highlight(l: SlotLayerRaw, mini: bool) {
 	}
 }
 
-function tab_layers_can_merge_down(l: SlotLayerRaw) : bool {
+function tab_layers_can_merge_down(l: slot_layer_t) : bool {
 	let index = array_index_of(project_layers, l);
 	// Lowest layer
 	if (index == 0) {
@@ -400,7 +403,7 @@ function tab_layers_can_merge_down(l: SlotLayerRaw) : bool {
 	return true;
 }
 
-function tab_layers_draw_layer_context_menu(l: SlotLayerRaw, mini: bool) {
+function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 
 }
 

@@ -4,12 +4,12 @@ type integer_node_t = {
 	value?: i32;
 };
 
-function integer_node_create(value: i32 = 0): integer_node_t {
+function integer_node_create(arg: i32): integer_node_t {
 	let n: float_node_t = {};
 	n.base = logic_node_create();
 	n.base.get = integer_node_get;
 	n.base.set = integer_node_set;
-	n.value = value;
+	n.value = arg;
 	return n;
 }
 

@@ -249,7 +249,8 @@ function util_render_make_brush_preview() {
 	// Set plane mesh
 	let painto: mesh_object_t = context_raw.paint_object;
 	let visibles: bool[] = [];
-	for (let p of project_paint_objects) {
+	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+		let p: mesh_object_t = project_paint_objects[i];
 		array_push(visibles, p.base.visible);
 		p.base.visible = false;
 	}

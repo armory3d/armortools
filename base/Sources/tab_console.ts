@@ -56,7 +56,8 @@ function tab_console_draw(htab: zui_handle_t) {
 		let f: g2_font_t = data_get_font("font_mono.ttf");
 		zui_set_font(ui, f);
 		ui.font_size = math_floor(15 * zui_SCALE(ui));
-		for (let t of console_last_traces) {
+		for (let i: i32 = 0; i < console_last_traces.length; ++i) {
+			let t: string = console_last_traces[i];
 			zui_text(t);
 		}
 		zui_set_font(ui, _font);

@@ -266,7 +266,8 @@ function project_new(resetLayers: bool = true) {
 	util_render_make_material_preview();
 	///end
 
-	for (let a of project_assets) {
+	for (let i: i32 = 0; i < project_assets.length; ++i) {
+		let a: asset_t = project_assets[i];
 		data_delete_image(a.file);
 	}
 	project_assets = [];
@@ -473,7 +474,8 @@ function project_unwrap_mesh_box(mesh: any, done: (a: any)=>void, skip_ui: bool 
 			if (box_preferences_files_plugin == null) {
 				box_preferences_fetch_plugins();
 			}
-			for (let f of box_preferences_files_plugin) {
+			for (let i: i32 = 0; i < box_preferences_files_plugin.length; ++i) {
+				let f: string = box_preferences_files_plugin[i];
 				if (string_index_of(f, "uv_unwrap") >= 0 && ends_with(f, ".js")) {
 					array_push(unwrap_plugins, f);
 				}
@@ -536,7 +538,8 @@ function project_import_swatches(replaceExisting: bool = false) {
 }
 
 function project_reimport_textures() {
-	for (let asset of project_assets) {
+	for (let i: i32 = 0; i < project_assets.length; ++i) {
+		let asset: asset_t = project_assets[i];
 		project_reimport_texture(asset);
 	}
 }
@@ -587,15 +590,17 @@ function project_get_image(asset: asset_t): image_t {
 function project_get_used_atlases(): string[] {
 	if (project_atlas_objects == null) return null;
 	let used: i32[] = [];
-	for (let i of project_atlas_objects) {
-		if (array_index_of(used, i) == -1) {
-			array_push(used, i);
+	for (let i: i32 = 0; i < project_atlas_objects.length; ++i) {
+		let ao: i32 = project_atlas_objects[i];
+		if (array_index_of(used, ao) == -1) {
+			array_push(used, ao);
 		}
 	}
 	if (used.length > 1) {
 		let res: string[] = [];
-		for (let i of used) {
-			array_push(res, project_atlas_names[i]);
+		for (let i: i32 = 0; i < used.length; ++i) {
+			let u: i32 = used[i];
+			array_push(res, project_atlas_names[u]);
 		}
 		return res;
 	}
@@ -625,7 +630,8 @@ function project_get_atlas_objects(objectMask: i32): mesh_object_t[] {
 ///end
 
 function project_packed_asset_exists(packed_assets: packed_asset_t[], name: string): bool {
-	for (let pa of packed_assets) {
+	for (let i: i32 = 0; i < packed_assets.length; ++i) {
+		let pa: packed_asset_t = packed_assets[i];
 		if (pa.name == name) {
 			return true;
 		}
@@ -661,13 +667,15 @@ function project_set_default_swatches() {
 	// http://eastfarthing.com/blog/2016-05-06-palette/
 	project_raw.swatches = [];
 	let colors: i32[] = [0xffffffff, 0xff000000, 0xffd6a090, 0xffa12c32, 0xfffa2f7a, 0xfffb9fda, 0xffe61cf7, 0xff992f7c, 0xff47011f, 0xff051155, 0xff4f02ec, 0xff2d69cb, 0xff00a6ee, 0xff6febff, 0xff08a29a, 0xff2a666a, 0xff063619, 0xff4a4957, 0xff8e7ba4, 0xffb7c0ff, 0xffacbe9c, 0xff827c70, 0xff5a3b1c, 0xffae6507, 0xfff7aa30, 0xfff4ea5c, 0xff9b9500, 0xff566204, 0xff11963b, 0xff51e113, 0xff08fdcc];
-	for (let c of colors) {
+	for (let i: i32 = 0; i < colors.length; ++i) {
+		let c: i32 = colors[i];
 		array_push(project_raw.swatches, make_swatch(c));
 	}
 }
 
 function project_get_material_group_by_name(groupName: string): node_group_t {
-	for (let g of project_material_groups) {
+	for (let i: i32 = 0; i < project_material_groups.length; ++i) {
+		let g: node_group_t = project_material_groups[i];
 		if (g.canvas.name == groupName) {
 			return g;
 		}
@@ -678,14 +686,18 @@ function project_get_material_group_by_name(groupName: string): node_group_t {
 ///if (is_paint || is_sculpt)
 function project_is_material_group_in_use(group: node_group_t): bool {
 	let canvases: zui_node_canvas_t[] = [];
-	for (let m of project_materials) {
+	for (let i: i32 = 0; i < project_materials.length; ++i) {
+		let m: slot_material_t = project_materials[i];
 		array_push(canvases, m.canvas);
 	}
-	for (let m of project_material_groups) {
+	for (let i: i32 = 0; i < project_material_groups.length; ++i) {
+		let m: node_group_t = project_material_groups[i];
 		array_push(canvases, m.canvas);
 	}
-	for (let canvas of canvases) {
-		for (let n of canvas.nodes) {
+	for (let i: i32 = 0; i < canvases.length; ++i) {
+		let canvas: zui_node_canvas_t = canvases[i];
+		for (let i: i32 = 0; i < canvas.nodes.length; ++i) {
+			let n: zui_node_t = canvas.nodes[i];
 			if (n.type == "GROUP" && n.name == group.canvas.name) {
 				return true;
 			}

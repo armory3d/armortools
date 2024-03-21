@@ -17,7 +17,8 @@ function parser_logic_get_raw_node(node: logic_node_t): zui_node_t {
 }
 
 function parser_logic_get_node(id: i32): zui_node_t {
-	for (let n of parser_logic_nodes) {
+	for (let i: i32 = 0; i < parser_logic_nodes.length; ++i) {
+		let n: zui_node_t = parser_logic_nodes[i];
 		if (n.id == id) {
 			return n;
 		}
@@ -26,7 +27,8 @@ function parser_logic_get_node(id: i32): zui_node_t {
 }
 
 function parser_logic_get_link(id: i32): zui_node_link_t {
-	for (let l of parser_logic_links) {
+	for (let i: i32 = 0; i < parser_logic_links.length; ++i) {
+		let l: zui_node_link_t = parser_logic_links[i];
 		if (l.id == id) {
 			return l;
 		}
@@ -35,7 +37,8 @@ function parser_logic_get_link(id: i32): zui_node_link_t {
 }
 
 function parser_logic_get_input_link(inp: zui_node_socket_t): zui_node_link_t {
-	for (let l of parser_logic_links) {
+	for (let i: i32 = 0; i < parser_logic_links.length; ++i) {
+		let l: zui_node_link_t = parser_logic_links[i];
 		if (l.to_id == inp.node_id) {
 			let node: zui_node_t = parser_logic_get_node(inp.node_id);
 			if (node.inputs.length <= l.to_socket) {
@@ -51,7 +54,8 @@ function parser_logic_get_input_link(inp: zui_node_socket_t): zui_node_link_t {
 
 function parser_logic_get_output_links(out: zui_node_socket_t): zui_node_link_t[] {
 	let res: zui_node_link_t[] = [];
-	for (let l of parser_logic_links) {
+	for (let i: i32 = 0; i < parser_logic_links.length; ++i) {
+		let l: zui_node_link_t = parser_logic_links[i];
 		if (l.from_id == out.node_id) {
 			let node: zui_node_t = parser_logic_get_node(out.node_id);
 			if (node.outputs.length <= l.from_socket) {
@@ -84,7 +88,8 @@ function parser_logic_parse(canvas: zui_node_canvas_t) {
 	parser_logic_raw_map = map_create();
 	let root_nodes: zui_node_t[] = parser_logic_get_root_nodes(canvas);
 
-	for (let node of root_nodes) {
+	for (let i: i32 = 0; i < root_nodes.length; ++i) {
+		let node: zui_node_t = root_nodes[i];
 		parser_logic_build_node(node);
 	}
 }
@@ -101,12 +106,13 @@ function parser_logic_build_node(node: zui_node_t): string {
 	array_push(parser_logic_parsed_nodes, name);
 
 	// Create node
-	let v: any = parser_logic_create_node_instance(node.type, []);
+	let v: any = parser_logic_create_node_instance(node.type, null);
 	map_set(parser_logic_node_map, name, v);
 	map_set(parser_logic_raw_map, v, node);
 
-	// Expose button values in node class
-	for (let b of node.buttons) {
+	// Expose button values in node
+	for (let i: i32 = 0; i < node.buttons.length; ++i) {
+		let b: zui_node_button_t = node.buttons[i];
 		if (b.type == "ENUM") {
 			// let array_data: bool = is_array(b.data);
 			let array_data: bool = b.data.length > 1;
@@ -139,11 +145,13 @@ function parser_logic_build_node(node: zui_node_t): string {
 	}
 
 	// Create outputss
-	for (let out of node.outputs) {
+	for (let i: i32 = 0; i < node.outputs.length; ++i) {
+		let out: zui_node_socket_t = node.outputs[i];
 		let out_nodes: logic_node_t[] = [];
 		let ls: zui_node_link_t[] = parser_logic_get_output_links(out);
 		if (ls != null && ls.length > 0) {
-			for (let l of ls) {
+			for (let i: i32 = 0; i < ls.length; ++i) {
+				let l: zui_node_link_t = ls[i];
 				let n: zui_node_t = parser_logic_get_node(l.to_id);
 				let out_name: string = parser_logic_build_node(n);
 				array_push(out_nodes, map_get(parser_logic_node_map, out_name));
@@ -162,9 +170,11 @@ function parser_logic_build_node(node: zui_node_t): string {
 
 function parser_logic_get_root_nodes(node_group: zui_node_canvas_t): zui_node_t[] {
 	let roots: zui_node_t[] = [];
-	for (let node of node_group.nodes) {
+	for (let i: i32 = 0; i < node_group.nodes.length; ++i) {
+		let node: zui_node_t = node_group.nodes[i];
 		let linked: bool = false;
-		for (let out of node.outputs) {
+		for (let i: i32 = 0; i < node.outputs.length; ++i) {
+			let out: zui_node_socket_t = node.outputs[i];
 			let ls: zui_node_link_t[] = parser_logic_get_output_links(out);
 			if (ls != null && ls.length > 0) {
 				linked = true;
@@ -185,39 +195,39 @@ function parser_logic_build_default_node(inp: zui_node_socket_t): logic_node_t {
 		if (inp.default_value == null) {
 			inp.default_value = [0, 0, 0]; // TODO
 		}
-		v = parser_logic_create_node_instance("vector_node", [inp.default_value[0], inp.default_value[1], inp.default_value[2]]);
+		v = parser_logic_create_node_instance("vector_node", inp.default_value);
 	}
 	else if (inp.type == "RGBA") {
 		if (inp.default_value == null) {
 			inp.default_value = [0, 0, 0, 0]; // TODO
 		}
-		v = parser_logic_create_node_instance("color_node", [inp.default_value[0], inp.default_value[1], inp.default_value[2], inp.default_value[3]]);
+		v = parser_logic_create_node_instance("color_node", inp.default_value);
 	}
 	else if (inp.type == "RGB") {
 		if (inp.default_value == null) {
 			inp.default_value = [0, 0, 0, 0]; // TODO
 		}
-		v = parser_logic_create_node_instance("color_node", [inp.default_value[0], inp.default_value[1], inp.default_value[2], inp.default_value[3]]);
+		v = parser_logic_create_node_instance("color_node", inp.default_value);
 	}
 	else if (inp.type == "VALUE") {
-		v = parser_logic_create_node_instance("float_node", [inp.default_value]);
+		v = parser_logic_create_node_instance("float_node", inp.default_value);
 	}
 	else if (inp.type == "INT") {
-		v = parser_logic_create_node_instance("integer_node", [inp.default_value]);
+		v = parser_logic_create_node_instance("integer_node", inp.default_value);
 	}
 	else if (inp.type == "BOOLEAN") {
-		v = parser_logic_create_node_instance("boolean_node", [inp.default_value]);
+		v = parser_logic_create_node_instance("boolean_node", inp.default_value);
 	}
 	else if (inp.type == "STRING") {
-		v = parser_logic_create_node_instance("string_node", [inp.default_value]);
+		v = parser_logic_create_node_instance("string_node", inp.default_value);
 	}
 	else {
-		v = parser_logic_create_node_instance("null_node", []);
+		v = parser_logic_create_node_instance("null_node", null);
 	}
 	return v;
 }
 
-function parser_logic_create_node_instance(node_type: string, args: any[]): any {
+function parser_logic_create_node_instance(node_type: string, args: any): any {
 	if (map_get(parser_logic_custom_nodes, node_type) != null) {
 		let node: logic_node_t = logic_node_create();
 		node.get = function (from: i32) {
@@ -226,13 +236,10 @@ function parser_logic_create_node_instance(node_type: string, args: any[]): any 
 		return node;
 	}
 
-	let eval_args: string = "";
-	for (let arg of args) {
-		if (eval_args != "") {
-			eval_args += ",";
-		}
-		eval_args += arg + "";
+	if (nodes_brush_creates == null) {
+		nodes_brush_init();
 	}
 
-	return eval(node_type + "_create(" + eval_args + ")");
+	let create: any = map_get(nodes_brush_creates, node_type);
+	return create(args);
 }

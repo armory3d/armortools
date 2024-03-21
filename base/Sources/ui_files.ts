@@ -37,7 +37,8 @@ function ui_files_show(filters: string, is_save: bool, open_multiple: bool, file
 	else {
 		let paths: string[] = krom_open_dialog(filters, "", open_multiple);
 		if (paths != null) {
-			for (let path of paths) {
+			for (let i: i32 = 0; i < paths.length; ++i) {
+				let path: string = paths[i];
 				while (string_index_of(path, path_sep + path_sep) >= 0) {
 					path = string_replace_all(path, path_sep + path_sep, path_sep);
 				}
@@ -104,7 +105,8 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 		///end
 		let files_all: string[] = file_read_directory(dir_path, folders_only);
 
-		for (let f of files_all) {
+		for (let i: i32 = 0; i < files_all.length; ++i) {
+			let f: string = files_all[i];
 			if (f == "" || char_at(f, 0) == ".") {
 				continue; // Skip hidden
 			}

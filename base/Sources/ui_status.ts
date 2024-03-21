@@ -27,7 +27,8 @@ function ui_status_render_ui() {
 		g2_fill_rect(ui._window_w - 1, 0, 1, ui._window_h);
 
 		// Draw tabs
-		for (let draw of ui_base_hwnd_tabs[tab_area_t.STATUS]) {
+		for (let i: i32 = 0; i < ui_base_hwnd_tabs[tab_area_t.STATUS].length; ++i) {
+			let draw: any = ui_base_hwnd_tabs[tab_area_t.STATUS][i];
 			draw(ui_base_htabs[tab_area_t.STATUS]);
 		}
 

@@ -1,13 +1,7 @@
 
 let translator_translations: map_t<string, string> = map_create();
-// The font index is a value specific to font_cjk.ttc.
-let translator_cjk_font_indices: map_t<string, i32> = new map_t([
-	["ja", 0],
-	["ko", 1],
-	["zh_cn", 2],
-	["zh_tw", 3],
-	["zh_tw.big5", 4]
-]);
+// The font index is a value specific to font_cjk.ttc
+let translator_cjk_font_indices: map_t<string, i32> = null;
 
 let translator_last_locale: string = "en";
 
@@ -39,6 +33,16 @@ function tr(id: string, vars: map_t<string, string> = null): string {
 
 // (Re)loads translations for the specified locale
 function translator_load_translations(new_locale: string) {
+
+	if (translator_cjk_font_indices == null) {
+		translator_cjk_font_indices = map_create();
+		map_set(translator_cjk_font_indices, "ja", 0);
+		map_set(translator_cjk_font_indices, "ko", 1);
+		map_set(translator_cjk_font_indices, "zh_cn", 2);
+		map_set(translator_cjk_font_indices, "zh_tw", 3);
+		map_set(translator_cjk_font_indices, "zh_tw.big5", 4);
+	}
+
 	if (new_locale == "system") {
 		config_raw.locale = krom_language();
 	}
@@ -75,7 +79,9 @@ function translator_load_translations(new_locale: string) {
 
 	// Push additional char codes contained in translation file
 	let cjk: bool = false;
-	for (let s of translator_translations.values()) {
+	let values: string[] = map_to_array(translator_translations);
+	for (let i: i32 = 0; i < values.length; ++i) {
+		let s: string = values[i];
 		for (let i: i32 = 0; i < s.length; ++i) {
 			// Assume cjk in the > 1119 range for now
 			if (char_code_at(s, i) > 1119 && array_index_of(_g2_font_glyphs, char_code_at(s, i)) == -1) {
@@ -131,7 +137,8 @@ function translator_init_font(cjk: bool, font_path: string, font_scale: f32) {
 		base_theme.FONT_SIZE = math_floor(base_default_font_size * font_scale);
 		base_theme.ELEMENT_W = math_floor(base_default_element_w * (config_raw.locale != "en" ? 1.4 : 1.0));
 		let uis: zui_t[] = base_get_uis();
-		for (let ui of uis) {
+		for (let i: i32 = 0; i < uis.length; ++i) {
+			let ui: zui_t = uis[i];
 			zui_set_font(ui, f);
 			zui_set_scale(ui, zui_SCALE(ui));
 		}

@@ -5,7 +5,11 @@ type color_node_t = {
 	image?: image_t;
 };
 
-function color_node_create(r: f32 = 0.8, g: f32 = 0.8, b: f32 = 0.8, a: f32 = 1.0): color_node_t {
+function color_node_create(args: any): color_node_t {
+	let r: f32 = args == null ? 0.8 : args[0];
+	let g: f32 = args == null ? 0.8 : args[1];
+	let b: f32 = args == null ? 0.8 : args[2];
+	let a: f32 = args == null ? 1.0 : args[3];
 	let n: color_node_t = {};
 	n.base = logic_node_create();
 	n.base.get = color_node_get;

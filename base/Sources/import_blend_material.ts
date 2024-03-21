@@ -3,13 +3,13 @@
 
 function import_blend_material_run(path: string) {
 	let b: buffer_t = data_get_blob(path);
-	let bl: BlendRaw = parser_blend_init(b);
+	let bl: blend_t = parser_blend_init(b);
 	if (bl.dna == null) {
 		console_error(strings_error3());
 		return;
 	}
 
-	let mats: BlHandleRaw[] = parser_blend_get(bl, "Material");
+	let mats: bl_handle_t[] = parser_blend_get(bl, "Material");
 	if (mats.length == 0) {
 		console_error("Error: No materials found");
 		return;
@@ -17,7 +17,8 @@ function import_blend_material_run(path: string) {
 
 	let imported: slot_material_t[] = [];
 
-	for (let mat of mats) {
+	for (let i: i32 = 0; i < mats.length; ++i) {
+		let mat: bl_handle_t = mats[i];
 		// Material slot
 		context_raw.material = slot_material_create(project_materials[0].data);
 		array_push(project_materials, context_raw.material);
@@ -27,13 +28,15 @@ function import_blend_material_run(path: string) {
 		canvas.name = bl_handle_get(bl_handle_get(mat, "id"), "name"); // MAWood
 		canvas.name = substring(canvas.name, 2, canvas.name.length);
 		let nout: zui_node_t = null;
-		for (let n of canvas.nodes) {
+		for (let i: i32 = 0; i < canvas.nodes.length; ++i) {
+			let n: zui_node_t = canvas.nodes[i];
 			if (n.type == "OUTPUT_MATERIAL_PBR") {
 				nout = n;
 				break;
 			}
 		}
-		for (let n of canvas.nodes) {
+		for (let i: i32 = 0; i < canvas.nodes.length; ++i) {
+			let n: zui_node_t = canvas.nodes[i];
 			if (n.name == "RGB") {
 				zui_remove_node(n, canvas);
 				break;
@@ -74,9 +77,11 @@ function import_blend_material_run(path: string) {
 			let search: string = bl_handle_get(node, "idname");
 			search = to_lower_case(substring(search, 10, search.length));
 			let base: zui_node_t = null;
-			for (let list of nodes_material_list) {
+			for (let i: i32 = 0; i < nodes_material_list.length; ++i) {
+				let list: zui_node_t[] = nodes_material_list[i];
 				let found: bool = false;
-				for (let n of list) {
+				for (let i: i32 = 0; i < list.length; ++i) {
+					let n: zui_node_t = list[i];
 					let s: string = to_lower_case(string_replace_all(n.type, "_", ""));
 					if (search == s) {
 						base = n;
@@ -197,13 +202,15 @@ function import_blend_material_run(path: string) {
 
 			let from_id: i32 = -1;
 			let to_id: i32 = -1;
-			for (let n of canvas.nodes) {
+			for (let i: i32 = 0; i < canvas.nodes.length; ++i) {
+				let n: zui_node_t = canvas.nodes[i];
 				if (n.name == fromnode) {
 					from_id = n.id;
 					break;
 				}
 			}
-			for (let n of canvas.nodes) {
+			for (let i: i32 = 0; i < canvas.nodes.length; ++i) {
+				let n: zui_node_t = canvas.nodes[i];
 				if (n.name == tonode) {
 					to_id = n.id;
 					break;
@@ -285,7 +292,8 @@ function import_blend_material_run(path: string) {
 	}
 
 	let _init = function () {
-		for (let m of imported) {
+		for (let i: i32 = 0; i < imported.length; ++i) {
+			let m: slot_material_t = imported[i];
 			context_set_material(m);
 			make_material_parse_paint_material();
 			util_render_make_material_preview();

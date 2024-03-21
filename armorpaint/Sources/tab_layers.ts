@@ -156,7 +156,8 @@ function tab_layers_button_new(text: string) {
 				array_remove(project_layers, group);
 				array_insert(project_layers, array_index_of(project_layers, l) + 1, group);
 				l.parent = group;
-				for (let m of project_materials) {
+				for (let i: i32 = 0; i < project_materials.length; ++i) {
+					let m: slot_material_t = project_materials[i];
 					tab_layers_remap_layer_pointers(m.canvas.nodes, tab_layers_fill_layer_map(pointers));
 				}
 				context_set_layer(group);
@@ -169,12 +170,14 @@ function tab_layers_button_new(text: string) {
 
 function tab_layers_combo_filter() {
 	let ar: string[] = [tr("All")];
-	for (let p of project_paint_objects) {
+	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+		let p: mesh_object_t = project_paint_objects[i];
 		array_push(ar, p.base.name);
 	}
 	let atlases: string[] = project_get_used_atlases();
 	if (atlases != null) {
-		for (let a of atlases) {
+		for (let i: i32 = 0; i < atlases.length; ++i) {
+			let a: string = atlases[i];
 			array_push(ar, a);
 		}
 	}
@@ -182,7 +185,8 @@ function tab_layers_combo_filter() {
 	filter_handle.position = context_raw.layer_filter;
 	context_raw.layer_filter = zui_combo(filter_handle, ar, tr("Filter"), false, zui_align_t.LEFT);
 	if (filter_handle.changed) {
-		for (let p of project_paint_objects) {
+		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+			let p: mesh_object_t = project_paint_objects[i];
 			p.base.visible = context_raw.layer_filter == 0 || p.base.name == ar[context_raw.layer_filter] || project_is_atlas_object(p);
 		}
 		if (context_raw.layer_filter == 0 && context_raw.merged_object_is_atlas) { // All
@@ -190,7 +194,8 @@ function tab_layers_combo_filter() {
 		}
 		else if (context_raw.layer_filter > project_paint_objects.length) { // Atlas
 			let visibles: mesh_object_t[] = [];
-			for (let p of project_paint_objects) {
+			for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+				let p: mesh_object_t = project_paint_objects[i];
 				if (p.base.visible) {
 					array_push(visibles, p);
 				}
@@ -207,7 +212,8 @@ function tab_layers_combo_filter() {
 }
 
 function tab_layers_remap_layer_pointers(nodes: zui_node_t[], pointer_map: map_t<i32, i32>) {
-	for (let n of nodes) {
+	for (let i: i32 = 0; i < nodes.length; ++i) {
+		let n: zui_node_t = nodes[i];
 		if (n.type == "LAYER" || n.type == "LAYER_MASK") {
 			let i: any = n.buttons[0].default_value;
 			if (pointer_map.has(i)) {
@@ -227,7 +233,9 @@ function tab_layers_init_layer_map(): map_t<slot_layer_t, i32> {
 
 function tab_layers_fill_layer_map(map: map_t<slot_layer_t, i32>): map_t<i32, i32> {
 	let res: map_t<i32, i32> = map_create();
-	for (let l of map.keys()) {
+	let keys: string[] = map_keys_to_array(map);
+	for (let i: i32 = 0; i < keys.length; ++i) {
+		let l: string = keys[i];
 		map_set(res, map_get(map, l), array_index_of(project_layers, l) > -1 ? array_index_of(project_layers, l) : 9999);
 	}
 	return res;
@@ -478,12 +486,14 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 
 function tab_layers_combo_object(ui: zui_t, l: slot_layer_t, label = false): zui_handle_t {
 	let ar: string[] = [tr("Shared")];
-	for (let p of project_paint_objects) {
+	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+		let p: mesh_object_t = project_paint_objects[i];
 		array_push(ar, p.base.name);
 	}
 	let atlases: string[] = project_get_used_atlases();
 	if (atlases != null) {
-		for (let a of atlases) {
+		for (let i: i32 = 0; i < atlases.length; ++i) {
+			let a: string = atlases[i];
 			array_push(ar, a);
 		}
 	}
@@ -824,7 +834,8 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 					slot_layer_clear(l);
 				}
 				else {
-					for (let c of slot_layer_get_children(l)) {
+					for (let i: i32 = 0; i < slot_layer_get_children(l).length; ++i) {
+						let c: slot_layer_t = slot_layer_get_children(l)[i];
 						context_raw.layer = c;
 						history_clear_layer();
 						slot_layer_clear(c);
@@ -1065,16 +1076,19 @@ function tab_layers_delete_layer(l: slot_layer_t) {
 	let pointers: map_t<slot_layer_t, i32> = tab_layers_init_layer_map();
 
 	if (slot_layer_is_layer(l) && slot_layer_has_masks(l, false)) {
-		for (let m of slot_layer_get_masks(l, false)) {
+		for (let i: i32 = 0; i < slot_layer_get_masks(l, false).length; ++i) {
+			let m: slot_layer_t = slot_layer_get_masks(l, false)[i];
 			context_raw.layer = m;
 			history_delete_layer();
 			slot_layer_delete(m);
 		}
 	}
 	if (slot_layer_is_group(l)) {
-		for (let c of slot_layer_get_children(l)) {
+		for (let i: i32 = 0; i < slot_layer_get_children(l).length; ++i) {
+			let c: slot_layer_t = slot_layer_get_children(l)[i];
 			if (slot_layer_has_masks(c, false)) {
-				for (let m of slot_layer_get_masks(c, false)) {
+				for (let i: i32 = 0; i < slot_layer_get_masks(c, false).length; ++i) {
+					let m: slot_layer_t = slot_layer_get_masks(c, false)[i];
 					context_raw.layer = m;
 					history_delete_layer();
 					slot_layer_delete(m);
@@ -1085,7 +1099,8 @@ function tab_layers_delete_layer(l: slot_layer_t) {
 			slot_layer_delete(c);
 		}
 		if (slot_layer_has_masks(l)) {
-			for (let m of slot_layer_get_masks(l)) {
+			for (let i: i32 = 0; i < slot_layer_get_masks(l).length; ++i) {
+				let m: slot_layer_t = slot_layer_get_masks(l)[i];
 				context_raw.layer = m;
 				history_delete_layer();
 				slot_layer_delete(m);
@@ -1107,7 +1122,8 @@ function tab_layers_delete_layer(l: slot_layer_t) {
 		let g: slot_layer_t = slot_layer_get_containing_group(l);
 		// Maybe some group masks are left
 		if (slot_layer_has_masks(g)) {
-			for (let m of slot_layer_get_masks(g)) {
+			for (let i: i32 = 0; i < slot_layer_get_masks(g).length; ++i) {
+				let m: slot_layer_t = slot_layer_get_masks(g)[i];
 				context_raw.layer = m;
 				history_delete_layer();
 				slot_layer_delete(m);
@@ -1118,7 +1134,8 @@ function tab_layers_delete_layer(l: slot_layer_t) {
 		slot_layer_delete(l.parent);
 	}
 	context_raw.ddirty = 2;
-	for (let m of project_materials) {
+	for (let i: i32 = 0; i < project_materials.length; ++i) {
+		let m: slot_material_t = project_materials[i];
 		tab_layers_remap_layer_pointers(m.canvas.nodes, tab_layers_fill_layer_map(pointers));
 	}
 }
@@ -1130,7 +1147,8 @@ function tab_layers_can_delete(l: slot_layer_t) {
 		return true;
 	}
 
-	for (let slot of project_layers) {
+	for (let i: i32 = 0; i < project_layers.length; ++i) {
+		let slot: slot_layer_t = project_layers[i];
 		if (slot_layer_is_layer(slot)) {
 			++num_layers;
 		}

@@ -175,7 +175,7 @@ type context_t = {
 	last_particle_hit_y?: f32;
 	last_particle_hit_z?: f32;
 	particle_timer?: tween_anim_t;
-	paint_body?: PhysicsBodyRaw;
+	paint_body?: physics_body_t;
 	///end
 
 	layer_filter?: i32;
@@ -686,7 +686,8 @@ function context_init_tool() {
 function context_select_paint_object(o: mesh_object_t) {
 	///if (is_paint || is_sculpt)
 	ui_header_handle.redraws = 2;
-	for (let p of project_paint_objects) {
+	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+		let p: mesh_object_t = project_paint_objects[i];
 		p.skip_context = "paint";
 	}
 	context_raw.paint_object = o;
@@ -711,7 +712,8 @@ function context_select_paint_object(o: mesh_object_t) {
 
 function context_main_object(): mesh_object_t {
 	///if (is_paint || is_sculpt)
-	for (let po of project_paint_objects) {
+	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+		let po: mesh_object_t = project_paint_objects[i];
 		if (po.base.children.length > 0) {
 			return po;
 		}
@@ -880,7 +882,8 @@ function context_enable_import_plugin(file: string): bool {
 		box_preferences_fetch_plugins();
 	}
 	let ext: string = substring(file, string_last_index_of(file, ".") + 1, file.length);
-	for (let f of box_preferences_files_plugin) {
+	for (let i: i32 = 0; i < box_preferences_files_plugin.length; ++i) {
+		let f: string = box_preferences_files_plugin[i];
 		if (starts_with(f, "import_") && string_index_of(f, ext) >= 0) {
 			config_enable_plugin(f);
 			console_info(f + " " + tr("plugin enabled"));

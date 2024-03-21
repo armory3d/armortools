@@ -85,11 +85,7 @@ function file_download(url: string, dstPath: string, done: ()=>void, size: i32 =
 function file_download_bytes(url: string, done: (ab: buffer_t)=>void) {
 	let save: string = (path_is_protected() ? krom_save_path() : path_data() + path_sep) + "download.bin";
 	file_download(url, save, function() {
-		let buffer: buffer_t = null;
-		try {
-			buffer = krom_load_blob(save);
-		}
-		catch (e: any) {}
+		let buffer: buffer_t = krom_load_blob(save);
 		done(buffer);
 	});
 }
@@ -163,7 +159,8 @@ function file_init_cloud_bytes(done: ()=>void, append: string = "") {
 			array_push(sizes, Number(substring(str, pos_start, pos_end)));
 		}
 
-		for (let file of files) {
+		for (let i: i32 = 0; i < files.length; ++i) {
+			let file: string = files[i];
 			if (path_is_folder(file)) {
 				map_set(file_cloud, substring(file, 0, file.length - 1), []);
 			}

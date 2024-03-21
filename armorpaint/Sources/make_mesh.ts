@@ -30,7 +30,8 @@ function make_mesh_run(data: material_t, layerPass = 0): node_shader_context_t {
 		vert.n = true;
 		node_shader_write(vert, 'float height = 0.0;');
 		let num_layers: i32 = 0;
-		for (let l of project_layers) {
+		for (let i: i32 = 0; i < project_layers.length; ++i) {
+			let l: slot_layer_t = project_layers[i];
 			if (!slot_layer_is_visible(l) || !l.paint_height || !slot_layer_is_layer(l)) {
 				continue;
 			}
@@ -43,7 +44,8 @@ function make_mesh_run(data: material_t, layerPass = 0): node_shader_context_t {
 			node_shader_write(vert, 'height += textureLod(texpaint_pack_vert' + l.id + ', tex, 0.0).a;');
 			let masks: slot_layer_t[] = slot_layer_get_masks(l);
 			if (masks != null) {
-				for (let m of masks) {
+				for (let i: i32 = 0; i < masks.length; ++i) {
+					let m: slot_layer_t = masks[i];
 					if (!slot_layer_is_visible(m)) {
 						continue;
 					}
@@ -128,7 +130,8 @@ function make_mesh_run(data: material_t, layerPass = 0): node_shader_context_t {
 		}
 
 		if (context_raw.viewport_mode == viewport_mode_t.MASK && slot_layer_get_masks(context_raw.layer) != null) {
-			for (let m of slot_layer_get_masks(context_raw.layer)) {
+			for (let i: i32 = 0; i < slot_layer_get_masks(context_raw.layer).length; ++i) {
+				let m: slot_layer_t = slot_layer_get_masks(context_raw.layer)[i];
 				if (!slot_layer_is_visible(m)) {
 					continue;
 				}
@@ -150,7 +153,8 @@ function make_mesh_run(data: material_t, layerPass = 0): node_shader_context_t {
 		let layers: slot_layer_t[] = [];
 		let start_count: i32 = texture_count;
 		let is_material_tool: bool = context_raw.tool == workspace_tool_t.MATERIAL;
-		for (let l of project_layers) {
+		for (let i: i32 = 0; i < project_layers.length; ++i) {
+			let l: slot_layer_t = project_layers[i];
 			if (is_material_tool && l != context_raw.layer) {
 				continue;
 			}
@@ -175,7 +179,8 @@ function make_mesh_run(data: material_t, layerPass = 0): node_shader_context_t {
 
 		let last_pass: bool = layerPass == make_mesh_layer_pass_count - 1;
 
-		for (let l of layers) {
+		for (let i: i32 = 0; i < layers.length; ++i) {
+			let l: slot_layer_t = layers[i];
 			if (slot_layer_get_object_mask(l) > 0) {
 				node_shader_add_uniform(frag, 'int uid', '_uid');
 				if (slot_layer_get_object_mask(l) > project_paint_objects.length) { // Atlas
@@ -207,7 +212,8 @@ function make_mesh_run(data: material_t, layerPass = 0): node_shader_context_t {
 			let masks: slot_layer_t[] = slot_layer_get_masks(l);
 			if (masks != null) {
 				let has_visible: bool = false;
-				for (let m of masks) {
+				for (let i: i32 = 0; i < masks.length; ++i) {
+					let m: slot_layer_t = masks[i];
 					if (slot_layer_is_visible(m)) {
 						has_visible = true;
 						break;
@@ -216,7 +222,8 @@ function make_mesh_run(data: material_t, layerPass = 0): node_shader_context_t {
 				if (has_visible) {
 					let texpaint_mask: string = 'texpaint_mask' + l.id;
 					node_shader_write(frag, `float ${texpaint_mask} = 0.0;`);
-					for (let m of masks) {
+					for (let i: i32 = 0; i < masks.length; ++i) {
+						let m: slot_layer_t = masks[i];
 						if (!slot_layer_is_visible(m)) {
 							continue;
 						}
@@ -464,7 +471,8 @@ function make_mesh_run(data: material_t, layerPass = 0): node_shader_context_t {
 			}
 			else {
 				node_shader_write(frag, 'float mask_view = 0.0;');
-				for (let m of slot_layer_get_masks(context_raw.layer)) {
+				for (let i: i32 = 0; i < slot_layer_get_masks(context_raw.layer).length; ++i) {
+					let m: slot_layer_t = slot_layer_get_masks(context_raw.layer)[i];
 					if (!slot_layer_is_visible(m)) continue;
 					node_shader_write(frag, 'float mask_sample' + m.id + ' = textureLodShared(texpaint_view_mask' + m.id + ', texCoord, 0.0).r;');
 					node_shader_write(frag, 'mask_view = ' + make_material_blend_mode_mask(frag, m.blending, 'mask_view', 'mask_sample' + m.id, 'float(' + slot_layer_get_opacity(m) + ')') + ';');

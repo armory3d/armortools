@@ -7,7 +7,7 @@ let upscale_node_temp: image_t = null;
 let upscale_node_image: image_t = null;
 let upscale_node_esrgan_blob: buffer_t;
 
-function upscale_node_create(): upscale_node_t {
+function upscale_node_create(arg: any): upscale_node_t {
 	let n: float_node_t = {};
 	n.base = logic_node_create();
 	n.base.get_as_image = upscale_node_get_as_image;
@@ -63,7 +63,7 @@ function upscale_node_do_tile(source: image_t) {
 	let bytes_img = image_get_pixels(upscale_node_temp);
 	let u8a = new u8_array_t(bytes_img);
 	let f32a = f32_array_create(3 * size1w * size1h);
-	for (let i = 0; i < (size1w * size1h); ++i) {
+	for (let i: i32 = 0; i < (size1w * size1h); ++i) {
 		f32a[i                      ] = (u8a[i * 4    ] / 255);
 		f32a[i + size1w * size1w    ] = (u8a[i * 4 + 1] / 255);
 		f32a[i + size1w * size1w * 2] = (u8a[i * 4 + 2] / 255);
@@ -71,7 +71,7 @@ function upscale_node_do_tile(source: image_t) {
 
 	let esrgan2x_buf = krom_ml_inference(upscale_node_esrgan_blob, [f32a.buffer], [[1, 3, size1w, size1h]], [1, 3, size2w, size2h], config_raw.gpu_inference);
 	let esrgan2x = new f32_array_t(esrgan2x_buf);
-	for (let i = 0; i < esrgan2x.length; ++i) {
+	for (let i: i32 = 0; i < esrgan2x.length; ++i) {
 		if (esrgan2x[i] < 0) {
 			esrgan2x[i] = 0;
 		}
@@ -81,7 +81,7 @@ function upscale_node_do_tile(source: image_t) {
 	}
 
 	u8a = u8_array_create(4 * size2w * size2h);
-	for (let i = 0; i < (size2w * size2h); ++i) {
+	for (let i: i32 = 0; i < (size2w * size2h); ++i) {
 		u8a[i * 4    ] = math_floor(esrgan2x[i                      ] * 255);
 		u8a[i * 4 + 1] = math_floor(esrgan2x[i + size2w * size2w    ] * 255);
 		u8a[i * 4 + 2] = math_floor(esrgan2x[i + size2w * size2w * 2] * 255);

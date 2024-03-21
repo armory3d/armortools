@@ -113,7 +113,8 @@ function util_mesh_remove_merged() {
 
 function util_mesh_swap_axis(a: i32, b: i32) {
 	let objects: mesh_object_t[] = project_paint_objects;
-	for (let o of objects) {
+	for (let i: i32 = 0; i < objects.length; ++i) {
+		let o: mesh_object_t = objects[i];
 		// Remapping vertices, buckle up
 		// 0 - x, 1 - y, 2 - z
 		let vas: vertex_array_t[] = o.data.vertex_arrays;
@@ -154,7 +155,8 @@ function util_mesh_swap_axis(a: i32, b: i32) {
 
 function util_mesh_flip_normals() {
 	let objects: mesh_object_t[] = project_paint_objects;
-	for (let o of objects) {
+	for (let i: i32 = 0; i < objects.length; ++i) {
+		let o: mesh_object_t = objects[i];
 		let vas: vertex_array_t[] = o.data.vertex_arrays;
 		let va0: i16_array_t = vas[0].values;
 		let va1: i16_array_t = vas[1].values;
@@ -184,7 +186,8 @@ function util_mesh_calc_normals(smooth: bool = false) {
 	let cb: vec4_t = vec4_create();
 	let ab: vec4_t = vec4_create();
 	let objects: mesh_object_t[] = project_paint_objects;
-	for (let o of objects) {
+	for (let i: i32 = 0; i < objects.length; ++i) {
+		let o: mesh_object_t = objects[i];
 		let g: mesh_data_t = o.data;
 		let l: i32 = g4_vertex_struct_byte_size(g._.structure) / 2;
 		let inda: u32_array_t = g._.indices[0];
@@ -280,7 +283,8 @@ function util_mesh_to_origin() {
 	let dx: f32 = 0.0;
 	let dy: f32 = 0.0;
 	let dz: f32 = 0.0;
-	for (let o of project_paint_objects) {
+	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+		let o: mesh_object_t = project_paint_objects[i];
 		let l: i32 = 4;
 		let sc: f32 = o.data.scale_pos / 32767;
 		let va: i16_array_t = o.data.vertex_arrays[0].values;
@@ -318,7 +322,8 @@ function util_mesh_to_origin() {
 	dy /= project_paint_objects.length;
 	dz /= project_paint_objects.length;
 
-	for (let o of project_paint_objects) {
+	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+		let o: mesh_object_t = project_paint_objects[i];
 		let g: mesh_data_t = o.data;
 		let sc: f32 = o.data.scale_pos / 32767;
 		let va: i16_array_t = o.data.vertex_arrays[0].values;

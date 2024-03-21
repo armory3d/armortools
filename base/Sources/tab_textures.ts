@@ -236,7 +236,8 @@ function tab_textures_to_pow2(i: i32): i32 {
 }
 
 function tab_textures_update_texture_pointers(nodes: zui_node_t[], i: i32) {
-	for (let n of nodes) {
+	for (let i: i32 = 0; i < nodes.length; ++i) {
+		let n: zui_node_t = nodes[i];
 		if (n.type == "TEX_IMAGE") {
 			if (n.buttons[0].default_value == i) {
 				n.buttons[0].default_value = 9999; // Texture deleted, use pink now
@@ -278,11 +279,13 @@ function tab_textures_delete_texture(asset: asset_t) {
 	}
 	base_notify_on_next_frame(_next);
 
-	for (let m of project_materials) {
+	for (let i: i32 = 0; i < project_materials.length; ++i) {
+		let m: slot_material_t = project_materials[i];
 		tab_textures_update_texture_pointers(m.canvas.nodes, i);
 	}
 	///if (is_paint || is_sculpt)
-	for (let b of project_brushes) {
+	for (let i: i32 = 0; i < project_brushes.length; ++i) {
+		let b: slot_brush_t = project_brushes[i];
 		tab_textures_update_texture_pointers(b.canvas.nodes, i);
 	}
 	///end

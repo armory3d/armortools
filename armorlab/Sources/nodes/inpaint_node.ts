@@ -14,7 +14,7 @@ let inpaint_node_prompt = "";
 let inpaint_node_strength = 0.5;
 let inpaint_node_auto = true;
 
-function inpaint_node_create(): inpaint_node_t {
+function inpaint_node_create(arg: any): inpaint_node_t {
 	let n: inpaint_node_t = {};
 	n.base = logic_node_create();
 	n.base.get_as_image = inpaint_node_get_as_image;
@@ -121,13 +121,13 @@ function inpaint_node_sd_inpaint(image: image_t, mask: image_t, done: (img: imag
 	let f32mask = f32_array_create(4 * 64 * 64);
 
 	let vae_encoder_blob: buffer_t = data_get_blob("models/sd_vae_encoder.quant.onnx");
-	// for (let x = 0; x < math_floor(image.width / 512); ++x) {
-		// for (let y = 0; y < math_floor(image.height / 512); ++y) {
+	// for (let x: i32 = 0; x < math_floor(image.width / 512); ++x) {
+		// for (let y: i32 = 0; y < math_floor(image.height / 512); ++y) {
 			let x = 0;
 			let y = 0;
 
-			for (let xx = 0; xx < 64; ++xx) {
-				for (let yy = 0; yy < 64; ++yy) {
+			for (let xx: i32 = 0; xx < 64; ++xx) {
+				for (let yy: i32 = 0; yy < 64; ++yy) {
 					// let step = math_floor(512 / 64);
 					// let j = (yy * step * mask.width + xx * step) + (y * 512 * mask.width + x * 512);
 					let step = math_floor(mask.width / 64);
@@ -149,7 +149,7 @@ function inpaint_node_sd_inpaint(image: image_t, mask: image_t, done: (img: imag
 			bytes_img = image_get_pixels(inpaint_node_temp);
 			let u8a = new u8_array_t(bytes_img);
 			let f32a = f32_array_create(3 * 512 * 512);
-			for (let i = 0; i < (512 * 512); ++i) {
+			for (let i: i32 = 0; i < (512 * 512); ++i) {
 				f32a[i                ] = (u8a[i * 4    ] / 255.0) * 2.0 - 1.0;
 				f32a[i + 512 * 512    ] = (u8a[i * 4 + 1] / 255.0) * 2.0 - 1.0;
 				f32a[i + 512 * 512 * 2] = (u8a[i * 4 + 2] / 255.0) * 2.0 - 1.0;
@@ -157,13 +157,13 @@ function inpaint_node_sd_inpaint(image: image_t, mask: image_t, done: (img: imag
 
 			let latents_buf = krom_ml_inference(vae_encoder_blob, [f32a.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], config_raw.gpu_inference);
 			let latents = new f32_array_t(latents_buf);
-			for (let i = 0; i < latents.length; ++i) {
+			for (let i: i32 = 0; i < latents.length; ++i) {
 				latents[i] = 0.18215 * latents[i];
 			}
 			let latents_orig = array_slice(latents, 0, latents.length);
 
 			let noise = f32_array_create(latents.length);
-			for (let i = 0; i < noise.length; ++i) noise[i] = math_cos(2.0 * 3.14 * random_node_get_float()) * math_sqrt(-2.0 * math_log(random_node_get_float()));
+			for (let i: i32 = 0; i < noise.length; ++i) noise[i] = math_cos(2.0 * 3.14 * random_node_get_float()) * math_sqrt(-2.0 * math_log(random_node_get_float()));
 
 			let num_inference_steps = 50;
 			let init_timestep = math_floor(num_inference_steps * inpaint_node_strength);
@@ -171,7 +171,7 @@ function inpaint_node_sd_inpaint(image: image_t, mask: image_t, done: (img: imag
 			let alphas_cumprod = TextToPhotoNode.alphas_cumprod;
 			let sqrt_alpha_prod = math_pow(alphas_cumprod[timestep], 0.5);
 			let sqrt_one_minus_alpha_prod = math_pow(1.0 - alphas_cumprod[timestep], 0.5);
-			for (let i = 0; i < latents.length; ++i) {
+			for (let i: i32 = 0; i < latents.length; ++i) {
 				latents[i] = sqrt_alpha_prod * latents[i] + sqrt_one_minus_alpha_prod * noise[i];
 			}
 

@@ -11,7 +11,7 @@ type brush_output_node_t = {
 
 let brush_output_node_inst: brush_output_node_t = null;
 
-function brush_output_node_create(): brush_output_node_t {
+function brush_output_node_create(arg: any): brush_output_node_t {
 	let n: brush_output_node_t = {};
 	n.base = logic_node_create();
 

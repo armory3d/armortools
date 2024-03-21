@@ -123,7 +123,8 @@ function history_undo() {
 			let layers_to_restore: slot_layer_t[] = slot_layer_is_group(current_layer) ? slot_layer_get_children(current_layer) : [current_layer];
 			layers_to_restore.reverse();
 
-			for (let layer of layers_to_restore) {
+			for (let i: i32 = 0; i < layers_to_restore.length; ++i) {
+				let layer: slot_layer_t = layers_to_restore[i];
 				// Replace the current layer's content with the old one
 				context_raw.layer = layer;
 				history_undo_i = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
@@ -664,7 +665,8 @@ function history_copy_merging_layers() {
 }
 
 function history_copy_merging_layers2(layers: slot_layer_t[]) {
-	for (let layer of layers) {
+	for (let i: i32 = 0; i < layers.length; ++i) {
+		let layer: slot_layer_t = layers[i];
 		history_copy_to_undo(layer.id, history_undo_i, slot_layer_is_mask(layer));
 	}
 }

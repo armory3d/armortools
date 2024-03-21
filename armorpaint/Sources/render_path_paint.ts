@@ -221,7 +221,8 @@ function render_path_paint_commands_paint(dilation = true) {
 				if (context_raw.picker_select_material && context_raw.color_picker_callback == null) {
 					// matid % 3 == 0 - normal, 1 - emission, 2 - subsurface
 					let matid: i32 = math_floor((buffer_view_get_u8(b, 3) - (buffer_view_get_u8(b, 3) % 3)) / 3);
-					for (let m of project_materials) {
+					for (let i: i32 = 0; i < project_materials.length; ++i) {
+						let m: slot_material_t = project_materials[i];
 						if (m.id == matid) {
 							context_set_material(m);
 							context_raw.materialid_picked = matid;
@@ -264,7 +265,8 @@ function render_path_paint_commands_paint(dilation = true) {
 			if (is_mask) {
 				let ptid: i32 = context_raw.layer.parent.id;
 				if (slot_layer_is_group(context_raw.layer.parent)) { // Group mask
-					for (let c of slot_layer_get_children(context_raw.layer.parent)) {
+					for (let i: i32 = 0; i < slot_layer_get_children(context_raw.layer.parent).length; ++i) {
+						let c: slot_layer_t = slot_layer_get_children(context_raw.layer.parent)[i];
 						ptid = c.id;
 						break;
 					}
@@ -751,7 +753,8 @@ function render_path_paint_draw() {
 					context_raw.merged_object.base.visible = false;
 				}
 
-				for (let p of project_paint_objects) {
+				for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+					let p: mesh_object_t = project_paint_objects[i];
 					context_select_paint_object(p);
 					render_path_paint_commands_paint();
 				}
@@ -805,7 +808,8 @@ function render_path_paint_set_plane_mesh() {
 	context_raw.paint2d_view = true;
 	render_path_paint_painto = context_raw.paint_object;
 	render_path_paint_visibles = [];
-	for (let p of project_paint_objects) {
+	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+		let p: mesh_object_t = project_paint_objects[i];
 		array_push(render_path_paint_visibles, p.base.visible);
 		p.base.visible = false;
 	}

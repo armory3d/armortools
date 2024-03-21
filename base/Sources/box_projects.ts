@@ -5,7 +5,9 @@ let box_projects_icon_map: map_t<string, image_t> = null;
 
 function box_projects_show() {
 	if (box_projects_icon_map != null) {
-		for (let handle of box_projects_icon_map.keys()) {
+		let keys: string[] = map_keys_to_array(box_projects_icon_map);
+		for (let i: i32 = 0; i < keys.length; ++i) {
+			let handle: string = keys[i];
 			data_delete_image(handle);
 		}
 		box_projects_icon_map = null;
@@ -190,7 +192,8 @@ function box_projects_recent_tab(ui: zui_t) {
 		box_projects_hsearch.text = zui_text_input(box_projects_hsearch, tr("Search"), zui_align_t.LEFT, true, true);
 		ui.enabled = true;
 
-		for (let path of config_raw.recent_projects) {
+		for (let i: i32 = 0; i < config_raw.recent_projects.length; ++i) {
+			let path: string = config_raw.recent_projects[i];
 			let file: string = path;
 			///if krom_windows
 			file = string_replace_all(path, "/", "\\");

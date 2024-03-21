@@ -7,30 +7,20 @@ let config_default_button_spacing: string = "       ";
 let config_button_spacing: string = config_default_button_spacing;
 
 function config_load(done: ()=>void) {
-	try {
-		let blob: buffer_t = data_get_blob((path_is_protected() ? krom_save_path() : "") + "config.json");
+	let blob: buffer_t = data_get_blob((path_is_protected() ? krom_save_path() : "") + "config.json");
+
+	///if krom_linux
+	if (blob == null) { // Protected directory
+		blob = data_get_blob(krom_save_path() + "config.json");
+	}
+	///end
+
+	if (blob != null) {
 		config_loaded = true;
 		config_raw = json_parse(sys_buffer_to_string(blob));
-		done();
 	}
-	catch (e: any) {
-		krom_log(e);
 
-		///if krom_linux
-		try { // Protected directory
-			let blob: buffer_t = data_get_blob(krom_save_path() + "config.json");
-			config_loaded = true;
-			config_raw = json_parse(sys_buffer_to_string(blob));
-			done();
-		}
-		catch (e: any) {
-			krom_log(e);
-			done();
-		}
-		///else
-		done();
-		///end
-	}
+	done();
 }
 
 function config_save() {
@@ -287,7 +277,8 @@ function config_load_theme(theme: string, tagRedraw: bool = true) {
 	}
 	base_theme.FILL_WINDOW_BG = true;
 	if (tagRedraw) {
-		for (let ui of base_get_uis()) {
+		for (let i: i32 = 0; i < base_get_uis().length; ++i) {
+			let ui: zui_t = base_get_uis()[i];
 			ui.t = base_theme;
 		}
 		ui_base_tag_ui_redraw();

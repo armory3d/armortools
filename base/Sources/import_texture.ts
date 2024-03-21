@@ -7,7 +7,8 @@ function import_texture_run(path: string, hdr_as_envmap: bool = true) {
 		}
 	}
 
-	for (let a of project_assets) {
+	for (let i: i32 = 0; i < project_assets.length; ++i) {
+		let a: asset_t = project_assets[i];
 		// Already imported
 		if (a.file == path) {
 			// Set as envmap

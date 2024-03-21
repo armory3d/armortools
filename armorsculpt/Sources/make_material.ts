@@ -7,7 +7,8 @@ let make_material_emis_used: bool = false;
 let make_material_subs_used: bool = false;
 
 function make_material_get_mout(): bool {
-	for (let n of ui_nodes_get_canvas_material().nodes) {
+	for (let i: i32 = 0; i < ui_nodes_get_canvas_material().nodes.length; ++i) {
+		let n = ui_nodes_get_canvas_material().nodes[i];
 		if (n.type == "OUTPUT_MATERIAL_PBR") {
 			return true;
 		}
@@ -18,7 +19,8 @@ function make_material_get_mout(): bool {
 function make_material_parse_mesh_material() {
 	let m = project_materials[0].data;
 
-	for (let c of m._.shader._.contexts) {
+	for (let i: i32 = 0; i < m._.shader._.contexts.length; ++i) {
+		let c = m._.shader._.contexts[i];
 		if (c.name == "mesh") {
 			array_remove(m._.shader.contexts, c);
 			array_remove(m._.shader._.contexts, c);
@@ -31,7 +33,7 @@ function make_material_parse_mesh_material() {
 		let i = 0;
 		while (i < m._.shader._.contexts.length) {
 			let c = m._.shader._.contexts[i];
-			for (let j = 1; j < make_mesh_layer_pass_count; ++j) {
+			for (let j: i32 = 1; j < make_mesh_layer_pass_count; ++j) {
 				if (c.name == "mesh" + j) {
 					array_remove(m._.shader.contexts, c);
 					array_remove(m._.shader._.contexts, c);
@@ -46,7 +48,7 @@ function make_material_parse_mesh_material() {
 		i = 0;
 		while (i < m.contexts.length) {
 			let c = m.contexts[i];
-			for (let j = 1; j < make_mesh_layer_pass_count; ++j) {
+			for (let j: i32 = 1; j < make_mesh_layer_pass_count; ++j) {
 				if (c.name == "mesh" + j) {
 					array_remove(m.contexts, c);
 					array_remove(m._.contexts, c);
@@ -71,7 +73,7 @@ function make_material_parse_mesh_material() {
 	array_push(m._.shader.contexts, scon);
 	array_push(m._.shader._.contexts, scon);
 
-	for (let i = 1; i < make_mesh_layer_pass_count; ++i) {
+	for (let i: i32 = 1; i < make_mesh_layer_pass_count; ++i) {
 		let con = make_mesh_run({ name: "Material", canvas: null }, i);
 		let scon: shader_context_t = shader_context_create(con.data);
 		scon._.override_context = {};
@@ -100,7 +102,8 @@ function make_material_parse_mesh_material() {
 function make_material_parse_particle_material() {
 	let m = context_raw.particle_material;
 	let sc: shader_context_t = null;
-	for (let c of m._.shader._.contexts) {
+	for (let i: i32 = 0; i < m._.shader._.contexts.length; ++i) {
+		let c = m._.shader._.contexts[i];
 		if (c.name == "mesh") {
 			sc = c;
 			break;
@@ -126,7 +129,8 @@ function make_material_parse_mesh_preview_material() {
 
 	let m = project_materials[0].data;
 	let scon: shader_context_t = null;
-	for (let c of m._.shader._.contexts) {
+	for (let i: i32 = 0; i < m._.shader._.contexts; ++i) {
+		let c = m._.shader._.contexts[i];
 		if (c.name == "mesh") {
 			scon = c;
 			break;
@@ -140,7 +144,7 @@ function make_material_parse_mesh_preview_material() {
 	let sd: material_t = { name: "Material", canvas: null };
 	let con = make_mesh_preview_run(sd, mcon);
 
-	for (let i = 0; i < m.contexts.length; ++i) {
+	for (let i: i32 = 0; i < m.contexts.length; ++i) {
 		if (m.contexts[i].name == "mesh") {
 			m.contexts[i] = material_context_create(mcon);
 			break;
@@ -170,7 +174,8 @@ function make_material_make_voxel(m: material_data_t) {
 	let rebuild = make_material_height_used;
 	if (config_raw.rp_gi != false && rebuild) {
 		let scon: shader_context_t = null;
-		for (let c of m._.shader._.contexts) {
+		for (let i: i32 = 0; i < m._.shader._.contexts.length; ++i) {
+			let c = m._.shader._.contexts[i];
 			if (c.name == "voxel") {
 				scon = c;
 				break;
@@ -199,7 +204,8 @@ function make_material_parse_paint_material(bake_previews: bool = true) {
 	let m = project_materials[0].data;
 	let scon: shader_context_t = null;
 	let mcon: material_context_t = null;
-	for (let c of m._.shader._.contexts) {
+	for (let i: i32 = 0; i < m._.shader._.contexts.length; ++i) {
+		let c = m._.shader._.contexts[i];
 		if (c.name == "paint") {
 			array_remove(m._.shader.contexts, c);
 			array_remove(m._.shader._.contexts, c);
@@ -209,7 +215,8 @@ function make_material_parse_paint_material(bake_previews: bool = true) {
 			break;
 		}
 	}
-	for (let c of m.contexts) {
+	for (let i: i32 = 0; i < m.contexts.length; ++i) {
+		let c = m.contexts[i];
 		if (c.name == "paint") {
 			array_remove(m.contexts, c);
 			array_remove(m._.contexts, c);
@@ -251,9 +258,14 @@ function make_material_parse_paint_material(bake_previews: bool = true) {
 
 function make_material_bake_node_previews() {
 	context_raw.node_previews_used = [];
-	if (context_raw.node_previews == null) context_raw.node_previews = map_create();
+	if (context_raw.node_previews == null) {
+		context_raw.node_previews = map_create();
+	}
 	make_material_traverse_nodes(ui_nodes_get_canvas_material().nodes, null, []);
-	for (let key of context_raw.node_previews.keys()) {
+
+	let keys: string[] = map_keys_to_array(context_raw.node_previews);
+	for (let i: i32 = 0; i < keys.length; ++i) {
+		let key: string = keys[i];
 		if (array_index_of(context_raw.node_previews_used, key) == -1) {
 			let image = map_get(context_raw.node_previews, key);
 			base_notify_on_next_frame(function() {
@@ -265,10 +277,12 @@ function make_material_bake_node_previews() {
 }
 
 function make_material_traverse_nodes(nodes: zui_node_t[], group: zui_node_canvas_t, parents: zui_node_t[]) {
-	for (let node of nodes) {
+	for (let i: i32 = 0; i < nodes.length; ++i) {
+		let node = nodes[i];
 		make_material_bake_node_preview(node, group, parents);
 		if (node.type == "GROUP") {
-			for (let g of project_material_groups) {
+			for (let j: i32 = 0; j < project_material_groups.length; ++j) {
+				let g = project_material_groups[j];
 				if (g.canvas.name == node.name) {
 					array_push(parents, node);
 					make_material_traverse_nodes(g.canvas.nodes, g.canvas, parents);

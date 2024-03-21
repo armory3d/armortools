@@ -67,7 +67,8 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 				import_asset_run(path, -1.0, -1.0, true, false);
 
 				context_raw.colorid_handle.position = project_asset_names.length - 1;
-				for (let a of project_assets) {
+				for (let i: i32 = 0; i < project_assets.length; ++i) {
+					let a: asset_t = project_assets[i];
 					// Already imported
 					if (a.file == path) {
 						context_raw.colorid_handle.position = array_index_of(project_assets, a);
@@ -285,7 +286,8 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 		}
 		if (context_raw.bake_type == bake_type_t.NORMAL || context_raw.bake_type == bake_type_t.HEIGHT || context_raw.bake_type == bake_type_t.DERIVATIVE) {
 			let ar: string[] = [];
-			for (let p of project_paint_objects) {
+			for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+				let p: mesh_object_t = project_paint_objects[i];
 				array_push(ar, p.base.name);
 			}
 			let poly_handle: zui_handle_t = zui_handle("uiheader_13", { position: context_raw.bake_high_poly });
@@ -311,13 +313,21 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 			if (decal_mask) {
 				context_raw.brush_decal_mask_radius = zui_slider(context_raw.brush_decal_mask_radius_handle, tr("Radius"), 0.01, 2.0, true);
 				if (ui.is_hovered) {
-					zui_tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", new map_t([["brush_radius", config_keymap.brush_radius], ["brush_radius_decrease", config_keymap.brush_radius_decrease], ["brush_radius_increase", config_keymap.brush_radius_increase]])));
+					let vars: map_t<string, string> = map_create();
+					map_set(vars, "brush_radius", config_keymap.brush_radius);
+					map_set(vars, "brush_radius_decrease", config_keymap.brush_radius_decrease);
+					map_set(vars, "brush_radius_increase", config_keymap.brush_radius_increase);
+					zui_tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", vars));
 				}
 			}
 			else {
 				context_raw.brush_radius = zui_slider(context_raw.brush_radius_handle, tr("Radius"), 0.01, 2.0, true);
 				if (ui.is_hovered) {
-					zui_tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", new map_t([["brush_radius", config_keymap.brush_radius], ["brush_radius_decrease", config_keymap.brush_radius_decrease], ["brush_radius_increase", config_keymap.brush_radius_increase]])));
+					let vars: map_t<string, string> = map_create();
+					map_set(vars, "brush_radius", config_keymap.brush_radius);
+					map_set(vars, "brush_radius_decrease", config_keymap.brush_radius_decrease);
+					map_set(vars, "brush_radius_increase", config_keymap.brush_radius_increase);
+					zui_tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", vars));
 				}
 			}
 		}
@@ -343,7 +353,9 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 
 			context_raw.brush_angle = zui_slider(context_raw.brush_angle_handle, tr("Angle"), 0.0, 360.0, true, 1);
 			if (ui.is_hovered) {
-				zui_tooltip(tr("Hold {brush_angle} and move mouse to the left to decrease the angle\nHold {brush_angle} and move mouse to the right to increase the angle", new map_t([["brush_angle", config_keymap.brush_angle]])));
+				let vars: map_t<string, string> = map_create();
+				map_set(vars, "brush_angle", config_keymap.brush_angle);
+				zui_tooltip(tr("Hold {brush_angle} and move mouse to the left to decrease the angle\nHold {brush_angle} and move mouse to the right to increase the angle", vars));
 			}
 
 			if (context_raw.brush_angle_handle.changed) {
@@ -353,7 +365,9 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 
 		context_raw.brush_opacity = zui_slider(context_raw.brush_opacity_handle, tr("Opacity"), 0.0, 1.0, true);
 		if (ui.is_hovered) {
-			zui_tooltip(tr("Hold {brush_opacity} and move mouse to the left to decrease the opacity\nHold {brush_opacity} and move mouse to the right to increase the opacity", new map_t([["brush_opacity", config_keymap.brush_opacity]])));
+			let vars: map_t<string, string> = map_create();
+			map_set(vars, "brush_opacity", config_keymap.brush_opacity);
+			zui_tooltip(tr("Hold {brush_opacity} and move mouse to the left to decrease the opacity\nHold {brush_opacity} and move mouse to the right to increase the opacity", vars));
 		}
 
 		if (context_raw.tool == workspace_tool_t.BRUSH || context_raw.tool == workspace_tool_t.ERASER || context_raw.tool == workspace_tool_t.CLONE || decal_mask) {
@@ -504,7 +518,11 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 	if (context_raw.tool == workspace_tool_t.BRUSH) {
 		context_raw.brush_radius = zui_slider(context_raw.brush_radius_handle, tr("Radius"), 0.01, 2.0, true);
 		if (ui.is_hovered) {
-			zui_tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", new map_t([["brush_radius", config_keymap.brush_radius], ["brush_radius_decrease", config_keymap.brush_radius_decrease], ["brush_radius_increase", config_keymap.brush_radius_increase]])));
+			let vars: map_t<string, string> = map_create();
+			map_set(vars, "brush_radius", config_keymap.brush_radius);
+			map_set(vars, "brush_radius_decrease", config_keymap.brush_radius_decrease);
+			map_set(vars, "brush_radius_increase", config_keymap.brush_radius_increase);
+			zui_tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", vars));
 		}
 	}
 }
@@ -526,7 +544,11 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 		if (inpaint) {
 			context_raw.brush_radius = zui_slider(context_raw.brush_radius_handle, tr("Radius"), 0.01, 2.0, true);
 			if (ui.is_hovered) {
-				zui_tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", new map_t([["brush_radius", config_keymap.brush_radius], ["brush_radius_decrease", config_keymap.brush_radius_decrease], ["brush_radius_increase", config_keymap.brush_radius_increase]])));
+				let vars: map_t<string, string> = map_create();
+				map_set(vars, "brush_radius", config_keymap.brush_radius);
+				map_set(vars, "brush_radius_decrease", config_keymap.brush_radius_decrease);
+				map_set(vars, "brush_radius_increase", config_keymap.brush_radius_increase);
+				zui_tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", vars));
 			}
 		}
 	}

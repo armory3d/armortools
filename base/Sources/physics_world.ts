@@ -1,17 +1,17 @@
 
 ///if arm_physics
 
-class PhysicsWorldRaw {
-	world: Ammo.btDiscreteDynamicsWorld;
-	dispatcher: Ammo.btCollisionDispatcher;
-	contacts: pair_t[] = [];
-	body_map: map_t<i32, PhysicsBodyRaw> = map_create();
-	time_scale: f32 = 1.0;
-	time_step: f32 = 1 / 60;
-	max_steps: i32 = 1;
-}
+type physics_world_t = {
+	world?: Ammo.btDiscreteDynamicsWorld;
+	dispatcher?: Ammo.btCollisionDispatcher;
+	contacts?: pair_t[];
+	body_map?: map_t<i32, physics_body_t>;
+	time_scale?: f32;
+	time_step?: f32;
+	max_steps?: i32;
+};
 
-let physics_world_active: PhysicsWorldRaw = null;
+let physics_world_active: physics_world_t = null;
 let physics_world_vec1: Ammo.btVector3 = null;
 let physics_world_vec2: Ammo.btVector3 = null;
 let physics_world_v1: vec4_t = vec4_create();
@@ -19,15 +19,20 @@ let physics_world_v2: vec4_t = vec4_create();
 
 function physics_world_load(done: ()=>void) {
 	let b: buffer_t = krom_load_blob("data/plugins/ammo.js");
-	globalThis.eval(sys_buffer_to_string(b));
+	js_eval(sys_buffer_to_string(b));
 	let print = function (s: string) {
 		krom_log(s);
 	};
 	Ammo({print: print}).then(done);
 }
 
-function physics_world_create(): PhysicsWorldRaw {
-	let pw: PhysicsWorldRaw = new PhysicsWorldRaw();
+function physics_world_create(): physics_world_t {
+	let pw: physics_world_t = {};
+	pw.contacts = [];
+	pw.body_map = map_create();
+	pw.time_scale = 1.0;
+	pw.time_step = 1 / 60;
+	pw.max_steps = 1;
 	physics_world_active = pw;
 	physics_world_vec1 = new Ammo.btVector3(0, 0, 0);
 	physics_world_vec2 = new Ammo.btVector3(0, 0, 0);
@@ -35,13 +40,15 @@ function physics_world_create(): PhysicsWorldRaw {
 	return pw;
 }
 
-function physics_world_reset(pw: PhysicsWorldRaw) {
-	for (let body of pw.body_map.values()) {
+function physics_world_reset(pw: physics_world_t) {
+	let values: physics_body_t[] = map_to_array(pw.body_map);
+	for (let i: i32 = 0; i < values.length; ++i) {
+		let body: physics_body_t = values[i];
 		physics_world_remove_body(pw, body);
 	}
 }
 
-function physics_world_init(pw: PhysicsWorldRaw) {
+function physics_world_init(pw: physics_world_t) {
 	let broadphase: Ammo.btDbvtBroadphase = new Ammo.btDbvtBroadphase();
 	let collision_conf: Ammo.btDefaultCollisionConfiguration = new Ammo.btDefaultCollisionConfiguration();
 	pw.dispatcher = new Ammo.btCollisionDispatcher(collision_conf);
@@ -50,17 +57,17 @@ function physics_world_init(pw: PhysicsWorldRaw) {
 	physics_world_set_gravity(pw, vec4_create(0, 0, -9.81));
 }
 
-function physics_world_set_gravity(pw: PhysicsWorldRaw, v: vec4_t) {
+function physics_world_set_gravity(pw: physics_world_t, v: vec4_t) {
 	physics_world_vec1.setValue(v.x, v.y, v.z);
 	pw.world.setGravity(physics_world_vec1);
 }
 
-function physics_world_add_body(pw: PhysicsWorldRaw, pb: PhysicsBodyRaw) {
+function physics_world_add_body(pw: physics_world_t, pb: physics_body_t) {
 	pw.world.addRigidBody(pb.body, pb.group, pb.mask);
 	map_set(pw.body_map, pb.id, pb);
 }
 
-function physics_world_remove_body(pw: PhysicsWorldRaw, pb: PhysicsBodyRaw) {
+function physics_world_remove_body(pw: physics_world_t, pb: physics_body_t) {
 	if (pb.destroyed) {
 		return;
 	}
@@ -72,14 +79,14 @@ function physics_world_remove_body(pw: PhysicsWorldRaw, pb: PhysicsBodyRaw) {
 	physics_body_delete(pb);
 }
 
-function physics_world_get_contacts(pw: PhysicsWorldRaw, pb: PhysicsBodyRaw): PhysicsBodyRaw[] {
+function physics_world_get_contacts(pw: physics_world_t, pb: physics_body_t): physics_body_t[] {
 	if (pw.contacts.length == 0) {
 		return null;
 	}
-	let res: PhysicsBodyRaw[] = [];
+	let res: physics_body_t[] = [];
 	for (let i: i32 = 0; i < pw.contacts.length; ++i) {
 		let c: pair_t = pw.contacts[i];
-		let pb: PhysicsBodyRaw = null;
+		let pb: physics_body_t = null;
 		if (c.a == pb.body.userIndex) {
 			pb = map_get(pw.body_map, c.b);
 		}
@@ -93,7 +100,7 @@ function physics_world_get_contacts(pw: PhysicsWorldRaw, pb: PhysicsBodyRaw): Ph
 	return res;
 }
 
-function physics_world_get_contact_pairs(pw: PhysicsWorldRaw, pb: PhysicsBodyRaw): pair_t[] {
+function physics_world_get_contact_pairs(pw: physics_world_t, pb: physics_body_t): pair_t[] {
 	if (pw.contacts.length == 0) {
 		return null;
 	}
@@ -110,7 +117,7 @@ function physics_world_get_contact_pairs(pw: PhysicsWorldRaw, pb: PhysicsBodyRaw
 	return res;
 }
 
-function physics_world_late_update(pw: PhysicsWorldRaw) {
+function physics_world_late_update(pw: physics_world_t) {
 	let t: f32 = time_delta() * pw.time_scale;
 	if (t == 0.0) {
 		return; // Simulation paused
@@ -118,12 +125,14 @@ function physics_world_late_update(pw: PhysicsWorldRaw) {
 
 	pw.world.stepSimulation(pw.time_step, pw.max_steps, t);
 	physics_world_update_contacts(pw);
-	for (let body of pw.body_map.values()) {
+	let values: physics_body_t[] = map_to_array(pw.body_map);
+	for (let i: i32 = 0; i < values.length; ++i) {
+		let body: physics_body_t = values[i];
 		physics_body_physics_update(body);
 	}
 }
 
-function physics_world_update_contacts(pw: PhysicsWorldRaw) {
+function physics_world_update_contacts(pw: physics_world_t) {
 	pw.contacts = [];
 	let disp: Ammo.btDispatcher = pw.dispatcher;
 	let num_manifolds: i32 = disp.getNumManifolds();
@@ -157,17 +166,17 @@ function physics_world_update_contacts(pw: PhysicsWorldRaw) {
 	}
 }
 
-function physics_world_pick_closest(pw: PhysicsWorldRaw, inputX: f32, inputY: f32): PhysicsBodyRaw {
+function physics_world_pick_closest(pw: physics_world_t, inputX: f32, inputY: f32): physics_body_t {
 	let camera: camera_object_t = scene_camera;
 	let start: vec4_t = vec4_create();
 	let end: vec4_t = vec4_create();
 	raycast_get_dir(start, end, inputX, inputY, camera);
 	let hit: hit_t = physics_world_ray_cast(pw, mat4_get_loc(camera.base.transform.world), end);
-	let body: PhysicsBodyRaw = (hit != null) ? hit.body : null;
+	let body: physics_body_t = (hit != null) ? hit.body : null;
 	return body;
 }
 
-function physics_world_ray_cast(pw: PhysicsWorldRaw, from: vec4_t, to: vec4_t, group: i32 = 0x00000001, mask: i32 = 0xffffffff): hit_t {
+function physics_world_ray_cast(pw: physics_world_t, from: vec4_t, to: vec4_t, group: i32 = 0x00000001, mask: i32 = 0xffffffff): hit_t {
 	let ray_from: Ammo.btVector3 = physics_world_vec1;
 	let ray_to: Ammo.btVector3 = physics_world_vec2;
 	ray_from.setValue(from.x, from.y, from.z);
@@ -181,7 +190,7 @@ function physics_world_ray_cast(pw: PhysicsWorldRaw, from: vec4_t, to: vec4_t, g
 	let world_dyn: Ammo.btDynamicsWorld = pw.world;
 	let world_col: Ammo.btCollisionWorld = world_dyn;
 	world_col.rayTest(ray_from, ray_to, ray_callback);
-	let pb: PhysicsBodyRaw = null;
+	let pb: physics_body_t = null;
 	let hit_info: hit_t = null;
 
 	let rc: Ammo.RayResultCallback = ray_callback;
@@ -205,7 +214,7 @@ function physics_world_ray_cast(pw: PhysicsWorldRaw, from: vec4_t, to: vec4_t, g
 }
 
 type hit_t = {
-	body?: PhysicsBodyRaw;
+	body?: physics_body_t;
 	pos?: vec4_t;
 	normal?: vec4_t;
 };

@@ -1,44 +1,66 @@
 
 function export_arm_run_mesh(path: string, paint_objects: mesh_object_t[]) {
 	let mesh_datas: mesh_data_t[] = [];
-	for (let p of paint_objects) array_push(mesh_datas, p.data);
+	for (let i: i32 = 0; i < paint_objects.length; ++i) {
+		let p: mesh_object_t = paint_objects[i];
+		array_push(mesh_datas, p.data);
+	}
 	let raw: scene_t = { mesh_datas: mesh_datas };
 	let b: buffer_t = armpack_encode(raw);
-	if (!ends_with(path, ".arm")) path += ".arm";
+	if (!ends_with(path, ".arm")) {
+		path += ".arm";
+	}
 	krom_file_save_bytes(path, b, buffer_size(b) + 1);
 }
 
 function export_arm_run_project() {
 	///if (is_paint || is_sculpt)
 	let mnodes: zui_node_canvas_t[] = [];
-	for (let m of project_materials) {
+	for (let i: i32 = 0; i < project_materials.length; ++i) {
+		let m: slot_material_t = project_materials[i];
 		let c: zui_node_canvas_t = json_parse(json_stringify(m.canvas));
-		for (let n of c.nodes) export_arm_export_node(n);
+		for (let i: i32 = 0; i < c.nodes.length; ++i) {
+			let n: zui_node_t = c.nodes[i];
+			export_arm_export_node(n);
+		}
 		array_push(mnodes, c);
 	}
 
 	let bnodes: zui_node_canvas_t[] = [];
-	for (let b of project_brushes) array_push(bnodes, b.canvas);
+	for (let i: i32 = 0; i < project_brushes.length; ++i) {
+		let b: slot_brush_t = project_brushes[i];
+		array_push(bnodes, b.canvas);
+	}
 	///end
 
 	///if is_lab
 	let c: zui_node_canvas_t = json_parse(json_stringify(project_canvas));
-	for (let n of c.nodes) export_arm_export_node(n);
+	for (let i: i32 = 0; i < c.nodes.length; ++i) {
+		let n: zui_node_t = c.nodes[i];
+		export_arm_export_node(n);
+	}
 	///end
 
 	let mgroups: zui_node_canvas_t[] = null;
 	if (project_material_groups.length > 0) {
 		mgroups = [];
-		for (let g of project_material_groups) {
+		for (let i: i32 = 0; i < project_material_groups.length; ++i) {
+			let g: node_group_t = project_material_groups[i];
 			let c: zui_node_canvas_t = json_parse(json_stringify(g.canvas));
-			for (let n of c.nodes) export_arm_export_node(n);
+			for (let i: i32 = 0; i < c.nodes.length; ++i) {
+				let n: zui_node_t = c.nodes[i];
+				export_arm_export_node(n);
+			}
 			array_push(mgroups, c);
 		}
 	}
 
 	///if (is_paint || is_sculpt)
 	let md: mesh_data_t[] = [];
-	for (let p of project_paint_objects) array_push(md, p.data);
+	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+		let p: mesh_object_t = project_paint_objects[i];
+		array_push(md, p.data);
+	}
 	///end
 
 	///if is_lab
@@ -55,7 +77,8 @@ function export_arm_run_project() {
 	let bpp: i32 = bits_pos == texture_bits_t.BITS8 ? 8 : bits_pos == texture_bits_t.BITS16 ? 16 : 32;
 
 	let ld: layer_data_t[] = [];
-	for (let l of project_layers) {
+	for (let i: i32 = 0; i < project_layers.length; ++i) {
+		let l: slot_layer_t = project_layers[i];
 		array_push(ld, {
 			name: l.name,
 			res: l.texpaint != null ? l.texpaint.width : project_layers[0].texpaint.width,
@@ -152,7 +175,7 @@ function export_arm_run_project() {
 	g2_end();
 	///end
 	let mesh_icon_pixels: buffer_t = image_get_pixels(mesh_icon);
-	let u8a: u8_array_t = new u8_array_t(mesh_icon_pixels);
+	let u8a: u8_array_t = u8_array_create_from_buffer(mesh_icon_pixels);
 	for (let i: i32 = 0; i < 256 * 256 * 4; ++i) {
 		u8a[i] = math_floor(math_pow(u8a[i] / 255, 1.0 / 2.2) * 255);
 	}
@@ -216,9 +239,21 @@ function export_arm_export_node(n: zui_node_t, assets: asset_t[] = null) {
 		}
 	}
 	// Pack colors
-	if (n.color > 0) n.color -= 4294967296;
-	for (let inp of n.inputs) if (inp.color > 0) inp.color -= 4294967296;
-	for (let out of n.outputs) if (out.color > 0) out.color -= 4294967296;
+	if (n.color > 0) {
+		n.color -= 4294967296;
+	}
+	for (let i: i32 = 0; i < n.inputs.length; ++i) {
+		let inp: zui_node_socket_t = n.inputs[i];
+		if (inp.color > 0) {
+			inp.color -= 4294967296;
+		}
+	}
+	for (let i: i32 = 0; i < n.outputs.length; ++i) {
+		let out: zui_node_socket_t = n.outputs[i];
+		if (out.color > 0) {
+			out.color -= 4294967296;
+		}
+	}
 }
 
 ///if (is_paint || is_sculpt)
@@ -232,14 +267,25 @@ function export_arm_run_material(path: string) {
 	if (ui_nodes_has_group(c)) {
 		mgroups = [];
 		ui_nodes_traverse_group(mgroups, c);
-		for (let gc of mgroups) for (let n of gc.nodes) export_arm_export_node(n, assets);
+		for (let i: i32 = 0; i < mgroups.length; ++i) {
+			let gc: zui_node_canvas_t = mgroups[i];
+			for (let i: i32 = 0; i < gc.nodes.length; ++i) {
+				let n: zui_node_t = gc.nodes[i];
+				export_arm_export_node(n, assets);
+			}
+		}
 	}
-	for (let n of c.nodes) export_arm_export_node(n, assets);
+	for (let i: i32 = 0; i < c.nodes.length; ++i) {
+		let n: zui_node_t = c.nodes[i];
+		export_arm_export_node(n, assets);
+	}
 	array_push(mnodes, c);
 
 	let texture_files: string[] = export_arm_assets_to_files(path, assets);
 	let is_cloud: bool = ends_with(path, "_cloud_.arm");
-	if (is_cloud) path = string_replace_all(path, "_cloud_", "");
+	if (is_cloud) {
+		path = string_replace_all(path, "_cloud_", "");
+	}
 	let packed_assets: packed_asset_t[] = null;
 	if (!context_raw.pack_assets_on_export) {
 		packed_assets = export_arm_get_packed_assets(path, texture_files);
@@ -296,7 +342,8 @@ function export_arm_run_brush(path: string) {
 	let b: slot_brush_t = context_raw.brush;
 	let c: zui_node_canvas_t = json_parse(json_stringify(b.canvas));
 	let assets: asset_t[] = [];
-	for (let n of c.nodes) {
+	for (let i: i32 = 0; i < c.nodes.length; ++i) {
+		let n: zui_node_t = c.nodes[i];
 		export_arm_export_node(n, assets);
 	}
 	array_push(bnodes, c);
@@ -339,7 +386,8 @@ function export_arm_run_brush(path: string) {
 
 function export_arm_assets_to_files(project_path: string, assets: asset_t[]): string[] {
 	let texture_files: string[] = [];
-	for (let a of assets) {
+	for (let i: i32 = 0; i < assets.length; ++i) {
+		let a: asset_t = assets[i];
 		///if krom_ios
 		let same_drive: bool = false;
 		///else
@@ -359,7 +407,8 @@ function export_arm_assets_to_files(project_path: string, assets: asset_t[]): st
 ///if (is_paint || is_sculpt)
 function export_arm_meshes_to_files(project_path: string): string[] {
 	let mesh_files: string[] = [];
-	for (let file of project_mesh_assets) {
+	for (let i: i32 = 0; i < project_mesh_assets.length; ++i) {
+		let file: string = project_mesh_assets[i];
 		///if krom_ios
 		let same_drive: bool = false;
 		///else
@@ -400,7 +449,8 @@ function export_arm_fonts_to_files(project_path: string, fonts: slot_font_t[]): 
 function export_arm_get_packed_assets(project_path: string, texture_files: string[]): packed_asset_t[] {
 	let packed_assets: packed_asset_t[] = null;
 	if (project_raw.packed_assets != null) {
-		for (let pa of project_raw.packed_assets) {
+		for (let i: i32 = 0; i < project_raw.packed_assets.length; ++i) {
+			let pa: packed_asset_t = project_raw.packed_assets[i];
 			///if krom_ios
 			let same_drive: bool = false;
 			///else
@@ -408,7 +458,8 @@ function export_arm_get_packed_assets(project_path: string, texture_files: strin
 			///end
 			// Convert path from absolute to relative
 			pa.name = same_drive ? path_to_relative(project_path, pa.name) : pa.name;
-			for (let tf of texture_files) {
+			for (let i: i32 = 0; i < texture_files.length; ++i) {
+				let tf: string = texture_files[i];
 				if (pa.name == tf) {
 					if (packed_assets == null) {
 						packed_assets = [];
@@ -444,7 +495,8 @@ function export_arm_pack_assets(raw: project_format_t, assets: asset_t[]) {
 		}
 	}
 	base_notify_on_next_frame(function () {
-		for (let image of temp_images) {
+		for (let i: i32 = 0; i < temp_images.length; ++i) {
+			let image: image_t = temp_images[i];
 			image_unload(image);
 		}
 	});

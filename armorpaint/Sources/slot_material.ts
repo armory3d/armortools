@@ -1,29 +1,42 @@
 
-class slot_material_t {
-	nodes: zui_nodes_t = zui_nodes_create();
-	canvas: zui_node_canvas_t;
-	image: image_t = null;
-	image_icon: image_t = null;
-	preview_ready: bool = false;
-	data: material_data_t;
-	id: i32 = 0;
-
-	paint_base: bool = true;
-	paint_opac: bool = true;
-	paint_occ: bool = true;
-	paint_rough: bool = true;
-	paint_met: bool = true;
-	paint_nor: bool = true;
-	paint_height: bool = true;
-	paint_emis: bool = true;
-	paint_subs: bool = true;
-}
+type slot_material_t = {
+	nodes?: zui_nodes_t;
+	canvas?: zui_node_canvas_t;
+	image?: image_t;
+	image_icon?: image_t;
+	preview_ready?: bool;
+	data?: material_data_t;
+	id?: i32;
+	paint_base?: bool;
+	paint_opac?: bool;
+	paint_occ?: bool;
+	paint_rough?: bool;
+	paint_met?: bool;
+	paint_nor?: bool;
+	paint_height?: bool;
+	paint_emis?: bool;
+	paint_subs?: bool;
+};
 
 let slot_material_default_canvas: buffer_t = null;
 
 function slot_material_create(m: material_data_t = null, c: zui_node_canvas_t = null): slot_material_t {
-	let raw: slot_material_t = new slot_material_t();
-	for (let mat of project_materials) {
+	let raw: slot_material_t = {};
+	raw.nodes = zui_nodes_create();
+	raw.preview_ready = false;
+	raw.id = 0;
+	raw.paint_base = true;
+	raw.paint_opac = true;
+	raw.paint_occ = true;
+	raw.paint_rough = true;
+	raw.paint_met = true;
+	raw.paint_nor = true;
+	raw.paint_height = true;
+	raw.paint_emis = true;
+	raw.paint_subs = true;
+
+	for (let i: i32 = 0; i < project_materials.length; ++i) {
+		let mat: slot_material_t = project_materials[i];
 		if (mat.id >= raw.id) {
 			raw.id = mat.id + 1;
 		}

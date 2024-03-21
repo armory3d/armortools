@@ -2,7 +2,8 @@
 let resource_bundled: map_t<string, image_t> = map_create();
 
 function resource_load(names: string[]) {
-	for (let s of names) {
+	for (let i: i32 = 0; i < names.length; ++i) {
+		let s: string = names[i];
 		let image: image_t = data_get_image(s);
 		map_set(resource_bundled, s, image);
 	}

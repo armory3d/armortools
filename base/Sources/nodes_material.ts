@@ -2829,7 +2829,8 @@ function nodes_material_color_ramp_button(ui: zui_t, nodes: zui_nodes_t, node: z
 	// Preview
 	let vals: f32_array_t[] = but.default_value; // [[r, g, b, a, pos], ..]
 	let sw: f32 = ui._w / zui_nodes_SCALE();
-	for (let val of vals) {
+	for (let i: i32 = 0; i < vals.length; ++i) {
+		let val: f32_array_t = vals[i];
 		let pos: f32 = val[4];
 		let col: i32 = color_from_floats(val[0], val[1], val[2], 1.0);
 		zui_fill(pos * sw, 0, (1.0 - pos) * sw, zui_nodes_LINE_H() - 2 * zui_nodes_SCALE(), col);
@@ -2890,7 +2891,8 @@ function nodes_material_new_group_button(ui: zui_t, nodes: zui_nodes_t, node: zu
 			node.name = tr("Group") + " " + i;
 
 			let found: bool = false;
-			for (let g of project_material_groups) {
+			for (let i: i32 = 0; i < project_material_groups.length; ++i) {
+				let g: node_group_t = project_material_groups[i];
 				if (g.canvas.name == node.name) {
 					found = true;
 					break;
@@ -2947,7 +2949,8 @@ function nodes_material_new_group_button(ui: zui_t, nodes: zui_nodes_t, node: zu
 	}
 
 	let group: node_group_t = null;
-	for (let g of project_material_groups) {
+	for (let i: i32 = 0; i < project_material_groups.length; ++i) {
+		let g: node_group_t = project_material_groups[i];
 		if (g.canvas.name == node.name) {
 			group = g;
 			break;
@@ -2991,29 +2994,33 @@ function nodes_material_add_socket_button(ui: zui_t, nodes: zui_nodes_t, node: z
 function nodes_material_sync_sockets(node: zui_node_t) {
 	let group_stack: node_group_t[] = ui_nodes_group_stack;
 	let c: zui_node_canvas_t = group_stack[group_stack.length - 1].canvas;
-	for (let m of project_materials) {
+	for (let i: i32 = 0; i < project_materials.length; ++i) {
+		let m: slot_material_t = project_materials[i];
 		nodes_material_sync_group_sockets(m.canvas, c.name, node);
 	}
-	for (let g of project_material_groups) {
+	for (let i: i32 = 0; i < project_material_groups.length; ++i) {
+		let g: node_group_t = project_material_groups[i];
 		nodes_material_sync_group_sockets(g.canvas, c.name, node);
 	}
 	array_push(zui_node_replace, node);
 }
 
-function nodes_material_sync_group_sockets(canvas: zui_node_canvas_t, groupName: string, node: zui_node_t) {
-	for (let n of canvas.nodes) {
-		if (n.type == "GROUP" && n.name == groupName) {
-			let isInputs: bool = node.name == "Group Input";
-			let oldSockets: zui_node_socket_t[] = isInputs ? n.inputs : n.outputs;
-			let sockets: zui_node_socket_t[] = json_parse(json_stringify(isInputs ? node.outputs : node.inputs));
-			isInputs ? n.inputs = sockets : n.outputs = sockets;
-			for (let s of sockets) {
+function nodes_material_sync_group_sockets(canvas: zui_node_canvas_t, group_name: string, node: zui_node_t) {
+	for (let i: i32 = 0; i < canvas.nodes.length; ++i) {
+		let n: zui_node_t = canvas.nodes[i];
+		if (n.type == "GROUP" && n.name == group_name) {
+			let is_inputs: bool = node.name == "Group Input";
+			let old_sockets: zui_node_socket_t[] = is_inputs ? n.inputs : n.outputs;
+			let sockets: zui_node_socket_t[] = json_parse(json_stringify(is_inputs ? node.outputs : node.inputs));
+			is_inputs ? n.inputs = sockets : n.outputs = sockets;
+			for (let i: i32 = 0; i < sockets.length; ++i) {
+				let s: zui_node_socket_t = sockets[i];
 				s.node_id = n.id;
 			}
-			let numSockets: i32 = sockets.length < oldSockets.length ? sockets.length : oldSockets.length;
-			for (let i: i32 = 0; i < numSockets; ++i) {
-				if (sockets[i].type == oldSockets[i].type) {
-					sockets[i].default_value = oldSockets[i].default_value;
+			let num_sockets: i32 = sockets.length < old_sockets.length ? sockets.length : old_sockets.length;
+			for (let i: i32 = 0; i < num_sockets; ++i) {
+				if (sockets[i].type == old_sockets[i].type) {
+					sockets[i].default_value = old_sockets[i].default_value;
 				}
 			}
 		}
@@ -3045,10 +3052,12 @@ function nodes_material_create_socket(nodes: zui_nodes_t, node: zui_node_t, name
 	}
 }
 
-function nodes_material_get_node_t(nodeType: string): zui_node_t {
-	for (let c of nodes_material_list) {
-		for (let n of c) {
-			if (n.type == nodeType) {
+function nodes_material_get_node_t(node_type: string): zui_node_t {
+	for (let i: i32 = 0; i < nodes_material_list.length; ++i) {
+		let c: zui_node_t[] = nodes_material_list[i];
+		for (let i: i32 = 0; i < c.length; ++i) {
+			let n: zui_node_t = c[i];
+			if (n.type == node_type) {
 				return n;
 			}
 		}
@@ -3056,8 +3065,8 @@ function nodes_material_get_node_t(nodeType: string): zui_node_t {
 	return null;
 }
 
-function nodes_material_create_node(nodeType: string, group: node_group_t = null): zui_node_t {
-	let n: zui_node_t = nodes_material_get_node_t(nodeType);
+function nodes_material_create_node(node_type: string, group: node_group_t = null): zui_node_t {
+	let n: zui_node_t = nodes_material_get_node_t(node_type);
 	if (n == null) {
 		return null;
 	}

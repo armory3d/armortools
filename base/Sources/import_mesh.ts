@@ -83,7 +83,8 @@ function import_mesh_finish_import() {
 		});
 
 		// No mask by default
-		for (let p of project_paint_objects) {
+		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+			let p: mesh_object_t = project_paint_objects[i];
 			p.base.visible = true;
 		}
 		if (context_raw.merged_object == null) {
@@ -187,7 +188,8 @@ function import_mesh_make_mesh(mesh: any, path: string) {
 		}
 		let first_unwrap_done = function (mesh: any) {
 			_import_mesh_make_mesh(mesh);
-			for (let mesh of import_mesh_meshes_to_unwrap) {
+			for (let i: i32 = 0; i < import_mesh_meshes_to_unwrap.length; ++i) {
+				let mesh: any = import_mesh_meshes_to_unwrap[i];
 				project_unwrap_mesh_box(mesh, _import_mesh_add_mesh, true);
 			}
 		}
@@ -211,7 +213,8 @@ function _import_mesh_add_mesh(mesh: any) {
 	object.skip_context = "paint";
 
 	// Ensure unique names
-	for (let p of project_paint_objects) {
+	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+		let p: mesh_object_t = project_paint_objects[i];
 		if (p.base.name == object.base.name) {
 			p.base.name += ".001";
 			p.data._.handle += ".001";

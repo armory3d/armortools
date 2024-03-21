@@ -80,7 +80,8 @@ function path_working_dir(): string {
 
 function path_is_mesh(path: string): bool {
 	let p: string = to_lower_case(path);
-	for (let s of path_mesh_formats) {
+	for (let i: i32 = 0; i < path_mesh_formats.length; ++i) {
+		let s: string = path_mesh_formats[i];
 		if (ends_with(p, "." + s)) {
 			return true;
 		}
@@ -90,7 +91,8 @@ function path_is_mesh(path: string): bool {
 
 function path_is_texture(path: string): bool {
 	let p: string = to_lower_case(path);
-	for (let s of path_texture_formats) {
+	for (let i: i32 = 0; i < path_texture_formats.length; ++i) {
+		let s: string = path_texture_formats[i];
 		if (ends_with(p, "." + s)) {
 			return true;
 		}
@@ -136,7 +138,8 @@ function path_is_known(path: string): bool {
 
 function path_check_ext(p: string, exts: string[]): bool {
 	p = string_replace_all(p, "-", "_");
-	for (let ext of exts) {
+	for (let i: i32 = 0; i < exts.length; ++i) {
+		let ext: string = exts[i];
 		if (ends_with(p, "_" + ext) ||
 			(string_index_of(p, "_" + ext + "_") >= 0 && !ends_with(p, "_preview") && !ends_with(p, "_icon"))) {
 			return true;

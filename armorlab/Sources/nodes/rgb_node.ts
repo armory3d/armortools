@@ -4,7 +4,7 @@ type rgb_node_t = {
 	image?: image_t;
 };
 
-function rgb_node_create(): rgb_node_t {
+function rgb_node_create(arg: any): rgb_node_t {
 	let n: rgb_node_t = {};
 	n.base = logic_node_create();
 	n.base.get_as_image = rgb_node_get_as_image;

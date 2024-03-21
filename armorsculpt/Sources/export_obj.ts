@@ -1,6 +1,6 @@
 
 function export_obj_write_string(out: i32[], str: string) {
-	for (let i = 0; i < str.length; ++i) {
+	for (let i: i32 = 0; i < str.length; ++i) {
 		array_push(out, char_code_at(str, i));
 	}
 }
@@ -16,7 +16,7 @@ function export_obj_run(path: string, paint_objects: mesh_object_t[], apply_disp
 	let inda = mesh.index_arrays[0].values;
 
 	let posa: i16_array_t = i16_array_create(inda.length * 4);
-	for (let i = 0; i < inda.length; ++i) {
+	for (let i: i32 = 0; i < inda.length; ++i) {
 		let index = inda[i];
 		posa[index * 4    ] = math_floor(buffer_view_get_f32(pixelsView, i * 16    ) * 32767);
 		posa[index * 4 + 1] = math_floor(buffer_view_get_f32(pixelsView, i * 16 + 4) * 32767);
@@ -24,7 +24,7 @@ function export_obj_run(path: string, paint_objects: mesh_object_t[], apply_disp
 	}
 
 	let poff = 0;
-	// for (let p of paintObjects) {
+	// for (let p of paint_objects) {
 		let p = paint_objects[0];
 		// let mesh = p.data.raw;
 		let inv = 1 / 32767;
@@ -38,9 +38,9 @@ function export_obj_run(path: string, paint_objects: mesh_object_t[], apply_disp
 		let posmap: map_t<i32, i32> = map_create();
 
 		let pi = 0;
-		for (let i = 0; i < len; ++i) {
+		for (let i: i32 = 0; i < len; ++i) {
 			let found = false;
-			for (let j = 0; j < pi; ++j) {
+			for (let j: i32 = 0; j < pi; ++j) {
 				if (posa2[j * 3    ] == posa[i * 4    ] &&
 					posa2[j * 3 + 1] == posa[i * 4 + 1] &&
 					posa2[j * 3 + 2] == posa[i * 4 + 2]) {
@@ -59,7 +59,7 @@ function export_obj_run(path: string, paint_objects: mesh_object_t[], apply_disp
 		}
 
 		export_obj_write_string(o, "o " + p.base.name + "\n");
-		for (let i = 0; i < pi; ++i) {
+		for (let i: i32 = 0; i < pi; ++i) {
 			export_obj_write_string(o, "v ");
 			let vx = posa2[i * 3] * sc + "";
 			export_obj_write_string(o, substring(vx, 0, string_index_of(vx, ".") + 7));
@@ -73,7 +73,7 @@ function export_obj_run(path: string, paint_objects: mesh_object_t[], apply_disp
 		}
 
 		// let inda = mesh.index_arrays[0].values;
-		for (let i = 0; i < math_floor(inda.length / 3); ++i) {
+		for (let i: i32 = 0; i < math_floor(inda.length / 3); ++i) {
 			let pi1 = map_get(posmap, inda[i * 3    ]) + 1 + poff;
 			let pi2 = map_get(posmap, inda[i * 3 + 1]) + 1 + poff;
 			let pi3 = map_get(posmap, inda[i * 3 + 2]) + 1 + poff;

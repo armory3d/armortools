@@ -56,11 +56,11 @@ function import_envmap_run(path: string, image: image_t) {
 
 	// Radiance
 	if (import_envmap_mips_cpu != null) {
-		for (let mip of import_envmap_mips_cpu) {
-			let _mip: image_t = mip;
+		for (let i: i32 = 0; i < import_envmap_mips_cpu.length; ++i) {
+			let mip: image_t = import_envmap_mips_cpu[i];
 			base_notify_on_next_frame(function () {
 				///if (!krom_direct3d12) // TODO: crashes after 50+ imports
-				image_unload(_mip);
+				image_unload(mip);
 				///end
 			});
 		}

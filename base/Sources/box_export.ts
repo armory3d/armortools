@@ -342,7 +342,8 @@ function box_export_tab_export_mesh(ui: zui_t, htab: zui_handle_t) {
 		context_raw.export_mesh_format = zui_combo(zui_handle("boxexport_9", { position: context_raw.export_mesh_format }), ["obj", "arm"], tr("Format"), true);
 
 		let ar: string[] = [tr("All")];
-		for (let p of project_paint_objects) {
+		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+			let p: mesh_object_t = project_paint_objects[i];
 			array_push(ar, p.base.name);
 		}
 		zui_combo(box_export_mesh_handle, ar, tr("Meshes"), true);
@@ -352,8 +353,10 @@ function box_export_tab_export_mesh(ui: zui_t, htab: zui_handle_t) {
 		let tris: i32 = 0;
 		let pos: i32 = box_export_mesh_handle.position;
 		let paint_objects: mesh_object_t[] = pos == 0 ? project_paint_objects : [project_paint_objects[pos - 1]];
-		for (let po of paint_objects) {
-			for (let inda of po.data.index_arrays) {
+		for (let i: i32 = 0; i < paint_objects.length; ++i) {
+			let po: mesh_object_t = paint_objects[i];
+			for (let i: i32 = 0; i < po.data.index_arrays.length; ++i) {
+				let inda: index_array_t = po.data.index_arrays[i];
 				tris += math_floor(inda.values.length / 3);
 			}
 		}

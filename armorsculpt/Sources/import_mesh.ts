@@ -56,7 +56,8 @@ function import_mesh_finish_import() {
 		});
 
 		// No mask by default
-		for (let p of project_paint_objects) {
+		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+			let p = project_paint_objects[i];
 			p.base.visible = true;
 		}
 		if (context_raw.merged_object == null) {
@@ -97,7 +98,7 @@ function import_mesh_make_mesh(mesh: any, path: string) {
 		context_raw.paint_object = context_main_object();
 
 		context_select_paint_object(context_main_object());
-		for (let i = 0; i < project_paint_objects.length; ++i) {
+		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 			let p = project_paint_objects[i];
 			if (p == context_raw.paint_object) {
 				continue;
@@ -131,12 +132,12 @@ function import_mesh_make_mesh(mesh: any, path: string) {
 		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 		ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 
-		// Wait for addMesh calls to finish
+		// Wait for add_mesh calls to finish
 		app_notify_on_init(import_mesh_finish_import);
 
 		base_notify_on_next_frame(function () {
 			let f32 = f32_array_create(config_get_texture_res_x() * config_get_texture_res_y() * 4);
-			for (let i = 0; i < math_floor(mesh.inda.length); ++i) {
+			for (let i: i32 = 0; i < math_floor(mesh.inda.length); ++i) {
 				let index = mesh.inda[i];
 				f32[i * 4]     = mesh.posa[index * 4]     / 32767;
 				f32[i * 4 + 1] = mesh.posa[index * 4 + 1] / 32767;
@@ -158,7 +159,7 @@ function import_mesh_make_mesh(mesh: any, path: string) {
 
 function import_mesh_add_mesh(mesh: any) {
 
-	let _addMesh = function () {
+	let _add_mesh = function () {
 		let raw = import_mesh_raw_mesh(mesh);
 		if (mesh.cola != null) {
 			array_push(raw.vertex_arrays, { values: mesh.cola, attrib: "col", data: "short4norm" });
@@ -171,7 +172,8 @@ function import_mesh_add_mesh(mesh: any) {
 		object.skip_context = "paint";
 
 		// Ensure unique names
-		for (let p of project_paint_objects) {
+		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+			let p = project_paint_objects[i];
 			if (p.base.name == object.base.name) {
 				p.base.name += ".001";
 				p.data._.handle += ".001";
@@ -188,7 +190,7 @@ function import_mesh_add_mesh(mesh: any) {
 		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 	}
 
-	_addMesh();
+	_add_mesh();
 }
 
 function import_mesh_raw_mesh(mesh: any): mesh_data_t {

@@ -11,7 +11,8 @@ function import_folder_run(path: string) {
 
 	let found_texture: bool = false;
 	// Import maps
-	for (let f of files) {
+	for (let i: i32 = 0; i < files.length; ++i) {
+		let f: string = files[i];
 		if (!path_is_texture(f)) {
 			continue;
 		}
@@ -68,13 +69,15 @@ function import_folder_run(path: string) {
 	let dirs: string[] = string_split(path, path_sep);
 	canvas.name = dirs[dirs.length - 1];
 	let nout: zui_node_t = null;
-	for (let n of canvas.nodes) {
+	for (let i: i32 = 0; i < canvas.nodes.length; ++i) {
+		let n: zui_node_t = canvas.nodes[i];
 		if (n.type == "OUTPUT_MATERIAL_PBR") {
 			nout = n;
 			break;
 		}
 	}
-	for (let n of canvas.nodes) {
+	for (let i: i32 = 0; i < canvas.nodes.length; ++i) {
+		let n: zui_node_t = canvas.nodes[i];
 		if (n.name == "RGB") {
 			zui_remove_node(n, canvas);
 			break;

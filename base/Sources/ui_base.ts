@@ -216,7 +216,8 @@ function ui_base_init() {
 	}
 
 	context_raw.project_objects = [];
-	for (let m of scene_meshes) {
+	for (let i: i32 = 0; i < scene_meshes.length; ++i) {
+		let m: mesh_object_t = scene_meshes[i];
 		array_push(context_raw.project_objects, m);
 	}
 
@@ -227,7 +228,9 @@ function ui_base_update() {
 	ui_base_update_ui();
 	operator_update();
 
-	for (let p of plugin_map.values()) {
+	let values: plugin_t[] = map_to_array(plugin_map);
+	for (let i: i32 = 0; i < values.length; ++i) {
+		let p: plugin_t = values[i];
 		if (p.update != null) {
 			p.update();
 		}
@@ -783,7 +786,7 @@ function ui_base_update() {
 	///if arm_physics
 	if (context_raw.tool == workspace_tool_t.PARTICLE && context_raw.particle_physics && context_in_paint_area() && !context_raw.paint2d) {
 		util_particle_init_physics();
-		let world: PhysicsWorldRaw = physics_world_active;
+		let world: physics_world_t = physics_world_active;
 		physics_world_late_update(world);
 		context_raw.ddirty = 2;
 		context_raw.rdirty = 2;
@@ -808,9 +811,9 @@ function ui_base_update() {
 			vec4_set(mo.base.transform.scale, context_raw.brush_radius * 0.2, context_raw.brush_radius * 0.2, context_raw.brush_radius * 0.2);
 			transform_build_matrix(mo.base.transform);
 
-			let body: PhysicsBodyRaw = physics_body_create();
+			let body: physics_body_t = physics_body_create();
 			body.shape = shape_type_t.SPHERE;
-			body.mass = 1.0;
+			physics_body_set_mass(body, 1.0);
 			body.ccd = true;
 			mo.base.transform.radius /= 10; // Lower ccd radius
 			physics_body_init(body, mo.base);
@@ -825,7 +828,8 @@ function ui_base_update() {
 
 		let pairs: pair_t[] = physics_world_get_contact_pairs(world, context_raw.paint_body);
 		if (pairs != null) {
-			for (let p of pairs) {
+			for (let i: i32 = 0; i < pairs.length; ++i) {
+				let p: pair_t = pairs[i];
 				context_raw.last_particle_hit_x = context_raw.particle_hit_x != 0 ? context_raw.particle_hit_x : p.pos_a.x;
 				context_raw.last_particle_hit_y = context_raw.particle_hit_y != 0 ? context_raw.particle_hit_y : p.pos_a.y;
 				context_raw.last_particle_hit_z = context_raw.particle_hit_z != 0 ? context_raw.particle_hit_z : p.pos_a.z;
@@ -1177,7 +1181,8 @@ function ui_base_update_ui() {
 			base_make_pipe();
 		}
 		// Update all layer previews
-		for (let l of project_layers) {
+		for (let i: i32 = 0; i < project_layers.length; ++i) {
+			let l: slot_layer_t = project_layers[i];
 			if (slot_layer_is_group(l)) {
 				continue;
 			}

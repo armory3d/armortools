@@ -11,7 +11,8 @@ function export_texture_run(path: string, bake_material: bool = false) {
 	}
 	else if (context_raw.layers_export == export_mode_t.PER_UDIM_TILE) {
 		let udim_tiles: string[] = [];
-		for (let l of project_layers) {
+		for (let i: i32 = 0; i < project_layers.length; ++i) {
+			let l: slot_layer_t = project_layers[i];
 			if (slot_layer_get_object_mask(l) > 0) {
 				let name: string = project_paint_objects[slot_layer_get_object_mask(l) - 1].base.name;
 				if (substring(name, name.length - 5, 2) == ".1") { // tile.1001
@@ -20,7 +21,8 @@ function export_texture_run(path: string, bake_material: bool = false) {
 			}
 		}
 		if (udim_tiles.length > 0) {
-			for (let udim_tile of udim_tiles) {
+			for (let i: i32 = 0; i < udim_tiles.length; ++i) {
+				let udim_tile: string = udim_tiles[i];
 				export_texture_run_layers(path, project_layers, udim_tile);
 			}
 		}
@@ -30,7 +32,8 @@ function export_texture_run(path: string, bake_material: bool = false) {
 	}
 	else if (context_raw.layers_export == export_mode_t.PER_OBJECT) {
 		let object_names: string[] = [];
-		for (let l of project_layers) {
+		for (let i: i32 = 0; i < project_layers.length; ++i) {
+			let l: slot_layer_t = project_layers[i];
 			if (slot_layer_get_object_mask(l) > 0) {
 				let name: string = project_paint_objects[slot_layer_get_object_mask(l) - 1].base.name;
 				if (array_index_of(object_names, name) == -1) {
@@ -39,7 +42,8 @@ function export_texture_run(path: string, bake_material: bool = false) {
 			}
 		}
 		if (object_names.length > 0) {
-			for (let name of object_names) {
+			for (let i: i32 = 0; i < object_names.length; ++i) {
+				let name: string = object_names[i];
 				export_texture_run_layers(path, project_layers, name);
 			}
 		}
@@ -62,7 +66,8 @@ function export_texture_run(path: string, bake_material: bool = false) {
 				let layers: slot_layer_t[] = [];
 				for (let object_index: i32 = 0; object_index < project_atlas_objects.length; ++object_index) {
 					if (project_atlas_objects[object_index] == atlas_index) {
-						for (let l of project_layers) {
+						for (let i: i32 = 0; i < project_layers.length; ++i) {
+							let l: slot_layer_t = project_layers[i];
 							if (slot_layer_get_object_mask(l) == 0 || // shared object
 								slot_layer_get_object_mask(l) - 1 == object_index) {
 								array_push(layers, l);
@@ -184,7 +189,8 @@ function export_texture_run_layers(path: string, layers: any[], object_name: str
 	g4_end();
 
 	// Flatten layers
-	for (let l1 of layers) {
+	for (let i: i32 = 0; i < layers.length; ++i) {
+		let l1: slot_layer_t = layers[i];
 		if (!export_selected && !slot_layer_is_visible(l1)) {
 			continue;
 		}
@@ -310,8 +316,10 @@ function export_texture_run_layers(path: string, layers: any[], object_name: str
 	let preset: export_preset_t = box_export_preset;
 	let pix: buffer_t = null;
 
-	for (let t of preset.textures) {
-		for (let c of t.channels) {
+	for (let i: i32 = 0; i < preset.textures.length; ++i) {
+		let t: export_preset_texture_t = preset.textures[i];
+		for (let i: i32 = 0; i < t.channels.length; ++i) {
+			let c: string = t.channels[i];
 			if ((c == "base_r" || c == "base_g" || c == "base_b" || c == "opac") && pixpaint == null) {
 				pixpaint = image_get_pixels(texpaint);
 			}
@@ -324,7 +332,8 @@ function export_texture_run_layers(path: string, layers: any[], object_name: str
 		}
 	}
 
-	for (let t of preset.textures) {
+	for (let i: i32 = 0; i < preset.textures.length; ++i) {
+		let t: export_preset_texture_t = preset.textures[i];
 		let c: string[] = t.channels;
 		let tex_name = t.name != "" ? "_" + t.name : "";
 		let single_channel: bool = c[0] == c[1] && c[1] == c[2] && c[3] == "1.0";

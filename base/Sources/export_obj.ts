@@ -12,7 +12,8 @@ function export_obj_run(path: string, paint_objects: mesh_object_t[], apply_disp
 	let poff: i32 = 0;
 	let noff: i32 = 0;
 	let toff: i32 = 0;
-	for (let p of paint_objects) {
+	for (let i: i32 = 0; i < paint_objects.length; ++i) {
+		let p: mesh_object_t = paint_objects[i];
 		let mesh: mesh_data_t = p.data;
 		let inv: f32 = 1 / 32767;
 		let sc: f32 = p.data.scale_pos * inv;

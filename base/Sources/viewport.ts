@@ -11,7 +11,8 @@ function viewport_scale_to_bounds() {
 	vec4_set(po.base.transform.scale, 2 / r, 2 / r, 2 / r);
 	vec4_set(po.base.transform.loc, 0, 0, 0);
 	transform_build_matrix(po.base.transform);
-	for (let c of po.base.children) {
+	for (let i: i32 = 0; i < po.base.children.length; ++i) {
+		let c: object_t = po.base.children[i];
 		vec4_set(c.transform.loc, 0, 0, 0);
 		transform_build_matrix(c.transform);
 	}
@@ -19,7 +20,8 @@ function viewport_scale_to_bounds() {
 
 function viewport_reset() {
 	let cam: camera_object_t = scene_camera;
-	for (let o of _scene_raw.objects) {
+	for (let i: i32 = 0; i < _scene_raw.objects.length; ++i) {
+		let o: obj_t = _scene_raw.objects[i];
 		if (o.type == "camera_object") {
 			mat4_set_from_f32_array(cam.base.transform.local, o.transform);
 			transform_decompose(cam.base.transform);

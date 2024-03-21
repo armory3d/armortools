@@ -48,7 +48,7 @@ function import_arm_run_project(path: string) {
 
 	// Save to recent
 	///if krom_ios
-	let recent_path: string = substring(path, string_last_index_of(path, "/") + 1);
+	let recent_path: string = substring(path, string_last_index_of(path, "/") + 1, path.length);
 	///else
 	let recent_path: string = path;
 	///end
@@ -86,7 +86,8 @@ function import_arm_run_project(path: string) {
 		camera_origins[0].z = origin[2];
 	}
 
-	for (let file of project.assets) {
+	for (let i: i32 = 0; i < project.assets.length; ++i) {
+		let file: string = project.assets[i];
 		///if krom_windows
 		file = string_replace_all(file, "/", "\\");
 		///else
@@ -107,7 +108,8 @@ function import_arm_run_project(path: string) {
 
 	///if (is_paint || is_sculpt)
 	if (project.font_assets != null) {
-		for (let file of project.font_assets) {
+		for (let i: i32 = 0; i < project.font_assets.length; ++i) {
+			let file: string = project.font_assets[i];
 			///if krom_windows
 			file = string_replace_all(file, "/", "\\");
 			///else
@@ -176,7 +178,8 @@ function import_arm_run_project(path: string) {
 	let tex: image_t = project_layers[0].texpaint;
 	if (tex.width != config_get_texture_res_x() || tex.height != config_get_texture_res_y()) {
 		if (history_undo_layers != null) {
-			for (let l of history_undo_layers) {
+			for (let i: i32 = 0; i < history_undo_layers.length; ++i) {
+				let l: slot_layer_t = history_undo_layers[i];
 				slot_layer_resize_and_set_bits(l);
 			}
 		}
@@ -198,7 +201,8 @@ function import_arm_run_project(path: string) {
 		context_raw.brush_blend_dirty = true;
 	}
 
-	for (let l of project_layers) {
+	for (let i: i32 = 0; i < project_layers.length; ++i) {
+		let l: slot_layer_t = project_layers[i];
 		slot_layer_unload(l);
 	}
 	project_layers = [];
@@ -319,7 +323,8 @@ function import_arm_run_project(path: string) {
 	let m0: material_data_t = data_get_material("Scene", "Material");
 
 	project_materials = [];
-	for (let n of project.material_nodes) {
+	for (let i: i32 = 0; i < project.material_nodes.length; ++i) {
+		let n: zui_node_canvas_t = project.material_nodes[i];
 		import_arm_init_nodes(n.nodes);
 		context_raw.material = slot_material_create(m0, n);
 		array_push(project_materials, context_raw.material);
@@ -330,20 +335,23 @@ function import_arm_run_project(path: string) {
 	ui_nodes_group_stack = [];
 	project_material_groups = [];
 	if (project.material_groups != null) {
-		for (let g of project.material_groups) {
+		for (let i: i32 = 0; i < project.material_groups.length; ++i) {
+			let g: zui_node_canvas_t = project.material_groups[i];
 			array_push(project_material_groups, { canvas: g, nodes: zui_nodes_create() });
 		}
 	}
 
 	///if (is_paint || is_sculpt)
-	for (let m of project_materials) {
+	for (let i: i32 = 0; i < project_materials.length; ++i) {
+		let m: slot_material_t = project_materials[i];
 		context_raw.material = m;
 		make_material_parse_paint_material();
 		util_render_make_material_preview();
 	}
 
 	project_brushes = [];
-	for (let n of project.brush_nodes) {
+	for (let i: i32 = 0; i < project.brush_nodes.length; ++i) {
+		let n: zui_node_canvas_t = project.brush_nodes[i];
 		import_arm_init_nodes(n.nodes);
 		context_raw.brush = slot_brush_create(n);
 		array_push(project_brushes, context_raw.brush);
@@ -415,7 +423,8 @@ function import_arm_run_material(path: string) {
 
 function import_arm_run_material_from_project(project: project_format_t, path: string) {
 	let base: string = path_base_dir(path);
-	for (let file of project.assets) {
+	for (let i: i32 = 0; i < project.assets.length; ++i) {
+		let file: string = project.assets[i];
 		///if krom_windows
 		file = string_replace_all(file, "/", "\\");
 		///else
@@ -437,7 +446,8 @@ function import_arm_run_material_from_project(project: project_format_t, path: s
 
 	let imported: slot_material_t[] = [];
 
-	for (let c of project.material_nodes) {
+	for (let i: i32 = 0; i < project.material_nodes.length; ++i) {
+		let c: zui_node_canvas_t = project.material_nodes[i];
 		import_arm_init_nodes(c.nodes);
 		context_raw.material = slot_material_create(m0, c);
 		array_push(project_materials, context_raw.material);
@@ -446,7 +456,8 @@ function import_arm_run_material_from_project(project: project_format_t, path: s
 	}
 
 	if (project.material_groups != null) {
-		for (let c of project.material_groups) {
+		for (let i: i32 = 0; i < project.material_groups.length; ++i) {
+			let c: zui_node_canvas_t = project.material_groups[i];
 			while (import_arm_group_exists(c)) {
 				import_arm_rename_group(c.name, imported, project.material_groups); // Ensure unique group name
 			}
@@ -456,7 +467,8 @@ function import_arm_run_material_from_project(project: project_format_t, path: s
 	}
 
 	let _init = function () {
-		for (let m of imported) {
+		for (let i: i32 = 0; i < imported.length; ++i) {
+			let m: slot_material_t = imported[i];
 			context_set_material(m);
 			make_material_parse_paint_material();
 			util_render_make_material_preview();
@@ -470,7 +482,8 @@ function import_arm_run_material_from_project(project: project_format_t, path: s
 }
 
 function import_arm_group_exists(c: zui_node_canvas_t): bool {
-	for (let g of project_material_groups) {
+	for (let i: i32 = 0; i < project_material_groups.length; ++i) {
+		let g: node_group_t = project_material_groups[i];
 		if (g.canvas.name == c.name) {
 			return true;
 		}
@@ -479,18 +492,22 @@ function import_arm_group_exists(c: zui_node_canvas_t): bool {
 }
 
 function import_arm_rename_group(name: string, materials: slot_material_t[], groups: zui_node_canvas_t[]) {
-	for (let m of materials) {
-		for (let n of m.canvas.nodes) {
+	for (let i: i32 = 0; i < materials.length; ++i) {
+		let m: slot_material_t = materials[i];
+		for (let i: i32 = 0; i < m.canvas.nodes.length; ++i) {
+			let n: zui_node_t = m.canvas.nodes[i];
 			if (n.type == "GROUP" && n.name == name) {
 				n.name += ".1";
 			}
 		}
 	}
-	for (let c of groups) {
+	for (let i: i32 = 0; i < groups.length; ++i) {
+		let c: zui_node_canvas_t = groups[i];
 		if (c.name == name) {
 			c.name += ".1";
 		}
-		for (let n of c.nodes) {
+		for (let i: i32 = 0; i < c.nodes.length; ++i) {
+			let n: zui_node_t = c.nodes[i];
 			if (n.type == "GROUP" && n.name == name) {
 				n.name += ".1";
 			}
@@ -510,7 +527,8 @@ function import_arm_run_brush(path: string) {
 
 function import_arm_run_brush_from_project(project: project_format_t, path: string) {
 	let base: string = path_base_dir(path);
-	for (let file of project.assets) {
+	for (let i: i32 = 0; i < project.assets.length; ++i) {
+		let file: string = project.assets[i];
 		///if krom_windows
 		file = string_replace_all(file, "/", "\\");
 		///else
@@ -530,7 +548,8 @@ function import_arm_run_brush_from_project(project: project_format_t, path: stri
 
 	let imported: slot_brush_t[] = [];
 
-	for (let n of project.brush_nodes) {
+	for (let i: i32 = 0; i < project.brush_nodes.length; ++i) {
+		let n: zui_node_canvas_t = project.brush_nodes[i];
 		import_arm_init_nodes(n.nodes);
 		context_raw.brush = slot_brush_create(n);
 		array_push(project_brushes, context_raw.brush);
@@ -538,7 +557,8 @@ function import_arm_run_brush_from_project(project: project_format_t, path: stri
 	}
 
 	let _init = function () {
-		for (let b of imported) {
+		for (let i: i32 = 0; i < imported.length; ++i) {
+			let b: slot_brush_t = imported[i];
 			context_set_brush(b);
 			util_render_make_brush_preview();
 		}
@@ -570,7 +590,8 @@ function import_arm_run_swatches_from_project(project: project_format_t, path: s
 	}
 
 	if (project.swatches != null) {
-		for (let s of project.swatches) {
+		for (let i: i32 = 0; i < project.swatches.length; ++i) {
+			let s: swatch_color_t = project.swatches[i];
 			array_push(project_raw.swatches, s);
 		}
 	}
@@ -598,7 +619,8 @@ function import_arm_texture_node_name(): string {
 }
 
 function import_arm_init_nodes(nodes: zui_node_t[]) {
-	for (let node of nodes) {
+	for (let i: i32 = 0; i < nodes.length; ++i) {
+		let node: zui_node_t = nodes[i];
 		if (node.type == import_arm_texture_node_name()) {
 			node.buttons[0].default_value = base_get_asset_index(node.buttons[0].data);
 			node.buttons[0].data = "";
@@ -610,7 +632,8 @@ function import_arm_unpack_asset(project: project_format_t, abs: string, file: s
 	if (project_raw.packed_assets == null) {
 		project_raw.packed_assets = [];
 	}
-	for (let pa of project.packed_assets) {
+	for (let i: i32 = 0; i < project.packed_assets.length; ++i) {
+		let pa: packed_asset_t = project.packed_assets[i];
 		///if krom_windows
 		pa.name = string_replace_all(pa.name, "/", "\\");
 		///else

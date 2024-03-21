@@ -10,7 +10,7 @@ let text_to_photo_node_text_encoder_blob : buffer_t;
 let text_to_photo_node_unet_blob : buffer_t;
 let text_to_photo_node_vae_decoder_blob : buffer_t;
 
-function text_to_photo_node_create(): text_to_photo_node_t {
+function text_to_photo_node_create(arg: any): text_to_photo_node_t {
 	let n: text_to_photo_node_t = {};
 	n.base = logic_node_create();
 	n.base.get_as_image = text_to_photo_node_get_as_image;
@@ -53,10 +53,10 @@ function text_to_photo_node_text_encoder(prompt: string, inpaint_latents: f32_ar
 	console_progress(tr("Processing") + " - " + tr("Text to Photo"));
 	base_notify_on_next_frame(function () {
 		let words = string_split(string_replace_all(string_replace_all(string_replace_all(prompt, "\n", " "), ",", " , "), "  ", " ").trim(), " ");
-		for (let i = 0; i < words.length; ++i) {
+		for (let i: i32 = 0; i < words.length; ++i) {
 			text_to_photo_node_text_input_ids[i + 1] = to_lower_case(text_to_photo_node_vocab[words[i]) + "</w>"];
 		}
-		for (let i = words.length; i < (text_to_photo_node_text_input_ids.length - 1); ++i) {
+		for (let i: i32 = words.length; i < (text_to_photo_node_text_input_ids.length - 1); ++i) {
 			text_to_photo_node_text_input_ids[i + 1] = 49407; // <|endoftext|>
 		}
 
@@ -69,18 +69,18 @@ function text_to_photo_node_text_encoder(prompt: string, inpaint_latents: f32_ar
 		let uncond_embeddings = new f32_array_t(uncond_embeddings_buf);
 
 		let f32a = f32_array_create(uncond_embeddings.length + text_embeddings.length);
-		for (let i = 0; i < uncond_embeddings.length; ++i) f32a[i] = uncond_embeddings[i];
-		for (let i = 0; i < text_embeddings.length; ++i) f32a[i + uncond_embeddings.length] = text_embeddings[i];
+		for (let i: i32 = 0; i < uncond_embeddings.length; ++i) f32a[i] = uncond_embeddings[i];
+		for (let i: i32 = 0; i < text_embeddings.length; ++i) f32a[i + uncond_embeddings.length] = text_embeddings[i];
 		text_embeddings = f32a;
 
 		let width = 512;
 		let height = 512;
 		let latents = f32_array_create(1 * 4 * math_floor(height / 8) * math_floor(width / 8));
 		if (inpaint_latents == null) {
-			for (let i = 0; i < latents.length; ++i) latents[i] = math_cos(2.0 * 3.14 * random_node_get_float()) * math_sqrt(-2.0 * math_log(random_node_get_float()));
+			for (let i: i32 = 0; i < latents.length; ++i) latents[i] = math_cos(2.0 * 3.14 * random_node_get_float()) * math_sqrt(-2.0 * math_log(random_node_get_float()));
 		}
 		else {
-			for (let i = 0; i < latents.length; ++i) latents[i] = inpaint_latents[i];
+			for (let i: i32 = 0; i < latents.length; ++i) latents[i] = inpaint_latents[i];
 		}
 
 		done(latents, text_embeddings);
@@ -102,20 +102,20 @@ function text_to_photo_node_unet(latents: f32_array_t, text_embeddings: f32_arra
 		console_progress(tr("Processing") + " - " + tr("Text to Photo") + " (" + (counter + 1) + "/" + (50 - offset) + ")");
 
 		let timestep = text_to_photo_node_timesteps[counter + offset];
-		for (let i = 0; i < latents.length; ++i) latent_model_input[i] = latents[i];
-		for (let i = 0; i < latents.length; ++i) latent_model_input[i + latents.length] = latents[i];
+		for (let i: i32 = 0; i < latents.length; ++i) latent_model_input[i] = latents[i];
+		for (let i: i32 = 0; i < latents.length; ++i) latent_model_input[i + latents.length] = latents[i];
 
 		let t32 = i32_array_create(2);
 		t32[0] = timestep;
 		let noise_pred_buf = krom_ml_inference(text_to_photo_node_unet_blob, [latent_model_input.buffer, t32.buffer, text_embeddings.buffer], [[2, 4, 64, 64], [1], [2, 77, 768]], [2, 4, 64, 64], config_raw.gpu_inference);
 		let noise_pred = new f32_array_t(noise_pred_buf);
 
-		for (let i = 0; i < noise_pred_uncond.length; ++i) noise_pred_uncond[i] = noise_pred[i];
-		for (let i = 0; i < noise_pred_text.length; ++i) noise_pred_text[i] = noise_pred[noise_pred_uncond.length + i];
+		for (let i: i32 = 0; i < noise_pred_uncond.length; ++i) noise_pred_uncond[i] = noise_pred[i];
+		for (let i: i32 = 0; i < noise_pred_text.length; ++i) noise_pred_text[i] = noise_pred[noise_pred_uncond.length + i];
 
 		let guidance_scale = 7.5;
 		noise_pred = f32_array_create(noise_pred_uncond.length);
-		for (let i = 0; i < noise_pred_uncond.length; ++i) {
+		for (let i: i32 = 0; i < noise_pred_uncond.length; ++i) {
 			noise_pred[i] = noise_pred_uncond[i] + guidance_scale * (noise_pred_text[i] - noise_pred_uncond[i]);
 		}
 
@@ -134,7 +134,7 @@ function text_to_photo_node_unet(latents: f32_array_t, text_embeddings: f32_arra
 		}
 		else if (ets.length == 1 && counter == 1) {
 			let _noise_pred = f32_array_create(noise_pred.length);
-			for (let i = 0; i < noise_pred.length; ++i) {
+			for (let i: i32 = 0; i < noise_pred.length; ++i) {
 				_noise_pred[i] = (noise_pred[i] + ets[ets.length - 1][i]) / 2;
 			}
 			noise_pred = _noise_pred;
@@ -143,21 +143,21 @@ function text_to_photo_node_unet(latents: f32_array_t, text_embeddings: f32_arra
 		}
 		else if (ets.length == 2) {
 			let _noise_pred = f32_array_create(noise_pred.length);
-			for (let i = 0; i < noise_pred.length; ++i) {
+			for (let i: i32 = 0; i < noise_pred.length; ++i) {
 				_noise_pred[i] = (3 * ets[ets.length - 1][i] - ets[ets.length - 2][i]) / 2;
 			}
 			noise_pred = _noise_pred;
 		}
 		else if (ets.length == 3) {
 			let _noise_pred = f32_array_create(noise_pred.length);
-			for (let i = 0; i < noise_pred.length; ++i) {
+			for (let i: i32 = 0; i < noise_pred.length; ++i) {
 				_noise_pred[i] = (23 * ets[ets.length - 1][i] - 16 * ets[ets.length - 2][i] + 5 * ets[ets.length - 3][i]) / 12;
 			}
 			noise_pred = _noise_pred;
 		}
 		else {
 			let _noise_pred = f32_array_create(noise_pred.length);
-			for (let i = 0; i < noise_pred.length; ++i) {
+			for (let i: i32 = 0; i < noise_pred.length; ++i) {
 				_noise_pred[i] = (1 / 24) * (55 * ets[ets.length - 1][i] - 59 * ets[ets.length - 2][i] + 37 * ets[ets.length - 3][i] - 9 * ets[ets.length - 4][i]);
 			}
 			noise_pred = _noise_pred;
@@ -169,25 +169,25 @@ function text_to_photo_node_unet(latents: f32_array_t, text_embeddings: f32_arra
 		let beta_prod_t_prev = 1 - alpha_prod_t_prev;
 		let latents_coeff = math_pow(alpha_prod_t_prev / alpha_prod_t, (0.5));
 		let noise_pred_denom_coeff = alpha_prod_t * math_pow(beta_prod_t_prev, (0.5)) + math_pow(alpha_prod_t * beta_prod_t * alpha_prod_t_prev, (0.5));
-		for (let i = 0; i < latents.length; ++i) {
+		for (let i: i32 = 0; i < latents.length; ++i) {
 			latents[i] = (latents_coeff * latents[i] - (alpha_prod_t_prev - alpha_prod_t) * noise_pred[i] / noise_pred_denom_coeff);
 		}
 		counter += 1;
 
 		if (mask != null) {
 			let noise = f32_array_create(latents.length);
-			for (let i = 0; i < noise.length; ++i) {
+			for (let i: i32 = 0; i < noise.length; ++i) {
 				noise[i] = math_cos(2.0 * 3.14 * random_node_get_float()) * math_sqrt(-2.0 * math_log(random_node_get_float()));
 			}
 			let sqrt_alpha_prod = math_pow(text_to_photo_node_alphas_cumprod[timestep], 0.5);
 			let sqrt_one_minus_alpha_prod = math_pow(1.0 - text_to_photo_node_alphas_cumprod[timestep], 0.5);
 
 			let init_latents_proper = f32_array_create(latents.length);
-			for (let i = 0; i < init_latents_proper.length; ++i) {
+			for (let i: i32 = 0; i < init_latents_proper.length; ++i) {
 				init_latents_proper[i] = sqrt_alpha_prod * latents_orig[i] + sqrt_one_minus_alpha_prod * noise[i];
 			}
 
-			for (let i = 0; i < latents.length; ++i) {
+			for (let i: i32 = 0; i < latents.length; ++i) {
 				latents[i] = (init_latents_proper[i] * mask[i]) + (latents[i] * (1.0 - mask[i]));
 			}
 		}
@@ -203,21 +203,21 @@ function text_to_photo_node_unet(latents: f32_array_t, text_embeddings: f32_arra
 function text_to_photo_node_vae_decoder(latents: f32_array_t, upscale: bool, done: (img: image_t)=>void) {
 	console_progress(tr("Processing") + " - " + tr("Text to Photo"));
 	base_notify_on_next_frame(function () {
-		for (let i = 0; i < latents.length; ++i) {
+		for (let i: i32 = 0; i < latents.length; ++i) {
 			latents[i] = 1.0 / 0.18215 * latents[i];
 		}
 
 		let pyimage_buf = krom_ml_inference(text_to_photo_node_vae_decoder_blob, [latents.buffer], [[1, 4, 64, 64]], [1, 3, 512, 512], config_raw.gpu_inference);
 		let pyimage = new f32_array_t(pyimage_buf);
 
-		for (let i = 0; i < pyimage.length; ++i) {
+		for (let i: i32 = 0; i < pyimage.length; ++i) {
 			pyimage[i] = pyimage[i] / 2.0 + 0.5;
 			if (pyimage[i] < 0) pyimage[i] = 0;
 			else if (pyimage[i] > 1) pyimage[i] = 1;
 		}
 
 		let u8a = u8_array_create(4 * 512 * 512);
-		for (let i = 0; i < (512 * 512); ++i) {
+		for (let i: i32 = 0; i < (512 * 512); ++i) {
 			u8a[i * 4    ] = math_floor(pyimage[i                ] * 255);
 			u8a[i * 4 + 1] = math_floor(pyimage[i + 512 * 512    ] * 255);
 			u8a[i * 4 + 2] = math_floor(pyimage[i + 512 * 512 * 2] * 255);

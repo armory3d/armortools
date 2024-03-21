@@ -69,7 +69,8 @@ function ui_nodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
 					// Connect to the first socket
 					link_drag.to_socket = 0;
 					// Try to find the first type-matching socket and use it if present
-					for (let socket of n.inputs) {
+					for (let i: i32 = 0; i < n.inputs.length; ++i) {
+						let socket: zui_node_socket_t = n.inputs[i];
 						if (socket.type == from_type) {
 							link_drag.to_socket = array_index_of(n.inputs, socket);
 							break;
@@ -217,7 +218,8 @@ function ui_nodes_on_canvas_released() {
 		let nodes: zui_nodes_t = ui_nodes_get_nodes();
 		let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
 		let selected: zui_node_t = null;
-		for (let node of canvas.nodes) {
+		for (let i: i32 = 0; i < canvas.nodes.length; ++i) {
+			let node: zui_node_t = canvas.nodes[i];
 			if (zui_get_input_in_rect(ui_nodes_ui._window_x + zui_nodes_NODE_X(node), ui_nodes_ui._window_y + zui_nodes_NODE_Y(node), zui_nodes_NODE_W(node), zui_nodes_NODE_H(canvas, node))) {
 				selected = node;
 				break;
@@ -313,7 +315,8 @@ function ui_nodes_on_canvas_released() {
 	if (ui_nodes_ui.input_released) {
 		let nodes: zui_nodes_t = ui_nodes_get_nodes();
 		let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
-		for (let node of canvas.nodes) {
+		for (let i: i32 = 0; i < canvas.nodes.length; ++i) {
+			let node: zui_node_t = canvas.nodes[i];
 			if (zui_get_input_in_rect(ui_nodes_ui._window_x + zui_nodes_NODE_X(node), ui_nodes_ui._window_y + zui_nodes_NODE_Y(node), zui_nodes_NODE_W(node), zui_nodes_NODE_H(canvas, node))) {
 				if (node.id == nodes.nodes_selected_id[0]) {
 					ui_view2d_hwnd.redraws = 2;
@@ -484,22 +487,26 @@ function ui_nodes_update() {
 	let nodes: zui_nodes_t = ui_nodes_get_nodes();
 	if (nodes.nodes_selected_id.length > 0 && ui_nodes_ui.is_key_pressed) {
 		if (ui_nodes_ui.key == key_code_t.LEFT) {
-			for (let n of nodes.nodes_selected_id) {
+			for (let i: i32 = 0; i < nodes.nodes_selected_id.length; ++i) {
+				let n: i32 = nodes.nodes_selected_id[i];
 				zui_get_node(ui_nodes_get_canvas(true).nodes, n).x -= 1;
 			}
 		}
 		else if (ui_nodes_ui.key == key_code_t.RIGHT) {
-			for (let n of nodes.nodes_selected_id) {
+			for (let i: i32 = 0; i < nodes.nodes_selected_id.length; ++i) {
+				let n: i32 = nodes.nodes_selected_id[i];
 				zui_get_node(ui_nodes_get_canvas(true).nodes, n).x += 1;
 			}
 		}
 		if (ui_nodes_ui.key == key_code_t.UP) {
-			for (let n of nodes.nodes_selected_id) {
+			for (let i: i32 = 0; i < nodes.nodes_selected_id.length; ++i) {
+				let n: i32 = nodes.nodes_selected_id[i];
 				zui_get_node(ui_nodes_get_canvas(true).nodes, n).y -= 1;
 			}
 		}
 		else if (ui_nodes_ui.key == key_code_t.DOWN) {
-			for (let n of nodes.nodes_selected_id) {
+			for (let i: i32 = 0; i < nodes.nodes_selected_id.length; ++i) {
+				let n: i32 = nodes.nodes_selected_id[i];
 				zui_get_node(ui_nodes_get_canvas(true).nodes, n).y += 1;
 			}
 		}
@@ -564,8 +571,10 @@ function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
 		let node_list: zui_node_t[][] = nodes_brush_list;
 		///end
 
-		for (let list of node_list) {
-			for (let n of list) {
+		for (let i: i32 = 0; i < node_list.length; ++i) {
+			let list: zui_node_t[] = node_list[i];
+			for (let i: i32 = 0; i < list.length; ++i) {
+				let n: zui_node_t = list[i];
 				if (string_index_of(to_lower_case(tr(n.name)), search) >= 0) {
 					ui.t.BUTTON_COL = count == ui_nodes_node_search_offset ? ui.t.HIGHLIGHT_COL : ui.t.SEPARATOR_COL;
 					if (zui_button(tr(n.name), zui_align_t.LEFT) || (enter && count == ui_nodes_node_search_offset)) {
@@ -851,8 +860,10 @@ function ui_nodes_render() {
 					continue;
 				}
 				let found: bool = false;
-				for (let list of node_list) {
-					for (let list_node of list) {
+				for (let i: i32 = 0; i < node_list.length; ++i) {
+					let list: zui_node_t[] = node_list[i];
+					for (let i: i32 = 0; i < list.length; ++i) {
+						let list_node: zui_node_t = list[i];
 						if (canvas_node.type == list_node.type) {
 							found = true;
 							break;
@@ -994,7 +1005,8 @@ function ui_nodes_render() {
 		if (h.changed) { // Check whether renaming is possible and update group links
 			if (ui_nodes_group_stack.length > 0) {
 				let can_rename: bool = true;
-				for (let m of project_material_groups) {
+				for (let i: i32 = 0; i < project_material_groups.length; ++i) {
+					let m: node_group_t = project_material_groups[i];
 					if (m.canvas.name == new_name) {
 						can_rename = false; // Name already used
 					}
@@ -1004,14 +1016,18 @@ function ui_nodes_render() {
 					let old_name: string = c.name;
 					c.name = new_name;
 					let canvases: zui_node_canvas_t[] = [];
-					for (let m of project_materials) {
+					for (let i: i32 = 0; i < project_materials.length; ++i) {
+						let m: slot_material_t = project_materials[i];
 						array_push(canvases, m.canvas);
 					}
-					for (let m of project_material_groups) {
+					for (let i: i32 = 0; i < project_material_groups.length; ++i) {
+						let m: node_group_t = project_material_groups[i];
 						array_push(canvases, m.canvas);
 					}
-					for (let canvas of canvases) {
-						for (let n of canvas.nodes) {
+					for (let i: i32 = 0; i < canvases.length; ++i) {
+						let canvas: zui_node_canvas_t = canvases[i];
+						for (let i: i32 = 0; i < canvas.nodes.length; ++i) {
+							let n: zui_node_t = canvas.nodes[i];
 							if (n.type == "GROUP" && n.name == old_name) {
 								n.name = c.name;
 							}
@@ -1122,7 +1138,8 @@ function ui_nodes_render() {
 
 		ui_menu_start(ui_nodes_ui);
 
-		for (let n of list[ui_nodes_menu_category]) {
+		for (let i: i32 = 0; i < list[ui_nodes_menu_category].length; ++i) {
+			let n: zui_node_t = list[ui_nodes_menu_category][i];
 			if (ui_menu_button(ui_nodes_ui, tr(n.name))) {
 				ui_nodes_push_undo();
 				let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
@@ -1142,7 +1159,8 @@ function ui_nodes_render() {
 			}
 		}
 		if (is_group_category) {
-			for (let g of project_material_groups) {
+			for (let i: i32 = 0; i < project_material_groups.length; ++i) {
+				let g: node_group_t = project_material_groups[i];
 				zui_fill(0, 1, ui_nodes_ui._w / zui_SCALE(ui_nodes_ui), ui_nodes_ui.t.BUTTON_H + 2, ui_nodes_ui.t.ACCENT_SELECT_COL);
 				zui_fill(1, 1, ui_nodes_ui._w / zui_SCALE(ui_nodes_ui) - 2, ui_nodes_ui.t.BUTTON_H + 1, ui_nodes_ui.t.SEPARATOR_COL);
 				ui_nodes_ui.enabled = ui_nodes_can_place_group(g.canvas.name);
@@ -1189,7 +1207,8 @@ function ui_nodes_contains_node_group_recursive(group: node_group_t, group_name:
 	if (group.canvas.name == group_name) {
 		return true;
 	}
-	for (let n of group.canvas.nodes) {
+	for (let i: i32 = 0; i < group.canvas.nodes.length; ++i) {
+		let n: zui_node_t = group.canvas.nodes[i];
 		if (n.type == "GROUP") {
 			let g: node_group_t = project_get_material_group_by_name(n.name);
 			if (g != null && ui_nodes_contains_node_group_recursive(g, group_name)) {
@@ -1204,13 +1223,15 @@ function ui_nodes_can_place_group(group_name: string): bool {
 	// Prevent Recursive node groups
 	// The group to place must not contain the current group or a group that contains the current group
 	if (ui_nodes_group_stack.length > 0) {
-		for (let g of ui_nodes_group_stack) {
+		for (let i: i32 = 0; i < ui_nodes_group_stack.length; ++i) {
+			let g: node_group_t = ui_nodes_group_stack[i];
 			if (ui_nodes_contains_node_group_recursive(project_get_material_group_by_name(group_name), g.canvas.name)) return false;
 		}
 	}
 	// Group was deleted / renamed
 	let group_exists: bool = false;
-	for (let group of project_material_groups) {
+	for (let i: i32 = 0; i < project_material_groups.length; ++i) {
+		let group: node_group_t = project_material_groups[i];
 		if (group_name == group.canvas.name) {
 			group_exists = true;
 		}
@@ -1296,12 +1317,14 @@ function ui_nodes_make_node(n: zui_node_t, nodes: zui_nodes_t, canvas: zui_node_
 	node.x = ui_nodes_get_node_x();
 	node.y = ui_nodes_get_node_y();
 	let count: i32 = 0;
-	for (let soc of node.inputs) {
+	for (let i: i32 = 0; i < node.inputs.length; ++i) {
+		let soc: zui_node_socket_t = node.inputs[i];
 		soc.id = zui_get_socket_id(canvas.nodes) + count;
 		soc.node_id = node.id;
 		count++;
 	}
-	for (let soc of node.outputs) {
+	for (let i: i32 = 0; i < node.outputs.length; ++i) {
+		let soc: zui_node_socket_t = node.outputs[i];
 		soc.id = zui_get_socket_id(canvas.nodes) + count;
 		soc.node_id = node.id;
 		count++;
@@ -1318,9 +1341,11 @@ function ui_nodes_make_group_node(group_canvas: zui_node_canvas_t, nodes: zui_no
 	node.y = ui_nodes_get_node_y();
 	let group_input: zui_node_t = null;
 	let group_output: zui_node_t = null;
-	for (let g of project_material_groups) {
+	for (let i: i32 = 0; i < project_material_groups.length; ++i) {
+		let g: node_group_t = project_material_groups[i];
 		if (g.canvas.name == node.name) {
-			for (let n of g.canvas.nodes) {
+			for (let i: i32 = 0; i < g.canvas.nodes.length; ++i) {
+				let n: zui_node_t = g.canvas.nodes[i];
 				if (n.type == "GROUP_INPUT") {
 					group_input = n;
 				}
@@ -1332,10 +1357,12 @@ function ui_nodes_make_group_node(group_canvas: zui_node_canvas_t, nodes: zui_no
 		}
 	}
 	if (group_input != null && group_output != null) {
-		for (let soc of group_input.outputs) {
+		for (let i: i32 = 0; i < group_input.outputs.length; ++i) {
+			let soc: zui_node_socket_t = group_input.outputs[i];
 			array_push(node.inputs, nodes_material_create_socket(nodes, node, soc.name, soc.type, canvas, soc.min, soc.max, soc.default_value));
 		}
-		for (let soc of group_output.inputs) {
+		for (let i: i32 = 0; i < group_output.inputs.length; ++i) {
+			let soc: zui_node_socket_t = group_output.inputs[i];
 			array_push(node.outputs, nodes_material_create_socket(nodes, node, soc.name, soc.type, canvas, soc.min, soc.max, soc.default_value));
 		}
 	}
@@ -1375,7 +1402,8 @@ function ui_nodes_make_node_preview() {
 ///end
 
 function ui_nodes_has_group(c: zui_node_canvas_t): bool {
-	for (let n of c.nodes) {
+	for (let i: i32 = 0; i < c.nodes.length; ++i) {
+		let n: zui_node_t = c.nodes[i];
 		if (n.type == "GROUP") {
 			return true;
 		}
@@ -1384,11 +1412,13 @@ function ui_nodes_has_group(c: zui_node_canvas_t): bool {
 }
 
 function ui_nodes_traverse_group(mgroups: zui_node_canvas_t[], c: zui_node_canvas_t) {
-	for (let n of c.nodes) {
+	for (let i: i32 = 0; i < c.nodes.length; ++i) {
+		let n: zui_node_t = c.nodes[i];
 		if (n.type == "GROUP") {
 			if (ui_nodes_get_group(mgroups, n.name) == null) {
 				let canvases: zui_node_canvas_t[] = [];
-				for (let g of project_material_groups) {
+				for (let i: i32 = 0; i < project_material_groups.length; ++i) {
+					let g: node_group_t = project_material_groups[i];
 					array_push(canvases, g.canvas);
 				}
 				let group: zui_node_canvas_t = ui_nodes_get_group(canvases, n.name);
@@ -1400,7 +1430,8 @@ function ui_nodes_traverse_group(mgroups: zui_node_canvas_t[], c: zui_node_canva
 }
 
 function ui_nodes_get_group(canvases: zui_node_canvas_t[], name: string): zui_node_canvas_t {
-	for (let c of canvases) {
+	for (let i: i32 = 0; i < canvases.length; ++i) {
+		let c: zui_node_canvas_t = canvases[i];
 		if (c.name == name) {
 			return c;
 		}

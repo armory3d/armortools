@@ -73,7 +73,8 @@ function tab_objects_draw(htab: zui_handle_t) {
 						if (ui_menu_button(ui, "Assign Material")) {
 							tab_objects_material_id++;
 
-							for (let sh of _scene_raw.shader_datas) {
+							for (let i: i32 = 0; i < _scene_raw.shader_datas.length; ++i) {
+								let sh: shader_data_t = _scene_raw.shader_datas[i];
 								if (sh.name == "Material_data") {
 									let s: shader_data_t = json_parse(json_stringify(sh));
 									s.name = "TempMaterial_data" + tab_objects_material_id;
@@ -82,7 +83,8 @@ function tab_objects_draw(htab: zui_handle_t) {
 								}
 							}
 
-							for (let mat of _scene_raw.material_datas) {
+							for (let i: i32 = 0; i < _scene_raw.material_datas.length; ++i) {
+								let mat: material_data_t = _scene_raw.material_datas[i];
 								if (mat.name == "Material") {
 									let m: material_data_t = json_parse(json_stringify(mat));
 									m.name = "TempMaterial" + tab_objects_material_id;
@@ -102,7 +104,8 @@ function tab_objects_draw(htab: zui_handle_t) {
 
 				if (b) {
 					let current_y = ui._y;
-					for (let child of current_object.children) {
+					for (let i: i32 = 0; i < current_object.children.length; ++i) {
+						let child: object_t = current_object.children[i];
 						// ui.indent();
 						draw_list(list_handle, child);
 						// ui.unindent();
@@ -114,7 +117,8 @@ function tab_objects_draw(htab: zui_handle_t) {
 					g2_set_color(0xffffffff);
 				}
 			}
-			for (let c of _scene_root.children) {
+			for (let i: i32 = 0; i < _scene_root.children.length) {
+				let c: object_t = _scene_root.children[i];
 				draw_list(zui_handle("tabobjects_1"), c);
 			}
 
@@ -142,21 +146,21 @@ function tab_objects_draw(htab: zui_handle_t) {
 
 				h = zui_handle("tabobjects_4");
 				h.text = roundfp(local_pos.x) + "";
-				f = parseFloat(zui_text_input(h, "X"));
+				f = parse_float(zui_text_input(h, "X"));
 				if (h.changed) {
 					local_pos.x = f;
 				}
 
 				h = zui_handle("tabobjects_5");
 				h.text = roundfp(local_pos.y) + "";
-				f = parseFloat(zui_text_input(h, "Y"));
+				f = parse_float(zui_text_input(h, "Y"));
 				if (h.changed) {
 					local_pos.y = f;
 				}
 
 				h = zui_handle("tabobjects_6");
 				h.text = roundfp(local_pos.z) + "";
-				f = parseFloat(zui_text_input(h, "Z"));
+				f = parse_float(zui_text_input(h, "Z"));
 				if (h.changed) {
 					local_pos.z = f;
 				}
@@ -166,7 +170,7 @@ function tab_objects_draw(htab: zui_handle_t) {
 
 				h = zui_handle("tabobjects_7");
 				h.text = roundfp(rot.x) + "";
-				f = parseFloat(zui_text_input(h, "X"));
+				f = parse_float(zui_text_input(h, "X"));
 				let changed = false;
 				if (h.changed) {
 					changed = true;
@@ -175,7 +179,7 @@ function tab_objects_draw(htab: zui_handle_t) {
 
 				h = zui_handle("tabobjects_8");
 				h.text = roundfp(rot.y) + "";
-				f = parseFloat(zui_text_input(h, "Y"));
+				f = parse_float(zui_text_input(h, "Y"));
 				if (h.changed) {
 					changed = true;
 					rot.y = f;
@@ -183,7 +187,7 @@ function tab_objects_draw(htab: zui_handle_t) {
 
 				h = zui_handle("tabobjects_9");
 				h.text = roundfp(rot.z) + "";
-				f = parseFloat(zui_text_input(h, "Z"));
+				f = parse_float(zui_text_input(h, "Z"));
 				if (h.changed) {
 					changed = true;
 					rot.z = f;
@@ -203,21 +207,21 @@ function tab_objects_draw(htab: zui_handle_t) {
 
 				h = zui_handle("tabobjects_10");
 				h.text = roundfp(scale.x) + "";
-				f = parseFloat(zui_text_input(h, "X"));
+				f = parse_float(zui_text_input(h, "X"));
 				if (h.changed) {
 					scale.x = f;
 				}
 
 				h = zui_handle("tabobjects_11");
 				h.text = roundfp(scale.y) + "";
-				f = parseFloat(zui_text_input(h, "Y"));
+				f = parse_float(zui_text_input(h, "Y"));
 				if (h.changed) {
 					scale.y = f;
 				}
 
 				h = zui_handle("tabobjects_12");
 				h.text = roundfp(scale.z) + "";
-				f = parseFloat(zui_text_input(h, "Z"));
+				f = parse_float(zui_text_input(h, "Z"));
 				if (h.changed) {
 					scale.z = f;
 				}
@@ -227,21 +231,21 @@ function tab_objects_draw(htab: zui_handle_t) {
 
 				h = zui_handle("tabobjects_13");
 				h.text = roundfp(dim.x) + "";
-				f = parseFloat(zui_text_input(h, "X"));
+				f = parse_float(zui_text_input(h, "X"));
 				if (h.changed) {
 					dim.x = f;
 				}
 
 				h = zui_handle("tabobjects_14");
 				h.text = roundfp(dim.y) + "";
-				f = parseFloat(zui_text_input(h, "Y"));
+				f = parse_float(zui_text_input(h, "Y"));
 				if (h.changed) {
 					dim.y = f;
 				}
 
 				h = zui_handle("tabobjects_15");
 				h.text = roundfp(dim.z) + "";
-				f = parseFloat(zui_text_input(h, "Z"));
+				f = parse_float(zui_text_input(h, "Z"));
 				if (h.changed) {
 					dim.z = f;
 				}

@@ -127,12 +127,18 @@ function ui_menu_render() {
 			if (history_redos > 0) {
 				step_redo = history_steps[history_steps.length - history_redos].name;
 			}
+
 			ui.enabled = history_undos > 0;
-			if (ui_menu_button(ui, tr("Undo {step}", new map_t([["step", step_undo]])), config_keymap.edit_undo)) {
+			let vars_undo: map_t<string, string> = map_create();
+			map_set(vars_undo, "step", step_undo);
+			if (ui_menu_button(ui, tr("Undo {step}", vars_undo), config_keymap.edit_undo)) {
 				history_undo();
 			}
+
 			ui.enabled = history_redos > 0;
-			if (ui_menu_button(ui, tr("Redo {step}", new map_t([["step", step_redo]])), config_keymap.edit_redo)) {
+			let vars_redo: map_t<string, string> = map_create();
+			map_set(vars_redo, "step", step_redo);
+			if (ui_menu_button(ui, tr("Redo {step}", vars_redo), config_keymap.edit_redo)) {
 				history_redo();
 			}
 			ui.enabled = true;
@@ -177,7 +183,9 @@ function ui_menu_render() {
 			ui_menu_align(ui);
 			context_raw.envmap_angle = zui_slider(enva_handle, tr("Environment Angle"), 0.0, 360.0, true, 1) / 180.0 * math_pi();
 			if (ui.is_hovered) {
-				zui_tooltip(tr("{shortcut} and move mouse", new map_t([["shortcut", config_keymap.rotate_envmap]])));
+				let vars: map_t<string, string> = map_create();
+				map_set(vars, "shortcut", config_keymap.rotate_envmap);
+				zui_tooltip(tr("{shortcut} and move mouse", vars));
 			}
 			if (enva_handle.changed) {
 				context_raw.ddirty = 2;
@@ -204,7 +212,9 @@ function ui_menu_render() {
 				ui_menu_align(ui);
 				let new_angle: f32 = zui_slider(lahandle, tr("Light Angle"), 0.0, 360.0, true, 1) / 180 * math_pi();
 				if (ui.is_hovered) {
-					zui_tooltip(tr("{shortcut} and move mouse", new map_t([["shortcut", config_keymap.rotate_light]])));
+					let vars: map_t<string, string> = map_create();
+					map_set(vars, "shortcut", config_keymap.rotate_light);
+					zui_tooltip(tr("{shortcut} and move mouse", vars));
 				}
 				let ldiff: f32 = new_angle - context_raw.light_angle;
 				if (math_abs(ldiff) > 0.005) {
@@ -431,13 +441,11 @@ function ui_menu_render() {
 			camera_controls_handle.position = context_raw.camera_controls;
 			context_raw.camera_controls = zui_inline_radio(camera_controls_handle, [tr("Orbit"), tr("Rotate"), tr("Fly")], zui_align_t.LEFT);
 
-			let orbit_and_rotate_tooltip: string = tr("Orbit and Rotate mode:\n{rotate_shortcut} or move right mouse button to rotate.\n{zoom_shortcut} or scroll to zoom.\n{pan_shortcut} or move middle mouse to pan.",
-				new map_t([
-					["rotate_shortcut", config_keymap.action_rotate],
-					["zoom_shortcut", config_keymap.action_zoom],
-					["pan_shortcut", config_keymap.action_pan]
-				])
-			);
+			let vars: map_t<string, string> = map_create();
+			map_set(vars, "rotate_shortcut", config_keymap.action_rotate);
+			map_set(vars, "zoom_shortcut", config_keymap.action_zoom);
+			map_set(vars, "pan_shortcut", config_keymap.action_pan);
+			let orbit_and_rotate_tooltip: string = tr("Orbit and Rotate mode:\n{rotate_shortcut} or move right mouse button to rotate.\n{zoom_shortcut} or scroll to zoom.\n{pan_shortcut} or move middle mouse to pan.", vars);
 			let fly_tooltip: string = tr("Fly mode:\nHold the right mouse button and one of the following commands:\nmove mouse to rotate.\nw, up or scroll up to move forward.\ns, down or scroll down to move backward.\na or left to move left.\nd or right to move right.\ne to move up.\nq to move down.\nHold shift to move faster or alt to move slower.");
 			if (ui.is_hovered) {
 				zui_tooltip(orbit_and_rotate_tooltip + "\n\n" + fly_tooltip);
@@ -501,9 +509,11 @@ function ui_menu_render() {
 						if (update_version > 0) {
 							let date: string = config_get_date(); // 2019 -> 19
 							date = substring(date, 2, date.length);
-							let date_int: i32 = parseInt(string_replace_all(date, "-", ""));
+							let date_int: i32 = parse_int(string_replace_all(date, "-", ""));
 							if (update_version > date_int) {
-								ui_box_show_message(tr("Update"), tr("Update is available!\nPlease visit {url}.", new map_t([["url", manifest_url]])));
+								let vars: map_t<string, string> = map_create();
+								map_set(vars, "url", manifest_url);
+								ui_box_show_message(tr("Update"), tr("Update is available!\nPlease visit {url}.", vars));
 							}
 							else {
 								ui_box_show_message(tr("Update"), tr("You are up to date!"));
@@ -511,7 +521,9 @@ function ui_menu_render() {
 						}
 					}
 					else {
-						ui_box_show_message(tr("Update"), tr("Unable to check for updates.\nPlease visit {url}.", new map_t([["url", manifest_url]])));
+						let vars: map_t<string, string> = map_create();
+						map_set(vars, "url", manifest_url);
+						ui_box_show_message(tr("Update"), tr("Unable to check for updates.\nPlease visit {url}.", vars));
 					}
 				});
 				///end
@@ -526,7 +538,7 @@ function ui_menu_render() {
 				let save: string = (path_is_protected() ? krom_save_path() : path_data()) + path_sep + "tmp.txt";
 				krom_sys_command('wmic path win32_VideoController get name > "' + save + '"');
 				let blob: buffer_t = krom_load_blob(save);
-				let u8: u8_array_t = new u8_array_t(blob);
+				let u8: u8_array_t = u8_array_create_from_buffer(blob);
 				let gpu_raw: string = "";
 				for (let i: i32 = 0; i < math_floor(u8.length / 2); ++i) {
 					let c: string = string_from_char_code(u8[i * 2]);
@@ -536,7 +548,8 @@ function ui_menu_render() {
 				let gpus: string[] = string_split(gpu_raw, "\n");
 				array_splice(gpus, 1, gpus.length - 2);
 				let gpu: string = "";
-				for (let g of gpus) {
+				for (let i: i32 = 0; i < gpus.length; ++i) {
+					let g: string = gpus[i];
 					gpu += trim_end(g) + ", ";
 				}
 				gpu = substring(gpu, 0, gpu.length - 2);

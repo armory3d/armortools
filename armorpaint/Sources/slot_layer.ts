@@ -1,45 +1,67 @@
 
-class slot_layer_t {
-	id: i32 = 0;
-	name: string;
-	ext: string = "";
-	visible: bool = true;
-	parent: slot_layer_t = null; // Group (for layers) or layer (for masks)
-
-	texpaint: image_t = null; // Base or mask
+type slot_layer_t = {
+	id?: i32;
+	name?: string;
+	ext?: string;
+	visible?: bool;
+	parent?: slot_layer_t; // Group (for layers) or layer (for masks)
+	texpaint?: image_t; // Base or mask
 	///if is_paint
-	texpaint_nor: image_t = null;
-	texpaint_pack: image_t = null;
-	texpaint_preview: image_t = null; // Layer preview
+	texpaint_nor?: image_t;
+	texpaint_pack?: image_t;
+	texpaint_preview?: image_t; // Layer preview
 	///end
-
-	mask_opacity: f32 = 1.0; // Opacity mask
-	fill_layer: slot_material_t = null;
-	show_panel: bool = true;
-	blending = blend_type_t.MIX;
-	object_mask: i32 = 0;
-	scale: f32 = 1.0;
-	angle: f32 = 0.0;
-	uv_type = uv_type_t.UVMAP;
-	paint_base: bool = true;
-	paint_opac: bool = true;
-	paint_occ: bool = true;
-	paint_rough: bool = true;
-	paint_met: bool = true;
-	paint_nor: bool = true;
-	paint_nor_blend: bool = true;
-	paint_height: bool = true;
-	paint_height_blend: bool = true;
-	paint_emis: bool = true;
-	paint_subs: bool = true;
-	decal_mat: mat4_t = mat4_identity(); // Decal layer
-}
+	mask_opacity?: f32; // Opacity mask
+	fill_layer?: slot_material_t;
+	show_panel?: bool;
+	blending?: blend_type_t;
+	object_mask?: i32;
+	scale?: f32;
+	angle?: f32;
+	uv_type?: uv_type_t;
+	paint_base?: bool;
+	paint_opac?: bool;
+	paint_occ?: bool;
+	paint_rough?: bool;
+	paint_met?: bool;
+	paint_nor?: bool;
+	paint_nor_blend?: bool;
+	paint_height?: bool;
+	paint_height_blend?: bool;
+	paint_emis?: bool;
+	paint_subs?: bool;
+	decal_mat?: mat4_t; // Decal layer
+};
 
 function slot_layer_create(ext: string = "", type: layer_slot_type_t = layer_slot_type_t.LAYER, parent: slot_layer_t = null): slot_layer_t {
-	let raw: slot_layer_t = new slot_layer_t();
+	let raw: slot_layer_t = {};
+	raw.id = 0;
+	raw.ext = "";
+	raw.visible = true;
+	raw.mask_opacity = 1.0; // Opacity mask
+	raw.show_panel = true;
+	raw.blending = blend_type_t.MIX;
+	raw.object_mask = 0;
+	raw.scale = 1.0;
+	raw.angle = 0.0;
+	raw.uv_type = uv_type_t.UVMAP;
+	raw.paint_base = true;
+	raw.paint_opac = true;
+	raw.paint_occ = true;
+	raw.paint_rough = true;
+	raw.paint_met = true;
+	raw.paint_nor = true;
+	raw.paint_nor_blend = true;
+	raw.paint_height = true;
+	raw.paint_height_blend = true;
+	raw.paint_emis = true;
+	raw.paint_subs = true;
+	raw.decal_mat = mat4_identity(); // Decal layer
+
 	if (ext == "") {
 		raw.id = 0;
-		for (let l of project_layers) {
+		for (let i: i32 = 0; i < project_layers.length; ++i) {
+			let l: slot_layer_t = project_layers[i];
 			if (l.id >= raw.id) {
 				raw.id = l.id + 1;
 			}
@@ -123,7 +145,8 @@ function slot_layer_delete(raw: slot_layer_t) {
 	if (slot_layer_is_layer(raw)) {
 		let masks: slot_layer_t[] = slot_layer_get_masks(raw, false); // Prevents deleting group masks
 		if (masks != null) {
-			for (let m of masks) {
+			for (let i: i32 = 0; i < masks.length; ++i) {
+				let m: slot_layer_t = masks[i];
 				slot_layer_delete(m);
 			}
 		}
@@ -131,13 +154,15 @@ function slot_layer_delete(raw: slot_layer_t) {
 	else if (slot_layer_is_group(raw)) {
 		let children: slot_layer_t[] = slot_layer_get_children(raw);
 		if (children != null) {
-			for (let c of children) {
+			for (let i: i32 = 0; i < children.length; ++i) {
+				let c: slot_layer_t = children[i];
 				slot_layer_delete(c);
 			}
 		}
 		let masks: slot_layer_t[] = slot_layer_get_masks(raw);
 		if (masks != null) {
-			for (let m of masks) {
+			for (let i: i32 = 0; i < masks.length; ++i) {
+				let m: slot_layer_t = masks[i];
 				slot_layer_delete(m);
 			}
 		}
@@ -269,7 +294,8 @@ function slot_layer_apply_mask(raw: slot_layer_t) {
 		slot_layer_to_paint_layer(raw.parent);
 	}
 	if (slot_layer_is_group(raw.parent)) {
-		for (let c of slot_layer_get_children(raw.parent)) {
+		for (let i: i32 = 0; i < slot_layer_get_children(raw.parent).length; ++i) {
+			let c: slot_layer_t = slot_layer_get_children(raw.parent)[i];
 			base_apply_mask(c, raw);
 		}
 	}
@@ -453,7 +479,8 @@ function slot_layer_is_visible(raw: slot_layer_t): bool {
 
 function slot_layer_get_children(raw: slot_layer_t): slot_layer_t[] {
 	let children: slot_layer_t[] = null; // Child layers of a group
-	for (let l of project_layers) {
+	for (let i: i32 = 0; i < project_layers.length; ++i) {
+		let l: slot_layer_t = project_layers[i];
 		if (l.parent == raw && slot_layer_is_layer(l)) {
 			if (children == null) {
 				children = [];
@@ -466,7 +493,8 @@ function slot_layer_get_children(raw: slot_layer_t): slot_layer_t[] {
 
 function slot_layer_get_recursive_children(raw: slot_layer_t): slot_layer_t[] {
 	let children: slot_layer_t[] = null;
-	for (let l of project_layers) {
+	for (let i: i32 = 0; i < project_layers.length; ++i) {
+		let l: slot_layer_t = project_layers[i];
 		if (l.parent == raw) { // Child layers and group masks
 			if (children == null) {
 				children = [];
@@ -490,7 +518,8 @@ function slot_layer_get_masks(raw: slot_layer_t, includeGroupMasks = true): slot
 
 	let children: slot_layer_t[] = null;
 	// Child masks of a layer
-	for (let l of project_layers) {
+	for (let i: i32 = 0; i < project_layers.length; ++i) {
+		let l: slot_layer_t = project_layers[i];
 		if (l.parent == raw && slot_layer_is_mask(l)) {
 			if (children == null) {
 				children = [];
@@ -501,7 +530,8 @@ function slot_layer_get_masks(raw: slot_layer_t, includeGroupMasks = true): slot
 	// Child masks of a parent group
 	if (includeGroupMasks) {
 		if (raw.parent != null && slot_layer_is_group(raw.parent)) {
-			for (let l of project_layers) {
+			for (let i: i32 = 0; i < project_layers.length; ++i) {
+				let l: slot_layer_t = project_layers[i];
 				if (l.parent == raw.parent && slot_layer_is_mask(l)) {
 					if (children == null) {
 						children = [];
@@ -516,14 +546,16 @@ function slot_layer_get_masks(raw: slot_layer_t, includeGroupMasks = true): slot
 
 function slot_layer_has_masks(raw: slot_layer_t, includeGroupMasks = true): bool {
 	// Layer mask
-	for (let l of project_layers) {
+	for (let i: i32 = 0; i < project_layers.length; ++i) {
+		let l: slot_layer_t = project_layers[i];
 		if (l.parent == raw && slot_layer_is_mask(l)) {
 			return true;
 		}
 	}
 	// Group mask
 	if (includeGroupMasks && raw.parent != null && slot_layer_is_group(raw.parent)) {
-		for (let l of project_layers) {
+		for (let i: i32 = 0; i < project_layers.length; ++i) {
+			let l: slot_layer_t = project_layers[i];
 			if (l.parent == raw.parent && slot_layer_is_mask(l)) {
 				return true;
 			}
@@ -608,12 +640,12 @@ function slot_layer_can_move(raw: slot_layer_t, to: i32): bool {
 		return false;
 	}
 
-	// If the layer is moved up, all layers between the old position and the new one move one down.
-	// The layers above the new position stay where they are.
-	// If the new position is on top or on bottom no upper resp. lower layer exists.
+	// If the layer is moved up, all layers between the old position and the new one move one down
+	// The layers above the new position stay where they are
+	// If the new position is on top or on bottom no upper resp. lower layer exists
 	let new_upper_layer: slot_layer_t = delta > 0 ? (to < project_layers.length - 1 ? project_layers[to + 1] : null) : project_layers[to];
 
-	// Group or layer is collapsed so we check below and update the upper layer.
+	// Group or layer is collapsed so we check below and update the upper layer
 	if (new_upper_layer != null && !new_upper_layer.show_panel) {
 		let children: slot_layer_t[] = slot_layer_get_recursive_children(new_upper_layer);
 		to -= children != null ? children.length : 0;
@@ -624,50 +656,50 @@ function slot_layer_can_move(raw: slot_layer_t, to: i32): bool {
 	let new_lower_layer: slot_layer_t = delta > 0 ? project_layers[to] : (to > 0 ? project_layers[to - 1] : null);
 
 	if (slot_layer_is_mask(raw)) {
-		// Masks can not be on top.
+		// Masks can not be on top
 		if (new_upper_layer == null) {
 			return false;
 		}
-		// Masks should not be placed below a collapsed group. This condition can be savely removed.
+		// Masks should not be placed below a collapsed group - this condition can be savely removed
 		if (slot_layer_is_in_group(new_upper_layer) && !slot_layer_get_containing_group(new_upper_layer).show_panel) {
 			return false;
 		}
-		// Masks should not be placed below a collapsed layer. This condition can be savely removed.
+		// Masks should not be placed below a collapsed layer - this condition can be savely removed
 		if (slot_layer_is_mask(new_upper_layer) && !new_upper_layer.parent.show_panel) {
 			return false;
 		}
 	}
 
 	if (slot_layer_is_layer(raw)) {
-		// Layers can not be moved directly below its own mask(s).
+		// Layers can not be moved directly below its own mask(s)
 		if (new_upper_layer != null && slot_layer_is_mask(new_upper_layer) && new_upper_layer.parent == raw) {
 			return false;
 		}
-		// Layers can not be placed above a mask as the mask would be reparented.
+		// Layers can not be placed above a mask as the mask would be reparented
 		if (new_lower_layer != null && slot_layer_is_mask(new_lower_layer)) {
 			return false;
 		}
 	}
 
-	// Currently groups can not be nested. Thus valid positions for groups are:
+	// Currently groups can not be nested - thus valid positions for groups are:
 	if (slot_layer_is_group(raw)) {
-		// At the top.
+		// At the top
 		if (new_upper_layer == null) {
 			return true;
 		}
-		// NOT below its own children.
+		// NOT below its own children
 		if (slot_layer_get_containing_group(new_upper_layer) == raw) {
 			return false;
 		}
-		// At the bottom.
+		// At the bottom
 		if (new_lower_layer == null) {
 			return true;
 		}
-		// Above a group.
+		// Above a group
 		if (slot_layer_is_group(new_lower_layer)) {
 			return true;
 		}
-		// Above a non-grouped layer.
+		// Above a non-grouped layer
 		if (slot_layer_is_layer(new_lower_layer) && !slot_layer_is_in_group(new_lower_layer)) {
 			return true;
 		}
@@ -689,7 +721,7 @@ function slot_layer_move(raw: slot_layer_t, to: i32) {
 	let delta: i32 = to - old_index;
 	let new_upper_layer: slot_layer_t = delta > 0 ? (to < project_layers.length - 1 ? project_layers[to + 1] : null) : project_layers[to];
 
-	// Group or layer is collapsed so we check below and update the upper layer.
+	// Group or layer is collapsed so we check below and update the upper layer
 	if (new_upper_layer != null && !new_upper_layer.show_panel) {
 		let children: slot_layer_t[] = slot_layer_get_recursive_children(new_upper_layer);
 		to -= children != null ? children.length : 0;
@@ -765,7 +797,8 @@ function slot_layer_move(raw: slot_layer_t, to: i32) {
 		}
 	}
 
-	for (let m of project_materials) {
+	for (let i: i32 = 0; i < project_materials.length; ++i) {
+		let m: slot_material_t = project_materials[i];
 		tab_layers_remap_layer_pointers(m.canvas.nodes, tab_layers_fill_layer_map(pointers));
 	}
 }

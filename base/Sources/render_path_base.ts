@@ -40,7 +40,9 @@ function render_path_base_init_voxels(target_name: string = "voxels") {
 function render_path_base_apply_config() {
 	if (render_path_base_super_sample != config_raw.rp_supersample) {
 		render_path_base_super_sample = config_raw.rp_supersample;
-		for (let rt of render_path_render_targets.values()) {
+		let values: render_target_t[] = map_to_array(render_path_render_targets);
+		for (let i: i32 = 0; i < values.length; ++i) {
+			let rt: render_target_t = values[i];
 			if (rt.width == 0 && rt.scale != null) {
 				rt.scale = render_path_base_super_sample;
 			}

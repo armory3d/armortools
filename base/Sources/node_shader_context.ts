@@ -1,16 +1,16 @@
 
-class node_shader_context_t {
-	vert: node_shader_t;
-	frag: node_shader_t;
-	data: shader_context_t;
-	allow_vcols: bool = false;
-	material: material_t;
-	constants: shader_const_t[];
-	tunits: tex_unit_t[];
-}
+type node_shader_context_t = {
+	vert?: node_shader_t;
+	frag?: node_shader_t;
+	data?: shader_context_t;
+	allow_vcols?: bool;
+	material?: material_t;
+	constants?: shader_const_t[];
+	tunits?: tex_unit_t[];
+};
 
 function node_shader_context_create(material: material_t, props: any): node_shader_context_t {
-	let raw: node_shader_context_t = new node_shader_context_t();
+	let raw: node_shader_context_t = {};
 	raw.material = material;
 	raw.data = {
 		name: props.name,
@@ -49,7 +49,8 @@ function node_shader_context_create(material: material_t, props: any): node_shad
 }
 
 function node_shader_context_add_elem(raw: node_shader_context_t, name: string, data_type: string) {
-	for (let e of raw.data.vertex_elements) {
+	for (let i: i32 = 0; i < raw.data.vertex_elements.length; ++i) {
+		let e: vertex_element_t = raw.data.vertex_elements[i];
 		if (e.name == name) {
 			return;
 		}
@@ -59,7 +60,8 @@ function node_shader_context_add_elem(raw: node_shader_context_t, name: string, 
 }
 
 function node_shader_context_is_elem(raw: node_shader_context_t, name: string): bool {
-	for (let elem of raw.data.vertex_elements) {
+	for (let i: i32 = 0; i < raw.data.vertex_elements.length; ++i) {
+		let elem: vertex_element_t = raw.data.vertex_elements[i];
 		if (elem.name == name) {
 			return true;
 		}
@@ -68,7 +70,8 @@ function node_shader_context_is_elem(raw: node_shader_context_t, name: string): 
 }
 
 function node_shader_context_get_elem(raw: node_shader_context_t, name: string): vertex_element_t {
-	for (let elem of raw.data.vertex_elements) {
+	for (let i: i32 = 0; i < raw.data.vertex_elements.length; ++i) {
+		let elem: vertex_element_t = raw.data.vertex_elements[i];
 		if (elem.name == name) {
 			return elem;
 		}
@@ -77,7 +80,8 @@ function node_shader_context_get_elem(raw: node_shader_context_t, name: string):
 }
 
 function node_shader_context_add_constant(raw: node_shader_context_t, ctype: string, name: string, link: string = null) {
-	for (let c of raw.constants) {
+	for (let i: i32 = 0; i < raw.constants.length; ++i) {
+		let c: shader_const_t = raw.constants[i];
 		if (c.name == name) {
 			return;
 		}
@@ -91,7 +95,8 @@ function node_shader_context_add_constant(raw: node_shader_context_t, ctype: str
 }
 
 function node_shader_context_add_texture_unit(raw: node_shader_context_t, ctype: string, name: string, link: string = null, is_image: bool = false) {
-	for (let c of raw.tunits) {
+	for (let i: i32 = 0; i < raw.tunits.length; ++i) {
+		let c: tex_unit_t = raw.tunits[i];
 		if (c.name == name) {
 			return;
 		}

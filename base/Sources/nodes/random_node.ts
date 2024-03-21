@@ -8,7 +8,7 @@ let random_node_b: i32;
 let random_node_c: i32;
 let random_node_d: i32 = -1;
 
-function random_node_create(): random_node_t {
+function random_node_create(arg: any): random_node_t {
 	let n: random_node_t = {};
 	n.base = logic_node_create();
 	n.base.get = random_node_get;

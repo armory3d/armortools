@@ -138,7 +138,8 @@ function args_run() {
 						}
 
 						let file: string = "export_presets/" + box_export_files[0] + ".json";
-						for (let f of box_export_files) {
+						for (let i: i32 = 0; i < box_export_files.length; ++i) {
+							let f: string = box_export_files[i];
 							if (f == args_export_textures_preset) {
 								file = "export_presets/" + box_export_files[array_index_of(box_export_files, f)] + ".json";
 							}

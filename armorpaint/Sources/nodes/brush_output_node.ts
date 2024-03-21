@@ -4,7 +4,7 @@ type brush_output_node_t = {
 	Directional?: bool; // button 0
 };
 
-function brush_output_node_create(): brush_output_node_t {
+function brush_output_node_create(arg: any): brush_output_node_t {
 	let n: brush_output_node_t = {};
 	n.base = logic_node_create();
 	context_raw.run_brush = brush_output_node_run;

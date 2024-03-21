@@ -2,7 +2,8 @@
 ///if (is_paint || is_sculpt)
 
 function import_font_run(path: string) {
-	for (let f of project_fonts) {
+	for (let i: i32 = 0; i < project_fonts.length; ++i) {
+		let f: slot_font_t = project_fonts[i];
 		if (f.file == path) {
 			console_info(strings_info0());
 			return;
@@ -22,7 +23,8 @@ function import_font_run(path: string) {
 	}
 
 	let _init = function () {
-		for (let f of font_slots) {
+		for (let i: i32 = 0; i < font_slots.length; ++i) {
+			let f: slot_font_t = font_slots[i];
 			context_raw.font = f;
 			array_push(project_fonts, f);
 			util_render_make_font_preview();

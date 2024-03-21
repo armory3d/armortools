@@ -301,7 +301,8 @@ function tab_materials_update_material() {
 }
 
 function tab_materials_update_material_pointers(nodes: zui_node_t[], i: i32) {
-	for (let n of nodes) {
+	for (let i: i32 = 0; i < nodes.length; ++i) {
+		let n: zui_node_t = nodes[i];
 		if (n.type == "MATERIAL") {
 			if (n.buttons[0].default_value == i) {
 				n.buttons[0].default_value = 9999; // Material deleted
@@ -315,7 +316,8 @@ function tab_materials_update_material_pointers(nodes: zui_node_t[], i: i32) {
 
 function tab_materials_accept_swatch_drag(swatch: swatch_color_t) {
 	context_raw.material = slot_material_create(project_materials[0].data);
-	for (let node of context_raw.material.canvas.nodes) {
+	for (let i: i32 = 0; i < context_raw.material.canvas.nodes.length; ++i) {
+		let node: zui_node_t = context_raw.material.canvas.nodes[i];
 		if (node.type == "RGB" ) {
 			node.outputs[0].default_value = [
 				color_get_rb(swatch.base) / 255,
@@ -339,7 +341,8 @@ function tab_materials_accept_swatch_drag(swatch: swatch_color_t) {
 
 function tab_materials_delete_material(m: slot_material_t) {
 	let i: i32 = array_index_of(project_materials, m);
-	for (let l of project_layers) {
+	for (let i: i32 = 0; i < project_layers.length; ++i) {
+		let l: slot_layer_t = project_layers[i];
 		if (l.fill_layer == m) {
 			l.fill_layer = null;
 		}
@@ -348,7 +351,8 @@ function tab_materials_delete_material(m: slot_material_t) {
 	context_select_material(i == project_materials.length - 1 ? i - 1 : i + 1);
 	array_splice(project_materials, i, 1);
 	ui_base_hwnds[1].redraws = 2;
-	for (let m of project_materials) {
+	for (let i: i32 = 0; i < project_materials.length; ++i) {
+		let m: slot_material_t = project_materials[i];
 		tab_materials_update_material_pointers(m.canvas.nodes, i);
 	}
 }

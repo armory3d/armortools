@@ -6,7 +6,8 @@ let make_material_height_used = false;
 function make_material_parse_mesh_material() {
 	let m = project_material_data;
 
-	for (let c of m._.shader.contexts) {
+	for (let i: i32 = 0; i < m._.shader.contexts.length; ++i) {
+		let c = m._.shader.contexts[i];
 		if (c.name == "mesh") {
 			array_remove(m._.shader.contexts, c);
 			array_remove(m._.shader._.contexts, c);
@@ -45,7 +46,8 @@ function make_material_make_voxel(m: material_data_t) {
 	let rebuild = true; // heightUsed;
 	if (config_raw.rp_gi != false && rebuild) {
 		let scon: shader_context_t = null;
-		for (let c of m._.shader._.contexts) {
+		for (let i: i32 = 0; i < m._.shader._.contexts.length; ++i) {
+			let c = m._.shader._.contexts[i];
 			if (c.name == "voxel") {
 				scon = c;
 				break;
@@ -60,7 +62,8 @@ function make_material_parse_paint_material() {
 	let m = project_material_data;
 	let scon: shader_context_t = null;
 	let mcon: material_context_t = null;
-	for (let c of m._.shader.contexts) {
+	for (let i: i32 = 0; i < m._.shader.contexts.length; ++i) {
+		let c = m._.shader.contexts[i];
 		if (c.name == "paint") {
 			array_remove(m._.shader.contexts, c);
 			array_remove(m._.shader._.contexts, c);
@@ -68,7 +71,8 @@ function make_material_parse_paint_material() {
 			break;
 		}
 	}
-	for (let c of m.contexts) {
+	for (let i: i32 = 0; i < m.contexts.length) {
+		let c = m.contexts[i];
 		if (c.name == "paint") {
 			array_remove(m.contexts, c);
 			array_remove(m._.contexts, c);

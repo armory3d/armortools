@@ -5,7 +5,7 @@ type tex_image_node_t = {
 	color_space?: string;
 };
 
-function tex_image_node_create(): tex_image_node_t {
+function tex_image_node_create(arg: any): tex_image_node_t {
 	let n: tex_image_node_t = {};
 	n.base = logic_node_create();
 	n.base.get = tex_image_node_get;

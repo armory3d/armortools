@@ -42,7 +42,8 @@ function util_particle_init() {
 		render_path_create_render_target(t);
 	}
 
-	for (let mat of _scene_raw.material_datas) {
+	for (let i: i32 = 0; i < _scene_raw.material_datas.length; ++i) {
+		let mat: material_data_t = _scene_raw.material_datas[i];
 		if (mat.name == "Material2") {
 			let m: material_data_t = json_parse(json_stringify(mat));
 			m.name = "MaterialParticle";
@@ -54,7 +55,8 @@ function util_particle_init() {
 	let md: material_data_t = data_get_material("Scene", "MaterialParticle");
 	context_raw.particle_material = md;
 
-	for (let obj of _scene_raw.objects) {
+	for (let i: i32 = 0; i < _scene_raw.objects.length; ++i) {
+		let obj: obj_t = _scene_raw.objects[i];
 		if (obj.name == ".Sphere") {
 			let particle: obj_t = json_parse(json_stringify(obj));
 			particle.name = ".Particle";

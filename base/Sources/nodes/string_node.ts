@@ -4,12 +4,12 @@ type string_node_t = {
 	value?: string;
 };
 
-function string_node_create(value: string = ""): string_node_t {
+function string_node_create(arg: string): string_node_t {
 	let n: string_node_t = {};
 	n.base = logic_node_create();
 	n.base.get = string_node_get;
 	n.base.set = string_node_set;
-	n.value = value;
+	n.value = arg;
 	return n;
 }
 

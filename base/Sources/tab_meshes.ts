@@ -147,7 +147,8 @@ function tab_meshes_draw(htab: zui_handle_t) {
 			}
 			if (h.changed) {
 				let visibles: mesh_object_t[] = [];
-				for (let p of project_paint_objects) {
+				for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+					let p: mesh_object_t = project_paint_objects[i];
 					if (p.base.visible) {
 						array_push(visibles, p);
 					}

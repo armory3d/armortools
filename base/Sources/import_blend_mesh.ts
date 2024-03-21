@@ -3,20 +3,21 @@ let import_blend_mesh_eps: f32 = 1.0 / 32767;
 
 function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 	let b: buffer_t = data_get_blob(path);
-	let bl: BlendRaw = parser_blend_init(b);
+	let bl: blend_t = parser_blend_init(b);
 	if (bl.dna == null) {
 		console_error(strings_error3());
 		return;
 	}
 
-	let obs: BlHandleRaw[] = parser_blend_get(bl, "Object");
+	let obs: bl_handle_t[] = parser_blend_get(bl, "Object");
 	if (obs == null || obs.length == 0) {
 		import_mesh_make_mesh(null, path);
 		return;
 	}
 
 	let first: bool = true;
-	for (let ob of obs) {
+	for (let i: i32 = 0; i < obs.length; ++i) {
+		let ob: bl_handle_t = obs[i];
 		if (bl_handle_get(ob, "type") != 1) {
 			continue;
 		}
@@ -99,8 +100,8 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 			let loopstart: i32 = bl_handle_get(poly, "loopstart");
 			let totloop: i32 = bl_handle_get(poly, "totloop");
 			if (totloop <= 4) { // Convex, fan triangulation
-				let v0: BlHandleRaw = import_blend_mesh_get_mvert_v(m, loopstart + totloop - 1);
-				let v1: BlHandleRaw = import_blend_mesh_get_mvert_v(m, loopstart);
+				let v0: bl_handle_t = import_blend_mesh_get_mvert_v(m, loopstart + totloop - 1);
+				let v1: bl_handle_t = import_blend_mesh_get_mvert_v(m, loopstart);
 				let co0: any = bl_handle_get(v0, "co");
 				let co1: any = bl_handle_get(v1, "co");
 				let no0: any = bl_handle_get(v0, "no");
@@ -150,7 +151,7 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 					col1b = parser_blend_read_i8(bl);
 				}
 				for (let j: i32 = 0; j < totloop - 2; ++j) {
-					let v2: BlHandleRaw = import_blend_mesh_get_mvert_v(m, loopstart + j + 1);
+					let v2: bl_handle_t = import_blend_mesh_get_mvert_v(m, loopstart + j + 1);
 					let co2: any = bl_handle_get(v2, "co");
 					let no2: any = bl_handle_get(v2, "no");
 					if (smooth) {
@@ -229,9 +230,9 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 				for (let i: i32 = 0; i < totloop; ++i) {
 					array_push(va, loopstart + i);
 				}
-				let v0: BlHandleRaw = import_blend_mesh_get_mvert_v(m, loopstart);
-				let v1: BlHandleRaw = import_blend_mesh_get_mvert_v(m, loopstart + 1);
-				let v2: BlHandleRaw = import_blend_mesh_get_mvert_v(m, loopstart + 2);
+				let v0: bl_handle_t = import_blend_mesh_get_mvert_v(m, loopstart);
+				let v1: bl_handle_t = import_blend_mesh_get_mvert_v(m, loopstart + 1);
+				let v2: bl_handle_t = import_blend_mesh_get_mvert_v(m, loopstart + 2);
 				let co0: any = bl_handle_get(v0, "co");
 				let co1: any = bl_handle_get(v1, "co");
 				let co2: any = bl_handle_get(v2, "co");
@@ -256,8 +257,8 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 
 				let winding: f32 = 0.0;
 				for (let i: i32 = 0; i < totloop; ++i) {
-					let v0: BlHandleRaw = import_blend_mesh_get_mvert_v(m, loopstart + i);
-					let v1: BlHandleRaw = import_blend_mesh_get_mvert_v(m, loopstart + ((i + 1) % totloop));
+					let v0: bl_handle_t = import_blend_mesh_get_mvert_v(m, loopstart + i);
+					let v1: bl_handle_t = import_blend_mesh_get_mvert_v(m, loopstart + ((i + 1) % totloop));
 					let co0: any = bl_handle_get(v0, "co");
 					let co1: any = bl_handle_get(v1, "co");
 					winding += (co1[axis0] - co0[axis0]) * (co1[axis1] + co0[axis1]);
@@ -273,9 +274,9 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 					i = (i + 1) % vi;
 					let i1: i32 = (i + 1) % vi;
 					let i2: i32 = (i + 2) % vi;
-					let v0: BlHandleRaw = import_blend_mesh_get_mvert_v(m, va[i ]);
-					let v1: BlHandleRaw = import_blend_mesh_get_mvert_v(m, va[i1]);
-					let v2: BlHandleRaw = import_blend_mesh_get_mvert_v(m, va[i2]);
+					let v0: bl_handle_t = import_blend_mesh_get_mvert_v(m, va[i ]);
+					let v1: bl_handle_t = import_blend_mesh_get_mvert_v(m, va[i1]);
+					let v2: bl_handle_t = import_blend_mesh_get_mvert_v(m, va[i2]);
 					let co0: any = bl_handle_get(v0, "co");
 					let co1: any = bl_handle_get(v1, "co");
 					let co2: any = bl_handle_get(v2, "co");
@@ -298,7 +299,7 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 					let overlap: bool = false; // Other vertex found inside this triangle
 					for (let j: i32 = 0; j < vi - 3; ++j) {
 						let j0: i32 = (i + 3 + j) % vi;
-						let v: BlHandleRaw = import_blend_mesh_get_mvert_v(m, va[j0]);
+						let v: bl_handle_t = import_blend_mesh_get_mvert_v(m, va[j0]);
 						let co: any = bl_handle_get(v, "co");
 						let px: f32 = co[axis0];
 						let py: f32 = co[axis1];
@@ -494,6 +495,6 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 	data_delete_blob(path);
 }
 
-function import_blend_mesh_get_mvert_v(m: BlHandleRaw, loopstart: i32) {
+function import_blend_mesh_get_mvert_v(m: bl_handle_t, loopstart: i32) {
 	return bl_handle_get(m, "mvert", bl_handle_get(bl_handle_get(m, "mloop", loopstart), "v"));
 }

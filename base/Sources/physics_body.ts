@@ -1,54 +1,37 @@
 
 ///if arm_physics
 
-class PhysicsBodyRaw {
-	_mass: f32 = 0.0;
-
-	get mass(): f32 {
-		return this._mass;
-	}
-
-	set mass(f: f32) {
-		if (this.ready) {
-			// remove();
-			let t: PhysicsBodyRaw = new PhysicsBodyRaw();
-			t._mass = f;
-			physics_body_init(t, this.object);
-			(this.object as any).physicsBody = t;
-		}
-		else this._mass = f;
-	}
-
-	object: object_t;
-	friction: f32 = 0.5;
-	restitution: f32 = 0.0;
-	collision_margin: f32 = 0.0;
-	linear_damping: f32 = 0.04;
-	angular_damping: f32 = 0.1;
-	linear_factors: f32[] = [1.0, 1.0, 1.0];
-	angular_factors: f32[] = [1.0, 1.0, 1.0];
-	linear_threshold: f32 = 0.0;
-	angular_threshold: f32 = 0.0;
-	ccd: bool = false; // Continuous collision detection
-	trigger: bool = false;
-	group: i32 = 1;
-	mask: i32 = 1;
-	shape: shape_type_t = shape_type_t.BOX;
-	destroyed: bool = false;
-	body_scale_x: f32; // Transform scale at creation time
-	body_scale_y: f32;
-	body_scale_z: f32;
-	current_scale_x: f32;
-	current_scale_y: f32;
-	current_scale_z: f32;
-
-	body: Ammo.btRigidBody = null;
-	motion_state: Ammo.btMotionState;
-	btshape: Ammo.btCollisionShape;
-	ready: bool = false;
-	id: i32 = 0;
-	height_data: u8_array_t = null;
-}
+type physics_body_t = {
+	_mass?: f32;
+	object?: object_t;
+	friction?: f32;
+	restitution?: f32;
+	collision_margin?: f32;
+	linear_damping?: f32;
+	angular_damping?: f32;
+	linear_factors?: f32[];
+	angular_factors?: f32[];
+	linear_threshold?: f32;
+	angular_threshold?: f32;
+	ccd?: bool; // Continuous collision detection
+	trigger?: bool;
+	group?: i32;
+	mask?: i32;
+	shape?: shape_type_t;
+	destroyed?: bool;
+	body_scale_x?: f32; // Transform scale at creation time
+	body_scale_y?: f32;
+	body_scale_z?: f32;
+	current_scale_x?: f32;
+	current_scale_y?: f32;
+	current_scale_z?: f32;
+	body?: Ammo.btRigidBody;
+	motion_state?: Ammo.btMotionState;
+	btshape?: Ammo.btCollisionShape;
+	ready?: bool;
+	id?: i32;
+	height_data?: u8_array_t;
+};
 
 let physics_body_next_id: i32 = 0;
 let physics_body_ammo_array: i32 = -1;
@@ -66,7 +49,7 @@ let physics_body_convex_hull_cache: map_t<mesh_data_t, Ammo.btConvexHullShape> =
 let physics_body_triangle_mesh_cache: map_t<mesh_data_t, Ammo.btTriangleMesh> = map_create();
 let physics_body_users_cache: map_t<mesh_data_t, i32> = map_create();
 
-function physics_body_create(): PhysicsBodyRaw {
+function physics_body_create(): physics_body_t {
 	if (physics_body_first) {
 		physics_body_first = false;
 		physics_body_vec1 = new Ammo.btVector3(0, 0, 0);
@@ -76,15 +59,50 @@ function physics_body_create(): PhysicsBodyRaw {
 		physics_body_trans1 = new Ammo.btTransform();
 		physics_body_trans2 = new Ammo.btTransform();
 	}
-	let pb: PhysicsBodyRaw = new PhysicsBodyRaw();
+	let pb: physics_body_t = {};
+	pb._mass = 0.0;
+	pb.friction = 0.5;
+	pb.restitution = 0.0;
+	pb.collision_margin = 0.0;
+	pb.linear_damping = 0.04;
+	pb.angular_damping = 0.1;
+	pb.linear_factors = [1.0, 1.0, 1.0];
+	pb.angular_factors = [1.0, 1.0, 1.0];
+	pb.linear_threshold = 0.0;
+	pb.angular_threshold = 0.0;
+	pb.ccd = false;
+	pb.trigger = false;
+	pb.group = 1;
+	pb.mask = 1;
+	pb.shape = shape_type_t.BOX;
+	pb.destroyed = false;
+	pb.ready = false;
+	pb.id = 0;
 	return pb;
 }
 
-function physics_body_with_margin(pb: PhysicsBodyRaw, f: f32) {
+function physics_body_get_mass(pb: physics_body_t): f32 {
+	return pb._mass;
+}
+
+function physics_body_set_mass(pb: physics_body_t, f: f32) {
+	if (pb.ready) {
+		// remove();
+		let t: physics_body_t = physics_body_create();
+		t._mass = f;
+		physics_body_init(t, pb.object);
+		(pb.object as any).physicsBody = t;
+	}
+	else {
+		pb._mass = f;
+	}
+}
+
+function physics_body_with_margin(pb: physics_body_t, f: f32) {
 	return f - f * pb.collision_margin;
 }
 
-function physics_body_init(pb: PhysicsBodyRaw, o: object_t) {
+function physics_body_init(pb: physics_body_t, o: object_t) {
 	pb.object = o;
 	if (pb.ready) {
 		return;
@@ -95,7 +113,7 @@ function physics_body_init(pb: PhysicsBodyRaw, o: object_t) {
 		return; // No mesh data
 	}
 	let transform: transform_t = o.transform;
-	let physics: PhysicsWorldRaw = physics_world_active;
+	let physics: physics_world_t = physics_world_active;
 
 	if (pb.shape == shape_type_t.BOX) {
 		physics_world_vec1.setX(physics_body_with_margin(pb, transform.dim.x / 2));
@@ -135,7 +153,7 @@ function physics_body_init(pb: PhysicsBodyRaw, o: object_t) {
 	}
 	else if (pb.shape == shape_type_t.MESH) {
 		let mesh_interface: Ammo.btTriangleMesh = physics_body_fill_triangle_mesh(pb, transform.scale);
-		if (pb.mass > 0) {
+		if (physics_body_get_mass(pb) > 0) {
 			let shape_gimpact: Ammo.btGImpactMeshShape = new Ammo.btGImpactMeshShape(mesh_interface);
 			shape_gimpact.updateBound();
 			let shape_concave: Ammo.btConcaveShape = shape_gimpact;
@@ -187,10 +205,10 @@ function physics_body_init(pb: PhysicsBodyRaw, o: object_t) {
 	physics_body_vec1.setZ(0);
 	let inertia: Ammo.btVector3 = physics_body_vec1;
 
-	if (pb.mass > 0) {
-		pb.btshape.calculateLocalInertia(pb.mass, inertia);
+	if (physics_body_get_mass(pb) > 0) {
+		pb.btshape.calculateLocalInertia(physics_body_get_mass(pb), inertia);
 	}
-	let body_ci: Ammo.btRigidBodyConstructionInfo = new Ammo.btRigidBodyConstructionInfo(pb.mass, pb.motion_state, pb.btshape, inertia);
+	let body_ci: Ammo.btRigidBodyConstructionInfo = new Ammo.btRigidBodyConstructionInfo(physics_body_get_mass(pb), pb.motion_state, pb.btshape, inertia);
 	pb.body = new Ammo.btRigidBody(body_ci);
 
 	pb.body.setFriction(pb.friction);
@@ -206,7 +224,7 @@ function physics_body_init(pb: PhysicsBodyRaw, o: object_t) {
 	if (pb.trigger) {
 		pb.body.setCollisionFlags(pb.body.getCollisionFlags() | collision_flags_t.CF_NO_CONTACT_RESPONSE);
 	}
-	if (pb.mass == 0.0) {
+	if (physics_body_get_mass(pb) == 0.0) {
 		pb.body.setCollisionFlags(pb.body.getCollisionFlags() | collision_flags_t.CF_STATIC_OBJECT);
 	}
 	if (pb.ccd) {
@@ -227,7 +245,7 @@ function physics_body_init(pb: PhysicsBodyRaw, o: object_t) {
 	Ammo.destroy(body_ci);
 }
 
-function physics_body_physics_update(pb: PhysicsBodyRaw) {
+function physics_body_physics_update(pb: physics_body_t) {
 	if (!pb.ready) {
 		return;
 	}
@@ -249,20 +267,20 @@ function physics_body_physics_update(pb: PhysicsBodyRaw) {
 	transform_build_matrix(transform);
 }
 
-function physics_body_remove_from_world(pb: PhysicsBodyRaw) {
+function physics_body_remove_from_world(pb: physics_body_t) {
 	physics_world_remove_body(physics_world_active, pb);
 }
 
-function physics_body_activate(pb: PhysicsBodyRaw) {
+function physics_body_activate(pb: physics_body_t) {
 	pb.body.activate(false);
 }
 
-function physics_body_set_gravity(pb: PhysicsBodyRaw, v: vec4_t) {
+function physics_body_set_gravity(pb: physics_body_t, v: vec4_t) {
 	physics_body_vec1.setValue(v.x, v.y, v.z);
 	pb.body.setGravity(physics_body_vec1);
 }
 
-function physics_body_apply_force(pb: PhysicsBodyRaw, force: vec4_t, loc: vec4_t = null) {
+function physics_body_apply_force(pb: physics_body_t, force: vec4_t, loc: vec4_t = null) {
 	physics_body_activate(pb);
 	physics_body_vec1.setValue(force.x, force.y, force.z);
 	if (loc == null) {
@@ -274,7 +292,7 @@ function physics_body_apply_force(pb: PhysicsBodyRaw, force: vec4_t, loc: vec4_t
 	}
 }
 
-function physics_body_apply_impulse(pb: PhysicsBodyRaw, impulse: vec4_t, loc: vec4_t = null) {
+function physics_body_apply_impulse(pb: physics_body_t, impulse: vec4_t, loc: vec4_t = null) {
 	physics_body_activate(pb);
 	physics_body_vec1.setValue(impulse.x, impulse.y, impulse.z);
 	if (loc == null) {
@@ -286,54 +304,54 @@ function physics_body_apply_impulse(pb: PhysicsBodyRaw, impulse: vec4_t, loc: ve
 	}
 }
 
-function physics_body_apply_torque(pb: PhysicsBodyRaw, torque: vec4_t) {
+function physics_body_apply_torque(pb: physics_body_t, torque: vec4_t) {
 	physics_body_activate(pb);
 	physics_body_vec1.setValue(torque.x, torque.y, torque.z);
 	pb.body.applyTorque(physics_body_vec1);
 }
 
-function physics_body_apply_torque_impulse(pb: PhysicsBodyRaw, torque: vec4_t) {
+function physics_body_apply_torque_impulse(pb: physics_body_t, torque: vec4_t) {
 	physics_body_activate(pb);
 	physics_body_vec1.setValue(torque.x, torque.y, torque.z);
 	pb.body.applyTorqueImpulse(physics_body_vec1);
 }
 
-function physics_body_set_linear_factor(pb: PhysicsBodyRaw, x: f32, y: f32, z: f32) {
+function physics_body_set_linear_factor(pb: physics_body_t, x: f32, y: f32, z: f32) {
 	physics_body_vec1.setValue(x, y, z);
 	pb.body.setLinearFactor(physics_body_vec1);
 }
 
-function physics_body_set_angular_factor(pb: PhysicsBodyRaw, x: f32, y: f32, z: f32) {
+function physics_body_set_angular_factor(pb: physics_body_t, x: f32, y: f32, z: f32) {
 	physics_body_vec1.setValue(x, y, z);
 	pb.body.setAngularFactor(physics_body_vec1);
 }
 
-function physics_body_get_linear_velocity(pb: PhysicsBodyRaw): vec4_t {
+function physics_body_get_linear_velocity(pb: physics_body_t): vec4_t {
 	let v: Ammo.btVector3 = pb.body.getLinearVelocity();
 	return vec4_create(v.x(), v.y(), v.z());
 }
 
-function physics_body_set_linear_velocity(pb: PhysicsBodyRaw, x: f32, y: f32, z: f32) {
+function physics_body_set_linear_velocity(pb: physics_body_t, x: f32, y: f32, z: f32) {
 	physics_body_vec1.setValue(x, y, z);
 	pb.body.setLinearVelocity(physics_body_vec1);
 }
 
-function physics_body_get_angular_velocity(pb: PhysicsBodyRaw): vec4_t {
+function physics_body_get_angular_velocity(pb: physics_body_t): vec4_t {
 	let v: Ammo.btVector3 = pb.body.getAngularVelocity();
 	return vec4_create(v.x(), v.y(), v.z());
 }
 
-function physics_body_set_angular_velocity(pb: PhysicsBodyRaw, x: f32, y: f32, z: f32) {
+function physics_body_set_angular_velocity(pb: physics_body_t, x: f32, y: f32, z: f32) {
 	physics_body_vec1.setValue(x, y, z);
 	pb.body.setAngularVelocity(physics_body_vec1);
 }
 
-function physics_body_set_friction(pb: PhysicsBodyRaw, f: f32) {
+function physics_body_set_friction(pb: physics_body_t, f: f32) {
 	pb.body.setFriction(f);
 	pb.friction = f;
 }
 
-function physics_body_set_scale(pb: PhysicsBodyRaw, v: vec4_t) {
+function physics_body_set_scale(pb: physics_body_t, v: vec4_t) {
 	pb.current_scale_x = v.x;
 	pb.current_scale_y = v.y;
 	pb.current_scale_z = v.z;
@@ -346,7 +364,7 @@ function physics_body_set_scale(pb: PhysicsBodyRaw, v: vec4_t) {
 	world_col.updateSingleAabb(pb.body);
 }
 
-function physics_body_sync_transform(pb: PhysicsBodyRaw) {
+function physics_body_sync_transform(pb: physics_body_t) {
 	let t: transform_t = pb.object.transform;
 	transform_build_matrix(t);
 	physics_body_vec1.setValue(transform_world_x(t), transform_world_y(t), transform_world_z(t));
@@ -361,12 +379,12 @@ function physics_body_sync_transform(pb: PhysicsBodyRaw) {
 	physics_body_activate(pb);
 }
 
-function physics_body_set_ccd(pb: PhysicsBodyRaw, sphereRadius: f32, motionThreshold = 1e-7) {
+function physics_body_set_ccd(pb: physics_body_t, sphereRadius: f32, motionThreshold = 1e-7) {
 	pb.body.setCcdSweptSphereRadius(sphereRadius);
 	pb.body.setCcdMotionThreshold(motionThreshold);
 }
 
-function physics_body_fill_convex_hull(pb: PhysicsBodyRaw, scale: vec4_t, margin: f32): Ammo.btConvexHullShape {
+function physics_body_fill_convex_hull(pb: physics_body_t, scale: vec4_t, margin: f32): Ammo.btConvexHullShape {
 	// Check whether shape already exists
 	let data: any = pb.object.ext.data;
 	let shape: Ammo.btConvexHullShape = map_get(physics_body_convex_hull_cache, data);
@@ -398,7 +416,7 @@ function physics_body_fill_convex_hull(pb: PhysicsBodyRaw, scale: vec4_t, margin
 	return shape;
 }
 
-function physics_body_fill_triangle_mesh(pb: PhysicsBodyRaw, scale: vec4_t): Ammo.btTriangleMesh {
+function physics_body_fill_triangle_mesh(pb: physics_body_t, scale: vec4_t): Ammo.btTriangleMesh {
 	// Check whether shape already exists
 	let data: any = pb.object.ext.data;
 	let triangle_mesh: Ammo.btTriangleMesh = map_get(physics_body_triangle_mesh_cache, data);
@@ -422,7 +440,8 @@ function physics_body_fill_triangle_mesh(pb: PhysicsBodyRaw, scale: vec4_t): Amm
 	sy *= data.scale_pos;
 	sz *= data.scale_pos;
 
-	for (let ar of indices) {
+	for (let i: i32 = 0; i < indices.length; ++i) {
+		let ar: any = indices[i];
 		for (let i: i32 = 0; i < math_floor(ar.length / 3); ++i) {
 			physics_body_vec1.setX(positions[ar[i * 3    ] * 4    ] * sx);
 			physics_body_vec1.setY(positions[ar[i * 3    ] * 4 + 1] * sy);
@@ -439,7 +458,7 @@ function physics_body_fill_triangle_mesh(pb: PhysicsBodyRaw, scale: vec4_t): Amm
 	return triangle_mesh;
 }
 
-function physics_body_delete(pb: PhysicsBodyRaw) {
+function physics_body_delete(pb: physics_body_t) {
 	Ammo.destroy(pb.motion_state);
 	Ammo.destroy(pb.body);
 

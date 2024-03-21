@@ -107,10 +107,12 @@ function main_embed(additional: string[]) {
 		"text_coloring.json",
 		"version.json"
 	];
-	for (let add of additional) {
+	for (let i: i32 = 0; i < additional.length; ++i) {
+		let add: string = additional[i];
 		array_push(files, add);
 	}
-	for (let file of files) {
+	for (let i: i32 = 0; i < files.length; ++i) {
+		let file: string = files[i];
 		resource_embed_blob(file, global["data/" + file]);
 		global["data/" + file] = null;
 	}
@@ -127,7 +129,8 @@ function main_embed_raytrace() {
 		"raytrace_brute_core" + render_path_raytrace_ext,
 		"raytrace_brute_full" + render_path_raytrace_ext
 	];
-	for (let file of files) {
+	for (let i: i32 = 0; i < files.length; ++i) {
+		let file: string = files[i];
 		resource_embed_blob(file, global["data/" + file]);
 		global["data/" + file] = null;
 	}
@@ -141,7 +144,8 @@ function main_embed_raytrace_bake() {
 		"raytrace_bake_light" + render_path_raytrace_ext,
 		"raytrace_bake_thick" + render_path_raytrace_ext
 	];
-	for (let file of files) {
+	for (let i: i32 = 0; i < files.length; ++i) {
+		let file: string = files[i];
 		resource_embed_blob(file, global["data/" + file]);
 		global["data/" + file] = null;
 	}

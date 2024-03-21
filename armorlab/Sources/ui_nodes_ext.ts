@@ -97,12 +97,12 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 						let vertices = g4_vertex_buffer_lock(g._.vertex_buffer);
 						if (ui_nodes_ext_last_vertices == null || buffer_view_size(ui_nodes_ext_last_vertices) != buffer_view_size(vertices)) {
 							ui_nodes_ext_last_vertices = buffer_view_create(buffer_create(buffer_view_size(vertices)));
-							for (let i = 0; i < math_floor(buffer_view_size(vertices) / 2); ++i) {
+							for (let i: i32 = 0; i < math_floor(buffer_view_size(vertices) / 2); ++i) {
 								buffer_view_set_i16(ui_nodes_ext_last_vertices, i * 2, buffer_view_get_i16(vertices, i * 2));
 							}
 						}
 						else {
-							for (let i = 0; i < math_floor(buffer_view_size(vertices) / 2); ++i) {
+							for (let i: i32 = 0; i < math_floor(buffer_view_size(vertices) / 2); ++i) {
 								buffer_view_set_i16(vertices, i * 2, buffer_view_get_i16(ui_nodes_ext_last_vertices, i * 2));
 							}
 						}

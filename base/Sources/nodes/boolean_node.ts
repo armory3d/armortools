@@ -4,12 +4,12 @@ type boolean_node_t = {
 	value?: bool;
 };
 
-function boolean_node_create(value: bool = false): boolean_node_t {
+function boolean_node_create(arg: bool): boolean_node_t {
 	let n: boolean_node_t = {};
 	n.base = logic_node_create();
 	n.base.get = boolean_node_get;
 	n.base.set = boolean_node_set;
-	n.value = value;
+	n.value = arg;
 	return n;
 }
 

@@ -15,12 +15,7 @@ function tab_script_draw(htab: zui_handle_t) {
 			zui_row([1 / 14, 1 / 14, 1 / 14, 1 / 14]);
 		}
 		if (zui_button(tr("Run"))) {
-			try {
-				eval(tab_script_hscript.text);
-			}
-			catch(e: any) {
-				console_log(e);
-			}
+			js_eval(tab_script_hscript.text);
 		}
 		if (zui_button(tr("Clear"))) {
 			tab_script_hscript.text = "";
@@ -70,7 +65,8 @@ function tab_script_get_text_coloring(): zui_text_coloring_t {
 		let blob: buffer_t = data_get_blob("text_coloring.json");
 		tab_script_text_coloring = json_parse(sys_buffer_to_string(blob));
 		tab_script_text_coloring.default_color = math_floor(tab_script_text_coloring.default_color);
-		for (let coloring of tab_script_text_coloring.colorings) {
+		for (let i: i32 = 0; i < tab_script_text_coloring.colorings.length; ++i) {
+			let coloring: zui_coloring_t = tab_script_text_coloring.colorings[i];
 			coloring.color = math_floor(coloring.color);
 		}
 	}

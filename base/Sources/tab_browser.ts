@@ -205,7 +205,8 @@ function tab_browser_draw(htab: zui_handle_t) {
 			///end
 		}
 
-		for (let b of config_raw.bookmarks) {
+		for (let i: i32 = 0; i < config_raw.bookmarks.length; ++i) {
+			let b: string = config_raw.bookmarks[i];
 			let folder: string = substring(b, string_last_index_of(b, path_sep) + 1, b.length);
 
 			if (zui_button(folder, zui_align_t.LEFT)) {

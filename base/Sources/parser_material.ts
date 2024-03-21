@@ -63,7 +63,8 @@ let parser_material_parsed_map: map_t<string, string> = map_create();
 let parser_material_texture_map: map_t<string, string> = map_create();
 
 function parser_material_get_node(id: i32): zui_node_t {
-	for (let n of parser_material_nodes) {
+	for (let i: i32 = 0; i < parser_material_nodes.length; ++i) {
+		let n: zui_node_t = parser_material_nodes[i];
 		if (n.id == id) {
 			return n;
 		}
@@ -72,7 +73,8 @@ function parser_material_get_node(id: i32): zui_node_t {
 }
 
 function parser_material_get_link(id: i32): zui_node_link_t {
-	for (let l of parser_material_links) {
+	for (let i: i32 = 0; i < parser_material_links.length; ++i) {
+		let l: zui_node_link_t = parser_material_links[i];
 		if (l.id == id) {
 			return l;
 		}
@@ -81,7 +83,8 @@ function parser_material_get_link(id: i32): zui_node_link_t {
 }
 
 function parser_material_get_input_link(inp: zui_node_socket_t): zui_node_link_t {
-	for (let l of parser_material_links) {
+	for (let i: i32 = 0; i < parser_material_links.length; ++i) {
+		let l: zui_node_link_t = parser_material_links[i];
 		if (l.to_id == inp.node_id) {
 			let node: zui_node_t = parser_material_get_node(inp.node_id);
 			if (node.inputs.length <= l.to_socket) {
@@ -97,7 +100,8 @@ function parser_material_get_input_link(inp: zui_node_socket_t): zui_node_link_t
 
 function parser_material_get_output_links(out: zui_node_socket_t): zui_node_link_t[] {
 	let ls: zui_node_link_t[] = null;
-	for (let l of parser_material_links) {
+	for (let i: i32 = 0; i < parser_material_links.length; ++i) {
+		let l: zui_node_link_t = parser_material_links[i];
 		if (l.from_id == out.node_id) {
 			let node: zui_node_t = parser_material_get_node(out.node_id);
 			if (node.outputs.length <= l.from_socket) {
@@ -282,7 +286,8 @@ function parser_material_parse_output_pbr(node: zui_node_t): shader_out_t {
 }
 
 function parser_material_get_group(name: string): zui_node_canvas_t {
-	for (let g of project_material_groups) {
+	for (let i: i32 = 0; i < project_material_groups.length; ++i) {
+		let g: node_group_t = project_material_groups[i];
 		if (g.canvas.name == name) {
 			return g.canvas;
 		}
@@ -1871,7 +1876,8 @@ function parser_material_to_vec3(s: string): string {
 }
 
 function parser_material_node_by_type(nodes: zui_node_t[], ntype: string): zui_node_t {
-	for (let n of nodes) {
+	for (let i: i32 = 0; i < nodes.length; ++i) {
+		let n: zui_node_t = nodes[i];
 		if (n.type == ntype) {
 			return n;
 		}
@@ -1893,7 +1899,8 @@ function parser_material_node_name(node: zui_node_t, _parents: zui_node_t[] = nu
 		_parents = parser_material_parents;
 	}
 	let s: string = node.name;
-	for (let p of _parents) {
+	for (let i: i32 = 0; i < _parents.length; ++i) {
+		let p: zui_node_t = _parents[i];
 		s = p.name + p.id + `_` + s;
 	}
 	s = parser_material_safesrc(s) + node.id;
@@ -1921,7 +1928,8 @@ function parser_material_safesrc(s: string): string {
 }
 
 function parser_material_enum_data(s: string): string {
-	for (let a of project_assets) {
+	for (let i: i32 = 0; i < project_assets.length; ++i) {
+		let a: asset_t = project_assets[i];
 		if (a.name == s) {
 			return a.file;
 		}
