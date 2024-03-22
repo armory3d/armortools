@@ -397,7 +397,7 @@ function physics_body_fill_convex_hull(pb: physics_body_t, scale: vec4_t, margin
 	map_set(physics_body_convex_hull_cache, data, shape);
 	map_set(physics_body_users_cache, data, 1);
 
-	let positions: i16_array_t = mesh_data_get_vertex_array(data, 'pos').values;
+	let positions: i16_array_t = mesh_data_get_vertex_array(data, "pos").values;
 
 	let sx: f32 = scale.x * (1.0 - margin) * (1 / 32767);
 	let sy: f32 = scale.y * (1.0 - margin) * (1 / 32767);
@@ -429,7 +429,7 @@ function physics_body_fill_triangle_mesh(pb: physics_body_t, scale: vec4_t): Amm
 	map_set(physics_body_triangle_mesh_cache, data, triangle_mesh);
 	map_set(physics_body_users_cache, data, 1);
 
-	let positions: i16_array_t = mesh_data_get_vertex_array(data, 'pos').values;
+	let positions: i16_array_t = mesh_data_get_vertex_array(data, "pos").values;
 	let indices: any = data._indices;
 
 	let sx: f32 = scale.x * (1 / 32767);

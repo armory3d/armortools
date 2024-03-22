@@ -20,8 +20,8 @@ function make_voxel_run(data: shader_context_t) {
 	// if (skin) {
 	// 	g4_vertex_structure_add(structure, "bone", vertex_data_t.I16_4X_Normalized);
 	// 	g4_vertex_structure_add(structure, "weight", vertex_data_t.I16_4X_Normalized);
-	// 	array_push(data.raw.vertex_elements, { name: "bone", data: 'short4norm' });
-	// 	array_push(data.raw.vertex_elements, { name: "weight", data: 'short4norm' });
+	// 	array_push(data.raw.vertex_elements, { name: "bone", data: "short4norm" });
+	// 	array_push(data.raw.vertex_elements, { name: "weight", data: "short4norm" });
 	// }
 	// ///end
 
@@ -50,39 +50,39 @@ function make_voxel_run(data: shader_context_t) {
 function make_voxel_source(): string {
 	let ds: f32 = make_material_get_displace_strength();
 	///if krom_direct3d11
-	return `#define vec3 float3
-	uniform float4x4 W;
-	uniform float3x3 N;
-	Texture2D<float4> texpaint_pack;
-	SamplerState _texpaint_pack_sampler;
-	struct SPIRV_Cross_Input { float4 pos : TEXCOORD1; float2 nor : TEXCOORD0; float2 tex : TEXCOORD2; };
-	struct SPIRV_Cross_Output { float4 svpos : SV_POSITION; };
-	SPIRV_Cross_Output main(SPIRV_Cross_Input stage_input) {
-		SPIRV_Cross_Output stage_output;
-		${make_material_voxelgi_half_extents()}
-		stage_output.svpos.xyz = mul(float4(stage_input.pos.xyz, 1.0), W).xyz / voxelgiHalfExtents.xxx;
-		float3 wnormal = normalize(mul(float3(stage_input.nor.xy, stage_input.pos.w), N));
-		float height = texpaint_pack.SampleLevel(_texpaint_pack_sampler, stage_input.tex, 0.0).a;
-		stage_output.svpos.xyz += wnormal * height.xxx * float3(${ds}, ${ds}, ${ds});
-		stage_output.svpos.w = 1.0;
-		return stage_output;
-	}`;
+	return "#define vec3 float3 \
+	uniform float4x4 W; \
+	uniform float3x3 N; \
+	Texture2D<float4> texpaint_pack; \
+	SamplerState _texpaint_pack_sampler; \
+	struct SPIRV_Cross_Input { float4 pos : TEXCOORD1; float2 nor : TEXCOORD0; float2 tex : TEXCOORD2; }; \
+	struct SPIRV_Cross_Output { float4 svpos : SV_POSITION; }; \
+	SPIRV_Cross_Output main(SPIRV_Cross_Input stage_input) { \
+		SPIRV_Cross_Output stage_output; \
+		" + make_material_voxelgi_half_extents + ")} \
+		stage_output.svpos.xyz = mul(float4(stage_input.pos.xyz, 1.0), W).xyz / voxelgiHalfExtents.xxx; \
+		float3 wnormal = normalize(mul(float3(stage_input.nor.xy, stage_input.pos.w), N)); \
+		float height = texpaint_pack.SampleLevel(_texpaint_pack_sampler, stage_input.tex, 0.0).a; \
+		stage_output.svpos.xyz += wnormal * height.xxx * float3(" + ds + ", " + ds + ", " + ds + "); \
+		stage_output.svpos.w = 1.0; \
+		return stage_output; \
+	}";
 	///else
-	return `#version 450
-	in vec4 pos;
-	in vec2 nor;
-	in vec2 tex;
-	out vec3 voxpositionGeom;
-	uniform mat4 W;
-	uniform mat3 N;
-	uniform sampler2D texpaint_pack;
-	void main() {
-		${make_material_voxelgi_half_extents()}
-		voxpositionGeom = vec3(W * vec4(pos.xyz, 1.0)) / voxelgiHalfExtents;
-		vec3 wnormal = normalize(N * vec3(nor.xy, pos.w));
-		float height = textureLod(texpaint_pack, tex, 0.0).a;
-		voxpositionGeom += wnormal * vec3(height) * vec3(${ds});
-	}`;
+	return "#version 450 \
+	in vec4 pos; \
+	in vec2 nor; \
+	in vec2 tex; \
+	out vec3 voxpositionGeom; \
+	uniform mat4 W; \
+	uniform mat3 N; \
+	uniform sampler2D texpaint_pack; \
+	void main() { \
+		" + make_material_voxelgi_half_extents + ")} \
+		voxpositionGeom = vec3(W * vec4(pos.xyz, 1.0)) / voxelgiHalfExtents; \
+		vec3 wnormal = normalize(N * vec3(nor.xy, pos.w)); \
+		float height = textureLod(texpaint_pack, tex, 0.0).a; \
+		voxpositionGeom += wnormal * vec3(height) * vec3(" + ds + "); \
+	}";
 	///end
 }
 ///end

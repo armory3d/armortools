@@ -95,7 +95,7 @@ function tab_layers_remap_layer_pointers(nodes: zui_node_t[], pointer_map: map_t
 		let n = nodes[i];
 		if (n.type == "LAYER" || n.type == "LAYER_MASK") {
 			let i = n.buttons[0].default_value;
-			if (pointer_map.has(i)) {
+			if (map_get(pointer_map, i) != null) {
 				n.buttons[0].default_value = map_get(pointer_map, i);
 			}
 		}

@@ -13,7 +13,8 @@ function operator_run(name: string) {
 
 function operator_update() {
 	if (mouse_started_any() || keyboard_started_any()) {
-		for (let op in config_keymap) {
+		for (let i: i32 = 0; i < base_keymap_keys.length; ++i) {
+			let op: string = base_keymap_keys[i];
 			if (operator_shortcut(config_keymap[op])) {
 				operator_run(op);
 			}
@@ -21,7 +22,7 @@ function operator_update() {
 	}
 }
 
-function operator_shortcut(s: string, type = shortcut_type_t.STARTED): bool {
+function operator_shortcut(s: string, type: shortcut_type_t = shortcut_type_t.STARTED): bool {
 	if (s == "") {
 		return false;
 	}

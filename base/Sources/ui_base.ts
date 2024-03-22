@@ -883,7 +883,8 @@ function ui_base_operator_search() {
 		let count: i32 = 0;
 		let BUTTON_COL: i32 = ui.t.BUTTON_COL;
 
-		for (let n in config_keymap) {
+		for (let i: i32 = 0; i < base_keymap_keys.length; ++i) {
+			let n: string = base_keymap_keys[i];
 			if (string_index_of(n, search) >= 0) {
 				ui.t.BUTTON_COL = count == ui_base_operator_search_offset ? ui.t.HIGHLIGHT_COL : ui.t.SEPARATOR_COL;
 				if (zui_button(n, zui_align_t.LEFT, config_keymap[n]) || (enter && count == ui_base_operator_search_offset)) {

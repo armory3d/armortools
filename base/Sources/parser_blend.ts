@@ -126,7 +126,7 @@ function parser_blend_parse(raw: blend_t) {
 
 		// Memory address
 		let addr: any = parser_blend_read_pointer(raw);
-		if (!raw.map.has(addr)) {
+		if (map_get(raw.map, addr) == null) {
 			map_set(raw.map, addr, b);
 		}
 
@@ -426,7 +426,7 @@ function bl_handle_get(raw: bl_handle_t, name: string, index: i32 = 0, as_type: 
 			if (is_pointer) {
 				raw.block.blend.pos = raw.block.pos + new_offset;
 				let addr: any = parser_blend_read_pointer(raw.block.blend);
-				if (raw.block.blend.map.has(addr)) {
+				if (map_get(raw.block.blend.map, addr) != null) {
 					h.block = map_get(raw.block.blend.map, addr);
 				}
 				else h.block = raw.block;

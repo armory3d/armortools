@@ -79,7 +79,7 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 
 	///if krom_ios
 	let document_directory: string = krom_save_dialog("", "");
-	document_directory = substring(document_directory, 0, document_directory.length - 8); // Strip /'untitled'
+	document_directory = substring(document_directory, 0, document_directory.length - 8); // Strip /"untitled"
 	///end
 
 	if (handle.text == "") handle.text = ui_files_default_path;
@@ -231,7 +231,7 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 				}
 				let key: string = handle.text + path_sep + f;
 				icon = map_get(ui_files_icon_map, key);
-				if (!ui_files_icon_map.has(key)) {
+				if (map_get(ui_files_icon_map, key) == null) {
 					let blob_path: string = key;
 
 					///if krom_ios

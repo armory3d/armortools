@@ -609,10 +609,11 @@ function box_preferences_show() {
 
 			zui_separator(8, false);
 
-			let i: i32 = 0;
+			let index: i32 = 0;
 			ui.changed = false;
-			for (let key in config_keymap) {
-				let h: zui_handle_t = zui_nest(zui_handle("boxpreferences_53"), i++);
+			for (let i: i32 = 0; i < base_keymap_keys.length; ++i) {
+				let key: string = base_keymap_keys[i];
+				let h: zui_handle_t = zui_nest(zui_handle("boxpreferences_53"), index++);
 				h.text = config_keymap[key];
 				let text: string = zui_text_input(h, key, zui_align_t.LEFT);
 				config_keymap[key] = text;
@@ -632,16 +633,16 @@ function box_preferences_show() {
 						let plugin_name: string = zui_text_input(zui_handle("boxpreferences_55", { text: "new_plugin" }), tr("Name"));
 						if (zui_button(tr("OK")) || ui.is_return_down) {
 							let template: string =
-`let plugin = create();
-let h1 = zui_handle_create();
-plugin.draw_ui = function (ui) {
-	if (zui_panel(h1, 'New Plugin')) {
-		if (zui_button('Button')) {
-			console.error('Hello');
-		}
-	}
-}
-`;
+"let plugin = create();\
+let h1 = zui_handle_create();\
+plugin.draw_ui = function (ui) {\
+	if (zui_panel(h1, \"New Plugin\")) {\
+		if (zui_button(\"Button\")) {\
+			console.error(\"Hello\");\
+		}\
+	}\
+}\
+";
 							if (!ends_with(plugin_name, ".js")) {
 								plugin_name += ".js";
 							}

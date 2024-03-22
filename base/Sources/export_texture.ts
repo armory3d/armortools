@@ -91,9 +91,9 @@ function export_texture_run(path: string, bake_material: bool = false) {
 	///end
 
 	///if krom_ios
-	console_info(tr("Textures exported") + " ('Files/On My iPad/" + manifest_title + "')");
+	console_info(tr("Textures exported") + " (\"Files/On My iPad/" + manifest_title + "\")");
 	///elseif krom_android
-	console_info(tr("Textures exported") + " ('Files/Internal storage/Pictures/" + manifest_title + "')");
+	console_info(tr("Textures exported") + " (\"Files/Internal storage/Pictures/" + manifest_title + "\")");
 	///else
 	console_info(tr("Textures exported"));
 	///end

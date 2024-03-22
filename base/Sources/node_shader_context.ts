@@ -23,9 +23,9 @@ function node_shader_context_create(material: material_t, props: any): node_shad
 		alpha_blend_source: props.alpha_blend_source,
 		alpha_blend_destination: props.alpha_blend_destination,
 		alpha_blend_operation: props.alpha_blend_operation,
-		fragment_shader: '',
-		vertex_shader: '',
-		vertex_elements: 'vertex_elements' in props ? props.vertex_elements : [ {name: "pos", data: 'short4norm'}, {name: "nor", data: 'short2norm'}],
+		fragment_shader: "",
+		vertex_shader: "",
+		vertex_elements: props.vertex_elements != null ? props.vertex_elements : [ {name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}],
 		color_attachments: props.color_attachments,
 		depth_attachment: props.depth_attachment
 	};
@@ -113,14 +113,14 @@ function node_shader_context_add_texture_unit(raw: node_shader_context_t, ctype:
 }
 
 function node_shader_context_make_vert(raw: node_shader_context_t): node_shader_t {
-	raw.data.vertex_shader = raw.material.name + '_' + raw.data.name + '.vert';
-	raw.vert = node_shader_create(raw, 'vert');
+	raw.data.vertex_shader = raw.material.name + "_" + raw.data.name + ".vert";
+	raw.vert = node_shader_create(raw, "vert");
 	return raw.vert;
 }
 
 function node_shader_context_make_frag(raw: node_shader_context_t): node_shader_t {
-	raw.data.fragment_shader = raw.material.name + '_' + raw.data.name + '.frag';
-	raw.frag = node_shader_create(raw, 'frag');
+	raw.data.fragment_shader = raw.material.name + "_" + raw.data.name + ".frag";
+	raw.frag = node_shader_create(raw, "frag");
 	return raw.frag;
 }
 

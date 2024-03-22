@@ -1090,7 +1090,7 @@ function ui_nodes_render() {
 			}
 		}
 		if (ui_nodes_ui.is_hovered) {
-			zui_tooltip(tr("Search for nodes") + ` (${config_keymap.node_search})`);
+			zui_tooltip(tr("Search for nodes") + " (" + config_keymap.node_search + ")");
 		}
 		ui_nodes_ui._x += ui_nodes_ui._w + 3;
 		ui_nodes_ui._y = 2 + start_y;

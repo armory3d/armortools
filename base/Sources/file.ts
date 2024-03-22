@@ -36,20 +36,20 @@ function file_read_directory(path: string, folders_only: bool = false): string[]
 }
 
 function file_create_directory(path: string) {
-	krom_sys_command(file_cmd_mkdir + ' "' + path + '"');
+	krom_sys_command(file_cmd_mkdir + " \"" + path + "\"");
 }
 
 function file_copy(srcPath: string, dst_path: string) {
-	krom_sys_command(file_cmd_copy + ' "' + srcPath + '" "' + dst_path + '"');
+	krom_sys_command(file_cmd_copy + " \"" + srcPath + "\" \"" + dst_path + "\"");
 }
 
 function file_start(path: string) {
 	///if krom_windows
-	krom_sys_command('start "" "' + path + '"');
+	krom_sys_command("start \"\" \"" + path + "\"");
 	///elseif krom_linux
-	krom_sys_command('xdg-open "' + path + '"');
+	krom_sys_command("xdg-open \"" + path + "\"");
 	///else
-	krom_sys_command('open "' + path + '"');
+	krom_sys_command("open \"" + path + "\"");
 	///end
 }
 
@@ -74,10 +74,10 @@ function file_download(url: string, dstPath: string, done: ()=>void, size: i32 =
 		done();
 	});
 	///elseif krom_linux
-	krom_sys_command('wget -O "' + dstPath + '" "' + url + '"');
+	krom_sys_command("wget -O \"" + dstPath + "\" \"" + url + "\"");
 	done();
 	///else
-	krom_sys_command('curl -L ' + url + ' -o "' + dstPath + '"');
+	krom_sys_command("curl -L " + url + " -o \"" + dstPath + "\"");
 	done();
 	///end
 }

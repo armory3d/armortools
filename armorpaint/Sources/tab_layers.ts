@@ -55,7 +55,7 @@ function tab_layers_button_2d_view() {
 		ui_base_show_2d_view(view_2d_type_t.LAYER);
 	}
 	else if (ui.is_hovered) {
-		zui_tooltip(tr("Show 2D View") + ` (${config_keymap.toggle_2d_view})`);
+		zui_tooltip(tr("Show 2D View") + " (" + config_keymap.toggle_2d_view + ")");
 	}
 }
 
@@ -216,7 +216,7 @@ function tab_layers_remap_layer_pointers(nodes: zui_node_t[], pointer_map: map_t
 		let n: zui_node_t = nodes[i];
 		if (n.type == "LAYER" || n.type == "LAYER_MASK") {
 			let i: any = n.buttons[0].default_value;
-			if (pointer_map.has(i)) {
+			if (map_get(pointer_map, i) != null) {
 				n.buttons[0].default_value = map_get(pointer_map, i);
 			}
 		}

@@ -171,7 +171,7 @@ function box_export_tab_export_textures(ui: zui_t, title: string, bake_material:
 			}
 		}
 		if (ui.is_hovered) {
-			zui_tooltip(tr("Export texture files") + ` (${config_keymap.file_export_textures})`);
+			zui_tooltip(tr("Export texture files") + " (" + config_keymap.file_export_textures + ")");
 		}
 	}
 }
@@ -470,12 +470,12 @@ function box_export_parse_preset() {
 
 function box_export_new_preset(name: string) {
 	let template: string =
-`{
-"textures": [
-	{ "name": "base", "channels": ["base_r", "base_g", "base_b", "1.0"], "color_space": "linear" }
-]
-}
-`;
+"{\
+\"textures\": [\
+	{ \"name\": \"base\", \"channels\": [\"base_r\", \"base_g\", \"base_b\", \"1.0\"], \"color_space\": \"linear\" }\
+]\
+}\
+";
 	if (!ends_with(name, ".json")) {
 		name += ".json";
 	}

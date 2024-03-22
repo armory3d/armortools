@@ -121,7 +121,7 @@ function import_blend_material_run(path: string) {
 				// Fill button values
 				if (search == "teximage") {
 					let img: any = bl_handle_get(node, "id", 0, "Image");
-					let file: string = bl_handle_get(img, "name"); // '//desktop\logo.png'
+					let file: string = bl_handle_get(img, "name"); // "//desktop\logo.png"
 					file = substring(file, 2, file.length);
 					file = path_base_dir(path) + file;
 					import_texture_run(file);

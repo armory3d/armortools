@@ -455,7 +455,7 @@ function ui_menu_render() {
 			ui_menu_align(ui);
 			context_raw.camera_type = zui_inline_radio(context_raw.cam_handle, [tr("Perspective"), tr("Orthographic")], zui_align_t.LEFT);
 			if (ui.is_hovered) {
-				zui_tooltip(tr("Camera Type") + ` (${config_keymap.view_camera_type})`);
+				zui_tooltip(tr("Camera Type") + " (" + config_keymap.view_camera_type + ")");
 			}
 			if (context_raw.cam_handle.changed) {
 				viewport_update_camera_type(context_raw.camera_type);
@@ -536,7 +536,7 @@ function ui_menu_render() {
 
 				///if krom_windows
 				let save: string = (path_is_protected() ? krom_save_path() : path_data()) + path_sep + "tmp.txt";
-				krom_sys_command('wmic path win32_VideoController get name > "' + save + '"');
+				krom_sys_command("wmic path win32_VideoController get name > \"" + save + "\"");
 				let blob: buffer_t = krom_load_blob(save);
 				let u8: u8_array_t = u8_array_create_from_buffer(blob);
 				let gpu_raw: string = "";
@@ -553,7 +553,7 @@ function ui_menu_render() {
 					gpu += trim_end(g) + ", ";
 				}
 				gpu = substring(gpu, 0, gpu.length - 2);
-				msg += `\n${gpu}`;
+				msg += "\n" + gpu;
 				///else
 				// { lshw -C display }
 				///end

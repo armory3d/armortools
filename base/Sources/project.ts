@@ -46,7 +46,7 @@ function project_save(saveAndQuit: bool = false) {
 	if (project_filepath == "") {
 		///if krom_ios
 		let document_directory: string = krom_save_dialog("", "");
-		document_directory = substring(document_directory, 0, document_directory.length - 8); // Strip /'untitled'
+		document_directory = substring(document_directory, 0, document_directory.length - 8); // Strip /"untitled"
 		project_filepath = document_directory + "/" + sys_title() + ".arm";
 		///elseif krom_android
 		project_filepath = krom_save_path() + "/" + sys_title() + ".arm";

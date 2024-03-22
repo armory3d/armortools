@@ -406,114 +406,114 @@ function make_material_parse_brush() {
 
 function make_material_blend_mode(frag: node_shader_t, blending: i32, cola: string, colb: string, opac: string): string {
 	if (blending == blend_type_t.MIX) {
-		return `mix(${cola}, ${colb}, ${opac})`;
+		return "mix(" + cola + ", " + colb + ", " + opac + ")";
 	}
 	else if (blending == blend_type_t.DARKEN) {
-		return `mix(${cola}, min(${cola}, ${colb}), ${opac})`;
+		return "mix(" + cola + ", min(" + cola + ", " + colb + "), " + opac + ")";
 	}
 	else if (blending == blend_type_t.MULTIPLY) {
-		return `mix(${cola}, ${cola} * ${colb}, ${opac})`;
+		return "mix(" + cola + ", " + cola + " * " + colb + ", " + opac + ")";
 	}
 	else if (blending == blend_type_t.BURN) {
-		return `mix(${cola}, vec3(1.0, 1.0, 1.0) - (vec3(1.0, 1.0, 1.0) - ${cola}) / ${colb}, ${opac})`;
+		return "mix(" + cola + ", vec3(1.0, 1.0, 1.0) - (vec3(1.0, 1.0, 1.0) - " + cola + ") / " + colb + ", " + opac + ")";
 	}
 	else if (blending == blend_type_t.LIGHTEN) {
-		return `max(${cola}, ${colb} * ${opac})`;
+		return "max(" + cola + ", " + colb + " * " + opac + ")";
 	}
 	else if (blending == blend_type_t.SCREEN) {
-		return `(vec3(1.0, 1.0, 1.0) - (vec3(1.0 - ${opac}, 1.0 - ${opac}, 1.0 - ${opac}) + ${opac} * (vec3(1.0, 1.0, 1.0) - ${colb})) * (vec3(1.0, 1.0, 1.0) - ${cola}))`;
+		return "(vec3(1.0, 1.0, 1.0) - (vec3(1.0 - " + opac + ", 1.0 - " + opac + ", 1.0 - " + opac + ") + " + opac + " * (vec3(1.0, 1.0, 1.0) - " + colb + ")) * (vec3(1.0, 1.0, 1.0) - " + cola + "))";
 	}
 	else if (blending == blend_type_t.DODGE) {
-		return `mix(${cola}, ${cola} / (vec3(1.0, 1.0, 1.0) - ${colb}), ${opac})`;
+		return "mix(" + cola + ", " + cola + " / (vec3(1.0, 1.0, 1.0) - " + colb + "), " + opac + ")";
 	}
 	else if (blending == blend_type_t.ADD) {
-		return `mix(${cola}, ${cola} + ${colb}, ${opac})`;
+		return "mix(" + cola + ", " + cola + " + " + colb + ", " + opac + ")";
 	}
 	else if (blending == blend_type_t.OVERLAY) {
-		return `mix(${cola}, vec3(
-			${cola}.r < 0.5 ? 2.0 * ${cola}.r * ${colb}.r : 1.0 - 2.0 * (1.0 - ${cola}.r) * (1.0 - ${colb}.r),
-			${cola}.g < 0.5 ? 2.0 * ${cola}.g * ${colb}.g : 1.0 - 2.0 * (1.0 - ${cola}.g) * (1.0 - ${colb}.g),
-			${cola}.b < 0.5 ? 2.0 * ${cola}.b * ${colb}.b : 1.0 - 2.0 * (1.0 - ${cola}.b) * (1.0 - ${colb}.b)
-		), ${opac})`;
+		return "mix(" + cola + ", vec3( \
+			" + cola + ".r < 0.5 ? 2.0 * " + cola + ".r * " + colb + ".r : 1.0 - 2.0 * (1.0 - " + cola + ".r) * (1.0 - " + colb + ".r), \
+			" + cola + ".g < 0.5 ? 2.0 * " + cola + ".g * " + colb + ".g : 1.0 - 2.0 * (1.0 - " + cola + ".g) * (1.0 - " + colb + ".g), \
+			" + cola + ".b < 0.5 ? 2.0 * " + cola + ".b * " + colb + ".b : 1.0 - 2.0 * (1.0 - " + cola + ".b) * (1.0 - " + colb + ".b) \
+		), " + opac + ")";
 	}
 	else if (blending == blend_type_t.SOFT_LIGHT) {
-		return `((1.0 - ${opac}) * ${cola} + ${opac} * ((vec3(1.0, 1.0, 1.0) - ${cola}) * ${colb} * ${cola} + ${cola} * (vec3(1.0, 1.0, 1.0) - (vec3(1.0, 1.0, 1.0) - ${colb}) * (vec3(1.0, 1.0, 1.0) - ${cola}))))`;
+		return "((1.0 - " + opac + ") * " + cola + " + " + opac + " * ((vec3(1.0, 1.0, 1.0) - " + cola + ") * " + colb + " * " + cola + " + " + cola + " * (vec3(1.0, 1.0, 1.0) - (vec3(1.0, 1.0, 1.0) - " + colb + ") * (vec3(1.0, 1.0, 1.0) - " + cola + "))))";
 	}
 	else if (blending == blend_type_t.LINEAR_LIGHT) {
-		return `(${cola} + ${opac} * (vec3(2.0, 2.0, 2.0) * (${colb} - vec3(0.5, 0.5, 0.5))))`;
+		return "(" + cola + " + " + opac + " * (vec3(2.0, 2.0, 2.0) * (" + colb + " - vec3(0.5, 0.5, 0.5))))";
 	}
 	else if (blending == blend_type_t.DIFFERENCE) {
-		return `mix(${cola}, abs(${cola} - ${colb}), ${opac})`;
+		return "mix(" + cola + ", abs(" + cola + " - " + colb + "), " + opac + ")";
 	}
 	else if (blending == blend_type_t.SUBTRACT) {
-		return `mix(${cola}, ${cola} - ${colb}, ${opac})`;
+		return "mix(" + cola + ", " + cola + " - " + colb + ", " + opac + ")";
 	}
 	else if (blending == blend_type_t.DIVIDE) {
-		return `vec3(1.0 - ${opac}, 1.0 - ${opac}, 1.0 - ${opac}) * ${cola} + vec3(${opac}, ${opac}, ${opac}) * ${cola} / ${colb}`;
+		return "vec3(1.0 - " + opac + ", 1.0 - " + opac + ", 1.0 - " + opac + ") * " + cola + " + vec3(" + opac + ", " + opac + ", " + opac + ") * " + cola + " / " + colb + "";
 	}
 	else if (blending == blend_type_t.HUE) {
 		node_shader_add_function(frag, str_hue_sat);
-		return `mix(${cola}, hsv_to_rgb(vec3(rgb_to_hsv(${colb}).r, rgb_to_hsv(${cola}).g, rgb_to_hsv(${cola}).b)), ${opac})`;
+		return "mix(" + cola + ", hsv_to_rgb(vec3(rgb_to_hsv(" + colb + ").r, rgb_to_hsv(" + cola + ").g, rgb_to_hsv(" + cola + ").b)), " + opac + ")";
 	}
 	else if (blending == blend_type_t.SATURATION) {
 		node_shader_add_function(frag, str_hue_sat);
-		return `mix(${cola}, hsv_to_rgb(vec3(rgb_to_hsv(${cola}).r, rgb_to_hsv(${colb}).g, rgb_to_hsv(${cola}).b)), ${opac})`;
+		return "mix(" + cola + ", hsv_to_rgb(vec3(rgb_to_hsv(" + cola + ").r, rgb_to_hsv(" + colb + ").g, rgb_to_hsv(" + cola + ").b)), " + opac + ")";
 	}
 	else if (blending == blend_type_t.COLOR) {
 		node_shader_add_function(frag, str_hue_sat);
-		return `mix(${cola}, hsv_to_rgb(vec3(rgb_to_hsv(${colb}).r, rgb_to_hsv(${colb}).g, rgb_to_hsv(${cola}).b)), ${opac})`;
+		return "mix(" + cola + ", hsv_to_rgb(vec3(rgb_to_hsv(" + colb + ").r, rgb_to_hsv(" + colb + ").g, rgb_to_hsv(" + cola + ").b)), " + opac + ")";
 	}
 	else { // BlendValue
 		node_shader_add_function(frag, str_hue_sat);
-		return `mix(${cola}, hsv_to_rgb(vec3(rgb_to_hsv(${cola}).r, rgb_to_hsv(${cola}).g, rgb_to_hsv(${colb}).b)), ${opac})`;
+		return "mix(" + cola + ", hsv_to_rgb(vec3(rgb_to_hsv(" + cola + ").r, rgb_to_hsv(" + cola + ").g, rgb_to_hsv(" + colb + ").b)), " + opac + ")";
 	}
 }
 
 function make_material_blend_mode_mask(frag: node_shader_t, blending: i32, cola: string, colb: string, opac: string): string {
 	if (blending == blend_type_t.MIX) {
-		return `mix(${cola}, ${colb}, ${opac})`;
+		return "mix(" + cola + ", " + colb + ", " + opac + ")";
 	}
 	else if (blending == blend_type_t.DARKEN) {
-		return `mix(${cola}, min(${cola}, ${colb}), ${opac})`;
+		return "mix(" + cola + ", min(" + cola + ", " + colb + "), " + opac + ")";
 	}
 	else if (blending == blend_type_t.MULTIPLY) {
-		return `mix(${cola}, ${cola} * ${colb}, ${opac})`;
+		return "mix(" + cola + ", " + cola + " * " + colb + ", " + opac + ")";
 	}
 	else if (blending == blend_type_t.BURN) {
-		return `mix(${cola}, 1.0 - (1.0 - ${cola}) / ${colb}, ${opac})`;
+		return "mix(" + cola + ", 1.0 - (1.0 - " + cola + ") / " + colb + ", " + opac + ")";
 	}
 	else if (blending == blend_type_t.LIGHTEN) {
-		return `max(${cola}, ${colb} * ${opac})`;
+		return "max(" + cola + ", " + colb + " * " + opac + ")";
 	}
 	else if (blending == blend_type_t.SCREEN) {
-		return `(1.0 - ((1.0 - ${opac}) + ${opac} * (1.0 - ${colb})) * (1.0 - ${cola}))`;
+		return "(1.0 - ((1.0 - " + opac + ") + " + opac + " * (1.0 - " + colb + ")) * (1.0 - " + cola + "))";
 	}
 	else if (blending == blend_type_t.DODGE) {
-		return `mix(${cola}, ${cola} / (1.0 - ${colb}), ${opac})`;
+		return "mix(" + cola + ", " + cola + " / (1.0 - " + colb + "), " + opac + ")";
 	}
 	else if (blending == blend_type_t.ADD) {
-		return `mix(${cola}, ${cola} + ${colb}, ${opac})`;
+		return "mix(" + cola + ", " + cola + " + " + colb + ", " + opac + ")";
 	}
 	else if (blending == blend_type_t.OVERLAY) {
-		return `mix(${cola}, ${cola} < 0.5 ? 2.0 * ${cola} * ${colb} : 1.0 - 2.0 * (1.0 - ${cola}) * (1.0 - ${colb}), ${opac})`;
+		return "mix(" + cola + ", " + cola + " < 0.5 ? 2.0 * " + cola + " * " + colb + " : 1.0 - 2.0 * (1.0 - " + cola + ") * (1.0 - " + colb + "), " + opac + ")";
 	}
 	else if (blending == blend_type_t.SOFT_LIGHT) {
-		return `((1.0 - ${opac}) * ${cola} + ${opac} * ((1.0 - ${cola}) * ${colb} * ${cola} + ${cola} * (1.0 - (1.0 - ${colb}) * (1.0 - ${cola}))))`;
+		return "((1.0 - " + opac + ") * " + cola + " + " + opac + " * ((1.0 - " + cola + ") * " + colb + " * " + cola + " + " + cola + " * (1.0 - (1.0 - " + colb + ") * (1.0 - " + cola + "))))";
 	}
 	else if (blending == blend_type_t.LINEAR_LIGHT) {
-		return `(${cola} + ${opac} * (2.0 * (${colb} - 0.5)))`;
+		return "(" + cola + " + " + opac + " * (2.0 * (" + colb + " - 0.5)))";
 	}
 	else if (blending == blend_type_t.DIFFERENCE) {
-		return `mix(${cola}, abs(${cola} - ${colb}), ${opac})`;
+		return "mix(" + cola + ", abs(" + cola + " - " + colb + "), " + opac + ")";
 	}
 	else if (blending == blend_type_t.SUBTRACT) {
-		return `mix(${cola}, ${cola} - ${colb}, ${opac})`;
+		return "mix(" + cola + ", " + cola + " - " + colb + ", " + opac + ")";
 	}
 	else if (blending == blend_type_t.DIVIDE) {
-		return `(1.0 - ${opac}) * ${cola} + ${opac} * ${cola} / ${colb}`;
+		return "(1.0 - " + opac + ") * " + cola + " + " + opac + " * " + cola + " / " + colb + "";
 	}
 	else { // BlendHue, BlendSaturation, BlendColor, BlendValue
-		return `mix(${cola}, ${colb}, ${opac})`;
+		return "mix(" + cola + ", " + colb + ", " + opac + ")";
 	}
 }
 
@@ -524,7 +524,7 @@ function make_material_get_displace_strength(): f32 {
 
 function make_material_voxelgi_half_extents(): string {
 	let ext: f32 = context_raw.vxao_ext;
-	return `const vec3 voxelgiHalfExtents = vec3(${ext}, ${ext}, ${ext});`;
+	return "const vec3 voxelgiHalfExtents = vec3(" + ext + ", " + ext + ", " + ext + ");";
 }
 
 function make_material_delete_context(c: shader_context_t) {

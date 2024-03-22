@@ -5,26 +5,28 @@ let translator_cjk_font_indices: map_t<string, i32> = null;
 
 let translator_last_locale: string = "en";
 
-// Mark strings as localizable in order to be parsed by the extract_locale script.
-// The string will not be translated to the currently selected locale though.
+// Mark strings as localizable in order to be parsed by the extract_locale script
+// The string will not be translated to the currently selected locale though
 function _tr(s: string) {
 	return s;
 }
 
-// Localizes a string with the given placeholders replaced (format is `{placeholderName}`).
-// If the string isn't available in the translation, this method will return the source English string.
+// Localizes a string with the given placeholders replaced (format is "{placeholder_name}")
+// If the string isn't available in the translation, this method will return the source English string
 function tr(id: string, vars: map_t<string, string> = null): string {
 	let translation: string = id;
 
 	// English is the source language
-	if (config_raw.locale != "en" && translator_translations.has(id)) {
+	if (config_raw.locale != "en" && map_get(translator_translations, id) != null) {
 		let atranslations: any = translator_translations as any;
 		translation = atranslations[id];
 	}
 
 	if (vars != null) {
-		for (let [key, value] of vars) {
-			translation = string_replace_all(translation, `{${key}}`, any_to_string(value));
+		let keys: string[] = map_keys_to_array(vars);
+		let values: string[] = map_to_array(vars);
+		for (let i: i32 = 0; i < keys.length; ++i) {
+			translation = string_replace_all(translation, "{" + keys[i] + "}", any_to_string(values[i]));
 		}
 	}
 
@@ -65,7 +67,7 @@ function translator_load_translations(new_locale: string) {
 
 	if (config_raw.locale != "en") {
 		// Load the translation file
-		let translation_json: string = sys_buffer_to_string(krom_load_blob(`data/locale/${config_raw.locale}.json`));
+		let translation_json: string = sys_buffer_to_string(krom_load_blob("data/locale/" + config_raw.locale + ".json"));
 
 		let data: any = json_parse(translation_json);
 		for (let field in data) {
@@ -129,7 +131,7 @@ function translator_init_font(cjk: bool, font_path: string, font_scale: f32) {
 		let f: g2_font_t = data_get_font(font_path);
 		if (cjk) {
 			let acjk_font_indices: any = translator_cjk_font_indices as any;
-			let font_index: i32 = translator_cjk_font_indices.has(config_raw.locale) ? acjk_font_indices[config_raw.locale] : 0;
+			let font_index: i32 = map_get(translator_cjk_font_indices, config_raw.locale) != null ? acjk_font_indices[config_raw.locale] : 0;
 			g2_font_set_font_index(f, font_index);
 		}
 		base_font = f;
@@ -162,7 +164,7 @@ function translator_extended_glyphs() {
 function translator_get_supported_locales(): string[] {
 	let locales: string[] = ["system", "en"];
 	for (let locale_filename of file_read_directory(path_data() + path_sep + "locale")) {
-		// Trim the `.json` file extension from file names
+		// Trim the ".json" file extension from file names
 		array_push(locales, substring(locale_filename, 0, locale_filename.length - 5));
 	}
 	return locales;

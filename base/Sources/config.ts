@@ -188,10 +188,11 @@ function config_load_keymap() {
 		let blob: buffer_t = data_get_blob("keymap_presets/" + config_raw.keymap);
 		config_keymap = json_parse(sys_buffer_to_string(blob));
 		// Fill in undefined keys with defaults
-		for (let field in base_default_keymap) {
-			if (!(field in config_keymap)) {
+		for (let i: i32 = 0; i < base_keymap_keys.length; ++i) {
+			let key: string = base_keymap_keys[i];
+			if (!(key in config_keymap)) {
 				let adefault_keymap: any = base_default_keymap;
-				config_keymap[field] = adefault_keymap[field];
+				config_keymap[key] = adefault_keymap[key];
 			}
 		}
 	}

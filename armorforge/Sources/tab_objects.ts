@@ -61,7 +61,7 @@ function tab_objects_draw(htab: zui_handle_t) {
 				}
 
 				line_counter++;
-				// Undo applied offset for row drawing caused by endElement() in Zui.hx
+				// Undo applied offset for row drawing caused by end_element()
 				ui._y -= zui_ELEMENT_OFFSET(ui);
 
 				if (ui.is_released) {
@@ -125,7 +125,7 @@ function tab_objects_draw(htab: zui_handle_t) {
 			// ui.unindent();
 		}
 
-		if (zui_panel(zui_handle("tabobjects_2", {selected: true}), 'Properties')) {
+		if (zui_panel(zui_handle("tabobjects_2", {selected: true}), "Properties")) {
 			// ui.indent();
 
 			if (context_context_raw.selected_object != null) {

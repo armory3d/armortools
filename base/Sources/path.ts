@@ -72,7 +72,7 @@ function path_working_dir(): string {
 	if (path_working_dir_cache == null) {
 		let cmd: string = path_pwd;
 		let save: string = (path_is_protected() ? krom_save_path() : path_data() + path_sep) + "working_dir.txt";
-		krom_sys_command(cmd + ' > "' + save + '"');
+		krom_sys_command(cmd + " > \"" + save + "\"");
 		path_working_dir_cache = trim_end(sys_buffer_to_string(krom_load_blob(save)));
 	}
 	return path_working_dir_cache;

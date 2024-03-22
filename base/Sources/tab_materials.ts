@@ -43,7 +43,7 @@ function tab_materials_button_nodes() {
 		ui_base_show_material_nodes();
 	}
 	else if (ui.is_hovered) {
-		zui_tooltip(tr("Show Node Editor") + ` (${config_keymap.toggle_node_editor})`);
+		zui_tooltip(tr("Show Node Editor") + " (" + config_keymap.toggle_node_editor + ")");
 	}
 }
 

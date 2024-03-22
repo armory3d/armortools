@@ -162,13 +162,13 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 			zui_tooltip(tr("Add picked color to swatches"));
 		}
 
-		zui_text(tr("Base") + ` (${base_r_picked},${base_g_picked},${base_b_picked})`);
-		zui_text(tr("Normal") + ` (${normal_r_picked},${normal_g_picked},${normal_b_picked})`);
-		zui_text(tr("Occlusion") + ` (${occlusion_picked})`);
-		zui_text(tr("Roughness") + ` (${roughness_picked})`);
-		zui_text(tr("Metallic") + ` (${metallic_picked})`);
-		zui_text(tr("Height") + ` (${height_picked})`);
-		zui_text(tr("Opacity") + ` (${opacity_picked})`);
+		zui_text(tr("Base") + " (" + base_r_picked + "," + base_g_picked + "," + base_b_picked + ")");
+		zui_text(tr("Normal") + " (" + normal_r_picked + "," + normal_g_picked + "," + normal_b_picked + ")");
+		zui_text(tr("Occlusion") + " (" + occlusion_picked + ")");
+		zui_text(tr("Roughness") + " (" + roughness_picked + ")");
+		zui_text(tr("Metallic") + " (" + metallic_picked + ")");
+		zui_text(tr("Height") + " (" + height_picked + ")");
+		zui_text(tr("Opacity") + " (" + opacity_picked + ")");
 		context_raw.picker_select_material = zui_check(zui_handle("uiheader_1", { selected: context_raw.picker_select_material }), tr("Select Material"));
 		zui_combo(context_raw.picker_mask_handle, [tr("None"), tr("Material")], tr("Mask"), true);
 		if (context_raw.picker_mask_handle.changed) {
