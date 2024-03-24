@@ -98,20 +98,20 @@ function box_export_tab_export_textures(ui: zui_t, title: string, bake_material:
 
 		zui_row([0.5, 0.5]);
 		if (base_bits_handle.position == texture_bits_t.BITS8) {
-			context_raw.format_type = zui_combo(zui_handle("boxexport_0", { position: context_raw.format_type }), ["png", "jpg"], tr("Format"), true);
+			context_raw.format_type = zui_combo(zui_handle(__ID__, { position: context_raw.format_type }), ["png", "jpg"], tr("Format"), true);
 		}
 		else {
-			context_raw.format_type = zui_combo(zui_handle("boxexport_1", { position: context_raw.format_type }), ["exr"], tr("Format"), true);
+			context_raw.format_type = zui_combo(zui_handle(__ID__, { position: context_raw.format_type }), ["exr"], tr("Format"), true);
 		}
 
 		ui.enabled = context_raw.format_type == texture_ldr_format_t.JPG && base_bits_handle.position == texture_bits_t.BITS8;
-		context_raw.format_quality = zui_slider(zui_handle("boxexport_2", { value: context_raw.format_quality }), tr("Quality"), 0.0, 100.0, true, 1);
+		context_raw.format_quality = zui_slider(zui_handle(__ID__, { value: context_raw.format_quality }), tr("Quality"), 0.0, 100.0, true, 1);
 		ui.enabled = true;
 
 		///if is_paint
 		zui_row([0.5, 0.5]);
 		ui.enabled = !bake_material;
-		let layers_export_handle: zui_handle_t = zui_handle("boxexport_3");
+		let layers_export_handle: zui_handle_t = zui_handle(__ID__);
 		layers_export_handle.position = context_raw.layers_export;
 		context_raw.layers_export = zui_combo(layers_export_handle, [tr("Visible"), tr("Selected"), tr("Per Object"), tr("Per Udim Tile")], tr("Layers"), true);
 		ui.enabled = true;
@@ -120,7 +120,7 @@ function box_export_tab_export_textures(ui: zui_t, title: string, bake_material:
 		zui_combo(box_export_hpreset, box_export_files, tr("Preset"), true);
 		if (box_export_hpreset.changed) box_export_preset = null;
 
-		let layers_destination_handle: zui_handle_t = zui_handle("boxexport_4");
+		let layers_destination_handle: zui_handle_t = zui_handle(__ID__);
 		layers_destination_handle.position = context_raw.layers_destination;
 		context_raw.layers_destination = zui_combo(layers_destination_handle, [tr("Disk"), tr("Packed")], tr("Destination"), true);
 
@@ -189,9 +189,9 @@ function box_export_tab_presets(ui: zui_t) {
 		if (zui_button(tr("New"))) {
 			ui_box_show_custom(function (ui: zui_t) {
 				let tab_vertical: bool = config_raw.touch_ui;
-				if (zui_tab(zui_handle("boxexport_5"), tr("New Preset"), tab_vertical)) {
+				if (zui_tab(zui_handle(__ID__), tr("New Preset"), tab_vertical)) {
 					zui_row([0.5, 0.5]);
-					let preset_name: string = zui_text_input(zui_handle("boxexport_6", { text: "new_preset" }), tr("Name"));
+					let preset_name: string = zui_text_input(zui_handle(__ID__, { text: "new_preset" }), tr("Name"));
 					if (zui_button(tr("OK")) || ui.is_return_down) {
 						box_export_new_preset(preset_name);
 						box_export_fetch_presets();
@@ -317,7 +317,7 @@ function box_export_tab_atlases(ui: zui_t) {
 		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 			zui_row([1 / 2, 1 / 2]);
 			zui_text(project_paint_objects[i].base.name);
-			let hatlas: zui_handle_t = zui_nest(zui_handle("boxexport_7"), i);
+			let hatlas: zui_handle_t = zui_nest(zui_handle(__ID__), i);
 			hatlas.position = project_atlas_objects[i];
 			project_atlas_objects[i] = zui_combo(hatlas, project_atlas_names, tr("Atlas"));
 		}
@@ -328,7 +328,7 @@ function box_export_tab_atlases(ui: zui_t) {
 function box_export_show_mesh() {
 	box_export_mesh_handle.position = context_raw.export_mesh_index;
 	ui_box_show_custom(function (ui: zui_t) {
-		let htab: zui_handle_t = zui_handle("boxexport_8");
+		let htab: zui_handle_t = zui_handle(__ID__);
 		box_export_tab_export_mesh(ui, htab);
 	});
 }
@@ -339,7 +339,7 @@ function box_export_tab_export_mesh(ui: zui_t, htab: zui_handle_t) {
 
 		zui_row([1 / 2, 1 / 2]);
 
-		context_raw.export_mesh_format = zui_combo(zui_handle("boxexport_9", { position: context_raw.export_mesh_format }), ["obj", "arm"], tr("Format"), true);
+		context_raw.export_mesh_format = zui_combo(zui_handle(__ID__, { position: context_raw.export_mesh_format }), ["obj", "arm"], tr("Format"), true);
 
 		let ar: string[] = [tr("All")];
 		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
@@ -348,7 +348,7 @@ function box_export_tab_export_mesh(ui: zui_t, htab: zui_handle_t) {
 		}
 		zui_combo(box_export_mesh_handle, ar, tr("Meshes"), true);
 
-		let apply_displacement: bool = zui_check(zui_handle("boxexport_10"), tr("Apply Displacement"));
+		let apply_displacement: bool = zui_check(zui_handle(__ID__), tr("Apply Displacement"));
 
 		let tris: i32 = 0;
 		let pos: i32 = box_export_mesh_handle.position;
@@ -394,11 +394,11 @@ function box_export_tab_export_mesh(ui: zui_t, htab: zui_handle_t) {
 ///if (is_paint || is_sculpt)
 function box_export_show_material() {
 	ui_box_show_custom(function (ui: zui_t) {
-		let htab: zui_handle_t = zui_handle("boxexport_11");
+		let htab: zui_handle_t = zui_handle(__ID__);
 		let tab_vertical: bool = config_raw.touch_ui;
 		if (zui_tab(htab, tr("Export Material"), tab_vertical)) {
-			let h1: zui_handle_t = zui_handle("boxexport_12");
-			let h2: zui_handle_t = zui_handle("boxexport_13");
+			let h1: zui_handle_t = zui_handle(__ID__);
+			let h2: zui_handle_t = zui_handle(__ID__);
 			h1.selected = context_raw.pack_assets_on_export;
 			h2.selected = context_raw.write_icon_on_export;
 			context_raw.pack_assets_on_export = zui_check(h1, tr("Pack Assets"));
@@ -425,11 +425,11 @@ function box_export_show_material() {
 
 function box_export_show_brush() {
 	ui_box_show_custom(function (ui: zui_t) {
-		let htab: zui_handle_t = zui_handle("boxexport_14");
+		let htab: zui_handle_t = zui_handle(__ID__);
 		let tab_vertical: bool = config_raw.touch_ui;
 		if (zui_tab(htab, tr("Export Brush"), tab_vertical)) {
-			let h1: zui_handle_t = zui_handle("boxexport_15");
-			let h2: zui_handle_t = zui_handle("boxexport_16");
+			let h1: zui_handle_t = zui_handle(__ID__);
+			let h2: zui_handle_t = zui_handle(__ID__);
 			h1.selected = context_raw.pack_assets_on_export;
 			h2.selected = context_raw.write_icon_on_export;
 			context_raw.pack_assets_on_export = zui_check(h1, tr("Pack Assets"));

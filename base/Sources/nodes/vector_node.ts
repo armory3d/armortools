@@ -101,7 +101,7 @@ let vector_node_def: zui_node_t = {
 			name: _tr("Vector"),
 			type: "VECTOR",
 			color: 0xff6363c7,
-			default_value: new f32_array_t([0.0, 0.0, 0.0])
+			default_value: f32_array_create_xyz(0.0, 0.0, 0.0)
 		}
 	],
 	buttons: []

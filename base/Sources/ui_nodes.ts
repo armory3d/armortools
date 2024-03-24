@@ -109,14 +109,14 @@ function ui_nodes_on_socket_released(socket_id: i32) {
 			base_notify_on_next_frame(function () {
 				ui_menu_draw(function (ui: zui_t) {
 					if (ui_menu_button(ui, tr("Edit"))) {
-						let htype: zui_handle_t = zui_handle("uinodes_0");
-						let hname: zui_handle_t = zui_handle("uinodes_1");
-						let hmin: zui_handle_t = zui_handle("uinodes_2");
-						let hmax: zui_handle_t = zui_handle("uinodes_3");
-						let hval0: zui_handle_t = zui_handle("uinodes_4");
-						let hval1: zui_handle_t = zui_handle("uinodes_5");
-						let hval2: zui_handle_t = zui_handle("uinodes_6");
-						let hval3: zui_handle_t = zui_handle("uinodes_7");
+						let htype: zui_handle_t = zui_handle(__ID__);
+						let hname: zui_handle_t = zui_handle(__ID__);
+						let hmin: zui_handle_t = zui_handle(__ID__);
+						let hmax: zui_handle_t = zui_handle(__ID__);
+						let hval0: zui_handle_t = zui_handle(__ID__);
+						let hval1: zui_handle_t = zui_handle(__ID__);
+						let hval2: zui_handle_t = zui_handle(__ID__);
+						let hval3: zui_handle_t = zui_handle(__ID__);
 						htype.position = socket.type == "RGBA" ? 0 : socket.type == "VECTOR" ? 1 : 2;
 						hname.text = socket.name;
 						hmin.value = socket.min;
@@ -135,7 +135,7 @@ function ui_nodes_on_socket_released(socket_id: i32) {
 						base_notify_on_next_frame(function () {
 							zui_end_input();
 							ui_box_show_custom(function (ui: zui_t) {
-								if (zui_tab(zui_handle("uinodes_8"), tr("Socket"))) {
+								if (zui_tab(zui_handle(__ID__), tr("Socket"))) {
 									let type: i32 = zui_combo(htype, [tr("Color"), tr("Vector"), tr("Value")], tr("Type"), true);
 									if (htype.changed) {
 										hname.text = type == 0 ? tr("Color") : type == 1 ? tr("Vector") : tr("Value");
@@ -150,14 +150,14 @@ function ui_nodes_on_socket_released(socket_id: i32) {
 										zui_float_input(hval1, tr("G"));
 										zui_float_input(hval2, tr("B"));
 										zui_float_input(hval3, tr("A"));
-										default_value = new f32_array_t([hval0.value, hval1.value, hval2.value, hval3.value]);
+										default_value = f32_array_create_xyzw(hval0.value, hval1.value, hval2.value, hval3.value);
 									}
 									else if (type == 1) {
 										zui_row([1 / 3, 1 / 3, 1 / 3]);
 										hval0.value = zui_float_input(hval0, tr("X"));
 										hval1.value = zui_float_input(hval1, tr("Y"));
 										hval2.value = zui_float_input(hval2, tr("Z"));
-										default_value = new f32_array_t([hval0.value, hval1.value, hval2.value]);
+										default_value = f32_array_create_xyz(hval0.value, hval1.value, hval2.value);
 									}
 									else {
 										default_value = zui_float_input(hval0, tr("default_value"));
@@ -533,7 +533,7 @@ function ui_nodes_canvas_changed() {
 }
 
 function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
-	let search_handle: zui_handle_t = zui_handle("uinodes_9");
+	let search_handle: zui_handle_t = zui_handle(__ID__);
 	let first: bool = true;
 	ui_menu_draw(function (ui: zui_t) {
 		g2_set_color(ui.t.SEPARATOR_COL);
@@ -798,7 +798,7 @@ function ui_nodes_render() {
 
 	if (zui_window(ui_nodes_hwnd, ui_nodes_wx, ui_nodes_wy, ui_nodes_ww, ui_nodes_wh)) {
 
-		zui_tab(zui_handle("uinodes_10"), tr("Nodes"));
+		zui_tab(zui_handle(__ID__), tr("Nodes"));
 
 		// Grid
 		g2_set_color(0xffffffff);
@@ -994,7 +994,7 @@ function ui_nodes_render() {
 
 		///if (is_paint || is_sculpt)
 		// Editable canvas name
-		let h: zui_handle_t = zui_handle("uinodes_11");
+		let h: zui_handle_t = zui_handle(__ID__);
 		h.text = c.name;
 		ui_nodes_ui._w = math_floor(math_min(g2_font_width(ui_nodes_ui.font, ui_nodes_ui.font_size, h.text) + 15 * zui_SCALE(ui_nodes_ui), 100 * zui_SCALE(ui_nodes_ui)));
 		let new_name: string = zui_text_input(h, "");

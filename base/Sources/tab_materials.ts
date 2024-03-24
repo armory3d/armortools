@@ -191,15 +191,15 @@ function tab_materials_draw_slots(mini: bool) {
 						tab_materials_delete_material(m);
 					}
 
-					let base_handle: zui_handle_t = zui_nest(zui_handle("tabmaterials_0"), m.id, {selected: m.paint_base});
-					let opac_handle: zui_handle_t = zui_nest(zui_handle("tabmaterials_1"), m.id, {selected: m.paint_opac});
-					let nor_handle: zui_handle_t = zui_nest(zui_handle("tabmaterials_2"), m.id, {selected: m.paint_nor});
-					let occ_handle: zui_handle_t = zui_nest(zui_handle("tabmaterials_3"), m.id, {selected: m.paint_occ});
-					let rough_handle: zui_handle_t = zui_nest(zui_handle("tabmaterials_4"), m.id, {selected: m.paint_rough});
-					let met_handle: zui_handle_t = zui_nest(zui_handle("tabmaterials_5"), m.id, {selected: m.paint_met});
-					let height_handle: zui_handle_t = zui_nest(zui_handle("tabmaterials_6"), m.id, {selected: m.paint_height});
-					let emis_handle: zui_handle_t = zui_nest(zui_handle("tabmaterials_7"), m.id, {selected: m.paint_emis});
-					let subs_handle: zui_handle_t = zui_nest(zui_handle("tabmaterials_8"), m.id, {selected: m.paint_subs});
+					let base_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id, {selected: m.paint_base});
+					let opac_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id, {selected: m.paint_opac});
+					let nor_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id, {selected: m.paint_nor});
+					let occ_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id, {selected: m.paint_occ});
+					let rough_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id, {selected: m.paint_rough});
+					let met_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id, {selected: m.paint_met});
+					let height_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id, {selected: m.paint_height});
+					let emis_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id, {selected: m.paint_emis});
+					let subs_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id, {selected: m.paint_subs});
 					ui_menu_fill(ui);
 					m.paint_base = zui_check(base_handle, tr("Base Color"));
 					ui_menu_fill(ui);

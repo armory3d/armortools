@@ -16,7 +16,7 @@ function box_preferences_show() {
 				box_preferences_locales = translator_get_supported_locales();
 			}
 
-			let locale_handle: zui_handle_t = zui_handle("boxpreferences_0", { position: array_index_of(box_preferences_locales, config_raw.locale) });
+			let locale_handle: zui_handle_t = zui_handle(__ID__, { position: array_index_of(box_preferences_locales, config_raw.locale) });
 			zui_combo(locale_handle, box_preferences_locales, tr("Language"), true);
 			if (locale_handle.changed) {
 				let locale_code: string = box_preferences_locales[locale_handle.position];
@@ -25,11 +25,13 @@ function box_preferences_show() {
 				ui_base_tag_ui_redraw();
 			}
 
-			let hscale: zui_handle_t = zui_handle("boxpreferences_1", { value: config_raw.window_scale });
+			let hscale: zui_handle_t = zui_handle(__ID__, { value: config_raw.window_scale });
 			zui_slider(hscale, tr("UI Scale"), 1.0, 4.0, true, 10);
 			if (context_raw.hscale_was_changed && !ui.input_down) {
 				context_raw.hscale_was_changed = false;
-				if (hscale.value == null || isNaN(hscale.value)) hscale.value = 1.0;
+				if (hscale.value == null) {
+					hscale.value = 1.0;
+				}
 				config_raw.window_scale = hscale.value;
 				box_preferences_set_scale();
 			}
@@ -37,37 +39,37 @@ function box_preferences_show() {
 				context_raw.hscale_was_changed = true;
 			}
 
-			let hspeed: zui_handle_t = zui_handle("boxpreferences_2", { value: config_raw.camera_zoom_speed });
+			let hspeed: zui_handle_t = zui_handle(__ID__, { value: config_raw.camera_zoom_speed });
 			config_raw.camera_zoom_speed = zui_slider(hspeed, tr("Camera Zoom Speed"), 0.1, 4.0, true);
 
-			hspeed = zui_handle("boxpreferences_3", { value: config_raw.camera_rotation_speed });
+			hspeed = zui_handle(__ID__, { value: config_raw.camera_rotation_speed });
 			config_raw.camera_rotation_speed = zui_slider(hspeed, tr("Camera Rotation Speed"), 0.1, 4.0, true);
 
-			hspeed = zui_handle("boxpreferences_4", { value: config_raw.camera_pan_speed });
+			hspeed = zui_handle(__ID__, { value: config_raw.camera_pan_speed });
 			config_raw.camera_pan_speed = zui_slider(hspeed, tr("Camera Pan Speed"), 0.1, 4.0, true);
 
-			let zoom_direction_handle: zui_handle_t = zui_handle("boxpreferences_5", { position: config_raw.zoom_direction });
+			let zoom_direction_handle: zui_handle_t = zui_handle(__ID__, { position: config_raw.zoom_direction });
 			zui_combo(zoom_direction_handle, [tr("Vertical"), tr("Vertical Inverted"), tr("Horizontal"), tr("Horizontal Inverted"), tr("Vertical and Horizontal"), tr("Vertical and Horizontal Inverted")], tr("Direction to Zoom"), true);
 			if (zoom_direction_handle.changed) {
 				config_raw.zoom_direction = zoom_direction_handle.position;
 			}
 
-			config_raw.wrap_mouse = zui_check(zui_handle("boxpreferences_6", { selected: config_raw.wrap_mouse }), tr("Wrap Mouse"));
+			config_raw.wrap_mouse = zui_check(zui_handle(__ID__, { selected: config_raw.wrap_mouse }), tr("Wrap Mouse"));
 			if (ui.is_hovered) {
 				zui_tooltip(tr("Wrap mouse around view boundaries during camera control"));
 			}
 
-			config_raw.node_preview = zui_check(zui_handle("boxpreferences_7", { selected: config_raw.node_preview }), tr("Show Node Preview"));
+			config_raw.node_preview = zui_check(zui_handle(__ID__, { selected: config_raw.node_preview }), tr("Show Node Preview"));
 
 			ui.changed = false;
-			config_raw.show_asset_names = zui_check(zui_handle("boxpreferences_8", { selected: config_raw.show_asset_names }), tr("Show Asset Names"));
+			config_raw.show_asset_names = zui_check(zui_handle(__ID__, { selected: config_raw.show_asset_names }), tr("Show Asset Names"));
 			if (ui.changed) {
 				ui_base_tag_ui_redraw();
 			}
 
 			///if !(krom_android || krom_ios)
 			ui.changed = false;
-			config_raw.touch_ui = zui_check(zui_handle("boxpreferences_9", { selected: config_raw.touch_ui }), tr("Touch UI"));
+			config_raw.touch_ui = zui_check(zui_handle(__ID__, { selected: config_raw.touch_ui }), tr("Touch UI"));
 			if (ui.changed) {
 				zui_set_touch_scroll(config_raw.touch_ui);
 				zui_set_touch_hold(config_raw.touch_ui);
@@ -78,7 +80,7 @@ function box_preferences_show() {
 			}
 			///end
 
-			config_raw.splash_screen = zui_check(zui_handle("boxpreferences_10", { selected: config_raw.splash_screen }), tr("Splash Screen"));
+			config_raw.splash_screen = zui_check(zui_handle(__ID__, { selected: config_raw.splash_screen }), tr("Splash Screen"));
 
 			// Zui.text("Node Editor");
 			// let grid_snap: bool = Zui.check(Zui.handle("boxpreferences_11", { selected: false }), "Grid Snap");
@@ -134,7 +136,7 @@ function box_preferences_show() {
 			if (box_preferences_themes == null) {
 				box_preferences_fetch_themes();
 			}
-			box_preferences_theme_handle = zui_handle("boxpreferences_12", { position: box_preferences_get_theme_index() });
+			box_preferences_theme_handle = zui_handle(__ID__, { position: box_preferences_get_theme_index() });
 
 			zui_begin_sticky();
 			zui_row([1 / 4, 1 / 4, 1 / 4, 1 / 4]);
@@ -147,9 +149,9 @@ function box_preferences_show() {
 
 			if (zui_button(tr("New"))) {
 				ui_box_show_custom(function (ui: zui_t) {
-					if (zui_tab(zui_handle("boxpreferences_13"), tr("New Theme"))) {
+					if (zui_tab(zui_handle(__ID__), tr("New Theme"))) {
 						zui_row([0.5, 0.5]);
-						let theme_name: string = zui_text_input(zui_handle("boxpreferences_14", { text: "new_theme" }), tr("Name"));
+						let theme_name: string = zui_text_input(zui_handle(__ID__, { text: "new_theme" }), tr("Name"));
 						if (zui_button(tr("OK")) || ui.is_return_down) {
 							let template: string = json_stringify(base_theme);
 							if (!ends_with(theme_name, ".json")) {
@@ -188,7 +190,7 @@ function box_preferences_show() {
 
 			let i: i32 = 0;
 			let theme: any = base_theme;
-			let hlist: zui_handle_t = zui_handle("boxpreferences_15");
+			let hlist: zui_handle_t = zui_handle(__ID__);
 
 			// Viewport color
 			let h: zui_handle_t = zui_nest(hlist, i++, { color: box_preferences_world_color });
@@ -207,7 +209,7 @@ function box_preferences_show() {
 			if (val < 0) {
 				val += 4294967296;
 			}
-			h.text = val.toString(16);
+			h.text = i32_to_string_hex(val);
 			zui_text_input(h, "VIEWPORT_COL");
 			h.color = parse_int_hex(h.text);
 
@@ -226,14 +228,10 @@ function box_preferences_show() {
 			}
 
 			// Theme fields
-			let props: string[] = Object.getOwnPropertyNames(theme_t.prototype);
-			for (let i: i32 = 0; i < props.length; ++i) {
-				let key: string = props[i];
-				if (key == "constructor") {
-					continue;
-				}
+			for (let i: i32 = 0; i < zui_theme_keys.length; ++i) {
+				let key: string = zui_theme_keys[i];
 
-				let h: zui_handle_t = zui_nest(hlist, i++);
+				let h: zui_handle_t = zui_nest(hlist, i);
 				let val: any = theme[key];
 
 				let is_hex: bool = ends_with(key, "_COL");
@@ -271,7 +269,7 @@ function box_preferences_show() {
 					theme[key] = i;
 				}
 				else {
-					h.text = is_hex ? val.toString(16) : val.toString();
+					h.text = is_hex ? i32_to_string_hex(val) : i32_to_string(val);
 					zui_text_input(h, key);
 					if (is_hex) {
 						theme[key] = parse_int_hex(h.text);
@@ -291,7 +289,7 @@ function box_preferences_show() {
 		}
 
 		if (zui_tab(box_preferences_htab, tr("Usage"), true)) {
-			context_raw.undo_handle = zui_handle("boxpreferences_16", { value: config_raw.undo_steps });
+			context_raw.undo_handle = zui_handle(__ID__, { value: config_raw.undo_steps });
 			config_raw.undo_steps = math_floor(zui_slider(context_raw.undo_handle, tr("Undo Steps"), 1, 64, false, 1));
 			if (config_raw.undo_steps < 1) {
 				config_raw.undo_steps = math_floor(context_raw.undo_handle.value = 1);
@@ -316,12 +314,12 @@ function box_preferences_show() {
 			}
 
 			///if is_paint
-			config_raw.dilate_radius = math_floor(zui_slider(zui_handle("boxpreferences_17", { value: config_raw.dilate_radius }), tr("Dilate Radius"), 0.0, 16.0, true, 1));
+			config_raw.dilate_radius = math_floor(zui_slider(zui_handle(__ID__, { value: config_raw.dilate_radius }), tr("Dilate Radius"), 0.0, 16.0, true, 1));
 			if (ui.is_hovered) {
 				zui_tooltip(tr("Dilate painted textures to prevent seams"));
 			}
 
-			let dilate_handle: zui_handle_t = zui_handle("boxpreferences_18", { position: config_raw.dilate });
+			let dilate_handle: zui_handle_t = zui_handle(__ID__, { position: config_raw.dilate });
 			zui_combo(dilate_handle, [tr("Instant"), tr("Delayed")], tr("Dilate"), true);
 			if (dilate_handle.changed) {
 				config_raw.dilate = dilate_handle.position;
@@ -329,20 +327,20 @@ function box_preferences_show() {
 			///end
 
 			///if is_lab
-			let workspace_handle: zui_handle_t = zui_handle("boxpreferences_19", { position: config_raw.workspace });
+			let workspace_handle: zui_handle_t = zui_handle(__ID__, { position: config_raw.workspace });
 			zui_combo(workspace_handle, [tr("3D View"), tr("2D View")], tr("Default Workspace"), true);
 			if (workspace_handle.changed) {
 				config_raw.workspace = workspace_handle.position;
 			}
 			///end
 
-			let camera_controls_handle: zui_handle_t = zui_handle("boxpreferences_20", { position: config_raw.camera_controls });
+			let camera_controls_handle: zui_handle_t = zui_handle(__ID__, { position: config_raw.camera_controls });
 			zui_combo(camera_controls_handle, [tr("Orbit"), tr("Rotate"), tr("Fly")], tr("Default Camera Controls"), true);
 			if (camera_controls_handle.changed) {
 				config_raw.camera_controls = camera_controls_handle.position;
 			}
 
-			let layer_res_handle: zui_handle_t = zui_handle("boxpreferences_21", { position: config_raw.layer_res });
+			let layer_res_handle: zui_handle_t = zui_handle(__ID__, { position: config_raw.layer_res });
 
 			///if is_paint
 			///if (krom_android || krom_ios)
@@ -364,17 +362,17 @@ function box_preferences_show() {
 				config_raw.layer_res = layer_res_handle.position;
 			}
 
-			let server_handle: zui_handle_t = zui_handle("boxpreferences_22", { text: config_raw.server });
+			let server_handle: zui_handle_t = zui_handle(__ID__, { text: config_raw.server });
 			config_raw.server = zui_text_input(server_handle, tr("Cloud Server"));
 
 			///if (is_paint || is_sculpt)
-			let material_live_handle: zui_handle_t = zui_handle("boxpreferences_23", {selected: config_raw.material_live });
+			let material_live_handle: zui_handle_t = zui_handle(__ID__, {selected: config_raw.material_live });
 			config_raw.material_live = zui_check(material_live_handle, tr("Live Material Preview"));
 			if (ui.is_hovered) {
 				zui_tooltip(tr("Instantly update material preview on node change"));
 			}
 
-			let brush_live_handle: zui_handle_t = zui_handle("boxpreferences_24", { selected: config_raw.brush_live });
+			let brush_live_handle: zui_handle_t = zui_handle(__ID__, { selected: config_raw.brush_live });
 			config_raw.brush_live = zui_check(brush_live_handle, tr("Live Brush Preview"));
 			if (ui.is_hovered) {
 				zui_tooltip(tr("Draw live brush preview in viewport"));
@@ -383,14 +381,14 @@ function box_preferences_show() {
 				context_raw.ddirty = 2;
 			}
 
-			let brush_3d_handle: zui_handle_t = zui_handle("boxpreferences_25", { selected: config_raw.brush_3d });
+			let brush_3d_handle: zui_handle_t = zui_handle(__ID__, { selected: config_raw.brush_3d });
 			config_raw.brush_3d = zui_check(brush_3d_handle, tr("3D Cursor"));
 			if (brush_3d_handle.changed) {
 				make_material_parse_paint_material();
 			}
 
 			ui.enabled = config_raw.brush_3d;
-			let brush_depth_reject_handle: zui_handle_t = zui_handle("boxpreferences_26", { selected: config_raw.brush_depth_reject });
+			let brush_depth_reject_handle: zui_handle_t = zui_handle(__ID__, { selected: config_raw.brush_depth_reject });
 			config_raw.brush_depth_reject = zui_check(brush_depth_reject_handle, tr("Depth Reject"));
 			if (brush_depth_reject_handle.changed) {
 				make_material_parse_paint_material();
@@ -398,14 +396,14 @@ function box_preferences_show() {
 
 			zui_row([0.5, 0.5]);
 
-			let brush_angle_reject_handle: zui_handle_t = zui_handle("boxpreferences_27", { selected: config_raw.brush_angle_reject });
+			let brush_angle_reject_handle: zui_handle_t = zui_handle(__ID__, { selected: config_raw.brush_angle_reject });
 			config_raw.brush_angle_reject = zui_check(brush_angle_reject_handle, tr("Angle Reject"));
 			if (brush_angle_reject_handle.changed) {
 				make_material_parse_paint_material();
 			}
 
 			if (!config_raw.brush_angle_reject) ui.enabled = false;
-			let angle_dot_handle: zui_handle_t = zui_handle("boxpreferences_28", { value: context_raw.brush_angle_reject_dot });
+			let angle_dot_handle: zui_handle_t = zui_handle(__ID__, { value: context_raw.brush_angle_reject_dot });
 			context_raw.brush_angle_reject_dot = zui_slider(angle_dot_handle, tr("Angle"), 0.0, 1.0, true);
 			if (angle_dot_handle.changed) {
 				make_material_parse_paint_material();
@@ -414,7 +412,7 @@ function box_preferences_show() {
 			///end
 
 			///if is_lab
-			config_raw.gpu_inference = zui_check(zui_handle("boxpreferences_29", { selected: config_raw.gpu_inference }), tr("Use GPU"));
+			config_raw.gpu_inference = zui_check(zui_handle(__ID__, { selected: config_raw.gpu_inference }), tr("Use GPU"));
 			if (ui.is_hovered) {
 				zui_tooltip(tr("Use GPU to accelerate node graph processing"));
 			}
@@ -430,12 +428,12 @@ function box_preferences_show() {
 
 		if (zui_tab(box_preferences_htab, pen_name, true)) {
 			zui_text(tr("Pressure controls"));
-			config_raw.pressure_radius = zui_check(zui_handle("boxpreferences_30", { selected: config_raw.pressure_radius }), tr("Brush Radius"));
-			config_raw.pressure_sensitivity = zui_slider(zui_handle("boxpreferences_31", { value: config_raw.pressure_sensitivity }), tr("Sensitivity"), 0.0, 10.0, true);
+			config_raw.pressure_radius = zui_check(zui_handle(__ID__, { selected: config_raw.pressure_radius }), tr("Brush Radius"));
+			config_raw.pressure_sensitivity = zui_slider(zui_handle(__ID__, { value: config_raw.pressure_sensitivity }), tr("Sensitivity"), 0.0, 10.0, true);
 			///if (is_paint || is_sculpt)
-			config_raw.pressure_hardness = zui_check(zui_handle("boxpreferences_32", { selected: config_raw.pressure_hardness }), tr("Brush Hardness"));
-			config_raw.pressure_opacity = zui_check(zui_handle("boxpreferences_33", { selected: config_raw.pressure_opacity }), tr("Brush Opacity"));
-			config_raw.pressure_angle = zui_check(zui_handle("boxpreferences_34", { selected: config_raw.pressure_angle }), tr("Brush Angle"));
+			config_raw.pressure_hardness = zui_check(zui_handle(__ID__, { selected: config_raw.pressure_hardness }), tr("Brush Hardness"));
+			config_raw.pressure_opacity = zui_check(zui_handle(__ID__, { selected: config_raw.pressure_opacity }), tr("Brush Opacity"));
+			config_raw.pressure_angle = zui_check(zui_handle(__ID__, { selected: config_raw.pressure_angle }), tr("Brush Angle"));
 			///end
 
 			zui_end_element();
@@ -450,15 +448,15 @@ function box_preferences_show() {
 			}
 		}
 
-		context_raw.hssao = zui_handle("boxpreferences_35", { selected: config_raw.rp_ssao });
-		context_raw.hssr = zui_handle("boxpreferences_36", { selected: config_raw.rp_ssr });
-		context_raw.hbloom = zui_handle("boxpreferences_37", { selected: config_raw.rp_bloom });
-		context_raw.hsupersample = zui_handle("boxpreferences_38", { position: config_get_super_sample_quality(config_raw.rp_supersample) });
-		context_raw.hvxao = zui_handle("boxpreferences_39", { selected: config_raw.rp_gi });
+		context_raw.hssao = zui_handle(__ID__, { selected: config_raw.rp_ssao });
+		context_raw.hssr = zui_handle(__ID__, { selected: config_raw.rp_ssr });
+		context_raw.hbloom = zui_handle(__ID__, { selected: config_raw.rp_bloom });
+		context_raw.hsupersample = zui_handle(__ID__, { position: config_get_super_sample_quality(config_raw.rp_supersample) });
+		context_raw.hvxao = zui_handle(__ID__, { selected: config_raw.rp_gi });
 		if (zui_tab(box_preferences_htab, tr("Viewport"), true)) {
 			///if (krom_direct3d12 || krom_vulkan || krom_metal)
 
-			let hpathtrace_mode: zui_handle_t = zui_handle("boxpreferences_40", { position: context_raw.pathtrace_mode });
+			let hpathtrace_mode: zui_handle_t = zui_handle(__ID__, { position: context_raw.pathtrace_mode });
 			context_raw.pathtrace_mode = zui_combo(hpathtrace_mode, [tr("Core"), tr("Full")], tr("Path Tracer"), true);
 			if (hpathtrace_mode.changed) {
 				render_path_raytrace_ready = false;
@@ -466,7 +464,7 @@ function box_preferences_show() {
 
 			///end
 
-			let hrender_mode: zui_handle_t = zui_handle("boxpreferences_41", { position: context_raw.render_mode });
+			let hrender_mode: zui_handle_t = zui_handle(__ID__, { position: context_raw.render_mode });
 			context_raw.render_mode = zui_combo(hrender_mode, [tr("Full"), tr("Mobile")], tr("Renderer"), true);
 			if (hrender_mode.changed) {
 				context_set_render_path();
@@ -488,12 +486,12 @@ function box_preferences_show() {
 				}
 
 				ui.enabled = context_raw.hvxao.selected;
-				let h: zui_handle_t = zui_handle("boxpreferences_42", { value: context_raw.vxao_offset });
+				let h: zui_handle_t = zui_handle(__ID__, { value: context_raw.vxao_offset });
 				context_raw.vxao_offset = zui_slider(h, tr("Cone Offset"), 1.0, 4.0, true);
 				if (h.changed) {
 					context_raw.ddirty = 2;
 				}
-				h = zui_handle("boxpreferences_43", { value: context_raw.vxao_aperture });
+				h = zui_handle(__ID__, { value: context_raw.vxao_aperture });
 				context_raw.vxao_aperture = zui_slider(h, tr("Aperture"), 1.0, 4.0, true);
 				if (h.changed) {
 					context_raw.ddirty = 2;
@@ -515,13 +513,13 @@ function box_preferences_show() {
 				}
 			}
 
-			let h: zui_handle_t = zui_handle("boxpreferences_44", { value: config_raw.rp_vignette });
+			let h: zui_handle_t = zui_handle(__ID__, { value: config_raw.rp_vignette });
 			config_raw.rp_vignette = zui_slider(h, tr("Vignette"), 0.0, 1.0, true);
 			if (h.changed) {
 				context_raw.ddirty = 2;
 			}
 
-			h = zui_handle("boxpreferences_45", { value: config_raw.rp_grain });
+			h = zui_handle(__ID__, { value: config_raw.rp_grain });
 			config_raw.rp_grain = zui_slider(h, tr("Noise Grain"), 0.0, 1.0, true);
 			if (h.changed) {
 				context_raw.ddirty = 2;
@@ -533,8 +531,8 @@ function box_preferences_show() {
 
 			let cam: camera_object_t = scene_camera;
 			let cam_raw: camera_data_t = cam.data;
-			let near_handle: zui_handle_t = zui_handle("boxpreferences_47");
-			let far_handle: zui_handle_t = zui_handle("boxpreferences_48");
+			let near_handle: zui_handle_t = zui_handle(__ID__);
+			let far_handle: zui_handle_t = zui_handle(__ID__);
 			near_handle.value = math_floor(cam_raw.near_plane * 1000) / 1000;
 			far_handle.value = math_floor(cam_raw.far_plane * 100) / 100;
 			cam_raw.near_plane = zui_slider(near_handle, tr("Clip Start"), 0.001, 1.0, true);
@@ -543,7 +541,7 @@ function box_preferences_show() {
 				camera_object_build_proj(cam);
 			}
 
-			let disp_handle: zui_handle_t = zui_handle("boxpreferences_49", { value: config_raw.displace_strength });
+			let disp_handle: zui_handle_t = zui_handle(__ID__, { value: config_raw.displace_strength });
 			config_raw.displace_strength = zui_slider(disp_handle, tr("Displacement Strength"), 0.0, 10.0, true);
 			if (disp_handle.changed) {
 				context_raw.ddirty = 2;
@@ -559,7 +557,7 @@ function box_preferences_show() {
 			zui_begin_sticky();
 			zui_row([1 / 4, 1 / 4, 1 / 4, 1 / 4]);
 
-			box_preferences_preset_handle = zui_handle("boxpreferences_50", { position: box_preferences_get_preset_index() });
+			box_preferences_preset_handle = zui_handle(__ID__, { position: box_preferences_get_preset_index() });
 			zui_combo(box_preferences_preset_handle, box_preferences_files_keymap, tr("Preset"));
 			if (box_preferences_preset_handle.changed) {
 				config_raw.keymap = box_preferences_files_keymap[box_preferences_preset_handle.position] + ".json";
@@ -569,9 +567,9 @@ function box_preferences_show() {
 
 			if (zui_button(tr("New"))) {
 				ui_box_show_custom(function (ui: zui_t) {
-					if (zui_tab(zui_handle("boxpreferences_51"), tr("New Keymap"))) {
+					if (zui_tab(zui_handle(__ID__), tr("New Keymap"))) {
 						zui_row([0.5, 0.5]);
-						let keymap_name: string = zui_text_input(zui_handle("boxpreferences_52", { text: "new_keymap" }), tr("Name"));
+						let keymap_name: string = zui_text_input(zui_handle(__ID__, { text: "new_keymap" }), tr("Name"));
 						if (zui_button(tr("OK")) || ui.is_return_down) {
 							let template: string = json_stringify(base_default_keymap);
 							if (!ends_with(keymap_name, ".json")) {
@@ -613,7 +611,7 @@ function box_preferences_show() {
 			ui.changed = false;
 			for (let i: i32 = 0; i < base_keymap_keys.length; ++i) {
 				let key: string = base_keymap_keys[i];
-				let h: zui_handle_t = zui_nest(zui_handle("boxpreferences_53"), index++);
+				let h: zui_handle_t = zui_nest(zui_handle(__ID__), index++);
 				h.text = config_keymap[key];
 				let text: string = zui_text_input(h, key, zui_align_t.LEFT);
 				config_keymap[key] = text;
@@ -628,9 +626,9 @@ function box_preferences_show() {
 			zui_row([1 / 4, 1 / 4]);
 			if (zui_button(tr("New"))) {
 				ui_box_show_custom(function (ui: zui_t) {
-					if (zui_tab(zui_handle("boxpreferences_54"), tr("New Plugin"))) {
+					if (zui_tab(zui_handle(__ID__), tr("New Plugin"))) {
 						zui_row([0.5, 0.5]);
-						let plugin_name: string = zui_text_input(zui_handle("boxpreferences_55", { text: "new_plugin" }), tr("Name"));
+						let plugin_name: string = zui_text_input(zui_handle(__ID__, { text: "new_plugin" }), tr("Name"));
 						if (zui_button(tr("OK")) || ui.is_return_down) {
 							let template: string =
 "let plugin = create();\
@@ -670,7 +668,7 @@ plugin.draw_ui = function (ui) {\
 			if (config_raw.plugins == null) {
 				config_raw.plugins = [];
 			}
-			let h: zui_handle_t = zui_handle("boxpreferences_56", { selected: false });
+			let h: zui_handle_t = zui_handle(__ID__, { selected: false });
 			for (let i: i32 = 0; i < box_preferences_files_plugin.length; ++i) {
 				let f: string = box_preferences_files_plugin[i];
 				let is_js: bool = ends_with(f, ".js");

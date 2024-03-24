@@ -27,8 +27,8 @@ function tiling_node_init() {
 function tiling_node_buttons(ui: zui_t, nodes: zui_nodes_t, node: zui_node_t) {
 	tiling_node_auto = node.buttons[0].default_value == 0 ? false : true;
 	if (!tiling_node_auto) {
-		tiling_node_strength = zui_slider(zui_handle("tilingnode_0", { value: tiling_node_strength }), tr("strength"), 0, 1, true);
-		tiling_node_prompt = zui_text_area(zui_handle("tilingnode_1"), zui_align_t.LEFT, true, tr("prompt"), true);
+		tiling_node_strength = zui_slider(zui_handle(__ID__, { value: tiling_node_strength }), tr("strength"), 0, 1, true);
+		tiling_node_prompt = zui_text_area(zui_handle(__ID__), zui_align_t.LEFT, true, tr("prompt"), true);
 		node.buttons[1].height = 1 + string_split(tiling_node_prompt, "\n").length;
 	}
 	else {

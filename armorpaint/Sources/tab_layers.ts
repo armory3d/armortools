@@ -181,7 +181,7 @@ function tab_layers_combo_filter() {
 			array_push(ar, a);
 		}
 	}
-	let filter_handle: zui_handle_t = zui_handle("tablayers_0");
+	let filter_handle: zui_handle_t = zui_handle(__ID__);
 	filter_handle.position = context_raw.layer_filter;
 	context_raw.layer_filter = zui_combo(filter_handle, ar, tr("Filter"), false, zui_align_t.LEFT);
 	if (filter_handle.changed) {
@@ -455,7 +455,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 
 	if (has_panel) {
 		ui._y += center;
-		let layer_panel: zui_handle_t = zui_nest(zui_handle("tablayers_1"), l.id);
+		let layer_panel: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
 		layer_panel.selected = l.show_panel;
 		l.show_panel = zui_panel(layer_panel, "", true, false, false);
 		ui._y -= center;
@@ -497,7 +497,7 @@ function tab_layers_combo_object(ui: zui_t, l: slot_layer_t, label = false): zui
 			array_push(ar, a);
 		}
 	}
-	let object_handle: zui_handle_t = zui_nest(zui_handle("tablayers_2"), l.id);
+	let object_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
 	object_handle.position = l.object_mask;
 	l.object_mask = zui_combo(object_handle, ar, tr("Object"), label, zui_align_t.LEFT);
 	if (object_handle.changed) {
@@ -519,7 +519,7 @@ function tab_layers_combo_object(ui: zui_t, l: slot_layer_t, label = false): zui
 }
 
 function tab_layers_combo_blending(ui: zui_t, l: slot_layer_t, label = false): zui_handle_t {
-	let blending_handle: zui_handle_t = zui_nest(zui_handle("tablayers_3"), l.id);
+	let blending_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
 	blending_handle.position = l.blending;
 	zui_combo(blending_handle, [
 		tr("Mix"),
@@ -753,7 +753,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 	ui_menu_draw(function (ui: zui_t) {
 
 		if (mini) {
-			let visible_handle: zui_handle_t = zui_handle("tablayers_4");
+			let visible_handle: zui_handle_t = zui_handle(__ID__);
 			visible_handle.selected = l.visible;
 			ui_menu_fill(ui);
 			zui_check(visible_handle, tr("Visible"));
@@ -893,7 +893,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 
 		ui_menu_fill(ui);
 		ui_menu_align(ui);
-		let layer_opac_handle: zui_handle_t = zui_nest(zui_handle("tablayers_5"), l.id);
+		let layer_opac_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
 		layer_opac_handle.value = l.mask_opacity;
 		zui_slider(layer_opac_handle, tr("Opacity"), 0.0, 1.0, true);
 		if (layer_opac_handle.changed) {
@@ -943,7 +943,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 		if (l.fill_layer != null) {
 			ui_menu_fill(ui);
 			ui_menu_align(ui);
-			let scale_handle: zui_handle_t = zui_nest(zui_handle("tablayers_6"), l.id);
+			let scale_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
 			scale_handle.value = l.scale;
 			l.scale = zui_slider(scale_handle, tr("UV Scale"), 0.0, 5.0, true);
 			if (scale_handle.changed) {
@@ -958,7 +958,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 
 			ui_menu_fill(ui);
 			ui_menu_align(ui);
-			let angle_handle: zui_handle_t = zui_nest(zui_handle("tablayers_7"), l.id);
+			let angle_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
 			angle_handle.value = l.angle;
 			l.angle = zui_slider(angle_handle, tr("Angle"), 0.0, 360, true, 1);
 			if (angle_handle.changed) {
@@ -974,7 +974,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 
 			ui_menu_fill(ui);
 			ui_menu_align(ui);
-			let uv_type_handle: zui_handle_t = zui_nest(zui_handle("tablayers_8"), l.id);
+			let uv_type_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
 			uv_type_handle.position = l.uv_type;
 			l.uv_type = zui_inline_radio(uv_type_handle, [tr("UV Map"), tr("Triplanar"), tr("Project")], zui_align_t.LEFT);
 			if (uv_type_handle.changed) {
@@ -990,17 +990,17 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 		}
 
 		if (!slot_layer_is_group(l)) {
-			let base_handle: zui_handle_t = zui_nest(zui_handle("tablayers_9"), l.id);
-			let opac_handle: zui_handle_t = zui_nest(zui_handle("tablayers_10"), l.id);
-			let nor_handle: zui_handle_t = zui_nest(zui_handle("tablayers_11"), l.id);
-			let nor_blend_handle: zui_handle_t = zui_nest(zui_handle("tablayers_12"), l.id);
-			let occ_handle: zui_handle_t = zui_nest(zui_handle("tablayers_13"), l.id);
-			let rough_handle: zui_handle_t = zui_nest(zui_handle("tablayers_14"), l.id);
-			let met_handle: zui_handle_t = zui_nest(zui_handle("tablayers_15"), l.id);
-			let height_handle: zui_handle_t = zui_nest(zui_handle("tablayers_16"), l.id);
-			let height_blend_handle: zui_handle_t = zui_nest(zui_handle("tablayers_17"), l.id);
-			let emis_handle: zui_handle_t = zui_nest(zui_handle("tablayers_18"), l.id);
-			let subs_handle: zui_handle_t = zui_nest(zui_handle("tablayers_19"), l.id);
+			let base_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
+			let opac_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
+			let nor_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
+			let nor_blend_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
+			let occ_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
+			let rough_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
+			let met_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
+			let height_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
+			let height_blend_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
+			let emis_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
+			let subs_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
 			base_handle.selected = l.paint_base;
 			opac_handle.selected = l.paint_opac;
 			nor_handle.selected = l.paint_nor;

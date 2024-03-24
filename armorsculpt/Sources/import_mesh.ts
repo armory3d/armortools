@@ -45,7 +45,7 @@ function import_mesh_finish_import() {
 
 	if (project_paint_objects.length > 1) {
 		// Sort by name
-		array_sort(project_paint_objects, function (a, b): i32 {
+		array_sort(project_paint_objects, function (a: string, b: string): i32 {
 			if (a.base.name < b.base.name) {
 				return -1;
 			}
@@ -158,39 +158,34 @@ function import_mesh_make_mesh(mesh: any, path: string) {
 }
 
 function import_mesh_add_mesh(mesh: any) {
-
-	let _add_mesh = function () {
-		let raw = import_mesh_raw_mesh(mesh);
-		if (mesh.cola != null) {
-			array_push(raw.vertex_arrays, { values: mesh.cola, attrib: "col", data: "short4norm" });
-		}
-
-		let md: mesh_data_t = mesh_data_create(raw);
-
-		let object = scene_add_mesh_object(md, context_raw.paint_object.materials, context_raw.paint_object.base);
-		object.base.name = mesh.base.name;
-		object.skip_context = "paint";
-
-		// Ensure unique names
-		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
-			let p = project_paint_objects[i];
-			if (p.base.name == object.base.name) {
-				p.base.name += ".001";
-				p.data._.handle += ".001";
-				map_set(data_cached_meshes, p.data._.handle, p.data);
-			}
-		}
-
-		array_push(project_paint_objects, object);
-
-		md._.handle = raw.name;
-		map_set(data_cached_meshes, md._.handle, md);
-
-		context_raw.ddirty = 4;
-		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
+	let raw = import_mesh_raw_mesh(mesh);
+	if (mesh.cola != null) {
+		array_push(raw.vertex_arrays, { values: mesh.cola, attrib: "col", data: "short4norm" });
 	}
 
-	_add_mesh();
+	let md: mesh_data_t = mesh_data_create(raw);
+
+	let object = scene_add_mesh_object(md, context_raw.paint_object.materials, context_raw.paint_object.base);
+	object.base.name = mesh.base.name;
+	object.skip_context = "paint";
+
+	// Ensure unique names
+	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+		let p = project_paint_objects[i];
+		if (p.base.name == object.base.name) {
+			p.base.name += ".001";
+			p.data._.handle += ".001";
+			map_set(data_cached_meshes, p.data._.handle, p.data);
+		}
+	}
+
+	array_push(project_paint_objects, object);
+
+	md._.handle = raw.name;
+	map_set(data_cached_meshes, md._.handle, md);
+
+	context_raw.ddirty = 4;
+	ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 }
 
 function import_mesh_raw_mesh(mesh: any): mesh_data_t {

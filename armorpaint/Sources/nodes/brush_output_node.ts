@@ -25,19 +25,13 @@ function brush_output_node_parse_inputs(self: brush_output_node_t) {
 	let input4: any;
 	let input5: any;
 	let input6: any;
-	try {
-		logic_node_input_get(self.base.inputs[0], function (value: any) { input0 = value; });
-		logic_node_input_get(self.base.inputs[1], function (value: any) { input1 = value; });
-		logic_node_input_get(self.base.inputs[2], function (value: any) { input2 = value; });
-		logic_node_input_get(self.base.inputs[3], function (value: any) { input3 = value; });
-		logic_node_input_get(self.base.inputs[4], function (value: any) { input4 = value; });
-		logic_node_input_get(self.base.inputs[5], function (value: any) { input5 = value; });
-		logic_node_input_get(self.base.inputs[6], function (value: any) { input6 = value; });
-	}
-	catch (e: any) {
-		krom_log(e);
-		return;
-	}
+	logic_node_input_get(self.base.inputs[0], function (value: any) { input0 = value; });
+	logic_node_input_get(self.base.inputs[1], function (value: any) { input1 = value; });
+	logic_node_input_get(self.base.inputs[2], function (value: any) { input2 = value; });
+	logic_node_input_get(self.base.inputs[3], function (value: any) { input3 = value; });
+	logic_node_input_get(self.base.inputs[4], function (value: any) { input4 = value; });
+	logic_node_input_get(self.base.inputs[5], function (value: any) { input5 = value; });
+	logic_node_input_get(self.base.inputs[6], function (value: any) { input6 = value; });
 
 	context_raw.paint_vec = input0;
 	context_raw.brush_nodes_radius = input1;
@@ -45,7 +39,9 @@ function brush_output_node_parse_inputs(self: brush_output_node_t) {
 	context_raw.brush_nodes_angle = input3;
 
 	let opac: any = input4; // Float or texture name
-	if (opac == null) opac = 1.0;
+	if (opac == null) {
+		opac = 1.0;
+	}
 	if (typeof opac == "string") {
 		context_raw.brush_mask_image_is_alpha = ends_with(opac, ".a");
 		opac = substring(opac, 0, string_last_index_of(opac, "."));

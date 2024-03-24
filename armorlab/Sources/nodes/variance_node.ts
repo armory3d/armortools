@@ -27,7 +27,7 @@ function variance_node_init() {
 }
 
 function variance_node_buttons(ui: zui_t, nodes: zui_nodes_t, node: zui_node_t) {
-	variance_node_prompt = zui_text_area(zui_handle("variancenode_0"), zui_align_t.LEFT, true, tr("prompt"), true);
+	variance_node_prompt = zui_text_area(zui_handle(__ID__), zui_align_t.LEFT, true, tr("prompt"), true);
 	node.buttons[0].height = string_split(variance_node_prompt, "\n").length;
 }
 

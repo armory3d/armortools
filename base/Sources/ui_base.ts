@@ -610,7 +610,7 @@ function ui_base_update() {
 				///end
 
 				ui_menu_draw(function (ui: zui_t) {
-					let mode_handle: zui_handle_t = zui_handle("uibase_0");
+					let mode_handle: zui_handle_t = zui_handle(__ID__);
 					mode_handle.position = context_raw.viewport_mode;
 					zui_text(tr("Viewport Mode"), zui_align_t.RIGHT, ui.t.HIGHLIGHT_COL);
 					let modes: string[] = [
@@ -855,7 +855,7 @@ function ui_base_view_top() {
 }
 
 function ui_base_operator_search() {
-	let search_handle: zui_handle_t = zui_handle("uibase_1");
+	let search_handle: zui_handle_t = zui_handle(__ID__);
 	let first: bool = true;
 	ui_menu_draw(function (ui: zui_t) {
 		zui_fill(0, 0, ui._w / zui_SCALE(ui), ui.t.ELEMENT_H * 8, ui.t.SEPARATOR_COL);
@@ -1259,7 +1259,7 @@ function ui_base_render() {
 		ui_base_ui.input_enabled = true;
 		g2_end();
 		zui_begin(ui_base_ui);
-		if (zui_window(zui_handle("uibase_2"), 0, 0, 150, math_floor(zui_ELEMENT_H(ui_base_ui) + zui_ELEMENT_OFFSET(ui_base_ui) + 1))) {
+		if (zui_window(zui_handle(__ID__), 0, 0, 150, math_floor(zui_ELEMENT_H(ui_base_ui) + zui_ELEMENT_OFFSET(ui_base_ui) + 1))) {
 			if (zui_button(tr("Close"))) {
 				ui_base_toggle_distract_free();
 			}
@@ -1335,7 +1335,7 @@ function ui_base_draw_sidebar() {
 	if (config_raw.touch_ui) {
 		let width: i32 = config_raw.layout[layout_size_t.SIDEBAR_W];
 		let height: i32 = math_floor(zui_ELEMENT_H(ui_base_ui) + zui_ELEMENT_OFFSET(ui_base_ui));
-		if (zui_window(zui_handle("uibase_3"), sys_width() - width, sys_height() - height, width, height + 1)) {
+		if (zui_window(zui_handle(__ID__), sys_width() - width, sys_height() - height, width, height + 1)) {
 			ui_base_ui._w = width;
 			let _BUTTON_H: i32 = ui_base_ui.t.BUTTON_H;
 			let _BUTTON_COL: i32 = ui_base_ui.t.BUTTON_COL;

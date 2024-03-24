@@ -31,7 +31,7 @@ function text_to_photo_node_get_cached_image(self: text_to_photo_node_t): image_
 
 function text_to_photo_node_buttons(ui: zui_t, nodes: zui_nodes_t, node: zui_node_t) {
 	text_to_photo_node_tiling = node.buttons[0].default_value == 0 ? false : true;
-	text_to_photo_node_prompt = zui_text_area(zui_handle("texttophotonode_0"), zui_align_t.LEFT, true, tr("prompt"), true);
+	text_to_photo_node_prompt = zui_text_area(zui_handle(__ID__), zui_align_t.LEFT, true, tr("prompt"), true);
 	node.buttons[1].height = string_split(text_to_photo_node_prompt, "\n").length;
 }
 

@@ -14,7 +14,7 @@ function util_particle_init() {
 		lifetime: 400,
 		lifetime_random: 0.5,
 		emit_from: 1,
-		object_align_factor: new f32_array_t([0, 0, -40]),
+		object_align_factor: f32_array_create_xyz(0, 0, -40),
 		factor_random: 2.0,
 		physics_type: 0,
 		particle_size: 1.0,

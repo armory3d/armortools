@@ -163,7 +163,7 @@ function ui_menu_render() {
 
 			ui_menu_fill(ui);
 			let p: world_data_t = scene_world;
-			let env_handle: zui_handle_t = zui_handle("uimenu_0");
+			let env_handle: zui_handle_t = zui_handle(__ID__);
 			env_handle.value = p.strength;
 			ui_menu_align(ui);
 			p.strength = zui_slider(env_handle, tr("Environment"), 0.0, 8.0, true);
@@ -172,7 +172,7 @@ function ui_menu_render() {
 			}
 
 			ui_menu_fill(ui);
-			let enva_handle: zui_handle_t = zui_handle("uimenu_1");
+			let enva_handle: zui_handle_t = zui_handle(__ID__);
 			enva_handle.value = context_raw.envmap_angle / math_pi() * 180.0;
 			if (enva_handle.value < 0) {
 				enva_handle.value += (math_floor(-enva_handle.value / 360) + 1) * 360;
@@ -195,7 +195,7 @@ function ui_menu_render() {
 				let light: light_object_t = scene_lights[0];
 
 				ui_menu_fill(ui);
-				let lhandle: zui_handle_t = zui_handle("uimenu_2");
+				let lhandle: zui_handle_t = zui_handle(__ID__);
 				let scale: f32 = 1333;
 				lhandle.value = light.data.strength / scale;
 				lhandle.value = math_floor(lhandle.value * 100) / 100;
@@ -207,7 +207,7 @@ function ui_menu_render() {
 
 				ui_menu_fill(ui);
 				light = scene_lights[0];
-				let lahandle: zui_handle_t = zui_handle("uimenu_3");
+				let lahandle: zui_handle_t = zui_handle(__ID__);
 				lahandle.value = context_raw.light_angle / math_pi() * 180;
 				ui_menu_align(ui);
 				let new_angle: f32 = zui_slider(lahandle, tr("Light Angle"), 0.0, 360.0, true, 1) / 180 * math_pi();
@@ -232,7 +232,7 @@ function ui_menu_render() {
 				}
 
 				ui_menu_fill(ui);
-				let sxhandle: zui_handle_t = zui_handle("uimenu_4");
+				let sxhandle: zui_handle_t = zui_handle(__ID__);
 				sxhandle.value = light.data.size;
 				ui_menu_align(ui);
 				light.data.size = zui_slider(sxhandle, tr("Light Size"), 0.0, 4.0, true);
@@ -243,7 +243,7 @@ function ui_menu_render() {
 
 			///if (is_paint || is_sculpt)
 			ui_menu_fill(ui);
-			let split_view_handle: zui_handle_t = zui_handle("uimenu_5", { selected: context_raw.split_view });
+			let split_view_handle: zui_handle_t = zui_handle(__ID__, { selected: context_raw.split_view });
 			context_raw.split_view = zui_check(split_view_handle, " " + tr("Split View"));
 			if (split_view_handle.changed) {
 				base_resize();
@@ -252,7 +252,7 @@ function ui_menu_render() {
 
 			///if is_lab
 			ui_menu_fill(ui);
-			let brush_scale_handle: zui_handle_t = zui_handle("uimenu_6", { value: context_raw.brush_scale });
+			let brush_scale_handle: zui_handle_t = zui_handle(__ID__, { value: context_raw.brush_scale });
 			ui_menu_align(ui);
 			context_raw.brush_scale = zui_slider(brush_scale_handle, tr("UV Scale"), 0.01, 5.0, true);
 			if (brush_scale_handle.changed) {
@@ -265,14 +265,14 @@ function ui_menu_render() {
 			///end
 
 			ui_menu_fill(ui);
-			let cull_handle: zui_handle_t = zui_handle("uimenu_7", { selected: context_raw.cull_backfaces });
+			let cull_handle: zui_handle_t = zui_handle(__ID__, { selected: context_raw.cull_backfaces });
 			context_raw.cull_backfaces = zui_check(cull_handle, " " + tr("Cull Backfaces"));
 			if (cull_handle.changed) {
 				make_material_parse_mesh_material();
 			}
 
 			ui_menu_fill(ui);
-			let filter_handle: zui_handle_t = zui_handle("uimenu_8", { selected: context_raw.texture_filter });
+			let filter_handle: zui_handle_t = zui_handle(__ID__, { selected: context_raw.texture_filter });
 			context_raw.texture_filter = zui_check(filter_handle, " " + tr("Filter Textures"));
 			if (filter_handle.changed) {
 				make_material_parse_paint_material();
@@ -300,7 +300,7 @@ function ui_menu_render() {
 			///end
 
 			ui_menu_fill(ui);
-			let compass_handle: zui_handle_t = zui_handle("uimenu_9", { selected: context_raw.show_compass });
+			let compass_handle: zui_handle_t = zui_handle(__ID__, { selected: context_raw.show_compass });
 			context_raw.show_compass = zui_check(compass_handle, " " + tr("Compass"));
 			if (compass_handle.changed) {
 				context_raw.ddirty = 2;
@@ -326,7 +326,7 @@ function ui_menu_render() {
 			}
 		}
 		else if (ui_menu_category == menu_category_t.MODE) {
-			let mode_handle: zui_handle_t = zui_handle("uimenu_10");
+			let mode_handle: zui_handle_t = zui_handle(__ID__);
 			mode_handle.position = context_raw.viewport_mode;
 			let modes: string[] = [
 				tr("Lit"),
@@ -428,7 +428,7 @@ function ui_menu_render() {
 
 			ui_menu_fill(ui);
 			let cam: camera_object_t = scene_camera;
-			context_raw.fov_handle = zui_handle("uimenu_11", { value: math_floor(cam.data.fov * 100) / 100 });
+			context_raw.fov_handle = zui_handle(__ID__, { value: math_floor(cam.data.fov * 100) / 100 });
 			ui_menu_align(ui);
 			cam.data.fov = zui_slider(context_raw.fov_handle, tr("FoV"), 0.3, 1.4, true);
 			if (context_raw.fov_handle.changed) {
@@ -437,7 +437,7 @@ function ui_menu_render() {
 
 			ui_menu_fill(ui);
 			ui_menu_align(ui);
-			let camera_controls_handle: zui_handle_t = zui_handle("uimenu_12");
+			let camera_controls_handle: zui_handle_t = zui_handle(__ID__);
 			camera_controls_handle.position = context_raw.camera_controls;
 			context_raw.camera_controls = zui_inline_radio(camera_controls_handle, [tr("Orbit"), tr("Rotate"), tr("Fly")], zui_align_t.LEFT);
 
@@ -560,13 +560,13 @@ function ui_menu_render() {
 
 				ui_box_show_custom(function (ui: zui_t) {
 					let tab_vertical: bool = config_raw.touch_ui;
-					if (zui_tab(zui_handle("uimenu_13"), tr("About"), tab_vertical)) {
+					if (zui_tab(zui_handle(__ID__), tr("About"), tab_vertical)) {
 
 						let img: image_t = data_get_image("badge.k");
 						zui_image(img);
 						zui_end_element();
 
-						zui_text_area(zui_handle("uimenu_14", { text: msg }), zui_align_t.LEFT, false);
+						zui_text_area(zui_handle(__ID__, { text: msg }), zui_align_t.LEFT, false);
 
 						zui_row([1 / 3, 1 / 3, 1 / 3]);
 

@@ -76,8 +76,8 @@ function ui_box_render() {
 		if (zui_window(ui_box_hwnd, left, top, mw, mh, ui_box_draggable)) {
 			ui._y += 10;
 			let tab_vertical: bool = config_raw.touch_ui;
-			if (zui_tab(zui_handle("uibox_0"), ui_box_title, tab_vertical)) {
-				let htext: zui_handle_t = zui_handle("uibox_1");
+			if (zui_tab(zui_handle(__ID__), ui_box_title, tab_vertical)) {
+				let htext: zui_handle_t = zui_handle(__ID__);
 				htext.text = ui_box_text;
 				ui_box_copyable ?
 					zui_text_area(htext, zui_align_t.LEFT, false) :

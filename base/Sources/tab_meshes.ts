@@ -115,7 +115,7 @@ function tab_meshes_draw(htab: zui_handle_t) {
 
 		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 			let o: mesh_object_t = project_paint_objects[i];
-			let h: zui_handle_t = zui_handle("tabmeshes_0");
+			let h: zui_handle_t = zui_handle(__ID__);
 			h.selected = o.base.visible;
 			o.base.visible = zui_check(h, o.base.name);
 			if (ui.is_hovered && ui.input_released_r) {

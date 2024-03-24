@@ -71,7 +71,7 @@ function make_material_parse_paint_material() {
 			break;
 		}
 	}
-	for (let i: i32 = 0; i < m.contexts.length) {
+	for (let i: i32 = 0; i < m.contexts.length; ++i) {
 		let c = m.contexts[i];
 		if (c.name == "paint") {
 			array_remove(m.contexts, c);

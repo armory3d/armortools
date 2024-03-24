@@ -12,14 +12,14 @@ function uniforms_ext_init() {
 	uniforms_tex_links = uniforms_ext_tex_link;
 }
 
-function uniforms_ext_i32_link(object: object_t, mat: material_data_t, link: string): Null<i32> {
+function uniforms_ext_i32_link(object: object_t, mat: material_data_t, link: string): i32 {
 	if (link == "_bloomCurrentMip") {
 		return render_path_base_bloom_current_mip;
 	}
-	return null;
+	return 0;
 }
 
-function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: string): Null<f32> {
+function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: string): f32 {
 	if (link == "_brushRadius") {
 		///if (is_paint || is_sculpt)
 		let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
@@ -146,7 +146,7 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 			return result;
 		}
 	}
-	return null;
+	return 0.0;
 }
 
 function uniforms_ext_vec2_link(object: object_t, mat: material_data_t, link: string): vec4_t {

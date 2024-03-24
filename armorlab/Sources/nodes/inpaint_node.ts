@@ -51,8 +51,8 @@ function inpaint_node_init() {
 function inpaint_node_buttons(ui: zui_t, nodes: zui_nodes_t, node: zui_node_t) {
 	inpaint_node_auto = node.buttons[0].default_value == 0 ? false : true;
 	if (!inpaint_node_auto) {
-		inpaint_node_strength = zui_slider(zui_handle("inpaintnode_0", { value: inpaint_node_strength }), tr("strength"), 0, 1, true);
-		inpaint_node_prompt = zui_text_area(zui_handle("inpaintnode_1"), zui_align_t.LEFT, true, tr("prompt"), true);
+		inpaint_node_strength = zui_slider(zui_handle(__ID__, { value: inpaint_node_strength }), tr("strength"), 0, 1, true);
+		inpaint_node_prompt = zui_text_area(zui_handle(__ID__), zui_align_t.LEFT, true, tr("prompt"), true);
 		node.buttons[1].height = 1 + string_split(inpaint_node_prompt, "\n").length;
 	}
 	else {

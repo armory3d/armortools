@@ -318,26 +318,26 @@ type config_t = {
 	// "system" is a special case that will use the system locale
 	locale?: string;
 	// Window
-	window_mode?: Null<i32>; // window, fullscreen
-	window_w?: Null<i32>;
-	window_h?: Null<i32>;
-	window_x?: Null<i32>;
-	window_y?: Null<i32>;
-	window_resizable?: Null<bool>;
-	window_maximizable?: Null<bool>;
-	window_minimizable?: Null<bool>;
-	window_vsync?: Null<bool>;
-	window_frequency?: Null<i32>;
-	window_scale?: Null<f32>;
+	window_mode?: i32; // window, fullscreen
+	window_w?: i32;
+	window_h?: i32;
+	window_x?: i32;
+	window_y?: i32;
+	window_resizable?: bool;
+	window_maximizable?: bool;
+	window_minimizable?: bool;
+	window_vsync?: bool;
+	window_frequency?: i32;
+	window_scale?: f32;
 	// Render path
-	rp_supersample?: Null<f32>;
-	rp_ssao?: Null<bool>;
-	rp_ssr?: Null<bool>;
-	rp_bloom?: Null<bool>;
-	rp_motionblur?: Null<bool>;
-	rp_gi?: Null<bool>;
-	rp_vignette?: Null<f32>;
-	rp_grain?: Null<f32>;
+	rp_supersample?: f32;
+	rp_ssao?: bool;
+	rp_ssr?: bool;
+	rp_bloom?: bool;
+	rp_motionblur?: bool;
+	rp_gi?: bool;
+	rp_vignette?: f32;
+	rp_grain?: f32;
 	// Application
 	version?: string;
 	sha?: string; // Commit id
@@ -346,38 +346,100 @@ type config_t = {
 	plugins?: string[]; // List of enabled plugins
 	keymap?: string; // Link to keymap file
 	theme?: string; // Link to theme file
-	undo_steps?: Null<i32>; // Number of undo steps to preserve
-	camera_pan_speed?: Null<f32>;
-	camera_zoom_speed?: Null<f32>;
-	camera_rotation_speed?: Null<f32>;
-	zoom_direction?: Null<i32>;
-	wrap_mouse?: Null<bool>;
-	show_asset_names?: Null<bool>;
-	touch_ui?: Null<bool>;
-	splash_screen?: Null<bool>;
+	undo_steps?: i32; // Number of undo steps to preserve
+	camera_pan_speed?: f32;
+	camera_zoom_speed?: f32;
+	camera_rotation_speed?: f32;
+	zoom_direction?: i32;
+	wrap_mouse?: bool;
+	show_asset_names?: bool;
+	touch_ui?: bool;
+	splash_screen?: bool;
 	layout?: i32[]; // Sizes
 	layout_tabs?: i32[]; // Active tabs
-	workspace?: Null<i32>;
-	camera_controls?: Null<i32>; // Orbit, rotate
+	workspace?: i32;
+	camera_controls?: i32; // Orbit, rotate
 	server?: string;
 
-	pressure_radius?: Null<bool>; // Pen pressure controls
-	pressure_sensitivity?: Null<f32>;
-	displace_strength?: Null<f32>;
-	layer_res?: Null<i32>;
-	brush_live?: Null<bool>;
-	brush_3d?: Null<bool>;
-	node_preview?: Null<bool>;
+	pressure_radius?: bool; // Pen pressure controls
+	pressure_sensitivity?: f32;
+	displace_strength?: f32;
+	layer_res?: i32;
+	brush_live?: bool;
+	brush_3d?: bool;
+	node_preview?: bool;
 
-	pressure_hardness?: Null<bool>;
-	pressure_angle?: Null<bool>;
-	pressure_opacity?: Null<bool>;
-	material_live?: Null<bool>;
-	brush_depth_reject?: Null<bool>;
-	brush_angle_reject?: Null<bool>;
+	pressure_hardness?: bool;
+	pressure_angle?: bool;
+	pressure_opacity?: bool;
+	material_live?: bool;
+	brush_depth_reject?: bool;
+	brush_angle_reject?: bool;
 
-	dilate?: Null<i32>;
-	dilate_radius?: Null<i32>;
+	dilate?: i32;
+	dilate_radius?: i32;
 
-	gpu_inference?: Null<bool>;
+	///if is_lab
+	gpu_inference?: bool;
+	///end
 };
+
+// let config_keys: string[] = [
+// 	"locale",
+// 	"window_mode",
+// 	"window_w",
+// 	"window_h",
+// 	"window_x",
+// 	"window_y",
+// 	"window_resizable",
+// 	"window_maximizable",
+// 	"window_minimizable",
+// 	"window_vsync",
+// 	"window_frequency",
+// 	"window_scale",
+// 	"rp_supersample",
+// 	"rp_ssao",
+// 	"rp_ssr",
+// 	"rp_bloom",
+// 	"rp_motionblur",
+// 	"rp_gi",
+// 	"rp_vignette",
+// 	"rp_grain",
+// 	"version",
+// 	"sha",
+// 	"recent_projects",
+// 	"bookmarks",
+// 	"plugins",
+// 	"keymap",
+// 	"theme",
+// 	"undo_steps",
+// 	"camera_pan_speed",
+// 	"camera_zoom_speed",
+// 	"camera_rotation_speed",
+// 	"zoom_direction",
+// 	"wrap_mouse",
+// 	"show_asset_names",
+// 	"touch_ui",
+// 	"splash_screen",
+// 	"layout",
+// 	"layout_tabs",
+// 	"workspace",
+// 	"camera_controls",
+// 	"server",
+// 	"pressure_radius",
+// 	"pressure_sensitivity",
+// 	"displace_strength",
+// 	"layer_res",
+// 	"brush_live",
+// 	"brush_3d",
+// 	"node_preview",
+// 	"pressure_hardness",
+// 	"pressure_angle",
+// 	"pressure_opacity",
+// 	"material_live",
+// 	"brush_depth_reject",
+// 	"brush_angle_reject",
+// 	"dilate",
+// 	"dilate_radius",
+// 	"gpu_inference",
+// ];

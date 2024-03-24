@@ -85,7 +85,7 @@ function tab_layers_button_new(text: string) {
 function tab_layers_combo_filter() {
 	let ui = ui_base_ui;
 	let ar = [tr("All")];
-	let filter_handle = zui_handle("tablayers_0");
+	let filter_handle = zui_handle(__ID__);
 	filter_handle.position = context_raw.layer_filter;
 	context_raw.layer_filter = zui_combo(filter_handle, ar, tr("Filter"), false, zui_align_t.LEFT);
 }
@@ -318,7 +318,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 
 	if (hasPanel) {
 		ui._y += center;
-		let layerPanel = zui_nest(zui_handle("tablayers_1"), l.id);
+		let layerPanel = zui_nest(zui_handle(__ID__), l.id);
 		layerPanel.selected = l.show_panel;
 		l.show_panel = zui_panel(layerPanel, "", true, false, false);
 		ui._y -= center;
@@ -352,7 +352,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 
 function tab_layers_combo_object(ui: zui_t, l: slot_layer_t, label: bool = false): zui_handle_t {
 	let ar = [tr("Shared")];
-	let objectHandle = zui_nest(zui_handle("tablayers_2"), l.id);
+	let objectHandle = zui_nest(zui_handle(__ID__), l.id);
 	objectHandle.position = l.object_mask;
 	l.object_mask = zui_combo(objectHandle, ar, tr("Object"), label, zui_align_t.LEFT);
 	return objectHandle;

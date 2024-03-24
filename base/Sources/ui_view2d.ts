@@ -113,7 +113,7 @@ function ui_view2d_render() {
 
 	if (zui_window(ui_view2d_hwnd, ui_view2d_wx, ui_view2d_wy, ui_view2d_ww, ui_view2d_wh)) {
 
-		zui_tab(zui_handle("uiview2d_0"), tr("2D View"));
+		zui_tab(zui_handle(__ID__), tr("2D View"));
 
 		// Grid
 		g2_set_color(0xffffffff);
@@ -286,7 +286,7 @@ function ui_view2d_render() {
 		ui_view2d_ui._w = ew;
 
 		// Editable layer name
-		let h: zui_handle_t = zui_handle("uiview2d_1");
+		let h: zui_handle_t = zui_handle(__ID__);
 
 		///if (is_paint || is_sculpt)
 		let text: string = ui_view2d_type == view_2d_type_t.NODE ? context_raw.node_preview_name : h.text;
@@ -341,7 +341,7 @@ function ui_view2d_render() {
 
 		///if (is_paint || is_sculpt)
 		if (ui_view2d_type == view_2d_type_t.LAYER) {
-			ui_view2d_layer_mode = zui_combo(zui_handle("uiview2d_2", { position: ui_view2d_layer_mode }), [
+			ui_view2d_layer_mode = zui_combo(zui_handle(__ID__, { position: ui_view2d_layer_mode }), [
 				tr("Visible"),
 				tr("Selected"),
 			], tr("Layers"));
@@ -349,7 +349,7 @@ function ui_view2d_render() {
 			ui_view2d_ui._y = 2 + start_y;
 
 			if (!slot_layer_is_mask(context_raw.layer)) {
-				ui_view2d_tex_type = zui_combo(zui_handle("uiview2d_3", { position: ui_view2d_tex_type }), [
+				ui_view2d_tex_type = zui_combo(zui_handle(__ID__, { position: ui_view2d_tex_type }), [
 					tr("Base Color"),
 					tr("Normal Map"),
 					tr("Occlusion"),
@@ -363,13 +363,13 @@ function ui_view2d_render() {
 			}
 
 			ui_view2d_ui._w = math_floor(ew * 0.7 + 3);
-			ui_view2d_uvmap_show = zui_check(zui_handle("uiview2d_4", { selected: ui_view2d_uvmap_show }), tr("UV Map"));
+			ui_view2d_uvmap_show = zui_check(zui_handle(__ID__, { selected: ui_view2d_uvmap_show }), tr("UV Map"));
 			ui_view2d_ui._x += ew * 0.7 + 3;
 			ui_view2d_ui._y = 2 + start_y;
 		}
 		///end
 
-		ui_view2d_tiled_show = zui_check(zui_handle("uiview2d_5", { selected: ui_view2d_tiled_show }), tr("Tiled"));
+		ui_view2d_tiled_show = zui_check(zui_handle(__ID__, { selected: ui_view2d_tiled_show }), tr("Tiled"));
 		ui_view2d_ui._x += ew * 0.7 + 3;
 		ui_view2d_ui._y = 2 + start_y;
 

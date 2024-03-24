@@ -42,7 +42,7 @@ function project_open() {
 	});
 }
 
-function project_save(saveAndQuit: bool = false) {
+function project_save(save_and_quit: bool = false) {
 	if (project_filepath == "") {
 		///if krom_ios
 		let document_directory: string = krom_save_dialog("", "");
@@ -51,7 +51,7 @@ function project_save(saveAndQuit: bool = false) {
 		///elseif krom_android
 		project_filepath = krom_save_path() + "/" + sys_title() + ".arm";
 		///else
-		project_save_as(saveAndQuit);
+		project_save_as(save_and_quit);
 		return;
 		///end
 	}
@@ -63,12 +63,12 @@ function project_save(saveAndQuit: bool = false) {
 
 	let _init = function () {
 		export_arm_run_project();
-		if (saveAndQuit) sys_stop();
+		if (save_and_quit) sys_stop();
 	}
 	app_notify_on_init(_init);
 }
 
-function project_save_as(saveAndQuit: bool = false) {
+function project_save_as(save_and_quit: bool = false) {
 	ui_files_show("arm", true, false, function (path: string) {
 		let f: string = ui_files_filename;
 		if (f == "") {
@@ -78,14 +78,14 @@ function project_save_as(saveAndQuit: bool = false) {
 		if (!ends_with(project_filepath, ".arm")) {
 			project_filepath += ".arm";
 		}
-		project_save(saveAndQuit);
+		project_save(save_and_quit);
 	});
 }
 
 function project_new_box() {
 	///if (is_paint || is_sculpt)
 	ui_box_show_custom(function (ui: zui_t) {
-		if (zui_tab(zui_handle("project_0"), tr("New Project"))) {
+		if (zui_tab(zui_handle(__ID__), tr("New Project"))) {
 			if (project_mesh_list == null) {
 				project_mesh_list = file_read_directory(path_data() + path_sep + "meshes");
 				for (let i: i32 = 0; i < project_mesh_list.length; ++i) {
@@ -97,8 +97,8 @@ function project_new_box() {
 			}
 
 			zui_row([0.5, 0.5]);
-			context_raw.project_type = zui_combo(zui_handle("project_1", { position: context_raw.project_type }), project_mesh_list, tr("Template"), true);
-			context_raw.project_aspect_ratio = zui_combo(zui_handle("project_2", { position: context_raw.project_aspect_ratio }), ["1:1", "2:1", "1:2"], tr("Aspect Ratio"), true);
+			context_raw.project_type = zui_combo(zui_handle(__ID__, { position: context_raw.project_type }), project_mesh_list, tr("Template"), true);
+			context_raw.project_aspect_ratio = zui_combo(zui_handle(__ID__, { position: context_raw.project_aspect_ratio }), ["1:1", "2:1", "1:2"], tr("Aspect Ratio"), true);
 
 			zui_end_element();
 			zui_row([0.5, 0.5]);
@@ -120,7 +120,7 @@ function project_new_box() {
 	///end
 }
 
-function project_new(resetLayers: bool = true) {
+function project_new(reset_layers: bool = true) {
 	///if (krom_windows || krom_linux || krom_darwin)
 	sys_title_set(manifest_title);
 	///end
@@ -282,7 +282,7 @@ function project_new(resetLayers: bool = true) {
 	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 	///end
 
-	if (resetLayers) {
+	if (reset_layers) {
 
 		///if (is_paint || is_sculpt)
 		let aspect_ratio_changed: bool = project_layers[0].texpaint.width != config_get_texture_res_x() || project_layers[0].texpaint.height != config_get_texture_res_y();
@@ -378,13 +378,13 @@ function project_import_brush() {
 }
 ///end
 
-function project_import_mesh(replaceExisting: bool = true, done: ()=>void = null) {
+function project_import_mesh(replace_existing: bool = true, done: ()=>void = null) {
 	ui_files_show(path_mesh_formats.join(","), false, false, function (path: string) {
-		project_import_mesh_box(path, replaceExisting, true, done);
+		project_import_mesh_box(path, replace_existing, true, done);
 	});
 }
 
-function project_import_mesh_box(path: string, replaceExisting: bool = true, clearLayers: bool = true, done: ()=>void = null) {
+function project_import_mesh_box(path: string, replace_existing: bool = true, clear_layers: bool = true, done: ()=>void = null) {
 
 	///if krom_ios
 	// Import immediately while access to resource is unlocked
@@ -393,10 +393,10 @@ function project_import_mesh_box(path: string, replaceExisting: bool = true, cle
 
 	ui_box_show_custom(function (ui: zui_t) {
 		let tab_vertical: bool = config_raw.touch_ui;
-		if (zui_tab(zui_handle("project_3"), tr("Import Mesh"), tab_vertical)) {
+		if (zui_tab(zui_handle(__ID__), tr("Import Mesh"), tab_vertical)) {
 
 			if (ends_with(to_lower_case(path), ".obj")) {
-				context_raw.split_by = zui_combo(zui_handle("project_4"), [
+				context_raw.split_by = zui_combo(zui_handle(__ID__), [
 					tr("Object"),
 					tr("Group"),
 					tr("Material"),
@@ -415,7 +415,7 @@ function project_import_mesh_box(path: string, replaceExisting: bool = true, cle
 			///if (is_paint || is_sculpt)
 			// if (ends_with(to_lower_case(path), ".fbx") || ends_with(to_lower_case(path), ".blend")) {
 			if (ends_with(to_lower_case(path), ".blend")) {
-				context_raw.parse_vcols = zui_check(zui_handle("project_6", { selected: context_raw.parse_vcols }), tr("Parse Vertex Colors"));
+				context_raw.parse_vcols = zui_check(zui_handle(__ID__, { selected: context_raw.parse_vcols }), tr("Parse Vertex Colors"));
 				if (ui.is_hovered) {
 					zui_tooltip(tr("Import vertex color data"));
 				}
@@ -430,10 +430,10 @@ function project_import_mesh_box(path: string, replaceExisting: bool = true, cle
 				ui_box_hide();
 				let do_import = function () {
 					///if (is_paint || is_sculpt)
-					import_mesh_run(path, clearLayers, replaceExisting);
+					import_mesh_run(path, clear_layers, replace_existing);
 					///end
 					///if is_lab
-					import_mesh_run(path, replaceExisting);
+					import_mesh_run(path, replace_existing);
 					///end
 					if (done != null) {
 						done();
@@ -468,7 +468,7 @@ function project_reimport_mesh() {
 function project_unwrap_mesh_box(mesh: any, done: (a: any)=>void, skip_ui: bool = false) {
 	ui_box_show_custom(function (ui: zui_t) {
 		let tab_vertical: bool = config_raw.touch_ui;
-		if (zui_tab(zui_handle("project_7"), tr("Unwrap Mesh"), tab_vertical)) {
+		if (zui_tab(zui_handle(__ID__), tr("Unwrap Mesh"), tab_vertical)) {
 
 			let unwrap_plugins: string[] = [];
 			if (box_preferences_files_plugin == null) {
@@ -482,7 +482,7 @@ function project_unwrap_mesh_box(mesh: any, done: (a: any)=>void, skip_ui: bool 
 			}
 			array_push(unwrap_plugins, "equirect");
 
-			let unwrap_by: i32 = zui_combo(zui_handle("project_8"), unwrap_plugins, tr("Plugin"), true);
+			let unwrap_by: i32 = zui_combo(zui_handle(__ID__), unwrap_plugins, tr("Plugin"), true);
 
 			zui_row([0.5, 0.5]);
 			if (zui_button(tr("Cancel"))) {
@@ -517,22 +517,22 @@ function project_unwrap_mesh_box(mesh: any, done: (a: any)=>void, skip_ui: bool 
 	});
 }
 
-function project_import_asset(filters: string = null, hdrAsEnvmap: bool = true) {
+function project_import_asset(filters: string = null, hdr_as_envmap: bool = true) {
 	if (filters == null) {
 		filters = path_texture_formats.join(",") + "," + path_mesh_formats.join(",");
 	}
 	ui_files_show(filters, false, true, function (path: string) {
-		import_asset_run(path, -1.0, -1.0, true, hdrAsEnvmap);
+		import_asset_run(path, -1.0, -1.0, true, hdr_as_envmap);
 	});
 }
 
-function project_import_swatches(replaceExisting: bool = false) {
+function project_import_swatches(replace_existing: bool = false) {
 	ui_files_show("arm,gpl", false, false, function (path: string) {
 		if (path_is_gimp_color_palette(path)) {
-			import_gpl_run(path, replaceExisting);
+			import_gpl_run(path, replace_existing);
 		}
 		else {
-			import_arm_run_swatches(path, replaceExisting);
+			import_arm_run_swatches(path, replace_existing);
 		}
 	});
 }
@@ -616,8 +616,8 @@ function project_is_atlas_object(p: mesh_object_t): bool {
 	return atlas_i == project_atlas_objects[array_index_of(project_paint_objects, p)];
 }
 
-function project_get_atlas_objects(objectMask: i32): mesh_object_t[] {
-	let atlas_name: string = project_get_used_atlases()[objectMask - project_paint_objects.length - 1];
+function project_get_atlas_objects(object_mask: i32): mesh_object_t[] {
+	let atlas_name: string = project_get_used_atlases()[object_mask - project_paint_objects.length - 1];
 	let atlas_i: i32 = array_index_of(project_atlas_names, atlas_name);
 	let visibles: mesh_object_t[] = [];
 	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
@@ -673,10 +673,10 @@ function project_set_default_swatches() {
 	}
 }
 
-function project_get_material_group_by_name(groupName: string): node_group_t {
+function project_get_material_group_by_name(group_name: string): node_group_t {
 	for (let i: i32 = 0; i < project_material_groups.length; ++i) {
 		let g: node_group_t = project_material_groups[i];
-		if (g.canvas.name == groupName) {
+		if (g.canvas.name == group_name) {
 			return g;
 		}
 	}
@@ -715,13 +715,13 @@ type node_group_t = {
 type project_format_t = {
 	version?: string;
 	assets?: string[]; // texture_assets
-	is_bgra?: Null<bool>; // Swapped red and blue channels for layer textures
+	is_bgra?: bool; // Swapped red and blue channels for layer textures
 	packed_assets?: packed_asset_t[];
 	envmap?: string; // Asset name
-	envmap_strength?: Null<f32>;
+	envmap_strength?: f32;
 	camera_world?: f32_array_t;
 	camera_origin?: f32_array_t;
-	camera_fov?: Null<f32>;
+	camera_fov?: f32;
 	swatches?: swatch_color_t[];
 
 	///if (is_paint || is_sculpt)

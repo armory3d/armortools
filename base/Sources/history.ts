@@ -442,10 +442,10 @@ function history_reset() {
 }
 
 ///if (is_paint || is_sculpt)
-function history_edit_nodes(canvas: zui_node_canvas_t, canvas_type: i32, canvas_group: Null<i32> = null) {
+function history_edit_nodes(canvas: zui_node_canvas_t, canvas_type: i32, canvas_group: i32 = -1) {
 ///end
 ///if is_lab
-function history_edit_nodes(canvas: zui_node_canvas_t, canvas_group: Null<i32> = null) {
+function history_edit_nodes(canvas: zui_node_canvas_t, canvas_group: i32 = -1) {
 ///end
 	let step: step_t = history_push(tr("Edit Nodes"));
 	step.canvas_group = canvas_group;
@@ -702,7 +702,7 @@ function history_copy_to_undo(from_id: i32, to_id: i32, is_mask: bool) {
 
 function history_get_canvas_owner(step: step_t): any {
 	///if (is_paint || is_sculpt)
-	return step.canvas_group == null ?
+	return step.canvas_group == -1 ?
 		project_materials[step.material] :
 		project_material_groups[step.canvas_group];
 	///end

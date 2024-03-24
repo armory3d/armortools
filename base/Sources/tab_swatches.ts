@@ -132,7 +132,7 @@ function tab_swatches_draw(htab: zui_handle_t) {
 					if (time_time() - context_raw.select_time < 0.25) {
 						ui_menu_draw(function (ui: zui_t) {
 							ui.changed = false;
-							let h: zui_handle_t = zui_handle("tabswatches_0");
+							let h: zui_handle_t = zui_handle(__ID__);
 							h.color = context_raw.swatch.base;
 
 							context_raw.swatch.base = zui_color_wheel(h, false, null, 11 * ui.t.ELEMENT_H * zui_SCALE(ui), true, function () {
@@ -142,19 +142,19 @@ function tab_swatches_draw(htab: zui_handle_t) {
 									project_raw.swatches[i] = project_clone_swatch(color);
 								};
 							});
-							let hopacity: zui_handle_t = zui_handle("tabswatches_1");
+							let hopacity: zui_handle_t = zui_handle(__ID__);
 							hopacity.value = context_raw.swatch.opacity;
 							context_raw.swatch.opacity = zui_slider(hopacity, "Opacity", 0, 1, true);
-							let hocclusion: zui_handle_t = zui_handle("tabswatches_2");
+							let hocclusion: zui_handle_t = zui_handle(__ID__);
 							hocclusion.value = context_raw.swatch.occlusion;
 							context_raw.swatch.occlusion = zui_slider(hocclusion, "Occlusion", 0, 1, true);
-							let hroughness: zui_handle_t = zui_handle("tabswatches_3");
+							let hroughness: zui_handle_t = zui_handle(__ID__);
 							hroughness.value = context_raw.swatch.roughness;
 							context_raw.swatch.roughness = zui_slider(hroughness, "Roughness", 0, 1, true);
-							let hmetallic: zui_handle_t = zui_handle("tabswatches_4");
+							let hmetallic: zui_handle_t = zui_handle(__ID__);
 							hmetallic.value = context_raw.swatch.metallic;
 							context_raw.swatch.metallic = zui_slider(hmetallic, "Metallic", 0, 1, true);
-							let hheight: zui_handle_t = zui_handle("tabswatches_5");
+							let hheight: zui_handle_t = zui_handle(__ID__);
 							hheight.value = context_raw.swatch.height;
 							context_raw.swatch.height = zui_slider(hheight, "Height", 0, 1, true);
 
@@ -196,7 +196,7 @@ function tab_swatches_draw(htab: zui_handle_t) {
 							if (val < 0) {
 								val += 4294967296;
 							}
-							krom_copy_to_clipboard(val.toString(16));
+							krom_copy_to_clipboard(i32_to_string(val));
 						}
 						///end
 						else if (project_raw.swatches.length > 1 && ui_menu_button(ui, tr("Delete"), "delete")) {
@@ -221,7 +221,7 @@ function tab_swatches_draw(htab: zui_handle_t) {
 					if (val < 0) {
 						val += 4294967296;
 					}
-					zui_tooltip("#" + val.toString(16));
+					zui_tooltip("#" + i32_to_string_hex(val));
 				}
 			}
 		}
