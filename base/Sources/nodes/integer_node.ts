@@ -13,12 +13,12 @@ function integer_node_create(arg: i32): integer_node_t {
 	return n;
 }
 
-function integer_node_get(self: integer_node_t, from: i32, done: (a: any)=>void) {
+function integer_node_get(self: integer_node_t, from: i32) {
 	if (self.base.inputs.length > 0) {
-		logic_node_input_get(self.base.inputs[0], done);
+		return logic_node_input_get(self.base.inputs[0]);
 	}
 	else {
-		done(self.value);
+		return self.value;
 	}
 }
 

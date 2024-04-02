@@ -60,38 +60,35 @@ function inpaint_node_buttons(ui: zui_t, nodes: zui_nodes_t, node: zui_node_t) {
 	}
 }
 
-function inpaint_node_get_as_image(self: inpaint_node_t, from: i32, done: (img: image_t)=>void) {
-	self.base.inputs[0].get_as_image(function (source: image_t) {
+function inpaint_node_get_as_image(self: inpaint_node_t, from: i32): image_t {
+	let source: image_t = self.base.inputs[0].get_as_image();
+	console_progress(tr("Processing") + " - " + tr("Inpaint"));
+	krom_g4_swap_buffers();
 
-		console_progress(tr("Processing") + " - " + tr("Inpaint"));
-		base_notify_on_next_frame(function () {
-			g2_begin(inpaint_node_image);
-			g2_draw_scaled_image(source, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
-			g2_end();
+	g2_begin(inpaint_node_image);
+	g2_draw_scaled_image(source, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
+	g2_end();
 
-			inpaint_node_auto ? inpaint_node_texsynth_inpaint(inpaint_node_image, false, inpaint_node_mask, done) : inpaint_node_inpaint_node_sd_inpaint(inpaint_node_image, inpaint_node_mask, done);
-		});
-	});
+	return inpaint_node_auto ? inpaint_node_texsynth_inpaint(inpaint_node_image, false, inpaint_node_mask) : inpaint_node_inpaint_node_sd_inpaint(inpaint_node_image, inpaint_node_mask);
 }
 
 function inpaint_node_get_cached_image(self: inpaint_node_t): image_t {
 	base_notify_on_next_frame(function () {
-		self.base.inputs[0].get_as_image(function (source: image_t) {
-			if (base_pipe_copy == null) {
-				base_make_pipe();
-			}
-			if (const_data_screen_aligned_vb == null) {
-				const_data_create_screen_aligned_data();
-			}
-			g4_begin(inpaint_node_image);
-			g4_set_pipeline(base_pipe_inpaint_preview);
-			g4_set_tex(base_tex0_inpaint_preview, source);
-			g4_set_tex(base_texa_inpaint_preview, inpaint_node_mask);
-			g4_set_vertex_buffer(const_data_screen_aligned_vb);
-			g4_set_index_buffer(const_data_screen_aligned_ib);
-			g4_draw();
-			g4_end();
-		});
+		let source: image_t = self.base.inputs[0].get_as_image();
+		if (base_pipe_copy == null) {
+			base_make_pipe();
+		}
+		if (const_data_screen_aligned_vb == null) {
+			const_data_create_screen_aligned_data();
+		}
+		g4_begin(inpaint_node_image);
+		g4_set_pipeline(base_pipe_inpaint_preview);
+		g4_set_tex(base_tex0_inpaint_preview, source);
+		g4_set_tex(base_texa_inpaint_preview, inpaint_node_mask);
+		g4_set_vertex_buffer(const_data_screen_aligned_vb);
+		g4_set_index_buffer(const_data_screen_aligned_ib);
+		g4_draw();
+		g4_end();
 	});
 	return inpaint_node_image;
 }
@@ -100,7 +97,7 @@ function inpaint_node_get_target(): image_t {
 	return inpaint_node_mask;
 }
 
-function inpaint_node_texsynth_inpaint(image: image_t, tiling: bool, mask: image_t, done: (img: image_t)=>void) {
+function inpaint_node_texsynth_inpaint(image: image_t, tiling: bool, mask: image_t): image_t {
 	let w = config_get_texture_res_x();
 	let h = config_get_texture_res_y();
 
@@ -110,14 +107,14 @@ function inpaint_node_texsynth_inpaint(image: image_t, tiling: bool, mask: image
 	Krom_texsynth.inpaint(w, h, bytes_out, bytes_img, bytes_mask, tiling);
 
 	inpaint_node_result = image_from_bytes(bytes_out, w, h);
-	done(inpaint_node_result);
+	return inpaint_node_result;
 }
 
-function inpaint_node_sd_inpaint(image: image_t, mask: image_t, done: (img: image_t)=>void) {
+function inpaint_node_sd_inpaint(image: image_t, mask: image_t): image_t {
 	inpaint_node_init();
 
 	let bytes_img = image_get_pixels(mask);
-	let u8 = new u8_array_t(bytes_img);
+	let u8 = u8_array_create_from_buffer(bytes_img);
 	let f32mask = f32_array_create(4 * 64 * 64);
 
 	let vae_encoder_blob: buffer_t = data_get_blob("models/sd_vae_encoder.quant.onnx");
@@ -147,7 +144,7 @@ function inpaint_node_sd_inpaint(image: image_t, mask: image_t, done: (img: imag
 			g2_end();
 
 			bytes_img = image_get_pixels(inpaint_node_temp);
-			let u8a = new u8_array_t(bytes_img);
+			let u8a = u8_array_create_from_buffer(bytes_img);
 			let f32a = f32_array_create(3 * 512 * 512);
 			for (let i: i32 = 0; i < (512 * 512); ++i) {
 				f32a[i                ] = (u8a[i * 4    ] / 255.0) * 2.0 - 1.0;
@@ -156,7 +153,7 @@ function inpaint_node_sd_inpaint(image: image_t, mask: image_t, done: (img: imag
 			}
 
 			let latents_buf = krom_ml_inference(vae_encoder_blob, [f32a.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], config_raw.gpu_inference);
-			let latents = new f32_array_t(latents_buf);
+			let latents = f32_array_create_from_buffer(latents_buf);
 			for (let i: i32 = 0; i < latents.length; ++i) {
 				latents[i] = 0.18215 * latents[i];
 			}
@@ -167,8 +164,8 @@ function inpaint_node_sd_inpaint(image: image_t, mask: image_t, done: (img: imag
 
 			let num_inference_steps = 50;
 			let init_timestep = math_floor(num_inference_steps * inpaint_node_strength);
-			let timestep = TextToPhotoNode.timesteps[num_inference_steps - init_timestep];
-			let alphas_cumprod = TextToPhotoNode.alphas_cumprod;
+			let timestep = text_to_photo_node.timesteps[num_inference_steps - init_timestep];
+			let alphas_cumprod = text_to_photo_node.alphas_cumprod;
 			let sqrt_alpha_prod = math_pow(alphas_cumprod[timestep], 0.5);
 			let sqrt_one_minus_alpha_prod = math_pow(1.0 - alphas_cumprod[timestep], 0.5);
 			for (let i: i32 = 0; i < latents.length; ++i) {
@@ -177,13 +174,8 @@ function inpaint_node_sd_inpaint(image: image_t, mask: image_t, done: (img: imag
 
 			let start = num_inference_steps - init_timestep;
 
-			text_to_photo_node_stable_diffusion(inpaint_node_prompt, function (img: image_t) {
-				// result.g2_begin();
-				// result.g2_draw_image(img, x * 512, y * 512);
-				// result.g2_end();
-				inpaint_node_result = img;
-				done(img);
-			}, latents, start, true, f32mask, latents_orig);
+			inpaint_node_result = text_to_photo_node_stable_diffusion(inpaint_node_prompt, latents, start, true, f32mask, latents_orig);
+			return inpaint_node_result;
 		// }
 	// }
 }
@@ -202,7 +194,7 @@ let inpaint_node_def: zui_node_t = {
 			name: _tr("Color"),
 			type: "RGBA",
 			color: 0xffc7c729,
-			default_value: new f32_array_t([1.0, 1.0, 1.0, 1.0])
+			default_value: f32_array_create_xyzw(1.0, 1.0, 1.0, 1.0)
 		}
 	],
 	outputs: [
@@ -212,7 +204,7 @@ let inpaint_node_def: zui_node_t = {
 			name: _tr("Color"),
 			type: "RGBA",
 			color: 0xffc7c729,
-			default_value: new f32_array_t([0.0, 0.0, 0.0, 1.0])
+			default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0)
 		}
 	],
 	buttons: [

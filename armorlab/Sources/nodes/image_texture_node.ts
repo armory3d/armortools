@@ -13,17 +13,14 @@ function image_texture_node_create(arg: any): image_texture_node_t {
 	return n;
 }
 
-function image_texture_node_get_as_image(self: image_texture_node_t, from: i32, done: (img: image_t)=>void) {
+function image_texture_node_get_as_image(self: image_texture_node_t, from: i32): image_t {
 	let index = array_index_of(project_asset_names, self.file);
 	let asset = project_assets[index];
-	done(project_get_image(asset));
+	return project_get_image(asset);
 }
 
 function image_texture_node_get_cached_image(self: image_texture_node_t): image_t {
-	let image: image_t;
-	self.base.get_as_image(self, 0, function (img: image_t) {
-		image = img;
-	});
+	let image: image_t = self.base.get_as_image(self, 0);
 	return image;
 }
 
@@ -41,7 +38,7 @@ let image_texture_node_def: zui_node_t = {
 			name: _tr("Vector"),
 			type: "VECTOR",
 			color: 0xff6363c7,
-			default_value: new f32_array_t([0.0, 0.0, 0.0])
+			default_value: f32_array_create_xyz(0.0, 0.0, 0.0)
 		}
 	],
 	outputs: [
@@ -51,7 +48,7 @@ let image_texture_node_def: zui_node_t = {
 			name: _tr("Color"),
 			type: "RGBA",
 			color: 0xffc7c729,
-			default_value: new f32_array_t([0.0, 0.0, 0.0, 1.0])
+			default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0)
 		},
 		{
 			id: 0,

@@ -823,7 +823,7 @@ function ui_base_update() {
 			let ray: ray_t = raycast_get_ray(mouse_view_x(), mouse_view_y(), camera);
 			physics_body_apply_impulse(body, vec4_mult(ray.dir, 0.15));
 
-			context_raw.particle_timer = tween_timer(5, function() { mesh_object_remove(mo); });
+			context_raw.particle_timer = tween_timer(5, function () { mesh_object_remove(mo); });
 		}
 
 		let pairs: pair_t[] = physics_world_get_contact_pairs(world, context_raw.paint_body);

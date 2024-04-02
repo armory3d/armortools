@@ -16,16 +16,11 @@ function brush_output_node_parse_inputs(self: brush_output_node_t) {
 	let last_mask = context_raw.brush_mask_image;
 	let last_stencil = context_raw.brush_stencil_image;
 
-	let input0: any;
-	let input1: any;
-	let input2: any;
-	let input3: any;
-	let input4: any;
-	logic_node_input_get(self.base.inputs[0], function (value: any) { input0 = value; });
-	logic_node_input_get(self.base.inputs[1], function (value: any) { input1 = value; });
-	logic_node_input_get(self.base.inputs[2], function (value: any) { input2 = value; });
-	logic_node_input_get(self.base.inputs[3], function (value: any) { input3 = value; });
-	logic_node_input_get(self.base.inputs[4], function (value: any) { input4 = value; });
+	let input0: any = logic_node_input_get(self.base.inputs[0]);
+	let input1: any = logic_node_input_get(self.base.inputs[1]);
+	let input2: any = logic_node_input_get(self.base.inputs[2]);
+	let input3: any = logic_node_input_get(self.base.inputs[3]);
+	let input4: any = logic_node_input_get(self.base.inputs[4]);
 
 	context_raw.paint_vec = input0;
 	context_raw.brush_nodes_radius = input1;

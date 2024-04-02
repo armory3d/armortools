@@ -242,7 +242,7 @@ function ui_view2d_render() {
 			if ((context_in_2d_view(view_2d_type_t.ASSET) || context_in_2d_view(view_2d_type_t.NODE)) && context_raw.tool == workspace_tool_t.PICKER && ui_view2d_ui.input_down) {
 				let x: f32 = ui_view2d_ui.input_x - tx - ui_view2d_wx;
 				let y: f32 = ui_view2d_ui.input_y - ty - ui_view2d_wy;
-				base_notify_on_next_frame(function() {
+				base_notify_on_next_frame(function () {
 					let texpaint_picker: image_t = map_get(render_path_render_targets, "texpaint_picker")._image;
 					g2_begin(texpaint_picker);
 					g2_draw_scaled_image(tex, -x, -y, tw, th);

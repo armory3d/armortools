@@ -10,6 +10,6 @@ function null_node_create(arg: any): null_node_t {
 	return n;
 }
 
-function null_node_get(self: null_node_t, from: i32, done: (a: any)=>void) {
-	done(null);
+function null_node_get(self: null_node_t, from: i32): any {
+	return null;
 }

@@ -285,7 +285,7 @@ function history_redo() {
 				while (history_steps[active + n].layer_type == layer_slot_type_t.MASK) {
 					++n;
 				}
-				base_notify_on_next_frame(function() {
+				base_notify_on_next_frame(function () {
 					for (let i: i32 = 0; i < n; ++i) {
 						history_redo();
 					}
@@ -300,7 +300,7 @@ function history_redo() {
 		}
 		else if (step.name == tr("Duplicate Layer")) {
 			context_raw.layer = project_layers[step.layer];
-			let _next = function() {
+			let _next = function () {
 				base_duplicate_layer(context_raw.layer);
 			}
 			base_notify_on_next_frame(_next);
@@ -327,7 +327,7 @@ function history_redo() {
 					history_copy_merging_layers2([context_raw.layer, context_raw.layer.parent]);
 				}
 
-			let _next = function() {
+			let _next = function () {
 				slot_layer_apply_mask(context_raw.layer);
 				context_set_layer(context_raw.layer);
 				context_raw.layers_preview_dirty = true;
@@ -335,7 +335,7 @@ function history_redo() {
 			base_notify_on_next_frame(_next);
 		}
 		else if (step.name == tr("Invert Mask")) {
-			let _next = function() {
+			let _next = function () {
 				context_raw.layer = project_layers[step.layer];
 				slot_layer_invert_mask(context_raw.layer);
 			}

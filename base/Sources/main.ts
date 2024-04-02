@@ -43,7 +43,7 @@ function main_start() {
 		base_init_layout();
 	}
 	krom_set_app_name(manifest_title);
-	app_init(function() {
+	app_init(function () {
 		let o: object_t = scene_set_active("Scene");
 		uniforms_ext_init();
 		render_path_base_init();

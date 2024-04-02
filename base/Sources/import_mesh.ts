@@ -36,22 +36,20 @@ function import_mesh_run(path: string, replace_existing: bool = true) {
 	}
 	else {
 		let ext: string = substring(path, string_last_index_of(path, ".") + 1, path.length);
-		let importer: (s: string, f: (a: any)=>void)=>void = map_get(path_mesh_importers, ext);
-		importer(path, function (mesh: any) {
-			replace_existing ? import_mesh_make_mesh(mesh, path) : import_mesh_add_mesh(mesh);
+		let importer: (s: string)=>any = map_get(path_mesh_importers, ext);
+		let mesh: any = importer(path);
+		replace_existing ? import_mesh_make_mesh(mesh, path) : import_mesh_add_mesh(mesh);
 
-			let has_next: bool = mesh.has_next;
-			while (has_next) {
-				importer(path, function (mesh: any) {
-					has_next = mesh.has_next;
-					import_mesh_add_mesh(mesh);
+		let has_next: bool = mesh.has_next;
+		while (has_next) {
+			let mesh: any = importer(path);
+			has_next = mesh.has_next;
+			import_mesh_add_mesh(mesh);
 
-					// let m: mat4_t = fromFloat32Array(mesh.transform);
-					// paintObjects[paintObjects.length - 1].transform.localOnly = true;
-					// paintObjects[paintObjects.length - 1].transform.setMatrix(m);
-				});
-			}
-		});
+			// let m: mat4_t = fromFloat32Array(mesh.transform);
+			// paintObjects[paintObjects.length - 1].transform.localOnly = true;
+			// paintObjects[paintObjects.length - 1].transform.setMatrix(m);
+		}
 	}
 
 	project_mesh_assets = [path];

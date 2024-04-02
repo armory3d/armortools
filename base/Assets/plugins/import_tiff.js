@@ -5,18 +5,17 @@ var UTIF={},pako=null;function log(){console.log(arguments)}!function(x,A){funct
 
 // Register as ArmorPaint plugin
 let import_tiff = function(path, done) {
-	Data.getBlob(path, function(b) {
-		let ifds = UTIF.decode(b);
-		UTIF.decodeImage(b, ifds[0]);
-		let rgba = UTIF.toRGBA8(ifds[0]);
-		let image = Image.fromBytes(rgba.buffer, ifds[0].width, ifds[0].height);
-		done(image);
-	});
+	let b = data_get_blob(path);
+	let ifds = UTIF.decode(b);
+	UTIF.decodeImage(b, ifds[0]);
+	let rgba = UTIF.toRGBA8(ifds[0]);
+	let image = image_from_bytes(rgba.buffer, ifds[0].width, ifds[0].height);
+	return image;
 }
 
-let plugin = Plugin.create();
-let formats = Path.textureFormats;
-let importers = Path.textureImporters;
+let plugin = plugin_create();
+let formats = path_texture_formats;
+let importers = path_texture_importers;
 formats.push("tif");
 formats.push("tiff");
 importers.set("tif", import_tiff);

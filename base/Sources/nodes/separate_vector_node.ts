@@ -10,18 +10,17 @@ function separate_vector_node_create(arg: any): separate_vector_node_t {
 	return n;
 }
 
-function separate_vector_node_get(self: separate_vector_node_t, from: i32, done: (a: any)=>void) {
-	logic_node_input_get(self.base.inputs[0], function (vector: vec4_t) {
-		if (from == 0) {
-			done(vector.x);
-		}
-		else if (from == 1) {
-			done(vector.y);
-		}
-		else {
-			done(vector.z);
-		}
-	});
+function separate_vector_node_get(self: separate_vector_node_t, from: i32): any {
+	let vector: vec4_t = logic_node_input_get(self.base.inputs[0]);
+	if (from == 0) {
+		return vector.x;
+	}
+	else if (from == 1) {
+		return vector.y;
+	}
+	else {
+		return vector.z;
+	}
 }
 
 let separate_vector_node_def: zui_node_t = {

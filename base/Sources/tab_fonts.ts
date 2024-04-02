@@ -109,7 +109,7 @@ function tab_fonts_draw(htab: zui_handle_t) {
 				}
 				if (ui.is_hovered) {
 					if (img == null) {
-						app_notify_on_init(function() {
+						app_notify_on_init(function () {
 							let _font: slot_font_t = context_raw.font;
 							context_raw.font = project_fonts[i];
 							util_render_make_font_preview();

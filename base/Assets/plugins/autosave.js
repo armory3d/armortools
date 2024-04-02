@@ -1,21 +1,23 @@
 
-let plugin = Plugin.create();
+let plugin = plugin_create();
 
-let h1 = new Handle();
-let h2 = new Handle({value: 5});
+let h1 = zui_handle_create();
+let h2 = zui_handle_create({value: 5});
 let timer = 0.0;
 
-plugin.drawUI = function(ui) {
-	if (Zui.panel(h1, "Auto Save")) {
-		Zui.slider(h2, "min", 1, 15, false, 1);
+plugin.draw_ui = function(ui) {
+	if (zui_panel(h1, "Auto Save")) {
+		zui_slider(h2, "min", 1, 15, false, 1);
 	}
 }
 
 plugin.update = function() {
-	if (Project.filepath == "") return;
+	if (project_filepath == "") {
+		return;
+	}
 	timer += 1 / 60;
 	if (timer >= h2.value * 60) {
 		timer = 0.0;
-		Project.projectSave();
+		project_save();
 	}
 }

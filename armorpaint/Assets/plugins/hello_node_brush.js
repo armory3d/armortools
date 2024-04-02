@@ -1,20 +1,20 @@
 
-let plugin = Plugin.create();
+let plugin = plugin_create();
 
-let categoryName = "My Nodes";
-let nodeName = "Hello World";
-let nodeType = "HELLO_WORLD";
+let category_name = "My Nodes";
+let node_name = "Hello World";
+let node_type = "HELLO_WORLD";
 
 // Create new node category
-let categories = NodesBrush.categories;
-categories.push(categoryName);
+let categories = nodes_brush_categories;
+categories.push(category_name);
 
 // Create new node
 let nodes = [
 	{
 		id: 0,
-		name: nodeName,
-		type: nodeType,
+		name: node_name,
+		type: node_type,
 		x: 0,
 		y: 0,
 		color: 0xffb34f5a,
@@ -43,16 +43,16 @@ let nodes = [
 		buttons: []
 	}
 ];
-NodesBrush.list.push(nodes);
+nodes_brush_list.push(nodes);
 
 // Brush node
-ParserLogic.customNodes.set(nodeType, function(node, from) {
-	return Math.sin(iron.Time.time() * node.inputs[0].get(0));
+parser_logic_custom_nodes.set(node_type, function(node, from) {
+	return Math.sin(time_time() * node.inputs[0].get(0));
 });
 
 // Cleanup
 plugin.delete = function() {
-	ParserLogic.customNodes.delete(nodeType);
-	NodesBrush.list.splice(NodesBrush.list.indexOf(nodes), 1);
-	categories.splice(categories.indexOf(categoryName), 1);
+	parser_logic_custom_nodes.delete(node_type);
+	nodes_brush_list.splice(nodes_brush_list.indexOf(nodes), 1);
+	categories.splice(categories.indexOf(category_name), 1);
 };

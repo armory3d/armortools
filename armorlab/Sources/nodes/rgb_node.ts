@@ -12,7 +12,7 @@ function rgb_node_create(arg: any): rgb_node_t {
 	return n;
 }
 
-function rgb_node_get_as_image(self: rgb_node_t, from: i32, done: (img: image_t)=>void) {
+function rgb_node_get_as_image(self: rgb_node_t, from: i32): image_t {
 	if (self.image != null) {
 		base_notify_on_next_frame(function () {
 			image_unload(self.image);
@@ -27,11 +27,11 @@ function rgb_node_get_as_image(self: rgb_node_t, from: i32, done: (img: image_t)
 	f32a[2] = default_value[2];
 	f32a[3] = default_value[3];
 	self.image = image_from_bytes(f32a.buffer, 1, 1, tex_format_t.RGBA128);
-	done(self.image);
+	return self.image;
 }
 
 function rgb_node_get_cached_image(self: rgb_node_t): image_t {
-	self.base.get_as_image(self, 0, function (img: image_t) {});
+	self.base.get_as_image(self, 0);
 	return self.image;
 }
 
@@ -50,7 +50,7 @@ let rgb_node_def: zui_node_t = {
 			name: _tr("Color"),
 			type: "RGBA",
 			color: 0xffc7c729,
-			default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
+			default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0)
 		}
 	],
 	buttons: [
@@ -58,7 +58,7 @@ let rgb_node_def: zui_node_t = {
 			name: _tr("default_value"),
 			type: "RGBA",
 			output: 0,
-			default_value: new f32_array_t([0.8, 0.8, 0.8, 1.0])
+			default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0)
 		}
 	]
 };

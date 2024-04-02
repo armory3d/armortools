@@ -22,9 +22,8 @@ function import_mesh_run(path: string, _clear_layers = true, replace_existing = 
 	else {
 		let ext = substring(path, string_last_index_of(path, ".") + 1, path.length);
 		let importer = map_get(path_mesh_importers, ext);
-		importer(path, function (mesh: any) {
-			replace_existing ? import_mesh_make_mesh(mesh, path) : import_mesh_add_mesh(mesh);
-		});
+		let mesh: any = importer(path);
+		replace_existing ? import_mesh_make_mesh(mesh, path) : import_mesh_add_mesh(mesh);
 	}
 
 	project_mesh_assets = [path];
@@ -45,7 +44,7 @@ function import_mesh_finish_import() {
 
 	if (project_paint_objects.length > 1) {
 		// Sort by name
-		array_sort(project_paint_objects, function (a: string, b: string): i32 {
+		array_sort(project_paint_objects, function (a: mesh_object_t, b: mesh_object_t): i32 {
 			if (a.base.name < b.base.name) {
 				return -1;
 			}
@@ -82,79 +81,79 @@ function import_mesh_finish_import() {
 	///end
 }
 
+function _import_mesh_make_mesh(mesh: any) {
+	let raw = import_mesh_raw_mesh(mesh);
+	if (mesh.cola != null) {
+		array_push(raw.vertex_arrays, { values: mesh.cola, attrib: "col", data: "short4norm" });
+	}
+
+	let md: mesh_data_t = mesh_data_create(raw);
+	context_raw.paint_object = context_main_object();
+
+	context_select_paint_object(context_main_object());
+	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+		let p = project_paint_objects[i];
+		if (p == context_raw.paint_object) {
+			continue;
+		}
+		data_delete_mesh(p.data._.handle);
+		mesh_object_remove(p);
+	}
+	let handle = context_raw.paint_object.data._.handle;
+	if (handle != "SceneSphere" && handle != "ScenePlane") {
+		data_delete_mesh(handle);
+	}
+
+	if (import_mesh_clear_layers) {
+		while (project_layers.length > 0) {
+			let l = project_layers.pop();
+			slot_layer_unload(l);
+		}
+		base_new_layer(false);
+		app_notify_on_init(base_init_layers);
+		history_reset();
+	}
+
+	mesh_object_set_data(context_raw.paint_object, md);
+	context_raw.paint_object.base.name = mesh.name;
+	project_paint_objects = [context_raw.paint_object];
+
+	md._.handle = raw.name;
+	map_set(data_cached_meshes, md._.handle, md);
+
+	context_raw.ddirty = 4;
+	ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
+	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
+
+	// Wait for add_mesh calls to finish
+	app_notify_on_init(import_mesh_finish_import);
+
+	base_notify_on_next_frame(function (mesh: any) {
+		let f32 = f32_array_create(config_get_texture_res_x() * config_get_texture_res_y() * 4);
+		for (let i: i32 = 0; i < math_floor(mesh.inda.length); ++i) {
+			let index = mesh.inda[i];
+			f32[i * 4]     = mesh.posa[index * 4]     / 32767;
+			f32[i * 4 + 1] = mesh.posa[index * 4 + 1] / 32767;
+			f32[i * 4 + 2] = mesh.posa[index * 4 + 2] / 32767;
+			f32[i * 4 + 3] = 1.0;
+		}
+		let imgmesh = image_from_bytes(f32.buffer, config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.RGBA128);
+		let texpaint = project_layers[0].texpaint;
+		g2_begin(texpaint);
+		g2_set_pipeline(base_pipe_copy128);
+		g2_draw_scaled_image(imgmesh, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
+		g2_set_pipeline(null);
+		g2_end();
+	}, mesh);
+}
+
 function import_mesh_make_mesh(mesh: any, path: string) {
 	if (mesh == null || mesh.posa == null || mesh.nora == null || mesh.inda == null || mesh.posa.length == 0) {
 		console_error(strings_error3());
 		return;
 	}
 
-	let _make_mesh = function() {
-		let raw = import_mesh_raw_mesh(mesh);
-		if (mesh.cola != null) {
-			array_push(raw.vertex_arrays, { values: mesh.cola, attrib: "col", data: "short4norm" });
-		}
-
-		let md: mesh_data_t = mesh_data_create(raw);
-		context_raw.paint_object = context_main_object();
-
-		context_select_paint_object(context_main_object());
-		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
-			let p = project_paint_objects[i];
-			if (p == context_raw.paint_object) {
-				continue;
-			}
-			data_delete_mesh(p.data._.handle);
-			mesh_object_remove(p);
-		}
-		let handle = context_raw.paint_object.data._.handle;
-		if (handle != "SceneSphere" && handle != "ScenePlane") {
-			data_delete_mesh(handle);
-		}
-
-		if (import_mesh_clear_layers) {
-			while (project_layers.length > 0) {
-				let l = project_layers.pop();
-				slot_layer_unload(l);
-			}
-			base_new_layer(false);
-			app_notify_on_init(base_init_layers);
-			history_reset();
-		}
-
-		mesh_object_set_data(context_raw.paint_object, md);
-		context_raw.paint_object.base.name = mesh.name;
-		project_paint_objects = [context_raw.paint_object];
-
-		md._.handle = raw.name;
-		map_set(data_cached_meshes, md._.handle, md);
-
-		context_raw.ddirty = 4;
-		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
-		ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
-
-		// Wait for add_mesh calls to finish
-		app_notify_on_init(import_mesh_finish_import);
-
-		base_notify_on_next_frame(function () {
-			let f32 = f32_array_create(config_get_texture_res_x() * config_get_texture_res_y() * 4);
-			for (let i: i32 = 0; i < math_floor(mesh.inda.length); ++i) {
-				let index = mesh.inda[i];
-				f32[i * 4]     = mesh.posa[index * 4]     / 32767;
-				f32[i * 4 + 1] = mesh.posa[index * 4 + 1] / 32767;
-				f32[i * 4 + 2] = mesh.posa[index * 4 + 2] / 32767;
-				f32[i * 4 + 3] = 1.0;
-			}
-			let imgmesh = image_from_bytes(f32.buffer, config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.RGBA128);
-			let texpaint = project_layers[0].texpaint;
-			g2_begin(texpaint);
-			g2_set_pipeline(base_pipe_copy128);
-			g2_draw_scaled_image(imgmesh, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
-			g2_set_pipeline(null);
-			g2_end();
-		});
-	}
-
-	_make_mesh();
+	_import_mesh_make_mesh(mesh);
 }
 
 function import_mesh_add_mesh(mesh: any) {

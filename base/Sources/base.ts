@@ -252,28 +252,30 @@ function base_init() {
 	base_last_window_width = sys_width();
 	base_last_window_height = sys_height();
 
-	sys_notify_on_drop_files(function(drop_path: string) {
+	sys_notify_on_drop_files(function (drop_path: string) {
 		///if krom_linux
-		drop_path = decodeURIComponent(drop_path);
+		krom_log(drop_path);
+		drop_path = uri_decode(drop_path);
+		krom_log(drop_path);
 		///end
 		drop_path = trim_end(drop_path);
 		array_push(base_drop_paths, drop_path);
 	});
 
 	sys_notify_on_app_state(
-		function() { // Foreground
+		function () { // Foreground
 			context_raw.foreground_event = true;
 			context_raw.last_paint_x = -1;
 			context_raw.last_paint_y = -1;
 		},
-		function() {}, // Resume
-		function() {}, // Pause
-		function() { // Background
+		function () {}, // Resume
+		function () {}, // Pause
+		function () { // Background
 			// Release keys after alt-tab / win-tab
 			keyboard_up_listener(key_code_t.ALT);
 			keyboard_up_listener(key_code_t.WIN);
 		},
-		function() { // Shutdown
+		function () { // Shutdown
 			///if (krom_android || krom_ios)
 			project_save();
 			///end
@@ -562,7 +564,7 @@ function base_resize() {
 
 	if (ui_nodes_grid != null) {
 		let _grid: image_t = ui_nodes_grid;
-		let _next = function() {
+		let _next = function () {
 			image_unload(_grid);
 		}
 		base_notify_on_next_frame(_next);
@@ -688,7 +690,7 @@ function base_update() {
 
 				///if (is_paint || is_sculpt)
 				let material_count: i32 = project_materials.length;
-				import_asset_run(base_drag_file, base_drop_x, base_drop_y, true, true, function() {
+				import_asset_run(base_drag_file, base_drop_x, base_drop_y, true, true, function () {
 					// Asset was material
 					if (project_materials.length > material_count) {
 						base_drag_material = context_raw.material;
@@ -873,16 +875,16 @@ function base_render() {
 		context_raw.camera_controls = config_raw.camera_controls;
 
 		///if is_lab
-		base_notify_on_next_frame(function() {
-			base_notify_on_next_frame(function() {
+		base_notify_on_next_frame(function () {
+			base_notify_on_next_frame(function () {
 				tab_meshes_set_default_mesh(".Sphere");
 			});
 		});
 		///end
 
 		///if is_sculpt
-		base_notify_on_next_frame(function() {
-			base_notify_on_next_frame(function() {
+		base_notify_on_next_frame(function () {
+			base_notify_on_next_frame(function () {
 				context_raw.project_type = project_model_t.SPHERE;
 				project_new();
 			});
@@ -985,18 +987,18 @@ function base_get_asset_index(file_name: string): i32 {
 	return i >= 0 ? i : 0;
 }
 
-function base_notify_on_next_frame(f: ()=>void) {
-	let _render = function() {
-		app_notify_on_init(function() {
-			let _update = function() {
-				app_notify_on_init(f);
+function base_notify_on_next_frame(f: (data?: any)=>void, data: any = null) {
+	let _render = function (data: any) {
+		app_notify_on_init(function (data: any) {
+			let _update = function (data: any) {
+				app_notify_on_init(f, data);
 				app_remove_update(_update);
 			}
-			app_notify_on_update(_update);
-		});
+			app_notify_on_update(_update, data);
+		}, data);
 		app_remove_render(_render);
 	}
-	app_notify_on_render(_render);
+	app_notify_on_render(_render, data);
 }
 
 function base_toggle_fullscreen() {
@@ -1218,7 +1220,7 @@ function base_resize_layers() {
 		}
 		while (history_undo_layers.length > conf.undo_steps) {
 			let l: slot_layer_t = history_undo_layers.pop();
-			base_notify_on_next_frame(function() {
+			base_notify_on_next_frame(function () {
 				slot_layer_unload(l);
 			});
 		}
@@ -1233,14 +1235,14 @@ function base_resize_layers() {
 	}
 	let rts: map_t<string, render_target_t> = render_path_render_targets;
 	let _texpaint_blend0: image_t = map_get(rts, "texpaint_blend0")._image;
-	base_notify_on_next_frame(function() {
+	base_notify_on_next_frame(function () {
 		image_unload(_texpaint_blend0);
 	});
 	map_get(rts, "texpaint_blend0").width = config_get_texture_res_x();
 	map_get(rts, "texpaint_blend0").height = config_get_texture_res_y();
 	map_get(rts, "texpaint_blend0")._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
 	let _texpaint_blend1: image_t = map_get(rts, "texpaint_blend1")._image;
-	base_notify_on_next_frame(function() {
+	base_notify_on_next_frame(function () {
 		image_unload(_texpaint_blend1);
 	});
 	map_get(rts, "texpaint_blend1").width = config_get_texture_res_x();
@@ -1249,7 +1251,7 @@ function base_resize_layers() {
 	context_raw.brush_blend_dirty = true;
 	if (map_get(rts, "texpaint_blur") != null) {
 		let _texpaint_blur: image_t = map_get(rts, "texpaint_blur")._image;
-		base_notify_on_next_frame(function() {
+		base_notify_on_next_frame(function () {
 			image_unload(_texpaint_blur);
 		});
 		let size_x: f32 = math_floor(config_get_texture_res_x() * 0.95);
@@ -1546,7 +1548,7 @@ function base_make_temp_img() {
 
 	if (base_temp_image != null && (base_temp_image.width != l.texpaint.width || base_temp_image.height != l.texpaint.height || base_temp_image.format != l.texpaint.format)) {
 		let _temptex0: render_target_t = map_get(render_path_render_targets, "temptex0");
-		base_notify_on_next_frame(function() {
+		base_notify_on_next_frame(function () {
 			render_target_unload(_temptex0);
 		});
 		map_delete(render_path_render_targets, "temptex0");
@@ -1576,7 +1578,7 @@ function base_make_temp_img() {
 function base_make_temp_mask_img() {
 	if (base_temp_mask_image != null && (base_temp_mask_image.width != config_get_texture_res_x() || base_temp_mask_image.height != config_get_texture_res_y())) {
 		let _temp_mask_image: image_t = base_temp_mask_image;
-		base_notify_on_next_frame(function() {
+		base_notify_on_next_frame(function () {
 			image_unload(_temp_mask_image);
 		});
 		base_temp_mask_image = null;
@@ -1599,7 +1601,7 @@ function base_make_export_img() {
 		let _expa: image_t = base_expa;
 		let _expb: image_t = base_expb;
 		let _expc: image_t = base_expc;
-		base_notify_on_next_frame(function() {
+		base_notify_on_next_frame(function () {
 			image_unload(_expa);
 			image_unload(_expb);
 			image_unload(_expc);
@@ -2306,7 +2308,7 @@ function base_new_layer(clear: bool = true, position: i32 = -1): slot_layer_t {
 		}
 	}
 	if (clear) {
-		app_notify_on_init(function() { slot_layer_clear(l); });
+		app_notify_on_init(function () { slot_layer_clear(l); });
 	}
 	context_raw.layer_preview_dirty = true;
 	return l;
@@ -2323,7 +2325,7 @@ function base_new_mask(clear: bool = true, parent: slot_layer_t, position: i32 =
 	array_insert(project_layers, position, l);
 	context_set_layer(l);
 	if (clear) {
-		app_notify_on_init(function() { slot_layer_clear(l); });
+		app_notify_on_init(function () { slot_layer_clear(l); });
 	}
 	context_raw.layer_preview_dirty = true;
 	return l;
@@ -2340,7 +2342,7 @@ function base_new_group(): slot_layer_t {
 }
 
 function base_create_fill_layer(uv_type: uv_type_t = uv_type_t.UVMAP, decal_mat: mat4_t = null, position: i32 = -1) {
-	let _init = function() {
+	let _init = function () {
 		let l: slot_layer_t = base_new_layer(false, position);
 		history_new_layer();
 		l.uv_type = uv_type;
@@ -2364,19 +2366,19 @@ function base_create_image_mask(asset: asset_t) {
 	context_raw.layer_preview_dirty = true;
 }
 
-function base_create_color_layer(baseColor: i32, occlusion: f32 = 1.0, roughness: f32 = base_default_rough, metallic: f32 = 0.0, position: i32 = -1) {
-	let _init = function() {
+function base_create_color_layer(base_color: i32, occlusion: f32 = 1.0, roughness: f32 = base_default_rough, metallic: f32 = 0.0, position: i32 = -1) {
+	let _init = function () {
 		let l: slot_layer_t = base_new_layer(false, position);
 		history_new_layer();
 		l.uv_type = uv_type_t.UVMAP;
 		l.object_mask = context_raw.layer_filter;
-		slot_layer_clear(l, baseColor, null, occlusion, roughness, metallic);
+		slot_layer_clear(l, base_color, null, occlusion, roughness, metallic);
 	}
 	app_notify_on_init(_init);
 }
 
 function base_on_layers_resized() {
-	app_notify_on_init(function() {
+	app_notify_on_init(function () {
 		base_resize_layers();
 		let _layer: slot_layer_t = context_raw.layer;
 		let _material: slot_material_t = context_raw.material;
@@ -2404,7 +2406,7 @@ function base_on_layers_resized() {
 ///end
 
 ///if is_lab
-function base_flatten(heightToNormal: bool = false): any {
+function base_flatten(height_to_normal: bool = false): any {
 	let texpaint: image_t = brush_output_node_inst.texpaint;
 	let texpaint_nor: image_t = brush_output_node_inst.texpaint_nor;
 	let texpaint_pack: image_t = brush_output_node_inst.texpaint_pack;
@@ -2432,12 +2434,12 @@ function base_on_layers_resized() {
 	image_unload(brush_output_node_inst.texpaint_pack);
 	brush_output_node_inst.texpaint_pack = map_get(render_path_render_targets, "texpaint_pack")._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
 
-	if (InpaintNode.image != null) {
-		image_unload(InpaintNode.image);
-		InpaintNode.image = null;
-		image_unload(InpaintNode.mask);
-		InpaintNode.mask = null;
-		InpaintNode.init();
+	if (inpaint_node_image != null) {
+		image_unload(inpaint_node_image);
+		inpaint_node_image = null;
+		image_unload(inpaint_node_mask);
+		inpaint_node_mask = null;
+		inpaint_node_init();
 	}
 
 	if (photo_to_pbr_node_images != null) {
@@ -2446,13 +2448,13 @@ function base_on_layers_resized() {
 			image_unload(image);
 		}
 		photo_to_pbr_node_images = null;
-		PhotoToPBRNode.init();
+		photo_to_pbr_node_init();
 	}
 
-	if (TilingNode.image != null) {
-		image_unload(TilingNode.image);
-		TilingNode.image = null;
-		TilingNode.init();
+	if (tiling_node_image != null) {
+		image_unload(tiling_node_image);
+		tiling_node_image = null;
+		tiling_node_init();
 	}
 
 	image_unload(map_get(render_path_render_targets, "texpaint_blend0")._image);
@@ -2467,7 +2469,7 @@ function base_on_layers_resized() {
 		map_delete(render_path_render_targets, "texpaint_node_target");
 	}
 
-	base_notify_on_next_frame(function() {
+	base_notify_on_next_frame(function () {
 		base_init_layers();
 	});
 

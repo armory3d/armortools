@@ -15,32 +15,26 @@ function upscale_node_create(arg: any): upscale_node_t {
 	return n;
 }
 
-function upscale_node_get_as_image(self: upscale_node_t, from: i32, done: (img: image_t)=>void) {
-	self.base.inputs[0].get_as_image(function (_image: image_t) {
-		upscale_node_image = _image;
+function upscale_node_get_as_image(self: upscale_node_t, from: i32): image_t {
+	upscale_node_image = self.base.inputs[0].get_as_image();
 
-		console_progress(tr("Processing") + " - " + tr("Upscale"));
-		base_notify_on_next_frame(function () {
-			upscale_node_load_blob(function () {
-				if (upscale_node_image.width < config_get_texture_res_x()) {
-					upscale_node_image = upscale_node_esrgan(upscale_node_image);
-					while (upscale_node_image.width < config_get_texture_res_x()) {
-						let lastImage = upscale_node_image;
-						upscale_node_image = upscale_node_esrgan(upscale_node_image);
-						image_unload(lastImage);
-					}
-				}
-				done(upscale_node_image);
-			});
-		});
-	});
+	console_progress(tr("Processing") + " - " + tr("Upscale"));
+	krom_g4_swap_buffers();
+
+	upscale_node_load_blob();
+	if (upscale_node_image.width < config_get_texture_res_x()) {
+		upscale_node_image = upscale_node_esrgan(upscale_node_image);
+		while (upscale_node_image.width < config_get_texture_res_x()) {
+			let last_image = upscale_node_image;
+			upscale_node_image = upscale_node_esrgan(upscale_node_image);
+			image_unload(last_image);
+		}
+	}
+	return upscale_node_image;
 }
 
-function upscale_node_load_blob(done: ()=>void) {
-	let _esrgan_blob: buffer_t = data_get_blob("models/esrgan.quant.onnx");
-	upscale_node_esrgan_blob = _esrgan_blob;
-	done();
-}
+function upscale_node_load_blob() {
+	upscale_node_esrgan_blob = data_get_blob("models/esrgan.quant.onnx");
 
 function upscale_node_get_cached_image(self: upscale_node_t): image_t {
 	return upscale_node_image;
@@ -61,7 +55,7 @@ function upscale_node_do_tile(source: image_t) {
 	g2_end();
 
 	let bytes_img = image_get_pixels(upscale_node_temp);
-	let u8a = new u8_array_t(bytes_img);
+	let u8a = u8_array_create_from_buffer(bytes_img);
 	let f32a = f32_array_create(3 * size1w * size1h);
 	for (let i: i32 = 0; i < (size1w * size1h); ++i) {
 		f32a[i                      ] = (u8a[i * 4    ] / 255);
@@ -70,7 +64,7 @@ function upscale_node_do_tile(source: image_t) {
 	}
 
 	let esrgan2x_buf = krom_ml_inference(upscale_node_esrgan_blob, [f32a.buffer], [[1, 3, size1w, size1h]], [1, 3, size2w, size2h], config_raw.gpu_inference);
-	let esrgan2x = new f32_array_t(esrgan2x_buf);
+	let esrgan2x = f32_array_create_from_buffer(esrgan2x_buf);
 	for (let i: i32 = 0; i < esrgan2x.length; ++i) {
 		if (esrgan2x[i] < 0) {
 			esrgan2x[i] = 0;
@@ -144,7 +138,7 @@ let upscale_node_def: zui_node_t = {
 			name: _tr("Color"),
 			type: "RGBA",
 			color: 0xffc7c729,
-			default_value: new f32_array_t([0.0, 0.0, 0.0, 1.0])
+			default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0)
 		}
 	],
 	outputs: [
@@ -154,7 +148,7 @@ let upscale_node_def: zui_node_t = {
 			name: _tr("Color"),
 			type: "RGBA",
 			color: 0xffc7c729,
-			default_value: new f32_array_t([0.0, 0.0, 0.0, 1.0])
+			default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0)
 		}
 	],
 	buttons: []

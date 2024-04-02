@@ -84,7 +84,7 @@ function file_download(url: string, dstPath: string, done: ()=>void, size: i32 =
 
 function file_download_bytes(url: string, done: (ab: buffer_t)=>void) {
 	let save: string = (path_is_protected() ? krom_save_path() : path_data() + path_sep) + "download.bin";
-	file_download(url, save, function() {
+	file_download(url, save, function () {
 		let buffer: buffer_t = krom_load_blob(save);
 		done(buffer);
 	});
@@ -114,7 +114,7 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 	path = string_replace_all(path, "\\", "/");
 	///end
 	let url: string = config_raw.server + "/" + path;
-	file_download(url, dest, function() {
+	file_download(url, dest, function () {
 		if (!file_exists(dest)) {
 			console_error(strings_error5());
 			done(null);

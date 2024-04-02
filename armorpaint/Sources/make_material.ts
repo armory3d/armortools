@@ -267,7 +267,9 @@ function make_material_bake_node_previews() {
 		let key: string = keys[i];
 		if (array_index_of(context_raw.node_previews_used, key) == -1) {
 			let image: image_t = map_get(context_raw.node_previews, key);
-			base_notify_on_next_frame(function() { image_unload(image); });
+			base_notify_on_next_frame(function () {
+				image_unload(image);
+			});
 			map_delete(context_raw.node_previews, key);
 		}
 	}

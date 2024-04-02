@@ -120,14 +120,10 @@ function input_node_update(self: float_node_t) {
 	context_raw.parse_brush_inputs(context_raw.brush_output_node_inst);
 }
 
-function input_node_get(self: input_node_t, from: i32, done: (a: any)=>void) {
-	logic_node_input_get(self.base.inputs[0], function (value) {
-		context_raw.brush_lazy_radius = value;
-		logic_node_input_get(self.base.inputs[1], function (value) {
-			context_raw.brush_lazy_step = value;
-			done(input_node_coords);
-		});
-	});
+function input_node_get(self: input_node_t, from: i32): any {
+	context_raw.brush_lazy_radius = logic_node_input_get(self.base.inputs[0]);
+	context_raw.brush_lazy_step = logic_node_input_get(self.base.inputs[1]);;
+	return input_node_coords;
 }
 
 let input_node_def: zui_node_t = {

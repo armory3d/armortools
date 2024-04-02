@@ -19,19 +19,18 @@ function color_node_create(args: any): color_node_t {
 	return n;
 }
 
-function color_node_get(self: color_node_t, from: i32, done: (a: any)=>void) {
+function color_node_get(self: color_node_t, from: i32): any {
 	if (self.base.inputs.length > 0) {
-		logic_node_input_get(self.base.inputs[0], done);
+		return logic_node_input_get(self.base.inputs[0]);
 	}
 	else {
-		done(self.value);
+		return self.value;
 	}
 }
 
-function color_node_get_as_image(self: color_node_t, from: i32, done: (img: image_t)=>void) {
+function color_node_get_as_image(self: color_node_t, from: i32): image_t {
 	if (self.base.inputs.length > 0) {
-		logic_node_input_get_as_image(self.base.inputs[0], done);
-		return;
+		return logic_node_input_get_as_image(self.base.inputs[0]);
 	}
 	if (self.image != null) {
 		image_unload(self.image);
@@ -43,7 +42,7 @@ function color_node_get_as_image(self: color_node_t, from: i32, done: (img: imag
 	buffer_view_set_f32(v, 8, self.value.z);
 	buffer_view_set_f32(v, 12, self.value.w);
 	self.image = image_from_bytes(b, 1, 1, tex_format_t.RGBA128);
-	done(self.image);
+	return self.image;
 }
 
 function color_node_set(self: color_node_t, value: any) {

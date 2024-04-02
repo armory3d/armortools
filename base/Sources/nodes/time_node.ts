@@ -10,15 +10,15 @@ function time_node_create(arg: any): time_node_t {
 	return n;
 }
 
-function time_node_get(self: time_node_t, from: i32, done: (a: any)=>void) {
+function time_node_get(self: time_node_t, from: i32): any {
 	if (from == 0) {
-		done(time_time());
+		return time_time();
 	}
 	else if (from == 1) {
-		done(time_delta());
+		return time_delta();
 	}
 	else {
-		done(context_raw.brush_time);
+		return context_raw.brush_time;
 	}
 }
 

@@ -67,6 +67,6 @@ function brush_output_node_create(arg: any): brush_output_node_t {
 	return n;
 }
 
-function brush_output_node_get_as_image(self: brush_output_node_t, from: i32, done: (img: image_t)=>void) {
-	self.base.inputs[from].get_as_image(done);
+function brush_output_node_get_as_image(self: brush_output_node_t, from: i32): image_t {
+	return self.base.inputs[from].get_as_image();
 }

@@ -13,12 +13,12 @@ function boolean_node_create(arg: bool): boolean_node_t {
 	return n;
 }
 
-function boolean_node_get(self: boolean_node_t, from: i32, done: (a: any)=>void) {
+function boolean_node_get(self: boolean_node_t, from: i32): any {
 	if (self.base.inputs.length > 0) {
-		logic_node_input_get(self.base.inputs[0], done);
+		return logic_node_input_get(self.base.inputs[0]);
 	}
 	else {
-		done(self.value);
+		return self.value;
 	}
 }
 

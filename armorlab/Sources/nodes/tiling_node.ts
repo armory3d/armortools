@@ -36,28 +36,29 @@ function tiling_node_buttons(ui: zui_t, nodes: zui_nodes_t, node: zui_node_t) {
 	}
 }
 
-function tiling_node_get_as_image(self: tiling_node_t, from: i32, done: (img: image_t)=>void) {
-	self.base.inputs[0].get_as_image(function (source: image_t) {
-		g2_begin(tiling_node_image);
-		g2_draw_scaled_image(source, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
-		g2_end();
+function tiling_node_get_as_image(self: tiling_node_t, from: i32): image_t {
+	let source: image_t = self.base.inputs[0].get_as_image();
+	g2_begin(tiling_node_image);
+	g2_draw_scaled_image(source, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
+	g2_end();
 
-		console_progress(tr("Processing") + " - " + tr("Tiling"));
-		base_notify_on_next_frame(function () {
-			let _done = function (image: image_t) {
-				self.result = image;
-				done(image);
-			}
-			tiling_node_auto ? inpaint_node_texsynth_inpaint(tiling_node_image, true, null, _done) : tiling_node_sd_tiling(tiling_node_image, -1, _done);
-		});
-	});
+	console_progress(tr("Processing") + " - " + tr("Tiling"));
+	krom_g4_swap_buffers();
+
+	if (tiling_node_auto){
+		self.result = inpaint_node_texsynth_inpaint(tiling_node_image, true, null);
+	}
+	else {
+		self.result = tiling_node_sd_tiling(tiling_node_image, -1);
+	}
+	return self.result;
 }
 
 function tiling_node_get_cached_image(self: tiling_node_t): image_t {
 	return self.result;
 }
 
-function tiling_node_sd_tiling(image: image_t, seed: i32, done: (img: image_t)=>void) {
+function tiling_node_sd_tiling(image: image_t, seed: i32): image_t {
 	text_to_photo_node_tiling = false;
 	let tile = image_create_render_target(512, 512);
 	g2_begin(tile);
@@ -92,7 +93,7 @@ function tiling_node_sd_tiling(image: image_t, seed: i32, done: (img: image_t)=>
 	if (seed >= 0) {
 		random_node_set_seed(seed);
 	}
-	inpaint_node_sd_inpaint(tile, mask, done);
+	return inpaint_node_sd_inpaint(tile, mask);
 }
 
 let tiling_node_def: zui_node_t = {
@@ -109,7 +110,7 @@ let tiling_node_def: zui_node_t = {
 			name: _tr("Color"),
 			type: "RGBA",
 			color: 0xffc7c729,
-			default_value: new f32_array_t([0.0, 0.0, 0.0, 1.0])
+			default_value: f32_array_xyzw(0.0, 0.0, 0.0, 1.0)
 		}
 	],
 	outputs: [
@@ -119,7 +120,7 @@ let tiling_node_def: zui_node_t = {
 			name: _tr("Color"),
 			type: "RGBA",
 			color: 0xffc7c729,
-			default_value: new f32_array_t([0.0, 0.0, 0.0, 1.0])
+			default_value: f32_array_xyzw(0.0, 0.0, 0.0, 1.0)
 		}
 	],
 	buttons: [

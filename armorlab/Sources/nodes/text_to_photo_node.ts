@@ -6,9 +6,9 @@ type text_to_photo_node_t = {
 let text_to_photo_node_prompt: string = "";
 let text_to_photo_node_image: image_t = null;
 let text_to_photo_node_tiling: bool = false;
-let text_to_photo_node_text_encoder_blob : buffer_t;
-let text_to_photo_node_unet_blob : buffer_t;
-let text_to_photo_node_vae_decoder_blob : buffer_t;
+let text_to_photo_node_text_encoder_blob: buffer_t;
+let text_to_photo_node_unet_blob: buffer_t;
+let text_to_photo_node_vae_decoder_blob: buffer_t;
 
 function text_to_photo_node_create(arg: any): text_to_photo_node_t {
 	let n: text_to_photo_node_t = {};
@@ -18,11 +18,9 @@ function text_to_photo_node_create(arg: any): text_to_photo_node_t {
 	return n;
 }
 
-function text_to_photo_node_get_as_image(self: text_to_photo_node_t, from: i32, done: (img: image_t)=>void) {
-	text_to_photo_node_stable_diffusion(text_to_photo_node_prompt, function (_image: image_t) {
-		text_to_photo_node_image = _image;
-		done(text_to_photo_node_image);
-	});
+function text_to_photo_node_get_as_image(self: text_to_photo_node_t, from: i32): image_t {
+	text_to_photo_node_image = text_to_photo_node_stable_diffusion(text_to_photo_node_prompt);
+	return text_to_photo_node_image;
 }
 
 function text_to_photo_node_get_cached_image(self: text_to_photo_node_t): image_t {
@@ -35,59 +33,63 @@ function text_to_photo_node_buttons(ui: zui_t, nodes: zui_nodes_t, node: zui_nod
 	node.buttons[1].height = string_split(text_to_photo_node_prompt, "\n").length;
 }
 
-function stable_diffusion(prompt: string, done: (img: image_t)=>void, inpaint_latents: f32_array_t = null, offset: i32 = 0, upscale: bool = true, mask: f32_array_t = null, latents_orig: f32_array_t = null) {
+function stable_diffusion(prompt: string, inpaint_latents: f32_array_t = null, offset: i32 = 0, upscale: bool = true, mask: f32_array_t = null, latents_orig: f32_array_t = null): image_t {
 	let _text_encoder_blob: buffer_t = data_get_blob("models/sd_text_encoder.quant.onnx");
 	let _unet_blob: buffer_t = data_get_blob("models/sd_unet.quant.onnx");
 	let _vae_decoder_blob: buffer_t = data_get_blob("models/sd_vae_decoder.quant.onnx");
 	text_to_photo_node_text_encoder_blob = _text_encoder_blob;
 	text_to_photo_node_unet_blob = _unet_blob;
 	text_to_photo_node_vae_decoder_blob = _vae_decoder_blob;
-	text_to_photo_node_text_encoder(prompt, inpaint_latents, function (latents: f32_array_t, text_embeddings: f32_array_t) {
-		text_to_photo_node_unet(latents, text_embeddings, mask, latents_orig, offset, function (latents: f32_array_t) {
-			text_to_photo_node_vae_decoder(latents, upscale, done);
-		});
-	});
+	let enc: text_encoder_result_t = text_to_photo_node_text_encoder(prompt, inpaint_latents);
+	let latents: f32_array_t = text_to_photo_node_unet(enc.latents, enc.text_embeddings, mask, latents_orig, offset);
+	return text_to_photo_node_vae_decoder(latents, upscale);
 }
 
-function text_to_photo_node_text_encoder(prompt: string, inpaint_latents: f32_array_t, done: (a: f32_array_t, b: f32_array_t)=>void) {
+type text_encoder_result_t = {
+	latents?: f32_array_t;
+	text_embeddings?: f32_array_t;
+};
+
+function text_to_photo_node_text_encoder(prompt: string, inpaint_latents: f32_array_t): text_encoder_result_t {
 	console_progress(tr("Processing") + " - " + tr("Text to Photo"));
-	base_notify_on_next_frame(function () {
-		let words = string_split(string_replace_all(string_replace_all(string_replace_all(prompt, "\n", " "), ",", " , "), "  ", " ").trim(), " ");
-		for (let i: i32 = 0; i < words.length; ++i) {
-			text_to_photo_node_text_input_ids[i + 1] = to_lower_case(text_to_photo_node_vocab[words[i]) + "</w>"];
-		}
-		for (let i: i32 = words.length; i < (text_to_photo_node_text_input_ids.length - 1); ++i) {
-			text_to_photo_node_text_input_ids[i + 1] = 49407; // <|endoftext|>
-		}
+	krom_g4_swap_buffers();
 
-		let i32a = new i32_array_t(text_to_photo_node_text_input_ids);
-		let text_embeddings_buf = krom_ml_inference(text_to_photo_node_text_encoder_blob, [i32a.buffer], [[1, 77]], [1, 77, 768], config_raw.gpu_inference);
-		let text_embeddings = new f32_array_t(text_embeddings_buf);
+	let words = string_split(string_replace_all(string_replace_all(string_replace_all(prompt, "\n", " "), ",", " , "), "  ", " ").trim(), " ");
+	for (let i: i32 = 0; i < words.length; ++i) {
+		text_to_photo_node_text_input_ids[i + 1] = to_lower_case(text_to_photo_node_vocab[words[i]) + "</w>"];
+	}
+	for (let i: i32 = words.length; i < (text_to_photo_node_text_input_ids.length - 1); ++i) {
+		text_to_photo_node_text_input_ids[i + 1] = 49407; // <|endoftext|>
+	}
 
-		i32a = new i32_array_t(text_to_photo_node_uncond_input_ids);
-		let uncond_embeddings_buf = krom_ml_inference(text_to_photo_node_text_encoder_blob, [i32a.buffer], [[1, 77]], [1, 77, 768], config_raw.gpu_inference);
-		let uncond_embeddings = new f32_array_t(uncond_embeddings_buf);
+	let i32a = i32_array_create_from_array(text_to_photo_node_text_input_ids);
+	let text_embeddings_buf = krom_ml_inference(text_to_photo_node_text_encoder_blob, [i32a.buffer], [[1, 77]], [1, 77, 768], config_raw.gpu_inference);
+	let text_embeddings = f32_array_create_from_array(text_embeddings_buf);
 
-		let f32a = f32_array_create(uncond_embeddings.length + text_embeddings.length);
-		for (let i: i32 = 0; i < uncond_embeddings.length; ++i) f32a[i] = uncond_embeddings[i];
-		for (let i: i32 = 0; i < text_embeddings.length; ++i) f32a[i + uncond_embeddings.length] = text_embeddings[i];
-		text_embeddings = f32a;
+	i32a = i32_array_create_from_array(text_to_photo_node_uncond_input_ids);
+	let uncond_embeddings_buf = krom_ml_inference(text_to_photo_node_text_encoder_blob, [i32a.buffer], [[1, 77]], [1, 77, 768], config_raw.gpu_inference);
+	let uncond_embeddings = f32_array_create_from_buffer(uncond_embeddings_buf);
 
-		let width = 512;
-		let height = 512;
-		let latents = f32_array_create(1 * 4 * math_floor(height / 8) * math_floor(width / 8));
-		if (inpaint_latents == null) {
-			for (let i: i32 = 0; i < latents.length; ++i) latents[i] = math_cos(2.0 * 3.14 * random_node_get_float()) * math_sqrt(-2.0 * math_log(random_node_get_float()));
-		}
-		else {
-			for (let i: i32 = 0; i < latents.length; ++i) latents[i] = inpaint_latents[i];
-		}
+	let f32a = f32_array_create(uncond_embeddings.length + text_embeddings.length);
+	for (let i: i32 = 0; i < uncond_embeddings.length; ++i) f32a[i] = uncond_embeddings[i];
+	for (let i: i32 = 0; i < text_embeddings.length; ++i) f32a[i + uncond_embeddings.length] = text_embeddings[i];
+	text_embeddings = f32a;
 
-		done(latents, text_embeddings);
-	});
+	let width = 512;
+	let height = 512;
+	let latents = f32_array_create(1 * 4 * math_floor(height / 8) * math_floor(width / 8));
+	if (inpaint_latents == null) {
+		for (let i: i32 = 0; i < latents.length; ++i) latents[i] = math_cos(2.0 * 3.14 * random_node_get_float()) * math_sqrt(-2.0 * math_log(random_node_get_float()));
+	}
+	else {
+		for (let i: i32 = 0; i < latents.length; ++i) latents[i] = inpaint_latents[i];
+	}
+
+	let res: text_encoder_result_t = { latents: latents, text_embeddings: text_embeddings };
+	return res;
 }
 
-function text_to_photo_node_unet(latents: f32_array_t, text_embeddings: f32_array_t, mask: f32_array_t, latents_orig: f32_array_t, offset: i32, done: (ar: f32_array_t)=>void) {
+function text_to_photo_node_unet(latents: f32_array_t, text_embeddings: f32_array_t, mask: f32_array_t, latents_orig: f32_array_t, offset: i32): f32_array_t {
 	let latent_model_input = f32_array_create(latents.length * 2);
 	let noise_pred_uncond = f32_array_create(latents.length);
 	let noise_pred_text = f32_array_create(latents.length);
@@ -98,8 +100,9 @@ function text_to_photo_node_unet(latents: f32_array_t, text_embeddings: f32_arra
 	let ets: f32_array_t[] = [];
 	let counter = 0;
 
-	let processing = function () {
+	while (true) {
 		console_progress(tr("Processing") + " - " + tr("Text to Photo") + " (" + (counter + 1) + "/" + (50 - offset) + ")");
+		krom_g4_swa_buffers();
 
 		let timestep = text_to_photo_node_timesteps[counter + offset];
 		for (let i: i32 = 0; i < latents.length; ++i) latent_model_input[i] = latents[i];
@@ -108,7 +111,7 @@ function text_to_photo_node_unet(latents: f32_array_t, text_embeddings: f32_arra
 		let t32 = i32_array_create(2);
 		t32[0] = timestep;
 		let noise_pred_buf = krom_ml_inference(text_to_photo_node_unet_blob, [latent_model_input.buffer, t32.buffer, text_embeddings.buffer], [[2, 4, 64, 64], [1], [2, 77, 768]], [2, 4, 64, 64], config_raw.gpu_inference);
-		let noise_pred = new f32_array_t(noise_pred_buf);
+		let noise_pred = f32_array_create_from_buffer(noise_pred_buf);
 
 		for (let i: i32 = 0; i < noise_pred_uncond.length; ++i) noise_pred_uncond[i] = noise_pred[i];
 		for (let i: i32 = 0; i < noise_pred_text.length; ++i) noise_pred_text[i] = noise_pred[noise_pred_uncond.length + i];
@@ -193,59 +196,58 @@ function text_to_photo_node_unet(latents: f32_array_t, text_embeddings: f32_arra
 		}
 
 		if (counter == (51 - offset)) {
-			app_remove_render_2d(processing);
-			done(latents);
+			break;
 		}
 	}
-	app_notify_on_render_2d(processing);
+
+	return latents;
 }
 
-function text_to_photo_node_vae_decoder(latents: f32_array_t, upscale: bool, done: (img: image_t)=>void) {
+function text_to_photo_node_vae_decoder(latents: f32_array_t, upscale: bool): image_t {
 	console_progress(tr("Processing") + " - " + tr("Text to Photo"));
-	base_notify_on_next_frame(function () {
-		for (let i: i32 = 0; i < latents.length; ++i) {
-			latents[i] = 1.0 / 0.18215 * latents[i];
-		}
+	krom_g4_swap_buffers();
 
-		let pyimage_buf = krom_ml_inference(text_to_photo_node_vae_decoder_blob, [latents.buffer], [[1, 4, 64, 64]], [1, 3, 512, 512], config_raw.gpu_inference);
-		let pyimage = new f32_array_t(pyimage_buf);
+	for (let i: i32 = 0; i < latents.length; ++i) {
+		latents[i] = 1.0 / 0.18215 * latents[i];
+	}
 
-		for (let i: i32 = 0; i < pyimage.length; ++i) {
-			pyimage[i] = pyimage[i] / 2.0 + 0.5;
-			if (pyimage[i] < 0) pyimage[i] = 0;
-			else if (pyimage[i] > 1) pyimage[i] = 1;
-		}
+	let pyimage_buf = krom_ml_inference(text_to_photo_node_vae_decoder_blob, [latents.buffer], [[1, 4, 64, 64]], [1, 3, 512, 512], config_raw.gpu_inference);
+	let pyimage = f32_array_create_from_buffer(pyimage_buf);
 
-		let u8a = u8_array_create(4 * 512 * 512);
-		for (let i: i32 = 0; i < (512 * 512); ++i) {
-			u8a[i * 4    ] = math_floor(pyimage[i                ] * 255);
-			u8a[i * 4 + 1] = math_floor(pyimage[i + 512 * 512    ] * 255);
-			u8a[i * 4 + 2] = math_floor(pyimage[i + 512 * 512 * 2] * 255);
-			u8a[i * 4 + 3] = 255;
-		}
-		let image = image_from_bytes(u8a.buffer, 512, 512);
+	for (let i: i32 = 0; i < pyimage.length; ++i) {
+		pyimage[i] = pyimage[i] / 2.0 + 0.5;
+		if (pyimage[i] < 0) pyimage[i] = 0;
+		else if (pyimage[i] > 1) pyimage[i] = 1;
+	}
 
-		if (text_to_photo_node_tiling) {
-			TilingNode.prompt = text_to_photo_node_prompt;
-			let seed = RandomNode.getSeed();
-			TilingNode.sd_tiling(image, seed, done);
+	let u8a = u8_array_create(4 * 512 * 512);
+	for (let i: i32 = 0; i < (512 * 512); ++i) {
+		u8a[i * 4    ] = math_floor(pyimage[i                ] * 255);
+		u8a[i * 4 + 1] = math_floor(pyimage[i + 512 * 512    ] * 255);
+		u8a[i * 4 + 2] = math_floor(pyimage[i + 512 * 512 * 2] * 255);
+		u8a[i * 4 + 3] = 255;
+	}
+	let image = image_from_bytes(u8a.buffer, 512, 512);
+
+	if (text_to_photo_node_tiling) {
+		tiling_node_prompt = text_to_photo_node_prompt;
+		let seed = random_node_get_seed();
+		return tiling_node_sd_tiling(image, seed);
+	}
+	else {
+		if (upscale) {
+			upscale_node_load_blob();
+			while (image.width < config_get_texture_res_x()) {
+				let last_image = image;
+				image = upscale_node_esrgan(image);
+				image_unload(last_image);
+			}
+			return image;
 		}
 		else {
-			if (upscale) {
-				UpscaleNode.load_blob(function () {
-					while (image.width < config_get_texture_res_x()) {
-						let lastImage = image;
-						image = UpscaleNode.esrgan(image);
-						image_unload(lastImage);
-					}
-					done(image);
-				});
-			}
-			else {
-				done(image);
-			}
+			return image;
 		}
-	});
+	}
 }
 
 let text_to_photo_node_def: zui_node_t = {
@@ -263,7 +265,7 @@ let text_to_photo_node_def: zui_node_t = {
 			name: _tr("Color"),
 			type: "RGBA",
 			color: 0xffc7c729,
-			default_value: new f32_array_t([0.0, 0.0, 0.0, 1.0])
+			default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0)
 		}
 	],
 	buttons: [
@@ -281,7 +283,7 @@ let text_to_photo_node_def: zui_node_t = {
 	]
 };
 
-let text_to_photo_node_text_input_ids = [49406,  49407,  49407, 49407, 49407, 49407, 49407, 49407, 49407,
+let text_to_photo_node_text_input_ids: i32[] = [49406,  49407,  49407, 49407, 49407, 49407, 49407, 49407, 49407,
 	49407, 49407, 49407, 49407, 49407, 49407, 49407, 49407, 49407,
 	49407, 49407, 49407, 49407, 49407, 49407, 49407, 49407, 49407,
 	49407, 49407, 49407, 49407, 49407, 49407, 49407, 49407, 49407,
@@ -291,7 +293,7 @@ let text_to_photo_node_text_input_ids = [49406,  49407,  49407, 49407, 49407, 49
 	49407, 49407, 49407, 49407, 49407, 49407, 49407, 49407, 49407,
 	49407, 49407, 49407, 49407, 49407];
 
-let text_to_photo_node_uncond_input_ids = [49406, 49407, 49407, 49407, 49407, 49407, 49407, 49407, 49407,
+let text_to_photo_node_uncond_input_ids: i32[] = [49406, 49407, 49407, 49407, 49407, 49407, 49407, 49407, 49407,
 	49407, 49407, 49407, 49407, 49407, 49407, 49407, 49407, 49407,
 	49407, 49407, 49407, 49407, 49407, 49407, 49407, 49407, 49407,
 	49407, 49407, 49407, 49407, 49407, 49407, 49407, 49407, 49407,
@@ -301,7 +303,7 @@ let text_to_photo_node_uncond_input_ids = [49406, 49407, 49407, 49407, 49407, 49
 	49407, 49407, 49407, 49407, 49407, 49407, 49407, 49407, 49407,
 	49407, 49407, 49407, 49407, 49407];
 
-let text_to_photo_node_alphas_cumprod = [0.99915, 0.998296, 0.9974381, 0.99657613, 0.99571025, 0.9948404,
+let text_to_photo_node_alphas_cumprod: f32[] = [0.99915, 0.998296, 0.9974381, 0.99657613, 0.99571025, 0.9948404,
 	0.9939665,  0.99308866, 0.9922069,  0.9913211,  0.9904313,  0.98953754,
 	0.9886398,  0.9877381,  0.9868324,  0.9859227,  0.985009,   0.98409134,
 	0.9831697,  0.982244,   0.98131436, 0.9803807,  0.97944313, 0.97850156,
@@ -469,7 +471,7 @@ let text_to_photo_node_alphas_cumprod = [0.99915, 0.998296, 0.9974381, 0.9965761
 	0.00519163, 0.00513006, 0.00506913, 0.00500883, 0.00494917, 0.00489013,
 	0.0048317,  0.00477389, 0.00471669, 0.00466009];
 
-let text_to_photo_node_timesteps = [981, 961, 961, 941, 921, 901, 881, 861, 841, 821, 801, 781, 761, 741, 721, 701, 681, 661,
+let text_to_photo_node_timesteps: i32[] = [981, 961, 961, 941, 921, 901, 881, 861, 841, 821, 801, 781, 761, 741, 721, 701, 681, 661,
 	641, 621, 601, 581, 561, 541, 521, 501, 481, 461, 441, 421, 401, 381, 361, 341, 321, 301,
 	281, 261, 241, 221, 201, 181, 161, 141, 121, 101, 81, 61, 41, 21, 1];
 
