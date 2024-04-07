@@ -27,7 +27,7 @@ flags.on_c_project_created = async function(c_project, platform, graphics) {
 	let dir = flags.name.toLowerCase();
 
 	if (graphics === "vulkan") {
-		c_project.addDefine("KORE_VKRT");
+		c_project.addDefine("KINC_VKRT");
 		await c_project.addProject("../" + dir + "/glsl_to_spirv");
 	}
 

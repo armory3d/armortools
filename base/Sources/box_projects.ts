@@ -35,6 +35,9 @@ function box_projects_show() {
 	}, 600, 400, null, draggable);
 }
 
+let _box_projects_path: string;
+let _box_projects_icon_path: string;
+
 function box_projects_tab(ui: zui_t) {
 	if (zui_tab(box_projects_htab, tr("Projects"), true)) {
 		zui_begin_sticky();
@@ -123,33 +126,29 @@ function box_projects_tab(ui: zui_t) {
 						ui._x = uix;
 						zui_fill(0, 0, 128, 128, 0x66000000);
 						ui._x = _uix;
-						let do_import = function () {
-							app_notify_on_init(function () {
-								ui_box_hide();
-								import_arm_run_project(path);
-							});
-						}
-
 						///if (krom_android || krom_ios)
-						base_notify_on_next_frame(function () {
-							console_toast(tr("Opening project"));
-							base_notify_on_next_frame(do_import);
-						});
-						///else
-						do_import();
+						console_toast(tr("Opening project"));
+						krom_g4_swap_buffers();
 						///end
+						app_notify_on_init(function (path: string) {
+							ui_box_hide();
+							import_arm_run_project(path);
+						}, path);
 					}
 
 					let name: string = substring(path, string_last_index_of(path, path_sep) + 1, string_last_index_of(path, "."));
 					if (ui.is_hovered && ui.input_released_r) {
+						_box_projects_path = path;
+						_box_projects_icon_path = icon_path;
 						ui_menu_draw(function (ui: zui_t) {
 							// if (menuButton(ui, tr("Duplicate"))) {}
 							if (ui_menu_button(ui, tr("Delete"))) {
 								app_notify_on_init(function () {
-									file_delete(path);
-									file_delete(icon_path);
+									file_delete(_box_projects_path);
+									file_delete(_box_projects_icon_path);
 									let data_path: string = substring(path, 0, path.length - 4);
 									file_delete(data_path);
+									let recent_projects: string[] = config_raw.recent_projects;
 									array_splice(recent_projects, i, 1);
 								});
 							}

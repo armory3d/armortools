@@ -1,4 +1,9 @@
 
+type import_texture_data = {
+	path: string;
+	image: image_t
+}
+
 function import_texture_run(path: string, hdr_as_envmap: bool = true) {
 	if (!path_is_texture(path)) {
 		if (!context_enable_import_plugin(path)) {
@@ -14,9 +19,10 @@ function import_texture_run(path: string, hdr_as_envmap: bool = true) {
 			// Set as envmap
 			if (hdr_as_envmap && ends_with(to_lower_case(path), ".hdr")) {
 				let image: image_t = data_get_image(path);
-				base_notify_on_next_frame(function () { // Make sure file browser process did finish
-					import_envmap_run(path, image);
-				});
+				let itd: import_texture_data = { path: path, image: image };
+				app_notify_on_next_frame(function (itd: import_texture_data) { // Make sure file browser process did finish
+					import_envmap_run(itd.path, itd.image);
+				}, itd);
 			}
 			console_info(strings_info0());
 			return;
@@ -46,9 +52,10 @@ function import_texture_run(path: string, hdr_as_envmap: bool = true) {
 
 	// Set as envmap
 	if (hdr_as_envmap && ends_with(to_lower_case(path), ".hdr")) {
-		base_notify_on_next_frame(function () { // Make sure file browser process did finish
-			import_envmap_run(path, image);
-		});
+		let itd: import_texture_data = { path: path, image: image };
+		app_notify_on_next_frame(function (itd: import_texture_data) { // Make sure file browser process did finish
+			import_envmap_run(itd.path, itd.image);
+		}, itd);
 	}
 }
 

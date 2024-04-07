@@ -28,8 +28,8 @@ function tab_script_draw(htab: zui_handle_t) {
 			});
 		}
 		if (zui_button(tr("Export"))) {
-			let str: string = tab_script_hscript.text;
 			ui_files_show("js", true, false, function (path: string) {
+				let str: string = tab_script_hscript.text;
 				let f: string = ui_files_filename;
 				if (f == "") {
 					f = tr("untitled");

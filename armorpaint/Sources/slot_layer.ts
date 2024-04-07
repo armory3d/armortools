@@ -190,19 +190,23 @@ function slot_layer_unload(raw: slot_layer_t) {
 	let _texpaint_preview: image_t = raw.texpaint_preview;
 	///end
 
-	let _next = function () {
+	app_notify_on_next_frame(function (_texpaint: image_t) {
 		image_unload(_texpaint);
-		///if is_paint
-		if (_texpaint_nor != null) {
+	}, _texpaint);
+
+	///if is_paint
+	if (_texpaint_nor != null) {
+		app_notify_on_next_frame(function (_texpaint_nor: image_t) {
 			image_unload(_texpaint_nor);
-		}
-		if (_texpaint_pack != null) {
-			image_unload(_texpaint_pack);
-		}
-		image_unload(_texpaint_preview);
-		///end
+		}, _texpaint_nor);
 	}
-	base_notify_on_next_frame(_next);
+	if (_texpaint_pack != null) {
+		app_notify_on_next_frame(function (_texpaint_pack: image_t) {
+			image_unload(_texpaint_pack);
+		}, _texpaint_pack);
+	}
+	image_unload(_texpaint_preview);
+	///end
 
 	map_delete(render_path_render_targets, "texpaint" + raw.ext);
 	///if is_paint
@@ -280,10 +284,9 @@ function slot_layer_invert_mask(raw: slot_layer_t) {
 	g2_set_pipeline(null);
 	g2_end();
 	let _texpaint: image_t = raw.texpaint;
-	let _next = function () {
+	app_notify_on_next_frame(function (_texpaint: image_t) {
 		image_unload(_texpaint);
-	}
-	base_notify_on_next_frame(_next);
+	}, _texpaint);
 	raw.texpaint = map_get(render_path_render_targets, "texpaint" + raw.id)._image = inverted;
 	context_raw.layer_preview_dirty = true;
 	context_raw.ddirty = 3;
@@ -419,14 +422,19 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 		g2_end();
 		///end
 
-		let _next = function () {
+		app_notify_on_next_frame(function (_texpaint: image_t) {
 			image_unload(_texpaint);
-			///if is_paint
+		}, _texpaint);
+
+		///if is_paint
+		app_notify_on_next_frame(function (_texpaint_nor: image_t) {
 			image_unload(_texpaint_nor);
+		}, _texpaint_nor);
+
+		app_notify_on_next_frame(function (_texpaint_pack: image_t) {
 			image_unload(_texpaint_pack);
-			///end
-		}
-		base_notify_on_next_frame(_next);
+		}, _texpaint_pack);
+		///end
 
 		map_get(rts, "texpaint" + raw.ext)._image = raw.texpaint;
 		///if is_paint
@@ -444,10 +452,9 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 		g2_set_pipeline(null);
 		g2_end();
 
-		let _next = function () {
+		app_notify_on_next_frame(function (_texpaint: image_t) {
 			image_unload(_texpaint);
-		}
-		base_notify_on_next_frame(_next);
+		}, _texpaint);
 
 		map_get(rts, "texpaint" + raw.ext)._image = raw.texpaint;
 	}
@@ -457,12 +464,11 @@ function slot_layer_to_fill_layer(raw: slot_layer_t) {
 	context_set_layer(raw);
 	raw.fill_layer = context_raw.material;
 	base_update_fill_layer();
-	let _next = function () {
+	app_notify_on_next_frame(function () {
 		make_material_parse_paint_material();
 		context_raw.layer_preview_dirty = true;
 		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
-	}
-	base_notify_on_next_frame(_next);
+	});
 }
 
 function slot_layer_to_paint_layer(raw: slot_layer_t) {

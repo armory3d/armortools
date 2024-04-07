@@ -147,6 +147,24 @@ function util_uv_cache_dilate_map() {
 	util_uv_dilate_bytes = null;
 }
 
+function _util_uv_check(c: coord_t, w: i32, h: i32, r: i32, view: buffer_view_t, coords: coord_t[]) {
+	if (c.x < 0 || c.x >= w || c.y < 0 || c.y >= h) {
+		return;
+	}
+	if (buffer_view_get_u8(view, c.y * w + c.x) == 255) {
+		return;
+	}
+	let dilate_view: buffer_view_t = buffer_view_create(util_uv_dilate_bytes);
+	if (buffer_view_get_u8(dilate_view, c.y * r * util_uv_dilatemap.width + c.x * r) == 0) {
+		return;
+	}
+	buffer_view_set_u8(view, c.y * w + c.x, 255);
+	array_push(coords, { x: c.x + 1, y: c.y });
+	array_push(coords, { x: c.x - 1, y: c.y });
+	array_push(coords, { x: c.x, y: c.y + 1 });
+	array_push(coords, { x: c.x, y: c.y - 1 });
+}
+
 function util_uv_cache_uv_island_map() {
 	util_uv_cache_dilate_map();
 	if (util_uv_dilate_bytes == null) {
@@ -162,26 +180,8 @@ function util_uv_cache_uv_island_map() {
 	let coords: coord_t[] = [{ x: x, y: y }];
 	let r: i32 = math_floor(util_uv_dilatemap.width / w);
 
-	let check = function (c: coord_t) {
-		if (c.x < 0 || c.x >= w || c.y < 0 || c.y >= h) {
-			return;
-		}
-		if (buffer_view_get_u8(view, c.y * w + c.x) == 255) {
-			return;
-		}
-		let dilate_view: buffer_view_t = buffer_view_create(util_uv_dilate_bytes);
-		if (buffer_view_get_u8(dilate_view, c.y * r * util_uv_dilatemap.width + c.x * r) == 0) {
-			return;
-		}
-		buffer_view_set_u8(view, c.y * w + c.x, 255);
-		array_push(coords, { x: c.x + 1, y: c.y });
-		array_push(coords, { x: c.x - 1, y: c.y });
-		array_push(coords, { x: c.x, y: c.y + 1 });
-		array_push(coords, { x: c.x, y: c.y - 1 });
-	}
-
 	while (coords.length > 0) {
-		check(coords.pop());
+		_util_uv_check(coords.pop(), w, h, r, view, coords);
 	}
 
 	if (util_uv_uvislandmap != null) {

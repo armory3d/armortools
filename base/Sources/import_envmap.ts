@@ -48,9 +48,9 @@ function import_envmap_run(path: string, image: image_t) {
 	let radiance_pixels: buffer_t = image_get_pixels(import_envmap_radiance);
 	if (import_envmap_radiance_cpu != null) {
 		let _radiance_cpu: image_t = import_envmap_radiance_cpu;
-		base_notify_on_next_frame(function () {
+		app_notify_on_next_frame(function (_radiance_cpu: image_t) {
 			image_unload(_radiance_cpu);
-		});
+		}, _radiance_cpu);
 	}
 	import_envmap_radiance_cpu = image_from_bytes(radiance_pixels, import_envmap_radiance.width, import_envmap_radiance.height, tex_format_t.RGBA128);
 
@@ -58,11 +58,11 @@ function import_envmap_run(path: string, image: image_t) {
 	if (import_envmap_mips_cpu != null) {
 		for (let i: i32 = 0; i < import_envmap_mips_cpu.length; ++i) {
 			let mip: image_t = import_envmap_mips_cpu[i];
-			base_notify_on_next_frame(function () {
+			app_notify_on_next_frame(function (mip: image_t) {
 				///if (!krom_direct3d12) // TODO: crashes after 50+ imports
 				image_unload(mip);
 				///end
-			});
+			}, mip);
 		}
 	}
 	import_envmap_mips_cpu = [];

@@ -8,6 +8,42 @@ function parser_exr_write_string(out: i32[], str: string) {
 	}
 }
 
+let _parser_exr_width: i32;
+let _parser_exr_stride: i32;
+let _parser_exr_out: u8[];
+let _parser_exr_src_view: buffer_view_t;
+let _parser_exr_write_line: (byte_pos: i32)=> void;
+
+function parser_exr_write_line16(byte_pos: i32) {
+	for (let x: i32 = 0; x < _parser_exr_width; ++x) {
+		array_push(_parser_exr_out, buffer_view_get_u8(_parser_exr_src_view, byte_pos    ));
+		array_push(_parser_exr_out, buffer_view_get_u8(_parser_exr_src_view, byte_pos + 1));
+		byte_pos += _parser_exr_stride;
+	}
+}
+
+function parser_exr_write_line32(byte_pos: i32) {
+	for (let x: i32 = 0; x < _parser_exr_width; ++x) {
+		array_push(_parser_exr_out, buffer_view_get_u8(_parser_exr_src_view, byte_pos    ));
+		array_push(_parser_exr_out, buffer_view_get_u8(_parser_exr_src_view, byte_pos + 1));
+		array_push(_parser_exr_out, buffer_view_get_u8(_parser_exr_src_view, byte_pos + 2));
+		array_push(_parser_exr_out, buffer_view_get_u8(_parser_exr_src_view, byte_pos + 3));
+		byte_pos += _parser_exr_stride;
+	}
+}
+
+function parser_exr_write_bgr(off: i32, pos: i32, byte_size: i32) {
+	_parser_exr_write_line(pos + byte_size * 2);
+	_parser_exr_write_line(pos + byte_size);
+	_parser_exr_write_line(pos);
+}
+
+function parser_exr_write_single(off: i32, pos: i32, byte_size: i32) {
+	_parser_exr_write_line(pos + off * byte_size);
+	_parser_exr_write_line(pos + off * byte_size);
+	_parser_exr_write_line(pos + off * byte_size);
+}
+
 function parser_exr_run(width: i32, height: i32, src: buffer_t, bits: i32 = 16, type: i32 = 1, off: i32 = 0): buffer_t {
 	let out: u8[] = [];
 	array_push(out, 0x76); // magic
@@ -266,39 +302,13 @@ function parser_exr_run(width: i32, height: i32, src: buffer_t, bits: i32 = 16, 
 	let pos: i32 = 0;
 	let src_view: buffer_view_t = buffer_view_create(src);
 
-	let write_line16 = function (byte_pos: i32) {
-		for (let x: i32 = 0; x < width; ++x) {
-			array_push(out, buffer_view_get_u8(src_view, byte_pos    ));
-			array_push(out, buffer_view_get_u8(src_view, byte_pos + 1));
-			byte_pos += stride;
-		}
-	}
+	_parser_exr_width = width;
+	_parser_exr_stride = stride;
+	_parser_exr_out = out;
+	_parser_exr_src_view = src_view;
 
-	let write_line32 = function (byte_pos: i32) {
-		for (let x: i32 = 0; x < width; ++x) {
-			array_push(out, buffer_view_get_u8(src_view, byte_pos    ));
-			array_push(out, buffer_view_get_u8(src_view, byte_pos + 1));
-			array_push(out, buffer_view_get_u8(src_view, byte_pos + 2));
-			array_push(out, buffer_view_get_u8(src_view, byte_pos + 3));
-			byte_pos += stride;
-		}
-	}
-
-	let write_line = bits == 16 ? write_line16 : write_line32;
-
-	let write_bgr = function (off: i32) {
-		write_line(pos + byte_size * 2);
-		write_line(pos + byte_size);
-		write_line(pos);
-	}
-
-	let write_single = function (off: i32) {
-		write_line(pos + off * byte_size);
-		write_line(pos + off * byte_size);
-		write_line(pos + off * byte_size);
-	}
-
-	let write_data = type == 1 ? write_bgr : write_single;
+	_parser_exr_write_line = bits == 16 ? parser_exr_write_line16 : parser_exr_write_line32;
+	let write_data: (off: i32, pos: i32, byte_size: i32)=>void = type == 1 ? parser_exr_write_bgr : parser_exr_write_single;
 
 	for (let y: i32 = 0; y < height; ++y) {
 		// coordinate
@@ -312,9 +322,9 @@ function parser_exr_run(width: i32, height: i32, src: buffer_t, bits: i32 = 16, 
 		array_push(out, (pixel_row_size >> 16) & 0xff);
 		array_push(out, (pixel_row_size >> 24) & 0xff);
 		// data
-		write_data(off);
+		write_data(off, pos, byte_size);
 		pos += width * stride;
 	}
 
-	return u8_array_t.from(out).buffer;
+	return u8_array_create_from_array(out).buffer;
 }

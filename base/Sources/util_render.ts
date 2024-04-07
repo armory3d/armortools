@@ -325,10 +325,9 @@ function util_render_make_brush_preview() {
 	context_raw.layer = _layer;
 	context_raw.material = _material;
 	context_raw.tool = _tool;
-	let _init = function () {
+	app_notify_on_init(function () {
 		make_material_parse_paint_material(false);
-	}
-	app_notify_on_init(_init);
+	});
 
 	// Restore paint mesh
 	context_raw.material_preview = false;

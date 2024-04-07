@@ -2970,9 +2970,20 @@ function nodes_material_group_output_button(ui: zui_t, nodes: zui_nodes_t, node:
 	nodes_material_add_socket_button(ui, nodes, node, node.inputs);
 }
 
+let _nodes_material_nodes: zui_nodes_t;
+let _nodes_material_node: zui_node_t;
+let _nodes_material_sockets: zui_node_socket_t[];
+
 function nodes_material_add_socket_button(ui: zui_t, nodes: zui_nodes_t, node: zui_node_t, sockets: zui_node_socket_t[]) {
 	if (zui_button(tr("Add"))) {
+		_nodes_material_nodes = nodes;
+		_nodes_material_node = node;
+		_nodes_material_sockets = sockets;
 		ui_menu_draw(function (ui: zui_t) {
+			let nodes: zui_nodes_t = _nodes_material_nodes;
+			let node: zui_node_t = _nodes_material_node;
+			let sockets: zui_node_socket_t[] = _nodes_material_sockets;
+
 			let group_stack: node_group_t[] = ui_nodes_group_stack;
 			let c: zui_node_canvas_t = group_stack[group_stack.length - 1].canvas;
 			if (ui_menu_button(ui, tr("RGBA"))) {

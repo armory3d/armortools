@@ -49,6 +49,12 @@ function ui_view2d_init() {
 	ui_view2d_ui.scroll_enabled = false;
 }
 
+let _ui_view2d_render_tex: image_t;
+let _ui_view2d_render_x: f32;
+let _ui_view2d_render_y: f32;
+let _ui_view2d_render_tw: f32;
+let _ui_view2d_render_th: f32;
+
 function ui_view2d_render() {
 
 	ui_view2d_ww = config_raw.layout[layout_size_t.NODES_W];
@@ -240,12 +246,16 @@ function ui_view2d_render() {
 
 			// Texture and node preview color picking
 			if ((context_in_2d_view(view_2d_type_t.ASSET) || context_in_2d_view(view_2d_type_t.NODE)) && context_raw.tool == workspace_tool_t.PICKER && ui_view2d_ui.input_down) {
-				let x: f32 = ui_view2d_ui.input_x - tx - ui_view2d_wx;
-				let y: f32 = ui_view2d_ui.input_y - ty - ui_view2d_wy;
-				base_notify_on_next_frame(function () {
+				_ui_view2d_render_tex = tex;
+				_ui_view2d_render_x = ui_view2d_ui.input_x - tx - ui_view2d_wx;;
+				_ui_view2d_render_y = ui_view2d_ui.input_y - ty - ui_view2d_wy;
+				_ui_view2d_render_tw = tw;
+				_ui_view2d_render_th = th;
+
+				app_notify_on_next_frame(function () {
 					let texpaint_picker: image_t = map_get(render_path_render_targets, "texpaint_picker")._image;
 					g2_begin(texpaint_picker);
-					g2_draw_scaled_image(tex, -x, -y, tw, th);
+					g2_draw_scaled_image(_ui_view2d_render_tex, -_ui_view2d_render_x, -_ui_view2d_render_y, _ui_view2d_render_tw, _ui_view2d_render_th);
 					g2_end();
 					let a: buffer_view_t = buffer_view_create(image_get_pixels(texpaint_picker));
 					///if (krom_metal || krom_vulkan)

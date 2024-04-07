@@ -128,7 +128,7 @@ function _import_mesh_make_mesh(mesh: any) {
 	// Wait for add_mesh calls to finish
 	app_notify_on_init(import_mesh_finish_import);
 
-	base_notify_on_next_frame(function (mesh: any) {
+	app_notify_on_next_frame(function (mesh: any) {
 		let f32 = f32_array_create(config_get_texture_res_x() * config_get_texture_res_y() * 4);
 		for (let i: i32 = 0; i < math_floor(mesh.inda.length); ++i) {
 			let index = mesh.inda[i];

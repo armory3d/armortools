@@ -18,15 +18,15 @@ function console_draw_toast(s: string) {
 	g2_draw_string(s, x - g2_font_width(_g2_font, _g2_font_size, s) / 2, y + 40 * scale - g2_font_height(_g2_font, _g2_font_size) / 2);
 }
 
+function _console_toast_render(s: any) {
+	console_draw_toast(s);
+	krom_g4_swap_buffers();
+	app_remove_render_2d(_console_toast_render);
+}
+
 function console_toast(s: string) {
 	// Show a popup message
-	let _render = function () {
-		console_draw_toast(s);
-		base_notify_on_next_frame(function () {
-			app_remove_render_2d(_render);
-		});
-	}
-	app_notify_on_render_2d(_render);
+	app_notify_on_render_2d(_console_toast_render, s);
 	console_trace(s);
 }
 

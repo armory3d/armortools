@@ -10,6 +10,9 @@ function tab_browser_show_directory(directory: string) {
 	ui_base_htabs[tab_area_t.STATUS].position = 0;
 }
 
+let _tab_browser_draw_file: string;
+let _tab_browser_draw_b: string;
+
 function tab_browser_draw(htab: zui_handle_t) {
 	let ui: zui_t = ui_base_ui;
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
@@ -85,87 +88,103 @@ function tab_browser_draw(htab: zui_handle_t) {
 		let _y: f32 = ui._y;
 		ui._x = bookmarks_w;
 		ui._w -= bookmarks_w;
+
 		ui_files_file_browser(ui, tab_browser_hpath, false, true, tab_browser_hsearch.text, refresh, function (file: string) {
+
 			let file_name: string = substring(file, string_last_index_of(file, path_sep) + 1, file.length);
-			if (file_name != "..") {
-				ui_menu_draw(function (ui: zui_t) {
-					if (ui_menu_button(ui, tr("Import"))) {
-						import_asset_run(file);
-					}
-					if (path_is_texture(file)) {
-						if (ui_menu_button(ui, tr("Set as Envmap"))) {
-							import_asset_run(file, -1.0, -1.0, true, true, function () {
-								base_notify_on_next_frame(function () {
-									let asset_index: i32 = -1;
-									for (let i: i32 = 0; i < project_assets.length; ++i) {
-										if (project_assets[i].file == file) {
-											asset_index = i;
-											break;
-										}
-									}
-									if (asset_index != -1) {
-										import_envmap_run(file, project_get_image(project_assets[asset_index]));
-									}
-								});
-							});
-						}
-
-						///if (is_paint || is_sculpt)
-						if (ui_menu_button(ui, tr("Set as Mask"))) {
-							import_asset_run(file, -1.0, -1.0, true, true, function () {
-								base_notify_on_next_frame(function () {
-									let asset_index: i32 = -1;
-									for (let i: i32 = 0; i < project_assets.length; ++i) {
-										if (project_assets[i].file == file) {
-											asset_index = i;
-											break;
-										}
-									}
-									if (asset_index != -1) {
-										base_create_image_mask(project_assets[asset_index]);
-									}
-								});
-							});
-						}
-						///end
-
-						///if is_paint
-						if (ui_menu_button(ui, tr("Set as Color ID Map"))) {
-							import_asset_run(file, -1.0, -1.0, true, true, function () {
-								base_notify_on_next_frame(function () {
-									let asset_index: i32 = -1;
-									for (let i: i32 = 0; i < project_assets.length; ++i) {
-										if (project_assets[i].file == file) {
-											asset_index = i;
-											break;
-										}
-									}
-									if (asset_index != -1) {
-										context_raw.colorid_handle.position = asset_index;
-										context_raw.colorid_picked = false;
-										ui_toolbar_handle.redraws = 1;
-										if (context_raw.tool == workspace_tool_t.COLORID) {
-											ui_header_handle.redraws = 2;
-											context_raw.ddirty = 2;
-										}
-									}
-								});
-							});
-						}
-						///end
-					}
-					if (ui_menu_button(ui, tr("Open Externally"))) {
-						file_start(file);
-					}
-				}, path_is_texture(file) ? 5 : 2);
+			if (file_name == "..") {
+				return;
 			}
+
+			_tab_browser_draw_file = file;
+
+			// Context menu
+			ui_menu_draw(function (ui: zui_t) {
+				let file: string = _tab_browser_draw_file;
+
+				if (ui_menu_button(ui, tr("Import"))) {
+					import_asset_run(file);
+				}
+				if (path_is_texture(file)) {
+					if (ui_menu_button(ui, tr("Set as Envmap"))) {
+
+						import_asset_run(file, -1.0, -1.0, true, true, function () {
+							app_notify_on_next_frame(function () {
+								let file: string = _tab_browser_draw_file;
+
+								let asset_index: i32 = -1;
+								for (let i: i32 = 0; i < project_assets.length; ++i) {
+									if (project_assets[i].file == file) {
+										asset_index = i;
+										break;
+									}
+								}
+								if (asset_index != -1) {
+									import_envmap_run(file, project_get_image(project_assets[asset_index]));
+								}
+							});
+						});
+					}
+
+					///if (is_paint || is_sculpt)
+					if (ui_menu_button(ui, tr("Set as Mask"))) {
+						import_asset_run(file, -1.0, -1.0, true, true, function () {
+							app_notify_on_next_frame(function () {
+								let file: string = _tab_browser_draw_file;
+
+								let asset_index: i32 = -1;
+								for (let i: i32 = 0; i < project_assets.length; ++i) {
+									if (project_assets[i].file == file) {
+										asset_index = i;
+										break;
+									}
+								}
+								if (asset_index != -1) {
+									base_create_image_mask(project_assets[asset_index]);
+								}
+							});
+						});
+					}
+					///end
+
+					///if is_paint
+					if (ui_menu_button(ui, tr("Set as Color ID Map"))) {
+						import_asset_run(file, -1.0, -1.0, true, true, function () {
+							app_notify_on_next_frame(function () {
+								let file: string = _tab_browser_draw_file;
+
+								let asset_index: i32 = -1;
+								for (let i: i32 = 0; i < project_assets.length; ++i) {
+									if (project_assets[i].file == file) {
+										asset_index = i;
+										break;
+									}
+								}
+								if (asset_index != -1) {
+									context_raw.colorid_handle.position = asset_index;
+									context_raw.colorid_picked = false;
+									ui_toolbar_handle.redraws = 1;
+									if (context_raw.tool == workspace_tool_t.COLORID) {
+										ui_header_handle.redraws = 2;
+										context_raw.ddirty = 2;
+									}
+								}
+							});
+						});
+					}
+					///end
+				}
+				if (ui_menu_button(ui, tr("Open Externally"))) {
+					file_start(file);
+				}
+			}, path_is_texture(file) ? 5 : 2);
 		});
 
 		if (tab_browser_known) {
 			let path: string = tab_browser_hpath.text;
-			app_notify_on_init(function () {
+			app_notify_on_init(function (path: string) {
 				import_asset_run(path);
-			});
+			}, path);
 			tab_browser_hpath.text = substring(tab_browser_hpath.text, 0, string_last_index_of(tab_browser_hpath.text, path_sep));
 		}
 		tab_browser_known = string_index_of(substring(tab_browser_hpath.text, string_last_index_of(tab_browser_hpath.text, path_sep), tab_browser_hpath.text.length), ".") > 0;
@@ -214,9 +233,10 @@ function tab_browser_draw(htab: zui_handle_t) {
 			}
 
 			if (ui.is_hovered && ui.input_released_r) {
+				_tab_browser_draw_b = b;
 				ui_menu_draw(function (ui: zui_t) {
 					if (ui_menu_button(ui, tr("Delete"))) {
-						array_remove(config_raw.bookmarks, b);
+						array_remove(config_raw.bookmarks, _tab_browser_draw_b);
 						config_save();
 					}
 				}, 1);

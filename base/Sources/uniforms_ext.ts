@@ -398,27 +398,18 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 	///if is_paint
 	else if (link == "_texuvmap") {
 		if (!util_uv_uvmap_cached) {
-			let _init = function () {
-				util_uv_cache_uv_map();
-			}
-			app_notify_on_init(_init);
+			app_notify_on_init(util_uv_cache_uv_map);
 		}
 		return util_uv_uvmap;
 	}
 	else if (link == "_textrianglemap") {
 		if (!util_uv_trianglemap_cached) {
-			let _init = function () {
-				util_uv_cache_triangle_map();
-			}
-			app_notify_on_init(_init);
+			app_notify_on_init(util_uv_cache_triangle_map);
 		}
 		return util_uv_trianglemap;
 	}
 	else if (link == "_texuvislandmap") {
-		let _init = function () {
-			util_uv_cache_uv_island_map();
-		}
-		app_notify_on_init(_init);
+		app_notify_on_init(util_uv_cache_uv_island_map);
 		return util_uv_uvislandmap_cached ? util_uv_uvislandmap :map_get(render_path_render_targets, "empty_black")._image;
 	}
 	else if (link == "_texdilatemap") {

@@ -29,8 +29,8 @@ function tab_console_draw(htab: zui_handle_t) {
 			console_last_traces = [];
 		}
 		if (zui_button(tr("Export"))) {
-			let str: string = console_last_traces.join("\n");
 			ui_files_show("txt", true, false, function (path: string) {
+				let str: string = console_last_traces.join("\n");
 				let f: string = ui_files_filename;
 				if (f == "") {
 					f = tr("untitled");

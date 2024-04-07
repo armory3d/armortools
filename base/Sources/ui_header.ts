@@ -37,6 +37,8 @@ function ui_header_render_ui() {
 
 ///if is_paint
 
+let _ui_header_draw_tool_properties_h: zui_handle_t;
+
 function ui_header_draw_tool_properties(ui: zui_t) {
 	if (context_raw.tool == workspace_tool_t.COLORID) {
 		zui_text(tr("Picked Color"));
@@ -86,7 +88,7 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 				context_set_layer(context_raw.layer.parent);
 			}
 			let m: slot_layer_t = base_new_mask(false, context_raw.layer);
-			let _next = function () {
+			app_notify_on_next_frame(function (m: slot_layer_t) {
 				if (base_pipe_merge == null) {
 					base_make_pipe();
 				}
@@ -106,8 +108,7 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 				ui_header_handle.redraws = 1;
 				context_raw.layer_preview_dirty = true;
 				base_update_fill_layers();
-			}
-			base_notify_on_next_frame(_next);
+			}, m);
 			history_new_white_mask();
 		}
 		ui.enabled = true;
@@ -143,10 +144,11 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 			zui_tooltip(tr("Drag and drop picked color to swatches, materials, layers or to the node editor"));
 		}
 		if (ui.is_hovered && ui.input_released) {
+			_ui_header_draw_tool_properties_h = h;
 			ui_menu_draw(function (ui: zui_t) {
 				zui_fill(0, 0, ui._w / zui_SCALE(ui), ui.t.ELEMENT_H * 9, ui.t.SEPARATOR_COL);
 				ui.changed = false;
-				zui_color_wheel(h, false, null, 10 * ui.t.ELEMENT_H * zui_SCALE(ui), false);
+				zui_color_wheel(_ui_header_draw_tool_properties_h, false, null, 10 * ui.t.ELEMENT_H * zui_SCALE(ui), false);
 				if (ui.changed) {
 					ui_menu_keep_open = true;
 				}
@@ -193,7 +195,7 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 		if (!baking && zui_button(tr("Bake"))) {
 			context_raw.pdirty = rt_bake ? context_raw.bake_samples : 1;
 			context_raw.rdirty = 3;
-			base_notify_on_next_frame(function () {
+			app_notify_on_next_frame(function () {
 				context_raw.layer_preview_dirty = true;
 			});
 			ui_base_hwnds[0].redraws = 2;

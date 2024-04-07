@@ -47,6 +47,8 @@ function tab_materials_button_nodes() {
 	}
 }
 
+let _tab_materials_draw_slots: i32;
+
 function tab_materials_draw_slots(mini: bool) {
 	let ui: zui_t = ui_base_ui;
 	let slotw: i32 = math_floor(51 * zui_SCALE(ui));
@@ -131,10 +133,7 @@ function tab_materials_draw_slots(mini: bool) {
 					context_select_material(i);
 					///if is_paint
 					if (context_raw.tool == workspace_tool_t.MATERIAL) {
-						let _init = function () {
-							base_update_fill_layers();
-						}
-						app_notify_on_init(_init);
+						app_notify_on_init(base_update_fill_layers);
 					}
 					///end
 				}
@@ -154,8 +153,10 @@ function tab_materials_draw_slots(mini: bool) {
 			if (ui.is_hovered && ui.input_released_r) {
 				context_select_material(i);
 				let add: i32 = project_materials.length > 1 ? 1 : 0;
+				_tab_materials_draw_slots = i;
 
 				ui_menu_draw(function (ui: zui_t) {
+					let i: i32 = _tab_materials_draw_slots;
 					let m: slot_material_t = project_materials[i];
 
 					if (ui_menu_button(ui, tr("To Fill Layer"))) {
@@ -176,15 +177,16 @@ function tab_materials_draw_slots(mini: bool) {
 					///end
 
 					if (ui_menu_button(ui, tr("Duplicate"))) {
-						let _init = function () {
+						app_notify_on_init(function () {
+							let i: i32 = _tab_materials_draw_slots;
+
 							context_raw.material = slot_material_create(project_materials[0].data);
 							array_push(project_materials, context_raw.material);
 							let cloned: zui_node_canvas_t = json_parse(json_stringify(project_materials[i].canvas));
 							context_raw.material.canvas = cloned;
 							tab_materials_update_material();
 							history_duplicate_material();
-						}
-						app_notify_on_init(_init);
+						});
 					}
 
 					if (project_materials.length > 1 && ui_menu_button(ui, tr("Delete"), "delete")) {

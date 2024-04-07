@@ -1,6 +1,8 @@
 
 ///if (is_paint || is_sculpt)
 
+let _tab_brushes_draw_i: i32;
+
 function tab_brushes_draw(htab: zui_handle_t) {
 	let ui: zui_t = ui_base_ui;
 	if (zui_tab(htab, tr("Brushes"))) {
@@ -81,8 +83,13 @@ function tab_brushes_draw(htab: zui_handle_t) {
 				if (ui.is_hovered && ui.input_released_r) {
 					context_select_brush(i);
 					let add: i32 = project_brushes.length > 1 ? 1 : 0;
+
+					_tab_brushes_draw_i = i;
+
 					ui_menu_draw(function (ui: zui_t) {
-						//let b: SlotBrushRaw = brushes[i];
+						let i: i32 = _tab_brushes_draw_i;
+
+						//let b: slot_brush_t = brushes[i];
 
 						if (ui_menu_button(ui, tr("Export"))) {
 							context_select_brush(i);
@@ -90,15 +97,16 @@ function tab_brushes_draw(htab: zui_handle_t) {
 						}
 
 						if (ui_menu_button(ui, tr("Duplicate"))) {
-							let _init = function () {
+							app_notify_on_init(function () {
+								let i: i32 = _tab_brushes_draw_i;
+
 								context_raw.brush = slot_brush_create();
 								array_push(project_brushes, context_raw.brush);
 								let cloned: any = json_parse(json_stringify(project_brushes[i].canvas));
 								context_raw.brush.canvas = cloned;
 								context_set_brush(context_raw.brush);
 								util_render_make_brush_preview();
-							}
-							app_notify_on_init(_init);
+							});
 						}
 
 						if (project_brushes.length > 1 && ui_menu_button(ui, tr("Delete"), "delete")) {
@@ -109,7 +117,11 @@ function tab_brushes_draw(htab: zui_handle_t) {
 
 				if (ui.is_hovered) {
 					if (img_full == null) {
+						_tab_brushes_draw_i = i;
+
 						app_notify_on_init(function () {
+							let i: i32 = _tab_brushes_draw_i;
+
 							let _brush: slot_brush_t = context_raw.brush;
 							context_raw.brush = project_brushes[i];
 							make_material_parse_brush();

@@ -230,9 +230,7 @@ function parser_logic_build_default_node(inp: zui_node_socket_t): logic_node_t {
 function parser_logic_create_node_instance(node_type: string, args: any): any {
 	if (map_get(parser_logic_custom_nodes, node_type) != null) {
 		let node: logic_node_t = logic_node_create();
-		node.get = function (from: i32) {
-			return map_get(parser_logic_custom_nodes, node_type)(node, from);
-		}
+		node.get = map_get(parser_logic_custom_nodes, node_type);
 		return node;
 	}
 

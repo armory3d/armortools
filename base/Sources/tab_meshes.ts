@@ -1,4 +1,6 @@
 
+let _tab_meshes_draw_i: i32;
+
 function tab_meshes_draw(htab: zui_handle_t) {
 	let ui: zui_t = ui_base_ui;
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
@@ -118,8 +120,14 @@ function tab_meshes_draw(htab: zui_handle_t) {
 			let h: zui_handle_t = zui_handle(__ID__);
 			h.selected = o.base.visible;
 			o.base.visible = zui_check(h, o.base.name);
+
 			if (ui.is_hovered && ui.input_released_r) {
+				_tab_meshes_draw_i = i;
+
 				ui_menu_draw(function (ui: zui_t) {
+					let i: i32 = _tab_meshes_draw_i;
+					let o: mesh_object_t = project_paint_objects[i];
+
 					if (ui_menu_button(ui, tr("Export"))) {
 						context_raw.export_mesh_index = i + 1;
 						box_export_show_mesh();

@@ -182,7 +182,7 @@ function export_arm_run_project() {
 	///if (krom_metal || krom_vulkan)
 	export_arm_bgra_swap(mesh_icon_pixels);
 	///end
-	base_notify_on_next_frame(function () {
+	app_notify_on_next_frame(function () {
 		image_unload(mesh_icon);
 	});
 	// raw.mesh_icons =
@@ -494,12 +494,12 @@ function export_arm_pack_assets(raw: project_format_t, assets: asset_t[]) {
 			});
 		}
 	}
-	base_notify_on_next_frame(function () {
+	app_notify_on_next_frame(function (temp_images: image_t[]) {
 		for (let i: i32 = 0; i < temp_images.length; ++i) {
 			let image: image_t = temp_images[i];
 			image_unload(image);
 		}
-	});
+	}, temp_images);
 }
 
 function export_arm_run_swatches(path: string) {

@@ -101,6 +101,10 @@ function translator_load_translations(new_locale: string) {
 		let cjk_font_disk_path: string = (path_is_protected() ? krom_save_path() : path_data() + path_sep) + "font_cjk.ttc";
 		if (!file_exists(cjk_font_disk_path)) {
 			file_download("https://github.com/armory3d/armorbase/raw/main/Assets/common/extra/font_cjk.ttc", cjk_font_disk_path, function () {
+
+				let cjk_font_path: string = (path_is_protected() ? krom_save_path() : "") + "font_cjk.ttc";
+				let cjk_font_disk_path: string = (path_is_protected() ? krom_save_path() : path_data() + path_sep) + "font_cjk.ttc";
+
 				if (!file_exists(cjk_font_disk_path)) {
 					// Fall back to English
 					config_raw.locale = "en";
@@ -122,12 +126,26 @@ function translator_load_translations(new_locale: string) {
 	}
 }
 
+let _translator_init_font_cjk: bool;
+let _translator_init_font_font_path: string;
+let _translator_init_font_font_scale: f32;
+
 function translator_init_font(cjk: bool, font_path: string, font_scale: f32) {
 	array_sort(_g2_font_glyphs, function (a: i32, b: i32) {
 		return a - b;
 	});
+
+	_translator_init_font_cjk = cjk;
+	_translator_init_font_font_path = font_path;
+	_translator_init_font_font_scale = font_scale;
+
 	// Load and assign font with cjk characters
 	app_notify_on_init(function () {
+
+		let cjk: bool = _translator_init_font_cjk;
+		let font_path: string = _translator_init_font_font_path;
+		let font_scale: f32 = _translator_init_font_font_scale;
+
 		let f: g2_font_t = data_get_font(font_path);
 		if (cjk) {
 			let acjk_font_indices: any = translator_cjk_font_indices as any;

@@ -65,30 +65,59 @@ function file_exists(path: string): bool {
 	return krom_file_exists(path);
 }
 
-function file_download(url: string, dstPath: string, done: ()=>void, size: i32 = 0) {
+type file_download_data_t = {
+	dst_path: string;
+	done: (url: string)=>void;
+};
+
+let _file_download_map: map_t<string, file_download_data_t> = map_create();
+
+function file_download(url: string, dst_path: string, done: (url: string)=>void, size: i32 = 0) {
 	///if (krom_windows || krom_darwin || krom_ios || krom_android)
-	krom_http_request(url, size, function (ab: buffer_t) {
+	let fdd: file_download_data_t = { dst_path: dst_path, done: done };
+	map_set(_file_download_map, url, fdd);
+	krom_http_request(url, size, function (url: string, ab: buffer_t) {
+		let fdd: file_download_data_t = map_get(_file_download_map, url);
 		if (ab != null) {
-			krom_file_save_bytes(dstPath, ab);
+			krom_file_save_bytes(fdd.dst_path, ab);
 		}
-		done();
+		fdd.done(url);
 	});
 	///elseif krom_linux
-	krom_sys_command("wget -O \"" + dstPath + "\" \"" + url + "\"");
-	done();
+	krom_sys_command("wget -O \"" + dst_path + "\" \"" + url + "\"");
+	done(url);
 	///else
-	krom_sys_command("curl -L " + url + " -o \"" + dstPath + "\"");
-	done();
+	krom_sys_command("curl -L " + url + " -o \"" + dst_path + "\"");
+	done(url);
 	///end
 }
 
-function file_download_bytes(url: string, done: (ab: buffer_t)=>void) {
+type file_download_bytes_data_t = {
+	url: string;
+	save: string;
+	done: (url: string, ab: buffer_t)=>void;
+};
+
+let _file_download_bytes_map: map_t<string, file_download_bytes_data_t> = map_create();
+
+function file_download_bytes(url: string, done: (url: string, ab: buffer_t)=>void) {
 	let save: string = (path_is_protected() ? krom_save_path() : path_data() + path_sep) + "download.bin";
-	file_download(url, save, function () {
-		let buffer: buffer_t = krom_load_blob(save);
-		done(buffer);
+	let fdbd: file_download_bytes_data_t = { url: url, save: save, done: done };
+	map_set(_file_download_bytes_map, url, fdbd);
+	file_download(url, save, function (url: string) {
+		let fdbd: file_download_bytes_data_t = map_get(_file_download_bytes_map, url);
+		let buffer: buffer_t = krom_load_blob(fdbd.save);
+		fdbd.done(fdbd.url, buffer);
 	});
 }
+
+type file_cache_cloud_data_t = {
+	dest: string;
+	path: string;
+	done: (dest: string)=>void;
+};
+
+let _file_cache_cloud_map: map_t<string, file_cache_cloud_data_t> = map_create();
 
 function file_cache_cloud(path: string, done: (s: string)=>void) {
 	///if krom_ios
@@ -114,22 +143,30 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 	path = string_replace_all(path, "\\", "/");
 	///end
 	let url: string = config_raw.server + "/" + path;
-	file_download(url, dest, function () {
+
+	let fccd: file_cache_cloud_data_t = { dest: dest, path: path, done: done };
+	map_set(_file_cache_cloud_map, url, fccd);
+
+	file_download(url, dest, function (url: string) {
+		let fccd: file_cache_cloud_data_t = map_get(_file_cache_cloud_map, url);
 		if (!file_exists(dest)) {
 			console_error(strings_error5());
-			done(null);
+			fccd.done(null);
 			return;
 		}
 		///if (krom_darwin || krom_ios)
-		done(dest);
+		fccd.done(fccd.dest);
 		///else
-		done((path_is_protected() ? krom_save_path() : path_working_dir() + path_sep) + path);
+		fccd.done((path_is_protected() ? krom_save_path() : path_working_dir() + path_sep) + fccd.path);
 		///end
 	}, map_get(file_cloud_sizes, path));
 }
 
+let _file_init_cloud_bytes_done: ()=>void;
+
 function file_init_cloud_bytes(done: ()=>void, append: string = "") {
-	file_download_bytes(config_raw.server + "/?list-type=2" + append, function (buffer: buffer_t) {
+	_file_init_cloud_bytes_done = done;
+	file_download_bytes(config_raw.server + "/?list-type=2" + append, function (url: string, buffer: buffer_t) {
 		if (buffer == null) {
 			map_set(file_cloud, "cloud", []);
 			console_error(strings_error5());
@@ -184,9 +221,11 @@ function file_init_cloud_bytes(done: ()=>void, append: string = "") {
 			let pos_start: i32 = string_index_of(str, "<NextContinuationToken>");
 			pos_start += 23;
 			let pos_end: i32 = string_index_of_pos(str, "</NextContinuationToken>", pos_start);
-			file_init_cloud_bytes(done, "&start-after=" + substring(str, pos_start, pos_end));
+			file_init_cloud_bytes(_file_init_cloud_bytes_done, "&start-after=" + substring(str, pos_start, pos_end));
 		}
-		else done();
+		else {
+			_file_init_cloud_bytes_done();
+		}
 	});
 }
 

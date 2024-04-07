@@ -46,6 +46,8 @@ function ui_nodes_init() {
 	ui_nodes_ui.scroll_enabled = false;
 }
 
+let _ui_nodes_on_link_drag_link_drag: zui_node_link_t;
+
 function ui_nodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
 	if (is_new_link) {
 		let nodes: zui_nodes_t = ui_nodes_get_nodes();
@@ -61,7 +63,12 @@ function ui_nodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
 			link_y += zui_nodes_INPUT_Y(ui_nodes_get_canvas(true), node.inputs, link_drag.to_socket) + zui_nodes_OUTPUTS_H(node.outputs) + zui_nodes_BUTTONS_H(node);
 		}
 		if (math_abs(mouse_x - link_x) > 5 || math_abs(mouse_y - link_y) > 5) { // Link length
+
+			_ui_nodes_on_link_drag_link_drag = link_drag;
+
 			ui_nodes_node_search(-1, -1, function () {
+				let link_drag: zui_node_link_t = _ui_nodes_on_link_drag_link_drag;
+
 				let n: zui_node_t = zui_get_node(ui_nodes_get_canvas(true).nodes, nodes.nodes_selected_id[0]);
 				if (link_drag.to_id == -1 && n.inputs.length > 0) {
 					link_drag.to_id = n.id;
@@ -99,6 +106,18 @@ function ui_nodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
 	}
 }
 
+let _ui_nodes_on_socket_released_socket: zui_node_socket_t;
+let _ui_nodes_on_socket_released_node: zui_node_t;
+
+let _ui_nodes_htype: zui_handle_t = zui_handle_create();
+let _ui_nodes_hname: zui_handle_t = zui_handle_create();
+let _ui_nodes_hmin: zui_handle_t = zui_handle_create();
+let _ui_nodes_hmax: zui_handle_t = zui_handle_create();
+let _ui_nodes_hval0: zui_handle_t = zui_handle_create();
+let _ui_nodes_hval1: zui_handle_t = zui_handle_create();
+let _ui_nodes_hval2: zui_handle_t = zui_handle_create();
+let _ui_nodes_hval3: zui_handle_t = zui_handle_create();
+
 function ui_nodes_on_socket_released(socket_id: i32) {
 	let nodes: zui_nodes_t = ui_nodes_get_nodes();
 	let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
@@ -106,61 +125,67 @@ function ui_nodes_on_socket_released(socket_id: i32) {
 	let node: zui_node_t = zui_get_node(canvas.nodes, socket.node_id);
 	if (ui_nodes_ui.input_released_r) {
 		if (node.type == "GROUP_INPUT" || node.type == "GROUP_OUTPUT") {
-			base_notify_on_next_frame(function () {
+
+			_ui_nodes_on_socket_released_socket = socket;
+			_ui_nodes_on_socket_released_node = node;
+
+			app_notify_on_next_frame(function () {
 				ui_menu_draw(function (ui: zui_t) {
+
+					let socket: zui_node_socket_t = _ui_nodes_on_socket_released_socket;
+					let node: zui_node_t = _ui_nodes_on_socket_released_node;
+
 					if (ui_menu_button(ui, tr("Edit"))) {
-						let htype: zui_handle_t = zui_handle(__ID__);
-						let hname: zui_handle_t = zui_handle(__ID__);
-						let hmin: zui_handle_t = zui_handle(__ID__);
-						let hmax: zui_handle_t = zui_handle(__ID__);
-						let hval0: zui_handle_t = zui_handle(__ID__);
-						let hval1: zui_handle_t = zui_handle(__ID__);
-						let hval2: zui_handle_t = zui_handle(__ID__);
-						let hval3: zui_handle_t = zui_handle(__ID__);
-						htype.position = socket.type == "RGBA" ? 0 : socket.type == "VECTOR" ? 1 : 2;
-						hname.text = socket.name;
-						hmin.value = socket.min;
-						hmax.value = socket.max;
+						_ui_nodes_htype.position = socket.type == "RGBA" ? 0 : socket.type == "VECTOR" ? 1 : 2;
+						_ui_nodes_hname.text = socket.name;
+						_ui_nodes_hmin.value = socket.min;
+						_ui_nodes_hmax.value = socket.max;
 						if (socket.type == "RGBA" || socket.type == "VECTOR") {
-							hval0.value = socket.default_value[0];
-							hval1.value = socket.default_value[1];
-							hval2.value = socket.default_value[2];
+							_ui_nodes_hval0.value = socket.default_value[0];
+							_ui_nodes_hval1.value = socket.default_value[1];
+							_ui_nodes_hval2.value = socket.default_value[2];
 							if (socket.type == "RGBA") {
-								hval3.value = socket.default_value[3];
+								_ui_nodes_hval3.value = socket.default_value[3];
 							}
 						}
 						else {
-							hval0.value = socket.default_value;
+							_ui_nodes_hval0.value = socket.default_value;
 						}
-						base_notify_on_next_frame(function () {
+
+						app_notify_on_next_frame(function () {
 							zui_end_input();
+
 							ui_box_show_custom(function (ui: zui_t) {
+
+								let socket: zui_node_socket_t = _ui_nodes_on_socket_released_socket;
+								let node: zui_node_t = _ui_nodes_on_socket_released_node;
+
 								if (zui_tab(zui_handle(__ID__), tr("Socket"))) {
-									let type: i32 = zui_combo(htype, [tr("Color"), tr("Vector"), tr("Value")], tr("Type"), true);
-									if (htype.changed) {
-										hname.text = type == 0 ? tr("Color") : type == 1 ? tr("Vector") : tr("Value");
+									let type: i32 = zui_combo(_ui_nodes_htype, [tr("Color"), tr("Vector"), tr("Value")], tr("Type"), true);
+									if (_ui_nodes_htype.changed) {
+										_ui_nodes_hname.text = type == 0 ? tr("Color") : type == 1 ? tr("Vector") : tr("Value");
 									}
-									let name: string = zui_text_input(hname, tr("Name"));
-									let min: f32 = zui_float_input(hmin, tr("Min"));
-									let max: f32 = zui_float_input(hmax, tr("Max"));
+									let name: string = zui_text_input(_ui_nodes_hname, tr("Name"));
+									let min: f32 = zui_float_input(_ui_nodes_hmin, tr("Min"));
+									let max: f32 = zui_float_input(_ui_nodes_hmax, tr("Max"));
 									let default_value: any = null;
 									if (type == 0) {
 										zui_row([1 / 4, 1 / 4, 1 / 4, 1 / 4]);
-										zui_float_input(hval0, tr("R"));
-										zui_float_input(hval1, tr("G"));
-										zui_float_input(hval2, tr("B"));
-										zui_float_input(hval3, tr("A"));
-										default_value = f32_array_create_xyzw(hval0.value, hval1.value, hval2.value, hval3.value);
+										zui_float_input(_ui_nodes_hval0, tr("R"));
+										zui_float_input(_ui_nodes_hval1, tr("G"));
+										zui_float_input(_ui_nodes_hval2, tr("B"));
+										zui_float_input(_ui_nodes_hval3, tr("A"));
+										default_value = f32_array_create_xyzw(_ui_nodes_hval0.value, _ui_nodes_hval1.value, _ui_nodes_hval2.value, _ui_nodes_hval3.value);
 									}
 									else if (type == 1) {
 										zui_row([1 / 3, 1 / 3, 1 / 3]);
-										hval0.value = zui_float_input(hval0, tr("X"));
-										hval1.value = zui_float_input(hval1, tr("Y"));
-										hval2.value = zui_float_input(hval2, tr("Z"));
-										default_value = f32_array_create_xyz(hval0.value, hval1.value, hval2.value);
+										_ui_nodes_hval0.value = zui_float_input(_ui_nodes_hval0, tr("X"));
+										_ui_nodes_hval1.value = zui_float_input(_ui_nodes_hval1, tr("Y"));
+										_ui_nodes_hval2.value = zui_float_input(_ui_nodes_hval2, tr("Z"));
+										default_value = f32_array_create_xyz(_ui_nodes_hval0.value, _ui_nodes_hval1.value, _ui_nodes_hval2.value);
 									}
 									else {
-										default_value = zui_float_input(hval0, tr("default_value"));
+										default_value = zui_float_input(_ui_nodes_hval0, tr("default_value"));
 									}
 									if (zui_button(tr("OK"))) { // || ui.isReturnDown
 										socket.name = name;
@@ -212,6 +237,8 @@ function ui_nodes_on_socket_released(socket_id: i32) {
 	}
 }
 
+let _ui_nodes_on_canvas_released_selected: zui_node_t;
+
 function ui_nodes_on_canvas_released() {
 	if (ui_nodes_ui.input_released_r && math_abs(ui_nodes_ui.input_x - ui_nodes_ui.input_started_x) < 2 && math_abs(ui_nodes_ui.input_y - ui_nodes_ui.input_started_y) < 2) {
 		// Node selection
@@ -242,18 +269,23 @@ function ui_nodes_on_canvas_released() {
 				++number_of_entries;
 			}
 
+			_ui_nodes_on_canvas_released_selected = selected;
+
 			ui_menu_draw(function (ui_menu: zui_t) {
+
+				let selected: zui_node_t = _ui_nodes_on_canvas_released_selected;
+
 				ui_menu._y += 1;
 				let is_protected: bool = selected == null ||
-								///if (is_paint || is_sculpt)
-								selected.type == "OUTPUT_MATERIAL_PBR" ||
-								///end
-								selected.type == "GROUP_INPUT" ||
-								selected.type == "GROUP_OUTPUT" ||
-								selected.type == "brush_output_node";
+					///if (is_paint || is_sculpt)
+					selected.type == "OUTPUT_MATERIAL_PBR" ||
+					///end
+					selected.type == "GROUP_INPUT" ||
+					selected.type == "GROUP_OUTPUT" ||
+					selected.type == "brush_output_node";
 				ui_menu.enabled = !is_protected;
 				if (ui_menu_button(ui_menu, tr("Cut"), "ctrl+x")) {
-					base_notify_on_next_frame(function () {
+					app_notify_on_next_frame(function () {
 						ui_nodes_hwnd.redraws = 2;
 						zui_set_is_copy(true);
 						zui_set_is_cut(true);
@@ -261,14 +293,14 @@ function ui_nodes_on_canvas_released() {
 					});
 				}
 				if (ui_menu_button(ui_menu, tr("Copy"), "ctrl+c")) {
-					base_notify_on_next_frame(function () {
+					app_notify_on_next_frame(function () {
 						zui_set_is_copy(true);
 						ui_nodes_is_node_menu_op = true;
 					});
 				}
 				ui_menu.enabled = zui_clipboard != "";
 				if (ui_menu_button(ui_menu, tr("Paste"), "ctrl+v")) {
-					base_notify_on_next_frame(function () {
+					app_notify_on_next_frame(function () {
 						ui_nodes_hwnd.redraws = 2;
 						zui_set_is_paste(true);
 						ui_nodes_is_node_menu_op = true;
@@ -276,14 +308,14 @@ function ui_nodes_on_canvas_released() {
 				}
 				ui_menu.enabled = !is_protected;
 				if (ui_menu_button(ui_menu, tr("Delete"), "delete")) {
-					base_notify_on_next_frame(function () {
+					app_notify_on_next_frame(function () {
 						ui_nodes_hwnd.redraws = 2;
 						ui_nodes_ui.is_delete_down = true;
 						ui_nodes_is_node_menu_op = true;
 					});
 				}
 				if (ui_menu_button(ui_menu, tr("Duplicate"))) {
-					base_notify_on_next_frame(function () {
+					app_notify_on_next_frame(function () {
 						ui_nodes_hwnd.redraws = 2;
 						zui_set_is_copy(true);
 						zui_set_is_paste(true);
@@ -532,18 +564,24 @@ function ui_nodes_canvas_changed() {
 	ui_nodes_recompile_mat_final = true;
 }
 
+let _ui_nodes_node_search_first: bool;
+let _ui_nodes_node_search_done: ()=>void;
+
 function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
-	let search_handle: zui_handle_t = zui_handle(__ID__);
-	let first: bool = true;
+	_ui_nodes_node_search_first = true;
+	_ui_nodes_node_search_done = done;
+
 	ui_menu_draw(function (ui: zui_t) {
+		let search_handle: zui_handle_t = zui_handle(__ID__);
+
 		g2_set_color(ui.t.SEPARATOR_COL);
 		zui_draw_rect(true, ui._x, ui._y, ui._w, zui_ELEMENT_H(ui) * 8);
 		g2_set_color(0xffffffff);
 
 		let search: string = to_lower_case(zui_text_input(search_handle, "", zui_align_t.LEFT, true, true));
 		ui.changed = false;
-		if (first) {
-			first = false;
+		if (_ui_nodes_node_search_first) {
+			_ui_nodes_node_search_first = false;
 			search_handle.text = "";
 			zui_start_text_edit(search_handle); // Focus search bar
 		}
@@ -595,8 +633,8 @@ function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
 							ui.changed = true;
 							count = 6; // Trigger break
 						}
-						if (done != null) {
-							done();
+						if (_ui_nodes_node_search_done != null) {
+							_ui_nodes_node_search_done();
 						}
 					}
 					if (++count > 6) {
@@ -667,6 +705,8 @@ function ui_nodes_draw_grid() {
 
 	g2_end();
 }
+
+let _ui_nodes_render_tmp: (col: i32)=>void;
 
 function ui_nodes_render() {
 	if (ui_nodes_recompile_mat) {
@@ -825,9 +865,10 @@ function ui_nodes_render() {
 		if (nodes.color_picker_callback != null) {
 			context_raw.color_picker_previous_tool = context_raw.tool;
 			context_select_tool(workspace_tool_t.PICKER);
-			let tmp: (col: i32)=>void = nodes.color_picker_callback;
+			_ui_nodes_render_tmp = nodes.color_picker_callback;
+
 			context_raw.color_picker_callback = function (color: swatch_color_t) {
-				tmp(color.base);
+				_ui_nodes_render_tmp(color.base);
 				ui_nodes_hwnd.redraws = 2;
 
 				///if (is_paint || is_sculpt)

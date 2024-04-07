@@ -292,10 +292,9 @@ function ui_base_update() {
 			box_export_show_textures();
 		}
 		else {
-			let _init = function () {
+			app_notify_on_init(function () {
 				export_texture_run(context_raw.texture_export_path);
-			}
-			app_notify_on_init(_init);
+			});
 		}
 	}
 	else if (operator_shortcut(config_keymap.file_export_textures_as)) {
@@ -823,7 +822,9 @@ function ui_base_update() {
 			let ray: ray_t = raycast_get_ray(mouse_view_x(), mouse_view_y(), camera);
 			physics_body_apply_impulse(body, vec4_mult(ray.dir, 0.15));
 
-			context_raw.particle_timer = tween_timer(5, function () { mesh_object_remove(mo); });
+			context_raw.particle_timer = tween_timer(5, function () {
+				mesh_object_remove(mo);
+			});
 		}
 
 		let pairs: pair_t[] = physics_world_get_contact_pairs(world, context_raw.paint_body);
@@ -854,15 +855,19 @@ function ui_base_view_top() {
 	}
 }
 
+let _ui_base_operator_search_first: bool;
+
 function ui_base_operator_search() {
-	let search_handle: zui_handle_t = zui_handle(__ID__);
-	let first: bool = true;
+	_ui_base_operator_search_first = true;
+
 	ui_menu_draw(function (ui: zui_t) {
+		let search_handle: zui_handle_t = zui_handle(__ID__);
+
 		zui_fill(0, 0, ui._w / zui_SCALE(ui), ui.t.ELEMENT_H * 8, ui.t.SEPARATOR_COL);
 		let search: string = zui_text_input(search_handle, "", zui_align_t.LEFT, true, true);
 		ui.changed = false;
-		if (first) {
-			first = false;
+		if (_ui_base_operator_search_first) {
+			_ui_base_operator_search_first = false;
 			search_handle.text = "";
 			zui_start_text_edit(search_handle); // Focus search bar
 		}
@@ -1165,7 +1170,7 @@ function ui_base_update_ui() {
 		///if is_paint
 		// New color id picked, update fill layer
 		if (context_raw.tool == workspace_tool_t.COLORID && context_raw.layer.fill_layer != null) {
-			base_notify_on_next_frame(function () {
+			app_notify_on_next_frame(function () {
 				base_update_fill_layer();
 				make_material_parse_paint_material(false);
 			});

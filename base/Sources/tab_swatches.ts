@@ -18,6 +18,8 @@ function tab_swatches_empty_get(): image_t {
 	return _tab_swatches_empty;
 }
 
+let _tab_swatches_draw_i: i32;
+
 function tab_swatches_draw(htab: zui_handle_t) {
 	let ui: zui_t = ui_base_ui;
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
@@ -130,6 +132,9 @@ function tab_swatches_draw(htab: zui_handle_t) {
 				}
 				else if (state == zui_state_t.RELEASED) {
 					if (time_time() - context_raw.select_time < 0.25) {
+
+						_tab_swatches_draw_i = i;
+
 						ui_menu_draw(function (ui: zui_t) {
 							ui.changed = false;
 							let h: zui_handle_t = zui_handle(__ID__);
@@ -138,10 +143,14 @@ function tab_swatches_draw(htab: zui_handle_t) {
 							context_raw.swatch.base = zui_color_wheel(h, false, null, 11 * ui.t.ELEMENT_H * zui_SCALE(ui), true, function () {
 								context_raw.color_picker_previous_tool = context_raw.tool;
 								context_select_tool(workspace_tool_t.PICKER);
+
 								context_raw.color_picker_callback = function (color: swatch_color_t) {
+									let i: i32 = _tab_swatches_draw_i;
+
 									project_raw.swatches[i] = project_clone_swatch(color);
 								};
 							});
+
 							let hopacity: zui_handle_t = zui_handle(__ID__);
 							hopacity.value = context_raw.swatch.opacity;
 							context_raw.swatch.opacity = zui_slider(hopacity, "Opacity", 0, 1, true);
@@ -183,7 +192,11 @@ function tab_swatches_draw(htab: zui_handle_t) {
 					add += 1;
 					///end
 
+					_tab_swatches_draw_i = i;
+
 					ui_menu_draw(function (ui: zui_t) {
+						let i: i32 = _tab_swatches_draw_i;
+
 						if (ui_menu_button(ui, tr("Duplicate"))) {
 							context_set_swatch(project_clone_swatch(context_raw.swatch));
 							array_push(project_raw.swatches, context_raw.swatch);

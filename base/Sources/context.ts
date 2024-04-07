@@ -560,10 +560,7 @@ function context_set_material(m: slot_material_t) {
 
 	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
 	if (decal) {
-		let _next = function () {
-			util_render_make_decal_preview();
-		}
-		base_notify_on_next_frame(_next);
+		app_notify_on_next_frame(util_render_make_decal_preview);
 	}
 }
 
@@ -871,9 +868,7 @@ function context_set_render_path() {
 	else {
 		render_path_commands = render_path_deferred_commands;
 	}
-	app_notify_on_init(function () {
-		make_material_parse_mesh_material();
-	});
+	app_notify_on_init(make_material_parse_mesh_material);
 }
 
 function context_enable_import_plugin(file: string): bool {

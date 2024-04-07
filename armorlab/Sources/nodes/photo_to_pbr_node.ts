@@ -36,16 +36,15 @@ function photo_to_pbr_node_init() {
 }
 
 function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): image_t {
-	let get_source = function (): image_t {
-		if (photo_to_pbr_node_cached_source != null) {
-			return photo_to_pbr_node_cached_source;
-		}
-		else {
-			return self.base.inputs[0].get_as_image();
-		}
+
+	let source: image_t;
+	if (photo_to_pbr_node_cached_source != null) {
+		source = photo_to_pbr_node_cached_source;
+	}
+	else {
+		source = self.base.inputs[0].get_as_image();
 	}
 
-	let source: image_t = get_source();
 	photo_to_pbr_node_cached_source = source;
 
 	console_progress(tr("Processing") + " - " + tr("Photo to PBR"));
@@ -158,9 +157,9 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): i
 		g2_begin(photo_to_pbr_node_images[from]);
 		g2_draw_image(temp2, x * photo_to_pbr_node_tile_w, y * photo_to_pbr_node_tile_w);
 		g2_end();
-		base_notify_on_next_frame(function () {
+		app_notify_on_next_frame(temp2: image_t) {
 			image_unload(temp2);
-		});
+		}, temp2);
 	}
 
 	return photo_to_pbr_node_images[from];

@@ -68,11 +68,10 @@ function slot_material_create(m: material_data_t = null, c: zui_node_canvas_t = 
 }
 
 function slot_material_unload(raw: slot_material_t) {
-	let _next = function () {
+	app_notify_on_next_frame(function (raw: slot_material_t) {
 		image_unload(raw.image);
 		image_unload(raw.image_icon);
-	}
-	base_notify_on_next_frame(_next);
+	}, raw);
 }
 
 function slot_material_delete(raw: slot_material_t) {

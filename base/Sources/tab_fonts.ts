@@ -1,6 +1,8 @@
 
 ///if (is_paint || is_sculpt)
 
+let _tab_fonts_draw_i: i32;
+
 function tab_fonts_draw(htab: zui_handle_t) {
 	let ui: zui_t = ui_base_ui;
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
@@ -88,10 +90,13 @@ function tab_fonts_draw(htab: zui_handle_t) {
 
 				if (state == zui_state_t.STARTED) {
 					if (context_raw.font != project_fonts[i]) {
-						let _init = function () {
+						_tab_fonts_draw_i = i;
+
+						app_notify_on_init(function () {
+							let i: i32 = _tab_fonts_draw_i;
+
 							context_select_font(i);
-						}
-						app_notify_on_init(_init);
+						});
 					}
 					if (time_time() - context_raw.select_time < 0.25) {
 						ui_base_show_2d_view(view_2d_type_t.FONT);
@@ -101,7 +106,11 @@ function tab_fonts_draw(htab: zui_handle_t) {
 				if (ui.is_hovered && ui.input_released_r) {
 					context_select_font(i);
 					let add: i32 = project_fonts.length > 1 ? 1 : 0;
+					_tab_fonts_draw_i = i;
+
 					ui_menu_draw(function (ui: zui_t) {
+						let i: i32 = _tab_fonts_draw_i;
+
 						if (project_fonts.length > 1 && ui_menu_button(ui, tr("Delete"), "delete") && project_fonts[i].file != "") {
 							tab_fonts_delete_font(project_fonts[i]);
 						}
@@ -109,7 +118,11 @@ function tab_fonts_draw(htab: zui_handle_t) {
 				}
 				if (ui.is_hovered) {
 					if (img == null) {
+						_tab_fonts_draw_i = i;
+
 						app_notify_on_init(function () {
+							let i: i32 = _tab_fonts_draw_i;
+
 							let _font: slot_font_t = context_raw.font;
 							context_raw.font = project_fonts[i];
 							util_render_make_font_preview();
@@ -149,13 +162,13 @@ function tab_fonts_draw(htab: zui_handle_t) {
 }
 
 function tab_fonts_delete_font(font: slot_font_t) {
-	let i: i32 = array_index_of(project_fonts, font);
-	let _init = function () {
+	app_notify_on_init(function (font: slot_font_t) {
+		let i: i32 = array_index_of(project_fonts, font);
 		context_select_font(i == project_fonts.length - 1 ? i - 1 : i + 1);
 		data_delete_font(project_fonts[i].file);
 		array_splice(project_fonts, i, 1);
-	}
-	app_notify_on_init(_init);
+	}, font);
+
 	ui_base_hwnds[2].redraws = 2;
 }
 

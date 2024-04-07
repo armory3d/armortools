@@ -11,6 +11,8 @@ let ui_menu_commands: (ui: zui_t)=>void = null;
 let ui_menu_show_first: bool = true;
 let ui_menu_hide_flag: bool = false;
 
+let _ui_menu_render_msg: string;
+
 function ui_menu_render() {
 	let ui: zui_t = base_ui_menu;
 	let menu_w: i32 = ui_menu_commands != null ? math_floor(base_default_element_w * zui_SCALE(base_ui_menu) * 2.3) : math_floor(zui_ELEMENT_W(ui) * 2.3);
@@ -501,7 +503,7 @@ function ui_menu_render() {
 				file_load_url(manifest_url_ios);
 				///else
 				// Retrieve latest version number
-				file_download_bytes("https://server.armorpaint.org/" + to_lower_case(manifest_title) + ".html", function (buffer: buffer_t) {
+				file_download_bytes("https://server.armorpaint.org/" + to_lower_case(manifest_title) + ".html", function (url: string, buffer: buffer_t) {
 					if (buffer != null)  {
 						// Compare versions
 						let update: any = json_parse(sys_buffer_to_string(buffer));
@@ -558,6 +560,8 @@ function ui_menu_render() {
 				// { lshw -C display }
 				///end
 
+				_ui_menu_render_msg = msg;
+
 				ui_box_show_custom(function (ui: zui_t) {
 					let tab_vertical: bool = config_raw.touch_ui;
 					if (zui_tab(zui_handle(__ID__), tr("About"), tab_vertical)) {
@@ -566,13 +570,13 @@ function ui_menu_render() {
 						zui_image(img);
 						zui_end_element();
 
-						zui_text_area(zui_handle(__ID__, { text: msg }), zui_align_t.LEFT, false);
+						zui_text_area(zui_handle(__ID__, { text: _ui_menu_render_msg }), zui_align_t.LEFT, false);
 
 						zui_row([1 / 3, 1 / 3, 1 / 3]);
 
 						///if (krom_windows || krom_linux || krom_darwin)
 						if (zui_button(tr("Copy"))) {
-							krom_copy_to_clipboard(msg);
+							krom_copy_to_clipboard(_ui_menu_render_msg);
 						}
 						///else
 						zui_end_element();

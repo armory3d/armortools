@@ -267,8 +267,8 @@ function make_material_bake_node_previews() {
 	for (let i: i32 = 0; i < keys.length; ++i) {
 		let key: string = keys[i];
 		if (array_index_of(context_raw.node_previews_used, key) == -1) {
-			let image = map_get(context_raw.node_previews, key);
-			base_notify_on_next_frame(function (image: image_t) {
+			let image: image_t = map_get(context_raw.node_previews, key);
+			app_notify_on_next_frame(function (image: image_t) {
 				image_unload(image);
 			}, image);
 			map_delete(context_raw.node_previews, key);
@@ -370,7 +370,7 @@ function make_material_voxelgi_half_extents(): string {
 }
 
 function make_material_delete_context(c: shader_context_t) {
-	base_notify_on_next_frame(function (c: shader_context_t) { // Ensure pipeline is no longer in use
+	app_notify_on_next_frame(function (c: shader_context_t) { // Ensure pipeline is no longer in use
 		shader_context_delete(c);
 	}, c);
 }

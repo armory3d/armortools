@@ -1,4 +1,8 @@
 
+let _tab_textures_draw_img: image_t;
+let _tab_textures_draw_path: string;
+let _tab_textures_draw_asset: asset_t;
+
 function tab_textures_draw(htab: zui_handle_t) {
 	let ui: zui_t = ui_base_ui;
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
@@ -118,10 +122,16 @@ function tab_textures_draw(htab: zui_handle_t) {
 						count = is_packed ? 6 : 6;
 						///end
 
+						_tab_textures_draw_img = img;
+
 						ui_menu_draw(function (ui: zui_t) {
 							if (ui_menu_button(ui, tr("Export"))) {
 								ui_files_show("png", true, false, function (path: string) {
-									base_notify_on_next_frame(function () {
+									_tab_textures_draw_path = path;
+
+									app_notify_on_next_frame(function () {
+										let img: image_t = _tab_textures_draw_img;
+
 										///if (is_paint || is_sculpt)
 										if (base_pipe_merge == null) base_make_pipe();
 										///end
@@ -135,7 +145,8 @@ function tab_textures_draw(htab: zui_handle_t) {
 										g2_draw_scaled_image(img, 0, 0, target.width, target.height);
 										g2_set_pipeline(null);
 										g2_end();
-										base_notify_on_next_frame(function () {
+										app_notify_on_next_frame(function () {
+											let path: string = _tab_textures_draw_path;
 											let f: string = ui_files_filename;
 											if (f == "") {
 												f = tr("untitled");
@@ -155,15 +166,18 @@ function tab_textures_draw(htab: zui_handle_t) {
 
 							///if (is_paint || is_sculpt)
 							if (ui_menu_button(ui, tr("To Mask"))) {
-								base_notify_on_next_frame(function () {
-									base_create_image_mask(asset);
+								_tab_textures_draw_asset = asset;
+								app_notify_on_next_frame(function () {
+									base_create_image_mask(_tab_textures_draw_asset);
 								});
 							}
 							///end
 
 							if (ui_menu_button(ui, tr("Set as Envmap"))) {
-								base_notify_on_next_frame(function () {
-									import_envmap_run(asset.file, img);
+								_tab_textures_draw_asset = asset;
+								_tab_textures_draw_img = img;
+								app_notify_on_next_frame(function () {
+									import_envmap_run(_tab_textures_draw_asset.file, _tab_textures_draw_img);
 								});
 							}
 
@@ -269,15 +283,14 @@ function tab_textures_delete_texture(asset: asset_t) {
 	map_delete(project_asset_map, asset.id);
 	array_splice(project_assets, i, 1);
 	array_splice(project_asset_names, i, 1);
-	let _next = function () {
+	app_notify_on_next_frame(function () {
 		make_material_parse_paint_material();
 
 		///if (is_paint || is_sculpt)
 		util_render_make_material_preview();
 		ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 		///end
-	}
-	base_notify_on_next_frame(_next);
+	});
 
 	for (let i: i32 = 0; i < project_materials.length; ++i) {
 		let m: slot_material_t = project_materials[i];

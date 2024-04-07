@@ -58,10 +58,7 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 		render_path_set_target("baketex0", ["baketex1"]);
 		render_path_draw_meshes("paint");
 		context_raw.bake_type = _bake_type;
-		let _next = function () {
-			parse_paint_material();
-		}
-		base_notify_on_next_frame(_next);
+		app_notify_on_next_frame(parse_paint_material);
 
 		render_path_raytrace_raytrace_init(render_path_raytrace_bake_get_bake_shader_name(), rebuild);
 

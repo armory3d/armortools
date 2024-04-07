@@ -254,9 +254,7 @@ function base_init() {
 
 	sys_notify_on_drop_files(function (drop_path: string) {
 		///if krom_linux
-		krom_log(drop_path);
 		drop_path = uri_decode(drop_path);
-		krom_log(drop_path);
 		///end
 		drop_path = trim_end(drop_path);
 		array_push(base_drop_paths, drop_path);
@@ -563,11 +561,9 @@ function base_resize() {
 	}
 
 	if (ui_nodes_grid != null) {
-		let _grid: image_t = ui_nodes_grid;
-		let _next = function () {
-			image_unload(_grid);
-		}
-		base_notify_on_next_frame(_next);
+		app_notify_on_next_frame(function (grid: image_t) {
+			image_unload(grid);
+		}, ui_nodes_grid);
 		ui_nodes_grid = null;
 	}
 
@@ -875,16 +871,16 @@ function base_render() {
 		context_raw.camera_controls = config_raw.camera_controls;
 
 		///if is_lab
-		base_notify_on_next_frame(function () {
-			base_notify_on_next_frame(function () {
+		app_notify_on_next_frame(function () {
+			app_notify_on_next_frame(function () {
 				tab_meshes_set_default_mesh(".Sphere");
 			});
 		});
 		///end
 
 		///if is_sculpt
-		base_notify_on_next_frame(function () {
-			base_notify_on_next_frame(function () {
+		app_notify_on_next_frame(function () {
+			app_notify_on_next_frame(function () {
 				context_raw.project_type = project_model_t.SPHERE;
 				project_new();
 			});
@@ -985,20 +981,6 @@ function base_enum_texts(node_type: string): string[] {
 function base_get_asset_index(file_name: string): i32 {
 	let i: i32 = array_index_of(project_asset_names, file_name);
 	return i >= 0 ? i : 0;
-}
-
-function base_notify_on_next_frame(f: (data?: any)=>void, data: any = null) {
-	let _render = function (data: any) {
-		app_notify_on_init(function (data: any) {
-			let _update = function (data: any) {
-				app_notify_on_init(f, data);
-				app_remove_update(_update);
-			}
-			app_notify_on_update(_update, data);
-		}, data);
-		app_remove_render(_render);
-	}
-	app_notify_on_render(_render, data);
 }
 
 function base_toggle_fullscreen() {
@@ -1220,9 +1202,9 @@ function base_resize_layers() {
 		}
 		while (history_undo_layers.length > conf.undo_steps) {
 			let l: slot_layer_t = history_undo_layers.pop();
-			base_notify_on_next_frame(function () {
+			app_notify_on_next_frame(function (l: slot_layer_t) {
 				slot_layer_unload(l);
-			});
+			}, l);
 		}
 	}
 	for (let i: i32 = 0; i < project_layers.length; ++i) {
@@ -1235,25 +1217,25 @@ function base_resize_layers() {
 	}
 	let rts: map_t<string, render_target_t> = render_path_render_targets;
 	let _texpaint_blend0: image_t = map_get(rts, "texpaint_blend0")._image;
-	base_notify_on_next_frame(function () {
+	app_notify_on_next_frame(function (_texpaint_blend0: image_t) {
 		image_unload(_texpaint_blend0);
-	});
+	}, _texpaint_blend0);
 	map_get(rts, "texpaint_blend0").width = config_get_texture_res_x();
 	map_get(rts, "texpaint_blend0").height = config_get_texture_res_y();
 	map_get(rts, "texpaint_blend0")._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
 	let _texpaint_blend1: image_t = map_get(rts, "texpaint_blend1")._image;
-	base_notify_on_next_frame(function () {
+	app_notify_on_next_frame(function (_texpaint_blend1: image_t) {
 		image_unload(_texpaint_blend1);
-	});
+	}, _texpaint_blend1);
 	map_get(rts, "texpaint_blend1").width = config_get_texture_res_x();
 	map_get(rts, "texpaint_blend1").height = config_get_texture_res_y();
 	map_get(rts, "texpaint_blend1")._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
 	context_raw.brush_blend_dirty = true;
 	if (map_get(rts, "texpaint_blur") != null) {
 		let _texpaint_blur: image_t = map_get(rts, "texpaint_blur")._image;
-		base_notify_on_next_frame(function () {
+		app_notify_on_next_frame(function (_texpaint_blur: image_t) {
 			image_unload(_texpaint_blur);
-		});
+		}, _texpaint_blur);
 		let size_x: f32 = math_floor(config_get_texture_res_x() * 0.95);
 		let size_y: f32 = math_floor(config_get_texture_res_y() * 0.95);
 		map_get(rts, "texpaint_blur").width = size_x;
@@ -1548,9 +1530,9 @@ function base_make_temp_img() {
 
 	if (base_temp_image != null && (base_temp_image.width != l.texpaint.width || base_temp_image.height != l.texpaint.height || base_temp_image.format != l.texpaint.format)) {
 		let _temptex0: render_target_t = map_get(render_path_render_targets, "temptex0");
-		base_notify_on_next_frame(function () {
+		app_notify_on_next_frame(function (_temptex0: render_target_t) {
 			render_target_unload(_temptex0);
-		});
+		}, _temptex0);
 		map_delete(render_path_render_targets, "temptex0");
 		base_temp_image = null;
 	}
@@ -1578,9 +1560,9 @@ function base_make_temp_img() {
 function base_make_temp_mask_img() {
 	if (base_temp_mask_image != null && (base_temp_mask_image.width != config_get_texture_res_x() || base_temp_mask_image.height != config_get_texture_res_y())) {
 		let _temp_mask_image: image_t = base_temp_mask_image;
-		base_notify_on_next_frame(function () {
+		app_notify_on_next_frame(function (_temp_mask_image: image_t) {
 			image_unload(_temp_mask_image);
-		});
+		}, _temp_mask_image);
 		base_temp_mask_image = null;
 	}
 	if (base_temp_mask_image == null) {
@@ -1601,11 +1583,15 @@ function base_make_export_img() {
 		let _expa: image_t = base_expa;
 		let _expb: image_t = base_expb;
 		let _expc: image_t = base_expc;
-		base_notify_on_next_frame(function () {
+		app_notify_on_next_frame(function (_expa: image_t) {
 			image_unload(_expa);
+		}, _expa);
+		app_notify_on_next_frame(function (_expb: image_t) {
 			image_unload(_expb);
+		}, _expb);
+		app_notify_on_next_frame(function (_expc: image_t) {
 			image_unload(_expc);
-		});
+		}, _expc);
 		base_expa = null;
 		base_expb = null;
 		base_expc = null;
@@ -1616,7 +1602,7 @@ function base_make_export_img() {
 	if (base_expa == null) {
 		///if (is_paint || is_sculpt)
 		let format: string = base_bits_handle.position == texture_bits_t.BITS8  ? "RGBA32" :
-						base_bits_handle.position == texture_bits_t.BITS16 		? "RGBA64" :
+							 base_bits_handle.position == texture_bits_t.BITS16 ? "RGBA64" :
 																				  "RGBA128";
 		///end
 		///if is_lab
@@ -2308,7 +2294,9 @@ function base_new_layer(clear: bool = true, position: i32 = -1): slot_layer_t {
 		}
 	}
 	if (clear) {
-		app_notify_on_init(function () { slot_layer_clear(l); });
+		app_notify_on_init(function (l: slot_layer_t) {
+			slot_layer_clear(l);
+		}, l);
 	}
 	context_raw.layer_preview_dirty = true;
 	return l;
@@ -2325,7 +2313,9 @@ function base_new_mask(clear: bool = true, parent: slot_layer_t, position: i32 =
 	array_insert(project_layers, position, l);
 	context_set_layer(l);
 	if (clear) {
-		app_notify_on_init(function () { slot_layer_clear(l); });
+		app_notify_on_init(function (l: slot_layer_t) {
+			slot_layer_clear(l);
+		}, l);
 	}
 	context_raw.layer_preview_dirty = true;
 	return l;
@@ -2341,17 +2331,25 @@ function base_new_group(): slot_layer_t {
 	return l;
 }
 
+let _base_uv_type: uv_type_t;
+let _base_decal_mat: mat4_t;
+let _base_position: i32;
+
 function base_create_fill_layer(uv_type: uv_type_t = uv_type_t.UVMAP, decal_mat: mat4_t = null, position: i32 = -1) {
-	let _init = function () {
-		let l: slot_layer_t = base_new_layer(false, position);
+	_base_uv_type = uv_type;
+	_base_decal_mat = decal_mat;
+	_base_position = position;
+	app_notify_on_init(function () {
+		let l: slot_layer_t = base_new_layer(false, _base_position);
 		history_new_layer();
-		l.uv_type = uv_type;
-		if (decal_mat != null) l.decal_mat = decal_mat;
+		l.uv_type = _base_uv_type;
+		if (_base_decal_mat != null) {
+			l.decal_mat = _base_decal_mat;
+		}
 		l.object_mask = context_raw.layer_filter;
 		history_to_fill_layer();
 		slot_layer_to_fill_layer(l);
-	}
-	app_notify_on_init(_init);
+	});
 }
 
 function base_create_image_mask(asset: asset_t) {
@@ -2366,15 +2364,26 @@ function base_create_image_mask(asset: asset_t) {
 	context_raw.layer_preview_dirty = true;
 }
 
+let _base_base_color: i32;
+let _base_occlusion: f32;
+let _base_roughness: f32;
+let _base_metallic: f32;
+
 function base_create_color_layer(base_color: i32, occlusion: f32 = 1.0, roughness: f32 = base_default_rough, metallic: f32 = 0.0, position: i32 = -1) {
-	let _init = function () {
-		let l: slot_layer_t = base_new_layer(false, position);
+
+	_base_base_color = base_color;
+	_base_occlusion = occlusion;
+	_base_roughness = roughness;
+	_base_metallic = metallic;
+	_base_position = position;
+
+	app_notify_on_init(function () {
+		let l: slot_layer_t = base_new_layer(false, _base_position);
 		history_new_layer();
 		l.uv_type = uv_type_t.UVMAP;
 		l.object_mask = context_raw.layer_filter;
-		slot_layer_clear(l, base_color, null, occlusion, roughness, metallic);
-	}
-	app_notify_on_init(_init);
+		slot_layer_clear(l, _base_base_color, null, _base_occlusion, _base_roughness, _base_metallic);
+	});
 }
 
 function base_on_layers_resized() {
@@ -2469,7 +2478,7 @@ function base_on_layers_resized() {
 		map_delete(render_path_render_targets, "texpaint_node_target");
 	}
 
-	base_notify_on_next_frame(function () {
+	app_notify_on_next_frame(function () {
 		base_init_layers();
 	});
 

@@ -291,15 +291,14 @@ function import_blend_material_run(path: string) {
 		history_new_material();
 	}
 
-	let _init = function () {
+	app_notify_on_init(function (imported: slot_material_t[]) {
 		for (let i: i32 = 0; i < imported.length; ++i) {
 			let m: slot_material_t = imported[i];
 			context_set_material(m);
 			make_material_parse_paint_material();
 			util_render_make_material_preview();
 		}
-	}
-	app_notify_on_init(_init);
+	}, imported);
 
 	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 	data_delete_blob(path);

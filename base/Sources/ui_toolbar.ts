@@ -27,6 +27,45 @@ let ui_toolbar_tool_names: string[] = [
 function ui_toolbar_init() {
 }
 
+let _ui_toolbar_i: i32;
+
+function ui_toolbar_draw_tool(i: i32, ui: zui_t, img: image_t, icon_accent: i32, keys: string[]) {
+	ui._x += 2;
+	if (context_raw.tool == i) {
+		ui_toolbar_draw_highlight();
+	}
+	let tile_y: i32 = math_floor(i / 12);
+	let tile_x: i32 = tile_y % 2 == 0 ? i % 12 : (11 - (i % 12));
+	let rect: rect_t = resource_tile50(img, tile_x, tile_y);
+	let _y: i32 = ui._y;
+
+	let image_state: zui_state_t = zui_image(img, icon_accent, -1.0, rect.x, rect.y, rect.w, rect.h);
+	if (image_state == zui_state_t.STARTED) {
+		_ui_toolbar_i = i;
+		app_notify_on_next_frame(function() {
+			context_select_tool(_ui_toolbar_i);
+		});
+	}
+	else if (image_state == zui_state_t.RELEASED && config_raw.layout[layout_size_t.HEADER] == 0) {
+		if (ui_toolbar_last_tool == i) {
+			ui_toolbar_tool_properties_menu();
+		}
+		ui_toolbar_last_tool = i;
+	}
+
+	///if is_paint
+	if (i == workspace_tool_t.COLORID && context_raw.colorid_picked) {
+		g2_draw_scaled_sub_image(map_get(render_path_render_targets, "texpaint_colorid")._image, 0, 0, 1, 1, 0, _y + 1.5 * zui_SCALE(ui), 5 * zui_SCALE(ui), 34 * zui_SCALE(ui));
+	}
+	///end
+
+	if (ui.is_hovered) {
+		zui_tooltip(tr(ui_toolbar_tool_names[i]) + " " + keys[i]);
+	}
+	ui._x -= 2;
+	ui._y += 2;
+}
+
 function ui_toolbar_render_ui() {
 	let ui: zui_t = ui_base_ui;
 
@@ -114,58 +153,24 @@ function ui_toolbar_render_ui() {
 			"(" + config_keymap.tool_material + ")",
 		];
 
-		let draw_tool = function (i: i32) {
-			ui._x += 2;
-			if (context_raw.tool == i) {
-				ui_toolbar_draw_highlight();
-			}
-			let tile_y: i32 = math_floor(i / 12);
-			let tile_x: i32 = tile_y % 2 == 0 ? i % 12 : (11 - (i % 12));
-			let rect: rect_t = resource_tile50(img, tile_x, tile_y);
-			let _y: i32 = ui._y;
-
-			let image_state: zui_state_t = zui_image(img, icon_accent, -1.0, rect.x, rect.y, rect.w, rect.h);
-			if (image_state == zui_state_t.STARTED) {
-				context_select_tool(i);
-			}
-			else if (image_state == zui_state_t.RELEASED && config_raw.layout[layout_size_t.HEADER] == 0) {
-				if (ui_toolbar_last_tool == i) {
-					ui_toolbar_tool_properties_menu();
-				}
-				ui_toolbar_last_tool = i;
-			}
-
-			///if is_paint
-			if (i == workspace_tool_t.COLORID && context_raw.colorid_picked) {
-				g2_draw_scaled_sub_image(map_get(render_path_render_targets, "texpaint_colorid")._image, 0, 0, 1, 1, 0, _y + 1.5 * zui_SCALE(ui), 5 * zui_SCALE(ui), 34 * zui_SCALE(ui));
-			}
-			///end
-
-			if (ui.is_hovered) {
-				zui_tooltip(tr(ui_toolbar_tool_names[i]) + " " + keys[i]);
-			}
-			ui._x -= 2;
-			ui._y += 2;
-		}
-
-		draw_tool(workspace_tool_t.BRUSH);
+		ui_toolbar_draw_tool(workspace_tool_t.BRUSH, ui, img, icon_accent, keys);
 		///if is_paint
-		draw_tool(workspace_tool_t.ERASER);
-		draw_tool(workspace_tool_t.FILL);
-		draw_tool(workspace_tool_t.DECAL);
-		draw_tool(workspace_tool_t.TEXT);
-		draw_tool(workspace_tool_t.CLONE);
-		draw_tool(workspace_tool_t.BLUR);
-		draw_tool(workspace_tool_t.SMUDGE);
-		draw_tool(workspace_tool_t.PARTICLE);
-		draw_tool(workspace_tool_t.COLORID);
-		draw_tool(workspace_tool_t.PICKER);
-		draw_tool(workspace_tool_t.BAKE);
-		draw_tool(workspace_tool_t.MATERIAL);
+		ui_toolbar_draw_tool(workspace_tool_t.ERASER, ui, img, icon_accent, keys);
+		ui_toolbar_draw_tool(workspace_tool_t.FILL, ui, img, icon_accent, keys);
+		ui_toolbar_draw_tool(workspace_tool_t.DECAL, ui, img, icon_accent, keys);
+		ui_toolbar_draw_tool(workspace_tool_t.TEXT, ui, img, icon_accent, keys);
+		ui_toolbar_draw_tool(workspace_tool_t.CLONE, ui, img, icon_accent, keys);
+		ui_toolbar_draw_tool(workspace_tool_t.BLUR, ui, img, icon_accent, keys);
+		ui_toolbar_draw_tool(workspace_tool_t.SMUDGE, ui, img, icon_accent, keys);
+		ui_toolbar_draw_tool(workspace_tool_t.PARTICLE, ui, img, icon_accent, keys);
+		ui_toolbar_draw_tool(workspace_tool_t.COLORID, ui, img, icon_accent, keys);
+		ui_toolbar_draw_tool(workspace_tool_t.PICKER, ui, img, icon_accent, keys);
+		ui_toolbar_draw_tool(workspace_tool_t.BAKE, ui, img, icon_accent, keys);
+		ui_toolbar_draw_tool(workspace_tool_t.MATERIAL, ui, img, icon_accent, keys);
 		///end
 
 		///if is_forge
-		draw_tool(workspace_tool_t.GIZMO);
+		ui_toolbar_draw_tool(workspace_tool_t.GIZMO, ui, img, icon_accent, keys);
 		///end
 
 		ui.image_scroll_align = true;
@@ -180,11 +185,15 @@ function ui_toolbar_render_ui() {
 	}
 }
 
+let _ui_toolbar_tool_properties_menu_x: i32;
+let _ui_toolbar_tool_properties_menu_y: i32;
+let _ui_toolbar_tool_properties_menu_w: i32;
+
 function ui_toolbar_tool_properties_menu() {
 	let ui: zui_t = ui_base_ui;
-	let _x: i32 = ui._x;
-	let _y: i32 = ui._y;
-	let _w: i32 = ui._w;
+	_ui_toolbar_tool_properties_menu_x = ui._x;
+	_ui_toolbar_tool_properties_menu_y = ui._y;
+	_ui_toolbar_tool_properties_menu_w = ui._w;
 	ui_menu_draw(function (ui: zui_t) {
 		let start_y: i32 = ui._y;
 		ui.changed = false;
@@ -201,8 +210,8 @@ function ui_toolbar_tool_properties_menu() {
 
 		let h: i32 = ui._y - start_y;
 		ui_menu_elements = math_floor(h / zui_ELEMENT_H(ui));
-		ui_menu_x = math_floor(_x + _w + 2);
-		ui_menu_y = math_floor(_y - 6 * zui_SCALE(ui));
+		ui_menu_x = math_floor(_ui_toolbar_tool_properties_menu_x + _ui_toolbar_tool_properties_menu_w + 2);
+		ui_menu_y = math_floor(_ui_toolbar_tool_properties_menu_y - 6 * zui_SCALE(ui));
 		ui_menu_fit_to_screen();
 
 	}, 0);

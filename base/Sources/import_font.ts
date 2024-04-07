@@ -22,15 +22,14 @@ function import_font_run(path: string) {
 		array_push(font_slots, font_slot);
 	}
 
-	let _init = function () {
+	app_notify_on_init(function (font_slots: slot_font_t[]) {
 		for (let i: i32 = 0; i < font_slots.length; ++i) {
 			let f: slot_font_t = font_slots[i];
 			context_raw.font = f;
 			array_push(project_fonts, f);
 			util_render_make_font_preview();
 		}
-	}
-	app_notify_on_init(_init);
+	}, font_slots);
 
 	ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
 }

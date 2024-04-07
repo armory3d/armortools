@@ -1,22 +1,30 @@
 
+let _import_asset_drop_x: f32;
+let _import_asset_drop_y: f32;
+let _import_asset_show_box: bool;
+let _import_asset_hdr_as_envmap: bool;
+let _import_asset_done: ()=>void;
+
 function import_asset_run(path: string, drop_x: f32 = -1.0, drop_y: f32 = -1.0, show_box: bool = true, hdr_as_envmap: bool = true, done: ()=>void = null) {
 
 	if (starts_with(path, "cloud")) {
-		let do_cache_cloud = function () {
-			file_cache_cloud(path, function (abs: string) {
-				if (abs == null) return;
-				import_asset_run(abs, drop_x, drop_y, show_box, hdr_as_envmap, done);
-			});
-		}
-
 		///if (krom_android || krom_ios)
-		base_notify_on_next_frame(function () {
-			console_toast(tr("Downloading"));
-			base_notify_on_next_frame(do_cache_cloud);
-		});
-		///else
-		do_cache_cloud();
+		console_toast(tr("Downloading"));
+		krom_g4_swap_buffers();
 		///end
+
+		_import_asset_drop_x = drop_x;
+		_import_asset_drop_y = drop_y;
+		_import_asset_show_box = show_box;
+		_import_asset_hdr_as_envmap = hdr_as_envmap;
+		_import_asset_done = done;
+
+		file_cache_cloud(path, function (abs: string) {
+			if (abs == null) {
+				return;
+			}
+			import_asset_run(abs, _import_asset_drop_x, _import_asset_drop_y, _import_asset_show_box, _import_asset_hdr_as_envmap, _import_asset_done);
+		});
 
 		return;
 	}

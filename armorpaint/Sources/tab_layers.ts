@@ -102,10 +102,9 @@ function tab_layers_button_new(text: string) {
 				// let l: slot_layer_t = raw.layer;
 
 				let m: slot_layer_t = base_new_mask(false, l);
-				let _next = function () {
+				app_notify_on_next_frame(function (m: slot_layer_t) {
 					slot_layer_clear(m, 0x00000000);
-				}
-				base_notify_on_next_frame(_next);
+				}, m);
 				context_raw.layer_preview_dirty = true;
 				history_new_black_mask();
 				base_update_fill_layers();
@@ -117,10 +116,9 @@ function tab_layers_button_new(text: string) {
 				// let l: slot_layer_t = raw.layer;
 
 				let m: slot_layer_t = base_new_mask(false, l);
-				let _next = function () {
+				app_notify_on_next_frame(function (m: slot_layer_t) {
 					slot_layer_clear(m, 0xffffffff);
-				}
-				base_notify_on_next_frame(_next);
+				}, m);
 				context_raw.layer_preview_dirty = true;
 				history_new_white_mask();
 				base_update_fill_layers();
@@ -132,10 +130,9 @@ function tab_layers_button_new(text: string) {
 				// let l: slot_layer_t = raw.layer;
 
 				let m: slot_layer_t = base_new_mask(false, l);
-				let _init = function () {
+				app_notify_on_init(function (m: slot_layer_t) {
 					slot_layer_to_fill_layer(m);
-				}
-				app_notify_on_init(_init);
+				}, m);
 				context_raw.layer_preview_dirty = true;
 				history_new_fill_mask();
 				base_update_fill_layers();
@@ -425,10 +422,9 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 							 ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
 		if (in_focus && ui.is_delete_down && tab_layers_can_delete(context_raw.layer)) {
 			ui.is_delete_down = false;
-			let _init = function () {
+			app_notify_on_init(function () {
 				tab_layers_delete_layer(context_raw.layer);
-			}
-			app_notify_on_init(_init);
+			});
 		}
 	}
 	ui._y -= center;
@@ -484,7 +480,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	ui._y -= zui_ELEMENT_OFFSET(ui);
 }
 
-function tab_layers_combo_object(ui: zui_t, l: slot_layer_t, label = false): zui_handle_t {
+function tab_layers_combo_object(ui: zui_t, l: slot_layer_t, label: bool = false): zui_handle_t {
 	let ar: string[] = [tr("Shared")];
 	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 		let p: mesh_object_t = project_paint_objects[i];
@@ -504,12 +500,11 @@ function tab_layers_combo_object(ui: zui_t, l: slot_layer_t, label = false): zui
 		context_set_layer(l);
 		make_material_parse_mesh_material();
 		if (l.fill_layer != null) { // Fill layer
-			let _init = function () {
+			app_notify_on_init(function (l: slot_layer_t) {
 				context_raw.material = l.fill_layer;
 				slot_layer_clear(l);
 				base_update_fill_layers();
-			}
-			app_notify_on_init(_init);
+			}, l);
 		}
 		else {
 			base_set_object_mask();
@@ -518,7 +513,7 @@ function tab_layers_combo_object(ui: zui_t, l: slot_layer_t, label = false): zui
 	return object_handle;
 }
 
-function tab_layers_combo_blending(ui: zui_t, l: slot_layer_t, label = false): zui_handle_t {
+function tab_layers_combo_blending(ui: zui_t, l: slot_layer_t, label: bool = false): zui_handle_t {
 	let blending_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
 	blending_handle.position = l.blending;
 	zui_combo(blending_handle, [
@@ -724,6 +719,9 @@ function tab_layers_can_merge_down(l: slot_layer_t) : bool {
 	return true;
 }
 
+let tab_layers_l: slot_layer_t;
+let tab_layers_mini: bool;
+
 function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 	let add: i32 = 0;
 
@@ -748,9 +746,15 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			add += 1;
 		}
 	}
+
 	let menu_elements: i32 = slot_layer_is_group(l) ? 7 : (19 + add);
+	tab_layers_l = l;
+	tab_layers_mini = mini;
 
 	ui_menu_draw(function (ui: zui_t) {
+
+		let l: slot_layer_t = tab_layers_l;
+		let mini: bool = tab_layers_mini;
 
 		if (mini) {
 			let visible_handle: zui_handle_t = zui_handle(__ID__);
@@ -779,6 +783,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 		if (ui_menu_button(ui, tr("Export"))) {
 			if (slot_layer_is_mask(l)) {
 				ui_files_show("png", true, false, function (path: string) {
+					let l: slot_layer_t = tab_layers_l;
 					let f: string = ui_files_filename;
 					if (f == "") {
 						f = tr("untitled");
@@ -802,33 +807,33 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			let to_paint_string: string = slot_layer_is_layer(l) ? tr("To Paint Layer") : tr("To Paint Mask");
 
 			if (l.fill_layer == null && ui_menu_button(ui, to_fill_string)) {
-				let _init = function () {
+				app_notify_on_init(function () {
+					let l: slot_layer_t = tab_layers_l;
 					slot_layer_is_layer(l) ? history_to_fill_layer() : history_to_fill_mask();
 					slot_layer_to_fill_layer(l);
-				}
-				app_notify_on_init(_init);
+				});
 			}
 			if (l.fill_layer != null && ui_menu_button(ui, to_paint_string)) {
-				let _init = function () {
+				app_notify_on_init(function () {
+					let l: slot_layer_t = tab_layers_l;
 					slot_layer_is_layer(l) ? history_to_paint_layer() : history_to_paint_mask();
 					slot_layer_to_paint_layer(l);
-				}
-				app_notify_on_init(_init);
+				});
 			}
 		}
 
 		ui.enabled = tab_layers_can_delete(l);
 		if (ui_menu_button(ui, tr("Delete"), "delete")) {
-			let _init = function () {
+			app_notify_on_init(function () {
 				tab_layers_delete_layer(context_raw.layer);
-			}
-			app_notify_on_init(_init);
+			});
 		}
 		ui.enabled = true;
 
 		if (l.fill_layer == null && ui_menu_button(ui, tr("Clear"))) {
 			context_set_layer(l);
-			let _init = function () {
+			app_notify_on_init(function () {
+				let l: slot_layer_t = tab_layers_l;
 				if (!slot_layer_is_group(l)) {
 					history_clear_layer();
 					slot_layer_clear(l);
@@ -843,52 +848,51 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 					context_raw.layers_preview_dirty = true;
 					context_raw.layer = l;
 				}
-			}
-			app_notify_on_init(_init);
+			});
 		}
 		if (slot_layer_is_mask(l) && l.fill_layer == null && ui_menu_button(ui, tr("Invert"))) {
-			let _init = function () {
+			app_notify_on_init(function () {
+				let l: slot_layer_t = tab_layers_l;
 				context_set_layer(l);
 				history_invert_mask();
 				slot_layer_invert_mask(l);
-			}
-			app_notify_on_init(_init);
+			});
 		}
 		if (slot_layer_is_mask(l) && ui_menu_button(ui, tr("Apply"))) {
-			let _init = function () {
+			app_notify_on_init(function () {
+				let l: slot_layer_t = tab_layers_l;
 				context_raw.layer = l;
 				history_apply_mask();
 				slot_layer_apply_mask(l);
 				context_set_layer(l.parent);
 				make_material_parse_mesh_material();
 				context_raw.layers_preview_dirty = true;
-			}
-			app_notify_on_init(_init);
+			});
 		}
 		if (slot_layer_is_group(l) && ui_menu_button(ui, tr("Merge Group"))) {
-			let _init = function () {
+			app_notify_on_init(function () {
+				let l: slot_layer_t = tab_layers_l;
 				base_merge_group(l);
-			}
-			app_notify_on_init(_init);
+			});
 		}
 		ui.enabled = tab_layers_can_merge_down(l);
 		if (ui_menu_button(ui, tr("Merge Down"))) {
-			let _init = function () {
+			app_notify_on_init(function () {
+				let l: slot_layer_t = tab_layers_l;
 				context_set_layer(l);
 				history_merge_layers();
 				base_merge_down();
 				if (context_raw.layer.fill_layer != null) slot_layer_to_paint_layer(context_raw.layer);
-			}
-			app_notify_on_init(_init);
+			});
 		}
 		ui.enabled = true;
 		if (ui_menu_button(ui, tr("Duplicate"))) {
-			let _init = function () {
+			app_notify_on_init(function () {
+				let l: slot_layer_t = tab_layers_l;
 				context_set_layer(l);
 				history_duplicate_layer();
 				base_duplicate_layer(l);
-			}
-			app_notify_on_init(_init);
+			});
 		}
 
 		ui_menu_fill(ui);
@@ -949,10 +953,9 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			if (scale_handle.changed) {
 				context_set_material(l.fill_layer);
 				context_set_layer(l);
-				let _init = function () {
+				app_notify_on_init(function () {
 					base_update_fill_layers();
-				}
-				app_notify_on_init(_init);
+				});
 				ui_menu_keep_open = true;
 			}
 
@@ -965,10 +968,9 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 				context_set_material(l.fill_layer);
 				context_set_layer(l);
 				make_material_parse_paint_material();
-				let _init = function () {
+				app_notify_on_init(function () {
 					base_update_fill_layers();
-				}
-				app_notify_on_init(_init);
+				});
 				ui_menu_keep_open = true;
 			}
 
@@ -981,10 +983,9 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 				context_set_material(l.fill_layer);
 				context_set_layer(l);
 				make_material_parse_paint_material();
-				let _init = function () {
+				app_notify_on_init(function () {
 					base_update_fill_layers();
-				}
-				app_notify_on_init(_init);
+				});
 				ui_menu_keep_open = true;
 			}
 		}
@@ -1060,7 +1061,9 @@ function tab_layers_make_mask_preview_rgba32(l: slot_layer_t) {
 	// Convert from R8 to RGBA32 for tooltip display
 	if (context_raw.mask_preview_last != l) {
 		context_raw.mask_preview_last = l;
+		tab_layers_l = l;
 		app_notify_on_init(function () {
+			let l: slot_layer_t = tab_layers_l;
 			g2_begin(context_raw.mask_preview_rgba32);
 			g2_set_pipeline(ui_view2d_pipe);
 			g4_set_int(ui_view2d_channel_loc, 1);

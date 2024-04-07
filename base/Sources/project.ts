@@ -42,6 +42,8 @@ function project_open() {
 	});
 }
 
+let _project_save_and_quit: bool;
+
 function project_save(save_and_quit: bool = false) {
 	if (project_filepath == "") {
 		///if krom_ios
@@ -61,14 +63,18 @@ function project_save(save_and_quit: bool = false) {
 	sys_title_set(filename + " - " + manifest_title);
 	///end
 
-	let _init = function () {
+	_project_save_and_quit = save_and_quit;
+
+	app_notify_on_init(function () {
 		export_arm_run_project();
-		if (save_and_quit) sys_stop();
-	}
-	app_notify_on_init(_init);
+		if (_project_save_and_quit) {
+			sys_stop();
+		}
+	});
 }
 
 function project_save_as(save_and_quit: bool = false) {
+	_project_save_and_quit = save_and_quit;
 	ui_files_show("arm", true, false, function (path: string) {
 		let f: string = ui_files_filename;
 		if (f == "") {
@@ -78,7 +84,7 @@ function project_save_as(save_and_quit: bool = false) {
 		if (!ends_with(project_filepath, ".arm")) {
 			project_filepath += ".arm";
 		}
-		project_save(save_and_quit);
+		project_save(_project_save_and_quit);
 	});
 }
 
@@ -175,7 +181,7 @@ function project_new(reset_layers: bool = true) {
 			raw = import_mesh_raw_mesh(mesh);
 
 			///if is_sculpt
-			base_notify_on_next_frame(function () {
+			app_notify_on_next_frame(function (mesh: any) {
 				let f32a: f32_array_t = f32_array_create(config_get_texture_res_x() * config_get_texture_res_y() * 4);
 				for (let i: i32 = 0; i < math_floor(mesh.inda.length); ++i) {
 					let index: i32 = mesh.inda[i];
@@ -192,7 +198,7 @@ function project_new(reset_layers: bool = true) {
 				g2_draw_scaled_image(imgmesh, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
 				g2_set_pipeline(null);
 				g2_end();
-			});
+			}, mesh);
 			///end
 		}
 		else {
@@ -365,10 +371,7 @@ function project_import_brush() {
 			// Parse brush
 			make_material_parse_brush();
 			ui_nodes_hwnd.redraws = 2;
-			let _init = function () {
-				util_render_make_brush_preview();
-			}
-			app_notify_on_init(_init);
+			app_notify_on_init(util_render_make_brush_preview);
 		}
 		// Import from project file
 		else {
@@ -378,13 +381,28 @@ function project_import_brush() {
 }
 ///end
 
+let _project_import_mesh_replace_existing: bool;
+let _project_import_mesh_done: ()=>void;
+
 function project_import_mesh(replace_existing: bool = true, done: ()=>void = null) {
+	_project_import_mesh_replace_existing = replace_existing;
+	_project_import_mesh_done = done;
 	ui_files_show(path_mesh_formats.join(","), false, false, function (path: string) {
-		project_import_mesh_box(path, replace_existing, true, done);
+		project_import_mesh_box(path, _project_import_mesh_replace_existing, true, _project_import_mesh_done);
 	});
 }
 
+let _project_import_mesh_box_path: string;
+let _project_import_mesh_box_replace_existing: bool;
+let _project_import_mesh_box_clear_layers: bool;
+let _project_import_mesh_box_done: ()=>void;
+
 function project_import_mesh_box(path: string, replace_existing: bool = true, clear_layers: bool = true, done: ()=>void = null) {
+
+	_project_import_mesh_box_path = path;
+	_project_import_mesh_box_replace_existing = replace_existing;
+	_project_import_mesh_box_clear_layers = clear_layers;
+	_project_import_mesh_box_done = done;
 
 	///if krom_ios
 	// Import immediately while access to resource is unlocked
@@ -392,6 +410,12 @@ function project_import_mesh_box(path: string, replace_existing: bool = true, cl
 	///end
 
 	ui_box_show_custom(function (ui: zui_t) {
+
+		let path: string = _project_import_mesh_box_path;
+		let replace_existing: bool = _project_import_mesh_box_replace_existing;
+		let clear_layers: bool = _project_import_mesh_box_clear_layers;
+		let done: ()=>void = _project_import_mesh_box_done;
+
 		let tab_vertical: bool = config_raw.touch_ui;
 		if (zui_tab(zui_handle(__ID__), tr("Import Mesh"), tab_vertical)) {
 
@@ -428,31 +452,28 @@ function project_import_mesh_box(path: string, replace_existing: bool = true, cl
 			}
 			if (zui_button(tr("Import")) || ui.is_return_down) {
 				ui_box_hide();
-				let do_import = function () {
-					///if (is_paint || is_sculpt)
-					import_mesh_run(path, clear_layers, replace_existing);
-					///end
-					///if is_lab
-					import_mesh_run(path, replace_existing);
-					///end
-					if (done != null) {
-						done();
-					}
-				}
+
 				///if (krom_android || krom_ios)
-				base_notify_on_next_frame(function () {
-					console_toast(tr("Importing mesh"));
-					base_notify_on_next_frame(do_import);
-				});
-				///else
-				do_import();
+				console_toast(tr("Importing mesh"));
+				krom_g4_swap_buffers();
 				///end
+
+				///if (is_paint || is_sculpt)
+				import_mesh_run(path, clear_layers, replace_existing);
+				///end
+				///if is_lab
+				import_mesh_run(path, replace_existing);
+				///end
+				if (done != null) {
+					done();
+				}
 			}
 			if (zui_button(tr("?"))) {
 				file_load_url("https://github.com/armory3d/armorpaint_docs/blob/master/faq.md");
 			}
 		}
 	});
+
 	ui_box_click_to_hide = false; // Prevent closing when going back to window from file browser
 }
 
@@ -465,8 +486,22 @@ function project_reimport_mesh() {
 	}
 }
 
+let _project_unwrap_mesh_box_mesh: any;
+let _project_unwrap_mesh_box_done: (a: any)=>void;
+let _project_unwrap_mesh_box_skip_ui: bool;
+
 function project_unwrap_mesh_box(mesh: any, done: (a: any)=>void, skip_ui: bool = false) {
+
+	_project_unwrap_mesh_box_mesh = mesh;
+	_project_unwrap_mesh_box_done = done;
+	_project_unwrap_mesh_box_skip_ui = skip_ui;
+
 	ui_box_show_custom(function (ui: zui_t) {
+
+		let mesh: any = _project_unwrap_mesh_box_mesh;
+		let done: (a: any)=>void = _project_unwrap_mesh_box_done;
+		let skip_ui: bool = _project_unwrap_mesh_box_skip_ui;
+
 		let tab_vertical: bool = config_raw.touch_ui;
 		if (zui_tab(zui_handle(__ID__), tr("Unwrap Mesh"), tab_vertical)) {
 
@@ -490,49 +525,53 @@ function project_unwrap_mesh_box(mesh: any, done: (a: any)=>void, skip_ui: bool 
 			}
 			if (zui_button(tr("Unwrap")) || ui.is_return_down || skip_ui) {
 				ui_box_hide();
-				let do_unwrap = function () {
-					if (unwrap_by == unwrap_plugins.length - 1) {
-						util_mesh_equirect_unwrap(mesh);
-					}
-					else {
-						let f: string = unwrap_plugins[unwrap_by];
-						if (array_index_of(config_raw.plugins, f) == -1) {
-							config_enable_plugin(f);
-							console_info(f + " " + tr("plugin enabled"));
-						}
-						map_get(util_mesh_unwrappers, f)(mesh);
-					}
-					done(mesh);
-				}
+
 				///if (krom_android || krom_ios)
-				base_notify_on_next_frame(function () {
-					console_toast(tr("Unwrapping mesh"));
-					base_notify_on_next_frame(do_unwrap);
-				});
-				///else
-				do_unwrap();
+				console_toast(tr("Unwrapping mesh"));
+				krom_g4_swap_buffers();
 				///end
+
+				if (unwrap_by == unwrap_plugins.length - 1) {
+					util_mesh_equirect_unwrap(mesh);
+				}
+				else {
+					let f: string = unwrap_plugins[unwrap_by];
+					if (array_index_of(config_raw.plugins, f) == -1) {
+						config_enable_plugin(f);
+						console_info(f + " " + tr("plugin enabled"));
+					}
+					map_get(util_mesh_unwrappers, f)(mesh);
+				}
+				done(mesh);
 			}
 		}
 	});
 }
 
+let _project_import_asset_hdr_as_envmap: bool;
+
 function project_import_asset(filters: string = null, hdr_as_envmap: bool = true) {
 	if (filters == null) {
 		filters = path_texture_formats.join(",") + "," + path_mesh_formats.join(",");
 	}
+
+	_project_import_asset_hdr_as_envmap = hdr_as_envmap;
+
 	ui_files_show(filters, false, true, function (path: string) {
-		import_asset_run(path, -1.0, -1.0, true, hdr_as_envmap);
+		import_asset_run(path, -1.0, -1.0, true, _project_import_asset_hdr_as_envmap);
 	});
 }
 
+let _project_import_swatches_replace_existing: bool;
+
 function project_import_swatches(replace_existing: bool = false) {
+	_project_import_swatches_replace_existing = replace_existing;
 	ui_files_show("arm,gpl", false, false, function (path: string) {
 		if (path_is_gimp_color_palette(path)) {
-			import_gpl_run(path, replace_existing);
+			import_gpl_run(path, _project_import_swatches_replace_existing);
 		}
 		else {
-			import_arm_run_swatches(path, replace_existing);
+			import_arm_run_swatches(path, _project_import_swatches_replace_existing);
 		}
 	});
 }
@@ -544,41 +583,46 @@ function project_reimport_textures() {
 	}
 }
 
-function project_reimport_texture(asset: asset_t) {
-	let load = function (path: string) {
-		asset.file = path;
-		let i: i32 = array_index_of(project_assets, asset);
-		data_delete_image(asset.file);
-		map_delete(project_asset_map, asset.id);
-		let old_asset: asset_t = project_assets[i];
-		array_splice(project_assets, i, 1);
-		array_splice(project_asset_names, i, 1);
-		import_texture_run(asset.file);
-		array_insert(project_assets, i, project_assets.pop());
-		array_insert(project_asset_names, i, project_asset_names.pop());
+function project_reimport_texture_load(path: string, asset: asset_t) {
+	asset.file = path;
+	let i: i32 = array_index_of(project_assets, asset);
+	data_delete_image(asset.file);
+	map_delete(project_asset_map, asset.id);
+	let old_asset: asset_t = project_assets[i];
+	array_splice(project_assets, i, 1);
+	array_splice(project_asset_names, i, 1);
+	import_texture_run(asset.file);
+	array_insert(project_assets, i, project_assets.pop());
+	array_insert(project_asset_names, i, project_asset_names.pop());
+
+	///if (is_paint || is_sculpt)
+	if (context_raw.texture == old_asset) {
+		context_raw.texture = project_assets[i];
+	}
+	///end
+
+	app_notify_on_next_frame(function () {
+		make_material_parse_paint_material();
 
 		///if (is_paint || is_sculpt)
-		if (context_raw.texture == old_asset) context_raw.texture = project_assets[i];
+		util_render_make_material_preview();
+		ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 		///end
+	});
+}
 
-		let _next = function () {
-			make_material_parse_paint_material();
+let _project_reimport_texture_asset: asset_t;
 
-			///if (is_paint || is_sculpt)
-			util_render_make_material_preview();
-			ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
-			///end
-		}
-		base_notify_on_next_frame(_next);
-	}
+function project_reimport_texture(asset: asset_t) {
 	if (!file_exists(asset.file)) {
 		let filters: string = path_texture_formats.join(",");
+		_project_reimport_texture_asset = asset;
 		ui_files_show(filters, false, false, function (path: string) {
-			load(path);
+			project_reimport_texture_load(path, _project_reimport_texture_asset);
 		});
 	}
 	else {
-		load(asset.file);
+		project_reimport_texture_load(asset.file, asset);
 	}
 }
 

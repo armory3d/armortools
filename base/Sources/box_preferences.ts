@@ -110,13 +110,13 @@ function box_preferences_show() {
 						ui_files_show("json", false, false, function (path: string) {
 							let b: buffer_t = data_get_blob(path);
 							let raw: config_t = json_parse(sys_buffer_to_string(b));
-							app_notify_on_init(function () {
+							app_notify_on_init(function (raw: config_t) {
 								ui.t.ELEMENT_H = base_default_element_h;
 								config_import_from(raw);
 								box_preferences_set_scale();
 								make_material_parse_mesh_material();
 								make_material_parse_paint_material();
-							});
+							}, raw);
 						});
 					}
 				}, 2);
@@ -247,6 +247,7 @@ function box_preferences_show() {
 						ui_menu_draw(function (ui: zui_t) {
 							ui.changed = false;
 							let color: i32 = zui_color_wheel(h, false, null, 11 * ui.t.ELEMENT_H * zui_SCALE(ui), true);
+							let theme: any = base_theme;
 							theme[key] = color;
 							if (ui.changed) {
 								ui_menu_keep_open = true;
@@ -697,7 +698,10 @@ plugin.draw_ui = function (ui) {\
 						}
 						if (ui_menu_button(ui, tr("Export"))) {
 							ui_files_show("js", true, false, function (dest: string) {
-								if (!ends_with(ui_files_filename, ".js")) ui_files_filename += ".js";
+								if (!ends_with(ui_files_filename, ".js")) {
+									ui_files_filename += ".js";
+								}
+								let path: string = path_data() + path_sep + "plugins" + path_sep + f;
 								file_copy(path, dest + path_sep + ui_files_filename);
 							});
 						}
@@ -714,7 +718,9 @@ plugin.draw_ui = function (ui) {\
 			}
 		}
 
-	}, 620, config_raw.touch_ui ? 480 : 420, function () { config_save(); });
+	}, 620, config_raw.touch_ui ? 480 : 420, function () {
+		config_save();
+	});
 }
 
 function box_preferences_fetch_themes() {

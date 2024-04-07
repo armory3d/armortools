@@ -70,7 +70,7 @@ function import_mesh_finish_import() {
 
 	if (project_paint_objects.length > 1) {
 		// Sort by name
-		array_sort(project_paint_objects, function (a, b): i32 {
+		array_sort(project_paint_objects, function (a: mesh_object_t, b: mesh_object_t): i32 {
 			if (a.base.name < b.base.name) {
 				return -1;
 			}
@@ -167,7 +167,7 @@ function _import_mesh_make_mesh(mesh: any) {
 
 	// Wait for addMesh calls to finish
 	if (import_mesh_meshes_to_unwrap != null) {
-		base_notify_on_next_frame(import_mesh_finish_import);
+		app_notify_on_next_frame(import_mesh_finish_import);
 	}
 	else {
 		app_notify_on_init(import_mesh_finish_import);

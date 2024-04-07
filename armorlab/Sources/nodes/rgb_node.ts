@@ -14,9 +14,9 @@ function rgb_node_create(arg: any): rgb_node_t {
 
 function rgb_node_get_as_image(self: rgb_node_t, from: i32): image_t {
 	if (self.image != null) {
-		base_notify_on_next_frame(function () {
+		app_notify_on_next_frame(function (self: rgb_node_t) {
 			image_unload(self.image);
-		});
+		}, self);
 	}
 
 	let f32a = f32_array_create(4);

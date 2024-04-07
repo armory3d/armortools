@@ -48,7 +48,8 @@ function history_undo() {
 
 			// Undo at least second time in order to avoid empty groups
 			if (step.layer_type == layer_slot_type_t.GROUP) {
-				base_notify_on_next_frame(function () {
+				app_notify_on_next_frame(function () {
+					let active: i32 = history_steps.length - 1 - history_redos;
 					// 1. Undo deleting group masks
 					let n: i32 = 1;
 					while (history_steps[active - n].layer_type == layer_slot_type_t.MASK) {
@@ -141,11 +142,10 @@ function history_undo() {
 			context_set_layer(context_raw.layer);
 		}
 		else if (step.name == tr("Invert Mask")) {
-			let _next = function () {
+			app_notify_on_init(function (step: step_t) {
 				context_raw.layer = project_layers[step.layer];
 				slot_layer_invert_mask(context_raw.layer);
-			}
-			app_notify_on_init(_next);
+			}, step);
 		}
 		else if (step.name == "Apply Filter") {
 			history_undo_i = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
@@ -247,20 +247,20 @@ function history_redo() {
 			let l: slot_layer_t = slot_layer_create("", step.layer_type, parent);
 			array_insert(project_layers, step.layer, l);
 			if (step.name == tr("New Black Mask")) {
-				base_notify_on_next_frame(function () {
+				app_notify_on_next_frame(function (l: slot_layer_t) {
 					slot_layer_clear(l, 0x00000000);
-				});
+				}, l);
 			}
 			else if (step.name == tr("New White Mask")) {
-				base_notify_on_next_frame(function () {
+				app_notify_on_next_frame(function (l: slot_layer_t) {
 					slot_layer_clear(l, 0xffffffff);
-				});
+				}, l);
 			}
 			else if (step.name == tr("New Fill Mask")) {
-				base_notify_on_next_frame(function () {
-					context_raw.material = project_materials[step.material];
+				context_raw.material = project_materials[step.material];
+				app_notify_on_next_frame(function (l: slot_layer_t) {
 					slot_layer_to_fill_layer(l);
-				});
+				}, l);
 			}
 			context_raw.layer_preview_dirty = true;
 			context_set_layer(l);
@@ -281,11 +281,13 @@ function history_redo() {
 			// Redoing the last delete would result in an empty group
 			// Redo deleting all group masks + the group itself
 			if (step.layer_type == layer_slot_type_t.LAYER && history_steps.length >= active + 2 && (history_steps[active + 1].layer_type == layer_slot_type_t.GROUP || history_steps[active + 1].layer_type == layer_slot_type_t.MASK)) {
-				let n: i32 = 1;
-				while (history_steps[active + n].layer_type == layer_slot_type_t.MASK) {
-					++n;
-				}
-				base_notify_on_next_frame(function () {
+				app_notify_on_next_frame(function () {
+					let active: i32 = history_steps.length - history_redos;
+					let n: i32 = 1;
+					while (history_steps[active + n].layer_type == layer_slot_type_t.MASK) {
+						++n;
+					}
+
 					for (let i: i32 = 0; i < n; ++i) {
 						history_redo();
 					}
@@ -300,10 +302,9 @@ function history_redo() {
 		}
 		else if (step.name == tr("Duplicate Layer")) {
 			context_raw.layer = project_layers[step.layer];
-			let _next = function () {
+			app_notify_on_next_frame(function () {
 				base_duplicate_layer(context_raw.layer);
-			}
-			base_notify_on_next_frame(_next);
+			});
 		}
 		else if (step.name == tr("Order Layers")) {
 			let target: slot_layer_t = project_layers[step.prev_order];
@@ -317,29 +318,27 @@ function history_redo() {
 		}
 		else if (step.name == tr("Apply Mask")) {
 			context_raw.layer = project_layers[step.layer];
-				if (slot_layer_is_group_mask(context_raw.layer)) {
-					let group: slot_layer_t = context_raw.layer.parent;
-					let layers: slot_layer_t[] = slot_layer_get_children(group);
-					array_insert(layers, 0, context_raw.layer);
-					history_copy_merging_layers2(layers);
-				}
-				else {
-					history_copy_merging_layers2([context_raw.layer, context_raw.layer.parent]);
-				}
+			if (slot_layer_is_group_mask(context_raw.layer)) {
+				let group: slot_layer_t = context_raw.layer.parent;
+				let layers: slot_layer_t[] = slot_layer_get_children(group);
+				array_insert(layers, 0, context_raw.layer);
+				history_copy_merging_layers2(layers);
+			}
+			else {
+				history_copy_merging_layers2([context_raw.layer, context_raw.layer.parent]);
+			}
 
-			let _next = function () {
+			app_notify_on_next_frame(function () {
 				slot_layer_apply_mask(context_raw.layer);
 				context_set_layer(context_raw.layer);
 				context_raw.layers_preview_dirty = true;
-			}
-			base_notify_on_next_frame(_next);
+			});
 		}
 		else if (step.name == tr("Invert Mask")) {
-			let _next = function () {
+			app_notify_on_init(function (step: step_t) {
 				context_raw.layer = project_layers[step.layer];
 				slot_layer_invert_mask(context_raw.layer);
-			}
-			app_notify_on_init(_next);
+			}, step);
 		}
 		else if (step.name == tr("Apply Filter")) {
 			let lay: slot_layer_t = history_undo_layers[history_undo_i];

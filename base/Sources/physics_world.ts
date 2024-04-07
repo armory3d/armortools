@@ -20,7 +20,7 @@ let physics_world_v2: vec4_t = vec4_create();
 function physics_world_load(done: ()=>void) {
 	let b: buffer_t = krom_load_blob("data/plugins/ammo.js");
 	js_eval(sys_buffer_to_string(b));
-	let print = function (s: string) {
+	let print: (s: string)=>void = function (s: string) {
 		krom_log(s);
 	};
 	Ammo({print: print}).then(done);

@@ -42,7 +42,7 @@ function ui_menubar_render_ui() {
 				console_toast(tr("Saving project"));
 				project_save();
 				///end
-				base_notify_on_next_frame(function () {
+				app_notify_on_next_frame(function () {
 					box_projects_show();
 				});
 			}

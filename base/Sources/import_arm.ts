@@ -185,16 +185,16 @@ function import_arm_run_project(path: string) {
 		}
 		let rts: map_t<string, render_target_t> = render_path_render_targets;
 		let _texpaint_blend0: image_t = map_get(rts, "texpaint_blend0")._image;
-		base_notify_on_next_frame(function () {
+		app_notify_on_next_frame(function (_texpaint_blend0: image_t) {
 			image_unload(_texpaint_blend0);
-		});
+		}, _texpaint_blend0);
 		map_get(rts, "texpaint_blend0").width = config_get_texture_res_x();
 		map_get(rts, "texpaint_blend0").height = config_get_texture_res_y();
 		map_get(rts, "texpaint_blend0")._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8, depth_format_t.NO_DEPTH);
 		let _texpaint_blend1: image_t = map_get(rts, "texpaint_blend1")._image;
-		base_notify_on_next_frame(function () {
+		app_notify_on_next_frame(function (_texpaint_blend1: image_t) {
 			image_unload(_texpaint_blend1);
-		});
+		}, _texpaint_blend1);
 		map_get(rts, "texpaint_blend1").width = config_get_texture_res_x();
 		map_get(rts, "texpaint_blend1").height = config_get_texture_res_y();
 		map_get(rts, "texpaint_blend1")._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8, depth_format_t.NO_DEPTH);
@@ -295,17 +295,22 @@ function import_arm_run_project(path: string) {
 			l.paint_subs = ld.paint_subs;
 			///end
 
-			base_notify_on_next_frame(function () {
+			app_notify_on_next_frame(function (_texpaint: image_t) {
 				image_unload(_texpaint);
-				///if is_paint
-				if (_texpaint_nor != null) {
+			}, _texpaint);
+
+			///if is_paint
+			if (_texpaint_nor != null) {
+				app_notify_on_next_frame(function (_texpaint_nor: image_t) {
 					image_unload(_texpaint_nor);
-				}
-				if (_texpaint_pack != null) {
+				}, _texpaint_nor);
+			}
+			if (_texpaint_pack != null) {
+				app_notify_on_next_frame(function (_texpaint_pack: image_t) {
 					image_unload(_texpaint_pack);
-				}
-				///end
-			});
+				}, _texpaint_pack);
+			}
+			///end
 		}
 	}
 
@@ -466,15 +471,14 @@ function import_arm_run_material_from_project(project: project_format_t, path: s
 		}
 	}
 
-	let _init = function () {
+	app_notify_on_init(function (imported: slot_material_t[]) {
 		for (let i: i32 = 0; i < imported.length; ++i) {
 			let m: slot_material_t = imported[i];
 			context_set_material(m);
 			make_material_parse_paint_material();
 			util_render_make_material_preview();
 		}
-	}
-	app_notify_on_init(_init);
+	}, imported);
 
 	ui_nodes_group_stack = [];
 	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
@@ -556,14 +560,13 @@ function import_arm_run_brush_from_project(project: project_format_t, path: stri
 		array_push(imported, context_raw.brush);
 	}
 
-	let _init = function () {
+	app_notify_on_init(function (imported: slot_brush_t[]) {
 		for (let i: i32 = 0; i < imported.length; ++i) {
 			let b: slot_brush_t = imported[i];
 			context_set_brush(b);
 			util_render_make_brush_preview();
 		}
-	}
-	app_notify_on_init(_init);
+	}, imported);
 
 	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 	data_delete_blob(path);
