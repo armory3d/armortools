@@ -18,46 +18,46 @@ function brush_output_node_parse_inputs(self: brush_output_node_t) {
 	let last_mask: image_t = context_raw.brush_mask_image;
 	let last_stencil: image_t = context_raw.brush_stencil_image;
 
-	let input0: any = logic_node_input_get(self.base.inputs[0]);
-	let input1: any = logic_node_input_get(self.base.inputs[1]);
-	let input2: any = logic_node_input_get(self.base.inputs[2]);
-	let input3: any = logic_node_input_get(self.base.inputs[3]);
-	let input4: any = logic_node_input_get(self.base.inputs[4]);
-	let input5: any = logic_node_input_get(self.base.inputs[5]);
-	let input6: any = logic_node_input_get(self.base.inputs[6]);
+	let input0: logic_node_value_t = logic_node_input_get(self.base.inputs[0]);
+	let input1: logic_node_value_t = logic_node_input_get(self.base.inputs[1]);
+	let input2: logic_node_value_t = logic_node_input_get(self.base.inputs[2]);
+	let input3: logic_node_value_t = logic_node_input_get(self.base.inputs[3]);
+	let input4: logic_node_value_t = logic_node_input_get(self.base.inputs[4]);
+	let input5: logic_node_value_t = logic_node_input_get(self.base.inputs[5]);
+	let input6: logic_node_value_t = logic_node_input_get(self.base.inputs[6]);
 
-	context_raw.paint_vec = input0;
-	context_raw.brush_nodes_radius = input1;
-	context_raw.brush_nodes_scale = input2;
-	context_raw.brush_nodes_angle = input3;
+	context_raw.paint_vec = input0._any;
+	context_raw.brush_nodes_radius = input1._f32;
+	context_raw.brush_nodes_scale = input2._f32;
+	context_raw.brush_nodes_angle = input3._f32;
 
-	let opac: any = input4; // Float or texture name
+	let opac: logic_node_value_t = input4; // Float or texture name
 	if (opac == null) {
-		opac = 1.0;
+		opac = { _f32: 1.0 };
 	}
-	if (typeof opac == "string") {
-		context_raw.brush_mask_image_is_alpha = ends_with(opac, ".a");
-		opac = substring(opac, 0, string_last_index_of(opac, "."));
+	if (opac._any != null) { // string
+		context_raw.brush_mask_image_is_alpha = ends_with(opac._any, ".a");
+		opac._any = substring(opac._any, 0, string_last_index_of(opac._any, "."));
 		context_raw.brush_nodes_opacity = 1.0;
-		let index: i32 = array_index_of(project_asset_names, opac);
+		let index: i32 = array_index_of(project_asset_names, opac._any);
 		let asset: asset_t = project_assets[index];
 		context_raw.brush_mask_image = project_get_image(asset);
 	}
 	else {
-		context_raw.brush_nodes_opacity = opac;
+		context_raw.brush_nodes_opacity = opac._f32;
 		context_raw.brush_mask_image = null;
 	}
 
-	context_raw.brush_nodes_hardness = input5;
+	context_raw.brush_nodes_hardness = input5._f32;
 
-	let stencil: any = input6; // Float or texture name
+	let stencil: logic_node_value_t = input6; // Float or texture name
 	if (stencil == null) {
-		stencil = 1.0;
+		stencil = { _f32: 1.0 };
 	}
-	if (typeof stencil == "string") {
-		context_raw.brush_stencil_image_is_alpha = ends_with(stencil, ".a");
-		stencil = substring(stencil, 0, string_last_index_of(stencil, "."));
-		let index: i32 = array_index_of(project_asset_names, stencil);
+	if (stencil._any != null) { // string
+		context_raw.brush_stencil_image_is_alpha = ends_with(stencil._any, ".a");
+		stencil._any = substring(stencil._any, 0, string_last_index_of(stencil._any, "."));
+		let index: i32 = array_index_of(project_asset_names, stencil._any);
 		let asset: asset_t = project_assets[index];
 		context_raw.brush_stencil_image = project_get_image(asset);
 	}

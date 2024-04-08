@@ -258,7 +258,11 @@ function box_preferences_show() {
 
 				ui.changed = false;
 
-				if (typeof val == "boolean") {
+				if (key == "FILL_WINDOW_BG" ||
+					key == "FILL_BUTTON_BG" ||
+					key == "FILL_ACCENT_BG" ||
+					key == "FULL_TABS" ||
+					key == "ROUND_CORNERS") {
 					h.selected = val;
 					let b: bool = zui_check(h, key);
 					theme[key] = b;
@@ -572,7 +576,7 @@ function box_preferences_show() {
 						zui_row([0.5, 0.5]);
 						let keymap_name: string = zui_text_input(zui_handle(__ID__, { text: "new_keymap" }), tr("Name"));
 						if (zui_button(tr("OK")) || ui.is_return_down) {
-							let template: string = json_stringify(base_default_keymap);
+							let template: string = json_stringify(base_get_default_keymap());
 							if (!ends_with(keymap_name, ".json")) {
 								keymap_name += ".json";
 							}
@@ -610,12 +614,13 @@ function box_preferences_show() {
 
 			let index: i32 = 0;
 			ui.changed = false;
-			for (let i: i32 = 0; i < base_keymap_keys.length; ++i) {
-				let key: string = base_keymap_keys[i];
+			let keys: string[] = map_keys_to_array(config_keymap);
+			for (let i: i32 = 0; i < keys.length; ++i) {
+				let key: string = keys[i];
 				let h: zui_handle_t = zui_nest(zui_handle(__ID__), index++);
-				h.text = config_keymap[key];
+				h.text = map_get(config_keymap, key);
 				let text: string = zui_text_input(h, key, zui_align_t.LEFT);
-				config_keymap[key] = text;
+				map_set(config_keymap, key, text);
 			}
 			if (ui.changed) {
 				config_apply();

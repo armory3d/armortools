@@ -634,7 +634,7 @@ function context_select_tool(i: i32) {
 	make_material_parse_mesh_material();
 	context_raw.ddirty = 3;
 	let _viewport_mode: viewport_mode_t = context_raw.viewport_mode;
-	context_raw.viewport_mode = -1 as viewport_mode_t;
+	context_raw.viewport_mode = viewport_mode_t.MINUS_ONE;
 	context_set_viewport_mode(_viewport_mode);
 
 	///if (is_paint || is_sculpt)
@@ -814,7 +814,7 @@ function context_get_area_type(): area_type_t {
 		return area_type_t.MATERIALS;
 	}
 	///end
-	return -1 as area_type_t;
+	return area_type_t.MINUS_ONE;
 }
 
 function context_set_viewport_mode(mode: viewport_mode_t) {

@@ -11,7 +11,7 @@ function gizmo_update() {
 	let is_decal: bool = base_is_decal_layer();
 
 	let gizmo: object_t = context_raw.gizmo;
-	let hide: bool = operator_shortcut(config_keymap.stencil_hide, shortcut_type_t.DOWN);
+	let hide: bool = operator_shortcut(map_get(config_keymap, "stencil_hide"), shortcut_type_t.DOWN);
 	gizmo.visible = (is_object || is_decal) && !hide;
 	if (!gizmo.visible) {
 		return;
@@ -82,9 +82,9 @@ function gizmo_update() {
 
 			transform_build_matrix(paint_object.transform);
 			///if arm_physics
-			let pb: any = (paint_object as any).physicsBody;
+			let pb: physics_body_t = map_get(physics_body_object_map, paint_object);
 			if (pb != null) {
-				pb.syncTransform();
+				physics_body_sync_transform(pb);
 			}
 			///end
 		}

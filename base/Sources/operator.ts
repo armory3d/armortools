@@ -13,9 +13,10 @@ function operator_run(name: string) {
 
 function operator_update() {
 	if (mouse_started_any() || keyboard_started_any()) {
-		for (let i: i32 = 0; i < base_keymap_keys.length; ++i) {
-			let op: string = base_keymap_keys[i];
-			if (operator_shortcut(config_keymap[op])) {
+		let keys: string[] = map_keys_to_array(config_keymap);
+		for (let i: i32 = 0; i < keys.length; ++i) {
+			let op: string = keys[i];
+			if (operator_shortcut(map_get(config_keymap, op))) {
 				operator_run(op);
 			}
 		}

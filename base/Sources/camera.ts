@@ -42,24 +42,24 @@ function camera_update() {
 	}
 
 	let modif_key: bool = keyboard_down("alt") || keyboard_down("shift") || keyboard_down("control");
-	let modif: bool = modif_key || config_keymap.action_rotate == "middle";
+	let modif: bool = modif_key || map_get(config_keymap, "action_rotate") == "middle";
 	let default_keymap: bool = config_raw.keymap == "default.json";
 
-	if (operator_shortcut(config_keymap.action_rotate, shortcut_type_t.STARTED) ||
-		operator_shortcut(config_keymap.action_zoom, shortcut_type_t.STARTED) ||
-		operator_shortcut(config_keymap.action_pan, shortcut_type_t.STARTED) ||
-		operator_shortcut(config_keymap.rotate_envmap, shortcut_type_t.STARTED) ||
-		operator_shortcut(config_keymap.rotate_light, shortcut_type_t.STARTED) ||
+	if (operator_shortcut(map_get(config_keymap, "action_rotate"), shortcut_type_t.STARTED) ||
+		operator_shortcut(map_get(config_keymap, "action_zoom"), shortcut_type_t.STARTED) ||
+		operator_shortcut(map_get(config_keymap, "action_pan"), shortcut_type_t.STARTED) ||
+		operator_shortcut(map_get(config_keymap, "rotate_envmap"), shortcut_type_t.STARTED) ||
+		operator_shortcut(map_get(config_keymap, "rotate_light"), shortcut_type_t.STARTED) ||
 		(mouse_started("right") && !modif) ||
 		(mouse_started("middle") && !modif) ||
 		(mouse_wheel_delta != 0 && !modif_key)) {
 		camera_controls_down = true;
 	}
-	else if (!operator_shortcut(config_keymap.action_rotate, shortcut_type_t.DOWN) &&
-		!operator_shortcut(config_keymap.action_zoom, shortcut_type_t.DOWN) &&
-		!operator_shortcut(config_keymap.action_pan, shortcut_type_t.DOWN) &&
-		!operator_shortcut(config_keymap.rotate_envmap, shortcut_type_t.DOWN) &&
-		!operator_shortcut(config_keymap.rotate_light, shortcut_type_t.DOWN) &&
+	else if (!operator_shortcut(map_get(config_keymap, "action_rotate"), shortcut_type_t.DOWN) &&
+		!operator_shortcut(map_get(config_keymap, "action_zoom"), shortcut_type_t.DOWN) &&
+		!operator_shortcut(map_get(config_keymap, "action_pan"), shortcut_type_t.DOWN) &&
+		!operator_shortcut(map_get(config_keymap, "rotate_envmap"), shortcut_type_t.DOWN) &&
+		!operator_shortcut(map_get(config_keymap, "rotate_light"), shortcut_type_t.DOWN) &&
 		!(mouse_down("right") && !modif) &&
 		!(mouse_down("middle") && !modif) &&
 		(mouse_wheel_delta == 0 && !modif_key)) {
@@ -71,7 +71,7 @@ function camera_update() {
 	}
 
 	let controls: camera_controls_t = context_raw.camera_controls;
-	if (controls == camera_controls_t.ORBIT && (operator_shortcut(config_keymap.action_rotate, shortcut_type_t.DOWN) || (mouse_down("right") && !modif && default_keymap))) {
+	if (controls == camera_controls_t.ORBIT && (operator_shortcut(map_get(config_keymap, "action_rotate"), shortcut_type_t.DOWN) || (mouse_down("right") && !modif && default_keymap))) {
 		camera_redraws = 2;
 		let dist: f32 = camera_distance();
 		transform_move(camera.base.transform, camera_object_look_world(camera), dist);
@@ -82,7 +82,7 @@ function camera_update() {
 		}
 		transform_move(camera.base.transform, camera_object_look_world(camera), -dist);
 	}
-	else if (controls == camera_controls_t.ROTATE && (operator_shortcut(config_keymap.action_rotate, shortcut_type_t.DOWN) || (mouse_down("right") && !modif && default_keymap))) {
+	else if (controls == camera_controls_t.ROTATE && (operator_shortcut(map_get(config_keymap, "action_rotate"), shortcut_type_t.DOWN) || (mouse_down("right") && !modif && default_keymap))) {
 		camera_redraws = 2;
 		let t: transform_t = context_main_object().base.transform;
 		let up: vec4_t = vec4_normalize(transform_up(t));
@@ -98,7 +98,7 @@ function camera_update() {
 	if (controls == camera_controls_t.ROTATE || controls == camera_controls_t.ORBIT) {
 		camera_pan_action(modif, default_keymap);
 
-		if (operator_shortcut(config_keymap.action_zoom, shortcut_type_t.DOWN)) {
+		if (operator_shortcut(map_get(config_keymap, "action_zoom"), shortcut_type_t.DOWN)) {
 			camera_redraws = 2;
 			let f: f32 = camera_get_zoom_delta() / 150;
 			f *= camera_get_zoom_speed();
@@ -170,7 +170,7 @@ function camera_update() {
 		transform_rotate(camera.base.transform, camera_object_right(camera), -mouse_movement_y / 200 * config_raw.camera_rotation_speed);
 	}
 
-	if (operator_shortcut(config_keymap.rotate_light, shortcut_type_t.DOWN)) {
+	if (operator_shortcut(map_get(config_keymap, "rotate_light"), shortcut_type_t.DOWN)) {
 		camera_redraws = 2;
 		let light: light_object_t = scene_lights[0];
 		context_raw.light_angle = (context_raw.light_angle + ((mouse_movement_x / 100) % (2 * math_pi()) + 2 * math_pi())) % (2 * math_pi());
@@ -179,7 +179,7 @@ function camera_update() {
 		transform_decompose(light.base.transform);
 	}
 
-	if (operator_shortcut(config_keymap.rotate_envmap, shortcut_type_t.DOWN)) {
+	if (operator_shortcut(map_get(config_keymap, "rotate_envmap"), shortcut_type_t.DOWN)) {
 		camera_redraws = 2;
 		context_raw.envmap_angle -= mouse_movement_x / 100;
 	}
@@ -224,7 +224,7 @@ function camera_reset(view_index: i32 = -1) {
 
 function camera_pan_action(modif: bool, default_keymap: bool) {
 	let camera: camera_object_t = scene_camera;
-	if (operator_shortcut(config_keymap.action_pan, shortcut_type_t.DOWN) || (mouse_down("middle") && !modif && default_keymap)) {
+	if (operator_shortcut(map_get(config_keymap, "action_pan"), shortcut_type_t.DOWN) || (mouse_down("middle") && !modif && default_keymap)) {
 		camera_redraws = 2;
 		let look: vec4_t = vec4_mult(vec4_normalize(transform_look(camera.base.transform)), mouse_movement_y / 150 * config_raw.camera_pan_speed);
 		let right: vec4_t = vec4_mult(vec4_normalize(transform_right(camera.base.transform)), -mouse_movement_x / 150 * config_raw.camera_pan_speed);

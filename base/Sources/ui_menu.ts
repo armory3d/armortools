@@ -37,23 +37,23 @@ function ui_menu_render() {
 	else {
 		ui_menu_start(ui);
 		if (ui_menu_category == menu_category_t.FILE) {
-			if (ui_menu_button(ui, tr("New .."), config_keymap.file_new)) {
+			if (ui_menu_button(ui, tr("New .."), map_get(config_keymap, "file_new"))) {
 				project_new_box();
 			}
-			if (ui_menu_button(ui, tr("Open..."), config_keymap.file_open)) {
+			if (ui_menu_button(ui, tr("Open..."), map_get(config_keymap, "file_open"))) {
 				project_open();
 			}
-			if (ui_menu_button(ui, tr("Open Recent..."), config_keymap.file_open_recent)) {
+			if (ui_menu_button(ui, tr("Open Recent..."), map_get(config_keymap, "file_open_recent"))) {
 				box_projects_show();
 			}
-			if (ui_menu_button(ui, tr("Save"), config_keymap.file_save)) {
+			if (ui_menu_button(ui, tr("Save"), map_get(config_keymap, "file_save"))) {
 				project_save();
 			}
-			if (ui_menu_button(ui, tr("Save As..."), config_keymap.file_save_as)) {
+			if (ui_menu_button(ui, tr("Save As..."), map_get(config_keymap, "file_save_as"))) {
 				project_save_as();
 			}
 			ui_menu_separator(ui);
-			if (ui_menu_button(ui, tr("Import Texture..."), config_keymap.file_import_assets)) {
+			if (ui_menu_button(ui, tr("Import Texture..."), map_get(config_keymap, "file_import_assets"))) {
 				project_import_asset(path_texture_formats.join(","), false);
 			}
 			if (ui_menu_button(ui, tr("Import Envmap..."))) {
@@ -86,15 +86,15 @@ function ui_menu_render() {
 			if (ui_menu_button(ui, tr("Import Mesh..."))) {
 				project_import_mesh();
 			}
-			if (ui_menu_button(ui, tr("Reimport Mesh"), config_keymap.file_reimport_mesh)) {
+			if (ui_menu_button(ui, tr("Reimport Mesh"), map_get(config_keymap, "file_reimport_mesh"))) {
 				project_reimport_mesh();
 			}
-			if (ui_menu_button(ui, tr("Reimport Textures"), config_keymap.file_reimport_textures)) {
+			if (ui_menu_button(ui, tr("Reimport Textures"), map_get(config_keymap, "file_reimport_textures"))) {
 				project_reimport_textures();
 			}
 			ui_menu_separator(ui);
 			///if (is_paint || is_lab)
-			if (ui_menu_button(ui, tr("Export Textures..."), config_keymap.file_export_textures_as)) {
+			if (ui_menu_button(ui, tr("Export Textures..."), map_get(config_keymap, "file_export_textures_as"))) {
 				///if is_paint
 				context_raw.layers_export = export_mode_t.VISIBLE;
 				///end
@@ -133,24 +133,24 @@ function ui_menu_render() {
 			ui.enabled = history_undos > 0;
 			let vars_undo: map_t<string, string> = map_create();
 			map_set(vars_undo, "step", step_undo);
-			if (ui_menu_button(ui, tr("Undo {step}", vars_undo), config_keymap.edit_undo)) {
+			if (ui_menu_button(ui, tr("Undo {step}", vars_undo), map_get(config_keymap, "edit_undo"))) {
 				history_undo();
 			}
 
 			ui.enabled = history_redos > 0;
 			let vars_redo: map_t<string, string> = map_create();
 			map_set(vars_redo, "step", step_redo);
-			if (ui_menu_button(ui, tr("Redo {step}", vars_redo), config_keymap.edit_redo)) {
+			if (ui_menu_button(ui, tr("Redo {step}", vars_redo), map_get(config_keymap, "edit_redo"))) {
 				history_redo();
 			}
 			ui.enabled = true;
 			ui_menu_separator(ui);
-			if (ui_menu_button(ui, tr("Preferences..."), config_keymap.edit_prefs)) {
+			if (ui_menu_button(ui, tr("Preferences..."), map_get(config_keymap, "edit_prefs"))) {
 				box_preferences_show();
 			}
 		}
 		else if (ui_menu_category == menu_category_t.VIEWPORT) {
-			if (ui_menu_button(ui, tr("Distract Free"), config_keymap.view_distract_free)) {
+			if (ui_menu_button(ui, tr("Distract Free"), map_get(config_keymap, "view_distract_free"))) {
 				ui_base_toggle_distract_free();
 				ui_base_ui.is_hovered = false;
 			}
@@ -186,7 +186,7 @@ function ui_menu_render() {
 			context_raw.envmap_angle = zui_slider(enva_handle, tr("Environment Angle"), 0.0, 360.0, true, 1) / 180.0 * math_pi();
 			if (ui.is_hovered) {
 				let vars: map_t<string, string> = map_create();
-				map_set(vars, "shortcut", config_keymap.rotate_envmap);
+				map_set(vars, "shortcut", map_get(config_keymap, "rotate_envmap"));
 				zui_tooltip(tr("{shortcut} and move mouse", vars));
 			}
 			if (enva_handle.changed) {
@@ -215,7 +215,7 @@ function ui_menu_render() {
 				let new_angle: f32 = zui_slider(lahandle, tr("Light Angle"), 0.0, 360.0, true, 1) / 180 * math_pi();
 				if (ui.is_hovered) {
 					let vars: map_t<string, string> = map_create();
-					map_set(vars, "shortcut", config_keymap.rotate_light);
+					map_set(vars, "shortcut", map_get(config_keymap, "rotate_light"));
 					zui_tooltip(tr("{shortcut} and move mouse", vars));
 				}
 				let ldiff: f32 = new_angle - context_raw.light_angle;
@@ -364,7 +364,7 @@ function ui_menu_render() {
 
 			for (let i: i32 = 0; i < modes.length; ++i) {
 				ui_menu_fill(ui);
-				let shortcut: string = config_raw.touch_ui ? "" : config_keymap.viewport_mode + ", " + shortcuts[i];
+				let shortcut: string = config_raw.touch_ui ? "" : map_get(config_keymap, "viewport_mode") + ", " + shortcuts[i];
 				zui_radio(mode_handle, i, modes[i], shortcut);
 			}
 
@@ -378,52 +378,52 @@ function ui_menu_render() {
 			}
 		}
 		else if (ui_menu_category == menu_category_t.CAMERA) {
-			if (ui_menu_button(ui, tr("Reset"), config_keymap.view_reset)) {
+			if (ui_menu_button(ui, tr("Reset"), map_get(config_keymap, "view_reset"))) {
 				viewport_reset();
 				viewport_scale_to_bounds();
 			}
 			ui_menu_separator(ui);
-			if (ui_menu_button(ui, tr("Front"), config_keymap.view_front)) {
+			if (ui_menu_button(ui, tr("Front"), map_get(config_keymap, "view_front"))) {
 				viewport_set_view(0, -1, 0, math_pi() / 2, 0, 0);
 			}
-			if (ui_menu_button(ui, tr("Back"), config_keymap.view_back)) {
+			if (ui_menu_button(ui, tr("Back"), map_get(config_keymap, "view_back"))) {
 				viewport_set_view(0, 1, 0, math_pi() / 2, 0, math_pi());
 			}
-			if (ui_menu_button(ui, tr("Right"), config_keymap.view_right)) {
+			if (ui_menu_button(ui, tr("Right"), map_get(config_keymap, "view_right"))) {
 				viewport_set_view(1, 0, 0, math_pi() / 2, 0, math_pi() / 2);
 			}
-			if (ui_menu_button(ui, tr("Left"), config_keymap.view_left)) {
+			if (ui_menu_button(ui, tr("Left"), map_get(config_keymap, "view_left"))) {
 				viewport_set_view(-1, 0, 0, math_pi() / 2, 0, -math_pi() / 2);
 			}
-			if (ui_menu_button(ui, tr("Top"), config_keymap.view_top)) {
+			if (ui_menu_button(ui, tr("Top"), map_get(config_keymap, "view_top"))) {
 				viewport_set_view(0, 0, 1, 0, 0, 0);
 			}
-			if (ui_menu_button(ui, tr("Bottom"), config_keymap.view_bottom)) {
+			if (ui_menu_button(ui, tr("Bottom"), map_get(config_keymap, "view_bottom"))) {
 				viewport_set_view(0, 0, -1, math_pi(), 0, math_pi());
 			}
 			ui_menu_separator(ui);
 
 			ui.changed = false;
 
-			if (ui_menu_button(ui, tr("Orbit Left"), config_keymap.view_orbit_left)) {
+			if (ui_menu_button(ui, tr("Orbit Left"), map_get(config_keymap, "view_orbit_left"))) {
 				viewport_orbit(-math_pi() / 12, 0);
 			}
-			if (ui_menu_button(ui, tr("Orbit Right"), config_keymap.view_orbit_right)) {
+			if (ui_menu_button(ui, tr("Orbit Right"), map_get(config_keymap, "view_orbit_right"))) {
 				viewport_orbit(math_pi() / 12, 0);
 			}
-			if (ui_menu_button(ui, tr("Orbit Up"), config_keymap.view_orbit_up)) {
+			if (ui_menu_button(ui, tr("Orbit Up"), map_get(config_keymap, "view_orbit_up"))) {
 				viewport_orbit(0, -math_pi() / 12);
 			}
-			if (ui_menu_button(ui, tr("Orbit Down"), config_keymap.view_orbit_down)) {
+			if (ui_menu_button(ui, tr("Orbit Down"), map_get(config_keymap, "view_orbit_down"))) {
 				viewport_orbit(0, math_pi() / 12);
 			}
-			if (ui_menu_button(ui, tr("Orbit Opposite"), config_keymap.view_orbit_opposite)) {
+			if (ui_menu_button(ui, tr("Orbit Opposite"), map_get(config_keymap, "view_orbit_opposite"))) {
 				viewport_orbit_opposite();
 			}
-			if (ui_menu_button(ui, tr("Zoom In"), config_keymap.view_zoom_in)) {
+			if (ui_menu_button(ui, tr("Zoom In"), map_get(config_keymap, "view_zoom_in"))) {
 				viewport_zoom(0.2);
 			}
-			if (ui_menu_button(ui, tr("Zoom Out"), config_keymap.view_zoom_out)) {
+			if (ui_menu_button(ui, tr("Zoom Out"), map_get(config_keymap, "view_zoom_out"))) {
 				viewport_zoom(-0.2);
 			}
 			// menuSeparator(ui);
@@ -444,9 +444,9 @@ function ui_menu_render() {
 			context_raw.camera_controls = zui_inline_radio(camera_controls_handle, [tr("Orbit"), tr("Rotate"), tr("Fly")], zui_align_t.LEFT);
 
 			let vars: map_t<string, string> = map_create();
-			map_set(vars, "rotate_shortcut", config_keymap.action_rotate);
-			map_set(vars, "zoom_shortcut", config_keymap.action_zoom);
-			map_set(vars, "pan_shortcut", config_keymap.action_pan);
+			map_set(vars, "rotate_shortcut", map_get(config_keymap, "action_rotate"));
+			map_set(vars, "zoom_shortcut", map_get(config_keymap, "action_zoom"));
+			map_set(vars, "pan_shortcut", map_get(config_keymap, "action_pan"));
 			let orbit_and_rotate_tooltip: string = tr("Orbit and Rotate mode:\n{rotate_shortcut} or move right mouse button to rotate.\n{zoom_shortcut} or scroll to zoom.\n{pan_shortcut} or move middle mouse to pan.", vars);
 			let fly_tooltip: string = tr("Fly mode:\nHold the right mouse button and one of the following commands:\nmove mouse to rotate.\nw, up or scroll up to move forward.\ns, down or scroll down to move backward.\na or left to move left.\nd or right to move right.\ne to move up.\nq to move down.\nHold shift to move faster or alt to move slower.");
 			if (ui.is_hovered) {
@@ -457,7 +457,7 @@ function ui_menu_render() {
 			ui_menu_align(ui);
 			context_raw.camera_type = zui_inline_radio(context_raw.cam_handle, [tr("Perspective"), tr("Orthographic")], zui_align_t.LEFT);
 			if (ui.is_hovered) {
-				zui_tooltip(tr("Camera Type") + " (" + config_keymap.view_camera_type + ")");
+				zui_tooltip(tr("Camera Type") + " (" + map_get(config_keymap, "view_camera_type") + ")");
 			}
 			if (context_raw.cam_handle.changed) {
 				viewport_update_camera_type(context_raw.camera_type);

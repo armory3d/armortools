@@ -12,12 +12,14 @@ function tex_image_node_create(arg: any): tex_image_node_t {
 	return n;
 }
 
-function tex_image_node_get(self: tex_image_node_t, from: i32): any {
+function tex_image_node_get(self: tex_image_node_t, from: i32): logic_node_value_t {
 	if (from == 0) {
-		return self.file + ".rgb";
+		let v: logic_node_value_t = { _any: self.file + ".rgb" };
+		return v;
 	}
 	else {
-		return self.file + ".a";
+		let v: logic_node_value_t = { _any: self.file + ".a" };
+		return v;
 	}
 }
 

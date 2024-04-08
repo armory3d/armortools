@@ -32,9 +32,9 @@ function variance_node_buttons(ui: zui_t, nodes: zui_nodes_t, node: zui_node_t) 
 }
 
 function variance_node_get_as_image(self: variance_node_t, from: i32): image_t {
-	let strength = (variance_node_inst.inputs[1].node as any).value;
+	let strength: f32 = variance_node_inst.base.inputs[1].node.value;
 
-	let source: image_t = variance_node_inst.inputs[0].get_as_image();
+	let source: image_t = logic_node_input_get_as_image(variance_node_inst.base.inputs[0]);
 	g2_begin(variance_node_temp);
 	g2_draw_scaled_image(source, 0, 0, 512, 512);
 	g2_end();

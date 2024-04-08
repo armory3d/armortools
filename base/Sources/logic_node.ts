@@ -2,10 +2,15 @@
 type logic_node_t = {
 	inputs?: logic_node_input_t[];
 	outputs?: logic_node_t[][];
-	get?: (self: any, from: i32)=>any;
+	get?: (self: any, from: i32)=>logic_node_value_t;
 	get_as_image?: (self: any, from: i32)=>image_t;
 	get_cached_image?: (self: any)=>image_t;
 	set?: (self: any, value: any)=>void;
+};
+
+type logic_node_value_t = {
+	_f32?: f32;
+	_any?: any;
 };
 
 type logic_node_input_t = {
@@ -53,7 +58,7 @@ function logic_node_input_create(node: logic_node_t, from: i32): logic_node_inpu
 	return inp;
 }
 
-function logic_node_input_get(self: logic_node_input_t): any {
+function logic_node_input_get(self: logic_node_input_t): logic_node_value_t {
 	return self.node.base.get(self.node, self.from);
 }
 

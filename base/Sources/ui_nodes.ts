@@ -387,14 +387,14 @@ function ui_nodes_get_canvas_control(ui: zui_t, controls_down: bool): zui_canvas
 		}
 	}
 
-	if (operator_shortcut(config_keymap.action_pan, shortcut_type_t.STARTED) ||
-		operator_shortcut(config_keymap.action_zoom, shortcut_type_t.STARTED) ||
+	if (operator_shortcut(map_get(config_keymap, "action_pan"), shortcut_type_t.STARTED) ||
+		operator_shortcut(map_get(config_keymap, "action_zoom"), shortcut_type_t.STARTED) ||
 		ui.input_started_r ||
 		ui.input_wheel_delta != 0.0) {
 		controls_down = true;
 	}
-	else if (!operator_shortcut(config_keymap.action_pan, shortcut_type_t.DOWN) &&
-		!operator_shortcut(config_keymap.action_zoom, shortcut_type_t.DOWN) &&
+	else if (!operator_shortcut(map_get(config_keymap, "action_pan"), shortcut_type_t.DOWN) &&
+		!operator_shortcut(map_get(config_keymap, "action_zoom"), shortcut_type_t.DOWN) &&
 		!ui.input_down_r &&
 		ui.input_wheel_delta == 0.0) {
 		controls_down = false;
@@ -408,8 +408,8 @@ function ui_nodes_get_canvas_control(ui: zui_t, controls_down: bool): zui_canvas
 		}
 	}
 
-	let pan: bool = ui.input_down_r || operator_shortcut(config_keymap.action_pan, shortcut_type_t.DOWN);
-	let zoom_delta: f32 = operator_shortcut(config_keymap.action_zoom, shortcut_type_t.DOWN) ? ui_nodes_get_zoom_delta(ui) / 100.0 : 0.0;
+	let pan: bool = ui.input_down_r || operator_shortcut(map_get(config_keymap, "action_pan"), shortcut_type_t.DOWN);
+	let zoom_delta: f32 = operator_shortcut(map_get(config_keymap, "action_zoom"), shortcut_type_t.DOWN) ? ui_nodes_get_zoom_delta(ui) / 100.0 : 0.0;
 	let control: zui_canvas_control_t = {
 		pan_x: pan ? ui.input_dx : 0.0,
 		pan_y: pan ? ui.input_dy : 0.0,
@@ -545,14 +545,14 @@ function ui_nodes_update() {
 	}
 
 	// Node search popup
-	if (operator_shortcut(config_keymap.node_search)) ui_nodes_node_search();
+	if (operator_shortcut(map_get(config_keymap, "node_search"))) ui_nodes_node_search();
 	if (ui_nodes_node_search_spawn != null) {
 		ui_nodes_ui.input_x = mouse_x; // Fix inputDX after popup removal
 		ui_nodes_ui.input_y = mouse_y;
 		ui_nodes_node_search_spawn = null;
 	}
 
-	if (operator_shortcut(config_keymap.view_reset)) {
+	if (operator_shortcut(map_get(config_keymap, "view_reset"))) {
 		nodes.pan_x = 0.0;
 		nodes.pan_y = 0.0;
 		nodes.zoom = 1.0;
@@ -1131,7 +1131,7 @@ function ui_nodes_render() {
 			}
 		}
 		if (ui_nodes_ui.is_hovered) {
-			zui_tooltip(tr("Search for nodes") + " (" + config_keymap.node_search + ")");
+			zui_tooltip(tr("Search for nodes") + " (" + map_get(config_keymap, "node_search") + ")");
 		}
 		ui_nodes_ui._x += ui_nodes_ui._w + 3;
 		ui_nodes_ui._y = 2 + start_y;

@@ -167,7 +167,7 @@ function box_export_tab_export_textures(ui: zui_t, title: string, bake_material:
 			}
 		}
 		if (ui.is_hovered) {
-			zui_tooltip(tr("Export texture files") + " (" + config_keymap.file_export_textures + ")");
+			zui_tooltip(tr("Export texture files") + " (" + map_get(config_keymap, "file_export_textures") + ")");
 		}
 	}
 }

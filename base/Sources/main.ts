@@ -43,23 +43,22 @@ function main_start() {
 		base_init_layout();
 	}
 	krom_set_app_name(manifest_title);
-	app_init(function () {
-		let o: object_t = scene_set_active("Scene");
-		uniforms_ext_init();
-		render_path_base_init();
+	app_init();
+	scene_set_active("Scene");
+	uniforms_ext_init();
+	render_path_base_init();
 
-		if (context_raw.render_mode == render_mode_t.FORWARD) {
-			render_path_deferred_init(); // Allocate gbuffer
-			render_path_forward_init();
-			render_path_commands = render_path_forward_commands;
-		}
-		else {
-			render_path_deferred_init();
-			render_path_commands = render_path_deferred_commands;
-		}
+	if (context_raw.render_mode == render_mode_t.FORWARD) {
+		render_path_deferred_init(); // Allocate gbuffer
+		render_path_forward_init();
+		render_path_commands = render_path_forward_commands;
+	}
+	else {
+		render_path_deferred_init();
+		render_path_commands = render_path_deferred_commands;
+	}
 
-		base_init();
-	});
+	base_init();
 }
 
 ///if arm_snapshot

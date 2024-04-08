@@ -1,6 +1,6 @@
 
 let config_raw: config_t = null;
-let config_keymap: any;
+let config_keymap: map_t<string, string>;
 let config_loaded: bool = false;
 let config_button_align: zui_align_t = zui_align_t.LEFT;
 let config_default_button_spacing: string = "       ";
@@ -181,19 +181,14 @@ function config_apply() {
 }
 
 function config_load_keymap() {
-	if (config_raw.keymap == "default.json") { // Built-in default
-		config_keymap = base_default_keymap;
-	}
-	else {
+	config_keymap = base_get_default_keymap();
+	if (config_raw.keymap != "default.json") {
 		let blob: buffer_t = data_get_blob("keymap_presets/" + config_raw.keymap);
-		config_keymap = json_parse(sys_buffer_to_string(blob));
-		// Fill in undefined keys with defaults
-		for (let i: i32 = 0; i < base_keymap_keys.length; ++i) {
-			let key: string = base_keymap_keys[i];
-			if (!(key in config_keymap)) {
-				let adefault_keymap: any = base_default_keymap;
-				config_keymap[key] = adefault_keymap[key];
-			}
+		let new_keymap: map_t<string, string> = json_parse_to_map(sys_buffer_to_string(blob));
+		let keys: string[] = map_keys_to_array(new_keymap);
+		for (let i: i32 = 0; i < keys.length; ++i) {
+			let key: string = keys[i];
+			map_set(config_keymap, key, map_get(new_keymap, key));
 		}
 	}
 }
@@ -254,36 +249,29 @@ function config_get_texture_res_pos(i: i32): i32 {
 		   i == 16384 ? texture_res_t.RES16384 : 0;
 }
 
-function config_load_theme(theme: string, tagRedraw: bool = true) {
-	if (theme == "default.json") { // Built-in default
-		base_theme = zui_theme_create();
-	}
-	else {
+function config_load_theme(theme: string, tag_redraw: bool = true) {
+	base_theme = zui_theme_create();
+
+	if (theme != "default.json") {
 		let b: buffer_t = data_get_blob("themes/" + theme);
 		let parsed: any = json_parse(sys_buffer_to_string(b));
-		base_theme = zui_theme_create();
-		for (let key in base_theme) {
-			if (key == "theme_") {
-				continue;
-			}
-			if (starts_with(key, "set_")) {
-				continue;
-			}
-			if (starts_with(key, "get_")) {
-				key = substring(key, 4, key.length);
-			}
-			let atheme: any = base_theme;
-			atheme[key] = parsed[key];
+		for (let i: i32 = 0; i < zui_theme_keys.length; ++i) {
+			let key: string = zui_theme_keys[i];
+			// @ts-ignore
+			base_theme[key] = parsed[key];
 		}
 	}
+
 	base_theme.FILL_WINDOW_BG = true;
-	if (tagRedraw) {
+
+	if (tag_redraw) {
 		for (let i: i32 = 0; i < base_get_uis().length; ++i) {
 			let ui: zui_t = base_get_uis()[i];
 			ui.t = base_theme;
 		}
 		ui_base_tag_ui_redraw();
 	}
+
 	if (config_raw.touch_ui) {
 		// Enlarge elements
 		base_theme.FULL_TABS = true;

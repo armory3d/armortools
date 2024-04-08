@@ -46,6 +46,7 @@ enum bake_up_axis_t {
 }
 
 enum viewport_mode_t {
+	MINUS_ONE = -1,
 	LIT = 0,
 	BASE_COLOR = 1,
 	NORMAL_MAP = 2,
@@ -254,6 +255,7 @@ enum workspace_tool_t {
 }
 
 enum area_type_t {
+	MINUS_ONE = -1,
 	VIEWPORT = 0,
 	VIEW2D = 1,
 	LAYERS = 2,

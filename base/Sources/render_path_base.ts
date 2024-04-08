@@ -545,7 +545,7 @@ function render_path_base_draw_gbuffer() {
 		}
 	}
 
-	let hide: bool = operator_shortcut(config_keymap.stencil_hide, shortcut_type_t.DOWN) || keyboard_down("control");
+	let hide: bool = operator_shortcut(map_get(config_keymap, "stencil_hide"), shortcut_type_t.DOWN) || keyboard_down("control");
 	let is_decal: bool = base_is_decal_layer();
 	if (is_decal && !hide) {
 		line_draw_render(context_raw.layer.decal_mat);

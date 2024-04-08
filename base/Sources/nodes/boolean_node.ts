@@ -13,12 +13,13 @@ function boolean_node_create(arg: bool): boolean_node_t {
 	return n;
 }
 
-function boolean_node_get(self: boolean_node_t, from: i32): any {
+function boolean_node_get(self: boolean_node_t, from: i32): logic_node_value_t {
 	if (self.base.inputs.length > 0) {
 		return logic_node_input_get(self.base.inputs[0]);
 	}
 	else {
-		return self.value;
+		let v: logic_node_value_t = { _f32: self.value ? 1.0 : 0.0 };
+		return v;
 	}
 }
 

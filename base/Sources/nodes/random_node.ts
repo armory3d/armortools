@@ -15,10 +15,11 @@ function random_node_create(arg: any): random_node_t {
 	return n;
 }
 
-function random_node_get(self: random_node_t, from: i32): any {
-	let min: f32 = logic_node_input_get(self.base.inputs[0]);
-	let max: f32 = logic_node_input_get(self.base.inputs[1]);
-	return min + random_node_get_float() * (max - min);
+function random_node_get(self: random_node_t, from: i32): logic_node_value_t {
+	let min: f32 = logic_node_input_get(self.base.inputs[0])._f32;
+	let max: f32 = logic_node_input_get(self.base.inputs[1])._f32;
+	let v: logic_node_value_t = { _f32: min + random_node_get_float() * (max - min) };
+	return v;
 }
 
 function random_node_get_int(): i32 {

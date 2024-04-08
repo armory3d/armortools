@@ -22,14 +22,15 @@ function vector_node_create(args: any): vector_node_t {
 	return n;
 }
 
-function vector_node_get(self: vector_node_t, from: i32): any {
-	let x: f32 = logic_node_input_get(self.base.inputs[0]);
-	let y: f32 = logic_node_input_get(self.base.inputs[1]);
-	let z: f32 = logic_node_input_get(self.base.inputs[2]);
+function vector_node_get(self: vector_node_t, from: i32): logic_node_value_t {
+	let x: f32 = logic_node_input_get(self.base.inputs[0])._f32;
+	let y: f32 = logic_node_input_get(self.base.inputs[1])._f32;
+	let z: f32 = logic_node_input_get(self.base.inputs[2])._f32;
 	self.value.x = x;
 	self.value.y = y;
 	self.value.z = z;
-	return self.value;
+	let v: logic_node_value_t = { _any: self.value };
+	return v;
 }
 
 function vector_node_get_as_image(self: vector_node_t, from: i32): image_t {
@@ -41,9 +42,9 @@ function vector_node_get_as_image(self: vector_node_t, from: i32): image_t {
 	}
 	let b: buffer_t = buffer_create(16);
 	let v: buffer_view_t = buffer_view_create(b);
-	buffer_view_set_f32(v, 0, (self.base.inputs[0].node as any).value);
-	buffer_view_set_f32(v, 4, (self.base.inputs[1].node as any).value);
-	buffer_view_set_f32(v, 8, (self.base.inputs[2].node as any).value);
+	buffer_view_set_f32(v, 0, self.base.inputs[0].node.value);
+	buffer_view_set_f32(v, 4, self.base.inputs[1].node.value);
+	buffer_view_set_f32(v, 8, self.base.inputs[2].node.value);
 	buffer_view_set_f32(v, 12, 1.0);
 	self.image = image_from_bytes(b, 1, 1, tex_format_t.RGBA128);
 	return self.image;

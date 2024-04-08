@@ -24,7 +24,7 @@ function tab_textures_draw(htab: zui_handle_t) {
 			});
 		}
 		if (ui.is_hovered) {
-			zui_tooltip(tr("Import texture file") + " (" + config_keymap.file_import_assets + ")");
+			zui_tooltip(tr("Import texture file") + " (" + map_get(config_keymap, "file_import_assets") + ")");
 		}
 
 		if (zui_button(tr("2D View"))) {

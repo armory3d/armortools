@@ -447,13 +447,13 @@ function ui_view2d_update() {
 
 	///if (is_paint || is_sculpt)
 	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
-	let decal_mask: bool = decal && operator_shortcut(config_keymap.decal_mask + "+" + config_keymap.action_paint, shortcut_type_t.DOWN);
-	let set_clone_source: bool = context_raw.tool == workspace_tool_t.CLONE && operator_shortcut(config_keymap.set_clone_source + "+" + config_keymap.action_paint, shortcut_type_t.DOWN);
+	let decal_mask: bool = decal && operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
+	let set_clone_source: bool = context_raw.tool == workspace_tool_t.CLONE && operator_shortcut(map_get(config_keymap, "set_clone_source") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
 
 	if (ui_view2d_type == view_2d_type_t.LAYER &&
 		!ui_view2d_text_input_hover &&
-		(operator_shortcut(config_keymap.action_paint, shortcut_type_t.DOWN) ||
-			operator_shortcut(config_keymap.brush_ruler + "+" + config_keymap.action_paint, shortcut_type_t.DOWN) ||
+		(operator_shortcut(map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN) ||
+			operator_shortcut(map_get(config_keymap, "brush_ruler") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN) ||
 			decal_mask ||
 			set_clone_source ||
 			config_raw.brush_live)) {
@@ -498,7 +498,7 @@ function ui_view2d_update() {
 		ui_view2d_pan_y = -tw / 2 - hh / 2 + border;
 	}
 
-	if (operator_shortcut(config_keymap.view_reset)) {
+	if (operator_shortcut(map_get(config_keymap, "view_reset"))) {
 		ui_view2d_pan_x = 0.0;
 		ui_view2d_pan_y = 0.0;
 		ui_view2d_pan_scale = 1.0;

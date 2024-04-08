@@ -55,7 +55,7 @@ function tab_layers_button_2d_view() {
 		ui_base_show_2d_view(view_2d_type_t.LAYER);
 	}
 	else if (ui.is_hovered) {
-		zui_tooltip(tr("Show 2D View") + " (" + config_keymap.toggle_2d_view + ")");
+		zui_tooltip(tr("Show 2D View") + " (" + map_get(config_keymap, "toggle_2d_view") + ")");
 	}
 }
 
@@ -591,7 +591,7 @@ function tab_layers_handle_layer_icon_state(l: slot_layer_t, i: i32, state: zui_
 			zui_tooltip_image(texpaint_preview);
 		}
 		if (i < 9) {
-			zui_tooltip(l.name + " - (" + config_keymap.select_layer + " " + (i + 1) + ")");
+			zui_tooltip(l.name + " - (" + map_get(config_keymap, "select_layer") + " " + (i + 1) + ")");
 		}
 		else {
 			zui_tooltip(l.name);
@@ -677,7 +677,7 @@ function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32,
 		// Draw layer numbers when selecting a layer via keyboard shortcut
 		let is_typing: bool = ui.is_typing || ui_view2d_ui.is_typing || ui_nodes_ui.is_typing;
 		if (!is_typing) {
-			if (i < 9 && operator_shortcut(config_keymap.select_layer, shortcut_type_t.DOWN)) {
+			if (i < 9 && operator_shortcut(map_get(config_keymap, "select_layer"), shortcut_type_t.DOWN)) {
 				let number: string = any_to_string(i + 1) ;
 				let width: i32 = g2_font_width(ui.font, ui.font_size, number) + 10;
 				let height: i32 = g2_font_height(ui.font, ui.font_size);

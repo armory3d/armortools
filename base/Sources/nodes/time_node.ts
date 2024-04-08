@@ -10,15 +10,18 @@ function time_node_create(arg: any): time_node_t {
 	return n;
 }
 
-function time_node_get(self: time_node_t, from: i32): any {
+function time_node_get(self: time_node_t, from: i32): logic_node_value_t {
 	if (from == 0) {
-		return time_time();
+		let v: logic_node_value_t = { _f32: time_time() };
+		return v;
 	}
 	else if (from == 1) {
-		return time_delta();
+		let v: logic_node_value_t = { _f32: time_delta() };
+		return v;
 	}
 	else {
-		return context_raw.brush_time;
+		let v: logic_node_value_t = { _f32: context_raw.brush_time };
+		return v;
 	}
 }
 

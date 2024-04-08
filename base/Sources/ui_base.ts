@@ -241,7 +241,7 @@ function ui_base_update() {
 	}
 
 	if (!ui_nodes_ui.is_typing && !ui_base_ui.is_typing) {
-		if (operator_shortcut(config_keymap.toggle_node_editor)) {
+		if (operator_shortcut(map_get(config_keymap, "toggle_node_editor"))) {
 			///if (is_paint || is_sculpt)
 			ui_nodes_canvas_type == canvas_type_t.MATERIAL ? ui_base_show_material_nodes() : ui_base_show_brush_nodes();
 			///end
@@ -249,11 +249,11 @@ function ui_base_update() {
 			ui_base_show_material_nodes();
 			///end
 		}
-		else if (operator_shortcut(config_keymap.toggle_browser)) {
+		else if (operator_shortcut(map_get(config_keymap, "toggle_browser"))) {
 			ui_base_toggle_browser();
 		}
 
-		else if (operator_shortcut(config_keymap.toggle_2d_view)) {
+		else if (operator_shortcut(map_get(config_keymap, "toggle_2d_view"))) {
 			///if (is_paint || is_sculpt)
 			ui_base_show_2d_view(view_2d_type_t.LAYER);
 			///else
@@ -262,29 +262,29 @@ function ui_base_update() {
 		}
 	}
 
-	if (operator_shortcut(config_keymap.file_save_as)) {
+	if (operator_shortcut(map_get(config_keymap, "file_save_as"))) {
 		project_save_as();
 	}
-	else if (operator_shortcut(config_keymap.file_save)) {
+	else if (operator_shortcut(map_get(config_keymap, "file_save"))) {
 		project_save();
 	}
-	else if (operator_shortcut(config_keymap.file_open)) {
+	else if (operator_shortcut(map_get(config_keymap, "file_open"))) {
 		project_open();
 	}
-	else if (operator_shortcut(config_keymap.file_open_recent)) {
+	else if (operator_shortcut(map_get(config_keymap, "file_open_recent"))) {
 		box_projects_show();
 	}
-	else if (operator_shortcut(config_keymap.file_reimport_mesh)) {
+	else if (operator_shortcut(map_get(config_keymap, "file_reimport_mesh"))) {
 		project_reimport_mesh();
 	}
-	else if (operator_shortcut(config_keymap.file_reimport_textures)) {
+	else if (operator_shortcut(map_get(config_keymap, "file_reimport_textures"))) {
 		project_reimport_textures();
 	}
-	else if (operator_shortcut(config_keymap.file_new)) {
+	else if (operator_shortcut(map_get(config_keymap, "file_new"))) {
 		project_new_box();
 	}
 	///if (is_paint || is_lab)
-	else if (operator_shortcut(config_keymap.file_export_textures)) {
+	else if (operator_shortcut(map_get(config_keymap, "file_export_textures"))) {
 		if (context_raw.texture_export_path == "") { // First export, ask for path
 			///if is_paint
 			context_raw.layers_export = export_mode_t.VISIBLE;
@@ -297,21 +297,21 @@ function ui_base_update() {
 			});
 		}
 	}
-	else if (operator_shortcut(config_keymap.file_export_textures_as)) {
+	else if (operator_shortcut(map_get(config_keymap, "file_export_textures_as"))) {
 		///if (is_paint || is_sculpt)
 		context_raw.layers_export = export_mode_t.VISIBLE;
 		///end
 		box_export_show_textures();
 	}
 	///end
-	else if (operator_shortcut(config_keymap.file_import_assets)) {
+	else if (operator_shortcut(map_get(config_keymap, "file_import_assets"))) {
 		project_import_asset();
 	}
-	else if (operator_shortcut(config_keymap.edit_prefs)) {
+	else if (operator_shortcut(map_get(config_keymap, "edit_prefs"))) {
 		box_preferences_show();
 	}
 
-	if (keyboard_started(config_keymap.view_distract_free) || (keyboard_started("escape") && !ui_base_show && !ui_box_show)) {
+	if (keyboard_started(map_get(config_keymap, "view_distract_free")) || (keyboard_started("escape") && !ui_base_show && !ui_box_show)) {
 		ui_base_toggle_distract_free();
 	}
 
@@ -323,28 +323,28 @@ function ui_base_update() {
 
 	///if (is_paint || is_sculpt)
 	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
-	let decal_mask: bool = decal && operator_shortcut(config_keymap.decal_mask, shortcut_type_t.DOWN);
+	let decal_mask: bool = decal && operator_shortcut(map_get(config_keymap, "decal_mask"), shortcut_type_t.DOWN);
 
 	if ((context_raw.brush_can_lock || context_raw.brush_locked) && mouse_moved) {
-		if (operator_shortcut(config_keymap.brush_radius, shortcut_type_t.DOWN) ||
-			operator_shortcut(config_keymap.brush_opacity, shortcut_type_t.DOWN) ||
-			operator_shortcut(config_keymap.brush_angle, shortcut_type_t.DOWN) ||
-			(decal_mask && operator_shortcut(config_keymap.decal_mask + "+" + config_keymap.brush_radius, shortcut_type_t.DOWN))) {
+		if (operator_shortcut(map_get(config_keymap, "brush_radius"), shortcut_type_t.DOWN) ||
+			operator_shortcut(map_get(config_keymap, "brush_opacity"), shortcut_type_t.DOWN) ||
+			operator_shortcut(map_get(config_keymap, "brush_angle"), shortcut_type_t.DOWN) ||
+			(decal_mask && operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "brush_radius"), shortcut_type_t.DOWN))) {
 			if (context_raw.brush_locked) {
-				if (operator_shortcut(config_keymap.brush_opacity, shortcut_type_t.DOWN)) {
+				if (operator_shortcut(map_get(config_keymap, "brush_opacity"), shortcut_type_t.DOWN)) {
 					context_raw.brush_opacity += mouse_movement_x / 500;
 					context_raw.brush_opacity = math_max(0.0, math_min(1.0, context_raw.brush_opacity));
 					context_raw.brush_opacity = math_round(context_raw.brush_opacity * 100) / 100;
 					context_raw.brush_opacity_handle.value = context_raw.brush_opacity;
 				}
-				else if (operator_shortcut(config_keymap.brush_angle, shortcut_type_t.DOWN)) {
+				else if (operator_shortcut(map_get(config_keymap, "brush_angle"), shortcut_type_t.DOWN)) {
 					context_raw.brush_angle += mouse_movement_x / 5;
 					context_raw.brush_angle = math_floor(context_raw.brush_angle) % 360;
 					if (context_raw.brush_angle < 0) context_raw.brush_angle += 360;
 					context_raw.brush_angle_handle.value = context_raw.brush_angle;
 					make_material_parse_paint_material();
 				}
-				else if (decal_mask && operator_shortcut(config_keymap.decal_mask + "+" + config_keymap.brush_radius, shortcut_type_t.DOWN)) {
+				else if (decal_mask && operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "brush_radius"), shortcut_type_t.DOWN)) {
 					context_raw.brush_decal_mask_radius += mouse_movement_x / 150;
 					context_raw.brush_decal_mask_radius = math_max(0.01, math_min(4.0, context_raw.brush_decal_mask_radius));
 					context_raw.brush_decal_mask_radius = math_round(context_raw.brush_decal_mask_radius * 100) / 100;
@@ -368,7 +368,7 @@ function ui_base_update() {
 
 	///if is_lab
 	if ((context_raw.brush_can_lock || context_raw.brush_locked) && mouse_moved) {
-		if (operator_shortcut(config_keymap.brush_radius, shortcut_type_t.DOWN)) {
+		if (operator_shortcut(map_get(config_keymap, "brush_radius"), shortcut_type_t.DOWN)) {
 			if (context_raw.brush_locked) {
 				context_raw.brush_radius += mouse_movement_x / 150;
 				context_raw.brush_radius = math_max(0.01, math_min(4.0, context_raw.brush_radius));
@@ -388,7 +388,7 @@ function ui_base_update() {
 
 	///if (is_paint || is_sculpt)
 	if (!is_typing) {
-		if (operator_shortcut(config_keymap.select_material, shortcut_type_t.DOWN)) {
+		if (operator_shortcut(map_get(config_keymap, "select_material"), shortcut_type_t.DOWN)) {
 			ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 			for (let i: i32 = 1; i < 10; ++i) {
 				if (keyboard_started(i + "")) {
@@ -396,7 +396,7 @@ function ui_base_update() {
 				}
 			}
 		}
-		else if (operator_shortcut(config_keymap.select_layer, shortcut_type_t.DOWN)) {
+		else if (operator_shortcut(map_get(config_keymap, "select_layer"), shortcut_type_t.DOWN)) {
 			ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 			for (let i: i32 = 1; i < 10; ++i) {
 				if (keyboard_started(i + "")) {
@@ -412,49 +412,49 @@ function ui_base_update() {
 
 		///if is_paint
 		if (!mouse_down("right")) { // Fly mode off
-			if (operator_shortcut(config_keymap.tool_brush)) {
+			if (operator_shortcut(map_get(config_keymap, "tool_brush"))) {
 				context_select_tool(workspace_tool_t.BRUSH);
 			}
-			else if (operator_shortcut(config_keymap.tool_eraser)) {
+			else if (operator_shortcut(map_get(config_keymap, "tool_eraser"))) {
 				context_select_tool(workspace_tool_t.ERASER);
 			}
-			else if (operator_shortcut(config_keymap.tool_fill)) {
+			else if (operator_shortcut(map_get(config_keymap, "tool_fill"))) {
 				context_select_tool(workspace_tool_t.FILL);
 			}
-			else if (operator_shortcut(config_keymap.tool_colorid)) {
+			else if (operator_shortcut(map_get(config_keymap, "tool_colorid"))) {
 				context_select_tool(workspace_tool_t.COLORID);
 			}
-			else if (operator_shortcut(config_keymap.tool_decal)) {
+			else if (operator_shortcut(map_get(config_keymap, "tool_decal"))) {
 				context_select_tool(workspace_tool_t.DECAL);
 			}
-			else if (operator_shortcut(config_keymap.tool_text)) {
+			else if (operator_shortcut(map_get(config_keymap, "tool_text"))) {
 				context_select_tool(workspace_tool_t.TEXT);
 			}
-			else if (operator_shortcut(config_keymap.tool_clone)) {
+			else if (operator_shortcut(map_get(config_keymap, "tool_clone"))) {
 				context_select_tool(workspace_tool_t.CLONE);
 			}
-			else if (operator_shortcut(config_keymap.tool_blur)) {
+			else if (operator_shortcut(map_get(config_keymap, "tool_blur"))) {
 				context_select_tool(workspace_tool_t.BLUR);
 			}
-			else if (operator_shortcut(config_keymap.tool_smudge)) {
+			else if (operator_shortcut(map_get(config_keymap, "tool_smudge"))) {
 				context_select_tool(workspace_tool_t.SMUDGE);
 			}
-			else if (operator_shortcut(config_keymap.tool_particle)) {
+			else if (operator_shortcut(map_get(config_keymap, "tool_particle"))) {
 				context_select_tool(workspace_tool_t.PARTICLE);
 			}
-			else if (operator_shortcut(config_keymap.tool_picker)) {
+			else if (operator_shortcut(map_get(config_keymap, "tool_picker"))) {
 				context_select_tool(workspace_tool_t.PICKER);
 			}
-			else if (operator_shortcut(config_keymap.tool_bake)) {
+			else if (operator_shortcut(map_get(config_keymap, "tool_bake"))) {
 				context_select_tool(workspace_tool_t.BAKE);
 			}
-			else if (operator_shortcut(config_keymap.tool_gizmo)) {
+			else if (operator_shortcut(map_get(config_keymap, "tool_gizmo"))) {
 				context_select_tool(workspace_tool_t.GIZMO);
 			}
-			else if (operator_shortcut(config_keymap.tool_material)) {
+			else if (operator_shortcut(map_get(config_keymap, "tool_material"))) {
 				context_select_tool(workspace_tool_t.MATERIAL);
 			}
-			else if (operator_shortcut(config_keymap.swap_brush_eraser)) {
+			else if (operator_shortcut(map_get(config_keymap, "swap_brush_eraser"))) {
 				context_select_tool(context_raw.tool == workspace_tool_t.BRUSH ? workspace_tool_t.ERASER : workspace_tool_t.BRUSH);
 			}
 		}
@@ -468,10 +468,10 @@ function ui_base_update() {
 			context_raw.tool == workspace_tool_t.BLUR   ||
 			context_raw.tool == workspace_tool_t.SMUDGE   ||
 			context_raw.tool == workspace_tool_t.PARTICLE) {
-			if (operator_shortcut(config_keymap.brush_radius) ||
-				operator_shortcut(config_keymap.brush_opacity) ||
-				operator_shortcut(config_keymap.brush_angle) ||
-				(decal_mask && operator_shortcut(config_keymap.decal_mask + "+" + config_keymap.brush_radius))) {
+			if (operator_shortcut(map_get(config_keymap, "brush_radius")) ||
+				operator_shortcut(map_get(config_keymap, "brush_opacity")) ||
+				operator_shortcut(map_get(config_keymap, "brush_angle")) ||
+				(decal_mask && operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "brush_radius")))) {
 				context_raw.brush_can_lock = true;
 				if (!pen_connected) {
 					mouse_lock();
@@ -479,26 +479,26 @@ function ui_base_update() {
 				context_raw.lock_started_x = mouse_x;
 				context_raw.lock_started_y = mouse_y;
 			}
-			else if (operator_shortcut(config_keymap.brush_radius_decrease, shortcut_type_t.REPEAT)) {
+			else if (operator_shortcut(map_get(config_keymap, "brush_radius_decrease"), shortcut_type_t.REPEAT)) {
 				context_raw.brush_radius -= ui_base_get_radius_increment();
 				context_raw.brush_radius = math_max(math_round(context_raw.brush_radius * 100) / 100, 0.01);
 				context_raw.brush_radius_handle.value = context_raw.brush_radius;
 				ui_header_handle.redraws = 2;
 			}
-			else if (operator_shortcut(config_keymap.brush_radius_increase, shortcut_type_t.REPEAT)) {
+			else if (operator_shortcut(map_get(config_keymap, "brush_radius_increase"), shortcut_type_t.REPEAT)) {
 				context_raw.brush_radius += ui_base_get_radius_increment();
 				context_raw.brush_radius = math_round(context_raw.brush_radius * 100) / 100;
 				context_raw.brush_radius_handle.value = context_raw.brush_radius;
 				ui_header_handle.redraws = 2;
 			}
 			else if (decal_mask) {
-				if (operator_shortcut(config_keymap.decal_mask + "+" + config_keymap.brush_radius_decrease, shortcut_type_t.REPEAT)) {
+				if (operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "brush_radius_decrease"), shortcut_type_t.REPEAT)) {
 					context_raw.brush_decal_mask_radius -= ui_base_get_radius_increment();
 					context_raw.brush_decal_mask_radius = math_max(math_round(context_raw.brush_decal_mask_radius * 100) / 100, 0.01);
 					context_raw.brush_decal_mask_radius_handle.value = context_raw.brush_decal_mask_radius;
 					ui_header_handle.redraws = 2;
 				}
-				else if (operator_shortcut(config_keymap.decal_mask + "+" + config_keymap.brush_radius_increase, shortcut_type_t.REPEAT)) {
+				else if (operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "brush_radius_increase"), shortcut_type_t.REPEAT)) {
 					context_raw.brush_decal_mask_radius += ui_base_get_radius_increment();
 					context_raw.brush_decal_mask_radius = math_round(context_raw.brush_decal_mask_radius * 100) / 100;
 					context_raw.brush_decal_mask_radius_handle.value = context_raw.brush_decal_mask_radius;
@@ -507,7 +507,7 @@ function ui_base_update() {
 			}
 		}
 
-		if (decal_mask && (operator_shortcut(config_keymap.decal_mask, shortcut_type_t.STARTED) || operator_shortcut(config_keymap.decal_mask, shortcut_type_t.RELEASED))) {
+		if (decal_mask && (operator_shortcut(map_get(config_keymap, "decal_mask"), shortcut_type_t.STARTED) || operator_shortcut(map_get(config_keymap, "decal_mask"), shortcut_type_t.RELEASED))) {
 			ui_header_handle.redraws = 2;
 		}
 		///end
@@ -519,7 +519,7 @@ function ui_base_update() {
 				context_raw.tool == workspace_tool_t.CLONE  ||
 				context_raw.tool == workspace_tool_t.BLUR   ||
 				context_raw.tool == workspace_tool_t.SMUDGE) {
-				if (operator_shortcut(config_keymap.brush_radius)) {
+				if (operator_shortcut(map_get(config_keymap, "brush_radius"))) {
 					context_raw.brush_can_lock = true;
 					if (!pen_connected) {
 						mouse_lock();
@@ -527,13 +527,13 @@ function ui_base_update() {
 					context_raw.lock_started_x = mouse_x;
 					context_raw.lock_started_y = mouse_y;
 				}
-				else if (operator_shortcut(config_keymap.brush_radius_decrease, shortcut_type_t.REPEAT)) {
+				else if (operator_shortcut(map_get(config_keymap, "brush_radius_decrease"), shortcut_type_t.REPEAT)) {
 					context_raw.brush_radius -= ui_base_get_radius_increment();
 					context_raw.brush_radius = math_max(math_round(context_raw.brush_radius * 100) / 100, 0.01);
 					context_raw.brush_radius_handle.value = context_raw.brush_radius;
 					ui_header_handle.redraws = 2;
 				}
-				else if (operator_shortcut(config_keymap.brush_radius_increase, shortcut_type_t.REPEAT)) {
+				else if (operator_shortcut(map_get(config_keymap, "brush_radius_increase"), shortcut_type_t.REPEAT)) {
 					context_raw.brush_radius += ui_base_get_radius_increment();
 					context_raw.brush_radius = math_round(context_raw.brush_radius * 100) / 100;
 					context_raw.brush_radius_handle.value = context_raw.brush_radius;
@@ -545,52 +545,52 @@ function ui_base_update() {
 
 		// Viewpoint
 		if (mouse_view_x() < app_w()) {
-			if (operator_shortcut(config_keymap.view_reset)) {
+			if (operator_shortcut(map_get(config_keymap, "view_reset"))) {
 				viewport_reset();
 				viewport_scale_to_bounds();
 			}
-			else if (operator_shortcut(config_keymap.view_back)) {
+			else if (operator_shortcut(map_get(config_keymap, "view_back"))) {
 				viewport_set_view(0, 1, 0, math_pi() / 2, 0, math_pi());
 			}
-			else if (operator_shortcut(config_keymap.view_front)) {
+			else if (operator_shortcut(map_get(config_keymap, "view_front"))) {
 				viewport_set_view(0, -1, 0, math_pi() / 2, 0, 0);
 			}
-			else if (operator_shortcut(config_keymap.view_left)) {
+			else if (operator_shortcut(map_get(config_keymap, "view_left"))) {
 				viewport_set_view(-1, 0, 0, math_pi() / 2, 0, -math_pi() / 2);
 			}
-			else if (operator_shortcut(config_keymap.view_right)) {
+			else if (operator_shortcut(map_get(config_keymap, "view_right"))) {
 				viewport_set_view(1, 0, 0, math_pi() / 2, 0, math_pi() / 2);
 			}
-			else if (operator_shortcut(config_keymap.view_bottom)) {
+			else if (operator_shortcut(map_get(config_keymap, "view_bottom"))) {
 				viewport_set_view(0, 0, -1, math_pi(), 0, math_pi());
 			}
-			else if (operator_shortcut(config_keymap.view_camera_type)) {
+			else if (operator_shortcut(map_get(config_keymap, "view_camera_type"))) {
 				context_raw.camera_type = context_raw.camera_type == camera_type_t.PERSPECTIVE ? camera_type_t.ORTHOGRAPHIC : camera_type_t.PERSPECTIVE;
 				context_raw.cam_handle.position = context_raw.camera_type;
 				viewport_update_camera_type(context_raw.camera_type);
 			}
-			else if (operator_shortcut(config_keymap.view_orbit_left, shortcut_type_t.REPEAT)) {
+			else if (operator_shortcut(map_get(config_keymap, "view_orbit_left"), shortcut_type_t.REPEAT)) {
 				viewport_orbit(-math_pi() / 12, 0);
 			}
-			else if (operator_shortcut(config_keymap.view_orbit_right, shortcut_type_t.REPEAT)) {
+			else if (operator_shortcut(map_get(config_keymap, "view_orbit_right"), shortcut_type_t.REPEAT)) {
 				viewport_orbit(math_pi() / 12, 0);
 			}
-			else if (operator_shortcut(config_keymap.view_orbit_up, shortcut_type_t.REPEAT)) {
+			else if (operator_shortcut(map_get(config_keymap, "view_orbit_up"), shortcut_type_t.REPEAT)) {
 				viewport_orbit(0, -math_pi() / 12);
 			}
-			else if (operator_shortcut(config_keymap.view_orbit_down, shortcut_type_t.REPEAT)) {
+			else if (operator_shortcut(map_get(config_keymap, "view_orbit_down"), shortcut_type_t.REPEAT)) {
 				viewport_orbit(0, math_pi() / 12);
 			}
-			else if (operator_shortcut(config_keymap.view_orbit_opposite)) {
+			else if (operator_shortcut(map_get(config_keymap, "view_orbit_opposite"))) {
 				viewport_orbit_opposite();
 			}
-			else if (operator_shortcut(config_keymap.view_zoom_in, shortcut_type_t.REPEAT)) {
+			else if (operator_shortcut(map_get(config_keymap, "view_zoom_in"), shortcut_type_t.REPEAT)) {
 				viewport_zoom(0.2);
 			}
-			else if (operator_shortcut(config_keymap.view_zoom_out, shortcut_type_t.REPEAT)) {
+			else if (operator_shortcut(map_get(config_keymap, "view_zoom_out"), shortcut_type_t.REPEAT)) {
 				viewport_zoom(-0.2);
 			}
-			else if (operator_shortcut(config_keymap.viewport_mode)) {
+			else if (operator_shortcut(map_get(config_keymap, "viewport_mode"))) {
 
 				let count: i32;
 
@@ -659,7 +659,7 @@ function ui_base_update() {
 			}
 		}
 
-		if (operator_shortcut(config_keymap.operator_search)) ui_base_operator_search();
+		if (operator_shortcut(map_get(config_keymap, "operator_search"))) ui_base_operator_search();
 	}
 
 	if (context_raw.brush_can_lock || context_raw.brush_locked) {
@@ -670,14 +670,14 @@ function ui_base_update() {
 
 		///if (is_paint || is_sculpt)
 		let b: bool = (context_raw.brush_can_lock || context_raw.brush_locked) &&
-			!operator_shortcut(config_keymap.brush_radius, shortcut_type_t.DOWN) &&
-			!operator_shortcut(config_keymap.brush_opacity, shortcut_type_t.DOWN) &&
-			!operator_shortcut(config_keymap.brush_angle, shortcut_type_t.DOWN) &&
-			!(decal_mask && operator_shortcut(config_keymap.decal_mask + "+" + config_keymap.brush_radius, shortcut_type_t.DOWN));
+			!operator_shortcut(map_get(config_keymap, "brush_radius"), shortcut_type_t.DOWN) &&
+			!operator_shortcut(map_get(config_keymap, "brush_opacity"), shortcut_type_t.DOWN) &&
+			!operator_shortcut(map_get(config_keymap, "brush_angle"), shortcut_type_t.DOWN) &&
+			!(decal_mask && operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "brush_radius"), shortcut_type_t.DOWN));
 		///end
 		///if is_lab
 		let b: bool = (context_raw.brush_can_lock || context_raw.brush_locked) &&
-			!operator_shortcut(config_keymap.brush_radius, shortcut_type_t.DOWN);
+			!operator_shortcut(map_get(config_keymap, "brush_radius"), shortcut_type_t.DOWN);
 		///end
 
 		if (b) {
@@ -816,7 +816,7 @@ function ui_base_update() {
 			body.ccd = true;
 			mo.base.transform.radius /= 10; // Lower ccd radius
 			physics_body_init(body, mo.base);
-			(mo.base as any).physicsBody = body;
+			map_set(physics_body_object_map, mo.base, body);
 			mo.base.transform.radius *= 10;
 
 			let ray: ray_t = raycast_get_ray(mouse_view_x(), mouse_view_y(), camera);
@@ -888,11 +888,12 @@ function ui_base_operator_search() {
 		let count: i32 = 0;
 		let BUTTON_COL: i32 = ui.t.BUTTON_COL;
 
-		for (let i: i32 = 0; i < base_keymap_keys.length; ++i) {
-			let n: string = base_keymap_keys[i];
+		let keys: string[] = map_keys_to_array(config_keymap);
+		for (let i: i32 = 0; i < keys.length; ++i) {
+			let n: string = keys[i];
 			if (string_index_of(n, search) >= 0) {
 				ui.t.BUTTON_COL = count == ui_base_operator_search_offset ? ui.t.HIGHLIGHT_COL : ui.t.SEPARATOR_COL;
-				if (zui_button(n, zui_align_t.LEFT, config_keymap[n]) || (enter && count == ui_base_operator_search_offset)) {
+				if (zui_button(n, zui_align_t.LEFT, map_get(config_keymap, n)) || (enter && count == ui_base_operator_search_offset)) {
 					if (enter) {
 						ui.changed = true;
 						count = 6; // Trigger break
@@ -955,8 +956,8 @@ function ui_base_update_ui() {
 	///if (is_paint || is_sculpt)
 	// Same mapping for paint and rotate (predefined in touch keymap)
 	if (context_in_viewport()) {
-		if (mouse_started() && config_keymap.action_paint == config_keymap.action_rotate) {
-			ui_base_action_paint_remap = config_keymap.action_paint;
+		if (mouse_started() && map_get(config_keymap, "action_paint") == map_get(config_keymap, "action_rotate")) {
+			ui_base_action_paint_remap = map_get(config_keymap, "action_paint");
 			util_render_pick_pos_nor_tex();
 			let is_mesh: bool = math_abs(context_raw.posx_picked) < 50 && math_abs(context_raw.posy_picked) < 50 && math_abs(context_raw.posz_picked) < 50;
 			///if krom_android
@@ -969,23 +970,23 @@ function ui_base_update_ui() {
 			// Mesh picked - disable rotate
 			// Pen painting only - rotate with touch, paint with pen
 			if ((is_mesh && !pen_only) || is_pen) {
-				config_keymap.action_rotate = "";
-				config_keymap.action_paint = ui_base_action_paint_remap;
+				map_set(config_keymap, "action_rotate", "");
+				map_set(config_keymap, "action_paint", ui_base_action_paint_remap);
 			}
 			// World sphere picked - disable paint
 			else {
-				config_keymap.action_paint = "";
-				config_keymap.action_rotate = ui_base_action_paint_remap;
+				map_set(config_keymap, "action_paint", "");
+				map_set(config_keymap, "action_rotate", ui_base_action_paint_remap);
 			}
 		}
 		else if (!mouse_down() && ui_base_action_paint_remap != "") {
-			config_keymap.action_rotate = ui_base_action_paint_remap;
-			config_keymap.action_paint = ui_base_action_paint_remap;
+			map_set(config_keymap, "action_rotate", ui_base_action_paint_remap);
+			map_set(config_keymap, "action_paint", ui_base_action_paint_remap);
 			ui_base_action_paint_remap = "";
 		}
 	}
 
-	if (context_raw.brush_stencil_image != null && operator_shortcut(config_keymap.stencil_transform, shortcut_type_t.DOWN)) {
+	if (context_raw.brush_stencil_image != null && operator_shortcut(map_get(config_keymap, "stencil_transform"), shortcut_type_t.DOWN)) {
 		let r: rect_t = ui_base_get_brush_stencil_rect();
 		if (mouse_started("left")) {
 			context_raw.brush_stencil_scaling =
@@ -1037,21 +1038,21 @@ function ui_base_update_ui() {
 	}
 	///end
 
-	let set_clone_source: bool = context_raw.tool == workspace_tool_t.CLONE && operator_shortcut(config_keymap.set_clone_source + "+" + config_keymap.action_paint, shortcut_type_t.DOWN);
+	let set_clone_source: bool = context_raw.tool == workspace_tool_t.CLONE && operator_shortcut(map_get(config_keymap, "set_clone_source") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
 
 	///if (is_paint || is_sculpt)
 	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
-	let decal_mask: bool = decal && operator_shortcut(config_keymap.decal_mask + "+" + config_keymap.action_paint, shortcut_type_t.DOWN);
-	let down: bool = operator_shortcut(config_keymap.action_paint, shortcut_type_t.DOWN) ||
+	let decal_mask: bool = decal && operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
+	let down: bool = operator_shortcut(map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN) ||
 					 decal_mask ||
 					 set_clone_source ||
-					 operator_shortcut(config_keymap.brush_ruler + "+" + config_keymap.action_paint, shortcut_type_t.DOWN) ||
+					 operator_shortcut(map_get(config_keymap, "brush_ruler") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN) ||
 					 (pen_down() && !keyboard_down("alt"));
 	///end
 	///if is_lab
-	let down: bool = operator_shortcut(config_keymap.action_paint, shortcut_type_t.DOWN) ||
+	let down: bool = operator_shortcut(map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN) ||
 					 set_clone_source ||
-					 operator_shortcut(config_keymap.brush_ruler + "+" + config_keymap.action_paint, shortcut_type_t.DOWN) ||
+					 operator_shortcut(map_get(config_keymap, "brush_ruler") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN) ||
 					 (pen_down() && !keyboard_down("alt"));
 	///end
 
@@ -1110,7 +1111,7 @@ function ui_base_update_ui() {
 					!base_is_combo_selected()) { // Paint started
 
 					// Draw line
-					if (operator_shortcut(config_keymap.brush_ruler + "+" + config_keymap.action_paint, shortcut_type_t.DOWN)) {
+					if (operator_shortcut(map_get(config_keymap, "brush_ruler") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN)) {
 						context_raw.last_paint_vec_x = context_raw.last_paint_x;
 						context_raw.last_paint_vec_y = context_raw.last_paint_y;
 					}
@@ -1225,8 +1226,8 @@ function ui_base_update_ui() {
 	}
 	///end
 
-	let undo_pressed: bool = operator_shortcut(config_keymap.edit_undo);
-	let redo_pressed: bool = operator_shortcut(config_keymap.edit_redo) ||
+	let undo_pressed: bool = operator_shortcut(map_get(config_keymap, "edit_undo"));
+	let redo_pressed: bool = operator_shortcut(map_get(config_keymap, "edit_redo")) ||
 							 (keyboard_down("control") && keyboard_started("y"));
 
 	// Two-finger tap to undo, three-finger tap to redo
@@ -1406,16 +1407,16 @@ function ui_base_render_cursor() {
 		my += context_raw.lock_started_y - sys_height() / 2;
 	}
 
-	let tool: workspace_tool_t = context_raw.tool as workspace_tool_t;
-
 	///if is_paint
 	if (context_raw.brush_stencil_image != null &&
-		tool != workspace_tool_t.BAKE &&
-		tool != workspace_tool_t.PICKER &&
-		tool != workspace_tool_t.MATERIAL &&
-		tool != workspace_tool_t.COLORID) {
+		// @ts-ignore
+		context_raw.tool != workspace_tool_t.BAKE &&
+		context_raw.tool != workspace_tool_t.PICKER &&
+		// @ts-ignore
+		context_raw.tool != workspace_tool_t.MATERIAL &&
+		context_raw.tool != workspace_tool_t.COLORID) {
 		let r: rect_t = ui_base_get_brush_stencil_rect();
-		if (!operator_shortcut(config_keymap.stencil_hide, shortcut_type_t.DOWN)) {
+		if (!operator_shortcut(map_get(config_keymap, "stencil_hide"), shortcut_type_t.DOWN)) {
 			g2_set_color(0x88ffffff);
 			let angle: f32 = context_raw.brush_stencil_angle;
 			let cx: f32 = r.x + r.w / 2;
@@ -1425,7 +1426,7 @@ function ui_base_render_cursor() {
 			g2_set_transformation(null);
 			g2_set_color(0xffffffff);
 		}
-		let transform: bool = operator_shortcut(config_keymap.stencil_transform, shortcut_type_t.DOWN);
+		let transform: bool = operator_shortcut(map_get(config_keymap, "stencil_transform"), shortcut_type_t.DOWN);
 		if (transform) {
 			// Outline
 			g2_draw_rect(r.x, r.y, r.w, r.h);
@@ -1473,7 +1474,7 @@ function ui_base_render_cursor() {
 	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
 
 	if (!config_raw.brush_3d || context_in_2d_view() || decal) {
-		let decal_mask: bool = decal && operator_shortcut(config_keymap.decal_mask, shortcut_type_t.DOWN);
+		let decal_mask: bool = decal && operator_shortcut(map_get(config_keymap, "decal_mask"), shortcut_type_t.DOWN);
 		if (decal && !context_in_nodes()) {
 			let decal_alpha: f32 = 0.5;
 			if (!decal_mask) {

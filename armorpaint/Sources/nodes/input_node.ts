@@ -33,11 +33,11 @@ function input_node_update(self: float_node_t) {
 	}
 
 	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
-	let decal_mask: bool = decal && operator_shortcut(config_keymap.decal_mask + "+" + config_keymap.action_paint, shortcut_type_t.DOWN);
+	let decal_mask: bool = decal && operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
 
 	let lazy_paint: bool = context_raw.brush_lazy_radius > 0 &&
-		(operator_shortcut(config_keymap.action_paint, shortcut_type_t.DOWN) ||
-			operator_shortcut(config_keymap.brush_ruler + "+" + config_keymap.action_paint, shortcut_type_t.DOWN) ||
+		(operator_shortcut(map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN) ||
+			operator_shortcut(map_get(config_keymap, "brush_ruler") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN) ||
 			decal_mask);
 
 	let paint_x: f32 = mouse_view_x() / app_w();
@@ -56,7 +56,7 @@ function input_node_update(self: float_node_t) {
 		input_node_start_y = pen_view_y() / app_h();
 	}
 
-	if (operator_shortcut(config_keymap.brush_ruler + "+" + config_keymap.action_paint, shortcut_type_t.DOWN)) {
+	if (operator_shortcut(map_get(config_keymap, "brush_ruler") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN)) {
 		if (input_node_lock_x) {
 			paint_x = input_node_start_x;
 		}
@@ -87,12 +87,12 @@ function input_node_update(self: float_node_t) {
 		}
 	}
 
-	if (keyboard_started(config_keymap.brush_ruler)) {
+	if (keyboard_started(map_get(config_keymap, "brush_ruler"))) {
 		input_node_lock_start_x = mouse_view_x();
 		input_node_lock_start_y = mouse_view_y();
 		input_node_lock_begin = true;
 	}
-	else if (keyboard_released(config_keymap.brush_ruler)) {
+	else if (keyboard_released(map_get(config_keymap, "brush_ruler"))) {
 		input_node_lock_x = input_node_lock_y = input_node_lock_begin = false;
 	}
 
@@ -120,10 +120,11 @@ function input_node_update(self: float_node_t) {
 	context_raw.parse_brush_inputs(context_raw.brush_output_node_inst);
 }
 
-function input_node_get(self: input_node_t, from: i32): any {
-	context_raw.brush_lazy_radius = logic_node_input_get(self.base.inputs[0]);
-	context_raw.brush_lazy_step = logic_node_input_get(self.base.inputs[1]);;
-	return input_node_coords;
+function input_node_get(self: input_node_t, from: i32): logic_node_value_t {
+	context_raw.brush_lazy_radius = logic_node_input_get(self.base.inputs[0])._f32;
+	context_raw.brush_lazy_step = logic_node_input_get(self.base.inputs[1])._f32;
+	let v: logic_node_value_t = { _any: input_node_coords };
+	return v;
 }
 
 let input_node_def: zui_node_t = {

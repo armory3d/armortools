@@ -452,7 +452,7 @@ function render_path_paint_commands_live_brush() {
 	let _pdirty: i32 = context_raw.pdirty;
 	context_raw.last_paint_vec_x = context_raw.paint_vec.x;
 	context_raw.last_paint_vec_y = context_raw.paint_vec.y;
-	if (operator_shortcut(config_keymap.brush_ruler)) {
+	if (operator_shortcut(map_get(config_keymap, "brush_ruler"))) {
 		context_raw.last_paint_vec_x = context_raw.last_paint_x;
 		context_raw.last_paint_vec_y = context_raw.last_paint_y;
 	}
@@ -474,7 +474,7 @@ function render_path_paint_commands_live_brush() {
 function render_path_paint_commands_cursor() {
 	if (!config_raw.brush_3d) return;
 	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
-	let decal_mask: bool = decal && operator_shortcut(config_keymap.decal_mask, shortcut_type_t.DOWN);
+	let decal_mask: bool = decal && operator_shortcut(map_get(config_keymap, "decal_mask"), shortcut_type_t.DOWN);
 	let tool: workspace_tool_t = context_raw.tool;
 	if (tool != workspace_tool_t.BRUSH &&
 		tool != workspace_tool_t.ERASER &&
@@ -513,7 +513,7 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 	render_path_set_target("");
 	g4_set_pipeline(base_pipe_cursor);
 	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
-	let decal_mask: bool = decal && operator_shortcut(config_keymap.decal_mask, shortcut_type_t.DOWN);
+	let decal_mask: bool = decal && operator_shortcut(map_get(config_keymap, "decal_mask"), shortcut_type_t.DOWN);
 	let img: image_t = (decal && !decal_mask) ? context_raw.decal_image : resource_get("cursor.k");
 	g4_set_tex(base_cursor_tex, img);
 	let gbuffer0: image_t = map_get(render_path_render_targets, "gbuffer0")._image;
@@ -739,8 +739,8 @@ function render_path_paint_draw() {
 						}
 						app_notify_on_init(_render_final);
 					}
-					let bake_type: bake_type_t = context_raw.bake_type as bake_type_t;
-					app_notify_on_init(bake_type == bake_type_t.DERIVATIVE ? _render_deriv : _render_final);
+					// @ts-ignore
+					app_notify_on_init(context_raw.bake_type == bake_type_t.DERIVATIVE ? _render_deriv : _render_final);
 				}
 			}
 			else if (context_raw.bake_type == bake_type_t.OBJECTID) {

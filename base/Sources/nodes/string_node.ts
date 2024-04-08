@@ -13,12 +13,13 @@ function string_node_create(arg: string): string_node_t {
 	return n;
 }
 
-function string_node_get(self: string_node_t, from: i32): any {
+function string_node_get(self: string_node_t, from: i32): logic_node_value_t {
 	if (self.base.inputs.length > 0) {
 		return logic_node_input_get(self.base.inputs[0]);
 	}
 	else {
-		return self.value;
+		let v: logic_node_value_t = { _any: self.value };
+		return v;
 	}
 }
 

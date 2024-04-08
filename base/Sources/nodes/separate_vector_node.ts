@@ -10,16 +10,19 @@ function separate_vector_node_create(arg: any): separate_vector_node_t {
 	return n;
 }
 
-function separate_vector_node_get(self: separate_vector_node_t, from: i32): any {
-	let vector: vec4_t = logic_node_input_get(self.base.inputs[0]);
+function separate_vector_node_get(self: separate_vector_node_t, from: i32): logic_node_value_t {
+	let vector: vec4_t = logic_node_input_get(self.base.inputs[0])._any;
 	if (from == 0) {
-		return vector.x;
+		let v: logic_node_value_t = { _f32: vector.x };
+		return v;
 	}
 	else if (from == 1) {
-		return vector.y;
+		let v: logic_node_value_t = { _f32: vector.y };
+		return v;
 	}
 	else {
-		return vector.z;
+		let v: logic_node_value_t = { _f32: vector.z };
+		return v;
 	}
 }
 

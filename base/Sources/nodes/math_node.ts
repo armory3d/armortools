@@ -12,9 +12,9 @@ function math_node_create(arg: any): math_node_t {
 	return n;
 }
 
-function math_node_get(self: math_node_t, from: i32): any {
-	let v1: f32 = logic_node_input_get(self.base.inputs[0]);
-	let v2: f32 = logic_node_input_get(self.base.inputs[1]);
+function math_node_get(self: math_node_t, from: i32): logic_node_value_t {
+	let v1: f32 = logic_node_input_get(self.base.inputs[0])._f32;
+	let v2: f32 = logic_node_input_get(self.base.inputs[1])._f32;
 	let f: f32 = 0.0;
 	let op: string = self.operation;
 	if (op == "Add") {
@@ -127,7 +127,8 @@ function math_node_get(self: math_node_t, from: i32): any {
 		f = f < 0.0 ? 0.0 : (f > 1.0 ? 1.0 : f);
 	}
 
-	return f;
+	let v: logic_node_value_t = { _f32: f };
+	return v;
 }
 
 let math_node_def: zui_node_t = {

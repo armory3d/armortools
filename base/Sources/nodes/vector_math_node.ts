@@ -13,9 +13,9 @@ function vector_math_node_create(arg: any): vector_math_node_t {
 	return n;
 }
 
-function vector_math_node_get(self: vector_math_node_t, from: i32): any {
-	let v1: vec4_t = logic_node_input_get(self.base.inputs[0]);
-	let v2: vec4_t = logic_node_input_get(self.base.inputs[1]);
+function vector_math_node_get(self: vector_math_node_t, from: i32): logic_node_value_t {
+	let v1: vec4_t = logic_node_input_get(self.base.inputs[0])._any;
+	let v2: vec4_t = logic_node_input_get(self.base.inputs[1])._any;
 	vec4_set_from(self.v, v1);
 	let f: f32 = 0.0;
 	let op: string = self.operation;
@@ -131,10 +131,12 @@ function vector_math_node_get(self: vector_math_node_t, from: i32): any {
 	}
 
 	if (from == 0) {
-		return self.v;
+		let v: logic_node_value_t = { _any: self.v };
+		return v;
 	}
 	else {
-		return f;
+		let v: logic_node_value_t = { _f32: f };
+		return v;
 	}
 }
 

@@ -48,6 +48,7 @@ let physics_body_quat: quat_t = quat_create();
 let physics_body_convex_hull_cache: map_t<mesh_data_t, Ammo.btConvexHullShape> = map_create();
 let physics_body_triangle_mesh_cache: map_t<mesh_data_t, Ammo.btTriangleMesh> = map_create();
 let physics_body_users_cache: map_t<mesh_data_t, i32> = map_create();
+let physics_body_object_map: map_t<object_t, physics_body_t> = map_create();
 
 function physics_body_create(): physics_body_t {
 	if (physics_body_first) {
@@ -91,7 +92,7 @@ function physics_body_set_mass(pb: physics_body_t, f: f32) {
 		let t: physics_body_t = physics_body_create();
 		t._mass = f;
 		physics_body_init(t, pb.object);
-		(pb.object as any).physicsBody = t;
+		map_set(physics_body_object_map, pb.object, t);
 	}
 	else {
 		pb._mass = f;

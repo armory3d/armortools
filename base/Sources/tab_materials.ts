@@ -43,7 +43,7 @@ function tab_materials_button_nodes() {
 		ui_base_show_material_nodes();
 	}
 	else if (ui.is_hovered) {
-		zui_tooltip(tr("Show Node Editor") + " (" + config_keymap.toggle_node_editor + ")");
+		zui_tooltip(tr("Show Node Editor") + " (" + map_get(config_keymap, "toggle_node_editor") + ")");
 	}
 }
 
@@ -116,7 +116,7 @@ function tab_materials_draw_slots(mini: bool) {
 			// Draw material numbers when selecting a material via keyboard shortcut
 			let is_typing: bool = ui.is_typing || ui_view2d_ui.is_typing || ui_nodes_ui.is_typing;
 			if (!is_typing) {
-				if (i < 9 && operator_shortcut(config_keymap.select_material, shortcut_type_t.DOWN)) {
+				if (i < 9 && operator_shortcut(map_get(config_keymap, "select_material"), shortcut_type_t.DOWN)) {
 					let number: string = any_to_string(i + 1);
 					let width: i32 = g2_font_width(ui.font, ui.font_size, number) + 10;
 					let height: i32 = g2_font_height(ui.font, ui.font_size);
@@ -237,7 +237,7 @@ function tab_materials_draw_slots(mini: bool) {
 			if (ui.is_hovered) {
 				zui_tooltip_image(imgFull);
 				if (i < 9) {
-					zui_tooltip(project_materials[i].canvas.name + " - (" + config_keymap.select_material + " " + (i + 1) + ")");
+					zui_tooltip(project_materials[i].canvas.name + " - (" + map_get(config_keymap, "select_material") + " " + (i + 1) + ")");
 				}
 				else {
 					zui_tooltip(project_materials[i].canvas.name);
@@ -250,7 +250,7 @@ function tab_materials_draw_slots(mini: bool) {
 				zui_text(project_materials[i].canvas.name, zui_align_t.CENTER);
 				if (ui.is_hovered) {
 					if (i < 9) {
-						zui_tooltip(project_materials[i].canvas.name + " - (" + config_keymap.select_material + " " + (i + 1) + ")");
+						zui_tooltip(project_materials[i].canvas.name + " - (" + map_get(config_keymap, "select_material") + " " + (i + 1) + ")");
 					}
 					else {
 						zui_tooltip(project_materials[i].canvas.name);

@@ -28,7 +28,7 @@ function tab_meshes_draw(htab: zui_handle_t) {
 
 		if (zui_button(tr("Import"))) {
 			ui_menu_draw(function (ui: zui_t) {
-				if (ui_menu_button(ui, tr("Replace Existing"), config_keymap.file_import_assets)) {
+				if (ui_menu_button(ui, tr("Replace Existing"), map_get(config_keymap, "file_import_assets"))) {
 					project_import_mesh(true);
 				}
 				if (ui_menu_button(ui, tr("Append"))) {

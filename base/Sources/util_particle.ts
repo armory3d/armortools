@@ -111,7 +111,7 @@ function util_particle_init_mesh() {
 	context_raw.paint_body = physics_body_create();
 	context_raw.paint_body.shape = shape_type_t.MESH;
 	physics_body_init(context_raw.paint_body, po.base);
-	(po.base as any).physicsBody = context_raw.paint_body;
+	map_set(physics_body_object_map, po.base, context_raw.paint_body);
 }
 
 ///end

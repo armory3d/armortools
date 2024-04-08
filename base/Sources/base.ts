@@ -102,151 +102,80 @@ let base_max_layers: i32 = 255;
 ///end
 let base_default_fov: f32 = 0.69;
 
-let base_default_keymap: any = {
-	action_paint: "left",
-	action_rotate: "alt+left",
-	action_pan: "alt+middle",
-	action_zoom: "alt+right",
-	rotate_light: "shift+middle",
-	rotate_envmap: "ctrl+middle",
-	set_clone_source: "alt",
-	stencil_transform: "ctrl",
-	stencil_hide: "z",
-	brush_radius: "f",
-	brush_radius_decrease: "[",
-	brush_radius_increase: "]",
-	brush_ruler: "shift",
-	file_new: "ctrl+n",
-	file_open: "ctrl+o",
-	file_open_recent: "ctrl+shift+o",
-	file_save: "ctrl+s",
-	file_save_as: "ctrl+shift+s",
-	file_reimport_mesh: "ctrl+r",
-	file_reimport_textures: "ctrl+shift+r",
-	file_import_assets: "ctrl+i",
-	file_export_textures: "ctrl+e",
-	file_export_textures_as: "ctrl+shift+e",
-	edit_undo: "ctrl+z",
-	edit_redo: "ctrl+shift+z",
-	edit_prefs: "ctrl+k",
-	view_reset: "0",
-	view_front: "1",
-	view_back: "ctrl+1",
-	view_right: "3",
-	view_left: "ctrl+3",
-	view_top: "7",
-	view_bottom: "ctrl+7",
-	view_camera_type: "5",
-	view_orbit_left: "4",
-	view_orbit_right: "6",
-	view_orbit_up: "8",
-	view_orbit_down: "2",
-	view_orbit_opposite: "9",
-	view_zoom_in: "",
-	view_zoom_out: "",
-	view_distract_free: "f11",
-	viewport_mode: "ctrl+m",
-	toggle_node_editor: "tab",
-	toggle_2d_view: "shift+tab",
-	toggle_browser: "`",
-	node_search: "space",
-	operator_search: "space",
+function base_get_default_keymap(): map_t<string, string> {
+	let keymap: map_t<string, string> = map_create();
+	map_set(keymap, "action_paint", "left");
+	map_set(keymap, "action_rotate", "alt+left");
+	map_set(keymap, "action_pan", "alt+middle");
+	map_set(keymap, "action_zoom", "alt+right");
+	map_set(keymap, "rotate_light", "shift+middle");
+	map_set(keymap, "rotate_envmap", "ctrl+middle");
+	map_set(keymap, "set_clone_source", "alt");
+	map_set(keymap, "stencil_transform", "ctrl");
+	map_set(keymap, "stencil_hide", "z");
+	map_set(keymap, "brush_radius", "f");
+	map_set(keymap, "brush_radius_decrease", "[");
+	map_set(keymap, "brush_radius_increase", "]");
+	map_set(keymap, "brush_ruler", "shift");
+	map_set(keymap, "file_new", "ctrl+n");
+	map_set(keymap, "file_open", "ctrl+o");
+	map_set(keymap, "file_open_recent", "ctrl+shift+o");
+	map_set(keymap, "file_save", "ctrl+s");
+	map_set(keymap, "file_save_as", "ctrl+shift+s");
+	map_set(keymap, "file_reimport_mesh", "ctrl+r");
+	map_set(keymap, "file_reimport_textures", "ctrl+shift+r");
+	map_set(keymap, "file_import_assets", "ctrl+i");
+	map_set(keymap, "file_export_textures", "ctrl+e");
+	map_set(keymap, "file_export_textures_as", "ctrl+shift+e");
+	map_set(keymap, "edit_undo", "ctrl+z");
+	map_set(keymap, "edit_redo", "ctrl+shift+z");
+	map_set(keymap, "edit_prefs", "ctrl+k");
+	map_set(keymap, "view_reset", "0");
+	map_set(keymap, "view_front", "1");
+	map_set(keymap, "view_back", "ctrl+1");
+	map_set(keymap, "view_right", "3");
+	map_set(keymap, "view_left", "ctrl+3");
+	map_set(keymap, "view_top", "7");
+	map_set(keymap, "view_bottom", "ctrl+7");
+	map_set(keymap, "view_camera_type", "5");
+	map_set(keymap, "view_orbit_left", "4");
+	map_set(keymap, "view_orbit_right", "6");
+	map_set(keymap, "view_orbit_up", "8");
+	map_set(keymap, "view_orbit_down", "2");
+	map_set(keymap, "view_orbit_opposite", "9");
+	map_set(keymap, "view_zoom_in", "");
+	map_set(keymap, "view_zoom_out", "");
+	map_set(keymap, "view_distract_free", "f11");
+	map_set(keymap, "viewport_mode", "ctrl+m");
+	map_set(keymap, "toggle_node_editor", "tab");
+	map_set(keymap, "toggle_2d_view", "shift+tab");
+	map_set(keymap, "toggle_browser", "`");
+	map_set(keymap, "node_search", "space");
+	map_set(keymap, "operator_search", "space");
 	///if (is_paint || is_sculpt)
-	decal_mask: "ctrl",
-	select_material: "shift+number",
-	select_layer: "alt+number",
-	brush_opacity: "shift+f",
-	brush_angle: "alt+f",
-	tool_brush: "b",
-	tool_eraser: "e",
-	tool_fill: "g",
-	tool_decal: "d",
-	tool_text: "t",
-	tool_clone: "l",
-	tool_blur: "u",
-	tool_smudge: "m",
-	tool_particle: "p",
-	tool_colorid: "c",
-	tool_picker: "v",
-	tool_bake: "k",
-	tool_gizmo: "",
-	tool_material: "",
-	swap_brush_eraser: "",
+	map_set(keymap, "decal_mask", "ctrl");
+	map_set(keymap, "select_material", "shift+number");
+	map_set(keymap, "select_layer", "alt+number");
+	map_set(keymap, "brush_opacity", "shift+f");
+	map_set(keymap, "brush_angle", "alt+f");
+	map_set(keymap, "tool_brush", "b");
+	map_set(keymap, "tool_eraser", "e");
+	map_set(keymap, "tool_fill", "g");
+	map_set(keymap, "tool_decal", "d");
+	map_set(keymap, "tool_text", "t");
+	map_set(keymap, "tool_clone", "l");
+	map_set(keymap, "tool_blur", "u");
+	map_set(keymap, "tool_smudge", "m");
+	map_set(keymap, "tool_particle", "p");
+	map_set(keymap, "tool_colorid", "c");
+	map_set(keymap, "tool_picker", "v");
+	map_set(keymap, "tool_bake", "k");
+	map_set(keymap, "tool_gizmo", "");
+	map_set(keymap, "tool_material", "");
+	map_set(keymap, "swap_brush_eraser", "");
 	///end
-};
-
-let base_keymap_keys: string[] = [
-	"action_paint",
-	"action_rotate",
-	"action_pan",
-	"action_zoom",
-	"rotate_light",
-	"rotate_envmap",
-	"set_clone_source",
-	"stencil_transform",
-	"stencil_hide",
-	"brush_radius",
-	"brush_radius_decrease",
-	"brush_radius_increase",
-	"brush_ruler",
-	"file_new",
-	"file_open",
-	"file_open_recent",
-	"file_save",
-	"file_save_as",
-	"file_reimport_mesh",
-	"file_reimport_textures",
-	"file_import_assets",
-	"file_export_textures",
-	"file_export_textures_as",
-	"edit_undo",
-	"edit_redo",
-	"edit_prefs",
-	"view_reset",
-	"view_front",
-	"view_back",
-	"view_right",
-	"view_left",
-	"view_top",
-	"view_bottom",
-	"view_camera_type",
-	"view_orbit_left",
-	"view_orbit_right",
-	"view_orbit_up",
-	"view_orbit_down",
-	"view_orbit_opposite",
-	"view_zoom_in",
-	"view_zoom_out",
-	"view_distract_free",
-	"viewport_mode",
-	"toggle_node_editor",
-	"toggle_2d_view",
-	"toggle_browser",
-	"node_search",
-	"operator_search",
-	///if (is_paint || is_sculpt)
-	"decal_mask",
-	"select_material",
-	"select_layer",
-	"brush_opacity",
-	"brush_angle",
-	"tool_brush",
-	"tool_eraser",
-	"tool_fill",
-	"tool_decal",
-	"tool_text",
-	"tool_clone",
-	"tool_blur",
-	"tool_smudge",
-	"tool_particle",
-	"tool_colorid",
-	"tool_picker",
-	"tool_bake",
-	"tool_gizmo",
-	"tool_material",
-	"swap_brush_eraser",
-	///end
-];
+	return keymap;
+}
 
 function base_init() {
 	base_last_window_width = sys_width();
