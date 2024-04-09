@@ -34,7 +34,6 @@ flags.on_c_project_created = async function(c_project, platform, graphics) {
 	if (flags.with_onnx) {
 		c_project.addDefine("WITH_ONNX");
 		c_project.addIncludeDir("../" + dir + "/onnx/include");
-		console.log(platform);
 		if (platform === "win32") {
 			c_project.addLib("../" + dir + "/onnx/win32/onnxruntime");
 		}
