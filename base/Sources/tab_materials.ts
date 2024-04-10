@@ -85,7 +85,7 @@ function tab_materials_draw_slots(mini: bool) {
 			if (context_raw.material == project_materials[i]) {
 				if (mini) {
 					let w: f32 = ui._w / zui_SCALE(ui);
-					zui_rect(0, -2, w - 2, w - 4, ui.t.HIGHLIGHT_COL, 3);
+					zui_rect(0, -2, w - 2, w - 4, ui.ops.theme.HIGHLIGHT_COL, 3);
 				}
 				else {
 					let off: i32 = row % 2 == 1 ? 1 : 0;
@@ -93,10 +93,10 @@ function tab_materials_draw_slots(mini: bool) {
 					if (config_raw.window_scale > 1) {
 						w += math_floor(config_raw.window_scale * 2);
 					}
-					zui_fill(-1,         -2, w + 3,       2, ui.t.HIGHLIGHT_COL);
-					zui_fill(-1,    w - off, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
-					zui_fill(-1,         -2,     2,   w + 3, ui.t.HIGHLIGHT_COL);
-					zui_fill(w + 1,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
+					zui_fill(-1,         -2, w + 3,       2, ui.ops.theme.HIGHLIGHT_COL);
+					zui_fill(-1,    w - off, w + 3, 2 + off, ui.ops.theme.HIGHLIGHT_COL);
+					zui_fill(-1,         -2,     2,   w + 3, ui.ops.theme.HIGHLIGHT_COL);
+					zui_fill(w + 1,      -2,     2,   w + 4, ui.ops.theme.HIGHLIGHT_COL);
 				}
 			}
 
@@ -118,11 +118,11 @@ function tab_materials_draw_slots(mini: bool) {
 			if (!is_typing) {
 				if (i < 9 && operator_shortcut(map_get(config_keymap, "select_material"), shortcut_type_t.DOWN)) {
 					let number: string = any_to_string(i + 1);
-					let width: i32 = g2_font_width(ui.font, ui.font_size, number) + 10;
-					let height: i32 = g2_font_height(ui.font, ui.font_size);
-					g2_set_color(ui.t.TEXT_COL);
+					let width: i32 = g2_font_width(ui.ops.font, ui.font_size, number) + 10;
+					let height: i32 = g2_font_height(ui.ops.font, ui.font_size);
+					g2_set_color(ui.ops.theme.TEXT_COL);
 					g2_fill_rect(uix, uiy, width, height);
-					g2_set_color(ui.t.ACCENT_COL);
+					g2_set_color(ui.ops.theme.ACCENT_COL);
 					g2_draw_string(number, uix + 5, uiy);
 				}
 			}

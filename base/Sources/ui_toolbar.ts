@@ -83,7 +83,7 @@ function ui_toolbar_render_ui() {
 		ui.image_scroll_align = false;
 		let img: image_t = resource_get("icons.k");
 
-		let col: i32 = ui.t.WINDOW_BG_COL;
+		let col: i32 = ui.ops.theme.WINDOW_BG_COL;
 		if (col < 0) {
 			col += 4294967296;
 		}
@@ -93,20 +93,20 @@ function ui_toolbar_render_ui() {
 		// Properties icon
 		if (config_raw.layout[layout_size_t.HEADER] == 1) {
 			let rect: rect_t = resource_tile50(img, 7, 1);
-			if (zui_image(img, light ? 0xff666666 : ui.t.BUTTON_COL, -1.0, rect.x, rect.y, rect.w, rect.h) == zui_state_t.RELEASED) {
+			if (zui_image(img, light ? 0xff666666 : ui.ops.theme.BUTTON_COL, -1.0, rect.x, rect.y, rect.w, rect.h) == zui_state_t.RELEASED) {
 				config_raw.layout[layout_size_t.HEADER] = 0;
 			}
 		}
 		// Draw ">>" button if header is hidden
 		else {
-			let _ELEMENT_H: i32 = ui.t.ELEMENT_H;
-			let _BUTTON_H: i32 = ui.t.BUTTON_H;
-			let _BUTTON_COL: i32 = ui.t.BUTTON_COL;
+			let _ELEMENT_H: i32 = ui.ops.theme.ELEMENT_H;
+			let _BUTTON_H: i32 = ui.ops.theme.BUTTON_H;
+			let _BUTTON_COL: i32 = ui.ops.theme.BUTTON_COL;
 			let _fontOffsetY: i32 = ui.font_offset_y;
-			ui.t.ELEMENT_H = math_floor(ui.t.ELEMENT_H * 1.5);
-			ui.t.BUTTON_H = ui.t.ELEMENT_H;
-			ui.t.BUTTON_COL = ui.t.WINDOW_BG_COL;
-			let font_height: i32 = g2_font_height(ui.font, ui.font_size);
+			ui.ops.theme.ELEMENT_H = math_floor(ui.ops.theme.ELEMENT_H * 1.5);
+			ui.ops.theme.BUTTON_H = ui.ops.theme.ELEMENT_H;
+			ui.ops.theme.BUTTON_COL = ui.ops.theme.WINDOW_BG_COL;
+			let font_height: i32 = g2_font_height(ui.ops.font, ui.font_size);
 			ui.font_offset_y = (zui_ELEMENT_H(ui) - font_height) / 2;
 			let _w: i32 = ui._w;
 			ui._w = ui_toolbar_w;
@@ -116,9 +116,9 @@ function ui_toolbar_render_ui() {
 			}
 
 			ui._w = _w;
-			ui.t.ELEMENT_H = _ELEMENT_H;
-			ui.t.BUTTON_H = _BUTTON_H;
-			ui.t.BUTTON_COL = _BUTTON_COL;
+			ui.ops.theme.ELEMENT_H = _ELEMENT_H;
+			ui.ops.theme.BUTTON_H = _BUTTON_H;
+			ui.ops.theme.BUTTON_COL = _BUTTON_COL;
 			ui.font_offset_y = _fontOffsetY;
 		}
 		if (ui.is_hovered) {
@@ -178,10 +178,10 @@ function ui_toolbar_render_ui() {
 
 	if (config_raw.touch_ui) {
 		// Hide scrollbar
-		let _SCROLL_W: i32 = ui.t.SCROLL_W;
-		ui.t.SCROLL_W = 0;
+		let _SCROLL_W: i32 = ui.ops.theme.SCROLL_W;
+		ui.ops.theme.SCROLL_W = 0;
 		zui_end_window();
-		ui.t.SCROLL_W = _SCROLL_W;
+		ui.ops.theme.SCROLL_W = _SCROLL_W;
 	}
 }
 
@@ -224,7 +224,7 @@ function ui_toolbar_tool_properties_menu() {
 function ui_toolbar_draw_highlight() {
 	let ui: zui_t = ui_base_ui;
 	let size: i32 = ui_toolbar_w - 4;
-	g2_set_color(ui.t.HIGHLIGHT_COL);
+	g2_set_color(ui.ops.theme.HIGHLIGHT_COL);
 	zui_draw_rect(true, ui._x + -1,  ui._y + 2, size + 2, size + 2);
 }
 

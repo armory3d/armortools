@@ -118,7 +118,7 @@ function box_projects_tab(ui: zui_t) {
 
 				let uix: i32 = ui._x;
 				if (icon != null) {
-					zui_fill(0, 0, 128, 128, ui.t.SEPARATOR_COL);
+					zui_fill(0, 0, 128, 128, ui.ops.theme.SEPARATOR_COL);
 
 					let state: i32 = zui_image(icon, 0xffffffff, 128  * zui_SCALE(ui));
 					if (state == zui_state_t.RELEASED) {

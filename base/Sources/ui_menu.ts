@@ -16,19 +16,19 @@ let _ui_menu_render_msg: string;
 function ui_menu_render() {
 	let ui: zui_t = base_ui_menu;
 	let menu_w: i32 = ui_menu_commands != null ? math_floor(base_default_element_w * zui_SCALE(base_ui_menu) * 2.3) : math_floor(zui_ELEMENT_W(ui) * 2.3);
-	let _BUTTON_COL: i32 = ui.t.BUTTON_COL;
-	ui.t.BUTTON_COL = ui.t.SEPARATOR_COL;
-	let _ELEMENT_OFFSET: i32 = ui.t.ELEMENT_OFFSET;
-	ui.t.ELEMENT_OFFSET = 0;
-	let _ELEMENT_H: i32 = ui.t.ELEMENT_H;
-	ui.t.ELEMENT_H = config_raw.touch_ui ? (28 + 2) : 28;
+	let _BUTTON_COL: i32 = ui.ops.theme.BUTTON_COL;
+	ui.ops.theme.BUTTON_COL = ui.ops.theme.SEPARATOR_COL;
+	let _ELEMENT_OFFSET: i32 = ui.ops.theme.ELEMENT_OFFSET;
+	ui.ops.theme.ELEMENT_OFFSET = 0;
+	let _ELEMENT_H: i32 = ui.ops.theme.ELEMENT_H;
+	ui.ops.theme.ELEMENT_H = config_raw.touch_ui ? (28 + 2) : 28;
 
 	zui_begin_region(ui, ui_menu_x, ui_menu_y, menu_w);
 
 	if (ui_menu_commands != null) {
-		g2_set_color(ui.t.ACCENT_SELECT_COL);
+		g2_set_color(ui.ops.theme.ACCENT_SELECT_COL);
 		zui_draw_rect(true, ui._x + -1, ui._y + -1, ui._w + 2, zui_ELEMENT_H(ui) * ui_menu_elements + 2);
-		g2_set_color(ui.t.SEPARATOR_COL);
+		g2_set_color(ui.ops.theme.SEPARATOR_COL);
 		zui_draw_rect(true, ui._x + 0, ui._y + 0, ui._w, zui_ELEMENT_H(ui) * ui_menu_elements);
 		g2_set_color(0xffffffff);
 
@@ -598,9 +598,9 @@ function ui_menu_render() {
 	ui_menu_show_first = false;
 	ui_menu_keep_open = false;
 
-	ui.t.BUTTON_COL = _BUTTON_COL;
-	ui.t.ELEMENT_OFFSET = _ELEMENT_OFFSET;
-	ui.t.ELEMENT_H = _ELEMENT_H;
+	ui.ops.theme.BUTTON_COL = _BUTTON_COL;
+	ui.ops.theme.ELEMENT_OFFSET = _ELEMENT_OFFSET;
+	ui.ops.theme.ELEMENT_H = _ELEMENT_H;
 	zui_end_region();
 
 	if (ui_menu_hide_flag) {
@@ -636,7 +636,7 @@ function ui_menu_fit_to_screen() {
 			ui_menu_x = math_floor(sys_width() - menu_w);
 		}
 	}
-	let menu_h: f32 = math_floor(ui_menu_elements * 30 * zui_SCALE(base_ui_menu)); // ui.t.ELEMENT_H
+	let menu_h: f32 = math_floor(ui_menu_elements * 30 * zui_SCALE(base_ui_menu)); // ui.ops.theme.ELEMENT_H
 	if (ui_menu_y + menu_h > sys_height()) {
 		if (ui_menu_y - menu_h > 0) {
 			ui_menu_y = math_floor(ui_menu_y - menu_h);
@@ -649,9 +649,9 @@ function ui_menu_fit_to_screen() {
 }
 
 function ui_menu_fill(ui: zui_t) {
-	g2_set_color(ui.t.ACCENT_SELECT_COL);
+	g2_set_color(ui.ops.theme.ACCENT_SELECT_COL);
 	g2_fill_rect(ui._x - 1, ui._y, ui._w + 2, zui_ELEMENT_H(ui) + 1 + 1);
-	g2_set_color(ui.t.SEPARATOR_COL);
+	g2_set_color(ui.ops.theme.SEPARATOR_COL);
 	g2_fill_rect(ui._x, ui._y, ui._w, zui_ELEMENT_H(ui) + 1);
 	g2_set_color(0xffffffff);
 }
@@ -659,10 +659,10 @@ function ui_menu_fill(ui: zui_t) {
 function ui_menu_separator(ui: zui_t) {
 	ui._y++;
 	if (config_raw.touch_ui) {
-		zui_fill(0, 0, ui._w / zui_SCALE(ui), 1, ui.t.ACCENT_SELECT_COL);
+		zui_fill(0, 0, ui._w / zui_SCALE(ui), 1, ui.ops.theme.ACCENT_SELECT_COL);
 	}
 	else {
-		zui_fill(26, 0, ui._w / zui_SCALE(ui) - 26, 1, ui.t.ACCENT_SELECT_COL);
+		zui_fill(26, 0, ui._w / zui_SCALE(ui) - 26, 1, ui.ops.theme.ACCENT_SELECT_COL);
 	}
 }
 
@@ -688,7 +688,7 @@ function ui_menu_align(ui: zui_t) {
 
 function ui_menu_start(ui: zui_t) {
 	// Draw top border
-	g2_set_color(ui.t.ACCENT_SELECT_COL);
+	g2_set_color(ui.ops.theme.ACCENT_SELECT_COL);
 	if (config_raw.touch_ui) {
 		g2_fill_rect(ui._x + ui._w / 2 + ui_menu_category_w / 2, ui._y - 1, ui._w / 2 - ui_menu_category_w / 2 + 1, 1);
 		g2_fill_rect(ui._x - 1, ui._y - 1, ui._w / 2 - ui_menu_category_w / 2 + 1, 1);

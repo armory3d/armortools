@@ -155,7 +155,11 @@ function brush_output_node_run(self: brush_output_node_t, from: i32) {
 // 			name: _tr("Position"),
 // 			type: "VECTOR",
 // 			color: 0xff63c763,
-// 			default_value: f32([0.0, 0.0, 0.0])
+// 			default_value: f32([0.0, 0.0, 0.0]),
+//			min: 0.0,
+//			max: 1.0,
+//			precision: 100,
+//			display: 0
 // 		},
 // 		{
 // 			id: 0,
@@ -163,7 +167,11 @@ function brush_output_node_run(self: brush_output_node_t, from: i32) {
 // 			name: _tr("Radius"),
 // 			type: "VALUE",
 // 			color: 0xffa1a1a1,
-// 			default_value: 1.0
+// 			default_value: 1.0,
+//			min: 0.0,
+//			max: 1.0,
+//			precision: 100,
+//			display: 0
 // 		},
 // 		{
 // 			id: 0,
@@ -171,7 +179,11 @@ function brush_output_node_run(self: brush_output_node_t, from: i32) {
 // 			name: _tr("Scale"),
 // 			type: "VALUE",
 // 			color: 0xffa1a1a1,
-// 			default_value: 1.0
+// 			default_value: 1.0,
+//			min: 0.0,
+//			max: 1.0,
+//			precision: 100,
+//			display: 0
 // 		},
 // 		{
 // 			id: 0,
@@ -179,7 +191,11 @@ function brush_output_node_run(self: brush_output_node_t, from: i32) {
 // 			name: _tr("Angle"),
 // 			type: "VALUE",
 // 			color: 0xffa1a1a1,
-// 			default_value: 0.0
+// 			default_value: 0.0,
+//			min: 0.0,
+//			max: 1.0,
+//			precision: 100,
+//			display: 0
 // 		},
 // 		{
 // 			id: 0,
@@ -187,7 +203,11 @@ function brush_output_node_run(self: brush_output_node_t, from: i32) {
 // 			name: _tr("Opacity"),
 // 			type: "VALUE",
 // 			color: 0xffa1a1a1,
-// 			default_value: 1.0
+// 			default_value: 1.0,
+//			min: 0.0,
+//			max: 1.0,
+//			precision: 100,
+//			display: 0
 // 		},
 // 		{
 // 			id: 0,
@@ -195,7 +215,11 @@ function brush_output_node_run(self: brush_output_node_t, from: i32) {
 // 			name: _tr("Hardness"),
 // 			type: "VALUE",
 // 			color: 0xffa1a1a1,
-// 			default_value: 1.0
+// 			default_value: 1.0,
+//			min: 0.0,
+//			max: 1.0,
+//			precision: 100,
+//			display: 0
 // 		},
 // 		{
 // 			id: 0,
@@ -203,7 +227,11 @@ function brush_output_node_run(self: brush_output_node_t, from: i32) {
 // 			name: _tr("Stencil"),
 // 			type: "VALUE",
 // 			color: 0xffa1a1a1,
-// 			default_value: 1.0
+// 			default_value: 1.0,
+//			min: 0.0,
+//			max: 1.0,
+//			precision: 100,
+//			display: 0
 // 		}
 // 	],
 // 	outputs: [],
@@ -211,8 +239,14 @@ function brush_output_node_run(self: brush_output_node_t, from: i32) {
 // 		{
 // 			name: _tr("Directional"),
 // 			type: "BOOL",
+// 			output: 0,
 // 			default_value: false,
-// 			output: 0
+//			data: null,
+//			min: 0.0,
+//			max: 1.0,
+//			precision: 100,
+//			height: 0
 // 		}
-// 	]
+// 	],
+//	width: 0
 // };

@@ -22,7 +22,7 @@ function ui_status_render_ui() {
 		ui._y += 2;
 
 		// Border
-		g2_set_color(ui.t.SEPARATOR_COL);
+		g2_set_color(ui.ops.theme.SEPARATOR_COL);
 		g2_fill_rect(0, 0, 1, ui._window_h);
 		g2_fill_rect(ui._window_w - 1, 0, 1, ui._window_h);
 

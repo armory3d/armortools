@@ -40,7 +40,11 @@ let time_node_def: zui_node_t = {
 			name: _tr("Time"),
 			type: "VALUE",
 			color: 0xffa1a1a1,
-			default_value: 0.0
+			default_value: 0.0,
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			display: 0
 		},
 		{
 			id: 0,
@@ -48,7 +52,11 @@ let time_node_def: zui_node_t = {
 			name: _tr("Delta"),
 			type: "VALUE",
 			color: 0xffa1a1a1,
-			default_value: 0.0
+			default_value: 0.0,
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			display: 0
 		},
 		{
 			id: 0,
@@ -56,8 +64,13 @@ let time_node_def: zui_node_t = {
 			name: _tr("Brush"),
 			type: "VALUE",
 			color: 0xffa1a1a1,
-			default_value: 0.0
+			default_value: 0.0,
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			display: 0
 		}
 	],
-	buttons: []
+	buttons: [],
+	width: 0
 };

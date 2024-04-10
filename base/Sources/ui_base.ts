@@ -611,7 +611,7 @@ function ui_base_update() {
 				ui_menu_draw(function (ui: zui_t) {
 					let mode_handle: zui_handle_t = zui_handle(__ID__);
 					mode_handle.position = context_raw.viewport_mode;
-					zui_text(tr("Viewport Mode"), zui_align_t.RIGHT, ui.t.HIGHLIGHT_COL);
+					zui_text(tr("Viewport Mode"), zui_align_t.RIGHT, ui.ops.theme.HIGHLIGHT_COL);
 					let modes: string[] = [
 						tr("Lit"),
 						tr("Base Color"),
@@ -863,7 +863,7 @@ function ui_base_operator_search() {
 	ui_menu_draw(function (ui: zui_t) {
 		let search_handle: zui_handle_t = zui_handle(__ID__);
 
-		zui_fill(0, 0, ui._w / zui_SCALE(ui), ui.t.ELEMENT_H * 8, ui.t.SEPARATOR_COL);
+		zui_fill(0, 0, ui._w / zui_SCALE(ui), ui.ops.theme.ELEMENT_H * 8, ui.ops.theme.SEPARATOR_COL);
 		let search: string = zui_text_input(search_handle, "", zui_align_t.LEFT, true, true);
 		ui.changed = false;
 		if (_ui_base_operator_search_first) {
@@ -886,13 +886,13 @@ function ui_base_operator_search() {
 		}
 		let enter: bool = keyboard_down("enter");
 		let count: i32 = 0;
-		let BUTTON_COL: i32 = ui.t.BUTTON_COL;
+		let BUTTON_COL: i32 = ui.ops.theme.BUTTON_COL;
 
 		let keys: string[] = map_keys_to_array(config_keymap);
 		for (let i: i32 = 0; i < keys.length; ++i) {
 			let n: string = keys[i];
 			if (string_index_of(n, search) >= 0) {
-				ui.t.BUTTON_COL = count == ui_base_operator_search_offset ? ui.t.HIGHLIGHT_COL : ui.t.SEPARATOR_COL;
+				ui.ops.theme.BUTTON_COL = count == ui_base_operator_search_offset ? ui.ops.theme.HIGHLIGHT_COL : ui.ops.theme.SEPARATOR_COL;
 				if (zui_button(n, zui_align_t.LEFT, map_get(config_keymap, n)) || (enter && count == ui_base_operator_search_offset)) {
 					if (enter) {
 						ui.changed = true;
@@ -910,7 +910,7 @@ function ui_base_operator_search() {
 			ui.changed = true;
 			search_handle.text = "";
 		}
-		ui.t.BUTTON_COL = BUTTON_COL;
+		ui.ops.theme.BUTTON_COL = BUTTON_COL;
 	}, 8, -1, -1);
 }
 
@@ -1318,9 +1318,9 @@ function ui_base_draw_sidebar() {
 	let expand_button_offset: i32 = config_raw.touch_ui ? math_floor(zui_ELEMENT_H(ui_base_ui) + zui_ELEMENT_OFFSET(ui_base_ui)) : 0;
 	ui_base_tabx = sys_width() - config_raw.layout[layout_size_t.SIDEBAR_W];
 
-	let _SCROLL_W: i32 = ui_base_ui.t.SCROLL_W;
+	let _SCROLL_W: i32 = ui_base_ui.ops.theme.SCROLL_W;
 	if (mini) {
-		ui_base_ui.t.SCROLL_W = ui_base_ui.t.SCROLL_MINI_W;
+		ui_base_ui.ops.theme.SCROLL_W = ui_base_ui.ops.theme.SCROLL_MINI_W;
 	}
 
 	if (zui_window(ui_base_hwnds[tab_area_t.SIDEBAR0], ui_base_tabx, 0, config_raw.layout[layout_size_t.SIDEBAR_W], config_raw.layout[layout_size_t.SIDEBAR_H0])) {
@@ -1335,7 +1335,7 @@ function ui_base_draw_sidebar() {
 	}
 
 	zui_end_window();
-	ui_base_ui.t.SCROLL_W = _SCROLL_W;
+	ui_base_ui.ops.theme.SCROLL_W = _SCROLL_W;
 
 	// Collapse / expand button for mini sidebar
 	if (config_raw.touch_ui) {
@@ -1343,34 +1343,34 @@ function ui_base_draw_sidebar() {
 		let height: i32 = math_floor(zui_ELEMENT_H(ui_base_ui) + zui_ELEMENT_OFFSET(ui_base_ui));
 		if (zui_window(zui_handle(__ID__), sys_width() - width, sys_height() - height, width, height + 1)) {
 			ui_base_ui._w = width;
-			let _BUTTON_H: i32 = ui_base_ui.t.BUTTON_H;
-			let _BUTTON_COL: i32 = ui_base_ui.t.BUTTON_COL;
-			ui_base_ui.t.BUTTON_H = ui_base_ui.t.ELEMENT_H;
-			ui_base_ui.t.BUTTON_COL = ui_base_ui.t.WINDOW_BG_COL;
+			let _BUTTON_H: i32 = ui_base_ui.ops.theme.BUTTON_H;
+			let _BUTTON_COL: i32 = ui_base_ui.ops.theme.BUTTON_COL;
+			ui_base_ui.ops.theme.BUTTON_H = ui_base_ui.ops.theme.ELEMENT_H;
+			ui_base_ui.ops.theme.BUTTON_COL = ui_base_ui.ops.theme.WINDOW_BG_COL;
 			if (zui_button(mini ? "<<" : ">>")) {
 				config_raw.layout[layout_size_t.SIDEBAR_W] = mini ? ui_base_default_sidebar_full_w : ui_base_default_sidebar_mini_w;
 				config_raw.layout[layout_size_t.SIDEBAR_W] = math_floor(config_raw.layout[layout_size_t.SIDEBAR_W] * zui_SCALE(ui_base_ui));
 			}
-			ui_base_ui.t.BUTTON_H = _BUTTON_H;
-			ui_base_ui.t.BUTTON_COL = _BUTTON_COL;
+			ui_base_ui.ops.theme.BUTTON_H = _BUTTON_H;
+			ui_base_ui.ops.theme.BUTTON_COL = _BUTTON_COL;
 		}
 	}
 
 	// Expand button
 	if (config_raw.layout[layout_size_t.SIDEBAR_W] == 0) {
-		let width: i32 = math_floor(g2_font_width(ui_base_ui.font, ui_base_ui.font_size, "<<") + 25 * zui_SCALE(ui_base_ui));
+		let width: i32 = math_floor(g2_font_width(ui_base_ui.ops.font, ui_base_ui.font_size, "<<") + 25 * zui_SCALE(ui_base_ui));
 		if (zui_window(ui_base_hminimized, sys_width() - width, 0, width, math_floor(zui_ELEMENT_H(ui_base_ui) + zui_ELEMENT_OFFSET(ui_base_ui) + 1))) {
 			ui_base_ui._w = width;
-			let _BUTTON_H: i32 = ui_base_ui.t.BUTTON_H;
-			let _BUTTON_COL: i32 = ui_base_ui.t.BUTTON_COL;
-			ui_base_ui.t.BUTTON_H = ui_base_ui.t.ELEMENT_H;
-			ui_base_ui.t.BUTTON_COL = ui_base_ui.t.SEPARATOR_COL;
+			let _BUTTON_H: i32 = ui_base_ui.ops.theme.BUTTON_H;
+			let _BUTTON_COL: i32 = ui_base_ui.ops.theme.BUTTON_COL;
+			ui_base_ui.ops.theme.BUTTON_H = ui_base_ui.ops.theme.ELEMENT_H;
+			ui_base_ui.ops.theme.BUTTON_COL = ui_base_ui.ops.theme.SEPARATOR_COL;
 
 			if (zui_button("<<")) {
 				config_raw.layout[layout_size_t.SIDEBAR_W] = context_raw.maximized_sidebar_width != 0 ? context_raw.maximized_sidebar_width : math_floor(ui_base_default_sidebar_w * config_raw.window_scale);
 			}
-			ui_base_ui.t.BUTTON_H = _BUTTON_H;
-			ui_base_ui.t.BUTTON_COL = _BUTTON_COL;
+			ui_base_ui.ops.theme.BUTTON_H = _BUTTON_H;
+			ui_base_ui.ops.theme.BUTTON_COL = _BUTTON_COL;
 		}
 	}
 	else if (ui_base_htabs[tab_area_t.SIDEBAR0].changed && ui_base_htabs[tab_area_t.SIDEBAR0].position == context_raw.last_htab0_pos) {

@@ -240,7 +240,7 @@ function base_init() {
 	zui_tr = tr;
 	base_ui_box = zui_create({ theme: base_theme, font: f, scale_factor: config_raw.window_scale, color_wheel: base_color_wheel, black_white_gradient: base_color_wheel_gradient });
 	base_ui_menu = zui_create({ theme: base_theme, font: f, scale_factor: config_raw.window_scale, color_wheel: base_color_wheel, black_white_gradient: base_color_wheel_gradient });
-	base_default_element_h = base_ui_menu.t.ELEMENT_H;
+	base_default_element_h = base_ui_menu.ops.theme.ELEMENT_H;
 
 	// Init plugins
 	if (config_raw.plugins != null) {
@@ -738,7 +738,7 @@ function base_get_drag_image(): image_t {
 		if (base_drag_file_icon != null) return base_drag_file_icon;
 		let icons: image_t = resource_get("icons.k");
 		base_drag_rect = string_index_of(base_drag_file, ".") > 0 ? resource_tile50(icons, 3, 1) : resource_tile50(icons, 2, 1);
-		base_drag_tint = ui_base_ui.t.HIGHLIGHT_COL;
+		base_drag_tint = ui_base_ui.ops.theme.HIGHLIGHT_COL;
 		return icons;
 	}
 
@@ -751,7 +751,7 @@ function base_get_drag_image(): image_t {
 		let folder_closed: rect_t = resource_tile50(icons, 2, 1);
 		let folder_open: rect_t = resource_tile50(icons, 8, 1);
 		base_drag_rect = base_drag_layer.show_panel ? folder_open : folder_closed;
-		base_drag_tint = ui_base_ui.t.LABEL_COL - 0x00202020;
+		base_drag_tint = ui_base_ui.ops.theme.LABEL_COL - 0x00202020;
 		return icons;
 	}
 	if (base_drag_layer != null && slot_layer_is_mask(base_drag_layer) && base_drag_layer.fill_layer == null) {

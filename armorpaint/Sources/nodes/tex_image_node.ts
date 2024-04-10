@@ -37,7 +37,11 @@ let tex_image_node_def: zui_node_t = {
 			name: _tr("Vector"),
 			type: "VECTOR",
 			color: 0xff6363c7,
-			default_value: f32_array_create_xyz(0.0, 0.0, 0.0)
+			default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			display: 0
 		}
 	],
 	outputs: [
@@ -47,7 +51,11 @@ let tex_image_node_def: zui_node_t = {
 			name: _tr("Color"),
 			type: "VALUE", // Match brush output socket type
 			color: 0xffc7c729,
-			default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0)
+			default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			display: 0
 		},
 		{
 			id: 0,
@@ -55,21 +63,36 @@ let tex_image_node_def: zui_node_t = {
 			name: _tr("Alpha"),
 			type: "VALUE",
 			color: 0xffa1a1a1,
-			default_value: 1.0
+			default_value: 1.0,
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			display: 0
 		}
 	],
 	buttons: [
 		{
 			name: _tr("file"),
 			type: "ENUM",
+			output: -1,
 			default_value: 0,
-			data: ""
+			data: "",
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			height: 0
 		},
 		{
 			name: _tr("color_space"),
 			type: "ENUM",
+			output: -1,
 			default_value: 0,
-			data: ["linear", "srgb"]
+			data: ["linear", "srgb"],
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			height: 0
 		}
-	]
+	],
+	width: 0
 };

@@ -141,7 +141,11 @@ let input_node_def: zui_node_t = {
 			name: _tr("Lazy Radius"),
 			type: "VALUE",
 			color: 0xffa1a1a1,
-			default_value: 0.0
+			default_value: 0.0,
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			display: 0
 		},
 		{
 			id: 0,
@@ -149,7 +153,11 @@ let input_node_def: zui_node_t = {
 			name: _tr("Lazy Step"),
 			type: "VALUE",
 			color: 0xffa1a1a1,
-			default_value: 0.0
+			default_value: 0.0,
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			display: 0
 		}
 	],
 	outputs: [
@@ -159,8 +167,13 @@ let input_node_def: zui_node_t = {
 			name: _tr("Position"),
 			type: "VECTOR",
 			color: 0xff63c763,
-			default_value: null
+			default_value: null,
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			display: 0
 		}
 	],
-	buttons: []
+	buttons: [],
+	width: 0
 };

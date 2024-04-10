@@ -56,25 +56,25 @@ function ui_menubar_render_ui() {
 			///end
 			let size: i32 = math_floor(ui._w / zui_SCALE(ui));
 			if (ui_menu_show && ui_menu_category == menu_category_t.VIEWPORT) {
-				zui_fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
+				zui_fill(0, -6, size, size - 4, ui.ops.theme.HIGHLIGHT_COL);
 			}
 			if (ui_menubar_icon_button(ui, 8, 2)) {
 				ui_menubar_show_menu(ui, menu_category_t.VIEWPORT);
 			}
 			if (ui_menu_show && ui_menu_category == menu_category_t.MODE) {
-				zui_fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
+				zui_fill(0, -6, size, size - 4, ui.ops.theme.HIGHLIGHT_COL);
 			}
 			if (ui_menubar_icon_button(ui, 9, 2)) {
 				ui_menubar_show_menu(ui, menu_category_t.MODE);
 			}
 			if (ui_menu_show && ui_menu_category == menu_category_t.CAMERA) {
-				zui_fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
+				zui_fill(0, -6, size, size - 4, ui.ops.theme.HIGHLIGHT_COL);
 			}
 			if (ui_menubar_icon_button(ui, 10, 2)) {
 				ui_menubar_show_menu(ui, menu_category_t.CAMERA);
 			}
 			if (ui_menu_show && ui_menu_category == menu_category_t.HELP) {
-				zui_fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
+				zui_fill(0, -6, size, size - 4, ui.ops.theme.HIGHLIGHT_COL);
 			}
 			if (ui_menubar_icon_button(ui, 11, 2)) {
 				ui_menubar_show_menu(ui, menu_category_t.HELP);
@@ -124,7 +124,7 @@ function ui_menubar_render_ui() {
 			zui_tab(ui_header_worktab, tr("3D View"));
 		}
 		else {
-			zui_fill(0, 0, ui._window_w, ui._window_h + 4, ui.t.SEPARATOR_COL);
+			zui_fill(0, 0, ui._window_w, ui._window_h + 4, ui.ops.theme.SEPARATOR_COL);
 		}
 
 		///if is_lab
@@ -198,7 +198,7 @@ function ui_menubar_show_menu(ui: zui_t, category: i32) {
 }
 
 function ui_menubar_icon_button(ui: zui_t, i: i32, j: i32): bool {
-	let col: i32 = ui.t.WINDOW_BG_COL;
+	let col: i32 = ui.ops.theme.WINDOW_BG_COL;
 	if (col < 0) {
 		col += 4294967296;
 	}

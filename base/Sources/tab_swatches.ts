@@ -106,7 +106,7 @@ function tab_swatches_draw(htab: zui_handle_t) {
 
 				if (context_raw.swatch == project_raw.swatches[i]) {
 					let w: i32 = 32;
-					zui_fill(-2, -2, w, w, ui.t.HIGHLIGHT_COL);
+					zui_fill(-2, -2, w, w, ui.ops.theme.HIGHLIGHT_COL);
 				}
 
 				uix = ui._x;
@@ -114,7 +114,7 @@ function tab_swatches_draw(htab: zui_handle_t) {
 
 				// Draw the drag position indicator
 				if (base_drag_swatch != null && tab_swatches_drag_pos == i) {
-					zui_fill(-1, -2 , 2, 32, ui.t.HIGHLIGHT_COL);
+					zui_fill(-1, -2 , 2, 32, ui.ops.theme.HIGHLIGHT_COL);
 				}
 
 				let state: zui_state_t = zui_image(tab_swatches_empty_get(), project_raw.swatches[i].base, slotw);
@@ -140,7 +140,7 @@ function tab_swatches_draw(htab: zui_handle_t) {
 							let h: zui_handle_t = zui_handle(__ID__);
 							h.color = context_raw.swatch.base;
 
-							context_raw.swatch.base = zui_color_wheel(h, false, null, 11 * ui.t.ELEMENT_H * zui_SCALE(ui), true, function () {
+							context_raw.swatch.base = zui_color_wheel(h, false, null, 11 * ui.ops.theme.ELEMENT_H * zui_SCALE(ui), true, function () {
 								context_raw.color_picker_previous_tool = context_raw.tool;
 								context_select_tool(workspace_tool_t.PICKER);
 
@@ -243,7 +243,7 @@ function tab_swatches_draw(htab: zui_handle_t) {
 		if (base_drag_swatch != null && tab_swatches_drag_pos == project_raw.swatches.length) {
 			ui._x = uix; // Reset the position because otherwise it would start in the row below
 			ui._y = uiy;
-			zui_fill(28, -2, 2, 32, ui.t.HIGHLIGHT_COL);
+			zui_fill(28, -2, 2, 32, ui.ops.theme.HIGHLIGHT_COL);
 		}
 
 		// Currently there is no valid dragPosition so reset it

@@ -91,7 +91,7 @@ function box_preferences_show() {
 				ui_menu_draw(function (ui: zui_t) {
 					if (ui_menu_button(ui, tr("Confirm"))) {
 						app_notify_on_init(function () {
-							ui.t.ELEMENT_H = base_default_element_h;
+							ui.ops.theme.ELEMENT_H = base_default_element_h;
 							config_restore();
 							box_preferences_set_scale();
 							if (box_preferences_files_plugin != null) {
@@ -111,7 +111,7 @@ function box_preferences_show() {
 							let b: buffer_t = data_get_blob(path);
 							let raw: config_t = json_parse(sys_buffer_to_string(b));
 							app_notify_on_init(function (raw: config_t) {
-								ui.t.ELEMENT_H = base_default_element_h;
+								ui.ops.theme.ELEMENT_H = base_default_element_h;
 								config_import_from(raw);
 								box_preferences_set_scale();
 								make_material_parse_mesh_material();
@@ -199,7 +199,7 @@ function box_preferences_show() {
 			if (ui.is_hovered && ui.input_released) {
 				ui_menu_draw(function (ui: zui_t) {
 					ui.changed = false;
-					zui_color_wheel(h, false, null, 11 * ui.t.ELEMENT_H * zui_SCALE(ui), true);
+					zui_color_wheel(h, false, null, 11 * ui.ops.theme.ELEMENT_H * zui_SCALE(ui), true);
 					if (ui.changed) {
 						ui_menu_keep_open = true;
 					}
@@ -246,7 +246,7 @@ function box_preferences_show() {
 						h.color = theme[key];
 						ui_menu_draw(function (ui: zui_t) {
 							ui.changed = false;
-							let color: i32 = zui_color_wheel(h, false, null, 11 * ui.t.ELEMENT_H * zui_SCALE(ui), true);
+							let color: i32 = zui_color_wheel(h, false, null, 11 * ui.ops.theme.ELEMENT_H * zui_SCALE(ui), true);
 							let theme: any = base_theme;
 							theme[key] = color;
 							if (ui.changed) {

@@ -157,8 +157,8 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 			let _x: f32 = ui._x;
 
 			let rect: rect_t = string_index_of(f, ".") > 0 ? file : folder;
-			let col: i32 = rect == file ? ui.t.LABEL_COL : ui.t.LABEL_COL - 0x00202020;
-			if (ui_files_selected == i) col = ui.t.HIGHLIGHT_COL;
+			let col: i32 = rect == file ? ui.ops.theme.LABEL_COL : ui.ops.theme.LABEL_COL - 0x00202020;
+			if (ui_files_selected == i) col = ui.ops.theme.HIGHLIGHT_COL;
 
 			let off: f32 = ui._w / 2 - 25 * zui_SCALE(ui);
 			ui._x += off;
@@ -221,10 +221,10 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 				if (icon != null) {
 					let w: i32 = 50;
 					if (i == ui_files_selected) {
-						zui_fill(-2,        -2, w + 4,     2, ui.t.HIGHLIGHT_COL);
-						zui_fill(-2,     w + 2, w + 4,     2, ui.t.HIGHLIGHT_COL);
-						zui_fill(-2,         0,     2, w + 4, ui.t.HIGHLIGHT_COL);
-						zui_fill(w + 2 ,    -2,     2, w + 6, ui.t.HIGHLIGHT_COL);
+						zui_fill(-2,        -2, w + 4,     2, ui.ops.theme.HIGHLIGHT_COL);
+						zui_fill(-2,     w + 2, w + 4,     2, ui.ops.theme.HIGHLIGHT_COL);
+						zui_fill(-2,         0,     2, w + 4, ui.ops.theme.HIGHLIGHT_COL);
+						zui_fill(w + 2 ,    -2,     2, w + 6, ui.ops.theme.HIGHLIGHT_COL);
 					}
 					state = zui_image(icon, 0xffffffff, w * zui_SCALE(ui));
 					if (ui.is_hovered) {
@@ -279,10 +279,10 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 				if (icon != null) {
 					let w: i32 = 50;
 					if (i == ui_files_selected) {
-						zui_fill(-2,        -2, w + 4,     2, ui.t.HIGHLIGHT_COL);
-						zui_fill(-2,     w + 2, w + 4,     2, ui.t.HIGHLIGHT_COL);
-						zui_fill(-2,         0,     2, w + 4, ui.t.HIGHLIGHT_COL);
-						zui_fill(w + 2 ,    -2,     2, w + 6, ui.t.HIGHLIGHT_COL);
+						zui_fill(-2,        -2, w + 4,     2, ui.ops.theme.HIGHLIGHT_COL);
+						zui_fill(-2,     w + 2, w + 4,     2, ui.ops.theme.HIGHLIGHT_COL);
+						zui_fill(-2,         0,     2, w + 4, ui.ops.theme.HIGHLIGHT_COL);
+						zui_fill(w + 2 ,    -2,     2, w + 6, ui.ops.theme.HIGHLIGHT_COL);
 					}
 					state = zui_image(icon, 0xffffffff, w * zui_SCALE(ui));
 					if (ui.is_hovered) {
@@ -327,10 +327,10 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 				}
 				if (icon != null) {
 					if (i == ui_files_selected) {
-						zui_fill(-2,        -2, w + 4,     2, ui.t.HIGHLIGHT_COL);
-						zui_fill(-2,     w + 2, w + 4,     2, ui.t.HIGHLIGHT_COL);
-						zui_fill(-2,         0,     2, w + 4, ui.t.HIGHLIGHT_COL);
-						zui_fill(w + 2 ,    -2,     2, w + 6, ui.t.HIGHLIGHT_COL);
+						zui_fill(-2,        -2, w + 4,     2, ui.ops.theme.HIGHLIGHT_COL);
+						zui_fill(-2,     w + 2, w + 4,     2, ui.ops.theme.HIGHLIGHT_COL);
+						zui_fill(-2,         0,     2, w + 4, ui.ops.theme.HIGHLIGHT_COL);
+						zui_fill(w + 2 ,    -2,     2, w + 6, ui.ops.theme.HIGHLIGHT_COL);
 					}
 					state = zui_image(icon, 0xffffffff, icon.height * zui_SCALE(ui));
 					generic = false;
@@ -391,7 +391,7 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 			ui._y += slotw * 0.75;
 			let label0: string = (ui_files_show_extensions || string_index_of(f, ".") <= 0) ? f : substring(f, 0, string_last_index_of(f, "."));
 			let label1: string = "";
-			while (label0.length > 0 && g2_font_width(ui.font, ui.font_size, label0) > ui._w - 6) { // 2 line split
+			while (label0.length > 0 && g2_font_width(ui.ops.font, ui.font_size, label0) > ui._w - 6) { // 2 line split
 				label1 = char_at(label0, label0.length - 1) + label1;
 				label0 = substring(label0, 0, label0.length - 1);
 			}
@@ -404,12 +404,12 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 			}
 			if (label1 != "") { // Second line
 				ui._x = _x;
-				ui._y += g2_font_height(ui.font, ui.font_size);
+				ui._y += g2_font_height(ui.ops.font, ui.font_size);
 				zui_text(label1, zui_align_t.CENTER);
 				if (ui.is_hovered) {
 					zui_tooltip(label0 + label1);
 				}
-				ui._y -= g2_font_height(ui.font, ui.font_size);
+				ui._y -= g2_font_height(ui.ops.font, ui.font_size);
 			}
 
 			ui._y -= slotw * 0.75;

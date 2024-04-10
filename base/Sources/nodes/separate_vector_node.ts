@@ -40,7 +40,11 @@ let separate_vector_node_def: zui_node_t = {
 			name: _tr("Vector"),
 			type: "VECTOR",
 			color: 0xff6363c7,
-			default_value: f32_array_create_xyz(0.0, 0.0, 0.0)
+			default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			display: 0
 		}
 	],
 	outputs: [
@@ -50,7 +54,11 @@ let separate_vector_node_def: zui_node_t = {
 			name: _tr("X"),
 			type: "VALUE",
 			color: 0xffa1a1a1,
-			default_value: 0.0
+			default_value: 0.0,
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			display: 0
 		},
 		{
 			id: 0,
@@ -58,7 +66,11 @@ let separate_vector_node_def: zui_node_t = {
 			name: _tr("Y"),
 			type: "VALUE",
 			color: 0xffa1a1a1,
-			default_value: 0.0
+			default_value: 0.0,
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			display: 0
 		},
 		{
 			id: 0,
@@ -66,8 +78,13 @@ let separate_vector_node_def: zui_node_t = {
 			name: _tr("Z"),
 			type: "VALUE",
 			color: 0xffa1a1a1,
-			default_value: 0.0
+			default_value: 0.0,
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			display: 0
 		}
 	],
-	buttons: []
+	buttons: [],
+	width: 0
 };

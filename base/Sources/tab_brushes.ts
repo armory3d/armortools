@@ -52,16 +52,16 @@ function tab_brushes_draw(htab: zui_handle_t) {
 				let img_full: image_t = project_brushes[i].image;
 
 				if (context_raw.brush == project_brushes[i]) {
-					// Zui.fill(1, -2, img.width + 3, img.height + 3, ui.t.HIGHLIGHT_COL); // TODO
+					// Zui.fill(1, -2, img.width + 3, img.height + 3, ui.ops.theme.HIGHLIGHT_COL); // TODO
 					let off: i32 = row % 2 == 1 ? 1 : 0;
 					let w: i32 = 50;
 					if (config_raw.window_scale > 1) {
 						w += math_floor(config_raw.window_scale * 2);
 					}
-					zui_fill(-1,         -2, w + 3,       2, ui.t.HIGHLIGHT_COL);
-					zui_fill(-1,    w - off, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
-					zui_fill(-1,         -2,     2,   w + 3, ui.t.HIGHLIGHT_COL);
-					zui_fill(w + 1,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
+					zui_fill(-1,         -2, w + 3,       2, ui.ops.theme.HIGHLIGHT_COL);
+					zui_fill(-1,    w - off, w + 3, 2 + off, ui.ops.theme.HIGHLIGHT_COL);
+					zui_fill(-1,         -2,     2,   w + 3, ui.ops.theme.HIGHLIGHT_COL);
+					zui_fill(w + 1,      -2,     2,   w + 4, ui.ops.theme.HIGHLIGHT_COL);
 				}
 
 				let uix: f32 = ui._x;

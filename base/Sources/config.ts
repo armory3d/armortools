@@ -267,7 +267,16 @@ function config_load_theme(theme: string, tag_redraw: bool = true) {
 	if (tag_redraw) {
 		for (let i: i32 = 0; i < base_get_uis().length; ++i) {
 			let ui: zui_t = base_get_uis()[i];
-			ui.t = base_theme;
+
+			// ui.ops.theme = base_theme;
+
+			for (let i: i32 = 0; i < zui_theme_keys.length; ++i) {
+				let key: string = zui_theme_keys[i];
+				// @ts-ignore
+				ui.ops.theme[key] = base_theme[key];
+			}
+			base_theme = ui.ops.theme;
+
 		}
 		ui_base_tag_ui_redraw();
 	}

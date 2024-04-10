@@ -574,7 +574,7 @@ function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
 	ui_menu_draw(function (ui: zui_t) {
 		let search_handle: zui_handle_t = zui_handle(__ID__);
 
-		g2_set_color(ui.t.SEPARATOR_COL);
+		g2_set_color(ui.ops.theme.SEPARATOR_COL);
 		zui_draw_rect(true, ui._x, ui._y, ui._w, zui_ELEMENT_H(ui) * 8);
 		g2_set_color(0xffffffff);
 
@@ -600,7 +600,7 @@ function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
 		}
 		let enter: bool = keyboard_down("enter");
 		let count: i32 = 0;
-		let BUTTON_COL: i32 = ui.t.BUTTON_COL;
+		let BUTTON_COL: i32 = ui.ops.theme.BUTTON_COL;
 
 		///if (is_paint || is_sculpt)
 		let node_list: zui_node_t[][] = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_list : nodes_brush_list;
@@ -614,7 +614,7 @@ function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
 			for (let i: i32 = 0; i < list.length; ++i) {
 				let n: zui_node_t = list[i];
 				if (string_index_of(to_lower_case(tr(n.name)), search) >= 0) {
-					ui.t.BUTTON_COL = count == ui_nodes_node_search_offset ? ui.t.HIGHLIGHT_COL : ui.t.SEPARATOR_COL;
+					ui.ops.theme.BUTTON_COL = count == ui_nodes_node_search_offset ? ui.ops.theme.HIGHLIGHT_COL : ui.ops.theme.SEPARATOR_COL;
 					if (zui_button(tr(n.name), zui_align_t.LEFT) || (enter && count == ui_nodes_node_search_offset)) {
 						ui_nodes_push_undo();
 						let nodes: zui_nodes_t = ui_nodes_get_nodes();
@@ -650,7 +650,7 @@ function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
 			ui.changed = true;
 			search_handle.text = "";
 		}
-		ui.t.BUTTON_COL = BUTTON_COL;
+		ui.ops.theme.BUTTON_COL = BUTTON_COL;
 	}, 8, x, y);
 }
 
@@ -683,9 +683,9 @@ function ui_nodes_draw_grid() {
 	}
 	ui_nodes_grid = image_create_render_target(w, h);
 	g2_begin(ui_nodes_grid);
-	g2_clear(ui_nodes_ui.t.SEPARATOR_COL);
+	g2_clear(ui_nodes_ui.ops.theme.SEPARATOR_COL);
 
-	g2_set_color(ui_nodes_ui.t.SEPARATOR_COL - 0x00050505);
+	g2_set_color(ui_nodes_ui.ops.theme.SEPARATOR_COL - 0x00050505);
 	step = 20 * zui_SCALE(ui_nodes_ui);
 	for (let i: i32 = 0; i < math_floor(h / step) + 1; ++i) {
 		g2_draw_line(0, i * step, w, i * step);
@@ -694,7 +694,7 @@ function ui_nodes_draw_grid() {
 		g2_draw_line(i * step, 0, i * step, h);
 	}
 
-	g2_set_color(ui_nodes_ui.t.SEPARATOR_COL - 0x00090909);
+	g2_set_color(ui_nodes_ui.ops.theme.SEPARATOR_COL - 0x00090909);
 	step = 100 * zui_SCALE(ui_nodes_ui);
 	for (let i: i32 = 0; i < math_floor(h / step) + 1; ++i) {
 		g2_draw_line(0, i * step, w, i * step);
@@ -1024,7 +1024,7 @@ function ui_nodes_render() {
 		}
 
 		// Menu
-		g2_set_color(ui_nodes_ui.t.SEPARATOR_COL);
+		g2_set_color(ui_nodes_ui.ops.theme.SEPARATOR_COL);
 		g2_fill_rect(0, zui_ELEMENT_H(ui_nodes_ui), ui_nodes_ww, zui_ELEMENT_H(ui_nodes_ui) + zui_ELEMENT_OFFSET(ui_nodes_ui) * 2);
 		g2_set_color(0xffffffff);
 
@@ -1037,7 +1037,7 @@ function ui_nodes_render() {
 		// Editable canvas name
 		let h: zui_handle_t = zui_handle(__ID__);
 		h.text = c.name;
-		ui_nodes_ui._w = math_floor(math_min(g2_font_width(ui_nodes_ui.font, ui_nodes_ui.font_size, h.text) + 15 * zui_SCALE(ui_nodes_ui), 100 * zui_SCALE(ui_nodes_ui)));
+		ui_nodes_ui._w = math_floor(math_min(g2_font_width(ui_nodes_ui.ops.font, ui_nodes_ui.font_size, h.text) + 15 * zui_SCALE(ui_nodes_ui), 100 * zui_SCALE(ui_nodes_ui)));
 		let new_name: string = zui_text_input(h, "");
 		ui_nodes_ui._x += ui_nodes_ui._w + 3;
 		ui_nodes_ui._y = 2 + start_y;
@@ -1087,8 +1087,8 @@ function ui_nodes_render() {
 		ui_nodes_ext_draw_buttons(ew, start_y);
 		///end
 
-		let _BUTTON_COL: i32 = ui_nodes_ui.t.BUTTON_COL;
-		ui_nodes_ui.t.BUTTON_COL = ui_nodes_ui.t.SEPARATOR_COL;
+		let _BUTTON_COL: i32 = ui_nodes_ui.ops.theme.BUTTON_COL;
+		ui_nodes_ui.ops.theme.BUTTON_COL = ui_nodes_ui.ops.theme.SEPARATOR_COL;
 
 		///if (is_paint || is_sculpt)
 		let cats: string[] = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_categories : nodes_brush_categories;
@@ -1136,7 +1136,7 @@ function ui_nodes_render() {
 		ui_nodes_ui._x += ui_nodes_ui._w + 3;
 		ui_nodes_ui._y = 2 + start_y;
 
-		ui_nodes_ui.t.BUTTON_COL = _BUTTON_COL;
+		ui_nodes_ui.ops.theme.BUTTON_COL = _BUTTON_COL;
 
 		// Close node group
 		if (ui_nodes_group_stack.length > 0 && zui_menu_button(tr("Close"))) {
@@ -1170,12 +1170,12 @@ function ui_nodes_render() {
 		let py: i32 = ui_nodes_popup_y;
 		let menuw: i32 = math_floor(ew * 2.3);
 		zui_begin_region(ui_nodes_ui, math_floor(ui_nodes_popup_x), math_floor(py), menuw);
-		let _BUTTON_COL: i32 = ui_nodes_ui.t.BUTTON_COL;
-		ui_nodes_ui.t.BUTTON_COL = ui_nodes_ui.t.SEPARATOR_COL;
-		let _ELEMENT_OFFSET: i32 = ui_nodes_ui.t.ELEMENT_OFFSET;
-		ui_nodes_ui.t.ELEMENT_OFFSET = 0;
-		let _ELEMENT_H: i32 = ui_nodes_ui.t.ELEMENT_H;
-		ui_nodes_ui.t.ELEMENT_H = config_raw.touch_ui ? (28 + 2) : 28;
+		let _BUTTON_COL: i32 = ui_nodes_ui.ops.theme.BUTTON_COL;
+		ui_nodes_ui.ops.theme.BUTTON_COL = ui_nodes_ui.ops.theme.SEPARATOR_COL;
+		let _ELEMENT_OFFSET: i32 = ui_nodes_ui.ops.theme.ELEMENT_OFFSET;
+		ui_nodes_ui.ops.theme.ELEMENT_OFFSET = 0;
+		let _ELEMENT_H: i32 = ui_nodes_ui.ops.theme.ELEMENT_H;
+		ui_nodes_ui.ops.theme.ELEMENT_H = config_raw.touch_ui ? (28 + 2) : 28;
 
 		ui_menu_start(ui_nodes_ui);
 
@@ -1202,8 +1202,8 @@ function ui_nodes_render() {
 		if (is_group_category) {
 			for (let i: i32 = 0; i < project_material_groups.length; ++i) {
 				let g: node_group_t = project_material_groups[i];
-				zui_fill(0, 1, ui_nodes_ui._w / zui_SCALE(ui_nodes_ui), ui_nodes_ui.t.BUTTON_H + 2, ui_nodes_ui.t.ACCENT_SELECT_COL);
-				zui_fill(1, 1, ui_nodes_ui._w / zui_SCALE(ui_nodes_ui) - 2, ui_nodes_ui.t.BUTTON_H + 1, ui_nodes_ui.t.SEPARATOR_COL);
+				zui_fill(0, 1, ui_nodes_ui._w / zui_SCALE(ui_nodes_ui), ui_nodes_ui.ops.theme.BUTTON_H + 2, ui_nodes_ui.ops.theme.ACCENT_SELECT_COL);
+				zui_fill(1, 1, ui_nodes_ui._w / zui_SCALE(ui_nodes_ui) - 2, ui_nodes_ui.ops.theme.BUTTON_H + 1, ui_nodes_ui.ops.theme.SEPARATOR_COL);
 				ui_nodes_ui.enabled = ui_nodes_can_place_group(g.canvas.name);
 				ui_menu_fill(ui_nodes_ui);
 				zui_row([5 / 6, 1 / 6]);
@@ -1232,9 +1232,9 @@ function ui_nodes_render() {
 		ui_nodes_hide_menu = ui_nodes_ui.combo_selected_handle_ptr == 0 && !ui_nodes_show_menu_first && (ui_nodes_ui.changed || ui_nodes_ui.input_released || ui_nodes_ui.input_released_r || ui_nodes_ui.is_escape_down);
 		ui_nodes_show_menu_first = false;
 
-		ui_nodes_ui.t.BUTTON_COL = _BUTTON_COL;
-		ui_nodes_ui.t.ELEMENT_OFFSET = _ELEMENT_OFFSET;
-		ui_nodes_ui.t.ELEMENT_H = _ELEMENT_H;
+		ui_nodes_ui.ops.theme.BUTTON_COL = _BUTTON_COL;
+		ui_nodes_ui.ops.theme.ELEMENT_OFFSET = _ELEMENT_OFFSET;
+		ui_nodes_ui.ops.theme.ELEMENT_H = _ELEMENT_H;
 		zui_end_region();
 	}
 

@@ -128,7 +128,6 @@ function parser_material_init() {
 }
 
 function parser_material_parse(canvas: zui_node_canvas_t, _con: node_shader_context_t, _vert: node_shader_t, _frag: node_shader_t, _matcon: material_context_t): shader_out_t {
-	zui_nodes_update_canvas_format(canvas);
 	parser_material_init();
 	parser_material_canvases = [canvas];
 	parser_material_nodes = canvas.nodes;

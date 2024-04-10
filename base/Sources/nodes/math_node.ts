@@ -145,7 +145,11 @@ let math_node_def: zui_node_t = {
 			name: _tr("Value"),
 			type: "VALUE",
 			color: 0xffa1a1a1,
-			default_value: 0.5
+			default_value: 0.5,
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			display: 0
 		},
 		{
 			id: 0,
@@ -153,7 +157,11 @@ let math_node_def: zui_node_t = {
 			name: _tr("Value"),
 			type: "VALUE",
 			color: 0xffa1a1a1,
-			default_value: 0.5
+			default_value: 0.5,
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			display: 0
 		}
 	],
 	outputs: [
@@ -163,22 +171,36 @@ let math_node_def: zui_node_t = {
 			name: _tr("Value"),
 			type: "VALUE",
 			color: 0xffa1a1a1,
-			default_value: 0.0
+			default_value: 0.0,
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			display: 0
 		}
 	],
 	buttons: [
 		{
 			name: _tr("operation"),
 			type: "ENUM",
-			data: ["Add", "Subtract", "Multiply", "Divide", "Power", "Logarithm", "Square Root", "Inverse Square Root", "Absolute", "Exponent", "Minimum", "Maximum", "Less Than", "Greater Than", "Sign", "Round", "Floor", "Ceil", "Truncate", "Fraction", "Modulo", "Snap", "Ping-Pong", "Sine", "Cosine", "Tangent", "Arcsine", "Arccosine", "Arctangent", "Arctan2", "Hyperbolic Sine", "Hyperbolic Cosine", "Hyperbolic Tangent", "To Radians", "To Degrees"],
+			output: 0,
 			default_value: 0,
-			output: 0
+			data: ["Add", "Subtract", "Multiply", "Divide", "Power", "Logarithm", "Square Root", "Inverse Square Root", "Absolute", "Exponent", "Minimum", "Maximum", "Less Than", "Greater Than", "Sign", "Round", "Floor", "Ceil", "Truncate", "Fraction", "Modulo", "Snap", "Ping-Pong", "Sine", "Cosine", "Tangent", "Arcsine", "Arccosine", "Arctangent", "Arctan2", "Hyperbolic Sine", "Hyperbolic Cosine", "Hyperbolic Tangent", "To Radians", "To Degrees"],
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			height: 0
 		},
 		{
 			name: _tr("use_clamp"),
 			type: "BOOL",
+			output: 0,
 			default_value: false,
-			output: 0
+			data: null,
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			height: 0
 		}
-	]
+	],
+	width: 0
 };

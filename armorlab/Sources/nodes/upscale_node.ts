@@ -138,7 +138,11 @@ let upscale_node_def: zui_node_t = {
 			name: _tr("Color"),
 			type: "RGBA",
 			color: 0xffc7c729,
-			default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0)
+			default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			display: 0
 		}
 	],
 	outputs: [
@@ -148,8 +152,13 @@ let upscale_node_def: zui_node_t = {
 			name: _tr("Color"),
 			type: "RGBA",
 			color: 0xffc7c729,
-			default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0)
+			default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			display: 0
 		}
 	],
-	buttons: []
+	buttons: [],
+	width: 0
 };

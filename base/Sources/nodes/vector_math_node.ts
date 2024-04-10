@@ -154,7 +154,11 @@ let vector_math_node_def: zui_node_t = {
 			name: _tr("Vector"),
 			type: "VECTOR",
 			color: 0xff6363c7,
-			default_value: f32_array_create_xyz(0.0, 0.0, 0.0)
+			default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			display: 0
 		},
 		{
 			id: 0,
@@ -162,7 +166,11 @@ let vector_math_node_def: zui_node_t = {
 			name: _tr("Vector"),
 			type: "VECTOR",
 			color: 0xff6363c7,
-			default_value: f32_array_create_xyz(0.0, 0.0, 0.0)
+			default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			display: 0
 		}
 	],
 	outputs: [
@@ -172,7 +180,11 @@ let vector_math_node_def: zui_node_t = {
 			name: _tr("Vector"),
 			type: "VECTOR",
 			color: 0xff6363c7,
-			default_value: f32_array_create_xyz(0.0, 0.0, 0.0)
+			default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			display: 0
 		},
 		{
 			id: 0,
@@ -180,16 +192,25 @@ let vector_math_node_def: zui_node_t = {
 			name: _tr("Value"),
 			type: "VALUE",
 			color: 0xffa1a1a1,
-			default_value: 0.0
+			default_value: 0.0,
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			display: 0
 		}
 	],
 	buttons: [
 		{
 			name: _tr("operation"),
 			type: "ENUM",
-			data: ["Add", "Subtract", "Multiply", "Divide", "Average", "Cross Product", "Project", "Reflect", "Dot Product", "Distance", "Length", "Scale", "Normalize", "Absolute", "Minimum", "Maximum", "Floor", "Ceil", "Fraction", "Modulo", "Snap", "Sine", "Cosine", "Tangent"],
+			output: 0,
 			default_value: 0,
-			output: 0
+			data: ["Add", "Subtract", "Multiply", "Divide", "Average", "Cross Product", "Project", "Reflect", "Dot Product", "Distance", "Length", "Scale", "Normalize", "Absolute", "Minimum", "Maximum", "Floor", "Ceil", "Fraction", "Modulo", "Snap", "Sine", "Cosine", "Tangent"],
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			height: 0
 		}
-	]
+	],
+	width: 0
 };

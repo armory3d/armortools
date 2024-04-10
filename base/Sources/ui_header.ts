@@ -146,9 +146,9 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 		if (ui.is_hovered && ui.input_released) {
 			_ui_header_draw_tool_properties_h = h;
 			ui_menu_draw(function (ui: zui_t) {
-				zui_fill(0, 0, ui._w / zui_SCALE(ui), ui.t.ELEMENT_H * 9, ui.t.SEPARATOR_COL);
+				zui_fill(0, 0, ui._w / zui_SCALE(ui), ui.ops.theme.ELEMENT_H * 9, ui.ops.theme.SEPARATOR_COL);
 				ui.changed = false;
-				zui_color_wheel(_ui_header_draw_tool_properties_h, false, null, 10 * ui.t.ELEMENT_H * zui_SCALE(ui), false);
+				zui_color_wheel(_ui_header_draw_tool_properties_h, false, null, 10 * ui.ops.theme.ELEMENT_H * zui_SCALE(ui), false);
 				if (ui.changed) {
 					ui_menu_keep_open = true;
 				}
@@ -266,9 +266,9 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 			let progress: f32 = render_path_raytrace_bake_current_sample / context_raw.bake_samples;
 			if (progress > 1.0) progress = 1.0;
 			// Progress bar
-			g2_set_color(ui.t.SEPARATOR_COL);
+			g2_set_color(ui.ops.theme.SEPARATOR_COL);
 			zui_draw_rect(true, ui._x + 1, ui._y, ui._w - 2, zui_ELEMENT_H(ui));
-			g2_set_color(ui.t.HIGHLIGHT_COL);
+			g2_set_color(ui.ops.theme.HIGHLIGHT_COL);
 			zui_draw_rect(true, ui._x + 1, ui._y, (ui._w - 2) * progress, zui_ELEMENT_H(ui));
 			g2_set_color(0xffffffff);
 			zui_text(tr("Samples") + ": " + render_path_raytrace_bake_current_sample);

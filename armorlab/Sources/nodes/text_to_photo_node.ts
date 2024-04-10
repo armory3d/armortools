@@ -265,22 +265,39 @@ let text_to_photo_node_def: zui_node_t = {
 			name: _tr("Color"),
 			type: "RGBA",
 			color: 0xffc7c729,
-			default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0)
+			default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			display: 0
 		}
 	],
 	buttons: [
 		{
 			name: _tr("tiling"),
 			type: "BOOL",
+			output: 0,
 			default_value: false,
-			output: 0
+			data: null,
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			height: 0
 		},
 		{
 			name: "text_to_photo_node_buttons",
 			type: "CUSTOM",
-			height: 1
+			output: -1,
+			default_value: null,
+			height: 1,
+			data: null,
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			height: 0
 		}
-	]
+	],
+	width: 0
 };
 
 let text_to_photo_node_text_input_ids: i32[] = [49406,  49407,  49407, 49407, 49407, 49407, 49407, 49407, 49407,

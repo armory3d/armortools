@@ -95,10 +95,10 @@ function tab_textures_draw(htab: zui_handle_t) {
 						ui._y = uiy;
 						let off: i32 = i % 2 == 1 ? 1 : 0;
 						let w: i32 = 50;
-						zui_fill(0,               0, w + 3,       2, ui.t.HIGHLIGHT_COL);
-						zui_fill(0,     w - off + 2, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
-						zui_fill(0,               0,     2,   w + 3, ui.t.HIGHLIGHT_COL);
-						zui_fill(w + 2,           0,     2,   w + 4, ui.t.HIGHLIGHT_COL);
+						zui_fill(0,               0, w + 3,       2, ui.ops.theme.HIGHLIGHT_COL);
+						zui_fill(0,     w - off + 2, w + 3, 2 + off, ui.ops.theme.HIGHLIGHT_COL);
+						zui_fill(0,               0,     2,   w + 3, ui.ops.theme.HIGHLIGHT_COL);
+						zui_fill(w + 2,           0,     2,   w + 4, ui.ops.theme.HIGHLIGHT_COL);
 						ui._x = _uix;
 						ui._y = _uiy;
 					}
@@ -223,7 +223,7 @@ function tab_textures_draw(htab: zui_handle_t) {
 		else {
 			let img: image_t = resource_get("icons.k");
 			let r: rect_t = resource_tile50(img, 0, 1);
-			zui_image(img, ui.t.BUTTON_COL, r.h, r.x, r.y, r.w, r.h);
+			zui_image(img, ui.ops.theme.BUTTON_COL, r.h, r.x, r.y, r.w, r.h);
 			if (ui.is_hovered) {
 				zui_tooltip(tr("Drag and drop files here"));
 			}

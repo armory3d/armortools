@@ -70,7 +70,11 @@ let random_node_def: zui_node_t = {
 			name: _tr("Min"),
 			type: "VALUE",
 			color: 0xffa1a1a1,
-			default_value: 0.0
+			default_value: 0.0,
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			display: 0
 		},
 		{
 			id: 0,
@@ -78,7 +82,11 @@ let random_node_def: zui_node_t = {
 			name: _tr("Max"),
 			type: "VALUE",
 			color: 0xffa1a1a1,
-			default_value: 1.0
+			default_value: 1.0,
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			display: 0
 		}
 	],
 	outputs: [
@@ -88,8 +96,13 @@ let random_node_def: zui_node_t = {
 			name: _tr("Value"),
 			type: "VALUE",
 			color: 0xffa1a1a1,
-			default_value: 0.5
+			default_value: 0.5,
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			display: 0
 		}
 	],
-	buttons: []
+	buttons: [],
+	width: 0
 };

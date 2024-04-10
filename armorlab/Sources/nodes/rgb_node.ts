@@ -50,7 +50,11 @@ let rgb_node_def: zui_node_t = {
 			name: _tr("Color"),
 			type: "RGBA",
 			color: 0xffc7c729,
-			default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0)
+			default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			display: 0
 		}
 	],
 	buttons: [
@@ -58,7 +62,13 @@ let rgb_node_def: zui_node_t = {
 			name: _tr("default_value"),
 			type: "RGBA",
 			output: 0,
-			default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0)
+			default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+			data: null,
+			min: 0.0,
+			max: 1.0,
+			precision: 100,
+			height: 0
 		}
-	]
+	],
+	width: 0
 };

@@ -43,7 +43,7 @@ function tab_script_draw(htab: zui_handle_t) {
 		}
 		zui_end_sticky();
 
-		let _font: g2_font_t = ui.font;
+		let _font: g2_font_t = ui.ops.font;
 		let _font_size: i32 = ui.font_size;
 		let f: g2_font_t = data_get_font("font_mono.ttf");
 		zui_set_font(ui, f);

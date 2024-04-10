@@ -286,7 +286,7 @@ function ui_view2d_render() {
 
 		// Menu
 		let ew: i32 = math_floor(zui_ELEMENT_W(ui_view2d_ui));
-		g2_set_color(ui_view2d_ui.t.SEPARATOR_COL);
+		g2_set_color(ui_view2d_ui.ops.theme.SEPARATOR_COL);
 		g2_fill_rect(0, zui_ELEMENT_H(ui_view2d_ui), ui_view2d_ww, zui_ELEMENT_H(ui_view2d_ui) + zui_ELEMENT_OFFSET(ui_view2d_ui) * 2);
 		g2_set_color(0xffffffff);
 
@@ -304,7 +304,7 @@ function ui_view2d_render() {
 		let text: string = h.text;
 		///end
 
-		ui_view2d_ui._w = math_floor(math_min(g2_font_width(ui_view2d_ui.font, ui_view2d_ui.font_size, text) + 15 * zui_SCALE(ui_view2d_ui), 100 * zui_SCALE(ui_view2d_ui)));
+		ui_view2d_ui._w = math_floor(math_min(g2_font_width(ui_view2d_ui.ops.font, ui_view2d_ui.font_size, text) + 15 * zui_SCALE(ui_view2d_ui), 100 * zui_SCALE(ui_view2d_ui)));
 
 		if (ui_view2d_type == view_2d_type_t.ASSET) {
 			let asset: asset_t = context_raw.texture;
