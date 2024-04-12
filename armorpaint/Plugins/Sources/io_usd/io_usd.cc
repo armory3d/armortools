@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include "tinyusdz/tinyusdz.hh"
 #include <math.h>
 
