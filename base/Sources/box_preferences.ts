@@ -614,7 +614,7 @@ function box_preferences_show() {
 
 			let index: i32 = 0;
 			ui.changed = false;
-			let keys: string[] = map_keys_to_array(config_keymap);
+			let keys: string[] = map_keys(config_keymap);
 			for (let i: i32 = 0; i < keys.length; ++i) {
 				let key: string = keys[i];
 				let h: zui_handle_t = zui_nest(zui_handle(__ID__), index++);

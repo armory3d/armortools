@@ -112,7 +112,7 @@ function tab_layers_init_layer_map(): map_t<slot_layer_t, i32> {
 
 function tab_layers_fill_layer_map(map: map_t<slot_layer_t, i32>): map_t<i32, i32> {
 	let res: map_t<i32, i32> = map_create();
-	let keys: string[] = map_keys_to_array(map);
+	let keys: string[] = map_keys(map);
 	for (let i: i32 = 0; i < keys.length; ++i) {
 		let l = keys[i];
 		map_set(res, map_get(map, l), array_index_of(project_layers, l) > -1 ? array_index_of(project_layers, l) : 9999);

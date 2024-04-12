@@ -228,9 +228,9 @@ function ui_base_update() {
 	ui_base_update_ui();
 	operator_update();
 
-	let values: plugin_t[] = map_to_array(plugin_map);
-	for (let i: i32 = 0; i < values.length; ++i) {
-		let p: plugin_t = values[i];
+	let keys: string[] = map_keys(plugin_map);
+	for (let i: i32 = 0; i < keys.length; ++i) {
+		let p: plugin_t = map_get(plugin_map, keys[i]);
 		if (p.update != null) {
 			p.update();
 		}
@@ -888,7 +888,7 @@ function ui_base_operator_search() {
 		let count: i32 = 0;
 		let BUTTON_COL: i32 = ui.ops.theme.BUTTON_COL;
 
-		let keys: string[] = map_keys_to_array(config_keymap);
+		let keys: string[] = map_keys(config_keymap);
 		for (let i: i32 = 0; i < keys.length; ++i) {
 			let n: string = keys[i];
 			if (string_index_of(n, search) >= 0) {

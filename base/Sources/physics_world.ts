@@ -41,9 +41,9 @@ function physics_world_create(): physics_world_t {
 }
 
 function physics_world_reset(pw: physics_world_t) {
-	let values: physics_body_t[] = map_to_array(pw.body_map);
-	for (let i: i32 = 0; i < values.length; ++i) {
-		let body: physics_body_t = values[i];
+	let keys: string[] = map_keys(pw.body_map);
+	for (let i: i32 = 0; i < keys.length; ++i) {
+		let body: physics_body_t = map_get(pw.body_map, keys[i]);
 		physics_world_remove_body(pw, body);
 	}
 }
@@ -125,9 +125,9 @@ function physics_world_late_update(pw: physics_world_t) {
 
 	pw.world.stepSimulation(pw.time_step, pw.max_steps, t);
 	physics_world_update_contacts(pw);
-	let values: physics_body_t[] = map_to_array(pw.body_map);
-	for (let i: i32 = 0; i < values.length; ++i) {
-		let body: physics_body_t = values[i];
+	let keys: string[] = map_keys(pw.body_map);
+	for (let i: i32 = 0; i < keys.length; ++i) {
+		let body: physics_body_t = map_get(pw.body_map, keys[i]);
 		physics_body_physics_update(body);
 	}
 }

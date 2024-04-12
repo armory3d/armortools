@@ -5,7 +5,7 @@ let box_projects_icon_map: map_t<string, image_t> = null;
 
 function box_projects_show() {
 	if (box_projects_icon_map != null) {
-		let keys: string[] = map_keys_to_array(box_projects_icon_map);
+		let keys: string[] = map_keys(box_projects_icon_map);
 		for (let i: i32 = 0; i < keys.length; ++i) {
 			let handle: string = keys[i];
 			data_delete_image(handle);

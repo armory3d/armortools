@@ -134,7 +134,7 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 	///end
 
 	if (parser_material_script_links != null) {
-		let keys: string[] = map_keys_to_array(parser_material_script_links);
+		let keys: string[] = map_keys(parser_material_script_links);
 		for (let i: i32 = 0; i < keys.length; ++i) {
 			let key: string = keys[i];
 			let asciprt_links: any = parser_material_script_links;

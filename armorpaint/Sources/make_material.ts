@@ -262,7 +262,7 @@ function make_material_bake_node_previews() {
 	}
 	make_material_traverse_nodes(ui_nodes_get_canvas_material().nodes, null, []);
 
-	let keys: string[] = map_keys_to_array(context_raw.node_previews);
+	let keys: string[] = map_keys(context_raw.node_previews);
 	for (let i: i32 = 0; i < keys.length; ++i) {
 		let key: string = keys[i];
 		if (array_index_of(context_raw.node_previews_used, key) == -1) {

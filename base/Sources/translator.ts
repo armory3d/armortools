@@ -22,10 +22,9 @@ function tr(id: string, vars: map_t<string, string> = null): string {
 	}
 
 	if (vars != null) {
-		let keys: string[] = map_keys_to_array(vars);
-		let values: string[] = map_to_array(vars);
+		let keys: string[] = map_keys(vars);
 		for (let i: i32 = 0; i < keys.length; ++i) {
-			translation = string_replace_all(translation, "{" + keys[i] + "}", any_to_string(values[i]));
+			translation = string_replace_all(translation, "{" + keys[i] + "}", any_to_string(map_get(vars, keys[i])));
 		}
 	}
 
@@ -69,7 +68,7 @@ function translator_load_translations(new_locale: string) {
 		let translation_json: string = sys_buffer_to_string(krom_load_blob("data/locale/" + config_raw.locale + ".json"));
 
 		let data: map_t<string, string> = json_parse_to_map(translation_json);
-		let keys: string[] = map_keys_to_array(data);
+		let keys: string[] = map_keys(data);
 		for (let i: i32 = 0; i < keys.length; ++i) {
 			let field: string = keys[i];
 			map_set(translator_translations, field, map_get(data, field));
@@ -81,9 +80,9 @@ function translator_load_translations(new_locale: string) {
 
 	// Push additional char codes contained in translation file
 	let cjk: bool = false;
-	let values: string[] = map_to_array(translator_translations);
-	for (let i: i32 = 0; i < values.length; ++i) {
-		let s: string = values[i];
+	let keys: string[] = map_keys(translator_translations);
+	for (let i: i32 = 0; i < keys.length; ++i) {
+		let s: string = map_get(translator_translations, keys[i]);
 		for (let i: i32 = 0; i < s.length; ++i) {
 			// Assume cjk in the > 1119 range for now
 			if (char_code_at(s, i) > 1119 && array_index_of(_g2_font_glyphs, char_code_at(s, i)) == -1) {

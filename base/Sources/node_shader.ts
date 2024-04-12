@@ -309,9 +309,9 @@ function node_shader_get_hlsl(raw: node_shader_t, shared_sampler: string): strin
 		s += "SamplerState " + shared_sampler + ";\n";
 	}
 
-	let values: string[] = map_to_array(raw.functions);
-	for (let i: i32 = 0; i < values.length; ++i) {
-		let f: string = values[i];
+	let keys: string[] = map_keys(raw.functions);
+	for (let i: i32 = 0; i < keys.length; ++i) {
+		let f: string = map_get(raw.functions, keys[i]);
 		s += f + "\n";
 	}
 
@@ -512,9 +512,9 @@ function node_shader_get_msl(raw: node_shader_t, shared_sampler: string): string
 		s += "};\n";
 	}
 
-	let values: string[] = map_to_array(raw.functions);
-	for (let i: i32 = 0; i < values.length; ++i) {
-		let f: string = values[i];
+	let keys: string[] = map_keys(raw.functions);
+	for (let i: i32 = 0; i < keys.length; ++i) {
+		let f: string = map_get(raw.functions, keys[i]);
 		s += f + "\n";
 	}
 
@@ -669,9 +669,9 @@ function node_shader_get_glsl(raw: node_shader_t, shared_sampler: string, versio
 		let a: string = raw.shared_samplers[i];
 		s += "uniform " + a + ";\n";
 	}
-	let values: string[] = map_to_array(raw.functions);
-	for (let i: i32 = 0; i < values.length; ++i) {
-		let f: string = values[i];
+	let keys: string[] = map_keys(raw.functions);
+	for (let i: i32 = 0; i < keys.length; ++i) {
+		let f: string = map_get(raw.functions, keys[i]);
 		s += f + "\n";
 	}
 	s += "void main() {\n";

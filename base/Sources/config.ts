@@ -185,7 +185,7 @@ function config_load_keymap() {
 	if (config_raw.keymap != "default.json") {
 		let blob: buffer_t = data_get_blob("keymap_presets/" + config_raw.keymap);
 		let new_keymap: map_t<string, string> = json_parse_to_map(sys_buffer_to_string(blob));
-		let keys: string[] = map_keys_to_array(new_keymap);
+		let keys: string[] = map_keys(new_keymap);
 		for (let i: i32 = 0; i < keys.length; ++i) {
 			let key: string = keys[i];
 			map_set(config_keymap, key, map_get(new_keymap, key));
