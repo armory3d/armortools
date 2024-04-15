@@ -42,7 +42,7 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): i
 		source = photo_to_pbr_node_cached_source;
 	}
 	else {
-		source = self.base.inputs[0].get_as_image();
+		source = logic_node_input_get_as_image(self.base.inputs[0]);
 	}
 
 	photo_to_pbr_node_cached_source = source;
@@ -157,7 +157,7 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): i
 		g2_begin(photo_to_pbr_node_images[from]);
 		g2_draw_image(temp2, x * photo_to_pbr_node_tile_w, y * photo_to_pbr_node_tile_w);
 		g2_end();
-		app_notify_on_next_frame(temp2: image_t) {
+		app_notify_on_next_frame(function(temp2: image_t) {
 			image_unload(temp2);
 		}, temp2);
 	}

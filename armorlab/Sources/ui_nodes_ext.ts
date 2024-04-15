@@ -10,8 +10,6 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 		}
 		app_notify_on_render_2d(delay_idle_sleep);
 
-		ui_nodes_ext_tasks = 1;
-
 		console_progress(tr("Processing"));
 		krom_g4_swap_buffers();
 
@@ -19,11 +17,11 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 		parser_logic_parse(project_canvas);
 
 		photo_to_pbr_node_cached_source = null;
-		let texbase: image_t = brush_output_node_inst.get_as_image(channel_type_t.BASE_COLOR);
-		let texocc: image_t = brush_output_node_inst.get_as_image(channel_type_t.OCCLUSION);
-		let texrough: image_t = brush_output_node_inst.get_as_image(channel_type_t.ROUGHNESS);
-		let texnor: image_t = brush_output_node_inst.get_as_image(channel_type_t.NORMAL_MAP);
-		let texheight: image_t = brush_output_node_inst.get_as_image(channel_type_t.HEIGHT);
+		let texbase: image_t = logic_node_get_as_image(brush_output_node_inst.base, channel_type_t.BASE_COLOR);
+		let texocc: image_t = logic_node_get_as_image(brush_output_node_inst.base, channel_type_t.OCCLUSION);
+		let texrough: image_t = logic_node_get_as_image(brush_output_node_inst.base, channel_type_t.ROUGHNESS);
+		let texnor: image_t = logic_node_get_as_image(brush_output_node_inst.base, channel_type_t.NORMAL_MAP);
+		let texheight: image_t = logic_node_get_as_image(brush_output_node_inst.base, channel_type_t.HEIGHT);
 
 		if (texbase != null) {
 			let texpaint = map_get(render_path_render_targets, "texpaint")._image;
@@ -77,7 +75,7 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 			g4_end();
 
 			if (ui_header_worktab.position == space_type_t.SPACE3D &&
-				BrushOutputNode.inst.inputs[channel_type_t.HEIGHT].node.constructor != FloatNode) {
+				brush_output_node_inst.base.inputs[channel_type_t.HEIGHT].node.get != float_node_get) {
 
 				// Make copy of vertices before displacement
 				let o = project_paint_objects[0];
@@ -98,7 +96,6 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 
 				// Apply displacement
 				if (config_raw.displace_strength > 0) {
-					ui_nodes_ext_tasks++;
 					console_progress(tr("Apply Displacement"));
 					krom_g4_swap_buffers();
 

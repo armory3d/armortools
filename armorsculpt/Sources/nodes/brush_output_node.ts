@@ -42,7 +42,7 @@ function brush_output_node_parse_inputs(self: brush_output_node_t) {
 		context_raw.brush_mask_image = null;
 	}
 
-	context_raw.brush_nodes_hardness = input3;
+	context_raw.brush_nodes_hardness = input3._f32;
 
 	let stencil: logic_node_value_t = input4; // Float or texture name
 	if (stencil == null) {

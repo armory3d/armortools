@@ -33,7 +33,7 @@ function text_to_photo_node_buttons(ui: zui_t, nodes: zui_nodes_t, node: zui_nod
 	node.buttons[1].height = string_split(text_to_photo_node_prompt, "\n").length;
 }
 
-function stable_diffusion(prompt: string, inpaint_latents: f32_array_t = null, offset: i32 = 0, upscale: bool = true, mask: f32_array_t = null, latents_orig: f32_array_t = null): image_t {
+function text_to_photo_node_stable_diffusion(prompt: string, inpaint_latents: f32_array_t = null, offset: i32 = 0, upscale: bool = true, mask: f32_array_t = null, latents_orig: f32_array_t = null): image_t {
 	let _text_encoder_blob: buffer_t = data_get_blob("models/sd_text_encoder.quant.onnx");
 	let _unet_blob: buffer_t = data_get_blob("models/sd_unet.quant.onnx");
 	let _vae_decoder_blob: buffer_t = data_get_blob("models/sd_vae_decoder.quant.onnx");
@@ -56,15 +56,15 @@ function text_to_photo_node_text_encoder(prompt: string, inpaint_latents: f32_ar
 
 	let words = string_split(string_replace_all(string_replace_all(string_replace_all(prompt, "\n", " "), ",", " , "), "  ", " ").trim(), " ");
 	for (let i: i32 = 0; i < words.length; ++i) {
-		text_to_photo_node_text_input_ids[i + 1] = to_lower_case(text_to_photo_node_vocab[words[i]) + "</w>"];
+		text_to_photo_node_text_input_ids[i + 1] = text_to_photo_node_vocab[to_lower_case(words[i]) + "</w>"];
 	}
 	for (let i: i32 = words.length; i < (text_to_photo_node_text_input_ids.length - 1); ++i) {
 		text_to_photo_node_text_input_ids[i + 1] = 49407; // <|endoftext|>
 	}
 
 	let i32a = i32_array_create_from_array(text_to_photo_node_text_input_ids);
-	let text_embeddings_buf = krom_ml_inference(text_to_photo_node_text_encoder_blob, [i32a.buffer], [[1, 77]], [1, 77, 768], config_raw.gpu_inference);
-	let text_embeddings = f32_array_create_from_array(text_embeddings_buf);
+	let text_embeddings_buf: buffer_t = krom_ml_inference(text_to_photo_node_text_encoder_blob, [i32a.buffer], [[1, 77]], [1, 77, 768], config_raw.gpu_inference);
+	let text_embeddings = f32_array_create_from_buffer(text_embeddings_buf);
 
 	i32a = i32_array_create_from_array(text_to_photo_node_uncond_input_ids);
 	let uncond_embeddings_buf = krom_ml_inference(text_to_photo_node_text_encoder_blob, [i32a.buffer], [[1, 77]], [1, 77, 768], config_raw.gpu_inference);
@@ -102,7 +102,7 @@ function text_to_photo_node_unet(latents: f32_array_t, text_embeddings: f32_arra
 
 	while (true) {
 		console_progress(tr("Processing") + " - " + tr("Text to Photo") + " (" + (counter + 1) + "/" + (50 - offset) + ")");
-		krom_g4_swa_buffers();
+		krom_g4_swap_buffers();
 
 		let timestep = text_to_photo_node_timesteps[counter + offset];
 		for (let i: i32 = 0; i < latents.length; ++i) latent_model_input[i] = latents[i];
@@ -289,18 +289,17 @@ let text_to_photo_node_def: zui_node_t = {
 			type: "CUSTOM",
 			output: -1,
 			default_value: null,
-			height: 1,
 			data: null,
 			min: 0.0,
 			max: 1.0,
 			precision: 100,
-			height: 0
+			height: 1
 		}
 	],
 	width: 0
 };
 
-let text_to_photo_node_text_input_ids: i32[] = [49406,  49407,  49407, 49407, 49407, 49407, 49407, 49407, 49407,
+let text_to_photo_node_text_input_ids: i32[] = [49406, 49407, 49407, 49407, 49407, 49407, 49407, 49407, 49407,
 	49407, 49407, 49407, 49407, 49407, 49407, 49407, 49407, 49407,
 	49407, 49407, 49407, 49407, 49407, 49407, 49407, 49407, 49407,
 	49407, 49407, 49407, 49407, 49407, 49407, 49407, 49407, 49407,

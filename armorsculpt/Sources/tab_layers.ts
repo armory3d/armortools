@@ -12,8 +12,8 @@ function tab_layers_draw_mini(htab: zui_handle_t) {
 	let ui = ui_base_ui;
 	zui_set_hovered_tab_name(tr("Layers"));
 
-	let _ELEMENT_H = ui.t.ELEMENT_H;
-	ui.t.ELEMENT_H = math_floor(ui_base_sidebar_mini_w / 2 / zui_SCALE(ui));
+	let _ELEMENT_H = ui.ops.theme.ELEMENT_H;
+	ui.ops.theme.ELEMENT_H = math_floor(ui_base_sidebar_mini_w / 2 / zui_SCALE(ui));
 
 	zui_begin_sticky();
 	zui_separator(5);
@@ -27,7 +27,7 @@ function tab_layers_draw_mini(htab: zui_handle_t) {
 	tab_layers_highlight_odd_lines();
 	tab_layers_draw_slots(true);
 
-	ui.t.ELEMENT_H = _ELEMENT_H;
+	ui.ops.theme.ELEMENT_H = _ELEMENT_H;
 }
 
 function tab_layers_draw_full(htab: zui_handle_t) {
@@ -60,11 +60,11 @@ function tab_layers_draw_slots(mini: bool) {
 
 function tab_layers_highlight_odd_lines() {
 	let ui = ui_base_ui;
-	let step = ui.t.ELEMENT_H * 2;
+	let step = ui.ops.theme.ELEMENT_H * 2;
 	let full_h = ui._window_h - ui_base_hwnds[0].scroll_offset;
 	for (let i: i32 = 0; i < math_floor(full_h / step); ++i) {
 		if (i % 2 == 0) {
-			zui_fill(0, i * step, (ui._w / zui_SCALE(ui) - 2), step, ui.t.WINDOW_BG_COL - 0x00040404);
+			zui_fill(0, i * step, (ui._w / zui_SCALE(ui) - 2), step, ui.ops.theme.WINDOW_BG_COL - 0x00040404);
 		}
 	}
 }
@@ -143,7 +143,7 @@ function tab_layers_draw_layer_slot(l: slot_layer_t, i: i32, mini: bool) {
 		return;
 	}
 
-	let step = ui.t.ELEMENT_H;
+	let step = ui.ops.theme.ELEMENT_H;
 	let checkw = (ui._window_w / 100 * 8) / zui_SCALE(ui);
 
 	// Highlight drag destination
@@ -159,14 +159,14 @@ function tab_layers_draw_layer_slot(l: slot_layer_t, i: i32, mini: bool) {
 			let nestedGroup = slot_layer_is_group(base_drag_layer) && toGroup;
 			if (!nestedGroup) {
 				if (slot_layer_can_move(context_raw.layer, context_raw.drag_dest)) {
-					zui_fill(checkw, step * 2, (ui._window_w / zui_SCALE(ui) - 2) - checkw, 2 * zui_SCALE(ui), ui.t.HIGHLIGHT_COL);
+					zui_fill(checkw, step * 2, (ui._window_w / zui_SCALE(ui) - 2) - checkw, 2 * zui_SCALE(ui), ui.ops.theme.HIGHLIGHT_COL);
 				}
 			}
 		}
 		else if (i == project_layers.length - 1 && mouse_y < absy + step) {
 			context_raw.drag_dest = project_layers.length - 1;
 			if (slot_layer_can_move(context_raw.layer, context_raw.drag_dest)) {
-				zui_fill(checkw, 0, (ui._window_w / zui_SCALE(ui) - 2) - checkw, 2 * zui_SCALE(ui), ui.t.HIGHLIGHT_COL);
+				zui_fill(checkw, 0, (ui._window_w / zui_SCALE(ui) - 2) - checkw, 2 * zui_SCALE(ui), ui.ops.theme.HIGHLIGHT_COL);
 			}
 		}
 	}
@@ -174,13 +174,13 @@ function tab_layers_draw_layer_slot(l: slot_layer_t, i: i32, mini: bool) {
 		if (mouse_y > absy + step && mouse_y < absy + step * 3) {
 			context_raw.drag_dest = i;
 			if (tab_layers_can_drop_new_layer(i)) {
-				zui_fill(checkw, 2 * step, (ui._window_w / zui_SCALE(ui) - 2) - checkw, 2 * zui_SCALE(ui), ui.t.HIGHLIGHT_COL);
+				zui_fill(checkw, 2 * step, (ui._window_w / zui_SCALE(ui) - 2) - checkw, 2 * zui_SCALE(ui), ui.ops.theme.HIGHLIGHT_COL);
 			}
 		}
 		else if (i == project_layers.length - 1 && mouse_y < absy + step) {
 			context_raw.drag_dest = project_layers.length;
 			if (tab_layers_can_drop_new_layer(project_layers.length)) {
-				zui_fill(checkw, 0, (ui._window_w / zui_SCALE(ui) - 2) - checkw, 2 * zui_SCALE(ui), ui.t.HIGHLIGHT_COL);
+				zui_fill(checkw, 0, (ui._window_w / zui_SCALE(ui) - 2) - checkw, 2 * zui_SCALE(ui), ui.ops.theme.HIGHLIGHT_COL);
 			}
 		}
 	}
@@ -210,7 +210,7 @@ function tab_layers_draw_layer_slot_mini(l: slot_layer_t, i: i32) {
 function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	let ui = ui_base_ui;
 
-	let step = ui.t.ELEMENT_H;
+	let step = ui.ops.theme.ELEMENT_H;
 
 	let hasPanel = slot_layer_is_group(l) || (slot_layer_is_layer(l) && slot_layer_get_masks(l, false) != null);
 	if (hasPanel) {
@@ -227,7 +227,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	ui._x += 2;
 	ui._y += 3;
 	ui._y += center;
-	let col = ui.t.ACCENT_SELECT_COL;
+	let col = ui.ops.theme.ACCENT_SELECT_COL;
 	let parentHidden = l.parent != null && (!l.parent.visible || (l.parent.parent != null && !l.parent.parent.visible));
 	if (parentHidden) {
 		col -= 0x99000000;
@@ -366,18 +366,18 @@ function tab_layers_layer_toggle_visible(l: slot_layer_t) {
 
 function tab_layers_draw_layer_highlight(l: slot_layer_t, mini: bool) {
 	let ui = ui_base_ui;
-	let step = ui.t.ELEMENT_H;
+	let step = ui.ops.theme.ELEMENT_H;
 
 	// Separator line
-	zui_fill(0, 0, (ui._w / zui_SCALE(ui) - 2), 1 * zui_SCALE(ui), ui.t.SEPARATOR_COL);
+	zui_fill(0, 0, (ui._w / zui_SCALE(ui) - 2), 1 * zui_SCALE(ui), ui.ops.theme.SEPARATOR_COL);
 
 	// Highlight selected
 	if (context_raw.layer == l) {
 		if (mini) {
-			zui_rect(1, -step * 2, ui._w / zui_SCALE(ui) - 1, step * 2 + (mini ? -1 : 1), ui.t.HIGHLIGHT_COL, 3);
+			zui_rect(1, -step * 2, ui._w / zui_SCALE(ui) - 1, step * 2 + (mini ? -1 : 1), ui.ops.theme.HIGHLIGHT_COL, 3);
 		}
 		else {
-			zui_rect(1, -step * 2 - 1, ui._w / zui_SCALE(ui) - 2, step * 2 + (mini ? -2 : 1), ui.t.HIGHLIGHT_COL, 2);
+			zui_rect(1, -step * 2 - 1, ui._w / zui_SCALE(ui) - 2, step * 2 + (mini ? -2 : 1), ui.ops.theme.HIGHLIGHT_COL, 2);
 		}
 	}
 }

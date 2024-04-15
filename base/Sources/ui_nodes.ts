@@ -981,9 +981,9 @@ function ui_nodes_render() {
 
 			///else
 
-			let brush_node: LogicNode = parser_logic_get_logic_node(sel);
+			let brush_node: logic_node_t = parser_logic_get_logic_node(sel);
 			if (brush_node != null) {
-				img = brush_node.get_cached_image();
+				img = logic_node_get_cached_image(brush_node);
 			}
 
 			///end

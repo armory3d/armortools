@@ -1,5 +1,6 @@
 /// <reference path="./nodes/tex_image_node.ts"/>
 /// <reference path="./nodes/input_node.ts"/>
+/// <reference path="./nodes/brush_output_node.ts"/>
 
 let nodes_brush_categories = [_tr("Nodes")];
 

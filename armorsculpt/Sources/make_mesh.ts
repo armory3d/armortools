@@ -1,7 +1,7 @@
 
 let make_mesh_layer_pass_count = 1;
 
-function make_mesh_run(data: material_t, layer_pass: i32 = 0): NodeShaderContextRaw {
+function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_context_t {
 	let context_id = layer_pass == 0 ? "mesh" : "mesh" + layer_pass;
 	let con_mesh = node_shader_context_create(data, {
 		name: context_id,
@@ -111,7 +111,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): NodeShaderContext
 
 	// Get layers for this pass
 	make_mesh_layer_pass_count = 1;
-	let layers: SlotLayerRaw[] = [];
+	let layers: slot_layer_t[] = [];
 	let start_count = texture_count;
 	for (let i: i32 = 0; i < project_layers.length; ++i) {
 		let l = project_layers[i];

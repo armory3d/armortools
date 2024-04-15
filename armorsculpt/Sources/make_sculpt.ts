@@ -1,5 +1,5 @@
 
-function make_sculpt_run(data: material_t, matcon: material_context_t): NodeShaderContextRaw {
+function make_sculpt_run(data: material_t, matcon: material_context_t): node_shader_context_t {
 	let context_id = "paint";
 	let con_paint = node_shader_context_create(data, {
 		name: context_id,

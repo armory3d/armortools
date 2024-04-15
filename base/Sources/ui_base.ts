@@ -1149,7 +1149,8 @@ function ui_base_update_ui() {
 				///end
 				///if is_lab
 				if (context_run_brush != null) {
-					context_run_brush(context_raw.brush_output_node_inst, 0);
+					// context_run_brush(context_raw.brush_output_node_inst, 0);
+					context_run_brush(0);
 				}
 				///end
 			}

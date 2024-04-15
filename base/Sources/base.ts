@@ -2353,9 +2353,9 @@ function base_flatten(height_to_normal: bool = false): any {
 	let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
 	if (nodes.nodes_selected_id.length > 0) {
 		let node: zui_node_t = zui_get_node(canvas.nodes, nodes.nodes_selected_id[0]);
-		let brush_node: LogicNode = parser_logic_get_logic_node(node);
-		if (brush_node != null && brush_node.get_cached_image() != null) {
-			texpaint = brush_node.get_cached_image();
+		let brush_node: logic_node_t = parser_logic_get_logic_node(node);
+		if (brush_node != null && logic_node_get_cached_image(brush_node) != null) {
+			texpaint = logic_node_get_cached_image(brush_node);
 			texpaint_nor = map_get(render_path_render_targets, "texpaint_nor_empty")._image;
 			texpaint_pack = map_get(render_path_render_targets, "texpaint_pack_empty")._image;
 		}

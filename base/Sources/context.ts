@@ -968,7 +968,7 @@ function context_update() {
 		context_raw.start_y = pen_view_y() / app_h();
 	}
 
-	if (operator_shortcut(config_keymap.brush_ruler + "+" + config_keymap.action_paint, shortcut_type_t.DOWN)) {
+	if (operator_shortcut(map_get(config_keymap, "brush_ruler") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN)) {
 		if (context_raw.lock_x) {
 			paint_x = context_raw.start_x;
 		}
@@ -989,12 +989,12 @@ function context_update() {
 		}
 	}
 
-	if (keyboard_started(config_keymap.brush_ruler)) {
+	if (keyboard_started(map_get(config_keymap, "brush_ruler"))) {
 		context_raw.lock_start_x = mouse_view_x();
 		context_raw.lock_start_y = mouse_view_y();
 		context_raw.lock_begin = true;
 	}
-	else if (keyboard_released(config_keymap.brush_ruler)) {
+	else if (keyboard_released(map_get(config_keymap, "brush_ruler"))) {
 		context_raw.lock_x = context_raw.lock_y = context_raw.lock_begin = false;
 	}
 

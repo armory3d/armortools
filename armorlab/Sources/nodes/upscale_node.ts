@@ -16,7 +16,7 @@ function upscale_node_create(arg: any): upscale_node_t {
 }
 
 function upscale_node_get_as_image(self: upscale_node_t, from: i32): image_t {
-	upscale_node_image = self.base.inputs[0].get_as_image();
+	upscale_node_image = logic_node_input_get_as_image(self.base.inputs[0]);
 
 	console_progress(tr("Processing") + " - " + tr("Upscale"));
 	krom_g4_swap_buffers();
@@ -35,6 +35,7 @@ function upscale_node_get_as_image(self: upscale_node_t, from: i32): image_t {
 
 function upscale_node_load_blob() {
 	upscale_node_esrgan_blob = data_get_blob("models/esrgan.quant.onnx");
+}
 
 function upscale_node_get_cached_image(self: upscale_node_t): image_t {
 	return upscale_node_image;

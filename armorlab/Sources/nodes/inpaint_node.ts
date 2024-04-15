@@ -61,7 +61,7 @@ function inpaint_node_buttons(ui: zui_t, nodes: zui_nodes_t, node: zui_node_t) {
 }
 
 function inpaint_node_get_as_image(self: inpaint_node_t, from: i32): image_t {
-	let source: image_t = self.base.inputs[0].get_as_image();
+	let source: image_t = logic_node_input_get_as_image(self.base.inputs[0]);
 	console_progress(tr("Processing") + " - " + tr("Inpaint"));
 	krom_g4_swap_buffers();
 
@@ -69,12 +69,12 @@ function inpaint_node_get_as_image(self: inpaint_node_t, from: i32): image_t {
 	g2_draw_scaled_image(source, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
 	g2_end();
 
-	return inpaint_node_auto ? inpaint_node_texsynth_inpaint(inpaint_node_image, false, inpaint_node_mask) : inpaint_node_inpaint_node_sd_inpaint(inpaint_node_image, inpaint_node_mask);
+	return inpaint_node_auto ? inpaint_node_texsynth_inpaint(inpaint_node_image, false, inpaint_node_mask) : inpaint_node_sd_inpaint(inpaint_node_image, inpaint_node_mask);
 }
 
 function inpaint_node_get_cached_image(self: inpaint_node_t): image_t {
 	app_notify_on_next_frame(function (self: inpaint_node_t) {
-		let source: image_t = self.base.inputs[0].get_as_image();
+		let source: image_t = logic_node_input_get_as_image(self.base.inputs[0]);
 		if (base_pipe_copy == null) {
 			base_make_pipe();
 		}
@@ -152,20 +152,23 @@ function inpaint_node_sd_inpaint(image: image_t, mask: image_t): image_t {
 				f32a[i + 512 * 512 * 2] = (u8a[i * 4 + 2] / 255.0) * 2.0 - 1.0;
 			}
 
-			let latents_buf = krom_ml_inference(vae_encoder_blob, [f32a.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], config_raw.gpu_inference);
-			let latents = f32_array_create_from_buffer(latents_buf);
+			let latents_buf: buffer_t = krom_ml_inference(vae_encoder_blob, [f32a.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], config_raw.gpu_inference);
+			let latents: f32_array_t = f32_array_create_from_buffer(latents_buf);
 			for (let i: i32 = 0; i < latents.length; ++i) {
 				latents[i] = 0.18215 * latents[i];
 			}
-			let latents_orig = array_slice(latents, 0, latents.length);
+			// let latents_orig: f32_array_t = array_slice(latents, 0, latents.length);
+			let latents_orig: f32_array_t = latents.slice(0, latents.length);
 
 			let noise = f32_array_create(latents.length);
-			for (let i: i32 = 0; i < noise.length; ++i) noise[i] = math_cos(2.0 * 3.14 * random_node_get_float()) * math_sqrt(-2.0 * math_log(random_node_get_float()));
+			for (let i: i32 = 0; i < noise.length; ++i) {
+				noise[i] = math_cos(2.0 * 3.14 * random_node_get_float()) * math_sqrt(-2.0 * math_log(random_node_get_float()));
+			}
 
 			let num_inference_steps = 50;
 			let init_timestep = math_floor(num_inference_steps * inpaint_node_strength);
-			let timestep = text_to_photo_node.timesteps[num_inference_steps - init_timestep];
-			let alphas_cumprod = text_to_photo_node.alphas_cumprod;
+			let timestep = text_to_photo_node_timesteps[num_inference_steps - init_timestep];
+			let alphas_cumprod = text_to_photo_node_alphas_cumprod;
 			let sqrt_alpha_prod = math_pow(alphas_cumprod[timestep], 0.5);
 			let sqrt_one_minus_alpha_prod = math_pow(1.0 - alphas_cumprod[timestep], 0.5);
 			for (let i: i32 = 0; i < latents.length; ++i) {

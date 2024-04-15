@@ -129,7 +129,7 @@ function make_material_parse_mesh_preview_material() {
 
 	let m = project_materials[0].data;
 	let scon: shader_context_t = null;
-	for (let i: i32 = 0; i < m._.shader._.contexts; ++i) {
+	for (let i: i32 = 0; i < m._.shader._.contexts.length; ++i) {
 		let c = m._.shader._.contexts[i];
 		if (c.name == "mesh") {
 			scon = c;

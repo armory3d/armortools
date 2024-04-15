@@ -37,7 +37,7 @@ function tiling_node_buttons(ui: zui_t, nodes: zui_nodes_t, node: zui_node_t) {
 }
 
 function tiling_node_get_as_image(self: tiling_node_t, from: i32): image_t {
-	let source: image_t = self.base.inputs[0].get_as_image();
+	let source: image_t = logic_node_input_get_as_image(self.base.inputs[0]);
 	g2_begin(tiling_node_image);
 	g2_draw_scaled_image(source, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
 	g2_end();
@@ -110,7 +110,7 @@ let tiling_node_def: zui_node_t = {
 			name: _tr("Color"),
 			type: "RGBA",
 			color: 0xffc7c729,
-			default_value: f32_array_xyzw(0.0, 0.0, 0.0, 1.0),
+			default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
 			min: 0.0,
 			max: 1.0,
 			precision: 100,
@@ -124,7 +124,7 @@ let tiling_node_def: zui_node_t = {
 			name: _tr("Color"),
 			type: "RGBA",
 			color: 0xffc7c729,
-			default_value: f32_array_xyzw(0.0, 0.0, 0.0, 1.0),
+			default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
 			min: 0.0,
 			max: 1.0,
 			precision: 100,

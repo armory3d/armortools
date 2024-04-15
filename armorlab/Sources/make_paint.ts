@@ -1,5 +1,5 @@
 
-function make_paint_run(data: material_t, matcon: material_context_t): NodeShaderContextRaw {
+function make_paint_run(data: material_t, matcon: material_context_t): node_shader_context_t {
 	let con_paint = node_shader_context_create(data, {
 		name: "paint",
 		depth_write: false,

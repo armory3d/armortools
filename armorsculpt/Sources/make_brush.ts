@@ -1,5 +1,5 @@
 
-function make_brush_run(vert: NodeShaderRaw, frag: NodeShaderRaw) {
+function make_brush_run(vert: node_shader_t, frag: node_shader_t) {
 
 	node_shader_write(frag, "float dist = 0.0;");
 

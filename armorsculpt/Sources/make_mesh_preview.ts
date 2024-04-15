@@ -1,7 +1,7 @@
 
 let make_mesh_preview_opacity_discard_decal: f32 = 0.05;
 
-function make_mesh_preview_run(data: material_t, matcon: material_context_t): NodeShaderContextRaw {
+function make_mesh_preview_run(data: material_t, matcon: material_context_t): node_shader_context_t {
 	let context_id = "mesh";
 	let con_mesh = node_shader_context_create(data, {
 		name: context_id,

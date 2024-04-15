@@ -1,7 +1,7 @@
 
 let make_mesh_layer_pass_count: i32 = 1;
 
-function make_mesh_run(data: material_t, layer_pass: i32 = 0): NodeShaderContextRaw {
+function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_context_t {
 	let con_mesh = node_shader_context_create(data, {
 		name: "mesh",
 		depth_write: layer_pass == 0 ? true : false,
