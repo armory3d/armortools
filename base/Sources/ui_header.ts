@@ -272,8 +272,8 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 			zui_draw_rect(true, ui._x + 1, ui._y, (ui._w - 2) * progress, zui_ELEMENT_H(ui));
 			g2_set_color(0xffffffff);
 			zui_text(tr("Samples") + ": " + render_path_raytrace_bake_current_sample);
-			zui_text(tr("Rays/pixel" + ": ") + render_path_raytrace_bake_rays_pix);
-			zui_text(tr("Rays/second" + ": ") + render_path_raytrace_bake_rays_sec);
+			zui_text(tr("Rays/pixel") + ": " + render_path_raytrace_bake_rays_pix);
+			zui_text(tr("Rays/second") + ": " + render_path_raytrace_bake_rays_sec);
 		}
 		///end
 		if (context_raw.bake_type == bake_type_t.CURVATURE) {
