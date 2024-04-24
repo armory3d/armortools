@@ -27,7 +27,12 @@ function tiling_node_init() {
 function tiling_node_buttons(ui: zui_t, nodes: zui_nodes_t, node: zui_node_t) {
 	tiling_node_auto = node.buttons[0].default_value == 0 ? false : true;
 	if (!tiling_node_auto) {
-		tiling_node_strength = zui_slider(zui_handle(__ID__, { value: tiling_node_strength }), tr("strength"), 0, 1, true);
+		let tiling_node_strength_handle: zui_handle_t = zui_handle(__ID__);
+		if (tiling_node_strength_handle.init) {
+			tiling_node_strength_handle.value = tiling_node_strength;
+		}
+
+		tiling_node_strength = zui_slider(tiling_node_strength_handle, tr("strength"), 0, 1, true);
 		tiling_node_prompt = zui_text_area(zui_handle(__ID__), zui_align_t.LEFT, true, tr("prompt"), true);
 		node.buttons[1].height = 1 + string_split(tiling_node_prompt, "\n").length;
 	}
@@ -136,7 +141,7 @@ let tiling_node_def: zui_node_t = {
 			name: _tr("auto"),
 			type: "BOOL",
 			output: 0,
-			default_value: true,
+			default_value: f32_array_create_x(1),
 			data: null,
 			min: 0.0,
 			max: 1.0,

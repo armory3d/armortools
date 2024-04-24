@@ -625,8 +625,8 @@ function import_arm_init_nodes(nodes: zui_node_t[]) {
 	for (let i: i32 = 0; i < nodes.length; ++i) {
 		let node: zui_node_t = nodes[i];
 		if (node.type == import_arm_texture_node_name()) {
-			node.buttons[0].default_value = base_get_asset_index(node.buttons[0].data);
-			node.buttons[0].data = "";
+			node.buttons[0].default_value = f32_array_create_x(base_get_asset_index(u8_array_to_string(node.buttons[0].data)));
+			node.buttons[0].data = u8_array_create_from_string("");
 		}
 	}
 }

@@ -149,7 +149,7 @@ function ui_nodes_on_socket_released(socket_id: i32) {
 							}
 						}
 						else {
-							_ui_nodes_hval0.value = socket.default_value;
+							_ui_nodes_hval0.value = socket.default_value[0];
 						}
 
 						app_notify_on_next_frame(function () {
@@ -1308,7 +1308,7 @@ function ui_nodes_accept_asset_drag(index: i32) {
 	let n: zui_node_t = nodes_brush_create_node("ImageTextureNode");
 	///end
 
-	n.buttons[0].default_value = index;
+	n.buttons[0].default_value[0] = index;
 	ui_nodes_get_nodes().nodes_selected_id = [n.id];
 
 	///if is_lab
@@ -1324,7 +1324,7 @@ function ui_nodes_accept_layer_drag(index: i32) {
 	}
 	let g: node_group_t = ui_nodes_group_stack.length > 0 ? ui_nodes_group_stack[ui_nodes_group_stack.length - 1] : null;
 	let n: zui_node_t = nodes_material_create_node(slot_layer_is_mask(context_raw.layer) ? "LAYER_MASK" : "LAYER", g);
-	n.buttons[0].default_value = index;
+	n.buttons[0].default_value[0] = index;
 	ui_nodes_get_nodes().nodes_selected_id = [n.id];
 }
 
@@ -1332,7 +1332,7 @@ function ui_nodes_accept_material_drag(index: i32) {
 	ui_nodes_push_undo();
 	let g: node_group_t = ui_nodes_group_stack.length > 0 ? ui_nodes_group_stack[ui_nodes_group_stack.length - 1] : null;
 	let n: zui_node_t = nodes_material_create_node("MATERIAL", g);
-	n.buttons[0].default_value = index;
+	n.buttons[0].default_value[0] = index;
 	ui_nodes_get_nodes().nodes_selected_id = [n.id];
 }
 ///end
@@ -1342,34 +1342,76 @@ function ui_nodes_accept_swatch_drag(swatch: swatch_color_t) {
 	ui_nodes_push_undo();
 	let g: node_group_t = ui_nodes_group_stack.length > 0 ? ui_nodes_group_stack[ui_nodes_group_stack.length - 1] : null;
 	let n: zui_node_t = nodes_material_create_node("RGB", g);
-	n.outputs[0].default_value = [
+	n.outputs[0].default_value = f32_array_create_xyzw(
 		color_get_rb(swatch.base) / 255,
 		color_get_gb(swatch.base) / 255,
 		color_get_bb(swatch.base) / 255,
 		color_get_ab(swatch.base) / 255
-	];
+	);
 	ui_nodes_get_nodes().nodes_selected_id = [n.id];
 	///end
 }
 
 function ui_nodes_make_node(n: zui_node_t, nodes: zui_nodes_t, canvas: zui_node_canvas_t): zui_node_t {
-	let node: zui_node_t = json_parse(json_stringify(n));
+	let node: zui_node_t = {};
 	node.id = zui_get_node_id(canvas.nodes);
+	node.name = n.name;
+	node.type = n.type;
 	node.x = ui_nodes_get_node_x();
 	node.y = ui_nodes_get_node_y();
+	node.color = n.color;
+	node.inputs = [];
+	node.outputs = [];
+	node.buttons = [];
+	node.width = 0;
+
 	let count: i32 = 0;
-	for (let i: i32 = 0; i < node.inputs.length; ++i) {
-		let soc: zui_node_socket_t = node.inputs[i];
+	for (let i: i32 = 0; i < n.inputs.length; ++i) {
+		let soc: zui_node_socket_t = {}
 		soc.id = zui_get_socket_id(canvas.nodes) + count;
-		soc.node_id = node.id;
 		count++;
+		soc.node_id = node.id;
+		soc.name = n.inputs[i].name;
+		soc.type = n.inputs[i].type;
+		soc.color = n.inputs[i].color;
+		soc.default_value = n.inputs[i].default_value;
+		soc.min = n.inputs[i].min;
+		soc.max = n.inputs[i].max;
+		soc.precision = n.inputs[i].precision;
+		soc.display = n.inputs[i].display;
+		array_push(node.inputs, soc);
 	}
-	for (let i: i32 = 0; i < node.outputs.length; ++i) {
-		let soc: zui_node_socket_t = node.outputs[i];
+
+	for (let i: i32 = 0; i < n.outputs.length; ++i) {
+		let soc: zui_node_socket_t = {};
 		soc.id = zui_get_socket_id(canvas.nodes) + count;
-		soc.node_id = node.id;
 		count++;
+		soc.node_id = node.id;
+		soc.name = n.outputs[i].name;
+		soc.type = n.outputs[i].type;
+		soc.color = n.outputs[i].color;
+		soc.default_value = n.outputs[i].default_value;
+		soc.min = n.outputs[i].min;
+		soc.max = n.outputs[i].max;
+		soc.precision = n.outputs[i].precision;
+		soc.display = n.outputs[i].display;
+		array_push(node.outputs, soc);
 	}
+
+	for (let i: i32 = 0; i < n.buttons.length; ++i) {
+		let but: zui_node_button_t = {};
+		but.name = n.buttons[i].name;
+		but.type = n.buttons[i].type;
+		but.output = n.buttons[i].output;
+		but.default_value = n.buttons[i].default_value;
+		but.data = n.buttons[i].data;
+		but.min = n.buttons[i].min;
+		but.max = n.buttons[i].max;
+		but.precision = n.buttons[i].precision;
+		but.height = n.buttons[i].height;
+		array_push(node.buttons, but);
+	}
+
 	return node;
 }
 

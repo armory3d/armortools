@@ -100,14 +100,26 @@ function box_export_tab_export_textures(ui: zui_t, title: string, bake_material:
 
 		zui_row([0.5, 0.5]);
 		if (base_bits_handle.position == texture_bits_t.BITS8) {
-			context_raw.format_type = zui_combo(zui_handle(__ID__, { position: context_raw.format_type }), ["png", "jpg"], tr("Format"), true);
+			let h: zui_handle_t = zui_handle(__ID__);
+			if (h.init) {
+				h.position = context_raw.format_type;
+			}
+			context_raw.format_type = zui_combo(h, ["png", "jpg"], tr("Format"), true);
 		}
 		else {
-			context_raw.format_type = zui_combo(zui_handle(__ID__, { position: context_raw.format_type }), ["exr"], tr("Format"), true);
+			let h: zui_handle_t = zui_handle(__ID__);
+			if (h.init) {
+				h.position = context_raw.format_type;
+			}
+			context_raw.format_type = zui_combo(h, ["exr"], tr("Format"), true);
 		}
 
 		ui.enabled = context_raw.format_type == texture_ldr_format_t.JPG && base_bits_handle.position == texture_bits_t.BITS8;
-		context_raw.format_quality = zui_slider(zui_handle(__ID__, { value: context_raw.format_quality }), tr("Quality"), 0.0, 100.0, true, 1);
+		let h_quality: zui_handle_t = zui_handle(__ID__);
+		if (h_quality.init) {
+			h_quality.value = context_raw.format_quality;
+		}
+		context_raw.format_quality = zui_slider(h_quality, tr("Quality"), 0.0, 100.0, true, 1);
 		ui.enabled = true;
 
 		///if is_paint
@@ -189,7 +201,11 @@ function box_export_tab_presets(ui: zui_t) {
 				let tab_vertical: bool = config_raw.touch_ui;
 				if (zui_tab(zui_handle(__ID__), tr("New Preset"), tab_vertical)) {
 					zui_row([0.5, 0.5]);
-					let preset_name: string = zui_text_input(zui_handle(__ID__, { text: "new_preset" }), tr("Name"));
+					let h_preset: zui_handle_t = zui_handle(__ID__);
+					if (h_preset.init) {
+						h_preset.text = "new_preset";
+					}
+					let preset_name: string = zui_text_input(h_preset, tr("Name"));
 					if (zui_button(tr("OK")) || ui.is_return_down) {
 						box_export_new_preset(preset_name);
 						box_export_fetch_presets();
@@ -338,7 +354,11 @@ function box_export_tab_export_mesh(ui: zui_t, htab: zui_handle_t) {
 
 		zui_row([1 / 2, 1 / 2]);
 
-		context_raw.export_mesh_format = zui_combo(zui_handle(__ID__, { position: context_raw.export_mesh_format }), ["obj", "arm"], tr("Format"), true);
+		let h_export_mesh_format: zui_handle_t = zui_handle(__ID__);
+		if (h_export_mesh_format.init) {
+			h_export_mesh_format.position = context_raw.export_mesh_format;
+		}
+		context_raw.export_mesh_format = zui_combo(h_export_mesh_format, ["obj", "arm"], tr("Format"), true);
 
 		let ar: string[] = [tr("All")];
 		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {

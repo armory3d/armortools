@@ -446,7 +446,7 @@ function parser_material_parse_vector_input(inp: zui_node_socket_t): string {
 	}
 	else {
 		if (inp.type == "VALUE") { // Unlinked reroute
-			return parser_material_vec3([0.0, 0.0, 0.0]);
+			return parser_material_vec3(f32_array_create_xyz(0.0, 0.0, 0.0));
 		}
 		else {
 			return parser_material_vec3(inp.default_value);
@@ -511,7 +511,7 @@ function parser_material_parse_vector(node: zui_node_t, socket: zui_node_socket_
 	else if (node.type == "TEX_GRADIENT") {
 		let co: string = parser_material_get_coord(node);
 		let but: zui_node_button_t = node.buttons[0]; //gradient_type;
-		let grad: string = but.data[but.default_value].toUpperCase();
+		let grad: string = to_upper_case(u8_array_string_at(but.data, but.default_value[0]));
 		grad = string_replace_all(grad, " ", "_");
 		let f: string = parser_material_get_gradient(grad, co);
 		let res: string = parser_material_to_vec3("clamp(" + f + ", 0.0, 1.0)");
@@ -526,7 +526,7 @@ function parser_material_parse_vector(node: zui_node_t, socket: zui_node_socket_
 		let tex_name: string = parser_material_node_name(node);
 		let tex: bind_tex_t = parser_material_make_texture(node, tex_name);
 		if (tex != null) {
-			let color_space: i32 = node.buttons[1].default_value;
+			let color_space: i32 = node.buttons[1].default_value[0];
 			let texstore: string = parser_material_texture_store(node, tex, tex_name, color_space);
 			return texstore + ".rgb";
 		}
@@ -556,7 +556,7 @@ function parser_material_parse_vector(node: zui_node_t, socket: zui_node_socket_
 		let co: string = parser_material_get_coord(node);
 		let scale: string = parser_material_parse_value_input(node.inputs[1]);
 		let but: zui_node_button_t = node.buttons[0]; //coloring;
-		let coloring: string = but.data[but.default_value].toUpperCase();
+		let coloring: string = to_upper_case(u8_array_string_at(but.data, but.default_value[0]));
 		coloring = string_replace_all(coloring, " ", "_");
 		let res: string = "";
 		if (coloring == "INTENSITY") {
@@ -642,9 +642,9 @@ function parser_material_parse_vector(node: zui_node_t, socket: zui_node_socket_
 		let col1: string = parser_material_parse_vector_input(node.inputs[1]);
 		let col2: string = parser_material_parse_vector_input(node.inputs[2]);
 		let but: zui_node_button_t = node.buttons[0]; // blend_type
-		let blend: string = but.data[but.default_value].toUpperCase();
+		let blend: string = to_upper_case(u8_array_string_at(but.data, but.default_value[0]));
 		blend = string_replace_all(blend, " ", "_");
-		let use_clamp: bool = node.buttons[1].default_value == true;
+		let use_clamp: bool = node.buttons[1].default_value[0] > 0;
 		let out_col: string = "";
 		if (blend == "MIX") {
 			out_col = "mix(" + col1 + ", " + col2 + ", " + fac_var + ")";
@@ -724,16 +724,16 @@ function parser_material_parse_vector(node: zui_node_t, socket: zui_node_socket_
 	}
 	else if (node.type == "VALTORGB") { // ColorRamp
 		let fac: string = parser_material_parse_value_input(node.inputs[0]);
-		let interp: string = node.buttons[0].data == 0 ? "LINEAR" : "CONSTANT";
-		let elems: f32[][] = node.buttons[0].default_value;
+		let interp: string = node.buttons[0].data[0] == 0 ? "LINEAR" : "CONSTANT";
+		let elems: f32[][] = null; //node.buttons[0].default_value;
 		if (elems.length == 1) {
-			return parser_material_vec3(elems[0]);
+			// return parser_material_vec3(elems[0]);
 		}
 		// Write cols array
 		let cols_var: string = parser_material_node_name(node) + "_cols";
 		node_shader_write(parser_material_curshader, "vec3 " + cols_var + "[" + elems.length + "];"); // TODO: Make const
 		for (let i: i32 = 0; i < elems.length; ++i) {
-			node_shader_write(parser_material_curshader, cols_var + "[" + i + "] = " + parser_material_vec3(elems[i]) + ";");
+			// node_shader_write(parser_material_curshader, cols_var + "[" + i + "] = " + parser_material_vec3(elems[i]) + ";");
 		}
 		// Get index
 		let fac_var: string = parser_material_node_name(node) + "_fac";
@@ -1001,7 +1001,7 @@ function parser_material_parse_vector(node: zui_node_t, socket: zui_node_socket_
 		let nm1: string = parser_material_parse_vector_input(node.inputs[0]);
 		let nm2: string = parser_material_parse_vector_input(node.inputs[1]);
 		let but: zui_node_button_t = node.buttons[0];
-		let blend: string = but.data[but.default_value].toUpperCase(); // blend_type
+		let blend: string = to_upper_case(u8_array_string_at(but.data, but.default_value[0])); // blend_type
 		blend = string_replace_all(blend, " ", "_");
 		let store: string = parser_material_store_var_name(node);
 
@@ -1040,7 +1040,7 @@ function parser_material_parse_vector(node: zui_node_t, socket: zui_node_socket_
 		let vec1: string = parser_material_parse_vector_input(node.inputs[0]);
 		let vec2: string = parser_material_parse_vector_input(node.inputs[1]);
 		let but: zui_node_button_t = node.buttons[0]; //operation;
-		let op: string = but.data[but.default_value].toUpperCase();
+		let op: string = to_upper_case(u8_array_string_at(but.data, but.default_value[0]));
 		op = string_replace_all(op, " ", "_");
 		if (op == "ADD") {
 			return "(" + vec1 + " + " + vec2 + ")";
@@ -1170,7 +1170,7 @@ function parser_material_parse_value_input(inp: zui_node_socket_t, vector_as_gra
 		}
 	}
 	else {
-		return parser_material_vec1(inp.default_value);
+		return parser_material_vec1(inp.default_value[0]);
 	}
 }
 
@@ -1351,7 +1351,7 @@ function parser_material_parse_value(node: zui_node_t, socket: zui_node_socket_t
 		}
 	}
 	else if (node.type == "VALUE") {
-		return parser_material_vec1(node.outputs[0].default_value);
+		return parser_material_vec1(node.outputs[0].default_value[0]);
 	}
 	else if (node.type == "TEX_BRICK") {
 		node_shader_add_function(parser_material_curshader, str_tex_brick);
@@ -1370,7 +1370,7 @@ function parser_material_parse_value(node: zui_node_t, socket: zui_node_socket_t
 	else if (node.type == "TEX_GRADIENT") {
 		let co: string = parser_material_get_coord(node);
 		let but: zui_node_button_t = node.buttons[0]; //gradient_type;
-		let grad: string = but.data[but.default_value].toUpperCase();
+		let grad: string = to_upper_case(u8_array_string_at(but.data, but.default_value[0]));
 		grad = string_replace_all(grad, " ", "_");
 		let f: string = parser_material_get_gradient(grad, co);
 		let res: string = "(clamp(" + f + ", 0.0, 1.0))";
@@ -1385,7 +1385,7 @@ function parser_material_parse_value(node: zui_node_t, socket: zui_node_socket_t
 		let tex_name: string = parser_material_node_name(node);
 		let tex: bind_tex_t = parser_material_make_texture(node, tex_name);
 		if (tex != null) {
-			let color_space: i32 = node.buttons[1].default_value;
+			let color_space: i32 = node.buttons[1].default_value[0];
 			let texstore: string = parser_material_texture_store(node, tex, tex_name, color_space);
 			return texstore + ".a";
 		}
@@ -1417,7 +1417,7 @@ function parser_material_parse_value(node: zui_node_t, socket: zui_node_socket_t
 		let co: string = parser_material_get_coord(node);
 		let scale: string = parser_material_parse_value_input(node.inputs[1]);
 		let but: zui_node_button_t = node.buttons[0]; // coloring
-		let coloring: string = but.data[but.default_value].toUpperCase();
+		let coloring: string = to_upper_case(u8_array_string_at(but.data, but.default_value[0]));
 		coloring = string_replace_all(coloring, " ", "_");
 		let res: string = "";
 		if (coloring == "INTENSITY") {
@@ -1464,9 +1464,9 @@ function parser_material_parse_value(node: zui_node_t, socket: zui_node_socket_t
 		let val1: string = parser_material_parse_value_input(node.inputs[0]);
 		let val2: string = parser_material_parse_value_input(node.inputs[1]);
 		let but: zui_node_button_t = node.buttons[0]; // operation
-		let op: string = but.data[but.default_value].toUpperCase();
+		let op: string = to_upper_case(u8_array_string_at(but.data, but.default_value[0]));
 		op = string_replace_all(op, " ", "_");
-		let use_clamp: bool = node.buttons[1].default_value == true;
+		let use_clamp: bool = node.buttons[1].default_value[0] > 0;
 		let out_val: string = "";
 		if (op == "ADD") {
 			out_val = "(" + val1 + " + " + val2 + ")";
@@ -1640,7 +1640,7 @@ function parser_material_parse_value(node: zui_node_t, socket: zui_node_socket_t
 		let vec1: string = parser_material_parse_vector_input(node.inputs[0]);
 		let vec2: string = parser_material_parse_vector_input(node.inputs[1]);
 		let but: zui_node_button_t = node.buttons[0]; //operation;
-		let op: string = but.data[but.default_value].toUpperCase();
+		let op: string = to_upper_case(u8_array_string_at(but.data, but.default_value[0]));
 		op = string_replace_all(op, " ", "_");
 		if (op == "DOT_PRODUCT") {
 			return "dot(" + vec1 + ", " + vec2 + ")";
@@ -1660,7 +1660,7 @@ function parser_material_parse_value(node: zui_node_t, socket: zui_node_socket_t
 		let min: string = parser_material_parse_value_input(node.inputs[1]);
 		let max: string = parser_material_parse_value_input(node.inputs[2]);
 		let but: zui_node_button_t = node.buttons[0]; //operation;
-		let op: string = but.data[but.default_value].toUpperCase();
+		let op: string = to_upper_case(u8_array_string_at(but.data, but.default_value[0]));
 		op = string_replace_all(op, " ", "_");
 
 		if (op == "MIN_MAX") {
@@ -1677,7 +1677,7 @@ function parser_material_parse_value(node: zui_node_t, socket: zui_node_socket_t
 		let tmin: string = parser_material_parse_value_input(node.inputs[3]);
 		let tmax: string = parser_material_parse_value_input(node.inputs[4]);
 
-		let use_clamp: bool = node.buttons[0].default_value == true;
+		let use_clamp: bool = node.buttons[0].default_value[0] > 0;
 
 		let a: string = "((" + tmin + " - " + tmax + ") / (" + fmin + " - " + fmax + "))";
 		let out_val: string = "(" + a + " * " + val + " + " + tmin + " - " + a + " * " + fmin + ")";
@@ -1858,7 +1858,7 @@ function parser_material_vec1(v: f32): string {
 	///end
 }
 
-function parser_material_vec3(v: f32[]): string {
+function parser_material_vec3(v: f32_array_t): string {
 	///if krom_android
 	return "vec3(float(" + v[0] + "), float(" + v[1] + "), float(" + v[2] + "))";
 	///else
@@ -1937,7 +1937,7 @@ function parser_material_enum_data(s: string): string {
 }
 
 function parser_material_make_texture(image_node: zui_node_t, tex_name: string, matname: string = null): bind_tex_t {
-	let filepath: string = parser_material_enum_data(base_enum_texts(image_node.type)[image_node.buttons[0].default_value]);
+	let filepath: string = parser_material_enum_data(base_enum_texts(image_node.type)[image_node.buttons[0].default_value[0]]);
 	if (filepath == "" || string_index_of(filepath, ".") == -1) {
 		return null;
 	}
@@ -1979,6 +1979,12 @@ function parser_material_extract_filename(s: string): string {
 
 function parser_material_safestr(s: string): string {
 	return s;
+}
+
+function u8_array_string_at(a: u8_array_t, i: i32): string {
+	let s: string = u8_array_to_string(a);
+	let ss: string[] = string_split(s, "\0");
+	return ss[i];
 }
 
 type shader_out_t = {

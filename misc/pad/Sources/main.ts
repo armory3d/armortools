@@ -13,6 +13,7 @@ type storage_t = {
 };
 
 let ui: zui_t;
+let theme: zui_theme_t;
 let text_handle: zui_handle_t = zui_handle_create();
 let sidebar_handle: zui_handle_t = zui_handle_create();
 let editor_handle: zui_handle_t = zui_handle_create();
@@ -31,14 +32,13 @@ function drop_files(path: string) {
 }
 
 function shutdown() {
-	krom_file_save_bytes(krom_save_path() + "/config.json", sys_string_to_buffer(json_stringify(storage)));
+	let storage_string: string = sys_string_to_buffer(json_stringify(storage));
+	krom_file_save_bytes(krom_save_path() + "/config.json", storage_string, 0);
 }
 
 function main() {
-	zui_set_text_area_line_numbers(true);
-	zui_set_text_area_scroll_past_end(true);
-
 	krom_set_app_name("ArmorPad");
+
 	let blob_storage: buffer_t = krom_load_blob(krom_save_path() + "/config.json");
 	if (blob_storage == null) {
 		storage = {};
@@ -59,47 +59,37 @@ function main() {
 
 	text_handle.text = storage.text;
 
-	let ops: kinc_sys_ops_t = {};
-	ops.title = "ArmorPad";
-	ops.x = storage.window_x;
-	ops.y = storage.window_y;
-	ops.width = storage.window_w;
-	ops.height = storage.window_h;
-	ops.features = window_features_t.RESIZABLE | window_features_t.MAXIMIZABLE | window_features_t.MINIMIZABLE;
-	ops.mode = window_mode_t.WINDOWED;
-	ops.frequency = 60;
-	ops.vsync = true;
+	let ops: kinc_sys_ops_t = {
+		title: "ArmorPad",
+		x: storage.window_x,
+		y: storage.window_y,
+		width: storage.window_w,
+		height: storage.window_h,
+		features: window_features_t.RESIZABLE |
+				  window_features_t.MAXIMIZABLE |
+				  window_features_t.MINIMIZABLE,
+		mode: window_mode_t.WINDOWED,
+		frequency: 60,
+		vsync: true,
+	};
 	sys_start(ops);
 
 	let font: g2_font_t = data_get_font("font_mono.ttf");
-	let blob_theme: buffer_t = data_get_blob("themes/dark.json");
-	let blob_coloring: buffer_t = data_get_blob("text_coloring.json");
-	let parsed: any = json_parse(sys_buffer_to_string(blob_theme));
-	let theme: any = zui_theme_create();
-	for (let key of Object.getOwnPropertyNames(theme_t.prototype)) {
-		if (key == "constructor") {
-			continue;
-		}
-		theme[key] = parsed[key];
-	}
-
 	g2_font_init(font);
-	let zui_ops: zui_ops_t = {};
-	zui_ops.theme = theme;
-	zui_ops.font = font;
-	zui_ops.scaleFactor = 1.0;
-	zui_ops.color_wheel = null;
-	zui_ops.black_white_gradient = null;
-	ui = zui_create(zui_ops);
-	zui_set_on_border_hover(on_border_hover);
-	zui_set_on_text_hover(on_text_hover);
 
+	theme = {};
+	zui_theme_default(theme);
+
+	let zui_ops: zui_options_t = { scale_factor: 1.0, theme: theme, font: font.font_ };
+	ui = zui_create(zui_ops);
+
+	let blob_coloring: buffer_t = data_get_blob("text_coloring.json");
 	let text_coloring: zui_text_coloring_t = json_parse(sys_buffer_to_string(blob_coloring));
-	text_coloring.default_color = math_floor(text_coloring.default_color);
-	for (let coloring of text_coloring.colorings) {
-		coloring.color = math_floor(coloring.color);
-	}
-	zui_set_text_area_coloring(text_coloring);
+	zui_text_area_coloring = text_coloring;
+	zui_on_border_hover = on_border_hover;
+	zui_on_text_hover = on_text_hover;
+	zui_text_area_line_numbers = true;
+	zui_text_area_scroll_past_end = true;
 
 	sys_notify_on_frames(render);
 	krom_set_drop_files_callback(drop_files);
@@ -116,7 +106,7 @@ function list_folder(path: string) {
 
 		// Active file
 		if (abs == storage.file) {
-			zui_fill(0, 1, ui._w - 1, zui_ELEMENT_H(ui) - 1, ui.t.BUTTON_PRESSED_COL);
+			zui_fill(0, 1, ui._w - 1, ZUI_ELEMENT_H() - 1, theme.BUTTON_PRESSED_COL);
 		}
 
 		let prefix: string = "";
@@ -124,7 +114,7 @@ function list_folder(path: string) {
 			prefix = is_expanded ? "- " : "+ ";
 		}
 
-		if (zui_button(prefix + f, Align.Left)) {
+		if (zui_button(prefix + f, ZUI_ALIGN_LEFT, "")) {
 			// Open file
 			if (is_file) {
 				storage.file = abs;
@@ -142,9 +132,7 @@ function list_folder(path: string) {
 		}
 
 		if (is_expanded) {
-			// ui.indent(false);
 			list_folder(abs);
-			// ui.unindent(false);
 		}
 	}
 }
@@ -161,41 +149,46 @@ function render() {
 	zui_begin(ui);
 
 	if (zui_window(sidebar_handle, 0, 0, storage.sidebar_w, sys_height(), false)) {
-		let _BUTTON_TEXT_COL: i32 = ui.t.BUTTON_TEXT_COL;
-		ui.t.BUTTON_TEXT_COL = ui.t.ACCENT_COL;
+		let _BUTTON_TEXT_COL: i32 = theme.BUTTON_TEXT_COL;
+		theme.BUTTON_TEXT_COL = theme.ACCENT_COL;
 		if (storage.project != "") {
 			list_folder(storage.project);
 		}
 		else {
-			zui_button("Drop folder here", Align.Left);
+			zui_button("Drop folder here", ZUI_ALIGN_LEFT, "");
 		}
-		ui.t.BUTTON_TEXT_COL = _BUTTON_TEXT_COL;
+		theme.BUTTON_TEXT_COL = _BUTTON_TEXT_COL;
 	}
 
-	zui_fill(sys_width() - minimap_w, 0, minimap_w, zui_ELEMENT_H(ui) + zui_ELEMENT_OFFSET(ui) + 1, ui.t.SEPARATOR_COL);
-	zui_fill(storage.sidebar_w, 0, 1, sys_height(), ui.t.SEPARATOR_COL);
+	zui_fill(sys_width() - minimap_w, 0, minimap_w, ZUI_ELEMENT_H() + ZUI_ELEMENT_OFFSET() + 1, theme.SEPARATOR_COL);
+	zui_fill(storage.sidebar_w, 0, 1, sys_height(), theme.SEPARATOR_COL);
 
 	let editor_updated: bool = false;
 
 	if (zui_window(editor_handle, storage.sidebar_w + 1, 0, sys_width() - storage.sidebar_w - minimap_w, sys_height(), false)) {
 		editor_updated = true;
-		let htab: zui_handle_t = zui_handle("main_0", { position: 0 });
-		let file_name: string = substring(storage.file, string_last_index_of(storage.file, "/") + 1);
+		let htab: zui_handle_t = zui_handle(__ID__);
+		let file_name: string = substring(storage.file, string_last_index_of(storage.file, "/") + 1, storage.file.length);
 		let file_names: string[] = [file_name];
 
-		for (let file_name of file_names) {
-			if (zui_tab(htab, file_name + (storage.modified ? "*" : ""))) {
+		for (let i: i32 = 0; i < file_names.length; ++i) {
+			let tab_name: string = file_names[i];
+			if (storage.modified) {
+				tab_name += "*";
+			}
+			if (zui_tab(htab, tab_name, false, -1)) {
 				// File modified
 				if (ui.is_key_pressed) {
 					storage.modified = true;
 				}
 
 				// Save
-				if (ui.is_ctrl_down && ui.key == key_code_t.S) {
+				if (ui.is_ctrl_down && ui.key_code == key_code_t.S) {
 					save_file();
 				}
 
-				storage.text = zui_text_area(text_handle);
+				// storage.text = zui_text_area(text_handle, ZUI_ALIGN_LEFT, true, "", false);
+				zui_text_area(text_handle, ZUI_ALIGN_LEFT, true, "", false);
 			}
 		}
 
@@ -220,18 +213,16 @@ function render() {
 		minimap_scrolling = false;
 	}
 	if (minimap_scrolling) {
-		// editor_handle.scroll_offset -= ui.input_dy * zui_ELEMENT_H(ui) / 2;
-		// // editor_handle.scroll_offset = -((ui.input_y - minimap_y - minimap_box_h / 2) * zui_ELEMENT_H(ui) / 2);
 		redraw = true;
 	}
 
 	// Build project
-	if (ui.is_ctrl_down && ui.key == key_code_t.B) {
+	if (ui.is_ctrl_down && ui.key_code == key_code_t.B) {
 		save_file();
 		build_project();
 	}
 
-	zui_end();
+	zui_end(false);
 
 	if (redraw) {
 		editor_handle.redraws = 2;
@@ -251,16 +242,16 @@ function render() {
 function save_file() {
 	// Trim
 	let lines: string[] = string_split(storage.text, "\n");
-	for (let i = 0; i < lines.length; ++i) {
+	for (let i: i32 = 0; i < lines.length; ++i) {
 		lines[i] = trim_end(lines[i]);
 	}
-	storage.text = lines.join("\n");
+	storage.text = string_array_join(lines, "\n");
 	// Spaces to tabs
 	storage.text = string_replace_all(storage.text, "    ", "\t");
 	text_handle.text = storage.text;
 	// Write bytes
-	let bytes = ends_with(storage.file, ".arm") ? armpack_encode(json_parse(storage.text)) : sys_string_to_buffer(storage.text);
-	krom_file_save_bytes(storage.file, bytes, buffer_size(bytes));
+	// let bytes: buffer_t = ends_with(storage.file, ".arm") ? armpack_encode(json_parse(storage.text)) : sys_string_to_buffer(storage.text);
+	// krom_file_save_bytes(storage.file, bytes, buffer_size(bytes));
 	storage.modified = false;
 }
 
@@ -273,7 +264,7 @@ function build_file(): string {
 }
 
 function build_project() {
-	krom_sys_command(storage.project + build_file() + " " + storage.project);
+	krom_sys_command(storage.project + build_file() + " " + storage.project, null);
 }
 
 function draw_minimap() {
@@ -286,11 +277,11 @@ function draw_minimap() {
 	}
 
 	g2_begin(minimap);
-	g2_clear(ui.t.SEPARATOR_COL);
+	g2_clear(theme.SEPARATOR_COL);
 	g2_set_color(0xff333333);
 	let lines: string[] = string_split(storage.text, "\n");
 	let minimap_full_h: i32 = lines.length * 2;
-	let scroll_progress: f32 = -editor_handle.scroll_offset / (lines.length * zui_ELEMENT_H(ui));
+	let scroll_progress: f32 = -editor_handle.scroll_offset / (lines.length * ZUI_ELEMENT_H());
 	let out_of_screen: i32 = minimap_full_h - minimap_h;
 	if (out_of_screen < 0) {
 		out_of_screen = 0;
@@ -314,7 +305,7 @@ function draw_minimap() {
 	// Current position
 	let visible_area: i32 = out_of_screen > 0 ? minimap_h : minimap_full_h;
 	g2_set_color(0x11ffffff);
-	minimap_box_h = math_floor((sys_height() - window_header_h) / zui_ELEMENT_H(ui) * 2);
+	minimap_box_h = math_floor((sys_height() - window_header_h) / ZUI_ELEMENT_H() * 2);
 	g2_fill_rect(0, scroll_progress * visible_area, minimap_w, minimap_box_h);
 	g2_end();
 }
@@ -341,5 +332,3 @@ function on_border_hover(handle: zui_handle_t, side: i32) {
 function on_text_hover() {
 	krom_set_mouse_cursor(2); // I-cursor
 }
-
-main();

@@ -317,9 +317,9 @@ function context_create(): context_t {
 	c.picked_color = make_swatch();
 	c.envmap_loaded = false;
 	c.show_envmap = false;
-	c.show_envmap_handle = zui_handle_create({ selected: false });
+	c.show_envmap_handle = zui_handle_create();
 	c.show_envmap_blur = false;
-	c.show_envmap_blur_handle = zui_handle_create({ selected: false });
+	c.show_envmap_blur_handle = zui_handle_create();
 	c.envmap_angle = 0.0;
 	c.light_angle = 0.0;
 	c.cull_backfaces = true;
@@ -409,9 +409,9 @@ function context_create(): context_t {
 	c.nory_picked = 0.0;
 	c.norz_picked = 0.0;
 	c.draw_wireframe = false;
-	c.wireframe_handle = zui_handle_create({ selected: false });
+	c.wireframe_handle = zui_handle_create();
 	c.draw_texels = false;
-	c.texels_handle = zui_handle_create({ selected: false });
+	c.texels_handle = zui_handle_create();
 	c.colorid_handle = zui_handle_create();
 	c.layers_export = export_mode_t.VISIBLE;
 	c.decal_preview = false;
@@ -457,17 +457,22 @@ function context_create(): context_t {
 	c.brush_nodes_hardness = 1.0;
 	c.brush_directional = false;
 	c.brush_radius = 0.5;
-	c.brush_radius_handle = zui_handle_create({ value: 0.5 });
+	c.brush_radius_handle = zui_handle_create();
+	c.brush_radius_handle.value = 0.5;
 	c.brush_scale_x = 1.0;
 	c.brush_decal_mask_radius = 0.5;
-	c.brush_decal_mask_radius_handle = zui_handle_create({ value: 0.5 });
-	c.brush_scale_x_handle = zui_handle_create({ value: 1.0 });
+	c.brush_decal_mask_radius_handle = zui_handle_create();
+	c.brush_decal_mask_radius_handle.value = 0.5;
+	c.brush_scale_x_handle = zui_handle_create();
+	c.brush_scale_x_handle.value = 1.0;
 	c.brush_blending = blend_type_t.MIX;
 	c.brush_opacity = 1.0;
-	c.brush_opacity_handle = zui_handle_create({ value: 1.0 });
+	c.brush_opacity_handle = zui_handle_create();
+	c.brush_opacity_handle.value = 1.0;
 	c.brush_scale = 1.0;
 	c.brush_angle = 0.0;
-	c.brush_angle_handle = zui_handle_create({ value: 0.0 });
+	c.brush_angle_handle = zui_handle_create();
+	c.brush_angle_handle.value = 0.0;
 	///if is_paint
 	c.brush_hardness = 0.8;
 	///end

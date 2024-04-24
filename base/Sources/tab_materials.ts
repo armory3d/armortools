@@ -193,15 +193,51 @@ function tab_materials_draw_slots(mini: bool) {
 						tab_materials_delete_material(m);
 					}
 
-					let base_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id, {selected: m.paint_base});
-					let opac_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id, {selected: m.paint_opac});
-					let nor_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id, {selected: m.paint_nor});
-					let occ_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id, {selected: m.paint_occ});
-					let rough_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id, {selected: m.paint_rough});
-					let met_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id, {selected: m.paint_met});
-					let height_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id, {selected: m.paint_height});
-					let emis_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id, {selected: m.paint_emis});
-					let subs_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id, {selected: m.paint_subs});
+					let base_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id);
+					if (base_handle.init) {
+						base_handle.selected = m.paint_base;
+					}
+
+					let opac_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id);
+					if (opac_handle.init) {
+						opac_handle.selected = m.paint_opac;
+					}
+
+					let nor_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id);
+					if (nor_handle.init) {
+						nor_handle.selected = m.paint_nor;
+					}
+
+					let occ_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id);
+					if (occ_handle.init) {
+						occ_handle.selected = m.paint_occ;
+					}
+
+					let rough_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id);
+					if (rough_handle.init) {
+						rough_handle.selected = m.paint_rough;
+					}
+
+					let met_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id);
+					if (met_handle.init) {
+						met_handle.selected = m.paint_met;
+					}
+
+					let height_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id);
+					if (height_handle.init) {
+						height_handle.selected = m.paint_height;
+					}
+
+					let emis_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id);
+					if (emis_handle.init) {
+						emis_handle.selected = m.paint_emis;
+					}
+
+					let subs_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id);
+					if (subs_handle.init) {
+						subs_handle.selected = m.paint_subs;
+					}
+
 					ui_menu_fill(ui);
 					m.paint_base = zui_check(base_handle, tr("Base Color"));
 					ui_menu_fill(ui);
@@ -306,11 +342,11 @@ function tab_materials_update_material_pointers(nodes: zui_node_t[], i: i32) {
 	for (let i: i32 = 0; i < nodes.length; ++i) {
 		let n: zui_node_t = nodes[i];
 		if (n.type == "MATERIAL") {
-			if (n.buttons[0].default_value == i) {
-				n.buttons[0].default_value = 9999; // Material deleted
+			if (n.buttons[0].default_value[0] == i) {
+				n.buttons[0].default_value[0] = 9999; // Material deleted
 			}
-			else if (n.buttons[0].default_value > i) {
-				n.buttons[0].default_value--; // Offset by deleted material
+			else if (n.buttons[0].default_value[0] > i) {
+				n.buttons[0].default_value[0]--; // Offset by deleted material
 			}
 		}
 	}
@@ -321,19 +357,19 @@ function tab_materials_accept_swatch_drag(swatch: swatch_color_t) {
 	for (let i: i32 = 0; i < context_raw.material.canvas.nodes.length; ++i) {
 		let node: zui_node_t = context_raw.material.canvas.nodes[i];
 		if (node.type == "RGB" ) {
-			node.outputs[0].default_value = [
+			node.outputs[0].default_value = f32_array_create_xyzw(
 				color_get_rb(swatch.base) / 255,
 				color_get_gb(swatch.base) / 255,
 				color_get_bb(swatch.base) / 255,
 				color_get_ab(swatch.base) / 255
-			];
+			);
 		}
 		else if (node.type == "OUTPUT_MATERIAL_PBR") {
-			node.inputs[1].default_value = swatch.opacity;
-			node.inputs[2].default_value = swatch.occlusion;
-			node.inputs[3].default_value = swatch.roughness;
-			node.inputs[4].default_value = swatch.metallic;
-			node.inputs[7].default_value = swatch.height;
+			node.inputs[1].default_value[0] = swatch.opacity;
+			node.inputs[2].default_value[0] = swatch.occlusion;
+			node.inputs[3].default_value[0] = swatch.roughness;
+			node.inputs[4].default_value[0] = swatch.metallic;
+			node.inputs[7].default_value[0] = swatch.height;
 		}
 	}
 	array_push(project_materials, context_raw.material);

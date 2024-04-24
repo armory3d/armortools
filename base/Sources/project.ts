@@ -103,8 +103,17 @@ function project_new_box() {
 			}
 
 			zui_row([0.5, 0.5]);
-			context_raw.project_type = zui_combo(zui_handle(__ID__, { position: context_raw.project_type }), project_mesh_list, tr("Template"), true);
-			context_raw.project_aspect_ratio = zui_combo(zui_handle(__ID__, { position: context_raw.project_aspect_ratio }), ["1:1", "2:1", "1:2"], tr("Aspect Ratio"), true);
+			let h_project_type: zui_handle_t = zui_handle(__ID__);
+			if (h_project_type.init) {
+				h_project_type.position = context_raw.project_type;
+			}
+			context_raw.project_type = zui_combo(h_project_type, project_mesh_list, tr("Template"), true);
+
+			let h_project_aspect_ratio: zui_handle_t = zui_handle(__ID__);
+			if (h_project_aspect_ratio.init) {
+				h_project_aspect_ratio.position = context_raw.project_aspect_ratio;
+			}
+			context_raw.project_aspect_ratio = zui_combo(h_project_aspect_ratio, ["1:1", "2:1", "1:2"], tr("Aspect Ratio"), true);
 
 			zui_end_element();
 			zui_row([0.5, 0.5]);
@@ -358,7 +367,7 @@ function project_import_brush() {
 			let n: zui_node_t = nodes_brush_create_node("TEX_IMAGE");
 			n.x = 83;
 			n.y = 340;
-			n.buttons[0].default_value = asset_index;
+			n.buttons[0].default_value = f32_array_create_x(asset_index);
 			let links: zui_node_link_t[] = context_raw.brush.canvas.links;
 			array_push(links, {
 				id: zui_get_link_id(links),
@@ -439,7 +448,11 @@ function project_import_mesh_box(path: string, replace_existing: bool = true, cl
 			///if (is_paint || is_sculpt)
 			// if (ends_with(to_lower_case(path), ".fbx") || ends_with(to_lower_case(path), ".blend")) {
 			if (ends_with(to_lower_case(path), ".blend")) {
-				context_raw.parse_vcols = zui_check(zui_handle(__ID__, { selected: context_raw.parse_vcols }), tr("Parse Vertex Colors"));
+				let h: zui_handle_t = zui_handle(__ID__);
+				if (h.init) {
+					h.selected = context_raw.parse_vcols;
+				}
+				context_raw.parse_vcols = zui_check(h, tr("Parse Vertex Colors"));
 				if (ui.is_hovered) {
 					zui_tooltip(tr("Import vertex color data"));
 				}

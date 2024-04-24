@@ -277,7 +277,7 @@ let text_to_photo_node_def: zui_node_t = {
 			name: _tr("tiling"),
 			type: "BOOL",
 			output: 0,
-			default_value: false,
+			default_value: f32_array_create_x(0),
 			data: null,
 			min: 0.0,
 			max: 1.0,

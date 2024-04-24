@@ -351,7 +351,11 @@ function ui_view2d_render() {
 
 		///if (is_paint || is_sculpt)
 		if (ui_view2d_type == view_2d_type_t.LAYER) {
-			ui_view2d_layer_mode = zui_combo(zui_handle(__ID__, { position: ui_view2d_layer_mode }), [
+			let h_layer_mode: zui_handle_t = zui_handle(__ID__);
+			if (h_layer_mode.init) {
+				h_layer_mode.position = ui_view2d_layer_mode;
+			}
+			ui_view2d_layer_mode = zui_combo(h_layer_mode, [
 				tr("Visible"),
 				tr("Selected"),
 			], tr("Layers"));
@@ -359,7 +363,11 @@ function ui_view2d_render() {
 			ui_view2d_ui._y = 2 + start_y;
 
 			if (!slot_layer_is_mask(context_raw.layer)) {
-				ui_view2d_tex_type = zui_combo(zui_handle(__ID__, { position: ui_view2d_tex_type }), [
+				let h_tex_type: zui_handle_t = zui_handle(__ID__);
+				if (h_tex_type.init) {
+					h_tex_type.position = ui_view2d_tex_type;
+				}
+				ui_view2d_tex_type = zui_combo(h_tex_type, [
 					tr("Base Color"),
 					tr("Normal Map"),
 					tr("Occlusion"),
@@ -373,13 +381,21 @@ function ui_view2d_render() {
 			}
 
 			ui_view2d_ui._w = math_floor(ew * 0.7 + 3);
-			ui_view2d_uvmap_show = zui_check(zui_handle(__ID__, { selected: ui_view2d_uvmap_show }), tr("UV Map"));
+			let h_uvmap_show: zui_handle_t = zui_handle(__ID__);
+			if (h_uvmap_show.init) {
+				h_uvmap_show.selected = ui_view2d_uvmap_show;
+			}
+			ui_view2d_uvmap_show = zui_check(h_uvmap_show, tr("UV Map"));
 			ui_view2d_ui._x += ew * 0.7 + 3;
 			ui_view2d_ui._y = 2 + start_y;
 		}
 		///end
 
-		ui_view2d_tiled_show = zui_check(zui_handle(__ID__, { selected: ui_view2d_tiled_show }), tr("Tiled"));
+		let h_tiled_show: zui_handle_t = zui_handle(__ID__);
+		if (h_tiled_show.init) {
+			h_tiled_show.selected = ui_view2d_tiled_show;
+		}
+		ui_view2d_tiled_show = zui_check(h_tiled_show, tr("Tiled"));
 		ui_view2d_ui._x += ew * 0.7 + 3;
 		ui_view2d_ui._y = 2 + start_y;
 

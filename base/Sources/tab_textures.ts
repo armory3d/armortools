@@ -253,11 +253,11 @@ function tab_textures_update_texture_pointers(nodes: zui_node_t[], i: i32) {
 	for (let i: i32 = 0; i < nodes.length; ++i) {
 		let n: zui_node_t = nodes[i];
 		if (n.type == "TEX_IMAGE") {
-			if (n.buttons[0].default_value == i) {
-				n.buttons[0].default_value = 9999; // Texture deleted, use pink now
+			if (n.buttons[0].default_value[0] == i) {
+				n.buttons[0].default_value[0] = 9999; // Texture deleted, use pink now
 			}
-			else if (n.buttons[0].default_value > i) {
-				n.buttons[0].default_value--; // Offset by deleted texture
+			else if (n.buttons[0].default_value[0] > i) {
+				n.buttons[0].default_value[0]--; // Offset by deleted texture
 			}
 		}
 	}

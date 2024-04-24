@@ -1,11 +1,11 @@
 
 let ui_header_default_h: i32 = 28;
 let ui_header_h: i32 = ui_header_default_h;
-let ui_header_handle: zui_handle_t = zui_handle_create({ layout: zui_layout_t.HORIZONTAL });
+let ui_header_handle: zui_handle_t = zui_handle_create();
 let ui_header_worktab: zui_handle_t = zui_handle_create();
 
 function ui_header_init() {
-
+	ui_header_handle.layout = zui_layout_t.HORIZONTAL;
 }
 
 function ui_header_render_ui() {
@@ -171,7 +171,11 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 		zui_text(tr("Metallic") + " (" + metallic_picked + ")");
 		zui_text(tr("Height") + " (" + height_picked + ")");
 		zui_text(tr("Opacity") + " (" + opacity_picked + ")");
-		context_raw.picker_select_material = zui_check(zui_handle(__ID__, { selected: context_raw.picker_select_material }), tr("Select Material"));
+		let h_select_mat: zui_handle_t = zui_handle(__ID__);
+		if (h_select_mat.init) {
+			h_select_mat.selected = context_raw.picker_select_material;
+		}
+		context_raw.picker_select_material = zui_check(h_select_mat, tr("Select Material"));
 		zui_combo(context_raw.picker_mask_handle, [tr("None"), tr("Material")], tr("Mask"), true);
 		if (context_raw.picker_mask_handle.changed) {
 			make_material_parse_paint_material();
@@ -205,7 +209,10 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 			///end
 		}
 
-		let bake_handle: zui_handle_t = zui_handle(__ID__, { position: context_raw.bake_type });
+		let bake_handle: zui_handle_t = zui_handle(__ID__);
+		if (bake_handle.init) {
+			bake_handle.position = context_raw.bake_type;
+		}
 		let bakes: string[] = [
 			tr("AO"),
 			tr("Curvature"),
@@ -240,25 +247,43 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 
 		///if (krom_direct3d12 || krom_vulkan || krom_metal)
 		if (rt_bake) {
-			let samples_handle: zui_handle_t = zui_handle(__ID__, { value: context_raw.bake_samples });
+			let samples_handle: zui_handle_t = zui_handle(__ID__);
+			if (samples_handle.init) {
+				samples_handle.value = context_raw.bake_samples;
+			}
 			context_raw.bake_samples = math_floor(zui_slider(samples_handle, tr("Samples"), 1, 512, true, 1));
 		}
 		///end
 
 		if (context_raw.bake_type == bake_type_t.NORMAL_OBJECT || context_raw.bake_type == bake_type_t.POSITION || context_raw.bake_type == bake_type_t.BENT_NORMAL) {
-			let bake_up_axis_handle: zui_handle_t = zui_handle(__ID__, { position: context_raw.bake_up_axis });
+			let bake_up_axis_handle: zui_handle_t = zui_handle(__ID__);
+			if (bake_up_axis_handle.init) {
+				bake_up_axis_handle.position = context_raw.bake_up_axis;
+			}
 			context_raw.bake_up_axis = zui_combo(bake_up_axis_handle, [tr("Z"), tr("Y")], tr("Up Axis"), true);
 		}
 		if (context_raw.bake_type == bake_type_t.AO || context_raw.bake_type == bake_type_t.CURVATURE) {
-			let bake_axis_handle: zui_handle_t = zui_handle(__ID__, { position: context_raw.bake_axis });
+			let bake_axis_handle: zui_handle_t = zui_handle(__ID__);
+			if (bake_axis_handle.init) {
+				bake_axis_handle.position = context_raw.bake_axis;
+			}
 			context_raw.bake_axis = zui_combo(bake_axis_handle, [tr("XYZ"), tr("X"), tr("Y"), tr("Z"), tr("-X"), tr("-Y"), tr("-Z")], tr("Axis"), true);
 		}
 		if (context_raw.bake_type == bake_type_t.AO) {
-			let strength_handle: zui_handle_t = zui_handle(__ID__, { value: context_raw.bake_ao_strength });
+			let strength_handle: zui_handle_t = zui_handle(__ID__);
+			if (strength_handle.init) {
+				strength_handle.value = context_raw.bake_ao_strength;
+			}
 			context_raw.bake_ao_strength = zui_slider(strength_handle, tr("Strength"), 0.0, 2.0, true);
-			let radius_handle: zui_handle_t = zui_handle(__ID__, { value: context_raw.bake_ao_radius });
+			let radius_handle: zui_handle_t = zui_handle(__ID__);
+			if (radius_handle.init) {
+				radius_handle.value = context_raw.bake_ao_radius;
+			}
 			context_raw.bake_ao_radius = zui_slider(radius_handle, tr("Radius"), 0.0, 2.0, true);
-			let offset_handle: zui_handle_t = zui_handle(__ID__, { value: context_raw.bake_ao_offset });
+			let offset_handle: zui_handle_t = zui_handle(__ID__);
+			if (offset_handle.init) {
+				offset_handle.value = context_raw.bake_ao_offset;
+			}
 			context_raw.bake_ao_offset = zui_slider(offset_handle, tr("Offset"), 0.0, 2.0, true);
 		}
 		///if (krom_direct3d12 || krom_vulkan || krom_metal)
@@ -277,13 +302,25 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 		}
 		///end
 		if (context_raw.bake_type == bake_type_t.CURVATURE) {
-			let strength_handle: zui_handle_t = zui_handle(__ID__, { value: context_raw.bake_curv_strength });
+			let strength_handle: zui_handle_t = zui_handle(__ID__);
+			if (strength_handle.init) {
+				strength_handle.value = context_raw.bake_curv_strength;
+			}
 			context_raw.bake_curv_strength = zui_slider(strength_handle, tr("Strength"), 0.0, 2.0, true);
-			let radius_handle: zui_handle_t = zui_handle(__ID__, { value: context_raw.bake_curv_radius });
+			let radius_handle: zui_handle_t = zui_handle(__ID__);
+			if (radius_handle.init) {
+				radius_handle.value = context_raw.bake_curv_radius;
+			}
 			context_raw.bake_curv_radius = zui_slider(radius_handle, tr("Radius"), 0.0, 2.0, true);
-			let offset_handle: zui_handle_t = zui_handle(__ID__, { value: context_raw.bake_curv_offset });
+			let offset_handle: zui_handle_t = zui_handle(__ID__);
+			if (offset_handle.init) {
+				offset_handle.value = context_raw.bake_curv_offset;
+			}
 			context_raw.bake_curv_offset = zui_slider(offset_handle, tr("Offset"), -2.0, 2.0, true);
-			let smooth_handle: zui_handle_t = zui_handle(__ID__, { value: context_raw.bake_curv_smooth });
+			let smooth_handle: zui_handle_t = zui_handle(__ID__);
+			if (smooth_handle.init) {
+				smooth_handle.value = context_raw.bake_curv_smooth;
+			}
 			context_raw.bake_curv_smooth = math_floor(zui_slider(smooth_handle, tr("Smooth"), 0, 5, false, 1));
 		}
 		if (context_raw.bake_type == bake_type_t.NORMAL || context_raw.bake_type == bake_type_t.HEIGHT || context_raw.bake_type == bake_type_t.DERIVATIVE) {
@@ -292,7 +329,10 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 				let p: mesh_object_t = project_paint_objects[i];
 				array_push(ar, p.base.name);
 			}
-			let poly_handle: zui_handle_t = zui_handle(__ID__, { position: context_raw.bake_high_poly });
+			let poly_handle: zui_handle_t = zui_handle(__ID__);
+			if (poly_handle.init) {
+				poly_handle.position = context_raw.bake_high_poly;
+			}
 			context_raw.bake_high_poly = zui_combo(poly_handle, ar, tr("High Poly"));
 		}
 		if (ui.changed) {
@@ -342,7 +382,10 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 			context_raw.tool == workspace_tool_t.FILL   ||
 			context_raw.tool == workspace_tool_t.DECAL  ||
 			context_raw.tool == workspace_tool_t.TEXT) {
-			let brush_scale_handle: zui_handle_t = zui_handle(__ID__, { value: context_raw.brush_scale });
+			let brush_scale_handle: zui_handle_t = zui_handle(__ID__);
+			if (brush_scale_handle.init) {
+				brush_scale_handle.value = context_raw.brush_scale;
+			}
 			context_raw.brush_scale = zui_slider(brush_scale_handle, tr("UV Scale"), 0.01, 5.0, true);
 			if (brush_scale_handle.changed) {
 				if (context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT) {
@@ -373,11 +416,18 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 		}
 
 		if (context_raw.tool == workspace_tool_t.BRUSH || context_raw.tool == workspace_tool_t.ERASER || context_raw.tool == workspace_tool_t.CLONE || decal_mask) {
-			context_raw.brush_hardness = zui_slider(zui_handle(__ID__, { value: context_raw.brush_hardness }), tr("Hardness"), 0.0, 1.0, true);
+			let h: zui_handle_t = zui_handle(__ID__);
+			if (h.init) {
+				h.value = context_raw.brush_hardness;
+			}
+			context_raw.brush_hardness = zui_slider(h, tr("Hardness"), 0.0, 1.0, true);
 		}
 
 		if (context_raw.tool != workspace_tool_t.ERASER) {
-			let brush_blending_handle: zui_handle_t = zui_handle(__ID__, { value: context_raw.brush_blending });
+			let brush_blending_handle: zui_handle_t = zui_handle(__ID__);
+			if (brush_blending_handle.init) {
+				brush_blending_handle.value = context_raw.brush_blending;
+			}
 			context_raw.brush_blending = zui_combo(brush_blending_handle, [
 				tr("Mix"),
 				tr("Darken"),
@@ -454,15 +504,27 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 			}
 			ui._w = math_floor((touch_header ? 54 : 60) * sc);
 
-			let xray_handle: zui_handle_t = zui_handle(__ID__, { selected: context_raw.xray });
+			let xray_handle: zui_handle_t = zui_handle(__ID__);
+			if (xray_handle.init) {
+				xray_handle.selected = context_raw.xray;
+			}
 			context_raw.xray = zui_check(xray_handle, tr("X-Ray"));
 			if (xray_handle.changed) {
 				make_material_parse_paint_material();
 			}
 
-			let sym_x_handle: zui_handle_t = zui_handle(__ID__, { selected: false });
-			let sym_y_handle: zui_handle_t = zui_handle(__ID__, { selected: false });
-			let sym_z_handle: zui_handle_t = zui_handle(__ID__, { selected: false });
+			let sym_x_handle: zui_handle_t = zui_handle(__ID__);
+			if (sym_x_handle.init) {
+				sym_x_handle.selected = false;
+			}
+			let sym_y_handle: zui_handle_t = zui_handle(__ID__);
+			if (sym_y_handle.init) {
+				sym_y_handle.selected = false;
+			}
+			let sym_z_handle: zui_handle_t = zui_handle(__ID__);
+			if (sym_z_handle.init) {
+				sym_z_handle.selected = false;
+			}
 
 			if (config_raw.layout[layout_size_t.HEADER] == 1) {
 				if (config_raw.touch_ui) {
@@ -502,7 +564,10 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 		///if arm_physics
 		if (context_raw.tool == workspace_tool_t.PARTICLE) {
 			ui._x += 10 * zui_SCALE(ui);
-			let phys_handle: zui_handle_t = zui_handle(__ID__, { selected: false });
+			let phys_handle: zui_handle_t = zui_handle(__ID__);
+			if (phys_handle.init) {
+				phys_handle.selected = false;
+			}
 			context_raw.particle_physics = zui_check(phys_handle, tr("Physics"));
 			if (phys_handle.changed) {
 				util_particle_init_physics();

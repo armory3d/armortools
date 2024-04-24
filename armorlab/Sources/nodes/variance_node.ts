@@ -106,7 +106,7 @@ let variance_node_def: zui_node_t = {
 			name: _tr("Strength"),
 			type: "VALUE",
 			color: 0xffa1a1a1,
-			default_value: 0.5,
+			default_value: f32_array_create_x(0.5),
 			min: 0.0,
 			max: 1.0,
 			precision: 100,

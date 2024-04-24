@@ -66,7 +66,11 @@ function tab_objects_draw_list(ui: zui_t, list_handle: zui_handle_t, current_obj
 
 	if (current_object.children.length > 0) {
 		zui_row([1 / 13, 12 / 13]);
-		b = zui_panel(zui_nest(list_handle, tab_objects_line_counter, {selected: true}), "", true, false, false);
+		let h: zui_handle_t = zui_nest(list_handle, tab_objects_line_counter);
+		if (h.init) {
+			h.selected = true;
+		}
+		b = zui_panel(h, "", true, false, false);
 		zui_text(current_object.name);
 	}
 	else {
@@ -120,7 +124,12 @@ function tab_objects_draw(htab: zui_handle_t) {
 		}
 		zui_end_sticky();
 
-		if (zui_panel(zui_handle(__ID__, {selected: true}), "Outliner")) {
+		let outliner_handle: zui_handle_t = zui_handle(__ID__);
+		if (outliner_handle.init) {
+			outliner_handle.selected = true;
+		}
+
+		if (zui_panel(outliner_handle, "Outliner")) {
 			// ui.indent();
 			ui._y -= zui_ELEMENT_OFFSET(ui);
 
@@ -134,7 +143,12 @@ function tab_objects_draw(htab: zui_handle_t) {
 			// ui.unindent();
 		}
 
-		if (zui_panel(zui_handle(__ID__, {selected: true}), "Properties")) {
+		let properties_handle: zui_handle_t = zui_handle(__ID__);
+		if (properties_handle.init) {
+			properties_handle.selected = true;
+		}
+
+		if (zui_panel(properties_handle, "Properties")) {
 			// ui.indent();
 
 			if (context_raw.selected_object != null) {
@@ -263,7 +277,13 @@ function tab_objects_draw(htab: zui_handle_t) {
 
 				if (context_raw.selected_object.name == "Scene") {
 					let p = scene_world;
-					p.strength = zui_slider(zui_handle(__ID__, {value: p.strength}), "Environment", 0.0, 5.0, true);
+
+					let p_handle: zui_handle_t = zui_handle(__ID__);
+					if (p_handle.init) {
+						p_handle.value = p.strength;
+					}
+
+					p.strength = zui_slider(p_handle, "Environment", 0.0, 5.0, true);
 				}
 				else if (context_raw.selected_object.ext_type == "light_object_t") {
 					let light = context_raw.selected_object.ext;

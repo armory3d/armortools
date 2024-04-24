@@ -125,7 +125,7 @@ function import_folder_run(path: string) {
 
 function import_folder_place_image_node(nodes: zui_nodes_t, canvas: zui_node_canvas_t, asset: string, ny: i32, to_id: i32, to_socket: i32) {
 	let n: zui_node_t = nodes_material_create_node("TEX_IMAGE");
-	n.buttons[0].default_value = base_get_asset_index(asset);
+	n.buttons[0].default_value = f32_array_create_x(base_get_asset_index(asset));
 	n.x = 72;
 	n.y = ny;
 	let l: zui_node_link_t = { id: zui_get_link_id(canvas.links), from_id: n.id, from_socket: 0, to_id: to_id, to_socket: to_socket };

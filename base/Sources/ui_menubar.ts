@@ -1,7 +1,7 @@
 
 let ui_menubar_default_w: i32 = 330;
-let ui_menubar_workspace_handle: zui_handle_t = zui_handle_create({ layout: zui_layout_t.HORIZONTAL });
-let ui_menubar_menu_handle: zui_handle_t = zui_handle_create({ layout: zui_layout_t.HORIZONTAL });
+let ui_menubar_workspace_handle: zui_handle_t = zui_handle_create();
+let ui_menubar_menu_handle: zui_handle_t = zui_handle_create();
 let ui_menubar_w: i32 = ui_menubar_default_w;
 
 ///if is_lab
@@ -10,6 +10,8 @@ let _ui_menubar_plane: mesh_object_t = null;
 ///end
 
 function ui_menubar_init() {
+	ui_menubar_workspace_handle.layout = zui_layout_t.HORIZONTAL;
+	ui_menubar_menu_handle.layout = zui_layout_t.HORIZONTAL;
 }
 
 function ui_menubar_render_ui() {

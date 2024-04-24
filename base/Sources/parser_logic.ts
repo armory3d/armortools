@@ -111,18 +111,17 @@ function parser_logic_build_node(node: zui_node_t): string {
 	map_set(parser_logic_raw_map, v, node);
 
 	// Expose button values in node
-	for (let i: i32 = 0; i < node.buttons.length; ++i) {
-		let b: zui_node_button_t = node.buttons[i];
-		if (b.type == "ENUM") {
-			// let array_data: bool = is_array(b.data);
-			let array_data: bool = b.data.length > 1;
-			let texts: string[] = array_data ? b.data : zui_enum_texts_js(node.type);
-			v[b.name] = texts[b.default_value];
-		}
-		else {
-			v[b.name] = b.default_value;
-		}
-	}
+	// for (let i: i32 = 0; i < node.buttons.length; ++i) {
+	// 	let b: zui_node_button_t = node.buttons[i];
+	// 	if (b.type == "ENUM") {
+	// 		let array_data: bool = b.data.length > 1;
+	// 		let texts: string[] = array_data ? b.data : zui_enum_texts_js(node.type);
+	// 		v[b.name] = texts[b.default_value];
+	// 	}
+	// 	else {
+	// 		v[b.name] = b.default_value;
+	// 	}
+	// }
 
 	// Create inputs
 	let inp_node: logic_node_t = null;
@@ -193,19 +192,19 @@ function parser_logic_build_default_node(inp: zui_node_socket_t): logic_node_t {
 
 	if (inp.type == "VECTOR") {
 		if (inp.default_value == null) {
-			inp.default_value = [0, 0, 0]; // TODO
+			inp.default_value = f32_array_create_xyz(0, 0, 0);
 		}
 		v = parser_logic_create_node_instance("vector_node", inp.default_value);
 	}
 	else if (inp.type == "RGBA") {
 		if (inp.default_value == null) {
-			inp.default_value = [0, 0, 0, 0]; // TODO
+			inp.default_value = f32_array_create_xyzw(0, 0, 0, 0);
 		}
 		v = parser_logic_create_node_instance("color_node", inp.default_value);
 	}
 	else if (inp.type == "RGB") {
 		if (inp.default_value == null) {
-			inp.default_value = [0, 0, 0, 0]; // TODO
+			inp.default_value = f32_array_create_xyzw(0, 0, 0, 0);
 		}
 		v = parser_logic_create_node_instance("color_node", inp.default_value);
 	}

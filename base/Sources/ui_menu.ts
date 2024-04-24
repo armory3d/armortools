@@ -245,7 +245,10 @@ function ui_menu_render() {
 
 			///if (is_paint || is_sculpt)
 			ui_menu_fill(ui);
-			let split_view_handle: zui_handle_t = zui_handle(__ID__, { selected: context_raw.split_view });
+			let split_view_handle = zui_handle(__ID__);
+			if (split_view_handle.init) {
+				split_view_handle.selected = context_raw.split_view;
+			}
 			context_raw.split_view = zui_check(split_view_handle, " " + tr("Split View"));
 			if (split_view_handle.changed) {
 				base_resize();
@@ -254,7 +257,10 @@ function ui_menu_render() {
 
 			///if is_lab
 			ui_menu_fill(ui);
-			let brush_scale_handle: zui_handle_t = zui_handle(__ID__, { value: context_raw.brush_scale });
+			let brush_scale_handle: zui_handle_t = zui_handle(__ID__);
+			if (brush_scale_handle.init) {
+				brush_scale_handle.value = context_raw.brush_scale;
+			}
 			ui_menu_align(ui);
 			context_raw.brush_scale = zui_slider(brush_scale_handle, tr("UV Scale"), 0.01, 5.0, true);
 			if (brush_scale_handle.changed) {
@@ -267,14 +273,20 @@ function ui_menu_render() {
 			///end
 
 			ui_menu_fill(ui);
-			let cull_handle: zui_handle_t = zui_handle(__ID__, { selected: context_raw.cull_backfaces });
+			let cull_handle: zui_handle_t = zui_handle(__ID__);
+			if (cull_handle.init) {
+				cull_handle.selected = context_raw.cull_backfaces;
+			}
 			context_raw.cull_backfaces = zui_check(cull_handle, " " + tr("Cull Backfaces"));
 			if (cull_handle.changed) {
 				make_material_parse_mesh_material();
 			}
 
 			ui_menu_fill(ui);
-			let filter_handle: zui_handle_t = zui_handle(__ID__, { selected: context_raw.texture_filter });
+			let filter_handle: zui_handle_t = zui_handle(__ID__);
+			if (filter_handle.init) {
+				filter_handle.selected = context_raw.texture_filter;
+			}
 			context_raw.texture_filter = zui_check(filter_handle, " " + tr("Filter Textures"));
 			if (filter_handle.changed) {
 				make_material_parse_paint_material();
@@ -302,7 +314,10 @@ function ui_menu_render() {
 			///end
 
 			ui_menu_fill(ui);
-			let compass_handle: zui_handle_t = zui_handle(__ID__, { selected: context_raw.show_compass });
+			let compass_handle: zui_handle_t = zui_handle(__ID__);
+			if (compass_handle.init) {
+				compass_handle.selected = context_raw.show_compass;
+			}
 			context_raw.show_compass = zui_check(compass_handle, " " + tr("Compass"));
 			if (compass_handle.changed) {
 				context_raw.ddirty = 2;
@@ -430,7 +445,10 @@ function ui_menu_render() {
 
 			ui_menu_fill(ui);
 			let cam: camera_object_t = scene_camera;
-			context_raw.fov_handle = zui_handle(__ID__, { value: math_floor(cam.data.fov * 100) / 100 });
+			context_raw.fov_handle = zui_handle(__ID__);
+			if (context_raw.fov_handle.init) {
+				context_raw.fov_handle.value = math_floor(cam.data.fov * 100) / 100;
+			}
 			ui_menu_align(ui);
 			cam.data.fov = zui_slider(context_raw.fov_handle, tr("FoV"), 0.3, 1.4, true);
 			if (context_raw.fov_handle.changed) {
@@ -570,7 +588,11 @@ function ui_menu_render() {
 						zui_image(img);
 						zui_end_element();
 
-						zui_text_area(zui_handle(__ID__, { text: _ui_menu_render_msg }), zui_align_t.LEFT, false);
+						let h: zui_handle_t = zui_handle(__ID__);
+						if (h.init) {
+							h.text = _ui_menu_render_msg;
+						}
+						zui_text_area(h, zui_align_t.LEFT, false);
 
 						zui_row([1 / 3, 1 / 3, 1 / 3]);
 

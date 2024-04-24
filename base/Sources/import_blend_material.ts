@@ -127,27 +127,27 @@ function import_blend_material_run(path: string) {
 					import_texture_run(file);
 					let ar: string[] = string_split(file, path_sep);
 					let filename: string = ar[ar.length - 1];
-					n.buttons[0].default_value = base_get_asset_index(filename);
+					n.buttons[0].default_value = f32_array_create_x(base_get_asset_index(filename));
 				}
 				else if (search == "valtorgb") {
-					let ramp: any = bl_handle_get(node, "storage", 0, "ColorBand");
-					n.buttons[0].data = bl_handle_get(ramp, "ipotype") == 0 ? 0 : 1; // Linear / Constant
-					let elems: f32[][] = n.buttons[0].default_value;
-					for (let i: i32 = 0; i < bl_handle_get(ramp, "tot"); ++i) {
-						if (i >= elems.length) {
-							array_push(elems, [1.0, 1.0, 1.0, 1.0, 0.0]);
-						}
-						let cbdata: any = bl_handle_get(ramp, "data", i, "CBData");
-						elems[i][0] = math_floor(bl_handle_get(cbdata, "r") * 100) / 100;
-						elems[i][1] = math_floor(bl_handle_get(cbdata, "g") * 100) / 100;
-						elems[i][2] = math_floor(bl_handle_get(cbdata, "b") * 100) / 100;
-						elems[i][3] = math_floor(bl_handle_get(cbdata, "a") * 100) / 100;
-						elems[i][4] = math_floor(bl_handle_get(cbdata, "pos") * 100) / 100;
-					}
+					// let ramp: any = bl_handle_get(node, "storage", 0, "ColorBand");
+					// n.buttons[0].data = bl_handle_get(ramp, "ipotype") == 0 ? 0 : 1; // Linear / Constant
+					// let elems: f32[][] = n.buttons[0].default_value;
+					// for (let i: i32 = 0; i < bl_handle_get(ramp, "tot"); ++i) {
+					// 	if (i >= elems.length) {
+					// 		array_push(elems, [1.0, 1.0, 1.0, 1.0, 0.0]);
+					// 	}
+					// 	let cbdata: any = bl_handle_get(ramp, "data", i, "CBData");
+					// 	elems[i][0] = math_floor(bl_handle_get(cbdata, "r") * 100) / 100;
+					// 	elems[i][1] = math_floor(bl_handle_get(cbdata, "g") * 100) / 100;
+					// 	elems[i][2] = math_floor(bl_handle_get(cbdata, "b") * 100) / 100;
+					// 	elems[i][3] = math_floor(bl_handle_get(cbdata, "a") * 100) / 100;
+					// 	elems[i][4] = math_floor(bl_handle_get(cbdata, "pos") * 100) / 100;
+					// }
 				}
 				else if (search == "mixrgb" || search == "math") {
-					n.buttons[0].default_value = bl_handle_get(node, "custom1");
-					n.buttons[1].default_value = bl_handle_get(node, "custom2") & 2;
+					n.buttons[0].default_value = f32_array_create_x(bl_handle_get(node, "custom1"));
+					n.buttons[1].default_value = f32_array_create_x(bl_handle_get(node, "custom2") & 2);
 				}
 				else if (search == "mapping") {
 					let storage: any = bl_handle_get(node, "storage", 0, "TexMapping");

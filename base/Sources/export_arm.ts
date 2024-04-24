@@ -228,8 +228,8 @@ function export_arm_texture_node_name(): string {
 
 function export_arm_export_node(n: zui_node_t, assets: asset_t[] = null) {
 	if (n.type == export_arm_texture_node_name()) {
-		let index: i32 = n.buttons[0].default_value;
-		n.buttons[0].data = base_enum_texts(n.type)[index];
+		let index: i32 = n.buttons[0].default_value[0];
+		n.buttons[0].data = u8_array_create_from_string(base_enum_texts(n.type)[index]);
 
 		if (assets != null) {
 			let asset: asset_t = project_assets[index];
