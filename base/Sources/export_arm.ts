@@ -291,16 +291,20 @@ function export_arm_run_material(path: string) {
 		packed_assets = export_arm_get_packed_assets(path, texture_files);
 	}
 
+	let micons: buffer_t[] = null;
+	if (!is_cloud) {
+		///if (krom_metal || krom_vulkan)
+		micons = [lz4_encode(export_arm_bgra_swap(image_get_pixels(m.image)))];
+		///else
+		micons = [lz4_encode(image_get_pixels(m.image))];
+		///end
+	}
+
 	let raw: project_format_t = {
 		version: manifest_version,
 		material_nodes: mnodes,
 		material_groups: mgroups,
-		material_icons: is_cloud ? null :
-			///if (krom_metal || krom_vulkan)
-			[lz4_encode(export_arm_bgra_swap(image_get_pixels(m.image)))],
-			///else
-			[lz4_encode(image_get_pixels(m.image))],
-			///end
+		material_icons: micons,
 		assets: texture_files,
 		packed_assets: packed_assets
 	};
@@ -358,15 +362,19 @@ function export_arm_run_brush(path: string) {
 		packed_assets = export_arm_get_packed_assets(path, texture_files);
 	}
 
+	let bicons: buffer_t[] = null;
+	if (!is_cloud) {
+		///if (krom_metal || krom_vulkan)
+		bicons = [lz4_encode(export_arm_bgra_swap(image_get_pixels(b.image)))];
+		///else
+		bicons = [lz4_encode(image_get_pixels(b.image))];
+		///end
+	}
+
 	let raw: project_format_t = {
 		version: manifest_version,
 		brush_nodes: bnodes,
-		brush_icons: is_cloud ? null :
-		///if (krom_metal || krom_vulkan)
-		[lz4_encode(export_arm_bgra_swap(image_get_pixels(b.image)))],
-		///else
-		[lz4_encode(image_get_pixels(b.image))],
-		///end
+		brush_icons: bicons,
 		assets: texture_files,
 		packed_assets: packed_assets
 	};

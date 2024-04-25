@@ -1,16 +1,35 @@
 
+function make_paint_color_attachments(): string[] {
+	if (context_raw.tool == workspace_tool_t.PICKER) {
+		return ["RGBA32", "RGBA32", "RGBA32", "RGBA32"];
+	}
+	return ["RGBA32", "RGBA32", "RGBA32", "R8"];
+}
+
 function make_paint_run(data: material_t, matcon: material_context_t): node_shader_context_t {
-	let con_paint = node_shader_context_create(data, {
+	let props: shader_context_t = {
 		name: "paint",
 		depth_write: false,
 		compare_mode: "always", // TODO: align texcoords winding order
 		// cull_mode: "counter_clockwise",
 		cull_mode: "none",
-		vertex_elements: [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}],
-		color_attachments:
-			context_raw.tool == workspace_tool_t.PICKER ? ["RGBA32", "RGBA32", "RGBA32", "RGBA32"] :
-				["RGBA32", "RGBA32", "RGBA32", "R8"]
-	});
+		vertex_elements: [
+			{
+				name: "pos",
+				data: "short4norm"
+			},
+			{
+				name: "nor",
+				data: "short2norm"
+			},
+			{
+				name: "tex",
+				data: "short2norm"
+			}
+		],
+		color_attachments: make_paint_color_attachments();
+	};
+	let con_paint = node_shader_context_create(data, props);
 
 	con_paint.data.color_writes_red = [true, true, true, true];
 	con_paint.data.color_writes_green = [true, true, true, true];

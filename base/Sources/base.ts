@@ -238,8 +238,15 @@ function base_init() {
 	base_color_wheel_gradient = image_color_wheel_gradient;
 	zui_set_enum_texts(base_enum_texts);
 	zui_tr = tr;
-	base_ui_box = zui_create({ theme: base_theme, font: f, scale_factor: config_raw.window_scale, color_wheel: base_color_wheel, black_white_gradient: base_color_wheel_gradient });
-	base_ui_menu = zui_create({ theme: base_theme, font: f, scale_factor: config_raw.window_scale, color_wheel: base_color_wheel, black_white_gradient: base_color_wheel_gradient });
+	let ops: zui_options_t = {
+		theme: base_theme,
+		font: f,
+		scale_factor: config_raw.window_scale,
+		color_wheel: base_color_wheel,
+		black_white_gradient: base_color_wheel_gradient
+	}
+	base_ui_box = zui_create(ops);
+	base_ui_menu = zui_create(ops);
 	base_default_element_h = base_ui_menu.ops.theme.ELEMENT_H;
 
 	// Init plugins
@@ -732,10 +739,12 @@ function base_get_drag_image(): image_t {
 	if (base_drag_swatch != null) {
 		base_drag_tint = base_drag_swatch.base;
 		base_drag_size = 26;
-		return tab_swatches_empty_get()
+		return tab_swatches_empty_get();
 	}
 	if (base_drag_file != null) {
-		if (base_drag_file_icon != null) return base_drag_file_icon;
+		if (base_drag_file_icon != null) {
+			return base_drag_file_icon;
+		}
 		let icons: image_t = resource_get("icons.k");
 		base_drag_rect = string_index_of(base_drag_file, ".") > 0 ? resource_tile50(icons, 3, 1) : resource_tile50(icons, 2, 1);
 		base_drag_tint = ui_base_ui.ops.theme.HIGHLIGHT_COL;
@@ -859,8 +868,12 @@ function base_render() {
 
 	let using_menu: bool = ui_menu_show && mouse_y > ui_header_h;
 	base_ui_enabled = !ui_box_show && !using_menu && !base_is_combo_selected();
-	if (ui_box_show) ui_box_render();
-	if (ui_menu_show) ui_menu_render();
+	if (ui_box_show) {
+		ui_box_render();
+	}
+	if (ui_menu_show) {
+		ui_menu_render();
+	}
 
 	// Save last pos for continuos paint
 	context_raw.last_paint_vec_x = context_raw.paint_vec.x;
@@ -979,30 +992,30 @@ function base_init_layout() {
 	let show2d: bool = ui_nodes_show || ui_view2d_show;
 
 	let raw: config_t = config_raw;
-	raw.layout = [
-		///if (is_paint || is_sculpt)
-		math_floor(ui_base_default_sidebar_w * raw.window_scale), // LayoutSidebarW
-		math_floor(sys_height() / 2), // LayoutSidebarH0
-		math_floor(sys_height() / 2), // LayoutSidebarH1
-		///end
+	raw.layout = [];
 
-		///if krom_ios
-		show2d ? math_floor((app_w() + raw.layout[layout_size_t.NODES_W]) * 0.473) : math_floor(app_w() * 0.473), // LayoutNodesW
-		///elseif krom_android
-		show2d ? math_floor((app_w() + raw.layout[layout_size_t.NODES_W]) * 0.473) : math_floor(app_w() * 0.473),
-		///else
-		show2d ? math_floor((app_w() + raw.layout[layout_size_t.NODES_W]) * 0.515) : math_floor(app_w() * 0.515), // Align with ui header controls
-		///end
+	///if (is_paint || is_sculpt)
+	array_push(raw.layout, math_floor(ui_base_default_sidebar_w * raw.window_scale)); // LayoutSidebarW
+	array_push(raw.layout, math_floor(sys_height() / 2)); // LayoutSidebarH0
+	array_push(raw.layout, math_floor(sys_height() / 2)); // LayoutSidebarH1
+	///end
 
-		math_floor(app_h() / 2), // LayoutNodesH
-		math_floor(ui_status_default_status_h * raw.window_scale), // LayoutStatusH
+	///if krom_ios
+	array_push(raw.layout, show2d ? math_floor((app_w() + raw.layout[layout_size_t.NODES_W]) * 0.473) : math_floor(app_w() * 0.473)); // LayoutNodesW
+	///elseif krom_android
+	array_push(raw.layout, show2d ? math_floor((app_w() + raw.layout[layout_size_t.NODES_W]) * 0.473) : math_floor(app_w() * 0.473));
+	///else
+	array_push(raw.layout, show2d ? math_floor((app_w() + raw.layout[layout_size_t.NODES_W]) * 0.515) : math_floor(app_w() * 0.515)); // Align with ui header controls
+	///end
 
-		///if (krom_android || krom_ios)
-		0, // LayoutHeader
-		///else
-		1,
-		///end
-	];
+	array_push(raw.layout, math_floor(app_h() / 2)); // LayoutNodesH
+	array_push(raw.layout, math_floor(ui_status_default_status_h * raw.window_scale)); // LayoutStatusH
+
+	///if (krom_android || krom_ios)
+	array_push(raw.layout, 0); // LayoutHeader
+	///else
+	array_push(raw.layout, 1);
+	///end
 
 	raw.layout_tabs = [
 		///if (is_paint || is_sculpt)
@@ -1171,7 +1184,9 @@ function base_resize_layers() {
 		map_get(rts, "texpaint_blur").height = size_y;
 		map_get(rts, "texpaint_blur")._image = image_create_render_target(size_x, size_y);
 	}
-	if (render_path_paint_live_layer != null) slot_layer_resize_and_set_bits(render_path_paint_live_layer);
+	if (render_path_paint_live_layer != null) {
+		slot_layer_resize_and_set_bits(render_path_paint_live_layer);
+	}
 	///if (krom_direct3d12 || krom_vulkan || krom_metal)
 	render_path_raytrace_ready = false; // Rebuild baketex
 	///end

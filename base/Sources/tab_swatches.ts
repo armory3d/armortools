@@ -27,10 +27,12 @@ function tab_swatches_draw(htab: zui_handle_t) {
 
 		zui_begin_sticky();
 		if (config_raw.touch_ui) {
-			zui_row([1 / 5, 1 / 5, 1 / 5, 1 / 5, 1 / 5]);
+			let row: f32[] = [1 / 5, 1 / 5, 1 / 5, 1 / 5, 1 / 5];
+			zui_row(row);
 		}
 		else {
-			zui_row([1 / 14, 1 / 14, 1 / 14, 1 / 14, 1 / 14]);
+			let row: f32[] = [1 / 14, 1 / 14, 1 / 14, 1 / 14, 1 / 14];
+			zui_row(row);
 		}
 
 		if (zui_button(tr("New"))) {

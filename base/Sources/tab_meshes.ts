@@ -10,19 +10,23 @@ function tab_meshes_draw(htab: zui_handle_t) {
 
 		///if (is_paint || is_sculpt)
 		if (config_raw.touch_ui) {
-			zui_row([1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6]);
+			let row: f32[] = [1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6];
+			zui_row(row);
 		}
 		else {
-			zui_row([1 / 14, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 14]);
+			let row: f32[] = [1 / 14, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 14];
+			zui_row(row);
 		}
 		///end
 
 		///if is_lab
 		if (config_raw.touch_ui) {
-			zui_row([1 / 7, 1 / 7, 1 / 7, 1 / 7, 1 / 7, 1 / 7, 1 / 7]);
+			let row: f32[] = [1 / 7, 1 / 7, 1 / 7, 1 / 7, 1 / 7, 1 / 7, 1 / 7];
+			zui_row(row);
 		}
 		else {
-			zui_row([1 / 14, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 14]);
+			let row: f32[] = [1 / 14, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 14];
+			zui_row(row);
 		}
 		///end
 

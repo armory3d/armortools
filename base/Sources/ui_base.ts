@@ -176,7 +176,14 @@ function ui_base_init() {
 	history_reset();
 
 	let scale: f32 = config_raw.window_scale;
-	ui_base_ui = zui_create({ theme: base_theme, font: base_font, scale_factor: scale, color_wheel: base_color_wheel, black_white_gradient: base_color_wheel_gradient });
+	let ops: zui_options_t = {
+		theme: base_theme,
+		font: base_font,
+		scale_factor: scale,
+		color_wheel: base_color_wheel,
+		black_white_gradient: base_color_wheel_gradient
+	};
+	ui_base_ui = zui_create(ops);
 	zui_set_on_border_hover(ui_base_on_border_hover);
 	zui_set_on_text_hover(ui_base_on_text_hover);
 	zui_set_on_deselect_text(ui_base_on_deselect_text);

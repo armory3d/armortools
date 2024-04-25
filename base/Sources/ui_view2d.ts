@@ -45,7 +45,14 @@ function ui_view2d_init() {
 	///end
 
 	let scale: f32 = config_raw.window_scale;
-	ui_view2d_ui = zui_create({ theme: base_theme, font: base_font, color_wheel: base_color_wheel, black_white_gradient: base_color_wheel_gradient, scale_factor: scale });
+	let ops: zui_options_t = {
+		theme: base_theme,
+		font: base_font,
+		color_wheel: base_color_wheel,
+		black_white_gradient: base_color_wheel_gradient,
+		scale_factor: scale
+	};
+	ui_view2d_ui = zui_create(ops);
 	ui_view2d_ui.scroll_enabled = false;
 }
 
@@ -355,10 +362,8 @@ function ui_view2d_render() {
 			if (h_layer_mode.init) {
 				h_layer_mode.position = ui_view2d_layer_mode;
 			}
-			ui_view2d_layer_mode = zui_combo(h_layer_mode, [
-				tr("Visible"),
-				tr("Selected"),
-			], tr("Layers"));
+			let layer_mode_combo: string[] = [tr("Visible"), tr("Selected")];
+			ui_view2d_layer_mode = zui_combo(h_layer_mode, layer_mode_combo, tr("Layers"));
 			ui_view2d_ui._x += ew + 3;
 			ui_view2d_ui._y = 2 + start_y;
 
@@ -367,7 +372,7 @@ function ui_view2d_render() {
 				if (h_tex_type.init) {
 					h_tex_type.position = ui_view2d_tex_type;
 				}
-				ui_view2d_tex_type = zui_combo(h_tex_type, [
+				let tex_type_combo: string[] = [
 					tr("Base Color"),
 					tr("Normal Map"),
 					tr("Occlusion"),
@@ -375,7 +380,8 @@ function ui_view2d_render() {
 					tr("Metallic"),
 					tr("Opacity"),
 					tr("Height"),
-				], tr("Texture"));
+				];
+				ui_view2d_tex_type = zui_combo(h_tex_type, tex_type_combo, tr("Texture"));
 				ui_view2d_ui._x += ew + 3;
 				ui_view2d_ui._y = 2 + start_y;
 			}

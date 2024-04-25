@@ -248,13 +248,13 @@ function slot_layer_swap(raw: slot_layer_t, other: slot_layer_t) {
 	///end
 }
 
-function slot_layer_clear(raw: slot_layer_t, baseColor = 0x00000000, baseImage: image_t = null, occlusion = 1.0, roughness = base_default_rough, metallic = 0.0) {
+function slot_layer_clear(raw: slot_layer_t, base_color: i32 = 0x00000000, base_image: image_t = null, occlusion: f32 = 1.0, roughness: f32 = base_default_rough, metallic: f32 = 0.0) {
 	g4_begin(raw.texpaint);
-	g4_clear(baseColor); // Base
+	g4_clear(base_color); // Base
 	g4_end();
-	if (baseImage != null) {
+	if (base_image != null) {
 		g2_begin(raw.texpaint);
-		g2_draw_scaled_image(baseImage, 0, 0, raw.texpaint.width, raw.texpaint.height);
+		g2_draw_scaled_image(base_image, 0, 0, raw.texpaint.width, raw.texpaint.height);
 		g2_end();
 	}
 

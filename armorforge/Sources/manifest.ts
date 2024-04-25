@@ -1,6 +1,6 @@
 
-let manifest_title = "ArmorForge";
-let manifest_version = "0.1";
-let manifest_url = "https://armorforge.org";
-let manifest_url_android = "";
-let manifest_url_ios = "";
+let manifest_title: string = "ArmorForge";
+let manifest_version: string = "0.1";
+let manifest_url: string = "https://armorforge.org";
+let manifest_url_android: string = "";
+let manifest_url_ios: string = "";

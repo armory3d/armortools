@@ -2,15 +2,29 @@
 let make_mesh_layer_pass_count: i32 = 1;
 
 function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_context_t {
-	let con_mesh = node_shader_context_create(data, {
+	let props: shader_context_t = {
 		name: "mesh",
 		depth_write: layer_pass == 0 ? true : false,
 		compare_mode: layer_pass == 0 ? "less" : "equal",
 		cull_mode: (context_raw.cull_backfaces || layer_pass > 0) ? "clockwise" : "none",
-		vertex_elements: [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}],
+		vertex_elements: [
+			{
+				name: "pos",
+				data: "short4norm"
+			},
+			{
+				name: "nor",
+				data: "short2norm"
+			},
+			{
+				name: "tex",
+				data: "short2norm"
+			}
+		],
 		color_attachments: ["RGBA64", "RGBA64", "RGBA64"],
 		depth_attachment: "DEPTH32"
-	});
+	};
+	let con_mesh = node_shader_context_create(data, props);
 
 	let vert = node_shader_context_make_vert(con_mesh);
 	let frag = node_shader_context_make_frag(con_mesh);
@@ -23,7 +37,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	node_shader_add_uniform(vert, "mat4 prevWVP", "_prev_world_view_proj_matrix");
 	vert.wposition = true;
 
-	let texture_count = 0;
+	let texture_count: i32 = 0;
 	let displace_strength = make_material_get_displace_strength();
 	if (make_material_height_used && displace_strength > 0.0) {
 		vert.n = true;

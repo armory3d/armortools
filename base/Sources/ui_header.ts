@@ -176,7 +176,8 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 			h_select_mat.selected = context_raw.picker_select_material;
 		}
 		context_raw.picker_select_material = zui_check(h_select_mat, tr("Select Material"));
-		zui_combo(context_raw.picker_mask_handle, [tr("None"), tr("Material")], tr("Mask"), true);
+		let picker_mask_combo: string[] = [tr("None"), tr("Material")];
+		zui_combo(context_raw.picker_mask_handle, picker_mask_combo, tr("Mask"), true);
 		if (context_raw.picker_mask_handle.changed) {
 			make_material_parse_paint_material();
 		}
@@ -260,14 +261,16 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 			if (bake_up_axis_handle.init) {
 				bake_up_axis_handle.position = context_raw.bake_up_axis;
 			}
-			context_raw.bake_up_axis = zui_combo(bake_up_axis_handle, [tr("Z"), tr("Y")], tr("Up Axis"), true);
+			let bake_up_axis_combo: string[] = [tr("Z"), tr("Y")];
+			context_raw.bake_up_axis = zui_combo(bake_up_axis_handle, bake_up_axis_combo, tr("Up Axis"), true);
 		}
 		if (context_raw.bake_type == bake_type_t.AO || context_raw.bake_type == bake_type_t.CURVATURE) {
 			let bake_axis_handle: zui_handle_t = zui_handle(__ID__);
 			if (bake_axis_handle.init) {
 				bake_axis_handle.position = context_raw.bake_axis;
 			}
-			context_raw.bake_axis = zui_combo(bake_axis_handle, [tr("XYZ"), tr("X"), tr("Y"), tr("Z"), tr("-X"), tr("-Y"), tr("-Z")], tr("Axis"), true);
+			let bake_axis_combo: string[] = [tr("XYZ"), tr("X"), tr("Y"), tr("Z"), tr("-X"), tr("-Y"), tr("-Z")];
+			context_raw.bake_axis = zui_combo(bake_axis_handle, bake_axis_combo, tr("Axis"), true);
 		}
 		if (context_raw.bake_type == bake_type_t.AO) {
 			let strength_handle: zui_handle_t = zui_handle(__ID__);
@@ -428,7 +431,7 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 			if (brush_blending_handle.init) {
 				brush_blending_handle.value = context_raw.brush_blending;
 			}
-			context_raw.brush_blending = zui_combo(brush_blending_handle, [
+			let brush_blending_combo: string[] = [
 				tr("Mix"),
 				tr("Darken"),
 				tr("Multiply"),
@@ -447,7 +450,8 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 				tr("Saturation"),
 				tr("Color"),
 				tr("Value"),
-			], tr("Blending"));
+			];
+			context_raw.brush_blending = zui_combo(brush_blending_handle, brush_blending_combo, tr("Blending"));
 			if (brush_blending_handle.changed) {
 				make_material_parse_paint_material();
 			}
@@ -455,7 +459,8 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 
 		if (context_raw.tool == workspace_tool_t.BRUSH || context_raw.tool == workspace_tool_t.FILL) {
 			let paint_handle: zui_handle_t = zui_handle(__ID__);
-			context_raw.brush_paint = zui_combo(paint_handle, [tr("UV Map"), tr("Triplanar"), tr("Project")], tr("TexCoord"));
+			let texcoord_combo: string[] = [tr("UV Map"), tr("Triplanar"), tr("Project")];
+			context_raw.brush_paint = zui_combo(paint_handle, texcoord_combo, tr("TexCoord"));
 			if (paint_handle.changed) {
 				make_material_parse_paint_material();
 			}
@@ -481,7 +486,8 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 		}
 
 		if (context_raw.tool == workspace_tool_t.FILL) {
-			zui_combo(context_raw.fill_type_handle, [tr("Object"), tr("Face"), tr("Angle"), tr("UV Island")], tr("Fill Mode"));
+			let fill_mode_combo: string[] = [tr("Object"), tr("Face"), tr("Angle"), tr("UV Island")];
+			zui_combo(context_raw.fill_type_handle, fill_mode_combo, tr("Fill Mode"));
 			if (context_raw.fill_type_handle.changed) {
 				if (context_raw.fill_type_handle.position == fill_type_t.FACE) {
 					let current: image_t = _g2_current;

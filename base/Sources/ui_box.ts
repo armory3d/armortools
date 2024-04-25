@@ -86,13 +86,16 @@ function ui_box_render() {
 
 				///if (krom_windows || krom_linux || krom_darwin)
 				if (ui_box_copyable) {
-					zui_row([1 / 3, 1 / 3, 1 / 3]);
+					let row: f32[] = [1 / 3, 1 / 3, 1 / 3];
+					zui_row(row);
 				}
 				else {
-					zui_row([2 / 3, 1 / 3]);
+					let row: f32[] = [2 / 3, 1 / 3];
+					zui_row(row);
 				}
 				///else
-				zui_row([2 / 3, 1 / 3]);
+				let row: f32[] = [2 / 3, 1 / 3];
+				zui_row(row);
 				///end
 
 				zui_end_element();

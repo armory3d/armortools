@@ -9,23 +9,47 @@ function make_paint_is_raytraced_bake(): bool {
 	///end
 }
 
+function make_paint_color_attachments(): string[] {
+	if (context_raw.tool == workspace_tool_t.COLORID) {
+		return ["RGBA32"];
+	}
+	if (context_raw.tool == workspace_tool_t.PICKER && context_raw.pick_pos_nor_tex) {
+		return ["RGBA128", "RGBA128"];
+	}
+	if (context_raw.tool == workspace_tool_t.PICKER || context_raw.tool == workspace_tool_t.MATERIAL) {
+		return ["RGBA32", "RGBA32", "RGBA32", "RGBA32"];
+	}
+	if (context_raw.tool == workspace_tool_t.BAKE && make_paint_is_raytraced_bake()) {
+		return ["RGBA64", "RGBA64"];
+	}
+	return ["RGBA32", "RGBA32", "RGBA32", "R8"];
+}
+
 function make_paint_run(data: material_t, matcon: material_context_t): node_shader_context_t {
 	let context_id: string = "paint";
-
-	let con_paint: node_shader_context_t = node_shader_context_create(data, {
+	let props: shader_context_t = {
 		name: context_id,
 		depth_write: false,
 		compare_mode: "always", // TODO: align texcoords winding order
 		// cull_mode: "counter_clockwise",
 		cull_mode: "none",
-		vertex_elements: [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}],
-		color_attachments:
-			context_raw.tool == workspace_tool_t.COLORID ? ["RGBA32"] :
-			(context_raw.tool == workspace_tool_t.PICKER && context_raw.pick_pos_nor_tex) ? ["RGBA128", "RGBA128"] :
-			(context_raw.tool == workspace_tool_t.PICKER || context_raw.tool == workspace_tool_t.MATERIAL) ? ["RGBA32", "RGBA32", "RGBA32", "RGBA32"] :
-			(context_raw.tool == workspace_tool_t.BAKE && make_paint_is_raytraced_bake()) ? ["RGBA64", "RGBA64"] :
-				["RGBA32", "RGBA32", "RGBA32", "R8"]
-	});
+		vertex_elements: [
+			{
+				name: "pos",
+				data: "short4norm"
+			},
+			{
+				name: "nor",
+				data: "short2norm"
+			},
+			{
+				name: "tex",
+				data: "short2norm"
+			}
+		],
+		color_attachments: make_paint_color_attachments()
+	};
+	let con_paint: node_shader_context_t = node_shader_context_create(data, props);
 
 	con_paint.data.color_writes_red = [true, true, true, true];
 	con_paint.data.color_writes_green = [true, true, true, true];

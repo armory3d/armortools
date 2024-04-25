@@ -35,7 +35,8 @@ function tab_layers_draw_full(htab: zui_handle_t) {
 	let ui: zui_t = ui_base_ui;
 	if (zui_tab(htab, tr("Layers"))) {
 		zui_begin_sticky();
-		zui_row([1 / 4, 1 / 4, 1 / 2]);
+		let row: f32[] = [1 / 4, 1 / 4, 1 / 2];
+		zui_row(row);
 
 		tab_layers_button_new(tr("New"));
 		tab_layers_button_2d_view();
@@ -315,7 +316,8 @@ function tab_layers_draw_layer_slot(l: slot_layer_t, i: i32, mini: bool) {
 function tab_layers_draw_layer_slot_mini(l: slot_layer_t, i: i32) {
 	let ui = ui_base_ui;
 
-	zui_row([1, 1]);
+	let row: f32[] = [1, 1];
+	zui_row(row);
 	let uix: f32 = ui._x;
 	let uiy: f32 = ui._y;
 	let state: zui_state_t = tab_layers_draw_layer_icon(l, i, uix, uiy, true);
@@ -333,10 +335,12 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 
 	let has_panel: bool = slot_layer_is_group(l) || (slot_layer_is_layer(l) && slot_layer_get_masks(l, false) != null);
 	if (has_panel) {
-		zui_row([8 / 100, 16 / 100, 36 / 100, 30 / 100, 10 / 100]);
+		let row: f32[] = [8 / 100, 16 / 100, 36 / 100, 30 / 100, 10 / 100];
+		zui_row(row);
 	}
 	else {
-		zui_row([8 / 100, 16 / 100, 36 / 100, 30 / 100]);
+		let row: f32[] = [8 / 100, 16 / 100, 36 / 100, 30 / 100];
+		zui_row(row);
 	}
 
 	// Draw eye icon
@@ -464,7 +468,8 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	else {
 		ui._y -= zui_ELEMENT_OFFSET(ui);
 
-		zui_row([8 / 100, 16 / 100, 36 / 100, 30 / 100, 10 / 100]);
+		let row: f32[] = [8 / 100, 16 / 100, 36 / 100, 30 / 100, 10 / 100];
+		zui_row(row);
 		zui_end_element();
 		zui_end_element();
 		zui_end_element();
@@ -516,7 +521,7 @@ function tab_layers_combo_object(ui: zui_t, l: slot_layer_t, label: bool = false
 function tab_layers_combo_blending(ui: zui_t, l: slot_layer_t, label: bool = false): zui_handle_t {
 	let blending_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
 	blending_handle.position = l.blending;
-	zui_combo(blending_handle, [
+	let blending_combo: string[] = [
 		tr("Mix"),
 		tr("Darken"),
 		tr("Multiply"),
@@ -535,7 +540,8 @@ function tab_layers_combo_blending(ui: zui_t, l: slot_layer_t, label: bool = fal
 		tr("Saturation"),
 		tr("Color"),
 		tr("Value"),
-	], tr("Blending"), label);
+	];
+	zui_combo(blending_handle, blending_combo, tr("Blending"), label);
 	if (blending_handle.changed) {
 		context_set_layer(l);
 		history_layer_blending();

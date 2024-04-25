@@ -102,7 +102,8 @@ function project_new_box() {
 				project_mesh_list.unshift("rounded_cube");
 			}
 
-			zui_row([0.5, 0.5]);
+			let row: f32[] = [0.5, 0.5];
+			zui_row(row);
 			let h_project_type: zui_handle_t = zui_handle(__ID__);
 			if (h_project_type.init) {
 				h_project_type.position = context_raw.project_type;
@@ -113,10 +114,11 @@ function project_new_box() {
 			if (h_project_aspect_ratio.init) {
 				h_project_aspect_ratio.position = context_raw.project_aspect_ratio;
 			}
-			context_raw.project_aspect_ratio = zui_combo(h_project_aspect_ratio, ["1:1", "2:1", "1:2"], tr("Aspect Ratio"), true);
+			let project_aspect_ratio_combo: string[] = ["1:1", "2:1", "1:2"];
+			context_raw.project_aspect_ratio = zui_combo(h_project_aspect_ratio, project_aspect_ratio_combo, tr("Aspect Ratio"), true);
 
 			zui_end_element();
-			zui_row([0.5, 0.5]);
+			zui_row(row);
 			if (zui_button(tr("Cancel"))) {
 				ui_box_hide();
 			}
@@ -429,12 +431,8 @@ function project_import_mesh_box(path: string, replace_existing: bool = true, cl
 		if (zui_tab(zui_handle(__ID__), tr("Import Mesh"), tab_vertical)) {
 
 			if (ends_with(to_lower_case(path), ".obj")) {
-				context_raw.split_by = zui_combo(zui_handle(__ID__), [
-					tr("Object"),
-					tr("Group"),
-					tr("Material"),
-					tr("UDIM Tile"),
-				], tr("Split By"), true);
+				let split_by_combo: string[] = [tr("Object"), tr("Group"), tr("Material"), tr("UDIM Tile")];
+				context_raw.split_by = zui_combo(zui_handle(__ID__), split_by_combo, tr("Split By"), true);
 				if (ui.is_hovered) {
 					zui_tooltip(tr("Split .obj mesh into objects"));
 				}
@@ -459,7 +457,8 @@ function project_import_mesh_box(path: string, replace_existing: bool = true, cl
 			}
 			///end
 
-			zui_row([0.45, 0.45, 0.1]);
+			let row: f32 [] = [0.45, 0.45, 0.1];
+			zui_row(row);
 			if (zui_button(tr("Cancel"))) {
 				ui_box_hide();
 			}
@@ -532,7 +531,8 @@ function project_unwrap_mesh_box(mesh: any, done: (a: any)=>void, skip_ui: bool 
 
 			let unwrap_by: i32 = zui_combo(zui_handle(__ID__), unwrap_plugins, tr("Plugin"), true);
 
-			zui_row([0.5, 0.5]);
+			let row: f32[] = [0.5, 0.5];
+			zui_row(row);
 			if (zui_button(tr("Cancel"))) {
 				ui_box_hide();
 			}

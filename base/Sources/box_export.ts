@@ -64,21 +64,26 @@ function box_export_tab_export_textures(ui: zui_t, title: string, bake_material:
 	let tab_vertical: bool = config_raw.touch_ui;
 	if (zui_tab(box_export_htab, title, tab_vertical)) {
 
-		zui_row([0.5, 0.5]);
+		let row: f32[] = [0.5, 0.5];
+		zui_row(row);
 
 		///if is_paint
 		///if (krom_android || krom_ios)
-		zui_combo(base_res_handle, ["128", "256", "512", "1K", "2K", "4K"], tr("Resolution"), true);
+		let base_res_combo: string[] = ["128", "256", "512", "1K", "2K", "4K"];
+		zui_combo(base_res_handle, base_res_combo, tr("Resolution"), true);
 		///else
-		zui_combo(base_res_handle, ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"], tr("Resolution"), true);
+		let base_res_combo: string[] = ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"];
+		zui_combo(base_res_handle, base_res_combo, tr("Resolution"), true);
 		///end
 		///end
 
 		///if is_lab
 		///if (krom_android || krom_ios)
-		zui_combo(base_res_handle, ["2K", "4K"], tr("Resolution"), true);
+		let base_res_combo: string[] = ["2K", "4K"];
+		zui_combo(base_res_handle, base_res_combo, tr("Resolution"), true);
 		///else
-		zui_combo(base_res_handle, ["2K", "4K", "8K", "16K"], tr("Resolution"), true);
+		let base_res_combo: string[] = ["2K", "4K", "8K", "16K"];
+		zui_combo(base_res_handle, base_res_combo, tr("Resolution"), true);
 		///end
 		///end
 
@@ -87,9 +92,11 @@ function box_export_tab_export_textures(ui: zui_t, title: string, bake_material:
 		}
 
 		///if (is_lab || krom_android || krom_ios)
-		zui_combo(base_bits_handle, ["8bit"], tr("Color"), true);
+		let base_bits_combo: string[] = ["8bit"];
+		zui_combo(base_bits_handle, base_bits_combo, tr("Color"), true);
 		///else
-		zui_combo(base_bits_handle, ["8bit", "16bit", "32bit"], tr("Color"), true);
+		let base_bits_combo: string[] = ["8bit", "16bit", "32bit"];
+		zui_combo(base_bits_handle, base_bits_combo, tr("Color"), true);
 		///end
 
 		///if is_paint
@@ -98,20 +105,22 @@ function box_export_tab_export_textures(ui: zui_t, title: string, bake_material:
 		}
 		///end
 
-		zui_row([0.5, 0.5]);
+		zui_row(row);
 		if (base_bits_handle.position == texture_bits_t.BITS8) {
 			let h: zui_handle_t = zui_handle(__ID__);
 			if (h.init) {
 				h.position = context_raw.format_type;
 			}
-			context_raw.format_type = zui_combo(h, ["png", "jpg"], tr("Format"), true);
+			let format_combo: string[] = ["png", "jpg"];
+			context_raw.format_type = zui_combo(h, format_combo, tr("Format"), true);
 		}
 		else {
 			let h: zui_handle_t = zui_handle(__ID__);
 			if (h.init) {
 				h.position = context_raw.format_type;
 			}
-			context_raw.format_type = zui_combo(h, ["exr"], tr("Format"), true);
+			let format_combo: string[] = ["exr"];
+			context_raw.format_type = zui_combo(h, format_combo, tr("Format"), true);
 		}
 
 		ui.enabled = context_raw.format_type == texture_ldr_format_t.JPG && base_bits_handle.position == texture_bits_t.BITS8;
@@ -123,11 +132,12 @@ function box_export_tab_export_textures(ui: zui_t, title: string, bake_material:
 		ui.enabled = true;
 
 		///if is_paint
-		zui_row([0.5, 0.5]);
+		zui_row(row);
 		ui.enabled = !bake_material;
 		let layers_export_handle: zui_handle_t = zui_handle(__ID__);
 		layers_export_handle.position = context_raw.layers_export;
-		context_raw.layers_export = zui_combo(layers_export_handle, [tr("Visible"), tr("Selected"), tr("Per Object"), tr("Per Udim Tile")], tr("Layers"), true);
+		let layers_export_combo: string[] = [tr("Visible"), tr("Selected"), tr("Per Object"), tr("Per Udim Tile")];
+		context_raw.layers_export = zui_combo(layers_export_handle, layers_export_combo, tr("Layers"), true);
 		ui.enabled = true;
 		///end
 
@@ -136,11 +146,12 @@ function box_export_tab_export_textures(ui: zui_t, title: string, bake_material:
 
 		let layers_destination_handle: zui_handle_t = zui_handle(__ID__);
 		layers_destination_handle.position = context_raw.layers_destination;
-		context_raw.layers_destination = zui_combo(layers_destination_handle, [tr("Disk"), tr("Packed")], tr("Destination"), true);
+		let layers_destination_combo: string[] = [tr("Disk"), tr("Packed")];
+		context_raw.layers_destination = zui_combo(layers_destination_handle, layers_destination_combo, tr("Destination"), true);
 
 		zui_end_element();
 
-		zui_row([0.5, 0.5]);
+		zui_row(row);
 		if (zui_button(tr("Cancel"))) {
 			ui_box_hide();
 		}
@@ -189,7 +200,9 @@ let _box_export_t: export_preset_texture_t;
 function box_export_tab_presets(ui: zui_t) {
 	let tab_vertical: bool = config_raw.touch_ui;
 	if (zui_tab(box_export_htab, tr("Presets"), tab_vertical)) {
-		zui_row([3 / 5, 1 / 5, 1 / 5]);
+
+		let row: f32[] = [3 / 5, 1 / 5, 1 / 5];
+		zui_row(row);
 
 		zui_combo(box_export_hpreset, box_export_files, tr("Preset"));
 		if (box_export_hpreset.changed) {
@@ -200,7 +213,8 @@ function box_export_tab_presets(ui: zui_t) {
 			ui_box_show_custom(function (ui: zui_t) {
 				let tab_vertical: bool = config_raw.touch_ui;
 				if (zui_tab(zui_handle(__ID__), tr("New Preset"), tab_vertical)) {
-					zui_row([0.5, 0.5]);
+					let row: f32[] = [0.5, 0.5];
+					zui_row(row);
 					let h_preset: zui_handle_t = zui_handle(__ID__);
 					if (h_preset.init) {
 						h_preset.text = "new_preset";
@@ -244,7 +258,8 @@ function box_export_tab_presets(ui: zui_t) {
 
 		// Texture list
 		zui_separator(10, false);
-		zui_row([1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6]);
+		row = [1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6];
+		zui_row(row);
 		zui_text(tr("Texture"));
 		zui_text(tr("R"));
 		zui_text(tr("G"));
@@ -254,7 +269,7 @@ function box_export_tab_presets(ui: zui_t) {
 		ui.changed = false;
 		for (let i: i32 = 0; i < box_export_preset.textures.length; ++i) {
 			let t: export_preset_texture_t = box_export_preset.textures[i];
-			zui_row([1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6]);
+			zui_row(row);
 			let htex: zui_handle_t = zui_nest(box_export_hpreset, i);
 			htex.text = t.name;
 			t.name = zui_text_input(htex);
@@ -307,7 +322,8 @@ function box_export_tab_presets(ui: zui_t) {
 			box_export_save_preset();
 		}
 
-		zui_row([1 / 8]);
+		row = [1 / 8];
+		zui_row(row);
 		if (zui_button(tr("Add"))) {
 			array_push(box_export_preset.textures, { name: "base", channels: ["base_r", "base_g", "base_b", "1.0"], color_space: "linear" });
 			box_export_hpreset.children = null;
@@ -330,7 +346,8 @@ function box_export_tab_atlases(ui: zui_t) {
 			}
 		}
 		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
-			zui_row([1 / 2, 1 / 2]);
+			let row: f32[] = [1 / 2, 1 / 2];
+			zui_row(row);
 			zui_text(project_paint_objects[i].base.name);
 			let hatlas: zui_handle_t = zui_nest(zui_handle(__ID__), i);
 			hatlas.position = project_atlas_objects[i];
@@ -352,13 +369,15 @@ function box_export_tab_export_mesh(ui: zui_t, htab: zui_handle_t) {
 	let tab_vertical: bool = config_raw.touch_ui;
 	if (zui_tab(htab, tr("Export Mesh"), tab_vertical)) {
 
-		zui_row([1 / 2, 1 / 2]);
+		let row: f32[] = [1 / 2, 1 / 2];
+		zui_row(row);
 
 		let h_export_mesh_format: zui_handle_t = zui_handle(__ID__);
 		if (h_export_mesh_format.init) {
 			h_export_mesh_format.position = context_raw.export_mesh_format;
 		}
-		context_raw.export_mesh_format = zui_combo(h_export_mesh_format, ["obj", "arm"], tr("Format"), true);
+		let export_mesh_format_combo: string[] = ["obj", "arm"];
+		context_raw.export_mesh_format = zui_combo(h_export_mesh_format, export_mesh_format_combo, tr("Format"), true);
 
 		let ar: string[] = [tr("All")];
 		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
@@ -381,7 +400,7 @@ function box_export_tab_export_mesh(ui: zui_t, htab: zui_handle_t) {
 		}
 		zui_text(tris + " " + tr("triangles"));
 
-		zui_row([0.5, 0.5]);
+		zui_row(row);
 		if (zui_button(tr("Cancel"))) {
 			ui_box_hide();
 		}
@@ -418,7 +437,8 @@ function box_export_show_material() {
 			h2.selected = context_raw.write_icon_on_export;
 			context_raw.pack_assets_on_export = zui_check(h1, tr("Pack Assets"));
 			context_raw.write_icon_on_export = zui_check(h2, tr("Export Icon"));
-			zui_row([0.5, 0.5]);
+			let row: f32[] = [0.5, 0.5];
+			zui_row(row);
 			if (zui_button(tr("Cancel"))) {
 				ui_box_hide();
 			}
@@ -449,7 +469,8 @@ function box_export_show_brush() {
 			h2.selected = context_raw.write_icon_on_export;
 			context_raw.pack_assets_on_export = zui_check(h1, tr("Pack Assets"));
 			context_raw.write_icon_on_export = zui_check(h2, tr("Export Icon"));
-			zui_row([0.5, 0.5]);
+			let row: f32[] = [0.5, 0.5];
+			zui_row(row);
 			if (zui_button(tr("Cancel"))) {
 				ui_box_hide();
 			}

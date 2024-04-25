@@ -1,15 +1,21 @@
 
 function make_sculpt_run(data: material_t, matcon: material_context_t): node_shader_context_t {
 	let context_id = "paint";
-	let con_paint = node_shader_context_create(data, {
+	let props: shader_context_t = {
 		name: context_id,
 		depth_write: false,
 		compare_mode: "always", // TODO: align texcoords winding order
 		// cull_mode: "counter_clockwise",
 		cull_mode: "none",
-		vertex_elements: [{name: "pos", data: "float2"}],
+		vertex_elements: [
+			{
+				name: "pos",
+				data: "float2"
+			}
+		],
 		color_attachments: ["RGBA32", "RGBA32", "RGBA32", "R8"]
-	});
+	};
+	let con_paint = node_shader_context_create(data, props);
 
 	con_paint.data.color_writes_red = [true, true, true, true];
 	con_paint.data.color_writes_green = [true, true, true, true];
@@ -21,7 +27,7 @@ function make_sculpt_run(data: material_t, matcon: material_context_t): node_sha
 	let frag = node_shader_context_make_frag(con_paint);
 	frag.ins = vert.outs;
 
-	let faceFill = context_raw.tool == workspace_tool_t.FILL && context_raw.fill_type_handle.position == fill_type_t.FACE;
+	let face_fill = context_raw.tool == workspace_tool_t.FILL && context_raw.fill_type_handle.position == fill_type_t.FACE;
 	let decal = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
 
 	node_shader_add_out(vert, "vec2 texCoord");

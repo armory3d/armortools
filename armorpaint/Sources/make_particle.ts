@@ -1,14 +1,20 @@
 
 function make_particle_run(data: material_t): node_shader_context_t {
 	let context_id: string = "mesh";
-	let con_part: node_shader_context_t = node_shader_context_create(data, {
+	let props: shader_context_t = {
 		name: context_id,
 		depth_write: false,
 		compare_mode: "always",
 		cull_mode: "clockwise",
-		vertex_elements: [{name: "pos", data: "short4norm"}],
+		vertex_elements: [
+			{
+				name: "pos",
+				data: "short4norm"
+			}
+		],
 		color_attachments: ["R8"]
-	});
+	};
+	let con_part: node_shader_context_t = node_shader_context_create(data, props);
 
 	let vert: node_shader_t = node_shader_context_make_vert(con_part);
 	let frag: node_shader_t = node_shader_context_make_frag(con_part);

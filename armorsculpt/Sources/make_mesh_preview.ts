@@ -3,15 +3,29 @@ let make_mesh_preview_opacity_discard_decal: f32 = 0.05;
 
 function make_mesh_preview_run(data: material_t, matcon: material_context_t): node_shader_context_t {
 	let context_id = "mesh";
-	let con_mesh = node_shader_context_create(data, {
+	let props: shader_context_t = {
 		name: context_id,
 		depth_write: true,
 		compare_mode: "less",
 		cull_mode: "clockwise",
-		vertex_elements: [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}],
+		vertex_elements: [
+			{
+				name: "pos",
+				data: "short4norm"
+			},
+			{
+				name: "nor",
+				data: "short2norm"
+			},
+			{
+				name: "tex",
+				data: "short2norm"
+			}
+		],
 		color_attachments: ["RGBA64", "RGBA64", "RGBA64"],
 		depth_attachment: "DEPTH32"
-	});
+	};
+	let con_mesh = node_shader_context_create(data, props);
 
 	let vert = node_shader_context_make_vert(con_mesh);
 	let frag = node_shader_context_make_frag(con_mesh);
@@ -54,13 +68,13 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 	parser_material_parse_height = false;
 	parser_material_parse_height_as_channel = false;
 	parser_material_sample_keep_aspect = false;
-	let base = "vec3(1.0, 1.0, 1.0)";//sout.out_basecol;
-	let rough = "0.0";//sout.out_roughness;
-	let met = "0.0";//sout.out_metallic;
-	let occ = "0.0";//sout.out_occlusion;
-	let opac = "0.0";//sout.out_opacity;
-	let height = "0.0";//sout.out_height;
-	let nortan = "vec3(1.0, 1.0, 1.0)";//parser_material_out_normaltan;
+	let base: string = "vec3(1.0, 1.0, 1.0)";//sout.out_basecol;
+	let rough: string = "0.0";//sout.out_roughness;
+	let met: string = "0.0";//sout.out_metallic;
+	let occ: string = "0.0";//sout.out_occlusion;
+	let opac: string = "0.0";//sout.out_opacity;
+	let height: string = "0.0";//sout.out_height;
+	let nortan: string = "vec3(1.0, 1.0, 1.0)";//parser_material_out_normaltan;
 	node_shader_write(frag, "vec3 basecol = pow(" + base + ", vec3(2.2, 2.2, 2.2));");
 	node_shader_write(frag, "float roughness = " + rough + ";");
 	node_shader_write(frag, "float metallic = " + met + ";");

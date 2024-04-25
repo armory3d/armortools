@@ -31,10 +31,12 @@ function tab_browser_draw(htab: zui_handle_t) {
 		zui_begin_sticky();
 		let step: i32 = (1 - bookmarks_w / ui._w);
 		if (tab_browser_hsearch.text != "") {
-			zui_row([bookmarks_w / ui._w, step * 0.73, step * 0.07, step * 0.17, step * 0.03]);
+			let row: f32[] = [bookmarks_w / ui._w, step * 0.73, step * 0.07, step * 0.17, step * 0.03];
+			zui_row(row);
 		}
 		else {
-			zui_row([bookmarks_w / ui._w, step * 0.73, step * 0.07, step * 0.2]);
+			let row: f32[] = [bookmarks_w / ui._w, step * 0.73, step * 0.07, step * 0.2];
+			zui_row(row);
 		}
 
 		if (zui_button("+")) {

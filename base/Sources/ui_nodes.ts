@@ -42,7 +42,14 @@ function ui_nodes_init() {
 	zui_set_on_canvas_control(ui_nodes_on_canvas_control);
 
 	let scale: f32 = config_raw.window_scale;
-	ui_nodes_ui = zui_create({ theme: base_theme, font: base_font, color_wheel: base_color_wheel, black_white_gradient: base_color_wheel_gradient, scale_factor: scale });
+	let ops: zui_options_t = {
+		theme: base_theme,
+		font: base_font,
+		color_wheel: base_color_wheel,
+		black_white_gradient: base_color_wheel_gradient,
+		scale_factor: scale
+	};
+	ui_nodes_ui = zui_create(ops);
 	ui_nodes_ui.scroll_enabled = false;
 }
 
@@ -161,7 +168,8 @@ function ui_nodes_on_socket_released(socket_id: i32) {
 								let node: zui_node_t = _ui_nodes_on_socket_released_node;
 
 								if (zui_tab(zui_handle(__ID__), tr("Socket"))) {
-									let type: i32 = zui_combo(_ui_nodes_htype, [tr("Color"), tr("Vector"), tr("Value")], tr("Type"), true);
+									let type_combo: string[] = [tr("Color"), tr("Vector"), tr("Value")];
+									let type: i32 = zui_combo(_ui_nodes_htype, type_combo, tr("Type"), true);
 									if (_ui_nodes_htype.changed) {
 										_ui_nodes_hname.text = type == 0 ? tr("Color") : type == 1 ? tr("Vector") : tr("Value");
 									}
@@ -170,7 +178,8 @@ function ui_nodes_on_socket_released(socket_id: i32) {
 									let max: f32 = zui_float_input(_ui_nodes_hmax, tr("Max"));
 									let default_value: any = null;
 									if (type == 0) {
-										zui_row([1 / 4, 1 / 4, 1 / 4, 1 / 4]);
+										let row: f32[] = [1 / 4, 1 / 4, 1 / 4, 1 / 4];
+										zui_row(row);
 										zui_float_input(_ui_nodes_hval0, tr("R"));
 										zui_float_input(_ui_nodes_hval1, tr("G"));
 										zui_float_input(_ui_nodes_hval2, tr("B"));
@@ -178,7 +187,8 @@ function ui_nodes_on_socket_released(socket_id: i32) {
 										default_value = f32_array_create_xyzw(_ui_nodes_hval0.value, _ui_nodes_hval1.value, _ui_nodes_hval2.value, _ui_nodes_hval3.value);
 									}
 									else if (type == 1) {
-										zui_row([1 / 3, 1 / 3, 1 / 3]);
+										let row: f32[] = [1 / 3, 1 / 3, 1 / 3];
+										zui_row(row);
 										_ui_nodes_hval0.value = zui_float_input(_ui_nodes_hval0, tr("X"));
 										_ui_nodes_hval1.value = zui_float_input(_ui_nodes_hval1, tr("Y"));
 										_ui_nodes_hval2.value = zui_float_input(_ui_nodes_hval2, tr("Z"));
@@ -1206,7 +1216,8 @@ function ui_nodes_render() {
 				zui_fill(1, 1, ui_nodes_ui._w / zui_SCALE(ui_nodes_ui) - 2, ui_nodes_ui.ops.theme.BUTTON_H + 1, ui_nodes_ui.ops.theme.SEPARATOR_COL);
 				ui_nodes_ui.enabled = ui_nodes_can_place_group(g.canvas.name);
 				ui_menu_fill(ui_nodes_ui);
-				zui_row([5 / 6, 1 / 6]);
+				let row: f32[] = [5 / 6, 1 / 6];
+				zui_row(row);
 				if (zui_button(config_button_spacing + g.canvas.name, zui_align_t.LEFT)) {
 					ui_nodes_push_undo();
 					let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);

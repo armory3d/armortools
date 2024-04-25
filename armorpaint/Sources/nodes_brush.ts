@@ -2,20 +2,22 @@
 /// <reference path="./nodes/input_node.ts"/>
 /// <reference path="./nodes/brush_output_node.ts"/>
 
-let nodes_brush_categories = [_tr("Nodes")];
+let nodes_brush_categories: string[] = [_tr("Nodes")];
 
-let nodes_brush_list: zui_node_t[][] = [
-	[ // Category 0
-		tex_image_node_def,
-		input_node_def,
-		math_node_def,
-		random_node_def,
-		separate_vector_node_def,
-		time_node_def,
-		float_node_def,
-		vector_node_def,
-		vector_math_node_def
-	]
+let nodes_brush_category0: zui_node_t[] = [
+	tex_image_node_def,
+	input_node_def,
+	math_node_def,
+	random_node_def,
+	separate_vector_node_def,
+	time_node_def,
+	float_node_def,
+	vector_node_def,
+	vector_math_node_def
+];
+
+let nodes_brush_list: node_list_t[] = [
+	nodes_brush_category0
 ];
 
 let nodes_brush_creates: map_t<string, any>;

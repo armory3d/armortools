@@ -3,15 +3,29 @@ let make_mesh_preview_opacity_discard_decal: f32 = 0.05;
 
 function make_mesh_preview_run(data: material_t, matcon: material_context_t): node_shader_context_t {
 	let context_id: string = "mesh";
-	let con_mesh: node_shader_context_t = node_shader_context_create(data, {
+	let props: shader_context_t = {
 		name: context_id,
 		depth_write: true,
 		compare_mode: "less",
 		cull_mode: "clockwise",
-		vertex_elements: [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}],
+		vertex_elements: [
+			{
+				name: "pos",
+				data: "short4norm"
+			},
+			{
+				name: "nor",
+				data: "short2norm"
+			},
+			{
+				name: "tex",
+				data: "short2norm"
+			}
+		],
 		color_attachments: ["RGBA64", "RGBA64", "RGBA64"],
 		depth_attachment: "DEPTH32"
-	});
+	};
+	let con_mesh: node_shader_context_t = node_shader_context_create(data, props);
 
 	let vert: node_shader_t = node_shader_context_make_vert(con_mesh);
 	let frag: node_shader_t = node_shader_context_make_frag(con_mesh);

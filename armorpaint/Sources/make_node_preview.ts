@@ -1,14 +1,32 @@
 
 function make_node_preview_run(data: material_t, matcon: material_context_t, node: zui_node_t, group: zui_node_canvas_t, parents: zui_node_t[]): node_shader_context_t {
 	let context_id: string = "mesh";
-	let con_mesh: node_shader_context_t = node_shader_context_create(data, {
+	let props: shader_context_t = {
 		name: context_id,
 		depth_write: false,
 		compare_mode: "always",
 		cull_mode: "clockwise",
-		vertex_elements: [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}, {name: "col", data: "short4norm"}],
+		vertex_elements: [
+			{
+				name: "pos",
+				data: "short4norm"
+			},
+			{
+				name: "nor",
+				data: "short2norm"
+			},
+			{
+				name: "tex",
+				data: "short2norm"
+			},
+			{
+				name: "col",
+				data: "short4norm"
+			}
+		],
 		color_attachments: ["RGBA32"]
-	});
+	};
+	let con_mesh: node_shader_context_t = node_shader_context_create(data, props);
 
 	con_mesh.allow_vcols = true;
 	let vert: node_shader_t = node_shader_context_make_vert(con_mesh);

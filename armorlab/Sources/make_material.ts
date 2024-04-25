@@ -16,7 +16,8 @@ function make_material_parse_mesh_material() {
 		}
 	}
 
-	let con = make_mesh_run({ name: "Material", canvas: null });
+	let mm: material_t = { name: "Material", canvas: null };
+	let con = make_mesh_run(mm);
 	let scon: shader_context_t = shader_context_create(con.data);
 	scon._.override_context = {};
 	if (con.frag.shared_samplers.length > 0) {
@@ -67,7 +68,9 @@ function make_material_parse_paint_material() {
 		if (c.name == "paint") {
 			array_remove(m._.shader.contexts, c);
 			array_remove(m._.shader._.contexts, c);
-			if (c != make_material_default_scon) make_material_delete_context(c);
+			if (c != make_material_default_scon) {
+				make_material_delete_context(c);
+			}
 			break;
 		}
 	}

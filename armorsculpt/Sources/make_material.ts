@@ -60,7 +60,8 @@ function make_material_parse_mesh_material() {
 		}
 	}
 
-	let con = make_mesh_run({ name: "Material", canvas: null });
+	let mm: material_t = { name: "Material", canvas: null };
+	let con = make_mesh_run(mm);
 	let scon: shader_context_t = shader_context_create(con.data);
 	scon._.override_context = {};
 	if (con.frag.shared_samplers.length > 0) {
@@ -74,7 +75,8 @@ function make_material_parse_mesh_material() {
 	array_push(m._.shader._.contexts, scon);
 
 	for (let i: i32 = 1; i < make_mesh_layer_pass_count; ++i) {
-		let con = make_mesh_run({ name: "Material", canvas: null }, i);
+		let mm: material_t = { name: "Material", canvas: null };
+		let con = make_mesh_run(mm, i);
 		let scon: shader_context_t = shader_context_create(con.data);
 		scon._.override_context = {};
 		if (con.frag.shared_samplers.length > 0) {

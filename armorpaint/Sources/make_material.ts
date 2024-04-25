@@ -60,35 +60,40 @@ function make_material_parse_mesh_material() {
 		}
 	}
 
-	let con: node_shader_context_t = make_mesh_run({ name: "Material", canvas: null });
+	let mm: material_t = { name: "Material", canvas: null };
+	let con: node_shader_context_t = make_mesh_run(mm);
 	let scon: shader_context_t = shader_context_create(con.data);
-	scon._.override_context = {};
+	let override_context: _shader_override_t = {};
 	if (con.frag.shared_samplers.length > 0) {
 		let sampler: string = con.frag.shared_samplers[0];
-		scon._.override_context.shared_sampler = substring(sampler, string_last_index_of(sampler, " ") + 1, sampler.length);
+		override_context.shared_sampler = substring(sampler, string_last_index_of(sampler, " ") + 1, sampler.length);
 	}
 	if (!context_raw.texture_filter) {
-		scon._.override_context.filter = "point";
+		override_context.filter = "point";
 	}
+	scon._.override_context = override_context;
 	array_push(m._.shader.contexts, scon);
 	array_push(m._.shader._.contexts, scon);
 
 	for (let i: i32 = 1; i < make_mesh_layer_pass_count; ++i) {
-		let con: node_shader_context_t = make_mesh_run({ name: "Material", canvas: null }, i);
+		let mm: material_t = { name: "Material", canvas: null };
+		let con: node_shader_context_t = make_mesh_run(mm, i);
 		let scon: shader_context_t = shader_context_create(con.data);
-		scon._.override_context = {};
+		let override_context: _shader_override_t = {};
 		if (con.frag.shared_samplers.length > 0) {
 			let sampler: string = con.frag.shared_samplers[0];
-			scon._.override_context.shared_sampler = substring(sampler, string_last_index_of(sampler, " ") + 1, sampler.length);
+			override_context.shared_sampler = substring(sampler, string_last_index_of(sampler, " ") + 1, sampler.length);
 		}
 		if (!context_raw.texture_filter) {
-			scon._.override_context.filter = "point";
+			override_context.filter = "point";
 		}
+		scon._.override_context = override_context;
 		array_push(m._.shader.contexts, scon);
 		array_push(m._.shader._.contexts, scon);
 
 		let mcon: material_context_t;
-		mcon = material_context_create({ name: "mesh" + i, bind_textures: [] });
+		let mmcon: material_context_t = { name: "mesh" + i, bind_textures: [] };
+		mcon = material_context_create(mmcon);
 		array_push(m.contexts, mcon);
 		array_push(m._.contexts, mcon);
 	}
@@ -118,7 +123,8 @@ function make_material_parse_particle_material() {
 		array_remove(m._.shader.contexts, sc);
 		array_remove(m._.shader._.contexts, sc);
 	}
-	let con: node_shader_context_t = make_particle_run({ name: "MaterialParticle", canvas: null });
+	let mm: material_t = { name: "MaterialParticle", canvas: null };
+	let con: node_shader_context_t = make_particle_run(mm);
 	if (sc != null) {
 		make_material_delete_context(sc);
 	}
@@ -128,7 +134,9 @@ function make_material_parse_particle_material() {
 }
 
 function make_material_parse_mesh_preview_material(md: material_data_t = null) {
-	if (!make_material_get_mout()) return;
+	if (!make_material_get_mout()) {
+		return;
+	}
 
 	let m: material_data_t = md == null ? project_materials[0].data : md;
 	let scon: shader_context_t = null;
@@ -192,7 +200,7 @@ function make_material_make_voxel(m: material_data_t) {
 }
 ///end
 
-function make_material_parse_paint_material(bake_previews = true) {
+function make_material_parse_paint_material(bake_previews: bool = true) {
 	if (!make_material_get_mout()) return;
 
 	if (bake_previews) {
@@ -211,7 +219,9 @@ function make_material_parse_paint_material(bake_previews = true) {
 		if (c.name == "paint") {
 			array_remove(m._.shader.contexts, c);
 			array_remove(m._.shader._.contexts, c);
-			if (c != make_material_default_scon) make_material_delete_context(c);
+			if (c != make_material_default_scon) {
+				make_material_delete_context(c);
+			}
 			break;
 		}
 	}
@@ -238,8 +248,9 @@ function make_material_parse_paint_material(bake_previews = true) {
 	if (compile_error) {
 		return;
 	}
-	scon._.override_context = {};
-	scon._.override_context.addressing = "repeat";
+	let override_context: _shader_override_t = {};
+	override_context.addressing = "repeat";
+	scon._.override_context = override_context;
 	let mcon: material_context_t = material_context_create(tmcon);
 
 	array_push(m._.shader.contexts, scon);

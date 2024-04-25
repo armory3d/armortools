@@ -67,7 +67,8 @@ function box_preferences_show() {
 			if (zoom_direction_handle.init) {
 				zoom_direction_handle.position = config_raw.zoom_direction;
 			}
-			zui_combo(zoom_direction_handle, [tr("Vertical"), tr("Vertical Inverted"), tr("Horizontal"), tr("Horizontal Inverted"), tr("Vertical and Horizontal"), tr("Vertical and Horizontal Inverted")], tr("Direction to Zoom"), true);
+			let zoom_direction_combo: string[] = [tr("Vertical"), tr("Vertical Inverted"), tr("Horizontal"), tr("Horizontal Inverted"), tr("Vertical and Horizontal"), tr("Vertical and Horizontal Inverted")];
+			zui_combo(zoom_direction_handle, zoom_direction_combo, tr("Direction to Zoom"), true);
 			if (zoom_direction_handle.changed) {
 				config_raw.zoom_direction = zoom_direction_handle.position;
 			}
@@ -124,7 +125,8 @@ function box_preferences_show() {
 			// let grid_snap: bool = Zui.check(Zui.handle("boxpreferences_11", { selected: false }), "Grid Snap");
 
 			zui_end_element();
-			zui_row([0.5, 0.5]);
+			let row: f32[] = [0.5, 0.5];
+			zui_row(row);
 			if (zui_button(tr("Restore")) && !ui_menu_show) {
 				ui_menu_draw(function (ui: zui_t) {
 					if (ui_menu_button(ui, tr("Confirm"))) {
@@ -180,7 +182,8 @@ function box_preferences_show() {
 			}
 
 			zui_begin_sticky();
-			zui_row([1 / 4, 1 / 4, 1 / 4, 1 / 4]);
+			let row: f32[] = [1 / 4, 1 / 4, 1 / 4, 1 / 4];
+			zui_row(row);
 
 			zui_combo(box_preferences_theme_handle, box_preferences_themes, tr("Theme"));
 			if (box_preferences_theme_handle.changed) {
@@ -191,7 +194,8 @@ function box_preferences_show() {
 			if (zui_button(tr("New"))) {
 				ui_box_show_custom(function (ui: zui_t) {
 					if (zui_tab(zui_handle(__ID__), tr("New Theme"))) {
-						zui_row([0.5, 0.5]);
+						let row: f32[] = [0.5, 0.5];
+						zui_row(row);
 						let h: zui_handle_t = zui_handle(__ID__);
 						if (h.init) {
 							h.text = "new_theme";
@@ -242,7 +246,8 @@ function box_preferences_show() {
 			if (h.init) {
 				h.color = box_preferences_world_color;
 			}
-			zui_row([1 / 8, 7 / 8]);
+			row = [1 / 8, 7 / 8];
+			zui_row(row);
 			zui_text("", 0, h.color);
 			if (ui.is_hovered && ui.input_released) {
 				ui_menu_draw(function (ui: zui_t) {
@@ -288,7 +293,8 @@ function box_preferences_show() {
 				}
 
 				if (is_hex) {
-					zui_row([1 / 8, 7 / 8]);
+					let row: f32[] = [1 / 8, 7 / 8];
+					zui_row(row);
 					zui_text("", 0, val);
 					if (ui.is_hovered && ui.input_released) {
 						h.color = theme[key];
@@ -383,7 +389,8 @@ function box_preferences_show() {
 			if (dilate_handle.init) {
 				dilate_handle.position = config_raw.dilate;
 			}
-			zui_combo(dilate_handle, [tr("Instant"), tr("Delayed")], tr("Dilate"), true);
+			let dilate_combo: string[] = [tr("Instant"), tr("Delayed")];
+			zui_combo(dilate_handle, dilate_combo, tr("Dilate"), true);
 			if (dilate_handle.changed) {
 				config_raw.dilate = dilate_handle.position;
 			}
@@ -394,7 +401,8 @@ function box_preferences_show() {
 			if (workspace_handle.init) {
 				workspace_handle.position = config_raw.workspace;
 			}
-			zui_combo(workspace_handle, [tr("3D View"), tr("2D View")], tr("Default Workspace"), true);
+			let workspace_combo: string[] = [tr("3D View"), tr("2D View")];
+			zui_combo(workspace_handle, workspace_combo, tr("Default Workspace"), true);
 			if (workspace_handle.changed) {
 				config_raw.workspace = workspace_handle.position;
 			}
@@ -404,7 +412,8 @@ function box_preferences_show() {
 			if (camera_controls_handle.init) {
 				camera_controls_handle.position = config_raw.camera_controls;
 			}
-			zui_combo(camera_controls_handle, [tr("Orbit"), tr("Rotate"), tr("Fly")], tr("Default Camera Controls"), true);
+			let camera_controls_combo: string[] = [tr("Orbit"), tr("Rotate"), tr("Fly")];
+			zui_combo(camera_controls_handle, camera_controls_combo, tr("Default Camera Controls"), true);
 			if (camera_controls_handle.changed) {
 				config_raw.camera_controls = camera_controls_handle.position;
 			}
@@ -416,17 +425,21 @@ function box_preferences_show() {
 
 			///if is_paint
 			///if (krom_android || krom_ios)
-			zui_combo(layer_res_handle, ["128", "256", "512", "1K", "2K", "4K"], tr("Default Layer Resolution"), true);
+			let layer_res_combo: string[] = ["128", "256", "512", "1K", "2K", "4K"];
+			zui_combo(layer_res_handle, layer_res_combo, tr("Default Layer Resolution"), true);
 			///else
-			zui_combo(layer_res_handle, ["128", "256", "512", "1K", "2K", "4K", "8K"], tr("Default Layer Resolution"), true);
+			let layer_res_combo: string[] = ["128", "256", "512", "1K", "2K", "4K", "8K"];
+			zui_combo(layer_res_handle, layer_res_combo, tr("Default Layer Resolution"), true);
 			///end
 			///end
 
 			///if is_lab
 			///if (krom_android || krom_ios)
-			zui_combo(layer_res_handle, ["2K", "4K"], tr("Default Layer Resolution"), true);
+			let layer_res_combo: string[] = ["2K", "4K"];
+			zui_combo(layer_res_handle, layer_res_combo, tr("Default Layer Resolution"), true);
 			///else
-			zui_combo(layer_res_handle, ["2K", "4K", "8K", "16K"], tr("Default Layer Resolution"), true);
+			let layer_res_combo: string[] = ["2K", "4K", "8K", "16K"];
+			zui_combo(layer_res_handle, layer_res_combo, tr("Default Layer Resolution"), true);
 			///end
 			///end
 
@@ -481,7 +494,8 @@ function box_preferences_show() {
 				make_material_parse_paint_material();
 			}
 
-			zui_row([0.5, 0.5]);
+			let row: f32[] = [0.5, 0.5];
+			zui_row(row);
 
 			let brush_angle_reject_handle: zui_handle_t = zui_handle(__ID__);
 			if (brush_angle_reject_handle.init) {
@@ -558,7 +572,8 @@ function box_preferences_show() {
 			///end
 
 			zui_end_element();
-			zui_row([0.5]);
+			let row: f32[] = [0.5];
+			zui_row(row);
 			if (zui_button(tr("Help"))) {
 				///if (is_paint || is_sculpt)
 				file_load_url("https://github.com/armory3d/armorpaint_docs///pen");
@@ -601,7 +616,8 @@ function box_preferences_show() {
 			if (hpathtrace_mode.init) {
 				hpathtrace_mode.position = context_raw.pathtrace_mode;
 			}
-			context_raw.pathtrace_mode = zui_combo(hpathtrace_mode, [tr("Core"), tr("Full")], tr("Path Tracer"), true);
+			let pathtrace_mode_combo: string[] = [tr("Core"), tr("Full")];
+			context_raw.pathtrace_mode = zui_combo(hpathtrace_mode, pathtrace_mode_combo, tr("Path Tracer"), true);
 			if (hpathtrace_mode.changed) {
 				render_path_raytrace_ready = false;
 			}
@@ -612,12 +628,14 @@ function box_preferences_show() {
 			if (hrender_mode.init) {
 				hrender_mode.position = context_raw.render_mode;
 			}
-			context_raw.render_mode = zui_combo(hrender_mode, [tr("Full"), tr("Mobile")], tr("Renderer"), true);
+			let render_mode_combo: string[] = [tr("Full"), tr("Mobile")];
+			context_raw.render_mode = zui_combo(hrender_mode, render_mode_combo, tr("Renderer"), true);
 			if (hrender_mode.changed) {
 				context_set_render_path();
 			}
 
-			zui_combo(context_raw.hsupersample, ["0.25x", "0.5x", "1.0x", "1.5x", "2.0x", "4.0x"], tr("Super Sample"), true);
+			let supersample_combo: string[] = ["0.25x", "0.5x", "1.0x", "1.5x", "2.0x", "4.0x"];
+			zui_combo(context_raw.hsupersample, supersample_combo, tr("Super Sample"), true);
 			if (context_raw.hsupersample.changed) {
 				config_apply();
 			}
@@ -717,7 +735,8 @@ function box_preferences_show() {
 			}
 
 			zui_begin_sticky();
-			zui_row([1 / 4, 1 / 4, 1 / 4, 1 / 4]);
+			let row: f32[] = [1 / 4, 1 / 4, 1 / 4, 1 / 4];
+			zui_row(row);
 
 			box_preferences_preset_handle = zui_handle(__ID__);
 			if (box_preferences_preset_handle.init) {
@@ -733,7 +752,8 @@ function box_preferences_show() {
 			if (zui_button(tr("New"))) {
 				ui_box_show_custom(function (ui: zui_t) {
 					if (zui_tab(zui_handle(__ID__), tr("New Keymap"))) {
-						zui_row([0.5, 0.5]);
+						let row: f32[] = [0.5, 0.5];
+						zui_row(row);
 						let h: zui_handle_t = zui_handle(__ID__);
 						if (h.init) {
 							h.text = "new_keymap";
@@ -793,11 +813,13 @@ function box_preferences_show() {
 		}
 		if (zui_tab(box_preferences_htab, tr("Plugins"), true)) {
 			zui_begin_sticky();
-			zui_row([1 / 4, 1 / 4]);
+			let row: f32[] = [1 / 4, 1 / 4];
+			zui_row(row);
 			if (zui_button(tr("New"))) {
 				ui_box_show_custom(function (ui: zui_t) {
 					if (zui_tab(zui_handle(__ID__), tr("New Plugin"))) {
-						zui_row([0.5, 0.5]);
+						let row: f32[] = [0.5, 0.5];
+						zui_row(row);
 						let h: zui_handle_t = zui_handle(__ID__);
 						if (h.init) {
 							h.text = "new_plugin";

@@ -23,7 +23,8 @@ function tab_materials_draw_mini(htab: zui_handle_t) {
 function tab_materials_draw_full(htab: zui_handle_t) {
 	if (zui_tab(htab, tr("Materials"))) {
 		zui_begin_sticky();
-		zui_row([1 / 4, 1 / 4, 1 / 4]);
+		let row: f32[] = [1 / 4, 1 / 4, 1 / 4];
+		zui_row(row);
 
 		tab_materials_button_new(tr("New"));
 		if (zui_button(tr("Import"))) {

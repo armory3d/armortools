@@ -594,7 +594,8 @@ function ui_menu_render() {
 						}
 						zui_text_area(h, zui_align_t.LEFT, false);
 
-						zui_row([1 / 3, 1 / 3, 1 / 3]);
+						let row: f32[] = [1 / 3, 1 / 3, 1 / 3];
+						zui_row(row);
 
 						///if (krom_windows || krom_linux || krom_darwin)
 						if (zui_button(tr("Copy"))) {
@@ -703,7 +704,8 @@ function ui_menu_button(ui: zui_t, text: string, label: string = ""): bool {
 
 function ui_menu_align(ui: zui_t) {
 	if (!config_raw.touch_ui) {
-		zui_row([12 / 100, 88 / 100]);
+		let row: f32[] = [12 / 100, 88 / 100];
+		zui_row(row);
 		zui_end_element();
 	}
 }

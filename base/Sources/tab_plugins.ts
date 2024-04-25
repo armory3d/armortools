@@ -6,10 +6,12 @@ function tab_plugins_draw(htab: zui_handle_t) {
 		zui_begin_sticky();
 
 		///if (is_paint || is_sculpt)
-		zui_row([1 / 4]);
+		let row: f32[] = [1 / 4];
+		zui_row(row);
 		///end
 		///if is_lab
-		zui_row([1 / 14]);
+		let row: f32[] = [1 / 14];
+		zui_row(row);
 		///end
 
 		if (zui_button(tr("Manager"))) {

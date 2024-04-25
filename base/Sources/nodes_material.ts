@@ -8,3830 +8,3846 @@ let nodes_material_categories: string[] = [
 	_tr("Group")
 ];
 
-let nodes_material_list: zui_node_t[][] = [
-	[ // Input
-		{
-			id: 0,
-			name: _tr("Attribute"),
-			type: "ATTRIBUTE",
-			x: 0,
-			y: 0,
-			color: 0xffb34f5a,
-			inputs: [],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Vector"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Fac"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [
-				{
-					name: _tr("Name"),
-					type: "STRING",
-					output: -1,
-					default_value: f32_array_create_x(0),
-					data: null,
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					height: 0
-				}
-			],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Camera Data"),
-			type: "CAMERA",
-			x: 0,
-			y: 0,
-			color: 0xffb34f5a,
-			inputs: [],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("View Vector"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("View Z Depth"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("View Distance"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Fresnel"),
-			type: "FRESNEL",
-			x: 0,
-			y: 0,
-			color: 0xffb34f5a,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("IOR"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.45),
-					min: 0.0,
-					max: 3.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Normal"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Fac"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Geometry"),
-			type: "NEW_GEOMETRY",
-			x: 0,
-			y: 0,
-			color: 0xffb34f5a,
-			inputs: [],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Position"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Normal"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Tangent"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("True Normal"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Incoming"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Parametric"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Backfacing"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Pointiness"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Random Per Island"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Layer"),
-			type: "LAYER", // extension
-			x: 0,
-			y: 0,
-			color: 0xff4982a0,
-			inputs: [],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Base Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Opacity"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Occlusion"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Roughness"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Metallic"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Normal Map"),
-					type: "VECTOR",
-					color: -10238109,
-					default_value: f32_array_create_xyz(0.5, 0.5, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Emission"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Height"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Subsurface"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [
-				{
-					name: _tr("Layer"),
-					type: "ENUM",
-					output: -1,
-					default_value: f32_array_create_x(0),
-					data: u8_array_create_from_string(""),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					height: 0
-				}
-			],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Layer Mask"),
-			type: "LAYER_MASK", // extension
-			x: 0,
-			y: 0,
-			color: 0xff4982a0,
-			inputs: [],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Value"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [
-				{
-					name: _tr("Layer"),
-					type: "ENUM",
-					output: -1,
-					default_value: f32_array_create_x(0),
-					data: u8_array_create_from_string(""),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					height: 0
-				}
-			],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Layer Weight"),
-			type: "LAYER_WEIGHT",
-			x: 0,
-			y: 0,
-			color: 0xffb34f5a,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Blend"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.5),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Normal"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Fresnel"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Facing"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Material"),
-			type: "MATERIAL", // extension
-			x: 0,
-			y: 0,
-			color: 0xff4982a0,
-			inputs: [],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Base Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Opacity"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Occlusion"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Roughness"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Metallic"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Normal Map"),
-					type: "VECTOR",
-					color: -10238109,
-					default_value: f32_array_create_xyz(0.5, 0.5, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Emission"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Height"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Subsurface"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [
-				{
-					name: _tr("Material"),
-					type: "ENUM",
-					output: -1,
-					default_value: f32_array_create_x(0),
-					data: u8_array_create_from_string(""),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					height: 0
-				}
-			],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Object Info"),
-			type: "OBJECT_INFO",
-			x: 0,
-			y: 0,
-			color: 0xffb34f5a,
-			inputs: [],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Location"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Object Index"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Material Index"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Random"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Picker"),
-			type: "PICKER", // extension
-			x: 0,
-			y: 0,
-			color: 0xff4982a0,
-			inputs: [],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Base Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Opacity"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Occlusion"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Roughness"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Metallic"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Normal Map"),
-					type: "VECTOR",
-					color: -10238109,
-					default_value: f32_array_create_xyz(0.5, 0.5, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Emission"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Height"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Subsurface"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("RGB"),
-			type: "RGB",
-			x: 0,
-			y: 0,
-			color: 0xffb34f5a,
-			inputs: [],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.5, 0.5, 0.5, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [
-				{
-					name: _tr("default_value"),
-					type: "RGBA",
-					output: 0,
-					default_value: f32_array_create_x(0),
-					data: null,
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					height: 0
-				}
-			],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Script"),
-			type: "SCRIPT_CPU", // extension
-			x: 0,
-			y: 0,
-			color: 0xffb34f5a,
-			inputs: [],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Value"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.5),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [
-				{
-					name: " ",
-					type: "STRING",
-					output: -1,
-					default_value: f32_array_create_x(0), // "",
-					data: null,
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					height: 0
-				}
-			],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Shader"),
-			type: "SHADER_GPU", // extension
-			x: 0,
-			y: 0,
-			color: 0xffb34f5a,
-			inputs: [],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Value"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.5),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [
-				{
-					name: " ",
-					type: "STRING",
-					output: -1,
-					default_value: f32_array_create_x(0), // "",
-					data: null,
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					height: 0
-				}
-			],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Tangent"),
-			type: "TANGENT",
-			x: 0,
-			y: 0,
-			color: 0xffb34f5a,
-			inputs: [],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Tangent"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Texture Coordinate"),
-			type: "TEX_COORD",
-			x: 0,
-			y: 0,
-			color: 0xffb34f5a,
-			inputs: [],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Generated"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Normal"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("UV"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Object"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Camera"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Window"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Reflection"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: []
-		},
-		{
-			id: 0,
-			name: _tr("UV Map"),
-			type: "UVMAP",
-			x: 0,
-			y: 0,
-			color: 0xffb34f5a,
-			inputs: [],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("UV"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Value"),
-			type: "VALUE",
-			x: 0,
-			y: 0,
-			color: 0xffb34f5a,
-			inputs: [],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Value"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.5),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [
-				{
-					name: _tr("default_value"),
-					type: "VALUE",
-					output: 0,
-					default_value: f32_array_create_x(0),
-					data: null,
-					min: 0.0,
-					max: 10.0,
-					precision: 100,
-					height: 0
-				}
-			],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Vertex Color"),
-			type: "VERTEX_COLOR",
-			x: 0,
-			y: 0,
-			color: 0xffb34f5a,
-			inputs: [],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Alpha"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Wireframe"),
-			type: "WIREFRAME",
-			x: 0,
-			y: 0,
-			color: 0xffb34f5a,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Size"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.01),
-					min: 0.0,
-					max: 0.1,
-					precision: 100,
-					display: 0
-				},
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Fac"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [
-				{
-					name: _tr("Pixel Size"),
-					type: "BOOL",
-					output: 0,
-					default_value: f32_array_create_x(0),
-					data: null,
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					height: 0
-				}
-			],
-			width: 0
-		},
-	],
-	// [ // Output
-	// 	{
-	// 		id: 0,
-	// 		name: _tr("Material Output"),
-	// 		type: "OUTPUT_MATERIAL_PBR",
-	// 		x: 0,
-	// 		y: 0,
-	// 		color: 0xffb34f5a,
-	// 		inputs: [
-	// 			{
-	// 				id: 0,
-	// 				node_id: 0,
-	// 				name: _tr("Base Color"),
-	// 				type: "RGBA",
-	// 				color: 0xffc7c729,
-	// 				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-	//				min: 0.0,
-	//				max: 1.0,
-	//				precision: 100,
-	//				display: 0
-	// 			},
-	// 			{
-	// 				id: 0,
-	// 				node_id: 0,
-	// 				name: _tr("Opacity"),
-	// 				type: "VALUE",
-	// 				color: 0xffa1a1a1,
-	// 				default_value: f32_array_create_x(1.0),
-	//				min: 0.0,
-	//				max: 1.0,
-	//				precision: 100,
-	//				display: 0
-	// 			},
-	// 			{
-	// 				id: 0,
-	// 				node_id: 0,
-	// 				name: _tr("Occlusion"),
-	// 				type: "VALUE",
-	// 				color: 0xffa1a1a1,
-	// 				default_value: f32_array_create_x(1.0),
-	//				min: 0.0,
-	//				max: 1.0,
-	//				precision: 100,
-	//				display: 0
-	// 			},
-	// 			{
-	// 				id: 0,
-	// 				node_id: 0,
-	// 				name: _tr("Roughness"),
-	// 				type: "VALUE",
-	// 				color: 0xffa1a1a1,
-	// 				default_value: f32_array_create_x(0.1),
-	//				min: 0.0,
-	//				max: 1.0,
-	//				precision: 100,
-	//				display: 0
-	// 			},
-	// 			{
-	// 				id: 0,
-	// 				node_id: 0,
-	// 				name: _tr("Metallic"),
-	// 				type: "VALUE",
-	// 				color: 0xffa1a1a1,
-	// 				default_value: f32_array_create_x(0.0),
-	//				min: 0.0,
-	//				max: 1.0,
-	//				precision: 100,
-	//				display: 0
-	// 			},
-	// 			{
-	// 				id: 0,
-	// 				node_id: 0,
-	// 				name: _tr("Normal Map"),
-	// 				type: "VECTOR",
-	// 				color: -10238109,
-	// 				default_value: f32_array_create_xyz(0.5, 0.5, 1.0),
-	//				min: 0.0,
-	//				max: 1.0,
-	//				precision: 100,
-	//				display: 0
-	// 			},
-	// 			{
-	// 				id: 0,
-	// 				node_id: 0,
-	// 				name: _tr("Emission"),
-	// 				type: "VALUE",
-	// 				color: 0xffa1a1a1,
-	// 				default_value: f32_array_create_x(0.0),
-	//				min: 0.0,
-	//				max: 1.0,
-	//				precision: 100,
-	//				display: 0
-	// 			},
-	// 			{
-	// 				id: 0,
-	// 				node_id: 0,
-	// 				name: _tr("Height"),
-	// 				type: "VALUE",
-	// 				color: 0xffa1a1a1,
-	// 				default_value: f32_array_create_x(0.0),
-	//				min: 0.0,
-	//				max: 1.0,
-	//				precision: 100,
-	//				display: 0
-	// 			},
-	// 			{
-	// 				id: 0,
-	// 				node_id: 0,
-	// 				name: _tr("Subsurface"),
-	// 				type: "VALUE",
-	// 				color: 0xffa1a1a1,
-	// 				default_value: f32_array_create_x(0.0),
-	//				min: 0.0,
-	//				max: 1.0,
-	//				precision: 100,
-	//				display: 0
-	// 			}
-	// 		],
-	// 		outputs: [],
-	// 		buttons: [],
-	//		width: 0
-	// 	}
-	// ],
-	[ // Texture
-		{
-			id: 0,
-			name: _tr("Brick Texture"),
-			type: "TEX_BRICK",
-			x: 0,
-			y: 0,
-			color: 0xff4982a0,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Vector"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color 1"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyz(0.8, 0.8, 0.8),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color 2"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyz(0.2, 0.2, 0.2),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Mortar"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Scale"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(5.0),
-					min: 0.0,
-					max: 10.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Fac"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Checker Texture"),
-			type: "TEX_CHECKER",
-			x: 0,
-			y: 0,
-			color: 0xff4982a0,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Vector"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color 1"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyz(0.8, 0.8, 0.8),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color 2"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyz(0.2, 0.2, 0.2),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Scale"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(5.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Fac"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Curvature Bake"),
-			type: "BAKE_CURVATURE",
-			x: 0,
-			y: 0,
-			color: 0xff4982a0,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Strength"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 2.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Radius"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 2.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Offset"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: -2.0,
-					max: 2.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Value"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Gradient Texture"),
-			type: "TEX_GRADIENT",
-			x: 0,
-			y: 0,
-			color: 0xff4982a0,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Vector"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Fac"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [
-				{
-					name: _tr("gradient_type"),
-					type: "ENUM",
-					output: 0,
-					default_value: f32_array_create_x(0),
-					data: u8_array_create_from_string(_tr("Linear") + "\0" + _tr("Diagonal") + "\0" + _tr("Radial") + "\0" + _tr("Spherical")),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					height: 0
-				}
-			],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Image Texture"),
-			type: "TEX_IMAGE",
-			x: 0,
-			y: 0,
-			color: 0xff4982a0,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Vector"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Alpha"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [
-				{
-					name: _tr("File"),
-					type: "ENUM",
-					output: -1,
-					default_value: f32_array_create_x(0),
-					data: u8_array_create_from_string(""),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					height: 0
-				},
-				{
-					name: _tr("Color Space"),
-					type: "ENUM",
-					output: -1,
-					default_value: f32_array_create_x(0),
-					data: u8_array_create_from_string(_tr("Auto") + "\0" + _tr("Linear") + "\0" + _tr("sRGB") + "\0" + _tr("DirectX Normal Map")),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					height: 0
-				}
-			],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Magic Texture"),
-			type: "TEX_MAGIC",
-			x: 0,
-			y: 0,
-			color: 0xff4982a0,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Vector"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Scale"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(5.0),
-					min: 0.0,
-					max: 10.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Fac"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Musgrave Texture"),
-			type: "TEX_MUSGRAVE",
-			x: 0,
-			y: 0,
-			color: 0xff4982a0,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Vector"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Scale"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(5.0),
-					min: 0.0,
-					max: 10.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Height"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Noise Texture"),
-			type: "TEX_NOISE",
-			x: 0,
-			y: 0,
-			color: 0xff4982a0,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Vector"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Scale"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(5.0),
-					min: 0.0,
-					max: 10.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Fac"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Voronoi Texture"),
-			type: "TEX_VORONOI",
-			x: 0,
-			y: 0,
-			color: 0xff4982a0,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Vector"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Scale"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(5.0),
-					min: 0.0,
-					max: 10.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Fac"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [
-				{
-					name: _tr("coloring"),
-					type: "ENUM",
-					output: 0,
-					default_value: f32_array_create_x(0),
-					data: u8_array_create_from_string(_tr("Intensity") + "\0" + _tr("Cells")),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					height: 0
-				}
-			],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Wave Texture"),
-			type: "TEX_WAVE",
-			x: 0,
-			y: 0,
-			color: 0xff4982a0,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Vector"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Scale"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(5.0),
-					min: 0.0,
-					max: 10.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Fac"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		}
-	],
-	[ // Color
-		{
-			id: 0,
-			name: _tr("Blur"),
-			type: "BLUR", // extension
-			x: 0,
-			y: 0,
-			color: 0xff448c6d,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Strength"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.5),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Bright/Contrast"),
-			type: "BRIGHTCONTRAST",
-			x: 0,
-			y: 0,
-			color: 0xff448c6d,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Bright"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Contrast"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Gamma"),
-			type: "GAMMA",
-			x: 0,
-			y: 0,
-			color: 0xff448c6d,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Gamma"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Hue/Saturation"),
-			type: "HUE_SAT",
-			x: 0,
-			y: 0,
-			color: 0xff448c6d,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Hue"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.5),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Saturation"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Value"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Fac"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Invert"),
-			type: "INVERT",
-			x: 0,
-			y: 0,
-			color: 0xff448c6d,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Fac"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("MixRGB"),
-			type: "MIX_RGB",
-			x: 0,
-			y: 0,
-			color: 0xff448c6d,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Fac"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.5),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color 1"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.5, 0.5, 0.5, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color 2"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.5, 0.5, 0.5, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [
-				{
-					name: _tr("blend_type"),
-					type: "ENUM",
-					output: 0,
-					default_value: f32_array_create_x(0),
-					data: u8_array_create_from_string(_tr("Mix") + "\0" + _tr("Darken") + "\0" + _tr("Multiply") + "\0" + _tr("Burn") + "\0" + _tr("Lighten") + "\0" + _tr("Screen") + "\0" + _tr("Dodge") + "\0" + _tr("Add") + "\0" + _tr("Overlay") + "\0" + _tr("Soft Light") + "\0" + _tr("Linear Light") + "\0" + _tr("Difference") + "\0" + _tr("Subtract") + "\0" + _tr("Divide") + "\0" + _tr("Hue") + "\0" + _tr("Saturation") + "\0" + _tr("Color") + "\0" + _tr("Value")),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					height: 0
-				},
-				{
-					name: _tr("use_clamp"),
-					type: "BOOL",
-					output: 0,
-					default_value: f32_array_create_x(0),
-					data: null,
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					height: 0
-				}
-			],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Quantize"),
-			type: "QUANTIZE",
-			x: 0,
-			y: 0,
-			color: 0xff448c6d,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Stength"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.1),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Warp"),
-			type: "DIRECT_WARP", // extension
-			x: 0,
-			y: 0,
-			color: 0xff448c6d,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Angle"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 360.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Mask"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.5),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		}
-	],
-	[ // Vector
-		{
-			id: 0,
-			name: _tr("Bump"),
-			type: "BUMP",
-			x: 0,
-			y: 0,
-			color: 0xff522c99,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Strength"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Distance"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Height"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Normal"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Normal Map"),
-					type: "VECTOR",
-					color: -10238109,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Mapping"),
-			type: "MAPPING",
-			x: 0,
-			y: 0,
-			color: 0xff522c99,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Vector"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Location"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 1
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Rotation"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 360.0,
-					precision: 100,
-					display: 1
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Scale"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(1.0, 1.0, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 1
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Vector"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Mix Normal Map"),
-			type: "MIX_NORMAL_MAP",
-			x: 0,
-			y: 0,
-			color: 0xff522c99,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Normal Map 1"),
-					type: "VECTOR",
-					color: -10238109,
-					default_value: f32_array_create_xyz(0.5, 0.5, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Normal Map 2"),
-					type: "VECTOR",
-					color: -10238109,
-					default_value: f32_array_create_xyz(0.5, 0.5, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Normal Map"),
-					type: "VECTOR",
-					color: -10238109,
-					default_value: f32_array_create_xyz(0.5, 0.5, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [
-				{
-					name: _tr("blend_type"),
-					type: "ENUM",
-					output: 0,
-					default_value: f32_array_create_x(0),
-					data: u8_array_create_from_string(_tr("Partial Derivative") + "\0" + _tr("Whiteout") + "\0" + _tr("Reoriented")),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					height: 0
-				}
-			],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Normal"),
-			type: "NORMAL",
-			x: 0,
-			y: 0,
-			color: 0xff522c99,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Normal"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Normal"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Dot"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [
-				{
-					name: _tr("Vector"),
-					type: "VECTOR",
-					output: 0,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					data: null,
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					height: 0
-				}
-			],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Normal Map"),
-			type: "NORMAL_MAP",
-			x: 0,
-			y: 0,
-			color: 0xff522c99,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Stength"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 2.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Normal Map"),
-					type: "VECTOR",
-					color: -10238109,
-					default_value: f32_array_create_xyz(0.5, 0.5, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Normal Map"),
-					type: "VECTOR",
-					color: -10238109,
-					default_value: f32_array_create_xyz(0.5, 0.5, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Vector Curves"),
-			type: "CURVE_VEC",
-			x: 0,
-			y: 0,
-			color: 0xff522c99,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Fac"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Vector"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Vector"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [
-				{
-					name: "nodes_material_vector_curves_button",
-					type: "CUSTOM",
-					output: 0,
-					// default_value: [[f32_array_create_xy(0.0, 0.0), f32_array_create_xy(0.0, 0.0)], [f32_array_create_xy(0.0, 0.0), f32_array_create_xy(0.0, 0.0)], [f32_array_create_xy(0.0, 0.0), f32_array_create_xy(0.0, 0.0)]],
-					default_value: f32_array_create_from_array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]),
-					data: null,
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					height: 8.5
-				}
-			],
-			width: 0
-		}
-	],
-	[ // Converter
-		{
-			id: 0,
-			name: _tr("Clamp"),
-			type: "CLAMP",
-			x: 0,
-			y: 0,
-			color: 0xff62676d,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Value"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.5),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Min"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Max"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Value"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [
-				{
-					name: _tr("operation"),
-					type: "ENUM",
-					output: 0,
-					default_value: f32_array_create_x(0),
-					data: u8_array_create_from_string(_tr("Min Max") + "\0" + _tr("Range")),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					height: 0
-				}
-			],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Color Ramp"),
-			type: "VALTORGB",
-			x: 0,
-			y: 0,
-			color: 0xff62676d,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Fac"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.5),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Alpha"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [
-				{
-					name: "nodes_material_color_ramp_button",
-					type: "CUSTOM",
-					output: 0,
-					// default_value: [f32_array_create_xyzwv(1.0, 1.0, 1.0, 1.0, 0.0)],
-					default_value: f32_array_create_xyzwv(1.0, 1.0, 1.0, 1.0, 0.0),
-					data: u8_array_create(1),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					height: 4.5
-				}
-			],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Color Mask"),
-			type: "COLMASK",
-			x: 0,
-			y: 0,
-			color: 0xff62676d,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Mask Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Radius"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.1),
-					min: 0.0,
-					max: 1.74,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Fuzziness"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Mask"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Combine HSV"),
-			type: "COMBHSV",
-			x: 0,
-			y: 0,
-			color: 0xff62676d,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("H"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("S"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("V"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Combine RGB"),
-			type: "COMBRGB",
-			x: 0,
-			y: 0,
-			color: 0xff62676d,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("R"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("G"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("B"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Combine XYZ"),
-			type: "COMBXYZ",
-			x: 0,
-			y: 0,
-			color: 0xff62676d,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("X"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Y"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Z"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Vector"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Map Range"),
-			type: "MAPRANGE",
-			x: 0,
-			y: 0,
-			color: 0xff62676d,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Value"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.5),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("From Min"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("From Max"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("To Min"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("To Max"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Value"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [
-				{
-					name: _tr("use_clamp"),
-					type: "BOOL",
-					output: 0,
-					default_value: f32_array_create_x(0),
-					data: null,
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					height: 0
-				}
-			],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Math"),
-			type: "MATH",
-			x: 0,
-			y: 0,
-			color: 0xff62676d,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Value"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.5),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Value"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.5),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Value"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [
-				{
-					name: _tr("operation"),
-					type: "ENUM",
-					output: 0,
-					default_value: f32_array_create_x(0),
-					data: u8_array_create_from_string(_tr("Add") + "\0" + _tr("Subtract") + "\0" + _tr("Multiply") + "\0" + _tr("Divide") + "\0" + _tr("Power") + "\0" + _tr("Logarithm") + "\0" + _tr("Square Root") + "\0" + _tr("Inverse Square Root") + "\0" + _tr("Absolute") + "\0" + _tr("Exponent") + "\0" + _tr("Minimum") + "\0" + _tr("Maximum") + "\0" + _tr("Less Than") + "\0" + _tr("Greater Than") + "\0" + _tr("Sign") + "\0" + _tr("Round") + "\0" + _tr("Floor") + "\0" + _tr("Ceil") + "\0" + _tr("Truncate") + "\0" + _tr("Fraction") + "\0" + _tr("Modulo") + "\0" + _tr("Snap") + "\0" + _tr("Ping-Pong") + "\0" + _tr("Sine") + "\0" + _tr("Cosine") + "\0" + _tr("Tangent") + "\0" + _tr("Arcsine") + "\0" + _tr("Arccosine") + "\0" + _tr("Arctangent") + "\0" + _tr("Arctan2") + "\0" + _tr("Hyperbolic Sine") + "\0" + _tr("Hyperbolic Cosine") + "\0" + _tr("Hyperbolic Tangent") + "\0" + _tr("To Radians") + "\0" + _tr("To Degrees")),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					height: 0
-				},
-				{
-					name: _tr("use_clamp"),
-					type: "BOOL",
-					output: 0,
-					default_value: f32_array_create_x(0),
-					data: null,
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					height: 0
-				}
-			],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("RGB to BW"),
-			type: "RGBTOBW",
-			x: 0,
-			y: 0,
-			color: 0xff62676d,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Val"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Separate HSV"),
-			type: "SEPHSV",
-			x: 0,
-			y: 0,
-			color: 0xff62676d,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.5, 0.5, 0.5, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("H"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("S"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("V"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Separate RGB"),
-			type: "SEPRGB",
-			x: 0,
-			y: 0,
-			color: 0xff62676d,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Color"),
-					type: "RGBA",
-					color: 0xffc7c729,
-					default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("R"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("G"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("B"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Separate XYZ"),
-			type: "SEPXYZ",
-			x: 0,
-			y: 0,
-			color: 0xff62676d,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Vector"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("X"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Y"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Z"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [],
-			width: 0
-		},
-		{
-			id: 0,
-			name: _tr("Vector Math"),
-			type: "VECT_MATH",
-			x: 0,
-			y: 0,
-			color: 0xff62676d,
-			inputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Vector"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Vector"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			outputs: [
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Vector"),
-					type: "VECTOR",
-					color: 0xff6363c7,
-					default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				},
-				{
-					id: 0,
-					node_id: 0,
-					name: _tr("Value"),
-					type: "VALUE",
-					color: 0xffa1a1a1,
-					default_value: f32_array_create_x(0.0),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					display: 0
-				}
-			],
-			buttons: [
-				{
-					name: _tr("operation"),
-					type: "ENUM",
-					output: 0,
-					default_value: f32_array_create_x(0),
-					data: u8_array_create_from_string(_tr("Add") + "\0" + _tr("Subtract") + "\0" + _tr("Multiply") + "\0" + _tr("Divide") + "\0" + _tr("Average") + "\0" + _tr("Cross Product") + "\0" + _tr("Project") + "\0" + _tr("Reflect") + "\0" + _tr("Dot Product") + "\0" + _tr("Distance") + "\0" + _tr("Length") + "\0" + _tr("Scale") + "\0" + _tr("Normalize") + "\0" + _tr("Absolute") + "\0" + _tr("Minimum") + "\0" + _tr("Maximum") + "\0" + _tr("Floor") + "\0" + _tr("Ceil") + "\0" + _tr("Fraction") + "\0" + _tr("Modulo") + "\0" + _tr("Snap") + "\0" + _tr("Sine") + "\0" + _tr("Cosine") + "\0" + _tr("Tangent")),
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					height: 0
-				}
-			],
-			width: 0
-		}
-	],
-	[ // Input
-		{
-			id: 0,
-			name: _tr("New Group"),
-			type: "GROUP",
-			x: 0,
-			y: 0,
-			color: 0xffb34f5a,
-			inputs: [],
-			outputs: [],
-			buttons: [
-				{
-					name: "nodes_material_new_group_button",
-					type: "CUSTOM",
-					output: -1,
-					default_value: f32_array_create_x(0),
-					data: null,
-					min: 0.0,
-					max: 1.0,
-					precision: 100,
-					height: 1
-				}
-			],
-			width: 0
-		}
-	]
+let nodes_material_input: zui_node_t[] = [
+	{
+		id: 0,
+		name: _tr("Attribute"),
+		type: "ATTRIBUTE",
+		x: 0,
+		y: 0,
+		color: 0xffb34f5a,
+		inputs: [],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Vector"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Fac"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [
+			{
+				name: _tr("Name"),
+				type: "STRING",
+				output: -1,
+				default_value: f32_array_create_x(0),
+				data: null,
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 0
+			}
+		],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Camera Data"),
+		type: "CAMERA",
+		x: 0,
+		y: 0,
+		color: 0xffb34f5a,
+		inputs: [],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("View Vector"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("View Z Depth"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("View Distance"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Fresnel"),
+		type: "FRESNEL",
+		x: 0,
+		y: 0,
+		color: 0xffb34f5a,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("IOR"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.45),
+				min: 0.0,
+				max: 3.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Normal"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Fac"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Geometry"),
+		type: "NEW_GEOMETRY",
+		x: 0,
+		y: 0,
+		color: 0xffb34f5a,
+		inputs: [],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Position"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Normal"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Tangent"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("True Normal"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Incoming"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Parametric"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Backfacing"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Pointiness"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Random Per Island"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Layer"),
+		type: "LAYER", // extension
+		x: 0,
+		y: 0,
+		color: 0xff4982a0,
+		inputs: [],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Base Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Opacity"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Occlusion"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Roughness"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Metallic"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Normal Map"),
+				type: "VECTOR",
+				color: -10238109,
+				default_value: f32_array_create_xyz(0.5, 0.5, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Emission"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Height"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Subsurface"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [
+			{
+				name: _tr("Layer"),
+				type: "ENUM",
+				output: -1,
+				default_value: f32_array_create_x(0),
+				data: u8_array_create_from_string(""),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 0
+			}
+		],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Layer Mask"),
+		type: "LAYER_MASK", // extension
+		x: 0,
+		y: 0,
+		color: 0xff4982a0,
+		inputs: [],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Value"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [
+			{
+				name: _tr("Layer"),
+				type: "ENUM",
+				output: -1,
+				default_value: f32_array_create_x(0),
+				data: u8_array_create_from_string(""),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 0
+			}
+		],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Layer Weight"),
+		type: "LAYER_WEIGHT",
+		x: 0,
+		y: 0,
+		color: 0xffb34f5a,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Blend"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.5),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Normal"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Fresnel"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Facing"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Material"),
+		type: "MATERIAL", // extension
+		x: 0,
+		y: 0,
+		color: 0xff4982a0,
+		inputs: [],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Base Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Opacity"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Occlusion"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Roughness"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Metallic"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Normal Map"),
+				type: "VECTOR",
+				color: -10238109,
+				default_value: f32_array_create_xyz(0.5, 0.5, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Emission"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Height"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Subsurface"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [
+			{
+				name: _tr("Material"),
+				type: "ENUM",
+				output: -1,
+				default_value: f32_array_create_x(0),
+				data: u8_array_create_from_string(""),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 0
+			}
+		],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Object Info"),
+		type: "OBJECT_INFO",
+		x: 0,
+		y: 0,
+		color: 0xffb34f5a,
+		inputs: [],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Location"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Object Index"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Material Index"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Random"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Picker"),
+		type: "PICKER", // extension
+		x: 0,
+		y: 0,
+		color: 0xff4982a0,
+		inputs: [],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Base Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Opacity"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Occlusion"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Roughness"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Metallic"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Normal Map"),
+				type: "VECTOR",
+				color: -10238109,
+				default_value: f32_array_create_xyz(0.5, 0.5, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Emission"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Height"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Subsurface"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("RGB"),
+		type: "RGB",
+		x: 0,
+		y: 0,
+		color: 0xffb34f5a,
+		inputs: [],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.5, 0.5, 0.5, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [
+			{
+				name: _tr("default_value"),
+				type: "RGBA",
+				output: 0,
+				default_value: f32_array_create_x(0),
+				data: null,
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 0
+			}
+		],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Script"),
+		type: "SCRIPT_CPU", // extension
+		x: 0,
+		y: 0,
+		color: 0xffb34f5a,
+		inputs: [],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Value"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.5),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [
+			{
+				name: " ",
+				type: "STRING",
+				output: -1,
+				default_value: f32_array_create_x(0), // "",
+				data: null,
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 0
+			}
+		],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Shader"),
+		type: "SHADER_GPU", // extension
+		x: 0,
+		y: 0,
+		color: 0xffb34f5a,
+		inputs: [],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Value"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.5),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [
+			{
+				name: " ",
+				type: "STRING",
+				output: -1,
+				default_value: f32_array_create_x(0), // "",
+				data: null,
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 0
+			}
+		],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Tangent"),
+		type: "TANGENT",
+		x: 0,
+		y: 0,
+		color: 0xffb34f5a,
+		inputs: [],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Tangent"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Texture Coordinate"),
+		type: "TEX_COORD",
+		x: 0,
+		y: 0,
+		color: 0xffb34f5a,
+		inputs: [],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Generated"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Normal"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("UV"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Object"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Camera"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Window"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Reflection"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: []
+	},
+	{
+		id: 0,
+		name: _tr("UV Map"),
+		type: "UVMAP",
+		x: 0,
+		y: 0,
+		color: 0xffb34f5a,
+		inputs: [],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("UV"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Value"),
+		type: "VALUE",
+		x: 0,
+		y: 0,
+		color: 0xffb34f5a,
+		inputs: [],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Value"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.5),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [
+			{
+				name: _tr("default_value"),
+				type: "VALUE",
+				output: 0,
+				default_value: f32_array_create_x(0),
+				data: null,
+				min: 0.0,
+				max: 10.0,
+				precision: 100,
+				height: 0
+			}
+		],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Vertex Color"),
+		type: "VERTEX_COLOR",
+		x: 0,
+		y: 0,
+		color: 0xffb34f5a,
+		inputs: [],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Alpha"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Wireframe"),
+		type: "WIREFRAME",
+		x: 0,
+		y: 0,
+		color: 0xffb34f5a,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Size"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.01),
+				min: 0.0,
+				max: 0.1,
+				precision: 100,
+				display: 0
+			},
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Fac"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [
+			{
+				name: _tr("Pixel Size"),
+				type: "BOOL",
+				output: 0,
+				default_value: f32_array_create_x(0),
+				data: null,
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 0
+			}
+		],
+		width: 0
+	},
+];
+
+// let nodes_material_output: zui_node_t[] = [
+// 	{
+// 		id: 0,
+// 		name: _tr("Material Output"),
+// 		type: "OUTPUT_MATERIAL_PBR",
+// 		x: 0,
+// 		y: 0,
+// 		color: 0xffb34f5a,
+// 		inputs: [
+// 			{
+// 				id: 0,
+// 				node_id: 0,
+// 				name: _tr("Base Color"),
+// 				type: "RGBA",
+// 				color: 0xffc7c729,
+// 				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+//				min: 0.0,
+//				max: 1.0,
+//				precision: 100,
+//				display: 0
+// 			},
+// 			{
+// 				id: 0,
+// 				node_id: 0,
+// 				name: _tr("Opacity"),
+// 				type: "VALUE",
+// 				color: 0xffa1a1a1,
+// 				default_value: f32_array_create_x(1.0),
+//				min: 0.0,
+//				max: 1.0,
+//				precision: 100,
+//				display: 0
+// 			},
+// 			{
+// 				id: 0,
+// 				node_id: 0,
+// 				name: _tr("Occlusion"),
+// 				type: "VALUE",
+// 				color: 0xffa1a1a1,
+// 				default_value: f32_array_create_x(1.0),
+//				min: 0.0,
+//				max: 1.0,
+//				precision: 100,
+//				display: 0
+// 			},
+// 			{
+// 				id: 0,
+// 				node_id: 0,
+// 				name: _tr("Roughness"),
+// 				type: "VALUE",
+// 				color: 0xffa1a1a1,
+// 				default_value: f32_array_create_x(0.1),
+//				min: 0.0,
+//				max: 1.0,
+//				precision: 100,
+//				display: 0
+// 			},
+// 			{
+// 				id: 0,
+// 				node_id: 0,
+// 				name: _tr("Metallic"),
+// 				type: "VALUE",
+// 				color: 0xffa1a1a1,
+// 				default_value: f32_array_create_x(0.0),
+//				min: 0.0,
+//				max: 1.0,
+//				precision: 100,
+//				display: 0
+// 			},
+// 			{
+// 				id: 0,
+// 				node_id: 0,
+// 				name: _tr("Normal Map"),
+// 				type: "VECTOR",
+// 				color: -10238109,
+// 				default_value: f32_array_create_xyz(0.5, 0.5, 1.0),
+//				min: 0.0,
+//				max: 1.0,
+//				precision: 100,
+//				display: 0
+// 			},
+// 			{
+// 				id: 0,
+// 				node_id: 0,
+// 				name: _tr("Emission"),
+// 				type: "VALUE",
+// 				color: 0xffa1a1a1,
+// 				default_value: f32_array_create_x(0.0),
+//				min: 0.0,
+//				max: 1.0,
+//				precision: 100,
+//				display: 0
+// 			},
+// 			{
+// 				id: 0,
+// 				node_id: 0,
+// 				name: _tr("Height"),
+// 				type: "VALUE",
+// 				color: 0xffa1a1a1,
+// 				default_value: f32_array_create_x(0.0),
+//				min: 0.0,
+//				max: 1.0,
+//				precision: 100,
+//				display: 0
+// 			},
+// 			{
+// 				id: 0,
+// 				node_id: 0,
+// 				name: _tr("Subsurface"),
+// 				type: "VALUE",
+// 				color: 0xffa1a1a1,
+// 				default_value: f32_array_create_x(0.0),
+//				min: 0.0,
+//				max: 1.0,
+//				precision: 100,
+//				display: 0
+// 			}
+// 		],
+// 		outputs: [],
+// 		buttons: [],
+//		width: 0
+// 	}
+// ];
+
+let nodes_material_texture: zui_node_t[] = [
+	{
+		id: 0,
+		name: _tr("Brick Texture"),
+		type: "TEX_BRICK",
+		x: 0,
+		y: 0,
+		color: 0xff4982a0,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Vector"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color 1"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyz(0.8, 0.8, 0.8),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color 2"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyz(0.2, 0.2, 0.2),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Mortar"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Scale"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(5.0),
+				min: 0.0,
+				max: 10.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Fac"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Checker Texture"),
+		type: "TEX_CHECKER",
+		x: 0,
+		y: 0,
+		color: 0xff4982a0,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Vector"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color 1"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyz(0.8, 0.8, 0.8),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color 2"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyz(0.2, 0.2, 0.2),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Scale"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(5.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Fac"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Curvature Bake"),
+		type: "BAKE_CURVATURE",
+		x: 0,
+		y: 0,
+		color: 0xff4982a0,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Strength"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 2.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Radius"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 2.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Offset"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: -2.0,
+				max: 2.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Value"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Gradient Texture"),
+		type: "TEX_GRADIENT",
+		x: 0,
+		y: 0,
+		color: 0xff4982a0,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Vector"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Fac"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [
+			{
+				name: _tr("gradient_type"),
+				type: "ENUM",
+				output: 0,
+				default_value: f32_array_create_x(0),
+				data: u8_array_create_from_string(_tr("Linear") + "\0" + _tr("Diagonal") + "\0" + _tr("Radial") + "\0" + _tr("Spherical")),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 0
+			}
+		],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Image Texture"),
+		type: "TEX_IMAGE",
+		x: 0,
+		y: 0,
+		color: 0xff4982a0,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Vector"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Alpha"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [
+			{
+				name: _tr("File"),
+				type: "ENUM",
+				output: -1,
+				default_value: f32_array_create_x(0),
+				data: u8_array_create_from_string(""),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 0
+			},
+			{
+				name: _tr("Color Space"),
+				type: "ENUM",
+				output: -1,
+				default_value: f32_array_create_x(0),
+				data: u8_array_create_from_string(_tr("Auto") + "\0" + _tr("Linear") + "\0" + _tr("sRGB") + "\0" + _tr("DirectX Normal Map")),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 0
+			}
+		],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Magic Texture"),
+		type: "TEX_MAGIC",
+		x: 0,
+		y: 0,
+		color: 0xff4982a0,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Vector"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Scale"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(5.0),
+				min: 0.0,
+				max: 10.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Fac"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Musgrave Texture"),
+		type: "TEX_MUSGRAVE",
+		x: 0,
+		y: 0,
+		color: 0xff4982a0,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Vector"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Scale"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(5.0),
+				min: 0.0,
+				max: 10.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Height"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Noise Texture"),
+		type: "TEX_NOISE",
+		x: 0,
+		y: 0,
+		color: 0xff4982a0,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Vector"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Scale"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(5.0),
+				min: 0.0,
+				max: 10.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Fac"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Voronoi Texture"),
+		type: "TEX_VORONOI",
+		x: 0,
+		y: 0,
+		color: 0xff4982a0,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Vector"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Scale"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(5.0),
+				min: 0.0,
+				max: 10.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Fac"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [
+			{
+				name: _tr("coloring"),
+				type: "ENUM",
+				output: 0,
+				default_value: f32_array_create_x(0),
+				data: u8_array_create_from_string(_tr("Intensity") + "\0" + _tr("Cells")),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 0
+			}
+		],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Wave Texture"),
+		type: "TEX_WAVE",
+		x: 0,
+		y: 0,
+		color: 0xff4982a0,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Vector"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Scale"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(5.0),
+				min: 0.0,
+				max: 10.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Fac"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	}
+];
+
+let nodes_material_color: zui_node_t[] = [
+	{
+		id: 0,
+		name: _tr("Blur"),
+		type: "BLUR", // extension
+		x: 0,
+		y: 0,
+		color: 0xff448c6d,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Strength"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.5),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Bright/Contrast"),
+		type: "BRIGHTCONTRAST",
+		x: 0,
+		y: 0,
+		color: 0xff448c6d,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Bright"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Contrast"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Gamma"),
+		type: "GAMMA",
+		x: 0,
+		y: 0,
+		color: 0xff448c6d,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Gamma"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Hue/Saturation"),
+		type: "HUE_SAT",
+		x: 0,
+		y: 0,
+		color: 0xff448c6d,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Hue"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.5),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Saturation"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Value"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Fac"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Invert"),
+		type: "INVERT",
+		x: 0,
+		y: 0,
+		color: 0xff448c6d,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Fac"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("MixRGB"),
+		type: "MIX_RGB",
+		x: 0,
+		y: 0,
+		color: 0xff448c6d,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Fac"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.5),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color 1"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.5, 0.5, 0.5, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color 2"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.5, 0.5, 0.5, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [
+			{
+				name: _tr("blend_type"),
+				type: "ENUM",
+				output: 0,
+				default_value: f32_array_create_x(0),
+				data: u8_array_create_from_string(_tr("Mix") + "\0" + _tr("Darken") + "\0" + _tr("Multiply") + "\0" + _tr("Burn") + "\0" + _tr("Lighten") + "\0" + _tr("Screen") + "\0" + _tr("Dodge") + "\0" + _tr("Add") + "\0" + _tr("Overlay") + "\0" + _tr("Soft Light") + "\0" + _tr("Linear Light") + "\0" + _tr("Difference") + "\0" + _tr("Subtract") + "\0" + _tr("Divide") + "\0" + _tr("Hue") + "\0" + _tr("Saturation") + "\0" + _tr("Color") + "\0" + _tr("Value")),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 0
+			},
+			{
+				name: _tr("use_clamp"),
+				type: "BOOL",
+				output: 0,
+				default_value: f32_array_create_x(0),
+				data: null,
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 0
+			}
+		],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Quantize"),
+		type: "QUANTIZE",
+		x: 0,
+		y: 0,
+		color: 0xff448c6d,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Stength"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.1),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Warp"),
+		type: "DIRECT_WARP", // extension
+		x: 0,
+		y: 0,
+		color: 0xff448c6d,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Angle"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 360.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Mask"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.5),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	}
+];
+
+let nodes_material_vector: zui_node_t[] = [
+	{
+		id: 0,
+		name: _tr("Bump"),
+		type: "BUMP",
+		x: 0,
+		y: 0,
+		color: 0xff522c99,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Strength"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Distance"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Height"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Normal"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Normal Map"),
+				type: "VECTOR",
+				color: -10238109,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Mapping"),
+		type: "MAPPING",
+		x: 0,
+		y: 0,
+		color: 0xff522c99,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Vector"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Location"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 1
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Rotation"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 360.0,
+				precision: 100,
+				display: 1
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Scale"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(1.0, 1.0, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 1
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Vector"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Mix Normal Map"),
+		type: "MIX_NORMAL_MAP",
+		x: 0,
+		y: 0,
+		color: 0xff522c99,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Normal Map 1"),
+				type: "VECTOR",
+				color: -10238109,
+				default_value: f32_array_create_xyz(0.5, 0.5, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Normal Map 2"),
+				type: "VECTOR",
+				color: -10238109,
+				default_value: f32_array_create_xyz(0.5, 0.5, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Normal Map"),
+				type: "VECTOR",
+				color: -10238109,
+				default_value: f32_array_create_xyz(0.5, 0.5, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [
+			{
+				name: _tr("blend_type"),
+				type: "ENUM",
+				output: 0,
+				default_value: f32_array_create_x(0),
+				data: u8_array_create_from_string(_tr("Partial Derivative") + "\0" + _tr("Whiteout") + "\0" + _tr("Reoriented")),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 0
+			}
+		],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Normal"),
+		type: "NORMAL",
+		x: 0,
+		y: 0,
+		color: 0xff522c99,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Normal"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Normal"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Dot"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [
+			{
+				name: _tr("Vector"),
+				type: "VECTOR",
+				output: 0,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				data: null,
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 0
+			}
+		],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Normal Map"),
+		type: "NORMAL_MAP",
+		x: 0,
+		y: 0,
+		color: 0xff522c99,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Stength"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 2.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Normal Map"),
+				type: "VECTOR",
+				color: -10238109,
+				default_value: f32_array_create_xyz(0.5, 0.5, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Normal Map"),
+				type: "VECTOR",
+				color: -10238109,
+				default_value: f32_array_create_xyz(0.5, 0.5, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Vector Curves"),
+		type: "CURVE_VEC",
+		x: 0,
+		y: 0,
+		color: 0xff522c99,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Fac"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Vector"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Vector"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [
+			{
+				name: "nodes_material_vector_curves_button",
+				type: "CUSTOM",
+				output: 0,
+				// default_value: [[f32_array_create_xy(0.0, 0.0), f32_array_create_xy(0.0, 0.0)], [f32_array_create_xy(0.0, 0.0), f32_array_create_xy(0.0, 0.0)], [f32_array_create_xy(0.0, 0.0), f32_array_create_xy(0.0, 0.0)]],
+				default_value: f32_array_create(0),
+				data: null,
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 8.5
+			}
+		],
+		width: 0
+	}
+];
+
+let nodes_material_converter: zui_node_t[] = [
+	{
+		id: 0,
+		name: _tr("Clamp"),
+		type: "CLAMP",
+		x: 0,
+		y: 0,
+		color: 0xff62676d,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Value"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.5),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Min"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Max"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Value"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [
+			{
+				name: _tr("operation"),
+				type: "ENUM",
+				output: 0,
+				default_value: f32_array_create_x(0),
+				data: u8_array_create_from_string(_tr("Min Max") + "\0" + _tr("Range")),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 0
+			}
+		],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Color Ramp"),
+		type: "VALTORGB",
+		x: 0,
+		y: 0,
+		color: 0xff62676d,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Fac"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.5),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Alpha"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [
+			{
+				name: "nodes_material_color_ramp_button",
+				type: "CUSTOM",
+				output: 0,
+				// default_value: [f32_array_create_xyzwv(1.0, 1.0, 1.0, 1.0, 0.0)],
+				default_value: f32_array_create_xyzwv(1.0, 1.0, 1.0, 1.0, 0.0),
+				data: u8_array_create(1),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 4.5
+			}
+		],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Color Mask"),
+		type: "COLMASK",
+		x: 0,
+		y: 0,
+		color: 0xff62676d,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Mask Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Radius"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.1),
+				min: 0.0,
+				max: 1.74,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Fuzziness"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Mask"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Combine HSV"),
+		type: "COMBHSV",
+		x: 0,
+		y: 0,
+		color: 0xff62676d,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("H"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("S"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("V"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Combine RGB"),
+		type: "COMBRGB",
+		x: 0,
+		y: 0,
+		color: 0xff62676d,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("R"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("G"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("B"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Combine XYZ"),
+		type: "COMBXYZ",
+		x: 0,
+		y: 0,
+		color: 0xff62676d,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("X"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Y"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Z"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Vector"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Map Range"),
+		type: "MAPRANGE",
+		x: 0,
+		y: 0,
+		color: 0xff62676d,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Value"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.5),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("From Min"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("From Max"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("To Min"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("To Max"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Value"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [
+			{
+				name: _tr("use_clamp"),
+				type: "BOOL",
+				output: 0,
+				default_value: f32_array_create_x(0),
+				data: null,
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 0
+			}
+		],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Math"),
+		type: "MATH",
+		x: 0,
+		y: 0,
+		color: 0xff62676d,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Value"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.5),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Value"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.5),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Value"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [
+			{
+				name: _tr("operation"),
+				type: "ENUM",
+				output: 0,
+				default_value: f32_array_create_x(0),
+				data: u8_array_create_from_string(_tr("Add") + "\0" + _tr("Subtract") + "\0" + _tr("Multiply") + "\0" + _tr("Divide") + "\0" + _tr("Power") + "\0" + _tr("Logarithm") + "\0" + _tr("Square Root") + "\0" + _tr("Inverse Square Root") + "\0" + _tr("Absolute") + "\0" + _tr("Exponent") + "\0" + _tr("Minimum") + "\0" + _tr("Maximum") + "\0" + _tr("Less Than") + "\0" + _tr("Greater Than") + "\0" + _tr("Sign") + "\0" + _tr("Round") + "\0" + _tr("Floor") + "\0" + _tr("Ceil") + "\0" + _tr("Truncate") + "\0" + _tr("Fraction") + "\0" + _tr("Modulo") + "\0" + _tr("Snap") + "\0" + _tr("Ping-Pong") + "\0" + _tr("Sine") + "\0" + _tr("Cosine") + "\0" + _tr("Tangent") + "\0" + _tr("Arcsine") + "\0" + _tr("Arccosine") + "\0" + _tr("Arctangent") + "\0" + _tr("Arctan2") + "\0" + _tr("Hyperbolic Sine") + "\0" + _tr("Hyperbolic Cosine") + "\0" + _tr("Hyperbolic Tangent") + "\0" + _tr("To Radians") + "\0" + _tr("To Degrees")),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 0
+			},
+			{
+				name: _tr("use_clamp"),
+				type: "BOOL",
+				output: 0,
+				default_value: f32_array_create_x(0),
+				data: null,
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 0
+			}
+		],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("RGB to BW"),
+		type: "RGBTOBW",
+		x: 0,
+		y: 0,
+		color: 0xff62676d,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Val"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Separate HSV"),
+		type: "SEPHSV",
+		x: 0,
+		y: 0,
+		color: 0xff62676d,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.5, 0.5, 0.5, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("H"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("S"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("V"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Separate RGB"),
+		type: "SEPRGB",
+		x: 0,
+		y: 0,
+		color: 0xff62676d,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("R"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("G"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("B"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Separate XYZ"),
+		type: "SEPXYZ",
+		x: 0,
+		y: 0,
+		color: 0xff62676d,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Vector"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("X"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Y"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Z"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Vector Math"),
+		type: "VECT_MATH",
+		x: 0,
+		y: 0,
+		color: 0xff62676d,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Vector"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Vector"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Vector"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Value"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [
+			{
+				name: _tr("operation"),
+				type: "ENUM",
+				output: 0,
+				default_value: f32_array_create_x(0),
+				data: u8_array_create_from_string(_tr("Add") + "\0" + _tr("Subtract") + "\0" + _tr("Multiply") + "\0" + _tr("Divide") + "\0" + _tr("Average") + "\0" + _tr("Cross Product") + "\0" + _tr("Project") + "\0" + _tr("Reflect") + "\0" + _tr("Dot Product") + "\0" + _tr("Distance") + "\0" + _tr("Length") + "\0" + _tr("Scale") + "\0" + _tr("Normalize") + "\0" + _tr("Absolute") + "\0" + _tr("Minimum") + "\0" + _tr("Maximum") + "\0" + _tr("Floor") + "\0" + _tr("Ceil") + "\0" + _tr("Fraction") + "\0" + _tr("Modulo") + "\0" + _tr("Snap") + "\0" + _tr("Sine") + "\0" + _tr("Cosine") + "\0" + _tr("Tangent")),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 0
+			}
+		],
+		width: 0
+	}
+];
+
+let nodes_material_group: zui_node_t[] = [
+	{
+		id: 0,
+		name: _tr("New Group"),
+		type: "GROUP",
+		x: 0,
+		y: 0,
+		color: 0xffb34f5a,
+		inputs: [],
+		outputs: [],
+		buttons: [
+			{
+				name: "nodes_material_new_group_button",
+				type: "CUSTOM",
+				output: -1,
+				default_value: f32_array_create_x(0),
+				data: null,
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 1
+			}
+		],
+		width: 0
+	}
+];
+
+type node_list_t = zui_node_t[];
+
+let nodes_material_list: node_list_t[] = [
+	nodes_material_input,
+	nodes_material_texture,
+	nodes_material_color,
+	nodes_material_vector,
+	nodes_material_converter,
+	nodes_material_group
 ];
 
 function nodes_material_vector_curves_button(ui: zui_t, nodes: zui_nodes_t, node: zui_node_t) {
 	let but: zui_node_button_t = node.buttons[0];
 	let nhandle: zui_handle_t = zui_nest(zui_handle(__ID__), node.id);
-	zui_row([1 / 3, 1 / 3, 1 / 3]);
+	let row: f32[] = [1 / 3, 1 / 3, 1 / 3];
+	zui_row(row);
 	zui_radio(zui_nest(zui_nest(nhandle, 0), 1), 0, "X");
 	zui_radio(zui_nest(zui_nest(nhandle, 0), 1), 1, "Y");
 	zui_radio(zui_nest(zui_nest(nhandle, 0), 1), 2, "Z");
@@ -3842,7 +3858,8 @@ function nodes_material_vector_curves_button(ui: zui_t, nodes: zui_nodes_t, node
 	// for (let i: i32 = 0; i < num; ++i) { ui.line(); }
 	ui._y += zui_nodes_LINE_H() * 5;
 	// Edit
-	zui_row([1 / 5, 1 / 5, 3 / 5]);
+	row = [1 / 5, 1 / 5, 3 / 5];
+	zui_row(row);
 	if (zui_button("+")) {
 		let f32a: f32_array_t = f32_array_create(2);
 		f32a[0] = 0; f32a[1] = 0;
@@ -3861,7 +3878,8 @@ function nodes_material_vector_curves_button(ui: zui_t, nodes: zui_nodes_t, node
 	if (i >= val.length || i < 0) {
 		ihandle.value = i = val.length - 1; // Stay in bounds
 	}
-	zui_row([1 / 2, 1 / 2]);
+	row = [1 / 2, 1 / 2];
+	zui_row(row);
 	zui_nest(zui_nest(nhandle, 0), 3).value = val[i][0];
 	zui_nest(zui_nest(nhandle, 0), 4).value = val[i][1];
 	let h1: zui_handle_t = zui_nest(zui_nest(nhandle, 0), 3);
@@ -3894,7 +3912,8 @@ function nodes_material_color_ramp_button(ui: zui_t, nodes: zui_nodes_t, node: z
 	ui._y += zui_nodes_LINE_H();
 	// Edit
 	let ihandle: zui_handle_t = zui_nest(zui_nest(nhandle, 0), 2);
-	zui_row([1 / 4, 1 / 4, 2 / 4]);
+	let row: f32[] = [1 / 4, 1 / 4, 2 / 4];
+	zui_row(row);
 	if (zui_button("+")) {
 		let last: f32_array_t = vals[vals.length - 1];
 		let f32a: f32_array_t = f32_array_create(5);
@@ -3913,7 +3932,8 @@ function nodes_material_color_ramp_button(ui: zui_t, nodes: zui_nodes_t, node: z
 
 	// but.data = zui_combo(zui_nest(zui_nest(nhandle, 0), 1, { position: but.data }), [tr("Linear"), tr("Constant")], tr("Interpolate"));
 
-	zui_row([1 / 2, 1 / 2]);
+	row = [1 / 2, 1 / 2];
+	zui_row(row);
 	let i: i32 = math_floor(zui_slider(ihandle, "Index", 0, vals.length - 1, false, 1, true, zui_align_t.LEFT));
 	if (i >= vals.length || i < 0) {
 		ihandle.value = i = vals.length - 1; // Stay in bounds

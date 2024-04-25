@@ -121,9 +121,11 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 	ui._y = 2 + start_y;
 
 	///if (krom_android || krom_ios)
-	zui_combo(base_res_handle, ["2K", "4K"], tr("Resolution"));
+	let base_res_combo: string[] = ["2K", "4K"];
+	zui_combo(base_res_handle, base_res_combo, tr("Resolution"));
 	///else
-	zui_combo(base_res_handle, ["2K", "4K", "8K", "16K"], tr("Resolution"));
+	let base_res_combo: string[] = ["2K", "4K", "8K", "16K"];
+	zui_combo(base_res_handle, base_res_combo, tr("Resolution"));
 	///end
 	if (base_res_handle.changed) {
 		base_on_layers_resized();

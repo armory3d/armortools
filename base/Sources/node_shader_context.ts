@@ -9,9 +9,21 @@ type node_shader_context_t = {
 	tunits?: tex_unit_t[];
 };
 
-function node_shader_context_create(material: material_t, props: any): node_shader_context_t {
+function node_shader_context_create(material: material_t, props: shader_context_t): node_shader_context_t {
 	let raw: node_shader_context_t = {};
 	raw.material = material;
+
+	let vertex_elements_default: vertex_element_t[] = [
+		{
+			name: "pos",
+			data: "short4norm"
+		},
+		{
+			name: "nor",
+			data: "short2norm"
+		}
+	];
+
 	raw.data = {
 		name: props.name,
 		depth_write: props.depth_write,
@@ -25,7 +37,7 @@ function node_shader_context_create(material: material_t, props: any): node_shad
 		alpha_blend_operation: props.alpha_blend_operation,
 		fragment_shader: "",
 		vertex_shader: "",
-		vertex_elements: props.vertex_elements != null ? props.vertex_elements : [ {name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}],
+		vertex_elements: props.vertex_elements != null ? props.vertex_elements : vertex_elements_default,
 		color_attachments: props.color_attachments,
 		depth_attachment: props.depth_attachment
 	};

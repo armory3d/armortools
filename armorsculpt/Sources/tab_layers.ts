@@ -34,7 +34,8 @@ function tab_layers_draw_full(htab: zui_handle_t) {
 	let ui = ui_base_ui;
 	if (zui_tab(htab, tr("Layers"))) {
 		zui_begin_sticky();
-		zui_row([1 / 4, 3 / 4]);
+		let row: f32[] = [1 / 4, 3 / 4];
+		zui_row(row);
 
 		tab_layers_button_new(tr("New"));
 		tab_layers_combo_filter();
@@ -197,7 +198,8 @@ function tab_layers_draw_layer_slot(l: slot_layer_t, i: i32, mini: bool) {
 function tab_layers_draw_layer_slot_mini(l: slot_layer_t, i: i32) {
 	let ui = ui_base_ui;
 
-	zui_row([1, 1]);
+	let row: f32[] = [1, 1];
+	zui_row(row);
 	let uix = ui._x;
 	let uiy = ui._y;
 	zui_end_element();
@@ -214,10 +216,12 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 
 	let hasPanel = slot_layer_is_group(l) || (slot_layer_is_layer(l) && slot_layer_get_masks(l, false) != null);
 	if (hasPanel) {
-		zui_row([8 / 100, 52 / 100, 30 / 100, 10 / 100]);
+		let row: f32[] = [8 / 100, 52 / 100, 30 / 100, 10 / 100];
+		zui_row(row);
 	}
 	else {
-		zui_row([8 / 100, 52 / 100, 30 / 100]);
+		let row: f32[] = [8 / 100, 52 / 100, 30 / 100];
+		zui_row(row);
 	}
 
 	// Draw eye icon
@@ -331,7 +335,8 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	else {
 		ui._y -= zui_ELEMENT_OFFSET(ui);
 
-		zui_row([8 / 100, 16 / 100, 36 / 100, 30 / 100, 10 / 100]);
+		let row: f32 = [8 / 100, 16 / 100, 36 / 100, 30 / 100, 10 / 100];
+		zui_row(row);
 		zui_end_element();
 		zui_end_element();
 		zui_end_element();

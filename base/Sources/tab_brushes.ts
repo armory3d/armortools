@@ -7,7 +7,8 @@ function tab_brushes_draw(htab: zui_handle_t) {
 	let ui: zui_t = ui_base_ui;
 	if (zui_tab(htab, tr("Brushes"))) {
 		zui_begin_sticky();
-		zui_row([1 / 4, 1 / 4, 1 / 4]);
+		let row: f32[] = [1 / 4, 1 / 4, 1 / 4];
+		zui_row(row);
 		if (zui_button(tr("New"))) {
 			context_raw.brush = slot_brush_create();
 			array_push(project_brushes, context_raw.brush);

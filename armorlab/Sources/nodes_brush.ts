@@ -9,20 +9,24 @@
 
 let nodes_brush_categories: string[] = [_tr("Input"), _tr("Model")];
 
-let nodes_brush_list: zui_node_t[][] = [
-	[ // Input
-		image_texture_node_def,
-		rgb_node_def,
-	],
-	[ // Model
-		inpaint_node_def,
-		photo_to_pbr_node_def,
-		text_to_photo_node_def,
-		tiling_node_def,
-		upscale_node_def,
-		variance_node_def,
-	]
+let nodes_brush_input: zui_node_t[] = [
+	image_texture_node_def,
+	rgb_node_def,
 ];
+
+let nodes_brush_model: zui_node_t[] = [
+	inpaint_node_def,
+	photo_to_pbr_node_def,
+	text_to_photo_node_def,
+	tiling_node_def,
+	upscale_node_def,
+	variance_node_def,
+];
+
+let nodes_brush_list: node_list_t[] = [
+	nodes_brush_input,
+	nodes_brush_model
+]
 
 let nodes_brush_creates: map_t<string, any>;
 

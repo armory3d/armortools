@@ -11,10 +11,12 @@ function tab_textures_draw(htab: zui_handle_t) {
 		zui_begin_sticky();
 
 		if (config_raw.touch_ui) {
-			zui_row([1 / 4, 1 / 4]);
+			let row: f32[] = [1 / 4, 1 / 4];
+			zui_row(row);
 		}
 		else {
-			zui_row([1 / 14, 1 / 14]);
+			let row: f32[] = [1 / 14, 1 / 14];
+			zui_row(row);
 		}
 
 		if (zui_button(tr("Import"))) {

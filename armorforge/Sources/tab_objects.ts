@@ -9,7 +9,7 @@ function tab_objects_roundfp(f: f32, precision: i32 = 2): f32 {
 }
 
 function tab_objects_import_mesh_done() {
-	object_set_parent(project_paint_objects.pop().base, null);
+	object_set_parent(array_pop(project_paint_objects).base, null);
 }
 
 function tab_objects_draw_menu(ui: zui_t) {
@@ -65,7 +65,8 @@ function tab_objects_draw_list(ui: zui_t, list_handle: zui_handle_t, current_obj
 	}
 
 	if (current_object.children.length > 0) {
-		zui_row([1 / 13, 12 / 13]);
+		let row: f32[] = [1 / 13, 12 / 13];
+		zui_row(row);
 		let h: zui_handle_t = zui_nest(list_handle, tab_objects_line_counter);
 		if (h.init) {
 			h.selected = true;
@@ -115,10 +116,11 @@ function tab_objects_draw_list(ui: zui_t, list_handle: zui_handle_t, current_obj
 }
 
 function tab_objects_draw(htab: zui_handle_t) {
-	let ui = ui_base_ui;
+	let ui: zui_t = ui_base_ui;
 	if (zui_tab(htab, tr("Objects"))) {
 		zui_begin_sticky();
-		zui_row([1 / 4]);
+		let row: f32[] = [1 / 4];
+		zui_row(row);
 		if (zui_button("Import")) {
 			project_import_mesh(false, tab_objects_import_mesh_done);
 		}
@@ -130,7 +132,6 @@ function tab_objects_draw(htab: zui_handle_t) {
 		}
 
 		if (zui_panel(outliner_handle, "Outliner")) {
-			// ui.indent();
 			ui._y -= zui_ELEMENT_OFFSET(ui);
 
 			tab_objects_line_counter = 0;
@@ -139,8 +140,6 @@ function tab_objects_draw(htab: zui_handle_t) {
 				let c: object_t = _scene_root.children[i];
 				tab_objects_draw_list(ui, zui_handle(__ID__), c);
 			}
-
-			// ui.unindent();
 		}
 
 		let properties_handle: zui_handle_t = zui_handle(__ID__);
@@ -149,22 +148,21 @@ function tab_objects_draw(htab: zui_handle_t) {
 		}
 
 		if (zui_panel(properties_handle, "Properties")) {
-			// ui.indent();
-
 			if (context_raw.selected_object != null) {
-				let h = zui_handle(__ID__);
+				let h: zui_handle_t = zui_handle(__ID__);
 				h.selected = context_raw.selected_object.visible;
 				context_raw.selected_object.visible = zui_check(h, "Visible");
 
-				let t = context_raw.selected_object.transform;
-				let local_pos = t.loc;
-				let scale = t.scale;
-				let rot = quat_get_euler(t.rot);
-				let dim = t.dim;
+				let t: transform_t = context_raw.selected_object.transform;
+				let local_pos: vec4_t = t.loc;
+				let scale: vec4_t = t.scale;
+				let rot: quat_t = quat_get_euler(t.rot);
+				let dim: vec4_t = t.dim;
 				vec4_mult(rot, 180 / 3.141592);
 				let f: f32 = 0.0;
 
-				zui_row([1 / 4, 1 / 4, 1 / 4, 1 / 4]);
+				let row: f32[] = [1 / 4, 1 / 4, 1 / 4, 1 / 4];
+				zui_row(row);
 				zui_text("Loc");
 
 				h = zui_handle(__ID__);
@@ -188,7 +186,7 @@ function tab_objects_draw(htab: zui_handle_t) {
 					local_pos.z = f;
 				}
 
-				zui_row([1 / 4, 1 / 4, 1 / 4, 1 / 4]);
+				zui_row(row);
 				zui_text("Rotation");
 
 				h = zui_handle(__ID__);
@@ -225,7 +223,7 @@ function tab_objects_draw(htab: zui_handle_t) {
 					// ///end
 				}
 
-				zui_row([1 / 4, 1 / 4, 1 / 4, 1 / 4]);
+				zui_row(row);
 				zui_text("Scale");
 
 				h = zui_handle(__ID__);
@@ -249,7 +247,7 @@ function tab_objects_draw(htab: zui_handle_t) {
 					scale.z = f;
 				}
 
-				zui_row([1 / 4, 1 / 4, 1 / 4, 1 / 4]);
+				zui_row(row);
 				zui_text("Dimensions");
 
 				h = zui_handle(__ID__);
@@ -301,8 +299,6 @@ function tab_objects_draw(htab: zui_handle_t) {
 					}
 				}
 			}
-
-			// ui.unindent();
 		}
 	}
 }
