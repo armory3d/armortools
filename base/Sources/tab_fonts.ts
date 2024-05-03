@@ -83,11 +83,11 @@ function tab_fonts_draw(htab: zui_handle_t) {
 					// g4_set_pipeline(pipe);
 					// ///end
 					// g4_set_int(channelLocation, 1);
-					state = zui_image(img);
+					state = _zui_image(img);
 					// g2_set_pipeline(null);
 				}
 				else {
-					state = zui_image(resource_get("icons.k"), -1, -1.0, tile * 6, tile, tile, tile);
+					state = _zui_image(resource_get("icons.k"), -1, -1.0, tile * 6, tile, tile, tile);
 				}
 
 				if (state == zui_state_t.STARTED) {

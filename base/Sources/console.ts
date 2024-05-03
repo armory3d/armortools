@@ -18,7 +18,7 @@ function console_draw_toast(s: string) {
 	g2_draw_string(s, x - g2_font_width(_g2_font, _g2_font_size, s) / 2, y + 40 * scale - g2_font_height(_g2_font, _g2_font_size) / 2);
 }
 
-function _console_toast_render(s: any) {
+function _console_toast_render(s: string) {
 	console_draw_toast(s);
 	krom_g4_swap_buffers();
 	app_remove_render_2d(_console_toast_render);
@@ -68,10 +68,10 @@ function console_log(s: string) {
 	console_trace(s);
 }
 
-function console_trace(v: any) {
+function console_trace(s: string) {
 	base_redraw_console();
-	console_last_traces.unshift(any_to_string(v));
+	array_insert(console_last_traces, 0, s);
 	if (console_last_traces.length > 100) {
-		console_last_traces.pop();
+		array_pop(console_last_traces);
 	}
 }

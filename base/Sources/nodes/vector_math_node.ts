@@ -5,7 +5,7 @@ type vector_math_node_t = {
 	v?: vec4_t;
 };
 
-function vector_math_node_create(arg: any): vector_math_node_t {
+function vector_math_node_create(args: f32_array_t): vector_math_node_t {
 	let n: vector_math_node_t = {};
 	n.base = logic_node_create();
 	n.base.get = vector_math_node_get;
@@ -39,7 +39,7 @@ function vector_math_node_get(self: vector_math_node_t, from: i32): logic_node_v
 		vec4_cross(self.v, v2);
 	}
 	else if (op == "Normalize") {
-		vec4_normalize(self.v, );
+		vec4_normalize(self.v);
 	}
 	else if (op == "Multiply") {
 		self.v.x *= v2.x;
@@ -105,9 +105,9 @@ function vector_math_node_get(self: vector_math_node_t, from: i32): logic_node_v
 		self.v.z = v1.z - math_floor(v1.z);
 	}
 	else if (op == "Modulo") {
-		self.v.x = v1.x % v2.x;
-		self.v.y = v1.y % v2.y;
-		self.v.z = v1.z % v2.z;
+		self.v.x = math_fmod(v1.x, v2.x);
+		self.v.y = math_fmod(v1.y, v2.y);
+		self.v.z = math_fmod(v1.z, v2.z);
 	}
 	else if (op == "Snap") {
 		self.v.x = math_floor(v1.x / v2.x) * v2.x;

@@ -1,12 +1,42 @@
 
+function encode_scene(raw: scene_t): buffer_t {
+	return null;
+
+	// armpack_encode_start(encoded);
+	// armpack_encode_map(3);
+	// armpack_encode_string("name");
+	// armpack_encode_string(canvas->name);
+}
+
+function encode_scene_size(raw: scene_t): i32 {
+	return 0;
+
+	// uint32_t size = 0;
+	// size += armpack_size_map();
+	// size += armpack_size_string("name");
+	// size += armpack_size_string(canvas->name);
+}
+
+function encode_project(raw: project_format_t): buffer_t {
+	return null;
+}
+
+function encode_project_size(raw: project_format_t): i32 {
+	return 0;
+}
+
 function export_arm_run_mesh(path: string, paint_objects: mesh_object_t[]) {
 	let mesh_datas: mesh_data_t[] = [];
 	for (let i: i32 = 0; i < paint_objects.length; ++i) {
 		let p: mesh_object_t = paint_objects[i];
 		array_push(mesh_datas, p.data);
 	}
-	let raw: scene_t = { mesh_datas: mesh_datas };
-	let b: buffer_t = armpack_encode(raw);
+
+	let raw: scene_t = {
+		mesh_datas: mesh_datas
+	};
+	let b: buffer_t = encode_scene(raw);
+
 	if (!ends_with(path, ".arm")) {
 		path += ".arm";
 	}
@@ -79,7 +109,7 @@ function export_arm_run_project() {
 	let ld: layer_data_t[] = [];
 	for (let i: i32 = 0; i < project_layers.length; ++i) {
 		let l: slot_layer_t = project_layers[i];
-		array_push(ld, {
+		let d: layer_data_t = {
 			name: l.name,
 			res: l.texpaint != null ? l.texpaint.width : project_layers[0].texpaint.width,
 			bpp: bpp,
@@ -109,7 +139,8 @@ function export_arm_run_project() {
 			paint_emis: l.paint_emis,
 			paint_subs: l.paint_subs
 			///end
-		});
+		};
+		array_push(ld, d);
 	}
 	///end
 
@@ -201,7 +232,7 @@ function export_arm_run_project() {
 	}
 	///end
 
-	let buffer: buffer_t = armpack_encode(project_raw);
+	let buffer: buffer_t = encode_project(project_raw);
 	krom_file_save_bytes(project_filepath, buffer, buffer_size(buffer) + 1);
 
 	// Save to recent
@@ -212,7 +243,7 @@ function export_arm_run_project() {
 	///end
 	let recent: string[] = config_raw.recent_projects;
 	array_remove(recent, recent_path);
-	recent.unshift(recent_path);
+	array_insert(recent, 0, recent_path);
 	config_save();
 
 	console_info(tr("Project saved"));
@@ -320,7 +351,7 @@ function export_arm_run_material(path: string) {
 		export_arm_pack_assets(raw, assets);
 	}
 
-	let buffer: buffer_t = armpack_encode(raw);
+	let buffer: buffer_t = encode_project(raw);
 	krom_file_save_bytes(path, buffer, buffer_size(buffer) + 1);
 }
 ///end
@@ -387,7 +418,7 @@ function export_arm_run_brush(path: string) {
 		export_arm_pack_assets(raw, assets);
 	}
 
-	let buffer: buffer_t = armpack_encode(raw);
+	let buffer: buffer_t = encode_project(raw);
 	krom_file_save_bytes(path, buffer, buffer_size(buffer) + 1);
 }
 ///end
@@ -435,7 +466,7 @@ function export_arm_meshes_to_files(project_path: string): string[] {
 
 function export_arm_fonts_to_files(project_path: string, fonts: slot_font_t[]): string[] {
 	let font_files: string[] = [];
-	for (let i = 1; i <fonts.length; ++i) {
+	for (let i: i32 = 1; i < fonts.length; ++i) {
 		let f: slot_font_t = fonts[i];
 		///if krom_ios
 		let same_drive: bool = false;
@@ -494,12 +525,13 @@ function export_arm_pack_assets(raw: project_format_t, assets: asset_t[]) {
 			g2_draw_image(image, 0, 0);
 			g2_end();
 			array_push(temp_images, temp);
-			array_push(raw.packed_assets, {
+			let pa: packed_asset_t = {
 				name: assets[i].file,
 				bytes: ends_with(assets[i].file, ".jpg") ?
 					krom_encode_jpg(image_get_pixels(temp), temp.width, temp.height, 0, 80) :
 					krom_encode_png(image_get_pixels(temp), temp.width, temp.height, 0)
-			});
+			};
+			array_push(raw.packed_assets, pa);
 		}
 	}
 	app_notify_on_next_frame(function (temp_images: image_t[]) {
@@ -514,11 +546,11 @@ function export_arm_run_swatches(path: string) {
 	if (!ends_with(path, ".arm")) {
 		path += ".arm";
 	}
-	let raw: any = {
+	let raw: project_format_t = {
 		version: manifest_version,
 		swatches: project_raw.swatches
 	};
-	let buffer: buffer_t = armpack_encode(raw);
+	let buffer: buffer_t = encode_project(raw);
 	krom_file_save_bytes(path, buffer, buffer_size(buffer) + 1);
 }
 

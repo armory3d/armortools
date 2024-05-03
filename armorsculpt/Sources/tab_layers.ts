@@ -237,7 +237,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 		col -= 0x99000000;
 	}
 
-	if (zui_image(icons, col, -1.0, r.x, r.y, r.w, r.h) == zui_state_t.RELEASED) {
+	if (_zui_image(icons, col, -1.0, r.x, r.y, r.w, r.h) == zui_state_t.RELEASED) {
 		tab_layers_layer_toggle_visible(l);
 	}
 	ui._x -= 2;
@@ -252,12 +252,12 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	if (tab_layers_layer_name_edit == l.id) {
 		tab_layers_layer_name_handle.text = l.name;
 		l.name = zui_text_input(tab_layers_layer_name_handle);
-		if (ui.text_selected_handle_ptr != tab_layers_layer_name_handle.ptr) {
+		if (ui.text_selected_handle != tab_layers_layer_name_handle) {
 			tab_layers_layer_name_edit = -1;
 		}
 	}
 	else {
-		if (ui.enabled && ui.input_enabled && ui.combo_selected_handle_ptr == 0 &&
+		if (ui.enabled && ui.input_enabled && ui.combo_selected_handle == 0 &&
 			ui.input_x > ui._window_x + ui._x && ui.input_x < ui._window_x + ui._window_w &&
 			ui.input_y > ui._window_y + ui._y - center && ui.input_y < ui._window_y + ui._y - center + (step * zui_SCALE(ui)) * 2) {
 			if (ui.input_started) {
@@ -412,7 +412,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 
 }
 
-function tab_layers_can_drop_new_layer(position: i32) {
+function tab_layers_can_drop_new_layer(position: i32): bool {
 	if (position > 0 && position < project_layers.length && slot_layer_is_mask(project_layers[position - 1])) {
 		// 1. The layer to insert is inserted in the middle
 		// 2. The layer below is a mask, i.e. the layer would have to be a (group) mask, too.

@@ -21,7 +21,7 @@ function import_gpl_run(path: string, replace_existing: bool) {
 	// 	else {
 	// 		let tokens: string[] = string_split(delimiter, line);
 	// 		if (tokens.length < 3) continue;
-	// 		let swatch: TSwatchColor = makeSwatch(Color.fromBytes(any_to_string(tokens[0]), any_to_string(tokens[1]), any_to_string(tokens[2])));
+	// 		let swatch: TSwatchColor = makeSwatch(Color.fromBytes(tokens[0], tokens[1], tokens[2]));
 	// 		array_push(swatches, swatch);
 	// 	}
 	// }

@@ -54,7 +54,8 @@ function slot_material_create(m: material_data_t = null, c: zui_node_canvas_t = 
 			slot_material_default_canvas = b;
 		}
 		raw.canvas = armpack_decode(slot_material_default_canvas);
-		raw.canvas.name = "Material " + (raw.id + 1);
+		let id: i32 = (raw.id + 1);
+		raw.canvas.name = "Material " + id;
 	}
 	else {
 		raw.canvas = c;

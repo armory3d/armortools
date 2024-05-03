@@ -12,7 +12,7 @@ let ui_nodes_ww: i32;
 let ui_nodes_wh: i32;
 
 let ui_nodes_ui: zui_t;
-let ui_nodes_canvas_type = canvas_type_t.MATERIAL;
+let ui_nodes_canvas_type: canvas_type_t = canvas_type_t.MATERIAL;
 let ui_nodes_show_menu: bool = false;
 let ui_nodes_show_menu_first: bool = true;
 let ui_nodes_hide_menu: bool = false;
@@ -36,17 +36,17 @@ let ui_nodes_group_stack: node_group_t[] = [];
 let ui_nodes_controls_down: bool = false;
 
 function ui_nodes_init() {
-	zui_set_on_link_drag(ui_nodes_on_link_drag);
-	zui_set_on_socket_released(ui_nodes_on_socket_released);
-	zui_set_on_canvas_released(ui_nodes_on_canvas_released);
-	zui_set_on_canvas_control(ui_nodes_on_canvas_control);
+	zui_nodes_on_link_drag = ui_nodes_on_link_drag;
+	zui_nodes_on_socket_released = ui_nodes_on_socket_released;
+	zui_nodes_on_canvas_released = ui_nodes_on_canvas_released;
+	zui_nodes_on_canvas_control = ui_nodes_on_canvas_control;
 
 	let scale: f32 = config_raw.window_scale;
 	let ops: zui_options_t = {
 		theme: base_theme,
-		font: base_font,
-		color_wheel: base_color_wheel,
-		black_white_gradient: base_color_wheel_gradient,
+		font: base_font.font_,
+		color_wheel: base_color_wheel.texture_,
+		black_white_gradient: base_color_wheel_gradient.texture_,
 		scale_factor: scale
 	};
 	ui_nodes_ui = zui_create(ops);
@@ -54,32 +54,37 @@ function ui_nodes_init() {
 }
 
 let _ui_nodes_on_link_drag_link_drag: zui_node_link_t;
+let _ui_nodes_on_link_drag_node: zui_node_t;
 
 function ui_nodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
 	if (is_new_link) {
-		let nodes: zui_nodes_t = ui_nodes_get_nodes();
-		let link_drag: zui_node_link_t = zui_get_link(ui_nodes_get_canvas(true).links, link_drag_id);
-		let node: zui_node_t = zui_get_node(ui_nodes_get_canvas(true).nodes, link_drag.from_id > -1 ? link_drag.from_id : link_drag.to_id);
+		let ui_nodes: zui_nodes_t = ui_nodes_get_nodes();
+		let links: zui_node_link_t[] = ui_nodes_get_canvas(true).links;
+		let link_drag: zui_node_link_t = zui_get_link(links.buffer, links.length, link_drag_id);
+		let nodes: zui_node_t[] = ui_nodes_get_canvas(true).nodes;
+		let node: zui_node_t = zui_get_node(nodes.buffer, nodes.length, link_drag.from_id > -1 ? link_drag.from_id : link_drag.to_id);
 		let link_x: i32 = ui_nodes_ui._window_x + zui_nodes_NODE_X(node);
 		let link_y: i32 = ui_nodes_ui._window_y + zui_nodes_NODE_Y(node);
 		if (link_drag.from_id > -1) {
 			link_x += zui_nodes_NODE_W(node);
-			link_y += zui_nodes_OUTPUT_Y(node.outputs, link_drag.from_socket);
+			link_y += zui_nodes_OUTPUT_Y(node.outputs.length, link_drag.from_socket);
 		}
 		else {
-			link_y += zui_nodes_INPUT_Y(ui_nodes_get_canvas(true), node.inputs, link_drag.to_socket) + zui_nodes_OUTPUTS_H(node.outputs) + zui_nodes_BUTTONS_H(node);
+			link_y += zui_nodes_INPUT_Y(ui_nodes_get_canvas(true), node.inputs, link_drag.to_socket) + zui_nodes_OUTPUTS_H(node.outputs.length) + zui_nodes_BUTTONS_H(node);
 		}
 		if (math_abs(mouse_x - link_x) > 5 || math_abs(mouse_y - link_y) > 5) { // Link length
 
 			_ui_nodes_on_link_drag_link_drag = link_drag;
+			_ui_nodes_on_link_drag_node = node;
 
 			ui_nodes_node_search(-1, -1, function () {
+				let ui_nodes: zui_nodes_t = ui_nodes_get_nodes();
 				let link_drag: zui_node_link_t = _ui_nodes_on_link_drag_link_drag;
-
-				let n: zui_node_t = zui_get_node(ui_nodes_get_canvas(true).nodes, nodes.nodes_selected_id[0]);
+				let nodes: zui_node_t[] = ui_nodes_get_canvas(true).nodes;
+				let n: zui_node_t = zui_get_node(nodes.buffer, nodes.length, ui_nodes.nodes_selected_id[0]);
 				if (link_drag.to_id == -1 && n.inputs.length > 0) {
 					link_drag.to_id = n.id;
-					let from_type: string = node.outputs[link_drag.from_socket].type;
+					let from_type: string = _ui_nodes_on_link_drag_node.outputs[link_drag.from_socket].type;
 					// Connect to the first socket
 					link_drag.to_socket = 0;
 					// Try to find the first type-matching socket and use it if present
@@ -104,7 +109,7 @@ function ui_nodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
 			});
 		}
 		// Selecting which node socket to preview
-		else if (node.id == nodes.nodes_selected_id[0]) {
+		else if (node.id == ui_nodes.nodes_selected_id[0]) {
 			context_raw.node_preview_socket = link_drag.from_id > -1 ? link_drag.from_socket : 0;
 			///if (is_paint || is_sculpt)
 			context_raw.node_preview_dirty = true;
@@ -129,7 +134,7 @@ function ui_nodes_on_socket_released(socket_id: i32) {
 	let nodes: zui_nodes_t = ui_nodes_get_nodes();
 	let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
 	let socket: zui_node_socket_t = zui_get_socket(canvas.nodes, socket_id);
-	let node: zui_node_t = zui_get_node(canvas.nodes, socket.node_id);
+	let node: zui_node_t = zui_get_node(canvas.nodes.buffer, canvas.nodes.length, socket.node_id);
 	if (ui_nodes_ui.input_released_r) {
 		if (node.type == "GROUP_INPUT" || node.type == "GROUP_OUTPUT") {
 
@@ -176,7 +181,7 @@ function ui_nodes_on_socket_released(socket_id: i32) {
 									let name: string = zui_text_input(_ui_nodes_hname, tr("Name"));
 									let min: f32 = zui_float_input(_ui_nodes_hmin, tr("Min"));
 									let max: f32 = zui_float_input(_ui_nodes_hmax, tr("Max"));
-									let default_value: any = null;
+									let default_value: f32_array_t = null;
 									if (type == 0) {
 										let row: f32[] = [1 / 4, 1 / 4, 1 / 4, 1 / 4];
 										zui_row(row);
@@ -195,7 +200,8 @@ function ui_nodes_on_socket_released(socket_id: i32) {
 										default_value = f32_array_create_xyz(_ui_nodes_hval0.value, _ui_nodes_hval1.value, _ui_nodes_hval2.value);
 									}
 									else {
-										default_value = zui_float_input(_ui_nodes_hval0, tr("default_value"));
+										let f: f32 = zui_float_input(_ui_nodes_hval0, tr("default_value"));
+										default_value = f32_array_create_x(f);
 									}
 									if (zui_button(tr("OK"))) { // || ui.isReturnDown
 										socket.name = name;
@@ -214,6 +220,7 @@ function ui_nodes_on_socket_released(socket_id: i32) {
 					}
 					if (ui_menu_button(ui, tr("Delete"))) {
 						let i: i32 = 0;
+						let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
 						// Remove links connected to the socket
 						while (i < canvas.links.length) {
 							let l: zui_node_link_t = canvas.links[i];
@@ -257,7 +264,7 @@ function ui_nodes_on_canvas_released() {
 		let selected: zui_node_t = null;
 		for (let i: i32 = 0; i < canvas.nodes.length; ++i) {
 			let node: zui_node_t = canvas.nodes[i];
-			if (zui_get_input_in_rect(ui_nodes_ui._window_x + zui_nodes_NODE_X(node), ui_nodes_ui._window_y + zui_nodes_NODE_Y(node), zui_nodes_NODE_W(node), zui_nodes_NODE_H(canvas, node))) {
+			if (zui_input_in_rect(ui_nodes_ui._window_x + zui_nodes_NODE_X(node), ui_nodes_ui._window_y + zui_nodes_NODE_Y(node), zui_nodes_NODE_W(node), zui_nodes_NODE_H(canvas, node))) {
 				selected = node;
 				break;
 			}
@@ -270,7 +277,7 @@ function ui_nodes_on_canvas_released() {
 		}
 
 		// Node context menu
-		if (!zui_socket_released()) {
+		if (!zui_nodes_socket_released) {
 			let number_of_entries: i32 = 5;
 			if (ui_nodes_canvas_type == canvas_type_t.MATERIAL) {
 				++number_of_entries;
@@ -297,14 +304,14 @@ function ui_nodes_on_canvas_released() {
 				if (ui_menu_button(ui_menu, tr("Cut"), "ctrl+x")) {
 					app_notify_on_next_frame(function () {
 						ui_nodes_hwnd.redraws = 2;
-						zui_set_is_copy(true);
-						zui_set_is_cut(true);
+						zui_is_copy = true;
+						zui_is_cut = true;
 						ui_nodes_is_node_menu_op = true;
 					});
 				}
 				if (ui_menu_button(ui_menu, tr("Copy"), "ctrl+c")) {
 					app_notify_on_next_frame(function () {
-						zui_set_is_copy(true);
+						zui_is_copy = true;
 						ui_nodes_is_node_menu_op = true;
 					});
 				}
@@ -312,7 +319,7 @@ function ui_nodes_on_canvas_released() {
 				if (ui_menu_button(ui_menu, tr("Paste"), "ctrl+v")) {
 					app_notify_on_next_frame(function () {
 						ui_nodes_hwnd.redraws = 2;
-						zui_set_is_paste(true);
+						zui_is_paste = true;
 						ui_nodes_is_node_menu_op = true;
 					});
 				}
@@ -327,14 +334,14 @@ function ui_nodes_on_canvas_released() {
 				if (ui_menu_button(ui_menu, tr("Duplicate"))) {
 					app_notify_on_next_frame(function () {
 						ui_nodes_hwnd.redraws = 2;
-						zui_set_is_copy(true);
-						zui_set_is_paste(true);
+						zui_is_copy = true;
+						zui_is_paste = true;
 						ui_nodes_is_node_menu_op = true;
 					});
 				}
 				if (selected != null && selected.type == "RGB") {
 					if (ui_menu_button(ui_menu, tr("Add Swatch"))) {
-						let color: any = selected.outputs[0].default_value;
+						let color: f32_array_t = selected.outputs[0].default_value;
 						let new_swatch: swatch_color_t = make_swatch(color_from_floats(color[0], color[1], color[2], color[3]));
 						context_set_swatch(new_swatch);
 						array_push(project_raw.swatches, new_swatch);
@@ -359,7 +366,7 @@ function ui_nodes_on_canvas_released() {
 		let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
 		for (let i: i32 = 0; i < canvas.nodes.length; ++i) {
 			let node: zui_node_t = canvas.nodes[i];
-			if (zui_get_input_in_rect(ui_nodes_ui._window_x + zui_nodes_NODE_X(node), ui_nodes_ui._window_y + zui_nodes_NODE_Y(node), zui_nodes_NODE_W(node), zui_nodes_NODE_H(canvas, node))) {
+			if (zui_input_in_rect(ui_nodes_ui._window_x + zui_nodes_NODE_X(node), ui_nodes_ui._window_y + zui_nodes_NODE_Y(node), zui_nodes_NODE_W(node), zui_nodes_NODE_H(canvas, node))) {
 				if (node.id == nodes.nodes_selected_id[0]) {
 					ui_view2d_hwnd.redraws = 2;
 					if (time_time() - context_raw.select_time < 0.25) ui_base_show_2d_view(view_2d_type_t.NODE);
@@ -410,12 +417,13 @@ function ui_nodes_get_canvas_control(ui: zui_t, controls_down: bool): zui_canvas
 		controls_down = false;
 	}
 	if (!controls_down) {
-		return {
+		let cc: zui_canvas_control_t = {
 			pan_x: 0,
 			pan_y: 0,
 			zoom: 0,
 			controls_down: controls_down
-		}
+		};
+		return cc;
 	}
 
 	let pan: bool = ui.input_down_r || operator_shortcut(map_get(config_keymap, "action_pan"), shortcut_type_t.DOWN);
@@ -528,28 +536,32 @@ function ui_nodes_update() {
 
 	let nodes: zui_nodes_t = ui_nodes_get_nodes();
 	if (nodes.nodes_selected_id.length > 0 && ui_nodes_ui.is_key_pressed) {
-		if (ui_nodes_ui.key == key_code_t.LEFT) {
+		if (ui_nodes_ui.key_code == key_code_t.LEFT) {
 			for (let i: i32 = 0; i < nodes.nodes_selected_id.length; ++i) {
 				let n: i32 = nodes.nodes_selected_id[i];
-				zui_get_node(ui_nodes_get_canvas(true).nodes, n).x -= 1;
+				let nodes: zui_node_t[] = ui_nodes_get_canvas(true).nodes;
+				zui_get_node(nodes.buffer, nodes.length, n).x -= 1;
 			}
 		}
-		else if (ui_nodes_ui.key == key_code_t.RIGHT) {
+		else if (ui_nodes_ui.key_code == key_code_t.RIGHT) {
 			for (let i: i32 = 0; i < nodes.nodes_selected_id.length; ++i) {
 				let n: i32 = nodes.nodes_selected_id[i];
-				zui_get_node(ui_nodes_get_canvas(true).nodes, n).x += 1;
+				let nodes: zui_node_t[] = ui_nodes_get_canvas(true).nodes;
+				zui_get_node(nodes.buffer, nodes.length, n).x += 1;
 			}
 		}
-		if (ui_nodes_ui.key == key_code_t.UP) {
+		if (ui_nodes_ui.key_code == key_code_t.UP) {
 			for (let i: i32 = 0; i < nodes.nodes_selected_id.length; ++i) {
 				let n: i32 = nodes.nodes_selected_id[i];
-				zui_get_node(ui_nodes_get_canvas(true).nodes, n).y -= 1;
+				let nodes: zui_node_t[] = ui_nodes_get_canvas(true).nodes;
+				zui_get_node(nodes.buffer, nodes.length, n).y -= 1;
 			}
 		}
-		else if (ui_nodes_ui.key == key_code_t.DOWN) {
+		else if (ui_nodes_ui.key_code == key_code_t.DOWN) {
 			for (let i: i32 = 0; i < nodes.nodes_selected_id.length; ++i) {
 				let n: i32 = nodes.nodes_selected_id[i];
-				zui_get_node(ui_nodes_get_canvas(true).nodes, n).y += 1;
+				let nodes: zui_node_t[] = ui_nodes_get_canvas(true).nodes;
+				zui_get_node(nodes.buffer, nodes.length, n).y += 1;
 			}
 		}
 	}
@@ -601,10 +613,10 @@ function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
 		}
 
 		if (ui.is_key_pressed) { // Move selection
-			if (ui.key == key_code_t.DOWN && ui_nodes_node_search_offset < 6) {
+			if (ui.key_code == key_code_t.DOWN && ui_nodes_node_search_offset < 6) {
 				ui_nodes_node_search_offset++;
 			}
-			if (ui.key == key_code_t.UP && ui_nodes_node_search_offset > 0) {
+			if (ui.key_code == key_code_t.UP && ui_nodes_node_search_offset > 0) {
 				ui_nodes_node_search_offset--;
 			}
 		}
@@ -613,10 +625,10 @@ function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
 		let BUTTON_COL: i32 = ui.ops.theme.BUTTON_COL;
 
 		///if (is_paint || is_sculpt)
-		let node_list: zui_node_t[][] = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_list : nodes_brush_list;
+		let node_list: node_list_t[] = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_list : nodes_brush_list;
 		///end
 		///if is_lab
-		let node_list: zui_node_t[][] = nodes_brush_list;
+		let node_list: node_list_t[] = nodes_brush_list;
 		///end
 
 		for (let i: i32 = 0; i < node_list.length; ++i) {
@@ -784,7 +796,7 @@ function ui_nodes_render() {
 	// Remove dragged link when mouse is released out of the node viewport
 	let c: zui_node_canvas_t = ui_nodes_get_canvas(true);
 	if (ui_nodes_release_link && nodes.link_drag_id != -1) {
-		array_remove(c.links, zui_get_link(c.links, nodes.link_drag_id));
+		array_remove(c.links, zui_get_link(c.links.buffer, c.links.length, nodes.link_drag_id));
 		nodes.link_drag_id = -1;
 	}
 	ui_nodes_release_link = ui_nodes_ui.input_released;
@@ -853,7 +865,9 @@ function ui_nodes_render() {
 		// Grid
 		g2_set_color(0xffffffff);
 		let step: f32 = 100 * zui_SCALE(ui_nodes_ui);
-		g2_draw_image(ui_nodes_grid, (nodes.pan_x * zui_nodes_SCALE()) % step - step, (nodes.pan_y * zui_nodes_SCALE()) % step - step);
+		let x: f32 = math_fmod(nodes.pan_x * zui_nodes_SCALE(), step) - step;
+		let y: f32 = math_fmod(nodes.pan_y * zui_nodes_SCALE(), step) - step;
+		g2_draw_image(ui_nodes_grid, x, y);
 
 		// Undo
 		if (ui_nodes_ui.input_started || ui_nodes_ui.is_key_pressed) {
@@ -869,7 +883,7 @@ function ui_nodes_render() {
 		ui_nodes_ui.window_border_top = ui_header_h * 2;
 		ui_nodes_ui.window_border_bottom = config_raw.layout[layout_size_t.STATUS_H];
 
-		zui_node_canvas(nodes, ui_nodes_ui, c);
+		zui_node_canvas(nodes, c);
 		ui_nodes_ui.input_enabled = _input_enabled;
 
 		if (nodes.color_picker_callback != null) {
@@ -896,18 +910,18 @@ function ui_nodes_render() {
 		}
 
 		// Remove nodes with unknown id for this canvas type
-		if (zui_is_paste()) {
+		if (zui_is_paste) {
 			///if (is_paint || is_sculpt)
-			let node_list: zui_node_t[][] = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_list : nodes_brush_list;
+			let node_list: node_list_t[] = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_list : nodes_brush_list;
 			///end
 			///if is_lab
-			let node_list: zui_node_t[][] = nodes_brush_list;
+			let node_list: node_list_t[] = nodes_brush_list;
 			///end
 
 			let i: i32 = 0;
 			while (i++ < c.nodes.length) {
 				let canvas_node: zui_node_t = c.nodes[i - 1];
-				if (array_index_of(zui_exclude_remove, canvas_node.type) >= 0) {
+				if (array_index_of(zui_nodes_exclude_remove, canvas_node.type) >= 0) {
 					continue;
 				}
 				let found: bool = false;
@@ -936,9 +950,9 @@ function ui_nodes_render() {
 		}
 
 		if (ui_nodes_is_node_menu_op) {
-			zui_set_is_copy(false);
-			zui_set_is_cut(false);
-			zui_set_is_paste(false);
+			zui_is_copy = false;
+			zui_is_cut = false;
+			zui_is_paste = false;
 			ui_nodes_ui.is_delete_down = false;
 		}
 
@@ -960,13 +974,13 @@ function ui_nodes_render() {
 		// Node previews
 		if (config_raw.node_preview && nodes.nodes_selected_id.length > 0) {
 			let img: image_t = null;
-			let sel: zui_node_t = zui_get_node(c.nodes, nodes.nodes_selected_id[0]);
+			let sel: zui_node_t = zui_get_node(c.nodes.buffer, c.nodes.length, nodes.nodes_selected_id[0]);
 
 			///if (is_paint || is_sculpt)
 
 			let single_channel: bool = sel.type == "LAYER_MASK";
 			if (sel.type == "LAYER" || sel.type == "LAYER_MASK") {
-				let id: any = sel.buttons[0].default_value;
+				let id: i32 = sel.buttons[0].default_value[0];
 				if (id < project_layers.length) {
 					///if is_paint
 					img = project_layers[id].texpaint_preview;
@@ -974,7 +988,7 @@ function ui_nodes_render() {
 				}
 			}
 			else if (sel.type == "MATERIAL") {
-				let id: any = sel.buttons[0].default_value;
+				let id: i32 = sel.buttons[0].default_value[0];
 				if (id < project_materials.length) {
 					img = project_materials[id].image;
 				}
@@ -1150,7 +1164,7 @@ function ui_nodes_render() {
 
 		// Close node group
 		if (ui_nodes_group_stack.length > 0 && zui_menu_button(tr("Close"))) {
-			ui_nodes_group_stack.pop();
+			array_pop(ui_nodes_group_stack);
 		}
 	}
 
@@ -1160,13 +1174,14 @@ function ui_nodes_render() {
 
 	if (ui_nodes_show_menu) {
 		///if (is_paint || is_sculpt)
-		let list:zui_node_t[][] = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_list : nodes_brush_list;
+		let list: node_list_t[] = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_list : nodes_brush_list;
 		///end
 		///if is_lab
-		let list:zui_node_t[][] = nodes_brush_list;
+		let list: node_list_t[] = nodes_brush_list;
 		///end
 
-		let num_nodes: i32 = list[ui_nodes_menu_category].length;
+		let category: zui_node_t[] = list[ui_nodes_menu_category];
+		let num_nodes: i32 = category.length;
 
 		///if (is_paint || is_sculpt)
 		let is_group_category: bool = ui_nodes_canvas_type == canvas_type_t.MATERIAL && nodes_material_categories[ui_nodes_menu_category] == "Group";
@@ -1175,7 +1190,9 @@ function ui_nodes_render() {
 		let is_group_category: bool = nodes_material_categories[ui_nodes_menu_category] == "Group";
 		///end
 
-		if (is_group_category) num_nodes += project_material_groups.length;
+		if (is_group_category) {
+			num_nodes += project_material_groups.length;
+		}
 
 		let py: i32 = ui_nodes_popup_y;
 		let menuw: i32 = math_floor(ew * 2.3);
@@ -1189,8 +1206,8 @@ function ui_nodes_render() {
 
 		ui_menu_start(ui_nodes_ui);
 
-		for (let i: i32 = 0; i < list[ui_nodes_menu_category].length; ++i) {
-			let n: zui_node_t = list[ui_nodes_menu_category][i];
+		for (let i: i32 = 0; i < category.length; ++i) {
+			let n: zui_node_t = category[i];
 			if (ui_menu_button(ui_nodes_ui, tr(n.name))) {
 				ui_nodes_push_undo();
 				let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
@@ -1240,7 +1257,7 @@ function ui_nodes_render() {
 			}
 		}
 
-		ui_nodes_hide_menu = ui_nodes_ui.combo_selected_handle_ptr == 0 && !ui_nodes_show_menu_first && (ui_nodes_ui.changed || ui_nodes_ui.input_released || ui_nodes_ui.input_released_r || ui_nodes_ui.is_escape_down);
+		ui_nodes_hide_menu = ui_nodes_ui.combo_selected_handle == null && !ui_nodes_show_menu_first && (ui_nodes_ui.changed || ui_nodes_ui.input_released || ui_nodes_ui.input_released_r || ui_nodes_ui.is_escape_down);
 		ui_nodes_show_menu_first = false;
 
 		ui_nodes_ui.ops.theme.BUTTON_COL = _BUTTON_COL;
@@ -1298,7 +1315,10 @@ function ui_nodes_push_undo(last_canvas: zui_node_canvas_t = null) {
 	if (last_canvas == null) {
 		last_canvas = ui_nodes_get_canvas(true);
 	}
-	let canvas_group: i32 = ui_nodes_group_stack.length > 0 ? array_index_of(project_material_groups, ui_nodes_group_stack[ui_nodes_group_stack.length - 1]) : null;
+	let canvas_group: i32 = -1;
+	if (ui_nodes_group_stack.length > 0) {
+		canvas_group = array_index_of(project_material_groups, ui_nodes_group_stack[ui_nodes_group_stack.length - 1]);
+	}
 
 	///if (is_paint || is_sculpt)
 	ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
@@ -1365,7 +1385,7 @@ function ui_nodes_accept_swatch_drag(swatch: swatch_color_t) {
 
 function ui_nodes_make_node(n: zui_node_t, nodes: zui_nodes_t, canvas: zui_node_canvas_t): zui_node_t {
 	let node: zui_node_t = {};
-	node.id = zui_get_node_id(canvas.nodes);
+	node.id = zui_next_node_id(canvas.nodes.buffer, canvas.nodes.length);
 	node.name = n.name;
 	node.type = n.type;
 	node.x = ui_nodes_get_node_x();
@@ -1378,8 +1398,8 @@ function ui_nodes_make_node(n: zui_node_t, nodes: zui_nodes_t, canvas: zui_node_
 
 	let count: i32 = 0;
 	for (let i: i32 = 0; i < n.inputs.length; ++i) {
-		let soc: zui_node_socket_t = {}
-		soc.id = zui_get_socket_id(canvas.nodes) + count;
+		let soc: zui_node_socket_t = {};
+		soc.id = zui_get_socket_id(canvas.nodes.buffer, canvas.nodes.length) + count;
 		count++;
 		soc.node_id = node.id;
 		soc.name = n.inputs[i].name;
@@ -1395,7 +1415,7 @@ function ui_nodes_make_node(n: zui_node_t, nodes: zui_nodes_t, canvas: zui_node_
 
 	for (let i: i32 = 0; i < n.outputs.length; ++i) {
 		let soc: zui_node_socket_t = {};
-		soc.id = zui_get_socket_id(canvas.nodes) + count;
+		soc.id = zui_get_socket_id(canvas.nodes.buffer, canvas.nodes.length) + count;
 		count++;
 		soc.node_id = node.id;
 		soc.name = n.outputs[i].name;
@@ -1427,10 +1447,11 @@ function ui_nodes_make_node(n: zui_node_t, nodes: zui_nodes_t, canvas: zui_node_
 }
 
 function ui_nodes_make_group_node(group_canvas: zui_node_canvas_t, nodes: zui_nodes_t, canvas: zui_node_canvas_t): zui_node_t {
-	let n: zui_node_t = nodes_material_list[5][0];
+	let category: zui_node_t[] = nodes_material_list[5];
+	let n: zui_node_t = category[0];
 	let node: zui_node_t = json_parse(json_stringify(n));
 	node.name = group_canvas.name;
-	node.id = zui_get_node_id(canvas.nodes);
+	node.id = zui_next_node_id(canvas.nodes.buffer, canvas.nodes.length);
 	node.x = ui_nodes_get_node_x();
 	node.y = ui_nodes_get_node_y();
 	let group_input: zui_node_t = null;
@@ -1465,12 +1486,13 @@ function ui_nodes_make_group_node(group_canvas: zui_node_canvas_t, nodes: zui_no
 
 ///if (is_paint || is_sculpt)
 function ui_nodes_make_node_preview() {
-	let nodes: zui_nodes_t = context_raw.material.nodes;
-	if (nodes.nodes_selected_id.length == 0) {
+	let ui_nodes: zui_nodes_t = context_raw.material.nodes;
+	if (ui_nodes.nodes_selected_id.length == 0) {
 		return;
 	}
 
-	let node: zui_node_t = zui_get_node(context_raw.material.canvas.nodes, nodes.nodes_selected_id[0]);
+	let nodes: zui_node_t[] = context_raw.material.canvas.nodes;
+	let node: zui_node_t = zui_get_node(nodes.buffer, nodes.length, ui_nodes.nodes_selected_id[0]);
 	// if (node == null) return;
 	context_raw.node_preview_name = node.name;
 
@@ -1481,7 +1503,7 @@ function ui_nodes_make_node_preview() {
 		return;
 	}
 
-	if (array_index_of(context_raw.material.canvas.nodes, node) == -1) {
+	if (array_index_of(nodes, node) == -1) {
 		return;
 	}
 

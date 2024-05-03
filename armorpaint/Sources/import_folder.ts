@@ -128,6 +128,12 @@ function import_folder_place_image_node(nodes: zui_nodes_t, canvas: zui_node_can
 	n.buttons[0].default_value = f32_array_create_x(base_get_asset_index(asset));
 	n.x = 72;
 	n.y = ny;
-	let l: zui_node_link_t = { id: zui_get_link_id(canvas.links), from_id: n.id, from_socket: 0, to_id: to_id, to_socket: to_socket };
+	let l: zui_node_link_t = {
+		id: zui_next_link_id(canvas.links.buffer, canvas.links.length),
+		from_id: n.id,
+		from_socket: 0,
+		to_id: to_id,
+		to_socket: to_socket
+	};
 	array_push(canvas.links, l);
 }

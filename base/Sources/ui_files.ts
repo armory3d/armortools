@@ -25,8 +25,9 @@ function ui_files_show(filters: string, is_save: bool, open_multiple: bool, file
 	if (is_save) {
 		ui_files_path = krom_save_dialog(filters, "");
 		if (ui_files_path != null) {
-			while (string_index_of(ui_files_path, path_sep + path_sep) >= 0) {
-				ui_files_path = string_replace_all(ui_files_path, path_sep + path_sep, path_sep);
+			let sep2: string = path_sep + path_sep;
+			while (string_index_of(ui_files_path, sep2) >= 0) {
+				ui_files_path = string_replace_all(ui_files_path, sep2, path_sep);
 			}
 			ui_files_path = string_replace_all(ui_files_path, "\r", "");
 			ui_files_filename = substring(ui_files_path, string_last_index_of(ui_files_path, path_sep) + 1, ui_files_path.length);
@@ -39,8 +40,9 @@ function ui_files_show(filters: string, is_save: bool, open_multiple: bool, file
 		if (paths != null) {
 			for (let i: i32 = 0; i < paths.length; ++i) {
 				let path: string = paths[i];
-				while (string_index_of(path, path_sep + path_sep) >= 0) {
-					path = string_replace_all(path, path_sep + path_sep, path_sep);
+				let sep2: string = path_sep + path_sep;
+				while (string_index_of(path, sep2) >= 0) {
+					path = string_replace_all(path, sep2, path_sep);
 				}
 				path = string_replace_all(path, "\r", "");
 				ui_files_filename = substring(path, string_last_index_of(path, path_sep) + 1, path.length);
@@ -64,6 +66,7 @@ function ui_files_release_keys() {
 let _ui_files_file_browser_handle: zui_handle_t;
 let _ui_files_file_browser_f: string;
 let _ui_files_file_browser_shandle: string;
+let _ui_files_file_browser_w: i32;
 
 function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bool = false, drag_files: bool = false, search: string = "", refresh: bool = false, context_menu: (s: string)=>void = null): string {
 
@@ -91,17 +94,18 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 		ui_files_files = [];
 
 		// Up directory
-		let i1: i32 = string_index_of(handle.text, path_sep);
-		let nested: bool = i1 > -1 && handle.text.length - 1 > i1;
+		let text: string = handle.text;
+		let i1: i32 = string_index_of(text, path_sep);
+		let nested: bool = i1 > -1 && text.length - 1 > i1;
 		///if krom_windows
 		// Server addresses like \\server are not nested
-		nested = nested && !(handle.text.length >= 2 && char_at(handle.text, 0) == path_sep && char_at(handle.text, 1) == path_sep && string_last_index_of(handle.text, path_sep) == 1);
+		nested = nested && !(text.length >= 2 && char_at(text, 0) == path_sep && char_at(text, 1) == path_sep && string_last_index_of(text, path_sep) == 1);
 		///end
 		if (nested) {
 			array_push(ui_files_files, "..");
 		}
 
-		let dir_path: string = handle.text;
+		let dir_path: string = text;
 		///if krom_ios
 		if (!is_cloud) {
 			dir_path = document_directory + dir_path;
@@ -178,7 +182,8 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 					let files_all: string[] = file_read_directory(handle.text);
 					let icon_file: string = substring(f, 0, string_last_index_of(f, ".")) + "_icon.jpg";
 					if (array_index_of(files_all, icon_file) >= 0) {
-						let empty: image_t = map_get(render_path_render_targets, "empty_black")._image;
+						let rt: render_target_t = map_get(render_path_render_targets, "empty_black");
+						let empty: image_t = rt._image;
 						map_set(ui_files_icon_map, handle.text + path_sep + f, empty);
 
 						_ui_files_file_browser_handle = handle;
@@ -193,7 +198,7 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 										base_make_pipe_copy_rgb();
 									}
 									let icon: image_t = image_create_render_target(image.width, image.height);
-									if (ends_with(f, ".arm")) { // Used for material sphere alpha cutout
+									if (ends_with(_ui_files_file_browser_f, ".arm")) { // Used for material sphere alpha cutout
 										g2_begin(icon);
 
 										///if (is_paint || is_sculpt)
@@ -226,7 +231,7 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 						zui_fill(-2,         0,     2, w + 4, ui.ops.theme.HIGHLIGHT_COL);
 						zui_fill(w + 2 ,    -2,     2, w + 6, ui.ops.theme.HIGHLIGHT_COL);
 					}
-					state = zui_image(icon, 0xffffffff, w * zui_SCALE(ui));
+					state = _zui_image(icon, 0xffffffff, w * zui_SCALE(ui));
 					if (ui.is_hovered) {
 						zui_tooltip_image(icon);
 						zui_tooltip(f);
@@ -249,7 +254,7 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 					///else
 
 					let buffer: buffer_t = krom_load_blob(blob_path);
-					let raw: any = armpack_decode(buffer);
+					let raw: project_format_t = armpack_decode(buffer);
 					if (raw.material_icons != null) {
 						let bytes_icon: any = raw.material_icons[0];
 						icon = image_from_bytes(lz4_decode(bytes_icon, 256 * 256 * 4), 256, 256);
@@ -284,7 +289,7 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 						zui_fill(-2,         0,     2, w + 4, ui.ops.theme.HIGHLIGHT_COL);
 						zui_fill(w + 2 ,    -2,     2, w + 6, ui.ops.theme.HIGHLIGHT_COL);
 					}
-					state = zui_image(icon, 0xffffffff, w * zui_SCALE(ui));
+					state = _zui_image(icon, 0xffffffff, w * zui_SCALE(ui));
 					if (ui.is_hovered) {
 						zui_tooltip_image(icon);
 						zui_tooltip(f);
@@ -301,16 +306,19 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 				let shandle: string = handle.text + path_sep + f;
 				icon = map_get(ui_files_icon_map, shandle);
 				if (icon == null) {
-					let empty: image_t = map_get(render_path_render_targets, "empty_black")._image;
+					let rt: render_target_t = map_get(render_path_render_targets, "empty_black");
+					let empty: image_t = rt._image;
 					map_set(ui_files_icon_map, shandle, empty);
 					let image: image_t = data_get_image(shandle);
 
 					_ui_files_file_browser_shandle = shandle;
+					_ui_files_file_browser_w = w;
 
 					app_notify_on_init(function (image: image_t) {
 						if (base_pipe_copy_rgb == null) {
 							base_make_pipe_copy_rgb();
 						}
+						let w: i32 = _ui_files_file_browser_w;
 						let sw: i32 = image.width > image.height ? w : math_floor(1.0 * image.width / image.height * w);
 						let sh: i32 = image.width > image.height ? math_floor(1.0 * image.height / image.width * w) : w;
 						let icon: image_t = image_create_render_target(sw, sh);
@@ -332,13 +340,13 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 						zui_fill(-2,         0,     2, w + 4, ui.ops.theme.HIGHLIGHT_COL);
 						zui_fill(w + 2 ,    -2,     2, w + 6, ui.ops.theme.HIGHLIGHT_COL);
 					}
-					state = zui_image(icon, 0xffffffff, icon.height * zui_SCALE(ui));
+					state = _zui_image(icon, 0xffffffff, icon.height * zui_SCALE(ui));
 					generic = false;
 				}
 			}
 
 			if (generic) {
-				state = zui_image(icons, col, 50 * zui_SCALE(ui), rect.x, rect.y, rect.w, rect.h);
+				state = _zui_image(icons, col, 50 * zui_SCALE(ui), rect.x, rect.y, rect.w, rect.h);
 			}
 
 			if (ui.is_hovered && ui.input_released_r && context_menu != null) {
@@ -371,15 +379,17 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 					if (f == "..") { // Up
 						handle.text = substring(handle.text, 0, string_last_index_of(handle.text, path_sep));
 						// Drive root
-						if (handle.text.length == 2 && char_at(handle.text, 1) == ":") {
-							handle.text += path_sep;
+						let text: string = handle.text;
+						if (text.length == 2 && char_at(text, 1) == ":") {
+							text += path_sep;
 						}
 					}
 					else {
-						if (char_at(handle.text, handle.text.length - 1) != path_sep) {
-							handle.text += path_sep;
+						let text: string = handle.text;
+						if (char_at(text, text.length - 1) != path_sep) {
+							text += path_sep;
 						}
-						handle.text += f;
+						text += f;
 					}
 					ui_files_selected = -1;
 				}
@@ -396,7 +406,7 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 				label0 = substring(label0, 0, label0.length - 1);
 			}
 			if (label1 != "") {
-				ui.cur_ratio--;
+				ui.current_ratio--;
 			}
 			zui_text(label0, zui_align_t.CENTER);
 			if (ui.is_hovered) {

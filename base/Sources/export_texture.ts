@@ -81,13 +81,26 @@ function export_texture_run(path: string, bake_material: bool = false) {
 			}
 		}
 		else {
-			export_texture_run_layers(path, context_raw.layers_export == export_mode_t.SELECTED ? (slot_layer_is_group(context_raw.layer) ? slot_layer_get_children(context_raw.layer) : [context_raw.layer]) : project_layers);
+			let layers: slot_layer_t[];
+			if (context_raw.layers_export == export_mode_t.SELECTED) {
+				if (slot_layer_is_group(context_raw.layer)) {
+					layers = slot_layer_get_children(context_raw.layer);
+				}
+				else {
+					layers = [context_raw.layer];
+				}
+			}
+			else {
+				layers = project_layers;
+			}
+			export_texture_run_layers(path, layers);
 		}
 	}
 	///end
 
 	///if is_lab
-	export_texture_run_layers(path, [brush_output_node_inst]);
+	let layers: slot_layer_t[] = [brush_output_node_inst];
+	export_texture_run_layers(path, layers);
 	///end
 
 	///if krom_ios
@@ -123,7 +136,8 @@ function export_texture_run_bake_material(path: string) {
 	planeo.base.visible = false;
 	context_raw.paint_object = _paint_object;
 
-	export_texture_run_layers(path, [render_path_paint_live_layer], "", true);
+	let layers: slot_layer_t[] = [render_path_paint_live_layer];
+	export_texture_run_layers(path, layers, "", true);
 }
 ///end
 
@@ -166,7 +180,8 @@ function export_texture_run_layers(path: string, layers: any[], object_name: str
 	if (const_data_screen_aligned_vb == null) {
 		const_data_create_screen_aligned_data();
 	}
-	let empty: image_t = map_get(render_path_render_targets, "empty_white")._image;
+	let rt: render_target_t = map_get(render_path_render_targets, "empty_white");
+	let empty: image_t = rt._image;
 
 	// Append object mask name
 	let export_selected: bool = context_raw.layers_export == export_mode_t.SELECTED;
@@ -216,7 +231,9 @@ function export_texture_run_layers(path: string, layers: any[], object_name: str
 				g2_begin(base_temp_mask_image);
 				g2_clear(0x00000000);
 				g2_end();
-				let l1: any = { texpaint: base_temp_mask_image };
+				let l1: slot_layer_t = {
+					texpaint: base_temp_mask_image
+				};
 				for (let i: i32 = 0; i < l1masks.length; ++i) {
 					base_merge_layer(l1, l1masks[i]);
 				}
@@ -335,7 +352,7 @@ function export_texture_run_layers(path: string, layers: any[], object_name: str
 	for (let i: i32 = 0; i < preset.textures.length; ++i) {
 		let t: export_preset_texture_t = preset.textures[i];
 		let c: string[] = t.channels;
-		let tex_name = t.name != "" ? "_" + t.name : "";
+		let tex_name: string = t.name != "" ? "_" + t.name : "";
 		let single_channel: bool = c[0] == c[1] && c[1] == c[2] && c[3] == "1.0";
 		if (c[0] == "base_r" && c[1] == "base_g" && c[2] == "base_b" && c[3] == "1.0" && t.color_space == "linear") {
 			export_texture_write_texture(path + path_sep + f + tex_name + ext, pixpaint, 1);
@@ -456,7 +473,11 @@ function export_texture_write_texture(file: string, pixels: buffer_t, type: i32 
 		map_set(data_cached_images, file, image);
 		let ar: string[] = string_split(file, path_sep);
 		let name: string = ar[ar.length - 1];
-		let asset: asset_t = {name: name, file: file, id: project_asset_id++};
+		let asset: asset_t = {
+			name: name,
+			file: file,
+			id: project_asset_id++
+		};
 		array_push(project_assets, asset);
 		if (project_raw.assets == null) {
 			project_raw.assets = [];
@@ -464,7 +485,8 @@ function export_texture_write_texture(file: string, pixels: buffer_t, type: i32 
 		array_push(project_raw.assets, asset.file);
 		array_push(project_asset_names, asset.name);
 		map_set(project_asset_map, asset.id, image);
-		export_arm_pack_assets(project_raw, [asset]);
+		let assets: asset_t[] = [asset];
+		export_arm_pack_assets(project_raw, assets);
 		return;
 	}
 

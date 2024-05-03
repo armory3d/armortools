@@ -55,7 +55,8 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 	node_shader_add_uniform(vert, "mat4 WVP", "_world_view_proj_matrix");
 	node_shader_write_attrib(vert, "gl_Position = mul(vec4(" + pos + ".xyz, 1.0), WVP);");
 
-	let brush_scale: string = (context_raw.brush_scale * context_raw.brush_nodes_scale) + "";
+	let sc: f32 = context_raw.brush_scale * context_raw.brush_nodes_scale;
+	let brush_scale: string = sc + "";
 	node_shader_add_out(vert, "vec2 texCoord");
 	node_shader_write_attrib(vert, "texCoord = tex * float(" + brush_scale + ");");
 

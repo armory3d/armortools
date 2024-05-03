@@ -8,10 +8,20 @@ function make_voxel_run(data: shader_context_t) {
 
 	let pipe_state: pipeline_t = data._.pipe_state;
 	pipe_state.input_layout = [structure];
+
 	data.vertex_elements = [
-		{name: "pos", data: "short4norm"},
-		{name: "nor", data: "short2norm"},
-		{name: "tex", data: "short2norm"}
+		{
+			name: "pos",
+			data: "short4norm"
+		},
+		{
+			name: "nor",
+			data: "short2norm"
+		},
+		{
+			name: "tex",
+			data: "short2norm"
+		}
 	];
 
 	// ///if arm_skin
@@ -30,16 +40,29 @@ function make_voxel_run(data: shader_context_t) {
 	g4_pipeline_compile(pipe_state);
 
 	data.constants = [
-		{ name: "W", type: "mat4", link: "_world_matrix" },
-		{ name: "N", type: "mat3", link: "_normal_matrix" }
+		{
+			name: "W",
+			type: "mat4",
+			link: "_world_matrix"
+		},
+		{
+			name: "N",
+			type: "mat3",
+			link: "_normal_matrix"
+		}
 	];
 	data._.constants = [
 		g4_pipeline_get_const_loc(pipe_state, "W"),
 		g4_pipeline_get_const_loc(pipe_state, "N")
 	];
 	data.texture_units = [
-		{ name: "texpaint_pack" },
-		{ name: "voxels", image_uniform: true }
+		{
+			name: "texpaint_pack"
+		},
+		{
+			name: "voxels",
+			image_uniform: true
+		}
 	];
 	data._.tex_units = [
 		g4_pipeline_get_tex_unit(pipe_state, "texpaint_pack"),

@@ -35,7 +35,7 @@ function export_obj_run(path: string, paint_objects: mesh_object_t[], apply_disp
 
 		// Merge shared vertices and remap indices
 		let posa2: i16_array_t = i16_array_create(len * 3);
-		let posmap: map_t<i32, i32> = map_create();
+		let posmap: i32_array_t = i32_array_create(len);
 
 		let pi = 0;
 		for (let i: i32 = 0; i < len; ++i) {
@@ -44,13 +44,13 @@ function export_obj_run(path: string, paint_objects: mesh_object_t[], apply_disp
 				if (posa2[j * 3    ] == posa[i * 4    ] &&
 					posa2[j * 3 + 1] == posa[i * 4 + 1] &&
 					posa2[j * 3 + 2] == posa[i * 4 + 2]) {
-					map_set(posmap, i, j);
+					posmap[i] = j;
 					found = true;
 					break;
 				}
 			}
 			if (!found) {
-				map_set(posmap, i, pi);
+				posmap[i] = pi;
 				posa2[pi * 3    ] = posa[i * 4    ];
 				posa2[pi * 3 + 1] = posa[i * 4 + 1];
 				posa2[pi * 3 + 2] = posa[i * 4 + 2];
@@ -74,9 +74,9 @@ function export_obj_run(path: string, paint_objects: mesh_object_t[], apply_disp
 
 		// let inda = mesh.index_arrays[0].values;
 		for (let i: i32 = 0; i < math_floor(inda.length / 3); ++i) {
-			let pi1 = map_get(posmap, inda[i * 3    ]) + 1 + poff;
-			let pi2 = map_get(posmap, inda[i * 3 + 1]) + 1 + poff;
-			let pi3 = map_get(posmap, inda[i * 3 + 2]) + 1 + poff;
+			let pi1 = posmap[inda[i * 3    ]] + 1 + poff;
+			let pi2 = posmap[inda[i * 3 + 1]] + 1 + poff;
+			let pi3 = posmap[inda[i * 3 + 2]] + 1 + poff;
 			export_obj_write_string(o, "f ");
 			export_obj_write_string(o, pi1 + "");
 			export_obj_write_string(o, " ");

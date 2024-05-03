@@ -17,7 +17,13 @@ let file_cloud_sizes: map_t<string, i32> = null;
 function file_read_directory(path: string, folders_only: bool = false): string[] {
 	if (starts_with(path, "cloud")) {
 		let files: string[] = file_cloud != null ? map_get(file_cloud, string_replace_all(path, "\\", "/")) : null;
-		return files != null ? files : [];
+		if (files != null) {
+			return files;
+		}
+		else {
+			let empty: string[] = [];
+			return empty;
+		}
 	}
 	// ///if krom_android
 	// path = string_replace_all(path, "//", "/");
@@ -79,7 +85,7 @@ function file_download(url: string, dst_path: string, done: (url: string)=>void,
 	krom_http_request(url, size, function (url: string, ab: buffer_t) {
 		let fdd: file_download_data_t = map_get(_file_download_map, url);
 		if (ab != null) {
-			krom_file_save_bytes(fdd.dst_path, ab);
+			krom_file_save_bytes(fdd.dst_path, ab, 0);
 		}
 		fdd.done(url);
 	});
@@ -101,7 +107,15 @@ type file_download_bytes_data_t = {
 let _file_download_bytes_map: map_t<string, file_download_bytes_data_t> = map_create();
 
 function file_download_bytes(url: string, done: (url: string, ab: buffer_t)=>void) {
-	let save: string = (path_is_protected() ? krom_save_path() : path_data() + path_sep) + "download.bin";
+	let save: string;
+	if (path_is_protected()) {
+		save = krom_save_path();
+	}
+	else {
+		save = path_data() + path_sep;
+	}
+	save += "download.bin";
+
 	let fdbd: file_download_bytes_data_t = { url: url, save: save, done: done };
 	map_set(_file_download_bytes_map, url, fdbd);
 	file_download(url, save, function (url: string) {
@@ -125,12 +139,28 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 	///else
 	let path2: string = path;
 	///end
-	let dest: string = (path_is_protected() ? krom_save_path() : krom_get_files_location() + path_sep) + path2;
+	let dest: string;
+	if (path_is_protected()) {
+		dest = krom_save_path();
+	}
+	else {
+		dest = krom_get_files_location() + path_sep;
+	}
+	dest += path2;
+
 	if (file_exists(dest)) {
 		///if (krom_darwin || krom_ios)
 		done(dest);
 		///else
-		done((path_is_protected() ? krom_save_path() : path_working_dir() + path_sep) + path);
+		let p: string;
+		if (path_is_protected()) {
+			p = krom_save_path();
+		}
+		else {
+			p = path_working_dir() + path_sep;
+		}
+		p += path;
+		done(p);
 		///end
 		return;
 	}
@@ -149,7 +179,7 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 
 	file_download(url, dest, function (url: string) {
 		let fccd: file_cache_cloud_data_t = map_get(_file_cache_cloud_map, url);
-		if (!file_exists(dest)) {
+		if (!file_exists(fccd.dest)) {
 			console_error(strings_error5());
 			fccd.done(null);
 			return;
@@ -157,7 +187,15 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 		///if (krom_darwin || krom_ios)
 		fccd.done(fccd.dest);
 		///else
-		fccd.done((path_is_protected() ? krom_save_path() : path_working_dir() + path_sep) + fccd.path);
+		let p: string;
+		if (path_is_protected()) {
+			p = krom_save_path();
+		}
+		else {
+			p = path_working_dir() + path_sep;
+		}
+		p += fccd.path;
+		fccd.done(p);
 		///end
 	}, map_get(file_cloud_sizes, path));
 }
@@ -168,7 +206,8 @@ function file_init_cloud_bytes(done: ()=>void, append: string = "") {
 	_file_init_cloud_bytes_done = done;
 	file_download_bytes(config_raw.server + "/?list-type=2" + append, function (url: string, buffer: buffer_t) {
 		if (buffer == null) {
-			map_set(file_cloud, "cloud", []);
+			let empty: string[] = [];
+			map_set(file_cloud, "cloud", empty);
 			console_error(strings_error5());
 			return;
 		}
@@ -193,13 +232,14 @@ function file_init_cloud_bytes(done: ()=>void, append: string = "") {
 			pos_start += 6; //<Size>
 			pos_end = string_index_of_pos(str, "</Size>", pos_start);
 
-			array_push(sizes, Number(substring(str, pos_start, pos_end)));
+			array_push(sizes, parse_int(substring(str, pos_start, pos_end)));
 		}
 
 		for (let i: i32 = 0; i < files.length; ++i) {
 			let file: string = files[i];
 			if (path_is_folder(file)) {
-				map_set(file_cloud, substring(file, 0, file.length - 1), []);
+				let empty: string[] = [];
+				map_set(file_cloud, substring(file, 0, file.length - 1), empty);
 			}
 		}
 		for (let i: i32 = 0; i < files.length; ++i) {

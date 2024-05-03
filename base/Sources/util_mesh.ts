@@ -77,18 +77,38 @@ function util_mesh_merge(paint_objects: mesh_object_t[] = null) {
 	let raw: mesh_data_t = {
 		name: context_raw.paint_object.base.name,
 		vertex_arrays: [
-			{ values: va0, attrib: "pos", data: "short4norm" },
-			{ values: va1, attrib: "nor", data: "short2norm" },
-			{ values: va2, attrib: "tex", data: "short2norm" }
+			{
+				values: va0,
+				attrib: "pos",
+				data: "short4norm"
+			},
+			{
+				values: va1,
+				attrib: "nor",
+				data: "short2norm"
+			},
+			{
+				values: va2,
+				attrib: "tex",
+				data: "short2norm"
+			}
 		],
 		index_arrays: [
-			{ values: ia, material: 0 }
+			{
+				values: ia,
+				material: 0
+			}
 		],
 		scale_pos: max_scale,
 		scale_tex: 1.0
 	};
 	if (va3 != null) {
-		array_push(raw.vertex_arrays, { values: va3, attrib: "col", data: "short4norm" });
+		let col: vertex_array_t = {
+			values: va3,
+			attrib: "col",
+			data: "short4norm"
+		};
+		array_push(raw.vertex_arrays, col);
 	}
 
 	util_mesh_remove_merged();
@@ -202,7 +222,7 @@ function util_mesh_calc_normals(smooth: bool = false) {
 			vec4_sub_vecs(cb, vc, vb);
 			vec4_sub_vecs(ab, va, vb);
 			vec4_cross(cb, ab);
-			vec4_normalize(cb, );
+			vec4_normalize(cb);
 			buffer_view_set_i16(vertices, (i1 * l + 4) * 2, math_floor(cb.x * 32767));
 			buffer_view_set_i16(vertices, (i1 * l + 5) * 2, math_floor(cb.y * 32767));
 			buffer_view_set_i16(vertices, (i1 * l + 3) * 2, math_floor(cb.z * 32767));
@@ -248,7 +268,7 @@ function util_mesh_calc_normals(smooth: bool = false) {
 						vec4_add_f(va, buffer_view_get_i16(vertices, (i1l + 4) * 2), buffer_view_get_i16(vertices, (i1l + 5) * 2), buffer_view_get_i16(vertices, (i1l + 3) * 2));
 					}
 					vec4_mult(va, 1 / shared_len);
-					vec4_normalize(va, );
+					vec4_normalize(va);
 					let vax: i32 = math_floor(va.x * 32767);
 					let vay: i32 = math_floor(va.y * 32767);
 					let vaz: i32 = math_floor(va.z * 32767);
@@ -361,7 +381,7 @@ function util_mesh_to_origin() {
 	util_mesh_merge();
 }
 
-function util_mesh_apply_displacement(texpaint_pack: image_t, strength: f32 = 0.1, uvScale: f32 = 1.0) {
+function util_mesh_apply_displacement(texpaint_pack: image_t, strength: f32 = 0.1, uv_scale: f32 = 1.0) {
 	let height: buffer_t = image_get_pixels(texpaint_pack);
 	let height_view: buffer_view_t = buffer_view_create(height);
 	let res: i32 = texpaint_pack.width;
@@ -372,8 +392,8 @@ function util_mesh_apply_displacement(texpaint_pack: image_t, strength: f32 = 0.
 	for (let i: i32 = 0; i < math_floor(buffer_view_size(vertices) / 2 / l); ++i) {
 		let x: i32 = math_floor(buffer_view_get_i16(vertices, (i * l + 6) * 2) / 32767 * res);
 		let y: i32 = math_floor(buffer_view_get_i16(vertices, (i * l + 7) * 2) / 32767 * res);
-		let xx: i32 = math_floor(x * uvScale) % res;
-		let yy: i32 = math_floor(y * uvScale) % res;
+		let xx: i32 = (i32)math_floor(x * uv_scale) % res;
+		let yy: i32 = (i32)math_floor(y * uv_scale) % res;
 		let h: f32 = (1.0 - buffer_view_get_u8(height_view, (yy * res + xx) * 4 + 3) / 255) * strength;
 		buffer_view_set_i16(vertices, (i * l    ) * 2, buffer_view_get_i16(vertices, (i * l    ) * 2) - math_floor(buffer_view_get_i16(vertices, (i * l + 4) * 2) * h));
 		buffer_view_set_i16(vertices, (i * l + 1) * 2, buffer_view_get_i16(vertices, (i * l + 1) * 2) - math_floor(buffer_view_get_i16(vertices, (i * l + 5) * 2) * h));
@@ -389,7 +409,7 @@ function util_mesh_apply_displacement(texpaint_pack: image_t, strength: f32 = 0.
 	}
 }
 
-function util_mesh_equirect_unwrap(mesh: any) {
+function util_mesh_equirect_unwrap(mesh: raw_mesh_t) {
 	let verts: i32 = math_floor(mesh.posa.length / 4);
 	mesh.texa = i16_array_create(verts * 2);
 	let n: vec4_t = vec4_create();

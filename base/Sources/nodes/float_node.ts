@@ -5,13 +5,13 @@ type float_node_t = {
 	image?: image_t;
 };
 
-function float_node_create(arg: f32): float_node_t {
+function float_node_create(args: f32): float_node_t {
 	let n: float_node_t = {};
 	n.base = logic_node_create();
 	n.base.get = float_node_get;
 	n.base.get_as_image = float_node_get_as_image;
 	n.base.set = float_node_set;
-	n.value = arg;
+	n.value = args;
 	return n;
 }
 
@@ -42,12 +42,12 @@ function float_node_get_as_image(self: float_node_t, from: i32): image_t {
 	return self.image;
 }
 
-function float_node_set(self: float_node_t, value: any) {
+function float_node_set(self: float_node_t, value: f32_array_t) {
 	if (self.base.inputs.length > 0) {
 		logic_node_input_set(self.base.inputs[0], value);
 	}
 	else {
-		self.value = value;
+		self.value = value[0];
 	}
 }
 

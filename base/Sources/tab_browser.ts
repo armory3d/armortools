@@ -67,14 +67,14 @@ function tab_browser_draw(htab: zui_handle_t) {
 		let refresh: bool = false;
 		let in_focus: bool = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
 							 ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
-		if (zui_button(tr("Refresh")) || (in_focus && ui.is_key_pressed && ui.key == key_code_t.F5)) {
+		if (zui_button(tr("Refresh")) || (in_focus && ui.is_key_pressed && ui.key_code == key_code_t.F5)) {
 			refresh = true;
 		}
 		tab_browser_hsearch.text = zui_text_input(tab_browser_hsearch, tr("Search"), zui_align_t.LEFT, true, true);
 		if (ui.is_hovered) {
 			zui_tooltip(tr("ctrl+f to search") + "\n" + tr("esc to cancel"));
 		}
-		if (ui.is_ctrl_down && ui.is_key_pressed && ui.key == key_code_t.F) { // Start searching via ctrl+f
+		if (ui.is_ctrl_down && ui.is_key_pressed && ui.key_code == key_code_t.F) { // Start searching via ctrl+f
 			zui_start_text_edit(tab_browser_hsearch);
 		}
 		if (tab_browser_hsearch.text != "" && (zui_button(tr("X")) || ui.is_escape_down)) {
@@ -189,7 +189,8 @@ function tab_browser_draw(htab: zui_handle_t) {
 			}, path);
 			tab_browser_hpath.text = substring(tab_browser_hpath.text, 0, string_last_index_of(tab_browser_hpath.text, path_sep));
 		}
-		tab_browser_known = string_index_of(substring(tab_browser_hpath.text, string_last_index_of(tab_browser_hpath.text, path_sep), tab_browser_hpath.text.length), ".") > 0;
+		let hpath_text: string = tab_browser_hpath.text;
+		tab_browser_known = string_index_of(substring(tab_browser_hpath.text, string_last_index_of(tab_browser_hpath.text, path_sep), hpath_text.length), ".") > 0;
 		///if krom_android
 		if (ends_with(tab_browser_hpath.text, "." + to_lower_case(manifest_title))) {
 			tab_browser_known = false;

@@ -769,11 +769,11 @@ function context_in_paint_area(): bool {
 }
 
 function context_in_layers(): bool {
-	return zui_get_hovered_tab_name() == tr("Layers");
+	return zui_hovered_tab_name() == tr("Layers");
 }
 
 function context_in_materials(): bool {
-	return zui_get_hovered_tab_name() == tr("Materials");
+	return zui_hovered_tab_name() == tr("Materials");
 }
 
 ///if (is_paint || is_sculpt)
@@ -791,11 +791,11 @@ function context_in_nodes(): bool {
 }
 
 function context_in_swatches(): bool {
-	return zui_get_hovered_tab_name() == tr("Swatches");
+	return zui_hovered_tab_name() == tr("Swatches");
 }
 
 function context_in_browser(): bool {
-	return zui_get_hovered_tab_name() == tr("Browser");
+	return zui_hovered_tab_name() == tr("Browser");
 }
 
 function context_get_area_type(): area_type_t {

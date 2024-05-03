@@ -7,6 +7,9 @@ let box_preferences_preset_handle: zui_handle_t;
 let box_preferences_locales: string[] = null;
 let box_preferences_themes: string[] = null;
 let box_preferences_world_color: i32 = 0xff080808;
+let _box_preferences_f: string;
+let _box_preferences_h: zui_handle_t;
+let _box_preferences_ui: zui_t;
 
 function box_preferences_show() {
 	ui_box_show_custom(function (ui: zui_t) {
@@ -35,7 +38,7 @@ function box_preferences_show() {
 			zui_slider(hscale, tr("UI Scale"), 1.0, 4.0, true, 10);
 			if (context_raw.hscale_was_changed && !ui.input_down) {
 				context_raw.hscale_was_changed = false;
-				if (hscale.value == null) {
+				if (hscale.value == 0.0) {
 					hscale.value = 1.0;
 				}
 				config_raw.window_scale = hscale.value;
@@ -106,9 +109,9 @@ function box_preferences_show() {
 			}
 			config_raw.touch_ui = zui_check(h_touch_ui, tr("Touch UI"));
 			if (ui.changed) {
-				zui_set_touch_scroll(config_raw.touch_ui);
-				zui_set_touch_hold(config_raw.touch_ui);
-				zui_set_touch_tooltip(config_raw.touch_ui);
+				zui_touch_scroll = config_raw.touch_ui;
+				zui_touch_hold = config_raw.touch_ui;
+				zui_touch_tooltip = config_raw.touch_ui;
 				config_load_theme(config_raw.theme);
 				box_preferences_set_scale();
 				ui_base_tag_ui_redraw();
@@ -130,7 +133,7 @@ function box_preferences_show() {
 			if (zui_button(tr("Restore")) && !ui_menu_show) {
 				ui_menu_draw(function (ui: zui_t) {
 					if (ui_menu_button(ui, tr("Confirm"))) {
-						app_notify_on_init(function () {
+						app_notify_on_init(function (ui: zui_t) {
 							ui.ops.theme.ELEMENT_H = base_default_element_h;
 							config_restore();
 							box_preferences_set_scale();
@@ -144,14 +147,15 @@ function box_preferences_show() {
 							box_preferences_files_keymap = null;
 							make_material_parse_mesh_material();
 							make_material_parse_paint_material();
-						});
+						}, ui);
 					}
 					if (ui_menu_button(ui, tr("Import..."))) {
+						_box_preferences_ui = ui;
 						ui_files_show("json", false, false, function (path: string) {
 							let b: buffer_t = data_get_blob(path);
 							let raw: config_t = json_parse(sys_buffer_to_string(b));
 							app_notify_on_init(function (raw: config_t) {
-								ui.ops.theme.ELEMENT_H = base_default_element_h;
+								_box_preferences_ui.ops.theme.ELEMENT_H = base_default_element_h;
 								config_import_from(raw);
 								box_preferences_set_scale();
 								make_material_parse_mesh_material();
@@ -207,7 +211,7 @@ function box_preferences_show() {
 								theme_name += ".json";
 							}
 							let path: string = path_data() + path_sep + "themes" + path_sep + theme_name;
-							krom_file_save_bytes(path, sys_string_to_buffer(template));
+							krom_file_save_bytes(path, sys_string_to_buffer(template), 0);
 							box_preferences_fetch_themes(); // Refresh file list
 							config_raw.theme = theme_name;
 							box_preferences_theme_handle.position = box_preferences_get_theme_index();
@@ -227,11 +231,12 @@ function box_preferences_show() {
 
 			if (zui_button(tr("Export"))) {
 				ui_files_show("json", true, false, function (path: string) {
-					path += path_sep + ui_files_filename;
+					path += path_sep;
+					path += ui_files_filename;
 					if (!ends_with(path, ".json")) {
 						path += ".json";
 					}
-					krom_file_save_bytes(path, sys_string_to_buffer(json_stringify(base_theme)));
+					krom_file_save_bytes(path, sys_string_to_buffer(json_stringify(base_theme)), 0);
 				});
 			}
 
@@ -250,9 +255,10 @@ function box_preferences_show() {
 			zui_row(row);
 			zui_text("", 0, h.color);
 			if (ui.is_hovered && ui.input_released) {
+				_box_preferences_h = h;
 				ui_menu_draw(function (ui: zui_t) {
 					ui.changed = false;
-					zui_color_wheel(h, false, null, 11 * ui.ops.theme.ELEMENT_H * zui_SCALE(ui), true);
+					zui_color_wheel(_box_preferences_h, false, -1, 11 * ui.ops.theme.ELEMENT_H * zui_SCALE(ui), true);
 					if (ui.changed) {
 						ui_menu_keep_open = true;
 					}
@@ -285,7 +291,7 @@ function box_preferences_show() {
 				let key: string = zui_theme_keys[i];
 
 				let h: zui_handle_t = zui_nest(hlist, i);
-				let val: any = theme[key];
+				let val: i32 = 0; //// theme[key];
 
 				let is_hex: bool = ends_with(key, "_COL");
 				if (is_hex && val < 0) {
@@ -297,16 +303,17 @@ function box_preferences_show() {
 					zui_row(row);
 					zui_text("", 0, val);
 					if (ui.is_hovered && ui.input_released) {
-						h.color = theme[key];
-						ui_menu_draw(function (ui: zui_t) {
-							ui.changed = false;
-							let color: i32 = zui_color_wheel(h, false, null, 11 * ui.ops.theme.ELEMENT_H * zui_SCALE(ui), true);
-							let theme: any = base_theme;
-							theme[key] = color;
-							if (ui.changed) {
-								ui_menu_keep_open = true;
-							}
-						}, 11);
+						// h.color = theme[key];
+						// _box_preferences_h = h;
+						// ui_menu_draw(function (ui: zui_t) {
+						// 	ui.changed = false;
+						// 	let color: i32 = zui_color_wheel(_box_preferences_h, false, -1, 11 * ui.ops.theme.ELEMENT_H * zui_SCALE(ui), true);
+						// 	// let theme: any = base_theme;
+						// 	// theme[key] = color; ////
+						// 	if (ui.changed) {
+						// 		ui_menu_keep_open = true;
+						// 	}
+						// }, 11);
 					}
 				}
 
@@ -319,22 +326,22 @@ function box_preferences_show() {
 					key == "ROUND_CORNERS") {
 					h.selected = val;
 					let b: bool = zui_check(h, key);
-					theme[key] = b;
+					// theme[key] = b; ////
 				}
 				else if (key == "LINK_STYLE") {
 					let styles: string[] = [tr("Straight"), tr("Curved")];
 					h.position = val;
 					let i: i32 = zui_combo(h, styles, key, true);
-					theme[key] = i;
+					// theme[key] = i; ////
 				}
 				else {
 					h.text = is_hex ? i32_to_string_hex(val) : i32_to_string(val);
 					zui_text_input(h, key);
 					if (is_hex) {
-						theme[key] = parse_int_hex(h.text);
+						// theme[key] = parse_int_hex(h.text); ////
 					}
 					else {
-						theme[key] = parse_int(h.text);
+						// theme[key] = parse_int(h.text); ////
 					}
 				}
 
@@ -362,11 +369,12 @@ function box_preferences_show() {
 
 				///if (is_paint || is_sculpt)
 				while (history_undo_layers.length < config_raw.undo_steps) {
-					let l: slot_layer_t = slot_layer_create("_undo" + history_undo_layers.length);
+					let len: i32 = history_undo_layers.length;
+					let l: slot_layer_t = slot_layer_create("_undo" + len);
 					array_push(history_undo_layers, l);
 				}
 				while (history_undo_layers.length > config_raw.undo_steps) {
-					let l: slot_layer_t = history_undo_layers.pop();
+					let l: slot_layer_t = array_pop(history_undo_layers);
 					slot_layer_unload(l);
 				}
 				///end
@@ -765,7 +773,7 @@ function box_preferences_show() {
 								keymap_name += ".json";
 							}
 							let path: string = path_data() + path_sep + "keymap_presets" + path_sep + keymap_name;
-							krom_file_save_bytes(path, sys_string_to_buffer(template));
+							krom_file_save_bytes(path, sys_string_to_buffer(template), 0);
 							box_preferences_fetch_keymaps(); // Refresh file list
 							config_raw.keymap = keymap_name;
 							box_preferences_preset_handle.position = box_preferences_get_preset_index();
@@ -841,7 +849,7 @@ plugin.draw_ui = function (ui) {\
 								plugin_name += ".js";
 							}
 							let path: string = path_data() + path_sep + "plugins" + path_sep + plugin_name;
-							krom_file_save_bytes(path, sys_string_to_buffer(template));
+							krom_file_save_bytes(path, sys_string_to_buffer(template), 0);
 							box_preferences_files_plugin = null; // Refresh file list
 							ui_box_hide();
 							box_preferences_htab.position = 6; // Plugins
@@ -883,15 +891,16 @@ plugin.draw_ui = function (ui) {\
 					base_redraw_ui();
 				}
 				if (ui.is_hovered && ui.input_released_r) {
+					_box_preferences_f = f;
 					ui_menu_draw(function (ui: zui_t) {
-						let path: string = path_data() + path_sep + "plugins" + path_sep + f;
+						let path: string = path_data() + path_sep + "plugins" + path_sep + _box_preferences_f;
 						if (ui_menu_button(ui, tr("Edit in Text Editor"))) {
 							file_start(path);
 						}
 						if (ui_menu_button(ui, tr("Edit in Script Tab"))) {
-							let blob: buffer_t = data_get_blob("plugins/" + f);
+							let blob: buffer_t = data_get_blob("plugins/" + _box_preferences_f);
 							tab_script_hscript.text = sys_buffer_to_string(blob);
-							data_delete_blob("plugins/" + f);
+							data_delete_blob("plugins/" + _box_preferences_f);
 							console_info(tr("Script opened"));
 						}
 						if (ui_menu_button(ui, tr("Export"))) {
@@ -899,16 +908,16 @@ plugin.draw_ui = function (ui) {\
 								if (!ends_with(ui_files_filename, ".js")) {
 									ui_files_filename += ".js";
 								}
-								let path: string = path_data() + path_sep + "plugins" + path_sep + f;
+								let path: string = path_data() + path_sep + "plugins" + path_sep + _box_preferences_f;
 								file_copy(path, dest + path_sep + ui_files_filename);
 							});
 						}
 						if (ui_menu_button(ui, tr("Delete"))) {
-							if (array_index_of(config_raw.plugins, f) >= 0) {
-								array_remove(config_raw.plugins, f);
-								plugin_stop(f);
+							if (array_index_of(config_raw.plugins, _box_preferences_f) >= 0) {
+								array_remove(config_raw.plugins, _box_preferences_f);
+								plugin_stop(_box_preferences_f);
 							}
-							array_remove(box_preferences_files_plugin, f);
+							array_remove(box_preferences_files_plugin, _box_preferences_f);
 							file_delete(path);
 						}
 					}, 4);
@@ -924,17 +933,19 @@ plugin.draw_ui = function (ui) {\
 function box_preferences_fetch_themes() {
 	box_preferences_themes = file_read_directory(path_data() + path_sep + "themes");
 	for (let i: i32 = 0; i < box_preferences_themes.length; ++i) {
-		box_preferences_themes[i] = substring(box_preferences_themes[i], 0, box_preferences_themes[i].length - 5); // Strip .json
+		let s: string = box_preferences_themes[i];
+		box_preferences_themes[i] = substring(box_preferences_themes[i], 0, s.length - 5); // Strip .json
 	}
-	box_preferences_themes.unshift("default");
+	array_insert(box_preferences_themes, 0, "default");
 }
 
 function box_preferences_fetch_keymaps() {
 	box_preferences_files_keymap = file_read_directory(path_data() + path_sep + "keymap_presets");
 	for (let i: i32 = 0; i < box_preferences_files_keymap.length; ++i) {
-		box_preferences_files_keymap[i] = substring(box_preferences_files_keymap[i], 0, box_preferences_files_keymap[i].length - 5); // Strip .json
+		let s: string = box_preferences_files_keymap[i];
+		box_preferences_files_keymap[i] = substring(box_preferences_files_keymap[i], 0, s.length - 5); // Strip .json
 	}
-	box_preferences_files_keymap.unshift("default");
+	array_insert(box_preferences_files_keymap, 0, "default");
 }
 
 function box_preferences_fetch_plugins() {
@@ -951,15 +962,15 @@ function box_preferences_get_preset_index(): i32 {
 
 function box_preferences_set_scale() {
 	let scale: f32 = config_raw.window_scale;
-	zui_set_scale(ui_base_ui, scale);
+	_zui_set_scale(ui_base_ui, scale);
 	ui_header_h = math_floor(ui_header_default_h * scale);
 	config_raw.layout[layout_size_t.STATUS_H] = math_floor(ui_status_default_status_h * scale);
 	ui_menubar_w = math_floor(ui_menubar_default_w * scale);
 	ui_base_set_icon_scale();
-	zui_set_scale(ui_nodes_ui, scale);
-	zui_set_scale(ui_view2d_ui, scale);
-	zui_set_scale(base_ui_box, scale);
-	zui_set_scale(base_ui_menu, scale);
+	_zui_set_scale(ui_nodes_ui, scale);
+	_zui_set_scale(ui_view2d_ui, scale);
+	_zui_set_scale(base_ui_box, scale);
+	_zui_set_scale(base_ui_menu, scale);
 	base_resize();
 	///if (is_paint || is_sculpt)
 	config_raw.layout[layout_size_t.SIDEBAR_W] = math_floor(ui_base_default_sidebar_w * scale);

@@ -95,11 +95,12 @@ function project_new_box() {
 			if (project_mesh_list == null) {
 				project_mesh_list = file_read_directory(path_data() + path_sep + "meshes");
 				for (let i: i32 = 0; i < project_mesh_list.length; ++i) {
-					project_mesh_list[i] = substring(project_mesh_list[i], 0, project_mesh_list[i].length - 4); // Trim .arm
+					let s: string = project_mesh_list[i];
+					project_mesh_list[i] = substring(project_mesh_list[i], 0, s.length - 4); // Trim .arm
 				}
-				project_mesh_list.unshift("plane");
-				project_mesh_list.unshift("sphere");
-				project_mesh_list.unshift("rounded_cube");
+				array_insert(project_mesh_list, 0, "plane");
+				array_insert(project_mesh_list, 0, "sphere");
+				array_insert(project_mesh_list, 0, "rounded_cube");
 			}
 
 			let row: f32[] = [0.5, 0.5];
@@ -185,14 +186,14 @@ function project_new(reset_layers: bool = true) {
 	if (context_raw.project_type != project_model_t.ROUNDED_CUBE) {
 		let raw: mesh_data_t = null;
 		if (context_raw.project_type == project_model_t.SPHERE || context_raw.project_type == project_model_t.TESSELLATED_PLANE) {
-			let mesh: any = context_raw.project_type == project_model_t.SPHERE ?
+			let mesh: raw_mesh_t = context_raw.project_type == project_model_t.SPHERE ?
 				geom_make_uv_sphere(1, 512, 256) :
 				geom_make_plane(1, 1, 512, 512);
 			mesh.name = "Tessellated";
 			raw = import_mesh_raw_mesh(mesh);
 
 			///if is_sculpt
-			app_notify_on_next_frame(function (mesh: any) {
+			app_notify_on_next_frame(function (mesh: raw_mesh_t) {
 				let f32a: f32_array_t = f32_array_create(config_get_texture_res_x() * config_get_texture_res_y() * 4);
 				for (let i: i32 = 0; i < math_floor(mesh.inda.length); ++i) {
 					let index: i32 = mesh.inda[i];
@@ -214,7 +215,8 @@ function project_new(reset_layers: bool = true) {
 		}
 		else {
 			let b: buffer_t = data_get_blob("meshes/" + project_mesh_list[context_raw.project_type] + ".arm");
-			raw = armpack_decode(b).mesh_datas[0];
+			let scene: scene_t = armpack_decode(b);
+			raw = scene.mesh_datas[0];
 		}
 
 		let md: mesh_data_t = mesh_data_create(raw);
@@ -243,7 +245,7 @@ function project_new(reset_layers: bool = true) {
 	project_paint_objects = [context_raw.paint_object];
 	///if (is_paint || is_sculpt)
 	while (project_materials.length > 0) {
-		slot_material_unload(project_materials.pop());
+		slot_material_unload(array_pop(project_materials));
 	}
 	///end
 	let m: material_data_t = data_get_material("Scene", "Material");
@@ -304,7 +306,7 @@ function project_new(reset_layers: bool = true) {
 		///if (is_paint || is_sculpt)
 		let aspect_ratio_changed: bool = project_layers[0].texpaint.width != config_get_texture_res_x() || project_layers[0].texpaint.height != config_get_texture_res_y();
 		while (project_layers.length > 0) {
-			slot_layer_unload(project_layers.pop());
+			slot_layer_unload(array_pop(project_layers));
 		}
 		let layer: slot_layer_t = slot_layer_create();
 		array_push(project_layers, layer);
@@ -348,7 +350,8 @@ function project_import_material() {
 }
 
 function project_import_brush() {
-	ui_files_show("arm," + path_texture_formats.join(","), false, true, function (path: string) {
+	let formats: string = string_array_join(path_texture_formats, ",");
+	ui_files_show("arm," + formats, false, true, function (path: string) {
 		// Create brush from texture
 		if (path_is_texture(path)) {
 			// Import texture
@@ -371,13 +374,14 @@ function project_import_brush() {
 			n.y = 340;
 			n.buttons[0].default_value = f32_array_create_x(asset_index);
 			let links: zui_node_link_t[] = context_raw.brush.canvas.links;
-			array_push(links, {
-				id: zui_get_link_id(links),
+			let link: zui_node_link_t = {
+				id: zui_next_link_id(links.buffer, links.length),
 				from_id: n.id,
 				from_socket: 0,
 				to_id: 0,
 				to_socket: 4
-			});
+			};
+			array_push(links, link);
 
 			// Parse brush
 			make_material_parse_brush();
@@ -398,7 +402,7 @@ let _project_import_mesh_done: ()=>void;
 function project_import_mesh(replace_existing: bool = true, done: ()=>void = null) {
 	_project_import_mesh_replace_existing = replace_existing;
 	_project_import_mesh_done = done;
-	ui_files_show(path_mesh_formats.join(","), false, false, function (path: string) {
+	ui_files_show(string_array_join(path_mesh_formats, ","), false, false, function (path: string) {
 		project_import_mesh_box(path, _project_import_mesh_replace_existing, true, _project_import_mesh_done);
 	});
 }
@@ -498,11 +502,11 @@ function project_reimport_mesh() {
 	}
 }
 
-let _project_unwrap_mesh_box_mesh: any;
-let _project_unwrap_mesh_box_done: (a: any)=>void;
+let _project_unwrap_mesh_box_mesh: raw_mesh_t;
+let _project_unwrap_mesh_box_done: (a: raw_mesh_t)=>void;
 let _project_unwrap_mesh_box_skip_ui: bool;
 
-function project_unwrap_mesh_box(mesh: any, done: (a: any)=>void, skip_ui: bool = false) {
+function project_unwrap_mesh_box(mesh: raw_mesh_t, done: (a: raw_mesh_t)=>void, skip_ui: bool = false) {
 
 	_project_unwrap_mesh_box_mesh = mesh;
 	_project_unwrap_mesh_box_done = done;
@@ -510,8 +514,8 @@ function project_unwrap_mesh_box(mesh: any, done: (a: any)=>void, skip_ui: bool 
 
 	ui_box_show_custom(function (ui: zui_t) {
 
-		let mesh: any = _project_unwrap_mesh_box_mesh;
-		let done: (a: any)=>void = _project_unwrap_mesh_box_done;
+		let mesh: raw_mesh_t = _project_unwrap_mesh_box_mesh;
+		let done: (a: raw_mesh_t)=>void = _project_unwrap_mesh_box_done;
 		let skip_ui: bool = _project_unwrap_mesh_box_skip_ui;
 
 		let tab_vertical: bool = config_raw.touch_ui;
@@ -553,7 +557,8 @@ function project_unwrap_mesh_box(mesh: any, done: (a: any)=>void, skip_ui: bool 
 						config_enable_plugin(f);
 						console_info(f + " " + tr("plugin enabled"));
 					}
-					map_get(util_mesh_unwrappers, f)(mesh);
+					let cb: (a: any)=>void = map_get(util_mesh_unwrappers, f);
+					cb(mesh);
 				}
 				done(mesh);
 			}
@@ -565,7 +570,7 @@ let _project_import_asset_hdr_as_envmap: bool;
 
 function project_import_asset(filters: string = null, hdr_as_envmap: bool = true) {
 	if (filters == null) {
-		filters = path_texture_formats.join(",") + "," + path_mesh_formats.join(",");
+		filters = string_array_join(path_texture_formats, ",") + "," + string_array_join(path_mesh_formats, ",");
 	}
 
 	_project_import_asset_hdr_as_envmap = hdr_as_envmap;
@@ -605,8 +610,8 @@ function project_reimport_texture_load(path: string, asset: asset_t) {
 	array_splice(project_assets, i, 1);
 	array_splice(project_asset_names, i, 1);
 	import_texture_run(asset.file);
-	array_insert(project_assets, i, project_assets.pop());
-	array_insert(project_asset_names, i, project_asset_names.pop());
+	array_insert(project_assets, i, array_pop(project_assets));
+	array_insert(project_asset_names, i, array_pop(project_asset_names));
 
 	///if (is_paint || is_sculpt)
 	if (context_raw.texture == old_asset) {
@@ -628,7 +633,7 @@ let _project_reimport_texture_asset: asset_t;
 
 function project_reimport_texture(asset: asset_t) {
 	if (!file_exists(asset.file)) {
-		let filters: string = path_texture_formats.join(",");
+		let filters: string = string_array_join(path_texture_formats, ",");
 		_project_reimport_texture_asset = asset;
 		ui_files_show(filters, false, false, function (path: string) {
 			project_reimport_texture_load(path, _project_reimport_texture_asset);
@@ -645,7 +650,9 @@ function project_get_image(asset: asset_t): image_t {
 
 ///if (is_paint || is_sculpt)
 function project_get_used_atlases(): string[] {
-	if (project_atlas_objects == null) return null;
+	if (project_atlas_objects == null) {
+		return null;
+	}
 	let used: i32[] = [];
 	for (let i: i32 = 0; i < project_atlas_objects.length; ++i) {
 		let ao: i32 = project_atlas_objects[i];
@@ -712,11 +719,13 @@ function project_export_swatches() {
 }
 
 function make_swatch(base: i32 = 0xffffffff): swatch_color_t {
-	return { base: base, opacity: 1.0, occlusion: 1.0, roughness: 0.0, metallic: 0.0, normal: 0xff8080ff, emission: 0.0, height: 0.0, subsurface: 0.0 };
+	let s: swatch_color_t = { base: base, opacity: 1.0, occlusion: 1.0, roughness: 0.0, metallic: 0.0, normal: 0xff8080ff, emission: 0.0, height: 0.0, subsurface: 0.0 };
+	return s;
 }
 
 function project_clone_swatch(swatch: swatch_color_t): swatch_color_t {
-	return { base: swatch.base, opacity: swatch.opacity, occlusion: swatch.occlusion, roughness: swatch.roughness, metallic: swatch.metallic, normal: swatch.normal, emission: swatch.emission, height: swatch.height, subsurface: swatch.subsurface };
+	let s: swatch_color_t = { base: swatch.base, opacity: swatch.opacity, occlusion: swatch.occlusion, roughness: swatch.roughness, metallic: swatch.metallic, normal: swatch.normal, emission: swatch.emission, height: swatch.height, subsurface: swatch.subsurface };
+	return s;
 }
 
 function project_set_default_swatches() {

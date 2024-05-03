@@ -1,13 +1,15 @@
 
-let operator_ops: map_t<string, any> = map_create();
 
-function operator_register(name: string, call: any) {
+let operator_ops: map_t<string, ()=>void> = map_create();
+
+function operator_register(name: string, call: ()=>void) {
 	map_set(operator_ops, name, call);
 }
 
 function operator_run(name: string) {
 	if (map_get(operator_ops, name) != null) {
-		map_get(operator_ops, name)();
+		let cb: ()=>void = map_get(operator_ops, name);
+		cb();
 	}
 }
 

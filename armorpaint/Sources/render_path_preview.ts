@@ -71,7 +71,8 @@ function render_path_preview_commands_preview() {
 
 	render_path_set_target("mgbuffer0");
 	render_path_clear_target(0xffffffff, 1.0, clear_flag_t.COLOR | clear_flag_t.DEPTH);
-	render_path_set_target("mgbuffer0", ["mgbuffer1", "mgbuffer2"]);
+	let additional: string[] = ["mgbuffer1", "mgbuffer2"];
+	render_path_set_target("mgbuffer0", additional);
 	render_path_draw_meshes("mesh");
 
 	// Deferred light
@@ -97,8 +98,10 @@ function render_path_preview_commands_preview() {
 
 	let framebuffer: string = "texpreview";
 	let selected_mat: slot_material_t = context_raw.material;
-	map_get(render_path_render_targets, "texpreview")._image = selected_mat.image;
-	map_get(render_path_render_targets, "texpreview_icon")._image = selected_mat.image_icon;
+	let texpreview: render_target_t = map_get(render_path_render_targets, "texpreview");
+	let texpreview_icon: render_target_t = map_get(render_path_render_targets, "texpreview_icon");
+	texpreview._image = selected_mat.image;
+	texpreview_icon._image = selected_mat.image_icon;
 
 	render_path_set_target(framebuffer);
 	render_path_bind_target("mtex", "tex");
@@ -115,7 +118,8 @@ function render_path_preview_commands_decal() {
 
 	render_path_set_target("gbuffer0");
 	render_path_clear_target(0xffffffff, 1.0, clear_flag_t.COLOR | clear_flag_t.DEPTH);
-	render_path_set_target("gbuffer0", ["gbuffer1", "gbuffer2"]);
+	let additional: string[] = ["gbuffer1", "gbuffer2"];
+	render_path_set_target("gbuffer0", additional);
 	render_path_draw_meshes("mesh");
 
 	// Deferred light
@@ -140,7 +144,8 @@ function render_path_preview_commands_decal() {
 	///end
 
 	let framebuffer: string = "texpreview";
-	map_get(render_path_render_targets, "texpreview")._image = context_raw.decal_image;
+	let texpreview: render_target_t = map_get(render_path_render_targets, "texpreview");
+	texpreview._image = context_raw.decal_image;
 
 	render_path_set_target(framebuffer);
 

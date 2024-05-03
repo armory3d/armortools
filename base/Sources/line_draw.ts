@@ -144,13 +144,20 @@ function line_draw_line(x1: f32, y1: f32, z1: f32, x2: f32, y2: f32, z2: f32) {
 	vec4_add(vec4_set(line_draw_corner4, x2, y2, z2), line_width);
 
 	let i: i32 = line_draw_lines * 24; // 4 * 6 (structure len)
-	line_draw_add_vb_data(i, [line_draw_corner1.x, line_draw_corner1.y, line_draw_corner1.z, color_get_rb(line_draw_color) / 255, color_get_gb(line_draw_color) / 255, color_get_ab(line_draw_color) / 255]);
+	let data: f32[] = [line_draw_corner1.x, line_draw_corner1.y, line_draw_corner1.z, color_get_rb(line_draw_color) / 255, color_get_gb(line_draw_color) / 255, color_get_ab(line_draw_color) / 255];
+	line_draw_add_vb_data(i, data);
+
 	i += 6;
-	line_draw_add_vb_data(i, [line_draw_corner2.x, line_draw_corner2.y, line_draw_corner2.z, color_get_rb(line_draw_color) / 255, color_get_gb(line_draw_color) / 255, color_get_ab(line_draw_color) / 255]);
+	data = [line_draw_corner2.x, line_draw_corner2.y, line_draw_corner2.z, color_get_rb(line_draw_color) / 255, color_get_gb(line_draw_color) / 255, color_get_ab(line_draw_color) / 255];
+	line_draw_add_vb_data(i, data);
+
 	i += 6;
-	line_draw_add_vb_data(i, [line_draw_corner3.x, line_draw_corner3.y, line_draw_corner3.z, color_get_rb(line_draw_color) / 255, color_get_gb(line_draw_color) / 255, color_get_ab(line_draw_color) / 255]);
+	data = [line_draw_corner3.x, line_draw_corner3.y, line_draw_corner3.z, color_get_rb(line_draw_color) / 255, color_get_gb(line_draw_color) / 255, color_get_ab(line_draw_color) / 255];
+	line_draw_add_vb_data(i, data);
+
 	i += 6;
-	line_draw_add_vb_data(i, [line_draw_corner4.x, line_draw_corner4.y, line_draw_corner4.z, color_get_rb(line_draw_color) / 255, color_get_gb(line_draw_color) / 255, color_get_ab(line_draw_color) / 255]);
+	data = [line_draw_corner4.x, line_draw_corner4.y, line_draw_corner4.z, color_get_rb(line_draw_color) / 255, color_get_gb(line_draw_color) / 255, color_get_ab(line_draw_color) / 255];
+	line_draw_add_vb_data(i, data);
 
 	i = line_draw_lines * 6;
 	line_draw_ib_data[i    ] = line_draw_lines * 4;

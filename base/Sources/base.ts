@@ -15,7 +15,7 @@ let base_drag_start: f32 = 0.0;
 let base_drop_x: f32 = 0.0;
 let base_drop_y: f32 = 0.0;
 let base_font: g2_font_t = null;
-let base_theme: theme_t;
+let base_theme: zui_theme_t;
 let base_color_wheel: image_t;
 let base_color_wheel_gradient: image_t;
 let base_ui_box: zui_t;
@@ -101,6 +101,7 @@ let base_max_layers: i32 = 255;
 ///end
 ///end
 let base_default_fov: f32 = 0.69;
+let _base_material_count: i32;
 
 function base_get_default_keymap(): map_t<string, string> {
 	let keymap: map_t<string, string> = map_create();
@@ -236,15 +237,16 @@ function base_init() {
 
 	base_color_wheel = image_color_wheel;
 	base_color_wheel_gradient = image_color_wheel_gradient;
-	zui_set_enum_texts(base_enum_texts);
+	// zui_set_enum_texts(base_enum_texts);
+	zui_nodes_enum_texts = base_enum_texts;
 	zui_tr = tr;
 	let ops: zui_options_t = {
 		theme: base_theme,
-		font: f,
+		font: f.font_,
 		scale_factor: config_raw.window_scale,
-		color_wheel: base_color_wheel,
-		black_white_gradient: base_color_wheel_gradient
-	}
+		color_wheel: base_color_wheel.texture_,
+		black_white_gradient: base_color_wheel_gradient.texture_
+	};
 	base_ui_box = zui_create(ops);
 	base_ui_menu = zui_create(ops);
 	base_default_element_h = base_ui_menu.ops.theme.ELEMENT_H;
@@ -566,7 +568,7 @@ function base_update() {
 			///end
 		}
 		// Disable touch scrolling while dragging is active
-		zui_set_touch_scroll(!base_is_dragging);
+		zui_touch_scroll = !base_is_dragging;
 	}
 
 	if (has_drag && (mouse_movement_x != 0 || mouse_movement_y != 0)) {
@@ -621,10 +623,10 @@ function base_update() {
 				base_drop_y = mouse_y;
 
 				///if (is_paint || is_sculpt)
-				let material_count: i32 = project_materials.length;
+				_base_material_count = project_materials.length;
 				import_asset_run(base_drag_file, base_drop_x, base_drop_y, true, true, function () {
 					// Asset was material
-					if (project_materials.length > material_count) {
+					if (project_materials.length > _base_material_count) {
 						base_drag_material = context_raw.material;
 						base_material_dropped();
 					}
@@ -668,7 +670,7 @@ function base_update() {
 	///if krom_windows
 	let is_picker: bool = context_raw.tool == workspace_tool_t.PICKER || context_raw.tool == workspace_tool_t.MATERIAL;
 	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
-	zui_set_always_redraw_window(!context_raw.cache_draws ||
+	zui_always_redraw_window = !context_raw.cache_draws ||
 		ui_menu_show ||
 		ui_box_show ||
 		base_is_dragging ||
@@ -676,11 +678,11 @@ function base_update() {
 		decal ||
 		ui_view2d_show ||
 		!config_raw.brush_3d ||
-		context_raw.frame < 3);
+		context_raw.frame < 3;
 	///end
 	///end
 
-	if (zui_always_redraw_window() && context_raw.ddirty < 0) context_raw.ddirty = 0;
+	if (zui_always_redraw_window && context_raw.ddirty < 0) context_raw.ddirty = 0;
 }
 
 ///if (is_paint || is_sculpt)
@@ -713,7 +715,7 @@ function base_handle_drop_paths() {
 		if (!wait) {
 			base_drop_x = mouse_x;
 			base_drop_y = mouse_y;
-			let drop_path: string = base_drop_paths.shift();
+			let drop_path: string = array_shift(base_drop_paths);
 			import_asset_run(drop_path, base_drop_x, base_drop_y);
 		}
 	}
@@ -792,7 +794,9 @@ function base_render() {
 		if (history_undo_layers == null) {
 			history_undo_layers = [];
 			for (let i: i32 = 0; i < config_raw.undo_steps; ++i) {
-				let l: slot_layer_t = slot_layer_create("_undo" + history_undo_layers.length);
+				let len: i32 = history_undo_layers.length;
+				let ext: string = "_undo" + len;
+				let l: slot_layer_t = slot_layer_create(ext);
 				array_push(history_undo_layers, l);
 			}
 		}
@@ -891,7 +895,13 @@ function base_render() {
 function base_enum_texts(node_type: string): string[] {
 	///if (is_paint || is_sculpt)
 	if (node_type == "TEX_IMAGE") {
-		return project_asset_names.length > 0 ? project_asset_names : [""];
+		if (project_asset_names.length > 0) {
+			project_asset_names;
+		}
+		else {
+			let empty: string[] = [""];
+			return empty;
+		}
 	}
 	if (node_type == "LAYER" || node_type == "LAYER_MASK") {
 		let layer_names: string[] = [];
@@ -913,7 +923,13 @@ function base_enum_texts(node_type: string): string[] {
 
 	///if is_lab
 	if (node_type == "ImageTextureNode") {
-		return project_asset_names.length > 0 ? project_asset_names : [""];
+		if (project_asset_names.length > 0) {
+			project_asset_names;
+		}
+		else {
+			let empty: string[] = [""];
+			return empty;
+		}
 	}
 	///end
 
@@ -955,7 +971,7 @@ function base_is_scrolling(): bool {
 function base_is_combo_selected(): bool {
 	for (let i: i32 = 0; i < base_get_uis().length; ++i) {
 		let ui: zui_t = base_get_uis()[i];
-		if (ui.combo_selected_handle_ptr != 0) {
+		if (ui.combo_selected_handle != null) {
 			return true;
 		}
 	}
@@ -963,7 +979,8 @@ function base_is_combo_selected(): bool {
 }
 
 function base_get_uis(): zui_t[] {
-	return [base_ui_box, base_ui_menu, ui_base_ui, ui_nodes_ui, ui_view2d_ui];
+	let uis: zui_t[] = [base_ui_box, base_ui_menu, ui_base_ui, ui_nodes_ui, ui_view2d_ui];
+	return uis;
 }
 
 function base_is_decal_layer(): bool {
@@ -1143,7 +1160,7 @@ function base_resize_layers() {
 			context_raw.undo_handle.value = conf.undo_steps;
 		}
 		while (history_undo_layers.length > conf.undo_steps) {
-			let l: slot_layer_t = history_undo_layers.pop();
+			let l: slot_layer_t = array_pop(history_undo_layers);
 			app_notify_on_next_frame(function (l: slot_layer_t) {
 				slot_layer_unload(l);
 			}, l);
@@ -1157,32 +1174,40 @@ function base_resize_layers() {
 		let l: slot_layer_t = history_undo_layers[i];
 		slot_layer_resize_and_set_bits(l);
 	}
+
 	let rts: map_t<string, render_target_t> = render_path_render_targets;
-	let _texpaint_blend0: image_t = map_get(rts, "texpaint_blend0")._image;
+
+	let blend0: render_target_t = map_get(rts, "texpaint_blend0");
+	let _texpaint_blend0: image_t = blend0._image;
 	app_notify_on_next_frame(function (_texpaint_blend0: image_t) {
 		image_unload(_texpaint_blend0);
 	}, _texpaint_blend0);
-	map_get(rts, "texpaint_blend0").width = config_get_texture_res_x();
-	map_get(rts, "texpaint_blend0").height = config_get_texture_res_y();
-	map_get(rts, "texpaint_blend0")._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
-	let _texpaint_blend1: image_t = map_get(rts, "texpaint_blend1")._image;
+	blend0.width = config_get_texture_res_x();
+	blend0.height = config_get_texture_res_y();
+	blend0._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
+
+	let blend1: render_target_t = map_get(rts, "texpaint_blend1");
+	let _texpaint_blend1: image_t = blend1._image;
 	app_notify_on_next_frame(function (_texpaint_blend1: image_t) {
 		image_unload(_texpaint_blend1);
 	}, _texpaint_blend1);
-	map_get(rts, "texpaint_blend1").width = config_get_texture_res_x();
-	map_get(rts, "texpaint_blend1").height = config_get_texture_res_y();
-	map_get(rts, "texpaint_blend1")._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
+	blend1.width = config_get_texture_res_x();
+	blend1.height = config_get_texture_res_y();
+	blend1._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
+
 	context_raw.brush_blend_dirty = true;
-	if (map_get(rts, "texpaint_blur") != null) {
-		let _texpaint_blur: image_t = map_get(rts, "texpaint_blur")._image;
+
+	let blur: render_target_t = map_get(rts, "texpaint_blur");
+	if (blur != null) {
+		let _texpaint_blur: image_t = blur._image;
 		app_notify_on_next_frame(function (_texpaint_blur: image_t) {
 			image_unload(_texpaint_blur);
 		}, _texpaint_blur);
 		let size_x: f32 = math_floor(config_get_texture_res_x() * 0.95);
 		let size_y: f32 = math_floor(config_get_texture_res_y() * 0.95);
-		map_get(rts, "texpaint_blur").width = size_x;
-		map_get(rts, "texpaint_blur").height = size_y;
-		map_get(rts, "texpaint_blur")._image = image_create_render_target(size_x, size_y);
+		blur.width = size_x;
+		blur.height = size_y;
+		blur._image = image_create_render_target(size_x, size_y);
 	}
 	if (render_path_paint_live_layer != null) {
 		slot_layer_resize_and_set_bits(render_path_paint_live_layer);
@@ -1483,8 +1508,8 @@ function base_make_temp_img() {
 	if (base_temp_image == null) {
 		///if (is_paint || is_sculpt)
 		let format: string = base_bits_handle.position == texture_bits_t.BITS8  ? "RGBA32" :
-								base_bits_handle.position == texture_bits_t.BITS16 ? "RGBA64" :
-																				"RGBA128";
+							 base_bits_handle.position == texture_bits_t.BITS16 ? "RGBA64" :
+																				  "RGBA128";
 		///end
 		///if is_lab
 		let format: string = "RGBA32";
@@ -1678,7 +1703,7 @@ function base_merge_down() {
 	context_raw.layer_preview_dirty = true;
 }
 
-function base_merge_group(l: slot_layer_t) {
+function base_merge_group(l: slot_layer_t): slot_layer_t {
 	if (!slot_layer_is_group(l)) {
 		return null;
 	}
@@ -1733,7 +1758,8 @@ function base_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool = 
 	g2_set_pipeline(null);
 	g2_end();
 
-	let empty: image_t = map_get(render_path_render_targets, "empty_white")._image;
+	let empty_rt: render_target_t = map_get(render_path_render_targets, "empty_white");
+	let empty: image_t = empty_rt._image;
 	let mask: image_t = empty;
 	let l1masks: slot_layer_t[] =  use_mask ? slot_layer_get_masks(l1) : null;
 	if (l1masks != null) {
@@ -1820,7 +1846,7 @@ function base_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool = 
 	}
 }
 
-function base_flatten(height_to_normal: bool = false, layers: slot_layer_t[] = null): any {
+function base_flatten(height_to_normal: bool = false, layers: slot_layer_t[] = null): slot_layer_t {
 	if (layers == null) {
 		layers = project_layers;
 	}
@@ -1832,7 +1858,8 @@ function base_flatten(height_to_normal: bool = false, layers: slot_layer_t[] = n
 	if (const_data_screen_aligned_vb == null) {
 		const_data_create_screen_aligned_data();
 	}
-	let empty: image_t = map_get(render_path_render_targets, "empty_white")._image;
+	let empty_rt: render_target_t = map_get(render_path_render_targets, "empty_white");
+	let empty: image_t = empty_rt._image;
 
 	// Clear export layer
 	g4_begin(base_expa);
@@ -1863,7 +1890,7 @@ function base_flatten(height_to_normal: bool = false, layers: slot_layer_t[] = n
 				g2_begin(base_temp_mask_image);
 				g2_clear(0x00000000);
 				g2_end();
-				let l1: any = { texpaint: base_temp_mask_image };
+				let l1: slot_layer_t = { texpaint: base_temp_mask_image };
 				for (let i: i32 = 0; i < l1masks.length; ++i) {
 					base_merge_layer(l1, l1masks[i]);
 				}
@@ -1952,7 +1979,11 @@ function base_flatten(height_to_normal: bool = false, layers: slot_layer_t[] = n
 	g2_end();
 	///end
 
-	let l0: any = { texpaint: base_expa, texpaint_nor: base_expb, texpaint_pack: base_expc };
+	let l0: slot_layer_t = {
+		texpaint: base_expa,
+		texpaint_nor: base_expb,
+		texpaint_pack: base_expc
+	};
 
 	// Merge height map into normal map
 	if (height_to_normal && make_material_height_used) {

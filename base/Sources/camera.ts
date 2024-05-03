@@ -173,8 +173,10 @@ function camera_update() {
 	if (operator_shortcut(map_get(config_keymap, "rotate_light"), shortcut_type_t.DOWN)) {
 		camera_redraws = 2;
 		let light: light_object_t = scene_lights[0];
-		context_raw.light_angle = (context_raw.light_angle + ((mouse_movement_x / 100) % (2 * math_pi()) + 2 * math_pi())) % (2 * math_pi());
-		let m: mat4_t = mat4_rot_z(mouse_movement_x / 100);
+		let pi2: f32 = math_pi() * 2.0;
+		let mx: f32 = mouse_movement_x / 100;
+		context_raw.light_angle = math_fmod(context_raw.light_angle + math_fmod(mx, pi2) + pi2, pi2);
+		let m: mat4_t = mat4_rot_z(mx);
 		mat4_mult_mat(light.base.transform.local, m);
 		transform_decompose(light.base.transform);
 	}

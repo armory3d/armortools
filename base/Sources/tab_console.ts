@@ -34,7 +34,7 @@ function tab_console_draw(htab: zui_handle_t) {
 		}
 		if (zui_button(tr("Export"))) {
 			ui_files_show("txt", true, false, function (path: string) {
-				let str: string = console_last_traces.join("\n");
+				let str: string = string_array_join(console_last_traces, "\n");
 				let f: string = ui_files_filename;
 				if (f == "") {
 					f = tr("untitled");
@@ -43,12 +43,12 @@ function tab_console_draw(htab: zui_handle_t) {
 				if (!ends_with(path, ".txt")) {
 					path += ".txt";
 				}
-				krom_file_save_bytes(path, sys_string_to_buffer(str));
+				krom_file_save_bytes(path, sys_string_to_buffer(str), 0);
 			});
 		}
 		///if (krom_windows || krom_linux || krom_darwin)
 		if (zui_button(tr("Copy"))) {
-			let str: string = console_last_traces.join("\n");
+			let str: string = string_array_join(console_last_traces, "\n");
 			krom_copy_to_clipboard(str);
 		}
 		///end

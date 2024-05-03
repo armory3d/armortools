@@ -18,16 +18,18 @@ function main() {
 
 	///else
 
-	kickstart();
+	// kickstart();
+	krom_set_app_name(manifest_title);
+	config_load(main_start);
 
 	///end
 }
 
-function kickstart() {
-	// Used to locate external application data folder
-	krom_set_app_name(manifest_title);
-	config_load(main_start);
-}
+// function kickstart() {
+// 	// Used to locate external application data folder
+// 	krom_set_app_name(manifest_title);
+// 	config_load(main_start);
+// }
 
 function main_start() {
 	app_on_resize = base_on_resize;

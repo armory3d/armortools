@@ -15,17 +15,20 @@ function resource_get(name: string): image_t {
 
 function resource_tile50(img: image_t, x: i32, y: i32): rect_t {
 	let size: i32 = config_raw.window_scale > 1 ? 100 : 50;
-	return { x: x * size, y: y * size, w: size, h: size };
+	let r: rect_t = { x: x * size, y: y * size, w: size, h: size };
+	return r;
 }
 
 function resource_tile25(img: image_t, x: i32, y: i32): rect_t {
 	let size: i32 = config_raw.window_scale > 1 ? 50 : 25;
-	return { x: x * size, y: y * size, w: size, h: size };
+	let r: rect_t = { x: x * size, y: y * size, w: size, h: size };
+	return r;
 }
 
 function resource_tile18(img: image_t, x: i32, y: i32): rect_t {
 	let size: i32 = config_raw.window_scale > 1 ? 36 : 18;
-	return { x: x * size, y: img.height - (y + 1) * size, w: size, h: size };
+	let r: rect_t = { x: x * size, y: img.height - (y + 1) * size, w: size, h: size };
+	return r;
 }
 
 ///if arm_snapshot

@@ -37,6 +37,7 @@ function box_projects_show() {
 
 let _box_projects_path: string;
 let _box_projects_icon_path: string;
+let _box_projects_i: i32;
 
 function box_projects_tab(ui: zui_t) {
 	if (zui_tab(box_projects_htab, tr("Projects"), true)) {
@@ -73,7 +74,7 @@ function box_projects_tab(ui: zui_t) {
 		let show_asset_names: bool = true;
 
 		for (let row: i32 = 0; row < math_ceil(recent_projects.length / num); ++row) {
-			let mult = show_asset_names ? 2 : 1;
+			let mult: i32 = show_asset_names ? 2 : 1;
 			let ar: f32[] = [];
 			for (let i: i32 = 0; i < num * mult; ++i) {
 				array_push(ar, 1 / num);
@@ -120,7 +121,7 @@ function box_projects_tab(ui: zui_t) {
 				if (icon != null) {
 					zui_fill(0, 0, 128, 128, ui.ops.theme.SEPARATOR_COL);
 
-					let state: i32 = zui_image(icon, 0xffffffff, 128  * zui_SCALE(ui));
+					let state: i32 = _zui_image(icon, 0xffffffff, 128  * zui_SCALE(ui));
 					if (state == zui_state_t.RELEASED) {
 						let _uix: i32 = ui._x;
 						ui._x = uix;
@@ -140,16 +141,17 @@ function box_projects_tab(ui: zui_t) {
 					if (ui.is_hovered && ui.input_released_r) {
 						_box_projects_path = path;
 						_box_projects_icon_path = icon_path;
+						_box_projects_i = i;
 						ui_menu_draw(function (ui: zui_t) {
 							// if (menuButton(ui, tr("Duplicate"))) {}
 							if (ui_menu_button(ui, tr("Delete"))) {
 								app_notify_on_init(function () {
 									file_delete(_box_projects_path);
 									file_delete(_box_projects_icon_path);
-									let data_path: string = substring(path, 0, path.length - 4);
+									let data_path: string = substring(_box_projects_path, 0, _box_projects_path.length - 4);
 									file_delete(data_path);
 									let recent_projects: string[] = config_raw.recent_projects;
-									array_splice(recent_projects, i, 1);
+									array_splice(recent_projects, _box_projects_i, 1);
 								});
 							}
 						}, 1);
@@ -239,7 +241,7 @@ function box_projects_recent_tab(ui: zui_t) {
 
 function box_projects_draw_badge(ui: zui_t) {
 	let img: image_t = data_get_image("badge.k");
-	zui_image(img);
+	_zui_image(img);
 	zui_end_element();
 }
 

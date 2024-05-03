@@ -1,7 +1,7 @@
 
 let make_material_default_scon: shader_context_t = null;
 let make_material_default_mcon: material_context_t = null;
-let make_material_height_used = false;
+let make_material_height_used: bool = false;
 
 function make_material_parse_mesh_material() {
 	let m = project_material_data;

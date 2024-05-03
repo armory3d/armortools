@@ -25,11 +25,12 @@ function slot_brush_create(c: zui_node_canvas_t = null): slot_brush_t {
 
 	if (c == null) {
 		if (slot_brush_default_canvas == null) { // Synchronous
-			let b: buffer_t = data_get_blob("default_brush.arm")
+			let b: buffer_t = data_get_blob("default_brush.arm");
 			slot_brush_default_canvas = b;
 		}
 		raw.canvas = armpack_decode(slot_brush_default_canvas);
-		raw.canvas.name = "Brush " + (raw.id + 1);
+		let id: i32 = (raw.id + 1);
+		raw.canvas.name = "Brush " + id;
 	}
 	else {
 		raw.canvas = c;

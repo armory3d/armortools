@@ -170,14 +170,14 @@ function box_export_tab_export_textures(ui: zui_t, title: string, bake_material:
 				});
 			}
 			else {
-				let filters = base_bits_handle.position != texture_bits_t.BITS8 ? "exr" : context_raw.format_type == texture_ldr_format_t.PNG ? "png" : "jpg";
+				let filters: string = base_bits_handle.position != texture_bits_t.BITS8 ? "exr" : context_raw.format_type == texture_ldr_format_t.PNG ? "png" : "jpg";
+				_box_export_bake_material = bake_material;
 				ui_files_show(filters, true, false, function (path: string) {
 					context_raw.texture_export_path = path;
 					///if (krom_android || krom_ios)
 					console_toast(tr("Exporting textures"));
 					krom_g4_swap_buffers();
 					///end
-					_box_export_bake_material = bake_material;
 					app_notify_on_init(function () {
 						///if is_paint
 						export_texture_run(context_raw.texture_export_path, _box_export_bake_material);
@@ -190,7 +190,9 @@ function box_export_tab_export_textures(ui: zui_t, title: string, bake_material:
 			}
 		}
 		if (ui.is_hovered) {
-			zui_tooltip(tr("Export texture files") + " (" + map_get(config_keymap, "file_export_textures") + ")");
+			let key: string = map_get(config_keymap, "file_export_textures");
+			let tip: string = tr("Export texture files") + " (" + key + ")";
+			zui_tooltip(tip);
 		}
 	}
 }
@@ -325,7 +327,12 @@ function box_export_tab_presets(ui: zui_t) {
 		row = [1 / 8];
 		zui_row(row);
 		if (zui_button(tr("Add"))) {
-			array_push(box_export_preset.textures, { name: "base", channels: ["base_r", "base_g", "base_b", "1.0"], color_space: "linear" });
+			let tex: export_preset_texture_t = {
+				name: "base",
+				channels: ["base_r", "base_g", "base_b", "1.0"],
+				color_space: "linear"
+			};
+			array_push(box_export_preset.textures, tex);
 			box_export_hpreset.children = null;
 			box_export_save_preset();
 		}
@@ -342,7 +349,8 @@ function box_export_tab_atlases(ui: zui_t) {
 			project_atlas_names = [];
 			for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 				array_push(project_atlas_objects, 0);
-				array_push(project_atlas_names, tr("Atlas") + " " + (i + 1));
+				let i1: i32 = i + 1;
+				array_push(project_atlas_names, tr("Atlas") + " " + i1);
 			}
 		}
 		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
@@ -364,6 +372,8 @@ function box_export_show_mesh() {
 		box_export_tab_export_mesh(ui, htab);
 	});
 }
+
+let _box_export_apply_displacement: bool;
 
 function box_export_tab_export_mesh(ui: zui_t, htab: zui_handle_t) {
 	let tab_vertical: bool = config_raw.touch_ui;
@@ -390,7 +400,14 @@ function box_export_tab_export_mesh(ui: zui_t, htab: zui_handle_t) {
 
 		let tris: i32 = 0;
 		let pos: i32 = box_export_mesh_handle.position;
-		let paint_objects: mesh_object_t[] = pos == 0 ? project_paint_objects : [project_paint_objects[pos - 1]];
+		let paint_objects: mesh_object_t[];
+		if (pos == 0) {
+			paint_objects = project_paint_objects;
+		}
+		else {
+			let po: mesh_object_t = project_paint_objects[pos - 1];
+			paint_objects = [po];
+		}
 		for (let i: i32 = 0; i < paint_objects.length; ++i) {
 			let po: mesh_object_t = paint_objects[i];
 			for (let i: i32 = 0; i < po.data.index_arrays.length; ++i) {
@@ -406,6 +423,7 @@ function box_export_tab_export_mesh(ui: zui_t, htab: zui_handle_t) {
 		}
 		if (zui_button(tr("Export"))) {
 			ui_box_hide();
+			_box_export_apply_displacement = apply_displacement;
 			ui_files_show(context_raw.export_mesh_format == mesh_format_t.OBJ ? "obj" : "arm", true, false, function (path: string) {
 				///if (krom_android || krom_ios)
 				let f: string = sys_title();
@@ -419,7 +437,17 @@ function box_export_tab_export_mesh(ui: zui_t, htab: zui_handle_t) {
 				console_toast(tr("Exporting mesh"));
 				krom_g4_swap_buffers();
 				///end
-				export_mesh_run(path + path_sep + f, box_export_mesh_handle.position == 0 ? null : [project_paint_objects[box_export_mesh_handle.position - 1]], apply_displacement);
+
+				let paint_objects: mesh_object_t[];
+				if (box_export_mesh_handle.position == 0) {
+					paint_objects = null;
+				}
+				else {
+					let po: mesh_object_t = project_paint_objects[box_export_mesh_handle.position - 1];
+					paint_objects = [po];
+				}
+
+				export_mesh_run(path + path_sep + f, paint_objects, _box_export_apply_displacement);
 			});
 		}
 	}
@@ -493,7 +521,8 @@ function box_export_show_brush() {
 function box_export_fetch_presets() {
 	box_export_files = file_read_directory(path_data() + path_sep + "export_presets");
 	for (let i: i32 = 0; i < box_export_files.length; ++i) {
-		box_export_files[i] = substring(box_export_files[i], 0, box_export_files[i].length - 5); // Strip .json
+		let s: string = box_export_files[i];
+		box_export_files[i] = substring(s, 0, s.length - 5); // Strip .json
 	}
 }
 
@@ -516,7 +545,7 @@ function box_export_new_preset(name: string) {
 		name += ".json";
 	}
 	let path: string = path_data() + path_sep + "export_presets" + path_sep + name;
-	krom_file_save_bytes(path, sys_string_to_buffer(template));
+	krom_file_save_bytes(path, sys_string_to_buffer(template), 0);
 }
 
 function box_export_save_preset() {
@@ -525,6 +554,6 @@ function box_export_save_preset() {
 		return; // generic is const
 	}
 	let path: string = path_data() + path_sep + "export_presets" + path_sep + name + ".json";
-	krom_file_save_bytes(path, sys_string_to_buffer(json_stringify(box_export_preset)));
+	krom_file_save_bytes(path, sys_string_to_buffer(json_stringify(box_export_preset)), 0);
 }
 ///end

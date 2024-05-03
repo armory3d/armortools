@@ -58,7 +58,7 @@ function tab_materials_draw_slots(mini: bool) {
 	for (let row: i32 = 0; row < math_floor(math_ceil(project_materials.length / num)); ++row) {
 		let mult: i32 = config_raw.show_asset_names ? 2 : 1;
 		let ar: f32[] = [];
-		for (let i = 0; i < num * mult; ++i) {
+		for (let i: i32 = 0; i < num * mult; ++i) {
 			array_push(ar, 1 / num);
 		}
 		zui_row(ar);
@@ -110,15 +110,15 @@ function tab_materials_draw_slots(mini: bool) {
 			let uiy: f32 = ui._y;
 			let tile: i32 = zui_SCALE(ui) > 1 ? 100 : 50;
 			let imgh: f32 = mini ? ui_base_default_sidebar_mini_w * 0.85 * zui_SCALE(ui) : -1.0;
-			let state = project_materials[i].preview_ready ?
-				zui_image(img, 0xffffffff, imgh) :
-				zui_image(resource_get("icons.k"), 0xffffffff, -1.0, tile, tile, tile, tile);
+			let state: zui_state_t = project_materials[i].preview_ready ?
+				_zui_image(img, 0xffffffff, imgh) :
+				_zui_image(resource_get("icons.k"), 0xffffffff, -1.0, tile, tile, tile, tile);
 
 			// Draw material numbers when selecting a material via keyboard shortcut
 			let is_typing: bool = ui.is_typing || ui_view2d_ui.is_typing || ui_nodes_ui.is_typing;
 			if (!is_typing) {
 				if (i < 9 && operator_shortcut(map_get(config_keymap, "select_material"), shortcut_type_t.DOWN)) {
-					let number: string = any_to_string(i + 1);
+					let number: string = i32_to_string(i + 1);
 					let width: i32 = g2_font_width(ui.ops.font, ui.font_size, number) + 10;
 					let height: i32 = g2_font_height(ui.ops.font, ui.font_size);
 					g2_set_color(ui.ops.theme.TEXT_COL);
@@ -274,7 +274,8 @@ function tab_materials_draw_slots(mini: bool) {
 			if (ui.is_hovered) {
 				zui_tooltip_image(imgFull);
 				if (i < 9) {
-					zui_tooltip(project_materials[i].canvas.name + " - (" + map_get(config_keymap, "select_material") + " " + (i + 1) + ")");
+					let i1: i32 = i + 1;
+					zui_tooltip(project_materials[i].canvas.name + " - (" + map_get(config_keymap, "select_material") + " " + i1 + ")");
 				}
 				else {
 					zui_tooltip(project_materials[i].canvas.name);
@@ -287,7 +288,8 @@ function tab_materials_draw_slots(mini: bool) {
 				zui_text(project_materials[i].canvas.name, zui_align_t.CENTER);
 				if (ui.is_hovered) {
 					if (i < 9) {
-						zui_tooltip(project_materials[i].canvas.name + " - (" + map_get(config_keymap, "select_material") + " " + (i + 1) + ")");
+						let i1: i32 = i + 1;
+						zui_tooltip(project_materials[i].canvas.name + " - (" + map_get(config_keymap, "select_material") + " " + i1 + ")");
 					}
 					else {
 						zui_tooltip(project_materials[i].canvas.name);

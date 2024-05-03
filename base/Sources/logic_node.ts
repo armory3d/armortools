@@ -5,8 +5,12 @@ type logic_node_t = {
 	get?: (self: any, from: i32)=>logic_node_value_t;
 	get_as_image?: (self: any, from: i32)=>image_t;
 	get_cached_image?: (self: any)=>image_t;
-	set?: (self: any, value: any)=>void;
+	set?: (self: any, value: f32_array_t)=>void;
 };
+
+type logic_node_ext_t = {
+	base?: logic_node_t;
+}
 
 type logic_node_value_t = {
 	_f32?: f32;
@@ -14,7 +18,7 @@ type logic_node_value_t = {
 };
 
 type logic_node_input_t = {
-	node?: any; // logic_node_t
+	node?: logic_node_ext_t;
 	from?: i32; // Socket index
 };
 
@@ -66,6 +70,6 @@ function logic_node_input_get_as_image(self: logic_node_input_t): image_t {
 	return self.node.base.get_as_image(self.node, self.from);
 }
 
-function logic_node_input_set(self: logic_node_input_t, value: any) {
+function logic_node_input_set(self: logic_node_input_t, value: f32_array_t) {
 	self.node.base.set(self.node, value);
 }

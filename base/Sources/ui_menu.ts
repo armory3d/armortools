@@ -13,6 +13,11 @@ let ui_menu_hide_flag: bool = false;
 
 let _ui_menu_render_msg: string;
 
+type update_info_t = {
+	version: i32;
+	version_name: string;
+};
+
 function ui_menu_render() {
 	let ui: zui_t = base_ui_menu;
 	let menu_w: i32 = ui_menu_commands != null ? math_floor(base_default_element_w * zui_SCALE(base_ui_menu) * 2.3) : math_floor(zui_ELEMENT_W(ui) * 2.3);
@@ -54,7 +59,7 @@ function ui_menu_render() {
 			}
 			ui_menu_separator(ui);
 			if (ui_menu_button(ui, tr("Import Texture..."), map_get(config_keymap, "file_import_assets"))) {
-				project_import_asset(path_texture_formats.join(","), false);
+				project_import_asset(string_array_join(path_texture_formats, ","), false);
 			}
 			if (ui_menu_button(ui, tr("Import Envmap..."))) {
 				ui_files_show("hdr", false, false, function (path: string) {
@@ -245,7 +250,7 @@ function ui_menu_render() {
 
 			///if (is_paint || is_sculpt)
 			ui_menu_fill(ui);
-			let split_view_handle = zui_handle(__ID__);
+			let split_view_handle: zui_handle_t = zui_handle(__ID__);
 			if (split_view_handle.init) {
 				split_view_handle.selected = context_raw.split_view;
 			}
@@ -459,7 +464,8 @@ function ui_menu_render() {
 			ui_menu_align(ui);
 			let camera_controls_handle: zui_handle_t = zui_handle(__ID__);
 			camera_controls_handle.position = context_raw.camera_controls;
-			context_raw.camera_controls = zui_inline_radio(camera_controls_handle, [tr("Orbit"), tr("Rotate"), tr("Fly")], zui_align_t.LEFT);
+			let camera_controls_items: string[] = [tr("Orbit"), tr("Rotate"), tr("Fly")];
+			context_raw.camera_controls = zui_inline_radio(camera_controls_handle, camera_controls_items, zui_align_t.LEFT);
 
 			let vars: map_t<string, string> = map_create();
 			map_set(vars, "rotate_shortcut", map_get(config_keymap, "action_rotate"));
@@ -473,7 +479,8 @@ function ui_menu_render() {
 
 			ui_menu_fill(ui);
 			ui_menu_align(ui);
-			context_raw.camera_type = zui_inline_radio(context_raw.cam_handle, [tr("Perspective"), tr("Orthographic")], zui_align_t.LEFT);
+			let camera_type_items: string[] = [tr("Perspective"), tr("Orthographic")];
+			context_raw.camera_type = zui_inline_radio(context_raw.cam_handle, camera_type_items, zui_align_t.LEFT);
 			if (ui.is_hovered) {
 				zui_tooltip(tr("Camera Type") + " (" + map_get(config_keymap, "view_camera_type") + ")");
 			}
@@ -524,7 +531,7 @@ function ui_menu_render() {
 				file_download_bytes("https://server.armorpaint.org/" + to_lower_case(manifest_title) + ".html", function (url: string, buffer: buffer_t) {
 					if (buffer != null)  {
 						// Compare versions
-						let update: any = json_parse(sys_buffer_to_string(buffer));
+						let update: update_info_t = json_parse(sys_buffer_to_string(buffer));
 						let update_version: i32 = math_floor(update.version);
 						if (update_version > 0) {
 							let date: string = config_get_date(); // 2019 -> 19
@@ -585,7 +592,7 @@ function ui_menu_render() {
 					if (zui_tab(zui_handle(__ID__), tr("About"), tab_vertical)) {
 
 						let img: image_t = data_get_image("badge.k");
-						zui_image(img);
+						_zui_image(img);
 						zui_end_element();
 
 						let h: zui_handle_t = zui_handle(__ID__);
@@ -617,7 +624,7 @@ function ui_menu_render() {
 		}
 	}
 
-	ui_menu_hide_flag = ui.combo_selected_handle_ptr == 0 && !ui_menu_keep_open && !ui_menu_show_first && (ui.changed || ui.input_released || ui.input_released_r || ui.is_escape_down);
+	ui_menu_hide_flag = ui.combo_selected_handle == null && !ui_menu_keep_open && !ui_menu_show_first && (ui.changed || ui.input_released || ui.input_released_r || ui.is_escape_down);
 	ui_menu_show_first = false;
 	ui_menu_keep_open = false;
 

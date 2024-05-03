@@ -2,7 +2,7 @@
 let ui_base_show: bool = true;
 let ui_base_ui: zui_t;
 let ui_base_border_started: i32 = 0;
-let ui_base_border_handle_ptr: i32 = 0;
+let ui_base_border_handle: zui_handle_t = null;
 let ui_base_action_paint_remap: string = "";
 let ui_base_operator_search_offset: i32 = 0;
 let ui_base_undo_tap_time: f32 = 0.0;
@@ -10,7 +10,12 @@ let ui_base_redo_tap_time: f32 = 0.0;
 
 let ui_base_hwnds: zui_handle_t[] = ui_base_init_hwnds();
 let ui_base_htabs: zui_handle_t[] = ui_base_init_htabs();
-let ui_base_hwnd_tabs: any[] = ui_base_init_hwnd_tabs();
+
+type tab_draw_t = {
+	f: (h: zui_handle_t)=>void;
+};
+type tab_draw_array_t = tab_draw_t[];
+let ui_base_hwnd_tabs: tab_draw_array_t[] = ui_base_init_hwnd_tabs();
 
 ///if (is_paint || is_sculpt)
 let ui_base_default_sidebar_mini_w: i32 = 56;
@@ -27,40 +32,69 @@ let ui_base_sidebar_mini_w: i32 = ui_base_default_sidebar_mini_w;
 
 function ui_base_init_hwnds(): zui_handle_t[] {
 	///if is_paint
-	return [zui_handle_create(), zui_handle_create(), zui_handle_create()];
+	let hwnds: zui_handle_t[] = [zui_handle_create(), zui_handle_create(), zui_handle_create()];
 	///end
 	///if is_sculpt
-	return [zui_handle_create(), zui_handle_create(), zui_handle_create()];
+	let hwnds: zui_handle_t[] = [zui_handle_create(), zui_handle_create(), zui_handle_create()];
 	///end
 	///if is_lab
-	return [zui_handle_create()];
+	let hwnds: zui_handle_t[] = [zui_handle_create()];
 	///end
+	return hwnds;
 }
 
 function ui_base_init_htabs(): zui_handle_t[] {
 	///if is_paint
-	return [zui_handle_create(), zui_handle_create(), zui_handle_create()];
+	let htabs: zui_handle_t[] = [zui_handle_create(), zui_handle_create(), zui_handle_create()];
 	///end
 	///if is_sculpt
-	return [zui_handle_create(), zui_handle_create(), zui_handle_create()];
+	let htabs: zui_handle_t[] = [zui_handle_create(), zui_handle_create(), zui_handle_create()];
 	///end
 	///if is_lab
-	return [zui_handle_create()];
+	let htabs: zui_handle_t[] = [zui_handle_create()];
 	///end
+	return htabs;
 }
 
-function ui_base_init_hwnd_tabs(): any[] {
+function _draw_callback_create(f: (h: zui_handle_t)=>void): tab_draw_t {
+	let cb: tab_draw_t = { f: f };
+	return cb;
+}
+
+function ui_base_init_hwnd_tabs(): tab_draw_array_t[] {
+
+	let r: tab_draw_array_t[] = [];
+
 	///if is_paint
-	return [
-		[tab_layers_draw, tab_history_draw, tab_plugins_draw
-			///if is_forge
-			, tab_objects_draw
-			///end
-		],
-		[tab_materials_draw, tab_brushes_draw, tab_particles_draw],
-		[tab_browser_draw, tab_textures_draw, tab_meshes_draw, tab_fonts_draw, tab_swatches_draw, tab_script_draw, tab_console_draw, ui_status_draw_version_tab]
+	let a0: tab_draw_array_t = [
+		_draw_callback_create(tab_layers_draw),
+		_draw_callback_create(tab_history_draw),
+		_draw_callback_create(tab_plugins_draw)
+		///if is_forge
+		, _draw_callback_create(tab_objects_draw)
+		///end
 	];
+	let a1: tab_draw_array_t = [
+		_draw_callback_create(tab_materials_draw),
+		_draw_callback_create(tab_brushes_draw),
+		_draw_callback_create(tab_particles_draw)
+	];
+	let a2: tab_draw_array_t = [
+		_draw_callback_create(tab_browser_draw),
+		_draw_callback_create(tab_textures_draw),
+		_draw_callback_create(tab_meshes_draw),
+		_draw_callback_create(tab_fonts_draw),
+		_draw_callback_create(tab_swatches_draw),
+		_draw_callback_create(tab_script_draw),
+		_draw_callback_create(tab_console_draw),
+		_draw_callback_create(ui_status_draw_version_tab)
+	];
+
+	array_push(r, a0);
+	array_push(r, a1);
+	array_push(r, a2);
 	///end
+
 	///if is_sculpt
 	return [
 		[tab_layers_draw, tab_history_draw, tab_plugins_draw
@@ -72,11 +106,14 @@ function ui_base_init_hwnd_tabs(): any[] {
 		[tab_browser_draw, tab_textures_draw, tab_meshes_draw, tab_fonts_draw, tab_script_draw, tab_console_draw, ui_status_draw_version_tab]
 	];
 	///end
+
 	///if is_lab
 	return [
 		[tab_browser_draw, tab_textures_draw, tab_meshes_draw, tab_swatches_draw, tab_plugins_draw, tab_script_draw, tab_console_draw, ui_status_draw_version_tab]
 	];
 	///end
+
+	return r;
 }
 
 function ui_base_init() {
@@ -178,16 +215,16 @@ function ui_base_init() {
 	let scale: f32 = config_raw.window_scale;
 	let ops: zui_options_t = {
 		theme: base_theme,
-		font: base_font,
+		font: base_font.font_,
 		scale_factor: scale,
-		color_wheel: base_color_wheel,
-		black_white_gradient: base_color_wheel_gradient
+		color_wheel: base_color_wheel.texture_,
+		black_white_gradient: base_color_wheel_gradient.texture_
 	};
 	ui_base_ui = zui_create(ops);
-	zui_set_on_border_hover(ui_base_on_border_hover);
-	zui_set_on_text_hover(ui_base_on_text_hover);
-	zui_set_on_deselect_text(ui_base_on_deselect_text);
-	zui_set_on_tab_drop(ui_base_on_tab_drop);
+	zui_on_border_hover = ui_base_on_border_hover;
+	zui_on_text_hover = ui_base_on_text_hover;
+	zui_on_deselect_text = ui_base_on_deselect_text;
+	zui_on_tab_drop = ui_base_on_tab_drop;
 
 	///if (is_paint || is_sculpt)
 	let resources: string[] = ["cursor.k", "icons.k"];
@@ -346,7 +383,8 @@ function ui_base_update() {
 				}
 				else if (operator_shortcut(map_get(config_keymap, "brush_angle"), shortcut_type_t.DOWN)) {
 					context_raw.brush_angle += mouse_movement_x / 5;
-					context_raw.brush_angle = math_floor(context_raw.brush_angle) % 360;
+					let i: i32 = math_floor(context_raw.brush_angle);
+					context_raw.brush_angle = i % 360;
 					if (context_raw.brush_angle < 0) context_raw.brush_angle += 360;
 					context_raw.brush_angle_handle.value = context_raw.brush_angle;
 					make_material_parse_paint_material();
@@ -652,7 +690,7 @@ function ui_base_update() {
 						zui_radio(mode_handle, i, modes[i], shortcuts[i]);
 					}
 
-					let index: i32 = array_index_of(shortcuts, keyboard_key_code(ui.key));
+					let index: i32 = array_index_of(shortcuts, keyboard_key_code(ui.key_code));
 					if (ui.is_key_pressed && index != -1) {
 						mode_handle.position = index;
 						ui.changed = true;
@@ -703,8 +741,8 @@ function ui_base_update() {
 	}
 
 	///if (is_paint || is_sculpt)
-	if (ui_base_border_handle_ptr != 0) {
-		if (ui_base_border_handle_ptr == ui_nodes_hwnd.ptr || ui_base_border_handle_ptr == ui_view2d_hwnd.ptr) {
+	if (ui_base_border_handle != 0) {
+		if (ui_base_border_handle == ui_nodes_hwnd || ui_base_border_handle == ui_view2d_hwnd) {
 			if (ui_base_border_started == border_side_t.LEFT) {
 				config_raw.layout[layout_size_t.NODES_W] -= math_floor(mouse_movement_x);
 				if (config_raw.layout[layout_size_t.NODES_W] < 32) {
@@ -724,7 +762,7 @@ function ui_base_update() {
 				}
 			}
 		}
-		else if (ui_base_border_handle_ptr == ui_base_hwnds[tab_area_t.STATUS].ptr) {
+		else if (ui_base_border_handle == ui_base_hwnds[tab_area_t.STATUS]) {
 			let my: i32 = math_floor(mouse_movement_y);
 			if (config_raw.layout[layout_size_t.STATUS_H] - my >= ui_status_default_status_h * config_raw.window_scale && config_raw.layout[layout_size_t.STATUS_H] - my < sys_height() * 0.7) {
 				config_raw.layout[layout_size_t.STATUS_H] -= my;
@@ -742,7 +780,7 @@ function ui_base_update() {
 			}
 			else {
 				let my: i32 = math_floor(mouse_movement_y);
-				if (ui_base_border_handle_ptr == ui_base_hwnds[tab_area_t.SIDEBAR1].ptr && ui_base_border_started == border_side_t.TOP) {
+				if (ui_base_border_handle == ui_base_hwnds[tab_area_t.SIDEBAR1] && ui_base_border_started == border_side_t.TOP) {
 					if (config_raw.layout[layout_size_t.SIDEBAR_H0] + my > 32 && config_raw.layout[layout_size_t.SIDEBAR_H1] - my > 32) {
 						config_raw.layout[layout_size_t.SIDEBAR_H0] += my;
 						config_raw.layout[layout_size_t.SIDEBAR_H1] -= my;
@@ -754,8 +792,8 @@ function ui_base_update() {
 	///end
 
 	///if is_lab
-	if (ui_base_border_handle_ptr != 0) {
-		if (ui_base_border_handle_ptr == ui_nodes_hwnd.ptr || ui_base_border_handle_ptr == ui_view2d_hwnd.ptr) {
+	if (ui_base_border_handle != null) {
+		if (ui_base_border_handle == ui_nodes_hwnd || ui_base_border_handle == ui_view2d_hwnd) {
 			if (ui_base_border_started == border_side_t.LEFT) {
 				config_raw.layout[layout_size_t.NODES_W] -= math_floor(mouse_movement_x);
 				if (config_raw.layout[layout_size_t.NODES_W] < 32) {
@@ -775,7 +813,7 @@ function ui_base_update() {
 				}
 			}
 		}
-		else if (ui_base_border_handle_ptr == ui_base_hwnds[tab_area_t.STATUS].ptr) {
+		else if (ui_base_border_handle == ui_base_hwnds[tab_area_t.STATUS]) {
 			let my: i32 = math_floor(mouse_movement_y);
 			if (config_raw.layout[layout_size_t.STATUS_H] - my >= ui_status_default_status_h * config_raw.window_scale && config_raw.layout[layout_size_t.STATUS_H] - my < sys_height() * 0.7) {
 				config_raw.layout[layout_size_t.STATUS_H] -= my;
@@ -785,7 +823,7 @@ function ui_base_update() {
 	///end
 
 	if (!mouse_down()) {
-		ui_base_border_handle_ptr = 0;
+		ui_base_border_handle = null;
 		base_is_resizing = false;
 	}
 
@@ -884,10 +922,10 @@ function ui_base_operator_search() {
 		}
 
 		if (ui.is_key_pressed) { // Move selection
-			if (ui.key == key_code_t.DOWN && ui_base_operator_search_offset < 6) {
+			if (ui.key_code == key_code_t.DOWN && ui_base_operator_search_offset < 6) {
 				ui_base_operator_search_offset++;
 			}
-			if (ui.key == key_code_t.UP && ui_base_operator_search_offset > 0) {
+			if (ui.key_code == key_code_t.UP && ui_base_operator_search_offset > 0) {
 				ui_base_operator_search_offset--;
 			}
 		}
@@ -930,7 +968,7 @@ function ui_base_get_radius_increment(): f32 {
 	return 0.1;
 }
 
-function ui_base_hit_rect(mx: f32, my: f32, x: i32, y: i32, w: i32, h: i32) {
+function ui_base_hit_rect(mx: f32, my: f32, x: i32, y: i32, w: i32, h: i32): bool {
 	return mx > x && mx < x + w && my > y && my < y + h;
 }
 
@@ -940,7 +978,13 @@ function ui_base_get_brush_stencil_rect(): rect_t {
 	let h: i32 = math_floor(base_h() * context_raw.brush_stencil_scale);
 	let x: i32 = math_floor(base_x() + context_raw.brush_stencil_x * base_w());
 	let y: i32 = math_floor(base_y() + context_raw.brush_stencil_y * base_h());
-	return { w: w, h: h, x: x, y: y };
+	let r: rect_t = {
+		w: w,
+		h: h,
+		x: x,
+		y: y
+	};
+	return r;
 }
 ///end
 
@@ -1332,13 +1376,15 @@ function ui_base_draw_sidebar() {
 	}
 
 	if (zui_window(ui_base_hwnds[tab_area_t.SIDEBAR0], ui_base_tabx, 0, config_raw.layout[layout_size_t.SIDEBAR_W], config_raw.layout[layout_size_t.SIDEBAR_H0])) {
-		for (let i: i32 = 0; i < (mini ? 1 : ui_base_hwnd_tabs[tab_area_t.SIDEBAR0].length); ++i) {
-			ui_base_hwnd_tabs[tab_area_t.SIDEBAR0][i](ui_base_htabs[tab_area_t.SIDEBAR0]);
+		let tabs: tab_draw_t[] = ui_base_hwnd_tabs[tab_area_t.SIDEBAR0];
+		for (let i: i32 = 0; i < (mini ? 1 : tabs.length); ++i) {
+			tabs[i].f(ui_base_htabs[tab_area_t.SIDEBAR0]);
 		}
 	}
 	if (zui_window(ui_base_hwnds[tab_area_t.SIDEBAR1], ui_base_tabx, config_raw.layout[layout_size_t.SIDEBAR_H0], config_raw.layout[layout_size_t.SIDEBAR_W], config_raw.layout[layout_size_t.SIDEBAR_H1] - expand_button_offset)) {
-		for (let i: i32 = 0; i < (mini ? 1 : ui_base_hwnd_tabs[tab_area_t.SIDEBAR1].length); ++i) {
-			ui_base_hwnd_tabs[tab_area_t.SIDEBAR1][i](ui_base_htabs[tab_area_t.SIDEBAR1]);
+		let tabs: tab_draw_t[] = ui_base_hwnd_tabs[tab_area_t.SIDEBAR1];
+		for (let i: i32 = 0; i < (mini ? 1 : tabs.length); ++i) {
+			tabs[i].f(ui_base_htabs[tab_area_t.SIDEBAR1]);
 		}
 	}
 
@@ -1605,52 +1651,54 @@ function ui_base_toggle_browser() {
 
 function ui_base_set_icon_scale() {
 	if (zui_SCALE(ui_base_ui) > 1) {
-		resource_load(["icons2x.k"]);
+		let res: string[] = ["icons2x.k"];
+		resource_load(res);
 		map_set(resource_bundled, "icons.k", resource_get("icons2x.k"));
 	}
 	else {
-		resource_load(["icons.k"]);
+		let res: string[] = ["icons.k"];
+		resource_load(res);
 	}
 }
 
-function ui_base_on_border_hover(handle_ptr: i32, side: i32) {
+function ui_base_on_border_hover(handle: zui_handle_t, side: i32) {
 	if (!base_ui_enabled) return;
 
 	///if (is_paint || is_sculpt)
-	if (handle_ptr != ui_base_hwnds[tab_area_t.SIDEBAR0].ptr &&
-		handle_ptr != ui_base_hwnds[tab_area_t.SIDEBAR1].ptr &&
-		handle_ptr != ui_base_hwnds[tab_area_t.STATUS].ptr &&
-		handle_ptr != ui_nodes_hwnd.ptr &&
-		handle_ptr != ui_view2d_hwnd.ptr) {
+	if (handle != ui_base_hwnds[tab_area_t.SIDEBAR0] &&
+		handle != ui_base_hwnds[tab_area_t.SIDEBAR1] &&
+		handle != ui_base_hwnds[tab_area_t.STATUS] &&
+		handle != ui_nodes_hwnd &&
+		handle != ui_view2d_hwnd) {
 		return; // Scalable handles
 	}
-	if (handle_ptr == ui_view2d_hwnd.ptr && side != border_side_t.LEFT) {
+	if (handle == ui_view2d_hwnd && side != border_side_t.LEFT) {
 		return;
 	}
-	if (handle_ptr == ui_nodes_hwnd.ptr && side == border_side_t.TOP && !ui_view2d_show) {
+	if (handle == ui_nodes_hwnd && side == border_side_t.TOP && !ui_view2d_show) {
 		return;
 	}
-	if (handle_ptr == ui_base_hwnds[tab_area_t.SIDEBAR0].ptr && side == border_side_t.TOP) {
+	if (handle == ui_base_hwnds[tab_area_t.SIDEBAR0] && side == border_side_t.TOP) {
 		return;
 	}
 	///end
 
 	///if is_lab
-	if (handle_ptr != ui_base_hwnds[tab_area_t.STATUS].ptr &&
-		handle_ptr != ui_nodes_hwnd.ptr &&
-		handle_ptr != ui_view2d_hwnd.ptr) return; // Scalable handles
-	if (handle_ptr == ui_view2d_hwnd.ptr && side != border_side_t.LEFT) {
+	if (handle != ui_base_hwnds[tab_area_t.STATUS] &&
+		handle != ui_nodes_hwnd &&
+		handle != ui_view2d_hwnd) return; // Scalable handles
+	if (handle == ui_view2d_hwnd && side != border_side_t.LEFT) {
 		return;
 	}
-	if (handle_ptr == ui_nodes_hwnd.ptr && side == border_side_t.TOP && !ui_view2d_show) {
+	if (handle == ui_nodes_hwnd && side == border_side_t.TOP && !ui_view2d_show) {
 		return;
 	}
 	///end
 
-	if (handle_ptr == ui_nodes_hwnd.ptr && side != border_side_t.LEFT && side != border_side_t.TOP) {
+	if (handle == ui_nodes_hwnd && side != border_side_t.LEFT && side != border_side_t.TOP) {
 		return;
 	}
-	if (handle_ptr == ui_base_hwnds[tab_area_t.STATUS].ptr && side != border_side_t.TOP) {
+	if (handle == ui_base_hwnds[tab_area_t.STATUS] && side != border_side_t.TOP) {
 		return;
 	}
 	if (side == border_side_t.RIGHT) {
@@ -1663,7 +1711,7 @@ function ui_base_on_border_hover(handle_ptr: i32, side: i32) {
 
 	if (zui_current.input_started) {
 		ui_base_border_started = side;
-		ui_base_border_handle_ptr = handle_ptr;
+		ui_base_border_handle = handle;
 		base_is_resizing = true;
 	}
 }
@@ -1678,21 +1726,23 @@ function ui_base_on_deselect_text() {
 	///end
 }
 
-function ui_base_on_tab_drop(to_ptr: i32, to_position: i32, from_ptr: i32, from_position: i32) {
+function ui_base_on_tab_drop(to: zui_handle_t, to_position: i32, from: zui_handle_t, from_position: i32) {
 	let i: i32 = -1;
 	let j: i32 = -1;
 	for (let k: i32 = 0; k < ui_base_htabs.length; ++k) {
-		if (ui_base_htabs[k].ptr == to_ptr) {
+		if (ui_base_htabs[k] == to) {
 			i = k;
 		}
-		if (ui_base_htabs[k].ptr == from_ptr) {
+		if (ui_base_htabs[k] == from) {
 			j = k;
 		}
 	}
 	if (i > -1 && j > -1) {
-		let element: any = ui_base_hwnd_tabs[j][from_position];
-		array_splice(ui_base_hwnd_tabs[j], from_position, 1);
-		array_insert(ui_base_hwnd_tabs[i], to_position, element);
+		let tabsi: tab_draw_t[] = ui_base_hwnd_tabs[i];
+		let tabsj: tab_draw_t[] = ui_base_hwnd_tabs[j];
+		let element: tab_draw_t = tabsj[from_position];
+		array_splice(tabsj, from_position, 1);
+		array_insert(tabsi, to_position, element);
 		ui_base_hwnds[i].redraws = 2;
 		ui_base_hwnds[j].redraws = 2;
 	}

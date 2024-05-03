@@ -5,7 +5,7 @@ type math_node_t = {
 	use_clamp?: bool;
 };
 
-function math_node_create(arg: any): math_node_t {
+function math_node_create(args: f32_array_t): math_node_t {
 	let n: math_node_t = {};
 	n.base = logic_node_create();
 	n.base.get = math_node_get;
@@ -87,7 +87,7 @@ function math_node_get(self: math_node_t, from: i32): logic_node_value_t {
 		f = v1 > v2 ? 1.0 : 0.0;
 	}
 	else if (op == "Modulo") {
-		f = v1 % v2;
+		f = math_fmod(v1, v2);
 	}
 	else if (op == "Snap") {
 		f = math_floor(v1 / v2) * v2;
@@ -105,7 +105,7 @@ function math_node_get(self: math_node_t, from: i32): logic_node_value_t {
 		f = v1 > 0 ? 1.0 : (v1 < 0 ? -1.0 : 0);
 	}
 	else if (op == "Ping-Pong") {
-		f = (v2 != 0.0) ? v2 - math_abs((math_abs(v1) % (2 * v2)) - v2) : 0.0;
+		f = (v2 != 0.0) ? v2 - math_abs(math_fmod(math_abs(v1), (2 * v2)) - v2) : 0.0;
 	}
 	else if (op == "Hyperbolic Sine") {
 		f = (math_exp(v1) - math_exp(-v1)) / 2.0;
@@ -127,7 +127,9 @@ function math_node_get(self: math_node_t, from: i32): logic_node_value_t {
 		f = f < 0.0 ? 0.0 : (f > 1.0 ? 1.0 : f);
 	}
 
-	let v: logic_node_value_t = { _f32: f };
+	let v: logic_node_value_t = {
+		_f32: f
+	};
 	return v;
 }
 

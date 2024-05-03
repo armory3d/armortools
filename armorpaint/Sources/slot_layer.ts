@@ -72,10 +72,12 @@ function slot_layer_create(ext: string = "", type: layer_slot_type_t = layer_slo
 	raw.parent = parent;
 
 	if (type == layer_slot_type_t.GROUP) {
-		raw.name = "Group " + (raw.id + 1);
+		let id: i32 = (raw.id + 1);
+		raw.name = "Group " + id;
 	}
 	else if (type == layer_slot_type_t.LAYER) {
-		raw.name = "Layer " + (raw.id + 1);
+		let id: i32 = (raw.id + 1);
+		raw.name = "Layer " + id;
 		///if is_paint
 		let format: string = base_bits_handle.position == texture_bits_t.BITS8  ? "RGBA32" :
 							 base_bits_handle.position == texture_bits_t.BITS16 ? "RGBA64" :
@@ -119,7 +121,8 @@ function slot_layer_create(ext: string = "", type: layer_slot_type_t = layer_slo
 
 	///if is_paint
 	else { // Mask
-		raw.name = "Mask " + (raw.id + 1);
+		let id: i32 = (raw.id + 1);
+		raw.name = "Mask " + id;
 		let format: string = "RGBA32"; // Full bits for undo support, R8 is used
 		raw.blending = blend_type_t.ADD;
 
@@ -219,8 +222,10 @@ function slot_layer_unload(raw: slot_layer_t) {
 
 function slot_layer_swap(raw: slot_layer_t, other: slot_layer_t) {
 	if ((slot_layer_is_layer(raw) || slot_layer_is_mask(raw)) && (slot_layer_is_layer(other) || slot_layer_is_mask(other))) {
-		map_get(render_path_render_targets, "texpaint" + raw.ext)._image = other.texpaint;
-		map_get(render_path_render_targets, "texpaint" + other.ext)._image = raw.texpaint;
+		let rt0: render_target_t = map_get(render_path_render_targets, "texpaint" + raw.ext);
+		let rt1: render_target_t = map_get(render_path_render_targets, "texpaint" + other.ext);
+		rt0._image = other.texpaint;
+		rt1._image = raw.texpaint;
 		let _texpaint: image_t = raw.texpaint;
 		raw.texpaint = other.texpaint;
 		other.texpaint = _texpaint;
@@ -234,10 +239,14 @@ function slot_layer_swap(raw: slot_layer_t, other: slot_layer_t) {
 
 	///if is_paint
 	if (slot_layer_is_layer(raw) && slot_layer_is_layer(other)) {
-		map_get(render_path_render_targets, "texpaint_nor" + raw.ext)._image = other.texpaint_nor;
-		map_get(render_path_render_targets, "texpaint_pack" + raw.ext)._image = other.texpaint_pack;
-		map_get(render_path_render_targets, "texpaint_nor" + other.ext)._image = raw.texpaint_nor;
-		map_get(render_path_render_targets, "texpaint_pack" + other.ext)._image = raw.texpaint_pack;
+		let nor0: render_target_t = map_get(render_path_render_targets, "texpaint_nor" + raw.ext);
+		nor0._image = other.texpaint_nor;
+		let pack0: render_target_t = map_get(render_path_render_targets, "texpaint_pack" + raw.ext);
+		pack0._image = other.texpaint_pack;
+		let nor1: render_target_t = map_get(render_path_render_targets, "texpaint_nor" + other.ext);
+		nor1._image = raw.texpaint_nor;
+		let pack1: render_target_t = map_get(render_path_render_targets, "texpaint_pack" + other.ext);
+		pack1._image = raw.texpaint_pack;
 		let _texpaint_nor: image_t = raw.texpaint_nor;
 		let _texpaint_pack: image_t = raw.texpaint_pack;
 		raw.texpaint_nor = other.texpaint_nor;
@@ -287,7 +296,8 @@ function slot_layer_invert_mask(raw: slot_layer_t) {
 	app_notify_on_next_frame(function (_texpaint: image_t) {
 		image_unload(_texpaint);
 	}, _texpaint);
-	raw.texpaint = map_get(render_path_render_targets, "texpaint" + raw.id)._image = inverted;
+	let rt: render_target_t = map_get(render_path_render_targets, "texpaint" + raw.id);
+	raw.texpaint = rt._image = inverted;
 	context_raw.layer_preview_dirty = true;
 	context_raw.ddirty = 3;
 }
@@ -436,10 +446,13 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 		}, _texpaint_pack);
 		///end
 
-		map_get(rts, "texpaint" + raw.ext)._image = raw.texpaint;
+		let rt: render_target_t = map_get(rts, "texpaint" + raw.ext);
+		rt._image = raw.texpaint;
 		///if is_paint
-		map_get(rts, "texpaint_nor" + raw.ext)._image = raw.texpaint_nor;
-		map_get(rts, "texpaint_pack" + raw.ext)._image = raw.texpaint_pack;
+		let rt_nor: render_target_t = map_get(rts, "texpaint_nor" + raw.ext);
+		rt_nor._image = raw.texpaint_nor;
+		let rt_pack: render_target_t = map_get(rts, "texpaint_pack" + raw.ext);
+		rt_pack._image = raw.texpaint_pack;
 		///end
 	}
 	else if (slot_layer_is_mask(raw)) {
@@ -456,7 +469,8 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 			image_unload(_texpaint);
 		}, _texpaint);
 
-		map_get(rts, "texpaint" + raw.ext)._image = raw.texpaint;
+		let rt: render_target_t = map_get(rts, "texpaint" + raw.ext);
+		rt._image = raw.texpaint;
 	}
 }
 
@@ -517,7 +531,7 @@ function slot_layer_get_recursive_children(raw: slot_layer_t): slot_layer_t[] {
 	return children;
 }
 
-function slot_layer_get_masks(raw: slot_layer_t, includeGroupMasks = true): slot_layer_t[] {
+function slot_layer_get_masks(raw: slot_layer_t, include_group_masks: bool = true): slot_layer_t[] {
 	if (slot_layer_is_mask(raw)) {
 		return null;
 	}
@@ -534,7 +548,7 @@ function slot_layer_get_masks(raw: slot_layer_t, includeGroupMasks = true): slot
 		}
 	}
 	// Child masks of a parent group
-	if (includeGroupMasks) {
+	if (include_group_masks) {
 		if (raw.parent != null && slot_layer_is_group(raw.parent)) {
 			for (let i: i32 = 0; i < project_layers.length; ++i) {
 				let l: slot_layer_t = project_layers[i];
@@ -550,7 +564,7 @@ function slot_layer_get_masks(raw: slot_layer_t, includeGroupMasks = true): slot
 	return children;
 }
 
-function slot_layer_has_masks(raw: slot_layer_t, includeGroupMasks = true): bool {
+function slot_layer_has_masks(raw: slot_layer_t, include_group_masks: bool = true): bool {
 	// Layer mask
 	for (let i: i32 = 0; i < project_layers.length; ++i) {
 		let l: slot_layer_t = project_layers[i];
@@ -559,7 +573,7 @@ function slot_layer_has_masks(raw: slot_layer_t, includeGroupMasks = true): bool
 		}
 	}
 	// Group mask
-	if (includeGroupMasks && raw.parent != null && slot_layer_is_group(raw.parent)) {
+	if (include_group_masks && raw.parent != null && slot_layer_is_group(raw.parent)) {
 		for (let i: i32 = 0; i < project_layers.length; ++i) {
 			let l: slot_layer_t = project_layers[i];
 			if (l.parent == raw.parent && slot_layer_is_mask(l)) {

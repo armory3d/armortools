@@ -106,7 +106,7 @@ function parser_logic_build_node(node: zui_node_t): string {
 	array_push(parser_logic_parsed_nodes, name);
 
 	// Create node
-	let v: any = parser_logic_create_node_instance(node.type, null);
+	let v: logic_node_ext_t = parser_logic_create_node_instance(node.type, null);
 	map_set(parser_logic_node_map, name, v);
 	map_set(parser_logic_raw_map, v, node);
 
@@ -226,17 +226,20 @@ function parser_logic_build_default_node(inp: zui_node_socket_t): logic_node_t {
 	return v;
 }
 
-function parser_logic_create_node_instance(node_type: string, args: any): any {
+function parser_logic_create_node_instance(node_type: string, args: f32_array_t): logic_node_ext_t {
 	if (map_get(parser_logic_custom_nodes, node_type) != null) {
 		let node: logic_node_t = logic_node_create();
 		node.get = map_get(parser_logic_custom_nodes, node_type);
-		return node;
+		let ext: logic_node_ext_t = {
+			base: node
+		};
+		return ext;
 	}
 
 	if (nodes_brush_creates == null) {
 		nodes_brush_init();
 	}
 
-	let create: any = map_get(nodes_brush_creates, node_type);
+	let create: (args: f32_array_t)=>logic_node_ext_t = map_get(nodes_brush_creates, node_type);
 	return create(args);
 }

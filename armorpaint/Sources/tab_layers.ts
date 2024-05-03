@@ -149,7 +149,7 @@ function tab_layers_button_new(text: string) {
 				}
 
 				let pointers: map_t<slot_layer_t, i32> = tab_layers_init_layer_map();
-				let group = base_new_group();
+				let group: slot_layer_t = base_new_group();
 				context_set_layer(l);
 				array_remove(project_layers, group);
 				array_insert(project_layers, array_index_of(project_layers, l) + 1, group);
@@ -213,9 +213,9 @@ function tab_layers_remap_layer_pointers(nodes: zui_node_t[], pointer_map: map_t
 	for (let i: i32 = 0; i < nodes.length; ++i) {
 		let n: zui_node_t = nodes[i];
 		if (n.type == "LAYER" || n.type == "LAYER_MASK") {
-			let i: any = n.buttons[0].default_value;
+			let i: i32 = n.buttons[0].default_value[0];
 			if (map_get(pointer_map, i) != null) {
-				n.buttons[0].default_value = map_get(pointer_map, i);
+				n.buttons[0].default_value[0] = map_get(pointer_map, i);
 			}
 		}
 	}
@@ -314,7 +314,7 @@ function tab_layers_draw_layer_slot(l: slot_layer_t, i: i32, mini: bool) {
 }
 
 function tab_layers_draw_layer_slot_mini(l: slot_layer_t, i: i32) {
-	let ui = ui_base_ui;
+	let ui: zui_t = ui_base_ui;
 
 	let row: f32[] = [1, 1];
 	zui_row(row);
@@ -356,7 +356,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 		col -= 0x99000000;
 	}
 
-	if (zui_image(icons, col, -1.0, r.x, r.y, r.w, r.h) == zui_state_t.RELEASED) {
+	if (_zui_image(icons, col, -1.0, r.x, r.y, r.w, r.h) == zui_state_t.RELEASED) {
 		tab_layers_layer_toggle_visible(l);
 	}
 	ui._x -= 2;
@@ -396,10 +396,10 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	if (tab_layers_layer_name_edit == l.id) {
 		tab_layers_layer_name_handle.text = l.name;
 		l.name = zui_text_input(tab_layers_layer_name_handle);
-		if (ui.text_selected_handle_ptr != tab_layers_layer_name_handle.ptr) tab_layers_layer_name_edit = -1;
+		if (ui.text_selected_handle != tab_layers_layer_name_handle) tab_layers_layer_name_edit = -1;
 	}
 	else {
-		if (ui.enabled && ui.input_enabled && ui.combo_selected_handle_ptr == 0 &&
+		if (ui.enabled && ui.input_enabled && ui.combo_selected_handle == 0 &&
 			ui.input_x > ui._window_x + ui._x && ui.input_x < ui._window_x + ui._window_w &&
 			ui.input_y > ui._window_y + ui._y - center && ui.input_y < ui._window_y + ui._y - center + (step * zui_SCALE(ui)) * 2) {
 			if (ui.input_started) {
@@ -597,7 +597,8 @@ function tab_layers_handle_layer_icon_state(l: slot_layer_t, i: i32, state: zui_
 			zui_tooltip_image(texpaint_preview);
 		}
 		if (i < 9) {
-			zui_tooltip(l.name + " - (" + map_get(config_keymap, "select_layer") + " " + (i + 1) + ")");
+			let i1: i32 = (i + 1);
+			zui_tooltip(l.name + " - (" + map_get(config_keymap, "select_layer") + " " + i1 + ")");
 		}
 		else {
 			zui_tooltip(l.name);
@@ -627,7 +628,7 @@ function tab_layers_handle_layer_icon_state(l: slot_layer_t, i: i32, state: zui_
 	}
 }
 
-function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32, mini: bool) {
+function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32, mini: bool): zui_state_t {
 	let ui: zui_t = ui_base_ui;
 	let icons: image_t = resource_get("icons.k");
 	let icon_h: i32 = (zui_ELEMENT_H(ui) - (mini ? 2 : 3)) * 2;
@@ -660,8 +661,8 @@ function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32,
 			let _x: f32 = ui._x;
 			let _y: f32 = ui._y;
 			let _w: f32 = ui._w;
-			zui_image(icons, 0xffffffff, icon_h, r.x, r.y, r.w, r.h);
-			ui.cur_ratio--;
+			_zui_image(icons, 0xffffffff, icon_h, r.x, r.y, r.w, r.h);
+			ui.current_ratio--;
 			ui._x = _x;
 			ui._y = _y;
 			ui._w = _w;
@@ -674,7 +675,7 @@ function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32,
 			krom_g4_set_int(ui_view2d_channel_loc, 1);
 		}
 
-		let state: zui_state_t = zui_image(icon, 0xffffffff, icon_h);
+		let state: zui_state_t = _zui_image(icon, 0xffffffff, icon_h);
 
 		if (l.fill_layer == null && slot_layer_is_mask(l)) {
 			g2_set_pipeline(null);
@@ -684,7 +685,7 @@ function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32,
 		let is_typing: bool = ui.is_typing || ui_view2d_ui.is_typing || ui_nodes_ui.is_typing;
 		if (!is_typing) {
 			if (i < 9 && operator_shortcut(map_get(config_keymap, "select_layer"), shortcut_type_t.DOWN)) {
-				let number: string = any_to_string(i + 1) ;
+				let number: string = i32_to_string(i + 1) ;
 				let width: i32 = g2_font_width(ui.ops.font, ui.font_size, number) + 10;
 				let height: i32 = g2_font_height(ui.ops.font, ui.font_size);
 				g2_set_color(ui.ops.theme.TEXT_COL);
@@ -700,11 +701,11 @@ function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32,
 		let folder_closed: rect_t = resource_tile50(icons, 2, 1);
 		let folder_open: rect_t = resource_tile50(icons, 8, 1);
 		let folder: rect_t = l.show_panel ? folder_open : folder_closed;
-		return zui_image(icons, ui.ops.theme.LABEL_COL - 0x00202020, icon_h, folder.x, folder.y, folder.w, folder.h);
+		return _zui_image(icons, ui.ops.theme.LABEL_COL - 0x00202020, icon_h, folder.x, folder.y, folder.w, folder.h);
 	}
 }
 
-function tab_layers_can_merge_down(l: slot_layer_t) : bool {
+function tab_layers_can_merge_down(l: slot_layer_t): bool {
 	let index: i32 = array_index_of(project_layers, l);
 	// Lowest layer
 	if (index == 0) {
@@ -934,15 +935,17 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 				base_on_layers_resized();
 			}
 			ui._y = _y;
-			zui_draw_string(tr("Res"), null, 0, zui_align_t.RIGHT);
+			zui_draw_string(tr("Res"), -1, 0, zui_align_t.RIGHT, true);
 			zui_end_element();
 
 			ui_menu_fill(ui);
 			ui_menu_align(ui);
 			///if (krom_android || krom_ios)
-			zui_inline_radio(base_bits_handle, ["8bit"]);
+			let bits_items: string[] = ["8bit"];
+			zui_inline_radio(base_bits_handle, bits_items, zui_align_t.LEFT);
 			///else
-			zui_inline_radio(base_bits_handle, ["8bit", "16bit", "32bit"]);
+			let bits_items: string[] = ["8bit", "16bit", "32bit"];
+			zui_inline_radio(base_bits_handle, bits_items, zui_align_t.LEFT);
 			///end
 			if (base_bits_handle.changed) {
 				app_notify_on_init(base_set_layer_bits);
@@ -984,7 +987,8 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			ui_menu_align(ui);
 			let uv_type_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
 			uv_type_handle.position = l.uv_type;
-			l.uv_type = zui_inline_radio(uv_type_handle, [tr("UV Map"), tr("Triplanar"), tr("Project")], zui_align_t.LEFT);
+			let uv_type_items: string[] = [tr("UV Map"), tr("Triplanar"), tr("Project")];
+			l.uv_type = zui_inline_radio(uv_type_handle, uv_type_items, zui_align_t.LEFT);
 			if (uv_type_handle.changed) {
 				context_set_material(l.fill_layer);
 				context_set_layer(l);
@@ -1149,7 +1153,7 @@ function tab_layers_delete_layer(l: slot_layer_t) {
 	}
 }
 
-function tab_layers_can_delete(l: slot_layer_t) {
+function tab_layers_can_delete(l: slot_layer_t): bool {
 	let num_layers: i32 = 0;
 
 	if (slot_layer_is_mask(l)) {
@@ -1172,7 +1176,7 @@ function tab_layers_can_delete(l: slot_layer_t) {
 	return num_layers > 1;
 }
 
-function tab_layers_can_drop_new_layer(position: i32) {
+function tab_layers_can_drop_new_layer(position: i32): bool {
 	if (position > 0 && position < project_layers.length && slot_layer_is_mask(project_layers[position - 1])) {
 		// 1. The layer to insert is inserted in the middle
 		// 2. The layer below is a mask, i.e. the layer would have to be a (group) mask, too.

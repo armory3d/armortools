@@ -43,7 +43,7 @@ function render_path_base_apply_config() {
 		let keys: string[] = map_keys(render_path_render_targets);
 		for (let i: i32 = 0; i < keys.length; ++i) {
 			let rt: render_target_t = map_get(render_path_render_targets, keys[i]);
-			if (rt.width == 0 && rt.scale != null) {
+			if (rt.width == 0 && rt.scale != 1.0) {
 				rt.scale = render_path_base_super_sample;
 			}
 		}
@@ -66,7 +66,7 @@ function render_path_base_draw_compass() {
 		let compass: mesh_object_t = scene_get_child(".Compass").ext;
 
 		let _visible: bool = compass.base.visible;
-		let _parent: object = compass.base.parent;
+		let _parent: object_t = compass.base.parent;
 		let _loc: vec4_t = compass.base.transform.loc;
 		let _rot: quat_t = compass.base.transform.rot;
 		let crot: quat_t = cam.base.transform.rot;
@@ -80,7 +80,8 @@ function render_path_base_draw_compass() {
 		vec4_set(compass.base.transform.scale, 0.4, 0.4, 0.4);
 		transform_build_matrix(compass.base.transform);
 		compass.frustum_culling = false;
-		mesh_object_render(compass, "overlay", []);
+		let empty: string[] = [];
+		mesh_object_render(compass, "overlay", empty);
 
 		cam.p = _P;
 		compass.base.visible = _visible;
@@ -513,13 +514,14 @@ function render_path_base_draw_gbuffer() {
 	///if krom_metal
 	render_path_clear_target(0x00000000, 1.0, clear_flag_t.COLOR | clear_flag_t.DEPTH);
 	///else
-	render_path_clear_target(null, 1.0, clear_flag_t.DEPTH);
+	render_path_clear_target(0, 1.0, clear_flag_t.DEPTH);
 	///end
 	if (make_mesh_layer_pass_count == 1) {
 		render_path_set_target("gbuffer2");
 		render_path_clear_target(0xff000000);
 	}
-	render_path_set_target("gbuffer0", ["gbuffer1", "gbuffer2"]);
+	let additional: string[] = ["gbuffer1", "gbuffer2"];
+	render_path_set_target("gbuffer0", additional);
 	render_path_paint_bind_layers();
 	render_path_draw_meshes("mesh");
 	render_path_paint_unbind_layers();
@@ -532,7 +534,10 @@ function render_path_base_draw_gbuffer() {
 				render_path_set_target("gbuffer2" + ping);
 				render_path_clear_target(0xff000000);
 			}
-			render_path_set_target("gbuffer0" + ping, ["gbuffer1" + ping, "gbuffer2" + ping]);
+			let g1ping: string = "gbuffer1" + ping;
+			let g2ping: string = "gbuffer2" + ping;
+			let additional: string[] = [g1ping, g2ping];
+			render_path_set_target("gbuffer0" + ping, additional);
 			render_path_bind_target("gbuffer0" + pong, "gbuffer0");
 			render_path_bind_target("gbuffer1" + pong, "gbuffer1");
 			render_path_bind_target("gbuffer2" + pong, "gbuffer2");
@@ -554,7 +559,8 @@ function render_path_base_draw_gbuffer() {
 
 function render_path_base_make_gbuffer_copy_textures() {
 	let copy: render_target_t = map_get(render_path_render_targets, "gbuffer0_copy");
-	if (copy == null || copy._image.width != map_get(render_path_render_targets, "gbuffer0")._image.width || copy._image.height != map_get(render_path_render_targets, "gbuffer0")._image.height) {
+	let g0: render_target_t = map_get(render_path_render_targets, "gbuffer0");
+	if (copy == null || copy._image.width != g0._image.width || copy._image.height != g0._image.height) {
 		{
 			let t: render_target_t = render_target_create();
 			t.name = "gbuffer0_copy";
@@ -593,7 +599,8 @@ function render_path_base_make_gbuffer_copy_textures() {
 }
 
 function render_path_base_copy_to_gbuffer() {
-	render_path_set_target("gbuffer0", ["gbuffer1", "gbuffer2"]);
+	let additional: string[] = ["gbuffer1", "gbuffer2"];
+	render_path_set_target("gbuffer0", additional);
 	render_path_bind_target("gbuffer0_copy", "tex0");
 	render_path_bind_target("gbuffer1_copy", "tex1");
 	render_path_bind_target("gbuffer2_copy", "tex2");

@@ -30,8 +30,10 @@ function geom_make_plane(size_x: f32 = 1.0, size_y: f32 = 1.0, verts_x: i32 = 2,
 		mesh.posa[i * 4 + 3] = 32767;
 		x = (i % verts_x) / (verts_x - 1);
 		y = 1.0 - math_floor(i / verts_x) / (verts_y - 1);
-		mesh.texa[i * 2    ] = (math_floor(x * 32767 * uv_scale) - 1) % 32767;
-		mesh.texa[i * 2 + 1] = (math_floor(y * 32767 * uv_scale) - 1) % 32767;
+		let tx: i32 = (math_floor(x * 32767 * uv_scale) - 1);
+		let ty: i32 = (math_floor(y * 32767 * uv_scale) - 1);
+		mesh.texa[i * 2    ] = tx % 32767;
+		mesh.texa[i * 2 + 1] = ty % 32767;
 	}
 	for (let i: i32 = 0; i < (verts_x - 1) * (verts_y - 1); ++i) {
 		let x: f32 = i % (verts_x - 1);
@@ -47,7 +49,7 @@ function geom_make_plane(size_x: f32 = 1.0, size_y: f32 = 1.0, verts_x: i32 = 2,
 	return mesh;
 }
 
-function geom_make_uv_sphere(radius: f32 = 1.0, widthSegments: i32 = 32, heightSegments: i32 = 16, stretch_uv: bool = true, uvScale: f32 = 1.0): raw_mesh_t {
+function geom_make_uv_sphere(radius: f32 = 1.0, width_segments: i32 = 32, height_segments: i32 = 16, stretch_uv: bool = true, uvScale: f32 = 1.0): raw_mesh_t {
 
 	let mesh: raw_mesh_t = {};
 	mesh.scale_pos = 1.0;
@@ -61,24 +63,24 @@ function geom_make_uv_sphere(radius: f32 = 1.0, widthSegments: i32 = 32, heightS
 	let inv: f32 = (1 / mesh.scale_pos) * 32767;
 	let pi2: f32 = math_pi() * 2;
 
-	let width_verts: i32 = widthSegments + 1;
-	let height_verts: i32 = heightSegments + 1;
+	let width_verts: i32 = width_segments + 1;
+	let height_verts: i32 = height_segments + 1;
 	mesh.posa = i16_array_create(width_verts * height_verts * 4);
 	mesh.nora = i16_array_create(width_verts * height_verts * 2);
 	mesh.texa = i16_array_create(width_verts * height_verts * 2);
-	mesh.inda = u32_array_create(widthSegments * heightSegments * 6 - widthSegments * 6);
+	mesh.inda = u32_array_create(width_segments * height_segments * 6 - width_segments * 6);
 
 	let nor: vec4_t = vec4_create();
 	let pos: i32 = 0;
 	for (let y: i32 = 0; y < height_verts; ++y) {
-		let v: f32 = y / heightSegments;
+		let v: f32 = y / height_segments;
 		let v_flip: f32 = 1.0 - v;
 		if (!stretch_uv) {
 			v_flip /= 2;
 		}
-		let u_off: f32 = y == 0 ? 0.5 / widthSegments : y == heightSegments ? -0.5 / widthSegments : 0.0;
+		let u_off: f32 = y == 0 ? 0.5 / width_segments : y == height_segments ? -0.5 / width_segments : 0.0;
 		for (let x: i32 = 0; x < width_verts; ++x) {
-			let u: f32 = x / widthSegments;
+			let u: f32 = x / width_segments;
 			let u_pi2: f32 = u * pi2;
 			let v_pi: f32  = v * math_pi();
 			let v_pi_sin: f32 = math_sin(v_pi);
@@ -94,16 +96,18 @@ function geom_make_uv_sphere(radius: f32 = 1.0, widthSegments: i32 = 32, heightS
 			mesh.posa[i4 + 3] = math_floor(nor.z * 32767);
 			mesh.nora[i2    ] = math_floor(nor.x * 32767);
 			mesh.nora[i2 + 1] = math_floor(nor.y * 32767);
-			mesh.texa[i2    ] = (math_floor((u + u_off) * 32767) - 1) % 32767;
-			mesh.texa[i2 + 1] = (math_floor(v_flip      * 32767) - 1) % 32767;
+			let tx: i32 = (math_floor((u + u_off) * 32767) - 1);
+			let ty: i32 = (math_floor(v_flip      * 32767) - 1);
+			mesh.texa[i2    ] = tx % 32767;
+			mesh.texa[i2 + 1] = ty % 32767;
 			pos++;
 		}
 	}
 
 	pos = 0;
-	let height_segments1: i32 = heightSegments - 1;
-	for (let y: i32 = 0; y < heightSegments; ++y) {
-		for (let x: i32 = 0; x < widthSegments; ++x) {
+	let height_segments1: i32 = height_segments - 1;
+	for (let y: i32 = 0; y < height_segments; ++y) {
+		for (let x: i32 = 0; x < width_segments; ++x) {
 			let x1: i32 = x + 1;
 			let y1: i32 = y + 1;
 			let a: f32 = y  * width_verts + x1;
@@ -130,9 +134,12 @@ type raw_mesh_t = {
 	posa?: i16_array_t;
 	nora?: i16_array_t;
 	texa?: i16_array_t;
+	cola?: i16_array_t;
 	inda?: u32_array_t;
 	scale_pos?: f32;
 	scale_tex?: f32;
 	name?: string;
 	has_next?: bool;
+	vertex_arrays?: vertex_array_t[];
+	index_arrays?: index_array_t[];
 };

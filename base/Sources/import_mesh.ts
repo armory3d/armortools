@@ -36,13 +36,13 @@ function import_mesh_run(path: string, replace_existing: bool = true) {
 	}
 	else {
 		let ext: string = substring(path, string_last_index_of(path, ".") + 1, path.length);
-		let importer: (s: string)=>any = map_get(path_mesh_importers, ext);
-		let mesh: any = importer(path);
+		let importer: (s: string)=>raw_mesh_t = map_get(path_mesh_importers, ext);
+		let mesh: raw_mesh_t = importer(path);
 		replace_existing ? import_mesh_make_mesh(mesh, path) : import_mesh_add_mesh(mesh);
 
 		let has_next: bool = mesh.has_next;
 		while (has_next) {
-			let mesh: any = importer(path);
+			let mesh: raw_mesh_t = importer(path);
 			has_next = mesh.has_next;
 			import_mesh_add_mesh(mesh);
 
@@ -113,10 +113,15 @@ function import_mesh_finish_import() {
 	///end
 }
 
-function _import_mesh_make_mesh(mesh: any) {
+function _import_mesh_make_mesh(mesh: raw_mesh_t) {
 	let raw: mesh_data_t = import_mesh_raw_mesh(mesh);
 	if (mesh.cola != null) {
-		array_push(raw.vertex_arrays, { values: mesh.cola, attrib: "col", data: "short4norm" });
+		let va: vertex_array_t = {
+			values: mesh.cola,
+			attrib: "col",
+			data: "short4norm"
+		};
+		array_push(raw.vertex_arrays, va);
 	}
 
 	let md: mesh_data_t = mesh_data_create(raw);
@@ -156,7 +161,7 @@ function _import_mesh_make_mesh(mesh: any) {
 	///if (is_paint || is_sculpt)
 	if (import_mesh_clear_layers) {
 		while (project_layers.length > 0) {
-			let l: slot_layer_t = project_layers.pop();
+			let l: slot_layer_t = array_pop(project_layers);
 			slot_layer_unload(l);
 		}
 		base_new_layer(false);
@@ -174,7 +179,15 @@ function _import_mesh_make_mesh(mesh: any) {
 	}
 }
 
-function import_mesh_make_mesh(mesh: any, path: string) {
+function import_mesh_first_unwrap_done(mesh: raw_mesh_t) {
+	_import_mesh_make_mesh(mesh);
+	for (let i: i32 = 0; i < import_mesh_meshes_to_unwrap.length; ++i) {
+		let mesh: raw_mesh_t = import_mesh_meshes_to_unwrap[i];
+		project_unwrap_mesh_box(mesh, _import_mesh_add_mesh, true);
+	}
+}
+
+function import_mesh_make_mesh(mesh: raw_mesh_t, path: string) {
 	if (mesh == null || mesh.posa == null || mesh.nora == null || mesh.inda == null || mesh.posa.length == 0) {
 		console_error(strings_error3());
 		return;
@@ -184,24 +197,22 @@ function import_mesh_make_mesh(mesh: any, path: string) {
 		if (import_mesh_meshes_to_unwrap == null) {
 			import_mesh_meshes_to_unwrap = [];
 		}
-		let first_unwrap_done = function (mesh: any) {
-			_import_mesh_make_mesh(mesh);
-			for (let i: i32 = 0; i < import_mesh_meshes_to_unwrap.length; ++i) {
-				let mesh: any = import_mesh_meshes_to_unwrap[i];
-				project_unwrap_mesh_box(mesh, _import_mesh_add_mesh, true);
-			}
-		}
-		project_unwrap_mesh_box(mesh, first_unwrap_done);
+		project_unwrap_mesh_box(mesh, import_mesh_first_unwrap_done);
 	}
 	else {
 		_import_mesh_make_mesh(mesh);
 	}
 }
 
-function _import_mesh_add_mesh(mesh: any) {
+function _import_mesh_add_mesh(mesh: raw_mesh_t) {
 	let raw: mesh_data_t = import_mesh_raw_mesh(mesh);
 	if (mesh.cola != null) {
-		array_push(raw.vertex_arrays, { values: mesh.cola, attrib: "col", data: "short4norm" });
+		let va: vertex_array_t = {
+			values: mesh.cola,
+			attrib: "col",
+			data: "short4norm"
+		};
+		array_push(raw.vertex_arrays, va);
 	}
 
 	let md: mesh_data_t = mesh_data_create(raw);
@@ -235,7 +246,7 @@ function _import_mesh_add_mesh(mesh: any) {
 	///end
 }
 
-function import_mesh_add_mesh(mesh: any) {
+function import_mesh_add_mesh(mesh: raw_mesh_t) {
 	if (mesh.texa == null) {
 		if (import_mesh_meshes_to_unwrap != null) {
 			array_push(import_mesh_meshes_to_unwrap, mesh);
@@ -249,18 +260,34 @@ function import_mesh_add_mesh(mesh: any) {
 	}
 }
 
-function import_mesh_raw_mesh(mesh: any): mesh_data_t {
-	return {
+function import_mesh_raw_mesh(mesh: raw_mesh_t): mesh_data_t {
+	let raw: raw_mesh_t = {
 		name: mesh.name,
 		vertex_arrays: [
-			{ values: mesh.posa, attrib: "pos", data: "short4norm" },
-			{ values: mesh.nora, attrib: "nor", data: "short2norm" },
-			{ values: mesh.texa, attrib: "tex", data: "short2norm" }
+			{
+				values: mesh.posa,
+				attrib: "pos",
+				data: "short4norm"
+			},
+			{
+				values: mesh.nora,
+				attrib: "nor",
+				data: "short2norm"
+			},
+			{
+				values: mesh.texa,
+				attrib: "tex",
+				data: "short2norm"
+			}
 		],
 		index_arrays: [
-			{ values: mesh.inda, material: 0 }
+			{
+				values: mesh.inda,
+				material: 0
+			}
 		],
 		scale_pos: mesh.scale_pos,
 		scale_tex: mesh.scale_tex
 	};
+	return raw;
 }

@@ -43,7 +43,8 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 	if (context_raw.tool == workspace_tool_t.COLORID) {
 		zui_text(tr("Picked Color"));
 		if (context_raw.colorid_picked) {
-			zui_image(map_get(render_path_render_targets, "texpaint_colorid")._image, 0xffffffff, 64);
+			let rt: render_target_t = map_get(render_path_render_targets, "texpaint_colorid");
+			_zui_image(rt._image, 0xffffffff, 64);
 		}
 		ui.enabled = context_raw.colorid_picked;
 		if (zui_button(tr("Clear"))) {
@@ -59,13 +60,13 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 				context_raw.colorid_picked = false;
 				ui_toolbar_handle.redraws = 1;
 			}
-			zui_image(project_get_image(project_assets[cid]));
+			_zui_image(project_get_image(project_assets[cid]));
 			if (ui.is_hovered) {
 				zui_tooltip_image(project_get_image(project_assets[cid]), 256);
 			}
 		}
 		if (zui_button(tr("Import"))) {
-			ui_files_show(path_texture_formats.join(","), false, true, function (path: string) {
+			ui_files_show(string_array_join(path_texture_formats, ","), false, true, function (path: string) {
 				import_asset_run(path, -1.0, -1.0, true, false);
 
 				context_raw.colorid_handle.position = project_asset_names.length - 1;
@@ -97,7 +98,8 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 				}
 				g4_begin(m.texpaint);
 				g4_set_pipeline(base_pipe_colorid_to_mask);
-				g4_set_tex(base_texpaint_colorid,map_get(render_path_render_targets, "texpaint_colorid")._image);
+				let rt: render_target_t = map_get(render_path_render_targets, "texpaint_colorid");
+				g4_set_tex(base_texpaint_colorid, rt._image);
 				g4_set_tex(base_tex_colorid, project_get_image(project_assets[context_raw.colorid_handle.position]));
 				g4_set_vertex_buffer(const_data_screen_aligned_vb);
 				g4_set_index_buffer(const_data_screen_aligned_ib);
@@ -148,7 +150,7 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 			ui_menu_draw(function (ui: zui_t) {
 				zui_fill(0, 0, ui._w / zui_SCALE(ui), ui.ops.theme.ELEMENT_H * 9, ui.ops.theme.SEPARATOR_COL);
 				ui.changed = false;
-				zui_color_wheel(_ui_header_draw_tool_properties_h, false, null, 10 * ui.ops.theme.ELEMENT_H * zui_SCALE(ui), false);
+				zui_color_wheel(_ui_header_draw_tool_properties_h, false, -1, 10 * ui.ops.theme.ELEMENT_H * zui_SCALE(ui), false);
 				if (ui.changed) {
 					ui_menu_keep_open = true;
 				}
@@ -234,7 +236,7 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 			array_push(bakes, tr("Thickness"));
 		}
 		else {
-			bakes.shift(); // Remove AO
+			array_shift(bakes); // Remove AO
 		}
 		///end
 
@@ -469,7 +471,7 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 			let h: zui_handle_t = zui_handle(__ID__);
 			h.text = context_raw.text_tool_text;
 			let w: i32 = ui._w;
-			if (ui.text_selected_handle_ptr == h.ptr || ui.submit_text_handle_ptr == h.ptr) {
+			if (ui.text_selected_handle == h || ui.submit_text_handle == h) {
 				ui._w *= 3;
 			}
 
@@ -542,7 +544,10 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 					context_raw.sym_z = zui_check(sym_z_handle, "");
 					ui._x -= 4 * sc;
 					ui._w = math_floor(40 * sc);
-					zui_text(tr("X") + tr("Y") + tr("Z"));
+					let x: string = tr("X");
+					let y: string = tr("Y");
+					let z: string = tr("Z");
+					zui_text(x + y + z);
 				}
 				else {
 					ui._w = math_floor(56 * sc);

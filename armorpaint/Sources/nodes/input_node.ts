@@ -83,7 +83,12 @@ function input_node_update(self: float_node_t) {
 		let dy: f32 = math_abs(input_node_lock_start_y - mouse_view_y());
 		if (dx > 1 || dy > 1) {
 			input_node_lock_begin = false;
-			dx > dy ? input_node_lock_y = true : input_node_lock_x = true;
+			if (dx > dy) {
+				input_node_lock_y = true;
+			}
+			else {
+				input_node_lock_x = true;
+			}
 		}
 	}
 

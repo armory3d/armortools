@@ -5,7 +5,7 @@ type color_node_t = {
 	image?: image_t;
 };
 
-function color_node_create(args: any): color_node_t {
+function color_node_create(args: f32_array_t): color_node_t {
 	let r: f32 = args == null ? 0.8 : args[0];
 	let g: f32 = args == null ? 0.8 : args[1];
 	let b: f32 = args == null ? 0.8 : args[2];
@@ -46,11 +46,14 @@ function color_node_get_as_image(self: color_node_t, from: i32): image_t {
 	return self.image;
 }
 
-function color_node_set(self: color_node_t, value: any) {
+function color_node_set(self: color_node_t, value: f32_array_t) {
 	if (self.base.inputs.length > 0) {
 		logic_node_input_set(self.base.inputs[0], value);
 	}
 	else {
-		self.value = value;
+		self.value.x = value[0];
+		self.value.y = value[1];
+		self.value.z = value[2];
+		self.value.w = value[3];
 	}
 }

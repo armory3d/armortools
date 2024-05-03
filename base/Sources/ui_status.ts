@@ -27,16 +27,18 @@ function ui_status_render_ui() {
 		g2_fill_rect(ui._window_w - 1, 0, 1, ui._window_h);
 
 		// Draw tabs
-		for (let i: i32 = 0; i < ui_base_hwnd_tabs[tab_area_t.STATUS].length; ++i) {
-			let draw: any = ui_base_hwnd_tabs[tab_area_t.STATUS][i];
-			draw(ui_base_htabs[tab_area_t.STATUS]);
+		let hwnd_draws: tab_draw_t[] = ui_base_hwnd_tabs[tab_area_t.STATUS];
+		let htab: zui_handle_t = ui_base_htabs[tab_area_t.STATUS];
+		for (let i: i32 = 0; i < hwnd_draws.length; ++i) {
+			let draw: tab_draw_t = hwnd_draws[i];
+			draw.f(htab);
 		}
 
 		let minimized: bool = statush <= ui_status_default_status_h * config_raw.window_scale;
-		if (ui_base_htabs[tab_area_t.STATUS].changed && (ui_base_htabs[tab_area_t.STATUS].position == context_raw.last_status_position || minimized)) {
+		if (htab.changed && (htab.position == context_raw.last_status_position || minimized)) {
 			ui_base_toggle_browser();
 		}
-		context_raw.last_status_position = ui_base_htabs[tab_area_t.STATUS].position;
+		context_raw.last_status_position = htab.position;
 	}
 }
 

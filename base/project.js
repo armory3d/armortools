@@ -19,8 +19,8 @@ flags.with_g2 = true;
 flags.with_iron = true;
 flags.with_zui = true;
 
-// flags.with_minits = true; ////
-// flags.physics = false; ////
+flags.with_minits = true; ////
+flags.physics = false; ////
 
 flags.on_c_project_created = async function(c_project, platform, graphics) {
 	c_project.addDefine("IDLE_SLEEP");

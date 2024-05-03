@@ -47,9 +47,9 @@ function ui_view2d_init() {
 	let scale: f32 = config_raw.window_scale;
 	let ops: zui_options_t = {
 		theme: base_theme,
-		font: base_font,
-		color_wheel: base_color_wheel,
-		black_white_gradient: base_color_wheel_gradient,
+		font: base_font.font_,
+		color_wheel: base_color_wheel.texture_,
+		black_white_gradient: base_color_wheel_gradient.texture_,
 		scale_factor: scale
 	};
 	ui_view2d_ui = zui_create(ops);
@@ -130,7 +130,9 @@ function ui_view2d_render() {
 
 		// Grid
 		g2_set_color(0xffffffff);
-		g2_draw_image(ui_nodes_grid, (ui_view2d_pan_x * ui_view2d_pan_scale) % 100 - 100, (ui_view2d_pan_y * ui_view2d_pan_scale) % 100 - 100);
+		let gx: i32 = (i32)(ui_view2d_pan_x * ui_view2d_pan_scale) % 100 - 100;
+		let gy: i32 = (i32)(ui_view2d_pan_y * ui_view2d_pan_scale) % 100 - 100;
+		g2_draw_image(ui_nodes_grid, gx, gy);
 
 		// Texture
 		let tex: image_t = null;
@@ -260,7 +262,8 @@ function ui_view2d_render() {
 				_ui_view2d_render_th = th;
 
 				app_notify_on_next_frame(function () {
-					let texpaint_picker: image_t = map_get(render_path_render_targets, "texpaint_picker")._image;
+					let rt: render_target_t = map_get(render_path_render_targets, "texpaint_picker");
+					let texpaint_picker: image_t = rt._image;
 					g2_begin(texpaint_picker);
 					g2_draw_scaled_image(_ui_view2d_render_tex, -_ui_view2d_render_x, -_ui_view2d_render_y, _ui_view2d_render_tw, _ui_view2d_render_th);
 					g2_end();
@@ -460,7 +463,7 @@ function ui_view2d_update() {
 		ui_view2d_pan_x = _pan_x * ui_view2d_pan_scale;
 		ui_view2d_pan_y = _pan_y * ui_view2d_pan_scale;
 
-		if (zui_touch_scroll()) {
+		if (zui_touch_scroll) {
 			// Zoom to finger location
 			ui_view2d_pan_x -= (ui_view2d_ui.input_x - ui_view2d_ui._window_x - ui_view2d_ui._window_w / 2) * control.zoom;
 			ui_view2d_pan_y -= (ui_view2d_ui.input_y - ui_view2d_ui._window_y - ui_view2d_ui._window_h / 2) * control.zoom;

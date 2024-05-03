@@ -20,7 +20,7 @@ let nodes_brush_list: node_list_t[] = [
 	nodes_brush_category0
 ];
 
-let nodes_brush_creates: map_t<string, any>;
+let nodes_brush_creates: map_t<string, (args: f32_array_t)=>logic_node_ext_t>;
 
 function nodes_brush_init() {
 	nodes_brush_creates = map_create();

@@ -3867,7 +3867,7 @@ function nodes_material_vector_curves_button(ui: zui_t, nodes: zui_nodes_t, node
 	}
 	if (zui_button("-")) {
 		if (val.length > 2) {
-			val.pop();
+			array_pop(val);
 		}
 	}
 	let ihandle: zui_handle_t = zui_nest(zui_nest(zui_nest(nhandle, 0), 2), axis);
@@ -3926,7 +3926,7 @@ function nodes_material_color_ramp_button(ui: zui_t, nodes: zui_nodes_t, node: z
 		ihandle.value += 1;
 	}
 	if (zui_button("-") && vals.length > 1) {
-		vals.pop();
+		array_pop(vals);
 		ihandle.value -= 1;
 	}
 
@@ -3955,7 +3955,7 @@ function nodes_material_color_ramp_button(ui: zui_t, nodes: zui_nodes_t, node: z
 		let rx: f32 = nx + ui._w - zui_nodes_p(37);
 		let ry: f32 = ny - zui_nodes_p(5);
 		nodes._input_started = ui.input_started = false;
-		zui_nodes_rgba_popup(ui, chandle, val, math_floor(rx), math_floor(ry + zui_ELEMENT_H(ui)));
+		zui_nodes_rgba_popup(chandle, val, math_floor(rx), math_floor(ry + zui_ELEMENT_H(ui)));
 	}
 	val[0] = color_get_rb(chandle.color) / 255;
 	val[1] = color_get_gb(chandle.color) / 255;
@@ -3979,8 +3979,6 @@ function nodes_material_new_group_button(ui: zui_t, nodes: zui_nodes_t, node: zu
 				break;
 			}
 		}
-
-		array_push(zui_node_replace, node);
 
 		let canvas: zui_node_canvas_t = {
 			name: node.name,
@@ -4022,7 +4020,11 @@ function nodes_material_new_group_button(ui: zui_t, nodes: zui_nodes_t, node: zu
 			],
 			links: []
 		};
-		array_push(project_material_groups, { canvas: canvas, nodes: zui_nodes_create() });
+		let ng: node_group_t = {
+			canvas: canvas,
+			nodes: zui_nodes_create()
+		};
+		array_push(project_material_groups, ng);
 	}
 
 	let group: node_group_t = null;
@@ -4090,7 +4092,6 @@ function nodes_material_sync_sockets(node: zui_node_t) {
 		let g: node_group_t = project_material_groups[i];
 		nodes_material_sync_group_sockets(g.canvas, c.name, node);
 	}
-	array_push(zui_node_replace, node);
 }
 
 function nodes_material_sync_group_sockets(canvas: zui_node_canvas_t, group_name: string, node: zui_node_t) {
@@ -4100,7 +4101,12 @@ function nodes_material_sync_group_sockets(canvas: zui_node_canvas_t, group_name
 			let is_inputs: bool = node.name == "Group Input";
 			let old_sockets: zui_node_socket_t[] = is_inputs ? n.inputs : n.outputs;
 			let sockets: zui_node_socket_t[] = json_parse(json_stringify(is_inputs ? node.outputs : node.inputs));
-			is_inputs ? n.inputs = sockets : n.outputs = sockets;
+			if (is_inputs) {
+				n.inputs = sockets;
+			}
+			else {
+				n.outputs = sockets;
+			}
 			for (let i: i32 = 0; i < sockets.length; ++i) {
 				let s: zui_node_socket_t = sockets[i];
 				s.node_id = n.id;
@@ -4119,17 +4125,17 @@ function nodes_material_get_socket_color(type: string): i32 {
 	return type == "RGBA" ? 0xffc7c729 : type == "VECTOR" ? 0xff6363c7 : 0xffa1a1a1;
 }
 
-function nodes_material_get_socket_default_value(type: string): any {
-	return type == "RGBA" ? f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0) : type == "VECTOR" ? f32_array_create_xyz(0.0, 0.0, 0.0) : 0.0;
+function nodes_material_get_socket_default_value(type: string): f32_array_t {
+	return type == "RGBA" ? f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0) : type == "VECTOR" ? f32_array_create_xyz(0.0, 0.0, 0.0) : f32_array_create_x(0.0);
 }
 
 function nodes_material_get_socket_name(type: string): string {
 	return type == "RGBA" ? _tr("Color") : type == "VECTOR" ? _tr("Vector") : _tr("Value");
 }
 
-function nodes_material_create_socket(nodes: zui_nodes_t, node: zui_node_t, name: string, type: string, canvas: zui_node_canvas_t, min = 0.0, max = 1.0, default_value: any = null): zui_node_socket_t {
-	return {
-		id: zui_get_socket_id(canvas.nodes),
+function nodes_material_create_socket(nodes: zui_nodes_t, node: zui_node_t, name: string, type: string, canvas: zui_node_canvas_t, min: f32 = 0.0, max: f32 = 1.0, default_value: any = null): zui_node_socket_t {
+	let soc: zui_node_socket_t = {
+		id: zui_get_socket_id(canvas.nodes.buffer, canvas.nodes.length),
 		node_id: node.id,
 		name: name == null ? nodes_material_get_socket_name(type) : name,
 		type: type,
@@ -4137,7 +4143,8 @@ function nodes_material_create_socket(nodes: zui_nodes_t, node: zui_node_t, name
 		default_value: default_value == null ? nodes_material_get_socket_default_value(type) : default_value,
 		min: min,
 		max: max
-	}
+	};
+	return soc;
 }
 
 function nodes_material_get_node_t(node_type: string): zui_node_t {

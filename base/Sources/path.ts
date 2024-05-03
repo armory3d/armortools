@@ -35,8 +35,8 @@ function path_to_relative(from: string, to: string): string {
 	let a: string[] = string_split(from, path_sep);
 	let b: string[] = string_split(to, path_sep);
 	while (a[0] == b[0]) {
-		a.shift();
-		b.shift();
+		array_shift(a);
+		array_shift(b);
 		if (a.length == 0 || b.length == 0) {
 			break;
 		}
@@ -45,7 +45,7 @@ function path_to_relative(from: string, to: string): string {
 	for (let i: i32 = 0; i < a.length - 1; ++i) {
 		base += ".." + path_sep;
 	}
-	base += b.join(path_sep);
+	base += string_array_join(b, path_sep);
 	return base;
 }
 
@@ -61,7 +61,7 @@ function path_normalize(path: string): string {
 			i++;
 		}
 	}
-	return ar.join(path_sep);
+	return string_array_join(ar, path_sep);
 }
 
 function path_base_dir(path: string): string {
@@ -71,7 +71,14 @@ function path_base_dir(path: string): string {
 function path_working_dir(): string {
 	if (path_working_dir_cache == null) {
 		let cmd: string = path_pwd;
-		let save: string = (path_is_protected() ? krom_save_path() : path_data() + path_sep) + "working_dir.txt";
+		let save: string;
+		if (path_is_protected()) {
+			save = krom_save_path();
+		}
+		else {
+			save = path_data() + path_sep;
+		}
+		save += "working_dir.txt";
 		krom_sys_command(cmd + " > \"" + save + "\"");
 		path_working_dir_cache = trim_end(sys_buffer_to_string(krom_load_blob(save)));
 	}
@@ -171,7 +178,8 @@ function path_is_displacement_tex(p: string): bool {
 }
 
 function path_is_folder(p: string): bool {
-	return string_index_of(string_split(string_replace_all(p, "\\", "/"), "/").pop(), ".") == -1;
+	let last: string = array_pop(string_split(string_replace_all(p, "\\", "/"), "/"));
+	return string_index_of(last, ".") == -1;
 }
 
 function path_is_protected(): bool {

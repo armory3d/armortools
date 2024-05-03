@@ -11,18 +11,23 @@ function make_paint_is_raytraced_bake(): bool {
 
 function make_paint_color_attachments(): string[] {
 	if (context_raw.tool == workspace_tool_t.COLORID) {
-		return ["RGBA32"];
+		let res: string[] = ["RGBA32"];
+		return res;
 	}
 	if (context_raw.tool == workspace_tool_t.PICKER && context_raw.pick_pos_nor_tex) {
-		return ["RGBA128", "RGBA128"];
+		let res: string[] = ["RGBA128", "RGBA128"];
+		return res;
 	}
 	if (context_raw.tool == workspace_tool_t.PICKER || context_raw.tool == workspace_tool_t.MATERIAL) {
-		return ["RGBA32", "RGBA32", "RGBA32", "RGBA32"];
+		let res: string[] = ["RGBA32", "RGBA32", "RGBA32", "RGBA32"];
+		return res;
 	}
 	if (context_raw.tool == workspace_tool_t.BAKE && make_paint_is_raytraced_bake()) {
-		return ["RGBA64", "RGBA64"];
+		let res: string[] = ["RGBA64", "RGBA64"];
+		return res;
 	}
-	return ["RGBA32", "RGBA32", "RGBA32", "R8"];
+	let res: string[] = ["RGBA32", "RGBA32", "RGBA32", "R8"];
+	return res;
 }
 
 function make_paint_run(data: material_t, matcon: material_context_t): node_shader_context_t {

@@ -68,7 +68,7 @@ function tab_brushes_draw(htab: zui_handle_t) {
 				let uix: f32 = ui._x;
 				//let uiy: f32 = ui._y;
 				let tile: i32 = zui_SCALE(ui) > 1 ? 100 : 50;
-				let state: zui_state_t = project_brushes[i].preview_ready ? zui_image(img) : zui_image(resource_get("icons.k"), -1, -1.0, tile * 5, tile, tile, tile);
+				let state: zui_state_t = project_brushes[i].preview_ready ? _zui_image(img) : _zui_image(resource_get("icons.k"), -1, -1.0, tile * 5, tile, tile, tile);
 				if (state == zui_state_t.STARTED) {
 					if (context_raw.brush != project_brushes[i]) {
 						context_select_brush(i);

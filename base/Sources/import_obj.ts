@@ -1,4 +1,22 @@
 
+declare type obj_part_t = {
+	posa: i16_array_t;
+	nora: i16_array_t;
+	texa: i16_array_t;
+	inda: u32_array_t;
+	vertex_count: i32;
+	index_count: i32;
+	scale_pos: f32;
+	scale_tex: f32;
+	name: string;
+	has_next: bool;
+	pos: i32;
+	udims: u32_array_t[];
+	udims_count: u32_array_t;
+	udims_u: i32;
+	udims_v: i32;
+};
+
 function import_obj_run(path: string, replace_existing: bool = true) {
 	let i: split_type_t = context_raw.split_by;
 	let is_udim: bool = i == split_type_t.UDIM;
@@ -10,22 +28,22 @@ function import_obj_run(path: string, replace_existing: bool = true) {
 	let b: buffer_t = data_get_blob(path);
 
 	if (is_udim) {
-		let part: any = krom_io_obj_parse(b, split_code, 0, is_udim);
-		let name: string = part.name;
-		for (let i: i32 = 0; i < part.udims.length; ++i) {
-			if (part.udims[i].length == 0) {
-				continue;
-			}
-			let u: i32 = i % part.udims_u;
-			let v: i32 = math_floor(i / part.udims_u);
-			part.name = name + "." + (1000 + v * 10 + u + 1);
-			part.inda = part.udims[i];
-			i == 0 ? (replace_existing ? import_mesh_make_mesh(part, path) : import_mesh_add_mesh(part)) : import_mesh_add_mesh(part);
-		}
+		// let part: obj_part_t = krom_io_obj_parse(b, split_code, 0, is_udim);
+		// let name: string = part.name;
+		// for (let i: i32 = 0; i < part.udims.length; ++i) {
+		// 	if (part.udims[i].length == 0) {
+		// 		continue;
+		// 	}
+		// 	let u: i32 = i % part.udims_u;
+		// 	let v: i32 = math_floor(i / part.udims_u);
+		// 	part.name = name + "." + (1000 + v * 10 + u + 1);
+		// 	part.inda = part.udims[i];
+		// 	i == 0 ? (replace_existing ? import_mesh_make_mesh(part, path) : import_mesh_add_mesh(part)) : import_mesh_add_mesh(part);
+		// }
 	}
 	else {
-		let parts: any[] = [];
-		let part: any = krom_io_obj_parse(b, split_code, 0, false);
+		let parts: obj_part_t[] = [];
+		let part: obj_part_t = krom_io_obj_parse(b, split_code, 0, false);
 		array_push(parts, part);
 		while (part.has_next) {
 			part = krom_io_obj_parse(b, split_code, part.pos, false);
@@ -94,16 +112,30 @@ function import_obj_run(path: string, replace_existing: bool = true) {
 						let nora: i16_array_t = i16_array_create(nora0.length + nora1.length);
 						let texa: i16_array_t = (texa0 != null && texa1 != null) ? i16_array_create(texa0.length + texa1.length) : null;
 						let inda: u32_array_t = u32_array_create(inda0.length + inda1.length);
-						nora.set(nora0);
-						nora.set(nora1, nora0.length);
-						if (texa != null) {
-							texa.set(texa0);
-							texa.set(texa1, texa0.length);
+
+						for (let k: i32 = 0; k < nora0.length; ++k) {
+							nora[k] = nora0[k];
 						}
-						inda.set(inda0);
+						for (let k: i32 = 0; k < nora1.length; ++k) {
+							nora[k + nora0.length] = nora1[k];
+						}
+
+						if (texa != null) {
+							for (let k: i32 = 0; k < texa0.length; ++k) {
+								texa[k] = texa0[k];
+							}
+							for (let k: i32 = 0; k < texa1.length; ++k) {
+								texa[k + texa0.length] = texa1[k];
+							}
+						}
+
+						for (let k: i32 = 0; k < inda0.length; ++k) {
+							inda[k] = inda0[k];
+						}
 						for (let k: i32 = 0; k < inda1.length; ++k) {
 							inda[k + inda0.length] = inda1[k] + voff;
 						}
+
 						parts[i].posa = posa;
 						parts[i].nora = nora;
 						parts[i].texa = texa;

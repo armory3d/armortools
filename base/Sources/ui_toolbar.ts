@@ -39,7 +39,7 @@ function ui_toolbar_draw_tool(i: i32, ui: zui_t, img: image_t, icon_accent: i32,
 	let rect: rect_t = resource_tile50(img, tile_x, tile_y);
 	let _y: i32 = ui._y;
 
-	let image_state: zui_state_t = zui_image(img, icon_accent, -1.0, rect.x, rect.y, rect.w, rect.h);
+	let image_state: zui_state_t = _zui_image(img, icon_accent, -1.0, rect.x, rect.y, rect.w, rect.h);
 	if (image_state == zui_state_t.STARTED) {
 		_ui_toolbar_i = i;
 		app_notify_on_next_frame(function() {
@@ -55,7 +55,8 @@ function ui_toolbar_draw_tool(i: i32, ui: zui_t, img: image_t, icon_accent: i32,
 
 	///if is_paint
 	if (i == workspace_tool_t.COLORID && context_raw.colorid_picked) {
-		g2_draw_scaled_sub_image(map_get(render_path_render_targets, "texpaint_colorid")._image, 0, 0, 1, 1, 0, _y + 1.5 * zui_SCALE(ui), 5 * zui_SCALE(ui), 34 * zui_SCALE(ui));
+		let rt: render_target_t = map_get(render_path_render_targets, "texpaint_colorid");
+		g2_draw_scaled_sub_image(rt._image, 0, 0, 1, 1, 0, _y + 1.5 * zui_SCALE(ui), 5 * zui_SCALE(ui), 34 * zui_SCALE(ui));
 	}
 	///end
 
@@ -93,7 +94,7 @@ function ui_toolbar_render_ui() {
 		// Properties icon
 		if (config_raw.layout[layout_size_t.HEADER] == 1) {
 			let rect: rect_t = resource_tile50(img, 7, 1);
-			if (zui_image(img, light ? 0xff666666 : ui.ops.theme.BUTTON_COL, -1.0, rect.x, rect.y, rect.w, rect.h) == zui_state_t.RELEASED) {
+			if (_zui_image(img, light ? 0xff666666 : ui.ops.theme.BUTTON_COL, -1.0, rect.x, rect.y, rect.w, rect.h) == zui_state_t.RELEASED) {
 				config_raw.layout[layout_size_t.HEADER] = 0;
 			}
 		}
@@ -136,21 +137,51 @@ function ui_toolbar_render_ui() {
 		let vars_clone: map_t<string, string> = map_create();
 		map_set(vars_clone, "key", map_get(config_keymap, "set_clone_source"));
 
+		let key_tool_brush: string = map_get(config_keymap, "tool_brush");
+		let key_tool_eraser: string = map_get(config_keymap, "tool_eraser");
+		let key_tool_fill: string = map_get(config_keymap, "tool_fill");
+		let key_tool_decal: string = map_get(config_keymap, "tool_decal");
+		let key_tool_text: string = map_get(config_keymap, "tool_text");
+		let key_tool_clone: string = map_get(config_keymap, "tool_clone");
+		let key_tool_blur: string = map_get(config_keymap, "tool_blur");
+		let key_tool_smudge: string = map_get(config_keymap, "tool_smudge");
+		let key_tool_particle: string = map_get(config_keymap, "tool_particle");
+		let key_tool_colorid: string = map_get(config_keymap, "tool_colorid");
+		let key_tool_picker: string = map_get(config_keymap, "tool_picker");
+		let key_tool_bake: string = map_get(config_keymap, "tool_bake");
+		let key_tool_gizmo: string = map_get(config_keymap, "tool_gizmo");
+		let key_tool_material: string = map_get(config_keymap, "tool_material");
+
+		key_tool_brush = "(" + key_tool_brush + ") - " + tr("Hold {action_paint} to paint\nHold {key} and press {action_paint} to paint a straight line (ruler mode)", vars_brush);
+		key_tool_eraser = "(" + key_tool_eraser + ") - " + tr("Hold {action_paint} to erase\nHold {key} and press {action_paint} to erase a straight line (ruler mode)", vars_brush);
+		key_tool_fill = "(" + key_tool_fill + ")";
+		key_tool_decal = "(" + key_tool_decal + ") - " + tr("Hold {key} to paint on a decal mask", vars_decal);
+		key_tool_text = "(" + key_tool_text + ") - " + tr("Hold {key} to use the text as a mask", vars_decal);
+		key_tool_clone = "(" + key_tool_clone + ") - " + tr("Hold {key} to set source", vars_clone);
+		key_tool_blur = "(" + key_tool_blur + ")";
+		key_tool_smudge = "(" + key_tool_smudge + ")";
+		key_tool_particle = "(" + key_tool_particle + ")";
+		key_tool_colorid = "(" + key_tool_colorid + ")";
+		key_tool_picker = "(" + key_tool_picker + ")";
+		key_tool_bake = "(" + key_tool_bake + ")";
+		key_tool_gizmo = "(" + key_tool_gizmo + ")";
+		key_tool_material = "(" + key_tool_material + ")";
+
 		let keys: string[] = [
-			"(" + map_get(config_keymap, "tool_brush") + ") - " + tr("Hold {action_paint} to paint\nHold {key} and press {action_paint} to paint a straight line (ruler mode)", vars_brush),
-			"(" + map_get(config_keymap, "tool_eraser") + ") - " + tr("Hold {action_paint} to erase\nHold {key} and press {action_paint} to erase a straight line (ruler mode)", vars_brush),
-			"(" + map_get(config_keymap, "tool_fill") + ")",
-			"(" + map_get(config_keymap, "tool_decal") + ") - " + tr("Hold {key} to paint on a decal mask", vars_decal),
-			"(" + map_get(config_keymap, "tool_text") + ") - " + tr("Hold {key} to use the text as a mask", vars_decal),
-			"(" + map_get(config_keymap, "tool_clone") + ") - " + tr("Hold {key} to set source", vars_clone),
-			"(" + map_get(config_keymap, "tool_blur") + ")",
-			"(" + map_get(config_keymap, "tool_smudge") + ")",
-			"(" + map_get(config_keymap, "tool_particle") + ")",
-			"(" + map_get(config_keymap, "tool_colorid") + ")",
-			"(" + map_get(config_keymap, "tool_picker") + ")",
-			"(" + map_get(config_keymap, "tool_bake") + ")",
-			"(" + map_get(config_keymap, "tool_gizmo") + ")",
-			"(" + map_get(config_keymap, "tool_material") + ")",
+			key_tool_brush,
+			key_tool_eraser,
+			key_tool_fill,
+			key_tool_decal,
+			key_tool_text,
+			key_tool_clone,
+			key_tool_blur,
+			key_tool_smudge,
+			key_tool_particle,
+			key_tool_colorid,
+			key_tool_picker,
+			key_tool_bake,
+			key_tool_gizmo,
+			key_tool_material
 		];
 
 		ui_toolbar_draw_tool(workspace_tool_t.BRUSH, ui, img, icon_accent, keys);

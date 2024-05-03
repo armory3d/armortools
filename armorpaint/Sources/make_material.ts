@@ -2,9 +2,9 @@
 let make_material_default_scon: shader_context_t = null;
 let make_material_default_mcon: material_context_t = null;
 
-let make_material_height_used = false;
-let make_material_emis_used = false;
-let make_material_subs_used = false;
+let make_material_height_used: bool = false;
+let make_material_emis_used: bool = false;
+let make_material_subs_used: bool = false;
 
 function make_material_get_mout(): bool {
 	for (let i: i32 = 0; i < ui_nodes_get_canvas_material().nodes.length; ++i) {
@@ -271,7 +271,8 @@ function make_material_bake_node_previews() {
 	if (context_raw.node_previews == null) {
 		context_raw.node_previews = map_create();
 	}
-	make_material_traverse_nodes(ui_nodes_get_canvas_material().nodes, null, []);
+	let empty: zui_node_t[] = [];
+	make_material_traverse_nodes(ui_nodes_get_canvas_material().nodes, null, empty);
 
 	let keys: string[] = map_keys(context_raw.node_previews);
 	for (let i: i32 = 0; i < keys.length; ++i) {
@@ -296,7 +297,7 @@ function make_material_traverse_nodes(nodes: zui_node_t[], group: zui_node_canva
 				if (g.canvas.name == node.name) {
 					array_push(parents, node);
 					make_material_traverse_nodes(g.canvas.nodes, g.canvas, parents);
-					parents.pop();
+					array_pop(parents);
 					break;
 				}
 			}
@@ -392,7 +393,12 @@ function make_material_bake_node_preview(node: zui_node_t, group: zui_node_canva
 	}
 }
 
-function make_material_parse_node_preview_material(node: zui_node_t, group: zui_node_canvas_t = null, parents: zui_node_t[] = null): { scon: shader_context_t, mcon: material_context_t } {
+type parse_node_preview_result_t = {
+	scon: shader_context_t;
+	mcon: material_context_t;
+};
+
+function make_material_parse_node_preview_material(node: zui_node_t, group: zui_node_canvas_t = null, parents: zui_node_t[] = null): parse_node_preview_result_t {
 	if (node.outputs.length == 0) {
 		return null;
 	}
@@ -410,7 +416,11 @@ function make_material_parse_node_preview_material(node: zui_node_t, group: zui_
 		return null;
 	}
 	let mcon: material_context_t = material_context_create(mcon_raw);
-	return { scon: scon, mcon: mcon };
+	let result: parse_node_preview_result_t = {
+		scon: scon,
+		mcon: mcon
+	};
+	return result;
 }
 
 function make_material_parse_brush() {

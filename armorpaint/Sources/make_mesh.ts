@@ -150,7 +150,8 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 					continue;
 				}
 				texture_count++;
-				node_shader_add_uniform(frag, "sampler2D texpaint_view_mask" + m.id, "_texpaint" + array_index_of(project_layers, m));
+				let index: i32 = array_index_of(project_layers, m);
+				node_shader_add_uniform(frag, "sampler2D texpaint_view_mask" + m.id, "_texpaint" + index);
 			}
 		}
 
@@ -204,7 +205,8 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 						if (i > 0) {
 							node_shader_write(frag, " || ");
 						}
-						node_shader_write(frag, visibles[i].base.uid + " == uid");
+						let uid: i32 = visibles[i].base.uid;
+						node_shader_write(frag, uid + " == uid");
 					}
 					node_shader_write(frag, ") {");
 				}
@@ -244,7 +246,9 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 						node_shader_add_shared_sampler(frag, "sampler2D texpaint" + m.id);
 						node_shader_write(frag, "{"); // Group mask is sampled across multiple layers
 						node_shader_write(frag, "float texpaint_mask_sample" + m.id + " = textureLodShared(texpaint" + m.id + ", texCoord, 0.0).r;");
-						node_shader_write(frag, texpaint_mask + " = " + make_material_blend_mode_mask(frag, m.blending, texpaint_mask, "texpaint_mask_sample" + m.id, "float(" + slot_layer_get_opacity(m) + ")") + ";");
+						let opac: f32 = slot_layer_get_opacity(m);
+						let mask: string = make_material_blend_mode_mask(frag, m.blending, texpaint_mask, "texpaint_mask_sample" + m.id, "float(" + opac + ")");
+						node_shader_write(frag, texpaint_mask + " = " + mask + ";");
 						node_shader_write(frag, "}");
 					}
 					node_shader_write(frag, "texpaint_opac *= clamp(" + texpaint_mask + ", 0.0, 1.0);");
@@ -252,7 +256,8 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 			}
 
 			if (slot_layer_get_opacity(l) < 1) {
-				node_shader_write(frag, "texpaint_opac *= " + slot_layer_get_opacity(l) + ";");
+				let opac: f32 = slot_layer_get_opacity(l);
+				node_shader_write(frag, "texpaint_opac *= " + opac + ";");
 			}
 
 			if (l.paint_base) {
@@ -463,9 +468,10 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 			node_shader_write(frag, "fragColor[1] = vec4(nAttr, 1.0);");
 		}
 		else if (context_raw.viewport_mode == viewport_mode_t.MATERIAL_ID) {
-			node_shader_add_shared_sampler(frag, "sampler2D texpaint_nor" + context_raw.layer.id);
+			let id: i32 = context_raw.layer.id;
+			node_shader_add_shared_sampler(frag, "sampler2D texpaint_nor" + id);
 			node_shader_add_uniform(frag, "vec2 texpaintSize", "_texpaintSize");
-			node_shader_write(frag, "float sample_matid = texelFetch(texpaint_nor" + context_raw.layer.id + ", ivec2(texCoord * texpaintSize), 0).a + 1.0 / 255.0;");
+			node_shader_write(frag, "float sample_matid = texelFetch(texpaint_nor" + id + ", ivec2(texCoord * texpaintSize), 0).a + 1.0 / 255.0;");
 			node_shader_write(frag, "float matid_r = fract(sin(dot(vec2(sample_matid, sample_matid * 20.0), vec2(12.9898, 78.233))) * 43758.5453);");
 			node_shader_write(frag, "float matid_g = fract(sin(dot(vec2(sample_matid * 20.0, sample_matid), vec2(12.9898, 78.233))) * 43758.5453);");
 			node_shader_write(frag, "float matid_b = fract(sin(dot(vec2(sample_matid, sample_matid * 40.0), vec2(12.9898, 78.233))) * 43758.5453);");
@@ -481,15 +487,20 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 		}
 		else if (context_raw.viewport_mode == viewport_mode_t.MASK && (slot_layer_get_masks(context_raw.layer) != null || slot_layer_is_mask(context_raw.layer))) {
 			if (slot_layer_is_mask(context_raw.layer)) {
-				node_shader_write(frag, "float mask_view = textureLodShared(texpaint" + context_raw.layer.id + ", texCoord, 0.0).r;");
+				let id: i32 = context_raw.layer.id;
+				node_shader_write(frag, "float mask_view = textureLodShared(texpaint" + id + ", texCoord, 0.0).r;");
 			}
 			else {
 				node_shader_write(frag, "float mask_view = 0.0;");
 				for (let i: i32 = 0; i < slot_layer_get_masks(context_raw.layer).length; ++i) {
 					let m: slot_layer_t = slot_layer_get_masks(context_raw.layer)[i];
-					if (!slot_layer_is_visible(m)) continue;
+					if (!slot_layer_is_visible(m)) {
+						continue;
+					}
 					node_shader_write(frag, "float mask_sample" + m.id + " = textureLodShared(texpaint_view_mask" + m.id + ", texCoord, 0.0).r;");
-					node_shader_write(frag, "mask_view = " + make_material_blend_mode_mask(frag, m.blending, "mask_view", "mask_sample" + m.id, "float(" + slot_layer_get_opacity(m) + ")") + ";");
+					let opac: f32 = slot_layer_get_opacity(m);
+					let mask: string = make_material_blend_mode_mask(frag, m.blending, "mask_view", "mask_sample" + m.id, "float(" + opac + ")");
+					node_shader_write(frag, "mask_view = " + mask + ";");
 				}
 			}
 			node_shader_write(frag, "fragColor[1] = vec4(mask_view, mask_view, mask_view, 1.0);");

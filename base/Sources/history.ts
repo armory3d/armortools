@@ -121,8 +121,14 @@ function history_undo() {
 				current_layer = project_layers[mask_pos];
 			}
 
-			let layers_to_restore: slot_layer_t[] = slot_layer_is_group(current_layer) ? slot_layer_get_children(current_layer) : [current_layer];
-			layers_to_restore.reverse();
+			let layers_to_restore: slot_layer_t[];
+			if (slot_layer_is_group(current_layer)) {
+				layers_to_restore = slot_layer_get_children(current_layer);
+			}
+			else {
+				layers_to_restore = [current_layer];
+			}
+			array_reverse(layers_to_restore);
 
 			for (let i: i32 = 0; i < layers_to_restore.length; ++i) {
 				let layer: slot_layer_t = layers_to_restore[i];
@@ -183,7 +189,11 @@ function history_undo() {
 			make_material_parse_mesh_material();
 		}
 		else if (step.name == tr("Delete Node Group")) {
-			array_insert(project_material_groups, step.canvas_group, { canvas: null, nodes: zui_nodes_create() });
+			let ng: node_group_t = {
+				canvas: null,
+				nodes: zui_nodes_create()
+			};
+			array_insert(project_material_groups, step.canvas_group, ng);
 			history_swap_canvas(step);
 		}
 		else if (step.name == tr("New Material")) {
@@ -325,7 +335,8 @@ function history_redo() {
 				history_copy_merging_layers2(layers);
 			}
 			else {
-				history_copy_merging_layers2([context_raw.layer, context_raw.layer.parent]);
+				let layers: slot_layer_t[] = [context_raw.layer, context_raw.layer.parent];
+				history_copy_merging_layers2(layers);
 			}
 
 			app_notify_on_next_frame(function () {
@@ -429,10 +440,24 @@ function history_redo() {
 
 function history_reset() {
 	///if (is_paint || is_sculpt)
-	history_steps = [{name: tr("New"), layer: 0, layer_type: layer_slot_type_t.LAYER, layer_parent: -1, object: 0, material: 0, brush: 0}];
+	history_steps = [
+		{
+			name: tr("New", null),
+			layer: 0,
+			layer_type: layer_slot_type_t.LAYER,
+			layer_parent: -1,
+			object: 0,
+			material: 0,
+			brush: 0
+		}
+	];
 	///end
 	///if is_lab
-	history_steps = [{name: tr("New")}];
+	history_steps = [
+		{
+			name: tr("New", null)
+		}
+	];
 	///end
 
 	history_undos = 0;
@@ -510,7 +535,7 @@ function history_merge_layers() {
 	if (slot_layer_has_masks(context_raw.layer)) {
 		step.layer -= slot_layer_get_masks(context_raw.layer).length;
 	}
-	history_steps.shift(); // Merge consumes 2 steps
+	array_shift(history_steps); // Merge consumes 2 steps
 	history_undos--;
 	// TODO: use undo layer in app_merge_down to save memory
 }
@@ -523,7 +548,8 @@ function history_apply_mask() {
 		history_copy_merging_layers2(layers);
 	}
 	else {
-		history_copy_merging_layers2([context_raw.layer, context_raw.layer.parent]);
+		let layers: slot_layer_t[] = [context_raw.layer, context_raw.layer.parent];
+		history_copy_merging_layers2(layers);
 	}
 	history_push(tr("Apply Mask"));
 }
@@ -612,7 +638,7 @@ function history_push(name: string): step_t {
 	}
 	if (history_redos > 0) {
 		for (let i: i32 = 0; i < history_redos; ++i) {
-			history_steps.pop();
+			array_pop(history_steps);
 		}
 		history_redos = 0;
 	}
@@ -623,7 +649,7 @@ function history_push(name: string): step_t {
 	let mpos: i32 = array_index_of(project_materials, context_raw.material);
 	let bpos: i32 = array_index_of(project_brushes, context_raw.brush);
 
-	array_push(history_steps, {
+	let step: step_t = {
 		name: name,
 		layer: lpos,
 		layer_type: slot_layer_is_mask(context_raw.layer) ? layer_slot_type_t.MASK : slot_layer_is_group(context_raw.layer) ? layer_slot_type_t.GROUP : layer_slot_type_t.LAYER,
@@ -634,17 +660,20 @@ function history_push(name: string): step_t {
 		layer_opacity: context_raw.layer.mask_opacity,
 		layer_object: context_raw.layer.object_mask,
 		layer_blending: context_raw.layer.blending
-	});
+	};
+
+	array_push(history_steps, step);
 	///end
 
 	///if is_lab
-	array_push(history_steps, {
+	let step: step_t = {
 		name: name
-	});
+	};
+	array_push(history_steps, step);
 	///end
 
 	while (history_steps.length > config_raw.undo_steps + 1) {
-		history_steps.shift();
+		array_shift(history_steps);
 	}
 	return history_steps[history_steps.length - 1];
 }
@@ -689,7 +718,8 @@ function history_copy_to_undo(from_id: i32, to_id: i32, is_mask: bool) {
 		render_path_draw_shader("shader_datas/copy_pass/copy_pass");
 	}
 	else {
-		render_path_set_target("texpaint_undo" + to_id, ["texpaint_nor_undo" + to_id, "texpaint_pack_undo" + to_id]);
+		let additional: string[] = ["texpaint_nor_undo" + to_id, "texpaint_pack_undo" + to_id];
+		render_path_set_target("texpaint_undo" + to_id, additional);
 		render_path_bind_target("texpaint" + from_id, "tex0");
 		render_path_bind_target("texpaint_nor" + from_id, "tex1");
 		render_path_bind_target("texpaint_pack" + from_id, "tex2");
@@ -699,11 +729,14 @@ function history_copy_to_undo(from_id: i32, to_id: i32, is_mask: bool) {
 }
 ///end
 
-function history_get_canvas_owner(step: step_t): any {
+function history_get_canvas(step: step_t): zui_node_canvas_t {
 	///if (is_paint || is_sculpt)
-	return step.canvas_group == -1 ?
-		project_materials[step.material] :
-		project_material_groups[step.canvas_group];
+	if (step.canvas_group == -1) {
+		return project_materials[step.material].canvas;
+	}
+	else {
+		return project_material_groups[step.canvas_group].canvas;
+	}
 	///end
 
 	///if is_lab
@@ -711,11 +744,22 @@ function history_get_canvas_owner(step: step_t): any {
 	///end
 }
 
+function history_set_canvas(step: step_t, canvas: zui_node_canvas_t) {
+	///if (is_paint || is_sculpt)
+	if (step.canvas_group == -1) {
+		project_materials[step.material].canvas = canvas;
+	}
+	else {
+		project_material_groups[step.canvas_group].canvas = canvas;
+	}
+	///end
+}
+
 function history_swap_canvas(step: step_t) {
 	///if (is_paint || is_sculpt)
 	if (step.canvas_type == 0) {
-		let _canvas: zui_node_canvas_t = history_get_canvas_owner(step).canvas;
-		history_get_canvas_owner(step).canvas = step.canvas;
+		let _canvas: zui_node_canvas_t = history_get_canvas(step);
+		history_set_canvas(step, step.canvas);
 		step.canvas = _canvas;
 		context_raw.material = project_materials[step.material];
 	}
@@ -728,8 +772,8 @@ function history_swap_canvas(step: step_t) {
 	///end
 
 	///if is_lab
-	let _canvas: zui_node_canvas_t = history_get_canvas_owner(step).canvas;
-	history_get_canvas_owner(step).canvas = step.canvas;
+	let _canvas: zui_node_canvas_t = history_get_canvas(step);
+	history_set_canvas(step, step.canvas);
 	step.canvas = _canvas;
 	///end
 

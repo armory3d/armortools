@@ -7,7 +7,7 @@ let translator_last_locale: string = "en";
 
 // Mark strings as localizable in order to be parsed by the extract_locale script
 // The string will not be translated to the currently selected locale though
-function _tr(s: string) {
+function _tr(s: string): string {
 	return s;
 }
 
@@ -24,12 +24,16 @@ function tr(id: string, vars: map_t<string, string> = null): string {
 	if (vars != null) {
 		let keys: string[] = map_keys(vars);
 		for (let i: i32 = 0; i < keys.length; ++i) {
-			translation = string_replace_all(translation, "{" + keys[i] + "}", any_to_string(map_get(vars, keys[i])));
+			let search: string = "{" + keys[i] + "}";
+			translation = string_replace_all(translation, search, map_get(vars, keys[i]));
 		}
 	}
 
 	return translation;
 }
+
+let _translator_load_translations_cjk_font_path: string;
+let _translator_load_translations_cjk_font_disk_path: string;
 
 // (Re)loads translations for the specified locale
 function translator_load_translations(new_locale: string) {
@@ -55,7 +59,7 @@ function translator_load_translations(new_locale: string) {
 
 	// No translations to load, as source strings are in English
 	// Clear existing translations if switching languages at runtime
-	translator_translations.clear();
+	translator_translations = map_create();
 
 	if (config_raw.locale == "en" && translator_last_locale == "en") {
 		// No need to generate extended font atlas for English locale
@@ -96,28 +100,34 @@ function translator_load_translations(new_locale: string) {
 	}
 
 	if (cjk) {
-		let cjk_font_path: string = (path_is_protected() ? krom_save_path() : "") + "font_cjk.ttc";
-		let cjk_font_disk_path: string = (path_is_protected() ? krom_save_path() : path_data() + path_sep) + "font_cjk.ttc";
-		if (!file_exists(cjk_font_disk_path)) {
-			file_download("https://github.com/armory3d/armorbase/raw/main/Assets/common/extra/font_cjk.ttc", cjk_font_disk_path, function () {
+		if (path_is_protected()) {
+			_translator_load_translations_cjk_font_path = krom_save_path();
+			_translator_load_translations_cjk_font_disk_path = krom_save_path();
+		}
+		else {
+			_translator_load_translations_cjk_font_path = "";
+			_translator_load_translations_cjk_font_disk_path = path_data() + path_sep;
+		}
+		_translator_load_translations_cjk_font_path += "font_cjk.ttc";
+		_translator_load_translations_cjk_font_disk_path += "font_cjk.ttc";
 
-				let cjk_font_path: string = (path_is_protected() ? krom_save_path() : "") + "font_cjk.ttc";
-				let cjk_font_disk_path: string = (path_is_protected() ? krom_save_path() : path_data() + path_sep) + "font_cjk.ttc";
+		if (!file_exists(_translator_load_translations_cjk_font_disk_path)) {
+			file_download("https://github.com/armory3d/armorbase/raw/main/Assets/common/extra/font_cjk.ttc", _translator_load_translations_cjk_font_disk_path, function () {
 
-				if (!file_exists(cjk_font_disk_path)) {
+				if (!file_exists(_translator_load_translations_cjk_font_disk_path)) {
 					// Fall back to English
 					config_raw.locale = "en";
 					translator_extended_glyphs();
-					translator_translations.clear();
+					translator_translations = map_create();
 					translator_init_font(false, "font.ttf", 1.0);
 				}
 				else {
-					translator_init_font(true, cjk_font_path, 1.4);
+					translator_init_font(true, _translator_load_translations_cjk_font_path, 1.4);
 				}
 			}, 20332392);
 		}
 		else {
-			translator_init_font(true, cjk_font_path, 1.4);
+			translator_init_font(true, _translator_load_translations_cjk_font_path, 1.4);
 		}
 	}
 	else {
@@ -130,7 +140,7 @@ let _translator_init_font_font_path: string;
 let _translator_init_font_font_scale: f32;
 
 function translator_init_font(cjk: bool, font_path: string, font_scale: f32) {
-	array_sort(_g2_font_glyphs, function (a: i32, b: i32) {
+	array_sort(_g2_font_glyphs, function (a: i32, b: i32): i32 {
 		return a - b;
 	});
 
@@ -158,7 +168,7 @@ function translator_init_font(cjk: bool, font_path: string, font_scale: f32) {
 		for (let i: i32 = 0; i < uis.length; ++i) {
 			let ui: zui_t = uis[i];
 			zui_set_font(ui, f);
-			zui_set_scale(ui, zui_SCALE(ui));
+			_zui_set_scale(ui, zui_SCALE(ui));
 		}
 	});
 }
@@ -179,7 +189,9 @@ function translator_extended_glyphs() {
 // Returns a list of supported locales (plus English and the automatically detected system locale)
 function translator_get_supported_locales(): string[] {
 	let locales: string[] = ["system", "en"];
-	for (let locale_filename of file_read_directory(path_data() + path_sep + "locale")) {
+	let files: string[] = file_read_directory(path_data() + path_sep + "locale");
+	for (let i: i32 = 0; i < files.length; ++i) {
+		let locale_filename: string = files[i];
 		// Trim the ".json" file extension from file names
 		array_push(locales, substring(locale_filename, 0, locale_filename.length - 5));
 	}

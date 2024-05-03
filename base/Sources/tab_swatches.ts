@@ -119,7 +119,7 @@ function tab_swatches_draw(htab: zui_handle_t) {
 					zui_fill(-1, -2 , 2, 32, ui.ops.theme.HIGHLIGHT_COL);
 				}
 
-				let state: zui_state_t = zui_image(tab_swatches_empty_get(), project_raw.swatches[i].base, slotw);
+				let state: zui_state_t = _zui_image(tab_swatches_empty_get(), project_raw.swatches[i].base, slotw);
 
 				if (state == zui_state_t.STARTED) {
 					context_set_swatch(project_raw.swatches[i]);
@@ -142,7 +142,7 @@ function tab_swatches_draw(htab: zui_handle_t) {
 							let h: zui_handle_t = zui_handle(__ID__);
 							h.color = context_raw.swatch.base;
 
-							context_raw.swatch.base = zui_color_wheel(h, false, null, 11 * ui.ops.theme.ELEMENT_H * zui_SCALE(ui), true, function () {
+							context_raw.swatch.base = zui_color_wheel(h, false, -1, 11 * ui.ops.theme.ELEMENT_H * zui_SCALE(ui), true, function () {
 								context_raw.color_picker_previous_tool = context_raw.tool;
 								context_select_tool(workspace_tool_t.PICKER);
 

@@ -54,7 +54,7 @@ function import_arm_run_project(path: string) {
 	///end
 	let recent: string[] = config_raw.recent_projects;
 	array_remove(recent, recent_path);
-	recent.unshift(recent_path);
+	array_insert(recent, 0, recent_path);
 	config_save();
 
 	project_raw = project;
@@ -72,9 +72,8 @@ function import_arm_run_project(path: string) {
 	if (project_raw.envmap != null) {
 		project_raw.envmap = data_is_abs(project_raw.envmap) ? project_raw.envmap : base + project_raw.envmap;
 	}
-	if (project_raw.envmap_strength != null) {
-		scene_world.strength = project_raw.envmap_strength;
-	}
+	scene_world.strength = project_raw.envmap_strength;
+
 	if (project_raw.camera_world != null) {
 		scene_camera.base.transform.local = mat4_from_f32_array(project_raw.camera_world);
 		transform_decompose(scene_camera.base.transform);
@@ -184,20 +183,22 @@ function import_arm_run_project(path: string) {
 			}
 		}
 		let rts: map_t<string, render_target_t> = render_path_render_targets;
-		let _texpaint_blend0: image_t = map_get(rts, "texpaint_blend0")._image;
+		let blend0: render_target_t = map_get(rts, "texpaint_blend0");
+		let _texpaint_blend0: image_t = blend0._image;
 		app_notify_on_next_frame(function (_texpaint_blend0: image_t) {
 			image_unload(_texpaint_blend0);
 		}, _texpaint_blend0);
-		map_get(rts, "texpaint_blend0").width = config_get_texture_res_x();
-		map_get(rts, "texpaint_blend0").height = config_get_texture_res_y();
-		map_get(rts, "texpaint_blend0")._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8, depth_format_t.NO_DEPTH);
-		let _texpaint_blend1: image_t = map_get(rts, "texpaint_blend1")._image;
+		blend0.width = config_get_texture_res_x();
+		blend0.height = config_get_texture_res_y();
+		blend0._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8, depth_format_t.NO_DEPTH);
+		let blend1: render_target_t = map_get(rts, "texpaint_blend1");
+		let _texpaint_blend1: image_t = blend1._image;
 		app_notify_on_next_frame(function (_texpaint_blend1: image_t) {
 			image_unload(_texpaint_blend1);
 		}, _texpaint_blend1);
-		map_get(rts, "texpaint_blend1").width = config_get_texture_res_x();
-		map_get(rts, "texpaint_blend1").height = config_get_texture_res_y();
-		map_get(rts, "texpaint_blend1")._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8, depth_format_t.NO_DEPTH);
+		blend1.width = config_get_texture_res_x();
+		blend1.height = config_get_texture_res_y();
+		blend1._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8, depth_format_t.NO_DEPTH);
 		context_raw.brush_blend_dirty = true;
 	}
 
@@ -342,7 +343,11 @@ function import_arm_run_project(path: string) {
 	if (project.material_groups != null) {
 		for (let i: i32 = 0; i < project.material_groups.length; ++i) {
 			let g: zui_node_canvas_t = project.material_groups[i];
-			array_push(project_material_groups, { canvas: g, nodes: zui_nodes_create() });
+			let ng: node_group_t = {
+				canvas: g,
+				nodes: zui_nodes_create()
+			};
+			array_push(project_material_groups, ng);
 		}
 	}
 
@@ -467,7 +472,11 @@ function import_arm_run_material_from_project(project: project_format_t, path: s
 				import_arm_rename_group(c.name, imported, project.material_groups); // Ensure unique group name
 			}
 			import_arm_init_nodes(c.nodes);
-			array_push(project_material_groups, { canvas: c, nodes: zui_nodes_create() });
+			let ng: node_group_t = {
+				canvas: c,
+				nodes: zui_nodes_create()
+			};
+			array_push(project_material_groups, ng);
 		}
 	}
 

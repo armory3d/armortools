@@ -359,8 +359,10 @@ function util_render_make_brush_preview() {
 	g2_end();
 
 	// Scale image preview down to to icon
-	map_get(render_path_render_targets, "texpreview")._image = context_raw.brush.image;
-	map_get(render_path_render_targets, "texpreview_icon")._image = context_raw.brush.image_icon;
+	let texpreview: render_target_t = map_get(render_path_render_targets, "texpreview");
+	texpreview._image = context_raw.brush.image;
+	let texpreview_icon: render_target_t = map_get(render_path_render_targets, "texpreview_icon");
+	texpreview_icon._image = context_raw.brush.image_icon;
 	render_path_set_target("texpreview_icon");
 	render_path_bind_target("texpreview", "tex");
 	render_path_draw_shader("shader_datas/supersample_resolve/supersample_resolve");
@@ -372,7 +374,7 @@ function util_render_make_brush_preview() {
 }
 
 function util_render_make_node_preview(canvas: zui_node_canvas_t, node: zui_node_t, image: image_t, group: zui_node_canvas_t = null, parents: zui_node_t[] = null) {
-	let res: any = make_material_parse_node_preview_material(node, group, parents);
+	let res: parse_node_preview_result_t = make_material_parse_node_preview_material(node, group, parents);
 	if (res == null || res.scon == null) {
 		return;
 	}
@@ -387,7 +389,8 @@ function util_render_make_node_preview(canvas: zui_node_canvas_t, node: zui_node
 
 	g4_begin(image);
 	g4_set_pipeline(res.scon._.pipe_state);
-	uniforms_set_context_consts(res.scon, [""]);
+	let empty: string[] = [""];
+	uniforms_set_context_consts(res.scon, empty);
 	uniforms_set_obj_consts(res.scon, context_raw.paint_object.base);
 	uniforms_set_material_consts(res.scon, res.mcon);
 	g4_set_vertex_buffer(util_render_screen_aligned_full_vb);
@@ -436,7 +439,7 @@ function util_render_create_screen_aligned_full_data() {
 	// Over-sized triangle
 	let data: f32[] = [-math_floor(32767 / 3), -math_floor(32767 / 3), 0, 32767, 0, 0, 0, 0, 0, 0, 0, 0,
 						32767,                 -math_floor(32767 / 3), 0, 32767, 0, 0, 0, 0, 0, 0, 0, 0,
-						-math_floor(32767 / 3),  32767,                 0, 32767, 0, 0, 0, 0, 0, 0, 0, 0];
+					   -math_floor(32767 / 3),  32767,                 0, 32767, 0, 0, 0, 0, 0, 0, 0, 0];
 	let indices: i32[] = [0, 1, 2];
 
 	// Mandatory vertex data names and sizes

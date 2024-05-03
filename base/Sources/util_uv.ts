@@ -159,10 +159,14 @@ function _util_uv_check(c: coord_t, w: i32, h: i32, r: i32, view: buffer_view_t,
 		return;
 	}
 	buffer_view_set_u8(view, c.y * w + c.x, 255);
-	array_push(coords, { x: c.x + 1, y: c.y });
-	array_push(coords, { x: c.x - 1, y: c.y });
-	array_push(coords, { x: c.x, y: c.y + 1 });
-	array_push(coords, { x: c.x, y: c.y - 1 });
+	let co: coord_t = { x: c.x + 1, y: c.y };
+	array_push(coords, co);
+	co = { x: c.x - 1, y: c.y };
+	array_push(coords, co);
+	co = { x: c.x, y: c.y + 1 };
+	array_push(coords, co);
+	co = { x: c.x, y: c.y - 1 };
+	array_push(coords, co);
 }
 
 function util_uv_cache_uv_island_map() {
@@ -181,7 +185,7 @@ function util_uv_cache_uv_island_map() {
 	let r: i32 = math_floor(util_uv_dilatemap.width / w);
 
 	while (coords.length > 0) {
-		_util_uv_check(coords.pop(), w, h, r, view, coords);
+		_util_uv_check(array_pop(coords), w, h, r, view, coords);
 	}
 
 	if (util_uv_uvislandmap != null) {

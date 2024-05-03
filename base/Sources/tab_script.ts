@@ -17,7 +17,7 @@ function tab_script_draw(htab: zui_handle_t) {
 			zui_row(row);
 		}
 		if (zui_button(tr("Run"))) {
-			js_eval(tab_script_hscript.text);
+			js_eval(tab_script_hscript.text, "");
 		}
 		if (zui_button(tr("Clear"))) {
 			tab_script_hscript.text = "";
@@ -40,7 +40,7 @@ function tab_script_draw(htab: zui_handle_t) {
 				if (!ends_with(path, ".js")) {
 					path += ".js";
 				}
-				krom_file_save_bytes(path, sys_string_to_buffer(str));
+				krom_file_save_bytes(path, sys_string_to_buffer(str), 0);
 			});
 		}
 		zui_end_sticky();
@@ -50,13 +50,13 @@ function tab_script_draw(htab: zui_handle_t) {
 		let f: g2_font_t = data_get_font("font_mono.ttf");
 		zui_set_font(ui, f);
 		ui.font_size = math_floor(15 * zui_SCALE(ui));
-		zui_set_text_area_line_numbers(true);
-		zui_set_text_area_scroll_past_end(true);
-		zui_set_text_area_coloring(tab_script_get_text_coloring());
+		zui_text_area_line_numbers = true;
+		zui_text_area_scroll_past_end = true;
+		zui_text_area_coloring = tab_script_get_text_coloring();
 		zui_text_area(tab_script_hscript);
-		zui_set_text_area_line_numbers(false);
-		zui_set_text_area_scroll_past_end(false);
-		zui_set_text_area_coloring(null);
+		zui_text_area_line_numbers = false;
+		zui_text_area_scroll_past_end = false;
+		zui_text_area_coloring = null;
 		zui_set_font(ui, _font);
 		ui.font_size = _font_size;
 	}

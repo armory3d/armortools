@@ -26,9 +26,9 @@ function export_obj_run(path: string, paint_objects: mesh_object_t[], apply_disp
 		let posa2: i16_array_t = i16_array_create(len * 3);
 		let nora2: i16_array_t = i16_array_create(len * 3);
 		let texa2: i16_array_t = i16_array_create(len * 2);
-		let posmap: map_t<i32, i32> = map_create();
-		let normap: map_t<i32, i32> = map_create();
-		let texmap: map_t<i32, i32> = map_create();
+		let posmap: i32_array_t = i32_array_create(len);
+		let normap: i32_array_t = i32_array_create(len);
+		let texmap: i32_array_t = i32_array_create(len);
 
 		let pi: i32 = 0;
 		let ni: i32 = 0;
@@ -39,13 +39,13 @@ function export_obj_run(path: string, paint_objects: mesh_object_t[], apply_disp
 				if (posa2[j * 3    ] == posa[i * 4    ] &&
 					posa2[j * 3 + 1] == posa[i * 4 + 1] &&
 					posa2[j * 3 + 2] == posa[i * 4 + 2]) {
-					map_set(posmap, i, j);
+					posmap[i] = j;
 					found = true;
 					break;
 				}
 			}
 			if (!found) {
-				map_set(posmap, i, pi);
+				posmap[i] = pi;
 				posa2[pi * 3    ] = posa[i * 4    ];
 				posa2[pi * 3 + 1] = posa[i * 4 + 1];
 				posa2[pi * 3 + 2] = posa[i * 4 + 2];
@@ -57,13 +57,13 @@ function export_obj_run(path: string, paint_objects: mesh_object_t[], apply_disp
 				if (nora2[j * 3    ] == nora[i * 2    ] &&
 					nora2[j * 3 + 1] == nora[i * 2 + 1] &&
 					nora2[j * 3 + 2] == posa[i * 4 + 3]) {
-					map_set(normap, i, j);
+					normap[i] = j;
 					found = true;
 					break;
 				}
 			}
 			if (!found) {
-				map_set(normap, i, ni);
+				normap[i] = ni;
 				nora2[ni * 3    ] = nora[i * 2    ];
 				nora2[ni * 3 + 1] = nora[i * 2 + 1];
 				nora2[ni * 3 + 2] = posa[i * 4 + 3];
@@ -74,13 +74,13 @@ function export_obj_run(path: string, paint_objects: mesh_object_t[], apply_disp
 			for (let j: i32 = 0; j < ti; ++j) {
 				if (texa2[j * 2    ] == texa[i * 2    ] &&
 					texa2[j * 2 + 1] == texa[i * 2 + 1]) {
-					map_set(texmap, i, j);
+					texmap[i] = j;
 					found = true;
 					break;
 				}
 			}
 			if (!found) {
-				map_set(texmap, i, ti);
+				texmap[i] = ti;
 				texa2[ti * 2    ] = texa[i * 2    ];
 				texa2[ti * 2 + 1] = texa[i * 2 + 1];
 				ti++;
@@ -104,41 +104,49 @@ function export_obj_run(path: string, paint_objects: mesh_object_t[], apply_disp
 		export_obj_write_string(o, "o " + p.base.name + "\n");
 		for (let i: i32 = 0; i < pi; ++i) {
 			export_obj_write_string(o, "v ");
-			export_obj_write_string(o, posa2[i * 3] * sc + "");
+			let f: f32 = posa2[i * 3] * sc;
+			export_obj_write_string(o, f + "");
 			export_obj_write_string(o, " ");
-			export_obj_write_string(o, posa2[i * 3 + 2] * sc + "");
+			f = posa2[i * 3 + 2] * sc;
+			export_obj_write_string(o, f + "");
 			export_obj_write_string(o, " ");
-			export_obj_write_string(o, -posa2[i * 3 + 1] * sc + "");
+			f = -posa2[i * 3 + 1] * sc;
+			export_obj_write_string(o, f + "");
 			export_obj_write_string(o, "\n");
 		}
 		for (let i: i32 = 0; i < ni; ++i) {
 			export_obj_write_string(o, "vn ");
-			export_obj_write_string(o, nora2[i * 3] * inv + "");
+			let f: f32 = nora2[i * 3] * inv;
+			export_obj_write_string(o, f + "");
 			export_obj_write_string(o, " ");
-			export_obj_write_string(o, nora2[i * 3 + 2] * inv + "");
+			f = nora2[i * 3 + 2] * inv;
+			export_obj_write_string(o, f + "");
 			export_obj_write_string(o, " ");
-			export_obj_write_string(o, -nora2[i * 3 + 1] * inv + "");
+			f = -nora2[i * 3 + 1] * inv;
+			export_obj_write_string(o, f + "");
 			export_obj_write_string(o, "\n");
 		}
 		for (let i: i32 = 0; i < ti; ++i) {
 			export_obj_write_string(o, "vt ");
-			export_obj_write_string(o, texa2[i * 2] * inv + "");
+			let f: f32 = texa2[i * 2] * inv;
+			export_obj_write_string(o, f + "");
 			export_obj_write_string(o, " ");
-			export_obj_write_string(o, 1.0 - texa2[i * 2 + 1] * inv + "");
+			f = 1.0 - texa2[i * 2 + 1] * inv;
+			export_obj_write_string(o, f + "");
 			export_obj_write_string(o, "\n");
 		}
 
 		let inda: u32_array_t = mesh.index_arrays[0].values;
 		for (let i: i32 = 0; i < math_floor(inda.length / 3); ++i) {
-			let pi1: i32 = map_get(posmap, inda[i * 3    ]) + 1 + poff;
-			let pi2: i32 = map_get(posmap, inda[i * 3 + 1]) + 1 + poff;
-			let pi3: i32 = map_get(posmap, inda[i * 3 + 2]) + 1 + poff;
-			let ni1: i32 = map_get(normap, inda[i * 3    ]) + 1 + noff;
-			let ni2: i32 = map_get(normap, inda[i * 3 + 1]) + 1 + noff;
-			let ni3: i32 = map_get(normap, inda[i * 3 + 2]) + 1 + noff;
-			let ti1: i32 = map_get(texmap, inda[i * 3    ]) + 1 + toff;
-			let ti2: i32 = map_get(texmap, inda[i * 3 + 1]) + 1 + toff;
-			let ti3: i32 = map_get(texmap, inda[i * 3 + 2]) + 1 + toff;
+			let pi1: i32 = posmap[inda[i * 3    ]] + 1 + poff;
+			let pi2: i32 = posmap[inda[i * 3 + 1]] + 1 + poff;
+			let pi3: i32 = posmap[inda[i * 3 + 2]] + 1 + poff;
+			let ni1: i32 = normap[inda[i * 3    ]] + 1 + noff;
+			let ni2: i32 = normap[inda[i * 3 + 1]] + 1 + noff;
+			let ni3: i32 = normap[inda[i * 3 + 2]] + 1 + noff;
+			let ti1: i32 = texmap[inda[i * 3    ]] + 1 + toff;
+			let ti2: i32 = texmap[inda[i * 3 + 1]] + 1 + toff;
+			let ti3: i32 = texmap[inda[i * 3 + 2]] + 1 + toff;
 			export_obj_write_string(o, "f ");
 			export_obj_write_string(o, pi1 + "");
 			export_obj_write_string(o, "/");
@@ -168,6 +176,9 @@ function export_obj_run(path: string, paint_objects: mesh_object_t[], apply_disp
 		path += ".obj";
 	}
 
-	let b: buffer_t = u8_array_t.from(o).buffer;
+	let b: buffer_t = {
+		data: o.buffer,
+		length: o.length
+	};
 	krom_file_save_bytes(path, b, buffer_size(b));
 }

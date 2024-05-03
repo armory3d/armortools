@@ -7,7 +7,12 @@ let config_default_button_spacing: string = "       ";
 let config_button_spacing: string = config_default_button_spacing;
 
 function config_load(done: ()=>void) {
-	let blob: buffer_t = data_get_blob((path_is_protected() ? krom_save_path() : "") + "config.json");
+	let path: string = "";
+	if (path_is_protected()) {
+		path += krom_save_path();
+	}
+	path += "config.json";
+	let blob: buffer_t = data_get_blob(path);
 
 	///if krom_linux
 	if (blob == null) { // Protected directory
@@ -26,13 +31,22 @@ function config_load(done: ()=>void) {
 function config_save() {
 	// Use system application data folder
 	// when running from protected path like "Program Files"
-	let path: string = (path_is_protected() ? krom_save_path() : path_data() + path_sep) + "config.json";
+	let path: string = "";
+	if (path_is_protected()) {
+		path += krom_save_path();
+	}
+	else {
+		path += path_data();
+		path += path_sep;
+	}
+	path += "config.json";
+
 	let buffer: buffer_t = sys_string_to_buffer(json_stringify(config_raw));
-	krom_file_save_bytes(path, buffer);
+	krom_file_save_bytes(path, buffer, 0);
 
 	///if krom_linux // Protected directory
 	if (!file_exists(path)) {
-		krom_file_save_bytes(krom_save_path() + "config.json", buffer);
+		krom_file_save_bytes(krom_save_path() + "config.json", buffer, 0);
 	}
 	///end
 }
@@ -91,25 +105,30 @@ function config_init() {
 		}
 	}
 
-	zui_set_touch_scroll(config_raw.touch_ui);
-	zui_set_touch_hold(config_raw.touch_ui);
-	zui_set_touch_tooltip(config_raw.touch_ui);
+	zui_touch_scroll = config_raw.touch_ui;
+	zui_touch_hold = config_raw.touch_ui;
+	zui_touch_tooltip = config_raw.touch_ui;
 	base_res_handle.position = config_raw.layer_res;
 	config_load_keymap();
 }
 
+type version_t = {
+	sha: string;
+	date: string;
+};
+
 function config_get_sha(): string {
 	let sha: string = "";
 	let blob: buffer_t = data_get_blob("version.json");
-	sha = json_parse(sys_buffer_to_string(blob)).sha;
-	return sha;
+	let v: version_t = json_parse(sys_buffer_to_string(blob));
+	return v.sha;
 }
 
 function config_get_date(): string {
 	let date: string = "";
 	let blob: buffer_t = data_get_blob("version.json");
-	date = json_parse(sys_buffer_to_string(blob)).date;
-	return date;
+	let v: version_t = json_parse(sys_buffer_to_string(blob));
+	return v.date;
 }
 
 function config_get_options(): kinc_sys_ops_t {
@@ -125,7 +144,7 @@ function config_get_options(): kinc_sys_ops_t {
 		window_features |= window_features_t.MINIMIZABLE;
 	}
 	let title: string = "untitled - " + manifest_title;
-	return {
+	let ops: kinc_sys_ops_t = {
 		title: title,
 		width: config_raw.window_w,
 		height: config_raw.window_h,
@@ -136,6 +155,7 @@ function config_get_options(): kinc_sys_ops_t {
 		vsync: config_raw.window_vsync,
 		frequency: config_raw.window_frequency
 	};
+	return ops;
 }
 
 function config_restore() {
@@ -199,7 +219,7 @@ function config_save_keymap() {
 	}
 	let path: string = data_path() + "keymap_presets/" + config_raw.keymap;
 	let buffer: buffer_t = sys_string_to_buffer(json_stringify(config_keymap));
-	krom_file_save_bytes(path, buffer);
+	krom_file_save_bytes(path, buffer, 0);
 }
 
 function config_get_super_sample_quality(f: f32): i32 {
@@ -258,7 +278,7 @@ function config_load_theme(theme: string, tag_redraw: bool = true) {
 		for (let i: i32 = 0; i < zui_theme_keys.length; ++i) {
 			let key: string = zui_theme_keys[i];
 			// @ts-ignore
-			base_theme[key] = parsed[key];
+			// base_theme[key] = parsed[key]; ////
 		}
 	}
 
@@ -273,7 +293,7 @@ function config_load_theme(theme: string, tag_redraw: bool = true) {
 			for (let i: i32 = 0; i < zui_theme_keys.length; ++i) {
 				let key: string = zui_theme_keys[i];
 				// @ts-ignore
-				ui.ops.theme[key] = base_theme[key];
+				// ui.ops.theme[key] = base_theme[key]; ////
 			}
 			base_theme = ui.ops.theme;
 

@@ -208,5 +208,5 @@ function ui_menubar_icon_button(ui: zui_t, i: i32, j: i32): bool {
 	let icon_accent: i32 = light ? 0xff666666 : 0xffaaaaaa;
 	let img: image_t = resource_get("icons.k");
 	let rect: rect_t = resource_tile50(img, i, j);
-	return zui_image(img, icon_accent, -1.0, rect.x, rect.y, rect.w, rect.h) == zui_state_t.RELEASED;
+	return _zui_image(img, icon_accent, -1.0, rect.x, rect.y, rect.w, rect.h) == zui_state_t.RELEASED;
 }
