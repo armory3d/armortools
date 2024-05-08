@@ -45,8 +45,10 @@ function tab_brushes_draw(htab: zui_handle_t) {
 				let imgw: i32 = math_floor(50 * zui_SCALE(ui));
 				let i: i32 = j + row * num;
 				if (i >= project_brushes.length) {
-					zui_end_element(imgw);
-					if (config_raw.show_asset_names) zui_end_element(0);
+					_zui_end_element(imgw);
+					if (config_raw.show_asset_names) {
+						_zui_end_element(0);
+					}
 					continue;
 				}
 				let img: image_t = zui_SCALE(ui) > 1 ? project_brushes[i].image : project_brushes[i].image_icon;

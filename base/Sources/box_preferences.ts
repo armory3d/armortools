@@ -127,7 +127,7 @@ function box_preferences_show() {
 			// zui_text("Node Editor");
 			// let grid_snap: bool = Zui.check(Zui.handle("boxpreferences_11", { selected: false }), "Grid Snap");
 
-			zui_end_element();
+			_zui_end_element();
 			let row: f32[] = [0.5, 0.5];
 			zui_row(row);
 			if (zui_button(tr("Restore")) && !ui_menu_show) {
@@ -264,10 +264,7 @@ function box_preferences_show() {
 					}
 				}, 11);
 			}
-			let val: i32 = h.color;
-			if (val < 0) {
-				val += 4294967296;
-			}
+			let val: u32 = h.color;
 			h.text = i32_to_string_hex(val);
 			zui_text_input(h, "VIEWPORT_COL");
 			h.color = parse_int_hex(h.text);
@@ -291,12 +288,8 @@ function box_preferences_show() {
 				let key: string = zui_theme_keys[i];
 
 				let h: zui_handle_t = zui_nest(hlist, i);
-				let val: i32 = 0; //// theme[key];
-
+				let val: u32 = 0; //// theme[key];
 				let is_hex: bool = ends_with(key, "_COL");
-				if (is_hex && val < 0) {
-					val += 4294967296;
-				}
 
 				if (is_hex) {
 					let row: f32[] = [1 / 8, 7 / 8];
@@ -579,7 +572,7 @@ function box_preferences_show() {
 			config_raw.pressure_angle = zui_check(h_pressure_angle, tr("Brush Angle"));
 			///end
 
-			zui_end_element();
+			_zui_end_element();
 			let row: f32[] = [0.5];
 			zui_row(row);
 			if (zui_button(tr("Help"))) {

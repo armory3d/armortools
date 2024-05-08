@@ -943,7 +943,7 @@ function ui_nodes_render() {
 				}
 				if (!found) {
 					zui_remove_node(canvas_node, c);
-					array_remove(nodes.nodes_selected_id, canvas_node.id);
+					i32_array_remove(nodes.nodes_selected_id, canvas_node.id);
 					i--;
 				}
 			}

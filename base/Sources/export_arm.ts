@@ -270,21 +270,21 @@ function export_arm_export_node(n: zui_node_t, assets: asset_t[] = null) {
 		}
 	}
 	// Pack colors
-	if (n.color > 0) {
-		n.color -= 4294967296;
-	}
-	for (let i: i32 = 0; i < n.inputs.length; ++i) {
-		let inp: zui_node_socket_t = n.inputs[i];
-		if (inp.color > 0) {
-			inp.color -= 4294967296;
-		}
-	}
-	for (let i: i32 = 0; i < n.outputs.length; ++i) {
-		let out: zui_node_socket_t = n.outputs[i];
-		if (out.color > 0) {
-			out.color -= 4294967296;
-		}
-	}
+	// if (n.color > 0) {
+	// 	n.color -= 4294967296;
+	// }
+	// for (let i: i32 = 0; i < n.inputs.length; ++i) {
+	// 	let inp: zui_node_socket_t = n.inputs[i];
+	// 	if (inp.color > 0) {
+	// 		inp.color -= 4294967296;
+	// 	}
+	// }
+	// for (let i: i32 = 0; i < n.outputs.length; ++i) {
+	// 	let out: zui_node_socket_t = n.outputs[i];
+	// 	if (out.color > 0) {
+	// 		out.color -= 4294967296;
+	// 	}
+	// }
 }
 
 ///if (is_paint || is_sculpt)

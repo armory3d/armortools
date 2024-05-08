@@ -102,7 +102,7 @@ function tab_swatches_draw(htab: zui_handle_t) {
 			for (let j: i32 = 0; j < num; ++j) {
 				let i: i32 = j + row * num;
 				if (i >= project_raw.swatches.length) {
-					zui_end_element(slotw);
+					_zui_end_element(slotw);
 					continue;
 				}
 
@@ -207,10 +207,7 @@ function tab_swatches_draw(htab: zui_handle_t) {
 						else if (ui_menu_button(ui, tr("Copy Hex Code"))) {
 							let color: i32 = context_raw.swatch.base;
 							color = color_set_ab(color, context_raw.swatch.opacity * 255);
-							let val: i32 = color;
-							if (val < 0) {
-								val += 4294967296;
-							}
+							let val: u32 = color;
 							krom_copy_to_clipboard(i32_to_string(val));
 						}
 						///end
@@ -232,10 +229,7 @@ function tab_swatches_draw(htab: zui_handle_t) {
 				if (ui.is_hovered) {
 					let color: i32 = project_raw.swatches[i].base;
 					color = color_set_ab(color, project_raw.swatches[i].opacity * 255);
-					let val: i32 = color;
-					if (val < 0) {
-						val += 4294967296;
-					}
+					let val: u32 = color;
 					zui_tooltip("#" + i32_to_string_hex(val));
 				}
 			}

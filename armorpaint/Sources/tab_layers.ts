@@ -214,7 +214,7 @@ function tab_layers_remap_layer_pointers(nodes: zui_node_t[], pointer_map: map_t
 		let n: zui_node_t = nodes[i];
 		if (n.type == "LAYER" || n.type == "LAYER_MASK") {
 			let i: i32 = n.buttons[0].default_value[0];
-			if (map_get(pointer_map, i) != null) {
+			if (map_get(pointer_map, i) != -1) {
 				n.buttons[0].default_value[0] = map_get(pointer_map, i);
 			}
 		}
@@ -322,7 +322,7 @@ function tab_layers_draw_layer_slot_mini(l: slot_layer_t, i: i32) {
 	let uiy: f32 = ui._y;
 	let state: zui_state_t = tab_layers_draw_layer_icon(l, i, uix, uiy, true);
 	tab_layers_handle_layer_icon_state(l, i, state, uix, uiy);
-	zui_end_element();
+	_zui_end_element();
 
 	ui._y += zui_ELEMENT_H(ui);
 	ui._y -= zui_ELEMENT_OFFSET(ui);
@@ -439,7 +439,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	}
 
 	if (slot_layer_is_group(l)) {
-		zui_end_element();
+		_zui_end_element();
 	}
 	else {
 		if (slot_layer_is_mask(l)) {
@@ -463,23 +463,23 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 
 	if (slot_layer_is_group(l) || slot_layer_is_mask(l)) {
 		ui._y -= zui_ELEMENT_OFFSET(ui);
-		zui_end_element();
+		_zui_end_element();
 	}
 	else {
 		ui._y -= zui_ELEMENT_OFFSET(ui);
 
 		let row: f32[] = [8 / 100, 16 / 100, 36 / 100, 30 / 100, 10 / 100];
 		zui_row(row);
-		zui_end_element();
-		zui_end_element();
-		zui_end_element();
+		_zui_end_element();
+		_zui_end_element();
+		_zui_end_element();
 
 		if (config_raw.touch_ui) {
 			ui._x += 12 * zui_SCALE(ui);
 		}
 
 		tab_layers_combo_object(ui, l);
-		zui_end_element();
+		_zui_end_element();
 	}
 
 	ui._y -= zui_ELEMENT_OFFSET(ui);
@@ -936,7 +936,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			}
 			ui._y = _y;
 			zui_draw_string(tr("Res"), -1, 0, zui_align_t.RIGHT, true);
-			zui_end_element();
+			_zui_end_element();
 
 			ui_menu_fill(ui);
 			ui_menu_align(ui);

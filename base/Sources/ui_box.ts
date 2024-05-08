@@ -79,10 +79,13 @@ function ui_box_render() {
 			if (zui_tab(zui_handle(__ID__), ui_box_title, tab_vertical)) {
 				let htext: zui_handle_t = zui_handle(__ID__);
 				htext.text = ui_box_text;
-				ui_box_copyable ?
-					zui_text_area(htext, zui_align_t.LEFT, false) :
+				if (ui_box_copyable) {
+					zui_text_area(htext, zui_align_t.LEFT, false);
+				}
+				else {
 					zui_text(ui_box_text);
-				zui_end_element();
+				}
+				_zui_end_element();
 
 				///if (krom_windows || krom_linux || krom_darwin)
 				if (ui_box_copyable) {
@@ -98,7 +101,7 @@ function ui_box_render() {
 				zui_row(row);
 				///end
 
-				zui_end_element();
+				_zui_end_element();
 
 				///if (krom_windows || krom_linux || krom_darwin)
 				if (ui_box_copyable && zui_button(tr("Copy"))) {

@@ -237,9 +237,8 @@ function base_init() {
 
 	base_color_wheel = image_color_wheel;
 	base_color_wheel_gradient = image_color_wheel_gradient;
-	// zui_set_enum_texts(base_enum_texts);
 	zui_nodes_enum_texts = base_enum_texts;
-	zui_tr = tr;
+	// zui_tr = tr; ////
 	let ops: zui_options_t = {
 		theme: base_theme,
 		font: f.font_,
@@ -896,7 +895,7 @@ function base_enum_texts(node_type: string): string[] {
 	///if (is_paint || is_sculpt)
 	if (node_type == "TEX_IMAGE") {
 		if (project_asset_names.length > 0) {
-			project_asset_names;
+			return project_asset_names;
 		}
 		else {
 			let empty: string[] = [""];

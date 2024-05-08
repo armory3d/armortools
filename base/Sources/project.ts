@@ -118,7 +118,7 @@ function project_new_box() {
 			let project_aspect_ratio_combo: string[] = ["1:1", "2:1", "1:2"];
 			context_raw.project_aspect_ratio = zui_combo(h_project_aspect_ratio, project_aspect_ratio_combo, tr("Aspect Ratio"), true);
 
-			zui_end_element();
+			_zui_end_element();
 			zui_row(row);
 			if (zui_button(tr("Cancel"))) {
 				ui_box_hide();
@@ -349,6 +349,17 @@ function project_import_material() {
 	});
 }
 
+function project_create_node_link(links: zui_node_link_t[], from_id: i32, from_socket: i32, to_id: i32, to_socket: i32): zui_node_link_t {
+	let link: zui_node_link_t = {
+		id: zui_next_link_id(links.buffer, links.length),
+		from_id: from_id,
+		from_socket: from_socket,
+		to_id: to_id,
+		to_socket: to_socket
+	};
+	return link;
+}
+
 function project_import_brush() {
 	let formats: string = string_array_join(path_texture_formats, ",");
 	ui_files_show("arm," + formats, false, true, function (path: string) {
@@ -374,13 +385,7 @@ function project_import_brush() {
 			n.y = 340;
 			n.buttons[0].default_value = f32_array_create_x(asset_index);
 			let links: zui_node_link_t[] = context_raw.brush.canvas.links;
-			let link: zui_node_link_t = {
-				id: zui_next_link_id(links.buffer, links.length),
-				from_id: n.id,
-				from_socket: 0,
-				to_id: 0,
-				to_socket: 4
-			};
+			let link: zui_node_link_t = project_create_node_link(links, n.id, 0, 0, 4);
 			array_push(links, link);
 
 			// Parse brush

@@ -593,7 +593,7 @@ function ui_menu_render() {
 
 						let img: image_t = data_get_image("badge.k");
 						_zui_image(img);
-						zui_end_element();
+						_zui_end_element();
 
 						let h: zui_handle_t = zui_handle(__ID__);
 						if (h.init) {
@@ -609,7 +609,7 @@ function ui_menu_render() {
 							krom_copy_to_clipboard(_ui_menu_render_msg);
 						}
 						///else
-						zui_end_element();
+						_zui_end_element();
 						///end
 
 						if (zui_button(tr("Contributors"))) {
@@ -713,7 +713,7 @@ function ui_menu_align(ui: zui_t) {
 	if (!config_raw.touch_ui) {
 		let row: f32[] = [12 / 100, 88 / 100];
 		zui_row(row);
-		zui_end_element();
+		_zui_end_element();
 	}
 }
 

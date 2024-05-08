@@ -157,7 +157,7 @@ function translator_init_font(cjk: bool, font_path: string, font_scale: f32) {
 
 		let f: g2_font_t = data_get_font(font_path);
 		if (cjk) {
-			let font_index: i32 = map_get(translator_cjk_font_indices, config_raw.locale) != null ? map_get(translator_cjk_font_indices, config_raw.locale) : 0;
+			let font_index: i32 = map_get(translator_cjk_font_indices, config_raw.locale) != -1 ? map_get(translator_cjk_font_indices, config_raw.locale) : 0;
 			g2_font_set_font_index(f, font_index);
 		}
 		base_font = f;

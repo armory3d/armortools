@@ -152,8 +152,8 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 		for (let j: i32 = 0; j < num; ++j) {
 			let i: i32 = j + row * num;
 			if (i >= ui_files_files.length) {
-				zui_end_element(slotw);
-				zui_end_element(slotw);
+				_zui_end_element(slotw);
+				_zui_end_element(slotw);
 				continue;
 			}
 

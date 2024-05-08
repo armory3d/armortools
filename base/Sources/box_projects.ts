@@ -91,9 +91,9 @@ function box_projects_tab(ui: zui_t) {
 				let imgw: i32 = math_floor(128 * zui_SCALE(ui));
 				let i: i32 = j + row * num;
 				if (i >= recent_projects.length) {
-					zui_end_element(imgw);
+					_zui_end_element(imgw);
 					if (show_asset_names) {
-						zui_end_element(0);
+						_zui_end_element(0);
 					}
 					continue;
 				}
@@ -171,9 +171,9 @@ function box_projects_tab(ui: zui_t) {
 					}
 				}
 				else {
-					zui_end_element(0);
+					_zui_end_element(0);
 					if (show_asset_names) {
-						zui_end_element(0);
+						_zui_end_element(0);
 					}
 					ui._x = uix;
 				}
@@ -229,7 +229,7 @@ function box_projects_recent_tab(ui: zui_t) {
 		}
 		ui.enabled = true;
 
-		zui_end_element();
+		_zui_end_element();
 		if (zui_button(tr("New .."), zui_align_t.LEFT)) {
 			project_new_box();
 		}
@@ -242,7 +242,7 @@ function box_projects_recent_tab(ui: zui_t) {
 function box_projects_draw_badge(ui: zui_t) {
 	let img: image_t = data_get_image("badge.k");
 	_zui_image(img);
-	zui_end_element();
+	_zui_end_element();
 }
 
 function box_projects_get_started_tab(ui: zui_t) {

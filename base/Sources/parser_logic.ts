@@ -74,7 +74,9 @@ function parser_logic_safe_src(s: string): string {
 }
 
 function parser_logic_node_name(node: zui_node_t): string {
-	let s: string = parser_logic_safe_src(node.name) + node.id;
+	let safe: string = parser_logic_safe_src(node.name);
+	let nid: i32 = node.id;
+	let s: string = safe + nid;
 	return s;
 }
 
@@ -131,7 +133,9 @@ function parser_logic_build_node(node: zui_node_t): string {
 		// Is linked - find node
 		let l: zui_node_link_t = parser_logic_get_input_link(inp);
 		if (l != null) {
-			inp_node = map_get(parser_logic_node_map, parser_logic_build_node(parser_logic_get_node(l.from_id)));
+			let n: zui_node_t = parser_logic_get_node(l.from_id);
+			let s: string = parser_logic_build_node(n);
+			inp_node = map_get(parser_logic_node_map, s);
 			inp_from = l.from_socket;
 		}
 		// Not linked - create node with default values

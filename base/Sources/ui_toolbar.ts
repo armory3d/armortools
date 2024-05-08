@@ -84,11 +84,8 @@ function ui_toolbar_render_ui() {
 		ui.image_scroll_align = false;
 		let img: image_t = resource_get("icons.k");
 
-		let col: i32 = ui.ops.theme.WINDOW_BG_COL;
-		if (col < 0) {
-			col += 4294967296;
-		}
-		let light: bool = col > (0xff666666 + 4294967296);
+		let col: u32 = ui.ops.theme.WINDOW_BG_COL;
+		let light: bool = col > 0xff666666;
 		let icon_accent: i32 = light ? 0xff666666 : -1;
 
 		// Properties icon

@@ -73,9 +73,9 @@ function tab_materials_draw_slots(mini: bool) {
 			let imgw: i32 = math_floor(50 * zui_SCALE(ui));
 			let i: i32 = j + row * num;
 			if (i >= project_materials.length) {
-				zui_end_element(imgw);
+				_zui_end_element(imgw);
 				if (config_raw.show_asset_names) {
-					zui_end_element(0);
+					_zui_end_element(0);
 				}
 				continue;
 			}

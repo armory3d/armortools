@@ -149,7 +149,7 @@ function box_export_tab_export_textures(ui: zui_t, title: string, bake_material:
 		let layers_destination_combo: string[] = [tr("Disk"), tr("Packed")];
 		context_raw.layers_destination = zui_combo(layers_destination_handle, layers_destination_combo, tr("Destination"), true);
 
-		zui_end_element();
+		_zui_end_element();
 
 		zui_row(row);
 		if (zui_button(tr("Cancel"))) {

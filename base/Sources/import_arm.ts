@@ -289,9 +289,9 @@ function import_arm_run_project(path: string) {
 			l.paint_rough = ld.paint_rough;
 			l.paint_met = ld.paint_met;
 			l.paint_nor = ld.paint_nor;
-			l.paint_nor_blend = ld.paint_nor_blend != null ? ld.paint_nor_blend : true; // TODO: deprecated
+			l.paint_nor_blend = ld.paint_nor_blend;
 			l.paint_height = ld.paint_height;
-			l.paint_height_blend = ld.paint_height_blend != null ? ld.paint_height_blend : true; // TODO: deprecated
+			l.paint_height_blend = ld.paint_height_blend;
 			l.paint_emis = ld.paint_emis;
 			l.paint_subs = ld.paint_subs;
 			///end

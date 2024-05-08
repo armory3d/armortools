@@ -200,11 +200,8 @@ function ui_menubar_show_menu(ui: zui_t, category: i32) {
 }
 
 function ui_menubar_icon_button(ui: zui_t, i: i32, j: i32): bool {
-	let col: i32 = ui.ops.theme.WINDOW_BG_COL;
-	if (col < 0) {
-		col += 4294967296;
-	}
-	let light: bool = col > (0xff666666 + 4294967296);
+	let col: u32 = ui.ops.theme.WINDOW_BG_COL;
+	let light: bool = col > 0xff666666 ;
 	let icon_accent: i32 = light ? 0xff666666 : 0xffaaaaaa;
 	let img: image_t = resource_get("icons.k");
 	let rect: rect_t = resource_tile50(img, i, j);

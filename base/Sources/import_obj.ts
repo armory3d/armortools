@@ -66,7 +66,9 @@ function import_obj_run(path: string, replace_existing: bool = true) {
 			for (let i: i32 = 0; i < parts.length; ++i) {
 				let j: i32 = i + 1;
 				while (j < parts.length) {
-					if (parts[i].name == parts[j].name) {
+					let iname: string = parts[i].name;
+					let jname: string = parts[j].name;
+					if (iname == jname) {
 						posa0 = parts[i].posa;
 						posa1 = parts[j].posa;
 						nora0 = parts[i].nora;

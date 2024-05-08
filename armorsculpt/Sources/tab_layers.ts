@@ -202,8 +202,8 @@ function tab_layers_draw_layer_slot_mini(l: slot_layer_t, i: i32) {
 	zui_row(row);
 	let uix = ui._x;
 	let uiy = ui._y;
-	zui_end_element();
-	zui_end_element();
+	_zui_end_element();
+	_zui_end_element();
 
 	ui._y += zui_ELEMENT_H(ui);
 	ui._y -= zui_ELEMENT_OFFSET(ui);
@@ -305,7 +305,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	}
 
 	if (slot_layer_is_group(l)) {
-		zui_end_element();
+		_zui_end_element();
 	}
 	else {
 		if (slot_layer_is_mask(l)) {
@@ -313,7 +313,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 		}
 
 		// comboBlending(ui, l);
-		zui_end_element();
+		_zui_end_element();
 
 		if (slot_layer_is_mask(l)) {
 			ui._y -= center;
@@ -330,16 +330,16 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 
 	if (slot_layer_is_group(l) || slot_layer_is_mask(l)) {
 		ui._y -= zui_ELEMENT_OFFSET(ui);
-		zui_end_element();
+		_zui_end_element();
 	}
 	else {
 		ui._y -= zui_ELEMENT_OFFSET(ui);
 
 		let row: f32 = [8 / 100, 16 / 100, 36 / 100, 30 / 100, 10 / 100];
 		zui_row(row);
-		zui_end_element();
-		zui_end_element();
-		zui_end_element();
+		_zui_end_element();
+		_zui_end_element();
+		_zui_end_element();
 
 		if (config_raw.touch_ui) {
 			ui._x += 12 * zui_SCALE(ui);
@@ -349,7 +349,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 		tab_layers_combo_object(ui, l);
 		ui._y += center;
 
-		zui_end_element();
+		_zui_end_element();
 	}
 
 	ui._y -= zui_ELEMENT_OFFSET(ui);
