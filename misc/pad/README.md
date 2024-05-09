@@ -13,7 +13,6 @@ cd armortools/misc/armorpad
 
 **Windows**
 ```bash
-# Unpack `..\..\armorcore\v8\libraries\win32\release\v8_monolith.7z` using 7-Zip - Extract Here (exceeds 100MB)
 ..\..\armorcore\Kinc\make --from ..\..\armorcore -g direct3d11 --run
 ```
 

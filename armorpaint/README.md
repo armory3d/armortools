@@ -16,7 +16,6 @@ cd armortools/armorpaint
 
 **Windows**
 ```bash
-# Unpack `..\armorcore\v8\libraries\win32\release\v8_monolith.7z` using 7-Zip - Extract Here (exceeds 100MB)
 ..\armorcore\Kinc\make --from ..\armorcore -g direct3d11
 # Open generated Visual Studio project at `build\ArmorPaint.sln`
 # Build and run for x64 & release
@@ -72,7 +71,6 @@ cp -a build/krom/ ../armorcore/Deployment
 
 **Windows DXR** *wip*
 ```bash
-# Unpack `..\armorcore\v8\libraries\win32\release\v8_monolith.7z` using 7-Zip - Extract Here (exceeds 100MB)
 cd ..\armorcore
 git apply Patches/d3d12_raytrace.diff --directory=Kinc
 cd ..\armorpaint

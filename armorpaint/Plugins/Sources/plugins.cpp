@@ -1,8 +1,5 @@
 
-#include <v8.h>
 #include <kinc/log.h>
-
-using namespace v8;
 
 static Isolate *isolate;
 

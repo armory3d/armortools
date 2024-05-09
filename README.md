@@ -21,14 +21,3 @@ export ARM_LOCALE=<locale code>
 ./armorcore/Kinc/make --from base/Tools --kfile extract_locales.js
 # Generates a `base/Assets/locale/<locale code>.json` file
 ```
-
-**Release builds** *Optional, used for best performance*
-```bash
-# Compile krom.js using the closure compiler
-https://developers.google.com/closure/compiler
-# Generate a v8 snapshot file
-export ARM_SNAPSHOT=1
-../armorcore/Kinc/make --from ../armorcore -g api
-./ArmorPaint . --snapshot
-# Generates a `krom.bin` file from `krom.js` file
-```

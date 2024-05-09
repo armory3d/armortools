@@ -1,10 +1,5 @@
 
-#include <v8.h>
 #include <kinc/log.h>
-
-using namespace v8;
-
-static Isolate *isolate;
 
 extern "C" {
 	void texsynth_inpaint(int w, int h, void *output_ptr, void *image_ptr, void *mask_ptr, bool tiling);

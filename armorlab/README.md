@@ -18,7 +18,6 @@ git clone https://github.com/armory3d/onnx_bin onnx
 
 **Windows**
 ```bash
-# Unpack `..\armorcore\v8\libraries\win32\release\v8_monolith.7z` using 7-Zip - Extract Here (exceeds 100MB)
 ..\armorcore\Kinc\make --from ..\armorcore -g direct3d11
 # Open generated Visual Studio project at `build\ArmorLab.sln`
 # Build and run for x64 & release
