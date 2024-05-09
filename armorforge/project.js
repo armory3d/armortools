@@ -10,11 +10,11 @@ project.addDefine("is_paint");
 await project.addProject("../base");
 
 project.addSources("../armorpaint/Sources"); ////
-project.addShaders("../armorpaint/Shaders/*.glsl", { embed: flags.snapshot }); ////
+project.addShaders("../armorpaint/Shaders/*.glsl", { embed: flags.embed }); ////
 project.addSources("Sources");
 project.addSources("Sources/nodes");
-project.addShaders("Shaders/*.glsl", { embed: flags.snapshot });
-project.addAssets("Assets/*", { destination: "data/{name}", embed: flags.snapshot });
+project.addShaders("Shaders/*.glsl", { embed: flags.embed });
+project.addAssets("Assets/*", { destination: "data/{name}", embed: flags.embed });
 project.addAssets("Assets/keymap_presets/*", { destination: "data/keymap_presets/{name}" });
 project.addAssets("Assets/licenses/**", { destination: "data/licenses/{name}" });
 project.addAssets("Assets/plugins/*", { destination: "data/plugins/{name}" });

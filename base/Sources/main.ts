@@ -1,35 +1,23 @@
 
 function main() {
-	///if arm_snapshot
 
-	///if (is_paint || is_sculpt)
-	main_embed(["default_material.arm"]);
-	///end
-	///if is_lab
-	main_embed(["placeholder.k"]);
-	///end
+	// ///if (is_paint || is_sculpt)
+	// main_embed(["default_material.arm"]);
+	// ///end
+	// ///if is_lab
+	// main_embed(["placeholder.k"]);
+	// ///end
 
-	///if (krom_direct3d12 || krom_vulkan || krom_metal)
-	main_embed_raytrace();
-	///if is_paint
-	main_embed_raytrace_bake();
-	///end
-	///end
+	// ///if (krom_direct3d12 || krom_vulkan || krom_metal)
+	// main_embed_raytrace();
+	// ///if is_paint
+	// main_embed_raytrace_bake();
+	// ///end
 
-	///else
-
-	// kickstart();
+	// Used to locate external application data folder
 	krom_set_app_name(manifest_title);
 	config_load(main_start);
-
-	///end
 }
-
-// function kickstart() {
-// 	// Used to locate external application data folder
-// 	krom_set_app_name(manifest_title);
-// 	config_load(main_start);
-// }
 
 function main_start() {
 	app_on_resize = base_on_resize;
@@ -63,7 +51,7 @@ function main_start() {
 	base_init();
 }
 
-///if arm_snapshot
+///if arm_embed
 
 function main_embed(additional: string[]) {
 	let global: any = globalThis;

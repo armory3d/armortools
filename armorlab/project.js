@@ -10,8 +10,8 @@ await project.addProject("../base");
 
 project.addSources("Sources");
 project.addSources("Sources/nodes");
-project.addShaders("Shaders/*.glsl", { embed: flags.snapshot });
-project.addAssets("Assets/*", { destination: "data/{name}", embed: flags.snapshot });
+project.addShaders("Shaders/*.glsl", { embed: flags.embed });
+project.addAssets("Assets/*", { destination: "data/{name}", embed: flags.embed });
 project.addAssets("Assets/export_presets/*", { destination: "data/export_presets/{name}" });
 project.addAssets("Assets/keymap_presets/*", { destination: "data/keymap_presets/{name}" });
 project.addAssets("Assets/licenses/**", { destination: "data/licenses/{name}" });

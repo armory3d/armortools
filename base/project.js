@@ -6,7 +6,7 @@ flags.d3d12 = process.argv.indexOf("direct3d12") >= 0;
 flags.vulkan = process.argv.indexOf("vulkan") >= 0;
 flags.metal = process.argv.indexOf("metal") >= 0;
 flags.raytrace = flags.d3d12 || flags.vulkan || flags.metal;
-flags.snapshot = process.argv.indexOf("--snapshot") >= 0;
+flags.embed = process.argv.indexOf("--embed") >= 0;
 flags.physics = true;
 flags.voxels = !flags.raytrace && !flags.android && !flags.ios;
 
@@ -60,16 +60,16 @@ flags.on_c_project_created = async function(c_project, platform, graphics) {
 let project = new Project("Base");
 project.addSources("Sources");
 project.addSources("Sources/nodes");
-project.addShaders("../armorcore/Shaders/*.glsl", { embed: flags.snapshot });
-project.addShaders("Shaders/*.glsl", { embed: flags.snapshot });
-project.addAssets("Assets/*", { destination: "data/{name}", embed: flags.snapshot });
+project.addShaders("../armorcore/Shaders/*.glsl", { embed: flags.embed });
+project.addShaders("Shaders/*.glsl", { embed: flags.embed });
+project.addAssets("Assets/*", { destination: "data/{name}", embed: flags.embed });
 project.addAssets("Assets/locale/*", { destination: "data/locale/{name}" });
 project.addAssets("Assets/licenses/**", { destination: "data/licenses/{name}" });
 project.addAssets("Assets/plugins/*", { destination: "data/plugins/{name}" });
 project.addAssets("Assets/themes/*.json", { destination: "data/themes/{name}" });
 
-if (flags.snapshot) {
-	project.addDefine("arm_snapshot");
+if (flags.embed) {
+	project.addDefine("arm_embed");
 	project.addDefine("arm_image_embed");
 	project.addDefine("arm_shader_embed");
 }
@@ -87,16 +87,16 @@ if (flags.android) {
 }
 
 if (flags.raytrace) {
-	project.addAssets("Assets/raytrace/*", { destination: "data/{name}", embed: flags.snapshot });
+	project.addAssets("Assets/raytrace/*", { destination: "data/{name}", embed: flags.embed });
 
 	if (flags.d3d12) {
-		project.addAssets("Shaders/raytrace/*.cso", { destination: "data/{name}", embed: flags.snapshot });
+		project.addAssets("Shaders/raytrace/*.cso", { destination: "data/{name}", embed: flags.embed });
 	}
 	else if (flags.vulkan) {
-		project.addAssets("Shaders/raytrace/*.spirv", { destination: "data/{name}", embed: flags.snapshot });
+		project.addAssets("Shaders/raytrace/*.spirv", { destination: "data/{name}", embed: flags.embed });
 	}
 	else if (flags.metal) {
-		project.addAssets("Shaders/raytrace/*.metal", { destination: "data/{name}", embed: flags.snapshot });
+		project.addAssets("Shaders/raytrace/*.metal", { destination: "data/{name}", embed: flags.embed });
 	}
 }
 
@@ -104,10 +104,10 @@ if (flags.voxels) {
 	project.addDefine("arm_voxels");
 
 	if (process.platform === "win32") {
-		project.addShaders("Shaders/voxel_hlsl/*.glsl", { embed: flags.snapshot, noprocessing: true });
+		project.addShaders("Shaders/voxel_hlsl/*.glsl", { embed: flags.embed, noprocessing: true });
 	}
 	else {
-		project.addShaders("Shaders/voxel_glsl/*.glsl", { embed: flags.snapshot });
+		project.addShaders("Shaders/voxel_glsl/*.glsl", { embed: flags.embed });
 	}
 }
 
@@ -121,7 +121,7 @@ if (export_version_info) {
 	fs.ensureDirSync(dir);
 	fs.writeFileSync(dir + "/version.json", data);
 	// Adds version.json to embed.txt list
-	project.addAssets(dir + "/version.json", { destination: "data/{name}", embed: flags.snapshot });
+	project.addAssets(dir + "/version.json", { destination: "data/{name}", embed: flags.embed });
 }
 
 resolve(project);
