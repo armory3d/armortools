@@ -317,7 +317,7 @@ function box_preferences_show() {
 					key == "FILL_ACCENT_BG" ||
 					key == "FULL_TABS" ||
 					key == "ROUND_CORNERS") {
-					h.selected = val;
+					h.selected = val > 0;
 					let b: bool = zui_check(h, key);
 					// theme[key] = b; ////
 				}

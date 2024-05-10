@@ -741,7 +741,7 @@ function ui_base_update() {
 	}
 
 	///if (is_paint || is_sculpt)
-	if (ui_base_border_handle != 0) {
+	if (ui_base_border_handle != null) {
 		if (ui_base_border_handle == ui_nodes_hwnd || ui_base_border_handle == ui_view2d_hwnd) {
 			if (ui_base_border_started == border_side_t.LEFT) {
 				config_raw.layout[layout_size_t.NODES_W] -= math_floor(mouse_movement_x);
@@ -1709,7 +1709,7 @@ function ui_base_on_border_hover(handle: zui_handle_t, side: i32) {
 		krom_set_mouse_cursor(3) : // Horizontal
 		krom_set_mouse_cursor(4);  // Vertical
 
-	if (zui_current.input_started) {
+	if (zui_get_current().input_started) {
 		ui_base_border_started = side;
 		ui_base_border_handle = handle;
 		base_is_resizing = true;

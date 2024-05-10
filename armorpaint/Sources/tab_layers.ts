@@ -399,7 +399,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 		if (ui.text_selected_handle != tab_layers_layer_name_handle) tab_layers_layer_name_edit = -1;
 	}
 	else {
-		if (ui.enabled && ui.input_enabled && ui.combo_selected_handle == 0 &&
+		if (ui.enabled && ui.input_enabled && ui.combo_selected_handle == null &&
 			ui.input_x > ui._window_x + ui._x && ui.input_x < ui._window_x + ui._window_w &&
 			ui.input_y > ui._window_y + ui._y - center && ui.input_y < ui._window_y + ui._y - center + (step * zui_SCALE(ui)) * 2) {
 			if (ui.input_started) {

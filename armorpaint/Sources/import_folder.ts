@@ -129,7 +129,7 @@ function import_folder_place_image_node(nodes: zui_nodes_t, canvas: zui_node_can
 	n.x = 72;
 	n.y = ny;
 	let l: zui_node_link_t = {
-		id: zui_next_link_id(canvas.links.buffer, canvas.links.length),
+		id: zui_next_link_id(canvas.links),
 		from_id: n.id,
 		from_socket: 0,
 		to_id: to_id,

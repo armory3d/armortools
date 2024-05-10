@@ -351,7 +351,7 @@ function project_import_material() {
 
 function project_create_node_link(links: zui_node_link_t[], from_id: i32, from_socket: i32, to_id: i32, to_socket: i32): zui_node_link_t {
 	let link: zui_node_link_t = {
-		id: zui_next_link_id(links.buffer, links.length),
+		id: zui_next_link_id(links),
 		from_id: from_id,
 		from_socket: from_socket,
 		to_id: to_id,

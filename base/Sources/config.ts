@@ -6,7 +6,7 @@ let config_button_align: zui_align_t = zui_align_t.LEFT;
 let config_default_button_spacing: string = "       ";
 let config_button_spacing: string = config_default_button_spacing;
 
-function config_load(done: ()=>void) {
+function config_load() {
 	let path: string = "";
 	if (path_is_protected()) {
 		path += krom_save_path();
@@ -24,8 +24,6 @@ function config_load(done: ()=>void) {
 		config_loaded = true;
 		config_raw = json_parse(sys_buffer_to_string(blob));
 	}
-
-	done();
 }
 
 function config_save() {
@@ -41,7 +39,12 @@ function config_save() {
 	}
 	path += "config.json";
 
-	let buffer: buffer_t = sys_string_to_buffer(json_stringify(config_raw));
+	json_encode_start();
+	json_encode_string("key", "value");
+	json_encode_f32("key", 2.4);
+	let config_json: string = json_encode_end();
+
+	let buffer: buffer_t = sys_string_to_buffer(config_json);
 	krom_file_save_bytes(path, buffer, 0);
 
 	///if krom_linux // Protected directory
@@ -331,7 +334,8 @@ function config_disable_plugin(f: string) {
 }
 
 type config_t = {
-	// The locale should be specified in ISO 639-1 format: https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
+	// The locale should be specified in ISO 639-1 format:
+	// https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
 	// "system" is a special case that will use the system locale
 	locale?: string;
 	// Window

@@ -33,7 +33,7 @@ function logic_node_create(): logic_node_t {
 	return n;
 }
 
-function logic_node_add_input(self: logic_node_t, node: logic_node_t, from: i32) {
+function logic_node_add_input(self: logic_node_t, node: logic_node_ext_t, from: i32) {
 	array_push(self.inputs, logic_node_input_create(node, from));
 }
 
@@ -55,7 +55,7 @@ function logic_node_get_cached_image(self: logic_node_t): image_t {
 
 function logic_node_set(self: logic_node_t, value: any) {}
 
-function logic_node_input_create(node: logic_node_t, from: i32): logic_node_input_t {
+function logic_node_input_create(node: logic_node_ext_t, from: i32): logic_node_input_t {
 	let inp: logic_node_input_t = {};
 	inp.node = node;
 	inp.from = from;

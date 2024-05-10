@@ -130,8 +130,10 @@ function ui_view2d_render() {
 
 		// Grid
 		g2_set_color(0xffffffff);
-		let gx: i32 = (i32)(ui_view2d_pan_x * ui_view2d_pan_scale) % 100 - 100;
-		let gy: i32 = (i32)(ui_view2d_pan_y * ui_view2d_pan_scale) % 100 - 100;
+		let ix: i32 = ui_view2d_pan_x * ui_view2d_pan_scale;
+		let iy: i32 = ui_view2d_pan_y * ui_view2d_pan_scale;
+		let gx: i32 = ix % 100 - 100;
+		let gy: i32 = iy % 100 - 100;
 		g2_draw_image(ui_nodes_grid, gx, gy);
 
 		// Texture

@@ -51,7 +51,7 @@ function make_node_preview_run(data: material_t, matcon: material_context_t, nod
 	}
 	let links: zui_node_link_t[] = parser_material_links;
 	let link: zui_node_link_t = {
-		id: zui_next_link_id(links.buffer, links.length),
+		id: zui_next_link_id(links),
 		from_id: node.id,
 		from_socket: context_raw.node_preview_socket,
 		to_id: -1,

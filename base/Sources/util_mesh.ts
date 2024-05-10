@@ -392,8 +392,10 @@ function util_mesh_apply_displacement(texpaint_pack: image_t, strength: f32 = 0.
 	for (let i: i32 = 0; i < math_floor(buffer_view_size(vertices) / 2 / l); ++i) {
 		let x: i32 = math_floor(buffer_view_get_i16(vertices, (i * l + 6) * 2) / 32767 * res);
 		let y: i32 = math_floor(buffer_view_get_i16(vertices, (i * l + 7) * 2) / 32767 * res);
-		let xx: i32 = (i32)math_floor(x * uv_scale) % res;
-		let yy: i32 = (i32)math_floor(y * uv_scale) % res;
+		let ix: i32 = math_floor(x * uv_scale);
+		let iy: i32 = math_floor(y * uv_scale);
+		let xx: i32 = ix % res;
+		let yy: i32 = iy % res;
 		let h: f32 = (1.0 - buffer_view_get_u8(height_view, (yy * res + xx) * 4 + 3) / 255) * strength;
 		buffer_view_set_i16(vertices, (i * l    ) * 2, buffer_view_get_i16(vertices, (i * l    ) * 2) - math_floor(buffer_view_get_i16(vertices, (i * l + 4) * 2) * h));
 		buffer_view_set_i16(vertices, (i * l + 1) * 2, buffer_view_get_i16(vertices, (i * l + 1) * 2) - math_floor(buffer_view_get_i16(vertices, (i * l + 5) * 2) * h));

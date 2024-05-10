@@ -16,10 +16,8 @@ function main() {
 
 	// Used to locate external application data folder
 	krom_set_app_name(manifest_title);
-	config_load(main_start);
-}
+	config_load();
 
-function main_start() {
 	app_on_resize = base_on_resize;
 	app_on_w = base_w;
 	app_on_h = base_h;

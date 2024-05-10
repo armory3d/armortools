@@ -14,9 +14,9 @@ function vector_node_create(args: f32_array_t): vector_node_t {
 	n.value = vec4_create();
 
 	if (args != null) {
-		logic_node_add_input(n.base, float_node_create(f32_array_create_x(args[0])).base, 0);
-		logic_node_add_input(n.base, float_node_create(f32_array_create_x(args[1])).base, 0);
-		logic_node_add_input(n.base, float_node_create(f32_array_create_x(args[2])).base, 0);
+		logic_node_add_input(n.base, float_node_create(f32_array_create_x(args[0])), 0);
+		logic_node_add_input(n.base, float_node_create(f32_array_create_x(args[1])), 0);
+		logic_node_add_input(n.base, float_node_create(f32_array_create_x(args[2])), 0);
 	}
 
 	return n;

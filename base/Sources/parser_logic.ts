@@ -5,14 +5,14 @@ let parser_logic_links: zui_node_link_t[];
 
 let parser_logic_parsed_nodes: string[] = null;
 let parser_logic_parsed_labels: map_t<string, string> = null;
-let parser_logic_node_map: map_t<string, logic_node_t>;
-let parser_logic_raw_map: map_t<logic_node_t, zui_node_t>;
+let parser_logic_node_map: map_t<string, logic_node_ext_t>;
+let parser_logic_raw_map: map_t<logic_node_ext_t, zui_node_t>;
 
-function parser_logic_get_logic_node(node: zui_node_t): logic_node_t {
+function parser_logic_get_logic_node(node: zui_node_t): logic_node_ext_t {
 	return map_get(parser_logic_node_map, parser_logic_node_name(node));
 }
 
-function parser_logic_get_raw_node(node: logic_node_t): zui_node_t {
+function parser_logic_get_raw_node(node: logic_node_ext_t): zui_node_t {
 	return map_get(parser_logic_raw_map, node);
 }
 
@@ -126,7 +126,7 @@ function parser_logic_build_node(node: zui_node_t): string {
 	// }
 
 	// Create inputs
-	let inp_node: logic_node_t = null;
+	let inp_node: logic_node_ext_t = null;
 	let inp_from: i32 = 0;
 	for (let i: i32 = 0; i < node.inputs.length; ++i) {
 		let inp: zui_node_socket_t = node.inputs[i];
@@ -191,8 +191,8 @@ function parser_logic_get_root_nodes(node_group: zui_node_canvas_t): zui_node_t[
 	return roots;
 }
 
-function parser_logic_build_default_node(inp: zui_node_socket_t): logic_node_t {
-	let v: logic_node_t = null;
+function parser_logic_build_default_node(inp: zui_node_socket_t): logic_node_ext_t {
+	let v: logic_node_ext_t = null;
 
 	if (inp.type == "VECTOR") {
 		if (inp.default_value == null) {

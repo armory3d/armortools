@@ -60,9 +60,9 @@ function ui_nodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
 	if (is_new_link) {
 		let ui_nodes: zui_nodes_t = ui_nodes_get_nodes();
 		let links: zui_node_link_t[] = ui_nodes_get_canvas(true).links;
-		let link_drag: zui_node_link_t = zui_get_link(links.buffer, links.length, link_drag_id);
+		let link_drag: zui_node_link_t = zui_get_link(links, link_drag_id);
 		let nodes: zui_node_t[] = ui_nodes_get_canvas(true).nodes;
-		let node: zui_node_t = zui_get_node(nodes.buffer, nodes.length, link_drag.from_id > -1 ? link_drag.from_id : link_drag.to_id);
+		let node: zui_node_t = zui_get_node(nodes, link_drag.from_id > -1 ? link_drag.from_id : link_drag.to_id);
 		let link_x: i32 = ui_nodes_ui._window_x + zui_nodes_NODE_X(node);
 		let link_y: i32 = ui_nodes_ui._window_y + zui_nodes_NODE_Y(node);
 		if (link_drag.from_id > -1) {
@@ -81,7 +81,7 @@ function ui_nodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
 				let ui_nodes: zui_nodes_t = ui_nodes_get_nodes();
 				let link_drag: zui_node_link_t = _ui_nodes_on_link_drag_link_drag;
 				let nodes: zui_node_t[] = ui_nodes_get_canvas(true).nodes;
-				let n: zui_node_t = zui_get_node(nodes.buffer, nodes.length, ui_nodes.nodes_selected_id[0]);
+				let n: zui_node_t = zui_get_node(nodes, ui_nodes.nodes_selected_id[0]);
 				if (link_drag.to_id == -1 && n.inputs.length > 0) {
 					link_drag.to_id = n.id;
 					let from_type: string = _ui_nodes_on_link_drag_node.outputs[link_drag.from_socket].type;
@@ -134,7 +134,7 @@ function ui_nodes_on_socket_released(socket_id: i32) {
 	let nodes: zui_nodes_t = ui_nodes_get_nodes();
 	let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
 	let socket: zui_node_socket_t = zui_get_socket(canvas.nodes, socket_id);
-	let node: zui_node_t = zui_get_node(canvas.nodes.buffer, canvas.nodes.length, socket.node_id);
+	let node: zui_node_t = zui_get_node(canvas.nodes, socket.node_id);
 	if (ui_nodes_ui.input_released_r) {
 		if (node.type == "GROUP_INPUT" || node.type == "GROUP_OUTPUT") {
 
@@ -539,29 +539,29 @@ function ui_nodes_update() {
 		if (ui_nodes_ui.key_code == key_code_t.LEFT) {
 			for (let i: i32 = 0; i < nodes.nodes_selected_id.length; ++i) {
 				let n: i32 = nodes.nodes_selected_id[i];
-				let nodes: zui_node_t[] = ui_nodes_get_canvas(true).nodes;
-				zui_get_node(nodes.buffer, nodes.length, n).x -= 1;
+				let _nodes: zui_node_t[] = ui_nodes_get_canvas(true).nodes;
+				zui_get_node(_nodes, n).x -= 1;
 			}
 		}
 		else if (ui_nodes_ui.key_code == key_code_t.RIGHT) {
 			for (let i: i32 = 0; i < nodes.nodes_selected_id.length; ++i) {
 				let n: i32 = nodes.nodes_selected_id[i];
-				let nodes: zui_node_t[] = ui_nodes_get_canvas(true).nodes;
-				zui_get_node(nodes.buffer, nodes.length, n).x += 1;
+				let _nodes: zui_node_t[] = ui_nodes_get_canvas(true).nodes;
+				zui_get_node(_nodes, n).x += 1;
 			}
 		}
 		if (ui_nodes_ui.key_code == key_code_t.UP) {
 			for (let i: i32 = 0; i < nodes.nodes_selected_id.length; ++i) {
 				let n: i32 = nodes.nodes_selected_id[i];
-				let nodes: zui_node_t[] = ui_nodes_get_canvas(true).nodes;
-				zui_get_node(nodes.buffer, nodes.length, n).y -= 1;
+				let _nodes: zui_node_t[] = ui_nodes_get_canvas(true).nodes;
+				zui_get_node(_nodes, n).y -= 1;
 			}
 		}
 		else if (ui_nodes_ui.key_code == key_code_t.DOWN) {
 			for (let i: i32 = 0; i < nodes.nodes_selected_id.length; ++i) {
 				let n: i32 = nodes.nodes_selected_id[i];
-				let nodes: zui_node_t[] = ui_nodes_get_canvas(true).nodes;
-				zui_get_node(nodes.buffer, nodes.length, n).y += 1;
+				let _nodes: zui_node_t[] = ui_nodes_get_canvas(true).nodes;
+				zui_get_node(_nodes, n).y += 1;
 			}
 		}
 	}
@@ -796,7 +796,7 @@ function ui_nodes_render() {
 	// Remove dragged link when mouse is released out of the node viewport
 	let c: zui_node_canvas_t = ui_nodes_get_canvas(true);
 	if (ui_nodes_release_link && nodes.link_drag_id != -1) {
-		array_remove(c.links, zui_get_link(c.links.buffer, c.links.length, nodes.link_drag_id));
+		array_remove(c.links, zui_get_link(c.links, nodes.link_drag_id));
 		nodes.link_drag_id = -1;
 	}
 	ui_nodes_release_link = ui_nodes_ui.input_released;
@@ -943,7 +943,7 @@ function ui_nodes_render() {
 				}
 				if (!found) {
 					zui_remove_node(canvas_node, c);
-					i32_array_remove(nodes.nodes_selected_id, canvas_node.id);
+					array_remove(nodes.nodes_selected_id, canvas_node.id);
 					i--;
 				}
 			}
@@ -974,7 +974,7 @@ function ui_nodes_render() {
 		// Node previews
 		if (config_raw.node_preview && nodes.nodes_selected_id.length > 0) {
 			let img: image_t = null;
-			let sel: zui_node_t = zui_get_node(c.nodes.buffer, c.nodes.length, nodes.nodes_selected_id[0]);
+			let sel: zui_node_t = zui_get_node(c.nodes, nodes.nodes_selected_id[0]);
 
 			///if (is_paint || is_sculpt)
 
@@ -1385,7 +1385,7 @@ function ui_nodes_accept_swatch_drag(swatch: swatch_color_t) {
 
 function ui_nodes_make_node(n: zui_node_t, nodes: zui_nodes_t, canvas: zui_node_canvas_t): zui_node_t {
 	let node: zui_node_t = {};
-	node.id = zui_next_node_id(canvas.nodes.buffer, canvas.nodes.length);
+	node.id = zui_next_node_id(canvas.nodes);
 	node.name = n.name;
 	node.type = n.type;
 	node.x = ui_nodes_get_node_x();
@@ -1399,7 +1399,7 @@ function ui_nodes_make_node(n: zui_node_t, nodes: zui_nodes_t, canvas: zui_node_
 	let count: i32 = 0;
 	for (let i: i32 = 0; i < n.inputs.length; ++i) {
 		let soc: zui_node_socket_t = {};
-		soc.id = zui_get_socket_id(canvas.nodes.buffer, canvas.nodes.length) + count;
+		soc.id = zui_get_socket_id(canvas.nodes) + count;
 		count++;
 		soc.node_id = node.id;
 		soc.name = n.inputs[i].name;
@@ -1415,7 +1415,7 @@ function ui_nodes_make_node(n: zui_node_t, nodes: zui_nodes_t, canvas: zui_node_
 
 	for (let i: i32 = 0; i < n.outputs.length; ++i) {
 		let soc: zui_node_socket_t = {};
-		soc.id = zui_get_socket_id(canvas.nodes.buffer, canvas.nodes.length) + count;
+		soc.id = zui_get_socket_id(canvas.nodes) + count;
 		count++;
 		soc.node_id = node.id;
 		soc.name = n.outputs[i].name;
@@ -1451,7 +1451,7 @@ function ui_nodes_make_group_node(group_canvas: zui_node_canvas_t, nodes: zui_no
 	let n: zui_node_t = category[0];
 	let node: zui_node_t = json_parse(json_stringify(n));
 	node.name = group_canvas.name;
-	node.id = zui_next_node_id(canvas.nodes.buffer, canvas.nodes.length);
+	node.id = zui_next_node_id(canvas.nodes);
 	node.x = ui_nodes_get_node_x();
 	node.y = ui_nodes_get_node_y();
 	let group_input: zui_node_t = null;
@@ -1492,7 +1492,7 @@ function ui_nodes_make_node_preview() {
 	}
 
 	let nodes: zui_node_t[] = context_raw.material.canvas.nodes;
-	let node: zui_node_t = zui_get_node(nodes.buffer, nodes.length, ui_nodes.nodes_selected_id[0]);
+	let node: zui_node_t = zui_get_node(nodes, ui_nodes.nodes_selected_id[0]);
 	// if (node == null) return;
 	context_raw.node_preview_name = node.name;
 

@@ -4135,7 +4135,7 @@ function nodes_material_get_socket_name(type: string): string {
 
 function nodes_material_create_socket(nodes: zui_nodes_t, node: zui_node_t, name: string, type: string, canvas: zui_node_canvas_t, min: f32 = 0.0, max: f32 = 1.0, default_value: any = null): zui_node_socket_t {
 	let soc: zui_node_socket_t = {
-		id: zui_get_socket_id(canvas.nodes.buffer, canvas.nodes.length),
+		id: zui_get_socket_id(canvas.nodes),
 		node_id: node.id,
 		name: name == null ? nodes_material_get_socket_name(type) : name,
 		type: type,

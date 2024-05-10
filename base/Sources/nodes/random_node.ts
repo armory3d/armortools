@@ -30,9 +30,11 @@ function random_node_get_int(): i32 {
 	// Courtesy of https://github.com/Kode/Kha/blob/main/Sources/kha/math/Random.hx
 	let t: i32 = (random_node_a + random_node_b | 0) + random_node_d | 0;
 	random_node_d = random_node_d + 1 | 0;
-	random_node_a = random_node_b ^ (u32)random_node_b >> 9;
+	let urandom_node_b: u32 = random_node_b;
+	random_node_a = random_node_b ^ urandom_node_b >> 9;
 	random_node_b = random_node_c + (random_node_c << 3) | 0;
-	random_node_c = random_node_c << 21 | (u32)random_node_c >> 11;
+	let urandom_node_c: u32 = random_node_c;
+	random_node_c = random_node_c << 21 | urandom_node_c >> 11;
 	random_node_c = random_node_c + t | 0;
 	return t & 0x7fffffff;
 }

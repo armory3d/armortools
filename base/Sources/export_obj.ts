@@ -177,7 +177,8 @@ function export_obj_run(path: string, paint_objects: mesh_object_t[], apply_disp
 	}
 
 	let b: buffer_t = {
-		data: o.buffer,
+		// @ts-ignore
+		buffer: o.buffer,
 		length: o.length
 	};
 	krom_file_save_bytes(path, b, buffer_size(b));
