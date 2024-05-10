@@ -2,7 +2,6 @@
 let flags = globalThis.flags;
 flags.name = 'ArmorPad';
 flags.package = 'org.armorpad';
-flags.with_minits = true;
 flags.with_nfd = true;
 flags.with_tinydir = true;
 flags.with_g2 = true;
