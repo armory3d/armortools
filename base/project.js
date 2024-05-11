@@ -122,4 +122,4 @@ if (export_version_info) {
 	project.addAssets(dir + "/version.json", { destination: "data/{name}", embed: flags.embed });
 }
 
-resolve(project);
+return project;

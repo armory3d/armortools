@@ -6,7 +6,7 @@ flags.with_onnx = true;
 
 let project = new Project(flags.name);
 project.addDefine("is_lab");
-await project.addProject("../base");
+project.addProject("../base");
 
 project.addSources("Sources");
 project.addSources("Sources/nodes");
@@ -44,4 +44,4 @@ if (flags.raytrace) {
 	}
 }
 
-resolve(project);
+return project;

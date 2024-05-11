@@ -5,7 +5,7 @@ flags.package = 'org.armorsculpt';
 
 let project = new Project(flags.name);
 project.addDefine("is_sculpt");
-await project.addProject("../base");
+project.addProject("../base");
 
 project.addSources("../armorpaint/Sources"); ////
 project.addSources("Sources");
@@ -30,4 +30,4 @@ if (flags.physics) {
 	project.addAssets("Assets/plugins/ammo/*", { destination: "data/plugins/{name}" });
 }
 
-resolve(project);
+return project;

@@ -40,8 +40,65 @@ function config_save() {
 	path += "config.json";
 
 	json_encode_start();
-	json_encode_string("key", "value");
-	json_encode_f32("key", 2.4);
+	json_encode_string("locale", config_raw.locale);
+	json_encode_i32("window_mode", config_raw.window_mode);
+	json_encode_i32("window_w", config_raw.window_w);
+	json_encode_i32("window_h", config_raw.window_h);
+	json_encode_i32("window_x", config_raw.window_x);
+	json_encode_i32("window_y", config_raw.window_y);
+	json_encode_bool("window_resizable", config_raw.window_resizable);
+	json_encode_bool("window_maximizable", config_raw.window_maximizable);
+	json_encode_bool("window_minimizable", config_raw.window_minimizable);
+	json_encode_bool("window_vsync", config_raw.window_vsync);
+	json_encode_i32("window_frequency", config_raw.window_frequency);
+	json_encode_f32("window_scale", config_raw.window_scale);
+	json_encode_f32("rp_supersample", config_raw.rp_supersample);
+	json_encode_bool("rp_ssao", config_raw.rp_ssao);
+	json_encode_bool("rp_ssr", config_raw.rp_ssr);
+	json_encode_bool("rp_bloom", config_raw.rp_bloom);
+	json_encode_bool("rp_motionblur", config_raw.rp_motionblur);
+	json_encode_bool("rp_gi", config_raw.rp_gi);
+	json_encode_f32("rp_vignette", config_raw.rp_vignette);
+	json_encode_f32("rp_grain", config_raw.rp_grain);
+	json_encode_string("version", config_raw.version);
+	json_encode_string("sha", config_raw.sha);
+	json_encode_string_array("recent_projects", config_raw.recent_projects);
+	json_encode_string_array("bookmarks", config_raw.bookmarks);
+	json_encode_string_array("plugins", config_raw.plugins);
+	json_encode_string("keymap", config_raw.keymap);
+	json_encode_string("theme", config_raw.theme);
+	json_encode_i32("undo_steps", config_raw.undo_steps);
+	json_encode_f32("camera_pan_speed", config_raw.camera_pan_speed);
+	json_encode_f32("camera_zoom_speed", config_raw.camera_zoom_speed);
+	json_encode_f32("camera_rotation_speed", config_raw.camera_rotation_speed);
+	json_encode_i32("zoom_direction", config_raw.zoom_direction);
+	json_encode_bool("wrap_mouse", config_raw.wrap_mouse);
+	json_encode_bool("show_asset_names", config_raw.show_asset_names);
+	json_encode_bool("touch_ui", config_raw.touch_ui);
+	json_encode_bool("splash_screen", config_raw.splash_screen);
+	json_encode_i32_array("layout", config_raw.layout);
+	json_encode_i32_array("layout_tabs", config_raw.layout_tabs);
+	json_encode_i32("workspace", config_raw.workspace);
+	json_encode_i32("camera_controls", config_raw.camera_controls);
+	json_encode_string("server", config_raw.server);
+	json_encode_bool("pressure_radius", config_raw.pressure_radius);
+	json_encode_f32("pressure_sensitivity", config_raw.pressure_sensitivity);
+	json_encode_f32("displace_strength", config_raw.displace_strength);
+	json_encode_i32("layer_res", config_raw.layer_res);
+	json_encode_bool("brush_live", config_raw.brush_live);
+	json_encode_bool("brush_3d", config_raw.brush_3d);
+	json_encode_bool("node_preview", config_raw.node_preview);
+	json_encode_bool("pressure_hardness", config_raw.pressure_hardness);
+	json_encode_bool("pressure_angle", config_raw.pressure_angle);
+	json_encode_bool("pressure_opacity", config_raw.pressure_opacity);
+	json_encode_bool("material_live", config_raw.material_live);
+	json_encode_bool("brush_depth_reject", config_raw.brush_depth_reject);
+	json_encode_bool("brush_angle_reject", config_raw.brush_angle_reject);
+	json_encode_i32("dilate", config_raw.dilate);
+	json_encode_i32("dilate_radius", config_raw.dilate_radius);
+	///if is_lab
+	json_encode_bool("gpu_inference", config_raw.gpu_inference);
+	///end
 	let config_json: string = json_encode_end();
 
 	let buffer: buffer_t = sys_string_to_buffer(config_json);
@@ -404,63 +461,3 @@ type config_t = {
 	gpu_inference?: bool;
 	///end
 };
-
-// let config_keys: string[] = [
-// 	"locale",
-// 	"window_mode",
-// 	"window_w",
-// 	"window_h",
-// 	"window_x",
-// 	"window_y",
-// 	"window_resizable",
-// 	"window_maximizable",
-// 	"window_minimizable",
-// 	"window_vsync",
-// 	"window_frequency",
-// 	"window_scale",
-// 	"rp_supersample",
-// 	"rp_ssao",
-// 	"rp_ssr",
-// 	"rp_bloom",
-// 	"rp_motionblur",
-// 	"rp_gi",
-// 	"rp_vignette",
-// 	"rp_grain",
-// 	"version",
-// 	"sha",
-// 	"recent_projects",
-// 	"bookmarks",
-// 	"plugins",
-// 	"keymap",
-// 	"theme",
-// 	"undo_steps",
-// 	"camera_pan_speed",
-// 	"camera_zoom_speed",
-// 	"camera_rotation_speed",
-// 	"zoom_direction",
-// 	"wrap_mouse",
-// 	"show_asset_names",
-// 	"touch_ui",
-// 	"splash_screen",
-// 	"layout",
-// 	"layout_tabs",
-// 	"workspace",
-// 	"camera_controls",
-// 	"server",
-// 	"pressure_radius",
-// 	"pressure_sensitivity",
-// 	"displace_strength",
-// 	"layer_res",
-// 	"brush_live",
-// 	"brush_3d",
-// 	"node_preview",
-// 	"pressure_hardness",
-// 	"pressure_angle",
-// 	"pressure_opacity",
-// 	"material_live",
-// 	"brush_depth_reject",
-// 	"brush_angle_reject",
-// 	"dilate",
-// 	"dilate_radius",
-// 	"gpu_inference",
-// ];

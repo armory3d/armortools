@@ -44,7 +44,7 @@ function ui_nodes_init() {
 	let scale: f32 = config_raw.window_scale;
 	let ops: zui_options_t = {
 		theme: base_theme,
-		font: base_font.font_,
+		font: base_font,
 		color_wheel: base_color_wheel.texture_,
 		black_white_gradient: base_color_wheel_gradient.texture_,
 		scale_factor: scale
@@ -871,7 +871,7 @@ function ui_nodes_render() {
 
 		// Undo
 		if (ui_nodes_ui.input_started || ui_nodes_ui.is_key_pressed) {
-			ui_nodes_last_canvas = json_parse(json_stringify(ui_nodes_get_canvas(true)));
+			// ui_nodes_last_canvas = json_parse(json_stringify(ui_nodes_get_canvas(true)));
 		}
 
 		// Nodes

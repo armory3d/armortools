@@ -215,7 +215,7 @@ function ui_base_init() {
 	let scale: f32 = config_raw.window_scale;
 	let ops: zui_options_t = {
 		theme: base_theme,
-		font: base_font.font_,
+		font: base_font,
 		scale_factor: scale,
 		color_wheel: base_color_wheel.texture_,
 		black_white_gradient: base_color_wheel_gradient.texture_

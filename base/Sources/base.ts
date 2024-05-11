@@ -241,7 +241,7 @@ function base_init() {
 	// zui_tr = tr; ////
 	let ops: zui_options_t = {
 		theme: base_theme,
-		font: f.font_,
+		font: f,
 		scale_factor: config_raw.window_scale,
 		color_wheel: base_color_wheel.texture_,
 		black_white_gradient: base_color_wheel_gradient.texture_

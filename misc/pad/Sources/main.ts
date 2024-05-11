@@ -80,7 +80,7 @@ function main() {
 	theme = {};
 	zui_theme_default(theme);
 
-	let zui_ops: zui_options_t = { scale_factor: 1.0, theme: theme, font: font.font_ };
+	let zui_ops: zui_options_t = { scale_factor: 1.0, theme: theme, font: font };
 	ui = zui_create(zui_ops);
 
 	let blob_coloring: buffer_t = data_get_blob("text_coloring.json");

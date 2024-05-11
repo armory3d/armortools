@@ -7,7 +7,7 @@ flags.with_mpeg_write = true;
 let project = new Project(flags.name);
 project.addDefine("is_forge");
 project.addDefine("is_paint");
-await project.addProject("../base");
+project.addProject("../base");
 
 project.addSources("../armorpaint/Sources"); ////
 project.addShaders("../armorpaint/Shaders/*.glsl", { embed: flags.embed }); ////
@@ -42,4 +42,4 @@ if (flags.raytrace) {
 	}
 }
 
-resolve(project);
+return project;
