@@ -189,7 +189,7 @@ function ui_base_init() {
 		b[1] = 8;
 		b[2] = 8;
 		b[3] = 255;
-		context_raw.empty_envmap = image_from_bytes(b.buffer, 1, 1);
+		context_raw.empty_envmap = image_from_bytes(b, 1, 1);
 	}
 	if (context_raw.preview_envmap == null) {
 		let b: u8_array_t = u8_array_create(4);
@@ -197,7 +197,7 @@ function ui_base_init() {
 		b[1] = 0;
 		b[2] = 0;
 		b[3] = 255;
-		context_raw.preview_envmap = image_from_bytes(b.buffer, 1, 1);
+		context_raw.preview_envmap = image_from_bytes(b, 1, 1);
 	}
 
 	let world: world_data_t = scene_world;

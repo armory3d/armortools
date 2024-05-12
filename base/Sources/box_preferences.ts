@@ -276,7 +276,7 @@ function box_preferences_show() {
 				b[1] = color_get_gb(box_preferences_world_color);
 				b[2] = color_get_bb(box_preferences_world_color);
 				b[3] = 255;
-				context_raw.empty_envmap = image_from_bytes(b.buffer, 1, 1);
+				context_raw.empty_envmap = image_from_bytes(b, 1, 1);
 				context_raw.ddirty = 2;
 				if (!context_raw.show_envmap) {
 					scene_world._.envmap = context_raw.empty_envmap;

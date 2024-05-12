@@ -203,7 +203,7 @@ function project_new(reset_layers: bool = true) {
 					f32a[i * 4 + 3] = 1.0;
 				}
 
-				let imgmesh: image_t = image_from_bytes(f32a.buffer, config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.RGBA128);
+				let imgmesh: image_t = image_from_bytes(f32a, config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.RGBA128);
 				let texpaint: image_t = project_layers[0].texpaint;
 				g2_begin(texpaint);
 				g2_set_pipeline(base_pipe_copy128);

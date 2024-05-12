@@ -618,7 +618,7 @@ function import_arm_make_pink(abs: string) {
 	b[1] = 0;
 	b[2] = 255;
 	b[3] = 255;
-	let pink: image_t = image_from_bytes(b.buffer, 1, 1);
+	let pink: image_t = image_from_bytes(b, 1, 1);
 	map_set(data_cached_images, abs, pink);
 }
 

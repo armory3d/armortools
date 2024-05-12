@@ -562,7 +562,14 @@ function ui_menu_render() {
 				msg += sys_system_id() + " - " + strings_graphics_api();
 
 				///if krom_windows
-				let save: string = (path_is_protected() ? krom_save_path() : path_data()) + path_sep + "tmp.txt";
+				let save: string;
+				if (path_is_protected()) {
+					save = krom_save_path();
+				}
+				else {
+					save = path_data();
+				}
+				save += path_sep + "tmp.txt";
 				krom_sys_command("wmic path win32_VideoController get name > \"" + save + "\"");
 				let blob: buffer_t = krom_load_blob(save);
 				let u8: u8_array_t = u8_array_create_from_buffer(blob);
