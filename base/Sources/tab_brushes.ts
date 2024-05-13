@@ -133,7 +133,7 @@ function tab_brushes_draw(htab: zui_handle_t) {
 						});
 					}
 					else {
-						zui_tooltip_image(img_full);
+						_zui_tooltip_image(img_full);
 						zui_tooltip(project_brushes[i].canvas.name);
 					}
 				}

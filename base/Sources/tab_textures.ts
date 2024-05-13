@@ -110,7 +110,7 @@ function tab_textures_draw(htab: zui_handle_t) {
 					let is_packed: bool = project_raw.packed_assets != null && project_packed_asset_exists(project_raw.packed_assets, asset.file);
 
 					if (ui.is_hovered) {
-						zui_tooltip_image(img, 256);
+						_zui_tooltip_image(img, 256);
 						if (is_packed) {
 							zui_tooltip(asset.name + " " + tr("(packed)"));
 						}

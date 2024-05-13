@@ -233,7 +233,7 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 					}
 					state = _zui_image(icon, 0xffffffff, w * zui_SCALE(ui));
 					if (ui.is_hovered) {
-						zui_tooltip_image(icon);
+						_zui_tooltip_image(icon);
 						zui_tooltip(f);
 					}
 					generic = false;
@@ -291,7 +291,7 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 					}
 					state = _zui_image(icon, 0xffffffff, w * zui_SCALE(ui));
 					if (ui.is_hovered) {
-						zui_tooltip_image(icon);
+						_zui_tooltip_image(icon);
 						zui_tooltip(f);
 					}
 					generic = false;

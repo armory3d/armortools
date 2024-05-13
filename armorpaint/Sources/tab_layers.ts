@@ -591,10 +591,10 @@ function tab_layers_handle_layer_icon_state(l: slot_layer_t, i: i32, state: zui_
 	if (ui.is_hovered && texpaint_preview != null) {
 		if (slot_layer_is_mask(l)) {
 			tab_layers_make_mask_preview_rgba32(l);
-			zui_tooltip_image(context_raw.mask_preview_rgba32);
+			_zui_tooltip_image(context_raw.mask_preview_rgba32);
 		}
 		else {
-			zui_tooltip_image(texpaint_preview);
+			_zui_tooltip_image(texpaint_preview);
 		}
 		if (i < 9) {
 			let i1: i32 = (i + 1);

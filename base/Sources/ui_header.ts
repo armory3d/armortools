@@ -62,7 +62,7 @@ function ui_header_draw_tool_properties(ui: zui_t) {
 			}
 			_zui_image(project_get_image(project_assets[cid]));
 			if (ui.is_hovered) {
-				zui_tooltip_image(project_get_image(project_assets[cid]), 256);
+				_zui_tooltip_image(project_get_image(project_assets[cid]), 256);
 			}
 		}
 		if (zui_button(tr("Import"))) {

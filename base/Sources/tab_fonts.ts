@@ -132,7 +132,7 @@ function tab_fonts_draw(htab: zui_handle_t) {
 						});
 					}
 					else {
-						zui_tooltip_image(img);
+						_zui_tooltip_image(img);
 						zui_tooltip(project_fonts[i].name);
 					}
 				}

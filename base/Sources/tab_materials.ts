@@ -272,7 +272,7 @@ function tab_materials_draw_slots(mini: bool) {
 				}, 13 + add);
 			}
 			if (ui.is_hovered) {
-				zui_tooltip_image(imgFull);
+				_zui_tooltip_image(imgFull);
 				if (i < 9) {
 					let i1: i32 = i + 1;
 					zui_tooltip(project_materials[i].canvas.name + " - (" + map_get(config_keymap, "select_material") + " " + i1 + ")");
