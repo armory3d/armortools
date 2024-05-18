@@ -42,7 +42,7 @@ function path_to_relative(from: string, to: string): string {
 		}
 	}
 	let base: string = "";
-	for (let i: i32 = 0; i < a.length - 1; ++i) {
+	for (let i: i32 = 0; i < a.length; ++i) {
 		base += ".." + path_sep;
 	}
 	base += string_array_join(b, path_sep);
@@ -50,6 +50,9 @@ function path_to_relative(from: string, to: string): string {
 }
 
 function path_normalize(path: string): string {
+	if (ends_with(path, path_sep)) {
+		path = substring(path, 0, path.length - 1);
+	}
 	let ar: string[] = string_split(path, path_sep);
 	let i: i32 = 0;
 	while (i < ar.length) {
