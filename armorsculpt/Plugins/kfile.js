@@ -4,4 +4,4 @@ project.addFile('Sources/**');
 
 project.addDefine('WITH_PLUGIN_EMBED');
 
-resolve(project);
+return project;

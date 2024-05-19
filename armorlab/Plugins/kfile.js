@@ -15,5 +15,5 @@ else if (platform === Platform.OSX) {
 	project.addLib('Sources/proc_texsynth/macos/libtexsynth.a');
 }
 
-resolve(project);
+return project;
 

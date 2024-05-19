@@ -41,12 +41,12 @@ function path_to_relative(from: string, to: string): string {
 			break;
 		}
 	}
-	let base: string = "";
+	let p: string = "";
 	for (let i: i32 = 0; i < a.length; ++i) {
-		base += ".." + path_sep;
+		p += ".." + path_sep;
 	}
-	base += string_array_join(b, path_sep);
-	return base;
+	p += string_array_join(b, path_sep);
+	return p;
 }
 
 function path_normalize(path: string): string {

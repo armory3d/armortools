@@ -7,7 +7,7 @@ flags.with_tinydir = true;
 flags.with_g2 = true;
 flags.with_iron = true;
 flags.with_zui = true;
-flags.on_c_project_created = function(c_project, platform, graphics) {
+flags.on_c_project_created = function(c_project) {
 	c_project.addDefine('IDLE_SLEEP');
 }
 
@@ -18,4 +18,4 @@ project.addShaders(root + "armorcore/Shaders/*.glsl",);
 project.addAssets(root + "base/Assets/font_mono.ttf", { destination: "data/{name}" });
 project.addAssets(root + "base/Assets/text_coloring.json", { destination: "data/{name}" });
 
-resolve(project);
+return project;

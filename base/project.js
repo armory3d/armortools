@@ -1,12 +1,12 @@
 
 let flags = globalThis.flags;
-flags.android = process.argv.indexOf("android") >= 0;
-flags.ios = process.argv.indexOf("ios") >= 0;
-flags.d3d12 = process.argv.indexOf("direct3d12") >= 0;
-flags.vulkan = process.argv.indexOf("vulkan") >= 0;
-flags.metal = process.argv.indexOf("metal") >= 0;
+flags.android = os_argv().indexOf("android") >= 0;
+flags.ios = os_argv().indexOf("ios") >= 0;
+flags.d3d12 = os_argv().indexOf("direct3d12") >= 0;
+flags.vulkan = os_argv().indexOf("vulkan") >= 0;
+flags.metal = os_argv().indexOf("metal") >= 0;
 flags.raytrace = flags.d3d12 || flags.vulkan || flags.metal;
-flags.embed = process.argv.indexOf("--embed") >= 0;
+flags.embed = os_argv().indexOf("--embed") >= 0;
 flags.physics = true;
 flags.voxels = !flags.raytrace && !flags.android && !flags.ios;
 
@@ -20,13 +20,13 @@ flags.with_iron = true;
 flags.with_zui = true;
 flags.physics = false; ////
 
-flags.on_c_project_created = async function(c_project, platform, graphics) {
+flags.on_c_project_created = function(c_project) {
 	c_project.addDefine("IDLE_SLEEP");
 	let dir = flags.name.toLowerCase();
 
 	if (graphics === "vulkan") {
 		c_project.addDefine("KINC_VKRT");
-		await c_project.addProject("../" + dir + "/glsl_to_spirv");
+		c_project.addProject("../" + dir + "/glsl_to_spirv");
 	}
 
 	if (flags.with_onnx) {
@@ -52,7 +52,7 @@ flags.on_c_project_created = async function(c_project, platform, graphics) {
 		}
 	}
 
-	await c_project.addProject("../" + dir + "/Plugins");
+	c_project.addProject("../" + dir + "/Plugins");
 };
 
 let project = new Project("Base");
@@ -101,7 +101,7 @@ if (flags.raytrace) {
 if (flags.voxels) {
 	project.addDefine("arm_voxels");
 
-	if (process.platform === "win32") {
+	if (os_platform() === "win32") {
 		project.addShaders("Shaders/voxel_hlsl/*.glsl", { embed: flags.embed, noprocessing: true });
 	}
 	else {
@@ -111,13 +111,12 @@ if (flags.voxels) {
 
 let export_version_info = true;
 if (export_version_info) {
-	const fs = require("fs");
 	let dir = "../" + flags.name.toLowerCase() + "/build";
-	let sha = require("child_process").execSync(`git log --pretty=format:"%h" -n 1`).toString().substr(1, 7);
+	let sha = os_exec(`git log --pretty=format:"%h" -n 1`).toString().substr(1, 7);
 	let date = new Date().toISOString().split("T")[0];
 	let data = `{ "sha": "${sha}", "date": "${date}" }`;
-	fs.ensureDirSync(dir);
-	fs.writeFileSync(dir + "/version.json", data);
+	fs_ensuredir(dir);
+	fs_writefile(dir + "/version.json", data);
 	// Adds version.json to embed.txt list
 	project.addAssets(dir + "/version.json", { destination: "data/{name}", embed: flags.embed });
 }
