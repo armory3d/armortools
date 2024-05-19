@@ -26,4 +26,4 @@ jobs:
     - name: Compile
       run: |
         cd armorpaint
-        ../armorcore/Kinc/make --from ../armorcore -g vulkan --compiler clang
+        ../armorcore/Kinc/make --from ../armorcore --graphics vulkan

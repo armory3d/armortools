@@ -20,4 +20,4 @@ jobs:
     - name: Compile
       run: |
         cd armorpaint
-        ../armorcore/Kinc/make --from ../armorcore -g direct3d12
+        ../armorcore/Kinc/make --from ../armorcore --graphics direct3d12
