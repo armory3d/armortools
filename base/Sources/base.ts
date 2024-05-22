@@ -1251,12 +1251,12 @@ function base_make_pipe() {
 	base_pipe_merge_g = base_make_merge_pipe(false, true, false, false);
 	base_pipe_merge_b = base_make_merge_pipe(false, false, true, false);
 	base_pipe_merge_a = base_make_merge_pipe(false, false, false, true);
-	base_tex0 =g4_pipeline_get_tex_unit(base_pipe_merge, "tex0"); // Always binding texpaint.a for blending
-	base_tex1 =g4_pipeline_get_tex_unit(base_pipe_merge, "tex1");
-	base_texmask =g4_pipeline_get_tex_unit(base_pipe_merge, "texmask");
-	base_texa =g4_pipeline_get_tex_unit(base_pipe_merge, "texa");
-	base_opac =g4_pipeline_get_const_loc(base_pipe_merge, "opac");
-	base_blending =g4_pipeline_get_const_loc(base_pipe_merge, "blending");
+	base_tex0 = g4_pipeline_get_tex_unit(base_pipe_merge, "tex0"); // Always binding texpaint.a for blending
+	base_tex1 = g4_pipeline_get_tex_unit(base_pipe_merge, "tex1");
+	base_texmask = g4_pipeline_get_tex_unit(base_pipe_merge, "texmask");
+	base_texa = g4_pipeline_get_tex_unit(base_pipe_merge, "texa");
+	base_opac = g4_pipeline_get_const_loc(base_pipe_merge, "opac");
+	base_blending = g4_pipeline_get_const_loc(base_pipe_merge, "blending");
 	///end
 
 	{
