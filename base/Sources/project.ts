@@ -58,7 +58,7 @@ function project_save(save_and_quit: bool = false) {
 		///end
 	}
 
-	///if (krom_windows || krom_linux || krom_darwin)
+	///if (krom_windows || krom_linux || krom_macos)
 	let filename: string = substring(project_filepath, string_last_index_of(project_filepath, path_sep) + 1, project_filepath.length - 4);
 	sys_title_set(filename + " - " + manifest_title);
 	///end
@@ -139,7 +139,7 @@ function project_new_box() {
 }
 
 function project_new(reset_layers: bool = true) {
-	///if (krom_windows || krom_linux || krom_darwin)
+	///if (krom_windows || krom_linux || krom_macos)
 	sys_title_set(manifest_title);
 	///end
 	project_filepath = "";

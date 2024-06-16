@@ -4,7 +4,7 @@ let ui_files_default_path: string =
 	"C:\\Users"
 	///elseif krom_android
 	"/storage/emulated/0/Download"
-	///elseif krom_darwin
+	///elseif krom_macos
 	"/Users"
 	///else
 	"/"
@@ -58,7 +58,7 @@ function ui_files_release_keys() {
 	// File dialog may prevent firing key up events
 	keyboard_up_listener(key_code_t.SHIFT);
 	keyboard_up_listener(key_code_t.CONTROL);
-	///if krom_darwin
+	///if krom_macos
 	keyboard_up_listener(key_code_t.META);
 	///end
 }

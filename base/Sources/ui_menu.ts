@@ -506,14 +506,14 @@ function ui_menu_render() {
 				file_load_url("https://github.com/armory3d/armortools/issues");
 			}
 			if (ui_menu_button(ui, tr("Report Bug"))) {
-				///if (krom_darwin || krom_ios) // Limited url length
+				///if (krom_macos || krom_ios) // Limited url length
 				file_load_url("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + sys_system_id());
 				///else
 				file_load_url("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + sys_system_id() + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A");
 				///end
 			}
 			if (ui_menu_button(ui, tr("Request Feature"))) {
-				///if (krom_darwin || krom_ios) // Limited url length
+				///if (krom_macos || krom_ios) // Limited url length
 				file_load_url("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + sys_system_id());
 				///else
 				file_load_url("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + sys_system_id() + "*%0A%0A**Feature description:**%0A%0A");
@@ -611,7 +611,7 @@ function ui_menu_render() {
 						let row: f32[] = [1 / 3, 1 / 3, 1 / 3];
 						zui_row(row);
 
-						///if (krom_windows || krom_linux || krom_darwin)
+						///if (krom_windows || krom_linux || krom_macos)
 						if (zui_button(tr("Copy"))) {
 							krom_copy_to_clipboard(_ui_menu_render_msg);
 						}

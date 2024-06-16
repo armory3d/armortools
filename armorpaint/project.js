@@ -39,4 +39,5 @@ if (flags.raytrace) {
 	}
 }
 
+project.flatten();
 return project;

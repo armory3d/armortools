@@ -20,45 +20,47 @@ flags.with_iron = true;
 flags.with_zui = true;
 flags.physics = false; ////
 
-flags.on_c_project_created = function(c_project) {
-	c_project.addDefine("IDLE_SLEEP");
+let project = new Project("Base");
+
+{
+	project.addDefine("IDLE_SLEEP");
 	let dir = flags.name.toLowerCase();
 
 	if (graphics === "vulkan") {
-		c_project.addDefine("KINC_VKRT");
-		c_project.addProject("../" + dir + "/glsl_to_spirv");
+		project.addDefine("KINC_VKRT");
+		project.addProject("../" + dir + "/glsl_to_spirv");
 	}
 
 	if (flags.with_onnx) {
-		c_project.addDefine("WITH_ONNX");
-		c_project.addIncludeDir("../" + dir + "/onnx/include");
+		project.addDefine("WITH_ONNX");
+		project.addIncludeDir("../" + dir + "/onnx/include");
 		if (platform === "win32") {
-			c_project.addLib("../" + dir + "/onnx/win32/onnxruntime");
+			project.addLib("../" + dir + "/onnx/win32/onnxruntime");
 		}
 		else if (platform === "linux") {
 			// patchelf --set-rpath . ArmorLab
-			c_project.addLib("onnxruntime -L" + flags.dirname + "/../" + dir + "/onnx/linux");
-			// c_project.addLib("onnxruntime_providers_cuda");
-			// c_project.addLib("onnxruntime_providers_shared");
-			// c_project.addLib("cublasLt");
-			// c_project.addLib("cublas");
-			// c_project.addLib("cudart");
-			// c_project.addLib("cudnn");
-			// c_project.addLib("cufft");
-			// c_project.addLib("curand");
+			project.addLib("onnxruntime -L" + flags.dirname + "/../" + dir + "/onnx/linux");
+			// project.addLib("onnxruntime_providers_cuda");
+			// project.addLib("onnxruntime_providers_shared");
+			// project.addLib("cublasLt");
+			// project.addLib("cublas");
+			// project.addLib("cudart");
+			// project.addLib("cudnn");
+			// project.addLib("cufft");
+			// project.addLib("curand");
 		}
-		else if (platform === "osx") {
-			c_project.addLib("../" + dir + "/onnx/macos/libonnxruntime.1.14.1.dylib");
+		else if (platform === "macos") {
+			project.addLib("../" + dir + "/onnx/macos/libonnxruntime.1.14.1.dylib");
 		}
 	}
 
-	c_project.addProject("../" + dir + "/Plugins");
-};
+	project.addProject("../" + dir + "/Plugins");
+}
 
-let project = new Project("Base");
+project.addProject("../armorcore");
 project.addSources("Sources");
 project.addSources("Sources/nodes");
-project.addShaders("../armorcore/Shaders/*.glsl", { embed: flags.embed });
+project.addShaders("../armorcore/shaders/*.glsl", { embed: flags.embed });
 project.addShaders("Shaders/*.glsl", { embed: flags.embed });
 project.addAssets("Assets/*", { destination: "data/{name}", embed: flags.embed });
 project.addAssets("Assets/locale/*", { destination: "data/locale/{name}" });
@@ -121,4 +123,5 @@ if (export_version_info) {
 	project.addAssets(dir + "/version.json", { destination: "data/{name}", embed: flags.embed });
 }
 
+project.flatten();
 return project;

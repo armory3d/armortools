@@ -9,7 +9,7 @@ function tab_console_draw(htab: zui_handle_t) {
 	if (zui_tab(htab, title, false, color) && statush > ui_status_default_status_h * zui_SCALE(ui)) {
 
 		zui_begin_sticky();
-		///if (krom_windows || krom_linux || krom_darwin) // Copy
+		///if (krom_windows || krom_linux || krom_macos) // Copy
 		if (config_raw.touch_ui) {
 			let row: f32[] = [1 / 4, 1 / 4, 1 / 4];
 			zui_row(row);
@@ -46,7 +46,7 @@ function tab_console_draw(htab: zui_handle_t) {
 				krom_file_save_bytes(path, sys_string_to_buffer(str), 0);
 			});
 		}
-		///if (krom_windows || krom_linux || krom_darwin)
+		///if (krom_windows || krom_linux || krom_macos)
 		if (zui_button(tr("Copy"))) {
 			let str: string = string_array_join(console_last_traces, "\n");
 			krom_copy_to_clipboard(str);

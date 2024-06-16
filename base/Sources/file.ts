@@ -79,7 +79,7 @@ type file_download_data_t = {
 let _file_download_map: map_t<string, file_download_data_t> = map_create();
 
 function file_download(url: string, dst_path: string, done: (url: string)=>void, size: i32 = 0) {
-	///if (krom_windows || krom_darwin || krom_ios || krom_android)
+	///if (krom_windows || krom_macos || krom_ios || krom_android)
 	let fdd: file_download_data_t = { dst_path: dst_path, done: done };
 	map_set(_file_download_map, url, fdd);
 	krom_http_request(url, size, function (url: string, ab: buffer_t) {
@@ -149,7 +149,7 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 	dest += path2;
 
 	if (file_exists(dest)) {
-		///if (krom_darwin || krom_ios)
+		///if (krom_macos || krom_ios)
 		done(dest);
 		///else
 		let p: string;
@@ -184,7 +184,7 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 			fccd.done(null);
 			return;
 		}
-		///if (krom_darwin || krom_ios)
+		///if (krom_macos || krom_ios)
 		fccd.done(fccd.dest);
 		///else
 		let p: string;

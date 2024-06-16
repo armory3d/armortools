@@ -87,7 +87,7 @@ function ui_box_render() {
 				}
 				_zui_end_element();
 
-				///if (krom_windows || krom_linux || krom_darwin)
+				///if (krom_windows || krom_linux || krom_macos)
 				if (ui_box_copyable) {
 					let row: f32[] = [1 / 3, 1 / 3, 1 / 3];
 					zui_row(row);
@@ -103,7 +103,7 @@ function ui_box_render() {
 
 				_zui_end_element();
 
-				///if (krom_windows || krom_linux || krom_darwin)
+				///if (krom_windows || krom_linux || krom_macos)
 				if (ui_box_copyable && zui_button(tr("Copy"))) {
 					krom_copy_to_clipboard(ui_box_text);
 				}

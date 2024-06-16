@@ -447,13 +447,13 @@ function base_on_resize() {
 
 	base_resize();
 
-	///if (krom_linux || krom_darwin)
+	///if (krom_linux || krom_macos)
 	base_save_window_rect();
 	///end
 }
 
 function base_save_window_rect() {
-	///if (krom_windows || krom_linux || krom_darwin)
+	///if (krom_windows || krom_linux || krom_macos)
 	config_raw.window_w = sys_width();
 	config_raw.window_h = sys_height();
 	config_raw.window_x = sys_x();
@@ -706,7 +706,7 @@ function base_material_dropped() {
 
 function base_handle_drop_paths() {
 	if (base_drop_paths.length > 0) {
-		///if (krom_linux || krom_darwin)
+		///if (krom_linux || krom_macos)
 		let wait: bool = !mouse_moved; // Mouse coords not updated during drag
 		///else
 		let wait: bool = false;
@@ -942,7 +942,7 @@ function base_get_asset_index(file_name: string): i32 {
 
 function base_toggle_fullscreen() {
 	if (sys_mode() == window_mode_t.WINDOWED) {
-		///if (krom_windows || krom_linux || krom_darwin)
+		///if (krom_windows || krom_linux || krom_macos)
 		config_raw.window_w = sys_width();
 		config_raw.window_h = sys_height();
 		config_raw.window_x = sys_x();
@@ -984,8 +984,8 @@ function base_get_uis(): zui_t[] {
 
 function base_is_decal_layer(): bool {
 	///if is_paint
-	let is_paint: bool = context_raw.tool != workspace_tool_t.MATERIAL && context_raw.tool != workspace_tool_t.BAKE;
-	return is_paint && context_raw.layer.fill_layer != null && context_raw.layer.uv_type == uv_type_t.PROJECT;
+	let is_painting: bool = context_raw.tool != workspace_tool_t.MATERIAL && context_raw.tool != workspace_tool_t.BAKE;
+	return is_painting && context_raw.layer.fill_layer != null && context_raw.layer.uv_type == uv_type_t.PROJECT;
 	///end
 
 	///if (is_sculpt || is_lab)

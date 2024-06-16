@@ -121,7 +121,7 @@ function config_init() {
 		config_raw.window_maximizable = true;
 		config_raw.window_w = 1600;
 		config_raw.window_h = 900;
-		///if krom_darwin
+		///if krom_macos
 		config_raw.window_w *= 2;
 		config_raw.window_h *= 2;
 		///end
@@ -131,7 +131,7 @@ function config_init() {
 		if (sys_display_width() >= 2560 && sys_display_height() >= 1600) {
 			config_raw.window_scale = 2.0;
 		}
-		///if (krom_android || krom_ios || krom_darwin)
+		///if (krom_android || krom_ios || krom_macos)
 		config_raw.window_scale = 2.0;
 		///end
 		config_raw.window_vsync = true;

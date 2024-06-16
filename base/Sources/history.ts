@@ -623,7 +623,7 @@ function history_delete_material_group(group: node_group_t) {
 ///end
 
 function history_push(name: string): step_t {
-	///if (krom_windows || krom_linux || krom_darwin)
+	///if (krom_windows || krom_linux || krom_macos)
 	let filename: string = project_filepath == "" ? ui_files_filename : substring(project_filepath, string_last_index_of(project_filepath, path_sep) + 1, project_filepath.length - 4);
 	sys_title_set(filename + "* - " + manifest_title);
 	///end
