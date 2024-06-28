@@ -36,7 +36,7 @@ strip ArmorLab
 ```bash
 cd ../armorcore
 git apply Patches/metal_raytrace.diff --directory=Kinc
-cd ../armorpaint
+cd ../armorlab
 ../armorcore/Kinc/make --from ../armorcore -g metal
 cp -a build/krom/ ../armorcore/Deployment
 # Open generated Xcode project at `build/ArmorLab.xcodeproj`
