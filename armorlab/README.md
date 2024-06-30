@@ -3,7 +3,7 @@
 armorlab
 ==============
 
-[ArmorLab](https://armorlab.org) is a software for AI-powered texture authoring - check out the [manual](https://armorlab.org/manual).
+[ArmorLab](https://armorlab.org) is a software for PBR texture authoring - check out the [manual](https://armorlab.org/manual).
 
 *Note 1: This repository is aimed at developers and may not be stable. Distributed binaries are [paid](https://armorlab.org/download) to help with the project funding. All of the development is happening here in order to make it accessible to everyone. Thank you for support!*
 
@@ -18,7 +18,7 @@ git clone https://github.com/armory3d/onnx_bin onnx
 
 **Windows**
 ```bash
-..\armorcore\Kinc\make --from ..\armorcore -g direct3d11
+..\armorcore\make --graphics direct3d11
 # Open generated Visual Studio project at `build\ArmorLab.sln`
 # Build and run for x64 & release
 # Copy build\x64\Release\ArmorLab.exe to build\krom to run ArmorLab.exe directly
@@ -26,7 +26,7 @@ git clone https://github.com/armory3d/onnx_bin onnx
 
 **Linux** *wip - cpu only*
 ```bash
-../armorcore/Kinc/make --from ../armorcore -g opengl --compiler clang --compile
+../armorcore/make --graphics opengl --compile
 cd ../armorcore/Deployment
 strip ArmorLab
 ./ArmorLab ../../armorlab/build/krom
@@ -34,10 +34,7 @@ strip ArmorLab
 
 **macOS** *wip - apple silicon only*
 ```bash
-cd ../armorcore
-git apply Patches/metal_raytrace.diff --directory=Kinc
-cd ../armorlab
-../armorcore/Kinc/make --from ../armorcore -g metal
+../armorcore/make --graphics metal
 cp -a build/krom/ ../armorcore/Deployment
 # Open generated Xcode project at `build/ArmorLab.xcodeproj`
 # Set macOS Deployment Target to 13.0

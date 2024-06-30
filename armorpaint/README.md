@@ -16,7 +16,7 @@ cd armortools/armorpaint
 
 **Windows**
 ```bash
-..\armorcore\Kinc\make --from ..\armorcore -g direct3d11
+..\armorcore\make --graphics direct3d11
 # Open generated Visual Studio project at `build\ArmorPaint.sln`
 # Build and run for x64 & release
 # Copy build\x64\Release\ArmorPaint.exe to build\krom to run ArmorPaint.exe directly
@@ -24,7 +24,7 @@ cd armortools/armorpaint
 
 **Linux**
 ```bash
-../armorcore/Kinc/make --from ../armorcore -g opengl --compiler clang --compile
+../armorcore/make --graphics opengl --compile
 cd ../armorcore/Deployment
 strip ArmorPaint
 ./ArmorPaint ../../armorpaint/build/krom
@@ -32,10 +32,7 @@ strip ArmorPaint
 
 **macOS**
 ```bash
-cd ../armorcore
-git apply Patches/metal_raytrace.diff --directory=Kinc
-cd ../armorpaint
-../armorcore/Kinc/make --from ../armorcore -g metal
+../armorcore/make --graphics metal
 cp -a build/krom/ ../armorcore/Deployment
 # Open generated Xcode project at `build/ArmorPaint.xcodeproj`
 # Set macOS Deployment Target to 13.0
@@ -44,10 +41,7 @@ cp -a build/krom/ ../armorcore/Deployment
 
 **Android** *wip*
 ```bash
-cd ../armorcore
-git apply Patches/android_document_picker.diff --directory=Kinc
-cd ../armorpaint
-../armorcore/Kinc/make --from ../armorcore -g opengl android
+../armorcore/make --graphics opengl --target android
 cp -r build/krom/* build/ArmorPaint/app/src/main/assets/
 # Manual tweaking is required for now:
 # https://github.com/armory3d/armorcore/blob/master/kfile.js#L136
@@ -57,12 +51,7 @@ cp -r build/krom/* build/ArmorPaint/app/src/main/assets/
 
 **iOS** *wip*
 ```bash
-cd ../armorcore
-git apply Patches/metal_raytrace.diff --directory=Kinc
-git apply Patches/ios_document_picker.diff --directory=Kinc
-git apply Patches/ios_pencil_hover.diff --directory=Kinc
-cd ../armorpaint
-../armorcore/Kinc/make --from ../armorcore -g metal ios
+../armorcore/make --graphics metal --target ios
 cp -a build/krom/ ../armorcore/Deployment
 # Open generated Xcode project `build/ArmorPaint.xcodeproj`
 # Set iOS Deployment Target to 16.0
@@ -71,10 +60,7 @@ cp -a build/krom/ ../armorcore/Deployment
 
 **Windows DXR** *wip*
 ```bash
-cd ..\armorcore
-git apply Patches/d3d12_raytrace.diff --directory=Kinc
-cd ..\armorpaint
-..\armorcore\Kinc\make --from ..\armorcore -g direct3d12
+..\armorcore\make --graphics direct3d12
 # Open generated Visual Studio project at `build\ArmorPaint.sln`
 # Build and run for x64 & release
 # Copy build\x64\Release\ArmorPaint.exe to build\krom to run ArmorPaint.exe directly
@@ -83,10 +69,7 @@ cd ..\armorpaint
 **Linux VKRT** *wip*
 ```bash
 git clone --recursive https://github.com/armory3d/glsl_to_spirv
-cd ../armorcore
-git apply Patches/vulkan_raytrace.diff --directory=Kinc
-cd ../armorpaint
-../armorcore/Kinc/make --from ../armorcore -g vulkan --compiler clang --compile
+../armorcore/make --graphics vulkan --compile
 cd ../armorcore/Deployment
 strip ArmorPaint
 ./ArmorPaint ../../armorpaint/build/krom
