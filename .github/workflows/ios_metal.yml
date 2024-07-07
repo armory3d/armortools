@@ -20,4 +20,4 @@ jobs:
     - name: Compile
       run: |
         cd armorpaint
-        ../armorcore/Kinc/make --from ../armorcore --target ios --graphics metal
+        ../armorcore/make --target ios --graphics metal
