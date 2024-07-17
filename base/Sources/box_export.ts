@@ -142,7 +142,9 @@ function box_export_tab_export_textures(ui: zui_t, title: string, bake_material:
 		///end
 
 		zui_combo(box_export_hpreset, box_export_files, tr("Preset"), true);
-		if (box_export_hpreset.changed) box_export_preset = null;
+		if (box_export_hpreset.changed) {
+			box_export_preset = null;
+		}
 
 		let layers_destination_handle: zui_handle_t = zui_handle(__ID__);
 		layers_destination_handle.position = context_raw.layers_destination;
@@ -530,7 +532,7 @@ function box_export_parse_preset() {
 	let file: string = "export_presets/" + box_export_files[box_export_hpreset.position] + ".json";
 	let blob: buffer_t = data_get_blob(file);
 	box_export_preset = json_parse(sys_buffer_to_string(blob));
-	data_delete_blob("export_presets/" + file);
+	data_delete_blob(file);
 }
 
 function box_export_new_preset(name: string) {
