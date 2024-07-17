@@ -1737,6 +1737,9 @@ function ui_base_on_tab_drop(to: zui_handle_t, to_position: i32, from: zui_handl
 			j = k;
 		}
 	}
+	if (i == j && to_position == from_position) {
+		return;
+	}
 	if (i > -1 && j > -1) {
 		let tabsi: tab_draw_t[] = ui_base_hwnd_tabs[i];
 		let tabsj: tab_draw_t[] = ui_base_hwnd_tabs[j];
