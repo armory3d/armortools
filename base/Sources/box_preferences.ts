@@ -9,6 +9,7 @@ let box_preferences_themes: string[] = null;
 let box_preferences_world_color: i32 = 0xff080808;
 let _box_preferences_f: string;
 let _box_preferences_h: zui_handle_t;
+let _box_preferences_i: i32;
 let _box_preferences_ui: zui_t;
 
 function box_preferences_show() {
@@ -243,7 +244,6 @@ function box_preferences_show() {
 			zui_end_sticky();
 
 			let i: i32 = 0;
-			let theme: any = base_theme;
 			let hlist: zui_handle_t = zui_handle(__ID__);
 
 			// Viewport color
@@ -284,11 +284,11 @@ function box_preferences_show() {
 			}
 
 			// Theme fields
+			let u32_theme: u32_ptr = base_theme;
 			for (let i: i32 = 0; i < zui_theme_keys.length; ++i) {
 				let key: string = zui_theme_keys[i];
-
 				let h: zui_handle_t = zui_nest(hlist, i);
-				let val: u32 = 0; //// theme[key];
+				let val: u32 = DEREFERENCE(u32_theme + i);
 				let is_hex: bool = ends_with(key, "_COL");
 
 				if (is_hex) {
@@ -296,17 +296,18 @@ function box_preferences_show() {
 					zui_row(row);
 					zui_text("", 0, val);
 					if (ui.is_hovered && ui.input_released) {
-						// h.color = theme[key];
-						// _box_preferences_h = h;
-						// ui_menu_draw(function (ui: zui_t) {
-						// 	ui.changed = false;
-						// 	let color: i32 = zui_color_wheel(_box_preferences_h, false, -1, 11 * ui.ops.theme.ELEMENT_H * zui_SCALE(ui), true);
-						// 	// let theme: any = base_theme;
-						// 	// theme[key] = color; ////
-						// 	if (ui.changed) {
-						// 		ui_menu_keep_open = true;
-						// 	}
-						// }, 11);
+						h.color = val;
+						_box_preferences_h = h;
+						_box_preferences_i = i;
+						ui_menu_draw(function (ui: zui_t) {
+							ui.changed = false;
+							let color: i32 = zui_color_wheel(_box_preferences_h, false, -1, 11 * ui.ops.theme.ELEMENT_H * zui_SCALE(ui), true);
+							let u32_theme: u32_ptr = base_theme;
+							DEREFERENCE(u32_theme + _box_preferences_i) = color;
+							if (ui.changed) {
+								ui_menu_keep_open = true;
+							}
+						}, 11);
 					}
 				}
 
@@ -319,22 +320,22 @@ function box_preferences_show() {
 					key == "ROUND_CORNERS") {
 					h.selected = val > 0;
 					let b: bool = zui_check(h, key);
-					// theme[key] = b; ////
+					DEREFERENCE(u32_theme + i) = b;
 				}
 				else if (key == "LINK_STYLE") {
 					let styles: string[] = [tr("Straight"), tr("Curved")];
 					h.position = val;
-					let i: i32 = zui_combo(h, styles, key, true);
-					// theme[key] = i; ////
+					let pos: i32 = zui_combo(h, styles, key, true);
+					DEREFERENCE(u32_theme + i) = pos;
 				}
 				else {
 					h.text = is_hex ? i32_to_string_hex(val) : i32_to_string(val);
 					zui_text_input(h, key);
 					if (is_hex) {
-						// theme[key] = parse_int_hex(h.text); ////
+						DEREFERENCE(u32_theme + i) = parse_int_hex(h.text);
 					}
 					else {
-						// theme[key] = parse_int(h.text); ////
+						DEREFERENCE(u32_theme + i) = parse_int(h.text);
 					}
 				}
 
