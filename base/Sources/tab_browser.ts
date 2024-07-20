@@ -29,7 +29,7 @@ function tab_browser_draw(htab: zui_handle_t) {
 		}
 
 		zui_begin_sticky();
-		let step: i32 = (1 - bookmarks_w / ui._w);
+		let step: f32 = (1.0 - bookmarks_w / ui._w);
 		if (tab_browser_hsearch.text != "") {
 			let row: f32[] = [bookmarks_w / ui._w, step * 0.73, step * 0.07, step * 0.17, step * 0.03];
 			zui_row(row);

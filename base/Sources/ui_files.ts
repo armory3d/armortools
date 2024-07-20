@@ -65,8 +65,6 @@ function ui_files_release_keys() {
 
 let _ui_files_file_browser_handle: zui_handle_t;
 let _ui_files_file_browser_f: string;
-let _ui_files_file_browser_shandle: string;
-let _ui_files_file_browser_w: i32;
 
 function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bool = false, drag_files: bool = false, search: string = "", refresh: bool = false, context_menu: (s: string)=>void = null): string {
 
@@ -311,27 +309,12 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 					map_set(ui_files_icon_map, shandle, empty);
 					let image: image_t = data_get_image(shandle);
 
-					_ui_files_file_browser_shandle = shandle;
-					_ui_files_file_browser_w = w;
-
-					app_notify_on_init(function (image: image_t) {
-						if (base_pipe_copy_rgb == null) {
-							base_make_pipe_copy_rgb();
-						}
-						let w: i32 = _ui_files_file_browser_w;
-						let sw: i32 = image.width > image.height ? w : math_floor(1.0 * image.width / image.height * w);
-						let sh: i32 = image.width > image.height ? math_floor(1.0 * image.height / image.width * w) : w;
-						let icon: image_t = image_create_render_target(sw, sh);
-						g2_begin(icon);
-						g2_clear(0xffffffff);
-						g2_set_pipeline(base_pipe_copy_rgb);
-						g2_draw_scaled_image(image, 0, 0, sw, sh);
-						g2_set_pipeline(null);
-						g2_end();
-						map_set(ui_files_icon_map, _ui_files_file_browser_shandle, icon);
-						ui_base_hwnds[tab_area_t.STATUS].redraws = 3;
-						data_delete_image(_ui_files_file_browser_shandle); // The big image is not needed anymore
-					}, image);
+					let args: ui_files_make_icon_t = {
+						image: image,
+						shandle: shandle,
+						w: w
+					};
+					app_notify_on_init(ui_files_make_icon, args);
 				}
 				if (icon != null) {
 					if (i == ui_files_selected) {
@@ -379,17 +362,15 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 					if (f == "..") { // Up
 						handle.text = substring(handle.text, 0, string_last_index_of(handle.text, path_sep));
 						// Drive root
-						let text: string = handle.text;
-						if (text.length == 2 && char_at(text, 1) == ":") {
-							text += path_sep;
+						if (handle.text.length == 2 && char_at(handle.text, 1) == ":") {
+							handle.text += path_sep;
 						}
 					}
 					else {
-						let text: string = handle.text;
-						if (char_at(text, text.length - 1) != path_sep) {
-							text += path_sep;
+						if (char_at(handle.text, handle.text.length - 1) != path_sep) {
+							handle.text += path_sep;
 						}
-						text += f;
+						handle.text += f;
 					}
 					ui_files_selected = -1;
 				}
@@ -437,3 +418,29 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 
 	return handle.text;
 }
+
+function ui_files_make_icon (args: ui_files_make_icon_t) {
+	if (base_pipe_copy_rgb == null) {
+		base_make_pipe_copy_rgb();
+	}
+	let w: i32 = args.w;
+	let image: image_t = args.image;
+	let sw: i32 = image.width > image.height ? w : math_floor(1.0 * image.width / image.height * w);
+	let sh: i32 = image.width > image.height ? math_floor(1.0 * image.height / image.width * w) : w;
+	let icon: image_t = image_create_render_target(sw, sh);
+	g2_begin(icon);
+	g2_clear(0xffffffff);
+	g2_set_pipeline(base_pipe_copy_rgb);
+	g2_draw_scaled_image(image, 0, 0, sw, sh);
+	g2_set_pipeline(null);
+	g2_end();
+	map_set(ui_files_icon_map, args.shandle, icon);
+	ui_base_hwnds[tab_area_t.STATUS].redraws = 3;
+	data_delete_image(args.shandle); // The big image is not needed anymore
+}
+
+type ui_files_make_icon_t = {
+	image: image_t;
+	shandle: string;
+	w: i32;
+};
