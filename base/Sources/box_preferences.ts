@@ -801,6 +801,9 @@ function box_preferences_show() {
 			let index: i32 = 0;
 			ui.changed = false;
 			let keys: string[] = map_keys(config_keymap);
+			array_sort(keys, function (a: any_ptr, b: any_ptr): i32 {
+				return strcmp(DEREFERENCE(a), DEREFERENCE(b));
+			});
 			for (let i: i32 = 0; i < keys.length; ++i) {
 				let key: string = keys[i];
 				let h: zui_handle_t = zui_nest(zui_handle(__ID__), index++);
