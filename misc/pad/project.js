@@ -13,9 +13,9 @@ flags.on_c_project_created = function(c_project) {
 
 let project = new Project("ArmorPad");
 let root = "../../";
-project.addSources("Sources");
+project.addSources("sources");
 project.addShaders(root + "armorcore/shaders/*.glsl",);
-project.addAssets(root + "base/Assets/font_mono.ttf", { destination: "data/{name}" });
-project.addAssets(root + "base/Assets/text_coloring.json", { destination: "data/{name}" });
+project.addAssets(root + "base/assets/font_mono.ttf", { destination: "data/{name}" });
+project.addAssets(root + "base/assets/text_coloring.json", { destination: "data/{name}" });
 
 return project;

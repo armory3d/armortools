@@ -1,22 +1,4 @@
 
-declare type obj_part_t = {
-	posa: i16_array_t;
-	nora: i16_array_t;
-	texa: i16_array_t;
-	inda: u32_array_t;
-	vertex_count: i32;
-	index_count: i32;
-	scale_pos: f32;
-	scale_tex: f32;
-	name: string;
-	has_next: bool;
-	pos: i32;
-	udims: u32_array_t[];
-	udims_count: u32_array_t;
-	udims_u: i32;
-	udims_v: i32;
-};
-
 function import_obj_run(path: string, replace_existing: bool = true) {
 	let i: split_type_t = context_raw.split_by;
 	let is_udim: bool = i == split_type_t.UDIM;
@@ -28,7 +10,7 @@ function import_obj_run(path: string, replace_existing: bool = true) {
 	let b: buffer_t = data_get_blob(path);
 
 	if (is_udim) {
-		// let part: obj_part_t = krom_io_obj_parse(b, split_code, 0, is_udim);
+		// let part: raw_mesh_t = krom_io_obj_parse(b, split_code, 0, is_udim);
 		// let name: string = part.name;
 		// for (let i: i32 = 0; i < part.udims.length; ++i) {
 		// 	if (part.udims[i].length == 0) {
@@ -42,8 +24,8 @@ function import_obj_run(path: string, replace_existing: bool = true) {
 		// }
 	}
 	else {
-		let parts: obj_part_t[] = [];
-		let part: obj_part_t = krom_io_obj_parse(b, split_code, 0, false);
+		let parts: raw_mesh_t[] = [];
+		let part: raw_mesh_t = krom_io_obj_parse(b, split_code, 0, false);
 		array_push(parts, part);
 		while (part.has_next) {
 			part = krom_io_obj_parse(b, split_code, part.pos, false);

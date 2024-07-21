@@ -2,7 +2,7 @@
 .vscode
 *.DS_Store
 *.blend1
-armorlab/Assets/models/*.onnx
-armorlab/Assets/models/*.txt
+armorlab/assets/models/*.onnx
+armorlab/assets/models/*.txt
 armorlab/onnx
 glsl_to_spirv

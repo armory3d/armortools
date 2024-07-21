@@ -83,7 +83,8 @@ function path_working_dir(): string {
 		}
 		save += "working_dir.txt";
 		krom_sys_command(cmd + " > \"" + save + "\"");
-		path_working_dir_cache = trim_end(sys_buffer_to_string(krom_load_blob(save)));
+		path_working_dir_cache = sys_buffer_to_string(krom_load_blob(save));
+		path_working_dir_cache = trim_end(path_working_dir_cache);
 	}
 	return path_working_dir_cache;
 }

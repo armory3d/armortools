@@ -44,14 +44,10 @@ function import_mesh_finish_import() {
 
 	if (project_paint_objects.length > 1) {
 		// Sort by name
-		array_sort(project_paint_objects, function (a: mesh_object_t, b: mesh_object_t): i32 {
-			if (a.base.name < b.base.name) {
-				return -1;
-			}
-			else if (a.base.name > b.base.name) {
-				return 1;
-			}
-			return 0;
+		array_sort(project_paint_objects, function (pa: any_ptr, pb: any_ptr): i32 {
+			let a: mesh_object_t = DEREFERENCE(pa);
+			let b: mesh_object_t = DEREFERENCE(pb);
+			return strcmp(a.base.name, b.base.name);
 		});
 
 		// No mask by default

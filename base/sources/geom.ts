@@ -130,16 +130,23 @@ function geom_make_uv_sphere(radius: f32 = 1.0, width_segments: i32 = 32, height
 	return mesh;
 }
 
-type raw_mesh_t = {
+declare type raw_mesh_t = {
 	posa?: i16_array_t;
 	nora?: i16_array_t;
 	texa?: i16_array_t;
 	cola?: i16_array_t;
 	inda?: u32_array_t;
+	vertex_count?: i32;
+	index_count?: i32;
 	scale_pos?: f32;
 	scale_tex?: f32;
 	name?: string;
 	has_next?: bool;
+	pos?: u64;
+	udims?: u32_array_t[];
+	udims_count?: u32_array_t;
+	udims_u?: i32;
+	udims_v?: i32;
 	vertex_arrays?: vertex_array_t[];
 	index_arrays?: index_array_t[];
 };

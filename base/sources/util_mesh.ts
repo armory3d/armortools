@@ -48,11 +48,12 @@ function util_mesh_merge(paint_objects: mesh_object_t[] = null) {
 		///end
 
 		// Re-scale
-		for (let j: i32 = 0; j < math_floor(va0.length / 4); ++j) {
-			va0[j * 4     + voff * 4] = math_floor((va0[j * 4     + voff * 4] * scale) / max_scale);
-			va0[j * 4 + 1 + voff * 4] = math_floor((va0[j * 4 + 1 + voff * 4] * scale) / max_scale);
-			va0[j * 4 + 2 + voff * 4] = math_floor((va0[j * 4 + 2 + voff * 4] * scale) / max_scale);
+		for (let j: i32 = voff; j < math_floor(va0.length / 4); ++j) {
+			va0[j * 4    ] = math_floor((va0[j * 4    ] * scale) / max_scale);
+			va0[j * 4 + 1] = math_floor((va0[j * 4 + 1] * scale) / max_scale);
+			va0[j * 4 + 2] = math_floor((va0[j * 4 + 2] * scale) / max_scale);
 		}
+
 		// Nor
 		for (let j: i32 = 0; j < vas[1].values.length; ++j) {
 			va1[j + voff * 2] = vas[1].values[j];
@@ -62,8 +63,10 @@ function util_mesh_merge(paint_objects: mesh_object_t[] = null) {
 			va2[j + voff * 2] = vas[2].values[j];
 		}
 		// Col
-		if (va3 != null) for (let j: i32 = 0; j < vas[3].values.length; ++j) {
-			va3[j + voff * 4] = vas[3].values[j];
+		if (va3 != null) {
+			for (let j: i32 = 0; j < vas[3].values.length; ++j) {
+				va3[j + voff * 4] = vas[3].values[j];
+			}
 		}
 		// Indices
 		for (let j: i32 = 0; j < ias[0].values.length; ++j) {

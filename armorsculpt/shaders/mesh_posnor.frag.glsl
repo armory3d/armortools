@@ -1,6 +1,6 @@
 #version 450
 
-#include "../../base/Shaders/std/gbuffer.glsl"
+#include "../../base/shaders/std/gbuffer.glsl"
 
 in vec3 wnormal;
 in vec4 wvpposition;

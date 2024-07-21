@@ -241,9 +241,11 @@ function node_shader_get_hlsl(raw: node_shader_t, shared_sampler: string): strin
 	if (raw.ins.length > 0) {
 		s += "struct SPIRV_Cross_Input {\n";
 		index = 0;
-		array_sort(raw.ins, function (stra: string, strb: string): i32 {
+		array_sort(raw.ins, function (pa: any_ptr, pb: any_ptr): i32 {
+			let stra: string = DEREFERENCE(pa);
+			let strb: string = DEREFERENCE(pb);
 			// Sort inputs by name
-			return substring(stra, 4, stra.length) >= substring(strb, 4, strb.length) ? 1 : -1;
+			return strcmp(substring(stra, 4, stra.length), substring(strb, 4, strb.length));
 		});
 		for (let i: i32 = 0; i < raw.ins.length; ++i) {
 			let a: string = raw.ins[i];
@@ -266,9 +268,11 @@ function node_shader_get_hlsl(raw: node_shader_t, shared_sampler: string): strin
 	let num: i32 = 0;
 	if (raw.outs.length > 0 || raw.shader_type == "vert") {
 		s += "struct SPIRV_Cross_Output {\n";
-		array_sort(raw.outs, function (stra: string, strb: string): i32 {
+		array_sort(raw.outs, function (pa: any_ptr, pb: any_ptr): i32 {
+			let stra: string = DEREFERENCE(pa);
+			let strb: string = DEREFERENCE(pb);
 			// Sort outputs by name
-			return substring(stra, 4, stra.length) >= substring(strb, 4, strb.length) ? 1 : -1;
+			return strcmp(substring(stra, 4, stra.length), substring(strb, 4, strb.length));
 		});
 		index = 0;
 		if (raw.shader_type == "vert") {
@@ -440,9 +444,11 @@ function node_shader_get_msl(raw: node_shader_t, shared_sampler: string): string
 	//if (ins.length > 0) {
 		s += "struct main_in {\n";
 		index = 0;
-		array_sort(raw.ins, function (stra: string, strb: string): i32 {
+		array_sort(raw.ins, function (pa: any_ptr, pb: any_ptr): i32 {
+			let stra: string = DEREFERENCE(pa);
+			let strb: string = DEREFERENCE(pb);
 			// Sort inputs by name
-			return substring(stra, 4, stra.length) >= substring(strb, 4, strb.length) ? 1 : -1;
+			return strcmp(substring(stra, 4, stra.length), substring(strb, 4, strb.length));
 		});
 		if (raw.shader_type == "vert") {
 			for (let i: i32 = 0; i < raw.ins.length; ++i) {
@@ -465,9 +471,11 @@ function node_shader_get_msl(raw: node_shader_t, shared_sampler: string): string
 	let num: i32 = 0;
 	if (raw.outs.length > 0 || raw.shader_type == "vert") {
 		s += "struct main_out {\n";
-		array_sort(raw.outs, function (stra: string, strb: string): i32 {
+		array_sort(raw.outs, function (pa: any_ptr, pb: any_ptr): i32 {
+			let stra: string = DEREFERENCE(pa);
+			let strb: string = DEREFERENCE(pb);
 			// Sort outputs by name
-			return substring(stra, 4, stra.length) >= substring(strb, 4, strb.length) ? 1 : -1;
+			return strcmp(substring(stra, 4, stra.length), substring(strb, 4, strb.length));
 		});
 		index = 0;
 		if (raw.shader_type == "vert") {
