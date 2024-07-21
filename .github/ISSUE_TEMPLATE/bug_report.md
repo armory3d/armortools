@@ -7,6 +7,10 @@ assignees: ''
 
 ---
 
+<!-- NOTE: If you are unable to compile the program, please open a discussion instead:
+https://github.com/armory3d/armortools/discussions
+-->
+
 <!-- Please search existing issues first:
 https://github.com/armory3d/armortools/issues?q=is%3Aissue
 -->
