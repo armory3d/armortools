@@ -18,6 +18,6 @@ git submodule update --init --recursive
 **Generating a locale file**
 ```bash
 export ARM_LOCALE=<locale code>
-./armorcore/make --from base/Tools --kfile extract_locales.js
-# Generates a `base/Assets/locale/<locale code>.json` file
+./armorcore/make --from base/tools --kfile extract_locales.js
+# Generates a `base/assets/locale/<locale code>.json` file
 ```

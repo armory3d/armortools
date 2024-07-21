@@ -19,21 +19,16 @@ cd armortools/armorpaint
 ..\armorcore\make --graphics direct3d11
 # Open generated Visual Studio project at `build\ArmorPaint.sln`
 # Build and run for x64 & release
-# Copy build\x64\Release\ArmorPaint.exe to build\krom to run ArmorPaint.exe directly
 ```
 
 **Linux**
 ```bash
-../armorcore/make --graphics opengl --compile
-cd ../armorcore/Deployment
-strip ArmorPaint
-./ArmorPaint ../../armorpaint/build/krom
+../armorcore/make --graphics opengl --run
 ```
 
 **macOS**
 ```bash
 ../armorcore/make --graphics metal
-cp -a build/krom/ ../armorcore/Deployment
 # Open generated Xcode project at `build/ArmorPaint.xcodeproj`
 # Set macOS Deployment Target to 13.0
 # Build and run
@@ -63,14 +58,10 @@ cp -a build/krom/ ../armorcore/Deployment
 ..\armorcore\make --graphics direct3d12
 # Open generated Visual Studio project at `build\ArmorPaint.sln`
 # Build and run for x64 & release
-# Copy build\x64\Release\ArmorPaint.exe to build\krom to run ArmorPaint.exe directly
 ```
 
 **Linux VKRT** *wip*
 ```bash
 git clone --recursive https://github.com/armory3d/glsl_to_spirv
-../armorcore/make --graphics vulkan --compile
-cd ../armorcore/Deployment
-strip ArmorPaint
-./ArmorPaint ../../armorpaint/build/krom
+../armorcore/make --graphics vulkan --run
 ```

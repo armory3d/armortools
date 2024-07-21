@@ -13,7 +13,7 @@ armorlab
 git clone --recursive https://github.com/armory3d/armortools
 cd armortools/armorlab
 git clone https://github.com/armory3d/onnx_bin onnx
-# Unpack `models.zip` from https://github.com/armory3d/armorai/releases into `Assets/models` using 7-Zip - Extract Here
+# Unpack `models.zip` from https://github.com/armory3d/armorai/releases into `assets/models` using 7-Zip - Extract Here
 ```
 
 **Windows**
@@ -21,21 +21,16 @@ git clone https://github.com/armory3d/onnx_bin onnx
 ..\armorcore\make --graphics direct3d11
 # Open generated Visual Studio project at `build\ArmorLab.sln`
 # Build and run for x64 & release
-# Copy build\x64\Release\ArmorLab.exe to build\krom to run ArmorLab.exe directly
 ```
 
 **Linux** *wip - cpu only*
 ```bash
-../armorcore/make --graphics opengl --compile
-cd ../armorcore/Deployment
-strip ArmorLab
-./ArmorLab ../../armorlab/build/krom
+../armorcore/make --graphics opengl --run
 ```
 
 **macOS** *wip - apple silicon only*
 ```bash
 ../armorcore/make --graphics metal
-cp -a build/krom/ ../armorcore/Deployment
 # Open generated Xcode project at `build/ArmorLab.xcodeproj`
 # Set macOS Deployment Target to 13.0
 # Build and run
