@@ -367,7 +367,7 @@ function ui_nodes_on_canvas_released() {
 		for (let i: i32 = 0; i < canvas.nodes.length; ++i) {
 			let node: zui_node_t = canvas.nodes[i];
 			if (zui_input_in_rect(ui_nodes_ui._window_x + zui_nodes_NODE_X(node), ui_nodes_ui._window_y + zui_nodes_NODE_Y(node), zui_nodes_NODE_W(node), zui_nodes_NODE_H(canvas, node))) {
-				if (node.id == nodes.nodes_selected_id[0]) {
+				if (nodes.nodes_selected_id.length > 0 && node.id == nodes.nodes_selected_id[0]) {
 					ui_view2d_hwnd.redraws = 2;
 					if (time_time() - context_raw.select_time < 0.25) ui_base_show_2d_view(view_2d_type_t.NODE);
 					context_raw.select_time = time_time();
