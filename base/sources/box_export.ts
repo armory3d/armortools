@@ -556,6 +556,20 @@ function box_export_save_preset() {
 		return; // generic is const
 	}
 	let path: string = path_data() + path_sep + "export_presets" + path_sep + name + ".json";
-	krom_file_save_bytes(path, sys_string_to_buffer(json_stringify(box_export_preset)), 0);
+	krom_file_save_bytes(path, sys_string_to_buffer(box_export_preset_to_json(box_export_preset)), 0);
+}
+
+function box_export_preset_to_json(p: export_preset_t): string {
+	json_encode_begin();
+	json_encode_begin_array("textures");
+	for (let i: i32 = 0; i < p.textures.length; ++i) {
+		json_encode_begin_object();
+		json_encode_string("name", p.textures[i].name);
+		json_encode_string_array("channels", p.textures[i].channels);
+		json_encode_string("color_space", p.textures[i].color_space);
+		json_encode_end_object();
+	}
+	json_encode_end_array();
+	return json_encode_end();
 }
 ///end

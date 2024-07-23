@@ -45,7 +45,7 @@ function util_particle_init() {
 	for (let i: i32 = 0; i < _scene_raw.material_datas.length; ++i) {
 		let mat: material_data_t = _scene_raw.material_datas[i];
 		if (mat.name == "Material2") {
-			let m: material_data_t = json_parse(json_stringify(mat));
+			let m: material_data_t = util_clone_material_data(mat);
 			m.name = "MaterialParticle";
 			array_push(_scene_raw.material_datas, m);
 			break;
@@ -58,7 +58,7 @@ function util_particle_init() {
 	for (let i: i32 = 0; i < _scene_raw.objects.length; ++i) {
 		let obj: obj_t = _scene_raw.objects[i];
 		if (obj.name == ".Sphere") {
-			let particle: obj_t = json_parse(json_stringify(obj));
+			let particle: obj_t = util_clone_obj(obj);
 			particle.name = ".Particle";
 			if (particle.particles == null) {
 				particle.particles = {};
@@ -76,7 +76,7 @@ function util_particle_init() {
 	let o: object_t = scene_spawn_object(".Sphere");
 	let mo: mesh_object_t = o.ext;
 	mo.base.name = ".ParticleEmitter";
-	mo.base.raw = json_parse(json_stringify(mo.base.raw));
+	mo.base.raw = util_clone_obj(mo.base.raw);
 	mo.base.raw.particles.refs = particle_refs;
 	///if arm_particles
 	mesh_object_setup_particle_system(mo, "Scene", particle_refs[0]);

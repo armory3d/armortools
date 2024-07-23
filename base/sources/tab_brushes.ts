@@ -105,7 +105,7 @@ function tab_brushes_draw(htab: zui_handle_t) {
 
 								context_raw.brush = slot_brush_create();
 								array_push(project_brushes, context_raw.brush);
-								let cloned: any = json_parse(json_stringify(project_brushes[i].canvas));
+								let cloned: any = util_clone_canvas(project_brushes[i].canvas);
 								context_raw.brush.canvas = cloned;
 								context_set_brush(context_raw.brush);
 								util_render_make_brush_preview();

@@ -4100,7 +4100,7 @@ function nodes_material_sync_group_sockets(canvas: zui_node_canvas_t, group_name
 		if (n.type == "GROUP" && n.name == group_name) {
 			let is_inputs: bool = node.name == "Group Input";
 			let old_sockets: zui_node_socket_t[] = is_inputs ? n.inputs : n.outputs;
-			let sockets: zui_node_socket_t[] = json_parse(json_stringify(is_inputs ? node.outputs : node.inputs));
+			let sockets: zui_node_socket_t[] = util_clone_canvas_sockets(is_inputs ? node.outputs : node.inputs);
 			if (is_inputs) {
 				n.inputs = sockets;
 			}

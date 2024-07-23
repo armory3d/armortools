@@ -19,7 +19,7 @@ function tab_objects_draw_menu(ui: zui_t) {
 		for (let i: i32 = 0; i < _scene_raw.shader_datas.length; ++i) {
 			let sh: shader_data_t = _scene_raw.shader_datas[i];
 			if (sh.name == "Material_data") {
-				let s: shader_data_t = json_parse(json_stringify(sh));
+				let s: shader_data_t = util_clone_shader_data(sh);
 				s.name = "TempMaterial_data" + tab_objects_material_id;
 				array_push(_scene_raw.shader_datas, s);
 				break;
@@ -29,7 +29,7 @@ function tab_objects_draw_menu(ui: zui_t) {
 		for (let i: i32 = 0; i < _scene_raw.material_datas.length; ++i) {
 			let mat: material_data_t = _scene_raw.material_datas[i];
 			if (mat.name == "Material") {
-				let m: material_data_t = json_parse(json_stringify(mat));
+				let m: material_data_t = util_clone_material_data(mat);
 				m.name = "TempMaterial" + tab_objects_material_id;
 				m.shader = "TempMaterial_data" + tab_objects_material_id;
 				array_push(_scene_raw.material_datas, m);

@@ -476,7 +476,7 @@ function history_edit_nodes(canvas: zui_node_canvas_t, canvas_group: i32 = -1) {
 	///if (is_paint || is_sculpt)
 	step.canvas_type = canvas_type;
 	///end
-	step.canvas = history_clone_canvas(canvas);
+	step.canvas = util_clone_canvas(canvas);
 }
 
 ///if (is_paint || is_sculpt)
@@ -599,26 +599,26 @@ function history_layer_blending() {
 function history_new_material() {
 	let step: step_t = history_push(tr("New Material"));
 	step.canvas_type = 0;
-	step.canvas = history_clone_canvas(context_raw.material.canvas);
+	step.canvas = util_clone_canvas(context_raw.material.canvas);
 }
 
 function history_delete_material() {
 	let step: step_t = history_push(tr("Delete Material"));
 	step.canvas_type = 0;
-	step.canvas = history_clone_canvas(context_raw.material.canvas);
+	step.canvas = util_clone_canvas(context_raw.material.canvas);
 }
 
 function history_duplicate_material() {
 	let step: step_t = history_push(tr("Duplicate Material"));
 	step.canvas_type = 0;
-	step.canvas = history_clone_canvas(context_raw.material.canvas);
+	step.canvas = util_clone_canvas(context_raw.material.canvas);
 }
 
 function history_delete_material_group(group: node_group_t) {
 	let step: step_t = history_push(tr("Delete Node Group"));
 	step.canvas_type = canvas_type_t.MATERIAL;
 	step.canvas_group = array_index_of(project_material_groups, group);
-	step.canvas = history_clone_canvas(group.canvas);
+	step.canvas = util_clone_canvas(group.canvas);
 }
 ///end
 
@@ -779,87 +779,6 @@ function history_swap_canvas(step: step_t) {
 
 	ui_nodes_canvas_changed();
 	ui_nodes_hwnd.redraws = 2;
-}
-
-function history_clone_canvas_sockets(sockets: zui_node_socket_t[]): zui_node_socket_t[] {
-	let r: zui_node_socket_t[] = [];
-	for (let i: i32 = 0; i < sockets.length; ++i) {
-		let s: zui_node_socket_t = {};
-		s.id = sockets[i].id;;
-		s.node_id = sockets[i].node_id;
-		s.name = sockets[i].name;
-		s.type = sockets[i].type;
-		s.color = sockets[i].color;
-		let f32a: f32_array_t = sockets[i].default_value;
-		s.default_value = f32a != null ? f32_array_create_from_array(f32a) : null;
-		s.min = sockets[i].min;
-		s.max = sockets[i].max;
-		s.precision = sockets[i].precision;
-		s.display = sockets[i].display;
-		array_push(r, s);
-	}
-	return r;
-}
-
-function history_clone_canvas_buttons(buttons: zui_node_button_t[]): zui_node_button_t[] {
-	let r: zui_node_button_t[] = [];
-	for (let i: i32 = 0; i < buttons.length; ++i) {
-		let b: zui_node_button_t = {};
-		b.name = buttons[i].name;
-		b.type = buttons[i].type;
-		b.output = buttons[i].output;
-		let f32a: f32_array_t = buttons[i].default_value;
-		b.default_value = f32a != null ? f32_array_create_from_array(f32a) : null;
-		let u8a: u8_array_t = buttons[i].data;
-		b.data = u8a != null ? u8_array_create_from_array(u8a) : null;
-		b.min = buttons[i].min;
-		b.max = buttons[i].max;
-		b.precision = buttons[i].precision;
-		b.height = buttons[i].height;
-		array_push(r, b);
-	}
-	return r;
-}
-
-function history_clone_canvas_nodes(nodes: zui_node_t[]): zui_node_t[] {
-	let r: zui_node_t[] = [];
-	for (let i: i32 = 0; i < nodes.length; ++i) {
-		let n: zui_node_t = {};
-		n.id = nodes[i].id;
-		n.name = nodes[i].name;
-		n.type = nodes[i].type;
-		n.x = nodes[i].x;
-		n.y = nodes[i].y;
-		n.color = nodes[i].color;
-		n.inputs = history_clone_canvas_sockets(nodes[i].inputs);
-		n.outputs = history_clone_canvas_sockets(nodes[i].outputs);
-		n.buttons = history_clone_canvas_buttons(nodes[i].buttons);
-		n.width = nodes[i].width;
-		array_push(r, n);
-	}
-	return r;
-}
-
-function history_clone_canvas_links(links: zui_node_link_t[]): zui_node_link_t[] {
-	let r: zui_node_link_t[] = [];
-	for (let i: i32 = 0; i < links.length; ++i) {
-		let l: zui_node_link_t = {};
-		l.id = links[i].id;
-		l.from_id = links[i].from_id;
-		l.from_socket = links[i].from_socket;
-		l.to_id = links[i].to_id;
-		l.to_socket = links[i].to_socket;
-		array_push(r, l);
-	}
-	return r;
-}
-
-function history_clone_canvas(c: zui_node_canvas_t): zui_node_canvas_t {
-	let r: zui_node_canvas_t = {};
-	r.name = c.name;
-	r.nodes = history_clone_canvas_nodes(c.nodes);
-	r.links = history_clone_canvas_links(c.links);
-	return r;
 }
 
 type step_t = {

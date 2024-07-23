@@ -48,7 +48,7 @@ function export_arm_run_project() {
 	let mnodes: zui_node_canvas_t[] = [];
 	for (let i: i32 = 0; i < project_materials.length; ++i) {
 		let m: slot_material_t = project_materials[i];
-		let c: zui_node_canvas_t = json_parse(json_stringify(m.canvas));
+		let c: zui_node_canvas_t = util_clone_canvas(m.canvas);
 		for (let i: i32 = 0; i < c.nodes.length; ++i) {
 			let n: zui_node_t = c.nodes[i];
 			export_arm_export_node(n);
@@ -64,7 +64,7 @@ function export_arm_run_project() {
 	///end
 
 	///if is_lab
-	let c: zui_node_canvas_t = json_parse(json_stringify(project_canvas));
+	let c: zui_node_canvas_t = util_clone_canvas(project_canvas);
 	for (let i: i32 = 0; i < c.nodes.length; ++i) {
 		let n: zui_node_t = c.nodes[i];
 		export_arm_export_node(n);
@@ -76,7 +76,7 @@ function export_arm_run_project() {
 		mgroups = [];
 		for (let i: i32 = 0; i < project_material_groups.length; ++i) {
 			let g: node_group_t = project_material_groups[i];
-			let c: zui_node_canvas_t = json_parse(json_stringify(g.canvas));
+			let c: zui_node_canvas_t = util_clone_canvas(g.canvas);
 			for (let i: i32 = 0; i < c.nodes.length; ++i) {
 				let n: zui_node_t = c.nodes[i];
 				export_arm_export_node(n);
@@ -293,7 +293,7 @@ function export_arm_run_material(path: string) {
 	let mnodes: zui_node_canvas_t[] = [];
 	let mgroups: zui_node_canvas_t[] = null;
 	let m: slot_material_t = context_raw.material;
-	let c: zui_node_canvas_t = json_parse(json_stringify(m.canvas));
+	let c: zui_node_canvas_t = util_clone_canvas(m.canvas);
 	let assets: asset_t[] = [];
 	if (ui_nodes_has_group(c)) {
 		mgroups = [];
@@ -375,7 +375,7 @@ function export_arm_run_brush(path: string) {
 	}
 	let bnodes: zui_node_canvas_t[] = [];
 	let b: slot_brush_t = context_raw.brush;
-	let c: zui_node_canvas_t = json_parse(json_stringify(b.canvas));
+	let c: zui_node_canvas_t = util_clone_canvas(b.canvas);
 	let assets: asset_t[] = [];
 	for (let i: i32 = 0; i < c.nodes.length; ++i) {
 		let n: zui_node_t = c.nodes[i];

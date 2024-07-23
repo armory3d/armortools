@@ -183,7 +183,7 @@ function tab_materials_draw_slots(mini: bool) {
 
 							context_raw.material = slot_material_create(project_materials[0].data);
 							array_push(project_materials, context_raw.material);
-							let cloned: zui_node_canvas_t = json_parse(json_stringify(project_materials[i].canvas));
+							let cloned: zui_node_canvas_t = util_clone_canvas(project_materials[i].canvas);
 							context_raw.material.canvas = cloned;
 							tab_materials_update_material();
 							history_duplicate_material();

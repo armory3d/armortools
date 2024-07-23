@@ -207,7 +207,7 @@ function box_preferences_show() {
 						}
 						let theme_name: string = zui_text_input(h, tr("Name"));
 						if (zui_button(tr("OK")) || ui.is_return_down) {
-							let template: string = json_stringify(base_theme);
+							let template: string = box_preferences_theme_to_json(base_theme);
 							if (!ends_with(theme_name, ".json")) {
 								theme_name += ".json";
 							}
@@ -237,7 +237,7 @@ function box_preferences_show() {
 					if (!ends_with(path, ".json")) {
 						path += ".json";
 					}
-					krom_file_save_bytes(path, sys_string_to_buffer(json_stringify(base_theme)), 0);
+					krom_file_save_bytes(path, sys_string_to_buffer(box_preferences_theme_to_json(base_theme)), 0);
 				});
 			}
 
@@ -762,7 +762,7 @@ function box_preferences_show() {
 						}
 						let keymap_name: string = zui_text_input(h, tr("Name"));
 						if (zui_button(tr("OK")) || ui.is_return_down) {
-							let template: string = json_stringify(base_get_default_keymap());
+							let template: string =  config_keymap_to_json(base_get_default_keymap());
 							if (!ends_with(keymap_name, ".json")) {
 								keymap_name += ".json";
 							}
@@ -973,4 +973,15 @@ function box_preferences_set_scale() {
 	config_raw.layout[layout_size_t.SIDEBAR_W] = math_floor(ui_base_default_sidebar_w * scale);
 	ui_toolbar_w = math_floor(ui_toolbar_default_w * scale);
 	///end
+}
+
+function box_preferences_theme_to_json(theme: zui_theme_t): string {
+	json_encode_begin();
+	let u32_theme: u32_ptr = theme;
+	for (let i: i32 = 0; i < zui_theme_keys.length; ++i) {
+		let key: string = zui_theme_keys[i];
+		let val: u32 = DEREFERENCE(u32_theme + i);
+		json_encode_i32(key, val);
+	}
+	return json_encode_end();
 }

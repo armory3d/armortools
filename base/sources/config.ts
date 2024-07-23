@@ -39,7 +39,7 @@ function config_save() {
 	}
 	path += "config.json";
 
-	json_encode_start();
+	json_encode_begin();
 	json_encode_string("locale", config_raw.locale);
 	json_encode_i32("window_mode", config_raw.window_mode);
 	json_encode_i32("window_w", config_raw.window_w);
@@ -278,8 +278,14 @@ function config_save_keymap() {
 		return;
 	}
 	let path: string = data_path() + "keymap_presets/" + config_raw.keymap;
-	let buffer: buffer_t = sys_string_to_buffer(json_stringify(config_keymap));
+	let buffer: buffer_t = sys_string_to_buffer(config_keymap_to_json(config_keymap));
 	krom_file_save_bytes(path, buffer, 0);
+}
+
+function config_keymap_to_json(keymap: map_t<string, string>): string {
+	json_encode_begin();
+	json_encode_map(keymap);
+	return json_encode_end();
 }
 
 function config_get_super_sample_quality(f: f32): i32 {

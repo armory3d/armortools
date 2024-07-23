@@ -871,7 +871,7 @@ function ui_nodes_render() {
 
 		// Undo
 		if (ui_nodes_ui.input_started || ui_nodes_ui.is_key_pressed) {
-			// ui_nodes_last_canvas = json_parse(json_stringify(ui_nodes_get_canvas(true)));
+			ui_nodes_last_canvas = util_clone_canvas(ui_nodes_get_canvas(true));
 		}
 
 		// Nodes
@@ -1449,7 +1449,7 @@ function ui_nodes_make_node(n: zui_node_t, nodes: zui_nodes_t, canvas: zui_node_
 function ui_nodes_make_group_node(group_canvas: zui_node_canvas_t, nodes: zui_nodes_t, canvas: zui_node_canvas_t): zui_node_t {
 	let category: zui_node_t[] = nodes_material_list[5];
 	let n: zui_node_t = category[0];
-	let node: zui_node_t = json_parse(json_stringify(n));
+	let node: zui_node_t = util_clone_canvas_node(n);
 	node.name = group_canvas.name;
 	node.id = zui_next_node_id(canvas.nodes);
 	node.x = ui_nodes_get_node_x();
@@ -1538,7 +1538,7 @@ function ui_nodes_traverse_group(mgroups: zui_node_canvas_t[], c: zui_node_canva
 					array_push(canvases, g.canvas);
 				}
 				let group: zui_node_canvas_t = ui_nodes_get_group(canvases, n.name);
-				array_push(mgroups, json_parse(json_stringify(group)));
+				array_push(mgroups, util_clone_canvas(group));
 				ui_nodes_traverse_group(mgroups, group);
 			}
 		}
