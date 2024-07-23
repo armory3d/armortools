@@ -2,8 +2,6 @@ let project = new Project('plugins');
 
 project.addFile('sources/**');
 
-project.addDefine('WITH_PLUGIN_EMBED');
-
 if (platform === Platform.Windows) {
 	project.addLib('sources/proc_texsynth/win32/texsynth');
 }

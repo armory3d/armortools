@@ -54,6 +54,8 @@ let project = new Project("Base");
 		}
 	}
 
+	project.addDefine('WITH_PLUGINS');
+	project.addFile("sources/plugin_api.c");
 	project.addProject("../" + dir + "/plugins");
 }
 
