@@ -54,7 +54,7 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 		let bnoise_scramble: image_t = map_get(scene_embedded, "bnoise_scramble.k");
 		let bnoise_rank: image_t = map_get(scene_embedded, "bnoise_rank.k");
 
-		let l: any = base_flatten(true);
+		let l: slot_layer_t = base_flatten(true);
 		krom_raytrace_set_textures(l.texpaint, l.texpaint_nor, l.texpaint_pack, saved_envmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
 	}
 
@@ -117,8 +117,8 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 	render_path_raytrace_f32a[22] *= scene_meshes[0].data.scale_tex;
 	///end
 
-	let framebuffer: image_t = map_get(render_path_render_targets, "buf")._image;
-	krom_raytrace_dispatch_rays(framebuffer.render_target_, render_path_raytrace_f32a.buffer);
+	let framebuffer: render_target_t = map_get(render_path_render_targets, "buf");
+	krom_raytrace_dispatch_rays(framebuffer._image.render_target_, render_path_raytrace_f32a);
 
 	if (context_raw.ddirty == 1 || context_raw.pdirty == 1) {
 		///if krom_metal

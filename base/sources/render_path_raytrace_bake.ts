@@ -20,9 +20,12 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 		render_path_raytrace_bake_last_layer = null;
 
 		if (map_get(render_path_render_targets, "baketex0") != null) {
-			image_unload(map_get(render_path_render_targets, "baketex0")._image);
-			image_unload(map_get(render_path_render_targets, "baketex1")._image);
-			image_unload(map_get(render_path_render_targets, "baketex2")._image);
+			let baketex0: render_target_t = map_get(render_path_render_targets, "baketex0");
+			let baketex1: render_target_t = map_get(render_path_render_targets, "baketex1");
+			let baketex2: render_target_t = map_get(render_path_render_targets, "baketex2");
+			image_unload(baketex0._image);
+			image_unload(baketex1._image);
+			image_unload(baketex2._image);
 		}
 
 		{
@@ -52,10 +55,11 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 
 		let _bake_type: bake_type_t = context_raw.bake_type;
 		context_raw.bake_type = bake_type_t.INIT;
-		parse_paint_material();
+		parse_paint_material(true);
 		render_path_set_target("baketex0");
 		render_path_clear_target(0x00000000); // Pixels with alpha of 0.0 are skipped during raytracing
-		render_path_set_target("baketex0", ["baketex1"]);
+		let additional: string[] = ["baketex1"];
+		render_path_set_target("baketex0", additional);
 		render_path_draw_meshes("paint");
 		context_raw.bake_type = _bake_type;
 		app_notify_on_next_frame(parse_paint_material);
@@ -75,13 +79,13 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 		render_path_raytrace_last_envmap = saved_envmap;
 		render_path_raytrace_bake_last_layer = context_raw.layer.texpaint;
 
-		let baketex0: image_t = map_get(render_path_render_targets, "baketex0")._image;
-		let baketex1: image_t = map_get(render_path_render_targets, "baketex1")._image;
+		let baketex0: render_target_t = map_get(render_path_render_targets, "baketex0");
+		let baketex1: render_target_t = map_get(render_path_render_targets, "baketex1");
+		let texpaint_undo: render_target_t = map_get(render_path_render_targets, "texpaint_undo" + history_undo_i);
 		let bnoise_sobol: image_t = map_get(scene_embedded, "bnoise_sobol.k");
 		let bnoise_scramble: image_t = map_get(scene_embedded, "bnoise_scramble.k");
 		let bnoise_rank: image_t = map_get(scene_embedded, "bnoise_rank.k");
-		let texpaint_undo: image_t = map_get(render_path_render_targets, "texpaint_undo" + history_undo_i)._image;
-		krom_raytrace_set_textures(baketex0, baketex1, texpaint_undo, saved_envmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
+		krom_raytrace_set_textures(baketex0._image, baketex1._image, texpaint_undo._image, saved_envmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
 	}
 
 	if (context_raw.brush_time > 0) {
@@ -99,10 +103,12 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 		f32a[5] = context_raw.bake_up_axis;
 		f32a[6] = context_raw.envmap_angle;
 
-		let framebuffer: image_t = map_get(render_path_render_targets, "baketex2")._image;
-		krom_raytrace_dispatch_rays(framebuffer.render_target_, f32a.buffer);
+		let framebuffer: render_target_t = map_get(render_path_render_targets, "baketex2");
+		krom_raytrace_dispatch_rays(framebuffer._image.render_target_, f32a);
 
-		render_path_set_target("texpaint" + context_raw.layer.id);
+		let id: i32 = context_raw.layer.id;
+		let texpaint_id: string = "texpaint" + id;
+		render_path_set_target(texpaint_id);
 		render_path_bind_target("baketex2", "tex");
 		render_path_draw_shader("shader_datas/copy_pass/copy_pass");
 

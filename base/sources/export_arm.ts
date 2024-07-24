@@ -325,10 +325,11 @@ function export_arm_run_material(path: string) {
 	let micons: buffer_t[] = null;
 	if (!is_cloud) {
 		///if (krom_metal || krom_vulkan)
-		micons = [lz4_encode(export_arm_bgra_swap(image_get_pixels(m.image)))];
+		let buf: buffer_t = lz4_encode(export_arm_bgra_swap(image_get_pixels(m.image)));
 		///else
-		micons = [lz4_encode(image_get_pixels(m.image))];
+		let buf: buffer_t = lz4_encode(image_get_pixels(m.image));
 		///end
+		micons = [buf];
 	}
 
 	let raw: project_format_t = {
@@ -357,12 +358,11 @@ function export_arm_run_material(path: string) {
 ///end
 
 ///if (krom_metal || krom_vulkan)
-function export_arm_bgra_swap(buffer: buffer_t) {
-	let view: buffer_view_t = buffer_view_create(buffer);
-	for (let i: i32 = 0; i < math_floor(buffer_size(buffer) / 4); ++i) {
-		let r: i32 = buffer_view_get_u8(view, i * 4);
-		buffer_view_set_u8(view, i * 4, buffer_view_get_u8(view, i * 4 + 2));
-		buffer_view_set_u8(view, i * 4 + 2, r);
+function export_arm_bgra_swap(buffer: buffer_t): buffer_t {
+	for (let i: i32 = 0; i < math_floor((buffer.length) / 4); ++i) {
+		let r: i32 = buffer[i * 4];
+		buffer[i * 4] = buffer[i * 4 + 2];
+		buffer[i * 4 + 2] = r;
 	}
 	return buffer;
 }
@@ -396,10 +396,11 @@ function export_arm_run_brush(path: string) {
 	let bicons: buffer_t[] = null;
 	if (!is_cloud) {
 		///if (krom_metal || krom_vulkan)
-		bicons = [lz4_encode(export_arm_bgra_swap(image_get_pixels(b.image)))];
+		let buf: buffer_t = lz4_encode(export_arm_bgra_swap(image_get_pixels(b.image)));
 		///else
-		bicons = [lz4_encode(image_get_pixels(b.image))];
+		let buf: buffer_t = lz4_encode(image_get_pixels(b.image));
 		///end
+		bicons = [buf];
 	}
 
 	let raw: project_format_t = {

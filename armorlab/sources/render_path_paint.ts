@@ -199,11 +199,12 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 	g4_set_float3(base_cursor_camera_right, right.x, right.y, right.z);
 	g4_set_float3(base_cursor_tint, tint_r, tint_g, tint_b);
 	g4_set_mat(base_cursor_vp, scene_camera.vp);
-	let helpMat = mat4_identity();
-	mat4_get_inv(helpMat, scene_camera.vp);
-	g4_set_mat(base_cursor_inv_vp, helpMat);
+	let help_mat = mat4_identity();
+	mat4_get_inv(help_mat, scene_camera.vp);
+	g4_set_mat(base_cursor_inv_vp, help_mat);
 	///if (krom_metal || krom_vulkan)
-	g4_set_vertex_buffer(mesh_data_get(geom, [{name: "tex", data: "short2norm"}]));
+	let vs: vertex_structure_t[] = [{name: "tex", data: "short2norm"}];
+	g4_set_vertex_buffer(mesh_data_get(geom, vs));
 	///else
 	g4_set_vertex_buffer(geom._vertexBuffer);
 	///end

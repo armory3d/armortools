@@ -136,7 +136,13 @@ function util_uv_cache_dilate_map() {
 	g4_clear(0x00000000);
 	g4_set_pipeline(util_uv_pipe_dilate);
 	///if (krom_metal || krom_vulkan)
-	g4_set_vertex_buffer(mesh_data_get(geom, [{name: "tex", data: "short2norm"}]));
+	let vs: vertex_element_t[] = [
+		{
+			name: "tex",
+			data: "short2norm"
+		}
+	];
+	g4_set_vertex_buffer(mesh_data_get(geom, vs));
 	///else
 	g4_set_vertex_buffer(geom._.vertex_buffer);
 	///end
