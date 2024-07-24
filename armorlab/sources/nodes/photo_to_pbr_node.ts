@@ -69,7 +69,7 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): i
 		g2_end();
 
 		let bytes_img = image_get_pixels(photo_to_pbr_node_temp);
-		let u8a = u8_array_create_from_buffer(bytes_img);
+		let u8a = bytes_img;
 		let f32a = f32_array_create(3 * photo_to_pbr_node_tile_with_border_w * photo_to_pbr_node_tile_with_border_w);
 		for (let i: i32 = 0; i < (photo_to_pbr_node_tile_with_border_w * photo_to_pbr_node_tile_with_border_w); ++i) {
 			f32a[i] = (u8a[i * 4] / 255 - 0.5) / 0.5;
@@ -167,8 +167,8 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): i
 
 ///if (krom_metal || krom_vulkan)
 function photo_to_pbr_node_bgra_swap(buffer: buffer_t) {
-	let u8a = u8_array_create_from_buffer(buffer);
-	for (let i: i32 = 0; i < math_floor(buffer_size(buffer) / 4); ++i) {
+	let u8a = buffer;
+	for (let i: i32 = 0; i < math_floor(buffer.length / 4); ++i) {
 		let r = u8a[i * 4];
 		u8a[i * 4] = u8a[i * 4 + 2];
 		u8a[i * 4 + 2] = r;

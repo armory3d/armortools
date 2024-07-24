@@ -572,7 +572,7 @@ function ui_menu_render() {
 				save += path_sep + "tmp.txt";
 				krom_sys_command("wmic path win32_VideoController get name > \"" + save + "\"");
 				let blob: buffer_t = krom_load_blob(save);
-				let u8: u8_array_t = u8_array_create_from_buffer(blob);
+				let u8: u8_array_t = blob;
 				let gpu_raw: string = "";
 				for (let i: i32 = 0; i < math_floor(u8.length / 2); ++i) {
 					let c: string = string_from_char_code(u8[i * 2]);

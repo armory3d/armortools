@@ -91,8 +91,7 @@ function render_path_deferred_init() {
 		t.height = 1;
 		t.format = "R8";
 		let b: buffer_t = buffer_create(1);
-		let v: buffer_view_t = buffer_view_create(b);
-		buffer_view_set_u8(v, 0, 255);
+		buffer_set_u8(b, 0, 255);
 		t._image = image_from_bytes(b, t.width, t.height, tex_format_t.R8);
 		map_set(render_path_render_targets, t.name, t);
 	}
@@ -103,11 +102,10 @@ function render_path_deferred_init() {
 		t.height = 1;
 		t.format = "RGBA32";
 		let b: buffer_t = buffer_create(4);
-		let v: buffer_view_t = buffer_view_create(b);
-		buffer_view_set_u8(v, 0, 0);
-		buffer_view_set_u8(v, 1, 0);
-		buffer_view_set_u8(v, 2, 0);
-		buffer_view_set_u8(v, 3, 0);
+		buffer_set_u8(b, 0, 0);
+		buffer_set_u8(b, 1, 0);
+		buffer_set_u8(b, 2, 0);
+		buffer_set_u8(b, 3, 0);
 		t._image = image_from_bytes(b, t.width, t.height, tex_format_t.RGBA32);
 		map_set(render_path_render_targets, t.name, t);
 	}

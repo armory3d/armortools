@@ -153,18 +153,18 @@ function util_uv_cache_dilate_map() {
 	util_uv_dilate_bytes = null;
 }
 
-function _util_uv_check(c: coord_t, w: i32, h: i32, r: i32, view: buffer_view_t, coords: coord_t[]) {
+function _util_uv_check(c: coord_t, w: i32, h: i32, r: i32, view: buffer_t, coords: coord_t[]) {
 	if (c.x < 0 || c.x >= w || c.y < 0 || c.y >= h) {
 		return;
 	}
-	if (buffer_view_get_u8(view, c.y * w + c.x) == 255) {
+	if (buffer_get_u8(view, c.y * w + c.x) == 255) {
 		return;
 	}
-	let dilate_view: buffer_view_t = buffer_view_create(util_uv_dilate_bytes);
-	if (buffer_view_get_u8(dilate_view, c.y * r * util_uv_dilatemap.width + c.x * r) == 0) {
+	let dilate_view: buffer_t = util_uv_dilate_bytes;
+	if (buffer_get_u8(dilate_view, c.y * r * util_uv_dilatemap.width + c.x * r) == 0) {
 		return;
 	}
-	buffer_view_set_u8(view, c.y * w + c.x, 255);
+	buffer_set_u8(view, c.y * w + c.x, 255);
 	let co: coord_t = { x: c.x + 1, y: c.y };
 	array_push(coords, co);
 	co = { x: c.x - 1, y: c.y };
@@ -186,12 +186,11 @@ function util_uv_cache_uv_island_map() {
 	let x: i32 = math_floor(context_raw.uvx_picked * w);
 	let y: i32 = math_floor(context_raw.uvy_picked * h);
 	let bytes: buffer_t = buffer_create(w * h);
-	let view: buffer_view_t = buffer_view_create(bytes);
 	let coords: coord_t[] = [{ x: x, y: y }];
 	let r: i32 = math_floor(util_uv_dilatemap.width / w);
 
 	while (coords.length > 0) {
-		_util_uv_check(array_pop(coords), w, h, r, view, coords);
+		_util_uv_check(array_pop(coords), w, h, r, bytes, coords);
 	}
 
 	if (util_uv_uvislandmap != null) {

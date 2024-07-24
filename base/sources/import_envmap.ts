@@ -120,14 +120,13 @@ function import_envmap_get_spherical_harmonics(source: buffer_t, source_width: i
 	let weight3: f32 = weight * 15 / 17;
 	let weight4: f32 = weight * 5 / 68;
 	let weight5: f32 = weight * 15 / 68;
-	let view: buffer_view_t = buffer_view_create(source);
 
 	for (let x: i32 = 0; x < source_width; ++x) {
 		for (let y: i32 = 0; y < source_height; ++y) {
 			import_envmap_n = import_envmap_reverse_equirect(x / source_width, y / source_height);
 
 			for (let i: i32 = 0; i < 3; ++i) {
-				let value: f32 = buffer_view_get_f32(view, ((x + y * source_width) * 16 + i * 4));
+				let value: f32 = buffer_get_f32(source, ((x + y * source_width) * 16 + i * 4));
 				value = math_pow(value, 1.0 / 2.2);
 
 				sh[0 + i] += value * weight1;

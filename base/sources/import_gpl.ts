@@ -6,7 +6,6 @@ function import_gpl_run(path: string, replace_existing: bool) {
 	// let str: string = sys_buffer_to_string(b);
 	// let lines: string[] = string_split(str, "\n");
 
-	// let view: buffer_view_t = buffer_view_create(b);
 	// // GIMP's color palette importer: https://gitlab.gnome.org/GNOME/gimp/-/blob/gimp-2-10/app/core/gimppalette-load.c#L39
 	// if (!starts_with(lines[0], "GIMP Palette")) {
 	// 	console_error(tr("Not a valid GIMP color palette"));

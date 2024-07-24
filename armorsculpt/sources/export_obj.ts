@@ -93,5 +93,5 @@ function export_obj_run(path: string, paint_objects: mesh_object_t[], apply_disp
 	}
 
 	let b = u8_array_t.from(o).buffer;
-	krom_file_save_bytes(path, b, buffer_size(b));
+	krom_file_save_bytes(path, b, b.length);
 }

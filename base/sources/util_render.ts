@@ -449,9 +449,9 @@ function util_render_create_screen_aligned_full_data() {
 	g4_vertex_struct_add(structure, "tex", vertex_data_t.I16_2X_NORM);
 	g4_vertex_struct_add(structure, "col", vertex_data_t.I16_4X_NORM);
 	util_render_screen_aligned_full_vb = g4_vertex_buffer_create(math_floor(data.length / math_floor(g4_vertex_struct_byte_size(structure) / 4)), structure, usage_t.STATIC);
-	let vertices: buffer_view_t = g4_vertex_buffer_lock(util_render_screen_aligned_full_vb);
-	for (let i: i32 = 0; i < math_floor(buffer_view_size(vertices) / 2); ++i) {
-		buffer_view_set_i16(vertices, i * 2, data[i]);
+	let vertices: buffer_t = g4_vertex_buffer_lock(util_render_screen_aligned_full_vb);
+	for (let i: i32 = 0; i < math_floor((vertices.length) / 2); ++i) {
+		buffer_set_i16(vertices, i * 2, data[i]);
 	}
 	g4_vertex_buffer_unlock(util_render_screen_aligned_full_vb);
 

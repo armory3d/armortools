@@ -155,16 +155,16 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 				let picker1: render_target_t = map_get(render_path_render_targets, "texpaint_posnortex_picker1");
 				let texpaint_posnortex_picker0: image_t = picker0._image;
 				let texpaint_posnortex_picker1: image_t = picker1._image;
-				let a: buffer_view_t = buffer_view_create(image_get_pixels(texpaint_posnortex_picker0));
-				let b: buffer_view_t = buffer_view_create(image_get_pixels(texpaint_posnortex_picker1));
-				context_raw.posx_picked = buffer_view_get_f32(a, 0);
-				context_raw.posy_picked = buffer_view_get_f32(a, 4);
-				context_raw.posz_picked = buffer_view_get_f32(a, 8);
-				context_raw.uvx_picked = buffer_view_get_f32(a, 12);
-				context_raw.norx_picked = buffer_view_get_f32(b, 0);
-				context_raw.nory_picked = buffer_view_get_f32(b, 4);
-				context_raw.norz_picked = buffer_view_get_f32(b, 8);
-				context_raw.uvy_picked = buffer_view_get_f32(b, 12);
+				let a: buffer_t = image_get_pixels(texpaint_posnortex_picker0);
+				let b: buffer_t = image_get_pixels(texpaint_posnortex_picker1);
+				context_raw.posx_picked = buffer_get_f32(a, 0);
+				context_raw.posy_picked = buffer_get_f32(a, 4);
+				context_raw.posz_picked = buffer_get_f32(a, 8);
+				context_raw.uvx_picked = buffer_get_f32(a, 12);
+				context_raw.norx_picked = buffer_get_f32(b, 0);
+				context_raw.nory_picked = buffer_get_f32(b, 4);
+				context_raw.norz_picked = buffer_get_f32(b, 8);
+				context_raw.uvy_picked = buffer_get_f32(b, 12);
 			}
 			else {
 				let additional: string[] = ["texpaint_nor_picker", "texpaint_pack_picker", "texpaint_uv_picker"];
@@ -189,10 +189,10 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 				let texpaint_nor_picker: render_target_t = map_get(render_path_render_targets, "texpaint_nor_picker");
 				let texpaint_pack_picker: render_target_t = map_get(render_path_render_targets, "texpaint_pack_picker");
 				let texpaint_uv_picker: render_target_t = map_get(render_path_render_targets, "texpaint_uv_picker");
-				let a: buffer_view_t = buffer_view_create(image_get_pixels(texpaint_picker._image));
-				let b: buffer_view_t = buffer_view_create(image_get_pixels(texpaint_nor_picker._image));
-				let c: buffer_view_t = buffer_view_create(image_get_pixels(texpaint_pack_picker._image));
-				let d: buffer_view_t = buffer_view_create(image_get_pixels(texpaint_uv_picker._image));
+				let a: buffer_t = image_get_pixels(texpaint_picker._image);
+				let b: buffer_t = image_get_pixels(texpaint_nor_picker._image);
+				let c: buffer_t = image_get_pixels(texpaint_pack_picker._image);
+				let d: buffer_t = image_get_pixels(texpaint_uv_picker._image);
 
 				if (context_raw.color_picker_callback != null) {
 					context_raw.color_picker_callback(context_raw.picked_color);
@@ -209,23 +209,23 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 				let i2: i32 = 2;
 				///end
 				let i3: i32 = 3;
-				context_raw.picked_color.base = color_set_rb(context_raw.picked_color.base, buffer_view_get_u8(a, i0));
-				context_raw.picked_color.base = color_set_gb(context_raw.picked_color.base, buffer_view_get_u8(a, i1));
-				context_raw.picked_color.base = color_set_bb(context_raw.picked_color.base, buffer_view_get_u8(a, i2));
-				context_raw.picked_color.normal = color_set_rb(context_raw.picked_color.normal, buffer_view_get_u8(b, i0));
-				context_raw.picked_color.normal = color_set_gb(context_raw.picked_color.normal, buffer_view_get_u8(b, i1));
-				context_raw.picked_color.normal = color_set_bb(context_raw.picked_color.normal, buffer_view_get_u8(b, i2));
-				context_raw.picked_color.occlusion = buffer_view_get_u8(c, i0) / 255;
-				context_raw.picked_color.roughness = buffer_view_get_u8(c, i1) / 255;
-				context_raw.picked_color.metallic = buffer_view_get_u8(c, i2) / 255;
-				context_raw.picked_color.height = buffer_view_get_u8(c, i3) / 255;
-				context_raw.picked_color.opacity = buffer_view_get_u8(a, i3) / 255;
-				context_raw.uvx_picked = buffer_view_get_u8(d, i0) / 255;
-				context_raw.uvy_picked = buffer_view_get_u8(d, i1) / 255;
+				context_raw.picked_color.base = color_set_rb(context_raw.picked_color.base, buffer_get_u8(a, i0));
+				context_raw.picked_color.base = color_set_gb(context_raw.picked_color.base, buffer_get_u8(a, i1));
+				context_raw.picked_color.base = color_set_bb(context_raw.picked_color.base, buffer_get_u8(a, i2));
+				context_raw.picked_color.normal = color_set_rb(context_raw.picked_color.normal, buffer_get_u8(b, i0));
+				context_raw.picked_color.normal = color_set_gb(context_raw.picked_color.normal, buffer_get_u8(b, i1));
+				context_raw.picked_color.normal = color_set_bb(context_raw.picked_color.normal, buffer_get_u8(b, i2));
+				context_raw.picked_color.occlusion = buffer_get_u8(c, i0) / 255;
+				context_raw.picked_color.roughness = buffer_get_u8(c, i1) / 255;
+				context_raw.picked_color.metallic = buffer_get_u8(c, i2) / 255;
+				context_raw.picked_color.height = buffer_get_u8(c, i3) / 255;
+				context_raw.picked_color.opacity = buffer_get_u8(a, i3) / 255;
+				context_raw.uvx_picked = buffer_get_u8(d, i0) / 255;
+				context_raw.uvy_picked = buffer_get_u8(d, i1) / 255;
 				// Pick material
 				if (context_raw.picker_select_material && context_raw.color_picker_callback == null) {
 					// matid % 3 == 0 - normal, 1 - emission, 2 - subsurface
-					let matid: i32 = math_floor((buffer_view_get_u8(b, 3) - (buffer_view_get_u8(b, 3) % 3)) / 3);
+					let matid: i32 = math_floor((buffer_get_u8(b, 3) - (buffer_get_u8(b, 3) % 3)) / 3);
 					for (let i: i32 = 0; i < project_materials.length; ++i) {
 						let m: slot_material_t = project_materials[i];
 						if (m.id == matid) {

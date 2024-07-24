@@ -385,55 +385,55 @@ function export_texture_run_layers(path: string, layers: any[], object_name: str
 			for (let i: i32 = 0; i < 4; ++i) {
 				let c: string = t.channels[i];
 				if (c == "base_r") {
-					export_texture_copy_channel(buffer_view_create(pixpaint), 0, buffer_view_create(pix), i, t.color_space == "linear");
+					export_texture_copy_channel(pixpaint, 0, pix, i, t.color_space == "linear");
 				}
 				else if (c == "base_g") {
-					export_texture_copy_channel(buffer_view_create(pixpaint), 1, buffer_view_create(pix), i, t.color_space == "linear");
+					export_texture_copy_channel(pixpaint, 1, pix, i, t.color_space == "linear");
 				}
 				else if (c == "base_b") {
-					export_texture_copy_channel(buffer_view_create(pixpaint), 2, buffer_view_create(pix), i, t.color_space == "linear");
+					export_texture_copy_channel(pixpaint, 2, pix, i, t.color_space == "linear");
 				}
 				else if (c == "height") {
-					export_texture_copy_channel(buffer_view_create(pixpaint_pack), 3, buffer_view_create(pix), i, t.color_space == "linear");
+					export_texture_copy_channel(pixpaint_pack, 3, pix, i, t.color_space == "linear");
 				}
 				else if (c == "metal") {
-					export_texture_copy_channel(buffer_view_create(pixpaint_pack), 2, buffer_view_create(pix), i, t.color_space == "linear");
+					export_texture_copy_channel(pixpaint_pack, 2, pix, i, t.color_space == "linear");
 				}
 				else if (c == "nor_r") {
-					export_texture_copy_channel(buffer_view_create(pixpaint_nor), 0, buffer_view_create(pix), i, t.color_space == "linear");
+					export_texture_copy_channel(pixpaint_nor, 0, pix, i, t.color_space == "linear");
 				}
 				else if (c == "nor_g") {
-					export_texture_copy_channel(buffer_view_create(pixpaint_nor), 1, buffer_view_create(pix), i, t.color_space == "linear");
+					export_texture_copy_channel(pixpaint_nor, 1, pix, i, t.color_space == "linear");
 				}
 				else if (c == "nor_g_directx") {
-					export_texture_copy_channel_inv(buffer_view_create(pixpaint_nor), 1, buffer_view_create(pix), i, t.color_space == "linear");
+					export_texture_copy_channel_inv(pixpaint_nor, 1, pix, i, t.color_space == "linear");
 				}
 				else if (c == "nor_b") {
-					export_texture_copy_channel(buffer_view_create(pixpaint_nor), 2, buffer_view_create(pix), i, t.color_space == "linear");
+					export_texture_copy_channel(pixpaint_nor, 2, pix, i, t.color_space == "linear");
 				}
 				else if (c == "occ") {
-					export_texture_copy_channel(buffer_view_create(pixpaint_pack), 0, buffer_view_create(pix), i, t.color_space == "linear");
+					export_texture_copy_channel(pixpaint_pack, 0, pix, i, t.color_space == "linear");
 				}
 				else if (c == "opac") {
-					export_texture_copy_channel(buffer_view_create(pixpaint), 3, buffer_view_create(pix), i, t.color_space == "linear");
+					export_texture_copy_channel(pixpaint, 3, pix, i, t.color_space == "linear");
 				}
 				else if (c == "rough") {
-					export_texture_copy_channel(buffer_view_create(pixpaint_pack), 1, buffer_view_create(pix), i, t.color_space == "linear");
+					export_texture_copy_channel(pixpaint_pack, 1, pix, i, t.color_space == "linear");
 				}
 				else if (c == "smooth") {
-					export_texture_copy_channel_inv(buffer_view_create(pixpaint_pack), 1, buffer_view_create(pix), i, t.color_space == "linear");
+					export_texture_copy_channel_inv(pixpaint_pack, 1, pix, i, t.color_space == "linear");
 				}
 				else if (c == "emis") {
-					export_texture_extract_channel(buffer_view_create(pixpaint_nor), 3, buffer_view_create(pix), i, 3, 1, t.color_space == "linear");
+					export_texture_extract_channel(pixpaint_nor, 3, pix, i, 3, 1, t.color_space == "linear");
 				}
 				else if (c == "subs") {
-					export_texture_extract_channel(buffer_view_create(pixpaint_nor), 3, buffer_view_create(pix), i, 3, 2, t.color_space == "linear");
+					export_texture_extract_channel(pixpaint_nor, 3, pix, i, 3, 2, t.color_space == "linear");
 				}
 				else if (c == "0.0") {
-					export_texture_set_channel(0, buffer_view_create(pix), i);
+					export_texture_set_channel(0, pix, i);
 				}
 				else if (c == "1.0") {
-					export_texture_set_channel(255, buffer_view_create(pix), i);
+					export_texture_set_channel(255, pix, i);
 				}
 			}
 			export_texture_write_texture(path + path_sep + f + tex_name + ext, pix, 3);
@@ -498,49 +498,49 @@ function export_texture_write_texture(file: string, pixels: buffer_t, type: i32 
 	}
 	else { // Exr
 		let b: buffer_t = parser_exr_run(res_x, res_y, pixels, bits, type, off);
-		krom_file_save_bytes(file, b, buffer_size(b));
+		krom_file_save_bytes(file, b, b.length);
 	}
 }
 
-function export_texture_copy_channel(from: buffer_view_t, from_channel: i32, to: buffer_view_t, to_channel: i32, linear: bool = true) {
-	for (let i: i32 = 0; i < math_floor(buffer_view_size(to) / 4); ++i) {
-		buffer_view_set_u8(to, i * 4 + to_channel, buffer_view_get_u8(from, i * 4 + from_channel));
+function export_texture_copy_channel(from: buffer_t, from_channel: i32, to: buffer_t, to_channel: i32, linear: bool = true) {
+	for (let i: i32 = 0; i < math_floor((to.length) / 4); ++i) {
+		buffer_set_u8(to, i * 4 + to_channel, buffer_get_u8(from, i * 4 + from_channel));
 	}
 	if (!linear) {
 		export_texture_to_srgb(to, to_channel);
 	}
 }
 
-function export_texture_copy_channel_inv(from: buffer_view_t, from_channel: i32, to: buffer_view_t, to_channel: i32, linear: bool = true) {
-	for (let i: i32 = 0; i < math_floor(buffer_view_size(to) / 4); ++i) {
-		buffer_view_set_u8(to, i * 4 + to_channel, 255 - buffer_view_get_u8(from, i * 4 + from_channel));
+function export_texture_copy_channel_inv(from: buffer_t, from_channel: i32, to: buffer_t, to_channel: i32, linear: bool = true) {
+	for (let i: i32 = 0; i < math_floor((to.length) / 4); ++i) {
+		buffer_set_u8(to, i * 4 + to_channel, 255 - buffer_get_u8(from, i * 4 + from_channel));
 	}
 	if (!linear) {
 		export_texture_to_srgb(to, to_channel);
 	}
 }
 
-function export_texture_extract_channel(from: buffer_view_t, from_channel: i32, to: buffer_view_t, to_channel: i32, step: i32, mask: i32, linear: bool = true) {
-	for (let i: i32 = 0; i < math_floor(buffer_view_size(to) / 4); ++i) {
-		buffer_view_set_u8(to, i * 4 + to_channel, buffer_view_get_u8(from, i * 4 + from_channel) % step == mask ? 255 : 0);
+function export_texture_extract_channel(from: buffer_t, from_channel: i32, to: buffer_t, to_channel: i32, step: i32, mask: i32, linear: bool = true) {
+	for (let i: i32 = 0; i < math_floor((to.length) / 4); ++i) {
+		buffer_set_u8(to, i * 4 + to_channel, buffer_get_u8(from, i * 4 + from_channel) % step == mask ? 255 : 0);
 	}
 	if (!linear) {
 		export_texture_to_srgb(to, to_channel);
 	}
 }
 
-function export_texture_set_channel(value: i32, to: buffer_view_t, to_channel: i32, linear: bool = true) {
-	for (let i: i32 = 0; i < math_floor(buffer_view_size(to) / 4); ++i) {
-		buffer_view_set_u8(to, i * 4 + to_channel, value);
+function export_texture_set_channel(value: i32, to: buffer_t, to_channel: i32, linear: bool = true) {
+	for (let i: i32 = 0; i < math_floor((to.length) / 4); ++i) {
+		buffer_set_u8(to, i * 4 + to_channel, value);
 	}
 	if (!linear) {
 		export_texture_to_srgb(to, to_channel);
 	}
 }
 
-function export_texture_to_srgb(to: buffer_view_t, to_channel: i32) {
-	for (let i: i32 = 0; i < math_floor(buffer_view_size(to) / 4); ++i) {
-		buffer_view_set_u8(to, i * 4 + to_channel, math_floor(math_pow(buffer_view_get_u8(to, i * 4 + to_channel) / 255, export_texture_gamma) * 255));
+function export_texture_to_srgb(to: buffer_t, to_channel: i32) {
+	for (let i: i32 = 0; i < math_floor((to.length) / 4); ++i) {
+		buffer_set_u8(to, i * 4 + to_channel, math_floor(math_pow(buffer_get_u8(to, i * 4 + to_channel) / 255, export_texture_gamma) * 255));
 	}
 }
 

@@ -56,7 +56,7 @@ function upscale_node_do_tile(source: image_t) {
 	g2_end();
 
 	let bytes_img = image_get_pixels(upscale_node_temp);
-	let u8a = u8_array_create_from_buffer(bytes_img);
+	let u8a = bytes_img;
 	let f32a = f32_array_create(3 * size1w * size1h);
 	for (let i: i32 = 0; i < (size1w * size1h); ++i) {
 		f32a[i                      ] = (u8a[i * 4    ] / 255);

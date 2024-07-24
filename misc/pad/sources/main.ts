@@ -251,7 +251,7 @@ function save_file() {
 	text_handle.text = storage.text;
 	// Write bytes
 	// let bytes: buffer_t = ends_with(storage.file, ".arm") ? armpack_encode(json_parse(storage.text)) : sys_string_to_buffer(storage.text);
-	// krom_file_save_bytes(storage.file, bytes, buffer_size(bytes));
+	// krom_file_save_bytes(storage.file, bytes, bytes.length);
 	storage.modified = false;
 }
 

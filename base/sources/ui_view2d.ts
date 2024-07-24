@@ -269,7 +269,7 @@ function ui_view2d_render() {
 					g2_begin(texpaint_picker);
 					g2_draw_scaled_image(_ui_view2d_render_tex, -_ui_view2d_render_x, -_ui_view2d_render_y, _ui_view2d_render_tw, _ui_view2d_render_th);
 					g2_end();
-					let a: buffer_view_t = buffer_view_create(image_get_pixels(texpaint_picker));
+					let a: buffer_t = image_get_pixels(texpaint_picker);
 					///if (krom_metal || krom_vulkan)
 					let i0: i32 = 2;
 					let i1: i32 = 1;
@@ -280,9 +280,9 @@ function ui_view2d_render() {
 					let i2: i32 = 2;
 					///end
 
-					context_raw.picked_color.base = color_set_rb(context_raw.picked_color.base, buffer_view_get_u8(a, i0));
-					context_raw.picked_color.base = color_set_gb(context_raw.picked_color.base, buffer_view_get_u8(a, i1));
-					context_raw.picked_color.base = color_set_bb(context_raw.picked_color.base, buffer_view_get_u8(a, i2));
+					context_raw.picked_color.base = color_set_rb(context_raw.picked_color.base, buffer_get_u8(a, i0));
+					context_raw.picked_color.base = color_set_gb(context_raw.picked_color.base, buffer_get_u8(a, i1));
+					context_raw.picked_color.base = color_set_bb(context_raw.picked_color.base, buffer_get_u8(a, i2));
 					ui_header_handle.redraws = 2;
 				});
 			}

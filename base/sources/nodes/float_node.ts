@@ -33,11 +33,10 @@ function float_node_get_as_image(self: float_node_t, from: i32): image_t {
 		image_unload(self.image);
 	}
 	let b: buffer_t = buffer_create(16);
-	let v: buffer_view_t = buffer_view_create(b);
-	buffer_view_set_f32(v, 0, self.value);
-	buffer_view_set_f32(v, 4, self.value);
-	buffer_view_set_f32(v, 8, self.value);
-	buffer_view_set_f32(v, 12, 1.0);
+	buffer_set_f32(b, 0, self.value);
+	buffer_set_f32(b, 4, self.value);
+	buffer_set_f32(b, 8, self.value);
+	buffer_set_f32(b, 12, 1.0);
 	self.image = image_from_bytes(b, 1, 1, tex_format_t.RGBA128);
 	return self.image;
 }

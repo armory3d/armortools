@@ -1,5 +1,5 @@
 
-let ui_nodes_ext_last_vertices: buffer_view_t = null; // Before displacement
+let ui_nodes_ext_last_vertices: buffer_t = null; // Before displacement
 
 function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 	let ui = ui_nodes_ui;
@@ -81,15 +81,15 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 				let o = project_paint_objects[0];
 				let g = o.data;
 				let vertices = g4_vertex_buffer_lock(g._.vertex_buffer);
-				if (ui_nodes_ext_last_vertices == null || buffer_view_size(ui_nodes_ext_last_vertices) != buffer_view_size(vertices)) {
-					ui_nodes_ext_last_vertices = buffer_view_create(buffer_create(buffer_view_size(vertices)));
-					for (let i: i32 = 0; i < math_floor(buffer_view_size(vertices) / 2); ++i) {
-						buffer_view_set_i16(ui_nodes_ext_last_vertices, i * 2, buffer_view_get_i16(vertices, i * 2));
+				if (ui_nodes_ext_last_vertices == null || ui_nodes_ext_last_vertices.length != vertices.length) {
+					ui_nodes_ext_last_vertices = buffer_create(vertices.length);
+					for (let i: i32 = 0; i < math_floor((vertices.length) / 2); ++i) {
+						buffer_set_i16(ui_nodes_ext_last_vertices, i * 2, buffer_get_i16(vertices, i * 2));
 					}
 				}
 				else {
-					for (let i: i32 = 0; i < math_floor(buffer_view_size(vertices) / 2); ++i) {
-						buffer_view_set_i16(vertices, i * 2, buffer_view_get_i16(ui_nodes_ext_last_vertices, i * 2));
+					for (let i: i32 = 0; i < math_floor((vertices.length) / 2); ++i) {
+						buffer_set_i16(vertices, i * 2, buffer_get_i16(ui_nodes_ext_last_vertices, i * 2));
 					}
 				}
 				g4_vertex_buffer_unlock(g._.vertex_buffer);

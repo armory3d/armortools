@@ -40,7 +40,7 @@ function export_arm_run_mesh(path: string, paint_objects: mesh_object_t[]) {
 	if (!ends_with(path, ".arm")) {
 		path += ".arm";
 	}
-	krom_file_save_bytes(path, b, buffer_size(b) + 1);
+	krom_file_save_bytes(path, b, b.length + 1);
 }
 
 function export_arm_run_project() {
@@ -206,7 +206,7 @@ function export_arm_run_project() {
 	g2_end();
 	///end
 	let mesh_icon_pixels: buffer_t = image_get_pixels(mesh_icon);
-	let u8a: u8_array_t = u8_array_create_from_buffer(mesh_icon_pixels);
+	let u8a: u8_array_t = mesh_icon_pixels;
 	for (let i: i32 = 0; i < 256 * 256 * 4; ++i) {
 		u8a[i] = math_floor(math_pow(u8a[i] / 255, 1.0 / 2.2) * 255);
 	}
@@ -233,7 +233,7 @@ function export_arm_run_project() {
 	///end
 
 	let buffer: buffer_t = encode_project(project_raw);
-	krom_file_save_bytes(project_filepath, buffer, buffer_size(buffer) + 1);
+	krom_file_save_bytes(project_filepath, buffer, buffer.length + 1);
 
 	// Save to recent
 	///if krom_ios
@@ -353,7 +353,7 @@ function export_arm_run_material(path: string) {
 	}
 
 	let buffer: buffer_t = encode_project(raw);
-	krom_file_save_bytes(path, buffer, buffer_size(buffer) + 1);
+	krom_file_save_bytes(path, buffer, buffer.length + 1);
 }
 ///end
 
@@ -420,7 +420,7 @@ function export_arm_run_brush(path: string) {
 	}
 
 	let buffer: buffer_t = encode_project(raw);
-	krom_file_save_bytes(path, buffer, buffer_size(buffer) + 1);
+	krom_file_save_bytes(path, buffer, buffer.length + 1);
 }
 ///end
 
@@ -552,7 +552,7 @@ function export_arm_run_swatches(path: string) {
 		swatches: project_raw.swatches
 	};
 	let buffer: buffer_t = encode_project(raw);
-	krom_file_save_bytes(path, buffer, buffer_size(buffer) + 1);
+	krom_file_save_bytes(path, buffer, buffer.length + 1);
 }
 
 function export_arm_vec3f32(v: vec4_t): f32_array_t {

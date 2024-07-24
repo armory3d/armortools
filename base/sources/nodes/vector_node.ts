@@ -41,14 +41,13 @@ function vector_node_get_as_image(self: vector_node_t, from: i32): image_t {
 		image_unload(self.image);
 	}
 	let b: buffer_t = buffer_create(16);
-	let v: buffer_view_t = buffer_view_create(b);
 	let n0: float_node_t = self.base.inputs[0].node;
 	let n1: float_node_t = self.base.inputs[1].node;
 	let n2: float_node_t = self.base.inputs[2].node;
-	buffer_view_set_f32(v, 0, n0.value);
-	buffer_view_set_f32(v, 4, n1.value);
-	buffer_view_set_f32(v, 8, n2.value);
-	buffer_view_set_f32(v, 12, 1.0);
+	buffer_set_f32(b, 0, n0.value);
+	buffer_set_f32(b, 4, n1.value);
+	buffer_set_f32(b, 8, n2.value);
+	buffer_set_f32(b, 12, 1.0);
 	self.image = image_from_bytes(b, 1, 1, tex_format_t.RGBA128);
 	return self.image;
 }

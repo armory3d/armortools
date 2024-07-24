@@ -181,5 +181,5 @@ function export_obj_run(path: string, paint_objects: mesh_object_t[], apply_disp
 		buffer: o.buffer,
 		length: o.length
 	};
-	krom_file_save_bytes(path, b, buffer_size(b));
+	krom_file_save_bytes(path, b, b.length);
 }

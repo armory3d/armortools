@@ -11,23 +11,23 @@ function parser_exr_write_string(out: i32[], str: string) {
 let _parser_exr_width: i32;
 let _parser_exr_stride: i32;
 let _parser_exr_out: u8[];
-let _parser_exr_src_view: buffer_view_t;
+let _parser_exr_src_view: buffer_t;
 let _parser_exr_write_line: (byte_pos: i32)=> void;
 
 function parser_exr_write_line16(byte_pos: i32) {
 	for (let x: i32 = 0; x < _parser_exr_width; ++x) {
-		array_push(_parser_exr_out, buffer_view_get_u8(_parser_exr_src_view, byte_pos    ));
-		array_push(_parser_exr_out, buffer_view_get_u8(_parser_exr_src_view, byte_pos + 1));
+		array_push(_parser_exr_out, buffer_get_u8(_parser_exr_src_view, byte_pos    ));
+		array_push(_parser_exr_out, buffer_get_u8(_parser_exr_src_view, byte_pos + 1));
 		byte_pos += _parser_exr_stride;
 	}
 }
 
 function parser_exr_write_line32(byte_pos: i32) {
 	for (let x: i32 = 0; x < _parser_exr_width; ++x) {
-		array_push(_parser_exr_out, buffer_view_get_u8(_parser_exr_src_view, byte_pos    ));
-		array_push(_parser_exr_out, buffer_view_get_u8(_parser_exr_src_view, byte_pos + 1));
-		array_push(_parser_exr_out, buffer_view_get_u8(_parser_exr_src_view, byte_pos + 2));
-		array_push(_parser_exr_out, buffer_view_get_u8(_parser_exr_src_view, byte_pos + 3));
+		array_push(_parser_exr_out, buffer_get_u8(_parser_exr_src_view, byte_pos    ));
+		array_push(_parser_exr_out, buffer_get_u8(_parser_exr_src_view, byte_pos + 1));
+		array_push(_parser_exr_out, buffer_get_u8(_parser_exr_src_view, byte_pos + 2));
+		array_push(_parser_exr_out, buffer_get_u8(_parser_exr_src_view, byte_pos + 3));
 		byte_pos += _parser_exr_stride;
 	}
 }
@@ -300,7 +300,7 @@ function parser_exr_run(width: i32, height: i32, src: buffer_t, bits: i32 = 16, 
 	// scanline data
 	let stride: i32 = channels * byte_size;
 	let pos: i32 = 0;
-	let src_view: buffer_view_t = buffer_view_create(src);
+	let src_view: buffer_t = src;
 
 	_parser_exr_width = width;
 	_parser_exr_stride = stride;

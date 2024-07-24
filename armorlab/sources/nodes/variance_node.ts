@@ -40,7 +40,7 @@ function variance_node_get_as_image(self: variance_node_t, from: i32): image_t {
 	g2_end();
 
 	let bytes_img = image_get_pixels(variance_node_temp);
-	let u8a = u8_array_create_from_buffer(bytes_img);
+	let u8a = bytes_img;
 	let f32a = f32_array_create(3 * 512 * 512);
 	for (let i: i32 = 0; i < (512 * 512); ++i) {
 		f32a[i                ] = (u8a[i * 4    ] / 255) * 2.0 - 1.0;

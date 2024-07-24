@@ -37,11 +37,10 @@ function color_node_get_as_image(self: color_node_t, from: i32): image_t {
 		image_unload(self.image);
 	}
 	let b: buffer_t = buffer_create(16);
-	let v: buffer_view_t = buffer_view_create(b);
-	buffer_view_set_f32(v, 0, self.value.x);
-	buffer_view_set_f32(v, 4, self.value.y);
-	buffer_view_set_f32(v, 8, self.value.z);
-	buffer_view_set_f32(v, 12, self.value.w);
+	buffer_set_f32(b, 0, self.value.x);
+	buffer_set_f32(b, 4, self.value.y);
+	buffer_set_f32(b, 8, self.value.z);
+	buffer_set_f32(b, 12, self.value.w);
 	self.image = image_from_bytes(b, 1, 1, tex_format_t.RGBA128);
 	return self.image;
 }

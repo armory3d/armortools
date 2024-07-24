@@ -3,14 +3,14 @@
 // https://github.com/fschutt/mystery-of-the-blend-backup
 // https://web.archive.org/web/20170630054951/http://www.atmind.nl/blender/mystery_ot_blend.html
 // Usage:
-// let bl: blend_t = parser_blend_init(blob: buffer_view_t);
+// let bl: blend_t = parser_blend_init(blob: buffer_t);
 // krom_log(parser_blend_dir(bl, "Scene"));
 // let scenes: any = parser_blend_get(bl, "Scene");
 // krom_log(get(get(scenes[0], "id"), "name"));
 
 type blend_t = {
 	pos?: i32;
-	view?: buffer_view_t;
+	view?: u8_array_t;
 	// Header
 	version?: string;
 	pointer_size?: i32;
@@ -25,10 +25,10 @@ function parser_blend_init(buffer: buffer_t): blend_t {
 	let raw: blend_t = {};
 	raw.blocks = [];
 	raw.map = map_create();
-	raw.view = buffer_view_create(buffer);
+	raw.view = buffer;
 	raw.pos = 0;
 	if (parser_blend_read_chars(raw, 7) != "BLENDER") {
-		raw.view = buffer_view_create(krom_inflate(buffer, false));
+		raw.view = krom_inflate(buffer, false);
 		raw.pos = 0;
 		if (parser_blend_read_chars(raw, 7) != "BLENDER") {
 			return null;
@@ -109,7 +109,7 @@ function parser_blend_parse(raw: blend_t) {
 
 	// Reading file blocks
 	// Header - data
-	while (raw.pos < buffer_view_size(raw.view)) {
+	while (raw.pos < raw.view.length) {
 		parser_blend_align(raw);
 		let b: block_t = {};
 
@@ -201,31 +201,31 @@ function parser_blend_align(raw: blend_t) {
 }
 
 function parser_blend_read_i8(raw: blend_t): i32 {
-	let i: i32 = buffer_view_get_u8(raw.view, raw.pos);
+	let i: i32 = buffer_get_u8(raw.view, raw.pos);
 	raw.pos += 1;
 	return i;
 }
 
 function parser_blend_read_i16(raw: blend_t): i32 {
-	let i: i32 = buffer_view_get_i16(raw.view, raw.pos); //, raw.little_endian
+	let i: i32 = buffer_get_i16(raw.view, raw.pos); //, raw.little_endian
 	raw.pos += 2;
 	return i;
 }
 
 function parser_blend_read_i32(raw: blend_t): i32 {
-	let i: i32 = buffer_view_get_i32(raw.view, raw.pos); //, raw.little_endian
+	let i: i32 = buffer_get_i32(raw.view, raw.pos); //, raw.little_endian
 	raw.pos += 4;
 	return i;
 }
 
 function parser_blend_read_i64(raw: blend_t): i64 {
-	let i: i32 = buffer_view_get_i64(raw.view, raw.pos); //, raw.little_endian
+	let i: i32 = buffer_get_i64(raw.view, raw.pos); //, raw.little_endian
 	raw.pos += 8;
 	return i;
 }
 
 function parser_blend_read_f32(raw: blend_t): f32 {
-	let f: f32 = buffer_view_get_f32(raw.view, raw.pos); //, raw.little_endian
+	let f: f32 = buffer_get_f32(raw.view, raw.pos); //, raw.little_endian
 	raw.pos += 4;
 	return f;
 }

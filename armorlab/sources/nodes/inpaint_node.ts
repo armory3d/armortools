@@ -120,7 +120,7 @@ function inpaint_node_sd_inpaint(image: image_t, mask: image_t): image_t {
 	inpaint_node_init();
 
 	let bytes_img = image_get_pixels(mask);
-	let u8 = u8_array_create_from_buffer(bytes_img);
+	let u8 = bytes_img;
 	let f32mask = f32_array_create(4 * 64 * 64);
 
 	let vae_encoder_blob: buffer_t = data_get_blob("models/sd_vae_encoder.quant.onnx");
@@ -150,7 +150,7 @@ function inpaint_node_sd_inpaint(image: image_t, mask: image_t): image_t {
 			g2_end();
 
 			bytes_img = image_get_pixels(inpaint_node_temp);
-			let u8a = u8_array_create_from_buffer(bytes_img);
+			let u8a = bytes_img;
 			let f32a = f32_array_create(3 * 512 * 512);
 			for (let i: i32 = 0; i < (512 * 512); ++i) {
 				f32a[i                ] = (u8a[i * 4    ] / 255.0) * 2.0 - 1.0;
