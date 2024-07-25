@@ -529,8 +529,20 @@ function node_shader_get_msl(raw: node_shader_t, shared_sampler: string): string
 	// Begin main declaration
 	s += "#undef texture\n";
 
-	s += raw.shader_type == "vert" ? "vertex " : "fragment ";
-	s += (raw.outs.length > 0 || raw.shader_type == "vert") ? "main_out " : "void ";
+	if (raw.shader_type == "vert") {
+		s += "vertex ";
+	}
+	else {
+		s += "fragment ";
+	}
+
+	if (raw.outs.length > 0 || raw.shader_type == "vert") {
+		s += "main_out ";
+	}
+	else {
+		s += "void ";
+	}
+
 	s += "my_main(";
 	//if (ins.length > 0) {
 		s += "main_in in [[stage_in]]";
