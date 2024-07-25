@@ -562,9 +562,10 @@ function node_shader_get_msl(raw: node_shader_t, shared_sampler: string): string
 	if (raw.shared_samplers.length > 0) {
 		for (let i: i32 = 0; i < raw.shared_samplers.length; ++i) {
 			let index: i32 = samplers.length + i;
-			s += ", " + raw + "shared_samplers[i]} [[texture(" + index + ")]]";
+			s += ", " + raw.shared_samplers[i] + " [[texture(" + index + ")]]";
 		}
-		s += ", sampler " + shared_sampler + " [[sampler(" + samplers + "length})]]";
+		let len: i32 = samplers.length;
+		s += ", sampler " + shared_sampler + " [[sampler(" + len + ")]]";
 	}
 
 	// Built-ins
