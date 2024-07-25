@@ -190,7 +190,8 @@ function export_arm_run_project() {
 	};
 
 	///if (krom_android || krom_ios)
-	let tex: image_t = map_get(render_path_render_targets, context_raw.render_mode == render_mode_t.FORWARD ? "buf" : "tex")._image;
+	let rt: render_target_t = map_get(render_path_render_targets, context_raw.render_mode == render_mode_t.FORWARD ? "buf" : "tex");
+	let tex: image_t = rt._image;
 	let mesh_icon: image_t = image_create_render_target(256, 256);
 	let r: f32 = app_w() / app_h();
 	g2_begin(mesh_icon);
@@ -213,7 +214,7 @@ function export_arm_run_project() {
 	///if (krom_metal || krom_vulkan)
 	export_arm_bgra_swap(mesh_icon_pixels);
 	///end
-	app_notify_on_next_frame(function () {
+	app_notify_on_next_frame(function (mesh_icon: image_t) {
 		image_unload(mesh_icon);
 	});
 	// raw.mesh_icons =
