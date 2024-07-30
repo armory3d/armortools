@@ -1,30 +1,4 @@
 
-function encode_scene(raw: scene_t): buffer_t {
-	return null;
-
-	// armpack_encode_start(encoded);
-	// armpack_encode_map(3);
-	// armpack_encode_string("name");
-	// armpack_encode_string(canvas->name);
-}
-
-function encode_scene_size(raw: scene_t): i32 {
-	return 0;
-
-	// uint32_t size = 0;
-	// size += armpack_size_map();
-	// size += armpack_size_string("name");
-	// size += armpack_size_string(canvas->name);
-}
-
-function encode_project(raw: project_format_t): buffer_t {
-	return null;
-}
-
-function encode_project_size(raw: project_format_t): i32 {
-	return 0;
-}
-
 function export_arm_run_mesh(path: string, paint_objects: mesh_object_t[]) {
 	let mesh_datas: mesh_data_t[] = [];
 	for (let i: i32 = 0; i < paint_objects.length; ++i) {
@@ -35,7 +9,7 @@ function export_arm_run_mesh(path: string, paint_objects: mesh_object_t[]) {
 	let raw: scene_t = {
 		mesh_datas: mesh_datas
 	};
-	let b: buffer_t = encode_scene(raw);
+	let b: buffer_t = util_encode_scene(raw);
 
 	if (!ends_with(path, ".arm")) {
 		path += ".arm";
@@ -233,7 +207,7 @@ function export_arm_run_project() {
 	}
 	///end
 
-	let buffer: buffer_t = encode_project(project_raw);
+	let buffer: buffer_t = util_encode_project(project_raw);
 	krom_file_save_bytes(project_filepath, buffer, buffer.length + 1);
 
 	// Save to recent
@@ -353,7 +327,7 @@ function export_arm_run_material(path: string) {
 		export_arm_pack_assets(raw, assets);
 	}
 
-	let buffer: buffer_t = encode_project(raw);
+	let buffer: buffer_t = util_encode_project(raw);
 	krom_file_save_bytes(path, buffer, buffer.length + 1);
 }
 ///end
@@ -420,7 +394,7 @@ function export_arm_run_brush(path: string) {
 		export_arm_pack_assets(raw, assets);
 	}
 
-	let buffer: buffer_t = encode_project(raw);
+	let buffer: buffer_t = util_encode_project(raw);
 	krom_file_save_bytes(path, buffer, buffer.length + 1);
 }
 ///end
@@ -552,7 +526,7 @@ function export_arm_run_swatches(path: string) {
 		version: manifest_version,
 		swatches: project_raw.swatches
 	};
-	let buffer: buffer_t = encode_project(raw);
+	let buffer: buffer_t = util_encode_project(raw);
 	krom_file_save_bytes(path, buffer, buffer.length + 1);
 }
 
