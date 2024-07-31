@@ -37,9 +37,6 @@ cd armortools/armorpaint
 **Android** *wip*
 ```bash
 ../armorcore/make --graphics opengl --target android
-cp -r build/krom/* build/ArmorPaint/app/src/main/assets/
-# Manual tweaking is required for now:
-# https://github.com/armory3d/armorcore/blob/master/kfile.js#L136
 # Open generated Android Studio project at `build/ArmorPaint`
 # Build for device
 ```
