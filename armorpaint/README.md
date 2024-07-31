@@ -7,7 +7,7 @@ armorpaint
 
 *Note 1: This repository is aimed at developers and may not be stable. Distributed binaries are [paid](https://armorpaint.org/download) to help with the project funding. All of the development is happening here in order to make it accessible to everyone. Thank you for support!*
 
-*Note 2: If you are compiling git version of ArmorPaint, then you need to have a compiler ([Visual Studio](https://visualstudio.microsoft.com/downloads/) - Windows, [deps](https://github.com/armory3d/armortools/wiki/Linux-Dependencies) - Linux, [Xcode](https://developer.apple.com/xcode/resources/) - macOS / iOS, [Android Studio](https://developer.android.com/studio) - Android) and [git](https://git-scm.com/downloads) installed.*
+*Note 2: If you are compiling git version of ArmorPaint, then you need to have a compiler ([Visual Studio with clang tools](https://visualstudio.microsoft.com/downloads/) - Windows, [clang + dependencies](https://github.com/armory3d/armortools/wiki/Linux-Dependencies) - Linux, [Xcode](https://developer.apple.com/xcode/resources/) - macOS / iOS, [Android Studio](https://developer.android.com/studio) - Android) and [git](https://git-scm.com/downloads) installed.*
 
 ```bash
 git clone --recursive https://github.com/armory3d/armortools
@@ -18,7 +18,7 @@ cd armortools/armorpaint
 ```bash
 ..\armorcore\make --graphics direct3d11
 # Open generated Visual Studio project at `build\ArmorPaint.sln`
-# Build and run for x64 & release
+# Build and run
 ```
 
 **Linux**
@@ -44,17 +44,15 @@ cd armortools/armorpaint
 **iOS** *wip*
 ```bash
 ../armorcore/make --graphics metal --target ios
-cp -a build/krom/ ../armorcore/Deployment
 # Open generated Xcode project `build/ArmorPaint.xcodeproj`
-# Set iOS Deployment Target to 16.0
-# Build for device in release mode
+# Build for device
 ```
 
 **Windows DXR** *wip*
 ```bash
 ..\armorcore\make --graphics direct3d12
 # Open generated Visual Studio project at `build\ArmorPaint.sln`
-# Build and run for x64 & release
+# Build and run
 ```
 
 **Linux VKRT** *wip*
