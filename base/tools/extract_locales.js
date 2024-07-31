@@ -2,50 +2,60 @@
 // This script can create new translations or update existing ones.
 // Usage:
 // `export ARM_LOCALE=<locale code>`
-// `../../armorcore/Kinc/make --kfile extract_locales.js`
-// Generates a `base/Assets/locale/<locale code>.json` file
+// `../../armorcore/make --js extract_locales.js`
+// Generates a `base/assets/locale/<locale code>.json` file
 
-const fs = require('fs');
+let locale = std.getenv("ARM_LOCALE");
 
-if (!process.env.ARM_LOCALE) {
+if (!locale) {
     console.log("ARM_LOCALE env variable not set!");
+    std.exit();
 }
 
-let locale = process.env.ARM_LOCALE;
-let locale_path = "./base/Assets/locale/" + locale + ".json";
+let locale_path = "./base/assets/locale/" + locale + ".json";
 
 let out = {};
 let old = {};
-if (fs.existsSync(locale_path)) {
-    old = JSON.parse(fs.readFileSync(locale_path).toString());
+if (fs_exists(locale_path)) {
+    old = JSON.parse(fs_readfile(locale_path).toString());
 }
 
 let source_paths = [
-    "base/Sources", "base/Sources/nodes",
-    "armorpaint/Sources", "armorpaint/Sources/nodes",
-    "armorlab/Sources", "armorlab/Sources/nodes",
-    "armorsculpt/Sources", "armorsculpt/Sources/nodes",
-    "armorforge/Sources", "armorforge/Sources/nodes"
+    "base/sources", "base/sources/nodes",
+    "armorpaint/sources", "armorpaint/sources/nodes",
+    "armorlab/sources", "armorlab/sources/nodes",
+    "armorsculpt/sources", "armorsculpt/sources/nodes",
+    "armorforge/sources", "armorforge/sources/nodes"
 ];
 
 for (let path of source_paths) {
-    if (!fs.existsSync(path)) continue;
+    if (!fs_exists(path)) {
+        continue;
+    }
 
-    let files = fs.readdirSync(path);
+    let files = fs_readdir(path);
     for (let file of files) {
-        if (!file.endsWith(".ts")) continue;
+        if (!file.endsWith(".ts")) {
+            continue;
+        }
 
-        let data = fs.readFileSync(path + "/" + file).toString();
+        let data = fs_readfile(path + "/" + file).toString();
         let start = 0;
         while (true) {
             start = data.indexOf('tr("', start);
-            if (start == -1) break;
+            if (start == -1) {
+                break;
+            }
             start += 4; // tr("
 
             let end_a = data.indexOf('")', start);
             let end_b = data.indexOf('",', start);
-            if (end_a == -1) end_a = end_b;
-            if (end_b == -1) end_b = end_a;
+            if (end_a == -1) {
+                end_a = end_b;
+            }
+            if (end_b == -1) {
+                end_b = end_a;
+            }
             let end = end_a < end_b ? end_a : end_b;
 
             let val = data.substring(start, end);
@@ -61,4 +71,4 @@ for (let path of source_paths) {
     }
 }
 
-fs.writeFileSync(locale_path, JSON.stringify(out, Object.keys(out).sort(), 4));
+fs_writefile(locale_path, JSON.stringify(out, Object.keys(out).sort(), 4));
