@@ -27,7 +27,6 @@ else if (flags.ios) {
 
 if (flags.physics) {
 	project.addDefine("arm_physics");
-	project.addAssets("assets/plugins/ammo/*", { destination: "data/plugins/{name}" });
 }
 
 return project;

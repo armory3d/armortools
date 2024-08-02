@@ -91,10 +91,8 @@ function util_particle_init_physics() {
 		return;
 	}
 
-	physics_world_load(function () {
-		physics_world_create();
-		util_particle_init_mesh();
-	});
+	physics_world_create();
+	util_particle_init_mesh();
 }
 
 function util_particle_init_mesh() {
@@ -109,7 +107,7 @@ function util_particle_init_mesh() {
 	po.base.transform.scale.z = po.base.parent.transform.scale.z;
 
 	context_raw.paint_body = physics_body_create();
-	context_raw.paint_body.shape = shape_type_t.MESH;
+	context_raw.paint_body.shape = physics_shape_t.MESH;
 	physics_body_init(context_raw.paint_body, po.base);
 	map_set(physics_body_object_map, po.base, context_raw.paint_body);
 }

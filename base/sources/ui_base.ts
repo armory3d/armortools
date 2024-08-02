@@ -831,15 +831,15 @@ function ui_base_update() {
 	if (context_raw.tool == workspace_tool_t.PARTICLE && context_raw.particle_physics && context_in_paint_area() && !context_raw.paint2d) {
 		util_particle_init_physics();
 		let world: physics_world_t = physics_world_active;
-		physics_world_late_update(world);
+		physics_world_update(world);
 		context_raw.ddirty = 2;
 		context_raw.rdirty = 2;
 		if (mouse_started()) {
-			if (context_raw.particle_timer != null) {
-				tween_stop(context_raw.particle_timer);
-				context_raw.particle_timer.done();
-				context_raw.particle_timer = null;
-			}
+			// if (context_raw.particle_timer != null) {
+			// 	tween_stop(context_raw.particle_timer);
+			// 	context_raw.particle_timer.done();
+			// 	context_raw.particle_timer = null;
+			// }
 			history_push_undo = true;
 			context_raw.particle_hit_x = context_raw.particle_hit_y = context_raw.particle_hit_z = 0;
 			let o: object_t = scene_spawn_object(".Sphere");
@@ -856,9 +856,9 @@ function ui_base_update() {
 			transform_build_matrix(mo.base.transform);
 
 			let body: physics_body_t = physics_body_create();
-			body.shape = shape_type_t.SPHERE;
+			body.shape = physics_shape_t.SPHERE;
 			physics_body_set_mass(body, 1.0);
-			body.ccd = true;
+			// body.ccd = true;
 			mo.base.transform.radius /= 10; // Lower ccd radius
 			physics_body_init(body, mo.base);
 			map_set(physics_body_object_map, mo.base, body);
@@ -867,15 +867,15 @@ function ui_base_update() {
 			let ray: ray_t = raycast_get_ray(mouse_view_x(), mouse_view_y(), camera);
 			physics_body_apply_impulse(body, vec4_mult(ray.dir, 0.15));
 
-			context_raw.particle_timer = tween_timer(5, function () {
-				mesh_object_remove(mo);
-			});
+			// context_raw.particle_timer = tween_timer(5, function () {
+			// 	mesh_object_remove(mo);
+			// });
 		}
 
-		let pairs: pair_t[] = physics_world_get_contact_pairs(world, context_raw.paint_body);
+		let pairs: physics_pair_t[] = physics_world_get_contact_pairs(world, context_raw.paint_body);
 		if (pairs != null) {
 			for (let i: i32 = 0; i < pairs.length; ++i) {
-				let p: pair_t = pairs[i];
+				let p: physics_pair_t = pairs[i];
 				context_raw.last_particle_hit_x = context_raw.particle_hit_x != 0 ? context_raw.particle_hit_x : p.pos_a.x;
 				context_raw.last_particle_hit_y = context_raw.particle_hit_y != 0 ? context_raw.particle_hit_y : p.pos_a.y;
 				context_raw.last_particle_hit_z = context_raw.particle_hit_z != 0 ? context_raw.particle_hit_z : p.pos_a.z;
