@@ -31,8 +31,12 @@ function drop_files(path: string) {
 	sidebar_handle.redraws = 1;
 }
 
+function encode_storage(): string {
+	return "";
+}
+
 function shutdown() {
-	let storage_string: string = sys_string_to_buffer(json_stringify(storage));
+	let storage_string: string = sys_string_to_buffer(encode_storage());
 	krom_file_save_bytes(krom_save_path() + "/config.json", storage_string, 0);
 }
 
@@ -80,7 +84,11 @@ function main() {
 	theme = {};
 	zui_theme_default(theme);
 
-	let zui_ops: zui_options_t = { scale_factor: 1.0, theme: theme, font: font };
+	let zui_ops: zui_options_t = {
+		scale_factor: 1.0,
+		theme: theme,
+		font: font
+	};
 	ui = zui_create(zui_ops);
 
 	let blob_coloring: buffer_t = data_get_blob("text_coloring.json");
@@ -94,6 +102,10 @@ function main() {
 	sys_notify_on_frames(render);
 	krom_set_drop_files_callback(drop_files);
 	krom_set_application_state_callback(null, null, null, null, shutdown);
+}
+
+function armpack_to_string(bytes: buffer_t): string {
+	return "";
 }
 
 function list_folder(path: string) {
@@ -119,7 +131,7 @@ function list_folder(path: string) {
 			if (is_file) {
 				storage.file = abs;
 				let bytes: buffer_t = krom_load_blob(storage.file);
-				storage.text = ends_with(f, ".arm") ? json_stringify(armpack_decode(bytes)) : sys_buffer_to_string(bytes);
+				storage.text = ends_with(f, ".arm") ? armpack_to_string(bytes) : sys_buffer_to_string(bytes);
 				storage.text = string_replace_all(storage.text, "\r", "");
 				text_handle.text = storage.text;
 				editor_handle.redraws = 1;
@@ -264,7 +276,7 @@ function build_file(): string {
 }
 
 function build_project() {
-	krom_sys_command(storage.project + build_file() + " " + storage.project, null);
+	krom_sys_command(storage.project + build_file() + " " + storage.project);
 }
 
 function draw_minimap() {
