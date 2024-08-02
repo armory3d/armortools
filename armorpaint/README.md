@@ -30,7 +30,6 @@ cd armortools/armorpaint
 ```bash
 ../armorcore/make --graphics metal
 # Open generated Xcode project at `build/ArmorPaint.xcodeproj`
-# Set macOS Deployment Target to 13.0
 # Build and run
 ```
 
