@@ -857,12 +857,8 @@ function ui_base_update() {
 
 			let body: physics_body_t = physics_body_create();
 			body.shape = physics_shape_t.SPHERE;
-			physics_body_set_mass(body, 1.0);
-			// body.ccd = true;
-			mo.base.transform.radius /= 10; // Lower ccd radius
+			body.mass = 1.0;
 			physics_body_init(body, mo.base);
-			map_set(physics_body_object_map, mo.base, body);
-			mo.base.transform.radius *= 10;
 
 			let ray: ray_t = raycast_get_ray(mouse_view_x(), mouse_view_y(), camera);
 			physics_body_apply_impulse(body, vec4_mult(ray.dir, 0.15));
@@ -876,12 +872,12 @@ function ui_base_update() {
 		if (pairs != null) {
 			for (let i: i32 = 0; i < pairs.length; ++i) {
 				let p: physics_pair_t = pairs[i];
-				context_raw.last_particle_hit_x = context_raw.particle_hit_x != 0 ? context_raw.particle_hit_x : p.pos_a.x;
-				context_raw.last_particle_hit_y = context_raw.particle_hit_y != 0 ? context_raw.particle_hit_y : p.pos_a.y;
-				context_raw.last_particle_hit_z = context_raw.particle_hit_z != 0 ? context_raw.particle_hit_z : p.pos_a.z;
-				context_raw.particle_hit_x = p.pos_a.x;
-				context_raw.particle_hit_y = p.pos_a.y;
-				context_raw.particle_hit_z = p.pos_a.z;
+				context_raw.last_particle_hit_x = context_raw.particle_hit_x != 0 ? context_raw.particle_hit_x : p.pos_a_x;
+				context_raw.last_particle_hit_y = context_raw.particle_hit_y != 0 ? context_raw.particle_hit_y : p.pos_a_y;
+				context_raw.last_particle_hit_z = context_raw.particle_hit_z != 0 ? context_raw.particle_hit_z : p.pos_a_z;
+				context_raw.particle_hit_x = p.pos_a_x;
+				context_raw.particle_hit_y = p.pos_a_y;
+				context_raw.particle_hit_z = p.pos_a_z;
 				context_raw.pdirty = 1;
 				break; // 1 pair for now
 			}

@@ -77,6 +77,8 @@ function util_particle_init() {
 	let mo: mesh_object_t = o.ext;
 	mo.base.name = ".ParticleEmitter";
 	mo.base.raw = util_clone_obj(mo.base.raw);
+	let oraw: obj_t = mo.base.raw;
+	oraw.particles = {};
 	mo.base.raw.particles.refs = particle_refs;
 	///if arm_particles
 	mesh_object_setup_particle_system(mo, "Scene", particle_refs[0]);
@@ -109,7 +111,6 @@ function util_particle_init_mesh() {
 	context_raw.paint_body = physics_body_create();
 	context_raw.paint_body.shape = physics_shape_t.MESH;
 	physics_body_init(context_raw.paint_body, po.base);
-	map_set(physics_body_object_map, po.base, context_raw.paint_body);
 }
 
 ///end
