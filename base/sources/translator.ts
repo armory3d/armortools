@@ -140,7 +140,7 @@ let _translator_init_font_font_path: string;
 let _translator_init_font_font_scale: f32;
 
 function translator_init_font(cjk: bool, font_path: string, font_scale: f32) {
-	array_sort(_g2_font_glyphs, function (pa: any_ptr, pb: any_ptr): i32 {
+	array_sort(_g2_font_glyphs, function (pa: u32_ptr, pb: u32_ptr): i32 {
 		let a: i32 = (i32)DEREFERENCE(pa);
 		let b: i32 = (i32)DEREFERENCE(pb);
 		return a - b;
