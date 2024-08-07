@@ -71,7 +71,7 @@ function tab_objects_draw_list(ui: zui_t, list_handle: zui_handle_t, current_obj
 		if (h.init) {
 			h.selected = true;
 		}
-		b = zui_panel(h, "", true, false, false);
+		b = zui_panel(h, "", true, false);
 		zui_text(current_object.name);
 	}
 	else {

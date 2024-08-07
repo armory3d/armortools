@@ -457,7 +457,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 		ui._y += center;
 		let layer_panel: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
 		layer_panel.selected = l.show_panel;
-		l.show_panel = zui_panel(layer_panel, "", true, false, false);
+		l.show_panel = zui_panel(layer_panel, "", true, false);
 		ui._y -= center;
 	}
 
