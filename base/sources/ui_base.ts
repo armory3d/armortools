@@ -275,8 +275,8 @@ function ui_base_update() {
 	let keys: string[] = map_keys(plugin_map);
 	for (let i: i32 = 0; i < keys.length; ++i) {
 		let p: plugin_t = map_get(plugin_map, keys[i]);
-		if (p.update != null) {
-			p.update();
+		if (p.on_update != null) {
+			js_call(p.on_update);
 		}
 	}
 

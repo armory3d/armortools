@@ -1,9 +1,9 @@
 
 type plugin_t = {
-	draw_ui?: (ui: zui_t)=>void;
-	draw?: ()=>void;
-	update?: ()=>void;
-	delete?: ()=>void;
+	on_ui?: any; // JSValue *
+	on_draw?: any; // JSValue *
+	on_update?: any; // JSValue *
+	on_delete?: any; // JSValue *
 	version?: string;
 	name?: string;
 };
@@ -27,8 +27,12 @@ function plugin_start(plugin: string) {
 
 function plugin_stop(plugin: string) {
 	let p: plugin_t = map_get(plugin_map, plugin);
-	if (p != null && p.delete != null) {
-		p.delete();
+	if (p.on_delete != null) {
+		js_call(p.on_delete);
 	}
 	map_delete(plugin_map, plugin);
+}
+
+function plugin_notify_on_ui(plugin: plugin_t, f: any): void {
+	plugin.on_ui = f;
 }

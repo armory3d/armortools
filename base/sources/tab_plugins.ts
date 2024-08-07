@@ -24,8 +24,8 @@ function tab_plugins_draw(htab: zui_handle_t) {
 		let keys: string[] = map_keys(plugin_map);
 		for (let i: i32 = 0; i < keys.length; ++i) {
 			let p: plugin_t = map_get(plugin_map, keys[i]);
-			if (p.draw_ui != null) {
-				p.draw_ui(ui);
+			if (p.on_ui != null) {
+				js_call(p.on_ui);
 			}
 		}
 	}
