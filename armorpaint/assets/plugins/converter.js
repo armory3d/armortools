@@ -1,11 +1,10 @@
 
 let plugin = plugin_create();
-
 let h1 = zui_handle_create();
 
-plugin.draw_ui = function(ui) {
+plugin_notify_on_ui(plugin, function() {
 	if (zui_panel(h1, "Converter")) {
-		zui_row([1/2, 1/2]);
+		zui_row([1 / 2, 1 / 2]);
 		if (zui_button(".arm to .json")) {
 			ui_files_show("arm", false, true, function(path) {
 				let b = data_get_blob(path);
@@ -74,4 +73,4 @@ plugin.draw_ui = function(ui) {
 			});
 		}
 	}
-}
+});
