@@ -56,6 +56,5 @@ cd armortools/armorpaint
 
 **Linux VKRT** *wip*
 ```bash
-git clone --recursive https://github.com/armory3d/glsl_to_spirv
 ../armorcore/make --graphics vulkan --run
 ```

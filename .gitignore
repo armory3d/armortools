@@ -5,4 +5,3 @@
 armorlab/assets/models/*.onnx
 armorlab/assets/models/*.txt
 armorlab/onnx
-glsl_to_spirv

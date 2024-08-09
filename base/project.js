@@ -29,7 +29,7 @@ let project = new Project("Base");
 
 	if (graphics === "vulkan") {
 		project.addDefine("KINC_VKRT");
-		project.addProject("../" + dir + "/glsl_to_spirv");
+		project.addProject("../armorcore/tools/ashader/to_spirv");
 	}
 
 	if (flags.with_onnx) {
