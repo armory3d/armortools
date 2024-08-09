@@ -8,6 +8,8 @@
 
 extern JSRuntime *js_runtime;
 extern JSContext *js_ctx;
+void js_call(void *p);
+void js_call_arg(void *p, int argc, void *argv);
 
 #define MAKE_FN(name)\
     static JSValue js_##name(JSContext *ctx, JSValue this_val, int argc, JSValue *argv)
@@ -54,6 +56,33 @@ MAKE_VOID_FN_STR(console_log)
 MAKE_VOID_FN_STR(console_info)
 MAKE_PTR_FN(plugin_create)
 MAKE_VOID_FN_PTR_CB(plugin_notify_on_ui)
+
+static JSObject *ui_files_cb;
+static void ui_files_done(char *path) {
+    JSValue path_val = JS_NewString(js_ctx, path);
+    JSValue argv[] = { path_val };
+    js_call_arg(ui_files_cb, 1, argv);
+}
+
+void ui_files_show(char *s, bool b0, bool b1, void(*f)(char *));
+MAKE_FN(ui_files_show) {
+    char *filters = (char *)JS_ToCString(ctx, argv[0]);
+    bool is_save = JS_ToBool(ctx, argv[1]);
+    bool open_multiple = JS_ToBool(ctx, argv[2]);
+    ui_files_cb = malloc(sizeof(JSValue));
+    JSValue dup = JS_DupValue(ctx, argv[3]);
+    memcpy(ui_files_cb, &dup, sizeof(JSValue));
+    ui_files_show(filters, is_save, open_multiple, ui_files_done);
+    return JS_UNDEFINED;
+}
+
+void *data_get_blob(char *s);
+MAKE_FN(data_get_blob) {
+    char *s = (char *)JS_ToCString(ctx, argv[0]);
+    buffer_t *b = data_get_blob(s);
+    JSValue val = JS_NewArrayBuffer(ctx, b->buffer, b->length, NULL, NULL, 0);
+    return val;
+}
 
 MAKE_FN(zui_handle_create) {
     int64_t result = (int64_t)zui_handle_create();
@@ -156,6 +185,8 @@ void plugin_api_init() {
     BIND_FN(console_info, 1);
     BIND_FN(plugin_create, 0);
     BIND_FN(plugin_notify_on_ui, 2);
+    BIND_FN(ui_files_show, 4);
+    BIND_FN(data_get_blob, 1);
 
     BIND_FN(zui_handle_create, 0);
     BIND_FN(zui_panel, 2);
