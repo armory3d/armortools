@@ -3,15 +3,15 @@ layout(triangles) in;
 layout(triangle_strip) out;
 layout(max_vertices=3) out;
 
-in vec3 voxpositionGeom[];
+in vec3 voxposition_geom[];
 out vec3 voxposition;
 
 void main() {
-	vec3 p1 = voxpositionGeom[1] - voxpositionGeom[0];
-	vec3 p2 = voxpositionGeom[2] - voxpositionGeom[0];
+	vec3 p1 = voxposition_geom[1] - voxposition_geom[0];
+	vec3 p2 = voxposition_geom[2] - voxposition_geom[0];
 	vec3 p = abs(cross(p1, p2));
 	for (uint i = 0; i < 3; ++i) {
-	    voxposition = voxpositionGeom[i];
+	    voxposition = voxposition_geom[i];
 	    if (p.z > p.x && p.z > p.y) {
 	        gl_Position = vec4(voxposition.x, voxposition.y, 0.0, 1.0);
 	    }

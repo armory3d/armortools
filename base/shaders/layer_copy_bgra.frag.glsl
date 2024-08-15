@@ -2,10 +2,10 @@
 
 uniform sampler2D tex;
 
-in vec2 texCoord;
+in vec2 tex_coord;
 in vec4 color;
-out vec4 FragColor;
+out vec4 frag_color;
 
 void main() {
-	FragColor = textureLod(tex, texCoord, 0).bgra * color;
+	frag_color = textureLod(tex, tex_coord, 0).bgra * color;
 }

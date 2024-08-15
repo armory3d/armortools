@@ -60,7 +60,7 @@ parser_material_custom_nodes.set(node_type, function(node, socket) {
 	let my_out = parser_material_node_name(node) + "_out";
 
 	node_shader_write(frag,
-		"float " + my_out + " = cos(sin(texCoord.x * 200.0 * " + scale + ") + cos(texCoord.y * 200.0 * " + scale + "));"
+		"float " + my_out + " = cos(sin(tex_coord.x * 200.0 * " + scale + ") + cos(tex_coord.y * 200.0 * " + scale + "));"
 	);
 
 	if (socket.name == "Color") {

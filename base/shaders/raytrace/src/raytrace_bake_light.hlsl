@@ -87,21 +87,21 @@ void raygeneration() {
 
 [shader("closesthit")]
 void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttributes attr) {
-	const uint triangleIndexStride = 12; // 3 * 4
-	uint base_index = PrimitiveIndex() * triangleIndexStride;
+	const uint triangle_index_stride = 12; // 3 * 4
+	uint base_index = PrimitiveIndex() * triangle_index_stride;
 	uint3 indices_sample = indices.Load3(base_index);
 
 	float3 vertex_normals[3] = {
-		float3(S16toF32(vertices[indices_sample[0]].nor), S16toF32(vertices[indices_sample[0]].poszw).y),
-		float3(S16toF32(vertices[indices_sample[1]].nor), S16toF32(vertices[indices_sample[1]].poszw).y),
-		float3(S16toF32(vertices[indices_sample[2]].nor), S16toF32(vertices[indices_sample[2]].poszw).y)
+		float3(s16_to_f32(vertices[indices_sample[0]].nor), s16_to_f32(vertices[indices_sample[0]].poszw).y),
+		float3(s16_to_f32(vertices[indices_sample[1]].nor), s16_to_f32(vertices[indices_sample[1]].poszw).y),
+		float3(s16_to_f32(vertices[indices_sample[2]].nor), s16_to_f32(vertices[indices_sample[2]].poszw).y)
 	};
 	float3 n = normalize(hit_attribute(vertex_normals, attr));
 
 	float2 vertex_uvs[3] = {
-		S16toF32(vertices[indices_sample[0]].tex),
-		S16toF32(vertices[indices_sample[1]].tex),
-		S16toF32(vertices[indices_sample[2]].tex)
+		s16_to_f32(vertices[indices_sample[0]].tex),
+		s16_to_f32(vertices[indices_sample[1]].tex),
+		s16_to_f32(vertices[indices_sample[2]].tex)
 	};
 	float2 tex_coord = hit_attribute2d(vertex_uvs, attr);
 

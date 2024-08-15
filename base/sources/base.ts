@@ -1480,9 +1480,9 @@ function base_make_cursor_pipe() {
 	base_cursor_vp = g4_pipeline_get_const_loc(base_pipe_cursor, "VP");
 	base_cursor_inv_vp = g4_pipeline_get_const_loc(base_pipe_cursor, "invVP");
 	base_cursor_mouse = g4_pipeline_get_const_loc(base_pipe_cursor, "mouse");
-	base_cursor_tex_step = g4_pipeline_get_const_loc(base_pipe_cursor, "texStep");
+	base_cursor_tex_step = g4_pipeline_get_const_loc(base_pipe_cursor, "tex_step");
 	base_cursor_radius = g4_pipeline_get_const_loc(base_pipe_cursor, "radius");
-	base_cursor_camera_right = g4_pipeline_get_const_loc(base_pipe_cursor, "cameraRight");
+	base_cursor_camera_right = g4_pipeline_get_const_loc(base_pipe_cursor, "camera_right");
 	base_cursor_tint = g4_pipeline_get_const_loc(base_pipe_cursor, "tint");
 	base_cursor_gbufferd = g4_pipeline_get_tex_unit(base_pipe_cursor, "gbufferD");
 	base_cursor_tex = g4_pipeline_get_tex_unit(base_pipe_cursor, "tex");

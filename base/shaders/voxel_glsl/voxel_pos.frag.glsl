@@ -9,5 +9,5 @@ in vec3 voxposition;
 
 void main() {
 	if (abs(voxposition.z) > 1.0 || abs(voxposition.x) > 1.0 || abs(voxposition.y) > 1.0) return;
-	imageStore(voxels, ivec3(voxelgiResolution * (voxposition * 0.5 + 0.5)), vec4(1.0));
+	imageStore(voxels, ivec3(voxelgi_resolution * (voxposition * 0.5 + 0.5)), vec4(1.0));
 }

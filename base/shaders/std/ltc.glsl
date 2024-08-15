@@ -8,17 +8,17 @@ const float LUT_SIZE = 64.0;
 const float LUT_SCALE = (LUT_SIZE - 1.0) / LUT_SIZE;
 const float LUT_BIAS = 0.5 / LUT_SIZE;
 
-float integrateEdge(vec3 v1, vec3 v2) {
-	float cosTheta = dot(v1, v2);
-	float theta = acos(cosTheta);
+float integrate_edge(vec3 v1, vec3 v2) {
+	float cos_theta = dot(v1, v2);
+	float theta = acos(cos_theta);
 	float res = cross(v1, v2).z * ((theta > 0.001) ? theta / sin(theta) : 1.0);
 	return res;
 }
 
-float ltcEvaluate(vec3 N, vec3 V, float dotNV, vec3 P, mat3 Minv, vec3 points0, vec3 points1, vec3 points2, vec3 points3) {
+float ltc_evaluate(vec3 N, vec3 V, float dotnv, vec3 P, mat3 Minv, vec3 points0, vec3 points1, vec3 points2, vec3 points3) {
 	// Construct orthonormal basis around N
 	vec3 T1, T2;
-	T1 = normalize(V - N * dotNV);
+	T1 = normalize(V - N * dotnv);
 	T2 = cross(N, T1);
 
 	// Rotate area light in (T1, T2, R) basis
@@ -131,12 +131,12 @@ float ltcEvaluate(vec3 N, vec3 V, float dotNV, vec3 P, mat3 Minv, vec3 points0, 
 	// Integrate
 	float sum = 0.0;
 
-	sum += integrateEdge(L0, L1);
-	sum += integrateEdge(L1, L2);
-	sum += integrateEdge(L2, L3);
+	sum += integrate_edge(L0, L1);
+	sum += integrate_edge(L1, L2);
+	sum += integrate_edge(L2, L3);
 
-	if (n >= 4) sum += integrateEdge(L3, L4);
-	if (n == 5) sum += integrateEdge(L4, L0);
+	if (n >= 4) sum += integrate_edge(L3, L4);
+	if (n == 5) sum += integrate_edge(L4, L0);
 
 	return max(0.0, -sum);
 }

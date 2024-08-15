@@ -13,14 +13,14 @@ function uniforms_ext_init() {
 }
 
 function uniforms_ext_i32_link(object: object_t, mat: material_data_t, link: string): i32 {
-	if (link == "_bloomCurrentMip") {
+	if (link == "_bloom_current_mip") {
 		return render_path_base_bloom_current_mip;
 	}
 	return 0;
 }
 
 function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: string): f32 {
-	if (link == "_brushRadius") {
+	if (link == "_brush_radius") {
 		///if (is_paint || is_sculpt)
 		let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
 		let decal_mask: bool = decal && operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
@@ -54,34 +54,34 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 
 		return val;
 	}
-	else if (link == "_vignetteStrength") {
+	else if (link == "_vignette_strength") {
 		return config_raw.rp_vignette;
 	}
-	else if (link == "_grainStrength") {
+	else if (link == "_grain_strength") {
 		return config_raw.rp_grain;
 	}
-	else if (link == "_coneOffset") {
+	else if (link == "_cone_offset") {
 		return context_raw.vxao_offset;
 	}
-	else if (link == "_coneAperture") {
+	else if (link == "_cone_aperture") {
 		return context_raw.vxao_aperture;
 	}
-	else if (link == "_bloomSampleScale") {
+	else if (link == "_bloom_sample_scale") {
 		return render_path_base_bloom_sample_scale;
 	}
 
 	///if (is_paint || is_sculpt)
-	else if (link == "_brushScaleX") {
+	else if (link == "_brush_scale_x") {
 		return 1 / context_raw.brush_scale_x;
 	}
-	else if (link == "_brushOpacity") {
+	else if (link == "_brush_opacity") {
 		let val: f32 = context_raw.brush_opacity * context_raw.brush_nodes_opacity;
 		if (config_raw.pressure_opacity && pen_down()) {
 			val *= pen_pressure * config_raw.pressure_sensitivity;
 		}
 		return val;
 	}
-	else if (link == "_brushHardness") {
+	else if (link == "_brush_hardness") {
 		let decal_mask: bool = operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
 		if (context_raw.tool != workspace_tool_t.BRUSH && context_raw.tool != workspace_tool_t.ERASER && context_raw.tool != workspace_tool_t.CLONE && !decal_mask) {
 			return 1.0;
@@ -100,35 +100,35 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 		}
 		return val;
 	}
-	else if (link == "_brushScale") {
+	else if (link == "_brush_scale") {
 		let fill: bool = context_raw.layer.fill_layer != null;
 		let val: f32 = (fill ? context_raw.layer.scale : context_raw.brush_scale) * context_raw.brush_nodes_scale;
 		return val;
 	}
-	else if (link == "_objectId") {
+	else if (link == "_object_id") {
 		return array_index_of(project_paint_objects, object.ext);
 	}
 	///if is_paint
-	else if (link == "_dilateRadius") {
+	else if (link == "_dilate_radius") {
 		return util_uv_dilatemap != null ? config_raw.dilate_radius : 0.0;
 	}
 	///end
-	else if (link == "_decalLayerDim") {
+	else if (link == "_decal_layer_dim") {
 		return mat4_get_scale(context_raw.layer.decal_mat).z * 0.5;
 	}
-	else if (link == "_pickerOpacity") {
+	else if (link == "_picker_opacity") {
 		return context_raw.picked_color.opacity;
 	}
-	else if (link == "_pickerOcclusion") {
+	else if (link == "_picker_occlusion") {
 		return context_raw.picked_color.occlusion;
 	}
-	else if (link == "_pickerRoughness") {
+	else if (link == "_picker_roughness") {
 		return context_raw.picked_color.roughness;
 	}
-	else if (link == "_pickerMetallic") {
+	else if (link == "_picker_metallic") {
 		return context_raw.picked_color.metallic;
 	}
-	else if (link == "_pickerHeight") {
+	else if (link == "_picker_height") {
 		return context_raw.picked_color.height;
 	}
 	///end
@@ -149,22 +149,22 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 }
 
 function uniforms_ext_vec2_link(object: object_t, mat: material_data_t, link: string): vec4_t {
-	if (link == "_gbufferSize") {
+	if (link == "_gbuffer_size") {
 		vec4_set(uniforms_ext_vec, 0, 0, 0);
 		let gbuffer2: render_target_t = map_get(render_path_render_targets, "gbuffer2");
 		vec4_set(uniforms_ext_vec, gbuffer2._image.width, gbuffer2._image.height, 0);
 		return uniforms_ext_vec;
 	}
-	else if (link == "_cloneDelta") {
+	else if (link == "_clone_delta") {
 		vec4_set(uniforms_ext_vec, context_raw.clone_delta_x, context_raw.clone_delta_y, 0);
 		return uniforms_ext_vec;
 	}
-	else if (link == "_texpaintSize") {
+	else if (link == "_texpaint_size") {
 		vec4_set(uniforms_ext_vec, config_get_texture_res_x(), config_get_texture_res_y(), 0);
 		return uniforms_ext_vec;
 	}
 	///if (is_paint || is_sculpt)
-	else if (link == "_brushAngle") {
+	else if (link == "_brush_angle") {
 		let brush_angle: f32 = context_raw.brush_angle + context_raw.brush_nodes_angle;
 		let angle: f32 = context_raw.layer.fill_layer != null ? context_raw.layer.angle : brush_angle;
 		angle *= (math_pi() / 180);
@@ -183,7 +183,7 @@ function uniforms_ext_vec3_link(object: object_t, mat: material_data_t, link: st
 	let v: vec4_t = null;
 
 	///if (is_paint || is_sculpt)
-	if (link == "_brushDirection") {
+	if (link == "_brush_direction") {
 		v = _uniforms_vec;
 		// Discard first paint for directional brush
 		let allow_paint: bool = context_raw.prev_paint_vec_x != context_raw.last_paint_vec_x &&
@@ -204,17 +204,17 @@ function uniforms_ext_vec3_link(object: object_t, mat: material_data_t, link: st
 		context_raw.prev_paint_vec_y = context_raw.last_paint_vec_y;
 		return v;
 	}
-	else if (link == "_decalLayerLoc") {
+	else if (link == "_decal_layer_loc") {
 		v = _uniforms_vec;
 		vec4_set(v, context_raw.layer.decal_mat.m[12], context_raw.layer.decal_mat.m[13], context_raw.layer.decal_mat.m[14]);
 		return v;
 	}
-	else if (link == "_decalLayerNor") {
+	else if (link == "_decal_layer_nor") {
 		v = _uniforms_vec;
 		vec4_normalize(vec4_set(v, context_raw.layer.decal_mat.m[8], context_raw.layer.decal_mat.m[9], context_raw.layer.decal_mat.m[10]));
 		return v;
 	}
-	else if (link == "_pickerBase") {
+	else if (link == "_picker_base") {
 		v = _uniforms_vec;
 		vec4_set(v,
 			color_get_rb(context_raw.picked_color.base) / 255,
@@ -223,7 +223,7 @@ function uniforms_ext_vec3_link(object: object_t, mat: material_data_t, link: st
 		);
 		return v;
 	}
-	else if (link == "_pickerNormal") {
+	else if (link == "_picker_normal") {
 		v = _uniforms_vec;
 		vec4_set(v,
 			color_get_rb(context_raw.picked_color.normal) / 255,
@@ -233,12 +233,12 @@ function uniforms_ext_vec3_link(object: object_t, mat: material_data_t, link: st
 		return v;
 	}
 	///if arm_physics
-	else if (link == "_particleHit") {
+	else if (link == "_particle_hit") {
 		v = _uniforms_vec;
 		vec4_set(v, context_raw.particle_hit_x, context_raw.particle_hit_y, context_raw.particle_hit_z);
 		return v;
 	}
-	else if (link == "_particleHitLast") {
+	else if (link == "_particle_hit_last") {
 		v = _uniforms_vec;
 		vec4_set(v, context_raw.last_particle_hit_x, context_raw.last_particle_hit_y, context_raw.last_particle_hit_z);
 		return v;
@@ -260,7 +260,7 @@ function vec2d(x: f32): f32 {
 ///end
 
 function uniforms_ext_vec4_link(object: object_t, mat: material_data_t, link: string): vec4_t {
-	if (link == "_inputBrush") {
+	if (link == "_input_brush") {
 		let down: bool = mouse_down() || pen_down();
 		vec4_set(uniforms_ext_vec, context_raw.paint_vec.x, context_raw.paint_vec.y, down ? 1.0 : 0.0, 0.0);
 
@@ -272,7 +272,7 @@ function uniforms_ext_vec4_link(object: object_t, mat: material_data_t, link: st
 
 		return uniforms_ext_vec;
 	}
-	else if (link == "_inputBrushLast") {
+	else if (link == "_input_brush_last") {
 		let down: bool = mouse_down() || pen_down();
 		vec4_set(uniforms_ext_vec, context_raw.last_paint_vec_x, context_raw.last_paint_vec_y, down ? 1.0 : 0.0, 0.0);
 
@@ -284,21 +284,21 @@ function uniforms_ext_vec4_link(object: object_t, mat: material_data_t, link: st
 
 		return uniforms_ext_vec;
 	}
-	else if (link == "_envmapData") {
+	else if (link == "_envmap_data") {
 		vec4_set(uniforms_ext_vec, context_raw.envmap_angle, math_sin(-context_raw.envmap_angle), math_cos(-context_raw.envmap_angle), scene_world.strength);
 		return uniforms_ext_vec;
 	}
-	else if (link == "_envmapDataWorld") {
+	else if (link == "_envmap_data_world") {
 		vec4_set(uniforms_ext_vec, context_raw.envmap_angle, math_sin(-context_raw.envmap_angle), math_cos(-context_raw.envmap_angle), context_raw.show_envmap ? scene_world.strength : 1.0);
 		return uniforms_ext_vec;
 	}
 	///if (is_paint || is_sculpt)
-	else if (link == "_stencilTransform") {
+	else if (link == "_stencil_transform") {
 		vec4_set(uniforms_ext_vec, context_raw.brush_stencil_x, context_raw.brush_stencil_y, context_raw.brush_stencil_scale, context_raw.brush_stencil_angle);
 		if (context_raw.paint2d) uniforms_ext_vec.x = vec2d(uniforms_ext_vec.x);
 		return uniforms_ext_vec;
 	}
-	else if (link == "_decalMask") {
+	else if (link == "_decal_mask") {
 		let decal_mask: bool = operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
 		let val: f32 = (context_raw.brush_radius * context_raw.brush_nodes_radius) / 15.0;
 		let scale2d: f32 = (900 / base_h()) * config_raw.window_scale;
@@ -316,7 +316,7 @@ function uniforms_ext_vec4_link(object: object_t, mat: material_data_t, link: st
 
 function uniforms_ext_mat4_link(object: object_t, mat: material_data_t, link: string): mat4_t {
 	///if (is_paint || is_sculpt)
-	if (link == "_decalLayerMatrix") { // Decal layer
+	if (link == "_decal_layer_matrix") { // Decal layer
 		let m: mat4_t = _uniforms_mat;
 		mat4_set_from(m, context_raw.layer.decal_mat);
 		mat4_get_inv(m, m);
@@ -362,13 +362,13 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 		return null;
 		///end
 	}
-	else if (link == "_ltcMat") {
+	else if (link == "_ltc_mat") {
 		if (const_data_ltc_mat_tex == null) {
 			const_data_init_ltc();
 		}
 		return const_data_ltc_mat_tex;
 	}
-	else if (link == "_ltcMag") {
+	else if (link == "_ltc_mag") {
 		if (const_data_ltc_mag_tex == null) {
 			const_data_init_ltc();
 		}

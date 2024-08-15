@@ -22,10 +22,10 @@ function make_particle_run(data: material_t): node_shader_context_t {
 
 	node_shader_write_attrib(vert, "vec4 spos = vec4(pos.xyz, 1.0);");
 
-	node_shader_add_uniform(vert, "float brushRadius", "_brushRadius");
-	node_shader_write_attrib(vert, "vec3 emitFrom = vec3(fhash(gl_InstanceID), fhash(gl_InstanceID * 2), fhash(gl_InstanceID * 3));");
-	node_shader_write_attrib(vert, "emitFrom = emitFrom * brushRadius - brushRadius / 2.0;");
-	node_shader_write_attrib(vert, "spos.xyz += emitFrom * vec3(256.0, 256.0, 256.0);");
+	node_shader_add_uniform(vert, "float brush_radius", "_brush_radius");
+	node_shader_write_attrib(vert, "vec3 emit_from = vec3(fhash(gl_InstanceID), fhash(gl_InstanceID * 2), fhash(gl_InstanceID * 3));");
+	node_shader_write_attrib(vert, "emit_from = emit_from * brush_radius - brush_radius / 2.0;");
+	node_shader_write_attrib(vert, "spos.xyz += emit_from * vec3(256.0, 256.0, 256.0);");
 
 	node_shader_add_uniform(vert, "mat4 pd", "_particle_data");
 
@@ -63,7 +63,7 @@ function make_particle_run(data: material_t): node_shader_context_t {
 	node_shader_add_uniform(vert, "mat4 WVP", "_world_view_proj_matrix");
 	node_shader_write(vert, "gl_Position = mul(spos, WVP);");
 
-	node_shader_add_uniform(vert, "vec4 inp", "_inputBrush");
+	node_shader_add_uniform(vert, "vec4 inp", "_input_brush");
 	node_shader_write(vert, "vec2 binp = vec2(inp.x, 1.0 - inp.y);");
 	node_shader_write(vert, "binp = binp * 2.0 - 1.0;");
 	node_shader_write(vert, "binp *= gl_Position.w;");
@@ -72,14 +72,14 @@ function make_particle_run(data: material_t): node_shader_context_t {
 	node_shader_add_out(vert, "float p_fade");
 	node_shader_write(vert, "p_fade = sin(min((p_age / 8.0) * 3.141592, 3.141592));");
 
-	node_shader_add_out(frag, "float fragColor");
-	node_shader_write(frag, "fragColor = p_fade;");
+	node_shader_add_out(frag, "float frag_color");
+	node_shader_write(frag, "frag_color = p_fade;");
 
 	// add_out(vert, "vec4 wvpposition");
 	// write(vert, "wvpposition = gl_Position;");
-	// write(frag, "vec2 texCoord = wvpposition.xy / wvpposition.w;");
+	// write(frag, "vec2 tex_coord = wvpposition.xy / wvpposition.w;");
 	// add_uniform(frag, "sampler2D gbufferD");
-	// write(frag, "fragColor *= 1.0 - clamp(distance(textureLod(gbufferD, texCoord, 0.0).r, wvpposition.z), 0.0, 1.0);");
+	// write(frag, "frag_color *= 1.0 - clamp(distance(textureLod(gbufferD, tex_coord, 0.0).r, wvpposition.z), 0.0, 1.0);");
 
 	// Material.finalize(con_part);
 	con_part.data.shader_from_source = true;
@@ -95,18 +95,18 @@ function make_particle_mask(vert: node_shader_t, frag: node_shader_t) {
 		node_shader_add_out(vert, "vec4 wpos");
 		node_shader_add_uniform(vert, "mat4 W", "_world_matrix");
 		node_shader_write_attrib(vert, "wpos = mul(vec4(pos.xyz, 1.0), W);");
-		node_shader_add_uniform(frag, "vec3 particleHit", "_particleHit");
-		node_shader_add_uniform(frag, "vec3 particleHitLast", "_particleHitLast");
+		node_shader_add_uniform(frag, "vec3 particle_hit", "_particle_hit");
+		node_shader_add_uniform(frag, "vec3 particle_hit_last", "_particle_hit_last");
 
-		node_shader_write(frag, "vec3 pa = wpos.xyz - particleHit;");
-		node_shader_write(frag, "vec3 ba = particleHitLast - particleHit;");
+		node_shader_write(frag, "vec3 pa = wpos.xyz - particle_hit;");
+		node_shader_write(frag, "vec3 ba = particle_hit_last - particle_hit;");
 		node_shader_write(frag, "float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);");
 		node_shader_write(frag, "dist = length(pa - ba * h) * 10.0;");
-		// write(frag, "dist = distance(particleHit, wpos.xyz) * 10.0;");
+		// write(frag, "dist = distance(particle_hit, wpos.xyz) * 10.0;");
 
 		node_shader_write(frag, "if (dist > 1.0) discard;");
-		node_shader_write(frag, "float str = clamp(pow(1.0 / dist * brushHardness * 0.2, 4.0), 0.0, 1.0) * opacity;");
-		node_shader_write(frag, "if (particleHit.x == 0.0 && particleHit.y == 0.0 && particleHit.z == 0.0) str = 0.0;");
+		node_shader_write(frag, "float str = clamp(pow(1.0 / dist * brush_hardness * 0.2, 4.0), 0.0, 1.0) * opacity;");
+		node_shader_write(frag, "if (particle_hit.x == 0.0 && particle_hit.y == 0.0 && particle_hit.z == 0.0) str = 0.0;");
 		node_shader_write(frag, "if (str == 0.0) discard;");
 		return;
 	}

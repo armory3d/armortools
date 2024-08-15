@@ -33,21 +33,21 @@ float2 equirect(float3 normal, float angle) {
 	return float2(theta / PI2, phi / PI);
 }
 
-float rand(int pixel_i, int pixel_j, int sampleIndex, int sampleDimension, int frame, texture2d<float, access::read> sobol, texture2d<float, access::read> scramble, texture2d<float, access::read> rank) {
+float rand(int pixel_i, int pixel_j, int sample_ndex, int sample_dimension, int frame, texture2d<float, access::read> sobol, texture2d<float, access::read> scramble, texture2d<float, access::read> rank) {
 	pixel_i += frame * 9;
 	pixel_j += frame * 11;
 	pixel_i = pixel_i & 127;
 	pixel_j = pixel_j & 127;
-	sampleIndex = sampleIndex & 255;
-	sampleDimension = sampleDimension & 255;
+	sample_ndex = sample_ndex & 255;
+	sample_dimension = sample_dimension & 255;
 
-	int i = sampleDimension + (pixel_i + pixel_j * 128) * 8;
-	int rankedSampleIndex = sampleIndex ^ int(rank.read(uint2(i % 128, uint(i / 128)), 0).r * 255);
+	int i = sample_dimension + (pixel_i + pixel_j * 128) * 8;
+	int ranked_sample_index = sample_ndex ^ int(rank.read(uint2(i % 128, uint(i / 128)), 0).r * 255);
 
-	i = sampleDimension + rankedSampleIndex * 256;
+	i = sample_dimension + ranked_sample_index * 256;
 	int value = int(sobol.read(uint2(i % 256, uint(i / 256)), 0).r * 255);
 
-	i = (sampleDimension % 8) + (pixel_i + pixel_j * 128) * 8;
+	i = (sample_dimension % 8) + (pixel_i + pixel_j * 128) * 8;
 	value = value ^ int(scramble.read(uint2(i % 128, uint(i / 128)), 0).r * 255);
 
 	float v = (0.5f + value) / 256.0f;
@@ -67,16 +67,16 @@ float3 cos_weighted_hemisphere_direction(uint2 tid, float3 n, uint sample, uint 
 	return normalize(n + float3(x, y, z));
 }
 
-float3 hit_attribute(float3 vertexAttribute[3], float2 barycentrics) {
-	return vertexAttribute[0] +
-		barycentrics.x * (vertexAttribute[1] - vertexAttribute[0]) +
-		barycentrics.y * (vertexAttribute[2] - vertexAttribute[0]);
+float3 hit_attribute(float3 vertex_attribute[3], float2 barycentrics) {
+	return vertex_attribute[0] +
+		barycentrics.x * (vertex_attribute[1] - vertex_attribute[0]) +
+		barycentrics.y * (vertex_attribute[2] - vertex_attribute[0]);
 }
 
-float2 hit_attribute2d(float2 vertexAttribute[3], float2 barycentrics) {
-	return vertexAttribute[0] +
-		barycentrics.x * (vertexAttribute[1] - vertexAttribute[0]) +
-		barycentrics.y * (vertexAttribute[2] - vertexAttribute[0]);
+float2 hit_attribute2d(float2 vertex_attribute[3], float2 barycentrics) {
+	return vertex_attribute[0] +
+		barycentrics.x * (vertex_attribute[1] - vertex_attribute[0]) +
+		barycentrics.y * (vertex_attribute[2] - vertex_attribute[0]);
 }
 
 float2 s16_to_f32(uint val) {

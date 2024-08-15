@@ -103,7 +103,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 
 	let decal_layer: bool = context_raw.layer.fill_layer != null && context_raw.layer.uv_type == uv_type_t.PROJECT;
 	if (decal_layer) {
-		node_shader_add_uniform(vert, "mat4 WVP", "_decalLayerMatrix");
+		node_shader_add_uniform(vert, "mat4 WVP", "_decal_layer_matrix");
 	}
 	else {
 		node_shader_add_uniform(vert, "mat4 WVP", "_world_view_proj_matrix");
@@ -121,20 +121,20 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		frag.ndcpos = true;
 	}
 
-	node_shader_add_uniform(frag, "vec4 inp", "_inputBrush");
-	node_shader_add_uniform(frag, "vec4 inplast", "_inputBrushLast");
-	node_shader_add_uniform(frag, "float aspectRatio", "_aspect_ratio_window");
+	node_shader_add_uniform(frag, "vec4 inp", "_input_brush");
+	node_shader_add_uniform(frag, "vec4 inplast", "_input_brush_last");
+	node_shader_add_uniform(frag, "float aspect_ratio", "_aspect_ratio_window");
 	node_shader_write(frag, "vec2 bsp = sp.xy * 2.0 - 1.0;");
-	node_shader_write(frag, "bsp.x *= aspectRatio;");
+	node_shader_write(frag, "bsp.x *= aspect_ratio;");
 	node_shader_write(frag, "bsp = bsp * 0.5 + 0.5;");
 
 	node_shader_add_uniform(frag, "sampler2D gbufferD");
 
-	node_shader_add_out(frag, "vec4 fragColor[4]");
+	node_shader_add_out(frag, "vec4 frag_color[4]");
 
-	node_shader_add_uniform(frag, "float brushRadius", "_brushRadius");
-	node_shader_add_uniform(frag, "float brushOpacity", "_brushOpacity");
-	node_shader_add_uniform(frag, "float brushHardness", "_brushHardness");
+	node_shader_add_uniform(frag, "float brush_radius", "_brush_radius");
+	node_shader_add_uniform(frag, "float brush_opacity", "_brush_opacity");
+	node_shader_add_uniform(frag, "float brush_hardness", "_brush_hardness");
 
 	if (context_raw.tool == workspace_tool_t.BRUSH  ||
 		context_raw.tool == workspace_tool_t.ERASER ||
@@ -176,7 +176,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 			node_shader_write(frag, "vec2 g0 = textureLod(gbuffer0, inp.xy, 0.0).rg;");
 			node_shader_write(frag, "vec3 wn;");
 			node_shader_write(frag, "wn.z = 1.0 - abs(g0.x) - abs(g0.y);");
-			node_shader_write(frag, "wn.xy = wn.z >= 0.0 ? g0.xy : octahedronWrap(g0.xy);");
+			node_shader_write(frag, "wn.xy = wn.z >= 0.0 ? g0.xy : octahedron_wrap(g0.xy);");
 			node_shader_write(frag, "wn = normalize(wn);");
 			frag.n = true;
 			let angle: f32 = context_raw.brush_angle_reject_dot;
@@ -193,8 +193,8 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	}
 
 	if (context_raw.colorid_picked || face_fill || uv_island_fill) {
-		node_shader_add_out(vert, "vec2 texCoordPick");
-		node_shader_write(vert, "texCoordPick = tex;");
+		node_shader_add_out(vert, "vec2 tex_coord_pick");
+		node_shader_write(vert, "tex_coord_pick = tex;");
 		if (context_raw.colorid_picked) {
 			make_discard_color_id(vert, frag);
 		}
@@ -214,7 +214,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 
 	if (context_raw.tool == workspace_tool_t.CLONE || context_raw.tool == workspace_tool_t.BLUR || context_raw.tool == workspace_tool_t.SMUDGE) {
 		node_shader_add_uniform(frag, "sampler2D gbuffer2");
-		node_shader_add_uniform(frag, "vec2 gbufferSize", "_gbufferSize");
+		node_shader_add_uniform(frag, "vec2 gbuffer_size", "_gbuffer_size");
 		node_shader_add_uniform(frag, "sampler2D texpaint_undo", "_texpaint_undo");
 		node_shader_add_uniform(frag, "sampler2D texpaint_nor_undo", "_texpaint_nor_undo");
 		node_shader_add_uniform(frag, "sampler2D texpaint_pack_undo", "_texpaint_pack_undo");
@@ -234,7 +234,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		let uv_type: uv_type_t = context_raw.layer.fill_layer != null ? context_raw.layer.uv_type : context_raw.brush_paint;
 		parser_material_triplanar = uv_type == uv_type_t.TRIPLANAR && !decal;
 		parser_material_sample_keep_aspect = decal;
-		parser_material_sample_uv_scale = "brushScale";
+		parser_material_sample_uv_scale = "brush_scale";
 		let sout: shader_out_t = parser_material_parse(ui_nodes_get_canvas_material(), con_paint, vert, frag, matcon);
 		parser_material_parse_emission = false;
 		parser_material_parse_subsurface = false;
@@ -258,7 +258,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		node_shader_write(frag, "float mat_opacity = " + opac + ";");
 		node_shader_write(frag, "float opacity = mat_opacity;");
 		if (context_raw.layer.fill_layer == null) {
-			node_shader_write(frag, "opacity *= brushOpacity;");
+			node_shader_write(frag, "opacity *= brush_opacity;");
 		}
 		if (context_raw.material.paint_emis) {
 			node_shader_write(frag, "float emis = " + emis + ";");
@@ -304,13 +304,13 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		context_raw.tool == workspace_tool_t.PARTICLE ||
 		decal)) {
 		node_shader_add_uniform(frag, "sampler2D texbrushstencil", "_texbrushstencil");
-		node_shader_add_uniform(frag, "vec4 stencilTransform", "_stencilTransform");
-		node_shader_write(frag, "vec2 stencil_uv = vec2((sp.xy - stencilTransform.xy) / stencilTransform.z * vec2(aspectRatio, 1.0));");
+		node_shader_add_uniform(frag, "vec4 stencil_transform", "_stencil_transform");
+		node_shader_write(frag, "vec2 stencil_uv = vec2((sp.xy - stencil_transform.xy) / stencil_transform.z * vec2(aspect_ratio, 1.0));");
 		node_shader_write(frag, "vec2 stencil_size = vec2(textureSize(texbrushstencil, 0));");
 		node_shader_write(frag, "float stencil_ratio = stencil_size.y / stencil_size.x;");
 		node_shader_write(frag, "stencil_uv -= vec2(0.5 / stencil_ratio, 0.5);");
-		node_shader_write(frag, "stencil_uv = vec2(stencil_uv.x * cos(stencilTransform.w) - stencil_uv.y * sin(stencilTransform.w),\
-												   stencil_uv.x * sin(stencilTransform.w) + stencil_uv.y * cos(stencilTransform.w));");
+		node_shader_write(frag, "stencil_uv = vec2(stencil_uv.x * cos(stencil_transform.w) - stencil_uv.y * sin(stencil_transform.w),\
+												   stencil_uv.x * sin(stencil_transform.w) + stencil_uv.y * cos(stencil_transform.w));");
 		node_shader_write(frag, "stencil_uv += vec2(0.5 / stencil_ratio, 0.5);");
 		node_shader_write(frag, "stencil_uv.x *= stencil_ratio;");
 		node_shader_write(frag, "if (stencil_uv.x < 0 || stencil_uv.x > 1 || stencil_uv.y < 0 || stencil_uv.y > 1) discard;");
@@ -326,20 +326,20 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	if (context_raw.brush_mask_image != null && (context_raw.tool == workspace_tool_t.BRUSH || context_raw.tool == workspace_tool_t.ERASER)) {
 		node_shader_add_uniform(frag, "sampler2D texbrushmask", "_texbrushmask");
 		node_shader_write(frag, "vec2 binp_mask = inp.xy * 2.0 - 1.0;");
-		node_shader_write(frag, "binp_mask.x *= aspectRatio;");
+		node_shader_write(frag, "binp_mask.x *= aspect_ratio;");
 		node_shader_write(frag, "binp_mask = binp_mask * 0.5 + 0.5;");
 		node_shader_write(frag, "vec2 pa_mask = bsp.xy - binp_mask.xy;");
 		if (context_raw.brush_directional) {
-			node_shader_add_uniform(frag, "vec3 brushDirection", "_brushDirection");
-			node_shader_write(frag, "if (brushDirection.z == 0.0) discard;");
-			node_shader_write(frag, "pa_mask = vec2(pa_mask.x * brushDirection.x - pa_mask.y * brushDirection.y, pa_mask.x * brushDirection.y + pa_mask.y * brushDirection.x);");
+			node_shader_add_uniform(frag, "vec3 brush_direction", "_brush_direction");
+			node_shader_write(frag, "if (brush_direction.z == 0.0) discard;");
+			node_shader_write(frag, "pa_mask = vec2(pa_mask.x * brush_direction.x - pa_mask.y * brush_direction.y, pa_mask.x * brush_direction.y + pa_mask.y * brush_direction.x);");
 		}
 		let angle: f32 = context_raw.brush_angle + context_raw.brush_nodes_angle;
 		if (angle != 0.0) {
-			node_shader_add_uniform(frag, "vec2 brushAngle", "_brushAngle");
-			node_shader_write(frag, "pa_mask.xy = vec2(pa_mask.x * brushAngle.x - pa_mask.y * brushAngle.y, pa_mask.x * brushAngle.y + pa_mask.y * brushAngle.x);");
+			node_shader_add_uniform(frag, "vec2 brush_angle", "_brush_angle");
+			node_shader_write(frag, "pa_mask.xy = vec2(pa_mask.x * brush_angle.x - pa_mask.y * brush_angle.y, pa_mask.x * brush_angle.y + pa_mask.y * brush_angle.x);");
 		}
-		node_shader_write(frag, "pa_mask /= brushRadius;");
+		node_shader_write(frag, "pa_mask /= brush_radius;");
 		if (config_raw.brush_3d) {
 			node_shader_add_uniform(frag, "vec3 eye", "_camera_pos");
 			node_shader_write(frag, "pa_mask *= distance(eye, winp.xyz) / 1.5;");
@@ -360,7 +360,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		make_particle_mask(vert, frag);
 	}
 	else { // Brush cursor mask
-		node_shader_write(frag, "float str = clamp((brushRadius - dist) * brushHardness * 400.0, 0.0, 1.0) * opacity;");
+		node_shader_write(frag, "float str = clamp((brush_radius - dist) * brush_hardness * 400.0, 0.0, 1.0) * opacity;");
 	}
 
 	// Manual blending to preserve memory
@@ -402,7 +402,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	let layered: bool = context_raw.layer != project_layers[0];
 	if (layered && !is_mask) {
 		if (context_raw.tool == workspace_tool_t.ERASER) {
-			node_shader_write(frag, "fragColor[0] = vec4(mix(sample_undo.rgb, vec3(0.0, 0.0, 0.0), str), sample_undo.a - str);");
+			node_shader_write(frag, "frag_color[0] = vec4(mix(sample_undo.rgb, vec3(0.0, 0.0, 0.0), str), sample_undo.a - str);");
 			node_shader_write(frag, "nortan = vec3(0.5, 0.5, 1.0);");
 			node_shader_write(frag, "occlusion = 1.0;");
 			node_shader_write(frag, "roughness = 0.0;");
@@ -410,17 +410,17 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 			node_shader_write(frag, "matid = 0.0;");
 		}
 		else if (context_raw.tool == workspace_tool_t.PARTICLE || decal || context_raw.brush_mask_image != null) {
-			node_shader_write(frag, "fragColor[0] = vec4(" + make_material_blend_mode(frag, context_raw.brush_blending, "sample_undo.rgb", "basecol", "str") + ", max(str, sample_undo.a));");
+			node_shader_write(frag, "frag_color[0] = vec4(" + make_material_blend_mode(frag, context_raw.brush_blending, "sample_undo.rgb", "basecol", "str") + ", max(str, sample_undo.a));");
 		}
 		else {
 			if (context_raw.layer.fill_layer != null) {
-				node_shader_write(frag, "fragColor[0] = vec4(" + make_material_blend_mode(frag, context_raw.brush_blending, "sample_undo.rgb", "basecol", "opacity") + ", mat_opacity);");
+				node_shader_write(frag, "frag_color[0] = vec4(" + make_material_blend_mode(frag, context_raw.brush_blending, "sample_undo.rgb", "basecol", "opacity") + ", mat_opacity);");
 			}
 			else {
-				node_shader_write(frag, "fragColor[0] = vec4(" + make_material_blend_mode(frag, context_raw.brush_blending, "sample_undo.rgb", "basecol", "opacity") + ", max(str, sample_undo.a));");
+				node_shader_write(frag, "frag_color[0] = vec4(" + make_material_blend_mode(frag, context_raw.brush_blending, "sample_undo.rgb", "basecol", "opacity") + ", max(str, sample_undo.a));");
 			}
 		}
-		node_shader_write(frag, "fragColor[1] = vec4(nortan, matid);");
+		node_shader_write(frag, "frag_color[1] = vec4(nortan, matid);");
 
 		let height: string = "0.0";
 		if (context_raw.material.paint_height && make_material_height_used) {
@@ -430,34 +430,34 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		if (decal) {
 			node_shader_add_uniform(frag, "sampler2D texpaint_pack_undo", "_texpaint_pack_undo");
 			node_shader_write(frag, "vec4 sample_pack_undo = textureLod(texpaint_pack_undo, sample_tc, 0.0);");
-			node_shader_write(frag, "fragColor[2] = mix(sample_pack_undo, vec4(occlusion, roughness, metallic, " + height + "), str);");
+			node_shader_write(frag, "frag_color[2] = mix(sample_pack_undo, vec4(occlusion, roughness, metallic, " + height + "), str);");
 		}
 		else {
-			node_shader_write(frag, "fragColor[2] = vec4(occlusion, roughness, metallic, " + height + ");");
+			node_shader_write(frag, "frag_color[2] = vec4(occlusion, roughness, metallic, " + height + ");");
 		}
 	}
 	else {
 		if (context_raw.tool == workspace_tool_t.ERASER) {
-			node_shader_write(frag, "fragColor[0] = vec4(mix(sample_undo.rgb, vec3(0.0, 0.0, 0.0), str), sample_undo.a - str);");
-			node_shader_write(frag, "fragColor[1] = vec4(0.5, 0.5, 1.0, 0.0);");
-			node_shader_write(frag, "fragColor[2] = vec4(1.0, 0.0, 0.0, 0.0);");
+			node_shader_write(frag, "frag_color[0] = vec4(mix(sample_undo.rgb, vec3(0.0, 0.0, 0.0), str), sample_undo.a - str);");
+			node_shader_write(frag, "frag_color[1] = vec4(0.5, 0.5, 1.0, 0.0);");
+			node_shader_write(frag, "frag_color[2] = vec4(1.0, 0.0, 0.0, 0.0);");
 		}
 		else {
 			node_shader_add_uniform(frag, "sampler2D texpaint_nor_undo", "_texpaint_nor_undo");
 			node_shader_add_uniform(frag, "sampler2D texpaint_pack_undo", "_texpaint_pack_undo");
 			node_shader_write(frag, "vec4 sample_nor_undo = textureLod(texpaint_nor_undo, sample_tc, 0.0);");
 			node_shader_write(frag, "vec4 sample_pack_undo = textureLod(texpaint_pack_undo, sample_tc, 0.0);");
-			node_shader_write(frag, "fragColor[0] = vec4(" + make_material_blend_mode(frag, context_raw.brush_blending, "sample_undo.rgb", "basecol", "str") + ", max(str, sample_undo.a));");
-			node_shader_write(frag, "fragColor[1] = vec4(mix(sample_nor_undo.rgb, nortan, str), matid);");
+			node_shader_write(frag, "frag_color[0] = vec4(" + make_material_blend_mode(frag, context_raw.brush_blending, "sample_undo.rgb", "basecol", "str") + ", max(str, sample_undo.a));");
+			node_shader_write(frag, "frag_color[1] = vec4(mix(sample_nor_undo.rgb, nortan, str), matid);");
 			if (context_raw.material.paint_height && make_material_height_used) {
-				node_shader_write(frag, "fragColor[2] = mix(sample_pack_undo, vec4(occlusion, roughness, metallic, height), str);");
+				node_shader_write(frag, "frag_color[2] = mix(sample_pack_undo, vec4(occlusion, roughness, metallic, height), str);");
 			}
 			else {
-				node_shader_write(frag, "fragColor[2] = vec4(mix(sample_pack_undo.rgb, vec3(occlusion, roughness, metallic), str), 0.0);");
+				node_shader_write(frag, "frag_color[2] = vec4(mix(sample_pack_undo.rgb, vec3(occlusion, roughness, metallic), str), 0.0);");
 			}
 		}
 	}
-	node_shader_write(frag, "fragColor[3] = vec4(str, 0.0, 0.0, 1.0);");
+	node_shader_write(frag, "frag_color[3] = vec4(str, 0.0, 0.0, 1.0);");
 
 	if (!context_raw.material.paint_base) {
 		con_paint.data.color_writes_red[0] = false;
@@ -488,7 +488,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	// Base color only as mask
 	if (is_mask) {
 		// TODO: Apply opacity into base
-		// write(frag, "fragColor[0].rgb *= fragColor[0].a;");
+		// write(frag, "frag_color[0].rgb *= frag_color[0].a;");
 		con_paint.data.color_writes_green[0] = false;
 		con_paint.data.color_writes_blue[0] = false;
 		con_paint.data.color_writes_alpha[0] = false;

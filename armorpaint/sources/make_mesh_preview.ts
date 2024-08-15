@@ -39,16 +39,16 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 		node_shader_context_add_elem(con_mesh, "bone", "short4norm");
 		node_shader_context_add_elem(con_mesh, "weight", "short4norm");
 		node_shader_add_function(vert, str_get_skinning_dual_quat);
-		node_shader_add_uniform(vert, "vec4 skinBones[128 * 2]", "_skin_bones");
-		node_shader_add_uniform(vert, "float posUnpack", "_pos_unpack");
-		node_shader_write_attrib(vert, "vec4 skinA;");
-		node_shader_write_attrib(vert, "vec4 skinB;");
-		node_shader_write_attrib(vert, "getSkinningDualQuat(ivec4(bone * 32767), weight, skinA, skinB);");
+		node_shader_add_uniform(vert, "vec4 skin_bones[128 * 2]", "_skin_bones");
+		node_shader_add_uniform(vert, "float pos_unpack", "_pos_unpack");
+		node_shader_write_attrib(vert, "vec4 skin_a;");
+		node_shader_write_attrib(vert, "vec4 skin_b;");
+		node_shader_write_attrib(vert, "get_skinning_dual_quat(ivec4(bone * 32767), weight, skin_a, skin_b);");
 		node_shader_write_attrib(vert, "vec3 spos = pos.xyz;");
-		node_shader_write_attrib(vert, "spos.xyz *= posUnpack;");
-		node_shader_write_attrib(vert, "spos.xyz += 2.0 * cross(skinA.xyz, cross(skinA.xyz, spos.xyz) + skinA.w * spos.xyz);");
-		node_shader_write_attrib(vert, "spos.xyz += 2.0 * (skinA.w * skinB.xyz - skinB.w * skinA.xyz + cross(skinA.xyz, skinB.xyz));");
-		node_shader_write_attrib(vert, "spos.xyz /= posUnpack;");
+		node_shader_write_attrib(vert, "spos.xyz *= pos_unpack;");
+		node_shader_write_attrib(vert, "spos.xyz += 2.0 * cross(skin_a.xyz, cross(skin_a.xyz, spos.xyz) + skin_a.w * spos.xyz);");
+		node_shader_write_attrib(vert, "spos.xyz += 2.0 * (skin_a.w * skin_b.xyz - skin_b.w * skin_a.xyz + cross(skin_a.xyz, skin_b.xyz));");
+		node_shader_write_attrib(vert, "spos.xyz /= pos_unpack;");
 	}
 	///end
 
@@ -57,8 +57,8 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 
 	let sc: f32 = context_raw.brush_scale * context_raw.brush_nodes_scale;
 	let brush_scale: string = sc + "";
-	node_shader_add_out(vert, "vec2 texCoord");
-	node_shader_write_attrib(vert, "texCoord = tex * float(" + brush_scale + ");");
+	node_shader_add_out(vert, "vec2 tex_coord");
+	node_shader_write_attrib(vert, "tex_coord = tex * float(" + brush_scale + ");");
 
 	let decal: bool = context_raw.decal_preview;
 	parser_material_sample_keep_aspect = decal;
@@ -88,16 +88,16 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 	// write(vert, "float vheight = " + height + ";");
 	// add_out(vert, "float height");
 	// write(vert, "height = vheight;");
-	// let displaceStrength: f32 = 0.1;
-	// if (heightUsed && displaceStrength > 0.0) {
-	// 	write(vert, "vec3 pos2 = " + pos + ".xyz + vec3(nor.xy, pos.w) * vec3(" + height + ", " + height + ", " + height + ") * vec3(" + displaceStrength + ", " + displaceStrength + ", " + displaceStrength + ");");
+	// let displace_strength: f32 = 0.1;
+	// if (height_used && displace_strength > 0.0) {
+	// 	write(vert, "vec3 pos2 = " + pos + ".xyz + vec3(nor.xy, pos.w) * vec3(" + height + ", " + height + ", " + height + ") * vec3(" + displace_strength + ", " + displace_strength + ", " + displace_strength + ");");
 	// 	write(vert, "gl_Position = mul(vec4(pos2.xyz, 1.0), WVP);");
 	// }
 
 	if (decal) {
 		if (context_raw.tool == workspace_tool_t.TEXT) {
 			node_shader_add_uniform(frag, "sampler2D textexttool", "_textexttool");
-			node_shader_write(frag, "opacity *= textureLod(textexttool, texCoord / float(" + brush_scale + "), 0.0).r;");
+			node_shader_write(frag, "opacity *= textureLod(textexttool, tex_coord / float(" + brush_scale + "), 0.0).r;");
 		}
 	}
 	if (decal) {
@@ -105,7 +105,7 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 		node_shader_write(frag, "if (opacity < " + opac + ") discard;");
 	}
 
-	node_shader_add_out(frag, "vec4 fragColor[3]");
+	node_shader_add_out(frag, "vec4 frag_color[3]");
 	frag.n = true;
 
 	node_shader_add_function(frag, str_pack_float_int16);
@@ -132,9 +132,9 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 	else {
 		frag.vvec = true;
 		///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
-		node_shader_write(frag, "mat3 TBN = cotangentFrame(n, vVec, texCoord);");
+		node_shader_write(frag, "mat3 TBN = cotangent_frame(n, vvec, tex_coord);");
 		///else
-		node_shader_write(frag, "mat3 TBN = cotangentFrame(n, -vVec, texCoord);");
+		node_shader_write(frag, "mat3 TBN = cotangent_frame(n, -vvec, tex_coord);");
 		///end
 		node_shader_write(frag, "n = nortan * 2.0 - 1.0;");
 		node_shader_write(frag, "n.y = -n.y;");
@@ -142,24 +142,24 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 	}
 
 	node_shader_write(frag, "n /= (abs(n.x) + abs(n.y) + abs(n.z));");
-	node_shader_write(frag, "n.xy = n.z >= 0.0 ? n.xy : octahedronWrap(n.xy);");
+	node_shader_write(frag, "n.xy = n.z >= 0.0 ? n.xy : octahedron_wrap(n.xy);");
 	// uint matid = 0;
 
 	if (decal) {
-		node_shader_write(frag, "fragColor[0] = vec4(n.x, n.y, roughness, packFloatInt16(metallic, uint(0)));"); // metallic/matid
-		node_shader_write(frag, "fragColor[1] = vec4(basecol, occlusion);");
+		node_shader_write(frag, "frag_color[0] = vec4(n.x, n.y, roughness, pack_f32_i16(metallic, uint(0)));"); // metallic/matid
+		node_shader_write(frag, "frag_color[1] = vec4(basecol, occlusion);");
 	}
 	else {
-		node_shader_write(frag, "fragColor[0] = vec4(n.x, n.y, mix(1.0, roughness, opacity), packFloatInt16(mix(1.0, metallic, opacity), uint(0)));"); // metallic/matid
-		node_shader_write(frag, "fragColor[1] = vec4(mix(vec3(0.0, 0.0, 0.0), basecol, opacity), occlusion);");
+		node_shader_write(frag, "frag_color[0] = vec4(n.x, n.y, mix(1.0, roughness, opacity), pack_f32_i16(mix(1.0, metallic, opacity), uint(0)));"); // metallic/matid
+		node_shader_write(frag, "frag_color[1] = vec4(mix(vec3(0.0, 0.0, 0.0), basecol, opacity), occlusion);");
 	}
-	node_shader_write(frag, "fragColor[2] = vec4(0.0, 0.0, 0.0, 0.0);"); // veloc
+	node_shader_write(frag, "frag_color[2] = vec4(0.0, 0.0, 0.0, 0.0);"); // veloc
 
 	parser_material_finalize(con_mesh);
 
 	///if arm_skin
 	if (skin) {
-		node_shader_write(vert, "wnormal = normalize(mul(vec3(nor.xy, pos.w) + 2.0 * cross(skinA.xyz, cross(skinA.xyz, vec3(nor.xy, pos.w)) + skinA.w * vec3(nor.xy, pos.w)), N));");
+		node_shader_write(vert, "wnormal = normalize(mul(vec3(nor.xy, pos.w) + 2.0 * cross(skin_a.xyz, cross(skin_a.xyz, vec3(nor.xy, pos.w)) + skin_a.w * vec3(nor.xy, pos.w)), N));");
 	}
 	///end
 

@@ -368,7 +368,7 @@ function make_material_get_displace_strength(): f32 {
 
 function make_material_voxelgi_half_extents(): string {
 	let ext = context_raw.vxao_ext;
-	return "const vec3 voxelgiHalfExtents = vec3(" + ext + ", " + ext + ", " + ext + ");";
+	return "const vec3 voxelgi_half_extents = vec3(" + ext + ", " + ext + ", " + ext + ");";
 }
 
 function make_material_delete_context(c: shader_context_t) {

@@ -3,9 +3,9 @@
 uniform mat4 VP;
 uniform mat4 invVP;
 uniform vec2 mouse;
-uniform vec2 texStep;
+uniform vec2 tex_step;
 uniform float radius;
-uniform vec3 cameraRight;
+uniform vec3 camera_right;
 uniform sampler2D gbufferD;
 #ifdef HLSL
 uniform sampler2D texa; // direct3d12 unit align
@@ -14,9 +14,9 @@ uniform sampler2D texa; // direct3d12 unit align
 in vec4 pos;
 in vec2 nor;
 in vec2 tex;
-out vec2 texCoord;
+out vec2 tex_coord;
 
-vec3 getPos(vec2 uv) {
+vec3 get_pos(vec2 uv) {
 	#ifdef HLSL
 	float keep = textureLod(texa, vec2(0.0, 0.0), 0.0).r; // direct3d12 unit align
 	float keep2 = pos.x + nor.x;
@@ -31,33 +31,32 @@ vec3 getPos(vec2 uv) {
 	return wpos.xyz / wpos.w;
 }
 
-vec3 getNormal(vec3 p0, vec2 uv) {
-	vec2 texStepLocal = texStep; // TODO: SPIRV workaround
-	vec3 p1 = getPos(uv + vec2(texStepLocal.x * 4, 0));
-	vec3 p2 = getPos(uv + vec2(0, texStepLocal.y * 4));
+vec3 get_normal(vec3 p0, vec2 uv) {
+	vec3 p1 = get_pos(uv + vec2(tex_step.x * 4, 0));
+	vec3 p2 = get_pos(uv + vec2(0, tex_step.y * 4));
 	return normalize(cross(p2 - p0, p1 - p0));
 }
 
-void createBasis(vec3 normal, out vec3 tangent, out vec3 binormal) {
-	tangent = normalize(cameraRight - normal * dot(cameraRight, normal));
+void create_basis(vec3 normal, out vec3 tangent, out vec3 binormal) {
+	tangent = normalize(camera_right - normal * dot(camera_right, normal));
 	binormal = cross(tangent, normal);
 }
 
 void main() {
-	texCoord = tex;
-	vec3 wpos = getPos(mouse);
-	vec2 uv1 = mouse + texStep * 4;
-	vec2 uv2 = mouse - texStep * 4;
-	vec3 wpos1 = getPos(uv1);
-	vec3 wpos2 = getPos(uv2);
+	tex_coord = tex;
+	vec3 wpos = get_pos(mouse);
+	vec2 uv1 = mouse + tex_step * 4;
+	vec2 uv2 = mouse - tex_step * 4;
+	vec3 wpos1 = get_pos(uv1);
+	vec3 wpos2 = get_pos(uv2);
 	vec3 n = normalize(
-		getNormal(wpos, mouse) +
-		getNormal(wpos1, uv1) +
-		getNormal(wpos2, uv2)
+		get_normal(wpos, mouse) +
+		get_normal(wpos1, uv1) +
+		get_normal(wpos2, uv2)
 	);
 	vec3 n_tan;
 	vec3 n_bin;
-	createBasis(n, n_tan, n_bin);
+	create_basis(n, n_tan, n_bin);
 	if      (gl_VertexID == 0) wpos += normalize(-n_tan - n_bin) * 0.7 * radius;
 	else if (gl_VertexID == 1) wpos += normalize( n_tan - n_bin) * 0.7 * radius;
 	else if (gl_VertexID == 2) wpos += normalize( n_tan + n_bin) * 0.7 * radius;

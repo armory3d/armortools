@@ -3,8 +3,8 @@
 uniform sampler2D radiance;
 uniform vec4 params;
 
-in vec2 texCoord;
-out vec4 fragColor;
+in vec2 tex_coord;
+out vec4 frag_color;
 
 const float PI = 3.14159265358979;
 const float PI2 = PI * 2.0;
@@ -24,7 +24,7 @@ vec2 equirect(vec3 normal) {
 	return vec2(theta / PI2, phi / PI);
 }
 
-vec3 reverseEquirect(vec2 co) {
+vec3 reverse_equirect(vec2 co) {
 	float theta = co.x * PI2 - PI;
 	float phi = co.y * PI;
 	return vec3(sin(phi) * cos(theta), -(sin(phi) * sin(theta)), cos(phi));
@@ -43,13 +43,12 @@ vec3 cos_weighted_hemisphere_direction(vec3 n, vec2 co, uint seed) {
 }
 
 void main() {
-	vec4 paramsLocal = params; // TODO: spirv workaround
-	fragColor = vec4(0.0, 0.0, 0.0, 1.0);
-	vec3 n = reverseEquirect(texCoord);
+	frag_color = vec4(0.0, 0.0, 0.0, 1.0);
+	vec3 n = reverse_equirect(tex_coord);
 	for (int i = 0; i < samples; i++) {
-		vec3 dir = normalize(mix(n, cos_weighted_hemisphere_direction(n, texCoord, i), paramsLocal.x));
-		fragColor.rgb += texture(radiance, equirect(dir)).rgb;
+		vec3 dir = normalize(mix(n, cos_weighted_hemisphere_direction(n, tex_coord, i), params.x));
+		frag_color.rgb += texture(radiance, equirect(dir)).rgb;
 	}
-	fragColor.rgb /= float(samples);
-	fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / 2.2));
+	frag_color.rgb /= float(samples);
+	frag_color.rgb = pow(frag_color.rgb, vec3(1.0 / 2.2));
 }

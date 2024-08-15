@@ -469,17 +469,17 @@ function render_path_base_draw_taa() {
 
 	render_path_set_target(current);
 	render_path_clear_target(0x00000000);
-	render_path_bind_target("buf", "colorTex");
+	render_path_bind_target("buf", "color_tex");
 	render_path_draw_shader("shader_datas/smaa_edge_detect/smaa_edge_detect");
 
 	render_path_set_target("taa");
 	render_path_clear_target(0x00000000);
-	render_path_bind_target(current, "edgesTex");
+	render_path_bind_target(current, "edges_tex");
 	render_path_draw_shader("shader_datas/smaa_blend_weight/smaa_blend_weight");
 
 	render_path_set_target(current);
-	render_path_bind_target("buf", "colorTex");
-	render_path_bind_target("taa", "blendTex");
+	render_path_bind_target("buf", "color_tex");
+	render_path_bind_target("taa", "blend_tex");
 	render_path_bind_target("gbuffer2", "sveloc");
 	render_path_draw_shader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
 

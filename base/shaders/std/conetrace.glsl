@@ -11,16 +11,16 @@
 // http://www.seas.upenn.edu/%7Epcozzi/OpenGLInsights/OpenGLInsights-SparseVoxelization.pdf
 // https://research.nvidia.com/sites/default/files/publications/GIVoxels-pg2011-authors.pdf
 
-uniform float coneOffset;
-uniform float coneAperture;
+uniform float cone_offset;
+uniform float cone_aperture;
 
-const int voxelgiResolution = 256;
-const vec3 voxelgiHalfExtents = vec3(1, 1, 1);
-const float voxelgiOcc = 1.0;
-const float voxelgiStep = 1.0;
-const float voxelgiRange = 2.0;
-const float MAX_DISTANCE = 1.73205080757 * voxelgiRange;
-const float VOXEL_SIZE = (2.0 / voxelgiResolution.x) * voxelgiStep;
+const int voxelgi_resolution = 256;
+const vec3 voxelgi_half_extents = vec3(1, 1, 1);
+const float voxelgi_occ = 1.0;
+const float voxelgi_step = 1.0;
+const float voxelgi_range = 2.0;
+const float MAX_DISTANCE = 1.73205080757 * voxelgi_range;
+const float VOXEL_SIZE = (2.0 / voxelgi_resolution.x) * voxelgi_step;
 
 vec3 tangent(const vec3 n) {
 	vec3 t1 = cross(n, vec3(0, 0, 1));
@@ -29,29 +29,29 @@ vec3 tangent(const vec3 n) {
 	else return normalize(t2);
 }
 
-float traceConeAO(sampler3D voxels, const vec3 origin, vec3 dir, const float aperture, const float maxDist) {
+float trace_cone_ao(sampler3D voxels, const vec3 origin, vec3 dir, const float aperture, const float max_dist) {
 	dir = normalize(dir);
-	float sampleCol = 0.0;
-	float dist = 1.5 * VOXEL_SIZE * coneOffset;
+	float sample_col = 0.0;
+	float dist = 1.5 * VOXEL_SIZE * cone_offset;
 	float diam = dist * aperture;
-	vec3 samplePos;
-	while (sampleCol < 1.0 && dist < maxDist) {
-		samplePos = dir * dist + origin;
-		float mip = max(log2(diam * voxelgiResolution.x), 0);
-		float mipSample = textureLod(voxels, samplePos * 0.5 + vec3(0.5), mip).r;
-		sampleCol += (1 - sampleCol) * mipSample;
+	vec3 sample_pos;
+	while (sample_col < 1.0 && dist < max_dist) {
+		sample_pos = dir * dist + origin;
+		float mip = max(log2(diam * voxelgi_resolution.x), 0);
+		float mip_sample = textureLod(voxels, sample_pos * 0.5 + vec3(0.5), mip).r;
+		sample_col += (1 - sample_col) * mip_sample;
 		dist += max(diam / 2, VOXEL_SIZE);
 		diam = dist * aperture;
 	}
-	return sampleCol;
+	return sample_col;
 }
 
-float traceShadow(sampler3D voxels, const vec3 origin, const vec3 dir) {
-	return traceConeAO(voxels, origin, dir, 0.14 * coneAperture, 2.5 * voxelgiRange);
+float trace_shadow(sampler3D voxels, const vec3 origin, const vec3 dir) {
+	return trace_cone_ao(voxels, origin, dir, 0.14 * cone_aperture, 2.5 * voxelgi_range);
 }
 
-float traceAO(const vec3 origin, const vec3 normal, sampler3D voxels) {
-	const float angleMix = 0.5f;
+float trace_ao(const vec3 origin, const vec3 normal, sampler3D voxels) {
+	const float angle_mix = 0.5f;
 	const float aperture = 0.55785173935;
 	vec3 o1 = normalize(tangent(normal));
 	vec3 o2 = normalize(cross(o1, normal));
@@ -59,16 +59,16 @@ float traceAO(const vec3 origin, const vec3 normal, sampler3D voxels) {
 	vec3 c2 = 0.5f * (o1 - o2);
 
 	#ifdef HLSL
-	const float factor = voxelgiOcc * 0.93;
+	const float factor = voxelgi_occ * 0.93;
 	#else
-	const float factor = voxelgiOcc * 0.90;
+	const float factor = voxelgi_occ * 0.90;
 	#endif
 
-	float col = traceConeAO(voxels, origin, normal, aperture, MAX_DISTANCE);
-	col += traceConeAO(voxels, origin, mix(normal, o1, angleMix), aperture, MAX_DISTANCE);
-	col += traceConeAO(voxels, origin, mix(normal, o2, angleMix), aperture, MAX_DISTANCE);
-	col += traceConeAO(voxels, origin, mix(normal, -c1, angleMix), aperture, MAX_DISTANCE);
-	col += traceConeAO(voxels, origin, mix(normal, -c2, angleMix), aperture, MAX_DISTANCE);
+	float col = trace_cone_ao(voxels, origin, normal, aperture, MAX_DISTANCE);
+	col += trace_cone_ao(voxels, origin, mix(normal, o1, angle_mix), aperture, MAX_DISTANCE);
+	col += trace_cone_ao(voxels, origin, mix(normal, o2, angle_mix), aperture, MAX_DISTANCE);
+	col += trace_cone_ao(voxels, origin, mix(normal, -c1, angle_mix), aperture, MAX_DISTANCE);
+	col += trace_cone_ao(voxels, origin, mix(normal, -c2, angle_mix), aperture, MAX_DISTANCE);
 	return (col / 5.0) * factor;
 
 	return 0.0;

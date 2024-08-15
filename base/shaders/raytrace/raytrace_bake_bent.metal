@@ -25,21 +25,21 @@ struct RayPayload {
 
 constant int SAMPLES = 4;//64;
 
-float rand(int pixel_i, int pixel_j, int sampleIndex, int sampleDimension, int frame, texture2d<float, access::read> sobol, texture2d<float, access::read> scramble, texture2d<float, access::read> rank) {
+float rand(int pixel_i, int pixel_j, int sample_index, int sample_dimension, int frame, texture2d<float, access::read> sobol, texture2d<float, access::read> scramble, texture2d<float, access::read> rank) {
 	pixel_i += frame * 9;
 	pixel_j += frame * 11;
 	pixel_i = pixel_i & 127;
 	pixel_j = pixel_j & 127;
-	sampleIndex = sampleIndex & 255;
-	sampleDimension = sampleDimension & 255;
+	sample_index = sample_index & 255;
+	sample_dimension = sample_dimension & 255;
 
-	int i = sampleDimension + (pixel_i + pixel_j * 128) * 8;
-	int rankedSampleIndex = sampleIndex ^ int(rank.read(uint2(i % 128, uint(i / 128)), 0).r * 255);
+	int i = sample_dimension + (pixel_i + pixel_j * 128) * 8;
+	int ranked_sample_index = sample_index ^ int(rank.read(uint2(i % 128, uint(i / 128)), 0).r * 255);
 
-	i = sampleDimension + rankedSampleIndex * 256;
+	i = sample_dimension + ranked_sample_index * 256;
 	int value = int(sobol.read(uint2(i % 256, uint(i / 256)), 0).r * 255);
 
-	i = (sampleDimension % 8) + (pixel_i + pixel_j * 128) * 8;
+	i = (sample_dimension % 8) + (pixel_i + pixel_j * 128) * 8;
 	value = value ^ int(scramble.read(uint2(i % 128, uint(i / 128)), 0).r * 255);
 
 	float v = (0.5f + value) / 256.0f;

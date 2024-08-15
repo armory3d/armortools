@@ -41,8 +41,8 @@ constant int DEPTH = 3; // Opaque hits
 constant int DEPTH_TRANSPARENT = 16; // Transparent hits
 #endif
 #ifdef _ROULETTE
-constant int rrStart = 2;
-constant float rrProbability = 0.5; // Map to albedo
+constant int rr_start = 2;
+constant float rr_probability = 0.5; // Map to albedo
 #endif
 
 void generate_camera_ray(float2 screen_pos, thread float3 & ray_origin, thread float3 & ray_dir, float3 eye, float4x4 inv_vp) {
@@ -61,21 +61,21 @@ float2 equirect(float3 normal, float angle) {
 	return float2(theta / PI2, phi / PI);
 }
 
-float rand(int pixel_i, int pixel_j, int sampleIndex, int sampleDimension, int frame, texture2d<float, access::read> sobol, texture2d<float, access::read> scramble, texture2d<float, access::read> rank) {
+float rand(int pixel_i, int pixel_j, int sample_index, int sample_dimension, int frame, texture2d<float, access::read> sobol, texture2d<float, access::read> scramble, texture2d<float, access::read> rank) {
 	pixel_i += frame * 9;
 	pixel_j += frame * 11;
 	pixel_i = pixel_i & 127;
 	pixel_j = pixel_j & 127;
-	sampleIndex = sampleIndex & 255;
-	sampleDimension = sampleDimension & 255;
+	sample_index = sample_index & 255;
+	sample_dimension = sample_dimension & 255;
 
-	int i = sampleDimension + (pixel_i + pixel_j * 128) * 8;
-	int rankedSampleIndex = sampleIndex ^ int(rank.read(uint2(i % 128, uint(i / 128)), 0).r * 255);
+	int i = sample_dimension + (pixel_i + pixel_j * 128) * 8;
+	int ranked_sample_index = sample_index ^ int(rank.read(uint2(i % 128, uint(i / 128)), 0).r * 255);
 
-	i = sampleDimension + rankedSampleIndex * 256;
+	i = sample_dimension + ranked_sample_index * 256;
 	int value = int(sobol.read(uint2(i % 256, uint(i / 256)), 0).r * 255);
 
-	i = (sampleDimension % 8) + (pixel_i + pixel_j * 128) * 8;
+	i = (sample_dimension % 8) + (pixel_i + pixel_j * 128) * 8;
 	value = value ^ int(scramble.read(uint2(i % 128, uint(i / 128)), 0).r * 255);
 
 	float v = (0.5f + value) / 256.0f;
@@ -105,16 +105,16 @@ float3 hit_world_position(ray ray, typename intersector<triangle_data, instancin
 	return ray.origin + ray.direction * intersection.distance;
 }
 
-float3 hit_attribute(float3 vertexAttribute[3], float2 barycentrics) {
-	return vertexAttribute[0] +
-		barycentrics.x * (vertexAttribute[1] - vertexAttribute[0]) +
-		barycentrics.y * (vertexAttribute[2] - vertexAttribute[0]);
+float3 hit_attribute(float3 vertex_attribute[3], float2 barycentrics) {
+	return vertex_attribute[0] +
+		barycentrics.x * (vertex_attribute[1] - vertex_attribute[0]) +
+		barycentrics.y * (vertex_attribute[2] - vertex_attribute[0]);
 }
 
-float2 hit_attribute2d(float2 vertexAttribute[3], float2 barycentrics) {
-	return vertexAttribute[0] +
-		barycentrics.x * (vertexAttribute[1] - vertexAttribute[0]) +
-		barycentrics.y * (vertexAttribute[2] - vertexAttribute[0]);
+float2 hit_attribute2d(float2 vertex_attribute[3], float2 barycentrics) {
+	return vertex_attribute[0] +
+		barycentrics.x * (vertex_attribute[1] - vertex_attribute[0]) +
+		barycentrics.y * (vertex_attribute[2] - vertex_attribute[0]);
 }
 
 void create_basis(float3 normal, thread float3 & tangent, thread float3 & binormal) {
@@ -124,19 +124,19 @@ void create_basis(float3 normal, thread float3 & tangent, thread float3 & binorm
 	binormal = cross(tangent, normal);
 }
 
-float3 surfaceAlbedo(const float3 baseColor, const float metalness) {
-	return mix(baseColor, float3(0.0, 0.0, 0.0), metalness);
+float3 surface_albedo(const float3 base_color, const float metalness) {
+	return mix(base_color, float3(0.0, 0.0, 0.0), metalness);
 }
 
-float3 surfaceSpecular(const float3 baseColor, const float metalness) {
-	return mix(float3(0.04, 0.04, 0.04), baseColor, metalness);
+float3 surface_specular(const float3 base_color, const float metalness) {
+	return mix(float3(0.04, 0.04, 0.04), base_color, metalness);
 }
 
-float3 envBRDFApprox(float3 specular, float roughness, float dotNV) {
+float3 env_brdf_approx(float3 specular, float roughness, float dotnv) {
 	const float4 c0 = float4(-1, -0.0275, -0.572, 0.022);
 	const float4 c1 = float4(1, 0.0425, 1.04, -0.04);
 	float4 r = roughness * c0 + c1;
-	float a004 = min(r.x * r.x, exp2(-9.28 * dotNV)) * r.x + r.y;
+	float a004 = min(r.x * r.x, exp2(-9.28 * dotnv)) * r.x + r.y;
 	float2 ab = float2(-1.04, 1.04) * a004 + r.zw;
 	return specular * ab.x + ab.y;
 }
@@ -180,19 +180,19 @@ kernel void raytracingKernel(
 		payload.color = float4(1, 1, 1, j);
 
 		#ifdef _TRANSPARENCY
-		int transparentHits = 0;
+		int transparent_hits = 0;
 		#endif
 
 		for (int i = 0; i < DEPTH; ++i) {
 
 			#ifdef _ROULETTE
-			float rrFactor = 1.0;
-			if (i >= rrStart) {
+			float rr_factor = 1.0;
+			if (i >= rr_start) {
 				float f = rand(tid.x, tid.y, j, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
-				if (f <= rrProbability) {
+				if (f <= rr_probability) {
 					break;
 				}
-				rrFactor = 1.0 / (1.0 - rrProbability);
+				rr_factor = 1.0 / (1.0 - rr_probability);
 			}
 			#endif
 
@@ -274,40 +274,40 @@ kernel void raytracingKernel(
 				seed += 1;
 
 				#ifdef _TRANSLUCENCY
-				float3 diffuseDir = texpaint0.a < f ?
+				float3 diffuse_dir = texpaint0.a < f ?
 					cos_weighted_hemisphere_direction(tid, ray.direction, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank) :
 					cos_weighted_hemisphere_direction(tid, n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
 				#else
-				float3 diffuseDir = cos_weighted_hemisphere_direction(tid, n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
+				float3 diffuse_dir = cos_weighted_hemisphere_direction(tid, n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
 				#endif
 
 				#ifdef _FRESNEL
-				float specularChance = fresnel(n, ray.direction);
+				float specular_chance = fresnel(n, ray.direction);
 				#else
-				const float specularChance = 0.5;
+				const float specular_chance = 0.5;
 				#endif
 
-				if (f < specularChance) {
+				if (f < specular_chance) {
 					#ifdef _TRANSLUCENCY
-					float3 specularDir = texpaint0.a < f * 2 ? ray.direction : reflect(ray.direction, n);
+					float3 specular_dir = texpaint0.a < f * 2 ? ray.direction : reflect(ray.direction, n);
 					#else
-					float3 specularDir = reflect(ray.direction, n);
+					float3 specular_dir = reflect(ray.direction, n);
 					#endif
-					payload.ray_dir = mix(specularDir, diffuseDir, texpaint2.g * texpaint2.g);
+					payload.ray_dir = mix(specular_dir, diffuse_dir, texpaint2.g * texpaint2.g);
 
 					float3 v = normalize(constant_buffer.eye.xyz - hit_world_position(ray, intersection));
-					float dotNV = max(dot(n, v), 0.0);
-					float3 specular = surfaceSpecular(texcolor, texpaint2.b);
-					payload.color.xyz *= envBRDFApprox(specular, texpaint2.g, dotNV);
+					float dotnv = max(dot(n, v), 0.0);
+					float3 specular = surface_specular(texcolor, texpaint2.b);
+					payload.color.xyz *= env_brdf_approx(specular, texpaint2.g, dotnv);
 					#ifdef _FRESNEL
-					payload.color.xyz /= specularChance;
+					payload.color.xyz /= specular_chance;
 					#endif
 				}
 				else {
-					payload.ray_dir = diffuseDir;
-					payload.color.xyz *= surfaceAlbedo(texcolor, texpaint2.b);
+					payload.ray_dir = diffuse_dir;
+					payload.color.xyz *= surface_albedo(texcolor, texpaint2.b);
 					#ifdef _FRESNEL
-					payload.color.xyz /= 1.0 - specularChance;
+					payload.color.xyz /= 1.0 - specular_chance;
 					#endif
 				}
 				#ifdef _FRESNEL
@@ -341,9 +341,9 @@ kernel void raytracingKernel(
 			// Miss
 			if (payload.color.a < 0) {
 				#ifdef _TRANSPARENCY
-				if (payload.color.a == -2 && transparentHits < DEPTH_TRANSPARENT) {
+				if (payload.color.a == -2 && transparent_hits < DEPTH_TRANSPARENT) {
 					payload.color.a = j;
-					transparentHits++;
+					transparent_hits++;
 					i--;
 				}
 				#endif
@@ -357,7 +357,7 @@ kernel void raytracingKernel(
 			}
 
 			#ifdef _ROULETTE
-			payload.color.rgb *= rrFactor;
+			payload.color.rgb *= rr_factor;
 			#endif
 
 			ray.origin = payload.ray_origin;

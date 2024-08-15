@@ -1,9 +1,9 @@
 #version 450
 
 in vec3 vcolor;
-out vec4 fragColor;
+out vec4 frag_color;
 
 void main() {
-	fragColor = vec4(vcolor, 1.0);
-	fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / 2.2));
+	frag_color = vec4(vcolor, 1.0);
+	frag_color.rgb = pow(frag_color.rgb, vec3(1.0 / 2.2));
 }

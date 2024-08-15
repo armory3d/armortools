@@ -199,14 +199,14 @@ float tex_brick_noise(int n) { \
 	return 0.5f * float(nn) / 1073741824.0; \
 } \
 vec3 tex_brick(vec3 p, const vec3 c1, const vec3 c2, const vec3 c3) { \
-	vec3 brickSize = vec3(0.9, 0.49, 0.49); \
-	vec3 mortarSize = vec3(0.05, 0.1, 0.1); \
-	p /= brickSize / 2; \
+	vec3 brick_size = vec3(0.9, 0.49, 0.49); \
+	vec3 mortar_size = vec3(0.05, 0.1, 0.1); \
+	p /= brick_size / 2; \
 	if (fract(p.y * 0.5) > 0.5) p.x += 0.5; \
-	float col = floor(p.x / (brickSize.x + (mortarSize.x * 2.0))); \
+	float col = floor(p.x / (brick_size.x + (mortar_size.x * 2.0))); \
 	float row = p.y; \
 	p = fract(p); \
-	vec3 b = step(p, 1.0 - mortarSize); \
+	vec3 b = step(p, 1.0 - mortar_size); \
 	float tint = min(max(tex_brick_noise((int(col) << 16) + (int(row) & 0xFFFF)), 0.0), 1.0); \
 	return mix(c3, mix(c1, c2, tint), b.x * b.y * b.z); \
 } \
@@ -235,24 +235,24 @@ vec3 brightcontrast(const vec3 col, const float bright, const float contr) { \
 
 ///if arm_voxels
 let str_trace_ao: string = " \
-float traceConeAO(sampler3D voxels, const vec3 origin, vec3 dir, const float aperture, const float maxDist, const float offset) { \
-	const ivec3 voxelgiResolution = ivec3(256, 256, 256); \
-	const float voxelgiStep = 1.0; \
-	const float VOXEL_SIZE = (2.0 / voxelgiResolution.x) * voxelgiStep; \
+float trace_cone_ao(sampler3D voxels, const vec3 origin, vec3 dir, const float aperture, const float max_dist, const float offset) { \
+	const ivec3 voxelgi_resolution = ivec3(256, 256, 256); \
+	const float voxelgi_step = 1.0; \
+	const float VOXEL_SIZE = (2.0 / voxelgi_resolution.x) * voxelgi_step; \
 	dir = normalize(dir); \
-	float sampleCol = 0.0; \
+	float sample_col = 0.0; \
 	float dist = offset; \
 	float diam = dist * aperture; \
-	vec3 samplePos; \
-	while (sampleCol < 1.0 && dist < maxDist) { \
-		samplePos = dir * dist + origin; \
-		float mip = max(log2(diam * voxelgiResolution.x), 0); \
-		float mipSample = textureLod(voxels, samplePos * 0.5 + vec3(0.5, 0.5, 0.5), mip).r; \
-		sampleCol += (1 - sampleCol) * mipSample; \
+	vec3 sample_pos; \
+	while (sample_col < 1.0 && dist < max_dist) { \
+		sample_pos = dir * dist + origin; \
+		float mip = max(log2(diam * voxelgi_resolution.x), 0); \
+		float mip_sample = textureLod(voxels, sample_pos * 0.5 + vec3(0.5, 0.5, 0.5), mip).r; \
+		sample_col += (1 - sample_col) * mip_sample; \
 		dist += max(diam / 2, VOXEL_SIZE); \
 		diam = dist * aperture; \
 	} \
-	return sampleCol; \
+	return sample_col; \
 } \
 vec3 tangent(const vec3 n) { \
 	vec3 t1 = cross(n, vec3(0, 0, 1)); \
@@ -260,34 +260,34 @@ vec3 tangent(const vec3 n) { \
 	if (length(t1) > length(t2)) return normalize(t1); \
 	else return normalize(t2); \
 } \
-float traceAO(const vec3 origin, const vec3 normal, const float vrange, const float voffset) { \
-	const float angleMix = 0.5f; \
+float trace_ao(const vec3 origin, const vec3 normal, const float vrange, const float voffset) { \
+	const float angle_mix = 0.5f; \
 	const float aperture = 0.55785173935; \
 	vec3 o1 = normalize(tangent(normal)); \
 	vec3 o2 = normalize(cross(o1, normal)); \
 	vec3 c1 = 0.5f * (o1 + o2); \
 	vec3 c2 = 0.5f * (o1 - o2); \
 	float MAX_DISTANCE = 1.73205080757 * 2.0 * vrange; \
-	const ivec3 voxelgiResolution = ivec3(256, 256, 256); \
-	const float voxelgiStep = 1.0; \
-	const float VOXEL_SIZE = (2.0 / voxelgiResolution.x) * voxelgiStep; \
+	const ivec3 voxelgi_resolution = ivec3(256, 256, 256); \
+	const float voxelgi_step = 1.0; \
+	const float VOXEL_SIZE = (2.0 / voxelgi_resolution.x) * voxelgi_step; \
 	float offset = 1.5 * VOXEL_SIZE * 2.5 * voffset; \
-	float col = traceConeAO(voxels, origin, normal, aperture, MAX_DISTANCE, offset); \
-	col += traceConeAO(voxels, origin, mix(normal, o1, angleMix), aperture, MAX_DISTANCE, offset); \
-	col += traceConeAO(voxels, origin, mix(normal, o2, angleMix), aperture, MAX_DISTANCE, offset); \
-	col += traceConeAO(voxels, origin, mix(normal, -c1, angleMix), aperture, MAX_DISTANCE, offset); \
-	col += traceConeAO(voxels, origin, mix(normal, -c2, angleMix), aperture, MAX_DISTANCE, offset); \
-	col += traceConeAO(voxels, origin, mix(normal, -o1, angleMix), aperture, MAX_DISTANCE, offset); \
-	col += traceConeAO(voxels, origin, mix(normal, -o2, angleMix), aperture, MAX_DISTANCE, offset); \
-	col += traceConeAO(voxels, origin, mix(normal, c1, angleMix), aperture, MAX_DISTANCE, offset); \
-	col += traceConeAO(voxels, origin, mix(normal, c2, angleMix), aperture, MAX_DISTANCE, offset); \
+	float col = trace_cone_ao(voxels, origin, normal, aperture, MAX_DISTANCE, offset); \
+	col += trace_cone_ao(voxels, origin, mix(normal, o1, angle_mix), aperture, MAX_DISTANCE, offset); \
+	col += trace_cone_ao(voxels, origin, mix(normal, o2, angle_mix), aperture, MAX_DISTANCE, offset); \
+	col += trace_cone_ao(voxels, origin, mix(normal, -c1, angle_mix), aperture, MAX_DISTANCE, offset); \
+	col += trace_cone_ao(voxels, origin, mix(normal, -c2, angle_mix), aperture, MAX_DISTANCE, offset); \
+	col += trace_cone_ao(voxels, origin, mix(normal, -o1, angle_mix), aperture, MAX_DISTANCE, offset); \
+	col += trace_cone_ao(voxels, origin, mix(normal, -o2, angle_mix), aperture, MAX_DISTANCE, offset); \
+	col += trace_cone_ao(voxels, origin, mix(normal, c1, angle_mix), aperture, MAX_DISTANCE, offset); \
+	col += trace_cone_ao(voxels, origin, mix(normal, c2, angle_mix), aperture, MAX_DISTANCE, offset); \
 	return col / 9.0; \
 } \
 ";
 ///end
 
 let str_cotangent_frame: string = " \
-mat3 cotangentFrame(const vec3 n, const vec3 p, const vec2 duv1, const vec2 duv2) { \
+mat3 cotangent_frame(const vec3 n, const vec3 p, const vec2 duv1, const vec2 duv2) { \
 	vec3 dp1 = dFdx(p); \
 	vec3 dp2 = dFdy(p); \
 	vec3 dp2perp = cross(dp2, n); \
@@ -297,62 +297,62 @@ mat3 cotangentFrame(const vec3 n, const vec3 p, const vec2 duv1, const vec2 duv2
 	float invmax = inversesqrt(max(dot(t, t), dot(b, b))); \
 	return mat3(t * invmax, b * invmax, n); \
 } \
-mat3 cotangentFrame(const vec3 n, const vec3 p, const vec2 texCoord) { \
-	return cotangentFrame(n, p, dFdx(texCoord), dFdy(texCoord)); \
+mat3 cotangent_frame(const vec3 n, const vec3 p, const vec2 tex_coord) { \
+	return cotangent_frame(n, p, dFdx(tex_coord), dFdy(tex_coord)); \
 } \
 ";
 
 let str_octahedron_wrap: string = " \
-vec2 octahedronWrap(const vec2 v) { \
+vec2 octahedron_wrap(const vec2 v) { \
 	return (1.0 - abs(v.yx)) * (vec2(v.x >= 0.0 ? 1.0 : -1.0, v.y >= 0.0 ? 1.0 : -1.0)); \
 } \
 ";
 
 let str_pack_float_int16: string = " \
-float packFloatInt16(const float f, const uint i) { \
+float pack_f32_i16(const float f, const uint i) { \
 	const float prec = float(1 << 16); \
 	const float maxi = float(1 << 4); \
-	const float precMinusOne = prec - 1.0; \
-	const float t1 = ((prec / maxi) - 1.0) / precMinusOne; \
-	const float t2 = (prec / maxi) / precMinusOne; \
+	const float prec_minus_one = prec - 1.0; \
+	const float t1 = ((prec / maxi) - 1.0) / prec_minus_one; \
+	const float t2 = (prec / maxi) / prec_minus_one; \
 	return t1 * f + t2 * float(i); \
 } \
 ";
 
 ///if arm_skin
 let str_get_skinning_dual_quat: string = " \
-void getSkinningDualQuat(const ivec4 bone, vec4 weight, out vec4 A, inout vec4 B) { \
+void get_skinning_dual_quat(const ivec4 bone, vec4 weight, out vec4 A, inout vec4 B) { \
 	ivec4 bonei = bone * 2; \
-	mat4 matA = mat4( \
-		skinBones[bonei.x], \
-		skinBones[bonei.y], \
-		skinBones[bonei.z], \
-		skinBones[bonei.w]); \
-	mat4 matB = mat4( \
-		skinBones[bonei.x + 1], \
-		skinBones[bonei.y + 1], \
-		skinBones[bonei.z + 1], \
-		skinBones[bonei.w + 1]); \
-	weight.xyz *= sign(mul(matA, matA[3])).xyz; \
-	A = mul(weight, matA); \
-	B = mul(weight, matB); \
-	float invNormA = 1.0 / length(A); \
-	A *= invNormA; \
-	B *= invNormA; \
+	mat4 mat_a = mat4( \
+		skin_bones[bonei.x], \
+		skin_bones[bonei.y], \
+		skin_bones[bonei.z], \
+		skin_bones[bonei.w]); \
+	mat4 mat_b = mat4( \
+		skin_bones[bonei.x + 1], \
+		skin_bones[bonei.y + 1], \
+		skin_bones[bonei.z + 1], \
+		skin_bones[bonei.w + 1]); \
+	weight.xyz *= sign(mul(mat_a, mat_a[3])).xyz; \
+	A = mul(weight, mat_a); \
+	B = mul(weight, mat_b); \
+	float inv_norm_a = 1.0 / length(A); \
+	A *= inv_norm_a; \
+	B *= inv_norm_a; \
 } \
 ";
 ///end
 
 let str_create_basis: string = " \
-void createBasis(vec3 normal, out vec3 tangent, out vec3 binormal) { \
-	tangent = normalize(cameraRight - normal * dot(cameraRight, normal)); \
+void create_basis(vec3 normal, out vec3 tangent, out vec3 binormal) { \
+	tangent = normalize(camera_right - normal * dot(camera_right, normal)); \
 	binormal = cross(tangent, normal); \
 } \
 ";
 
 function str_sh_irradiance(): string {
 ///if krom_metal
-	return "vec3 shIrradiance(const vec3 nor, constant vec4 shirr[7]) { \
+	return "vec3 sh_irradiance(const vec3 nor, constant vec4 shirr[7]) { \
 	const float c1 = 0.429043; \
 	const float c2 = 0.511664; \
 	const float c3 = 0.743125; \
@@ -382,7 +382,7 @@ function str_sh_irradiance(): string {
 } \
 ";
 ///else
-	return "vec3 shIrradiance(const vec3 nor, const vec4 shirr[7]) { \
+	return "vec3 sh_irradiance(const vec3 nor, const vec4 shirr[7]) { \
 	const float c1 = 0.429043; \
 	const float c2 = 0.511664; \
 	const float c3 = 0.743125; \
@@ -415,7 +415,7 @@ function str_sh_irradiance(): string {
 }
 
 let str_envmap_equirect: string = " \
-vec2 envMapEquirect(const vec3 normal, const float angle) { \
+vec2 envmap_equirect(const vec3 normal, const float angle) { \
 	const float PI = 3.1415926535; \
 	const float PI2 = PI * 2.0; \
 	float phi = acos(normal.z); \
@@ -427,14 +427,14 @@ vec2 envMapEquirect(const vec3 normal, const float angle) { \
 // Linearly Transformed Cosines
 // https://eheitzresearch.wordpress.com/415-2/
 let str_ltc_evaluate: string = " \
-float integrateEdge(vec3 v1, vec3 v2) { \
-	float cosTheta = dot(v1, v2); \
-	float theta = acos(cosTheta); \
+float integrate_edge(vec3 v1, vec3 v2) { \
+	float cos_theta = dot(v1, v2); \
+	float theta = acos(cos_theta); \
 	float res = cross(v1, v2).z * ((theta > 0.001) ? theta / sin(theta) : 1.0); \
 	return res; \
 } \
-float ltcEvaluate(vec3 N, vec3 V, float dotNV, vec3 P, mat3 Minv, vec3 points0, vec3 points1, vec3 points2, vec3 points3) { \
-	vec3 T1 = normalize(V - N * dotNV); \
+float ltc_evaluate(vec3 N, vec3 V, float dotnv, vec3 P, mat3 Minv, vec3 points0, vec3 points1, vec3 points2, vec3 points3) { \
+	vec3 T1 = normalize(V - N * dotnv); \
 	vec3 T2 = cross(N, T1); \
 	Minv = mul(transpose(mat3(T1, T2, N)), Minv); \
 	vec3 L0 = mul((points0 - P), Minv); \
@@ -525,11 +525,11 @@ float ltcEvaluate(vec3 N, vec3 V, float dotNV, vec3 P, mat3 Minv, vec3 points0, 
 	L3 = normalize(L3); \
 	L4 = normalize(L4); \
 	float sum = 0.0; \
-	sum += integrateEdge(L0, L1); \
-	sum += integrateEdge(L1, L2); \
-	sum += integrateEdge(L2, L3); \
-	if (n >= 4) sum += integrateEdge(L3, L4); \
-	if (n == 5) sum += integrateEdge(L4, L0); \
+	sum += integrate_edge(L0, L1); \
+	sum += integrate_edge(L1, L2); \
+	sum += integrate_edge(L2, L3); \
+	if (n >= 4) sum += integrate_edge(L3, L4); \
+	if (n == 5) sum += integrate_edge(L4, L0); \
 	return max(0.0, -sum); \
 } \
 ";
@@ -548,9 +548,9 @@ vec3 get_pos_from_depth(vec2 uv, mat4 invVP, textureArg(gbufferD)) { \
 ";
 
 let str_get_nor_from_depth: string = " \
-vec3 get_nor_from_depth(vec3 p0, vec2 uv, mat4 invVP, vec2 texStep, textureArg(gbufferD)) { \
-	vec3 p1 = get_pos_from_depth(uv + vec2(texStep.x * 4.0, 0.0), invVP, texturePass(gbufferD)); \
-	vec3 p2 = get_pos_from_depth(uv + vec2(0.0, texStep.y * 4.0), invVP, texturePass(gbufferD)); \
+vec3 get_nor_from_depth(vec3 p0, vec2 uv, mat4 invVP, vec2 tex_step, textureArg(gbufferD)) { \
+	vec3 p1 = get_pos_from_depth(uv + vec2(tex_step.x * 4.0, 0.0), invVP, texturePass(gbufferD)); \
+	vec3 p2 = get_pos_from_depth(uv + vec2(0.0, tex_step.y * 4.0), invVP, texturePass(gbufferD)); \
 	return normalize(cross(p2 - p0, p1 - p0)); \
 } \
 ";

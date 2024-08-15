@@ -44,20 +44,20 @@ float3 cos_weighted_hemisphere_direction(float3 n, uint sample, uint seed, int f
 	return normalize(n + float3(x, y, z));
 }
 
-float3 surfaceAlbedo(const float3 baseColor, const float metalness) {
-	return lerp(baseColor, float3(0.0, 0.0, 0.0), metalness);
+float3 surface_albedo(const float3 base_color, const float metalness) {
+	return lerp(base_color, float3(0.0, 0.0, 0.0), metalness);
 }
 
-float3 surfaceSpecular(const float3 baseColor, const float metalness) {
-	return lerp(float3(0.04, 0.04, 0.04), baseColor, metalness);
+float3 surface_specular(const float3 base_color, const float metalness) {
+	return lerp(float3(0.04, 0.04, 0.04), base_color, metalness);
 }
 
 // https://www.unrealengine.com/en-US/blog/physically-based-shading-on-mobile
-float3 envBRDFApprox(float3 specular, float roughness, float dotNV) {
+float3 env_brdf_approx(float3 specular, float roughness, float dotnv) {
 	const float4 c0 = float4(-1, -0.0275, -0.572, 0.022);
 	const float4 c1 = float4(1, 0.0425, 1.04, -0.04);
 	float4 r = roughness * c0 + c1;
-	float a004 = min(r.x * r.x, exp2(-9.28 * dotNV)) * r.x + r.y;
+	float a004 = min(r.x * r.x, exp2(-9.28 * dotnv)) * r.x + r.y;
 	float2 ab = float2(-1.04, 1.04) * a004 + r.zw;
 	return specular * ab.x + ab.y;
 }

@@ -124,7 +124,7 @@ function util_uv_cache_dilate_map() {
 		util_uv_pipe_dilate.depth_mode = compare_mode_t.ALWAYS;
 		util_uv_pipe_dilate.color_attachments[0] = tex_format_t.R8;
 		g4_pipeline_compile(util_uv_pipe_dilate);
-		// dilateTexUnpack = getConstantLocation(pipeDilate, "texUnpack");
+		// dilate_tex_unpack = getConstantLocation(pipeDilate, "tex_unpack");
 	}
 
 	let mask: i32 = context_object_mask_used() ? slot_layer_get_object_mask(context_raw.layer) : 0;

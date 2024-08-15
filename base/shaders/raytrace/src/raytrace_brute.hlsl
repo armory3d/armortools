@@ -57,8 +57,8 @@ static uint seed = 0;
 static const int DEPTH_TRANSPARENT = 16; // Transparent hits
 #endif
 #ifdef _ROULETTE
-static const int rrStart = 2;
-static const float rrProbability = 0.5; // Map to albedo
+static const int rr_start = 2;
+static const float rr_probability = 0.5; // Map to albedo
 #endif
 
 [shader("raygeneration")]
@@ -81,19 +81,19 @@ void raygeneration() {
 		payload.color = float4(1, 1, 1, j);
 
 		#ifdef _TRANSPARENCY
-		int transparentHits = 0;
+		int transparent_hits = 0;
 		#endif
 
 		for (int i = 0; i < DEPTH; ++i) {
 
 			#ifdef _ROULETTE
-			float rrFactor = 1.0;
-			if (i >= rrStart) {
+			float rr_factor = 1.0;
+			if (i >= rr_start) {
 				float f = rand(DispatchRaysIndex().x, DispatchRaysIndex().y, j, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
-				if (f <= rrProbability) {
+				if (f <= rr_probability) {
 					break;
 				}
-				rrFactor = 1.0 / (1.0 - rrProbability);
+				rr_factor = 1.0 / (1.0 - rr_probability);
 			}
 			#endif
 
@@ -113,9 +113,9 @@ void raygeneration() {
 			// Miss
 			if (payload.color.a < 0) {
 				#ifdef _TRANSPARENCY
-				if (payload.color.a == -2 && transparentHits < DEPTH_TRANSPARENT) {
+				if (payload.color.a == -2 && transparent_hits < DEPTH_TRANSPARENT) {
 					payload.color.a = j;
-					transparentHits++;
+					transparent_hits++;
 					i--;
 				}
 				#endif
@@ -129,7 +129,7 @@ void raygeneration() {
 			}
 
 			#ifdef _ROULETTE
-			payload.color.rgb *= rrFactor;
+			payload.color.rgb *= rr_factor;
 			#endif
 
 			ray.Origin = payload.ray_origin;
@@ -155,14 +155,14 @@ void raygeneration() {
 
 [shader("closesthit")]
 void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttributes attr) {
-	const uint triangleIndexStride = 12; // 3 * 4
-	uint base_index = PrimitiveIndex() * triangleIndexStride;
+	const uint triangle_index_stride = 12; // 3 * 4
+	uint base_index = PrimitiveIndex() * triangle_index_stride;
 	uint3 indices_sample = indices.Load3(base_index);
 
 	float2 vertex_uvs[3] = {
-		S16toF32(vertices[indices_sample[0]].tex),
-		S16toF32(vertices[indices_sample[1]].tex),
-		S16toF32(vertices[indices_sample[2]].tex)
+		s16_to_f32(vertices[indices_sample[0]].tex),
+		s16_to_f32(vertices[indices_sample[1]].tex),
+		s16_to_f32(vertices[indices_sample[2]].tex)
 	};
 	float2 tex_coord = hit_attribute2d(vertex_uvs, attr) * constant_buffer.params.z;
 
@@ -181,9 +181,9 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 	#endif
 
 	float3 vertex_normals[3] = {
-		float3(S16toF32(vertices[indices_sample[0]].nor), S16toF32(vertices[indices_sample[0]].poszw).y),
-		float3(S16toF32(vertices[indices_sample[1]].nor), S16toF32(vertices[indices_sample[1]].poszw).y),
-		float3(S16toF32(vertices[indices_sample[2]].nor), S16toF32(vertices[indices_sample[2]].poszw).y)
+		float3(s16_to_f32(vertices[indices_sample[0]].nor), s16_to_f32(vertices[indices_sample[0]].poszw).y),
+		float3(s16_to_f32(vertices[indices_sample[1]].nor), s16_to_f32(vertices[indices_sample[1]].poszw).y),
+		float3(s16_to_f32(vertices[indices_sample[2]].nor), s16_to_f32(vertices[indices_sample[2]].poszw).y)
 	};
 	float3 n = normalize(hit_attribute(vertex_normals, attr));
 
@@ -209,40 +209,40 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 	seed += 1;
 
 	#ifdef _TRANSLUCENCY
-	float3 diffuseDir = texpaint0.a < f ?
+	float3 diffuse_dir = texpaint0.a < f ?
 		cos_weighted_hemisphere_direction(WorldRayDirection(), payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank) :
 		cos_weighted_hemisphere_direction(n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
 	#else
-	float3 diffuseDir = cos_weighted_hemisphere_direction(n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
+	float3 diffuse_dir = cos_weighted_hemisphere_direction(n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
 	#endif
 
 	#ifdef _FRESNEL
-	float specularChance = fresnel(n, WorldRayDirection());
+	float specular_chance = fresnel(n, WorldRayDirection());
 	#else
-	const float specularChance = 0.5;
+	const float specular_chance = 0.5;
 	#endif
 
-	if (f < specularChance) {
+	if (f < specular_chance) {
 		#ifdef _TRANSLUCENCY
-		float3 specularDir = texpaint0.a < f * 2 ? WorldRayDirection() : reflect(WorldRayDirection(), n);
+		float3 specular_dir = texpaint0.a < f * 2 ? WorldRayDirection() : reflect(WorldRayDirection(), n);
 		#else
-		float3 specularDir = reflect(WorldRayDirection(), n);
+		float3 specular_dir = reflect(WorldRayDirection(), n);
 		#endif
-		payload.ray_dir = lerp(specularDir, diffuseDir, texpaint2.g * texpaint2.g);
+		payload.ray_dir = lerp(specular_dir, diffuse_dir, texpaint2.g * texpaint2.g);
 
 		float3 v = normalize(constant_buffer.eye.xyz - hit_world_position());
-		float dotNV = max(dot(n, v), 0.0);
-		float3 specular = surfaceSpecular(texcolor, texpaint2.b);
-		payload.color.xyz *= envBRDFApprox(specular, texpaint2.g, dotNV);
+		float dotnv = max(dot(n, v), 0.0);
+		float3 specular = surface_specular(texcolor, texpaint2.b);
+		payload.color.xyz *= env_brdf_approx(specular, texpaint2.g, dotnv);
 		#ifdef _FRESNEL
-		payload.color.xyz /= specularChance;
+		payload.color.xyz /= specular_chance;
 		#endif
 	}
 	else {
-		payload.ray_dir = diffuseDir;
-		payload.color.xyz *= surfaceAlbedo(texcolor, texpaint2.b);
+		payload.ray_dir = diffuse_dir;
+		payload.color.xyz *= surface_albedo(texcolor, texpaint2.b);
 		#ifdef _FRESNEL
-		payload.color.xyz /= 1.0 - specularChance;
+		payload.color.xyz /= 1.0 - specular_chance;
 		#endif
 	}
 	#ifdef _FRESNEL

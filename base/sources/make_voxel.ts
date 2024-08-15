@@ -83,7 +83,7 @@ function make_voxel_source(): string {
 	SPIRV_Cross_Output main(SPIRV_Cross_Input stage_input) { \
 		SPIRV_Cross_Output stage_output; \
 		" + make_material_voxelgi_half_extents() + ")} \
-		stage_output.svpos.xyz = mul(float4(stage_input.pos.xyz, 1.0), W).xyz / voxelgiHalfExtents.xxx; \
+		stage_output.svpos.xyz = mul(float4(stage_input.pos.xyz, 1.0), W).xyz / voxelgi_half_extents.xxx; \
 		float3 wnormal = normalize(mul(float3(stage_input.nor.xy, stage_input.pos.w), N)); \
 		float height = texpaint_pack.SampleLevel(_texpaint_pack_sampler, stage_input.tex, 0.0).a; \
 		stage_output.svpos.xyz += wnormal * height.xxx * float3(" + ds + ", " + ds + ", " + ds + "); \
@@ -95,16 +95,16 @@ function make_voxel_source(): string {
 	in vec4 pos; \
 	in vec2 nor; \
 	in vec2 tex; \
-	out vec3 voxpositionGeom; \
+	out vec3 voxposition_geom; \
 	uniform mat4 W; \
 	uniform mat3 N; \
 	uniform sampler2D texpaint_pack; \
 	void main() { \
 		" + make_material_voxelgi_half_extents() + ")} \
-		voxpositionGeom = vec3(W * vec4(pos.xyz, 1.0)) / voxelgiHalfExtents; \
+		voxposition_geom = vec3(W * vec4(pos.xyz, 1.0)) / voxelgi_half_extents; \
 		vec3 wnormal = normalize(N * vec3(nor.xy, pos.w)); \
 		float height = textureLod(texpaint_pack, tex, 0.0).a; \
-		voxpositionGeom += wnormal * vec3(height) * vec3(" + ds + "); \
+		voxposition_geom += wnormal * vec3(height) * vec3(" + ds + "); \
 	}";
 	///end
 }

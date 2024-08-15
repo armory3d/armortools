@@ -1,10 +1,10 @@
 #version 450
 
-uniform vec2 screenSize;
-uniform vec2 screenSizeInv;
+uniform vec2 screen_size;
+uniform vec2 screen_size_inv;
 
 in vec2 pos;
-out vec2 texCoord;
+out vec2 tex_coord;
 out vec2 pixcoord;
 out vec4 offset0;
 out vec4 offset1;
@@ -15,17 +15,17 @@ const int SMAA_MAX_SEARCH_STEPS = 16;
 void main() {
 	// Scale vertex attribute to [0-1] range
 	const vec2 madd = vec2(0.5, 0.5);
-	texCoord = pos.xy * madd + madd;
+	tex_coord = pos.xy * madd + madd;
 
 	// Blend Weight Calculation Vertex Shader
-	pixcoord = texCoord * screenSize;
+	pixcoord = tex_coord * screen_size;
 
 	// We will use these offsets for the searches later on (see @PSEUDO_GATHER4):
-	offset0 = screenSizeInv.xyxy * vec4(-0.25, -0.125,  1.25, -0.125) + texCoord.xyxy;
-	offset1 = screenSizeInv.xyxy * vec4(-0.125, -0.25, -0.125,  1.25) + texCoord.xyxy;
+	offset0 = screen_size_inv.xyxy * vec4(-0.25, -0.125,  1.25, -0.125) + tex_coord.xyxy;
+	offset1 = screen_size_inv.xyxy * vec4(-0.125, -0.25, -0.125,  1.25) + tex_coord.xyxy;
 
 	// And these for the searches, they indicate the ends of the loops:
-	offset2 = screenSizeInv.xxyy *
+	offset2 = screen_size_inv.xxyy *
 				(vec4(-2.0, 2.0, -2.0, 2.0) * float(SMAA_MAX_SEARCH_STEPS)) +
 				 vec4(offset0.xz, offset1.yw);
 

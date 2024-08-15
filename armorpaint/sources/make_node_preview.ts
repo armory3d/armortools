@@ -35,10 +35,10 @@ function make_node_preview_run(data: material_t, matcon: material_context_t, nod
 
 	node_shader_write_attrib(vert, "gl_Position = vec4(pos.xy * 3.0, 0.0, 1.0);"); // Pos unpack
 	node_shader_write_attrib(vert, "const vec2 madd = vec2(0.5, 0.5);");
-	node_shader_add_out(vert, "vec2 texCoord");
-	node_shader_write_attrib(vert, "texCoord = gl_Position.xy * madd + madd;");
+	node_shader_add_out(vert, "vec2 tex_coord");
+	node_shader_write_attrib(vert, "tex_coord = gl_Position.xy * madd + madd;");
 	///if (!krom_opengl)
-	node_shader_write_attrib(vert, "texCoord.y = 1.0 - texCoord.y;");
+	node_shader_write_attrib(vert, "tex_coord.y = 1.0 - tex_coord.y;");
 	///end
 
 	parser_material_init();
@@ -74,9 +74,9 @@ function make_node_preview_run(data: material_t, matcon: material_context_t, nod
 	}
 	array_remove(links, link);
 
-	node_shader_add_out(frag, "vec4 fragColor");
+	node_shader_add_out(frag, "vec4 frag_color");
 	node_shader_write(frag, "vec3 basecol = " + res + ";");
-	node_shader_write(frag, "fragColor = vec4(basecol.rgb, 1.0);");
+	node_shader_write(frag, "frag_color = vec4(basecol.rgb, 1.0);");
 
 	// frag.ndcpos = true;
 	// add_out(vert, "vec4 ndc");

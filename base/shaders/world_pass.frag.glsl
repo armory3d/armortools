@@ -3,14 +3,13 @@
 #include "std/math.glsl"
 
 uniform sampler2D envmap;
-uniform vec4 envmapDataWorld; // angle, sin(angle), cos(angle), strength
+uniform vec4 envmap_data_world; // angle, sin(angle), cos(angle), strength
 
 in vec3 normal;
-out vec4 fragColor;
+out vec4 frag_color;
 
 void main() {
-	vec4 envmapDataLocal = envmapDataWorld; // TODO: SPIRV workaround
 	vec3 n = normalize(normal);
-	fragColor.rgb = texture(envmap, envMapEquirect(-n, envmapDataLocal.x)).rgb * envmapDataLocal.w;
-	fragColor.a = 0.0; // Mark as non-opaque
+	frag_color.rgb = texture(envmap, envmap_equirect(-n, envmap_data_world.x)).rgb * envmap_data_world.w;
+	frag_color.a = 0.0; // Mark as non-opaque
 }

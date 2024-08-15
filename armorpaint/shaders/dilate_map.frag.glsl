@@ -1,7 +1,7 @@
 #version 450
 
-out float fragColor;
+out float frag_color;
 
 void main() {
-	fragColor = 1.0;
+	frag_color = 1.0;
 }

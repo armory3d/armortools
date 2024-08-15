@@ -288,10 +288,10 @@ function node_shader_get_hlsl(raw: node_shader_t, shared_sampler: string): strin
 			// Multiple render targets
 			if (char_at(out, out.length - 1) == "]") {
 				num = parse_int(char_at(out, out.length - 2));
-				s += "vec4 fragColor[" + num + "] : SV_TARGET0;\n";
+				s += "vec4 frag_color[" + num + "] : SV_TARGET0;\n";
 			}
 			else {
-				s += "vec4 fragColor : SV_TARGET0;\n";
+				s += "vec4 frag_color : SV_TARGET0;\n";
 			}
 		}
 		s += "};\n";
@@ -354,10 +354,10 @@ function node_shader_get_hlsl(raw: node_shader_t, shared_sampler: string): strin
 	else {
 		if (raw.outs.length > 0) {
 			if (num > 0) {
-				s += "vec4 fragColor[" + num + "];\n";
+				s += "vec4 frag_color[" + num + "];\n";
 			}
 			else {
-				s += "vec4 fragColor;\n";
+				s += "vec4 frag_color;\n";
 			}
 		}
 	}
@@ -384,11 +384,11 @@ function node_shader_get_hlsl(raw: node_shader_t, shared_sampler: string): strin
 		else {
 			if (num > 0) {
 				for (let i: i32 = 0; i < num; ++i) {
-					s += "stage_output.fragColor[" + i + "] = fragColor[" + i + "];\n";
+					s += "stage_output.frag_color[" + i + "] = frag_color[" + i + "];\n";
 				}
 			}
 			else {
-				s += "stage_output.fragColor = fragColor;\n";
+				s += "stage_output.frag_color = frag_color;\n";
 			}
 		}
 		s += "return stage_output;\n";
@@ -492,11 +492,11 @@ function node_shader_get_msl(raw: node_shader_t, shared_sampler: string): string
 			if (char_at(out, out.length - 1) == "]") {
 				num = parse_int(char_at(out, out.length - 2));
 				for (let i: i32 = 0; i < num; ++i) {
-					s += "float4 fragColor_" + i + " [[color(" + i + ")]];\n";
+					s += "float4 frag_color_" + i + " [[color(" + i + ")]];\n";
 				}
 			}
 			else {
-				s += "float4 fragColor [[color(0)]];\n";
+				s += "float4 frag_color [[color(0)]];\n";
 			}
 		}
 		s += "};\n";
@@ -612,10 +612,10 @@ function node_shader_get_msl(raw: node_shader_t, shared_sampler: string): string
 	else {
 		if (raw.outs.length > 0) {
 			if (num > 0) {
-				s += "vec4 fragColor[" + num + "];\n";
+				s += "vec4 frag_color[" + num + "];\n";
 			}
 			else {
-				s += "vec4 fragColor;\n";
+				s += "vec4 frag_color;\n";
 			}
 		}
 	}
@@ -642,11 +642,11 @@ function node_shader_get_msl(raw: node_shader_t, shared_sampler: string): string
 		else {
 			if (num > 0) {
 				for (let i: i32 = 0; i < num; ++i) {
-					s += "out.fragColor_" + i + " = fragColor[" + i + "];\n";
+					s += "out.frag_color_" + i + " = frag_color[" + i + "];\n";
 				}
 			}
 			else {
-				s += "out.fragColor = fragColor;\n";
+				s += "out.frag_color = frag_color;\n";
 			}
 		}
 		s += "return out;\n";

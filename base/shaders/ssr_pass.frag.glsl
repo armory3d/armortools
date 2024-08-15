@@ -9,98 +9,98 @@ uniform sampler2D gbuffer0; // Normal, roughness
 uniform sampler2D gbuffer1; // basecol, occ
 uniform mat4 P;
 uniform mat3 V3;
-uniform vec2 cameraProj;
+uniform vec2 camera_proj;
 
-in vec3 viewRay;
-in vec2 texCoord;
-out vec4 fragColor;
+in vec3 view_ray;
+in vec2 tex_coord;
+out vec4 frag_color;
 
-const float ssrRayStep = 0.04;
-const float ssrMinRayStep = 0.05;
-const float ssrSearchDist = 5.0;
-const float ssrFalloffExp = 5.0;
-const float ssrJitter = 0.6;
-const int numBinarySearchSteps = 7;
-const int maxSteps = 18;
+const float ssr_ray_step = 0.04;
+const float ssr_min_ray_step = 0.05;
+const float ssr_search_dist = 5.0;
+const float ssr_falloff_exp = 5.0;
+const float ssr_jitter = 0.6;
+const int num_binary_search_steps = 7;
+const int max_steps = 18;
 
-vec3 hitCoord;
+vec3 hit_coord;
 float depth;
 
-vec2 getProjectedCoord(const vec3 hit) {
-	vec4 projectedCoord = P * vec4(hit, 1.0);
-	projectedCoord.xy /= projectedCoord.w;
-	projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
+vec2 get_projected_coord(const vec3 hit) {
+	vec4 projected_coord = P * vec4(hit, 1.0);
+	projected_coord.xy /= projected_coord.w;
+	projected_coord.xy = projected_coord.xy * 0.5 + 0.5;
 	#if defined(HLSL) || defined(METAL) || defined(SPIRV)
-	projectedCoord.y = 1.0 - projectedCoord.y;
+	projected_coord.y = 1.0 - projected_coord.y;
 	#endif
-	return projectedCoord.xy;
+	return projected_coord.xy;
 }
 
-float getDeltaDepth(const vec3 hit) {
-	depth = textureLod(gbufferD, getProjectedCoord(hit), 0.0).r * 2.0 - 1.0;
-	vec3 viewPos = getPosView(viewRay, depth, cameraProj);
-	return viewPos.z - hit.z;
+float get_delta_depth(const vec3 hit) {
+	depth = textureLod(gbufferD, get_projected_coord(hit), 0.0).r * 2.0 - 1.0;
+	vec3 view_pos = get_pos_view(view_ray, depth, camera_proj);
+	return view_pos.z - hit.z;
 }
 
-vec4 binarySearch(vec3 dir) {
+vec4 binary_search(vec3 dir) {
 	float ddepth;
-	vec3 start = hitCoord;
-	for (int i = 0; i < numBinarySearchSteps; i++) {
+	vec3 start = hit_coord;
+	for (int i = 0; i < num_binary_search_steps; i++) {
 		dir *= 0.5;
-		hitCoord -= dir;
-		ddepth = getDeltaDepth(hitCoord);
-		if (ddepth < 0.0) hitCoord += dir;
+		hit_coord -= dir;
+		ddepth = get_delta_depth(hit_coord);
+		if (ddepth < 0.0) hit_coord += dir;
 	}
 	// Ugly discard of hits too far away
-	if (abs(ddepth) > ssrSearchDist / 500) return vec4(0.0);
-	return vec4(getProjectedCoord(hitCoord), 0.0, 1.0);
+	if (abs(ddepth) > ssr_search_dist / 500) return vec4(0.0);
+	return vec4(get_projected_coord(hit_coord), 0.0, 1.0);
 }
 
-vec4 rayCast(vec3 dir) {
-	dir *= ssrRayStep;
-	for (int i = 0; i < maxSteps; i++) {
-		hitCoord += dir;
-		if (getDeltaDepth(hitCoord) > 0.0) return binarySearch(dir);
+vec4 ray_cast(vec3 dir) {
+	dir *= ssr_ray_step;
+	for (int i = 0; i < max_steps; i++) {
+		hit_coord += dir;
+		if (get_delta_depth(hit_coord) > 0.0) return binary_search(dir);
 	}
 	return vec4(0.0);
 }
 
 void main() {
-	vec4 g0 = textureLod(gbuffer0, texCoord, 0.0);
+	vec4 g0 = textureLod(gbuffer0, tex_coord, 0.0);
 	float roughness = g0.b;
-	if (roughness == 1.0) { fragColor.rgb = vec3(0.0); return; }
+	if (roughness == 1.0) { frag_color.rgb = vec3(0.0); return; }
 
-	float d = textureLod(gbufferD, texCoord, 0.0).r * 2.0 - 1.0;
-	if (d == 1.0) { fragColor.rgb = vec3(0.0); return; }
+	float d = textureLod(gbufferD, tex_coord, 0.0).r * 2.0 - 1.0;
+	if (d == 1.0) { frag_color.rgb = vec3(0.0); return; }
 
 	vec2 enc = g0.rg;
 	vec3 n;
 	n.z = 1.0 - abs(enc.x) - abs(enc.y);
-	n.xy = n.z >= 0.0 ? enc.xy : octahedronWrap(enc.xy);
+	n.xy = n.z >= 0.0 ? enc.xy : octahedron_wrap(enc.xy);
 	n = normalize(n);
 
-	vec3 viewNormal = V3 * n;
-	vec3 viewPos = getPosView(viewRay, d, cameraProj);
-	vec3 reflected = normalize(reflect(viewPos, viewNormal));
-	hitCoord = viewPos;
+	vec3 view_normal = V3 * n;
+	vec3 view_pos = get_pos_view(view_ray, d, camera_proj);
+	vec3 reflected = normalize(reflect(view_pos, view_normal));
+	hit_coord = view_pos;
 
-	vec3 dir = reflected * (1.0 - rand(texCoord) * ssrJitter * roughness) * 2.0;
-	// * max(ssrMinRayStep, -viewPos.z)
-	vec4 coords = rayCast(dir);
+	vec3 dir = reflected * (1.0 - rand(tex_coord) * ssr_jitter * roughness) * 2.0;
+	// * max(ssr_min_ray_step, -view_pos.z)
+	vec4 coords = ray_cast(dir);
 
-	vec2 deltaCoords = abs(vec2(0.5, 0.5) - coords.xy);
-	float screenEdgeFactor = clamp(1.0 - (deltaCoords.x + deltaCoords.y), 0.0, 1.0);
+	vec2 delta_coords = abs(vec2(0.5, 0.5) - coords.xy);
+	float screen_edge_factor = clamp(1.0 - (delta_coords.x + delta_coords.y), 0.0, 1.0);
 
 	float reflectivity = 1.0 - roughness;
-	float intensity = pow(reflectivity, ssrFalloffExp) *
-		screenEdgeFactor *
+	float intensity = pow(reflectivity, ssr_falloff_exp) *
+		screen_edge_factor *
 		clamp(-reflected.z, 0.0, 1.0) *
-		clamp((ssrSearchDist - length(viewPos - hitCoord)) *
-		(1.0 / ssrSearchDist), 0.0, 1.0) *
+		clamp((ssr_search_dist - length(view_pos - hit_coord)) *
+		(1.0 / ssr_search_dist), 0.0, 1.0) *
 		coords.w;
 
 	intensity = clamp(intensity, 0.0, 1.0);
-	vec3 reflCol = textureLod(tex, coords.xy, 0.0).rgb;
-	reflCol = clamp(reflCol, 0.0, 1.0);
-	fragColor.rgb = reflCol * intensity * 0.5;
+	vec3 reflcol = textureLod(tex, coords.xy, 0.0).rgb;
+	reflcol = clamp(reflcol, 0.0, 1.0);
+	frag_color.rgb = reflcol * intensity * 0.5;
 }

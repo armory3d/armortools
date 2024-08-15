@@ -5,7 +5,7 @@
 const float PI = 3.1415926535;
 const float PI2 = PI * 2.0;
 
-vec2 envMapEquirect(const vec3 normal, const float angle) {
+vec2 envmap_equirect(const vec3 normal, const float angle) {
 	const float PI = 3.1415926535;
 	const float PI2 = PI * 2.0;
 	float phi = acos(normal.z);
