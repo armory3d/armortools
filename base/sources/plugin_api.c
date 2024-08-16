@@ -84,6 +84,16 @@ MAKE_FN(data_get_blob) {
     return val;
 }
 
+void *krom_file_save_bytes(char *s, buffer_t *b, int l);
+MAKE_FN(krom_file_save_bytes) {
+    char *to = (char *)JS_ToCString(ctx, argv[0]);
+    int64_t len;
+    void *ab = JS_GetArrayBuffer(ctx, &len, argv[1]);
+    buffer_t b = { .buffer = ab, .length = len, .capacity = len };
+    krom_file_save_bytes(to, &b, len);
+    return JS_UNDEFINED;
+}
+
 MAKE_FN(zui_handle_create) {
     int64_t result = (int64_t)zui_handle_create();
     return JS_NewInt64(ctx, result);
@@ -187,6 +197,7 @@ void plugin_api_init() {
     BIND_FN(plugin_notify_on_ui, 2);
     BIND_FN(ui_files_show, 4);
     BIND_FN(data_get_blob, 1);
+    BIND_FN(krom_file_save_bytes, 3);
 
     BIND_FN(zui_handle_create, 0);
     BIND_FN(zui_panel, 2);
