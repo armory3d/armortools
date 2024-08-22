@@ -562,8 +562,8 @@ function project_unwrap_mesh_box(mesh: raw_mesh_t, done: (a: raw_mesh_t)=>void, 
 						config_enable_plugin(f);
 						console_info(f + " " + tr("plugin enabled"));
 					}
-					let cb: (a: any)=>void = map_get(util_mesh_unwrappers, f);
-					cb(mesh);
+					let cb: any = map_get(util_mesh_unwrappers, f); // JSValue * -> (a: raw_mesh_t)=>void
+					js_call_ptr(cb, mesh);
 				}
 				done(mesh);
 			}

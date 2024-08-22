@@ -31,7 +31,7 @@ let parser_material_cotangent_frame_written: bool;
 let parser_material_tex_coord: string = "tex_coord";
 let parser_material_eps: f32 = 0.000001;
 
-let parser_material_custom_nodes: map_t<string, (n: zui_node_t, s: zui_node_socket_t)=>string> = map_create();
+let parser_material_custom_nodes: map_t<string, any> = map_create(); // JSValue -> (n: zui_node_t, s: string)=>string
 let parser_material_parse_surface: bool = true;
 let parser_material_parse_opacity: bool = true;
 let parser_material_parse_height: bool = false;
@@ -1135,8 +1135,8 @@ function parser_material_parse_vector(node: zui_node_t, socket: zui_node_socket_
 		return parser_material_to_vec3(height);
 	}
 	else if (map_get(parser_material_custom_nodes, node.type) != null) {
-		let cb: (n: zui_node_t, s: zui_node_socket_t)=>string = map_get(parser_material_custom_nodes, node.type);
-		return cb(node, socket);
+		let cb: any = map_get(parser_material_custom_nodes, node.type); // JSValue -> (n: zui_node_t, s: string)=>string
+		return js_call_ptr_str(cb, node, socket.name);
 	}
 	return "vec3(0.0, 0.0, 0.0)";
 }
@@ -1163,7 +1163,7 @@ function parse_normal_map_color_input(inp: zui_node_socket_t) {
 	parser_material_frag.write_normal--;
 }
 
-function parser_material_parse_value_input(inp: zui_node_socket_t, vector_as_grayscale: bool = false) : string {
+function parser_material_parse_value_input(inp: zui_node_socket_t, vector_as_grayscale: bool = false): string {
 	let l: zui_node_link_t = parser_material_get_input_link(inp);
 	let from_node: zui_node_t = l != null ? parser_material_get_node(l.from_id) : null;
 	if (from_node != null) {

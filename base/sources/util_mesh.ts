@@ -1,5 +1,5 @@
 
-let util_mesh_unwrappers: map_t<string, ((a: any)=>void)> = map_create();
+let util_mesh_unwrappers: map_t<string, any> = map_create(); // JSValue * -> ((a: raw_mesh_t)=>void)
 
 function util_mesh_merge(paint_objects: mesh_object_t[] = null) {
 	if (paint_objects == null) {

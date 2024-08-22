@@ -153,8 +153,9 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 		node_shader_write(frag, "basecol = pow(basecol, vec3(2.2, 2.2, 2.2));");
 
 		if (context_raw.viewport_shader != null) {
-			let color = context_raw.viewport_shader(frag);
-			node_shader_write(frag, "frag_color[1] = vec4(" + color + ", 1.0);");
+			node_shader_write(frag, "vec3 output_color;");
+			js_call_ptr(context_raw.viewport_shader, frag);
+			node_shader_write(frag, "frag_color[1] = vec4(output_color, 1.0);");
 		}
 		else if (context_raw.render_mode == render_mode_t.FORWARD && context_raw.viewport_mode != viewport_mode_t.PATH_TRACE) {
 			frag.wposition = true;

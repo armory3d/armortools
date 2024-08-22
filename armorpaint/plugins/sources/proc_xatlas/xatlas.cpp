@@ -10049,103 +10049,79 @@ void xatlasPackOptionsInit(xatlasPackOptions *packOptions)
 #endif
 #endif // XATLAS_C_API
 
+////
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-static xatlas::Atlas *atlas;
-static uint8_t *buffer = NULL;
-static uint32_t bufferLength = 0;
-static int vertexCount = 0;
-static int indexCount = 0;
-static int positionsOff = 0;
-static int normalsOff = 0;
-static int indicesOff = 0;
+#include <io_obj.h>
 
-static int allocate(int size) {
-	size += size % 4; // Byte align
-	bufferLength += size;
-	buffer = buffer == NULL ? (uint8_t *)malloc(bufferLength) : (uint8_t *)realloc(buffer, bufferLength);
-	return bufferLength - size;
-}
+void proc_xatlas_unwrap(raw_mesh_t *mesh) {
+	int vertex_count = mesh->posa->length / 4;
+	float *pa = (float *)malloc(sizeof(float) * vertex_count * 3);
+	float *na = (float *)malloc(sizeof(float) * vertex_count * 3);
+	float inv = 1.0 / 32767.0;
+	for (int i = 0; i < vertex_count; i++) {
+		pa[i * 3    ] = mesh->posa->buffer[i * 4    ] * inv;
+		pa[i * 3 + 1] = mesh->posa->buffer[i * 4 + 1] * inv;
+		pa[i * 3 + 2] = mesh->posa->buffer[i * 4 + 2] * inv;
+		na[i * 3    ] = mesh->nora->buffer[i * 2    ] * inv;
+		na[i * 3 + 1] = mesh->nora->buffer[i * 2 + 1] * inv;
+		na[i * 3 + 2] = mesh->posa->buffer[i * 4 + 3] * inv;
+	}
 
-void proc_xatlas_setVertexCount(int i) {
-	vertexCount = i;
-	positionsOff = allocate(sizeof(float) * vertexCount * 3);
-	normalsOff = allocate(sizeof(float) * vertexCount * 3);
-}
-void proc_xatlas_setIndexCount(int i) {
-	indexCount = i;
-	indicesOff = allocate(sizeof(unsigned int) * indexCount);
-}
-int proc_xatlas_setPositions() { return positionsOff; }
-int proc_xatlas_setNormals() { return normalsOff; }
-int proc_xatlas_setIndices() { return indicesOff; }
-
-static int vertexCountOut = 0;
-static int indexCountOut = 0;
-static int positionsOutOff = 0;
-static int normalsOutOff = 0;
-static int uvsOutOff = 0;
-static int indicesOutOff = 0;
-
-uint8_t *proc_xatlas_getBuffer() { return buffer; }
-uint32_t proc_xatlas_getBufferLength() { return bufferLength; }
-int proc_xatlas_getVertexCount() { return vertexCountOut; }
-int proc_xatlas_getIndexCount() { return indexCountOut; }
-int proc_xatlas_getPositions() { return positionsOutOff; }
-int proc_xatlas_getNormals() { return normalsOutOff; }
-int proc_xatlas_getUVs() { return uvsOutOff; }
-int proc_xatlas_getIndices() { return indicesOutOff; }
-
-void proc_xatlas_unwrap() {
-    atlas = xatlas::Create();
-	xatlas::MeshDecl meshDecl;
-	meshDecl.vertexCount = vertexCount;
-	meshDecl.vertexPositionData = buffer + positionsOff;
-	meshDecl.vertexPositionStride = sizeof(float) * 3;
-	meshDecl.vertexNormalData = buffer + normalsOff;
-	meshDecl.vertexNormalStride = sizeof(float) * 3;
-	meshDecl.indexCount = indexCount;
-	meshDecl.indexData = buffer + indicesOff;
-	meshDecl.indexFormat = xatlas::IndexFormat::UInt32;
-	xatlas::AddMesh(atlas, meshDecl, 1);
+    xatlas::Atlas *atlas = xatlas::Create();
+	xatlas::MeshDecl mesh_decl;
+	mesh_decl.vertexCount = vertex_count;
+	mesh_decl.vertexPositionData = pa;
+	mesh_decl.vertexPositionStride = sizeof(float) * 3;
+	mesh_decl.vertexNormalData = na;
+	mesh_decl.vertexNormalStride = sizeof(float) * 3;
+	mesh_decl.indexCount = mesh->inda->length;
+	mesh_decl.indexData = mesh->inda->buffer;
+	mesh_decl.indexFormat = xatlas::IndexFormat::UInt32;
+	xatlas::AddMesh(atlas, mesh_decl, 1);
 	xatlas::ChartOptions chartOptions = xatlas::ChartOptions();
 	xatlas::PackOptions packOptions = xatlas::PackOptions();
 	xatlas::Generate(atlas, chartOptions, packOptions);
 
-	const xatlas::Mesh &mesh = atlas->meshes[0];
-	vertexCountOut = mesh.vertexCount;
-	positionsOutOff = allocate(sizeof(float) * vertexCountOut * 3);
-	normalsOutOff = allocate(sizeof(float) * vertexCountOut * 3);
-	uvsOutOff = allocate(sizeof(float) * vertexCountOut * 2);
-	float *positions = (float *)&buffer[positionsOff];
-	float *normals = (float *)&buffer[normalsOff];
-	float *positionsOut = (float *)&buffer[positionsOutOff];
-	float *normalsOut = (float *)&buffer[normalsOutOff];
-	float *uvsOut = (float *)&buffer[uvsOutOff];
-	for (uint32_t v = 0; v < mesh.vertexCount; v++) {
-		const xatlas::Vertex &vertex = mesh.vertexArray[v];
-		const float *pos = &positions[vertex.xref * 3];
-		positionsOut[v * 3    ] = pos[0];
-		positionsOut[v * 3 + 1] = pos[1];
-		positionsOut[v * 3 + 2] = pos[2];
-		const float *normal = &normals[vertex.xref * 3];
-		normalsOut[v * 3    ] = normal[0];
-		normalsOut[v * 3 + 1] = normal[1];
-		normalsOut[v * 3 + 2] = normal[2];
-		uvsOut[v * 2    ] = vertex.uv[0] / atlas->width;
-		uvsOut[v * 2 + 1] = vertex.uv[1] / atlas->height;
-	}
-	indexCountOut = mesh.indexCount;
-	indicesOutOff = allocate(sizeof(unsigned int) * indexCountOut);
-	memcpy(buffer + indicesOutOff, mesh.indexArray, sizeof(unsigned int) * indexCountOut);
-}
+	const xatlas::Mesh &xmesh = atlas->meshes[0];
 
-void proc_xatlas_destroy() {
+	int vertex_count_out = xmesh.vertexCount;
+	int16_t *pa_out = (int16_t *)malloc(sizeof(int16_t) * vertex_count_out * 4);
+	int16_t *na_out = (int16_t *)malloc(sizeof(int16_t) * vertex_count_out * 2);
+	int16_t *ta_out = (int16_t *)malloc(sizeof(int16_t) * vertex_count_out * 2);
+	for (uint32_t v = 0; v < xmesh.vertexCount; v++) {
+		const xatlas::Vertex &vertex = xmesh.vertexArray[v];
+		const float *pos = &pa[vertex.xref * 3];
+		pa_out[v * 4    ] = pos[0] / inv;
+		pa_out[v * 4 + 1] = pos[1] / inv;
+		pa_out[v * 4 + 2] = pos[2] / inv;
+		const float *normal = &na[vertex.xref * 3];
+		na_out[v * 2    ] = normal[0] / inv;
+		na_out[v * 2 + 1] = normal[1] / inv;
+		pa_out[v * 4 + 3] = normal[2] / inv;
+		ta_out[v * 2    ] = vertex.uv[0] / atlas->width / inv;
+		ta_out[v * 2 + 1] = vertex.uv[1] / atlas->height / inv;
+	}
+	int index_count_out = xmesh.indexCount;
+	uint32_t *ia_out = (uint32_t *)malloc(sizeof(uint32_t) * index_count_out);
+	memcpy(ia_out, xmesh.indexArray, sizeof(uint32_t) * index_count_out);
+
+	mesh->posa->buffer = pa_out;
+	mesh->posa->length = vertex_count_out * 4;
+	mesh->nora->buffer = na_out;
+	mesh->nora->length = vertex_count_out * 2;
+	mesh->texa = (i16_array_t*)malloc(sizeof(i16_array_t));
+	mesh->texa->buffer = ta_out;
+	mesh->texa->length = vertex_count_out * 2;
+	mesh->inda->buffer = ia_out;
+	mesh->inda->length = index_count_out;
+
 	xatlas::Destroy(atlas);
-	free(buffer);
-	buffer = NULL;
+	free(pa);
+	free(na);
 }
 
 #ifdef __cplusplus

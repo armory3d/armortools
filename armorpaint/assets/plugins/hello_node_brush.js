@@ -6,11 +6,7 @@ let node_name = "Hello World";
 let node_type = "HELLO_WORLD";
 
 // Create new node category
-let categories = nodes_brush_categories;
-categories.push(category_name);
-
-// Create new node
-let nodes = [
+let node_list = [
 	{
 		id: 0,
 		name: node_name,
@@ -25,9 +21,11 @@ let nodes = [
 				name: "Scale",
 				type: "VALUE",
 				color: 0xffa1a1a1,
-				default_value: 1.0,
-				min: 0.0,
-				max: 5.0
+				default_value__f32: [1.0],
+				min__f32: 0.0,
+				max__f32: 5.0,
+				precision__f32: 100.0,
+				display: 0
 			}
 		],
 		outputs: [
@@ -37,22 +35,27 @@ let nodes = [
 				name: "Value",
 				type: "VALUE",
 				color: 0xffc7c729,
-				default_value: 1.0
+				default_value__f32: [1.0],
+				min__f32: 0.0,
+				max__f32: 5.0,
+				precision__f32: 100.0,
+				display: 0
 			}
 		],
-		buttons: []
+		buttons: [],
+		width: 0
 	}
 ];
-nodes_brush_list.push(nodes);
+
+nodes_brush_category_add(category_name, armpack_encode(node_list));
 
 // Brush node
-parser_logic_custom_nodes.set(node_type, function(node, from) {
+parser_logic_custom_nodes_set(node_type, function(node, from) {
 	return Math.sin(time_time() * node.inputs[0].get(0));
 });
 
 // Cleanup
-plugin.delete = function() {
-	parser_logic_custom_nodes.delete(node_type);
-	nodes_brush_list.splice(nodes_brush_list.indexOf(nodes), 1);
-	categories.splice(categories.indexOf(category_name), 1);
-};
+plugin_notify_on_delete(plugin, function() {
+	parser_logic_custom_nodes_delete(node_type);
+	nodes_brush_category_remove(category_name);
+});

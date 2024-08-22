@@ -6,11 +6,7 @@ let node_name = "Hello World";
 let node_type = "HELLO_WORLD";
 
 // Create new node category
-let categories = nodes_material_categories;
-categories.push(category_name);
-
-// Create new node
-let nodes = [
+let node_list = [
 	{
 		id: 0,
 		name: node_name,
@@ -25,9 +21,11 @@ let nodes = [
 				name: "Scale",
 				type: "VALUE",
 				color: 0xffa1a1a1,
-				default_value: 1,
-				min: 0.0,
-				max: 5.0
+				default_value__f32: [1.0],
+				min__f32: 0.0,
+				max__f32: 5.0,
+				precision__f32: 100.0,
+				display: 0
 			}
 		],
 		outputs: [
@@ -37,7 +35,11 @@ let nodes = [
 				name: "Color",
 				type: "RGBA",
 				color: 0xffc7c729,
-				default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
+				default_value__f32: [0.8, 0.8, 0.8, 1.0],
+				min__f32: 0.0,
+				max__f32: 1.0,
+				precision__f32: 100.0,
+				display: 0
 			},
 			{
 				id: 1,
@@ -45,35 +47,40 @@ let nodes = [
 				name: "Fac",
 				type: "VALUE",
 				color: 0xffa1a1a1,
-				default_value: 1.0
+				default_value__f32: [1.0],
+				min__f32: 0.0,
+				max__f32: 1.0,
+				precision__f32: 100.0,
+				display: 0
 			}
 		],
-		buttons: []
+		buttons: [],
+		width: 0
 	}
 ];
-nodes_material_list.push(nodes);
+
+nodes_material_category_add(category_name, armpack_encode(node_list));
 
 // Node shader
-parser_material_custom_nodes.set(node_type, function(node, socket) {
-	let frag = parser_material_frag;
-	let scale = parser_material_parse_value_input(node.inputs[0]);
-	let my_out = parser_material_node_name(node) + "_out";
+parser_material_custom_nodes_set(node_type, function(node, socket_name) {
+	let frag = parser_material_frag_get();
+	let scale = parser_material_parse_value_input(node, 0);
+	let my_out = "my_out";
 
 	node_shader_write(frag,
 		"float " + my_out + " = cos(sin(tex_coord.x * 200.0 * " + scale + ") + cos(tex_coord.y * 200.0 * " + scale + "));"
 	);
 
-	if (socket.name == "Color") {
+	if (socket_name == "Color") {
 		return "vec3(" + my_out + ", " + my_out + ", " + my_out + ")";
 	}
-	else if (socket.name == "Fac") {
+	else if (socket_name == "Fac") {
 		return my_out;
 	}
 });
 
 // Cleanup
-plugin.delete = function() {
-	parser_material_custom_nodes.delete(node_type);
-	nodes_material_list.splice(nodes_material_list.indexOf(nodes), 1);
-	categories.splice(categories.indexOf(category_name), 1);
-};
+plugin_notify_on_delete(plugin, function() {
+	parser_material_custom_nodes_delete(node_type);
+	nodes_material_category_remove(category_name);
+});

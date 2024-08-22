@@ -1,11 +1,11 @@
 let project = new Project("plugins");
 
-// project.addFile("sources/plugins.cpp");
+project.addFile("sources/plugins.c");
+project.addFile("sources/proc_xatlas/**");
 
 project.addDefine("TINYUSDZ_NO_STB_IMAGE_IMPLEMENTATION");
 
 if (flags.physics) {
-
 	project.addFile("sources/phys_jolt/phys_jolt.cpp");
 	project.addIncludeDir("sources/phys_jolt");
 	project.addDefine("JPH_NO_DEBUG");

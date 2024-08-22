@@ -57,7 +57,7 @@ type context_t = {
 	render_mode?: render_mode_t;
 	///end
 
-	viewport_shader?: (ns: node_shader_t)=>string;
+	viewport_shader?: any; // JSValue * -> (ns: node_shader_t)=>void;
 	hscale_was_changed?: bool;
 	export_mesh_format?: mesh_format_t;
 	export_mesh_index?: i32;
@@ -865,8 +865,8 @@ function context_update_envmap() {
 	}
 }
 
-function context_set_viewport_shader(viewportShader: (ns: node_shader_t)=>string) {
-	context_raw.viewport_shader = viewportShader;
+function context_set_viewport_shader(viewport_shader: any) { // JSValue * -> (ns: node_shader_t)=>void
+	context_raw.viewport_shader = viewport_shader;
 	context_set_render_path();
 }
 
