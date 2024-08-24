@@ -11,12 +11,12 @@ flags.with_zui = true;
 let project = new Project("ArmorPad");
 project.addSources("sources");
 
-let root = "../../";
+let root = "../../../";
 project.addShaders(root + "armorcore/shaders/*.glsl",);
 project.addAssets(root + "base/assets/font_mono.ttf", { destination: "data/{name}" });
 project.addAssets(root + "base/assets/text_coloring.json", { destination: "data/{name}" });
 
 project.addDefine('IDLE_SLEEP');
-project.addProject("../../armorcore");
+project.addProject(root + "armorcore");
 
 return project;

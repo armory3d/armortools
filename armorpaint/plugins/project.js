@@ -1,28 +1,28 @@
 let project = new Project("plugins");
 
-project.addFile("sources/plugins.c");
-project.addFile("sources/proc_xatlas/**");
-project.addFile("sources/io_svg/**");
-project.addFile("sources/io_usd/**");
-project.addFile("sources/io_gltf/**");
-project.addFile("sources/io_fbx/**");
+project.addFile("plugins.c");
+project.addFile("proc_xatlas/**");
+project.addFile("io_svg/**");
+project.addFile("io_usd/**");
+project.addFile("io_gltf/**");
+project.addFile("io_fbx/**");
 
 project.addDefine("TINYUSDZ_NO_STB_IMAGE_IMPLEMENTATION");
 
 if (flags.physics) {
-	project.addFile("sources/phys_jolt/phys_jolt.cpp");
-	project.addIncludeDir("sources/phys_jolt");
+	project.addFile("phys_jolt/phys_jolt.cpp");
+	project.addIncludeDir("phys_jolt");
 	project.addDefine("JPH_NO_DEBUG");
 	project.addDefine("JPH_OBJECT_STREAM");
 
 	if (platform === "windows") {
-		project.addLib("sources/phys_jolt/win32/Jolt");
+		project.addLib("phys_jolt/win32/Jolt");
 	}
 	else if (platform === "linux") {
-		project.addLib("Jolt -L" + project.basedir + "/sources/phys_jolt/linux");
+		project.addLib("Jolt -L" + project.basedir + "/phys_jolt/linux");
 	}
 	else if (platform === "macos") {
-		project.addLib("sources/phys_jolt/macos/libJolt.a");
+		project.addLib("phys_jolt/macos/libJolt.a");
 	}
 }
 
