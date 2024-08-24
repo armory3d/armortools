@@ -225,7 +225,8 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 				// Pick material
 				if (context_raw.picker_select_material && context_raw.color_picker_callback == null) {
 					// matid % 3 == 0 - normal, 1 - emission, 2 - subsurface
-					let matid: i32 = math_floor((buffer_get_u8(b, 3) - (buffer_get_u8(b, 3) % 3)) / 3);
+					let id: i32 = buffer_get_u8(b, 3);
+					let matid: i32 = math_floor((id - (id % 3)) / 3);
 					for (let i: i32 = 0; i < project_materials.length; ++i) {
 						let m: slot_material_t = project_materials[i];
 						if (m.id == matid) {
