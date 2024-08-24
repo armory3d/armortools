@@ -1,41 +1,13 @@
 #include <stdint.h>
-#include "tinyusdz/tinyusdz.hh"
 #include <math.h>
+#include "tinyusdz/tinyusdz.hh"
+#include "io_obj.h"
+#include "iron_array.h"
 
-static uint8_t *buffer = NULL;
-static uint32_t bufferLength = 0;
-static int bufOff; /* Pointer to usdc file data */
-static size_t size; /* Size of the file data */
-
-static int index_count;
-static int vertex_count;
-static int indaOff;
-static int posaOff;
-static int noraOff;
-static int texaOff;
-static float scale_pos;
-
-extern "C" uint8_t *io_usd_getBuffer() { return buffer; }
-extern "C" uint32_t io_usd_getBufferLength() { return bufferLength; }
-
-static int allocate(int size) {
-	size += size % 4; // Byte align
-	bufferLength += size;
-	buffer = buffer == NULL ? (uint8_t *)malloc(bufferLength) : (uint8_t *)realloc(buffer, bufferLength);
-	return bufferLength - size;
-}
-
-extern "C" int io_usd_init(int bufSize) {
-	size = bufSize;
-	bufOff = allocate(sizeof(uint8_t) * bufSize);
-	return bufOff;
-}
-
-extern "C" void io_usd_parse() {
+extern "C" void *io_usd_parse(uint8_t *buf, size_t size) {
 	tinyusdz::Scene scene;
 	std::string warn;
 	std::string err;
-	uint8_t *buf = &buffer[bufOff];
 	tinyusdz::LoadUSDCFromMemory(buf, size, &scene, &warn, &err);
 	tinyusdz::GeomMesh mesh = scene.geom_meshes[0];
 
@@ -111,8 +83,8 @@ extern "C" void io_usd_parse() {
         face_offset += f_count;
     }
 
-    vertex_count = dst_facevarying_indices.size();
-    index_count = dst_facevarying_indices.size();
+    int vertex_count = dst_facevarying_indices.size();
+    int index_count = dst_facevarying_indices.size();
 
     // Pack positions to (-1, 1) range
 	float hx = 0.0;
@@ -126,21 +98,17 @@ extern "C" void io_usd_parse() {
 		f = fabsf(vertices[i * 3 + 2]);
 		if (hz < f) hz = f;
 	}
-	scale_pos = fmax(hx, fmax(hy, hz));
+	float scale_pos = fmax(hx, fmax(hy, hz));
 	float inv = 1 / scale_pos;
 
 	// Pack into 16bit
-	indaOff = allocate(sizeof(unsigned int) * index_count);
-	unsigned int *inda = (unsigned int *)&buffer[indaOff];
+	uint32_t *inda = (uint32_t *)malloc(sizeof(uint32_t) * index_count);
 	for (int i = 0; i < index_count; ++i) {
 		inda[i] = i;
 	}
-	posaOff = allocate(sizeof(short) * vertex_count * 4);
-	noraOff = allocate(sizeof(short) * vertex_count * 2);
-	texaOff = allocate(sizeof(short) * vertex_count * 2);
-	short *posa = (short *)&buffer[posaOff];
-	short *nora = (short *)&buffer[noraOff];
-	short *texa = (short *)&buffer[texaOff];
+	int16_t *posa = (int16_t *)malloc(sizeof(int16_t) * vertex_count * 4);
+	int16_t *nora = (int16_t *)malloc(sizeof(int16_t) * vertex_count * 2);
+	int16_t *texa = (int16_t *)malloc(sizeof(int16_t) * vertex_count * 2);
 
 	for (int i = 0; i < vertex_count; ++i) {
 		posa[i * 4    ] = vertices[dst_facevarying_indices[i] * 3    ] * 32767 * inv;
@@ -152,17 +120,30 @@ extern "C" void io_usd_parse() {
 		texa[i * 2    ] = dst_facevarying_texcoords[i * 2    ] * 32767;
 		texa[i * 2 + 1] = (1.0 - dst_facevarying_texcoords[i * 2 + 1]) * 32767;
 	}
-}
 
-extern "C" void io_usd_destroy() {
-	free(buffer);
-	buffer = NULL;
-}
+	raw_mesh_t *raw = (raw_mesh_t *)calloc(sizeof(raw_mesh_t), 1);
 
-extern "C" int io_usd_get_index_count() { return index_count; }
-extern "C" int io_usd_get_vertex_count() { return vertex_count; }
-extern "C" float io_usd_get_scale_pos() { return scale_pos; }
-extern "C" int io_usd_get_indices() { return indaOff; }
-extern "C" int io_usd_get_positions() { return posaOff; }
-extern "C" int io_usd_get_normals() { return noraOff; }
-extern "C" int io_usd_get_uvs() { return texaOff; }
+	raw->name = (char *)malloc(mesh.name.length() + 1);
+	strcpy(raw->name, mesh.name.c_str());
+
+	raw->posa = (i16_array_t *)malloc(sizeof(i16_array_t));
+	raw->posa->buffer = posa;
+	raw->posa->length = raw->posa->capacity = vertex_count * 4;
+
+	raw->nora = (i16_array_t *)malloc(sizeof(i16_array_t));
+	raw->nora->buffer = nora;
+	raw->nora->length = raw->nora->capacity = vertex_count * 2;
+
+	raw->texa = (i16_array_t *)malloc(sizeof(i16_array_t));
+	raw->texa->buffer = texa;
+	raw->texa->length = raw->texa->capacity = vertex_count * 2;
+
+	raw->inda = (u32_array_t *)malloc(sizeof(u32_array_t));
+	raw->inda->buffer = inda;
+	raw->inda->length = raw->inda->capacity = vertex_count * 2;
+
+	raw->scale_pos = scale_pos;
+	raw->scale_tex = 1.0;
+
+	return raw;
+}

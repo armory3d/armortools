@@ -37,6 +37,10 @@ function plugin_notify_on_ui(plugin: plugin_t, f: any): void {
 	plugin.on_ui = f;
 }
 
+function plugin_notify_on_update(plugin: plugin_t, f: any): void {
+	plugin.on_update = f;
+}
+
 function plugin_notify_on_delete(plugin: plugin_t, f: any): void {
 	plugin.on_delete = f;
 }

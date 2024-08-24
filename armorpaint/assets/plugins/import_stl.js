@@ -1,33 +1,29 @@
 
 let pos = 0;
 
-let read_i16 = function(view) {
+function read_i16(view) {
 	let i = view.getInt16(pos, true);
 	pos += 2;
 	return i;
 }
 
-let read_i32 = function(view) {
+function read_i32(view) {
 	let i = view.getInt32(pos, true);
 	pos += 4;
 	return i;
 }
 
-let read_f32 = function(view) {
+function read_f32(view) {
 	let f = view.getFloat32(pos, true);
 	pos += 4;
 	return f;
 }
 
-let import_stl = function(path, done) {
+function import_stl(path) {
 	let b = data_get_blob(path);
 	let view = new DataView(b);
 	pos = 0;
-	// let header = input.read(80);
-	pos += 80;
-	// if (header.getString(0, 5) == "solid") {
-		// return; // ascii not supported
-	// }
+	pos += 80; // header
 	let faces = read_i32(view);
 	let pos_temp = new Float32Array(faces * 9);
 	let nor_temp = new Float32Array(faces * 3);
@@ -74,23 +70,11 @@ let import_stl = function(path, done) {
 
 	data_delete_blob(path);
 	let name = path.split("\\").pop().split("/").pop().split(".").shift();
-	return {
-		name: name,
-		posa: posa,
-		nora: nora,
-		inda: inda,
-		scale_pos: scale_pos,
-		scale_tex: 1.0
-	};
+	return plugin_api_make_raw_mesh(name, posa.buffer, nora.buffer, inda.buffer, scale_pos);
 }
 
 let plugin = plugin_create();
-let formats = path_mesh_formats;
-let importers = path_mesh_importers;
-formats.push("stl");
-importers.set("stl", import_stl);
-
-plugin.delete = function() {
-	formats.splice(formats.indexOf("stl"), 1);
-	importers.delete("stl");
-};
+path_mesh_importers_set("stl", import_stl);
+plugin_notify_on_delete(plugin, function() {
+	path_mesh_importers_delete("stl");
+});

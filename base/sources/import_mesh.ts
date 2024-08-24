@@ -36,19 +36,22 @@ function import_mesh_run(path: string, replace_existing: bool = true) {
 	}
 	else {
 		let ext: string = substring(path, string_last_index_of(path, ".") + 1, path.length);
-		let importer: (s: string)=>raw_mesh_t = map_get(path_mesh_importers, ext);
-		let mesh: raw_mesh_t = importer(path);
+		let importer: any = map_get(path_mesh_importers, ext); // JSValue -> (s: string)=>raw_mesh_t
+		let mesh: raw_mesh_t = js_pcall_str(importer, path);
+		if (mesh.name == "") {
+			mesh.name = path_base_name(path);
+		}
+
 		replace_existing ? import_mesh_make_mesh(mesh, path) : import_mesh_add_mesh(mesh);
 
 		let has_next: bool = mesh.has_next;
 		while (has_next) {
-			let mesh: raw_mesh_t = importer(path);
+			let mesh: raw_mesh_t = js_pcall_str(importer, path);
+			if (mesh.name == "") {
+				mesh.name = path_base_name(path);
+			}
 			has_next = mesh.has_next;
 			import_mesh_add_mesh(mesh);
-
-			// let m: mat4_t = fromFloat32Array(mesh.transform);
-			// paintObjects[paintObjects.length - 1].transform.localOnly = true;
-			// paintObjects[paintObjects.length - 1].transform.setMatrix(m);
 		}
 	}
 

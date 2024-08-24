@@ -30,13 +30,16 @@ function import_texture_run(path: string, hdr_as_envmap: bool = true) {
 	}
 
 	let ext: string = substring(path, string_last_index_of(path, ".") + 1, path.length);
-	let importer: (s: string)=>image_t = map_get(path_texture_importers, ext);
+	let importer: any = map_get(path_texture_importers, ext); // JSValue -> (s: string)=>image_t
 	let cached: bool = map_get(data_cached_images, path) != null; // Already loaded or pink texture for missing file
+	let image: image_t;
 	if (importer == null || cached) {
-		importer = import_texture_default_importer;
+		image = import_texture_default_importer(path);
+	}
+	else {
+		image = js_pcall_str(importer, path);
 	}
 
-	let image: image_t = importer(path);
 	map_set(data_cached_images, path, image);
 	let ar: string[] = string_split(path, path_sep);
 	let name: string = ar[ar.length - 1];

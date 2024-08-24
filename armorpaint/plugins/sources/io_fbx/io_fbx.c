@@ -1,49 +1,16 @@
 #include "ufbx/ufbx.h"
 #include <stdlib.h>
 #include <math.h>
+#include "iron_array.h"
+#include "io_obj.h"
 
-static uint8_t *buffer = NULL;
-static uint32_t bufferLength = 0;
-static int bufOff; /* Pointer to fbx file data */
-static size_t size; /* Size of the file data */
-
-static int index_count;
-static int vertex_count;
-static int indaOff;
-static int posaOff;
-static int noraOff;
-static int texaOff;
-static int colaOff;
-static float scale_pos;
-static char name[128];
-static float transform[16];
 static bool has_next = false;
-static int current_node;
+static int current_node = 0;
+static float scale_pos = 1.0;
 
-uint8_t *io_fbx_getBuffer() { return buffer; }
-uint32_t io_fbx_getBufferLength() { return bufferLength; }
-
-static int allocate(int size) {
-	size += size % 4; // Byte align
-	bufferLength += size;
-	buffer = buffer == NULL ? (uint8_t *)malloc(bufferLength) : (uint8_t *)realloc(buffer, bufferLength);
-	return bufferLength - size;
-}
-
-int io_fbx_init(int bufSize) {
-	if (!has_next) {
-		current_node = 0;
-		scale_pos = 0;
-	}
-
-	size = bufSize;
-	bufOff = allocate(sizeof(uint8_t) * bufSize);
-	return bufOff;
-}
-
-void io_fbx_parse_mesh(ufbx_mesh *mesh) {
+void io_fbx_parse_mesh(raw_mesh_t *raw, ufbx_mesh *mesh, ufbx_matrix *to_world, ufbx_matrix *to_world_unscaled) {
 	uint32_t indices_size = mesh->max_face_triangles * 3;
-	uint32_t *indices = (uint32_t *)malloc(sizeof(uint32_t) * mesh->max_face_triangles * 3);
+	uint32_t *indices = (uint32_t *)malloc(sizeof(uint32_t) * indices_size);
 
 	bool has_tex = mesh->vertex_uv.exists;
 	bool has_col = mesh->vertex_color.exists;
@@ -64,13 +31,15 @@ void io_fbx_parse_mesh(ufbx_mesh *mesh) {
 		for (uint32_t v_ix = 0; v_ix < num_triangles * 3; v_ix++) {
 			uint32_t a = indices[v_ix];
 
-			posa32[pi++] = ufbx_get_vertex_vec3(&mesh->vertex_position, a).x;
-			posa32[pi++] = ufbx_get_vertex_vec3(&mesh->vertex_position, a).y;
-			posa32[pi++] = ufbx_get_vertex_vec3(&mesh->vertex_position, a).z;
+			ufbx_vec3 v = ufbx_transform_position(to_world, ufbx_get_vertex_vec3(&mesh->vertex_position, a));
+			posa32[pi++] = v.x;
+			posa32[pi++] = v.y;
+			posa32[pi++] = v.z;
 
-			nora32[ni++] = ufbx_get_vertex_vec3(&mesh->vertex_normal, a).x;
-			nora32[ni++] = ufbx_get_vertex_vec3(&mesh->vertex_normal, a).y;
-			nora32[ni++] = ufbx_get_vertex_vec3(&mesh->vertex_normal, a).z;
+			v = ufbx_transform_direction(to_world_unscaled, ufbx_get_vertex_vec3(&mesh->vertex_normal, a));
+			nora32[ni++] = v.x;
+			nora32[ni++] = v.y;
+			nora32[ni++] = v.z;
 
 			if (has_tex) {
 				texa32[ti++] = ufbx_get_vertex_vec2(&mesh->vertex_uv, a).x;
@@ -87,11 +56,10 @@ void io_fbx_parse_mesh(ufbx_mesh *mesh) {
 
 	free(indices);
 
-	vertex_count = pi / 3;
-	index_count = vertex_count;
+	int vertex_count = pi / 3;
+	int index_count = vertex_count;
 
-	indaOff = allocate(sizeof(uint32_t) * index_count);
-	uint32_t *inda = (uint32_t *)&buffer[indaOff];
+	uint32_t *inda = malloc(sizeof(uint32_t) * index_count);
 	for (int i = 0; i < index_count; ++i) {
 		inda[i] = i;
 	}
@@ -113,16 +81,14 @@ void io_fbx_parse_mesh(ufbx_mesh *mesh) {
 	float inv = 1 / scale_pos;
 
     // Pack into 16bit
-	posaOff = allocate(sizeof(short) * vertex_count * 4);
-	short *posa = (short *)&buffer[posaOff];
+	short *posa = malloc(sizeof(short) * vertex_count * 4);
 	for (int i = 0; i < vertex_count; ++i) {
 		posa[i * 4    ] = posa32[i * 3    ] * 32767 * inv;
 		posa[i * 4 + 1] = posa32[i * 3 + 1] * 32767 * inv;
 		posa[i * 4 + 2] = posa32[i * 3 + 2] * 32767 * inv;
 	}
 
-	noraOff = allocate(sizeof(short) * vertex_count * 2);
-	short *nora = (short *)&buffer[noraOff];
+	short *nora = malloc(sizeof(short) * vertex_count * 2);
 	if (nora32 != NULL) {
 		for (int i = 0; i < vertex_count; ++i) {
 			nora[i * 2    ] = nora32[i * 3    ] * 32767;
@@ -134,20 +100,19 @@ void io_fbx_parse_mesh(ufbx_mesh *mesh) {
 
 	free(posa32);
 
+	short *texa = NULL;
 	if (texa32 != NULL) {
-		texaOff = allocate(sizeof(short) * vertex_count * 2);
-		short *texa = (short *)&buffer[texaOff];
+		texa = malloc(sizeof(short) * vertex_count * 2);
 		for (int i = 0; i < vertex_count; ++i) {
 			texa[i * 2    ] = 		 texa32[i * 2    ]  * 32767;
 			texa[i * 2 + 1] = (1.0 - texa32[i * 2 + 1]) * 32767;
 		}
 		free(texa32);
 	}
-	else texaOff = 0;
 
+	short *cola = NULL;
 	if (cola32 != NULL) {
-		colaOff = allocate(sizeof(short) * vertex_count * 3);
-		short *cola = (short *)&buffer[colaOff];
+		short *cola = malloc(sizeof(short) * vertex_count * 3);
 		for (int i = 0; i < vertex_count; ++i) {
 			cola[i * 3    ] = cola32[i * 3    ] * 32767;
 			cola[i * 3 + 1] = cola32[i * 3 + 1] * 32767;
@@ -155,46 +120,38 @@ void io_fbx_parse_mesh(ufbx_mesh *mesh) {
 		}
 		free(cola32);
 	}
-	else colaOff = 0;
+
+	raw->posa = (i16_array_t *)malloc(sizeof(i16_array_t));
+	raw->posa->buffer = posa;
+	raw->posa->length = raw->posa->capacity = vertex_count * 4;
+
+	raw->nora = (i16_array_t *)malloc(sizeof(i16_array_t));
+	raw->nora->buffer = nora;
+	raw->nora->length = raw->nora->capacity = vertex_count * 2;
+
+	raw->texa = (i16_array_t *)malloc(sizeof(i16_array_t));
+	raw->texa->buffer = texa;
+	raw->texa->length = raw->texa->capacity = vertex_count * 2;
+
+	raw->inda = (u32_array_t *)malloc(sizeof(u32_array_t));
+	raw->inda->buffer = inda;
+	raw->inda->length = raw->inda->capacity = index_count;
+
+	raw->scale_pos = scale_pos;
+	raw->scale_tex = 1.0;
 }
 
-void io_fbx_parse() {
-	void *buf = &buffer[bufOff];
+void *io_fbx_parse(char *buf, size_t size) {
 	ufbx_load_opts opts = { .generate_missing_normals = true };
 	ufbx_scene *scene = ufbx_load_memory(buf, size, &opts, NULL);
+	raw_mesh_t *raw = (raw_mesh_t *)calloc(sizeof(raw_mesh_t), 1);
 
-	for (size_t i = current_node; i < scene->nodes.count; ++i) {
-		current_node = i;
-		ufbx_node *n = scene->nodes.data[i];
+	for (; current_node < scene->nodes.count; ++current_node) {
+		ufbx_node *n = scene->nodes.data[current_node];
 		if (n->mesh != NULL) {
-			strcpy(name, n->name.data);
-			// transform[0] = n->local_transform.translation.x;
-			// transform[1] = n->local_transform.translation.y;
-			// transform[2] = n->local_transform.translation.z;
-			// transform[3] = n->local_transform.scale.x;
-			// transform[4] = n->local_transform.scale.y;
-			// transform[5] = n->local_transform.scale.z;
-			// transform[6] = n->local_transform.rotation.x;
-			// transform[7] = n->local_transform.rotation.y;
-			// transform[8] = n->local_transform.rotation.z;
-			// transform[9] = n->local_transform.rotation.w;
-			transform[0] = n->unscaled_node_to_world.m00;
-			transform[1] = n->unscaled_node_to_world.m01;
-			transform[2] = n->unscaled_node_to_world.m02;
-			transform[3] = n->unscaled_node_to_world.m03;
-			transform[4] = n->unscaled_node_to_world.m10;
-			transform[5] = n->unscaled_node_to_world.m11;
-			transform[6] = n->unscaled_node_to_world.m12;
-			transform[7] = n->unscaled_node_to_world.m13;
-			transform[8] = n->unscaled_node_to_world.m20;
-			transform[9] = n->unscaled_node_to_world.m21;
-			transform[10] = n->unscaled_node_to_world.m22;
-			transform[11] = n->unscaled_node_to_world.m23;
-			transform[12] = 0.0;
-			transform[13] = 0.0;
-			transform[14] = 0.0;
-			transform[15] = 1.0;
-			io_fbx_parse_mesh(n->mesh);
+			raw->name = malloc(strlen(n->name.data) + 1);
+			strcpy(raw->name, n->name.data);
+			io_fbx_parse_mesh(raw, n->mesh, &n->node_to_world, &n->unscaled_node_to_world);
 			break;
 		}
 	}
@@ -208,21 +165,12 @@ void io_fbx_parse() {
 			break;
 		}
 	}
-}
 
-void io_fbx_destroy() {
-	free(buffer);
-	buffer = NULL;
-}
+	if (!has_next) {
+		current_node = 0;
+	}
 
-int io_fbx_get_index_count() { return index_count; }
-int io_fbx_get_vertex_count() { return vertex_count; }
-float io_fbx_get_scale_pos() { return scale_pos; }
-int io_fbx_get_indices() { return indaOff; }
-int io_fbx_get_positions() { return posaOff; }
-int io_fbx_get_normals() { return noraOff; }
-int io_fbx_get_uvs() { return texaOff; }
-int io_fbx_get_colors() { return colaOff; }
-char *io_fbx_get_name() { return &name[0]; }
-float *io_fbx_get_transform() { return &transform[0]; }
-int io_fbx_has_next() { return has_next; }
+	raw->has_next = has_next;
+
+	return raw;
+}

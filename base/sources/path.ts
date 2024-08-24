@@ -14,8 +14,8 @@ let path_pwd: string = "echo $PWD";
 let path_mesh_formats: string[] = ["obj", "blend"];
 let path_texture_formats: string[] = ["jpg", "jpeg", "png", "tga", "bmp", "psd", "gif", "hdr", "k"];
 
-let path_mesh_importers: map_t<string, (s: string)=>any> = map_create();
-let path_texture_importers: map_t<string, (s: string)=>image_t> = map_create();
+let path_mesh_importers: map_t<string, any> = map_create(); // JSValue -> (s: string)=>raw_mesh_t
+let path_texture_importers: map_t<string, any> = map_create(); // JSValue -> (s: string)=>image_t
 
 let path_base_color_ext: string[] = ["albedo", "alb", "basecol", "basecolor", "diffuse", "diff", "base", "bc", "d", "color", "col"];
 let path_opacity_ext: string[] = ["opac", "opacity", "alpha"];
@@ -69,6 +69,10 @@ function path_normalize(path: string): string {
 
 function path_base_dir(path: string): string {
 	return substring(path, 0, string_last_index_of(path, path_sep) + 1);
+}
+
+function path_base_name(path: string): string {
+	return substring(path, string_last_index_of(path, path_sep) + 1, string_last_index_of(path, "."));
 }
 
 function path_working_dir(): string {

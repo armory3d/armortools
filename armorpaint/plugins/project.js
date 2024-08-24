@@ -2,6 +2,10 @@ let project = new Project("plugins");
 
 project.addFile("sources/plugins.c");
 project.addFile("sources/proc_xatlas/**");
+project.addFile("sources/io_svg/**");
+project.addFile("sources/io_usd/**");
+project.addFile("sources/io_gltf/**");
+project.addFile("sources/io_fbx/**");
 
 project.addDefine("TINYUSDZ_NO_STB_IMAGE_IMPLEMENTATION");
 
