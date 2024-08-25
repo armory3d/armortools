@@ -42,7 +42,7 @@ function import_mesh_run(path: string, replace_existing: bool = true) {
 			mesh.name = path_base_name(path);
 		}
 
-		replace_existing ? import_mesh_make_mesh(mesh, path) : import_mesh_add_mesh(mesh);
+		replace_existing ? import_mesh_make_mesh(mesh) : import_mesh_add_mesh(mesh);
 
 		let has_next: bool = mesh.has_next;
 		while (has_next) {
@@ -186,7 +186,7 @@ function import_mesh_first_unwrap_done(mesh: raw_mesh_t) {
 	}
 }
 
-function import_mesh_make_mesh(mesh: raw_mesh_t, path: string) {
+function import_mesh_make_mesh(mesh: raw_mesh_t) {
 	if (mesh == null || mesh.posa == null || mesh.nora == null || mesh.inda == null || mesh.posa.length == 0) {
 		console_error(strings_error3());
 		return;

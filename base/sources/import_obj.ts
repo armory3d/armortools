@@ -20,7 +20,7 @@ function import_obj_run(path: string, replace_existing: bool = true) {
 		// 	let v: i32 = math_floor(i / part.udims_u);
 		// 	part.name = name + "." + (1000 + v * 10 + u + 1);
 		// 	part.inda = part.udims[i];
-		// 	i == 0 ? (replace_existing ? import_mesh_make_mesh(part, path) : import_mesh_add_mesh(part)) : import_mesh_add_mesh(part);
+		// 	i == 0 ? (replace_existing ? import_mesh_make_mesh(part) : import_mesh_add_mesh(part)) : import_mesh_add_mesh(part);
 		// }
 	}
 	else {
@@ -133,7 +133,7 @@ function import_obj_run(path: string, replace_existing: bool = true) {
 				}
 			}
 		}
-		replace_existing ? import_mesh_make_mesh(parts[0], path) : import_mesh_add_mesh(parts[0]);
+		replace_existing ? import_mesh_make_mesh(parts[0]) : import_mesh_add_mesh(parts[0]);
 		for (let i: i32 = 1; i < parts.length; ++i) {
 			import_mesh_add_mesh(parts[i]);
 		}

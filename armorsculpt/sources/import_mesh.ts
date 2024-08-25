@@ -23,7 +23,7 @@ function import_mesh_run(path: string, _clear_layers = true, replace_existing = 
 		let ext = substring(path, string_last_index_of(path, ".") + 1, path.length);
 		let importer = map_get(path_mesh_importers, ext);
 		let mesh: any = importer(path);
-		replace_existing ? import_mesh_make_mesh(mesh, path) : import_mesh_add_mesh(mesh);
+		replace_existing ? import_mesh_make_mesh(mesh) : import_mesh_add_mesh(mesh);
 	}
 
 	project_mesh_assets = [path];
@@ -143,7 +143,7 @@ function _import_mesh_make_mesh(mesh: any) {
 	}, mesh);
 }
 
-function import_mesh_make_mesh(mesh: any, path: string) {
+function import_mesh_make_mesh(mesh: any) {
 	if (mesh == null || mesh.posa == null || mesh.nora == null || mesh.inda == null || mesh.posa.length == 0) {
 		console_error(strings_error3());
 		return;
