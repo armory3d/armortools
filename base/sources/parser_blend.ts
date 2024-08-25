@@ -2,11 +2,6 @@
 // Reference:
 // https://github.com/fschutt/mystery-of-the-blend-backup
 // https://web.archive.org/web/20170630054951/http://www.atmind.nl/blender/mystery_ot_blend.html
-// Usage:
-// let bl: blend_t = parser_blend_init(blob: buffer_t);
-// krom_log(parser_blend_dir(bl, "Scene"));
-// let scenes: any = parser_blend_get(bl, "Scene");
-// krom_log(get(get(scenes[0], "id"), "name"));
 
 type blend_t = {
 	pos?: i32;
@@ -18,7 +13,7 @@ type blend_t = {
 	// Data
 	blocks?: block_t[];
 	dna?: dna_t;
-	map?: map_t<i64, block_t>; // Map blocks by memory address
+	map?: map_t<string, block_t>; // Map blocks by memory address
 };
 
 function parser_blend_init(buffer: buffer_t): blend_t {
@@ -126,10 +121,10 @@ function parser_blend_parse(raw: blend_t) {
 		b.size = parser_blend_read_i32(raw);
 
 		// Memory address
-		let addr: i64 = parser_blend_read_pointer(raw);
-		// if (map_get(raw.map, addr) == null) { ////
-		// 	map_set(raw.map, addr, b); ////
-		// } ////
+		let addr: string = parser_blend_read_pointer(raw);
+		if (map_get(raw.map, addr) == null) {
+			map_set(raw.map, addr, b);
+		}
 
 		// Index of dna struct contained in this block
 		b.sdna_index = parser_blend_read_i32(raw);
@@ -201,32 +196,38 @@ function parser_blend_align(raw: blend_t) {
 }
 
 function parser_blend_read_i8(raw: blend_t): i32 {
-	let i: i32 = buffer_get_u8(raw.view, raw.pos);
+	let i: i32 = buffer_get_i8(raw.view, raw.pos);
 	raw.pos += 1;
 	return i;
 }
 
 function parser_blend_read_i16(raw: blend_t): i32 {
-	let i: i32 = buffer_get_i16(raw.view, raw.pos); //, raw.little_endian
+	let i: i32 = buffer_get_i16(raw.view, raw.pos);
 	raw.pos += 2;
 	return i;
 }
 
 function parser_blend_read_i32(raw: blend_t): i32 {
-	let i: i32 = buffer_get_i32(raw.view, raw.pos); //, raw.little_endian
+	let i: i32 = buffer_get_i32(raw.view, raw.pos);
 	raw.pos += 4;
 	return i;
 }
 
 function parser_blend_read_i64(raw: blend_t): i64 {
-	let i: i32 = buffer_get_i64(raw.view, raw.pos); //, raw.little_endian
+	let i: i32 = buffer_get_i64(raw.view, raw.pos);
 	raw.pos += 8;
 	return i;
 }
 
 function parser_blend_read_f32(raw: blend_t): f32 {
-	let f: f32 = buffer_get_f32(raw.view, raw.pos); //, raw.little_endian
+	let f: f32 = buffer_get_f32(raw.view, raw.pos);
 	raw.pos += 4;
+	return f;
+}
+
+function parser_blend_read_f64(raw: blend_t): f64 {
+	let f: f64 = buffer_get_f64(raw.view, raw.pos);
+	raw.pos += 8;
 	return f;
 }
 
@@ -262,10 +263,18 @@ function parser_blend_read_f32array(raw: blend_t, len: i32): f32_array_t {
 	return ar;
 }
 
+function parser_blend_read_f64array(raw: blend_t, len: i32): f32_array_t { // f64_array_t
+	let ar: f32_array_t = f32_array_create(len);
+	for (let i: i32 = 0; i < len; ++i) {
+		ar[i] = parser_blend_read_f64(raw);
+	}
+	return ar;
+}
+
 function parser_blend_read_string(raw: blend_t): string {
 	let s: string = "";
 	while (true) {
-		let ch: i32 = parser_blend_read_i8(raw);
+		let ch: u8 = parser_blend_read_i8(raw);
 		if (ch == 0) {
 			break;
 		}
@@ -286,8 +295,9 @@ function parser_blend_read_char(raw: blend_t): string {
 	return string_from_char_code(parser_blend_read_i8(raw));
 }
 
-function parser_blend_read_pointer(raw: blend_t): i64 {
-	return raw.pointer_size == 4 ? parser_blend_read_i32(raw) : parser_blend_read_i64(raw);
+function parser_blend_read_pointer(raw: blend_t): string {
+	let i: u64 = parser_blend_read_i64(raw);
+	return u64_to_string(i);
 }
 
 type block_t = {
@@ -351,6 +361,19 @@ function bl_handle_get_array_len(s: string): i32 {
 	return parse_int(substring(s, string_index_of(s, "[") + 1, string_index_of(s, "]")));
 }
 
+let bl_handle_tmp_i: i64;
+let bl_handle_tmp_f: f64;
+
+function bl_handle_get_f(raw: bl_handle_t, name: string): f64 {
+	let p: f64_ptr = bl_handle_get(raw, name);
+	return DEREFERENCE(p);
+}
+
+function bl_handle_get_i(raw: bl_handle_t, name: string): i64 {
+	let p: i64_ptr = bl_handle_get(raw, name);
+	return DEREFERENCE(p);
+}
+
 function bl_handle_get(raw: bl_handle_t, name: string, index: i32 = 0, as_type: string = null, array_len: i32 = 0): any {
 	// Return raw type or structure
 	let dna: dna_t = raw.ds.dna;
@@ -358,6 +381,7 @@ function bl_handle_get(raw: bl_handle_t, name: string, index: i32 = 0, as_type: 
 		let name_index: i32 = raw.ds.field_names[i];
 		let dna_name: string = dna.names[name_index];
 		if (name == bl_handle_base_name(dna_name)) {
+
 			let type_index: i32 = raw.ds.field_types[i];
 			let type: string = dna.types[type_index];
 			let new_offset: i32 = raw.offset;
@@ -373,53 +397,109 @@ function bl_handle_get(raw: bl_handle_t, name: string, index: i32 = 0, as_type: 
 					}
 				}
 			}
+
 			// Raw type
 			if (type_index < 12) {
 				let blend: blend_t = raw.block.blend;
 				blend.pos = raw.block.pos + new_offset;
 				let is_array: bool = char_at(dna_name, dna_name.length - 1) == "]";
 				let len: i32 = is_array ? (array_len > 0 ? array_len : bl_handle_get_array_len(dna_name)) : 1;
-				////
-				// if (type == "int") {
-				// 	return is_array ? parser_blend_read_i32array(blend, len) : parser_blend_read_i32(blend);
-				// }
-				// else if (type == "char") {
-				// 	return is_array ? parser_blend_read_string(blend) : parser_blend_read_i8(blend);
-				// }
-				// else if (type == "uchar") {
-				// 	return is_array ? parser_blend_read_i8array(blend, len) : parser_blend_read_i8(blend);
-				// }
-				// else if (type == "short") {
-				// 	return is_array ? parser_blend_read_i16array(blend, len) : parser_blend_read_i16(blend);
-				// }
-				// else if (type == "ushort") {
-				// 	return is_array ? parser_blend_read_i16array(blend, len) : parser_blend_read_i16(blend);
-				// }
-				// else if (type == "float") {
-				// 	return is_array ? parser_blend_read_f32array(blend, len) : parser_blend_read_f32(blend);
-				// }
-				// else if (type == "double") {
-				// 	return 0; //readf64(blend);
-				// }
-				// else if (type == "long") {
-				// 	return is_array ? parser_blend_read_i32array(blend, len) : parser_blend_read_i32(blend);
-				// }
-				// else if (type == "ulong") {
-				// 	return is_array ? parser_blend_read_i32array(blend, len) : parser_blend_read_i32(blend);
-				// }
-				// else if (type == "int64_t") {
-				// 	return parser_blend_read_i64(blend);
-				// }
-				// else if (type == "uint64_t") {
-				// 	return parser_blend_read_i64(blend);
-				// }
-				// else if (type == "void") {
-				// 	if (char_at(dna_name, 0) == "*") {
-				// 		return parser_blend_read_i64(blend);
-				// 	}
-				// }
-				////
+
+				if (type == "int") {
+					if (is_array) {
+						return parser_blend_read_i32array(blend, len).buffer;
+					}
+					else {
+						bl_handle_tmp_i = parser_blend_read_i32(blend);
+						return ADDRESS(bl_handle_tmp_i);
+					}
+				}
+				else if (type == "char") {
+					if (is_array) {
+						return parser_blend_read_string(blend);
+					}
+					else {
+						bl_handle_tmp_i = parser_blend_read_i8(blend);
+						return ADDRESS(bl_handle_tmp_i);
+					}
+				}
+				else if (type == "uchar") {
+					if (is_array) {
+						return parser_blend_read_i8array(blend, len).buffer;
+					}
+					else {
+						bl_handle_tmp_i = parser_blend_read_i8(blend);
+						return ADDRESS(bl_handle_tmp_i);
+					}
+				}
+				else if (type == "short") {
+					if (is_array) {
+						return parser_blend_read_i16array(blend, len).buffer;
+					}
+					else {
+						bl_handle_tmp_i = parser_blend_read_i16(blend);
+						return ADDRESS(bl_handle_tmp_i);
+					}
+				}
+				else if (type == "ushort") {
+					if (is_array) {
+						return parser_blend_read_i16array(blend, len).buffer;
+					}
+					else {
+						bl_handle_tmp_i = parser_blend_read_i16(blend);
+						return ADDRESS(bl_handle_tmp_i);
+					}
+				}
+				else if (type == "float") {
+					if (is_array) {
+						return parser_blend_read_f32array(blend, len).buffer;
+					}
+					else {
+						bl_handle_tmp_f = parser_blend_read_f32(blend);
+						return ADDRESS(bl_handle_tmp_f);
+					}
+				}
+				else if (type == "double") {
+					if (is_array) {
+						return parser_blend_read_f64array(blend, len).buffer;
+					}
+					else {
+						bl_handle_tmp_f = parser_blend_read_f64(blend);
+						return ADDRESS(bl_handle_tmp_f);
+					}
+				}
+				else if (type == "long") {
+					if (is_array) {
+						return parser_blend_read_i32array(blend, len).buffer;
+					}
+					else {
+						bl_handle_tmp_i = parser_blend_read_i32(blend);
+						return ADDRESS(bl_handle_tmp_i);
+					}
+				}
+				else if (type == "ulong") {
+					if (is_array) {
+						return parser_blend_read_i32array(blend, len).buffer;
+					}
+					else {
+						bl_handle_tmp_i = parser_blend_read_i32(blend);
+						return ADDRESS(bl_handle_tmp_i);
+					}
+				}
+				else if (type == "int64_t") {
+					bl_handle_tmp_i = parser_blend_read_i64(blend);
+					return ADDRESS(bl_handle_tmp_i);
+				}
+				else if (type == "uint64_t") {
+					bl_handle_tmp_i = parser_blend_read_i64(blend);
+					return ADDRESS(bl_handle_tmp_i);
+				}
+				else if (type == "void" && char_at(dna_name, 0) == "*") {
+					bl_handle_tmp_i = parser_blend_read_i64(blend);
+					return ADDRESS(bl_handle_tmp_i);
+				}
 			}
+
 			// Structure
 			let h: bl_handle_t = {};
 			h.offset = 0;
@@ -427,15 +507,14 @@ function bl_handle_get(raw: bl_handle_t, name: string, index: i32 = 0, as_type: 
 			let is_pointer: bool = char_at(dna_name, 0) == "*";
 			if (is_pointer) {
 				raw.block.blend.pos = raw.block.pos + new_offset;
-				let addr: i64 = parser_blend_read_pointer(raw.block.blend);
-				////
-				// if (map_get(raw.block.blend.map, addr) != null) {
-				// 	h.block = map_get(raw.block.blend.map, addr);
-				// }
-				// else {
-				// 	h.block = raw.block;
-				// }
-				////
+				let addr: string = parser_blend_read_pointer(raw.block.blend);
+				let bl: block_t = map_get(raw.block.blend.map, addr);
+				if (bl != null) {
+					h.block = bl;
+				}
+				else {
+					h.block = raw.block;
+				}
 				h.offset = 0;
 			}
 			else {
