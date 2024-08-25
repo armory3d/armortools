@@ -144,7 +144,6 @@ declare type raw_mesh_t = {
 	has_next?: bool;
 	pos?: u64;
 	udims?: u32_array_t[];
-	udims_count?: u32_array_t;
 	udims_u?: i32;
 	udims_v?: i32;
 	vertex_arrays?: vertex_array_t[];

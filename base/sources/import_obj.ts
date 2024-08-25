@@ -10,18 +10,30 @@ function import_obj_run(path: string, replace_existing: bool = true) {
 	let b: buffer_t = data_get_blob(path);
 
 	if (is_udim) {
-		// let part: raw_mesh_t = krom_io_obj_parse(b, split_code, 0, is_udim);
-		// let name: string = part.name;
-		// for (let i: i32 = 0; i < part.udims.length; ++i) {
-		// 	if (part.udims[i].length == 0) {
-		// 		continue;
-		// 	}
-		// 	let u: i32 = i % part.udims_u;
-		// 	let v: i32 = math_floor(i / part.udims_u);
-		// 	part.name = name + "." + (1000 + v * 10 + u + 1);
-		// 	part.inda = part.udims[i];
-		// 	i == 0 ? (replace_existing ? import_mesh_make_mesh(part) : import_mesh_add_mesh(part)) : import_mesh_add_mesh(part);
-		// }
+		let part: raw_mesh_t = krom_io_obj_parse(b, split_code, 0, is_udim);
+		let name: string = part.name;
+		for (let i: i32 = 0; i < part.udims.length; ++i) {
+			let a: u32_array_t = part.udims[i];
+			if (a.length == 0) {
+				continue;
+			}
+			let u: i32 = i % part.udims_u;
+			let v: i32 = math_floor(i / part.udims_u);
+			let id: i32 = (1000 + v * 10 + u + 1);
+			part.name = name + "." + id;
+			part.inda = a;
+			if (i == 0) {
+				if (replace_existing) {
+					import_mesh_make_mesh(part);
+				}
+				else {
+					import_mesh_add_mesh(part);
+				}
+			}
+			else {
+				import_mesh_add_mesh(part);
+			}
+		}
 	}
 	else {
 		let parts: raw_mesh_t[] = [];
