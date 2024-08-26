@@ -319,13 +319,12 @@ function tab_materials_draw_slots(mini: bool) {
 
 function tab_materials_button_new(text: string) {
 	if (zui_button(text)) {
-		let current: image_t = _g2_current;
-		g2_end();
-		context_raw.material = slot_material_create(project_materials[0].data);
-		array_push(project_materials, context_raw.material);
-		tab_materials_update_material();
-		g2_begin(current);
-		history_new_material();
+		app_notify_on_init(function() {
+			context_raw.material = slot_material_create(project_materials[0].data);
+			array_push(project_materials, context_raw.material);
+			tab_materials_update_material();
+			history_new_material();
+		});
 	}
 }
 

@@ -57,64 +57,74 @@ let _ui_nodes_on_link_drag_link_drag: zui_node_link_t;
 let _ui_nodes_on_link_drag_node: zui_node_t;
 
 function ui_nodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
-	if (is_new_link) {
-		let ui_nodes: zui_nodes_t = ui_nodes_get_nodes();
-		let links: zui_node_link_t[] = ui_nodes_get_canvas(true).links;
-		let link_drag: zui_node_link_t = zui_get_link(links, link_drag_id);
-		let nodes: zui_node_t[] = ui_nodes_get_canvas(true).nodes;
-		let node: zui_node_t = zui_get_node(nodes, link_drag.from_id > -1 ? link_drag.from_id : link_drag.to_id);
-		let link_x: i32 = ui_nodes_ui._window_x + zui_nodes_NODE_X(node);
-		let link_y: i32 = ui_nodes_ui._window_y + zui_nodes_NODE_Y(node);
-		if (link_drag.from_id > -1) {
-			link_x += zui_nodes_NODE_W(node);
-			link_y += zui_nodes_OUTPUT_Y(node.outputs.length, link_drag.from_socket);
-		}
-		else {
-			link_y += zui_nodes_INPUT_Y(ui_nodes_get_canvas(true), node.inputs, link_drag.to_socket) + zui_nodes_OUTPUTS_H(node.outputs.length) + zui_nodes_BUTTONS_H(node);
-		}
-		if (math_abs(mouse_x - link_x) > 5 || math_abs(mouse_y - link_y) > 5) { // Link length
+	if (!is_new_link) {
+		return;
+	}
 
-			_ui_nodes_on_link_drag_link_drag = link_drag;
-			_ui_nodes_on_link_drag_node = node;
+	let ui_nodes: zui_nodes_t = ui_nodes_get_nodes();
+	let links: zui_node_link_t[] = ui_nodes_get_canvas(true).links;
+	let link_drag: zui_node_link_t = zui_get_link(links, link_drag_id);
+	let nodes: zui_node_t[] = ui_nodes_get_canvas(true).nodes;
+	let node: zui_node_t = zui_get_node(nodes, link_drag.from_id > -1 ? link_drag.from_id : link_drag.to_id);
+	let link_x: i32 = ui_nodes_ui._window_x + zui_nodes_NODE_X(node);
+	let link_y: i32 = ui_nodes_ui._window_y + zui_nodes_NODE_Y(node);
+	if (link_drag.from_id > -1) {
+		link_x += zui_nodes_NODE_W(node);
+		link_y += zui_nodes_OUTPUT_Y(node.outputs.length, link_drag.from_socket);
+	}
+	else {
+		link_y += zui_nodes_INPUT_Y(ui_nodes_get_canvas(true), node.inputs, link_drag.to_socket) +
+			zui_nodes_OUTPUTS_H(node.outputs.length) + zui_nodes_BUTTONS_H(node);
+	}
 
-			ui_nodes_node_search(-1, -1, function () {
-				let ui_nodes: zui_nodes_t = ui_nodes_get_nodes();
-				let link_drag: zui_node_link_t = _ui_nodes_on_link_drag_link_drag;
-				let nodes: zui_node_t[] = ui_nodes_get_canvas(true).nodes;
-				let n: zui_node_t = zui_get_node(nodes, ui_nodes.nodes_selected_id[0]);
-				if (link_drag.to_id == -1 && n.inputs.length > 0) {
-					link_drag.to_id = n.id;
-					let from_type: string = _ui_nodes_on_link_drag_node.outputs[link_drag.from_socket].type;
-					// Connect to the first socket
-					link_drag.to_socket = 0;
-					// Try to find the first type-matching socket and use it if present
-					for (let i: i32 = 0; i < n.inputs.length; ++i) {
-						let socket: zui_node_socket_t = n.inputs[i];
-						if (socket.type == from_type) {
-							link_drag.to_socket = array_index_of(n.inputs, socket);
-							break;
-						}
+	if (math_abs(mouse_x - link_x) > 5 || math_abs(mouse_y - link_y) > 5) { // Link length
+
+		_ui_nodes_on_link_drag_link_drag = link_drag;
+		_ui_nodes_on_link_drag_node = node;
+
+		ui_nodes_node_search(-1, -1, function () {
+			let ui_nodes: zui_nodes_t = ui_nodes_get_nodes();
+
+			let node_selected_id: i32 = _ui_nodes_on_link_drag_node.id;
+			if (ui_nodes.nodes_selected_id.length > 0) {
+				node_selected_id = ui_nodes.nodes_selected_id[0];
+			}
+
+			let link_drag: zui_node_link_t = _ui_nodes_on_link_drag_link_drag;
+			let nodes: zui_node_t[] = ui_nodes_get_canvas(true).nodes;
+			let n: zui_node_t = zui_get_node(nodes, node_selected_id);
+			if (link_drag.to_id == -1 && n.inputs.length > 0) {
+				link_drag.to_id = n.id;
+				let from_type: string = _ui_nodes_on_link_drag_node.outputs[link_drag.from_socket].type;
+				// Connect to the first socket
+				link_drag.to_socket = 0;
+				// Try to find the first type-matching socket and use it if present
+				for (let i: i32 = 0; i < n.inputs.length; ++i) {
+					let socket: zui_node_socket_t = n.inputs[i];
+					if (socket.type == from_type) {
+						link_drag.to_socket = array_index_of(n.inputs, socket);
+						break;
 					}
-					array_push(ui_nodes_get_canvas(true).links, link_drag);
 				}
-				else if (link_drag.from_id == -1 && n.outputs.length > 0) {
-					link_drag.from_id = n.id;
-					link_drag.from_socket = 0;
-					array_push(ui_nodes_get_canvas(true).links, link_drag);
-				}
-				///if is_lab
-				parser_logic_parse(ui_nodes_get_canvas(true));
-				context_raw.rdirty = 5;
-				///end
-			});
-		}
-		// Selecting which node socket to preview
-		else if (node.id == ui_nodes.nodes_selected_id[0]) {
-			context_raw.node_preview_socket = link_drag.from_id > -1 ? link_drag.from_socket : 0;
-			///if (is_paint || is_sculpt)
-			context_raw.node_preview_dirty = true;
+				array_push(ui_nodes_get_canvas(true).links, link_drag);
+			}
+			else if (link_drag.from_id == -1 && n.outputs.length > 0) {
+				link_drag.from_id = n.id;
+				link_drag.from_socket = 0;
+				array_push(ui_nodes_get_canvas(true).links, link_drag);
+			}
+			///if is_lab
+			parser_logic_parse(ui_nodes_get_canvas(true));
+			context_raw.rdirty = 5;
 			///end
-		}
+		});
+	}
+	// Selecting which node socket to preview
+	else if (node.id == ui_nodes.nodes_selected_id[0]) {
+		context_raw.node_preview_socket = link_drag.from_id > -1 ? link_drag.from_socket : 0;
+		///if (is_paint || is_sculpt)
+		context_raw.node_preview_dirty = true;
+		///end
 	}
 }
 
@@ -189,7 +199,8 @@ function ui_nodes_on_socket_released(socket_id: i32) {
 										zui_float_input(_ui_nodes_hval1, tr("G"));
 										zui_float_input(_ui_nodes_hval2, tr("B"));
 										zui_float_input(_ui_nodes_hval3, tr("A"));
-										default_value = f32_array_create_xyzw(_ui_nodes_hval0.value, _ui_nodes_hval1.value, _ui_nodes_hval2.value, _ui_nodes_hval3.value);
+										default_value = f32_array_create_xyzw(
+											_ui_nodes_hval0.value, _ui_nodes_hval1.value, _ui_nodes_hval2.value, _ui_nodes_hval3.value);
 									}
 									else if (type == 1) {
 										let row: f32[] = [1 / 3, 1 / 3, 1 / 3];
@@ -197,7 +208,8 @@ function ui_nodes_on_socket_released(socket_id: i32) {
 										_ui_nodes_hval0.value = zui_float_input(_ui_nodes_hval0, tr("X"));
 										_ui_nodes_hval1.value = zui_float_input(_ui_nodes_hval1, tr("Y"));
 										_ui_nodes_hval2.value = zui_float_input(_ui_nodes_hval2, tr("Z"));
-										default_value = f32_array_create_xyz(_ui_nodes_hval0.value, _ui_nodes_hval1.value, _ui_nodes_hval2.value);
+										default_value = f32_array_create_xyz(
+											_ui_nodes_hval0.value, _ui_nodes_hval1.value, _ui_nodes_hval2.value);
 									}
 									else {
 										let f: f32 = zui_float_input(_ui_nodes_hval0, tr("default_value"));
@@ -243,7 +255,7 @@ function ui_nodes_on_socket_released(socket_id: i32) {
 		else ui_nodes_on_canvas_released();
 	}
 	// Selecting which node socket to preview
-	else if (node.id == nodes.nodes_selected_id[0]) {
+	else if (nodes.nodes_selected_id.length > 0 && node.id == nodes.nodes_selected_id[0]) {
 		let i: i32 = array_index_of(node.outputs, socket);
 		if (i > -1) {
 			context_raw.node_preview_socket = i;

@@ -2007,7 +2007,7 @@ function parser_material_safestr(s: string): string {
 
 function u8_array_string_at(a: u8_array_t, i: i32): string {
 	let s: string = u8_array_to_string(a);
-	let ss: string[] = string_split(s, "\0");
+	let ss: string[] = string_split(s, "\n");
 	return ss[i];
 }
 
