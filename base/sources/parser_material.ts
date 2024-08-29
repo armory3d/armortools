@@ -735,71 +735,79 @@ function parser_material_parse_vector(node: zui_node_t, socket: zui_node_socket_
 		return "(floor(100.0 * " + strength + " * " + col + ") / (100.0 * " + strength + "))";
 	}
 	else if (node.type == "VALTORGB") { // ColorRamp
-		// let fac: string = parser_material_parse_value_input(node.inputs[0]);
-		// let data0: i32 = node.buttons[0].data[0];
-		// let interp: string = data0 == 0 ? "LINEAR" : "CONSTANT";
-		// // let elems: f32[][] = null; //node.buttons[0].default_value;
-		// let elems: f32[] = null; //node.buttons[0].default_value;
-		// if (elems.length == 1) {
-		// 	// return parser_material_vec3(elems[0]);
-		// }
-		// // Write cols array
-		// let cols_var: string = parser_material_node_name(node) + "_cols";
-		// let len: i32 = elems.length;
-		// node_shader_write(parser_material_curshader, "vec3 " + cols_var + "[" + len + "];"); // TODO: Make const
-		// for (let i: i32 = 0; i < elems.length; ++i) {
-		// 	// node_shader_write(parser_material_curshader, cols_var + "[" + i + "] = " + parser_material_vec3(elems[i]) + ";");
-		// }
-		// // Get index
-		// let fac_var: string = parser_material_node_name(node) + "_fac";
-		// node_shader_write(parser_material_curshader, "float " + fac_var + " = " + fac + ";");
-		// let index: string = "0";
-		// for (let i: i32 = 1; i < elems.length; ++i) {
-		// 	index += " + (" + fac_var + " > " + elems[i][4] + " ? 1 : 0)";
-		// }
-		// // Write index
-		// let index_var: string = parser_material_node_name(node) + "_i";
-		// node_shader_write(parser_material_curshader, "int " + index_var + " = " + index + ";");
-		// if (interp == "CONSTANT") {
-		// 	return "" + cols_var + "[" + index_var + "]";
-		// }
-		// else { // Linear
-		// 	// Write facs array
-		// 	let facs_var: string = parser_material_node_name(node) + "_facs";
-		// 	node_shader_write(parser_material_curshader, "float " + facs_var + "[" + elems + "length}];"); // TODO: Make const
-		// 	for (let i: i32 = 0; i < elems.length; ++i) {
-		// 		node_shader_write(parser_material_curshader, facs_var + "[" + i + "] = " + elems[i][4] + ";");
-		// 	}
-		// 	// Mix color
-		// 	// float f = (pos - start) * (1.0 / (finish - start))
-		// 	return "mix(" + cols_var + "[" + index_var + "], " + cols_var + "[" + index_var + " + 1], (" + fac_var + " - " + facs_var + "[" + index_var + "]) * (1.0 / (" + facs_var + "[" + index_var + " + 1] - " + facs_var + "[" + index_var + "]) ))";
-		// }
+		let fac: string = parser_material_parse_value_input(node.inputs[0]);
+		let data0: i32 = node.buttons[0].data[0];
+		let interp: string = data0 == 0 ? "LINEAR" : "CONSTANT";
+		let elems: f32[] = node.buttons[0].default_value;
+		let len: i32 = elems.length / 5;
+		if (len == 1) {
+			return parser_material_vec3(elems);
+		}
+		// Write cols array
+		let cols_var: string = parser_material_node_name(node) + "_cols";
+		node_shader_write(parser_material_curshader, "vec3 " + cols_var + "[" + len + "];"); // TODO: Make const
+		for (let i: i32 = 0; i < len; ++i) {
+			let tmp: f32[] = [];
+			array_push(tmp, elems[i * 5]);
+			array_push(tmp, elems[i * 5 + 1]);
+			array_push(tmp, elems[i * 5 + 2]);
+			node_shader_write(parser_material_curshader, cols_var + "[" + i + "] = " + parser_material_vec3(tmp) + ";");
+		}
+		// Get index
+		let fac_var: string = parser_material_node_name(node) + "_fac";
+		node_shader_write(parser_material_curshader, "float " + fac_var + " = " + fac + ";");
+		let index: string = "0";
+		for (let i: i32 = 1; i < len; ++i) {
+			let e: f32 = elems[i * 5 + 4];
+			index += " + (" + fac_var + " > " + e + " ? 1 : 0)";
+		}
+		// Write index
+		let index_var: string = parser_material_node_name(node) + "_i";
+		node_shader_write(parser_material_curshader, "int " + index_var + " = " + index + ";");
+		if (interp == "CONSTANT") {
+			return cols_var + "[" + index_var + "]";
+		}
+		else { // Linear
+			// Write facs array
+			let facs_var: string = parser_material_node_name(node) + "_facs";
+			node_shader_write(parser_material_curshader, "float " + facs_var + "[" + len + "];"); // TODO: Make const
+			for (let i: i32 = 0; i < len; ++i) {
+				let e: f32 = elems[i * 5 + 4];
+				node_shader_write(parser_material_curshader, facs_var + "[" + i + "] = " + e + ";");
+			}
+			// Mix color
+			// float f = (pos - start) * (1.0 / (finish - start))
+			// TODO: index_var + 1 out of bounds
+			return "mix(" + cols_var + "[" + index_var + "], " + cols_var + "[" + index_var + " + 1], (" +
+				fac_var + " - " + facs_var + "[" + index_var + "]) * (1.0 / (" + facs_var + "[" + index_var + " + 1] - " +
+				facs_var + "[" + index_var + "]) ))";
+		}
 	}
 	else if (node.type == "CURVE_VEC") {
-		// let fac: string = parser_material_parse_value_input(node.inputs[0]);
-		// let vec: string = parser_material_parse_vector_input(node.inputs[1]);
-		// let curves: f32_array_t = node.buttons[0].default_value;
-		// let name: string = parser_material_node_name(node);
-		// let vc0: string = parser_material_vector_curve(name + "0", vec + ".x", curves[0]);
-		// let vc1: string = parser_material_vector_curve(name + "1", vec + ".y", curves[1]);
-		// let vc2: string = parser_material_vector_curve(name + "2", vec + ".z", curves[2]);
-		// // mapping.curves[0].points[0].handle_type // bezier curve
-		// return "(vec3(" + vc0 + ", " + vc1 + ", " + vc2 + ") * " + fac + ")";
+		let fac: string = parser_material_parse_value_input(node.inputs[0]);
+		let vec: string = parser_material_parse_vector_input(node.inputs[1]);
+		let curves: f32_array_t = node.buttons[0].default_value;
+		let name: string = parser_material_node_name(node);
+		let vc0: string = parser_material_vector_curve(name + "0", vec + ".x", curves.buffer + 32 * 0, curves[96]);
+		let vc1: string = parser_material_vector_curve(name + "1", vec + ".y", curves.buffer + 32 * 1, curves[97]);
+		let vc2: string = parser_material_vector_curve(name + "2", vec + ".z", curves.buffer + 32 * 2, curves[98]);
+		// mapping.curves[0].points[0].handle_type // bezier curve
+		return "(vec3(" + vc0 + ", " + vc1 + ", " + vc2 + ") * " + fac + ")";
 	}
-	else if (node.type == "CURVE_RGB") { // RGB Curves
-		// let fac: string = parser_material_parse_value_input(node.inputs[0]);
-		// let vec: string = parser_material_parse_vector_input(node.inputs[1]);
-		// let curves: any = node.buttons[0].default_value;
-		// let name: string = parser_material_node_name(node);
-		// // mapping.curves[0].points[0].handle_type
-		// let vc0: string = parser_material_vector_curve(name + "0", vec + ".x", curves[0]);
-		// let vc1: string = parser_material_vector_curve(name + "1", vec + ".y", curves[1]);
-		// let vc2: string = parser_material_vector_curve(name + "2", vec + ".z", curves[2]);
-		// let vc3a: string = parser_material_vector_curve(name + "3a", vec + ".x", curves[3]);
-		// let vc3b: string = parser_material_vector_curve(name + "3b", vec + ".y", curves[3]);
-		// let vc3c: string = parser_material_vector_curve(name + "3c", vec + ".z", curves[3]);
-		// return "(sqrt(vec3(" + vc0 + ", " + vc1 + ", " + vc2 + ") * vec3(" + vc3a + ", " + vc3b + ", " + vc3c + ")) * " + fac + ")";
-	}
+	// else if (node.type == "CURVE_RGB") { // RGB Curves
+	// 	let fac: string = parser_material_parse_value_input(node.inputs[0]);
+	// 	let vec: string = parser_material_parse_vector_input(node.inputs[1]);
+	// 	let curves: f32_array_t = node.buttons[0].default_value;
+	// 	let name: string = parser_material_node_name(node);
+	// 	// mapping.curves[0].points[0].handle_type
+	// 	let vc0: string = parser_material_vector_curve(name + "0", vec + ".x", curves[0]);
+	// 	let vc1: string = parser_material_vector_curve(name + "1", vec + ".y", curves[1]);
+	// 	let vc2: string = parser_material_vector_curve(name + "2", vec + ".z", curves[2]);
+	// 	let vc3a: string = parser_material_vector_curve(name + "3a", vec + ".x", curves[3]);
+	// 	let vc3b: string = parser_material_vector_curve(name + "3b", vec + ".y", curves[3]);
+	// 	let vc3c: string = parser_material_vector_curve(name + "3c", vec + ".z", curves[3]);
+	// 	return "(sqrt(vec3(" + vc0 + ", " + vc1 + ", " + vc2 + ") * vec3(" + vc3a + ", " + vc3b + ", " + vc3c + ")) * " + fac + ")";
+	// }
 	else if (node.type == "COMBHSV") {
 		node_shader_add_function(parser_material_curshader, str_hue_sat);
 		let h: string = parser_material_parse_value_input(node.inputs[0]);
@@ -1608,8 +1616,9 @@ function parser_material_parse_value(node: zui_node_t, socket: zui_node_socket_t
 		return link;
 	}
 	else if (node.type == "SHADER_GPU") {
-		let shader: any = node.buttons[0].default_value;
-		return shader == "" ? "0.0" : shader;
+		let shader: buffer_t = node.buttons[0].default_value;
+		let str: string = sys_buffer_to_string(shader);
+		return str == "" ? "0.0" : str;
 	}
 	else if (node.type == "RGBTOBW") {
 		let col: string = parser_material_parse_vector_input(node.inputs[0]);
@@ -1745,36 +1754,37 @@ function parser_material_get_gradient(grad: string, co: string): string {
 	}
 }
 
-function parser_material_vector_curve(name: string, fac: string, points: f32_array_t[]): string {
+function parser_material_vector_curve(name: string, fac: string, points: f32_ptr, num: i32): string {
 	// Write Ys array
-	// let ys_var: string = name + "_ys";
-	// let num: i32 = points.length;
-	// node_shader_write(parser_material_curshader, "float " + ys_var + "[" + num + "];"); // TODO: Make const
-	// for (let i: i32 = 0; i < num; ++i) {
-	// 	node_shader_write(parser_material_curshader, ys_var + "[" + i + "] = " + points[i][1] + ";");
-	// }
-	// // Get index
-	// let fac_var: string = name + "_fac";
-	// node_shader_write(parser_material_curshader, "float " + fac_var + " = " + fac + ";");
-	// let index: string = "0";
-	// for (let i: i32 = 1; i < num; ++i) {
-	// 	index += " + (" + fac_var + " > " + points[i][0] + " ? 1 : 0)";
-	// }
-	// // Write index
-	// let index_var: string = name + "_i";
-	// node_shader_write(parser_material_curshader, "int " + index_var + " = " + index + ";");
-	// // Linear
-	// // Write Xs array
-	// let facs_var: string = name + "_xs";
-	// node_shader_write(parser_material_curshader, "float " + facs_var + "[" + num + "];"); // TODO: Make const
-	// for (let i: i32 = 0; i < num; ++i) {
-	// 	node_shader_write(parser_material_curshader, "" + facs_var + "[" + i + "] = " + points[i][0] + ";");
-	// }
-	// // Map vector
-	// return "mix(" + ys_var + "[" + index_var + "], " + ys_var + "[" + index_var + " + 1], (" + fac_var + " - " + facs_var + "[" + index_var + "]) * (1.0 / (" + facs_var + "[" + index_var + " + 1] - " + facs_var + "[" + index_var + "])))";
-
-	////
-	return "";
+	let ys_var: string = name + "_ys";
+	node_shader_write(parser_material_curshader, "float " + ys_var + "[" + num + "];"); // TODO: Make const
+	for (let i: i32 = 0; i < num; ++i) {
+		let p: f32 = ARRAY_ACCESS(points, i * 2 + 1);
+		node_shader_write(parser_material_curshader, ys_var + "[" + i + "] = " + p + ";");
+	}
+	// Get index
+	let fac_var: string = name + "_fac";
+	node_shader_write(parser_material_curshader, "float " + fac_var + " = " + fac + ";");
+	let index: string = "0";
+	for (let i: i32 = 1; i < num; ++i) {
+		let p: f32 = ARRAY_ACCESS(points, i * 2 + 0);
+		index += " + (" + fac_var + " > " + p + " ? 1 : 0)";
+	}
+	// Write index
+	let index_var: string = name + "_i";
+	node_shader_write(parser_material_curshader, "int " + index_var + " = " + index + ";");
+	// Linear
+	// Write Xs array
+	let facs_var: string = name + "_xs";
+	node_shader_write(parser_material_curshader, "float " + facs_var + "[" + num + "];"); // TODO: Make const
+	for (let i: i32 = 0; i < num; ++i) {
+		let p: f32 = ARRAY_ACCESS(points, i * 2 + 0);
+		node_shader_write(parser_material_curshader, "" + facs_var + "[" + i + "] = " + p + ";");
+	}
+	// Map vector
+	return "mix(" +
+		ys_var + "[" + index_var + "], " + ys_var + "[" + index_var + " + 1], (" + fac_var + " - " +
+		facs_var + "[" + index_var + "]) * (1.0 / (" + facs_var + "[" + index_var + " + 1] - " + facs_var + "[" + index_var + "])))";
 }
 
 function parser_material_res_var_name(node: zui_node_t, socket: zui_node_socket_t): string {
@@ -1925,7 +1935,9 @@ function parser_material_node_name(node: zui_node_t, _parents: zui_node_t[] = nu
 		let p: zui_node_t = _parents[i];
 		s = p.name + p.id + "_" + s;
 	}
-	s = parser_material_safesrc(s) + node.id;
+	s = parser_material_safesrc(s);
+	let nid: i32 = node.id;
+	s = s + nid;
 	return s;
 }
 

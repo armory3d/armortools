@@ -2923,8 +2923,7 @@ let nodes_material_vector: zui_node_t[] = [
 				name: "nodes_material_vector_curves_button",
 				type: "CUSTOM",
 				output: 0,
-				// default_value: [[f32_array_create_xy(0.0, 0.0), f32_array_create_xy(0.0, 0.0)], [f32_array_create_xy(0.0, 0.0), f32_array_create_xy(0.0, 0.0)], [f32_array_create_xy(0.0, 0.0), f32_array_create_xy(0.0, 0.0)]],
-				default_value: f32_array_create(0),
+				default_value: f32_array_create(96 + 3), // x - [0, 32], y - [33, 64], z - [65, 96], x_len, y_len, z_len
 				data: null,
 				min: 0.0,
 				max: 1.0,
@@ -3063,7 +3062,6 @@ let nodes_material_converter: zui_node_t[] = [
 				name: "nodes_material_color_ramp_button",
 				type: "CUSTOM",
 				output: 0,
-				// default_value: [f32_array_create_xyzwv(1.0, 1.0, 1.0, 1.0, 0.0)],
 				default_value: f32_array_create_xyzwv(1.0, 1.0, 1.0, 1.0, 0.0),
 				data: u8_array_create(1),
 				min: 0.0,
@@ -3843,7 +3841,20 @@ let nodes_material_list: node_list_t[] = [
 	nodes_material_group
 ];
 
-function nodes_material_vector_curves_button(ui: zui_t, nodes: zui_nodes_t, node: zui_node_t) {
+function nodes_material_init() {
+	zui_nodes_custom_buttons = map_create();
+	map_set(zui_nodes_custom_buttons, "nodes_material_vector_curves_button", nodes_material_vector_curves_button);
+	map_set(zui_nodes_custom_buttons, "nodes_material_color_ramp_button", nodes_material_color_ramp_button);
+	map_set(zui_nodes_custom_buttons, "nodes_material_new_group_button", nodes_material_new_group_button);
+	map_set(zui_nodes_custom_buttons, "nodes_material_group_input_button", nodes_material_group_input_button);
+	map_set(zui_nodes_custom_buttons, "nodes_material_group_output_button", nodes_material_group_output_button);
+}
+
+function nodes_material_vector_curves_button(node_id: i32) {
+	let ui: zui_t = ui_nodes_ui;
+	let nodes: zui_nodes_t = ui_nodes_get_nodes();
+	let node: zui_node_t = zui_get_node(ui_nodes_get_canvas(true).nodes, node_id);
+
 	let but: zui_node_button_t = node.buttons[0];
 	let nhandle: zui_handle_t = zui_nest(zui_handle(__ID__), node.id);
 	let row: f32[] = [1 / 3, 1 / 3, 1 / 3];
@@ -3851,37 +3862,52 @@ function nodes_material_vector_curves_button(ui: zui_t, nodes: zui_nodes_t, node
 	zui_radio(zui_nest(zui_nest(nhandle, 0), 1), 0, "X");
 	zui_radio(zui_nest(zui_nest(nhandle, 0), 1), 1, "Y");
 	zui_radio(zui_nest(zui_nest(nhandle, 0), 1), 2, "Z");
+
 	// Preview
 	let axis: i32 = zui_nest(zui_nest(nhandle, 0), 1).position;
-	let val: f32_array_t[] = null; // but.default_value[axis]; // [ [[x, y], [x, y], ..], [[x, y]], ..]
-	let num: i32 = val.length;
-	// for (let i: i32 = 0; i < num; ++i) { ui.line(); }
+	let val: f32[] = but.default_value;
 	ui._y += zui_nodes_LINE_H() * 5;
+
+	let num: i32 = val[96 + axis];
+
+	if (num == 0) {
+		// Init
+		val[96 + 0] = 1;
+		val[96 + 1] = 1;
+		val[96 + 2] = 1;
+	}
+
 	// Edit
 	row = [1 / 5, 1 / 5, 3 / 5];
 	zui_row(row);
 	if (zui_button("+")) {
-		let f32a: f32_array_t = f32_array_create(2);
-		f32a[0] = 0; f32a[1] = 0;
-		array_push(val, f32a);
+		val[axis * 32 + num * 2 + 0] = 0.0;
+		val[axis * 32 + num * 2 + 1] = 0.0;
+		num++;
+		val[96 + axis] = num;
 	}
 	if (zui_button("-")) {
-		if (val.length > 2) {
-			array_pop(val);
+		if (num > 1) {
+			num--;
+			val[96 + axis] = num;
 		}
 	}
+
 	let ihandle: zui_handle_t = zui_nest(zui_nest(zui_nest(nhandle, 0), 2), axis);
 	if (ihandle.init) {
 		ihandle.position = 0;
 	}
+
 	let i: i32 = math_floor(zui_slider(ihandle, "Index", 0, num - 1, false, 1, true, zui_align_t.LEFT));
-	if (i >= val.length || i < 0) {
-		ihandle.value = i = val.length - 1; // Stay in bounds
+	if (i >= num || i < 0) {
+		ihandle.value = i = num - 1; // Stay in bounds
 	}
+
 	row = [1 / 2, 1 / 2];
 	zui_row(row);
-	zui_nest(zui_nest(nhandle, 0), 3).value = val[i][0];
-	zui_nest(zui_nest(nhandle, 0), 4).value = val[i][1];
+	zui_nest(zui_nest(nhandle, 0), 3).value = val[axis * 32 + i * 2 + 0];
+	zui_nest(zui_nest(nhandle, 0), 4).value = val[axis * 32 + i * 2 + 1];
+
 	let h1: zui_handle_t = zui_nest(zui_nest(nhandle, 0), 3);
 	if (h1.init) {
 		h1.value = 0.0;
@@ -3890,23 +3916,26 @@ function nodes_material_vector_curves_button(ui: zui_t, nodes: zui_nodes_t, node
 	if (h2.init) {
 		h2.value = 0.0;
 	}
-	val[i][0] = zui_slider(h1, "X", -1, 1, true, 100, true, zui_align_t.LEFT);
-	val[i][1] = zui_slider(h2, "Y", -1, 1, true, 100, true, zui_align_t.LEFT);
+	val[axis * 32 + i * 2 + 0] = zui_slider(h1, "X", -1, 1, true, 100, true, zui_align_t.LEFT);
+	val[axis * 32 + i * 2 + 1] = zui_slider(h2, "Y", -1, 1, true, 100, true, zui_align_t.LEFT);
 }
 
-function nodes_material_color_ramp_button(ui: zui_t, nodes: zui_nodes_t, node: zui_node_t) {
+function nodes_material_color_ramp_button(node_id: i32) {
+	let ui: zui_t = ui_nodes_ui;
+	let nodes: zui_nodes_t = ui_nodes_get_nodes();
+	let node: zui_node_t = zui_get_node(ui_nodes_get_canvas(true).nodes, node_id);
+
 	let but: zui_node_button_t = node.buttons[0];
 	let nhandle: zui_handle_t = zui_nest(zui_handle(__ID__), node.id);
 	let nx: f32 = ui._x;
 	let ny: f32 = ui._y;
 
 	// Preview
-	let vals: f32_array_t[] = null; // but.default_value; // [[r, g, b, a, pos], ..]
+	let vals: f32[] = but.default_value; // [r, g, b, a, pos, r, g, b, a, pos, ..]
 	let sw: f32 = ui._w / zui_nodes_SCALE();
-	for (let i: i32 = 0; i < vals.length; ++i) {
-		let val: f32_array_t = vals[i];
-		let pos: f32 = val[4];
-		let col: i32 = color_from_floats(val[0], val[1], val[2], 1.0);
+	for (let i: i32 = 0; i < vals.length / 5; ++i) {
+		let pos: f32 = vals[i * 5 + 4];
+		let col: i32 = color_from_floats(vals[i * 5 + 0], vals[i * 5 + 1], vals[i * 5 + 2], 1.0);
 		zui_fill(pos * sw, 0, (1.0 - pos) * sw, zui_nodes_LINE_H() - 2 * zui_nodes_SCALE(), col);
 	}
 	ui._y += zui_nodes_LINE_H();
@@ -3915,54 +3944,63 @@ function nodes_material_color_ramp_button(ui: zui_t, nodes: zui_nodes_t, node: z
 	let row: f32[] = [1 / 4, 1 / 4, 2 / 4];
 	zui_row(row);
 	if (zui_button("+")) {
-		let last: f32_array_t = vals[vals.length - 1];
-		let f32a: f32_array_t = f32_array_create(5);
-		f32a[0] = last[0];
-		f32a[1] = last[1];
-		f32a[2] = last[2];
-		f32a[3] = last[3];
-		f32a[4] = 1.0;
-		array_push(vals, f32a);
+		array_push(vals, vals[vals.length - 5]); // r
+		array_push(vals, vals[vals.length - 5]); // g
+		array_push(vals, vals[vals.length - 5]); // b
+		array_push(vals, vals[vals.length - 5]); // a
+		array_push(vals, 1.0); // pos
 		ihandle.value += 1;
 	}
-	if (zui_button("-") && vals.length > 1) {
+	if (zui_button("-") && vals.length > 5) {
+		array_pop(vals);
+		array_pop(vals);
+		array_pop(vals);
+		array_pop(vals);
 		array_pop(vals);
 		ihandle.value -= 1;
 	}
 
-	// but.data = zui_combo(zui_nest(zui_nest(nhandle, 0), 1, { position: but.data }), [tr("Linear"), tr("Constant")], tr("Interpolate"));
+	let h: zui_handle_t = zui_nest(zui_nest(nhandle, 0), 1);
+	if (h.init) {
+		h.position = but.data[0];
+	}
+	let interpolate_combo: string[] = [tr("Linear"), tr("Constant")];
+	but.data[0] = zui_combo(h, interpolate_combo, tr("Interpolate"));
 
 	row = [1 / 2, 1 / 2];
 	zui_row(row);
-	let i: i32 = math_floor(zui_slider(ihandle, "Index", 0, vals.length - 1, false, 1, true, zui_align_t.LEFT));
-	if (i >= vals.length || i < 0) {
-		ihandle.value = i = vals.length - 1; // Stay in bounds
+	let i: i32 = math_floor(zui_slider(ihandle, "Index", 0, (vals.length / 5) - 1, false, 1, true, zui_align_t.LEFT));
+	if (i >= (vals.length * 5) || i < 0) {
+		ihandle.value = i = (vals.length / 5) - 1; // Stay in bounds
 	}
 
-	let val: f32_array_t = vals[i];
-	zui_nest(zui_nest(nhandle, 0), 3).value = val[4];
-	val[4] = zui_slider(zui_nest(zui_nest(nhandle, 0), 3), "Pos", 0, 1, true, 100, true, zui_align_t.LEFT);
-	if (val[4] > 1.0) {
-		val[4] = 1.0; // Stay in bounds
+	zui_nest(zui_nest(nhandle, 0), 3).value = vals[i * 5 + 4];
+	vals[i * 5 + 4] = zui_slider(zui_nest(zui_nest(nhandle, 0), 3), "Pos", 0, 1, true, 100, true, zui_align_t.LEFT);
+	if (vals[i * 5 + 4] > 1.0) {
+		vals[i * 5 + 4] = 1.0; // Stay in bounds
 	}
-	else if (val[4] < 0.0) {
-		val[4] = 0.0;
+	else if (vals[i * 5 + 4] < 0.0) {
+		vals[i * 5 + 4] = 0.0;
 	}
 
 	let chandle: zui_handle_t = zui_nest(zui_nest(nhandle, 0), 4);
-	chandle.color = color_from_floats(val[0], val[1], val[2], 1.0);
+	chandle.color = color_from_floats(vals[i * 5 + 0], vals[i * 5 + 1], vals[i * 5 + 2], 1.0);
 	if (zui_text("", zui_align_t.RIGHT, chandle.color) == zui_state_t.STARTED) {
 		let rx: f32 = nx + ui._w - zui_nodes_p(37);
 		let ry: f32 = ny - zui_nodes_p(5);
 		nodes._input_started = ui.input_started = false;
-		zui_nodes_rgba_popup(chandle, val, math_floor(rx), math_floor(ry + zui_ELEMENT_H(ui)));
+		zui_nodes_rgba_popup(chandle, vals.buffer + i * 5, math_floor(rx), math_floor(ry + zui_ELEMENT_H(ui)));
 	}
-	val[0] = color_get_rb(chandle.color) / 255;
-	val[1] = color_get_gb(chandle.color) / 255;
-	val[2] = color_get_bb(chandle.color) / 255;
+	vals[i * 5 + 0] = color_get_rb(chandle.color) / 255;
+	vals[i * 5 + 1] = color_get_gb(chandle.color) / 255;
+	vals[i * 5 + 2] = color_get_bb(chandle.color) / 255;
 }
 
-function nodes_material_new_group_button(ui: zui_t, nodes: zui_nodes_t, node: zui_node_t) {
+function nodes_material_new_group_button(node_id: i32) {
+	let ui: zui_t = ui_nodes_ui;
+	let nodes: zui_nodes_t = ui_nodes_get_nodes();
+	let node: zui_node_t = zui_get_node(ui_nodes_get_canvas(true).nodes, node_id);
+
 	if (node.name == "New Group") {
 		for (let i: i32 = 1; i < 999; ++i) {
 			node.name = tr("Group") + " " + i;
@@ -3970,7 +4008,8 @@ function nodes_material_new_group_button(ui: zui_t, nodes: zui_nodes_t, node: zu
 			let found: bool = false;
 			for (let i: i32 = 0; i < project_material_groups.length; ++i) {
 				let g: node_group_t = project_material_groups[i];
-				if (g.canvas.name == node.name) {
+				let cname: string = g.canvas.name;
+				if (cname == node.name) {
 					found = true;
 					break;
 				}
@@ -4041,11 +4080,19 @@ function nodes_material_new_group_button(ui: zui_t, nodes: zui_nodes_t, node: zu
 	}
 }
 
-function nodes_material_group_input_button(ui: zui_t, nodes: zui_nodes_t, node: zui_node_t) {
+function nodes_material_group_input_button(node_id: i32) {
+	let ui: zui_t = ui_nodes_ui;
+	let nodes: zui_nodes_t = ui_nodes_get_nodes();
+	let node: zui_node_t = zui_get_node(ui_nodes_get_canvas(true).nodes, node_id);
+
 	nodes_material_add_socket_button(ui, nodes, node, node.outputs);
 }
 
-function nodes_material_group_output_button(ui: zui_t, nodes: zui_nodes_t, node: zui_node_t) {
+function nodes_material_group_output_button(node_id: i32) {
+	let ui: zui_t = ui_nodes_ui;
+	let nodes: zui_nodes_t = ui_nodes_get_nodes();
+	let node: zui_node_t = zui_get_node(ui_nodes_get_canvas(true).nodes, node_id);
+
 	nodes_material_add_socket_button(ui, nodes, node, node.inputs);
 }
 

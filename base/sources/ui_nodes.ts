@@ -40,6 +40,7 @@ function ui_nodes_init() {
 	zui_nodes_on_socket_released = ui_nodes_on_socket_released;
 	zui_nodes_on_canvas_released = ui_nodes_on_canvas_released;
 	zui_nodes_on_canvas_control = ui_nodes_on_canvas_control;
+	nodes_material_init();
 
 	let scale: f32 = config_raw.window_scale;
 	let ops: zui_options_t = {
@@ -1417,7 +1418,7 @@ function ui_nodes_make_node(n: zui_node_t, nodes: zui_nodes_t, canvas: zui_node_
 		soc.name = n.inputs[i].name;
 		soc.type = n.inputs[i].type;
 		soc.color = n.inputs[i].color;
-		soc.default_value = n.inputs[i].default_value;
+		soc.default_value = f32_array_create_from_array(n.inputs[i].default_value);
 		soc.min = n.inputs[i].min;
 		soc.max = n.inputs[i].max;
 		soc.precision = n.inputs[i].precision;
@@ -1433,7 +1434,7 @@ function ui_nodes_make_node(n: zui_node_t, nodes: zui_nodes_t, canvas: zui_node_
 		soc.name = n.outputs[i].name;
 		soc.type = n.outputs[i].type;
 		soc.color = n.outputs[i].color;
-		soc.default_value = n.outputs[i].default_value;
+		soc.default_value = f32_array_create_from_array(n.outputs[i].default_value);
 		soc.min = n.outputs[i].min;
 		soc.max = n.outputs[i].max;
 		soc.precision = n.outputs[i].precision;
@@ -1446,8 +1447,8 @@ function ui_nodes_make_node(n: zui_node_t, nodes: zui_nodes_t, canvas: zui_node_
 		but.name = n.buttons[i].name;
 		but.type = n.buttons[i].type;
 		but.output = n.buttons[i].output;
-		but.default_value = n.buttons[i].default_value;
-		but.data = n.buttons[i].data;
+		but.default_value = f32_array_create_from_array(n.buttons[i].default_value);
+		but.data = u8_array_create_from_array(n.buttons[i].data);
 		but.min = n.buttons[i].min;
 		but.max = n.buttons[i].max;
 		but.precision = n.buttons[i].precision;
@@ -1505,7 +1506,6 @@ function ui_nodes_make_node_preview() {
 
 	let nodes: zui_node_t[] = context_raw.material.canvas.nodes;
 	let node: zui_node_t = zui_get_node(nodes, ui_nodes.nodes_selected_id[0]);
-	// if (node == null) return;
 	context_raw.node_preview_name = node.name;
 
 	if (node.type == "LAYER" ||

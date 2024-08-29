@@ -39,7 +39,7 @@ function strings_graphics_api(): string {
 
 let str_tex_checker: string = " \
 vec3 tex_checker(const vec3 co, const vec3 col1, const vec3 col2, const float scale) { \
-	// Prevent precision issues on unit coordinates \
+	/* Prevent precision issues on unit coordinates */ \
 	vec3 p = (co + 0.000001 * 0.999999) * scale; \
 	float xi = abs(floor(p.x)); \
 	float yi = abs(floor(p.y)); \
