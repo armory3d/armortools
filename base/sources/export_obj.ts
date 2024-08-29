@@ -1,12 +1,12 @@
 
-function export_obj_write_string(out: i32[], str: string) {
+function export_obj_write_string(out: u8[], str: string) {
 	for (let i: i32 = 0; i < str.length; ++i) {
 		array_push(out, char_code_at(str, i));
 	}
 }
 
 function export_obj_run(path: string, paint_objects: mesh_object_t[], apply_disp: bool = false) {
-	let o: i32[] = [];
+	let o: u8[] = [];
 	export_obj_write_string(o, "# armorpaint.org\n");
 
 	let poff: i32 = 0;
@@ -175,11 +175,5 @@ function export_obj_run(path: string, paint_objects: mesh_object_t[], apply_disp
 	if (!ends_with(path, ".obj")) {
 		path += ".obj";
 	}
-
-	let b: buffer_t = {
-		// @ts-ignore
-		buffer: o.buffer,
-		length: o.length
-	};
-	krom_file_save_bytes(path, b, b.length);
+	krom_file_save_bytes(path, o, 0);
 }
