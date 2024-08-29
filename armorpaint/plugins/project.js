@@ -22,7 +22,7 @@ if (flags.physics) {
 		project.addLib("Jolt -L" + project.basedir + "/phys_jolt/linux");
 	}
 	else if (platform === "macos") {
-		project.addLib("phys_jolt/macos/libJolt.a");
+		project.addLib(project.basedir + "/phys_jolt/macos/libJolt.a");
 	}
 }
 
