@@ -127,14 +127,27 @@ function export_texture_run_bake_material(path: string) {
 	planeo.base.visible = true;
 	context_raw.paint_object = planeo;
 	context_raw.pdirty = 1;
+
+	let _visibles: bool[] = [];
+	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+		let p: mesh_object_t = project_paint_objects[i];
+		array_push(_visibles, p.base.visible);
+		p.base.visible = false;
+	}
+
 	render_path_paint_use_live_layer(true);
 	render_path_paint_commands_paint(false);
 	render_path_paint_use_live_layer(false);
+
 	context_raw.tool = _tool;
 	make_material_parse_paint_material();
 	context_raw.pdirty = 0;
 	planeo.base.visible = false;
 	context_raw.paint_object = _paint_object;
+
+	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+		project_paint_objects[i].base.visible = _visibles[i];
+	}
 
 	let layers: slot_layer_t[] = [render_path_paint_live_layer];
 	export_texture_run_layers(path, layers, "", true);
