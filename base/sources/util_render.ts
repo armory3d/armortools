@@ -437,10 +437,10 @@ function util_render_get_decal_mat(): mat4_t {
 
 function util_render_create_screen_aligned_full_data() {
 	// Over-sized triangle
-	let data: f32[] = [-math_floor(32767 / 3), -math_floor(32767 / 3), 0, 32767, 0, 0, 0, 0, 0, 0, 0, 0,
+	let data: i16[] = [-math_floor(32767 / 3), -math_floor(32767 / 3), 0, 32767, 0, 0, 0, 0, 0, 0, 0, 0,
 						32767,                 -math_floor(32767 / 3), 0, 32767, 0, 0, 0, 0, 0, 0, 0, 0,
 					   -math_floor(32767 / 3),  32767,                 0, 32767, 0, 0, 0, 0, 0, 0, 0, 0];
-	let indices: i32[] = [0, 1, 2];
+	let indices: u32[] = [0, 1, 2];
 
 	// Mandatory vertex data names and sizes
 	let structure: vertex_struct_t = g4_vertex_struct_create();
@@ -448,7 +448,7 @@ function util_render_create_screen_aligned_full_data() {
 	g4_vertex_struct_add(structure, "nor", vertex_data_t.I16_2X_NORM);
 	g4_vertex_struct_add(structure, "tex", vertex_data_t.I16_2X_NORM);
 	g4_vertex_struct_add(structure, "col", vertex_data_t.I16_4X_NORM);
-	util_render_screen_aligned_full_vb = g4_vertex_buffer_create(math_floor(data.length / math_floor(g4_vertex_struct_byte_size(structure) / 4)), structure, usage_t.STATIC);
+	util_render_screen_aligned_full_vb = g4_vertex_buffer_create(math_floor(data.length / math_floor(g4_vertex_struct_byte_size(structure) / 2)), structure, usage_t.STATIC);
 	let vertices: buffer_t = g4_vertex_buffer_lock(util_render_screen_aligned_full_vb);
 	for (let i: i32 = 0; i < math_floor((vertices.length) / 2); ++i) {
 		buffer_set_i16(vertices, i * 2, data[i]);
@@ -457,7 +457,9 @@ function util_render_create_screen_aligned_full_data() {
 
 	util_render_screen_aligned_full_ib = g4_index_buffer_create(indices.length);
 	let id: u32_array_t = g4_index_buffer_lock(util_render_screen_aligned_full_ib);
-	for (let i: i32 = 0; i < id.length; ++i) id[i] = indices[i];
+	for (let i: i32 = 0; i < id.length; ++i) {
+		id[i] = indices[i];
+	}
 	g4_index_buffer_unlock(util_render_screen_aligned_full_ib);
 }
 
