@@ -80,6 +80,10 @@ else {
 	project.addAssets("assets/extra/*", { destination: "data/{name}" });
 }
 
+if (flags.physics) {
+	project.addDefine("arm_physics");
+}
+
 project.addDefine("arm_particles");
 // project.addDefine("arm_skin");
 // project.addDefine("arm_audio");
@@ -93,9 +97,11 @@ if (flags.raytrace) {
 
 	if (flags.d3d12) {
 		project.addAssets("shaders/raytrace/*.cso", { destination: "data/{name}", embed: flags.embed });
+		project.addAssets("assets/readme/readme_dxr.txt", { destination: "{name}" });
 	}
 	else if (flags.vulkan) {
 		project.addAssets("shaders/raytrace/*.spirv", { destination: "data/{name}", embed: flags.embed });
+		project.addAssets("assets/readme/readme_vkrt.txt", { destination: "{name}" });
 	}
 	else if (flags.metal) {
 		project.addAssets("shaders/raytrace/*.metal", { destination: "data/{name}", embed: flags.embed });

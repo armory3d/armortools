@@ -1,5 +1,5 @@
-let project = new Project('plugins');
+let project = new Project("plugins");
 
-project.addFile('sources/**');
+project.addFile("plugins.c");
 
 return project;

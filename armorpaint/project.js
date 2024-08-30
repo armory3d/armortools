@@ -18,25 +18,5 @@ project.addAssets("assets/plugins/*", { destination: "data/plugins/{name}" });
 project.addAssets("assets/meshes/*", { destination: "data/meshes/{name}" });
 project.addAssets("assets/readme/readme.txt", { destination: "{name}" });
 
-if (flags.android) {
-	project.addAssets("assets/readme/readme_android.txt", { destination: "{name}" });
-}
-else if (flags.ios) {
-	project.addAssets("assets/readme/readme_ios.txt", { destination: "{name}" });
-}
-
-if (flags.physics) {
-	project.addDefine("arm_physics");
-}
-
-if (flags.raytrace) {
-	if (flags.d3d12) {
-		project.addAssets("assets/readme/readme_dxr.txt", { destination: "{name}" });
-	}
-	else if (flags.vulkan) {
-		project.addAssets("assets/readme/readme_vkrt.txt", { destination: "{name}" });
-	}
-}
-
 project.flatten();
 return project;

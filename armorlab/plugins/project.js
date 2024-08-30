@@ -1,16 +1,15 @@
-let project = new Project('plugins');
+let project = new Project("plugins");
 
-project.addFile('sources/**');
+project.addFile("plugins.c");
 
-if (platform === Platform.Windows) {
-	project.addLib('sources/proc_texsynth/win32/texsynth');
+if (platform === "windows") {
+	project.addLib('proc_texsynth/win32/texsynth');
 }
-else if (platform === Platform.Linux) {
-	process.env.LIBRARY_PATH = project.basedir + "/sources/proc_texsynth/linux";
-	project.addLib('texsynth');
+else if (platform === "linux") {
+	project.addLib("texsynth -L" + project.basedir + "/proc_texsynth/linux");
 }
-else if (platform === Platform.OSX) {
-	project.addLib('sources/proc_texsynth/macos/libtexsynth.a');
+else if (platform === "macos") {
+	project.addLib(project.basedir + '/proc_texsynth/macos/libtexsynth.a');
 }
 
 return project;

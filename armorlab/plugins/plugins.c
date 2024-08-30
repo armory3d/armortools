@@ -1,6 +1,5 @@
 
-#include <kinc/log.h>
-
+/*
 extern "C" {
 	void texsynth_inpaint(int w, int h, void *output_ptr, void *image_ptr, void *mask_ptr, bool tiling);
 }
@@ -21,11 +20,6 @@ namespace {
 	}
 }
 
-#define SET_FUNCTION(object, name, fn)\
-	object->Set(String::NewFromUtf8(isolate, name).ToLocalChecked(),\
-	FunctionTemplate::New(isolate, fn, Local<v8::Value>(), Local<v8::Signature>(), 0,\
-	v8::ConstructorBehavior::kThrow, v8::SideEffectType::kHasNoSideEffect, nullptr))
-
 void plugin_embed(Isolate *_isolate, Local<ObjectTemplate> global) {
 	isolate = _isolate;
 	Isolate::Scope isolate_scope(isolate);
@@ -34,4 +28,13 @@ void plugin_embed(Isolate *_isolate, Local<ObjectTemplate> global) {
 	Local<ObjectTemplate> krom_texsynth = ObjectTemplate::New(isolate);
 	SET_FUNCTION(krom_texsynth, "inpaint", krom_texsynth_inpaint);
 	global->Set(String::NewFromUtf8(isolate, "Krom_texsynth").ToLocalChecked(), krom_texsynth);
+}
+*/
+
+#include "../../../base/sources/plugin_api.h"
+
+void plugin_embed() {
+	JSValue global_obj = JS_GetGlobalObject(js_ctx);
+
+	JS_FreeValue(js_ctx, global_obj);
 }

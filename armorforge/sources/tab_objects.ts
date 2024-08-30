@@ -3,13 +3,14 @@ let tab_objects_material_id: i32 = 0;
 let tab_objects_line_counter: i32 = 0;
 let tab_objects_current_object: object_t;
 
-function tab_objects_roundfp(f: f32, precision: i32 = 2): f32 {
-	f *= math_pow(10, precision);
-	return math_round(f) / math_pow(10, precision);
+function f32_to_string_prec(f: f32): string {
+	f = math_round(f);
+	return f + "";
 }
 
 function tab_objects_import_mesh_done() {
-	object_set_parent(array_pop(project_paint_objects).base, null);
+	let mo: mesh_object_t = array_pop(project_paint_objects);
+	object_set_parent(mo.base, null);
 }
 
 function tab_objects_draw_menu(ui: zui_t) {
@@ -100,7 +101,7 @@ function tab_objects_draw_list(ui: zui_t, list_handle: zui_handle_t, current_obj
 	}
 
 	if (b) {
-		let current_y = ui._y;
+		let current_y: i32 = ui._y;
 		for (let i: i32 = 0; i < current_object.children.length; ++i) {
 			let child: object_t = current_object.children[i];
 			// ui.indent();
@@ -131,7 +132,7 @@ function tab_objects_draw(htab: zui_handle_t) {
 			outliner_handle.selected = true;
 		}
 
-		if (zui_panel(outliner_handle, "Outliner")) {
+		if (zui_panel(outliner_handle, "Outliner", true, false)) {
 			ui._y -= zui_ELEMENT_OFFSET(ui);
 
 			tab_objects_line_counter = 0;
@@ -147,7 +148,7 @@ function tab_objects_draw(htab: zui_handle_t) {
 			properties_handle.selected = true;
 		}
 
-		if (zui_panel(properties_handle, "Properties")) {
+		if (zui_panel(properties_handle, "Properties", true, false)) {
 			if (context_raw.selected_object != null) {
 				let h: zui_handle_t = zui_handle(__ID__);
 				h.selected = context_raw.selected_object.visible;
@@ -166,21 +167,21 @@ function tab_objects_draw(htab: zui_handle_t) {
 				zui_text("Loc");
 
 				h = zui_handle(__ID__);
-				h.text = math_round(local_pos.x) + "";
+				h.text = f32_to_string_prec(local_pos.x);
 				f = parse_float(zui_text_input(h, "X"));
 				if (h.changed) {
 					local_pos.x = f;
 				}
 
 				h = zui_handle(__ID__);
-				h.text = math_round(local_pos.y) + "";
+				h.text = f32_to_string_prec(local_pos.y);
 				f = parse_float(zui_text_input(h, "Y"));
 				if (h.changed) {
 					local_pos.y = f;
 				}
 
 				h = zui_handle(__ID__);
-				h.text = math_round(local_pos.z) + "";
+				h.text = f32_to_string_prec(local_pos.z);
 				f = parse_float(zui_text_input(h, "Z"));
 				if (h.changed) {
 					local_pos.z = f;
@@ -190,16 +191,16 @@ function tab_objects_draw(htab: zui_handle_t) {
 				zui_text("Rotation");
 
 				h = zui_handle(__ID__);
-				h.text = math_round(rot.x) + "";
+				h.text = f32_to_string_prec(rot.x);
 				f = parse_float(zui_text_input(h, "X"));
-				let changed = false;
+				let changed: bool = false;
 				if (h.changed) {
 					changed = true;
 					rot.x = f;
 				}
 
 				h = zui_handle(__ID__);
-				h.text = math_round(rot.y) + "";
+				h.text = f32_to_string_prec(rot.y);
 				f = parse_float(zui_text_input(h, "Y"));
 				if (h.changed) {
 					changed = true;
@@ -207,7 +208,7 @@ function tab_objects_draw(htab: zui_handle_t) {
 				}
 
 				h = zui_handle(__ID__);
-				h.text = math_round(rot.z) + "";
+				h.text = f32_to_string_prec(rot.z);
 				f = parse_float(zui_text_input(h, "Z"));
 				if (h.changed) {
 					changed = true;
@@ -227,21 +228,21 @@ function tab_objects_draw(htab: zui_handle_t) {
 				zui_text("Scale");
 
 				h = zui_handle(__ID__);
-				h.text = math_round(scale.x) + "";
+				h.text = f32_to_string_prec(scale.x);
 				f = parse_float(zui_text_input(h, "X"));
 				if (h.changed) {
 					scale.x = f;
 				}
 
 				h = zui_handle(__ID__);
-				h.text = math_round(scale.y) + "";
+				h.text = f32_to_string_prec(scale.y);
 				f = parse_float(zui_text_input(h, "Y"));
 				if (h.changed) {
 					scale.y = f;
 				}
 
 				h = zui_handle(__ID__);
-				h.text = math_round(scale.z) + "";
+				h.text = f32_to_string_prec(scale.z);
 				f = parse_float(zui_text_input(h, "Z"));
 				if (h.changed) {
 					scale.z = f;
@@ -251,21 +252,21 @@ function tab_objects_draw(htab: zui_handle_t) {
 				zui_text("Dimensions");
 
 				h = zui_handle(__ID__);
-				h.text = math_round(dim.x) + "";
+				h.text = f32_to_string_prec(dim.x);
 				f = parse_float(zui_text_input(h, "X"));
 				if (h.changed) {
 					dim.x = f;
 				}
 
 				h = zui_handle(__ID__);
-				h.text = math_round(dim.y) + "";
+				h.text = f32_to_string_prec(dim.y);
 				f = parse_float(zui_text_input(h, "Y"));
 				if (h.changed) {
 					dim.y = f;
 				}
 
 				h = zui_handle(__ID__);
-				h.text = math_round(dim.z) + "";
+				h.text = f32_to_string_prec(dim.z);
 				f = parse_float(zui_text_input(h, "Z"));
 				if (h.changed) {
 					dim.z = f;
@@ -274,7 +275,7 @@ function tab_objects_draw(htab: zui_handle_t) {
 				context_raw.selected_object.transform.dirty = true;
 
 				if (context_raw.selected_object.name == "Scene") {
-					let p = scene_world;
+					let p: world_data_t = scene_world;
 
 					let p_handle: zui_handle_t = zui_handle(__ID__);
 					if (p_handle.init) {
@@ -284,14 +285,14 @@ function tab_objects_draw(htab: zui_handle_t) {
 					p.strength = zui_slider(p_handle, "Environment", 0.0, 5.0, true);
 				}
 				else if (context_raw.selected_object.ext_type == "light_object_t") {
-					let light = context_raw.selected_object.ext;
-					let light_handle = zui_handle(__ID__);
+					let light: light_object_t = context_raw.selected_object.ext;
+					let light_handle: zui_handle_t = zui_handle(__ID__);
 					light_handle.value = light.data.strength / 10;
 					light.data.strength = zui_slider(light_handle, "Strength", 0.0, 5.0, true) * 10;
 				}
 				else if (context_raw.selected_object.ext_type == "camera_object_t") {
-					let cam = context_raw.selected_object.ext;
-					let fov_handle = zui_handle(__ID__);
+					let cam: camera_object_t = context_raw.selected_object.ext;
+					let fov_handle: zui_handle_t = zui_handle(__ID__);
 					fov_handle.value = math_floor(cam.data.fov * 100) / 100;
 					cam.data.fov = zui_slider(fov_handle, "FoV", 0.3, 2.0, true);
 					if (fov_handle.changed) {
