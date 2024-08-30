@@ -837,7 +837,7 @@ function ui_base_update() {
 		if (mouse_started()) {
 			if (context_raw.particle_timer != null) {
 				tween_stop(context_raw.particle_timer);
-				context_raw.particle_timer.done(null);
+				context_raw.particle_timer.done(context_raw.particle_timer.done_data);
 				context_raw.particle_timer = null;
 			}
 			history_push_undo = true;
