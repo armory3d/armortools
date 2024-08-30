@@ -7,8 +7,7 @@ flags.vulkan = os_argv().indexOf("vulkan") >= 0;
 flags.metal = os_argv().indexOf("metal") >= 0;
 flags.raytrace = flags.d3d12 || flags.vulkan || flags.metal;
 flags.embed = os_argv().indexOf("--embed") >= 0;
-// flags.physics = true;
-flags.physics = false;
+flags.physics = os_argv().indexOf("--debug") == -1;
 flags.voxels = !flags.raytrace && !flags.android && !flags.ios;
 
 flags.with_d3dcompiler = true;
