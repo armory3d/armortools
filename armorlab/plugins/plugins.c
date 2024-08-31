@@ -1,40 +1,26 @@
 
-/*
-extern "C" {
-	void texsynth_inpaint(int w, int h, void *output_ptr, void *image_ptr, void *mask_ptr, bool tiling);
-}
-
-namespace {
-	void krom_texsynth_inpaint(const FunctionCallbackInfo<Value> &args) {
-		HandleScope scope(args.GetIsolate());
-		int32_t w = args[0]->ToInt32(isolate->GetCurrentContext()).ToLocalChecked()->Value();
-		int32_t h = args[1]->ToInt32(isolate->GetCurrentContext()).ToLocalChecked()->Value();
-		Local<ArrayBuffer> bufferOut = Local<ArrayBuffer>::Cast(args[2]);
-		std::shared_ptr<BackingStore> contentOut = bufferOut->GetBackingStore();
-		Local<ArrayBuffer> bufferImage = Local<ArrayBuffer>::Cast(args[3]);
-		std::shared_ptr<BackingStore> contentImage = bufferImage->GetBackingStore();
-		Local<ArrayBuffer> bufferMask = Local<ArrayBuffer>::Cast(args[4]);
-		std::shared_ptr<BackingStore> contentMask = bufferMask->GetBackingStore();
-		bool tiling = args[5]->ToBoolean(isolate)->Value();
-		texsynth_inpaint(w, h, contentOut->Data(), contentImage->Data(), contentMask->Data(), tiling);
-	}
-}
-
-void plugin_embed(Isolate *_isolate, Local<ObjectTemplate> global) {
-	isolate = _isolate;
-	Isolate::Scope isolate_scope(isolate);
-	HandleScope handle_scope(isolate);
-
-	Local<ObjectTemplate> krom_texsynth = ObjectTemplate::New(isolate);
-	SET_FUNCTION(krom_texsynth, "inpaint", krom_texsynth_inpaint);
-	global->Set(String::NewFromUtf8(isolate, "Krom_texsynth").ToLocalChecked(), krom_texsynth);
-}
-*/
-
 #include "../../../base/sources/plugin_api.h"
+#include "iron_array.h"
+
+void texsynth_inpaint(int w, int h, void *output_ptr, void *image_ptr, void *mask_ptr, bool tiling);
+
+FN(texsynth_inpaint) {
+	int32_t w;
+	JS_ToInt32(ctx, &w, argv[0]);
+	int32_t h;
+	JS_ToInt32(ctx, &h, argv[1]);
+	size_t size;
+	void *out = JS_GetArrayBuffer(ctx, &size, argv[2]);
+	void *img = JS_GetArrayBuffer(ctx, &size, argv[3]);
+	void *mask = JS_GetArrayBuffer(ctx, &size, argv[4]);
+	bool tiling = JS_ToBool(ctx, argv[5]);
+	texsynth_inpaint(w, h, out, img, mask, tiling);
+}
 
 void plugin_embed() {
 	JSValue global_obj = JS_GetGlobalObject(js_ctx);
+
+	BIND(texsynth_inpaint, 6);
 
 	JS_FreeValue(js_ctx, global_obj);
 }

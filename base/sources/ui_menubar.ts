@@ -146,16 +146,31 @@ function ui_menubar_render_ui() {
 			}
 			else { // Space2D
 				if (_ui_menubar_plane == null) {
-					let mesh: any = geom_make_plane(1, 1, 2, 2);
-					let raw: any = {
+					let mesh: raw_mesh_t = geom_make_plane(1, 1, 2, 2);
+					let raw: raw_mesh_t = {
 						name: "2DView",
 						vertex_arrays: [
-							{ values: mesh.posa, attrib: "pos", data: "short4norm" },
-							{ values: mesh.nora, attrib: "nor", data: "short2norm" },
-							{ values: mesh.texa, attrib: "tex", data: "short2norm" }
+							{
+								values: mesh.posa,
+								attrib: "pos",
+								data: "short4norm"
+							},
+							{
+								values: mesh.nora,
+								attrib: "nor",
+								data: "short2norm"
+							},
+							{
+								values: mesh.texa,
+								attrib: "tex",
+								data: "short2norm"
+							}
 						],
 						index_arrays: [
-							{ values: mesh.inda, material: 0 }
+							{
+								values: mesh.inda,
+								material: 0
+							}
 						],
 						scale_pos: mesh.scale_pos,
 						scale_tex: mesh.scale_tex

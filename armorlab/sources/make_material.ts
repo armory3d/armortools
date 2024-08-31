@@ -4,10 +4,10 @@ let make_material_default_mcon: material_context_t = null;
 let make_material_height_used: bool = false;
 
 function make_material_parse_mesh_material() {
-	let m = project_material_data;
+	let m: material_data_t = project_material_data;
 
 	for (let i: i32 = 0; i < m._.shader.contexts.length; ++i) {
-		let c = m._.shader.contexts[i];
+		let c: shader_context_t = m._.shader.contexts[i];
 		if (c.name == "mesh") {
 			array_remove(m._.shader.contexts, c);
 			array_remove(m._.shader._.contexts, c);
@@ -16,12 +16,17 @@ function make_material_parse_mesh_material() {
 		}
 	}
 
-	let mm: material_t = { name: "Material", canvas: null };
-	let con = make_mesh_run(mm);
+	let mm: material_t = {
+		name: "Material",
+		canvas: null
+	};
+
+	let con: node_shader_context_t = make_mesh_run(mm);
 	let scon: shader_context_t = shader_context_create(con.data);
-	scon._.override_context = {};
+	let override_context: _shader_override_t = {};
+	scon._.override_context = override_context;
 	if (con.frag.shared_samplers.length > 0) {
-		let sampler = con.frag.shared_samplers[0];
+		let sampler: string = con.frag.shared_samplers[0];
 		scon._.override_context.shared_sampler = substring(sampler, string_last_index_of(sampler, " ") + 1, sampler.length);
 	}
 	if (!context_raw.texture_filter) {
@@ -44,11 +49,11 @@ function make_material_parse_mesh_material() {
 
 ///if arm_voxels
 function make_material_make_voxel(m: material_data_t) {
-	let rebuild = true; // heightUsed;
+	let rebuild: bool = true; // heightUsed;
 	if (config_raw.rp_gi != false && rebuild) {
 		let scon: shader_context_t = null;
 		for (let i: i32 = 0; i < m._.shader._.contexts.length; ++i) {
-			let c = m._.shader._.contexts[i];
+			let c: shader_context_t = m._.shader._.contexts[i];
 			if (c.name == "voxel") {
 				scon = c;
 				break;
@@ -60,11 +65,11 @@ function make_material_make_voxel(m: material_data_t) {
 ///end
 
 function make_material_parse_paint_material() {
-	let m = project_material_data;
+	let m: material_data_t = project_material_data;
 	let scon: shader_context_t = null;
 	let mcon: material_context_t = null;
 	for (let i: i32 = 0; i < m._.shader.contexts.length; ++i) {
-		let c = m._.shader.contexts[i];
+		let c: shader_context_t = m._.shader.contexts[i];
 		if (c.name == "paint") {
 			array_remove(m._.shader.contexts, c);
 			array_remove(m._.shader._.contexts, c);
@@ -75,7 +80,7 @@ function make_material_parse_paint_material() {
 		}
 	}
 	for (let i: i32 = 0; i < m.contexts.length; ++i) {
-		let c = m.contexts[i];
+		let c: material_context_t = m.contexts[i];
 		if (c.name == "paint") {
 			array_remove(m.contexts, c);
 			array_remove(m._.contexts, c);
@@ -85,20 +90,22 @@ function make_material_parse_paint_material() {
 
 	let sdata: material_t = { name: "Material", canvas: null };
 	let mcon2: material_context_t = { name: "paint", bind_textures: [] };
-	let con = make_paint_run(sdata, mcon2);
+	let con: node_shader_context_t = make_paint_run(sdata, mcon2);
 
-	let compileError = false;
+	let compile_error: bool = false;
 	let scon2: shader_context_t;
 	let _scon: shader_context_t = shader_context_create(con.data);
 	if (_scon == null) {
-		compileError = true;
+		compile_error = true;
 	}
 	scon2 = _scon;
 
-	if (compileError) {
+	if (compile_error) {
 		return;
 	}
-	scon2._.override_context = {};
+
+	let override_context: _shader_override_t = {};
+	scon2._.override_context = override_context;
 	scon2._.override_context.addressing = "repeat";
 	let mcon3: material_context_t = material_context_create(mcon2);
 
@@ -116,12 +123,12 @@ function make_material_parse_paint_material() {
 }
 
 function make_material_get_displace_strength(): f32 {
-	let sc = context_main_object().base.transform.scale.x;
+	let sc: f32 = context_main_object().base.transform.scale.x;
 	return config_raw.displace_strength * 0.02 * sc;
 }
 
 function make_material_voxelgi_half_extents(): string {
-	let ext = context_raw.vxao_ext;
+	let ext: i32 = context_raw.vxao_ext;
 	return "const vec3 voxelgi_half_extents = vec3(" + ext + ", " + ext + ", " + ext + ");";
 }
 

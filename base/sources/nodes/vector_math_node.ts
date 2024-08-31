@@ -205,7 +205,7 @@ let vector_math_node_def: zui_node_t = {
 			type: "ENUM",
 			output: 0,
 			default_value: f32_array_create_x(0),
-			data: u8_array_create_from_string("Add\0Subtract\0Multiply\0Divide\0Average\0Cross Product\0Project\0Reflect\0Dot Product\0Distance\0Length\0Scale\0Normalize\0Absolute\0Minimum\0Maximum\0Floor\0Ceil\0Fraction\0Modulo\0Snap\0Sine\0Cosine\0Tangent"),
+			data: u8_array_create_from_string("Add\nSubtract\nMultiply\nDivide\nAverage\nCross Product\nProject\nReflect\nDot Product\nDistance\nLength\nScale\nNormalize\nAbsolute\nMinimum\nMaximum\nFloor\nCeil\nFraction\nModulo\nSnap\nSine\nCosine\nTangent"),
 			min: 0.0,
 			max: 1.0,
 			precision: 100,

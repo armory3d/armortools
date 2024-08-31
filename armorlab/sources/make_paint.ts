@@ -1,9 +1,11 @@
 
 function make_paint_color_attachments(): string[] {
 	if (context_raw.tool == workspace_tool_t.PICKER) {
-		return ["RGBA32", "RGBA32", "RGBA32", "RGBA32"];
+		let res: string[] = ["RGBA32", "RGBA32", "RGBA32", "RGBA32"];
+		return res;
 	}
-	return ["RGBA32", "RGBA32", "RGBA32", "R8"];
+	let res: string[] = ["RGBA32", "RGBA32", "RGBA32", "R8"];
+	return res;
 }
 
 function make_paint_run(data: material_t, matcon: material_context_t): node_shader_context_t {
@@ -27,9 +29,9 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 				data: "short2norm"
 			}
 		],
-		color_attachments: make_paint_color_attachments();
+		color_attachments: make_paint_color_attachments()
 	};
-	let con_paint = node_shader_context_create(data, props);
+	let con_paint: node_shader_context_t = node_shader_context_create(data, props);
 
 	con_paint.data.color_writes_red = [true, true, true, true];
 	con_paint.data.color_writes_green = [true, true, true, true];
@@ -37,8 +39,8 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	con_paint.data.color_writes_alpha = [true, true, true, true];
 	con_paint.allow_vcols = mesh_data_get_vertex_array(context_raw.paint_object.data, "col") != null;
 
-	let vert = node_shader_context_make_vert(con_paint);
-	let frag = node_shader_context_make_frag(con_paint);
+	let vert: node_shader_t = node_shader_context_make_vert(con_paint);
+	let frag: node_shader_t = node_shader_context_make_frag(con_paint);
 	frag.ins = vert.outs;
 
 	if (context_raw.tool == workspace_tool_t.PICKER) {
@@ -162,13 +164,13 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 			// ///end
 
 			// node_shader_write(frag, "vec3 texpaint_pack_sample = textureLod(texpaint_pack_undo, tex_coord_inp, 0.0).rgb;");
-			// let base = "textureLod(texpaint_undo, tex_coord_inp, 0.0).rgb";
-			// let rough = "texpaint_pack_sample.g";
-			// let met = "texpaint_pack_sample.b";
-			// let occ = "texpaint_pack_sample.r";
-			// let nortan = "textureLod(texpaint_nor_undo, tex_coord_inp, 0.0).rgb";
-			// let height = "0.0";
-			// let opac = "1.0";
+			// let base: string = "textureLod(texpaint_undo, tex_coord_inp, 0.0).rgb";
+			// let rough: string = "texpaint_pack_sample.g";
+			// let met: string = "texpaint_pack_sample.b";
+			// let occ: string = "texpaint_pack_sample.r";
+			// let nortan: string = "textureLod(texpaint_nor_undo, tex_coord_inp, 0.0).rgb";
+			// let height: string = "0.0";
+			// let opac: string = "1.0";
 			// node_shader_write(frag, "vec3 basecol = " + base + ";");
 			// node_shader_write(frag, "float roughness = " + rough + ";");
 			// node_shader_write(frag, "float metallic = " + met + ";");

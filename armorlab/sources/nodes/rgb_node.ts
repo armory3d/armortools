@@ -19,9 +19,9 @@ function rgb_node_get_as_image(self: rgb_node_t, from: i32): image_t {
 		}, self);
 	}
 
-	let f32a = f32_array_create(4);
-	let raw = parser_logic_get_raw_node(self.base);
-	let default_value = raw.outputs[0].default_value;
+	let f32a: f32_array_t = f32_array_create(4);
+	let raw: zui_node_t = parser_logic_get_raw_node(self.base);
+	let default_value: f32_array_t = raw.outputs[0].default_value;
 	f32a[0] = default_value[0];
 	f32a[1] = default_value[1];
 	f32a[2] = default_value[2];

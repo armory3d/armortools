@@ -65,7 +65,7 @@ function tiling_node_get_cached_image(self: tiling_node_t): image_t {
 
 function tiling_node_sd_tiling(image: image_t, seed: i32): image_t {
 	text_to_photo_node_tiling = false;
-	let tile = image_create_render_target(512, 512);
+	let tile: image_t = image_create_render_target(512, 512);
 	g2_begin(tile);
 	g2_draw_scaled_image(image, -256, -256, 512, 512);
 	g2_draw_scaled_image(image, 256, -256, 512, 512);
@@ -73,11 +73,11 @@ function tiling_node_sd_tiling(image: image_t, seed: i32): image_t {
 	g2_draw_scaled_image(image, 256, 256, 512, 512);
 	g2_end();
 
-	let u8a = u8_array_create(512 * 512);
+	let u8a: u8_array_t = u8_array_create(512 * 512);
 	for (let i: i32 = 0; i < 512 * 512; ++i) {
-		let x = i % 512;
-		let y = math_floor(i / 512);
-		let l = y < 256 ? y : (511 - y);
+		let x: i32 = i % 512;
+		let y: i32 = math_floor(i / 512);
+		let l: i32 = y < 256 ? y : (511 - y);
 		u8a[i] = (x > 256 - l && x < 256 + l) ? 0 : 255;
 	}
 	// for (let i: i32 = 0; i < 512 * 512; ++i) u8a[i] = 255;
@@ -91,7 +91,7 @@ function tiling_node_sd_tiling(image: image_t, seed: i32): image_t {
 	// 		u8a[y * 512 + x] = 0;
 	// 	}
 	// }
-	let mask = image_from_bytes(u8a.buffer, 512, 512, tex_format_t.R8);
+	let mask: image_t = image_from_bytes(u8a.buffer, 512, 512, tex_format_t.R8);
 
 	inpaint_node_prompt = tiling_node_prompt;
 	inpaint_node_strength = tiling_node_strength;

@@ -177,8 +177,8 @@ function tab_meshes_set_default_mesh(name: string) {
 	let mo: mesh_object_t = null;
 	if (name == ".Plane" || name == ".Sphere") {
 		let res: i32 = config_raw.rp_supersample > 1.0 ? 2048 : 1024;
-		let mesh: any = name == ".Plane" ? geom_make_plane(1, 1, res, res) : geom_make_uv_sphere(1.0, res, math_floor(res / 2), false, 2.0);
-		let raw: any = {
+		let mesh: raw_mesh_t = name == ".Plane" ? geom_make_plane(1, 1, res, res) : geom_make_uv_sphere(1.0, res, math_floor(res / 2), false, 2.0);
+		let raw: mesh_data_t = {
 			name: "Tessellated",
 			vertex_arrays: [
 				{ values: mesh.posa, attrib: "pos", data: "short4norm" },

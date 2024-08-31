@@ -6,11 +6,11 @@ type slot_layer_t = {
 	visible?: bool;
 	parent?: slot_layer_t; // Group (for layers) or layer (for masks)
 	texpaint?: image_t; // Base or mask
-	///if is_paint
+	////if is_paint
 	texpaint_nor?: image_t;
 	texpaint_pack?: image_t;
 	texpaint_preview?: image_t; // Layer preview
-	///end
+	////end
 	mask_opacity?: f32; // Opacity mask
 	fill_layer?: slot_material_t;
 	show_panel?: bool;

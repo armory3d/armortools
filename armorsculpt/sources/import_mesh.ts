@@ -1,7 +1,7 @@
 
 let import_mesh_clear_layers: bool = true;
 
-function import_mesh_run(path: string, _clear_layers = true, replace_existing = true) {
+function import_mesh_run(path: string, _clear_layers: bool = true, replace_existing: bool = true) {
 	if (!path_is_mesh(path)) {
 		if (!context_enable_import_plugin(path)) {
 			console_error(strings_error1());
@@ -12,7 +12,7 @@ function import_mesh_run(path: string, _clear_layers = true, replace_existing = 
 	import_mesh_clear_layers = _clear_layers;
 	context_raw.layer_filter = 0;
 
-	let p = to_lower_case(path);
+	let p: string = to_lower_case(path);
 	if (ends_with(p, ".obj")) {
 		import_obj_run(path, replace_existing);
 	}
@@ -20,10 +20,15 @@ function import_mesh_run(path: string, _clear_layers = true, replace_existing = 
 		import_blend_mesh_run(path, replace_existing);
 	}
 	else {
-		let ext = substring(path, string_last_index_of(path, ".") + 1, path.length);
-		let importer = map_get(path_mesh_importers, ext);
-		let mesh: any = importer(path);
-		replace_existing ? import_mesh_make_mesh(mesh) : import_mesh_add_mesh(mesh);
+		let ext: string = substring(path, string_last_index_of(path, ".") + 1, path.length);
+		let importer: any = map_get(path_mesh_importers, ext);
+		let mesh: raw_mesh_t = js_pcall_str(importer, path);
+		if (replace_existing) {
+			import_mesh_make_mesh(mesh);
+		}
+		else {
+			import_mesh_add_mesh(mesh);
+		}
 	}
 
 	project_mesh_assets = [path];
@@ -52,7 +57,7 @@ function import_mesh_finish_import() {
 
 		// No mask by default
 		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
-			let p = project_paint_objects[i];
+			let p: mesh_object_t = project_paint_objects[i];
 			p.base.visible = true;
 		}
 		if (context_raw.merged_object == null) {
@@ -77,10 +82,15 @@ function import_mesh_finish_import() {
 	///end
 }
 
-function _import_mesh_make_mesh(mesh: any) {
-	let raw = import_mesh_raw_mesh(mesh);
+function _import_mesh_make_mesh(mesh: raw_mesh_t) {
+	let raw: raw_mesh_t = import_mesh_raw_mesh(mesh);
 	if (mesh.cola != null) {
-		array_push(raw.vertex_arrays, { values: mesh.cola, attrib: "col", data: "short4norm" });
+		let va: vertex_array_t = {
+			values: mesh.cola,
+			attrib: "col",
+			data: "short4norm"
+		};
+		array_push(raw.vertex_arrays, va);
 	}
 
 	let md: mesh_data_t = mesh_data_create(raw);
@@ -88,21 +98,21 @@ function _import_mesh_make_mesh(mesh: any) {
 
 	context_select_paint_object(context_main_object());
 	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
-		let p = project_paint_objects[i];
+		let p: mesh_object_t = project_paint_objects[i];
 		if (p == context_raw.paint_object) {
 			continue;
 		}
 		data_delete_mesh(p.data._.handle);
 		mesh_object_remove(p);
 	}
-	let handle = context_raw.paint_object.data._.handle;
+	let handle: string = context_raw.paint_object.data._.handle;
 	if (handle != "SceneSphere" && handle != "ScenePlane") {
 		data_delete_mesh(handle);
 	}
 
 	if (import_mesh_clear_layers) {
 		while (project_layers.length > 0) {
-			let l = project_layers.pop();
+			let l: slot_layer_t = array_pop(project_layers);
 			slot_layer_unload(l);
 		}
 		base_new_layer(false);
@@ -124,17 +134,17 @@ function _import_mesh_make_mesh(mesh: any) {
 	// Wait for add_mesh calls to finish
 	app_notify_on_init(import_mesh_finish_import);
 
-	app_notify_on_next_frame(function (mesh: any) {
-		let f32 = f32_array_create(config_get_texture_res_x() * config_get_texture_res_y() * 4);
+	app_notify_on_next_frame(function (mesh: raw_mesh_t) {
+		let f32a: f32_array_t = f32_array_create(config_get_texture_res_x() * config_get_texture_res_y() * 4);
 		for (let i: i32 = 0; i < math_floor(mesh.inda.length); ++i) {
-			let index = mesh.inda[i];
-			f32[i * 4]     = mesh.posa[index * 4]     / 32767;
-			f32[i * 4 + 1] = mesh.posa[index * 4 + 1] / 32767;
-			f32[i * 4 + 2] = mesh.posa[index * 4 + 2] / 32767;
-			f32[i * 4 + 3] = 1.0;
+			let index: i32 = mesh.inda[i];
+			f32a[i * 4]     = mesh.posa[index * 4]     / 32767;
+			f32a[i * 4 + 1] = mesh.posa[index * 4 + 1] / 32767;
+			f32a[i * 4 + 2] = mesh.posa[index * 4 + 2] / 32767;
+			f32a[i * 4 + 3] = 1.0;
 		}
-		let imgmesh = image_from_bytes(f32.buffer, config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.RGBA128);
-		let texpaint = project_layers[0].texpaint;
+		let imgmesh: image_t = image_from_bytes(f32a.buffer, config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.RGBA128);
+		let texpaint: image_t = project_layers[0].texpaint;
 		g2_begin(texpaint);
 		g2_set_pipeline(base_pipe_copy128);
 		g2_draw_scaled_image(imgmesh, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
@@ -143,7 +153,7 @@ function _import_mesh_make_mesh(mesh: any) {
 	}, mesh);
 }
 
-function import_mesh_make_mesh(mesh: any) {
+function import_mesh_make_mesh(mesh: raw_mesh_t) {
 	if (mesh == null || mesh.posa == null || mesh.nora == null || mesh.inda == null || mesh.posa.length == 0) {
 		console_error(strings_error3());
 		return;
@@ -152,21 +162,26 @@ function import_mesh_make_mesh(mesh: any) {
 	_import_mesh_make_mesh(mesh);
 }
 
-function import_mesh_add_mesh(mesh: any) {
-	let raw = import_mesh_raw_mesh(mesh);
+function import_mesh_add_mesh(mesh: raw_mesh_t) {
+	let raw: raw_mesh_t = import_mesh_raw_mesh(mesh);
 	if (mesh.cola != null) {
-		array_push(raw.vertex_arrays, { values: mesh.cola, attrib: "col", data: "short4norm" });
+		let va: vertex_array_t = {
+			values: mesh.cola,
+			attrib: "col",
+			data: "short4norm"
+		};
+		array_push(raw.vertex_arrays, va);
 	}
 
 	let md: mesh_data_t = mesh_data_create(raw);
 
-	let object = scene_add_mesh_object(md, context_raw.paint_object.materials, context_raw.paint_object.base);
-	object.base.name = mesh.base.name;
+	let object: mesh_object_t = scene_add_mesh_object(md, context_raw.paint_object.materials, context_raw.paint_object.base);
+	object.base.name = mesh.name;
 	object.skip_context = "paint";
 
 	// Ensure unique names
 	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
-		let p = project_paint_objects[i];
+		let p: mesh_object_t = project_paint_objects[i];
 		if (p.base.name == object.base.name) {
 			p.base.name += ".001";
 			p.data._.handle += ".001";
@@ -183,23 +198,34 @@ function import_mesh_add_mesh(mesh: any) {
 	ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 }
 
-function import_mesh_raw_mesh(mesh: any): mesh_data_t {
-	let posa: i16_array_t = i16_array_create(math_floor(mesh.inda.length * 4));
+function import_mesh_raw_mesh(mesh: raw_mesh_t): mesh_data_t {
+	let posa: i16_array_t = i16_array_create(mesh.inda.length * 4);
 	for (let i: i32 = 0; i < posa.length; ++i) {
 		posa[i] = 32767;
 	}
+
 	let inda: u32_array_t = u32_array_create(mesh.inda.length);
 	for (let i: i32 = 0; i < inda.length; ++i) {
 		inda[i] = i;
 	}
-	return {
+
+	let raw: mesh_data_t = {
 		name: mesh.name,
 		vertex_arrays: [
-			{ values: posa, attrib: "pos", data: "short4norm" }
+			{
+				values: posa,
+				attrib: "pos",
+				data: "short4norm"
+			}
 		],
 		index_arrays: [
-			{ values: inda, material: 0 }
+			{
+				values: inda,
+				material: 0
+			}
 		],
-		scale_pos: 1.0
+		scale_pos: 1.0,
+		scale_tex: 1.0
 	};
+	return raw;
 }

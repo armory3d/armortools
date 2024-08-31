@@ -186,7 +186,7 @@ let math_node_def: zui_node_t = {
 			type: "ENUM",
 			output: 0,
 			default_value: f32_array_create_x(0),
-			data: u8_array_create_from_string("Add\0Subtract\0Multiply\0Divide\0Power\0Logarithm\0Square Root\0Inverse Square Root\0Absolute\0Exponent\0Minimum\0Maximum\0Less Than\0Greater Than\0Sign\0Round\0Floor\0Ceil\0Truncate\0Fraction\0Modulo\0Snap\0Ping-Pong\0Sine\0Cosine\0Tangent\0Arcsine\0Arccosine\0Arctangent\0Arctan2\0Hyperbolic Sine\0Hyperbolic Cosine\0Hyperbolic Tangent\0To Radians\0To Degrees"),
+			data: u8_array_create_from_string("Add\nSubtract\nMultiply\nDivide\nPower\nLogarithm\nSquare Root\nInverse Square Root\nAbsolute\nExponent\nMinimum\nMaximum\nLess Than\nGreater Than\nSign\nRound\nFloor\nCeil\nTruncate\nFraction\nModulo\nSnap\nPing-Pong\nSine\nCosine\nTangent\nArcsine\nArccosine\nArctangent\nArctan2\nHyperbolic Sine\nHyperbolic Cosine\nHyperbolic Tangent\nTo Radians\nTo Degrees"),
 			min: 0.0,
 			max: 1.0,
 			precision: 100,

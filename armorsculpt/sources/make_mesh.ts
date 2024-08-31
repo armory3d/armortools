@@ -1,26 +1,35 @@
 
-let make_mesh_layer_pass_count = 1;
+let make_mesh_layer_pass_count: i32 = 1;
 
 function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_context_t {
-	let context_id = layer_pass == 0 ? "mesh" : "mesh" + layer_pass;
+	let context_id: string = layer_pass == 0 ? "mesh" : "mesh" + layer_pass;
+	let depth_write: bool = layer_pass == 0 ? true : false;
+	let compare_mode: string = layer_pass == 0 ? "less" : "equal";
+	let cull_mode: string = (context_raw.cull_backfaces || layer_pass > 0) ? "clockwise" : "none";
+
 	let props: shader_context_t = {
 		name: context_id,
-		depth_write: layer_pass == 0 ? true : false,
-		compare_mode: layer_pass == 0 ? "less" : "equal",
-		cull_mode: (context_raw.cull_backfaces || layer_pass > 0) ? "clockwise" : "none",
+		depth_write: depth_write,
+		compare_mode: compare_mode,
+		cull_mode: cull_mode,
 		vertex_elements: [
 			{
 				name: "pos",
 				data: "short4norm"
 			}
 		],
-		color_attachments: ["RGBA64", "RGBA64", "RGBA64"],
+		color_attachments: [
+			"RGBA64",
+			"RGBA64",
+			"RGBA64"
+		],
 		depth_attachment: "DEPTH32"
 	};
-	let con_mesh = node_shader_context_create(data, props);
 
-	let vert = node_shader_context_make_vert(con_mesh);
-	let frag = node_shader_context_make_frag(con_mesh);
+	let con_mesh: node_shader_context_t = node_shader_context_create(data, props);
+
+	let vert: node_shader_t = node_shader_context_make_vert(con_mesh);
+	let frag: node_shader_t = node_shader_context_make_frag(con_mesh);
 	frag.ins = vert.outs;
 
 	node_shader_add_out(vert, "vec2 tex_coord");
@@ -33,7 +42,8 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	let texture_count: i32 = 0;
 
 	node_shader_add_uniform(vert, "mat4 WVP", "_world_view_proj_matrix");
-	node_shader_add_uniform(vert, "sampler2D texpaint_vert", "_texpaint_vert" + project_layers[0].id);
+	let lid: i32 = project_layers[0].id;
+	node_shader_add_uniform(vert, "sampler2D texpaint_vert", "_texpaint_vert" + lid);
 	node_shader_write(vert, "vec3 meshpos = texelFetch(texpaint_vert, ivec2(gl_VertexID % textureSize(texpaint_vert, 0).x, gl_VertexID / textureSize(texpaint_vert, 0).y), 0).xyz;");
 	// + pos.xyz * 0.000001
 	node_shader_write(vert, "gl_Position = mul(vec4(meshpos.xyz, 1.0), WVP);");
@@ -118,15 +128,15 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	// Get layers for this pass
 	make_mesh_layer_pass_count = 1;
 	let layers: slot_layer_t[] = [];
-	let start_count = texture_count;
+	let start_count: i32 = texture_count;
 	for (let i: i32 = 0; i < project_layers.length; ++i) {
-		let l = project_layers[i];
+		let l: slot_layer_t = project_layers[i];
 		if (!slot_layer_is_layer(l) || !slot_layer_is_visible(l)) {
 			continue;
 		}
 
-		let count = 3;
-		let masks = slot_layer_get_masks(l);
+		let count: i32 = 3;
+		let masks: slot_layer_t[] = slot_layer_get_masks(l);
 		if (masks != null) {
 			count += masks.length;
 		}
@@ -140,25 +150,26 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 		}
 	}
 
-	let last_pass = layer_pass == make_mesh_layer_pass_count - 1;
+	let last_pass: bool = layer_pass == make_mesh_layer_pass_count - 1;
 
 	for (let i: i32 = 0; i < layers.length; ++i) {
-		let l = layers[i];
+		let l: slot_layer_t = layers[i];
 		if (slot_layer_get_object_mask(l) > 0) {
 			node_shader_add_uniform(frag, "int uid", "_uid");
 			if (slot_layer_get_object_mask(l) > project_paint_objects.length) { // Atlas
-				let visibles = project_get_atlas_objects(slot_layer_get_object_mask(l));
+				let visibles: mesh_object_t[] = project_get_atlas_objects(slot_layer_get_object_mask(l));
 				node_shader_write(frag, "if (");
 				for (let i: i32 = 0; i < visibles.length; ++i) {
 					if (i > 0) {
 						node_shader_write(frag, " || ");
 					}
-					node_shader_write(frag, visibles[i].base.uid + " == uid");
+					let uid: i32 = visibles[i].base.uid;
+					node_shader_write(frag, uid + " == uid");
 				}
 				node_shader_write(frag, ") {");
 			}
 			else { // Object mask
-				let uid = project_paint_objects[slot_layer_get_object_mask(l) - 1].base.uid;
+				let uid: i32 = project_paint_objects[slot_layer_get_object_mask(l) - 1].base.uid;
 				node_shader_write(frag, "if (" + uid + " == uid) {");
 			}
 		}
@@ -167,21 +178,21 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 		node_shader_write(frag, "texpaint_sample = vec4(0.8, 0.8, 0.8, 1.0);");
 		node_shader_write(frag, "texpaint_opac = texpaint_sample.a;");
 
-		let masks = slot_layer_get_masks(l);
+		let masks: slot_layer_t[] = slot_layer_get_masks(l);
 		if (masks != null) {
-			let has_visible = false;
+			let has_visible: bool = false;
 			for (let i: i32 = 0; i < masks.length; ++i) {
-				let m = masks[i];
+				let m: slot_layer_t = masks[i];
 				if (slot_layer_is_visible(m)) {
 					has_visible = true;
 					break;
 				}
 			}
 			if (has_visible) {
-				let texpaint_mask = "texpaint_mask" + l.id;
+				let texpaint_mask: string = "texpaint_mask" + l.id;
 				node_shader_write(frag, "float " + texpaint_mask + " = 0.0;");
 				for (let i: i32 = 0; i < masks.length; ++i) {
-					let m = masks[i];
+					let m: slot_layer_t = masks[i];
 					if (!slot_layer_is_visible(m)) continue;
 					node_shader_add_shared_sampler(frag, "sampler2D texpaint" + m.id);
 					node_shader_write(frag, "{"); // Group mask is sampled across multiple layers
@@ -193,7 +204,8 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 		}
 
 		if (slot_layer_get_opacity(l) < 1) {
-			node_shader_write(frag, "texpaint_opac *= " + slot_layer_get_opacity(l) + ";");
+			let opac: f32 = slot_layer_get_opacity(l);
+			node_shader_write(frag, "texpaint_opac *= " + opac + ";");
 		}
 
 		if (l == project_layers[0]) {

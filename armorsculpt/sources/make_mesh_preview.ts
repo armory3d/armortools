@@ -2,7 +2,8 @@
 let make_mesh_preview_opacity_discard_decal: f32 = 0.05;
 
 function make_mesh_preview_run(data: material_t, matcon: material_context_t): node_shader_context_t {
-	let context_id = "mesh";
+	let context_id: string = "mesh";
+
 	let props: shader_context_t = {
 		name: context_id,
 		depth_write: true,
@@ -22,18 +23,23 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 				data: "short2norm"
 			}
 		],
-		color_attachments: ["RGBA64", "RGBA64", "RGBA64"],
+		color_attachments: [
+			"RGBA64",
+			"RGBA64",
+			"RGBA64"
+		],
 		depth_attachment: "DEPTH32"
 	};
-	let con_mesh = node_shader_context_create(data, props);
 
-	let vert = node_shader_context_make_vert(con_mesh);
-	let frag = node_shader_context_make_frag(con_mesh);
+	let con_mesh: node_shader_context_t = node_shader_context_create(data, props);
+
+	let vert: node_shader_t = node_shader_context_make_vert(con_mesh);
+	let frag: node_shader_t = node_shader_context_make_frag(con_mesh);
 	frag.ins = vert.outs;
-	let pos = "pos";
+	let pos: string = "pos";
 
 	///if arm_skin
-	let skin = mesh_data_get_vertex_array(context_raw.paint_object.data, "bone") != null;
+	let skin: bool = mesh_data_get_vertex_array(context_raw.paint_object.data, "bone") != null;
 	if (skin) {
 		pos = "spos";
 		node_shader_context_add_elem(con_mesh, "bone", "short4norm");
@@ -55,11 +61,12 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 	node_shader_add_uniform(vert, "mat4 WVP", "_world_view_proj_matrix");
 	node_shader_write_attrib(vert, "gl_Position = mul(vec4(" + pos + ".xyz, 1.0), WVP);");
 
-	let brush_scale = (context_raw.brush_scale * context_raw.brush_nodes_scale) + "";
+	let sc: f32 = context_raw.brush_scale * context_raw.brush_nodes_scale;
+	let brush_scale: string = sc + "";
 	node_shader_add_out(vert, "vec2 tex_coord");
 	node_shader_write_attrib(vert, "tex_coord = tex * float(" + brush_scale + ");");
 
-	let decal = context_raw.decal_preview;
+	let decal: bool = context_raw.decal_preview;
 	parser_material_sample_keep_aspect = decal;
 	parser_material_sample_uv_scale = brush_scale;
 	parser_material_parse_height = make_material_height_used;
@@ -100,7 +107,7 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 		}
 	}
 	if (decal) {
-		let opac = make_mesh_preview_opacity_discard_decal;
+		let opac: f32 = make_mesh_preview_opacity_discard_decal;
 		node_shader_write(frag, "if (opacity < " + opac + ") discard;");
 	}
 

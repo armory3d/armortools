@@ -4,15 +4,15 @@ let tab_layers_layer_name_handle: zui_handle_t = zui_handle_create();
 let tab_layers_show_context_menu: bool = false;
 
 function tab_layers_draw(htab: zui_handle_t) {
-	let mini = config_raw.layout[layout_size_t.SIDEBAR_W] <= ui_base_sidebar_mini_w;
+	let mini: bool = config_raw.layout[layout_size_t.SIDEBAR_W] <= ui_base_sidebar_mini_w;
 	mini ? tab_layers_draw_mini(htab) : tab_layers_draw_full(htab);
 }
 
 function tab_layers_draw_mini(htab: zui_handle_t) {
-	let ui = ui_base_ui;
+	let ui: zui_t = ui_base_ui;
 	zui_set_hovered_tab_name(tr("Layers"));
 
-	let _ELEMENT_H = ui.ops.theme.ELEMENT_H;
+	let _ELEMENT_H: i32 = ui.ops.theme.ELEMENT_H;
 	ui.ops.theme.ELEMENT_H = math_floor(ui_base_sidebar_mini_w / 2 / zui_SCALE(ui));
 
 	zui_begin_sticky();
@@ -31,7 +31,7 @@ function tab_layers_draw_mini(htab: zui_handle_t) {
 }
 
 function tab_layers_draw_full(htab: zui_handle_t) {
-	let ui = ui_base_ui;
+	let ui: zui_t = ui_base_ui;
 	if (zui_tab(htab, tr("Layers"))) {
 		zui_begin_sticky();
 		let row: f32[] = [1 / 4, 3 / 4];
@@ -53,16 +53,16 @@ function tab_layers_draw_slots(mini: bool) {
 		if (i >= project_layers.length) {
 			break; // Layer was deleted
 		}
-		let j = project_layers.length - 1 - i;
-		let l = project_layers[j];
+		let j: i32 = project_layers.length - 1 - i;
+		let l: slot_layer_t = project_layers[j];
 		tab_layers_draw_layer_slot(l, j, mini);
 	}
 }
 
 function tab_layers_highlight_odd_lines() {
-	let ui = ui_base_ui;
-	let step = ui.ops.theme.ELEMENT_H * 2;
-	let full_h = ui._window_h - ui_base_hwnds[0].scroll_offset;
+	let ui: zui_t = ui_base_ui;
+	let step: i32 = ui.ops.theme.ELEMENT_H * 2;
+	let full_h: i32 = ui._window_h - ui_base_hwnds[0].scroll_offset;
 	for (let i: i32 = 0; i < math_floor(full_h / step); ++i) {
 		if (i % 2 == 0) {
 			zui_fill(0, i * step, (ui._w / zui_SCALE(ui) - 2), step, ui.ops.theme.WINDOW_BG_COL - 0x00040404);
@@ -71,10 +71,10 @@ function tab_layers_highlight_odd_lines() {
 }
 
 function tab_layers_button_new(text: string) {
-	let ui = ui_base_ui;
+	let ui: zui_t = ui_base_ui;
 	if (zui_button(text)) {
 		ui_menu_draw(function (ui: zui_t) {
-			let l = context_raw.layer;
+			let l: slot_layer_t = context_raw.layer;
 			if (ui_menu_button(ui, tr("Paint Layer"))) {
 				base_new_layer();
 				history_new_layer();
@@ -84,20 +84,20 @@ function tab_layers_button_new(text: string) {
 }
 
 function tab_layers_combo_filter() {
-	let ui = ui_base_ui;
-	let ar = [tr("All")];
-	let filter_handle = zui_handle(__ID__);
+	let ui: zui_t = ui_base_ui;
+	let ar: string[] = [tr("All")];
+	let filter_handle: zui_handle_t = zui_handle(__ID__);
 	filter_handle.position = context_raw.layer_filter;
 	context_raw.layer_filter = zui_combo(filter_handle, ar, tr("Filter"), false, zui_align_t.LEFT);
 }
 
 function tab_layers_remap_layer_pointers(nodes: zui_node_t[], pointer_map: map_t<i32, i32>) {
 	for (let i: i32 = 0; i < nodes.length; ++i) {
-		let n = nodes[i];
+		let n: zui_node_t = nodes[i];
 		if (n.type == "LAYER" || n.type == "LAYER_MASK") {
-			let i = n.buttons[0].default_value;
-			if (map_get(pointer_map, i) != null) {
-				n.buttons[0].default_value = map_get(pointer_map, i);
+			let i: i32 = n.buttons[0].default_value[0];
+			if (map_get(pointer_map, i) != -1) {
+				n.buttons[0].default_value[0] = map_get(pointer_map, i);
 			}
 		}
 	}
@@ -115,7 +115,7 @@ function tab_layers_fill_layer_map(map: map_t<slot_layer_t, i32>): map_t<i32, i3
 	let res: map_t<i32, i32> = map_create();
 	let keys: string[] = map_keys(map);
 	for (let i: i32 = 0; i < keys.length; ++i) {
-		let l = keys[i];
+		let l: string = keys[i];
 		map_set(res, map_get(map, l), array_index_of(project_layers, l) > -1 ? array_index_of(project_layers, l) : 9999);
 	}
 	return res;
@@ -129,7 +129,7 @@ function tab_layers_set_drag_layer(layer: slot_layer_t, off_x: f32, off_y: f32) 
 }
 
 function tab_layers_draw_layer_slot(l: slot_layer_t, i: i32, mini: bool) {
-	let ui = ui_base_ui;
+	let ui: zui_t = ui_base_ui;
 
 	if (context_raw.layer_filter > 0 &&
 		slot_layer_get_object_mask(l) > 0 &&
@@ -144,21 +144,21 @@ function tab_layers_draw_layer_slot(l: slot_layer_t, i: i32, mini: bool) {
 		return;
 	}
 
-	let step = ui.ops.theme.ELEMENT_H;
-	let checkw = (ui._window_w / 100 * 8) / zui_SCALE(ui);
+	let step: i32 = ui.ops.theme.ELEMENT_H;
+	let checkw: i32 = (ui._window_w / 100 * 8) / zui_SCALE(ui);
 
 	// Highlight drag destination
-	let absy = ui._window_y + ui._y;
+	let absy: i32 = ui._window_y + ui._y;
 	if (base_is_dragging && base_drag_layer != null && context_in_layers()) {
 		if (mouse_y > absy + step && mouse_y < absy + step * 3) {
-			let down = array_index_of(project_layers, base_drag_layer) >= i;
+			let down: bool = array_index_of(project_layers, base_drag_layer) >= i;
 			context_raw.drag_dest = down ? i : i - 1;
 
-			let ls = project_layers;
-			let dest = context_raw.drag_dest;
-			let toGroup = down ? dest > 0 && ls[dest - 1].parent != null && ls[dest - 1].parent.show_panel : dest < ls.length && ls[dest].parent != null && ls[dest].parent.show_panel;
-			let nestedGroup = slot_layer_is_group(base_drag_layer) && toGroup;
-			if (!nestedGroup) {
+			let ls: slot_layer_t[] = project_layers;
+			let dest: i32 = context_raw.drag_dest;
+			let to_group: bool = down ? dest > 0 && ls[dest - 1].parent != null && ls[dest - 1].parent.show_panel : dest < ls.length && ls[dest].parent != null && ls[dest].parent.show_panel;
+			let nested_group: bool = slot_layer_is_group(base_drag_layer) && to_group;
+			if (!nested_group) {
 				if (slot_layer_can_move(context_raw.layer, context_raw.drag_dest)) {
 					zui_fill(checkw, step * 2, (ui._window_w / zui_SCALE(ui) - 2) - checkw, 2 * zui_SCALE(ui), ui.ops.theme.HIGHLIGHT_COL);
 				}
@@ -196,12 +196,12 @@ function tab_layers_draw_layer_slot(l: slot_layer_t, i: i32, mini: bool) {
 }
 
 function tab_layers_draw_layer_slot_mini(l: slot_layer_t, i: i32) {
-	let ui = ui_base_ui;
+	let ui: zui_t = ui_base_ui;
 
 	let row: f32[] = [1, 1];
 	zui_row(row);
-	let uix = ui._x;
-	let uiy = ui._y;
+	let uix: i32 = ui._x;
+	let uiy: i32 = ui._y;
 	_zui_end_element();
 	_zui_end_element();
 
@@ -210,12 +210,12 @@ function tab_layers_draw_layer_slot_mini(l: slot_layer_t, i: i32) {
 }
 
 function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
-	let ui = ui_base_ui;
+	let ui: zui_t = ui_base_ui;
 
-	let step = ui.ops.theme.ELEMENT_H;
+	let step: i32 = ui.ops.theme.ELEMENT_H;
 
-	let hasPanel = slot_layer_is_group(l) || (slot_layer_is_layer(l) && slot_layer_get_masks(l, false) != null);
-	if (hasPanel) {
+	let has_panel: bool = slot_layer_is_group(l) || (slot_layer_is_layer(l) && slot_layer_get_masks(l, false) != null);
+	if (has_panel) {
 		let row: f32[] = [8 / 100, 52 / 100, 30 / 100, 10 / 100];
 		zui_row(row);
 	}
@@ -225,15 +225,15 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	}
 
 	// Draw eye icon
-	let icons = resource_get("icons.k");
-	let r = resource_tile18(icons, l.visible ? 0 : 1, 0);
-	let center = (step / 2) * zui_SCALE(ui);
+	let icons: image_t = resource_get("icons.k");
+	let r: rect_t = resource_tile18(icons, l.visible ? 0 : 1, 0);
+	let center: i32 = (step / 2) * zui_SCALE(ui);
 	ui._x += 2;
 	ui._y += 3;
 	ui._y += center;
-	let col = ui.ops.theme.ACCENT_SELECT_COL;
-	let parentHidden = l.parent != null && (!l.parent.visible || (l.parent.parent != null && !l.parent.parent.visible));
-	if (parentHidden) {
+	let col: i32 = ui.ops.theme.ACCENT_SELECT_COL;
+	let parent_hidden: bool = l.parent != null && (!l.parent.visible || (l.parent.parent != null && !l.parent.parent.visible));
+	if (parent_hidden) {
 		col -= 0x99000000;
 	}
 
@@ -244,8 +244,8 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	ui._y -= 3;
 	ui._y -= center;
 
-	let uix = ui._x;
-	let uiy = ui._y;
+	let uix: i32 = ui._x;
+	let uiy: i32 = ui._y;
 
 	// Draw layer name
 	ui._y += center;
@@ -275,9 +275,9 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 			}
 		}
 
-		let state = zui_text(l.name);
+		let state: zui_state_t = zui_text(l.name);
 		if (state == zui_state_t.RELEASED) {
-			let td = time_time() - context_raw.select_time;
+			let td: f32 = time_time() - context_raw.select_time;
 			if (td < 0.2 && td > 0.0) {
 				tab_layers_layer_name_edit = l.id;
 				tab_layers_layer_name_handle.text = l.name;
@@ -285,8 +285,8 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 			}
 		}
 
-		// let in_focus = ui.inputX > ui._windowX && ui.inputX < ui._windowX + ui._windowW &&
-		// 			  ui.inputY > ui._windowY && ui.inputY < ui._windowY + ui._windowH;
+		// let in_focus: bool = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
+		// 			  ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
 		// if (in_focus && ui.is_delete_down && can_delete(context_raw.layer)) {
 		// 	ui.is_delete_down = false;
 		// 	let _init() = function () {
@@ -320,9 +320,9 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 		}
 	}
 
-	if (hasPanel) {
+	if (has_panel) {
 		ui._y += center;
-		let layer_panel = zui_nest(zui_handle(__ID__), l.id);
+		let layer_panel: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
 		layer_panel.selected = l.show_panel;
 		l.show_panel = zui_panel(layer_panel, "", true, false);
 		ui._y -= center;
@@ -335,7 +335,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	else {
 		ui._y -= zui_ELEMENT_OFFSET(ui);
 
-		let row: f32 = [8 / 100, 16 / 100, 36 / 100, 30 / 100, 10 / 100];
+		let row: f32[] = [8 / 100, 16 / 100, 36 / 100, 30 / 100, 10 / 100];
 		zui_row(row);
 		_zui_end_element();
 		_zui_end_element();
@@ -356,8 +356,8 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 }
 
 function tab_layers_combo_object(ui: zui_t, l: slot_layer_t, label: bool = false): zui_handle_t {
-	let ar = [tr("Shared")];
-	let object_handle = zui_nest(zui_handle(__ID__), l.id);
+	let ar: string[] = [tr("Shared")];
+	let object_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
 	object_handle.position = l.object_mask;
 	l.object_mask = zui_combo(object_handle, ar, tr("Object"), label, zui_align_t.LEFT);
 	return object_handle;
@@ -370,8 +370,8 @@ function tab_layers_layer_toggle_visible(l: slot_layer_t) {
 }
 
 function tab_layers_draw_layer_highlight(l: slot_layer_t, mini: bool) {
-	let ui = ui_base_ui;
-	let step = ui.ops.theme.ELEMENT_H;
+	let ui: zui_t = ui_base_ui;
+	let step: i32 = ui.ops.theme.ELEMENT_H;
 
 	// Separator line
 	zui_fill(0, 0, (ui._w / zui_SCALE(ui) - 2), 1 * zui_SCALE(ui), ui.ops.theme.SEPARATOR_COL);
@@ -388,7 +388,7 @@ function tab_layers_draw_layer_highlight(l: slot_layer_t, mini: bool) {
 }
 
 function tab_layers_can_merge_down(l: slot_layer_t) : bool {
-	let index = array_index_of(project_layers, l);
+	let index: i32 = array_index_of(project_layers, l);
 	// Lowest layer
 	if (index == 0) {
 		return false;

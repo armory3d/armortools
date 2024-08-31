@@ -2,11 +2,16 @@
 let make_mesh_layer_pass_count: i32 = 1;
 
 function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_context_t {
+
+	let depth_write: bool = layer_pass == 0 ? true : false;
+	let compare_mode: string = layer_pass == 0 ? "less" : "equal";
+	let cull_mode: string = (context_raw.cull_backfaces || layer_pass > 0) ? "clockwise" : "none";
+
 	let props: shader_context_t = {
 		name: "mesh",
-		depth_write: layer_pass == 0 ? true : false,
-		compare_mode: layer_pass == 0 ? "less" : "equal",
-		cull_mode: (context_raw.cull_backfaces || layer_pass > 0) ? "clockwise" : "none",
+		depth_write: depth_write,
+		compare_mode: compare_mode,
+		cull_mode: cull_mode,
 		vertex_elements: [
 			{
 				name: "pos",
@@ -21,13 +26,17 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 				data: "short2norm"
 			}
 		],
-		color_attachments: ["RGBA64", "RGBA64", "RGBA64"],
+		color_attachments: [
+			"RGBA64",
+			"RGBA64",
+			"RGBA64"
+		],
 		depth_attachment: "DEPTH32"
 	};
-	let con_mesh = node_shader_context_create(data, props);
+	let con_mesh: node_shader_context_t = node_shader_context_create(data, props);
 
-	let vert = node_shader_context_make_vert(con_mesh);
-	let frag = node_shader_context_make_frag(con_mesh);
+	let vert: node_shader_t = node_shader_context_make_vert(con_mesh);
+	let frag: node_shader_t = node_shader_context_make_frag(con_mesh);
 	frag.ins = vert.outs;
 
 	node_shader_add_out(vert, "vec2 tex_coord");
@@ -38,16 +47,16 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	vert.wposition = true;
 
 	let texture_count: i32 = 0;
-	let displace_strength = make_material_get_displace_strength();
+	let displace_strength: f32 = make_material_get_displace_strength();
 	if (make_material_height_used && displace_strength > 0.0) {
 		vert.n = true;
 		node_shader_write(vert, "float height = 0.0;");
-		let num_layers = 1;
+		let num_layers: i32 = 1;
 		node_shader_write(vert, "wposition += wnormal * vec3(height, height, height) * vec3(" + displace_strength +", " + displace_strength + ", " + displace_strength + ");");
 	}
 
 	node_shader_write(vert, "gl_Position = mul(vec4(wposition.xyz, 1.0), VP);");
-	let brush_scale = context_raw.brush_scale;
+	let brush_scale: f32 = context_raw.brush_scale;
 	node_shader_add_uniform(vert, "float tex_scale", "_tex_unpack");
 	node_shader_write(vert, "tex_coord = tex * " + brush_scale + " * tex_scale;");
 	if (make_material_height_used && displace_strength > 0) {
@@ -115,7 +124,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	node_shader_write(frag, "height = texpaint_pack_sample.a * texpaint_opac;");
 
 	// if (l.paint_height && height_used) {
-	// 	let assign = l.paint_height_blend ? "+=" : "=";
+	// 	let assign: string = l.paint_height_blend ? "+=" : "=";
 	// 	node_shader_write(frag, "height " + assign + " texpaint_pack_sample.a * texpaint_opac;");
 	// 	node_shader_write(frag, "{");
 	// 	node_shader_add_uniform(frag, "vec2 texpaint_size", "_texpaint_size");

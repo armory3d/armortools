@@ -17,7 +17,7 @@ function brush_output_node_create(arg: any): brush_output_node_t {
 
 	if (brush_output_node_inst == null) {
 		{
-			let t = render_target_create();
+			let t: render_target_t = render_target_create();
 			t.name = "texpaint";
 			t.width = config_get_texture_res_x();
 			t.height = config_get_texture_res_y();
@@ -25,7 +25,7 @@ function brush_output_node_create(arg: any): brush_output_node_t {
 			n.texpaint = render_path_create_render_target(t)._image;
 		}
 		{
-			let t = render_target_create();
+			let t: render_target_t = render_target_create();
 			t.name = "texpaint_nor";
 			t.width = config_get_texture_res_x();
 			t.height = config_get_texture_res_y();
@@ -33,7 +33,7 @@ function brush_output_node_create(arg: any): brush_output_node_t {
 			n.texpaint_nor = render_path_create_render_target(t)._image;
 		}
 		{
-			let t = render_target_create();
+			let t: render_target_t = render_target_create();
 			t.name = "texpaint_pack";
 			t.width = config_get_texture_res_x();
 			t.height = config_get_texture_res_y();
@@ -41,7 +41,7 @@ function brush_output_node_create(arg: any): brush_output_node_t {
 			n.texpaint_pack = render_path_create_render_target(t)._image;
 		}
 		{
-			let t = render_target_create();
+			let t: render_target_t = render_target_create();
 			t.name = "texpaint_nor_empty";
 			t.width = 1;
 			t.height = 1;
@@ -49,7 +49,7 @@ function brush_output_node_create(arg: any): brush_output_node_t {
 			n.texpaint_nor_empty = render_path_create_render_target(t)._image;
 		}
 		{
-			let t = render_target_create();
+			let t: render_target_t = render_target_create();
 			t.name = "texpaint_pack_empty";
 			t.width = 1;
 			t.height = 1;

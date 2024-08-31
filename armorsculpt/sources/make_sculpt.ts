@@ -1,11 +1,11 @@
 
 function make_sculpt_run(data: material_t, matcon: material_context_t): node_shader_context_t {
-	let context_id = "paint";
+	let context_id: string = "paint";
+
 	let props: shader_context_t = {
 		name: context_id,
 		depth_write: false,
-		compare_mode: "always", // TODO: align texcoords winding order
-		// cull_mode: "counter_clockwise",
+		compare_mode: "always",
 		cull_mode: "none",
 		vertex_elements: [
 			{
@@ -13,9 +13,14 @@ function make_sculpt_run(data: material_t, matcon: material_context_t): node_sha
 				data: "float2"
 			}
 		],
-		color_attachments: ["RGBA32", "RGBA32", "RGBA32", "R8"]
+		color_attachments: [
+			"RGBA32",
+			"RGBA32",
+			"RGBA32",
+			"R8"
+		]
 	};
-	let con_paint = node_shader_context_create(data, props);
+	let con_paint: node_shader_context_t = node_shader_context_create(data, props);
 
 	con_paint.data.color_writes_red = [true, true, true, true];
 	con_paint.data.color_writes_green = [true, true, true, true];
@@ -23,12 +28,12 @@ function make_sculpt_run(data: material_t, matcon: material_context_t): node_sha
 	con_paint.data.color_writes_alpha = [true, true, true, true];
 	con_paint.allow_vcols = mesh_data_get_vertex_array(context_raw.paint_object.data, "col") != null;
 
-	let vert = node_shader_context_make_vert(con_paint);
-	let frag = node_shader_context_make_frag(con_paint);
+	let vert: node_shader_t = node_shader_context_make_vert(con_paint);
+	let frag: node_shader_t = node_shader_context_make_frag(con_paint);
 	frag.ins = vert.outs;
 
-	let face_fill = context_raw.tool == workspace_tool_t.FILL && context_raw.fill_type_handle.position == fill_type_t.FACE;
-	let decal = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
+	let face_fill: bool = context_raw.tool == workspace_tool_t.FILL && context_raw.fill_type_handle.position == fill_type_t.FACE;
+	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
 
 	node_shader_add_out(vert, "vec2 tex_coord");
 	node_shader_write(vert, "const vec2 madd = vec2(0.5, 0.5);");
@@ -57,7 +62,7 @@ function make_sculpt_run(data: material_t, matcon: material_context_t): node_sha
 		context_raw.tool == workspace_tool_t.PARTICLE ||
 		decal) {
 
-		let depth_reject = !context_raw.xray;
+		let depth_reject: bool = !context_raw.xray;
 
 		make_brush_run(vert, frag);
 	}

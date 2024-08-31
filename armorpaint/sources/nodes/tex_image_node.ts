@@ -87,7 +87,7 @@ let tex_image_node_def: zui_node_t = {
 			type: "ENUM",
 			output: -1,
 			default_value: f32_array_create_x(0),
-			data: u8_array_create_from_string("linear\0srgb"),
+			data: u8_array_create_from_string("linear\nsrgb"),
 			min: 0.0,
 			max: 1.0,
 			precision: 100,

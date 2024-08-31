@@ -1,19 +1,20 @@
 
 let ui_nodes_ext_last_vertices: buffer_t = null; // Before displacement
 
+function ui_nodes_ext_delay_idle_sleep() {
+	krom_delay_idle_sleep();
+}
+
 function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
-	let ui = ui_nodes_ui;
+	let ui: zui_t = ui_nodes_ui;
 	if (zui_button(tr("Run"))) {
 
-		let delay_idle_sleep = function () {
-			krom_delay_idle_sleep();
-		}
-		app_notify_on_render_2d(delay_idle_sleep);
+		app_notify_on_render_2d(ui_nodes_ext_delay_idle_sleep);
 
 		console_progress(tr("Processing"));
 		krom_g4_swap_buffers();
 
-		let timer = time_time();
+		let timer: f32 = time_time();
 		parser_logic_parse(project_canvas);
 
 		photo_to_pbr_node_cached_source = null;
@@ -24,14 +25,14 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 		let texheight: image_t = logic_node_get_as_image(brush_output_node_inst.base, channel_type_t.HEIGHT);
 
 		if (texbase != null) {
-			let texpaint = map_get(render_path_render_targets, "texpaint")._image;
+			let texpaint: image_t = map_get(render_path_render_targets, "texpaint")._image;
 			g2_begin(texpaint);
 			g2_draw_scaled_image(texbase, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
 			g2_end();
 		}
 
 		if (texnor != null) {
-			let texpaint_nor = map_get(render_path_render_targets, "texpaint_nor")._image;
+			let texpaint_nor: image_t = map_get(render_path_render_targets, "texpaint_nor")._image;
 			g2_begin(texpaint_nor);
 			g2_draw_scaled_image(texnor, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
 			g2_end();
@@ -47,7 +48,7 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 			const_data_create_screen_aligned_data();
 		}
 
-		let texpaint_pack = map_get(render_path_render_targets, "texpaint_pack")._image;
+		let texpaint_pack: image_t = map_get(render_path_render_targets, "texpaint_pack")._image;
 
 		if (texocc != null) {
 			g2_begin(texpaint_pack);
@@ -78,9 +79,9 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 				brush_output_node_inst.base.inputs[channel_type_t.HEIGHT].node.get != float_node_get) {
 
 				// Make copy of vertices before displacement
-				let o = project_paint_objects[0];
-				let g = o.data;
-				let vertices = g4_vertex_buffer_lock(g._.vertex_buffer);
+				let o: mesh_object_t = project_paint_objects[0];
+				let g: mesh_data_t = o.data;
+				let vertices: buffer_t = g4_vertex_buffer_lock(g._.vertex_buffer);
 				if (ui_nodes_ext_last_vertices == null || ui_nodes_ext_last_vertices.length != vertices.length) {
 					ui_nodes_ext_last_vertices = buffer_create(vertices.length);
 					for (let i: i32 = 0; i < math_floor((vertices.length) / 2); ++i) {
@@ -99,7 +100,7 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 					console_progress(tr("Apply Displacement"));
 					krom_g4_swap_buffers();
 
-					let uv_scale = scene_meshes[0].data.scale_tex * context_raw.brush_scale;
+					let uv_scale: f32 = scene_meshes[0].data.scale_tex * context_raw.brush_scale;
 					util_mesh_apply_displacement(texpaint_pack, 0.05 * config_raw.displace_strength, uv_scale);
 					util_mesh_calc_normals();
 				}
@@ -111,7 +112,7 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 
 		console_progress(null);
 		context_raw.ddirty = 2;
-		app_remove_render_2d(delay_idle_sleep);
+		app_remove_render_2d(ui_nodes_ext_delay_idle_sleep);
 
 		///if (krom_direct3d12 || krom_vulkan || krom_metal)
 		render_path_raytrace_ready = false;

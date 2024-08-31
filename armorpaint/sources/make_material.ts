@@ -201,7 +201,9 @@ function make_material_make_voxel(m: material_data_t) {
 ///end
 
 function make_material_parse_paint_material(bake_previews: bool = true) {
-	if (!make_material_get_mout()) return;
+	if (!make_material_get_mout()) {
+		return;
+	}
 
 	if (bake_previews) {
 		let current: image_t = _g2_current;
@@ -310,13 +312,13 @@ function make_material_bake_node_preview(node: zui_node_t, group: zui_node_canva
 		let id: string = parser_material_node_name(node, parents);
 		let image: image_t = map_get(context_raw.node_previews, id);
 		array_push(context_raw.node_previews_used, id);
-		let resX: i32 = math_floor(config_get_texture_res_x() / 4);
-		let resY: i32 = math_floor(config_get_texture_res_y() / 4);
-		if (image == null || image.width != resX || image.height != resY) {
+		let res_x: i32 = math_floor(config_get_texture_res_x() / 4);
+		let res_y: i32 = math_floor(config_get_texture_res_y() / 4);
+		if (image == null || image.width != res_x || image.height != res_y) {
 			if (image != null) {
 				image_unload(image);
 			}
-			image = image_create_render_target(resX, resY);
+			image = image_create_render_target(res_x, res_y);
 			map_set(context_raw.node_previews, id, image);
 		}
 
@@ -328,11 +330,11 @@ function make_material_bake_node_preview(node: zui_node_t, group: zui_node_canva
 		let id: string = parser_material_node_name(node, parents);
 		let image: image_t = map_get(context_raw.node_previews, id);
 		array_push(context_raw.node_previews_used, id);
-		let resX: i32 = math_floor(config_get_texture_res_x());
-		let resY: i32 = math_floor(config_get_texture_res_y());
-		if (image == null || image.width != resX || image.height != resY) {
+		let res_x: i32 = math_floor(config_get_texture_res_x());
+		let res_y: i32 = math_floor(config_get_texture_res_y());
+		if (image == null || image.width != res_x || image.height != res_y) {
 			if (image != null) image_unload(image);
-			image = image_create_render_target(resX, resY);
+			image = image_create_render_target(res_x, res_y);
 			map_set(context_raw.node_previews, id, image);
 		}
 
@@ -344,11 +346,11 @@ function make_material_bake_node_preview(node: zui_node_t, group: zui_node_canva
 		let id: string = parser_material_node_name(node, parents);
 		let image: image_t = map_get(context_raw.node_previews, id);
 		array_push(context_raw.node_previews_used, id);
-		let resX: i32 = math_floor(config_get_texture_res_x());
-		let resY: i32 = math_floor(config_get_texture_res_y());
-		if (image == null || image.width != resX || image.height != resY) {
+		let res_x: i32 = math_floor(config_get_texture_res_x());
+		let res_y: i32 = math_floor(config_get_texture_res_y());
+		if (image == null || image.width != res_x || image.height != res_y) {
 			if (image != null) image_unload(image);
-			image = image_create_render_target(resX, resY, tex_format_t.R8);
+			image = image_create_render_target(res_x, res_y, tex_format_t.R8);
 			map_set(context_raw.node_previews, id, image);
 		}
 

@@ -1493,7 +1493,7 @@ function base_make_temp_img() {
 	let l: slot_layer_t = project_layers[0];
 	///end
 	///if is_lab
-	let l: any = brush_output_node_inst;
+	let l: brush_output_node_t = brush_output_node_inst;
 	///end
 
 	if (base_temp_image != null && (base_temp_image.width != l.texpaint.width || base_temp_image.height != l.texpaint.height || base_temp_image.format != l.texpaint.format)) {
@@ -1544,7 +1544,7 @@ function base_make_export_img() {
 	let l: slot_layer_t = project_layers[0];
 	///end
 	///if is_lab
-	let l: any = brush_output_node_inst;
+	let l: brush_output_node_t = brush_output_node_inst;
 	///end
 
 	if (base_expa != null && (base_expa.width != l.texpaint.width || base_expa.height != l.texpaint.height || base_expa.format != l.texpaint.format)) {

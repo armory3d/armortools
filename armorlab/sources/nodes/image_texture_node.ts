@@ -14,8 +14,8 @@ function image_texture_node_create(arg: any): image_texture_node_t {
 }
 
 function image_texture_node_get_as_image(self: image_texture_node_t, from: i32): image_t {
-	let index = array_index_of(project_asset_names, self.file);
-	let asset = project_assets[index];
+	let index: i32 = array_index_of(project_asset_names, self.file);
+	let asset: asset_t = project_assets[index];
 	return project_get_image(asset);
 }
 
@@ -88,7 +88,7 @@ let image_texture_node_def: zui_node_t = {
 			type: "ENUM",
 			output: -1,
 			default_value: f32_array_create_x(0),
-			data: u8_array_create_from_string("linear\0srgb"),
+			data: u8_array_create_from_string("linear\nsrgb"),
 			min: 0.0,
 			max: 1.0,
 			precision: 100,

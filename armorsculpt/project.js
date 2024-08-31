@@ -8,6 +8,7 @@ project.addDefine("is_sculpt");
 project.addProject("../base");
 
 project.addSources("../armorpaint/sources");
+project.addSources("../armorpaint/sources/nodes");
 project.addSources("sources");
 project.addSources("sources/nodes");
 project.addShaders("shaders/*.glsl", { embed: flags.embed });

@@ -1,11 +1,3 @@
-/// <reference path="./nodes/image_texture_node.ts"/>
-/// <reference path="./nodes/rgb_node.ts"/>
-/// <reference path="./nodes/inpaint_node.ts"/>
-/// <reference path="./nodes/photo_to_pbr_node.ts"/>
-/// <reference path="./nodes/text_to_photo_node.ts"/>
-/// <reference path="./nodes/tiling_node.ts"/>
-/// <reference path="./nodes/upscale_node.ts"/>
-/// <reference path="./nodes/variance_node.ts"/>
 
 let nodes_brush_categories: string[] = [_tr("Input"), _tr("Model")];
 
@@ -45,13 +37,13 @@ function nodes_brush_init() {
 
 function nodes_brush_create_node(node_type: string): zui_node_t {
 	for (let i: i32 = 0; i < nodes_brush_list.length; ++i) {
-		let c = nodes_brush_list[i];
+		let c: node_list_t = nodes_brush_list[i];
 		for (let j: i32 = 0; j < c.length; ++j) {
-			let n = c[j];
+			let n: zui_node_t = c[j];
 			if (n.type == node_type) {
-				let canvas = project_canvas;
-				let nodes = project_nodes;
-				let node = ui_nodes_make_node(n, nodes, canvas);
+				let canvas: zui_node_canvas_t = project_canvas;
+				let nodes: zui_nodes_t = project_nodes;
+				let node: zui_node_t = ui_nodes_make_node(n, nodes, canvas);
 				array_push(canvas.nodes, node);
 				return node;
 			}

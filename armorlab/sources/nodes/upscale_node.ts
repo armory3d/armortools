@@ -25,7 +25,7 @@ function upscale_node_get_as_image(self: upscale_node_t, from: i32): image_t {
 	if (upscale_node_image.width < config_get_texture_res_x()) {
 		upscale_node_image = upscale_node_esrgan(upscale_node_image);
 		while (upscale_node_image.width < config_get_texture_res_x()) {
-			let last_image = upscale_node_image;
+			let last_image: image_t = upscale_node_image;
 			upscale_node_image = upscale_node_esrgan(upscale_node_image);
 			image_unload(last_image);
 		}
@@ -43,10 +43,10 @@ function upscale_node_get_cached_image(self: upscale_node_t): image_t {
 
 function upscale_node_do_tile(source: image_t) {
 	let result: image_t = null;
-	let size1w = source.width;
-	let size1h = source.height;
-	let size2w = math_floor(size1w * 2);
-	let size2h = math_floor(size1h * 2);
+	let size1w: i32 = source.width;
+	let size1h: i32 = source.height;
+	let size2w: i32 = math_floor(size1w * 2);
+	let size2h: i32 = math_floor(size1h * 2);
 	if (upscale_node_temp != null) {
 		image_unload(upscale_node_temp);
 	}
@@ -55,17 +55,17 @@ function upscale_node_do_tile(source: image_t) {
 	g2_draw_scaled_image(source, 0, 0, size1w, size1h);
 	g2_end();
 
-	let bytes_img = image_get_pixels(upscale_node_temp);
-	let u8a = bytes_img;
-	let f32a = f32_array_create(3 * size1w * size1h);
+	let bytes_img: buffer_t = image_get_pixels(upscale_node_temp);
+	let u8a: u8_array_t = bytes_img;
+	let f32a: f32_array_t = f32_array_create(3 * size1w * size1h);
 	for (let i: i32 = 0; i < (size1w * size1h); ++i) {
 		f32a[i                      ] = (u8a[i * 4    ] / 255);
 		f32a[i + size1w * size1w    ] = (u8a[i * 4 + 1] / 255);
 		f32a[i + size1w * size1w * 2] = (u8a[i * 4 + 2] / 255);
 	}
 
-	let esrgan2x_buf = krom_ml_inference(upscale_node_esrgan_blob, [f32a.buffer], [[1, 3, size1w, size1h]], [1, 3, size2w, size2h], config_raw.gpu_inference);
-	let esrgan2x = f32_array_create_from_buffer(esrgan2x_buf);
+	let esrgan2x_buf: buffer_t = krom_ml_inference(upscale_node_esrgan_blob, [f32a.buffer], [[1, 3, size1w, size1h]], [1, 3, size2w, size2h], config_raw.gpu_inference);
+	let esrgan2x: f32_array_t = f32_array_create_from_buffer(esrgan2x_buf);
 	for (let i: i32 = 0; i < esrgan2x.length; ++i) {
 		if (esrgan2x[i] < 0) {
 			esrgan2x[i] = 0;
@@ -89,16 +89,16 @@ function upscale_node_do_tile(source: image_t) {
 
 function upscale_node_esrgan(source: image_t): image_t {
 	let result: image_t = null;
-	let size1w = source.width;
-	let size1h = source.height;
-	let tile_size = 512;
-	let tile_size2x = math_floor(tile_size * 2);
+	let size1w: i32 = source.width;
+	let size1h: i32 = source.height;
+	let tile_size: i32 = 512;
+	let tile_size2x: i32 = math_floor(tile_size * 2);
 
 	if (size1w >= tile_size2x || size1h >= tile_size2x) { // Split into tiles
-		let size2w = math_floor(size1w * 2);
-		let size2h = math_floor(size1h * 2);
+		let size2w: i32 = math_floor(size1w * 2);
+		let size2h: i32 = math_floor(size1h * 2);
 		result = image_create_render_target(size2w, size2h);
-		let tile_source = image_create_render_target(tile_size + 32 * 2, tile_size + 32 * 2);
+		let tile_source: image_t = image_create_render_target(tile_size + 32 * 2, tile_size + 32 * 2);
 		for (let x: i32 = 0; x < math_floor(size1w / tile_size); ++x) {
 			for (let y: i32 = 0; y < math_floor(size1h / tile_size); ++y) {
 				g2_begin(tile_source);
@@ -110,11 +110,11 @@ function upscale_node_esrgan(source: image_t): image_t {
 				g2_draw_scaled_image(source, 32 - x * tile_size + tile_size, 32 - y * tile_size + tile_size, source.width, -source.height);
 				g2_draw_scaled_image(source, 32 - x * tile_size, 32 - y * tile_size, source.width, source.height);
 				g2_end();
-				let tileResult = upscale_node_do_tile(tile_source);
+				let tile_result: image_t = upscale_node_do_tile(tile_source);
 				g2_begin(result);
-				g2_draw_sub_image(tileResult, x * tile_size2x, y * tile_size2x, 64, 64, tile_size2x, tile_size2x);
+				g2_draw_sub_image(tile_result, x * tile_size2x, y * tile_size2x, 64, 64, tile_size2x, tile_size2x);
 				g2_end();
-				image_unload(tileResult);
+				image_unload(tile_result);
 			}
 		}
 		image_unload(tile_source);

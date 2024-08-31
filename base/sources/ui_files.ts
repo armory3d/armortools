@@ -271,7 +271,7 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 
 					///if is_lab
 					if (raw.mesh_icon != null) {
-						let bytes_icon: any = raw.mesh_icon;
+						let bytes_icon: buffer_t = raw.mesh_icon;
 						icon = image_from_bytes(lz4_decode(bytes_icon, 256 * 256 * 4), 256, 256);
 					}
 					///end

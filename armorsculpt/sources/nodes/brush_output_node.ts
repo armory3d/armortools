@@ -4,17 +4,19 @@ type brush_output_node_t = {
 	Directional?: bool;
 };
 
-function brush_output_node_create(): brush_output_node_t {
+function brush_output_node_create(arg: any): brush_output_node_t {
 	let n: brush_output_node_t = {};
 	n.base = logic_node_create();
 	context_raw.run_brush = brush_output_node_run;
 	context_raw.parse_brush_inputs = brush_output_node_parse_inputs;
+	context_raw.brush_output_node_inst = n;
 	return n;
 }
 
 function brush_output_node_parse_inputs(self: brush_output_node_t) {
-	let last_mask = context_raw.brush_mask_image;
-	let last_stencil = context_raw.brush_stencil_image;
+
+	let last_mask: image_t = context_raw.brush_mask_image;
+	let last_stencil: image_t = context_raw.brush_stencil_image;
 
 	let input0: logic_node_value_t = logic_node_input_get(self.base.inputs[0]);
 	let input1: logic_node_value_t = logic_node_input_get(self.base.inputs[1]);
@@ -23,7 +25,7 @@ function brush_output_node_parse_inputs(self: brush_output_node_t) {
 	let input4: logic_node_value_t = logic_node_input_get(self.base.inputs[4]);
 
 	context_raw.paint_vec = input0._any;
-	context_raw.brush_nodes_radius = input1._any;
+	context_raw.brush_nodes_radius = input1._f32;
 
 	let opac: logic_node_value_t = input2; // Float or texture name
 	if (opac == null) {
@@ -33,8 +35,8 @@ function brush_output_node_parse_inputs(self: brush_output_node_t) {
 		context_raw.brush_mask_image_is_alpha = ends_with(opac._any, ".a");
 		opac._any = substring(opac._any, 0, string_last_index_of(opac._any, "."));
 		context_raw.brush_nodes_opacity = 1.0;
-		let index = array_index_of(project_asset_names, opac._any);
-		let asset = project_assets[index];
+		let index: i32 = array_index_of(project_asset_names, opac._any);
+		let asset: asset_t = project_assets[index];
 		context_raw.brush_mask_image = project_get_image(asset);
 	}
 	else {
@@ -51,8 +53,8 @@ function brush_output_node_parse_inputs(self: brush_output_node_t) {
 	if (stencil._any != null) { // string
 		context_raw.brush_stencil_image_is_alpha = ends_with(stencil._any, ".a");
 		stencil._any = substring(stencil._any, 0, string_last_index_of(stencil._any, "."));
-		let index = array_index_of(project_asset_names, stencil._any);
-		let asset = project_assets[index];
+		let index: i32 = array_index_of(project_asset_names, stencil._any);
+		let asset: asset_t = project_assets[index];
 		context_raw.brush_stencil_image = project_get_image(asset);
 	}
 	else {
@@ -101,11 +103,11 @@ function brush_output_node_run(self: brush_output_node_t, from: i32) {
 		!base_is_scrolling() &&
 		!base_is_combo_selected()) {
 
-		let down = mouse_down() || pen_down();
+		let down: bool = mouse_down() || pen_down();
 
 		// Prevent painting the same spot
-		let same_spot = context_raw.paint_vec.x == context_raw.last_paint_x && context_raw.paint_vec.y == context_raw.last_paint_y;
-		let lazy = context_raw.tool == workspace_tool_t.BRUSH && context_raw.brush_lazy_radius > 0;
+		let same_spot: bool = context_raw.paint_vec.x == context_raw.last_paint_x && context_raw.paint_vec.y == context_raw.last_paint_y;
+		let lazy: bool = context_raw.tool == workspace_tool_t.BRUSH && context_raw.brush_lazy_radius > 0;
 		if (down && (same_spot || lazy)) {
 			context_raw.painted++;
 		}

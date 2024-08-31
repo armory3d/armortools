@@ -512,7 +512,8 @@ function context_create(): context_t {
 	c.tool = workspace_tool_t.ERASER;
 	c.color_picker_previous_tool = workspace_tool_t.ERASER;
 	c.brush_radius = 0.25;
-	c.brush_radius_handle = zui_handle_create({ value: 0.25 });
+	c.brush_radius_handle = zui_handle_create();
+	c.brush_radius_handle.value = 0.25;
 	c.brush_scale = 1.0;
 	c.coords = vec4_create();
 	c.start_x = 0.0;
