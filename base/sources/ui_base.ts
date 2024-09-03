@@ -1,18 +1,18 @@
 
 let ui_base_show: bool = true;
-let ui_base_ui: zui_t;
+let ui_base_ui: ui_t;
 let ui_base_border_started: i32 = 0;
-let ui_base_border_handle: zui_handle_t = null;
+let ui_base_border_handle: ui_handle_t = null;
 let ui_base_action_paint_remap: string = "";
 let ui_base_operator_search_offset: i32 = 0;
 let ui_base_undo_tap_time: f32 = 0.0;
 let ui_base_redo_tap_time: f32 = 0.0;
 
-let ui_base_hwnds: zui_handle_t[] = ui_base_init_hwnds();
-let ui_base_htabs: zui_handle_t[] = ui_base_init_htabs();
+let ui_base_hwnds: ui_handle_t[] = ui_base_init_hwnds();
+let ui_base_htabs: ui_handle_t[] = ui_base_init_htabs();
 
 type tab_draw_t = {
-	f: (h: zui_handle_t)=>void;
+	f: (h: ui_handle_t)=>void;
 };
 type tab_draw_array_t = tab_draw_t[];
 let ui_base_hwnd_tabs: tab_draw_array_t[] = ui_base_init_hwnd_tabs();
@@ -26,37 +26,37 @@ let ui_base_default_sidebar_w: i32 = ui_base_default_sidebar_mini_w;
 let ui_base_default_sidebar_w: i32 = ui_base_default_sidebar_full_w;
 ///end
 let ui_base_tabx: i32 = 0;
-let ui_base_hminimized: zui_handle_t = zui_handle_create();
+let ui_base_hminimized: ui_handle_t = ui_handle_create();
 let ui_base_sidebar_mini_w: i32 = ui_base_default_sidebar_mini_w;
 ///end
 
-function ui_base_init_hwnds(): zui_handle_t[] {
+function ui_base_init_hwnds(): ui_handle_t[] {
 	///if is_paint
-	let hwnds: zui_handle_t[] = [zui_handle_create(), zui_handle_create(), zui_handle_create()];
+	let hwnds: ui_handle_t[] = [ui_handle_create(), ui_handle_create(), ui_handle_create()];
 	///end
 	///if is_sculpt
-	let hwnds: zui_handle_t[] = [zui_handle_create(), zui_handle_create(), zui_handle_create()];
+	let hwnds: ui_handle_t[] = [ui_handle_create(), ui_handle_create(), ui_handle_create()];
 	///end
 	///if is_lab
-	let hwnds: zui_handle_t[] = [zui_handle_create()];
+	let hwnds: ui_handle_t[] = [ui_handle_create()];
 	///end
 	return hwnds;
 }
 
-function ui_base_init_htabs(): zui_handle_t[] {
+function ui_base_init_htabs(): ui_handle_t[] {
 	///if is_paint
-	let htabs: zui_handle_t[] = [zui_handle_create(), zui_handle_create(), zui_handle_create()];
+	let htabs: ui_handle_t[] = [ui_handle_create(), ui_handle_create(), ui_handle_create()];
 	///end
 	///if is_sculpt
-	let htabs: zui_handle_t[] = [zui_handle_create(), zui_handle_create(), zui_handle_create()];
+	let htabs: ui_handle_t[] = [ui_handle_create(), ui_handle_create(), ui_handle_create()];
 	///end
 	///if is_lab
-	let htabs: zui_handle_t[] = [zui_handle_create()];
+	let htabs: ui_handle_t[] = [ui_handle_create()];
 	///end
 	return htabs;
 }
 
-function _draw_callback_create(f: (h: zui_handle_t)=>void): tab_draw_t {
+function _draw_callback_create(f: (h: ui_handle_t)=>void): tab_draw_t {
 	let cb: tab_draw_t = { f: f };
 	return cb;
 }
@@ -191,7 +191,7 @@ function ui_base_init() {
 		project_default_canvas = b;
 	}
 
-	project_nodes = zui_nodes_create();
+	project_nodes = ui_nodes_create();
 	project_canvas = armpack_decode(project_default_canvas);
 	project_canvas.name = "Brush 1";
 
@@ -235,18 +235,18 @@ function ui_base_init() {
 	history_reset();
 
 	let scale: f32 = config_raw.window_scale;
-	let ops: zui_options_t = {
+	let ops: ui_options_t = {
 		theme: base_theme,
 		font: base_font,
 		scale_factor: scale,
 		color_wheel: base_color_wheel.texture_,
 		black_white_gradient: base_color_wheel_gradient.texture_
 	};
-	ui_base_ui = zui_create(ops);
-	zui_on_border_hover = ui_base_on_border_hover;
-	zui_on_text_hover = ui_base_on_text_hover;
-	zui_on_deselect_text = ui_base_on_deselect_text;
-	zui_on_tab_drop = ui_base_on_tab_drop;
+	ui_base_ui = ui_create(ops);
+	ui_on_border_hover = ui_base_on_border_hover;
+	ui_on_text_hover = ui_base_on_text_hover;
+	ui_on_deselect_text = ui_base_on_deselect_text;
+	ui_on_tab_drop = ui_base_on_tab_drop;
 
 	///if (is_paint || is_sculpt)
 	let resources: string[] = ["cursor.k", "icons.k"];
@@ -270,7 +270,7 @@ function ui_base_init() {
 
 	resource_load(resources);
 
-	if (zui_SCALE(ui_base_ui) > 1) {
+	if (ui_SCALE(ui_base_ui) > 1) {
 		ui_base_set_icon_scale();
 	}
 
@@ -675,10 +675,10 @@ function ui_base_update() {
 				///end
 				///end
 
-				ui_menu_draw(function (ui: zui_t) {
-					let mode_handle: zui_handle_t = zui_handle(__ID__);
+				ui_menu_draw(function (ui: ui_t) {
+					let mode_handle: ui_handle_t = ui_handle(__ID__);
 					mode_handle.position = context_raw.viewport_mode;
-					zui_text(tr("Viewport Mode"), zui_align_t.RIGHT, ui.ops.theme.HIGHLIGHT_COL);
+					ui_text(tr("Viewport Mode"), ui_align_t.RIGHT, ui.ops.theme.HIGHLIGHT_COL);
 					let modes: string[] = [
 						tr("Lit"),
 						tr("Base Color"),
@@ -709,7 +709,7 @@ function ui_base_update() {
 					///end
 
 					for (let i: i32 = 0; i < modes.length; ++i) {
-						zui_radio(mode_handle, i, modes[i], shortcuts[i]);
+						ui_radio(mode_handle, i, modes[i], shortcuts[i]);
 					}
 
 					let index: i32 = array_index_of(shortcuts, keyboard_key_code(ui.key_code));
@@ -923,16 +923,16 @@ let _ui_base_operator_search_first: bool;
 function ui_base_operator_search() {
 	_ui_base_operator_search_first = true;
 
-	ui_menu_draw(function (ui: zui_t) {
-		let search_handle: zui_handle_t = zui_handle(__ID__);
+	ui_menu_draw(function (ui: ui_t) {
+		let search_handle: ui_handle_t = ui_handle(__ID__);
 
-		zui_fill(0, 0, ui._w / zui_SCALE(ui), ui.ops.theme.ELEMENT_H * 8, ui.ops.theme.SEPARATOR_COL);
-		let search: string = zui_text_input(search_handle, "", zui_align_t.LEFT, true, true);
+		ui_fill(0, 0, ui._w / ui_SCALE(ui), ui.ops.theme.ELEMENT_H * 8, ui.ops.theme.SEPARATOR_COL);
+		let search: string = ui_text_input(search_handle, "", ui_align_t.LEFT, true, true);
 		ui.changed = false;
 		if (_ui_base_operator_search_first) {
 			_ui_base_operator_search_first = false;
 			search_handle.text = "";
-			zui_start_text_edit(search_handle); // Focus search bar
+			ui_start_text_edit(search_handle); // Focus search bar
 		}
 
 		if (search_handle.changed) {
@@ -956,7 +956,7 @@ function ui_base_operator_search() {
 			let n: string = keys[i];
 			if (string_index_of(n, search) >= 0) {
 				ui.ops.theme.BUTTON_COL = count == ui_base_operator_search_offset ? ui.ops.theme.HIGHLIGHT_COL : ui.ops.theme.SEPARATOR_COL;
-				if (zui_button(n, zui_align_t.LEFT, map_get(config_keymap, n)) || (enter && count == ui_base_operator_search_offset)) {
+				if (ui_button(n, ui_align_t.LEFT, map_get(config_keymap, n)) || (enter && count == ui_base_operator_search_offset)) {
 					if (enter) {
 						ui.changed = true;
 						count = 6; // Trigger break
@@ -1015,7 +1015,7 @@ function ui_base_update_ui() {
 	}
 
 	///if (is_paint || is_sculpt)
-	ui_base_sidebar_mini_w = math_floor(ui_base_default_sidebar_mini_w * zui_SCALE(ui_base_ui));
+	ui_base_sidebar_mini_w = math_floor(ui_base_default_sidebar_mini_w * ui_SCALE(ui_base_ui));
 	///end
 
 	if (!base_ui_enabled) {
@@ -1334,13 +1334,13 @@ function ui_base_render() {
 	if (!ui_base_show && config_raw.touch_ui) {
 		ui_base_ui.input_enabled = true;
 		g2_end();
-		zui_begin(ui_base_ui);
-		if (zui_window(zui_handle(__ID__), 0, 0, 150, math_floor(zui_ELEMENT_H(ui_base_ui) + zui_ELEMENT_OFFSET(ui_base_ui) + 1))) {
-			if (zui_button(tr("Close"))) {
+		ui_begin(ui_base_ui);
+		if (ui_window(ui_handle(__ID__), 0, 0, 150, math_floor(ui_ELEMENT_H(ui_base_ui) + ui_ELEMENT_OFFSET(ui_base_ui) + 1))) {
+			if (ui_button(tr("Close"))) {
 				ui_base_toggle_distract_free();
 			}
 		}
-		zui_end();
+		ui_end();
 		g2_begin(null);
 	}
 
@@ -1364,7 +1364,7 @@ function ui_base_render() {
 	}
 
 	g2_end();
-	zui_begin(ui_base_ui);
+	ui_begin(ui_base_ui);
 
 	///if (is_paint || is_sculpt)
 	ui_toolbar_render_ui();
@@ -1377,7 +1377,7 @@ function ui_base_render() {
 	ui_base_draw_sidebar();
 	///end
 
-	zui_end();
+	ui_end();
 	g2_begin(null);
 }
 
@@ -1385,7 +1385,7 @@ function ui_base_render() {
 function ui_base_draw_sidebar() {
 	// Tabs
 	let mini: bool = config_raw.layout[layout_size_t.SIDEBAR_W] <= ui_base_sidebar_mini_w;
-	let expand_button_offset: i32 = config_raw.touch_ui ? math_floor(zui_ELEMENT_H(ui_base_ui) + zui_ELEMENT_OFFSET(ui_base_ui)) : 0;
+	let expand_button_offset: i32 = config_raw.touch_ui ? math_floor(ui_ELEMENT_H(ui_base_ui) + ui_ELEMENT_OFFSET(ui_base_ui)) : 0;
 	ui_base_tabx = sys_width() - config_raw.layout[layout_size_t.SIDEBAR_W];
 
 	let _SCROLL_W: i32 = ui_base_ui.ops.theme.SCROLL_W;
@@ -1393,35 +1393,35 @@ function ui_base_draw_sidebar() {
 		ui_base_ui.ops.theme.SCROLL_W = ui_base_ui.ops.theme.SCROLL_MINI_W;
 	}
 
-	if (zui_window(ui_base_hwnds[tab_area_t.SIDEBAR0], ui_base_tabx, 0, config_raw.layout[layout_size_t.SIDEBAR_W], config_raw.layout[layout_size_t.SIDEBAR_H0])) {
+	if (ui_window(ui_base_hwnds[tab_area_t.SIDEBAR0], ui_base_tabx, 0, config_raw.layout[layout_size_t.SIDEBAR_W], config_raw.layout[layout_size_t.SIDEBAR_H0])) {
 		let tabs: tab_draw_t[] = ui_base_hwnd_tabs[tab_area_t.SIDEBAR0];
 		for (let i: i32 = 0; i < (mini ? 1 : tabs.length); ++i) {
 			tabs[i].f(ui_base_htabs[tab_area_t.SIDEBAR0]);
 		}
 	}
-	if (zui_window(ui_base_hwnds[tab_area_t.SIDEBAR1], ui_base_tabx, config_raw.layout[layout_size_t.SIDEBAR_H0], config_raw.layout[layout_size_t.SIDEBAR_W], config_raw.layout[layout_size_t.SIDEBAR_H1] - expand_button_offset)) {
+	if (ui_window(ui_base_hwnds[tab_area_t.SIDEBAR1], ui_base_tabx, config_raw.layout[layout_size_t.SIDEBAR_H0], config_raw.layout[layout_size_t.SIDEBAR_W], config_raw.layout[layout_size_t.SIDEBAR_H1] - expand_button_offset)) {
 		let tabs: tab_draw_t[] = ui_base_hwnd_tabs[tab_area_t.SIDEBAR1];
 		for (let i: i32 = 0; i < (mini ? 1 : tabs.length); ++i) {
 			tabs[i].f(ui_base_htabs[tab_area_t.SIDEBAR1]);
 		}
 	}
 
-	zui_end_window();
+	ui_end_window();
 	ui_base_ui.ops.theme.SCROLL_W = _SCROLL_W;
 
 	// Collapse / expand button for mini sidebar
 	if (config_raw.touch_ui) {
 		let width: i32 = config_raw.layout[layout_size_t.SIDEBAR_W];
-		let height: i32 = math_floor(zui_ELEMENT_H(ui_base_ui) + zui_ELEMENT_OFFSET(ui_base_ui));
-		if (zui_window(zui_handle(__ID__), sys_width() - width, sys_height() - height, width, height + 1)) {
+		let height: i32 = math_floor(ui_ELEMENT_H(ui_base_ui) + ui_ELEMENT_OFFSET(ui_base_ui));
+		if (ui_window(ui_handle(__ID__), sys_width() - width, sys_height() - height, width, height + 1)) {
 			ui_base_ui._w = width;
 			let _BUTTON_H: i32 = ui_base_ui.ops.theme.BUTTON_H;
 			let _BUTTON_COL: i32 = ui_base_ui.ops.theme.BUTTON_COL;
 			ui_base_ui.ops.theme.BUTTON_H = ui_base_ui.ops.theme.ELEMENT_H;
 			ui_base_ui.ops.theme.BUTTON_COL = ui_base_ui.ops.theme.WINDOW_BG_COL;
-			if (zui_button(mini ? "<<" : ">>")) {
+			if (ui_button(mini ? "<<" : ">>")) {
 				config_raw.layout[layout_size_t.SIDEBAR_W] = mini ? ui_base_default_sidebar_full_w : ui_base_default_sidebar_mini_w;
-				config_raw.layout[layout_size_t.SIDEBAR_W] = math_floor(config_raw.layout[layout_size_t.SIDEBAR_W] * zui_SCALE(ui_base_ui));
+				config_raw.layout[layout_size_t.SIDEBAR_W] = math_floor(config_raw.layout[layout_size_t.SIDEBAR_W] * ui_SCALE(ui_base_ui));
 			}
 			ui_base_ui.ops.theme.BUTTON_H = _BUTTON_H;
 			ui_base_ui.ops.theme.BUTTON_COL = _BUTTON_COL;
@@ -1430,15 +1430,15 @@ function ui_base_draw_sidebar() {
 
 	// Expand button
 	if (config_raw.layout[layout_size_t.SIDEBAR_W] == 0) {
-		let width: i32 = math_floor(g2_font_width(ui_base_ui.ops.font, ui_base_ui.font_size, "<<") + 25 * zui_SCALE(ui_base_ui));
-		if (zui_window(ui_base_hminimized, sys_width() - width, 0, width, math_floor(zui_ELEMENT_H(ui_base_ui) + zui_ELEMENT_OFFSET(ui_base_ui) + 1))) {
+		let width: i32 = math_floor(g2_font_width(ui_base_ui.ops.font, ui_base_ui.font_size, "<<") + 25 * ui_SCALE(ui_base_ui));
+		if (ui_window(ui_base_hminimized, sys_width() - width, 0, width, math_floor(ui_ELEMENT_H(ui_base_ui) + ui_ELEMENT_OFFSET(ui_base_ui) + 1))) {
 			ui_base_ui._w = width;
 			let _BUTTON_H: i32 = ui_base_ui.ops.theme.BUTTON_H;
 			let _BUTTON_COL: i32 = ui_base_ui.ops.theme.BUTTON_COL;
 			ui_base_ui.ops.theme.BUTTON_H = ui_base_ui.ops.theme.ELEMENT_H;
 			ui_base_ui.ops.theme.BUTTON_COL = ui_base_ui.ops.theme.SEPARATOR_COL;
 
-			if (zui_button("<<")) {
+			if (ui_button("<<")) {
 				config_raw.layout[layout_size_t.SIDEBAR_W] = context_raw.maximized_sidebar_width != 0 ? context_raw.maximized_sidebar_width : math_floor(ui_base_default_sidebar_w * config_raw.window_scale);
 			}
 			ui_base_ui.ops.theme.BUTTON_H = _BUTTON_H;
@@ -1534,7 +1534,7 @@ function ui_base_render_cursor() {
 	}
 
 	let cursor_img: image_t = resource_get("cursor.k");
-	let psize: i32 = math_floor(cursor_img.width * (context_raw.brush_radius * context_raw.brush_nodes_radius) * zui_SCALE(ui_base_ui));
+	let psize: i32 = math_floor(cursor_img.width * (context_raw.brush_radius * context_raw.brush_nodes_radius) * ui_SCALE(ui_base_ui));
 
 	// Clone source cursor
 	if (context_raw.tool == workspace_tool_t.CLONE && !keyboard_down("alt") && (mouse_down() || pen_down())) {
@@ -1562,8 +1562,8 @@ function ui_base_render_cursor() {
 			}
 
 			if (!config_raw.brush_live) {
-				let psizex: i32 = math_floor(256 * zui_SCALE(ui_base_ui) * (context_raw.brush_radius * context_raw.brush_nodes_radius * context_raw.brush_scale_x));
-				let psizey: i32 = math_floor(256 * zui_SCALE(ui_base_ui) * (context_raw.brush_radius * context_raw.brush_nodes_radius));
+				let psizex: i32 = math_floor(256 * ui_SCALE(ui_base_ui) * (context_raw.brush_radius * context_raw.brush_nodes_radius * context_raw.brush_scale_x));
+				let psizey: i32 = math_floor(256 * ui_SCALE(ui_base_ui) * (context_raw.brush_radius * context_raw.brush_nodes_radius));
 
 				context_raw.view_index = context_raw.view_index_last;
 				let decalx: f32 = base_x() + context_raw.decal_x * base_w() - psizex / 2;
@@ -1593,7 +1593,7 @@ function ui_base_render_cursor() {
 			(decal_mask && !config_raw.brush_3d) ||
 			(decal_mask && context_in_2d_view())) {
 			if (decal_mask) {
-				psize = math_floor(cursor_img.width * (context_raw.brush_decal_mask_radius * context_raw.brush_nodes_radius) * zui_SCALE(ui_base_ui));
+				psize = math_floor(cursor_img.width * (context_raw.brush_decal_mask_radius * context_raw.brush_nodes_radius) * ui_SCALE(ui_base_ui));
 			}
 			if (config_raw.brush_3d && context_in_2d_view()) {
 				psize = math_floor(psize * ui_view2d_pan_scale);
@@ -1624,7 +1624,7 @@ function ui_base_render_cursor() {
 
 function ui_base_show_material_nodes() {
 	// Clear input state as ui receives input events even when not drawn
-	zui_end_input();
+	ui_end_input();
 
 	///if (is_paint || is_sculpt)
 	ui_nodes_show = !ui_nodes_show || ui_nodes_canvas_type != canvas_type_t.MATERIAL;
@@ -1640,7 +1640,7 @@ function ui_base_show_material_nodes() {
 ///if (is_paint || is_sculpt)
 function ui_base_show_brush_nodes() {
 	// Clear input state as ui receives input events even when not drawn
-	zui_end_input();
+	ui_end_input();
 	ui_nodes_show = !ui_nodes_show || ui_nodes_canvas_type != canvas_type_t.BRUSH;
 	ui_nodes_canvas_type = canvas_type_t.BRUSH;
 	base_resize();
@@ -1649,7 +1649,7 @@ function ui_base_show_brush_nodes() {
 
 function ui_base_show_2d_view(type: view_2d_type_t) {
 	// Clear input state as ui receives input events even when not drawn
-	zui_end_input();
+	ui_end_input();
 	if (ui_view2d_type != type) {
 		ui_view2d_show = true;
 	}
@@ -1668,7 +1668,7 @@ function ui_base_toggle_browser() {
 }
 
 function ui_base_set_icon_scale() {
-	if (zui_SCALE(ui_base_ui) > 1) {
+	if (ui_SCALE(ui_base_ui) > 1) {
 		let res: string[] = ["icons2x.k"];
 		resource_load(res);
 		map_set(resource_bundled, "icons.k", resource_get("icons2x.k"));
@@ -1679,7 +1679,7 @@ function ui_base_set_icon_scale() {
 	}
 }
 
-function ui_base_on_border_hover(handle: zui_handle_t, side: i32) {
+function ui_base_on_border_hover(handle: ui_handle_t, side: i32) {
 	if (!base_ui_enabled) return;
 
 	///if (is_paint || is_sculpt)
@@ -1727,7 +1727,7 @@ function ui_base_on_border_hover(handle: zui_handle_t, side: i32) {
 		krom_set_mouse_cursor(3) : // Horizontal
 		krom_set_mouse_cursor(4);  // Vertical
 
-	if (zui_get_current().input_started) {
+	if (ui_get_current().input_started) {
 		ui_base_border_started = side;
 		ui_base_border_handle = handle;
 		base_is_resizing = true;
@@ -1744,7 +1744,7 @@ function ui_base_on_deselect_text() {
 	///end
 }
 
-function ui_base_on_tab_drop(to: zui_handle_t, to_position: i32, from: zui_handle_t, from_position: i32) {
+function ui_base_on_tab_drop(to: ui_handle_t, to_position: i32, from: ui_handle_t, from_position: i32) {
 	let i: i32 = -1;
 	let j: i32 = -1;
 	for (let k: i32 = 0; k < ui_base_htabs.length; ++k) {

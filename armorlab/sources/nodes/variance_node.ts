@@ -26,8 +26,8 @@ function variance_node_init() {
 	}
 }
 
-function variance_node_buttons(ui: zui_t, nodes: zui_nodes_t, node: zui_node_t) {
-	variance_node_prompt = zui_text_area(zui_handle(__ID__), zui_align_t.LEFT, true, tr("prompt"), true);
+function variance_node_buttons(ui: ui_t, nodes: ui_nodes_t, node: ui_node_t) {
+	variance_node_prompt = ui_text_area(ui_handle(__ID__), ui_align_t.LEFT, true, tr("prompt"), true);
 	node.buttons[0].height = string_split(variance_node_prompt, "\n").length;
 }
 
@@ -80,7 +80,7 @@ function variance_node_get_cached_image(self: variance_node_t): image_t {
 	return variance_node_image;
 }
 
-let variance_node_def: zui_node_t = {
+let variance_node_def: ui_node_t = {
 	id: 0,
 	name: _tr("Variance"),
 	type: "variance_node",

@@ -44,13 +44,13 @@ function util_clone_bool_array(a: bool[]): bool[] {
     return r;
 }
 
-function util_clone_canvas_sockets(sockets: zui_node_socket_t[]): zui_node_socket_t[] {
+function util_clone_canvas_sockets(sockets: ui_node_socket_t[]): ui_node_socket_t[] {
     if (sockets == null) {
         return null;
     }
-	let r: zui_node_socket_t[] = [];
+	let r: ui_node_socket_t[] = [];
 	for (let i: i32 = 0; i < sockets.length; ++i) {
-		let s: zui_node_socket_t = {};
+		let s: ui_node_socket_t = {};
 		s.id = sockets[i].id;;
 		s.node_id = sockets[i].node_id;
 		s.name = sockets[i].name;
@@ -66,13 +66,13 @@ function util_clone_canvas_sockets(sockets: zui_node_socket_t[]): zui_node_socke
 	return r;
 }
 
-function util_clone_canvas_buttons(buttons: zui_node_button_t[]): zui_node_button_t[] {
+function util_clone_canvas_buttons(buttons: ui_node_button_t[]): ui_node_button_t[] {
     if (buttons == null) {
         return null;
     }
-	let r: zui_node_button_t[] = [];
+	let r: ui_node_button_t[] = [];
 	for (let i: i32 = 0; i < buttons.length; ++i) {
-		let b: zui_node_button_t = {};
+		let b: ui_node_button_t = {};
 		b.name = buttons[i].name;
 		b.type = buttons[i].type;
 		b.output = buttons[i].output;
@@ -87,11 +87,11 @@ function util_clone_canvas_buttons(buttons: zui_node_button_t[]): zui_node_butto
 	return r;
 }
 
-function util_clone_canvas_node(n: zui_node_t): zui_node_t {
+function util_clone_canvas_node(n: ui_node_t): ui_node_t {
     if (n == null) {
         return null;
     }
-    let r: zui_node_t = {};
+    let r: ui_node_t = {};
     r.id = n.id;
     r.name = n.name;
     r.type = n.type;
@@ -105,25 +105,25 @@ function util_clone_canvas_node(n: zui_node_t): zui_node_t {
     return r;
 }
 
-function util_clone_canvas_nodes(nodes: zui_node_t[]): zui_node_t[] {
+function util_clone_canvas_nodes(nodes: ui_node_t[]): ui_node_t[] {
     if (nodes == null) {
         return null;
     }
-	let r: zui_node_t[] = [];
+	let r: ui_node_t[] = [];
 	for (let i: i32 = 0; i < nodes.length; ++i) {
-		let n: zui_node_t = util_clone_canvas_node(nodes[i]);
+		let n: ui_node_t = util_clone_canvas_node(nodes[i]);
 		array_push(r, n);
 	}
 	return r;
 }
 
-function util_clone_canvas_links(links: zui_node_link_t[]): zui_node_link_t[] {
+function util_clone_canvas_links(links: ui_node_link_t[]): ui_node_link_t[] {
     if (links == null) {
         return null;
     }
-	let r: zui_node_link_t[] = [];
+	let r: ui_node_link_t[] = [];
 	for (let i: i32 = 0; i < links.length; ++i) {
-		let l: zui_node_link_t = {};
+		let l: ui_node_link_t = {};
 		l.id = links[i].id;
 		l.from_id = links[i].from_id;
 		l.from_socket = links[i].from_socket;
@@ -134,11 +134,11 @@ function util_clone_canvas_links(links: zui_node_link_t[]): zui_node_link_t[] {
 	return r;
 }
 
-function util_clone_canvas(c: zui_node_canvas_t): zui_node_canvas_t {
+function util_clone_canvas(c: ui_node_canvas_t): ui_node_canvas_t {
     if (c == null) {
         return null;
     }
-	let r: zui_node_canvas_t = {};
+	let r: ui_node_canvas_t = {};
 	r.name = c.name;
 	r.nodes = util_clone_canvas_nodes(c.nodes);
 	r.links = util_clone_canvas_links(c.links);

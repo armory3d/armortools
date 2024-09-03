@@ -24,7 +24,7 @@ function image_texture_node_get_cached_image(self: image_texture_node_t): image_
 	return image;
 }
 
-let image_texture_node_def: zui_node_t = {
+let image_texture_node_def: ui_node_t = {
 	id: 0,
 	name: _tr("Image Texture"),
 	type: "image_texture_node",

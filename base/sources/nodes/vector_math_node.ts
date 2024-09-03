@@ -140,7 +140,7 @@ function vector_math_node_get(self: vector_math_node_t, from: i32): logic_node_v
 	}
 }
 
-let vector_math_node_def: zui_node_t = {
+let vector_math_node_def: ui_node_t = {
 	id: 0,
 	name: _tr("Vector Math"),
 	type: "vector_math_node",

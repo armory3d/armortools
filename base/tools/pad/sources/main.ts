@@ -12,11 +12,11 @@ type storage_t = {
 	sidebar_w?: i32;
 };
 
-let ui: zui_t;
-let theme: zui_theme_t;
-let text_handle: zui_handle_t = zui_handle_create();
-let sidebar_handle: zui_handle_t = zui_handle_create();
-let editor_handle: zui_handle_t = zui_handle_create();
+let ui: ui_t;
+let theme: ui_theme_t;
+let text_handle: ui_handle_t = ui_handle_create();
+let sidebar_handle: ui_handle_t = ui_handle_create();
+let editor_handle: ui_handle_t = ui_handle_create();
 let storage: storage_t = null;
 let resizing_sidebar: bool = false;
 let minimap_w: i32 = 150;
@@ -82,22 +82,22 @@ function main() {
 	g2_font_init(font);
 
 	theme = {};
-	zui_theme_default(theme);
+	ui_theme_default(theme);
 
-	let zui_ops: zui_options_t = {
+	let ui_ops: ui_options_t = {
 		scale_factor: 1.0,
 		theme: theme,
 		font: font
 	};
-	ui = zui_create(zui_ops);
+	ui = ui_create(ui_ops);
 
 	let blob_coloring: buffer_t = data_get_blob("text_coloring.json");
-	let text_coloring: zui_text_coloring_t = json_parse(sys_buffer_to_string(blob_coloring));
-	zui_text_area_coloring = text_coloring;
-	zui_on_border_hover = on_border_hover;
-	zui_on_text_hover = on_text_hover;
-	zui_text_area_line_numbers = true;
-	zui_text_area_scroll_past_end = true;
+	let text_coloring: ui_text_coloring_t = json_parse(sys_buffer_to_string(blob_coloring));
+	ui_text_area_coloring = text_coloring;
+	ui_on_border_hover = on_border_hover;
+	ui_on_text_hover = on_text_hover;
+	ui_text_area_line_numbers = true;
+	ui_text_area_scroll_past_end = true;
 
 	sys_notify_on_frames(render);
 	krom_set_drop_files_callback(drop_files);
@@ -118,7 +118,7 @@ function list_folder(path: string) {
 
 		// Active file
 		if (abs == storage.file) {
-			zui_fill(0, 1, ui._w - 1, ZUI_ELEMENT_H() - 1, theme.BUTTON_PRESSED_COL);
+			ui_fill(0, 1, ui._w - 1, UI_ELEMENT_H() - 1, theme.BUTTON_PRESSED_COL);
 		}
 
 		let prefix: string = "";
@@ -126,7 +126,7 @@ function list_folder(path: string) {
 			prefix = is_expanded ? "- " : "+ ";
 		}
 
-		if (zui_button(prefix + f, ZUI_ALIGN_LEFT, "")) {
+		if (ui_button(prefix + f, UI_ALIGN_LEFT, "")) {
 			// Open file
 			if (is_file) {
 				storage.file = abs;
@@ -158,28 +158,28 @@ function render() {
 		krom_set_mouse_cursor(0); // Arrow
 	}
 
-	zui_begin(ui);
+	ui_begin(ui);
 
-	if (zui_window(sidebar_handle, 0, 0, storage.sidebar_w, sys_height(), false)) {
+	if (ui_window(sidebar_handle, 0, 0, storage.sidebar_w, sys_height(), false)) {
 		let _BUTTON_TEXT_COL: i32 = theme.BUTTON_TEXT_COL;
 		theme.BUTTON_TEXT_COL = theme.ACCENT_COL;
 		if (storage.project != "") {
 			list_folder(storage.project);
 		}
 		else {
-			zui_button("Drop folder here", ZUI_ALIGN_LEFT, "");
+			ui_button("Drop folder here", UI_ALIGN_LEFT, "");
 		}
 		theme.BUTTON_TEXT_COL = _BUTTON_TEXT_COL;
 	}
 
-	zui_fill(sys_width() - minimap_w, 0, minimap_w, ZUI_ELEMENT_H() + ZUI_ELEMENT_OFFSET() + 1, theme.SEPARATOR_COL);
-	zui_fill(storage.sidebar_w, 0, 1, sys_height(), theme.SEPARATOR_COL);
+	ui_fill(sys_width() - minimap_w, 0, minimap_w, UI_ELEMENT_H() + UI_ELEMENT_OFFSET() + 1, theme.SEPARATOR_COL);
+	ui_fill(storage.sidebar_w, 0, 1, sys_height(), theme.SEPARATOR_COL);
 
 	let editor_updated: bool = false;
 
-	if (zui_window(editor_handle, storage.sidebar_w + 1, 0, sys_width() - storage.sidebar_w - minimap_w, sys_height(), false)) {
+	if (ui_window(editor_handle, storage.sidebar_w + 1, 0, sys_width() - storage.sidebar_w - minimap_w, sys_height(), false)) {
 		editor_updated = true;
-		let htab: zui_handle_t = zui_handle(__ID__);
+		let htab: ui_handle_t = ui_handle(__ID__);
 		let file_name: string = substring(storage.file, string_last_index_of(storage.file, "/") + 1, storage.file.length);
 		let file_names: string[] = [file_name];
 
@@ -188,7 +188,7 @@ function render() {
 			if (storage.modified) {
 				tab_name += "*";
 			}
-			if (zui_tab(htab, tab_name, false, -1)) {
+			if (ui_tab(htab, tab_name, false, -1)) {
 				// File modified
 				if (ui.is_key_pressed) {
 					storage.modified = true;
@@ -199,8 +199,8 @@ function render() {
 					save_file();
 				}
 
-				// storage.text = zui_text_area(text_handle, ZUI_ALIGN_LEFT, true, "", false);
-				zui_text_area(text_handle, ZUI_ALIGN_LEFT, true, "", false);
+				// storage.text = ui_text_area(text_handle, UI_ALIGN_LEFT, true, "", false);
+				ui_text_area(text_handle, UI_ALIGN_LEFT, true, "", false);
 			}
 		}
 
@@ -234,7 +234,7 @@ function render() {
 		build_project();
 	}
 
-	zui_end(false);
+	ui_end(false);
 
 	if (redraw) {
 		editor_handle.redraws = 2;
@@ -293,7 +293,7 @@ function draw_minimap() {
 	g2_set_color(0xff333333);
 	let lines: string[] = string_split(storage.text, "\n");
 	let minimap_full_h: i32 = lines.length * 2;
-	let scroll_progress: f32 = -editor_handle.scroll_offset / (lines.length * ZUI_ELEMENT_H());
+	let scroll_progress: f32 = -editor_handle.scroll_offset / (lines.length * UI_ELEMENT_H());
 	let out_of_screen: i32 = minimap_full_h - minimap_h;
 	if (out_of_screen < 0) {
 		out_of_screen = 0;
@@ -317,7 +317,7 @@ function draw_minimap() {
 	// Current position
 	let visible_area: i32 = out_of_screen > 0 ? minimap_h : minimap_full_h;
 	g2_set_color(0x11ffffff);
-	minimap_box_h = math_floor((sys_height() - window_header_h) / ZUI_ELEMENT_H() * 2);
+	minimap_box_h = math_floor((sys_height() - window_header_h) / UI_ELEMENT_H() * 2);
 	g2_fill_rect(0, scroll_progress * visible_area, minimap_w, minimap_box_h);
 	g2_end();
 }
@@ -326,7 +326,7 @@ function hit_test(mx: f32, my: f32, x: f32, y: f32, w: f32, h: f32): bool {
 	return mx > x && mx < x + w && my > y && my < y + h;
 }
 
-function on_border_hover(handle: zui_handle_t, side: i32) {
+function on_border_hover(handle: ui_handle_t, side: i32) {
 	if (handle != sidebar_handle) {
 		return;
 	}
@@ -336,7 +336,7 @@ function on_border_hover(handle: zui_handle_t, side: i32) {
 
 	krom_set_mouse_cursor(3); // Horizontal
 
-	if (zui_get_current().input_started) {
+	if (ui_get_current().input_started) {
 		resizing_sidebar = true;
 	}
 }

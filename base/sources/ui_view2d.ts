@@ -19,8 +19,8 @@ let ui_view2d_wx: i32;
 let ui_view2d_wy: i32;
 let ui_view2d_ww: i32;
 let ui_view2d_wh: i32;
-let ui_view2d_ui: zui_t;
-let ui_view2d_hwnd: zui_handle_t = zui_handle_create();
+let ui_view2d_ui: ui_t;
+let ui_view2d_hwnd: ui_handle_t = ui_handle_create();
 let ui_view2d_pan_x: f32 = 0.0;
 let ui_view2d_pan_y: f32 = 0.0;
 let ui_view2d_pan_scale: f32 = 1.0;
@@ -45,14 +45,14 @@ function ui_view2d_init() {
 	///end
 
 	let scale: f32 = config_raw.window_scale;
-	let ops: zui_options_t = {
+	let ops: ui_options_t = {
 		theme: base_theme,
 		font: base_font,
 		color_wheel: base_color_wheel.texture_,
 		black_white_gradient: base_color_wheel_gradient.texture_,
 		scale_factor: scale
 	};
-	ui_view2d_ui = zui_create(ops);
+	ui_view2d_ui = ui_create(ops);
 	ui_view2d_ui.scroll_enabled = false;
 }
 
@@ -113,7 +113,7 @@ function ui_view2d_render() {
 	}
 	///end
 
-	zui_begin(ui_view2d_ui);
+	ui_begin(ui_view2d_ui);
 
 	let headerh: i32 = config_raw.layout[layout_size_t.HEADER] == 1 ? ui_header_h * 2 : ui_header_h;
 	let apph: i32 = sys_height() - config_raw.layout[layout_size_t.STATUS_H] + headerh;
@@ -124,9 +124,9 @@ function ui_view2d_render() {
 		if (config_raw.touch_ui) ui_view2d_wh += ui_header_h;
 	}
 
-	if (zui_window(ui_view2d_hwnd, ui_view2d_wx, ui_view2d_wy, ui_view2d_ww, ui_view2d_wh)) {
+	if (ui_window(ui_view2d_hwnd, ui_view2d_wx, ui_view2d_wy, ui_view2d_ww, ui_view2d_wh)) {
 
-		zui_tab(zui_handle(__ID__), tr("2D View"));
+		ui_tab(ui_handle(__ID__), tr("2D View"));
 
 		// Grid
 		g2_set_color(0xffffffff);
@@ -158,9 +158,9 @@ function ui_view2d_render() {
 
 			///else
 
-			let nodes: zui_nodes_t = ui_nodes_get_nodes();
+			let nodes: ui_nodes_t = ui_nodes_get_nodes();
 			if (nodes.nodes_selected_id.length > 0) {
-				let sel: zui_node_t = zui_get_node(ui_nodes_get_canvas(true).nodes, nodes.nodes_selected_id[0]);
+				let sel: ui_node_t = ui_get_node(ui_nodes_get_canvas(true).nodes, nodes.nodes_selected_id[0]);
 				let brush_node: logic_node_t = parser_logic_get_logic_node(sel);
 				if (brush_node != null) {
 					tex = logic_node_get_cached_image(brush_node);
@@ -297,18 +297,18 @@ function ui_view2d_render() {
 		///end
 
 		// Menu
-		let ew: i32 = math_floor(zui_ELEMENT_W(ui_view2d_ui));
+		let ew: i32 = math_floor(ui_ELEMENT_W(ui_view2d_ui));
 		g2_set_color(ui_view2d_ui.ops.theme.SEPARATOR_COL);
-		g2_fill_rect(0, zui_ELEMENT_H(ui_view2d_ui), ui_view2d_ww, zui_ELEMENT_H(ui_view2d_ui) + zui_ELEMENT_OFFSET(ui_view2d_ui) * 2);
+		g2_fill_rect(0, ui_ELEMENT_H(ui_view2d_ui), ui_view2d_ww, ui_ELEMENT_H(ui_view2d_ui) + ui_ELEMENT_OFFSET(ui_view2d_ui) * 2);
 		g2_set_color(0xffffffff);
 
-		let start_y: f32 = zui_ELEMENT_H(ui_view2d_ui) + zui_ELEMENT_OFFSET(ui_view2d_ui);
+		let start_y: f32 = ui_ELEMENT_H(ui_view2d_ui) + ui_ELEMENT_OFFSET(ui_view2d_ui);
 		ui_view2d_ui._x = 2;
 		ui_view2d_ui._y = 2 + start_y;
 		ui_view2d_ui._w = ew;
 
 		// Editable layer name
-		let h: zui_handle_t = zui_handle(__ID__);
+		let h: ui_handle_t = ui_handle(__ID__);
 
 		///if (is_paint || is_sculpt)
 		let text: string = ui_view2d_type == view_2d_type_t.NODE ? context_raw.node_preview_name : h.text;
@@ -316,7 +316,7 @@ function ui_view2d_render() {
 		let text: string = h.text;
 		///end
 
-		ui_view2d_ui._w = math_floor(math_min(g2_font_width(ui_view2d_ui.ops.font, ui_view2d_ui.font_size, text) + 15 * zui_SCALE(ui_view2d_ui), 100 * zui_SCALE(ui_view2d_ui)));
+		ui_view2d_ui._w = math_floor(math_min(g2_font_width(ui_view2d_ui.ops.font, ui_view2d_ui.font_size, text) + 15 * ui_SCALE(ui_view2d_ui), 100 * ui_SCALE(ui_view2d_ui)));
 
 		if (ui_view2d_type == view_2d_type_t.ASSET) {
 			let asset: asset_t = context_raw.texture;
@@ -324,20 +324,20 @@ function ui_view2d_render() {
 				let asset_names: string[] = project_asset_names;
 				let i: i32 = array_index_of(asset_names, asset.name);
 				h.text = asset.name;
-				asset.name = zui_text_input(h, "");
+				asset.name = ui_text_input(h, "");
 				asset_names[i] = asset.name;
 			}
 		}
 		else if (ui_view2d_type == view_2d_type_t.NODE) {
 			///if (is_paint || is_sculpt)
 
-			zui_text(context_raw.node_preview_name);
+			ui_text(context_raw.node_preview_name);
 
 			///else
 
-			let nodes: zui_nodes_t = ui_nodes_get_nodes();
+			let nodes: ui_nodes_t = ui_nodes_get_nodes();
 			if (nodes.nodes_selected_id.length > 0) {
-				zui_text(zui_get_node(ui_nodes_get_canvas(true).nodes, nodes.nodes_selected_id[0]).name);
+				ui_text(ui_get_node(ui_nodes_get_canvas(true).nodes, nodes.nodes_selected_id[0]).name);
 			}
 
 			///end
@@ -345,12 +345,12 @@ function ui_view2d_render() {
 		///if (is_paint || is_sculpt)
 		else if (ui_view2d_type == view_2d_type_t.LAYER) {
 			h.text = l.name;
-			l.name = zui_text_input(h, "");
+			l.name = ui_text_input(h, "");
 			ui_view2d_text_input_hover = ui_view2d_ui.is_hovered;
 		}
 		else if (ui_view2d_type == view_2d_type_t.FONT) {
 			h.text = context_raw.font.name;
-			context_raw.font.name = zui_text_input(h, "");
+			context_raw.font.name = ui_text_input(h, "");
 		}
 		///end
 
@@ -363,17 +363,17 @@ function ui_view2d_render() {
 
 		///if (is_paint || is_sculpt)
 		if (ui_view2d_type == view_2d_type_t.LAYER) {
-			let h_layer_mode: zui_handle_t = zui_handle(__ID__);
+			let h_layer_mode: ui_handle_t = ui_handle(__ID__);
 			if (h_layer_mode.init) {
 				h_layer_mode.position = ui_view2d_layer_mode;
 			}
 			let layer_mode_combo: string[] = [tr("Visible"), tr("Selected")];
-			ui_view2d_layer_mode = zui_combo(h_layer_mode, layer_mode_combo, tr("Layers"));
+			ui_view2d_layer_mode = ui_combo(h_layer_mode, layer_mode_combo, tr("Layers"));
 			ui_view2d_ui._x += ew + 3;
 			ui_view2d_ui._y = 2 + start_y;
 
 			if (!slot_layer_is_mask(context_raw.layer)) {
-				let h_tex_type: zui_handle_t = zui_handle(__ID__);
+				let h_tex_type: ui_handle_t = ui_handle(__ID__);
 				if (h_tex_type.init) {
 					h_tex_type.position = ui_view2d_tex_type;
 				}
@@ -386,50 +386,50 @@ function ui_view2d_render() {
 					tr("Opacity"),
 					tr("Height"),
 				];
-				ui_view2d_tex_type = zui_combo(h_tex_type, tex_type_combo, tr("Texture"));
+				ui_view2d_tex_type = ui_combo(h_tex_type, tex_type_combo, tr("Texture"));
 				ui_view2d_ui._x += ew + 3;
 				ui_view2d_ui._y = 2 + start_y;
 			}
 
 			ui_view2d_ui._w = math_floor(ew * 0.7 + 3);
-			let h_uvmap_show: zui_handle_t = zui_handle(__ID__);
+			let h_uvmap_show: ui_handle_t = ui_handle(__ID__);
 			if (h_uvmap_show.init) {
 				h_uvmap_show.selected = ui_view2d_uvmap_show;
 			}
-			ui_view2d_uvmap_show = zui_check(h_uvmap_show, tr("UV Map"));
+			ui_view2d_uvmap_show = ui_check(h_uvmap_show, tr("UV Map"));
 			ui_view2d_ui._x += ew * 0.7 + 3;
 			ui_view2d_ui._y = 2 + start_y;
 		}
 		///end
 
-		let h_tiled_show: zui_handle_t = zui_handle(__ID__);
+		let h_tiled_show: ui_handle_t = ui_handle(__ID__);
 		if (h_tiled_show.init) {
 			h_tiled_show.selected = ui_view2d_tiled_show;
 		}
-		ui_view2d_tiled_show = zui_check(h_tiled_show, tr("Tiled"));
+		ui_view2d_tiled_show = ui_check(h_tiled_show, tr("Tiled"));
 		ui_view2d_ui._x += ew * 0.7 + 3;
 		ui_view2d_ui._y = 2 + start_y;
 
 		if (ui_view2d_type == view_2d_type_t.ASSET && tex != null) { // Texture resolution
-			zui_text(tex.width + "x" + tex.height);
+			ui_text(tex.width + "x" + tex.height);
 		}
 
 		// Picked position
 		///if (is_paint || is_sculpt)
 		if (context_raw.tool == workspace_tool_t.PICKER && (ui_view2d_type == view_2d_type_t.LAYER || ui_view2d_type == view_2d_type_t.ASSET)) {
 			let cursor_img: image_t = resource_get("cursor.k");
-			let hsize: f32 = 16 * zui_SCALE(ui_view2d_ui);
+			let hsize: f32 = 16 * ui_SCALE(ui_view2d_ui);
 			let size: f32 = hsize * 2;
 			g2_draw_scaled_image(cursor_img, tx + tw * context_raw.uvx_picked - hsize, ty + th * context_raw.uvy_picked - hsize, size, size);
 		}
 		///end
 	}
-	zui_end();
+	ui_end();
 	g2_begin(null);
 }
 
 function ui_view2d_update() {
-	let headerh: f32 = zui_ELEMENT_H(ui_view2d_ui) * 1.4;
+	let headerh: f32 = ui_ELEMENT_H(ui_view2d_ui) * 1.4;
 
 	///if (is_paint || is_sculpt)
 	context_raw.paint2d = false;
@@ -442,13 +442,13 @@ function ui_view2d_update() {
 		mouse_y < ui_view2d_wy + headerh ||
 		mouse_y > ui_view2d_wy + ui_view2d_wh) {
 		if (ui_view2d_controls_down) {
-			let control: zui_canvas_control_t = ui_nodes_get_canvas_control(ui_view2d_ui, ui_view2d_controls_down);
+			let control: ui_canvas_control_t = ui_nodes_get_canvas_control(ui_view2d_ui, ui_view2d_controls_down);
 			ui_view2d_controls_down = control.controls_down;
 		}
 		return;
 	}
 
-	let control: zui_canvas_control_t = ui_nodes_get_canvas_control(ui_view2d_ui, ui_view2d_controls_down);
+	let control: ui_canvas_control_t = ui_nodes_get_canvas_control(ui_view2d_ui, ui_view2d_controls_down);
 	ui_view2d_pan_x += control.pan_x;
 	ui_view2d_pan_y += control.pan_y;
 	ui_view2d_controls_down = control.controls_down;
@@ -465,7 +465,7 @@ function ui_view2d_update() {
 		ui_view2d_pan_x = _pan_x * ui_view2d_pan_scale;
 		ui_view2d_pan_y = _pan_y * ui_view2d_pan_scale;
 
-		if (zui_touch_scroll) {
+		if (ui_touch_scroll) {
 			// Zoom to finger location
 			ui_view2d_pan_x -= (ui_view2d_ui.input_x - ui_view2d_ui._window_x - ui_view2d_ui._window_w / 2) * control.zoom;
 			ui_view2d_pan_y -= (ui_view2d_ui.input_y - ui_view2d_ui._window_y - ui_view2d_ui._window_h / 2) * control.zoom;

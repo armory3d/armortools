@@ -10055,7 +10055,7 @@ void xatlasPackOptionsInit(xatlasPackOptions *packOptions)
 extern "C" {
 #endif
 
-#include <io_obj.h>
+#include <iron_obj.h>
 
 void proc_xatlas_unwrap(raw_mesh_t *mesh) {
 	int vertex_count = mesh->posa->length / 4;
@@ -10113,7 +10113,7 @@ void proc_xatlas_unwrap(raw_mesh_t *mesh) {
 	mesh->posa->length = vertex_count_out * 4;
 	mesh->nora->buffer = na_out;
 	mesh->nora->length = vertex_count_out * 2;
-	mesh->texa = (i16_array_t*)malloc(sizeof(i16_array_t));
+	mesh->texa = (i16_array_t *)malloc(sizeof(i16_array_t));
 	mesh->texa->buffer = ta_out;
 	mesh->texa->length = vertex_count_out * 2;
 	mesh->inda->buffer = ia_out;

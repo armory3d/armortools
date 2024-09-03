@@ -125,7 +125,7 @@ function upscale_node_esrgan(source: image_t): image_t {
 	return result;
 }
 
-let upscale_node_def: zui_node_t = {
+let upscale_node_def: ui_node_t = {
 	id: 0,
 	name: _tr("Upscale"),
 	type: "upscale_node",

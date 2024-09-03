@@ -63,10 +63,10 @@ function ui_files_release_keys() {
 	///end
 }
 
-let _ui_files_file_browser_handle: zui_handle_t;
+let _ui_files_file_browser_handle: ui_handle_t;
 let _ui_files_file_browser_f: string;
 
-function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bool = false, drag_files: bool = false, search: string = "", refresh: bool = false, context_menu: (s: string)=>void = null): string {
+function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, folders_only: bool = false, drag_files: bool = false, search: string = "", refresh: bool = false, context_menu: (s: string)=>void = null): string {
 
 	let icons: image_t = resource_get("icons.k");
 	let folder: rect_t = resource_tile50(icons, 2, 1);
@@ -132,7 +132,7 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 	ui_files_last_search = search;
 	handle.changed = false;
 
-	let slotw: i32 = math_floor(70 * zui_SCALE(ui));
+	let slotw: i32 = math_floor(70 * ui_SCALE(ui));
 	let num: i32 = math_floor(ui._w / slotw);
 
 	ui._y += 4; // Don't cut off the border around selected materials
@@ -142,16 +142,16 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 		for (let i: i32 = 0; i < num * 2; ++i) {
 			array_push(ar, 1 / num);
 		}
-		zui_row(ar);
+		ui_row(ar);
 		if (row > 0) {
-			ui._y += zui_ELEMENT_OFFSET(ui) * 14.0;
+			ui._y += ui_ELEMENT_OFFSET(ui) * 14.0;
 		}
 
 		for (let j: i32 = 0; j < num; ++j) {
 			let i: i32 = j + row * num;
 			if (i >= ui_files_files.length) {
-				_zui_end_element(slotw);
-				_zui_end_element(slotw);
+				_ui_end_element(slotw);
+				_ui_end_element(slotw);
 				continue;
 			}
 
@@ -162,12 +162,12 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 			let col: i32 = rect == file ? ui.ops.theme.LABEL_COL : ui.ops.theme.LABEL_COL - 0x00202020;
 			if (ui_files_selected == i) col = ui.ops.theme.HIGHLIGHT_COL;
 
-			let off: f32 = ui._w / 2 - 25 * zui_SCALE(ui);
+			let off: f32 = ui._w / 2 - 25 * ui_SCALE(ui);
 			ui._x += off;
 
 			let uix: f32 = ui._x;
 			let uiy: f32 = ui._y;
-			let state: zui_state_t = zui_state_t.IDLE;
+			let state: ui_state_t = ui_state_t.IDLE;
 			let generic: bool = true;
 			let icon: image_t = null;
 
@@ -224,15 +224,15 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 				if (icon != null) {
 					let w: i32 = 50;
 					if (i == ui_files_selected) {
-						zui_fill(-2,        -2, w + 4,     2, ui.ops.theme.HIGHLIGHT_COL);
-						zui_fill(-2,     w + 2, w + 4,     2, ui.ops.theme.HIGHLIGHT_COL);
-						zui_fill(-2,         0,     2, w + 4, ui.ops.theme.HIGHLIGHT_COL);
-						zui_fill(w + 2 ,    -2,     2, w + 6, ui.ops.theme.HIGHLIGHT_COL);
+						ui_fill(-2,        -2, w + 4,     2, ui.ops.theme.HIGHLIGHT_COL);
+						ui_fill(-2,     w + 2, w + 4,     2, ui.ops.theme.HIGHLIGHT_COL);
+						ui_fill(-2,         0,     2, w + 4, ui.ops.theme.HIGHLIGHT_COL);
+						ui_fill(w + 2 ,    -2,     2, w + 6, ui.ops.theme.HIGHLIGHT_COL);
 					}
-					state = _zui_image(icon, 0xffffffff, w * zui_SCALE(ui));
+					state = _ui_image(icon, 0xffffffff, w * ui_SCALE(ui));
 					if (ui.is_hovered) {
-						_zui_tooltip_image(icon);
-						zui_tooltip(f);
+						_ui_tooltip_image(icon);
+						ui_tooltip(f);
 					}
 					generic = false;
 				}
@@ -282,15 +282,15 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 				if (icon != null) {
 					let w: i32 = 50;
 					if (i == ui_files_selected) {
-						zui_fill(-2,        -2, w + 4,     2, ui.ops.theme.HIGHLIGHT_COL);
-						zui_fill(-2,     w + 2, w + 4,     2, ui.ops.theme.HIGHLIGHT_COL);
-						zui_fill(-2,         0,     2, w + 4, ui.ops.theme.HIGHLIGHT_COL);
-						zui_fill(w + 2 ,    -2,     2, w + 6, ui.ops.theme.HIGHLIGHT_COL);
+						ui_fill(-2,        -2, w + 4,     2, ui.ops.theme.HIGHLIGHT_COL);
+						ui_fill(-2,     w + 2, w + 4,     2, ui.ops.theme.HIGHLIGHT_COL);
+						ui_fill(-2,         0,     2, w + 4, ui.ops.theme.HIGHLIGHT_COL);
+						ui_fill(w + 2 ,    -2,     2, w + 6, ui.ops.theme.HIGHLIGHT_COL);
 					}
-					state = _zui_image(icon, 0xffffffff, w * zui_SCALE(ui));
+					state = _ui_image(icon, 0xffffffff, w * ui_SCALE(ui));
 					if (ui.is_hovered) {
-						_zui_tooltip_image(icon);
-						zui_tooltip(f);
+						_ui_tooltip_image(icon);
+						ui_tooltip(f);
 					}
 					generic = false;
 				}
@@ -318,25 +318,25 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 				}
 				if (icon != null) {
 					if (i == ui_files_selected) {
-						zui_fill(-2,        -2, w + 4,     2, ui.ops.theme.HIGHLIGHT_COL);
-						zui_fill(-2,     w + 2, w + 4,     2, ui.ops.theme.HIGHLIGHT_COL);
-						zui_fill(-2,         0,     2, w + 4, ui.ops.theme.HIGHLIGHT_COL);
-						zui_fill(w + 2 ,    -2,     2, w + 6, ui.ops.theme.HIGHLIGHT_COL);
+						ui_fill(-2,        -2, w + 4,     2, ui.ops.theme.HIGHLIGHT_COL);
+						ui_fill(-2,     w + 2, w + 4,     2, ui.ops.theme.HIGHLIGHT_COL);
+						ui_fill(-2,         0,     2, w + 4, ui.ops.theme.HIGHLIGHT_COL);
+						ui_fill(w + 2 ,    -2,     2, w + 6, ui.ops.theme.HIGHLIGHT_COL);
 					}
-					state = _zui_image(icon, 0xffffffff, icon.height * zui_SCALE(ui));
+					state = _ui_image(icon, 0xffffffff, icon.height * ui_SCALE(ui));
 					generic = false;
 				}
 			}
 
 			if (generic) {
-				state = _zui_image(icons, col, 50 * zui_SCALE(ui), rect.x, rect.y, rect.w, rect.h);
+				state = _ui_image(icons, col, 50 * ui_SCALE(ui), rect.x, rect.y, rect.w, rect.h);
 			}
 
 			if (ui.is_hovered && ui.input_released_r && context_menu != null) {
 				context_menu(handle.text + path_sep + f);
 			}
 
-			if (state == zui_state_t.STARTED) {
+			if (state == ui_state_t.STARTED) {
 				if (f != ".." && drag_files) {
 					base_drag_off_x = -(mouse_x - uix - ui._window_x - 3);
 					base_drag_off_y = -(mouse_y - uiy - ui._window_y + 1);
@@ -389,16 +389,16 @@ function ui_files_file_browser(ui: zui_t, handle: zui_handle_t, folders_only: bo
 			if (label1 != "") {
 				ui.current_ratio--;
 			}
-			zui_text(label0, zui_align_t.CENTER);
+			ui_text(label0, ui_align_t.CENTER);
 			if (ui.is_hovered) {
-				zui_tooltip(label0 + label1);
+				ui_tooltip(label0 + label1);
 			}
 			if (label1 != "") { // Second line
 				ui._x = _x;
 				ui._y += g2_font_height(ui.ops.font, ui.font_size);
-				zui_text(label1, zui_align_t.CENTER);
+				ui_text(label1, ui_align_t.CENTER);
 				if (ui.is_hovered) {
-					zui_tooltip(label0 + label1);
+					ui_tooltip(label0 + label1);
 				}
 				ui._y -= g2_font_height(ui.ops.font, ui.font_size);
 			}

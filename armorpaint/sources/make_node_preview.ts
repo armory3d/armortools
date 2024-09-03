@@ -1,5 +1,5 @@
 
-function make_node_preview_run(data: material_t, matcon: material_context_t, node: zui_node_t, group: zui_node_canvas_t, parents: zui_node_t[]): node_shader_context_t {
+function make_node_preview_run(data: material_t, matcon: material_context_t, node: ui_node_t, group: ui_node_canvas_t, parents: ui_node_t[]): node_shader_context_t {
 	let context_id: string = "mesh";
 	let props: shader_context_t = {
 		name: context_id,
@@ -49,9 +49,9 @@ function make_node_preview_run(data: material_t, matcon: material_context_t, nod
 		parser_material_push_group(group);
 		parser_material_parents = parents;
 	}
-	let links: zui_node_link_t[] = parser_material_links;
-	let link: zui_node_link_t = {
-		id: zui_next_link_id(links),
+	let links: ui_node_link_t[] = parser_material_links;
+	let link: ui_node_link_t = {
+		id: ui_next_link_id(links),
 		from_id: node.id,
 		from_socket: context_raw.node_preview_socket,
 		to_id: -1,

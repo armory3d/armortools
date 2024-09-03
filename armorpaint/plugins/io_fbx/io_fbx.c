@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "iron_array.h"
-#include "io_obj.h"
+#include "iron_obj.h"
 
 static bool has_next = false;
 static int current_node = 0;

@@ -11,7 +11,7 @@ let ui_nodes_wy: i32;
 let ui_nodes_ww: i32;
 let ui_nodes_wh: i32;
 
-let ui_nodes_ui: zui_t;
+let ui_nodes_ui: ui_t;
 let ui_nodes_canvas_type: canvas_type_t = canvas_type_t.MATERIAL;
 let ui_nodes_show_menu: bool = false;
 let ui_nodes_show_menu_first: bool = true;
@@ -23,59 +23,59 @@ let ui_nodes_popup_y: f32 = 0.0;
 let ui_nodes_uichanged_last: bool = false;
 let ui_nodes_recompile_mat: bool = false; // Mat preview
 let ui_nodes_recompile_mat_final: bool = false;
-let ui_nodes_node_search_spawn: zui_node_t = null;
+let ui_nodes_node_search_spawn: ui_node_t = null;
 let ui_nodes_node_search_offset: i32 = 0;
-let ui_nodes_last_canvas: zui_node_canvas_t = null;
+let ui_nodes_last_canvas: ui_node_canvas_t = null;
 let ui_nodes_last_node_selected_id: i32 = -1;
 let ui_nodes_release_link: bool = false;
 let ui_nodes_is_node_menu_op: bool = false;
 
 let ui_nodes_grid: image_t = null;
-let ui_nodes_hwnd: zui_handle_t = zui_handle_create();
+let ui_nodes_hwnd: ui_handle_t = ui_handle_create();
 let ui_nodes_group_stack: node_group_t[] = [];
 let ui_nodes_controls_down: bool = false;
 
-function ui_nodes_init() {
-	zui_nodes_on_link_drag = ui_nodes_on_link_drag;
-	zui_nodes_on_socket_released = ui_nodes_on_socket_released;
-	zui_nodes_on_canvas_released = ui_nodes_on_canvas_released;
-	zui_nodes_on_canvas_control = ui_nodes_on_canvas_control;
+function ui_viewnodes_init() {
+	ui_nodes_on_link_drag = ui_viewnodes_on_link_drag;
+	ui_nodes_on_socket_released = ui_viewnodes_on_socket_released;
+	ui_nodes_on_canvas_released = ui_viewnodes_on_canvas_released;
+	ui_nodes_on_canvas_control = ui_viewnodes_on_canvas_control;
 	nodes_material_init();
 
 	let scale: f32 = config_raw.window_scale;
-	let ops: zui_options_t = {
+	let ops: ui_options_t = {
 		theme: base_theme,
 		font: base_font,
 		color_wheel: base_color_wheel.texture_,
 		black_white_gradient: base_color_wheel_gradient.texture_,
 		scale_factor: scale
 	};
-	ui_nodes_ui = zui_create(ops);
+	ui_nodes_ui = ui_create(ops);
 	ui_nodes_ui.scroll_enabled = false;
 }
 
-let _ui_nodes_on_link_drag_link_drag: zui_node_link_t;
-let _ui_nodes_on_link_drag_node: zui_node_t;
+let _ui_nodes_on_link_drag_link_drag: ui_node_link_t;
+let _ui_nodes_on_link_drag_node: ui_node_t;
 
-function ui_nodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
+function ui_viewnodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
 	if (!is_new_link) {
 		return;
 	}
 
-	let ui_nodes: zui_nodes_t = ui_nodes_get_nodes();
-	let links: zui_node_link_t[] = ui_nodes_get_canvas(true).links;
-	let link_drag: zui_node_link_t = zui_get_link(links, link_drag_id);
-	let nodes: zui_node_t[] = ui_nodes_get_canvas(true).nodes;
-	let node: zui_node_t = zui_get_node(nodes, link_drag.from_id > -1 ? link_drag.from_id : link_drag.to_id);
-	let link_x: i32 = ui_nodes_ui._window_x + zui_nodes_NODE_X(node);
-	let link_y: i32 = ui_nodes_ui._window_y + zui_nodes_NODE_Y(node);
+	let ui_nodes: ui_nodes_t = ui_nodes_get_nodes();
+	let links: ui_node_link_t[] = ui_nodes_get_canvas(true).links;
+	let link_drag: ui_node_link_t = ui_get_link(links, link_drag_id);
+	let nodes: ui_node_t[] = ui_nodes_get_canvas(true).nodes;
+	let node: ui_node_t = ui_get_node(nodes, link_drag.from_id > -1 ? link_drag.from_id : link_drag.to_id);
+	let link_x: i32 = ui_nodes_ui._window_x + ui_nodes_NODE_X(node);
+	let link_y: i32 = ui_nodes_ui._window_y + ui_nodes_NODE_Y(node);
 	if (link_drag.from_id > -1) {
-		link_x += zui_nodes_NODE_W(node);
-		link_y += zui_nodes_OUTPUT_Y(node.outputs.length, link_drag.from_socket);
+		link_x += ui_nodes_NODE_W(node);
+		link_y += ui_nodes_OUTPUT_Y(node.outputs.length, link_drag.from_socket);
 	}
 	else {
-		link_y += zui_nodes_INPUT_Y(ui_nodes_get_canvas(true), node.inputs, link_drag.to_socket) +
-			zui_nodes_OUTPUTS_H(node.outputs.length) + zui_nodes_BUTTONS_H(node);
+		link_y += ui_nodes_INPUT_Y(ui_nodes_get_canvas(true), node.inputs, link_drag.to_socket) +
+			ui_nodes_OUTPUTS_H(node.outputs.length) + ui_nodes_BUTTONS_H(node);
 	}
 
 	if (math_abs(mouse_x - link_x) > 5 || math_abs(mouse_y - link_y) > 5) { // Link length
@@ -84,16 +84,16 @@ function ui_nodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
 		_ui_nodes_on_link_drag_node = node;
 
 		ui_nodes_node_search(-1, -1, function () {
-			let ui_nodes: zui_nodes_t = ui_nodes_get_nodes();
+			let ui_nodes: ui_nodes_t = ui_nodes_get_nodes();
 
 			let node_selected_id: i32 = _ui_nodes_on_link_drag_node.id;
 			if (ui_nodes.nodes_selected_id.length > 0) {
 				node_selected_id = ui_nodes.nodes_selected_id[0];
 			}
 
-			let link_drag: zui_node_link_t = _ui_nodes_on_link_drag_link_drag;
-			let nodes: zui_node_t[] = ui_nodes_get_canvas(true).nodes;
-			let n: zui_node_t = zui_get_node(nodes, node_selected_id);
+			let link_drag: ui_node_link_t = _ui_nodes_on_link_drag_link_drag;
+			let nodes: ui_node_t[] = ui_nodes_get_canvas(true).nodes;
+			let n: ui_node_t = ui_get_node(nodes, node_selected_id);
 			if (link_drag.to_id == -1 && n.inputs.length > 0) {
 				link_drag.to_id = n.id;
 				let from_type: string = _ui_nodes_on_link_drag_node.outputs[link_drag.from_socket].type;
@@ -101,7 +101,7 @@ function ui_nodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
 				link_drag.to_socket = 0;
 				// Try to find the first type-matching socket and use it if present
 				for (let i: i32 = 0; i < n.inputs.length; ++i) {
-					let socket: zui_node_socket_t = n.inputs[i];
+					let socket: ui_node_socket_t = n.inputs[i];
 					if (socket.type == from_type) {
 						link_drag.to_socket = array_index_of(n.inputs, socket);
 						break;
@@ -129,23 +129,23 @@ function ui_nodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
 	}
 }
 
-let _ui_nodes_on_socket_released_socket: zui_node_socket_t;
-let _ui_nodes_on_socket_released_node: zui_node_t;
+let _ui_nodes_on_socket_released_socket: ui_node_socket_t;
+let _ui_nodes_on_socket_released_node: ui_node_t;
 
-let _ui_nodes_htype: zui_handle_t = zui_handle_create();
-let _ui_nodes_hname: zui_handle_t = zui_handle_create();
-let _ui_nodes_hmin: zui_handle_t = zui_handle_create();
-let _ui_nodes_hmax: zui_handle_t = zui_handle_create();
-let _ui_nodes_hval0: zui_handle_t = zui_handle_create();
-let _ui_nodes_hval1: zui_handle_t = zui_handle_create();
-let _ui_nodes_hval2: zui_handle_t = zui_handle_create();
-let _ui_nodes_hval3: zui_handle_t = zui_handle_create();
+let _ui_nodes_htype: ui_handle_t = ui_handle_create();
+let _ui_nodes_hname: ui_handle_t = ui_handle_create();
+let _ui_nodes_hmin: ui_handle_t = ui_handle_create();
+let _ui_nodes_hmax: ui_handle_t = ui_handle_create();
+let _ui_nodes_hval0: ui_handle_t = ui_handle_create();
+let _ui_nodes_hval1: ui_handle_t = ui_handle_create();
+let _ui_nodes_hval2: ui_handle_t = ui_handle_create();
+let _ui_nodes_hval3: ui_handle_t = ui_handle_create();
 
-function ui_nodes_on_socket_released(socket_id: i32) {
-	let nodes: zui_nodes_t = ui_nodes_get_nodes();
-	let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
-	let socket: zui_node_socket_t = zui_get_socket(canvas.nodes, socket_id);
-	let node: zui_node_t = zui_get_node(canvas.nodes, socket.node_id);
+function ui_viewnodes_on_socket_released(socket_id: i32) {
+	let nodes: ui_nodes_t = ui_nodes_get_nodes();
+	let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
+	let socket: ui_node_socket_t = ui_get_socket(canvas.nodes, socket_id);
+	let node: ui_node_t = ui_get_node(canvas.nodes, socket.node_id);
 	if (ui_nodes_ui.input_released_r) {
 		if (node.type == "GROUP_INPUT" || node.type == "GROUP_OUTPUT") {
 
@@ -153,10 +153,10 @@ function ui_nodes_on_socket_released(socket_id: i32) {
 			_ui_nodes_on_socket_released_node = node;
 
 			app_notify_on_next_frame(function () {
-				ui_menu_draw(function (ui: zui_t) {
+				ui_menu_draw(function (ui: ui_t) {
 
-					let socket: zui_node_socket_t = _ui_nodes_on_socket_released_socket;
-					let node: zui_node_t = _ui_nodes_on_socket_released_node;
+					let socket: ui_node_socket_t = _ui_nodes_on_socket_released_socket;
+					let node: ui_node_t = _ui_nodes_on_socket_released_node;
 
 					if (ui_menu_button(ui, tr("Edit"))) {
 						_ui_nodes_htype.position = socket.type == "RGBA" ? 0 : socket.type == "VECTOR" ? 1 : 2;
@@ -176,47 +176,47 @@ function ui_nodes_on_socket_released(socket_id: i32) {
 						}
 
 						app_notify_on_next_frame(function () {
-							zui_end_input();
+							ui_end_input();
 
-							ui_box_show_custom(function (ui: zui_t) {
+							ui_box_show_custom(function (ui: ui_t) {
 
-								let socket: zui_node_socket_t = _ui_nodes_on_socket_released_socket;
-								let node: zui_node_t = _ui_nodes_on_socket_released_node;
+								let socket: ui_node_socket_t = _ui_nodes_on_socket_released_socket;
+								let node: ui_node_t = _ui_nodes_on_socket_released_node;
 
-								if (zui_tab(zui_handle(__ID__), tr("Socket"))) {
+								if (ui_tab(ui_handle(__ID__), tr("Socket"))) {
 									let type_combo: string[] = [tr("Color"), tr("Vector"), tr("Value")];
-									let type: i32 = zui_combo(_ui_nodes_htype, type_combo, tr("Type"), true);
+									let type: i32 = ui_combo(_ui_nodes_htype, type_combo, tr("Type"), true);
 									if (_ui_nodes_htype.changed) {
 										_ui_nodes_hname.text = type == 0 ? tr("Color") : type == 1 ? tr("Vector") : tr("Value");
 									}
-									let name: string = zui_text_input(_ui_nodes_hname, tr("Name"));
-									let min: f32 = zui_float_input(_ui_nodes_hmin, tr("Min"));
-									let max: f32 = zui_float_input(_ui_nodes_hmax, tr("Max"));
+									let name: string = ui_text_input(_ui_nodes_hname, tr("Name"));
+									let min: f32 = ui_float_input(_ui_nodes_hmin, tr("Min"));
+									let max: f32 = ui_float_input(_ui_nodes_hmax, tr("Max"));
 									let default_value: f32_array_t = null;
 									if (type == 0) {
 										let row: f32[] = [1 / 4, 1 / 4, 1 / 4, 1 / 4];
-										zui_row(row);
-										zui_float_input(_ui_nodes_hval0, tr("R"));
-										zui_float_input(_ui_nodes_hval1, tr("G"));
-										zui_float_input(_ui_nodes_hval2, tr("B"));
-										zui_float_input(_ui_nodes_hval3, tr("A"));
+										ui_row(row);
+										ui_float_input(_ui_nodes_hval0, tr("R"));
+										ui_float_input(_ui_nodes_hval1, tr("G"));
+										ui_float_input(_ui_nodes_hval2, tr("B"));
+										ui_float_input(_ui_nodes_hval3, tr("A"));
 										default_value = f32_array_create_xyzw(
 											_ui_nodes_hval0.value, _ui_nodes_hval1.value, _ui_nodes_hval2.value, _ui_nodes_hval3.value);
 									}
 									else if (type == 1) {
 										let row: f32[] = [1 / 3, 1 / 3, 1 / 3];
-										zui_row(row);
-										_ui_nodes_hval0.value = zui_float_input(_ui_nodes_hval0, tr("X"));
-										_ui_nodes_hval1.value = zui_float_input(_ui_nodes_hval1, tr("Y"));
-										_ui_nodes_hval2.value = zui_float_input(_ui_nodes_hval2, tr("Z"));
+										ui_row(row);
+										_ui_nodes_hval0.value = ui_float_input(_ui_nodes_hval0, tr("X"));
+										_ui_nodes_hval1.value = ui_float_input(_ui_nodes_hval1, tr("Y"));
+										_ui_nodes_hval2.value = ui_float_input(_ui_nodes_hval2, tr("Z"));
 										default_value = f32_array_create_xyz(
 											_ui_nodes_hval0.value, _ui_nodes_hval1.value, _ui_nodes_hval2.value);
 									}
 									else {
-										let f: f32 = zui_float_input(_ui_nodes_hval0, tr("default_value"));
+										let f: f32 = ui_float_input(_ui_nodes_hval0, tr("default_value"));
 										default_value = f32_array_create_x(f);
 									}
-									if (zui_button(tr("OK"))) { // || ui.isReturnDown
+									if (ui_button(tr("OK"))) { // || ui.isReturnDown
 										socket.name = name;
 										socket.type = type == 0 ? "RGBA" : type == 1 ? "VECTOR" : "VALUE";
 										socket.color = nodes_material_get_socket_color(socket.type);
@@ -233,10 +233,10 @@ function ui_nodes_on_socket_released(socket_id: i32) {
 					}
 					if (ui_menu_button(ui, tr("Delete"))) {
 						let i: i32 = 0;
-						let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
+						let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
 						// Remove links connected to the socket
 						while (i < canvas.links.length) {
-							let l: zui_node_link_t = canvas.links[i];
+							let l: ui_node_link_t = canvas.links[i];
 							if ((l.from_id == node.id && l.from_socket == array_index_of(node.outputs, socket)) ||
 								(l.to_id == node.id && l.to_socket == array_index_of(node.inputs, socket))) {
 								array_splice(canvas.links, i, 1);
@@ -253,7 +253,7 @@ function ui_nodes_on_socket_released(socket_id: i32) {
 				}, 2);
 			});
 		}
-		else ui_nodes_on_canvas_released();
+		else ui_viewnodes_on_canvas_released();
 	}
 	// Selecting which node socket to preview
 	else if (nodes.nodes_selected_id.length > 0 && node.id == nodes.nodes_selected_id[0]) {
@@ -267,17 +267,17 @@ function ui_nodes_on_socket_released(socket_id: i32) {
 	}
 }
 
-let _ui_nodes_on_canvas_released_selected: zui_node_t;
+let _ui_nodes_on_canvas_released_selected: ui_node_t;
 
-function ui_nodes_on_canvas_released() {
+function ui_viewnodes_on_canvas_released() {
 	if (ui_nodes_ui.input_released_r && math_abs(ui_nodes_ui.input_x - ui_nodes_ui.input_started_x) < 2 && math_abs(ui_nodes_ui.input_y - ui_nodes_ui.input_started_y) < 2) {
 		// Node selection
-		let nodes: zui_nodes_t = ui_nodes_get_nodes();
-		let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
-		let selected: zui_node_t = null;
+		let nodes: ui_nodes_t = ui_nodes_get_nodes();
+		let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
+		let selected: ui_node_t = null;
 		for (let i: i32 = 0; i < canvas.nodes.length; ++i) {
-			let node: zui_node_t = canvas.nodes[i];
-			if (zui_input_in_rect(ui_nodes_ui._window_x + zui_nodes_NODE_X(node), ui_nodes_ui._window_y + zui_nodes_NODE_Y(node), zui_nodes_NODE_W(node), zui_nodes_NODE_H(canvas, node))) {
+			let node: ui_node_t = canvas.nodes[i];
+			if (ui_input_in_rect(ui_nodes_ui._window_x + ui_nodes_NODE_X(node), ui_nodes_ui._window_y + ui_nodes_NODE_Y(node), ui_nodes_NODE_W(node), ui_nodes_NODE_H(canvas, node))) {
 				selected = node;
 				break;
 			}
@@ -290,7 +290,7 @@ function ui_nodes_on_canvas_released() {
 		}
 
 		// Node context menu
-		if (!zui_nodes_socket_released) {
+		if (!ui_nodes_socket_released) {
 			let number_of_entries: i32 = 5;
 			if (ui_nodes_canvas_type == canvas_type_t.MATERIAL) {
 				++number_of_entries;
@@ -301,9 +301,9 @@ function ui_nodes_on_canvas_released() {
 
 			_ui_nodes_on_canvas_released_selected = selected;
 
-			ui_menu_draw(function (ui_menu: zui_t) {
+			ui_menu_draw(function (ui_menu: ui_t) {
 
-				let selected: zui_node_t = _ui_nodes_on_canvas_released_selected;
+				let selected: ui_node_t = _ui_nodes_on_canvas_released_selected;
 
 				ui_menu._y += 1;
 				let is_protected: bool = selected == null ||
@@ -317,22 +317,22 @@ function ui_nodes_on_canvas_released() {
 				if (ui_menu_button(ui_menu, tr("Cut"), "ctrl+x")) {
 					app_notify_on_next_frame(function () {
 						ui_nodes_hwnd.redraws = 2;
-						zui_is_copy = true;
-						zui_is_cut = true;
+						ui_is_copy = true;
+						ui_is_cut = true;
 						ui_nodes_is_node_menu_op = true;
 					});
 				}
 				if (ui_menu_button(ui_menu, tr("Copy"), "ctrl+c")) {
 					app_notify_on_next_frame(function () {
-						zui_is_copy = true;
+						ui_is_copy = true;
 						ui_nodes_is_node_menu_op = true;
 					});
 				}
-				ui_menu.enabled = zui_clipboard != "";
+				ui_menu.enabled = ui_clipboard != "";
 				if (ui_menu_button(ui_menu, tr("Paste"), "ctrl+v")) {
 					app_notify_on_next_frame(function () {
 						ui_nodes_hwnd.redraws = 2;
-						zui_is_paste = true;
+						ui_is_paste = true;
 						ui_nodes_is_node_menu_op = true;
 					});
 				}
@@ -347,8 +347,8 @@ function ui_nodes_on_canvas_released() {
 				if (ui_menu_button(ui_menu, tr("Duplicate"))) {
 					app_notify_on_next_frame(function () {
 						ui_nodes_hwnd.redraws = 2;
-						zui_is_copy = true;
-						zui_is_paste = true;
+						ui_is_copy = true;
+						ui_is_paste = true;
 						ui_nodes_is_node_menu_op = true;
 					});
 				}
@@ -375,11 +375,11 @@ function ui_nodes_on_canvas_released() {
 	}
 
 	if (ui_nodes_ui.input_released) {
-		let nodes: zui_nodes_t = ui_nodes_get_nodes();
-		let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
+		let nodes: ui_nodes_t = ui_nodes_get_nodes();
+		let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
 		for (let i: i32 = 0; i < canvas.nodes.length; ++i) {
-			let node: zui_node_t = canvas.nodes[i];
-			if (zui_input_in_rect(ui_nodes_ui._window_x + zui_nodes_NODE_X(node), ui_nodes_ui._window_y + zui_nodes_NODE_Y(node), zui_nodes_NODE_W(node), zui_nodes_NODE_H(canvas, node))) {
+			let node: ui_node_t = canvas.nodes[i];
+			if (ui_input_in_rect(ui_nodes_ui._window_x + ui_nodes_NODE_X(node), ui_nodes_ui._window_y + ui_nodes_NODE_Y(node), ui_nodes_NODE_W(node), ui_nodes_NODE_H(canvas, node))) {
 				if (nodes.nodes_selected_id.length > 0 && node.id == nodes.nodes_selected_id[0]) {
 					ui_view2d_hwnd.redraws = 2;
 					if (time_time() - context_raw.select_time < 0.25) ui_base_show_2d_view(view_2d_type_t.NODE);
@@ -391,13 +391,13 @@ function ui_nodes_on_canvas_released() {
 	}
 }
 
-function ui_nodes_on_canvas_control(): zui_canvas_control_t {
-	let control: zui_canvas_control_t = ui_nodes_get_canvas_control(ui_nodes_ui, ui_nodes_controls_down);
+function ui_viewnodes_on_canvas_control(): ui_canvas_control_t {
+	let control: ui_canvas_control_t = ui_nodes_get_canvas_control(ui_nodes_ui, ui_nodes_controls_down);
 	ui_nodes_controls_down = control.controls_down;
 	return control;
 }
 
-function ui_nodes_get_canvas_control(ui: zui_t, controls_down: bool): zui_canvas_control_t {
+function ui_nodes_get_canvas_control(ui: ui_t, controls_down: bool): ui_canvas_control_t {
 	if (config_raw.wrap_mouse && controls_down) {
 		if (ui.input_x < ui._window_x) {
 			ui.input_x = ui._window_x + ui._window_w;
@@ -430,7 +430,7 @@ function ui_nodes_get_canvas_control(ui: zui_t, controls_down: bool): zui_canvas
 		controls_down = false;
 	}
 	if (!controls_down) {
-		let cc: zui_canvas_control_t = {
+		let cc: ui_canvas_control_t = {
 			pan_x: 0,
 			pan_y: 0,
 			zoom: 0,
@@ -441,7 +441,7 @@ function ui_nodes_get_canvas_control(ui: zui_t, controls_down: bool): zui_canvas
 
 	let pan: bool = ui.input_down_r || operator_shortcut(map_get(config_keymap, "action_pan"), shortcut_type_t.DOWN);
 	let zoom_delta: f32 = operator_shortcut(map_get(config_keymap, "action_zoom"), shortcut_type_t.DOWN) ? ui_nodes_get_zoom_delta(ui) / 100.0 : 0.0;
-	let control: zui_canvas_control_t = {
+	let control: ui_canvas_control_t = {
 		pan_x: pan ? ui.input_dx : 0.0,
 		pan_y: pan ? ui.input_dy : 0.0,
 		zoom: ui.input_wheel_delta != 0.0 ? -ui.input_wheel_delta / 10 : zoom_delta,
@@ -453,7 +453,7 @@ function ui_nodes_get_canvas_control(ui: zui_t, controls_down: bool): zui_canvas
 	return control;
 }
 
-function ui_nodes_get_zoom_delta(ui: zui_t): f32 {
+function ui_nodes_get_zoom_delta(ui: ui_t): f32 {
 	return config_raw.zoom_direction == zoom_direction_t.VERTICAL ? -ui.input_dy :
 		   config_raw.zoom_direction == zoom_direction_t.VERTICAL_INVERTED ? -ui.input_dy :
 		   config_raw.zoom_direction == zoom_direction_t.HORIZONTAL ? ui.input_dx :
@@ -461,7 +461,7 @@ function ui_nodes_get_zoom_delta(ui: zui_t): f32 {
 		   -(ui.input_dy - ui.input_dx);
 }
 
-function ui_nodes_get_canvas(groups: bool = false): zui_node_canvas_t {
+function ui_nodes_get_canvas(groups: bool = false): ui_node_canvas_t {
 	///if (is_paint || is_sculpt)
 	if (ui_nodes_canvas_type == canvas_type_t.MATERIAL) {
 		if (groups && ui_nodes_group_stack.length > 0) {
@@ -482,12 +482,12 @@ function ui_nodes_get_canvas(groups: bool = false): zui_node_canvas_t {
 }
 
 ///if (is_paint || is_sculpt)
-function ui_nodes_get_canvas_material(): zui_node_canvas_t {
+function ui_nodes_get_canvas_material(): ui_node_canvas_t {
 	return context_raw.material.canvas;
 }
 ///end
 
-function ui_nodes_get_nodes(): zui_nodes_t {
+function ui_nodes_get_nodes(): ui_nodes_t {
 	///if (is_paint || is_sculpt)
 	if (ui_nodes_canvas_type == canvas_type_t.MATERIAL) {
 		if (ui_nodes_group_stack.length > 0) {
@@ -547,34 +547,34 @@ function ui_nodes_update() {
 		return;
 	}
 
-	let nodes: zui_nodes_t = ui_nodes_get_nodes();
+	let nodes: ui_nodes_t = ui_nodes_get_nodes();
 	if (nodes.nodes_selected_id.length > 0 && ui_nodes_ui.is_key_pressed) {
 		if (ui_nodes_ui.key_code == key_code_t.LEFT) {
 			for (let i: i32 = 0; i < nodes.nodes_selected_id.length; ++i) {
 				let n: i32 = nodes.nodes_selected_id[i];
-				let _nodes: zui_node_t[] = ui_nodes_get_canvas(true).nodes;
-				zui_get_node(_nodes, n).x -= 1;
+				let _nodes: ui_node_t[] = ui_nodes_get_canvas(true).nodes;
+				ui_get_node(_nodes, n).x -= 1;
 			}
 		}
 		else if (ui_nodes_ui.key_code == key_code_t.RIGHT) {
 			for (let i: i32 = 0; i < nodes.nodes_selected_id.length; ++i) {
 				let n: i32 = nodes.nodes_selected_id[i];
-				let _nodes: zui_node_t[] = ui_nodes_get_canvas(true).nodes;
-				zui_get_node(_nodes, n).x += 1;
+				let _nodes: ui_node_t[] = ui_nodes_get_canvas(true).nodes;
+				ui_get_node(_nodes, n).x += 1;
 			}
 		}
 		if (ui_nodes_ui.key_code == key_code_t.UP) {
 			for (let i: i32 = 0; i < nodes.nodes_selected_id.length; ++i) {
 				let n: i32 = nodes.nodes_selected_id[i];
-				let _nodes: zui_node_t[] = ui_nodes_get_canvas(true).nodes;
-				zui_get_node(_nodes, n).y -= 1;
+				let _nodes: ui_node_t[] = ui_nodes_get_canvas(true).nodes;
+				ui_get_node(_nodes, n).y -= 1;
 			}
 		}
 		else if (ui_nodes_ui.key_code == key_code_t.DOWN) {
 			for (let i: i32 = 0; i < nodes.nodes_selected_id.length; ++i) {
 				let n: i32 = nodes.nodes_selected_id[i];
-				let _nodes: zui_node_t[] = ui_nodes_get_canvas(true).nodes;
-				zui_get_node(_nodes, n).y += 1;
+				let _nodes: ui_node_t[] = ui_nodes_get_canvas(true).nodes;
+				ui_get_node(_nodes, n).y += 1;
 			}
 		}
 	}
@@ -606,19 +606,19 @@ function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
 	_ui_nodes_node_search_first = true;
 	_ui_nodes_node_search_done = done;
 
-	ui_menu_draw(function (ui: zui_t) {
-		let search_handle: zui_handle_t = zui_handle(__ID__);
+	ui_menu_draw(function (ui: ui_t) {
+		let search_handle: ui_handle_t = ui_handle(__ID__);
 
 		g2_set_color(ui.ops.theme.SEPARATOR_COL);
-		zui_draw_rect(true, ui._x, ui._y, ui._w, zui_ELEMENT_H(ui) * 8);
+		ui_draw_rect(true, ui._x, ui._y, ui._w, ui_ELEMENT_H(ui) * 8);
 		g2_set_color(0xffffffff);
 
-		let search: string = to_lower_case(zui_text_input(search_handle, "", zui_align_t.LEFT, true, true));
+		let search: string = to_lower_case(ui_text_input(search_handle, "", ui_align_t.LEFT, true, true));
 		ui.changed = false;
 		if (_ui_nodes_node_search_first) {
 			_ui_nodes_node_search_first = false;
 			search_handle.text = "";
-			zui_start_text_edit(search_handle); // Focus search bar
+			ui_start_text_edit(search_handle); // Focus search bar
 		}
 
 		if (search_handle.changed) {
@@ -645,15 +645,15 @@ function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
 		///end
 
 		for (let i: i32 = 0; i < node_list.length; ++i) {
-			let list: zui_node_t[] = node_list[i];
+			let list: ui_node_t[] = node_list[i];
 			for (let i: i32 = 0; i < list.length; ++i) {
-				let n: zui_node_t = list[i];
+				let n: ui_node_t = list[i];
 				if (string_index_of(to_lower_case(tr(n.name)), search) >= 0) {
 					ui.ops.theme.BUTTON_COL = count == ui_nodes_node_search_offset ? ui.ops.theme.HIGHLIGHT_COL : ui.ops.theme.SEPARATOR_COL;
-					if (zui_button(tr(n.name), zui_align_t.LEFT) || (enter && count == ui_nodes_node_search_offset)) {
+					if (ui_button(tr(n.name), ui_align_t.LEFT) || (enter && count == ui_nodes_node_search_offset)) {
 						ui_nodes_push_undo();
-						let nodes: zui_nodes_t = ui_nodes_get_nodes();
-						let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
+						let nodes: ui_nodes_t = ui_nodes_get_nodes();
+						let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
 						ui_nodes_node_search_spawn = ui_nodes_make_node(n, nodes, canvas); // Spawn selected node
 						array_push(canvas.nodes, ui_nodes_node_search_spawn);
 						nodes.nodes_selected_id = [ui_nodes_node_search_spawn.id];
@@ -690,11 +690,11 @@ function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
 }
 
 function ui_nodes_get_node_x(): i32 {
-	return math_floor((mouse_x - ui_nodes_wx - zui_nodes_PAN_X()) / zui_nodes_SCALE());
+	return math_floor((mouse_x - ui_nodes_wx - ui_nodes_PAN_X()) / ui_nodes_SCALE());
 }
 
 function ui_nodes_get_node_y(): i32 {
-	return math_floor((mouse_y - ui_nodes_wy - zui_nodes_PAN_Y()) / zui_nodes_SCALE());
+	return math_floor((mouse_y - ui_nodes_wy - ui_nodes_PAN_Y()) / ui_nodes_SCALE());
 }
 
 function ui_nodes_draw_grid() {
@@ -707,7 +707,7 @@ function ui_nodes_draw_grid() {
 	///end
 
 	let wh: i32 = app_h();
-	let step: f32 = 100 * zui_SCALE(ui_nodes_ui);
+	let step: f32 = 100 * ui_SCALE(ui_nodes_ui);
 	let w: i32 = math_floor(ww + step * 3);
 	let h: i32 = math_floor(wh + step * 3);
 	if (w < 1) {
@@ -721,7 +721,7 @@ function ui_nodes_draw_grid() {
 	g2_clear(ui_nodes_ui.ops.theme.SEPARATOR_COL);
 
 	g2_set_color(ui_nodes_ui.ops.theme.SEPARATOR_COL - 0x00050505);
-	step = 20 * zui_SCALE(ui_nodes_ui);
+	step = 20 * ui_SCALE(ui_nodes_ui);
 	for (let i: i32 = 0; i < math_floor(h / step) + 1; ++i) {
 		g2_draw_line(0, i * step, w, i * step);
 	}
@@ -730,7 +730,7 @@ function ui_nodes_draw_grid() {
 	}
 
 	g2_set_color(ui_nodes_ui.ops.theme.SEPARATOR_COL - 0x00090909);
-	step = 100 * zui_SCALE(ui_nodes_ui);
+	step = 100 * ui_SCALE(ui_nodes_ui);
 	for (let i: i32 = 0; i < math_floor(h / step) + 1; ++i) {
 		g2_draw_line(0, i * step, w, i * step);
 	}
@@ -791,7 +791,7 @@ function ui_nodes_render() {
 		ui_nodes_recompile_mat_final = false;
 	}
 
-	let nodes: zui_nodes_t = ui_nodes_get_nodes();
+	let nodes: ui_nodes_t = ui_nodes_get_nodes();
 	if (nodes.nodes_selected_id.length > 0 && nodes.nodes_selected_id[0] != ui_nodes_last_node_selected_id) {
 		ui_nodes_last_node_selected_id = nodes.nodes_selected_id[0];
 		///if (is_paint || is_sculpt)
@@ -807,9 +807,9 @@ function ui_nodes_render() {
 	}
 
 	// Remove dragged link when mouse is released out of the node viewport
-	let c: zui_node_canvas_t = ui_nodes_get_canvas(true);
+	let c: ui_node_canvas_t = ui_nodes_get_canvas(true);
 	if (ui_nodes_release_link && nodes.link_drag_id != -1) {
-		array_remove(c.links, zui_get_link(c.links, nodes.link_drag_id));
+		array_remove(c.links, ui_get_link(c.links, nodes.link_drag_id));
 		nodes.link_drag_id = -1;
 	}
 	ui_nodes_release_link = ui_nodes_ui.input_released;
@@ -833,7 +833,7 @@ function ui_nodes_render() {
 	///end
 
 	// Start with UI
-	zui_begin(ui_nodes_ui);
+	ui_begin(ui_nodes_ui);
 
 	// Make window
 	ui_nodes_ww = config_raw.layout[layout_size_t.NODES_W];
@@ -854,7 +854,7 @@ function ui_nodes_render() {
 	}
 	///end
 
-	let ew: i32 = math_floor(zui_ELEMENT_W(ui_nodes_ui) * 0.7);
+	let ew: i32 = math_floor(ui_ELEMENT_W(ui_nodes_ui) * 0.7);
 	ui_nodes_wh = app_h() + ui_header_h;
 	if (config_raw.layout[layout_size_t.HEADER] == 1) {
 		ui_nodes_wh += ui_header_h;
@@ -871,15 +871,15 @@ function ui_nodes_render() {
 		}
 	}
 
-	if (zui_window(ui_nodes_hwnd, ui_nodes_wx, ui_nodes_wy, ui_nodes_ww, ui_nodes_wh)) {
+	if (ui_window(ui_nodes_hwnd, ui_nodes_wx, ui_nodes_wy, ui_nodes_ww, ui_nodes_wh)) {
 
-		zui_tab(zui_handle(__ID__), tr("Nodes"));
+		ui_tab(ui_handle(__ID__), tr("Nodes"));
 
 		// Grid
 		g2_set_color(0xffffffff);
-		let step: f32 = 100 * zui_SCALE(ui_nodes_ui);
-		let x: f32 = math_fmod(nodes.pan_x * zui_nodes_SCALE(), step) - step;
-		let y: f32 = math_fmod(nodes.pan_y * zui_nodes_SCALE(), step) - step;
+		let step: f32 = 100 * ui_SCALE(ui_nodes_ui);
+		let x: f32 = math_fmod(nodes.pan_x * ui_nodes_SCALE(), step) - step;
+		let y: f32 = math_fmod(nodes.pan_y * ui_nodes_SCALE(), step) - step;
 		g2_draw_image(ui_nodes_grid, x, y);
 
 		// Undo
@@ -896,7 +896,7 @@ function ui_nodes_render() {
 		ui_nodes_ui.window_border_top = ui_header_h * 2;
 		ui_nodes_ui.window_border_bottom = config_raw.layout[layout_size_t.STATUS_H];
 
-		zui_node_canvas(nodes, c);
+		ui_node_canvas(nodes, c);
 		ui_nodes_ui.input_enabled = _input_enabled;
 
 		if (nodes.color_picker_callback != null) {
@@ -923,7 +923,7 @@ function ui_nodes_render() {
 		}
 
 		// Remove nodes with unknown id for this canvas type
-		if (zui_is_paste) {
+		if (ui_is_paste) {
 			///if (is_paint || is_sculpt)
 			let node_list: node_list_t[] = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_list : nodes_brush_list;
 			///end
@@ -933,15 +933,15 @@ function ui_nodes_render() {
 
 			let i: i32 = 0;
 			while (i++ < c.nodes.length) {
-				let canvas_node: zui_node_t = c.nodes[i - 1];
-				if (array_index_of(zui_nodes_exclude_remove, canvas_node.type) >= 0) {
+				let canvas_node: ui_node_t = c.nodes[i - 1];
+				if (array_index_of(ui_nodes_exclude_remove, canvas_node.type) >= 0) {
 					continue;
 				}
 				let found: bool = false;
 				for (let i: i32 = 0; i < node_list.length; ++i) {
-					let list: zui_node_t[] = node_list[i];
+					let list: ui_node_t[] = node_list[i];
 					for (let i: i32 = 0; i < list.length; ++i) {
-						let list_node: zui_node_t = list[i];
+						let list_node: ui_node_t = list[i];
 						if (canvas_node.type == list_node.type) {
 							found = true;
 							break;
@@ -955,7 +955,7 @@ function ui_nodes_render() {
 					found = false;
 				}
 				if (!found) {
-					zui_remove_node(canvas_node, c);
+					ui_remove_node(canvas_node, c);
 					array_remove(nodes.nodes_selected_id, canvas_node.id);
 					i--;
 				}
@@ -963,9 +963,9 @@ function ui_nodes_render() {
 		}
 
 		if (ui_nodes_is_node_menu_op) {
-			zui_is_copy = false;
-			zui_is_cut = false;
-			zui_is_paste = false;
+			ui_is_copy = false;
+			ui_is_cut = false;
+			ui_is_paste = false;
 			ui_nodes_ui.is_delete_down = false;
 		}
 
@@ -987,7 +987,7 @@ function ui_nodes_render() {
 		// Node previews
 		if (config_raw.node_preview && nodes.nodes_selected_id.length > 0) {
 			let img: image_t = null;
-			let sel: zui_node_t = zui_get_node(c.nodes, nodes.nodes_selected_id[0]);
+			let sel: ui_node_t = ui_get_node(c.nodes, nodes.nodes_selected_id[0]);
 
 			///if (is_paint || is_sculpt)
 
@@ -1026,10 +1026,10 @@ function ui_nodes_render() {
 			///end
 
 			if (img != null) {
-				let tw: f32 = 128 * zui_SCALE(ui_nodes_ui);
+				let tw: f32 = 128 * ui_SCALE(ui_nodes_ui);
 				let th: f32 = tw * (img.height / img.width);
-				let tx: f32 = ui_nodes_ww - tw - 8 * zui_SCALE(ui_nodes_ui);
-				let ty: f32 = ui_nodes_wh - th - 8 * zui_SCALE(ui_nodes_ui);
+				let tx: f32 = ui_nodes_ww - tw - 8 * ui_SCALE(ui_nodes_ui);
+				let ty: f32 = ui_nodes_wh - th - 8 * ui_SCALE(ui_nodes_ui);
 
 				///if krom_opengl
 				let invert_y: bool = sel.type == "MATERIAL";
@@ -1062,20 +1062,20 @@ function ui_nodes_render() {
 
 		// Menu
 		g2_set_color(ui_nodes_ui.ops.theme.SEPARATOR_COL);
-		g2_fill_rect(0, zui_ELEMENT_H(ui_nodes_ui), ui_nodes_ww, zui_ELEMENT_H(ui_nodes_ui) + zui_ELEMENT_OFFSET(ui_nodes_ui) * 2);
+		g2_fill_rect(0, ui_ELEMENT_H(ui_nodes_ui), ui_nodes_ww, ui_ELEMENT_H(ui_nodes_ui) + ui_ELEMENT_OFFSET(ui_nodes_ui) * 2);
 		g2_set_color(0xffffffff);
 
-		let start_y: i32 = zui_ELEMENT_H(ui_nodes_ui) + zui_ELEMENT_OFFSET(ui_nodes_ui);
+		let start_y: i32 = ui_ELEMENT_H(ui_nodes_ui) + ui_ELEMENT_OFFSET(ui_nodes_ui);
 		ui_nodes_ui._x = 0;
 		ui_nodes_ui._y = 2 + start_y;
 		ui_nodes_ui._w = ew;
 
 		///if (is_paint || is_sculpt)
 		// Editable canvas name
-		let h: zui_handle_t = zui_handle(__ID__);
+		let h: ui_handle_t = ui_handle(__ID__);
 		h.text = c.name;
-		ui_nodes_ui._w = math_floor(math_min(g2_font_width(ui_nodes_ui.ops.font, ui_nodes_ui.font_size, h.text) + 15 * zui_SCALE(ui_nodes_ui), 100 * zui_SCALE(ui_nodes_ui)));
-		let new_name: string = zui_text_input(h, "");
+		ui_nodes_ui._w = math_floor(math_min(g2_font_width(ui_nodes_ui.ops.font, ui_nodes_ui.font_size, h.text) + 15 * ui_SCALE(ui_nodes_ui), 100 * ui_SCALE(ui_nodes_ui)));
+		let new_name: string = ui_text_input(h, "");
 		ui_nodes_ui._x += ui_nodes_ui._w + 3;
 		ui_nodes_ui._y = 2 + start_y;
 		ui_nodes_ui._w = ew;
@@ -1093,7 +1093,7 @@ function ui_nodes_render() {
 				if (can_rename) {
 					let old_name: string = c.name;
 					c.name = new_name;
-					let canvases: zui_node_canvas_t[] = [];
+					let canvases: ui_node_canvas_t[] = [];
 					for (let i: i32 = 0; i < project_materials.length; ++i) {
 						let m: slot_material_t = project_materials[i];
 						array_push(canvases, m.canvas);
@@ -1103,9 +1103,9 @@ function ui_nodes_render() {
 						array_push(canvases, m.canvas);
 					}
 					for (let i: i32 = 0; i < canvases.length; ++i) {
-						let canvas: zui_node_canvas_t = canvases[i];
+						let canvas: ui_node_canvas_t = canvases[i];
 						for (let i: i32 = 0; i < canvas.nodes.length; ++i) {
-							let n: zui_node_t = canvas.nodes[i];
+							let n: ui_node_t = canvas.nodes[i];
 							if (n.type == "GROUP" && n.name == old_name) {
 								n.name = c.name;
 							}
@@ -1135,7 +1135,7 @@ function ui_nodes_render() {
 		///end
 
 		for (let i: i32 = 0; i < cats.length; ++i) {
-			if ((zui_menu_button(tr(cats[i]))) || (ui_nodes_ui.is_hovered && ui_nodes_show_menu)) {
+			if ((_ui_menu_button(tr(cats[i]))) || (ui_nodes_ui.is_hovered && ui_nodes_show_menu)) {
 				ui_nodes_show_menu = true;
 				ui_nodes_menu_category = i;
 				ui_nodes_popup_x = ui_nodes_wx + ui_nodes_ui._x;
@@ -1147,7 +1147,7 @@ function ui_nodes_render() {
 					ui_nodes_popup_x += ui_nodes_ui._w / 2;
 				}
 				ui_menu_category_w = ui_nodes_ui._w;
-				ui_menu_category_h = math_floor(zui_MENUBAR_H(ui_nodes_ui));
+				ui_menu_category_h = math_floor(ui_MENUBAR_H(ui_nodes_ui));
 			}
 			ui_nodes_ui._x += ui_nodes_ui._w + 3;
 			ui_nodes_ui._y = 2 + start_y;
@@ -1155,20 +1155,20 @@ function ui_nodes_render() {
 
 		if (config_raw.touch_ui) {
 			let _w: i32 = ui_nodes_ui._w;
-			ui_nodes_ui._w = math_floor(36 * zui_SCALE(ui_nodes_ui));
-			ui_nodes_ui._y = 4 * zui_SCALE(ui_nodes_ui) + start_y;
+			ui_nodes_ui._w = math_floor(36 * ui_SCALE(ui_nodes_ui));
+			ui_nodes_ui._y = 4 * ui_SCALE(ui_nodes_ui) + start_y;
 			if (ui_menubar_icon_button(ui_nodes_ui, 2, 3)) {
 				ui_nodes_node_search(math_floor(ui_nodes_ui._window_x + ui_nodes_ui._x), math_floor(ui_nodes_ui._window_y + ui_nodes_ui._y));
 			}
 			ui_nodes_ui._w = _w;
 		}
 		else {
-			if (zui_menu_button(tr("Search"))) {
+			if (_ui_menu_button(tr("Search"))) {
 				ui_nodes_node_search(math_floor(ui_nodes_ui._window_x + ui_nodes_ui._x), math_floor(ui_nodes_ui._window_y + ui_nodes_ui._y));
 			}
 		}
 		if (ui_nodes_ui.is_hovered) {
-			zui_tooltip(tr("Search for nodes") + " (" + map_get(config_keymap, "node_search") + ")");
+			ui_tooltip(tr("Search for nodes") + " (" + map_get(config_keymap, "node_search") + ")");
 		}
 		ui_nodes_ui._x += ui_nodes_ui._w + 3;
 		ui_nodes_ui._y = 2 + start_y;
@@ -1176,12 +1176,12 @@ function ui_nodes_render() {
 		ui_nodes_ui.ops.theme.BUTTON_COL = _BUTTON_COL;
 
 		// Close node group
-		if (ui_nodes_group_stack.length > 0 && zui_menu_button(tr("Close"))) {
+		if (ui_nodes_group_stack.length > 0 && _ui_menu_button(tr("Close"))) {
 			array_pop(ui_nodes_group_stack);
 		}
 	}
 
-	zui_end(!ui_nodes_show_menu);
+	ui_end(!ui_nodes_show_menu);
 
 	g2_begin(null);
 
@@ -1193,7 +1193,7 @@ function ui_nodes_render() {
 		let list: node_list_t[] = nodes_brush_list;
 		///end
 
-		let category: zui_node_t[] = list[ui_nodes_menu_category];
+		let category: ui_node_t[] = list[ui_nodes_menu_category];
 		let num_nodes: i32 = category.length;
 
 		///if (is_paint || is_sculpt)
@@ -1209,7 +1209,7 @@ function ui_nodes_render() {
 
 		let py: i32 = ui_nodes_popup_y;
 		let menuw: i32 = math_floor(ew * 2.3);
-		zui_begin_region(ui_nodes_ui, math_floor(ui_nodes_popup_x), math_floor(py), menuw);
+		ui_begin_region(ui_nodes_ui, math_floor(ui_nodes_popup_x), math_floor(py), menuw);
 		let _BUTTON_COL: i32 = ui_nodes_ui.ops.theme.BUTTON_COL;
 		ui_nodes_ui.ops.theme.BUTTON_COL = ui_nodes_ui.ops.theme.SEPARATOR_COL;
 		let _ELEMENT_OFFSET: i32 = ui_nodes_ui.ops.theme.ELEMENT_OFFSET;
@@ -1220,12 +1220,12 @@ function ui_nodes_render() {
 		ui_menu_start(ui_nodes_ui);
 
 		for (let i: i32 = 0; i < category.length; ++i) {
-			let n: zui_node_t = category[i];
+			let n: ui_node_t = category[i];
 			if (ui_menu_button(ui_nodes_ui, tr(n.name))) {
 				ui_nodes_push_undo();
-				let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
-				let nodes: zui_nodes_t = ui_nodes_get_nodes();
-				let node: zui_node_t = ui_nodes_make_node(n, nodes, canvas);
+				let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
+				let nodes: ui_nodes_t = ui_nodes_get_nodes();
+				let node: ui_node_t = ui_nodes_make_node(n, nodes, canvas);
 				array_push(canvas.nodes, node);
 				nodes.nodes_selected_id = [node.id];
 				nodes.nodes_drag = true;
@@ -1234,7 +1234,7 @@ function ui_nodes_render() {
 				///end
 			}
 			// Next column
-			if (ui_nodes_ui._y - ui_nodes_wy + zui_ELEMENT_H(ui_nodes_ui) / 2 > ui_nodes_wh) {
+			if (ui_nodes_ui._y - ui_nodes_wy + ui_ELEMENT_H(ui_nodes_ui) / 2 > ui_nodes_wh) {
 				ui_nodes_ui._x += menuw;
 				ui_nodes_ui._y = py;
 			}
@@ -1242,17 +1242,17 @@ function ui_nodes_render() {
 		if (is_group_category) {
 			for (let i: i32 = 0; i < project_material_groups.length; ++i) {
 				let g: node_group_t = project_material_groups[i];
-				zui_fill(0, 1, ui_nodes_ui._w / zui_SCALE(ui_nodes_ui), ui_nodes_ui.ops.theme.BUTTON_H + 2, ui_nodes_ui.ops.theme.ACCENT_SELECT_COL);
-				zui_fill(1, 1, ui_nodes_ui._w / zui_SCALE(ui_nodes_ui) - 2, ui_nodes_ui.ops.theme.BUTTON_H + 1, ui_nodes_ui.ops.theme.SEPARATOR_COL);
+				ui_fill(0, 1, ui_nodes_ui._w / ui_SCALE(ui_nodes_ui), ui_nodes_ui.ops.theme.BUTTON_H + 2, ui_nodes_ui.ops.theme.ACCENT_SELECT_COL);
+				ui_fill(1, 1, ui_nodes_ui._w / ui_SCALE(ui_nodes_ui) - 2, ui_nodes_ui.ops.theme.BUTTON_H + 1, ui_nodes_ui.ops.theme.SEPARATOR_COL);
 				ui_nodes_ui.enabled = ui_nodes_can_place_group(g.canvas.name);
 				ui_menu_fill(ui_nodes_ui);
 				let row: f32[] = [5 / 6, 1 / 6];
-				zui_row(row);
-				if (zui_button(config_button_spacing + g.canvas.name, zui_align_t.LEFT)) {
+				ui_row(row);
+				if (ui_button(config_button_spacing + g.canvas.name, ui_align_t.LEFT)) {
 					ui_nodes_push_undo();
-					let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
-					let nodes: zui_nodes_t = ui_nodes_get_nodes();
-					let node: zui_node_t = ui_nodes_make_group_node(g.canvas, nodes, canvas);
+					let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
+					let nodes: ui_nodes_t = ui_nodes_get_nodes();
+					let node: ui_node_t = ui_nodes_make_group_node(g.canvas, nodes, canvas);
 					array_push(canvas.nodes, node);
 					nodes.nodes_selected_id = [node.id];
 					nodes.nodes_drag = true;
@@ -1260,7 +1260,7 @@ function ui_nodes_render() {
 
 				///if (is_paint || is_sculpt)
 				ui_nodes_ui.enabled = !project_is_material_group_in_use(g);
-				if (zui_button("x", zui_align_t.CENTER)) {
+				if (ui_button("x", ui_align_t.CENTER)) {
 					history_delete_material_group(g);
 					array_remove(project_material_groups, g);
 				}
@@ -1276,7 +1276,7 @@ function ui_nodes_render() {
 		ui_nodes_ui.ops.theme.BUTTON_COL = _BUTTON_COL;
 		ui_nodes_ui.ops.theme.ELEMENT_OFFSET = _ELEMENT_OFFSET;
 		ui_nodes_ui.ops.theme.ELEMENT_H = _ELEMENT_H;
-		zui_end_region();
+		ui_end_region();
 	}
 
 	if (ui_nodes_hide_menu) {
@@ -1290,7 +1290,7 @@ function ui_nodes_contains_node_group_recursive(group: node_group_t, group_name:
 		return true;
 	}
 	for (let i: i32 = 0; i < group.canvas.nodes.length; ++i) {
-		let n: zui_node_t = group.canvas.nodes[i];
+		let n: ui_node_t = group.canvas.nodes[i];
 		if (n.type == "GROUP") {
 			let g: node_group_t = project_get_material_group_by_name(n.name);
 			if (g != null && ui_nodes_contains_node_group_recursive(g, group_name)) {
@@ -1324,7 +1324,7 @@ function ui_nodes_can_place_group(group_name: string): bool {
 	return true;
 }
 
-function ui_nodes_push_undo(last_canvas: zui_node_canvas_t = null) {
+function ui_nodes_push_undo(last_canvas: ui_node_canvas_t = null) {
 	if (last_canvas == null) {
 		last_canvas = ui_nodes_get_canvas(true);
 	}
@@ -1346,10 +1346,10 @@ function ui_nodes_accept_asset_drag(index: i32) {
 	ui_nodes_push_undo();
 	let g: node_group_t = ui_nodes_group_stack.length > 0 ? ui_nodes_group_stack[ui_nodes_group_stack.length - 1] : null;
 	///if (is_paint || is_sculpt)
-	let n: zui_node_t = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_create_node("TEX_IMAGE", g) : nodes_brush_create_node("TEX_IMAGE");
+	let n: ui_node_t = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_create_node("TEX_IMAGE", g) : nodes_brush_create_node("TEX_IMAGE");
 	///end
 	///if is_lab
-	let n: zui_node_t = nodes_brush_create_node("ImageTextureNode");
+	let n: ui_node_t = nodes_brush_create_node("ImageTextureNode");
 	///end
 
 	n.buttons[0].default_value[0] = index;
@@ -1367,7 +1367,7 @@ function ui_nodes_accept_layer_drag(index: i32) {
 		return;
 	}
 	let g: node_group_t = ui_nodes_group_stack.length > 0 ? ui_nodes_group_stack[ui_nodes_group_stack.length - 1] : null;
-	let n: zui_node_t = nodes_material_create_node(slot_layer_is_mask(context_raw.layer) ? "LAYER_MASK" : "LAYER", g);
+	let n: ui_node_t = nodes_material_create_node(slot_layer_is_mask(context_raw.layer) ? "LAYER_MASK" : "LAYER", g);
 	n.buttons[0].default_value[0] = index;
 	ui_nodes_get_nodes().nodes_selected_id = [n.id];
 }
@@ -1375,7 +1375,7 @@ function ui_nodes_accept_layer_drag(index: i32) {
 function ui_nodes_accept_material_drag(index: i32) {
 	ui_nodes_push_undo();
 	let g: node_group_t = ui_nodes_group_stack.length > 0 ? ui_nodes_group_stack[ui_nodes_group_stack.length - 1] : null;
-	let n: zui_node_t = nodes_material_create_node("MATERIAL", g);
+	let n: ui_node_t = nodes_material_create_node("MATERIAL", g);
 	n.buttons[0].default_value[0] = index;
 	ui_nodes_get_nodes().nodes_selected_id = [n.id];
 }
@@ -1385,7 +1385,7 @@ function ui_nodes_accept_swatch_drag(swatch: swatch_color_t) {
 	///if (is_paint || is_sculpt)
 	ui_nodes_push_undo();
 	let g: node_group_t = ui_nodes_group_stack.length > 0 ? ui_nodes_group_stack[ui_nodes_group_stack.length - 1] : null;
-	let n: zui_node_t = nodes_material_create_node("RGB", g);
+	let n: ui_node_t = nodes_material_create_node("RGB", g);
 	n.outputs[0].default_value = f32_array_create_xyzw(
 		color_get_rb(swatch.base) / 255,
 		color_get_gb(swatch.base) / 255,
@@ -1396,9 +1396,9 @@ function ui_nodes_accept_swatch_drag(swatch: swatch_color_t) {
 	///end
 }
 
-function ui_nodes_make_node(n: zui_node_t, nodes: zui_nodes_t, canvas: zui_node_canvas_t): zui_node_t {
-	let node: zui_node_t = {};
-	node.id = zui_next_node_id(canvas.nodes);
+function ui_nodes_make_node(n: ui_node_t, nodes: ui_nodes_t, canvas: ui_node_canvas_t): ui_node_t {
+	let node: ui_node_t = {};
+	node.id = ui_next_node_id(canvas.nodes);
 	node.name = n.name;
 	node.type = n.type;
 	node.x = ui_nodes_get_node_x();
@@ -1411,8 +1411,8 @@ function ui_nodes_make_node(n: zui_node_t, nodes: zui_nodes_t, canvas: zui_node_
 
 	let count: i32 = 0;
 	for (let i: i32 = 0; i < n.inputs.length; ++i) {
-		let soc: zui_node_socket_t = {};
-		soc.id = zui_get_socket_id(canvas.nodes) + count;
+		let soc: ui_node_socket_t = {};
+		soc.id = ui_get_socket_id(canvas.nodes) + count;
 		count++;
 		soc.node_id = node.id;
 		soc.name = n.inputs[i].name;
@@ -1427,8 +1427,8 @@ function ui_nodes_make_node(n: zui_node_t, nodes: zui_nodes_t, canvas: zui_node_
 	}
 
 	for (let i: i32 = 0; i < n.outputs.length; ++i) {
-		let soc: zui_node_socket_t = {};
-		soc.id = zui_get_socket_id(canvas.nodes) + count;
+		let soc: ui_node_socket_t = {};
+		soc.id = ui_get_socket_id(canvas.nodes) + count;
 		count++;
 		soc.node_id = node.id;
 		soc.name = n.outputs[i].name;
@@ -1443,7 +1443,7 @@ function ui_nodes_make_node(n: zui_node_t, nodes: zui_nodes_t, canvas: zui_node_
 	}
 
 	for (let i: i32 = 0; i < n.buttons.length; ++i) {
-		let but: zui_node_button_t = {};
+		let but: ui_node_button_t = {};
 		but.name = n.buttons[i].name;
 		but.type = n.buttons[i].type;
 		but.output = n.buttons[i].output;
@@ -1459,21 +1459,21 @@ function ui_nodes_make_node(n: zui_node_t, nodes: zui_nodes_t, canvas: zui_node_
 	return node;
 }
 
-function ui_nodes_make_group_node(group_canvas: zui_node_canvas_t, nodes: zui_nodes_t, canvas: zui_node_canvas_t): zui_node_t {
-	let category: zui_node_t[] = nodes_material_list[5];
-	let n: zui_node_t = category[0];
-	let node: zui_node_t = util_clone_canvas_node(n);
+function ui_nodes_make_group_node(group_canvas: ui_node_canvas_t, nodes: ui_nodes_t, canvas: ui_node_canvas_t): ui_node_t {
+	let category: ui_node_t[] = nodes_material_list[5];
+	let n: ui_node_t = category[0];
+	let node: ui_node_t = util_clone_canvas_node(n);
 	node.name = group_canvas.name;
-	node.id = zui_next_node_id(canvas.nodes);
+	node.id = ui_next_node_id(canvas.nodes);
 	node.x = ui_nodes_get_node_x();
 	node.y = ui_nodes_get_node_y();
-	let group_input: zui_node_t = null;
-	let group_output: zui_node_t = null;
+	let group_input: ui_node_t = null;
+	let group_output: ui_node_t = null;
 	for (let i: i32 = 0; i < project_material_groups.length; ++i) {
 		let g: node_group_t = project_material_groups[i];
 		if (g.canvas.name == node.name) {
 			for (let i: i32 = 0; i < g.canvas.nodes.length; ++i) {
-				let n: zui_node_t = g.canvas.nodes[i];
+				let n: ui_node_t = g.canvas.nodes[i];
 				if (n.type == "GROUP_INPUT") {
 					group_input = n;
 				}
@@ -1486,11 +1486,11 @@ function ui_nodes_make_group_node(group_canvas: zui_node_canvas_t, nodes: zui_no
 	}
 	if (group_input != null && group_output != null) {
 		for (let i: i32 = 0; i < group_input.outputs.length; ++i) {
-			let soc: zui_node_socket_t = group_input.outputs[i];
+			let soc: ui_node_socket_t = group_input.outputs[i];
 			array_push(node.inputs, nodes_material_create_socket(nodes, node, soc.name, soc.type, canvas, soc.min, soc.max, soc.default_value));
 		}
 		for (let i: i32 = 0; i < group_output.inputs.length; ++i) {
-			let soc: zui_node_socket_t = group_output.inputs[i];
+			let soc: ui_node_socket_t = group_output.inputs[i];
 			array_push(node.outputs, nodes_material_create_socket(nodes, node, soc.name, soc.type, canvas, soc.min, soc.max, soc.default_value));
 		}
 	}
@@ -1499,13 +1499,13 @@ function ui_nodes_make_group_node(group_canvas: zui_node_canvas_t, nodes: zui_no
 
 ///if (is_paint || is_sculpt)
 function ui_nodes_make_node_preview() {
-	let ui_nodes: zui_nodes_t = context_raw.material.nodes;
+	let ui_nodes: ui_nodes_t = context_raw.material.nodes;
 	if (ui_nodes.nodes_selected_id.length == 0) {
 		return;
 	}
 
-	let nodes: zui_node_t[] = context_raw.material.canvas.nodes;
-	let node: zui_node_t = zui_get_node(nodes, ui_nodes.nodes_selected_id[0]);
+	let nodes: ui_node_t[] = context_raw.material.canvas.nodes;
+	let node: ui_node_t = ui_get_node(nodes, ui_nodes.nodes_selected_id[0]);
 	context_raw.node_preview_name = node.name;
 
 	if (node.type == "LAYER" ||
@@ -1529,9 +1529,9 @@ function ui_nodes_make_node_preview() {
 }
 ///end
 
-function ui_nodes_has_group(c: zui_node_canvas_t): bool {
+function ui_nodes_has_group(c: ui_node_canvas_t): bool {
 	for (let i: i32 = 0; i < c.nodes.length; ++i) {
-		let n: zui_node_t = c.nodes[i];
+		let n: ui_node_t = c.nodes[i];
 		if (n.type == "GROUP") {
 			return true;
 		}
@@ -1539,17 +1539,17 @@ function ui_nodes_has_group(c: zui_node_canvas_t): bool {
 	return false;
 }
 
-function ui_nodes_traverse_group(mgroups: zui_node_canvas_t[], c: zui_node_canvas_t) {
+function ui_nodes_traverse_group(mgroups: ui_node_canvas_t[], c: ui_node_canvas_t) {
 	for (let i: i32 = 0; i < c.nodes.length; ++i) {
-		let n: zui_node_t = c.nodes[i];
+		let n: ui_node_t = c.nodes[i];
 		if (n.type == "GROUP") {
 			if (ui_nodes_get_group(mgroups, n.name) == null) {
-				let canvases: zui_node_canvas_t[] = [];
+				let canvases: ui_node_canvas_t[] = [];
 				for (let i: i32 = 0; i < project_material_groups.length; ++i) {
 					let g: node_group_t = project_material_groups[i];
 					array_push(canvases, g.canvas);
 				}
-				let group: zui_node_canvas_t = ui_nodes_get_group(canvases, n.name);
+				let group: ui_node_canvas_t = ui_nodes_get_group(canvases, n.name);
 				array_push(mgroups, util_clone_canvas(group));
 				ui_nodes_traverse_group(mgroups, group);
 			}
@@ -1557,9 +1557,9 @@ function ui_nodes_traverse_group(mgroups: zui_node_canvas_t[], c: zui_node_canva
 	}
 }
 
-function ui_nodes_get_group(canvases: zui_node_canvas_t[], name: string): zui_node_canvas_t {
+function ui_nodes_get_group(canvases: ui_node_canvas_t[], name: string): ui_node_canvas_t {
 	for (let i: i32 = 0; i < canvases.length; ++i) {
-		let c: zui_node_canvas_t = canvases[i];
+		let c: ui_node_canvas_t = canvases[i];
 		if (c.name == name) {
 			return c;
 		}

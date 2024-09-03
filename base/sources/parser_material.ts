@@ -21,17 +21,17 @@ let parser_material_frag: node_shader_t;
 let parser_material_curshader: node_shader_t;
 let parser_material_matcon: material_context_t;
 let parser_material_parsed: string[];
-let parser_material_parents: zui_node_t[];
+let parser_material_parents: ui_node_t[];
 
-let parser_material_canvases: zui_node_canvas_t[];
-let parser_material_nodes: zui_node_t[];
-let parser_material_links: zui_node_link_t[];
+let parser_material_canvases: ui_node_canvas_t[];
+let parser_material_nodes: ui_node_t[];
+let parser_material_links: ui_node_link_t[];
 
 let parser_material_cotangent_frame_written: bool;
 let parser_material_tex_coord: string = "tex_coord";
 let parser_material_eps: f32 = 0.000001;
 
-let parser_material_custom_nodes: map_t<string, any> = map_create(); // JSValue -> (n: zui_node_t, s: string)=>string
+let parser_material_custom_nodes: map_t<string, any> = map_create(); // JSValue -> (n: ui_node_t, s: string)=>string
 let parser_material_parse_surface: bool = true;
 let parser_material_parse_opacity: bool = true;
 let parser_material_parse_height: bool = false;
@@ -50,9 +50,9 @@ let parser_material_bake_passthrough: bool = false;
 let parser_material_bake_passthrough_strength: string = "0.0";
 let parser_material_bake_passthrough_radius: string = "0.0";
 let parser_material_bake_passthrough_offset: string = "0.0";
-let parser_material_start_group: zui_node_canvas_t = null;
-let parser_material_start_parents: zui_node_t[] = null;
-let parser_material_start_node: zui_node_t = null;
+let parser_material_start_group: ui_node_canvas_t = null;
+let parser_material_start_parents: ui_node_t[] = null;
+let parser_material_start_node: ui_node_t = null;
 
 let parser_material_arm_export_tangents: bool = true;
 let parser_material_out_normaltan: string; // Raw tangent space normal parsed from normal map
@@ -62,9 +62,9 @@ let parser_material_script_links: map_t<string, string> = null;
 let parser_material_parsed_map: map_t<string, string> = map_create();
 let parser_material_texture_map: map_t<string, string> = map_create();
 
-function parser_material_get_node(id: i32): zui_node_t {
+function parser_material_get_node(id: i32): ui_node_t {
 	for (let i: i32 = 0; i < parser_material_nodes.length; ++i) {
-		let n: zui_node_t = parser_material_nodes[i];
+		let n: ui_node_t = parser_material_nodes[i];
 		if (n.id == id) {
 			return n;
 		}
@@ -72,9 +72,9 @@ function parser_material_get_node(id: i32): zui_node_t {
 	return null;
 }
 
-function parser_material_get_link(id: i32): zui_node_link_t {
+function parser_material_get_link(id: i32): ui_node_link_t {
 	for (let i: i32 = 0; i < parser_material_links.length; ++i) {
-		let l: zui_node_link_t = parser_material_links[i];
+		let l: ui_node_link_t = parser_material_links[i];
 		if (l.id == id) {
 			return l;
 		}
@@ -82,11 +82,11 @@ function parser_material_get_link(id: i32): zui_node_link_t {
 	return null;
 }
 
-function parser_material_get_input_link(inp: zui_node_socket_t): zui_node_link_t {
+function parser_material_get_input_link(inp: ui_node_socket_t): ui_node_link_t {
 	for (let i: i32 = 0; i < parser_material_links.length; ++i) {
-		let l: zui_node_link_t = parser_material_links[i];
+		let l: ui_node_link_t = parser_material_links[i];
 		if (l.to_id == inp.node_id) {
-			let node: zui_node_t = parser_material_get_node(inp.node_id);
+			let node: ui_node_t = parser_material_get_node(inp.node_id);
 			if (node.inputs.length <= l.to_socket) {
 				return null;
 			}
@@ -98,12 +98,12 @@ function parser_material_get_input_link(inp: zui_node_socket_t): zui_node_link_t
 	return null;
 }
 
-function parser_material_get_output_links(out: zui_node_socket_t): zui_node_link_t[] {
-	let ls: zui_node_link_t[] = null;
+function parser_material_get_output_links(out: ui_node_socket_t): ui_node_link_t[] {
+	let ls: ui_node_link_t[] = null;
 	for (let i: i32 = 0; i < parser_material_links.length; ++i) {
-		let l: zui_node_link_t = parser_material_links[i];
+		let l: ui_node_link_t = parser_material_links[i];
 		if (l.from_id == out.node_id) {
-			let node: zui_node_t = parser_material_get_node(out.node_id);
+			let node: ui_node_t = parser_material_get_node(out.node_id);
 			if (node.outputs.length <= l.from_socket) {
 				continue;
 			}
@@ -127,7 +127,7 @@ function parser_material_init() {
 	parser_material_parsing_basecolor = false;
 }
 
-function parser_material_parse(canvas: zui_node_canvas_t, _con: node_shader_context_t, _vert: node_shader_t, _frag: node_shader_t, _matcon: material_context_t): shader_out_t {
+function parser_material_parse(canvas: ui_node_canvas_t, _con: node_shader_context_t, _vert: node_shader_t, _frag: node_shader_t, _matcon: material_context_t): shader_out_t {
 	parser_material_init();
 	parser_material_canvases = [canvas];
 	parser_material_nodes = canvas.nodes;
@@ -144,7 +144,7 @@ function parser_material_parse(canvas: zui_node_canvas_t, _con: node_shader_cont
 	}
 
 	if (parser_material_start_node != null) {
-		let link: zui_node_link_t = {
+		let link: ui_node_link_t = {
 			id: 99999,
 			from_id: parser_material_start_node.id,
 			from_socket: 0,
@@ -165,7 +165,7 @@ function parser_material_parse(canvas: zui_node_canvas_t, _con: node_shader_cont
 		return sout;
 	}
 
-	let output_node: zui_node_t = parser_material_node_by_type(parser_material_nodes, "OUTPUT_MATERIAL");
+	let output_node: ui_node_t = parser_material_node_by_type(parser_material_nodes, "OUTPUT_MATERIAL");
 	if (output_node != null) {
 		return parser_material_parse_output(output_node);
 	}
@@ -275,7 +275,7 @@ function parser_material_finalize(con: node_shader_context_t) {
 	}
 }
 
-function parser_material_parse_output(node: zui_node_t): shader_out_t {
+function parser_material_parse_output(node: ui_node_t): shader_out_t {
 	if (parser_material_parse_surface || parser_material_parse_opacity) {
 		return parser_material_parse_shader_input(node.inputs[0]);
 	}
@@ -283,7 +283,7 @@ function parser_material_parse_output(node: zui_node_t): shader_out_t {
 	// Parse volume, displacement..
 }
 
-function parser_material_parse_output_pbr(node: zui_node_t): shader_out_t {
+function parser_material_parse_output_pbr(node: ui_node_t): shader_out_t {
 	if (parser_material_parse_surface || parser_material_parse_opacity) {
 		return parser_material_parse_shader(node, null);
 	}
@@ -291,7 +291,7 @@ function parser_material_parse_output_pbr(node: zui_node_t): shader_out_t {
 	// Parse volume, displacement..
 }
 
-function parser_material_get_group(name: string): zui_node_canvas_t {
+function parser_material_get_group(name: string): ui_node_canvas_t {
 	for (let i: i32 = 0; i < project_material_groups.length; ++i) {
 		let g: node_group_t = project_material_groups[i];
 		if (g.canvas.name == name) {
@@ -301,7 +301,7 @@ function parser_material_get_group(name: string): zui_node_canvas_t {
 	return null;
 }
 
-function parser_material_push_group(g: zui_node_canvas_t) {
+function parser_material_push_group(g: ui_node_canvas_t) {
 	array_push(parser_material_canvases, g);
 	parser_material_nodes = g.nodes;
 	parser_material_links = g.links;
@@ -309,38 +309,38 @@ function parser_material_push_group(g: zui_node_canvas_t) {
 
 function parser_material_pop_group() {
 	array_pop(parser_material_canvases);
-	let g: zui_node_canvas_t = parser_material_canvases[parser_material_canvases.length - 1];
+	let g: ui_node_canvas_t = parser_material_canvases[parser_material_canvases.length - 1];
 	parser_material_nodes = g.nodes;
 	parser_material_links = g.links;
 }
 
-function parser_material_parse_group(node: zui_node_t, socket: zui_node_socket_t): string {
+function parser_material_parse_group(node: ui_node_t, socket: ui_node_socket_t): string {
 	array_push(parser_material_parents, node); // Entering group
 	parser_material_push_group(parser_material_get_group(node.name));
-	let output_node: zui_node_t = parser_material_node_by_type(parser_material_nodes, "GROUP_OUTPUT");
+	let output_node: ui_node_t = parser_material_node_by_type(parser_material_nodes, "GROUP_OUTPUT");
 	if (output_node == null) {
 		return null;
 	}
 	let index: i32 = parser_material_socket_index(node, socket);
-	let inp: zui_node_socket_t = output_node.inputs[index];
+	let inp: ui_node_socket_t = output_node.inputs[index];
 	let out_group: string = parser_material_parse_input(inp);
 	array_pop(parser_material_parents);
 	parser_material_pop_group();
 	return out_group;
 }
 
-function parser_material_parse_group_input(node: zui_node_t, socket: zui_node_socket_t): string {
-	let parent: zui_node_t = array_pop(parser_material_parents); // Leaving group
+function parser_material_parse_group_input(node: ui_node_t, socket: ui_node_socket_t): string {
+	let parent: ui_node_t = array_pop(parser_material_parents); // Leaving group
 	parser_material_pop_group();
 	let index: i32 = parser_material_socket_index(node, socket);
-	let inp: zui_node_socket_t = parent.inputs[index];
+	let inp: ui_node_socket_t = parent.inputs[index];
 	let res: string = parser_material_parse_input(inp);
 	array_push(parser_material_parents, parent); // Return to group
 	parser_material_push_group(parser_material_get_group(parent.name));
 	return res;
 }
 
-function parser_material_parse_input(inp: zui_node_socket_t): string {
+function parser_material_parse_input(inp: ui_node_socket_t): string {
 	if (inp.type == "RGB") {
 		return parser_material_parse_vector_input(inp);
 	}
@@ -356,9 +356,9 @@ function parser_material_parse_input(inp: zui_node_socket_t): string {
 	return null;
 }
 
-function parser_material_parse_shader_input(inp: zui_node_socket_t): shader_out_t {
-	let l: zui_node_link_t = parser_material_get_input_link(inp);
-	let from_node: zui_node_t = l != null ? parser_material_get_node(l.from_id) : null;
+function parser_material_parse_shader_input(inp: ui_node_socket_t): shader_out_t {
+	let l: ui_node_link_t = parser_material_get_input_link(inp);
+	let from_node: ui_node_t = l != null ? parser_material_get_node(l.from_id) : null;
 	if (from_node != null) {
 		if (from_node.type == "REROUTE") {
 			return parser_material_parse_shader_input(from_node.inputs[0]);
@@ -380,7 +380,7 @@ function parser_material_parse_shader_input(inp: zui_node_socket_t): shader_out_
 	}
 }
 
-function parser_material_parse_shader(node: zui_node_t, socket: zui_node_socket_t): shader_out_t {
+function parser_material_parse_shader(node: ui_node_t, socket: ui_node_socket_t): shader_out_t {
 	let sout: shader_out_t = {
 		out_basecol: "vec3(0.8, 0.8, 0.8)",
 		out_roughness: "0.0",
@@ -435,9 +435,9 @@ function parser_material_parse_shader(node: zui_node_t, socket: zui_node_socket_
 	return sout;
 }
 
-function parser_material_parse_vector_input(inp: zui_node_socket_t): string {
-	let l: zui_node_link_t = parser_material_get_input_link(inp);
-	let from_node: zui_node_t = l != null ? parser_material_get_node(l.from_id) : null;
+function parser_material_parse_vector_input(inp: ui_node_socket_t): string {
+	let l: ui_node_link_t = parser_material_get_input_link(inp);
+	let from_node: ui_node_t = l != null ? parser_material_get_node(l.from_id) : null;
 	if (from_node != null) {
 		if (from_node.type == "REROUTE") {
 			return parser_material_parse_vector_input(from_node.inputs[0]);
@@ -462,7 +462,7 @@ function parser_material_parse_vector_input(inp: zui_node_socket_t): string {
 	}
 }
 
-function parser_material_parse_vector(node: zui_node_t, socket: zui_node_socket_t): string {
+function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t): string {
 	if (node.type == "GROUP") {
 		return parser_material_parse_group(node, socket);
 	}
@@ -518,7 +518,7 @@ function parser_material_parse_vector(node: zui_node_t, socket: zui_node_socket_
 	}
 	else if (node.type == "TEX_GRADIENT") {
 		let co: string = parser_material_get_coord(node);
-		let but: zui_node_button_t = node.buttons[0]; //gradient_type;
+		let but: ui_node_button_t = node.buttons[0]; //gradient_type;
 		let grad: string = to_upper_case(u8_array_string_at(but.data, but.default_value[0]));
 		grad = string_replace_all(grad, " ", "_");
 		let f: string = parser_material_get_gradient(grad, co);
@@ -563,7 +563,7 @@ function parser_material_parse_vector(node: zui_node_t, socket: zui_node_socket_
 		node_shader_add_uniform(parser_material_curshader, "sampler2D snoise256", "$noise256.k");
 		let co: string = parser_material_get_coord(node);
 		let scale: string = parser_material_parse_value_input(node.inputs[1]);
-		let but: zui_node_button_t = node.buttons[0]; //coloring;
+		let but: ui_node_button_t = node.buttons[0]; //coloring;
 		let coloring: string = to_upper_case(u8_array_string_at(but.data, but.default_value[0]));
 		coloring = string_replace_all(coloring, " ", "_");
 		let res: string = "";
@@ -651,7 +651,7 @@ function parser_material_parse_vector(node: zui_node_t, socket: zui_node_socket_
 		node_shader_write(parser_material_curshader, "float " + fac_var + " = " + fac + ";");
 		let col1: string = parser_material_parse_vector_input(node.inputs[1]);
 		let col2: string = parser_material_parse_vector_input(node.inputs[2]);
-		let but: zui_node_button_t = node.buttons[0]; // blend_type
+		let but: ui_node_button_t = node.buttons[0]; // blend_type
 		let blend: string = to_upper_case(u8_array_string_at(but.data, but.default_value[0]));
 		blend = string_replace_all(blend, " ", "_");
 		let use_clamp: bool = node.buttons[1].default_value[0] > 0;
@@ -849,12 +849,12 @@ function parser_material_parse_vector(node: zui_node_t, socket: zui_node_socket_
 			return result;
 		}
 		let m: slot_material_t = project_materials[mi];
-		let _nodes: zui_node_t[] = parser_material_nodes;
-		let _links: zui_node_link_t[] = parser_material_links;
+		let _nodes: ui_node_t[] = parser_material_nodes;
+		let _links: ui_node_link_t[] = parser_material_links;
 		parser_material_nodes = m.canvas.nodes;
 		parser_material_links = m.canvas.links;
 		array_push(parser_material_parents, node);
-		let output_node: zui_node_t = parser_material_node_by_type(parser_material_nodes, "OUTPUT_MATERIAL_PBR");
+		let output_node: ui_node_t = parser_material_node_by_type(parser_material_nodes, "OUTPUT_MATERIAL_PBR");
 		if (socket == node.outputs[0]) { // Base
 			result = parser_material_parse_vector_input(output_node.inputs[0]);
 		}
@@ -1023,7 +1023,7 @@ function parser_material_parse_vector(node: zui_node_t, socket: zui_node_socket_
 	else if (node.type == "MIX_NORMAL_MAP") {
 		let nm1: string = parser_material_parse_vector_input(node.inputs[0]);
 		let nm2: string = parser_material_parse_vector_input(node.inputs[1]);
-		let but: zui_node_button_t = node.buttons[0];
+		let but: ui_node_button_t = node.buttons[0];
 		let blend: string = to_upper_case(u8_array_string_at(but.data, but.default_value[0])); // blend_type
 		blend = string_replace_all(blend, " ", "_");
 		let store: string = parser_material_store_var_name(node);
@@ -1062,7 +1062,7 @@ function parser_material_parse_vector(node: zui_node_t, socket: zui_node_socket_
 	else if (node.type == "VECT_MATH") {
 		let vec1: string = parser_material_parse_vector_input(node.inputs[0]);
 		let vec2: string = parser_material_parse_vector_input(node.inputs[1]);
-		let but: zui_node_button_t = node.buttons[0]; //operation;
+		let but: ui_node_button_t = node.buttons[0]; //operation;
 		let op: string = to_upper_case(u8_array_string_at(but.data, but.default_value[0]));
 		op = string_replace_all(op, " ", "_");
 		if (op == "ADD") {
@@ -1143,13 +1143,13 @@ function parser_material_parse_vector(node: zui_node_t, socket: zui_node_socket_
 		return parser_material_to_vec3(height);
 	}
 	else if (map_get(parser_material_custom_nodes, node.type) != null) {
-		let cb: any = map_get(parser_material_custom_nodes, node.type); // JSValue -> (n: zui_node_t, s: string)=>string
+		let cb: any = map_get(parser_material_custom_nodes, node.type); // JSValue -> (n: ui_node_t, s: string)=>string
 		return js_call_ptr_str(cb, node, socket.name);
 	}
 	return "vec3(0.0, 0.0, 0.0)";
 }
 
-function parse_normal_map_color_input(inp: zui_node_socket_t) {
+function parse_normal_map_color_input(inp: ui_node_socket_t) {
 	parser_material_frag.write_normal++;
 	parser_material_out_normaltan = parser_material_parse_vector_input(inp);
 	if (!parser_material_arm_export_tangents) {
@@ -1171,9 +1171,9 @@ function parse_normal_map_color_input(inp: zui_node_socket_t) {
 	parser_material_frag.write_normal--;
 }
 
-function parser_material_parse_value_input(inp: zui_node_socket_t, vector_as_grayscale: bool = false): string {
-	let l: zui_node_link_t = parser_material_get_input_link(inp);
-	let from_node: zui_node_t = l != null ? parser_material_get_node(l.from_id) : null;
+function parser_material_parse_value_input(inp: ui_node_socket_t, vector_as_grayscale: bool = false): string {
+	let l: ui_node_link_t = parser_material_get_input_link(inp);
+	let from_node: ui_node_t = l != null ? parser_material_get_node(l.from_id) : null;
 	if (from_node != null) {
 		if (from_node.type == "REROUTE") {
 			return parser_material_parse_value_input(from_node.inputs[0]);
@@ -1198,7 +1198,7 @@ function parser_material_parse_value_input(inp: zui_node_socket_t, vector_as_gra
 	}
 }
 
-function parser_material_parse_value(node: zui_node_t, socket: zui_node_socket_t): string {
+function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t): string {
 	if (node.type == "GROUP") {
 		return parser_material_parse_group(node, socket);
 	}
@@ -1269,12 +1269,12 @@ function parser_material_parse_value(node: zui_node_t, socket: zui_node_socket_t
 		let mi: i32 = node.buttons[0].default_value[0];
 		if (mi >= project_materials.length) return result;
 		let m: slot_material_t = project_materials[mi];
-		let _nodes: zui_node_t[] = parser_material_nodes;
-		let _links: zui_node_link_t[] = parser_material_links;
+		let _nodes: ui_node_t[] = parser_material_nodes;
+		let _links: ui_node_link_t[] = parser_material_links;
 		parser_material_nodes = m.canvas.nodes;
 		parser_material_links = m.canvas.links;
 		array_push(parser_material_parents, node);
-		let output_node: zui_node_t = parser_material_node_by_type(parser_material_nodes, "OUTPUT_MATERIAL_PBR");
+		let output_node: ui_node_t = parser_material_node_by_type(parser_material_nodes, "OUTPUT_MATERIAL_PBR");
 		if (socket == node.outputs[1]) { // Opac
 			result = parser_material_parse_value_input(output_node.inputs[1]);
 		}
@@ -1393,7 +1393,7 @@ function parser_material_parse_value(node: zui_node_t, socket: zui_node_socket_t
 	}
 	else if (node.type == "TEX_GRADIENT") {
 		let co: string = parser_material_get_coord(node);
-		let but: zui_node_button_t = node.buttons[0]; //gradient_type;
+		let but: ui_node_button_t = node.buttons[0]; //gradient_type;
 		let grad: string = to_upper_case(u8_array_string_at(but.data, but.default_value[0]));
 		grad = string_replace_all(grad, " ", "_");
 		let f: string = parser_material_get_gradient(grad, co);
@@ -1440,7 +1440,7 @@ function parser_material_parse_value(node: zui_node_t, socket: zui_node_socket_t
 		node_shader_add_uniform(parser_material_curshader, "sampler2D snoise256", "$noise256.k");
 		let co: string = parser_material_get_coord(node);
 		let scale: string = parser_material_parse_value_input(node.inputs[1]);
-		let but: zui_node_button_t = node.buttons[0]; // coloring
+		let but: ui_node_button_t = node.buttons[0]; // coloring
 		let coloring: string = to_upper_case(u8_array_string_at(but.data, but.default_value[0]));
 		coloring = string_replace_all(coloring, " ", "_");
 		let res: string = "";
@@ -1487,7 +1487,7 @@ function parser_material_parse_value(node: zui_node_t, socket: zui_node_socket_t
 	else if (node.type == "MATH") {
 		let val1: string = parser_material_parse_value_input(node.inputs[0]);
 		let val2: string = parser_material_parse_value_input(node.inputs[1]);
-		let but: zui_node_button_t = node.buttons[0]; // operation
+		let but: ui_node_button_t = node.buttons[0]; // operation
 		let op: string = to_upper_case(u8_array_string_at(but.data, but.default_value[0]));
 		op = string_replace_all(op, " ", "_");
 		let use_clamp: bool = node.buttons[1].default_value[0] > 0;
@@ -1664,7 +1664,7 @@ function parser_material_parse_value(node: zui_node_t, socket: zui_node_socket_t
 	else if (node.type == "VECT_MATH") {
 		let vec1: string = parser_material_parse_vector_input(node.inputs[0]);
 		let vec2: string = parser_material_parse_vector_input(node.inputs[1]);
-		let but: zui_node_button_t = node.buttons[0]; //operation;
+		let but: ui_node_button_t = node.buttons[0]; //operation;
 		let op: string = to_upper_case(u8_array_string_at(but.data, but.default_value[0]));
 		op = string_replace_all(op, " ", "_");
 		if (op == "DOT_PRODUCT") {
@@ -1684,7 +1684,7 @@ function parser_material_parse_value(node: zui_node_t, socket: zui_node_socket_t
 		let val: string = parser_material_parse_value_input(node.inputs[0]);
 		let min: string = parser_material_parse_value_input(node.inputs[1]);
 		let max: string = parser_material_parse_value_input(node.inputs[2]);
-		let but: zui_node_button_t = node.buttons[0]; //operation;
+		let but: ui_node_button_t = node.buttons[0]; //operation;
 		let op: string = to_upper_case(u8_array_string_at(but.data, but.default_value[0]));
 		op = string_replace_all(op, " ", "_");
 
@@ -1714,13 +1714,13 @@ function parser_material_parse_value(node: zui_node_t, socket: zui_node_socket_t
 		}
 	}
 	else if (map_get(parser_material_custom_nodes, node.type) != null) {
-		let cb: (n: zui_node_t, s: zui_node_socket_t)=>string = map_get(parser_material_custom_nodes, node.type);
+		let cb: (n: ui_node_t, s: ui_node_socket_t)=>string = map_get(parser_material_custom_nodes, node.type);
 		return cb(node, socket);
 	}
 	return "0.0";
 }
 
-function parser_material_get_coord(node: zui_node_t): string {
+function parser_material_get_coord(node: ui_node_t): string {
 	if (parser_material_get_input_link(node.inputs[0]) != null) {
 		return parser_material_parse_vector_input(node.inputs[0]);
 	}
@@ -1787,13 +1787,13 @@ function parser_material_vector_curve(name: string, fac: string, points: f32_ptr
 		facs_var + "[" + index_var + "]) * (1.0 / (" + facs_var + "[" + index_var + " + 1] - " + facs_var + "[" + index_var + "])))";
 }
 
-function parser_material_res_var_name(node: zui_node_t, socket: zui_node_socket_t): string {
+function parser_material_res_var_name(node: ui_node_t, socket: ui_node_socket_t): string {
 	return parser_material_node_name(node) + "_" + parser_material_safesrc(socket.name) + "_res";
 }
 
-function parser_material_write_result(l: zui_node_link_t): string {
-	let from_node: zui_node_t = parser_material_get_node(l.from_id);
-	let from_socket: zui_node_socket_t = from_node.outputs[l.from_socket];
+function parser_material_write_result(l: ui_node_link_t): string {
+	let from_node: ui_node_t = parser_material_get_node(l.from_id);
+	let from_socket: ui_node_socket_t = from_node.outputs[l.from_socket];
 	let res_var: string = parser_material_res_var_name(from_node, from_socket);
 	let st: string = from_socket.type;
 	if (array_index_of(parser_material_parsed, res_var) < 0) {
@@ -1818,11 +1818,11 @@ function parser_material_write_result(l: zui_node_link_t): string {
 	return res_var;
 }
 
-function parser_material_store_var_name(node: zui_node_t): string {
+function parser_material_store_var_name(node: ui_node_t): string {
 	return parser_material_node_name(node) + "_store";
 }
 
-function parser_material_texture_store(node: zui_node_t, tex: bind_tex_t, tex_name: string, color_space: i32): string {
+function parser_material_texture_store(node: ui_node_t, tex: bind_tex_t, tex_name: string, color_space: i32): string {
 	array_push(parser_material_matcon.bind_textures, tex);
 	node_shader_context_add_elem(parser_material_curshader.context, "tex", "short2norm");
 	node_shader_add_uniform(parser_material_curshader, "sampler2D " + tex_name);
@@ -1907,9 +1907,9 @@ function parser_material_to_vec3(s: string): string {
 	///end
 }
 
-function parser_material_node_by_type(nodes: zui_node_t[], ntype: string): zui_node_t {
+function parser_material_node_by_type(nodes: ui_node_t[], ntype: string): ui_node_t {
 	for (let i: i32 = 0; i < nodes.length; ++i) {
-		let n: zui_node_t = nodes[i];
+		let n: ui_node_t = nodes[i];
 		if (n.type == ntype) {
 			return n;
 		}
@@ -1917,7 +1917,7 @@ function parser_material_node_by_type(nodes: zui_node_t[], ntype: string): zui_n
 	return null;
 }
 
-function parser_material_socket_index(node: zui_node_t, socket: zui_node_socket_t): i32 {
+function parser_material_socket_index(node: ui_node_t, socket: ui_node_socket_t): i32 {
 	for (let i: i32 = 0; i < node.outputs.length; ++i) {
 		if (node.outputs[i] == socket) {
 			return i;
@@ -1926,13 +1926,13 @@ function parser_material_socket_index(node: zui_node_t, socket: zui_node_socket_
 	return -1;
 }
 
-function parser_material_node_name(node: zui_node_t, _parents: zui_node_t[] = null): string {
+function parser_material_node_name(node: ui_node_t, _parents: ui_node_t[] = null): string {
 	if (_parents == null) {
 		_parents = parser_material_parents;
 	}
 	let s: string = node.name;
 	for (let i: i32 = 0; i < _parents.length; ++i) {
-		let p: zui_node_t = _parents[i];
+		let p: ui_node_t = _parents[i];
 		s = p.name + p.id + "_" + s;
 	}
 	s = parser_material_safesrc(s);
@@ -1971,7 +1971,7 @@ function parser_material_enum_data(s: string): string {
 	return "";
 }
 
-function parser_material_make_texture(image_node: zui_node_t, tex_name: string, matname: string = null): bind_tex_t {
+function parser_material_make_texture(image_node: ui_node_t, tex_name: string, matname: string = null): bind_tex_t {
 	let i: i32 = image_node.buttons[0].default_value[0];
 	let filepath: string = parser_material_enum_data(base_enum_texts(image_node.type)[i]);
 	if (filepath == "" || string_index_of(filepath, ".") == -1) {

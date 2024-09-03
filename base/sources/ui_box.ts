@@ -1,10 +1,10 @@
 
 let ui_box_show: bool = false;
 let ui_box_draggable: bool = true;
-let ui_box_hwnd: zui_handle_t = zui_handle_create();
+let ui_box_hwnd: ui_handle_t = ui_handle_create();
 let ui_box_title: string = "";
 let ui_box_text: string = "";
-let ui_box_commands: (ui: zui_t)=>void = null;
+let ui_box_commands: (ui: ui_t)=>void = null;
 let ui_box_click_to_hide: bool = true;
 let ui_box_modalw: i32 = 400;
 let ui_box_modalh: i32 = 170;
@@ -26,14 +26,14 @@ function ui_box_init() {
 
 function ui_box_render() {
 	if (!ui_menu_show) {
-		let ui: zui_t = base_ui_box;
+		let ui: ui_t = base_ui_box;
 		let in_use: bool = ui.combo_selected_handle != null;
 		let is_escape: bool = keyboard_started("escape");
 		if (ui_box_draws > 2 && (ui.input_released || is_escape) && !in_use && !ui.is_typing) {
 			let appw: i32 = sys_width();
 			let apph: i32 = sys_height();
-			let mw: i32 = math_floor(ui_box_modalw * zui_SCALE(ui));
-			let mh: i32 = math_floor(ui_box_modalh * zui_SCALE(ui));
+			let mw: i32 = math_floor(ui_box_modalw * ui_SCALE(ui));
+			let mh: i32 = math_floor(ui_box_modalh * ui_SCALE(ui));
 			let left: f32 = (appw / 2 - mw / 2) + ui_box_hwnd.drag_x;
 			let right: f32 = (appw / 2 + mw / 2) + ui_box_hwnd.drag_x;
 			let top: f32 = (apph / 2 - mh / 2) + ui_box_hwnd.drag_y;
@@ -57,11 +57,11 @@ function ui_box_render() {
 
 	g2_end();
 
-	let ui: zui_t = base_ui_box;
+	let ui: ui_t = base_ui_box;
 	let appw: i32 = sys_width();
 	let apph: i32 = sys_height();
-	let mw: i32 = math_floor(ui_box_modalw * zui_SCALE(ui));
-	let mh: i32 = math_floor(ui_box_modalh * zui_SCALE(ui));
+	let mw: i32 = math_floor(ui_box_modalw * ui_SCALE(ui));
+	let mh: i32 = math_floor(ui_box_modalh * ui_SCALE(ui));
 	if (mw > appw) {
 		mw = appw;
 	}
@@ -72,58 +72,58 @@ function ui_box_render() {
 	let top: i32 = math_floor(apph / 2 - mh / 2);
 
 	if (ui_box_commands == null) {
-		zui_begin(ui);
-		if (zui_window(ui_box_hwnd, left, top, mw, mh, ui_box_draggable)) {
+		ui_begin(ui);
+		if (ui_window(ui_box_hwnd, left, top, mw, mh, ui_box_draggable)) {
 			ui._y += 10;
 			let tab_vertical: bool = config_raw.touch_ui;
-			if (zui_tab(zui_handle(__ID__), ui_box_title, tab_vertical)) {
-				let htext: zui_handle_t = zui_handle(__ID__);
+			if (ui_tab(ui_handle(__ID__), ui_box_title, tab_vertical)) {
+				let htext: ui_handle_t = ui_handle(__ID__);
 				htext.text = ui_box_text;
 				if (ui_box_copyable) {
-					zui_text_area(htext, zui_align_t.LEFT, false);
+					ui_text_area(htext, ui_align_t.LEFT, false);
 				}
 				else {
-					zui_text(ui_box_text);
+					ui_text(ui_box_text);
 				}
-				_zui_end_element();
+				_ui_end_element();
 
 				///if (krom_windows || krom_linux || krom_macos)
 				if (ui_box_copyable) {
 					let row: f32[] = [1 / 3, 1 / 3, 1 / 3];
-					zui_row(row);
+					ui_row(row);
 				}
 				else {
 					let row: f32[] = [2 / 3, 1 / 3];
-					zui_row(row);
+					ui_row(row);
 				}
 				///else
 				let row: f32[] = [2 / 3, 1 / 3];
-				zui_row(row);
+				ui_row(row);
 				///end
 
-				_zui_end_element();
+				_ui_end_element();
 
 				///if (krom_windows || krom_linux || krom_macos)
-				if (ui_box_copyable && zui_button(tr("Copy"))) {
+				if (ui_box_copyable && ui_button(tr("Copy"))) {
 					krom_copy_to_clipboard(ui_box_text);
 				}
 				///end
-				if (zui_button(tr("OK"))) {
+				if (ui_button(tr("OK"))) {
 					ui_box_hide();
 				}
 			}
 			ui_box_window_border(ui);
 		}
-		zui_end();
+		ui_end();
 	}
 	else {
-		zui_begin(ui);
-		if (zui_window(ui_box_hwnd, left, top, mw, mh, ui_box_draggable)) {
+		ui_begin(ui);
+		if (ui_window(ui_box_hwnd, left, top, mw, mh, ui_box_draggable)) {
 			ui._y += 10;
 			ui_box_commands(ui);
 			ui_box_window_border(ui);
 		}
-		zui_end();
+		ui_end();
 	}
 
 	g2_begin(null);
@@ -145,7 +145,7 @@ function ui_box_show_message(title: string, text: string, copyable: bool = false
 	///end
 }
 
-function ui_box_show_custom(commands: (ui: zui_t)=>void = null, mw: i32 = 400, mh: i32 = 200, on_hide: ()=>void = null, draggable: bool = true) {
+function ui_box_show_custom(commands: (ui: ui_t)=>void = null, mw: i32 = 400, mh: i32 = 200, on_hide: ()=>void = null, draggable: bool = true) {
 	ui_box_init();
 	ui_box_modalw = mw;
 	ui_box_modalh = mh;
@@ -198,7 +198,7 @@ function ui_box_tween_tick() {
 }
 ///end
 
-function ui_box_window_border(ui: zui_t) {
+function ui_box_window_border(ui: ui_t) {
 	if (ui.scissor) {
 		ui.scissor = false;
 		g2_disable_scissor();

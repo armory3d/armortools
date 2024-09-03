@@ -1,37 +1,37 @@
 
 let _tab_meshes_draw_i: i32;
 
-function tab_meshes_draw(htab: zui_handle_t) {
-	let ui: zui_t = ui_base_ui;
+function tab_meshes_draw(htab: ui_handle_t) {
+	let ui: ui_t = ui_base_ui;
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-	if (zui_tab(htab, tr("Meshes")) && statush > ui_status_default_status_h * zui_SCALE(ui)) {
+	if (ui_tab(htab, tr("Meshes")) && statush > ui_status_default_status_h * ui_SCALE(ui)) {
 
-		zui_begin_sticky();
+		ui_begin_sticky();
 
 		///if (is_paint || is_sculpt)
 		if (config_raw.touch_ui) {
 			let row: f32[] = [1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6];
-			zui_row(row);
+			ui_row(row);
 		}
 		else {
 			let row: f32[] = [1 / 14, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 14];
-			zui_row(row);
+			ui_row(row);
 		}
 		///end
 
 		///if is_lab
 		if (config_raw.touch_ui) {
 			let row: f32[] = [1 / 7, 1 / 7, 1 / 7, 1 / 7, 1 / 7, 1 / 7, 1 / 7];
-			zui_row(row);
+			ui_row(row);
 		}
 		else {
 			let row: f32[] = [1 / 14, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 14];
-			zui_row(row);
+			ui_row(row);
 		}
 		///end
 
-		if (zui_button(tr("Import"))) {
-			ui_menu_draw(function (ui: zui_t) {
+		if (ui_button(tr("Import"))) {
+			ui_menu_draw(function (ui: ui_t) {
 				if (ui_menu_button(ui, tr("Replace Existing"), map_get(config_keymap, "file_import_assets"))) {
 					project_import_mesh(true);
 				}
@@ -40,11 +40,11 @@ function tab_meshes_draw(htab: zui_handle_t) {
 				}
 			}, 2);
 		}
-		if (ui.is_hovered) zui_tooltip(tr("Import mesh file"));
+		if (ui.is_hovered) ui_tooltip(tr("Import mesh file"));
 
 		///if is_lab
-		if (zui_button(tr("Set Default"))) {
-			ui_menu_draw(function (ui: zui_t) {
+		if (ui_button(tr("Set Default"))) {
+			ui_menu_draw(function (ui: ui_t) {
 				if (ui_menu_button(ui, tr("Cube"))) {
 					tab_meshes_set_default_mesh(".Cube");
 				}
@@ -61,13 +61,13 @@ function tab_meshes_draw(htab: zui_handle_t) {
 		}
 		///end
 
-		if (zui_button(tr("Flip Normals"))) {
+		if (ui_button(tr("Flip Normals"))) {
 			util_mesh_flip_normals();
 			context_raw.ddirty = 2;
 		}
 
-		if (zui_button(tr("Calculate Normals"))) {
-			ui_menu_draw(function (ui: zui_t) {
+		if (ui_button(tr("Calculate Normals"))) {
+			ui_menu_draw(function (ui: ui_t) {
 				if (ui_menu_button(ui, tr("Smooth"))) {
 					util_mesh_calc_normals(true);
 					context_raw.ddirty = 2;
@@ -79,12 +79,12 @@ function tab_meshes_draw(htab: zui_handle_t) {
 			}, 2);
 		}
 
-		if (zui_button(tr("Geometry to Origin"))) {
+		if (ui_button(tr("Geometry to Origin"))) {
 			util_mesh_to_origin();
 			context_raw.ddirty = 2;
 		}
 
-		if (zui_button(tr("Apply Displacement"))) {
+		if (ui_button(tr("Apply Displacement"))) {
 			///if is_paint
 			util_mesh_apply_displacement(project_layers[0].texpaint_pack);
 			///end
@@ -98,8 +98,8 @@ function tab_meshes_draw(htab: zui_handle_t) {
 			context_raw.ddirty = 2;
 		}
 
-		if (zui_button(tr("Rotate"))) {
-			ui_menu_draw(function (ui: zui_t) {
+		if (ui_button(tr("Rotate"))) {
+			ui_menu_draw(function (ui: ui_t) {
 				if (ui_menu_button(ui, tr("Rotate X"))) {
 					util_mesh_swap_axis(1, 2);
 					context_raw.ddirty = 2;
@@ -117,18 +117,18 @@ function tab_meshes_draw(htab: zui_handle_t) {
 			}, 3);
 		}
 
-		zui_end_sticky();
+		ui_end_sticky();
 
 		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 			let o: mesh_object_t = project_paint_objects[i];
-			let h: zui_handle_t = zui_handle(__ID__);
+			let h: ui_handle_t = ui_handle(__ID__);
 			h.selected = o.base.visible;
-			o.base.visible = zui_check(h, o.base.name);
+			o.base.visible = ui_check(h, o.base.name);
 
 			if (ui.is_hovered && ui.input_released_r) {
 				_tab_meshes_draw_i = i;
 
-				ui_menu_draw(function (ui: zui_t) {
+				ui_menu_draw(function (ui: ui_t) {
 					let i: i32 = _tab_meshes_draw_i;
 					let o: mesh_object_t = project_paint_objects[i];
 

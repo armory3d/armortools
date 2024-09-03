@@ -64,22 +64,22 @@ function import_folder_run(path: string) {
 	// Create material
 	context_raw.material = slot_material_create(project_materials[0].data);
 	array_push(project_materials, context_raw.material);
-	let nodes: zui_nodes_t = context_raw.material.nodes;
-	let canvas: zui_node_canvas_t = context_raw.material.canvas;
+	let nodes: ui_nodes_t = context_raw.material.nodes;
+	let canvas: ui_node_canvas_t = context_raw.material.canvas;
 	let dirs: string[] = string_split(path, path_sep);
 	canvas.name = dirs[dirs.length - 1];
-	let nout: zui_node_t = null;
+	let nout: ui_node_t = null;
 	for (let i: i32 = 0; i < canvas.nodes.length; ++i) {
-		let n: zui_node_t = canvas.nodes[i];
+		let n: ui_node_t = canvas.nodes[i];
 		if (n.type == "OUTPUT_MATERIAL_PBR") {
 			nout = n;
 			break;
 		}
 	}
 	for (let i: i32 = 0; i < canvas.nodes.length; ++i) {
-		let n: zui_node_t = canvas.nodes[i];
+		let n: ui_node_t = canvas.nodes[i];
 		if (n.name == "RGB") {
-			zui_remove_node(n, canvas);
+			ui_remove_node(n, canvas);
 			break;
 		}
 	}
@@ -123,13 +123,13 @@ function import_folder_run(path: string) {
 	history_new_material();
 }
 
-function import_folder_place_image_node(nodes: zui_nodes_t, canvas: zui_node_canvas_t, asset: string, ny: i32, to_id: i32, to_socket: i32) {
-	let n: zui_node_t = nodes_material_create_node("TEX_IMAGE");
+function import_folder_place_image_node(nodes: ui_nodes_t, canvas: ui_node_canvas_t, asset: string, ny: i32, to_id: i32, to_socket: i32) {
+	let n: ui_node_t = nodes_material_create_node("TEX_IMAGE");
 	n.buttons[0].default_value = f32_array_create_x(base_get_asset_index(asset));
 	n.x = 72;
 	n.y = ny;
-	let l: zui_node_link_t = {
-		id: zui_next_link_id(canvas.links),
+	let l: ui_node_link_t = {
+		id: ui_next_link_id(canvas.links),
 		from_id: n.id,
 		from_socket: 0,
 		to_id: to_id,

@@ -1,7 +1,7 @@
 
 type slot_brush_t = {
-	nodes?: zui_nodes_t;
-	canvas?: zui_node_canvas_t;
+	nodes?: ui_nodes_t;
+	canvas?: ui_node_canvas_t;
 	image?: image_t; // 200px
 	image_icon?: image_t; // 50px
 	preview_ready?: bool;
@@ -10,9 +10,9 @@ type slot_brush_t = {
 
 let slot_brush_default_canvas: buffer_t = null;
 
-function slot_brush_create(c: zui_node_canvas_t = null): slot_brush_t {
+function slot_brush_create(c: ui_node_canvas_t = null): slot_brush_t {
 	let raw: slot_brush_t = {};
-	raw.nodes = zui_nodes_create();
+	raw.nodes = ui_nodes_create();
 	raw.preview_ready = false;
 	raw.id = 0;
 

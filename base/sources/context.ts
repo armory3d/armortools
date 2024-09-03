@@ -27,9 +27,9 @@ type context_t = {
 	preview_envmap?: image_t;
 	envmap_loaded?: bool;
 	show_envmap?: bool;
-	show_envmap_handle?: zui_handle_t;
+	show_envmap_handle?: ui_handle_t;
 	show_envmap_blur?: bool;
-	show_envmap_blur_handle?: zui_handle_t;
+	show_envmap_blur_handle?: ui_handle_t;
 	envmap_angle?: f32;
 	light_angle?: f32;
 	cull_backfaces?: bool;
@@ -92,14 +92,14 @@ type context_t = {
 	brush_can_lock?: bool;
 	brush_can_unlock?: bool;
 	camera_type?: camera_type_t;
-	cam_handle?: zui_handle_t;
-	fov_handle?: zui_handle_t;
-	undo_handle?: zui_handle_t;
-	hssao?: zui_handle_t;
-	hssr?: zui_handle_t;
-	hbloom?: zui_handle_t;
-	hsupersample?: zui_handle_t;
-	hvxao?: zui_handle_t;
+	cam_handle?: ui_handle_t;
+	fov_handle?: ui_handle_t;
+	undo_handle?: ui_handle_t;
+	hssao?: ui_handle_t;
+	hssr?: ui_handle_t;
+	hbloom?: ui_handle_t;
+	hsupersample?: ui_handle_t;
+	hvxao?: ui_handle_t;
 	///if is_forge
 	vxao_ext?: f32;
 	///else
@@ -138,7 +138,7 @@ type context_t = {
 	uvx_picked?: f32;
 	uvy_picked?: f32;
 	picker_select_material?: bool;
-	picker_mask_handle?: zui_handle_t;
+	picker_mask_handle?: ui_handle_t;
 	pick_pos_nor_tex?: bool;
 	posx_picked?: f32;
 	posy_picked?: f32;
@@ -148,11 +148,11 @@ type context_t = {
 	norz_picked?: f32;
 
 	draw_wireframe?: bool;
-	wireframe_handle?: zui_handle_t;
+	wireframe_handle?: ui_handle_t;
 	draw_texels?: bool;
-	texels_handle?: zui_handle_t;
+	texels_handle?: ui_handle_t;
 
-	colorid_handle?: zui_handle_t;
+	colorid_handle?: ui_handle_t;
 	layers_export?: export_mode_t;
 
 	decal_image?: image_t;
@@ -225,17 +225,17 @@ type context_t = {
 	brush_directional?: bool;
 
 	brush_radius?: f32;
-	brush_radius_handle?: zui_handle_t;
+	brush_radius_handle?: ui_handle_t;
 	brush_scale_x?: f32;
 	brush_decal_mask_radius?: f32;
-	brush_decal_mask_radius_handle?: zui_handle_t;
-	brush_scale_x_handle?: zui_handle_t;
+	brush_decal_mask_radius_handle?: ui_handle_t;
+	brush_scale_x_handle?: ui_handle_t;
 	brush_blending?: blend_type_t;
 	brush_opacity?: f32;
-	brush_opacity_handle?: zui_handle_t;
+	brush_opacity_handle?: ui_handle_t;
 	brush_scale?: f32;
 	brush_angle?: f32;
-	brush_angle_handle?: zui_handle_t;
+	brush_angle_handle?: ui_handle_t;
 	///if is_paint
 	brush_hardness?: f32;
 	///end
@@ -265,7 +265,7 @@ type context_t = {
 	sym_x?: bool;
 	sym_y?: bool;
 	sym_z?: bool;
-	fill_type_handle?: zui_handle_t;
+	fill_type_handle?: ui_handle_t;
 
 	paint2d?: bool;
 
@@ -282,7 +282,7 @@ type context_t = {
 	color_picker_previous_tool?: workspace_tool_t;
 
 	brush_radius?: f32;
-	brush_radius_handle?: zui_handle_t;
+	brush_radius_handle?: ui_handle_t;
 	brush_scale?: f32;
 
 	coords?: vec4_t;
@@ -317,9 +317,9 @@ function context_create(): context_t {
 	c.picked_color = make_swatch();
 	c.envmap_loaded = false;
 	c.show_envmap = false;
-	c.show_envmap_handle = zui_handle_create();
+	c.show_envmap_handle = ui_handle_create();
 	c.show_envmap_blur = false;
-	c.show_envmap_blur_handle = zui_handle_create();
+	c.show_envmap_blur_handle = ui_handle_create();
 	c.envmap_angle = 0.0;
 	c.light_angle = 0.0;
 	c.cull_backfaces = true;
@@ -373,7 +373,7 @@ function context_create(): context_t {
 	c.brush_can_lock = false;
 	c.brush_can_unlock = false;
 	c.camera_type = camera_type_t.PERSPECTIVE;
-	c.cam_handle = zui_handle_create();
+	c.cam_handle = ui_handle_create();
 	///if is_forge
 	c.vxao_ext = 2.0;
 	///else
@@ -400,7 +400,7 @@ function context_create(): context_t {
 	c.uvx_picked = 0.0;
 	c.uvy_picked = 0.0;
 	c.picker_select_material = true;
-	c.picker_mask_handle = zui_handle_create();
+	c.picker_mask_handle = ui_handle_create();
 	c.pick_pos_nor_tex = false;
 	c.posx_picked = 0.0;
 	c.posy_picked = 0.0;
@@ -409,10 +409,10 @@ function context_create(): context_t {
 	c.nory_picked = 0.0;
 	c.norz_picked = 0.0;
 	c.draw_wireframe = false;
-	c.wireframe_handle = zui_handle_create();
+	c.wireframe_handle = ui_handle_create();
 	c.draw_texels = false;
-	c.texels_handle = zui_handle_create();
-	c.colorid_handle = zui_handle_create();
+	c.texels_handle = ui_handle_create();
+	c.colorid_handle = ui_handle_create();
 	c.layers_export = export_mode_t.VISIBLE;
 	c.decal_preview = false;
 	c.decal_x = 0.0;
@@ -457,21 +457,21 @@ function context_create(): context_t {
 	c.brush_nodes_hardness = 1.0;
 	c.brush_directional = false;
 	c.brush_radius = 0.5;
-	c.brush_radius_handle = zui_handle_create();
+	c.brush_radius_handle = ui_handle_create();
 	c.brush_radius_handle.value = 0.5;
 	c.brush_scale_x = 1.0;
 	c.brush_decal_mask_radius = 0.5;
-	c.brush_decal_mask_radius_handle = zui_handle_create();
+	c.brush_decal_mask_radius_handle = ui_handle_create();
 	c.brush_decal_mask_radius_handle.value = 0.5;
-	c.brush_scale_x_handle = zui_handle_create();
+	c.brush_scale_x_handle = ui_handle_create();
 	c.brush_scale_x_handle.value = 1.0;
 	c.brush_blending = blend_type_t.MIX;
 	c.brush_opacity = 1.0;
-	c.brush_opacity_handle = zui_handle_create();
+	c.brush_opacity_handle = ui_handle_create();
 	c.brush_opacity_handle.value = 1.0;
 	c.brush_scale = 1.0;
 	c.brush_angle = 0.0;
-	c.brush_angle_handle = zui_handle_create();
+	c.brush_angle_handle = ui_handle_create();
 	c.brush_angle_handle.value = 0.0;
 	///if is_paint
 	c.brush_hardness = 0.8;
@@ -501,7 +501,7 @@ function context_create(): context_t {
 	c.sym_x = false;
 	c.sym_y = false;
 	c.sym_z = false;
-	c.fill_type_handle = zui_handle_create();
+	c.fill_type_handle = ui_handle_create();
 	c.paint2d = false;
 	c.last_htab0_pos = 0;
 	c.maximized_sidebar_width = 0;
@@ -512,7 +512,7 @@ function context_create(): context_t {
 	c.tool = workspace_tool_t.ERASER;
 	c.color_picker_previous_tool = workspace_tool_t.ERASER;
 	c.brush_radius = 0.25;
-	c.brush_radius_handle = zui_handle_create();
+	c.brush_radius_handle = ui_handle_create();
 	c.brush_radius_handle.value = 0.25;
 	c.brush_scale = 1.0;
 	c.coords = vec4_create();
@@ -770,12 +770,12 @@ function context_in_paint_area(): bool {
 }
 
 function context_in_layers(): bool {
-	let tab: string = zui_hovered_tab_name();
+	let tab: string = ui_hovered_tab_name();
 	return tab == tr("Layers");
 }
 
 function context_in_materials(): bool {
-	let tab: string = zui_hovered_tab_name();
+	let tab: string = ui_hovered_tab_name();
 	return tab == tr("Materials");
 }
 
@@ -794,12 +794,12 @@ function context_in_nodes(): bool {
 }
 
 function context_in_swatches(): bool {
-	let tab: string = zui_hovered_tab_name();
+	let tab: string = ui_hovered_tab_name();
 	return tab == tr("Swatches");
 }
 
 function context_in_browser(): bool {
-	let tab: string = zui_hovered_tab_name();
+	let tab: string = ui_hovered_tab_name();
 	return tab == tr("Browser");
 }
 
@@ -913,9 +913,9 @@ function context_run_brush(from: i32) {
 		context_raw.last_paint_vec_y = context_raw.paint_vec.y;
 	}
 
-	let nodes: zui_nodes_t = ui_nodes_get_nodes();
-	let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
-	let inpaint: bool = nodes.nodes_selected_id.length > 0 && zui_get_node(canvas.nodes, nodes.nodes_selected_id[0]).type == "InpaintNode";
+	let nodes: ui_nodes_t = ui_nodes_get_nodes();
+	let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
+	let inpaint: bool = nodes.nodes_selected_id.length > 0 && ui_get_node(canvas.nodes, nodes.nodes_selected_id[0]).type == "InpaintNode";
 
 	// Paint bounds
 	if (inpaint &&

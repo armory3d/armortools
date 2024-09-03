@@ -1,7 +1,7 @@
 
 type slot_material_t = {
-	nodes?: zui_nodes_t;
-	canvas?: zui_node_canvas_t;
+	nodes?: ui_nodes_t;
+	canvas?: ui_node_canvas_t;
 	image?: image_t;
 	image_icon?: image_t;
 	preview_ready?: bool;
@@ -20,9 +20,9 @@ type slot_material_t = {
 
 let slot_material_default_canvas: buffer_t = null;
 
-function slot_material_create(m: material_data_t = null, c: zui_node_canvas_t = null): slot_material_t {
+function slot_material_create(m: material_data_t = null, c: ui_node_canvas_t = null): slot_material_t {
 	let raw: slot_material_t = {};
-	raw.nodes = zui_nodes_create();
+	raw.nodes = ui_nodes_create();
 	raw.preview_ready = false;
 	raw.id = 0;
 	raw.paint_base = true;

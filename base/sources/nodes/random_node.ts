@@ -58,7 +58,7 @@ function random_node_get_float(): f32 {
 	return random_node_get_int() / 0x7fffffff;
 }
 
-let random_node_def: zui_node_t = {
+let random_node_def: ui_node_t = {
 	id: 0,
 	name: _tr("Random"),
 	type: "random_node",

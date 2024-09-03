@@ -1,11 +1,11 @@
 
 #include "plugin_api.h"
-#include "zui.h"
-#include "zui_nodes.h"
+#include "iron_ui.h"
+#include "iron_ui_nodes.h"
 #include "iron_array.h"
 #include "iron_map.h"
 #include "iron_armpack.h"
-#include "io_obj.h"
+#include "iron_obj.h"
 
 void plugin_embed();
 
@@ -465,57 +465,57 @@ FN(project_save) {
 	return JS_UNDEFINED;
 }
 
-FN(zui_handle_create) {
-	int64_t result = (int64_t)zui_handle_create();
+FN(ui_handle_create) {
+	int64_t result = (int64_t)ui_handle_create();
 	return JS_NewInt64(ctx, result);
 }
 
-FN(zui_handle_set_value) {
+FN(ui_handle_set_value) {
 	int64_t p;
 	JS_ToInt64(ctx, &p, argv[0]);
-	zui_handle_t *h = (zui_handle_t *)p;
+	ui_handle_t *h = (ui_handle_t *)p;
 	double d;
 	JS_ToFloat64(ctx, &d, argv[1]);
 	h->value = d;
 	return JS_UNDEFINED;
 }
 
-FN(zui_handle_get_value) {
+FN(ui_handle_get_value) {
 	int64_t p;
 	JS_ToInt64(ctx, &p, argv[0]);
-	zui_handle_t *h = (zui_handle_t *)p;
+	ui_handle_t *h = (ui_handle_t *)p;
 	return JS_NewFloat64(ctx, h->value);
 }
 
-FN(zui_panel) {
+FN(ui_panel) {
 	int64_t p;
 	JS_ToInt64(ctx, &p, argv[0]);
 	char *s = (char *)JS_ToCString(ctx, argv[1]);
-	bool result = zui_panel((void *)p, s, false, false);
+	bool result = ui_panel((void *)p, s, false, false);
 	return JS_NewBool(ctx, result);
 }
 
-FN(zui_button) {
+FN(ui_button) {
 	char *s = (char *)JS_ToCString(ctx, argv[0]);
-	bool result = zui_button(s, ZUI_ALIGN_CENTER, "");
+	bool result = ui_button(s, UI_ALIGN_CENTER, "");
 	return JS_NewBool(ctx, result);
 }
 
-FN(zui_text) {
+FN(ui_text) {
 	char *s = (char *)JS_ToCString(ctx, argv[0]);
-	zui_text(s, ZUI_ALIGN_LEFT, 0);
+	ui_text(s, UI_ALIGN_LEFT, 0);
 	return JS_UNDEFINED;
 }
 
-FN(zui_text_input) {
+FN(ui_text_input) {
 	int64_t p;
 	JS_ToInt64(ctx, &p, argv[0]);
 	char *s = (char *)JS_ToCString(ctx, argv[1]);
-	zui_text_input((void *)p, s, ZUI_ALIGN_LEFT, true, false);
+	ui_text_input((void *)p, s, UI_ALIGN_LEFT, true, false);
 	return JS_UNDEFINED;
 }
 
-FN(zui_slider) {
+FN(ui_slider) {
 	int64_t p;
 	JS_ToInt64(ctx, &p, argv[0]);
 	char *s = (char *)JS_ToCString(ctx, argv[1]);
@@ -535,29 +535,29 @@ FN(zui_slider) {
 	if (argc > 5) {
 		JS_ToFloat64(ctx, &prec, argv[5]);
 	}
-	zui_slider((void *)p, s, from, to, filled, prec, true, ZUI_ALIGN_LEFT, true);
+	ui_slider((void *)p, s, from, to, filled, prec, true, UI_ALIGN_LEFT, true);
 	return JS_UNDEFINED;
 }
 
-FN(zui_check) {
+FN(ui_check) {
 	int64_t p;
 	JS_ToInt64(ctx, &p, argv[0]);
 	char *s = (char *)JS_ToCString(ctx, argv[1]);
-	zui_check((void *)p, s, "");
+	ui_check((void *)p, s, "");
 	return JS_UNDEFINED;
 }
 
-FN(zui_radio) {
+FN(ui_radio) {
 	int64_t p;
 	JS_ToInt64(ctx, &p, argv[0]);
 	int32_t pos;
 	JS_ToInt32(ctx, &pos, argv[1]);
 	char *s = (char *)JS_ToCString(ctx, argv[2]);
-	zui_radio((void *)p, pos, s, "");
+	ui_radio((void *)p, pos, s, "");
 	return JS_UNDEFINED;
 }
 
-FN(zui_row) {
+FN(ui_row) {
 	JSValue val_len = JS_GetPropertyStr(ctx, argv[0], "length");
 	int len;
 	JS_ToInt32(ctx, &len, val_len);
@@ -568,11 +568,11 @@ FN(zui_row) {
 		JS_ToFloat64(ctx, &f, val);
 		ratios->buffer[i] = f;
 	}
-	zui_row(ratios);
+	ui_row(ratios);
 	return JS_UNDEFINED;
 }
 
-FN(zui_combo) {
+FN(ui_combo) {
 	int64_t p;
 	JS_ToInt64(ctx, &p, argv[0]);
 
@@ -588,7 +588,7 @@ FN(zui_combo) {
 
 	char *label = (char *)JS_ToCString(ctx, argv[2]);
 
-	zui_combo((void *)p, texts, label, true, ZUI_ALIGN_LEFT, true);
+	ui_combo((void *)p, texts, label, true, UI_ALIGN_LEFT, true);
 	return JS_UNDEFINED;
 }
 
@@ -639,7 +639,7 @@ FN(parser_material_parse_value_input) {
 	JS_ToInt64(ctx, &node, argv[0]);
 	int64_t i;
 	JS_ToInt64(ctx, &i, argv[1]);
-	char *s = parser_material_parse_value_input(((zui_node_t *)node)->inputs->buffer[i], false);
+	char *s = parser_material_parse_value_input(((ui_node_t *)node)->inputs->buffer[i], false);
 	return JS_NewString(ctx, s);
 }
 
@@ -786,18 +786,18 @@ void plugin_api_init() {
 	BIND(project_filepath_get, 0);
 	BIND(project_save, 0);
 
-	BIND(zui_handle_create, 0);
-	BIND(zui_handle_set_value, 2);
-	BIND(zui_handle_get_value, 1);
-	BIND(zui_panel, 2);
-	BIND(zui_button, 1);
-	BIND(zui_text, 1);
-	BIND(zui_text_input, 2);
-	BIND(zui_slider, 5);
-	BIND(zui_check, 2);
-	BIND(zui_radio, 3);
-	BIND(zui_row, 1);
-	BIND(zui_combo, 3);
+	BIND(ui_handle_create, 0);
+	BIND(ui_handle_set_value, 2);
+	BIND(ui_handle_get_value, 1);
+	BIND(ui_panel, 2);
+	BIND(ui_button, 1);
+	BIND(ui_text, 1);
+	BIND(ui_text_input, 2);
+	BIND(ui_slider, 5);
+	BIND(ui_check, 2);
+	BIND(ui_radio, 3);
+	BIND(ui_row, 1);
+	BIND(ui_combo, 3);
 
 	BIND(nodes_material_category_add, 2);
 	BIND(nodes_material_category_remove, 1);

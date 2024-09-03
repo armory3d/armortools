@@ -17,7 +17,7 @@ flags.with_zlib = true;
 flags.with_stb_image_write = true;
 flags.with_g2 = true;
 flags.with_iron = true;
-flags.with_zui = true;
+flags.with_ui = true;
 flags.with_eval = true;
 
 let project = new Project("Base");

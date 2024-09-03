@@ -3,7 +3,7 @@
 #include "cgltf.h"
 #include <math.h>
 #include "iron_array.h"
-#include "io_obj.h"
+#include "iron_obj.h"
 
 uint32_t *io_gltf_read_u8_array(cgltf_accessor *a) {
 	cgltf_buffer_view *v = a->buffer_view;

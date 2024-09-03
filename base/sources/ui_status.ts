@@ -14,11 +14,11 @@ function ui_status_width(): i32 {
 }
 
 function ui_status_render_ui() {
-	let ui: zui_t = ui_base_ui;
+	let ui: ui_t = ui_base_ui;
 
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
 
-	if (zui_window(ui_base_hwnds[tab_area_t.STATUS], app_x(), sys_height() - statush, ui_status_width(), statush)) {
+	if (ui_window(ui_base_hwnds[tab_area_t.STATUS], app_x(), sys_height() - statush, ui_status_width(), statush)) {
 		ui._y += 2;
 
 		// Border
@@ -28,7 +28,7 @@ function ui_status_render_ui() {
 
 		// Draw tabs
 		let hwnd_draws: tab_draw_t[] = ui_base_hwnd_tabs[tab_area_t.STATUS];
-		let htab: zui_handle_t = ui_base_htabs[tab_area_t.STATUS];
+		let htab: ui_handle_t = ui_base_htabs[tab_area_t.STATUS];
 		for (let i: i32 = 0; i < hwnd_draws.length; ++i) {
 			let draw: tab_draw_t = hwnd_draws[i];
 			draw.f(htab);
@@ -42,12 +42,12 @@ function ui_status_render_ui() {
 	}
 }
 
-function ui_status_draw_version_tab(htab: zui_handle_t) {
+function ui_status_draw_version_tab(htab: ui_handle_t) {
 	// Version label
 	if (!config_raw.touch_ui) {
-		let ui: zui_t = ui_base_ui;
+		let ui: ui_t = ui_base_ui;
 		ui.enabled = false;
-		zui_tab(ui_base_htabs[tab_area_t.STATUS], manifest_version);
+		ui_tab(ui_base_htabs[tab_area_t.STATUS], manifest_version);
 		ui.enabled = true;
 	}
 }

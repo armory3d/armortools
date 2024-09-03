@@ -1,7 +1,7 @@
 
 let ui_menubar_default_w: i32 = 330;
-let ui_menubar_workspace_handle: zui_handle_t = zui_handle_create();
-let ui_menubar_menu_handle: zui_handle_t = zui_handle_create();
+let ui_menubar_workspace_handle: ui_handle_t = ui_handle_create();
+let ui_menubar_menu_handle: ui_handle_t = ui_handle_create();
 let ui_menubar_w: i32 = ui_menubar_default_w;
 
 ///if is_lab
@@ -10,12 +10,12 @@ let _ui_menubar_plane: mesh_object_t = null;
 ///end
 
 function ui_menubar_init() {
-	ui_menubar_workspace_handle.layout = zui_layout_t.HORIZONTAL;
-	ui_menubar_menu_handle.layout = zui_layout_t.HORIZONTAL;
+	ui_menubar_workspace_handle.layout = ui_layout_t.HORIZONTAL;
+	ui_menubar_menu_handle.layout = ui_layout_t.HORIZONTAL;
 }
 
 function ui_menubar_render_ui() {
-	let ui: zui_t = ui_base_ui;
+	let ui: ui_t = ui_base_ui;
 
 	///if (is_paint || is_sculpt)
 	let panelx: i32 = app_x() - ui_toolbar_w;
@@ -24,10 +24,10 @@ function ui_menubar_render_ui() {
 	let panelx: i32 = app_x();
 	///end
 
-	if (zui_window(ui_menubar_menu_handle, panelx, 0, ui_menubar_w, ui_header_h)) {
+	if (ui_window(ui_menubar_menu_handle, panelx, 0, ui_menubar_w, ui_header_h)) {
 		ui._x += 1; // Prevent "File" button highlight on startup
 
-		zui_begin_menu();
+		ui_begin_menu();
 
 		if (config_raw.touch_ui) {
 
@@ -56,27 +56,27 @@ function ui_menubar_render_ui() {
 				box_export_show_textures();
 			}
 			///end
-			let size: i32 = math_floor(ui._w / zui_SCALE(ui));
+			let size: i32 = math_floor(ui._w / ui_SCALE(ui));
 			if (ui_menu_show && ui_menu_category == menu_category_t.VIEWPORT) {
-				zui_fill(0, -6, size, size - 4, ui.ops.theme.HIGHLIGHT_COL);
+				ui_fill(0, -6, size, size - 4, ui.ops.theme.HIGHLIGHT_COL);
 			}
 			if (ui_menubar_icon_button(ui, 8, 2)) {
 				ui_menubar_show_menu(ui, menu_category_t.VIEWPORT);
 			}
 			if (ui_menu_show && ui_menu_category == menu_category_t.MODE) {
-				zui_fill(0, -6, size, size - 4, ui.ops.theme.HIGHLIGHT_COL);
+				ui_fill(0, -6, size, size - 4, ui.ops.theme.HIGHLIGHT_COL);
 			}
 			if (ui_menubar_icon_button(ui, 9, 2)) {
 				ui_menubar_show_menu(ui, menu_category_t.MODE);
 			}
 			if (ui_menu_show && ui_menu_category == menu_category_t.CAMERA) {
-				zui_fill(0, -6, size, size - 4, ui.ops.theme.HIGHLIGHT_COL);
+				ui_fill(0, -6, size, size - 4, ui.ops.theme.HIGHLIGHT_COL);
 			}
 			if (ui_menubar_icon_button(ui, 10, 2)) {
 				ui_menubar_show_menu(ui, menu_category_t.CAMERA);
 			}
 			if (ui_menu_show && ui_menu_category == menu_category_t.HELP) {
-				zui_fill(0, -6, size, size - 4, ui.ops.theme.HIGHLIGHT_COL);
+				ui_fill(0, -6, size, size - 4, ui.ops.theme.HIGHLIGHT_COL);
 			}
 			if (ui_menubar_icon_button(ui, 11, 2)) {
 				ui_menubar_show_menu(ui, menu_category_t.HELP);
@@ -94,7 +94,7 @@ function ui_menubar_render_ui() {
 		else {
 			let categories: string[] = [tr("File"), tr("Edit"), tr("Viewport"), tr("Mode"), tr("Camera"), tr("Help")];
 			for (let i: i32 = 0; i < categories.length; ++i) {
-				if (zui_menu_button(categories[i]) || (ui_menu_show && ui_menu_commands == null && ui.is_hovered)) {
+				if (_ui_menu_button(categories[i]) || (ui_menu_show && ui_menu_commands == null && ui.is_hovered)) {
 					ui_menubar_show_menu(ui, i);
 				}
 			}
@@ -108,7 +108,7 @@ function ui_menubar_render_ui() {
 			///end
 		}
 
-		zui_end_menu();
+		ui_end_menu();
 	}
 
 	let nodesw: i32 = (ui_nodes_show || ui_view2d_show) ? config_raw.layout[layout_size_t.NODES_W] : 0;
@@ -120,17 +120,17 @@ function ui_menubar_render_ui() {
 	panelx = (app_x()) + ui_menubar_w;
 	///end
 
-	if (zui_window(ui_menubar_workspace_handle, panelx, 0, ww, ui_header_h)) {
+	if (ui_window(ui_menubar_workspace_handle, panelx, 0, ww, ui_header_h)) {
 
 		if (!config_raw.touch_ui) {
-			zui_tab(ui_header_worktab, tr("3D View"));
+			ui_tab(ui_header_worktab, tr("3D View"));
 		}
 		else {
-			zui_fill(0, 0, ui._window_w, ui._window_h + 4, ui.ops.theme.SEPARATOR_COL);
+			ui_fill(0, 0, ui._window_w, ui._window_h + 4, ui.ops.theme.SEPARATOR_COL);
 		}
 
 		///if is_lab
-		zui_tab(ui_header_worktab, tr("2D View"));
+		ui_tab(ui_header_worktab, tr("2D View"));
 		if (ui_header_worktab.changed) {
 			context_raw.ddirty = 2;
 			context_raw.brush_blend_dirty = true;
@@ -197,28 +197,28 @@ function ui_menubar_render_ui() {
 	}
 }
 
-function ui_menubar_show_menu(ui: zui_t, category: i32) {
+function ui_menubar_show_menu(ui: ui_t, category: i32) {
 	ui_menu_show = true;
 	ui_menu_commands = null;
 	ui_menu_category = category;
 	ui_menu_category_w = ui._w;
-	ui_menu_category_h = math_floor(zui_MENUBAR_H(ui));
+	ui_menu_category_h = math_floor(ui_MENUBAR_H(ui));
 	ui_menu_x = math_floor(ui._x - ui._w);
-	ui_menu_y = math_floor(zui_MENUBAR_H(ui));
+	ui_menu_y = math_floor(ui_MENUBAR_H(ui));
 	if (config_raw.touch_ui) {
-		let menuW: i32 = math_floor(base_default_element_w * zui_SCALE(base_ui_menu) * 2.0);
+		let menuW: i32 = math_floor(base_default_element_w * ui_SCALE(base_ui_menu) * 2.0);
 		ui_menu_x -= math_floor((menuW - ui._w) / 2) + math_floor(ui_header_h / 2);
-		ui_menu_x += math_floor(2 * zui_SCALE(base_ui_menu));
-		ui_menu_y -= math_floor(2 * zui_SCALE(base_ui_menu));
+		ui_menu_x += math_floor(2 * ui_SCALE(base_ui_menu));
+		ui_menu_y -= math_floor(2 * ui_SCALE(base_ui_menu));
 		ui_menu_keep_open = true;
 	}
 }
 
-function ui_menubar_icon_button(ui: zui_t, i: i32, j: i32): bool {
+function ui_menubar_icon_button(ui: ui_t, i: i32, j: i32): bool {
 	let col: u32 = ui.ops.theme.WINDOW_BG_COL;
 	let light: bool = col > 0xff666666 ;
 	let icon_accent: i32 = light ? 0xff666666 : 0xffaaaaaa;
 	let img: image_t = resource_get("icons.k");
 	let rect: rect_t = resource_tile50(img, i, j);
-	return _zui_image(img, icon_accent, -1.0, rect.x, rect.y, rect.w, rect.h) == zui_state_t.RELEASED;
+	return _ui_image(img, icon_accent, -1.0, rect.x, rect.y, rect.w, rect.h) == ui_state_t.RELEASED;
 }

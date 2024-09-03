@@ -6,8 +6,8 @@ function ui_nodes_ext_delay_idle_sleep() {
 }
 
 function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
-	let ui: zui_t = ui_nodes_ui;
-	if (zui_button(tr("Run"))) {
+	let ui: ui_t = ui_nodes_ui;
+	if (ui_button(tr("Run"))) {
 
 		app_notify_on_render_2d(ui_nodes_ext_delay_idle_sleep);
 
@@ -123,10 +123,10 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 
 	///if (krom_android || krom_ios)
 	let base_res_combo: string[] = ["2K", "4K"];
-	zui_combo(base_res_handle, base_res_combo, tr("Resolution"));
+	ui_combo(base_res_handle, base_res_combo, tr("Resolution"));
 	///else
 	let base_res_combo: string[] = ["2K", "4K", "8K", "16K"];
-	zui_combo(base_res_handle, base_res_combo, tr("Resolution"));
+	ui_combo(base_res_handle, base_res_combo, tr("Resolution"));
 	///end
 	if (base_res_handle.changed) {
 		base_on_layers_resized();

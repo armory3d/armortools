@@ -23,7 +23,7 @@ function tex_image_node_get(self: tex_image_node_t, from: i32): logic_node_value
 	}
 }
 
-let tex_image_node_def: zui_node_t = {
+let tex_image_node_def: ui_node_t = {
 	id: 0,
 	name: _tr("Image Texture"),
 	type: "tex_image_node",

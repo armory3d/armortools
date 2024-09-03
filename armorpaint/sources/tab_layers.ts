@@ -1,28 +1,28 @@
 
 let tab_layers_layer_name_edit: i32 = -1;
-let tab_layers_layer_name_handle: zui_handle_t = zui_handle_create();
+let tab_layers_layer_name_handle: ui_handle_t = ui_handle_create();
 let tab_layers_show_context_menu: bool = false;
 
-function tab_layers_draw(htab: zui_handle_t) {
+function tab_layers_draw(htab: ui_handle_t) {
 	let mini: bool = config_raw.layout[layout_size_t.SIDEBAR_W] <= ui_base_sidebar_mini_w;
 	mini ? tab_layers_draw_mini(htab) : tab_layers_draw_full(htab);
 }
 
-function tab_layers_draw_mini(htab: zui_handle_t) {
-	let ui: zui_t = ui_base_ui;
-	zui_set_hovered_tab_name(tr("Layers"));
+function tab_layers_draw_mini(htab: ui_handle_t) {
+	let ui: ui_t = ui_base_ui;
+	ui_set_hovered_tab_name(tr("Layers"));
 
 	let _ELEMENT_H: i32 = ui.ops.theme.ELEMENT_H;
-	ui.ops.theme.ELEMENT_H = math_floor(ui_base_sidebar_mini_w / 2 / zui_SCALE(ui));
+	ui.ops.theme.ELEMENT_H = math_floor(ui_base_sidebar_mini_w / 2 / ui_SCALE(ui));
 
-	zui_begin_sticky();
-	zui_separator(5);
+	ui_begin_sticky();
+	ui_separator(5);
 
 	tab_layers_combo_filter();
 	tab_layers_button_2d_view();
 	tab_layers_button_new("+");
 
-	zui_end_sticky();
+	ui_end_sticky();
 	ui._y += 2;
 
 	tab_layers_highlight_odd_lines();
@@ -31,18 +31,18 @@ function tab_layers_draw_mini(htab: zui_handle_t) {
 	ui.ops.theme.ELEMENT_H = _ELEMENT_H;
 }
 
-function tab_layers_draw_full(htab: zui_handle_t) {
-	let ui: zui_t = ui_base_ui;
-	if (zui_tab(htab, tr("Layers"))) {
-		zui_begin_sticky();
+function tab_layers_draw_full(htab: ui_handle_t) {
+	let ui: ui_t = ui_base_ui;
+	if (ui_tab(htab, tr("Layers"))) {
+		ui_begin_sticky();
 		let row: f32[] = [1 / 4, 1 / 4, 1 / 2];
-		zui_row(row);
+		ui_row(row);
 
 		tab_layers_button_new(tr("New"));
 		tab_layers_button_2d_view();
 		tab_layers_combo_filter();
 
-		zui_end_sticky();
+		ui_end_sticky();
 		ui._y += 2;
 
 		tab_layers_highlight_odd_lines();
@@ -51,12 +51,12 @@ function tab_layers_draw_full(htab: zui_handle_t) {
 }
 
 function tab_layers_button_2d_view() {
-	let ui: zui_t = ui_base_ui;
-	if (zui_button(tr("2D View"))) {
+	let ui: ui_t = ui_base_ui;
+	if (ui_button(tr("2D View"))) {
 		ui_base_show_2d_view(view_2d_type_t.LAYER);
 	}
 	else if (ui.is_hovered) {
-		zui_tooltip(tr("Show 2D View") + " (" + map_get(config_keymap, "toggle_2d_view") + ")");
+		ui_tooltip(tr("Show 2D View") + " (" + map_get(config_keymap, "toggle_2d_view") + ")");
 	}
 }
 
@@ -72,19 +72,19 @@ function tab_layers_draw_slots(mini: bool) {
 }
 
 function tab_layers_highlight_odd_lines() {
-	let ui: zui_t = ui_base_ui;
+	let ui: ui_t = ui_base_ui;
 	let step: i32 = ui.ops.theme.ELEMENT_H * 2;
 	let full_h: i32 = ui._window_h - ui_base_hwnds[0].scroll_offset;
 	for (let i: i32 = 0; i < math_floor(full_h / step); ++i) {
 		if (i % 2 == 0) {
-			zui_fill(0, i * step, (ui._w / zui_SCALE(ui) - 2), step, ui.ops.theme.WINDOW_BG_COL - 0x00040404);
+			ui_fill(0, i * step, (ui._w / ui_SCALE(ui) - 2), step, ui.ops.theme.WINDOW_BG_COL - 0x00040404);
 		}
 	}
 }
 
 function tab_layers_button_new(text: string) {
-	if (zui_button(text)) {
-		ui_menu_draw(function (ui: zui_t) {
+	if (ui_button(text)) {
+		ui_menu_draw(function (ui: ui_t) {
 			let l: slot_layer_t = context_raw.layer;
 			if (ui_menu_button(ui, tr("Paint Layer"))) {
 				base_new_layer();
@@ -179,9 +179,9 @@ function tab_layers_combo_filter() {
 			array_push(ar, a);
 		}
 	}
-	let filter_handle: zui_handle_t = zui_handle(__ID__);
+	let filter_handle: ui_handle_t = ui_handle(__ID__);
 	filter_handle.position = context_raw.layer_filter;
-	context_raw.layer_filter = zui_combo(filter_handle, ar, tr("Filter"), false, zui_align_t.LEFT);
+	context_raw.layer_filter = ui_combo(filter_handle, ar, tr("Filter"), false, ui_align_t.LEFT);
 	if (filter_handle.changed) {
 		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 			let p: mesh_object_t = project_paint_objects[i];
@@ -209,9 +209,9 @@ function tab_layers_combo_filter() {
 	}
 }
 
-function tab_layers_remap_layer_pointers(nodes: zui_node_t[], pointer_map: map_t<i32, i32>) {
+function tab_layers_remap_layer_pointers(nodes: ui_node_t[], pointer_map: map_t<i32, i32>) {
 	for (let i: i32 = 0; i < nodes.length; ++i) {
-		let n: zui_node_t = nodes[i];
+		let n: ui_node_t = nodes[i];
 		if (n.type == "LAYER" || n.type == "LAYER_MASK") {
 			let i: i32 = n.buttons[0].default_value[0];
 			if (map_get(pointer_map, i) != -1) {
@@ -247,7 +247,7 @@ function tab_layers_set_drag_layer(layer: slot_layer_t, off_x: f32, off_y: f32) 
 }
 
 function tab_layers_draw_layer_slot(l: slot_layer_t, i: i32, mini: bool) {
-	let ui: zui_t = ui_base_ui;
+	let ui: ui_t = ui_base_ui;
 
 	if (context_raw.layer_filter > 0 &&
 		slot_layer_get_object_mask(l) > 0 &&
@@ -263,7 +263,7 @@ function tab_layers_draw_layer_slot(l: slot_layer_t, i: i32, mini: bool) {
 	}
 
 	let step: i32 = ui.ops.theme.ELEMENT_H;
-	let checkw: f32 = (ui._window_w / 100 * 8) / zui_SCALE(ui);
+	let checkw: f32 = (ui._window_w / 100 * 8) / ui_SCALE(ui);
 
 	// Highlight drag destination
 	let absy: f32 = ui._window_y + ui._y;
@@ -278,14 +278,14 @@ function tab_layers_draw_layer_slot(l: slot_layer_t, i: i32, mini: bool) {
 			let nested_group: bool = slot_layer_is_group(base_drag_layer) && to_group;
 			if (!nested_group) {
 				if (slot_layer_can_move(context_raw.layer, context_raw.drag_dest)) {
-					zui_fill(checkw, step * 2, (ui._window_w / zui_SCALE(ui) - 2) - checkw, 2 * zui_SCALE(ui), ui.ops.theme.HIGHLIGHT_COL);
+					ui_fill(checkw, step * 2, (ui._window_w / ui_SCALE(ui) - 2) - checkw, 2 * ui_SCALE(ui), ui.ops.theme.HIGHLIGHT_COL);
 				}
 			}
 		}
 		else if (i == project_layers.length - 1 && mouse_y < absy + step) {
 			context_raw.drag_dest = project_layers.length - 1;
 			if (slot_layer_can_move(context_raw.layer, context_raw.drag_dest)) {
-				zui_fill(checkw, 0, (ui._window_w / zui_SCALE(ui) - 2) - checkw, 2 * zui_SCALE(ui), ui.ops.theme.HIGHLIGHT_COL);
+				ui_fill(checkw, 0, (ui._window_w / ui_SCALE(ui) - 2) - checkw, 2 * ui_SCALE(ui), ui.ops.theme.HIGHLIGHT_COL);
 			}
 		}
 	}
@@ -293,13 +293,13 @@ function tab_layers_draw_layer_slot(l: slot_layer_t, i: i32, mini: bool) {
 		if (mouse_y > absy + step && mouse_y < absy + step * 3) {
 			context_raw.drag_dest = i;
 			if (tab_layers_can_drop_new_layer(i)) {
-				zui_fill(checkw, 2 * step, (ui._window_w / zui_SCALE(ui) - 2) - checkw, 2 * zui_SCALE(ui), ui.ops.theme.HIGHLIGHT_COL);
+				ui_fill(checkw, 2 * step, (ui._window_w / ui_SCALE(ui) - 2) - checkw, 2 * ui_SCALE(ui), ui.ops.theme.HIGHLIGHT_COL);
 			}
 		}
 		else if (i == project_layers.length - 1 && mouse_y < absy + step) {
 			context_raw.drag_dest = project_layers.length;
 			if (tab_layers_can_drop_new_layer(project_layers.length)) {
-				zui_fill(checkw, 0, (ui._window_w / zui_SCALE(ui) - 2) - checkw, 2 * zui_SCALE(ui), ui.ops.theme.HIGHLIGHT_COL);
+				ui_fill(checkw, 0, (ui._window_w / ui_SCALE(ui) - 2) - checkw, 2 * ui_SCALE(ui), ui.ops.theme.HIGHLIGHT_COL);
 			}
 		}
 	}
@@ -314,39 +314,39 @@ function tab_layers_draw_layer_slot(l: slot_layer_t, i: i32, mini: bool) {
 }
 
 function tab_layers_draw_layer_slot_mini(l: slot_layer_t, i: i32) {
-	let ui: zui_t = ui_base_ui;
+	let ui: ui_t = ui_base_ui;
 
 	let row: f32[] = [1, 1];
-	zui_row(row);
+	ui_row(row);
 	let uix: f32 = ui._x;
 	let uiy: f32 = ui._y;
-	let state: zui_state_t = tab_layers_draw_layer_icon(l, i, uix, uiy, true);
+	let state: ui_state_t = tab_layers_draw_layer_icon(l, i, uix, uiy, true);
 	tab_layers_handle_layer_icon_state(l, i, state, uix, uiy);
-	_zui_end_element();
+	_ui_end_element();
 
-	ui._y += zui_ELEMENT_H(ui);
-	ui._y -= zui_ELEMENT_OFFSET(ui);
+	ui._y += ui_ELEMENT_H(ui);
+	ui._y -= ui_ELEMENT_OFFSET(ui);
 }
 
 function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
-	let ui: zui_t = ui_base_ui;
+	let ui: ui_t = ui_base_ui;
 
 	let step: i32 = ui.ops.theme.ELEMENT_H;
 
 	let has_panel: bool = slot_layer_is_group(l) || (slot_layer_is_layer(l) && slot_layer_get_masks(l, false) != null);
 	if (has_panel) {
 		let row: f32[] = [8 / 100, 16 / 100, 36 / 100, 30 / 100, 10 / 100];
-		zui_row(row);
+		ui_row(row);
 	}
 	else {
 		let row: f32[] = [8 / 100, 16 / 100, 36 / 100, 30 / 100];
-		zui_row(row);
+		ui_row(row);
 	}
 
 	// Draw eye icon
 	let icons: image_t = resource_get("icons.k");
 	let r: rect_t = resource_tile18(icons, l.visible ? 0 : 1, 0);
-	let center: f32 = (step / 2) * zui_SCALE(ui);
+	let center: f32 = (step / 2) * ui_SCALE(ui);
 	ui._x += 2;
 	ui._y += 3;
 	ui._y += center;
@@ -356,7 +356,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 		col -= 0x99000000;
 	}
 
-	if (_zui_image(icons, col, -1.0, r.x, r.y, r.w, r.h) == zui_state_t.RELEASED) {
+	if (_ui_image(icons, col, -1.0, r.x, r.y, r.w, r.h) == ui_state_t.RELEASED) {
 		tab_layers_layer_toggle_visible(l);
 	}
 	ui._x -= 2;
@@ -372,17 +372,17 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	ui._x += 2;
 	ui._y += 3;
 	if (l.parent != null) {
-		ui._x += 10 * zui_SCALE(ui);
-		if (l.parent.parent != null) ui._x += 10 * zui_SCALE(ui);
+		ui._x += 10 * ui_SCALE(ui);
+		if (l.parent.parent != null) ui._x += 10 * ui_SCALE(ui);
 	}
 
-	let state: zui_state_t = tab_layers_draw_layer_icon(l, i, uix, uiy, false);
+	let state: ui_state_t = tab_layers_draw_layer_icon(l, i, uix, uiy, false);
 
 	ui._x -= 2;
 	ui._y -= 3;
 
 	if (config_raw.touch_ui) {
-		ui._x += 12 * zui_SCALE(ui);
+		ui._x += 12 * ui_SCALE(ui);
 	}
 
 	///if krom_opengl
@@ -395,13 +395,13 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	ui._y += center;
 	if (tab_layers_layer_name_edit == l.id) {
 		tab_layers_layer_name_handle.text = l.name;
-		l.name = zui_text_input(tab_layers_layer_name_handle);
+		l.name = ui_text_input(tab_layers_layer_name_handle);
 		if (ui.text_selected_handle != tab_layers_layer_name_handle) tab_layers_layer_name_edit = -1;
 	}
 	else {
 		if (ui.enabled && ui.input_enabled && ui.combo_selected_handle == null &&
 			ui.input_x > ui._window_x + ui._x && ui.input_x < ui._window_x + ui._window_w &&
-			ui.input_y > ui._window_y + ui._y - center && ui.input_y < ui._window_y + ui._y - center + (step * zui_SCALE(ui)) * 2) {
+			ui.input_y > ui._window_y + ui._y - center && ui.input_y < ui._window_y + ui._y - center + (step * ui_SCALE(ui)) * 2) {
 			if (ui.input_started) {
 				context_set_layer(l);
 				tab_layers_set_drag_layer(context_raw.layer, -(mouse_x - uix - ui._window_x - 3), -(mouse_y - uiy - ui._window_y + 1));
@@ -412,12 +412,12 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 			}
 		}
 
-		let state: zui_state_t = zui_text(l.name);
-		if (state == zui_state_t.RELEASED) {
+		let state: ui_state_t = ui_text(l.name);
+		if (state == ui_state_t.RELEASED) {
 			if (time_time() - context_raw.select_time < 0.25) {
 				tab_layers_layer_name_edit = l.id;
 				tab_layers_layer_name_handle.text = l.name;
-				zui_start_text_edit(tab_layers_layer_name_handle);
+				ui_start_text_edit(tab_layers_layer_name_handle);
 			}
 			context_raw.select_time = time_time();
 		}
@@ -434,12 +434,12 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	ui._y -= center;
 
 	if (l.parent != null) {
-		ui._x -= 10 * zui_SCALE(ui);
-		if (l.parent.parent != null) ui._x -= 10 * zui_SCALE(ui);
+		ui._x -= 10 * ui_SCALE(ui);
+		if (l.parent.parent != null) ui._x -= 10 * ui_SCALE(ui);
 	}
 
 	if (slot_layer_is_group(l)) {
-		_zui_end_element();
+		_ui_end_element();
 	}
 	else {
 		if (slot_layer_is_mask(l)) {
@@ -455,37 +455,37 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 
 	if (has_panel) {
 		ui._y += center;
-		let layer_panel: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
+		let layer_panel: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
 		layer_panel.selected = l.show_panel;
-		l.show_panel = zui_panel(layer_panel, "", true, false);
+		l.show_panel = ui_panel(layer_panel, "", true, false);
 		ui._y -= center;
 	}
 
 	if (slot_layer_is_group(l) || slot_layer_is_mask(l)) {
-		ui._y -= zui_ELEMENT_OFFSET(ui);
-		_zui_end_element();
+		ui._y -= ui_ELEMENT_OFFSET(ui);
+		_ui_end_element();
 	}
 	else {
-		ui._y -= zui_ELEMENT_OFFSET(ui);
+		ui._y -= ui_ELEMENT_OFFSET(ui);
 
 		let row: f32[] = [8 / 100, 16 / 100, 36 / 100, 30 / 100, 10 / 100];
-		zui_row(row);
-		_zui_end_element();
-		_zui_end_element();
-		_zui_end_element();
+		ui_row(row);
+		_ui_end_element();
+		_ui_end_element();
+		_ui_end_element();
 
 		if (config_raw.touch_ui) {
-			ui._x += 12 * zui_SCALE(ui);
+			ui._x += 12 * ui_SCALE(ui);
 		}
 
 		tab_layers_combo_object(ui, l);
-		_zui_end_element();
+		_ui_end_element();
 	}
 
-	ui._y -= zui_ELEMENT_OFFSET(ui);
+	ui._y -= ui_ELEMENT_OFFSET(ui);
 }
 
-function tab_layers_combo_object(ui: zui_t, l: slot_layer_t, label: bool = false): zui_handle_t {
+function tab_layers_combo_object(ui: ui_t, l: slot_layer_t, label: bool = false): ui_handle_t {
 	let ar: string[] = [tr("Shared")];
 	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 		let p: mesh_object_t = project_paint_objects[i];
@@ -498,9 +498,9 @@ function tab_layers_combo_object(ui: zui_t, l: slot_layer_t, label: bool = false
 			array_push(ar, a);
 		}
 	}
-	let object_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
+	let object_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
 	object_handle.position = l.object_mask;
-	l.object_mask = zui_combo(object_handle, ar, tr("Object"), label, zui_align_t.LEFT);
+	l.object_mask = ui_combo(object_handle, ar, tr("Object"), label, ui_align_t.LEFT);
 	if (object_handle.changed) {
 		context_set_layer(l);
 		make_material_parse_mesh_material();
@@ -518,8 +518,8 @@ function tab_layers_combo_object(ui: zui_t, l: slot_layer_t, label: bool = false
 	return object_handle;
 }
 
-function tab_layers_combo_blending(ui: zui_t, l: slot_layer_t, label: bool = false): zui_handle_t {
-	let blending_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
+function tab_layers_combo_blending(ui: ui_t, l: slot_layer_t, label: bool = false): ui_handle_t {
+	let blending_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
 	blending_handle.position = l.blending;
 	let blending_combo: string[] = [
 		tr("Mix"),
@@ -541,7 +541,7 @@ function tab_layers_combo_blending(ui: zui_t, l: slot_layer_t, label: bool = fal
 		tr("Color"),
 		tr("Value"),
 	];
-	zui_combo(blending_handle, blending_combo, tr("Blending"), label);
+	ui_combo(blending_handle, blending_combo, tr("Blending"), label);
 	if (blending_handle.changed) {
 		context_set_layer(l);
 		history_layer_blending();
@@ -558,25 +558,25 @@ function tab_layers_layer_toggle_visible(l: slot_layer_t) {
 }
 
 function tab_layers_draw_layer_highlight(l: slot_layer_t, mini: bool) {
-	let ui: zui_t = ui_base_ui;
+	let ui: ui_t = ui_base_ui;
 	let step: i32 = ui.ops.theme.ELEMENT_H;
 
 	// Separator line
-	zui_fill(0, 0, (ui._w / zui_SCALE(ui) - 2), 1 * zui_SCALE(ui), ui.ops.theme.SEPARATOR_COL);
+	ui_fill(0, 0, (ui._w / ui_SCALE(ui) - 2), 1 * ui_SCALE(ui), ui.ops.theme.SEPARATOR_COL);
 
 	// Highlight selected
 	if (context_raw.layer == l) {
 		if (mini) {
-			zui_rect(1, -step * 2, ui._w / zui_SCALE(ui) - 1, step * 2 + (mini ? -1 : 1), ui.ops.theme.HIGHLIGHT_COL, 3);
+			ui_rect(1, -step * 2, ui._w / ui_SCALE(ui) - 1, step * 2 + (mini ? -1 : 1), ui.ops.theme.HIGHLIGHT_COL, 3);
 		}
 		else {
-			zui_rect(1, -step * 2 - 1, ui._w / zui_SCALE(ui) - 2, step * 2 + (mini ? -2 : 1), ui.ops.theme.HIGHLIGHT_COL, 2);
+			ui_rect(1, -step * 2 - 1, ui._w / ui_SCALE(ui) - 2, step * 2 + (mini ? -2 : 1), ui.ops.theme.HIGHLIGHT_COL, 2);
 		}
 	}
 }
 
-function tab_layers_handle_layer_icon_state(l: slot_layer_t, i: i32, state: zui_state_t, uix: f32, uiy: f32) {
-	let ui: zui_t = ui_base_ui;
+function tab_layers_handle_layer_icon_state(l: slot_layer_t, i: i32, state: ui_state_t, uix: f32, uiy: f32) {
+	let ui: ui_t = ui_base_ui;
 
 	///if is_paint
 	let texpaint_preview: image_t = l.texpaint_preview;
@@ -591,17 +591,17 @@ function tab_layers_handle_layer_icon_state(l: slot_layer_t, i: i32, state: zui_
 	if (ui.is_hovered && texpaint_preview != null) {
 		if (slot_layer_is_mask(l)) {
 			tab_layers_make_mask_preview_rgba32(l);
-			_zui_tooltip_image(context_raw.mask_preview_rgba32);
+			_ui_tooltip_image(context_raw.mask_preview_rgba32);
 		}
 		else {
-			_zui_tooltip_image(texpaint_preview);
+			_ui_tooltip_image(texpaint_preview);
 		}
 		if (i < 9) {
 			let i1: i32 = (i + 1);
-			zui_tooltip(l.name + " - (" + map_get(config_keymap, "select_layer") + " " + i1 + ")");
+			ui_tooltip(l.name + " - (" + map_get(config_keymap, "select_layer") + " " + i1 + ")");
 		}
 		else {
-			zui_tooltip(l.name);
+			ui_tooltip(l.name);
 		}
 	}
 
@@ -611,11 +611,11 @@ function tab_layers_handle_layer_icon_state(l: slot_layer_t, i: i32, state: zui_
 		tab_layers_show_context_menu = true;
 	}
 
-	if (state == zui_state_t.STARTED) {
+	if (state == ui_state_t.STARTED) {
 		context_set_layer(l);
 		tab_layers_set_drag_layer(context_raw.layer, -(mouse_x - uix - ui._window_x - 3), -(mouse_y - uiy - ui._window_y + 1));
 	}
-	else if (state == zui_state_t.RELEASED) {
+	else if (state == ui_state_t.RELEASED) {
 		if (time_time() - context_raw.select_time < 0.2) {
 			ui_base_show_2d_view(view_2d_type_t.LAYER);
 		}
@@ -628,13 +628,13 @@ function tab_layers_handle_layer_icon_state(l: slot_layer_t, i: i32, state: zui_
 	}
 }
 
-function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32, mini: bool): zui_state_t {
-	let ui: zui_t = ui_base_ui;
+function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32, mini: bool): ui_state_t {
+	let ui: ui_t = ui_base_ui;
 	let icons: image_t = resource_get("icons.k");
-	let icon_h: i32 = (zui_ELEMENT_H(ui) - (mini ? 2 : 3)) * 2;
+	let icon_h: i32 = (ui_ELEMENT_H(ui) - (mini ? 2 : 3)) * 2;
 
-	if (mini && zui_SCALE(ui) > 1) {
-		ui._x -= 1 * zui_SCALE(ui);
+	if (mini && ui_SCALE(ui) > 1) {
+		ui._x -= 1 * ui_SCALE(ui);
 	}
 
 	if (l.parent != null) {
@@ -661,7 +661,7 @@ function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32,
 			let _x: f32 = ui._x;
 			let _y: f32 = ui._y;
 			let _w: f32 = ui._w;
-			_zui_image(icons, 0xffffffff, icon_h, r.x, r.y, r.w, r.h);
+			_ui_image(icons, 0xffffffff, icon_h, r.x, r.y, r.w, r.h);
 			ui.current_ratio--;
 			ui._x = _x;
 			ui._y = _y;
@@ -675,7 +675,7 @@ function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32,
 			krom_g4_set_int(ui_view2d_channel_loc, 1);
 		}
 
-		let state: zui_state_t = _zui_image(icon, 0xffffffff, icon_h);
+		let state: ui_state_t = _ui_image(icon, 0xffffffff, icon_h);
 
 		if (l.fill_layer == null && slot_layer_is_mask(l)) {
 			g2_set_pipeline(null);
@@ -701,7 +701,7 @@ function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32,
 		let folder_closed: rect_t = resource_tile50(icons, 2, 1);
 		let folder_open: rect_t = resource_tile50(icons, 8, 1);
 		let folder: rect_t = l.show_panel ? folder_open : folder_closed;
-		return _zui_image(icons, ui.ops.theme.LABEL_COL - 0x00202020, icon_h, folder.x, folder.y, folder.w, folder.h);
+		return _ui_image(icons, ui.ops.theme.LABEL_COL - 0x00202020, icon_h, folder.x, folder.y, folder.w, folder.h);
 	}
 }
 
@@ -758,16 +758,16 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 	tab_layers_l = l;
 	tab_layers_mini = mini;
 
-	ui_menu_draw(function (ui: zui_t) {
+	ui_menu_draw(function (ui: ui_t) {
 
 		let l: slot_layer_t = tab_layers_l;
 		let mini: bool = tab_layers_mini;
 
 		if (mini) {
-			let visible_handle: zui_handle_t = zui_handle(__ID__);
+			let visible_handle: ui_handle_t = ui_handle(__ID__);
 			visible_handle.selected = l.visible;
 			ui_menu_fill(ui);
-			zui_check(visible_handle, tr("Visible"));
+			ui_check(visible_handle, tr("Visible"));
 			if (visible_handle.changed) {
 				tab_layers_layer_toggle_visible(l);
 				ui_menu_keep_open = true;
@@ -904,9 +904,9 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 
 		ui_menu_fill(ui);
 		ui_menu_align(ui);
-		let layer_opac_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
+		let layer_opac_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
 		layer_opac_handle.value = l.mask_opacity;
-		zui_slider(layer_opac_handle, tr("Opacity"), 0.0, 1.0, true);
+		ui_slider(layer_opac_handle, tr("Opacity"), 0.0, 1.0, true);
 		if (layer_opac_handle.changed) {
 			if (ui.input_started) {
 				history_layer_opacity();
@@ -927,7 +927,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			///end
 			let _y: i32 = ui._y;
 			base_res_handle.value = base_res_handle.position;
-			base_res_handle.position = math_floor(zui_slider(base_res_handle, ar[base_res_handle.position], 0, ar.length - 1, false, 1, false, zui_align_t.LEFT, false));
+			base_res_handle.position = math_floor(ui_slider(base_res_handle, ar[base_res_handle.position], 0, ar.length - 1, false, 1, false, ui_align_t.LEFT, false));
 			if (base_res_handle.changed) {
 				ui_menu_keep_open = true;
 			}
@@ -935,17 +935,17 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 				base_on_layers_resized();
 			}
 			ui._y = _y;
-			zui_draw_string(tr("Res"), -1, 0, zui_align_t.RIGHT, true);
-			_zui_end_element();
+			ui_draw_string(tr("Res"), -1, 0, ui_align_t.RIGHT, true);
+			_ui_end_element();
 
 			ui_menu_fill(ui);
 			ui_menu_align(ui);
 			///if (krom_android || krom_ios)
 			let bits_items: string[] = ["8bit"];
-			zui_inline_radio(base_bits_handle, bits_items, zui_align_t.LEFT);
+			ui_inline_radio(base_bits_handle, bits_items, ui_align_t.LEFT);
 			///else
 			let bits_items: string[] = ["8bit", "16bit", "32bit"];
-			zui_inline_radio(base_bits_handle, bits_items, zui_align_t.LEFT);
+			ui_inline_radio(base_bits_handle, bits_items, ui_align_t.LEFT);
 			///end
 			if (base_bits_handle.changed) {
 				app_notify_on_init(base_set_layer_bits);
@@ -956,9 +956,9 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 		if (l.fill_layer != null) {
 			ui_menu_fill(ui);
 			ui_menu_align(ui);
-			let scale_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
+			let scale_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
 			scale_handle.value = l.scale;
-			l.scale = zui_slider(scale_handle, tr("UV Scale"), 0.0, 5.0, true);
+			l.scale = ui_slider(scale_handle, tr("UV Scale"), 0.0, 5.0, true);
 			if (scale_handle.changed) {
 				context_set_material(l.fill_layer);
 				context_set_layer(l);
@@ -970,9 +970,9 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 
 			ui_menu_fill(ui);
 			ui_menu_align(ui);
-			let angle_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
+			let angle_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
 			angle_handle.value = l.angle;
-			l.angle = zui_slider(angle_handle, tr("Angle"), 0.0, 360, true, 1);
+			l.angle = ui_slider(angle_handle, tr("Angle"), 0.0, 360, true, 1);
 			if (angle_handle.changed) {
 				context_set_material(l.fill_layer);
 				context_set_layer(l);
@@ -985,10 +985,10 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 
 			ui_menu_fill(ui);
 			ui_menu_align(ui);
-			let uv_type_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
+			let uv_type_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
 			uv_type_handle.position = l.uv_type;
 			let uv_type_items: string[] = [tr("UV Map"), tr("Triplanar"), tr("Project")];
-			l.uv_type = zui_inline_radio(uv_type_handle, uv_type_items, zui_align_t.LEFT);
+			l.uv_type = ui_inline_radio(uv_type_handle, uv_type_items, ui_align_t.LEFT);
 			if (uv_type_handle.changed) {
 				context_set_material(l.fill_layer);
 				context_set_layer(l);
@@ -1001,17 +1001,17 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 		}
 
 		if (!slot_layer_is_group(l)) {
-			let base_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
-			let opac_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
-			let nor_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
-			let nor_blend_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
-			let occ_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
-			let rough_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
-			let met_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
-			let height_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
-			let height_blend_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
-			let emis_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
-			let subs_handle: zui_handle_t = zui_nest(zui_handle(__ID__), l.id);
+			let base_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
+			let opac_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
+			let nor_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
+			let nor_blend_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
+			let occ_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
+			let rough_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
+			let met_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
+			let height_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
+			let height_blend_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
+			let emis_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
+			let subs_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
 			base_handle.selected = l.paint_base;
 			opac_handle.selected = l.paint_opac;
 			nor_handle.selected = l.paint_nor;
@@ -1024,27 +1024,27 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			emis_handle.selected = l.paint_emis;
 			subs_handle.selected = l.paint_subs;
 			ui_menu_fill(ui);
-			l.paint_base = zui_check(base_handle, tr("Base Color"));
+			l.paint_base = ui_check(base_handle, tr("Base Color"));
 			ui_menu_fill(ui);
-			l.paint_opac = zui_check(opac_handle, tr("Opacity"));
+			l.paint_opac = ui_check(opac_handle, tr("Opacity"));
 			ui_menu_fill(ui);
-			l.paint_nor = zui_check(nor_handle, tr("Normal"));
+			l.paint_nor = ui_check(nor_handle, tr("Normal"));
 			ui_menu_fill(ui);
-			l.paint_nor_blend = zui_check(nor_blend_handle, tr("Normal Blending"));
+			l.paint_nor_blend = ui_check(nor_blend_handle, tr("Normal Blending"));
 			ui_menu_fill(ui);
-			l.paint_occ = zui_check(occ_handle, tr("Occlusion"));
+			l.paint_occ = ui_check(occ_handle, tr("Occlusion"));
 			ui_menu_fill(ui);
-			l.paint_rough = zui_check(rough_handle, tr("Roughness"));
+			l.paint_rough = ui_check(rough_handle, tr("Roughness"));
 			ui_menu_fill(ui);
-			l.paint_met = zui_check(met_handle, tr("Metallic"));
+			l.paint_met = ui_check(met_handle, tr("Metallic"));
 			ui_menu_fill(ui);
-			l.paint_height = zui_check(height_handle, tr("Height"));
+			l.paint_height = ui_check(height_handle, tr("Height"));
 			ui_menu_fill(ui);
-			l.paint_height_blend = zui_check(height_blend_handle, tr("Height Blending"));
+			l.paint_height_blend = ui_check(height_blend_handle, tr("Height Blending"));
 			ui_menu_fill(ui);
-			l.paint_emis = zui_check(emis_handle, tr("Emission"));
+			l.paint_emis = ui_check(emis_handle, tr("Emission"));
 			ui_menu_fill(ui);
-			l.paint_subs = zui_check(subs_handle, tr("Subsurface"));
+			l.paint_subs = ui_check(subs_handle, tr("Subsurface"));
 			if (base_handle.changed ||
 				opac_handle.changed ||
 				nor_handle.changed ||

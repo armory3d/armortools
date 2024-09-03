@@ -24,16 +24,16 @@ function tiling_node_init() {
 	}
 }
 
-function tiling_node_buttons(ui: zui_t, nodes: zui_nodes_t, node: zui_node_t) {
+function tiling_node_buttons(ui: ui_t, nodes: ui_nodes_t, node: ui_node_t) {
 	tiling_node_auto = node.buttons[0].default_value == 0 ? false : true;
 	if (!tiling_node_auto) {
-		let tiling_node_strength_handle: zui_handle_t = zui_handle(__ID__);
+		let tiling_node_strength_handle: ui_handle_t = ui_handle(__ID__);
 		if (tiling_node_strength_handle.init) {
 			tiling_node_strength_handle.value = tiling_node_strength;
 		}
 
-		tiling_node_strength = zui_slider(tiling_node_strength_handle, tr("strength"), 0, 1, true);
-		tiling_node_prompt = zui_text_area(zui_handle(__ID__), zui_align_t.LEFT, true, tr("prompt"), true);
+		tiling_node_strength = ui_slider(tiling_node_strength_handle, tr("strength"), 0, 1, true);
+		tiling_node_prompt = ui_text_area(ui_handle(__ID__), ui_align_t.LEFT, true, tr("prompt"), true);
 		node.buttons[1].height = 1 + string_split(tiling_node_prompt, "\n").length;
 	}
 	else {
@@ -101,7 +101,7 @@ function tiling_node_sd_tiling(image: image_t, seed: i32): image_t {
 	return inpaint_node_sd_inpaint(tile, mask);
 }
 
-let tiling_node_def: zui_node_t = {
+let tiling_node_def: ui_node_t = {
 	id: 0,
 	name: _tr("Tiling"),
 	type: "tiling_node",

@@ -138,5 +138,5 @@ function node_shader_context_make_frag(raw: node_shader_context_t): node_shader_
 
 type material_t = {
 	name?: string;
-	canvas?: zui_node_canvas_t;
+	canvas?: ui_node_canvas_t;
 };

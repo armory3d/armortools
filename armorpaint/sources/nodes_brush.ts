@@ -3,7 +3,7 @@ let nodes_brush_categories: string[] = [
 	_tr("Nodes")
 ];
 
-let nodes_brush_category0: zui_node_t[];
+let nodes_brush_category0: ui_node_t[];
 let nodes_brush_list: node_list_t[];
 
 let nodes_brush_creates: map_t<string, (args: f32_array_t)=>logic_node_ext_t>;
@@ -37,15 +37,15 @@ function nodes_brush_init() {
 	];
 }
 
-function nodes_brush_create_node(node_type: string): zui_node_t {
+function nodes_brush_create_node(node_type: string): ui_node_t {
 	for (let i: i32 = 0; i < nodes_brush_list.length; ++i) {
-		let c: zui_node_t[] = nodes_brush_list[i];
+		let c: ui_node_t[] = nodes_brush_list[i];
 		for (let i: i32 = 0; i < c.length; ++i) {
-			let n: zui_node_t = c[i];
+			let n: ui_node_t = c[i];
 			if (n.type == node_type) {
-				let canvas: zui_node_canvas_t = context_raw.brush.canvas;
-				let nodes: zui_nodes_t = context_raw.brush.nodes;
-				let node: zui_node_t = ui_nodes_make_node(n, nodes, canvas);
+				let canvas: ui_node_canvas_t = context_raw.brush.canvas;
+				let nodes: ui_nodes_t = context_raw.brush.nodes;
+				let node: ui_node_t = ui_nodes_make_node(n, nodes, canvas);
 				array_push(canvas.nodes, node);
 				return node;
 			}

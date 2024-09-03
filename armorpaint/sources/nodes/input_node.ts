@@ -132,7 +132,7 @@ function input_node_get(self: input_node_t, from: i32): logic_node_value_t {
 	return v;
 }
 
-let input_node_def: zui_node_t = {
+let input_node_def: ui_node_t = {
 	id: 0,
 	name: _tr("Input"),
 	type: "input_node",

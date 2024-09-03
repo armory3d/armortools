@@ -50,7 +50,7 @@ function float_node_set(self: float_node_t, value: f32_array_t) {
 	}
 }
 
-let float_node_def: zui_node_t = {
+let float_node_def: ui_node_t = {
 	id: 0,
 	name: _tr("Value"),
 	type: "float_node",

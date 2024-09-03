@@ -161,9 +161,9 @@ function render_path_paint_commands_cursor() {
 		return;
 	}
 
-	let nodes: zui_nodes_t = ui_nodes_get_nodes();
-	let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
-	let inpaint: bool = nodes.nodes_selected_id.length > 0 && zui_get_node(canvas.nodes, nodes.nodes_selected_id[0]).type == "InpaintNode";
+	let nodes: ui_nodes_t = ui_nodes_get_nodes();
+	let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
+	let inpaint: bool = nodes.nodes_selected_id.length > 0 && ui_get_node(canvas.nodes, nodes.nodes_selected_id[0]).type == "InpaintNode";
 
 	if (!base_ui_enabled || base_is_dragging || !inpaint) {
 		return;
@@ -259,10 +259,10 @@ function render_path_paint_draw() {
 
 function render_path_paint_bind_layers() {
 	let image: image_t = null;
-	let nodes: zui_nodes_t = ui_nodes_get_nodes();
-	let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
+	let nodes: ui_nodes_t = ui_nodes_get_nodes();
+	let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
 	if (nodes.nodes_selected_id.length > 0) {
-		let node: zui_node_t = zui_get_node(canvas.nodes, nodes.nodes_selected_id[0]);
+		let node: ui_node_t = ui_get_node(canvas.nodes, nodes.nodes_selected_id[0]);
 		let brush_node: logic_node_t = parser_logic_get_logic_node(node);
 		if (brush_node != null) {
 			image = logic_node_get_cached_image(brush_node);
@@ -290,9 +290,9 @@ function render_path_paint_bind_layers() {
 		render_path_bind_target("texpaint_nor_empty", "texpaint_nor");
 		render_path_bind_target("texpaint_pack_empty", "texpaint_pack");
 
-		let nodes: zui_nodes_t = ui_nodes_get_nodes();
-		let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
-		let node: zui_node_t = zui_get_node(canvas.nodes, nodes.nodes_selected_id[0]);
+		let nodes: ui_nodes_t = ui_nodes_get_nodes();
+		let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
+		let node: ui_node_t = ui_get_node(canvas.nodes, nodes.nodes_selected_id[0]);
 		let inpaint: bool = node.type == "InpaintNode";
 		if (inpaint) {
 			map_get(render_path_render_targets, "texpaint_node_target")._image = inpaint_node_get_target();

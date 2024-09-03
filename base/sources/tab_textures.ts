@@ -5,37 +5,37 @@ let _tab_textures_draw_asset: asset_t;
 let _tab_textures_draw_i: i32;
 let _tab_textures_draw_is_packed: bool;
 
-function tab_textures_draw(htab: zui_handle_t) {
-	let ui: zui_t = ui_base_ui;
+function tab_textures_draw(htab: ui_handle_t) {
+	let ui: ui_t = ui_base_ui;
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-	if (zui_tab(htab, tr("Textures")) && statush > ui_status_default_status_h * zui_SCALE(ui)) {
+	if (ui_tab(htab, tr("Textures")) && statush > ui_status_default_status_h * ui_SCALE(ui)) {
 
-		zui_begin_sticky();
+		ui_begin_sticky();
 
 		if (config_raw.touch_ui) {
 			let row: f32[] = [1 / 4, 1 / 4];
-			zui_row(row);
+			ui_row(row);
 		}
 		else {
 			let row: f32[] = [1 / 14, 1 / 14];
-			zui_row(row);
+			ui_row(row);
 		}
 
-		if (zui_button(tr("Import"))) {
+		if (ui_button(tr("Import"))) {
 			ui_files_show(string_array_join(path_texture_formats, ","), false, true, function (path: string) {
 				import_asset_run(path, -1.0, -1.0, true, false);
 				ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
 			});
 		}
 		if (ui.is_hovered) {
-			zui_tooltip(tr("Import texture file") + " (" + map_get(config_keymap, "file_import_assets") + ")");
+			ui_tooltip(tr("Import texture file") + " (" + map_get(config_keymap, "file_import_assets") + ")");
 		}
 
-		if (zui_button(tr("2D View"))) {
+		if (ui_button(tr("2D View"))) {
 			ui_base_show_2d_view(view_2d_type_t.ASSET);
 		}
 
-		zui_end_sticky();
+		ui_end_sticky();
 
 		if (project_assets.length > 0) {
 
@@ -46,7 +46,7 @@ function tab_textures_draw(htab: zui_handle_t) {
 			let statusw: i32 = sys_width();
 			///end
 
-			let slotw: i32 = math_floor(52 * zui_SCALE(ui));
+			let slotw: i32 = math_floor(52 * ui_SCALE(ui));
 			let num: i32 = math_floor(statusw / slotw);
 
 			for (let row: i32 = 0; row < math_floor(math_ceil(project_assets.length / num)); ++row) {
@@ -55,21 +55,21 @@ function tab_textures_draw(htab: zui_handle_t) {
 				for (let i: i32 = 0; i < num * mult; ++i) {
 					array_push(ar, 1 / num);
 				}
-				zui_row(ar);
+				ui_row(ar);
 
 				ui._x += 2;
-				let off: f32 = config_raw.show_asset_names ? zui_ELEMENT_OFFSET(ui) * 10.0 : 6;
+				let off: f32 = config_raw.show_asset_names ? ui_ELEMENT_OFFSET(ui) * 10.0 : 6;
 				if (row > 0) {
 					ui._y += off;
 				}
 
 				for (let j: i32 = 0; j < num; ++j) {
-					let imgw: i32 = math_floor(50 * zui_SCALE(ui));
+					let imgw: i32 = math_floor(50 * ui_SCALE(ui));
 					let i: i32 = j + row * num;
 					if (i >= project_assets.length) {
-						_zui_end_element(imgw);
+						_ui_end_element(imgw);
 						if (config_raw.show_asset_names) {
-							_zui_end_element(0);
+							_ui_end_element(0);
 						}
 						continue;
 					}
@@ -79,7 +79,7 @@ function tab_textures_draw(htab: zui_handle_t) {
 					let uix: f32 = ui._x;
 					let uiy: f32 = ui._y;
 					let sw: i32 = img.height < img.width ? img.height : 0;
-					if (_zui_image(img, 0xffffffff, slotw, 0, 0, sw, sw) == zui_state_t.STARTED && ui.input_y > ui._window_y) {
+					if (_ui_image(img, 0xffffffff, slotw, 0, 0, sw, sw) == ui_state_t.STARTED && ui.input_y > ui._window_y) {
 						base_drag_off_x = -(mouse_x - uix - ui._window_x - 3);
 						base_drag_off_y = -(mouse_y - uiy - ui._window_y + 1);
 						base_drag_asset = asset;
@@ -99,10 +99,10 @@ function tab_textures_draw(htab: zui_handle_t) {
 						ui._y = uiy;
 						let off: i32 = i % 2 == 1 ? 1 : 0;
 						let w: i32 = 50;
-						zui_fill(0,               0, w + 3,       2, ui.ops.theme.HIGHLIGHT_COL);
-						zui_fill(0,     w - off + 2, w + 3, 2 + off, ui.ops.theme.HIGHLIGHT_COL);
-						zui_fill(0,               0,     2,   w + 3, ui.ops.theme.HIGHLIGHT_COL);
-						zui_fill(w + 2,           0,     2,   w + 4, ui.ops.theme.HIGHLIGHT_COL);
+						ui_fill(0,               0, w + 3,       2, ui.ops.theme.HIGHLIGHT_COL);
+						ui_fill(0,     w - off + 2, w + 3, 2 + off, ui.ops.theme.HIGHLIGHT_COL);
+						ui_fill(0,               0,     2,   w + 3, ui.ops.theme.HIGHLIGHT_COL);
+						ui_fill(w + 2,           0,     2,   w + 4, ui.ops.theme.HIGHLIGHT_COL);
 						ui._x = _uix;
 						ui._y = _uiy;
 					}
@@ -110,12 +110,12 @@ function tab_textures_draw(htab: zui_handle_t) {
 					let is_packed: bool = project_raw.packed_assets != null && project_packed_asset_exists(project_raw.packed_assets, asset.file);
 
 					if (ui.is_hovered) {
-						_zui_tooltip_image(img, 256);
+						_ui_tooltip_image(img, 256);
 						if (is_packed) {
-							zui_tooltip(asset.name + " " + tr("(packed)"));
+							ui_tooltip(asset.name + " " + tr("(packed)"));
 						}
 						else {
-							zui_tooltip(asset.name);
+							ui_tooltip(asset.name);
 						}
 					}
 
@@ -136,7 +136,7 @@ function tab_textures_draw(htab: zui_handle_t) {
 						_tab_textures_draw_i = i;
 						_tab_textures_draw_is_packed = is_packed;
 
-						ui_menu_draw(function (ui: zui_t) {
+						ui_menu_draw(function (ui: ui_t) {
 							if (ui_menu_button(ui, tr("Export"))) {
 								ui_files_show("png", true, false, function (path: string) {
 									_tab_textures_draw_path = path;
@@ -217,13 +217,13 @@ function tab_textures_draw(htab: zui_handle_t) {
 					if (config_raw.show_asset_names) {
 						ui._x = uix;
 						ui._y += slotw * 0.9;
-						zui_text(project_assets[i].name, zui_align_t.CENTER);
+						ui_text(project_assets[i].name, ui_align_t.CENTER);
 						if (ui.is_hovered) {
-							zui_tooltip(project_assets[i].name);
+							ui_tooltip(project_assets[i].name);
 						}
 						ui._y -= slotw * 0.9;
 						if (i == project_assets.length - 1) {
-							ui._y += j == num - 1 ? imgw : imgw + zui_ELEMENT_H(ui) + zui_ELEMENT_OFFSET(ui);
+							ui._y += j == num - 1 ? imgw : imgw + ui_ELEMENT_H(ui) + ui_ELEMENT_OFFSET(ui);
 						}
 					}
 				}
@@ -232,9 +232,9 @@ function tab_textures_draw(htab: zui_handle_t) {
 		else {
 			let img: image_t = resource_get("icons.k");
 			let r: rect_t = resource_tile50(img, 0, 1);
-			_zui_image(img, ui.ops.theme.BUTTON_COL, r.h, r.x, r.y, r.w, r.h);
+			_ui_image(img, ui.ops.theme.BUTTON_COL, r.h, r.x, r.y, r.w, r.h);
 			if (ui.is_hovered) {
-				zui_tooltip(tr("Drag and drop files here"));
+				ui_tooltip(tr("Drag and drop files here"));
 			}
 		}
 
@@ -258,9 +258,9 @@ function tab_textures_to_pow2(i: i32): i32 {
 	return i;
 }
 
-function tab_textures_update_texture_pointers(nodes: zui_node_t[], i: i32) {
+function tab_textures_update_texture_pointers(nodes: ui_node_t[], i: i32) {
 	for (let i: i32 = 0; i < nodes.length; ++i) {
-		let n: zui_node_t = nodes[i];
+		let n: ui_node_t = nodes[i];
 		if (n.type == "TEX_IMAGE") {
 			if (n.buttons[0].default_value[0] == i) {
 				n.buttons[0].default_value[0] = 9999; // Texture deleted, use pink now

@@ -8,8 +8,8 @@ function util_encode_scene(raw: scene_t): buffer_t {
 	// armpack_encode_string(canvas->name);
 }
 
-function util_encode_node_canvas(c: zui_node_canvas_t) {
-	zui_node_canvas_encode(c);
+function util_encode_node_canvas(c: ui_node_canvas_t) {
+	ui_node_canvas_encode(c);
 }
 
 function util_encode_project(raw: project_format_t): buffer_t {
@@ -240,8 +240,8 @@ function util_encode_project(raw: project_format_t): buffer_t {
 	///end
 
 	///if is_lab
-	// material?: zui_node_canvas_t;
-	// material_groups?: zui_node_canvas_t[];
+	// material?: ui_node_canvas_t;
+	// material_groups?: ui_node_canvas_t[];
 	// mesh_data?: mesh_data_t;
 	// mesh_icon?: buffer_t;
 	///end

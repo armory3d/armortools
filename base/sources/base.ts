@@ -15,16 +15,16 @@ let base_drag_start: f32 = 0.0;
 let base_drop_x: f32 = 0.0;
 let base_drop_y: f32 = 0.0;
 let base_font: g2_font_t = null;
-let base_theme: zui_theme_t;
+let base_theme: ui_theme_t;
 let base_color_wheel: image_t;
 let base_color_wheel_gradient: image_t;
-let base_ui_box: zui_t;
-let base_ui_menu: zui_t;
+let base_ui_box: ui_t;
+let base_ui_menu: ui_t;
 let base_default_element_w: i32 = 100;
 let base_default_element_h: i32 = 28;
 let base_default_font_size: i32 = 13;
-let base_res_handle: zui_handle_t = zui_handle_create();
-let base_bits_handle: zui_handle_t = zui_handle_create();
+let base_res_handle: ui_handle_t = ui_handle_create();
+let base_bits_handle: ui_handle_t = ui_handle_create();
 let base_drop_paths: string[] = [];
 let base_appx: i32 = 0;
 let base_appy: i32 = 0;
@@ -237,17 +237,17 @@ function base_init() {
 
 	base_color_wheel = image_color_wheel;
 	base_color_wheel_gradient = image_color_wheel_gradient;
-	zui_nodes_enum_texts = base_enum_texts;
-	// zui_tr = tr; ////
-	let ops: zui_options_t = {
+	ui_nodes_enum_texts = base_enum_texts;
+	// ui_tr = tr; ////
+	let ops: ui_options_t = {
 		theme: base_theme,
 		font: f,
 		scale_factor: config_raw.window_scale,
 		color_wheel: base_color_wheel.texture_,
 		black_white_gradient: base_color_wheel_gradient.texture_
 	};
-	base_ui_box = zui_create(ops);
-	base_ui_menu = zui_create(ops);
+	base_ui_box = ui_create(ops);
+	base_ui_menu = ui_create(ops);
 	base_default_element_h = base_ui_menu.ops.theme.ELEMENT_H;
 
 	// Init plugins
@@ -262,7 +262,7 @@ function base_init() {
 
 	camera_init();
 	ui_base_init();
-	ui_nodes_init();
+	ui_viewnodes_init();
 	ui_view2d_init();
 
 	///if is_lab
@@ -567,7 +567,7 @@ function base_update() {
 			///end
 		}
 		// Disable touch scrolling while dragging is active
-		zui_touch_scroll = !base_is_dragging;
+		ui_touch_scroll = !base_is_dragging;
 	}
 
 	if (has_drag && (mouse_movement_x != 0 || mouse_movement_y != 0)) {
@@ -669,7 +669,7 @@ function base_update() {
 	///if krom_windows
 	let is_picker: bool = context_raw.tool == workspace_tool_t.PICKER || context_raw.tool == workspace_tool_t.MATERIAL;
 	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
-	zui_always_redraw_window = !context_raw.cache_draws ||
+	ui_always_redraw_window = !context_raw.cache_draws ||
 		ui_menu_show ||
 		ui_box_show ||
 		base_is_dragging ||
@@ -681,7 +681,7 @@ function base_update() {
 	///end
 	///end
 
-	if (zui_always_redraw_window && context_raw.ddirty < 0) context_raw.ddirty = 0;
+	if (ui_always_redraw_window && context_raw.ddirty < 0) context_raw.ddirty = 0;
 }
 
 ///if (is_paint || is_sculpt)
@@ -838,10 +838,10 @@ function base_render() {
 		let img: image_t = base_get_drag_image();
 
 		///if (is_paint || is_sculpt)
-		let scale_factor: f32 = zui_SCALE(ui_base_ui);
+		let scale_factor: f32 = ui_SCALE(ui_base_ui);
 		///end
 		///if is_lab
-		let scale_factor: f32 = zui_SCALE(base_ui_box);
+		let scale_factor: f32 = ui_SCALE(base_ui_box);
 		///end
 
 		let size: f32 = (base_drag_size == -1 ? 50 : base_drag_size) * scale_factor;
@@ -959,7 +959,7 @@ function base_toggle_fullscreen() {
 
 function base_is_scrolling(): bool {
 	for (let i: i32 = 0; i < base_get_uis().length; ++i) {
-		let ui: zui_t = base_get_uis()[i];
+		let ui: ui_t = base_get_uis()[i];
 		if (ui.is_scrolling) {
 			return true;
 		}
@@ -969,7 +969,7 @@ function base_is_scrolling(): bool {
 
 function base_is_combo_selected(): bool {
 	for (let i: i32 = 0; i < base_get_uis().length; ++i) {
-		let ui: zui_t = base_get_uis()[i];
+		let ui: ui_t = base_get_uis()[i];
 		if (ui.combo_selected_handle != null) {
 			return true;
 		}
@@ -977,8 +977,8 @@ function base_is_combo_selected(): bool {
 	return false;
 }
 
-function base_get_uis(): zui_t[] {
-	let uis: zui_t[] = [base_ui_box, base_ui_menu, ui_base_ui, ui_nodes_ui, ui_view2d_ui];
+function base_get_uis(): ui_t[] {
+	let uis: ui_t[] = [base_ui_box, base_ui_menu, ui_base_ui, ui_nodes_ui, ui_view2d_ui];
 	return uis;
 }
 
@@ -999,7 +999,7 @@ function base_redraw_status() {
 
 function base_redraw_console() {
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-	if (ui_base_ui != null && statush > ui_status_default_status_h * zui_SCALE(ui_base_ui)) {
+	if (ui_base_ui != null && statush > ui_status_default_status_h * ui_SCALE(ui_base_ui)) {
 		ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
 	}
 }
@@ -2394,10 +2394,10 @@ function base_flatten(height_to_normal: bool = false): any {
 	let texpaint_nor: image_t = brush_output_node_inst.texpaint_nor;
 	let texpaint_pack: image_t = brush_output_node_inst.texpaint_pack;
 
-	let nodes: zui_nodes_t = ui_nodes_get_nodes();
-	let canvas: zui_node_canvas_t = ui_nodes_get_canvas(true);
+	let nodes: ui_nodes_t = ui_nodes_get_nodes();
+	let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
 	if (nodes.nodes_selected_id.length > 0) {
-		let node: zui_node_t = zui_get_node(canvas.nodes, nodes.nodes_selected_id[0]);
+		let node: ui_node_t = ui_get_node(canvas.nodes, nodes.nodes_selected_id[0]);
 		let brush_node: logic_node_t = parser_logic_get_logic_node(node);
 		if (brush_node != null && logic_node_get_cached_image(brush_node) != null) {
 			texpaint = logic_node_get_cached_image(brush_node);

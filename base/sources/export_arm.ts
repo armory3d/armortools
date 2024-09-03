@@ -19,18 +19,18 @@ function export_arm_run_mesh(path: string, paint_objects: mesh_object_t[]) {
 
 function export_arm_run_project() {
 	///if (is_paint || is_sculpt)
-	let mnodes: zui_node_canvas_t[] = [];
+	let mnodes: ui_node_canvas_t[] = [];
 	for (let i: i32 = 0; i < project_materials.length; ++i) {
 		let m: slot_material_t = project_materials[i];
-		let c: zui_node_canvas_t = util_clone_canvas(m.canvas);
+		let c: ui_node_canvas_t = util_clone_canvas(m.canvas);
 		for (let i: i32 = 0; i < c.nodes.length; ++i) {
-			let n: zui_node_t = c.nodes[i];
+			let n: ui_node_t = c.nodes[i];
 			export_arm_export_node(n);
 		}
 		array_push(mnodes, c);
 	}
 
-	let bnodes: zui_node_canvas_t[] = [];
+	let bnodes: ui_node_canvas_t[] = [];
 	for (let i: i32 = 0; i < project_brushes.length; ++i) {
 		let b: slot_brush_t = project_brushes[i];
 		array_push(bnodes, b.canvas);
@@ -38,21 +38,21 @@ function export_arm_run_project() {
 	///end
 
 	///if is_lab
-	let c: zui_node_canvas_t = util_clone_canvas(project_canvas);
+	let c: ui_node_canvas_t = util_clone_canvas(project_canvas);
 	for (let i: i32 = 0; i < c.nodes.length; ++i) {
-		let n: zui_node_t = c.nodes[i];
+		let n: ui_node_t = c.nodes[i];
 		export_arm_export_node(n);
 	}
 	///end
 
-	let mgroups: zui_node_canvas_t[] = null;
+	let mgroups: ui_node_canvas_t[] = null;
 	if (project_material_groups.length > 0) {
 		mgroups = [];
 		for (let i: i32 = 0; i < project_material_groups.length; ++i) {
 			let g: node_group_t = project_material_groups[i];
-			let c: zui_node_canvas_t = util_clone_canvas(g.canvas);
+			let c: ui_node_canvas_t = util_clone_canvas(g.canvas);
 			for (let i: i32 = 0; i < c.nodes.length; ++i) {
-				let n: zui_node_t = c.nodes[i];
+				let n: ui_node_t = c.nodes[i];
 				export_arm_export_node(n);
 			}
 			array_push(mgroups, c);
@@ -232,7 +232,7 @@ function export_arm_texture_node_name(): string {
 	///end
 }
 
-function export_arm_export_node(n: zui_node_t, assets: asset_t[] = null) {
+function export_arm_export_node(n: ui_node_t, assets: asset_t[] = null) {
 	if (n.type == export_arm_texture_node_name()) {
 		let index: i32 = n.buttons[0].default_value[0];
 		n.buttons[0].data = u8_array_create_from_string(base_enum_texts(n.type)[index]);
@@ -249,13 +249,13 @@ function export_arm_export_node(n: zui_node_t, assets: asset_t[] = null) {
 	// 	n.color -= 4294967296;
 	// }
 	// for (let i: i32 = 0; i < n.inputs.length; ++i) {
-	// 	let inp: zui_node_socket_t = n.inputs[i];
+	// 	let inp: ui_node_socket_t = n.inputs[i];
 	// 	if (inp.color > 0) {
 	// 		inp.color -= 4294967296;
 	// 	}
 	// }
 	// for (let i: i32 = 0; i < n.outputs.length; ++i) {
-	// 	let out: zui_node_socket_t = n.outputs[i];
+	// 	let out: ui_node_socket_t = n.outputs[i];
 	// 	if (out.color > 0) {
 	// 		out.color -= 4294967296;
 	// 	}
@@ -265,24 +265,24 @@ function export_arm_export_node(n: zui_node_t, assets: asset_t[] = null) {
 ///if (is_paint || is_sculpt)
 function export_arm_run_material(path: string) {
 	if (!ends_with(path, ".arm")) path += ".arm";
-	let mnodes: zui_node_canvas_t[] = [];
-	let mgroups: zui_node_canvas_t[] = null;
+	let mnodes: ui_node_canvas_t[] = [];
+	let mgroups: ui_node_canvas_t[] = null;
 	let m: slot_material_t = context_raw.material;
-	let c: zui_node_canvas_t = util_clone_canvas(m.canvas);
+	let c: ui_node_canvas_t = util_clone_canvas(m.canvas);
 	let assets: asset_t[] = [];
 	if (ui_nodes_has_group(c)) {
 		mgroups = [];
 		ui_nodes_traverse_group(mgroups, c);
 		for (let i: i32 = 0; i < mgroups.length; ++i) {
-			let gc: zui_node_canvas_t = mgroups[i];
+			let gc: ui_node_canvas_t = mgroups[i];
 			for (let i: i32 = 0; i < gc.nodes.length; ++i) {
-				let n: zui_node_t = gc.nodes[i];
+				let n: ui_node_t = gc.nodes[i];
 				export_arm_export_node(n, assets);
 			}
 		}
 	}
 	for (let i: i32 = 0; i < c.nodes.length; ++i) {
-		let n: zui_node_t = c.nodes[i];
+		let n: ui_node_t = c.nodes[i];
 		export_arm_export_node(n, assets);
 	}
 	array_push(mnodes, c);
@@ -348,12 +348,12 @@ function export_arm_run_brush(path: string) {
 	if (!ends_with(path, ".arm")) {
 		path += ".arm";
 	}
-	let bnodes: zui_node_canvas_t[] = [];
+	let bnodes: ui_node_canvas_t[] = [];
 	let b: slot_brush_t = context_raw.brush;
-	let c: zui_node_canvas_t = util_clone_canvas(b.canvas);
+	let c: ui_node_canvas_t = util_clone_canvas(b.canvas);
 	let assets: asset_t[] = [];
 	for (let i: i32 = 0; i < c.nodes.length; ++i) {
-		let n: zui_node_t = c.nodes[i];
+		let n: ui_node_t = c.nodes[i];
 		export_arm_export_node(n, assets);
 	}
 	array_push(bnodes, c);

@@ -8,7 +8,7 @@ let console_progress_text: string = null;
 function console_draw_toast(s: string) {
 	g2_set_color(0x55000000);
 	g2_fill_rect(0, 0, sys_width(), sys_height());
-	let scale: f32 = zui_SCALE(base_get_uis()[0]);
+	let scale: f32 = ui_SCALE(base_get_uis()[0]);
 	let x: f32 = sys_width() / 2;
 	let y: f32 = sys_height() - 200 * scale;
 	g2_fill_rect(x - 200 * scale, y, 400 * scale, 80 * scale);

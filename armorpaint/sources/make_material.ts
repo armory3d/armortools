@@ -8,7 +8,7 @@ let make_material_subs_used: bool = false;
 
 function make_material_get_mout(): bool {
 	for (let i: i32 = 0; i < ui_nodes_get_canvas_material().nodes.length; ++i) {
-		let n: zui_node_t = ui_nodes_get_canvas_material().nodes[i];
+		let n: ui_node_t = ui_nodes_get_canvas_material().nodes[i];
 		if (n.type == "OUTPUT_MATERIAL_PBR") {
 			return true;
 		}
@@ -273,7 +273,7 @@ function make_material_bake_node_previews() {
 	if (context_raw.node_previews == null) {
 		context_raw.node_previews = map_create();
 	}
-	let empty: zui_node_t[] = [];
+	let empty: ui_node_t[] = [];
 	make_material_traverse_nodes(ui_nodes_get_canvas_material().nodes, null, empty);
 
 	let keys: string[] = map_keys(context_raw.node_previews);
@@ -289,9 +289,9 @@ function make_material_bake_node_previews() {
 	}
 }
 
-function make_material_traverse_nodes(nodes: zui_node_t[], group: zui_node_canvas_t, parents: zui_node_t[]) {
+function make_material_traverse_nodes(nodes: ui_node_t[], group: ui_node_canvas_t, parents: ui_node_t[]) {
 	for (let i: i32 = 0; i < nodes.length; ++i) {
-		let node: zui_node_t = nodes[i];
+		let node: ui_node_t = nodes[i];
 		make_material_bake_node_preview(node, group, parents);
 		if (node.type == "GROUP") {
 			for (let j: i32 = 0; j < project_material_groups.length; ++j) {
@@ -307,7 +307,7 @@ function make_material_traverse_nodes(nodes: zui_node_t[], group: zui_node_canva
 	}
 }
 
-function make_material_bake_node_preview(node: zui_node_t, group: zui_node_canvas_t, parents: zui_node_t[]) {
+function make_material_bake_node_preview(node: ui_node_t, group: ui_node_canvas_t, parents: ui_node_t[]) {
 	if (node.type == "BLUR") {
 		let id: string = parser_material_node_name(node, parents);
 		let image: image_t = map_get(context_raw.node_previews, id);
@@ -400,7 +400,7 @@ type parse_node_preview_result_t = {
 	mcon: material_context_t;
 };
 
-function make_material_parse_node_preview_material(node: zui_node_t, group: zui_node_canvas_t = null, parents: zui_node_t[] = null): parse_node_preview_result_t {
+function make_material_parse_node_preview_material(node: ui_node_t, group: ui_node_canvas_t = null, parents: ui_node_t[] = null): parse_node_preview_result_t {
 	if (node.outputs.length == 0) {
 		return null;
 	}

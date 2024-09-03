@@ -330,7 +330,7 @@ function import_arm_run_project(path: string) {
 
 	project_materials = [];
 	for (let i: i32 = 0; i < project.material_nodes.length; ++i) {
-		let n: zui_node_canvas_t = project.material_nodes[i];
+		let n: ui_node_canvas_t = project.material_nodes[i];
 		import_arm_init_nodes(n.nodes);
 		context_raw.material = slot_material_create(m0, n);
 		array_push(project_materials, context_raw.material);
@@ -342,10 +342,10 @@ function import_arm_run_project(path: string) {
 	project_material_groups = [];
 	if (project.material_groups != null) {
 		for (let i: i32 = 0; i < project.material_groups.length; ++i) {
-			let g: zui_node_canvas_t = project.material_groups[i];
+			let g: ui_node_canvas_t = project.material_groups[i];
 			let ng: node_group_t = {
 				canvas: g,
-				nodes: zui_nodes_create()
+				nodes: ui_nodes_create()
 			};
 			array_push(project_material_groups, ng);
 		}
@@ -361,7 +361,7 @@ function import_arm_run_project(path: string) {
 
 	project_brushes = [];
 	for (let i: i32 = 0; i < project.brush_nodes.length; ++i) {
-		let n: zui_node_canvas_t = project.brush_nodes[i];
+		let n: ui_node_canvas_t = project.brush_nodes[i];
 		import_arm_init_nodes(n.nodes);
 		context_raw.brush = slot_brush_create(n);
 		array_push(project_brushes, context_raw.brush);
@@ -457,7 +457,7 @@ function import_arm_run_material_from_project(project: project_format_t, path: s
 	let imported: slot_material_t[] = [];
 
 	for (let i: i32 = 0; i < project.material_nodes.length; ++i) {
-		let c: zui_node_canvas_t = project.material_nodes[i];
+		let c: ui_node_canvas_t = project.material_nodes[i];
 		import_arm_init_nodes(c.nodes);
 		context_raw.material = slot_material_create(m0, c);
 		array_push(project_materials, context_raw.material);
@@ -467,14 +467,14 @@ function import_arm_run_material_from_project(project: project_format_t, path: s
 
 	if (project.material_groups != null) {
 		for (let i: i32 = 0; i < project.material_groups.length; ++i) {
-			let c: zui_node_canvas_t = project.material_groups[i];
+			let c: ui_node_canvas_t = project.material_groups[i];
 			while (import_arm_group_exists(c)) {
 				import_arm_rename_group(c.name, imported, project.material_groups); // Ensure unique group name
 			}
 			import_arm_init_nodes(c.nodes);
 			let ng: node_group_t = {
 				canvas: c,
-				nodes: zui_nodes_create()
+				nodes: ui_nodes_create()
 			};
 			array_push(project_material_groups, ng);
 		}
@@ -494,7 +494,7 @@ function import_arm_run_material_from_project(project: project_format_t, path: s
 	data_delete_blob(path);
 }
 
-function import_arm_group_exists(c: zui_node_canvas_t): bool {
+function import_arm_group_exists(c: ui_node_canvas_t): bool {
 	for (let i: i32 = 0; i < project_material_groups.length; ++i) {
 		let g: node_group_t = project_material_groups[i];
 		if (g.canvas.name == c.name) {
@@ -504,23 +504,23 @@ function import_arm_group_exists(c: zui_node_canvas_t): bool {
 	return false;
 }
 
-function import_arm_rename_group(name: string, materials: slot_material_t[], groups: zui_node_canvas_t[]) {
+function import_arm_rename_group(name: string, materials: slot_material_t[], groups: ui_node_canvas_t[]) {
 	for (let i: i32 = 0; i < materials.length; ++i) {
 		let m: slot_material_t = materials[i];
 		for (let i: i32 = 0; i < m.canvas.nodes.length; ++i) {
-			let n: zui_node_t = m.canvas.nodes[i];
+			let n: ui_node_t = m.canvas.nodes[i];
 			if (n.type == "GROUP" && n.name == name) {
 				n.name += ".1";
 			}
 		}
 	}
 	for (let i: i32 = 0; i < groups.length; ++i) {
-		let c: zui_node_canvas_t = groups[i];
+		let c: ui_node_canvas_t = groups[i];
 		if (c.name == name) {
 			c.name += ".1";
 		}
 		for (let i: i32 = 0; i < c.nodes.length; ++i) {
-			let n: zui_node_t = c.nodes[i];
+			let n: ui_node_t = c.nodes[i];
 			if (n.type == "GROUP" && n.name == name) {
 				n.name += ".1";
 			}
@@ -562,7 +562,7 @@ function import_arm_run_brush_from_project(project: project_format_t, path: stri
 	let imported: slot_brush_t[] = [];
 
 	for (let i: i32 = 0; i < project.brush_nodes.length; ++i) {
-		let n: zui_node_canvas_t = project.brush_nodes[i];
+		let n: ui_node_canvas_t = project.brush_nodes[i];
 		import_arm_init_nodes(n.nodes);
 		context_raw.brush = slot_brush_create(n);
 		array_push(project_brushes, context_raw.brush);
@@ -630,9 +630,9 @@ function import_arm_texture_node_name(): string {
 	///end
 }
 
-function import_arm_init_nodes(nodes: zui_node_t[]) {
+function import_arm_init_nodes(nodes: ui_node_t[]) {
 	for (let i: i32 = 0; i < nodes.length; ++i) {
-		let node: zui_node_t = nodes[i];
+		let node: ui_node_t = nodes[i];
 		if (node.type == import_arm_texture_node_name()) {
 			node.buttons[0].default_value = f32_array_create_x(base_get_asset_index(u8_array_to_string(node.buttons[0].data)));
 			node.buttons[0].data = u8_array_create_from_string("");

@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <math.h>
 #include "tinyusdz/tinyusdz.hh"
-#include "io_obj.h"
+#include "iron_obj.h"
 #include "iron_array.h"
 
 extern "C" void *io_usd_parse(uint8_t *buf, size_t size) {

@@ -373,7 +373,7 @@ function util_render_make_brush_preview() {
 	if (g2_in_use) g2_begin(current);
 }
 
-function util_render_make_node_preview(canvas: zui_node_canvas_t, node: zui_node_t, image: image_t, group: zui_node_canvas_t = null, parents: zui_node_t[] = null) {
+function util_render_make_node_preview(canvas: ui_node_canvas_t, node: ui_node_t, image: image_t, group: ui_node_canvas_t = null, parents: ui_node_t[] = null) {
 	let res: parse_node_preview_result_t = make_material_parse_node_preview_material(node, group, parents);
 	if (res == null || res.scon == null) {
 		return;

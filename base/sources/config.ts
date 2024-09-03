@@ -2,7 +2,7 @@
 let config_raw: config_t = null;
 let config_keymap: map_t<string, string>;
 let config_loaded: bool = false;
-let config_button_align: zui_align_t = zui_align_t.LEFT;
+let config_button_align: ui_align_t = ui_align_t.LEFT;
 let config_default_button_spacing: string = "       ";
 let config_button_spacing: string = config_default_button_spacing;
 
@@ -165,9 +165,9 @@ function config_init() {
 		}
 	}
 
-	zui_touch_scroll = config_raw.touch_ui;
-	zui_touch_hold = config_raw.touch_ui;
-	zui_touch_tooltip = config_raw.touch_ui;
+	ui_touch_scroll = config_raw.touch_ui;
+	ui_touch_hold = config_raw.touch_ui;
+	ui_touch_tooltip = config_raw.touch_ui;
 	base_res_handle.position = config_raw.layer_res;
 	config_load_keymap();
 }
@@ -217,7 +217,7 @@ function config_get_options(): kinc_sys_ops_t {
 }
 
 function config_restore() {
-	zui_children = map_create(); // Reset ui handles
+	ui_children = map_create(); // Reset ui handles
 	config_loaded = false;
 	let _layout: i32[] = config_raw.layout;
 	config_init();
@@ -234,7 +234,7 @@ function config_import_from(from: config_t) {
 	config_raw = from;
 	config_raw.sha = _sha;
 	config_raw.version = _version;
-	zui_children = map_create(); // Reset ui handles
+	ui_children = map_create(); // Reset ui handles
 	config_load_keymap();
 	base_init_layout();
 	translator_load_translations(config_raw.locale);
@@ -334,11 +334,11 @@ function config_get_texture_res_pos(i: i32): i32 {
 }
 
 function config_load_theme(theme: string, tag_redraw: bool = true) {
-	base_theme = zui_theme_create();
+	base_theme = ui_theme_create();
 
 	if (theme != "default.json") {
 		let b: buffer_t = data_get_blob("themes/" + theme);
-		let parsed: zui_theme_t = json_parse(sys_buffer_to_string(b));
+		let parsed: ui_theme_t = json_parse(sys_buffer_to_string(b));
 		base_theme = parsed;
 	}
 
@@ -346,7 +346,7 @@ function config_load_theme(theme: string, tag_redraw: bool = true) {
 
 	if (tag_redraw) {
 		for (let i: i32 = 0; i < base_get_uis().length; ++i) {
-			let ui: zui_t = base_get_uis()[i];
+			let ui: ui_t = base_get_uis()[i];
 			ui.ops.theme = base_theme;
 		}
 		ui_base_tag_ui_redraw();
@@ -361,12 +361,12 @@ function config_load_theme(theme: string, tag_redraw: bool = true) {
 		base_theme.ARROW_SIZE = 5 + 2;
 		base_theme.CHECK_SIZE = 15 + 4;
 		base_theme.CHECK_SELECT_SIZE = 8 + 2;
-		config_button_align = zui_align_t.LEFT;
+		config_button_align = ui_align_t.LEFT;
 		config_button_spacing = "";
 	}
 	else {
 		base_theme.FULL_TABS = false;
-		config_button_align = zui_align_t.LEFT;
+		config_button_align = ui_align_t.LEFT;
 		config_button_spacing = config_default_button_spacing;
 	}
 }

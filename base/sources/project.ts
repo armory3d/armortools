@@ -20,8 +20,8 @@ let project_atlas_names: string[] = null;
 ///if is_lab
 let project_material_data: material_data_t = null; ////
 let project_materials: any[] = null; ////
-let project_nodes: zui_nodes_t;
-let project_canvas: zui_node_canvas_t;
+let project_nodes: ui_nodes_t;
+let project_canvas: ui_node_canvas_t;
 let project_default_canvas: buffer_t = null;
 ///end
 
@@ -90,8 +90,8 @@ function project_save_as(save_and_quit: bool = false) {
 
 function project_new_box() {
 	///if (is_paint || is_sculpt)
-	ui_box_show_custom(function (ui: zui_t) {
-		if (zui_tab(zui_handle(__ID__), tr("New Project"))) {
+	ui_box_show_custom(function (ui: ui_t) {
+		if (ui_tab(ui_handle(__ID__), tr("New Project"))) {
 			if (project_mesh_list == null) {
 				project_mesh_list = file_read_directory(path_data() + path_sep + "meshes");
 				for (let i: i32 = 0; i < project_mesh_list.length; ++i) {
@@ -104,26 +104,26 @@ function project_new_box() {
 			}
 
 			let row: f32[] = [0.5, 0.5];
-			zui_row(row);
-			let h_project_type: zui_handle_t = zui_handle(__ID__);
+			ui_row(row);
+			let h_project_type: ui_handle_t = ui_handle(__ID__);
 			if (h_project_type.init) {
 				h_project_type.position = context_raw.project_type;
 			}
-			context_raw.project_type = zui_combo(h_project_type, project_mesh_list, tr("Template"), true);
+			context_raw.project_type = ui_combo(h_project_type, project_mesh_list, tr("Template"), true);
 
-			let h_project_aspect_ratio: zui_handle_t = zui_handle(__ID__);
+			let h_project_aspect_ratio: ui_handle_t = ui_handle(__ID__);
 			if (h_project_aspect_ratio.init) {
 				h_project_aspect_ratio.position = context_raw.project_aspect_ratio;
 			}
 			let project_aspect_ratio_combo: string[] = ["1:1", "2:1", "1:2"];
-			context_raw.project_aspect_ratio = zui_combo(h_project_aspect_ratio, project_aspect_ratio_combo, tr("Aspect Ratio"), true);
+			context_raw.project_aspect_ratio = ui_combo(h_project_aspect_ratio, project_aspect_ratio_combo, tr("Aspect Ratio"), true);
 
-			_zui_end_element();
-			zui_row(row);
-			if (zui_button(tr("Cancel"))) {
+			_ui_end_element();
+			ui_row(row);
+			if (ui_button(tr("Cancel"))) {
 				ui_box_hide();
 			}
-			if (zui_button(tr("OK")) || ui.is_return_down) {
+			if (ui_button(tr("OK")) || ui.is_return_down) {
 				project_new();
 				viewport_scale_to_bounds();
 				ui_box_hide();
@@ -349,9 +349,9 @@ function project_import_material() {
 	});
 }
 
-function project_create_node_link(links: zui_node_link_t[], from_id: i32, from_socket: i32, to_id: i32, to_socket: i32): zui_node_link_t {
-	let link: zui_node_link_t = {
-		id: zui_next_link_id(links),
+function project_create_node_link(links: ui_node_link_t[], from_id: i32, from_socket: i32, to_id: i32, to_socket: i32): ui_node_link_t {
+	let link: ui_node_link_t = {
+		id: ui_next_link_id(links),
 		from_id: from_id,
 		from_socket: from_socket,
 		to_id: to_id,
@@ -380,12 +380,12 @@ function project_import_brush() {
 			array_push(project_brushes, context_raw.brush);
 
 			// Create and link image node
-			let n: zui_node_t = nodes_brush_create_node("TEX_IMAGE");
+			let n: ui_node_t = nodes_brush_create_node("TEX_IMAGE");
 			n.x = 83;
 			n.y = 340;
 			n.buttons[0].default_value = f32_array_create_x(asset_index);
-			let links: zui_node_link_t[] = context_raw.brush.canvas.links;
-			let link: zui_node_link_t = project_create_node_link(links, n.id, 0, 0, 4);
+			let links: ui_node_link_t[] = context_raw.brush.canvas.links;
+			let link: ui_node_link_t = project_create_node_link(links, n.id, 0, 0, 4);
 			array_push(links, link);
 
 			// Parse brush
@@ -429,7 +429,7 @@ function project_import_mesh_box(path: string, replace_existing: bool = true, cl
 	// data_get_blob(path);
 	///end
 
-	ui_box_show_custom(function (ui: zui_t) {
+	ui_box_show_custom(function (ui: ui_t) {
 
 		let path: string = _project_import_mesh_box_path;
 		let replace_existing: bool = _project_import_mesh_box_replace_existing;
@@ -437,41 +437,36 @@ function project_import_mesh_box(path: string, replace_existing: bool = true, cl
 		let done: ()=>void = _project_import_mesh_box_done;
 
 		let tab_vertical: bool = config_raw.touch_ui;
-		if (zui_tab(zui_handle(__ID__), tr("Import Mesh"), tab_vertical)) {
+		if (ui_tab(ui_handle(__ID__), tr("Import Mesh"), tab_vertical)) {
 
 			if (ends_with(to_lower_case(path), ".obj")) {
 				let split_by_combo: string[] = [tr("Object"), tr("Group"), tr("Material"), tr("UDIM Tile")];
-				context_raw.split_by = zui_combo(zui_handle(__ID__), split_by_combo, tr("Split By"), true);
+				context_raw.split_by = ui_combo(ui_handle(__ID__), split_by_combo, tr("Split By"), true);
 				if (ui.is_hovered) {
-					zui_tooltip(tr("Split .obj mesh into objects"));
+					ui_tooltip(tr("Split .obj mesh into objects"));
 				}
 			}
-
-			// if (ends_with(to_lower_case(path), ".fbx")) {
-			// 	raw.parseTransform = Zui.check(Zui.handle("project_5", { selected: raw.parseTransform }), tr("Parse Transforms"));
-			// 	if (ui.isHovered) Zui.tooltip(tr("Load per-object transforms from .fbx"));
-			// }
 
 			///if (is_paint || is_sculpt)
 			// if (ends_with(to_lower_case(path), ".fbx") || ends_with(to_lower_case(path), ".blend")) {
 			if (ends_with(to_lower_case(path), ".blend")) {
-				let h: zui_handle_t = zui_handle(__ID__);
+				let h: ui_handle_t = ui_handle(__ID__);
 				if (h.init) {
 					h.selected = context_raw.parse_vcols;
 				}
-				context_raw.parse_vcols = zui_check(h, tr("Parse Vertex Colors"));
+				context_raw.parse_vcols = ui_check(h, tr("Parse Vertex Colors"));
 				if (ui.is_hovered) {
-					zui_tooltip(tr("Import vertex color data"));
+					ui_tooltip(tr("Import vertex color data"));
 				}
 			}
 			///end
 
 			let row: f32 [] = [0.45, 0.45, 0.1];
-			zui_row(row);
-			if (zui_button(tr("Cancel"))) {
+			ui_row(row);
+			if (ui_button(tr("Cancel"))) {
 				ui_box_hide();
 			}
-			if (zui_button(tr("Import")) || ui.is_return_down) {
+			if (ui_button(tr("Import")) || ui.is_return_down) {
 				ui_box_hide();
 
 				///if (krom_android || krom_ios)
@@ -489,7 +484,7 @@ function project_import_mesh_box(path: string, replace_existing: bool = true, cl
 					done();
 				}
 			}
-			if (zui_button(tr("?"))) {
+			if (ui_button(tr("?"))) {
 				file_load_url("https://github.com/armory3d/armorpaint_docs/blob/master/faq.md");
 			}
 		}
@@ -517,14 +512,14 @@ function project_unwrap_mesh_box(mesh: raw_mesh_t, done: (a: raw_mesh_t)=>void, 
 	_project_unwrap_mesh_box_done = done;
 	_project_unwrap_mesh_box_skip_ui = skip_ui;
 
-	ui_box_show_custom(function (ui: zui_t) {
+	ui_box_show_custom(function (ui: ui_t) {
 
 		let mesh: raw_mesh_t = _project_unwrap_mesh_box_mesh;
 		let done: (a: raw_mesh_t)=>void = _project_unwrap_mesh_box_done;
 		let skip_ui: bool = _project_unwrap_mesh_box_skip_ui;
 
 		let tab_vertical: bool = config_raw.touch_ui;
-		if (zui_tab(zui_handle(__ID__), tr("Unwrap Mesh"), tab_vertical)) {
+		if (ui_tab(ui_handle(__ID__), tr("Unwrap Mesh"), tab_vertical)) {
 
 			let unwrap_plugins: string[] = [];
 			if (box_preferences_files_plugin == null) {
@@ -538,14 +533,14 @@ function project_unwrap_mesh_box(mesh: raw_mesh_t, done: (a: raw_mesh_t)=>void, 
 			}
 			array_push(unwrap_plugins, "equirect");
 
-			let unwrap_by: i32 = zui_combo(zui_handle(__ID__), unwrap_plugins, tr("Plugin"), true);
+			let unwrap_by: i32 = ui_combo(ui_handle(__ID__), unwrap_plugins, tr("Plugin"), true);
 
 			let row: f32[] = [0.5, 0.5];
-			zui_row(row);
-			if (zui_button(tr("Cancel"))) {
+			ui_row(row);
+			if (ui_button(tr("Cancel"))) {
 				ui_box_hide();
 			}
-			if (zui_button(tr("Unwrap")) || ui.is_return_down || skip_ui) {
+			if (ui_button(tr("Unwrap")) || ui.is_return_down || skip_ui) {
 				ui_box_hide();
 
 				///if (krom_android || krom_ios)
@@ -756,7 +751,7 @@ function project_get_material_group_by_name(group_name: string): node_group_t {
 
 ///if (is_paint || is_sculpt)
 function project_is_material_group_in_use(group: node_group_t): bool {
-	let canvases: zui_node_canvas_t[] = [];
+	let canvases: ui_node_canvas_t[] = [];
 	for (let i: i32 = 0; i < project_materials.length; ++i) {
 		let m: slot_material_t = project_materials[i];
 		array_push(canvases, m.canvas);
@@ -766,9 +761,9 @@ function project_is_material_group_in_use(group: node_group_t): bool {
 		array_push(canvases, m.canvas);
 	}
 	for (let i: i32 = 0; i < canvases.length; ++i) {
-		let canvas: zui_node_canvas_t = canvases[i];
+		let canvas: ui_node_canvas_t = canvases[i];
 		for (let i: i32 = 0; i < canvas.nodes.length; ++i) {
-			let n: zui_node_t = canvas.nodes[i];
+			let n: ui_node_t = canvas.nodes[i];
 			if (n.type == "GROUP" && n.name == group.canvas.name) {
 				return true;
 			}
@@ -779,8 +774,8 @@ function project_is_material_group_in_use(group: node_group_t): bool {
 ///end
 
 type node_group_t = {
-	nodes?: zui_nodes_t;
-	canvas?: zui_node_canvas_t;
+	nodes?: ui_nodes_t;
+	canvas?: ui_node_canvas_t;
 };
 
 type project_format_t = {
@@ -796,10 +791,10 @@ type project_format_t = {
 	swatches?: swatch_color_t[];
 
 	///if (is_paint || is_sculpt)
-	brush_nodes?: zui_node_canvas_t[];
+	brush_nodes?: ui_node_canvas_t[];
 	brush_icons?: buffer_t[];
-	material_nodes?: zui_node_canvas_t[];
-	material_groups?: zui_node_canvas_t[];
+	material_nodes?: ui_node_canvas_t[];
+	material_groups?: ui_node_canvas_t[];
 	material_icons?: buffer_t[];
 	font_assets?: string[];
 	layer_datas?: layer_data_t[];
@@ -814,8 +809,8 @@ type project_format_t = {
 	///end
 
 	///if is_lab
-	material?: zui_node_canvas_t;
-	material_groups?: zui_node_canvas_t[];
+	material?: ui_node_canvas_t;
+	material_groups?: ui_node_canvas_t[];
 	mesh_data?: mesh_data_t;
 	mesh_icon?: buffer_t;
 	///end

@@ -25,7 +25,7 @@ function time_node_get(self: time_node_t, from: i32): logic_node_value_t {
 	}
 }
 
-let time_node_def: zui_node_t = {
+let time_node_def: ui_node_t = {
 	id: 0,
 	name: _tr("Time"),
 	type: "time_node",

@@ -27,9 +27,9 @@ function text_to_photo_node_get_cached_image(self: text_to_photo_node_t): image_
 	return text_to_photo_node_image;
 }
 
-function text_to_photo_node_buttons(ui: zui_t, nodes: zui_nodes_t, node: zui_node_t) {
+function text_to_photo_node_buttons(ui: ui_t, nodes: ui_nodes_t, node: ui_node_t) {
 	text_to_photo_node_tiling = node.buttons[0].default_value == 0 ? false : true;
-	text_to_photo_node_prompt = zui_text_area(zui_handle(__ID__), zui_align_t.LEFT, true, tr("prompt"), true);
+	text_to_photo_node_prompt = ui_text_area(ui_handle(__ID__), ui_align_t.LEFT, true, tr("prompt"), true);
 	node.buttons[1].height = string_split(text_to_photo_node_prompt, "\n").length;
 }
 
@@ -255,7 +255,7 @@ function text_to_photo_node_vae_decoder(latents: f32_array_t, upscale: bool): im
 	}
 }
 
-let text_to_photo_node_def: zui_node_t = {
+let text_to_photo_node_def: ui_node_t = {
 	id: 0,
 	name: _tr("Text to Photo"),
 	type: "text_to_photo_node",

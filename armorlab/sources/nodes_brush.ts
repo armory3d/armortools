@@ -1,12 +1,12 @@
 
 let nodes_brush_categories: string[] = [_tr("Input"), _tr("Model")];
 
-let nodes_brush_input: zui_node_t[] = [
+let nodes_brush_input: ui_node_t[] = [
 	image_texture_node_def,
 	rgb_node_def,
 ];
 
-let nodes_brush_model: zui_node_t[] = [
+let nodes_brush_model: ui_node_t[] = [
 	inpaint_node_def,
 	photo_to_pbr_node_def,
 	text_to_photo_node_def,
@@ -35,15 +35,15 @@ function nodes_brush_init() {
 	map_set(nodes_brush_creates, "variance_node", variance_node_create);
 }
 
-function nodes_brush_create_node(node_type: string): zui_node_t {
+function nodes_brush_create_node(node_type: string): ui_node_t {
 	for (let i: i32 = 0; i < nodes_brush_list.length; ++i) {
 		let c: node_list_t = nodes_brush_list[i];
 		for (let j: i32 = 0; j < c.length; ++j) {
-			let n: zui_node_t = c[j];
+			let n: ui_node_t = c[j];
 			if (n.type == node_type) {
-				let canvas: zui_node_canvas_t = project_canvas;
-				let nodes: zui_nodes_t = project_nodes;
-				let node: zui_node_t = ui_nodes_make_node(n, nodes, canvas);
+				let canvas: ui_node_canvas_t = project_canvas;
+				let nodes: ui_nodes_t = project_nodes;
+				let node: ui_node_t = ui_nodes_make_node(n, nodes, canvas);
 				array_push(canvas.nodes, node);
 				return node;
 			}

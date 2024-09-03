@@ -177,7 +177,7 @@ function photo_to_pbr_node_bgra_swap(buffer: buffer_t) {
 }
 ///end
 
-let photo_to_pbr_node_def: zui_node_t = {
+let photo_to_pbr_node_def: ui_node_t = {
 	id: 0,
 	name: _tr("Photo to PBR"),
 	type: "photo_to_pbr_node",

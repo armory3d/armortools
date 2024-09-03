@@ -26,7 +26,7 @@ function separate_vector_node_get(self: separate_vector_node_t, from: i32): logi
 	}
 }
 
-let separate_vector_node_def: zui_node_t = {
+let separate_vector_node_def: ui_node_t = {
 	id: 0,
 	name: _tr("Separate Vector"),
 	type: "separate_vector_node",

@@ -1,58 +1,58 @@
 
 ///if (is_paint || is_sculpt)
 
-function tab_materials_draw(htab: zui_handle_t) {
+function tab_materials_draw(htab: ui_handle_t) {
 	let mini: bool = config_raw.layout[layout_size_t.SIDEBAR_W] <= ui_base_sidebar_mini_w;
 	mini ? tab_materials_draw_mini(htab) : tab_materials_draw_full(htab);
 }
 
-function tab_materials_draw_mini(htab: zui_handle_t) {
-	zui_set_hovered_tab_name(tr("Materials"));
+function tab_materials_draw_mini(htab: ui_handle_t) {
+	ui_set_hovered_tab_name(tr("Materials"));
 
-	zui_begin_sticky();
-	zui_separator(5);
+	ui_begin_sticky();
+	ui_separator(5);
 
 	tab_materials_button_nodes();
 	tab_materials_button_new("+");
 
-	zui_end_sticky();
-	zui_separator(3, false);
+	ui_end_sticky();
+	ui_separator(3, false);
 	tab_materials_draw_slots(true);
 }
 
-function tab_materials_draw_full(htab: zui_handle_t) {
-	if (zui_tab(htab, tr("Materials"))) {
-		zui_begin_sticky();
+function tab_materials_draw_full(htab: ui_handle_t) {
+	if (ui_tab(htab, tr("Materials"))) {
+		ui_begin_sticky();
 		let row: f32[] = [1 / 4, 1 / 4, 1 / 4];
-		zui_row(row);
+		ui_row(row);
 
 		tab_materials_button_new(tr("New"));
-		if (zui_button(tr("Import"))) {
+		if (ui_button(tr("Import"))) {
 			project_import_material();
 		}
 		tab_materials_button_nodes();
 
-		zui_end_sticky();
-		zui_separator(3, false);
+		ui_end_sticky();
+		ui_separator(3, false);
 		tab_materials_draw_slots(false);
 	}
 }
 
 function tab_materials_button_nodes() {
-	let ui: zui_t = ui_base_ui;
-	if (zui_button(tr("Nodes"))) {
+	let ui: ui_t = ui_base_ui;
+	if (ui_button(tr("Nodes"))) {
 		ui_base_show_material_nodes();
 	}
 	else if (ui.is_hovered) {
-		zui_tooltip(tr("Show Node Editor") + " (" + map_get(config_keymap, "toggle_node_editor") + ")");
+		ui_tooltip(tr("Show Node Editor") + " (" + map_get(config_keymap, "toggle_node_editor") + ")");
 	}
 }
 
 let _tab_materials_draw_slots: i32;
 
 function tab_materials_draw_slots(mini: bool) {
-	let ui: zui_t = ui_base_ui;
-	let slotw: i32 = math_floor(51 * zui_SCALE(ui));
+	let ui: ui_t = ui_base_ui;
+	let slotw: i32 = math_floor(51 * ui_SCALE(ui));
 	let num: i32 = math_floor(config_raw.layout[layout_size_t.SIDEBAR_W] / slotw);
 
 	for (let row: i32 = 0; row < math_floor(math_ceil(project_materials.length / num)); ++row) {
@@ -61,32 +61,32 @@ function tab_materials_draw_slots(mini: bool) {
 		for (let i: i32 = 0; i < num * mult; ++i) {
 			array_push(ar, 1 / num);
 		}
-		zui_row(ar);
+		ui_row(ar);
 
 		ui._x += 2;
-		let off: f32 = config_raw.show_asset_names ? zui_ELEMENT_OFFSET(ui) * 10.0 : 6;
+		let off: f32 = config_raw.show_asset_names ? ui_ELEMENT_OFFSET(ui) * 10.0 : 6;
 		if (row > 0) {
 			ui._y += off;
 		}
 
 		for (let j: i32 = 0; j < num; ++j) {
-			let imgw: i32 = math_floor(50 * zui_SCALE(ui));
+			let imgw: i32 = math_floor(50 * ui_SCALE(ui));
 			let i: i32 = j + row * num;
 			if (i >= project_materials.length) {
-				_zui_end_element(imgw);
+				_ui_end_element(imgw);
 				if (config_raw.show_asset_names) {
-					_zui_end_element(0);
+					_ui_end_element(0);
 				}
 				continue;
 			}
-			let img: image_t = zui_SCALE(ui) > 1 ? project_materials[i].image : project_materials[i].image_icon;
+			let img: image_t = ui_SCALE(ui) > 1 ? project_materials[i].image : project_materials[i].image_icon;
 			let imgFull: image_t = project_materials[i].image;
 
 			// Highligh selected
 			if (context_raw.material == project_materials[i]) {
 				if (mini) {
-					let w: f32 = ui._w / zui_SCALE(ui);
-					zui_rect(0, -2, w - 2, w - 4, ui.ops.theme.HIGHLIGHT_COL, 3);
+					let w: f32 = ui._w / ui_SCALE(ui);
+					ui_rect(0, -2, w - 2, w - 4, ui.ops.theme.HIGHLIGHT_COL, 3);
 				}
 				else {
 					let off: i32 = row % 2 == 1 ? 1 : 0;
@@ -94,10 +94,10 @@ function tab_materials_draw_slots(mini: bool) {
 					if (config_raw.window_scale > 1) {
 						w += math_floor(config_raw.window_scale * 2);
 					}
-					zui_fill(-1,         -2, w + 3,       2, ui.ops.theme.HIGHLIGHT_COL);
-					zui_fill(-1,    w - off, w + 3, 2 + off, ui.ops.theme.HIGHLIGHT_COL);
-					zui_fill(-1,         -2,     2,   w + 3, ui.ops.theme.HIGHLIGHT_COL);
-					zui_fill(w + 1,      -2,     2,   w + 4, ui.ops.theme.HIGHLIGHT_COL);
+					ui_fill(-1,         -2, w + 3,       2, ui.ops.theme.HIGHLIGHT_COL);
+					ui_fill(-1,    w - off, w + 3, 2 + off, ui.ops.theme.HIGHLIGHT_COL);
+					ui_fill(-1,         -2,     2,   w + 3, ui.ops.theme.HIGHLIGHT_COL);
+					ui_fill(w + 1,      -2,     2,   w + 4, ui.ops.theme.HIGHLIGHT_COL);
 				}
 			}
 
@@ -108,11 +108,11 @@ function tab_materials_draw_slots(mini: bool) {
 			// Draw material icon
 			let uix: f32 = ui._x;
 			let uiy: f32 = ui._y;
-			let tile: i32 = zui_SCALE(ui) > 1 ? 100 : 50;
-			let imgh: f32 = mini ? ui_base_default_sidebar_mini_w * 0.85 * zui_SCALE(ui) : -1.0;
-			let state: zui_state_t = project_materials[i].preview_ready ?
-				_zui_image(img, 0xffffffff, imgh) :
-				_zui_image(resource_get("icons.k"), 0xffffffff, -1.0, tile, tile, tile, tile);
+			let tile: i32 = ui_SCALE(ui) > 1 ? 100 : 50;
+			let imgh: f32 = mini ? ui_base_default_sidebar_mini_w * 0.85 * ui_SCALE(ui) : -1.0;
+			let state: ui_state_t = project_materials[i].preview_ready ?
+				_ui_image(img, 0xffffffff, imgh) :
+				_ui_image(resource_get("icons.k"), 0xffffffff, -1.0, tile, tile, tile, tile);
 
 			// Draw material numbers when selecting a material via keyboard shortcut
 			let is_typing: bool = ui.is_typing || ui_view2d_ui.is_typing || ui_nodes_ui.is_typing;
@@ -129,7 +129,7 @@ function tab_materials_draw_slots(mini: bool) {
 			}
 
 			// Select material
-			if (state == zui_state_t.STARTED && ui.input_y > ui._window_y) {
+			if (state == ui_state_t.STARTED && ui.input_y > ui._window_y) {
 				if (context_raw.material != project_materials[i]) {
 					context_select_material(i);
 					///if is_paint
@@ -156,7 +156,7 @@ function tab_materials_draw_slots(mini: bool) {
 				let add: i32 = project_materials.length > 1 ? 1 : 0;
 				_tab_materials_draw_slots = i;
 
-				ui_menu_draw(function (ui: zui_t) {
+				ui_menu_draw(function (ui: ui_t) {
 					let i: i32 = _tab_materials_draw_slots;
 					let m: slot_material_t = project_materials[i];
 
@@ -183,7 +183,7 @@ function tab_materials_draw_slots(mini: bool) {
 
 							context_raw.material = slot_material_create(project_materials[0].data);
 							array_push(project_materials, context_raw.material);
-							let cloned: zui_node_canvas_t = util_clone_canvas(project_materials[i].canvas);
+							let cloned: ui_node_canvas_t = util_clone_canvas(project_materials[i].canvas);
 							context_raw.material.canvas = cloned;
 							tab_materials_update_material();
 							history_duplicate_material();
@@ -194,69 +194,69 @@ function tab_materials_draw_slots(mini: bool) {
 						tab_materials_delete_material(m);
 					}
 
-					let base_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id);
+					let base_handle: ui_handle_t = ui_nest(ui_handle(__ID__), m.id);
 					if (base_handle.init) {
 						base_handle.selected = m.paint_base;
 					}
 
-					let opac_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id);
+					let opac_handle: ui_handle_t = ui_nest(ui_handle(__ID__), m.id);
 					if (opac_handle.init) {
 						opac_handle.selected = m.paint_opac;
 					}
 
-					let nor_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id);
+					let nor_handle: ui_handle_t = ui_nest(ui_handle(__ID__), m.id);
 					if (nor_handle.init) {
 						nor_handle.selected = m.paint_nor;
 					}
 
-					let occ_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id);
+					let occ_handle: ui_handle_t = ui_nest(ui_handle(__ID__), m.id);
 					if (occ_handle.init) {
 						occ_handle.selected = m.paint_occ;
 					}
 
-					let rough_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id);
+					let rough_handle: ui_handle_t = ui_nest(ui_handle(__ID__), m.id);
 					if (rough_handle.init) {
 						rough_handle.selected = m.paint_rough;
 					}
 
-					let met_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id);
+					let met_handle: ui_handle_t = ui_nest(ui_handle(__ID__), m.id);
 					if (met_handle.init) {
 						met_handle.selected = m.paint_met;
 					}
 
-					let height_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id);
+					let height_handle: ui_handle_t = ui_nest(ui_handle(__ID__), m.id);
 					if (height_handle.init) {
 						height_handle.selected = m.paint_height;
 					}
 
-					let emis_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id);
+					let emis_handle: ui_handle_t = ui_nest(ui_handle(__ID__), m.id);
 					if (emis_handle.init) {
 						emis_handle.selected = m.paint_emis;
 					}
 
-					let subs_handle: zui_handle_t = zui_nest(zui_handle(__ID__), m.id);
+					let subs_handle: ui_handle_t = ui_nest(ui_handle(__ID__), m.id);
 					if (subs_handle.init) {
 						subs_handle.selected = m.paint_subs;
 					}
 
 					ui_menu_fill(ui);
-					m.paint_base = zui_check(base_handle, tr("Base Color"));
+					m.paint_base = ui_check(base_handle, tr("Base Color"));
 					ui_menu_fill(ui);
-					m.paint_opac = zui_check(opac_handle, tr("Opacity"));
+					m.paint_opac = ui_check(opac_handle, tr("Opacity"));
 					ui_menu_fill(ui);
-					m.paint_nor = zui_check(nor_handle, tr("Normal"));
+					m.paint_nor = ui_check(nor_handle, tr("Normal"));
 					ui_menu_fill(ui);
-					m.paint_occ = zui_check(occ_handle, tr("Occlusion"));
+					m.paint_occ = ui_check(occ_handle, tr("Occlusion"));
 					ui_menu_fill(ui);
-					m.paint_rough = zui_check(rough_handle, tr("Roughness"));
+					m.paint_rough = ui_check(rough_handle, tr("Roughness"));
 					ui_menu_fill(ui);
-					m.paint_met = zui_check(met_handle, tr("Metallic"));
+					m.paint_met = ui_check(met_handle, tr("Metallic"));
 					ui_menu_fill(ui);
-					m.paint_height = zui_check(height_handle, tr("Height"));
+					m.paint_height = ui_check(height_handle, tr("Height"));
 					ui_menu_fill(ui);
-					m.paint_emis = zui_check(emis_handle, tr("Emission"));
+					m.paint_emis = ui_check(emis_handle, tr("Emission"));
 					ui_menu_fill(ui);
-					m.paint_subs = zui_check(subs_handle, tr("Subsurface"));
+					m.paint_subs = ui_check(subs_handle, tr("Subsurface"));
 					if (base_handle.changed ||
 						opac_handle.changed ||
 						nor_handle.changed ||
@@ -272,32 +272,32 @@ function tab_materials_draw_slots(mini: bool) {
 				}, 13 + add);
 			}
 			if (ui.is_hovered) {
-				_zui_tooltip_image(imgFull);
+				_ui_tooltip_image(imgFull);
 				if (i < 9) {
 					let i1: i32 = i + 1;
-					zui_tooltip(project_materials[i].canvas.name + " - (" + map_get(config_keymap, "select_material") + " " + i1 + ")");
+					ui_tooltip(project_materials[i].canvas.name + " - (" + map_get(config_keymap, "select_material") + " " + i1 + ")");
 				}
 				else {
-					zui_tooltip(project_materials[i].canvas.name);
+					ui_tooltip(project_materials[i].canvas.name);
 				}
 			}
 
 			if (config_raw.show_asset_names) {
 				ui._x = uix;
 				ui._y += slotw * 0.9;
-				zui_text(project_materials[i].canvas.name, zui_align_t.CENTER);
+				ui_text(project_materials[i].canvas.name, ui_align_t.CENTER);
 				if (ui.is_hovered) {
 					if (i < 9) {
 						let i1: i32 = i + 1;
-						zui_tooltip(project_materials[i].canvas.name + " - (" + map_get(config_keymap, "select_material") + " " + i1 + ")");
+						ui_tooltip(project_materials[i].canvas.name + " - (" + map_get(config_keymap, "select_material") + " " + i1 + ")");
 					}
 					else {
-						zui_tooltip(project_materials[i].canvas.name);
+						ui_tooltip(project_materials[i].canvas.name);
 					}
 				}
 				ui._y -= slotw * 0.9;
 				if (i == project_materials.length - 1) {
-					ui._y += j == num - 1 ? imgw : imgw + zui_ELEMENT_H(ui) + zui_ELEMENT_OFFSET(ui);
+					ui._y += j == num - 1 ? imgw : imgw + ui_ELEMENT_H(ui) + ui_ELEMENT_OFFSET(ui);
 				}
 			}
 		}
@@ -318,7 +318,7 @@ function tab_materials_draw_slots(mini: bool) {
 }
 
 function tab_materials_button_new(text: string) {
-	if (zui_button(text)) {
+	if (ui_button(text)) {
 		app_notify_on_init(function() {
 			context_raw.material = slot_material_create(project_materials[0].data);
 			array_push(project_materials, context_raw.material);
@@ -340,9 +340,9 @@ function tab_materials_update_material() {
 	}
 }
 
-function tab_materials_update_material_pointers(nodes: zui_node_t[], i: i32) {
+function tab_materials_update_material_pointers(nodes: ui_node_t[], i: i32) {
 	for (let i: i32 = 0; i < nodes.length; ++i) {
-		let n: zui_node_t = nodes[i];
+		let n: ui_node_t = nodes[i];
 		if (n.type == "MATERIAL") {
 			if (n.buttons[0].default_value[0] == i) {
 				n.buttons[0].default_value[0] = 9999; // Material deleted
@@ -357,7 +357,7 @@ function tab_materials_update_material_pointers(nodes: zui_node_t[], i: i32) {
 function tab_materials_accept_swatch_drag(swatch: swatch_color_t) {
 	context_raw.material = slot_material_create(project_materials[0].data);
 	for (let i: i32 = 0; i < context_raw.material.canvas.nodes.length; ++i) {
-		let node: zui_node_t = context_raw.material.canvas.nodes[i];
+		let node: ui_node_t = context_raw.material.canvas.nodes[i];
 		if (node.type == "RGB" ) {
 			node.outputs[0].default_value = f32_array_create_xyzw(
 				color_get_rb(swatch.base) / 255,

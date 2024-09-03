@@ -5,10 +5,10 @@ function unwrap_mesh(mesh) {
 	proc_xatlas_unwrap(mesh);
 }
 
-// let h1 = zui_handle_create();
+// let h1 = ui_handle_create();
 // plugin_notify_on_ui(plugin, function() {
-// 	if (zui_panel(h1, "UV Unwrap")) {
-// 		if (zui_button("Unwrap Mesh")) {
+// 	if (ui_panel(h1, "UV Unwrap")) {
+// 		if (ui_button("Unwrap Mesh")) {
 // 			for (let po of project_paint_objects) {
 // 				unwrap_mesh(mesh);
 // 				mesh_data_build();

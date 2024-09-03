@@ -361,6 +361,8 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	}
 	else { // Brush cursor mask
 		node_shader_write(frag, "float str = clamp((brush_radius - dist) * brush_hardness * 400.0, 0.0, 1.0) * opacity;");
+		// node_shader_write(frag, "float str = pow(clamp(1.0 - (dist / brush_radius), 0.0, 1.0), 1.0 - brush_hardness) * opacity;");
+		// node_shader_write(frag, "float t = clamp(dist / brush_radius, 0.0, 1.0); float falloff = 1.0 - smoothstep(0.0, 1.0, t); float str = pow(falloff, 1.0 / max(brush_hardness, 0.01)) * opacity;");
 	}
 
 	// Manual blending to preserve memory

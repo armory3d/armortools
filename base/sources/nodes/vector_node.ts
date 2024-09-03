@@ -58,7 +58,7 @@ function vector_node_set(self: vector_node_t, value: f32_array_t) {
 	logic_node_input_set(self.base.inputs[2], f32_array_create_x(value[2]));
 }
 
-let vector_node_def: zui_node_t = {
+let vector_node_def: ui_node_t = {
 	id: 0,
 	name: _tr("Vector"),
 	type: "vector_node",
