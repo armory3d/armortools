@@ -112,7 +112,7 @@ function util_uv_cache_dilate_map() {
 		util_uv_pipe_dilate.vertex_shader = sys_get_shader("dilate_map.vert");
 		util_uv_pipe_dilate.fragment_shader = sys_get_shader("dilate_map.frag");
 		let vs: vertex_struct_t = g4_vertex_struct_create();
-		///if (krom_metal || krom_vulkan)
+		///if (iron_metal || iron_vulkan)
 		g4_vertex_struct_add(vs, "tex", vertex_data_t.I16_2X_NORM);
 		///else
 		g4_vertex_struct_add(vs, "pos", vertex_data_t.I16_4X_NORM);
@@ -135,7 +135,7 @@ function util_uv_cache_dilate_map() {
 	g4_begin(util_uv_dilatemap);
 	g4_clear(0x00000000);
 	g4_set_pipeline(util_uv_pipe_dilate);
-	///if (krom_metal || krom_vulkan)
+	///if (iron_metal || iron_vulkan)
 	let vs: vertex_element_t[] = [
 		{
 			name: "tex",

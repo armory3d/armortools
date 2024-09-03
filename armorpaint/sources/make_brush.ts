@@ -14,7 +14,7 @@ function make_brush_run(vert: node_shader_t, frag: node_shader_t) {
 	}
 
 	if (config_raw.brush_3d) {
-		///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
+		///if (iron_direct3d11 || iron_direct3d12 || iron_metal || iron_vulkan)
 		node_shader_write(frag, "float depth = textureLod(gbufferD, inp.xy, 0.0).r;");
 		///else
 		node_shader_write(frag, "float depth = textureLod(gbufferD, vec2(inp.x, 1.0 - inp.y), 0.0).r;");
@@ -29,7 +29,7 @@ function make_brush_run(vert: node_shader_t, frag: node_shader_t) {
 		if (config_raw.brush_angle_reject || context_raw.xray) {
 			node_shader_add_function(frag, str_octahedron_wrap);
 			node_shader_add_uniform(frag, "sampler2D gbuffer0");
-			///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
+			///if (iron_direct3d11 || iron_direct3d12 || iron_metal || iron_vulkan)
 			node_shader_write(frag, "vec2 g0 = textureLod(gbuffer0, inp.xy, 0.0).rg;");
 			///else
 			node_shader_write(frag, "vec2 g0 = textureLod(gbuffer0, vec2(inp.x, 1.0 - inp.y), 0.0).rg;");
@@ -48,7 +48,7 @@ function make_brush_run(vert: node_shader_t, frag: node_shader_t) {
 			}
 		}
 
-		///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
+		///if (iron_direct3d11 || iron_direct3d12 || iron_metal || iron_vulkan)
 		node_shader_write(frag, "float depthlast = textureLod(gbufferD, inplast.xy, 0.0).r;");
 		///else
 		node_shader_write(frag, "float depthlast = textureLod(gbufferD, vec2(inplast.x, 1.0 - inplast.y), 0.0).r;");

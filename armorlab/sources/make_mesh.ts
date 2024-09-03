@@ -148,7 +148,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	}
 
 	frag.vvec = true;
-	///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
+	///if (iron_direct3d11 || iron_direct3d12 || iron_metal || iron_vulkan)
 	node_shader_write(frag, "mat3 TBN = cotangent_frame(n, vvec, tex_coord);");
 	///else
 	node_shader_write(frag, "mat3 TBN = cotangent_frame(n, -vvec, tex_coord);");

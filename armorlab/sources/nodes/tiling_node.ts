@@ -48,7 +48,7 @@ function tiling_node_get_as_image(self: tiling_node_t, from: i32): image_t {
 	g2_end();
 
 	console_progress(tr("Processing") + " - " + tr("Tiling"));
-	krom_g4_swap_buffers();
+	iron_g4_swap_buffers();
 
 	if (tiling_node_auto){
 		self.result = inpaint_node_texsynth_inpaint(tiling_node_image, true, null);

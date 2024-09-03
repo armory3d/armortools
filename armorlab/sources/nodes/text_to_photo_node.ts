@@ -52,7 +52,7 @@ type text_encoder_result_t = {
 
 function text_to_photo_node_text_encoder(prompt: string, inpaint_latents: f32_array_t): text_encoder_result_t {
 	console_progress(tr("Processing") + " - " + tr("Text to Photo"));
-	krom_g4_swap_buffers();
+	iron_g4_swap_buffers();
 
 	let words: string[] = string_split(
 		trim_end(string_replace_all(string_replace_all(string_replace_all(prompt, "\n", " "), ",", " , "), "  ", " ")), " "
@@ -65,11 +65,11 @@ function text_to_photo_node_text_encoder(prompt: string, inpaint_latents: f32_ar
 	}
 
 	let i32a: i32_array_t = i32_array_create_from_array(text_to_photo_node_text_input_ids);
-	let text_embeddings_buf: buffer_t = krom_ml_inference(text_to_photo_node_text_encoder_blob, [i32a.buffer], [[1, 77]], [1, 77, 768], config_raw.gpu_inference);
+	let text_embeddings_buf: buffer_t = iron_ml_inference(text_to_photo_node_text_encoder_blob, [i32a.buffer], [[1, 77]], [1, 77, 768], config_raw.gpu_inference);
 	let text_embeddings: f32_array_t = f32_array_create_from_buffer(text_embeddings_buf);
 
 	i32a = i32_array_create_from_array(text_to_photo_node_uncond_input_ids);
-	let uncond_embeddings_buf: buffer_t = krom_ml_inference(text_to_photo_node_text_encoder_blob, [i32a.buffer], [[1, 77]], [1, 77, 768], config_raw.gpu_inference);
+	let uncond_embeddings_buf: buffer_t = iron_ml_inference(text_to_photo_node_text_encoder_blob, [i32a.buffer], [[1, 77]], [1, 77, 768], config_raw.gpu_inference);
 	let uncond_embeddings: f32_array_t = f32_array_create_from_buffer(uncond_embeddings_buf);
 
 	let f32a: f32_array_t = f32_array_create(uncond_embeddings.length + text_embeddings.length);
@@ -107,7 +107,7 @@ function text_to_photo_node_unet(latents: f32_array_t, text_embeddings: f32_arra
 
 	while (true) {
 		console_progress(tr("Processing") + " - " + tr("Text to Photo") + " (" + (counter + 1) + "/" + (50 - offset) + ")");
-		krom_g4_swap_buffers();
+		iron_g4_swap_buffers();
 
 		let timestep: i32 = text_to_photo_node_timesteps[counter + offset];
 		for (let i: i32 = 0; i < latents.length; ++i) latent_model_input[i] = latents[i];
@@ -115,7 +115,7 @@ function text_to_photo_node_unet(latents: f32_array_t, text_embeddings: f32_arra
 
 		let t32: i32_array_t = i32_array_create(2);
 		t32[0] = timestep;
-		let noise_pred_buf: buffer_t = krom_ml_inference(text_to_photo_node_unet_blob, [latent_model_input.buffer, t32.buffer, text_embeddings.buffer], [[2, 4, 64, 64], [1], [2, 77, 768]], [2, 4, 64, 64], config_raw.gpu_inference);
+		let noise_pred_buf: buffer_t = iron_ml_inference(text_to_photo_node_unet_blob, [latent_model_input.buffer, t32.buffer, text_embeddings.buffer], [[2, 4, 64, 64], [1], [2, 77, 768]], [2, 4, 64, 64], config_raw.gpu_inference);
 		let noise_pred: f32_array_t = f32_array_create_from_buffer(noise_pred_buf);
 
 		for (let i: i32 = 0; i < noise_pred_uncond.length; ++i) noise_pred_uncond[i] = noise_pred[i];
@@ -210,13 +210,13 @@ function text_to_photo_node_unet(latents: f32_array_t, text_embeddings: f32_arra
 
 function text_to_photo_node_vae_decoder(latents: f32_array_t, upscale: bool): image_t {
 	console_progress(tr("Processing") + " - " + tr("Text to Photo"));
-	krom_g4_swap_buffers();
+	iron_g4_swap_buffers();
 
 	for (let i: i32 = 0; i < latents.length; ++i) {
 		latents[i] = 1.0 / 0.18215 * latents[i];
 	}
 
-	let pyimage_buf: buffer_t = krom_ml_inference(text_to_photo_node_vae_decoder_blob, [latents.buffer], [[1, 4, 64, 64]], [1, 3, 512, 512], config_raw.gpu_inference);
+	let pyimage_buf: buffer_t = iron_ml_inference(text_to_photo_node_vae_decoder_blob, [latents.buffer], [[1, 4, 64, 64]], [1, 3, 512, 512], config_raw.gpu_inference);
 	let pyimage: f32_array_t = f32_array_create_from_buffer(pyimage_buf);
 
 	for (let i: i32 = 0; i < pyimage.length; ++i) {

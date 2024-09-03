@@ -10,7 +10,7 @@ plugin_notify_on_ui(plugin, function() {
 				let b = data_get_blob(path);
 				let parsed = armpack_decode(b);
 				let out = string_to_buffer(JSON.stringify(parsed, null, "	"));
-				krom_file_save_bytes(path.substr(0, path.length - 3) + "json", out);
+				iron_file_save_bytes(path.substr(0, path.length - 3) + "json", out);
 			});
 		}
 		if (ui_button(".json to .arm")) {
@@ -18,7 +18,7 @@ plugin_notify_on_ui(plugin, function() {
 				let b = data_get_blob(path);
 				let parsed = JSON.parse(buffer_to_string(b));
 				let out = armpack_encode(parsed);
-				krom_file_save_bytes(path.substr(0, path.length - 4) + "arm", out);
+				iron_file_save_bytes(path.substr(0, path.length - 4) + "arm", out);
 			});
 		}
 	}

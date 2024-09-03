@@ -40,7 +40,7 @@ function tab_script_draw(htab: ui_handle_t) {
 				if (!ends_with(path, ".js")) {
 					path += ".js";
 				}
-				krom_file_save_bytes(path, sys_string_to_buffer(str), 0);
+				iron_file_save_bytes(path, sys_string_to_buffer(str), 0);
 			});
 		}
 		ui_end_sticky();

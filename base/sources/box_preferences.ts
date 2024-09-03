@@ -102,7 +102,7 @@ function box_preferences_show() {
 				ui_base_tag_ui_redraw();
 			}
 
-			///if !(krom_android || krom_ios)
+			///if !(iron_android || iron_ios)
 			ui.changed = false;
 			let h_touch_ui: ui_handle_t = ui_handle(__ID__);
 			if (h_touch_ui.init) {
@@ -212,7 +212,7 @@ function box_preferences_show() {
 								theme_name += ".json";
 							}
 							let path: string = path_data() + path_sep + "themes" + path_sep + theme_name;
-							krom_file_save_bytes(path, sys_string_to_buffer(template), 0);
+							iron_file_save_bytes(path, sys_string_to_buffer(template), 0);
 							box_preferences_fetch_themes(); // Refresh file list
 							config_raw.theme = theme_name;
 							box_preferences_theme_handle.position = box_preferences_get_theme_index();
@@ -237,7 +237,7 @@ function box_preferences_show() {
 					if (!ends_with(path, ".json")) {
 						path += ".json";
 					}
-					krom_file_save_bytes(path, sys_string_to_buffer(box_preferences_theme_to_json(base_theme)), 0);
+					iron_file_save_bytes(path, sys_string_to_buffer(box_preferences_theme_to_json(base_theme)), 0);
 				});
 			}
 
@@ -427,7 +427,7 @@ function box_preferences_show() {
 			}
 
 			///if is_paint
-			///if (krom_android || krom_ios)
+			///if (iron_android || iron_ios)
 			let layer_res_combo: string[] = ["128", "256", "512", "1K", "2K", "4K"];
 			ui_combo(layer_res_handle, layer_res_combo, tr("Default Layer Resolution"), true);
 			///else
@@ -437,7 +437,7 @@ function box_preferences_show() {
 			///end
 
 			///if is_lab
-			///if (krom_android || krom_ios)
+			///if (iron_android || iron_ios)
 			let layer_res_combo: string[] = ["2K", "4K"];
 			ui_combo(layer_res_handle, layer_res_combo, tr("Default Layer Resolution"), true);
 			///else
@@ -534,7 +534,7 @@ function box_preferences_show() {
 		}
 
 		let pen_name: string;
-		///if krom_ios
+		///if iron_ios
 		pen_name = tr("Pencil");
 		///else
 		pen_name = tr("Pen");
@@ -613,7 +613,7 @@ function box_preferences_show() {
 		}
 
 		if (ui_tab(box_preferences_htab, tr("Viewport"), true)) {
-			///if (krom_direct3d12 || krom_vulkan || krom_metal)
+			///if (iron_direct3d12 || iron_vulkan || iron_metal)
 
 			let hpathtrace_mode: ui_handle_t = ui_handle(__ID__);
 			if (hpathtrace_mode.init) {
@@ -768,7 +768,7 @@ function box_preferences_show() {
 								keymap_name += ".json";
 							}
 							let path: string = path_data() + path_sep + "keymap_presets" + path_sep + keymap_name;
-							krom_file_save_bytes(path, sys_string_to_buffer(template), 0);
+							iron_file_save_bytes(path, sys_string_to_buffer(template), 0);
 							box_preferences_fetch_keymaps(); // Refresh file list
 							config_raw.keymap = keymap_name;
 							box_preferences_preset_handle.position = box_preferences_get_preset_index();
@@ -847,7 +847,7 @@ plugin.draw_ui = function (ui) {\
 								plugin_name += ".js";
 							}
 							let path: string = path_data() + path_sep + "plugins" + path_sep + plugin_name;
-							krom_file_save_bytes(path, sys_string_to_buffer(template), 0);
+							iron_file_save_bytes(path, sys_string_to_buffer(template), 0);
 							box_preferences_files_plugin = null; // Refresh file list
 							ui_box_hide();
 							box_preferences_htab.position = 6; // Plugins

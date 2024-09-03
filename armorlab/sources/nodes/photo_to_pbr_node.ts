@@ -48,7 +48,7 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): i
 	photo_to_pbr_node_cached_source = source;
 
 	console_progress(tr("Processing") + " - " + tr("Photo to PBR"));
-	krom_g4_swap_buffers();
+	iron_g4_swap_buffers();
 
 	let tile_floats: f32_array_t[] = [];
 	let tiles_x: i32 = math_floor(config_get_texture_res_x() / photo_to_pbr_node_tile_w);
@@ -78,7 +78,7 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): i
 		}
 
 		let model_blob: buffer_t = data_get_blob("models/photo_to_" + photo_to_pbr_node_model_names[from] + ".quant.onnx");
-		let buf: buffer_t = krom_ml_inference(model_blob, [f32a.buffer], null, null, config_raw.gpu_inference);
+		let buf: buffer_t = iron_ml_inference(model_blob, [f32a.buffer], null, null, config_raw.gpu_inference);
 		let ar: f32_array_t = f32_array_create_from_buffer(buf);
 		u8a = u8_array_create(4 * photo_to_pbr_node_tile_w * photo_to_pbr_node_tile_w);
 		let offset_g: i32 = (from == channel_type_t.BASE_COLOR || from == channel_type_t.NORMAL_MAP) ? photo_to_pbr_node_tile_with_border_w * photo_to_pbr_node_tile_with_border_w : 0;
@@ -147,7 +147,7 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): i
 			}
 		}
 
-		///if (krom_metal || krom_vulkan)
+		///if (iron_metal || iron_vulkan)
 		if (from == channel_type_t.BASE_COLOR) {
 			photo_to_pbr_node_bgra_swap(u8a.buffer);
 		}
@@ -165,7 +165,7 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): i
 	return photo_to_pbr_node_images[from];
 }
 
-///if (krom_metal || krom_vulkan)
+///if (iron_metal || iron_vulkan)
 function photo_to_pbr_node_bgra_swap(buffer: buffer_t) {
 	let u8a: buffer_t = buffer;
 	for (let i: i32 = 0; i < math_floor(buffer.length / 4); ++i) {

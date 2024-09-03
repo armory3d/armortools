@@ -1,11 +1,11 @@
 
-///if krom_windows
+///if iron_windows
 let path_sep: string = "\\";
 ///else
 let path_sep: string = "/";
 ///end
 
-///if krom_windows
+///if iron_windows
 let path_pwd: string = "cd";
 ///else
 let path_pwd: string = "echo $PWD";
@@ -28,7 +28,7 @@ let path_displacement_ext: string[] = ["displacement", "height", "h", "disp"];
 let path_working_dir_cache: string = null;
 
 function path_data(): string {
-	return krom_get_files_location() + path_sep + data_path();
+	return iron_get_files_location() + path_sep + data_path();
 }
 
 function path_to_relative(from: string, to: string): string {
@@ -80,14 +80,14 @@ function path_working_dir(): string {
 		let cmd: string = path_pwd;
 		let save: string;
 		if (path_is_protected()) {
-			save = krom_save_path();
+			save = iron_save_path();
 		}
 		else {
 			save = path_data() + path_sep;
 		}
 		save += "working_dir.txt";
-		krom_sys_command(cmd + " > \"" + save + "\"");
-		path_working_dir_cache = sys_buffer_to_string(krom_load_blob(save));
+		iron_sys_command(cmd + " > \"" + save + "\"");
+		path_working_dir_cache = sys_buffer_to_string(iron_load_blob(save));
 		path_working_dir_cache = trim_end(path_working_dir_cache);
 	}
 	return path_working_dir_cache;
@@ -191,11 +191,11 @@ function path_is_folder(p: string): bool {
 }
 
 function path_is_protected(): bool {
-	///if krom_windows
-	return string_index_of(krom_get_files_location(), "Program Files") >= 0;
-	///elseif krom_android
+	///if iron_windows
+	return string_index_of(iron_get_files_location(), "Program Files") >= 0;
+	///elseif iron_android
 	return true;
-	///elseif krom_ios
+	///elseif iron_ios
 	return true;
 	///else
 	return false;

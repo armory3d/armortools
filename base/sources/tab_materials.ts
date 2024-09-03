@@ -101,7 +101,7 @@ function tab_materials_draw_slots(mini: bool) {
 				}
 			}
 
-			///if krom_opengl
+			///if iron_opengl
 			ui.image_invert_y = project_materials[i].preview_ready;
 			///end
 
@@ -304,7 +304,7 @@ function tab_materials_draw_slots(mini: bool) {
 
 		ui._y += mini ? 0 : 6;
 
-		///if krom_opengl
+		///if iron_opengl
 		ui.image_invert_y = false; // Material preview
 		///end
 	}

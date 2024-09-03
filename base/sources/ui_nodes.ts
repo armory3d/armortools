@@ -401,19 +401,19 @@ function ui_nodes_get_canvas_control(ui: ui_t, controls_down: bool): ui_canvas_c
 	if (config_raw.wrap_mouse && controls_down) {
 		if (ui.input_x < ui._window_x) {
 			ui.input_x = ui._window_x + ui._window_w;
-			krom_set_mouse_position(math_floor(ui.input_x), math_floor(ui.input_y));
+			iron_set_mouse_position(math_floor(ui.input_x), math_floor(ui.input_y));
 		}
 		else if (ui.input_x > ui._window_x + ui._window_w) {
 			ui.input_x = ui._window_x;
-			krom_set_mouse_position(math_floor(ui.input_x), math_floor(ui.input_y));
+			iron_set_mouse_position(math_floor(ui.input_x), math_floor(ui.input_y));
 		}
 		else if (ui.input_y < ui._window_y) {
 			ui.input_y = ui._window_y + ui._window_h;
-			krom_set_mouse_position(math_floor(ui.input_x), math_floor(ui.input_y));
+			iron_set_mouse_position(math_floor(ui.input_x), math_floor(ui.input_y));
 		}
 		else if (ui.input_y > ui._window_y + ui._window_h) {
 			ui.input_y = ui._window_y;
-			krom_set_mouse_position(math_floor(ui.input_x), math_floor(ui.input_y));
+			iron_set_mouse_position(math_floor(ui.input_x), math_floor(ui.input_y));
 		}
 	}
 
@@ -1031,7 +1031,7 @@ function ui_nodes_render() {
 				let tx: f32 = ui_nodes_ww - tw - 8 * ui_SCALE(ui_nodes_ui);
 				let ty: f32 = ui_nodes_wh - th - 8 * ui_SCALE(ui_nodes_ui);
 
-				///if krom_opengl
+				///if iron_opengl
 				let invert_y: bool = sel.type == "MATERIAL";
 				///else
 				let invert_y: bool = false;
@@ -1040,10 +1040,10 @@ function ui_nodes_render() {
 				///if (is_paint || is_sculpt)
 				if (single_channel) {
 					g2_set_pipeline(ui_view2d_pipe);
-					///if krom_opengl
-					krom_g4_set_pipeline(ui_view2d_pipe.pipeline_);
+					///if iron_opengl
+					iron_g4_set_pipeline(ui_view2d_pipe.pipeline_);
 					///end
-					krom_g4_set_int(ui_view2d_channel_loc, 1);
+					iron_g4_set_int(ui_view2d_channel_loc, 1);
 				}
 				///end
 

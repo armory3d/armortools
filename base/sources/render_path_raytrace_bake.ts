@@ -1,5 +1,5 @@
 
-///if (krom_direct3d12 || krom_vulkan || krom_metal)
+///if (iron_direct3d12 || iron_vulkan || iron_metal)
 
 let render_path_raytrace_bake_rays_pix: i32 = 0;
 let render_path_raytrace_bake_rays_sec: i32 = 0;
@@ -85,7 +85,7 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 		let bnoise_sobol: image_t = map_get(scene_embedded, "bnoise_sobol.k");
 		let bnoise_scramble: image_t = map_get(scene_embedded, "bnoise_scramble.k");
 		let bnoise_rank: image_t = map_get(scene_embedded, "bnoise_rank.k");
-		krom_raytrace_set_textures(baketex0._image, baketex1._image, texpaint_undo._image, saved_envmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
+		iron_raytrace_set_textures(baketex0._image, baketex1._image, texpaint_undo._image, saved_envmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
 	}
 
 	if (context_raw.brush_time > 0) {
@@ -104,7 +104,7 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 		f32a[6] = context_raw.envmap_angle;
 
 		let framebuffer: render_target_t = map_get(render_path_render_targets, "baketex2");
-		krom_raytrace_dispatch_rays(framebuffer._image.render_target_, f32a);
+		iron_raytrace_dispatch_rays(framebuffer._image.render_target_, f32a);
 
 		let id: i32 = context_raw.layer.id;
 		let texpaint_id: string = "texpaint" + id;
@@ -112,7 +112,7 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 		render_path_bind_target("baketex2", "tex");
 		render_path_draw_shader("shader_datas/copy_pass/copy_pass");
 
-		///if krom_metal
+		///if iron_metal
 		let samples_per_frame: i32 = 4;
 		///else
 		let samples_per_frame: i32 = 64;
@@ -127,7 +127,7 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 			render_path_raytrace_bake_rays_counter = 0;
 		}
 		render_path_raytrace_bake_current_sample++;
-		krom_delay_idle_sleep();
+		iron_delay_idle_sleep();
 		return true;
 	}
 	else {

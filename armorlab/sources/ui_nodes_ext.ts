@@ -2,7 +2,7 @@
 let ui_nodes_ext_last_vertices: buffer_t = null; // Before displacement
 
 function ui_nodes_ext_delay_idle_sleep() {
-	krom_delay_idle_sleep();
+	iron_delay_idle_sleep();
 }
 
 function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
@@ -12,7 +12,7 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 		app_notify_on_render_2d(ui_nodes_ext_delay_idle_sleep);
 
 		console_progress(tr("Processing"));
-		krom_g4_swap_buffers();
+		iron_g4_swap_buffers();
 
 		let timer: f32 = time_time();
 		parser_logic_parse(project_canvas);
@@ -98,7 +98,7 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 				// Apply displacement
 				if (config_raw.displace_strength > 0) {
 					console_progress(tr("Apply Displacement"));
-					krom_g4_swap_buffers();
+					iron_g4_swap_buffers();
 
 					let uv_scale: f32 = scene_meshes[0].data.scale_tex * context_raw.brush_scale;
 					util_mesh_apply_displacement(texpaint_pack, 0.05 * config_raw.displace_strength, uv_scale);
@@ -108,20 +108,20 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 		}
 
 		console_log("Processing finished in " + (time_time() - timer));
-		krom_ml_unload();
+		iron_ml_unload();
 
 		console_progress(null);
 		context_raw.ddirty = 2;
 		app_remove_render_2d(ui_nodes_ext_delay_idle_sleep);
 
-		///if (krom_direct3d12 || krom_vulkan || krom_metal)
+		///if (iron_direct3d12 || iron_vulkan || iron_metal)
 		render_path_raytrace_ready = false;
 		///end
 	}
 	ui._x += ew + 3;
 	ui._y = 2 + start_y;
 
-	///if (krom_android || krom_ios)
+	///if (iron_android || iron_ios)
 	let base_res_combo: string[] = ["2K", "4K"];
 	ui_combo(base_res_handle, base_res_combo, tr("Resolution"));
 	///else

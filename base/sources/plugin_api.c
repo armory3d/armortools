@@ -417,13 +417,13 @@ FN(data_delete_blob) {
 	return JS_UNDEFINED;
 }
 
-void *krom_file_save_bytes(char *s, buffer_t *b, int l);
-FN(krom_file_save_bytes) {
+void *iron_file_save_bytes(char *s, buffer_t *b, int l);
+FN(iron_file_save_bytes) {
 	char *to = (char *)JS_ToCString(ctx, argv[0]);
 	size_t len;
 	void *ab = JS_GetArrayBuffer(ctx, &len, argv[1]);
 	buffer_t b = { .buffer = ab, .length = len, .capacity = len };
-	krom_file_save_bytes(to, &b, len);
+	iron_file_save_bytes(to, &b, len);
 	return JS_UNDEFINED;
 }
 
@@ -778,7 +778,7 @@ void plugin_api_init() {
 	BIND(ui_box_show_message, 2);
 	BIND(data_get_blob, 1);
 	BIND(data_delete_blob, 1);
-	BIND(krom_file_save_bytes, 3);
+	BIND(iron_file_save_bytes, 3);
 	BIND(context_set_viewport_shader, 1);
 	BIND(node_shader_add_uniform, 3);
 	BIND(node_shader_write, 2);

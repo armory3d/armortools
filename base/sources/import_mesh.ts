@@ -57,7 +57,7 @@ function import_mesh_run(path: string, replace_existing: bool = true) {
 
 	project_mesh_assets = [path];
 
-	///if (krom_android || krom_ios)
+	///if (iron_android || iron_ios)
 	sys_title_set(substring(path, string_last_index_of(path, path_sep) + 1, string_last_index_of(path, ".")));
 	///end
 }
@@ -103,7 +103,7 @@ function import_mesh_finish_import() {
 	ui_view2d_hwnd.redraws = 2;
 	///end
 
-	///if (krom_direct3d12 || krom_vulkan || krom_metal)
+	///if (iron_direct3d12 || iron_vulkan || iron_metal)
 	render_path_raytrace_ready = false;
 	///end
 

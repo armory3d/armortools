@@ -1,10 +1,10 @@
 
 let ui_files_default_path: string =
-	///if krom_windows
+	///if iron_windows
 	"C:\\Users"
-	///elseif krom_android
+	///elseif iron_android
 	"/storage/emulated/0/Download"
-	///elseif krom_macos
+	///elseif iron_macos
 	"/Users"
 	///else
 	"/"
@@ -23,7 +23,7 @@ let ui_files_offline: bool = false;
 
 function ui_files_show(filters: string, is_save: bool, open_multiple: bool, files_done: (s: string)=>void) {
 	if (is_save) {
-		ui_files_path = krom_save_dialog(filters, "");
+		ui_files_path = iron_save_dialog(filters, "");
 		if (ui_files_path != null) {
 			let sep2: string = path_sep + path_sep;
 			while (string_index_of(ui_files_path, sep2) >= 0) {
@@ -36,7 +36,7 @@ function ui_files_show(filters: string, is_save: bool, open_multiple: bool, file
 		}
 	}
 	else {
-		let paths: string[] = krom_open_dialog(filters, "", open_multiple);
+		let paths: string[] = iron_open_dialog(filters, "", open_multiple);
 		if (paths != null) {
 			for (let i: i32 = 0; i < paths.length; ++i) {
 				let path: string = paths[i];
@@ -58,7 +58,7 @@ function ui_files_release_keys() {
 	// File dialog may prevent firing key up events
 	keyboard_up_listener(key_code_t.SHIFT);
 	keyboard_up_listener(key_code_t.CONTROL);
-	///if krom_macos
+	///if iron_macos
 	keyboard_up_listener(key_code_t.META);
 	///end
 }
@@ -82,8 +82,8 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, folders_only: bool
 		return handle.text;
 	}
 
-	///if krom_ios
-	let document_directory: string = krom_save_dialog("", "");
+	///if iron_ios
+	let document_directory: string = iron_save_dialog("", "");
 	document_directory = substring(document_directory, 0, document_directory.length - 8); // Strip /"untitled"
 	///end
 
@@ -95,7 +95,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, folders_only: bool
 		let text: string = handle.text;
 		let i1: i32 = string_index_of(text, path_sep);
 		let nested: bool = i1 > -1 && text.length - 1 > i1;
-		///if krom_windows
+		///if iron_windows
 		// Server addresses like \\server are not nested
 		nested = nested && !(text.length >= 2 && char_at(text, 0) == path_sep && char_at(text, 1) == path_sep && string_last_index_of(text, path_sep) == 1);
 		///end
@@ -104,7 +104,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, folders_only: bool
 		}
 
 		let dir_path: string = text;
-		///if krom_ios
+		///if iron_ios
 		if (!is_cloud) {
 			dir_path = document_directory + dir_path;
 		}
@@ -246,12 +246,12 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, folders_only: bool
 				if (map_get(ui_files_icon_map, key) == null) {
 					let blob_path: string = key;
 
-					///if krom_ios
+					///if iron_ios
 					blob_path = document_directory + blob_path;
 					// TODO: implement native .arm parsing first
 					///else
 
-					let buffer: buffer_t = krom_load_blob(blob_path);
+					let buffer: buffer_t = iron_load_blob(blob_path);
 					let raw: project_format_t = armpack_decode(buffer);
 					if (raw.material_icons != null) {
 						let bytes_icon: any = raw.material_icons[0];
@@ -341,7 +341,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, folders_only: bool
 					base_drag_off_x = -(mouse_x - uix - ui._window_x - 3);
 					base_drag_off_y = -(mouse_y - uiy - ui._window_y + 1);
 					base_drag_file = handle.text;
-					///if krom_ios
+					///if iron_ios
 					if (!is_cloud) {
 						base_drag_file = document_directory + base_drag_file;
 					}

@@ -199,7 +199,7 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 				}
 
 				// Picked surface values
-				///if (krom_metal || krom_vulkan)
+				///if (iron_metal || iron_vulkan)
 				let i0: i32 = 2;
 				let i1: i32 = 1;
 				let i2: i32 = 0;
@@ -539,7 +539,7 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 	let help_mat: mat4_t = mat4_identity();
 	mat4_get_inv(help_mat, scene_camera.vp);
 	g4_set_mat(base_cursor_inv_vp, help_mat);
-	///if (krom_metal || krom_vulkan)
+	///if (iron_metal || iron_vulkan)
 	let vs: vertex_element_t[] = [
 		{
 			name: "tex",
@@ -695,7 +695,7 @@ function render_path_paint_draw() {
 		return;
 	}
 
-	///if (!krom_ios) // No hover on iPad, decals are painted by pen release
+	///if (!iron_ios) // No hover on iPad, decals are painted by pen release
 	if (config_raw.brush_live && context_raw.pdirty <= 0 && context_raw.ddirty > 0 && context_raw.brush_time == 0) {
 		// gbuffer has been updated now but brush will lag 1 frame
 		render_path_paint_commands_live_brush();
@@ -712,7 +712,7 @@ function render_path_paint_draw() {
 		///if is_paint
 		if (context_raw.tool == workspace_tool_t.BAKE) {
 
-			///if (krom_direct3d12 || krom_vulkan || krom_metal)
+			///if (iron_direct3d12 || iron_vulkan || iron_metal)
 			let is_raytraced_bake: bool = (context_raw.bake_type == bake_type_t.AO  ||
 				context_raw.bake_type == bake_type_t.LIGHTMAP ||
 				context_raw.bake_type == bake_type_t.BENT_NORMAL ||
@@ -782,7 +782,7 @@ function render_path_paint_draw() {
 				context_select_paint_object(_paint_object);
 				if (is_merged) context_raw.merged_object.base.visible = _visible;
 			}
-			///if (krom_direct3d12 || krom_vulkan || krom_metal)
+			///if (iron_direct3d12 || iron_vulkan || iron_metal)
 			else if (is_raytraced_bake) {
 				let dirty: bool = render_path_raytrace_bake_commands(make_material_parse_paint_material);
 				if (dirty) ui_header_handle.redraws = 2;
@@ -807,7 +807,7 @@ function render_path_paint_draw() {
 
 	if (context_raw.brush_blend_dirty) {
 		context_raw.brush_blend_dirty = false;
-		///if krom_metal
+		///if iron_metal
 		render_path_set_target("texpaint_blend0");
 		render_path_clear_target(0x00000000);
 		render_path_set_target("texpaint_blend1");

@@ -221,16 +221,16 @@ function ui_view2d_render() {
 
 			///if (is_paint || is_sculpt)
 			if (ui_view2d_type == view_2d_type_t.LAYER) {
-				///if (!krom_opengl)
+				///if (!iron_opengl)
 				g2_set_pipeline(ui_view2d_pipe);
 				///end
 				if (!context_raw.texture_filter) {
 					g2_set_bilinear_filter(false);
 				}
-				///if krom_opengl
-				krom_g4_set_pipeline(ui_view2d_pipe.pipeline_);
+				///if iron_opengl
+				iron_g4_set_pipeline(ui_view2d_pipe.pipeline_);
 				///end
-				krom_g4_set_int(ui_view2d_channel_loc, channel);
+				iron_g4_set_int(ui_view2d_channel_loc, channel);
 			}
 			///end
 
@@ -270,7 +270,7 @@ function ui_view2d_render() {
 					g2_draw_scaled_image(_ui_view2d_render_tex, -_ui_view2d_render_x, -_ui_view2d_render_y, _ui_view2d_render_tw, _ui_view2d_render_th);
 					g2_end();
 					let a: buffer_t = image_get_pixels(texpaint_picker);
-					///if (krom_metal || krom_vulkan)
+					///if (iron_metal || iron_vulkan)
 					let i0: i32 = 2;
 					let i1: i32 = 1;
 					let i2: i32 = 0;

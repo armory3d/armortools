@@ -195,7 +195,7 @@ function node_shader_vstruct_to_vsin(raw: node_shader_t) {
 	}
 }
 
-///if (krom_direct3d11 || krom_direct3d12)
+///if (iron_direct3d11 || iron_direct3d12)
 function node_shader_get_hlsl(raw: node_shader_t, shared_sampler: string): string {
 	let s: string = "#define HLSL\n";
 	s += "#define textureArg(tex) Texture2D tex,SamplerState tex ## _sampler\n";
@@ -398,7 +398,7 @@ function node_shader_get_hlsl(raw: node_shader_t, shared_sampler: string): strin
 }
 ///end
 
-///if krom_metal
+///if iron_metal
 function node_shader_get_msl(raw: node_shader_t, shared_sampler: string): string {
 	let s: string = "#define METAL\n";
 	s += "#include <metal_stdlib>\n";
@@ -656,7 +656,7 @@ function node_shader_get_msl(raw: node_shader_t, shared_sampler: string): string
 }
 ///end
 
-///if (krom_opengl || krom_vulkan)
+///if (iron_opengl || iron_vulkan)
 function node_shader_get_glsl(raw: node_shader_t, shared_sampler: string, version_header: string): string {
 	let s: string = version_header;
 	s += "#define textureArg(tex) sampler2D tex\n";
@@ -718,21 +718,21 @@ function node_shader_get(raw: node_shader_t): string {
 		shared_sampler = string_split(raw.shared_samplers[0], " ")[1] + "_sampler";
 	}
 
-	///if (krom_direct3d11 || krom_direct3d12)
+	///if (iron_direct3d11 || iron_direct3d12)
 	let s: string = node_shader_get_hlsl(raw, shared_sampler);
-	///elseif krom_metal
+	///elseif iron_metal
 	let s: string = node_shader_get_msl(raw, shared_sampler);
-	///elseif krom_vulkan
+	///elseif iron_vulkan
 	let version_header: string = "#version 450\n";
 	let s: string = node_shader_get_glsl(raw, shared_sampler, version_header);
-	///elseif krom_android
+	///elseif iron_android
 	let version_header: string = "#version 300 es\n";
 	if (raw.shader_type == "frag") {
 		version_header += "precision highp float;\n";
 		version_header += "precision mediump int;\n";
 	}
 	let s: string = node_shader_get_glsl(raw, shared_sampler, version_header);
-	///elseif krom_opengl
+	///elseif iron_opengl
 	let version_header: string = "#version 330\n";
 	let s: string = node_shader_get_glsl(raw, shared_sampler, version_header);
 	///end

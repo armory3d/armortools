@@ -1,5 +1,5 @@
 
-///if krom_windows
+///if iron_windows
 let file_cmd_mkdir: string = "mkdir";
 let file_cmd_copy: string = "copy";
 ///else
@@ -10,7 +10,7 @@ let file_cmd_copy: string = "cp";
 let file_cloud: map_t<string, string[]> = null;
 let file_cloud_sizes: map_t<string, i32> = null;
 
-// ///if krom_android
+// ///if iron_android
 // let let file_internal: map_t<string, string[]> = null; // .apk contents
 // ///end
 
@@ -25,50 +25,50 @@ function file_read_directory(path: string, folders_only: bool = false): string[]
 			return empty;
 		}
 	}
-	// ///if krom_android
+	// ///if iron_android
 	// path = string_replace_all(path, "//", "/");
 	// if (file_internal == null) {
 	// 	file_internal = [];
-	// 	map_set(file_internal, "/data/plugins", BuildMacros.readDirectory("krom/data/plugins"));
-	// 	map_set(file_internal, "/data/export_presets", BuildMacros.readDirectory("krom/data/export_presets"));
-	// 	map_set(file_internal, "/data/keymap_presets", BuildMacros.readDirectory("krom/data/keymap_presets"));
-	// 	map_set(file_internal, "/data/locale", BuildMacros.readDirectory("krom/data/locale"));
-	// 	map_set(file_internal, "/data/meshes", BuildMacros.readDirectory("krom/data/meshes"));
-	// 	map_set(file_internal, "/data/themes", BuildMacros.readDirectory("krom/data/themes"));
+	// 	map_set(file_internal, "/data/plugins", BuildMacros.readDirectory("out/data/plugins"));
+	// 	map_set(file_internal, "/data/export_presets", BuildMacros.readDirectory("out/data/export_presets"));
+	// 	map_set(file_internal, "/data/keymap_presets", BuildMacros.readDirectory("out/data/keymap_presets"));
+	// 	map_set(file_internal, "/data/locale", BuildMacros.readDirectory("out/data/locale"));
+	// 	map_set(file_internal, "/data/meshes", BuildMacros.readDirectory("out/data/meshes"));
+	// 	map_set(file_internal, "/data/themes", BuildMacros.readDirectory("out/data/themes"));
 	// }
 	// if (file_internal.exists(path)) return map_get(file_internal, path);
 	// ///end
-	return string_split(krom_read_directory(path, folders_only), "\n");
+	return string_split(iron_read_directory(path, folders_only), "\n");
 }
 
 function file_create_directory(path: string) {
-	krom_sys_command(file_cmd_mkdir + " \"" + path + "\"");
+	iron_sys_command(file_cmd_mkdir + " \"" + path + "\"");
 }
 
 function file_copy(srcPath: string, dst_path: string) {
-	krom_sys_command(file_cmd_copy + " \"" + srcPath + "\" \"" + dst_path + "\"");
+	iron_sys_command(file_cmd_copy + " \"" + srcPath + "\" \"" + dst_path + "\"");
 }
 
 function file_start(path: string) {
-	///if krom_windows
-	krom_sys_command("start \"\" \"" + path + "\"");
-	///elseif krom_linux
-	krom_sys_command("xdg-open \"" + path + "\"");
+	///if iron_windows
+	iron_sys_command("start \"\" \"" + path + "\"");
+	///elseif iron_linux
+	iron_sys_command("xdg-open \"" + path + "\"");
 	///else
-	krom_sys_command("open \"" + path + "\"");
+	iron_sys_command("open \"" + path + "\"");
 	///end
 }
 
 function file_load_url(url: string) {
-	krom_load_url(url);
+	iron_load_url(url);
 }
 
 function file_delete(path: string) {
-	krom_delete_file(path);
+	iron_delete_file(path);
 }
 
 function file_exists(path: string): bool {
-	return krom_file_exists(path);
+	return iron_file_exists(path);
 }
 
 type file_download_data_t = {
@@ -79,21 +79,21 @@ type file_download_data_t = {
 let _file_download_map: map_t<string, file_download_data_t> = map_create();
 
 function file_download(url: string, dst_path: string, done: (url: string)=>void, size: i32 = 0) {
-	///if (krom_windows || krom_macos || krom_ios || krom_android)
+	///if (iron_windows || iron_macos || iron_ios || iron_android)
 	let fdd: file_download_data_t = { dst_path: dst_path, done: done };
 	map_set(_file_download_map, url, fdd);
-	krom_http_request(url, size, function (url: string, ab: buffer_t) {
+	iron_http_request(url, size, function (url: string, ab: buffer_t) {
 		let fdd: file_download_data_t = map_get(_file_download_map, url);
 		if (ab != null) {
-			krom_file_save_bytes(fdd.dst_path, ab, 0);
+			iron_file_save_bytes(fdd.dst_path, ab, 0);
 		}
 		fdd.done(url);
 	});
-	///elseif krom_linux
-	krom_sys_command("wget -O \"" + dst_path + "\" \"" + url + "\"");
+	///elseif iron_linux
+	iron_sys_command("wget -O \"" + dst_path + "\" \"" + url + "\"");
 	done(url);
 	///else
-	krom_sys_command("curl -L " + url + " -o \"" + dst_path + "\"");
+	iron_sys_command("curl -L " + url + " -o \"" + dst_path + "\"");
 	done(url);
 	///end
 }
@@ -109,7 +109,7 @@ let _file_download_bytes_map: map_t<string, file_download_bytes_data_t> = map_cr
 function file_download_bytes(url: string, done: (url: string, ab: buffer_t)=>void) {
 	let save: string;
 	if (path_is_protected()) {
-		save = krom_save_path();
+		save = iron_save_path();
 	}
 	else {
 		save = path_data() + path_sep;
@@ -120,7 +120,7 @@ function file_download_bytes(url: string, done: (url: string, ab: buffer_t)=>voi
 	map_set(_file_download_bytes_map, url, fdbd);
 	file_download(url, save, function (url: string) {
 		let fdbd: file_download_bytes_data_t = map_get(_file_download_bytes_map, url);
-		let buffer: buffer_t = krom_load_blob(fdbd.save);
+		let buffer: buffer_t = iron_load_blob(fdbd.save);
 		fdbd.done(fdbd.url, buffer);
 	});
 }
@@ -134,27 +134,27 @@ type file_cache_cloud_data_t = {
 let _file_cache_cloud_map: map_t<string, file_cache_cloud_data_t> = map_create();
 
 function file_cache_cloud(path: string, done: (s: string)=>void) {
-	///if krom_ios
+	///if iron_ios
 	let path2: string = string_replace_all(path, "/", "_"); // Cache everything into root folder
 	///else
 	let path2: string = path;
 	///end
 	let dest: string;
 	if (path_is_protected()) {
-		dest = krom_save_path();
+		dest = iron_save_path();
 	}
 	else {
-		dest = krom_get_files_location() + path_sep;
+		dest = iron_get_files_location() + path_sep;
 	}
 	dest += path2;
 
 	if (file_exists(dest)) {
-		///if (krom_macos || krom_ios)
+		///if (iron_macos || iron_ios)
 		done(dest);
 		///else
 		let p: string;
 		if (path_is_protected()) {
-			p = krom_save_path();
+			p = iron_save_path();
 		}
 		else {
 			p = path_working_dir() + path_sep;
@@ -169,7 +169,7 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 	if (file_read_directory(file_dir)[0] == "") {
 		file_create_directory(file_dir);
 	}
-	///if krom_windows
+	///if iron_windows
 	path = string_replace_all(path, "\\", "/");
 	///end
 	let url: string = config_raw.server + "/" + path;
@@ -184,12 +184,12 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 			fccd.done(null);
 			return;
 		}
-		///if (krom_macos || krom_ios)
+		///if (iron_macos || iron_ios)
 		fccd.done(fccd.dest);
 		///else
 		let p: string;
 		if (path_is_protected()) {
-			p = krom_save_path();
+			p = iron_save_path();
 		}
 		else {
 			p = path_working_dir() + path_sep;

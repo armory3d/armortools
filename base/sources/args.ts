@@ -19,13 +19,13 @@ let args_export_material_path: string = "";
 ///end
 
 function args_parse() {
-	if (krom_get_arg_count() > 1) {
+	if (iron_get_arg_count() > 1) {
 		args_use = true;
 
 		let i: i32 = 0;
-		while (i < krom_get_arg_count()) {
+		while (i < iron_get_arg_count()) {
 			// Process each arg
-			let current_arg: string = krom_get_arg(i);
+			let current_arg: string = iron_get_arg(i);
 
 			if (path_is_project(current_arg)) {
 				project_filepath = current_arg;
@@ -38,14 +38,14 @@ function args_parse() {
 			else if (path_is_texture(current_arg)) {
 				args_asset_path = current_arg;
 			}
-			else if (current_arg == "--export-textures" && (i + 3) <= krom_get_arg_count()) {
+			else if (current_arg == "--export-textures" && (i + 3) <= iron_get_arg_count()) {
 				args_export_textures = true;
 				++i;
-				args_export_textures_type = krom_get_arg(i);
+				args_export_textures_type = iron_get_arg(i);
 				++i;
-				args_export_textures_preset = krom_get_arg(i);
+				args_export_textures_preset = iron_get_arg(i);
 				++i;
-				args_export_textures_path = krom_get_arg(i);
+				args_export_textures_path = iron_get_arg(i);
 			}
 			///end
 
@@ -53,10 +53,10 @@ function args_parse() {
 			else if (current_arg == "--reload-mesh") {
 				args_reimport_mesh = true;
 			}
-			else if (current_arg == "--export-mesh" && (i + 1) <= krom_get_arg_count()) {
+			else if (current_arg == "--export-mesh" && (i + 1) <= iron_get_arg_count()) {
 				args_export_mesh = true;
 				++i;
-				args_export_mesh_path = krom_get_arg(i);
+				args_export_mesh_path = iron_get_arg(i);
 			}
 			else if (path_is_mesh(current_arg) || (i > 1 && !starts_with(current_arg, "-") && path_is_folder(current_arg))) {
 				args_asset_path = current_arg;
@@ -64,10 +64,10 @@ function args_parse() {
 			///end
 
 			///if is_paint
-			else if (current_arg == "--export-material" && (i + 1) <= krom_get_arg_count()) {
+			else if (current_arg == "--export-material" && (i + 1) <= iron_get_arg_count()) {
 				args_export_material = true;
 				++i;
-				args_export_material_path = krom_get_arg(i);
+				args_export_material_path = iron_get_arg(i);
 			}
 			///end
 
@@ -156,11 +156,11 @@ function args_run() {
 						});
 					}
 					else {
-						krom_log(tr("Invalid export directory"));
+						iron_log(tr("Invalid export directory"));
 					}
 				}
 				else {
-					krom_log(tr("Invalid texture type"));
+					iron_log(tr("Invalid texture type"));
 				}
 			}
 			///end
@@ -175,7 +175,7 @@ function args_run() {
 					export_mesh_run(args_export_mesh_path + path_sep + f, null, false);
 				}
 				else {
-					krom_log(tr("Invalid export directory"));
+					iron_log(tr("Invalid export directory"));
 				}
 			}
 			///end

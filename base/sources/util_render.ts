@@ -162,7 +162,7 @@ function util_render_make_text_preview() {
 		context_raw.text_tool_image = null;
 	}
 	if (context_raw.text_tool_image == null) {
-		///if krom_metal
+		///if iron_metal
 		context_raw.text_tool_image = image_create_render_target(texW, texW, tex_format_t.RGBA32);
 		///else
 		context_raw.text_tool_image = image_create_render_target(texW, texW, tex_format_t.R8);
@@ -412,7 +412,7 @@ function util_render_pick_pos_nor_tex() {
 		render_path_paint_set_plane_mesh();
 	}
 	render_path_paint_commands_paint(false);
-	///if krom_metal
+	///if iron_metal
 	// Flush command list
 	render_path_paint_commands_paint(false);
 	///end

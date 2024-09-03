@@ -37,7 +37,7 @@ function render_path_deferred_init() {
 		t.height = 0;
 		t.format = "RGBA64";
 		t.scale = render_path_base_get_super_sampling();
-		///if krom_opengl
+		///if iron_opengl
 		t.depth_buffer = "main";
 		///end
 		render_path_create_render_target(t);
@@ -47,7 +47,7 @@ function render_path_deferred_init() {
 		t.name = "buf";
 		t.width = 0;
 		t.height = 0;
-		///if (krom_direct3d12 || krom_vulkan)// || krom_metal)
+		///if (iron_direct3d12 || iron_vulkan)// || iron_metal)
 		// Match raytrace_target format
 		// Will cause "The render target format in slot 0 does not match that specified by the current pipeline state"
 		t.format = "RGBA64";
@@ -160,7 +160,7 @@ function render_path_deferred_init() {
 	render_path_preview_init();
 	///end
 
-	///if (krom_direct3d12 || krom_vulkan || krom_metal)
+	///if (iron_direct3d12 || iron_vulkan || iron_metal)
 	render_path_raytrace_init();
 	///end
 }

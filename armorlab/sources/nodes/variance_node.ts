@@ -49,10 +49,10 @@ function variance_node_get_as_image(self: variance_node_t, from: i32): image_t {
 	}
 
 	console_progress(tr("Processing") + " - " + tr("Variance"));
-	krom_g4_swap_buffers();
+	iron_g4_swap_buffers();
 
 	let vae_encoder_blob: buffer_t = data_get_blob("models/sd_vae_encoder.quant.onnx");
-	let latents_buf: buffer_t = krom_ml_inference(vae_encoder_blob, [f32a.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], config_raw.gpu_inference);
+	let latents_buf: buffer_t = iron_ml_inference(vae_encoder_blob, [f32a.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], config_raw.gpu_inference);
 	let latents: f32_array_t = f32_array_create_from_buffer(latents_buf);
 	for (let i: i32 = 0; i < latents.length; ++i) {
 		latents[i] = 0.18215 * latents[i];

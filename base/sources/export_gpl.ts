@@ -14,5 +14,5 @@ function export_gpl_run(path: string, name: string, swatches: swatch_color_t[]) 
 		o += rb + " " + gb + " " + bb + "\n";
 	}
 
-	krom_file_save_bytes(path, sys_string_to_buffer(o), o.length);
+	iron_file_save_bytes(path, sys_string_to_buffer(o), o.length);
 }

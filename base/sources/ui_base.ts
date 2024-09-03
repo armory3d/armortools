@@ -20,7 +20,7 @@ let ui_base_hwnd_tabs: tab_draw_array_t[] = ui_base_init_hwnd_tabs();
 ///if (is_paint || is_sculpt)
 let ui_base_default_sidebar_mini_w: i32 = 56;
 let ui_base_default_sidebar_full_w: i32 = 280;
-///if (krom_android || krom_ios)
+///if (iron_android || iron_ios)
 let ui_base_default_sidebar_w: i32 = ui_base_default_sidebar_mini_w;
 ///else
 let ui_base_default_sidebar_w: i32 = ui_base_default_sidebar_full_w;
@@ -381,7 +381,7 @@ function ui_base_update() {
 		ui_base_toggle_distract_free();
 	}
 
-	///if krom_linux
+	///if iron_linux
 	if (operator_shortcut("alt+enter", shortcut_type_t.STARTED)) {
 		base_toggle_fullscreen();
 	}
@@ -663,14 +663,14 @@ function ui_base_update() {
 
 				///if (is_paint || is_sculpt)
 				count = 16;
-				///if (krom_direct3d12 || krom_vulkan || krom_metal)
+				///if (iron_direct3d12 || iron_vulkan || iron_metal)
 				count += 1;
 				///end
 				///end
 
 				///if is_lab
 				count = 9;
-				///if (krom_direct3d12 || krom_vulkan || krom_metal)
+				///if (iron_direct3d12 || iron_vulkan || iron_metal)
 				count += 1;
 				///end
 				///end
@@ -701,8 +701,8 @@ function ui_base_update() {
 
 					let shortcuts: string[] = ["l", "b", "n", "o", "r", "m", "a", "h", "e", "s", "t", "1", "2", "3", "4"];
 
-					///if (krom_direct3d12 || krom_vulkan || krom_metal)
-					if (krom_raytrace_supported()) {
+					///if (iron_direct3d12 || iron_vulkan || iron_metal)
+					if (iron_raytrace_supported()) {
 						array_push(modes, tr("Path Traced"));
 						array_push(shortcuts, "p");
 					}
@@ -1029,7 +1029,7 @@ function ui_base_update_ui() {
 			ui_base_action_paint_remap = map_get(config_keymap, "action_paint");
 			util_render_pick_pos_nor_tex();
 			let is_mesh: bool = math_abs(context_raw.posx_picked) < 50 && math_abs(context_raw.posy_picked) < 50 && math_abs(context_raw.posz_picked) < 50;
-			///if krom_android
+			///if iron_android
 			// Allow rotating with both pen and touch, because hovering a pen prevents touch input on android
 			let pen_only: bool = false;
 			///else
@@ -1141,7 +1141,7 @@ function ui_base_update_ui() {
 	///end
 
 	///if (is_paint || is_sculpt)
-	///if krom_ios
+	///if iron_ios
 	// No hover on iPad, decals are painted by pen release
 	if (decal) {
 		down = pen_released();
@@ -1229,7 +1229,7 @@ function ui_base_update_ui() {
 		context_raw.brush_time = 0;
 		context_raw.prev_paint_vec_x = -1;
 		context_raw.prev_paint_vec_y = -1;
-		///if (!krom_direct3d12 && !krom_vulkan && !krom_metal) // Keep accumulated samples for D3D12
+		///if (!iron_direct3d12 && !iron_vulkan && !iron_metal) // Keep accumulated samples for D3D12
 		context_raw.ddirty = 3;
 		///end
 		context_raw.brush_blend_dirty = true; // Update brush mask
@@ -1521,7 +1521,7 @@ function ui_base_render_cursor() {
 	// Show picked material next to cursor
 	if (context_raw.tool == workspace_tool_t.PICKER && context_raw.picker_select_material && context_raw.color_picker_callback == null) {
 		let img: image_t = context_raw.material.image_icon;
-		///if krom_opengl
+		///if iron_opengl
 		g2_draw_scaled_image(img, mx + 10, my + 10 + img.height, img.width, -img.height);
 		///else
 		g2_draw_image(img, mx + 10, my + 10);
@@ -1575,7 +1575,7 @@ function ui_base_render_cursor() {
 				let cx: f32 = decalx + psizex / 2;
 				let cy: f32 = decaly + psizey / 2;
 				g2_set_transformation(mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(angle)), mat3_translation(-cx, -cy)));
-				///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
+				///if (iron_direct3d11 || iron_direct3d12 || iron_metal || iron_vulkan)
 				g2_draw_scaled_image(context_raw.decal_image, decalx, decaly, psizex, psizey);
 				///else
 				g2_draw_scaled_image(context_raw.decal_image, decalx, decaly + psizey, psizex, -psizey);
@@ -1724,8 +1724,8 @@ function ui_base_on_border_hover(handle: ui_handle_t, side: i32) {
 	}
 
 	side == border_side_t.LEFT || side == border_side_t.RIGHT ?
-		krom_set_mouse_cursor(3) : // Horizontal
-		krom_set_mouse_cursor(4);  // Vertical
+		iron_set_mouse_cursor(3) : // Horizontal
+		iron_set_mouse_cursor(4);  // Vertical
 
 	if (ui_get_current().input_started) {
 		ui_base_border_started = side;
@@ -1735,11 +1735,11 @@ function ui_base_on_border_hover(handle: ui_handle_t, side: i32) {
 }
 
 function ui_base_on_text_hover() {
-	krom_set_mouse_cursor(2); // I-cursor
+	iron_set_mouse_cursor(2); // I-cursor
 }
 
 function ui_base_on_deselect_text() {
-	///if krom_ios
+	///if iron_ios
 	keyboard_up_listener(key_code_t.SHIFT);
 	///end
 }

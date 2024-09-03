@@ -48,7 +48,7 @@ function translator_load_translations(new_locale: string) {
 	}
 
 	if (new_locale == "system") {
-		config_raw.locale = krom_language();
+		config_raw.locale = iron_language();
 	}
 
 	// Check whether the requested or detected locale is available
@@ -69,7 +69,7 @@ function translator_load_translations(new_locale: string) {
 
 	if (config_raw.locale != "en") {
 		// Load the translation file
-		let translation_json: string = sys_buffer_to_string(krom_load_blob("data/locale/" + config_raw.locale + ".json"));
+		let translation_json: string = sys_buffer_to_string(iron_load_blob("data/locale/" + config_raw.locale + ".json"));
 
 		let data: map_t<string, string> = json_parse_to_map(translation_json);
 		let keys: string[] = map_keys(data);
@@ -101,8 +101,8 @@ function translator_load_translations(new_locale: string) {
 
 	if (cjk) {
 		if (path_is_protected()) {
-			_translator_load_translations_cjk_font_path = krom_save_path();
-			_translator_load_translations_cjk_font_disk_path = krom_save_path();
+			_translator_load_translations_cjk_font_path = iron_save_path();
+			_translator_load_translations_cjk_font_disk_path = iron_save_path();
 		}
 		else {
 			_translator_load_translations_cjk_font_path = "";

@@ -19,7 +19,7 @@ function upscale_node_get_as_image(self: upscale_node_t, from: i32): image_t {
 	upscale_node_image = logic_node_input_get_as_image(self.base.inputs[0]);
 
 	console_progress(tr("Processing") + " - " + tr("Upscale"));
-	krom_g4_swap_buffers();
+	iron_g4_swap_buffers();
 
 	upscale_node_load_blob();
 	if (upscale_node_image.width < config_get_texture_res_x()) {
@@ -64,7 +64,7 @@ function upscale_node_do_tile(source: image_t) {
 		f32a[i + size1w * size1w * 2] = (u8a[i * 4 + 2] / 255);
 	}
 
-	let esrgan2x_buf: buffer_t = krom_ml_inference(upscale_node_esrgan_blob, [f32a.buffer], [[1, 3, size1w, size1h]], [1, 3, size2w, size2h], config_raw.gpu_inference);
+	let esrgan2x_buf: buffer_t = iron_ml_inference(upscale_node_esrgan_blob, [f32a.buffer], [[1, 3, size1w, size1h]], [1, 3, size2w, size2h], config_raw.gpu_inference);
 	let esrgan2x: f32_array_t = f32_array_create_from_buffer(esrgan2x_buf);
 	for (let i: i32 = 0; i < esrgan2x.length; ++i) {
 		if (esrgan2x[i] < 0) {

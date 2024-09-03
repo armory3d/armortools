@@ -10,7 +10,7 @@ function import_obj_run(path: string, replace_existing: bool = true) {
 	let b: buffer_t = data_get_blob(path);
 
 	if (is_udim) {
-		let part: raw_mesh_t = krom_obj_parse(b, split_code, 0, is_udim);
+		let part: raw_mesh_t = iron_obj_parse(b, split_code, 0, is_udim);
 		let name: string = part.name;
 		for (let i: i32 = 0; i < part.udims.length; ++i) {
 			let a: u32_array_t = part.udims[i];
@@ -37,10 +37,10 @@ function import_obj_run(path: string, replace_existing: bool = true) {
 	}
 	else {
 		let parts: raw_mesh_t[] = [];
-		let part: raw_mesh_t = krom_obj_parse(b, split_code, 0, false);
+		let part: raw_mesh_t = iron_obj_parse(b, split_code, 0, false);
 		array_push(parts, part);
 		while (part.has_next) {
-			part = krom_obj_parse(b, split_code, part.pos, false);
+			part = iron_obj_parse(b, split_code, part.pos, false);
 			// This part does not contain faces (may contain lines only)
 			if (part.inda.length == 0) {
 				continue;

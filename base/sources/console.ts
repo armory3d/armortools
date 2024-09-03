@@ -20,7 +20,7 @@ function console_draw_toast(s: string) {
 
 function _console_toast_render(s: string) {
 	console_draw_toast(s);
-	krom_g4_swap_buffers();
+	iron_g4_swap_buffers();
 	app_remove_render_2d(_console_toast_render);
 }
 
@@ -69,7 +69,7 @@ function console_log(s: string) {
 }
 
 function console_trace(s: string) {
-	krom_log(s);
+	iron_log(s);
 	base_redraw_console();
 	array_insert(console_last_traces, 0, s);
 	if (console_last_traces.length > 100) {

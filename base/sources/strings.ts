@@ -24,13 +24,13 @@ function strings_info0(): string {
 }
 
 function strings_graphics_api(): string {
-	///if krom_direct3d11
+	///if iron_direct3d11
 	return "Direct3D11";
-	///elseif krom_direct3d12
+	///elseif iron_direct3d12
 	return "Direct3D12";
-	///elseif krom_metal
+	///elseif iron_metal
 	return "Metal";
-	///elseif krom_vulkan
+	///elseif iron_vulkan
 	return "Vulkan";
 	///else
 	return "OpenGL";
@@ -351,7 +351,7 @@ void create_basis(vec3 normal, out vec3 tangent, out vec3 binormal) { \
 ";
 
 function str_sh_irradiance(): string {
-///if krom_metal
+///if iron_metal
 	return "vec3 sh_irradiance(const vec3 nor, constant vec4 shirr[7]) { \
 	const float c1 = 0.429043; \
 	const float c2 = 0.511664; \

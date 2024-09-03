@@ -160,7 +160,7 @@ function ui_menu_render() {
 				ui_base_ui.is_hovered = false;
 			}
 
-			///if !(krom_android || krom_ios)
+			///if !(iron_android || iron_ios)
 			if (ui_menu_button(ui, tr("Toggle Fullscreen"), "alt+enter")) {
 				base_toggle_fullscreen();
 			}
@@ -270,7 +270,7 @@ function ui_menu_render() {
 			context_raw.brush_scale = ui_slider(brush_scale_handle, tr("UV Scale"), 0.01, 5.0, true);
 			if (brush_scale_handle.changed) {
 				make_material_parse_mesh_material();
-				///if (krom_direct3d12 || krom_vulkan || krom_metal)
+				///if (iron_direct3d12 || iron_vulkan || iron_metal)
 				render_path_raytrace_uv_scale = context_raw.brush_scale;
 				render_path_raytrace_ready = false;
 				///end
@@ -375,8 +375,8 @@ function ui_menu_render() {
 			];
 			let shortcuts: string[] = ["l", "b", "n", "o", "r", "m", "a", "h", "e", "s", "t", "1", "2", "3", "4"];
 
-			///if (krom_direct3d12 || krom_vulkan || krom_metal)
-			if (krom_raytrace_supported()) {
+			///if (iron_direct3d12 || iron_vulkan || iron_metal)
+			if (iron_raytrace_supported()) {
 				array_push(modes, tr("Path Traced"));
 				array_push(shortcuts, "p");
 			}
@@ -506,14 +506,14 @@ function ui_menu_render() {
 				file_load_url("https://github.com/armory3d/armortools/issues");
 			}
 			if (ui_menu_button(ui, tr("Report Bug"))) {
-				///if (krom_macos || krom_ios) // Limited url length
+				///if (iron_macos || iron_ios) // Limited url length
 				file_load_url("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + sys_system_id());
 				///else
 				file_load_url("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + sys_system_id() + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A");
 				///end
 			}
 			if (ui_menu_button(ui, tr("Request Feature"))) {
-				///if (krom_macos || krom_ios) // Limited url length
+				///if (iron_macos || iron_ios) // Limited url length
 				file_load_url("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + sys_system_id());
 				///else
 				file_load_url("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + sys_system_id() + "*%0A%0A**Feature description:**%0A%0A");
@@ -522,9 +522,9 @@ function ui_menu_render() {
 			ui_menu_separator(ui);
 
 			if (ui_menu_button(ui, tr("Check for Updates..."))) {
-				///if krom_android
+				///if iron_android
 				file_load_url(manifest_url_android);
-				///elseif krom_ios
+				///elseif iron_ios
 				file_load_url(manifest_url_ios);
 				///else
 				// Retrieve latest version number
@@ -561,17 +561,17 @@ function ui_menu_render() {
 				let msg: string = manifest_title + ".org - v" + manifest_version + " (" + config_get_date() + ") - " + config_get_sha() + "\n";
 				msg += sys_system_id() + " - " + strings_graphics_api();
 
-				///if krom_windows
+				///if iron_windows
 				let save: string;
 				if (path_is_protected()) {
-					save = krom_save_path();
+					save = iron_save_path();
 				}
 				else {
 					save = path_data();
 				}
 				save += path_sep + "tmp.txt";
-				krom_sys_command("wmic path win32_VideoController get name > \"" + save + "\"");
-				let blob: buffer_t = krom_load_blob(save);
+				iron_sys_command("wmic path win32_VideoController get name > \"" + save + "\"");
+				let blob: buffer_t = iron_load_blob(save);
 				let u8: u8_array_t = blob;
 				let gpu_raw: string = "";
 				for (let i: i32 = 0; i < math_floor(u8.length / 2); ++i) {
@@ -611,9 +611,9 @@ function ui_menu_render() {
 						let row: f32[] = [1 / 3, 1 / 3, 1 / 3];
 						ui_row(row);
 
-						///if (krom_windows || krom_linux || krom_macos)
+						///if (iron_windows || iron_linux || iron_macos)
 						if (ui_button(tr("Copy"))) {
-							krom_copy_to_clipboard(_ui_menu_render_msg);
+							iron_copy_to_clipboard(_ui_menu_render_msg);
 						}
 						///else
 						_ui_end_element();

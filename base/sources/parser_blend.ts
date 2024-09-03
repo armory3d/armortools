@@ -23,7 +23,7 @@ function parser_blend_init(buffer: buffer_t): blend_t {
 	raw.view = buffer;
 	raw.pos = 0;
 	if (parser_blend_read_chars(raw, 7) != "BLENDER") {
-		raw.view = krom_inflate(buffer, false);
+		raw.view = iron_inflate(buffer, false);
 		raw.pos = 0;
 		if (parser_blend_read_chars(raw, 7) != "BLENDER") {
 			return null;

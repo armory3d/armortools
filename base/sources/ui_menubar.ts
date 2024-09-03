@@ -40,7 +40,7 @@ function ui_menubar_render_ui() {
 
 			if (ui_menubar_icon_button(ui, 0, 2)) box_preferences_show();
 			if (ui_menubar_icon_button(ui, 0, 3)) {
-				///if (krom_android || krom_ios)
+				///if (iron_android || iron_ios)
 				console_toast(tr("Saving project"));
 				project_save();
 				///end
@@ -189,7 +189,7 @@ function ui_menubar_render_ui() {
 				mat4_translate(m, 0, 0, 1.6);
 				transform_set_matrix(scene_camera.base.transform, m);
 			}
-			///if (krom_direct3d12 || krom_vulkan || krom_metal)
+			///if (iron_direct3d12 || iron_vulkan || iron_metal)
 			render_path_raytrace_ready = false;
 			///end
 		}

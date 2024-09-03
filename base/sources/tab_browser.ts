@@ -47,7 +47,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 			ui_tooltip(tr("Add bookmark"));
 		}
 
-		///if krom_android
+		///if iron_android
 		let stripped: bool = false;
 		let strip: string = "/storage/emulated/0/";
 		if (starts_with(tab_browser_hpath.text, strip)) {
@@ -58,7 +58,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 
 		tab_browser_hpath.text = ui_text_input(tab_browser_hpath, tr("Path"));
 
-		///if krom_android
+		///if iron_android
 		if (stripped) {
 			tab_browser_hpath.text = "/storage/emulated/0" + tab_browser_hpath.text;
 		}
@@ -191,7 +191,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 		}
 		let hpath_text: string = tab_browser_hpath.text;
 		tab_browser_known = string_index_of(substring(tab_browser_hpath.text, string_last_index_of(tab_browser_hpath.text, path_sep), hpath_text.length), ".") > 0;
-		///if krom_android
+		///if iron_android
 		if (ends_with(tab_browser_hpath.text, "." + to_lower_case(manifest_title))) {
 			tab_browser_known = false;
 		}
@@ -207,7 +207,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 		}
 
 		if (ui_button(tr("Disk"), ui_align_t.LEFT)) {
-			///if krom_android
+			///if iron_android
 			ui_menu_draw(function (ui: ui_t) {
 				if (ui_menu_button(ui, tr("Download"))) {
 					tab_browser_hpath.text = ui_files_default_path;
@@ -219,7 +219,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 					tab_browser_hpath.text = "/storage/emulated/0/DCIM/Camera";
 				}
 				if (ui_menu_button(ui, tr("Projects"))) {
-					tab_browser_hpath.text = krom_save_path();
+					tab_browser_hpath.text = iron_save_path();
 				}
 			}, 4);
 			///else

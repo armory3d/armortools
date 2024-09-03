@@ -103,9 +103,9 @@ function export_texture_run(path: string, bake_material: bool = false) {
 	export_texture_run_layers(path, layers);
 	///end
 
-	///if krom_ios
+	///if iron_ios
 	console_info(tr("Textures exported") + " (\"Files/On My iPad/" + manifest_title + "\")");
-	///elseif krom_android
+	///elseif iron_android
 	console_info(tr("Textures exported") + " (\"Files/Internal storage/Pictures/" + manifest_title + "\")");
 	///else
 	console_info(tr("Textures exported"));
@@ -164,7 +164,7 @@ function export_texture_run_layers(path: string, layers: any[], object_name: str
 
 	let texture_size_x: i32 = config_get_texture_res_x();
 	let texture_size_y: i32 = config_get_texture_res_y();
-	///if (krom_android || krom_ios)
+	///if (iron_android || iron_ios)
 	let f: string = sys_title();
 	///else
 	let f: string = ui_files_filename;
@@ -317,7 +317,7 @@ function export_texture_run_layers(path: string, layers: any[], object_name: str
 		}
 	}
 
-	///if krom_metal
+	///if iron_metal
 	// Flush command list
 	g2_begin(base_expa);
 	g2_end();
@@ -504,14 +504,14 @@ function export_texture_write_texture(file: string, pixels: buffer_t, type: i32 
 	}
 
 	if (bits == 8 && context_raw.format_type == texture_ldr_format_t.PNG) {
-		krom_write_png(file, pixels, res_x, res_y, format);
+		iron_write_png(file, pixels, res_x, res_y, format);
 	}
 	else if (bits == 8 && context_raw.format_type == texture_ldr_format_t.JPG) {
-		krom_write_jpg(file, pixels, res_x, res_y, format, math_floor(context_raw.format_quality));
+		iron_write_jpg(file, pixels, res_x, res_y, format, math_floor(context_raw.format_quality));
 	}
 	else { // Exr
 		let b: buffer_t = parser_exr_run(res_x, res_y, pixels, bits, type, off);
-		krom_file_save_bytes(file, b, b.length);
+		iron_file_save_bytes(file, b, b.length);
 	}
 }
 

@@ -89,7 +89,7 @@ project.addDefine("arm_particles");
 // project.addDefine("arm_audio");
 
 if (flags.android) {
-	project.addDefine("krom_android_rmb");
+	project.addDefine("iron_android_rmb");
 }
 
 if (flags.raytrace) {

@@ -46,19 +46,19 @@ let _project_save_and_quit: bool;
 
 function project_save(save_and_quit: bool = false) {
 	if (project_filepath == "") {
-		///if krom_ios
-		let document_directory: string = krom_save_dialog("", "");
+		///if iron_ios
+		let document_directory: string = iron_save_dialog("", "");
 		document_directory = substring(document_directory, 0, document_directory.length - 8); // Strip /"untitled"
 		project_filepath = document_directory + "/" + sys_title() + ".arm";
-		///elseif krom_android
-		project_filepath = krom_save_path() + "/" + sys_title() + ".arm";
+		///elseif iron_android
+		project_filepath = iron_save_path() + "/" + sys_title() + ".arm";
 		///else
 		project_save_as(save_and_quit);
 		return;
 		///end
 	}
 
-	///if (krom_windows || krom_linux || krom_macos)
+	///if (iron_windows || iron_linux || iron_macos)
 	let filename: string = substring(project_filepath, string_last_index_of(project_filepath, path_sep) + 1, project_filepath.length - 4);
 	sys_title_set(filename + " - " + manifest_title);
 	///end
@@ -139,7 +139,7 @@ function project_new_box() {
 }
 
 function project_new(reset_layers: bool = true) {
-	///if (krom_windows || krom_linux || krom_macos)
+	///if (iron_windows || iron_linux || iron_macos)
 	sys_title_set(manifest_title);
 	///end
 	project_filepath = "";
@@ -335,7 +335,7 @@ function project_new(reset_layers: bool = true) {
 	context_init_tool();
 	///end
 
-	///if (krom_direct3d12 || krom_vulkan || krom_metal)
+	///if (iron_direct3d12 || iron_vulkan || iron_metal)
 	render_path_raytrace_ready = false;
 	///end
 }
@@ -424,7 +424,7 @@ function project_import_mesh_box(path: string, replace_existing: bool = true, cl
 	_project_import_mesh_box_clear_layers = clear_layers;
 	_project_import_mesh_box_done = done;
 
-	///if krom_ios
+	///if iron_ios
 	// Import immediately while access to resource is unlocked
 	// data_get_blob(path);
 	///end
@@ -469,9 +469,9 @@ function project_import_mesh_box(path: string, replace_existing: bool = true, cl
 			if (ui_button(tr("Import")) || ui.is_return_down) {
 				ui_box_hide();
 
-				///if (krom_android || krom_ios)
+				///if (iron_android || iron_ios)
 				console_toast(tr("Importing mesh"));
-				krom_g4_swap_buffers();
+				iron_g4_swap_buffers();
 				///end
 
 				///if (is_paint || is_sculpt)
@@ -543,9 +543,9 @@ function project_unwrap_mesh_box(mesh: raw_mesh_t, done: (a: raw_mesh_t)=>void, 
 			if (ui_button(tr("Unwrap")) || ui.is_return_down || skip_ui) {
 				ui_box_hide();
 
-				///if (krom_android || krom_ios)
+				///if (iron_android || iron_ios)
 				console_toast(tr("Unwrapping mesh"));
-				krom_g4_swap_buffers();
+				iron_g4_swap_buffers();
 				///end
 
 				if (unwrap_by == unwrap_plugins.length - 1) {

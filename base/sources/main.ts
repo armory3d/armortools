@@ -8,14 +8,14 @@ function main() {
 	// main_embed(["placeholder.k"]);
 	// ///end
 
-	// ///if (krom_direct3d12 || krom_vulkan || krom_metal)
+	// ///if (iron_direct3d12 || iron_vulkan || iron_metal)
 	// main_embed_raytrace();
 	// ///if is_paint
 	// main_embed_raytrace_bake();
 	// ///end
 
 	// Used to locate external application data folder
-	krom_set_app_name(manifest_title);
+	iron_set_app_name(manifest_title);
 	config_load();
 
 	app_on_resize = base_on_resize;
@@ -30,7 +30,7 @@ function main() {
 	if (config_raw.layout == null) {
 		base_init_layout();
 	}
-	krom_set_app_name(manifest_title);
+	iron_set_app_name(manifest_title);
 	app_init();
 	scene_set_active("Scene");
 	uniforms_ext_init();
@@ -105,7 +105,7 @@ function main_embed(additional: string[]) {
 	}
 }
 
-///if (krom_direct3d12 || krom_vulkan || krom_metal)
+///if (iron_direct3d12 || iron_vulkan || iron_metal)
 
 function main_embed_raytrace() {
 	let global: any = globalThis;

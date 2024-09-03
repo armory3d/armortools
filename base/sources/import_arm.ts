@@ -32,7 +32,7 @@ function import_arm_run_project(path: string) {
 	project_new(import_as_mesh);
 	project_filepath = path;
 	ui_files_filename = substring(path, string_last_index_of(path, path_sep) + 1, string_last_index_of(path, "."));
-	///if (krom_android || krom_ios)
+	///if (iron_android || iron_ios)
 	sys_title_set(ui_files_filename);
 	///else
 	sys_title_set(ui_files_filename + " - " + manifest_title);
@@ -47,7 +47,7 @@ function import_arm_run_project(path: string) {
 	///end
 
 	// Save to recent
-	///if krom_ios
+	///if iron_ios
 	let recent_path: string = substring(path, string_last_index_of(path, "/") + 1, path.length);
 	///else
 	let recent_path: string = path;
@@ -87,7 +87,7 @@ function import_arm_run_project(path: string) {
 
 	for (let i: i32 = 0; i < project.assets.length; ++i) {
 		let file: string = project.assets[i];
-		///if krom_windows
+		///if iron_windows
 		file = string_replace_all(file, "/", "\\");
 		///else
 		file = string_replace_all(file, "\\", "/");
@@ -109,7 +109,7 @@ function import_arm_run_project(path: string) {
 	if (project.font_assets != null) {
 		for (let i: i32 = 0; i < project.font_assets.length; ++i) {
 			let file: string = project.font_assets[i];
-			///if krom_windows
+			///if iron_windows
 			file = string_replace_all(file, "/", "\\");
 			///else
 			file = string_replace_all(file, "\\", "/");
@@ -435,7 +435,7 @@ function import_arm_run_material_from_project(project: project_format_t, path: s
 	let base: string = path_base_dir(path);
 	for (let i: i32 = 0; i < project.assets.length; ++i) {
 		let file: string = project.assets[i];
-		///if krom_windows
+		///if iron_windows
 		file = string_replace_all(file, "/", "\\");
 		///else
 		file = string_replace_all(file, "\\", "/");
@@ -542,7 +542,7 @@ function import_arm_run_brush_from_project(project: project_format_t, path: stri
 	let base: string = path_base_dir(path);
 	for (let i: i32 = 0; i < project.assets.length; ++i) {
 		let file: string = project.assets[i];
-		///if krom_windows
+		///if iron_windows
 		file = string_replace_all(file, "/", "\\");
 		///else
 		file = string_replace_all(file, "\\", "/");
@@ -646,7 +646,7 @@ function import_arm_unpack_asset(project: project_format_t, abs: string, file: s
 	}
 	for (let i: i32 = 0; i < project.packed_assets.length; ++i) {
 		let pa: packed_asset_t = project.packed_assets[i];
-		///if krom_windows
+		///if iron_windows
 		pa.name = string_replace_all(pa.name, "/", "\\");
 		///else
 		pa.name = string_replace_all(pa.name, "\\", "/");

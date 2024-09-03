@@ -94,7 +94,7 @@ let base_cursor_gbufferd: kinc_tex_unit_t;
 ///if (is_paint || is_sculpt)
 let base_default_base: f32 = 0.5;
 let base_default_rough: f32 = 0.4;
-///if (krom_android || krom_ios)
+///if (iron_android || iron_ios)
 let base_max_layers: i32 = 18;
 ///else
 let base_max_layers: i32 = 255;
@@ -183,7 +183,7 @@ function base_init() {
 	base_last_window_height = sys_height();
 
 	sys_notify_on_drop_files(function (drop_path: string) {
-		///if krom_linux
+		///if iron_linux
 		drop_path = uri_decode(drop_path);
 		///end
 		drop_path = trim_end(drop_path);
@@ -204,13 +204,13 @@ function base_init() {
 			keyboard_up_listener(key_code_t.WIN);
 		},
 		function () { // Shutdown
-			///if (krom_android || krom_ios)
+			///if (iron_android || iron_ios)
 			project_save();
 			///end
 		}
 	);
 
-	krom_set_save_and_quit_callback(base_save_and_quit_callback);
+	iron_set_save_and_quit_callback(base_save_and_quit_callback);
 
 	let f: g2_font_t = data_get_font("font.ttf");
 	let image_color_wheel: image_t = data_get_image("color_wheel.k");
@@ -222,13 +222,13 @@ function base_init() {
 	base_default_font_size = base_theme.FONT_SIZE;
 	translator_load_translations(config_raw.locale);
 	ui_files_filename = tr("untitled");
-	///if (krom_android || krom_ios)
+	///if (iron_android || iron_ios)
 	sys_title_set(tr("untitled"));
 	///end
 
 	// Baked font for fast startup
 	if (config_raw.locale == "en") {
-		base_font.font_ = krom_g2_font_13(base_font.blob);
+		base_font.font_ = iron_g2_font_13(base_font.blob);
 		base_font.glyphs = _g2_font_glyphs;
 	}
 	else {
@@ -297,7 +297,7 @@ function base_init() {
 
 	args_run();
 
-	///if (krom_android || krom_ios)
+	///if (iron_android || iron_ios)
 	let has_projects: bool = config_raw.recent_projects.length > 0;
 	///else
 	let has_projects: bool = true;
@@ -370,7 +370,7 @@ function base_h(): i32 {
 	if (config_raw.layout == null) {
 		res -= ui_header_default_h * 2 + ui_status_default_status_h;
 
-		///if (krom_android || krom_ios)
+		///if (iron_android || iron_ios)
 		let layout_header: i32 = 0;
 		///else
 		let layout_header: i32 = 1;
@@ -447,13 +447,13 @@ function base_on_resize() {
 
 	base_resize();
 
-	///if (krom_linux || krom_macos)
+	///if (iron_linux || iron_macos)
 	base_save_window_rect();
 	///end
 }
 
 function base_save_window_rect() {
-	///if (krom_windows || krom_linux || krom_macos)
+	///if (iron_windows || iron_linux || iron_macos)
 	config_raw.window_w = sys_width();
 	config_raw.window_h = sys_height();
 	config_raw.window_x = sys_x();
@@ -530,7 +530,7 @@ function base_redraw_ui() {
 
 function base_update() {
 	if (mouse_movement_x != 0 || mouse_movement_y != 0) {
-		krom_set_mouse_cursor(0); // Arrow
+		iron_set_mouse_cursor(0); // Arrow
 	}
 
 	///if (is_paint || is_sculpt)
@@ -655,7 +655,7 @@ function base_update() {
 		}
 		///end
 
-		krom_set_mouse_cursor(0); // Arrow
+		iron_set_mouse_cursor(0); // Arrow
 		base_is_dragging = false;
 	}
 	if (context_raw.color_picker_callback != null && (mouse_released() || mouse_released("right"))) {
@@ -666,7 +666,7 @@ function base_update() {
 	base_handle_drop_paths();
 
 	///if (is_paint || is_sculpt)
-	///if krom_windows
+	///if iron_windows
 	let is_picker: bool = context_raw.tool == workspace_tool_t.PICKER || context_raw.tool == workspace_tool_t.MATERIAL;
 	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
 	ui_always_redraw_window = !context_raw.cache_draws ||
@@ -706,7 +706,7 @@ function base_material_dropped() {
 
 function base_handle_drop_paths() {
 	if (base_drop_paths.length > 0) {
-		///if (krom_linux || krom_macos)
+		///if (iron_linux || iron_macos)
 		let wait: bool = !mouse_moved; // Mouse coords not updated during drag
 		///else
 		let wait: bool = false;
@@ -834,7 +834,7 @@ function base_render() {
 	context_raw.frame++;
 
 	if (base_is_dragging) {
-		krom_set_mouse_cursor(1); // Hand
+		iron_set_mouse_cursor(1); // Hand
 		let img: image_t = base_get_drag_image();
 
 		///if (is_paint || is_sculpt)
@@ -848,7 +848,7 @@ function base_render() {
 		let ratio: f32 = size / img.width;
 		let h: f32 = img.height * ratio;
 
-		///if (is_lab || krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
+		///if (is_lab || iron_direct3d11 || iron_direct3d12 || iron_metal || iron_vulkan)
 		let inv: i32 = 0;
 		///else
 		let inv: i32 = (base_drag_material != null || (base_drag_layer != null && base_drag_layer.fill_layer != null)) ? h : 0;
@@ -882,7 +882,7 @@ function base_render() {
 	context_raw.last_paint_vec_x = context_raw.paint_vec.x;
 	context_raw.last_paint_vec_y = context_raw.paint_vec.y;
 
-	///if (krom_android || krom_ios)
+	///if (iron_android || iron_ios)
 	// No mouse move events for touch, re-init last paint position on touch start
 	if (!mouse_down()) {
 		context_raw.last_paint_x = -1;
@@ -942,7 +942,7 @@ function base_get_asset_index(file_name: string): i32 {
 
 function base_toggle_fullscreen() {
 	if (sys_mode() == window_mode_t.WINDOWED) {
-		///if (krom_windows || krom_linux || krom_macos)
+		///if (iron_windows || iron_linux || iron_macos)
 		config_raw.window_w = sys_width();
 		config_raw.window_h = sys_height();
 		config_raw.window_x = sys_x();
@@ -1016,9 +1016,9 @@ function base_init_layout() {
 	array_push(raw.layout, math_floor(sys_height() / 2)); // LayoutSidebarH1
 	///end
 
-	///if krom_ios
+	///if iron_ios
 	array_push(raw.layout, show2d ? math_floor((app_w() + raw.layout[layout_size_t.NODES_W]) * 0.473) : math_floor(app_w() * 0.473)); // LayoutNodesW
-	///elseif krom_android
+	///elseif iron_android
 	array_push(raw.layout, show2d ? math_floor((app_w() + raw.layout[layout_size_t.NODES_W]) * 0.473) : math_floor(app_w() * 0.473));
 	///else
 	array_push(raw.layout, show2d ? math_floor((app_w() + raw.layout[layout_size_t.NODES_W]) * 0.515) : math_floor(app_w() * 0.515)); // Align with ui header controls
@@ -1027,7 +1027,7 @@ function base_init_layout() {
 	array_push(raw.layout, math_floor(app_h() / 2)); // LayoutNodesH
 	array_push(raw.layout, math_floor(ui_status_default_status_h * raw.window_scale)); // LayoutStatusH
 
-	///if (krom_android || krom_ios)
+	///if (iron_android || iron_ios)
 	array_push(raw.layout, 0); // LayoutHeader
 	///else
 	array_push(raw.layout, 1);
@@ -1047,7 +1047,7 @@ function base_init_config() {
 	raw.recent_projects = [];
 	raw.bookmarks = [];
 	raw.plugins = [];
-	///if (krom_android || krom_ios)
+	///if (iron_android || iron_ios)
 	raw.keymap = "touch.json";
 	///else
 	raw.keymap = "default.json";
@@ -1076,13 +1076,13 @@ function base_init_config() {
 	///if is_lab
 	raw.workspace = space_type_t.SPACE2D;
 	///end
-	///if (krom_android || krom_ios)
+	///if (iron_android || iron_ios)
 	raw.camera_controls = camera_controls_t.ROTATE;
 	///else
 	raw.camera_controls = camera_controls_t.ORBIT;
 	///end
 	raw.layer_res = texture_res_t.RES2048;
-	///if (krom_android || krom_ios)
+	///if (iron_android || iron_ios)
 	raw.touch_ui = true;
 	raw.splash_screen = true;
 	///else
@@ -1099,7 +1099,7 @@ function base_init_config() {
 	raw.pressure_hardness = true;
 	raw.pressure_angle = false;
 	raw.pressure_opacity = false;
-	///if (krom_vulkan || krom_ios)
+	///if (iron_vulkan || iron_ios)
 	raw.material_live = false;
 	///else
 	raw.material_live = true;
@@ -1211,7 +1211,7 @@ function base_resize_layers() {
 	if (render_path_paint_live_layer != null) {
 		slot_layer_resize_and_set_bits(render_path_paint_live_layer);
 	}
-	///if (krom_direct3d12 || krom_vulkan || krom_metal)
+	///if (iron_direct3d12 || iron_vulkan || iron_metal)
 	render_path_raytrace_ready = false; // Rebuild baketex
 	///end
 	context_raw.ddirty = 2;
@@ -1283,7 +1283,7 @@ function base_make_pipe() {
 		g4_pipeline_compile(base_pipe_copy_bgra);
 	}
 
-	///if (krom_metal || krom_vulkan || krom_direct3d12)
+	///if (iron_metal || iron_vulkan || iron_direct3d12)
 	{
 		base_pipe_copy8 = g4_pipeline_create();
 		base_pipe_copy8.vertex_shader = sys_get_shader("layer_view.vert");
@@ -1464,7 +1464,7 @@ function base_make_cursor_pipe() {
 	base_pipe_cursor.vertex_shader = sys_get_shader("cursor.vert");
 	base_pipe_cursor.fragment_shader = sys_get_shader("cursor.frag");
 	let vs: vertex_struct_t = g4_vertex_struct_create();
-	///if (krom_metal || krom_vulkan)
+	///if (iron_metal || iron_vulkan)
 	g4_vertex_struct_add(vs, "tex", vertex_data_t.I16_2X_NORM);
 	///else
 	g4_vertex_struct_add(vs, "pos", vertex_data_t.I16_4X_NORM);
@@ -1968,7 +1968,7 @@ function base_flatten(height_to_normal: bool = false, layers: slot_layer_t[] = n
 		///end
 	}
 
-	///if krom_metal
+	///if iron_metal
 	// Flush command list
 	g2_begin(base_expa);
 	g2_end();
@@ -2382,7 +2382,7 @@ function base_on_layers_resized() {
 	util_uv_trianglemap = null;
 	util_uv_trianglemap_cached = false;
 	util_uv_dilatemap_cached = false;
-	///if (krom_direct3d12 || krom_vulkan || krom_metal)
+	///if (iron_direct3d12 || iron_vulkan || iron_metal)
 	render_path_raytrace_ready = false;
 	///end
 }
@@ -2456,7 +2456,7 @@ function base_on_layers_resized() {
 		base_init_layers();
 	});
 
-	///if (krom_direct3d12 || krom_vulkan || krom_metal)
+	///if (iron_direct3d12 || iron_vulkan || iron_metal)
 	render_path_raytrace_ready = false;
 	///end
 }

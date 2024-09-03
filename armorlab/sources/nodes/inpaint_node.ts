@@ -1,5 +1,5 @@
 
-declare let Krom_texsynth: any;
+declare let iron_texsynth: any;
 
 type inpaint_node_t = {
 	base?: logic_node_t;
@@ -69,7 +69,7 @@ function inpaint_node_buttons(ui: ui_t, nodes: ui_nodes_t, node: ui_node_t) {
 function inpaint_node_get_as_image(self: inpaint_node_t, from: i32): image_t {
 	let source: image_t = logic_node_input_get_as_image(self.base.inputs[0]);
 	console_progress(tr("Processing") + " - " + tr("Inpaint"));
-	krom_g4_swap_buffers();
+	iron_g4_swap_buffers();
 
 	g2_begin(inpaint_node_image);
 	g2_draw_scaled_image(source, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
@@ -115,7 +115,7 @@ function inpaint_node_texsynth_inpaint(image: image_t, tiling: bool, mask: image
 	let bytes_img: buffer_t = image_get_pixels(image);
 	let bytes_mask: buffer_t = mask != null ? image_get_pixels(mask) : buffer_create(w * h);
 	let bytes_out: buffer_t = buffer_create(w * h * 4);
-	Krom_texsynth.inpaint(w, h, bytes_out, bytes_img, bytes_mask, tiling);
+	iron_texsynth.inpaint(w, h, bytes_out, bytes_img, bytes_mask, tiling);
 
 	inpaint_node_result = image_from_bytes(bytes_out, w, h);
 	return inpaint_node_result;
@@ -163,7 +163,7 @@ function inpaint_node_sd_inpaint(image: image_t, mask: image_t): image_t {
 				f32a[i + 512 * 512 * 2] = (u8a[i * 4 + 2] / 255.0) * 2.0 - 1.0;
 			}
 
-			let latents_buf: buffer_t = krom_ml_inference(vae_encoder_blob, [f32a.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], config_raw.gpu_inference);
+			let latents_buf: buffer_t = iron_ml_inference(vae_encoder_blob, [f32a.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], config_raw.gpu_inference);
 			let latents: f32_array_t = f32_array_create_from_buffer(latents_buf);
 			for (let i: i32 = 0; i < latents.length; ++i) {
 				latents[i] = 0.18215 * latents[i];

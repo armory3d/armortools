@@ -166,7 +166,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 											if (!ends_with(f, ".png")) {
 												f += ".png";
 											}
-											krom_write_png(path + path_sep + f, image_get_pixels(target), target.width, target.height, 0);
+											iron_write_png(path + path_sep + f, image_get_pixels(target), target.width, target.height, 0);
 											image_unload(target);
 										}, target);
 									});

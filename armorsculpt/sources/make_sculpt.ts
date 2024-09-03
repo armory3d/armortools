@@ -38,7 +38,7 @@ function make_sculpt_run(data: material_t, matcon: material_context_t): node_sha
 	node_shader_add_out(vert, "vec2 tex_coord");
 	node_shader_write(vert, "const vec2 madd = vec2(0.5, 0.5);");
 	node_shader_write(vert, "tex_coord = pos.xy * madd + madd;");
-	///if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
+	///if (iron_direct3d11 || iron_direct3d12 || iron_metal || iron_vulkan)
 	node_shader_write(vert, "tex_coord.y = 1.0 - tex_coord.y;");
 	///end
 	node_shader_write(vert, "gl_Position = vec4(pos.xy, 0.0, 1.0);");

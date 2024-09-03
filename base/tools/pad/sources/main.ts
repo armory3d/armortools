@@ -37,13 +37,13 @@ function encode_storage(): string {
 
 function shutdown() {
 	let storage_string: string = sys_string_to_buffer(encode_storage());
-	krom_file_save_bytes(krom_save_path() + "/config.json", storage_string, 0);
+	iron_file_save_bytes(iron_save_path() + "/config.json", storage_string, 0);
 }
 
 function main() {
-	krom_set_app_name("ArmorPad");
+	iron_set_app_name("ArmorPad");
 
-	let blob_storage: buffer_t = krom_load_blob(krom_save_path() + "/config.json");
+	let blob_storage: buffer_t = iron_load_blob(iron_save_path() + "/config.json");
 	if (blob_storage == null) {
 		storage = {};
 		storage.project = "";
@@ -100,8 +100,8 @@ function main() {
 	ui_text_area_scroll_past_end = true;
 
 	sys_notify_on_frames(render);
-	krom_set_drop_files_callback(drop_files);
-	krom_set_application_state_callback(null, null, null, null, shutdown);
+	iron_set_drop_files_callback(drop_files);
+	iron_set_application_state_callback(null, null, null, null, shutdown);
 }
 
 function armpack_to_string(bytes: buffer_t): string {
@@ -109,7 +109,7 @@ function armpack_to_string(bytes: buffer_t): string {
 }
 
 function list_folder(path: string) {
-	let files: string[] = string_split(krom_read_directory(path, false), "\n");
+	let files: string[] = string_split(iron_read_directory(path, false), "\n");
 	for (let i: i32 = 0; i < files.length; ++i) {
 		let f: string = files[i];
 		let abs: string = path + "/" + f;
@@ -130,12 +130,12 @@ function list_folder(path: string) {
 			// Open file
 			if (is_file) {
 				storage.file = abs;
-				let bytes: buffer_t = krom_load_blob(storage.file);
+				let bytes: buffer_t = iron_load_blob(storage.file);
 				storage.text = ends_with(f, ".arm") ? armpack_to_string(bytes) : sys_buffer_to_string(bytes);
 				storage.text = string_replace_all(storage.text, "\r", "");
 				text_handle.text = storage.text;
 				editor_handle.redraws = 1;
-				krom_set_window_title(abs);
+				iron_set_window_title(abs);
 			}
 			// Expand folder
 			else {
@@ -152,10 +152,10 @@ function list_folder(path: string) {
 function render() {
 	storage.window_w = sys_width();
 	storage.window_h = sys_height();
-	storage.window_x = krom_window_x();
-	storage.window_y = krom_window_y();
+	storage.window_x = iron_window_x();
+	storage.window_y = iron_window_y();
 	if (ui.input_dx != 0 || ui.input_dy != 0) {
-		krom_set_mouse_cursor(0); // Arrow
+		iron_set_mouse_cursor(0); // Arrow
 	}
 
 	ui_begin(ui);
@@ -263,12 +263,12 @@ function save_file() {
 	text_handle.text = storage.text;
 	// Write bytes
 	// let bytes: buffer_t = ends_with(storage.file, ".arm") ? armpack_encode(json_parse(storage.text)) : sys_string_to_buffer(storage.text);
-	// krom_file_save_bytes(storage.file, bytes, bytes.length);
+	// iron_file_save_bytes(storage.file, bytes, bytes.length);
 	storage.modified = false;
 }
 
 function build_file(): string {
-	///if krom_windows
+	///if iron_windows
 	return "\\build.bat";
 	///else
 	return "/build.sh";
@@ -276,7 +276,7 @@ function build_file(): string {
 }
 
 function build_project() {
-	krom_sys_command(storage.project + build_file() + " " + storage.project);
+	iron_sys_command(storage.project + build_file() + " " + storage.project);
 }
 
 function draw_minimap() {
@@ -334,7 +334,7 @@ function on_border_hover(handle: ui_handle_t, side: i32) {
 		return; // Right
 	}
 
-	krom_set_mouse_cursor(3); // Horizontal
+	iron_set_mouse_cursor(3); // Horizontal
 
 	if (ui_get_current().input_started) {
 		resizing_sidebar = true;
@@ -342,5 +342,5 @@ function on_border_hover(handle: ui_handle_t, side: i32) {
 }
 
 function on_text_hover() {
-	krom_set_mouse_cursor(2); // I-cursor
+	iron_set_mouse_cursor(2); // I-cursor
 }

@@ -9,14 +9,14 @@ let config_button_spacing: string = config_default_button_spacing;
 function config_load() {
 	let path: string = "";
 	if (path_is_protected()) {
-		path += krom_save_path();
+		path += iron_save_path();
 	}
 	path += "config.json";
 	let blob: buffer_t = data_get_blob(path);
 
-	///if krom_linux
+	///if iron_linux
 	if (blob == null) { // Protected directory
-		blob = data_get_blob(krom_save_path() + "config.json");
+		blob = data_get_blob(iron_save_path() + "config.json");
 	}
 	///end
 
@@ -31,7 +31,7 @@ function config_save() {
 	// when running from protected path like "Program Files"
 	let path: string = "";
 	if (path_is_protected()) {
-		path += krom_save_path();
+		path += iron_save_path();
 	}
 	else {
 		path += path_data();
@@ -102,11 +102,11 @@ function config_save() {
 	let config_json: string = json_encode_end();
 
 	let buffer: buffer_t = sys_string_to_buffer(config_json);
-	krom_file_save_bytes(path, buffer, 0);
+	iron_file_save_bytes(path, buffer, 0);
 
-	///if krom_linux // Protected directory
+	///if iron_linux // Protected directory
 	if (!file_exists(path)) {
-		krom_file_save_bytes(krom_save_path() + "config.json", buffer, 0);
+		iron_file_save_bytes(iron_save_path() + "config.json", buffer, 0);
 	}
 	///end
 }
@@ -121,7 +121,7 @@ function config_init() {
 		config_raw.window_maximizable = true;
 		config_raw.window_w = 1600;
 		config_raw.window_h = 900;
-		///if krom_macos
+		///if iron_macos
 		config_raw.window_w *= 2;
 		config_raw.window_h *= 2;
 		///end
@@ -131,7 +131,7 @@ function config_init() {
 		if (sys_display_width() >= 2560 && sys_display_height() >= 1600) {
 			config_raw.window_scale = 2.0;
 		}
-		///if (krom_android || krom_ios || krom_macos)
+		///if (iron_android || iron_ios || iron_macos)
 		config_raw.window_scale = 2.0;
 		///end
 		config_raw.window_vsync = true;
@@ -141,7 +141,7 @@ function config_init() {
 		config_raw.rp_vignette = 0.2;
 		config_raw.rp_grain = 0.09;
 		config_raw.rp_motionblur = false;
-		///if (krom_android || krom_ios)
+		///if (iron_android || iron_ios)
 		config_raw.rp_ssao = false;
 		///else
 		config_raw.rp_ssao = true;
@@ -277,7 +277,7 @@ function config_save_keymap() {
 	}
 	let path: string = data_path() + "keymap_presets/" + config_raw.keymap;
 	let buffer: buffer_t = sys_string_to_buffer(config_keymap_to_json(config_keymap));
-	krom_file_save_bytes(path, buffer, 0);
+	iron_file_save_bytes(path, buffer, 0);
 }
 
 function config_keymap_to_json(keymap: map_t<string, string>): string {

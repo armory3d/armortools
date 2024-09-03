@@ -14,18 +14,18 @@ function box_projects_show() {
 	}
 
 	let draggable: bool;
-	///if (krom_android || krom_ios)
+	///if (iron_android || iron_ios)
 	draggable = false;
 	///else
 	draggable = true;
 	///end
 
 	ui_box_show_custom(function (ui: ui_t) {
-		///if (krom_android || krom_ios)
+		///if (iron_android || iron_ios)
 		box_projects_align_to_fullscreen();
 		///end
 
-		///if (krom_android || krom_ios)
+		///if (iron_android || iron_ios)
 		box_projects_tab(ui);
 		box_projects_get_started_tab(ui);
 		///else
@@ -100,8 +100,8 @@ function box_projects_tab(ui: ui_t) {
 
 				let path: string = recent_projects[i];
 
-				///if krom_ios
-				let document_directory: string = krom_save_dialog("", "");
+				///if iron_ios
+				let document_directory: string = iron_save_dialog("", "");
 				document_directory = substring(document_directory, 0, document_directory.length - 8); // Strip /"untitled"
 				path = document_directory + path;
 				///end
@@ -127,9 +127,9 @@ function box_projects_tab(ui: ui_t) {
 						ui._x = uix;
 						ui_fill(0, 0, 128, 128, 0x66000000);
 						ui._x = _uix;
-						///if (krom_android || krom_ios)
+						///if (iron_android || iron_ios)
 						console_toast(tr("Opening project"));
-						krom_g4_swap_buffers();
+						iron_g4_swap_buffers();
 						///end
 						app_notify_on_init(function (path: string) {
 							ui_box_hide();
@@ -196,7 +196,7 @@ function box_projects_recent_tab(ui: ui_t) {
 		for (let i: i32 = 0; i < config_raw.recent_projects.length; ++i) {
 			let path: string = config_raw.recent_projects[i];
 			let file: string = path;
-			///if krom_windows
+			///if iron_windows
 			file = string_replace_all(path, "/", "\\");
 			///else
 			file = string_replace_all(path, "\\", "/");

@@ -14,7 +14,7 @@ function export_arm_run_mesh(path: string, paint_objects: mesh_object_t[]) {
 	if (!ends_with(path, ".arm")) {
 		path += ".arm";
 	}
-	krom_file_save_bytes(path, b, b.length + 1);
+	iron_file_save_bytes(path, b, b.length + 1);
 }
 
 function export_arm_run_project() {
@@ -119,7 +119,7 @@ function export_arm_run_project() {
 	///end
 
 	let packed_assets: packed_asset_t[] = (project_raw.packed_assets == null || project_raw.packed_assets.length == 0) ? null : project_raw.packed_assets;
-	///if krom_ios
+	///if iron_ios
 	let same_drive: bool = false;
 	///else
 	let same_drive: bool = project_raw.envmap != null ? char_at(project_filepath, 0) == char_at(project_raw.envmap, 0) : true;
@@ -156,26 +156,26 @@ function export_arm_run_project() {
 		material: c,
 		///end
 
-		///if (krom_metal || krom_vulkan)
+		///if (iron_metal || iron_vulkan)
 		is_bgra: true
 		///else
 		is_bgra: false
 		///end
 	};
 
-	///if (krom_android || krom_ios)
+	///if (iron_android || iron_ios)
 	let rt: render_target_t = map_get(render_path_render_targets, context_raw.render_mode == render_mode_t.FORWARD ? "buf" : "tex");
 	let tex: image_t = rt._image;
 	let mesh_icon: image_t = image_create_render_target(256, 256);
 	let r: f32 = app_w() / app_h();
 	g2_begin(mesh_icon);
-	///if krom_opengl
+	///if iron_opengl
 	g2_draw_scaled_image(tex, -(256 * r - 256) / 2, 256, 256 * r, -256);
 	///else
 	g2_draw_scaled_image(tex, -(256 * r - 256) / 2, 0, 256 * r, 256);
 	///end
 	g2_end();
-	///if krom_metal
+	///if iron_metal
 	// Flush command list
 	g2_begin(mesh_icon);
 	g2_end();
@@ -185,19 +185,19 @@ function export_arm_run_project() {
 	for (let i: i32 = 0; i < 256 * 256 * 4; ++i) {
 		u8a[i] = math_floor(math_pow(u8a[i] / 255, 1.0 / 2.2) * 255);
 	}
-	///if (krom_metal || krom_vulkan)
+	///if (iron_metal || iron_vulkan)
 	export_arm_bgra_swap(mesh_icon_pixels);
 	///end
 	app_notify_on_next_frame(function (mesh_icon: image_t) {
 		image_unload(mesh_icon);
 	});
 	// raw.mesh_icons =
-	// 	///if (krom_metal || krom_vulkan)
+	// 	///if (iron_metal || iron_vulkan)
 	// 	[encode(bgraSwap(mesh_icon_pixels)];
 	// 	///else
 	// 	[encode(mesh_icon_pixels)];
 	// 	///end
-	krom_write_png(substring(project_filepath, 0, project_filepath.length - 4) + "_icon.png", mesh_icon_pixels, 256, 256, 0);
+	iron_write_png(substring(project_filepath, 0, project_filepath.length - 4) + "_icon.png", mesh_icon_pixels, 256, 256, 0);
 	///end
 
 	///if (is_paint || is_sculpt)
@@ -208,10 +208,10 @@ function export_arm_run_project() {
 	///end
 
 	let buffer: buffer_t = util_encode_project(project_raw);
-	krom_file_save_bytes(project_filepath, buffer, buffer.length + 1);
+	iron_file_save_bytes(project_filepath, buffer, buffer.length + 1);
 
 	// Save to recent
-	///if krom_ios
+	///if iron_ios
 	let recent_path: string = substring(project_filepath, string_last_index_of(project_filepath, "/") + 1, project_filepath.length);
 	///else
 	let recent_path: string = project_filepath;
@@ -299,7 +299,7 @@ function export_arm_run_material(path: string) {
 
 	let micons: buffer_t[] = null;
 	if (!is_cloud) {
-		///if (krom_metal || krom_vulkan)
+		///if (iron_metal || iron_vulkan)
 		let buf: buffer_t = lz4_encode(export_arm_bgra_swap(image_get_pixels(m.image)));
 		///else
 		let buf: buffer_t = lz4_encode(image_get_pixels(m.image));
@@ -317,9 +317,9 @@ function export_arm_run_material(path: string) {
 	};
 
 	if (context_raw.write_icon_on_export) { // Separate icon files
-		krom_write_png(substring(path, 0, path.length - 4) + "_icon.png", image_get_pixels(m.image), m.image.width, m.image.height, 0);
+		iron_write_png(substring(path, 0, path.length - 4) + "_icon.png", image_get_pixels(m.image), m.image.width, m.image.height, 0);
 		if (is_cloud) {
-			krom_write_jpg(substring(path, 0, path.length - 4) + "_icon.jpg", image_get_pixels(m.image), m.image.width, m.image.height, 0, 50);
+			iron_write_jpg(substring(path, 0, path.length - 4) + "_icon.jpg", image_get_pixels(m.image), m.image.width, m.image.height, 0, 50);
 		}
 	}
 
@@ -328,11 +328,11 @@ function export_arm_run_material(path: string) {
 	}
 
 	let buffer: buffer_t = util_encode_project(raw);
-	krom_file_save_bytes(path, buffer, buffer.length + 1);
+	iron_file_save_bytes(path, buffer, buffer.length + 1);
 }
 ///end
 
-///if (krom_metal || krom_vulkan)
+///if (iron_metal || iron_vulkan)
 function export_arm_bgra_swap(buffer: buffer_t): buffer_t {
 	for (let i: i32 = 0; i < math_floor((buffer.length) / 4); ++i) {
 		let r: i32 = buffer[i * 4];
@@ -370,7 +370,7 @@ function export_arm_run_brush(path: string) {
 
 	let bicons: buffer_t[] = null;
 	if (!is_cloud) {
-		///if (krom_metal || krom_vulkan)
+		///if (iron_metal || iron_vulkan)
 		let buf: buffer_t = lz4_encode(export_arm_bgra_swap(image_get_pixels(b.image)));
 		///else
 		let buf: buffer_t = lz4_encode(image_get_pixels(b.image));
@@ -387,7 +387,7 @@ function export_arm_run_brush(path: string) {
 	};
 
 	if (context_raw.write_icon_on_export) { // Separate icon file
-		krom_write_png(substring(path, 0, path.length - 4) + "_icon.png", image_get_pixels(b.image), b.image.width, b.image.height, 0);
+		iron_write_png(substring(path, 0, path.length - 4) + "_icon.png", image_get_pixels(b.image), b.image.width, b.image.height, 0);
 	}
 
 	if (context_raw.pack_assets_on_export) { // Pack textures
@@ -395,7 +395,7 @@ function export_arm_run_brush(path: string) {
 	}
 
 	let buffer: buffer_t = util_encode_project(raw);
-	krom_file_save_bytes(path, buffer, buffer.length + 1);
+	iron_file_save_bytes(path, buffer, buffer.length + 1);
 }
 ///end
 
@@ -403,7 +403,7 @@ function export_arm_assets_to_files(project_path: string, assets: asset_t[]): st
 	let texture_files: string[] = [];
 	for (let i: i32 = 0; i < assets.length; ++i) {
 		let a: asset_t = assets[i];
-		///if krom_ios
+		///if iron_ios
 		let same_drive: bool = false;
 		///else
 		let same_drive: bool = char_at(project_path, 0) == char_at(a.file, 0);
@@ -424,7 +424,7 @@ function export_arm_meshes_to_files(project_path: string): string[] {
 	let mesh_files: string[] = [];
 	for (let i: i32 = 0; i < project_mesh_assets.length; ++i) {
 		let file: string = project_mesh_assets[i];
-		///if krom_ios
+		///if iron_ios
 		let same_drive: bool = false;
 		///else
 		let same_drive: bool = char_at(project_path, 0) == char_at(file, 0);
@@ -444,7 +444,7 @@ function export_arm_fonts_to_files(project_path: string, fonts: slot_font_t[]): 
 	let font_files: string[] = [];
 	for (let i: i32 = 1; i < fonts.length; ++i) {
 		let f: slot_font_t = fonts[i];
-		///if krom_ios
+		///if iron_ios
 		let same_drive: bool = false;
 		///else
 		let same_drive: bool = char_at(project_path, 0) == char_at(f.file, 0);
@@ -466,7 +466,7 @@ function export_arm_get_packed_assets(project_path: string, texture_files: strin
 	if (project_raw.packed_assets != null) {
 		for (let i: i32 = 0; i < project_raw.packed_assets.length; ++i) {
 			let pa: packed_asset_t = project_raw.packed_assets[i];
-			///if krom_ios
+			///if iron_ios
 			let same_drive: bool = false;
 			///else
 			let same_drive: bool = char_at(project_path, 0) == char_at(pa.name, 0);
@@ -504,8 +504,8 @@ function export_arm_pack_assets(raw: project_format_t, assets: asset_t[]) {
 			let pa: packed_asset_t = {
 				name: assets[i].file,
 				bytes: ends_with(assets[i].file, ".jpg") ?
-					krom_encode_jpg(image_get_pixels(temp), temp.width, temp.height, 0, 80) :
-					krom_encode_png(image_get_pixels(temp), temp.width, temp.height, 0)
+					iron_encode_jpg(image_get_pixels(temp), temp.width, temp.height, 0, 80) :
+					iron_encode_png(image_get_pixels(temp), temp.width, temp.height, 0)
 			};
 			array_push(raw.packed_assets, pa);
 		}
@@ -527,7 +527,7 @@ function export_arm_run_swatches(path: string) {
 		swatches: project_raw.swatches
 	};
 	let buffer: buffer_t = util_encode_project(raw);
-	krom_file_save_bytes(path, buffer, buffer.length + 1);
+	iron_file_save_bytes(path, buffer, buffer.length + 1);
 }
 
 function export_arm_vec3f32(v: vec4_t): f32_array_t {

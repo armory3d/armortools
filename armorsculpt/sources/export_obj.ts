@@ -94,5 +94,5 @@ function export_obj_run(path: string, paint_objects: mesh_object_t[], apply_disp
 		path += ".obj";
 	}
 
-	krom_file_save_bytes(path, o, 0);
+	iron_file_save_bytes(path, o, 0);
 }
