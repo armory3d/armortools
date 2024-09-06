@@ -1,5 +1,5 @@
 
-///if (iron_direct3d12 || iron_vulkan || iron_metal)
+///if (arm_direct3d12 || arm_vulkan || arm_metal)
 
 let render_path_raytrace_bake_rays_pix: i32 = 0;
 let render_path_raytrace_bake_rays_sec: i32 = 0;
@@ -112,7 +112,7 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 		render_path_bind_target("baketex2", "tex");
 		render_path_draw_shader("shader_datas/copy_pass/copy_pass");
 
-		///if iron_metal
+		///if arm_metal
 		let samples_per_frame: i32 = 4;
 		///else
 		let samples_per_frame: i32 = 64;

@@ -11,7 +11,7 @@ let ui_box_modalh: i32 = 170;
 let ui_box_modal_on_hide: ()=>void = null;
 let ui_box_draws: i32 = 0;
 let ui_box_copyable: bool = false;
-///if (iron_android || iron_ios)
+///if (arm_android || arm_ios)
 let ui_box_tween_alpha: f32 = 0.0;
 ///end
 
@@ -47,7 +47,7 @@ function ui_box_render() {
 	}
 
 	if (config_raw.touch_ui) { // Darken bg
-		///if (iron_android || iron_ios)
+		///if (arm_android || arm_ios)
 		g2_set_color(color_from_floats(0, 0, 0, ui_box_tween_alpha));
 		///else
 		g2_set_color(color_from_floats(0, 0, 0, 0.5));
@@ -87,7 +87,7 @@ function ui_box_render() {
 				}
 				_ui_end_element();
 
-				///if (iron_windows || iron_linux || iron_macos)
+				///if (arm_windows || arm_linux || arm_macos)
 				if (ui_box_copyable) {
 					let row: f32[] = [1 / 3, 1 / 3, 1 / 3];
 					ui_row(row);
@@ -103,7 +103,7 @@ function ui_box_render() {
 
 				_ui_end_element();
 
-				///if (iron_windows || iron_linux || iron_macos)
+				///if (arm_windows || arm_linux || arm_macos)
 				if (ui_box_copyable && ui_button(tr("Copy"))) {
 					iron_copy_to_clipboard(ui_box_text);
 				}
@@ -140,7 +140,7 @@ function ui_box_show_message(title: string, text: string, copyable: bool = false
 	ui_box_commands = null;
 	ui_box_copyable = copyable;
 	ui_box_draggable = true;
-	///if (iron_android || iron_ios)
+	///if (arm_android || arm_ios)
 	ui_box_tween_in();
 	///end
 }
@@ -152,13 +152,13 @@ function ui_box_show_custom(commands: (ui: ui_t)=>void = null, mw: i32 = 400, mh
 	ui_box_modal_on_hide = on_hide;
 	ui_box_commands = commands;
 	ui_box_draggable = draggable;
-	///if (iron_android || iron_ios)
+	///if (arm_android || arm_ios)
 	ui_box_tween_in();
 	///end
 }
 
 function ui_box_hide() {
-	///if (iron_android || iron_ios)
+	///if (arm_android || arm_ios)
 	ui_box_tween_out();
 	///else
 	ui_box_hide_internal();
@@ -173,7 +173,7 @@ function ui_box_hide_internal() {
 	base_redraw_ui();
 }
 
-///if (iron_android || iron_ios)
+///if (arm_android || arm_ios)
 function ui_box_tween_in() {
 	tween_reset();
 

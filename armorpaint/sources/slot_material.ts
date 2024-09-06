@@ -61,7 +61,7 @@ function slot_material_create(m: material_data_t = null, c: ui_node_canvas_t = n
 		raw.canvas = c;
 	}
 
-	///if (iron_android || iron_ios)
+	///if (arm_android || arm_ios)
 	raw.nodes.pan_x -= 50; // Center initial position
 	///end
 

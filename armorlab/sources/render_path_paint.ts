@@ -62,7 +62,7 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 
 		if (context_raw.tool == workspace_tool_t.PICKER) {
 
-				///if iron_metal
+				///if arm_metal
 				// render_path_set_target("texpaint_picker");
 				// render_path_clear_target(0xff000000);
 				// render_path_set_target("texpaint_nor_picker");
@@ -96,7 +96,7 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 				}
 
 				// Picked surface values
-				// ///if (iron_metal || iron_vulkan)
+				// ///if (arm_metal || arm_vulkan)
 				// context_raw.pickedColor.base.Rb = a.get(2);
 				// context_raw.pickedColor.base.Gb = a.get(1);
 				// context_raw.pickedColor.base.Bb = a.get(0);
@@ -202,7 +202,7 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 	let help_mat: mat4_t = mat4_identity();
 	mat4_get_inv(help_mat, scene_camera.vp);
 	g4_set_mat(base_cursor_inv_vp, help_mat);
-	///if (iron_metal || iron_vulkan)
+	///if (arm_metal || arm_vulkan)
 	let vs: vertex_structure_t[] = [{name: "tex", data: "short2norm"}];
 	g4_set_vertex_buffer(mesh_data_get(geom, vs));
 	///else
@@ -245,7 +245,7 @@ function render_path_paint_draw() {
 
 	if (context_raw.brush_blend_dirty) {
 		context_raw.brush_blend_dirty = false;
-		///if iron_metal
+		///if arm_metal
 		render_path_set_target("texpaint_blend0");
 		render_path_clear_target(0x00000000);
 		render_path_set_target("texpaint_blend1");

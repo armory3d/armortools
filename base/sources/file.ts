@@ -1,5 +1,5 @@
 
-///if iron_windows
+///if arm_windows
 let file_cmd_mkdir: string = "mkdir";
 let file_cmd_copy: string = "copy";
 ///else
@@ -10,7 +10,7 @@ let file_cmd_copy: string = "cp";
 let file_cloud: map_t<string, string[]> = null;
 let file_cloud_sizes: map_t<string, i32> = null;
 
-// ///if iron_android
+// ///if arm_android
 // let let file_internal: map_t<string, string[]> = null; // .apk contents
 // ///end
 
@@ -25,7 +25,7 @@ function file_read_directory(path: string, folders_only: bool = false): string[]
 			return empty;
 		}
 	}
-	// ///if iron_android
+	// ///if arm_android
 	// path = string_replace_all(path, "//", "/");
 	// if (file_internal == null) {
 	// 	file_internal = [];
@@ -50,9 +50,9 @@ function file_copy(srcPath: string, dst_path: string) {
 }
 
 function file_start(path: string) {
-	///if iron_windows
+	///if arm_windows
 	iron_sys_command("start \"\" \"" + path + "\"");
-	///elseif iron_linux
+	///elseif arm_linux
 	iron_sys_command("xdg-open \"" + path + "\"");
 	///else
 	iron_sys_command("open \"" + path + "\"");
@@ -79,7 +79,7 @@ type file_download_data_t = {
 let _file_download_map: map_t<string, file_download_data_t> = map_create();
 
 function file_download(url: string, dst_path: string, done: (url: string)=>void, size: i32 = 0) {
-	///if (iron_windows || iron_macos || iron_ios || iron_android)
+	///if (arm_windows || arm_macos || arm_ios || arm_android)
 	let fdd: file_download_data_t = { dst_path: dst_path, done: done };
 	map_set(_file_download_map, url, fdd);
 	iron_http_request(url, size, function (url: string, ab: buffer_t) {
@@ -89,7 +89,7 @@ function file_download(url: string, dst_path: string, done: (url: string)=>void,
 		}
 		fdd.done(url);
 	});
-	///elseif iron_linux
+	///elseif arm_linux
 	iron_sys_command("wget -O \"" + dst_path + "\" \"" + url + "\"");
 	done(url);
 	///else
@@ -134,7 +134,7 @@ type file_cache_cloud_data_t = {
 let _file_cache_cloud_map: map_t<string, file_cache_cloud_data_t> = map_create();
 
 function file_cache_cloud(path: string, done: (s: string)=>void) {
-	///if iron_ios
+	///if arm_ios
 	let path2: string = string_replace_all(path, "/", "_"); // Cache everything into root folder
 	///else
 	let path2: string = path;
@@ -149,7 +149,7 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 	dest += path2;
 
 	if (file_exists(dest)) {
-		///if (iron_macos || iron_ios)
+		///if (arm_macos || arm_ios)
 		done(dest);
 		///else
 		let p: string;
@@ -169,7 +169,7 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 	if (file_read_directory(file_dir)[0] == "") {
 		file_create_directory(file_dir);
 	}
-	///if iron_windows
+	///if arm_windows
 	path = string_replace_all(path, "\\", "/");
 	///end
 	let url: string = config_raw.server + "/" + path;
@@ -184,7 +184,7 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 			fccd.done(null);
 			return;
 		}
-		///if (iron_macos || iron_ios)
+		///if (arm_macos || arm_ios)
 		fccd.done(fccd.dest);
 		///else
 		let p: string;

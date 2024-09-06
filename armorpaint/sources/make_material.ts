@@ -104,7 +104,7 @@ function make_material_parse_mesh_material() {
 	make_material_make_voxel(m);
 	///end
 
-	///if (iron_direct3d12 || iron_vulkan || iron_metal)
+	///if (arm_direct3d12 || arm_vulkan || arm_metal)
 	render_path_raytrace_dirty = 1;
 	///end
 }

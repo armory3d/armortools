@@ -114,14 +114,14 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 		context_raw.ddirty = 2;
 		app_remove_render_2d(ui_nodes_ext_delay_idle_sleep);
 
-		///if (iron_direct3d12 || iron_vulkan || iron_metal)
+		///if (arm_direct3d12 || arm_vulkan || arm_metal)
 		render_path_raytrace_ready = false;
 		///end
 	}
 	ui._x += ew + 3;
 	ui._y = 2 + start_y;
 
-	///if (iron_android || iron_ios)
+	///if (arm_android || arm_ios)
 	let base_res_combo: string[] = ["2K", "4K"];
 	ui_combo(base_res_handle, base_res_combo, tr("Resolution"));
 	///else

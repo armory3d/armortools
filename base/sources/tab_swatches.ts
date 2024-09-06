@@ -183,7 +183,7 @@ function tab_swatches_draw(htab: ui_handle_t) {
 				if (ui.is_hovered && ui.input_released_r) {
 					context_set_swatch(project_raw.swatches[i]);
 					let add: i32 = project_raw.swatches.length > 1 ? 1 : 0;
-					///if (iron_windows || iron_linux || iron_macos)
+					///if (arm_windows || arm_linux || arm_macos)
 					add += 1; // Copy
 					///end
 
@@ -203,7 +203,7 @@ function tab_swatches_draw(htab: ui_handle_t) {
 							context_set_swatch(project_clone_swatch(context_raw.swatch));
 							array_push(project_raw.swatches, context_raw.swatch);
 						}
-						///if (iron_windows || iron_linux || iron_macos)
+						///if (arm_windows || arm_linux || arm_macos)
 						else if (ui_menu_button(ui, tr("Copy Hex Code"))) {
 							let color: i32 = context_raw.swatch.base;
 							color = color_set_ab(color, context_raw.swatch.opacity * 255);

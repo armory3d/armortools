@@ -1,11 +1,11 @@
 
-///if iron_windows
+///if arm_windows
 let path_sep: string = "\\";
 ///else
 let path_sep: string = "/";
 ///end
 
-///if iron_windows
+///if arm_windows
 let path_pwd: string = "cd";
 ///else
 let path_pwd: string = "echo $PWD";
@@ -191,11 +191,11 @@ function path_is_folder(p: string): bool {
 }
 
 function path_is_protected(): bool {
-	///if iron_windows
+	///if arm_windows
 	return string_index_of(iron_get_files_location(), "Program Files") >= 0;
-	///elseif iron_android
+	///elseif arm_android
 	return true;
-	///elseif iron_ios
+	///elseif arm_ios
 	return true;
 	///else
 	return false;

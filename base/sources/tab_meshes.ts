@@ -208,7 +208,7 @@ function tab_meshes_set_default_mesh(name: string) {
 		scene_meshes = [mo];
 	}
 
-	///if (iron_direct3d12 || iron_vulkan || iron_metal)
+	///if (arm_direct3d12 || arm_vulkan || arm_metal)
 	render_path_raytrace_ready = false;
 	///end
 }

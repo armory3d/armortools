@@ -187,7 +187,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 	else if (context_raw.tool == workspace_tool_t.BAKE) {
 		ui.changed = false;
 
-		///if (iron_direct3d12 || iron_vulkan || iron_metal)
+		///if (arm_direct3d12 || arm_vulkan || arm_metal)
 		let baking: bool = context_raw.pdirty > 0;
 		let rt_bake: bool = context_raw.bake_type == bake_type_t.AO || context_raw.bake_type == bake_type_t.LIGHTMAP || context_raw.bake_type == bake_type_t.BENT_NORMAL || context_raw.bake_type == bake_type_t.THICKNESS;
 		if (baking && ui_button(tr("Stop"))) {
@@ -207,7 +207,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			});
 			ui_base_hwnds[0].redraws = 2;
 			history_push_undo = true;
-			///if (iron_direct3d12 || iron_vulkan || iron_metal)
+			///if (arm_direct3d12 || arm_vulkan || arm_metal)
 			render_path_raytrace_bake_current_sample = 0;
 			///end
 		}
@@ -229,7 +229,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			tr("Object ID"),
 			tr("Vertex Color"),
 		];
-		///if (iron_direct3d12 || iron_vulkan || iron_metal)
+		///if (arm_direct3d12 || arm_vulkan || arm_metal)
 		if (iron_raytrace_supported()) {
 			array_push(bakes, tr("Lightmap"));
 			array_push(bakes, tr("Bent Normal"));
@@ -242,13 +242,13 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 
 		context_raw.bake_type = ui_combo(bake_handle, bakes, tr("Bake"));
 
-		///if (iron_direct3d12 || iron_vulkan || iron_metal)
+		///if (arm_direct3d12 || arm_vulkan || arm_metal)
 		if (!iron_raytrace_supported()) {
 			context_raw.bake_type += 1; // Offset for removed AO
 		}
 		///end
 
-		///if (iron_direct3d12 || iron_vulkan || iron_metal)
+		///if (arm_direct3d12 || arm_vulkan || arm_metal)
 		if (rt_bake) {
 			let samples_handle: ui_handle_t = ui_handle(__ID__);
 			if (samples_handle.init) {
@@ -291,7 +291,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			}
 			context_raw.bake_ao_offset = ui_slider(offset_handle, tr("Offset"), 0.0, 2.0, true);
 		}
-		///if (iron_direct3d12 || iron_vulkan || iron_metal)
+		///if (arm_direct3d12 || arm_vulkan || arm_metal)
 		if (rt_bake) {
 			let progress: f32 = render_path_raytrace_bake_current_sample / context_raw.bake_samples;
 			if (progress > 1.0) progress = 1.0;

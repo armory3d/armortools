@@ -46,11 +46,11 @@ let _project_save_and_quit: bool;
 
 function project_save(save_and_quit: bool = false) {
 	if (project_filepath == "") {
-		///if iron_ios
+		///if arm_ios
 		let document_directory: string = iron_save_dialog("", "");
 		document_directory = substring(document_directory, 0, document_directory.length - 8); // Strip /"untitled"
 		project_filepath = document_directory + "/" + sys_title() + ".arm";
-		///elseif iron_android
+		///elseif arm_android
 		project_filepath = iron_save_path() + "/" + sys_title() + ".arm";
 		///else
 		project_save_as(save_and_quit);
@@ -58,7 +58,7 @@ function project_save(save_and_quit: bool = false) {
 		///end
 	}
 
-	///if (iron_windows || iron_linux || iron_macos)
+	///if (arm_windows || arm_linux || arm_macos)
 	let filename: string = substring(project_filepath, string_last_index_of(project_filepath, path_sep) + 1, project_filepath.length - 4);
 	sys_title_set(filename + " - " + manifest_title);
 	///end
@@ -139,7 +139,7 @@ function project_new_box() {
 }
 
 function project_new(reset_layers: bool = true) {
-	///if (iron_windows || iron_linux || iron_macos)
+	///if (arm_windows || arm_linux || arm_macos)
 	sys_title_set(manifest_title);
 	///end
 	project_filepath = "";
@@ -335,7 +335,7 @@ function project_new(reset_layers: bool = true) {
 	context_init_tool();
 	///end
 
-	///if (iron_direct3d12 || iron_vulkan || iron_metal)
+	///if (arm_direct3d12 || arm_vulkan || arm_metal)
 	render_path_raytrace_ready = false;
 	///end
 }
@@ -424,7 +424,7 @@ function project_import_mesh_box(path: string, replace_existing: bool = true, cl
 	_project_import_mesh_box_clear_layers = clear_layers;
 	_project_import_mesh_box_done = done;
 
-	///if iron_ios
+	///if arm_ios
 	// Import immediately while access to resource is unlocked
 	// data_get_blob(path);
 	///end
@@ -469,7 +469,7 @@ function project_import_mesh_box(path: string, replace_existing: bool = true, cl
 			if (ui_button(tr("Import")) || ui.is_return_down) {
 				ui_box_hide();
 
-				///if (iron_android || iron_ios)
+				///if (arm_android || arm_ios)
 				console_toast(tr("Importing mesh"));
 				iron_g4_swap_buffers();
 				///end
@@ -543,7 +543,7 @@ function project_unwrap_mesh_box(mesh: raw_mesh_t, done: (a: raw_mesh_t)=>void, 
 			if (ui_button(tr("Unwrap")) || ui.is_return_down || skip_ui) {
 				ui_box_hide();
 
-				///if (iron_android || iron_ios)
+				///if (arm_android || arm_ios)
 				console_toast(tr("Unwrapping mesh"));
 				iron_g4_swap_buffers();
 				///end

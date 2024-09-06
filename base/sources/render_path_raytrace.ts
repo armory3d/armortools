@@ -1,5 +1,5 @@
 
-///if (iron_direct3d12 || iron_vulkan || iron_metal)
+///if (arm_direct3d12 || arm_vulkan || arm_metal)
 
 let render_path_raytrace_frame: i32 = 0;
 let render_path_raytrace_ready: bool = false;
@@ -15,9 +15,9 @@ let render_path_raytrace_ib: index_buffer_t;
 let render_path_raytrace_last_envmap: image_t = null;
 let render_path_raytrace_is_bake: bool = false;
 
-///if iron_direct3d12
+///if arm_direct3d12
 let render_path_raytrace_ext: string = ".cso";
-///elseif iron_metal
+///elseif arm_metal
 let render_path_raytrace_ext: string = ".metal";
 ///else
 let render_path_raytrace_ext: string = ".spirv";
@@ -84,7 +84,7 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 	render_path_raytrace_f32a[1] = transform_world_y(ct);
 	render_path_raytrace_f32a[2] = transform_world_z(ct);
 	render_path_raytrace_f32a[3] = render_path_raytrace_frame;
-	///if iron_metal
+	///if arm_metal
 	// frame = (frame % (16)) + 1; // _PAINT
 	render_path_raytrace_frame = render_path_raytrace_frame + 1; // _RENDER
 	///else
@@ -121,7 +121,7 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 	iron_raytrace_dispatch_rays(framebuffer._image.render_target_, render_path_raytrace_f32a);
 
 	if (context_raw.ddirty == 1 || context_raw.pdirty == 1) {
-		///if iron_metal
+		///if arm_metal
 		context_raw.rdirty = 128;
 		///else
 		context_raw.rdirty = 4;
@@ -174,7 +174,7 @@ function render_path_raytrace_draw(useLiveLayer: bool) {
 		render_path_raytrace_frame = 0;
 	}
 
-	///if iron_metal
+	///if arm_metal
 	// Delay path tracing additional samples while painting
 	let down: bool = mouse_down() || pen_down();
 	if (context_in_viewport() && down) {

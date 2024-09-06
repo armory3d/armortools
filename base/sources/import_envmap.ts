@@ -59,7 +59,7 @@ function import_envmap_run(path: string, image: image_t) {
 		for (let i: i32 = 0; i < import_envmap_mips_cpu.length; ++i) {
 			let mip: image_t = import_envmap_mips_cpu[i];
 			app_notify_on_next_frame(function (mip: image_t) {
-				///if (!iron_direct3d12) // TODO: crashes after 50+ imports
+				///if (!arm_direct3d12) // TODO: crashes after 50+ imports
 				image_unload(mip);
 				///end
 			}, mip);

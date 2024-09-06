@@ -43,15 +43,15 @@ type context_t = {
 	parse_vcols?: bool;
 
 	select_time?: f32;
-	///if (iron_direct3d12 || iron_vulkan || iron_metal)
+	///if (arm_direct3d12 || arm_vulkan || arm_metal)
 	pathtrace_mode?: path_trace_mode_t;
 	///end
-	///if (iron_direct3d12 || iron_vulkan) // || iron_metal)
+	///if (arm_direct3d12 || arm_vulkan) // || arm_metal)
 	viewport_mode?: viewport_mode_t;
 	///else
 	viewport_mode?: viewport_mode_t;
 	///end
-	///if (iron_android || iron_ios)
+	///if (arm_android || arm_ios)
 	render_mode?: render_mode_t;
 	///else
 	render_mode?: render_mode_t;
@@ -331,15 +331,15 @@ function context_create(): context_t {
 	c.parse_transform = true;
 	c.parse_vcols = false;
 	c.select_time = 0.0;
-	///if (iron_direct3d12 || iron_vulkan || iron_metal)
+	///if (arm_direct3d12 || arm_vulkan || arm_metal)
 	c.pathtrace_mode = path_trace_mode_t.CORE;
 	///end
-	///if (iron_direct3d12 || iron_vulkan) // || iron_metal)
+	///if (arm_direct3d12 || arm_vulkan) // || arm_metal)
 	c.viewport_mode = viewport_mode_t.PATH_TRACE;
 	///else
 	c.viewport_mode = viewport_mode_t.LIT;
 	///end
-	///if (iron_android || iron_ios)
+	///if (arm_android || arm_ios)
 	c.render_mode = render_mode_t.FORWARD;
 	///else
 	c.render_mode = render_mode_t.DEFERRED;
@@ -666,7 +666,7 @@ function context_init_tool() {
 	}
 
 	else if (context_raw.tool == workspace_tool_t.BAKE) {
-		///if (iron_direct3d12 || iron_vulkan || iron_metal)
+		///if (arm_direct3d12 || arm_vulkan || arm_metal)
 		// Bake in lit mode for now
 		if (context_raw.viewport_mode == viewport_mode_t.PATH_TRACE) {
 			context_raw.viewport_mode = viewport_mode_t.LIT;
@@ -679,7 +679,7 @@ function context_init_tool() {
 		context_main_object().skip_context = null;
 	}
 
-	///if iron_ios
+	///if arm_ios
 	// No hover on iPad, decals are painted by pen release
 	config_raw.brush_live = decal;
 	///end

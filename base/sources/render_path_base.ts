@@ -160,7 +160,7 @@ function render_path_base_is_cached(): bool {
 		if (mx != render_path_base_last_x || my != render_path_base_last_y || mouse_locked) {
 			context_raw.ddirty = 0;
 		}
-		///if (iron_metal || iron_android)
+		///if (arm_metal || arm_android)
 		if (context_raw.ddirty > -6) {
 		///else
 		if (context_raw.ddirty > -2) {
@@ -192,7 +192,7 @@ function render_path_base_commands(draw_commands: ()=>void) {
 	render_path_base_draw_gbuffer();
 	render_path_paint_draw();
 
-	///if (iron_direct3d12 || iron_vulkan || iron_metal)
+	///if (arm_direct3d12 || arm_vulkan || arm_metal)
 	if (context_raw.viewport_mode ==  viewport_mode_t.PATH_TRACE) {
 		///if is_paint
 		let use_live_layer: bool = context_raw.tool == workspace_tool_t.MATERIAL;
@@ -264,7 +264,7 @@ function render_path_base_draw_split(draw_commands: ()=>void) {
 
 		render_path_base_draw_gbuffer();
 
-		///if (iron_direct3d12 || iron_vulkan || iron_metal)
+		///if (arm_direct3d12 || arm_vulkan || arm_metal)
 		///if is_paint
 		let use_live_layer: bool = context_raw.tool == workspace_tool_t.MATERIAL;
 		///else
@@ -375,14 +375,14 @@ function render_path_base_draw_deferred_light() {
 		render_path_draw_shader("shader_datas/deferred_light/deferred_light_voxel") :
 		render_path_draw_shader("shader_datas/deferred_light/deferred_light");
 
-	///if (iron_direct3d11 || iron_direct3d12 || iron_metal || iron_vulkan)
+	///if (arm_direct3d11 || arm_direct3d12 || arm_metal || arm_vulkan)
 	render_path_set_depth_from("tex", "gbuffer0"); // Bind depth for world pass
 	///end
 
 	render_path_set_target("tex");
 	render_path_draw_skydome("shader_datas/world_pass/world_pass");
 
-	///if (iron_direct3d11 || iron_direct3d12 || iron_metal || iron_vulkan)
+	///if (arm_direct3d11 || arm_direct3d12 || arm_metal || arm_vulkan)
 	render_path_set_depth_from("tex", "gbuffer1"); // Unbind depth
 	///end
 }
@@ -511,7 +511,7 @@ function render_path_base_draw_taa() {
 
 function render_path_base_draw_gbuffer() {
 	render_path_set_target("gbuffer0"); // Only clear gbuffer0
-	///if iron_metal
+	///if arm_metal
 	render_path_clear_target(0x00000000, 1.0, clear_flag_t.COLOR | clear_flag_t.DEPTH);
 	///else
 	render_path_clear_target(0, 1.0, clear_flag_t.DEPTH);
@@ -590,7 +590,7 @@ function render_path_base_make_gbuffer_copy_textures() {
 			render_path_create_render_target(t);
 		}
 
-		///if iron_metal
+		///if arm_metal
 		// TODO: Fix depth attach for gbuffer0_copy on metal
 		// Use resize to re-create buffers from scratch for now
 		render_path_resize();

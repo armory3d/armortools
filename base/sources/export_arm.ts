@@ -119,7 +119,7 @@ function export_arm_run_project() {
 	///end
 
 	let packed_assets: packed_asset_t[] = (project_raw.packed_assets == null || project_raw.packed_assets.length == 0) ? null : project_raw.packed_assets;
-	///if iron_ios
+	///if arm_ios
 	let same_drive: bool = false;
 	///else
 	let same_drive: bool = project_raw.envmap != null ? char_at(project_filepath, 0) == char_at(project_raw.envmap, 0) : true;
@@ -156,26 +156,26 @@ function export_arm_run_project() {
 		material: c,
 		///end
 
-		///if (iron_metal || iron_vulkan)
+		///if (arm_metal || arm_vulkan)
 		is_bgra: true
 		///else
 		is_bgra: false
 		///end
 	};
 
-	///if (iron_android || iron_ios)
+	///if (arm_android || arm_ios)
 	let rt: render_target_t = map_get(render_path_render_targets, context_raw.render_mode == render_mode_t.FORWARD ? "buf" : "tex");
 	let tex: image_t = rt._image;
 	let mesh_icon: image_t = image_create_render_target(256, 256);
 	let r: f32 = app_w() / app_h();
 	g2_begin(mesh_icon);
-	///if iron_opengl
+	///if arm_opengl
 	g2_draw_scaled_image(tex, -(256 * r - 256) / 2, 256, 256 * r, -256);
 	///else
 	g2_draw_scaled_image(tex, -(256 * r - 256) / 2, 0, 256 * r, 256);
 	///end
 	g2_end();
-	///if iron_metal
+	///if arm_metal
 	// Flush command list
 	g2_begin(mesh_icon);
 	g2_end();
@@ -185,14 +185,14 @@ function export_arm_run_project() {
 	for (let i: i32 = 0; i < 256 * 256 * 4; ++i) {
 		u8a[i] = math_floor(math_pow(u8a[i] / 255, 1.0 / 2.2) * 255);
 	}
-	///if (iron_metal || iron_vulkan)
+	///if (arm_metal || arm_vulkan)
 	export_arm_bgra_swap(mesh_icon_pixels);
 	///end
 	app_notify_on_next_frame(function (mesh_icon: image_t) {
 		image_unload(mesh_icon);
 	});
 	// raw.mesh_icons =
-	// 	///if (iron_metal || iron_vulkan)
+	// 	///if (arm_metal || arm_vulkan)
 	// 	[encode(bgraSwap(mesh_icon_pixels)];
 	// 	///else
 	// 	[encode(mesh_icon_pixels)];
@@ -211,7 +211,7 @@ function export_arm_run_project() {
 	iron_file_save_bytes(project_filepath, buffer, buffer.length + 1);
 
 	// Save to recent
-	///if iron_ios
+	///if arm_ios
 	let recent_path: string = substring(project_filepath, string_last_index_of(project_filepath, "/") + 1, project_filepath.length);
 	///else
 	let recent_path: string = project_filepath;
@@ -299,7 +299,7 @@ function export_arm_run_material(path: string) {
 
 	let micons: buffer_t[] = null;
 	if (!is_cloud) {
-		///if (iron_metal || iron_vulkan)
+		///if (arm_metal || arm_vulkan)
 		let buf: buffer_t = lz4_encode(export_arm_bgra_swap(image_get_pixels(m.image)));
 		///else
 		let buf: buffer_t = lz4_encode(image_get_pixels(m.image));
@@ -332,7 +332,7 @@ function export_arm_run_material(path: string) {
 }
 ///end
 
-///if (iron_metal || iron_vulkan)
+///if (arm_metal || arm_vulkan)
 function export_arm_bgra_swap(buffer: buffer_t): buffer_t {
 	for (let i: i32 = 0; i < math_floor((buffer.length) / 4); ++i) {
 		let r: i32 = buffer[i * 4];
@@ -370,7 +370,7 @@ function export_arm_run_brush(path: string) {
 
 	let bicons: buffer_t[] = null;
 	if (!is_cloud) {
-		///if (iron_metal || iron_vulkan)
+		///if (arm_metal || arm_vulkan)
 		let buf: buffer_t = lz4_encode(export_arm_bgra_swap(image_get_pixels(b.image)));
 		///else
 		let buf: buffer_t = lz4_encode(image_get_pixels(b.image));
@@ -403,7 +403,7 @@ function export_arm_assets_to_files(project_path: string, assets: asset_t[]): st
 	let texture_files: string[] = [];
 	for (let i: i32 = 0; i < assets.length; ++i) {
 		let a: asset_t = assets[i];
-		///if iron_ios
+		///if arm_ios
 		let same_drive: bool = false;
 		///else
 		let same_drive: bool = char_at(project_path, 0) == char_at(a.file, 0);
@@ -424,7 +424,7 @@ function export_arm_meshes_to_files(project_path: string): string[] {
 	let mesh_files: string[] = [];
 	for (let i: i32 = 0; i < project_mesh_assets.length; ++i) {
 		let file: string = project_mesh_assets[i];
-		///if iron_ios
+		///if arm_ios
 		let same_drive: bool = false;
 		///else
 		let same_drive: bool = char_at(project_path, 0) == char_at(file, 0);
@@ -444,7 +444,7 @@ function export_arm_fonts_to_files(project_path: string, fonts: slot_font_t[]): 
 	let font_files: string[] = [];
 	for (let i: i32 = 1; i < fonts.length; ++i) {
 		let f: slot_font_t = fonts[i];
-		///if iron_ios
+		///if arm_ios
 		let same_drive: bool = false;
 		///else
 		let same_drive: bool = char_at(project_path, 0) == char_at(f.file, 0);
@@ -466,7 +466,7 @@ function export_arm_get_packed_assets(project_path: string, texture_files: strin
 	if (project_raw.packed_assets != null) {
 		for (let i: i32 = 0; i < project_raw.packed_assets.length; ++i) {
 			let pa: packed_asset_t = project_raw.packed_assets[i];
-			///if iron_ios
+			///if arm_ios
 			let same_drive: bool = false;
 			///else
 			let same_drive: bool = char_at(project_path, 0) == char_at(pa.name, 0);

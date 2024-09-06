@@ -268,7 +268,7 @@ function save_file() {
 }
 
 function build_file(): string {
-	///if iron_windows
+	///if arm_windows
 	return "\\build.bat";
 	///else
 	return "/build.sh";

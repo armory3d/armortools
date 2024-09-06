@@ -203,7 +203,7 @@ function tab_layers_combo_filter() {
 		base_set_object_mask();
 		util_uv_uvmap_cached = false;
 		context_raw.ddirty = 2;
-		///if (iron_direct3d12 || iron_vulkan || iron_metal)
+		///if (arm_direct3d12 || arm_vulkan || arm_metal)
 		render_path_raytrace_ready = false;
 		///end
 	}
@@ -363,7 +363,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	ui._y -= 3;
 	ui._y -= center;
 
-	///if iron_opengl
+	///if arm_opengl
 	ui.image_invert_y = l.fill_layer != null;
 	///end
 
@@ -385,7 +385,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 		ui._x += 12 * ui_SCALE(ui);
 	}
 
-	///if iron_opengl
+	///if arm_opengl
 	ui.image_invert_y = false;
 	///end
 
@@ -669,7 +669,7 @@ function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32,
 		}
 		if (l.fill_layer == null && slot_layer_is_mask(l)) {
 			g2_set_pipeline(ui_view2d_pipe);
-			///if iron_opengl
+			///if arm_opengl
 			iron_g4_set_pipeline(ui_view2d_pipe.pipeline_);
 			///end
 			iron_g4_set_int(ui_view2d_channel_loc, 1);
@@ -920,7 +920,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			ui_menu_fill(ui);
 			ui_menu_align(ui);
 			let res_handle_changed_last: bool = base_res_handle.changed;
-			///if (iron_android || iron_ios)
+			///if (arm_android || arm_ios)
 			let ar: string[] = ["128", "256", "512", "1K", "2K", "4K"];
 			///else
 			let ar: string[] = ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"];
@@ -940,7 +940,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 
 			ui_menu_fill(ui);
 			ui_menu_align(ui);
-			///if (iron_android || iron_ios)
+			///if (arm_android || arm_ios)
 			let bits_items: string[] = ["8bit"];
 			ui_inline_radio(base_bits_handle, bits_items, ui_align_t.LEFT);
 			///else

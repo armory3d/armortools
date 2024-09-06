@@ -33,7 +33,7 @@ function import_mesh_run(path: string, _clear_layers: bool = true, replace_exist
 
 	project_mesh_assets = [path];
 
-	///if (iron_android || iron_ios)
+	///if (arm_android || arm_ios)
 	sys_title_set(substring(path, string_last_index_of(path, path_sep) + 1, string_last_index_of(path, ".")));
 	///end
 }

@@ -7,7 +7,7 @@ function make_bake_run(con: node_shader_context_t, vert: node_shader_t, frag: no
 		frag.n = true;
 		frag.vvec = true;
 		node_shader_add_function(frag, str_cotangent_frame);
-		///if iron_direct3d11
+		///if arm_direct3d11
 		node_shader_write(frag, "mat3 TBN = cotangent_frame(n, vvec, tex_coord);");
 		///else
 		node_shader_write(frag, "mat3 TBN = cotangent_frame(n, -vvec, tex_coord);");

@@ -14,7 +14,7 @@ function config_load() {
 	path += "config.json";
 	let blob: buffer_t = data_get_blob(path);
 
-	///if iron_linux
+	///if arm_linux
 	if (blob == null) { // Protected directory
 		blob = data_get_blob(iron_save_path() + "config.json");
 	}
@@ -104,7 +104,7 @@ function config_save() {
 	let buffer: buffer_t = sys_string_to_buffer(config_json);
 	iron_file_save_bytes(path, buffer, 0);
 
-	///if iron_linux // Protected directory
+	///if arm_linux // Protected directory
 	if (!file_exists(path)) {
 		iron_file_save_bytes(iron_save_path() + "config.json", buffer, 0);
 	}
@@ -121,7 +121,7 @@ function config_init() {
 		config_raw.window_maximizable = true;
 		config_raw.window_w = 1600;
 		config_raw.window_h = 900;
-		///if iron_macos
+		///if arm_macos
 		config_raw.window_w *= 2;
 		config_raw.window_h *= 2;
 		///end
@@ -131,7 +131,7 @@ function config_init() {
 		if (sys_display_width() >= 2560 && sys_display_height() >= 1600) {
 			config_raw.window_scale = 2.0;
 		}
-		///if (iron_android || iron_ios || iron_macos)
+		///if (arm_android || arm_ios || arm_macos)
 		config_raw.window_scale = 2.0;
 		///end
 		config_raw.window_vsync = true;
@@ -141,7 +141,7 @@ function config_init() {
 		config_raw.rp_vignette = 0.2;
 		config_raw.rp_grain = 0.09;
 		config_raw.rp_motionblur = false;
-		///if (iron_android || iron_ios)
+		///if (arm_android || arm_ios)
 		config_raw.rp_ssao = false;
 		///else
 		config_raw.rp_ssao = true;

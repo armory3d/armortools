@@ -101,7 +101,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 			node_shader_add_uniform(frag, "sampler2D gbuffer1");
 			node_shader_add_uniform(frag, "sampler2D gbuffer2");
 			node_shader_write(frag, "vec2 fragcoord = (wvpposition.xy / wvpposition.w) * 0.5 + 0.5;");
-			///if (iron_direct3d11 || iron_direct3d12 || iron_metal || iron_vulkan)
+			///if (arm_direct3d11 || arm_direct3d12 || arm_metal || arm_vulkan)
 			node_shader_write(frag, "fragcoord.y = 1.0 - fragcoord.y;");
 			///end
 			node_shader_write(frag, "vec4 gbuffer0_sample = textureLod(gbuffer0, fragcoord, 0.0);");
@@ -219,7 +219,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 			node_shader_add_shared_sampler(frag, "sampler2D texpaint" + l.id);
 			node_shader_write(frag, "texpaint_sample = textureLodShared(texpaint" + l.id + ", tex_coord, 0.0);");
 			node_shader_write(frag, "texpaint_opac = texpaint_sample.a;");
-			// ///if (iron_direct3d12 || iron_vulkan)
+			// ///if (arm_direct3d12 || arm_vulkan)
 			// if (raw.viewportMode == ViewLit) {
 			// 	write(frag, "if (texpaint_opac < 0.1) discard;");
 			// }
@@ -363,7 +363,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 		}
 
 		frag.vvec = true;
-		///if (iron_direct3d11 || iron_direct3d12 || iron_metal || iron_vulkan)
+		///if (arm_direct3d11 || arm_direct3d12 || arm_metal || arm_vulkan)
 		node_shader_write(frag, "mat3 TBN = cotangent_frame(n, vvec, tex_coord);");
 		///else
 		node_shader_write(frag, "mat3 TBN = cotangent_frame(n, -vvec, tex_coord);");
@@ -531,7 +531,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 }
 
 function make_mesh_get_max_textures(): i32 {
-	///if iron_direct3d11
+	///if arm_direct3d11
 	return 128 - 66;
 	///else
 	return 16 - 3; // G4onG5/G4.c.h MAX_TEXTURES

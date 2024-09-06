@@ -102,7 +102,7 @@ function box_preferences_show() {
 				ui_base_tag_ui_redraw();
 			}
 
-			///if !(iron_android || iron_ios)
+			///if !(arm_android || arm_ios)
 			ui.changed = false;
 			let h_touch_ui: ui_handle_t = ui_handle(__ID__);
 			if (h_touch_ui.init) {
@@ -427,7 +427,7 @@ function box_preferences_show() {
 			}
 
 			///if is_paint
-			///if (iron_android || iron_ios)
+			///if (arm_android || arm_ios)
 			let layer_res_combo: string[] = ["128", "256", "512", "1K", "2K", "4K"];
 			ui_combo(layer_res_handle, layer_res_combo, tr("Default Layer Resolution"), true);
 			///else
@@ -437,7 +437,7 @@ function box_preferences_show() {
 			///end
 
 			///if is_lab
-			///if (iron_android || iron_ios)
+			///if (arm_android || arm_ios)
 			let layer_res_combo: string[] = ["2K", "4K"];
 			ui_combo(layer_res_handle, layer_res_combo, tr("Default Layer Resolution"), true);
 			///else
@@ -534,7 +534,7 @@ function box_preferences_show() {
 		}
 
 		let pen_name: string;
-		///if iron_ios
+		///if arm_ios
 		pen_name = tr("Pencil");
 		///else
 		pen_name = tr("Pen");
@@ -613,7 +613,7 @@ function box_preferences_show() {
 		}
 
 		if (ui_tab(box_preferences_htab, tr("Viewport"), true)) {
-			///if (iron_direct3d12 || iron_vulkan || iron_metal)
+			///if (arm_direct3d12 || arm_vulkan || arm_metal)
 
 			let hpathtrace_mode: ui_handle_t = ui_handle(__ID__);
 			if (hpathtrace_mode.init) {

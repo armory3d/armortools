@@ -121,7 +121,7 @@ function util_mesh_merge(paint_objects: mesh_object_t[] = null) {
 	context_raw.merged_object.force_context = "paint";
 	object_set_parent(context_raw.merged_object.base, context_main_object().base);
 
-	///if (iron_direct3d12 || iron_vulkan || iron_metal)
+	///if (arm_direct3d12 || arm_vulkan || arm_metal)
 	render_path_raytrace_ready = false;
 	///end
 }
@@ -197,7 +197,7 @@ function util_mesh_flip_normals() {
 		g4_vertex_buffer_unlock(g._.vertex_buffer);
 	}
 
-	///if (iron_direct3d12 || iron_vulkan || iron_metal)
+	///if (arm_direct3d12 || arm_vulkan || arm_metal)
 	render_path_raytrace_ready = false;
 	///end
 }
@@ -296,7 +296,7 @@ function util_mesh_calc_normals(smooth: bool = false) {
 		}
 	}
 
-	///if (iron_direct3d12 || iron_vulkan || iron_metal)
+	///if (arm_direct3d12 || arm_vulkan || arm_metal)
 	util_mesh_merge();
 	render_path_raytrace_ready = false;
 	///end

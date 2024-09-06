@@ -1,10 +1,10 @@
 
 let ui_files_default_path: string =
-	///if iron_windows
+	///if arm_windows
 	"C:\\Users"
-	///elseif iron_android
+	///elseif arm_android
 	"/storage/emulated/0/Download"
-	///elseif iron_macos
+	///elseif arm_macos
 	"/Users"
 	///else
 	"/"
@@ -58,7 +58,7 @@ function ui_files_release_keys() {
 	// File dialog may prevent firing key up events
 	keyboard_up_listener(key_code_t.SHIFT);
 	keyboard_up_listener(key_code_t.CONTROL);
-	///if iron_macos
+	///if arm_macos
 	keyboard_up_listener(key_code_t.META);
 	///end
 }
@@ -82,7 +82,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, folders_only: bool
 		return handle.text;
 	}
 
-	///if iron_ios
+	///if arm_ios
 	let document_directory: string = iron_save_dialog("", "");
 	document_directory = substring(document_directory, 0, document_directory.length - 8); // Strip /"untitled"
 	///end
@@ -95,7 +95,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, folders_only: bool
 		let text: string = handle.text;
 		let i1: i32 = string_index_of(text, path_sep);
 		let nested: bool = i1 > -1 && text.length - 1 > i1;
-		///if iron_windows
+		///if arm_windows
 		// Server addresses like \\server are not nested
 		nested = nested && !(text.length >= 2 && char_at(text, 0) == path_sep && char_at(text, 1) == path_sep && string_last_index_of(text, path_sep) == 1);
 		///end
@@ -104,7 +104,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, folders_only: bool
 		}
 
 		let dir_path: string = text;
-		///if iron_ios
+		///if arm_ios
 		if (!is_cloud) {
 			dir_path = document_directory + dir_path;
 		}
@@ -246,7 +246,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, folders_only: bool
 				if (map_get(ui_files_icon_map, key) == null) {
 					let blob_path: string = key;
 
-					///if iron_ios
+					///if arm_ios
 					blob_path = document_directory + blob_path;
 					// TODO: implement native .arm parsing first
 					///else
@@ -341,7 +341,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, folders_only: bool
 					base_drag_off_x = -(mouse_x - uix - ui._window_x - 3);
 					base_drag_off_y = -(mouse_y - uiy - ui._window_y + 1);
 					base_drag_file = handle.text;
-					///if iron_ios
+					///if arm_ios
 					if (!is_cloud) {
 						base_drag_file = document_directory + base_drag_file;
 					}

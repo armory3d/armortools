@@ -9,7 +9,7 @@ function tab_console_draw(htab: ui_handle_t) {
 	if (ui_tab(htab, title, false, color) && statush > ui_status_default_status_h * ui_SCALE(ui)) {
 
 		ui_begin_sticky();
-		///if (iron_windows || iron_linux || iron_macos) // Copy
+		///if (arm_windows || arm_linux || arm_macos) // Copy
 		if (config_raw.touch_ui) {
 			let row: f32[] = [1 / 4, 1 / 4, 1 / 4];
 			ui_row(row);
@@ -46,7 +46,7 @@ function tab_console_draw(htab: ui_handle_t) {
 				iron_file_save_bytes(path, sys_string_to_buffer(str), 0);
 			});
 		}
-		///if (iron_windows || iron_linux || iron_macos)
+		///if (arm_windows || arm_linux || arm_macos)
 		if (ui_button(tr("Copy"))) {
 			let str: string = string_array_join(console_last_traces, "\n");
 			iron_copy_to_clipboard(str);

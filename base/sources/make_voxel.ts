@@ -72,7 +72,7 @@ function make_voxel_run(data: shader_context_t) {
 
 function make_voxel_source(): string {
 	let ds: f32 = make_material_get_displace_strength();
-	///if iron_direct3d11
+	///if arm_direct3d11
 	return "#define vec3 float3 \
 	uniform float4x4 W; \
 	uniform float3x3 N; \
