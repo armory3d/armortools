@@ -31,22 +31,6 @@ function resource_tile18(img: image_t, x: i32, y: i32): rect_t {
 	return r;
 }
 
-///if arm_embed
-function resource_embed_raw(handle: string, name: string, file: buffer_t) {
-	map_set(data_cached_blobs, name, file);
-	data_get_scene_raw(handle);
-	map_delete(data_cached_blobs, name);
-}
-
-function resource_embed_blob(name: string, file: buffer_t) {
-	map_set(data_cached_blobs, name, file);
-}
-
-function resource_embed_font(name: string, file: buffer_t) {
-	map_set(data_cached_fonts, name, g2_font_create(file));
-}
-///end
-
 type rect_t = {
 	x?: i32;
 	y?: i32;

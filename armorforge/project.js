@@ -11,16 +11,16 @@ project.addProject("../base");
 
 project.addSources("../armorpaint/sources");
 project.addSources("../armorpaint/sources/nodes");
-project.addShaders("../armorpaint/shaders/*.glsl", { embed: flags.embed });
+project.addShaders("../armorpaint/shaders/*.glsl");
 project.addSources("sources");
 project.addSources("sources/nodes");
-project.addShaders("shaders/*.glsl", { embed: flags.embed });
-project.addAssets("assets/*", { destination: "data/{name}", embed: flags.embed });
+project.addShaders("shaders/*.glsl");
+project.addAssets("assets/*", { destination: "data/{name}" });
 project.addAssets("assets/keymap_presets/*", { destination: "data/keymap_presets/{name}" });
 project.addAssets("assets/licenses/**", { destination: "data/licenses/{name}" });
 project.addAssets("assets/plugins/*", { destination: "data/plugins/{name}" });
 project.addAssets("../armorpaint/assets/plugins/hello_world.js", { destination: "data/plugins/{name}" });
-project.addAssets("assets/meshes/*", { destination: "data/meshes/{name}" });
+project.addAssets("assets/meshes/*", { destination: "data/meshes/{name}", noembed: true });
 project.addAssets("assets/readme/readme.txt", { destination: "{name}" });
 
 return project;
