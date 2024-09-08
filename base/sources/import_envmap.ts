@@ -106,7 +106,8 @@ function import_envmap_reverse_equirect(x: f32, y: f32): vec4_t {
 	let theta: f32 = x * math_pi() * 2 - math_pi();
 	let phi: f32 = y * math_pi();
 	// return n.set(math_sin(phi) * math_cos(theta), -(math_sin(phi) * math_sin(theta)), math_cos(phi));
-	return vec4_set(import_envmap_n, -math_cos(phi), math_sin(phi) * math_cos(theta), -(math_sin(phi) * math_sin(theta)));
+	import_envmap_n = vec4_new(-math_cos(phi), math_sin(phi) * math_cos(theta), -(math_sin(phi) * math_sin(theta)));
+	return import_envmap_n;
 }
 
 // https://ndotl.wordpress.com/2015/03/07/pbr-cubemap-filtering

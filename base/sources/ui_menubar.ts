@@ -186,7 +186,7 @@ function ui_menubar_render_ui() {
 				}
 				scene_meshes = [_ui_menubar_plane];
 				let m: mat4_t = mat4_identity();
-				mat4_translate(m, 0, 0, 1.6);
+				m = mat4_translate(m, 0, 0, 1.6);
 				transform_set_matrix(scene_camera.base.transform, m);
 			}
 			///if (arm_direct3d12 || arm_vulkan || arm_metal)

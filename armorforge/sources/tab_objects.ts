@@ -159,7 +159,7 @@ function tab_objects_draw(htab: ui_handle_t) {
 				let scale: vec4_t = t.scale;
 				let rot: quat_t = quat_get_euler(t.rot);
 				let dim: vec4_t = t.dim;
-				vec4_mult(rot, 180 / 3.141592);
+				rot = vec4_mult(rot, 180 / 3.141592);
 				let f: f32 = 0.0;
 
 				let row: f32[] = [1 / 4, 1 / 4, 1 / 4, 1 / 4];
@@ -216,8 +216,8 @@ function tab_objects_draw(htab: ui_handle_t) {
 				}
 
 				if (changed && context_raw.selected_object.name != "Scene") {
-					vec4_mult(rot, 3.141592 / 180);
-					quat_from_euler(context_raw.selected_object.transform.rot, rot.x, rot.y, rot.z);
+					rot = vec4_mult(rot, 3.141592 / 180);
+					context_raw.selected_object.transform.rot = quat_from_euler(rot.x, rot.y, rot.z);
 					transform_build_matrix(context_raw.selected_object.transform);
 					// ///if arm_physics
 					// if (rb != null) rb.syncTransform();

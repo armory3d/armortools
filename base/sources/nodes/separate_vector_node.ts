@@ -11,7 +11,7 @@ function separate_vector_node_create(args: f32_array_t): separate_vector_node_t 
 }
 
 function separate_vector_node_get(self: separate_vector_node_t, from: i32): logic_node_value_t {
-	let vector: vec4_t = logic_node_input_get(self.base.inputs[0])._any;
+	let vector: vec4_t = logic_node_input_get(self.base.inputs[0])._vec4;
 	if (from == 0) {
 		let v: logic_node_value_t = { _f32: vector.x };
 		return v;

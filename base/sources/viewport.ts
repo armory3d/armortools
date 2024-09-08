@@ -8,12 +8,12 @@ function viewport_scale_to_bounds() {
 	po.base.transform.dim.x = aabb.x;
 	po.base.transform.dim.y = aabb.y;
 	po.base.transform.dim.z = aabb.z;
-	vec4_set(po.base.transform.scale, 2 / r, 2 / r, 2 / r);
-	vec4_set(po.base.transform.loc, 0, 0, 0);
+	po.base.transform.scale = vec4_new(2 / r, 2 / r, 2 / r);
+	po.base.transform.loc = vec4_new(0, 0, 0);
 	transform_build_matrix(po.base.transform);
 	for (let i: i32 = 0; i < po.base.children.length; ++i) {
 		let c: object_t = po.base.children[i];
-		vec4_set(c.transform.loc, 0, 0, 0);
+		c.transform.loc = vec4_new(0, 0, 0);
 		transform_build_matrix(c.transform);
 	}
 }
@@ -23,7 +23,7 @@ function viewport_reset() {
 	for (let i: i32 = 0; i < _scene_raw.objects.length; ++i) {
 		let o: obj_t = _scene_raw.objects[i];
 		if (o.type == "camera_object") {
-			mat4_set_from_f32_array(cam.base.transform.local, o.transform);
+			cam.base.transform.local = mat4_from_f32_array(o.transform);
 			transform_decompose(cam.base.transform);
 			if (context_raw.fov_handle != null) {
 				context_raw.fov_handle.value = cam.data.fov = base_default_fov;
@@ -40,12 +40,12 @@ function viewport_reset() {
 }
 
 function viewport_set_view(x: f32, y: f32, z: f32, rx: f32, ry: f32, rz: f32) {
-	quat_set(context_raw.paint_object.base.transform.rot, 0, 0, 0, 1);
+	context_raw.paint_object.base.transform.rot = quat_new(0, 0, 0, 1);
 	context_raw.paint_object.base.transform.dirty = true;
 	let cam: camera_object_t = scene_camera;
 	let dist: f32 = vec4_len(cam.base.transform.loc);
-	vec4_set(cam.base.transform.loc, x * dist, y * dist, z * dist);
-	quat_from_euler(cam.base.transform.rot, rx, ry, rz);
+	cam.base.transform.loc = vec4_new(x * dist, y * dist, z * dist);
+	cam.base.transform.rot = quat_from_euler(rx, ry, rz);
 	transform_build_matrix(cam.base.transform);
 	camera_object_build_proj(cam);
 	context_raw.ddirty = 2;
@@ -64,7 +64,8 @@ function viewport_orbit(x: f32, y: f32) {
 
 function viewport_orbit_opposite() {
 	let cam: camera_object_t = scene_camera;
-	let z: f32 = math_abs(camera_object_look(cam).z) - 1.0;
+	let look: vec4_t = camera_object_look(cam);
+	let z: f32 = math_abs(look.z) - 1.0;
 	(z < 0.0001 && z > -0.0001) ? viewport_orbit(0, math_pi()) : viewport_orbit(math_pi(), 0);
 }
 

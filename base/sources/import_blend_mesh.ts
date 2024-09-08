@@ -112,8 +112,11 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 				let no0: i16_ptr = bl_handle_get(v0, "no");
 				let no1: i16_ptr = bl_handle_get(v1, "no");
 				if (smooth) {
-					vec4_normalize(vec4_set(vec0, ARRAY_ACCESS(no0, 0) / 32767, ARRAY_ACCESS(no0, 1) / 32767, ARRAY_ACCESS(no0, 2) / 32767)); // shortmax
-					vec4_normalize(vec4_set(vec1, ARRAY_ACCESS(no1, 0) / 32767, ARRAY_ACCESS(no1, 1) / 32767, ARRAY_ACCESS(no1, 2) / 32767));
+					vec0 = vec4_new(ARRAY_ACCESS(no0, 0) / 32767, ARRAY_ACCESS(no0, 1) / 32767, ARRAY_ACCESS(no0, 2) / 32767);
+					vec0 = vec4_norm(vec0); // shortmax
+
+					vec1 = vec4_new(ARRAY_ACCESS(no1, 0) / 32767, ARRAY_ACCESS(no1, 1) / 32767, ARRAY_ACCESS(no1, 2) / 32767);
+					vec1 = vec4_norm(vec1);
 				}
 				let uv0: f32_array_t = null;
 				let uv1: f32_array_t = null;
@@ -160,16 +163,17 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 					let co2: f32_ptr = bl_handle_get(v2, "co");
 					let no2: i16_ptr = bl_handle_get(v2, "no");
 					if (smooth) {
-						vec4_normalize(vec4_set(vec2, ARRAY_ACCESS(no2, 0) / 32767, ARRAY_ACCESS(no2, 1) / 32767, ARRAY_ACCESS(no2, 2) / 32767));
+						vec2 = vec4_new(ARRAY_ACCESS(no2, 0) / 32767, ARRAY_ACCESS(no2, 1) / 32767, ARRAY_ACCESS(no2, 2) / 32767);
+						vec2 = vec4_norm(vec2);
 					}
 					else {
-						vec4_set(vec2, ARRAY_ACCESS(co2, 0), ARRAY_ACCESS(co2, 1), ARRAY_ACCESS(co2, 2));
-						vec4_set(vec1, ARRAY_ACCESS(co1, 0), ARRAY_ACCESS(co1, 1), ARRAY_ACCESS(co1, 2));
-						vec4_sub_vecs(vec0, vec2, vec1);
-						vec4_set(vec2, ARRAY_ACCESS(co0, 0), ARRAY_ACCESS(co0, 1), ARRAY_ACCESS(co0, 2));
-						vec4_sub_vecs(vec1, vec2, vec1);
-						vec4_cross(vec0, vec1);
-						vec4_normalize(vec0);
+						vec2 = vec4_new(ARRAY_ACCESS(co2, 0), ARRAY_ACCESS(co2, 1), ARRAY_ACCESS(co2, 2));
+						vec1 = vec4_new(ARRAY_ACCESS(co1, 0), ARRAY_ACCESS(co1, 1), ARRAY_ACCESS(co1, 2));
+						vec0 = vec4_sub(vec2, vec1);
+						vec2 = vec4_new(ARRAY_ACCESS(co0, 0), ARRAY_ACCESS(co0, 1), ARRAY_ACCESS(co0, 2));
+						vec1 = vec4_sub(vec2, vec1);
+						vec0 = vec4_cross(vec0, vec1);
+						vec0 = vec4_norm(vec0);
 					}
 					posa32[tri * 9    ] = ARRAY_ACCESS(co0, 0);
 					posa32[tri * 9 + 1] = ARRAY_ACCESS(co0, 1);
@@ -191,7 +195,7 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 					nora[tri * 6 + 5] = math_floor((smooth ? vec2.y : vec0.y) * 32767);
 					co1 = co2;
 					no1 = no2;
-					vec4_set_from(vec1, vec2);
+					vec1 = vec4_clone(vec2);
 					if (hasuv) {
 						bl.pos = uvdata_pos + (loopstart + j + 1) * 4 * 3;
 						uv2 = parser_blend_read_f32array(bl, 2);
@@ -241,13 +245,13 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 				let co0: f32_ptr = bl_handle_get(v0, "co");
 				let co1: f32_ptr = bl_handle_get(v1, "co");
 				let co2: f32_ptr = bl_handle_get(v2, "co");
-				vec4_set(vec2, ARRAY_ACCESS(co2, 0), ARRAY_ACCESS(co2, 1), ARRAY_ACCESS(co2, 2));
-				vec4_set(vec1, ARRAY_ACCESS(co1, 0), ARRAY_ACCESS(co1, 1), ARRAY_ACCESS(co1, 2));
-				vec4_sub_vecs(vec0, vec2, vec1);
-				vec4_set(vec2, ARRAY_ACCESS(co0, 0), ARRAY_ACCESS(co0, 1), ARRAY_ACCESS(co0, 2));
-				vec4_sub_vecs(vec1, vec2, vec1);
+				vec2 = vec4_new(ARRAY_ACCESS(co2, 0), ARRAY_ACCESS(co2, 1), ARRAY_ACCESS(co2, 2));
+				vec1 = vec4_new(ARRAY_ACCESS(co1, 0), ARRAY_ACCESS(co1, 1), ARRAY_ACCESS(co1, 2));
+				vec0 = vec4_sub(vec2, vec1);
+				vec2 = vec4_new(ARRAY_ACCESS(co0, 0), ARRAY_ACCESS(co0, 1), ARRAY_ACCESS(co0, 2));
+				vec1 = vec4_sub(vec2, vec1);
 				vec4_cross(vec0, vec1);
-				vec4_normalize(vec0);
+				vec0 = vec4_norm(vec0);
 
 				let nx: f32 = vec0.x;
 				let ny: f32 = vec0.y;
@@ -324,18 +328,23 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 						let no1: i16_ptr = bl_handle_get(v1, "no");
 						let no2: i16_ptr = bl_handle_get(v2, "no");
 						if (smooth) {
-							vec4_normalize(vec4_set(vec0, ARRAY_ACCESS(no0, 0) / 32767, ARRAY_ACCESS(no0, 1) / 32767, ARRAY_ACCESS(no0, 2) / 32767)); // shortmax
-							vec4_normalize(vec4_set(vec1, ARRAY_ACCESS(no1, 0) / 32767, ARRAY_ACCESS(no1, 1) / 32767, ARRAY_ACCESS(no1, 2) / 32767));
-							vec4_normalize(vec4_set(vec2, ARRAY_ACCESS(no2, 0) / 32767, ARRAY_ACCESS(no2, 1) / 32767, ARRAY_ACCESS(no2, 2) / 32767));
+							vec0 = vec4_new(ARRAY_ACCESS(no0, 0) / 32767, ARRAY_ACCESS(no0, 1) / 32767, ARRAY_ACCESS(no0, 2) / 32767);
+							vec0 = vec4_norm(vec0); // shortmax
+
+							vec1 = vec4_new(ARRAY_ACCESS(no1, 0) / 32767, ARRAY_ACCESS(no1, 1) / 32767, ARRAY_ACCESS(no1, 2) / 32767);
+							vec1 = vec4_norm(vec1);
+
+							vec2 = vec4_new(ARRAY_ACCESS(no2, 0) / 32767, ARRAY_ACCESS(no2, 1) / 32767, ARRAY_ACCESS(no2, 2) / 32767);
+							vec2 = vec4_norm(vec2);
 						}
 						else {
-							vec4_set(vec2, ARRAY_ACCESS(co2, 0), ARRAY_ACCESS(co2, 1), ARRAY_ACCESS(co2, 2));
-							vec4_set(vec1, ARRAY_ACCESS(co1, 0), ARRAY_ACCESS(co1, 1), ARRAY_ACCESS(co1, 2));
-							vec4_sub_vecs(vec0, vec2, vec1);
-							vec4_set(vec2, ARRAY_ACCESS(co0, 0), ARRAY_ACCESS(co0, 1), ARRAY_ACCESS(co0, 2));
-							vec4_sub_vecs(vec1, vec2, vec1);
+							vec2 = vec4_new(ARRAY_ACCESS(co2, 0), ARRAY_ACCESS(co2, 1), ARRAY_ACCESS(co2, 2));
+							vec1 = vec4_new(ARRAY_ACCESS(co1, 0), ARRAY_ACCESS(co1, 1), ARRAY_ACCESS(co1, 2));
+							vec0 = vec4_sub(vec2, vec1);
+							vec2 = vec4_new(ARRAY_ACCESS(co0, 0), ARRAY_ACCESS(co0, 1), ARRAY_ACCESS(co0, 2));
+							vec1 = vec4_sub(vec2, vec1);
 							vec4_cross(vec0, vec1);
-							vec4_normalize(vec0);
+							vec0 = vec4_norm(vec0);
 						}
 						let uv0: f32_array_t = null;
 						let uv1: f32_array_t = null;
@@ -450,24 +459,24 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 			ARRAY_ACCESS(obmat, 8), ARRAY_ACCESS(obmat, 9), ARRAY_ACCESS(obmat, 10), ARRAY_ACCESS(obmat, 11),
 			ARRAY_ACCESS(obmat, 12), ARRAY_ACCESS(obmat, 13), ARRAY_ACCESS(obmat, 14), ARRAY_ACCESS(obmat, 15)
 		);
-		mat4_transpose(mat);
+		mat = mat4_transpose(mat);
 
 		let v: vec4_t = vec4_create();
 		for (let i: i32 = 0; i < math_floor(posa32.length / 3); ++i) {
-			vec4_set(v, posa32[i * 3], posa32[i * 3 + 1], posa32[i * 3 + 2]);
-			vec4_apply_mat4(v, mat);
+			v = vec4_new(posa32[i * 3], posa32[i * 3 + 1], posa32[i * 3 + 2]);
+			v = vec4_apply_mat4(v, mat);
 			posa32[i * 3    ] = v.x;
 			posa32[i * 3 + 1] = v.y;
 			posa32[i * 3 + 2] = v.z;
 		}
 
-		mat4_get_inv(mat, mat);
-		mat4_transpose3x3(mat);
-		mat.m[12] = mat.m[13] = mat.m[14] = mat.m[15] = 0;
+		mat = mat4_get_inv(mat);
+		mat = mat4_transpose3x3(mat);
+		mat.m30 = mat.m31 = mat.m32 = mat.m33 = 0;
 		for (let i: i32 = 0; i < math_floor(nora.length / 2); ++i) {
-			vec4_set(v, nora[i * 2] / 32767, nora[i * 2 + 1] / 32767, posa[i * 4 + 3] / 32767);
-			vec4_apply_mat(v, mat);
-			vec4_normalize(v);
+			v = vec4_new(nora[i * 2] / 32767, nora[i * 2 + 1] / 32767, posa[i * 4 + 3] / 32767);
+			v = vec4_apply_mat(v, mat);
+			v = vec4_norm(v);
 			nora[i * 2    ] = math_floor(v.x * 32767);
 			nora[i * 2 + 1] = math_floor(v.y * 32767);
 			posa[i * 4 + 3] = math_floor(v.z * 32767);

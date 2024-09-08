@@ -1,6 +1,6 @@
 
-let camera_origins: vec4_t[];
-let camera_views: mat4_t[];
+let camera_origins: vec4_box_t[];
+let camera_views: mat4_box_t[];
 let camera_redraws: i32 = 0;
 let camera_dir: vec4_t = vec4_create();
 let camera_ease: f32 = 1.0;
@@ -77,7 +77,8 @@ function camera_update() {
 		transform_move(camera.base.transform, camera_object_look_world(camera), dist);
 		transform_rotate(camera.base.transform, vec4_z_axis(), -mouse_movement_x / 100 * config_raw.camera_rotation_speed);
 		transform_rotate(camera.base.transform, camera_object_right_world(camera), -mouse_movement_y / 100 * config_raw.camera_rotation_speed);
-		if (camera_object_up_world(camera).z < 0) {
+		let up_world: vec4_t = camera_object_up_world(camera);
+		if (up_world.z < 0) {
 			transform_rotate(camera.base.transform, camera_object_right_world(camera), mouse_movement_y / 100 * config_raw.camera_rotation_speed);
 		}
 		transform_move(camera.base.transform, camera_object_look_world(camera), -dist);
@@ -85,12 +86,13 @@ function camera_update() {
 	else if (controls == camera_controls_t.ROTATE && (operator_shortcut(map_get(config_keymap, "action_rotate"), shortcut_type_t.DOWN) || (mouse_down("right") && !modif && default_keymap))) {
 		camera_redraws = 2;
 		let t: transform_t = context_main_object().base.transform;
-		let up: vec4_t = vec4_normalize(transform_up(t));
+		let up: vec4_t = vec4_norm(transform_up(t));
 		transform_rotate(t, up, mouse_movement_x / 100 * config_raw.camera_rotation_speed);
-		let right: vec4_t = vec4_normalize(camera_object_right_world(camera));
+		let right: vec4_t = vec4_norm(camera_object_right_world(camera));
 		transform_rotate(t, right, mouse_movement_y / 100 * config_raw.camera_rotation_speed);
 		transform_build_matrix(t);
-		if (transform_up(t).z < 0) {
+		let tup: vec4_t = transform_up(t);
+		if (tup.z < 0) {
 			transform_rotate(t, right, -mouse_movement_y / 100 * config_raw.camera_rotation_speed);
 		}
 	}
@@ -129,24 +131,26 @@ function camera_update() {
 			if (camera_ease > 1.0) {
 				camera_ease = 1.0;
 			}
-			vec4_set(camera_dir, 0, 0, 0);
+			camera_dir = vec4_new(0, 0, 0);
+			let look: vec4_t = camera_object_look(camera);
+			let right: vec4_t = camera_object_right(camera);
 			if (move_forward) {
-				vec4_add_f(camera_dir, camera_object_look(camera).x, camera_object_look(camera).y, camera_object_look(camera).z);
+				camera_dir = vec4_fadd(camera_dir, look.x, look.y, look.z);
 			}
 			if (move_backward) {
-				vec4_add_f(camera_dir, -camera_object_look(camera).x, -camera_object_look(camera).y, -camera_object_look(camera).z);
+				camera_dir = vec4_fadd(camera_dir, -look.x, -look.y, -look.z);
 			}
 			if (strafe_right) {
-				vec4_add_f(camera_dir, camera_object_right(camera).x, camera_object_right(camera).y, camera_object_right(camera).z);
+				camera_dir = vec4_fadd(camera_dir, right.x, right.y, right.z);
 			}
 			if (strafe_left) {
-				vec4_add_f(camera_dir, -camera_object_right(camera).x, -camera_object_right(camera).y, -camera_object_right(camera).z);
+				camera_dir = vec4_fadd(camera_dir, -right.x, -right.y, -right.z);
 			}
 			if (strafe_up) {
-				vec4_add_f(camera_dir, 0, 0, 1);
+				camera_dir = vec4_fadd(camera_dir, 0, 0, 1);
 			}
 			if (strafe_down) {
-				vec4_add_f(camera_dir, 0, 0, -1);
+				camera_dir = vec4_fadd(camera_dir, 0, 0, -1);
 			}
 		}
 		else {
@@ -177,7 +181,7 @@ function camera_update() {
 		let mx: f32 = mouse_movement_x / 100;
 		context_raw.light_angle = math_fmod(context_raw.light_angle + math_fmod(mx, pi2) + pi2, pi2);
 		let m: mat4_t = mat4_rot_z(mx);
-		mat4_mult_mat(light.base.transform.local, m);
+		light.base.transform.local = mat4_mult_mat(light.base.transform.local, m);
 		transform_decompose(light.base.transform);
 	}
 
@@ -198,7 +202,7 @@ function camera_update() {
 
 function camera_distance(): f32 {
 	let camera: camera_object_t = scene_camera;
-	return vec4_dist(camera_origins[camera_index()], camera.base.transform.loc);
+	return vec4_dist(camera_origins[camera_index()].v, camera.base.transform.loc);
 }
 
 function camera_index(): i32 {
@@ -215,12 +219,17 @@ function camera_get_zoom_speed(): f32 {
 function camera_reset(view_index: i32 = -1) {
 	let camera: camera_object_t = scene_camera;
 	if (view_index == -1) {
-		camera_origins = [vec4_create(0, 0, 0), vec4_create(0, 0, 0)];
-		camera_views = [mat4_clone(camera.base.transform.local), mat4_clone(camera.base.transform.local)];
+		let v0: vec4_box_t = { v: vec4_create(0, 0, 0, 1) };
+		let v1: vec4_box_t = { v: vec4_create(0, 0, 0, 1) };
+		camera_origins = [v0, v1];
+
+		let m0: mat4_box_t = { v: mat4_clone(camera.base.transform.local) };
+		let m1: mat4_box_t = { v: mat4_clone(camera.base.transform.local) };
+		camera_views = [m0, m1];
 	}
 	else {
-		camera_origins[view_index] = vec4_create(0, 0, 0);
-		camera_views[view_index] = mat4_clone(camera.base.transform.local);
+		camera_origins[view_index].v = vec4_create(0, 0, 0);
+		camera_views[view_index].v = mat4_clone(camera.base.transform.local);
 	}
 }
 
@@ -228,12 +237,12 @@ function camera_pan_action(modif: bool, default_keymap: bool) {
 	let camera: camera_object_t = scene_camera;
 	if (operator_shortcut(map_get(config_keymap, "action_pan"), shortcut_type_t.DOWN) || (mouse_down("middle") && !modif && default_keymap)) {
 		camera_redraws = 2;
-		let look: vec4_t = vec4_mult(vec4_normalize(transform_look(camera.base.transform)), mouse_movement_y / 150 * config_raw.camera_pan_speed);
-		let right: vec4_t = vec4_mult(vec4_normalize(transform_right(camera.base.transform)), -mouse_movement_x / 150 * config_raw.camera_pan_speed);
-		vec4_add(camera.base.transform.loc, look);
-		vec4_add(camera.base.transform.loc, right);
-		vec4_add(camera_origins[camera_index()], look);
-		vec4_add(camera_origins[camera_index()], right);
+		let look: vec4_t = vec4_mult(vec4_norm(transform_look(camera.base.transform)), mouse_movement_y / 150 * config_raw.camera_pan_speed);
+		let right: vec4_t = vec4_mult(vec4_norm(transform_right(camera.base.transform)), -mouse_movement_x / 150 * config_raw.camera_pan_speed);
+		camera.base.transform.loc = vec4_add(camera.base.transform.loc, look);
+		camera.base.transform.loc = vec4_add(camera.base.transform.loc, right);
+		camera_origins[camera_index()].v = vec4_add(camera_origins[camera_index()].v, look);
+		camera_origins[camera_index()].v = vec4_add(camera_origins[camera_index()].v, right);
 		camera_object_build_mat(camera);
 	}
 }

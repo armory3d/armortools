@@ -25,24 +25,24 @@ function gizmo_update() {
 	///end
 
 	if (is_object) {
-		vec4_set_from(gizmo.transform.loc, paint_object.transform.loc);
+		gizmo.transform.loc = vec4_clone(paint_object.transform.loc);
 	}
 	else if (is_decal) {
-		vec4_set(gizmo.transform.loc, context_raw.layer.decal_mat.m[12], context_raw.layer.decal_mat.m[13], context_raw.layer.decal_mat.m[14]);
+		gizmo.transform.loc = vec4_new(context_raw.layer.decal_mat.m30, context_raw.layer.decal_mat.m31, context_raw.layer.decal_mat.m32);
 	}
 	let cam: camera_object_t = scene_camera;
 	let fov: f32 = cam.data.fov;
 	let dist: f32 = vec4_dist(cam.base.transform.loc, gizmo.transform.loc) / 8 * fov;
-	vec4_set(gizmo.transform.scale, dist, dist, dist);
-	vec4_set(context_raw.gizmo_translate_x.transform.scale, dist, dist, dist);
-	vec4_set(context_raw.gizmo_translate_y.transform.scale, dist, dist, dist);
-	vec4_set(context_raw.gizmo_translate_z.transform.scale, dist, dist, dist);
-	vec4_set(context_raw.gizmo_scale_x.transform.scale, dist, dist, dist);
-	vec4_set(context_raw.gizmo_scale_y.transform.scale, dist, dist, dist);
-	vec4_set(context_raw.gizmo_scale_z.transform.scale, dist, dist, dist);
-	vec4_set(context_raw.gizmo_rotate_x.transform.scale, dist, dist, dist);
-	vec4_set(context_raw.gizmo_rotate_y.transform.scale, dist, dist, dist);
-	vec4_set(context_raw.gizmo_rotate_z.transform.scale, dist, dist, dist);
+	gizmo.transform.scale = vec4_new(dist, dist, dist);
+	context_raw.gizmo_translate_x.transform.scale = vec4_new(dist, dist, dist);
+	context_raw.gizmo_translate_y.transform.scale = vec4_new(dist, dist, dist);
+	context_raw.gizmo_translate_z.transform.scale = vec4_new(dist, dist, dist);
+	context_raw.gizmo_scale_x.transform.scale = vec4_new(dist, dist, dist);
+	context_raw.gizmo_scale_y.transform.scale = vec4_new(dist, dist, dist);
+	context_raw.gizmo_scale_z.transform.scale = vec4_new(dist, dist, dist);
+	context_raw.gizmo_rotate_x.transform.scale = vec4_new(dist, dist, dist);
+	context_raw.gizmo_rotate_y.transform.scale = vec4_new(dist, dist, dist);
+	context_raw.gizmo_rotate_z.transform.scale = vec4_new(dist, dist, dist);
 	transform_build_matrix(gizmo.transform);
 
 	// Scene control
@@ -67,16 +67,16 @@ function gizmo_update() {
 				paint_object.transform.scale.z += context_raw.gizmo_drag - context_raw.gizmo_drag_last;
 			}
 			else if (context_raw.rotate_x) {
-				quat_from_axis_angle(gizmo_q0, vec4_x_axis(), context_raw.gizmo_drag - context_raw.gizmo_drag_last);
-				quat_mult(paint_object.transform.rot, gizmo_q0);
+				gizmo_q0 = quat_from_axis_angle(vec4_x_axis(), context_raw.gizmo_drag - context_raw.gizmo_drag_last);
+				paint_object.transform.rot = quat_mult(paint_object.transform.rot, gizmo_q0);
 			}
 			else if (context_raw.rotate_y) {
-				quat_from_axis_angle(gizmo_q0, vec4_y_axis(), context_raw.gizmo_drag - context_raw.gizmo_drag_last);
-				quat_mult(paint_object.transform.rot, gizmo_q0);
+				gizmo_q0 = quat_from_axis_angle(vec4_y_axis(), context_raw.gizmo_drag - context_raw.gizmo_drag_last);
+				paint_object.transform.rot = quat_mult(paint_object.transform.rot, gizmo_q0);
 			}
 			else if (context_raw.rotate_z) {
-				quat_from_axis_angle(gizmo_q0, vec4_z_axis(), context_raw.gizmo_drag - context_raw.gizmo_drag_last);
-				quat_mult(paint_object.transform.rot, gizmo_q0);
+				gizmo_q0 = quat_from_axis_angle(vec4_z_axis(), context_raw.gizmo_drag - context_raw.gizmo_drag_last);
+				paint_object.transform.rot = quat_mult(paint_object.transform.rot, gizmo_q0);
 			}
 			context_raw.gizmo_drag_last = context_raw.gizmo_drag;
 
@@ -93,46 +93,64 @@ function gizmo_update() {
 	else if (is_decal) {
 		if (context_raw.translate_x || context_raw.translate_y || context_raw.translate_z || context_raw.scale_x || context_raw.scale_y || context_raw.scale_z || context_raw.rotate_x || context_raw.rotate_y || context_raw.rotate_z) {
 			if (context_raw.translate_x) {
-				context_raw.layer.decal_mat.m[12] = context_raw.gizmo_drag;
+				context_raw.layer.decal_mat.m30 = context_raw.gizmo_drag;
 			}
 			else if (context_raw.translate_y) {
-				context_raw.layer.decal_mat.m[13] = context_raw.gizmo_drag;
+				context_raw.layer.decal_mat.m31 = context_raw.gizmo_drag;
 			}
 			else if (context_raw.translate_z) {
-				context_raw.layer.decal_mat.m[14] = context_raw.gizmo_drag;
+				context_raw.layer.decal_mat.m32 = context_raw.gizmo_drag;
 			}
 			else if (context_raw.scale_x) {
-				mat4_decompose(context_raw.layer.decal_mat, gizmo_v, gizmo_q, gizmo_v0);
+				let dec: mat4_decomposed_t = mat4_decompose(context_raw.layer.decal_mat);
+				gizmo_v = dec.loc;
+				gizmo_q = dec.rot;
+				gizmo_v0 = dec.scl;
 				gizmo_v0.x += context_raw.gizmo_drag - context_raw.gizmo_drag_last;
-				mat4_compose(context_raw.layer.decal_mat, gizmo_v, gizmo_q, gizmo_v0);
+				context_raw.layer.decal_mat = mat4_compose(gizmo_v, gizmo_q, gizmo_v0);
 			}
 			else if (context_raw.scale_y) {
-				mat4_decompose(context_raw.layer.decal_mat, gizmo_v, gizmo_q, gizmo_v0);
+				let dec: mat4_decomposed_t = mat4_decompose(context_raw.layer.decal_mat);
+				gizmo_v = dec.loc;
+				gizmo_q = dec.rot;
+				gizmo_v0 = dec.scl;
 				gizmo_v0.y += context_raw.gizmo_drag - context_raw.gizmo_drag_last;
-				mat4_compose(context_raw.layer.decal_mat, gizmo_v, gizmo_q, gizmo_v0);
+				context_raw.layer.decal_mat = mat4_compose(gizmo_v, gizmo_q, gizmo_v0);
 			}
 			else if (context_raw.scale_z) {
-				mat4_decompose(context_raw.layer.decal_mat, gizmo_v, gizmo_q, gizmo_v0);
+				let dec: mat4_decomposed_t = mat4_decompose(context_raw.layer.decal_mat);
+				gizmo_v = dec.loc;
+				gizmo_q = dec.rot;
+				gizmo_v0 = dec.scl;
 				gizmo_v0.z += context_raw.gizmo_drag - context_raw.gizmo_drag_last;
-				mat4_compose(context_raw.layer.decal_mat, gizmo_v, gizmo_q, gizmo_v0);
+				context_raw.layer.decal_mat = mat4_compose(gizmo_v, gizmo_q, gizmo_v0);
 			}
 			else if (context_raw.rotate_x) {
-				mat4_decompose(context_raw.layer.decal_mat, gizmo_v, gizmo_q, gizmo_v0);
-				quat_from_axis_angle(gizmo_q0, vec4_x_axis(), -context_raw.gizmo_drag + context_raw.gizmo_drag_last);
-				quat_mult_quats(gizmo_q, gizmo_q0, gizmo_q);
-				mat4_compose(context_raw.layer.decal_mat, gizmo_v, gizmo_q, gizmo_v0);
+				let dec: mat4_decomposed_t = mat4_decompose(context_raw.layer.decal_mat);
+				gizmo_v = dec.loc;
+				gizmo_q = dec.rot;
+				gizmo_v0 = dec.scl;
+				gizmo_q0 = quat_from_axis_angle(vec4_x_axis(), -context_raw.gizmo_drag + context_raw.gizmo_drag_last);
+				gizmo_q = quat_mult(gizmo_q0, gizmo_q);
+				context_raw.layer.decal_mat = mat4_compose(gizmo_v, gizmo_q, gizmo_v0);
 			}
 			else if (context_raw.rotate_y) {
-				mat4_decompose(context_raw.layer.decal_mat, gizmo_v, gizmo_q, gizmo_v0);
-				quat_from_axis_angle(gizmo_q0, vec4_y_axis(), -context_raw.gizmo_drag + context_raw.gizmo_drag_last);
-				quat_mult_quats(gizmo_q, gizmo_q0, gizmo_q);
-				mat4_compose(context_raw.layer.decal_mat, gizmo_v, gizmo_q, gizmo_v0);
+				let dec: mat4_decomposed_t = mat4_decompose(context_raw.layer.decal_mat);
+				gizmo_v = dec.loc;
+				gizmo_q = dec.rot;
+				gizmo_v0 = dec.scl;
+				gizmo_q0 = quat_from_axis_angle(vec4_y_axis(), -context_raw.gizmo_drag + context_raw.gizmo_drag_last);
+				gizmo_q = quat_mult(gizmo_q0, gizmo_q);
+				context_raw.layer.decal_mat = mat4_compose(gizmo_v, gizmo_q, gizmo_v0);
 			}
 			else if (context_raw.rotate_z) {
-				mat4_decompose(context_raw.layer.decal_mat, gizmo_v, gizmo_q, gizmo_v0);
-				quat_from_axis_angle(gizmo_q0, vec4_z_axis(), context_raw.gizmo_drag - context_raw.gizmo_drag_last);
-				quat_mult_quats(gizmo_q, gizmo_q0, gizmo_q);
-				mat4_compose(context_raw.layer.decal_mat, gizmo_v, gizmo_q, gizmo_v0);
+				let dec: mat4_decomposed_t = mat4_decompose(context_raw.layer.decal_mat);
+				gizmo_v = dec.loc;
+				gizmo_q = dec.rot;
+				gizmo_v0 = dec.scl;
+				gizmo_q0 = quat_from_axis_angle(vec4_z_axis(), context_raw.gizmo_drag - context_raw.gizmo_drag_last);
+				gizmo_q = quat_mult(gizmo_q0, gizmo_q);
+				context_raw.layer.decal_mat = mat4_compose(gizmo_v, gizmo_q, gizmo_v0);
 			}
 			context_raw.gizmo_drag_last = context_raw.gizmo_drag;
 
@@ -215,15 +233,15 @@ function gizmo_update() {
 
 		if (is_object) {
 			let t: transform_t = paint_object.transform;
-			vec4_set(gizmo_v, transform_world_x(t), transform_world_y(t), transform_world_z(t));
+			gizmo_v = vec4_new(transform_world_x(t), transform_world_y(t), transform_world_z(t));
 		}
 		else if (is_decal) {
-			vec4_set(gizmo_v, context_raw.layer.decal_mat.m[12], context_raw.layer.decal_mat.m[13], context_raw.layer.decal_mat.m[14]);
+			gizmo_v = vec4_new(context_raw.layer.decal_mat.m30, context_raw.layer.decal_mat.m31, context_raw.layer.decal_mat.m32);
 		}
 
 		if (context_raw.translate_x || context_raw.scale_x) {
 			let hit: vec4_t = raycast_plane_intersect(vec4_y_axis(), gizmo_v, mouse_view_x(), mouse_view_y(), scene_camera);
-			if (hit != null) {
+			if (!vec4_isnan(hit)) {
 				if (context_raw.gizmo_started) {
 					context_raw.gizmo_offset = hit.x - gizmo_v.x;
 				}
@@ -232,7 +250,7 @@ function gizmo_update() {
 		}
 		else if (context_raw.translate_y || context_raw.scale_y) {
 			let hit: vec4_t = raycast_plane_intersect(vec4_x_axis(), gizmo_v, mouse_view_x(), mouse_view_y(), scene_camera);
-			if (hit != null) {
+			if (!vec4_isnan(hit)) {
 				if (context_raw.gizmo_started) {
 					context_raw.gizmo_offset = hit.y - gizmo_v.y;
 				}
@@ -241,7 +259,7 @@ function gizmo_update() {
 		}
 		else if (context_raw.translate_z || context_raw.scale_z) {
 			let hit: vec4_t = raycast_plane_intersect(vec4_x_axis(), gizmo_v, mouse_view_x(), mouse_view_y(), scene_camera);
-			if (hit != null) {
+			if (!vec4_isnan(hit)) {
 				if (context_raw.gizmo_started) {
 					context_raw.gizmo_offset = hit.z - gizmo_v.z;
 				}
@@ -250,9 +268,12 @@ function gizmo_update() {
 		}
 		else if (context_raw.rotate_x) {
 			let hit: vec4_t = raycast_plane_intersect(vec4_x_axis(), gizmo_v, mouse_view_x(), mouse_view_y(), scene_camera);
-			if (hit != null) {
+			if (!vec4_isnan(hit)) {
 				if (context_raw.gizmo_started) {
-					mat4_decompose(context_raw.layer.decal_mat, gizmo_v, gizmo_q, gizmo_v0);
+					let dec: mat4_decomposed_t = mat4_decompose(context_raw.layer.decal_mat);
+					gizmo_v = dec.loc;
+					gizmo_q = dec.rot;
+					gizmo_v0 = dec.scl;
 					context_raw.gizmo_offset = math_atan2(hit.y - gizmo_v.y, hit.z - gizmo_v.z);
 				}
 				context_raw.gizmo_drag = math_atan2(hit.y - gizmo_v.y, hit.z - gizmo_v.z) - context_raw.gizmo_offset;
@@ -260,9 +281,12 @@ function gizmo_update() {
 		}
 		else if (context_raw.rotate_y) {
 			let hit: vec4_t = raycast_plane_intersect(vec4_y_axis(), gizmo_v, mouse_view_x(), mouse_view_y(), scene_camera);
-			if (hit != null) {
+			if (!vec4_isnan(hit)) {
 				if (context_raw.gizmo_started) {
-					mat4_decompose(context_raw.layer.decal_mat, gizmo_v, gizmo_q, gizmo_v0);
+					let dec: mat4_decomposed_t = mat4_decompose(context_raw.layer.decal_mat);
+					gizmo_v = dec.loc;
+					gizmo_q = dec.rot;
+					gizmo_v0 = dec.scl;
 					context_raw.gizmo_offset = math_atan2(hit.z - gizmo_v.z, hit.x - gizmo_v.x);
 				}
 				context_raw.gizmo_drag = math_atan2(hit.z - gizmo_v.z, hit.x - gizmo_v.x) - context_raw.gizmo_offset;
@@ -270,9 +294,12 @@ function gizmo_update() {
 		}
 		else if (context_raw.rotate_z) {
 			let hit: vec4_t = raycast_plane_intersect(vec4_z_axis(), gizmo_v, mouse_view_x(), mouse_view_y(), scene_camera);
-			if (hit != null) {
+			if (!vec4_isnan(hit)) {
 				if (context_raw.gizmo_started) {
-					mat4_decompose(context_raw.layer.decal_mat, gizmo_v, gizmo_q, gizmo_v0);
+					let dec: mat4_decomposed_t = mat4_decompose(context_raw.layer.decal_mat);
+					gizmo_v = dec.loc;
+					gizmo_q = dec.rot;
+					gizmo_v0 = dec.scl;
 					context_raw.gizmo_offset = math_atan2(hit.y - gizmo_v.y, hit.x - gizmo_v.x);
 				}
 				context_raw.gizmo_drag = math_atan2(hit.y - gizmo_v.y, hit.x - gizmo_v.x) - context_raw.gizmo_offset;

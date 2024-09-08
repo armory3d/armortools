@@ -1,8 +1,8 @@
 
 let line_draw_color: color_t = 0xffff0000;
 let line_draw_strength: f32 = 0.005;
-let line_draw_mat: mat4_t = null;
-let line_draw_dim: vec4_t = null;
+let line_draw_mat: mat4_t = mat4_nan();
+let line_draw_dim: vec4_t = vec4_nan();
 
 let line_draw_vertex_buffer: vertex_buffer_t;
 let line_draw_index_buffer: index_buffer_t;
@@ -77,16 +77,16 @@ function line_draw_bounds(mat: mat4_t, dim: vec4_t) {
 	let up: vec4_t = mat4_up(mat);
 	let look: vec4_t = mat4_look(mat);
 	let right: vec4_t = mat4_right(mat);
-	vec4_normalize(up);
-	vec4_normalize(look);
-	vec4_normalize(right);
+	up = vec4_norm(up);
+	look = vec4_norm(look);
+	right = vec4_norm(right);
 
-	vec4_set_from(line_draw_vx, right);
-	vec4_mult(line_draw_vx, dx);
-	vec4_set_from(line_draw_vy, look);
-	vec4_mult(line_draw_vy, dy);
-	vec4_set_from(line_draw_vz, up);
-	vec4_mult(line_draw_vz, dz);
+	line_draw_vx = vec4_clone(right);
+	line_draw_vx = vec4_mult(line_draw_vx, dx);
+	line_draw_vy = vec4_clone(look);
+	line_draw_vy = vec4_mult(line_draw_vy, dy);
+	line_draw_vz = vec4_clone(up);
+	line_draw_vz = vec4_mult(line_draw_vz, dz);
 
 	line_draw_lineb(-1, -1, -1,  1, -1, -1);
 	line_draw_lineb(-1,  1, -1,  1,  1, -1);
@@ -105,15 +105,33 @@ function line_draw_bounds(mat: mat4_t, dim: vec4_t) {
 }
 
 function line_draw_lineb(a: i32, b: i32, c: i32, d: i32, e: i32, f: i32) {
-	vec4_set_from(line_draw_v1, line_draw_wpos);
-	vec4_set_from(line_draw_t, line_draw_vx); vec4_mult(line_draw_t, a); vec4_add(line_draw_v1, line_draw_t);
-	vec4_set_from(line_draw_t, line_draw_vy); vec4_mult(line_draw_t, b); vec4_add(line_draw_v1, line_draw_t);
-	vec4_set_from(line_draw_t, line_draw_vz); vec4_mult(line_draw_t, c); vec4_add(line_draw_v1, line_draw_t);
+	line_draw_v1 = vec4_clone(line_draw_wpos);
 
-	vec4_set_from(line_draw_v2, line_draw_wpos);
-	vec4_set_from(line_draw_t, line_draw_vx); vec4_mult(line_draw_t, d); vec4_add(line_draw_v2, line_draw_t);
-	vec4_set_from(line_draw_t, line_draw_vy); vec4_mult(line_draw_t, e); vec4_add(line_draw_v2, line_draw_t);
-	vec4_set_from(line_draw_t, line_draw_vz); vec4_mult(line_draw_t, f); vec4_add(line_draw_v2, line_draw_t);
+	line_draw_t = vec4_clone(line_draw_vx);
+	line_draw_t = vec4_mult(line_draw_t, a);
+	line_draw_v1 = vec4_add(line_draw_v1, line_draw_t);
+
+	line_draw_t = vec4_clone(line_draw_vy);
+	line_draw_t = vec4_mult(line_draw_t, b);
+	line_draw_v1 = vec4_add(line_draw_v1, line_draw_t);
+
+	line_draw_t = vec4_clone(line_draw_vz);
+	line_draw_t = vec4_mult(line_draw_t, c);
+	line_draw_v1 = vec4_add(line_draw_v1, line_draw_t);
+
+	line_draw_v2 = vec4_clone(line_draw_wpos);
+
+	line_draw_t = vec4_clone(line_draw_vx);
+	line_draw_t = vec4_mult(line_draw_t, d);
+	line_draw_v2 = vec4_add(line_draw_v2, line_draw_t);
+
+	line_draw_t = vec4_clone(line_draw_vy);
+	line_draw_t = vec4_mult(line_draw_t, e);
+	line_draw_v2 = vec4_add(line_draw_v2, line_draw_t);
+
+	line_draw_t = vec4_clone(line_draw_vz);
+	line_draw_t = vec4_mult(line_draw_t, f);
+	line_draw_v2 = vec4_add(line_draw_v2, line_draw_t);
 
 	line_draw_line(line_draw_v1.x, line_draw_v1.y, line_draw_v1.z, line_draw_v2.x, line_draw_v2.y, line_draw_v2.z);
 }
@@ -124,24 +142,31 @@ function line_draw_line(x1: f32, y1: f32, z1: f32, x2: f32, y2: f32, z2: f32) {
 		line_draw_begin();
 	}
 
-	vec4_set(line_draw_mid_point, x1 + x2, y1 + y2, z1 + z2);
-	vec4_mult(line_draw_mid_point, 0.5);
+	line_draw_mid_point = vec4_new(x1 + x2, y1 + y2, z1 + z2);
+	line_draw_mid_point = vec4_mult(line_draw_mid_point, 0.5);
 
-	vec4_set(line_draw_mid_line, x1, y1, z1);
-	vec4_sub(line_draw_mid_line, line_draw_mid_point);
+	line_draw_mid_line = vec4_new(x1, y1, z1);
+	line_draw_mid_line = vec4_sub(line_draw_mid_line, line_draw_mid_point);
 
 	let camera: camera_object_t = scene_camera;
 	line_draw_camera_look = mat4_get_loc(camera.base.transform.world);
-	vec4_sub(line_draw_camera_look, line_draw_mid_point);
+	line_draw_camera_look = vec4_sub(line_draw_camera_look, line_draw_mid_point);
 
 	let line_width: vec4_t = vec4_cross(line_draw_camera_look, line_draw_mid_line);
-	vec4_normalize(line_width);
-	vec4_mult(line_width, line_draw_strength);
+	line_width = vec4_norm(line_width);
+	line_width = vec4_mult(line_width, line_draw_strength);
 
-	vec4_add(vec4_set(line_draw_corner1, x1, y1, z1), line_width);
-	vec4_sub(vec4_set(line_draw_corner2, x1, y1, z1), line_width);
-	vec4_sub(vec4_set(line_draw_corner3, x2, y2, z2), line_width);
-	vec4_add(vec4_set(line_draw_corner4, x2, y2, z2), line_width);
+	line_draw_corner1 = vec4_new(x1, y1, z1);
+	line_draw_corner1 = vec4_add(line_draw_corner1, line_width);
+
+	line_draw_corner2 = vec4_new(x1, y1, z1);
+	line_draw_corner2 = vec4_sub(line_draw_corner2, line_width);
+
+	line_draw_corner3 = vec4_new(x2, y2, z2);
+	line_draw_corner3 = vec4_sub(line_draw_corner3, line_width);
+
+	line_draw_corner4 = vec4_new(x2, y2, z2);
+	line_draw_corner4 = vec4_add(line_draw_corner4, line_width);
 
 	let i: i32 = line_draw_lines * 24; // 4 * 6 (structure len)
 	let data: f32[] = [line_draw_corner1.x, line_draw_corner1.y, line_draw_corner1.z, color_get_rb(line_draw_color) / 255, color_get_gb(line_draw_color) / 255, color_get_ab(line_draw_color) / 255];
@@ -184,8 +209,8 @@ function line_draw_end() {
 	g4_set_index_buffer(line_draw_index_buffer);
 	g4_set_pipeline(line_draw_pipeline);
 	let camera: camera_object_t = scene_camera;
-	mat4_set_from(line_draw_vp, camera.v);
-	mat4_mult_mat(line_draw_vp, camera.p);
+	line_draw_vp = mat4_clone(camera.v);
+	line_draw_vp = mat4_mult_mat(line_draw_vp, camera.p);
 	g4_set_mat(line_draw_vp_loc, line_draw_vp);
 	g4_draw(0, line_draw_lines * 6);
 }

@@ -14,7 +14,8 @@ type logic_node_ext_t = {
 
 type logic_node_value_t = {
 	_f32?: f32;
-	_any?: any;
+	_vec4?: vec4_t;
+	_str?: string;
 };
 
 type logic_node_input_t = {

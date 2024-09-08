@@ -233,7 +233,7 @@ function ui_menu_render() {
 					}
 					context_raw.light_angle = new_angle;
 					let m: mat4_t = mat4_rot_z(ldiff);
-					mat4_mult_mat(light.base.transform.local, m);
+					light.base.transform.local = mat4_mult_mat(light.base.transform.local, m);
 					transform_decompose(light.base.transform);
 					context_raw.ddirty = 2;
 				}

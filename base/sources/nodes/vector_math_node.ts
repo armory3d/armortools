@@ -14,32 +14,32 @@ function vector_math_node_create(args: f32_array_t): vector_math_node_t {
 }
 
 function vector_math_node_get(self: vector_math_node_t, from: i32): logic_node_value_t {
-	let v1: vec4_t = logic_node_input_get(self.base.inputs[0])._any;
-	let v2: vec4_t = logic_node_input_get(self.base.inputs[1])._any;
-	vec4_set_from(self.v, v1);
+	let v1: vec4_t = logic_node_input_get(self.base.inputs[0])._vec4;
+	let v2: vec4_t = logic_node_input_get(self.base.inputs[1])._vec4;
+	self.v = vec4_clone(v1);
 	let f: f32 = 0.0;
 	let op: string = self.operation;
 	if (op == "Add") {
-		vec4_add(self.v, v2);
+		self.v = vec4_add(self.v, v2);
 	}
 	else if (op == "Subtract") {
-		vec4_sub(self.v, v2);
+		self.v = vec4_sub(self.v, v2);
 	}
 	else if (op == "Average") {
-		vec4_add(self.v, v2);
+		self.v = vec4_add(self.v, v2);
 		self.v.x *= 0.5;
 		self.v.y *= 0.5;
 		self.v.z *= 0.5;
 	}
 	else if (op == "Dot Product") {
 		f = vec4_dot(self.v, v2);
-		vec4_set(self.v, f, f, f);
+		self.v = vec4_new(f, f, f);
 	}
 	else if (op == "Cross Product") {
-		vec4_cross(self.v, v2);
+		self.v = vec4_cross(self.v, v2);
 	}
 	else if (op == "Normalize") {
-		vec4_normalize(self.v);
+		self.v = vec4_norm(self.v);
 	}
 	else if (op == "Multiply") {
 		self.v.x *= v2.x;
@@ -53,21 +53,21 @@ function vector_math_node_get(self: vector_math_node_t, from: i32): logic_node_v
 	}
 	else if (op == "Length") {
 		f = vec4_len(self.v);
-		vec4_set(self.v, f, f, f);
+		self.v = vec4_new(f, f, f);
 	}
 	else if (op == "Distance") {
-		f = vec4_dist_to(self.v, v2);
-		vec4_set(self.v, f, f, f);
+		f = vec4_dist(self.v, v2);
+		self.v = vec4_new(f, f, f);
 	}
 	else if (op == "Project") {
-		vec4_set_from(self.v, v2);
-		vec4_mult(self.v, vec4_dot(v1, v2) / vec4_dot(v2, v2));
+		self.v = vec4_clone(v2);
+		self.v = vec4_mult(self.v, vec4_dot(v1, v2) / vec4_dot(v2, v2));
 	}
 	else if (op == "Reflect") {
 		let tmp: vec4_t = vec4_create();
-		vec4_set_from(tmp, v2);
-		vec4_normalize(tmp);
-		vec4_reflect(self.v, tmp);
+		tmp = vec4_clone(v2);
+		tmp = vec4_norm(tmp);
+		self.v = vec4_reflect(self.v, tmp);
 	}
 	else if (op == "Scale") {
 		self.v.x *= v2.x;
@@ -131,7 +131,7 @@ function vector_math_node_get(self: vector_math_node_t, from: i32): logic_node_v
 	}
 
 	if (from == 0) {
-		let v: logic_node_value_t = { _any: self.v };
+		let v: logic_node_value_t = { _vec4: self.v };
 		return v;
 	}
 	else {

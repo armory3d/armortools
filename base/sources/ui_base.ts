@@ -873,8 +873,8 @@ function ui_base_update() {
 
 			let camera: camera_object_t = scene_camera;
 			let ct: transform_t = camera.base.transform;
-			vec4_set(mo.base.transform.loc, transform_world_x(ct), transform_world_y(ct), transform_world_z(ct));
-			vec4_set(mo.base.transform.scale, context_raw.brush_radius * 0.2, context_raw.brush_radius * 0.2, context_raw.brush_radius * 0.2);
+			mo.base.transform.loc = vec4_new(transform_world_x(ct), transform_world_y(ct), transform_world_z(ct));
+			mo.base.transform.scale = vec4_new(context_raw.brush_radius * 0.2, context_raw.brush_radius * 0.2, context_raw.brush_radius * 0.2);
 			transform_build_matrix(mo.base.transform);
 
 			let body: physics_body_t = physics_body_create();
@@ -1495,7 +1495,7 @@ function ui_base_render_cursor() {
 			let cy: f32 = r.y + r.h / 2;
 			g2_set_transformation(mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(-angle)), mat3_translation(-cx, -cy)));
 			g2_draw_scaled_image(context_raw.brush_stencil_image, r.x, r.y, r.w, r.h);
-			g2_set_transformation(null);
+			g2_set_transformation(mat3_nan());
 			g2_set_color(0xffffffff);
 		}
 		let transform: bool = operator_shortcut(map_get(config_keymap, "stencil_transform"), shortcut_type_t.DOWN);
@@ -1513,7 +1513,7 @@ function ui_base_render_cursor() {
 			let cy: f32 = r.y + r.h / 2;
 			g2_set_transformation(mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(-angle)), mat3_translation(-cx, -cy)));
 			g2_fill_circle(r.x + r.w / 2, r.y - 4, 8);
-			g2_set_transformation(null);
+			g2_set_transformation(mat3_nan());
 		}
 	}
 	///end
@@ -1580,7 +1580,7 @@ function ui_base_render_cursor() {
 				///else
 				g2_draw_scaled_image(context_raw.decal_image, decalx, decaly + psizey, psizex, -psizey);
 				///end
-				g2_set_transformation(null);
+				g2_set_transformation(mat3_nan());
 				g2_set_color(0xffffffff);
 			}
 		}

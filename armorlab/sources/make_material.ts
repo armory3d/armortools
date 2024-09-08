@@ -123,8 +123,8 @@ function make_material_parse_paint_material() {
 }
 
 function make_material_get_displace_strength(): f32 {
-	let sc: f32 = context_main_object().base.transform.scale.x;
-	return config_raw.displace_strength * 0.02 * sc;
+	let sc: vec4_t = context_main_object().base.transform.scale;
+	return config_raw.displace_strength * 0.02 * sc.x;
 }
 
 function make_material_voxelgi_half_extents(): string {

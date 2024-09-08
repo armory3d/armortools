@@ -177,48 +177,51 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, folders_only: bool
 				}
 				icon = map_get(ui_files_icon_map, handle.text + path_sep + f);
 				if (icon == null) {
-					let files_all: string[] = file_read_directory(handle.text);
-					let icon_file: string = substring(f, 0, string_last_index_of(f, ".")) + "_icon.jpg";
-					if (array_index_of(files_all, icon_file) >= 0) {
-						let rt: render_target_t = map_get(render_path_render_targets, "empty_black");
-						let empty: image_t = rt._image;
-						map_set(ui_files_icon_map, handle.text + path_sep + f, empty);
+					let dot: i32 = string_last_index_of(f, ".");
+					if (dot > -1) {
+						let files_all: string[] = file_read_directory(handle.text);
+						let icon_file: string = substring(f, 0, dot) + "_icon.jpg";
+						if (array_index_of(files_all, icon_file) >= 0) {
+							let rt: render_target_t = map_get(render_path_render_targets, "empty_black");
+							let empty: image_t = rt._image;
+							map_set(ui_files_icon_map, handle.text + path_sep + f, empty);
 
-						_ui_files_file_browser_handle = handle;
-						_ui_files_file_browser_f = f;
+							_ui_files_file_browser_handle = handle;
+							_ui_files_file_browser_f = f;
 
-						file_cache_cloud(handle.text + path_sep + icon_file, function (abs: string) {
-							if (abs != null) {
-								let image: image_t = data_get_image(abs);
+							file_cache_cloud(handle.text + path_sep + icon_file, function (abs: string) {
+								if (abs != null) {
+									let image: image_t = data_get_image(abs);
 
-								app_notify_on_init(function (image: image_t) {
-									if (base_pipe_copy_rgb == null) {
-										base_make_pipe_copy_rgb();
-									}
-									let icon: image_t = image_create_render_target(image.width, image.height);
-									if (ends_with(_ui_files_file_browser_f, ".arm")) { // Used for material sphere alpha cutout
-										g2_begin(icon);
+									app_notify_on_init(function (image: image_t) {
+										if (base_pipe_copy_rgb == null) {
+											base_make_pipe_copy_rgb();
+										}
+										let icon: image_t = image_create_render_target(image.width, image.height);
+										if (ends_with(_ui_files_file_browser_f, ".arm")) { // Used for material sphere alpha cutout
+											g2_begin(icon);
 
-										///if (is_paint || is_sculpt)
-										g2_draw_image(project_materials[0].image, 0, 0);
-										///end
-									}
-									else {
-										g2_begin(icon);
-										g2_clear(0xffffffff);
-									}
-									g2_set_pipeline(base_pipe_copy_rgb);
-									g2_draw_image(image, 0, 0);
-									g2_set_pipeline(null);
-									g2_end();
-									map_set(ui_files_icon_map, _ui_files_file_browser_handle.text + path_sep + _ui_files_file_browser_f, icon);
-									ui_base_hwnds[tab_area_t.STATUS].redraws = 3;
-								}, image);
-							}
-							else {
-								ui_files_offline = true;
-							}
-						});
+											///if (is_paint || is_sculpt)
+											g2_draw_image(project_materials[0].image, 0, 0);
+											///end
+										}
+										else {
+											g2_begin(icon);
+											g2_clear(0xffffffff);
+										}
+										g2_set_pipeline(base_pipe_copy_rgb);
+										g2_draw_image(image, 0, 0);
+										g2_set_pipeline(null);
+										g2_end();
+										map_set(ui_files_icon_map, _ui_files_file_browser_handle.text + path_sep + _ui_files_file_browser_f, icon);
+										ui_base_hwnds[tab_area_t.STATUS].redraws = 3;
+									}, image);
+								}
+								else {
+									ui_files_offline = true;
+								}
+							});
+						}
 					}
 				}
 				if (icon != null) {

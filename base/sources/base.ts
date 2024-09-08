@@ -689,12 +689,12 @@ function base_material_dropped() {
 	// Material drag and dropped onto viewport or layers tab
 	if (context_in_viewport()) {
 		let uv_type: uv_type_t = keyboard_down("control") ? uv_type_t.PROJECT : uv_type_t.UVMAP;
-		let decal_mat: mat4_t = uv_type == uv_type_t.PROJECT ? util_render_get_decal_mat() : null;
+		let decal_mat: mat4_t = uv_type == uv_type_t.PROJECT ? util_render_get_decal_mat() : mat4_nan();
 		base_create_fill_layer(uv_type, decal_mat);
 	}
 	if (context_in_layers() && tab_layers_can_drop_new_layer(context_raw.drag_dest)) {
 		let uv_type: uv_type_t = keyboard_down("control") ? uv_type_t.PROJECT : uv_type_t.UVMAP;
-		let decal_mat: mat4_t = uv_type == uv_type_t.PROJECT ? util_render_get_decal_mat() : null;
+		let decal_mat: mat4_t = uv_type == uv_type_t.PROJECT ? util_render_get_decal_mat() : mat4_nan();
 		base_create_fill_layer(uv_type, decal_mat, context_raw.drag_dest);
 	}
 	else if (context_in_nodes()) {
@@ -2309,7 +2309,7 @@ let _base_uv_type: uv_type_t;
 let _base_decal_mat: mat4_t;
 let _base_position: i32;
 
-function base_create_fill_layer(uv_type: uv_type_t = uv_type_t.UVMAP, decal_mat: mat4_t = null, position: i32 = -1) {
+function base_create_fill_layer(uv_type: uv_type_t = uv_type_t.UVMAP, decal_mat: mat4_t = mat4nan, position: i32 = -1) {
 	_base_uv_type = uv_type;
 	_base_decal_mat = decal_mat;
 	_base_position = position;
@@ -2317,7 +2317,7 @@ function base_create_fill_layer(uv_type: uv_type_t = uv_type_t.UVMAP, decal_mat:
 		let l: slot_layer_t = base_new_layer(false, _base_position);
 		history_new_layer();
 		l.uv_type = _base_uv_type;
-		if (_base_decal_mat != null) {
+		if (!mat4_isnan(_base_decal_mat)) {
 			l.decal_mat = _base_decal_mat;
 		}
 		l.object_mask = context_raw.layer_filter;

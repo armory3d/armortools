@@ -29,7 +29,7 @@ function vector_node_get(self: vector_node_t, from: i32): logic_node_value_t {
 	self.value.x = x;
 	self.value.y = y;
 	self.value.z = z;
-	let v: logic_node_value_t = { _any: self.value };
+	let v: logic_node_value_t = { _vec4: self.value };
 	return v;
 }
 

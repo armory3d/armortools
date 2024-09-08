@@ -145,7 +145,7 @@ function tab_meshes_draw(htab: ui_handle_t) {
 								object_set_parent(child, project_paint_objects[0].base);
 							}
 							if (o.base.children.length == 0) {
-								vec4_set_from(project_paint_objects[0].base.transform.scale, o.base.transform.scale);
+								project_paint_objects[0].base.transform.scale = vec4_clone(o.base.transform.scale);
 								transform_build_matrix(project_paint_objects[0].base.transform);
 							}
 						}

@@ -18,7 +18,7 @@ function string_node_get(self: string_node_t, from: i32): logic_node_value_t {
 		return logic_node_input_get(self.base.inputs[0]);
 	}
 	else {
-		let v: logic_node_value_t = { _any: self.value };
+		let v: logic_node_value_t = { _str: self.value };
 		return v;
 	}
 }

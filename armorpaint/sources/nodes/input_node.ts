@@ -108,11 +108,11 @@ function input_node_update(self: float_node_t) {
 		let r: f32 = context_raw.brush_lazy_radius * 85;
 		if (d > r) {
 			let v3: vec4_t = vec4_create();
-			vec4_sub_vecs(v3, v2, v1);
-			vec4_normalize(v3);
-			vec4_mult(v3, 1.0 - context_raw.brush_lazy_step);
-			vec4_mult(v3, r);
-			vec4_add_vecs(v2, v1, v3);
+			v3 = vec4_sub(v2, v1);
+			v3 = vec4_norm(v3);
+			v3 = vec4_mult(v3, 1.0 - context_raw.brush_lazy_step);
+			v3 = vec4_mult(v3, r);
+			v2 = vec4_add(v1, v3);
 			input_node_coords.x = v2.x / app_w();
 			input_node_coords.y = v2.y / app_h();
 			// Parse brush inputs once on next draw
@@ -128,7 +128,7 @@ function input_node_update(self: float_node_t) {
 function input_node_get(self: input_node_t, from: i32): logic_node_value_t {
 	context_raw.brush_lazy_radius = logic_node_input_get(self.base.inputs[0])._f32;
 	context_raw.brush_lazy_step = logic_node_input_get(self.base.inputs[1])._f32;
-	let v: logic_node_value_t = { _any: input_node_coords };
+	let v: logic_node_value_t = { _vec4: input_node_coords };
 	return v;
 }
 

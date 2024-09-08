@@ -77,9 +77,9 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 
 	let cam: camera_object_t = scene_camera;
 	let ct: transform_t = cam.base.transform;
-	mat4_set_from(render_path_raytrace_help_mat, cam.v);
-	mat4_mult_mat(render_path_raytrace_help_mat, cam.p);
-	mat4_get_inv(render_path_raytrace_help_mat, render_path_raytrace_help_mat);
+	render_path_raytrace_help_mat = mat4_clone(cam.v);
+	render_path_raytrace_help_mat = mat4_mult_mat(render_path_raytrace_help_mat, cam.p);
+	render_path_raytrace_help_mat = mat4_get_inv(render_path_raytrace_help_mat);
 	render_path_raytrace_f32a[0] = transform_world_x(ct);
 	render_path_raytrace_f32a[1] = transform_world_y(ct);
 	render_path_raytrace_f32a[2] = transform_world_z(ct);
@@ -91,22 +91,22 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 	render_path_raytrace_frame = (render_path_raytrace_frame % 4) + 1; // _PAINT
 	// frame = frame + 1; // _RENDER
 	///end
-	render_path_raytrace_f32a[4] = render_path_raytrace_help_mat.m[0];
-	render_path_raytrace_f32a[5] = render_path_raytrace_help_mat.m[1];
-	render_path_raytrace_f32a[6] = render_path_raytrace_help_mat.m[2];
-	render_path_raytrace_f32a[7] = render_path_raytrace_help_mat.m[3];
-	render_path_raytrace_f32a[8] = render_path_raytrace_help_mat.m[4];
-	render_path_raytrace_f32a[9] = render_path_raytrace_help_mat.m[5];
-	render_path_raytrace_f32a[10] = render_path_raytrace_help_mat.m[6];
-	render_path_raytrace_f32a[11] = render_path_raytrace_help_mat.m[7];
-	render_path_raytrace_f32a[12] = render_path_raytrace_help_mat.m[8];
-	render_path_raytrace_f32a[13] = render_path_raytrace_help_mat.m[9];
-	render_path_raytrace_f32a[14] = render_path_raytrace_help_mat.m[10];
-	render_path_raytrace_f32a[15] = render_path_raytrace_help_mat.m[11];
-	render_path_raytrace_f32a[16] = render_path_raytrace_help_mat.m[12];
-	render_path_raytrace_f32a[17] = render_path_raytrace_help_mat.m[13];
-	render_path_raytrace_f32a[18] = render_path_raytrace_help_mat.m[14];
-	render_path_raytrace_f32a[19] = render_path_raytrace_help_mat.m[15];
+	render_path_raytrace_f32a[4] = render_path_raytrace_help_mat.m00;
+	render_path_raytrace_f32a[5] = render_path_raytrace_help_mat.m01;
+	render_path_raytrace_f32a[6] = render_path_raytrace_help_mat.m02;
+	render_path_raytrace_f32a[7] = render_path_raytrace_help_mat.m03;
+	render_path_raytrace_f32a[8] = render_path_raytrace_help_mat.m10;
+	render_path_raytrace_f32a[9] = render_path_raytrace_help_mat.m11;
+	render_path_raytrace_f32a[10] = render_path_raytrace_help_mat.m12;
+	render_path_raytrace_f32a[11] = render_path_raytrace_help_mat.m13;
+	render_path_raytrace_f32a[12] = render_path_raytrace_help_mat.m20;
+	render_path_raytrace_f32a[13] = render_path_raytrace_help_mat.m21;
+	render_path_raytrace_f32a[14] = render_path_raytrace_help_mat.m22;
+	render_path_raytrace_f32a[15] = render_path_raytrace_help_mat.m23;
+	render_path_raytrace_f32a[16] = render_path_raytrace_help_mat.m30;
+	render_path_raytrace_f32a[17] = render_path_raytrace_help_mat.m31;
+	render_path_raytrace_f32a[18] = render_path_raytrace_help_mat.m32;
+	render_path_raytrace_f32a[19] = render_path_raytrace_help_mat.m33;
 	render_path_raytrace_f32a[20] = scene_world.strength * 1.5;
 	if (!context_raw.show_envmap) {
 		render_path_raytrace_f32a[20] = -render_path_raytrace_f32a[20];

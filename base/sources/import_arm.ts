@@ -80,9 +80,7 @@ function import_arm_run_project(path: string) {
 		scene_camera.data.fov = project_raw.camera_fov;
 		camera_object_build_proj(scene_camera);
 		let origin: f32_array_t = project_raw.camera_origin;
-		camera_origins[0].x = origin[0];
-		camera_origins[0].y = origin[1];
-		camera_origins[0].z = origin[2];
+		camera_origins[0].v = vec4_new(origin[0], origin[1], origin[2]);
 	}
 
 	for (let i: i32 = 0; i < project.assets.length; ++i) {
@@ -132,7 +130,7 @@ function import_arm_run_project(path: string) {
 	///end
 
 	mesh_object_set_data(context_raw.paint_object, md);
-	vec4_set(context_raw.paint_object.base.transform.scale, 1, 1, 1);
+	context_raw.paint_object.base.transform.scale = vec4_new(1, 1, 1);
 	transform_build_matrix(context_raw.paint_object.base.transform);
 	context_raw.paint_object.base.name = md.name;
 	project_paint_objects = [context_raw.paint_object];
@@ -410,7 +408,7 @@ function import_arm_run_mesh(raw: scene_t) {
 			md._.handle = md.name;
 			map_set(data_cached_meshes, md._.handle, md);
 		}
-		vec4_set(object.base.transform.scale, 1, 1, 1);
+		object.base.transform.scale = vec4_new(1, 1, 1);
 		transform_build_matrix(object.base.transform);
 		object.base.name = md.name;
 		array_push(project_paint_objects, object);

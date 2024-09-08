@@ -114,7 +114,8 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 	}
 	///end
 	else if (link == "_decal_layer_dim") {
-		return mat4_get_scale(context_raw.layer.decal_mat).z * 0.5;
+		let sc: vec4_t = mat4_get_scale(context_raw.layer.decal_mat);
+		return sc.z * 0.5;
 	}
 	else if (link == "_picker_opacity") {
 		return context_raw.picked_color.opacity;
@@ -150,17 +151,17 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 
 function uniforms_ext_vec2_link(object: object_t, mat: material_data_t, link: string): vec4_t {
 	if (link == "_gbuffer_size") {
-		vec4_set(uniforms_ext_vec, 0, 0, 0);
+		uniforms_ext_vec = vec4_new(0, 0, 0);
 		let gbuffer2: render_target_t = map_get(render_path_render_targets, "gbuffer2");
-		vec4_set(uniforms_ext_vec, gbuffer2._image.width, gbuffer2._image.height, 0);
+		uniforms_ext_vec = vec4_new(gbuffer2._image.width, gbuffer2._image.height, 0);
 		return uniforms_ext_vec;
 	}
 	else if (link == "_clone_delta") {
-		vec4_set(uniforms_ext_vec, context_raw.clone_delta_x, context_raw.clone_delta_y, 0);
+		uniforms_ext_vec = vec4_new(context_raw.clone_delta_x, context_raw.clone_delta_y, 0);
 		return uniforms_ext_vec;
 	}
 	else if (link == "_texpaint_size") {
-		vec4_set(uniforms_ext_vec, config_get_texture_res_x(), config_get_texture_res_y(), 0);
+		uniforms_ext_vec = vec4_new(config_get_texture_res_x(), config_get_texture_res_y(), 0);
 		return uniforms_ext_vec;
 	}
 	///if (is_paint || is_sculpt)
@@ -171,16 +172,16 @@ function uniforms_ext_vec2_link(object: object_t, mat: material_data_t, link: st
 		if (config_raw.pressure_angle && pen_down()) {
 			angle *= pen_pressure * config_raw.pressure_sensitivity;
 		}
-		vec4_set(uniforms_ext_vec, math_cos(-angle), math_sin(-angle), 0);
+		uniforms_ext_vec = vec4_new(math_cos(-angle), math_sin(-angle), 0);
 		return uniforms_ext_vec;
 	}
 	///end
 
-	return null;
+	return vec4_nan();
 }
 
 function uniforms_ext_vec3_link(object: object_t, mat: material_data_t, link: string): vec4_t {
-	let v: vec4_t = null;
+	let v: vec4_t = vec4_nan();
 
 	///if (is_paint || is_sculpt)
 	if (link == "_brush_direction") {
@@ -199,24 +200,25 @@ function uniforms_ext_vec3_link(object: object_t, mat: material_data_t, link: st
 			lastx = vec2d(lastx);
 		}
 		let angle: f32 = math_atan2(-y + lasty, x - lastx) - math_pi() / 2;
-		vec4_set(v, math_cos(angle), math_sin(angle), allow_paint ? 1 : 0);
+		v = vec4_new(math_cos(angle), math_sin(angle), allow_paint ? 1 : 0);
 		context_raw.prev_paint_vec_x = context_raw.last_paint_vec_x;
 		context_raw.prev_paint_vec_y = context_raw.last_paint_vec_y;
 		return v;
 	}
 	else if (link == "_decal_layer_loc") {
 		v = _uniforms_vec;
-		vec4_set(v, context_raw.layer.decal_mat.m[12], context_raw.layer.decal_mat.m[13], context_raw.layer.decal_mat.m[14]);
+		v = vec4_new(context_raw.layer.decal_mat.m30, context_raw.layer.decal_mat.m31, context_raw.layer.decal_mat.m32);
 		return v;
 	}
 	else if (link == "_decal_layer_nor") {
 		v = _uniforms_vec;
-		vec4_normalize(vec4_set(v, context_raw.layer.decal_mat.m[8], context_raw.layer.decal_mat.m[9], context_raw.layer.decal_mat.m[10]));
+		v = vec4_new(context_raw.layer.decal_mat.m20, context_raw.layer.decal_mat.m21, context_raw.layer.decal_mat.m22);
+		v = vec4_norm(v);
 		return v;
 	}
 	else if (link == "_picker_base") {
 		v = _uniforms_vec;
-		vec4_set(v,
+		v = vec4_new(
 			color_get_rb(context_raw.picked_color.base) / 255,
 			color_get_gb(context_raw.picked_color.base) / 255,
 			color_get_bb(context_raw.picked_color.base) / 255
@@ -225,7 +227,7 @@ function uniforms_ext_vec3_link(object: object_t, mat: material_data_t, link: st
 	}
 	else if (link == "_picker_normal") {
 		v = _uniforms_vec;
-		vec4_set(v,
+		v = vec4_new(
 			color_get_rb(context_raw.picked_color.normal) / 255,
 			color_get_gb(context_raw.picked_color.normal) / 255,
 			color_get_bb(context_raw.picked_color.normal) / 255
@@ -235,12 +237,12 @@ function uniforms_ext_vec3_link(object: object_t, mat: material_data_t, link: st
 	///if arm_physics
 	else if (link == "_particle_hit") {
 		v = _uniforms_vec;
-		vec4_set(v, context_raw.particle_hit_x, context_raw.particle_hit_y, context_raw.particle_hit_z);
+		v = vec4_new(context_raw.particle_hit_x, context_raw.particle_hit_y, context_raw.particle_hit_z);
 		return v;
 	}
 	else if (link == "_particle_hit_last") {
 		v = _uniforms_vec;
-		vec4_set(v, context_raw.last_particle_hit_x, context_raw.last_particle_hit_y, context_raw.last_particle_hit_z);
+		v = vec4_new(context_raw.last_particle_hit_x, context_raw.last_particle_hit_y, context_raw.last_particle_hit_z);
 		return v;
 	}
 	///end
@@ -262,7 +264,7 @@ function vec2d(x: f32): f32 {
 function uniforms_ext_vec4_link(object: object_t, mat: material_data_t, link: string): vec4_t {
 	if (link == "_input_brush") {
 		let down: bool = mouse_down() || pen_down();
-		vec4_set(uniforms_ext_vec, context_raw.paint_vec.x, context_raw.paint_vec.y, down ? 1.0 : 0.0, 0.0);
+		uniforms_ext_vec = vec4_new(context_raw.paint_vec.x, context_raw.paint_vec.y, down ? 1.0 : 0.0, 0.0);
 
 		///if (is_paint || is_sculpt)
 		if (context_raw.paint2d) {
@@ -274,7 +276,7 @@ function uniforms_ext_vec4_link(object: object_t, mat: material_data_t, link: st
 	}
 	else if (link == "_input_brush_last") {
 		let down: bool = mouse_down() || pen_down();
-		vec4_set(uniforms_ext_vec, context_raw.last_paint_vec_x, context_raw.last_paint_vec_y, down ? 1.0 : 0.0, 0.0);
+		uniforms_ext_vec = vec4_new(context_raw.last_paint_vec_x, context_raw.last_paint_vec_y, down ? 1.0 : 0.0, 0.0);
 
 		///if (is_paint || is_sculpt)
 		if (context_raw.paint2d) {
@@ -285,16 +287,16 @@ function uniforms_ext_vec4_link(object: object_t, mat: material_data_t, link: st
 		return uniforms_ext_vec;
 	}
 	else if (link == "_envmap_data") {
-		vec4_set(uniforms_ext_vec, context_raw.envmap_angle, math_sin(-context_raw.envmap_angle), math_cos(-context_raw.envmap_angle), scene_world.strength);
+		uniforms_ext_vec = vec4_new(context_raw.envmap_angle, math_sin(-context_raw.envmap_angle), math_cos(-context_raw.envmap_angle), scene_world.strength);
 		return uniforms_ext_vec;
 	}
 	else if (link == "_envmap_data_world") {
-		vec4_set(uniforms_ext_vec, context_raw.envmap_angle, math_sin(-context_raw.envmap_angle), math_cos(-context_raw.envmap_angle), context_raw.show_envmap ? scene_world.strength : 1.0);
+		uniforms_ext_vec = vec4_new(context_raw.envmap_angle, math_sin(-context_raw.envmap_angle), math_cos(-context_raw.envmap_angle), context_raw.show_envmap ? scene_world.strength : 1.0);
 		return uniforms_ext_vec;
 	}
 	///if (is_paint || is_sculpt)
 	else if (link == "_stencil_transform") {
-		vec4_set(uniforms_ext_vec, context_raw.brush_stencil_x, context_raw.brush_stencil_y, context_raw.brush_stencil_scale, context_raw.brush_stencil_angle);
+		uniforms_ext_vec = vec4_new(context_raw.brush_stencil_x, context_raw.brush_stencil_y, context_raw.brush_stencil_scale, context_raw.brush_stencil_angle);
 		if (context_raw.paint2d) uniforms_ext_vec.x = vec2d(uniforms_ext_vec.x);
 		return uniforms_ext_vec;
 	}
@@ -303,7 +305,7 @@ function uniforms_ext_vec4_link(object: object_t, mat: material_data_t, link: st
 		let val: f32 = (context_raw.brush_radius * context_raw.brush_nodes_radius) / 15.0;
 		let scale2d: f32 = (900 / base_h()) * config_raw.window_scale;
 		val *= scale2d; // Projection ratio
-		vec4_set(uniforms_ext_vec, context_raw.decal_x, context_raw.decal_y, decal_mask ? 1 : 0, val);
+		uniforms_ext_vec = vec4_new(context_raw.decal_x, context_raw.decal_y, decal_mask ? 1 : 0, val);
 		if (context_raw.paint2d) {
 			uniforms_ext_vec.x = vec2d(uniforms_ext_vec.x);
 		}
@@ -311,21 +313,21 @@ function uniforms_ext_vec4_link(object: object_t, mat: material_data_t, link: st
 	}
 	///end
 
-	return null;
+	return vec4_nan();
 }
 
 function uniforms_ext_mat4_link(object: object_t, mat: material_data_t, link: string): mat4_t {
 	///if (is_paint || is_sculpt)
 	if (link == "_decal_layer_matrix") { // Decal layer
 		let m: mat4_t = _uniforms_mat;
-		mat4_set_from(m, context_raw.layer.decal_mat);
-		mat4_get_inv(m, m);
-		mat4_mult_mat(m, uniforms_ext_ortho_p);
+		m = mat4_clone(context_raw.layer.decal_mat);
+		m = mat4_get_inv(m);
+		m = mat4_mult_mat(m, uniforms_ext_ortho_p);
 		return m;
 	}
 	///end
 
-	return null;
+	return mat4_nan();
 }
 
 function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: string): image_t {

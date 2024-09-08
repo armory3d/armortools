@@ -20,7 +20,7 @@ function util_render_make_material_preview() {
 	sphere.materials[0] = project_materials[0].data;
 	context_raw.material.preview_ready = true;
 
-	mat4_set_from(context_raw.saved_camera, scene_camera.base.transform.local);
+	context_raw.saved_camera = mat4_clone(scene_camera.base.transform.local);
 	let m: mat4_t = mat4_create(0.9146286343879498, -0.0032648027153306235, 0.404281837254303, 0.4659988049397712, 0.404295023959927, 0.007367569133732468, -0.9145989516155143, -1.0687517188018691, 0.000007410128652369705, 0.9999675337275382, 0.008058532943908717, 0.015935682577325486, 0, 0, 0, 1);
 	transform_set_matrix(scene_camera.base.transform, m);
 	let saved_fov: f32 = scene_camera.data.fov;
@@ -87,8 +87,8 @@ function util_render_make_decal_preview() {
 	context_raw.decal_preview = true;
 
 	let plane: mesh_object_t = scene_get_child(".Plane").ext;
-	vec4_set(plane.base.transform.scale, 1, 1, 1);
-	quat_from_euler(plane.base.transform.rot, -math_pi() / 2, 0, 0);
+	plane.base.transform.scale = vec4_new(1, 1, 1);
+	plane.base.transform.rot = quat_from_euler(-math_pi() / 2, 0, 0);
 	transform_build_matrix(plane.base.transform);
 	plane.base.visible = true;
 	let meshes: mesh_object_t[] = scene_meshes;
@@ -96,9 +96,9 @@ function util_render_make_decal_preview() {
 	let painto: mesh_object_t = context_raw.paint_object;
 	context_raw.paint_object = plane;
 
-	mat4_set_from(context_raw.saved_camera, scene_camera.base.transform.local);
+	context_raw.saved_camera = mat4_clone(scene_camera.base.transform.local);
 	let m: mat4_t = mat4_identity();
-	mat4_translate(m, 0, 0, 1);
+	m = mat4_translate(m, 0, 0, 1);
 	transform_set_matrix(scene_camera.base.transform, m);
 	let saved_fov: f32 = scene_camera.data.fov;
 	scene_camera.data.fov = 0.92;
@@ -261,26 +261,27 @@ function util_render_make_brush_preview() {
 	}
 
 	let cam: camera_object_t = scene_camera;
-	mat4_set_from(context_raw.saved_camera, cam.base.transform.local);
+	context_raw.saved_camera = mat4_clone(cam.base.transform.local);
 	let saved_fov: f32 = cam.data.fov;
 	viewport_update_camera_type(camera_type_t.PERSPECTIVE);
 	let m: mat4_t = mat4_identity();
-	mat4_translate(m, 0, 0, 0.5);
+	m = mat4_translate(m, 0, 0, 0.5);
 	transform_set_matrix(cam.base.transform, m);
 	cam.data.fov = 0.92;
 	camera_object_build_proj(cam);
 	camera_object_build_mat(cam);
-	mat4_get_inv(m, scene_camera.vp);
+	m = mat4_get_inv(scene_camera.vp);
 
 	let planeo: mesh_object_t = scene_get_child(".Plane").ext;
 	planeo.base.visible = true;
 	context_raw.paint_object = planeo;
 
 	let v: vec4_t = vec4_create();
-	let sx: f32 = vec4_len(vec4_set(v, m.m[0], m.m[1], m.m[2]));
-	quat_from_euler(planeo.base.transform.rot, -math_pi() / 2, 0, 0);
-	vec4_set(planeo.base.transform.scale, sx, 1.0, sx);
-	vec4_set(planeo.base.transform.loc, m.m[12], -m.m[13], 0.0);
+	v = vec4_new(m.m00, m.m01, m.m02);
+	let sx: f32 = vec4_len(v);
+	planeo.base.transform.rot = quat_from_euler(-math_pi() / 2, 0, 0);
+	planeo.base.transform.scale = vec4_new(sx, 1.0, sx);
+	planeo.base.transform.loc = vec4_new(m.m30, -m.m31, 0.0);
 	transform_build_matrix(planeo.base.transform);
 
 	render_path_paint_live_layer_drawn = 0;
@@ -429,9 +430,9 @@ function util_render_get_decal_mat(): mat4_t {
 	util_render_pick_pos_nor_tex();
 	let decal_mat: mat4_t = mat4_identity();
 	let loc: vec4_t = vec4_create(context_raw.posx_picked, context_raw.posy_picked, context_raw.posz_picked);
-	let rot: quat_t = quat_from_to(quat_create(), vec4_create(0.0, 0.0, -1.0), vec4_create(context_raw.norx_picked, context_raw.nory_picked, context_raw.norz_picked));
+	let rot: quat_t = quat_from_to(vec4_create(0.0, 0.0, -1.0), vec4_create(context_raw.norx_picked, context_raw.nory_picked, context_raw.norz_picked));
 	let scale: vec4_t = vec4_create(context_raw.brush_radius * 0.5, context_raw.brush_radius * 0.5, context_raw.brush_radius * 0.5);
-	mat4_compose(decal_mat, loc, rot, scale);
+	decal_mat = mat4_compose(loc, rot, scale);
 	return decal_mat;
 }
 

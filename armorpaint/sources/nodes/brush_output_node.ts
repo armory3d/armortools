@@ -26,7 +26,7 @@ function brush_output_node_parse_inputs(self: brush_output_node_t) {
 	let input5: logic_node_value_t = logic_node_input_get(self.base.inputs[5]);
 	let input6: logic_node_value_t = logic_node_input_get(self.base.inputs[6]);
 
-	context_raw.paint_vec = input0._any;
+	context_raw.paint_vec = input0._vec4;
 	context_raw.brush_nodes_radius = input1._f32;
 	context_raw.brush_nodes_scale = input2._f32;
 	context_raw.brush_nodes_angle = input3._f32;
@@ -35,11 +35,11 @@ function brush_output_node_parse_inputs(self: brush_output_node_t) {
 	if (opac == null) {
 		opac = { _f32: 1.0 };
 	}
-	if (opac._any != null) { // string
-		context_raw.brush_mask_image_is_alpha = ends_with(opac._any, ".a");
-		opac._any = substring(opac._any, 0, string_last_index_of(opac._any, "."));
+	if (opac._str != null) { // string
+		context_raw.brush_mask_image_is_alpha = ends_with(opac._str, ".a");
+		opac._str = substring(opac._str, 0, string_last_index_of(opac._str, "."));
 		context_raw.brush_nodes_opacity = 1.0;
-		let index: i32 = array_index_of(project_asset_names, opac._any);
+		let index: i32 = array_index_of(project_asset_names, opac._str);
 		let asset: asset_t = project_assets[index];
 		context_raw.brush_mask_image = project_get_image(asset);
 	}
@@ -54,10 +54,10 @@ function brush_output_node_parse_inputs(self: brush_output_node_t) {
 	if (stencil == null) {
 		stencil = { _f32: 1.0 };
 	}
-	if (stencil._any != null) { // string
-		context_raw.brush_stencil_image_is_alpha = ends_with(stencil._any, ".a");
-		stencil._any = substring(stencil._any, 0, string_last_index_of(stencil._any, "."));
-		let index: i32 = array_index_of(project_asset_names, stencil._any);
+	if (stencil._str != null) { // string
+		context_raw.brush_stencil_image_is_alpha = ends_with(stencil._str, ".a");
+		stencil._str = substring(stencil._str, 0, string_last_index_of(stencil._str, "."));
+		let index: i32 = array_index_of(project_asset_names, stencil._str);
 		let asset: asset_t = project_assets[index];
 		context_raw.brush_stencil_image = project_get_image(asset);
 	}

@@ -77,7 +77,7 @@ function render_path_base_draw_compass() {
 		compass.base.parent = cam.base;
 		compass.base.transform.loc = vec4_create(7.4 * ratio, 7.0, -1);
 		compass.base.transform.rot = quat_create(-crot.x, -crot.y, -crot.z, crot.w);
-		vec4_set(compass.base.transform.scale, 0.4, 0.4, 0.4);
+		compass.base.transform.scale = vec4_new(0.4, 0.4, 0.4);
 		transform_build_matrix(compass.base.transform);
 		compass.frustum_culling = false;
 		let empty: string[] = [];
@@ -107,7 +107,7 @@ function render_path_base_begin() {
 		let cam: camera_object_t = scene_camera;
 		if (context_raw.view_index_last > -1) {
 			// Save current viewport camera
-			mat4_set_from(camera_views[context_raw.view_index_last], cam.base.transform.local);
+			camera_views[context_raw.view_index_last].v = mat4_clone(cam.base.transform.local);
 		}
 
 		let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
@@ -117,7 +117,7 @@ function render_path_base_begin() {
 			context_raw.ddirty = 1;
 		}
 
-		transform_set_matrix(cam.base.transform, camera_views[context_raw.view_index]);
+		transform_set_matrix(cam.base.transform, camera_views[context_raw.view_index].v);
 		camera_object_build_mat(cam);
 		camera_object_build_proj(cam);
 	}
@@ -258,7 +258,7 @@ function render_path_base_draw_split(draw_commands: ()=>void) {
 		let cam: camera_object_t = scene_camera;
 
 		context_raw.view_index = context_raw.view_index == 0 ? 1 : 0;
-		transform_set_matrix(cam.base.transform, camera_views[context_raw.view_index]);
+		transform_set_matrix(cam.base.transform, camera_views[context_raw.view_index].v);
 		camera_object_build_mat(cam);
 		camera_object_build_proj(cam);
 
@@ -276,7 +276,7 @@ function render_path_base_draw_split(draw_commands: ()=>void) {
 		///end
 
 		context_raw.view_index = context_raw.view_index == 0 ? 1 : 0;
-		transform_set_matrix(cam.base.transform, camera_views[context_raw.view_index]);
+		transform_set_matrix(cam.base.transform, camera_views[context_raw.view_index].v);
 		camera_object_build_mat(cam);
 		camera_object_build_proj(cam);
 	}

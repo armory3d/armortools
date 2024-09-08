@@ -532,12 +532,12 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 	g4_set_float2(base_cursor_mouse, mx, my);
 	g4_set_float2(base_cursor_tex_step, 1 / gbuffer0.width, 1 / gbuffer0.height);
 	g4_set_float(base_cursor_radius, radius);
-	let right: vec4_t = vec4_normalize(camera_object_right_world(scene_camera));
+	let right: vec4_t = vec4_norm(camera_object_right_world(scene_camera));
 	g4_set_float3(base_cursor_camera_right, right.x, right.y, right.z);
 	g4_set_float3(base_cursor_tint, tint_r, tint_g, tint_b);
 	g4_set_mat(base_cursor_vp, scene_camera.vp);
 	let help_mat: mat4_t = mat4_identity();
-	mat4_get_inv(help_mat, scene_camera.vp);
+	help_mat = mat4_get_inv(scene_camera.vp);
 	g4_set_mat(base_cursor_inv_vp, help_mat);
 	///if (arm_metal || arm_vulkan)
 	let vs: vertex_element_t[] = [
@@ -565,41 +565,41 @@ function render_path_paint_commands_symmetry() {
 		let sy: f32 = t.scale.y;
 		let sz: f32 = t.scale.z;
 		if (context_raw.sym_x) {
-			vec4_set(t.scale, -sx, sy, sz);
+			t.scale = vec4_new(-sx, sy, sz);
 			transform_build_matrix(t);
 			render_path_paint_commands_paint(false);
 		}
 		if (context_raw.sym_y) {
-			vec4_set(t.scale, sx, -sy, sz);
+			t.scale = vec4_new(sx, -sy, sz);
 			transform_build_matrix(t);
 			render_path_paint_commands_paint(false);
 		}
 		if (context_raw.sym_z) {
-			vec4_set(t.scale, sx, sy, -sz);
+			t.scale = vec4_new(sx, sy, -sz);
 			transform_build_matrix(t);
 			render_path_paint_commands_paint(false);
 		}
 		if (context_raw.sym_x && context_raw.sym_y) {
-			vec4_set(t.scale, -sx, -sy, sz);
+			t.scale = vec4_new(-sx, -sy, sz);
 			transform_build_matrix(t);
 			render_path_paint_commands_paint(false);
 		}
 		if (context_raw.sym_x && context_raw.sym_z) {
-			vec4_set(t.scale, -sx, sy, -sz);
+			t.scale = vec4_new(-sx, sy, -sz);
 			transform_build_matrix(t);
 			render_path_paint_commands_paint(false);
 		}
 		if (context_raw.sym_y && context_raw.sym_z) {
-			vec4_set(t.scale, sx, -sy, -sz);
+			t.scale = vec4_new(sx, -sy, -sz);
 			transform_build_matrix(t);
 			render_path_paint_commands_paint(false);
 		}
 		if (context_raw.sym_x && context_raw.sym_y && context_raw.sym_z) {
-			vec4_set(t.scale, -sx, -sy, -sz);
+			t.scale = vec4_new(-sx, -sy, -sz);
 			transform_build_matrix(t);
 			render_path_paint_commands_paint(false);
 		}
-		vec4_set(t.scale, sx, sy, sz);
+		t.scale = vec4_new(sx, sy, sz);
 		transform_build_matrix(t);
 	}
 }
@@ -839,11 +839,11 @@ function render_path_paint_set_plane_mesh() {
 	}
 
 	let cam: camera_object_t = scene_camera;
-	mat4_set_from(context_raw.saved_camera, cam.base.transform.local);
+	context_raw.saved_camera = mat4_clone(cam.base.transform.local);
 	render_path_paint_saved_fov = cam.data.fov;
 	viewport_update_camera_type(camera_type_t.PERSPECTIVE);
 	let m: mat4_t = mat4_identity();
-	mat4_translate(m, 0, 0, 0.5);
+	m = mat4_translate(m, 0, 0, 0.5);
 	transform_set_matrix(cam.base.transform, m);
 	cam.data.fov = base_default_fov;
 	camera_object_build_proj(cam);
@@ -852,12 +852,12 @@ function render_path_paint_set_plane_mesh() {
 	let tw: f32 = 0.95 * ui_view2d_pan_scale;
 	let tx: f32 = ui_view2d_pan_x / ui_view2d_ww;
 	let ty: f32 = ui_view2d_pan_y / app_h();
-	mat4_set_identity(m);
-	mat4_scale(m, vec4_create(tw, tw, 1));
-	mat4_set_loc(m, vec4_create(tx, ty, 0));
+	m = mat4_identity();
+	m = mat4_scale(m, vec4_create(tw, tw, 1));
+	m = mat4_set_loc(m, vec4_create(tx, ty, 0));
 	let m2: mat4_t = mat4_identity();
-	mat4_get_inv(m2, scene_camera.vp);
-	mat4_mult_mat(m, m2);
+	m2 = mat4_get_inv(scene_camera.vp);
+	m = mat4_mult_mat(m, m2);
 
 	let tiled: bool = ui_view2d_tiled_show;
 	if (tiled && scene_get_child(".PlaneTiled") == null) {
@@ -891,18 +891,19 @@ function render_path_paint_set_plane_mesh() {
 	context_raw.paint_object = render_path_paint_planeo;
 
 	let v: vec4_t = vec4_create();
-	let sx: f32 = vec4_len(vec4_set(v, m.m[0], m.m[1], m.m[2]));
-	quat_from_euler(render_path_paint_planeo.base.transform.rot, -math_pi() / 2, 0, 0);
-	vec4_set(render_path_paint_planeo.base.transform.scale, sx, 1.0, sx);
+	v = vec4_new(m.m00, m.m01, m.m02);
+	let sx: f32 = vec4_len(v);
+	render_path_paint_planeo.base.transform.rot = quat_from_euler(-math_pi() / 2, 0, 0);
+	render_path_paint_planeo.base.transform.scale = vec4_new(sx, 1.0, sx);
 	render_path_paint_planeo.base.transform.scale.z *= config_get_texture_res_y() / config_get_texture_res_x();
-	vec4_set(render_path_paint_planeo.base.transform.loc, m.m[12], -m.m[13], 0.0);
+	render_path_paint_planeo.base.transform.loc = vec4_new(m.m30, -m.m31, 0.0);
 	transform_build_matrix(render_path_paint_planeo.base.transform);
 }
 
 function render_path_paint_restore_plane_mesh() {
 	context_raw.paint2d_view = false;
 	render_path_paint_planeo.base.visible = false;
-	vec4_set(render_path_paint_planeo.base.transform.loc, 0.0, 0.0, 0.0);
+	render_path_paint_planeo.base.transform.loc = vec4_new(0.0, 0.0, 0.0);
 	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 		project_paint_objects[i].base.visible = render_path_paint_visibles[i];
 	}

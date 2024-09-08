@@ -239,7 +239,7 @@ function project_new(reset_layers: bool = true) {
 	///end
 
 	mesh_object_set_data(context_raw.paint_object, md);
-	vec4_set(context_raw.paint_object.base.transform.scale, 1, 1, 1);
+	context_raw.paint_object.base.transform.scale = vec4_new(1, 1, 1);
 	transform_build_matrix(context_raw.paint_object.base.transform);
 	context_raw.paint_object.base.name = n;
 	project_paint_objects = [context_raw.paint_object];
