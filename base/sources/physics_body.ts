@@ -82,8 +82,8 @@ function physics_body_sync_transform(body: physics_body_t) {
 
 function physics_body_update(body: physics_body_t) {
 	let transform: transform_t = body.obj.transform;
-	jolt_body_get_pos(body._body, transform.loc);
-	jolt_body_get_rot(body._body, transform.rot);
+	jolt_body_get_pos(body._body, ADDRESS(transform.loc));
+	jolt_body_get_rot(body._body, ADDRESS(transform.rot));
 	transform_build_matrix(transform);
 }
 
