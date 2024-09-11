@@ -66,6 +66,16 @@ function ui_files_release_keys() {
 let _ui_files_file_browser_handle: ui_handle_t;
 let _ui_files_file_browser_f: string;
 
+type draw_cloud_icon_data_t = {
+	f: string;
+	image: image_t;
+};
+
+function make_draw_cloud_icon_data(f: string, image: image_t): draw_cloud_icon_data_t {
+	let data: draw_cloud_icon_data_t = { f: f, image: image };
+	return data;
+}
+
 function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, folders_only: bool = false, drag_files: bool = false, search: string = "", refresh: bool = false, context_menu: (s: string)=>void = null): string {
 
 	let icons: image_t = resource_get("icons.k");
@@ -187,18 +197,19 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, folders_only: bool
 							map_set(ui_files_icon_map, handle.text + path_sep + f, empty);
 
 							_ui_files_file_browser_handle = handle;
-							_ui_files_file_browser_f = f;
+							_ui_files_file_browser_f = f; ////
 
 							file_cache_cloud(handle.text + path_sep + icon_file, function (abs: string) {
 								if (abs != null) {
 									let image: image_t = data_get_image(abs);
+									let data: draw_cloud_icon_data_t = make_draw_cloud_icon_data(_ui_files_file_browser_f, image);
 
-									app_notify_on_init(function (image: image_t) {
+									app_notify_on_init(function (data: draw_cloud_icon_data_t) {
 										if (base_pipe_copy_rgb == null) {
 											base_make_pipe_copy_rgb();
 										}
-										let icon: image_t = image_create_render_target(image.width, image.height);
-										if (ends_with(_ui_files_file_browser_f, ".arm")) { // Used for material sphere alpha cutout
+										let icon: image_t = image_create_render_target(data.image.width, data.image.height);
+										if (ends_with(data.f, ".arm")) { // Used for material sphere alpha cutout
 											g2_begin(icon);
 
 											///if (is_paint || is_sculpt)
@@ -210,12 +221,13 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, folders_only: bool
 											g2_clear(0xffffffff);
 										}
 										g2_set_pipeline(base_pipe_copy_rgb);
-										g2_draw_image(image, 0, 0);
+										g2_draw_image(data.image, 0, 0);
 										g2_set_pipeline(null);
 										g2_end();
-										map_set(ui_files_icon_map, _ui_files_file_browser_handle.text + path_sep + _ui_files_file_browser_f, icon);
+
+										map_set(ui_files_icon_map, _ui_files_file_browser_handle.text + path_sep + data.f, icon);
 										ui_base_hwnds[tab_area_t.STATUS].redraws = 3;
-									}, image);
+									}, data);
 								}
 								else {
 									ui_files_offline = true;

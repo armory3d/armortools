@@ -273,7 +273,11 @@ function ui_viewnodes_on_socket_released(socket_id: i32) {
 let _ui_nodes_on_canvas_released_selected: ui_node_t;
 
 function ui_viewnodes_on_canvas_released() {
-	if (ui_nodes_ui.input_released_r && math_abs(ui_nodes_ui.input_x - ui_nodes_ui.input_started_x) < 2 && math_abs(ui_nodes_ui.input_y - ui_nodes_ui.input_started_y) < 2) {
+	if (ui_nodes_ui.input_released_r &&
+		context_in_nodes() &&
+		math_abs(ui_nodes_ui.input_x - ui_nodes_ui.input_started_x) < 2 &&
+		math_abs(ui_nodes_ui.input_y - ui_nodes_ui.input_started_y) < 2) {
+
 		// Node selection
 		let nodes: ui_nodes_t = ui_nodes_get_nodes();
 		let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
