@@ -2103,7 +2103,7 @@ let nodes_material_color: ui_node_t[] = [
 	},
 	{
 		id: 0,
-		name: _tr("Bright/Contrast"),
+		name: _tr("Brightness/Contrast"),
 		type: "BRIGHTCONTRAST",
 		x: 0,
 		y: 0,
@@ -2215,7 +2215,7 @@ let nodes_material_color: ui_node_t[] = [
 	},
 	{
 		id: 0,
-		name: _tr("Hue/Saturation"),
+		name: _tr("Hue/Saturation/Value"),
 		type: "HUE_SAT",
 		x: 0,
 		y: 0,
@@ -2351,7 +2351,7 @@ let nodes_material_color: ui_node_t[] = [
 	},
 	{
 		id: 0,
-		name: _tr("MixRGB"),
+		name: _tr("Mix Color"),
 		type: "MIX_RGB",
 		x: 0,
 		y: 0,
