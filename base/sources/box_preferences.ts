@@ -164,7 +164,7 @@ function box_preferences_show() {
 							}, raw);
 						});
 					}
-				}, 2);
+				});
 			}
 			if (ui_button(tr("Reset Layout")) && !ui_menu_show) {
 				ui_menu_draw(function (ui: ui_t) {
@@ -172,7 +172,7 @@ function box_preferences_show() {
 						base_init_layout();
 						config_save();
 					}
-				}, 1);
+				});
 			}
 		}
 
@@ -262,7 +262,7 @@ function box_preferences_show() {
 					if (ui.changed) {
 						ui_menu_keep_open = true;
 					}
-				}, 11);
+				});
 			}
 			let val: u32 = h.color;
 			h.text = i32_to_string_hex(val);
@@ -307,7 +307,7 @@ function box_preferences_show() {
 							if (ui.changed) {
 								ui_menu_keep_open = true;
 							}
-						}, 11);
+						});
 					}
 				}
 
@@ -315,7 +315,6 @@ function box_preferences_show() {
 
 				if (key == "FILL_WINDOW_BG" ||
 					key == "FILL_BUTTON_BG" ||
-					key == "FILL_ACCENT_BG" ||
 					key == "FULL_TABS" ||
 					key == "ROUND_CORNERS" ||
 					key == "SHADOWS") {
@@ -918,7 +917,7 @@ plugin.draw_ui = function (ui) {\
 							array_remove(box_preferences_files_plugin, _box_preferences_f);
 							file_delete(path);
 						}
-					}, 4);
+					});
 				}
 			}
 		}

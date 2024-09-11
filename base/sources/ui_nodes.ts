@@ -31,6 +31,9 @@ let ui_nodes_release_link: bool = false;
 let ui_nodes_is_node_menu_op: bool = false;
 
 let ui_nodes_grid: image_t = null;
+let ui_nodes_grid_redraw: bool = true;
+let ui_nodes_grid_cell_w: i32 = 200;
+let ui_nodes_grid_small_cell_w: i32 = 40;
 let ui_nodes_hwnd: ui_handle_t = ui_handle_create();
 let ui_nodes_group_stack: node_group_t[] = [];
 let ui_nodes_controls_down: bool = false;
@@ -250,7 +253,7 @@ function ui_viewnodes_on_socket_released(socket_id: i32) {
 						array_remove(node.outputs, socket);
 						nodes_material_sync_sockets(node);
 					}
-				}, 2);
+				});
 			});
 		}
 		else ui_viewnodes_on_canvas_released();
@@ -291,13 +294,6 @@ function ui_viewnodes_on_canvas_released() {
 
 		// Node context menu
 		if (!ui_nodes_socket_released) {
-			let number_of_entries: i32 = 5;
-			if (ui_nodes_canvas_type == canvas_type_t.MATERIAL) {
-				++number_of_entries;
-			}
-			if (selected != null && selected.type == "RGB") {
-				++number_of_entries;
-			}
 
 			_ui_nodes_on_canvas_released_selected = selected;
 
@@ -370,7 +366,7 @@ function ui_viewnodes_on_canvas_released() {
 				}
 
 				ui_menu.enabled = true;
-			}, number_of_entries);
+			});
 		}
 	}
 
@@ -449,6 +445,9 @@ function ui_nodes_get_canvas_control(ui: ui_t, controls_down: bool): ui_canvas_c
 	};
 	if (base_is_combo_selected()) {
 		control.zoom = 0.0;
+	}
+	if (control.zoom != 0.0) {
+		ui_nodes_grid_redraw = true;
 	}
 	return control;
 }
@@ -686,7 +685,7 @@ function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
 			search_handle.text = "";
 		}
 		ui.ops.theme.BUTTON_COL = BUTTON_COL;
-	}, 8, x, y);
+	}, x, y);
 }
 
 function ui_nodes_get_node_x(): i32 {
@@ -698,6 +697,9 @@ function ui_nodes_get_node_y(): i32 {
 }
 
 function ui_nodes_draw_grid() {
+	let ui_nodes: ui_nodes_t = ui_nodes_get_nodes();
+	let zoom: f32 = ui_nodes.zoom;
+
 	let ww: i32 = config_raw.layout[layout_size_t.NODES_W];
 
 	///if (is_paint || is_sculpt)
@@ -707,21 +709,22 @@ function ui_nodes_draw_grid() {
 	///end
 
 	let wh: i32 = app_h();
-	let step: f32 = 100 * ui_SCALE(ui_nodes_ui);
-	let w: i32 = math_floor(ww + step * 3);
-	let h: i32 = math_floor(wh + step * 3);
+	let step: f32 = ui_nodes_grid_cell_w * zoom;
+	let w: i32 = math_floor(ww + step * 5);
+	let h: i32 = math_floor(wh + step * 5);
 	if (w < 1) {
 		w = 1;
 	}
 	if (h < 1) {
 		h = 1;
 	}
+
 	ui_nodes_grid = image_create_render_target(w, h);
 	g2_begin(ui_nodes_grid);
 	g2_clear(ui_nodes_ui.ops.theme.SEPARATOR_COL);
 
 	g2_set_color(ui_nodes_ui.ops.theme.SEPARATOR_COL - 0x00050505);
-	step = 20 * ui_SCALE(ui_nodes_ui);
+	step = ui_nodes_grid_small_cell_w * zoom;
 	for (let i: i32 = 0; i < math_floor(h / step) + 1; ++i) {
 		g2_draw_line(0, i * step, w, i * step);
 	}
@@ -730,7 +733,7 @@ function ui_nodes_draw_grid() {
 	}
 
 	g2_set_color(ui_nodes_ui.ops.theme.SEPARATOR_COL - 0x00090909);
-	step = 100 * ui_SCALE(ui_nodes_ui);
+	step = ui_nodes_grid_cell_w * zoom;
 	for (let i: i32 = 0; i < math_floor(h / step) + 1; ++i) {
 		g2_draw_line(0, i * step, w, i * step);
 	}
@@ -822,7 +825,10 @@ function ui_nodes_render() {
 
 	g2_end();
 
-	if (ui_nodes_grid == null) {
+	if (ui_nodes_grid_redraw) {
+		if (ui_nodes_grid != null) {
+			image_unload(ui_nodes_grid);
+		}
 		ui_nodes_draw_grid();
 	}
 
@@ -877,9 +883,9 @@ function ui_nodes_render() {
 
 		// Grid
 		g2_set_color(0xffffffff);
-		let step: f32 = 100 * ui_SCALE(ui_nodes_ui);
-		let x: f32 = math_fmod(nodes.pan_x * ui_nodes_SCALE(), step) - step;
-		let y: f32 = math_fmod(nodes.pan_y * ui_nodes_SCALE(), step) - step;
+		let step: f32 = ui_nodes_grid_cell_w * nodes.zoom;
+		let x: f32 = math_fmod(ui_nodes_PAN_X(), step) - step;
+		let y: f32 = math_fmod(ui_nodes_PAN_Y(), step) - step;
 		g2_draw_image(ui_nodes_grid, x, y);
 
 		// Undo
@@ -1146,8 +1152,6 @@ function ui_nodes_render() {
 					ui_nodes_popup_x -= menuw / 2;
 					ui_nodes_popup_x += ui_nodes_ui._w / 2;
 				}
-				ui_menu_category_w = ui_nodes_ui._w;
-				ui_menu_category_h = math_floor(ui_MENUBAR_H(ui_nodes_ui));
 			}
 			ui_nodes_ui._x += ui_nodes_ui._w + 3;
 			ui_nodes_ui._y = 2 + start_y;
@@ -1210,12 +1214,17 @@ function ui_nodes_render() {
 		let py: i32 = ui_nodes_popup_y;
 		let menuw: i32 = math_floor(ew * 2.3);
 		ui_begin_region(ui_nodes_ui, math_floor(ui_nodes_popup_x), math_floor(py), menuw);
-		let _BUTTON_COL: i32 = ui_nodes_ui.ops.theme.BUTTON_COL;
-		ui_nodes_ui.ops.theme.BUTTON_COL = ui_nodes_ui.ops.theme.SEPARATOR_COL;
+		let _FILL_BUTTON_BG: i32 = ui_nodes_ui.ops.theme.FILL_BUTTON_BG;
+		ui_nodes_ui.ops.theme.FILL_BUTTON_BG = false;
 		let _ELEMENT_OFFSET: i32 = ui_nodes_ui.ops.theme.ELEMENT_OFFSET;
 		ui_nodes_ui.ops.theme.ELEMENT_OFFSET = 0;
 		let _ELEMENT_H: i32 = ui_nodes_ui.ops.theme.ELEMENT_H;
 		ui_nodes_ui.ops.theme.ELEMENT_H = config_raw.touch_ui ? (28 + 2) : 28;
+
+		ui_menu_h = category.length * ui_ELEMENT_H(ui_nodes_ui);
+		if (is_group_category) {
+			ui_menu_h += project_material_groups.length * ui_ELEMENT_H(ui_nodes_ui);
+		}
 
 		ui_menu_start(ui_nodes_ui);
 
@@ -1273,9 +1282,10 @@ function ui_nodes_render() {
 		ui_nodes_hide_menu = ui_nodes_ui.combo_selected_handle == null && !ui_nodes_show_menu_first && (ui_nodes_ui.changed || ui_nodes_ui.input_released || ui_nodes_ui.input_released_r || ui_nodes_ui.is_escape_down);
 		ui_nodes_show_menu_first = false;
 
-		ui_nodes_ui.ops.theme.BUTTON_COL = _BUTTON_COL;
+		ui_nodes_ui.ops.theme.FILL_BUTTON_BG = _FILL_BUTTON_BG;
 		ui_nodes_ui.ops.theme.ELEMENT_OFFSET = _ELEMENT_OFFSET;
 		ui_nodes_ui.ops.theme.ELEMENT_H = _ELEMENT_H;
+		ui_menu_end(ui_nodes_ui);
 		ui_end_region();
 	}
 
@@ -1448,7 +1458,9 @@ function ui_nodes_make_node(n: ui_node_t, nodes: ui_nodes_t, canvas: ui_node_can
 		but.type = n.buttons[i].type;
 		but.output = n.buttons[i].output;
 		but.default_value = f32_array_create_from_array(n.buttons[i].default_value);
-		but.data = u8_array_create_from_array(n.buttons[i].data);
+		if (n.buttons[i].data != null) {
+			but.data = u8_array_create_from_array(n.buttons[i].data);
+		}
 		but.min = n.buttons[i].min;
 		but.max = n.buttons[i].max;
 		but.precision = n.buttons[i].precision;

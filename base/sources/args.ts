@@ -2,21 +2,15 @@
 let args_use: bool = false;
 let args_asset_path: string = "";
 let args_background: bool = false;
-///if (is_paint || is_lab)
 let args_export_textures: bool = false;
 let args_export_textures_type: string = "";
 let args_export_textures_preset: string = "";
 let args_export_textures_path: string = "";
-///end
-///if (is_paint || is_sculpt)
 let args_reimport_mesh: bool = false;
 let args_export_mesh: bool = false;
 let args_export_mesh_path: string = "";
-///end
-///if is_paint
 let args_export_material: bool = false;
 let args_export_material_path: string = "";
-///end
 
 function args_parse() {
 	if (iron_get_arg_count() > 1) {

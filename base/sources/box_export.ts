@@ -285,7 +285,7 @@ function box_export_tab_presets(ui: ui_t) {
 						array_remove(box_export_preset.textures, _box_export_t);
 						box_export_save_preset();
 					}
-				}, 1);
+				});
 			}
 
 			let hr: ui_handle_t = ui_nest(htex, 0);

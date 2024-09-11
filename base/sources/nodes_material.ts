@@ -4124,7 +4124,7 @@ function nodes_material_add_socket_button(ui: ui_t, nodes: ui_nodes_t, node: ui_
 				array_push(sockets, nodes_material_create_socket(nodes, node, null, "VALUE", c));
 				nodes_material_sync_sockets(node);
 			}
-		}, 3);
+		});
 	}
 }
 

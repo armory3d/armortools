@@ -659,22 +659,6 @@ function ui_base_update() {
 			}
 			else if (operator_shortcut(map_get(config_keymap, "viewport_mode"))) {
 
-				let count: i32;
-
-				///if (is_paint || is_sculpt)
-				count = 16;
-				///if (arm_direct3d12 || arm_vulkan || arm_metal)
-				count += 1;
-				///end
-				///end
-
-				///if is_lab
-				count = 9;
-				///if (arm_direct3d12 || arm_vulkan || arm_metal)
-				count += 1;
-				///end
-				///end
-
 				ui_menu_draw(function (ui: ui_t) {
 					let mode_handle: ui_handle_t = ui_handle(__ID__);
 					mode_handle.position = context_raw.viewport_mode;
@@ -722,7 +706,7 @@ function ui_base_update() {
 						context_set_viewport_mode(mode_handle.position);
 						ui.changed = true;
 					}
-				}, count);
+				});
 			}
 		}
 
@@ -974,7 +958,7 @@ function ui_base_operator_search() {
 			search_handle.text = "";
 		}
 		ui.ops.theme.BUTTON_COL = BUTTON_COL;
-	}, 8, -1, -1);
+	});
 }
 
 function ui_base_toggle_distract_free() {

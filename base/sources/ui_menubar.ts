@@ -198,11 +198,14 @@ function ui_menubar_render_ui() {
 }
 
 function ui_menubar_show_menu(ui: ui_t, category: i32) {
+	if (ui_menu_show && ui_menu_category == category) {
+		return;
+	}
+
 	ui_menu_show = true;
+	ui_menu_show_first = true;
 	ui_menu_commands = null;
 	ui_menu_category = category;
-	ui_menu_category_w = ui._w;
-	ui_menu_category_h = math_floor(ui_MENUBAR_H(ui));
 	ui_menu_x = math_floor(ui._x - ui._w);
 	ui_menu_y = math_floor(ui_MENUBAR_H(ui));
 	if (config_raw.touch_ui) {

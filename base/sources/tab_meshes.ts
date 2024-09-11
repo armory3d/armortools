@@ -38,7 +38,7 @@ function tab_meshes_draw(htab: ui_handle_t) {
 				if (ui_menu_button(ui, tr("Append"))) {
 					project_import_mesh(false);
 				}
-			}, 2);
+			});
 		}
 		if (ui.is_hovered) ui_tooltip(tr("Import mesh file"));
 
@@ -57,7 +57,7 @@ function tab_meshes_draw(htab: ui_handle_t) {
 				if (ui_menu_button(ui, tr("Cylinder"))) {
 					tab_meshes_set_default_mesh(".Cylinder");
 				}
-			}, 4);
+			});
 		}
 		///end
 
@@ -76,7 +76,7 @@ function tab_meshes_draw(htab: ui_handle_t) {
 					util_mesh_calc_normals(false);
 					context_raw.ddirty = 2;
 				}
-			}, 2);
+			});
 		}
 
 		if (ui_button(tr("Geometry to Origin"))) {
@@ -114,7 +114,7 @@ function tab_meshes_draw(htab: ui_handle_t) {
 					util_mesh_swap_axis(0, 1);
 					context_raw.ddirty = 2;
 				}
-			}, 3);
+			});
 		}
 
 		ui_end_sticky();
@@ -155,7 +155,7 @@ function tab_meshes_draw(htab: ui_handle_t) {
 						util_mesh_merge();
 						context_raw.ddirty = 2;
 					}
-				}, project_paint_objects.length > 1 ? 2 : 1);
+				});
 			}
 			if (h.changed) {
 				let visibles: mesh_object_t[] = [];

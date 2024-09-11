@@ -85,7 +85,6 @@ function tab_brushes_draw(htab: ui_handle_t) {
 				}
 				if (ui.is_hovered && ui.input_released_r) {
 					context_select_brush(i);
-					let add: i32 = project_brushes.length > 1 ? 1 : 0;
 
 					_tab_brushes_draw_i = i;
 
@@ -115,7 +114,7 @@ function tab_brushes_draw(htab: ui_handle_t) {
 						if (project_brushes.length > 1 && ui_menu_button(ui, tr("Delete"), "delete")) {
 							tab_brushes_delete_brush(project_brushes[i]);
 						}
-					}, 2 + add);
+					});
 				}
 
 				if (ui.is_hovered) {

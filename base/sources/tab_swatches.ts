@@ -52,7 +52,7 @@ function tab_swatches_draw(htab: ui_handle_t) {
 				if (ui_menu_button(ui, tr("Append"))) {
 					project_import_swatches(false);
 				}
-			}, 2);
+			});
 		}
 		if (ui.is_hovered) {
 			ui_tooltip(tr("Import swatches"));
@@ -175,24 +175,13 @@ function tab_swatches_draw(htab: ui_handle_t) {
 							if (ui.input_released) {
 								context_set_swatch(context_raw.swatch); // Trigger material preview update
 							}
-						}, 16, math_floor(mouse_x - 200 * ui_SCALE(ui)), math_floor(mouse_y - 250 * ui_SCALE(ui)));
+						}, math_floor(mouse_x - 200 * ui_SCALE(ui)), math_floor(mouse_y - 250 * ui_SCALE(ui)));
 					}
 
 					context_raw.select_time = time_time();
 				}
 				if (ui.is_hovered && ui.input_released_r) {
 					context_set_swatch(project_raw.swatches[i]);
-					let add: i32 = project_raw.swatches.length > 1 ? 1 : 0;
-					///if (arm_windows || arm_linux || arm_macos)
-					add += 1; // Copy
-					///end
-
-					///if (is_paint || is_sculpt)
-					add += 3;
-					///end
-					///if is_lav
-					add += 1;
-					///end
 
 					_tab_swatches_draw_i = i;
 
@@ -224,7 +213,7 @@ function tab_swatches_draw(htab: ui_handle_t) {
 							base_create_color_layer(color, project_raw.swatches[i].occlusion, project_raw.swatches[i].roughness, project_raw.swatches[i].metallic);
 						}
 						///end
-					}, add);
+					});
 				}
 				if (ui.is_hovered) {
 					let color: i32 = project_raw.swatches[i].base;

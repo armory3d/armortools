@@ -30,17 +30,14 @@ let base_appx: i32 = 0;
 let base_appy: i32 = 0;
 let base_last_window_width: i32 = 0;
 let base_last_window_height: i32 = 0;
-///if (is_paint || is_sculpt)
 let base_drag_material: slot_material_t = null;
 let base_drag_layer: slot_layer_t = null;
-///end
 
 let base_pipe_copy: pipeline_t;
 let base_pipe_copy8: pipeline_t;
 let base_pipe_copy128: pipeline_t;
 let base_pipe_copy_bgra: pipeline_t;
 let base_pipe_copy_rgb: pipeline_t = null;
-///if (is_paint || is_sculpt)
 let base_pipe_merge: pipeline_t = null;
 let base_pipe_merge_r: pipeline_t = null;
 let base_pipe_merge_g: pipeline_t = null;
@@ -65,7 +62,7 @@ let base_texpaint_colorid: kinc_tex_unit_t;
 let base_opac_merge_mask: kinc_const_loc_t;
 let base_blending_merge_mask: kinc_const_loc_t;
 let base_temp_mask_image: image_t = null;
-///end
+
 ///if is_lab
 let base_pipe_copy_r: pipeline_t;
 let base_pipe_copy_g: pipeline_t;
@@ -91,14 +88,13 @@ let base_cursor_tint: kinc_const_loc_t;
 let base_cursor_tex: kinc_tex_unit_t;
 let base_cursor_gbufferd: kinc_tex_unit_t;
 
-///if (is_paint || is_sculpt)
 let base_default_base: f32 = 0.5;
 let base_default_rough: f32 = 0.4;
+let base_max_layers: i32 =
 ///if (arm_android || arm_ios)
-let base_max_layers: i32 = 18;
+	18;
 ///else
-let base_max_layers: i32 = 255;
-///end
+	255;
 ///end
 let base_default_fov: f32 = 0.69;
 let _base_material_count: i32;
@@ -297,10 +293,11 @@ function base_init() {
 
 	args_run();
 
+	let has_projects: bool =
 	///if (arm_android || arm_ios)
-	let has_projects: bool = config_raw.recent_projects.length > 0;
+		config_raw.recent_projects.length > 0;
 	///else
-	let has_projects: bool = true;
+		true;
 	///end
 
 	if (config_raw.splash_screen && has_projects) {

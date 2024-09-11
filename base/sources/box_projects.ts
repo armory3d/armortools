@@ -154,7 +154,7 @@ function box_projects_tab(ui: ui_t) {
 									array_splice(recent_projects, _box_projects_i, 1);
 								});
 							}
-						}, 1);
+						});
 					}
 
 					if (show_asset_names) {

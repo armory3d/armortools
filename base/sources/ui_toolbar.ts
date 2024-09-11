@@ -213,17 +213,9 @@ function ui_toolbar_render_ui() {
 	}
 }
 
-let _ui_toolbar_tool_properties_menu_x: i32;
-let _ui_toolbar_tool_properties_menu_y: i32;
-let _ui_toolbar_tool_properties_menu_w: i32;
-
 function ui_toolbar_tool_properties_menu() {
 	let ui: ui_t = ui_base_ui;
-	_ui_toolbar_tool_properties_menu_x = ui._x;
-	_ui_toolbar_tool_properties_menu_y = ui._y;
-	_ui_toolbar_tool_properties_menu_w = ui._w;
 	ui_menu_draw(function (ui: ui_t) {
-		let start_y: i32 = ui._y;
 		ui.changed = false;
 
 		ui_header_draw_tool_properties(ui);
@@ -235,18 +227,7 @@ function ui_toolbar_tool_properties_menu() {
 		if (ui_button(tr("Pin to Header"), ui_align_t.LEFT)) {
 			config_raw.layout[layout_size_t.HEADER] = 1;
 		}
-
-		let h: i32 = ui._y - start_y;
-		ui_menu_elements = math_floor(h / ui_ELEMENT_H(ui));
-		ui_menu_x = math_floor(_ui_toolbar_tool_properties_menu_x + _ui_toolbar_tool_properties_menu_w + 2);
-		ui_menu_y = math_floor(_ui_toolbar_tool_properties_menu_y - 6 * ui_SCALE(ui));
-		ui_menu_fit_to_screen();
-
-	}, 0);
-
-	// First draw out of screen, then align the menu based on menu height
-	ui_menu_x = -sys_width();
-	ui_menu_y = -sys_height();
+	}, math_floor(ui._x + ui._w + 2), math_floor(ui._y - 6 * ui_SCALE(ui)));
 }
 
 function ui_toolbar_draw_highlight() {

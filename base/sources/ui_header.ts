@@ -154,7 +154,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 				if (ui.changed) {
 					ui_menu_keep_open = true;
 				}
-			}, 10);
+			});
 		}
 		if (ui_button(tr("Add Swatch"))) {
 			let new_swatch: swatch_color_t = project_clone_swatch(context_raw.picked_color);

@@ -79,7 +79,7 @@ function tab_layers_button_new(text: string) {
 				base_new_layer();
 				history_new_layer();
 			}
-		}, 1);
+		});
 	}
 }
 

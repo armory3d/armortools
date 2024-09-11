@@ -107,7 +107,6 @@ function tab_fonts_draw(htab: ui_handle_t) {
 				}
 				if (ui.is_hovered && ui.input_released_r) {
 					context_select_font(i);
-					let add: i32 = project_fonts.length > 1 ? 1 : 0;
 					_tab_fonts_draw_i = i;
 
 					ui_menu_draw(function (ui: ui_t) {
@@ -116,7 +115,7 @@ function tab_fonts_draw(htab: ui_handle_t) {
 						if (project_fonts.length > 1 && ui_menu_button(ui, tr("Delete"), "delete") && project_fonts[i].file != "") {
 							tab_fonts_delete_font(project_fonts[i]);
 						}
-					}, 0 + add);
+					});
 				}
 				if (ui.is_hovered) {
 					if (img == null) {

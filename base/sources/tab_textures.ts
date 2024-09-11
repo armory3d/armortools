@@ -122,15 +122,6 @@ function tab_textures_draw(htab: ui_handle_t) {
 					if (ui.is_hovered && ui.input_released_r) {
 						context_raw.texture = asset;
 
-						let count: i32 = 0;
-
-						///if (is_paint || is_sculpt)
-						count = is_packed ? 6 : 8;
-						///end
-						///if is_lab
-						count = is_packed ? 6 : 6;
-						///end
-
 						_tab_textures_draw_img = img;
 						_tab_textures_draw_asset = asset;
 						_tab_textures_draw_i = i;
@@ -211,7 +202,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 							if (!_tab_textures_draw_is_packed && ui_menu_button(ui, tr("Open in Browser"))) {
 								tab_browser_show_directory(substring(_tab_textures_draw_asset.file, 0, string_last_index_of(_tab_textures_draw_asset.file, path_sep)));
 							}
-						}, count);
+						});
 					}
 
 					if (config_raw.show_asset_names) {

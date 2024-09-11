@@ -161,15 +161,15 @@ function render() {
 	ui_begin(ui);
 
 	if (ui_window(sidebar_handle, 0, 0, storage.sidebar_w, sys_height(), false)) {
-		let _BUTTON_TEXT_COL: i32 = theme.BUTTON_TEXT_COL;
-		theme.BUTTON_TEXT_COL = theme.ACCENT_COL;
+		let _TEXT_COL: i32 = theme.TEXT_COL;
+		theme.TEXT_COL = theme.BUTTON_COL;
 		if (storage.project != "") {
 			list_folder(storage.project);
 		}
 		else {
 			ui_button("Drop folder here", UI_ALIGN_LEFT, "");
 		}
-		theme.BUTTON_TEXT_COL = _BUTTON_TEXT_COL;
+		theme.TEXT_COL = _TEXT_COL;
 	}
 
 	ui_fill(sys_width() - minimap_w, 0, minimap_w, UI_ELEMENT_H() + UI_ELEMENT_OFFSET() + 1, theme.SEPARATOR_COL);

@@ -179,7 +179,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 				if (ui_menu_button(ui, tr("Open Externally"))) {
 					file_start(file);
 				}
-			}, path_is_texture(file) ? 5 : 2);
+			});
 		});
 
 		if (tab_browser_known) {
@@ -221,7 +221,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 				if (ui_menu_button(ui, tr("Projects"))) {
 					tab_browser_hpath.text = iron_save_path();
 				}
-			}, 4);
+			});
 			///else
 			tab_browser_hpath.text = ui_files_default_path;
 			///end
@@ -242,7 +242,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 						array_remove(config_raw.bookmarks, _tab_browser_draw_b);
 						config_save();
 					}
-				}, 1);
+				});
 			}
 		}
 

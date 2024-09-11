@@ -123,7 +123,7 @@ function tab_materials_draw_slots(mini: bool) {
 					let height: i32 = g2_font_height(ui.ops.font, ui.font_size);
 					g2_set_color(ui.ops.theme.TEXT_COL);
 					g2_fill_rect(uix, uiy, width, height);
-					g2_set_color(ui.ops.theme.ACCENT_COL);
+					g2_set_color(ui.ops.theme.BUTTON_COL);
 					g2_draw_string(number, uix + 5, uiy);
 				}
 			}
@@ -153,7 +153,6 @@ function tab_materials_draw_slots(mini: bool) {
 			// Context menu
 			if (ui.is_hovered && ui.input_released_r) {
 				context_select_material(i);
-				let add: i32 = project_materials.length > 1 ? 1 : 0;
 				_tab_materials_draw_slots = i;
 
 				ui_menu_draw(function (ui: ui_t) {
@@ -269,7 +268,7 @@ function tab_materials_draw_slots(mini: bool) {
 						make_material_parse_paint_material();
 						ui_menu_keep_open = true;
 					}
-				}, 13 + add);
+				});
 			}
 			if (ui.is_hovered) {
 				_ui_tooltip_image(imgFull);

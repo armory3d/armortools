@@ -1,11 +1,10 @@
 
 let ui_menu_show: bool = false;
 let ui_menu_category: i32 = 0;
-let ui_menu_category_w: i32 = 0;
-let ui_menu_category_h: i32 = 0;
 let ui_menu_x: i32 = 0;
 let ui_menu_y: i32 = 0;
-let ui_menu_elements: i32 = 0;
+let ui_menu_h: i32 = 0;
+let ui_menu_elements: i32 = 0; ////
 let ui_menu_keep_open: bool = false;
 let ui_menu_commands: (ui: ui_t)=>void = null;
 let ui_menu_show_first: bool = true;
@@ -20,27 +19,30 @@ type update_info_t = {
 
 function ui_menu_render() {
 	let ui: ui_t = base_ui_menu;
-	let menu_w: i32 = ui_menu_commands != null ? math_floor(base_default_element_w * ui_SCALE(base_ui_menu) * 2.3) : math_floor(ui_ELEMENT_W(ui) * 2.3);
-	let _BUTTON_COL: i32 = ui.ops.theme.BUTTON_COL;
-	ui.ops.theme.BUTTON_COL = ui.ops.theme.SEPARATOR_COL;
+	let menu_w: i32 = ui_menu_commands != null ?
+		math_floor(base_default_element_w * ui_SCALE(base_ui_menu) * 2.3) :
+		math_floor(ui_ELEMENT_W(ui) * 2.3);
+
+	let _FILL_BUTTON_BG: i32 = ui.ops.theme.FILL_BUTTON_BG;
+	ui.ops.theme.FILL_BUTTON_BG = false;
 	let _ELEMENT_OFFSET: i32 = ui.ops.theme.ELEMENT_OFFSET;
 	ui.ops.theme.ELEMENT_OFFSET = 0;
 	let _ELEMENT_H: i32 = ui.ops.theme.ELEMENT_H;
 	ui.ops.theme.ELEMENT_H = config_raw.touch_ui ? (28 + 2) : 28;
 
+	// First draw out of screen, then align the menu based on menu height
+	if (ui_menu_show_first) {
+		ui_menu_x -= sys_width() * 2;
+		ui_menu_y -= sys_height() * 2;
+	}
+
 	ui_begin_region(ui, ui_menu_x, ui_menu_y, menu_w);
+	ui_menu_start(ui);
 
 	if (ui_menu_commands != null) {
-		g2_set_color(ui.ops.theme.ACCENT_SELECT_COL);
-		ui_draw_rect(true, ui._x + -1, ui._y + -1, ui._w + 2, ui_ELEMENT_H(ui) * ui_menu_elements + 2);
-		g2_set_color(ui.ops.theme.SEPARATOR_COL);
-		ui_draw_rect(true, ui._x + 0, ui._y + 0, ui._w, ui_ELEMENT_H(ui) * ui_menu_elements);
-		g2_set_color(0xffffffff);
-
 		ui_menu_commands(ui);
 	}
 	else {
-		ui_menu_start(ui);
 		if (ui_menu_category == menu_category_t.FILE) {
 			if (ui_menu_button(ui, tr("New .."), map_get(config_keymap, "file_new"))) {
 				project_new_box();
@@ -632,13 +634,22 @@ function ui_menu_render() {
 	}
 
 	ui_menu_hide_flag = ui.combo_selected_handle == null && !ui_menu_keep_open && !ui_menu_show_first && (ui.changed || ui.input_released || ui.input_released_r || ui.is_escape_down);
-	ui_menu_show_first = false;
 	ui_menu_keep_open = false;
 
-	ui.ops.theme.BUTTON_COL = _BUTTON_COL;
+	ui.ops.theme.FILL_BUTTON_BG = _FILL_BUTTON_BG;
 	ui.ops.theme.ELEMENT_OFFSET = _ELEMENT_OFFSET;
 	ui.ops.theme.ELEMENT_H = _ELEMENT_H;
+	ui_menu_end(ui);
 	ui_end_region();
+
+	if (ui_menu_show_first) {
+		ui_menu_show_first = false;
+		ui_menu_h = ui._y - ui_menu_y;
+		ui_menu_x += sys_width() * 2;
+		ui_menu_y += sys_height() * 2;
+		ui_menu_fit_to_screen();
+		ui_menu_render(); // Render at correct position now
+	}
 
 	if (ui_menu_hide_flag) {
 		ui_menu_hide();
@@ -652,14 +663,13 @@ function ui_menu_hide() {
 	base_redraw_ui();
 }
 
-function ui_menu_draw(commands: (ui: ui_t)=>void = null, elements: i32, x: i32 = -1, y: i32 = -1) {
+function ui_menu_draw(commands: (ui: ui_t)=>void = null, x: i32 = -1, y: i32 = -1) {
 	ui_end_input();
 	ui_menu_show = true;
 	ui_menu_commands = commands;
-	ui_menu_elements = elements;
 	ui_menu_x = x > -1 ? x : math_floor(mouse_x + 1);
 	ui_menu_y = y > -1 ? y : math_floor(mouse_y + 1);
-	ui_menu_fit_to_screen();
+	ui_menu_h = 0;
 }
 
 function ui_menu_fit_to_screen() {
@@ -673,21 +683,18 @@ function ui_menu_fit_to_screen() {
 			ui_menu_x = math_floor(sys_width() - menu_w);
 		}
 	}
-	let menu_h: f32 = math_floor(ui_menu_elements * 30 * ui_SCALE(base_ui_menu)); // ui.ops.theme.ELEMENT_H
-	if (ui_menu_y + menu_h > sys_height()) {
-		if (ui_menu_y - menu_h > 0) {
-			ui_menu_y = math_floor(ui_menu_y - menu_h);
+	if (ui_menu_y + ui_menu_h > sys_height()) {
+		if (ui_menu_y - ui_menu_h > 0) {
+			ui_menu_y = math_floor(ui_menu_y - ui_menu_h);
 		}
 		else {
-			ui_menu_y = sys_height() - menu_h;
+			ui_menu_y = sys_height() - ui_menu_h;
 		}
 		ui_menu_x += 1; // Move out of mouse focus
 	}
 }
 
 function ui_menu_fill(ui: ui_t) {
-	g2_set_color(ui.ops.theme.ACCENT_SELECT_COL);
-	g2_fill_rect(ui._x - 1, ui._y, ui._w + 2, ui_ELEMENT_H(ui) + 1 + 1);
 	g2_set_color(ui.ops.theme.SEPARATOR_COL);
 	g2_fill_rect(ui._x, ui._y, ui._w, ui_ELEMENT_H(ui) + 1);
 	g2_set_color(0xffffffff);
@@ -725,20 +732,14 @@ function ui_menu_align(ui: ui_t) {
 }
 
 function ui_menu_start(ui: ui_t) {
-	// Draw top border
-	g2_set_color(ui.ops.theme.ACCENT_SELECT_COL);
-	if (config_raw.touch_ui) {
-		g2_fill_rect(ui._x + ui._w / 2 + ui_menu_category_w / 2, ui._y - 1, ui._w / 2 - ui_menu_category_w / 2 + 1, 1);
-		g2_fill_rect(ui._x - 1, ui._y - 1, ui._w / 2 - ui_menu_category_w / 2 + 1, 1);
-		g2_fill_rect(ui._x + ui._w / 2 - ui_menu_category_w / 2, ui._y - ui_menu_category_h, ui_menu_category_w, 1);
-		g2_fill_rect(ui._x + ui._w / 2 - ui_menu_category_w / 2, ui._y - ui_menu_category_h, 1, ui_menu_category_h);
-		g2_fill_rect(ui._x + ui._w / 2 + ui_menu_category_w / 2, ui._y - ui_menu_category_h, 1, ui_menu_category_h);
-	}
-	else {
-		g2_fill_rect(ui._x - 1 + ui_menu_category_w, ui._y - 1, ui._w + 2 - ui_menu_category_w, 1);
-		g2_fill_rect(ui._x - 1, ui._y - ui_menu_category_h, ui_menu_category_w, 1);
-		g2_fill_rect(ui._x - 1, ui._y - ui_menu_category_h, 1, ui_menu_category_h);
-		g2_fill_rect(ui._x - 1 + ui_menu_category_w, ui._y - ui_menu_category_h, 1, ui_menu_category_h);
-	}
+	ui_draw_shadow(ui._x, ui._y - 4, ui._w, ui_menu_h + 8);
+	// Round top
+	g2_set_color(ui.ops.theme.SEPARATOR_COL);
+	ui_draw_rect(true, ui._x, ui._y - 4, ui._w, 8);
+	g2_set_color(0xffffffff);
+}
+
+function ui_menu_end(ui: ui_t) {
+	ui_draw_round_bottom(ui._x, ui._y, ui._w);
 	g2_set_color(0xffffffff);
 }

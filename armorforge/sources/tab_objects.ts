@@ -79,7 +79,7 @@ function tab_objects_draw_list(ui: ui_t, list_handle: ui_handle_t, current_objec
 		ui._x += 18; // Sign offset
 
 		// Draw line that shows parent relations
-		g2_set_color(ui.ops.theme.ACCENT_COL);
+		g2_set_color(ui.ops.theme.BUTTON_COL);
 		g2_draw_line(ui._x - 10, ui._y + ui_ELEMENT_H(ui) / 2, ui._x, ui._y + ui_ELEMENT_H(ui) / 2);
 		g2_set_color(0xffffffff);
 
@@ -97,7 +97,7 @@ function tab_objects_draw_list(ui: ui_t, list_handle: ui_handle_t, current_objec
 
 	if (ui.is_hovered && ui.input_released_r) {
 		tab_objects_current_object = current_object;
-		ui_menu_draw(tab_objects_draw_menu, 1);
+		ui_menu_draw(tab_objects_draw_menu);
 	}
 
 	if (b) {
@@ -110,7 +110,7 @@ function tab_objects_draw_list(ui: ui_t, list_handle: ui_handle_t, current_objec
 		}
 
 		// Draw line that shows parent relations
-		g2_set_color(ui.ops.theme.ACCENT_COL);
+		g2_set_color(ui.ops.theme.BUTTON_COL);
 		g2_draw_line(ui._x + 14, current_y, ui._x + 14, ui._y - ui_ELEMENT_H(ui) / 2);
 		g2_set_color(0xffffffff);
 	}
