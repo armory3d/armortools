@@ -703,10 +703,10 @@ function ui_menu_fill(ui: ui_t) {
 function ui_menu_separator(ui: ui_t) {
 	ui._y++;
 	if (config_raw.touch_ui) {
-		ui_fill(0, 0, ui._w / ui_SCALE(ui), 1, ui.ops.theme.ACCENT_SELECT_COL);
+		ui_fill(0, 0, ui._w / ui_SCALE(ui), 1, ui.ops.theme.BUTTON_COL);
 	}
 	else {
-		ui_fill(26, 0, ui._w / ui_SCALE(ui) - 26, 1, ui.ops.theme.ACCENT_SELECT_COL);
+		ui_fill(26, 0, ui._w / ui_SCALE(ui) - 26, 1, ui.ops.theme.BUTTON_COL);
 	}
 }
 

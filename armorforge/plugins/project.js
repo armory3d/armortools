@@ -1,5 +1,5 @@
 let project = new Project("plugins");
 
-project.addFile("plugins.c");
+project.add_cfiles("plugins.c");
 
 return project;

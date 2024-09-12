@@ -5,30 +5,30 @@ flags.package = 'org.armorlab';
 flags.with_onnx = true;
 
 let project = new Project(flags.name);
-project.addDefine("is_lab");
-project.addProject("../base");
+project.add_define("is_lab");
+project.add_project("../base");
 
-project.addSources("sources");
-project.addSources("sources/nodes");
-project.addShaders("shaders/*.glsl");
-project.addAssets("assets/*", { destination: "data/{name}" });
-project.addAssets("../armorpaint/assets/export_presets/*", { destination: "data/export_presets/{name}" });
-project.addAssets("assets/keymap_presets/*", { destination: "data/keymap_presets/{name}" });
-project.addAssets("assets/licenses/**", { destination: "data/licenses/{name}" });
-project.addAssets("assets/plugins/*", { destination: "data/plugins/{name}" });
-project.addAssets("../armorpaint/assets/plugins/hello_world.js", { destination: "data/plugins/{name}" });
-project.addAssets("../armorpaint/assets/plugins/hello_node_brush.js", { destination: "data/plugins/{name}" });
-project.addAssets("../armorpaint/assets/plugins/import_svg.js", { destination: "data/plugins/{name}" });
-project.addAssets("assets/meshes/*", { destination: "data/meshes/{name}", noembed: true });
-project.addAssets("assets/models/*.onnx", { destination: "data/models/{name}" });
-project.addAssets("assets/models/LICENSE.txt", { destination: "data/models/LICENSE.txt" });
-project.addAssets("assets/readme/readme.txt", { destination: "{name}" });
+project.add_tsfiles("sources");
+project.add_tsfiles("sources/nodes");
+project.add_shaders("shaders/*.glsl");
+project.add_assets("assets/*", { destination: "data/{name}" });
+project.add_assets("../armorpaint/assets/export_presets/*", { destination: "data/export_presets/{name}" });
+project.add_assets("assets/keymap_presets/*", { destination: "data/keymap_presets/{name}" });
+project.add_assets("assets/licenses/**", { destination: "data/licenses/{name}" });
+project.add_assets("assets/plugins/*", { destination: "data/plugins/{name}" });
+project.add_assets("../armorpaint/assets/plugins/hello_world.js", { destination: "data/plugins/{name}" });
+project.add_assets("../armorpaint/assets/plugins/hello_node_brush.js", { destination: "data/plugins/{name}" });
+project.add_assets("../armorpaint/assets/plugins/import_svg.js", { destination: "data/plugins/{name}" });
+project.add_assets("assets/meshes/*", { destination: "data/meshes/{name}", noembed: true });
+project.add_assets("assets/models/*.onnx", { destination: "data/models/{name}" });
+project.add_assets("assets/models/LICENSE.txt", { destination: "data/models/LICENSE.txt" });
+project.add_assets("assets/readme/readme.txt", { destination: "{name}" });
 
 if (platform === "win32") {
-	project.addAssets("onnx/win32/*.dll", { destination: "{name}" });
+	project.add_assets("onnx/win32/*.dll", { destination: "{name}" });
 }
 else if (platform === "linux") {
-	project.addAssets("onnx/linux/*.so.*", { destination: "{name}" }); // Versioned lib
+	project.add_assets("onnx/linux/*.so.*", { destination: "{name}" }); // Versioned lib
 }
 
 return project;

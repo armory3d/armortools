@@ -118,7 +118,7 @@ function list_folder(path: string) {
 
 		// Active file
 		if (abs == storage.file) {
-			ui_fill(0, 1, ui._w - 1, UI_ELEMENT_H() - 1, theme.BUTTON_PRESSED_COL);
+			ui_fill(0, 1, ui._w - 1, UI_ELEMENT_H() - 1, theme.PRESSED_COL);
 		}
 
 		let prefix: string = "";

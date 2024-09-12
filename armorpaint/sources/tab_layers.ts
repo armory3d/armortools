@@ -350,7 +350,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	ui._x += 2;
 	ui._y += 3;
 	ui._y += center;
-	let col: i32 = ui.ops.theme.ACCENT_SELECT_COL;
+	let col: i32 = ui.ops.theme.ACCENT_COL;
 	let parent_hidden: bool = l.parent != null && (!l.parent.visible || (l.parent.parent != null && !l.parent.parent.visible));
 	if (parent_hidden) {
 		col -= 0x99000000;

@@ -9,14 +9,14 @@ flags.with_iron = true;
 flags.with_ui = true;
 
 let project = new Project("ArmorPad");
-project.addSources("sources");
+project.add_tsfiles("sources");
 
 let root = "../../../";
-project.addShaders(root + "armorcore/shaders/*.glsl",);
-project.addAssets(root + "base/assets/font_mono.ttf", { destination: "data/{name}" });
-project.addAssets(root + "base/assets/text_coloring.json", { destination: "data/{name}" });
+project.add_shaders(root + "armorcore/shaders/*.glsl",);
+project.add_assets(root + "base/assets/font_mono.ttf", { destination: "data/{name}" });
+project.add_assets(root + "base/assets/text_coloring.json", { destination: "data/{name}" });
 
-project.addDefine('IDLE_SLEEP');
-project.addProject(root + "armorcore");
+project.add_define('IDLE_SLEEP');
+project.add_project(root + "armorcore");
 
 return project;
