@@ -750,8 +750,8 @@ function _import_arm_get_node_canvas_array(map: map_t<string, any>, key: string)
 			n.id = _import_arm_get_i32(old, "id");
 			n.name = map_get(old, "name");
 			n.type = map_get(old, "type");
-			n.x = _import_arm_get_i32(old, "x");
-			n.y = _import_arm_get_i32(old, "y");
+			n.x = _import_arm_get_f32(old, "x");
+			n.y = _import_arm_get_f32(old, "y");
 			n.color = _import_arm_get_i32(old, "color");
 			n.inputs = _import_arm_get_node_socket_array(old, "inputs");
 			n.outputs = _import_arm_get_node_socket_array(old, "outputs");
