@@ -3,6 +3,10 @@ function import_arm_run_project(path: string) {
 	let b: buffer_t = data_get_blob(path);
 	let project: project_format_t = armpack_decode(b);
 
+	if (project.version != null && project.version == "0.8") {
+		project = import_arm_upgrade_from_08(b);
+	}
+
 	///if (is_paint || is_sculpt)
 	if (project.version != null && project.layer_datas == null) {
 		// Import as material
@@ -426,6 +430,9 @@ function import_arm_run_material(path: string) {
 		data_delete_blob(path);
 		return;
 	}
+	if (project.version == "0.8") {
+		project = import_arm_upgrade_from_08(b);
+	}
 	import_arm_run_material_from_project(project, path);
 }
 
@@ -662,4 +669,170 @@ function import_arm_unpack_asset(project: project_format_t, abs: string, file: s
 			break;
 		}
 	}
+}
+
+function _import_arm_get_f32(map: map_t<string, any>, key: string): f32 {
+	let i: i32 = armpack_map_get_i64(map, key);
+	if (i < 1024) { // Otherwise it's likely encoded as a float
+		return i;
+	}
+	return armpack_map_get_f64(map, key);
+}
+
+function _import_arm_get_i32(map: map_t<string, any>, key: string): i32 {
+	let i: i32 = armpack_map_get_i64(map, key);
+	if (i < 1024) {
+		return i;
+	}
+	return armpack_map_get_f64(map, key);
+}
+
+function _import_arm_get_node_socket_array(old: map_t<string, any>, key: string): ui_node_socket_t[] {
+	let sockets: ui_node_socket_t[] = [];
+	let ias: any[] = map_get(old, key);
+	for (let i: i32 = 0; i < ias.length; ++i) {
+		let old: map_t<string, any> = ias[i];
+		let s: ui_node_socket_t = {};
+		s.id = _import_arm_get_i32(old, "id");
+		s.node_id = _import_arm_get_i32(old, "node_id");
+		s.name = map_get(old, "name");
+		s.type = map_get(old, "type");
+		s.color = _import_arm_get_i32(old, "color");
+		if (s.type == "VALUE") {
+			let x: f32 = _import_arm_get_f32(old, "default_value");
+			s.default_value = f32_array_create_x(x);
+		}
+		else { // VECTOR, RGBA
+			let dv: map_t<string, any> = map_get(old, "default_value");
+			let x: f32 = _import_arm_get_f32(dv, "0");
+			let y: f32 = _import_arm_get_f32(dv, "1");
+			let z: f32 = _import_arm_get_f32(dv, "2");
+			if (s.type == "VECTOR") {
+				s.default_value = f32_array_create_xyz(x, y, z);
+			}
+			else { // RGBA
+				let w: f32 = _import_arm_get_f32(dv, "3");
+				s.default_value = f32_array_create_xyzw(x, y, z, w);
+			}
+		}
+		s.min = _import_arm_get_f32(old, "min");
+		s.max = _import_arm_get_f32(old, "max");
+		if (s.max == 0.0) {
+			s.max = 1.0;
+		}
+		s.precision = _import_arm_get_f32(old, "precision");
+		if (s.precision == 0.0) {
+			s.precision = 100.0;
+		}
+		s.display = _import_arm_get_i32(old, "display");
+		array_push(sockets, s);
+	}
+	return sockets;
+}
+
+function _import_arm_get_node_canvas_array(map: map_t<string, any>, key: string): ui_node_canvas_t[] {
+	let cas: any[] = map_get(map, key);
+	if (cas == null) {
+		return null;
+	}
+	let ar: ui_node_canvas_t[] = [];
+	for (let i: i32 = 0; i < cas.length; ++i) {
+		let old: map_t<string, any> = cas[i];
+		let c: ui_node_canvas_t = {};
+		c.name = map_get(old, "name");
+
+		c.nodes = [];
+		let nas: any[] = map_get(old, "nodes");
+		for (let i: i32 = 0; i < nas.length; ++i) {
+			let old: map_t<string, any> = nas[i];
+			let n: ui_node_t = {};
+
+			n.id = _import_arm_get_i32(old, "id");
+			n.name = map_get(old, "name");
+			n.type = map_get(old, "type");
+			n.x = _import_arm_get_i32(old, "x");
+			n.y = _import_arm_get_i32(old, "y");
+			n.color = _import_arm_get_i32(old, "color");
+			n.inputs = _import_arm_get_node_socket_array(old, "inputs");
+			n.outputs = _import_arm_get_node_socket_array(old, "outputs");
+
+			n.buttons = [];
+			let bas: any[] = map_get(old, "buttons");
+			for (let i: i32 = 0; i < bas.length; ++i) {
+				let old: map_t<string, any> = bas[i];
+				let b: ui_node_button_t = {};
+				b.name = map_get(old, "name");
+				b.type = map_get(old, "type");
+				b.output = _import_arm_get_i32(old, "output");
+
+				if (b.type == "ENUM") {
+					let x: f32 = _import_arm_get_i32(old, "default_value");
+					b.default_value = f32_array_create_x(x);
+
+					if (b.name == "File") {
+						let data_string: string = map_get(old, "data");
+						b.data = sys_string_to_buffer(data_string);
+					}
+					else {
+						let data_strings: string[] = map_get(old, "data");
+						let joined: string = string_array_join(data_strings, "\n");
+						b.data = sys_string_to_buffer(joined);
+					}
+				}
+
+				b.min = _import_arm_get_f32(old, "min");
+				b.max = _import_arm_get_f32(old, "max");
+				b.precision = _import_arm_get_f32(old, "precision");
+				b.height = _import_arm_get_f32(old, "height");
+				array_push(n.buttons, b);
+			}
+
+			n.width = _import_arm_get_f32(old, "width");
+
+			array_push(c.nodes, n);
+		}
+
+		c.links = [];
+		let las: any[] = map_get(old, "links");
+		for (let i: i32 = 0; i < las.length; ++i) {
+			let old: map_t<string, any> = las[i];
+			let l: ui_node_link_t = {};
+			l.id = _import_arm_get_i32(old, "id");
+			l.from_id = _import_arm_get_i32(old, "from_id");
+			l.from_socket = _import_arm_get_i32(old, "from_socket");
+			l.to_id = _import_arm_get_i32(old, "to_id");
+			l.to_socket = _import_arm_get_i32(old, "to_socket");
+			array_push(c.links, l);
+		}
+
+		array_push(ar, c);
+	}
+	return ar;
+}
+
+function import_arm_upgrade_from_08(b: buffer_t): project_format_t {
+	// Deprecated
+	// Cloud materials are at version 0.8
+	let old: map_t<string, any> = armpack_decode_to_map(b);
+	let project: project_format_t = {};
+	project.version = "1.0 alpha";
+	project.assets = map_get(old, "assets");
+	project.is_bgra = _import_arm_get_i32(old, "is_bgra") > 0;
+	let pas: any[] = map_get(old, "packed_assets");
+	if (pas != null) {
+		project.packed_assets = [];
+		for (let i: i32 = 0; i < pas.length; ++i) {
+			let old: map_t<string, any> = pas[i];
+			let pa: packed_asset_t = {};
+			pa.name = map_get(old, "name");
+			pa.bytes = map_get(old, "bytes");
+			array_push(project.packed_assets, pa);
+		}
+	}
+	project.brush_nodes = _import_arm_get_node_canvas_array(old, "brush_nodes");
+	project.brush_icons = map_get(old, "brush_icons");
+	project.material_nodes = _import_arm_get_node_canvas_array(old, "material_nodes");
+	project.material_groups = _import_arm_get_node_canvas_array(old, "material_groups");
+	project.material_icons = map_get(old, "material_icons");
+	return project;
 }
