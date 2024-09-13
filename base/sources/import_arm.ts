@@ -24,7 +24,7 @@ function import_arm_run_project(path: string) {
 		return;
 	}
 
-	let import_as_mesh: bool = project.version == null;
+	let import_as_mesh: bool = b[10] != 'v'; // No version
 	context_raw.layers_preview_dirty = true;
 	context_raw.layer_filter = 0;
 	///end
