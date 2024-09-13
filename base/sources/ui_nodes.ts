@@ -639,6 +639,8 @@ function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
 		let enter: bool = keyboard_down("enter");
 		let count: i32 = 0;
 		let BUTTON_COL: i32 = ui.ops.theme.BUTTON_COL;
+		let FILL_BUTTON_BG: bool = ui.ops.theme.FILL_BUTTON_BG;
+		ui.ops.theme.FILL_BUTTON_BG = true;
 
 		///if (is_paint || is_sculpt)
 		let node_list: node_list_t[] = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_list : nodes_brush_list;
@@ -689,6 +691,7 @@ function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
 			search_handle.text = "";
 		}
 		ui.ops.theme.BUTTON_COL = BUTTON_COL;
+		ui.ops.theme.FILL_BUTTON_BG = FILL_BUTTON_BG;
 	}, x, y);
 }
 
