@@ -673,15 +673,19 @@ function import_arm_unpack_asset(project: project_format_t, abs: string, file: s
 
 function _import_arm_get_f32(map: map_t<string, any>, key: string): f32 {
 	let i: i32 = armpack_map_get_i64(map, key);
-	if (i < 1024) { // Otherwise it's likely encoded as a float
+	if (i < 2048) { // Otherwise it's likely encoded as a float
 		return i;
 	}
 	return armpack_map_get_f64(map, key);
 }
 
+function _import_arm_get_f32_array_element(map: map_t<string, any>, key: string): f32 {
+	return armpack_map_get_f64(map, key);
+}
+
 function _import_arm_get_i32(map: map_t<string, any>, key: string): i32 {
 	let i: i32 = armpack_map_get_i64(map, key);
-	if (i < 1024) {
+	if (i < 2048) {
 		return i;
 	}
 	return armpack_map_get_f64(map, key);
@@ -704,14 +708,14 @@ function _import_arm_get_node_socket_array(old: map_t<string, any>, key: string)
 		}
 		else { // VECTOR, RGBA
 			let dv: map_t<string, any> = map_get(old, "default_value");
-			let x: f32 = _import_arm_get_f32(dv, "0");
-			let y: f32 = _import_arm_get_f32(dv, "1");
-			let z: f32 = _import_arm_get_f32(dv, "2");
+			let x: f32 = _import_arm_get_f32_array_element(dv, "0");
+			let y: f32 = _import_arm_get_f32_array_element(dv, "1");
+			let z: f32 = _import_arm_get_f32_array_element(dv, "2");
 			if (s.type == "VECTOR") {
 				s.default_value = f32_array_create_xyz(x, y, z);
 			}
 			else { // RGBA
-				let w: f32 = _import_arm_get_f32(dv, "3");
+				let w: f32 = _import_arm_get_f32_array_element(dv, "3");
 				s.default_value = f32_array_create_xyzw(x, y, z, w);
 			}
 		}
@@ -779,6 +783,27 @@ function _import_arm_get_node_canvas_array(map: map_t<string, any>, key: string)
 						b.data = sys_string_to_buffer(joined);
 					}
 				}
+				else if (b.type == "BOOL") {
+					let x: f32 = _import_arm_get_i32(old, "default_value");
+					b.default_value = f32_array_create_x(x);
+				}
+				else if (b.type == "CUSTOM") {
+					if (b.name == "arm.shader.NodesMaterial.newGroupButton") {
+						b.name = "nodes_material_new_group_button";
+					}
+					else if (b.name == "arm.shader.NodesMaterial.groupOutputButton") {
+						b.name = "nodes_material_group_output_button";
+					}
+					else if (b.name == "arm.shader.NodesMaterial.groupInputButton") {
+						b.name = "nodes_material_group_input_button";
+					}
+					else if (b.name == "arm.shader.NodesMaterial.vectorCurvesButton") {
+						b.name = "nodes_material_vector_curves_button";
+					}
+					else if (b.name == "arm.shader.NodesMaterial.colorRampButton") {
+						b.name = "nodes_material_color_ramp_button";
+					}
+				}
 
 				b.min = _import_arm_get_f32(old, "min");
 				b.max = _import_arm_get_f32(old, "max");
@@ -817,6 +842,9 @@ function import_arm_upgrade_from_08(b: buffer_t): project_format_t {
 	let project: project_format_t = {};
 	project.version = "1.0 alpha";
 	project.assets = map_get(old, "assets");
+	if (project.assets == null) {
+		project.assets = [];
+	}
 	project.is_bgra = _import_arm_get_i32(old, "is_bgra") > 0;
 	let pas: any[] = map_get(old, "packed_assets");
 	if (pas != null) {

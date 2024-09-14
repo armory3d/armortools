@@ -4069,7 +4069,8 @@ function nodes_material_new_group_button(node_id: i32) {
 	let group: node_group_t = null;
 	for (let i: i32 = 0; i < project_material_groups.length; ++i) {
 		let g: node_group_t = project_material_groups[i];
-		if (g.canvas.name == node.name) {
+		let cname: string = g.canvas.name;
+		if (cname == node.name) {
 			group = g;
 			break;
 		}

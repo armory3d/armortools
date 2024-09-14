@@ -349,7 +349,9 @@ function make_material_bake_node_preview(node: ui_node_t, group: ui_node_canvas_
 		let res_x: i32 = math_floor(config_get_texture_res_x());
 		let res_y: i32 = math_floor(config_get_texture_res_y());
 		if (image == null || image.width != res_x || image.height != res_y) {
-			if (image != null) image_unload(image);
+			if (image != null) {
+				image_unload(image);
+			}
 			image = image_create_render_target(res_x, res_y, tex_format_t.R8);
 			map_set(context_raw.node_previews, id, image);
 		}
