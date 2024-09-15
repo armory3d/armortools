@@ -87,7 +87,7 @@ function util_render_make_decal_preview() {
 	context_raw.decal_preview = true;
 
 	let plane: mesh_object_t = scene_get_child(".Plane").ext;
-	plane.base.transform.scale = vec4_new(1, 1, 1);
+	plane.base.transform.scale = vec4_create(1, 1, 1);
 	plane.base.transform.rot = quat_from_euler(-math_pi() / 2, 0, 0);
 	transform_build_matrix(plane.base.transform);
 	plane.base.visible = true;
@@ -270,18 +270,18 @@ function util_render_make_brush_preview() {
 	cam.data.fov = 0.92;
 	camera_object_build_proj(cam);
 	camera_object_build_mat(cam);
-	m = mat4_get_inv(scene_camera.vp);
+	m = mat4_inv(scene_camera.vp);
 
 	let planeo: mesh_object_t = scene_get_child(".Plane").ext;
 	planeo.base.visible = true;
 	context_raw.paint_object = planeo;
 
 	let v: vec4_t = vec4_create();
-	v = vec4_new(m.m00, m.m01, m.m02);
+	v = vec4_create(m.m00, m.m01, m.m02);
 	let sx: f32 = vec4_len(v);
 	planeo.base.transform.rot = quat_from_euler(-math_pi() / 2, 0, 0);
-	planeo.base.transform.scale = vec4_new(sx, 1.0, sx);
-	planeo.base.transform.loc = vec4_new(m.m30, -m.m31, 0.0);
+	planeo.base.transform.scale = vec4_create(sx, 1.0, sx);
+	planeo.base.transform.loc = vec4_create(m.m30, -m.m31, 0.0);
 	transform_build_matrix(planeo.base.transform);
 
 	render_path_paint_live_layer_drawn = 0;

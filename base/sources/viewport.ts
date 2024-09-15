@@ -8,12 +8,12 @@ function viewport_scale_to_bounds() {
 	po.base.transform.dim.x = aabb.x;
 	po.base.transform.dim.y = aabb.y;
 	po.base.transform.dim.z = aabb.z;
-	po.base.transform.scale = vec4_new(2 / r, 2 / r, 2 / r);
-	po.base.transform.loc = vec4_new(0, 0, 0);
+	po.base.transform.scale = vec4_create(2 / r, 2 / r, 2 / r);
+	po.base.transform.loc = vec4_create(0, 0, 0);
 	transform_build_matrix(po.base.transform);
 	for (let i: i32 = 0; i < po.base.children.length; ++i) {
 		let c: object_t = po.base.children[i];
-		c.transform.loc = vec4_new(0, 0, 0);
+		c.transform.loc = vec4_create(0, 0, 0);
 		transform_build_matrix(c.transform);
 	}
 }
@@ -40,11 +40,11 @@ function viewport_reset() {
 }
 
 function viewport_set_view(x: f32, y: f32, z: f32, rx: f32, ry: f32, rz: f32) {
-	context_raw.paint_object.base.transform.rot = quat_new(0, 0, 0, 1);
+	context_raw.paint_object.base.transform.rot = quat_create(0, 0, 0, 1);
 	context_raw.paint_object.base.transform.dirty = true;
 	let cam: camera_object_t = scene_camera;
 	let dist: f32 = vec4_len(cam.base.transform.loc);
-	cam.base.transform.loc = vec4_new(x * dist, y * dist, z * dist);
+	cam.base.transform.loc = vec4_create(x * dist, y * dist, z * dist);
 	cam.base.transform.rot = quat_from_euler(rx, ry, rz);
 	transform_build_matrix(cam.base.transform);
 	camera_object_build_proj(cam);

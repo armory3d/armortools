@@ -33,7 +33,7 @@ function vector_math_node_get(self: vector_math_node_t, from: i32): logic_node_v
 	}
 	else if (op == "Dot Product") {
 		f = vec4_dot(self.v, v2);
-		self.v = vec4_new(f, f, f);
+		self.v = vec4_create(f, f, f);
 	}
 	else if (op == "Cross Product") {
 		self.v = vec4_cross(self.v, v2);
@@ -53,11 +53,11 @@ function vector_math_node_get(self: vector_math_node_t, from: i32): logic_node_v
 	}
 	else if (op == "Length") {
 		f = vec4_len(self.v);
-		self.v = vec4_new(f, f, f);
+		self.v = vec4_create(f, f, f);
 	}
 	else if (op == "Distance") {
 		f = vec4_dist(self.v, v2);
-		self.v = vec4_new(f, f, f);
+		self.v = vec4_create(f, f, f);
 	}
 	else if (op == "Project") {
 		self.v = vec4_clone(v2);

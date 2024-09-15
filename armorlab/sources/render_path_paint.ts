@@ -200,7 +200,7 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 	g4_set_float3(base_cursor_tint, tint_r, tint_g, tint_b);
 	g4_set_mat(base_cursor_vp, scene_camera.vp);
 	let help_mat: mat4_t = mat4_identity();
-	help_mat = mat4_get_inv(scene_camera.vp);
+	help_mat = mat4_inv(scene_camera.vp);
 	g4_set_mat(base_cursor_inv_vp, help_mat);
 	///if (arm_metal || arm_vulkan)
 	let vs: vertex_structure_t[] = [{name: "tex", data: "short2norm"}];

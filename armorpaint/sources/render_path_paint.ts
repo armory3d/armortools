@@ -537,7 +537,7 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 	g4_set_float3(base_cursor_tint, tint_r, tint_g, tint_b);
 	g4_set_mat(base_cursor_vp, scene_camera.vp);
 	let help_mat: mat4_t = mat4_identity();
-	help_mat = mat4_get_inv(scene_camera.vp);
+	help_mat = mat4_inv(scene_camera.vp);
 	g4_set_mat(base_cursor_inv_vp, help_mat);
 	///if (arm_metal || arm_vulkan)
 	let vs: vertex_element_t[] = [
@@ -565,41 +565,41 @@ function render_path_paint_commands_symmetry() {
 		let sy: f32 = t.scale.y;
 		let sz: f32 = t.scale.z;
 		if (context_raw.sym_x) {
-			t.scale = vec4_new(-sx, sy, sz);
+			t.scale = vec4_create(-sx, sy, sz);
 			transform_build_matrix(t);
 			render_path_paint_commands_paint(false);
 		}
 		if (context_raw.sym_y) {
-			t.scale = vec4_new(sx, -sy, sz);
+			t.scale = vec4_create(sx, -sy, sz);
 			transform_build_matrix(t);
 			render_path_paint_commands_paint(false);
 		}
 		if (context_raw.sym_z) {
-			t.scale = vec4_new(sx, sy, -sz);
+			t.scale = vec4_create(sx, sy, -sz);
 			transform_build_matrix(t);
 			render_path_paint_commands_paint(false);
 		}
 		if (context_raw.sym_x && context_raw.sym_y) {
-			t.scale = vec4_new(-sx, -sy, sz);
+			t.scale = vec4_create(-sx, -sy, sz);
 			transform_build_matrix(t);
 			render_path_paint_commands_paint(false);
 		}
 		if (context_raw.sym_x && context_raw.sym_z) {
-			t.scale = vec4_new(-sx, sy, -sz);
+			t.scale = vec4_create(-sx, sy, -sz);
 			transform_build_matrix(t);
 			render_path_paint_commands_paint(false);
 		}
 		if (context_raw.sym_y && context_raw.sym_z) {
-			t.scale = vec4_new(sx, -sy, -sz);
+			t.scale = vec4_create(sx, -sy, -sz);
 			transform_build_matrix(t);
 			render_path_paint_commands_paint(false);
 		}
 		if (context_raw.sym_x && context_raw.sym_y && context_raw.sym_z) {
-			t.scale = vec4_new(-sx, -sy, -sz);
+			t.scale = vec4_create(-sx, -sy, -sz);
 			transform_build_matrix(t);
 			render_path_paint_commands_paint(false);
 		}
-		t.scale = vec4_new(sx, sy, sz);
+		t.scale = vec4_create(sx, sy, sz);
 		transform_build_matrix(t);
 	}
 }
@@ -856,7 +856,7 @@ function render_path_paint_set_plane_mesh() {
 	m = mat4_scale(m, vec4_create(tw, tw, 1));
 	m = mat4_set_loc(m, vec4_create(tx, ty, 0));
 	let m2: mat4_t = mat4_identity();
-	m2 = mat4_get_inv(scene_camera.vp);
+	m2 = mat4_inv(scene_camera.vp);
 	m = mat4_mult_mat(m, m2);
 
 	let tiled: bool = ui_view2d_tiled_show;
@@ -891,19 +891,19 @@ function render_path_paint_set_plane_mesh() {
 	context_raw.paint_object = render_path_paint_planeo;
 
 	let v: vec4_t = vec4_create();
-	v = vec4_new(m.m00, m.m01, m.m02);
+	v = vec4_create(m.m00, m.m01, m.m02);
 	let sx: f32 = vec4_len(v);
 	render_path_paint_planeo.base.transform.rot = quat_from_euler(-math_pi() / 2, 0, 0);
-	render_path_paint_planeo.base.transform.scale = vec4_new(sx, 1.0, sx);
+	render_path_paint_planeo.base.transform.scale = vec4_create(sx, 1.0, sx);
 	render_path_paint_planeo.base.transform.scale.z *= config_get_texture_res_y() / config_get_texture_res_x();
-	render_path_paint_planeo.base.transform.loc = vec4_new(m.m30, -m.m31, 0.0);
+	render_path_paint_planeo.base.transform.loc = vec4_create(m.m30, -m.m31, 0.0);
 	transform_build_matrix(render_path_paint_planeo.base.transform);
 }
 
 function render_path_paint_restore_plane_mesh() {
 	context_raw.paint2d_view = false;
 	render_path_paint_planeo.base.visible = false;
-	render_path_paint_planeo.base.transform.loc = vec4_new(0.0, 0.0, 0.0);
+	render_path_paint_planeo.base.transform.loc = vec4_create(0.0, 0.0, 0.0);
 	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 		project_paint_objects[i].base.visible = render_path_paint_visibles[i];
 	}

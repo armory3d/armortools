@@ -142,10 +142,10 @@ function line_draw_line(x1: f32, y1: f32, z1: f32, x2: f32, y2: f32, z2: f32) {
 		line_draw_begin();
 	}
 
-	line_draw_mid_point = vec4_new(x1 + x2, y1 + y2, z1 + z2);
+	line_draw_mid_point = vec4_create(x1 + x2, y1 + y2, z1 + z2);
 	line_draw_mid_point = vec4_mult(line_draw_mid_point, 0.5);
 
-	line_draw_mid_line = vec4_new(x1, y1, z1);
+	line_draw_mid_line = vec4_create(x1, y1, z1);
 	line_draw_mid_line = vec4_sub(line_draw_mid_line, line_draw_mid_point);
 
 	let camera: camera_object_t = scene_camera;
@@ -156,16 +156,16 @@ function line_draw_line(x1: f32, y1: f32, z1: f32, x2: f32, y2: f32, z2: f32) {
 	line_width = vec4_norm(line_width);
 	line_width = vec4_mult(line_width, line_draw_strength);
 
-	line_draw_corner1 = vec4_new(x1, y1, z1);
+	line_draw_corner1 = vec4_create(x1, y1, z1);
 	line_draw_corner1 = vec4_add(line_draw_corner1, line_width);
 
-	line_draw_corner2 = vec4_new(x1, y1, z1);
+	line_draw_corner2 = vec4_create(x1, y1, z1);
 	line_draw_corner2 = vec4_sub(line_draw_corner2, line_width);
 
-	line_draw_corner3 = vec4_new(x2, y2, z2);
+	line_draw_corner3 = vec4_create(x2, y2, z2);
 	line_draw_corner3 = vec4_sub(line_draw_corner3, line_width);
 
-	line_draw_corner4 = vec4_new(x2, y2, z2);
+	line_draw_corner4 = vec4_create(x2, y2, z2);
 	line_draw_corner4 = vec4_add(line_draw_corner4, line_width);
 
 	let i: i32 = line_draw_lines * 24; // 4 * 6 (structure len)

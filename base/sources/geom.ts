@@ -92,7 +92,7 @@ function geom_make_uv_sphere(radius: f32 = 1.0, width_segments: i32 = 32, height
 			mesh.posa[i4    ] = math_floor(vx * inv);
 			mesh.posa[i4 + 1] = math_floor(vy * inv);
 			mesh.posa[i4 + 2] = math_floor(vz * inv);
-			nor = vec4_new(vx, vy, vz);
+			nor = vec4_create(vx, vy, vz);
 			nor = vec4_norm(nor);
 			mesh.posa[i4 + 3] = math_floor(nor.z * 32767);
 			mesh.nora[i2    ] = math_floor(nor.x * 32767);

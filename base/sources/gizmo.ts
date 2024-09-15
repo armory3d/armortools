@@ -28,21 +28,21 @@ function gizmo_update() {
 		gizmo.transform.loc = vec4_clone(paint_object.transform.loc);
 	}
 	else if (is_decal) {
-		gizmo.transform.loc = vec4_new(context_raw.layer.decal_mat.m30, context_raw.layer.decal_mat.m31, context_raw.layer.decal_mat.m32);
+		gizmo.transform.loc = vec4_create(context_raw.layer.decal_mat.m30, context_raw.layer.decal_mat.m31, context_raw.layer.decal_mat.m32);
 	}
 	let cam: camera_object_t = scene_camera;
 	let fov: f32 = cam.data.fov;
 	let dist: f32 = vec4_dist(cam.base.transform.loc, gizmo.transform.loc) / 8 * fov;
-	gizmo.transform.scale = vec4_new(dist, dist, dist);
-	context_raw.gizmo_translate_x.transform.scale = vec4_new(dist, dist, dist);
-	context_raw.gizmo_translate_y.transform.scale = vec4_new(dist, dist, dist);
-	context_raw.gizmo_translate_z.transform.scale = vec4_new(dist, dist, dist);
-	context_raw.gizmo_scale_x.transform.scale = vec4_new(dist, dist, dist);
-	context_raw.gizmo_scale_y.transform.scale = vec4_new(dist, dist, dist);
-	context_raw.gizmo_scale_z.transform.scale = vec4_new(dist, dist, dist);
-	context_raw.gizmo_rotate_x.transform.scale = vec4_new(dist, dist, dist);
-	context_raw.gizmo_rotate_y.transform.scale = vec4_new(dist, dist, dist);
-	context_raw.gizmo_rotate_z.transform.scale = vec4_new(dist, dist, dist);
+	gizmo.transform.scale = vec4_create(dist, dist, dist);
+	context_raw.gizmo_translate_x.transform.scale = vec4_create(dist, dist, dist);
+	context_raw.gizmo_translate_y.transform.scale = vec4_create(dist, dist, dist);
+	context_raw.gizmo_translate_z.transform.scale = vec4_create(dist, dist, dist);
+	context_raw.gizmo_scale_x.transform.scale = vec4_create(dist, dist, dist);
+	context_raw.gizmo_scale_y.transform.scale = vec4_create(dist, dist, dist);
+	context_raw.gizmo_scale_z.transform.scale = vec4_create(dist, dist, dist);
+	context_raw.gizmo_rotate_x.transform.scale = vec4_create(dist, dist, dist);
+	context_raw.gizmo_rotate_y.transform.scale = vec4_create(dist, dist, dist);
+	context_raw.gizmo_rotate_z.transform.scale = vec4_create(dist, dist, dist);
 	transform_build_matrix(gizmo.transform);
 
 	// Scene control
@@ -233,10 +233,10 @@ function gizmo_update() {
 
 		if (is_object) {
 			let t: transform_t = paint_object.transform;
-			gizmo_v = vec4_new(transform_world_x(t), transform_world_y(t), transform_world_z(t));
+			gizmo_v = vec4_create(transform_world_x(t), transform_world_y(t), transform_world_z(t));
 		}
 		else if (is_decal) {
-			gizmo_v = vec4_new(context_raw.layer.decal_mat.m30, context_raw.layer.decal_mat.m31, context_raw.layer.decal_mat.m32);
+			gizmo_v = vec4_create(context_raw.layer.decal_mat.m30, context_raw.layer.decal_mat.m31, context_raw.layer.decal_mat.m32);
 		}
 
 		if (context_raw.translate_x || context_raw.scale_x) {

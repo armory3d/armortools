@@ -857,8 +857,8 @@ function ui_base_update() {
 
 			let camera: camera_object_t = scene_camera;
 			let ct: transform_t = camera.base.transform;
-			mo.base.transform.loc = vec4_new(transform_world_x(ct), transform_world_y(ct), transform_world_z(ct));
-			mo.base.transform.scale = vec4_new(context_raw.brush_radius * 0.2, context_raw.brush_radius * 0.2, context_raw.brush_radius * 0.2);
+			mo.base.transform.loc = vec4_create(transform_world_x(ct), transform_world_y(ct), transform_world_z(ct));
+			mo.base.transform.scale = vec4_create(context_raw.brush_radius * 0.2, context_raw.brush_radius * 0.2, context_raw.brush_radius * 0.2);
 			transform_build_matrix(mo.base.transform);
 
 			let body: physics_body_t = physics_body_create();

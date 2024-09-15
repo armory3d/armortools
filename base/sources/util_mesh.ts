@@ -219,9 +219,9 @@ function util_mesh_calc_normals(smooth: bool = false) {
 			let i1: i32 = inda[i * 3    ];
 			let i2: i32 = inda[i * 3 + 1];
 			let i3: i32 = inda[i * 3 + 2];
-			va = vec4_new(buffer_get_i16(vertices, (i1 * l) * 2), buffer_get_i16(vertices, (i1 * l + 1) * 2), buffer_get_i16(vertices, (i1 * l + 2) * 2));
-			vb = vec4_new(buffer_get_i16(vertices, (i2 * l) * 2), buffer_get_i16(vertices, (i2 * l + 1) * 2), buffer_get_i16(vertices, (i2 * l + 2) * 2));
-			vc = vec4_new(buffer_get_i16(vertices, (i3 * l) * 2), buffer_get_i16(vertices, (i3 * l + 1) * 2), buffer_get_i16(vertices, (i3 * l + 2) * 2));
+			va = vec4_create(buffer_get_i16(vertices, (i1 * l) * 2), buffer_get_i16(vertices, (i1 * l + 1) * 2), buffer_get_i16(vertices, (i1 * l + 2) * 2));
+			vb = vec4_create(buffer_get_i16(vertices, (i2 * l) * 2), buffer_get_i16(vertices, (i2 * l + 1) * 2), buffer_get_i16(vertices, (i2 * l + 2) * 2));
+			vc = vec4_create(buffer_get_i16(vertices, (i3 * l) * 2), buffer_get_i16(vertices, (i3 * l + 1) * 2), buffer_get_i16(vertices, (i3 * l + 2) * 2));
 			cb = vec4_sub(vc, vb);
 			ab = vec4_sub(va, vb);
 			cb = vec4_cross(cb, ab);
@@ -264,7 +264,7 @@ function util_mesh_calc_normals(smooth: bool = false) {
 					}
 				}
 				if (shared_len > 1) {
-					va = vec4_new(0, 0, 0);
+					va = vec4_create(0, 0, 0);
 					for (let j: i32 = 0; j < shared_len; ++j) {
 						let i1: i32 = shared[j];
 						let i1l: i32 = i1 * l;
@@ -421,7 +421,7 @@ function util_mesh_equirect_unwrap(mesh: raw_mesh_t) {
 	mesh.texa = i16_array_create(verts * 2);
 	let n: vec4_t = vec4_create();
 	for (let i: i32 = 0; i < verts; ++i) {
-		n = vec4_new(mesh.posa[i * 4] / 32767, mesh.posa[i * 4 + 1] / 32767, mesh.posa[i * 4 + 2] / 32767);
+		n = vec4_create(mesh.posa[i * 4] / 32767, mesh.posa[i * 4 + 1] / 32767, mesh.posa[i * 4 + 2] / 32767);
 		n = vec4_norm(n);
 		// Sphere projection
 		// mesh.texa[i * 2    ] = math_atan2(n.x, n.y) / (math_pi() * 2) + 0.5;

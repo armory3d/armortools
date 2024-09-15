@@ -84,7 +84,7 @@ function import_arm_run_project(path: string) {
 		scene_camera.data.fov = project_raw.camera_fov;
 		camera_object_build_proj(scene_camera);
 		let origin: f32_array_t = project_raw.camera_origin;
-		camera_origins[0].v = vec4_new(origin[0], origin[1], origin[2]);
+		camera_origins[0].v = vec4_create(origin[0], origin[1], origin[2]);
 	}
 
 	for (let i: i32 = 0; i < project.assets.length; ++i) {
@@ -134,7 +134,7 @@ function import_arm_run_project(path: string) {
 	///end
 
 	mesh_object_set_data(context_raw.paint_object, md);
-	context_raw.paint_object.base.transform.scale = vec4_new(1, 1, 1);
+	context_raw.paint_object.base.transform.scale = vec4_create(1, 1, 1);
 	transform_build_matrix(context_raw.paint_object.base.transform);
 	context_raw.paint_object.base.name = md.name;
 	project_paint_objects = [context_raw.paint_object];
@@ -412,7 +412,7 @@ function import_arm_run_mesh(raw: scene_t) {
 			md._.handle = md.name;
 			map_set(data_cached_meshes, md._.handle, md);
 		}
-		object.base.transform.scale = vec4_new(1, 1, 1);
+		object.base.transform.scale = vec4_create(1, 1, 1);
 		transform_build_matrix(object.base.transform);
 		object.base.name = md.name;
 		array_push(project_paint_objects, object);
@@ -671,64 +671,44 @@ function import_arm_unpack_asset(project: project_format_t, abs: string, file: s
 	}
 }
 
-function _import_arm_get_f32(map: map_t<string, any>, key: string): f32 {
-	let i: i32 = armpack_map_get_i64(map, key);
-	if (i < 2048) { // Otherwise it's likely encoded as a float
-		return i;
-	}
-	return armpack_map_get_f64(map, key);
-}
-
-function _import_arm_get_f32_array_element(map: map_t<string, any>, key: string): f32 {
-	return armpack_map_get_f64(map, key);
-}
-
-function _import_arm_get_i32(map: map_t<string, any>, key: string): i32 {
-	let i: i32 = armpack_map_get_i64(map, key);
-	if (i < 2048) {
-		return i;
-	}
-	return armpack_map_get_f64(map, key);
-}
-
 function _import_arm_get_node_socket_array(old: map_t<string, any>, key: string): ui_node_socket_t[] {
 	let sockets: ui_node_socket_t[] = [];
 	let ias: any[] = map_get(old, key);
 	for (let i: i32 = 0; i < ias.length; ++i) {
 		let old: map_t<string, any> = ias[i];
 		let s: ui_node_socket_t = {};
-		s.id = _import_arm_get_i32(old, "id");
-		s.node_id = _import_arm_get_i32(old, "node_id");
+		s.id = armpack_map_get_i32(old, "id");
+		s.node_id = armpack_map_get_i32(old, "node_id");
 		s.name = map_get(old, "name");
 		s.type = map_get(old, "type");
-		s.color = _import_arm_get_i32(old, "color");
+		s.color = armpack_map_get_i32(old, "color");
 		if (s.type == "VALUE") {
-			let x: f32 = _import_arm_get_f32(old, "default_value");
+			let x: f32 = armpack_map_get_f32(old, "default_value");
 			s.default_value = f32_array_create_x(x);
 		}
 		else { // VECTOR, RGBA
 			let dv: map_t<string, any> = map_get(old, "default_value");
-			let x: f32 = _import_arm_get_f32_array_element(dv, "0");
-			let y: f32 = _import_arm_get_f32_array_element(dv, "1");
-			let z: f32 = _import_arm_get_f32_array_element(dv, "2");
+			let x: f32 = armpack_map_get_f32(dv, "0");
+			let y: f32 = armpack_map_get_f32(dv, "1");
+			let z: f32 = armpack_map_get_f32(dv, "2");
 			if (s.type == "VECTOR") {
 				s.default_value = f32_array_create_xyz(x, y, z);
 			}
 			else { // RGBA
-				let w: f32 = _import_arm_get_f32_array_element(dv, "3");
+				let w: f32 = armpack_map_get_f32(dv, "3");
 				s.default_value = f32_array_create_xyzw(x, y, z, w);
 			}
 		}
-		s.min = _import_arm_get_f32(old, "min");
-		s.max = _import_arm_get_f32(old, "max");
+		s.min = armpack_map_get_f32(old, "min");
+		s.max = armpack_map_get_f32(old, "max");
 		if (s.max == 0.0) {
 			s.max = 1.0;
 		}
-		s.precision = _import_arm_get_f32(old, "precision");
+		s.precision = armpack_map_get_f32(old, "precision");
 		if (s.precision == 0.0) {
 			s.precision = 100.0;
 		}
-		s.display = _import_arm_get_i32(old, "display");
+		s.display = armpack_map_get_i32(old, "display");
 		array_push(sockets, s);
 	}
 	return sockets;
@@ -751,12 +731,12 @@ function _import_arm_get_node_canvas_array(map: map_t<string, any>, key: string)
 			let old: map_t<string, any> = nas[i];
 			let n: ui_node_t = {};
 
-			n.id = _import_arm_get_i32(old, "id");
+			n.id = armpack_map_get_i32(old, "id");
 			n.name = map_get(old, "name");
 			n.type = map_get(old, "type");
-			n.x = _import_arm_get_f32(old, "x");
-			n.y = _import_arm_get_f32(old, "y");
-			n.color = _import_arm_get_i32(old, "color");
+			n.x = armpack_map_get_f32(old, "x");
+			n.y = armpack_map_get_f32(old, "y");
+			n.color = armpack_map_get_i32(old, "color");
 			n.inputs = _import_arm_get_node_socket_array(old, "inputs");
 			n.outputs = _import_arm_get_node_socket_array(old, "outputs");
 
@@ -767,10 +747,10 @@ function _import_arm_get_node_canvas_array(map: map_t<string, any>, key: string)
 				let b: ui_node_button_t = {};
 				b.name = map_get(old, "name");
 				b.type = map_get(old, "type");
-				b.output = _import_arm_get_i32(old, "output");
+				b.output = armpack_map_get_i32(old, "output");
 
 				if (b.type == "ENUM") {
-					let x: f32 = _import_arm_get_i32(old, "default_value");
+					let x: f32 = armpack_map_get_i32(old, "default_value");
 					b.default_value = f32_array_create_x(x);
 
 					if (b.name == "File") {
@@ -784,7 +764,7 @@ function _import_arm_get_node_canvas_array(map: map_t<string, any>, key: string)
 					}
 				}
 				else if (b.type == "BOOL") {
-					let x: f32 = _import_arm_get_i32(old, "default_value");
+					let x: f32 = armpack_map_get_i32(old, "default_value");
 					b.default_value = f32_array_create_x(x);
 				}
 				else if (b.type == "CUSTOM") {
@@ -805,14 +785,14 @@ function _import_arm_get_node_canvas_array(map: map_t<string, any>, key: string)
 					}
 				}
 
-				b.min = _import_arm_get_f32(old, "min");
-				b.max = _import_arm_get_f32(old, "max");
-				b.precision = _import_arm_get_f32(old, "precision");
-				b.height = _import_arm_get_f32(old, "height");
+				b.min = armpack_map_get_f32(old, "min");
+				b.max = armpack_map_get_f32(old, "max");
+				b.precision = armpack_map_get_f32(old, "precision");
+				b.height = armpack_map_get_f32(old, "height");
 				array_push(n.buttons, b);
 			}
 
-			n.width = _import_arm_get_f32(old, "width");
+			n.width = armpack_map_get_f32(old, "width");
 
 			array_push(c.nodes, n);
 		}
@@ -822,11 +802,11 @@ function _import_arm_get_node_canvas_array(map: map_t<string, any>, key: string)
 		for (let i: i32 = 0; i < las.length; ++i) {
 			let old: map_t<string, any> = las[i];
 			let l: ui_node_link_t = {};
-			l.id = _import_arm_get_i32(old, "id");
-			l.from_id = _import_arm_get_i32(old, "from_id");
-			l.from_socket = _import_arm_get_i32(old, "from_socket");
-			l.to_id = _import_arm_get_i32(old, "to_id");
-			l.to_socket = _import_arm_get_i32(old, "to_socket");
+			l.id = armpack_map_get_i32(old, "id");
+			l.from_id = armpack_map_get_i32(old, "from_id");
+			l.from_socket = armpack_map_get_i32(old, "from_socket");
+			l.to_id = armpack_map_get_i32(old, "to_id");
+			l.to_socket = armpack_map_get_i32(old, "to_socket");
 			array_push(c.links, l);
 		}
 
@@ -845,7 +825,7 @@ function import_arm_upgrade_from_08(b: buffer_t): project_format_t {
 	if (project.assets == null) {
 		project.assets = [];
 	}
-	project.is_bgra = _import_arm_get_i32(old, "is_bgra") > 0;
+	project.is_bgra = armpack_map_get_i32(old, "is_bgra") > 0;
 	let pas: any[] = map_get(old, "packed_assets");
 	if (pas != null) {
 		project.packed_assets = [];

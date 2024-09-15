@@ -76,7 +76,7 @@ function camera_update() {
 		let dist: f32 = camera_distance();
 		transform_move(camera.base.transform, camera_object_look_world(camera), dist);
 		transform_rotate(camera.base.transform, vec4_z_axis(), -mouse_movement_x / 100 * config_raw.camera_rotation_speed);
-		transform_rotate(camera.base.transform, camera_object_right_world(camera), -mouse_movement_y / 100 * config_raw.camera_rotation_speed);
+		transform_rotate(camera.base.transform,  camera_object_right_world(camera), -mouse_movement_y / 100 * config_raw.camera_rotation_speed);
 		let up_world: vec4_t = camera_object_up_world(camera);
 		if (up_world.z < 0) {
 			transform_rotate(camera.base.transform, camera_object_right_world(camera), mouse_movement_y / 100 * config_raw.camera_rotation_speed);
@@ -86,9 +86,9 @@ function camera_update() {
 	else if (controls == camera_controls_t.ROTATE && (operator_shortcut(map_get(config_keymap, "action_rotate"), shortcut_type_t.DOWN) || (mouse_down("right") && !modif && default_keymap))) {
 		camera_redraws = 2;
 		let t: transform_t = context_main_object().base.transform;
-		let up: vec4_t = vec4_norm(transform_up(t));
+		let up: vec4_t = transform_up(t);
 		transform_rotate(t, up, mouse_movement_x / 100 * config_raw.camera_rotation_speed);
-		let right: vec4_t = vec4_norm(camera_object_right_world(camera));
+		let right: vec4_t = camera_object_right_world(camera);
 		transform_rotate(t, right, mouse_movement_y / 100 * config_raw.camera_rotation_speed);
 		transform_build_matrix(t);
 		let tup: vec4_t = transform_up(t);
@@ -131,7 +131,7 @@ function camera_update() {
 			if (camera_ease > 1.0) {
 				camera_ease = 1.0;
 			}
-			camera_dir = vec4_new(0, 0, 0);
+			camera_dir = vec4_create(0, 0, 0);
 			let look: vec4_t = camera_object_look(camera);
 			let right: vec4_t = camera_object_right(camera);
 			if (move_forward) {
@@ -237,8 +237,8 @@ function camera_pan_action(modif: bool, default_keymap: bool) {
 	let camera: camera_object_t = scene_camera;
 	if (operator_shortcut(map_get(config_keymap, "action_pan"), shortcut_type_t.DOWN) || (mouse_down("middle") && !modif && default_keymap)) {
 		camera_redraws = 2;
-		let look: vec4_t = vec4_mult(vec4_norm(transform_look(camera.base.transform)), mouse_movement_y / 150 * config_raw.camera_pan_speed);
-		let right: vec4_t = vec4_mult(vec4_norm(transform_right(camera.base.transform)), -mouse_movement_x / 150 * config_raw.camera_pan_speed);
+		let look: vec4_t = vec4_mult(transform_look(camera.base.transform), mouse_movement_y / 150 * config_raw.camera_pan_speed);
+		let right: vec4_t = vec4_mult(transform_right(camera.base.transform), -mouse_movement_x / 150 * config_raw.camera_pan_speed);
 		camera.base.transform.loc = vec4_add(camera.base.transform.loc, look);
 		camera.base.transform.loc = vec4_add(camera.base.transform.loc, right);
 		camera_origins[camera_index()].v = vec4_add(camera_origins[camera_index()].v, look);

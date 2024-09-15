@@ -77,7 +77,7 @@ function render_path_base_draw_compass() {
 		compass.base.parent = cam.base;
 		compass.base.transform.loc = vec4_create(7.4 * ratio, 7.0, -1);
 		compass.base.transform.rot = quat_create(-crot.x, -crot.y, -crot.z, crot.w);
-		compass.base.transform.scale = vec4_new(0.4, 0.4, 0.4);
+		compass.base.transform.scale = vec4_create(0.4, 0.4, 0.4);
 		transform_build_matrix(compass.base.transform);
 		compass.frustum_culling = false;
 		let empty: string[] = [];

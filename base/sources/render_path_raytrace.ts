@@ -79,7 +79,7 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 	let ct: transform_t = cam.base.transform;
 	render_path_raytrace_help_mat = mat4_clone(cam.v);
 	render_path_raytrace_help_mat = mat4_mult_mat(render_path_raytrace_help_mat, cam.p);
-	render_path_raytrace_help_mat = mat4_get_inv(render_path_raytrace_help_mat);
+	render_path_raytrace_help_mat = mat4_inv(render_path_raytrace_help_mat);
 	render_path_raytrace_f32a[0] = transform_world_x(ct);
 	render_path_raytrace_f32a[1] = transform_world_y(ct);
 	render_path_raytrace_f32a[2] = transform_world_z(ct);
