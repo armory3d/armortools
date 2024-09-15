@@ -764,7 +764,8 @@ function project_is_material_group_in_use(group: node_group_t): bool {
 		let canvas: ui_node_canvas_t = canvases[i];
 		for (let i: i32 = 0; i < canvas.nodes.length; ++i) {
 			let n: ui_node_t = canvas.nodes[i];
-			if (n.type == "GROUP" && n.name == group.canvas.name) {
+			let cname: string = group.canvas.name;
+			if (n.type == "GROUP" && n.name == cname) {
 				return true;
 			}
 		}

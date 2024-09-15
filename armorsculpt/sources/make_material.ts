@@ -293,7 +293,8 @@ function make_material_traverse_nodes(nodes: ui_node_t[], group: ui_node_canvas_
 		if (node.type == "GROUP") {
 			for (let j: i32 = 0; j < project_material_groups.length; ++j) {
 				let g: node_group_t = project_material_groups[j];
-				if (g.canvas.name == node.name) {
+				let cname: string = g.canvas.name;
+				if (cname == node.name) {
 					array_push(parents, node);
 					make_material_traverse_nodes(g.canvas.nodes, g.canvas, parents);
 					array_pop(parents);

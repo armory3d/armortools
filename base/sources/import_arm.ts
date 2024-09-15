@@ -502,7 +502,8 @@ function import_arm_run_material_from_project(project: project_format_t, path: s
 function import_arm_group_exists(c: ui_node_canvas_t): bool {
 	for (let i: i32 = 0; i < project_material_groups.length; ++i) {
 		let g: node_group_t = project_material_groups[i];
-		if (g.canvas.name == c.name) {
+		let cname: string = g.canvas.name;
+		if (cname == c.name) {
 			return true;
 		}
 	}

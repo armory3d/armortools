@@ -185,7 +185,8 @@ function tab_layers_combo_filter() {
 	if (filter_handle.changed) {
 		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 			let p: mesh_object_t = project_paint_objects[i];
-			p.base.visible = context_raw.layer_filter == 0 || p.base.name == ar[context_raw.layer_filter] || project_is_atlas_object(p);
+			let filter_name: string = ar[context_raw.layer_filter];
+			p.base.visible = context_raw.layer_filter == 0 || p.base.name == filter_name || project_is_atlas_object(p);
 		}
 		if (context_raw.layer_filter == 0 && context_raw.merged_object_is_atlas) { // All
 			util_mesh_merge();

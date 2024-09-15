@@ -223,7 +223,8 @@ function _import_mesh_add_mesh(mesh: raw_mesh_t) {
 	// Ensure unique names
 	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 		let p: mesh_object_t = project_paint_objects[i];
-		if (p.base.name == object.base.name) {
+		let oname: string = object.base.name;
+		if (p.base.name == oname) {
 			p.base.name += ".001";
 			p.data._.handle += ".001";
 			map_set(data_cached_meshes, p.data._.handle, p.data);

@@ -1490,7 +1490,8 @@ function ui_nodes_make_group_node(group_canvas: ui_node_canvas_t, nodes: ui_node
 	let group_output: ui_node_t = null;
 	for (let i: i32 = 0; i < project_material_groups.length; ++i) {
 		let g: node_group_t = project_material_groups[i];
-		if (g.canvas.name == node.name) {
+		let cname: string = g.canvas.name;
+		if (cname == node.name) {
 			for (let i: i32 = 0; i < g.canvas.nodes.length; ++i) {
 				let n: ui_node_t = g.canvas.nodes[i];
 				if (n.type == "GROUP_INPUT") {

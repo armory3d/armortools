@@ -266,15 +266,15 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		if (context_raw.material.paint_subs) {
 			node_shader_write(frag, "float subs = " + subs + ";");
 		}
-		if (parse_float(height) != 0.0 && !make_material_height_used) {
+		if (height != "0.0" && height != "0" && !make_material_height_used) {
 			make_material_height_used = true;
 			// Height used for the first time, also rebuild vertex shader
 			return make_paint_run(data, matcon);
 		}
-		if (parse_float(emis) != 0.0) {
+		if (emis != "0.0" && emis != "0") {
 			make_material_emis_used = true;
 		}
-		if (parse_float(subs) != 0.0) {
+		if (subs != "0.0" && subs != "0") {
 			make_material_subs_used = true;
 		}
 	}

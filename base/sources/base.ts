@@ -2222,7 +2222,8 @@ function base_set_object_mask() {
 		let o: mesh_object_t = project_paint_objects[0];
 		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 			let p: mesh_object_t = project_paint_objects[i];
-			if (p.base.name == ar[mask]) {
+			let mask_name: string = ar[mask];
+			if (p.base.name == mask_name) {
 				o = p;
 				break;
 			}
