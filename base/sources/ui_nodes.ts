@@ -124,7 +124,7 @@ function ui_viewnodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
 		});
 	}
 	// Selecting which node socket to preview
-	else if (node.id == ui_nodes.nodes_selected_id[0]) {
+	else if (ui_nodes.nodes_selected_id.length > 0 && node.id == ui_nodes.nodes_selected_id[0]) {
 		context_raw.node_preview_socket = link_drag.from_id > -1 ? link_drag.from_socket : 0;
 		///if (is_paint || is_sculpt)
 		context_raw.node_preview_dirty = true;
