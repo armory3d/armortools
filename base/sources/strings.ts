@@ -536,11 +536,11 @@ float ltc_evaluate(vec3 N, vec3 V, float dotnv, vec3 P, mat3 Minv, vec3 points0,
 
 let str_get_pos_from_depth: string = " \
 vec3 get_pos_from_depth(vec2 uv, mat4 invVP, textureArg(gbufferD)) { \
-	#if defined(HLSL) || defined(METAL) || defined(SPIRV) \
+	#if defined(HLSL) || defined(METAL) || defined(SPIRV) \n\
 	float depth = textureLod(gbufferD, vec2(uv.x, 1.0 - uv.y), 0.0).r; \
-	#else \
+	#else \n\
 	float depth = textureLod(gbufferD, uv, 0.0).r; \
-	#endif \
+	#endif \n\
 	vec4 wpos = vec4(uv * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0); \
 	wpos = mul(wpos, invVP); \
 	return wpos.xyz / wpos.w; \
