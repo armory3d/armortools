@@ -55,14 +55,14 @@ enum viewport_mode_t {
 	METALLIC = 5,
 	OPACITY = 6,
 	HEIGHT = 7,
-	PATH_TRACE = 8,
-	EMISSION = 9,
-	SUBSURFACE = 10,
-	TEXCOORD = 11,
-	OBJECT_NORMAL = 12,
-	MATERIAL_ID = 13,
-	OBJECT_ID = 14,
-	MASK = 15,
+	EMISSION = 8,
+	SUBSURFACE = 9,
+	TEXCOORD = 10,
+	OBJECT_NORMAL = 11,
+	MATERIAL_ID = 12,
+	OBJECT_ID = 13,
+	MASK = 14,
+	PATH_TRACE = 15,
 }
 
 enum channel_type_t {

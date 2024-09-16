@@ -46,11 +46,7 @@ type context_t = {
 	///if (arm_direct3d12 || arm_vulkan || arm_metal)
 	pathtrace_mode?: path_trace_mode_t;
 	///end
-	///if (arm_direct3d12 || arm_vulkan) // || arm_metal)
 	viewport_mode?: viewport_mode_t;
-	///else
-	viewport_mode?: viewport_mode_t;
-	///end
 	///if (arm_android || arm_ios)
 	render_mode?: render_mode_t;
 	///else
@@ -334,7 +330,7 @@ function context_create(): context_t {
 	///if (arm_direct3d12 || arm_vulkan || arm_metal)
 	c.pathtrace_mode = path_trace_mode_t.CORE;
 	///end
-	///if (arm_direct3d12 || arm_vulkan) // || arm_metal)
+	///if (arm_direct3d12 || arm_vulkan)
 	c.viewport_mode = viewport_mode_t.PATH_TRACE;
 	///else
 	c.viewport_mode = viewport_mode_t.LIT;

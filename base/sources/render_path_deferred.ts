@@ -47,7 +47,7 @@ function render_path_deferred_init() {
 		t.name = "buf";
 		t.width = 0;
 		t.height = 0;
-		///if (arm_direct3d12 || arm_vulkan)// || arm_metal)
+		///if (arm_direct3d12 || arm_vulkan)
 		// Match raytrace_target format
 		// Will cause "The render target format in slot 0 does not match that specified by the current pipeline state"
 		t.format = "RGBA64";
