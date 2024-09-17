@@ -238,23 +238,14 @@ function tab_materials_draw_slots(mini: bool) {
 						subs_handle.selected = m.paint_subs;
 					}
 
-					ui_menu_fill(ui);
 					m.paint_base = ui_check(base_handle, tr("Base Color"));
-					ui_menu_fill(ui);
 					m.paint_opac = ui_check(opac_handle, tr("Opacity"));
-					ui_menu_fill(ui);
 					m.paint_nor = ui_check(nor_handle, tr("Normal"));
-					ui_menu_fill(ui);
 					m.paint_occ = ui_check(occ_handle, tr("Occlusion"));
-					ui_menu_fill(ui);
 					m.paint_rough = ui_check(rough_handle, tr("Roughness"));
-					ui_menu_fill(ui);
 					m.paint_met = ui_check(met_handle, tr("Metallic"));
-					ui_menu_fill(ui);
 					m.paint_height = ui_check(height_handle, tr("Height"));
-					ui_menu_fill(ui);
 					m.paint_emis = ui_check(emis_handle, tr("Emission"));
-					ui_menu_fill(ui);
 					m.paint_subs = ui_check(subs_handle, tr("Subsurface"));
 					if (base_handle.changed ||
 						opac_handle.changed ||

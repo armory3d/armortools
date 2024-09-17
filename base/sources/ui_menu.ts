@@ -170,7 +170,6 @@ function ui_menu_render() {
 
 			ui.changed = false;
 
-			ui_menu_fill(ui);
 			let p: world_data_t = scene_world;
 			let env_handle: ui_handle_t = ui_handle(__ID__);
 			env_handle.value = p.strength;
@@ -180,7 +179,6 @@ function ui_menu_render() {
 				context_raw.ddirty = 2;
 			}
 
-			ui_menu_fill(ui);
 			let enva_handle: ui_handle_t = ui_handle(__ID__);
 			enva_handle.value = context_raw.envmap_angle / math_pi() * 180.0;
 			if (enva_handle.value < 0) {
@@ -203,7 +201,6 @@ function ui_menu_render() {
 			if (scene_lights.length > 0) {
 				let light: light_object_t = scene_lights[0];
 
-				ui_menu_fill(ui);
 				let lhandle: ui_handle_t = ui_handle(__ID__);
 				let scale: f32 = 1333;
 				lhandle.value = light.data.strength / scale;
@@ -214,7 +211,6 @@ function ui_menu_render() {
 					context_raw.ddirty = 2;
 				}
 
-				ui_menu_fill(ui);
 				light = scene_lights[0];
 				let lahandle: ui_handle_t = ui_handle(__ID__);
 				lahandle.value = context_raw.light_angle / math_pi() * 180;
@@ -240,7 +236,6 @@ function ui_menu_render() {
 					context_raw.ddirty = 2;
 				}
 
-				ui_menu_fill(ui);
 				let sxhandle: ui_handle_t = ui_handle(__ID__);
 				sxhandle.value = light.data.size;
 				ui_menu_align(ui);
@@ -251,7 +246,6 @@ function ui_menu_render() {
 			}
 
 			///if (is_paint || is_sculpt)
-			ui_menu_fill(ui);
 			let split_view_handle: ui_handle_t = ui_handle(__ID__);
 			if (split_view_handle.init) {
 				split_view_handle.selected = context_raw.split_view;
@@ -263,7 +257,6 @@ function ui_menu_render() {
 			///end
 
 			///if is_lab
-			ui_menu_fill(ui);
 			let brush_scale_handle: ui_handle_t = ui_handle(__ID__);
 			if (brush_scale_handle.init) {
 				brush_scale_handle.value = context_raw.brush_scale;
@@ -279,7 +272,6 @@ function ui_menu_render() {
 			}
 			///end
 
-			ui_menu_fill(ui);
 			let cull_handle: ui_handle_t = ui_handle(__ID__);
 			if (cull_handle.init) {
 				cull_handle.selected = context_raw.cull_backfaces;
@@ -289,7 +281,6 @@ function ui_menu_render() {
 				make_material_parse_mesh_material();
 			}
 
-			ui_menu_fill(ui);
 			let filter_handle: ui_handle_t = ui_handle(__ID__);
 			if (filter_handle.init) {
 				filter_handle.selected = context_raw.texture_filter;
@@ -301,7 +292,6 @@ function ui_menu_render() {
 			}
 
 			///if (is_paint || is_sculpt)
-			ui_menu_fill(ui);
 			context_raw.draw_wireframe = ui_check(context_raw.wireframe_handle, " " + tr("Wireframe"));
 			if (context_raw.wireframe_handle.changed) {
 				let current: image_t = _g2_current;
@@ -313,14 +303,12 @@ function ui_menu_render() {
 			///end
 
 			///if is_paint
-			ui_menu_fill(ui);
 			context_raw.draw_texels = ui_check(context_raw.texels_handle, " " + tr("Texels"));
 			if (context_raw.texels_handle.changed) {
 				make_material_parse_mesh_material();
 			}
 			///end
 
-			ui_menu_fill(ui);
 			let compass_handle: ui_handle_t = ui_handle(__ID__);
 			if (compass_handle.init) {
 				compass_handle.selected = context_raw.show_compass;
@@ -330,14 +318,12 @@ function ui_menu_render() {
 				context_raw.ddirty = 2;
 			}
 
-			ui_menu_fill(ui);
 			context_raw.show_envmap = ui_check(context_raw.show_envmap_handle, " " + tr("Envmap"));
 			if (context_raw.show_envmap_handle.changed) {
 				context_load_envmap();
 				context_raw.ddirty = 2;
 			}
 
-			ui_menu_fill(ui);
 			context_raw.show_envmap_blur = ui_check(context_raw.show_envmap_blur_handle, " " + tr("Blur Envmap"));
 			if (context_raw.show_envmap_blur_handle.changed) {
 				context_raw.ddirty = 2;
@@ -385,7 +371,6 @@ function ui_menu_render() {
 			///end
 
 			for (let i: i32 = 0; i < modes.length; ++i) {
-				ui_menu_fill(ui);
 				let shortcut: string = config_raw.touch_ui ? "" : map_get(config_keymap, "viewport_mode") + ", " + shortcuts[i];
 				ui_radio(mode_handle, i, modes[i], shortcut);
 			}
@@ -450,7 +435,6 @@ function ui_menu_render() {
 			}
 			// menuSeparator(ui);
 
-			ui_menu_fill(ui);
 			let cam: camera_object_t = scene_camera;
 			context_raw.fov_handle = ui_handle(__ID__);
 			if (context_raw.fov_handle.init) {
@@ -462,7 +446,6 @@ function ui_menu_render() {
 				viewport_update_camera_type(context_raw.camera_type);
 			}
 
-			ui_menu_fill(ui);
 			ui_menu_align(ui);
 			let camera_controls_handle: ui_handle_t = ui_handle(__ID__);
 			camera_controls_handle.position = context_raw.camera_controls;
@@ -479,7 +462,6 @@ function ui_menu_render() {
 				ui_tooltip(orbit_and_rotate_tooltip + "\n\n" + fly_tooltip);
 			}
 
-			ui_menu_fill(ui);
 			ui_menu_align(ui);
 			let camera_type_items: string[] = [tr("Perspective"), tr("Orthographic")];
 			context_raw.camera_type = ui_inline_radio(context_raw.cam_handle, camera_type_items, ui_align_t.LEFT);
@@ -694,12 +676,6 @@ function ui_menu_fit_to_screen() {
 	}
 }
 
-function ui_menu_fill(ui: ui_t) {
-	g2_set_color(ui.ops.theme.SEPARATOR_COL);
-	g2_fill_rect(ui._x, ui._y, ui._w, ui_ELEMENT_H(ui) + 1);
-	g2_set_color(0xffffffff);
-}
-
 function ui_menu_separator(ui: ui_t) {
 	ui._y++;
 	if (config_raw.touch_ui) {
@@ -711,7 +687,6 @@ function ui_menu_separator(ui: ui_t) {
 }
 
 function ui_menu_button(ui: ui_t, text: string, label: string = ""): bool {
-	ui_menu_fill(ui);
 	if (config_raw.touch_ui) {
 		label = "";
 	}
@@ -732,14 +707,12 @@ function ui_menu_align(ui: ui_t) {
 }
 
 function ui_menu_start(ui: ui_t) {
-	ui_draw_shadow(ui._x, ui._y - 4, ui._w, ui_menu_h + 8);
-	// Round top
+	ui_draw_shadow(ui._x, ui._y, ui._w, ui_menu_h);
+
 	g2_set_color(ui.ops.theme.SEPARATOR_COL);
-	ui_draw_rect(true, ui._x, ui._y - 4, ui._w, 8);
+	ui_draw_rect(true, ui._x, ui._y, ui._w, ui_menu_h);
 	g2_set_color(0xffffffff);
 }
 
 function ui_menu_end(ui: ui_t) {
-	ui_draw_round_bottom(ui._x, ui._y, ui._w);
-	g2_set_color(0xffffffff);
 }

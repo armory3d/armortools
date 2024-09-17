@@ -658,11 +658,11 @@ function ui_base_update() {
 				viewport_zoom(-0.2);
 			}
 			else if (operator_shortcut(map_get(config_keymap, "viewport_mode"))) {
-
+				base_ui_menu.is_key_pressed = false;
 				ui_menu_draw(function (ui: ui_t) {
 					let mode_handle: ui_handle_t = ui_handle(__ID__);
 					mode_handle.position = context_raw.viewport_mode;
-					ui_text(tr("Viewport Mode"), ui_align_t.RIGHT, ui.ops.theme.HIGHLIGHT_COL);
+					ui_text(tr("Viewport Mode"), ui_align_t.RIGHT);
 					let modes: string[] = [
 						tr("Lit"),
 						tr("Base Color"),
@@ -710,7 +710,9 @@ function ui_base_update() {
 			}
 		}
 
-		if (operator_shortcut(map_get(config_keymap, "operator_search"))) ui_base_operator_search();
+		if (operator_shortcut(map_get(config_keymap, "operator_search"))) {
+			ui_base_operator_search();
+		}
 	}
 
 	if (context_raw.brush_can_lock || context_raw.brush_locked) {
@@ -908,9 +910,8 @@ function ui_base_operator_search() {
 	_ui_base_operator_search_first = true;
 
 	ui_menu_draw(function (ui: ui_t) {
+		ui_menu_h = ui_ELEMENT_H(ui) * 8;
 		let search_handle: ui_handle_t = ui_handle(__ID__);
-
-		ui_fill(0, 0, ui._w / ui_SCALE(ui), ui.ops.theme.ELEMENT_H * 8, ui.ops.theme.SEPARATOR_COL);
 		let search: string = ui_text_input(search_handle, "", ui_align_t.LEFT, true, true);
 		ui.changed = false;
 		if (_ui_base_operator_search_first) {

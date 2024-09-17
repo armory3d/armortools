@@ -583,7 +583,9 @@ function ui_nodes_update() {
 	}
 
 	// Node search popup
-	if (operator_shortcut(map_get(config_keymap, "node_search"))) ui_nodes_node_search();
+	if (operator_shortcut(map_get(config_keymap, "node_search"))) {
+		ui_nodes_node_search();
+	}
 	if (ui_nodes_node_search_spawn != null) {
 		ui_nodes_ui.input_x = mouse_x; // Fix inputDX after popup removal
 		ui_nodes_ui.input_y = mouse_y;
@@ -610,12 +612,8 @@ function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
 	_ui_nodes_node_search_done = done;
 
 	ui_menu_draw(function (ui: ui_t) {
+		ui_menu_h = ui_ELEMENT_H(ui) * 8;
 		let search_handle: ui_handle_t = ui_handle(__ID__);
-
-		g2_set_color(ui.ops.theme.SEPARATOR_COL);
-		ui_draw_rect(true, ui._x, ui._y, ui._w, ui_ELEMENT_H(ui) * 8);
-		g2_set_color(0xffffffff);
-
 		let search: string = to_lower_case(ui_text_input(search_handle, "", ui_align_t.LEFT, true, true));
 		ui.changed = false;
 		if (_ui_nodes_node_search_first) {
@@ -1261,7 +1259,6 @@ function ui_nodes_render() {
 				ui_fill(0, 1, ui_nodes_ui._w / ui_SCALE(ui_nodes_ui), ui_nodes_ui.ops.theme.BUTTON_H + 2, ui_nodes_ui.ops.theme.ACCENT_COL);
 				ui_fill(1, 1, ui_nodes_ui._w / ui_SCALE(ui_nodes_ui) - 2, ui_nodes_ui.ops.theme.BUTTON_H + 1, ui_nodes_ui.ops.theme.SEPARATOR_COL);
 				ui_nodes_ui.enabled = ui_nodes_can_place_group(g.canvas.name);
-				ui_menu_fill(ui_nodes_ui);
 				let row: f32[] = [5 / 6, 1 / 6];
 				ui_row(row);
 				if (ui_button(config_button_spacing + g.canvas.name, ui_align_t.LEFT)) {
