@@ -16,29 +16,29 @@ git clone https://github.com/armory3d/onnx_bin onnx
 # Unpack `models.zip` from https://github.com/armory3d/armorai/releases into `assets/models` using 7-Zip - Extract Here
 ```
 
-**Windows**
+**Windows (x64)**
 ```bash
 ..\armorcore\make --graphics direct3d11
 # Open generated Visual Studio project at `build\ArmorLab.sln`
 # Build and run
 ```
 
-**Linux** *wip - cpu only*
+**Linux (x64)** *wip - cpu only*
 ```bash
 ../armorcore/make --graphics opengl --run
 ```
 
-**macOS** *wip - apple silicon only*
+**macOS (arm64)**
 ```bash
 ../armorcore/make --graphics metal
 # Open generated Xcode project at `build/ArmorLab.xcodeproj`
 # Build and run
 ```
 
-**Android** *wip*
+**Android (arm64)** *wip*
 ```bash
 ```
 
-**iOS** *wip*
+**iOS (arm64)** *wip*
 ```bash
 ```
