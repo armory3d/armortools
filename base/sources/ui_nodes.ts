@@ -453,6 +453,7 @@ function ui_nodes_get_canvas_control(ui: ui_t, controls_down: bool): ui_canvas_c
 	if (control.zoom != 0.0) {
 		ui_nodes_grid_redraw = true;
 	}
+
 	return control;
 }
 

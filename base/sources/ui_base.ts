@@ -1609,7 +1609,7 @@ function ui_base_render_cursor() {
 
 function ui_base_show_material_nodes() {
 	// Clear input state as ui receives input events even when not drawn
-	ui_end_input();
+	_ui_end_input(ui_nodes_ui);
 
 	///if (is_paint || is_sculpt)
 	ui_nodes_show = !ui_nodes_show || ui_nodes_canvas_type != canvas_type_t.MATERIAL;
@@ -1625,7 +1625,7 @@ function ui_base_show_material_nodes() {
 ///if (is_paint || is_sculpt)
 function ui_base_show_brush_nodes() {
 	// Clear input state as ui receives input events even when not drawn
-	ui_end_input();
+	_ui_end_input(ui_nodes_ui);
 	ui_nodes_show = !ui_nodes_show || ui_nodes_canvas_type != canvas_type_t.BRUSH;
 	ui_nodes_canvas_type = canvas_type_t.BRUSH;
 	base_resize();
@@ -1634,7 +1634,7 @@ function ui_base_show_brush_nodes() {
 
 function ui_base_show_2d_view(type: view_2d_type_t) {
 	// Clear input state as ui receives input events even when not drawn
-	ui_end_input();
+	_ui_end_input(ui_view2d_ui);
 	if (ui_view2d_type != type) {
 		ui_view2d_show = true;
 	}
