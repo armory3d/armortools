@@ -1,10 +1,13 @@
 
 function import_arm_run_project(path: string) {
 	let b: buffer_t = data_get_blob(path);
-	let project: project_format_t = armpack_decode(b);
+	let project: project_format_t;
 
-	if (project.version != null && project.version == "0.8") {
-		project = import_arm_upgrade_from_08(b);
+	if (import_arm_is_legacy(b)) {
+		project = import_arm_from_legacy(b);
+	}
+	else {
+		project = armpack_decode(b);
 	}
 
 	///if (is_paint || is_sculpt)
@@ -24,7 +27,7 @@ function import_arm_run_project(path: string) {
 		return;
 	}
 
-	let import_as_mesh: bool = b[10] != 'v'; // No version
+	let import_as_mesh: bool = b[10] != 118; // 'v', no version
 	context_raw.layers_preview_dirty = true;
 	context_raw.layer_filter = 0;
 	///end
@@ -425,13 +428,17 @@ function import_arm_run_mesh(raw: scene_t) {
 
 function import_arm_run_material(path: string) {
 	let b: buffer_t = data_get_blob(path);
-	let project: project_format_t = armpack_decode(b);
+	let project: project_format_t;
+	if (import_arm_is_legacy(b)) {
+		project = import_arm_from_legacy(b);
+	}
+	else {
+		project = armpack_decode(b);
+	}
+
 	if (project.version == null) {
 		data_delete_blob(path);
 		return;
-	}
-	if (project.version == "0.8") {
-		project = import_arm_upgrade_from_08(b);
 	}
 	import_arm_run_material_from_project(project, path);
 }
@@ -816,9 +823,21 @@ function _import_arm_get_node_canvas_array(map: map_t<string, any>, key: string)
 	return ar;
 }
 
-function import_arm_upgrade_from_08(b: buffer_t): project_format_t {
+function import_arm_is_legacy(b: buffer_t): bool {
+	// Cloud materials are at version 0.8 / 0.9
+	let has_version: bool = b[10] == 118; // 'v'
+	let has_zero: bool = b[22] == 48; // '0'
+	let has_dot: bool = b[23] == 46; // '.'
+	let has_eight: bool = b[24] == 56; // '8'
+	let has_nine: bool = b[24] == 57; // '9'
+	if (has_version && has_zero && has_dot && (has_eight || has_nine)) {
+		return true;
+	}
+	return false;
+}
+
+function import_arm_from_legacy(b: buffer_t): project_format_t {
 	// Deprecated
-	// Cloud materials are at version 0.8
 	let old: map_t<string, any> = armpack_decode_to_map(b);
 	let project: project_format_t = {};
 	project.version = "1.0 alpha";
