@@ -12,10 +12,34 @@ function util_encode_node_canvas(c: ui_node_canvas_t) {
 	ui_node_canvas_encode(c);
 }
 
-function util_encode_project(raw: project_format_t): buffer_t {
+function util_encode_mesh_data_size(datas: mesh_data_t[]): i32 {
+	let size: i32 = 0;
+	for (let i: i32 = 0; i < datas.length; ++i) {
+		for (let j: i32 = 0; j < datas[i].vertex_arrays.length; ++j) {
+			size += datas[i].vertex_arrays[j].values.length * 2;
+		}
+		for (let j: i32 = 0; j < datas[i].index_arrays.length; ++j) {
+			size += datas[i].index_arrays[j].values.length * 4;
+		}
+	}
+	return size;
+}
 
-    // let size: i32 = util_encode_project_size(raw);
-    let size: i32 = 128 * 1024 * 1024;
+function util_encode_layer_data_size(datas: layer_data_t[]): i32 {
+	let size: i32 = 0;
+	for (let i: i32 = 0; i < datas.length; ++i) {
+		let tp: buffer_t = datas[i].texpaint;
+		let tp_nor: buffer_t = datas[i].texpaint_nor;
+		let tp_pack: buffer_t = datas[i].texpaint_pack;
+		size += tp.length;
+		size += tp_nor.length;
+		size += tp_pack.length;
+	}
+	return size;
+}
+
+function util_encode_project(raw: project_format_t): buffer_t {
+    let size: i32 = 32 * 1024 * 1024 + util_encode_layer_data_size(raw.layer_datas) + util_encode_mesh_data_size(raw.mesh_datas);
     let encoded: buffer_t = buffer_create(size);
 
     armpack_encode_start(encoded.buffer);
