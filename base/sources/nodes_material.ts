@@ -1507,7 +1507,7 @@ let nodes_material_texture: ui_node_t[] = [
 				color: 0xffa1a1a1,
 				default_value: f32_array_create_x(5.0),
 				min: 0.0,
-				max: 1.0,
+				max: 10.0,
 				precision: 100,
 				display: 0
 			}
