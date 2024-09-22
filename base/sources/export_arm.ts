@@ -216,6 +216,9 @@ function export_arm_run_project() {
 	///else
 	let recent_path: string = project_filepath;
 	///end
+	///if arm_windows
+	recent_path = string_replace_all(recent_path, "\\", "/");
+	///end
 	let recent: string[] = config_raw.recent_projects;
 	array_remove(recent, recent_path);
 	array_insert(recent, 0, recent_path);

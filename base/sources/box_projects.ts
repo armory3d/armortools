@@ -195,13 +195,12 @@ function box_projects_recent_tab(ui: ui_t) {
 
 		for (let i: i32 = 0; i < config_raw.recent_projects.length; ++i) {
 			let path: string = config_raw.recent_projects[i];
-			let file: string = path;
 			///if arm_windows
-			file = string_replace_all(path, "/", "\\");
+			path = string_replace_all(path, "/", "\\");
 			///else
-			file = string_replace_all(path, "\\", "/");
+			path = string_replace_all(path, "\\", "/");
 			///end
-			file = substring(file, string_last_index_of(file, path_sep) + 1, file.length);
+			let file: string = substring(path, string_last_index_of(path, path_sep) + 1, path.length);
 
 			if (string_index_of(to_lower_case(file), to_lower_case(box_projects_hsearch.text)) < 0) {
 				continue; // Search filter
