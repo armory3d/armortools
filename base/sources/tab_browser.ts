@@ -26,6 +26,9 @@ function tab_browser_draw(htab: ui_handle_t) {
 
 		if (tab_browser_hpath.text == "" && config_raw.bookmarks.length > 0) { // Init to first bookmark
 			tab_browser_hpath.text = config_raw.bookmarks[0];
+			///if arm_windows
+			tab_browser_hpath.text = string_replace_all(tab_browser_hpath.text, "/", "\\");
+			///end
 		}
 
 		ui_begin_sticky();
@@ -40,7 +43,11 @@ function tab_browser_draw(htab: ui_handle_t) {
 		}
 
 		if (ui_button("+")) {
-			array_push(config_raw.bookmarks, tab_browser_hpath.text);
+			let bookmark: string = tab_browser_hpath.text;
+			///if arm_windows
+			bookmark = string_replace_all(bookmark, "\\", "/");
+			///end
+			array_push(config_raw.bookmarks, bookmark);
 			config_save();
 		}
 		if (ui.is_hovered) {
@@ -229,10 +236,13 @@ function tab_browser_draw(htab: ui_handle_t) {
 
 		for (let i: i32 = 0; i < config_raw.bookmarks.length; ++i) {
 			let b: string = config_raw.bookmarks[i];
-			let folder: string = substring(b, string_last_index_of(b, path_sep) + 1, b.length);
+			let folder: string = substring(b, string_last_index_of(b, "/") + 1, b.length);
 
 			if (ui_button(folder, ui_align_t.LEFT)) {
 				tab_browser_hpath.text = b;
+				///if arm_windows
+				tab_browser_hpath.text = string_replace_all(tab_browser_hpath.text, "/", "\\");
+				///end
 			}
 
 			if (ui.is_hovered && ui.input_released_r) {

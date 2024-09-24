@@ -76,6 +76,10 @@ function tab_textures_draw(htab: ui_handle_t) {
 
 					let asset: asset_t = project_assets[i];
 					let img: image_t = project_get_image(asset);
+					if (img == null) {
+						let empty_rt: render_target_t = map_get(render_path_render_targets, "empty_black");
+						img = empty_rt._image;
+					}
 					let uix: f32 = ui._x;
 					let uiy: f32 = ui._y;
 					let sw: i32 = img.height < img.width ? img.height : 0;
