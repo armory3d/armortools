@@ -14,3 +14,9 @@ export ARM_LOCALE=<locale code>
 ./armorcore/make --js base/tools/extract_locales.js
 # Generates a `base/assets/locale/<locale code>.json` file
 ```
+
+**Embedding data files**
+```bash
+# Requires compiler with c23 #embed support (clang 19 or newer)
+../armorcore/make --embed
+```
