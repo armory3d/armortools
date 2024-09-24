@@ -5,7 +5,7 @@ type color_node_t = {
 	image?: image_t;
 };
 
-function color_node_create(args: f32_array_t): color_node_t {
+function color_node_create(raw: ui_node_t, args: f32_array_t): color_node_t {
 	let r: f32 = args == null ? 0.8 : args[0];
 	let g: f32 = args == null ? 0.8 : args[1];
 	let b: f32 = args == null ? 0.8 : args[2];

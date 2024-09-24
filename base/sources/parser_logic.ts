@@ -4,16 +4,10 @@ let parser_logic_nodes: ui_node_t[];
 let parser_logic_links: ui_node_link_t[];
 
 let parser_logic_parsed_nodes: string[] = null;
-let parser_logic_parsed_labels: map_t<string, string> = null;
 let parser_logic_node_map: map_t<string, logic_node_ext_t>;
-let parser_logic_raw_map: map_t<logic_node_ext_t, ui_node_t>;
 
 function parser_logic_get_logic_node(node: ui_node_t): logic_node_ext_t {
 	return map_get(parser_logic_node_map, parser_logic_node_name(node));
-}
-
-function parser_logic_get_raw_node(node: logic_node_ext_t): ui_node_t {
-	return map_get(parser_logic_raw_map, node);
 }
 
 function parser_logic_get_node(id: i32): ui_node_t {
@@ -85,9 +79,7 @@ function parser_logic_parse(canvas: ui_node_canvas_t) {
 	parser_logic_links = canvas.links;
 
 	parser_logic_parsed_nodes = [];
-	parser_logic_parsed_labels = map_create();
 	parser_logic_node_map = map_create();
-	parser_logic_raw_map = map_create();
 	let root_nodes: ui_node_t[] = parser_logic_get_root_nodes(canvas);
 
 	for (let i: i32 = 0; i < root_nodes.length; ++i) {
@@ -108,9 +100,8 @@ function parser_logic_build_node(node: ui_node_t): string {
 	array_push(parser_logic_parsed_nodes, name);
 
 	// Create node
-	let v: logic_node_ext_t = parser_logic_create_node_instance(node.type, null);
+	let v: logic_node_ext_t = parser_logic_create_node_instance(node.type, node, null);
 	map_set(parser_logic_node_map, name, v);
-	map_set(parser_logic_raw_map, v, node);
 
 	// Create inputs
 	let inp_node: logic_node_ext_t = null;
@@ -185,39 +176,39 @@ function parser_logic_build_default_node(inp: ui_node_socket_t): logic_node_ext_
 		if (inp.default_value == null) {
 			inp.default_value = f32_array_create_xyz(0, 0, 0);
 		}
-		v = parser_logic_create_node_instance("vector_node", inp.default_value);
+		v = parser_logic_create_node_instance("vector_node", null, inp.default_value);
 	}
 	else if (inp.type == "RGBA") {
 		if (inp.default_value == null) {
 			inp.default_value = f32_array_create_xyzw(0, 0, 0, 0);
 		}
-		v = parser_logic_create_node_instance("color_node", inp.default_value);
+		v = parser_logic_create_node_instance("color_node", null, inp.default_value);
 	}
 	else if (inp.type == "RGB") {
 		if (inp.default_value == null) {
 			inp.default_value = f32_array_create_xyzw(0, 0, 0, 0);
 		}
-		v = parser_logic_create_node_instance("color_node", inp.default_value);
+		v = parser_logic_create_node_instance("color_node", null, inp.default_value);
 	}
 	else if (inp.type == "VALUE") {
-		v = parser_logic_create_node_instance("float_node", inp.default_value);
+		v = parser_logic_create_node_instance("float_node", null, inp.default_value);
 	}
 	else if (inp.type == "INT") {
-		v = parser_logic_create_node_instance("integer_node", inp.default_value);
+		v = parser_logic_create_node_instance("integer_node", null, inp.default_value);
 	}
 	else if (inp.type == "BOOLEAN") {
-		v = parser_logic_create_node_instance("boolean_node", inp.default_value);
+		v = parser_logic_create_node_instance("boolean_node", null, inp.default_value);
 	}
 	else if (inp.type == "STRING") {
-		v = parser_logic_create_node_instance("string_node", inp.default_value);
+		v = parser_logic_create_node_instance("string_node", null, inp.default_value);
 	}
 	else {
-		v = parser_logic_create_node_instance("null_node", null);
+		v = parser_logic_create_node_instance("null_node", null, null);
 	}
 	return v;
 }
 
-function parser_logic_create_node_instance(node_type: string, args: f32_array_t): logic_node_ext_t {
+function parser_logic_create_node_instance(node_type: string, raw: ui_node_t, args: f32_array_t): logic_node_ext_t {
 	if (map_get(parser_logic_custom_nodes, node_type) != null) {
 		let node: logic_node_t = logic_node_create();
 		node.get = map_get(parser_logic_custom_nodes, node_type);
@@ -231,6 +222,6 @@ function parser_logic_create_node_instance(node_type: string, args: f32_array_t)
 		nodes_brush_init();
 	}
 
-	let create: (args: f32_array_t)=>logic_node_ext_t = map_get(nodes_brush_creates, node_type);
-	return create(args);
+	let create: (raw: ui_node_t, args: f32_array_t)=>logic_node_ext_t = map_get(nodes_brush_creates, node_type);
+	return create(raw, args);
 }

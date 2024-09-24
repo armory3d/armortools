@@ -836,6 +836,7 @@ function ui_nodes_render() {
 			image_unload(ui_nodes_grid);
 		}
 		ui_nodes_draw_grid();
+		ui_nodes_grid_redraw = false;
 	}
 
 	///if (is_paint || is_sculpt)

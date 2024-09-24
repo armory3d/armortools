@@ -5,7 +5,7 @@ type math_node_t = {
 	use_clamp?: bool;
 };
 
-function math_node_create(args: f32_array_t): math_node_t {
+function math_node_create(raw: ui_node_t, args: f32_array_t): math_node_t {
 	let n: math_node_t = {};
 	n.base = logic_node_create();
 	n.base.get = math_node_get;

@@ -494,12 +494,7 @@ function base_resize() {
 		base_appy = 0;
 	}
 
-	if (ui_nodes_grid != null) {
-		app_notify_on_next_frame(function (grid: image_t) {
-			image_unload(grid);
-		}, ui_nodes_grid);
-		ui_nodes_grid = null;
-	}
+	ui_nodes_grid_redraw = true;
 
 	base_redraw_ui();
 }

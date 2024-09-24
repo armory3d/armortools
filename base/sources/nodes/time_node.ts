@@ -3,7 +3,7 @@ type time_node_t = {
 	base?: logic_node_t;
 };
 
-function time_node_create(args: f32_array_t): time_node_t {
+function time_node_create(raw: ui_node_t, args: f32_array_t): time_node_t {
 	let n: time_node_t = {};
 	n.base = logic_node_create();
 	n.base.get = time_node_get;

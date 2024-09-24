@@ -5,13 +5,13 @@ type float_node_t = {
 	image?: image_t;
 };
 
-function float_node_create(args: f32_array_t): float_node_t {
+function float_node_create(raw: ui_node_t, args: f32_array_t): float_node_t {
 	let n: float_node_t = {};
 	n.base = logic_node_create();
 	n.base.get = float_node_get;
 	n.base.get_as_image = float_node_get_as_image;
 	n.base.set = float_node_set;
-	n.value = args[0];
+	n.value = args == null ? 0.5 : args[0];
 	return n;
 }
 

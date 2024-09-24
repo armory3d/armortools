@@ -14,7 +14,7 @@ let input_node_lock_start_x: f32 = 0.0;
 let input_node_lock_start_y: f32 = 0.0;
 let input_node_registered: bool = false;
 
-function input_node_create(arg: any): input_node_t {
+function input_node_create(raw: ui_node_t, args: f32_array_t): input_node_t {
 	let n: float_node_t = {};
 	n.base = logic_node_create();
 	n.base.get = input_node_get;

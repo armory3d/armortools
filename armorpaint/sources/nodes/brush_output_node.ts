@@ -1,14 +1,16 @@
 
 type brush_output_node_t = {
 	base?: logic_node_t;
+	raw?: ui_node_t;
 };
 
-function brush_output_node_create(arg: any): brush_output_node_t {
+function brush_output_node_create(raw: ui_node_t, args: f32_array_t): brush_output_node_t {
 	let n: brush_output_node_t = {};
 	n.base = logic_node_create();
 	context_raw.run_brush = brush_output_node_run;
 	context_raw.parse_brush_inputs = brush_output_node_parse_inputs;
 	context_raw.brush_output_node_inst = n;
+	n.raw = raw;
 	return n;
 }
 
@@ -69,8 +71,7 @@ function brush_output_node_parse_inputs(self: brush_output_node_t) {
 		make_material_parse_paint_material();
 	}
 
-	let n: ui_node_t = map_get(parser_logic_raw_map, self);
-	context_raw.brush_directional = n.buttons[0].default_value[0] > 0.0;
+	context_raw.brush_directional = self.raw.buttons[0].default_value[0] > 0.0;
 }
 
 function brush_output_node_run(self: brush_output_node_t, from: i32) {

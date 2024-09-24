@@ -5,7 +5,7 @@ type vector_node_t = {
 	image?: image_t;
 };
 
-function vector_node_create(args: f32_array_t): vector_node_t {
+function vector_node_create(raw: ui_node_t, args: f32_array_t): vector_node_t {
 	let n: vector_node_t = {};
 	n.base = logic_node_create();
 	n.base.get = vector_node_get;
@@ -14,9 +14,9 @@ function vector_node_create(args: f32_array_t): vector_node_t {
 	n.value = vec4_create();
 
 	if (args != null) {
-		logic_node_add_input(n.base, float_node_create(f32_array_create_x(args[0])), 0);
-		logic_node_add_input(n.base, float_node_create(f32_array_create_x(args[1])), 0);
-		logic_node_add_input(n.base, float_node_create(f32_array_create_x(args[2])), 0);
+		logic_node_add_input(n.base, float_node_create(null, f32_array_create_x(args[0])), 0);
+		logic_node_add_input(n.base, float_node_create(null, f32_array_create_x(args[1])), 0);
+		logic_node_add_input(n.base, float_node_create(null, f32_array_create_x(args[2])), 0);
 	}
 
 	return n;
