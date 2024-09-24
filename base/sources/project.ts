@@ -280,6 +280,7 @@ function project_new(reset_layers: bool = true) {
 	history_reset();
 
 	make_material_parse_paint_material();
+	make_material_parse_brush();
 
 	///if (is_paint || is_sculpt)
 	util_render_make_material_preview();
