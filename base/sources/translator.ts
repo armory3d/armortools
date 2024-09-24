@@ -87,14 +87,19 @@ function translator_load_translations(new_locale: string) {
 	let keys: string[] = map_keys(translator_translations);
 	for (let i: i32 = 0; i < keys.length; ++i) {
 		let s: string = map_get(translator_translations, keys[i]);
-		for (let i: i32 = 0; i < s.length; ++i) {
-			// Assume cjk in the > 1119 range for now
-			if (char_code_at(s, i) > 1119 && array_index_of(_g2_font_glyphs, char_code_at(s, i)) == -1) {
+
+		for (let i: i32 = 0; char_code_at(s, i) != 0; ) {
+			let l: i32 = 0;
+			let codepoint: i32 = string_utf8_decode((s) + i, ADDRESS(l));
+			i += l;
+
+			// Assume cjk in the > 1119 range
+			if (codepoint > 1119 && array_index_of(_g2_font_glyphs, codepoint) == -1) {
 				if (!cjk) {
 					_g2_font_glyphs = _g2_make_glyphs(32, 127);
 					cjk = true;
 				}
-				array_push(_g2_font_glyphs, char_code_at(s, i));
+				array_push(_g2_font_glyphs, codepoint);
 			}
 		}
 	}
