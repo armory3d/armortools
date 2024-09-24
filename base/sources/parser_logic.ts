@@ -112,19 +112,6 @@ function parser_logic_build_node(node: ui_node_t): string {
 	map_set(parser_logic_node_map, name, v);
 	map_set(parser_logic_raw_map, v, node);
 
-	// Expose button values in node
-	// for (let i: i32 = 0; i < node.buttons.length; ++i) {
-	// 	let b: ui_node_button_t = node.buttons[i];
-	// 	if (b.type == "ENUM") {
-	// 		let array_data: bool = b.data.length > 1;
-	// 		let texts: string[] = array_data ? b.data : ui_enum_texts_js(node.type);
-	// 		v[b.name] = texts[b.default_value];
-	// 	}
-	// 	else {
-	// 		v[b.name] = b.default_value;
-	// 	}
-	// }
-
 	// Create inputs
 	let inp_node: logic_node_ext_t = null;
 	let inp_from: i32 = 0;

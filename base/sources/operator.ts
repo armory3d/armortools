@@ -44,12 +44,27 @@ function operator_shortcut(s: string, type: shortcut_type_t = shortcut_type_t.ST
 		return flag;
 	}
 
-	let key: bool = (s == "left" || s == "right" || s == "middle") ?
-		// Mouse
-		(type == shortcut_type_t.DOWN ? mouse_down(s) : mouse_started(s)) :
-		// Keyboard
-		(type == shortcut_type_t.REPEAT ? keyboard_repeat(s) : type == shortcut_type_t.DOWN ? keyboard_down(s) :
-		type == shortcut_type_t.RELEASED ? keyboard_released(s) : keyboard_started(s));
+	let key: bool = false;
+	if (s == "left" || s == "right" || s == "middle") {
+		if (type == shortcut_type_t.DOWN) {
+			key = mouse_down(s);
+		}
+		else {
+			key = mouse_started(s);
+		}
+	}
+	else if (type == shortcut_type_t.REPEAT) {
+		key = keyboard_repeat(s);
+	}
+	else if (type == shortcut_type_t.DOWN) {
+		key = keyboard_down(s);
+	}
+	else if (type == shortcut_type_t.RELEASED) {
+		key = keyboard_released(s);
+	}
+	else {
+		key = keyboard_started(s);
+	}
 
 	return flag && key;
 }

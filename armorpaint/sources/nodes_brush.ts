@@ -11,7 +11,8 @@ let nodes_brush_creates: map_t<string, (args: f32_array_t)=>logic_node_ext_t>;
 function nodes_brush_init() {
 	nodes_brush_creates = map_create();
 	map_set(nodes_brush_creates, "brush_output_node", brush_output_node_create);
-	map_set(nodes_brush_creates, "tex_image_node", tex_image_node_create);
+	// map_set(nodes_brush_creates, "tex_image_node", tex_image_node_create);
+	map_set(nodes_brush_creates, "TEX_IMAGE", tex_image_node_create);
 	map_set(nodes_brush_creates, "input_node", input_node_create);
 	map_set(nodes_brush_creates, "math_node", math_node_create);
 	map_set(nodes_brush_creates, "random_node", random_node_create);

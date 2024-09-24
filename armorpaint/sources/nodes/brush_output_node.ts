@@ -1,7 +1,6 @@
 
 type brush_output_node_t = {
 	base?: logic_node_t;
-	Directional?: bool; // button 0
 };
 
 function brush_output_node_create(arg: any): brush_output_node_t {
@@ -70,7 +69,8 @@ function brush_output_node_parse_inputs(self: brush_output_node_t) {
 		make_material_parse_paint_material();
 	}
 
-	context_raw.brush_directional = self.Directional;
+	let n: ui_node_t = map_get(parser_logic_raw_map, self);
+	context_raw.brush_directional = n.buttons[0].default_value[0] > 0.0;
 }
 
 function brush_output_node_run(self: brush_output_node_t, from: i32) {

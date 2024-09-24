@@ -1,8 +1,6 @@
 
 type tex_image_node_t = {
 	base?: logic_node_t;
-	file?: string;
-	color_space?: string;
 };
 
 function tex_image_node_create(arg: any): tex_image_node_t {
@@ -13,12 +11,17 @@ function tex_image_node_create(arg: any): tex_image_node_t {
 }
 
 function tex_image_node_get(self: tex_image_node_t, from: i32): logic_node_value_t {
+	let n: ui_node_t = map_get(parser_logic_raw_map, self);
+	let ar: string[] = ui_nodes_enum_texts(n.type);
+	let i: i32 = n.buttons[0].default_value[0];
+	let file: string =  ar[i];
+
 	if (from == 0) {
-		let v: logic_node_value_t = { _str: self.file + ".rgb" };
+		let v: logic_node_value_t = { _str: file + ".rgb" };
 		return v;
 	}
 	else {
-		let v: logic_node_value_t = { _str: self.file + ".a" };
+		let v: logic_node_value_t = { _str: file + ".a" };
 		return v;
 	}
 }
@@ -26,7 +29,8 @@ function tex_image_node_get(self: tex_image_node_t, from: i32): logic_node_value
 let tex_image_node_def: ui_node_t = {
 	id: 0,
 	name: _tr("Image Texture"),
-	type: "tex_image_node",
+	// type: "tex_image_node",
+	type: "TEX_IMAGE",
 	x: 0,
 	y: 0,
 	color: 0xff4982a0,

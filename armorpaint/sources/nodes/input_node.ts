@@ -172,7 +172,7 @@ let input_node_def: ui_node_t = {
 			name: _tr("Position"),
 			type: "VECTOR",
 			color: 0xff63c763,
-			default_value: null,
+			default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
 			min: 0.0,
 			max: 1.0,
 			precision: 100,
