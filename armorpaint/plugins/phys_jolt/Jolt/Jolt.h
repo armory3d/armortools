@@ -7,7 +7,7 @@
 // Project includes
 #include <Jolt/Core/Core.h>
 #include <Jolt/Core/ARMNeon.h>
-#include <Jolt/Core/Memory.h>
+#include <Jolt/Core/JoltMemory.h>
 #include <Jolt/Core/IssueReporting.h>
 #include <Jolt/Core/Array.h>
 #include <Jolt/Math/Math.h>
