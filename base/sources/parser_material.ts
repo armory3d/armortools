@@ -1714,8 +1714,8 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 		}
 	}
 	else if (map_get(parser_material_custom_nodes, node.type) != null) {
-		let cb: (n: ui_node_t, s: ui_node_socket_t)=>string = map_get(parser_material_custom_nodes, node.type);
-		return cb(node, socket);
+		let cb: any = map_get(parser_material_custom_nodes, node.type);
+		return js_call_ptr_str(cb, node, socket.name);
 	}
 	return "0.0";
 }
