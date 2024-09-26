@@ -16,6 +16,9 @@ function util_encode_node_canvas(c: ui_node_canvas_t) {
 }
 
 function util_encode_mesh_data_size(datas: mesh_data_t[]): i32 {
+	if (datas == null) {
+		return 0;
+	}
 	let size: i32 = 0;
 	for (let i: i32 = 0; i < datas.length; ++i) {
 		for (let j: i32 = 0; j < datas[i].vertex_arrays.length; ++j) {
@@ -29,6 +32,9 @@ function util_encode_mesh_data_size(datas: mesh_data_t[]): i32 {
 }
 
 function util_encode_layer_data_size(datas: layer_data_t[]): i32 {
+	if (datas == null) {
+		return 0;
+	}
 	let size: i32 = 0;
 	for (let i: i32 = 0; i < datas.length; ++i) {
 		let tp: buffer_t = datas[i].texpaint;
@@ -43,6 +49,11 @@ function util_encode_layer_data_size(datas: layer_data_t[]): i32 {
 
 function util_encode_mesh_datas(datas: mesh_data_t[]) {
 	armpack_encode_string("mesh_datas");
+	if (datas == null) {
+		armpack_encode_null();
+		return;
+	}
+
 	armpack_encode_array(datas.length);
 	for (let i: i32 = 0; i < datas.length; ++i) {
 		armpack_encode_map(7);
@@ -146,10 +157,16 @@ function util_encode_project(raw: project_format_t): buffer_t {
 
 	///if (is_paint || is_sculpt)
 	armpack_encode_string("brush_nodes");
-	armpack_encode_array(raw.brush_nodes.length);
-	for (let i: i32 = 0; i < raw.brush_nodes.length; ++i) {
-		util_encode_node_canvas(raw.brush_nodes[i]);
+	if (raw.brush_nodes != null) {
+		armpack_encode_array(raw.brush_nodes.length);
+		for (let i: i32 = 0; i < raw.brush_nodes.length; ++i) {
+			util_encode_node_canvas(raw.brush_nodes[i]);
+		}
 	}
+	else {
+		armpack_encode_null();
+	}
+
 	armpack_encode_string("brush_icons");
 	if (raw.brush_icons != null) {
 		armpack_encode_array(raw.brush_icons.length);
@@ -160,11 +177,18 @@ function util_encode_project(raw: project_format_t): buffer_t {
 	else {
 		armpack_encode_null();
 	}
+
 	armpack_encode_string("material_nodes");
-	armpack_encode_array(raw.material_nodes.length);
-	for (let i: i32 = 0; i < raw.material_nodes.length; ++i) {
-		util_encode_node_canvas(raw.material_nodes[i]);
+	if (raw.material_nodes != null) {
+		armpack_encode_array(raw.material_nodes.length);
+		for (let i: i32 = 0; i < raw.material_nodes.length; ++i) {
+			util_encode_node_canvas(raw.material_nodes[i]);
+		}
 	}
+	else {
+		armpack_encode_null();
+	}
+
 	armpack_encode_string("material_groups");
 	if (raw.material_groups != null) {
 		armpack_encode_array(raw.material_groups.length);
@@ -175,6 +199,7 @@ function util_encode_project(raw: project_format_t): buffer_t {
 	else {
 		armpack_encode_null();
 	}
+
 	armpack_encode_string("material_icons");
 	if (raw.material_icons != null) {
 		armpack_encode_array(raw.material_icons.length);
@@ -185,72 +210,82 @@ function util_encode_project(raw: project_format_t): buffer_t {
 	else {
 		armpack_encode_null();
 	}
+
 	armpack_encode_string("font_assets");
 	armpack_encode_array_string(raw.font_assets);
+
 	armpack_encode_string("layer_datas");
-	armpack_encode_array(raw.layer_datas.length);
-	for (let i: i32 = 0; i < raw.layer_datas.length; ++i) {
-		armpack_encode_map(27);
-		armpack_encode_string("name");
-		armpack_encode_string(raw.layer_datas[i].name);
-		armpack_encode_string("res");
-		armpack_encode_i32(raw.layer_datas[i].res);
-		armpack_encode_string("bpp");
-		armpack_encode_i32(raw.layer_datas[i].bpp);
-		armpack_encode_string("texpaint");
-		armpack_encode_array_u8(raw.layer_datas[i].texpaint);
-		armpack_encode_string("uv_scale");
-		armpack_encode_f32(raw.layer_datas[i].uv_scale);
-		armpack_encode_string("uv_rot");
-		armpack_encode_f32(raw.layer_datas[i].uv_rot);
-		armpack_encode_string("uv_type");
-		armpack_encode_i32(raw.layer_datas[i].uv_type);
-		armpack_encode_string("decal_mat");
-		armpack_encode_array_f32(raw.layer_datas[i].decal_mat);
-		armpack_encode_string("opacity_mask");
-		armpack_encode_f32(raw.layer_datas[i].opacity_mask);
-		armpack_encode_string("fill_layer");
-		armpack_encode_i32(raw.layer_datas[i].fill_layer);
-		armpack_encode_string("object_mask");
-		armpack_encode_i32(raw.layer_datas[i].object_mask);
-		armpack_encode_string("blending");
-		armpack_encode_i32(raw.layer_datas[i].blending);
-		armpack_encode_string("parent");
-		armpack_encode_i32(raw.layer_datas[i].parent);
-		armpack_encode_string("visible");
-		armpack_encode_bool(raw.layer_datas[i].visible);
-		///if is_paint
-		armpack_encode_string("texpaint_nor");
-		armpack_encode_array_u8(raw.layer_datas[i].texpaint_nor);
-		armpack_encode_string("texpaint_pack");
-		armpack_encode_array_u8(raw.layer_datas[i].texpaint_pack);
-		armpack_encode_string("paint_base");
-		armpack_encode_bool(raw.layer_datas[i].paint_base);
-		armpack_encode_string("paint_opac");
-		armpack_encode_bool(raw.layer_datas[i].paint_opac);
-		armpack_encode_string("paint_occ");
-		armpack_encode_bool(raw.layer_datas[i].paint_occ);
-		armpack_encode_string("paint_rough");
-		armpack_encode_bool(raw.layer_datas[i].paint_rough);
-		armpack_encode_string("paint_met");
-		armpack_encode_bool(raw.layer_datas[i].paint_met);
-		armpack_encode_string("paint_nor");
-		armpack_encode_bool(raw.layer_datas[i].paint_nor);
-		armpack_encode_string("paint_nor_blend");
-		armpack_encode_bool(raw.layer_datas[i].paint_nor_blend);
-		armpack_encode_string("paint_height");
-		armpack_encode_bool(raw.layer_datas[i].paint_height);
-		armpack_encode_string("paint_height_blend");
-		armpack_encode_bool(raw.layer_datas[i].paint_height_blend);
-		armpack_encode_string("paint_emis");
-		armpack_encode_bool(raw.layer_datas[i].paint_emis);
-		armpack_encode_string("paint_subs");
-		armpack_encode_bool(raw.layer_datas[i].paint_subs);
-		///end
+	if (raw.layer_datas != null) {
+		armpack_encode_array(raw.layer_datas.length);
+		for (let i: i32 = 0; i < raw.layer_datas.length; ++i) {
+			armpack_encode_map(27);
+			armpack_encode_string("name");
+			armpack_encode_string(raw.layer_datas[i].name);
+			armpack_encode_string("res");
+			armpack_encode_i32(raw.layer_datas[i].res);
+			armpack_encode_string("bpp");
+			armpack_encode_i32(raw.layer_datas[i].bpp);
+			armpack_encode_string("texpaint");
+			armpack_encode_array_u8(raw.layer_datas[i].texpaint);
+			armpack_encode_string("uv_scale");
+			armpack_encode_f32(raw.layer_datas[i].uv_scale);
+			armpack_encode_string("uv_rot");
+			armpack_encode_f32(raw.layer_datas[i].uv_rot);
+			armpack_encode_string("uv_type");
+			armpack_encode_i32(raw.layer_datas[i].uv_type);
+			armpack_encode_string("decal_mat");
+			armpack_encode_array_f32(raw.layer_datas[i].decal_mat);
+			armpack_encode_string("opacity_mask");
+			armpack_encode_f32(raw.layer_datas[i].opacity_mask);
+			armpack_encode_string("fill_layer");
+			armpack_encode_i32(raw.layer_datas[i].fill_layer);
+			armpack_encode_string("object_mask");
+			armpack_encode_i32(raw.layer_datas[i].object_mask);
+			armpack_encode_string("blending");
+			armpack_encode_i32(raw.layer_datas[i].blending);
+			armpack_encode_string("parent");
+			armpack_encode_i32(raw.layer_datas[i].parent);
+			armpack_encode_string("visible");
+			armpack_encode_bool(raw.layer_datas[i].visible);
+			///if is_paint
+			armpack_encode_string("texpaint_nor");
+			armpack_encode_array_u8(raw.layer_datas[i].texpaint_nor);
+			armpack_encode_string("texpaint_pack");
+			armpack_encode_array_u8(raw.layer_datas[i].texpaint_pack);
+			armpack_encode_string("paint_base");
+			armpack_encode_bool(raw.layer_datas[i].paint_base);
+			armpack_encode_string("paint_opac");
+			armpack_encode_bool(raw.layer_datas[i].paint_opac);
+			armpack_encode_string("paint_occ");
+			armpack_encode_bool(raw.layer_datas[i].paint_occ);
+			armpack_encode_string("paint_rough");
+			armpack_encode_bool(raw.layer_datas[i].paint_rough);
+			armpack_encode_string("paint_met");
+			armpack_encode_bool(raw.layer_datas[i].paint_met);
+			armpack_encode_string("paint_nor");
+			armpack_encode_bool(raw.layer_datas[i].paint_nor);
+			armpack_encode_string("paint_nor_blend");
+			armpack_encode_bool(raw.layer_datas[i].paint_nor_blend);
+			armpack_encode_string("paint_height");
+			armpack_encode_bool(raw.layer_datas[i].paint_height);
+			armpack_encode_string("paint_height_blend");
+			armpack_encode_bool(raw.layer_datas[i].paint_height_blend);
+			armpack_encode_string("paint_emis");
+			armpack_encode_bool(raw.layer_datas[i].paint_emis);
+			armpack_encode_string("paint_subs");
+			armpack_encode_bool(raw.layer_datas[i].paint_subs);
+			///end
+		}
 	}
+	else {
+		armpack_encode_null();
+	}
+
 	util_encode_mesh_datas(raw.mesh_datas);
+
 	armpack_encode_string("mesh_assets");
 	armpack_encode_array_string(raw.mesh_assets);
+
 	armpack_encode_string("mesh_icons");
 	if (raw.mesh_icons != null) {
 		armpack_encode_array(raw.mesh_icons.length);

@@ -472,7 +472,7 @@ function import_arm_run_material_from_project(project: project_format_t, path: s
 	let imported: slot_material_t[] = [];
 
 	for (let i: i32 = 0; i < project.material_nodes.length; ++i) {
-		let c: ui_node_canvas_t = project.material_nodes[i];
+		let c: ui_node_canvas_t = util_clone_canvas(project.material_nodes[i]); // project will get GCed
 		import_arm_init_nodes(c.nodes);
 		context_raw.material = slot_material_create(m0, c);
 		array_push(project_materials, context_raw.material);
@@ -482,7 +482,7 @@ function import_arm_run_material_from_project(project: project_format_t, path: s
 
 	if (project.material_groups != null) {
 		for (let i: i32 = 0; i < project.material_groups.length; ++i) {
-			let c: ui_node_canvas_t = project.material_groups[i];
+			let c: ui_node_canvas_t = util_clone_canvas(project.material_groups[i]);
 			while (import_arm_group_exists(c)) {
 				import_arm_rename_group(c.name, imported, project.material_groups); // Ensure unique group name
 			}
@@ -578,9 +578,9 @@ function import_arm_run_brush_from_project(project: project_format_t, path: stri
 	let imported: slot_brush_t[] = [];
 
 	for (let i: i32 = 0; i < project.brush_nodes.length; ++i) {
-		let n: ui_node_canvas_t = project.brush_nodes[i];
-		import_arm_init_nodes(n.nodes);
-		context_raw.brush = slot_brush_create(n);
+		let c: ui_node_canvas_t = util_clone_canvas(project.brush_nodes[i]);
+		import_arm_init_nodes(c.nodes);
+		context_raw.brush = slot_brush_create(c);
 		array_push(project_brushes, context_raw.brush);
 		array_push(imported, context_raw.brush);
 	}
@@ -589,6 +589,7 @@ function import_arm_run_brush_from_project(project: project_format_t, path: stri
 		for (let i: i32 = 0; i < imported.length; ++i) {
 			let b: slot_brush_t = imported[i];
 			context_set_brush(b);
+			make_material_parse_brush();
 			util_render_make_brush_preview();
 		}
 	}, imported);
