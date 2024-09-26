@@ -175,7 +175,7 @@ function tab_swatches_draw(htab: ui_handle_t) {
 							if (ui.input_released) {
 								context_set_swatch(context_raw.swatch); // Trigger material preview update
 							}
-						}, math_floor(mouse_x - 200 * ui_SCALE(ui)), math_floor(mouse_y - 250 * ui_SCALE(ui)));
+						});
 					}
 
 					context_raw.select_time = time_time();
