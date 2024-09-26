@@ -56,8 +56,9 @@ void js_call_arg(void *p, int argc, void *argv);
 #define VOID_FN_CB(name)\
     void name(void *p);\
     FN(name) {\
-        JSValue *p = malloc(sizeof(JSValue));\
         JSValue dup = JS_DupValue(ctx, argv[0]);\
+        if (JS_IsNull(dup)) { name(NULL); return JS_UNDEFINED; } \
+        JSValue *p = malloc(sizeof(JSValue));\
         memcpy(p, &dup, sizeof(JSValue));\
         name(p);\
         return JS_UNDEFINED;\

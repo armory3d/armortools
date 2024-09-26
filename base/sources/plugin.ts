@@ -21,7 +21,7 @@ function plugin_create(): plugin_t {
 function plugin_start(plugin: string) {
 	let blob: buffer_t = data_get_blob("plugins/" + plugin);
 	_plugin_name = plugin;
-	js_eval(sys_buffer_to_string(blob));
+	js_eval("(1, eval)(`" + sys_buffer_to_string(blob) + "`)");
 	data_delete_blob("plugins/" + plugin);
 }
 
