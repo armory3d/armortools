@@ -4,7 +4,32 @@ function util_encode_scene(raw: scene_t): buffer_t {
 	let encoded: buffer_t = buffer_create(size);
 
 	armpack_encode_start(encoded.buffer);
+	armpack_encode_map(13);
+	armpack_encode_string("name");
+	armpack_encode_null();
+	armpack_encode_string("objects");
+	armpack_encode_null();
 	util_encode_mesh_datas(raw.mesh_datas);
+	armpack_encode_string("light_datas");
+	armpack_encode_null();
+	armpack_encode_string("camera_datas");
+	armpack_encode_null();
+	armpack_encode_string("camera_ref");
+	armpack_encode_null();
+	armpack_encode_string("material_datas");
+	armpack_encode_null();
+	armpack_encode_string("shader_datas");
+	armpack_encode_null();
+	armpack_encode_string("world_datas");
+	armpack_encode_null();
+	armpack_encode_string("world_ref");
+	armpack_encode_null();
+	armpack_encode_string("particle_datas");
+	armpack_encode_null();
+	armpack_encode_string("speaker_datas");
+	armpack_encode_null();
+	armpack_encode_string("embedded_datas");
+	armpack_encode_null();
 
 	let ei: i32 = armpack_encode_end();
 	encoded.length = ei;

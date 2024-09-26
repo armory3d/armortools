@@ -1,10 +1,20 @@
 
+let scene_raw_gc: scene_t;
+
 function import_arm_run_project(path: string) {
 	let b: buffer_t = data_get_blob(path);
 	let project: project_format_t;
+	let import_as_mesh: bool = false;
 
 	if (import_arm_is_legacy(b)) {
 		project = import_arm_from_legacy(b);
+	}
+	else if (!import_arm_has_version(b)) {
+		import_as_mesh = true;
+		scene_raw_gc = armpack_decode(b);
+		project = {
+			mesh_datas: scene_raw_gc.mesh_datas
+		};
 	}
 	else {
 		project = armpack_decode(b);
@@ -26,14 +36,8 @@ function import_arm_run_project(path: string) {
 		}
 		return;
 	}
-
-	let import_as_mesh: bool = b[10] != 118; // 'v', no version
 	context_raw.layers_preview_dirty = true;
 	context_raw.layer_filter = 0;
-	///end
-
-	///if is_lab
-	let import_as_mesh: bool = true;
 	///end
 
 	project_new(import_as_mesh);
@@ -402,7 +406,7 @@ function import_arm_run_project(path: string) {
 }
 
 ///if (is_paint || is_sculpt)
-function import_arm_run_mesh(raw: scene_t) {
+function import_arm_run_mesh(raw: project_format_t) {
 	project_paint_objects = [];
 	for (let i: i32 = 0; i < raw.mesh_datas.length; ++i) {
 		let md: mesh_data_t = mesh_data_create(raw.mesh_datas[i]);
@@ -825,6 +829,11 @@ function _import_arm_get_node_canvas_array(map: map_t<string, any>, key: string)
 		array_push(ar, c);
 	}
 	return ar;
+}
+
+function import_arm_has_version(b: buffer_t): bool {
+	let has_version: bool = b[10] == 118; // 'v';
+	return has_version;
 }
 
 function import_arm_is_legacy(b: buffer_t): bool {
