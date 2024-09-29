@@ -2,24 +2,16 @@
 type node_shader_t = {
 	context?: node_shader_context_t;
 	shader_type?: string;
-	includes?: string[];
 	ins?: string[];
 	outs?: string[];
 	shared_samplers?: string[];
 	uniforms?: string[];
 	functions?: map_t<string, string>;
 	main?: string;
-	main_init?: string;
 	main_end?: string;
 	main_normal?: string;
-	main_textures?: string;
 	main_attribs?: string;
-	header?: string;
-	write_pre?: bool;
 	write_normal?: i32;
-	write_textures?: i32;
-	vstruct_as_vsin?: bool;
-	lock?: bool;
 
 	// References
 	bposition?: bool;
@@ -34,35 +26,23 @@ type node_shader_t = {
 	n?: bool;
 	nattr?: bool;
 	dotnv?: bool;
-	inv_tbn?: bool;
 };
 
 function node_shader_create(context: node_shader_context_t, shader_type: string): node_shader_t {
 	let raw: node_shader_t = {};
 	raw.context = context;
 	raw.shader_type = shader_type;
-	raw.includes = [];
 	raw.ins = [];
 	raw.outs = [];
 	raw.shared_samplers = [];
 	raw.uniforms = [];
 	raw.functions = map_create();
 	raw.main = "";
-	raw.main_init = "";
 	raw.main_end = "";
 	raw.main_normal = "";
-	raw.main_textures = "";
 	raw.main_attribs = "";
-	raw.header = "";
-	raw.write_pre = false;
 	raw.write_normal = 0;
-	raw.write_textures = 0;
-	raw.vstruct_as_vsin = true;
 	return raw;
-}
-
-function node_shader_add_include(raw: node_shader_t, s: string) {
-	array_push(raw.includes, s);
 }
 
 function node_shader_add_in(raw: node_shader_t, s: string) {
@@ -120,37 +100,18 @@ function node_shader_add_function(raw: node_shader_t, s: string) {
 
 function node_shader_contains(raw: node_shader_t, s: string): bool {
 	return string_index_of(raw.main, s) >= 0 ||
-		   string_index_of(raw.main_init, s) >= 0 ||
 		   string_index_of(raw.main_normal, s) >= 0 ||
 		   array_index_of(raw.ins, s) >= 0 ||
-		   string_index_of(raw.main_textures, s) >= 0 ||
 		   string_index_of(raw.main_attribs, s) >= 0;
 }
 
-function node_shader_write_init(raw: node_shader_t, s: string) {
-	raw.main_init = s + "\n" + raw.main_init;
-}
-
 function node_shader_write(raw: node_shader_t, s: string) {
-	if (raw.lock) {
-		return;
-	}
-	if (raw.write_textures > 0) {
-		raw.main_textures += s + "\n";
-	}
-	else if (raw.write_normal > 0) {
+	if (raw.write_normal > 0) {
 		raw.main_normal += s + "\n";
-	}
-	else if (raw.write_pre) {
-		raw.main_init += s + "\n";
 	}
 	else {
 		raw.main += s + "\n";
 	}
-}
-
-function node_shader_write_header(raw: node_shader_t, s: string) {
-	raw.header += s + "\n";
 }
 
 function node_shader_write_end(raw: node_shader_t, s: string) {
@@ -165,29 +126,18 @@ function node_shader_data_size(raw: node_shader_t, data: string): string {
 	if (data == "float1") {
 		return "1";
 	}
-	else if (data == "float2") {
+	else if (data == "float2" || data == "short2norm") {
 		return "2";
 	}
 	else if (data == "float3") {
 		return "3";
 	}
-	else if (data == "float4") {
+	else { // float 4 || short4norm
 		return "4";
-	}
-	else if (data == "short2norm") {
-		return "2";
-	}
-	else if (data == "short4norm") {
-		return "4";
-	}
-	else {
-		return "1";
 	}
 }
 
 function node_shader_vstruct_to_vsin(raw: node_shader_t) {
-	// if self.shader_type != "vert" or self.ins != [] or not self.vstruct_as_vsin: # Vertex structure as vertex shader input
-		// return
 	let vs: vertex_element_t[] = raw.context.data.vertex_elements;
 	for (let i: i32 = 0; i < vs.length; ++i) {
 		let e: vertex_element_t = vs[i];
@@ -224,17 +174,9 @@ function node_shader_get_hlsl(raw: node_shader_t, shared_sampler: string): strin
 	s += "#define inversesqrt rsqrt\n";
 	s += "#define fract frac\n";
 	s += "#define mix lerp\n";
-	// s += "#define fma mad\n";
-
-	s += raw.header;
 
 	let in_ext: string = "";
 	let out_ext: string = "";
-
-	for (let i: i32 = 0; i < raw.includes.length; ++i) {
-		let a: string = raw.includes[i];
-		s += "#include \"" + a + "\"\n";
-	}
 
 	// Input structure
 	let index: i32 = 0;
@@ -363,9 +305,7 @@ function node_shader_get_hlsl(raw: node_shader_t, shared_sampler: string): strin
 	}
 
 	s += raw.main_attribs;
-	s += raw.main_textures;
 	s += raw.main_normal;
-	s += raw.main_init;
 	s += raw.main;
 	s += raw.main_end;
 
@@ -432,40 +372,31 @@ function node_shader_get_msl(raw: node_shader_t, shared_sampler: string): string
 	s += "#define mul(a, b) b * a\n";
 	s += "#define discard discard_fragment()\n";
 
-	for (let i: i32 = 0; i < raw.includes.length; ++i) {
-		let a: string = raw.includes[i];
-		s += "#include \"" + a + "\"\n";
-	}
-
-	s += raw.header;
-
 	// Input structure
 	let index: i32 = 0;
-	//if (ins.length > 0) {
-		s += "struct main_in {\n";
-		index = 0;
-		array_sort(raw.ins, function (pa: any_ptr, pb: any_ptr): i32 {
-			let stra: string = DEREFERENCE(pa);
-			let strb: string = DEREFERENCE(pb);
-			// Sort inputs by name
-			return strcmp(substring(stra, 4, stra.length), substring(strb, 4, strb.length));
-		});
-		if (raw.shader_type == "vert") {
-			for (let i: i32 = 0; i < raw.ins.length; ++i) {
-				let a: string = raw.ins[i];
-				s += a + " [[attribute(" + index + ")]];\n";
-				index++;
-			}
+	s += "struct main_in {\n";
+	index = 0;
+	array_sort(raw.ins, function (pa: any_ptr, pb: any_ptr): i32 {
+		let stra: string = DEREFERENCE(pa);
+		let strb: string = DEREFERENCE(pb);
+		// Sort inputs by name
+		return strcmp(substring(stra, 4, stra.length), substring(strb, 4, strb.length));
+	});
+	if (raw.shader_type == "vert") {
+		for (let i: i32 = 0; i < raw.ins.length; ++i) {
+			let a: string = raw.ins[i];
+			s += a + " [[attribute(" + index + ")]];\n";
+			index++;
 		}
-		else {
-			for (let i: i32 = 0; i < raw.ins.length; ++i) {
-				let a: string = raw.ins[i];
-				s += a + " [[user(locn" + index + ")]];\n";
-				index++;
-			}
+	}
+	else {
+		for (let i: i32 = 0; i < raw.ins.length; ++i) {
+			let a: string = raw.ins[i];
+			s += a + " [[user(locn" + index + ")]];\n";
+			index++;
 		}
-		s += "};\n";
-	//}
+	}
+	s += "};\n";
 
 	// Output structure
 	let num: i32 = 0;
@@ -544,9 +475,7 @@ function node_shader_get_msl(raw: node_shader_t, shared_sampler: string): string
 	}
 
 	s += "my_main(";
-	//if (ins.length > 0) {
-		s += "main_in in [[stage_in]]";
-	//}
+	s += "main_in in [[stage_in]]";
 	if (raw.uniforms.length > 0) {
 		let bufi: i32 = raw.shader_type == "vert" ? 1 : 0;
 		s += ", constant main_uniforms& uniforms [[buffer(" + bufi + ")]]";
@@ -621,9 +550,7 @@ function node_shader_get_msl(raw: node_shader_t, shared_sampler: string): string
 	}
 
 	s += raw.main_attribs;
-	s += raw.main_textures;
 	s += raw.main_normal;
-	s += raw.main_init;
 	s += raw.main;
 	s += raw.main_end;
 
@@ -665,15 +592,10 @@ function node_shader_get_glsl(raw: node_shader_t, shared_sampler: string, versio
 	s += "#define textureShared texture\n";
 	s += "#define textureLodShared textureLod\n";
 	s += "#define atan2(x, y) atan(y, x)\n";
-	s += raw.header;
 
 	let in_ext: string = "";
 	let out_ext: string = "";
 
-	for (let i: i32 = 0; i < raw.includes.length; ++i) {
-		let a: string = raw.includes[i];
-		s += "#include \"" + a + "\"\n";
-	}
 	for (let i: i32 = 0; i < raw.ins.length; ++i) {
 		let a: string = raw.ins[i];
 		s += "in " + a + in_ext + ";\n";
@@ -697,9 +619,7 @@ function node_shader_get_glsl(raw: node_shader_t, shared_sampler: string, versio
 	}
 	s += "void main() {\n";
 	s += raw.main_attribs;
-	s += raw.main_textures;
 	s += raw.main_normal;
-	s += raw.main_init;
 	s += raw.main;
 	s += raw.main_end;
 	s += "}\n";
@@ -709,7 +629,7 @@ function node_shader_get_glsl(raw: node_shader_t, shared_sampler: string, versio
 
 function node_shader_get(raw: node_shader_t): string {
 
-	if (raw.shader_type == "vert" && raw.vstruct_as_vsin) {
+	if (raw.shader_type == "vert") {
 		node_shader_vstruct_to_vsin(raw);
 	}
 

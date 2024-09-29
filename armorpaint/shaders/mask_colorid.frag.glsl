@@ -1,5 +1,6 @@
-// Turn picked color id into mask
 #version 450
+
+// Turn picked color id into mask
 
 uniform sampler2D texpaint_colorid; // 1x1 picked color
 uniform sampler2D texcolorid;

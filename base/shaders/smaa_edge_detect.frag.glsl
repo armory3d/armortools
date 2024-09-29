@@ -1,3 +1,5 @@
+#version 450
+
 /**
  * Copyright (C) 2013 Jorge Jimenez (jorge@iryoku.com)
  * Copyright (C) 2013 Jose I. Echevarria (joseignacioechevarria@gmail.com)
@@ -39,7 +41,6 @@
  *
  *                         http://www.iryoku.com/smaa/
  */
-#version 450
 
 #define SMAA_THRESHOLD 0.1
 #define SMAA_DEPTH_THRESHOLD (0.1 * SMAA_THRESHOLD) // For depth edge detection, depends on the depth range of the scene
