@@ -12,8 +12,7 @@ flags.voxels = !flags.raytrace && !flags.android && !flags.ios;
 
 flags.with_d3dcompiler = true;
 flags.with_nfd = true;
-flags.with_tinydir = true;
-flags.with_zlib = true;
+flags.with_compress = true;
 flags.with_stb_image_write = true;
 flags.with_g2 = true;
 flags.with_iron = true;
@@ -54,7 +53,7 @@ let project = new Project("Base");
 		}
 	}
 
-	project.add_define('WITH_PLUGINS');
+	project.add_define("WITH_PLUGINS");
 	project.add_cfiles("sources/plugin_api.c");
 	project.add_project("../" + dir + "/plugins");
 }

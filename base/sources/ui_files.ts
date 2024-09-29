@@ -76,7 +76,7 @@ function make_draw_cloud_icon_data(f: string, image: image_t): draw_cloud_icon_d
 	return data;
 }
 
-function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, folders_only: bool = false, drag_files: bool = false, search: string = "", refresh: bool = false, context_menu: (s: string)=>void = null): string {
+function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool = false, search: string = "", refresh: bool = false, context_menu: (s: string)=>void = null): string {
 
 	let icons: image_t = resource_get("icons.k");
 	let folder: rect_t = resource_tile50(icons, 2, 1);
@@ -88,7 +88,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, folders_only: bool
 			ui_base_hwnds[tab_area_t.STATUS].redraws = 3;
 		});
 	}
-	if (is_cloud && file_read_directory("cloud", false).length == 0) {
+	if (is_cloud && file_read_directory("cloud").length == 0) {
 		return handle.text;
 	}
 
@@ -119,7 +119,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, folders_only: bool
 			dir_path = document_directory + dir_path;
 		}
 		///end
-		let files_all: string[] = file_read_directory(dir_path, folders_only);
+		let files_all: string[] = file_read_directory(dir_path);
 
 		for (let i: i32 = 0; i < files_all.length; ++i) {
 			let f: string = files_all[i];

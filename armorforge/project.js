@@ -1,7 +1,7 @@
 
 let flags = globalThis.flags;
-flags.name = 'ArmorForge';
-flags.package = 'org.armorforge';
+flags.name = "ArmorForge";
+flags.package = "org.armorforge";
 flags.with_mpeg_write = true;
 
 let project = new Project(flags.name);

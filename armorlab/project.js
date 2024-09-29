@@ -1,7 +1,7 @@
 
 let flags = globalThis.flags;
-flags.name = 'ArmorLab';
-flags.package = 'org.armorlab';
+flags.name = "ArmorLab";
+flags.package = "org.armorlab";
 flags.with_onnx = true;
 
 let project = new Project(flags.name);

@@ -109,7 +109,7 @@ function armpack_to_string(bytes: buffer_t): string {
 }
 
 function list_folder(path: string) {
-	let files: string[] = string_split(iron_read_directory(path, false), "\n");
+	let files: string[] = string_split(iron_read_directory(path), "\n");
 	for (let i: i32 = 0; i < files.length; ++i) {
 		let f: string = files[i];
 		let abs: string = path + "/" + f;

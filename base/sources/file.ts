@@ -14,7 +14,7 @@ let file_cloud_sizes: map_t<string, i32> = null;
 // let let file_internal: map_t<string, string[]> = null; // .apk contents
 // ///end
 
-function file_read_directory(path: string, folders_only: bool = false): string[] {
+function file_read_directory(path: string): string[] {
 	if (starts_with(path, "cloud")) {
 		let files: string[] = file_cloud != null ? map_get(file_cloud, string_replace_all(path, "\\", "/")) : null;
 		if (files != null) {
@@ -38,7 +38,7 @@ function file_read_directory(path: string, folders_only: bool = false): string[]
 	// }
 	// if (file_internal.exists(path)) return map_get(file_internal, path);
 	// ///end
-	return string_split(iron_read_directory(path, folders_only), "\n");
+	return string_split(iron_read_directory(path), "\n");
 }
 
 function file_create_directory(path: string) {

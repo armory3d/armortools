@@ -1,7 +1,7 @@
 
 let flags = globalThis.flags;
-flags.name = 'ArmorPaint';
-flags.package = 'org.armorpaint';
+flags.name = "ArmorPaint";
+flags.package = "org.armorpaint";
 
 let project = new Project(flags.name);
 project.add_define("is_paint");

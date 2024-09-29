@@ -98,7 +98,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 		ui._x = bookmarks_w;
 		ui._w -= bookmarks_w;
 
-		ui_files_file_browser(ui, tab_browser_hpath, false, true, tab_browser_hsearch.text, refresh, function (file: string) {
+		ui_files_file_browser(ui, tab_browser_hpath, true, tab_browser_hsearch.text, refresh, function (file: string) {
 
 			let file_name: string = substring(file, string_last_index_of(file, path_sep) + 1, file.length);
 			if (file_name == "..") {
