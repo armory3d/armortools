@@ -53,7 +53,7 @@ function node_shader_add_out(raw: node_shader_t, s: string) {
 	array_push(raw.outs, s);
 }
 
-function node_shader_add_uniform(raw: node_shader_t, s: string, link: string = null, included: bool = false) {
+function node_shader_add_uniform(raw: node_shader_t, s: string, link: string = null) {
 	let ar: string[] = string_split(s, " ");
 	// layout(RGBA8) image3D voxels
 	let utype: string = ar[ar.length - 2];
@@ -74,7 +74,7 @@ function node_shader_add_uniform(raw: node_shader_t, s: string, link: string = n
 		}
 		node_shader_context_add_constant(raw.context, ar[0], ar[1], link);
 	}
-	if (included == false && array_index_of(raw.uniforms, s) == -1) {
+	if (array_index_of(raw.uniforms, s) == -1) {
 		array_push(raw.uniforms, s);
 	}
 }
@@ -96,13 +96,6 @@ function node_shader_add_function(raw: node_shader_t, s: string) {
 		return;
 	}
 	map_set(raw.functions, fname, s);
-}
-
-function node_shader_contains(raw: node_shader_t, s: string): bool {
-	return string_index_of(raw.main, s) >= 0 ||
-		   string_index_of(raw.main_normal, s) >= 0 ||
-		   array_index_of(raw.ins, s) >= 0 ||
-		   string_index_of(raw.main_attribs, s) >= 0;
 }
 
 function node_shader_write(raw: node_shader_t, s: string) {
@@ -628,7 +621,6 @@ function node_shader_get_glsl(raw: node_shader_t, shared_sampler: string, versio
 ///end
 
 function node_shader_get(raw: node_shader_t): string {
-
 	if (raw.shader_type == "vert") {
 		node_shader_vstruct_to_vsin(raw);
 	}

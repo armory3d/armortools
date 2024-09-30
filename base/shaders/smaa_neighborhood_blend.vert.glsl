@@ -3,7 +3,6 @@
 uniform vec2 screen_size_inv;
 
 in vec2 pos;
-
 out vec2 tex_coord;
 out vec4 offset;
 

@@ -4,7 +4,6 @@ uniform mat4 SMVP;
 
 in vec3 pos;
 in vec3 nor;
-
 out vec3 normal;
 
 void main() {
