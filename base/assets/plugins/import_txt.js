@@ -1,7 +1,7 @@
 
 function import_txt(path) {
 	let b = data_get_blob(path);
-	let filename = path.split('\\').pop().split('/').pop();
+	let filename = path.split("\\").pop().split("/").pop();
 	ui_box_show_message(filename, buffer_to_string(b));
 	data_delete_blob(path);
 }

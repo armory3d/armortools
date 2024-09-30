@@ -13,10 +13,8 @@ flags.voxels = !flags.raytrace && !flags.android && !flags.ios;
 flags.with_d3dcompiler = true;
 flags.with_nfd = true;
 flags.with_compress = true;
-flags.with_stb_image_write = true;
-flags.with_g2 = true;
+flags.with_image_write = true;
 flags.with_iron = true;
-flags.with_ui = true;
 flags.with_eval = true;
 
 let project = new Project("Base");

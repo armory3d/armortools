@@ -3,9 +3,7 @@ let flags = globalThis.flags;
 flags.name = "ArmorPad";
 flags.package = "org.armorpad";
 flags.with_nfd = true;
-flags.with_g2 = true;
 flags.with_iron = true;
-flags.with_ui = true;
 
 let project = new Project("ArmorPad");
 project.add_tsfiles("sources");
