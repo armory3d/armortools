@@ -38,7 +38,21 @@ function file_read_directory(path: string): string[] {
 	// }
 	// if (file_internal.exists(path)) return map_get(file_internal, path);
 	// ///end
-	return string_split(iron_read_directory(path), "\n");
+
+	let files: string[] = string_split(iron_read_directory(path), "\n");
+	///if arm_windows
+	let num: i32 = files.length;
+	for (let i: i32 = 0; i < num; ++i) {
+		let f: string = files[i];
+		if (string_index_of(f, ".") > -1) {
+			array_splice(files, i, 1);
+			array_push(files, f);
+			i--;
+			num--;
+		}
+	}
+	///end
+	return files;
 }
 
 function file_create_directory(path: string) {
