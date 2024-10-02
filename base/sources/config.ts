@@ -179,12 +179,18 @@ type version_t = {
 
 function config_get_sha(): string {
 	let blob: buffer_t = data_get_blob("version.json");
+	if (blob == null) {
+		return "undefined";
+	}
 	let v: version_t = json_parse(sys_buffer_to_string(blob));
 	return v.sha;
 }
 
 function config_get_date(): string {
 	let blob: buffer_t = data_get_blob("version.json");
+	if (blob == null) {
+		return "undefined";
+	}
 	let v: version_t = json_parse(sys_buffer_to_string(blob));
 	return v.date;
 }
