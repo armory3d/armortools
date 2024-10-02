@@ -9,5 +9,5 @@ out vec3 vcolor;
 void main() {
 	vec4 spos = vec4(pos.xyz, 1.0);
 	vcolor = col.rgb;
-	gl_Position = WVP * spos;
+	gl_Position = mul(spos, WVP);
 }

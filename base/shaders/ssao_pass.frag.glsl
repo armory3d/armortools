@@ -1,13 +1,13 @@
 #version 450
 
-#include "std/math.glsl"
-#include "std/gbuffer.glsl"
-
 uniform sampler2D gbufferD;
-uniform sampler2D gbuffer0; // Normal
+uniform sampler2D gbuffer0;
 uniform mat4 P;
 uniform mat3 V3;
 uniform vec2 camera_proj;
+
+#include "std/math.glsl"
+#include "std/gbuffer.glsl"
 
 in vec3 view_ray;
 in vec2 tex_coord;
@@ -24,7 +24,7 @@ float depth;
 vec3 vpos;
 
 vec2 get_projected_coord(vec3 hit_coord) {
-	vec4 projected_coord = P * vec4(hit_coord, 1.0);
+	vec4 projected_coord = mul(vec4(hit_coord, 1.0), P);
 	projected_coord.xy /= projected_coord.w;
 	projected_coord.xy = projected_coord.xy * 0.5 + 0.5;
 	#if defined(HLSL) || defined(METAL) || defined(SPIRV)
@@ -71,7 +71,7 @@ void main() {
 	vec3 n;
 	n.z = 1.0 - abs(enc.x) - abs(enc.y);
 	n.xy = n.z >= 0.0 ? enc.xy : octahedron_wrap(enc.xy);
-	n = normalize(V3 * n);
+	n = normalize(mul(n, V3));
 
 	vpos = get_pos_view(view_ray, d, camera_proj);
 

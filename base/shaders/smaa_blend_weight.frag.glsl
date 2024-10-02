@@ -31,22 +31,19 @@ out vec4 frag_color;
 // Blending Weight Calculation Pixel Shader (Second Pass)
 vec2 cdw_end;
 
-vec4 textureLod_a(sampler2D tex, vec2 coord, float lod) {
+vec4 textureLod_a(sampler2D edges_tex, vec2 coord, float lod) {
 	#if defined(HLSL) || defined(METAL) || defined(SPIRV)
 	coord.y = 1.0 - coord.y;
 	#endif
-	return textureLod(tex, coord, lod);
+	return textureLod(edges_tex, coord, lod);
 }
 
-#define smaa_sample_level_zero_offset(tex, coord, offset) textureLod_a(tex, coord + offset * screen_size_inv.xy, 0.0)
+#define smaa_sample_level_zero_offset(edges_tex, coord, offset) textureLod_a(edges_tex, coord + offset * screen_size_inv.xy, 0.0)
 
 //-----------------------------------------------------------------------------
 // Diagonal Search Functions
 
 // #if !defined(SMAA_DISABLE_DIAG_DETECTION)
-/**
- * Allows to decode two binary values from a bilinear-filtered access.
- */
 vec2 smaa_decode_diag_bilinear_access(vec2 e) {
 	// Bilinear access for fetching 'e' have a 0.25 offset, and we are
 	// interested in the R and G edges:
@@ -70,9 +67,6 @@ vec4 smaa_decode_diag_bilinear_access(vec4 e) {
 	return round(e);
 }
 
-/**
- * These functions allows to perform diagonal pattern searches.
- */
 vec2 smaa_search_diag1(vec2 texcoord, vec2 dir/*, out vec2 e*/) {
 	vec4 coord = vec4(texcoord, -1.0, 1.0);
 	vec3 t = vec3(screen_size_inv.xy, 1.0);
@@ -100,10 +94,6 @@ vec2 smaa_search_diag2(vec2 texcoord, vec2 dir) {
 	return coord.zw;
 }
 
-/**
- * Similar to smaa_area, this calculates the area corresponding to a certain
- * diagonal distance and crossing edges 'e'.
- */
 vec2 smaa_area_diag(vec2 dist, vec2 e, float offset) {
 	vec2 texcoord = mad(vec2(SMAA_AREATEX_MAX_DISTANCE_DIAG, SMAA_AREATEX_MAX_DISTANCE_DIAG), e, dist);
 
@@ -120,9 +110,6 @@ vec2 smaa_area_diag(vec2 dist, vec2 e, float offset) {
 	return SMAA_AREATEX_SELECT(textureLod(area_tex, texcoord, 0.0));
 }
 
-/**
- * This searches for diagonal patterns and returns the corresponding weights.
- */
 vec2 smaa_calculate_diag_weights(vec2 texcoord, vec2 e, vec4 subsample_indices) {
 	vec2 weights = vec2(0.0, 0.0);
 
@@ -201,12 +188,6 @@ vec2 smaa_calculate_diag_weights(vec2 texcoord, vec2 e, vec4 subsample_indices) 
 //-----------------------------------------------------------------------------
 // Horizontal/Vertical Search Functions
 
-/**
- * This allows to determine how much length should we add in the last step
- * of the searches. It takes the bilinearly interpolated edge (see
- * @PSEUDO_GATHER4), and adds 0, 1 or 2, depending on which edges and
- * crossing edges are active.
- */
 float smaa_search_length(vec2 e, float offset) {
 	// The texture is flipped vertically, with left and right cases taking half
 	// of the space horizontally:
@@ -228,17 +209,7 @@ float smaa_search_length(vec2 e, float offset) {
 	return SMAA_SEARCHTEX_SELECT(textureLod(search_tex, coord, 0.0));
 }
 
-/**
- * Horizontal/vertical search functions for the 2nd pass.
- */
 float smaa_search_x_left(vec2 texcoord, float end) {
-	/**
-	 * @PSEUDO_GATHER4
-	 * This texcoord has been offset by (-0.25, -0.125) in the vertex shader to
-	 * sample between edge, thus fetching four edges in a row.
-	 * Sampling with different offsets in each direction allows to disambiguate
-	 * which edges are active from the four fetched ones.
-	 */
 	vec2 e = vec2(0.0, 1.0);
 	while (texcoord.x > end &&
 		   e.g > 0.8281 && // Is there some edge not activated?
@@ -288,10 +259,6 @@ float smaa_search_y_down(vec2 texcoord, float end) {
 	return mad(-screen_size_inv.y, offset, texcoord.y);
 }
 
-/**
- * Ok, we have the distance and both crossing edges. So, what are the areas
- * at each side of current edge?
- */
 vec2 smaa_area(vec2 dist, float e1, float e2, float offset) {
 	// Rounding prevents precision errors of bilinear filtering:
 	vec2 texcoord = mad(vec2(SMAA_AREATEX_MAX_DISTANCE, SMAA_AREATEX_MAX_DISTANCE), round(4.0 * vec2(e1, e2)), dist);
@@ -447,5 +414,5 @@ vec4 smaa_blending_weight_calculation_ps(vec2 texcoord, vec2 pixcoord, vec4 subs
 }
 
 void main() {
-	frag_color = smaa_blending_weight_calculation_ps(tex_coord, pixcoord, vec4(0.0));
+	frag_color = smaa_blending_weight_calculation_ps(tex_coord, pixcoord, vec4(0.0, 0.0, 0.0, 0.0));
 }

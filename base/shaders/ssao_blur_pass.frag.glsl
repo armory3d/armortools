@@ -9,7 +9,7 @@ uniform vec2 dir_inv;
 in vec2 tex_coord;
 out float frag_color;
 
-const float blur_weights[10] = float[] (0.132572, 0.125472, 0.106373, 0.08078, 0.05495, 0.033482, 0.018275, 0.008934, 0.003912, 0.001535);
+const float blur_weights[10] = { 0.132572, 0.125472, 0.106373, 0.08078, 0.05495, 0.033482, 0.018275, 0.008934, 0.003912, 0.001535 };
 const float discard_threshold = 0.95;
 
 void main() {

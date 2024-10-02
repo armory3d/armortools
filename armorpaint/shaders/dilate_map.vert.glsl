@@ -3,6 +3,7 @@
 in vec4 pos;
 in vec2 nor;
 in vec2 tex;
+out float dummy;
 
 void main() {
 	#if defined(HLSL) || defined(METAL) || defined(SPIRV)

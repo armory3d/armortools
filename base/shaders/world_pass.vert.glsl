@@ -8,5 +8,5 @@ out vec3 normal;
 
 void main() {
 	normal = nor;
-	gl_Position = SMVP * vec4(pos, 1.0);
+	gl_Position = mul(vec4(pos, 1.0), SMVP);
 }

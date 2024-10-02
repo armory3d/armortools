@@ -1,10 +1,10 @@
 #version 450
 
-#include "std/gbuffer.glsl"
-
 uniform sampler2D tex;
-uniform sampler2D gbuffer0; // Roughness
+uniform sampler2D gbuffer0;
 uniform vec2 dir_inv;
+
+#include "std/gbuffer.glsl"
 
 in vec2 tex_coord;
 out vec4 frag_color;
@@ -21,5 +21,5 @@ void main() {
 	frag_color.rgb += textureLod(tex, tex_coord, 0.0).rgb;
 	frag_color.rgb += textureLod(tex, tex_coord - dir_inv * 1.5, 0.0).rgb;
 	frag_color.rgb += textureLod(tex, tex_coord - dir_inv * 2.5, 0.0).rgb;
-	frag_color.rgb /= vec3(5.0);
+	frag_color.rgb /= vec3(5.0, 5.0, 5.0);
 }

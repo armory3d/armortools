@@ -20,7 +20,7 @@ float rand(vec2 co) {
 
 vec2 equirect(vec3 normal) {
 	float phi = acos(normal.z);
-	float theta = atan(-normal.y, normal.x) + PI;
+	float theta = atan2(normal.x, -normal.y) + PI;
 	return vec2(theta / PI2, phi / PI);
 }
 
@@ -50,5 +50,5 @@ void main() {
 		frag_color.rgb += texture(radiance, equirect(dir)).rgb;
 	}
 	frag_color.rgb /= float(samples);
-	frag_color.rgb = pow(frag_color.rgb, vec3(1.0 / 2.2));
+	frag_color.rgb = pow(frag_color.rgb, vec3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));
 }

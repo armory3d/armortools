@@ -2,11 +2,11 @@
 #ifndef _LIGHT_GLSL_
 #define _LIGHT_GLSL_
 
-#include "std/brdf.glsl"
-#include "std/math.glsl"
-#include "std/ltc.glsl"
+#include "brdf.glsl"
+#include "math.glsl"
+#include "ltc.glsl"
 #ifdef _Voxel
-#include "std/conetrace.glsl"
+#include "conetrace.glsl"
 #endif
 
 uniform vec3 light_area0;
@@ -36,7 +36,12 @@ vec3 sample_light(const vec3 p, const vec3 n, const vec3 v, const float dotnv, c
 		vec3(t.w, 0.0, t.x));
 	float ltcspec = ltc_evaluate(n, v, dotnv, p, inv, light_area0, light_area1, light_area2, light_area3);
 	ltcspec *= textureLod(sltc_mag, tuv, 0.0).a;
-	float ltcdiff = ltc_evaluate(n, v, dotnv, p, mat3(1.0), light_area0, light_area1, light_area2, light_area3);
+
+	mat3 m1 = mat3(
+		vec3(1.0, 0.0, 0.0),
+		vec3(0.0, 1.0, 0.0),
+		vec3(0.0, 0.0, 1.0));
+	float ltcdiff = ltc_evaluate(n, v, dotnv, p, m1, light_area0, light_area1, light_area2, light_area3);
 	vec3 direct = albedo * ltcdiff + ltcspec * 0.05;
 
 	direct *= attenuate(distance(p, lp));

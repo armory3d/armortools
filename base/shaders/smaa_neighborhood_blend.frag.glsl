@@ -16,11 +16,18 @@ out vec4 frag_color;
 //-----------------------------------------------------------------------------
 // Neighborhood Blending Pixel Shader (Third Pass)
 
-vec4 textureLodA(sampler2D tex, vec2 coords, float lod) {
+vec4 textureLodA_color_tex(sampler2D color_tex, vec2 coords, float lod) {
 	#if defined(HLSL) || defined(METAL) || defined(SPIRV)
 	coords.y = 1.0 - coords.y;
 	#endif
-	return textureLod(tex, coords, lod);
+	return textureLod(color_tex, coords, lod);
+}
+
+vec4 textureLodA_sveloc(sampler2D sveloc, vec2 coords, float lod) {
+	#if defined(HLSL) || defined(METAL) || defined(SPIRV)
+	coords.y = 1.0 - coords.y;
+	#endif
+	return textureLod(sveloc, coords, lod);
 }
 
 vec4 smaa_neighborhood_blending_ps(vec2 texcoord, vec4 offset) {
@@ -70,20 +77,20 @@ vec4 smaa_neighborhood_blending_ps(vec2 texcoord, vec4 offset) {
 
 		// We exploit bilinear filtering to mix current pixel with the chosen
 		// neighbor:
-		vec4 color = blending_weight.x * textureLodA(color_tex, blending_coord.xy, 0.0);
-		color += blending_weight.y * textureLodA(color_tex, blending_coord.zw, 0.0);
+		vec4 color = blending_weight.x * textureLodA_color_tex(color_tex, blending_coord.xy, 0.0);
+		color += blending_weight.y * textureLodA_color_tex(color_tex, blending_coord.zw, 0.0);
 
 #ifdef _Veloc
 		// Antialias velocity for proper reprojection in a later stage:
-		vec2 velocity = blending_weight.x * textureLodA(sveloc, blending_coord.xy, 0.0).rg;
-		velocity += blending_weight.y * textureLodA(sveloc, blending_coord.zw, 0.0).rg;
+		vec2 velocity = blending_weight.x * textureLodA_sveloc(sveloc, blending_coord.xy, 0.0).rg;
+		velocity += blending_weight.y * textureLodA_sveloc(sveloc, blending_coord.zw, 0.0).rg;
 
 		// Pack velocity into the alpha channel:
 		color.a = sqrt(5.0 * length(velocity));
 #endif
 		return color;
 	}
-	return vec4(0.0);
+	return vec4(0.0, 0.0, 0.0, 0.0);
 }
 
 void main() {

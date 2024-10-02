@@ -107,7 +107,7 @@ if (flags.voxels) {
 	project.add_define("arm_voxels");
 
 	if (os_platform() === "win32") {
-		project.add_shaders("shaders/voxel_hlsl/*.glsl", { noprocessing: true });
+		project.add_assets("shaders/voxel_hlsl/*.d3d11", { destination: "data/{name}" });
 	}
 	else {
 		project.add_shaders("shaders/voxel_glsl/*.glsl");

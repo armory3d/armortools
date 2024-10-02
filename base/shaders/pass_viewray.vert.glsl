@@ -20,7 +20,7 @@ void main() {
 
 	// NDC (at the back of cube)
 	vec4 v = vec4(pos.x, pos.y, 1.0, 1.0);
-	v = vec4(invVP * v);
+	v = vec4(mul(v, invVP));
 	v.xyz /= v.w;
 	view_ray = v.xyz - eye;
 }

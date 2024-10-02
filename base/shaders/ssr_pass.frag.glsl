@@ -1,15 +1,15 @@
 #version 450
 
-#include "std/math.glsl"
-#include "std/gbuffer.glsl"
-
 uniform sampler2D tex;
 uniform sampler2D gbufferD;
-uniform sampler2D gbuffer0; // Normal, roughness
-uniform sampler2D gbuffer1; // basecol, occ
+uniform sampler2D gbuffer0;
+uniform sampler2D gbuffer1;
 uniform mat4 P;
 uniform mat3 V3;
 uniform vec2 camera_proj;
+
+#include "std/math.glsl"
+#include "std/gbuffer.glsl"
 
 in vec3 view_ray;
 in vec2 tex_coord;
@@ -27,7 +27,7 @@ vec3 hit_coord;
 float depth;
 
 vec2 get_projected_coord(const vec3 hit) {
-	vec4 projected_coord = P * vec4(hit, 1.0);
+	vec4 projected_coord = mul(vec4(hit, 1.0), P);
 	projected_coord.xy /= projected_coord.w;
 	projected_coord.xy = projected_coord.xy * 0.5 + 0.5;
 	#if defined(HLSL) || defined(METAL) || defined(SPIRV)
@@ -52,7 +52,7 @@ vec4 binary_search(vec3 dir) {
 		if (ddepth < 0.0) hit_coord += dir;
 	}
 	// Ugly discard of hits too far away
-	if (abs(ddepth) > ssr_search_dist / 500) return vec4(0.0);
+	if (abs(ddepth) > ssr_search_dist / 500) return vec4(0.0, 0.0, 0.0, 0.0);
 	return vec4(get_projected_coord(hit_coord), 0.0, 1.0);
 }
 
@@ -62,16 +62,22 @@ vec4 ray_cast(vec3 dir) {
 		hit_coord += dir;
 		if (get_delta_depth(hit_coord) > 0.0) return binary_search(dir);
 	}
-	return vec4(0.0);
+	return vec4(0.0, 0.0, 0.0, 0.0);
 }
 
 void main() {
 	vec4 g0 = textureLod(gbuffer0, tex_coord, 0.0);
 	float roughness = g0.b;
-	if (roughness == 1.0) { frag_color.rgb = vec3(0.0); return; }
+	if (roughness == 1.0) {
+		frag_color.rgb = vec3(0.0, 0.0, 0.0);
+		return;
+	}
 
 	float d = textureLod(gbufferD, tex_coord, 0.0).r * 2.0 - 1.0;
-	if (d == 1.0) { frag_color.rgb = vec3(0.0); return; }
+	if (d == 1.0) {
+		frag_color.rgb = vec3(0.0, 0.0, 0.0);
+		return;
+	}
 
 	vec2 enc = g0.rg;
 	vec3 n;
@@ -79,7 +85,7 @@ void main() {
 	n.xy = n.z >= 0.0 ? enc.xy : octahedron_wrap(enc.xy);
 	n = normalize(n);
 
-	vec3 view_normal = V3 * n;
+	vec3 view_normal = mul(n, V3);
 	vec3 view_pos = get_pos_view(view_ray, d, camera_proj);
 	vec3 reflected = normalize(reflect(view_pos, view_normal));
 	hit_coord = view_pos;

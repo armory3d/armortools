@@ -8,5 +8,5 @@ out vec3 color;
 
 void main() {
 	color = col;
-	gl_Position = VP * vec4(pos, 1.0);
+	gl_Position = mul(vec4(pos, 1.0), VP);
 }

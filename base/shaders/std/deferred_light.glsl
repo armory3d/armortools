@@ -1,14 +1,4 @@
 
-#ifndef _DEFERRED_LIGHT_GLSL_
-#define _DEFERRED_LIGHT_GLSL_
-
-#include "std/gbuffer.glsl"
-#include "std/light.glsl"
-#include "std/shirr.glsl"
-#ifdef _Voxel
-#include "std/conetrace.glsl"
-#endif
-
 uniform sampler2D gbufferD;
 uniform sampler2D gbuffer0;
 uniform sampler2D gbuffer1;
@@ -30,6 +20,13 @@ uniform vec3 eye;
 uniform vec3 eye_look;
 uniform vec3 point_pos;
 uniform vec3 point_col;
+
+#include "gbuffer.glsl"
+#include "light.glsl"
+#include "shirr.glsl"
+#ifdef _Voxel
+#include "conetrace.glsl"
+#endif
 
 in vec2 tex_coord;
 in vec3 view_ray;
@@ -86,7 +83,7 @@ void main() {
 
 	if (matid == 1) { // Emission
 		frag_color.rgb += g1.rgb; // materialid
-		albedo = vec3(0.0);
+		albedo = vec3(0.0, 0.0, 0.0);
 	}
 
 	frag_color.rgb += sample_light(p, n, v, dotnv, point_pos, point_col, albedo, roughness, f0, occ
@@ -96,5 +93,3 @@ void main() {
 	);
 	frag_color.a = 1.0; // Mark as opaque
 }
-
-#endif

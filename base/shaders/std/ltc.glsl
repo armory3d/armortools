@@ -22,14 +22,14 @@ float ltc_evaluate(vec3 N, vec3 V, float dotnv, vec3 P, mat3 Minv, vec3 points0,
 	T2 = cross(N, T1);
 
 	// Rotate area light in (T1, T2, R) basis
-	Minv = Minv * transpose(mat3(T1, T2, N));
+	Minv = mul(transpose(mat3(T1, T2, N)), Minv);
 
 	// Polygon (allocate 5 vertices for clipping)
-	vec3 L0 = Minv * (points0 - P);
-	vec3 L1 = Minv * (points1 - P);
-	vec3 L2 = Minv * (points2 - P);
-	vec3 L3 = Minv * (points3 - P);
-	vec3 L4 = vec3(0.0);
+	vec3 L0 = mul((points0 - P), Minv);
+	vec3 L1 = mul((points1 - P), Minv);
+	vec3 L2 = mul((points2 - P), Minv);
+	vec3 L3 = mul((points3 - P), Minv);
+	vec3 L4 = vec3(0.0, 0.0, 0.0);
 
 	int n = 0;
 	// Detect clipping config

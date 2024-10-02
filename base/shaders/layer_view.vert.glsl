@@ -9,7 +9,7 @@ out vec2 tex_coord;
 out vec4 color;
 
 void main() {
-	gl_Position = P * vec4(pos, 1.0);
+	gl_Position = mul(vec4(pos, 1.0), P);
 	tex_coord = tex;
 	color = col;
 }

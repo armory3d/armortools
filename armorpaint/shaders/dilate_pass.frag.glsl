@@ -7,7 +7,7 @@ uniform float dilate_radius;
 in vec2 tex_coord;
 out vec4 frag_color;
 
-const vec2 offsets[8] = vec2[] (
+const vec2 offsets[8] = {
 	vec2(-1, 0),
 	vec2( 1, 0),
 	vec2( 0, 1),
@@ -16,7 +16,7 @@ const vec2 offsets[8] = vec2[] (
 	vec2( 1, 1),
 	vec2( 1,-1),
 	vec2(-1,-1)
-);
+};
 
 void main() {
 	// Based on https://shaderbits.com/blog/uv-dilation by Ryan Brucks

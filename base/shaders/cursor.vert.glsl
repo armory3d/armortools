@@ -8,7 +8,8 @@ uniform float radius;
 uniform vec3 camera_right;
 uniform sampler2D gbufferD;
 #ifdef HLSL
-uniform sampler2D texa; // direct3d12 unit align
+// direct3d12 unit align
+uniform sampler2D texa;
 #endif
 
 in vec4 pos;
@@ -27,7 +28,7 @@ vec3 get_pos(vec2 uv) {
 	float depth = textureLod(gbufferD, uv, 0.0).r;
 	#endif
 	vec4 wpos = vec4(uv * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
-	wpos = invVP * wpos;
+	wpos = mul(wpos, invVP);
 	return wpos.xyz / wpos.w;
 }
 
@@ -61,5 +62,5 @@ void main() {
 	else if (gl_VertexID == 1) wpos += normalize( n_tan - n_bin) * 0.7 * radius;
 	else if (gl_VertexID == 2) wpos += normalize( n_tan + n_bin) * 0.7 * radius;
 	else if (gl_VertexID == 3) wpos += normalize(-n_tan + n_bin) * 0.7 * radius;
-	gl_Position = VP * vec4(wpos, 1.0);
+	gl_Position = mul(vec4(wpos, 1.0), VP);
 }

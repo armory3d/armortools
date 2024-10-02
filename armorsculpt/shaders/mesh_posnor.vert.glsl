@@ -12,8 +12,8 @@ out vec4 prevwvpposition;
 
 void main() {
 	vec4 spos = vec4(pos.xyz, 1.0);
-	wnormal = normalize(N * vec3(nor.xy, pos.w));
-	gl_Position = WVP * spos;
+	wnormal = normalize(mul(vec3(nor.xy, pos.w), N));
+	gl_Position = mul(spos, WVP);
 	wvpposition = gl_Position;
-	prevwvpposition = prevWVP * spos;
+	prevwvpposition = mul(spos, prevWVP);
 }
