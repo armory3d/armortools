@@ -1,6 +1,8 @@
 
 Toolbar icons are courtesy of Sven Möller.
 
+ArmorSculpt and ArmorForge icons courtesy of Matvey Dolgachyov.
+
 Material icons: https://github.com/google/material-design-icons
 
 
