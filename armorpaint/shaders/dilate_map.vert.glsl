@@ -6,13 +6,13 @@ in vec2 tex;
 out float dummy;
 
 void main() {
-	#if defined(HLSL) || defined(METAL) || defined(SPIRV)
-	vec2 tex_coord = vec2(tex.x * 2.0 - 1.0, (1.0 - tex.y) * 2.0 - 1.0);
-	#else
+#ifdef GLSL
 	vec2 tex_coord = tex * 2.0 - 1.0;
-	#endif
+#else
+	vec2 tex_coord = vec2(tex.x * 2.0 - 1.0, (1.0 - tex.y) * 2.0 - 1.0);
+#endif
 	gl_Position = vec4(tex_coord, 0.0, 1.0);
-	#ifdef HLSL
+#ifdef HLSL
 	float keep = pos.x + nor.x;
-	#endif
+#endif
 }

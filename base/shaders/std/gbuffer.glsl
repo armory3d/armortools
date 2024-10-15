@@ -1,7 +1,4 @@
 
-#ifndef _GBUFFER_GLSL_
-#define _GBUFFER_GLSL_
-
 vec2 octahedron_wrap(const vec2 v) {
 	return (1.0 - abs(v.yx)) * (vec2(v.x >= 0.0 ? 1.0 : -1.0, v.y >= 0.0 ? 1.0 : -1.0));
 }
@@ -43,7 +40,7 @@ float pack_f32_i16(const float f, const uint i) {
 	return t1 * f + t2 * float(i);
 }
 
-void unpack_f32_i16(const float val, out float f, out uint i) {
+void unpack_f32_i16(const float val, OUT(float, f), OUT(uint, i)) {
 	// Constant optimize by compiler
 	const int num_bit_target = 16;
 	const int num_bit_i = 4;
@@ -56,9 +53,7 @@ void unpack_f32_i16(const float val, out float f, out uint i) {
 	// extract integer part
 	// + rcp(prec_minus_one) to deal with precision issue
 	i = int((val / t2) + (1.0 / prec_minus_one));
-	// Now that we have i, solve formula in packFloatInt for f
+	// Now that we have i, solve formula in pack_f32_i16 for f
 	//f = (val - t2 * float(i)) / t1 => convert in mads form
 	f = clamp((-t2 * float(i) + val) / t1, 0.0, 1.0); // Saturate in case of precision issue
 }
-
-#endif

@@ -30,9 +30,10 @@ vec2 get_projected_coord(const vec3 hit) {
 	vec4 projected_coord = mul(vec4(hit, 1.0), P);
 	projected_coord.xy /= projected_coord.w;
 	projected_coord.xy = projected_coord.xy * 0.5 + 0.5;
-	#if defined(HLSL) || defined(METAL) || defined(SPIRV)
+#ifdef GLSL
+#else
 	projected_coord.y = 1.0 - projected_coord.y;
-	#endif
+#endif
 	return projected_coord.xy;
 }
 

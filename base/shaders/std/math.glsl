@@ -1,7 +1,4 @@
 
-#ifndef _MATH_GLSL_
-#define _MATH_GLSL_
-
 const float PI = 3.1415926535;
 const float PI2 = PI * 2.0;
 
@@ -20,5 +17,3 @@ float rand(const vec2 co) { // Unreliable
 float attenuate(const float dist) {
 	return 1.0 / (dist * dist);
 }
-
-#endif

@@ -15,9 +15,10 @@ void main() {
 	// Velocity is assumed to be calculated for motion blur, so we need to inverse it for reprojection
 	vec2 velocity = -textureLod(sveloc, tex_coord, 0.0).rg;
 
-	#if defined(HLSL) || defined(METAL) || defined(SPIRV)
+#ifdef GLSL
+#else
 	velocity.y = -velocity.y;
-	#endif
+#endif
 
 	// Reproject current coordinates and fetch previous pixel
 	vec4 previous = textureLod(tex2, tex_coord + velocity, 0.0);

@@ -12,21 +12,25 @@ uniform sampler2D gbufferD;
 uniform sampler2D texa;
 #endif
 
+#ifdef HLSL
 in vec4 pos;
 in vec2 nor;
+#endif
 in vec2 tex;
 out vec2 tex_coord;
 
 vec3 get_pos(vec2 uv) {
-	#ifdef HLSL
+#ifdef HLSL
 	float keep = textureLod(texa, vec2(0.0, 0.0), 0.0).r; // direct3d12 unit align
 	float keep2 = pos.x + nor.x;
-	#endif
-	#if defined(HLSL) || defined(METAL) || defined(SPIRV)
-	float depth = textureLod(gbufferD, vec2(uv.x, 1.0 - uv.y), 0.0).r;
-	#else
+#endif
+
+#ifdef GLSL
 	float depth = textureLod(gbufferD, uv, 0.0).r;
-	#endif
+#else
+	float depth = textureLod(gbufferD, vec2(uv.x, 1.0 - uv.y), 0.0).r;
+#endif
+
 	vec4 wpos = vec4(uv * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
 	wpos = mul(wpos, invVP);
 	return wpos.xyz / wpos.w;
@@ -38,7 +42,7 @@ vec3 get_normal(vec3 p0, vec2 uv) {
 	return normalize(cross(p2 - p0, p1 - p0));
 }
 
-void create_basis(vec3 normal, out vec3 tangent, out vec3 binormal) {
+void create_basis(vec3 normal, OUT(vec3, tangent), OUT(vec3, binormal)) {
 	tangent = normalize(camera_right - normal * dot(camera_right, normal));
 	binormal = cross(tangent, normal);
 }
