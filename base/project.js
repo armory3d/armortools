@@ -110,7 +110,7 @@ if (flags.voxels) {
 		project.add_assets("shaders/voxel_hlsl/*.d3d11", { destination: "data/{name}" });
 	}
 	else {
-		project.add_shaders("shaders/voxel_glsl/*.glsl");
+		project.add_shaders("shaders/voxel_glsl/*.glsl", { noprocessing: true });
 	}
 }
 

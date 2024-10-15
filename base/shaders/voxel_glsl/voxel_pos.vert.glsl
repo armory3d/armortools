@@ -1,6 +1,6 @@
 #version 450
 
-#include "../std/conetrace.glsl"
+const vec3 voxelgi_half_extents = vec3(1, 1, 1);
 
 uniform mat4 W;
 
