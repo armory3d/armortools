@@ -157,7 +157,7 @@ function tab_objects_draw(htab: ui_handle_t) {
 				let t: transform_t = context_raw.selected_object.transform;
 				let local_pos: vec4_t = t.loc;
 				let scale: vec4_t = t.scale;
-				let rot: quat_t = quat_get_euler(t.rot);
+				let rot: vec4_t = quat_get_euler(t.rot);
 				let dim: vec4_t = t.dim;
 				rot = vec4_mult(rot, 180 / 3.141592);
 				let f: f32 = 0.0;

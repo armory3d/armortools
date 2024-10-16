@@ -792,7 +792,6 @@ type project_format_t = {
 	camera_fov?: f32;
 	swatches?: swatch_color_t[];
 
-	///if (is_paint || is_sculpt)
 	brush_nodes?: ui_node_canvas_t[];
 	brush_icons?: buffer_t[];
 	material_nodes?: ui_node_canvas_t[];
@@ -803,12 +802,9 @@ type project_format_t = {
 	mesh_datas?: mesh_data_t[];
 	mesh_assets?: string[];
 	mesh_icons?: buffer_t[];
-	///end
 
-	///if is_paint
 	atlas_objects?: i32[];
 	atlas_names?: string[];
-	///end
 
 	///if is_lab
 	material?: ui_node_canvas_t;
@@ -841,7 +837,6 @@ type swatch_color_t = {
 	subsurface?: f32;
 };
 
-///if (is_paint || is_sculpt)
 type layer_data_t = {
 	name?: string;
 	res?: i32; // Width pixels
@@ -857,7 +852,6 @@ type layer_data_t = {
 	blending?: i32;
 	parent?: i32;
 	visible?: bool;
-	///if is_paint
 	texpaint_nor?: buffer_t;
 	texpaint_pack?: buffer_t;
 	paint_base?: bool;
@@ -871,6 +865,4 @@ type layer_data_t = {
 	paint_height_blend?: bool;
 	paint_emis?: bool;
 	paint_subs?: bool;
-	///end
 };
-///end

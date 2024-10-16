@@ -17,7 +17,7 @@ function make_brush_run(vert: node_shader_t, frag: node_shader_t) {
 
 		node_shader_add_uniform(frag, "mat4 W", "_world_matrix");
 
-		node_shader_write_attrib(frag, "vec3 wposition = mul(texelFetch(texpaint_undo, ivec2(tex_coord.x * textureSize(texpaint_undo, 0).x, tex_coord.y * textureSize(texpaint_undo, 0).y), 0), W).xyz;");
+		node_shader_write_attrib(frag, "vec3 wposition = (mul(texelFetch(texpaint_undo, ivec2(tex_coord.x * textureSize(texpaint_undo, 0).x, tex_coord.y * textureSize(texpaint_undo, 0).y), 0), W)).xyz;");
 
 		///if (arm_direct3d11 || arm_direct3d12 || arm_metal || arm_vulkan)
 		node_shader_write(frag, "float depthlast = textureLod(gbufferD, inplast.xy, 0.0).r;");
