@@ -22,7 +22,7 @@ function make_material_parse_mesh_material() {
 	for (let i: i32 = 0; i < m._.shader._.contexts.length; ++i) {
 		let c: shader_context_t = m._.shader._.contexts[i];
 		if (c.name == "mesh") {
-			// array_remove(m._.shader.contexts, c);
+			array_remove(m._.shader.contexts, c);
 			array_remove(m._.shader._.contexts, c);
 			make_material_delete_context(c);
 			break;
@@ -35,7 +35,7 @@ function make_material_parse_mesh_material() {
 			let c: shader_context_t = m._.shader._.contexts[i];
 			for (let j: i32 = 1; j < make_mesh_layer_pass_count; ++j) {
 				if (c.name == "mesh" + j) {
-					// array_remove(m._.shader.contexts, c);
+					array_remove(m._.shader.contexts, c);
 					array_remove(m._.shader._.contexts, c);
 					make_material_delete_context(c);
 					i--;
@@ -50,7 +50,7 @@ function make_material_parse_mesh_material() {
 			let c: material_context_t = m._.contexts[i];
 			for (let j: i32 = 1; j < make_mesh_layer_pass_count; ++j) {
 				if (c.name == "mesh" + j) {
-					// array_remove(m.contexts, c);
+					array_remove(m.contexts, c);
 					array_remove(m._.contexts, c);
 					i--;
 					break;
@@ -72,7 +72,7 @@ function make_material_parse_mesh_material() {
 		override_context.filter = "point";
 	}
 	scon._.override_context = override_context;
-	// array_push(m._.shader.contexts, scon);
+	array_push(m._.shader.contexts, scon);
 	array_push(m._.shader._.contexts, scon);
 
 	for (let i: i32 = 1; i < make_mesh_layer_pass_count; ++i) {
@@ -88,12 +88,12 @@ function make_material_parse_mesh_material() {
 			override_context.filter = "point";
 		}
 		scon._.override_context = override_context;
-		// array_push(m._.shader.contexts, scon);
+		array_push(m._.shader.contexts, scon);
 		array_push(m._.shader._.contexts, scon);
 
 		let tmcon: material_context_t = { name: "mesh" + i, bind_textures: [] };
 		let mcon: material_context_t = material_context_create(tmcon);
-		// array_push(m.contexts, mcon);
+		array_push(m.contexts, mcon);
 		array_push(m._.contexts, mcon);
 	}
 
@@ -115,7 +115,7 @@ function make_material_parse_particle_material() {
 		}
 	}
 	if (sc != null) {
-		// array_remove(m._.shader.contexts, sc);
+		array_remove(m._.shader.contexts, sc);
 		array_remove(m._.shader._.contexts, sc);
 	}
 	let mt: material_t = { name: "MaterialParticle", canvas: null };
@@ -124,7 +124,7 @@ function make_material_parse_particle_material() {
 		make_material_delete_context(sc);
 	}
 	sc = shader_context_create(con.data);
-	// array_push(m._.shader.contexts, sc);
+	array_push(m._.shader.contexts, sc);
 	array_push(m._.shader._.contexts, sc);
 }
 
@@ -143,7 +143,7 @@ function make_material_parse_mesh_preview_material() {
 		}
 	}
 
-	// array_remove(m._.shader.contexts, scon);
+	array_remove(m._.shader.contexts, scon);
 	array_remove(m._.shader._.contexts, scon);
 
 	let mcon: material_context_t = { name: "mesh", bind_textures: [] };
@@ -172,7 +172,7 @@ function make_material_parse_mesh_preview_material() {
 		return;
 	}
 
-	// array_push(m._.shader.contexts, scon);
+	array_push(m._.shader.contexts, scon);
 	array_push(m._.shader._.contexts, scon);
 }
 
@@ -214,7 +214,7 @@ function make_material_parse_paint_material(bake_previews: bool = true) {
 	for (let i: i32 = 0; i < m._.shader._.contexts.length; ++i) {
 		let c: shader_context_t = m._.shader._.contexts[i];
 		if (c.name == "paint") {
-			// array_remove(m._.shader.contexts, c);
+			array_remove(m._.shader.contexts, c);
 			array_remove(m._.shader._.contexts, c);
 			if (c != make_material_default_scon) {
 				make_material_delete_context(c);
@@ -225,7 +225,7 @@ function make_material_parse_paint_material(bake_previews: bool = true) {
 	for (let i: i32 = 0; i < m._.contexts.length; ++i) {
 		let c: material_context_t = m._.contexts[i];
 		if (c.name == "paint") {
-			// array_remove(m.contexts, c);
+			array_remove(m.contexts, c);
 			array_remove(m._.contexts, c);
 			break;
 		}
@@ -252,9 +252,9 @@ function make_material_parse_paint_material(bake_previews: bool = true) {
 	scon2._.override_context = override_context;
 	let mcon3: material_context_t = material_context_create(mcon2);
 
-	// array_push(m._.shader.contexts, scon2);
+	array_push(m._.shader.contexts, scon2);
 	array_push(m._.shader._.contexts, scon2);
-	// array_push(m.contexts, mcon3);
+	array_push(m.contexts, mcon3);
 	array_push(m._.contexts, mcon3);
 
 	if (make_material_default_scon == null) {

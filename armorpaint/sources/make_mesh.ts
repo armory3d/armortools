@@ -22,7 +22,11 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 				data: "short2norm"
 			}
 		],
-		color_attachments: ["RGBA64", "RGBA64", "RGBA64"],
+		color_attachments: [
+			"RGBA64",
+			"RGBA64",
+			"RGBA64"
+		],
 		depth_attachment: "DEPTH32"
 	};
 	let con_mesh: node_shader_context_t = node_shader_context_create(data, props);
