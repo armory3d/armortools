@@ -194,16 +194,16 @@ function project_new(reset_layers: bool = true) {
 
 			///if is_sculpt
 			app_notify_on_next_frame(function (mesh: raw_mesh_t) {
-				let f32a: f32_array_t = f32_array_create(config_get_texture_res_x() * config_get_texture_res_y() * 4);
+				let b: buffer_t = buffer_create(config_get_texture_res_x() * config_get_texture_res_y() * 4 * 4);
 				for (let i: i32 = 0; i < math_floor(mesh.inda.length); ++i) {
 					let index: i32 = mesh.inda[i];
-					f32a[i * 4]     = mesh.posa[index * 4]     / 32767;
-					f32a[i * 4 + 1] = mesh.posa[index * 4 + 1] / 32767;
-					f32a[i * 4 + 2] = mesh.posa[index * 4 + 2] / 32767;
-					f32a[i * 4 + 3] = 1.0;
+					buffer_set_f32(b, 4 * i * 4,         mesh.posa[index * 4]     / 32767);
+					buffer_set_f32(b, 4 * i * 4 + 1 * 4, mesh.posa[index * 4 + 1] / 32767);
+					buffer_set_f32(b, 4 * i * 4 + 2 * 4, mesh.posa[index * 4 + 2] / 32767);
+					buffer_set_f32(b, 4 * i * 4 + 3 * 4, 1.0);
 				}
 
-				let imgmesh: image_t = image_from_bytes(f32a, config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.RGBA128);
+				let imgmesh: image_t = image_from_bytes(b, config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.RGBA128);
 				let texpaint: image_t = project_layers[0].texpaint;
 				g2_begin(texpaint);
 				g2_set_pipeline(base_pipe_copy128);
