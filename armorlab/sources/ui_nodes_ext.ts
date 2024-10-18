@@ -107,7 +107,8 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 			}
 		}
 
-		console_log("Processing finished in " + (time_time() - timer));
+		let t: f32 = time_time() - timer;
+		console_log("Processing finished in " + t);
 		iron_ml_unload();
 
 		console_progress(null);
