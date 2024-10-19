@@ -52,7 +52,8 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 		vert.n = true;
 		node_shader_write(vert, "float height = 0.0;");
 		let num_layers: i32 = 1;
-		node_shader_write(vert, "wposition += wnormal * vec3(height, height, height) * vec3(" + displace_strength +", " + displace_strength + ", " + displace_strength + ");");
+		let displace_3: string = displace_strength + ", " + displace_strength + ", " + displace_strength;
+		node_shader_write(vert, "wposition += wnormal * vec3(height, height, height) * vec3(" + displace_3 + ");");
 	}
 
 	node_shader_write(vert, "gl_Position = mul(vec4(wposition.xyz, 1.0), VP);");

@@ -137,3 +137,7 @@ function make_material_delete_context(c: shader_context_t) {
 		shader_context_delete(c);
 	}, c);
 }
+
+function make_material_parse_brush() {
+	// parser_logic_parse(context_raw.brush.canvas);
+}

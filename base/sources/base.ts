@@ -1119,24 +1119,24 @@ function base_init_layers() {
 	///end
 
 	///if is_lab
-	let texpaint: image_t = map_get(render_path_render_targets, "texpaint")._image;
-	let texpaint_nor: image_t = map_get(render_path_render_targets, "texpaint_nor")._image;
-	let texpaint_pack: image_t = map_get(render_path_render_targets, "texpaint_pack")._image;
-	g2_begin(texpaint);
+	let texpaint: render_target_t = map_get(render_path_render_targets, "texpaint");
+	let texpaint_nor: render_target_t = map_get(render_path_render_targets, "texpaint_nor");
+	let texpaint_pack: render_target_t = map_get(render_path_render_targets, "texpaint_pack");
+	g2_begin(texpaint._image);
 	g2_draw_scaled_image(resource_get("placeholder.k"), 0, 0, config_get_texture_res_x(), config_get_texture_res_y()); // Base
 	g2_end();
-	g4_begin(texpaint_nor);
+	g4_begin(texpaint_nor._image);
 	g4_clear(color_from_floats(0.5, 0.5, 1.0, 0.0)); // Nor
 	g4_end();
-	g4_begin(texpaint_pack);
+	g4_begin(texpaint_pack._image);
 	g4_clear(color_from_floats(1.0, 0.4, 0.0, 0.0)); // Occ, rough, met
 	g4_end();
-	let texpaint_nor_empty: image_t = map_get(render_path_render_targets, "texpaint_nor_empty")._image;
-	let texpaint_pack_empty: image_t = map_get(render_path_render_targets, "texpaint_pack_empty")._image;
-	g4_begin(texpaint_nor_empty);
+	let texpaint_nor_empty: render_target_t = map_get(render_path_render_targets, "texpaint_nor_empty");
+	let texpaint_pack_empty: render_target_t = map_get(render_path_render_targets, "texpaint_pack_empty");
+	g4_begin(texpaint_nor_empty._image);
 	g4_clear(color_from_floats(0.5, 0.5, 1.0, 0.0)); // Nor
 	g4_end();
-	g4_begin(texpaint_pack_empty);
+	g4_begin(texpaint_pack_empty._image);
 	g4_clear(color_from_floats(1.0, 0.4, 0.0, 0.0)); // Occ, rough, met
 	g4_end();
 	///end
@@ -2382,7 +2382,7 @@ function base_on_layers_resized() {
 ///end
 
 ///if is_lab
-function base_flatten(height_to_normal: bool = false): any {
+function base_flatten(height_to_normal: bool = false): slot_layer_t {
 	let texpaint: image_t = brush_output_node_inst.texpaint;
 	let texpaint_nor: image_t = brush_output_node_inst.texpaint_nor;
 	let texpaint_pack: image_t = brush_output_node_inst.texpaint_pack;
@@ -2394,21 +2394,29 @@ function base_flatten(height_to_normal: bool = false): any {
 		let brush_node: logic_node_t = parser_logic_get_logic_node(node);
 		if (brush_node != null && logic_node_get_cached_image(brush_node) != null) {
 			texpaint = logic_node_get_cached_image(brush_node);
-			texpaint_nor = map_get(render_path_render_targets, "texpaint_nor_empty")._image;
-			texpaint_pack = map_get(render_path_render_targets, "texpaint_pack_empty")._image;
+			let texpaint_nor_rt: render_target_t = map_get(render_path_render_targets, "texpaint_nor_empty");
+			let texpaint_pack_rt: render_target_t = map_get(render_path_render_targets, "texpaint_pack_empty");
+			texpaint_nor = texpaint_nor_rt._image;
+			texpaint_pack = texpaint_pack_rt._image;
 		}
 	}
 
-	return { texpaint: texpaint, texpaint_nor: texpaint_nor, texpaint_pack: texpaint_pack };
+	let l: slot_layer_t = { texpaint: texpaint, texpaint_nor: texpaint_nor, texpaint_pack: texpaint_pack };
+	return l;
 }
 
 function base_on_layers_resized() {
 	image_unload(brush_output_node_inst.texpaint);
-	brush_output_node_inst.texpaint = map_get(render_path_render_targets, "texpaint")._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
+	let texpaint_rt: render_target_t = map_get(render_path_render_targets, "texpaint");
+	brush_output_node_inst.texpaint = texpaint_rt._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
+
 	image_unload(brush_output_node_inst.texpaint_nor);
-	brush_output_node_inst.texpaint_nor = map_get(render_path_render_targets, "texpaint_nor")._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
+	let texpaint_nor_rt: render_target_t = map_get(render_path_render_targets, "texpaint_nor");
+	brush_output_node_inst.texpaint_nor = texpaint_nor_rt._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
+
 	image_unload(brush_output_node_inst.texpaint_pack);
-	brush_output_node_inst.texpaint_pack = map_get(render_path_render_targets, "texpaint_pack")._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
+	let texpaint_pack_rt: render_target_t = map_get(render_path_render_targets, "texpaint_pack");
+	brush_output_node_inst.texpaint_pack = texpaint_pack_rt._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
 
 	if (inpaint_node_image != null) {
 		image_unload(inpaint_node_image);
@@ -2433,10 +2441,13 @@ function base_on_layers_resized() {
 		tiling_node_init();
 	}
 
-	image_unload(map_get(render_path_render_targets, "texpaint_blend0")._image);
-	map_get(render_path_render_targets, "texpaint_blend0")._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
-	image_unload(map_get(render_path_render_targets, "texpaint_blend1")._image);
-	map_get(render_path_render_targets, "texpaint_blend1")._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
+	let texpaint_blend0_rt: render_target_t = map_get(render_path_render_targets, "texpaint_blend0");
+	image_unload(texpaint_blend0_rt._image);
+	texpaint_blend0_rt._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
+
+	let texpaint_blend1_rt: render_target_t = map_get(render_path_render_targets, "texpaint_blend1");
+	image_unload(texpaint_blend1_rt._image);
+	texpaint_blend1_rt._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
 
 	if (map_get(render_path_render_targets, "texpaint_node") != null) {
 		map_delete(render_path_render_targets, "texpaint_node");

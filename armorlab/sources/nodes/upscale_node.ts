@@ -41,7 +41,7 @@ function upscale_node_get_cached_image(self: upscale_node_t): image_t {
 	return upscale_node_image;
 }
 
-function upscale_node_do_tile(source: image_t) {
+function upscale_node_do_tile(source: image_t): image_t {
 	let result: image_t = null;
 	let size1w: i32 = source.width;
 	let size1h: i32 = source.height;

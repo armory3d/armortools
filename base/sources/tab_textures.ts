@@ -296,11 +296,12 @@ function tab_textures_delete_texture(asset: asset_t) {
 		///end
 	});
 
+	///if (is_paint || is_sculpt)
 	for (let i: i32 = 0; i < project_materials.length; ++i) {
 		let m: slot_material_t = project_materials[i];
 		tab_textures_update_texture_pointers(m.canvas.nodes, i);
 	}
-	///if (is_paint || is_sculpt)
+
 	for (let i: i32 = 0; i < project_brushes.length; ++i) {
 		let b: slot_brush_t = project_brushes[i];
 		tab_textures_update_texture_pointers(b.canvas.nodes, i);

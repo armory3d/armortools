@@ -25,15 +25,15 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 		let texheight: image_t = logic_node_get_as_image(brush_output_node_inst.base, channel_type_t.HEIGHT);
 
 		if (texbase != null) {
-			let texpaint: image_t = map_get(render_path_render_targets, "texpaint")._image;
-			g2_begin(texpaint);
+			let texpaint: render_target_t = map_get(render_path_render_targets, "texpaint");
+			g2_begin(texpaint._image);
 			g2_draw_scaled_image(texbase, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
 			g2_end();
 		}
 
 		if (texnor != null) {
-			let texpaint_nor: image_t = map_get(render_path_render_targets, "texpaint_nor")._image;
-			g2_begin(texpaint_nor);
+			let texpaint_nor: render_target_t = map_get(render_path_render_targets, "texpaint_nor");
+			g2_begin(texpaint_nor._image);
 			g2_draw_scaled_image(texnor, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
 			g2_end();
 		}
@@ -48,10 +48,10 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 			const_data_create_screen_aligned_data();
 		}
 
-		let texpaint_pack: image_t = map_get(render_path_render_targets, "texpaint_pack")._image;
+		let texpaint_pack: render_target_t = map_get(render_path_render_targets, "texpaint_pack");
 
 		if (texocc != null) {
-			g2_begin(texpaint_pack);
+			g2_begin(texpaint_pack._image);
 			g2_set_pipeline(base_pipe_copy_r);
 			g2_draw_scaled_image(texocc, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
 			g2_set_pipeline(null);
@@ -59,7 +59,7 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 		}
 
 		if (texrough != null) {
-			g2_begin(texpaint_pack);
+			g2_begin(texpaint_pack._image);
 			g2_set_pipeline(base_pipe_copy_g);
 			g2_draw_scaled_image(texrough, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
 			g2_set_pipeline(null);
@@ -67,7 +67,7 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 		}
 
 		if (texheight != null) {
-			g4_begin(texpaint_pack);
+			g4_begin(texpaint_pack._image);
 			g4_set_pipeline(base_pipe_copy_a);
 			g4_set_tex(base_pipe_copy_a_tex, texheight);
 			g4_set_vertex_buffer(const_data_screen_aligned_vb);
@@ -101,7 +101,7 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 					iron_g4_swap_buffers();
 
 					let uv_scale: f32 = scene_meshes[0].data.scale_tex * context_raw.brush_scale;
-					util_mesh_apply_displacement(texpaint_pack, 0.05 * config_raw.displace_strength, uv_scale);
+					util_mesh_apply_displacement(texpaint_pack._image, 0.05 * config_raw.displace_strength, uv_scale);
 					util_mesh_calc_normals();
 				}
 			}

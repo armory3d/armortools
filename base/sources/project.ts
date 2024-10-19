@@ -795,7 +795,6 @@ type project_format_t = {
 
 	///if is_lab
 	material?: ui_node_canvas_t;
-	material_groups?: ui_node_canvas_t[];
 	mesh_data?: mesh_data_t;
 	mesh_icon?: buffer_t;
 	///end

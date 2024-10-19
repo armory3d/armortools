@@ -271,8 +271,8 @@ type context_t = {
 	///end
 
 	///if is_lab
-	material?: any; ////
-	layer?: any; ////
+	material?: slot_material_t; ////
+	layer?: slot_layer_t; ////
 	tool?: workspace_tool_t;
 
 	color_picker_previous_tool?: workspace_tool_t;
@@ -991,7 +991,12 @@ function context_update() {
 		let dy: i32 = math_abs(context_raw.lock_start_y - mouse_view_y());
 		if (dx > 1 || dy > 1) {
 			context_raw.lock_begin = false;
-			dx > dy ? context_raw.lock_y = true : context_raw.lock_x = true;
+			if (dx > dy) {
+				context_raw.lock_y = true;
+			}
+			else {
+				context_raw.lock_x = true;
+			}
 		}
 	}
 
