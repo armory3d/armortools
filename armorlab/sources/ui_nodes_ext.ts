@@ -75,8 +75,10 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 			g4_draw();
 			g4_end();
 
-			if (ui_header_worktab.position == space_type_t.SPACE3D &&
-				brush_output_node_inst.base.inputs[channel_type_t.HEIGHT].node.get != float_node_get) {
+			let is_float_node: bool = true;
+			// brush_output_node_inst.base.inputs[channel_type_t.HEIGHT].node.get != float_node_get
+
+			if (ui_header_worktab.position == space_type_t.SPACE3D && !is_float_node) {
 
 				// Make copy of vertices before displacement
 				let o: mesh_object_t = project_paint_objects[0];

@@ -2,10 +2,12 @@
 type rgb_node_t = {
 	base?: logic_node_t;
 	image?: image_t;
+	raw?: ui_node_t;
 };
 
-function rgb_node_create(arg: any): rgb_node_t {
+function rgb_node_create(raw: ui_node_t, args: f32_array_t): rgb_node_t {
 	let n: rgb_node_t = {};
+	n.raw = raw;
 	n.base = logic_node_create();
 	n.base.get_as_image = rgb_node_get_as_image;
 	n.base.get_cached_image = rgb_node_get_cached_image;
@@ -20,7 +22,7 @@ function rgb_node_get_as_image(self: rgb_node_t, from: i32): image_t {
 	}
 
 	let f32a: f32_array_t = f32_array_create(4);
-	let raw: ui_node_t = parser_logic_get_raw_node(self.base);
+	let raw: ui_node_t = self.raw;
 	let default_value: f32_array_t = raw.outputs[0].default_value;
 	f32a[0] = default_value[0];
 	f32a[1] = default_value[1];

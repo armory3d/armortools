@@ -8,7 +8,7 @@ let variance_node_image: image_t = null;
 let variance_node_inst: variance_node_t = null;
 let variance_node_prompt: string = "";
 
-function variance_node_create(arg: any): variance_node_t {
+function variance_node_create(raw: ui_node_t, args: f32_array_t): variance_node_t {
 	let n: variance_node_t = {};
 	n.base = logic_node_create();
 	n.base.get_as_image = variance_node_get_as_image;
@@ -32,7 +32,8 @@ function variance_node_buttons(ui: ui_t, nodes: ui_nodes_t, node: ui_node_t) {
 }
 
 function variance_node_get_as_image(self: variance_node_t, from: i32): image_t {
-	let strength: f32 = variance_node_inst.base.inputs[1].node.value;
+	let node: float_node_t = variance_node_inst.base.inputs[1].node;
+	let strength: f32 = node.value;
 
 	let source: image_t = logic_node_input_get_as_image(variance_node_inst.base.inputs[0]);
 	g2_begin(variance_node_temp);
@@ -41,7 +42,7 @@ function variance_node_get_as_image(self: variance_node_t, from: i32): image_t {
 
 	let bytes_img: buffer_t = image_get_pixels(variance_node_temp);
 	let u8a: u8_array_t = bytes_img;
-	let f32a = f32_array_create(3 * 512 * 512);
+	let f32a: f32_array_t = f32_array_create(3 * 512 * 512);
 	for (let i: i32 = 0; i < (512 * 512); ++i) {
 		f32a[i                ] = (u8a[i * 4    ] / 255) * 2.0 - 1.0;
 		f32a[i + 512 * 512    ] = (u8a[i * 4 + 1] / 255) * 2.0 - 1.0;
@@ -52,7 +53,12 @@ function variance_node_get_as_image(self: variance_node_t, from: i32): image_t {
 	iron_g4_swap_buffers();
 
 	let vae_encoder_blob: buffer_t = data_get_blob("models/sd_vae_encoder.quant.onnx");
-	let latents_buf: buffer_t = iron_ml_inference(vae_encoder_blob, [f32a.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], config_raw.gpu_inference);
+	let tensors: buffer_t[] = [f32a.buffer];
+	let input_shape: i32_array_t[] = [];
+	let input_shape0: i32[] = [1, 3, 512, 512];
+	array_push(input_shape, input_shape0);
+	let output_shape: i32[] = [1, 4, 64, 64];
+	let latents_buf: buffer_t = iron_ml_inference(vae_encoder_blob, tensors, input_shape, output_shape, config_raw.gpu_inference);
 	let latents: f32_array_t = f32_array_create_from_buffer(latents_buf);
 	for (let i: i32 = 0; i < latents.length; ++i) {
 		latents[i] = 0.18215 * latents[i];
@@ -65,7 +71,7 @@ function variance_node_get_as_image(self: variance_node_t, from: i32): image_t {
 	let num_inference_steps: i32 = 50;
 	let init_timestep: i32 = math_floor(num_inference_steps * strength);
 	let timesteps: i32 = text_to_photo_node_timesteps[num_inference_steps - init_timestep];
-	let alphas_cumprod: f32 = text_to_photo_node_alphas_cumprod;
+	let alphas_cumprod: f32[] = text_to_photo_node_alphas_cumprod;
 	let sqrt_alpha_prod: f32 = math_pow(alphas_cumprod[timesteps], 0.5);
 	let sqrt_one_minus_alpha_prod: f32 = math_pow(1.0 - alphas_cumprod[timesteps], 0.5);
 	for (let i: i32 = 0; i < latents.length; ++i) {

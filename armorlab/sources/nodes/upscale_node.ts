@@ -7,7 +7,7 @@ let upscale_node_temp: image_t = null;
 let upscale_node_image: image_t = null;
 let upscale_node_esrgan_blob: buffer_t;
 
-function upscale_node_create(arg: any): upscale_node_t {
+function upscale_node_create(raw: ui_node_t, args: f32_array_t): upscale_node_t {
 	let n: float_node_t = {};
 	n.base = logic_node_create();
 	n.base.get_as_image = upscale_node_get_as_image;
@@ -64,7 +64,12 @@ function upscale_node_do_tile(source: image_t): image_t {
 		f32a[i + size1w * size1w * 2] = (u8a[i * 4 + 2] / 255);
 	}
 
-	let esrgan2x_buf: buffer_t = iron_ml_inference(upscale_node_esrgan_blob, [f32a.buffer], [[1, 3, size1w, size1h]], [1, 3, size2w, size2h], config_raw.gpu_inference);
+	let tensors: buffer_t[] = [f32a.buffer];
+	let input_shape: i32_array_t[] = [];
+	let input_shape0: i32[] = [1, 3, size1w, size1h];
+	array_push(input_shape, input_shape0);
+	let output_shape: i32[] = [1, 3, size2w, size2h];
+	let esrgan2x_buf: buffer_t = iron_ml_inference(upscale_node_esrgan_blob, tensors, input_shape, output_shape, config_raw.gpu_inference);
 	let esrgan2x: f32_array_t = f32_array_create_from_buffer(esrgan2x_buf);
 	for (let i: i32 = 0; i < esrgan2x.length; ++i) {
 		if (esrgan2x[i] < 0) {

@@ -14,7 +14,7 @@ let inpaint_node_prompt: string = "";
 let inpaint_node_strength: f32 = 0.5;
 let inpaint_node_auto: bool = true;
 
-function inpaint_node_create(arg: any): inpaint_node_t {
+function inpaint_node_create(raw: ui_node_t, args: f32_array_t): inpaint_node_t {
 	let n: inpaint_node_t = {};
 	n.base = logic_node_create();
 	n.base.get_as_image = inpaint_node_get_as_image;
@@ -115,7 +115,7 @@ function inpaint_node_texsynth_inpaint(image: image_t, tiling: bool, mask: image
 	let bytes_img: buffer_t = image_get_pixels(image);
 	let bytes_mask: buffer_t = mask != null ? image_get_pixels(mask) : buffer_create(w * h);
 	let bytes_out: buffer_t = buffer_create(w * h * 4);
-	iron_texsynth.inpaint(w, h, bytes_out, bytes_img, bytes_mask, tiling);
+	// texsynth_inpaint(w, h, bytes_out, bytes_img, bytes_mask, tiling);
 
 	inpaint_node_result = image_from_bytes(bytes_out, w, h);
 	return inpaint_node_result;
@@ -163,13 +163,17 @@ function inpaint_node_sd_inpaint(image: image_t, mask: image_t): image_t {
 				f32a[i + 512 * 512 * 2] = (u8a[i * 4 + 2] / 255.0) * 2.0 - 1.0;
 			}
 
-			let latents_buf: buffer_t = iron_ml_inference(vae_encoder_blob, [f32a.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], config_raw.gpu_inference);
+			let tensors: buffer_t[] = [f32a.buffer];
+			let input_shape: i32_array_t[] = [];
+			let input_shape0: i32[] = [1, 3, 512, 512];
+			array_push(input_shape, input_shape0);
+			let output_shape: i32[] = [1, 4, 64, 64];
+			let latents_buf: buffer_t = iron_ml_inference(vae_encoder_blob, tensors, input_shape, output_shape, config_raw.gpu_inference);
 			let latents: f32_array_t = f32_array_create_from_buffer(latents_buf);
 			for (let i: i32 = 0; i < latents.length; ++i) {
 				latents[i] = 0.18215 * latents[i];
 			}
-			// let latents_orig: f32_array_t = array_slice(latents, 0, latents.length);
-			let latents_orig: f32_array_t = latents.slice(0, latents.length);
+			let latents_orig: f32_array_t = array_slice(latents, 0, latents.length);
 
 			let noise: f32_array_t = f32_array_create(latents.length);
 			for (let i: i32 = 0; i < noise.length; ++i) {

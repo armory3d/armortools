@@ -10,7 +10,7 @@ let text_to_photo_node_text_encoder_blob: buffer_t;
 let text_to_photo_node_unet_blob: buffer_t;
 let text_to_photo_node_vae_decoder_blob: buffer_t;
 
-function text_to_photo_node_create(arg: any): text_to_photo_node_t {
+function text_to_photo_node_create(raw: ui_node_t, args: f32_array_t): text_to_photo_node_t {
 	let n: text_to_photo_node_t = {};
 	n.base = logic_node_create();
 	n.base.get_as_image = text_to_photo_node_get_as_image;
@@ -65,11 +65,17 @@ function text_to_photo_node_text_encoder(prompt: string, inpaint_latents: f32_ar
 	}
 
 	let i32a: i32_array_t = i32_array_create_from_array(text_to_photo_node_text_input_ids);
-	let text_embeddings_buf: buffer_t = iron_ml_inference(text_to_photo_node_text_encoder_blob, [i32a.buffer], [[1, 77]], [1, 77, 768], config_raw.gpu_inference);
+	let tensors: buffer_t[] = [i32a.buffer];
+	let input_shape: i32_array_t[] = [];
+	let input_shape0: i32[] = [1, 77];
+	array_push(input_shape, input_shape0);
+	let output_shape: i32[] = [1, 77, 768];
+	let text_embeddings_buf: buffer_t = iron_ml_inference(text_to_photo_node_text_encoder_blob, tensors, input_shape, output_shape, config_raw.gpu_inference);
 	let text_embeddings: f32_array_t = f32_array_create_from_buffer(text_embeddings_buf);
 
 	i32a = i32_array_create_from_array(text_to_photo_node_uncond_input_ids);
-	let uncond_embeddings_buf: buffer_t = iron_ml_inference(text_to_photo_node_text_encoder_blob, [i32a.buffer], [[1, 77]], [1, 77, 768], config_raw.gpu_inference);
+	tensors = [i32a.buffer];
+	let uncond_embeddings_buf: buffer_t = iron_ml_inference(text_to_photo_node_text_encoder_blob, tensors, input_shape, output_shape, config_raw.gpu_inference);
 	let uncond_embeddings: f32_array_t = f32_array_create_from_buffer(uncond_embeddings_buf);
 
 	let f32a: f32_array_t = f32_array_create(uncond_embeddings.length + text_embeddings.length);
@@ -106,7 +112,9 @@ function text_to_photo_node_unet(latents: f32_array_t, text_embeddings: f32_arra
 	let counter: i32 = 0;
 
 	while (true) {
-		console_progress(tr("Processing") + " - " + tr("Text to Photo") + " (" + (counter + 1) + "/" + (50 - offset) + ")");
+		let a: i32 = counter + 1;
+		let b: i32 = 50 - offset;
+		console_progress(tr("Processing") + " - " + tr("Text to Photo") + " (" + a + "/" + b + ")");
 		iron_g4_swap_buffers();
 
 		let timestep: i32 = text_to_photo_node_timesteps[counter + offset];
@@ -115,7 +123,16 @@ function text_to_photo_node_unet(latents: f32_array_t, text_embeddings: f32_arra
 
 		let t32: i32_array_t = i32_array_create(2);
 		t32[0] = timestep;
-		let noise_pred_buf: buffer_t = iron_ml_inference(text_to_photo_node_unet_blob, [latent_model_input.buffer, t32.buffer, text_embeddings.buffer], [[2, 4, 64, 64], [1], [2, 77, 768]], [2, 4, 64, 64], config_raw.gpu_inference);
+		let tensors: buffer_t[] = [latent_model_input.buffer, t32.buffer, text_embeddings.buffer];
+		let input_shape: i32_array_t[] = [];
+		let input_shape0: i32[] = [2, 4, 64, 64];
+		let input_shape1: i32[] = [1];
+		let input_shape2: i32[] = [2, 77, 768];
+		array_push(input_shape, input_shape0);
+		array_push(input_shape, input_shape1);
+		array_push(input_shape, input_shape2);
+		let output_shape: i32[] = [2, 4, 64, 64];
+		let noise_pred_buf: buffer_t = iron_ml_inference(text_to_photo_node_unet_blob, tensors, input_shape, output_shape, config_raw.gpu_inference);
 		let noise_pred: f32_array_t = f32_array_create_from_buffer(noise_pred_buf);
 
 		for (let i: i32 = 0; i < noise_pred_uncond.length; ++i) noise_pred_uncond[i] = noise_pred[i];
@@ -216,7 +233,12 @@ function text_to_photo_node_vae_decoder(latents: f32_array_t, upscale: bool): im
 		latents[i] = 1.0 / 0.18215 * latents[i];
 	}
 
-	let pyimage_buf: buffer_t = iron_ml_inference(text_to_photo_node_vae_decoder_blob, [latents.buffer], [[1, 4, 64, 64]], [1, 3, 512, 512], config_raw.gpu_inference);
+	let tensors: buffer_t[] = [latents.buffer];
+	let input_shape: i32_array_t[] = [];
+	let input_shape0: i32[] = [1, 4, 64, 64];
+	array_push(input_shape, input_shape0);
+	let output_shape: i32[] = [1, 3, 512, 512];
+	let pyimage_buf: buffer_t = iron_ml_inference(text_to_photo_node_vae_decoder_blob, tensors, input_shape, output_shape, config_raw.gpu_inference);
 	let pyimage: f32_array_t = f32_array_create_from_buffer(pyimage_buf);
 
 	for (let i: i32 = 0; i < pyimage.length; ++i) {

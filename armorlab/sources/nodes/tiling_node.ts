@@ -9,7 +9,7 @@ let tiling_node_prompt: string = "";
 let tiling_node_strength: f32 = 0.5;
 let tiling_node_auto: bool = true;
 
-function tiling_node_create(arg: any): tiling_node_t {
+function tiling_node_create(raw: ui_node_t, args: f32_array_t): tiling_node_t {
 	let n: float_node_t = {};
 	n.base = logic_node_create();
 	n.base.get_as_image = tiling_node_get_as_image;

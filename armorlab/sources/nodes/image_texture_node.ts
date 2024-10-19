@@ -5,7 +5,7 @@ type image_texture_node_t = {
 	color_space?: string;
 };
 
-function image_texture_node_create(arg: any): image_texture_node_t {
+function image_texture_node_create(raw: ui_node_t, args: f32_array_t): image_texture_node_t {
 	let n: image_texture_node_t = {};
 	n.base = logic_node_create();
 	n.base.get_as_image = image_texture_node_get_as_image;
