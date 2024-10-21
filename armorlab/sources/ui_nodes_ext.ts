@@ -124,6 +124,8 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 	ui._x += ew + 3;
 	ui._y = 2 + start_y;
 
+	base_res_handle.position -= 4;
+
 	///if (arm_android || arm_ios)
 	let base_res_combo: string[] = ["2K", "4K"];
 	ui_combo(base_res_handle, base_res_combo, tr("Resolution"));
@@ -131,6 +133,9 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 	let base_res_combo: string[] = ["2K", "4K", "8K", "16K"];
 	ui_combo(base_res_handle, base_res_combo, tr("Resolution"));
 	///end
+
+	base_res_handle.position += 4;
+
 	if (base_res_handle.changed) {
 		base_on_layers_resized();
 	}

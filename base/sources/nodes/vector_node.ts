@@ -7,7 +7,7 @@ type vector_node_t = {
 
 function vector_node_create(raw: ui_node_t, args: f32_array_t): vector_node_t {
 	let n: vector_node_t = {};
-	n.base = logic_node_create();
+	n.base = logic_node_create(n);
 	n.base.get = vector_node_get;
 	n.base.get_as_image = vector_node_get_as_image;
 	n.base.set = vector_node_set;

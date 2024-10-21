@@ -231,7 +231,7 @@ function export_arm_texture_node_name(): string {
 	///if (is_paint || is_sculpt)
 	return "TEX_IMAGE";
 	///else
-	return "ImageTextureNode";
+	return "image_texture_node";
 	///end
 }
 

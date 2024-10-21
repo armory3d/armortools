@@ -13,7 +13,8 @@ let brush_output_node_inst: brush_output_node_t = null;
 
 function brush_output_node_create(raw: ui_node_t, args: f32_array_t): brush_output_node_t {
 	let n: brush_output_node_t = {};
-	n.base = logic_node_create();
+	n.base = logic_node_create(n);
+	n.base.get_as_image = brush_output_node_get_as_image;
 
 	if (brush_output_node_inst == null) {
 		{

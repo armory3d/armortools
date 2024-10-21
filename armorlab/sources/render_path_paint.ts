@@ -266,9 +266,9 @@ function render_path_paint_bind_layers() {
 	let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
 	if (nodes.nodes_selected_id.length > 0) {
 		let node: ui_node_t = ui_get_node(canvas.nodes, nodes.nodes_selected_id[0]);
-		let brush_node: logic_node_t = parser_logic_get_logic_node(node);
+		let brush_node: logic_node_ext_t = parser_logic_get_logic_node(node);
 		if (brush_node != null) {
-			image = logic_node_get_cached_image(brush_node);
+			image = logic_node_get_cached_image(brush_node.base);
 		}
 	}
 	if (image != null) {

@@ -12,7 +12,7 @@ let text_to_photo_node_vae_decoder_blob: buffer_t;
 
 function text_to_photo_node_create(raw: ui_node_t, args: f32_array_t): text_to_photo_node_t {
 	let n: text_to_photo_node_t = {};
-	n.base = logic_node_create();
+	n.base = logic_node_create(n);
 	n.base.get_as_image = text_to_photo_node_get_as_image;
 	n.base.get_cached_image = text_to_photo_node_get_cached_image;
 	return n;
@@ -27,7 +27,9 @@ function text_to_photo_node_get_cached_image(self: text_to_photo_node_t): image_
 	return text_to_photo_node_image;
 }
 
-function text_to_photo_node_buttons(ui: ui_t, nodes: ui_nodes_t, node: ui_node_t) {
+function text_to_photo_node_button(node_id: i32) {
+	let node: ui_node_t = ui_get_node(ui_nodes_get_canvas(true).nodes, node_id);
+
 	text_to_photo_node_tiling = node.buttons[0].default_value == 0 ? false : true;
 	text_to_photo_node_prompt = ui_text_area(ui_handle(__ID__), ui_align_t.LEFT, true, tr("prompt"), true);
 	node.buttons[1].height = string_split(text_to_photo_node_prompt, "\n").length;
@@ -57,15 +59,25 @@ function text_to_photo_node_text_encoder(prompt: string, inpaint_latents: f32_ar
 	let words: string[] = string_split(
 		trim_end(string_replace_all(string_replace_all(string_replace_all(prompt, "\n", " "), ",", " , "), "  ", " ")), " "
 	);
+
+	if (text_to_photo_node_vocab == null) {
+		let vocab_buffer: buffer_t = data_get_blob("models/vocab.json");
+		let vocab_json: string = sys_buffer_to_string(vocab_buffer);
+		text_to_photo_node_vocab = json_parse_to_map(vocab_json);
+	}
+
 	for (let i: i32 = 0; i < words.length; ++i) {
-		text_to_photo_node_text_input_ids[i + 1] = map_get(text_to_photo_node_vocab, to_lower_case(words[i]) + "</w>");
+		let word: string = to_lower_case(words[i]) + "</w>";
+		let value_string: string = map_get(text_to_photo_node_vocab, word);
+		let value: i32 = parse_int(value_string);
+		text_to_photo_node_text_input_ids[i + 1] = value;
 	}
 	for (let i: i32 = words.length; i < (text_to_photo_node_text_input_ids.length - 1); ++i) {
 		text_to_photo_node_text_input_ids[i + 1] = 49407; // <|endoftext|>
 	}
 
 	let i32a: i32_array_t = i32_array_create_from_array(text_to_photo_node_text_input_ids);
-	let tensors: buffer_t[] = [i32a.buffer];
+	let tensors: buffer_t[] = [buffer_create_from_raw(i32a.buffer, i32a.length * 4)];
 	let input_shape: i32_array_t[] = [];
 	let input_shape0: i32[] = [1, 77];
 	array_push(input_shape, input_shape0);
@@ -74,7 +86,7 @@ function text_to_photo_node_text_encoder(prompt: string, inpaint_latents: f32_ar
 	let text_embeddings: f32_array_t = f32_array_create_from_buffer(text_embeddings_buf);
 
 	i32a = i32_array_create_from_array(text_to_photo_node_uncond_input_ids);
-	tensors = [i32a.buffer];
+	tensors = [buffer_create_from_raw(i32a.buffer, i32a.length * 4)];
 	let uncond_embeddings_buf: buffer_t = iron_ml_inference(text_to_photo_node_text_encoder_blob, tensors, input_shape, output_shape, config_raw.gpu_inference);
 	let uncond_embeddings: f32_array_t = f32_array_create_from_buffer(uncond_embeddings_buf);
 
@@ -123,7 +135,11 @@ function text_to_photo_node_unet(latents: f32_array_t, text_embeddings: f32_arra
 
 		let t32: i32_array_t = i32_array_create(2);
 		t32[0] = timestep;
-		let tensors: buffer_t[] = [latent_model_input.buffer, t32.buffer, text_embeddings.buffer];
+		let tensors: buffer_t[] = [
+			buffer_create_from_raw(latent_model_input.buffer, latent_model_input.length * 4),
+			buffer_create_from_raw(t32.buffer, t32.length * 4),
+			buffer_create_from_raw(text_embeddings.buffer, text_embeddings.length * 4),
+		];
 		let input_shape: i32_array_t[] = [];
 		let input_shape0: i32[] = [2, 4, 64, 64];
 		let input_shape1: i32[] = [1];
@@ -233,7 +249,7 @@ function text_to_photo_node_vae_decoder(latents: f32_array_t, upscale: bool): im
 		latents[i] = 1.0 / 0.18215 * latents[i];
 	}
 
-	let tensors: buffer_t[] = [latents.buffer];
+	let tensors: buffer_t[] = [buffer_create_from_raw(latents.buffer, latents.length)];
 	let input_shape: i32_array_t[] = [];
 	let input_shape0: i32[] = [1, 4, 64, 64];
 	array_push(input_shape, input_shape0);
@@ -254,7 +270,7 @@ function text_to_photo_node_vae_decoder(latents: f32_array_t, upscale: bool): im
 		u8a[i * 4 + 2] = math_floor(pyimage[i + 512 * 512 * 2] * 255);
 		u8a[i * 4 + 3] = 255;
 	}
-	let image: image_t = image_from_bytes(u8a.buffer, 512, 512);
+	let image: image_t = image_from_bytes(u8a, 512, 512);
 
 	if (text_to_photo_node_tiling) {
 		tiling_node_prompt = text_to_photo_node_prompt;
@@ -312,10 +328,10 @@ let text_to_photo_node_def: ui_node_t = {
 			height: 0
 		},
 		{
-			name: "text_to_photo_node_buttons",
+			name: "text_to_photo_node_button",
 			type: "CUSTOM",
 			output: -1,
-			default_value: null,
+			default_value: f32_array_create_x(0),
 			data: null,
 			min: 0.0,
 			max: 1.0,
@@ -518,4 +534,4 @@ let text_to_photo_node_timesteps: i32[] = [981, 961, 961, 941, 921, 901, 881, 86
 	641, 621, 601, 581, 561, 541, 521, 501, 481, 461, 441, 421, 401, 381, 361, 341, 321, 301,
 	281, 261, 241, 221, 201, 181, 161, 141, 121, 101, 81, 61, 41, 21, 1];
 
-let text_to_photo_node_vocab: map_t<string, i32>;
+let text_to_photo_node_vocab: map_t<string, string> = null;

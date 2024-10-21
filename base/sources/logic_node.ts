@@ -6,6 +6,7 @@ type logic_node_t = {
 	get_as_image?: (self: any, from: i32)=>image_t;
 	get_cached_image?: (self: any)=>image_t;
 	set?: (self: any, value: f32_array_t)=>void;
+	ext?: logic_node_ext_t;
 };
 
 type logic_node_ext_t = {
@@ -23,14 +24,11 @@ type logic_node_input_t = {
 	from?: i32; // Socket index
 };
 
-function logic_node_create(): logic_node_t {
+function logic_node_create(ext: logic_node_ext_t): logic_node_t {
 	let n: logic_node_t = {};
 	n.inputs = [];
 	n.outputs = [];
-	n.get = logic_node_get;
-	n.get_as_image = logic_node_get_as_image;
-	n.get_cached_image = logic_node_get_cached_image;
-	n.set = logic_node_set;
+	n.ext = ext;
 	return n;
 }
 
@@ -43,18 +41,31 @@ function logic_node_add_outputs(self: logic_node_t, nodes: logic_node_t[]) {
 }
 
 function logic_node_get(self: logic_node_t, from: i32): any {
+	if (self.get != null) {
+		return self.get(self.ext, from);
+	}
 	return null;
 }
 
 function logic_node_get_as_image(self: logic_node_t, from: i32): image_t {
+	if (self.get_as_image != null) {
+		return self.get_as_image(self.ext, from);
+	}
 	return null;
 }
 
 function logic_node_get_cached_image(self: logic_node_t): image_t {
+	if (self.get_cached_image != null) {
+		return self.get_cached_image(self.ext);
+	}
 	return null;
 }
 
-function logic_node_set(self: logic_node_t, value: any) {}
+function logic_node_set(self: logic_node_t, value: any) {
+	if (self.set != null) {
+		self.set(self.ext, value);
+	}
+}
 
 function logic_node_input_create(node: logic_node_ext_t, from: i32): logic_node_input_t {
 	let inp: logic_node_input_t = {};
@@ -64,13 +75,13 @@ function logic_node_input_create(node: logic_node_ext_t, from: i32): logic_node_
 }
 
 function logic_node_input_get(self: logic_node_input_t): logic_node_value_t {
-	return self.node.base.get(self.node, self.from);
+	return logic_node_get(self.node.base, self.from);
 }
 
 function logic_node_input_get_as_image(self: logic_node_input_t): image_t {
-	return self.node.base.get_as_image(self.node, self.from);
+	return logic_node_get_as_image(self.node.base, self.from);
 }
 
 function logic_node_input_set(self: logic_node_input_t, value: f32_array_t) {
-	self.node.base.set(self.node, value);
+	logic_node_set(self.node.base, value);
 }

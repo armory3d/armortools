@@ -16,7 +16,7 @@ let inpaint_node_auto: bool = true;
 
 function inpaint_node_create(raw: ui_node_t, args: f32_array_t): inpaint_node_t {
 	let n: inpaint_node_t = {};
-	n.base = logic_node_create();
+	n.base = logic_node_create(n);
 	n.base.get_as_image = inpaint_node_get_as_image;
 	n.base.get_cached_image = inpaint_node_get_cached_image;
 
@@ -48,7 +48,9 @@ function inpaint_node_init() {
 	}
 }
 
-function inpaint_node_buttons(ui: ui_t, nodes: ui_nodes_t, node: ui_node_t) {
+function inpaint_node_button(node_id: i32) {
+	let node: ui_node_t = ui_get_node(ui_nodes_get_canvas(true).nodes, node_id);
+
 	inpaint_node_auto = node.buttons[0].default_value == 0 ? false : true;
 	if (!inpaint_node_auto) {
 
@@ -163,7 +165,7 @@ function inpaint_node_sd_inpaint(image: image_t, mask: image_t): image_t {
 				f32a[i + 512 * 512 * 2] = (u8a[i * 4 + 2] / 255.0) * 2.0 - 1.0;
 			}
 
-			let tensors: buffer_t[] = [f32a.buffer];
+			let tensors: buffer_t[] = [buffer_create_from_raw(f32a.buffer, f32a.length * 4)];
 			let input_shape: i32_array_t[] = [];
 			let input_shape0: i32[] = [1, 3, 512, 512];
 			array_push(input_shape, input_shape0);
@@ -246,10 +248,10 @@ let inpaint_node_def: ui_node_t = {
 			height: 0
 		},
 		{
-			name: "inpaint_node_buttons",
+			name: "inpaint_node_button",
 			type: "CUSTOM",
 			output: -1,
-			default_value: null,
+			default_value: f32_array_create_x(0),
 			data: null,
 			min: 0.0,
 			max: 1.0,

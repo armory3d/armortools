@@ -11,7 +11,7 @@ function color_node_create(raw: ui_node_t, args: f32_array_t): color_node_t {
 	let b: f32 = args == null ? 0.8 : args[2];
 	let a: f32 = args == null ? 1.0 : args[3];
 	let n: color_node_t = {};
-	n.base = logic_node_create();
+	n.base = logic_node_create(n);
 	n.base.get = color_node_get;
 	n.base.get_as_image = color_node_get_as_image;
 	n.base.set = color_node_set;

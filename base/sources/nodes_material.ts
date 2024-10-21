@@ -3842,7 +3842,6 @@ let nodes_material_list: node_list_t[] = [
 ];
 
 function nodes_material_init() {
-	ui_nodes_custom_buttons = map_create();
 	map_set(ui_nodes_custom_buttons, "nodes_material_vector_curves_button", nodes_material_vector_curves_button);
 	map_set(ui_nodes_custom_buttons, "nodes_material_color_ramp_button", nodes_material_color_ramp_button);
 	map_set(ui_nodes_custom_buttons, "nodes_material_new_group_button", nodes_material_new_group_button);

@@ -6,7 +6,7 @@ type string_node_t = {
 
 function string_node_create(raw: ui_node_t, args: f32_array_t): string_node_t {
 	let n: string_node_t = {};
-	n.base = logic_node_create();
+	n.base = logic_node_create(n);
 	n.base.get = string_node_get;
 	n.base.set = string_node_set;
 	n.value = args == null ? "" : sys_buffer_to_string(args.buffer);

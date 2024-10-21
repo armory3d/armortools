@@ -6,7 +6,7 @@ type integer_node_t = {
 
 function integer_node_create(raw: ui_node_t, args: f32_array_t): integer_node_t {
 	let n: float_node_t = {};
-	n.base = logic_node_create();
+	n.base = logic_node_create(n);
 	n.base.get = integer_node_get;
 	n.base.set = integer_node_set;
 	n.value = args == null ? 0 : args[0];

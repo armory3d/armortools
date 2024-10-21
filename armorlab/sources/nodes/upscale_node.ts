@@ -9,7 +9,7 @@ let upscale_node_esrgan_blob: buffer_t;
 
 function upscale_node_create(raw: ui_node_t, args: f32_array_t): upscale_node_t {
 	let n: float_node_t = {};
-	n.base = logic_node_create();
+	n.base = logic_node_create(n);
 	n.base.get_as_image = upscale_node_get_as_image;
 	n.base.get_cached_image = upscale_node_get_cached_image;
 	return n;
@@ -64,7 +64,7 @@ function upscale_node_do_tile(source: image_t): image_t {
 		f32a[i + size1w * size1w * 2] = (u8a[i * 4 + 2] / 255);
 	}
 
-	let tensors: buffer_t[] = [f32a.buffer];
+	let tensors: buffer_t[] = [buffer_create_from_raw(f32a.buffer, f32a.length)];
 	let input_shape: i32_array_t[] = [];
 	let input_shape0: i32[] = [1, 3, size1w, size1h];
 	array_push(input_shape, input_shape0);
@@ -88,7 +88,7 @@ function upscale_node_do_tile(source: image_t): image_t {
 		u8a[i * 4 + 3] = 255;
 	}
 
-	result = image_from_bytes(u8a.buffer, size2w, size2h);
+	result = image_from_bytes(u8a, size2w, size2h);
 	return result;
 }
 

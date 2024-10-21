@@ -210,12 +210,12 @@ function parser_logic_build_default_node(inp: ui_node_socket_t): logic_node_ext_
 
 function parser_logic_create_node_instance(node_type: string, raw: ui_node_t, args: f32_array_t): logic_node_ext_t {
 	if (map_get(parser_logic_custom_nodes, node_type) != null) {
-		let node: logic_node_t = logic_node_create();
+		let node: logic_node_t = logic_node_create(null);
 		node.get = map_get(parser_logic_custom_nodes, node_type);
-		let ext: logic_node_ext_t = {
+		node.ext = {
 			base: node
 		};
-		return ext;
+		return node.ext;
 	}
 
 	if (nodes_brush_creates == null) {

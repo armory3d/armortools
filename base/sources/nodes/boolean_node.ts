@@ -6,7 +6,7 @@ type boolean_node_t = {
 
 function boolean_node_create(raw: ui_node_t, args: f32_array_t): boolean_node_t {
 	let n: boolean_node_t = {};
-	n.base = logic_node_create();
+	n.base = logic_node_create(n);
 	n.base.get = boolean_node_get;
 	n.base.set = boolean_node_set;
 	n.value = args == null ? false : args[0] > 0.0;

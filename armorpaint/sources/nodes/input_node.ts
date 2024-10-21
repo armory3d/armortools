@@ -16,7 +16,7 @@ let input_node_registered: bool = false;
 
 function input_node_create(raw: ui_node_t, args: f32_array_t): input_node_t {
 	let n: float_node_t = {};
-	n.base = logic_node_create();
+	n.base = logic_node_create(n);
 	n.base.get = input_node_get;
 
 	if (!input_node_registered) {

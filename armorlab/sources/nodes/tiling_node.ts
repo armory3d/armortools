@@ -11,7 +11,7 @@ let tiling_node_auto: bool = true;
 
 function tiling_node_create(raw: ui_node_t, args: f32_array_t): tiling_node_t {
 	let n: float_node_t = {};
-	n.base = logic_node_create();
+	n.base = logic_node_create(n);
 	n.base.get_as_image = tiling_node_get_as_image;
 	n.base.get_cached_image = tiling_node_get_cached_image;
 	tiling_node_init();
@@ -24,7 +24,9 @@ function tiling_node_init() {
 	}
 }
 
-function tiling_node_buttons(ui: ui_t, nodes: ui_nodes_t, node: ui_node_t) {
+function tiling_node_button(node_id: i32) {
+	let node: ui_node_t = ui_get_node(ui_nodes_get_canvas(true).nodes, node_id);
+
 	tiling_node_auto = node.buttons[0].default_value == 0 ? false : true;
 	if (!tiling_node_auto) {
 		let tiling_node_strength_handle: ui_handle_t = ui_handle(__ID__);
@@ -91,7 +93,7 @@ function tiling_node_sd_tiling(image: image_t, seed: i32): image_t {
 	// 		u8a[y * 512 + x] = 0;
 	// 	}
 	// }
-	let mask: image_t = image_from_bytes(u8a.buffer, 512, 512, tex_format_t.R8);
+	let mask: image_t = image_from_bytes(u8a, 512, 512, tex_format_t.R8);
 
 	inpaint_node_prompt = tiling_node_prompt;
 	inpaint_node_strength = tiling_node_strength;
@@ -149,10 +151,10 @@ let tiling_node_def: ui_node_t = {
 			height: 0
 		},
 		{
-			name: "tiling_node_buttons",
+			name: "tiling_node_button",
 			type: "CUSTOM",
 			output: -1,
-			default_value: null,
+			default_value: f32_array_create_x(0),
 			data: null,
 			min: 0.0,
 			max: 1.0,

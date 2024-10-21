@@ -7,7 +7,7 @@ type vector_math_node_t = {
 
 function vector_math_node_create(raw: ui_node_t, args: f32_array_t): vector_math_node_t {
 	let n: vector_math_node_t = {};
-	n.base = logic_node_create();
+	n.base = logic_node_create(n);
 	n.base.get = vector_math_node_get;
 	n.v = vec4_create();
 	return n;

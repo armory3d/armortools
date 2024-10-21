@@ -1031,9 +1031,9 @@ function ui_nodes_render() {
 
 			///else
 
-			let brush_node: logic_node_t = parser_logic_get_logic_node(sel);
+			let brush_node: logic_node_ext_t = parser_logic_get_logic_node(sel);
 			if (brush_node != null) {
-				img = logic_node_get_cached_image(brush_node);
+				img = logic_node_get_cached_image(brush_node.base);
 			}
 
 			///end
@@ -1365,7 +1365,7 @@ function ui_nodes_accept_asset_drag(index: i32) {
 	let n: ui_node_t = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_create_node("TEX_IMAGE", g) : nodes_brush_create_node("TEX_IMAGE");
 	///end
 	///if is_lab
-	let n: ui_node_t = nodes_brush_create_node("ImageTextureNode");
+	let n: ui_node_t = nodes_brush_create_node("image_texture_node");
 	///end
 
 	n.buttons[0].default_value[0] = index;

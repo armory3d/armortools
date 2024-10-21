@@ -22,6 +22,10 @@ function nodes_brush_init() {
 	map_set(nodes_brush_creates, "upscale_node", upscale_node_create);
 	map_set(nodes_brush_creates, "variance_node", variance_node_create);
 
+	map_set(nodes_brush_creates, "float_node", float_node_create);
+	map_set(nodes_brush_creates, "vector_node", vector_node_create);
+	map_set(nodes_brush_creates, "color_node", color_node_create);
+
 	nodes_brush_input = [
 		image_texture_node_def,
 		rgb_node_def,
@@ -40,6 +44,11 @@ function nodes_brush_init() {
 		nodes_brush_input,
 		nodes_brush_model
 	];
+
+	map_set(ui_nodes_custom_buttons, "inpaint_node_button", inpaint_node_button);
+	map_set(ui_nodes_custom_buttons, "text_to_photo_node_button", text_to_photo_node_button);
+	map_set(ui_nodes_custom_buttons, "tiling_node_button", tiling_node_button);
+	map_set(ui_nodes_custom_buttons, "variance_node_button", variance_node_button);
 }
 
 function nodes_brush_create_node(node_type: string): ui_node_t {

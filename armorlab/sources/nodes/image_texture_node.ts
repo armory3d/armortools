@@ -1,20 +1,23 @@
 
 type image_texture_node_t = {
 	base?: logic_node_t;
-	file?: string;
-	color_space?: string;
+	raw?: ui_node_t;
 };
 
 function image_texture_node_create(raw: ui_node_t, args: f32_array_t): image_texture_node_t {
 	let n: image_texture_node_t = {};
-	n.base = logic_node_create();
+	n.base = logic_node_create(n);
 	n.base.get_as_image = image_texture_node_get_as_image;
 	n.base.get_cached_image = image_texture_node_get_cached_image;
+	n.raw = raw;
 	return n;
 }
 
 function image_texture_node_get_as_image(self: image_texture_node_t, from: i32): image_t {
-	let index: i32 = array_index_of(project_asset_names, self.file);
+	if (project_assets.length == 0) {
+		return null;
+	}
+	let index: i32 = self.raw.buttons[0].default_value[0];
 	let asset: asset_t = project_assets[index];
 	return project_get_image(asset);
 }

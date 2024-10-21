@@ -6,7 +6,7 @@ type brush_output_node_t = {
 
 function brush_output_node_create(arg: any): brush_output_node_t {
 	let n: brush_output_node_t = {};
-	n.base = logic_node_create();
+	n.base = logic_node_create(n);
 	context_raw.run_brush = brush_output_node_run;
 	context_raw.parse_brush_inputs = brush_output_node_parse_inputs;
 	context_raw.brush_output_node_inst = n;

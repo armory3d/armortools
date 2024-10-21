@@ -8,7 +8,7 @@ type rgb_node_t = {
 function rgb_node_create(raw: ui_node_t, args: f32_array_t): rgb_node_t {
 	let n: rgb_node_t = {};
 	n.raw = raw;
-	n.base = logic_node_create();
+	n.base = logic_node_create(n);
 	n.base.get_as_image = rgb_node_get_as_image;
 	n.base.get_cached_image = rgb_node_get_cached_image;
 	return n;
@@ -28,7 +28,8 @@ function rgb_node_get_as_image(self: rgb_node_t, from: i32): image_t {
 	f32a[1] = default_value[1];
 	f32a[2] = default_value[2];
 	f32a[3] = default_value[3];
-	self.image = image_from_bytes(f32a.buffer, 1, 1, tex_format_t.RGBA128);
+	let buf: buffer_t = buffer_create_from_raw(f32a.buffer, f32a.length * 4);
+	self.image = image_from_bytes(buf, 1, 1, tex_format_t.RGBA128);
 	return self.image;
 }
 

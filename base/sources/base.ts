@@ -392,7 +392,8 @@ function base_h(): i32 {
 ///if is_lab
 function base_w(): i32 {
 	let res: i32 = 0;
-	if (ui_nodes_show || ui_view2d_show) {
+	let show2d: bool = (ui_nodes_show || ui_view2d_show) && config_raw.layout != null && config_raw.layout.length > 0;
+	if (show2d) {
 		res = sys_width() - config_raw.layout[layout_size_t.NODES_W];
 	}
 	else { // Distract free
@@ -404,7 +405,8 @@ function base_w(): i32 {
 
 function base_h(): i32 {
 	let res: i32 = sys_height();
-	if (res > 0) {
+	let has_layout: bool = config_raw.layout != null && config_raw.layout.length > 0;
+	if (res > 0 && has_layout) {
 		let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
 		res -= math_floor(ui_header_default_h * 2 * config_raw.window_scale) + statush;
 	}
@@ -913,9 +915,9 @@ function base_enum_texts(node_type: string): string[] {
 	///end
 
 	///if is_lab
-	if (node_type == "ImageTextureNode") {
+	if (node_type == "image_texture_node") {
 		if (project_asset_names.length > 0) {
-			project_asset_names;
+			return project_asset_names;
 		}
 		else {
 			let empty: string[] = [""];
@@ -997,15 +999,20 @@ function base_redraw_console() {
 }
 
 function base_init_layout() {
-	let show2d: bool = ui_nodes_show || ui_view2d_show;
-
 	let raw: config_t = config_raw;
+	let show2d: bool = (ui_nodes_show || ui_view2d_show) && raw.layout != null;
 	raw.layout = [];
 
 	///if (is_paint || is_sculpt)
 	array_push(raw.layout, math_floor(ui_base_default_sidebar_w * raw.window_scale)); // LayoutSidebarW
 	array_push(raw.layout, math_floor(sys_height() / 2)); // LayoutSidebarH0
 	array_push(raw.layout, math_floor(sys_height() / 2)); // LayoutSidebarH1
+	///end
+
+	///if is_lab
+	array_push(raw.layout, 0);
+	array_push(raw.layout, 0);
+	array_push(raw.layout, 0);
 	///end
 
 	///if arm_ios
@@ -1026,10 +1033,8 @@ function base_init_layout() {
 	///end
 
 	raw.layout_tabs = [
-		///if (is_paint || is_sculpt)
 		0,
 		0,
-		///end
 		0
 	];
 }
@@ -2391,9 +2396,9 @@ function base_flatten(height_to_normal: bool = false): slot_layer_t {
 	let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
 	if (nodes.nodes_selected_id.length > 0) {
 		let node: ui_node_t = ui_get_node(canvas.nodes, nodes.nodes_selected_id[0]);
-		let brush_node: logic_node_t = parser_logic_get_logic_node(node);
-		if (brush_node != null && logic_node_get_cached_image(brush_node) != null) {
-			texpaint = logic_node_get_cached_image(brush_node);
+		let brush_node: logic_node_ext_t = parser_logic_get_logic_node(node);
+		if (brush_node != null && logic_node_get_cached_image(brush_node.base) != null) {
+			texpaint = logic_node_get_cached_image(brush_node.base);
 			let texpaint_nor_rt: render_target_t = map_get(render_path_render_targets, "texpaint_nor_empty");
 			let texpaint_pack_rt: render_target_t = map_get(render_path_render_targets, "texpaint_pack_empty");
 			texpaint_nor = texpaint_nor_rt._image;

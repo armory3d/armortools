@@ -147,7 +147,7 @@ function ui_menubar_render_ui() {
 			else { // Space2D
 				if (_ui_menubar_plane == null) {
 					let mesh: raw_mesh_t = geom_make_plane(1, 1, 2, 2);
-					let raw: raw_mesh_t = {
+					let raw: mesh_data_t = {
 						name: "2DView",
 						vertex_arrays: [
 							{

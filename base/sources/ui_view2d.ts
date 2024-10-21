@@ -161,9 +161,9 @@ function ui_view2d_render() {
 			let nodes: ui_nodes_t = ui_nodes_get_nodes();
 			if (nodes.nodes_selected_id.length > 0) {
 				let sel: ui_node_t = ui_get_node(ui_nodes_get_canvas(true).nodes, nodes.nodes_selected_id[0]);
-				let brush_node: logic_node_t = parser_logic_get_logic_node(sel);
+				let brush_node: logic_node_ext_t = parser_logic_get_logic_node(sel);
 				if (brush_node != null) {
-					tex = logic_node_get_cached_image(brush_node);
+					tex = logic_node_get_cached_image(brush_node.base);
 				}
 			}
 

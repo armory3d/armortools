@@ -10,7 +10,7 @@ let variance_node_prompt: string = "";
 
 function variance_node_create(raw: ui_node_t, args: f32_array_t): variance_node_t {
 	let n: variance_node_t = {};
-	n.base = logic_node_create();
+	n.base = logic_node_create(n);
 	n.base.get_as_image = variance_node_get_as_image;
 	n.base.get_cached_image = variance_node_get_cached_image;
 
@@ -26,7 +26,9 @@ function variance_node_init() {
 	}
 }
 
-function variance_node_buttons(ui: ui_t, nodes: ui_nodes_t, node: ui_node_t) {
+function variance_node_button(node_id: i32) {
+	let node: ui_node_t = ui_get_node(ui_nodes_get_canvas(true).nodes, node_id);
+
 	variance_node_prompt = ui_text_area(ui_handle(__ID__), ui_align_t.LEFT, true, tr("prompt"), true);
 	node.buttons[0].height = string_split(variance_node_prompt, "\n").length;
 }
@@ -53,7 +55,7 @@ function variance_node_get_as_image(self: variance_node_t, from: i32): image_t {
 	iron_g4_swap_buffers();
 
 	let vae_encoder_blob: buffer_t = data_get_blob("models/sd_vae_encoder.quant.onnx");
-	let tensors: buffer_t[] = [f32a.buffer];
+	let tensors: buffer_t[] = [buffer_create_from_raw(f32a.buffer, f32a.length)];
 	let input_shape: i32_array_t[] = [];
 	let input_shape0: i32[] = [1, 3, 512, 512];
 	array_push(input_shape, input_shape0);
@@ -135,10 +137,10 @@ let variance_node_def: ui_node_t = {
 	],
 	buttons: [
 		{
-			name: "variance_node_buttons",
+			name: "variance_node_button",
 			type: "CUSTOM",
 			output: -1,
-			default_value: null,
+			default_value: f32_array_create_x(0),
 			data: null,
 			min: 0.0,
 			max: 1.0,

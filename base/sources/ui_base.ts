@@ -31,28 +31,12 @@ let ui_base_sidebar_mini_w: i32 = ui_base_default_sidebar_mini_w;
 ///end
 
 function ui_base_init_hwnds(): ui_handle_t[] {
-	///if is_paint
 	let hwnds: ui_handle_t[] = [ui_handle_create(), ui_handle_create(), ui_handle_create()];
-	///end
-	///if is_sculpt
-	let hwnds: ui_handle_t[] = [ui_handle_create(), ui_handle_create(), ui_handle_create()];
-	///end
-	///if is_lab
-	let hwnds: ui_handle_t[] = [ui_handle_create()];
-	///end
 	return hwnds;
 }
 
 function ui_base_init_htabs(): ui_handle_t[] {
-	///if is_paint
 	let htabs: ui_handle_t[] = [ui_handle_create(), ui_handle_create(), ui_handle_create()];
-	///end
-	///if is_sculpt
-	let htabs: ui_handle_t[] = [ui_handle_create(), ui_handle_create(), ui_handle_create()];
-	///end
-	///if is_lab
-	let htabs: ui_handle_t[] = [ui_handle_create()];
-	///end
 	return htabs;
 }
 
@@ -62,9 +46,6 @@ function _draw_callback_create(f: (h: ui_handle_t)=>void): tab_draw_t {
 }
 
 function ui_base_init_hwnd_tabs(): tab_draw_array_t[] {
-
-	let r: tab_draw_array_t[] = [];
-
 	///if is_paint
 	let a0: tab_draw_array_t = [
 		_draw_callback_create(tab_layers_draw),
@@ -89,10 +70,6 @@ function ui_base_init_hwnd_tabs(): tab_draw_array_t[] {
 		_draw_callback_create(tab_console_draw),
 		_draw_callback_create(ui_status_draw_version_tab)
 	];
-
-	array_push(r, a0);
-	array_push(r, a1);
-	array_push(r, a2);
 	///end
 
 	///if is_sculpt
@@ -115,14 +92,12 @@ function ui_base_init_hwnd_tabs(): tab_draw_array_t[] {
 		_draw_callback_create(tab_console_draw),
 		_draw_callback_create(ui_status_draw_version_tab)
 	];
-
-	array_push(r, a0);
-	array_push(r, a1);
-	array_push(r, a2);
 	///end
 
 	///if is_lab
-	let a0: tab_draw_array_t = [
+	let a0: tab_draw_array_t = [];
+	let a1: tab_draw_array_t = [];
+	let a2: tab_draw_array_t = [
 		_draw_callback_create(tab_browser_draw),
 		_draw_callback_create(tab_textures_draw),
 		_draw_callback_create(tab_meshes_draw),
@@ -132,9 +107,12 @@ function ui_base_init_hwnd_tabs(): tab_draw_array_t[] {
 		_draw_callback_create(tab_console_draw),
 		_draw_callback_create(ui_status_draw_version_tab)
 	];
-	array_push(r, a0);
 	///end
 
+	let r: tab_draw_array_t[] = [];
+	array_push(r, a0);
+	array_push(r, a1);
+	array_push(r, a2);
 	return r;
 }
 

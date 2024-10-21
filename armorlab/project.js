@@ -21,6 +21,7 @@ project.add_assets("../armorpaint/assets/plugins/hello_node_brush.js", { destina
 project.add_assets("../armorpaint/assets/plugins/import_svg.js", { destination: "data/plugins/{name}" });
 project.add_assets("assets/meshes/*", { destination: "data/meshes/{name}", noembed: true });
 project.add_assets("assets/models/*.onnx", { destination: "data/models/{name}" });
+project.add_assets("assets/models/*.json", { destination: "data/models/{name}" });
 project.add_assets("assets/models/LICENSE.txt", { destination: "data/models/LICENSE.txt" });
 project.add_assets("assets/readme/readme.txt", { destination: "{name}" });
 
