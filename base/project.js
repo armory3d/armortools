@@ -31,7 +31,7 @@ let project = new Project("Base");
 	if (flags.with_onnx) {
 		project.add_define("WITH_ONNX");
 		project.add_include_dir("../" + dir + "/onnx/include");
-		if (platform === "win32") {
+		if (platform === "windows") {
 			project.add_lib("../" + dir + "/onnx/win32/onnxruntime");
 		}
 		else if (platform === "linux") {
@@ -107,7 +107,7 @@ if (flags.raytrace) {
 if (flags.voxels) {
 	project.add_define("arm_voxels");
 
-	if (os_platform() === "win32") {
+	if (platform === "windows") {
 		project.add_assets("shaders/voxel_hlsl/*.d3d11", { destination: "data/{name}" });
 	}
 	else {
