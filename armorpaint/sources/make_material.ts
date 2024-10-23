@@ -60,7 +60,11 @@ function make_material_parse_mesh_material() {
 		}
 	}
 
-	let mm: material_t = { name: "Material", canvas: null };
+	let mm: material_t = {
+		name: "Material",
+		canvas: null
+	};
+
 	let con: node_shader_context_t = make_mesh_run(mm);
 	let scon: shader_context_t = shader_context_create(con.data);
 	let override_context: _shader_override_t = {};
@@ -151,9 +155,15 @@ function make_material_parse_mesh_preview_material(md: material_data_t = null) {
 	array_remove(m._.shader.contexts, scon);
 	array_remove(m._.shader._.contexts, scon);
 
-	let mcon: material_context_t = { name: "mesh", bind_textures: [] };
+	let mcon: material_context_t = {
+		name: "mesh",
+		bind_textures: []
+	};
 
-	let sd: material_t = { name: "Material", canvas: null };
+	let sd: material_t = {
+		name: "Material",
+		canvas: null
+	};
 	let con: node_shader_context_t = make_mesh_preview_run(sd, mcon);
 
 	for (let i: i32 = 0; i < m._.contexts.length; ++i) {
@@ -236,8 +246,14 @@ function make_material_parse_paint_material(bake_previews: bool = true) {
 		}
 	}
 
-	let sdata: material_t = { name: "Material", canvas: ui_nodes_get_canvas_material() };
-	let tmcon: material_context_t = { name: "paint", bind_textures: [] };
+	let sdata: material_t = {
+		name: "Material",
+		canvas: ui_nodes_get_canvas_material()
+	};
+	let tmcon: material_context_t = {
+		name: "paint",
+		bind_textures: []
+	};
 	let con: node_shader_context_t = make_paint_run(sdata, tmcon);
 
 	let compile_error: bool = false;
@@ -407,8 +423,14 @@ function make_material_parse_node_preview_material(node: ui_node_t, group: ui_no
 	if (node.outputs.length == 0) {
 		return null;
 	}
-	let sdata: material_t = { name: "Material", canvas: ui_nodes_get_canvas_material() };
-	let mcon_raw: material_context_t = { name: "mesh", bind_textures: [] };
+	let sdata: material_t = {
+		name: "Material",
+		canvas: ui_nodes_get_canvas_material()
+	};
+	let mcon_raw: material_context_t = {
+		name: "mesh",
+		bind_textures: []
+	};
 	let con: node_shader_context_t = make_node_preview_run(sdata, mcon_raw, node, group, parents);
 	let compile_error: bool = false;
 	let scon: shader_context_t;
