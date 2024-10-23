@@ -20,4 +20,5 @@ project.add_assets("../armorpaint/assets/plugins/hello_world.js", { destination:
 project.add_assets("assets/meshes/*", { destination: "data/meshes/{name}", noembed: true });
 project.add_assets("assets/readme/readme.txt", { destination: "{name}" });
 
+project.flatten();
 return project;

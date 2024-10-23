@@ -32,4 +32,5 @@ else if (platform === "linux") {
 	project.add_assets("onnx/linux/*.so.*", { destination: "{name}" }); // Versioned lib
 }
 
+project.flatten();
 return project;

@@ -13,4 +13,3 @@ else if (platform === "macos") {
 }
 
 return project;
-
