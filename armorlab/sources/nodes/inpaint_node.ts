@@ -51,7 +51,7 @@ function inpaint_node_init() {
 function inpaint_node_button(node_id: i32) {
 	let node: ui_node_t = ui_get_node(ui_nodes_get_canvas(true).nodes, node_id);
 
-	inpaint_node_auto = node.buttons[0].default_value == 0 ? false : true;
+	inpaint_node_auto = node.buttons[0].default_value[0] == 0 ? false : true;
 	if (!inpaint_node_auto) {
 
 		let inpaint_node_strength_handle: ui_handle_t = ui_handle(__ID__);
@@ -127,7 +127,7 @@ function inpaint_node_sd_inpaint(image: image_t, mask: image_t): image_t {
 	inpaint_node_init();
 
 	let bytes_img: buffer_t = image_get_pixels(mask);
-	let u8: buffer_t = bytes_img;
+	let u8_img: buffer_t = bytes_img;
 	let f32mask: f32_array_t = f32_array_create(4 * 64 * 64);
 
 	let vae_encoder_blob: buffer_t = data_get_blob("models/sd_vae_encoder.quant.onnx");
@@ -142,7 +142,7 @@ function inpaint_node_sd_inpaint(image: image_t, mask: image_t): image_t {
 					// let j = (yy * step * mask.width + xx * step) + (y * 512 * mask.width + x * 512);
 					let step: i32 = math_floor(mask.width / 64);
 					let j: i32 = (yy * step * mask.width + xx * step);
-					let f: f32 = u8[j] / 255.0;
+					let f: f32 = u8_img[j] / 255.0;
 					let i: i32 = yy * 64 + xx;
 					f32mask[i              ] = f;
 					f32mask[i + 64 * 64    ] = f;

@@ -27,7 +27,7 @@ function tiling_node_init() {
 function tiling_node_button(node_id: i32) {
 	let node: ui_node_t = ui_get_node(ui_nodes_get_canvas(true).nodes, node_id);
 
-	tiling_node_auto = node.buttons[0].default_value == 0 ? false : true;
+	tiling_node_auto = node.buttons[0].default_value[0] == 0 ? false : true;
 	if (!tiling_node_auto) {
 		let tiling_node_strength_handle: ui_handle_t = ui_handle(__ID__);
 		if (tiling_node_strength_handle.init) {

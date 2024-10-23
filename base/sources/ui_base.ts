@@ -823,7 +823,8 @@ function ui_base_update() {
 		if (mouse_started()) {
 			if (context_raw.particle_timer != null) {
 				tween_stop(context_raw.particle_timer);
-				context_raw.particle_timer.done(context_raw.particle_timer.done_data);
+				let timer: tween_anim_t = context_raw.particle_timer;
+				timer.done(timer.done_data);
 				context_raw.particle_timer = null;
 			}
 			history_push_undo = true;

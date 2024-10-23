@@ -205,7 +205,12 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 	help_mat = mat4_inv(scene_camera.vp);
 	g4_set_mat(base_cursor_inv_vp, help_mat);
 	///if (arm_metal || arm_vulkan)
-	let vs: vertex_structure_t[] = [{ name: "tex", data: "short2norm" }];
+	let vs: vertex_element_t[] = [
+		{
+			name: "tex",
+			data: "short2norm"
+		}
+	];
 	g4_set_vertex_buffer(mesh_data_get(geom, vs));
 	///else
 	g4_set_vertex_buffer(geom._.vertex_buffer);

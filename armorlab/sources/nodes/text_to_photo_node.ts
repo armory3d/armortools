@@ -30,7 +30,7 @@ function text_to_photo_node_get_cached_image(self: text_to_photo_node_t): image_
 function text_to_photo_node_button(node_id: i32) {
 	let node: ui_node_t = ui_get_node(ui_nodes_get_canvas(true).nodes, node_id);
 
-	text_to_photo_node_tiling = node.buttons[0].default_value == 0 ? false : true;
+	text_to_photo_node_tiling = node.buttons[0].default_value[0] == 0 ? false : true;
 	text_to_photo_node_prompt = ui_text_area(ui_handle(__ID__), ui_align_t.LEFT, true, tr("prompt"), true);
 	node.buttons[1].height = string_split(text_to_photo_node_prompt, "\n").length;
 }
@@ -249,7 +249,7 @@ function text_to_photo_node_vae_decoder(latents: f32_array_t, upscale: bool): im
 		latents[i] = 1.0 / 0.18215 * latents[i];
 	}
 
-	let tensors: buffer_t[] = [buffer_create_from_raw(latents.buffer, latents.length)];
+	let tensors: buffer_t[] = [buffer_create_from_raw(latents.buffer, latents.length * 4)];
 	let input_shape: i32_array_t[] = [];
 	let input_shape0: i32[] = [1, 4, 64, 64];
 	array_push(input_shape, input_shape0);

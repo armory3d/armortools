@@ -64,7 +64,7 @@ function upscale_node_do_tile(source: image_t): image_t {
 		f32a[i + size1w * size1w * 2] = (u8a[i * 4 + 2] / 255);
 	}
 
-	let tensors: buffer_t[] = [buffer_create_from_raw(f32a.buffer, f32a.length)];
+	let tensors: buffer_t[] = [buffer_create_from_raw(f32a.buffer, f32a.length * 4)];
 	let input_shape: i32_array_t[] = [];
 	let input_shape0: i32[] = [1, 3, size1w, size1h];
 	array_push(input_shape, input_shape0);
