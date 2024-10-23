@@ -1,6 +1,4 @@
 
-///if (is_paint || is_sculpt)
-
 function util_particle_init() {
 	if (context_raw.particle_material != null) return;
 
@@ -112,7 +110,5 @@ function util_particle_init_mesh() {
 	context_raw.paint_body.shape = physics_shape_t.MESH;
 	physics_body_init(context_raw.paint_body, po.base);
 }
-
-///end
 
 ///end

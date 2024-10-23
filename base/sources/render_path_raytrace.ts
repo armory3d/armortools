@@ -59,7 +59,7 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 	}
 
 	///if is_lab
-	let l: any = base_flatten(true);
+	let l: slot_layer_t = base_flatten(true);
 	if (l.texpaint != render_path_raytrace_last_texpaint) {
 		render_path_raytrace_last_texpaint = l.texpaint;
 

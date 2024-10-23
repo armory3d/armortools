@@ -43,15 +43,9 @@ type context_t = {
 	parse_vcols?: bool;
 
 	select_time?: f32;
-	///if (arm_direct3d12 || arm_vulkan || arm_metal)
 	pathtrace_mode?: path_trace_mode_t;
-	///end
 	viewport_mode?: viewport_mode_t;
-	///if (arm_android || arm_ios)
 	render_mode?: render_mode_t;
-	///else
-	render_mode?: render_mode_t;
-	///end
 
 	viewport_shader?: any; // JSValue * -> (ns: node_shader_t)=>void;
 	hscale_was_changed?: bool;
@@ -96,11 +90,7 @@ type context_t = {
 	hbloom?: ui_handle_t;
 	hsupersample?: ui_handle_t;
 	hvxao?: ui_handle_t;
-	///if is_forge
 	vxao_ext?: f32;
-	///else
-	vxao_ext?: f32;
-	///end
 	vxao_offset?: f32;
 	vxao_aperture?: f32;
 	texture_export_path?: string;
@@ -108,7 +98,6 @@ type context_t = {
 	camera_controls?: camera_controls_t;
 	pen_painting_only?: bool;
 
-	///if (is_paint || is_sculpt)
 	material?: slot_material_t;
 	layer?: slot_layer_t;
 	brush?: slot_brush_t;
@@ -162,17 +151,6 @@ type context_t = {
 	text_tool_image?: image_t;
 	text_tool_text?: string;
 	particle_material?: material_data_t;
-	///if arm_physics
-	particle_physics?: bool;
-	particle_hit_x?: f32;
-	particle_hit_y?: f32;
-	particle_hit_z?: f32;
-	last_particle_hit_x?: f32;
-	last_particle_hit_y?: f32;
-	last_particle_hit_z?: f32;
-	particle_timer?: tween_anim_t;
-	paint_body?: physics_body_t;
-	///end
 
 	layer_filter?: i32;
 	brush_output_node_inst?: brush_output_node_t;
@@ -232,12 +210,7 @@ type context_t = {
 	brush_scale?: f32;
 	brush_angle?: f32;
 	brush_angle_handle?: ui_handle_t;
-	///if is_paint
 	brush_hardness?: f32;
-	///end
-	///if is_sculpt
-	brush_hardness?: f32;
-	///end
 	brush_lazy_radius?: f32;
 	brush_lazy_step?: f32;
 	brush_lazy_x?: f32;
@@ -268,34 +241,30 @@ type context_t = {
 	last_htab0_pos?: i32;
 	maximized_sidebar_width?: i32;
 	drag_dest?: i32;
-	///end
-
-	///if is_lab
-	material?: slot_material_t; ////
-	layer?: slot_layer_t; ////
-	tool?: workspace_tool_t;
-
-	color_picker_previous_tool?: workspace_tool_t;
-
-	brush_radius?: f32;
-	brush_radius_handle?: ui_handle_t;
-	brush_scale?: f32;
 
 	coords?: vec4_t;
 	start_x?: f32;
 	start_y?: f32;
 
-	// Brush ruler
 	lock_begin?: bool;
 	lock_x?: bool;
 	lock_y?: bool;
 	lock_start_x?: f32;
 	lock_start_y?: f32;
 	registered?: bool;
-	///end
 
-	///if is_forge
 	selected_object?: object_t;
+
+	///if arm_physics
+	particle_physics?: bool;
+	particle_hit_x?: f32;
+	particle_hit_y?: f32;
+	particle_hit_z?: f32;
+	last_particle_hit_x?: f32;
+	last_particle_hit_y?: f32;
+	last_particle_hit_z?: f32;
+	particle_timer?: tween_anim_t;
+	paint_body?: physics_body_t;
 	///end
 }
 

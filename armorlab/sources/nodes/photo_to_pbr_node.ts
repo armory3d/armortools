@@ -167,7 +167,7 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): i
 }
 
 ///if (arm_metal || arm_vulkan)
-function photo_to_pbr_node_bgra_swap(buffer: buffer_t) {
+function photo_to_pbr_node_bgra_swap(buffer: buffer_t): buffer_t {
 	let u8a: buffer_t = buffer;
 	for (let i: i32 = 0; i < math_floor(buffer.length / 4); ++i) {
 		let r: i32 = u8a[i * 4];

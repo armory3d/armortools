@@ -3,13 +3,9 @@ let history_steps: step_t[];
 let history_undo_i: i32 = 0; // Undo layer
 let history_undos: i32 = 0; // Undos available
 let history_redos: i32 = 0; // Redos available
-///if (is_paint || is_sculpt)
 let history_push_undo: bool = false; // Store undo on next paint
 let history_undo_layers: slot_layer_t[] = null;
-///end
-///if is_sculpt
 let history_push_undo2: bool = false;
-///end
 
 function history_undo() {
 	if (history_undos > 0) {
