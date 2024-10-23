@@ -54,6 +54,7 @@ let project = new Project("Base");
 	project.add_define("WITH_PLUGINS");
 	project.add_cfiles("sources/plugin_api.c");
 	project.add_project("../" + dir + "/plugins");
+	project.add_project("plugins");
 }
 
 project.add_project("../armorcore");
