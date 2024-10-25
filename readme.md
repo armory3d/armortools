@@ -10,8 +10,7 @@ armortools
 
 **Generating a locale file**
 ```bash
-export ARM_LOCALE=<locale code>
-./armorcore/make --js base/tools/extract_locales.js
+./armorcore/make --js base/tools/extract_locales.js <locale code>
 # Generates a `base/assets/locale/<locale code>.json` file
 ```
 

@@ -1,14 +1,13 @@
 // Extracts localizable strings from a set of source files and writes them to JSON files.
 // This script can create new translations or update existing ones.
 // Usage:
-// `export ARM_LOCALE=<locale code>`
-// `../../armorcore/make --js extract_locales.js`
+// `../../armorcore/make --js extract_locales.js <locale code>`
 // Generates a `base/assets/locale/<locale code>.json` file
 
-let locale = std.getenv("ARM_LOCALE");
+let locale = scriptArgs[4];
 
 if (!locale) {
-    console.log("ARM_LOCALE env variable not set!");
+    console.log("Locale code not set!");
     std.exit();
 }
 
