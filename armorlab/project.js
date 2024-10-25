@@ -25,7 +25,7 @@ project.add_assets("assets/models/*.json", { destination: "data/models/{name}" }
 project.add_assets("assets/models/LICENSE.txt", { destination: "data/models/LICENSE.txt" });
 project.add_assets("assets/readme/readme.txt", { destination: "{name}" });
 
-if (platform === "win32") {
+if (platform === "windows") {
 	project.add_assets("onnx/win32/*.dll", { destination: "{name}" });
 }
 else if (platform === "linux") {
