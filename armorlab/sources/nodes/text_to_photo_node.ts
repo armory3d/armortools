@@ -123,7 +123,7 @@ function text_to_photo_node_unet(latents: f32_array_t, text_embeddings: f32_arra
 	let counter: i32 = 0;
 
 	while (true) {
-		let a: i32 = counter + 1;
+		let a: i32 = counter;
 		let b: i32 = 50 - offset;
 		console_progress(tr("Processing") + " - " + tr("Text to Photo") + " (" + a + "/" + b + ")");
 
