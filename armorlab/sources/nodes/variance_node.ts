@@ -52,7 +52,6 @@ function variance_node_get_as_image(self: variance_node_t, from: i32): image_t {
 	}
 
 	console_progress(tr("Processing") + " - " + tr("Variance"));
-	iron_g4_swap_buffers();
 
 	let vae_encoder_blob: buffer_t = data_get_blob("models/sd_vae_encoder.quant.onnx");
 	let tensors: buffer_t[] = [buffer_create_from_raw(f32a.buffer, f32a.length * 4)];

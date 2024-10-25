@@ -48,7 +48,6 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): i
 	photo_to_pbr_node_cached_source = source;
 
 	console_progress(tr("Processing") + " - " + tr("Photo to PBR"));
-	iron_g4_swap_buffers();
 
 	let tile_floats: f32_array_t[] = [];
 	let tiles_x: i32 = math_floor(config_get_texture_res_x() / photo_to_pbr_node_tile_w);

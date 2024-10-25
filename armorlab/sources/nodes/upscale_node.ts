@@ -19,7 +19,6 @@ function upscale_node_get_as_image(self: upscale_node_t, from: i32): image_t {
 	upscale_node_image = logic_node_input_get_as_image(self.base.inputs[0]);
 
 	console_progress(tr("Processing") + " - " + tr("Upscale"));
-	iron_g4_swap_buffers();
 
 	upscale_node_load_blob();
 	if (upscale_node_image.width < config_get_texture_res_x()) {

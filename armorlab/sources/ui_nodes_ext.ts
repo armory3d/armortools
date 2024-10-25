@@ -12,7 +12,6 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 		app_notify_on_render_2d(ui_nodes_ext_delay_idle_sleep);
 
 		console_progress(tr("Processing"));
-		iron_g4_swap_buffers();
 
 		let timer: f32 = time_time();
 		parser_logic_parse(project_canvas);
@@ -99,7 +98,6 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 				// Apply displacement
 				if (config_raw.displace_strength > 0) {
 					console_progress(tr("Apply Displacement"));
-					iron_g4_swap_buffers();
 
 					let uv_scale: f32 = scene_meshes[0].data.scale_tex * context_raw.brush_scale;
 					util_mesh_apply_displacement(texpaint_pack._image, 0.05 * config_raw.displace_strength, uv_scale);

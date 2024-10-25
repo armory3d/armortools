@@ -71,7 +71,6 @@ function inpaint_node_button(node_id: i32) {
 function inpaint_node_get_as_image(self: inpaint_node_t, from: i32): image_t {
 	let source: image_t = logic_node_input_get_as_image(self.base.inputs[0]);
 	console_progress(tr("Processing") + " - " + tr("Inpaint"));
-	iron_g4_swap_buffers();
 
 	g2_begin(inpaint_node_image);
 	g2_draw_scaled_image(source, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());

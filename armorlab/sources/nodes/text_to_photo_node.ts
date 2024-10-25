@@ -54,7 +54,6 @@ type text_encoder_result_t = {
 
 function text_to_photo_node_text_encoder(prompt: string, inpaint_latents: f32_array_t): text_encoder_result_t {
 	console_progress(tr("Processing") + " - " + tr("Text to Photo"));
-	iron_g4_swap_buffers();
 
 	let words: string[] = string_split(
 		trim_end(string_replace_all(string_replace_all(string_replace_all(prompt, "\n", " "), ",", " , "), "  ", " ")), " "
@@ -127,7 +126,6 @@ function text_to_photo_node_unet(latents: f32_array_t, text_embeddings: f32_arra
 		let a: i32 = counter + 1;
 		let b: i32 = 50 - offset;
 		console_progress(tr("Processing") + " - " + tr("Text to Photo") + " (" + a + "/" + b + ")");
-		iron_g4_swap_buffers();
 
 		let timestep: i32 = text_to_photo_node_timesteps[counter + offset];
 		for (let i: i32 = 0; i < latents.length; ++i) latent_model_input[i] = latents[i];
@@ -243,7 +241,6 @@ function text_to_photo_node_unet(latents: f32_array_t, text_embeddings: f32_arra
 
 function text_to_photo_node_vae_decoder(latents: f32_array_t, upscale: bool): image_t {
 	console_progress(tr("Processing") + " - " + tr("Text to Photo"));
-	iron_g4_swap_buffers();
 
 	for (let i: i32 = 0; i < latents.length; ++i) {
 		latents[i] = 1.0 / 0.18215 * latents[i];

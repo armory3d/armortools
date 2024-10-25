@@ -46,6 +46,13 @@ function console_progress(s: string) {
 		console_trace(s);
 	}
 	console_progress_text = s;
+
+	// Pass one frame to immediately show the message
+	ui_end_input();
+	g2_end();
+	app_render();
+	g2_begin();
+	iron_g4_swap_buffers();
 }
 
 function console_info(s: string) {
