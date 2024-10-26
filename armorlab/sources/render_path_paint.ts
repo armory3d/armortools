@@ -165,7 +165,7 @@ function render_path_paint_commands_cursor() {
 
 	let nodes: ui_nodes_t = ui_nodes_get_nodes();
 	let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
-	let inpaint: bool = nodes.nodes_selected_id.length > 0 && ui_get_node(canvas.nodes, nodes.nodes_selected_id[0]).type == "InpaintNode";
+	let inpaint: bool = nodes.nodes_selected_id.length > 0 && ui_get_node(canvas.nodes, nodes.nodes_selected_id[0]).type == "inpaint_node";
 
 	if (!base_ui_enabled || base_is_dragging || !inpaint) {
 		return;
@@ -302,7 +302,7 @@ function render_path_paint_bind_layers() {
 		let nodes: ui_nodes_t = ui_nodes_get_nodes();
 		let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
 		let node: ui_node_t = ui_get_node(canvas.nodes, nodes.nodes_selected_id[0]);
-		let inpaint: bool = node.type == "InpaintNode";
+		let inpaint: bool = node.type == "inpaint_node";
 		if (inpaint) {
 			let texpaint_node_target_rt: render_target_t = map_get(render_path_render_targets, "texpaint_node_target");
 			texpaint_node_target_rt._image = inpaint_node_get_target();

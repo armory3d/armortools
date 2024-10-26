@@ -1,5 +1,5 @@
 
-declare let iron_texsynth: any;
+///include "../plugins/proc_texsynth/proc_texsynth.h"
 
 type inpaint_node_t = {
 	base?: logic_node_t;
@@ -116,7 +116,7 @@ function inpaint_node_texsynth_inpaint(image: image_t, tiling: bool, mask: image
 	let bytes_img: buffer_t = image_get_pixels(image);
 	let bytes_mask: buffer_t = mask != null ? image_get_pixels(mask) : buffer_create(w * h);
 	let bytes_out: buffer_t = buffer_create(w * h * 4);
-	// texsynth_inpaint(w, h, bytes_out, bytes_img, bytes_mask, tiling);
+	texsynth_inpaint(w, h, bytes_out.buffer, bytes_img.buffer, bytes_mask.buffer, tiling);
 
 	inpaint_node_result = image_from_bytes(bytes_out, w, h);
 	return inpaint_node_result;

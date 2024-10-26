@@ -1,8 +1,7 @@
 
 #include "../../../base/sources/plugin_api.h"
 #include "iron_array.h"
-
-void texsynth_inpaint(int w, int h, void *output_ptr, void *image_ptr, void *mask_ptr, bool tiling);
+#include "proc_texsynth/proc_texsynth.h"
 
 FN(texsynth_inpaint) {
 	int32_t w;

@@ -425,24 +425,12 @@ function box_preferences_show() {
 				layer_res_handle.position = config_raw.layer_res;
 			}
 
-			///if is_paint
 			///if (arm_android || arm_ios)
 			let layer_res_combo: string[] = ["128", "256", "512", "1K", "2K", "4K"];
 			ui_combo(layer_res_handle, layer_res_combo, tr("Default Layer Resolution"), true);
 			///else
 			let layer_res_combo: string[] = ["128", "256", "512", "1K", "2K", "4K", "8K"];
 			ui_combo(layer_res_handle, layer_res_combo, tr("Default Layer Resolution"), true);
-			///end
-			///end
-
-			///if is_lab
-			///if (arm_android || arm_ios)
-			let layer_res_combo: string[] = ["2K", "4K"];
-			ui_combo(layer_res_handle, layer_res_combo, tr("Default Layer Resolution"), true);
-			///else
-			let layer_res_combo: string[] = ["2K", "4K", "8K", "16K"];
-			ui_combo(layer_res_handle, layer_res_combo, tr("Default Layer Resolution"), true);
-			///end
 			///end
 
 			if (layer_res_handle.changed) {

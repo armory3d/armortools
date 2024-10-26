@@ -880,7 +880,7 @@ function context_run_brush(from: i32) {
 
 	let nodes: ui_nodes_t = ui_nodes_get_nodes();
 	let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
-	let inpaint: bool = nodes.nodes_selected_id.length > 0 && ui_get_node(canvas.nodes, nodes.nodes_selected_id[0]).type == "InpaintNode";
+	let inpaint: bool = nodes.nodes_selected_id.length > 0 && ui_get_node(canvas.nodes, nodes.nodes_selected_id[0]).type == "inpaint_node";
 
 	// Paint bounds
 	if (inpaint &&

@@ -67,24 +67,12 @@ function box_export_tab_export_textures(ui: ui_t, title: string, bake_material: 
 		let row: f32[] = [0.5, 0.5];
 		ui_row(row);
 
-		///if is_paint
 		///if (arm_android || arm_ios)
 		let base_res_combo: string[] = ["128", "256", "512", "1K", "2K", "4K"];
 		ui_combo(base_res_handle, base_res_combo, tr("Resolution"), true);
 		///else
 		let base_res_combo: string[] = ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"];
 		ui_combo(base_res_handle, base_res_combo, tr("Resolution"), true);
-		///end
-		///end
-
-		///if is_lab
-		///if (arm_android || arm_ios)
-		let base_res_combo: string[] = ["2K", "4K"];
-		ui_combo(base_res_handle, base_res_combo, tr("Resolution"), true);
-		///else
-		let base_res_combo: string[] = ["2K", "4K", "8K", "16K"];
-		ui_combo(base_res_handle, base_res_combo, tr("Resolution"), true);
-		///end
 		///end
 
 		if (base_res_handle.changed) {

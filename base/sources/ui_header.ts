@@ -618,7 +618,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 
 		let nodes: ui_nodes_t = ui_nodes_get_nodes();
 		let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
-		let inpaint: bool = nodes.nodes_selected_id.length > 0 && ui_get_node(canvas.nodes, nodes.nodes_selected_id[0]).type == "InpaintNode";
+		let inpaint: bool = nodes.nodes_selected_id.length > 0 && ui_get_node(canvas.nodes, nodes.nodes_selected_id[0]).type == "inpaint_node";
 		if (inpaint) {
 			context_raw.brush_radius = ui_slider(context_raw.brush_radius_handle, tr("Radius"), 0.01, 2.0, true);
 			if (ui.is_hovered) {
