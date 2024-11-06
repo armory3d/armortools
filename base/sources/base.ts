@@ -63,7 +63,6 @@ let base_opac_merge_mask: kinc_const_loc_t;
 let base_blending_merge_mask: kinc_const_loc_t;
 let base_temp_mask_image: image_t = null;
 
-///if is_lab
 let base_pipe_copy_r: pipeline_t;
 let base_pipe_copy_g: pipeline_t;
 let base_pipe_copy_b: pipeline_t;
@@ -72,7 +71,7 @@ let base_pipe_copy_a_tex: kinc_tex_unit_t;
 let base_pipe_inpaint_preview: pipeline_t;
 let base_tex0_inpaint_preview: kinc_tex_unit_t;
 let base_texa_inpaint_preview: kinc_tex_unit_t;
-///end
+
 let base_temp_image: image_t = null;
 let base_expa: image_t = null;
 let base_expb: image_t = null;

@@ -1,6 +1,4 @@
 
-///if (is_paint || is_sculpt)
-
 let util_render_material_preview_size: i32 = 256;
 let util_render_decal_preview_size: i32 = 512;
 let util_render_layer_preview_size: i32 = 200;
@@ -463,5 +461,3 @@ function util_render_create_screen_aligned_full_data() {
 	}
 	g4_index_buffer_unlock(util_render_screen_aligned_full_ib);
 }
-
-///end

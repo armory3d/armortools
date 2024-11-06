@@ -1,6 +1,4 @@
 
-///if (is_paint || is_sculpt)
-
 let ui_toolbar_default_w: i32 = 36;
 
 let ui_toolbar_handle: ui_handle_t = ui_handle_create();
@@ -236,5 +234,3 @@ function ui_toolbar_draw_highlight() {
 	g2_set_color(ui.ops.theme.HIGHLIGHT_COL);
 	ui_draw_rect(true, ui._x + -1,  ui._y + 2, size + 2, size + 2);
 }
-
-///end

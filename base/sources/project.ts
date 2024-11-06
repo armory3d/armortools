@@ -19,7 +19,7 @@ let project_atlas_names: string[] = null;
 ///end
 ///if is_lab
 let project_material_data: material_data_t = null; ////
-let project_materials: any[] = null; ////
+let project_materials: slot_material_t[] = null; ////
 let project_nodes: ui_nodes_t;
 let project_canvas: ui_node_canvas_t;
 let project_default_canvas: buffer_t = null;

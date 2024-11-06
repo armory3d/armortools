@@ -3,6 +3,11 @@ let make_material_default_scon: shader_context_t = null;
 let make_material_default_mcon: material_context_t = null;
 let make_material_height_used: bool = false;
 
+type parse_node_preview_result_t = {
+	scon: shader_context_t;
+	mcon: material_context_t;
+};
+
 function make_material_parse_mesh_material() {
 	let m: material_data_t = project_material_data;
 
@@ -140,4 +145,10 @@ function make_material_delete_context(c: shader_context_t) {
 
 function make_material_parse_brush() {
 	// parser_logic_parse(context_raw.brush.canvas);
+}
+
+function make_material_parse_mesh_preview_material(md: material_data_t = null) {
+}
+
+function make_material_parse_node_preview_material(node: ui_node_t, group: ui_node_canvas_t = null, parents: ui_node_t[] = null): parse_node_preview_result_t {
 }

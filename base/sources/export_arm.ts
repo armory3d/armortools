@@ -265,9 +265,16 @@ function export_arm_export_node(n: ui_node_t, assets: asset_t[] = null) {
 	// }
 }
 
+///if is_lab
+function export_arm_run_material(path: string) {
+}
+///end
+
 ///if (is_paint || is_sculpt)
 function export_arm_run_material(path: string) {
-	if (!ends_with(path, ".arm")) path += ".arm";
+	if (!ends_with(path, ".arm")) {
+		path += ".arm";
+	}
 	let mnodes: ui_node_canvas_t[] = [];
 	let mgroups: ui_node_canvas_t[] = null;
 	let m: slot_material_t = context_raw.material;

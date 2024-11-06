@@ -9,6 +9,7 @@ project.add_project("../base");
 
 project.add_tsfiles("../armorpaint/sources");
 project.add_tsfiles("../armorpaint/sources/nodes");
+project.add_shaders("../armorpaint/shaders/*.glsl");
 project.add_tsfiles("sources");
 project.add_tsfiles("sources/nodes");
 project.add_shaders("shaders/*.glsl");

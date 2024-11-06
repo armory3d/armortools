@@ -1,6 +1,4 @@
 
-///if (is_paint || is_sculpt)
-
 let util_uv_uvmap: image_t = null;
 let util_uv_uvmap_cached: bool = false;
 let util_uv_trianglemap: image_t = null;
@@ -204,5 +202,3 @@ type coord_t = {
 	x?: i32;
 	y?: i32;
 }
-
-///end

@@ -3,12 +3,10 @@ let box_export_htab: ui_handle_t = ui_handle_create();
 let box_export_files: string[] = null;
 let box_export_mesh_handle: ui_handle_t = ui_handle_create();
 
-///if (is_paint || is_lab)
 let box_export_hpreset: ui_handle_t = ui_handle_create();
 let box_export_preset: export_preset_t = null;
 let box_export_channels: string[] = ["base_r", "base_g", "base_b", "height", "metal", "nor_r", "nor_g", "nor_g_directx", "nor_b", "occ", "opac", "rough", "smooth", "emis", "subs", "0.0", "1.0"];
 let box_export_color_spaces: string[] = ["linear", "srgb"];
-///end
 
 ///if (is_paint || is_lab)
 function box_export_show_textures() {

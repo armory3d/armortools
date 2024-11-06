@@ -1,6 +1,4 @@
 
-///if (is_paint || is_lab)
-
 let export_texture_gamma: f32 = 1.0 / 2.2;
 
 function export_texture_run(path: string, bake_material: bool = false) {
@@ -154,13 +152,7 @@ function export_texture_run_bake_material(path: string) {
 }
 ///end
 
-///if is_paint
 function export_texture_run_layers(path: string, layers: slot_layer_t[], object_name: string = "", bake_material: bool = false) {
-///end
-
-///if is_lab
-function export_texture_run_layers(path: string, layers: any[], object_name: string = "") {
-///end
 
 	let texture_size_x: i32 = config_get_texture_res_x();
 	let texture_size_y: i32 = config_get_texture_res_y();
@@ -328,16 +320,14 @@ function export_texture_run_layers(path: string, layers: any[], object_name: str
 	///end
 	///end
 
-	///if is_paint
 	let texpaint: image_t = base_expa;
 	let texpaint_nor: image_t = base_expb;
 	let texpaint_pack: image_t = base_expc;
-	///end
 
 	///if is_lab
-	let texpaint: image_t = brush_output_node_inst.texpaint;
-	let texpaint_nor: image_t = brush_output_node_inst.texpaint_nor;
-	let texpaint_pack: image_t = brush_output_node_inst.texpaint_pack;
+	texpaint = brush_output_node_inst.texpaint;
+	texpaint_nor = brush_output_node_inst.texpaint_nor;
+	texpaint_pack = brush_output_node_inst.texpaint_pack;
 	///end
 
 	let pixpaint: buffer_t = null;
@@ -566,5 +556,3 @@ type export_preset_texture_t = {
 	channels?: string[];
 	color_space?: string;
 };
-
-///end

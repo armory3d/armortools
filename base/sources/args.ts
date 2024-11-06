@@ -27,8 +27,6 @@ function args_parse() {
 			else if (current_arg == "--b" || current_arg == "--background") {
 				args_background = true;
 			}
-
-			///if (is_paint || is_lab)
 			else if (path_is_texture(current_arg)) {
 				args_asset_path = current_arg;
 			}
@@ -41,9 +39,6 @@ function args_parse() {
 				++i;
 				args_export_textures_path = iron_get_arg(i);
 			}
-			///end
-
-			///if (is_paint || is_sculpt)
 			else if (current_arg == "--reload-mesh") {
 				args_reimport_mesh = true;
 			}
@@ -55,15 +50,11 @@ function args_parse() {
 			else if (path_is_mesh(current_arg) || (i > 1 && !starts_with(current_arg, "-") && path_is_folder(current_arg))) {
 				args_asset_path = current_arg;
 			}
-			///end
-
-			///if is_paint
 			else if (current_arg == "--export-material" && (i + 1) <= iron_get_arg_count()) {
 				args_export_material = true;
 				++i;
 				args_export_material_path = iron_get_arg(i);
 			}
-			///end
 
 			++i;
 		}
@@ -78,19 +69,14 @@ function args_run() {
 			}
 			else if (args_asset_path != "") {
 				import_asset_run(args_asset_path, -1, -1, false);
-				///if is_paint
 				if (path_is_texture(args_asset_path)) {
 					ui_base_show_2d_view(view_2d_type_t.ASSET);
 				}
-				///end
 			}
-			///if (is_paint || is_sculpt)
 			else if (args_reimport_mesh) {
 				project_reimport_mesh();
 			}
-			///end
 
-			///if (is_paint || is_lab)
 			if (args_export_textures) {
 				if (args_export_textures_type == "png" ||
 					args_export_textures_type == "jpg" ||
@@ -99,31 +85,21 @@ function args_run() {
 					if (path_is_folder(args_export_textures_path)) {
 						// Applying the correct format type from args
 						if (args_export_textures_type == "png") {
-							///if is_paint
 							base_bits_handle.position = texture_bits_t.BITS8;
-							///end
 							context_raw.format_type = texture_ldr_format_t.PNG;
 						}
 						else if (args_export_textures_type == "jpg") {
-							///if is_paint
 							base_bits_handle.position = texture_bits_t.BITS8;
-							///end
 							context_raw.format_type = texture_ldr_format_t.JPG;
 						}
 						else if (args_export_textures_type == "exr16") {
-							///if is_paint
 							base_bits_handle.position = texture_bits_t.BITS16;
-							///end
 						}
 						else if (args_export_textures_type == "exr32") {
-							///if is_paint
 							base_bits_handle.position = texture_bits_t.BITS32;
-							///end
 						}
 
-						///if is_paint
 						context_raw.layers_export = export_mode_t.VISIBLE;
-						///end
 
 						// Get export preset and apply the correct one from args
 						box_export_files = file_read_directory(path_data() + path_sep + "export_presets");
@@ -157,9 +133,7 @@ function args_run() {
 					iron_log(tr("Invalid texture type"));
 				}
 			}
-			///end
 
-			///if (is_paint || is_sculpt)
 			else if (args_export_mesh) {
 				if (path_is_folder(args_export_mesh_path)) {
 					let f: string = ui_files_filename;
@@ -172,14 +146,11 @@ function args_run() {
 					iron_log(tr("Invalid export directory"));
 				}
 			}
-			///end
 
-			///if is_paint
 			else if (args_export_material) {
 				context_raw.write_icon_on_export = true;
 				export_arm_run_material(args_export_material_path);
 			}
-			///end
 
 			if (args_background) {
 				sys_stop();

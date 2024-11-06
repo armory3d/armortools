@@ -6,11 +6,9 @@ type slot_layer_t = {
 	visible?: bool;
 	parent?: slot_layer_t; // Group (for layers) or layer (for masks)
 	texpaint?: image_t; // Base or mask
-	////if is_paint
 	texpaint_nor?: image_t;
 	texpaint_pack?: image_t;
 	texpaint_preview?: image_t; // Layer preview
-	////end
 	mask_opacity?: f32; // Opacity mask
 	fill_layer?: slot_material_t;
 	show_panel?: bool;
@@ -119,7 +117,6 @@ function slot_layer_create(ext: string = "", type: layer_slot_type_t = layer_slo
 		///end
 	}
 
-	///if is_paint
 	else { // Mask
 		let id: i32 = (raw.id + 1);
 		raw.name = "Mask " + id;
@@ -137,7 +134,6 @@ function slot_layer_create(ext: string = "", type: layer_slot_type_t = layer_slo
 
 		raw.texpaint_preview = image_create_render_target(util_render_layer_preview_size, util_render_layer_preview_size, tex_format_t.RGBA32);
 	}
-	///end
 
 	return raw;
 }
@@ -187,17 +183,14 @@ function slot_layer_unload(raw: slot_layer_t) {
 	}
 
 	let _texpaint: image_t = raw.texpaint;
-	///if is_paint
 	let _texpaint_nor: image_t = raw.texpaint_nor;
 	let _texpaint_pack: image_t = raw.texpaint_pack;
 	let _texpaint_preview: image_t = raw.texpaint_preview;
-	///end
 
 	app_notify_on_next_frame(function (_texpaint: image_t) {
 		image_unload(_texpaint);
 	}, _texpaint);
 
-	///if is_paint
 	if (_texpaint_nor != null) {
 		app_notify_on_next_frame(function (_texpaint_nor: image_t) {
 			image_unload(_texpaint_nor);
@@ -208,16 +201,16 @@ function slot_layer_unload(raw: slot_layer_t) {
 			image_unload(_texpaint_pack);
 		}, _texpaint_pack);
 	}
-	image_unload(_texpaint_preview);
-	///end
+
+	if (_texpaint_preview != null) {
+		image_unload(_texpaint_preview);
+	}
 
 	map_delete(render_path_render_targets, "texpaint" + raw.ext);
-	///if is_paint
 	if (slot_layer_is_layer(raw)) {
 		map_delete(render_path_render_targets, "texpaint_nor" + raw.ext);
 		map_delete(render_path_render_targets, "texpaint_pack" + raw.ext);
 	}
-	///end
 }
 
 function slot_layer_swap(raw: slot_layer_t, other: slot_layer_t) {
@@ -230,14 +223,11 @@ function slot_layer_swap(raw: slot_layer_t, other: slot_layer_t) {
 		raw.texpaint = other.texpaint;
 		other.texpaint = _texpaint;
 
-		///if is_paint
 		let _texpaint_preview: image_t = raw.texpaint_preview;
 		raw.texpaint_preview = other.texpaint_preview;
 		other.texpaint_preview = _texpaint_preview;
-		///end
 	}
 
-	///if is_paint
 	if (slot_layer_is_layer(raw) && slot_layer_is_layer(other)) {
 		let nor0: render_target_t = map_get(render_path_render_targets, "texpaint_nor" + raw.ext);
 		nor0._image = other.texpaint_nor;
@@ -254,7 +244,6 @@ function slot_layer_swap(raw: slot_layer_t, other: slot_layer_t) {
 		other.texpaint_nor = _texpaint_nor;
 		other.texpaint_pack = _texpaint_pack;
 	}
-	///end
 }
 
 function slot_layer_clear(raw: slot_layer_t, base_color: i32 = 0x00000000, base_image: image_t = null, occlusion: f32 = 1.0, roughness: f32 = base_default_rough, metallic: f32 = 0.0) {
@@ -267,7 +256,6 @@ function slot_layer_clear(raw: slot_layer_t, base_color: i32 = 0x00000000, base_
 		g2_end();
 	}
 
-	///if is_paint
 	if (slot_layer_is_layer(raw)) {
 		g4_begin(raw.texpaint_nor);
 		g4_clear(color_from_floats(0.5, 0.5, 1.0, 0.0)); // Nor
@@ -276,7 +264,6 @@ function slot_layer_clear(raw: slot_layer_t, base_color: i32 = 0x00000000, base_
 		g4_clear(color_from_floats(occlusion, roughness, metallic, 0.0)); // Occ, rough, met
 		g4_end();
 	}
-	///end
 
 	context_raw.layer_preview_dirty = true;
 	context_raw.ddirty = 3;
@@ -333,18 +320,22 @@ function slot_layer_duplicate(raw: slot_layer_t): slot_layer_t {
 		g2_draw_image(raw.texpaint, 0, 0);
 		g2_set_pipeline(null);
 		g2_end();
-		///if is_paint
-		g2_begin(l.texpaint_nor);
-		g2_set_pipeline(base_pipe_copy);
-		g2_draw_image(raw.texpaint_nor, 0, 0);
-		g2_set_pipeline(null);
-		g2_end();
-		g2_begin(l.texpaint_pack);
-		g2_set_pipeline(base_pipe_copy);
-		g2_draw_image(raw.texpaint_pack, 0, 0);
-		g2_set_pipeline(null);
-		g2_end();
-		///end
+
+		if (l.texpaint_nor != null) {
+			g2_begin(l.texpaint_nor);
+			g2_set_pipeline(base_pipe_copy);
+			g2_draw_image(raw.texpaint_nor, 0, 0);
+			g2_set_pipeline(null);
+			g2_end();
+		}
+
+		if (l.texpaint_pack != null) {
+			g2_begin(l.texpaint_pack);
+			g2_set_pipeline(base_pipe_copy);
+			g2_draw_image(raw.texpaint_pack, 0, 0);
+			g2_set_pipeline(null);
+			g2_end();
+		}
 	}
 	else if (slot_layer_is_mask(raw)) {
 		g2_begin(l.texpaint);
@@ -354,14 +345,14 @@ function slot_layer_duplicate(raw: slot_layer_t): slot_layer_t {
 		g2_end();
 	}
 
-	///if is_paint
-	g2_begin(l.texpaint_preview);
-	g2_clear(0x00000000);
-	g2_set_pipeline(base_pipe_copy);
-	g2_draw_scaled_image(raw.texpaint_preview, 0, 0, raw.texpaint_preview.width, raw.texpaint_preview.height);
-	g2_set_pipeline(null);
-	g2_end();
-	///end
+	if (l.texpaint_preview != null) {
+		g2_begin(l.texpaint_preview);
+		g2_clear(0x00000000);
+		g2_set_pipeline(base_pipe_copy);
+		g2_draw_scaled_image(raw.texpaint_preview, 0, 0, raw.texpaint_preview.width, raw.texpaint_preview.height);
+		g2_set_pipeline(null);
+		g2_end();
+	}
 
 	l.visible = raw.visible;
 	l.mask_opacity = raw.mask_opacity;
@@ -396,7 +387,8 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 
 	if (slot_layer_is_layer(raw)) {
 		///if is_paint
-		let format: tex_format_t = base_bits_handle.position == texture_bits_t.BITS8  ? tex_format_t.RGBA32 :
+		let format: tex_format_t =
+			base_bits_handle.position == texture_bits_t.BITS8  ? tex_format_t.RGBA32 :
 			base_bits_handle.position == texture_bits_t.BITS16 ? tex_format_t.RGBA64 :
 			tex_format_t.RGBA128;
 		///end
@@ -413,47 +405,56 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 		g2_set_pipeline(null);
 		g2_end();
 
-		///if is_paint
 		let _texpaint_nor: image_t = raw.texpaint_nor;
+		if (raw.texpaint_nor != null) {
+			raw.texpaint_nor = image_create_render_target(res_x, res_y, format);
+
+			g2_begin(raw.texpaint_nor);
+			g2_set_pipeline(base_pipe_copy);
+			g2_draw_scaled_image(_texpaint_nor, 0, 0, res_x, res_y);
+			g2_set_pipeline(null);
+			g2_end();
+		}
+
 		let _texpaint_pack: image_t = raw.texpaint_pack;
-		raw.texpaint_nor = image_create_render_target(res_x, res_y, format);
-		raw.texpaint_pack = image_create_render_target(res_x, res_y, format);
+		if (raw.texpaint_pack != null) {
+			raw.texpaint_pack = image_create_render_target(res_x, res_y, format);
 
-		g2_begin(raw.texpaint_nor);
-		g2_set_pipeline(base_pipe_copy);
-		g2_draw_scaled_image(_texpaint_nor, 0, 0, res_x, res_y);
-		g2_set_pipeline(null);
-		g2_end();
-
-		g2_begin(raw.texpaint_pack);
-		g2_set_pipeline(base_pipe_copy);
-		g2_draw_scaled_image(_texpaint_pack, 0, 0, res_x, res_y);
-		g2_set_pipeline(null);
-		g2_end();
-		///end
+			g2_begin(raw.texpaint_pack);
+			g2_set_pipeline(base_pipe_copy);
+			g2_draw_scaled_image(_texpaint_pack, 0, 0, res_x, res_y);
+			g2_set_pipeline(null);
+			g2_end();
+		}
 
 		app_notify_on_next_frame(function (_texpaint: image_t) {
 			image_unload(_texpaint);
 		}, _texpaint);
 
-		///if is_paint
-		app_notify_on_next_frame(function (_texpaint_nor: image_t) {
-			image_unload(_texpaint_nor);
-		}, _texpaint_nor);
+		if (_texpaint_nor != null) {
+			app_notify_on_next_frame(function (_texpaint_nor: image_t) {
+				image_unload(_texpaint_nor);
+			}, _texpaint_nor);
+		}
 
-		app_notify_on_next_frame(function (_texpaint_pack: image_t) {
-			image_unload(_texpaint_pack);
-		}, _texpaint_pack);
-		///end
+		if (_texpaint_pack != null) {
+			app_notify_on_next_frame(function (_texpaint_pack: image_t) {
+				image_unload(_texpaint_pack);
+			}, _texpaint_pack);
+		}
 
 		let rt: render_target_t = map_get(rts, "texpaint" + raw.ext);
 		rt._image = raw.texpaint;
-		///if is_paint
-		let rt_nor: render_target_t = map_get(rts, "texpaint_nor" + raw.ext);
-		rt_nor._image = raw.texpaint_nor;
-		let rt_pack: render_target_t = map_get(rts, "texpaint_pack" + raw.ext);
-		rt_pack._image = raw.texpaint_pack;
-		///end
+
+		if (raw.texpaint_nor != null) {
+			let rt_nor: render_target_t = map_get(rts, "texpaint_nor" + raw.ext);
+			rt_nor._image = raw.texpaint_nor;
+		}
+
+		if (raw.texpaint_pack != null) {
+			let rt_pack: render_target_t = map_get(rts, "texpaint_pack" + raw.ext);
+			rt_pack._image = raw.texpaint_pack;
+		}
 	}
 	else if (slot_layer_is_mask(raw)) {
 		let _texpaint: image_t = raw.texpaint;
@@ -597,12 +598,11 @@ function slot_layer_get_object_mask(raw: slot_layer_t): i32 {
 }
 
 function slot_layer_is_layer(raw: slot_layer_t): bool {
-	///if is_paint
-	return raw.texpaint != null && raw.texpaint_nor != null;
-	///end
 	///if is_sculpt
 	return raw.texpaint != null;
 	///end
+
+	return raw.texpaint != null && raw.texpaint_nor != null;
 }
 
 function slot_layer_is_group(raw: slot_layer_t): bool {
@@ -622,30 +622,27 @@ function slot_layer_get_containing_group(raw: slot_layer_t): slot_layer_t {
 }
 
 function slot_layer_is_mask(raw: slot_layer_t): bool {
-	///if is_paint
-	return raw.texpaint != null && raw.texpaint_nor == null;
-	///end
 	///if is_sculpt
 	return false;
 	///end
+
+	return raw.texpaint != null && raw.texpaint_nor == null;
 }
 
 function slot_layer_is_group_mask(raw: slot_layer_t): bool {
-	///if is_paint
-	return raw.texpaint != null && raw.texpaint_nor == null && slot_layer_is_group(raw.parent);
-	///end
 	///if is_sculpt
 	return false;
 	///end
+
+	return raw.texpaint != null && raw.texpaint_nor == null && slot_layer_is_group(raw.parent);
 }
 
 function slot_layer_is_layer_mask(raw: slot_layer_t): bool {
-	///if is_paint
-	return raw.texpaint != null && raw.texpaint_nor == null && slot_layer_is_layer(raw.parent);
-	///end
 	///if is_sculpt
 	return false;
 	///end
+
+	return raw.texpaint != null && raw.texpaint_nor == null && slot_layer_is_layer(raw.parent);
 }
 
 function slot_layer_is_in_group(raw: slot_layer_t): bool {

@@ -97,9 +97,7 @@ function render_path_paint_init() {
 
 	render_path_load_shader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
 	render_path_load_shader("shader_datas/copy_mrt3_pass/copy_mrt3RGBA64_pass");
-	///if is_paint
 	render_path_load_shader("shader_datas/dilate_pass/dilate_pass");
-	///end
 }
 
 function render_path_paint_commands_paint(dilation: bool = true) {
@@ -131,7 +129,11 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 			render_path_end();
 		}
 
-		///if is_paint
+		///if is_sculpt
+		render_path_sculpt_commands();
+		return;
+		///end
+
 		if (context_raw.tool == workspace_tool_t.COLORID) {
 			render_path_set_target("texpaint_colorid");
 			render_path_clear_target(0xff000000);
@@ -333,49 +335,6 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 				render_path_paint_dilate(true, false);
 			}
 		}
-		///end
-
-		///if is_sculpt
-		let texpaint: string = "texpaint" + tid;
-		render_path_set_target("texpaint_blend1");
-		render_path_bind_target("texpaint_blend0", "tex");
-		render_path_draw_shader("shader_datas/copy_pass/copyR8_pass");
-		let additional: string[] = ["texpaint_blend0"];
-		render_path_set_target(texpaint, additional);
-		render_path_bind_target("gbufferD_undo", "gbufferD");
-		if ((context_raw.xray || config_raw.brush_angle_reject) && config_raw.brush_3d) {
-			render_path_bind_target("gbuffer0", "gbuffer0");
-		}
-		render_path_bind_target("texpaint_blend1", "paintmask");
-
-		// Read texcoords from gbuffer
-		let read_tc: bool = (context_raw.tool == workspace_tool_t.FILL && context_raw.fill_type_handle.position == fill_type_t.FACE) ||
-								context_raw.tool == workspace_tool_t.CLONE ||
-								context_raw.tool == workspace_tool_t.BLUR ||
-								context_raw.tool == workspace_tool_t.SMUDGE;
-		if (read_tc) {
-			render_path_bind_target("gbuffer2", "gbuffer2");
-		}
-		render_path_bind_target("gbuffer0_undo", "gbuffer0_undo");
-
-		let material_contexts: material_context_t[] = [];
-		let shader_contexts: shader_context_t[] = [];
-		let mats: material_data_t[] = project_paint_objects[0].materials;
-		mesh_object_get_contexts(project_paint_objects[0], "paint", mats, material_contexts, shader_contexts);
-
-		let cc_context: shader_context_t = shader_contexts[0];
-		if (const_data_screen_aligned_vb == null) {
-			const_data_create_screen_aligned_data();
-		}
-		g4_set_pipeline(cc_context._.pipe_state);
-		uniforms_set_context_consts(cc_context,_render_path_bind_params);
-		uniforms_set_obj_consts(cc_context, project_paint_objects[0].base);
-		uniforms_set_material_consts(cc_context, material_contexts[0]);
-		g4_set_vertex_buffer(const_data_screen_aligned_vb);
-		g4_set_index_buffer(const_data_screen_aligned_ib);
-		g4_draw();
-		render_path_end();
-		///end
 	}
 }
 
@@ -605,14 +564,7 @@ function render_path_paint_commands_symmetry() {
 }
 
 function render_path_paint_paint_enabled(): bool {
-	///if is_paint
 	let fill_layer: bool = context_raw.layer.fill_layer != null && context_raw.tool != workspace_tool_t.PICKER && context_raw.tool != workspace_tool_t.MATERIAL && context_raw.tool != workspace_tool_t.COLORID;
-	///end
-
-	///if is_sculpt
-	let fill_layer: bool = context_raw.layer.fill_layer != null && context_raw.tool != workspace_tool_t.PICKER && context_raw.tool != workspace_tool_t.MATERIAL;
-	///end
-
 	let group_layer: bool = slot_layer_is_group(context_raw.layer);
 	return !fill_layer && !group_layer && !context_raw.foreground_event;
 }
@@ -632,46 +584,33 @@ function render_path_paint_live_brush_dirty() {
 
 function render_path_paint_begin() {
 
-	///if is_paint
+	///if is_sculpt
+	render_path_sculpt_begin();
+	return;
+	///end
+
 	if (!render_path_paint_dilated) {
 		render_path_paint_dilate(config_raw.dilate == dilate_type_t.DELAYED, true);
 		render_path_paint_dilated = true;
 	}
-	///end
 
 	if (!render_path_paint_paint_enabled()) {
 		return;
 	}
 
-	///if is_paint
 	render_path_paint_push_undo_last = history_push_undo;
-	///end
 
 	if (history_push_undo && history_undo_layers != null) {
 		history_paint();
-
-		///if is_sculpt
-		render_path_set_target("gbuffer0_undo");
-		render_path_bind_target("gbuffer0", "tex");
-		render_path_draw_shader("shader_datas/copy_pass/copy_pass");
-
-		render_path_set_target("gbufferD_undo");
-		render_path_bind_target("_main", "tex");
-		render_path_draw_shader("shader_datas/copy_pass/copy_pass");
-		///end
 	}
-
-	///if is_sculpt
-	if (history_push_undo2 && history_undo_layers != null) {
-		history_paint();
-	}
-	///end
 
 	if (context_raw.paint2d) {
 		render_path_paint_set_plane_mesh();
 	}
 
-	if (render_path_paint_live_layer_drawn > 0) render_path_paint_live_layer_drawn--;
+	if (render_path_paint_live_layer_drawn > 0) {
+		render_path_paint_live_layer_drawn--;
+	}
 
 	if (config_raw.brush_live && context_raw.pdirty <= 0 && context_raw.ddirty <= 0 && context_raw.brush_time == 0) {
 		// Depth is unchanged, draw before gbuffer gets updated
@@ -709,7 +648,6 @@ function render_path_paint_draw() {
 			render_path_paint_dilated = false;
 		}
 
-		///if is_paint
 		if (context_raw.tool == workspace_tool_t.BAKE) {
 
 			///if (arm_direct3d12 || arm_vulkan || arm_metal)
@@ -798,11 +736,6 @@ function render_path_paint_draw() {
 		else { // Paint
 			render_path_paint_commands_paint();
 		}
-		///end
-
-		///if is_sculpt
-		render_path_paint_commands_paint();
-		///end
 	}
 
 	if (context_raw.brush_blend_dirty) {
@@ -921,39 +854,41 @@ function render_path_paint_restore_plane_mesh() {
 }
 
 function render_path_paint_bind_layers() {
-	///if is_paint
+	///if is_sculpt
+	render_path_sculpt_bind_layers();
+	return;
+	///end
+
 	let is_live: bool = config_raw.brush_live && render_path_paint_live_layer_drawn > 0;
 	let is_material_tool: bool = context_raw.tool == workspace_tool_t.MATERIAL;
 	if (is_live || is_material_tool) {
 		render_path_paint_use_live_layer(true);
 	}
-	///end
 
 	for (let i: i32 = 0; i < project_layers.length; ++i) {
 		let l: slot_layer_t = project_layers[i];
 		render_path_bind_target("texpaint" + l.id, "texpaint" + l.id);
 
-		///if is_paint
 		if (slot_layer_is_layer(l)) {
 			render_path_bind_target("texpaint_nor" + l.id, "texpaint_nor" + l.id);
 			render_path_bind_target("texpaint_pack" + l.id, "texpaint_pack" + l.id);
 		}
-		///end
 	}
 }
 
 function render_path_paint_unbind_layers() {
-	///if is_paint
+	///if is_sculpt
+	return;
+	///end
+
 	let is_live: bool = config_raw.brush_live && render_path_paint_live_layer_drawn > 0;
 	let is_material_tool: bool = context_raw.tool == workspace_tool_t.MATERIAL;
 	if (is_live || is_material_tool) {
 		render_path_paint_use_live_layer(false);
 	}
-	///end
 }
 
 function render_path_paint_dilate(base: bool, nor_pack: bool) {
-	///if is_paint
 	if (config_raw.dilate_radius > 0 && !context_raw.paint2d) {
 		util_uv_cache_dilate_map();
 		base_make_temp_img();
@@ -983,5 +918,4 @@ function render_path_paint_dilate(base: bool, nor_pack: bool) {
 			render_path_draw_shader("shader_datas/dilate_pass/dilate_pass");
 		}
 	}
-	///end
 }

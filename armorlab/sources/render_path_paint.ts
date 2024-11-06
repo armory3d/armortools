@@ -1,4 +1,6 @@
 
+let render_path_paint_live_layer: slot_layer_t = null;
+let render_path_paint_live_layer_locked: bool = false;
 let render_path_paint_live_layer_drawn: i32 = 0; ////
 
 function render_path_paint_init() {
@@ -317,4 +319,13 @@ function render_path_paint_bind_layers() {
 
 function render_path_paint_unbind_layers() {
 
+}
+
+function render_path_paint_use_live_layer(use: bool) {
+}
+
+function render_path_paint_set_plane_mesh() {
+}
+
+function render_path_paint_restore_plane_mesh() {
 }

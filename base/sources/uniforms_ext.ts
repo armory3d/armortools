@@ -107,11 +107,9 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 	else if (link == "_object_id") {
 		return array_index_of(project_paint_objects, object.ext);
 	}
-	///if is_paint
 	else if (link == "_dilate_radius") {
 		return util_uv_dilatemap != null ? config_raw.dilate_radius : 0.0;
 	}
-	///end
 	else if (link == "_decal_layer_dim") {
 		let sc: vec4_t = mat4_get_scale(context_raw.layer.decal_mat);
 		return sc.z * 0.5;
@@ -324,37 +322,31 @@ function uniforms_ext_mat4_link(object: object_t, mat: material_data_t, link: st
 
 function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: string): image_t {
 	if (link == "_texpaint_undo") {
-		///if (is_paint || is_sculpt)
+		///if is_lab
+		return null;
+		///end
+
 		let i: i32 = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
 		let rt: render_target_t = map_get(render_path_render_targets, "texpaint_undo" + i);
 		return rt._image;
-		///end
-
+	}
+	else if (link == "_texpaint_nor_undo") {
 		///if is_lab
 		return null;
 		///end
-	}
-	else if (link == "_texpaint_nor_undo") {
-		///if (is_paint || is_sculpt)
+
 		let i: i32 = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
 		let rt: render_target_t = map_get(render_path_render_targets, "texpaint_nor_undo" + i);
 		return rt._image;
-		///end
-
+	}
+	else if (link == "_texpaint_pack_undo") {
 		///if is_lab
 		return null;
 		///end
-	}
-	else if (link == "_texpaint_pack_undo") {
-		///if (is_paint || is_sculpt)
+
 		let i: i32 = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
 		let rt: render_target_t = map_get(render_path_render_targets, "texpaint_pack_undo" + i);
 		return rt._image;
-		///end
-
-		///if is_lab
-		return null;
-		///end
 	}
 	else if (link == "_ltc_mat") {
 		if (const_data_ltc_mat_tex == null) {
@@ -368,7 +360,6 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 		}
 		return const_data_ltc_mag_tex;
 	}
-	///if (is_paint || is_sculpt)
 	else if (link == "_texcolorid") {
 		if (project_assets.length == 0) {
 			let rt: render_target_t = map_get(render_path_render_targets, "empty_white");
@@ -391,9 +382,7 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 		let rt: render_target_t = map_get(render_path_render_targets, "texparticle");
 		return rt._image;
 	}
-	///end
 
-	///if is_paint
 	else if (link == "_texuvmap") {
 		if (!util_uv_uvmap_cached) {
 			app_notify_on_init(util_uv_cache_uv_map);
@@ -419,7 +408,6 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 	else if (link == "_texdilatemap") {
 		return util_uv_dilatemap;
 	}
-	///end
 
 	if (starts_with(link, "_texpaint_pack_vert")) {
 		let tid: string = substring(link, link.length - 1, link.length);

@@ -579,12 +579,7 @@ function tab_layers_draw_layer_highlight(l: slot_layer_t, mini: bool) {
 function tab_layers_handle_layer_icon_state(l: slot_layer_t, i: i32, state: ui_state_t, uix: f32, uiy: f32) {
 	let ui: ui_t = ui_base_ui;
 
-	///if is_paint
 	let texpaint_preview: image_t = l.texpaint_preview;
-	///end
-	///if is_sculpt
-	let texpaint_preview: image_t = l.texpaint;
-	///end
 
 	tab_layers_show_context_menu = false;
 
@@ -648,12 +643,7 @@ function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32,
 	}
 
 	if (!slot_layer_is_group(l)) {
-		///if is_paint
 		let texpaint_preview: image_t = l.texpaint_preview;
-		///end
-		///if is_sculpt
-		let texpaint_preview: image_t = l.texpaint;
-		///end
 
 		let icon: image_t = l.fill_layer == null ? texpaint_preview : l.fill_layer.image_icon;
 		if (l.fill_layer == null) {
@@ -776,10 +766,8 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 				});
 			}
 			else {
-				///if is_paint
 				context_raw.layers_export = export_mode_t.SELECTED;
 				box_export_show_textures();
-				///end
 			}
 		}
 
@@ -1021,7 +1009,6 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 }
 
 function tab_layers_make_mask_preview_rgba32(l: slot_layer_t) {
-	///if is_paint
 	if (context_raw.mask_preview_rgba32 == null) {
 		context_raw.mask_preview_rgba32 = image_create_render_target(util_render_layer_preview_size, util_render_layer_preview_size);
 	}
@@ -1039,7 +1026,6 @@ function tab_layers_make_mask_preview_rgba32(l: slot_layer_t) {
 			g2_set_pipeline(null);
 		});
 	}
-	///end
 }
 
 function tab_layers_delete_layer(l: slot_layer_t) {
