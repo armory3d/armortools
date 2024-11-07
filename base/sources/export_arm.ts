@@ -265,12 +265,6 @@ function export_arm_export_node(n: ui_node_t, assets: asset_t[] = null) {
 	// }
 }
 
-///if is_lab
-function export_arm_run_material(path: string) {
-}
-///end
-
-///if (is_paint || is_sculpt)
 function export_arm_run_material(path: string) {
 	if (!ends_with(path, ".arm")) {
 		path += ".arm";
@@ -340,7 +334,6 @@ function export_arm_run_material(path: string) {
 	let buffer: buffer_t = util_encode_project(raw);
 	iron_file_save_bytes(path, buffer, buffer.length + 1);
 }
-///end
 
 ///if (arm_metal || arm_vulkan)
 function export_arm_bgra_swap(buffer: buffer_t): buffer_t {
@@ -353,7 +346,6 @@ function export_arm_bgra_swap(buffer: buffer_t): buffer_t {
 }
 ///end
 
-///if (is_paint || is_sculpt)
 function export_arm_run_brush(path: string) {
 	if (!ends_with(path, ".arm")) {
 		path += ".arm";
@@ -407,7 +399,6 @@ function export_arm_run_brush(path: string) {
 	let buffer: buffer_t = util_encode_project(raw);
 	iron_file_save_bytes(path, buffer, buffer.length + 1);
 }
-///end
 
 function export_arm_assets_to_files(project_path: string, assets: asset_t[]): string[] {
 	let texture_files: string[] = [];

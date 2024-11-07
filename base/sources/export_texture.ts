@@ -111,7 +111,6 @@ function export_texture_run(path: string, bake_material: bool = false) {
 	ui_files_last_path = "";
 }
 
-///if is_paint
 function export_texture_run_bake_material(path: string) {
 	if (render_path_paint_live_layer == null) {
 		render_path_paint_live_layer = slot_layer_create("_live");
@@ -150,7 +149,6 @@ function export_texture_run_bake_material(path: string) {
 	let layers: slot_layer_t[] = [render_path_paint_live_layer];
 	export_texture_run_layers(path, layers, "", true);
 }
-///end
 
 function export_texture_run_layers(path: string, layers: slot_layer_t[], object_name: string = "", bake_material: bool = false) {
 

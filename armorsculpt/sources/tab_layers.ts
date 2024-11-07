@@ -420,3 +420,6 @@ function tab_layers_can_drop_new_layer(position: i32): bool {
 	}
 	return true;
 }
+
+function tab_layers_make_mask_preview_rgba32(l: slot_layer_t) {
+}

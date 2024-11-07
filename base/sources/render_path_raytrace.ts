@@ -23,9 +23,7 @@ let render_path_raytrace_ext: string = ".metal";
 let render_path_raytrace_ext: string = ".spirv";
 ///end
 
-///if is_lab
 let render_path_raytrace_last_texpaint: image_t = null;
-///end
 
 function render_path_raytrace_init() {
 }

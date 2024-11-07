@@ -53,12 +53,10 @@ function import_asset_run(path: string, drop_x: f32 = -1.0, drop_y: f32 = -1.0, 
 			ui_nodes_hwnd.redraws = 2;
 		}
 
-		///if is_paint
 		if (context_raw.tool == workspace_tool_t.COLORID && project_asset_names.length == 1) {
 			ui_header_handle.redraws = 2;
 			context_raw.ddirty = 2;
 		}
-		///end
 	}
 	else if (path_is_project(path)) {
 		import_arm_run_project(path);
@@ -69,14 +67,12 @@ function import_asset_run(path: string, drop_x: f32 = -1.0, drop_y: f32 = -1.0, 
 	else if (path_is_gimp_color_palette(path)) {
 		import_gpl_run(path, false);
 	}
-	///if is_paint
 	else if (path_is_font(path)) {
 		import_font_run(path);
 	}
 	else if (path_is_folder(path)) {
 		import_folder_run(path);
 	}
-	///end
 	else {
 		if (context_enable_import_plugin(path)) {
 			import_asset_run(path, drop_x, drop_y, show_box);

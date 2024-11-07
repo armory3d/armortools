@@ -76,14 +76,11 @@ function slot_layer_create(ext: string = "", type: layer_slot_type_t = layer_slo
 	else if (type == layer_slot_type_t.LAYER) {
 		let id: i32 = (raw.id + 1);
 		raw.name = "Layer " + id;
-		///if is_paint
 		let format: string = base_bits_handle.position == texture_bits_t.BITS8  ? "RGBA32" :
 							 base_bits_handle.position == texture_bits_t.BITS16 ? "RGBA64" :
 																				  "RGBA128";
-		///end
-
 		///if is_sculpt
-		let format: string = "RGBA128";
+		format = "RGBA128";
 		///end
 
 		{
@@ -386,15 +383,13 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 	}
 
 	if (slot_layer_is_layer(raw)) {
-		///if is_paint
 		let format: tex_format_t =
 			base_bits_handle.position == texture_bits_t.BITS8  ? tex_format_t.RGBA32 :
 			base_bits_handle.position == texture_bits_t.BITS16 ? tex_format_t.RGBA64 :
 			tex_format_t.RGBA128;
-		///end
 
 		///if is_sculpt
-		let format: tex_format_t = tex_format_t.RGBA128;
+		format = tex_format_t.RGBA128;
 		///end
 
 		let _texpaint: image_t = raw.texpaint;

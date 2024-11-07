@@ -329,3 +329,6 @@ function render_path_paint_set_plane_mesh() {
 
 function render_path_paint_restore_plane_mesh() {
 }
+
+function render_path_paint_dilate(base: bool, nor_pack: bool) {
+}

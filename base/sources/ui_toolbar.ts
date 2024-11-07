@@ -1,5 +1,9 @@
 
+///if is_lab
+let ui_toolbar_default_w: i32 = 0;
+///else
 let ui_toolbar_default_w: i32 = 36;
+///end
 
 let ui_toolbar_handle: ui_handle_t = ui_handle_create();
 let ui_toolbar_w: i32 = ui_toolbar_default_w;

@@ -475,7 +475,6 @@ function history_edit_nodes(canvas: ui_node_canvas_t, canvas_group: i32 = -1) {
 	step.canvas = util_clone_canvas(canvas);
 }
 
-///if (is_paint || is_sculpt)
 function history_paint() {
 	let is_mask: bool = slot_layer_is_mask(context_raw.layer);
 	history_copy_to_undo(context_raw.layer.id, history_undo_i, is_mask);
@@ -616,7 +615,6 @@ function history_delete_material_group(group: node_group_t) {
 	step.canvas_group = array_index_of(project_material_groups, group);
 	step.canvas = util_clone_canvas(group.canvas);
 }
-///end
 
 function history_push(name: string): step_t {
 	///if (arm_windows || arm_linux || arm_macos)
@@ -674,7 +672,6 @@ function history_push(name: string): step_t {
 	return history_steps[history_steps.length - 1];
 }
 
-///if (is_paint || is_sculpt)
 function history_redo_merge_layers() {
 	history_copy_merging_layers();
 }
@@ -723,7 +720,6 @@ function history_copy_to_undo(from_id: i32, to_id: i32, is_mask: bool) {
 	}
 	history_undo_i = (history_undo_i + 1) % config_raw.undo_steps;
 }
-///end
 
 function history_get_canvas(step: step_t): ui_node_canvas_t {
 	///if (is_paint || is_sculpt)
@@ -781,7 +777,6 @@ type step_t = {
 	name?: string;
 	canvas?: ui_node_canvas_t; // Node history
 	canvas_group?: i32;
-	///if (is_paint || is_sculpt)
 	layer?: i32;
 	layer_type?: layer_slot_type_t;
 	layer_parent?: i32;
@@ -793,5 +788,4 @@ type step_t = {
 	layer_blending?: i32;
 	prev_order?: i32; // Previous layer position
 	canvas_type?: i32;
-	///end
 };

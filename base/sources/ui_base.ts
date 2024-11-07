@@ -17,18 +17,23 @@ type tab_draw_t = {
 type tab_draw_array_t = tab_draw_t[];
 let ui_base_hwnd_tabs: tab_draw_array_t[] = ui_base_init_hwnd_tabs();
 
-///if (is_paint || is_sculpt)
+///if is_lab
+let ui_base_default_sidebar_mini_w: i32 = 0;
+let ui_base_default_sidebar_full_w: i32 = 0;
+///else
 let ui_base_default_sidebar_mini_w: i32 = 56;
 let ui_base_default_sidebar_full_w: i32 = 280;
+///end
+
 ///if (arm_android || arm_ios)
 let ui_base_default_sidebar_w: i32 = ui_base_default_sidebar_mini_w;
 ///else
 let ui_base_default_sidebar_w: i32 = ui_base_default_sidebar_full_w;
 ///end
+
 let ui_base_tabx: i32 = 0;
 let ui_base_hminimized: ui_handle_t = ui_handle_create();
 let ui_base_sidebar_mini_w: i32 = ui_base_default_sidebar_mini_w;
-///end
 
 function ui_base_init_hwnds(): ui_handle_t[] {
 	let hwnds: ui_handle_t[] = [ui_handle_create(), ui_handle_create(), ui_handle_create()];
@@ -1198,11 +1203,8 @@ function ui_base_update_ui() {
 		///end
 		context_raw.brush_blend_dirty = true; // Update brush mask
 
-		///if (is_paint || is_sculpt)
 		context_raw.layer_preview_dirty = true; // Update layer preview
-		///end
 
-		///if is_paint
 		// New color id picked, update fill layer
 		if (context_raw.tool == workspace_tool_t.COLORID && context_raw.layer.fill_layer != null) {
 			app_notify_on_next_frame(function () {
@@ -1210,10 +1212,8 @@ function ui_base_update_ui() {
 				make_material_parse_paint_material(false);
 			});
 		}
-		///end
 	}
 
-	///if is_paint
 	if (context_raw.layers_preview_dirty) {
 		context_raw.layers_preview_dirty = false;
 		context_raw.layer_preview_dirty = false;
@@ -1258,7 +1258,6 @@ function ui_base_update_ui() {
 		g2_end();
 		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 	}
-	///end
 
 	let undo_pressed: bool = operator_shortcut(map_get(config_keymap, "edit_undo"));
 	let redo_pressed: bool = operator_shortcut(map_get(config_keymap, "edit_redo")) ||

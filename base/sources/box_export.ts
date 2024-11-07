@@ -8,7 +8,6 @@ let box_export_preset: export_preset_t = null;
 let box_export_channels: string[] = ["base_r", "base_g", "base_b", "height", "metal", "nor_r", "nor_g", "nor_g_directx", "nor_b", "occ", "opac", "rough", "smooth", "emis", "subs", "0.0", "1.0"];
 let box_export_color_spaces: string[] = ["linear", "srgb"];
 
-///if (is_paint || is_lab)
 function box_export_show_textures() {
 	ui_box_show_custom(function (ui: ui_t) {
 
@@ -33,9 +32,7 @@ function box_export_show_textures() {
 
 	}, 540, 310);
 }
-///end
 
-///if is_paint
 function box_export_show_bake_material() {
 	ui_box_show_custom(function (ui: ui_t) {
 
@@ -53,11 +50,9 @@ function box_export_show_bake_material() {
 
 	}, 540, 310);
 }
-///end
 
 let _box_export_bake_material: bool;
 
-///if (is_paint || is_lab)
 function box_export_tab_export_textures(ui: ui_t, title: string, bake_material: bool = false) {
 	let tab_vertical: bool = config_raw.touch_ui;
 	if (ui_tab(box_export_htab, title, tab_vertical)) {
@@ -326,9 +321,7 @@ function box_export_tab_presets(ui: ui_t) {
 		}
 	}
 }
-///end
 
-///if is_paint
 function box_export_tab_atlases(ui: ui_t) {
 	let tab_vertical: bool = config_raw.touch_ui;
 	if (ui_tab(box_export_htab, tr("Atlases"), tab_vertical)) {
@@ -351,7 +344,6 @@ function box_export_tab_atlases(ui: ui_t) {
 		}
 	}
 }
-///end
 
 function box_export_show_mesh() {
 	box_export_mesh_handle.position = context_raw.export_mesh_index;
@@ -441,7 +433,6 @@ function box_export_tab_export_mesh(ui: ui_t, htab: ui_handle_t) {
 	}
 }
 
-///if (is_paint || is_sculpt)
 function box_export_show_material() {
 	ui_box_show_custom(function (ui: ui_t) {
 		let htab: ui_handle_t = ui_handle(__ID__);
@@ -503,9 +494,7 @@ function box_export_show_brush() {
 		}
 	});
 }
-///end
 
-///if (is_paint || is_lab)
 function box_export_fetch_presets() {
 	box_export_files = file_read_directory(path_data() + path_sep + "export_presets");
 	for (let i: i32 = 0; i < box_export_files.length; ++i) {
@@ -558,4 +547,3 @@ function box_export_preset_to_json(p: export_preset_t): string {
 	json_encode_end_array();
 	return json_encode_end();
 }
-///end

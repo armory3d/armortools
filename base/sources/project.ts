@@ -9,21 +9,20 @@ let project_material_groups: node_group_t[] = [];
 let project_paint_objects: mesh_object_t[] = null;
 let project_asset_map: map_t<i32, any> = map_create(); // image_t | font_t
 let project_mesh_list: string[] = null;
-///if (is_paint || is_sculpt)
+
 let project_materials: slot_material_t[] = null;
 let project_brushes: slot_brush_t[] = null;
 let project_layers: slot_layer_t[] = null;
 let project_fonts: slot_font_t[] = null;
 let project_atlas_objects: i32[] = null;
 let project_atlas_names: string[] = null;
-///end
-///if is_lab
-let project_material_data: material_data_t = null; ////
-let project_materials: slot_material_t[] = null; ////
+
+// lab
+let project_material_data: material_data_t = null;
 let project_nodes: ui_nodes_t;
 let project_canvas: ui_node_canvas_t;
 let project_default_canvas: buffer_t = null;
-///end
+
 
 function project_open() {
 	ui_files_show("arm", false, false, function (path: string) {
@@ -636,7 +635,6 @@ function project_get_image(asset: asset_t): image_t {
 	return asset != null ? map_get(project_asset_map, asset.id) : null;
 }
 
-///if (is_paint || is_sculpt)
 function project_get_used_atlases(): string[] {
 	if (project_atlas_objects == null) {
 		return null;
@@ -679,7 +677,6 @@ function project_get_atlas_objects(object_mask: i32): mesh_object_t[] {
 	}
 	return visibles;
 }
-///end
 
 function project_packed_asset_exists(packed_assets: packed_asset_t[], name: string): bool {
 	for (let i: i32 = 0; i < packed_assets.length; ++i) {

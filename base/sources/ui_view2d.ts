@@ -1,12 +1,10 @@
 
-///if (is_paint || is_sculpt)
 let ui_view2d_pipe: pipeline_t;
 let ui_view2d_channel_loc: kinc_const_loc_t;
 let ui_view2d_text_input_hover: bool = false;
 let ui_view2d_uvmap_show: bool = false;
 let ui_view2d_tex_type: paint_tex_t = paint_tex_t.BASE;
 let ui_view2d_layer_mode: view_2d_layer_mode_t = view_2d_layer_mode_t.SELECTED;
-///end
 
 ///if (is_paint || is_sculpt)
 let ui_view2d_type: view_2d_type_t = view_2d_type_t.LAYER;
@@ -139,10 +137,8 @@ function ui_view2d_render() {
 		// Texture
 		let tex: image_t = null;
 
-		///if (is_paint || is_sculpt)
 		let l: slot_layer_t = context_raw.layer;
 		let channel: i32 = 0;
-		///end
 
 		let tw: f32 = ui_view2d_ww * 0.95 * ui_view2d_pan_scale;
 		let tx: f32 = ui_view2d_ww / 2 - tw / 2 + ui_view2d_pan_x;
@@ -169,7 +165,6 @@ function ui_view2d_render() {
 
 			///end
 		}
-		///if is_paint
 		else if (ui_view2d_type == view_2d_type_t.LAYER) {
 			let layer: slot_layer_t = l;
 
@@ -212,7 +207,6 @@ function ui_view2d_render() {
 		else if (ui_view2d_type == view_2d_type_t.FONT) {
 			tex = context_raw.font.image;
 		}
-		///end
 
 		let th: f32 = tw;
 		if (tex != null) {

@@ -339,11 +339,7 @@ function context_create(): context_t {
 	c.brush_can_unlock = false;
 	c.camera_type = camera_type_t.PERSPECTIVE;
 	c.cam_handle = ui_handle_create();
-	///if is_forge
-	c.vxao_ext = 2.0;
-	///else
 	c.vxao_ext = 1.0;
-	///end
 	c.vxao_offset = 1.5;
 	c.vxao_aperture = 1.2;
 	c.texture_export_path = "";
@@ -510,7 +506,6 @@ function context_use_deferred(): bool {
 	///end
 }
 
-///if (is_paint || is_sculpt)
 function context_select_material(i: i32) {
 	if (project_materials.length <= i) {
 		return;
@@ -597,7 +592,6 @@ function context_set_layer(l: slot_layer_t) {
 	ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 	ui_view2d_hwnd.redraws = 2;
 }
-///end
 
 function context_select_tool(i: i32) {
 	context_raw.tool = i;
@@ -679,7 +673,10 @@ function context_select_paint_object(o: mesh_object_t) {
 }
 
 function context_main_object(): mesh_object_t {
-	///if (is_paint || is_sculpt)
+	///if is_lab
+	return project_paint_objects[0];
+	///end
+
 	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 		let po: mesh_object_t = project_paint_objects[i];
 		if (po.base.children.length > 0) {
@@ -687,31 +684,22 @@ function context_main_object(): mesh_object_t {
 		}
 	}
 	return project_paint_objects[0];
-	///end
-
-	///if is_lab
-	return project_paint_objects[0];
-	///end
 }
 
 function context_layer_filter_used(): bool {
-	///if (is_paint || is_sculpt)
-	return context_raw.layer_filter > 0 && context_raw.layer_filter <= project_paint_objects.length;
-	///end
-
 	///if is_lab
 	return true;
 	///end
+
+	return context_raw.layer_filter > 0 && context_raw.layer_filter <= project_paint_objects.length;
 }
 
 function context_object_mask_used(): bool {
-	///if (is_paint || is_sculpt)
-	return slot_layer_get_object_mask(context_raw.layer) > 0 && slot_layer_get_object_mask(context_raw.layer) <= project_paint_objects.length;
-	///end
-
 	///if is_lab
 	return false;
 	///end
+
+	return slot_layer_get_object_mask(context_raw.layer) > 0 && slot_layer_get_object_mask(context_raw.layer) <= project_paint_objects.length;
 }
 
 function context_in_viewport(): bool {
@@ -720,18 +708,16 @@ function context_in_viewport(): bool {
 }
 
 function context_in_paint_area(): bool {
-	///if (is_paint || is_sculpt)
+	///if is_lab
+	return context_in_viewport();
+	///end
+
 	let right: i32 = app_w();
 	if (ui_view2d_show) {
 		right += ui_view2d_ww;
 	}
 	return mouse_view_x() > 0 && mouse_view_x() < right &&
 		   mouse_view_y() > 0 && mouse_view_y() < app_h();
-	///end
-
-	///if is_lab
-	return context_in_viewport();
-	///end
 }
 
 function context_in_layers(): bool {
@@ -867,7 +853,6 @@ function context_set_swatch(s: swatch_color_t) {
 	context_raw.swatch = s;
 }
 
-///if is_lab
 function context_run_brush(from: i32) {
 	let left: f32 = 0.0;
 	let right: f32 = 1.0;
@@ -980,4 +965,3 @@ function context_update() {
 
 	context_parse_brush_inputs();
 }
-///end

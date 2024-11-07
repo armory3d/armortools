@@ -1,6 +1,4 @@
 
-///if (is_paint || is_sculpt)
-
 function import_font_run(path: string) {
 	for (let i: i32 = 0; i < project_fonts.length; ++i) {
 		let f: slot_font_t = project_fonts[i];
@@ -33,5 +31,3 @@ function import_font_run(path: string) {
 
 	ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
 }
-
-///end

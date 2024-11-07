@@ -485,11 +485,9 @@ function ui_nodes_get_canvas(groups: bool = false): ui_node_canvas_t {
 	///end
 }
 
-///if (is_paint || is_sculpt)
 function ui_nodes_get_canvas_material(): ui_node_canvas_t {
 	return context_raw.material.canvas;
 }
-///end
 
 function ui_nodes_get_nodes(): ui_nodes_t {
 	///if (is_paint || is_sculpt)

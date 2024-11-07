@@ -102,9 +102,7 @@ function ui_menu_render() {
 			ui_menu_separator(ui);
 			///if (is_paint || is_lab)
 			if (ui_menu_button(ui, tr("Export Textures..."), map_get(config_keymap, "file_export_textures_as"))) {
-				///if is_paint
 				context_raw.layers_export = export_mode_t.VISIBLE;
-				///end
 				box_export_show_textures();
 			}
 			if (ui_menu_button(ui, tr("Export Swatches..."))) {

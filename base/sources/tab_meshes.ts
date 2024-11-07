@@ -172,7 +172,6 @@ function tab_meshes_draw(htab: ui_handle_t) {
 	}
 }
 
-///if is_lab
 function tab_meshes_set_default_mesh(name: string) {
 	let mo: mesh_object_t = null;
 	if (name == ".Plane" || name == ".Sphere") {
@@ -212,4 +211,3 @@ function tab_meshes_set_default_mesh(name: string) {
 	render_path_raytrace_ready = false;
 	///end
 }
-///end
