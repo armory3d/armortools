@@ -327,7 +327,6 @@ function project_new(reset_layers: bool = true) {
 	///end
 }
 
-///if (is_paint || is_sculpt)
 function project_import_material() {
 	ui_files_show("arm,blend", false, true, function (path: string) {
 		ends_with(path, ".blend") ?
@@ -386,7 +385,6 @@ function project_import_brush() {
 		}
 	});
 }
-///end
 
 let _project_import_mesh_replace_existing: bool;
 let _project_import_mesh_done: ()=>void;
@@ -458,7 +456,6 @@ function project_import_mesh_box(path: string, replace_existing: bool = true, cl
 
 				///if (arm_android || arm_ios)
 				console_toast(tr("Importing mesh"));
-				iron_g4_swap_buffers();
 				///end
 
 				///if (is_paint || is_sculpt)
@@ -532,7 +529,6 @@ function project_unwrap_mesh_box(mesh: raw_mesh_t, done: (a: raw_mesh_t)=>void, 
 
 				///if (arm_android || arm_ios)
 				console_toast(tr("Unwrapping mesh"));
-				iron_g4_swap_buffers();
 				///end
 
 				if (unwrap_by == unwrap_plugins.length - 1) {

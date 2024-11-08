@@ -129,8 +129,8 @@ function box_preferences_show() {
 			// let grid_snap: bool = ui_check(ui_handle("boxpreferences_11", { selected: false }), "Grid Snap");
 
 			_ui_end_element();
-			let row: f32[] = [0.5, 0.5];
-			ui_row(row);
+
+			ui_row2();
 			if (ui_button(tr("Restore")) && !ui_menu_show) {
 				ui_menu_draw(function (ui: ui_t) {
 					if (ui_menu_button(ui, tr("Confirm"))) {
@@ -187,8 +187,7 @@ function box_preferences_show() {
 			}
 
 			ui_begin_sticky();
-			let row: f32[] = [1 / 4, 1 / 4, 1 / 4, 1 / 4];
-			ui_row(row);
+			ui_row4();
 
 			ui_combo(box_preferences_theme_handle, box_preferences_themes, tr("Theme"));
 			if (box_preferences_theme_handle.changed) {
@@ -251,7 +250,7 @@ function box_preferences_show() {
 			if (h.init) {
 				h.color = box_preferences_world_color;
 			}
-			row = [1 / 8, 7 / 8];
+			let row: f32[] = [1 / 8, 7 / 8];
 			ui_row(row);
 			ui_text("", 0, h.color);
 			if (ui.is_hovered && ui.input_released) {
@@ -361,17 +360,17 @@ function box_preferences_show() {
 				let current: image_t = _g2_current;
 				g2_end();
 
-				///if (is_paint || is_sculpt)
-				while (history_undo_layers.length < config_raw.undo_steps) {
-					let len: i32 = history_undo_layers.length;
-					let l: slot_layer_t = slot_layer_create("_undo" + len);
-					array_push(history_undo_layers, l);
+				if (history_undo_layers != null) {
+					while (history_undo_layers.length < config_raw.undo_steps) {
+						let len: i32 = history_undo_layers.length;
+						let l: slot_layer_t = slot_layer_create("_undo" + len);
+						array_push(history_undo_layers, l);
+					}
+					while (history_undo_layers.length > config_raw.undo_steps) {
+						let l: slot_layer_t = array_pop(history_undo_layers);
+						slot_layer_unload(l);
+					}
 				}
-				while (history_undo_layers.length > config_raw.undo_steps) {
-					let l: slot_layer_t = array_pop(history_undo_layers);
-					slot_layer_unload(l);
-				}
-				///end
 
 				history_reset();
 				g2_begin(current);
@@ -427,11 +426,11 @@ function box_preferences_show() {
 
 			///if (arm_android || arm_ios)
 			let layer_res_combo: string[] = ["128", "256", "512", "1K", "2K", "4K"];
-			ui_combo(layer_res_handle, layer_res_combo, tr("Default Layer Resolution"), true);
 			///else
 			let layer_res_combo: string[] = ["128", "256", "512", "1K", "2K", "4K", "8K"];
-			ui_combo(layer_res_handle, layer_res_combo, tr("Default Layer Resolution"), true);
 			///end
+
+			ui_combo(layer_res_handle, layer_res_combo, tr("Default Layer Resolution"), true);
 
 			if (layer_res_handle.changed) {
 				config_raw.layer_res = layer_res_handle.position;
@@ -750,7 +749,7 @@ function box_preferences_show() {
 						}
 						let keymap_name: string = ui_text_input(h, tr("Name"));
 						if (ui_button(tr("OK")) || ui.is_return_down) {
-							let template: string =  config_keymap_to_json(base_get_default_keymap());
+							let template: string = config_keymap_to_json(keymap_get_default());
 							if (!ends_with(keymap_name, ".json")) {
 								keymap_name += ".json";
 							}
@@ -957,10 +956,8 @@ function box_preferences_set_scale() {
 	_ui_set_scale(base_ui_box, scale);
 	_ui_set_scale(base_ui_menu, scale);
 	base_resize();
-	///if (is_paint || is_sculpt)
 	config_raw.layout[layout_size_t.SIDEBAR_W] = math_floor(ui_base_default_sidebar_w * scale);
 	ui_toolbar_w = math_floor(ui_toolbar_default_w * scale);
-	///end
 }
 
 function box_preferences_theme_to_json(theme: ui_theme_t): string {

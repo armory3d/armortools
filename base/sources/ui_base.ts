@@ -1227,7 +1227,12 @@ function ui_base_update_ui() {
 			if (slot_layer_is_group(l)) {
 				continue;
 			}
+
 			let target: image_t = l.texpaint_preview;
+			if (target == null) {
+				continue;
+			}
+
 			let source: image_t = l.texpaint;
 			g2_begin(target);
 			g2_clear(0x00000000);
@@ -1247,16 +1252,20 @@ function ui_base_update_ui() {
 		}
 		// Update layer preview
 		let l: slot_layer_t = context_raw.layer;
+
 		let target: image_t = l.texpaint_preview;
-		let source: image_t = l.texpaint;
-		g2_begin(target);
-		g2_clear(0x00000000);
-		// g2_set_pipeline(raw.layer.isMask() ? base_pipe_copy8 : base_pipe_copy);
-		g2_set_pipeline(base_pipe_copy); // texpaint_preview is always RGBA32 for now
-		g2_draw_scaled_image(source, 0, 0, target.width, target.height);
-		g2_set_pipeline(null);
-		g2_end();
-		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
+		if (target != null) {
+
+			let source: image_t = l.texpaint;
+			g2_begin(target);
+			g2_clear(0x00000000);
+			// g2_set_pipeline(raw.layer.isMask() ? base_pipe_copy8 : base_pipe_copy);
+			g2_set_pipeline(base_pipe_copy); // texpaint_preview is always RGBA32 for now
+			g2_draw_scaled_image(source, 0, 0, target.width, target.height);
+			g2_set_pipeline(null);
+			g2_end();
+			ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
+		}
 	}
 
 	let undo_pressed: bool = operator_shortcut(map_get(config_keymap, "edit_undo"));
@@ -1344,7 +1353,6 @@ function ui_base_render() {
 	g2_begin(null);
 }
 
-///if (is_paint || is_sculpt)
 function ui_base_draw_sidebar() {
 	// Tabs
 	let mini: bool = config_raw.layout[layout_size_t.SIDEBAR_W] <= ui_base_sidebar_mini_w;
@@ -1583,7 +1591,6 @@ function ui_base_render_cursor() {
 		g2_set_color(0xffffffff);
 	}
 }
-///end
 
 function ui_base_show_material_nodes() {
 	// Clear input state as ui receives input events even when not drawn

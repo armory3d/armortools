@@ -1,6 +1,4 @@
 
-///if (is_paint || is_sculpt)
-
 function tab_materials_draw(htab: ui_handle_t) {
 	let mini: bool = config_raw.layout[layout_size_t.SIDEBAR_W] <= ui_base_sidebar_mini_w;
 	mini ? tab_materials_draw_mini(htab) : tab_materials_draw_full(htab);
@@ -386,5 +384,3 @@ function tab_materials_delete_material(m: slot_material_t) {
 		tab_materials_update_material_pointers(m.canvas.nodes, i);
 	}
 }
-
-///end

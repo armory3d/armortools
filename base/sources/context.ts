@@ -730,13 +730,11 @@ function context_in_materials(): bool {
 	return tab == tr("Materials");
 }
 
-///if (is_paint || is_sculpt)
 function context_in_2d_view(type: view_2d_type_t = view_2d_type_t.LAYER): bool {
 	return ui_view2d_show && ui_view2d_type == type &&
 		   mouse_x > ui_view2d_wx && mouse_x < ui_view2d_wx + ui_view2d_ww &&
 		   mouse_y > ui_view2d_wy && mouse_y < ui_view2d_wy + ui_view2d_wh;
 }
-///end
 
 function context_in_nodes(): bool {
 	return ui_nodes_show &&

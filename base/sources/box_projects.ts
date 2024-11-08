@@ -129,7 +129,6 @@ function box_projects_tab(ui: ui_t) {
 						ui._x = _uix;
 						///if (arm_android || arm_ios)
 						console_toast(tr("Opening project"));
-						iron_g4_swap_buffers();
 						///end
 						app_notify_on_init(function (path: string) {
 							ui_box_hide();

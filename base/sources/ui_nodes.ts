@@ -1374,7 +1374,6 @@ function ui_nodes_accept_asset_drag(index: i32) {
 	///end
 }
 
-///if (is_paint || is_sculpt)
 function ui_nodes_accept_layer_drag(index: i32) {
 	ui_nodes_push_undo();
 	if (slot_layer_is_group(project_layers[index])) {
@@ -1393,7 +1392,6 @@ function ui_nodes_accept_material_drag(index: i32) {
 	n.buttons[0].default_value[0] = index;
 	ui_nodes_get_nodes().nodes_selected_id = [n.id];
 }
-///end
 
 function ui_nodes_accept_swatch_drag(swatch: swatch_color_t) {
 	///if (is_paint || is_sculpt)

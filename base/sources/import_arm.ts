@@ -405,7 +405,6 @@ function import_arm_run_project(path: string) {
 	data_delete_blob(path);
 }
 
-///if (is_paint || is_sculpt)
 function import_arm_run_mesh(raw: project_format_t) {
 	project_paint_objects = [];
 	for (let i: i32 = 0; i < raw.mesh_datas.length; ++i) {
@@ -601,7 +600,6 @@ function import_arm_run_brush_from_project(project: project_format_t, path: stri
 	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 	data_delete_blob(path);
 }
-///end
 
 function import_arm_run_swatches(path: string, replace_existing: bool = false) {
 	let b: buffer_t = data_get_blob(path);

@@ -10,7 +10,6 @@ function import_asset_run(path: string, drop_x: f32 = -1.0, drop_y: f32 = -1.0, 
 	if (starts_with(path, "cloud")) {
 		///if (arm_android || arm_ios)
 		console_toast(tr("Downloading"));
-		iron_g4_swap_buffers();
 		///end
 
 		_import_asset_drop_x = drop_x;

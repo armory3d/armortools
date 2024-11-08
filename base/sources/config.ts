@@ -262,34 +262,6 @@ function config_apply() {
 	if (g2_in_use) g2_begin(current);
 }
 
-function config_load_keymap() {
-	config_keymap = base_get_default_keymap();
-	if (config_raw.keymap != "default.json") {
-		let blob: buffer_t = data_get_blob("keymap_presets/" + config_raw.keymap);
-		let new_keymap: map_t<string, string> = json_parse_to_map(sys_buffer_to_string(blob));
-		let keys: string[] = map_keys(new_keymap);
-		for (let i: i32 = 0; i < keys.length; ++i) {
-			let key: string = keys[i];
-			map_set(config_keymap, key, map_get(new_keymap, key));
-		}
-	}
-}
-
-function config_save_keymap() {
-	if (config_raw.keymap == "default.json") {
-		return;
-	}
-	let path: string = data_path() + "keymap_presets/" + config_raw.keymap;
-	let buffer: buffer_t = sys_string_to_buffer(config_keymap_to_json(config_keymap));
-	iron_file_save_bytes(path, buffer, 0);
-}
-
-function config_keymap_to_json(keymap: map_t<string, string>): string {
-	json_encode_begin();
-	json_encode_map(keymap);
-	return json_encode_end();
-}
-
 function config_get_super_sample_quality(f: f32): i32 {
 	return f == 0.25 ? 0 :
 		   f == 0.5 ? 1 :

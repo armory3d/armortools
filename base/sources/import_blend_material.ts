@@ -1,6 +1,4 @@
 
-///if (is_paint || is_sculpt)
-
 function import_blend_material_run(path: string) {
 	let b: buffer_t = data_get_blob(path);
 	let bl: blend_t = parser_blend_init(b);
@@ -365,5 +363,3 @@ function import_blend_material_read_blend_socket(sock: bl_handle_t): f32_array_t
 	}
 	return null;
 }
-
-///end

@@ -33,60 +33,12 @@ let base_last_window_height: i32 = 0;
 let base_drag_material: slot_material_t = null;
 let base_drag_layer: slot_layer_t = null;
 
-let base_pipe_copy: pipeline_t;
-let base_pipe_copy8: pipeline_t;
-let base_pipe_copy128: pipeline_t;
-let base_pipe_copy_bgra: pipeline_t;
-let base_pipe_copy_rgb: pipeline_t = null;
-let base_pipe_merge: pipeline_t = null;
-let base_pipe_merge_r: pipeline_t = null;
-let base_pipe_merge_g: pipeline_t = null;
-let base_pipe_merge_b: pipeline_t = null;
-let base_pipe_merge_a: pipeline_t = null;
-let base_pipe_invert8: pipeline_t;
-let base_pipe_apply_mask: pipeline_t;
-let base_pipe_merge_mask: pipeline_t;
-let base_pipe_colorid_to_mask: pipeline_t;
-let base_tex0: kinc_tex_unit_t;
-let base_tex1: kinc_tex_unit_t;
-let base_texmask: kinc_tex_unit_t;
-let base_texa: kinc_tex_unit_t;
-let base_opac: kinc_const_loc_t;
-let base_blending: kinc_const_loc_t;
-let base_tex0_mask: kinc_tex_unit_t;
-let base_texa_mask: kinc_tex_unit_t;
-let base_tex0_merge_mask: kinc_tex_unit_t;
-let base_texa_merge_mask: kinc_tex_unit_t;
-let base_tex_colorid: kinc_tex_unit_t;
-let base_texpaint_colorid: kinc_tex_unit_t;
-let base_opac_merge_mask: kinc_const_loc_t;
-let base_blending_merge_mask: kinc_const_loc_t;
-let base_temp_mask_image: image_t = null;
-
-let base_pipe_copy_r: pipeline_t;
-let base_pipe_copy_g: pipeline_t;
-let base_pipe_copy_b: pipeline_t;
-let base_pipe_copy_a: pipeline_t;
-let base_pipe_copy_a_tex: kinc_tex_unit_t;
-let base_pipe_inpaint_preview: pipeline_t;
-let base_tex0_inpaint_preview: kinc_tex_unit_t;
-let base_texa_inpaint_preview: kinc_tex_unit_t;
-
 let base_temp_image: image_t = null;
 let base_expa: image_t = null;
 let base_expb: image_t = null;
 let base_expc: image_t = null;
-let base_pipe_cursor: pipeline_t;
-let base_cursor_vp: kinc_const_loc_t;
-let base_cursor_inv_vp: kinc_const_loc_t;
-let base_cursor_mouse: kinc_const_loc_t;
-let base_cursor_tex_step: kinc_const_loc_t;
-let base_cursor_radius: kinc_const_loc_t;
-let base_cursor_camera_right: kinc_const_loc_t;
-let base_cursor_tint: kinc_const_loc_t;
-let base_cursor_tex: kinc_tex_unit_t;
-let base_cursor_gbufferd: kinc_tex_unit_t;
 
+let base_default_fov: f32 = 0.69;
 let base_default_base: f32 = 0.5;
 let base_default_rough: f32 = 0.4;
 let base_max_layers: i32 =
@@ -95,83 +47,15 @@ let base_max_layers: i32 =
 ///else
 	255;
 ///end
-let base_default_fov: f32 = 0.69;
-let _base_material_count: i32;
 
-function base_get_default_keymap(): map_t<string, string> {
-	let keymap: map_t<string, string> = map_create();
-	map_set(keymap, "action_paint", "left");
-	map_set(keymap, "action_rotate", "alt+left");
-	map_set(keymap, "action_pan", "alt+middle");
-	map_set(keymap, "action_zoom", "alt+right");
-	map_set(keymap, "rotate_light", "shift+middle");
-	map_set(keymap, "rotate_envmap", "ctrl+middle");
-	map_set(keymap, "set_clone_source", "alt");
-	map_set(keymap, "stencil_transform", "ctrl");
-	map_set(keymap, "stencil_hide", "z");
-	map_set(keymap, "brush_radius", "f");
-	map_set(keymap, "brush_radius_decrease", "[");
-	map_set(keymap, "brush_radius_increase", "]");
-	map_set(keymap, "brush_ruler", "shift");
-	map_set(keymap, "file_new", "ctrl+n");
-	map_set(keymap, "file_open", "ctrl+o");
-	map_set(keymap, "file_open_recent", "ctrl+shift+o");
-	map_set(keymap, "file_save", "ctrl+s");
-	map_set(keymap, "file_save_as", "ctrl+shift+s");
-	map_set(keymap, "file_reimport_mesh", "ctrl+r");
-	map_set(keymap, "file_reimport_textures", "ctrl+shift+r");
-	map_set(keymap, "file_import_assets", "ctrl+i");
-	map_set(keymap, "file_export_textures", "ctrl+e");
-	map_set(keymap, "file_export_textures_as", "ctrl+shift+e");
-	map_set(keymap, "edit_undo", "ctrl+z");
-	map_set(keymap, "edit_redo", "ctrl+shift+z");
-	map_set(keymap, "edit_prefs", "ctrl+k");
-	map_set(keymap, "view_reset", "0");
-	map_set(keymap, "view_front", "1");
-	map_set(keymap, "view_back", "ctrl+1");
-	map_set(keymap, "view_right", "3");
-	map_set(keymap, "view_left", "ctrl+3");
-	map_set(keymap, "view_top", "7");
-	map_set(keymap, "view_bottom", "ctrl+7");
-	map_set(keymap, "view_camera_type", "5");
-	map_set(keymap, "view_orbit_left", "4");
-	map_set(keymap, "view_orbit_right", "6");
-	map_set(keymap, "view_orbit_up", "8");
-	map_set(keymap, "view_orbit_down", "2");
-	map_set(keymap, "view_orbit_opposite", "9");
-	map_set(keymap, "view_zoom_in", "");
-	map_set(keymap, "view_zoom_out", "");
-	map_set(keymap, "view_distract_free", "f11");
-	map_set(keymap, "viewport_mode", "ctrl+m");
-	map_set(keymap, "toggle_node_editor", "tab");
-	map_set(keymap, "toggle_2d_view", "shift+tab");
-	map_set(keymap, "toggle_browser", "`");
-	map_set(keymap, "node_search", "space");
-	map_set(keymap, "operator_search", "space");
-	///if (is_paint || is_sculpt)
-	map_set(keymap, "decal_mask", "ctrl");
-	map_set(keymap, "select_material", "shift+number");
-	map_set(keymap, "select_layer", "alt+number");
-	map_set(keymap, "brush_opacity", "shift+f");
-	map_set(keymap, "brush_angle", "alt+f");
-	map_set(keymap, "tool_brush", "b");
-	map_set(keymap, "tool_eraser", "e");
-	map_set(keymap, "tool_fill", "g");
-	map_set(keymap, "tool_decal", "d");
-	map_set(keymap, "tool_text", "t");
-	map_set(keymap, "tool_clone", "l");
-	map_set(keymap, "tool_blur", "u");
-	map_set(keymap, "tool_smudge", "m");
-	map_set(keymap, "tool_particle", "p");
-	map_set(keymap, "tool_colorid", "c");
-	map_set(keymap, "tool_picker", "v");
-	map_set(keymap, "tool_bake", "k");
-	map_set(keymap, "tool_gizmo", "");
-	map_set(keymap, "tool_material", "");
-	map_set(keymap, "swap_brush_eraser", "");
-	///end
-	return keymap;
-}
+let _base_material_count: i32;
+let _base_uv_type: uv_type_t;
+let _base_decal_mat: mat4_t;
+let _base_position: i32;
+let _base_base_color: i32;
+let _base_occlusion: f32;
+let _base_roughness: f32;
+let _base_metallic: f32;
 
 function base_init() {
 	base_last_window_width = sys_width();
@@ -207,13 +91,14 @@ function base_init() {
 
 	iron_set_save_and_quit_callback(base_save_and_quit_callback);
 
-	let f: g2_font_t = data_get_font("font.ttf");
+	let font: g2_font_t = data_get_font("font.ttf");
 	let image_color_wheel: image_t = data_get_image("color_wheel.k");
 	let image_color_wheel_gradient: image_t = data_get_image("color_wheel_gradient.k");
 
-	base_font = f;
+	base_font = font;
 	config_load_theme(config_raw.theme, false);
 	base_default_element_w = base_theme.ELEMENT_W;
+	base_default_element_h = base_theme.ELEMENT_H;
 	base_default_font_size = base_theme.FONT_SIZE;
 	translator_load_translations(config_raw.locale);
 	ui_files_filename = tr("untitled");
@@ -233,17 +118,15 @@ function base_init() {
 	base_color_wheel = image_color_wheel;
 	base_color_wheel_gradient = image_color_wheel_gradient;
 	ui_nodes_enum_texts = base_enum_texts;
-	// ui_tr = tr; ////
 	let ops: ui_options_t = {
 		theme: base_theme,
-		font: f,
+		font: font,
 		scale_factor: config_raw.window_scale,
 		color_wheel: base_color_wheel.texture_,
 		black_white_gradient: base_color_wheel_gradient.texture_
 	};
 	base_ui_box = ui_create(ops);
 	base_ui_menu = ui_create(ops);
-	base_default_element_h = base_ui_menu.ops.theme.ELEMENT_H;
 
 	// Init plugins
 	if (config_raw.plugins != null) {
@@ -259,17 +142,12 @@ function base_init() {
 	ui_base_init();
 	ui_viewnodes_init();
 	ui_view2d_init();
-
-	///if is_lab
-	random_node_set_seed(math_floor(time_time() * 4294967295));
-	///end
+	base_ext_init();
 
 	app_notify_on_update(base_update);
 	app_notify_on_render_2d(ui_view2d_render);
 	app_notify_on_update(ui_view2d_update);
-	///if (is_paint || is_sculpt)
 	app_notify_on_render_2d(ui_base_render_cursor);
-	///end
 	app_notify_on_update(ui_nodes_update);
 	app_notify_on_render_2d(ui_nodes_render);
 	app_notify_on_update(ui_base_update);
@@ -278,7 +156,6 @@ function base_init() {
 	app_notify_on_render_2d(base_render);
 
 	base_appx = ui_toolbar_w;
-
 	base_appy = ui_header_h;
 	if (config_raw.layout[layout_size_t.HEADER] == 1) {
 		base_appy += ui_header_h;
@@ -289,13 +166,7 @@ function base_init() {
 
 	args_run();
 
-	let has_projects: bool =
-	///if (arm_android || arm_ios)
-		config_raw.recent_projects.length > 0;
-	///else
-		true;
-	///end
-
+	let has_projects: bool = config_raw.recent_projects.length > 0;
 	if (config_raw.splash_screen && has_projects) {
 		box_projects_show();
 	}
@@ -311,7 +182,6 @@ function base_save_and_quit_callback(save: bool) {
 	}
 }
 
-///if (is_paint || is_sculpt)
 function base_w(): i32 {
 	// Drawing material preview
 	if (context_raw.material_preview) {
@@ -362,15 +232,9 @@ function base_h(): i32 {
 
 	if (config_raw.layout == null) {
 		res -= ui_header_default_h * 2 + ui_status_default_status_h;
-
 		///if (arm_android || arm_ios)
-		let layout_header: i32 = 0;
-		///else
-		let layout_header: i32 = 1;
+		res += ui_header_h;
 		///end
-		if (layout_header == 0) {
-			res += ui_header_h;
-		}
 	}
 	else if (ui_base_show && res > 0) {
 		let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
@@ -383,39 +247,8 @@ function base_h(): i32 {
 
 	return res > 0 ? res : 1; // App was minimized, force render path resize
 }
-///end
-
-///if is_lab
-function base_w(): i32 {
-	let res: i32 = 0;
-	let show2d: bool = (ui_nodes_show || ui_view2d_show) && config_raw.layout != null && config_raw.layout.length > 0;
-	if (show2d) {
-		res = sys_width() - config_raw.layout[layout_size_t.NODES_W];
-	}
-	else { // Distract free
-		res = sys_width();
-	}
-
-	return res > 0 ? res : 1; // App was minimized, force render path resize
-}
-
-function base_h(): i32 {
-	let res: i32 = sys_height();
-	let has_layout: bool = config_raw.layout != null && config_raw.layout.length > 0;
-	if (res > 0 && has_layout) {
-		let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-		res -= math_floor(ui_header_default_h * 2 * config_raw.window_scale) + statush;
-	}
-
-	return res > 0 ? res : 1; // App was minimized, force render path resize
-}
-///end
 
 function base_x(): i32 {
-	///if is_lab
-	return base_appx;
-	///end
-
 	return context_raw.view_index == 1 ? base_appx + base_w() : base_appx;
 }
 
@@ -438,20 +271,15 @@ function base_on_resize() {
 	config_raw.layout[layout_size_t.SIDEBAR_H1] = sys_height() - config_raw.layout[layout_size_t.SIDEBAR_H0];
 
 	base_resize();
-
-	///if (arm_linux || arm_macos)
 	base_save_window_rect();
-	///end
 }
 
 function base_save_window_rect() {
-	///if (arm_windows || arm_linux || arm_macos)
 	config_raw.window_w = sys_width();
 	config_raw.window_h = sys_height();
 	config_raw.window_x = sys_x();
 	config_raw.window_y = sys_y();
 	config_save();
-	///end
 }
 
 function base_resize() {
@@ -497,17 +325,16 @@ function base_redraw_ui() {
 	ui_nodes_hwnd.redraws = 2;
 	ui_box_hwnd.redraws = 2;
 	ui_view2d_hwnd.redraws = 2;
+	// Redraw viewport
 	if (context_raw.ddirty < 0) {
-		context_raw.ddirty = 0; // Redraw viewport
+		context_raw.ddirty = 0;
 	}
-	///if (is_paint || is_sculpt)
 	ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 	ui_toolbar_handle.redraws = 2;
 	if (context_raw.split_view) {
 		context_raw.ddirty = 1;
 	}
-	///end
 }
 
 function base_update() {
@@ -515,7 +342,11 @@ function base_update() {
 		iron_set_mouse_cursor(0); // Arrow
 	}
 
-	let has_drag: bool = base_drag_asset != null || base_drag_material != null || base_drag_layer != null || base_drag_file != null || base_drag_swatch != null;
+	let has_drag: bool = base_drag_asset != null ||
+						 base_drag_material != null ||
+						 base_drag_layer != null ||
+						 base_drag_file != null ||
+						 base_drag_swatch != null;
 
 	if (config_raw.touch_ui) {
 		// Touch and hold to activate dragging
@@ -538,10 +369,8 @@ function base_update() {
 			base_drag_file = null;
 			base_drag_file_icon = null;
 			base_is_dragging = false;
-			///if (is_paint || is_sculpt)
 			base_drag_material = null;
 			base_drag_layer = null;
-			///end
 		}
 		// Disable touch scrolling while dragging is active
 		ui_touch_scroll = !base_is_dragging;
@@ -552,7 +381,9 @@ function base_update() {
 	}
 	if (mouse_released() && has_drag) {
 		if (base_drag_asset != null) {
-			if (context_in_nodes()) { // Create image texture
+
+			// Create image texture
+			if (context_in_nodes()) {
 				ui_nodes_accept_asset_drag(array_index_of(project_assets, base_drag_asset));
 			}
 			else if (context_in_viewport()) {
@@ -561,21 +392,20 @@ function base_update() {
 					import_envmap_run(base_drag_asset.file, image);
 				}
 			}
-			///if (is_paint || is_sculpt)
-			else if (context_in_layers() || context_in_2d_view()) { // Create mask
+			// Create mask
+			else if (context_in_layers() || context_in_2d_view()) {
 				base_create_image_mask(base_drag_asset);
 			}
-			///end
 			base_drag_asset = null;
 		}
 		else if (base_drag_swatch != null) {
-			if (context_in_nodes()) { // Create RGB node
+			// Create RGB node
+			if (context_in_nodes()) {
 				ui_nodes_accept_swatch_drag(base_drag_swatch);
 			}
 			else if (context_in_swatches()) {
 				tab_swatches_accept_swatch_drag(base_drag_swatch);
 			}
-			///if (is_paint || is_sculpt)
 			else if (context_in_materials()) {
 				tab_materials_accept_swatch_drag(base_drag_swatch);
 			}
@@ -589,7 +419,6 @@ function base_update() {
 				color = color_set_ab(color, base_drag_swatch.opacity * 255);
 				base_create_color_layer(color, base_drag_swatch.occlusion, base_drag_swatch.roughness, base_drag_swatch.metallic, context_raw.drag_dest);
 			}
-			///end
 
 			base_drag_swatch = null;
 		}
@@ -616,7 +445,6 @@ function base_update() {
 			base_drag_file = null;
 			base_drag_file_icon = null;
 		}
-		///if (is_paint || is_sculpt)
 		else if (base_drag_material != null) {
 			base_material_dropped();
 		}
@@ -630,7 +458,6 @@ function base_update() {
 			}
 			base_drag_layer = null;
 		}
-		///end
 
 		iron_set_mouse_cursor(0); // Arrow
 		base_is_dragging = false;
@@ -642,26 +469,25 @@ function base_update() {
 
 	base_handle_drop_paths();
 
-	///if (is_paint || is_sculpt)
 	///if arm_windows
 	let is_picker: bool = context_raw.tool == workspace_tool_t.PICKER || context_raw.tool == workspace_tool_t.MATERIAL;
 	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
 	ui_always_redraw_window = !context_raw.cache_draws ||
-		ui_menu_show ||
-		ui_box_show ||
-		base_is_dragging ||
-		is_picker ||
-		decal ||
-		ui_view2d_show ||
-		!config_raw.brush_3d ||
-		context_raw.frame < 3;
-	///end
+							  ui_menu_show ||
+							  ui_box_show ||
+							  base_is_dragging ||
+							  is_picker ||
+							  decal ||
+							  ui_view2d_show ||
+							  !config_raw.brush_3d ||
+							  context_raw.frame < 3;
 	///end
 
-	if (ui_always_redraw_window && context_raw.ddirty < 0) context_raw.ddirty = 0;
+	if (ui_always_redraw_window && context_raw.ddirty < 0) {
+		context_raw.ddirty = 0;
+	}
 }
 
-///if (is_paint || is_sculpt)
 function base_material_dropped() {
 	// Material drag and dropped onto viewport or layers tab
 	if (context_in_viewport()) {
@@ -679,14 +505,12 @@ function base_material_dropped() {
 	}
 	base_drag_material = null;
 }
-///end
 
 function base_handle_drop_paths() {
 	if (base_drop_paths.length > 0) {
-		///if (arm_linux || arm_macos)
-		let wait: bool = !mouse_moved; // Mouse coords not updated during drag
-		///else
 		let wait: bool = false;
+		///if (arm_linux || arm_macos)
+		wait = !mouse_moved; // Mouse coords not updated during drag
 		///end
 		if (!wait) {
 			base_drop_x = mouse_x;
@@ -750,29 +574,16 @@ function base_get_drag_image(): image_t {
 }
 
 function base_render() {
-	if (sys_width() == 0 || sys_height() == 0) return;
+	if (sys_width() == 0 || sys_height() == 0) {
+		return;
+	}
+
+	base_ext_render();
 
 	if (context_raw.frame == 2) {
-		///if (is_paint || is_sculpt)
-		util_render_make_material_preview();
-		ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
-		///end
-
 		make_material_parse_mesh_material();
 		make_material_parse_paint_material();
 		context_raw.ddirty = 0;
-
-		///if (is_paint || is_sculpt)
-		if (history_undo_layers == null) {
-			history_undo_layers = [];
-			for (let i: i32 = 0; i < config_raw.undo_steps; ++i) {
-				let len: i32 = history_undo_layers.length;
-				let ext: string = "_undo" + len;
-				let l: slot_layer_t = slot_layer_create(ext);
-				array_push(history_undo_layers, l);
-			}
-		}
-		///end
 
 		// Default workspace
 		if (config_raw.workspace != 0) {
@@ -783,35 +594,17 @@ function base_render() {
 
 		// Default camera controls
 		context_raw.camera_controls = config_raw.camera_controls;
-
-		///if is_lab
-		app_notify_on_next_frame(function () {
-			app_notify_on_next_frame(function () {
-				tab_meshes_set_default_mesh(".Sphere");
-			});
-		});
-		///end
-
-		///if is_sculpt
-		app_notify_on_next_frame(function () {
-			app_notify_on_next_frame(function () {
-				context_raw.project_type = project_model_t.SPHERE;
-				project_new();
-			});
-		});
-		///end
 	}
 	else if (context_raw.frame == 3) {
 		context_raw.ddirty = 3;
 	}
+
 	context_raw.frame++;
 
 	if (base_is_dragging) {
 		iron_set_mouse_cursor(1); // Hand
 		let img: image_t = base_get_drag_image();
-
 		let scale_factor: f32 = ui_SCALE(ui_base_ui);
-
 		let size: f32 = (base_drag_size == -1 ? 50 : base_drag_size) * scale_factor;
 		let ratio: f32 = size / img.width;
 		let h: f32 = img.height * ratio;
@@ -903,12 +696,10 @@ function base_get_asset_index(file_name: string): i32 {
 
 function base_toggle_fullscreen() {
 	if (sys_mode() == window_mode_t.WINDOWED) {
-		///if (arm_windows || arm_linux || arm_macos)
 		config_raw.window_w = sys_width();
 		config_raw.window_h = sys_height();
 		config_raw.window_x = sys_x();
 		config_raw.window_y = sys_y();
-		///end
 		sys_mode_set(window_mode_t.FULLSCREEN);
 	}
 	else {
@@ -1057,10 +848,8 @@ function base_init_config() {
 	raw.brush_angle_reject = true;
 	raw.brush_live = false;
 	raw.show_asset_names = false;
-
 	raw.dilate = dilate_type_t.INSTANT;
 	raw.dilate_radius = 2;
-
 	raw.gpu_inference = true;
 }
 
@@ -1170,263 +959,6 @@ function base_set_layer_bits() {
 	}
 }
 
-function base_make_merge_pipe(red: bool, green: bool, blue: bool, alpha: bool): pipeline_t {
-	let pipe: pipeline_t = g4_pipeline_create();
-	pipe.vertex_shader = sys_get_shader("pass.vert");
-	pipe.fragment_shader = sys_get_shader("layer_merge.frag");
-	let vs: vertex_struct_t = g4_vertex_struct_create();
-	g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
-	pipe.input_layout = [vs];
-	pipe.color_write_masks_red = [red];
-	pipe.color_write_masks_green = [green];
-	pipe.color_write_masks_blue = [blue];
-	pipe.color_write_masks_alpha = [alpha];
-	g4_pipeline_compile(pipe);
-	return pipe;
-}
-
-function base_make_pipe() {
-	///if (is_paint || is_sculpt)
-	base_pipe_merge = base_make_merge_pipe(true, true, true, true);
-	base_pipe_merge_r = base_make_merge_pipe(true, false, false, false);
-	base_pipe_merge_g = base_make_merge_pipe(false, true, false, false);
-	base_pipe_merge_b = base_make_merge_pipe(false, false, true, false);
-	base_pipe_merge_a = base_make_merge_pipe(false, false, false, true);
-	base_tex0 = g4_pipeline_get_tex_unit(base_pipe_merge, "tex0"); // Always binding texpaint.a for blending
-	base_tex1 = g4_pipeline_get_tex_unit(base_pipe_merge, "tex1");
-	base_texmask = g4_pipeline_get_tex_unit(base_pipe_merge, "texmask");
-	base_texa = g4_pipeline_get_tex_unit(base_pipe_merge, "texa");
-	base_opac = g4_pipeline_get_const_loc(base_pipe_merge, "opac");
-	base_blending = g4_pipeline_get_const_loc(base_pipe_merge, "blending");
-	///end
-
-	{
-		base_pipe_copy = g4_pipeline_create();
-		base_pipe_copy.vertex_shader = sys_get_shader("layer_view.vert");
-		base_pipe_copy.fragment_shader = sys_get_shader("layer_copy.frag");
-		let vs: vertex_struct_t = g4_vertex_struct_create();
-		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_3X);
-		g4_vertex_struct_add(vs, "tex", vertex_data_t.F32_2X);
-		g4_vertex_struct_add(vs, "col", vertex_data_t.U8_4X_NORM);
-		base_pipe_copy.input_layout = [vs];
-		g4_pipeline_compile(base_pipe_copy);
-	}
-
-	{
-		base_pipe_copy_bgra = g4_pipeline_create();
-		base_pipe_copy_bgra.vertex_shader = sys_get_shader("layer_view.vert");
-		base_pipe_copy_bgra.fragment_shader = sys_get_shader("layer_copy_bgra.frag");
-		let vs: vertex_struct_t = g4_vertex_struct_create();
-		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_3X);
-		g4_vertex_struct_add(vs, "tex", vertex_data_t.F32_2X);
-		g4_vertex_struct_add(vs, "col", vertex_data_t.U8_4X_NORM);
-		base_pipe_copy_bgra.input_layout = [vs];
-		g4_pipeline_compile(base_pipe_copy_bgra);
-	}
-
-	///if (arm_metal || arm_vulkan || arm_direct3d12)
-	{
-		base_pipe_copy8 = g4_pipeline_create();
-		base_pipe_copy8.vertex_shader = sys_get_shader("layer_view.vert");
-		base_pipe_copy8.fragment_shader = sys_get_shader("layer_copy.frag");
-		let vs: vertex_struct_t = g4_vertex_struct_create();
-		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_3X);
-		g4_vertex_struct_add(vs, "tex", vertex_data_t.F32_2X);
-		g4_vertex_struct_add(vs, "col", vertex_data_t.U8_4X_NORM);
-		base_pipe_copy8.input_layout = [vs];
-		base_pipe_copy8.color_attachment_count = 1;
-		base_pipe_copy8.color_attachments[0] = tex_format_t.R8;
-		g4_pipeline_compile(base_pipe_copy8);
-	}
-
-	{
-		base_pipe_copy128 = g4_pipeline_create();
-		base_pipe_copy128.vertex_shader = sys_get_shader("layer_view.vert");
-		base_pipe_copy128.fragment_shader = sys_get_shader("layer_copy.frag");
-		let vs: vertex_struct_t = g4_vertex_struct_create();
-		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_3X);
-		g4_vertex_struct_add(vs, "tex", vertex_data_t.F32_2X);
-		g4_vertex_struct_add(vs, "col", vertex_data_t.U8_4X_NORM);
-		base_pipe_copy128.input_layout = [vs];
-		base_pipe_copy128.color_attachment_count = 1;
-		base_pipe_copy128.color_attachments[0] = tex_format_t.RGBA128;
-		g4_pipeline_compile(base_pipe_copy128);
-	}
-	///else
-	base_pipe_copy8 = base_pipe_copy;
-	base_pipe_copy128 = base_pipe_copy;
-	///end
-
-	///if (is_paint || is_sculpt)
-	{
-		base_pipe_invert8 = g4_pipeline_create();
-		base_pipe_invert8.vertex_shader = sys_get_shader("layer_view.vert");
-		base_pipe_invert8.fragment_shader = sys_get_shader("layer_invert.frag");
-		let vs: vertex_struct_t = g4_vertex_struct_create();
-		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_3X);
-		g4_vertex_struct_add(vs, "tex", vertex_data_t.F32_2X);
-		g4_vertex_struct_add(vs, "col", vertex_data_t.U8_4X_NORM);
-		base_pipe_invert8.input_layout = [vs];
-		base_pipe_invert8.color_attachment_count = 1;
-		base_pipe_invert8.color_attachments[0] = tex_format_t.R8;
-		g4_pipeline_compile(base_pipe_invert8);
-	}
-
-	{
-		base_pipe_apply_mask = g4_pipeline_create();
-		base_pipe_apply_mask.vertex_shader = sys_get_shader("pass.vert");
-		base_pipe_apply_mask.fragment_shader = sys_get_shader("mask_apply.frag");
-		let vs: vertex_struct_t = g4_vertex_struct_create();
-		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
-		base_pipe_apply_mask.input_layout = [vs];
-		g4_pipeline_compile(base_pipe_apply_mask);
-		base_tex0_mask = g4_pipeline_get_tex_unit(base_pipe_apply_mask, "tex0");
-		base_texa_mask = g4_pipeline_get_tex_unit(base_pipe_apply_mask, "texa");
-	}
-
-	{
-		base_pipe_merge_mask = g4_pipeline_create();
-		base_pipe_merge_mask.vertex_shader = sys_get_shader("pass.vert");
-		base_pipe_merge_mask.fragment_shader = sys_get_shader("mask_merge.frag");
-		let vs: vertex_struct_t = g4_vertex_struct_create();
-		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
-		base_pipe_merge_mask.input_layout = [vs];
-		g4_pipeline_compile(base_pipe_merge_mask);
-		base_tex0_merge_mask = g4_pipeline_get_tex_unit(base_pipe_merge_mask, "tex0");
-		base_texa_merge_mask = g4_pipeline_get_tex_unit(base_pipe_merge_mask, "texa");
-		base_opac_merge_mask = g4_pipeline_get_const_loc(base_pipe_merge_mask, "opac");
-		base_blending_merge_mask = g4_pipeline_get_const_loc(base_pipe_merge_mask, "blending");
-	}
-
-	{
-		base_pipe_colorid_to_mask = g4_pipeline_create();
-		base_pipe_colorid_to_mask.vertex_shader = sys_get_shader("pass.vert");
-		base_pipe_colorid_to_mask.fragment_shader = sys_get_shader("mask_colorid.frag");
-		let vs: vertex_struct_t = g4_vertex_struct_create();
-		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
-		base_pipe_colorid_to_mask.input_layout = [vs];
-		g4_pipeline_compile(base_pipe_colorid_to_mask);
-		base_texpaint_colorid = g4_pipeline_get_tex_unit(base_pipe_colorid_to_mask, "texpaint_colorid");
-		base_tex_colorid = g4_pipeline_get_tex_unit(base_pipe_colorid_to_mask, "texcolorid");
-	}
-	///end
-
-	///if is_lab
-	{
-		base_pipe_copy_r = g4_pipeline_create();
-		base_pipe_copy_r.vertex_shader = sys_get_shader("layer_view.vert");
-		base_pipe_copy_r.fragment_shader = sys_get_shader("layer_copy.frag");
-		let vs: vertex_struct_t = g4_vertex_struct_create();
-		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_3X);
-		g4_vertex_struct_add(vs, "tex", vertex_data_t.F32_2X);
-		g4_vertex_struct_add(vs, "col", vertex_data_t.U8_4X_NORM);
-		base_pipe_copy_r.input_layout = [vs];
-		base_pipe_copy_r.color_write_masks_green = [false];
-		base_pipe_copy_r.color_write_masks_blue = [false];
-		base_pipe_copy_r.color_write_masks_alpha = [false];
-		g4_pipeline_compile(base_pipe_copy_r);
-	}
-
-	{
-		base_pipe_copy_g = g4_pipeline_create();
-		base_pipe_copy_g.vertex_shader = sys_get_shader("layer_view.vert");
-		base_pipe_copy_g.fragment_shader = sys_get_shader("layer_copy.frag");
-		let vs: vertex_struct_t = g4_vertex_struct_create();
-		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_3X);
-		g4_vertex_struct_add(vs, "tex", vertex_data_t.F32_2X);
-		g4_vertex_struct_add(vs, "col", vertex_data_t.U8_4X_NORM);
-		base_pipe_copy_g.input_layout = [vs];
-		base_pipe_copy_g.color_write_masks_red = [false];
-		base_pipe_copy_g.color_write_masks_blue = [false];
-		base_pipe_copy_g.color_write_masks_alpha = [false];
-		g4_pipeline_compile(base_pipe_copy_g);
-	}
-
-	{
-		base_pipe_copy_b = g4_pipeline_create();
-		base_pipe_copy_b.vertex_shader = sys_get_shader("layer_view.vert");
-		base_pipe_copy_b.fragment_shader = sys_get_shader("layer_copy.frag");
-		let vs: vertex_struct_t = g4_vertex_struct_create();
-		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_3X);
-		g4_vertex_struct_add(vs, "tex", vertex_data_t.F32_2X);
-		g4_vertex_struct_add(vs, "col", vertex_data_t.U8_4X_NORM);
-		base_pipe_copy_b.input_layout = [vs];
-		base_pipe_copy_b.color_write_masks_red = [false];
-		base_pipe_copy_b.color_write_masks_green = [false];
-		base_pipe_copy_b.color_write_masks_alpha = [false];
-		g4_pipeline_compile(base_pipe_copy_b);
-	}
-
-	{
-		base_pipe_inpaint_preview = g4_pipeline_create();
-		base_pipe_inpaint_preview.vertex_shader = sys_get_shader("pass.vert");
-		base_pipe_inpaint_preview.fragment_shader = sys_get_shader("inpaint_preview.frag");
-		let vs: vertex_struct_t = g4_vertex_struct_create();
-		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
-		base_pipe_inpaint_preview.input_layout = [vs];
-		g4_pipeline_compile(base_pipe_inpaint_preview);
-		base_tex0_inpaint_preview = g4_pipeline_get_tex_unit(base_pipe_inpaint_preview, "tex0");
-		base_texa_inpaint_preview = g4_pipeline_get_tex_unit(base_pipe_inpaint_preview, "texa");
-	}
-	///end
-}
-
-function base_make_pipe_copy_rgb() {
-	base_pipe_copy_rgb = g4_pipeline_create();
-	base_pipe_copy_rgb.vertex_shader = sys_get_shader("layer_view.vert");
-	base_pipe_copy_rgb.fragment_shader = sys_get_shader("layer_copy.frag");
-	let vs: vertex_struct_t = g4_vertex_struct_create();
-	g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_3X);
-	g4_vertex_struct_add(vs, "tex", vertex_data_t.F32_2X);
-	g4_vertex_struct_add(vs, "col", vertex_data_t.U8_4X_NORM);
-	base_pipe_copy_rgb.input_layout = [vs];
-	base_pipe_copy_rgb.color_write_masks_alpha = [false];
-	g4_pipeline_compile(base_pipe_copy_rgb);
-}
-
-function base_make_pipe_copy_a() {
-	base_pipe_copy_a = g4_pipeline_create();
-	base_pipe_copy_a.vertex_shader = sys_get_shader("pass.vert");
-	base_pipe_copy_a.fragment_shader = sys_get_shader("layer_copy_rrrr.frag");
-	let vs: vertex_struct_t = g4_vertex_struct_create();
-	g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
-	base_pipe_copy_a.input_layout = [vs];
-	base_pipe_copy_a.color_write_masks_red = [false];
-	base_pipe_copy_a.color_write_masks_green = [false];
-	base_pipe_copy_a.color_write_masks_blue = [false];
-	g4_pipeline_compile(base_pipe_copy_a);
-	base_pipe_copy_a_tex = g4_pipeline_get_tex_unit(base_pipe_copy_a, "tex");
-}
-
-function base_make_cursor_pipe() {
-	base_pipe_cursor = g4_pipeline_create();
-	base_pipe_cursor.vertex_shader = sys_get_shader("cursor.vert");
-	base_pipe_cursor.fragment_shader = sys_get_shader("cursor.frag");
-	let vs: vertex_struct_t = g4_vertex_struct_create();
-	///if (arm_metal || arm_vulkan)
-	g4_vertex_struct_add(vs, "tex", vertex_data_t.I16_2X_NORM);
-	///else
-	g4_vertex_struct_add(vs, "pos", vertex_data_t.I16_4X_NORM);
-	g4_vertex_struct_add(vs, "nor", vertex_data_t.I16_2X_NORM);
-	g4_vertex_struct_add(vs, "tex", vertex_data_t.I16_2X_NORM);
-	///end
-	base_pipe_cursor.input_layout = [vs];
-	base_pipe_cursor.blend_source = blend_factor_t.SOURCE_ALPHA;
-	base_pipe_cursor.blend_dest = blend_factor_t.INV_SOURCE_ALPHA;
-	base_pipe_cursor.depth_write = false;
-	base_pipe_cursor.depth_mode = compare_mode_t.ALWAYS;
-	g4_pipeline_compile(base_pipe_cursor);
-	base_cursor_vp = g4_pipeline_get_const_loc(base_pipe_cursor, "VP");
-	base_cursor_inv_vp = g4_pipeline_get_const_loc(base_pipe_cursor, "invVP");
-	base_cursor_mouse = g4_pipeline_get_const_loc(base_pipe_cursor, "mouse");
-	base_cursor_tex_step = g4_pipeline_get_const_loc(base_pipe_cursor, "tex_step");
-	base_cursor_radius = g4_pipeline_get_const_loc(base_pipe_cursor, "radius");
-	base_cursor_camera_right = g4_pipeline_get_const_loc(base_pipe_cursor, "camera_right");
-	base_cursor_tint = g4_pipeline_get_const_loc(base_pipe_cursor, "tint");
-	base_cursor_gbufferd = g4_pipeline_get_tex_unit(base_pipe_cursor, "gbufferD");
-	base_cursor_tex = g4_pipeline_get_tex_unit(base_pipe_cursor, "tex");
-}
-
 function base_make_temp_img() {
 	///if (is_paint || is_sculpt)
 	let l: slot_layer_t = project_layers[0];
@@ -1461,7 +993,6 @@ function base_make_temp_img() {
 	}
 }
 
-///if (is_paint || is_sculpt)
 function base_make_temp_mask_img() {
 	if (base_temp_mask_image != null && (base_temp_mask_image.width != config_get_texture_res_x() || base_temp_mask_image.height != config_get_texture_res_y())) {
 		let _temp_mask_image: image_t = base_temp_mask_image;
@@ -1474,7 +1005,6 @@ function base_make_temp_mask_img() {
 		base_temp_mask_image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
 	}
 }
-///end
 
 function base_make_export_img() {
 	///if (is_paint || is_sculpt)
@@ -1781,8 +1311,10 @@ function base_new_layer(clear: bool = true, position: i32 = -1): slot_layer_t {
 	if (project_layers.length > base_max_layers) {
 		return null;
 	}
+
 	let l: slot_layer_t = slot_layer_create();
 	l.object_mask = context_raw.layer_filter;
+
 	if (position == -1) {
 		if (slot_layer_is_mask(context_raw.layer)) context_set_layer(context_raw.layer.parent);
 		array_insert(project_layers, array_index_of(project_layers, context_raw.layer) + 1, l);
@@ -1837,10 +1369,6 @@ function base_new_group(): slot_layer_t {
 	return l;
 }
 
-let _base_uv_type: uv_type_t;
-let _base_decal_mat: mat4_t;
-let _base_position: i32;
-
 function base_create_fill_layer(uv_type: uv_type_t = uv_type_t.UVMAP, decal_mat: mat4_t = mat4nan, position: i32 = -1) {
 	_base_uv_type = uv_type;
 	_base_decal_mat = decal_mat;
@@ -1870,13 +1398,7 @@ function base_create_image_mask(asset: asset_t) {
 	context_raw.layer_preview_dirty = true;
 }
 
-let _base_base_color: i32;
-let _base_occlusion: f32;
-let _base_roughness: f32;
-let _base_metallic: f32;
-
 function base_create_color_layer(base_color: i32, occlusion: f32 = 1.0, roughness: f32 = base_default_rough, metallic: f32 = 0.0, position: i32 = -1) {
-
 	_base_base_color = base_color;
 	_base_occlusion = occlusion;
 	_base_roughness = roughness;
@@ -2129,280 +1651,10 @@ function base_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool = 
 	}
 }
 
-///if (is_paint || is_sculpt)
-
 function base_flatten(height_to_normal: bool = false, layers: slot_layer_t[] = null): slot_layer_t {
-	if (layers == null) {
-		layers = project_layers;
-	}
-	base_make_temp_img();
-	base_make_export_img();
-	if (base_pipe_merge == null) {
-		base_make_pipe();
-	}
-	if (const_data_screen_aligned_vb == null) {
-		const_data_create_screen_aligned_data();
-	}
-	let empty_rt: render_target_t = map_get(render_path_render_targets, "empty_white");
-	let empty: image_t = empty_rt._image;
-
-	// Clear export layer
-	g4_begin(base_expa);
-	g4_clear(color_from_floats(0.0, 0.0, 0.0, 0.0));
-	g4_end();
-	g4_begin(base_expb);
-	g4_clear(color_from_floats(0.5, 0.5, 1.0, 0.0));
-	g4_end();
-	g4_begin(base_expc);
-	g4_clear(color_from_floats(1.0, 0.0, 0.0, 0.0));
-	g4_end();
-
-	// Flatten layers
-	for (let i: i32 = 0; i < layers.length; ++i) {
-		let l1: slot_layer_t = layers[i];
-		if (!slot_layer_is_visible(l1)) {
-			continue;
-		}
-		if (!slot_layer_is_layer(l1)) {
-			continue;
-		}
-
-		let mask: image_t = empty;
-		let l1masks: slot_layer_t[] = slot_layer_get_masks(l1);
-		if (l1masks != null) {
-			if (l1masks.length > 1) {
-				base_make_temp_mask_img();
-				g2_begin(base_temp_mask_image);
-				g2_clear(0x00000000);
-				g2_end();
-				let l1: slot_layer_t = { texpaint: base_temp_mask_image };
-				for (let i: i32 = 0; i < l1masks.length; ++i) {
-					base_merge_layer(l1, l1masks[i]);
-				}
-				mask = base_temp_mask_image;
-			}
-			else {
-				mask = l1masks[0].texpaint;
-			}
-		}
-
-		if (l1.paint_base) {
-			g2_begin(base_temp_image); // Copy to temp
-			g2_set_pipeline(base_pipe_copy);
-			g2_draw_image(base_expa, 0, 0);
-			g2_set_pipeline(null);
-			g2_end();
-
-			g4_begin(base_expa);
-			g4_set_pipeline(base_pipe_merge);
-			g4_set_tex(base_tex0, l1.texpaint);
-			g4_set_tex(base_tex1, empty);
-			g4_set_tex(base_texmask, mask);
-			g4_set_tex(base_texa, base_temp_image);
-			g4_set_float(base_opac, slot_layer_get_opacity(l1));
-			g4_set_int(base_blending, layers.length > 1 ? l1.blending : 0);
-			g4_set_vertex_buffer(const_data_screen_aligned_vb);
-			g4_set_index_buffer(const_data_screen_aligned_ib);
-			g4_draw();
-			g4_end();
-		}
-
-		if (l1.paint_nor) {
-			g2_begin(base_temp_image);
-			g2_set_pipeline(base_pipe_copy);
-			g2_draw_image(base_expb, 0, 0);
-			g2_set_pipeline(null);
-			g2_end();
-
-			g4_begin(base_expb);
-			g4_set_pipeline(base_pipe_merge);
-			g4_set_tex(base_tex0, l1.texpaint);
-			g4_set_tex(base_tex1, l1.texpaint_nor);
-			g4_set_tex(base_texmask, mask);
-			g4_set_tex(base_texa, base_temp_image);
-			g4_set_float(base_opac, slot_layer_get_opacity(l1));
-			g4_set_int(base_blending, l1.paint_nor_blend ? -2 : -1);
-			g4_set_vertex_buffer(const_data_screen_aligned_vb);
-			g4_set_index_buffer(const_data_screen_aligned_ib);
-			g4_draw();
-			g4_end();
-		}
-
-		if (l1.paint_occ || l1.paint_rough || l1.paint_met || l1.paint_height) {
-			g2_begin(base_temp_image);
-			g2_set_pipeline(base_pipe_copy);
-			g2_draw_image(base_expc, 0, 0);
-			g2_set_pipeline(null);
-			g2_end();
-
-			if (l1.paint_occ && l1.paint_rough && l1.paint_met && l1.paint_height) {
-				base_commands_merge_pack(base_pipe_merge, base_expc, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask, l1.paint_height_blend ? -3 : -1);
-			}
-			else {
-				if (l1.paint_occ) {
-					base_commands_merge_pack(base_pipe_merge_r, base_expc, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask);
-				}
-				if (l1.paint_rough) {
-					base_commands_merge_pack(base_pipe_merge_g, base_expc, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask);
-				}
-				if (l1.paint_met) {
-					base_commands_merge_pack(base_pipe_merge_b, base_expc, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask);
-				}
-			}
-		}
-	}
-
-	///if arm_metal
-	// Flush command list
-	g2_begin(base_expa);
-	g2_end();
-	g2_begin(base_expb);
-	g2_end();
-	g2_begin(base_expc);
-	g2_end();
-	///end
-
-	let l0: slot_layer_t = {
-		texpaint: base_expa,
-		texpaint_nor: base_expb,
-		texpaint_pack: base_expc
-	};
-
-	// Merge height map into normal map
-	if (height_to_normal && make_material_height_used) {
-
-		g2_begin(base_temp_image);
-		g2_set_pipeline(base_pipe_copy);
-		g2_draw_image(l0.texpaint_nor, 0, 0);
-		g2_set_pipeline(null);
-		g2_end();
-
-		g4_begin(l0.texpaint_nor);
-		g4_set_pipeline(base_pipe_merge);
-		g4_set_tex(base_tex0, base_temp_image);
-		g4_set_tex(base_tex1, l0.texpaint_pack);
-		g4_set_tex(base_texmask, empty);
-		g4_set_tex(base_texa, empty);
-		g4_set_float(base_opac, 1.0);
-		g4_set_int(base_blending, -4);
-		g4_set_vertex_buffer(const_data_screen_aligned_vb);
-		g4_set_index_buffer(const_data_screen_aligned_ib);
-		g4_draw();
-		g4_end();
-	}
-
-	return l0;
+	base_ext_flatten(height_to_normal, layers);
 }
 
 function base_on_layers_resized() {
-	app_notify_on_init(function () {
-		base_resize_layers();
-		let _layer: slot_layer_t = context_raw.layer;
-		let _material: slot_material_t = context_raw.material;
-		for (let i: i32 = 0; i < project_layers.length; ++i) {
-			let l: slot_layer_t = project_layers[i];
-			if (l.fill_layer != null) {
-				context_raw.layer = l;
-				context_raw.material = l.fill_layer;
-				base_update_fill_layer();
-			}
-		}
-		context_raw.layer = _layer;
-		context_raw.material = _material;
-		make_material_parse_paint_material();
-	});
-	util_uv_uvmap = null;
-	util_uv_uvmap_cached = false;
-	util_uv_trianglemap = null;
-	util_uv_trianglemap_cached = false;
-	util_uv_dilatemap_cached = false;
-	///if (arm_direct3d12 || arm_vulkan || arm_metal)
-	render_path_raytrace_ready = false;
-	///end
+	base_ext_on_layers_resized();
 }
-///end
-
-///if is_lab
-function base_flatten(height_to_normal: bool = false, layers: slot_layer_t[] = null): slot_layer_t {
-	let texpaint: image_t = brush_output_node_inst.texpaint;
-	let texpaint_nor: image_t = brush_output_node_inst.texpaint_nor;
-	let texpaint_pack: image_t = brush_output_node_inst.texpaint_pack;
-
-	let nodes: ui_nodes_t = ui_nodes_get_nodes();
-	let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
-	if (nodes.nodes_selected_id.length > 0) {
-		let node: ui_node_t = ui_get_node(canvas.nodes, nodes.nodes_selected_id[0]);
-		let brush_node: logic_node_ext_t = parser_logic_get_logic_node(node);
-		if (brush_node != null && logic_node_get_cached_image(brush_node.base) != null) {
-			texpaint = logic_node_get_cached_image(brush_node.base);
-			let texpaint_nor_rt: render_target_t = map_get(render_path_render_targets, "texpaint_nor_empty");
-			let texpaint_pack_rt: render_target_t = map_get(render_path_render_targets, "texpaint_pack_empty");
-			texpaint_nor = texpaint_nor_rt._image;
-			texpaint_pack = texpaint_pack_rt._image;
-		}
-	}
-
-	let l: slot_layer_t = { texpaint: texpaint, texpaint_nor: texpaint_nor, texpaint_pack: texpaint_pack };
-	return l;
-}
-
-function base_on_layers_resized() {
-	image_unload(brush_output_node_inst.texpaint);
-	let texpaint_rt: render_target_t = map_get(render_path_render_targets, "texpaint");
-	brush_output_node_inst.texpaint = texpaint_rt._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
-
-	image_unload(brush_output_node_inst.texpaint_nor);
-	let texpaint_nor_rt: render_target_t = map_get(render_path_render_targets, "texpaint_nor");
-	brush_output_node_inst.texpaint_nor = texpaint_nor_rt._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
-
-	image_unload(brush_output_node_inst.texpaint_pack);
-	let texpaint_pack_rt: render_target_t = map_get(render_path_render_targets, "texpaint_pack");
-	brush_output_node_inst.texpaint_pack = texpaint_pack_rt._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
-
-	if (inpaint_node_image != null) {
-		image_unload(inpaint_node_image);
-		inpaint_node_image = null;
-		image_unload(inpaint_node_mask);
-		inpaint_node_mask = null;
-		inpaint_node_init();
-	}
-
-	if (photo_to_pbr_node_images != null) {
-		for (let i: i32 = 0; i < photo_to_pbr_node_images.length; ++i) {
-			let image: image_t = photo_to_pbr_node_images[i];
-			image_unload(image);
-		}
-		photo_to_pbr_node_images = null;
-		photo_to_pbr_node_init();
-	}
-
-	if (tiling_node_image != null) {
-		image_unload(tiling_node_image);
-		tiling_node_image = null;
-		tiling_node_init();
-	}
-
-	let texpaint_blend0_rt: render_target_t = map_get(render_path_render_targets, "texpaint_blend0");
-	image_unload(texpaint_blend0_rt._image);
-	texpaint_blend0_rt._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
-
-	let texpaint_blend1_rt: render_target_t = map_get(render_path_render_targets, "texpaint_blend1");
-	image_unload(texpaint_blend1_rt._image);
-	texpaint_blend1_rt._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
-
-	if (map_get(render_path_render_targets, "texpaint_node") != null) {
-		map_delete(render_path_render_targets, "texpaint_node");
-	}
-	if (map_get(render_path_render_targets, "texpaint_node_target") != null) {
-		map_delete(render_path_render_targets, "texpaint_node_target");
-	}
-
-	app_notify_on_next_frame(function () {
-		base_init_layers();
-	});
-
-	///if (arm_direct3d12 || arm_vulkan || arm_metal)
-	render_path_raytrace_ready = false;
-	///end
-}
-///end

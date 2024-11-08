@@ -28,6 +28,7 @@ function console_toast(s: string) {
 	// Show a popup message
 	app_notify_on_render_2d(_console_toast_render, s);
 	console_trace(s);
+	iron_g4_swap_buffers();
 }
 
 function console_draw_progress() {
