@@ -6,7 +6,9 @@ armortools
 3D content creation tools.
 
 [armorpaint/](https://github.com/armory3d/armortools/tree/main/armorpaint)<br>
-[armorlab/](https://github.com/armory3d/armortools/tree/main/armorlab)
+[armorlab/](https://github.com/armory3d/armortools/tree/main/armorlab)<br>
+[armorsculpt/](https://github.com/armory3d/armortools/tree/main/armorsculpt)<br>
+[armorforge/](https://github.com/armory3d/armortools/tree/main/armorforge)
 
 **Generating a locale file**
 ```bash
