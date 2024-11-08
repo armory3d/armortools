@@ -2,17 +2,17 @@
 // https://github.com/aras-p/miniexr
 // https://www.openexr.com/documentation/openexrfilelayout.pdf
 
-function parser_exr_write_string(out: i32[], str: string) {
-	for (let i: i32 = 0; i < str.length; ++i) {
-		array_push(out, char_code_at(str, i));
-	}
-}
-
 let _parser_exr_width: i32;
 let _parser_exr_stride: i32;
 let _parser_exr_out: u8[];
 let _parser_exr_src_view: buffer_t;
 let _parser_exr_write_line: (byte_pos: i32)=> void;
+
+function parser_exr_write_string(out: i32[], str: string) {
+	for (let i: i32 = 0; i < str.length; ++i) {
+		array_push(out, char_code_at(str, i));
+	}
+}
 
 function parser_exr_write_line16(byte_pos: i32) {
 	for (let x: i32 = 0; x < _parser_exr_width; ++x) {

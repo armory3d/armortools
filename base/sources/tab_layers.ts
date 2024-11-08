@@ -2,6 +2,8 @@
 let tab_layers_layer_name_edit: i32 = -1;
 let tab_layers_layer_name_handle: ui_handle_t = ui_handle_create();
 let tab_layers_show_context_menu: bool = false;
+let tab_layers_l: slot_layer_t;
+let tab_layers_mini: bool;
 
 function tab_layers_draw(htab: ui_handle_t) {
 	let mini: bool = config_raw.layout[layout_size_t.SIDEBAR_W] <= ui_base_sidebar_mini_w;
@@ -716,9 +718,6 @@ function tab_layers_can_merge_down(l: slot_layer_t): bool {
 	}
 	return true;
 }
-
-let tab_layers_l: slot_layer_t;
-let tab_layers_mini: bool;
 
 function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 

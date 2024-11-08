@@ -16,6 +16,38 @@ type blend_t = {
 	map?: map_t<string, block_t>; // Map blocks by memory address
 };
 
+type block_t = {
+	blend?: blend_t;
+	code?: string;
+	size?: i32;
+	sdna_index?: i32;
+	count?: i32;
+	pos?: i32; // Byte pos of data start in blob
+};
+
+type dna_t = {
+	names?: string[];
+	types?: string[];
+	types_length?: i32[];
+	structs?: dna_struct_t[];
+};
+
+type dna_struct_t = {
+	dna?: dna_t;
+	type?: i32; // Index in dna.types
+	field_types?: i32[]; // Index in dna.types
+	field_names?: i32[]; // Index in dna.names
+};
+
+type bl_handle_t = {
+	block?: block_t;
+	offset?: i32; // Block data bytes offset
+	ds?: dna_struct_t;
+};
+
+let bl_handle_tmp_i: i64;
+let bl_handle_tmp_f: f64;
+
 function parser_blend_init(buffer: buffer_t): blend_t {
 	let raw: blend_t = {};
 	raw.blocks = [];
@@ -300,35 +332,6 @@ function parser_blend_read_pointer(raw: blend_t): string {
 	return u64_to_string(i);
 }
 
-type block_t = {
-	blend?: blend_t;
-	code?: string;
-	size?: i32;
-	sdna_index?: i32;
-	count?: i32;
-	pos?: i32; // Byte pos of data start in blob
-};
-
-type dna_t = {
-	names?: string[];
-	types?: string[];
-	types_length?: i32[];
-	structs?: dna_struct_t[];
-};
-
-type dna_struct_t = {
-	dna?: dna_t;
-	type?: i32; // Index in dna.types
-	field_types?: i32[]; // Index in dna.types
-	field_names?: i32[]; // Index in dna.names
-};
-
-type bl_handle_t = {
-	block?: block_t;
-	offset?: i32; // Block data bytes offset
-	ds?: dna_struct_t;
-};
-
 function bl_handle_get_size(raw: bl_handle_t, index: i32): i32 {
 	let name_index: i32 = raw.ds.field_names[index];
 	let type_index: i32 = raw.ds.field_types[index];
@@ -360,9 +363,6 @@ function bl_handle_base_name(s: string): string {
 function bl_handle_get_array_len(s: string): i32 {
 	return parse_int(substring(s, string_index_of(s, "[") + 1, string_index_of(s, "]")));
 }
-
-let bl_handle_tmp_i: i64;
-let bl_handle_tmp_f: f64;
 
 function bl_handle_get_f(raw: bl_handle_t, name: string): f64 {
 	let p: f64_ptr = bl_handle_get(raw, name);

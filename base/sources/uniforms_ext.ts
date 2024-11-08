@@ -68,8 +68,6 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 	else if (link == "_bloom_sample_scale") {
 		return render_path_base_bloom_sample_scale;
 	}
-
-	///if (is_paint || is_sculpt)
 	else if (link == "_brush_scale_x") {
 		return 1 / context_raw.brush_scale_x;
 	}
@@ -129,7 +127,6 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 	else if (link == "_picker_height") {
 		return context_raw.picked_color.height;
 	}
-	///end
 
 	if (parser_material_script_links != null) {
 		let keys: string[] = map_keys(parser_material_script_links);
@@ -157,7 +154,6 @@ function uniforms_ext_vec2_link(object: object_t, mat: material_data_t, link: st
 	else if (link == "_texpaint_size") {
 		return vec2_create(config_get_texture_res_x(), config_get_texture_res_y());
 	}
-	///if (is_paint || is_sculpt)
 	else if (link == "_brush_angle") {
 		let brush_angle: f32 = context_raw.brush_angle + context_raw.brush_nodes_angle;
 		let angle: f32 = context_raw.layer.fill_layer != null ? context_raw.layer.angle : brush_angle;
@@ -167,7 +163,6 @@ function uniforms_ext_vec2_link(object: object_t, mat: material_data_t, link: st
 		}
 		return vec2_create(math_cos(-angle), math_sin(-angle));
 	}
-	///end
 
 	return vec2_nan();
 }
@@ -175,7 +170,6 @@ function uniforms_ext_vec2_link(object: object_t, mat: material_data_t, link: st
 function uniforms_ext_vec3_link(object: object_t, mat: material_data_t, link: string): vec4_t {
 	let v: vec4_t = vec4_nan();
 
-	///if (is_paint || is_sculpt)
 	if (link == "_brush_direction") {
 		v = _uniforms_vec;
 		// Discard first paint for directional brush
@@ -238,12 +232,10 @@ function uniforms_ext_vec3_link(object: object_t, mat: material_data_t, link: st
 		return v;
 	}
 	///end
-	///end
 
 	return v;
 }
 
-///if (is_paint || is_sculpt)
 function vec2d(x: f32): f32 {
 	// Transform from 3d viewport coord to 2d view coord
 	context_raw.paint2d_view = false;
@@ -251,30 +243,23 @@ function vec2d(x: f32): f32 {
 	context_raw.paint2d_view = true;
 	return res;
 }
-///end
 
 function uniforms_ext_vec4_link(object: object_t, mat: material_data_t, link: string): vec4_t {
 	if (link == "_input_brush") {
 		let down: bool = mouse_down() || pen_down();
 		let v: vec4_t = vec4_create(context_raw.paint_vec.x, context_raw.paint_vec.y, down ? 1.0 : 0.0, 0.0);
-
-		///if (is_paint || is_sculpt)
 		if (context_raw.paint2d) {
 			v.x = vec2d(v.x);
 		}
-		///end
 
 		return v;
 	}
 	else if (link == "_input_brush_last") {
 		let down: bool = mouse_down() || pen_down();
 		let v: vec4_t = vec4_create(context_raw.last_paint_vec_x, context_raw.last_paint_vec_y, down ? 1.0 : 0.0, 0.0);
-
-		///if (is_paint || is_sculpt)
 		if (context_raw.paint2d) {
 			v.x = vec2d(v.x);
 		}
-		///end
 
 		return v;
 	}
@@ -284,7 +269,6 @@ function uniforms_ext_vec4_link(object: object_t, mat: material_data_t, link: st
 	else if (link == "_envmap_data_world") {
 		return vec4_create(context_raw.envmap_angle, math_sin(-context_raw.envmap_angle), math_cos(-context_raw.envmap_angle), context_raw.show_envmap ? scene_world.strength : 1.0);
 	}
-	///if (is_paint || is_sculpt)
 	else if (link == "_stencil_transform") {
 		let v: vec4_t = vec4_create(context_raw.brush_stencil_x, context_raw.brush_stencil_y, context_raw.brush_stencil_scale, context_raw.brush_stencil_angle);
 		if (context_raw.paint2d) {
@@ -303,19 +287,16 @@ function uniforms_ext_vec4_link(object: object_t, mat: material_data_t, link: st
 		}
 		return v;
 	}
-	///end
 
 	return vec4_nan();
 }
 
 function uniforms_ext_mat4_link(object: object_t, mat: material_data_t, link: string): mat4_t {
-	///if (is_paint || is_sculpt)
 	if (link == "_decal_layer_matrix") { // Decal layer
 		let m: mat4_t = mat4_inv(context_raw.layer.decal_mat);
 		m = mat4_mult_mat(m, uniforms_ext_ortho_p);
 		return m;
 	}
-	///end
 
 	return mat4_nan();
 }
@@ -455,8 +436,6 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 		return brush_output_node_inst.texpaint;
 		///end
 	}
-
-	///if (is_paint || is_sculpt)
 	if (starts_with(link, "_texblur_")) {
 		let id: string = substring(link, 9, link.length);
 		if (context_raw.node_previews != null) {
@@ -487,7 +466,6 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 			return rt._image;
 		}
 	}
-	///end
 
 	return null;
 }

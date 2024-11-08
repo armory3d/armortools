@@ -3841,6 +3841,10 @@ let nodes_material_list: node_list_t[] = [
 	nodes_material_group
 ];
 
+let _nodes_material_nodes: ui_nodes_t;
+let _nodes_material_node: ui_node_t;
+let _nodes_material_sockets: ui_node_socket_t[];
+
 function nodes_material_init() {
 	map_set(ui_nodes_custom_buttons, "nodes_material_vector_curves_button", nodes_material_vector_curves_button);
 	map_set(ui_nodes_custom_buttons, "nodes_material_color_ramp_button", nodes_material_color_ramp_button);
@@ -3856,8 +3860,7 @@ function nodes_material_vector_curves_button(node_id: i32) {
 
 	let but: ui_node_button_t = node.buttons[0];
 	let nhandle: ui_handle_t = ui_nest(ui_handle(__ID__), node.id);
-	let row: f32[] = [1 / 3, 1 / 3, 1 / 3];
-	ui_row(row);
+	ui_row3();
 	ui_radio(ui_nest(ui_nest(nhandle, 0), 1), 0, "X");
 	ui_radio(ui_nest(ui_nest(nhandle, 0), 1), 1, "Y");
 	ui_radio(ui_nest(ui_nest(nhandle, 0), 1), 2, "Z");
@@ -3877,7 +3880,7 @@ function nodes_material_vector_curves_button(node_id: i32) {
 	}
 
 	// Edit
-	row = [1 / 5, 1 / 5, 3 / 5];
+	let row: f32[] = [1 / 5, 1 / 5, 3 / 5];
 	ui_row(row);
 	if (ui_button("+")) {
 		val[axis * 32 + num * 2 + 0] = 0.0;
@@ -3902,8 +3905,7 @@ function nodes_material_vector_curves_button(node_id: i32) {
 		ihandle.value = i = num - 1; // Stay in bounds
 	}
 
-	row = [1 / 2, 1 / 2];
-	ui_row(row);
+	ui_row2();
 	ui_nest(ui_nest(nhandle, 0), 3).value = val[axis * 32 + i * 2 + 0];
 	ui_nest(ui_nest(nhandle, 0), 4).value = val[axis * 32 + i * 2 + 1];
 
@@ -3966,8 +3968,7 @@ function nodes_material_color_ramp_button(node_id: i32) {
 	let interpolate_combo: string[] = [tr("Linear"), tr("Constant")];
 	but.data[0] = ui_combo(h, interpolate_combo, tr("Interpolate"));
 
-	row = [1 / 2, 1 / 2];
-	ui_row(row);
+	ui_row2();
 	let i: i32 = math_floor(ui_slider(ihandle, "Index", 0, (vals.length / 5) - 1, false, 1, true, ui_align_t.LEFT));
 	if (i >= (vals.length * 5) || i < 0) {
 		ihandle.value = i = (vals.length / 5) - 1; // Stay in bounds
@@ -4095,10 +4096,6 @@ function nodes_material_group_output_button(node_id: i32) {
 
 	nodes_material_add_socket_button(ui, nodes, node, node.inputs);
 }
-
-let _nodes_material_nodes: ui_nodes_t;
-let _nodes_material_node: ui_node_t;
-let _nodes_material_sockets: ui_node_socket_t[];
 
 function nodes_material_add_socket_button(ui: ui_t, nodes: ui_nodes_t, node: ui_node_t, sockets: ui_node_socket_t[]) {
 	if (ui_button(tr("Add"))) {

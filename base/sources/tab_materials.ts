@@ -1,4 +1,6 @@
 
+let _tab_materials_draw_slots: i32;
+
 function tab_materials_draw(htab: ui_handle_t) {
 	let mini: bool = config_raw.layout[layout_size_t.SIDEBAR_W] <= ui_base_sidebar_mini_w;
 	mini ? tab_materials_draw_mini(htab) : tab_materials_draw_full(htab);
@@ -45,8 +47,6 @@ function tab_materials_button_nodes() {
 		ui_tooltip(tr("Show Node Editor") + " (" + map_get(config_keymap, "toggle_node_editor") + ")");
 	}
 }
-
-let _tab_materials_draw_slots: i32;
 
 function tab_materials_draw_slots(mini: bool) {
 	let ui: ui_t = ui_base_ui;

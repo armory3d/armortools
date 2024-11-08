@@ -2,8 +2,12 @@
 let translator_translations: map_t<string, string> = map_create();
 // The font index is a value specific to font_cjk.ttc
 let translator_cjk_font_indices: map_t<string, i32> = null;
-
 let translator_last_locale: string = "en";
+let _translator_load_translations_cjk_font_path: string;
+let _translator_load_translations_cjk_font_disk_path: string;
+let _translator_init_font_cjk: bool;
+let _translator_init_font_font_path: string;
+let _translator_init_font_font_scale: f32;
 
 // Mark strings as localizable in order to be parsed by the extract_locale script
 // The string will not be translated to the currently selected locale though
@@ -31,9 +35,6 @@ function tr(id: string, vars: map_t<string, string> = null): string {
 
 	return translation;
 }
-
-let _translator_load_translations_cjk_font_path: string;
-let _translator_load_translations_cjk_font_disk_path: string;
 
 // (Re)loads translations for the specified locale
 function translator_load_translations(new_locale: string) {
@@ -139,10 +140,6 @@ function translator_load_translations(new_locale: string) {
 		translator_init_font(false, "font.ttf", 1.0);
 	}
 }
-
-let _translator_init_font_cjk: bool;
-let _translator_init_font_font_path: string;
-let _translator_init_font_font_scale: f32;
 
 function translator_init_font(cjk: bool, font_path: string, font_scale: f32) {
 	i32_array_sort(_g2_font_glyphs, function (pa: u32_ptr, pb: u32_ptr): i32 {

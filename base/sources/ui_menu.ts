@@ -590,8 +590,7 @@ function ui_menu_render() {
 						}
 						ui_text_area(h, ui_align_t.LEFT, false);
 
-						let row: f32[] = [1 / 3, 1 / 3, 1 / 3];
-						ui_row(row);
+						ui_row3();
 
 						///if (arm_windows || arm_linux || arm_macos)
 						if (ui_button(tr("Copy"))) {

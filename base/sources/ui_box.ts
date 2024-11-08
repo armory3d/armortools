@@ -11,9 +11,7 @@ let ui_box_modalh: i32 = 170;
 let ui_box_modal_on_hide: ()=>void = null;
 let ui_box_draws: i32 = 0;
 let ui_box_copyable: bool = false;
-///if (arm_android || arm_ios)
 let ui_box_tween_alpha: f32 = 0.0;
-///end
 
 function ui_box_init() {
 	ui_box_hwnd.redraws = 2;
@@ -89,8 +87,7 @@ function ui_box_render() {
 
 				///if (arm_windows || arm_linux || arm_macos)
 				if (ui_box_copyable) {
-					let row: f32[] = [1 / 3, 1 / 3, 1 / 3];
-					ui_row(row);
+					ui_row3();
 				}
 				else {
 					let row: f32[] = [2 / 3, 1 / 3];
@@ -173,7 +170,6 @@ function ui_box_hide_internal() {
 	base_redraw_ui();
 }
 
-///if (arm_android || arm_ios)
 function ui_box_tween_in() {
 	tween_reset();
 
@@ -196,7 +192,6 @@ function ui_box_tween_out() {
 function ui_box_tween_tick() {
 	base_redraw_ui();
 }
-///end
 
 function ui_box_window_border(ui: ui_t) {
 	if (ui.scissor) {

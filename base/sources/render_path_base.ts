@@ -194,11 +194,7 @@ function render_path_base_commands(draw_commands: ()=>void) {
 
 	///if (arm_direct3d12 || arm_vulkan || arm_metal)
 	if (context_raw.viewport_mode ==  viewport_mode_t.PATH_TRACE) {
-		///if is_paint
 		let use_live_layer: bool = context_raw.tool == workspace_tool_t.MATERIAL;
-		///else
-		let use_live_layer: bool = false;
-		///end
 		render_path_raytrace_draw(use_live_layer);
 		return;
 	}
@@ -265,11 +261,7 @@ function render_path_base_draw_split(draw_commands: ()=>void) {
 		render_path_base_draw_gbuffer();
 
 		///if (arm_direct3d12 || arm_vulkan || arm_metal)
-		///if is_paint
 		let use_live_layer: bool = context_raw.tool == workspace_tool_t.MATERIAL;
-		///else
-		let use_live_layer: bool = false;
-		///end
 		context_raw.viewport_mode == viewport_mode_t.PATH_TRACE ? render_path_raytrace_draw(use_live_layer) : draw_commands();
 		///else
 		draw_commands();

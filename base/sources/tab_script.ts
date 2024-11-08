@@ -9,8 +9,7 @@ function tab_script_draw(htab: ui_handle_t) {
 
 		ui_begin_sticky();
 		if (config_raw.touch_ui) {
-			let row: f32[] = [1 / 4, 1 / 4, 1 / 4, 1 / 4];
-			ui_row(row);
+			ui_row4();
 		}
 		else {
 			let row: f32[] = [1 / 14, 1 / 14, 1 / 14, 1 / 14];

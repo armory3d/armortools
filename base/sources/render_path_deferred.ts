@@ -180,8 +180,8 @@ function render_path_deferred_draw_deferred() {
 	render_path_base_draw_deferred_light();
 	render_path_base_draw_bloom();
 	render_path_base_draw_ssr();
-	// drawMotionBlur();
-	// drawHistogram();
+	// draw_motion_blur();
+	// draw_histogram();
 
 	render_path_set_target("buf");
 	render_path_bind_target("tex", "tex");

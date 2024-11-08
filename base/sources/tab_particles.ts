@@ -1,6 +1,4 @@
 
-///if (is_paint || is_sculpt)
-
 function tab_particles_draw(htab: ui_handle_t) {
 	if (ui_tab(htab, tr("Particles"))) {
 		ui_begin_sticky();
@@ -18,5 +16,3 @@ function tab_particles_draw(htab: ui_handle_t) {
 		ui_end_sticky();
 	}
 }
-
-///end

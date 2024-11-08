@@ -1,6 +1,4 @@
 
-///if (is_paint || is_sculpt)
-
 let _tab_brushes_draw_i: i32;
 
 function tab_brushes_draw(htab: ui_handle_t) {
@@ -169,5 +167,3 @@ function tab_brushes_delete_brush(b: slot_brush_t) {
 	array_splice(project_brushes, i, 1);
 	ui_base_hwnds[1].redraws = 2;
 }
-
-///end

@@ -64,7 +64,7 @@ function import_asset_run(path: string, drop_x: f32 = -1.0, drop_y: f32 = -1.0, 
 		import_plugin_run(path);
 	}
 	else if (path_is_gimp_color_palette(path)) {
-		import_gpl_run(path, false);
+		// import_gpl_run(path, false);
 	}
 	else if (path_is_font(path)) {
 		import_font_run(path);

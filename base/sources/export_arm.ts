@@ -144,9 +144,6 @@ function export_arm_run_project() {
 		layer_datas: ld,
 		font_assets: font_files,
 		mesh_assets: mesh_files,
-		///end
-
-		///if is_paint
 		atlas_objects: project_atlas_objects,
 		atlas_names: project_atlas_names,
 		///end
@@ -335,7 +332,6 @@ function export_arm_run_material(path: string) {
 	iron_file_save_bytes(path, buffer, buffer.length + 1);
 }
 
-///if (arm_metal || arm_vulkan)
 function export_arm_bgra_swap(buffer: buffer_t): buffer_t {
 	for (let i: i32 = 0; i < math_floor((buffer.length) / 4); ++i) {
 		let r: i32 = buffer[i * 4];
@@ -344,7 +340,6 @@ function export_arm_bgra_swap(buffer: buffer_t): buffer_t {
 	}
 	return buffer;
 }
-///end
 
 function export_arm_run_brush(path: string) {
 	if (!ends_with(path, ".arm")) {
@@ -420,7 +415,6 @@ function export_arm_assets_to_files(project_path: string, assets: asset_t[]): st
 	return texture_files;
 }
 
-///if (is_paint || is_sculpt)
 function export_arm_meshes_to_files(project_path: string): string[] {
 	let mesh_files: string[] = [];
 	for (let i: i32 = 0; i < project_mesh_assets.length; ++i) {
@@ -460,7 +454,6 @@ function export_arm_fonts_to_files(project_path: string, fonts: slot_font_t[]): 
 	}
 	return font_files;
 }
-///end
 
 function export_arm_get_packed_assets(project_path: string, texture_files: string[]): packed_asset_t[] {
 	let packed_assets: packed_asset_t[] = null;

@@ -3,15 +3,14 @@ let tab_browser_hpath: ui_handle_t = ui_handle_create();
 let tab_browser_hsearch: ui_handle_t = ui_handle_create();
 let tab_browser_known: bool = false;
 let tab_browser_last_path: string =  "";
+let _tab_browser_draw_file: string;
+let _tab_browser_draw_b: string;
 
 function tab_browser_show_directory(directory: string) {
 	tab_browser_hpath.text = directory;
 	tab_browser_hsearch.text = "";
 	ui_base_htabs[tab_area_t.STATUS].position = 0;
 }
-
-let _tab_browser_draw_file: string;
-let _tab_browser_draw_b: string;
 
 function tab_browser_draw(htab: ui_handle_t) {
 	let ui: ui_t = ui_base_ui;

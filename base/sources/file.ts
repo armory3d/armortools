@@ -1,4 +1,25 @@
 
+type file_download_data_t = {
+	dst_path: string;
+	done: (url: string)=>void;
+};
+
+type file_download_bytes_data_t = {
+	url: string;
+	save: string;
+	done: (url: string, ab: buffer_t)=>void;
+};
+
+type file_cache_cloud_data_t = {
+	dest: string;
+	path: string;
+	done: (dest: string)=>void;
+};
+
+let _file_download_map: map_t<string, file_download_data_t> = map_create();
+let _file_download_bytes_map: map_t<string, file_download_bytes_data_t> = map_create();
+let _file_cache_cloud_map: map_t<string, file_cache_cloud_data_t> = map_create();
+
 ///if arm_windows
 let file_cmd_mkdir: string = "mkdir";
 let file_cmd_copy: string = "copy";
@@ -9,6 +30,8 @@ let file_cmd_copy: string = "cp";
 
 let file_cloud: map_t<string, string[]> = null;
 let file_cloud_sizes: map_t<string, i32> = null;
+
+let _file_init_cloud_bytes_done: ()=>void;
 
 // ///if arm_android
 // let let file_internal: map_t<string, string[]> = null; // .apk contents
@@ -85,13 +108,6 @@ function file_exists(path: string): bool {
 	return iron_file_exists(path);
 }
 
-type file_download_data_t = {
-	dst_path: string;
-	done: (url: string)=>void;
-};
-
-let _file_download_map: map_t<string, file_download_data_t> = map_create();
-
 function file_download(url: string, dst_path: string, done: (url: string)=>void, size: i32 = 0) {
 	///if (arm_windows || arm_macos || arm_ios || arm_android)
 	let fdd: file_download_data_t = { dst_path: dst_path, done: done };
@@ -112,14 +128,6 @@ function file_download(url: string, dst_path: string, done: (url: string)=>void,
 	///end
 }
 
-type file_download_bytes_data_t = {
-	url: string;
-	save: string;
-	done: (url: string, ab: buffer_t)=>void;
-};
-
-let _file_download_bytes_map: map_t<string, file_download_bytes_data_t> = map_create();
-
 function file_download_bytes(url: string, done: (url: string, ab: buffer_t)=>void) {
 	let save: string;
 	if (path_is_protected()) {
@@ -138,14 +146,6 @@ function file_download_bytes(url: string, done: (url: string, ab: buffer_t)=>voi
 		fdbd.done(fdbd.url, buffer);
 	});
 }
-
-type file_cache_cloud_data_t = {
-	dest: string;
-	path: string;
-	done: (dest: string)=>void;
-};
-
-let _file_cache_cloud_map: map_t<string, file_cache_cloud_data_t> = map_create();
 
 function file_cache_cloud(path: string, done: (s: string)=>void) {
 	///if arm_ios
@@ -213,8 +213,6 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 		///end
 	}, map_get(file_cloud_sizes, path));
 }
-
-let _file_init_cloud_bytes_done: ()=>void;
 
 function file_init_cloud_bytes(done: ()=>void, append: string = "") {
 	_file_init_cloud_bytes_done = done;

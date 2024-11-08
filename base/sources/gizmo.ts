@@ -1,6 +1,4 @@
 
-///if (is_paint || is_sculpt)
-
 let gizmo_v: vec4_t = vec4_create();
 let gizmo_v0: vec4_t = vec4_create();
 let gizmo_q: quat_t = quat_create();
@@ -318,5 +316,3 @@ function gizmo_update() {
 
 	_input_occupied = (context_raw.translate_x || context_raw.translate_y || context_raw.translate_z || context_raw.scale_x || context_raw.scale_y || context_raw.scale_z || context_raw.rotate_x || context_raw.rotate_y || context_raw.rotate_z) && mouse_view_x() < base_w();
 }
-
-///end

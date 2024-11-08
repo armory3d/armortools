@@ -5,13 +5,11 @@ let ui_view2d_text_input_hover: bool = false;
 let ui_view2d_uvmap_show: bool = false;
 let ui_view2d_tex_type: paint_tex_t = paint_tex_t.BASE;
 let ui_view2d_layer_mode: view_2d_layer_mode_t = view_2d_layer_mode_t.SELECTED;
-
 ///if (is_paint || is_sculpt)
 let ui_view2d_type: view_2d_type_t = view_2d_type_t.LAYER;
 ///else
 let ui_view2d_type: view_2d_type_t = view_2d_type_t.ASSET;
 ///end
-
 let ui_view2d_show: bool = false;
 let ui_view2d_wx: i32;
 let ui_view2d_wy: i32;
@@ -24,6 +22,11 @@ let ui_view2d_pan_y: f32 = 0.0;
 let ui_view2d_pan_scale: f32 = 1.0;
 let ui_view2d_tiled_show: bool = false;
 let ui_view2d_controls_down: bool = false;
+let _ui_view2d_render_tex: image_t;
+let _ui_view2d_render_x: f32;
+let _ui_view2d_render_y: f32;
+let _ui_view2d_render_tw: f32;
+let _ui_view2d_render_th: f32;
 
 function ui_view2d_init() {
 	///if (is_paint || is_sculpt)
@@ -53,12 +56,6 @@ function ui_view2d_init() {
 	ui_view2d_ui = ui_create(ops);
 	ui_view2d_ui.scroll_enabled = false;
 }
-
-let _ui_view2d_render_tex: image_t;
-let _ui_view2d_render_x: f32;
-let _ui_view2d_render_y: f32;
-let _ui_view2d_render_tw: f32;
-let _ui_view2d_render_th: f32;
 
 function ui_view2d_render() {
 

@@ -56,7 +56,7 @@ function tab_console_draw(htab: ui_handle_t) {
 		ui_end_sticky();
 
 		let _font: g2_font_t = ui.ops.font;
-		let _fontSize: i32 = ui.font_size;
+		let _font_size: i32 = ui.font_size;
 		let f: g2_font_t = data_get_font("font_mono.ttf");
 		ui_set_font(ui, f);
 		ui.font_size = math_floor(15 * ui_SCALE(ui));
@@ -65,6 +65,6 @@ function tab_console_draw(htab: ui_handle_t) {
 			ui_text(t);
 		}
 		ui_set_font(ui, _font);
-		ui.font_size = _fontSize;
+		ui.font_size = _font_size;
 	}
 }

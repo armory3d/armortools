@@ -1,6 +1,4 @@
 
-///if (is_paint || is_sculpt)
-
 let _tab_fonts_draw_i: i32;
 
 function tab_fonts_draw(htab: ui_handle_t) {
@@ -172,5 +170,3 @@ function tab_fonts_delete_font(font: slot_font_t) {
 
 	ui_base_hwnds[2].redraws = 2;
 }
-
-///end

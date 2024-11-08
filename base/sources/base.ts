@@ -1652,7 +1652,7 @@ function base_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool = 
 }
 
 function base_flatten(height_to_normal: bool = false, layers: slot_layer_t[] = null): slot_layer_t {
-	base_ext_flatten(height_to_normal, layers);
+	return base_ext_flatten(height_to_normal, layers);
 }
 
 function base_on_layers_resized() {

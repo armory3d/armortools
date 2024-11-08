@@ -1,8 +1,5 @@
 
-///if (is_paint || is_sculpt)
 let import_mesh_clear_layers: bool = true;
-///end
-
 let import_mesh_meshes_to_unwrap: any[] = null;
 
 ///if (is_paint || is_sculpt)

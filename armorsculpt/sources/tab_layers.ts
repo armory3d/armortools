@@ -198,10 +198,8 @@ function tab_layers_draw_layer_slot(l: slot_layer_t, i: i32, mini: bool) {
 function tab_layers_draw_layer_slot_mini(l: slot_layer_t, i: i32) {
 	let ui: ui_t = ui_base_ui;
 
-	let row: f32[] = [1, 1];
+	let row: f32[] = [1 / 1, 1 / 1];
 	ui_row(row);
-	let uix: i32 = ui._x;
-	let uiy: i32 = ui._y;
 	_ui_end_element();
 	_ui_end_element();
 

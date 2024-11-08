@@ -274,14 +274,12 @@ function tab_textures_delete_texture(asset: asset_t) {
 	}
 	ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
 
-	///if is_paint
 	if (context_raw.tool == workspace_tool_t.COLORID && i == context_raw.colorid_handle.position) {
 		ui_header_handle.redraws = 2;
 		context_raw.ddirty = 2;
 		context_raw.colorid_picked = false;
 		ui_toolbar_handle.redraws = 1;
 	}
-	///end
 
 	data_delete_image(asset.file);
 	map_delete(project_asset_map, asset.id);

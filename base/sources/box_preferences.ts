@@ -198,8 +198,7 @@ function box_preferences_show() {
 			if (ui_button(tr("New"))) {
 				ui_box_show_custom(function (ui: ui_t) {
 					if (ui_tab(ui_handle(__ID__), tr("New Theme"))) {
-						let row: f32[] = [0.5, 0.5];
-						ui_row(row);
+						ui_row2();
 						let h: ui_handle_t = ui_handle(__ID__);
 						if (h.init) {
 							h.text = "new_theme";
@@ -483,8 +482,7 @@ function box_preferences_show() {
 				make_material_parse_paint_material();
 			}
 
-			let row: f32[] = [0.5, 0.5];
-			ui_row(row);
+			ui_row2();
 
 			let brush_angle_reject_handle: ui_handle_t = ui_handle(__ID__);
 			if (brush_angle_reject_handle.init) {
@@ -724,8 +722,7 @@ function box_preferences_show() {
 			}
 
 			ui_begin_sticky();
-			let row: f32[] = [1 / 4, 1 / 4, 1 / 4, 1 / 4];
-			ui_row(row);
+			ui_row4();
 
 			box_preferences_preset_handle = ui_handle(__ID__);
 			if (box_preferences_preset_handle.init) {
@@ -741,8 +738,7 @@ function box_preferences_show() {
 			if (ui_button(tr("New"))) {
 				ui_box_show_custom(function (ui: ui_t) {
 					if (ui_tab(ui_handle(__ID__), tr("New Keymap"))) {
-						let row: f32[] = [0.5, 0.5];
-						ui_row(row);
+						ui_row2();
 						let h: ui_handle_t = ui_handle(__ID__);
 						if (h.init) {
 							h.text = "new_keymap";
@@ -810,8 +806,7 @@ function box_preferences_show() {
 			if (ui_button(tr("New"))) {
 				ui_box_show_custom(function (ui: ui_t) {
 					if (ui_tab(ui_handle(__ID__), tr("New Plugin"))) {
-						let row: f32[] = [0.5, 0.5];
-						ui_row(row);
+						ui_row2();
 						let h: ui_handle_t = ui_handle(__ID__);
 						if (h.init) {
 							h.text = "new_plugin";

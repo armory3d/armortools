@@ -15,8 +15,6 @@ function history_undo() {
 		if (step.name == tr("Edit Nodes")) {
 			history_swap_canvas(step);
 		}
-
-		///if (is_paint || is_sculpt)
 		else if (step.name == tr("New Layer") || step.name == tr("New Black Mask") || step.name == tr("New White Mask") || step.name == tr("New Fill Mask")) {
 			context_raw.layer = project_layers[step.layer];
 			slot_layer_delete(context_raw.layer);
@@ -217,13 +215,11 @@ function history_undo() {
 			slot_layer_swap(context_raw.layer, lay);
 			context_raw.layer_preview_dirty = true;
 		}
-		///end
 
 		history_undos--;
 		history_redos++;
 		context_raw.ddirty = 2;
 
-		///if (is_paint || is_sculpt)
 		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 		ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 		if (ui_view2d_show) {
@@ -234,7 +230,6 @@ function history_undo() {
 			// Refresh undo & redo buttons
 			ui_menubar_menu_handle.redraws = 2;
 		}
-		///end
 	}
 }
 
@@ -246,8 +241,6 @@ function history_redo() {
 		if (step.name == tr("Edit Nodes")) {
 			history_swap_canvas(step);
 		}
-
-		///if (is_paint || is_sculpt)
 		else if (step.name == tr("New Layer") || step.name == tr("New Black Mask") || step.name == tr("New White Mask") || step.name == tr("New Fill Mask")) {
 			let parent: slot_layer_t = step.layer_parent > 0 ? project_layers[step.layer_parent - 1] : null;
 			let l: slot_layer_t = slot_layer_create("", step.layer_type, parent);
@@ -413,13 +406,11 @@ function history_redo() {
 			context_raw.layer_preview_dirty = true;
 			history_undo_i = (history_undo_i + 1) % config_raw.undo_steps;
 		}
-		///end
 
 		history_undos++;
 		history_redos--;
 		context_raw.ddirty = 2;
 
-		///if (is_paint || is_sculpt)
 		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 		ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 		if (ui_view2d_show) {
@@ -430,7 +421,6 @@ function history_redo() {
 			// Refresh undo & redo buttons
 			ui_menubar_menu_handle.redraws = 2;
 		}
-		///end
 	}
 }
 
@@ -461,12 +451,7 @@ function history_reset() {
 	history_undo_i = 0;
 }
 
-///if (is_paint || is_sculpt)
 function history_edit_nodes(canvas: ui_node_canvas_t, canvas_type: i32, canvas_group: i32 = -1) {
-///end
-///if is_lab
-function history_edit_nodes(canvas: ui_node_canvas_t, canvas_group: i32 = -1) {
-///end
 	let step: step_t = history_push(tr("Edit Nodes"));
 	step.canvas_group = canvas_group;
 	///if (is_paint || is_sculpt)

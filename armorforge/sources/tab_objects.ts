@@ -162,8 +162,7 @@ function tab_objects_draw(htab: ui_handle_t) {
 				rot = vec4_mult(rot, 180 / 3.141592);
 				let f: f32 = 0.0;
 
-				let row: f32[] = [1 / 4, 1 / 4, 1 / 4, 1 / 4];
-				ui_row(row);
+				ui_row4();
 				ui_text("Loc");
 
 				h = ui_handle(__ID__);
@@ -187,7 +186,7 @@ function tab_objects_draw(htab: ui_handle_t) {
 					local_pos.z = f;
 				}
 
-				ui_row(row);
+				ui_row4();
 				ui_text("Rotation");
 
 				h = ui_handle(__ID__);
@@ -224,7 +223,7 @@ function tab_objects_draw(htab: ui_handle_t) {
 					// ///end
 				}
 
-				ui_row(row);
+				ui_row4();
 				ui_text("Scale");
 
 				h = ui_handle(__ID__);
@@ -248,7 +247,7 @@ function tab_objects_draw(htab: ui_handle_t) {
 					scale.z = f;
 				}
 
-				ui_row(row);
+				ui_row4();
 				ui_text("Dimensions");
 
 				h = ui_handle(__ID__);

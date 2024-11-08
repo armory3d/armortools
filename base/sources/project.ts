@@ -23,6 +23,19 @@ let project_nodes: ui_nodes_t;
 let project_canvas: ui_node_canvas_t;
 let project_default_canvas: buffer_t = null;
 
+let _project_save_and_quit: bool;
+let _project_import_mesh_replace_existing: bool;
+let _project_import_mesh_done: ()=>void;
+let _project_import_mesh_box_path: string;
+let _project_import_mesh_box_replace_existing: bool;
+let _project_import_mesh_box_clear_layers: bool;
+let _project_import_mesh_box_done: ()=>void;
+let _project_unwrap_mesh_box_mesh: raw_mesh_t;
+let _project_unwrap_mesh_box_done: (a: raw_mesh_t)=>void;
+let _project_unwrap_mesh_box_skip_ui: bool;
+let _project_import_asset_hdr_as_envmap: bool;
+let _project_import_swatches_replace_existing: bool;
+let _project_reimport_texture_asset: asset_t;
 
 function project_open() {
 	ui_files_show("arm", false, false, function (path: string) {
@@ -40,8 +53,6 @@ function project_open() {
 		if (g2_in_use) g2_begin(current);
 	});
 }
-
-let _project_save_and_quit: bool;
 
 function project_save(save_and_quit: bool = false) {
 	if (project_filepath == "") {
@@ -102,8 +113,7 @@ function project_new_box() {
 				array_insert(project_mesh_list, 0, "rounded_cube");
 			}
 
-			let row: f32[] = [0.5, 0.5];
-			ui_row(row);
+			ui_row2();
 			let h_project_type: ui_handle_t = ui_handle(__ID__);
 			if (h_project_type.init) {
 				h_project_type.position = context_raw.project_type;
@@ -118,7 +128,7 @@ function project_new_box() {
 			context_raw.project_aspect_ratio = ui_combo(h_project_aspect_ratio, project_aspect_ratio_combo, tr("Aspect Ratio"), true);
 
 			_ui_end_element();
-			ui_row(row);
+			ui_row2();
 			if (ui_button(tr("Cancel"))) {
 				ui_box_hide();
 			}
@@ -386,9 +396,6 @@ function project_import_brush() {
 	});
 }
 
-let _project_import_mesh_replace_existing: bool;
-let _project_import_mesh_done: ()=>void;
-
 function project_import_mesh(replace_existing: bool = true, done: ()=>void = null) {
 	_project_import_mesh_replace_existing = replace_existing;
 	_project_import_mesh_done = done;
@@ -396,11 +403,6 @@ function project_import_mesh(replace_existing: bool = true, done: ()=>void = nul
 		project_import_mesh_box(path, _project_import_mesh_replace_existing, true, _project_import_mesh_done);
 	});
 }
-
-let _project_import_mesh_box_path: string;
-let _project_import_mesh_box_replace_existing: bool;
-let _project_import_mesh_box_clear_layers: bool;
-let _project_import_mesh_box_done: ()=>void;
 
 function project_import_mesh_box(path: string, replace_existing: bool = true, clear_layers: bool = true, done: ()=>void = null) {
 
@@ -486,10 +488,6 @@ function project_reimport_mesh() {
 	}
 }
 
-let _project_unwrap_mesh_box_mesh: raw_mesh_t;
-let _project_unwrap_mesh_box_done: (a: raw_mesh_t)=>void;
-let _project_unwrap_mesh_box_skip_ui: bool;
-
 function project_unwrap_mesh_box(mesh: raw_mesh_t, done: (a: raw_mesh_t)=>void, skip_ui: bool = false) {
 
 	_project_unwrap_mesh_box_mesh = mesh;
@@ -519,8 +517,7 @@ function project_unwrap_mesh_box(mesh: raw_mesh_t, done: (a: raw_mesh_t)=>void, 
 
 			let unwrap_by: i32 = ui_combo(ui_handle(__ID__), unwrap_plugins, tr("Plugin"), true);
 
-			let row: f32[] = [0.5, 0.5];
-			ui_row(row);
+			ui_row2();
 			if (ui_button(tr("Cancel"))) {
 				ui_box_hide();
 			}
@@ -549,8 +546,6 @@ function project_unwrap_mesh_box(mesh: raw_mesh_t, done: (a: raw_mesh_t)=>void, 
 	});
 }
 
-let _project_import_asset_hdr_as_envmap: bool;
-
 function project_import_asset(filters: string = null, hdr_as_envmap: bool = true) {
 	if (filters == null) {
 		filters = string_array_join(path_texture_formats, ",") + "," + string_array_join(path_mesh_formats, ",");
@@ -563,13 +558,11 @@ function project_import_asset(filters: string = null, hdr_as_envmap: bool = true
 	});
 }
 
-let _project_import_swatches_replace_existing: bool;
-
 function project_import_swatches(replace_existing: bool = false) {
 	_project_import_swatches_replace_existing = replace_existing;
 	ui_files_show("arm,gpl", false, false, function (path: string) {
 		if (path_is_gimp_color_palette(path)) {
-			import_gpl_run(path, _project_import_swatches_replace_existing);
+			// import_gpl_run(path, _project_import_swatches_replace_existing);
 		}
 		else {
 			import_arm_run_swatches(path, _project_import_swatches_replace_existing);
@@ -611,8 +604,6 @@ function project_reimport_texture_load(path: string, asset: asset_t) {
 		///end
 	});
 }
-
-let _project_reimport_texture_asset: asset_t;
 
 function project_reimport_texture(asset: asset_t) {
 	if (!file_exists(asset.file)) {
@@ -691,7 +682,7 @@ function project_export_swatches() {
 			f = tr("untitled");
 		}
 		if (path_is_gimp_color_palette(f)) {
-			export_gpl_run(path + path_sep + f, substring(f, 0, string_last_index_of(f, ".")), project_raw.swatches);
+			// export_gpl_run(path + path_sep + f, substring(f, 0, string_last_index_of(f, ".")), project_raw.swatches);
 		}
 		else {
 			export_arm_run_swatches(path + path_sep + f);
@@ -700,12 +691,32 @@ function project_export_swatches() {
 }
 
 function make_swatch(base: i32 = 0xffffffff): swatch_color_t {
-	let s: swatch_color_t = { base: base, opacity: 1.0, occlusion: 1.0, roughness: 0.0, metallic: 0.0, normal: 0xff8080ff, emission: 0.0, height: 0.0, subsurface: 0.0 };
+	let s: swatch_color_t = {
+		base: base,
+		opacity: 1.0,
+		occlusion: 1.0,
+		roughness: 0.0,
+		metallic: 0.0,
+		normal: 0xff8080ff,
+		emission: 0.0,
+		height: 0.0,
+		subsurface: 0.0
+	};
 	return s;
 }
 
 function project_clone_swatch(swatch: swatch_color_t): swatch_color_t {
-	let s: swatch_color_t = { base: swatch.base, opacity: swatch.opacity, occlusion: swatch.occlusion, roughness: swatch.roughness, metallic: swatch.metallic, normal: swatch.normal, emission: swatch.emission, height: swatch.height, subsurface: swatch.subsurface };
+	let s: swatch_color_t = {
+		base: swatch.base,
+		opacity: swatch.opacity,
+		occlusion: swatch.occlusion,
+		roughness: swatch.roughness,
+		metallic: swatch.metallic,
+		normal: swatch.normal,
+		emission: swatch.emission,
+		height: swatch.height,
+		subsurface: swatch.subsurface
+	};
 	return s;
 }
 
@@ -713,7 +724,39 @@ function project_set_default_swatches() {
 	// 32-Color Palette by Andrew Kensler
 	// http://eastfarthing.com/blog/2016-05-06-palette/
 	project_raw.swatches = [];
-	let colors: i32[] = [0xffffffff, 0xff000000, 0xffd6a090, 0xffa12c32, 0xfffa2f7a, 0xfffb9fda, 0xffe61cf7, 0xff992f7c, 0xff47011f, 0xff051155, 0xff4f02ec, 0xff2d69cb, 0xff00a6ee, 0xff6febff, 0xff08a29a, 0xff2a666a, 0xff063619, 0xff4a4957, 0xff8e7ba4, 0xffb7c0ff, 0xffacbe9c, 0xff827c70, 0xff5a3b1c, 0xffae6507, 0xfff7aa30, 0xfff4ea5c, 0xff9b9500, 0xff566204, 0xff11963b, 0xff51e113, 0xff08fdcc];
+	let colors: i32[] = [
+		0xffffffff,
+		0xff000000,
+		0xffd6a090,
+		0xffa12c32,
+		0xfffa2f7a,
+		0xfffb9fda,
+		0xffe61cf7,
+		0xff992f7c,
+		0xff47011f,
+		0xff051155,
+		0xff4f02ec,
+		0xff2d69cb,
+		0xff00a6ee,
+		0xff6febff,
+		0xff08a29a,
+		0xff2a666a,
+		0xff063619,
+		0xff4a4957,
+		0xff8e7ba4,
+		0xffb7c0ff,
+		0xffacbe9c,
+		0xff827c70,
+		0xff5a3b1c,
+		0xffae6507,
+		0xfff7aa30,
+		0xfff4ea5c,
+		0xff9b9500,
+		0xff566204,
+		0xff11963b,
+		0xff51e113,
+		0xff08fdcc
+	];
 	for (let i: i32 = 0; i < colors.length; ++i) {
 		let c: i32 = colors[i];
 		array_push(project_raw.swatches, make_swatch(c));
@@ -730,7 +773,6 @@ function project_get_material_group_by_name(group_name: string): node_group_t {
 	return null;
 }
 
-///if (is_paint || is_sculpt)
 function project_is_material_group_in_use(group: node_group_t): bool {
 	let canvases: ui_node_canvas_t[] = [];
 	for (let i: i32 = 0; i < project_materials.length; ++i) {
@@ -753,7 +795,6 @@ function project_is_material_group_in_use(group: node_group_t): bool {
 	}
 	return false;
 }
-///end
 
 type node_group_t = {
 	nodes?: ui_nodes_t;

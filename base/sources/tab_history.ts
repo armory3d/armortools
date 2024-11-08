@@ -1,6 +1,4 @@
 
-///if (is_paint || is_sculpt)
-
 function tab_history_draw(htab: ui_handle_t) {
 	let ui: ui_t = ui_base_ui;
 	if (ui_tab(htab, tr("History"))) {
@@ -25,5 +23,3 @@ function tab_history_draw(htab: ui_handle_t) {
 		}
 	}
 }
-
-///end

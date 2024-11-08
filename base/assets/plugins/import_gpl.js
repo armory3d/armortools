@@ -1,6 +1,6 @@
 
-function import_gpl_run(path: string, replace_existing: bool) {
-	let b: buffer_t = data_get_blob(path);
+function import_gpl(path, replace_existing) {
+	let b = data_get_blob(path);
 	// let swatches: TSwatchColor[] = [];
 
 	// let str: string = sys_buffer_to_string(b);
@@ -39,3 +39,9 @@ function import_gpl_run(path: string, replace_existing: bool) {
 	// 	}
 	// }
 }
+
+let plugin = plugin_create();
+path_swatch_importers_set("gpl", import_gpl);
+plugin_notify_on_delete(plugin, function() {
+	path_swatch_importers_delete("gpl");
+});

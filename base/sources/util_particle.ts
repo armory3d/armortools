@@ -1,6 +1,8 @@
 
 function util_particle_init() {
-	if (context_raw.particle_material != null) return;
+	if (context_raw.particle_material != null) {
+		return;
+	}
 
 	let raw: particle_data_t = {
 		name: "Particles",

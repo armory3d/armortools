@@ -268,6 +268,8 @@ type context_t = {
 	///end
 }
 
+let context_raw: context_t;
+
 function context_create(): context_t {
 	let c: context_t = {};
 	c.merged_object_is_atlas = false; // Only objects referenced by atlas are merged
@@ -490,20 +492,12 @@ function context_create(): context_t {
 	return c;
 }
 
-let context_raw: context_t;
-
 function context_init() {
 	context_raw = context_create();
 }
 
 function context_use_deferred(): bool {
-	///if is_paint
 	return context_raw.render_mode != render_mode_t.FORWARD && (context_raw.viewport_mode == viewport_mode_t.LIT || context_raw.viewport_mode == viewport_mode_t.PATH_TRACE) && context_raw.tool != workspace_tool_t.COLORID;
-	///end
-
-	///if (is_sculpt || is_lab)
-	return context_raw.render_mode != render_mode_t.FORWARD && (context_raw.viewport_mode == viewport_mode_t.LIT || context_raw.viewport_mode == viewport_mode_t.PATH_TRACE);
-	///end
 }
 
 function context_select_material(i: i32) {
@@ -602,14 +596,11 @@ function context_select_tool(i: i32) {
 	context_raw.viewport_mode = viewport_mode_t.MINUS_ONE;
 	context_set_viewport_mode(_viewport_mode);
 
-	///if (is_paint || is_sculpt)
 	context_init_tool();
 	ui_header_handle.redraws = 2;
 	ui_toolbar_handle.redraws = 2;
-	///end
 }
 
-///if (is_paint || is_sculpt)
 function context_init_tool() {
 	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
 	if (decal) {
@@ -623,7 +614,6 @@ function context_init_tool() {
 		util_particle_init();
 		make_material_parse_particle_material();
 	}
-
 	else if (context_raw.tool == workspace_tool_t.BAKE) {
 		///if (arm_direct3d12 || arm_vulkan || arm_metal)
 		// Bake in lit mode for now
@@ -632,7 +622,6 @@ function context_init_tool() {
 		}
 		///end
 	}
-
 	else if (context_raw.tool == workspace_tool_t.MATERIAL) {
 		base_update_fill_layers();
 		context_main_object().skip_context = null;
@@ -643,7 +632,6 @@ function context_init_tool() {
 	config_raw.brush_live = decal;
 	///end
 }
-///end
 
 function context_select_paint_object(o: mesh_object_t) {
 	///if (is_paint || is_sculpt)
@@ -762,7 +750,6 @@ function context_get_area_type(): area_type_t {
 	if (context_in_browser()) {
 		return area_type_t.BROWSER;
 	}
-	///if (is_paint || is_sculpt)
 	if (context_in_2d_view()) {
 		return area_type_t.VIEW2D;
 	}
@@ -772,7 +759,6 @@ function context_get_area_type(): area_type_t {
 	if (context_in_materials()) {
 		return area_type_t.MATERIALS;
 	}
-	///end
 	return area_type_t.MINUS_ONE;
 }
 
