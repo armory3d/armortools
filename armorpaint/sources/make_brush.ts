@@ -8,7 +8,7 @@ function make_brush_run(vert: node_shader_t, frag: node_shader_t) {
 	}
 
 	let fill_layer: bool = context_raw.layer.fill_layer != null;
-	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
+	let decal: bool = context_is_decal();
 	if (decal && !fill_layer) {
 		node_shader_write(frag, "if (decal_mask.z > 0.0) {");
 	}

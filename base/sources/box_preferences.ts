@@ -732,7 +732,7 @@ function box_preferences_show() {
 			if (box_preferences_preset_handle.changed) {
 				config_raw.keymap = box_preferences_files_keymap[box_preferences_preset_handle.position] + ".json";
 				config_apply();
-				config_load_keymap();
+				keymap_load();
 			}
 
 			if (ui_button(tr("New"))) {
@@ -745,7 +745,7 @@ function box_preferences_show() {
 						}
 						let keymap_name: string = ui_text_input(h, tr("Name"));
 						if (ui_button(tr("OK")) || ui.is_return_down) {
-							let template: string = config_keymap_to_json(keymap_get_default());
+							let template: string = keymap_to_json(keymap_get_default());
 							if (!ends_with(keymap_name, ".json")) {
 								keymap_name += ".json";
 							}
@@ -796,7 +796,7 @@ function box_preferences_show() {
 			}
 			if (ui.changed) {
 				config_apply();
-				config_save_keymap();
+				keymap_save();
 			}
 		}
 		if (ui_tab(box_preferences_htab, tr("Plugins"), true)) {

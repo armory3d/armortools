@@ -267,12 +267,9 @@ function slot_layer_clear(raw: slot_layer_t, base_color: i32 = 0x00000000, base_
 }
 
 function slot_layer_invert_mask(raw: slot_layer_t) {
-	if (base_pipe_invert8 == null) {
-		base_make_pipe();
-	}
 	let inverted: image_t = image_create_render_target(raw.texpaint.width, raw.texpaint.height, tex_format_t.RGBA32);
 	g2_begin(inverted);
-	g2_set_pipeline(base_pipe_invert8);
+	g2_set_pipeline(pipes_invert8);
 	g2_draw_image(raw.texpaint, 0, 0);
 	g2_set_pipeline(null);
 	g2_end();
@@ -308,19 +305,16 @@ function slot_layer_duplicate(raw: slot_layer_t): slot_layer_t {
 	let l: slot_layer_t = slot_layer_create("", slot_layer_is_layer(raw) ? layer_slot_type_t.LAYER : slot_layer_is_mask(raw) ? layer_slot_type_t.MASK : layer_slot_type_t.GROUP, raw.parent);
 	array_insert(layers, i, l);
 
-	if (base_pipe_merge == null) {
-		base_make_pipe();
-	}
 	if (slot_layer_is_layer(raw)) {
 		g2_begin(l.texpaint);
-		g2_set_pipeline(base_pipe_copy);
+		g2_set_pipeline(pipes_copy);
 		g2_draw_image(raw.texpaint, 0, 0);
 		g2_set_pipeline(null);
 		g2_end();
 
 		if (l.texpaint_nor != null) {
 			g2_begin(l.texpaint_nor);
-			g2_set_pipeline(base_pipe_copy);
+			g2_set_pipeline(pipes_copy);
 			g2_draw_image(raw.texpaint_nor, 0, 0);
 			g2_set_pipeline(null);
 			g2_end();
@@ -328,7 +322,7 @@ function slot_layer_duplicate(raw: slot_layer_t): slot_layer_t {
 
 		if (l.texpaint_pack != null) {
 			g2_begin(l.texpaint_pack);
-			g2_set_pipeline(base_pipe_copy);
+			g2_set_pipeline(pipes_copy);
 			g2_draw_image(raw.texpaint_pack, 0, 0);
 			g2_set_pipeline(null);
 			g2_end();
@@ -336,7 +330,7 @@ function slot_layer_duplicate(raw: slot_layer_t): slot_layer_t {
 	}
 	else if (slot_layer_is_mask(raw)) {
 		g2_begin(l.texpaint);
-		g2_set_pipeline(base_pipe_copy8);
+		g2_set_pipeline(pipes_copy8);
 		g2_draw_image(raw.texpaint, 0, 0);
 		g2_set_pipeline(null);
 		g2_end();
@@ -345,7 +339,7 @@ function slot_layer_duplicate(raw: slot_layer_t): slot_layer_t {
 	if (l.texpaint_preview != null) {
 		g2_begin(l.texpaint_preview);
 		g2_clear(0x00000000);
-		g2_set_pipeline(base_pipe_copy);
+		g2_set_pipeline(pipes_copy);
 		g2_draw_scaled_image(raw.texpaint_preview, 0, 0, raw.texpaint_preview.width, raw.texpaint_preview.height);
 		g2_set_pipeline(null);
 		g2_end();
@@ -378,9 +372,6 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 	let res_x: i32 = config_get_texture_res_x();
 	let res_y: i32 = config_get_texture_res_y();
 	let rts: map_t<string, render_target_t> = render_path_render_targets;
-	if (base_pipe_merge == null) {
-		base_make_pipe();
-	}
 
 	if (slot_layer_is_layer(raw)) {
 		let format: tex_format_t =
@@ -395,7 +386,7 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 		let _texpaint: image_t = raw.texpaint;
 		raw.texpaint = image_create_render_target(res_x, res_y, format);
 		g2_begin(raw.texpaint);
-		g2_set_pipeline(base_pipe_copy);
+		g2_set_pipeline(pipes_copy);
 		g2_draw_scaled_image(_texpaint, 0, 0, res_x, res_y);
 		g2_set_pipeline(null);
 		g2_end();
@@ -405,7 +396,7 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 			raw.texpaint_nor = image_create_render_target(res_x, res_y, format);
 
 			g2_begin(raw.texpaint_nor);
-			g2_set_pipeline(base_pipe_copy);
+			g2_set_pipeline(pipes_copy);
 			g2_draw_scaled_image(_texpaint_nor, 0, 0, res_x, res_y);
 			g2_set_pipeline(null);
 			g2_end();
@@ -416,7 +407,7 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 			raw.texpaint_pack = image_create_render_target(res_x, res_y, format);
 
 			g2_begin(raw.texpaint_pack);
-			g2_set_pipeline(base_pipe_copy);
+			g2_set_pipeline(pipes_copy);
 			g2_draw_scaled_image(_texpaint_pack, 0, 0, res_x, res_y);
 			g2_set_pipeline(null);
 			g2_end();
@@ -456,7 +447,7 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 		raw.texpaint = image_create_render_target(res_x, res_y, tex_format_t.RGBA32);
 
 		g2_begin(raw.texpaint);
-		g2_set_pipeline(base_pipe_copy8);
+		g2_set_pipeline(pipes_copy8);
 		g2_draw_scaled_image(_texpaint, 0, 0, res_x, res_y);
 		g2_set_pipeline(null);
 		g2_end();

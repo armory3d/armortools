@@ -90,17 +90,11 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			}
 			let m: slot_layer_t = base_new_mask(false, context_raw.layer);
 			app_notify_on_next_frame(function (m: slot_layer_t) {
-				if (base_pipe_merge == null) {
-					base_make_pipe();
-				}
-				if (const_data_screen_aligned_vb == null) {
-					const_data_create_screen_aligned_data();
-				}
 				g4_begin(m.texpaint);
-				g4_set_pipeline(base_pipe_colorid_to_mask);
+				g4_set_pipeline(pipes_colorid_to_mask);
 				let rt: render_target_t = map_get(render_path_render_targets, "texpaint_colorid");
-				g4_set_tex(base_texpaint_colorid, rt._image);
-				g4_set_tex(base_tex_colorid, project_get_image(project_assets[context_raw.colorid_handle.position]));
+				g4_set_tex(pipes_texpaint_colorid, rt._image);
+				g4_set_tex(pipes_tex_colorid, project_get_image(project_assets[context_raw.colorid_handle.position]));
 				g4_set_vertex_buffer(const_data_screen_aligned_vb);
 				g4_set_index_buffer(const_data_screen_aligned_ib);
 				g4_draw();
@@ -354,8 +348,8 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			 context_raw.tool == workspace_tool_t.SMUDGE ||
 			 context_raw.tool == workspace_tool_t.PARTICLE) {
 
-		let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
-		let decal_mask: bool = decal && operator_shortcut(map_get(config_keymap, "decal_mask"), shortcut_type_t.DOWN);
+		let decal: bool = context_is_decal();
+		let decal_mask: bool = context_is_decal_mask();
 		if (context_raw.tool != workspace_tool_t.FILL) {
 			if (decal_mask) {
 				context_raw.brush_decal_mask_radius = ui_slider(context_raw.brush_decal_mask_radius_handle, tr("Radius"), 0.01, 2.0, true);

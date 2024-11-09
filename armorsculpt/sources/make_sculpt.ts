@@ -32,8 +32,7 @@ function make_sculpt_run(data: material_t, matcon: material_context_t): node_sha
 	let frag: node_shader_t = node_shader_context_make_frag(con_paint);
 	frag.ins = vert.outs;
 
-	let face_fill: bool = context_raw.tool == workspace_tool_t.FILL && context_raw.fill_type_handle.position == fill_type_t.FACE;
-	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
+	let decal: bool = context_is_decal();
 
 	node_shader_add_out(vert, "vec2 tex_coord");
 	node_shader_write(vert, "const vec2 madd = vec2(0.5, 0.5);");

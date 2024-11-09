@@ -442,8 +442,7 @@ function render_path_paint_commands_live_brush() {
 
 function render_path_paint_commands_cursor() {
 	if (!config_raw.brush_3d) return;
-	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
-	let decal_mask: bool = decal && operator_shortcut(map_get(config_keymap, "decal_mask"), shortcut_type_t.DOWN);
+	let decal_mask: bool = context_is_decal_mask();
 	let tool: workspace_tool_t = context_raw.tool;
 	if (tool != workspace_tool_t.BRUSH &&
 		tool != workspace_tool_t.ERASER &&
@@ -475,29 +474,25 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 	let plane: mesh_object_t = scene_get_child(".Plane").ext;
 	let geom: mesh_data_t = plane.data;
 
-	if (base_pipe_cursor == null) {
-		base_make_cursor_pipe();
-	}
-
 	render_path_set_target("");
-	g4_set_pipeline(base_pipe_cursor);
-	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
-	let decal_mask: bool = decal && operator_shortcut(map_get(config_keymap, "decal_mask"), shortcut_type_t.DOWN);
+	g4_set_pipeline(pipes_cursor);
+	let decal: bool = context_is_decal();
+	let decal_mask: bool = context_is_decal_mask();
 	let img: image_t = (decal && !decal_mask) ? context_raw.decal_image : resource_get("cursor.k");
-	g4_set_tex(base_cursor_tex, img);
+	g4_set_tex(pipes_cursor_tex, img);
 	let rt: render_target_t = map_get(render_path_render_targets, "gbuffer0");
 	let gbuffer0: image_t = rt._image;
-	g4_set_tex_depth(base_cursor_gbufferd, gbuffer0);
-	g4_set_float2(base_cursor_mouse, mx, my);
-	g4_set_float2(base_cursor_tex_step, 1 / gbuffer0.width, 1 / gbuffer0.height);
-	g4_set_float(base_cursor_radius, radius);
+	g4_set_tex_depth(pipes_cursor_gbufferd, gbuffer0);
+	g4_set_float2(pipes_cursor_mouse, mx, my);
+	g4_set_float2(pipes_cursor_tex_step, 1 / gbuffer0.width, 1 / gbuffer0.height);
+	g4_set_float(pipes_cursor_radius, radius);
 	let right: vec4_t = vec4_norm(camera_object_right_world(scene_camera));
-	g4_set_float3(base_cursor_camera_right, right.x, right.y, right.z);
-	g4_set_float3(base_cursor_tint, tint_r, tint_g, tint_b);
-	g4_set_mat(base_cursor_vp, scene_camera.vp);
+	g4_set_float3(pipes_cursor_camera_right, right.x, right.y, right.z);
+	g4_set_float3(pipes_cursor_tint, tint_r, tint_g, tint_b);
+	g4_set_mat(pipes_cursor_vp, scene_camera.vp);
 	let help_mat: mat4_t = mat4_identity();
 	help_mat = mat4_inv(scene_camera.vp);
-	g4_set_mat(base_cursor_inv_vp, help_mat);
+	g4_set_mat(pipes_cursor_inv_vp, help_mat);
 	///if (arm_metal || arm_vulkan)
 	let vs: vertex_element_t[] = [
 		{

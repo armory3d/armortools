@@ -138,17 +138,9 @@ function tab_textures_draw(htab: ui_handle_t) {
 
 									app_notify_on_next_frame(function () {
 										let img: image_t = _tab_textures_draw_img;
-
-										///if (is_paint || is_sculpt)
-										if (base_pipe_merge == null) base_make_pipe();
-										///end
-										///if is_lab
-										if (base_pipe_copy == null) base_make_pipe();
-										///end
-
 										let target: image_t = image_create_render_target(tab_textures_to_pow2(img.width), tab_textures_to_pow2(img.height));
 										g2_begin(target);
-										g2_set_pipeline(base_pipe_copy);
+										g2_set_pipeline(pipes_copy);
 										g2_draw_scaled_image(img, 0, 0, target.width, target.height);
 										g2_set_pipeline(null);
 										g2_end();

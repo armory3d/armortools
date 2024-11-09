@@ -350,14 +350,11 @@ function util_render_make_brush_preview() {
 	camera_object_build_mat(scene_camera);
 
 	// Scale layer down to to image preview
-	if (base_pipe_merge == null) {
-		base_make_pipe();
-	}
 	l = render_path_paint_live_layer;
 	let target: image_t = context_raw.brush.image;
 	g2_begin(target);
 	g2_clear(0x00000000);
-	g2_set_pipeline(base_pipe_copy);
+	g2_set_pipeline(pipes_copy);
 	g2_draw_scaled_image(l.texpaint, 0, 0, target.width, target.height);
 	g2_set_pipeline(null);
 	g2_end();

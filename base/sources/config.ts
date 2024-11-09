@@ -167,7 +167,7 @@ function config_init() {
 	ui_touch_hold = config_raw.touch_ui;
 	ui_touch_tooltip = config_raw.touch_ui;
 	base_res_handle.position = config_raw.layer_res;
-	config_load_keymap();
+	keymap_load();
 }
 
 type version_t = {
@@ -239,7 +239,7 @@ function config_import_from(from: config_t) {
 	config_raw.sha = _sha;
 	config_raw.version = _version;
 	ui_children = map_create(); // Reset ui handles
-	config_load_keymap();
+	keymap_load();
 	base_init_layout();
 	translator_load_translations(config_raw.locale);
 	config_apply();

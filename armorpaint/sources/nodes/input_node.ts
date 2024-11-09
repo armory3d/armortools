@@ -32,8 +32,7 @@ function input_node_update(self: float_node_t) {
 		context_raw.view_index = mouse_view_x() > base_w() / 2 ? 1 : 0;
 	}
 
-	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
-	let decal_mask: bool = decal && operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
+	let decal_mask: bool = context_is_decal_mask_paint();
 
 	let lazy_paint: bool = context_raw.brush_lazy_radius > 0 &&
 		(operator_shortcut(map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN) ||

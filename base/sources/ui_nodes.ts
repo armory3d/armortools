@@ -780,7 +780,7 @@ function ui_nodes_render() {
 			util_render_make_material_preview();
 		}
 
-		let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
+		let decal: bool = context_is_decal();
 		if (decal) {
 			util_render_make_decal_preview();
 		}

@@ -470,8 +470,8 @@ function base_update() {
 	base_handle_drop_paths();
 
 	///if arm_windows
-	let is_picker: bool = context_raw.tool == workspace_tool_t.PICKER || context_raw.tool == workspace_tool_t.MATERIAL;
-	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
+	let is_picker: bool = context_is_picker();
+	let decal: bool = context_is_decal();
 	ui_always_redraw_window = !context_raw.cache_draws ||
 							  ui_menu_show ||
 							  ui_box_show ||
@@ -994,15 +994,15 @@ function base_make_temp_img() {
 }
 
 function base_make_temp_mask_img() {
-	if (base_temp_mask_image != null && (base_temp_mask_image.width != config_get_texture_res_x() || base_temp_mask_image.height != config_get_texture_res_y())) {
-		let _temp_mask_image: image_t = base_temp_mask_image;
+	if (pipes_temp_mask_image != null && (pipes_temp_mask_image.width != config_get_texture_res_x() || pipes_temp_mask_image.height != config_get_texture_res_y())) {
+		let _temp_mask_image: image_t = pipes_temp_mask_image;
 		app_notify_on_next_frame(function (_temp_mask_image: image_t) {
 			image_unload(_temp_mask_image);
 		}, _temp_mask_image);
-		base_temp_mask_image = null;
+		pipes_temp_mask_image = null;
 	}
-	if (base_temp_mask_image == null) {
-		base_temp_mask_image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
+	if (pipes_temp_mask_image == null) {
+		pipes_temp_mask_image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
 	}
 }
 
@@ -1080,26 +1080,20 @@ function base_apply_mask(l: slot_layer_t, m: slot_layer_t) {
 		return;
 	}
 
-	if (base_pipe_merge == null) {
-		base_make_pipe();
-	}
 	base_make_temp_img();
 
 	// Copy layer to temp
 	g2_begin(base_temp_image);
-	g2_set_pipeline(base_pipe_copy);
+	g2_set_pipeline(pipes_copy);
 	g2_draw_image(l.texpaint, 0, 0);
 	g2_set_pipeline(null);
 	g2_end();
 
 	// Apply mask
-	if (const_data_screen_aligned_vb == null) {
-		const_data_create_screen_aligned_data();
-	}
 	g4_begin(l.texpaint);
-	g4_set_pipeline(base_pipe_apply_mask);
-	g4_set_tex(base_tex0_mask, base_temp_image);
-	g4_set_tex(base_texa_mask, m.texpaint);
+	g4_set_pipeline(pipes_apply_mask);
+	g4_set_tex(pipes_tex0_mask, base_temp_image);
+	g4_set_tex(pipes_texa_mask, m.texpaint);
 	g4_set_vertex_buffer(const_data_screen_aligned_vb);
 	g4_set_index_buffer(const_data_screen_aligned_ib);
 	g4_draw();
@@ -1109,12 +1103,12 @@ function base_apply_mask(l: slot_layer_t, m: slot_layer_t) {
 function base_commands_merge_pack(pipe: pipeline_t, i0: image_t, i1: image_t, i1pack: image_t, i1mask_opacity: f32, i1texmask: image_t, i1blending: i32 = -1) {
 	g4_begin(i0);
 	g4_set_pipeline(pipe);
-	g4_set_tex(base_tex0, i1);
-	g4_set_tex(base_tex1, i1pack);
-	g4_set_tex(base_texmask, i1texmask);
-	g4_set_tex(base_texa, base_temp_image);
-	g4_set_float(base_opac, i1mask_opacity);
-	g4_set_int(base_blending, i1blending);
+	g4_set_tex(pipes_tex0, i1);
+	g4_set_tex(pipes_tex1, i1pack);
+	g4_set_tex(pipes_texmask, i1texmask);
+	g4_set_tex(pipes_texa, base_temp_image);
+	g4_set_float(pipes_opac, i1mask_opacity);
+	g4_set_int(pipes_blending, i1blending);
 	g4_set_vertex_buffer(const_data_screen_aligned_vb);
 	g4_set_index_buffer(const_data_screen_aligned_ib);
 	g4_draw();
@@ -1547,16 +1541,10 @@ function base_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool = 
 		return;
 	}
 
-	if (base_pipe_merge == null) {
-		base_make_pipe();
-	}
 	base_make_temp_img();
-	if (const_data_screen_aligned_vb == null) {
-		const_data_create_screen_aligned_data();
-	}
 
 	g2_begin(base_temp_image); // Copy to temp
-	g2_set_pipeline(base_pipe_copy);
+	g2_set_pipeline(pipes_copy);
 	g2_draw_image(l0.texpaint, 0, 0);
 	g2_set_pipeline(null);
 	g2_end();
@@ -1574,11 +1562,11 @@ function base_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool = 
 
 	if (slot_layer_is_mask(l1)) {
 		g4_begin(l0.texpaint);
-		g4_set_pipeline(base_pipe_merge_mask);
-		g4_set_tex(base_tex0_merge_mask, l1.texpaint);
-		g4_set_tex(base_texa_merge_mask, base_temp_image);
-		g4_set_float(base_opac_merge_mask, slot_layer_get_opacity(l1));
-		g4_set_int(base_blending_merge_mask, l1.blending);
+		g4_set_pipeline(pipes_merge_mask);
+		g4_set_tex(pipes_tex0_merge_mask, l1.texpaint);
+		g4_set_tex(pipes_texa_merge_mask, base_temp_image);
+		g4_set_float(pipes_opac_merge_mask, slot_layer_get_opacity(l1));
+		g4_set_int(pipes_blending_merge_mask, l1.blending);
 		g4_set_vertex_buffer(const_data_screen_aligned_vb);
 		g4_set_index_buffer(const_data_screen_aligned_ib);
 		g4_draw();
@@ -1588,13 +1576,13 @@ function base_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool = 
 	if (slot_layer_is_layer(l1)) {
 		if (l1.paint_base) {
 			g4_begin(l0.texpaint);
-			g4_set_pipeline(base_pipe_merge);
-			g4_set_tex(base_tex0, l1.texpaint);
-			g4_set_tex(base_tex1, empty);
-			g4_set_tex(base_texmask, mask);
-			g4_set_tex(base_texa, base_temp_image);
-			g4_set_float(base_opac, slot_layer_get_opacity(l1));
-			g4_set_int(base_blending, l1.blending);
+			g4_set_pipeline(pipes_merge);
+			g4_set_tex(pipes_tex0, l1.texpaint);
+			g4_set_tex(pipes_tex1, empty);
+			g4_set_tex(pipes_texmask, mask);
+			g4_set_tex(pipes_texa, base_temp_image);
+			g4_set_float(pipes_opac, slot_layer_get_opacity(l1));
+			g4_set_int(pipes_blending, l1.blending);
 			g4_set_vertex_buffer(const_data_screen_aligned_vb);
 			g4_set_index_buffer(const_data_screen_aligned_ib);
 			g4_draw();
@@ -1603,20 +1591,20 @@ function base_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool = 
 
 		if (l0.texpaint_nor != null) {
 			g2_begin(base_temp_image);
-			g2_set_pipeline(base_pipe_copy);
+			g2_set_pipeline(pipes_copy);
 			g2_draw_image(l0.texpaint_nor, 0, 0);
 			g2_set_pipeline(null);
 			g2_end();
 
 			if (l1.paint_nor) {
 				g4_begin(l0.texpaint_nor);
-				g4_set_pipeline(base_pipe_merge);
-				g4_set_tex(base_tex0, l1.texpaint);
-				g4_set_tex(base_tex1, l1.texpaint_nor);
-				g4_set_tex(base_texmask, mask);
-				g4_set_tex(base_texa, base_temp_image);
-				g4_set_float(base_opac, slot_layer_get_opacity(l1));
-				g4_set_int(base_blending, l1.paint_nor_blend ? -2 : -1);
+				g4_set_pipeline(pipes_merge);
+				g4_set_tex(pipes_tex0, l1.texpaint);
+				g4_set_tex(pipes_tex1, l1.texpaint_nor);
+				g4_set_tex(pipes_texmask, mask);
+				g4_set_tex(pipes_texa, base_temp_image);
+				g4_set_float(pipes_opac, slot_layer_get_opacity(l1));
+				g4_set_int(pipes_blending, l1.paint_nor_blend ? -2 : -1);
 				g4_set_vertex_buffer(const_data_screen_aligned_vb);
 				g4_set_index_buffer(const_data_screen_aligned_ib);
 				g4_draw();
@@ -1626,24 +1614,24 @@ function base_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool = 
 
 		if (l0.texpaint_pack != null) {
 			g2_begin(base_temp_image);
-			g2_set_pipeline(base_pipe_copy);
+			g2_set_pipeline(pipes_copy);
 			g2_draw_image(l0.texpaint_pack, 0, 0);
 			g2_set_pipeline(null);
 			g2_end();
 
 			if (l1.paint_occ || l1.paint_rough || l1.paint_met || l1.paint_height) {
 				if (l1.paint_occ && l1.paint_rough && l1.paint_met && l1.paint_height) {
-					base_commands_merge_pack(base_pipe_merge, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask, l1.paint_height_blend ? -3 : -1);
+					base_commands_merge_pack(pipes_merge, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask, l1.paint_height_blend ? -3 : -1);
 				}
 				else {
 					if (l1.paint_occ) {
-						base_commands_merge_pack(base_pipe_merge_r, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask);
+						base_commands_merge_pack(pipes_merge_r, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask);
 					}
 					if (l1.paint_rough) {
-						base_commands_merge_pack(base_pipe_merge_g, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask);
+						base_commands_merge_pack(pipes_merge_g, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask);
 					}
 					if (l1.paint_met) {
-						base_commands_merge_pack(base_pipe_merge_b, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask);
+						base_commands_merge_pack(pipes_merge_b, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask);
 					}
 				}
 			}

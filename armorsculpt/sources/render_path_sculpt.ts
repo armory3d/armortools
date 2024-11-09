@@ -29,9 +29,6 @@ function render_path_sculpt_commands() {
     mesh_object_get_contexts(project_paint_objects[0], "paint", mats, material_contexts, shader_contexts);
 
     let cc_context: shader_context_t = shader_contexts[0];
-    if (const_data_screen_aligned_vb == null) {
-        const_data_create_screen_aligned_data();
-    }
     g4_set_pipeline(cc_context._.pipe_state);
     uniforms_set_context_consts(cc_context,_render_path_bind_params);
     uniforms_set_obj_consts(cc_context, project_paint_objects[0].base);

@@ -1,5 +1,5 @@
 
-function config_load_keymap() {
+function keymap_load() {
 	config_keymap = keymap_get_default();
 	if (config_raw.keymap != "default.json") {
 		let blob: buffer_t = data_get_blob("keymap_presets/" + config_raw.keymap);
@@ -12,16 +12,16 @@ function config_load_keymap() {
 	}
 }
 
-function config_save_keymap() {
+function keymap_save() {
 	if (config_raw.keymap == "default.json") {
 		return;
 	}
 	let path: string = data_path() + "keymap_presets/" + config_raw.keymap;
-	let buffer: buffer_t = sys_string_to_buffer(config_keymap_to_json(config_keymap));
+	let buffer: buffer_t = sys_string_to_buffer(keymap_to_json(config_keymap));
 	iron_file_save_bytes(path, buffer, 0);
 }
 
-function config_keymap_to_json(keymap: map_t<string, string>): string {
+function keymap_to_json(keymap: map_t<string, string>): string {
 	json_encode_begin();
 	json_encode_map(keymap);
 	return json_encode_end();

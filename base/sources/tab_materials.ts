@@ -322,7 +322,7 @@ function tab_materials_update_material() {
 	ui_nodes_group_stack = [];
 	make_material_parse_paint_material();
 	util_render_make_material_preview();
-	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
+	let decal: bool = context_is_decal();
 	if (decal) {
 		util_render_make_decal_preview();
 	}

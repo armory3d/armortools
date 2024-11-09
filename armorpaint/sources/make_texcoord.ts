@@ -3,7 +3,7 @@ function make_texcoord_run(vert: node_shader_t, frag: node_shader_t) {
 
 	let fill_layer: bool = context_raw.layer.fill_layer != null;
 	let uv_type: uv_type_t = fill_layer ? context_raw.layer.uv_type : context_raw.brush_paint;
-	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
+	let decal: bool = context_is_decal();
 	let angle: f32 = context_raw.brush_angle + context_raw.brush_nodes_angle;
 	let uv_angle: f32 = fill_layer ? context_raw.layer.angle : angle;
 

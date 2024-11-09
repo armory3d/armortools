@@ -21,7 +21,7 @@ function uniforms_ext_i32_link(object: object_t, mat: material_data_t, link: str
 function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: string): f32 {
 	if (link == "_brush_radius") {
 		///if (is_paint || is_sculpt)
-		let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
+		let decal: bool = context_is_decal();
 		let decal_mask: bool = decal && operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
 		let brush_decal_mask_radius: f32 = context_raw.brush_decal_mask_radius;
 		if (config_raw.brush_3d) {
@@ -79,7 +79,7 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 		return val;
 	}
 	else if (link == "_brush_hardness") {
-		let decal_mask: bool = operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
+		let decal_mask: bool = context_is_decal_mask_paint();
 		if (context_raw.tool != workspace_tool_t.BRUSH && context_raw.tool != workspace_tool_t.ERASER && context_raw.tool != workspace_tool_t.CLONE && !decal_mask) {
 			return 1.0;
 		}
@@ -277,7 +277,7 @@ function uniforms_ext_vec4_link(object: object_t, mat: material_data_t, link: st
 		return v;
 	}
 	else if (link == "_decal_mask") {
-		let decal_mask: bool = operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
+		let decal_mask: bool = context_is_decal_mask_paint();
 		let val: f32 = (context_raw.brush_radius * context_raw.brush_nodes_radius) / 15.0;
 		let scale2d: f32 = (900 / base_h()) * config_raw.window_scale;
 		val *= scale2d; // Projection ratio

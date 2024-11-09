@@ -91,7 +91,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 
 	let face_fill: bool = context_raw.tool == workspace_tool_t.FILL && context_raw.fill_type_handle.position == fill_type_t.FACE;
 	let uv_island_fill: bool = context_raw.tool == workspace_tool_t.FILL && context_raw.fill_type_handle.position == fill_type_t.UV_ISLAND;
-	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
+	let decal: bool = context_is_decal();
 
 	///if (arm_direct3d11 || arm_direct3d12 || arm_metal || arm_vulkan)
 	node_shader_write(vert, "vec2 tpos = vec2(tex.x * 2.0 - 1.0, (1.0 - tex.y) * 2.0 - 1.0);");

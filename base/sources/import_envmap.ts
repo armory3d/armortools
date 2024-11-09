@@ -32,15 +32,11 @@ function import_envmap_run(path: string, image: image_t) {
 			array_push(import_envmap_mips, image_create_render_target(w, w > 1 ? math_floor(w / 2) : 1, tex_format_t.RGBA128));
 			w = math_floor(w / 2);
 		}
-
-		if (const_data_screen_aligned_vb == null) {
-			const_data_create_screen_aligned_data();
-		}
 	}
 
 	// Down-scale to 1024x512
 	g2_begin(import_envmap_radiance);
-	g2_set_pipeline(base_pipe_copy128);
+	g2_set_pipeline(pipes_copy128);
 	g2_draw_scaled_image(image, 0, 0, 1024, 512);
 	g2_set_pipeline(null);
 	g2_end();

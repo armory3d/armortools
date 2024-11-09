@@ -37,21 +37,11 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 			g2_end();
 		}
 
-		if (base_pipe_copy == null) {
-			base_make_pipe();
-		}
-		if (base_pipe_copy_a == null) {
-			base_make_pipe_copy_a();
-		}
-		if (const_data_screen_aligned_vb == null) {
-			const_data_create_screen_aligned_data();
-		}
-
 		let texpaint_pack: render_target_t = map_get(render_path_render_targets, "texpaint_pack");
 
 		if (texocc != null) {
 			g2_begin(texpaint_pack._image);
-			g2_set_pipeline(base_pipe_copy_r);
+			g2_set_pipeline(pipes_copy_r);
 			g2_draw_scaled_image(texocc, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
 			g2_set_pipeline(null);
 			g2_end();
@@ -59,7 +49,7 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 
 		if (texrough != null) {
 			g2_begin(texpaint_pack._image);
-			g2_set_pipeline(base_pipe_copy_g);
+			g2_set_pipeline(pipes_copy_g);
 			g2_draw_scaled_image(texrough, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
 			g2_set_pipeline(null);
 			g2_end();
@@ -67,8 +57,8 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 
 		if (texheight != null) {
 			g4_begin(texpaint_pack._image);
-			g4_set_pipeline(base_pipe_copy_a);
-			g4_set_tex(base_pipe_copy_a_tex, texheight);
+			g4_set_pipeline(pipes_copy_a);
+			g4_set_tex(pipes_copy_a_tex, texheight);
 			g4_set_vertex_buffer(const_data_screen_aligned_vb);
 			g4_set_index_buffer(const_data_screen_aligned_ib);
 			g4_draw();

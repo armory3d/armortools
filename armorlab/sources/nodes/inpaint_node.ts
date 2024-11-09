@@ -87,16 +87,10 @@ function inpaint_node_get_as_image(self: inpaint_node_t, from: i32): image_t {
 function inpaint_node_get_cached_image(self: inpaint_node_t): image_t {
 	app_notify_on_next_frame(function (self: inpaint_node_t) {
 		let source: image_t = logic_node_input_get_as_image(self.base.inputs[0]);
-		if (base_pipe_copy == null) {
-			base_make_pipe();
-		}
-		if (const_data_screen_aligned_vb == null) {
-			const_data_create_screen_aligned_data();
-		}
 		g4_begin(inpaint_node_image);
-		g4_set_pipeline(base_pipe_inpaint_preview);
-		g4_set_tex(base_tex0_inpaint_preview, source);
-		g4_set_tex(base_texa_inpaint_preview, inpaint_node_mask);
+		g4_set_pipeline(pipes_inpaint_preview);
+		g4_set_tex(pipes_tex0_inpaint_preview, source);
+		g4_set_tex(pipes_texa_inpaint_preview, inpaint_node_mask);
 		g4_set_vertex_buffer(const_data_screen_aligned_vb);
 		g4_set_index_buffer(const_data_screen_aligned_ib);
 		g4_draw();

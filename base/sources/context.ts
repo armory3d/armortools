@@ -518,7 +518,7 @@ function context_set_material(m: slot_material_t) {
 	ui_nodes_hwnd.redraws = 2;
 	ui_nodes_group_stack = [];
 
-	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
+	let decal: bool = context_is_decal();
 	if (decal) {
 		app_notify_on_next_frame(util_render_make_decal_preview);
 	}
@@ -602,7 +602,7 @@ function context_select_tool(i: i32) {
 }
 
 function context_init_tool() {
-	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
+	let decal: bool = context_is_decal();
 	if (decal) {
 		if (context_raw.tool == workspace_tool_t.TEXT) {
 			util_render_make_text_preview();
@@ -738,6 +738,22 @@ function context_in_swatches(): bool {
 function context_in_browser(): bool {
 	let tab: string = ui_hovered_tab_name();
 	return tab == tr("Browser");
+}
+
+function context_is_picker(): bool {
+	return context_raw.tool == workspace_tool_t.PICKER || context_raw.tool == workspace_tool_t.MATERIAL;
+}
+
+function context_is_decal(): bool {
+	return context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
+}
+
+function context_is_decal_mask(): bool {
+	return context_is_decal() && operator_shortcut(map_get(config_keymap, "decal_mask"), shortcut_type_t.DOWN);
+}
+
+function context_is_decal_mask_paint(): bool {
+	return context_is_decal() && operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
 }
 
 function context_get_area_type(): area_type_t {

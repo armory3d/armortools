@@ -12,6 +12,8 @@ let render_path_base_voxels_created: bool = false;
 ///end
 
 function render_path_base_init() {
+	pipes_init();
+	const_data_create_screen_aligned_data();
 	render_path_base_super_sample = config_raw.rp_supersample;
 }
 
@@ -110,7 +112,7 @@ function render_path_base_begin() {
 			camera_views[context_raw.view_index_last].v = mat4_clone(cam.base.transform.local);
 		}
 
-		let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
+		let decal: bool = context_is_decal();
 
 		if (context_raw.view_index_last != context_raw.view_index || decal || !config_raw.brush_3d) {
 			// Redraw on current viewport change

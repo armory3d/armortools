@@ -365,8 +365,8 @@ function ui_base_update() {
 	///end
 
 	///if (is_paint || is_sculpt)
-	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
-	let decal_mask: bool = decal && operator_shortcut(map_get(config_keymap, "decal_mask"), shortcut_type_t.DOWN);
+	let decal: bool = context_is_decal();
+	let decal_mask: bool = context_is_decal_mask();
 
 	if ((context_raw.brush_can_lock || context_raw.brush_locked) && mouse_moved) {
 		if (operator_shortcut(map_get(config_keymap, "brush_radius"), shortcut_type_t.DOWN) ||
@@ -1031,8 +1031,8 @@ function ui_base_update_ui() {
 
 	let set_clone_source: bool = context_raw.tool == workspace_tool_t.CLONE && operator_shortcut(map_get(config_keymap, "set_clone_source") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
 
-	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
-	let decal_mask: bool = decal && operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
+	let decal: bool = context_is_decal();
+	let decal_mask: bool = context_is_decal_mask_paint();
 
 	///if (is_paint || is_sculpt)
 	let down: bool = operator_shortcut(map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN) ||
@@ -1166,9 +1166,6 @@ function ui_base_update_ui() {
 		context_raw.layers_preview_dirty = false;
 		context_raw.layer_preview_dirty = false;
 		context_raw.mask_preview_last = null;
-		if (base_pipe_merge == null) {
-			base_make_pipe();
-		}
 		// Update all layer previews
 		for (let i: i32 = 0; i < project_layers.length; ++i) {
 			let l: slot_layer_t = project_layers[i];
@@ -1184,20 +1181,17 @@ function ui_base_update_ui() {
 			let source: image_t = l.texpaint;
 			g2_begin(target);
 			g2_clear(0x00000000);
-			// g2_set_pipeline(l.isMask() ? base_pipe_copy8 : base_pipe_copy);
-			g2_set_pipeline(base_pipe_copy); // texpaint_preview is always RGBA32 for now
+			// g2_set_pipeline(l.is_mask() ? pipes_copy8 : pipes_copy);
+			g2_set_pipeline(pipes_copy); // texpaint_preview is always RGBA32 for now
 			g2_draw_scaled_image(source, 0, 0, target.width, target.height);
 			g2_set_pipeline(null);
 			g2_end();
 		}
 		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 	}
-	if (context_raw.layer_preview_dirty && !slot_layer_is_group(context_raw.layer)) {
+	if (context_raw.layer != null && context_raw.layer_preview_dirty && !slot_layer_is_group(context_raw.layer)) {
 		context_raw.layer_preview_dirty = false;
 		context_raw.mask_preview_last = null;
-		if (base_pipe_merge == null) {
-			base_make_pipe();
-		}
 		// Update layer preview
 		let l: slot_layer_t = context_raw.layer;
 
@@ -1207,8 +1201,8 @@ function ui_base_update_ui() {
 			let source: image_t = l.texpaint;
 			g2_begin(target);
 			g2_clear(0x00000000);
-			// g2_set_pipeline(raw.layer.isMask() ? base_pipe_copy8 : base_pipe_copy);
-			g2_set_pipeline(base_pipe_copy); // texpaint_preview is always RGBA32 for now
+			// g2_set_pipeline(raw.layer.is_mask() ? pipes_copy8 : pipes_copy);
+			g2_set_pipeline(pipes_copy); // texpaint_preview is always RGBA32 for now
 			g2_draw_scaled_image(source, 0, 0, target.width, target.height);
 			g2_set_pipeline(null);
 			g2_end();
@@ -1458,10 +1452,10 @@ function ui_base_render_cursor() {
 		g2_set_color(0xffffffff);
 	}
 
-	let decal: bool = context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
+	let decal: bool = context_is_decal();
 
 	if (!config_raw.brush_3d || context_in_2d_view() || decal) {
-		let decal_mask: bool = decal && operator_shortcut(map_get(config_keymap, "decal_mask"), shortcut_type_t.DOWN);
+		let decal_mask: bool = context_is_decal_mask();
 		if (decal && !context_in_nodes()) {
 			let decal_alpha: f32 = 0.5;
 			if (!decal_mask) {

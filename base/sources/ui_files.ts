@@ -207,9 +207,6 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 									let data: draw_cloud_icon_data_t = make_draw_cloud_icon_data(_ui_files_file_browser_f, image);
 
 									app_notify_on_init(function (data: draw_cloud_icon_data_t) {
-										if (base_pipe_copy_rgb == null) {
-											base_make_pipe_copy_rgb();
-										}
 										let icon: image_t = image_create_render_target(data.image.width, data.image.height);
 										if (ends_with(data.f, ".arm")) { // Used for material sphere alpha cutout
 											g2_begin(icon);
@@ -222,7 +219,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 											g2_begin(icon);
 											g2_clear(0xffffffff);
 										}
-										g2_set_pipeline(base_pipe_copy_rgb);
+										g2_set_pipeline(pipes_copy_rgb);
 										g2_draw_image(data.image, 0, 0);
 										g2_set_pipeline(null);
 										g2_end();
@@ -432,9 +429,6 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 }
 
 function ui_files_make_icon (args: ui_files_make_icon_t) {
-	if (base_pipe_copy_rgb == null) {
-		base_make_pipe_copy_rgb();
-	}
 	let w: i32 = args.w;
 	let image: image_t = args.image;
 	let sw: i32 = image.width > image.height ? w : math_floor(1.0 * image.width / image.height * w);
@@ -442,7 +436,7 @@ function ui_files_make_icon (args: ui_files_make_icon_t) {
 	let icon: image_t = image_create_render_target(sw, sh);
 	g2_begin(icon);
 	g2_clear(0xffffffff);
-	g2_set_pipeline(base_pipe_copy_rgb);
+	g2_set_pipeline(pipes_copy_rgb);
 	g2_draw_scaled_image(image, 0, 0, sw, sh);
 	g2_set_pipeline(null);
 	g2_end();
