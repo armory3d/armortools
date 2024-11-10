@@ -10,9 +10,8 @@ armorlab
 *Note 2: If you are compiling git version of ArmorLab, then you need to have a compiler ([Visual Studio with clang tools](https://visualstudio.microsoft.com/downloads/) - Windows, [clang + dependencies](https://github.com/armory3d/armortools/wiki/Linux-Dependencies) - Linux, [Xcode](https://developer.apple.com/xcode/resources/) - macOS / iOS, [Android Studio](https://developer.android.com/studio) - Android) and [git](https://git-scm.com/downloads) installed.*
 
 ```bash
-git clone --recursive https://github.com/armory3d/armortools
+git clone https://github.com/armory3d/armortools
 cd armortools/armorlab
-git clone https://github.com/armory3d/onnx_bin onnx
 # Unpack `models.zip` from https://github.com/armory3d/armorai/releases into `assets/models` using 7-Zip - Extract Here
 ```
 
