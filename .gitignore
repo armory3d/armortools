@@ -6,4 +6,3 @@ armorlab/assets/models/*.onnx
 armorlab/assets/models/*.json
 armorlab/assets/models/*.txt
 armorlab/assets/models/*.zip
-armorlab/onnx
