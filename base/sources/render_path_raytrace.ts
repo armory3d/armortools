@@ -52,12 +52,12 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 		let bnoise_scramble: image_t = map_get(scene_embedded, "bnoise_scramble.k");
 		let bnoise_rank: image_t = map_get(scene_embedded, "bnoise_rank.k");
 
-		let l: slot_layer_t = base_flatten(true);
+		let l: slot_layer_t = layers_flatten(true);
 		iron_raytrace_set_textures(l.texpaint, l.texpaint_nor, l.texpaint_pack, saved_envmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
 	}
 
 	///if is_lab
-	let l: slot_layer_t = base_flatten(true);
+	let l: slot_layer_t = layers_flatten(true);
 	if (l.texpaint != render_path_raytrace_last_texpaint) {
 		render_path_raytrace_last_texpaint = l.texpaint;
 
@@ -70,7 +70,7 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 	///end
 
 	if (context_raw.pdirty > 0 || render_path_raytrace_dirty > 0) {
-		base_flatten(true);
+		layers_flatten(true);
 	}
 
 	let cam: camera_object_t = scene_camera;

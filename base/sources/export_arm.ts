@@ -172,11 +172,13 @@ function export_arm_run_project() {
 	g2_draw_scaled_image(tex, -(256 * r - 256) / 2, 0, 256 * r, 256);
 	///end
 	g2_end();
+
 	///if arm_metal
 	// Flush command list
 	g2_begin(mesh_icon);
 	g2_end();
 	///end
+
 	let mesh_icon_pixels: buffer_t = image_get_pixels(mesh_icon);
 	let u8a: u8_array_t = mesh_icon_pixels;
 	for (let i: i32 = 0; i < 256 * 256 * 4; ++i) {
@@ -185,9 +187,11 @@ function export_arm_run_project() {
 	///if (arm_metal || arm_vulkan)
 	export_arm_bgra_swap(mesh_icon_pixels);
 	///end
+
 	app_notify_on_next_frame(function (mesh_icon: image_t) {
 		image_unload(mesh_icon);
 	});
+
 	// raw.mesh_icons =
 	// 	///if (arm_metal || arm_vulkan)
 	// 	[encode(bgraSwap(mesh_icon_pixels)];
@@ -213,6 +217,7 @@ function export_arm_run_project() {
 	///else
 	let recent_path: string = project_filepath;
 	///end
+
 	///if arm_windows
 	recent_path = string_replace_all(recent_path, "\\", "/");
 	///end
@@ -244,22 +249,6 @@ function export_arm_export_node(n: ui_node_t, assets: asset_t[] = null) {
 			}
 		}
 	}
-	// Pack colors
-	// if (n.color > 0) {
-	// 	n.color -= 4294967296;
-	// }
-	// for (let i: i32 = 0; i < n.inputs.length; ++i) {
-	// 	let inp: ui_node_socket_t = n.inputs[i];
-	// 	if (inp.color > 0) {
-	// 		inp.color -= 4294967296;
-	// 	}
-	// }
-	// for (let i: i32 = 0; i < n.outputs.length; ++i) {
-	// 	let out: ui_node_socket_t = n.outputs[i];
-	// 	if (out.color > 0) {
-	// 		out.color -= 4294967296;
-	// 	}
-	// }
 }
 
 function export_arm_run_material(path: string) {

@@ -753,7 +753,7 @@ function ui_nodes_render() {
 			ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 		}
 		else {
-			base_is_fill_material() ? base_update_fill_layers() : util_render_make_material_preview();
+			layers_is_fill_material() ? layers_update_fill_layers() : util_render_make_material_preview();
 			if (ui_view2d_show && ui_view2d_type == view_2d_type_t.NODE) {
 				ui_view2d_hwnd.redraws = 2;
 			}
@@ -775,8 +775,8 @@ function ui_nodes_render() {
 		///if (is_paint || is_sculpt)
 		make_material_parse_paint_material();
 
-		if (ui_nodes_canvas_type == canvas_type_t.MATERIAL && base_is_fill_material()) {
-			base_update_fill_layers();
+		if (ui_nodes_canvas_type == canvas_type_t.MATERIAL && layers_is_fill_material()) {
+			layers_update_fill_layers();
 			util_render_make_material_preview();
 		}
 

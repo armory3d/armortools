@@ -209,7 +209,7 @@ function tab_swatches_draw(htab: ui_handle_t) {
 						else if (ui_menu_button(ui, tr("Create Color Layer"))) {
 							let color: i32 = project_raw.swatches[i].base;
 							color = color_set_ab(color, project_raw.swatches[i].opacity * 255);
-							base_create_color_layer(color, project_raw.swatches[i].occlusion, project_raw.swatches[i].roughness, project_raw.swatches[i].metallic);
+							layers_create_color_layer(color, project_raw.swatches[i].occlusion, project_raw.swatches[i].roughness, project_raw.swatches[i].metallic);
 						}
 						///end
 					});

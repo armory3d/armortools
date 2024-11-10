@@ -166,7 +166,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 							///if (is_paint || is_sculpt)
 							if (ui_menu_button(ui, tr("To Mask"))) {
 								app_notify_on_next_frame(function () {
-									base_create_image_mask(_tab_textures_draw_asset);
+									layers_create_image_mask(_tab_textures_draw_asset);
 								});
 							}
 							///end

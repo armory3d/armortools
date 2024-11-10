@@ -243,7 +243,7 @@ function slot_layer_swap(raw: slot_layer_t, other: slot_layer_t) {
 	}
 }
 
-function slot_layer_clear(raw: slot_layer_t, base_color: i32 = 0x00000000, base_image: image_t = null, occlusion: f32 = 1.0, roughness: f32 = base_default_rough, metallic: f32 = 0.0) {
+function slot_layer_clear(raw: slot_layer_t, base_color: i32 = 0x00000000, base_image: image_t = null, occlusion: f32 = 1.0, roughness: f32 = layers_default_rough, metallic: f32 = 0.0) {
 	g4_begin(raw.texpaint);
 	g4_clear(base_color); // Base
 	g4_end();
@@ -290,11 +290,11 @@ function slot_layer_apply_mask(raw: slot_layer_t) {
 	if (slot_layer_is_group(raw.parent)) {
 		for (let i: i32 = 0; i < slot_layer_get_children(raw.parent).length; ++i) {
 			let c: slot_layer_t = slot_layer_get_children(raw.parent)[i];
-			base_apply_mask(c, raw);
+			layers_apply_mask(c, raw);
 		}
 	}
 	else {
-		base_apply_mask(raw.parent, raw);
+		layers_apply_mask(raw.parent, raw);
 	}
 	slot_layer_delete(raw);
 }
@@ -464,7 +464,7 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 function slot_layer_to_fill_layer(raw: slot_layer_t) {
 	context_set_layer(raw);
 	raw.fill_layer = context_raw.material;
-	base_update_fill_layer();
+	layers_update_fill_layer();
 	app_notify_on_next_frame(function () {
 		make_material_parse_paint_material();
 		context_raw.layer_preview_dirty = true;

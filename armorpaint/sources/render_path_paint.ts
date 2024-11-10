@@ -886,7 +886,7 @@ function render_path_paint_unbind_layers() {
 function render_path_paint_dilate(base: bool, nor_pack: bool) {
 	if (config_raw.dilate_radius > 0 && !context_raw.paint2d) {
 		util_uv_cache_dilate_map();
-		base_make_temp_img();
+		layers_make_temp_img();
 		let tid: i32 = context_raw.layer.id;
 		if (base) {
 			let texpaint: string = "texpaint";

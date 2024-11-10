@@ -155,7 +155,7 @@ function gizmo_update() {
 			if (context_raw.material != context_raw.layer.fill_layer) {
 				context_set_material(context_raw.layer.fill_layer);
 			}
-			base_update_fill_layer(context_raw.gizmo_started);
+			layers_update_fill_layer(context_raw.gizmo_started);
 		}
 	}
 

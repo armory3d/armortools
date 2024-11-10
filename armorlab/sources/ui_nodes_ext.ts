@@ -120,7 +120,7 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 	///end
 
 	if (base_res_handle.changed) {
-		base_on_layers_resized();
+		layers_on_resized();
 	}
 	ui._x += ew + 3;
 	ui._y = 2 + start_y;

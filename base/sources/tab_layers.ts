@@ -89,14 +89,14 @@ function tab_layers_button_new(text: string) {
 		ui_menu_draw(function (ui: ui_t) {
 			let l: slot_layer_t = context_raw.layer;
 			if (ui_menu_button(ui, tr("Paint Layer"))) {
-				base_new_layer();
+				layers_new_layer();
 				history_new_layer();
 			}
 			if (ui_menu_button(ui, tr("Fill Layer"))) {
-				base_create_fill_layer(uv_type_t.UVMAP);
+				layers_create_fill_layer(uv_type_t.UVMAP);
 			}
 			if (ui_menu_button(ui, tr("Decal Layer"))) {
-				base_create_fill_layer(uv_type_t.PROJECT);
+				layers_create_fill_layer(uv_type_t.PROJECT);
 			}
 			if (ui_menu_button(ui, tr("Black Mask"))) {
 				if (slot_layer_is_mask(l)) {
@@ -104,13 +104,13 @@ function tab_layers_button_new(text: string) {
 				}
 				// let l: slot_layer_t = raw.layer;
 
-				let m: slot_layer_t = base_new_mask(false, l);
+				let m: slot_layer_t = layers_new_mask(false, l);
 				app_notify_on_next_frame(function (m: slot_layer_t) {
 					slot_layer_clear(m, 0x00000000);
 				}, m);
 				context_raw.layer_preview_dirty = true;
 				history_new_black_mask();
-				base_update_fill_layers();
+				layers_update_fill_layers();
 			}
 			if (ui_menu_button(ui, tr("White Mask"))) {
 				if (slot_layer_is_mask(l)) {
@@ -118,13 +118,13 @@ function tab_layers_button_new(text: string) {
 				}
 				// let l: slot_layer_t = raw.layer;
 
-				let m: slot_layer_t = base_new_mask(false, l);
+				let m: slot_layer_t = layers_new_mask(false, l);
 				app_notify_on_next_frame(function (m: slot_layer_t) {
 					slot_layer_clear(m, 0xffffffff);
 				}, m);
 				context_raw.layer_preview_dirty = true;
 				history_new_white_mask();
-				base_update_fill_layers();
+				layers_update_fill_layers();
 			}
 			if (ui_menu_button(ui, tr("Fill Mask"))) {
 				if (slot_layer_is_mask(l)) {
@@ -132,13 +132,13 @@ function tab_layers_button_new(text: string) {
 				}
 				// let l: slot_layer_t = raw.layer;
 
-				let m: slot_layer_t = base_new_mask(false, l);
+				let m: slot_layer_t = layers_new_mask(false, l);
 				app_notify_on_init(function (m: slot_layer_t) {
 					slot_layer_to_fill_layer(m);
 				}, m);
 				context_raw.layer_preview_dirty = true;
 				history_new_fill_mask();
-				base_update_fill_layers();
+				layers_update_fill_layers();
 			}
 			ui.enabled = !slot_layer_is_group(context_raw.layer) && !slot_layer_is_in_group(context_raw.layer);
 			if (ui_menu_button(ui, tr("Group"))) {
@@ -151,7 +151,7 @@ function tab_layers_button_new(text: string) {
 				}
 
 				let pointers: map_t<slot_layer_t, i32> = tab_layers_init_layer_map();
-				let group: slot_layer_t = base_new_group();
+				let group: slot_layer_t = layers_new_group();
 				context_set_layer(l);
 				array_remove(project_layers, group);
 				array_insert(project_layers, array_index_of(project_layers, l) + 1, group);
@@ -203,7 +203,7 @@ function tab_layers_combo_filter() {
 			}
 			util_mesh_merge(visibles);
 		}
-		base_set_object_mask();
+		layers_set_object_mask();
 		util_uv_uvmap_cached = false;
 		context_raw.ddirty = 2;
 		///if (arm_direct3d12 || arm_vulkan || arm_metal)
@@ -511,11 +511,11 @@ function tab_layers_combo_object(ui: ui_t, l: slot_layer_t, label: bool = false)
 			app_notify_on_init(function (l: slot_layer_t) {
 				context_raw.material = l.fill_layer;
 				slot_layer_clear(l);
-				base_update_fill_layers();
+				layers_update_fill_layers();
 			}, l);
 		}
 		else {
-			base_set_object_mask();
+			layers_set_object_mask();
 		}
 	}
 	return object_handle;
@@ -840,7 +840,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 		if (slot_layer_is_group(l) && ui_menu_button(ui, tr("Merge Group"))) {
 			app_notify_on_init(function () {
 				let l: slot_layer_t = tab_layers_l;
-				base_merge_group(l);
+				layers_merge_group(l);
 			});
 		}
 		ui.enabled = tab_layers_can_merge_down(l);
@@ -849,7 +849,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 				let l: slot_layer_t = tab_layers_l;
 				context_set_layer(l);
 				history_merge_layers();
-				base_merge_down();
+				layers_merge_down();
 				if (context_raw.layer.fill_layer != null) slot_layer_to_paint_layer(context_raw.layer);
 			});
 		}
@@ -859,7 +859,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 				let l: slot_layer_t = tab_layers_l;
 				context_set_layer(l);
 				history_duplicate_layer();
-				base_duplicate_layer(l);
+				layers_duplicate_layer(l);
 			});
 		}
 
@@ -891,7 +891,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 				ui_menu_keep_open = true;
 			}
 			if (res_handle_changed_last && !base_res_handle.changed) {
-				base_on_layers_resized();
+				layers_on_resized();
 			}
 			ui._y = _y;
 			ui_draw_string(tr("Res"), -1, 0, ui_align_t.RIGHT, true);
@@ -906,7 +906,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			ui_inline_radio(base_bits_handle, bits_items, ui_align_t.LEFT);
 			///end
 			if (base_bits_handle.changed) {
-				app_notify_on_init(base_set_layer_bits);
+				app_notify_on_init(layers_set_bits);
 				ui_menu_keep_open = true;
 			}
 		}
@@ -920,7 +920,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 				context_set_material(l.fill_layer);
 				context_set_layer(l);
 				app_notify_on_init(function () {
-					base_update_fill_layers();
+					layers_update_fill_layers();
 				});
 				ui_menu_keep_open = true;
 			}
@@ -934,7 +934,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 				context_set_layer(l);
 				make_material_parse_paint_material();
 				app_notify_on_init(function () {
-					base_update_fill_layers();
+					layers_update_fill_layers();
 				});
 				ui_menu_keep_open = true;
 			}
@@ -949,7 +949,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 				context_set_layer(l);
 				make_material_parse_paint_material();
 				app_notify_on_init(function () {
-					base_update_fill_layers();
+					layers_update_fill_layers();
 				});
 				ui_menu_keep_open = true;
 			}
@@ -1069,7 +1069,7 @@ function tab_layers_delete_layer(l: slot_layer_t) {
 
 	if (slot_layer_is_mask(l)) {
 		context_raw.layer = l.parent;
-		base_update_fill_layers();
+		layers_update_fill_layers();
 	}
 
 	// Remove empty group

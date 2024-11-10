@@ -170,11 +170,6 @@ function config_init() {
 	keymap_load();
 }
 
-type version_t = {
-	sha: string;
-	date: string;
-};
-
 function config_get_sha(): string {
 	let blob: buffer_t = data_get_blob("version.json");
 	if (blob == null) {
@@ -356,6 +351,11 @@ function config_disable_plugin(f: string) {
 	array_remove(config_raw.plugins, f);
 	plugin_stop(f);
 }
+
+type version_t = {
+	sha: string;
+	date: string;
+};
 
 type config_t = {
 	// The locale should be specified in ISO 639-1 format:

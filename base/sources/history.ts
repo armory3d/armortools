@@ -136,7 +136,7 @@ function history_undo() {
 			// Now restore the applied mask
 			history_undo_i = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
 			let mask: slot_layer_t = history_undo_layers[history_undo_i];
-			base_new_mask(false, current_layer, mask_pos);
+			layers_new_mask(false, current_layer, mask_pos);
 			slot_layer_swap(context_raw.layer, mask);
 			context_raw.layers_preview_dirty = true;
 			context_set_layer(context_raw.layer);
@@ -152,7 +152,7 @@ function history_undo() {
 			let lay: slot_layer_t = history_undo_layers[history_undo_i];
 			context_set_layer(project_layers[step.layer]);
 			slot_layer_swap(context_raw.layer, lay);
-			base_new_mask(false, context_raw.layer);
+			layers_new_mask(false, context_raw.layer);
 			slot_layer_swap(context_raw.layer, lay);
 			context_raw.layer_preview_dirty = true;
 		}
@@ -266,7 +266,7 @@ function history_redo() {
 		}
 		else if (step.name == tr("New Group")) {
 			let l: slot_layer_t = project_layers[step.layer - 1];
-			let group: slot_layer_t = base_new_group();
+			let group: slot_layer_t = layers_new_group();
 			array_remove(project_layers, group);
 			array_insert(project_layers, step.layer, group);
 			l.parent = group;
@@ -302,7 +302,7 @@ function history_redo() {
 		else if (step.name == tr("Duplicate Layer")) {
 			context_raw.layer = project_layers[step.layer];
 			app_notify_on_next_frame(function () {
-				base_duplicate_layer(context_raw.layer);
+				layers_duplicate_layer(context_raw.layer);
 			});
 		}
 		else if (step.name == tr("Order Layers")) {
@@ -313,7 +313,7 @@ function history_redo() {
 		else if (step.name == tr("Merge Layers")) {
 			context_raw.layer = project_layers[step.layer + 1];
 			app_notify_on_init(history_redo_merge_layers);
-			app_notify_on_init(base_merge_down);
+			app_notify_on_init(layers_merge_down);
 		}
 		else if (step.name == tr("Apply Mask")) {
 			context_raw.layer = project_layers[step.layer];
@@ -344,7 +344,7 @@ function history_redo() {
 			let lay: slot_layer_t = history_undo_layers[history_undo_i];
 			context_set_layer(project_layers[step.layer]);
 			slot_layer_swap(context_raw.layer, lay);
-			base_new_mask(false, lay);
+			layers_new_mask(false, lay);
 			slot_layer_swap(context_raw.layer, lay);
 			context_raw.layer_preview_dirty = true;
 			history_undo_i = (history_undo_i + 1) % config_raw.undo_steps;
@@ -425,7 +425,6 @@ function history_redo() {
 }
 
 function history_reset() {
-	///if (is_paint || is_sculpt)
 	history_steps = [
 		{
 			name: tr("New", null),
@@ -437,15 +436,6 @@ function history_reset() {
 			brush: 0
 		}
 	];
-	///end
-	///if is_lab
-	history_steps = [
-		{
-			name: tr("New", null)
-		}
-	];
-	///end
-
 	history_undos = 0;
 	history_redos = 0;
 	history_undo_i = 0;
@@ -454,9 +444,7 @@ function history_reset() {
 function history_edit_nodes(canvas: ui_node_canvas_t, canvas_type: i32, canvas_group: i32 = -1) {
 	let step: step_t = history_push(tr("Edit Nodes"));
 	step.canvas_group = canvas_group;
-	///if (is_paint || is_sculpt)
 	step.canvas_type = canvas_type;
-	///end
 	step.canvas = util_clone_canvas(canvas);
 }
 
@@ -640,16 +628,15 @@ function history_push(name: string): step_t {
 		layer_object: context_raw.layer.object_mask,
 		layer_blending: context_raw.layer.blending
 	};
-
-	array_push(history_steps, step);
 	///end
 
 	///if is_lab
 	let step: step_t = {
 		name: name
 	};
-	array_push(history_steps, step);
 	///end
+
+	array_push(history_steps, step);
 
 	while (history_steps.length > config_raw.undo_steps + 1) {
 		array_shift(history_steps);
@@ -684,7 +671,6 @@ function history_swap_active() {
 }
 
 function history_copy_to_undo(from_id: i32, to_id: i32, is_mask: bool) {
-
 	///if is_sculpt
 	is_mask = true;
 	///end
@@ -707,29 +693,25 @@ function history_copy_to_undo(from_id: i32, to_id: i32, is_mask: bool) {
 }
 
 function history_get_canvas(step: step_t): ui_node_canvas_t {
-	///if (is_paint || is_sculpt)
+	///if is_lab
+	return null;
+	///end
+
 	if (step.canvas_group == -1) {
 		return project_materials[step.material].canvas;
 	}
 	else {
 		return project_material_groups[step.canvas_group].canvas;
 	}
-	///end
-
-	///if is_lab
-	return null;
-	///end
 }
 
 function history_set_canvas(step: step_t, canvas: ui_node_canvas_t) {
-	///if (is_paint || is_sculpt)
 	if (step.canvas_group == -1) {
 		project_materials[step.material].canvas = canvas;
 	}
 	else {
 		project_material_groups[step.canvas_group].canvas = canvas;
 	}
-	///end
 }
 
 function history_swap_canvas(step: step_t) {

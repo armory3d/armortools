@@ -562,12 +562,11 @@ function box_preferences_show() {
 			let row: f32[] = [0.5];
 			ui_row(row);
 			if (ui_button(tr("Help"))) {
-				///if (is_paint || is_sculpt)
-				file_load_url("https://github.com/armory3d/armorpaint_docs///pen");
-				///end
-				///if is_lab
-				file_load_url("https://github.com/armory3d/armorlab_docs///pen");
-				///end
+				let url: string = "https://github.com/armory3d/";
+				let name: string = to_lower_case(manifest_title);
+				url += name;
+				url += "_docs#pen";
+				file_load_url(url);
 			}
 		}
 

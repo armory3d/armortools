@@ -148,7 +148,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 									}
 								}
 								if (asset_index != -1) {
-									base_create_image_mask(project_assets[asset_index]);
+									layers_create_image_mask(project_assets[asset_index]);
 								}
 							});
 						});

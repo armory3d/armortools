@@ -153,7 +153,6 @@ function project_new(reset_layers: bool = true) {
 	///end
 	project_filepath = "";
 
-	///if (is_paint || is_sculpt)
 	if (context_raw.merged_object != null) {
 		mesh_object_remove(context_raw.merged_object);
 		data_delete_mesh(context_raw.merged_object.data._.handle);
@@ -162,7 +161,6 @@ function project_new(reset_layers: bool = true) {
 	context_raw.layer_preview_dirty = true;
 	context_raw.layer_filter = 0;
 	project_mesh_assets = [];
-	///end
 
 	viewport_reset();
 	context_raw.paint_object = context_main_object();
@@ -309,11 +307,11 @@ function project_new(reset_layers: bool = true) {
 		array_push(project_layers, layer);
 		context_set_layer(layer);
 		if (aspect_ratio_changed) {
-			app_notify_on_init(base_resize_layers);
+			app_notify_on_init(layers_resize);
 		}
 		///end
 
-		app_notify_on_init(base_init_layers);
+		app_notify_on_init(layers_init);
 	}
 
 	if (g2_in_use) g2_begin(current);

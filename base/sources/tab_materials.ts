@@ -132,7 +132,7 @@ function tab_materials_draw_slots(mini: bool) {
 					context_select_material(i);
 					///if is_paint
 					if (context_raw.tool == workspace_tool_t.MATERIAL) {
-						app_notify_on_init(base_update_fill_layers);
+						app_notify_on_init(layers_update_fill_layers);
 					}
 					///end
 				}
@@ -159,7 +159,7 @@ function tab_materials_draw_slots(mini: bool) {
 
 					if (ui_menu_button(ui, tr("To Fill Layer"))) {
 						context_select_material(i);
-						base_create_fill_layer();
+						layers_create_fill_layer();
 					}
 
 					if (ui_menu_button(ui, tr("Export"))) {

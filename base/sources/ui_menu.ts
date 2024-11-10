@@ -44,7 +44,7 @@ function ui_menu_render() {
 	}
 	else {
 		if (ui_menu_category == menu_category_t.FILE) {
-			if (ui_menu_button(ui, tr("New .."), map_get(config_keymap, "file_new"))) {
+			if (ui_menu_button(ui, tr("New Project..."), map_get(config_keymap, "file_new"))) {
 				project_new_box();
 			}
 			if (ui_menu_button(ui, tr("Open..."), map_get(config_keymap, "file_open"))) {

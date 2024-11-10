@@ -178,7 +178,7 @@ function ui_base_init() {
 	project_canvas = armpack_decode(project_default_canvas);
 	project_canvas.name = "Brush 1";
 
-	context_parse_brush_inputs();
+	brush_output_node_parse_inputs();
 
 	parser_logic_parse(project_canvas);
 	///end
@@ -261,7 +261,7 @@ function ui_base_init() {
 	project_paint_objects = [context_raw.paint_object];
 
 	if (project_filepath == "") {
-		app_notify_on_init(base_init_layers);
+		app_notify_on_init(layers_init);
 	}
 
 	context_raw.project_objects = [];
@@ -1128,17 +1128,9 @@ function ui_base_update_ui() {
 
 				context_raw.brush_time += time_delta();
 
-				///if (is_paint || is_sculpt)
 				if (context_raw.run_brush != null) {
 					context_raw.run_brush(context_raw.brush_output_node_inst, 0);
 				}
-				///end
-				///if is_lab
-				if (context_run_brush != null) {
-					// context_run_brush(context_raw.brush_output_node_inst, 0);
-					context_run_brush(0);
-				}
-				///end
 			}
 		}
 	}
@@ -1156,7 +1148,7 @@ function ui_base_update_ui() {
 		// New color id picked, update fill layer
 		if (context_raw.tool == workspace_tool_t.COLORID && context_raw.layer.fill_layer != null) {
 			app_notify_on_next_frame(function () {
-				base_update_fill_layer();
+				layers_update_fill_layer();
 				make_material_parse_paint_material(false);
 			});
 		}

@@ -88,7 +88,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			if (slot_layer_is_mask(context_raw.layer)) {
 				context_set_layer(context_raw.layer.parent);
 			}
-			let m: slot_layer_t = base_new_mask(false, context_raw.layer);
+			let m: slot_layer_t = layers_new_mask(false, context_raw.layer);
 			app_notify_on_next_frame(function (m: slot_layer_t) {
 				g4_begin(m.texpaint);
 				g4_set_pipeline(pipes_colorid_to_mask);
@@ -103,7 +103,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 				ui_toolbar_handle.redraws = 1;
 				ui_header_handle.redraws = 1;
 				context_raw.layer_preview_dirty = true;
-				base_update_fill_layers();
+				layers_update_fill_layers();
 			}, m);
 			history_new_white_mask();
 		}

@@ -173,14 +173,14 @@ function ui_view2d_render() {
 				let current: image_t = _g2_current;
 				let g2_in_use: bool = _g2_in_use;
 				if (g2_in_use) g2_end();
-				layer = base_flatten();
+				layer = layers_flatten();
 				if (g2_in_use) g2_begin(current);
 			}
 			else if (slot_layer_is_group(layer)) {
 				let current: image_t = _g2_current;
 				let g2_in_use: bool = _g2_in_use;
 				if (g2_in_use) g2_end();
-				layer = base_flatten(false, slot_layer_get_children(layer));
+				layer = layers_flatten(false, slot_layer_get_children(layer));
 				if (g2_in_use) g2_begin(current);
 			}
 

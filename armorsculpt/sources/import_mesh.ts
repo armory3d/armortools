@@ -115,8 +115,8 @@ function _import_mesh_make_mesh(mesh: raw_mesh_t) {
 			let l: slot_layer_t = array_pop(project_layers);
 			slot_layer_unload(l);
 		}
-		base_new_layer(false);
-		app_notify_on_init(base_init_layers);
+		layers_new_layer(false);
+		app_notify_on_init(layers_init);
 		history_reset();
 	}
 

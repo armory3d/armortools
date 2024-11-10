@@ -76,7 +76,7 @@ function tab_layers_button_new(text: string) {
 		ui_menu_draw(function (ui: ui_t) {
 			let l: slot_layer_t = context_raw.layer;
 			if (ui_menu_button(ui, tr("Paint Layer"))) {
-				base_new_layer();
+				layers_new_layer();
 				history_new_layer();
 			}
 		});

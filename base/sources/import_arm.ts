@@ -421,7 +421,7 @@ function import_arm_run_mesh(raw: project_format_t) {
 		util_mesh_merge();
 		viewport_scale_to_bounds();
 	}
-	app_notify_on_init(base_init_layers);
+	app_notify_on_init(layers_init);
 	history_reset();
 }
 

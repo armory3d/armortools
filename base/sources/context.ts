@@ -349,8 +349,6 @@ function context_create(): context_t {
 	c.camera_controls = camera_controls_t.ORBIT;
 	c.pen_painting_only = false; // Reject painting with finger when using pen
 
-	///if (is_paint || is_sculpt)
-	c.tool = workspace_tool_t.BRUSH;
 	c.layer_preview_dirty = true;
 	c.layers_preview_dirty = false;
 	c.node_preview_dirty = false;
@@ -358,7 +356,6 @@ function context_create(): context_t {
 	c.colorid_picked = false;
 	c.material_preview = false; // Drawing material previews
 	c.saved_camera = mat4_identity();
-	c.color_picker_previous_tool = workspace_tool_t.BRUSH;
 	c.materialid_picked = 0;
 	c.uvx_picked = 0.0;
 	c.uvy_picked = 0.0;
@@ -419,9 +416,8 @@ function context_create(): context_t {
 	c.brush_nodes_angle = 0.0;
 	c.brush_nodes_hardness = 1.0;
 	c.brush_directional = false;
-	c.brush_radius = 0.5;
+
 	c.brush_radius_handle = ui_handle_create();
-	c.brush_radius_handle.value = 0.5;
 	c.brush_scale_x = 1.0;
 	c.brush_decal_mask_radius = 0.5;
 	c.brush_decal_mask_radius_handle = ui_handle_create();
@@ -436,12 +432,6 @@ function context_create(): context_t {
 	c.brush_angle = 0.0;
 	c.brush_angle_handle = ui_handle_create();
 	c.brush_angle_handle.value = 0.0;
-	///if is_paint
-	c.brush_hardness = 0.8;
-	///end
-	///if is_sculpt
-	c.brush_hardness = 0.05;
-	///end
 	c.brush_lazy_radius = 0.0;
 	c.brush_lazy_step = 0.0;
 	c.brush_lazy_x = 0.0;
@@ -469,31 +459,13 @@ function context_create(): context_t {
 	c.last_htab0_pos = 0;
 	c.maximized_sidebar_width = 0;
 	c.drag_dest = 0;
-	///end
-
-	///if is_lab
-	c.tool = workspace_tool_t.ERASER;
-	c.color_picker_previous_tool = workspace_tool_t.ERASER;
-	c.brush_radius = 0.25;
-	c.brush_radius_handle = ui_handle_create();
-	c.brush_radius_handle.value = 0.25;
-	c.brush_scale = 1.0;
-	c.coords = vec4_create();
-	c.start_x = 0.0;
-	c.start_y = 0.0;
-	c.lock_begin = false;
-	c.lock_x = false;
-	c.lock_y = false;
-	c.lock_start_x = 0.0;
-	c.lock_start_y = 0.0;
-	c.registered = false;
-	///end
 
 	return c;
 }
 
 function context_init() {
 	context_raw = context_create();
+	context_ext_init(context_raw);
 }
 
 function context_use_deferred(): bool {
@@ -577,7 +549,7 @@ function context_set_layer(l: slot_layer_t) {
 	let g2_in_use: bool = _g2_in_use;
 	if (g2_in_use) g2_end();
 
-	base_set_object_mask();
+	layers_set_object_mask();
 	make_material_parse_mesh_material();
 	make_material_parse_paint_material();
 
@@ -623,7 +595,7 @@ function context_init_tool() {
 		///end
 	}
 	else if (context_raw.tool == workspace_tool_t.MATERIAL) {
-		base_update_fill_layers();
+		layers_update_fill_layers();
 		context_main_object().skip_context = null;
 	}
 
@@ -634,30 +606,7 @@ function context_init_tool() {
 }
 
 function context_select_paint_object(o: mesh_object_t) {
-	///if (is_paint || is_sculpt)
-	ui_header_handle.redraws = 2;
-	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
-		let p: mesh_object_t = project_paint_objects[i];
-		p.skip_context = "paint";
-	}
-	context_raw.paint_object = o;
-
-	let mask: i32 = slot_layer_get_object_mask(context_raw.layer);
-	if (context_layer_filter_used()) {
-		mask = context_raw.layer_filter;
-	}
-
-	if (context_raw.merged_object == null || mask > 0) {
-		context_raw.paint_object.skip_context = "";
-	}
-	util_uv_uvmap_cached = false;
-	util_uv_trianglemap_cached = false;
-	util_uv_dilatemap_cached = false;
-	///end
-
-	///if is_lab
-	context_raw.paint_object = o;
-	///end
+	context_ext_select_paint_object(o);
 }
 
 function context_main_object(): mesh_object_t {
@@ -851,117 +800,4 @@ function context_enable_import_plugin(file: string): bool {
 
 function context_set_swatch(s: swatch_color_t) {
 	context_raw.swatch = s;
-}
-
-function context_run_brush(from: i32) {
-	let left: f32 = 0.0;
-	let right: f32 = 1.0;
-
-	// First time init
-	if (context_raw.last_paint_x < 0 || context_raw.last_paint_y < 0) {
-		context_raw.last_paint_vec_x = context_raw.paint_vec.x;
-		context_raw.last_paint_vec_y = context_raw.paint_vec.y;
-	}
-
-	let nodes: ui_nodes_t = ui_nodes_get_nodes();
-	let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
-	let inpaint: bool = nodes.nodes_selected_id.length > 0 && ui_get_node(canvas.nodes, nodes.nodes_selected_id[0]).type == "inpaint_node";
-
-	// Paint bounds
-	if (inpaint &&
-		context_raw.paint_vec.x > left &&
-		context_raw.paint_vec.x < right &&
-		context_raw.paint_vec.y > 0 &&
-		context_raw.paint_vec.y < 1 &&
-		!base_is_dragging &&
-		!base_is_resizing &&
-		!base_is_scrolling() &&
-		!base_is_combo_selected()) {
-
-		let down: bool = mouse_down() || pen_down();
-
-		// Prevent painting the same spot
-		let same_spot: bool = context_raw.paint_vec.x == context_raw.last_paint_x && context_raw.paint_vec.y == context_raw.last_paint_y;
-		if (down && same_spot) {
-			context_raw.painted++;
-		}
-		else {
-			context_raw.painted = 0;
-		}
-		context_raw.last_paint_x = context_raw.paint_vec.x;
-		context_raw.last_paint_y = context_raw.paint_vec.y;
-
-		if (context_raw.painted == 0) {
-			context_parse_brush_inputs();
-		}
-
-		if (context_raw.painted <= 1) {
-			context_raw.pdirty = 1;
-			context_raw.rdirty = 2;
-		}
-	}
-}
-
-function context_parse_brush_inputs() {
-	if (!context_raw.registered) {
-		context_raw.registered = true;
-		app_notify_on_update(context_update);
-	}
-
-	context_raw.paint_vec = context_raw.coords;
-}
-
-function context_update() {
-	let paint_x: f32 = mouse_view_x() / app_w();
-	let paint_y: f32 = mouse_view_y() / app_h();
-	if (mouse_started()) {
-		context_raw.start_x = mouse_view_x() / app_w();
-		context_raw.start_y = mouse_view_y() / app_h();
-	}
-
-	if (pen_down()) {
-		paint_x = pen_view_x() / app_w();
-		paint_y = pen_view_y() / app_h();
-	}
-	if (pen_started()) {
-		context_raw.start_x = pen_view_x() / app_w();
-		context_raw.start_y = pen_view_y() / app_h();
-	}
-
-	if (operator_shortcut(map_get(config_keymap, "brush_ruler") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN)) {
-		if (context_raw.lock_x) {
-			paint_x = context_raw.start_x;
-		}
-		if (context_raw.lock_y) {
-			paint_y = context_raw.start_y;
-		}
-	}
-
-	context_raw.coords.x = paint_x;
-	context_raw.coords.y = paint_y;
-
-	if (context_raw.lock_begin) {
-		let dx: i32 = math_abs(context_raw.lock_start_x - mouse_view_x());
-		let dy: i32 = math_abs(context_raw.lock_start_y - mouse_view_y());
-		if (dx > 1 || dy > 1) {
-			context_raw.lock_begin = false;
-			if (dx > dy) {
-				context_raw.lock_y = true;
-			}
-			else {
-				context_raw.lock_x = true;
-			}
-		}
-	}
-
-	if (keyboard_started(map_get(config_keymap, "brush_ruler"))) {
-		context_raw.lock_start_x = mouse_view_x();
-		context_raw.lock_start_y = mouse_view_y();
-		context_raw.lock_begin = true;
-	}
-	else if (keyboard_released(map_get(config_keymap, "brush_ruler"))) {
-		context_raw.lock_x = context_raw.lock_y = context_raw.lock_begin = false;
-	}
-
-	context_parse_brush_inputs();
 }

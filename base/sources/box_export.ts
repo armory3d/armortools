@@ -90,7 +90,7 @@ function box_export_tab_export_textures(ui: ui_t, title: string, bake_material: 
 
 		ui_combo(base_res_handle, base_res_combo, tr("Resolution"), true);
 		if (base_res_handle.changed) {
-			base_on_layers_resized();
+			layers_on_resized();
 		}
 
 		///if (is_lab || arm_android || arm_ios)
@@ -101,7 +101,7 @@ function box_export_tab_export_textures(ui: ui_t, title: string, bake_material: 
 
 		ui_combo(base_bits_handle, base_bits_combo, tr("Color"), true);
 		if (base_bits_handle.changed) {
-			app_notify_on_init(base_set_layer_bits);
+			app_notify_on_init(layers_set_bits);
 		}
 
 		ui_row2();
