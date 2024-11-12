@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.22.1)
 
 project("Kinc")
 
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}{debug_defines}")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}{debug_defines}")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO}{release_defines}")

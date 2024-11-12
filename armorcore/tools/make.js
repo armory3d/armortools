@@ -1983,36 +1983,37 @@ class AndroidExporter extends Exporter {
 		gradle = gradle.replace(/{compileSdkVersion}/g, target_options.compileSdkVersion.toString());
 		gradle = gradle.replace(/{minSdkVersion}/g, target_options.minSdkVersion.toString());
 		gradle = gradle.replace(/{targetSdkVersion}/g, target_options.targetSdkVersion.toString());
-		let arch = '';
-		if (target_options.abiFilters.length > 0) {
-			for (let item of target_options.abiFilters) {
-				if (arch.length === 0) {
-					arch = '"' + item + '"';
-				}
-				else {
-					arch = arch + ', "' + item + '"';
-				}
-			}
-			arch = `ndk { abiFilters += listOf(${arch}) }`;
-		}
-		else {
-			switch (goptions.arch) {
-				case 'default':
-					arch = '';
-					break;
-				case 'arm8':
-					arch = 'arm64-v8a';
-					break;
-			}
-			if (goptions.arch !== 'default') {
-				arch = `ndk {abiFilters += listOf("${arch}")}`;
-			}
-		}
-		gradle = gradle.replace(/{architecture}/g, arch);
-		gradle = gradle.replace(/{cflags}/g, cflags);
-		cppflags = '-frtti -fexceptions ' + cppflags;
-		cppflags = '-std=' + project.cppStd + ' ' + cppflags;
-		gradle = gradle.replace(/{cppflags}/g, cppflags);
+		// Looks like these should go into CMakeLists.txt now..
+		// let arch = '';
+		// if (target_options.abiFilters.length > 0) {
+		// 	for (let item of target_options.abiFilters) {
+		// 		if (arch.length === 0) {
+		// 			arch = '"' + item + '"';
+		// 		}
+		// 		else {
+		// 			arch = arch + ', "' + item + '"';
+		// 		}
+		// 	}
+		// 	arch = `ndk { abiFilters += listOf(${arch}) }`;
+		// }
+		// else {
+		// 	switch (goptions.arch) {
+		// 		case 'default':
+		// 			arch = '';
+		// 			break;
+		// 		case 'arm8':
+		// 			arch = 'arm64-v8a';
+		// 			break;
+		// 	}
+		// 	if (goptions.arch !== 'default') {
+		// 		arch = `ndk {abiFilters += listOf("${arch}")}`;
+		// 	}
+		// }
+		// gradle = gradle.replace(/{architecture}/g, arch);
+		// gradle = gradle.replace(/{cflags}/g, cflags);
+		// cppflags = '-frtti -fexceptions ' + cppflags;
+		// cppflags = '-std=' + project.cppStd + ' ' + cppflags;
+		// gradle = gradle.replace(/{cppflags}/g, cppflags);
 		let javasources = '';
 		for (let dir of project.getJavaDirs()) {
 			javasources += '"' + path_relative(path_join(outdir, 'app'), path_resolve(from, dir)).replace(/\\/g, '/') + '", ';
@@ -2058,8 +2059,7 @@ class AndroidExporter extends Exporter {
 			libraries1 += 'find_library(' + lib + '-lib ' + lib + ')\n';
 			libraries2 += '  ${' + lib + '-lib}\n';
 		}
-		cmake = cmake.replace(/{libraries1}/g, libraries1)
-			.replace(/{libraries2}/g, libraries2);
+		cmake = cmake.replace(/{libraries1}/g, libraries1).replace(/{libraries2}/g, libraries2);
 		let cmakePath = path_join(outdir, 'app', 'CMakeLists.txt');
 		fs_writefile(cmakePath, cmake);
 	}
