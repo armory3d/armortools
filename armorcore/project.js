@@ -332,8 +332,6 @@ else if (platform === "linux") {
 	project.add_define("KINC_NO_WAYLAND"); // TODO: kinc_wayland_display_init() not implemented
 }
 else if (platform === "android") {
-	// In app/build.gradle:
-	//   android - defaultconfig - ndk.abiFilters "arm64-v8a"
 	project.add_define("IDLE_SLEEP");
 	project.target_options.android.package = flags.package;
 	project.target_options.android.permissions = ["android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.READ_EXTERNAL_STORAGE", "android.permission.INTERNET"];
