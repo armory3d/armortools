@@ -52,6 +52,9 @@ function tab_materials_draw_slots(mini: bool) {
 	let ui: ui_t = ui_base_ui;
 	let slotw: i32 = math_floor(51 * ui_SCALE(ui));
 	let num: i32 = math_floor(config_raw.layout[layout_size_t.SIDEBAR_W] / slotw);
+	if (num == 0) {
+		return;
+	}
 
 	for (let row: i32 = 0; row < math_floor(math_ceil(project_materials.length / num)); ++row) {
 		let mult: i32 = config_raw.show_asset_names ? 2 : 1;
