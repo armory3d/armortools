@@ -2447,7 +2447,12 @@ function shader_find_type(options) {
 		return 'msl';
 	}
 	else if (options.graphics === 'opengl') {
-		return 'glsl';
+		if (goptions.target === "android" || goptions.target === "wasm") {
+			return "essl";
+		}
+		else {
+			return 'glsl';
+		}
 	}
 	else if (options.graphics === 'direct3d11' || options.graphics === 'direct3d12') {
 		return 'hlsl';
@@ -2534,23 +2539,13 @@ class ShaderCompiler {
 			return null;
 		}
 		else {
-			let parameters = [this.type, from, to, this.temp, "iron"];
 			fs_ensuredir(this.temp);
 
-			if (goptions.target === "android" || goptions.target === "wasm") {
-				parameters[0] = "essl";
-			}
-
-			parameters[1] = path_resolve(parameters[1]);
-			parameters[2] = path_resolve(parameters[2]);
-			parameters[3] = path_resolve(parameters[3]);
+			// from = path_resolve(from);
+			// to = path_resolve(to);
+			// this.temp = path_resolve(this.temp);
 
 			amake.ashader(this.type, from, to);
-
-			// let child = os_exec(this.compiler, parameters);
-			// if (child.status !== 0) {
-			// 	console.log('Shader compiler error.')
-			// }
 
 			let compiled_shader = new CompiledShader();
 			return compiled_shader;

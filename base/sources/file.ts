@@ -34,7 +34,7 @@ let file_cloud_sizes: map_t<string, i32> = null;
 let _file_init_cloud_bytes_done: ()=>void;
 
 // ///if arm_android
-// let let file_internal: map_t<string, string[]> = null; // .apk contents
+// let file_internal: map_t<string, string[]> = null; // .apk contents
 // ///end
 
 function file_read_directory(path: string): string[] {

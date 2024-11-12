@@ -76,12 +76,12 @@ function _g2_make_glyphs(start: i32, end: i32): i32[] {
 function g2_init() {
 	if (!_g2_initialized) {
 		iron_g2_init(
-			iron_load_blob("./data/g2_image.vert" + sys_shader_ext()),
-			iron_load_blob("./data/g2_image.frag" + sys_shader_ext()),
-			iron_load_blob("./data/g2_colored.vert" + sys_shader_ext()),
-			iron_load_blob("./data/g2_colored.frag" + sys_shader_ext()),
-			iron_load_blob("./data/g2_text.vert" + sys_shader_ext()),
-			iron_load_blob("./data/g2_text.frag" + sys_shader_ext())
+			iron_load_blob(data_path() + "g2_image.vert" + sys_shader_ext()),
+			iron_load_blob(data_path() + "g2_image.frag" + sys_shader_ext()),
+			iron_load_blob(data_path() + "g2_colored.vert" + sys_shader_ext()),
+			iron_load_blob(data_path() + "g2_colored.frag" + sys_shader_ext()),
+			iron_load_blob(data_path() + "g2_text.vert" + sys_shader_ext()),
+			iron_load_blob(data_path() + "g2_text.frag" + sys_shader_ext())
 		);
 		_g2_initialized = true;
 	}
