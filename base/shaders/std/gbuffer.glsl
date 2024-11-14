@@ -52,7 +52,7 @@ void unpack_f32_i16(const float val, OUT(float, f), OUT(uint, i)) {
 	// Code
 	// extract integer part
 	// + rcp(prec_minus_one) to deal with precision issue
-	i = int((val / t2) + (1.0 / prec_minus_one));
+	i = uint((val / t2) + (1.0 / prec_minus_one));
 	// Now that we have i, solve formula in pack_f32_i16 for f
 	//f = (val - t2 * float(i)) / t1 => convert in mads form
 	f = clamp((-t2 * float(i) + val) / t1, 0.0, 1.0); // Saturate in case of precision issue
