@@ -46,7 +46,7 @@ void main() {
 		frag_color = vec4(mix(cola.rgb, col1.rgb, str), cola.a + col1.a);
 	}
 	else if (blending == -4) { // Merge _pack.height into _nor
-		float tex_step = 1.0 / textureSize(tex1, 0).x;
+		float tex_step = 1.0 / float(textureSize(tex1, 0).x);
 		float height0 = textureLod(tex1, vec2(tex_coord.x - tex_step, tex_coord.y), 0.0).a;
 		float height1 = textureLod(tex1, vec2(tex_coord.x + tex_step, tex_coord.y), 0.0).a;
 		float height2 = textureLod(tex1, vec2(tex_coord.x, tex_coord.y - tex_step), 0.0).a;
