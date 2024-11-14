@@ -51,7 +51,7 @@ function file_read_directory(path: string): string[] {
 	///if arm_android
 	path = string_replace_all(path, "//", "/");
 	if (file_internal == null) {
-		let s: string = sys_buffer_to_string(data_get_blob("/data/data_list.json"));
+		let s: string = sys_buffer_to_string(data_get_blob("data_list.json"));
 		file_internal = json_parse_to_map(s);
 	}
 	if (map_get(file_internal, path) != null) {
