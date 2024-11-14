@@ -26,23 +26,23 @@ vec3 rgb_to_hsv(const vec3 c) {
 }
 
 void main() {
-	vec4 col0 = textureLod(tex0, tex_coord, 0);
-	vec4 cola = textureLod(texa, tex_coord, 0);
+	vec4 col0 = textureLod(tex0, tex_coord, 0.0);
+	vec4 cola = textureLod(texa, tex_coord, 0.0);
 	float str = col0.a * opac;
-	str *= textureLod(texmask, tex_coord, 0).r;
+	str *= textureLod(texmask, tex_coord, 0.0).r;
 	if (blending == -1) { // Merging _nor and _pack
-		vec4 col1 = textureLod(tex1, tex_coord, 0);
+		vec4 col1 = textureLod(tex1, tex_coord, 0.0);
 		frag_color = vec4(mix(cola, col1, str));
 	}
 	else if (blending == -2) { // Merging _nor with normal blending
-		vec4 col1 = textureLod(tex1, tex_coord, 0);
+		vec4 col1 = textureLod(tex1, tex_coord, 0.0);
 		// Whiteout blend
 		vec3 n1 = cola.rgb * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0);
 		vec3 n2 = mix(vec3(0.5, 0.5, 1.0), col1.rgb, str) * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0);
 		frag_color = vec4(normalize(vec3(n1.xy + n2.xy, n1.z * n2.z)) * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5), max(col1.a, cola.a));
 	}
 	else if (blending == -3) { // Merging _pack with height blending
-		vec4 col1 = textureLod(tex1, tex_coord, 0);
+		vec4 col1 = textureLod(tex1, tex_coord, 0.0);
 		frag_color = vec4(mix(cola.rgb, col1.rgb, str), cola.a + col1.a);
 	}
 	else if (blending == -4) { // Merge _pack.height into _nor

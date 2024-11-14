@@ -26,7 +26,7 @@ void main() {
 
 	// Auto exposure
 	// const float auto_exposure_strength = 1.0;
-	// float expo = 2.0 - clamp(length(textureLod(histogram, vec2(0.5, 0.5), 0).rgb), 0.0, 1.0);
+	// float expo = 2.0 - clamp(length(textureLod(histogram, vec2(0.5, 0.5), 0.0).rgb), 0.0, 1.0);
 	// frag_color.rgb *= pow(expo, auto_exposure_strength * 2.0);
 
 	frag_color.rgb = tonemap_filmic(frag_color.rgb); // With gamma

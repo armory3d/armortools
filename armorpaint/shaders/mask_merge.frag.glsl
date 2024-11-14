@@ -9,8 +9,8 @@ in vec2 tex_coord;
 out vec4 frag_color;
 
 void main() {
-	float col0 = textureLod(tex0, tex_coord, 0).r;
-	float cola = textureLod(texa, tex_coord, 0).r;
+	float col0 = textureLod(tex0, tex_coord, 0.0).r;
+	float cola = textureLod(texa, tex_coord, 0.0).r;
 	float str = opac;
 	float out_color = 0.0;
 	if (blending == 0) { // Mix

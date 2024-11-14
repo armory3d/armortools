@@ -22,7 +22,7 @@ function make_discard_face(vert: node_shader_t, frag: node_shader_t) {
 	node_shader_write(frag, "vec2 tex_coord_inp = texelFetch(gbuffer2, ivec2(inp.x * gbuffer_size.x, (1.0 - inp.y) * gbuffer_size.y), 0).ba;");
 	///end
 	node_shader_write(frag, "vec4 face_c1 = texelFetch(textrianglemap, ivec2(tex_coord_inp * textrianglemap_size), 0);");
-	node_shader_write(frag, "vec4 face_c2 = textureLod(textrianglemap, tex_coord_pick, 0);");
+	node_shader_write(frag, "vec4 face_c2 = textureLod(textrianglemap, tex_coord_pick, 0.0);");
 	///if (arm_direct3d11 || arm_direct3d12 || arm_metal)
 	node_shader_write(frag, "if (any(face_c1 != face_c2)) discard;");
 	///else
@@ -32,7 +32,7 @@ function make_discard_face(vert: node_shader_t, frag: node_shader_t) {
 
 function make_discard_uv_island(vert: node_shader_t, frag: node_shader_t) {
 	node_shader_add_uniform(frag, "sampler2D texuvislandmap", "_texuvislandmap");
-	node_shader_write(frag, "if (textureLod(texuvislandmap, tex_coord_pick, 0).r == 0.0) discard;");
+	node_shader_write(frag, "if (textureLod(texuvislandmap, tex_coord_pick, 0.0).r == 0.0) discard;");
 }
 
 function make_discard_material_id(vert: node_shader_t, frag: node_shader_t) {
