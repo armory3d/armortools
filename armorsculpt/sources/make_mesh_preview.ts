@@ -149,7 +149,7 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 
 	node_shader_write(frag, "n /= (abs(n.x) + abs(n.y) + abs(n.z));");
 	node_shader_write(frag, "n.xy = n.z >= 0.0 ? n.xy : octahedron_wrap(n.xy);");
-	// uint matid = 0;
+	// uint matid = uint(0);
 
 	if (decal) {
 		node_shader_write(frag, "frag_color[0] = vec4(n.x, n.y, roughness, pack_f32_i16(metallic, uint(0)));"); // metallic/matid
