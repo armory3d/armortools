@@ -127,5 +127,22 @@ if (export_version_info) {
 	project.add_assets(dir + "/version.json", { destination: "data/{name}" });
 }
 
+let export_data_list = flags.android; // .apk contents
+if (export_data_list) {
+	let root = "../" + flags.name.toLowerCase();
+	let data_list = {
+		"/data/plugins": fs_readdir("../base/assets/plugins").concat(fs_readdir(root + "/assets/plugins")).join(","),
+		"/data/export_presets": fs_readdir(root + "/assets/export_presets").join(","),
+		"/data/keymap_presets": fs_readdir(root + "/assets/keymap_presets").join(","),
+		"/data/locale": fs_readdir("../base/assets/locale").join(","),
+		"/data/meshes": fs_readdir(root + "/assets/meshes").join(","),
+		"/data/themes": fs_readdir("../base/assets/themes").join(","),
+	};
+	let dir = "../" + flags.name.toLowerCase() + "/build";
+	fs_ensuredir(dir);
+	fs_writefile(dir + "/data_list.json", JSON.stringify(data_list));
+	project.add_assets(dir + "/data_list.json", { destination: "data/{name}" });
+}
+
 project.flatten();
 return project;
