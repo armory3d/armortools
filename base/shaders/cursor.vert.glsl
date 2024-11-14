@@ -37,8 +37,8 @@ vec3 get_pos(vec2 uv) {
 }
 
 vec3 get_normal(vec3 p0, vec2 uv) {
-	vec3 p1 = get_pos(uv + vec2(tex_step.x * 4, 0));
-	vec3 p2 = get_pos(uv + vec2(0, tex_step.y * 4));
+	vec3 p1 = get_pos(uv + vec2(tex_step.x * 4.0, 0.0));
+	vec3 p2 = get_pos(uv + vec2(0.0, tex_step.y * 4.0));
 	return normalize(cross(p2 - p0, p1 - p0));
 }
 
@@ -50,8 +50,8 @@ void create_basis(vec3 normal, OUT(vec3, tangent), OUT(vec3, binormal)) {
 void main() {
 	tex_coord = tex;
 	vec3 wpos = get_pos(mouse);
-	vec2 uv1 = mouse + tex_step * 4;
-	vec2 uv2 = mouse - tex_step * 4;
+	vec2 uv1 = mouse + tex_step * vec2(4.0, 4.0);
+	vec2 uv2 = mouse - tex_step * vec2(4.0, 4.0);
 	vec3 wpos1 = get_pos(uv1);
 	vec3 wpos2 = get_pos(uv2);
 	vec3 n = normalize(
