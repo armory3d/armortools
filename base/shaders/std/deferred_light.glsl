@@ -213,7 +213,8 @@ vec3 sample_light(const vec3 p, const vec3 n, const vec3 v, const float dotnv, c
 	direct *= clamp(dotnl + 2.0 * occ * occ - 1.0, 0.0, 1.0); // Micro shadowing
 
 #ifdef _Voxel
-	direct *= 1.0 - trace_shadow(voxels, voxpos, l);
+	float voxshadow = 1.0 - trace_shadow(voxels, voxpos, l);
+	direct *= vec3(voxshadow, voxshadow, voxshadow);
 #endif
 
 	return direct;
@@ -262,7 +263,8 @@ void main() {
 
 #ifdef _Voxel
 	vec3 voxpos = p / voxelgi_half_extents;
-	envl.rgb *= 1.0 - trace_ao(voxpos, n, voxels);
+	float voxao = 1.0 - trace_ao(voxpos, n, voxels);
+	envl.rgb *= vec3(voxao, voxao, voxao);
 #endif
 
 	frag_color.rgb = envl;
