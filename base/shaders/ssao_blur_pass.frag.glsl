@@ -9,7 +9,7 @@ uniform vec2 dir_inv;
 in vec2 tex_coord;
 out float frag_color;
 
-#ifdef GL_ES
+#ifdef ESSL
 #define CONST_ARRAY_BEGIN(t, v, n) const t v[n] = t[](
 #define CONST_ARRAY_END() );
 #else
