@@ -270,7 +270,7 @@ void main() {
 	frag_color.rgb = envl;
 	frag_color.rgb *= textureLod(ssaotex, tex_coord, 0.0).r;
 
-	if (matid == 1) { // Emission
+	if (matid == uint(1)) { // Emission
 		frag_color.rgb += g1.rgb; // materialid
 		albedo = vec3(0.0, 0.0, 0.0);
 	}
