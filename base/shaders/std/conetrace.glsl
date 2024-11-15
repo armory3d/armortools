@@ -24,7 +24,7 @@ float trace_cone_ao(sampler3D voxels, const vec3 origin, vec3 dir, const float a
 		sample_pos = dir * dist + origin;
 		float mip = max(log2(diam * voxelgi_resolution), 0.0);
 		float mip_sample = textureLod(voxels, sample_pos * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5), mip).r;
-		sample_col += (1 - sample_col) * mip_sample;
+		sample_col += (1.0 - sample_col) * mip_sample;
 		dist += max(diam / 2.0, VOXEL_SIZE);
 		diam = dist * aperture;
 	}

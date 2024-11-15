@@ -251,7 +251,7 @@ void main() {
 	envl /= PI;
 
 	vec3 reflection_world = reflect(-v, n);
-	float lod = mip_from_roughness(roughness, envmap_num_mipmaps);
+	float lod = mip_from_roughness(roughness, float(envmap_num_mipmaps));
 	vec3 prefiltered_color = textureLod(senvmap_radiance, envmap_equirect(reflection_world, envmap_data.x), lod).rgb;
 
 	envl.rgb *= albedo;
