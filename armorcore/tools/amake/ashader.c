@@ -417,6 +417,9 @@ static void write_header(char *shader_lang) {
 		}
 		else {
 			strcpy(defines[defines_count++], "GLSL\n");
+			if (string_equals(shader_lang, "essl")) {
+				strcpy(defines[defines_count++], "ESSL\n");
+			}
 		}
 	}
 	else if (string_equals(shader_lang, "hlsl")) {
