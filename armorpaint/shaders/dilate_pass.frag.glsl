@@ -7,22 +7,30 @@ uniform float dilate_radius;
 in vec2 tex_coord;
 out vec4 frag_color;
 
-const vec2 offsets[8] = {
-	vec2(-1, 0),
-	vec2( 1, 0),
-	vec2( 0, 1),
-	vec2( 0,-1),
-	vec2(-1, 1),
-	vec2( 1, 1),
-	vec2( 1,-1),
-	vec2(-1,-1)
-};
+#ifdef GL_ES
+#define CONST_ARRAY_BEGIN(t, v, n) const t v[n] = t[](
+#define CONST_ARRAY_END() );
+#else
+#define CONST_ARRAY_BEGIN(t, v, n) const t v[n] = {
+#define CONST_ARRAY_END() };
+#endif
+
+CONST_ARRAY_BEGIN(vec2, offsets, 8)
+	vec2(-1.0,  0.0),
+	vec2( 1.0,  0.0),
+	vec2( 0.0,  1.0),
+	vec2( 0.0, -1.0),
+	vec2(-1.0,  1.0),
+	vec2( 1.0,  1.0),
+	vec2( 1.0, -1.0),
+	vec2(-1.0, -1.0)
+CONST_ARRAY_END()
 
 void main() {
 	// Based on https://shaderbits.com/blog/uv-dilation by Ryan Brucks
 	vec2 size = textureSize(tex, 0).xy;
-	vec2 texel_size = 1.0 / size;
-	float min_dist = 10000000;
+	vec2 texel_size = vec2(1.0, 1.0) / size;
+	float min_dist = 10000000.0;
 	ivec2 coord = ivec2(tex_coord * size);
 	float mask = texelFetch(texdilate, coord, 0).r;
 	if (mask > 0) discard;
