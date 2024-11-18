@@ -117,6 +117,8 @@ void kinc_g5_command_list_viewport(kinc_g5_command_list_t *list, int x, int y, i
 	viewport.originY = y;
 	viewport.width = width;
 	viewport.height = height;
+	viewport.znear = 0.1;
+	viewport.zfar = 100.0;
 	[encoder setViewport:viewport];
 }
 
