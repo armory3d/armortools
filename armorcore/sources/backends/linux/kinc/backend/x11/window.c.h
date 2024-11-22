@@ -108,12 +108,12 @@ void kinc_x11_window_set_title(int window_index, const char *_title) {
 }
 
 int kinc_x11_window_x(int window_index) {
-	kinc_log(KINC_LOG_LEVEL_ERROR, "x11 does not support getting the window position.");
+	// kinc_log(KINC_LOG_LEVEL_ERROR, "x11 does not support getting the window position.");
 	return 0;
 }
 
 int kinc_x11_window_y(int window_index) {
-	kinc_log(KINC_LOG_LEVEL_ERROR, "x11 does not support getting the window position.");
+	// kinc_log(KINC_LOG_LEVEL_ERROR, "x11 does not support getting the window position.");
 	return 0;
 }
 
