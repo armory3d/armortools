@@ -33,14 +33,15 @@ function tab_browser_draw(htab: ui_handle_t) {
 		ui_begin_sticky();
 		let step: f32 = (1.0 - bookmarks_w / ui._w);
 		if (tab_browser_hsearch.text != "") {
-			let row: f32[] = [bookmarks_w / ui._w, step * 0.73, step * 0.07, step * 0.17, step * 0.03];
+			let row: f32[] = [bookmarks_w / ui._w, step * 0.07, step * 0.07, step * 0.66, step * 0.17, step * 0.03];
 			ui_row(row);
 		}
 		else {
-			let row: f32[] = [bookmarks_w / ui._w, step * 0.73, step * 0.07, step * 0.2];
+			let row: f32[] = [bookmarks_w / ui._w, step * 0.07, step * 0.07, step * 0.66, step * 0.2];
 			ui_row(row);
 		}
 
+		// Bookmark
 		if (ui_button("+")) {
 			let bookmark: string = tab_browser_hpath.text;
 			///if arm_windows
@@ -51,6 +52,32 @@ function tab_browser_draw(htab: ui_handle_t) {
 		}
 		if (ui.is_hovered) {
 			ui_tooltip(tr("Add bookmark"));
+		}
+
+		// Refresh
+		let refresh: bool = false;
+		let in_focus: bool = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
+							 ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
+		if (ui_button(tr("Refresh")) || (in_focus && ui.is_key_pressed && ui.key_code == key_code_t.F5)) {
+			refresh = true;
+		}
+
+		// Previous folder
+		let text: string = tab_browser_hpath.text;
+		let i1: i32 = string_index_of(text, path_sep);
+		let nested: bool = i1 > -1 && text.length - 1 > i1;
+		///if arm_windows
+		// Server addresses like \\server are not nested
+		nested = nested && !(text.length >= 2 && char_at(text, 0) == path_sep && char_at(text, 1) == path_sep && string_last_index_of(text, path_sep) == 1);
+		///end
+
+		ui.enabled = nested;
+		if (ui_button("<")) {
+			ui_files_go_up(tab_browser_hpath);
+		}
+		ui.enabled = true;
+		if (ui.is_hovered) {
+			ui_tooltip(tr("Previous folder"));
 		}
 
 		///if arm_android
@@ -70,12 +97,6 @@ function tab_browser_draw(htab: ui_handle_t) {
 		}
 		///end
 
-		let refresh: bool = false;
-		let in_focus: bool = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
-							 ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
-		if (ui_button(tr("Refresh")) || (in_focus && ui.is_key_pressed && ui.key_code == key_code_t.F5)) {
-			refresh = true;
-		}
 		tab_browser_hsearch.text = ui_text_input(tab_browser_hsearch, tr("Search"), ui_align_t.LEFT, true, true);
 		if (ui.is_hovered) {
 			ui_tooltip(tr("ctrl+f to search") + "\n" + tr("esc to cancel"));

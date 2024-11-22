@@ -70,6 +70,9 @@ function box_projects_tab(ui: ui_t) {
 
 		let slotw: i32 = math_floor(150 * ui_SCALE(ui));
 		let num: i32 = math_floor(sys_width() / slotw);
+		if (num == 0) {
+			return;
+		}
 		let recent_projects: string[] = config_raw.recent_projects;
 		let show_asset_names: bool = true;
 

@@ -103,19 +103,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 	if (handle.text != ui_files_last_path || search != ui_files_last_search || refresh) {
 		ui_files_files = [];
 
-		// Up directory
-		let text: string = handle.text;
-		let i1: i32 = string_index_of(text, path_sep);
-		let nested: bool = i1 > -1 && text.length - 1 > i1;
-		///if arm_windows
-		// Server addresses like \\server are not nested
-		nested = nested && !(text.length >= 2 && char_at(text, 0) == path_sep && char_at(text, 1) == path_sep && string_last_index_of(text, path_sep) == 1);
-		///end
-		if (nested) {
-			array_push(ui_files_files, "..");
-		}
-
-		let dir_path: string = text;
+		let dir_path: string = handle.text;
 		///if arm_ios
 		if (!is_cloud) {
 			dir_path = document_directory + dir_path;
@@ -146,6 +134,9 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 
 	let slotw: i32 = math_floor(70 * ui_SCALE(ui));
 	let num: i32 = math_floor(ui._w / slotw);
+	if (num == 0) {
+		return handle.text;
+	}
 
 	ui._y += 4; // Don't cut off the border around selected materials
 	// Directory contents
@@ -443,6 +434,14 @@ function ui_files_make_icon (args: ui_files_make_icon_t) {
 	map_set(ui_files_icon_map, args.shandle, icon);
 	ui_base_hwnds[tab_area_t.STATUS].redraws = 3;
 	data_delete_image(args.shandle); // The big image is not needed anymore
+}
+
+function ui_files_go_up(handle: ui_handle_t) {
+	handle.text = substring(handle.text, 0, string_last_index_of(handle.text, path_sep));
+	// Drive root
+	if (handle.text.length == 2 && char_at(handle.text, 1) == ":") {
+		handle.text += path_sep;
+	}
 }
 
 type ui_files_make_icon_t = {

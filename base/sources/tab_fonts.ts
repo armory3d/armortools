@@ -32,6 +32,9 @@ function tab_fonts_draw(htab: ui_handle_t) {
 		let statusw: i32 = sys_width() - ui_toolbar_w - config_raw.layout[layout_size_t.SIDEBAR_W];
 		let slotw: i32 = math_floor(51 * ui_SCALE(ui));
 		let num: i32 = math_floor(statusw / slotw);
+		if (num == 0) {
+			return;
+		}
 
 		for (let row: i32 = 0; row < math_floor(math_ceil(project_fonts.length / num)); ++row) {
 			let mult: i32 = config_raw.show_asset_names ? 2 : 1;

@@ -82,6 +82,9 @@ function tab_swatches_draw(htab: ui_handle_t) {
 
 		let slotw: i32 = math_floor(26 * ui_SCALE(ui));
 		let num: i32 = math_floor(ui._w / (slotw + 3));
+		if (num == 0) {
+			return;
+		}
 		let drag_pos_set: bool = false;
 
 		let uix: f32 = 0.0;

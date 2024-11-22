@@ -48,6 +48,9 @@ function tab_textures_draw(htab: ui_handle_t) {
 
 			let slotw: i32 = math_floor(52 * ui_SCALE(ui));
 			let num: i32 = math_floor(statusw / slotw);
+			if (num == 0) {
+				return;
+			}
 
 			for (let row: i32 = 0; row < math_floor(math_ceil(project_assets.length / num)); ++row) {
 				let mult: i32 = config_raw.show_asset_names ? 2 : 1;
