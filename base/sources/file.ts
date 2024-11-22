@@ -48,6 +48,7 @@ function file_read_directory(path: string): string[] {
 			return empty;
 		}
 	}
+
 	///if arm_android
 	path = string_replace_all(path, "//", "/");
 	if (file_internal == null) {
@@ -60,7 +61,12 @@ function file_read_directory(path: string): string[] {
 	///end
 
 	let files: string[] = string_split(iron_read_directory(path), "\n");
-	///if arm_windows
+
+	array_sort(files, function (a: any_ptr, b: any_ptr): i32 {
+		return strcmp(DEREFERENCE(a), DEREFERENCE(b));
+	});
+
+	// Folders first
 	let num: i32 = files.length;
 	for (let i: i32 = 0; i < num; ++i) {
 		let f: string = files[i];
@@ -71,7 +77,7 @@ function file_read_directory(path: string): string[] {
 			num--;
 		}
 	}
-	///end
+
 	return files;
 }
 
