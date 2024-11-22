@@ -352,9 +352,9 @@ function sys_display_frequency(): i32 {
 }
 
 function sys_buffer_to_string(b: buffer_t): string {
-	let str: u8_array_t = u8_array_create(b.length + 1);
-	memcpy(str.buffer, b.buffer, b.length);
-	return (any_ptr)str.buffer;
+	let str: string = string_alloc(b.length + 1);
+	memcpy(str, b.buffer, b.length);
+	return str;
 }
 
 function sys_string_to_buffer(str: string): buffer_t {
