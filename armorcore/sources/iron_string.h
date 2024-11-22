@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include "iron_array.h"
 
+char *string_alloc(int size);
 char *string_join(char *a, char *b);
 char *string_copy(char *a);
 int string_length(char *str);
