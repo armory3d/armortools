@@ -2699,7 +2699,13 @@ function write_ts_project(projectdir, options) {
 	let main_ts = null;
 
 	for (let i = 0; i < options.sources.length; ++i) {
-		let files = fs_readdir(options.sources[i]);
+		let src = options.sources[i];
+		let files = fs_readdir(src);
+		if (src.endsWith(".ts")) {
+			// Add file instead of dir
+			files = [src.substring(src.lastIndexOf("/") + 1, src.length)];
+			src = src.substring(0, src.lastIndexOf("/"));
+		}
 		for (let file of files) {
 			if (file.endsWith(".ts")) {
 				// Prevent duplicates, keep the newly added file
@@ -2709,8 +2715,10 @@ function write_ts_project(projectdir, options) {
 						break;
 					}
 				}
-				tsdata.include.push(options.sources[i] + path_sep + file);
-				if (file == "main.ts") main_ts = options.sources[i] + path_sep + file;
+				tsdata.include.push(src + path_sep + file);
+				if (file == "main.ts") {
+					main_ts = src + path_sep + file;
+				}
 			}
 		}
 	}
