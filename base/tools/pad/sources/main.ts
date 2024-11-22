@@ -32,7 +32,19 @@ function drop_files(path: string) {
 }
 
 function encode_storage(): string {
-	return "";
+	json_encode_begin();
+	json_encode_string("project", storage.project);
+	json_encode_string("file", storage.file);
+	json_encode_string("text", storage.text);
+	json_encode_bool("modified", storage.modified);
+	json_encode_string_array("expanded", storage.expanded);
+	json_encode_i32("window_w", storage.window_w);
+	json_encode_i32("window_h", storage.window_h);
+	json_encode_i32("window_x", storage.window_x);
+	json_encode_i32("window_y", storage.window_y);
+	json_encode_i32("sidebar_w", storage.sidebar_w);
+	let config_json: string = json_encode_end();
+	return config_json;
 }
 
 function shutdown() {
@@ -83,6 +95,10 @@ function main() {
 
 	theme = {};
 	ui_theme_default(theme);
+	theme.WINDOW_BG_COL = 0xff000000;
+	theme.SEPARATOR_COL = 0xff000000;
+	theme.BUTTON_COL = 0xff000000;
+	theme.FONT_SIZE = 18;
 
 	let ui_ops: ui_options_t = {
 		scale_factor: 1.0,
@@ -105,11 +121,12 @@ function main() {
 }
 
 function armpack_to_string(bytes: buffer_t): string {
+	// Use plugin api + converter.js
 	return "";
 }
 
 function list_folder(path: string) {
-	let files: string[] = string_split(iron_read_directory(path), "\n");
+	let files: string[] = file_read_directory(path);
 	for (let i: i32 = 0; i < files.length; ++i) {
 		let f: string = files[i];
 		let abs: string = path + "/" + f;
@@ -139,7 +156,12 @@ function list_folder(path: string) {
 			}
 			// Expand folder
 			else {
-				array_index_of(storage.expanded, abs) == -1 ? array_push(storage.expanded, abs) : array_remove(storage.expanded, abs);
+				if (array_index_of(storage.expanded, abs) == -1) {
+					array_push(storage.expanded, abs);
+				}
+				else {
+					array_remove(storage.expanded, abs);
+				}
 			}
 		}
 
@@ -161,15 +183,12 @@ function render() {
 	ui_begin(ui);
 
 	if (ui_window(sidebar_handle, 0, 0, storage.sidebar_w, sys_height(), false)) {
-		let _TEXT_COL: i32 = theme.TEXT_COL;
-		theme.TEXT_COL = theme.BUTTON_COL;
 		if (storage.project != "") {
 			list_folder(storage.project);
 		}
 		else {
 			ui_button("Drop folder here", UI_ALIGN_LEFT, "");
 		}
-		theme.TEXT_COL = _TEXT_COL;
 	}
 
 	ui_fill(sys_width() - minimap_w, 0, minimap_w, UI_ELEMENT_H() + UI_ELEMENT_OFFSET() + 1, theme.SEPARATOR_COL);
@@ -199,8 +218,7 @@ function render() {
 					save_file();
 				}
 
-				// storage.text = ui_text_area(text_handle, UI_ALIGN_LEFT, true, "", false);
-				ui_text_area(text_handle, UI_ALIGN_LEFT, true, "", false);
+				storage.text = ui_text_area(text_handle, UI_ALIGN_LEFT, true, "", false);
 			}
 		}
 
@@ -234,7 +252,7 @@ function render() {
 		build_project();
 	}
 
-	ui_end(false);
+	ui_end();
 
 	if (redraw) {
 		editor_handle.redraws = 2;
@@ -262,7 +280,13 @@ function save_file() {
 	storage.text = string_replace_all(storage.text, "    ", "\t");
 	text_handle.text = storage.text;
 	// Write bytes
-	// let bytes: buffer_t = ends_with(storage.file, ".arm") ? armpack_encode(json_parse(storage.text)) : sys_string_to_buffer(storage.text);
+	// let bytes: buffer_t;
+	// if (ends_with(storage.file, ".arm")) {
+	// 	armpack_encode(json_parse(storage.text));
+	// }
+	// else {
+	// 	sys_string_to_buffer(storage.text);
+	// }
 	// iron_file_save_bytes(storage.file, bytes, bytes.length);
 	storage.modified = false;
 }
@@ -344,3 +368,9 @@ function on_border_hover(handle: ui_handle_t, side: i32) {
 function on_text_hover() {
 	iron_set_mouse_cursor(2); // I-cursor
 }
+
+////
+type config_t = { server: string; };
+let config_raw: config_t;
+function strings_error5(): string { return ""; };
+function console_error(s: string) { };
