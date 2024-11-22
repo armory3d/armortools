@@ -575,7 +575,6 @@ char *ui_lower_case(char *dest, char *src) {
 }
 
 void ui_draw_tooltip_text(bool bind_global_g) {
-	arm_g2_set_color(theme->TEXT_COL);
 	int line_count = ui_line_count(current->tooltip_text);
 	float tooltip_w = 0.0;
 	for (int i = 0; i < line_count; ++i) {
@@ -602,9 +601,17 @@ void ui_draw_tooltip_text(bool bind_global_g) {
 		}
 		off = current->tooltip_rt->height * (w / current->tooltip_rt->width);
 	}
-	arm_g2_fill_rect(current->tooltip_x, current->tooltip_y + off, tooltip_w + 20, font_height * line_count);
+
+	int x = current->tooltip_x - 5;
+	int y = current->tooltip_y + off - 5;
+	int w = tooltip_w + 20 + 10;
+	int h = font_height * line_count + 10;
+	ui_draw_shadow(x, y, w, h);
+	arm_g2_set_color(theme->SEPARATOR_COL);
+	arm_g2_fill_rect(x, y, w, h);
+
 	arm_g2_set_font(current->ops->font->font_, current->font_size);
-	arm_g2_set_color(theme->BUTTON_COL);
+	arm_g2_set_color(theme->TEXT_COL);
 	for (int i = 0; i < line_count; ++i) {
 		arm_g2_draw_string(ui_extract_line(current->tooltip_text, i), current->tooltip_x + 5, current->tooltip_y + off + i * current->font_size);
 	}
