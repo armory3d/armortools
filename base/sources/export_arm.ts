@@ -131,7 +131,11 @@ function export_arm_run_project() {
 		assets: texture_files,
 		packed_assets: packed_assets,
 		swatches: project_raw.swatches,
-		envmap: project_raw.envmap != null ? (same_drive ? path_to_relative(project_filepath, project_raw.envmap) : project_raw.envmap) : null,
+		envmap: project_raw.envmap != null ?
+					(same_drive ?
+						path_to_relative(project_filepath, project_raw.envmap) :
+						project_raw.envmap) :
+					null,
 		envmap_strength: scene_world.strength,
 		camera_world: mat4_to_f32_array(scene_camera.base.transform.local),
 		camera_origin: export_arm_vec3f32(camera_origins[0].v),
