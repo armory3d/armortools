@@ -23,5 +23,3 @@ plugin_notify_on_ui(plugin, function() {
 		}
 	}
 });
-
-
