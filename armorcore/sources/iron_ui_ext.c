@@ -156,7 +156,9 @@ char *ui_file_browser(ui_handle_t *handle, bool folders_only) {
 	int count = ui_line_count(str);
 	for (int i = 0; i < count; ++i) {
 		char *f = ui_extract_line(str, i);
-		if (f[0] == '\0' || f[0] == '.') continue; // Skip hidden
+		if (f[0] == '\0' || f[0] == '.') {
+			continue; // Skip hidden
+		}
 		if (ui_button(f, UI_ALIGN_LEFT, "")) {
 			handle->changed = current->changed = true;
 			if (handle->text[strlen(handle->text) - 1] != sep[0]) {
@@ -244,7 +246,9 @@ uint32_t ui_color(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
 
 int ui_color_wheel(ui_handle_t *handle, bool alpha, float w, float h, bool color_preview, void (*picker)(void *), void *data) {
 	ui_t *current = ui_get_current();
-	if (w < 0) w = current->_w;
+	if (w < 0) {
+		w = current->_w;
+	}
 	float r = ui_color_r(handle->color) / 255.0f;
 	float g = ui_color_g(handle->color) / 255.0f;
 	float b = ui_color_b(handle->color) / 255.0f;
@@ -318,7 +322,9 @@ int ui_color_wheel(ui_handle_t *handle, bool alpha, float w, float h, bool color
 			alpha_handle->value = round(calpha * 100.0) / 100.0;
 		}
 		calpha = ui_slider(alpha_handle, "Alpha", 0.0, 1.0, true, 100, true, UI_ALIGN_LEFT, true);
-		if (alpha_handle->changed) handle->changed = current->changed = true;
+		if (alpha_handle->changed) {
+			handle->changed = current->changed = true;
+		}
 	}
 	// Mouse picking for color wheel
 	float gx = ox + current->_window_x;
@@ -457,7 +463,9 @@ static void scroll_align(ui_t *current, ui_handle_t *handle) {
 static char *right_align_number(char *s, int number, int length) {
 	sprintf(s, "%d", number);
 	while (strlen(s) < length) {
-		for (int i = strlen(s) + 1; i > 0; --i) s[i] = s[i - 1];
+		for (int i = strlen(s) + 1; i > 0; --i) {
+			s[i] = s[i - 1];
+		}
 		s[0] = ' ';
 	}
 	return s;
@@ -528,7 +536,7 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 	handle->text = string_replace_all(handle->text, "\t", "    ");
 	bool selected = current->text_selected_handle == handle; // Text being edited
 
-	char lines[512];
+	char lines[4096];
 	strcpy(lines, handle->text);
 	int line_count = ui_line_count(lines);
 	bool show_label = (line_count == 1 && lines[0] == '\0');
@@ -543,9 +551,9 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 			cursor_pos += strlen(ui_extract_line(lines, i)) + 1; // + '\n'
 		}
 		int word_count = ui_word_count(lines);
-		char line[256];
+		char line[1024];
 		line[0] = '\0';
-		char new_lines[512];
+		char new_lines[4096];
 		new_lines[0] = '\0';
 		for (int i = 0; i < word_count; ++i) {
 			char *w = ui_extract_word(lines, i);
@@ -553,7 +561,9 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 			float wordw = spacew + arm_g2_string_width(current->ops->font->font_, current->font_size, w);
 			float linew = wordw + arm_g2_string_width(current->ops->font->font_, current->font_size, line);
 			if (linew > current->_w - 10 && linew > wordw) {
-				if (new_lines[0] != '\0') strcat(new_lines, "\n");
+				if (new_lines[0] != '\0') {
+					strcat(new_lines, "\n");
+				}
 				strcat(new_lines, line);
 				line[0] = '\0';
 			}
@@ -593,7 +603,7 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 	if (ui_text_area_line_numbers) {
 		float _y = current->_y;
 		int _TEXT_COL = current->ops->theme->TEXT_COL;
-		current->ops->theme->TEXT_COL = current->ops->theme->BUTTON_COL;
+		current->ops->theme->TEXT_COL = current->ops->theme->PRESSED_COL;
 		int max_length = ceil(log(line_count + 0.5) / log(10)); // Express log_10 with natural log
 		char s[64];
 		for (int i = 0; i < line_count; ++i) {

@@ -88,8 +88,8 @@ typedef struct ui_handle {
 } ui_handle_t;
 
 typedef struct ui_text_extract {
-	char colored[128];
-	char uncolored[128];
+	char colored[1024];
+	char uncolored[1024];
 } ui_text_extract_t;
 
 typedef struct ui_coloring {
@@ -214,9 +214,9 @@ typedef struct ui {
 	float restore_y;
 
 	ui_handle_t *text_selected_handle;
-	char text_selected[256];
+	char text_selected[1024];
 	ui_handle_t *submit_text_handle;
-	char text_to_submit[256];
+	char text_to_submit[1024];
 	bool tab_pressed;
 	ui_handle_t *tab_pressed_handle;
 	ui_handle_t *combo_selected_handle;
