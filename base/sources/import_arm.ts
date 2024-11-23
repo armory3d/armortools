@@ -615,7 +615,7 @@ function import_arm_run_swatches_from_project(project: project_format_t, path: s
 
 	if (project.swatches != null) {
 		for (let i: i32 = 0; i < project.swatches.length; ++i) {
-			let s: swatch_color_t = project.swatches[i];
+			let s: swatch_color_t = util_clone_swatch_color(project.swatches[i]);
 			array_push(project_raw.swatches, s);
 		}
 	}

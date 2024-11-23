@@ -54,11 +54,12 @@ function slot_material_create(m: material_data_t = null, c: ui_node_canvas_t = n
 			slot_material_default_canvas = b;
 		}
 		raw.canvas = armpack_decode(slot_material_default_canvas);
+		raw.canvas = util_clone_canvas(raw.canvas); // Clone to create GC references
 		let id: i32 = (raw.id + 1);
 		raw.canvas.name = "Material " + id;
 	}
 	else {
-		raw.canvas = c;
+		raw.canvas = util_clone_canvas(c);
 	}
 
 	///if (arm_android || arm_ios)

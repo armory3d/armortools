@@ -36,6 +36,7 @@ let _project_unwrap_mesh_box_skip_ui: bool;
 let _project_import_asset_hdr_as_envmap: bool;
 let _project_import_swatches_replace_existing: bool;
 let _project_reimport_texture_asset: asset_t;
+let _project_scene_mesh_gc: scene_t;
 
 function project_open() {
 	ui_files_show("arm", false, false, function (path: string) {
@@ -209,8 +210,8 @@ function project_new(reset_layers: bool = true) {
 		}
 		else {
 			let b: buffer_t = data_get_blob("meshes/" + project_mesh_list[context_raw.project_type] + ".arm");
-			let scene: scene_t = armpack_decode(b);
-			raw = scene.mesh_datas[0];
+			_project_scene_mesh_gc = armpack_decode(b);
+			raw = _project_scene_mesh_gc.mesh_datas[0];
 		}
 
 		let md: mesh_data_t = mesh_data_create(raw);

@@ -29,11 +29,13 @@ function slot_brush_create(c: ui_node_canvas_t = null): slot_brush_t {
 			slot_brush_default_canvas = b;
 		}
 		raw.canvas = armpack_decode(slot_brush_default_canvas);
+		raw.canvas = util_clone_canvas(raw.canvas); // Clone to create GC references
+
 		let id: i32 = (raw.id + 1);
 		raw.canvas.name = "Brush " + id;
 	}
 	else {
-		raw.canvas = c;
+		raw.canvas = util_clone_canvas(c);
 	}
 
 	return raw;

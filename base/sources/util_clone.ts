@@ -380,3 +380,17 @@ function util_clone_obj(o: obj_t): obj_t {
     }
     return r;
 }
+
+function util_clone_swatch_color(s: swatch_color_t): swatch_color_t {
+    let r: swatch_color_t = {};
+    r.base = s.base;
+	r.opacity = s.opacity;
+	r.occlusion = s.occlusion;
+	r.roughness = s.roughness;
+	r.metallic = s.metallic;
+	r.normal = s.normal;
+	r.emission = s.emission;
+	r.height = s.height;
+	r.subsurface = s.subsurface;
+    return r;
+}

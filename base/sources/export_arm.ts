@@ -125,44 +125,47 @@ function export_arm_run_project() {
 	let same_drive: bool = project_raw.envmap != null ? char_at(project_filepath, 0) == char_at(project_raw.envmap, 0) : true;
 	///end
 
-	project_raw = {
-		version: manifest_version,
-		material_groups: mgroups,
-		assets: texture_files,
-		packed_assets: packed_assets,
-		swatches: project_raw.swatches,
-		envmap: project_raw.envmap != null ?
-					(same_drive ?
-						path_to_relative(project_filepath, project_raw.envmap) :
-						project_raw.envmap) :
-					null,
-		envmap_strength: scene_world.strength,
-		camera_world: mat4_to_f32_array(scene_camera.base.transform.local),
-		camera_origin: export_arm_vec3f32(camera_origins[0].v),
-		camera_fov: scene_camera.data.fov,
+	project_raw.version = manifest_version;
+	project_raw.material_groups = mgroups;
+	project_raw.assets = texture_files;
+	project_raw.packed_assets = packed_assets;
+	project_raw.swatches = project_raw.swatches;
+	project_raw.envmap = project_raw.envmap != null ?
+		(same_drive ?
+			path_to_relative(project_filepath, project_raw.envmap) :
+			project_raw.envmap) :
+		null;
+	project_raw.envmap_strength = scene_world.strength;
+	project_raw.camera_world = mat4_to_f32_array(scene_camera.base.transform.local);
+	project_raw.camera_origin = export_arm_vec3f32(camera_origins[0].v);
+	project_raw.camera_fov = scene_camera.data.fov;
 
-		///if (is_paint || is_sculpt)
-		mesh_datas: md,
-		material_nodes: mnodes,
-		brush_nodes: bnodes,
-		layer_datas: ld,
-		font_assets: font_files,
-		mesh_assets: mesh_files,
-		atlas_objects: project_atlas_objects,
-		atlas_names: project_atlas_names,
-		///end
+	///if (is_paint || is_sculpt)
+	// project_raw.mesh_datas = md; // TODO: fix GC ref
+	project_raw.mesh_datas.length = 0;
+	for (let i: i32 = 0; i < md.length; ++i) {
+		array_push(project_raw.mesh_datas, md[i]);
+	}
 
-		///if is_lab
-		mesh_data: md,
-		material: c,
-		///end
+	project_raw.material_nodes = mnodes;
+	project_raw.brush_nodes = bnodes;
+	project_raw.layer_datas = ld;
+	project_raw.font_assets = font_files;
+	project_raw.mesh_assets = mesh_files;
+	project_raw.atlas_objects = project_atlas_objects;
+	project_raw.atlas_names = project_atlas_names;
+	///end
 
-		///if (arm_metal || arm_vulkan)
-		is_bgra: true
-		///else
-		is_bgra: false
-		///end
-	};
+	///if is_lab
+	project_raw.mesh_data = md;
+	project_raw.material = c;
+	///end
+
+	///if (arm_metal || arm_vulkan)
+	project_raw.is_bgra = true;
+	///else
+	project_raw.is_bgra = false;
+	///end
 
 	///if (arm_android || arm_ios)
 	let rt: render_target_t = map_get(render_path_render_targets, context_raw.render_mode == render_mode_t.FORWARD ? "buf" : "tex");
