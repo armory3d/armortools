@@ -117,8 +117,7 @@ function data_get_scene_raw(file: string): scene_t {
 	// If no extension specified, set to .arm
 	let ext: string = ends_with(file, ".arm") ? "" : ".arm";
 	let b: buffer_t = data_get_blob(file + ext);
-	let parsed: scene_t = null;
-	parsed = armpack_decode(b);
+	let parsed: scene_t = armpack_decode(b);
 	map_set(data_cached_scene_raws, file, parsed);
 	return parsed;
 }
