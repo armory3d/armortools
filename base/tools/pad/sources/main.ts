@@ -35,7 +35,8 @@ function encode_storage(): string {
 	json_encode_begin();
 	json_encode_string("project", storage.project);
 	json_encode_string("file", storage.file);
-	json_encode_string("text", storage.text);
+	// json_encode_string("text", storage.text);
+	json_encode_string("text", "");
 	json_encode_bool("modified", storage.modified);
 	json_encode_string_array("expanded", storage.expanded);
 	json_encode_i32("window_w", storage.window_w);
@@ -148,7 +149,12 @@ function list_folder(path: string) {
 			if (is_file) {
 				storage.file = abs;
 				let bytes: buffer_t = iron_load_blob(storage.file);
-				storage.text = ends_with(f, ".arm") ? armpack_to_string(bytes) : sys_buffer_to_string(bytes);
+				if (ends_with(f, ".arm")) {
+					storage.text = armpack_to_string(bytes);
+				}
+				else {
+					storage.text = sys_buffer_to_string(bytes);
+				}
 				storage.text = string_replace_all(storage.text, "\r", "");
 				text_handle.text = storage.text;
 				editor_handle.redraws = 1;
@@ -166,7 +172,9 @@ function list_folder(path: string) {
 		}
 
 		if (is_expanded) {
+			ui._x += 16;
 			list_folder(abs);
+			ui._x -= 16;
 		}
 	}
 }
