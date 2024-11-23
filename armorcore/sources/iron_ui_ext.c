@@ -603,7 +603,7 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 	if (ui_text_area_line_numbers) {
 		float _y = current->_y;
 		int _TEXT_COL = current->ops->theme->TEXT_COL;
-		current->ops->theme->TEXT_COL = current->ops->theme->PRESSED_COL;
+		current->ops->theme->TEXT_COL = current->ops->theme->HOVER_COL;
 		int max_length = ceil(log(line_count + 0.5) / log(10)); // Express log_10 with natural log
 		char s[64];
 		for (int i = 0; i < line_count; ++i) {
