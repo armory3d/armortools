@@ -2698,8 +2698,18 @@ buffer_t *iron_encode_png(buffer_t *bytes, i32 w, i32 h, i32 format) {
 #endif
 
 #ifdef WITH_MPEG_WRITE
-buffer_t *iron_write_mpeg() {
-	return NULL;
+static FILE *iron_mpeg_fp;
+
+void iron_mpeg_begin(char *path) {
+	iron_mpeg_fp = fopen(path, "wb");
+}
+
+void iron_mpeg_end() {
+	fclose(iron_mpeg_fp);
+}
+
+void iron_mpeg_write(buffer_t *bytes, i32 w, i32 h) {
+	jo_write_mpeg(iron_mpeg_fp, bytes->buffer, w, h, 60);
 }
 #endif
 
