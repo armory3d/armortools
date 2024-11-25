@@ -16,3 +16,4 @@ quat_t quat_from_euler(float x, float y, float z);
 quat_t quat_lerp(quat_t from, quat_t to, float s);
 float quat_dot(quat_t a, quat_t b);
 quat_t quat_from_to(vec4_t v0, vec4_t v1);
+quat_t quat_inv(quat_t q);

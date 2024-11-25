@@ -173,3 +173,13 @@ quat_t quat_from_to(vec4_t v0, vec4_t v1) {
 		return quat_norm(q);
 	}
 }
+
+quat_t quat_inv(quat_t q) {
+	float l = q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w;
+	l = -1.0 / l;
+	q.x = q.x * l;
+	q.y = q.y * l;
+	q.z = q.z * l;
+	q.w = -q.w * l;
+	return q;
+}

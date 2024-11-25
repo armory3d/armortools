@@ -420,6 +420,7 @@ declare function quat_from_euler(x: f32, y: f32, z: f32): quat_t;
 declare function quat_lerp(from: quat_t, to: quat_t, s: f32): quat_t;
 declare function quat_dot(a: quat_t, b: quat_t): f32;
 declare function quat_from_to(v0: vec4_t, v1: vec4_t): quat_t;
+declare function quat_inv(q: quat_t): quat_t;
 
 declare type mat3_t = {
 	m?: f32_ptr;
