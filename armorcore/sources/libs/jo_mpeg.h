@@ -1,16 +1,17 @@
 /* public domain Simple, Minimalistic, No Allocations MPEG writer - http://jonolick.com
  *
- * "Converted" to C by Wladislav Artsimovich
- * I just added a bunch of * and removed a bunch of & ¯\_(ツ)_/¯
+ * Converted to C by Wladislav Artsimovich https://blog.frost.kiwi/jo-mpeg-in-c
  *
  * Latest revisions:
- * 	1.02 (22-03-2017) Fixed AC encoding bug. 
+ * 	1.03 (15-08-2024) Reverted color space change from 1.02, as it resulted in
+ *                    overscaled color vectors and thus oversaturated colors
+ * 	1.02 (22-03-2017) Fixed AC encoding bug.
  *                    Fixed color space bug (thx r- lyeh!)
  * 	1.01 (18-10-2016) warning fixes
  * 	1.00 (25-09-2016) initial release
  *
  * Basic usage:
- *	char *frame = new char[width*height*4]; // 4 component. RGBX format, where X is unused 
+ *	char *frame = new char[width*height*4]; // 4 component. RGBX format, where X is unused
  *	FILE *fp = fopen("foo.mpg", "wb");
  *	jo_write_mpeg(fp, frame, width, height, 60);  // frame 0
  *	jo_write_mpeg(fp, frame, width, height, 60);  // frame 1
@@ -21,11 +22,11 @@
  * Notes:
  * 	Only supports 24, 25, 30, 50, or 60 fps
  *
- * 	I don't know if decoders support changing of fps, or dimensions for each frame. 
+ * 	I don't know if decoders support changing of fps, or dimensions for each frame.
  * 	Movie players *should* support it as the spec allows it, but ...
  *
  * 	MPEG-1/2 currently has no active patents as far as I am aware.
- * 	
+ *
  *	http://dvd.sourceforge.net/dvdinfo/mpeghdrs.html
  *	http://www.cs.cornell.edu/dali/api/mpegvideo-c.html
  * */
@@ -131,7 +132,7 @@ static void jo_DCT(float *d0, float *d1, float *d2, float *d3, float *d4, float 
 	*d3 = z13 - z2;
 	*d1 = z11 + z4;
 	*d7 = z11 - z4;
-} 
+}
 
 static int jo_processDU(jo_bits_t *bits, float A[64], const unsigned char htdc[9][2], int DC) {
 	for(int dataOff=0; dataOff<64; dataOff+=8) {
@@ -156,7 +157,7 @@ static int jo_processDU(jo_bits_t *bits, float A[64], const unsigned char htdc[9
 	}
 	jo_writeBits(bits, htdc[size][0], htdc[size][1]);
 	if(DC < 0) aDC ^= (1 << size) - 1;
-	jo_writeBits(bits, aDC, size); 
+	jo_writeBits(bits, aDC, size);
 
 	int endpos = 63;
 	for(; (endpos>0)&&(Q[endpos]==0); --endpos) { /* do nothing */ }
@@ -201,7 +202,7 @@ void jo_write_mpeg(FILE *fp, const unsigned char *rgbx, int width, int height, i
 	// 12 bits for width, height
 	putc((width>>4)&0xFF, fp);
 	putc(((width&0xF)<<4) | ((height>>8) & 0xF), fp);
-	putc(height & 0xFF, fp); 
+	putc(height & 0xFF, fp);
 	// aspect ratio, framerate
 	if(fps <= 24) putc(0x12, fp);
 	else if(fps <= 25) putc(0x13, fp);
@@ -227,9 +228,9 @@ void jo_write_mpeg(FILE *fp, const unsigned char *rgbx, int width, int height, i
 				y = y >= height ? height-1 : y;
 				const unsigned char *c = rgbx + y*width*4+x*4;
 				float r = c[0], g = c[1], b = c[2];
-                Y[i] = (0.299f*r + 0.587f*g + 0.114f*b) * (219.f/255) + 16;
-                CBx[i] = (-0.299f*r - 0.587f*g + 0.886f*b) * (224.f/255) + 128;
-                CRx[i] = (0.701f*r - 0.587f*g - 0.114f*b) * (224.f/255) + 128;
+				Y[i] = (0.59f*r + 0.30f*g + 0.11f*b) * (219.f/255) + 16;
+				CBx[i] = (-0.17f*r - 0.33f*g + 0.50f*b) * (224.f/255) + 128;
+				CRx[i] = (0.50f*r - 0.42f*g - 0.08f*b) * (224.f/255) + 128;
 			}
 
 			// Downsample Cb,Cr (420 format)
@@ -258,4 +259,3 @@ void jo_write_mpeg(FILE *fp, const unsigned char *rgbx, int width, int height, i
 	fwrite("\x00\x00\x01\xb7", 4, 1, fp); // End of Sequence
 }
 #endif
-
