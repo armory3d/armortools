@@ -7,7 +7,10 @@
 #define _TRANSPARENCY
 #endif
 #define _FRESNEL
-// #define _RENDER
+
+#ifdef _FORGE
+#define _RENDER
+#endif
 
 #include "std/rand.hlsl"
 #include "std/attrib.hlsl"
@@ -23,7 +26,7 @@ struct Vertex {
 struct RayGenConstantBuffer {
 	float4 eye; // xyz, frame
 	float4x4 inv_vp;
-	float4 params; // envstr, envangle, uvscale
+	float4 params; // envstr, envangle, uvscale, empty
 };
 
 struct RayPayload {
@@ -186,6 +189,10 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 		float3(s16_to_f32(vertices[indices_sample[2]].nor), s16_to_f32(vertices[indices_sample[2]].poszw).y)
 	};
 	float3 n = normalize(hit_attribute(vertex_normals, attr));
+
+	#ifdef _FORGE
+	n = mul((float3x3)(ObjectToWorld3x4()), n);
+	#endif
 
 	mytexture1.GetDimensions(size.x, size.y);
 	utex_coord = uint3((tex_coord - uint2(tex_coord)) * size, 0);

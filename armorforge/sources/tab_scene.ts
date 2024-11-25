@@ -1,27 +1,27 @@
 
-let tab_objects_material_id: i32 = 0;
-let tab_objects_line_counter: i32 = 0;
-let tab_objects_current_object: object_t;
+let tab_scene_material_id: i32 = 0;
+let tab_scene_line_counter: i32 = 0;
+let tab_scene_current_object: object_t;
 
 function f32_to_string_prec(f: f32): string {
 	f = math_round(f);
 	return f + "";
 }
 
-function tab_objects_import_mesh_done() {
+function tab_scene_import_mesh_done() {
 	let mo: mesh_object_t = array_pop(project_paint_objects);
 	object_set_parent(mo.base, null);
 }
 
-function tab_objects_draw_menu(ui: ui_t) {
+function tab_scene_draw_menu(ui: ui_t) {
 	if (ui_menu_button(ui, "Assign Material")) {
-		tab_objects_material_id++;
+		tab_scene_material_id++;
 
 		for (let i: i32 = 0; i < _scene_raw.shader_datas.length; ++i) {
 			let sh: shader_data_t = _scene_raw.shader_datas[i];
 			if (sh.name == "Material_data") {
 				let s: shader_data_t = util_clone_shader_data(sh);
-				s.name = "TempMaterial_data" + tab_objects_material_id;
+				s.name = "TempMaterial_data" + tab_scene_material_id;
 				array_push(_scene_raw.shader_datas, s);
 				break;
 			}
@@ -31,28 +31,28 @@ function tab_objects_draw_menu(ui: ui_t) {
 			let mat: material_data_t = _scene_raw.material_datas[i];
 			if (mat.name == "Material") {
 				let m: material_data_t = util_clone_material_data(mat);
-				m.name = "TempMaterial" + tab_objects_material_id;
-				m.shader = "TempMaterial_data" + tab_objects_material_id;
+				m.name = "TempMaterial" + tab_scene_material_id;
+				m.shader = "TempMaterial_data" + tab_scene_material_id;
 				array_push(_scene_raw.material_datas, m);
 				break;
 			}
 		}
 
-		let md: material_data_t = data_get_material("Scene", "TempMaterial" + tab_objects_material_id);
-		let mo: mesh_object_t = tab_objects_current_object.ext;
+		let md: material_data_t = data_get_material("Scene", "TempMaterial" + tab_scene_material_id);
+		let mo: mesh_object_t = tab_scene_current_object.ext;
 		mo.materials = [md];
 		make_material_parse_mesh_preview_material(md);
 	}
 }
 
-function tab_objects_draw_list(ui: ui_t, list_handle: ui_handle_t, current_object: object_t) {
+function tab_scene_draw_list(ui: ui_t, list_handle: ui_handle_t, current_object: object_t) {
 	if (char_at(current_object.name, 0) == ".") {
 		return; // Hidden
 	}
 	let b: bool = false;
 
 	// Highlight every other line
-	if (tab_objects_line_counter % 2 == 0) {
+	if (tab_scene_line_counter % 2 == 0) {
 		g2_set_color(ui.ops.theme.SEPARATOR_COL);
 		g2_fill_rect(0, ui._y, ui._window_w, ui_ELEMENT_H(ui));
 		g2_set_color(0xffffffff);
@@ -68,7 +68,7 @@ function tab_objects_draw_list(ui: ui_t, list_handle: ui_handle_t, current_objec
 	if (current_object.children.length > 0) {
 		let row: f32[] = [1 / 13, 12 / 13];
 		ui_row(row);
-		let h: ui_handle_t = ui_nest(list_handle, tab_objects_line_counter);
+		let h: ui_handle_t = ui_nest(list_handle, tab_scene_line_counter);
 		if (h.init) {
 			h.selected = true;
 		}
@@ -87,7 +87,7 @@ function tab_objects_draw_list(ui: ui_t, list_handle: ui_handle_t, current_objec
 		ui._x -= 18;
 	}
 
-	tab_objects_line_counter++;
+	tab_scene_line_counter++;
 	// Undo applied offset for row drawing caused by end_element()
 	ui._y -= ui_ELEMENT_OFFSET(ui);
 
@@ -96,8 +96,8 @@ function tab_objects_draw_list(ui: ui_t, list_handle: ui_handle_t, current_objec
 	}
 
 	if (ui.is_hovered && ui.input_released_r) {
-		tab_objects_current_object = current_object;
-		ui_menu_draw(tab_objects_draw_menu);
+		tab_scene_current_object = current_object;
+		ui_menu_draw(tab_scene_draw_menu);
 	}
 
 	if (b) {
@@ -105,7 +105,7 @@ function tab_objects_draw_list(ui: ui_t, list_handle: ui_handle_t, current_objec
 		for (let i: i32 = 0; i < current_object.children.length; ++i) {
 			let child: object_t = current_object.children[i];
 			// ui.indent();
-			tab_objects_draw_list(ui, list_handle, child);
+			tab_scene_draw_list(ui, list_handle, child);
 			// ui.unindent();
 		}
 
@@ -116,14 +116,14 @@ function tab_objects_draw_list(ui: ui_t, list_handle: ui_handle_t, current_objec
 	}
 }
 
-function tab_objects_draw(htab: ui_handle_t) {
+function tab_scene_draw(htab: ui_handle_t) {
 	let ui: ui_t = ui_base_ui;
-	if (ui_tab(htab, tr("Objects"))) {
+	if (ui_tab(htab, tr("Scene"))) {
 		ui_begin_sticky();
 		let row: f32[] = [1 / 4];
 		ui_row(row);
 		if (ui_button("Import")) {
-			project_import_mesh(false, tab_objects_import_mesh_done);
+			project_import_mesh(false, tab_scene_import_mesh_done);
 		}
 		ui_end_sticky();
 
@@ -135,11 +135,11 @@ function tab_objects_draw(htab: ui_handle_t) {
 		if (ui_panel(outliner_handle, "Outliner", true, false)) {
 			ui._y -= ui_ELEMENT_OFFSET(ui);
 
-			tab_objects_line_counter = 0;
+			tab_scene_line_counter = 0;
 
 			for (let i: i32 = 0; i < _scene_root.children.length; ++i) {
 				let c: object_t = _scene_root.children[i];
-				tab_objects_draw_list(ui, ui_handle(__ID__), c);
+				tab_scene_draw_list(ui, ui_handle(__ID__), c);
 			}
 		}
 
@@ -300,5 +300,19 @@ function tab_objects_draw(htab: ui_handle_t) {
 				}
 			}
 		}
+
+		if (ui_button("Play")) {
+			app_notify_on_update(_tab_scene_update);
+		}
+		if (ui_button("Stop")) {
+			app_remove_update(_tab_scene_update);
+		}
 	}
+}
+
+function _tab_scene_update() {
+	let o: mesh_object_t = project_paint_objects[0];
+	transform_rotate(o.base.transform, vec4_z_axis(), 0.02);
+	transform_build_matrix(o.base.transform);
+	util_mesh_merge(project_paint_objects);
 }

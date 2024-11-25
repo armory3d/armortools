@@ -57,7 +57,7 @@ function ui_base_init_hwnd_tabs(): tab_draw_array_t[] {
 		_draw_callback_create(tab_history_draw),
 		_draw_callback_create(tab_plugins_draw)
 		///if is_forge
-		, _draw_callback_create(tab_objects_draw)
+		, _draw_callback_create(tab_scene_draw)
 		///end
 	];
 	let a1: tab_draw_array_t = [
