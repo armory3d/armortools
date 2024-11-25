@@ -8,7 +8,7 @@ let render_path_raytrace_uv_scale: f32 = 1.0;
 let render_path_raytrace_first: bool = true;
 let render_path_raytrace_f32a: f32_array_t = f32_array_create(24);
 let render_path_raytrace_help_mat: mat4_t = mat4_identity();
-let render_path_raytrace_vb_scale: f32 = 1.0;
+let render_path_raytrace_transform: mat4_t;
 let render_path_raytrace_vb: vertex_buffer_t;
 let render_path_raytrace_ib: index_buffer_t;
 
@@ -33,6 +33,9 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 		render_path_raytrace_ready = true;
 		render_path_raytrace_is_bake = false;
 		let mode: string = context_raw.pathtrace_mode == path_trace_mode_t.CORE ? "core" : "full";
+		///if is_forge
+		mode = "forge";
+		///end
 		render_path_raytrace_raytrace_init("raytrace_brute_" + mode + render_path_raytrace_ext);
 		render_path_raytrace_last_envmap = null;
 	}
@@ -87,7 +90,10 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 	render_path_raytrace_frame = render_path_raytrace_frame + 1; // _RENDER
 	///else
 	render_path_raytrace_frame = (render_path_raytrace_frame % 4) + 1; // _PAINT
-	// frame = frame + 1; // _RENDER
+	// render_path_raytrace_frame = render_path_raytrace_frame + 1; // _RENDER
+	///end
+	///if is_forge
+	render_path_raytrace_frame = 0;
 	///end
 	render_path_raytrace_f32a[4] = render_path_raytrace_help_mat.m00;
 	render_path_raytrace_f32a[5] = render_path_raytrace_help_mat.m01;
@@ -129,7 +135,9 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 	context_raw.pdirty--;
 	context_raw.rdirty--;
 
-	// raw.ddirty = 1; // _RENDER
+	///if is_forge
+	context_raw.ddirty = 1; // _RENDER
+	///end
 }
 
 function render_path_raytrace_raytrace_init(shader_name: string, build: bool = true) {
@@ -144,26 +152,24 @@ function render_path_raytrace_raytrace_init(shader_name: string, build: bool = t
 	if (build) {
 		render_path_raytrace_build_data();
 	}
-	iron_raytrace_init(shader, render_path_raytrace_vb.buffer_, render_path_raytrace_ib.buffer_, render_path_raytrace_vb_scale);
+	iron_raytrace_init(shader, render_path_raytrace_vb.buffer_, render_path_raytrace_ib.buffer_, render_path_raytrace_transform);
 }
 
 function render_path_raytrace_build_data() {
 	if (context_raw.merged_object == null) {
 		util_mesh_merge();
 	}
+
 	///if is_paint
 	let mo: mesh_object_t = !context_layer_filter_used() ? context_raw.merged_object : context_raw.paint_object;
 	///else
 	let mo: mesh_object_t = scene_meshes[0];
 	///end
-	let md: mesh_data_t = mo.data;
-	let mo_scale: f32 = mo.base.transform.scale.x; // Uniform scale only
-	render_path_raytrace_vb_scale = md.scale_pos * mo_scale;
-	if (mo.base.parent != null) {
-		render_path_raytrace_vb_scale *= mo.base.parent.transform.scale.x;
-	}
-	render_path_raytrace_vb = md._.vertex_buffer;
-	render_path_raytrace_ib = md._.index_buffers[0];
+
+	// render_path_raytrace_transform = mo.base.transform.world_unpack;
+	render_path_raytrace_transform = project_paint_objects[0].base.transform.world_unpack;// mo.base.transform.world_unpack;
+	render_path_raytrace_vb = mo.data._.vertex_buffer;
+	render_path_raytrace_ib = mo.data._.index_buffers[0];
 }
 
 function render_path_raytrace_draw(useLiveLayer: bool) {

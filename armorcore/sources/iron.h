@@ -2852,7 +2852,7 @@ bool iron_raytrace_supported() {
 	#endif
 }
 
-void iron_raytrace_init(buffer_t *shader, kinc_g4_vertex_buffer_t *vb, kinc_g4_index_buffer_t *ib, f32 scale) {
+void iron_raytrace_init(buffer_t *shader, kinc_g4_vertex_buffer_t *vb, kinc_g4_index_buffer_t *ib, kinc_matrix4x4_t transform) {
 	if (accel_created) {
 		kinc_g5_constant_buffer_destroy(&constant_buffer);
 		kinc_raytrace_acceleration_structure_destroy(&accel);
@@ -2864,7 +2864,9 @@ void iron_raytrace_init(buffer_t *shader, kinc_g4_vertex_buffer_t *vb, kinc_g4_i
 
 	kinc_g5_constant_buffer_init(&constant_buffer, constant_buffer_size * 4);
 	kinc_raytrace_pipeline_init(&pipeline, &commandList, shader->buffer, (int)shader->length, &constant_buffer);
-	kinc_raytrace_acceleration_structure_init(&accel, &commandList, vertex_buffer, index_buffer, scale);
+	kinc_raytrace_acceleration_structure_init(&accel);
+	kinc_raytrace_acceleration_structure_add(&accel, vertex_buffer, index_buffer, transform);
+	kinc_raytrace_acceleration_structure_build(&accel, &commandList);
 	accel_created = true;
 }
 

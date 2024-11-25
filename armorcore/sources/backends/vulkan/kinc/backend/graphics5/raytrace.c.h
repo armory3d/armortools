@@ -35,8 +35,9 @@ static kinc_g5_texture_t *texenv;
 static kinc_g5_texture_t *texsobol;
 static kinc_g5_texture_t *texscramble;
 static kinc_g5_texture_t *texrank;
-static kinc_g5_vertex_buffer_t *vb;
-static kinc_g5_index_buffer_t *ib;
+static kinc_g5_vertex_buffer_t *vb[8] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+static kinc_g5_index_buffer_t *ib[8] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+static int vb_count = 0;
 
 static PFN_vkCreateRayTracingPipelinesKHR _vkCreateRayTracingPipelinesKHR = NULL;
 static PFN_vkGetRayTracingShaderGroupHandlesKHR _vkGetRayTracingShaderGroupHandlesKHR = NULL;
@@ -378,22 +379,34 @@ uint64_t get_buffer_device_address(VkBuffer buffer) {
 	return _vkGetBufferDeviceAddressKHR(vk_ctx.device, &buffer_device_address_info);
 }
 
-void kinc_raytrace_acceleration_structure_init(kinc_raytrace_acceleration_structure_t *accel, kinc_g5_command_list_t *command_list, kinc_g5_vertex_buffer_t *_vb,
-                                               kinc_g5_index_buffer_t *_ib, float scale) {
+void kinc_raytrace_acceleration_structure_init(kinc_raytrace_acceleration_structure_t *accel) {
 	_vkGetBufferDeviceAddressKHR = (void *)vkGetDeviceProcAddr(vk_ctx.device, "vkGetBufferDeviceAddressKHR");
 	_vkCreateAccelerationStructureKHR = (void *)vkGetDeviceProcAddr(vk_ctx.device, "vkCreateAccelerationStructureKHR");
 	_vkGetAccelerationStructureDeviceAddressKHR = (void *)vkGetDeviceProcAddr(vk_ctx.device, "vkGetAccelerationStructureDeviceAddressKHR");
 	_vkGetAccelerationStructureBuildSizesKHR = (void *)vkGetDeviceProcAddr(vk_ctx.device, "vkGetAccelerationStructureBuildSizesKHR");
 
-	vb = _vb;
-	ib = _ib;
+	vb_count = 0;
+}
+
+static kinc_matrix4x4_t transform;
+
+void kinc_raytrace_acceleration_structure_add(kinc_raytrace_acceleration_structure_t *accel, kinc_g5_vertex_buffer_t *_vb, kinc_g5_index_buffer_t *_ib,
+	kinc_matrix4x4_t _transform) {
+
+	transform = _transform;
+	vb[vb_count] = _vb;
+	ib[vb_count] = _ib;
+	vb_count++;
+}
+
+void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_structure_t *accel, kinc_g5_command_list_t *command_list) {
 
 	{
 		VkDeviceOrHostAddressConstKHR vertex_data_device_address = {0};
 		VkDeviceOrHostAddressConstKHR index_data_device_address = {0};
 
-		vertex_data_device_address.deviceAddress = get_buffer_device_address(vb->impl.vertices.buf);
-		index_data_device_address.deviceAddress = get_buffer_device_address(ib->impl.buf);
+		vertex_data_device_address.deviceAddress = get_buffer_device_address(vb[0]->impl.vertices.buf);
+		index_data_device_address.deviceAddress = get_buffer_device_address(ib[0]->impl.buf);
 
 		VkAccelerationStructureGeometryKHR acceleration_geometry = {0};
 		acceleration_geometry.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
@@ -402,8 +415,8 @@ void kinc_raytrace_acceleration_structure_init(kinc_raytrace_acceleration_struct
 		acceleration_geometry.geometry.triangles.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR;
 		acceleration_geometry.geometry.triangles.vertexFormat = VK_FORMAT_R16G16B16A16_SNORM;
 		acceleration_geometry.geometry.triangles.vertexData.deviceAddress = vertex_data_device_address.deviceAddress;
-		acceleration_geometry.geometry.triangles.vertexStride = vb->impl.myStride;
-		acceleration_geometry.geometry.triangles.maxVertex = vb->impl.myCount;
+		acceleration_geometry.geometry.triangles.vertexStride = vb[0]->impl.myStride;
+		acceleration_geometry.geometry.triangles.maxVertex = vb[0]->impl.myCount;
 		acceleration_geometry.geometry.triangles.indexType = VK_INDEX_TYPE_UINT32;
 		acceleration_geometry.geometry.triangles.indexData.deviceAddress = index_data_device_address.deviceAddress;
 
@@ -416,7 +429,7 @@ void kinc_raytrace_acceleration_structure_init(kinc_raytrace_acceleration_struct
 
 		VkAccelerationStructureBuildSizesInfoKHR acceleration_build_sizes_info = {0};
 		acceleration_build_sizes_info.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
-		const uint32_t primitive_count = ib->impl.count / 3;
+		const uint32_t primitive_count = ib[0]->impl.count / 3;
 		_vkGetAccelerationStructureBuildSizesKHR(vk_ctx.device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &acceleration_structure_build_geometry_info,
 		                                         &primitive_count, &acceleration_build_sizes_info);
 
@@ -490,7 +503,7 @@ void kinc_raytrace_acceleration_structure_init(kinc_raytrace_acceleration_struct
 		acceleration_build_geometry_info.scratchData.deviceAddress = scratch_buffer_device_address;
 
 		VkAccelerationStructureBuildRangeInfoKHR acceleration_build_range_info = {0};
-		acceleration_build_range_info.primitiveCount = ib->impl.count / 3;
+		acceleration_build_range_info.primitiveCount = ib[0]->impl.count / 3;
 		acceleration_build_range_info.primitiveOffset = 0x0;
 		acceleration_build_range_info.firstVertex = 0;
 		acceleration_build_range_info.transformOffset = 0x0;
@@ -546,7 +559,20 @@ void kinc_raytrace_acceleration_structure_init(kinc_raytrace_acceleration_struct
 	}
 
 	{
-		VkTransformMatrixKHR transform_matrix = {scale, 0.0f, 0.0f, 0.0f, 0.0f, scale, 0.0f, 0.0f, 0.0f, 0.0f, scale, 0.0f};
+		VkTransformMatrixKHR transform_matrix = {
+			transform.m[0],
+			transform.m[4],
+			transform.m[8],
+			transform.m[12],
+			transform.m[1],
+			transform.m[5],
+			transform.m[9],
+			transform.m[13],
+			transform.m[2],
+			transform.m[6],
+			transform.m[10],
+			transform.m[14]
+		};
 
 		VkAccelerationStructureInstanceKHR instance = {0};
 		instance.transform = transform_matrix;
@@ -862,7 +888,7 @@ void kinc_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
 	uniform_buffer_write.pBufferInfo = &buffer_descriptor;
 
 	VkDescriptorBufferInfo ib_descriptor = {0};
-	ib_descriptor.buffer = ib->impl.buf;
+	ib_descriptor.buffer = ib[0]->impl.buf;
 	ib_descriptor.range = VK_WHOLE_SIZE;
 	ib_descriptor.offset = 0;
 
@@ -876,7 +902,7 @@ void kinc_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
 	ib_write.pBufferInfo = &ib_descriptor;
 
 	VkDescriptorBufferInfo vb_descriptor = {0};
-	vb_descriptor.buffer = vb->impl.vertices.buf;
+	vb_descriptor.buffer = vb[0]->impl.vertices.buf;
 	vb_descriptor.range = VK_WHOLE_SIZE;
 	vb_descriptor.offset = 0;
 
