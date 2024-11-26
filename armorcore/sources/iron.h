@@ -394,7 +394,7 @@ unsigned char *iron_deflate_raw(unsigned char *data, int data_len, int *out_len,
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 #endif
-#ifdef WITH_MPEG_WRITE
+#ifdef WITH_VIDEO_WRITE
 #include <jo_mpeg.h>
 #endif
 #ifdef WITH_COMPRESS
@@ -2697,7 +2697,7 @@ buffer_t *iron_encode_png(buffer_t *bytes, i32 w, i32 h, i32 format) {
 }
 #endif
 
-#ifdef WITH_MPEG_WRITE
+#ifdef WITH_VIDEO_WRITE
 static FILE *iron_mpeg_fp;
 
 void iron_mpeg_begin(char *path) {

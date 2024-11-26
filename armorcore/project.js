@@ -382,8 +382,8 @@ if (flags.with_image_write) {
 	project.add_define("WITH_IMAGE_WRITE");
 }
 
-if (flags.with_mpeg_write) {
-	project.add_define("WITH_MPEG_WRITE");
+if (flags.with_video_write) {
+	project.add_define("WITH_VIDEO_WRITE");
 }
 
 project.flatten();

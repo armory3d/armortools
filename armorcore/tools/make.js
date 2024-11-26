@@ -2279,7 +2279,7 @@ function load_project(directory, is_root_project) {
 			with_nfd: false,
 			with_compress: false,
 			with_image_write: false,
-			with_mpeg_write: false,
+			with_video_write: false,
 			with_audio: false,
 			with_iron: false,
 			with_eval: false,
