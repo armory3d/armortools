@@ -92,9 +92,6 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 	render_path_raytrace_frame = (render_path_raytrace_frame % 4) + 1; // _PAINT
 	// render_path_raytrace_frame = render_path_raytrace_frame + 1; // _RENDER
 	///end
-	///if is_forge
-	render_path_raytrace_frame = 0;
-	///end
 	render_path_raytrace_f32a[4] = render_path_raytrace_help_mat.m00;
 	render_path_raytrace_f32a[5] = render_path_raytrace_help_mat.m01;
 	render_path_raytrace_f32a[6] = render_path_raytrace_help_mat.m02;
@@ -135,8 +132,10 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 	context_raw.pdirty--;
 	context_raw.rdirty--;
 
+	// context_raw.ddirty = 1; // _RENDER
+
 	///if is_forge
-	context_raw.ddirty = 1; // _RENDER
+	context_raw.ddirty = 1;
 	///end
 }
 

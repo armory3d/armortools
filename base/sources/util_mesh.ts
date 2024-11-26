@@ -39,13 +39,11 @@ function util_mesh_merge(paint_objects: mesh_object_t[] = null) {
 		}
 
 		// Translate
-		///if is_forge
-		for (let j: i32 = 0; j < math_floor(va0.length / 4); ++j) {
-			va0[j * 4     + voff * 4] += math_floor(transform_world_x(paint_objects[i].base.transform) * 32767);
-			va0[j * 4 + 1 + voff * 4] += math_floor(transform_world_y(paint_objects[i].base.transform) * 32767);
-			va0[j * 4 + 2 + voff * 4] += math_floor(transform_world_z(paint_objects[i].base.transform) * 32767);
-		}
-		///end
+		// for (let j: i32 = 0; j < math_floor(va0.length / 4); ++j) {
+		// 	va0[j * 4     + voff * 4] += math_floor(transform_world_x(paint_objects[i].base.transform) * 32767);
+		// 	va0[j * 4 + 1 + voff * 4] += math_floor(transform_world_y(paint_objects[i].base.transform) * 32767);
+		// 	va0[j * 4 + 2 + voff * 4] += math_floor(transform_world_z(paint_objects[i].base.transform) * 32767);
+		// }
 
 		// Re-scale
 		for (let j: i32 = voff; j < math_floor(va0.length / 4); ++j) {

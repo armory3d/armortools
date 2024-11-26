@@ -7,10 +7,7 @@
 #define _TRANSPARENCY
 #endif
 #define _FRESNEL
-
-#ifdef _FORGE
-#define _RENDER
-#endif
+// #define _RENDER
 
 #include "std/rand.hlsl"
 #include "std/attrib.hlsl"
@@ -144,15 +141,19 @@ void raygeneration() {
 	accum = accum / SAMPLES;
 
 	#ifdef _RENDER
+
 	float a = 1.0 / (constant_buffer.eye.w + 1);
 	float b = 1.0 - a;
 	color = color * b + accum * a;
 	render_target[DispatchRaysIndex().xy] = float4(color, 0.0f);
+
 	#else
+
 	if (constant_buffer.eye.w == 0) {
 		color = accum;
 	}
 	render_target[DispatchRaysIndex().xy] = float4(lerp(color, accum, 1.0 / 4.0), 0.0f);
+
 	#endif
 }
 
