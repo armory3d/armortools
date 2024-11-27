@@ -3,7 +3,7 @@
 
 ///include <phys_jolt.h>
 
-declare function jolt_body_create(shape: i32, mass: f32, dimx: f32, x: f32, y: f32, z: f32, triangles: f32[]): any;
+declare function jolt_body_create(shape: i32, mass: f32, dimx: f32, dimy: f32, dimz: f32, x: f32, y: f32, z: f32, triangles: f32[]): any;
 declare function jolt_body_apply_impulse(body: any, x: f32, y: f32, z: f32): void;
 declare function jolt_body_get_pos(body: any, pos: vec4_t): void;
 declare function jolt_body_get_rot(body: any, rot: quat_t): void;
@@ -13,12 +13,15 @@ type physics_body_t = {
 	shape?: physics_shape_t;
 	mass?: f32;
 	dimx?: f32;
+	dimy?: f32;
+	dimz?: f32;
 	obj?: object_t;
 };
 
 enum physics_shape_t {
-	SPHERE = 0,
-	MESH = 1,
+	BOX = 0,
+	SPHERE = 1,
+	MESH = 2,
 }
 
 let physics_body_object_map: map_t<i32, physics_body_t> = map_create();
@@ -69,7 +72,7 @@ function physics_body_init(body: physics_body_t, obj: object_t) {
 	}
 
 	let loc: vec4_t = obj.transform.loc;
-	body._body = jolt_body_create(body.shape, body.mass, body.dimx, loc.x, loc.y, loc.z, triangles);
+	body._body = jolt_body_create(body.shape, body.mass, body.dimx, body.dimy, body.dimz, loc.x, loc.y, loc.z, triangles);
 }
 
 function physics_body_apply_impulse(body: physics_body_t, dir: vec4_t) {

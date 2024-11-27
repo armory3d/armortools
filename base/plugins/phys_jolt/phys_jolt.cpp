@@ -7,6 +7,7 @@
 #include <Jolt/Core/JobSystemThreadPool.h>
 #include <Jolt/Physics/PhysicsSettings.h>
 #include <Jolt/Physics/PhysicsSystem.h>
+#include <Jolt/Physics/Collision/Shape/BoxShape.h>
 #include <Jolt/Physics/Collision/Shape/SphereShape.h>
 #include <Jolt/Physics/Collision/Shape/MeshShape.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
@@ -156,27 +157,22 @@ void _jolt_world_destroy() {
 	Factory::sInstance = nullptr;
 }
 
-void *_jolt_body_create(int shape, float mass, float dimx, float x, float y, float z, void *f32a_triangles) {
+void *_jolt_body_create(int shape, float mass, float dimx, float dimy, float dimz, float x, float y, float z, void *f32a_triangles) {
 	BodyInterface &body_interface = physics_system->GetBodyInterface();
 	Body *body;
+	ShapeSettings::ShapeResult result;
 
 	if (shape == 0) {
+		// Box
+		BoxShapeSettings shape_settings(RVec3(dimx, dimy, dimz));
+		shape_settings.SetEmbedded();
+		result = shape_settings.Create();
+	}
+	else if (shape == 1) {
 		// Sphere
 		SphereShapeSettings shape_settings(dimx);
 		shape_settings.SetEmbedded();
-		ShapeSettings::ShapeResult result = shape_settings.Create();
-		ShapeRefC shape = result.Get();
-		BodyCreationSettings settings(shape, RVec3(x, y, z), Quat::sIdentity(), EMotionType::Dynamic, Layers::MOVING);
-
-		settings.mMotionQuality = EMotionQuality::LinearCast; // CCD
-
-		MassProperties mass_prop;
-		mass_prop.ScaleToMass(mass);
-		settings.mMassPropertiesOverride = mass_prop;
-		settings.mOverrideMassProperties = EOverrideMassProperties::CalculateInertia;
-
-		body = body_interface.CreateBody(settings);
-		body_interface.AddBody(body->GetID(), EActivation::Activate);
+		result = shape_settings.Create();
 	}
 	else {
 		// Mesh
@@ -191,13 +187,25 @@ void *_jolt_body_create(int shape, float mass, float dimx, float x, float y, flo
 		}
 		MeshShapeSettings shape_settings(triangles);
 		shape_settings.SetEmbedded();
-		ShapeSettings::ShapeResult result = shape_settings.Create();
-		ShapeRefC shape = result.Get();
-		BodyCreationSettings settings(shape, RVec3(x, y, z), Quat::sIdentity(), EMotionType::Static, Layers::NON_MOVING);
-
-		body = body_interface.CreateBody(settings);
-		body_interface.AddBody(body->GetID(), EActivation::Activate);
+		result = shape_settings.Create();
 	}
+
+	ShapeRefC shape_c = result.Get();
+	BodyCreationSettings settings(shape_c, RVec3(x, y, z), Quat::sIdentity(), mass == 0 ? EMotionType::Static : EMotionType::Dynamic,
+		mass == 0 ? Layers::NON_MOVING : Layers::MOVING);
+
+	// if (ccd) {
+	if (shape != 2) { // != Mesh
+		settings.mMotionQuality = EMotionQuality::LinearCast;
+	}
+
+	MassProperties mass_prop;
+	mass_prop.ScaleToMass(mass);
+	settings.mMassPropertiesOverride = mass_prop;
+	settings.mOverrideMassProperties = EOverrideMassProperties::CalculateInertia;
+
+	body = body_interface.CreateBody(settings);
+	body_interface.AddBody(body->GetID(), EActivation::Activate);
 
 	return body;
 }
@@ -246,8 +254,8 @@ extern "C" {
         _jolt_world_destroy();
     }
 
-	void *jolt_body_create(int shape, float mass, float dimx, float x, float y, float z, void *f32a_triangles) {
-		return _jolt_body_create(shape, mass, dimx, x, y, z, f32a_triangles);
+	void *jolt_body_create(int shape, float mass, float dimx, float dimy, float dimz, float x, float y, float z, void *f32a_triangles) {
+		return _jolt_body_create(shape, mass, dimx, dimy, dimz, x, y, z, f32a_triangles);
 	}
 
 	void jolt_body_apply_impulse(void *body, float x, float y, float z) {
