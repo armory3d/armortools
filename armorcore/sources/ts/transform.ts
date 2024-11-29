@@ -171,15 +171,11 @@ function transform_compute_radius(raw: transform_t) {
 }
 
 function transform_compute_dim(raw: transform_t) {
-	if (raw.object.raw == null) {
-		transform_compute_radius(raw);
-		return;
-	}
-	let d: f32_array_t = raw.object.raw.dimensions;
-	if (d == null) {
+	if (raw.object.raw == null || raw.object.raw.dimensions == null) {
 		raw.dim = vec4_create(2 * raw.scale.x, 2 * raw.scale.y, 2 * raw.scale.z);
 	}
 	else {
+		let d: f32_array_t = raw.object.raw.dimensions;
 		raw.dim = vec4_create(d[0] * raw.scale.x, d[1] * raw.scale.y, d[2] * raw.scale.z);
 	}
 	transform_compute_radius(raw);
