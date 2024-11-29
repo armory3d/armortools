@@ -1,5 +1,8 @@
 
 function base_ext_init() {
+	///if is_forge
+	sim_init();
+	///end
 }
 
 function base_ext_render() {
@@ -26,4 +29,8 @@ function base_ext_render() {
 		});
 		///end
     }
+
+	///if is_forge
+	sim_update();
+	///end
 }

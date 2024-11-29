@@ -1,48 +1,9 @@
 
-let tab_scene_material_id: i32 = 0;
 let tab_scene_line_counter: i32 = 0;
-let tab_scene_current_object: object_t;
-
-function f32_to_string_prec(f: f32): string {
-	f = math_round(f);
-	return f + "";
-}
 
 function tab_scene_import_mesh_done() {
-	let mo: mesh_object_t = array_pop(project_paint_objects);
+	let mo: mesh_object_t = project_paint_objects[project_paint_objects.length - 1];
 	object_set_parent(mo.base, null);
-}
-
-function tab_scene_draw_menu(ui: ui_t) {
-	if (ui_menu_button(ui, "Assign Material")) {
-		tab_scene_material_id++;
-
-		for (let i: i32 = 0; i < _scene_raw.shader_datas.length; ++i) {
-			let sh: shader_data_t = _scene_raw.shader_datas[i];
-			if (sh.name == "Material_data") {
-				let s: shader_data_t = util_clone_shader_data(sh);
-				s.name = "TempMaterial_data" + tab_scene_material_id;
-				array_push(_scene_raw.shader_datas, s);
-				break;
-			}
-		}
-
-		for (let i: i32 = 0; i < _scene_raw.material_datas.length; ++i) {
-			let mat: material_data_t = _scene_raw.material_datas[i];
-			if (mat.name == "Material") {
-				let m: material_data_t = util_clone_material_data(mat);
-				m.name = "TempMaterial" + tab_scene_material_id;
-				m.shader = "TempMaterial_data" + tab_scene_material_id;
-				array_push(_scene_raw.material_datas, m);
-				break;
-			}
-		}
-
-		let md: material_data_t = data_get_material("Scene", "TempMaterial" + tab_scene_material_id);
-		let mo: mesh_object_t = tab_scene_current_object.ext;
-		mo.materials = [md];
-		make_material_parse_mesh_preview_material(md);
-	}
 }
 
 function tab_scene_draw_list(ui: ui_t, list_handle: ui_handle_t, current_object: object_t) {
@@ -95,18 +56,13 @@ function tab_scene_draw_list(ui: ui_t, list_handle: ui_handle_t, current_object:
 		context_raw.selected_object = current_object;
 	}
 
-	if (ui.is_hovered && ui.input_released_r) {
-		tab_scene_current_object = current_object;
-		ui_menu_draw(tab_scene_draw_menu);
-	}
-
 	if (b) {
 		let current_y: i32 = ui._y;
 		for (let i: i32 = 0; i < current_object.children.length; ++i) {
 			let child: object_t = current_object.children[i];
-			// ui.indent();
+			ui._x += 8;
 			tab_scene_draw_list(ui, list_handle, child);
-			// ui.unindent();
+			ui._x -= 8;
 		}
 
 		// Draw line that shows parent relations
@@ -155,51 +111,51 @@ function tab_scene_draw(htab: ui_handle_t) {
 				context_raw.selected_object.visible = ui_check(h, "Visible");
 
 				let t: transform_t = context_raw.selected_object.transform;
-				let local_pos: vec4_t = t.loc;
-				let scale: vec4_t = t.scale;
 				let rot: vec4_t = quat_get_euler(t.rot);
-				let dim: vec4_t = t.dim;
 				rot = vec4_mult(rot, 180 / 3.141592);
 				let f: f32 = 0.0;
+				let changed: bool = false;
 
 				ui_row4();
 				ui_text("Loc");
 
 				h = ui_handle(__ID__);
-				h.text = f32_to_string_prec(local_pos.x);
+				h.text = f32_to_string(t.loc.x);
 				f = parse_float(ui_text_input(h, "X"));
 				if (h.changed) {
-					local_pos.x = f;
+					changed = true;
+					t.loc.x = f;
 				}
 
 				h = ui_handle(__ID__);
-				h.text = f32_to_string_prec(local_pos.y);
+				h.text = f32_to_string(t.loc.y);
 				f = parse_float(ui_text_input(h, "Y"));
 				if (h.changed) {
-					local_pos.y = f;
+					changed = true;
+					t.loc.y = f;
 				}
 
 				h = ui_handle(__ID__);
-				h.text = f32_to_string_prec(local_pos.z);
+				h.text = f32_to_string(t.loc.z);
 				f = parse_float(ui_text_input(h, "Z"));
 				if (h.changed) {
-					local_pos.z = f;
+					changed = true;
+					t.loc.z = f;
 				}
 
 				ui_row4();
 				ui_text("Rotation");
 
 				h = ui_handle(__ID__);
-				h.text = f32_to_string_prec(rot.x);
+				h.text = f32_to_string(rot.x);
 				f = parse_float(ui_text_input(h, "X"));
-				let changed: bool = false;
 				if (h.changed) {
 					changed = true;
 					rot.x = f;
 				}
 
 				h = ui_handle(__ID__);
-				h.text = f32_to_string_prec(rot.y);
+				h.text = f32_to_string(rot.y);
 				f = parse_float(ui_text_input(h, "Y"));
 				if (h.changed) {
 					changed = true;
@@ -207,112 +163,99 @@ function tab_scene_draw(htab: ui_handle_t) {
 				}
 
 				h = ui_handle(__ID__);
-				h.text = f32_to_string_prec(rot.z);
+				h.text = f32_to_string(rot.z);
 				f = parse_float(ui_text_input(h, "Z"));
 				if (h.changed) {
 					changed = true;
 					rot.z = f;
 				}
 
-				if (changed && context_raw.selected_object.name != "Scene") {
-					rot = vec4_mult(rot, 3.141592 / 180);
-					context_raw.selected_object.transform.rot = quat_from_euler(rot.x, rot.y, rot.z);
-					transform_build_matrix(context_raw.selected_object.transform);
-					// ///if arm_physics
-					// if (rb != null) rb.syncTransform();
-					// ///end
-				}
-
 				ui_row4();
 				ui_text("Scale");
 
 				h = ui_handle(__ID__);
-				h.text = f32_to_string_prec(scale.x);
+				h.text = f32_to_string(t.scale.x);
 				f = parse_float(ui_text_input(h, "X"));
 				if (h.changed) {
-					scale.x = f;
+					changed = true;
+					t.scale.x = f;
 				}
 
 				h = ui_handle(__ID__);
-				h.text = f32_to_string_prec(scale.y);
+				h.text = f32_to_string(t.scale.y);
 				f = parse_float(ui_text_input(h, "Y"));
 				if (h.changed) {
-					scale.y = f;
+					changed = true;
+					t.scale.y = f;
 				}
 
 				h = ui_handle(__ID__);
-				h.text = f32_to_string_prec(scale.z);
+				h.text = f32_to_string(t.scale.z);
 				f = parse_float(ui_text_input(h, "Z"));
 				if (h.changed) {
-					scale.z = f;
+					changed = true;
+					t.scale.z = f;
 				}
 
 				ui_row4();
 				ui_text("Dimensions");
 
 				h = ui_handle(__ID__);
-				h.text = f32_to_string_prec(dim.x);
+				h.text = f32_to_string(t.dim.x);
 				f = parse_float(ui_text_input(h, "X"));
 				if (h.changed) {
-					dim.x = f;
+					changed = true;
+					t.dim.x = f;
 				}
 
 				h = ui_handle(__ID__);
-				h.text = f32_to_string_prec(dim.y);
+				h.text = f32_to_string(t.dim.y);
 				f = parse_float(ui_text_input(h, "Y"));
 				if (h.changed) {
-					dim.y = f;
+					changed = true;
+					t.dim.y = f;
 				}
 
 				h = ui_handle(__ID__);
-				h.text = f32_to_string_prec(dim.z);
+				h.text = f32_to_string(t.dim.z);
 				f = parse_float(ui_text_input(h, "Z"));
 				if (h.changed) {
-					dim.z = f;
+					changed = true;
+					t.dim.z = f;
 				}
 
-				context_raw.selected_object.transform.dirty = true;
-
-				if (context_raw.selected_object.name == "Scene") {
-					let p: world_data_t = scene_world;
-
-					let p_handle: ui_handle_t = ui_handle(__ID__);
-					if (p_handle.init) {
-						p_handle.value = p.strength;
+				if (changed) {
+					rot = vec4_mult(rot, 3.141592 / 180);
+					context_raw.selected_object.transform.rot = quat_from_euler(rot.x, rot.y, rot.z);
+					transform_build_matrix(context_raw.selected_object.transform);
+					transform_compute_dim(context_raw.selected_object.transform);
+					///if arm_physics
+					let pb: physics_body_t = map_get(physics_body_object_map, context_raw.selected_object.uid);
+					if (pb != null) {
+						physics_body_sync_transform(pb);
 					}
+					///end
+				}
 
-					p.strength = ui_slider(p_handle, "Environment", 0.0, 5.0, true);
+				if (ui_button("Sphere Dynamic")) {
+					sim_add(context_raw.selected_object, physics_shape_t.SPHERE, 1.0);
 				}
-				else if (context_raw.selected_object.ext_type == "light_object_t") {
-					let light: light_object_t = context_raw.selected_object.ext;
-					let light_handle: ui_handle_t = ui_handle(__ID__);
-					light_handle.value = light.data.strength / 10;
-					light.data.strength = ui_slider(light_handle, "Strength", 0.0, 5.0, true) * 10;
+
+				if (ui_button("Box Dynamic")) {
+					sim_add(context_raw.selected_object, physics_shape_t.BOX, 1.0);
 				}
-				else if (context_raw.selected_object.ext_type == "camera_object_t") {
-					let cam: camera_object_t = context_raw.selected_object.ext;
-					let fov_handle: ui_handle_t = ui_handle(__ID__);
-					fov_handle.value = math_floor(cam.data.fov * 100) / 100;
-					cam.data.fov = ui_slider(fov_handle, "FoV", 0.3, 2.0, true);
-					if (fov_handle.changed) {
-						camera_object_build_proj(cam);
-					}
+
+				if (ui_button("Box Static")) {
+					sim_add(context_raw.selected_object, physics_shape_t.BOX, 0.0);
 				}
 			}
 		}
 
 		if (ui_button("Play")) {
-			app_notify_on_update(_tab_scene_update);
+			sim_play();
 		}
 		if (ui_button("Stop")) {
-			app_remove_update(_tab_scene_update);
+			sim_stop();
 		}
 	}
-}
-
-function _tab_scene_update() {
-	let o: mesh_object_t = project_paint_objects[0];
-	transform_rotate(o.base.transform, vec4_z_axis(), 0.02);
-	transform_build_matrix(o.base.transform);
-	util_mesh_merge(project_paint_objects);
 }
