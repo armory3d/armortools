@@ -7,6 +7,7 @@ declare function jolt_body_create(shape: i32, mass: f32, dimx: f32, dimy: f32, d
 declare function jolt_body_apply_impulse(body: any, x: f32, y: f32, z: f32): void;
 declare function jolt_body_get_pos(body: any, pos: vec4_t): void;
 declare function jolt_body_get_rot(body: any, rot: quat_t): void;
+declare function jolt_body_sync_transform(body: any, pos: vec4_t, rot: quat_t): void;
 
 type physics_body_t = {
 	_body?: any;
@@ -35,7 +36,10 @@ function physics_body_init(body: physics_body_t, obj: object_t) {
 	map_set(physics_body_object_map, obj.uid, body);
 
 	body.obj = obj;
+	transform_compute_dim(obj.transform);
 	body.dimx = obj.transform.dim.x;
+	body.dimy = obj.transform.dim.y;
+	body.dimz = obj.transform.dim.z;
 
 	let triangles: f32[] = null;
 	if (body.shape == physics_shape_t.MESH) {
@@ -80,7 +84,8 @@ function physics_body_apply_impulse(body: physics_body_t, dir: vec4_t) {
 }
 
 function physics_body_sync_transform(body: physics_body_t) {
-	//
+	let transform: transform_t = body.obj.transform;
+	jolt_body_sync_transform(body._body, transform.loc, transform.rot);
 }
 
 function physics_body_update(body: physics_body_t) {

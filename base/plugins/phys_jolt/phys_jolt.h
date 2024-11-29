@@ -1,6 +1,9 @@
 
 #pragma once
 
+#include "iron_vec4.h"
+#include "iron_quat.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -20,6 +23,7 @@ void* jolt_body_create(int shape, float mass, float dimx, float dimy, float dimz
 void jolt_body_apply_impulse(void *b, float x, float y, float z);
 void jolt_body_get_pos(void *b, void *p);
 void jolt_body_get_rot(void *b, void *r);
+void jolt_body_sync_transform(void *b, vec4_t p, quat_t r);
 
 #ifdef __cplusplus
 }

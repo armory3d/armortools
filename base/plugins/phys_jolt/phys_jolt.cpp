@@ -162,15 +162,19 @@ void *_jolt_body_create(int shape, float mass, float dimx, float dimy, float dim
 	Body *body;
 	ShapeSettings::ShapeResult result;
 
+	if (dimx <= 0.2) dimx = 0.21;
+	if (dimy <= 0.2) dimy = 0.21;
+	if (dimz <= 0.2) dimz = 0.21;
+
 	if (shape == 0) {
 		// Box
-		BoxShapeSettings shape_settings(RVec3(dimx, dimy, dimz));
+		BoxShapeSettings shape_settings(RVec3(dimx / 2.0, dimy / 2.0, dimz / 2.0));
 		shape_settings.SetEmbedded();
 		result = shape_settings.Create();
 	}
 	else if (shape == 1) {
 		// Sphere
-		SphereShapeSettings shape_settings(dimx);
+		SphereShapeSettings shape_settings(dimx / 2.0);
 		shape_settings.SetEmbedded();
 		result = shape_settings.Create();
 	}
@@ -197,12 +201,13 @@ void *_jolt_body_create(int shape, float mass, float dimx, float dimy, float dim
 	// if (ccd) {
 	if (shape != 2) { // != Mesh
 		settings.mMotionQuality = EMotionQuality::LinearCast;
-	}
 
-	MassProperties mass_prop;
-	mass_prop.ScaleToMass(mass);
-	settings.mMassPropertiesOverride = mass_prop;
-	settings.mOverrideMassProperties = EOverrideMassProperties::CalculateInertia;
+		MassProperties mass_prop;
+		mass_prop.ScaleToMass(mass);
+		settings.mMassPropertiesOverride = mass_prop;
+
+		settings.mOverrideMassProperties = EOverrideMassProperties::CalculateInertia;
+	}
 
 	body = body_interface.CreateBody(settings);
 	body_interface.AddBody(body->GetID(), EActivation::Activate);
@@ -237,6 +242,12 @@ void _jolt_body_get_rot(void *b, void *r) {
 	q->w = rotation.GetW();
 }
 
+void _jolt_body_sync_transform(void *b, vec4_t p, quat_t r) {
+	BodyInterface &body_interface = physics_system->GetBodyInterface();
+	Body *body = (Body *)b;
+	body_interface.SetPositionAndRotation(body->GetID(), RVec3(p.x, p.y, p.z), Quat(r.x, r.y, r.z, r.w), EActivation::Activate);
+}
+
 extern "C" {
     void jolt_world_create() {
         _jolt_world_create();
@@ -268,5 +279,9 @@ extern "C" {
 
 	void jolt_body_get_rot(void *b, void *r) {
 		_jolt_body_get_rot(b, r);
+	}
+
+	void jolt_body_sync_transform(void *b, vec4_t p, quat_t r) {
+		_jolt_body_sync_transform(b, p, r);
 	}
 }
