@@ -15,6 +15,9 @@ static void createUniformBuffer(VkBuffer *buf, VkMemoryAllocateInfo *mem_alloc, 
 	memset(&buf_info, 0, sizeof(buf_info));
 	buf_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 	buf_info.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+#ifdef KINC_VKRT
+	buf_info.usage |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+#endif
 	buf_info.size = size;
 	VkResult err = vkCreateBuffer(vk_ctx.device, &buf_info, NULL, buf);
 	assert(!err);
