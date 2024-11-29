@@ -20,9 +20,9 @@ typedef struct {
 
 typedef struct {
 	VkAccelerationStructureKHR top_level_acceleration_structure;
-	VkAccelerationStructureKHR bottom_level_acceleration_structure;
+	VkAccelerationStructureKHR bottom_level_acceleration_structure[64];
 	uint64_t top_level_acceleration_structure_handle;
-	uint64_t bottom_level_acceleration_structure_handle;
+	uint64_t bottom_level_acceleration_structure_handle[64];
 } kinc_raytrace_acceleration_structure_impl_t;
 
 #ifdef __cplusplus

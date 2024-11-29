@@ -428,7 +428,8 @@ static kinc_g5_constant_buffer_t constant_buffer;
 static kinc_g4_render_target_t *render_target;
 static kinc_raytrace_pipeline_t pipeline;
 static kinc_raytrace_acceleration_structure_t accel;
-static bool accel_created = false;
+static bool raytrace_created = false;
+static bool raytrace_accel_created = false;
 const int constant_buffer_size = 24;
 #endif
 
@@ -2862,22 +2863,32 @@ bool iron_raytrace_supported() {
 	#endif
 }
 
-void iron_raytrace_init(buffer_t *shader, kinc_g4_vertex_buffer_t *vb, kinc_g4_index_buffer_t *ib, kinc_matrix4x4_t transform) {
-	if (accel_created) {
+void iron_raytrace_init(buffer_t *shader) {
+	if (raytrace_created) {
 		kinc_g5_constant_buffer_destroy(&constant_buffer);
-		kinc_raytrace_acceleration_structure_destroy(&accel);
 		kinc_raytrace_pipeline_destroy(&pipeline);
 	}
-
-	kinc_g5_vertex_buffer_t *vertex_buffer = &vb->impl._buffer;
-	kinc_g5_index_buffer_t *index_buffer = &ib->impl._buffer;
-
+	raytrace_created = true;
 	kinc_g5_constant_buffer_init(&constant_buffer, constant_buffer_size * 4);
 	kinc_raytrace_pipeline_init(&pipeline, &commandList, shader->buffer, (int)shader->length, &constant_buffer);
+}
+
+void iron_raytrace_as_init() {
+	if (raytrace_accel_created) {
+		kinc_raytrace_acceleration_structure_destroy(&accel);
+	}
+	raytrace_accel_created = true;
 	kinc_raytrace_acceleration_structure_init(&accel);
+}
+
+void iron_raytrace_as_add(kinc_g4_vertex_buffer_t *vb, kinc_g4_index_buffer_t *ib, kinc_matrix4x4_t transform) {
+	kinc_g5_vertex_buffer_t *vertex_buffer = &vb->impl._buffer;
+	kinc_g5_index_buffer_t *index_buffer = &ib->impl._buffer;
 	kinc_raytrace_acceleration_structure_add(&accel, vertex_buffer, index_buffer, transform);
-	kinc_raytrace_acceleration_structure_build(&accel, &commandList);
-	accel_created = true;
+}
+
+void iron_raytrace_as_build(kinc_g4_vertex_buffer_t *vb_full, kinc_g4_index_buffer_t *ib_full) {
+	kinc_raytrace_acceleration_structure_build(&accel, &commandList, &vb_full->impl._buffer, &ib_full->impl._buffer);
 }
 
 void iron_raytrace_set_textures(image_t *tex0, image_t *tex1, image_t *tex2, kinc_g4_texture_t *texenv, kinc_g4_texture_t *texsobol, kinc_g4_texture_t *texscramble, kinc_g4_texture_t *texrank) {

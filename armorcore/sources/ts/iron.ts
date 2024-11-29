@@ -357,7 +357,11 @@ declare function iron_ml_inference(model: buffer_t, tensors: buffer_t[], input_s
 declare function iron_ml_unload(): void;
 
 declare function iron_raytrace_supported(): bool;
-declare function iron_raytrace_init(shader: buffer_t, vb: any, ib: any, transform: mat4_t): void;
+declare function iron_raytrace_init(shader: buffer_t): void;
+declare function iron_raytrace_as_init(): void;
+declare function iron_raytrace_as_add(vb: any, ib: any, transform: mat4_t): void;
+declare function iron_raytrace_as_build(vb_full: any, ib_full: any): void;
+
 declare function iron_raytrace_set_textures(tex0: image_t, tex1: image_t, tex2: image_t, texenv: any, tex_sobol: any, tex_scramble: any, tex_rank: any): void;
 declare function iron_raytrace_dispatch_rays(target: any, cb: buffer_t): void;
 

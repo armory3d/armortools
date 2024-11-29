@@ -86,7 +86,7 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 	render_path_raytrace_f32a[2] = transform_world_z(ct);
 	render_path_raytrace_f32a[3] = render_path_raytrace_frame;
 	///if arm_metal
-	// frame = (frame % (16)) + 1; // _PAINT
+	// render_path_raytrace_frame = (render_path_raytrace_frame % (16)) + 1; // _PAINT
 	render_path_raytrace_frame = render_path_raytrace_frame + 1; // _RENDER
 	///else
 	render_path_raytrace_frame = (render_path_raytrace_frame % 4) + 1; // _PAINT
@@ -145,13 +145,32 @@ function render_path_raytrace_raytrace_init(shader_name: string, build: bool = t
 		scene_embed_data("bnoise_sobol.k");
 		scene_embed_data("bnoise_scramble.k");
 		scene_embed_data("bnoise_rank.k");
+
+		let shader: buffer_t = data_get_blob(shader_name);
+		iron_raytrace_init(shader);
 	}
 
-	let shader: buffer_t = data_get_blob(shader_name);
 	if (build) {
 		render_path_raytrace_build_data();
 	}
-	iron_raytrace_init(shader, render_path_raytrace_vb.buffer_, render_path_raytrace_ib.buffer_, render_path_raytrace_transform);
+
+	{
+		iron_raytrace_as_init();
+
+		///if is_forge
+		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+			let po: mesh_object_t = project_paint_objects[i];
+			iron_raytrace_as_add(po.data._.vertex_buffer.buffer_, po.data._.index_buffers[0].buffer_, po.base.transform.world_unpack);
+		}
+		///else
+		iron_raytrace_as_add(render_path_raytrace_vb.buffer_, render_path_raytrace_ib.buffer_, render_path_raytrace_transform);
+		///end
+
+		let vb_full: vertex_buffer_t = context_raw.merged_object.data._.vertex_buffer;
+		let ib_full: index_buffer_t = context_raw.merged_object.data._.index_buffers[0];
+
+		iron_raytrace_as_build(vb_full.buffer_, ib_full.buffer_);
+	}
 }
 
 function render_path_raytrace_build_data() {
@@ -165,13 +184,12 @@ function render_path_raytrace_build_data() {
 	let mo: mesh_object_t = scene_meshes[0];
 	///end
 
-	// render_path_raytrace_transform = mo.base.transform.world_unpack;
-	render_path_raytrace_transform = project_paint_objects[0].base.transform.world_unpack;// mo.base.transform.world_unpack;
+	render_path_raytrace_transform = mo.base.transform.world_unpack;
 	render_path_raytrace_vb = mo.data._.vertex_buffer;
 	render_path_raytrace_ib = mo.data._.index_buffers[0];
 }
 
-function render_path_raytrace_draw(useLiveLayer: bool) {
+function render_path_raytrace_draw(use_live_layer: bool) {
 	let is_live: bool = config_raw.brush_live && render_path_paint_live_layer_drawn > 0;
 	if (context_raw.ddirty > 1 || context_raw.pdirty > 0 || is_live) {
 		render_path_raytrace_frame = 0;
@@ -185,7 +203,7 @@ function render_path_raytrace_draw(useLiveLayer: bool) {
 	}
 	///end
 
-	render_path_raytrace_commands(useLiveLayer);
+	render_path_raytrace_commands(use_live_layer);
 
 	if (config_raw.rp_bloom != false) {
 		render_path_base_draw_bloom("buf");
