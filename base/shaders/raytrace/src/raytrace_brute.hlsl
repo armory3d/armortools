@@ -161,6 +161,11 @@ void raygeneration() {
 void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttributes attr) {
 	const uint triangle_index_stride = 12; // 3 * 4
 	uint base_index = PrimitiveIndex() * triangle_index_stride;
+
+	#ifdef _FORGE
+	base_index += InstanceID(); // Offset to index buffer of this instance
+	#endif
+
 	uint3 indices_sample = indices.Load3(base_index);
 
 	float2 vertex_uvs[3] = {
@@ -192,7 +197,8 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 	float3 n = normalize(hit_attribute(vertex_normals, attr));
 
 	#ifdef _FORGE
-	n = mul((float3x3)(ObjectToWorld3x4()), n);
+	n = mul((float3x3)(WorldToObject4x3()), n);
+	n = normalize(n);
 	#endif
 
 	mytexture1.GetDimensions(size.x, size.y);
