@@ -124,6 +124,7 @@ function _import_mesh_make_mesh(mesh: raw_mesh_t) {
 	context_raw.paint_object = context_main_object();
 
 	context_select_paint_object(context_main_object());
+
 	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 		let p: mesh_object_t = project_paint_objects[i];
 		if (p == context_raw.paint_object) {
@@ -132,9 +133,12 @@ function _import_mesh_make_mesh(mesh: raw_mesh_t) {
 		data_delete_mesh(p.data._.handle);
 		mesh_object_remove(p);
 	}
+
 	let handle: string = context_raw.paint_object.data._.handle;
 	if (handle != "SceneSphere" && handle != "ScenePlane") {
-		data_delete_mesh(handle);
+		app_notify_on_init(function(handle: string) {
+			data_delete_mesh(handle);
+		}, handle);
 	}
 
 	mesh_object_set_data(context_raw.paint_object, md);
