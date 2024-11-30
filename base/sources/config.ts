@@ -139,7 +139,7 @@ function config_init() {
 		config_raw.rp_vignette = 0.2;
 		config_raw.rp_grain = 0.09;
 		config_raw.rp_motionblur = false;
-		///if (arm_android || arm_ios)
+		///if (arm_android || arm_ios || is_forge)
 		config_raw.rp_ssao = false;
 		///else
 		config_raw.rp_ssao = true;

@@ -17,14 +17,16 @@ function sim_update() {
         let world: physics_world_t = physics_world_active;
 	    physics_world_update(world);
 
-        {
+        iron_delay_idle_sleep();
+
+        let record: bool = true;
+        if (record) {
             let rt: render_target_t = map_get(render_path_render_targets, "taa");
             let pixels: buffer_t = image_get_pixels(rt._image);
             ///if (arm_metal || arm_vulkan)
             export_arm_bgra_swap(pixels);
             ///end
             iron_mpeg_write(pixels, rt._image.width, rt._image.height);
-            iron_delay_idle_sleep();
         }
     }
 }

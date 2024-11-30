@@ -4,6 +4,7 @@ let tab_scene_line_counter: i32 = 0;
 function tab_scene_import_mesh_done() {
 	let mo: mesh_object_t = project_paint_objects[project_paint_objects.length - 1];
 	object_set_parent(mo.base, null);
+	context_raw.selected_object = mo.base;
 }
 
 function tab_scene_draw_list(ui: ui_t, list_handle: ui_handle_t, current_object: object_t) {
@@ -96,6 +97,20 @@ function tab_scene_draw(htab: ui_handle_t) {
 			for (let i: i32 = 0; i < _scene_root.children.length; ++i) {
 				let c: object_t = _scene_root.children[i];
 				tab_scene_draw_list(ui, ui_handle(__ID__), c);
+			}
+
+			// Select object with arrow keys
+			if (ui.is_key_pressed && ui.key_code == key_code_t.DOWN) {
+				let i: i32 = array_index_of(project_paint_objects, context_raw.selected_object.ext);
+				if (i < project_paint_objects.length - 1) {
+					context_raw.selected_object = project_paint_objects[i + 1].base;
+				}
+			}
+			if (ui.is_key_pressed && ui.key_code == key_code_t.UP) {
+				let i: i32 = array_index_of(project_paint_objects, context_raw.selected_object.ext);
+				if (i > 1) {
+					context_raw.selected_object = project_paint_objects[i - 1].base;
+				}
 			}
 		}
 
@@ -247,6 +262,22 @@ function tab_scene_draw(htab: ui_handle_t) {
 
 				if (ui_button("Box Static")) {
 					sim_add(context_raw.selected_object, physics_shape_t.BOX, 0.0);
+				}
+
+				if (ui_button("Hull Dynamic")) {
+					sim_add(context_raw.selected_object, physics_shape_t.HULL, 1.0);
+				}
+
+				if (ui_button("Mesh Static")) {
+					sim_add(context_raw.selected_object, physics_shape_t.MESH, 0.0);
+				}
+
+				if (ui_button("Duplicate")) {
+					let so: mesh_object_t = context_raw.selected_object.ext;
+					let dup: mesh_object_t = scene_add_mesh_object(so.data, so.materials, so.base.parent);
+					transform_set_matrix(dup.base.transform, so.base.transform.local);
+					array_push(project_paint_objects, dup);
+					dup.base.name = so.base.name;
 				}
 			}
 		}
