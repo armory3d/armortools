@@ -23,6 +23,7 @@ enum physics_shape_t {
 	BOX = 0,
 	SPHERE = 1,
 	MESH = 2,
+	HULL = 3,
 }
 
 let physics_body_object_map: map_t<i32, physics_body_t> = map_create();
@@ -42,7 +43,9 @@ function physics_body_init(body: physics_body_t, obj: object_t) {
 	body.dimz = obj.transform.dim.z;
 
 	let triangles: f32[] = null;
-	if (body.shape == physics_shape_t.MESH) {
+	if (body.shape == physics_shape_t.MESH ||
+		body.shape == physics_shape_t.HULL
+	) {
 		let mo: mesh_object_t = obj.ext;
 		let data: mesh_data_t = mo.data;
 		let scale: vec4_t = obj.transform.scale;

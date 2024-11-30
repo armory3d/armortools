@@ -10,6 +10,7 @@
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>
 #include <Jolt/Physics/Collision/Shape/SphereShape.h>
 #include <Jolt/Physics/Collision/Shape/MeshShape.h>
+#include <Jolt/Physics/Collision/Shape/ConvexHullShape.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/MotionQuality.h>
 #include <kinc/math/vector.h>
@@ -142,7 +143,11 @@ void _jolt_world_create() {
 }
 
 void _jolt_world_update() {
+	#ifdef is_forge
+	const int cCollisionSteps = 16;
+	#else
 	const int cCollisionSteps = 1;
+	#endif
 	const float cDeltaTime = 1.0f / 60.0f;
 	physics_system->Update(cDeltaTime, cCollisionSteps, temp_allocator, job_system);
 }
@@ -162,19 +167,43 @@ void *_jolt_body_create(int shape, float mass, float dimx, float dimy, float dim
 	Body *body;
 	ShapeSettings::ShapeResult result;
 
-	if (dimx <= 0.2) dimx = 0.21;
-	if (dimy <= 0.2) dimy = 0.21;
-	if (dimz <= 0.2) dimz = 0.21;
+	// float convex_radius = 0.05f;
+	float convex_radius = 0.0f;
+
+	// if (convex_radius > 0.0) {
+	// 	if (dimx <= 0.2) dimx = 0.21;
+	// 	if (dimy <= 0.2) dimy = 0.21;
+	// 	if (dimz <= 0.2) dimz = 0.21;
+	// }
 
 	if (shape == 0) {
 		// Box
-		BoxShapeSettings shape_settings(RVec3(dimx / 2.0, dimy / 2.0, dimz / 2.0));
+		BoxShapeSettings shape_settings(RVec3(dimx / 2.0, dimy / 2.0, dimz / 2.0), convex_radius);
 		shape_settings.SetEmbedded();
 		result = shape_settings.Create();
 	}
 	else if (shape == 1) {
 		// Sphere
 		SphereShapeSettings shape_settings(dimx / 2.0);
+		shape_settings.SetEmbedded();
+		result = shape_settings.Create();
+	}
+	else if (shape == 3) {
+		// Hull
+		f32_array_t *f32a = (f32_array_t *)f32a_triangles;
+
+		JPH::Array<JPH::Vec3> points;
+		points.reserve(f32a->length / 3);
+		for (int i = 0; i < f32a->length / 9; ++i) {
+			Vec3 v1(f32a->buffer[i * 9    ], f32a->buffer[i * 9 + 1], f32a->buffer[i * 9 + 2]);
+			Vec3 v2(f32a->buffer[i * 9 + 3], f32a->buffer[i * 9 + 4], f32a->buffer[i * 9 + 5]);
+			Vec3 v3(f32a->buffer[i * 9 + 6], f32a->buffer[i * 9 + 7], f32a->buffer[i * 9 + 8]);
+			points.push_back(v1);
+			points.push_back(v2);
+			points.push_back(v3);
+		}
+
+		ConvexHullShapeSettings shape_settings(points, convex_radius);
 		shape_settings.SetEmbedded();
 		result = shape_settings.Create();
 	}
@@ -189,6 +218,7 @@ void *_jolt_body_create(int shape, float mass, float dimx, float dimy, float dim
 			Float3 v3(f32a->buffer[i * 9 + 6], f32a->buffer[i * 9 + 7], f32a->buffer[i * 9 + 8]);
 			triangles.push_back(Triangle(v1, v2, v3));
 		}
+
 		MeshShapeSettings shape_settings(triangles);
 		shape_settings.SetEmbedded();
 		result = shape_settings.Create();
