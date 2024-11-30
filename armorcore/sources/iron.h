@@ -2706,7 +2706,10 @@ void iron_mpeg_begin(char *path) {
 }
 
 void iron_mpeg_end() {
-	fclose(iron_mpeg_fp);
+	if (iron_mpeg_fp != NULL) {
+		fclose(iron_mpeg_fp);
+		iron_mpeg_fp = NULL;
+	}
 }
 
 void iron_mpeg_write(buffer_t *bytes, i32 w, i32 h) {
