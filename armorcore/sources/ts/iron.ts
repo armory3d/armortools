@@ -352,7 +352,9 @@ declare function iron_write_jpg(path: string, bytes: buffer_t, w: i32, h: i32, f
 declare function iron_write_png(path: string, bytes: buffer_t, w: i32, h: i32, format: i32): void;
 declare function iron_encode_jpg(bytes: buffer_t, w: i32, h: i32, format: i32, quality: i32): buffer_t;
 declare function iron_encode_png(bytes: buffer_t, w: i32, h: i32, format: i32): buffer_t;
-declare function iron_write_mpeg(): buffer_t;
+declare function iron_mp4_begin(path: string, w: i32, h: i32): void;
+declare function iron_mp4_end(): void;
+declare function iron_mp4_encode(pixels: buffer_t): void;
 declare function iron_ml_inference(model: buffer_t, tensors: buffer_t[], input_shape?: i32[][], output_shape?: i32[], use_gpu?: bool): buffer_t;
 declare function iron_ml_unload(): void;
 
