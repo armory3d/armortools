@@ -637,6 +637,7 @@ function base_enum_texts(node_type: string): string[] {
 			return empty;
 		}
 	}
+
 	if (node_type == "LAYER" || node_type == "LAYER_MASK") {
 		let layer_names: string[] = [];
 		for (let i: i32 = 0; i < project_layers.length; ++i) {
@@ -645,6 +646,7 @@ function base_enum_texts(node_type: string): string[] {
 		}
 		return layer_names;
 	}
+
 	if (node_type == "MATERIAL") {
 		let material_names: string[] = [];
 		for (let i: i32 = 0; i < project_materials.length; ++i) {
@@ -732,6 +734,18 @@ function base_redraw_console() {
 	}
 }
 
+function base_init_undo_layers() {
+	if (history_undo_layers == null) {
+		history_undo_layers = [];
+		for (let i: i32 = 0; i < config_raw.undo_steps; ++i) {
+			let len: i32 = history_undo_layers.length;
+			let ext: string = "_undo" + len;
+			let l: slot_layer_t = slot_layer_create(ext);
+			array_push(history_undo_layers, l);
+		}
+	}
+}
+
 function base_init_layout() {
 	let raw: config_t = config_raw;
 	let show2d: bool = (ui_nodes_show || ui_view2d_show) && raw.layout != null;
@@ -784,21 +798,15 @@ function base_init_config() {
 	raw.camera_pan_speed = 1.0;
 	raw.camera_rotation_speed = 1.0;
 	raw.zoom_direction = zoom_direction_t.VERTICAL;
-	///if (is_paint || is_sculpt)
 	raw.displace_strength = 0.0;
-	///else
-	raw.displace_strength = 1.0;
-	///end
 	raw.wrap_mouse = false;
 	raw.workspace = space_type_t.SPACE3D;
-	///if is_lab
-	raw.workspace = space_type_t.SPACE2D;
-	///end
 	///if (arm_android || arm_ios)
 	raw.camera_controls = camera_controls_t.ROTATE;
 	///else
 	raw.camera_controls = camera_controls_t.ORBIT;
 	///end
+
 	raw.layer_res = texture_res_t.RES2048;
 	///if (arm_android || arm_ios)
 	raw.touch_ui = true;
@@ -807,11 +815,7 @@ function base_init_config() {
 	raw.touch_ui = false;
 	raw.splash_screen = false;
 	///end
-	///if (is_paint || is_sculpt)
 	raw.node_preview = true;
-	///else
-	raw.node_preview = false;
-	///end
 
 	raw.pressure_hardness = true;
 	raw.pressure_angle = false;
@@ -829,4 +833,6 @@ function base_init_config() {
 	raw.dilate = dilate_type_t.INSTANT;
 	raw.dilate_radius = 2;
 	raw.gpu_inference = true;
+
+	base_ext_init_config(raw);
 }
