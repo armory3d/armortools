@@ -12,3 +12,9 @@ function base_ext_render() {
 		});
     }
 }
+
+function base_ext_init_config(raw: config_t) {
+	raw.displace_strength = 1.0;
+	raw.workspace = space_type_t.SPACE2D;
+	raw.node_preview = false;
+}

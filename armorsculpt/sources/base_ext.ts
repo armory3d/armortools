@@ -1,5 +1,6 @@
 
 function base_ext_init() {
+
 }
 
 function base_ext_render() {
@@ -8,6 +9,13 @@ function base_ext_render() {
 		ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 
 		base_init_undo_layers();
+
+		app_notify_on_next_frame(function () {
+			app_notify_on_next_frame(function () {
+				context_raw.project_type = project_model_t.SPHERE;
+				project_new();
+			});
+		});
     }
 }
 
