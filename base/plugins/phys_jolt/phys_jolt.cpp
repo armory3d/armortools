@@ -276,6 +276,8 @@ void _jolt_body_sync_transform(void *b, vec4_t p, quat_t r) {
 	BodyInterface &body_interface = physics_system->GetBodyInterface();
 	Body *body = (Body *)b;
 	body_interface.SetPositionAndRotation(body->GetID(), RVec3(p.x, p.y, p.z), Quat(r.x, r.y, r.z, r.w), EActivation::Activate);
+	body_interface.SetLinearVelocity(body->GetID(), RVec3(0, 0, 0));
+	body_interface.SetAngularVelocity(body->GetID(), RVec3(0, 0, 0));
 }
 
 extern "C" {
