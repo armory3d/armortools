@@ -384,6 +384,8 @@ if (flags.with_image_write) {
 
 if (flags.with_video_write) {
 	project.add_define("WITH_VIDEO_WRITE");
+	project.add_cfiles("sources/libs/minimp4.c");
+	project.add_cfiles("sources/libs/minih264e.c");
 }
 
 project.flatten();
