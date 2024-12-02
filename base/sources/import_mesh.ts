@@ -215,6 +215,22 @@ function _import_mesh_add_mesh(mesh: raw_mesh_t) {
 		array_push(raw.vertex_arrays, va);
 	}
 
+	///if is_forge
+	// Scale tex coords into global atlas
+	let atlas_w: i32 = config_get_texture_res();
+	let item_i: i32 = project_paint_objects.length;
+	let item_w: i32 = 4096;
+	let atlas_stride: i32 = atlas_w / item_w;
+	let atlas_step: i32 = 32767 / atlas_stride;
+	let item_x: i32 = (item_i % atlas_stride) * atlas_step;
+	let item_y: i32 = math_floor(item_i / atlas_stride) * atlas_step;
+	let texa: i16_array_t = mesh.texa;
+	for (let i: i32 = 0; i < texa.length / 2; ++i) {
+		texa[i * 2] = texa[i * 2] / atlas_stride + item_x;
+		texa[i * 2 + 1] = texa[i * 2 + 1] / atlas_stride + item_y;
+	}
+	///end
+
 	let md: mesh_data_t = mesh_data_create(raw);
 
 	let object: mesh_object_t = scene_add_mesh_object(md, context_raw.paint_object.materials, context_raw.paint_object.base);

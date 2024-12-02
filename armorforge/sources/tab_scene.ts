@@ -1,10 +1,19 @@
 
 let tab_scene_line_counter: i32 = 0;
 
+function tab_scene_select_object(mo: mesh_object_t) {
+	context_raw.selected_object = mo.base;
+	context_raw.paint_object = mo;
+	if (context_raw.merged_object != null) {
+		context_raw.merged_object.base.visible = false;
+	}
+	context_select_paint_object(mo);
+}
+
 function tab_scene_import_mesh_done() {
 	let mo: mesh_object_t = project_paint_objects[project_paint_objects.length - 1];
 	object_set_parent(mo.base, null);
-	context_raw.selected_object = mo.base;
+	tab_scene_select_object(mo);
 }
 
 function tab_scene_draw_list(ui: ui_t, list_handle: ui_handle_t, current_object: object_t) {
@@ -54,7 +63,7 @@ function tab_scene_draw_list(ui: ui_t, list_handle: ui_handle_t, current_object:
 	ui._y -= ui_ELEMENT_OFFSET(ui);
 
 	if (ui.is_released) {
-		context_raw.selected_object = current_object;
+		tab_scene_select_object(current_object.ext);
 	}
 
 	if (b) {
@@ -103,13 +112,13 @@ function tab_scene_draw(htab: ui_handle_t) {
 			if (ui.is_key_pressed && ui.key_code == key_code_t.DOWN) {
 				let i: i32 = array_index_of(project_paint_objects, context_raw.selected_object.ext);
 				if (i < project_paint_objects.length - 1) {
-					context_raw.selected_object = project_paint_objects[i + 1].base;
+					tab_scene_select_object(project_paint_objects[i + 1]);
 				}
 			}
 			if (ui.is_key_pressed && ui.key_code == key_code_t.UP) {
 				let i: i32 = array_index_of(project_paint_objects, context_raw.selected_object.ext);
 				if (i > 1) {
-					context_raw.selected_object = project_paint_objects[i - 1].base;
+					tab_scene_select_object(project_paint_objects[i - 1]);
 				}
 			}
 		}

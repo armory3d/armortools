@@ -1,5 +1,6 @@
 
 let sim_running: bool = false;
+let sim_transforms: mat4_box_t[];
 
 function sim_init() {
     physics_world_create();
@@ -35,11 +36,30 @@ function sim_play() {
     sim_running = true;
     let rt: render_target_t = map_get(render_path_render_targets, "taa");
     iron_mp4_begin("/home/lubos/Desktop/test.mp4", rt._image.width, rt._image.height);
+
+    // Save transforms
+    sim_transforms = [];
+    let pos: mesh_object_t[] = project_paint_objects;
+    for (let i: i32 = 0; i < pos.length; ++i) {
+        let m: mat4_box_t = { v: pos[i].base.transform.local };
+        array_push(sim_transforms, m);
+    }
 }
 
 function sim_stop() {
     sim_running = false;
     iron_mp4_end();
+
+    // Restore transforms
+    let pos: mesh_object_t[] = project_paint_objects;
+    for (let i: i32 = 0; i < pos.length; ++i) {
+        transform_set_matrix(pos[i].base.transform, sim_transforms[i].v);
+
+        let pb: physics_body_t = map_get(physics_body_object_map, pos[i].base.uid);
+        if (pb != null) {
+            physics_body_sync_transform(pb);
+        }
+    }
 }
 
 function sim_add(o: object_t, shape: physics_shape_t, mass: f32) {
