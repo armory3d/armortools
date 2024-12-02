@@ -26,19 +26,20 @@ function sim_update() {
             ///if (arm_metal || arm_vulkan)
             export_arm_bgra_swap(pixels);
             ///end
-            iron_mpeg_write(pixels, rt._image.width, rt._image.height);
+            iron_mp4_encode(pixels);
         }
     }
 }
 
 function sim_play() {
     sim_running = true;
-    iron_mpeg_begin("/home/lubos/Desktop/test.mpeg");
+    let rt: render_target_t = map_get(render_path_render_targets, "taa");
+    iron_mp4_begin("/home/lubos/Desktop/test.mp4", rt._image.width, rt._image.height);
 }
 
 function sim_stop() {
     sim_running = false;
-    iron_mpeg_end();
+    iron_mp4_end();
 }
 
 function sim_add(o: object_t, shape: physics_shape_t, mass: f32) {
