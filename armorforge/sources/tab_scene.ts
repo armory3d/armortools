@@ -106,12 +106,7 @@ function tab_scene_draw(htab: ui_handle_t) {
 		}
 		ui_end_sticky();
 
-		let outliner_handle: ui_handle_t = ui_handle(__ID__);
-		if (outliner_handle.init) {
-			outliner_handle.selected = true;
-		}
-
-		if (ui_panel(outliner_handle, "Outliner", true, false)) {
+		{
 			ui._y -= ui_ELEMENT_OFFSET(ui);
 
 			tab_scene_line_counter = 0;
@@ -298,15 +293,6 @@ function tab_scene_draw(htab: ui_handle_t) {
 					sim_duplicate();
 				}
 			}
-		}
-
-		if (ui_button("Play")) {
-			sim_play();
-
-			context_raw.selected_object = scene_camera.base;
-		}
-		if (ui_button("Stop")) {
-			sim_stop();
 		}
 	}
 }
