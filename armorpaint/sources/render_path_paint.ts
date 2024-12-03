@@ -561,7 +561,8 @@ function render_path_paint_commands_symmetry() {
 function render_path_paint_paint_enabled(): bool {
 	let fill_layer: bool = context_raw.layer.fill_layer != null && context_raw.tool != workspace_tool_t.PICKER && context_raw.tool != workspace_tool_t.MATERIAL && context_raw.tool != workspace_tool_t.COLORID;
 	let group_layer: bool = slot_layer_is_group(context_raw.layer);
-	return !fill_layer && !group_layer && !context_raw.foreground_event;
+	let gizmo: bool = context_raw.tool == workspace_tool_t.GIZMO;
+	return !fill_layer && !group_layer && !context_raw.foreground_event && !gizmo;
 }
 
 function render_path_paint_live_brush_dirty() {

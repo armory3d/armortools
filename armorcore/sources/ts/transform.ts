@@ -171,6 +171,16 @@ function transform_compute_radius(raw: transform_t) {
 }
 
 function transform_compute_dim(raw: transform_t) {
+	///if is_forge
+	if (raw.object.raw == null && raw.object.ext_type == "mesh_object_t") {
+		let mo: mesh_object_t = raw.object.ext;
+		let aabb: vec4_t = mesh_data_calculate_aabb(mo.data);
+		let o: object_t = raw.object;
+		o.raw = {};
+		o.raw.dimensions = f32_array_create_xyz(aabb.x, aabb.y, aabb.z);
+	}
+	///end
+
 	if (raw.object.raw == null || raw.object.raw.dimensions == null) {
 		raw.dim = vec4_create(2 * raw.scale.x, 2 * raw.scale.y, 2 * raw.scale.z);
 	}

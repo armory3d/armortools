@@ -307,11 +307,6 @@ function gizmo_update() {
 		if (context_raw.gizmo_started) {
 			context_raw.gizmo_drag_last = context_raw.gizmo_drag;
 		}
-
-		///if is_forge
-		util_mesh_remove_merged();
-		render_path_raytrace_ready = false;
-		///end
 	}
 
 	_input_occupied = (context_raw.translate_x || context_raw.translate_y || context_raw.translate_z || context_raw.scale_x || context_raw.scale_y || context_raw.scale_z || context_raw.rotate_x || context_raw.rotate_y || context_raw.rotate_z) && mouse_view_x() < base_w();

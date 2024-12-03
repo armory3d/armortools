@@ -144,7 +144,7 @@ void _jolt_world_create() {
 
 void _jolt_world_update() {
 	#ifdef is_forge
-	const int cCollisionSteps = 16;
+	const int cCollisionSteps = 2;
 	#else
 	const int cCollisionSteps = 1;
 	#endif
@@ -227,6 +227,10 @@ void *_jolt_body_create(int shape, float mass, float dimx, float dimy, float dim
 	ShapeRefC shape_c = result.Get();
 	BodyCreationSettings settings(shape_c, RVec3(x, y, z), Quat::sIdentity(), mass == 0 ? EMotionType::Static : EMotionType::Dynamic,
 		mass == 0 ? Layers::NON_MOVING : Layers::MOVING);
+
+#ifdef is_forge
+	settings.mAllowSleeping = false;
+#endif
 
 	// if (ccd) {
 	if (shape != 2) { // != Mesh

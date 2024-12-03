@@ -2,7 +2,16 @@
 let tab_scene_line_counter: i32 = 0;
 
 function tab_scene_select_object(mo: mesh_object_t) {
+	if (mo == null) {
+		return;
+	}
+
 	context_raw.selected_object = mo.base;
+
+	if (mo.base.ext_type != "mesh_object_t") {
+		return;
+	}
+
 	context_raw.paint_object = mo;
 	if (context_raw.merged_object != null) {
 		context_raw.merged_object.base.visible = false;
@@ -14,6 +23,10 @@ function tab_scene_import_mesh_done() {
 	let mo: mesh_object_t = project_paint_objects[project_paint_objects.length - 1];
 	object_set_parent(mo.base, null);
 	tab_scene_select_object(mo);
+
+	app_notify_on_next_frame(function() {
+		util_mesh_merge();
+	});
 }
 
 function tab_scene_draw_list(ui: ui_t, list_handle: ui_handle_t, current_object: object_t) {
@@ -282,17 +295,15 @@ function tab_scene_draw(htab: ui_handle_t) {
 				}
 
 				if (ui_button("Duplicate")) {
-					let so: mesh_object_t = context_raw.selected_object.ext;
-					let dup: mesh_object_t = scene_add_mesh_object(so.data, so.materials, so.base.parent);
-					transform_set_matrix(dup.base.transform, so.base.transform.local);
-					array_push(project_paint_objects, dup);
-					dup.base.name = so.base.name;
+					sim_duplicate();
 				}
 			}
 		}
 
 		if (ui_button("Play")) {
 			sim_play();
+
+			context_raw.selected_object = scene_camera.base;
 		}
 		if (ui_button("Stop")) {
 			sim_stop();
