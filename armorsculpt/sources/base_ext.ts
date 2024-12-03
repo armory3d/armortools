@@ -22,3 +22,7 @@ function base_ext_render() {
 function base_ext_init_config(raw: config_t) {
 
 }
+
+function base_ext_update() {
+
+}

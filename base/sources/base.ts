@@ -464,6 +464,8 @@ function base_update() {
 	if (ui_always_redraw_window && context_raw.ddirty < 0) {
 		context_raw.ddirty = 0;
 	}
+
+	base_ext_update();
 }
 
 function base_material_dropped() {

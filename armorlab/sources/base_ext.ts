@@ -18,3 +18,7 @@ function base_ext_init_config(raw: config_t) {
 	raw.workspace = space_type_t.SPACE2D;
 	raw.node_preview = false;
 }
+
+function base_ext_update() {
+
+}
