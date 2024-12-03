@@ -5,10 +5,6 @@
 #include "rand.hlsl"
 
 void create_basis(float3 normal, out float3 tangent, out float3 binormal) {
-	// tangent = abs(normal.x) > abs(normal.y) ?
-	// 	normalize(float3(0.0, normal.z, -normal.y)) :
-	// 	normalize(float3(-normal.z, 0.0, normal.x));
-	// binormal = cross(normal, tangent);
 	float3 v1 = cross(normal, float3(0.0, 0.0, 1.0));
 	float3 v2 = cross(normal, float3(0.0, 1.0, 0.0));
 	tangent = length(v1) > length(v2) ? v1 : v2;

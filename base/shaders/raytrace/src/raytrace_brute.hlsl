@@ -5,8 +5,8 @@
 #define _TRANSLUCENCY
 #define _ROULETTE
 #define _TRANSPARENCY
-#endif
 #define _FRESNEL
+#endif
 // #define _RENDER
 
 #include "std/rand.hlsl"
@@ -74,7 +74,7 @@ void raygeneration() {
 		float2 screen_pos = xy / DispatchRaysDimensions().xy * 2.0 - 1.0;
 		RayDesc ray;
 		ray.TMin = 0.0001;
-		ray.TMax = 10.0;
+		ray.TMax = 100.0;
 		generate_camera_ray(screen_pos, ray.Origin, ray.Direction, constant_buffer.eye.xyz, constant_buffer.inv_vp);
 
 		RayPayload payload;
