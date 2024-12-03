@@ -2780,7 +2780,7 @@ void iron_mp4_end() {
 			continue;
 		}
 
-		int fps = 30;
+		int fps = 24;
 		mp4_h26x_write_nal(&mp4wr, buf, nal_size, 90000 / fps);
 		buf += nal_size;
 		buf_size -= nal_size;
@@ -2791,6 +2791,7 @@ void iron_mp4_end() {
 	free(iron_mp4_enc);
 	free(iron_mp4_scratch);
 	free(iron_mp4_yuv_buf);
+	fclose(fout);
 	fclose(iron_mp4_fp);
 	iron_mp4_fp = NULL;
 }
@@ -2817,7 +2818,7 @@ void iron_mp4_encode(buffer_t *pixels) {
 	H264E_run_param_t run_param = {0};
 	run_param.frame_type = 0;
     run_param.encode_speed = H264E_SPEED_SLOWEST; // H264E_SPEED_FASTEST;
-	run_param.desired_frame_bytes = 2048 * 1000 / 8 / 30; // 2048 kbps
+	run_param.desired_frame_bytes = (2048 * 4) * 1000 / 8 / 30; // 2048 * 4 kbps
 	run_param.qp_min = 10;
 	run_param.qp_max = 50;
 
