@@ -462,9 +462,9 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 		memory_allocate_info.pNext = &memory_allocate_flags_info2;
 		memory_allocate_info.allocationSize = memory_requirements2.size;
 		memory_type_from_properties(memory_requirements2.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &memory_allocate_info.memoryTypeIndex);
-		VkDeviceMemory mem;
-		vkAllocateMemory(vk_ctx.device, &memory_allocate_info, NULL, &mem);
-		vkBindBufferMemory(vk_ctx.device, bottom_level_buffer, mem, 0);
+		VkDeviceMemory bottom_level_mem;
+		vkAllocateMemory(vk_ctx.device, &memory_allocate_info, NULL, &bottom_level_mem);
+		vkBindBufferMemory(vk_ctx.device, bottom_level_buffer, bottom_level_mem, 0);
 
 		VkAccelerationStructureCreateInfoKHR acceleration_create_info = {0};
 		acceleration_create_info.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
@@ -565,6 +565,9 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 
 		vkFreeMemory(vk_ctx.device, scratch_memory, NULL);
 		vkDestroyBuffer(vk_ctx.device, scratch_buffer, NULL);
+
+		accel->impl.bottom_level_buffer[i] = bottom_level_buffer;
+		accel->impl.bottom_level_mem[i] = bottom_level_mem;
 	}
 
 	// Top level
@@ -598,17 +601,15 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 		memory_allocate_flags_info.flags = VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT_KHR;
 		mem_alloc.pNext = &memory_allocate_flags_info;
 
-		VkDeviceMemory mem;
-		vkAllocateMemory(vk_ctx.device, &mem_alloc, NULL, &mem);
+		VkDeviceMemory instances_mem;
+		vkAllocateMemory(vk_ctx.device, &mem_alloc, NULL, &instances_mem);
 
-		vkBindBufferMemory(vk_ctx.device, instances_buffer, mem, 0);
+		vkBindBufferMemory(vk_ctx.device, instances_buffer, instances_mem, 0);
 		void *data;
-		vkMapMemory(vk_ctx.device, mem, 0, sizeof(VkAccelerationStructureInstanceKHR), 0, (void **)&data);
+		vkMapMemory(vk_ctx.device, instances_mem, 0, sizeof(VkAccelerationStructureInstanceKHR), 0, (void **)&data);
 
 		int ib_off = 0;
-
 		for (int i = 0; i < vb_count; ++i) {
-
 			VkTransformMatrixKHR transform_matrix = {
 				transforms[i].m[0],
 				transforms[i].m[4],
@@ -623,7 +624,6 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 				transforms[i].m[10],
 				transforms[i].m[14]
 			};
-
 			VkAccelerationStructureInstanceKHR instance = {0};
 			instance.transform = transform_matrix;
 			instance.instanceCustomIndex = ib_off;
@@ -632,11 +632,10 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 			instance.instanceShaderBindingTableRecordOffset = 0;
 			instance.flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
 			instance.accelerationStructureReference = accel->impl.bottom_level_acceleration_structure_handle[i];
-
 			memcpy(data + i * sizeof(VkAccelerationStructureInstanceKHR), &instance, sizeof(VkAccelerationStructureInstanceKHR));
 		}
 
-		vkUnmapMemory(vk_ctx.device, mem);
+		vkUnmapMemory(vk_ctx.device, instances_mem);
 
 		VkDeviceOrHostAddressConstKHR instance_data_device_address = {0};
 		instance_data_device_address.deviceAddress = get_buffer_device_address(instances_buffer);
@@ -683,8 +682,9 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 		memory_allocate_info.pNext = &memory_allocate_flags_info;
 		memory_allocate_info.allocationSize = memory_requirements2.size;
 		memory_type_from_properties(memory_requirements2.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &memory_allocate_info.memoryTypeIndex);
-		vkAllocateMemory(vk_ctx.device, &memory_allocate_info, NULL, &mem);
-		vkBindBufferMemory(vk_ctx.device, top_level_buffer, mem, 0);
+		VkDeviceMemory top_level_mem;
+		vkAllocateMemory(vk_ctx.device, &memory_allocate_info, NULL, &top_level_mem);
+		vkBindBufferMemory(vk_ctx.device, top_level_buffer, top_level_mem, 0);
 
 		VkAccelerationStructureCreateInfoKHR acceleration_create_info = {0};
 		acceleration_create_info.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
@@ -786,6 +786,11 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 
 		vkFreeMemory(vk_ctx.device, scratch_memory, NULL);
 		vkDestroyBuffer(vk_ctx.device, scratch_buffer, NULL);
+
+		accel->impl.top_level_buffer = top_level_buffer;
+		accel->impl.top_level_mem = top_level_mem;
+		accel->impl.instances_buffer = instances_buffer;
+		accel->impl.instances_mem = instances_mem;
 	}
 
 	{
@@ -910,8 +915,14 @@ void kinc_raytrace_acceleration_structure_destroy(kinc_raytrace_acceleration_str
 	_vkDestroyAccelerationStructureKHR = (void *)vkGetDeviceProcAddr(vk_ctx.device, "vkDestroyAccelerationStructureKHR");
 	for (int i = 0; i < vb_count; ++i) {
 		_vkDestroyAccelerationStructureKHR(vk_ctx.device, accel->impl.bottom_level_acceleration_structure[i], NULL);
+		vkFreeMemory(vk_ctx.device, accel->impl.bottom_level_mem[i], NULL);
+		vkDestroyBuffer(vk_ctx.device, accel->impl.bottom_level_buffer[i], NULL);
 	}
 	_vkDestroyAccelerationStructureKHR(vk_ctx.device, accel->impl.top_level_acceleration_structure, NULL);
+	vkFreeMemory(vk_ctx.device, accel->impl.top_level_mem, NULL);
+	vkDestroyBuffer(vk_ctx.device, accel->impl.top_level_buffer, NULL);
+	vkFreeMemory(vk_ctx.device, accel->impl.instances_mem, NULL);
+	vkDestroyBuffer(vk_ctx.device, accel->impl.instances_buffer, NULL);
 }
 
 void kinc_raytrace_set_textures(kinc_g5_render_target_t *_texpaint0, kinc_g5_render_target_t *_texpaint1, kinc_g5_render_target_t *_texpaint2, kinc_g5_texture_t *_texenv, kinc_g5_texture_t *_texsobol, kinc_g5_texture_t *_texscramble, kinc_g5_texture_t *_texrank) {
