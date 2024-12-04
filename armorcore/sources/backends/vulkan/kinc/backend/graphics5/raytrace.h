@@ -20,12 +20,12 @@ typedef struct {
 
 typedef struct {
 	VkAccelerationStructureKHR top_level_acceleration_structure;
-	VkAccelerationStructureKHR bottom_level_acceleration_structure[64];
+	VkAccelerationStructureKHR bottom_level_acceleration_structure[16];
 	uint64_t top_level_acceleration_structure_handle;
-	uint64_t bottom_level_acceleration_structure_handle[64];
+	uint64_t bottom_level_acceleration_structure_handle[16];
 
-	VkBuffer bottom_level_buffer[64];
-	VkDeviceMemory bottom_level_mem[64];
+	VkBuffer bottom_level_buffer[16];
+	VkDeviceMemory bottom_level_mem[16];
 	VkBuffer top_level_buffer;
 	VkDeviceMemory top_level_mem;
 	VkBuffer instances_buffer;

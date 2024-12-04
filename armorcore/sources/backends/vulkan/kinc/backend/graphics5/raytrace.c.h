@@ -24,6 +24,11 @@ static const char *raygen_shader_name = "raygeneration";
 static const char *closesthit_shader_name = "closesthit";
 static const char *miss_shader_name = "miss";
 
+typedef struct inst {
+	kinc_matrix4x4_t m;
+	int i;
+} inst_t;
+
 static VkDescriptorPool raytrace_descriptor_pool;
 static kinc_raytrace_acceleration_structure_t *accel;
 static kinc_raytrace_pipeline_t *pipeline;
@@ -35,10 +40,11 @@ static kinc_g5_texture_t *texenv;
 static kinc_g5_texture_t *texsobol;
 static kinc_g5_texture_t *texscramble;
 static kinc_g5_texture_t *texrank;
-static kinc_matrix4x4_t transforms[64];
-static kinc_g5_vertex_buffer_t *vb[64];
-static kinc_g5_index_buffer_t *ib[64];
+static kinc_g5_vertex_buffer_t *vb[16];
+static kinc_g5_index_buffer_t *ib[16];
 static int vb_count = 0;
+static inst_t instances[1024];
+static int instances_count = 0;
 static VkBuffer vb_full = VK_NULL_HANDLE;
 static VkBuffer ib_full = VK_NULL_HANDLE;
 static VkDeviceMemory vb_full_mem = VK_NULL_HANDLE;
@@ -391,15 +397,29 @@ void kinc_raytrace_acceleration_structure_init(kinc_raytrace_acceleration_struct
 	_vkGetAccelerationStructureBuildSizesKHR = (void *)vkGetDeviceProcAddr(vk_ctx.device, "vkGetAccelerationStructureBuildSizesKHR");
 
 	vb_count = 0;
+	instances_count = 0;
 }
 
 void kinc_raytrace_acceleration_structure_add(kinc_raytrace_acceleration_structure_t *accel, kinc_g5_vertex_buffer_t *_vb, kinc_g5_index_buffer_t *_ib,
 	kinc_matrix4x4_t _transform) {
 
-	transforms[vb_count] = _transform;
-	vb[vb_count] = _vb;
-	ib[vb_count] = _ib;
-	vb_count++;
+	int vb_i = -1;
+	for (int i = 0; i < vb_count; ++i) {
+		if (_vb == vb[i]) {
+			vb_i = i;
+			break;
+		}
+	}
+	if (vb_i == -1) {
+		vb_i = vb_count;
+		vb[vb_count] = _vb;
+		ib[vb_count] = _ib;
+		vb_count++;
+	}
+
+	inst_t inst = { .i = vb_i, .m =  _transform };
+	instances[instances_count] = inst;
+	instances_count++;
 }
 
 void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_structure_t *accel, kinc_g5_command_list_t *command_list,
@@ -576,7 +596,7 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 		VkBufferCreateInfo buf_info = {0};
 		buf_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 		buf_info.pNext = NULL;
-		buf_info.size = vb_count * sizeof(VkAccelerationStructureInstanceKHR);
+		buf_info.size = instances_count * sizeof(VkAccelerationStructureInstanceKHR);
 		buf_info.usage = VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
 		buf_info.flags = 0;
 
@@ -609,29 +629,29 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 		vkMapMemory(vk_ctx.device, instances_mem, 0, sizeof(VkAccelerationStructureInstanceKHR), 0, (void **)&data);
 
 		int ib_off = 0;
-		for (int i = 0; i < vb_count; ++i) {
+		for (int i = 0; i < instances_count; ++i) {
 			VkTransformMatrixKHR transform_matrix = {
-				transforms[i].m[0],
-				transforms[i].m[4],
-				transforms[i].m[8],
-				transforms[i].m[12],
-				transforms[i].m[1],
-				transforms[i].m[5],
-				transforms[i].m[9],
-				transforms[i].m[13],
-				transforms[i].m[2],
-				transforms[i].m[6],
-				transforms[i].m[10],
-				transforms[i].m[14]
+				instances[i].m.m[0],
+				instances[i].m.m[4],
+				instances[i].m.m[8],
+				instances[i].m.m[12],
+				instances[i].m.m[1],
+				instances[i].m.m[5],
+				instances[i].m.m[9],
+				instances[i].m.m[13],
+				instances[i].m.m[2],
+				instances[i].m.m[6],
+				instances[i].m.m[10],
+				instances[i].m.m[14]
 			};
 			VkAccelerationStructureInstanceKHR instance = {0};
 			instance.transform = transform_matrix;
 			instance.instanceCustomIndex = ib_off;
-			ib_off += ib[i]->impl.count * 4;
+			ib_off += ib[instances[i].i]->impl.count * 4;
 			instance.mask = 0xFF;
 			instance.instanceShaderBindingTableRecordOffset = 0;
 			instance.flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
-			instance.accelerationStructureReference = accel->impl.bottom_level_acceleration_structure_handle[i];
+			instance.accelerationStructureReference = accel->impl.bottom_level_acceleration_structure_handle[instances[i].i];
 			memcpy(data + i * sizeof(VkAccelerationStructureInstanceKHR), &instance, sizeof(VkAccelerationStructureInstanceKHR));
 		}
 
@@ -658,7 +678,7 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 		VkAccelerationStructureBuildSizesInfoKHR acceleration_build_sizes_info = {0};
 		acceleration_build_sizes_info.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
 
-		uint32_t instance_count = vb_count;
+		uint32_t instance_count = instances_count;
 
 		_vkGetAccelerationStructureBuildSizesKHR(vk_ctx.device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &acceleration_structure_build_geometry_info,
 		                                         &instance_count, &acceleration_build_sizes_info);
@@ -732,7 +752,7 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 		acceleration_build_geometry_info.scratchData.deviceAddress = scratch_buffer_device_address;
 
 		VkAccelerationStructureBuildRangeInfoKHR acceleration_build_range_info = {0};
-		acceleration_build_range_info.primitiveCount = vb_count;
+		acceleration_build_range_info.primitiveCount = instances_count;
 		acceleration_build_range_info.primitiveOffset = 0x0;
 		acceleration_build_range_info.firstVertex = 0;
 		acceleration_build_range_info.transformOffset = 0x0;
@@ -890,7 +910,7 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 
 		// uint8_t *data;
 		// vkMapMemory(vk_ctx.device, ib_full_mem, 0, mem_alloc.allocationSize, 0, (void **)&data);
-		// for (int i = 0; i < vb_count; ++i) {
+		// for (int i = 0; i < instances_count; ++i) {
 		// 	memcpy(data, ib[i]->impl., sizeof(VkAccelerationStructureInstanceKHR));
 		// }
 		// vkUnmapMemory(vk_ctx.device, ib_full_mem);
