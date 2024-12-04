@@ -430,7 +430,7 @@ function context_create(): context_t {
 	c.brush_opacity_handle.value = 1.0;
 	///if is_forge
 	let atlas_w: i32 = 8192; // config_get_texture_res();
-	let item_w: i32 = 4096;
+	let item_w: i32 = 2048;
 	let atlas_stride: i32 = atlas_w / item_w;
 	c.brush_scale = atlas_stride;
 	///else

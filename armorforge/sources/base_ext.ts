@@ -1,6 +1,11 @@
 
 function base_ext_init() {
 	sim_init();
+
+	object_remove(scene_lights[0].base);
+
+	// 	project_paint_objects[0].base.visible = false;
+	// 	tab_scene_new_object("box.arm");
 }
 
 function base_ext_render() {

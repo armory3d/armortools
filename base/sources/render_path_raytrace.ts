@@ -160,6 +160,9 @@ function render_path_raytrace_raytrace_init(shader_name: string, build: bool = t
 		///if is_forge
 		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 			let po: mesh_object_t = project_paint_objects[i];
+			if (!po.base.visible) {
+				continue;
+			}
 			iron_raytrace_as_add(po.data._.vertex_buffer.buffer_, po.data._.index_buffers[0].buffer_, po.base.transform.world_unpack);
 		}
 		///else

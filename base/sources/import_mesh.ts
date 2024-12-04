@@ -219,7 +219,7 @@ function _import_mesh_add_mesh(mesh: raw_mesh_t) {
 	// Scale tex coords into global atlas
 	let atlas_w: i32 = config_get_texture_res();
 	let item_i: i32 = project_paint_objects.length;
-	let item_w: i32 = 4096;
+	let item_w: i32 = 2048;
 	let atlas_stride: i32 = atlas_w / item_w;
 	let atlas_step: i32 = 32767 / atlas_stride;
 	let item_x: i32 = (item_i % atlas_stride) * atlas_step;

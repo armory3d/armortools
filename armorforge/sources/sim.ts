@@ -70,6 +70,10 @@ function sim_add(o: object_t, shape: physics_shape_t, mass: f32) {
     physics_body_init(body, o);
 }
 
+function sim_remove(uid: i32) {
+    physics_body_remove(uid);
+}
+
 function sim_duplicate() {
     // Mesh
     let so: mesh_object_t = context_raw.selected_object.ext;

@@ -7,6 +7,7 @@ function ui_base_ext_init_hwnd_tabs(): tab_draw_array_t[] {
 		_draw_callback_create(tab_plugins_draw)
 	];
 	let a1: tab_draw_array_t = [
+		_draw_callback_create(tab_object_draw),
 		_draw_callback_create(tab_materials_draw),
 		_draw_callback_create(tab_particles_draw)
 	];

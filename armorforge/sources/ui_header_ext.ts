@@ -14,4 +14,12 @@ function ui_header_draw_tool_properties(ui: ui_t) {
         let h_record: ui_handle_t = ui_handle(__ID__);
         let record: bool = ui_check(h_record, tr("Record"));
 	}
+
+	else if (context_raw.tool == workspace_tool_t.FILL) {
+		let brush_scale_handle: ui_handle_t = ui_handle(__ID__);
+		if (brush_scale_handle.init) {
+			brush_scale_handle.value = context_raw.brush_scale;
+		}
+		context_raw.brush_scale = ui_slider(brush_scale_handle, tr("UV Scale"), 0.01, 5.0, true);
+	}
 }
