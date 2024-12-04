@@ -29,11 +29,15 @@ function util_render_make_material_preview() {
 	let saved_fov: f32 = scene_camera.data.fov;
 	scene_camera.data.fov = 0.92;
 	viewport_update_camera_type(camera_type_t.PERSPECTIVE);
-	let light: light_object_t = scene_lights[0];
-	let _light_strength: f32 = light.data.strength;
+
+	let light: light_object_t = scene_lights.length > 0 ? scene_lights[0]: null;
+	let _light_strength: f32 = light != null ? light.data.strength : 0.0;
+	if (light != null) {
+		light.data.strength = 0;
+	}
+
 	let probe: world_data_t = scene_world;
 	let _probe_strength: f32 = probe.strength;
-	light.data.strength = 0;
 	probe.strength = 7;
 	let _envmap_angle: f32 = context_raw.envmap_angle;
 	context_raw.envmap_angle = 6.0;
@@ -69,7 +73,11 @@ function util_render_make_material_preview() {
 	scene_camera.data.fov = saved_fov;
 	camera_object_build_proj(scene_camera);
 	camera_object_build_mat(scene_camera);
-	light.data.strength = _light_strength;
+
+	if (light != null) {
+		light.data.strength = _light_strength;
+	}
+
 	probe.strength = _probe_strength;
 	context_raw.envmap_angle = _envmap_angle;
 	context_raw.brush_scale = _brush_scale;
