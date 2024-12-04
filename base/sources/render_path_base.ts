@@ -45,7 +45,7 @@ function render_path_base_apply_config() {
 		let keys: string[] = map_keys(render_path_render_targets);
 		for (let i: i32 = 0; i < keys.length; ++i) {
 			let rt: render_target_t = map_get(render_path_render_targets, keys[i]);
-			if (rt.width == 0 && rt.scale != 1.0) {
+			if (rt.width == 0) {
 				rt.scale = render_path_base_super_sample;
 			}
 		}
