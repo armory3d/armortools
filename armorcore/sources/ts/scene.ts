@@ -770,6 +770,11 @@ type obj_t = {
 	anim?: anim_t; // Bone/object animation
 	material_refs?: string[];
 	children?: obj_t[];
+	_?: obj_runtime_t;
+};
+
+type obj_runtime_t = {
+	_gc?: scene_t; // Link to armpack_decode result
 };
 
 type particles_t = {
