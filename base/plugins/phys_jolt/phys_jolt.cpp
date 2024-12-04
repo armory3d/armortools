@@ -113,6 +113,13 @@ public:
 	}
 };
 
+typedef enum {
+	physics_shape_BOX = 0,
+	physics_shape_SPHERE = 1,
+	physics_shape_HULL = 2,
+	physics_shape_MESH = 3,
+} physics_shape_t;
+
 BPLayerInterfaceImpl broad_phase_layer_interface;
 ObjectVsBroadPhaseLayerFilterImpl object_vs_broadphase_layer_filter;
 ObjectLayerPairFilterImpl object_vs_object_layer_filter;
@@ -176,20 +183,17 @@ void *_jolt_body_create(int shape, float mass, float dimx, float dimy, float dim
 	// 	if (dimz <= 0.2) dimz = 0.21;
 	// }
 
-	if (shape == 0) {
-		// Box
+	if (shape == physics_shape_BOX) {
 		BoxShapeSettings shape_settings(RVec3(dimx / 2.0, dimy / 2.0, dimz / 2.0), convex_radius);
 		shape_settings.SetEmbedded();
 		result = shape_settings.Create();
 	}
-	else if (shape == 1) {
-		// Sphere
+	else if (shape == physics_shape_SPHERE) {
 		SphereShapeSettings shape_settings(dimx / 2.0);
 		shape_settings.SetEmbedded();
 		result = shape_settings.Create();
 	}
-	else if (shape == 3) {
-		// Hull
+	else if (shape == physics_shape_HULL) {
 		f32_array_t *f32a = (f32_array_t *)f32a_triangles;
 
 		JPH::Array<JPH::Vec3> points;
@@ -233,7 +237,7 @@ void *_jolt_body_create(int shape, float mass, float dimx, float dimy, float dim
 #endif
 
 	// if (ccd) {
-	if (shape != 2) { // != Mesh
+	if (shape != physics_shape_MESH) {
 		settings.mMotionQuality = EMotionQuality::LinearCast;
 
 		MassProperties mass_prop;
@@ -284,6 +288,12 @@ void _jolt_body_sync_transform(void *b, vec4_t p, quat_t r) {
 	body_interface.SetAngularVelocity(body->GetID(), RVec3(0, 0, 0));
 }
 
+void _jolt_body_remove(void *b) {
+	BodyInterface &body_interface = physics_system->GetBodyInterface();
+	Body *body = (Body *)b;
+	body_interface.RemoveBody(body->GetID());
+}
+
 extern "C" {
     void jolt_world_create() {
         _jolt_world_create();
@@ -319,5 +329,9 @@ extern "C" {
 
 	void jolt_body_sync_transform(void *b, vec4_t p, quat_t r) {
 		_jolt_body_sync_transform(b, p, r);
+	}
+
+	void jolt_body_remove(void *b) {
+		_jolt_body_remove(b);
 	}
 }

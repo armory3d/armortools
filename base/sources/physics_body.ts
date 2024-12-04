@@ -8,6 +8,7 @@ declare function jolt_body_apply_impulse(body: any, x: f32, y: f32, z: f32): voi
 declare function jolt_body_get_pos(body: any, pos: vec4_t): void;
 declare function jolt_body_get_rot(body: any, rot: quat_t): void;
 declare function jolt_body_sync_transform(body: any, pos: vec4_t, rot: quat_t): void;
+declare function jolt_body_remove(body: any): void;
 
 type physics_body_t = {
 	_body?: any;
@@ -22,8 +23,8 @@ type physics_body_t = {
 enum physics_shape_t {
 	BOX = 0,
 	SPHERE = 1,
-	MESH = 2,
-	HULL = 3,
+	HULL = 2,
+	MESH = 3,
 }
 
 let physics_body_object_map: map_t<i32, physics_body_t> = map_create();
@@ -80,6 +81,15 @@ function physics_body_init(body: physics_body_t, obj: object_t) {
 
 	let loc: vec4_t = obj.transform.loc;
 	body._body = jolt_body_create(body.shape, body.mass, body.dimx, body.dimy, body.dimz, loc.x, loc.y, loc.z, triangles);
+}
+
+function physics_body_remove(uid: i32) {
+	let body: physics_body_t = map_get(physics_body_object_map, uid);
+	if (body == null) {
+		return;
+	}
+	map_delete(physics_body_object_map, uid);
+	jolt_body_remove(body._body);
 }
 
 function physics_body_apply_impulse(body: physics_body_t, dir: vec4_t) {

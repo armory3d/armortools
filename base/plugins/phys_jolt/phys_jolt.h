@@ -24,6 +24,7 @@ void jolt_body_apply_impulse(void *b, float x, float y, float z);
 void jolt_body_get_pos(void *b, void *p);
 void jolt_body_get_rot(void *b, void *r);
 void jolt_body_sync_transform(void *b, vec4_t p, quat_t r);
+void jolt_body_remove(void *b);
 
 #ifdef __cplusplus
 }
