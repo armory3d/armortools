@@ -531,6 +531,9 @@ function layers_new_group(): slot_layer_t {
 }
 
 function layers_create_fill_layer(uv_type: uv_type_t = uv_type_t.UVMAP, decal_mat: mat4_t = mat4nan, position: i32 = -1) {
+	///if is_forge
+	return;
+	///end
 	_layers_uv_type = uv_type;
 	_layers_decal_mat = decal_mat;
 	_layers_position = position;

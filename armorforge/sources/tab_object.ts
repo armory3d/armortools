@@ -162,6 +162,30 @@ function tab_object_draw(htab: ui_handle_t) {
                     sim_add(context_raw.selected_object, hshape.position - 1, hdynamic.selected ? 1.0 : 0.0);
                 }
 			}
+
+            ui_text("Script", ui_align_t.LEFT, ui.ops.theme.SEPARATOR_COL);
+
+            let script: string = map_get(sim_object_script_map, context_raw.selected_object);
+            if (script == null) {
+                script = "";
+            }
+
+            let hscript: ui_handle_t = ui_handle(__ID__);
+            hscript.text = script;
+
+            let _font: g2_font_t = ui.ops.font;
+            let _font_size: i32 = ui.font_size;
+            let fmono: g2_font_t = data_get_font("font_mono.ttf");
+            ui_set_font(ui, fmono);
+            ui.font_size = math_floor(15 * ui_SCALE(ui));
+            ui_text_area_coloring = tab_script_get_text_coloring();
+            ui_text_area(hscript);
+            ui_text_area_coloring = null;
+            ui_set_font(ui, _font);
+            ui.font_size = _font_size;
+
+            script = hscript.text;
+            map_set(sim_object_script_map, context_raw.selected_object, script);
         }
     }
 }

@@ -110,9 +110,10 @@ function tab_scene_draw_list(ui: ui_t, list_handle: ui_handle_t, current_object:
 function tab_scene_new_object(mesh_name: string) {
 	let blob: buffer_t = iron_load_blob(data_path() + "meshes/" + mesh_name);
 	let raw: scene_t = armpack_decode(blob);
+	util_mesh_ext_pack_uvs(raw.mesh_datas[0].vertex_arrays[2].values);
 	let md: mesh_data_t = mesh_data_create(raw.mesh_datas[0]);
 	md._.handle = md.name;
-	let mo: mesh_object_t = scene_add_mesh_object(md, scene_meshes[0].materials);
+	let mo: mesh_object_t = scene_add_mesh_object(md, project_paint_objects[0].materials);
 	mo.base.name = md.name;
 	let o: obj_t = {};
 	o._ = { _gc: raw };

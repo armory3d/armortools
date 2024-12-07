@@ -1,6 +1,7 @@
 
 let sim_running: bool = false;
 let sim_transforms: mat4_box_t[];
+let sim_object_script_map: map_t<object_t, string> = map_create();
 
 function sim_init() {
     physics_world_create();
@@ -14,6 +15,15 @@ function sim_update() {
         // if (render_path_raytrace_frame != 1) {
             // return;
         // }
+
+        let objects: object_t[] = map_keys(sim_object_script_map);
+        for (let i: i32 = 0; i < objects.length; ++i) {
+            let o: object_t = objects[i];
+            let s: string = map_get(sim_object_script_map, o);
+            let addr: string = i64_to_string((i64)(o.transform));
+            s = "{let transform=" + addr + ";" + s + "}";
+            js_eval(s);
+        }
 
         let world: physics_world_t = physics_world_active;
 	    physics_world_update(world);
@@ -35,8 +45,12 @@ function sim_update() {
 
 function sim_play() {
     sim_running = true;
-    let rt: render_target_t = map_get(render_path_render_targets, "taa");
-    iron_mp4_begin("/home/lubos/Desktop/test.mp4", rt._image.width, rt._image.height);
+
+    let record: bool = false;
+    if (record) {
+        let rt: render_target_t = map_get(render_path_render_targets, "taa");
+        iron_mp4_begin("/home/lubos/Desktop/test.mp4", rt._image.width, rt._image.height);
+    }
 
     // Save transforms
     sim_transforms = [];
@@ -49,7 +63,11 @@ function sim_play() {
 
 function sim_stop() {
     sim_running = false;
-    iron_mp4_end();
+
+    let record: bool = false;
+    if (record) {
+        iron_mp4_end();
+    }
 
     // Restore transforms
     let pos: mesh_object_t[] = project_paint_objects;
