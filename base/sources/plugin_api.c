@@ -6,6 +6,8 @@
 #include "iron_map.h"
 #include "iron_armpack.h"
 #include "iron_obj.h"
+#include "iron_vec4.h"
+#include "iron_mat4.h"
 
 void plugin_embed();
 
@@ -770,6 +772,19 @@ FN(plugin_api_make_raw_mesh) {
 	return JS_NewInt64(ctx, (int64_t)mesh);
 }
 
+void transform_rotate(void *raw, vec4_t axis, float f);
+FN(transform_rotate) {
+	int64_t p;
+	JS_ToInt64(ctx, &p, argv[0]);
+	vec4_t axis;
+	axis.x = 0.0;
+	axis.y = 0.0;
+	axis.z = 1.0;
+	float f = 0.05;
+	transform_rotate((void *)p, axis, f);
+	return JS_UNDEFINED;
+}
+
 void plugin_api_init() {
 	JSValue global_obj = JS_GetGlobalObject(js_ctx);
 
@@ -829,6 +844,8 @@ void plugin_api_init() {
 	BIND(path_texture_importers_delete, 1);
 
 	BIND(plugin_api_make_raw_mesh, 5);
+
+	BIND(transform_rotate, 3);
 
 	plugin_embed();
 
