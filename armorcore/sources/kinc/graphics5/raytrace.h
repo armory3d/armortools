@@ -37,7 +37,6 @@ typedef struct kinc_raytrace_acceleration_structure {
 
 void kinc_raytrace_acceleration_structure_init(kinc_raytrace_acceleration_structure_t *accel);
 void kinc_raytrace_acceleration_structure_add(kinc_raytrace_acceleration_structure_t *accel, struct kinc_g5_vertex_buffer *vb, struct kinc_g5_index_buffer *ib, kinc_matrix4x4_t transform);
-void kinc_raytrace_acceleration_structure_update(kinc_raytrace_acceleration_structure_t *accel, int id, kinc_matrix4x4_t transform);
 void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_structure_t *accel, struct kinc_g5_command_list *command_list,
     struct kinc_g5_vertex_buffer *_vb_full, struct kinc_g5_index_buffer *_ib_full);
 void kinc_raytrace_acceleration_structure_destroy(kinc_raytrace_acceleration_structure_t *accel);
