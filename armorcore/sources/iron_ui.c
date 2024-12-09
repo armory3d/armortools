@@ -2010,6 +2010,7 @@ char *ui_text_input(ui_handle_t *handle, char *label, int align, bool editable, 
 	}
 	if (current->text_selected_handle == handle) {
 		ui_update_text_edit(align, editable, live_update);
+		current->current_window->redraws = 2; // Keep redrawing window while typing
 	}
 	if (current->submit_text_handle == handle) {
 		ui_submit_text_edit();
