@@ -215,7 +215,9 @@ function camera_get_zoom_speed(): f32 {
 	let sign: i32 = config_raw.zoom_direction == zoom_direction_t.VERTICAL_INVERTED ||
 					config_raw.zoom_direction == zoom_direction_t.HORIZONTAL_INVERTED ||
 					config_raw.zoom_direction == zoom_direction_t.VERTICAL_HORIZONTAL_INVERTED ? -1 : 1;
-	return config_raw.camera_zoom_speed * sign;
+	let camera: camera_object_t = scene_camera;
+	let fov_adjust: f32 = camera.data.fov;
+	return (config_raw.camera_zoom_speed * sign) / fov_adjust;
 }
 
 function camera_reset(view_index: i32 = -1) {
