@@ -22,6 +22,9 @@ project.add_assets("assets/keymap_presets/*", { destination: "data/keymap_preset
 project.add_assets("assets/licenses/**", { destination: "data/licenses/{name}" });
 project.add_assets("assets/plugins/*", { destination: "data/plugins/{name}" });
 project.add_assets("../armorpaint/assets/plugins/hello_world.js", { destination: "data/plugins/{name}" });
+project.add_assets("../armorpaint/assets/plugins/import_fbx.js", { destination: "data/plugins/{name}" });
+project.add_assets("../armorpaint/assets/plugins/import_gltf_glb.js", { destination: "data/plugins/{name}" });
+project.add_assets("../armorpaint/assets/plugins/uv_unwrap.js", { destination: "data/plugins/{name}" });
 project.add_assets("assets/meshes/*", { destination: "data/meshes/{name}", noembed: true });
 project.add_assets("assets/readme/readme.txt", { destination: "{name}" });
 
