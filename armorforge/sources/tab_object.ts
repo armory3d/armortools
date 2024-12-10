@@ -157,9 +157,9 @@ function tab_object_draw(htab: ui_handle_t) {
             ui_check(hdynamic, "Dynamic");
 
             if (hshape.changed || hdynamic.changed) {
-                sim_remove(context_raw.selected_object.uid);
+                sim_remove_body(context_raw.selected_object.uid);
                 if (hshape.position > 0) {
-                    sim_add(context_raw.selected_object, hshape.position - 1, hdynamic.selected ? 1.0 : 0.0);
+                    sim_add_body(context_raw.selected_object, hshape.position - 1, hdynamic.selected ? 1.0 : 0.0);
                 }
 			}
 

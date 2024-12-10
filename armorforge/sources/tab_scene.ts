@@ -88,6 +88,9 @@ function tab_scene_draw_list(ui: ui_t, list_handle: ui_handle_t, current_object:
 			if (ui_menu_button(ui, tr("Duplicate"))) {
 				sim_duplicate();
 			}
+			if (ui_menu_button(ui, tr("Delete"))) {
+				sim_delete();
+			}
 		});
 	}
 

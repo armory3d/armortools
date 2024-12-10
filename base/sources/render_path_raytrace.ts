@@ -32,11 +32,12 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 	if (!render_path_raytrace_ready || render_path_raytrace_is_bake) {
 		render_path_raytrace_ready = true;
 		render_path_raytrace_is_bake = false;
-		let mode: string = context_raw.pathtrace_mode == path_trace_mode_t.CORE ? "core" : "full";
+		let ext: string = "";
 		///if is_forge
-		mode = "forge";
+		ext = "forge_";
 		///end
-		render_path_raytrace_raytrace_init("raytrace_brute_" + mode + render_path_raytrace_ext);
+		let mode: string = context_raw.pathtrace_mode == path_trace_mode_t.CORE ? "core" : "full";
+		render_path_raytrace_raytrace_init("raytrace_brute_" + ext + mode + render_path_raytrace_ext);
 		render_path_raytrace_last_envmap = null;
 	}
 

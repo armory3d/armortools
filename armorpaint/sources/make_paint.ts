@@ -257,9 +257,13 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		node_shader_write(frag, "float height = " + height + ";");
 		node_shader_write(frag, "float mat_opacity = " + opac + ";");
 		node_shader_write(frag, "float opacity = mat_opacity;");
+		///if is_forge
+		node_shader_write(frag, "opacity = 1.0;");
+		///else
 		if (context_raw.layer.fill_layer == null) {
 			node_shader_write(frag, "opacity *= brush_opacity;");
 		}
+		///end
 		if (context_raw.material.paint_emis) {
 			node_shader_write(frag, "float emis = " + emis + ";");
 		}
@@ -449,7 +453,11 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 			node_shader_add_uniform(frag, "sampler2D texpaint_pack_undo", "_texpaint_pack_undo");
 			node_shader_write(frag, "vec4 sample_nor_undo = textureLod(texpaint_nor_undo, sample_tc, 0.0);");
 			node_shader_write(frag, "vec4 sample_pack_undo = textureLod(texpaint_pack_undo, sample_tc, 0.0);");
+			///if is_forge
+			node_shader_write(frag, "frag_color[0] = vec4(" + make_material_blend_mode(frag, context_raw.brush_blending, "sample_undo.rgb", "basecol", "str") + ", mat_opacity);");
+			///else
 			node_shader_write(frag, "frag_color[0] = vec4(" + make_material_blend_mode(frag, context_raw.brush_blending, "sample_undo.rgb", "basecol", "str") + ", max(str, sample_undo.a));");
+			///end
 			node_shader_write(frag, "frag_color[1] = vec4(mix(sample_nor_undo.rgb, nortan, str), matid);");
 			if (context_raw.material.paint_height && make_material_height_used) {
 				node_shader_write(frag, "frag_color[2] = mix(sample_pack_undo, vec4(occlusion, roughness, metallic, height), str);");

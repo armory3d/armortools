@@ -81,14 +81,14 @@ function sim_stop() {
     }
 }
 
-function sim_add(o: object_t, shape: physics_shape_t, mass: f32) {
+function sim_add_body(o: object_t, shape: physics_shape_t, mass: f32) {
     let body: physics_body_t = physics_body_create();
     body.shape = shape;
     body.mass = mass;
     physics_body_init(body, o);
 }
 
-function sim_remove(uid: i32) {
+function sim_remove_body(uid: i32) {
     physics_body_remove(uid);
 }
 
@@ -112,4 +112,11 @@ function sim_duplicate() {
         pbdup.mass = pb.mass;
         physics_body_init(pbdup, dup.base);
     }
+}
+
+function sim_delete() {
+    let so: mesh_object_t = context_raw.selected_object.ext;
+    array_remove(project_paint_objects, so);
+    mesh_object_remove(so);
+    sim_remove_body(so.base.uid);
 }

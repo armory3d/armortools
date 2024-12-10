@@ -56,6 +56,14 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 			g2_set_pipeline(null);
 			g2_end();
 
+			///if is_forge
+			// Do not multiply basecol by alpha
+			g2_begin(layers_expa); // Copy to temp
+			g2_set_pipeline(pipes_copy);
+			g2_draw_image(l1.texpaint, 0, 0);
+			g2_set_pipeline(null);
+			g2_end();
+			///else
 			g4_begin(layers_expa);
 			g4_set_pipeline(pipes_merge);
 			g4_set_tex(pipes_tex0, l1.texpaint);
@@ -68,6 +76,7 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 			g4_set_index_buffer(const_data_screen_aligned_ib);
 			g4_draw();
 			g4_end();
+			///end
 		}
 
 		if (l1.paint_nor) {

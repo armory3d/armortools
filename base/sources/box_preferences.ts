@@ -602,10 +602,11 @@ function box_preferences_show() {
 			if (hpathtrace_mode.init) {
 				hpathtrace_mode.position = context_raw.pathtrace_mode;
 			}
-			let pathtrace_mode_combo: string[] = [tr("Core"), tr("Full")];
+			let pathtrace_mode_combo: string[] = [tr("Fast"), tr("Quality")];
 			context_raw.pathtrace_mode = ui_combo(hpathtrace_mode, pathtrace_mode_combo, tr("Path Tracer"), true);
 			if (hpathtrace_mode.changed) {
 				render_path_raytrace_ready = false;
+				render_path_raytrace_first = true;
 			}
 
 			///end
@@ -614,7 +615,7 @@ function box_preferences_show() {
 			if (hrender_mode.init) {
 				hrender_mode.position = context_raw.render_mode;
 			}
-			let render_mode_combo: string[] = [tr("Full"), tr("Mobile")];
+			let render_mode_combo: string[] = [tr("Desktop"), tr("Mobile")];
 			context_raw.render_mode = ui_combo(hrender_mode, render_mode_combo, tr("Renderer"), true);
 			if (hrender_mode.changed) {
 				context_set_render_path();
