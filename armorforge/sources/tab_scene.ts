@@ -1,6 +1,7 @@
 
 let tab_scene_line_counter: i32 = 0;
 let tab_scene_new_meshes: string[] = null;
+let _tab_scene_paint_object_length: i32 = 1;
 
 function tab_scene_select_object(mo: mesh_object_t) {
 	if (mo == null) {
@@ -21,9 +22,14 @@ function tab_scene_select_object(mo: mesh_object_t) {
 }
 
 function tab_scene_import_mesh_done() {
-	let mo: mesh_object_t = project_paint_objects[project_paint_objects.length - 1];
-	object_set_parent(mo.base, null);
-	tab_scene_select_object(mo);
+	let count: i32 = project_paint_objects.length - _tab_scene_paint_object_length;
+	_tab_scene_paint_object_length = project_paint_objects.length;
+
+	for (let i: i32 = 0; i < count; ++i) {
+		let mo: mesh_object_t = project_paint_objects[project_paint_objects.length - 1 - i];
+		object_set_parent(mo.base, null);
+		tab_scene_select_object(mo);
+	}
 
 	app_notify_on_next_frame(function() {
 		util_mesh_merge();

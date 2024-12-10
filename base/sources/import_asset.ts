@@ -29,7 +29,11 @@ function import_asset_run(path: string, drop_x: f32 = -1.0, drop_y: f32 = -1.0, 
 	}
 
 	if (path_is_mesh(path)) {
+		///if is_forge
+		project_import_mesh_box(path, false, false, tab_scene_import_mesh_done);
+		///else
 		show_box ? project_import_mesh_box(path) : import_mesh_run(path);
+		///end
 		if (drop_x > 0) {
 			ui_box_click_to_hide = false; // Prevent closing when going back to window after drag and drop
 		}

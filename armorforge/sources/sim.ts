@@ -119,4 +119,5 @@ function sim_delete() {
     array_remove(project_paint_objects, so);
     mesh_object_remove(so);
     sim_remove_body(so.base.uid);
+    _tab_scene_paint_object_length--;
 }
