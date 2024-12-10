@@ -5,7 +5,7 @@
 #define _TRANSLUCENCY
 #define _ROULETTE
 #define _TRANSPARENCY
-#define _FRESNEL
+// #define _FRESNEL
 #endif
 // #define _RENDER
 
@@ -104,22 +104,22 @@ void raygeneration() {
 			#endif
 
 			#ifdef _EMISSION
-			if (payload.color.a == -2) {
+			if (payload.color.a == -3) {
 				accum += payload.color.rgb;
 				break;
 			}
 			#endif
 
+			#ifdef _TRANSPARENCY
+			if (payload.color.a == -2 && transparent_hits < DEPTH_TRANSPARENT) {
+				payload.color.a = j;
+				transparent_hits++;
+				i--;
+			}
+			#endif
+
 			// Miss
 			if (payload.color.a < 0) {
-				#ifdef _TRANSPARENCY
-				if (payload.color.a == -2 && transparent_hits < DEPTH_TRANSPARENT) {
-					payload.color.a = j;
-					transparent_hits++;
-					i--;
-				}
-				#endif
-
 				if (i == 0 && constant_buffer.params.x < 0) { // No envmap
 					payload.color.rgb = float3(0.032, 0.032, 0.032);
 				}
@@ -181,7 +181,7 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 	float4 texpaint0 = mytexture0.Load(utex_coord);
 
 	#ifdef _TRANSPARENCY
-	if (texpaint0.a <= 0.1) {
+	if (texpaint0.a <= 0.01) {
 		payload.ray_dir = WorldRayDirection();
 		payload.ray_origin = hit_world_position() + payload.ray_dir * 0.0001f;
 		payload.color.a = -2;
@@ -268,7 +268,7 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 	#ifdef _EMISSION
 	if (int(texpaint1.a * 255.0f) % 3 == 1) { // matid
 		payload.color.xyz *= 100.0f;
-		payload.color.a = -2.0;
+		payload.color.a = -3.0;
 	}
 	#endif
 
@@ -283,7 +283,7 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 void miss(inout RayPayload payload) {
 
 	#ifdef _EMISSION
-	if (payload.color.a == -2.0) {
+	if (payload.color.a == -3.0) {
 		return;
 	}
 	#endif
