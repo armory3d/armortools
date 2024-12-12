@@ -9,8 +9,6 @@ function sim_init() {
 
 function sim_update() {
 
-	render_path_raytrace_ready = false;
-
     if (sim_running) {
         // if (render_path_raytrace_frame != 1) {
             // return;
