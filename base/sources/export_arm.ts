@@ -141,11 +141,13 @@ function export_arm_run_project() {
 	project_raw.camera_fov = scene_camera.data.fov;
 
 	///if (is_paint || is_sculpt)
-	// project_raw.mesh_datas = md; // TODO: fix GC ref
-	project_raw.mesh_datas.length = 0;
-	for (let i: i32 = 0; i < md.length; ++i) {
-		array_push(project_raw.mesh_datas, md[i]);
-	}
+	project_raw.mesh_datas = md; // TODO: fix GC ref
+//	project_raw.mesh_datas.length = 0; // This causes segmentation faults, however,
+									   // the above code does not. I don't understand
+									   // why it was originally commented out though...
+//	for (let i: i32 = 0; i < md.length; ++i) {
+//		array_push(project_raw.mesh_datas, md[i]);
+//	}
 
 	project_raw.material_nodes = mnodes;
 	project_raw.brush_nodes = bnodes;
