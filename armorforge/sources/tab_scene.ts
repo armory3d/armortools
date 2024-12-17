@@ -130,6 +130,9 @@ function tab_scene_new_object(mesh_name: string) {
 	map_set(data_cached_meshes, md._.handle, md);
 	array_push(project_paint_objects, mo);
 	tab_scene_import_mesh_done();
+	app_notify_on_next_frame(function(mo: mesh_object_t) {
+		tab_scene_select_object(mo);
+	}, mo);
 }
 
 function tab_scene_new_menu(ui: ui_t) {

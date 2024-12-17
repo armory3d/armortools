@@ -670,7 +670,6 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 		void *data;
 		vkMapMemory(vk_ctx.device, instances_mem, 0, sizeof(VkAccelerationStructureInstanceKHR), 0, (void **)&data);
 
-		int ib_off = 0;
 		for (int i = 0; i < instances_count; ++i) {
 			VkTransformMatrixKHR transform_matrix = {
 				instances[i].m.m[0],
@@ -688,8 +687,13 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 			};
 			VkAccelerationStructureInstanceKHR instance = {0};
 			instance.transform = transform_matrix;
+
+			int ib_off = 0;
+			for (int j = 0; j < instances[i].i; ++j) {
+				ib_off += ib[j]->impl.count * 4;
+			}
 			instance.instanceCustomIndex = ib_off;
-			ib_off += ib[instances[i].i]->impl.count * 4;
+
 			instance.mask = 0xFF;
 			instance.instanceShaderBindingTableRecordOffset = 0;
 			instance.flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;

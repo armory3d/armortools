@@ -114,8 +114,10 @@ function util_render_make_decal_preview() {
 	let saved_fov: f32 = scene_camera.data.fov;
 	scene_camera.data.fov = 0.92;
 	viewport_update_camera_type(camera_type_t.PERSPECTIVE);
-	let light: light_object_t = scene_lights[0];
-	light.base.visible = false;
+	let light: light_object_t = scene_lights.length > 0 ? scene_lights[0] : null;
+	if (light != null) {
+		light.base.visible = false;
+	}
 	scene_world._.envmap = context_raw.preview_envmap;
 
 	// No resize
@@ -144,8 +146,12 @@ function util_render_make_decal_preview() {
 	viewport_update_camera_type(context_raw.camera_type);
 	camera_object_build_proj(scene_camera);
 	camera_object_build_mat(scene_camera);
-	light = scene_lights[0];
-	light.base.visible = true;
+
+	light = scene_lights.length > 0 ? scene_lights[0] : null;
+	if (light != null) {
+		light.base.visible = true;
+	}
+
 	scene_world._.envmap = context_raw.show_envmap ? context_raw.saved_envmap : context_raw.empty_envmap;
 
 	make_material_parse_mesh_material();

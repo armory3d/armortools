@@ -3,7 +3,11 @@ let util_mesh_unwrappers: map_t<string, any> = map_create(); // JSValue * -> ((a
 
 function util_mesh_merge(paint_objects: mesh_object_t[] = null) {
 	if (paint_objects == null) {
+		///if is_forge
+		paint_objects = util_mesh_ext_get_unique();
+		///else
 		paint_objects = project_paint_objects;
+		///end
 	}
 	if (paint_objects.length == 0) {
 		return;

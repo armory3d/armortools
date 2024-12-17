@@ -100,10 +100,6 @@ function sim_duplicate() {
     array_push(project_paint_objects, dup);
     dup.base.name = so.base.name;
 
-    app_notify_on_next_frame(function() {
-        util_mesh_merge();
-    });
-
     // Physics
     let pb: physics_body_t = map_get(physics_body_object_map, so.base.uid);
     if (pb != null) {

@@ -223,9 +223,9 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 	seed += 1;
 
 	#ifdef _TRANSLUCENCY
+	float3 _payload_color = payload.color.xyz;
 	float3 diffuse_dir = texpaint0.a < f ?
-		cos_weighted_hemisphere_direction(WorldRayDirection(), payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank) :
-		cos_weighted_hemisphere_direction(n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
+		WorldRayDirection() : cos_weighted_hemisphere_direction(n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
 	#else
 	float3 diffuse_dir = cos_weighted_hemisphere_direction(n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
 	#endif
@@ -238,7 +238,7 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 
 	if (f < specular_chance) {
 		#ifdef _TRANSLUCENCY
-		float3 specular_dir = texpaint0.a < f * 2 ? WorldRayDirection() : reflect(WorldRayDirection(), n);
+		float3 specular_dir = texpaint0.a < f * 2.0 ? WorldRayDirection() : reflect(WorldRayDirection(), n);
 		#else
 		float3 specular_dir = reflect(WorldRayDirection(), n);
 		#endif
@@ -261,6 +261,10 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 	}
 	#ifdef _FRESNEL
 	payload.color.xyz *= 0.5;
+	#endif
+
+	#ifdef _TRANSLUCENCY
+	payload.color.xyz = lerp(_payload_color, payload.color.xyz, texpaint0.a);
 	#endif
 
 	payload.ray_origin = hit_world_position() + payload.ray_dir * 0.0001f;
