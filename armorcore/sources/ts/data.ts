@@ -323,8 +323,11 @@ function data_is_abs(file: string): bool {
 	return char_at(file, 0) == "/" || char_at(file, 1) == ":" || (char_at(file, 0) == "\\" && char_at(file, 1) == "\\");
 }
 
-function data_is_up(file: string): bool {
-	return char_at(file, 0) == "." && char_at(file, 1) == ".";
+function data_is_rel(file: string): bool { // This function does not check for paths that
+										   // don't begin in `.` or `..`, such paths are
+										   // used in the code as `./data` paths. Read
+										   // the comment I've written at import_arm.ts:4
+	return char_at(file, 0) == "." || (char_at(file, 0) == "." && char_at(file, 1) == ".");
 }
 
 function data_base_name(path: string): string {
@@ -333,7 +336,7 @@ function data_base_name(path: string): string {
 }
 
 function data_resolve_path(file: string): string {
-	if (data_is_abs(file) || data_is_up(file)) {
+	if (data_is_abs(file) || data_is_rel(file)) {
 		return file;
 	}
 	return data_path() + file;

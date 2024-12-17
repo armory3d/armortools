@@ -141,10 +141,14 @@ function export_arm_run_project() {
 	project_raw.camera_fov = scene_camera.data.fov;
 
 	///if (is_paint || is_sculpt)
-	project_raw.mesh_datas = md; // TODO: fix GC ref
-//	project_raw.mesh_datas.length = 0; // This causes segmentation faults, however,
-									   // the above code does not. I don't understand
-									   // why it was originally commented out though...
+	project_raw.mesh_datas = md; // TODO: fix GC ref // Best to keep an eye on this, there
+								 // might be a bug reintroduced, or it might have been
+								 // fixed already.
+//	project_raw.mesh_datas.length = 0; // This code assigns something to a null variable,
+									   // which prevents saving any project. (At least in ArmorPaint.)
+									   // Runtime tests may help prevent this kind of thing
+									   // from happening again, because this is code that
+									   // *does* make its way on the stores...
 //	for (let i: i32 = 0; i < md.length; ++i) {
 //		array_push(project_raw.mesh_datas, md[i]);
 //	}

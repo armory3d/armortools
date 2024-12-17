@@ -1,7 +1,16 @@
 
 let scene_raw_gc: scene_t;
 
-function import_arm_run_project(path: string) {
+function import_arm_run_project(path: string) { // This function should be rewritten to support
+												// relative paths passed on the command line,
+												// including just names. Paths starting from
+												// the current directory now work, but not
+												// names only, which is fundamentally
+												// impossible to implement unless this code was
+												// written to support it. Assuming people on
+												// Linux aren't going to use a command line
+												// and assuming all paths are full, absolute
+												// paths is a bad assumption to make.
 	let b: buffer_t = data_get_blob(path);
 	let project: project_format_t;
 	let import_as_mesh: bool = false;
