@@ -133,14 +133,14 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 		for (let i: i32 = 0; i < keys.length; ++i) {
 			let key: string = keys[i];
 			// let script: string = parser_material_script_links[key]; ////
-			let result: f32 = 0.0;
+			let result: f32 = f32_nan();
 			// if (script != "") {
 				// result = js_eval(script);
 			// }
 			return result;
 		}
 	}
-	return 0.0;
+	return f32_nan();
 }
 
 function uniforms_ext_vec2_link(object: object_t, mat: material_data_t, link: string): vec2_t {

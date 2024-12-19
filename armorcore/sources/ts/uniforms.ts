@@ -526,7 +526,7 @@ function uniforms_set_obj_const(obj: object_t, loc: kinc_const_loc_t, c: shader_
 		g4_set_float2(loc, v.x, v.y);
 	}
 	else if (c.type == "float") {
-		let f: f32 = 0.0;
+		let f: f32 = f32_nan();
 
 		if (c.link == "_object_info_index") {
 			f = obj.uid;
@@ -545,11 +545,11 @@ function uniforms_set_obj_const(obj: object_t, loc: kinc_const_loc_t, c: shader_
 		}
 		else if (uniforms_f32_links != null) {
 			f = uniforms_f32_links(obj, current_material(obj), c.link);
-			if (f == 0.0) {
-				return; // TODO: return when uniform is not found
-			}
 		}
 
+		if (f32_isnan(f)) {
+			return;
+		}
 		g4_set_float(loc, f);
 	}
 	else if (c.type == "floats") {
