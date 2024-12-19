@@ -11,6 +11,7 @@
 #include <Jolt/Physics/Collision/Shape/SphereShape.h>
 #include <Jolt/Physics/Collision/Shape/MeshShape.h>
 #include <Jolt/Physics/Collision/Shape/ConvexHullShape.h>
+#include <Jolt/Physics/Collision/Shape/HeightFieldShape.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/MotionQuality.h>
 #include <kinc/math/vector.h>
@@ -117,7 +118,8 @@ typedef enum {
 	physics_shape_BOX = 0,
 	physics_shape_SPHERE = 1,
 	physics_shape_HULL = 2,
-	physics_shape_MESH = 3,
+	physics_shape_TERRAIN = 3,
+	physics_shape_MESH = 4,
 } physics_shape_t;
 
 BPLayerInterfaceImpl broad_phase_layer_interface;
@@ -210,6 +212,13 @@ void *_jolt_body_create(int shape, float mass, float dimx, float dimy, float dim
 		ConvexHullShapeSettings shape_settings(points, convex_radius);
 		shape_settings.SetEmbedded();
 		result = shape_settings.Create();
+	}
+	else if (shape == physics_shape_TERRAIN) {
+		f32_array_t *f32a = (f32_array_t *)f32a_triangles;
+
+		// HeightFieldShapeSettings shape_settings();
+		// shape_settings.SetEmbedded();
+		// result = shape_settings.Create();
 	}
 	else {
 		// Mesh

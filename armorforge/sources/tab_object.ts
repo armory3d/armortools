@@ -147,6 +147,7 @@ function tab_object_draw(htab: ui_handle_t) {
 				tr("Box"),
 				tr("Sphere"),
 				tr("Convex Hull"),
+				tr("Terrain"),
 				tr("Mesh"),
 			];
             hshape.position = pb != null ? pb.shape + 1 : 0;
