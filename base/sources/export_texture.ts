@@ -497,7 +497,16 @@ function export_texture_write_texture(file: string, pixels: buffer_t, type: i32 
 	}
 }
 
+///if (arm_metal || arm_vulkan)
+function _export_texture_channel_bgra_swap(c: i32): i32 {
+	return c == 0 ? 2 : c == 2 ? 0 : c;
+}
+///end
+
 function export_texture_copy_channel(from: buffer_t, from_channel: i32, to: buffer_t, to_channel: i32, linear: bool = true) {
+	///if (arm_metal || arm_vulkan)
+	from_channel = _export_texture_channel_bgra_swap(from_channel);
+	///end
 	for (let i: i32 = 0; i < math_floor((to.length) / 4); ++i) {
 		buffer_set_u8(to, i * 4 + to_channel, buffer_get_u8(from, i * 4 + from_channel));
 	}
@@ -507,6 +516,9 @@ function export_texture_copy_channel(from: buffer_t, from_channel: i32, to: buff
 }
 
 function export_texture_copy_channel_inv(from: buffer_t, from_channel: i32, to: buffer_t, to_channel: i32, linear: bool = true) {
+	///if (arm_metal || arm_vulkan)
+	from_channel = _export_texture_channel_bgra_swap(from_channel);
+	///end
 	for (let i: i32 = 0; i < math_floor((to.length) / 4); ++i) {
 		buffer_set_u8(to, i * 4 + to_channel, 255 - buffer_get_u8(from, i * 4 + from_channel));
 	}
@@ -516,6 +528,9 @@ function export_texture_copy_channel_inv(from: buffer_t, from_channel: i32, to: 
 }
 
 function export_texture_extract_channel(from: buffer_t, from_channel: i32, to: buffer_t, to_channel: i32, step: i32, mask: i32, linear: bool = true) {
+	///if (arm_metal || arm_vulkan)
+	from_channel = _export_texture_channel_bgra_swap(from_channel);
+	///end
 	for (let i: i32 = 0; i < math_floor((to.length) / 4); ++i) {
 		buffer_set_u8(to, i * 4 + to_channel, buffer_get_u8(from, i * 4 + from_channel) % step == mask ? 255 : 0);
 	}
