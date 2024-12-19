@@ -142,9 +142,14 @@ function export_arm_run_project() {
 
 	///if (is_paint || is_sculpt)
 	// project_raw.mesh_datas = md; // TODO: fix GC ref
-	project_raw.mesh_datas.length = 0;
-	for (let i: i32 = 0; i < md.length; ++i) {
-		array_push(project_raw.mesh_datas, md[i]);
+	if (project_raw.mesh_datas == null) {
+		project_raw.mesh_datas = md;
+	}
+	else {
+		project_raw.mesh_datas.length = 0;
+		for (let i: i32 = 0; i < md.length; ++i) {
+			array_push(project_raw.mesh_datas, md[i]);
+		}
 	}
 
 	project_raw.material_nodes = mnodes;
