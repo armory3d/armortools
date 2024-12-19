@@ -108,6 +108,8 @@ function sim_duplicate() {
         pbdup.mass = pb.mass;
         physics_body_init(pbdup, dup.base);
     }
+
+    _tab_scene_paint_object_length++;
 }
 
 function sim_delete() {

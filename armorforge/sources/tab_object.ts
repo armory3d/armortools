@@ -8,6 +8,11 @@ function tab_object_draw(htab: ui_handle_t) {
             h.selected = context_raw.selected_object.visible;
             context_raw.selected_object.visible = ui_check(h, "Visible");
 
+            if (h.changed) {
+                // Rebuild full vb for path-tracing
+                util_mesh_merge();
+            }
+
             let t: transform_t = context_raw.selected_object.transform;
             let rot: vec4_t = quat_get_euler(t.rot);
             rot = vec4_mult(rot, 180 / 3.141592);

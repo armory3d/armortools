@@ -4,8 +4,8 @@ function base_ext_init() {
 
 	object_remove(scene_lights[0].base);
 
-	// project_paint_objects[0].base.visible = false;
-	// tab_scene_new_object("box.arm");
+	transform_move(project_paint_objects[0].base.transform, vec4_z_axis(), -999); // Move default cube away
+	tab_scene_new_object("box.arm");
 }
 
 function base_ext_render() {
@@ -29,5 +29,9 @@ function base_ext_init_config(raw: config_t) {
 function base_ext_update() {
 	if (keyboard_down("control") && keyboard_started("d")) {
 		sim_duplicate();
+	}
+
+	if (keyboard_started("delete")) {
+		sim_delete();
 	}
 }

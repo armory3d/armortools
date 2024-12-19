@@ -22,6 +22,9 @@ function util_mesh_ext_get_unique(): mesh_object_t[] {
 	let ar: mesh_object_t[] = [];
 
 	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+		if (!project_paint_objects[i].base.visible) {
+			continue;
+		}
 		let found: bool = false;
 		for (let j: i32 = 0; j < i; ++j) {
 			if (project_paint_objects[i].data == project_paint_objects[j].data) {

@@ -33,6 +33,14 @@ function tab_scene_import_mesh_done() {
 
 	app_notify_on_next_frame(function() {
 		util_mesh_merge();
+		tab_scene_select_object(context_raw.selected_object.ext);
+
+		let scene: object_t = _scene_root.children[0];
+		array_sort(scene.children, function (pa: any_ptr, pb: any_ptr): i32 {
+			let a: object_t = DEREFERENCE(pa);
+			let b: object_t = DEREFERENCE(pb);
+			return strcmp(a.name, b.name);
+		});
 	});
 }
 
@@ -173,7 +181,6 @@ function tab_scene_draw(htab: ui_handle_t) {
 			tab_scene_line_counter = 0;
 
 			let scene: object_t = _scene_root.children[0];
-
 			for (let i: i32 = 0; i < scene.children.length; ++i) {
 				let c: object_t = scene.children[i];
 				tab_scene_draw_list(ui, ui_handle(__ID__), c);
