@@ -574,3 +574,6 @@ declare function vec4_isnan(a: vec4_t): bool;
 type vec4_box_t = {
 	v: vec4_t;
 };
+
+declare function f32_nan(): f32;
+declare function f32_isnan(f: f32): bool;

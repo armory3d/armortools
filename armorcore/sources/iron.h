@@ -181,6 +181,14 @@ buffer_t *embed_get(char *key) {
 #define ADDRESS &
 #define ARRAY_ACCESS(a, i) a[i]
 
+f32 f32_nan() {
+	return NAN;
+}
+
+bool f32_isnan(f32 f) {
+	return isnan(f);
+}
+
 void _kickstart();
 
 bool enable_window = true;
