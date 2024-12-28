@@ -478,7 +478,10 @@ function import_arm_run_material_from_project(project: project_format_t, path: s
 
 	if (project.material_groups != null) {
 		for (let i: i32 = 0; i < project.material_groups.length; ++i) {
-			let c: ui_node_canvas_t = util_clone_canvas(project.material_groups[i]);
+			project.material_groups[i] = util_clone_canvas(project.material_groups[i]);
+		}
+		for (let i: i32 = 0; i < project.material_groups.length; ++i) {
+			let c: ui_node_canvas_t = project.material_groups[i];
 			while (import_arm_group_exists(c)) {
 				import_arm_rename_group(c.name, imported, project.material_groups); // Ensure unique group name
 			}
