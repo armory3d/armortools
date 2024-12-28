@@ -21,6 +21,15 @@ function tab_scene_select_object(mo: mesh_object_t) {
 	context_select_paint_object(mo);
 }
 
+function tab_scene_sort() {
+	let scene: object_t = _scene_root.children[0];
+	array_sort(scene.children, function (pa: any_ptr, pb: any_ptr): i32 {
+		let a: object_t = DEREFERENCE(pa);
+		let b: object_t = DEREFERENCE(pb);
+		return strcmp(a.name, b.name);
+	});
+}
+
 function tab_scene_import_mesh_done() {
 	let count: i32 = project_paint_objects.length - _tab_scene_paint_object_length;
 	_tab_scene_paint_object_length = project_paint_objects.length;
@@ -34,13 +43,7 @@ function tab_scene_import_mesh_done() {
 	app_notify_on_next_frame(function() {
 		util_mesh_merge();
 		tab_scene_select_object(context_raw.selected_object.ext);
-
-		let scene: object_t = _scene_root.children[0];
-		array_sort(scene.children, function (pa: any_ptr, pb: any_ptr): i32 {
-			let a: object_t = DEREFERENCE(pa);
-			let b: object_t = DEREFERENCE(pb);
-			return strcmp(a.name, b.name);
-		});
+		tab_scene_sort();
 	});
 }
 

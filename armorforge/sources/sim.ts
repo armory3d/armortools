@@ -110,6 +110,7 @@ function sim_duplicate() {
     }
 
     _tab_scene_paint_object_length++;
+    tab_scene_sort();
 }
 
 function sim_delete() {
@@ -118,4 +119,5 @@ function sim_delete() {
     mesh_object_remove(so);
     sim_remove_body(so.base.uid);
     _tab_scene_paint_object_length--;
+    tab_scene_sort();
 }
