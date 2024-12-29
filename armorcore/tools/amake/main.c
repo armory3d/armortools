@@ -1,7 +1,4 @@
 
-// ../../make --compile --alangjs --ccompiler gcc --cppcompiler g++
-// (gcc has lto enabled)
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>

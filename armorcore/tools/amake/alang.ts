@@ -1,6 +1,4 @@
 
-// ../../make --graphics opengl --compile --alangjs
-
 ///include <stdio.h>
 
 let alang_output: string = null;
