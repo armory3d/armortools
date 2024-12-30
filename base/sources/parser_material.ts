@@ -734,6 +734,14 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		let col: string = parser_material_parse_vector_input(node.inputs[1]);
 		return "(floor(100.0 * " + strength + " * " + col + ") / (100.0 * " + strength + "))";
 	}
+	else if (node.type == "REPLACECOL") {
+		let inputColor: string = parser_material_parse_vector_input(node.inputs[0]);
+		let oldColor: string = parser_material_parse_vector_input(node.inputs[1]);
+		let newColor: string = parser_material_parse_vector_input(node.inputs[2]);
+		let radius: string = parser_material_parse_value_input(node.inputs[3]);
+		let fuzziness: string = parser_material_parse_value_input(node.inputs[4]);
+		return "mix(" + newColor + ", " + inputColor + ", clamp((distance(" + oldColor + ", " + inputColor + ") - " + radius + ") / max(" + fuzziness + ", " + parser_material_eps + "), 0.0, 1.0))";
+	}
 	else if (node.type == "VALTORGB") { // ColorRamp
 		let fac: string = parser_material_parse_value_input(node.inputs[0]);
 		let data0: i32 = node.buttons[0].data[0];
