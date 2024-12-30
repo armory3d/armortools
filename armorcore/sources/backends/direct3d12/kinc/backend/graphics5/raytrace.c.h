@@ -13,6 +13,11 @@ static const wchar_t *raygen_shader_name = L"raygeneration";
 static const wchar_t *closesthit_shader_name = L"closesthit";
 static const wchar_t *miss_shader_name = L"miss";
 
+typedef struct inst {
+	kinc_matrix4x4_t m;
+	int i;
+} inst_t;
+
 static ID3D12Device5 *dxrDevice = NULL;
 static ID3D12GraphicsCommandList4 *dxrCommandList = NULL;
 static ID3D12RootSignature *dxrRootSignature = NULL;
@@ -33,6 +38,14 @@ static D3D12_GPU_DESCRIPTOR_HANDLE texscramblegpuDescriptorHandle;
 static D3D12_GPU_DESCRIPTOR_HANDLE texrankgpuDescriptorHandle;
 static int descriptorsAllocated = 0;
 static UINT descriptorSize;
+
+static kinc_g5_vertex_buffer_t *vb[16];
+static kinc_g5_vertex_buffer_t *vb_last[16];
+static kinc_g5_index_buffer_t *ib[16];
+static int vb_count = 0;
+static int vb_count_last = 0;
+static inst_t instances[1024];
+static int instances_count = 0;
 
 void kinc_raytrace_pipeline_init(kinc_raytrace_pipeline_t *pipeline, kinc_g5_command_list_t *command_list, void *ray_shader, int ray_shader_size,
                                  kinc_g5_constant_buffer_t *constant_buffer) {
@@ -184,29 +197,29 @@ void kinc_raytrace_pipeline_init(kinc_raytrace_pipeline_t *pipeline, kinc_g5_com
 	D3D12_STATE_OBJECT_DESC raytracingPipeline = {};
 	raytracingPipeline.Type = D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE;
 
-	D3D12_SHADER_BYTECODE shaderBytecode = {};
+	D3D12_SHADER_BYTECODE shaderBytecode = {0};
 	shaderBytecode.pShaderBytecode = ray_shader;
 	shaderBytecode.BytecodeLength = ray_shader_size;
 
-	D3D12_DXIL_LIBRARY_DESC dxilLibrary = {};
+	D3D12_DXIL_LIBRARY_DESC dxilLibrary = {0};
 	dxilLibrary.DXILLibrary = shaderBytecode;
-	D3D12_EXPORT_DESC exports[3] = {};
+	D3D12_EXPORT_DESC exports[3] = {0};
 	exports[0].Name = raygen_shader_name;
 	exports[1].Name = closesthit_shader_name;
 	exports[2].Name = miss_shader_name;
 	dxilLibrary.pExports = exports;
 	dxilLibrary.NumExports = 3;
 
-	D3D12_HIT_GROUP_DESC hitGroup = {};
+	D3D12_HIT_GROUP_DESC hitGroup = {0};
 	hitGroup.ClosestHitShaderImport = closesthit_shader_name;
 	hitGroup.HitGroupExport = hit_group_name;
 	hitGroup.Type = D3D12_HIT_GROUP_TYPE_TRIANGLES;
 
-	D3D12_RAYTRACING_SHADER_CONFIG shaderConfig = {};
+	D3D12_RAYTRACING_SHADER_CONFIG shaderConfig = {0};
 	shaderConfig.MaxPayloadSizeInBytes = 10 * sizeof(float); // float4 color
 	shaderConfig.MaxAttributeSizeInBytes = 8 * sizeof(float); // float2 barycentrics
 
-	D3D12_RAYTRACING_PIPELINE_CONFIG pipelineConfig = {};
+	D3D12_RAYTRACING_PIPELINE_CONFIG pipelineConfig = {0};
 	pipelineConfig.MaxTraceRecursionDepth = 1; // ~ primary rays only
 
 	D3D12_STATE_SUBOBJECT subobjects[5] = {};
@@ -257,13 +270,13 @@ void kinc_raytrace_pipeline_init(kinc_raytrace_pipeline_t *pipeline, kinc_g5_com
 		device->CreateCommittedResource(&uploadHeapProperties, D3D12_HEAP_FLAG_NONE, &bufferDesc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL,
 		                                IID_GRAPHICS_PPV_ARGS(&pipeline->impl.raygen_shader_table));
 
-		D3D12_RANGE rstRange = {};
+		D3D12_RANGE rstRange = {0};
 		rstRange.Begin = 0;
 		rstRange.End = 0;
 		uint8_t *byteDest;
 		pipeline->impl.raygen_shader_table->Map(0, &rstRange, (void **)(&byteDest));
 
-		D3D12_RANGE cbRange = {};
+		D3D12_RANGE cbRange = {0};
 		cbRange.Begin = 0;
 		cbRange.End = constant_buffer->impl.mySize;
 		void *constantBufferData;
@@ -295,7 +308,7 @@ void kinc_raytrace_pipeline_init(kinc_raytrace_pipeline_t *pipeline, kinc_g5_com
 		device->CreateCommittedResource(&uploadHeapProperties, D3D12_HEAP_FLAG_NONE, &bufferDesc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL,
 		                                IID_GRAPHICS_PPV_ARGS(&pipeline->impl.miss_shader_table));
 
-		D3D12_RANGE mstRange = {};
+		D3D12_RANGE mstRange = {0};
 		mstRange.Begin = 0;
 		mstRange.End = 0;
 		uint8_t *byteDest;
@@ -326,7 +339,7 @@ void kinc_raytrace_pipeline_init(kinc_raytrace_pipeline_t *pipeline, kinc_g5_com
 		device->CreateCommittedResource(&uploadHeapProperties, D3D12_HEAP_FLAG_NONE, &bufferDesc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL,
 		                                IID_GRAPHICS_PPV_ARGS(&pipeline->impl.hitgroup_shader_table));
 
-		D3D12_RANGE hstRange = {};
+		D3D12_RANGE hstRange = {0};
 		hstRange.Begin = 0;
 		hstRange.End = 0;
 		uint8_t *byteDest;
@@ -401,25 +414,77 @@ UINT create_srv_ib(kinc_g5_index_buffer_t *ib, UINT numElements, UINT elementSiz
 	return descriptorIndex;
 }
 
-void kinc_raytrace_acceleration_structure_init(kinc_raytrace_acceleration_structure_t *accel, kinc_g5_command_list_t *command_list, kinc_g5_vertex_buffer_t *vb,
-                                               kinc_g5_index_buffer_t *ib, float scale) {
-	create_srv_ib(ib, ib->impl.count, 0);
-	create_srv_vb(vb, vb->impl.myCount, 8 * 2);
+void kinc_raytrace_acceleration_structure_init(kinc_raytrace_acceleration_structure_t *accel) {
+	vb_count = 0;
+	instances_count = 0;
+}
+
+void kinc_raytrace_acceleration_structure_add(kinc_raytrace_acceleration_structure_t *accel, kinc_g5_vertex_buffer_t *_vb, kinc_g5_index_buffer_t *_ib,
+	kinc_matrix4x4_t _transform) {
+
+	int vb_i = -1;
+	for (int i = 0; i < vb_count; ++i) {
+		if (_vb == vb[i]) {
+			vb_i = i;
+			break;
+		}
+	}
+	if (vb_i == -1) {
+		vb_i = vb_count;
+		vb[vb_count] = _vb;
+		ib[vb_count] = _ib;
+		vb_count++;
+	}
+
+	inst_t inst = { .i = vb_i, .m =  _transform };
+	instances[instances_count] = inst;
+	instances_count++;
+}
+
+void _kinc_raytrace_acceleration_structure_destroy_bottom(kinc_raytrace_acceleration_structure_t *accel) {
+	for (int i = 0; i < vb_count_last; ++i) {
+		accel->impl.bottom_level_accel[i]->Release();
+	}
+}
+
+void _kinc_raytrace_acceleration_structure_destroy_top(kinc_raytrace_acceleration_structure_t *accel) {
+	accel->impl.top_level_accel->Release();
+}
+
+void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_structure_t *accel, kinc_g5_command_list_t *command_list,
+	kinc_g5_vertex_buffer_t *_vb_full, kinc_g5_index_buffer_t *_ib_full) {
+
+	bool build_bottom = false;
+	for (int i = 0; i < 16; ++i) {
+		if (vb_last[i] != vb[i]) {
+			build_bottom = true;
+		}
+		vb_last[i] = vb[i];
+	}
+
+	if (vb_count_last > 0) {
+		if (build_bottom) {
+			_kinc_raytrace_acceleration_structure_destroy_bottom(accel);
+		}
+		_kinc_raytrace_acceleration_structure_destroy_top(accel);
+	}
+
+	vb_count_last = vb_count;
+
+	if (vb_count == 0) {
+		return;
+	}
+
+	#ifdef is_forge
+	create_srv_ib(_ib_full, _ib_full->impl.count, 0);
+	create_srv_vb(_vb_full, _vb_full->impl.myCount, 8 * 2);
+	#else
+	create_srv_ib(ib[0], ib[0]->impl.count, 0);
+	create_srv_vb(vb[0], vb[0]->impl.myCount, 8 * 2);
+	#endif
 
 	// Reset the command list for the acceleration structure construction
 	command_list->impl._commandList->Reset(command_list->impl._commandAllocator, NULL);
-
-	D3D12_RAYTRACING_GEOMETRY_DESC geometryDesc = {};
-	geometryDesc.Type = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
-	geometryDesc.Triangles.IndexBuffer = ib->impl.upload_buffer->GetGPUVirtualAddress();
-	geometryDesc.Triangles.IndexCount = ib->impl.count;
-	geometryDesc.Triangles.IndexFormat = ib->impl.format == KINC_G5_INDEX_BUFFER_FORMAT_16BIT ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
-	geometryDesc.Triangles.Transform3x4 = 0;
-	geometryDesc.Triangles.VertexFormat = DXGI_FORMAT_R16G16B16A16_SNORM;
-	geometryDesc.Triangles.VertexCount = vb->impl.myCount;
-	geometryDesc.Triangles.VertexBuffer.StartAddress = vb->impl.uploadBuffer->GetGPUVirtualAddress();
-	geometryDesc.Triangles.VertexBuffer.StrideInBytes = vb->impl.uploadBuffer->GetDesc().Width / vb->impl.myCount;
-	geometryDesc.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_OPAQUE;
 
 	// Get required sizes for an acceleration structure
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS topLevelInputs = {};
@@ -431,20 +496,73 @@ void kinc_raytrace_acceleration_structure_init(kinc_raytrace_acceleration_struct
 	D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO topLevelPrebuildInfo = {0};
 	dxrDevice->GetRaytracingAccelerationStructurePrebuildInfo(&topLevelInputs, &topLevelPrebuildInfo);
 
-	D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO bottomLevelPrebuildInfo = {0};
-	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS bottomLevelInputs = topLevelInputs;
-	bottomLevelInputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL;
-	bottomLevelInputs.pGeometryDescs = &geometryDesc;
-	bottomLevelInputs.Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE;
-	dxrDevice->GetRaytracingAccelerationStructurePrebuildInfo(&bottomLevelInputs, &bottomLevelPrebuildInfo);
+	UINT64 scratch_size = topLevelPrebuildInfo.ScratchDataSizeInBytes;
 
+	// Bottom AS
+	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS bottomLevelInputs[16];
+	D3D12_RAYTRACING_GEOMETRY_DESC geometryDescs[16];
+	if (build_bottom) {
+		for (int i = 0; i < vb_count; ++i) {
+			D3D12_RAYTRACING_GEOMETRY_DESC geometryDesc = {};
+			geometryDesc.Type = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
+			geometryDesc.Triangles.IndexBuffer = ib[i]->impl.upload_buffer->GetGPUVirtualAddress();
+			geometryDesc.Triangles.IndexCount = ib[i]->impl.count;
+			geometryDesc.Triangles.IndexFormat = ib[i]->impl.format == KINC_G5_INDEX_BUFFER_FORMAT_16BIT ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
+			geometryDesc.Triangles.Transform3x4 = 0;
+			geometryDesc.Triangles.VertexFormat = DXGI_FORMAT_R16G16B16A16_SNORM;
+			geometryDesc.Triangles.VertexCount = vb[i]->impl.myCount;
+			geometryDesc.Triangles.VertexBuffer.StartAddress = vb[i]->impl.uploadBuffer->GetGPUVirtualAddress();
+			geometryDesc.Triangles.VertexBuffer.StrideInBytes = vb[i]->impl.uploadBuffer->GetDesc().Width / vb[i]->impl.myCount;
+			geometryDesc.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_OPAQUE;
+			geometryDescs[i] = geometryDesc;
+
+			D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO bottomLevelPrebuildInfo = {0};
+			D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS inputs = {};
+			inputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
+			inputs.NumDescs = 1;
+			inputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL;
+			inputs.pGeometryDescs = &geometryDescs[i];
+			inputs.Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE;
+			dxrDevice->GetRaytracingAccelerationStructurePrebuildInfo(&inputs, &bottomLevelPrebuildInfo);
+			bottomLevelInputs[i] = inputs;
+
+			UINT64 blSize = bottomLevelPrebuildInfo.ScratchDataSizeInBytes;
+			if (scratch_size < blSize) {
+				scratch_size = blSize;
+			}
+
+			// Allocate resources for acceleration structures
+			// The resources that will contain acceleration structures must be created in the state D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE,
+			// and must have resource flag D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS.
+			{
+				D3D12_RESOURCE_DESC bufferDesc = {};
+				bufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+				bufferDesc.Width = bottomLevelPrebuildInfo.ResultDataMaxSizeInBytes;
+				bufferDesc.Height = 1;
+				bufferDesc.DepthOrArraySize = 1;
+				bufferDesc.MipLevels = 1;
+				bufferDesc.Format = DXGI_FORMAT_UNKNOWN;
+				bufferDesc.SampleDesc.Count = 1;
+				bufferDesc.SampleDesc.Quality = 0;
+				bufferDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+				bufferDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+				D3D12_HEAP_PROPERTIES uploadHeapProperties = {};
+				uploadHeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
+				uploadHeapProperties.CreationNodeMask = 1;
+				uploadHeapProperties.VisibleNodeMask = 1;
+
+				device->CreateCommittedResource(&uploadHeapProperties, D3D12_HEAP_FLAG_NONE, &bufferDesc, D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE, NULL,
+				                                IID_GRAPHICS_PPV_ARGS(&accel->impl.bottom_level_accel[i]));
+			}
+		}
+	}
+
+	// Create scratch memory
 	ID3D12Resource *scratchResource;
 	{
-		UINT64 tlSize = topLevelPrebuildInfo.ScratchDataSizeInBytes;
-		UINT64 blSize = bottomLevelPrebuildInfo.ScratchDataSizeInBytes;
 		D3D12_RESOURCE_DESC bufferDesc = {};
 		bufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-		bufferDesc.Width = tlSize > blSize ? tlSize : blSize;
+		bufferDesc.Width = scratch_size;
 		bufferDesc.Height = 1;
 		bufferDesc.DepthOrArraySize = 1;
 		bufferDesc.MipLevels = 1;
@@ -462,29 +580,21 @@ void kinc_raytrace_acceleration_structure_init(kinc_raytrace_acceleration_struct
 		                                IID_GRAPHICS_PPV_ARGS(&scratchResource));
 	}
 
-	// Allocate resources for acceleration structures
-	// The resources that will contain acceleration structures must be created in the state D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE,
-	// and must have resource flag D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS.
-	{
-		D3D12_RESOURCE_DESC bufferDesc = {};
-		bufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-		bufferDesc.Width = bottomLevelPrebuildInfo.ResultDataMaxSizeInBytes;
-		bufferDesc.Height = 1;
-		bufferDesc.DepthOrArraySize = 1;
-		bufferDesc.MipLevels = 1;
-		bufferDesc.Format = DXGI_FORMAT_UNKNOWN;
-		bufferDesc.SampleDesc.Count = 1;
-		bufferDesc.SampleDesc.Quality = 0;
-		bufferDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-		bufferDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
-		D3D12_HEAP_PROPERTIES uploadHeapProperties = {};
-		uploadHeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
-		uploadHeapProperties.CreationNodeMask = 1;
-		uploadHeapProperties.VisibleNodeMask = 1;
+	// Bottom AS
+	if (build_bottom) {
+		for (int i = 0; i < vb_count; ++i) {
+			// Bottom Level Acceleration Structure desc
+			D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC bottomLevelBuildDesc = {0};
+			bottomLevelBuildDesc.Inputs = bottomLevelInputs[i];
+			bottomLevelBuildDesc.ScratchAccelerationStructureData = scratchResource->GetGPUVirtualAddress();
+			bottomLevelBuildDesc.DestAccelerationStructureData = accel->impl.bottom_level_accel[i]->GetGPUVirtualAddress();
 
-		device->CreateCommittedResource(&uploadHeapProperties, D3D12_HEAP_FLAG_NONE, &bufferDesc, D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE, NULL,
-		                                IID_GRAPHICS_PPV_ARGS(&accel->impl.bottom_level_accel));
+			// Build acceleration structure
+			dxrCommandList->BuildRaytracingAccelerationStructure(&bottomLevelBuildDesc, 0, NULL);
+		}
 	}
+
+	// Top AS
 	{
 		D3D12_RESOURCE_DESC bufferDesc = {};
 		bufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
@@ -507,15 +617,9 @@ void kinc_raytrace_acceleration_structure_init(kinc_raytrace_acceleration_struct
 	}
 
 	// Create an instance desc for the bottom-level acceleration structure
-	ID3D12Resource *instanceDescs;
-	D3D12_RAYTRACING_INSTANCE_DESC instanceDesc = {};
-	instanceDesc.Transform[0][0] = instanceDesc.Transform[1][1] = instanceDesc.Transform[2][2] = scale;
-	instanceDesc.InstanceMask = 1;
-	instanceDesc.AccelerationStructure = accel->impl.bottom_level_accel->GetGPUVirtualAddress();
-
 	D3D12_RESOURCE_DESC bufferDesc = {};
 	bufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	bufferDesc.Width = sizeof(instanceDesc);
+	bufferDesc.Width = sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * instances_count;
 	bufferDesc.Height = 1;
 	bufferDesc.DepthOrArraySize = 1;
 	bufferDesc.MipLevels = 1;
@@ -528,31 +632,50 @@ void kinc_raytrace_acceleration_structure_init(kinc_raytrace_acceleration_struct
 	uploadHeapProperties.CreationNodeMask = 1;
 	uploadHeapProperties.VisibleNodeMask = 1;
 
+	ID3D12Resource *instanceDescs;
 	device->CreateCommittedResource(&uploadHeapProperties, D3D12_HEAP_FLAG_NONE, &bufferDesc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL,
 	                                IID_GRAPHICS_PPV_ARGS(&instanceDescs));
 	void *mappedData;
 	instanceDescs->Map(0, NULL, &mappedData);
-	memcpy(mappedData, &instanceDesc, sizeof(instanceDesc));
+
+	for (int i = 0; i < instances_count; ++i) {
+		D3D12_RAYTRACING_INSTANCE_DESC instanceDesc = {0};
+
+		instanceDesc.Transform[0][0] = instances[i].m.m[0];
+		instanceDesc.Transform[0][1] = instances[i].m.m[1];
+		instanceDesc.Transform[0][2] = instances[i].m.m[2];
+		instanceDesc.Transform[0][3] = instances[i].m.m[3];
+		instanceDesc.Transform[1][0] = instances[i].m.m[4];
+		instanceDesc.Transform[1][1] = instances[i].m.m[5];
+		instanceDesc.Transform[1][2] = instances[i].m.m[6];
+		instanceDesc.Transform[1][3] = instances[i].m.m[7];
+		instanceDesc.Transform[2][0] = instances[i].m.m[8];
+		instanceDesc.Transform[2][1] = instances[i].m.m[9];
+		instanceDesc.Transform[2][2] = instances[i].m.m[10];
+		instanceDesc.Transform[2][3] = instances[i].m.m[11];
+
+		int ib_off = 0;
+		for (int j = 0; j < instances[i].i; ++j) {
+			ib_off += ib[j]->impl.count * 4;
+		}
+		instanceDesc.InstanceID = ib_off;
+		instanceDesc.InstanceMask = 1;
+		instanceDesc.AccelerationStructure = accel->impl.bottom_level_accel[instances[i].i]->GetGPUVirtualAddress();
+		memcpy((uint8_t *)mappedData + i * sizeof(D3D12_RAYTRACING_INSTANCE_DESC), &instanceDesc, sizeof(D3D12_RAYTRACING_INSTANCE_DESC));
+	}
+
 	instanceDescs->Unmap(0, NULL);
 
-	// Bottom Level Acceleration Structure desc
-	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC bottomLevelBuildDesc = {0};
-	bottomLevelBuildDesc.Inputs = bottomLevelInputs;
-	bottomLevelBuildDesc.ScratchAccelerationStructureData = scratchResource->GetGPUVirtualAddress();
-	bottomLevelBuildDesc.DestAccelerationStructureData = accel->impl.bottom_level_accel->GetGPUVirtualAddress();
-
 	// Top Level Acceleration Structure desc
-	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC topLevelBuildDesc = bottomLevelBuildDesc;
+	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC topLevelBuildDesc = {0};
 	topLevelInputs.InstanceDescs = instanceDescs->GetGPUVirtualAddress();
 	topLevelBuildDesc.Inputs = topLevelInputs;
 	topLevelBuildDesc.DestAccelerationStructureData = accel->impl.top_level_accel->GetGPUVirtualAddress();
 	topLevelBuildDesc.ScratchAccelerationStructureData = scratchResource->GetGPUVirtualAddress();
 
-	// Build acceleration structure
-	dxrCommandList->BuildRaytracingAccelerationStructure(&bottomLevelBuildDesc, 0, NULL);
 	D3D12_RESOURCE_BARRIER barrier = {};
 	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
-	barrier.UAV.pResource = accel->impl.bottom_level_accel;
+	barrier.UAV.pResource = accel->impl.bottom_level_accel[0];
 	command_list->impl._commandList->ResourceBarrier(1, &barrier);
 	dxrCommandList->BuildRaytracingAccelerationStructure(&topLevelBuildDesc, 0, NULL);
 
@@ -566,8 +689,8 @@ void kinc_raytrace_acceleration_structure_init(kinc_raytrace_acceleration_struct
 }
 
 void kinc_raytrace_acceleration_structure_destroy(kinc_raytrace_acceleration_structure_t *accel) {
-	accel->impl.bottom_level_accel->Release();
-	accel->impl.top_level_accel->Release();
+	// accel->impl.bottom_level_accel->Release();
+	// accel->impl.top_level_accel->Release();
 }
 
 void kinc_raytrace_set_textures(kinc_g5_render_target_t *texpaint0, kinc_g5_render_target_t *texpaint1, kinc_g5_render_target_t *texpaint2, kinc_g5_texture_t *texenv, kinc_g5_texture_t *texsobol, kinc_g5_texture_t *texscramble, kinc_g5_texture_t *texrank) {

@@ -15,7 +15,7 @@ typedef struct {
 } kinc_raytrace_pipeline_impl_t;
 
 typedef struct {
-	struct ID3D12Resource *bottom_level_accel;
+	struct ID3D12Resource *bottom_level_accel[16];
 	struct ID3D12Resource *top_level_accel;
 } kinc_raytrace_acceleration_structure_impl_t;
 
