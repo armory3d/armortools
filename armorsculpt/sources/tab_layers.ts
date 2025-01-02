@@ -288,7 +288,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 		// if (in_focus && ui.is_delete_down && can_delete(context_raw.layer)) {
 		// 	ui.is_delete_down = false;
 		// 	let _init() = function () {
-		// 		deleteLayer(context_raw.layer);
+		// 		delete_layer(context_raw.layer);
 		// 	}
 		// 	app_notify_on_init(_init);
 		// }
@@ -310,7 +310,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 			ui._y += center;
 		}
 
-		// comboBlending(ui, l);
+		// combo_blending(ui, l);
 		_ui_end_element();
 
 		if (slot_layer_is_mask(l)) {

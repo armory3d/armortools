@@ -54,7 +54,7 @@ function make_material_parse_mesh_material() {
 
 ///if arm_voxels
 function make_material_make_voxel(m: material_data_t) {
-	let rebuild: bool = true; // heightUsed;
+	let rebuild: bool = true; // height_used;
 	if (config_raw.rp_gi != false && rebuild) {
 		let scon: shader_context_t = null;
 		for (let i: i32 = 0; i < m._.shader._.contexts.length; ++i) {

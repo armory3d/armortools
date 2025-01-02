@@ -725,7 +725,7 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 	let l1masks: slot_layer_t[] =  use_mask ? slot_layer_get_masks(l1) : null;
 	if (l1masks != null) {
 		// for (let i: i32 = 1; i < l1masks.length - 1; ++i) {
-		// 	mergeLayer(l1masks[i + 1], l1masks[i]);
+		// 	merge_layer(l1masks[i + 1], l1masks[i]);
 		// }
 		mask = l1masks[0].texpaint;
 	}

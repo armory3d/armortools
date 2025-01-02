@@ -95,7 +95,7 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 	// node_shader_add_out(vert, "float height");
 	// node_shader_write(vert, "height = vheight;");
 	// let displace_strength = 0.1;
-	// if (heightUsed && displace_strength > 0.0) {
+	// if (height_used && displace_strength > 0.0) {
 	// 	node_shader_write(vert, "vec3 pos2 = " + pos + ".xyz + vec3(nor.xy, pos.w) * vec3(" + height + ", " + height + ", " + height + ") * vec3(" + displace_strength + ", " + displace_strength + ", " + displace_strength + ");");
 	// 	node_shader_write(vert, "gl_Position = mul(vec4(pos2.xyz, 1.0), WVP);");
 	// }

@@ -457,20 +457,20 @@ vec4_t mat4_get_scale(mat4_t m) {
 
 mat4_t mat4_mult(mat4_t m, float s) {
 	m.m[0] *= s;
-	m.m[4] *= s;
-	m.m[8] *= s;
-	m.m[12] *= s;
 	m.m[1] *= s;
-	m.m[5] *= s;
-	m.m[9] *= s;
-	m.m[13] *= s;
 	m.m[2] *= s;
-	m.m[6] *= s;
-	m.m[10] *= s;
-	m.m[14] *= s;
 	m.m[3] *= s;
+	m.m[4] *= s;
+	m.m[5] *= s;
+	m.m[6] *= s;
 	m.m[7] *= s;
+	m.m[8] *= s;
+	m.m[9] *= s;
+	m.m[10] *= s;
 	m.m[11] *= s;
+	m.m[12] *= s;
+	m.m[13] *= s;
+	m.m[14] *= s;
 	m.m[15] *= s;
 	return m;
 }

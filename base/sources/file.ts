@@ -85,8 +85,8 @@ function file_create_directory(path: string) {
 	iron_sys_command(file_cmd_mkdir + " \"" + path + "\"");
 }
 
-function file_copy(srcPath: string, dst_path: string) {
-	iron_sys_command(file_cmd_copy + " \"" + srcPath + "\" \"" + dst_path + "\"");
+function file_copy(src_path: string, dst_path: string) {
+	iron_sys_command(file_cmd_copy + " \"" + src_path + "\" \"" + dst_path + "\"");
 }
 
 function file_start(path: string) {

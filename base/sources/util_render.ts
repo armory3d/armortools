@@ -170,19 +170,19 @@ function util_render_make_text_preview() {
 	let font_size: i32 = 200;
 	let text_w: i32 = math_floor(g2_font_width(font, font_size, text));
 	let text_h: i32 = math_floor(g2_font_height(font, font_size));
-	let texW: i32 = text_w + 32;
-	if (texW < 512) {
-		texW = 512;
+	let tex_w: i32 = text_w + 32;
+	if (tex_w < 512) {
+		tex_w = 512;
 	}
-	if (context_raw.text_tool_image != null && context_raw.text_tool_image.width < texW) {
+	if (context_raw.text_tool_image != null && context_raw.text_tool_image.width < tex_w) {
 		image_unload(context_raw.text_tool_image);
 		context_raw.text_tool_image = null;
 	}
 	if (context_raw.text_tool_image == null) {
 		///if arm_metal
-		context_raw.text_tool_image = image_create_render_target(texW, texW, tex_format_t.RGBA32);
+		context_raw.text_tool_image = image_create_render_target(tex_w, tex_w, tex_format_t.RGBA32);
 		///else
-		context_raw.text_tool_image = image_create_render_target(texW, texW, tex_format_t.R8);
+		context_raw.text_tool_image = image_create_render_target(tex_w, tex_w, tex_format_t.R8);
 		///end
 	}
 	g2_begin(context_raw.text_tool_image);
@@ -190,7 +190,7 @@ function util_render_make_text_preview() {
 	g2_set_font(font);
 	g2_set_font_size(font_size);
 	g2_set_color(0xffffffff);
-	g2_draw_string(text, texW / 2 - text_w / 2, texW / 2 - text_h / 2);
+	g2_draw_string(text, tex_w / 2 - text_w / 2, tex_w / 2 - text_h / 2);
 	g2_end();
 
 	if (g2_in_use) g2_begin(current);

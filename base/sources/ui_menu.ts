@@ -431,7 +431,6 @@ function ui_menu_render() {
 			if (ui_menu_button(ui, tr("Zoom Out"), map_get(config_keymap, "view_zoom_out"))) {
 				viewport_zoom(-0.2);
 			}
-			// menuSeparator(ui);
 
 			let cam: camera_object_t = scene_camera;
 			context_raw.fov_handle = ui_handle(__ID__);

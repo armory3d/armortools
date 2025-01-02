@@ -83,7 +83,7 @@ function tab_fonts_draw(htab: ui_handle_t) {
 					// ///if arm_opengl
 					// g4_set_pipeline(pipe);
 					// ///end
-					// g4_set_int(channelLocation, 1);
+					// g4_set_int(channel_location, 1);
 					state = _ui_image(img);
 					// g2_set_pipeline(null);
 				}

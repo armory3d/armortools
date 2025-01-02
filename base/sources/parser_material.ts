@@ -735,12 +735,12 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		return "(floor(100.0 * " + strength + " * " + col + ") / (100.0 * " + strength + "))";
 	}
 	else if (node.type == "REPLACECOL") {
-		let inputColor: string = parser_material_parse_vector_input(node.inputs[0]);
-		let oldColor: string = parser_material_parse_vector_input(node.inputs[1]);
-		let newColor: string = parser_material_parse_vector_input(node.inputs[2]);
+		let input_color: string = parser_material_parse_vector_input(node.inputs[0]);
+		let old_color: string = parser_material_parse_vector_input(node.inputs[1]);
+		let new_color: string = parser_material_parse_vector_input(node.inputs[2]);
 		let radius: string = parser_material_parse_value_input(node.inputs[3]);
 		let fuzziness: string = parser_material_parse_value_input(node.inputs[4]);
-		return "mix(" + newColor + ", " + inputColor + ", clamp((distance(" + oldColor + ", " + inputColor + ") - " + radius + ") / max(" + fuzziness + ", " + parser_material_eps + "), 0.0, 1.0))";
+		return "mix(" + new_color + ", " + input_color + ", clamp((distance(" + old_color + ", " + input_color + ") - " + radius + ") / max(" + fuzziness + ", " + parser_material_eps + "), 0.0, 1.0))";
 	}
 	else if (node.type == "VALTORGB") { // ColorRamp
 		let fac: string = parser_material_parse_value_input(node.inputs[0]);
@@ -1486,11 +1486,11 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 		return "dot(" + norout + ", " + nor + ")";
 	}
 	else if (node.type == "COLMASK") {
-		let inputColor: string = parser_material_parse_vector_input(node.inputs[0]);
-		let maskColor: string = parser_material_parse_vector_input(node.inputs[1]);
+		let input_color: string = parser_material_parse_vector_input(node.inputs[0]);
+		let mask_color: string = parser_material_parse_vector_input(node.inputs[1]);
 		let radius: string = parser_material_parse_value_input(node.inputs[2]);
 		let fuzziness: string = parser_material_parse_value_input(node.inputs[3]);
-		return "clamp(1.0 - (distance(" + inputColor + ", " + maskColor + ") - " + radius + ") / max(" + fuzziness + ", " + parser_material_eps + "), 0.0, 1.0)";
+		return "clamp(1.0 - (distance(" + input_color + ", " + mask_color + ") - " + radius + ") / max(" + fuzziness + ", " + parser_material_eps + "), 0.0, 1.0)";
 	}
 	else if (node.type == "MATH") {
 		let val1: string = parser_material_parse_value_input(node.inputs[0]);

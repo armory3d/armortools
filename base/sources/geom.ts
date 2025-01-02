@@ -49,7 +49,7 @@ function geom_make_plane(size_x: f32 = 1.0, size_y: f32 = 1.0, verts_x: i32 = 2,
 	return mesh;
 }
 
-function geom_make_uv_sphere(radius: f32 = 1.0, width_segments: i32 = 32, height_segments: i32 = 16, stretch_uv: bool = true, uvScale: f32 = 1.0): raw_mesh_t {
+function geom_make_uv_sphere(radius: f32 = 1.0, width_segments: i32 = 32, height_segments: i32 = 16, stretch_uv: bool = true, uv_scale: f32 = 1.0): raw_mesh_t {
 
 	let mesh: raw_mesh_t = {};
 	mesh.scale_pos = 1.0;
@@ -59,7 +59,7 @@ function geom_make_uv_sphere(radius: f32 = 1.0, width_segments: i32 = 32, height
 
 	// Pack positions to (-1, 1) range
 	mesh.scale_pos = radius;
-	mesh.scale_tex = uvScale;
+	mesh.scale_tex = uv_scale;
 	let inv: f32 = (1 / mesh.scale_pos) * 32767;
 	let pi2: f32 = math_pi() * 2;
 

@@ -81,7 +81,7 @@ function tab_materials_draw_slots(mini: bool) {
 				continue;
 			}
 			let img: image_t = ui_SCALE(ui) > 1 ? project_materials[i].image : project_materials[i].image_icon;
-			let imgFull: image_t = project_materials[i].image;
+			let img_full: image_t = project_materials[i].image;
 
 			// Highligh selected
 			if (context_raw.material == project_materials[i]) {
@@ -263,7 +263,7 @@ function tab_materials_draw_slots(mini: bool) {
 				});
 			}
 			if (ui.is_hovered) {
-				_ui_tooltip_image(imgFull);
+				_ui_tooltip_image(img_full);
 				if (i < 9) {
 					let i1: i32 = i + 1;
 					ui_tooltip(project_materials[i].canvas.name + " - (" + map_get(config_keymap, "select_material") + " " + i1 + ")");

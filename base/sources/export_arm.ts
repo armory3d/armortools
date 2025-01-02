@@ -206,7 +206,7 @@ function export_arm_run_project() {
 
 	// raw.mesh_icons =
 	// 	///if (arm_metal || arm_vulkan)
-	// 	[encode(bgraSwap(mesh_icon_pixels)];
+	// 	[encode(bgra_swap(mesh_icon_pixels)];
 	// 	///else
 	// 	[encode(mesh_icon_pixels)];
 	// 	///end

@@ -689,8 +689,8 @@ function box_preferences_show() {
 				context_raw.ddirty = 2;
 			}
 
-			// let h: ui_handle_t = ui_handle("boxpreferences_46", { value: raw.autoExposureStrength });
-			// raw.autoExposureStrength = ui_slider(h, "Auto Exposure", 0.0, 2.0, true);
+			// let h: ui_handle_t = ui_handle("boxpreferences_46", { value: raw.auto_exposure_strength });
+			// raw.auto_exposure_strength = ui_slider(h, "Auto Exposure", 0.0, 2.0, true);
 			// if (h.changed) raw.ddirty = 2;
 
 			let cam: camera_object_t = scene_camera;

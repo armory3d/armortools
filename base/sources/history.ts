@@ -490,9 +490,9 @@ function history_clear_layer() {
 	history_push(tr("Clear Layer"));
 }
 
-function history_order_layers(prevOrder: i32) {
+function history_order_layers(prev_order: i32) {
 	let step: step_t = history_push(tr("Order Layers"));
-	step.prev_order = prevOrder;
+	step.prev_order = prev_order;
 }
 
 function history_merge_layers() {

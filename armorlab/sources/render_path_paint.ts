@@ -100,33 +100,33 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 
 				// Picked surface values
 				// ///if (arm_metal || arm_vulkan)
-				// context_raw.pickedColor.base.Rb = a.get(2);
-				// context_raw.pickedColor.base.Gb = a.get(1);
-				// context_raw.pickedColor.base.Bb = a.get(0);
-				// context_raw.pickedColor.normal.Rb = b.get(2);
-				// context_raw.pickedColor.normal.Gb = b.get(1);
-				// context_raw.pickedColor.normal.Bb = b.get(0);
-				// context_raw.pickedColor.occlusion = c.get(2) / 255;
-				// context_raw.pickedColor.roughness = c.get(1) / 255;
-				// context_raw.pickedColor.metallic = c.get(0) / 255;
-				// context_raw.pickedColor.height = c.get(3) / 255;
-				// context_raw.pickedColor.opacity = a.get(3) / 255;
-				// context_raw.uvxPicked = d.get(2) / 255;
-				// context_raw.uvyPicked = d.get(1) / 255;
+				// context_raw.picked_color.base.Rb = a.get(2);
+				// context_raw.picked_color.base.Gb = a.get(1);
+				// context_raw.picked_color.base.Bb = a.get(0);
+				// context_raw.picked_color.normal.Rb = b.get(2);
+				// context_raw.picked_color.normal.Gb = b.get(1);
+				// context_raw.picked_color.normal.Bb = b.get(0);
+				// context_raw.picked_color.occlusion = c.get(2) / 255;
+				// context_raw.picked_color.roughness = c.get(1) / 255;
+				// context_raw.picked_color.metallic = c.get(0) / 255;
+				// context_raw.picked_color.height = c.get(3) / 255;
+				// context_raw.picked_color.opacity = a.get(3) / 255;
+				// context_raw.uvx_picked = d.get(2) / 255;
+				// context_raw.uvy_picked = d.get(1) / 255;
 				// ///else
-				// context_raw.pickedColor.base.Rb = a.get(0);
-				// context_raw.pickedColor.base.Gb = a.get(1);
-				// context_raw.pickedColor.base.Bb = a.get(2);
-				// context_raw.pickedColor.normal.Rb = b.get(0);
-				// context_raw.pickedColor.normal.Gb = b.get(1);
-				// context_raw.pickedColor.normal.Bb = b.get(2);
-				// context_raw.pickedColor.occlusion = c.get(0) / 255;
-				// context_raw.pickedColor.roughness = c.get(1) / 255;
-				// context_raw.pickedColor.metallic = c.get(2) / 255;
-				// context_raw.pickedColor.height = c.get(3) / 255;
-				// context_raw.pickedColor.opacity = a.get(3) / 255;
-				// context_raw.uvxPicked = d.get(0) / 255;
-				// context_raw.uvyPicked = d.get(1) / 255;
+				// context_raw.picked_color.base.Rb = a.get(0);
+				// context_raw.picked_color.base.Gb = a.get(1);
+				// context_raw.picked_color.base.Bb = a.get(2);
+				// context_raw.picked_color.normal.Rb = b.get(0);
+				// context_raw.picked_color.normal.Gb = b.get(1);
+				// context_raw.picked_color.normal.Bb = b.get(2);
+				// context_raw.picked_color.occlusion = c.get(0) / 255;
+				// context_raw.picked_color.roughness = c.get(1) / 255;
+				// context_raw.picked_color.metallic = c.get(2) / 255;
+				// context_raw.picked_color.height = c.get(3) / 255;
+				// context_raw.picked_color.opacity = a.get(3) / 255;
+				// context_raw.uvx_picked = d.get(0) / 255;
+				// context_raw.uvy_picked = d.get(1) / 255;
 				// ///end
 		}
 		else {

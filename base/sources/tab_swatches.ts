@@ -233,7 +233,7 @@ function tab_swatches_draw(htab: ui_handle_t) {
 			ui_fill(28, -2, 2, 32, ui.ops.theme.HIGHLIGHT_COL);
 		}
 
-		// Currently there is no valid dragPosition so reset it
+		// Currently there is no valid drag_position so reset it
 		if (!drag_pos_set) {
 			tab_swatches_drag_pos = -1;
 		}

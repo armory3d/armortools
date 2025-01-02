@@ -189,6 +189,23 @@ function render_path_raytrace_build_data() {
 	///end
 
 	render_path_raytrace_transform = mo.base.transform.world_unpack;
+
+	let md: mesh_data_t = mo.data;
+	if (md.scale_pos != 1.0) {
+		render_path_raytrace_transform = mat4_scale(
+			render_path_raytrace_transform, vec4_create(md.scale_pos, md.scale_pos, md.scale_pos)
+		);
+	}
+
+	if (mo.base.parent != null) {
+		let f: f32 = mo.base.parent.transform.scale.x;
+		if (f != 1.0) {
+			render_path_raytrace_transform = mat4_scale(
+				render_path_raytrace_transform, vec4_create(f, f, f)
+			);
+		}
+	}
+
 	render_path_raytrace_vb = mo.data._.vertex_buffer;
 	render_path_raytrace_ib = mo.data._.index_buffers[0];
 }

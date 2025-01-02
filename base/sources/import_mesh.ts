@@ -170,7 +170,7 @@ function _import_mesh_make_mesh(mesh: raw_mesh_t) {
 	}
 	///end
 
-	// Wait for addMesh calls to finish
+	// Wait for add_mesh calls to finish
 	if (import_mesh_meshes_to_unwrap != null) {
 		app_notify_on_next_frame(import_mesh_finish_import);
 	}

@@ -224,7 +224,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 			node_shader_write(frag, "texpaint_sample = textureLodShared(texpaint" + l.id + ", tex_coord, 0.0);");
 			node_shader_write(frag, "texpaint_opac = texpaint_sample.a;");
 			// ///if (arm_direct3d12 || arm_vulkan)
-			// if (raw.viewportMode == ViewLit) {
+			// if (raw.viewport_mode == viewport_mode_t.LIT) {
 			// 	write(frag, "if (texpaint_opac < 0.1) discard;");
 			// }
 			// ///end

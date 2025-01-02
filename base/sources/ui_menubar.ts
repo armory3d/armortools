@@ -207,8 +207,8 @@ function ui_menubar_show_menu(ui: ui_t, category: i32) {
 	ui_menu_x = math_floor(ui._x - ui._w);
 	ui_menu_y = math_floor(ui_MENUBAR_H(ui));
 	if (config_raw.touch_ui) {
-		let menuW: i32 = math_floor(base_default_element_w * ui_SCALE(base_ui_menu) * 2.0);
-		ui_menu_x -= math_floor((menuW - ui._w) / 2) + math_floor(ui_header_h / 2);
+		let menu_w: i32 = math_floor(base_default_element_w * ui_SCALE(base_ui_menu) * 2.0);
+		ui_menu_x -= math_floor((menu_w - ui._w) / 2) + math_floor(ui_header_h / 2);
 		ui_menu_x += math_floor(2 * ui_SCALE(base_ui_menu));
 		ui_menu_y -= math_floor(2 * ui_SCALE(base_ui_menu));
 		ui_menu_keep_open = true;
