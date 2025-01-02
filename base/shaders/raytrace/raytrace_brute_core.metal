@@ -5,8 +5,8 @@
 #define _TRANSLUCENCY
 #define _ROULETTE
 #define _TRANSPARENCY
+// #define _FRESNEL
 #endif
-#define _FRESNEL
 #define _RENDER
 
 using namespace metal;
@@ -200,6 +200,7 @@ kernel void raytracingKernel(
 			// TraceRay(scene, RAY_FLAG_FORCE_OPAQUE | RAY_FLAG_CULL_BACK_FACING_TRIANGLES, ~0, 0, 1, 0, ray, payload);
 			// #else
 			// TraceRay(scene, RAY_FLAG_FORCE_OPAQUE, ~0, 0, 1, 0, ray, payload);
+			// #endif
 
 			intersector<triangle_data, instancing> in;
 			in.assume_geometry_type(geometry_type::triangle);
@@ -329,7 +330,6 @@ kernel void raytracingKernel(
 				}
 				#endif
 			}
-			// #endif
 
 			#ifdef _EMISSION
 			if (payload.color.a == -2) {
