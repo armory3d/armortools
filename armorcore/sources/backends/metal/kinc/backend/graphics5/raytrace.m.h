@@ -14,6 +14,11 @@ static kinc_g5_constant_buffer_t *constant_buf;
 id getMetalDevice(void);
 id getMetalQueue(void);
 
+typedef struct inst {
+	kinc_matrix4x4_t m;
+	int i;
+} inst_t;
+
 id<MTLComputePipelineState> _raytracing_pipeline;
 NSMutableArray *_primitive_accels;
 id<MTLAccelerationStructure> _instance_accel;
@@ -26,8 +31,14 @@ static kinc_g5_texture_t *_texenv;
 static kinc_g5_texture_t *_texsobol;
 static kinc_g5_texture_t *_texscramble;
 static kinc_g5_texture_t *_texrank;
-static kinc_g5_vertex_buffer_t *_vb;
-static kinc_g5_index_buffer_t *_ib;
+
+static kinc_g5_vertex_buffer_t *vb[16];
+static kinc_g5_vertex_buffer_t *vb_last[16];
+static kinc_g5_index_buffer_t *ib[16];
+static int vb_count = 0;
+static int vb_count_last = 0;
+static inst_t instances[1024];
+static int instances_count = 0;
 
 bool kinc_raytrace_supported() {
 	id<MTLDevice> device = getMetalDevice();
@@ -88,25 +99,84 @@ id<MTLAccelerationStructure> create_acceleration_sctructure(MTLAccelerationStruc
 	return compacted_acceleration_structure;
 }
 
-void kinc_raytrace_acceleration_structure_init(kinc_raytrace_acceleration_structure_t *accel, kinc_g5_command_list_t *command_list, kinc_g5_vertex_buffer_t *vb,
-                                               kinc_g5_index_buffer_t *ib, float scale) {
+void kinc_raytrace_acceleration_structure_init(kinc_raytrace_acceleration_structure_t *accel) {
+	vb_count = 0;
+	instances_count = 0;
+}
+
+void kinc_raytrace_acceleration_structure_add(kinc_raytrace_acceleration_structure_t *accel, kinc_g5_vertex_buffer_t *_vb, kinc_g5_index_buffer_t *_ib,
+	kinc_matrix4x4_t _transform) {
+
+	int vb_i = -1;
+	for (int i = 0; i < vb_count; ++i) {
+		if (_vb == vb[i]) {
+			vb_i = i;
+			break;
+		}
+	}
+	if (vb_i == -1) {
+		vb_i = vb_count;
+		vb[vb_count] = _vb;
+		ib[vb_count] = _ib;
+		vb_count++;
+	}
+
+	inst_t inst = { .i = vb_i, .m =  _transform };
+	instances[instances_count] = inst;
+	instances_count++;
+}
+
+void _kinc_raytrace_acceleration_structure_destroy_bottom(kinc_raytrace_acceleration_structure_t *accel) {
+//	for (int i = 0; i < vb_count_last; ++i) {
+//	}
+	_primitive_accels = nil;
+}
+
+void _kinc_raytrace_acceleration_structure_destroy_top(kinc_raytrace_acceleration_structure_t *accel) {
+	_instance_accel = nil;
+}
+
+void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_structure_t *accel, kinc_g5_command_list_t *command_list,
+	kinc_g5_vertex_buffer_t *_vb_full, kinc_g5_index_buffer_t *_ib_full) {
+
+	bool build_bottom = false;
+	for (int i = 0; i < 16; ++i) {
+		if (vb_last[i] != vb[i]) {
+			build_bottom = true;
+		}
+		vb_last[i] = vb[i];
+	}
+
+	if (vb_count_last > 0) {
+		if (build_bottom) {
+			_kinc_raytrace_acceleration_structure_destroy_bottom(accel);
+		}
+		_kinc_raytrace_acceleration_structure_destroy_top(accel);
+	}
+
+	vb_count_last = vb_count;
+
+	if (vb_count == 0) {
+		return;
+	}
+
 	id<MTLDevice> device = getMetalDevice();
-	if (!device.supportsRaytracing) return;
+	if (!device.supportsRaytracing) {
+		return;
+	}
+
 #if !TARGET_OS_IPHONE
 	MTLResourceOptions options = MTLResourceStorageModeManaged;
 #else
 	MTLResourceOptions options = MTLResourceStorageModeShared;
 #endif
 
-	_vb = vb;
-	_ib = ib;
-
 	MTLAccelerationStructureTriangleGeometryDescriptor *descriptor = [MTLAccelerationStructureTriangleGeometryDescriptor descriptor];
 	descriptor.indexType = MTLIndexTypeUInt32;
-	descriptor.indexBuffer = (__bridge id<MTLBuffer>)ib->impl.metal_buffer;
-	descriptor.vertexBuffer = (__bridge id<MTLBuffer>)vb->impl.mtlBuffer;
-	descriptor.vertexStride = vb->impl.myStride;
-	descriptor.triangleCount = ib->impl.count / 3;
+	descriptor.indexBuffer = (__bridge id<MTLBuffer>)ib[0]->impl.metal_buffer;
+	descriptor.vertexBuffer = (__bridge id<MTLBuffer>)vb[0]->impl.mtlBuffer;
+	descriptor.vertexStride = vb[0]->impl.myStride;
+	descriptor.triangleCount = ib[0]->impl.count / 3;
 	descriptor.vertexFormat = MTLAttributeFormatShort4Normalized;
 
 	MTLPrimitiveAccelerationStructureDescriptor *accel_descriptor = [MTLPrimitiveAccelerationStructureDescriptor descriptor];
@@ -121,10 +191,10 @@ void kinc_raytrace_acceleration_structure_init(kinc_raytrace_acceleration_struct
 	instance_descriptors[0].accelerationStructureIndex = 0;
 	instance_descriptors[0].options = MTLAccelerationStructureInstanceOptionOpaque;
 	instance_descriptors[0].mask = 1;
-	instance_descriptors[0].transformationMatrix.columns[0] = MTLPackedFloat3Make(scale, 0, 0);
-	instance_descriptors[0].transformationMatrix.columns[1] = MTLPackedFloat3Make(0, scale, 0);
-	instance_descriptors[0].transformationMatrix.columns[2] = MTLPackedFloat3Make(0, 0, scale);
-	instance_descriptors[0].transformationMatrix.columns[3] = MTLPackedFloat3Make(0, 0, 0);
+	instance_descriptors[0].transformationMatrix.columns[0] = MTLPackedFloat3Make(instances[0].m.m[0], instances[0].m.m[1], instances[0].m.m[2]);
+	instance_descriptors[0].transformationMatrix.columns[1] = MTLPackedFloat3Make(instances[0].m.m[4], instances[0].m.m[5], instances[0].m.m[6]);
+	instance_descriptors[0].transformationMatrix.columns[2] = MTLPackedFloat3Make(instances[0].m.m[8], instances[0].m.m[9], instances[0].m.m[10]);
+	instance_descriptors[0].transformationMatrix.columns[3] = MTLPackedFloat3Make(instances[0].m.m[12], instances[0].m.m[13], instances[0].m.m[14]);
 
 #if !TARGET_OS_IPHONE
 	[instance_buffer didModifyRange:NSMakeRange(0, instance_buffer.length)];
@@ -182,8 +252,8 @@ void kinc_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
 	id<MTLComputeCommandEncoder> compute_encoder = [command_buffer computeCommandEncoder];
 	[compute_encoder setBuffer:(__bridge id<MTLBuffer>)constant_buf->impl._buffer offset:0 atIndex:0];
 	[compute_encoder setAccelerationStructure:_instance_accel atBufferIndex:1];
-	[compute_encoder setBuffer: (__bridge id<MTLBuffer>)_ib->impl.metal_buffer offset:0 atIndex:2];
-	[compute_encoder setBuffer: (__bridge id<MTLBuffer>)_vb->impl.mtlBuffer offset:0 atIndex:3];
+	[compute_encoder setBuffer: (__bridge id<MTLBuffer>)ib[0]->impl.metal_buffer offset:0 atIndex:2];
+	[compute_encoder setBuffer: (__bridge id<MTLBuffer>)vb[0]->impl.mtlBuffer offset:0 atIndex:3];
 	[compute_encoder setTexture:(__bridge id<MTLTexture>)output->impl._tex atIndex:0];
 	[compute_encoder setTexture:(__bridge id<MTLTexture>)_texpaint0->impl._tex atIndex:1];
 	[compute_encoder setTexture:(__bridge id<MTLTexture>)_texpaint1->impl._tex atIndex:2];
@@ -193,8 +263,9 @@ void kinc_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
 	[compute_encoder setTexture:(__bridge id<MTLTexture>)_texscramble->impl._tex atIndex:6];
 	[compute_encoder setTexture:(__bridge id<MTLTexture>)_texrank->impl._tex atIndex:7];
 
-	for (id<MTLAccelerationStructure> primitive_accel in _primitive_accels)
+	for (id<MTLAccelerationStructure> primitive_accel in _primitive_accels) {
 		[compute_encoder useResource:primitive_accel usage:MTLResourceUsageRead];
+	}
 
 	[compute_encoder setComputePipelineState:_raytracing_pipeline];
 	[compute_encoder dispatchThreadgroups:threadgroups threadsPerThreadgroup:threads_per_threadgroup];
@@ -203,14 +274,14 @@ void kinc_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
 }
 
 void kinc_raytrace_copy(kinc_g5_command_list_t *command_list, kinc_g5_render_target_t *target, kinc_g5_texture_t *source) {
-	id<MTLCommandQueue> queue = getMetalQueue();
-	id<MTLCommandBuffer> command_buffer = [queue commandBuffer];
-	id<MTLBlitCommandEncoder> command_encoder = [command_buffer blitCommandEncoder];
-	[command_encoder copyFromTexture:(__bridge id<MTLTexture>)source->impl._tex toTexture:(__bridge id<MTLTexture>)target->impl._tex];
-#ifndef KINC_APPLE_SOC
-	[command_encoder synchronizeResource:(__bridge id<MTLTexture>)target->impl._tex];
-#endif
-	[command_encoder endEncoding];
-	[command_buffer commit];
-	[command_buffer waitUntilCompleted];
+// 	id<MTLCommandQueue> queue = getMetalQueue();
+// 	id<MTLCommandBuffer> command_buffer = [queue commandBuffer];
+// 	id<MTLBlitCommandEncoder> command_encoder = [command_buffer blitCommandEncoder];
+// 	[command_encoder copyFromTexture:(__bridge id<MTLTexture>)source->impl._tex toTexture:(__bridge id<MTLTexture>)target->impl._tex];
+// #ifndef KINC_APPLE_SOC
+// 	[command_encoder synchronizeResource:(__bridge id<MTLTexture>)target->impl._tex];
+// #endif
+// 	[command_encoder endEncoding];
+// 	[command_buffer commit];
+// 	[command_buffer waitUntilCompleted];
 }
