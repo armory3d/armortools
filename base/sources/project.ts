@@ -487,62 +487,76 @@ function project_reimport_mesh() {
 	}
 }
 
+let _project_unwrap_by: i32 = 0;
+
+function project_get_unwrap_plugins(): string[] {
+	let unwrap_plugins: string[] = [];
+	if (box_preferences_files_plugin == null) {
+		box_preferences_fetch_plugins();
+	}
+	for (let i: i32 = 0; i < box_preferences_files_plugin.length; ++i) {
+		let f: string = box_preferences_files_plugin[i];
+		if (string_index_of(f, "uv_unwrap") >= 0 && ends_with(f, ".js")) {
+			array_push(unwrap_plugins, f);
+		}
+	}
+	array_push(unwrap_plugins, "equirect");
+	return unwrap_plugins;
+}
+
 function project_unwrap_mesh_box(mesh: raw_mesh_t, done: (a: raw_mesh_t)=>void, skip_ui: bool = false) {
 
 	_project_unwrap_mesh_box_mesh = mesh;
 	_project_unwrap_mesh_box_done = done;
-	_project_unwrap_mesh_box_skip_ui = skip_ui;
+
+	if (skip_ui) {
+		project_unwrap_mesh(mesh, done);
+		return;
+	}
 
 	ui_box_show_custom(function (ui: ui_t) {
-
 		let mesh: raw_mesh_t = _project_unwrap_mesh_box_mesh;
 		let done: (a: raw_mesh_t)=>void = _project_unwrap_mesh_box_done;
-		let skip_ui: bool = _project_unwrap_mesh_box_skip_ui;
 
 		let tab_vertical: bool = config_raw.touch_ui;
 		if (ui_tab(ui_handle(__ID__), tr("Unwrap Mesh"), tab_vertical)) {
 
-			let unwrap_plugins: string[] = [];
-			if (box_preferences_files_plugin == null) {
-				box_preferences_fetch_plugins();
-			}
-			for (let i: i32 = 0; i < box_preferences_files_plugin.length; ++i) {
-				let f: string = box_preferences_files_plugin[i];
-				if (string_index_of(f, "uv_unwrap") >= 0 && ends_with(f, ".js")) {
-					array_push(unwrap_plugins, f);
-				}
-			}
-			array_push(unwrap_plugins, "equirect");
-
-			let unwrap_by: i32 = ui_combo(ui_handle(__ID__), unwrap_plugins, tr("Plugin"), true);
+			let unwrap_plugins: string[] = project_get_unwrap_plugins();
+			_project_unwrap_by = ui_combo(ui_handle(__ID__), unwrap_plugins, tr("Plugin"), true);
 
 			ui_row2();
 			if (ui_button(tr("Cancel"))) {
 				ui_box_hide();
 			}
-			if (ui_button(tr("Unwrap")) || ui.is_return_down || skip_ui) {
+			if (ui_button(tr("Unwrap")) || ui.is_return_down) {
 				ui_box_hide();
 
 				///if (arm_android || arm_ios)
 				console_toast(tr("Unwrapping mesh"));
 				///end
 
-				if (unwrap_by == unwrap_plugins.length - 1) {
-					util_mesh_equirect_unwrap(mesh);
-				}
-				else {
-					let f: string = unwrap_plugins[unwrap_by];
-					if (array_index_of(config_raw.plugins, f) == -1) {
-						config_enable_plugin(f);
-						console_info(f + " " + tr("plugin enabled"));
-					}
-					let cb: any = map_get(util_mesh_unwrappers, f); // JSValue * -> (a: raw_mesh_t)=>void
-					js_call_ptr(cb, mesh);
-				}
-				done(mesh);
+				project_unwrap_mesh(mesh, done);
 			}
 		}
 	});
+}
+
+function project_unwrap_mesh(mesh: raw_mesh_t, done: (a: raw_mesh_t)=>void) {
+	let unwrap_plugins: string[] = project_get_unwrap_plugins();
+
+	if (_project_unwrap_by == unwrap_plugins.length - 1) {
+		util_mesh_equirect_unwrap(mesh);
+	}
+	else {
+		let f: string = unwrap_plugins[_project_unwrap_by];
+		if (array_index_of(config_raw.plugins, f) == -1) {
+			config_enable_plugin(f);
+			console_info(f + " " + tr("plugin enabled"));
+		}
+		let cb: any = map_get(util_mesh_unwrappers, f); // JSValue * -> (a: raw_mesh_t)=>void
+		js_call_ptr(cb, mesh);
+	}
+	done(mesh);
 }
 
 function project_import_asset(filters: string = null, hdr_as_envmap: bool = true) {
