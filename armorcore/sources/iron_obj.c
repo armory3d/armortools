@@ -81,7 +81,15 @@ static void read_face() {
 			if (uv_temp.length > 0) {
 				ua[ui++] = read_int() - 1;
 			}
+
 			if (nor_temp.length > 0) {
+
+				// Some exporters put fake uv index even when uv data is not present... (f 1/1/1 instead of f 1//1)
+				bool has_bogus_uv = uv_temp.length == 0 && bytes[part->pos] != '/';
+				if (has_bogus_uv) {
+					read_int();
+				}
+
 				part->pos++; // "/"
 				na[ni++] = read_int() - 1;
 			}
