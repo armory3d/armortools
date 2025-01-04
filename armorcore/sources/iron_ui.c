@@ -1651,7 +1651,7 @@ bool ui_window_dirty(ui_handle_t *handle, int x, int y, int w, int h) {
 	return current->always_redraw || current->is_scrolling || input_changed;
 }
 
-bool ui_window(ui_handle_t *handle, int x, int y, int w, int h, bool drag) {
+bool _ui_window(ui_handle_t *handle, int x, int y, int w, int h, bool drag) {
 	if (handle->texture.width == 0 || w != handle->texture.width || h != handle->texture.height) {
 		ui_resize(handle, w, h);
 	}

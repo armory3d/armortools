@@ -140,6 +140,12 @@ function _ui_tooltip_image(image: image_t, max_width: i32 = 0) {
 	}
 }
 
+function ui_window(handle: ui_handle_t, x: i32, y: i32, w: i32, h: i32, drag: bool = false): bool {
+	_g2_current = { render_target_: ADDRESS(handle.texture) };
+	_g2_in_use = true;
+	return _ui_window(handle, x, y, w, h, drag);
+}
+
 function _ui_set_scale(ui: ui_t, factor: f32) {
 	let current: ui_t = ui_get_current();
 	ui_set_current(ui);
@@ -271,7 +277,7 @@ declare function ui_tooltip_image(tex: any, max_width: i32 = 0): void;
 declare function ui_tooltip_render_target(rt: any, max_width: i32 = 0): void;
 declare function ui_separator(h: i32 = 4, fill: bool = true): void;
 declare function ui_text_area(handle: ui_handle_t, align: ui_align_t = ui_align_t.LEFT, editable: bool = true, label: string = "", word_wrap: bool = false): string;
-declare function ui_window(handle: ui_handle_t, x: i32, y: i32, w: i32, h: i32, drag: bool = false): bool;
+declare function _ui_window(handle: ui_handle_t, x: i32, y: i32, w: i32, h: i32, drag: bool = false): bool;
 declare function ui_begin(ui: ui_t): void;
 declare function ui_end(last: bool = true): void;
 declare function ui_end_window(bind_global_g: bool = true): void;

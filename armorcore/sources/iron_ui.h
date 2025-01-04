@@ -265,7 +265,7 @@ void ui_begin_sticky();
 void ui_end_sticky();
 void ui_begin_region(ui_t *ui, int x, int y, int w);
 void ui_end_region(bool last);
-bool ui_window(ui_handle_t *handle, int x, int y, int w, int h, bool drag); // Returns true if redraw is needed
+bool _ui_window(ui_handle_t *handle, int x, int y, int w, int h, bool drag); // Returns true if redraw is needed
 bool ui_button(char *text, int align, char *label);
 int ui_text(char *text, int align, int bg);
 bool ui_tab(ui_handle_t *handle, char *text, bool vertical, uint32_t color);
