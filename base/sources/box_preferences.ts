@@ -814,15 +814,15 @@ function box_preferences_show() {
 						let plugin_name: string = ui_text_input(h, tr("Name"));
 						if (ui_button(tr("OK")) || ui.is_return_down) {
 							let template: string =
-"let plugin = create();\
+"let plugin = plugin_create();\
 let h1 = ui_handle_create();\
-plugin.draw_ui = function (ui) {\
+plugin_notify_on_ui(plugin, function() {\
 	if (ui_panel(h1, \"New Plugin\")) {\
 		if (ui_button(\"Button\")) {\
-			console.error(\"Hello\");\
+			console_info(\"Hello\");\
 		}\
 	}\
-}\
+});\
 ";
 							if (!ends_with(plugin_name, ".js")) {
 								plugin_name += ".js";
