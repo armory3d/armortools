@@ -1018,7 +1018,7 @@ void ui_start_text_edit(ui_handle_t *handle, int align) {
 void ui_submit_text_edit() {
 	current->changed = strcmp(current->submit_text_handle->text, current->text_to_submit) != 0;
 	current->submit_text_handle->changed = current->changed;
-	strcpy(current->submit_text_handle->text, current->text_to_submit);
+	current->submit_text_handle->text = string_copy(current->text_to_submit);
 	current->submit_text_handle = NULL;
 	current->text_to_submit[0] = '\0';
 	current->text_selected[0] = '\0';
