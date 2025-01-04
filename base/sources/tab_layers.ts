@@ -399,7 +399,9 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	if (tab_layers_layer_name_edit == l.id) {
 		tab_layers_layer_name_handle.text = l.name;
 		l.name = ui_text_input(tab_layers_layer_name_handle);
-		if (ui.text_selected_handle != tab_layers_layer_name_handle) tab_layers_layer_name_edit = -1;
+		if (ui.text_selected_handle != tab_layers_layer_name_handle) {
+			tab_layers_layer_name_edit = -1;
+		}
 	}
 	else {
 		if (ui.enabled && ui.input_enabled && ui.combo_selected_handle == null &&

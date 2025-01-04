@@ -116,7 +116,9 @@ function ui_view2d_render() {
 
 	if (ui_nodes_show) {
 		ui_view2d_wh -= config_raw.layout[layout_size_t.NODES_H];
-		if (config_raw.touch_ui) ui_view2d_wh += ui_header_h;
+		if (config_raw.touch_ui) {
+			ui_view2d_wh += ui_header_h;
+		}
 	}
 
 	if (ui_window(ui_view2d_hwnd, ui_view2d_wx, ui_view2d_wy, ui_view2d_ww, ui_view2d_wh)) {
