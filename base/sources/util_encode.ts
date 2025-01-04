@@ -63,11 +63,17 @@ function util_encode_layer_data_size(datas: layer_data_t[]): i32 {
 	let size: i32 = 0;
 	for (let i: i32 = 0; i < datas.length; ++i) {
 		let tp: buffer_t = datas[i].texpaint;
-		let tp_nor: buffer_t = datas[i].texpaint_nor;
-		let tp_pack: buffer_t = datas[i].texpaint_pack;
 		size += tp.length;
-		size += tp_nor.length;
-		size += tp_pack.length;
+
+		let tp_nor: buffer_t = datas[i].texpaint_nor;
+		if (tp_nor != null) {
+			size += tp_nor.length;
+		}
+
+		let tp_pack: buffer_t = datas[i].texpaint_pack;
+		if (tp_pack != null) {
+			size += tp_pack.length;
+		}
 	}
 	return size;
 }
