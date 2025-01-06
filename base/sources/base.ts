@@ -835,6 +835,7 @@ function base_init_config() {
 	raw.dilate = dilate_type_t.INSTANT;
 	raw.dilate_radius = 2;
 	raw.gpu_inference = true;
+	raw.blender = "";
 
 	base_ext_init_config(raw);
 }
