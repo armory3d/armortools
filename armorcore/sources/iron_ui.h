@@ -282,7 +282,7 @@ void ui_separator(int h, bool fill);
 void ui_tooltip(char *text);
 void ui_tooltip_image(kinc_g4_texture_t *image, int max_width);
 void ui_tooltip_render_target(kinc_g4_render_target_t *image, int max_width);
-void ui_end(bool last);
+void _ui_end(bool last);
 void ui_end_window(bool bind_global_g);
 char *ui_hovered_tab_name();
 void ui_set_hovered_tab_name(char *name);

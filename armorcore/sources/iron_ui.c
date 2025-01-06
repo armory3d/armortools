@@ -2303,7 +2303,7 @@ void ui_tooltip_render_target(kinc_g4_render_target_t *image, int max_width) {
 	current->tooltip_y = current->_y + current->_window_y;
 }
 
-void ui_end(bool last) {
+void _ui_end(bool last) {
 	if (!current->window_ended) {
 		ui_end_window(true);
 	}
