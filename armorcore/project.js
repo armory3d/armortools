@@ -8,7 +8,19 @@ let project = new Project(flags.name);
 	project.add_define("KINC_G2");
 	let g5 = false;
 
-	project.add_cfiles("sources/kinc/**");
+	// project.add_cfiles("sources/kinc/**");
+	project.add_cfiles("sources/kinc/*");
+	project.add_cfiles("sources/kinc/audio1/*");
+	project.add_cfiles("sources/kinc/audio2/*");
+	project.add_cfiles("sources/kinc/graphics2/*");
+	project.add_cfiles("sources/kinc/graphics4/*");
+	project.add_cfiles("sources/kinc/input/*");
+	project.add_cfiles("sources/kinc/io/*");
+	project.add_cfiles("sources/kinc/libs/*");
+	project.add_cfiles("sources/kinc/math/*");
+	project.add_cfiles("sources/kinc/network/*");
+	project.add_cfiles("sources/kinc/simd/*");
+	project.add_cfiles("sources/kinc/threads/*");
 	project.add_include_dir("sources");
 
 	function add_backend(name) {
@@ -268,14 +280,10 @@ let project = new Project(flags.name);
 	project.add_define("KINC_G4");
 
 	if (g5) {
+		project.add_cfiles("sources/kinc/graphics5/*");
 		project.add_define("KINC_G5");
 		project.add_define("KINC_G4ONG5");
 		add_backend("g4ong5");
-	}
-	else {
-		project.add_define("KINC_G5");
-		project.add_define("KINC_G5ONG4");
-		add_backend("g5ong4");
 	}
 }
 
