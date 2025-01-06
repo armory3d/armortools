@@ -708,8 +708,9 @@ function ui_nodes_draw_grid() {
 
 	let wh: i32 = app_h();
 	let step: f32 = ui_nodes_grid_cell_w * zoom;
-	let w: i32 = math_floor(ww + step * 5);
-	let h: i32 = math_floor(wh + step * 5);
+	let mult: i32 = 5 * ui_SCALE(ui_nodes_ui);
+	let w: i32 = math_floor(ww + step * mult);
+	let h: i32 = math_floor(wh + step * mult);
 	if (w < 1) {
 		w = 1;
 	}
