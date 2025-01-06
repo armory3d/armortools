@@ -305,7 +305,7 @@ declare function iron_g4_begin(render_target: image_t, additional: image_t[]): v
 declare function iron_g4_end(): void;
 declare function iron_g4_swap_buffers(): void;
 declare function iron_file_save_bytes(path: string, bytes: buffer_t, length?: i32): void;
-declare function iron_sys_command(cmd: string, args?: string[]): i32;
+declare function iron_sys_command(cmd: string): i32;
 declare function iron_save_path(): string;
 declare function iron_get_arg_count(): i32;
 declare function iron_get_arg(index: i32): string;
