@@ -97,6 +97,7 @@ function config_save() {
 	json_encode_i32("dilate", config_raw.dilate);
 	json_encode_i32("dilate_radius", config_raw.dilate_radius);
 	json_encode_bool("gpu_inference", config_raw.gpu_inference);
+	json_encode_string("blender", config_raw.blender);
 	let config_json: string = json_encode_end();
 
 	let buffer: buffer_t = sys_string_to_buffer(config_json);
@@ -425,4 +426,6 @@ type config_t = {
 	dilate_radius?: i32;
 
 	gpu_inference?: bool;
+
+	blender?: string;
 };

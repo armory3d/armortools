@@ -434,16 +434,19 @@ function project_import_mesh_box(path: string, replace_existing: bool = true, cl
 			}
 
 			///if (is_paint || is_sculpt)
-			// if (ends_with(to_lower_case(path), ".fbx") || ends_with(to_lower_case(path), ".blend")) {
+			// if (ends_with(to_lower_case(path), ".fbx")) {
+			// 	let h: ui_handle_t = ui_handle(__ID__);
+			// 	if (h.init) {
+			// 		h.selected = context_raw.parse_vcols;
+			// 	}
+			// 	context_raw.parse_vcols = ui_check(h, tr("Parse Vertex Colors"));
+			// 	if (ui.is_hovered) {
+			// 		ui_tooltip(tr("Import vertex color data"));
+			// 	}
+			// }
+
 			if (ends_with(to_lower_case(path), ".blend")) {
-				let h: ui_handle_t = ui_handle(__ID__);
-				if (h.init) {
-					h.selected = context_raw.parse_vcols;
-				}
-				context_raw.parse_vcols = ui_check(h, tr("Parse Vertex Colors"));
-				if (ui.is_hovered) {
-					ui_tooltip(tr("Import vertex color data"));
-				}
+				import_blend_mesh_ui();
 			}
 			///end
 
@@ -470,7 +473,7 @@ function project_import_mesh_box(path: string, replace_existing: bool = true, cl
 				}
 			}
 			if (ui_button(tr("?"))) {
-				file_load_url("https://github.com/armory3d/armorpaint_docs/blob/master/faq.md");
+				file_load_url("https://github.com/armory3d/armorpaint_web/blob/main/manual.md#faq");
 			}
 		}
 	});
