@@ -4,15 +4,20 @@ function import_blend_mesh_ui() {
 		config_raw.blender = "";
 	}
 
+	ui_text(tr("Blender Executable"));
+
 	let ar: f32[] = [ 7 / 8, 1 / 8];
 	ui_row(ar);
 
 	let h: ui_handle_t = ui_handle(__ID__);
 	h.text = config_raw.blender;
-	config_raw.blender = ui_text_input(h, tr("Blender Executable"));
+	config_raw.blender = ui_text_input(h);
 
 	if (ui_button("...")) {
 		ui_files_show("", false, false, function (path: string) {
+			///if arm_windows
+			path = string_replace_all(path, "\\", "/");
+			///end
 			config_raw.blender = path;
 			config_save();
 		});
@@ -35,10 +40,17 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 	}
 	save += "tmp.obj";
 
+	///if arm_windows
+	path = string_replace_all(path, "\\", "\\\\");
+	save = string_replace_all(save, "\\", "\\\\");
+	///end
+
+	// Have to use ; instead of \n on windows
 	let py: string = "\
-import bpy\n\
+import bpy;\
 bpy.ops.wm.obj_export(filepath='" + save + "',export_triangulated_mesh=True,export_materials=False,check_existing=False)";
 
-	iron_sys_command("\"" + config_raw.blender + "\" \"" + path + "\" -b --python-expr \"" + py + "\"");
+	let bl: string = string_replace_all(config_raw.blender, " ", "\\ ");
+	iron_sys_command(bl + " \"" + path + "\" -b --python-expr \"" + py + "\"");
 	import_obj_run(save, replace_existing);
 }
