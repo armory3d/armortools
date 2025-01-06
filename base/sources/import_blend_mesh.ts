@@ -14,6 +14,7 @@ function import_blend_mesh_ui() {
 	if (ui_button("...")) {
 		ui_files_show("", false, false, function (path: string) {
 			config_raw.blender = path;
+			config_save();
 		});
 	}
 }
