@@ -128,16 +128,16 @@ function _import_mesh_make_mesh(mesh: raw_mesh_t) {
 
 	let handle: string = context_raw.paint_object.data._.handle;
 	if (handle != "SceneSphere" && handle != "ScenePlane") {
-		app_notify_on_init(function(handle: string) {
-			data_delete_mesh(handle);
-		}, handle);
+		app_notify_on_init(function(md: mesh_data_t) {
+			mesh_data_delete(md);
+		}, context_raw.paint_object.data);
 	}
 
 	mesh_object_set_data(context_raw.paint_object, md);
 	context_raw.paint_object.base.name = mesh.name;
 	project_paint_objects = [context_raw.paint_object];
 
-	md._.handle = raw.name;
+	md._.handle = string_copy(raw.name);
 	map_set(data_cached_meshes, md._.handle, md);
 
 	context_raw.ddirty = 4;
@@ -222,7 +222,7 @@ function _import_mesh_add_mesh(mesh: raw_mesh_t) {
 
 	array_push(project_paint_objects, object);
 
-	md._.handle = raw.name;
+	md._.handle = string_copy(raw.name);
 	map_set(data_cached_meshes, md._.handle, md);
 
 	context_raw.ddirty = 4;
