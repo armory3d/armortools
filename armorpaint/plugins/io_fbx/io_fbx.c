@@ -19,7 +19,7 @@ void io_fbx_parse_mesh(raw_mesh_t *raw, ufbx_mesh *mesh, ufbx_matrix *to_world, 
 	float *posa32 = (float *)malloc(sizeof(float) * numtri * 3 * 3);
 	float *nora32 = (float *)malloc(sizeof(float) * numtri * 3 * 3);
 	float *texa32 = has_tex ? (float *)malloc(sizeof(float) * numtri * 3 * 2) : NULL;
-	float *cola32 = has_col ? (float *)malloc(sizeof(float) * numtri * 3 * 3) : NULL;
+	float *cola32 = has_col ? (float *)malloc(sizeof(float) * numtri * 3 * 4) : NULL;
 	int pi = 0;
 	int ni = 0;
 	int ti = 0;
@@ -50,6 +50,7 @@ void io_fbx_parse_mesh(raw_mesh_t *raw, ufbx_mesh *mesh, ufbx_matrix *to_world, 
 				cola32[ci++] = ufbx_get_vertex_vec4(&mesh->vertex_color, a).x;
 				cola32[ci++] = ufbx_get_vertex_vec4(&mesh->vertex_color, a).y;
 				cola32[ci++] = ufbx_get_vertex_vec4(&mesh->vertex_color, a).z;
+				cola32[ci++] = ufbx_get_vertex_vec4(&mesh->vertex_color, a).w;
 			}
 		}
 	}
@@ -112,11 +113,12 @@ void io_fbx_parse_mesh(raw_mesh_t *raw, ufbx_mesh *mesh, ufbx_matrix *to_world, 
 
 	short *cola = NULL;
 	if (cola32 != NULL) {
-		short *cola = malloc(sizeof(short) * vertex_count * 3);
+		cola = malloc(sizeof(short) * vertex_count * 4);
 		for (int i = 0; i < vertex_count; ++i) {
-			cola[i * 3    ] = cola32[i * 3    ] * 32767;
-			cola[i * 3 + 1] = cola32[i * 3 + 1] * 32767;
-			cola[i * 3 + 2] = cola32[i * 3 + 2] * 32767;
+			cola[i * 4    ] = cola32[i * 4    ] * 32767;
+			cola[i * 4 + 1] = cola32[i * 4 + 1] * 32767;
+			cola[i * 4 + 2] = cola32[i * 4 + 2] * 32767;
+			cola[i * 4 + 3] = cola32[i * 4 + 3] * 32767;
 		}
 		free(cola32);
 	}
@@ -132,6 +134,12 @@ void io_fbx_parse_mesh(raw_mesh_t *raw, ufbx_mesh *mesh, ufbx_matrix *to_world, 
 	raw->texa = (i16_array_t *)malloc(sizeof(i16_array_t));
 	raw->texa->buffer = texa;
 	raw->texa->length = raw->texa->capacity = vertex_count * 2;
+
+	if (cola != NULL) {
+		raw->cola = (i16_array_t *)malloc(sizeof(i16_array_t));
+		raw->cola->buffer = cola;
+		raw->cola->length = raw->cola->capacity = vertex_count * 4;
+	}
 
 	raw->inda = (u32_array_t *)malloc(sizeof(u32_array_t));
 	raw->inda->buffer = inda;

@@ -84,14 +84,6 @@ function import_mesh_finish_import() {
 
 function _import_mesh_make_mesh(mesh: raw_mesh_t) {
 	let raw: raw_mesh_t = import_mesh_raw_mesh(mesh);
-	if (mesh.cola != null) {
-		let va: vertex_array_t = {
-			values: mesh.cola,
-			attrib: "col",
-			data: "short4norm"
-		};
-		array_push(raw.vertex_arrays, va);
-	}
 
 	let md: mesh_data_t = mesh_data_create(raw);
 	context_raw.paint_object = context_main_object();
@@ -150,14 +142,6 @@ function import_mesh_make_mesh(mesh: raw_mesh_t) {
 
 function import_mesh_add_mesh(mesh: raw_mesh_t) {
 	let raw: raw_mesh_t = import_mesh_raw_mesh(mesh);
-	if (mesh.cola != null) {
-		let va: vertex_array_t = {
-			values: mesh.cola,
-			attrib: "col",
-			data: "short4norm"
-		};
-		array_push(raw.vertex_arrays, va);
-	}
 
 	let md: mesh_data_t = mesh_data_create(raw);
 
