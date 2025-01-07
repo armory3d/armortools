@@ -308,14 +308,15 @@ ui_text_extract_t ui_extract_coloring(char *text, ui_coloring_t *col) {
 
 void ui_draw_string(char *text, float x_offset, float y_offset, int align, bool truncation) {
 	static char temp[1024];
+	static char truncated[1024];
 	if (text == NULL) {
 		return;
 	}
 	if (truncation) {
 		assert(strlen(text) < 1024 - 2);
 		char *full_text = text;
-		strcpy(temp, text);
-		text = &temp[0];
+		strcpy(truncated, text);
+		text = &truncated[0];
 		while (strlen(text) > 0 && arm_g2_string_width(current->ops->font->font_, current->font_size, text) > current->_w - 6.0 * UI_SCALE()) {
 			text[strlen(text) - 1] = 0;
 		}
