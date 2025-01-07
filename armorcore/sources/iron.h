@@ -207,7 +207,7 @@ char temp_string_fs[1024 * 128];
 char temp_string_vstruct[4][32][32];
 #ifdef KINC_WINDOWS
 wchar_t temp_wstring[1024 * 32];
-bool show_window = false;
+struct HWND__ *kinc_windows_window_handle(int window_index);
 #endif
 
 void (*iron_update)(void);
@@ -370,15 +370,6 @@ extern bool waitAfterNextDraw;
 #include <kinc/graphics5/raytrace.h>
 #endif
 
-#ifdef KINC_WINDOWS
-#include <dwmapi.h>
-#ifndef DWMWA_USE_IMMERSIVE_DARK_MODE
-#define DWMWA_USE_IMMERSIVE_DARK_MODE 20
-#endif
-struct HWND__ *kinc_windows_window_handle(int window_index);
-// Enable visual styles for ui controls
-#pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
-#endif
 #ifdef WITH_D3DCOMPILER
 #include <d3d11.h>
 #include <D3Dcompiler.h>
@@ -444,11 +435,6 @@ const int constant_buffer_size = 24;
 
 void _update(void *data) {
 	#ifdef KINC_WINDOWS
-	if (show_window && enable_window) {
-		show_window = false;
-		kinc_window_show(0);
-	}
-
 	if (in_background && ++paused_frames > 3) {
 		Sleep(1);
 		return;
@@ -724,16 +710,6 @@ void _drop_files(wchar_t *file_path, void *data) {
 	_mouse_move(0, p.x, p.y, 0, 0, NULL);
 #endif
 
-	// if (sizeof(wchar_t) == 2) {
-	// 	(const uint16_t *)file_path
-	// }
-	// else {
-	// 	size_t len = wcslen(file_path);
-	// 	uint16_t *str = new uint16_t[len + 1];
-	// 	for (int i = 0; i < len; i++) str[i] = file_path[i];
-	// 	str[len] = 0;
-	// }
-
 	char buffer[512];
 	wcstombs(buffer, file_path, sizeof(buffer));
 	iron_drop_files(buffer);
@@ -871,11 +847,7 @@ void iron_init(string_t *title, i32 width, i32 height, bool vsync, i32 window_mo
 	frame.frequency = frequency;
 
 	win.display_index = -1;
-	#ifdef KINC_WINDOWS
-	win.visible = false; // Prevent white flicker when opening the window
-	#else
 	win.visible = enable_window;
-	#endif
 	frame.color_bits = 32;
 	frame.depth_bits = 0;
 	frame.stencil_bits = 0;
@@ -888,14 +860,6 @@ void iron_init(string_t *title, i32 width, i32 height, bool vsync, i32 window_mo
 	if (win.x < -1 && win.y < -1) {
 		kinc_window_move(0, win.x, win.y);
 	}
-
-	char vdata[4];
-	DWORD cbdata = 4 * sizeof(char);
-	RegGetValueW(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", L"AppsUseLightTheme", RRF_RT_REG_DWORD, NULL, vdata, &cbdata);
-	BOOL use_dark_mode = (int)(vdata[3] << 24 | vdata[2] << 16 | vdata[1] << 8 | vdata[0]) != 1;
-	DwmSetWindowAttribute(kinc_windows_window_handle(0), DWMWA_USE_IMMERSIVE_DARK_MODE, &use_dark_mode, sizeof(use_dark_mode));
-
-	show_window = true;
 	#endif
 
 	#ifdef WITH_AUDIO

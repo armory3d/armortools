@@ -9,6 +9,15 @@
 struct HWND__;
 typedef unsigned long DWORD;
 
+// Dark mode
+#include <dwmapi.h>
+#ifndef DWMWA_USE_IMMERSIVE_DARK_MODE
+#define DWMWA_USE_IMMERSIVE_DARK_MODE 20
+#endif
+struct HWND__ *kinc_windows_window_handle(int window_index);
+// Enable visual styles for ui controls
+#pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+
 typedef struct {
 	struct HWND__ *handle;
 	int display_index;
@@ -71,7 +80,7 @@ static void RegisterWindowClass(HINSTANCE hInstance, const wchar_t *className) {
 	                  hInstance,
 	                  LoadIconW(hInstance, MAKEINTRESOURCEW(107)),
 	                  LoadCursor(NULL, IDC_ARROW),
-	                  0,
+	                  CreateSolidBrush(0x00202020),
 	                  0,
 	                  className,
 	                  0};
@@ -228,6 +237,13 @@ static int createWindow(const wchar_t *title, int x, int y, int width, int heigh
 	windows[window_counter].manualWidth = width;
 	windows[window_counter].manualHeight = height;
 	windows[window_counter].index = window_counter;
+
+	// Dark mode
+	char vdata[4];
+	DWORD cbdata = 4 * sizeof(char);
+	RegGetValueW(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", L"AppsUseLightTheme", RRF_RT_REG_DWORD, NULL, vdata, &cbdata);
+	BOOL use_dark_mode = (int)(vdata[3] << 24 | vdata[2] << 16 | vdata[1] << 8 | vdata[0]) != 1;
+	DwmSetWindowAttribute(kinc_windows_window_handle(0), DWMWA_USE_IMMERSIVE_DARK_MODE, &use_dark_mode, sizeof(use_dark_mode));
 
 	return window_counter++;
 }

@@ -290,6 +290,7 @@ static bool cursors_initialized = false;
 static int cursor = 0;
 #define NUM_CURSORS 14
 static HCURSOR cursors[NUM_CURSORS];
+static bool bg_erased = false;
 
 void kinc_mouse_set_cursor(int set_cursor) {
 	cursor = set_cursor >= NUM_CURSORS ? 0 : set_cursor;
@@ -351,8 +352,12 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 		}
 		return 0;
 	}
-	case WM_ERASEBKGND:
-		return 1;
+	case WM_ERASEBKGND: {
+		if (bg_erased) {
+			return 1;
+		}
+		bg_erased = true;
+	}
 	case WM_ACTIVATE:
 		if (LOWORD(wParam) == WA_ACTIVE || LOWORD(wParam) == WA_CLICKACTIVE) {
 			kinc_internal_mouse_window_activated(kinc_windows_window_index_from_hwnd(hWnd));
