@@ -2379,10 +2379,10 @@ bool _window_close_callback(void *data) {
 			return false;
 		}
 	}
-	//if (save_and_quit_func_set) {
-	//	iron_save_and_quit(save);
-	//	return false;
-	//}
+	if (save_and_quit_callback_set) {
+		iron_save_and_quit(save);
+		return false;
+	}
 	#endif
 	return true;
 }
