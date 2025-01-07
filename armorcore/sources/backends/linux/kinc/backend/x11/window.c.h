@@ -168,7 +168,6 @@ void kinc_x11_window_change_mode(int window_index, kinc_window_mode_t mode) {
 		}
 		break;
 	case KINC_WINDOW_MODE_FULLSCREEN:
-	case KINC_WINDOW_MODE_EXCLUSIVE_FULLSCREEN:
 		if (window->mode == KINC_WINDOW_MODE_WINDOW) {
 			window->mode = KINC_WINDOW_MODE_FULLSCREEN;
 			fullscreen = true;

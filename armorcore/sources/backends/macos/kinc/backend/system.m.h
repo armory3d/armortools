@@ -123,7 +123,7 @@ static int createWindow(kinc_window_options_t *options) {
 
 	[window makeKeyAndOrderFront:nil];
 
-	if (options->mode == KINC_WINDOW_MODE_FULLSCREEN || options->mode == KINC_WINDOW_MODE_EXCLUSIVE_FULLSCREEN) {
+	if (options->mode == KINC_WINDOW_MODE_FULLSCREEN) {
 		[window toggleFullScreen:nil];
 		windows[windowCounter].fullscreen = true;
 	}
@@ -144,7 +144,6 @@ void kinc_window_change_window_mode(int window_index, kinc_window_mode_t mode) {
 		}
 		break;
 	case KINC_WINDOW_MODE_FULLSCREEN:
-	case KINC_WINDOW_MODE_EXCLUSIVE_FULLSCREEN:
 		if (!windows[window_index].fullscreen) {
 			[window toggleFullScreen:nil];
 			windows[window_index].fullscreen = true;

@@ -155,9 +155,6 @@ int kinc_window_height(int window_index) {
 
 static DWORD getDwStyle(kinc_window_mode_t mode, int features) {
 	switch (mode) {
-	case KINC_WINDOW_MODE_EXCLUSIVE_FULLSCREEN: {
-		return WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP;
-	}
 	case KINC_WINDOW_MODE_FULLSCREEN:
 		return WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP;
 	case KINC_WINDOW_MODE_WINDOW:
@@ -168,9 +165,6 @@ static DWORD getDwStyle(kinc_window_mode_t mode, int features) {
 
 static DWORD getDwExStyle(kinc_window_mode_t mode, int features) {
 	switch (mode) {
-	case KINC_WINDOW_MODE_EXCLUSIVE_FULLSCREEN: {
-		return WS_EX_APPWINDOW;
-	}
 	case KINC_WINDOW_MODE_FULLSCREEN:
 		return WS_EX_APPWINDOW;
 	case KINC_WINDOW_MODE_WINDOW:
@@ -195,10 +189,6 @@ static int createWindow(const wchar_t *title, int x, int y, int width, int heigh
 	WindowRect.top = 0;
 	WindowRect.bottom = height;
 
-	if (windowMode == KINC_WINDOW_MODE_EXCLUSIVE_FULLSCREEN) {
-		kinc_windows_set_display_mode(display_index, width, height, bpp, frequency);
-	}
-
 	AdjustWindowRectEx(&WindowRect, getDwStyle(windowMode, features), FALSE, getDwExStyle(windowMode, features));
 
 	kinc_display_mode_t display_mode = kinc_display_current_mode(display_index);
@@ -218,8 +208,6 @@ static int createWindow(const wchar_t *title, int x, int y, int width, int heigh
 	case KINC_WINDOW_MODE_FULLSCREEN:
 		dstw = display_mode.width;
 		dsth = display_mode.height;
-		break;
-	case KINC_WINDOW_MODE_EXCLUSIVE_FULLSCREEN:
 		break;
 	}
 
@@ -257,13 +245,6 @@ void kinc_window_resize(int window_index, int width, int height) {
 		rect.bottom = height;
 		AdjustWindowRectEx(&rect, getDwStyle((kinc_window_mode_t)win->mode, win->features), FALSE, getDwExStyle((kinc_window_mode_t)win->mode, win->features));
 		SetWindowPos(win->handle, NULL, kinc_window_x(window_index), kinc_window_y(window_index), rect.right - rect.left, rect.bottom - rect.top, 0);
-		break;
-	}
-	case KINC_WINDOW_MODE_EXCLUSIVE_FULLSCREEN: {
-		int display_index = kinc_window_display(window_index);
-		kinc_display_mode_t display_mode = kinc_display_current_mode(display_index);
-		kinc_windows_set_display_mode(display_index, width, height, win->bpp, win->frequency);
-		SetWindowPos(win->handle, NULL, display_mode.x, display_mode.y, display_mode.width, display_mode.height, 0);
 		break;
 	}
 	}
@@ -312,11 +293,12 @@ void kinc_window_change_mode(int window_index, kinc_window_mode_t mode) {
 	int display_index = kinc_window_display(window_index);
 	kinc_display_mode_t display_mode = kinc_display_current_mode(display_index);
 	switch (mode) {
-	case KINC_WINDOW_MODE_WINDOW:
+	case KINC_WINDOW_MODE_WINDOW: {
 		kinc_windows_restore_display(display_index);
 		kinc_window_change_features(window_index, win->features);
 		kinc_window_show(window_index);
 		break;
+	}
 	case KINC_WINDOW_MODE_FULLSCREEN: {
 		kinc_windows_restore_display(display_index);
 		SetWindowLongW(win->handle, GWL_STYLE, WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP);
@@ -325,15 +307,9 @@ void kinc_window_change_mode(int window_index, kinc_window_mode_t mode) {
 		kinc_window_show(window_index);
 		break;
 	}
-	case KINC_WINDOW_MODE_EXCLUSIVE_FULLSCREEN:
-		kinc_windows_set_display_mode(display_index, win->manualWidth, win->manualHeight, win->bpp, win->frequency);
-		SetWindowLongW(win->handle, GWL_STYLE, WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP);
-		SetWindowLongW(win->handle, GWL_EXSTYLE, WS_EX_APPWINDOW);
-		SetWindowPos(win->handle, NULL, display_mode.x, display_mode.y, display_mode.width, display_mode.height, 0);
-		kinc_window_show(window_index);
-		break;
 	}
 	win->mode = mode;
+	DragAcceptFiles(win->handle, true);
 }
 
 kinc_window_mode_t kinc_window_get_mode(int window_index) {

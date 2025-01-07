@@ -23,8 +23,7 @@ typedef struct kinc_framebuffer_options {
 
 typedef enum {
 	KINC_WINDOW_MODE_WINDOW,
-	KINC_WINDOW_MODE_FULLSCREEN,
-	KINC_WINDOW_MODE_EXCLUSIVE_FULLSCREEN // Only relevant for Windows
+	KINC_WINDOW_MODE_FULLSCREEN
 } kinc_window_mode_t;
 
 #define KINC_WINDOW_FEATURE_RESIZEABLE 1

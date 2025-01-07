@@ -284,9 +284,7 @@ static wchar_t toUnicode(WPARAM wParam, LPARAM lParam) {
 	return buffer[0];
 }
 
-#if !defined(KINC_DIRECT3D9) && !defined(KINC_DIRECT3D11) && !defined(KINC_DIRECT3D12)
 #define HANDLE_ALT_ENTER
-#endif
 
 static bool cursors_initialized = false;
 static int cursor = 0;

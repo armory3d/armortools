@@ -443,13 +443,12 @@ void kinc_wayland_window_change_mode(int window_index, kinc_window_mode_t mode) 
 	}
 	switch (mode) {
 	case KINC_WINDOW_MODE_WINDOW:
-		if (window->mode == KINC_WINDOW_MODE_FULLSCREEN || window->mode == KINC_WINDOW_MODE_EXCLUSIVE_FULLSCREEN) {
+		if (window->mode == KINC_WINDOW_MODE_FULLSCREEN) {
 			window->mode = KINC_WINDOW_MODE_WINDOW;
 			xdg_toplevel_unset_fullscreen(window->toplevel);
 		}
 		break;
 	case KINC_WINDOW_MODE_FULLSCREEN:
-	case KINC_WINDOW_MODE_EXCLUSIVE_FULLSCREEN:
 		if (window->mode == KINC_WINDOW_MODE_WINDOW) {
 			window->mode = mode;
 			struct kinc_wl_display *display = &wl_ctx.displays[window->display_index];

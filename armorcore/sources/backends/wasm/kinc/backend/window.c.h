@@ -40,8 +40,8 @@ void kinc_window_change_features(int window_index, int features) {}
 
 // In HTML5 fullscreen is activable only from user input.
 void kinc_window_change_mode(int window_index, kinc_window_mode_t mode) {
-	if (mode == KINC_WINDOW_MODE_FULLSCREEN || mode == KINC_WINDOW_MODE_EXCLUSIVE_FULLSCREEN) {
-		if (kinc_internal_window_mode == KINC_WINDOW_MODE_FULLSCREEN || kinc_internal_window_mode == KINC_WINDOW_MODE_EXCLUSIVE_FULLSCREEN) {
+	if (mode == KINC_WINDOW_MODE_FULLSCREEN) {
+		if (kinc_internal_window_mode == KINC_WINDOW_MODE_FULLSCREEN) {
 			kinc_internal_window_mode = mode;
 			return;
 		}
