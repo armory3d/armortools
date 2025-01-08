@@ -403,6 +403,10 @@ function project_import_mesh(replace_existing: bool = true, done: ()=>void = nul
 	});
 }
 
+function project_append_mesh() {
+	project_import_mesh(false, import_mesh_finish_import);
+}
+
 function project_import_mesh_box(path: string, replace_existing: bool = true, clear_layers: bool = true, done: ()=>void = null) {
 
 	_project_import_mesh_box_path = path;

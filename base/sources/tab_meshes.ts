@@ -34,7 +34,7 @@ function tab_meshes_draw(htab: ui_handle_t) {
 					project_import_mesh(true);
 				}
 				if (ui_menu_button(ui, tr("Append"))) {
-					project_import_mesh(false);
+					project_append_mesh();
 				}
 			});
 		}
