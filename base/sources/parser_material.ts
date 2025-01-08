@@ -1617,9 +1617,10 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 		if (parser_material_script_links == null) {
 			parser_material_script_links = map_create();
 		}
-		let script: any = node.buttons[0].default_value;
+		let script: buffer_t = node.buttons[0].default_value;
+		let str: string = sys_buffer_to_string(script);
 		let link: string = parser_material_node_name(node);
-		map_set(parser_material_script_links, link, script);
+		map_set(parser_material_script_links, link, str);
 		node_shader_add_uniform(parser_material_curshader, "float " + link, "_" + link);
 		return link;
 	}

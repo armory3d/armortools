@@ -132,11 +132,11 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 		let keys: string[] = map_keys(parser_material_script_links);
 		for (let i: i32 = 0; i < keys.length; ++i) {
 			let key: string = keys[i];
-			// let script: string = parser_material_script_links[key]; ////
+			let script: string = map_get(parser_material_script_links, key);
 			let result: f32 = f32_nan();
-			// if (script != "") {
-				// result = js_eval(script);
-			// }
+			if (script != "") {
+				result = js_eval(script);
+			}
 			return result;
 		}
 	}
