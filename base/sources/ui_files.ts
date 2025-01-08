@@ -22,6 +22,7 @@ let ui_files_last_path: string = "";
 let ui_files_last_search: string = "";
 let ui_files_files: string[] = null;
 let ui_files_icon_map: map_t<string, image_t> = null;
+let ui_files_icon_file_map: map_t<string, string> = null;
 let ui_files_selected: i32 = -1;
 let ui_files_show_extensions: bool = false;
 let ui_files_offline: bool = false;
@@ -177,6 +178,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 			if (is_cloud && f != ".." && !ui_files_offline) {
 				if (ui_files_icon_map == null) {
 					ui_files_icon_map = map_create();
+					ui_files_icon_file_map = map_create();
 				}
 				icon = map_get(ui_files_icon_map, handle.text + path_sep + f);
 				if (icon == null) {
@@ -190,12 +192,14 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 							map_set(ui_files_icon_map, handle.text + path_sep + f, empty);
 
 							_ui_files_file_browser_handle = handle;
-							_ui_files_file_browser_f = f; ////
+							map_set(ui_files_icon_file_map, icon_file, f);
 
 							file_cache_cloud(handle.text + path_sep + icon_file, function (abs: string) {
 								if (abs != null) {
+									let icon_file: string = substring(abs, string_last_index_of(abs, path_sep) + 1, abs.length);
+									let f: string = map_get(ui_files_icon_file_map, icon_file);
 									let image: image_t = data_get_image(abs);
-									let data: draw_cloud_icon_data_t = make_draw_cloud_icon_data(_ui_files_file_browser_f, image);
+									let data: draw_cloud_icon_data_t = make_draw_cloud_icon_data(f, image);
 
 									app_notify_on_init(function (data: draw_cloud_icon_data_t) {
 										let icon: image_t = image_create_render_target(data.image.width, data.image.height);
