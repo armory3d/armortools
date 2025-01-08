@@ -102,7 +102,7 @@ function tab_layers_button_new(text: string) {
 				if (slot_layer_is_mask(l)) {
 					context_set_layer(l.parent);
 				}
-				// let l: slot_layer_t = raw.layer;
+				l = context_raw.layer;
 
 				let m: slot_layer_t = layers_new_mask(false, l);
 				app_notify_on_next_frame(function (m: slot_layer_t) {
@@ -116,7 +116,7 @@ function tab_layers_button_new(text: string) {
 				if (slot_layer_is_mask(l)) {
 					context_set_layer(l.parent);
 				}
-				// let l: slot_layer_t = raw.layer;
+				l = context_raw.layer;
 
 				let m: slot_layer_t = layers_new_mask(false, l);
 				app_notify_on_next_frame(function (m: slot_layer_t) {
@@ -130,7 +130,7 @@ function tab_layers_button_new(text: string) {
 				if (slot_layer_is_mask(l)) {
 					context_set_layer(l.parent);
 				}
-				// let l: slot_layer_t = raw.layer;
+				l = context_raw.layer;
 
 				let m: slot_layer_t = layers_new_mask(false, l);
 				app_notify_on_init(function (m: slot_layer_t) {
