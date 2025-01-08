@@ -19,6 +19,8 @@ let ui_nodes_hide_menu: bool = false;
 let ui_nodes_menu_category: i32 = 0;
 let ui_nodes_popup_x: f32 = 0.0;
 let ui_nodes_popup_y: f32 = 0.0;
+let ui_nodes_node_search_x: i32;
+let ui_nodes_node_search_y: i32;
 
 let ui_nodes_uichanged_last: bool = false;
 let ui_nodes_recompile_mat: bool = false; // Mat preview
@@ -1179,7 +1181,12 @@ function ui_nodes_render() {
 		}
 		else {
 			if (_ui_menu_button(tr("Search"))) {
-				ui_nodes_node_search(math_floor(ui_nodes_ui._window_x + ui_nodes_ui._x), math_floor(ui_nodes_ui._window_y + ui_nodes_ui._y));
+				ui_nodes_node_search_x = ui_nodes_ui._window_x + ui_nodes_ui._x;
+				ui_nodes_node_search_y = ui_nodes_ui._window_y + ui_nodes_ui._y;
+				// Allow for node menu to be closed first
+				app_notify_on_init(function() {
+					ui_nodes_node_search(math_floor(ui_nodes_node_search_x), math_floor(ui_nodes_node_search_y));
+				});
 			}
 		}
 		if (ui_nodes_ui.is_hovered) {
