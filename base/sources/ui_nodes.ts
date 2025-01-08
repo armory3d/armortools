@@ -722,7 +722,18 @@ function ui_nodes_draw_grid() {
 	g2_begin(ui_nodes_grid);
 	g2_clear(ui_nodes_ui.ops.theme.SEPARATOR_COL);
 
-	g2_set_color(ui_nodes_ui.ops.theme.SEPARATOR_COL - 0x00050505);
+	let sep_col: i32 = ui_nodes_ui.ops.theme.SEPARATOR_COL;
+	let line_primary: i32 = sep_col - 0x00050505;
+	if (line_primary < 0xff000000) {
+		line_primary = sep_col + 0x00050505;
+	}
+
+	let line_secondary: i32 = sep_col - 0x00090909;
+	if (line_secondary < 0xff000000) {
+		line_secondary = sep_col + 0x00090909;
+	}
+
+	g2_set_color(line_primary);
 	step = ui_nodes_grid_small_cell_w * zoom;
 	for (let i: i32 = 0; i < math_floor(h / step) + 1; ++i) {
 		g2_draw_line(0, i * step, w, i * step);
@@ -731,7 +742,7 @@ function ui_nodes_draw_grid() {
 		g2_draw_line(i * step, 0, i * step, h);
 	}
 
-	g2_set_color(ui_nodes_ui.ops.theme.SEPARATOR_COL - 0x00090909);
+	g2_set_color(line_secondary);
 	step = ui_nodes_grid_cell_w * zoom;
 	for (let i: i32 = 0; i < math_floor(h / step) + 1; ++i) {
 		g2_draw_line(0, i * step, w, i * step);

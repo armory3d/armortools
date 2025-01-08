@@ -1357,7 +1357,11 @@ void ui_draw_tabs() {
 
 		// Tab separator
 		if (i < current->tab_count - 1) {
-			arm_g2_set_color(theme->SEPARATOR_COL - 0x00050505);
+			int sep_col = theme->SEPARATOR_COL - 0x00050505;
+			if (sep_col < 0xff000000) {
+				sep_col = theme->SEPARATOR_COL + 0x00050505;
+			}
+			arm_g2_set_color(sep_col);
 			if (current->tab_vertical) {
 				arm_g2_fill_rect(current->_x, current->_y + tab_h, current->_w, 1);
 			}
