@@ -6,7 +6,6 @@ let box_preferences_theme_handle: ui_handle_t;
 let box_preferences_preset_handle: ui_handle_t;
 let box_preferences_locales: string[] = null;
 let box_preferences_themes: string[] = null;
-let box_preferences_world_color: i32 = 0xff080808;
 let _box_preferences_f: string;
 let _box_preferences_h: ui_handle_t;
 let _box_preferences_i: i32;
@@ -241,47 +240,8 @@ function box_preferences_show() {
 
 			ui_end_sticky();
 
-			let i: i32 = 0;
-			let hlist: ui_handle_t = ui_handle(__ID__);
-
-			// Viewport color
-			let h: ui_handle_t = ui_nest(hlist, i++);
-			if (h.init) {
-				h.color = box_preferences_world_color;
-			}
-			let row: f32[] = [1 / 8, 7 / 8];
-			ui_row(row);
-			ui_text("", 0, h.color);
-			if (ui.is_hovered && ui.input_released) {
-				_box_preferences_h = h;
-				ui_menu_draw(function (ui: ui_t) {
-					ui.changed = false;
-					ui_color_wheel(_box_preferences_h, false, -1, 11 * ui.ops.theme.ELEMENT_H * ui_SCALE(ui), true);
-					if (ui.changed) {
-						ui_menu_keep_open = true;
-					}
-				});
-			}
-			let val: u32 = h.color;
-			h.text = i32_to_string_hex(val);
-			ui_text_input(h, "VIEWPORT_COL");
-			h.color = parse_int_hex(h.text);
-
-			if (box_preferences_world_color != h.color) {
-				box_preferences_world_color = h.color;
-				let b: u8_array_t = u8_array_create(4);
-				b[0] = color_get_rb(box_preferences_world_color);
-				b[1] = color_get_gb(box_preferences_world_color);
-				b[2] = color_get_bb(box_preferences_world_color);
-				b[3] = 255;
-				context_raw.empty_envmap = image_from_bytes(b, 1, 1);
-				context_raw.ddirty = 2;
-				if (!context_raw.show_envmap) {
-					scene_world._.envmap = context_raw.empty_envmap;
-				}
-			}
-
 			// Theme fields
+			let hlist: ui_handle_t = ui_handle(__ID__);
 			let u32_theme: u32_ptr = base_theme;
 			for (let i: i32 = 0; i < ui_theme_keys.length; ++i) {
 				let key: string = ui_theme_keys[i];
@@ -306,6 +266,10 @@ function box_preferences_show() {
 								ui_menu_keep_open = true;
 							}
 						});
+					}
+
+					if (key == "VIEWPORT_COL" && ui_base_viewport_col != val) {
+						ui_base_set_viewport_col(val);
 					}
 				}
 

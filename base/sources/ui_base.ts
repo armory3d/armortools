@@ -15,6 +15,7 @@ let ui_base_redo_tap_time: f32 = 0.0;
 let ui_base_hwnds: ui_handle_t[] = ui_base_init_hwnds();
 let ui_base_htabs: ui_handle_t[] = ui_base_init_htabs();
 let ui_base_hwnd_tabs: tab_draw_array_t[] = ui_base_init_hwnd_tabs();
+let ui_base_viewport_col: i32;
 
 ///if is_lab
 let ui_base_default_sidebar_mini_w: i32 = 0;
@@ -122,12 +123,7 @@ function ui_base_init() {
 	}
 
 	if (context_raw.empty_envmap == null) {
-		let b: u8_array_t = u8_array_create(4);
-		b[0] = 8;
-		b[1] = 8;
-		b[2] = 8;
-		b[3] = 255;
-		context_raw.empty_envmap = image_from_bytes(b, 1, 1);
+		ui_base_make_empty_envmap(base_theme.VIEWPORT_COL);
 	}
 	if (context_raw.preview_envmap == null) {
 		let b: u8_array_t = u8_array_create(4);
@@ -1594,4 +1590,22 @@ function ui_base_tag_ui_redraw() {
 	ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 	ui_toolbar_handle.redraws = 2;
+}
+
+function ui_base_make_empty_envmap(col: i32) {
+	ui_base_viewport_col = col;
+	let b: u8_array_t = u8_array_create(4);
+	b[0] = color_get_rb(col);
+	b[1] = color_get_gb(col);
+	b[2] = color_get_bb(col);
+	b[3] = 255;
+	context_raw.empty_envmap = image_from_bytes(b, 1, 1);
+}
+
+function ui_base_set_viewport_col(col: i32) {
+	ui_base_make_empty_envmap(col);
+	context_raw.ddirty = 2;
+	if (!context_raw.show_envmap) {
+		scene_world._.envmap = context_raw.empty_envmap;
+	}
 }

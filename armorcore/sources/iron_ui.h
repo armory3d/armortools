@@ -50,6 +50,7 @@ typedef struct ui_theme {
 	/*bool*/int FULL_TABS; // Make tabs take full window width
 	/*bool*/int ROUND_CORNERS;
 	/*bool*/int SHADOWS;
+	int VIEWPORT_COL;
 } ui_theme_t;
 
 typedef struct ui_options {

@@ -532,4 +532,5 @@ let ui_theme_keys: string[] = [
 	"FULL_TABS",
 	"ROUND_CORNERS",
 	"SHADOWS",
+	"VIEWPORT_COL"
 ];

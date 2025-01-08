@@ -2587,4 +2587,5 @@ void ui_theme_default(ui_theme_t *t) {
 	t->FULL_TABS = false;
 	t->ROUND_CORNERS = true;
 	t->SHADOWS = true;
+	t->VIEWPORT_COL = 0xff080808;
 }
