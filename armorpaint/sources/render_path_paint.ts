@@ -625,6 +625,29 @@ function render_path_paint_end() {
 	context_raw.pdirty--;
 }
 
+let _render_path_paint_bake_type: bake_type_t;
+
+function _render_path_paint_final() {
+	context_raw.bake_type = _render_path_paint_bake_type;
+	make_material_parse_paint_material();
+	context_raw.pdirty = 1;
+	render_path_paint_commands_paint();
+	context_raw.pdirty = 0;
+	render_path_paint_baking = false;
+}
+
+function _render_path_paint_deriv() {
+	context_raw.bake_type = bake_type_t.HEIGHT;
+	make_material_parse_paint_material();
+	context_raw.pdirty = 1;
+	render_path_paint_commands_paint();
+	context_raw.pdirty = 0;
+	if (render_path_paint_push_undo_last) {
+		history_paint();
+	}
+	app_notify_on_init(_render_path_paint_final);
+}
+
 function render_path_paint_draw() {
 	if (!render_path_paint_paint_enabled()) {
 		return;
@@ -656,7 +679,7 @@ function render_path_paint_draw() {
 			if (context_raw.bake_type == bake_type_t.NORMAL || context_raw.bake_type == bake_type_t.HEIGHT || context_raw.bake_type == bake_type_t.DERIVATIVE) {
 				if (!render_path_paint_baking && context_raw.pdirty > 0) {
 					render_path_paint_baking = true;
-					let _bake_type: bake_type_t = context_raw.bake_type;
+					_render_path_paint_bake_type = context_raw.bake_type;
 					context_raw.bake_type = context_raw.bake_type == bake_type_t.NORMAL ? bake_type_t.NORMAL_OBJECT : bake_type_t.POSITION; // Bake high poly data
 					make_material_parse_paint_material();
 					let _paint_object: mesh_object_t = context_raw.paint_object;
@@ -671,29 +694,12 @@ function render_path_paint_draw() {
 					}
 					context_select_paint_object(_paint_object);
 
-					////
-					// let _render_final: ()=>void = function () {
-					// 	context_raw.bake_type = _bake_type;
-					// 	make_material_parse_paint_material();
-					// 	context_raw.pdirty = 1;
-					// 	render_path_paint_commands_paint();
-					// 	context_raw.pdirty = 0;
-					// 	render_path_paint_baking = false;
-					// }
-					// let _render_deriv: ()=>void = function () {
-					// 	context_raw.bake_type = bake_type_t.HEIGHT;
-					// 	make_material_parse_paint_material();
-					// 	context_raw.pdirty = 1;
-					// 	render_path_paint_commands_paint();
-					// 	context_raw.pdirty = 0;
-					// 	if (render_path_paint_push_undo_last) {
-					// 		history_paint();
-					// 	}
-					// 	app_notify_on_init(_render_final);
-					// }
-					// // @ts-ignore
-					// app_notify_on_init(context_raw.bake_type == bake_type_t.DERIVATIVE ? _render_deriv : _render_final);
-					////
+					if (context_raw.bake_type == bake_type_t.DERIVATIVE) {
+						app_notify_on_init(_render_path_paint_deriv);
+					}
+					else {
+						app_notify_on_init(_render_path_paint_final);
+					}
 				}
 			}
 			else if (context_raw.bake_type == bake_type_t.OBJECTID) {
