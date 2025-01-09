@@ -219,7 +219,7 @@ function base_h(): i32 {
 		res -= math_floor(ui_header_default_h * 2 * config_raw.window_scale) + statush;
 
 		if (config_raw.layout[layout_size_t.HEADER] == 0) {
-			res += ui_header_h;
+			res += ui_header_h * 2;
 		}
 	}
 
@@ -280,9 +280,9 @@ function base_resize() {
 
 	if (ui_base_show) {
 		base_appx = ui_toolbar_w;
-		base_appy = ui_header_h * 2;
-		if (config_raw.layout[layout_size_t.HEADER] == 0) {
-			base_appy -= ui_header_h;
+		base_appy = 0;
+		if (config_raw.layout[layout_size_t.HEADER] == 1) {
+			base_appy = ui_header_h * 2;
 		}
 	}
 	else {

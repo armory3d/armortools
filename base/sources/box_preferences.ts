@@ -147,6 +147,7 @@ function box_preferences_show() {
 							box_preferences_files_keymap = null;
 							make_material_parse_mesh_material();
 							make_material_parse_paint_material();
+							ui_base_set_viewport_col(ui.ops.theme.VIEWPORT_COL);
 						}, ui);
 					}
 					if (ui_menu_button(ui, tr("Import..."))) {

@@ -68,18 +68,39 @@ function ui_toolbar_draw_tool(i: i32, ui: ui_t, img: image_t, icon_accent: i32, 
 	ui._y += 2;
 }
 
+function ui_toolbar_get_w(): i32 {
+	let ui: ui_t = ui_base_ui;
+
+	let w: i32 = 0;
+	if (config_raw.touch_ui) {
+		w = ui_toolbar_default_w + 6;
+	}
+	else {
+		w = ui_toolbar_default_w;
+	}
+	w = math_floor(w * ui_SCALE(ui));
+	return w;
+}
+
 function ui_toolbar_render_ui() {
 	let ui: ui_t = ui_base_ui;
 
-	if (config_raw.touch_ui) {
-		ui_toolbar_w = ui_toolbar_default_w + 6;
-	}
-	else {
-		ui_toolbar_w = ui_toolbar_default_w;
-	}
-	ui_toolbar_w = math_floor(ui_toolbar_w * ui_SCALE(ui));
+	ui_toolbar_w = ui_toolbar_get_w();
 
-	if (ui_window(ui_toolbar_handle, 0, ui_header_h, ui_toolbar_w, sys_height() - ui_header_h)) {
+	let x: i32 = 0;
+	let y: i32 = ui_header_h;
+	let h: i32 = sys_height() - ui_header_h;
+	let _WINDOW_BG_COL: i32 = ui.ops.theme.WINDOW_BG_COL;
+
+	if (config_raw.layout[layout_size_t.HEADER] == 0) {
+		// Header is off -> floating toolbar
+		x += 5 * ui_SCALE(ui);
+		y += 5 * ui_SCALE(ui);
+		h = ui_toolbar_tool_names.length * (ui_toolbar_w + 2);
+		ui.ops.theme.WINDOW_BG_COL = ui.ops.theme.SEPARATOR_COL;
+	}
+
+	if (ui_window(ui_toolbar_handle, x, y, ui_toolbar_w, h)) {
 		ui._y -= 4 * ui_SCALE(ui);
 
 		ui.image_scroll_align = false;
@@ -185,6 +206,12 @@ function ui_toolbar_render_ui() {
 		ui_toolbar_ext_draw_tools(ui, img, icon_accent, keys);
 
 		ui.image_scroll_align = true;
+	}
+
+	if (config_raw.layout[layout_size_t.HEADER] == 0) {
+		// Header is off -> floating toolbar
+		ui_toolbar_w = 0;
+		ui.ops.theme.WINDOW_BG_COL = _WINDOW_BG_COL;
 	}
 
 	if (config_raw.touch_ui) {

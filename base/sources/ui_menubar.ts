@@ -15,14 +15,16 @@ function ui_menubar_init() {
 function ui_menubar_render_ui() {
 	let ui: ui_t = ui_base_ui;
 
+	let item_w: i32 = ui_toolbar_get_w();
+	let panel_x: i32 = app_x();
+
 	///if (is_paint || is_sculpt)
-	let panelx: i32 = app_x() - ui_toolbar_w;
-	///end
-	///if is_lab
-	let panelx: i32 = app_x();
+	if (config_raw.layout[layout_size_t.HEADER] == 1) {
+		panel_x = app_x() - item_w;
+	}
 	///end
 
-	if (ui_window(ui_menubar_menu_handle, panelx, 0, ui_menubar_w, ui_header_h)) {
+	if (ui_window(ui_menubar_menu_handle, panel_x, 0, ui_menubar_w, ui_header_h)) {
 		ui._x += 1; // Prevent "File" button highlight on startup
 
 		ui_begin_menu();
@@ -30,7 +32,7 @@ function ui_menubar_render_ui() {
 		if (config_raw.touch_ui) {
 
 			///if (is_paint || is_sculpt)
-			ui._w = ui_toolbar_w;
+			ui._w = item_w;
 			///end
 			///if is_lab
 			ui._w = 36;
@@ -109,16 +111,28 @@ function ui_menubar_render_ui() {
 		ui_end_menu();
 	}
 
+	if (config_raw.layout[layout_size_t.HEADER] == 1) {
+		// Non-floating header
+		ui_menubar_draw_tab_header();
+	}
+}
+
+function ui_menubar_draw_tab_header() {
+	let ui: ui_t = ui_base_ui;
+
+	let item_w: i32 = ui_toolbar_get_w();
+	let panel_x: i32 = app_x();
+
 	let nodesw: i32 = (ui_nodes_show || ui_view2d_show) ? config_raw.layout[layout_size_t.NODES_W] : 0;
 	///if (is_paint || is_sculpt)
 	let ww: i32 = sys_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - ui_menubar_w - nodesw;
-	panelx = (app_x() - ui_toolbar_w) + ui_menubar_w;
+	panel_x = (app_x() - item_w) + ui_menubar_w;
 	///else
 	let ww: i32 = sys_width() - ui_menubar_w - nodesw;
-	panelx = (app_x()) + ui_menubar_w;
+	panel_x = (app_x()) + ui_menubar_w;
 	///end
 
-	if (ui_window(ui_menubar_workspace_handle, panelx, 0, ww, ui_header_h)) {
+	if (ui_window(ui_menubar_workspace_handle, panel_x, 0, ww, ui_header_h)) {
 
 		if (!config_raw.touch_ui) {
 			ui_tab(ui_header_worktab, tr("3D View"));
