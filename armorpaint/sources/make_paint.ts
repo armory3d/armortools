@@ -275,12 +275,8 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 			// Height used for the first time, also rebuild vertex shader
 			return make_paint_run(data, matcon);
 		}
-		if (emis != "0.0" && emis != "0") {
-			make_material_emis_used = true;
-		}
-		if (subs != "0.0" && subs != "0") {
-			make_material_subs_used = true;
-		}
+		make_material_emis_used = emis != "0.0" && emis != "0";
+		make_material_subs_used = subs != "0.0" && subs != "0";
 	}
 
 	if (context_raw.brush_mask_image != null && context_raw.tool == workspace_tool_t.DECAL) {
@@ -391,13 +387,13 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	node_shader_write(frag, "float matid = " + matid_string + ";");
 
 	// matid % 3 == 0 - normal, 1 - emission, 2 - subsurface
-	if (context_raw.material.paint_emis) {
+	if (context_raw.material.paint_emis && make_material_emis_used) {
 		node_shader_write(frag, "if (emis > 0.0) {");
 		node_shader_write(frag, "	matid += 1.0 / 255.0;");
 		node_shader_write(frag, "	if (str == 0.0) discard;");
 		node_shader_write(frag, "}");
 	}
-	else if (context_raw.material.paint_subs) {
+	else if (context_raw.material.paint_subs && make_material_subs_used) {
 		node_shader_write(frag, "if (subs > 0.0) {");
 		node_shader_write(frag, "    matid += 2.0 / 255.0;");
 		node_shader_write(frag, "	if (str == 0.0) discard;");

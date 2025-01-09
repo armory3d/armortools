@@ -3,8 +3,8 @@
 #define _EMISSION
 #define _SUBSURFACE
 #define _TRANSLUCENCY
-#define _ROULETTE
 #define _TRANSPARENCY
+#define _ROULETTE
 // #define _FRESNEL
 #endif
 // #define _RENDER
@@ -97,11 +97,11 @@ void raygeneration() {
 			}
 			#endif
 
-			#ifdef _SUBSURFACE
-			TraceRay(scene, RAY_FLAG_FORCE_OPAQUE | RAY_FLAG_CULL_BACK_FACING_TRIANGLES, ~0, 0, 1, 0, ray, payload);
-			#else
+			// #ifdef _SUBSURFACE
+			// TraceRay(scene, RAY_FLAG_FORCE_OPAQUE | RAY_FLAG_CULL_BACK_FACING_TRIANGLES, ~0, 0, 1, 0, ray, payload);
+			// #else
 			TraceRay(scene, RAY_FLAG_FORCE_OPAQUE, ~0, 0, 1, 0, ray, payload);
-			#endif
+			// #endif
 
 			#ifdef _EMISSION
 			if (payload.color.a == -3) {
@@ -278,7 +278,13 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 
 	#ifdef _SUBSURFACE
 	if (int(texpaint1.a * 255.0f) % 3 == 2) {
-		payload.ray_origin += WorldRayDirection() * f;
+		// Thickness
+		float d = min(1.0 / min(RayTCurrent() * 2.0, 1.0) / 10.0, 0.5);
+		payload.color.xyz += payload.color.xyz * d;
+		// Fake scatter
+		if (f < 0.5) {
+			payload.ray_origin += WorldRayDirection() * f * 0.001;
+		}
 	}
 	#endif
 }
