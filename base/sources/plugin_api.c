@@ -780,8 +780,9 @@ FN(transform_rotate) {
 	axis.x = 0.0;
 	axis.y = 0.0;
 	axis.z = 1.0;
-	float f = 0.05;
-	transform_rotate((void *)p, axis, f);
+	double d;
+	JS_ToFloat64(ctx, &d, argv[1]);
+	transform_rotate((void *)p, axis, d);
 	return JS_UNDEFINED;
 }
 
