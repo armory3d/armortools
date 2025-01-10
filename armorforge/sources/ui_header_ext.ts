@@ -12,7 +12,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 		}
 
         let h_record: ui_handle_t = ui_handle(__ID__);
-        let record: bool = ui_check(h_record, tr("Record"));
+        sim_record = ui_check(h_record, tr("Record"));
 	}
 
 	else if (context_raw.tool == workspace_tool_t.FILL) {

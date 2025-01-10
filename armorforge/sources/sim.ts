@@ -2,6 +2,7 @@
 let sim_running: bool = false;
 let sim_transforms: mat4_box_t[];
 let sim_object_script_map: map_t<object_t, string> = map_create();
+let sim_record: bool = false;
 
 function sim_init() {
     physics_world_create();
@@ -30,9 +31,7 @@ function sim_update() {
 
         iron_delay_idle_sleep();
 
-        // let record: bool = true;
-        let record: bool = false;
-        if (record) {
+        if (sim_record) {
             let rt: render_target_t = map_get(render_path_render_targets, "taa");
             let pixels: buffer_t = image_get_pixels(rt._image);
             ///if (arm_metal || arm_vulkan)
@@ -46,10 +45,15 @@ function sim_update() {
 function sim_play() {
     sim_running = true;
 
-    let record: bool = false;
-    if (record) {
+    if (sim_record) {
+        if (project_filepath == "") {
+            console_error(tr("Save project first"));
+            sim_record = false;
+            return;
+        }
+        let path: string = path_base_dir(project_filepath) + "/output.mp4";
         let rt: render_target_t = map_get(render_path_render_targets, "taa");
-        iron_mp4_begin("/home/lubos/Desktop/test.mp4", rt._image.width, rt._image.height);
+        iron_mp4_begin(path, rt._image.width, rt._image.height);
     }
 
     // Save transforms
@@ -64,8 +68,7 @@ function sim_play() {
 function sim_stop() {
     sim_running = false;
 
-    let record: bool = false;
-    if (record) {
+    if (sim_record) {
         iron_mp4_end();
     }
 
