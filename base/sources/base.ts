@@ -836,6 +836,7 @@ function base_init_config() {
 	raw.dilate_radius = 2;
 	raw.gpu_inference = true;
 	raw.blender = "";
+	raw.atlas_res = 0;
 
 	base_ext_init_config(raw);
 }

@@ -389,16 +389,29 @@ function box_preferences_show() {
 			}
 
 			///if (arm_android || arm_ios)
-			let layer_res_combo: string[] = ["128", "256", "512", "1K", "2K", "4K"];
+			let res_combo: string[] = ["128", "256", "512", "1K", "2K", "4K"];
 			///else
-			let layer_res_combo: string[] = ["128", "256", "512", "1K", "2K", "4K", "8K"];
+			let res_combo: string[] = ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"];
 			///end
 
-			ui_combo(layer_res_handle, layer_res_combo, tr("Default Layer Resolution"), true);
-
+			ui_combo(layer_res_handle, res_combo, tr("Default Layer Resolution"), true);
 			if (layer_res_handle.changed) {
 				config_raw.layer_res = layer_res_handle.position;
 			}
+
+			///if is_forge
+			let atlas_res_handle: ui_handle_t = ui_handle(__ID__);
+			if (atlas_res_handle.init) {
+				atlas_res_handle.position = config_raw.atlas_res;
+			}
+
+			ui_combo(atlas_res_handle, res_combo, tr("Atlas Resolution"), true);
+			if (atlas_res_handle.changed) {
+				config_raw.atlas_res = atlas_res_handle.position;
+			}
+			///end
+
+
 
 			let server_handle: ui_handle_t = ui_handle(__ID__);
 			if (server_handle.init) {
@@ -572,6 +585,7 @@ function box_preferences_show() {
 			if (hpathtrace_mode.changed) {
 				render_path_raytrace_ready = false;
 				render_path_raytrace_first = true;
+				context_raw.ddirty = 2;
 			}
 
 			///end

@@ -22,7 +22,7 @@ function base_ext_render() {
 function base_ext_init_config(raw: config_t) {
 	raw.window_w = 1920;
 	raw.window_h = 1080;
-    raw.layer_res = texture_res_t.RES8192;
+	raw.atlas_res = texture_res_t.RES8192;
 	raw.undo_steps = 1;
 }
 

@@ -11,8 +11,8 @@ function main() {
 	app_on_x = base_x;
 	app_on_y = base_y;
 
-	context_init();
 	config_init();
+	context_init();
 	sys_start(config_get_options());
 	if (config_raw.layout == null) {
 		base_init_layout();

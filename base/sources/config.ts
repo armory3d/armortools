@@ -98,6 +98,7 @@ function config_save() {
 	json_encode_i32("dilate_radius", config_raw.dilate_radius);
 	json_encode_bool("gpu_inference", config_raw.gpu_inference);
 	json_encode_string("blender", config_raw.blender);
+	json_encode_i32("atlas_res", config_raw.atlas_res);
 	let config_json: string = json_encode_end();
 
 	let buffer: buffer_t = sys_string_to_buffer(config_json);
@@ -274,16 +275,30 @@ function config_get_super_sample_size(i: i32): f32 {
 		   i == 4 ? 2.0 : 4.0;
 }
 
+function config_texture_res_size(pos: i32): i32 {
+	return pos == texture_res_t.RES128 ? 128 :
+		   pos == texture_res_t.RES256 ? 256 :
+		   pos == texture_res_t.RES512 ? 512 :
+		   pos == texture_res_t.RES1024 ? 1024 :
+		   pos == texture_res_t.RES2048 ? 2048 :
+		   pos == texture_res_t.RES4096 ? 4096 :
+		   pos == texture_res_t.RES8192 ? 8192 :
+		   pos == texture_res_t.RES16384 ? 16384 : 0;
+}
+
 function config_get_texture_res(): i32 {
 	let res: i32 = base_res_handle.position;
-	return res == texture_res_t.RES128 ? 128 :
-		   res == texture_res_t.RES256 ? 256 :
-		   res == texture_res_t.RES512 ? 512 :
-		   res == texture_res_t.RES1024 ? 1024 :
-		   res == texture_res_t.RES2048 ? 2048 :
-		   res == texture_res_t.RES4096 ? 4096 :
-		   res == texture_res_t.RES8192 ? 8192 :
-		   res == texture_res_t.RES16384 ? 16384 : 0;
+	return config_texture_res_size(res);
+}
+
+function config_get_layer_res(): i32 {
+	let res: i32 = config_raw.layer_res;
+	return config_texture_res_size(res);
+}
+
+function config_get_atlas_res(): i32 {
+	let res: i32 = config_raw.atlas_res;
+	return config_texture_res_size(res);
 }
 
 function config_get_texture_res_x(): i32 {
@@ -426,6 +441,6 @@ type config_t = {
 	dilate_radius?: i32;
 
 	gpu_inference?: bool;
-
 	blender?: string;
+	atlas_res: i32; // Forge
 };
