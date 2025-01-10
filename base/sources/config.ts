@@ -54,7 +54,6 @@ function config_save() {
 	json_encode_f32("window_scale", config_raw.window_scale);
 	json_encode_f32("rp_supersample", config_raw.rp_supersample);
 	json_encode_bool("rp_ssao", config_raw.rp_ssao);
-	json_encode_bool("rp_ssr", config_raw.rp_ssr);
 	json_encode_bool("rp_bloom", config_raw.rp_bloom);
 	json_encode_bool("rp_motionblur", config_raw.rp_motionblur);
 	json_encode_bool("rp_gi", config_raw.rp_gi);
@@ -147,7 +146,6 @@ function config_init() {
 		///else
 		config_raw.rp_ssao = true;
 		///end
-		config_raw.rp_ssr = false;
 		config_raw.rp_supersample = 1.0;
 		config_raw.version = manifest_version;
 		config_raw.sha = config_get_sha();
@@ -246,7 +244,6 @@ function config_import_from(from: config_t) {
 
 function config_apply() {
 	config_raw.rp_ssao = context_raw.hssao.selected;
-	config_raw.rp_ssr = context_raw.hssr.selected;
 	config_raw.rp_bloom = context_raw.hbloom.selected;
 	config_raw.rp_gi = context_raw.hvxao.selected;
 	config_raw.rp_supersample = config_get_super_sample_size(context_raw.hsupersample.position);
@@ -394,7 +391,6 @@ type config_t = {
 	// Render path
 	rp_supersample?: f32;
 	rp_ssao?: bool;
-	rp_ssr?: bool;
 	rp_bloom?: bool;
 	rp_motionblur?: bool;
 	rp_gi?: bool;

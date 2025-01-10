@@ -553,11 +553,6 @@ function box_preferences_show() {
 			context_raw.hssao.selected = config_raw.rp_ssao;
 		}
 
-		context_raw.hssr = ui_handle(__ID__);
-		if (context_raw.hssr.init) {
-			context_raw.hssr.selected = config_raw.rp_ssr;
-		}
-
 		context_raw.hbloom = ui_handle(__ID__);
 		if (context_raw.hbloom.init) {
 			context_raw.hbloom.selected = config_raw.rp_bloom;
@@ -638,10 +633,6 @@ function box_preferences_show() {
 
 				ui_check(context_raw.hssao, tr("SSAO"));
 				if (context_raw.hssao.changed) {
-					config_apply();
-				}
-				ui_check(context_raw.hssr, tr("SSR"));
-				if (context_raw.hssr.changed) {
 					config_apply();
 				}
 				ui_check(context_raw.hbloom, tr("Bloom"));

@@ -179,7 +179,6 @@ function render_path_deferred_draw_deferred() {
 	///end
 	render_path_base_draw_deferred_light();
 	render_path_base_draw_bloom();
-	render_path_base_draw_ssr();
 	// draw_motion_blur();
 	// draw_histogram();
 

@@ -383,43 +383,6 @@ function render_path_base_draw_deferred_light() {
 	///end
 }
 
-function render_path_base_draw_ssr() {
-	if (config_raw.rp_ssr != false) {
-		if (map_get(_render_path_cached_shader_contexts, "shader_datas/ssr_pass/ssr_pass") == null) {
-			{
-				let t: render_target_t = render_target_create();
-				t.name = "bufb";
-				t.width = 0;
-				t.height = 0;
-				t.format = "RGBA64";
-				render_path_create_render_target(t);
-			}
-			render_path_load_shader("shader_datas/ssr_pass/ssr_pass");
-			render_path_load_shader("shader_datas/ssr_blur_pass/ssr_blur_pass_x");
-			render_path_load_shader("shader_datas/ssr_blur_pass/ssr_blur_pass_y3_blend");
-		}
-		let targeta: string = "bufb";
-		let targetb: string = "gbuffer1";
-
-		render_path_set_target(targeta);
-		render_path_bind_target("tex", "tex");
-		render_path_bind_target("_main", "gbufferD");
-		render_path_bind_target("gbuffer0", "gbuffer0");
-		render_path_bind_target("gbuffer1", "gbuffer1");
-		render_path_draw_shader("shader_datas/ssr_pass/ssr_pass");
-
-		render_path_set_target(targetb);
-		render_path_bind_target(targeta, "tex");
-		render_path_bind_target("gbuffer0", "gbuffer0");
-		render_path_draw_shader("shader_datas/ssr_blur_pass/ssr_blur_pass_x");
-
-		render_path_set_target("tex");
-		render_path_bind_target(targetb, "tex");
-		render_path_bind_target("gbuffer0", "gbuffer0");
-		render_path_draw_shader("shader_datas/ssr_blur_pass/ssr_blur_pass_y3_blend");
-	}
-}
-
 // function render_path_base_draw_motion_blur() {
 // 	if (config_raw.rp_motionblur != false) {
 // 		render_path_set_target("buf");

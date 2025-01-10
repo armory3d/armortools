@@ -85,7 +85,6 @@ type context_t = {
 	fov_handle?: ui_handle_t;
 	undo_handle?: ui_handle_t;
 	hssao?: ui_handle_t;
-	hssr?: ui_handle_t;
 	hbloom?: ui_handle_t;
 	hsupersample?: ui_handle_t;
 	hvxao?: ui_handle_t;
