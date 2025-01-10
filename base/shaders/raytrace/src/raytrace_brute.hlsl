@@ -301,6 +301,22 @@ void miss(inout RayPayload payload) {
 	float2 tex_coord = frac(equirect(WorldRayDirection(), constant_buffer.params.y));
 	uint2 size;
 	mytexture_env.GetDimensions(size.x, size.y);
-	float3 texenv = mytexture_env.Load(uint3(tex_coord * size, 0)).rgb * abs(constant_buffer.params.x);
+	uint2 itex = tex_coord * size;
+
+	#ifdef _FULL
+	// Use .Sample() instead..
+	itex = clamp(itex, uint2(0, 0), size - uint2(2, 2));
+	float2 f = frac(tex_coord * size);
+	float3 t00 = mytexture_env.Load(int3(itex, 0)).rgb;
+	float3 t10 = mytexture_env.Load(int3(itex + uint2(1, 0), 0)).rgb;
+	float3 t01 = mytexture_env.Load(int3(itex + uint2(0, 1), 0)).rgb;
+	float3 t11 = mytexture_env.Load(int3(itex + uint2(1, 1), 0)).rgb;
+	float3 texenv = lerp(lerp(t00, t10, f.x), lerp(t01, t11, f.x), f.y);
+	#else
+	float3 texenv = mytexture_env.Load(uint3(tex_coord * size, 0)).rgb;
+	#endif
+
+	texenv *= abs(constant_buffer.params.x);
+
 	payload.color = float4(payload.color.rgb * texenv.rgb, -1);
 }
