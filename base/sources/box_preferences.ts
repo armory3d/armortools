@@ -578,10 +578,10 @@ function box_preferences_show() {
 
 			let hpathtrace_mode: ui_handle_t = ui_handle(__ID__);
 			if (hpathtrace_mode.init) {
-				hpathtrace_mode.position = context_raw.pathtrace_mode;
+				hpathtrace_mode.position = config_raw.pathtrace_mode;
 			}
 			let pathtrace_mode_combo: string[] = [tr("Fast"), tr("Quality")];
-			context_raw.pathtrace_mode = ui_combo(hpathtrace_mode, pathtrace_mode_combo, tr("Path Tracer"), true);
+			config_raw.pathtrace_mode = ui_combo(hpathtrace_mode, pathtrace_mode_combo, tr("Path Tracer"), true);
 			if (hpathtrace_mode.changed) {
 				render_path_raytrace_ready = false;
 				render_path_raytrace_first = true;

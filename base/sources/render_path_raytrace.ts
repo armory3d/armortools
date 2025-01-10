@@ -36,7 +36,7 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 		///if is_forge
 		ext = "forge_";
 		///end
-		let mode: string = context_raw.pathtrace_mode == path_trace_mode_t.CORE ? "core" : "full";
+		let mode: string = config_raw.pathtrace_mode == pathtrace_mode_t.FAST ? "core" : "full";
 		render_path_raytrace_raytrace_init("raytrace_brute_" + ext + mode + render_path_raytrace_ext);
 		render_path_raytrace_last_envmap = null;
 	}

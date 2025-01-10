@@ -99,6 +99,7 @@ function config_save() {
 	json_encode_bool("gpu_inference", config_raw.gpu_inference);
 	json_encode_string("blender", config_raw.blender);
 	json_encode_i32("atlas_res", config_raw.atlas_res);
+	json_encode_i32("pathtrace_mode", config_raw.pathtrace_mode);
 	let config_json: string = json_encode_end();
 
 	let buffer: buffer_t = sys_string_to_buffer(config_json);
@@ -443,4 +444,5 @@ type config_t = {
 	gpu_inference?: bool;
 	blender?: string;
 	atlas_res: i32; // Forge
+	pathtrace_mode: i32;
 };

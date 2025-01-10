@@ -43,7 +43,6 @@ type context_t = {
 	parse_vcols?: bool;
 
 	select_time?: f32;
-	pathtrace_mode?: path_trace_mode_t;
 	viewport_mode?: viewport_mode_t;
 	render_mode?: render_mode_t;
 
@@ -298,9 +297,6 @@ function context_create(): context_t {
 	c.parse_transform = true;
 	c.parse_vcols = false;
 	c.select_time = 0.0;
-	///if (arm_direct3d12 || arm_vulkan || arm_metal)
-	c.pathtrace_mode = path_trace_mode_t.CORE;
-	///end
 	///if (arm_direct3d12 || arm_vulkan)
 	c.viewport_mode = viewport_mode_t.PATH_TRACE;
 	///else

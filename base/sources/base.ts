@@ -837,6 +837,7 @@ function base_init_config() {
 	raw.gpu_inference = true;
 	raw.blender = "";
 	raw.atlas_res = 0;
+	raw.pathtrace_mode = pathtrace_mode_t.FAST;
 
 	base_ext_init_config(raw);
 }

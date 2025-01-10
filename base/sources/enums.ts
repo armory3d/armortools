@@ -92,9 +92,9 @@ enum export_destination_t {
 	PACKED = 1,
 }
 
-enum path_trace_mode_t {
-	CORE = 0,
-	FULL = 1,
+enum pathtrace_mode_t {
+	FAST = 0,
+	QUALITY = 1,
 }
 
 enum fill_type_t {
