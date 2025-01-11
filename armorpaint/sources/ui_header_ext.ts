@@ -145,7 +145,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 
 		///if (arm_direct3d12 || arm_vulkan || arm_metal)
 		let baking: bool = context_raw.pdirty > 0;
-		let rt_bake: bool = context_raw.bake_type == bake_type_t.AO || context_raw.bake_type == bake_type_t.LIGHTMAP || context_raw.bake_type == bake_type_t.BENT_NORMAL || context_raw.bake_type == bake_type_t.THICKNESS;
+		let rt_bake: bool = render_path_paint_is_rt_bake();
 		if (baking && ui_button(tr("Stop"))) {
 			context_raw.pdirty = 0;
 			context_raw.rdirty = 2;
@@ -214,7 +214,10 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 		}
 		///end
 
-		if (context_raw.bake_type == bake_type_t.NORMAL_OBJECT || context_raw.bake_type == bake_type_t.POSITION || context_raw.bake_type == bake_type_t.BENT_NORMAL) {
+		if (context_raw.bake_type == bake_type_t.NORMAL_OBJECT ||
+			context_raw.bake_type == bake_type_t.POSITION ||
+			context_raw.bake_type == bake_type_t.BENT_NORMAL
+		) {
 			let bake_up_axis_handle: ui_handle_t = ui_handle(__ID__);
 			if (bake_up_axis_handle.init) {
 				bake_up_axis_handle.position = context_raw.bake_up_axis;

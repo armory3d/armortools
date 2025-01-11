@@ -648,6 +648,15 @@ function _render_path_paint_deriv() {
 	app_notify_on_init(_render_path_paint_final);
 }
 
+///if (arm_direct3d12 || arm_vulkan || arm_metal)
+function render_path_paint_is_rt_bake(): bool {
+	return (context_raw.bake_type == bake_type_t.AO  ||
+		context_raw.bake_type == bake_type_t.LIGHTMAP ||
+		context_raw.bake_type == bake_type_t.BENT_NORMAL ||
+		context_raw.bake_type == bake_type_t.THICKNESS);
+}
+///end
+
 function render_path_paint_draw() {
 	if (!render_path_paint_paint_enabled()) {
 		return;
@@ -668,14 +677,6 @@ function render_path_paint_draw() {
 		}
 
 		if (context_raw.tool == workspace_tool_t.BAKE) {
-
-			///if (arm_direct3d12 || arm_vulkan || arm_metal)
-			let is_raytraced_bake: bool = (context_raw.bake_type == bake_type_t.AO  ||
-				context_raw.bake_type == bake_type_t.LIGHTMAP ||
-				context_raw.bake_type == bake_type_t.BENT_NORMAL ||
-				context_raw.bake_type == bake_type_t.THICKNESS);
-			///end
-
 			if (context_raw.bake_type == bake_type_t.NORMAL || context_raw.bake_type == bake_type_t.HEIGHT || context_raw.bake_type == bake_type_t.DERIVATIVE) {
 				if (!render_path_paint_baking && context_raw.pdirty > 0) {
 					render_path_paint_baking = true;
@@ -723,7 +724,7 @@ function render_path_paint_draw() {
 				if (is_merged) context_raw.merged_object.base.visible = _visible;
 			}
 			///if (arm_direct3d12 || arm_vulkan || arm_metal)
-			else if (is_raytraced_bake) {
+			else if (render_path_paint_is_rt_bake()) {
 				let dirty: bool = render_path_raytrace_bake_commands(make_material_parse_paint_material);
 				if (dirty) ui_header_handle.redraws = 2;
 				if (config_raw.dilate == dilate_type_t.INSTANT) { // && raw.pdirty == 1
