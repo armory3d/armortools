@@ -2455,14 +2455,8 @@ char_ptr_array_t *iron_open_dialog(char *filter_list, char *default_path, bool o
 
 char *iron_save_dialog(char *filter_list, char *default_path) {
 	wchar_t *out_path = AndroidFileDialogSave();
-	size_t len = wcslen(out_path);
-	uint16_t *str = malloc(sizeof(uint16_t) * (len + 1));
-	for (int i = 0; i < len; i++) {
-		str[i] = out_path[i];
-	}
-	str[len] = 0;
-	// free(str);
-	return str;
+	wcstombs(temp_string, out_path, sizeof(temp_string));
+	return temp_string;
 }
 
 #elif defined(KINC_IOS)
@@ -2476,14 +2470,8 @@ char_ptr_array_t *iron_open_dialog(char *filter_list, char *default_path, bool o
 char *iron_save_dialog(char *filter_list, char *default_path) {
 	// Path to app document directory
 	wchar_t *out_path = IOSFileDialogSave();
-	size_t len = wcslen(out_path);
-	uint16_t *str = malloc(sizeof(uint16_t) * (len + 1));
-	for (int i = 0; i < len; i++) {
-		str[i] = out_path[i];
-	}
-	str[len] = 0;
-	// free(str);
-	return str;;
+	wcstombs(temp_string, out_path, sizeof(temp_string));
+	return temp_string;
 }
 #endif
 
