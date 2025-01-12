@@ -151,26 +151,29 @@ function util_uv_cache_dilate_map() {
 	util_uv_dilate_bytes = null;
 }
 
-function _util_uv_check(c: coord_t, w: i32, h: i32, r: i32, view: buffer_t, coords: coord_t[]) {
-	if (c.x < 0 || c.x >= w || c.y < 0 || c.y >= h) {
+function _util_uv_check(cx: i32, cy: i32, w: i32, h: i32, r: i32, view: buffer_t, coords_x: i32[], coords_y: i32[]) {
+	if (cx < 0 || cx >= w || cy < 0 || cy >= h) {
 		return;
 	}
-	if (buffer_get_u8(view, c.y * w + c.x) == 255) {
+	if (buffer_get_u8(view, cy * w + cx) == 255) {
 		return;
 	}
-	let dilate_view: buffer_t = util_uv_dilate_bytes;
-	if (buffer_get_u8(dilate_view, c.y * r * util_uv_dilatemap.width + c.x * r) == 0) {
+	if (buffer_get_u8(util_uv_dilate_bytes, cy * r * util_uv_dilatemap.width + cx * r) == 0) {
 		return;
 	}
-	buffer_set_u8(view, c.y * w + c.x, 255);
-	let co: coord_t = { x: c.x + 1, y: c.y };
-	array_push(coords, co);
-	co = { x: c.x - 1, y: c.y };
-	array_push(coords, co);
-	co = { x: c.x, y: c.y + 1 };
-	array_push(coords, co);
-	co = { x: c.x, y: c.y - 1 };
-	array_push(coords, co);
+	buffer_set_u8(view, cy * w + cx, 255);
+
+	array_push(coords_x, cx + 1);
+	array_push(coords_y, cy);
+
+	array_push(coords_x, cx - 1);
+	array_push(coords_y, cy);
+
+	array_push(coords_x, cx);
+	array_push(coords_y, cy + 1);
+
+	array_push(coords_x, cx);
+	array_push(coords_y, cy - 1);
 }
 
 function util_uv_cache_uv_island_map() {
@@ -184,11 +187,14 @@ function util_uv_cache_uv_island_map() {
 	let x: i32 = math_floor(context_raw.uvx_picked * w);
 	let y: i32 = math_floor(context_raw.uvy_picked * h);
 	let bytes: buffer_t = buffer_create(w * h);
-	let coords: coord_t[] = [{ x: x, y: y }];
+	let coords_x: i32[] = [x];
+	let coords_y: i32[] = [y];
 	let r: i32 = math_floor(util_uv_dilatemap.width / w);
 
-	while (coords.length > 0) {
-		_util_uv_check(array_pop(coords), w, h, r, bytes, coords);
+	while (coords_x.length > 0) {
+		let cx: i32 = i32_array_pop(coords_x);
+		let cy: i32 = i32_array_pop(coords_y);
+		_util_uv_check(cx, cy, w, h, r, bytes, coords_x, coords_y);
 	}
 
 	if (util_uv_uvislandmap != null) {
@@ -196,9 +202,4 @@ function util_uv_cache_uv_island_map() {
 	}
 	util_uv_uvislandmap = image_from_bytes(bytes, w, h, tex_format_t.R8);
 	util_uv_uvislandmap_cached = true;
-}
-
-type coord_t = {
-	x?: i32;
-	y?: i32;
 }

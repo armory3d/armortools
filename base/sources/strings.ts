@@ -534,7 +534,7 @@ float ltc_evaluate(vec3 N, vec3 V, float dotnv, vec3 P, mat3 Minv, vec3 points0,
 } \
 ";
 
-let str_get_pos_from_depth: string = " \
+let str_get_pos_nor_from_depth: string = " \
 vec3 get_pos_from_depth(vec2 uv, mat4 invVP, textureArg(gbufferD)) { \n\
 #ifdef GLSL \n\
 	float depth = textureLod(gbufferD, uv, 0.0).r; \n\
@@ -545,9 +545,6 @@ vec3 get_pos_from_depth(vec2 uv, mat4 invVP, textureArg(gbufferD)) { \n\
 	wpos = mul(wpos, invVP); \
 	return wpos.xyz / wpos.w; \
 } \
-";
-
-let str_get_nor_from_depth: string = " \
 vec3 get_nor_from_depth(vec3 p0, vec2 uv, mat4 invVP, vec2 tex_step, textureArg(gbufferD)) { \
 	vec3 p1 = get_pos_from_depth(uv + vec2(tex_step.x * 4.0, 0.0), invVP, texturePass(gbufferD)); \
 	vec3 p2 = get_pos_from_depth(uv + vec2(0.0, tex_step.y * 4.0), invVP, texturePass(gbufferD)); \
