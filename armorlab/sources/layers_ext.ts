@@ -1,8 +1,8 @@
 
 function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t[] = null): slot_layer_t {
-	let texpaint: image_t = brush_output_node_inst.texpaint;
-	let texpaint_nor: image_t = brush_output_node_inst.texpaint_nor;
-	let texpaint_pack: image_t = brush_output_node_inst.texpaint_pack;
+	let texpaint: image_t = context_raw.brush_output_node_inst.texpaint;
+	let texpaint_nor: image_t = context_raw.brush_output_node_inst.texpaint_nor;
+	let texpaint_pack: image_t = context_raw.brush_output_node_inst.texpaint_pack;
 
 	let nodes: ui_nodes_t = ui_nodes_get_nodes();
 	let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
@@ -23,17 +23,17 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 }
 
 function layers_ext_on_resized() {
-	image_unload(brush_output_node_inst.texpaint);
+	image_unload(context_raw.brush_output_node_inst.texpaint);
 	let texpaint_rt: render_target_t = map_get(render_path_render_targets, "texpaint");
-	brush_output_node_inst.texpaint = texpaint_rt._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
+	context_raw.brush_output_node_inst.texpaint = texpaint_rt._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
 
-	image_unload(brush_output_node_inst.texpaint_nor);
+	image_unload(context_raw.brush_output_node_inst.texpaint_nor);
 	let texpaint_nor_rt: render_target_t = map_get(render_path_render_targets, "texpaint_nor");
-	brush_output_node_inst.texpaint_nor = texpaint_nor_rt._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
+	context_raw.brush_output_node_inst.texpaint_nor = texpaint_nor_rt._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
 
-	image_unload(brush_output_node_inst.texpaint_pack);
+	image_unload(context_raw.brush_output_node_inst.texpaint_pack);
 	let texpaint_pack_rt: render_target_t = map_get(render_path_render_targets, "texpaint_pack");
-	brush_output_node_inst.texpaint_pack = texpaint_pack_rt._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
+	context_raw.brush_output_node_inst.texpaint_pack = texpaint_pack_rt._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
 
 	if (inpaint_node_image != null) {
 		image_unload(inpaint_node_image);

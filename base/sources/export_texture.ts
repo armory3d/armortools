@@ -97,7 +97,7 @@ function export_texture_run(path: string, bake_material: bool = false) {
 	///end
 
 	///if is_lab
-	let layers: slot_layer_t[] = [brush_output_node_inst];
+	let layers: slot_layer_t[] = [context_raw.brush_output_node_inst];
 	export_texture_run_layers(path, layers);
 	///end
 
@@ -317,9 +317,9 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 	let texpaint_pack: image_t = layers_expc;
 
 	///if is_lab
-	texpaint = brush_output_node_inst.texpaint;
-	texpaint_nor = brush_output_node_inst.texpaint_nor;
-	texpaint_pack = brush_output_node_inst.texpaint_pack;
+	texpaint = context_raw.brush_output_node_inst.texpaint;
+	texpaint_nor = context_raw.brush_output_node_inst.texpaint_nor;
+	texpaint_pack = context_raw.brush_output_node_inst.texpaint_pack;
 	///end
 
 	let pixpaint: buffer_t = null;

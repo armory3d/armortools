@@ -403,7 +403,7 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 		///end
 
 		///if is_lab
-		return brush_output_node_inst.texpaint;
+		return context_raw.brush_output_node_inst.texpaint;
 		///end
 	}
 	if (starts_with(link, "_texpaint_nor")) {
@@ -413,7 +413,7 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 		///end
 
 		///if is_lab
-		return brush_output_node_inst.texpaint_nor;
+		return context_raw.brush_output_node_inst.texpaint_nor;
 		///end
 	}
 	if (starts_with(link, "_texpaint_pack")) {
@@ -423,7 +423,7 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 		///end
 
 		///if is_lab
-		return brush_output_node_inst.texpaint_pack;
+		return context_raw.brush_output_node_inst.texpaint_pack;
 		///end
 	}
 	if (starts_with(link, "_texpaint")) {
@@ -433,7 +433,7 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 		///end
 
 		///if is_lab
-		return brush_output_node_inst.texpaint;
+		return context_raw.brush_output_node_inst.texpaint;
 		///end
 	}
 	if (starts_with(link, "_texblur_")) {

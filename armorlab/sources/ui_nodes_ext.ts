@@ -17,11 +17,11 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 		parser_logic_parse(project_canvas);
 
 		photo_to_pbr_node_cached_source = null;
-		let texbase: image_t = logic_node_get_as_image(brush_output_node_inst.base, channel_type_t.BASE_COLOR);
-		let texocc: image_t = logic_node_get_as_image(brush_output_node_inst.base, channel_type_t.OCCLUSION);
-		let texrough: image_t = logic_node_get_as_image(brush_output_node_inst.base, channel_type_t.ROUGHNESS);
-		let texnor: image_t = logic_node_get_as_image(brush_output_node_inst.base, channel_type_t.NORMAL_MAP);
-		let texheight: image_t = logic_node_get_as_image(brush_output_node_inst.base, channel_type_t.HEIGHT);
+		let texbase: image_t = logic_node_get_as_image(context_raw.brush_output_node_inst.base, channel_type_t.BASE_COLOR);
+		let texocc: image_t = logic_node_get_as_image(context_raw.brush_output_node_inst.base, channel_type_t.OCCLUSION);
+		let texrough: image_t = logic_node_get_as_image(context_raw.brush_output_node_inst.base, channel_type_t.ROUGHNESS);
+		let texnor: image_t = logic_node_get_as_image(context_raw.brush_output_node_inst.base, channel_type_t.NORMAL_MAP);
+		let texheight: image_t = logic_node_get_as_image(context_raw.brush_output_node_inst.base, channel_type_t.HEIGHT);
 
 		if (texbase != null) {
 			let texpaint: render_target_t = map_get(render_path_render_targets, "texpaint");
@@ -64,7 +64,7 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 			g4_draw();
 			g4_end();
 
-			let is_float_node: bool = brush_output_node_inst.base.inputs[channel_type_t.HEIGHT].node.base.get == float_node_get;
+			let is_float_node: bool = context_raw.brush_output_node_inst.base.inputs[channel_type_t.HEIGHT].node.base.get == float_node_get;
 
 			if (ui_header_worktab.position == space_type_t.SPACE3D && !is_float_node) {
 
