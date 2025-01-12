@@ -65,7 +65,7 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 		app_notify_on_next_frame(parse_paint_material);
 
 		render_path_raytrace_first = true;
-		render_path_raytrace_raytrace_init(render_path_raytrace_bake_get_bake_shader_name(), rebuild);
+		render_path_raytrace_raytrace_init(render_path_raytrace_bake_get_bake_shader_name(), rebuild, true);
 
 		return false;
 	}
@@ -74,18 +74,22 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 		context_load_envmap();
 		context_update_envmap();
 	}
+
 	let probe: world_data_t = scene_world;
 	let saved_envmap: image_t = context_raw.show_envmap_blur ? probe._.radiance_mipmaps[0] : context_raw.saved_envmap;
+
 	if (render_path_raytrace_last_envmap != saved_envmap || render_path_raytrace_bake_last_layer != context_raw.layer.texpaint) {
 		render_path_raytrace_last_envmap = saved_envmap;
 		render_path_raytrace_bake_last_layer = context_raw.layer.texpaint;
 
-		let baketex0: render_target_t = map_get(render_path_render_targets, "baketex0");
-		let baketex1: render_target_t = map_get(render_path_render_targets, "baketex1");
-		let texpaint_undo: render_target_t = map_get(render_path_render_targets, "texpaint_undo" + history_undo_i);
 		let bnoise_sobol: image_t = map_get(scene_embedded, "bnoise_sobol.k");
 		let bnoise_scramble: image_t = map_get(scene_embedded, "bnoise_scramble.k");
 		let bnoise_rank: image_t = map_get(scene_embedded, "bnoise_rank.k");
+
+		let baketex0: render_target_t = map_get(render_path_render_targets, "baketex0");
+		let baketex1: render_target_t = map_get(render_path_render_targets, "baketex1");
+		let texpaint_undo: render_target_t = map_get(render_path_render_targets, "texpaint_undo" + history_undo_i);
+
 		iron_raytrace_set_textures(baketex0._image, baketex1._image, texpaint_undo._image, saved_envmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
 	}
 
