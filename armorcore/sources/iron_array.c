@@ -159,6 +159,11 @@ void *array_pop(any_array_t *ar) {
 	return ar->buffer[ar->length];
 }
 
+int i32_array_pop(i32_array_t *ar) {
+	ar->length--;
+	return ar->buffer[ar->length];
+}
+
 void *array_shift(any_array_t *ar) {
 	void *first = ar->buffer[0];
 	for (int i = 0; i < ar->length - 1; ++i) {
