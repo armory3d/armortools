@@ -41,6 +41,7 @@ function input_node_update(self: float_node_t) {
 
 	let paint_x: f32 = mouse_view_x() / app_w();
 	let paint_y: f32 = mouse_view_y() / app_h();
+
 	if (mouse_started()) {
 		input_node_start_x = mouse_view_x() / app_w();
 		input_node_start_y = mouse_view_y() / app_h();

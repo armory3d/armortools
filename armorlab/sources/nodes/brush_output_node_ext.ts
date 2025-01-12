@@ -1,6 +1,8 @@
 
 type brush_output_node_t = {
 	base?: logic_node_t;
+	raw?: ui_node_t;
+
 	id?: i32;
 	texpaint?: image_t;
 	texpaint_nor?: image_t;
@@ -9,14 +11,11 @@ type brush_output_node_t = {
 	texpaint_pack_empty?: image_t;
 };
 
-let brush_output_node_inst: brush_output_node_t = null;
+function brush_output_node_create_ext(n: brush_output_node_t) {
 
-function brush_output_node_create(raw: ui_node_t, args: f32_array_t): brush_output_node_t {
-	let n: brush_output_node_t = {};
-	n.base = logic_node_create(n);
 	n.base.get_as_image = brush_output_node_get_as_image;
 
-	if (brush_output_node_inst == null) {
+	if (context_raw.brush_output_node_inst == null) {
 		{
 			let t: render_target_t = render_target_create();
 			t.name = "texpaint";
@@ -59,26 +58,32 @@ function brush_output_node_create(raw: ui_node_t, args: f32_array_t): brush_outp
 		}
 	}
 	else {
-		n.texpaint = brush_output_node_inst.texpaint;
-		n.texpaint_nor = brush_output_node_inst.texpaint_nor;
-		n.texpaint_pack = brush_output_node_inst.texpaint_pack;
+		n.texpaint = context_raw.brush_output_node_inst.texpaint;
+		n.texpaint_nor = context_raw.brush_output_node_inst.texpaint_nor;
+		n.texpaint_pack = context_raw.brush_output_node_inst.texpaint_pack;
 	}
 
-	brush_output_node_inst = n;
-
-	context_raw.run_brush = brush_output_node_run;
-	context_raw.parse_brush_inputs = brush_output_node_parse_inputs;
-
-	return n;
+	context_raw.brush_output_node_inst = n;
 }
 
 function brush_output_node_get_as_image(self: brush_output_node_t, from: i32): image_t {
 	return logic_node_input_get_as_image(self.base.inputs[from]);
 }
 
+function brush_output_node_parse_inputs() {
+	if (!context_raw.registered) {
+		context_raw.registered = true;
+		app_notify_on_update(brush_output_node_update);
+	}
+
+	context_raw.paint_vec = context_raw.coords;
+}
+
 function brush_output_node_run(from: i32) {
 	let left: f32 = 0.0;
 	let right: f32 = 1.0;
+	let top: f32 = 0.0;
+	let bottom: f32 = 1.0;
 
 	// First time init
 	if (context_raw.last_paint_x < 0 || context_raw.last_paint_y < 0) {
@@ -123,15 +128,6 @@ function brush_output_node_run(from: i32) {
 			context_raw.rdirty = 2;
 		}
 	}
-}
-
-function brush_output_node_parse_inputs() {
-	if (!context_raw.registered) {
-		context_raw.registered = true;
-		app_notify_on_update(brush_output_node_update);
-	}
-
-	context_raw.paint_vec = context_raw.coords;
 }
 
 function brush_output_node_update() {

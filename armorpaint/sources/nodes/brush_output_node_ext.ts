@@ -4,14 +4,8 @@ type brush_output_node_t = {
 	raw?: ui_node_t;
 };
 
-function brush_output_node_create(raw: ui_node_t, args: f32_array_t): brush_output_node_t {
-	let n: brush_output_node_t = {};
-	n.base = logic_node_create(n);
-	context_raw.run_brush = brush_output_node_run;
-	context_raw.parse_brush_inputs = brush_output_node_parse_inputs;
+function brush_output_node_create_ext(n: brush_output_node_t) {
 	context_raw.brush_output_node_inst = n;
-	n.raw = raw;
-	return n;
 }
 
 function brush_output_node_parse_inputs(self: brush_output_node_t) {
@@ -77,9 +71,19 @@ function brush_output_node_parse_inputs(self: brush_output_node_t) {
 function brush_output_node_run(self: brush_output_node_t, from: i32) {
 	let left: f32 = 0.0;
 	let right: f32 = 1.0;
+	let top: f32 = 0.0;
+	let bottom: f32 = 1.0;
+
 	if (context_raw.paint2d) {
 		left = 1.0;
 		right = (context_raw.split_view ? 2.0 : 1.0) + ui_view2d_ww / base_w();
+	}
+
+	// Do not paint over floating toolbar
+	if (context_is_floating_toolbar()) {
+		let w: i32 = ui_toolbar_get_x() + ui_toolbar_get_w();
+		left += w / app_w();
+		top += w / app_h();
 	}
 
 	// First time init
@@ -88,57 +92,75 @@ function brush_output_node_run(self: brush_output_node_t, from: i32) {
 		context_raw.last_paint_vec_y = context_raw.paint_vec.y;
 	}
 
+	// Paint bounds
+	if (context_raw.paint_vec.x < left ||
+		context_raw.paint_vec.x > right ||
+		context_raw.paint_vec.y < top ||
+		context_raw.paint_vec.y > bottom) {
+		return;
+	}
+
 	// Do not paint over fill layer
-	let fill_layer: bool = context_raw.layer.fill_layer != null && context_raw.tool != workspace_tool_t.PICKER && context_raw.tool != workspace_tool_t.MATERIAL && context_raw.tool != workspace_tool_t.COLORID;
+	let fill_layer: bool = context_raw.layer.fill_layer != null &&
+		context_raw.tool != workspace_tool_t.PICKER &&
+		context_raw.tool != workspace_tool_t.MATERIAL &&
+		context_raw.tool != workspace_tool_t.COLORID;
+	if (fill_layer) {
+		return;
+	}
 
 	// Do not paint over groups
-	let group_layer: bool = slot_layer_is_group(context_raw.layer);
+	if (slot_layer_is_group(context_raw.layer)) {
+		return;
+	}
 
-	// Paint bounds
-	if (context_raw.paint_vec.x > left &&
-		context_raw.paint_vec.x < right &&
-		context_raw.paint_vec.y > 0 &&
-		context_raw.paint_vec.y < 1 &&
-		!fill_layer &&
-		!group_layer &&
-		(slot_layer_is_visible(context_raw.layer) || context_raw.paint2d) &&
-		!ui_base_ui.is_hovered &&
-		!base_is_dragging &&
-		!base_is_resizing &&
-		!base_is_scrolling() &&
-		!base_is_combo_selected()) {
+	if (!slot_layer_is_visible(context_raw.layer) && !context_raw.paint2d) {
+		return;
+	}
 
-		// Set color pick
-		let down: bool = mouse_down() || pen_down();
-		if (down && context_raw.tool == workspace_tool_t.COLORID && project_assets.length > 0) {
-			context_raw.colorid_picked = true;
-			ui_toolbar_handle.redraws = 1;
-		}
+	if (ui_base_ui.is_hovered ||
+		base_is_dragging ||
+		base_is_resizing ||
+		base_is_scrolling() ||
+		base_is_combo_selected()) {
+		return;
+	}
 
-		// Prevent painting the same spot
-		let same_spot: bool = context_raw.paint_vec.x == context_raw.last_paint_x && context_raw.paint_vec.y == context_raw.last_paint_y;
-		let lazy: bool = context_raw.tool == workspace_tool_t.BRUSH && context_raw.brush_lazy_radius > 0;
-		if (down && (same_spot || lazy)) {
-			context_raw.painted++;
-		}
-		else {
-			context_raw.painted = 0;
-		}
-		context_raw.last_paint_x = context_raw.paint_vec.x;
-		context_raw.last_paint_y = context_raw.paint_vec.y;
+	brush_output_paint(self);
+}
 
-		if (context_raw.tool == workspace_tool_t.PARTICLE) {
-			context_raw.painted = 0; // Always paint particles
-		}
+function brush_output_paint(self: brush_output_node_t) {
+	let down: bool = mouse_down() || pen_down();
 
-		if (context_raw.painted == 0) {
-			brush_output_node_parse_inputs(self);
-		}
+	// Set color pick
+	if (down && context_raw.tool == workspace_tool_t.COLORID && project_assets.length > 0) {
+		context_raw.colorid_picked = true;
+		ui_toolbar_handle.redraws = 1;
+	}
 
-		if (context_raw.painted <= 1) {
-			context_raw.pdirty = 1;
-			context_raw.rdirty = 2;
-		}
+	// Prevent painting the same spot
+	let same_spot: bool = context_raw.paint_vec.x == context_raw.last_paint_x && context_raw.paint_vec.y == context_raw.last_paint_y;
+	let lazy: bool = context_raw.tool == workspace_tool_t.BRUSH && context_raw.brush_lazy_radius > 0;
+	if (down && (same_spot || lazy)) {
+		context_raw.painted++;
+	}
+	else {
+		context_raw.painted = 0;
+	}
+	context_raw.last_paint_x = context_raw.paint_vec.x;
+	context_raw.last_paint_y = context_raw.paint_vec.y;
+
+	if (context_raw.tool == workspace_tool_t.PARTICLE) {
+		context_raw.painted = 0; // Always paint particles
+	}
+
+	if (context_raw.painted == 0) {
+		brush_output_node_parse_inputs(self);
+	}
+
+	if (context_raw.painted <= 1) {
+		context_raw.pdirty = 1;
+		context_raw.rdirty = 2;
 	}
 }
 

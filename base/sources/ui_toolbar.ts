@@ -82,6 +82,11 @@ function ui_toolbar_get_w(): i32 {
 	return w;
 }
 
+function ui_toolbar_get_x(): i32 {
+	let ui: ui_t = ui_base_ui;
+	return 5 * ui_SCALE(ui);
+}
+
 function ui_toolbar_render_ui() {
 	let ui: ui_t = ui_base_ui;
 
@@ -92,10 +97,9 @@ function ui_toolbar_render_ui() {
 	let h: i32 = sys_height() - ui_header_h;
 	let _WINDOW_BG_COL: i32 = ui.ops.theme.WINDOW_BG_COL;
 
-	if (config_raw.layout[layout_size_t.HEADER] == 0) {
-		// Header is off -> floating toolbar
-		x += 5 * ui_SCALE(ui);
-		y += 5 * ui_SCALE(ui);
+	if (context_is_floating_toolbar()) {
+		x += ui_toolbar_get_x();
+		y += ui_toolbar_get_x();
 		h = ui_toolbar_tool_names.length * (ui_toolbar_w + 2);
 		ui.ops.theme.WINDOW_BG_COL = ui.ops.theme.SEPARATOR_COL;
 	}
@@ -208,8 +212,7 @@ function ui_toolbar_render_ui() {
 		ui.image_scroll_align = true;
 	}
 
-	if (config_raw.layout[layout_size_t.HEADER] == 0) {
-		// Header is off -> floating toolbar
+	if (context_is_floating_toolbar()) {
 		ui_toolbar_w = 0;
 		ui.ops.theme.WINDOW_BG_COL = _WINDOW_BG_COL;
 	}

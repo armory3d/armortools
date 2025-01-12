@@ -707,6 +707,11 @@ function context_is_decal_mask_paint(): bool {
 	return context_is_decal() && operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
 }
 
+function context_is_floating_toolbar(): bool {
+	// Header is off -> floating toolbar
+	return config_raw.layout[layout_size_t.HEADER] == 0;
+}
+
 function context_get_area_type(): area_type_t {
 	if (context_in_viewport()) {
 		return area_type_t.VIEWPORT;
