@@ -170,9 +170,6 @@ function render_path_set_viewport(view_w: i32, view_h: i32) {
 }
 
 function render_path_clear_target(color: color_t = 0x00000000, depth: f32 = 0.0, flags: i32 = clear_flag_t.COLOR) {
-	if (color == -1 && scene_world != null) { // 0xffffffff
-		color = scene_world.color;
-	}
 	g4_clear(color, depth, flags);
 }
 
