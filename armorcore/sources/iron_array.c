@@ -146,11 +146,25 @@ void buffer_resize(buffer_t *b, int32_t size) {
 	gc_leaf(b->buffer);
 }
 
+static int _array_sort_alpha(const void *a, const void *b) {
+	return strcmp(*(const char **)a, *(const char **)b);
+}
+
 void array_sort(any_array_t *ar, int (*compare)(const void *, const void *)) {
+	if (compare == NULL) {
+		compare = _array_sort_alpha;
+	}
 	qsort(ar->buffer, ar->length, sizeof(ar->buffer[0]), compare);
 }
 
+static int _array_sort_num(const void *a, const void *b) {
+	return (*(int *)a - *(int *)b);
+}
+
 void i32_array_sort(i32_array_t *ar, int (*compare)(const void *, const void *)) {
+	if (compare == NULL) {
+		compare = _array_sort_num;
+	}
 	qsort(ar->buffer, ar->length, sizeof(ar->buffer[0]), compare);
 }
 
