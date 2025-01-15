@@ -142,11 +142,7 @@ function translator_load_translations(new_locale: string) {
 }
 
 function translator_init_font(cjk: bool, font_path: string, font_scale: f32) {
-	i32_array_sort(_g2_font_glyphs, function (pa: u32_ptr, pb: u32_ptr): i32 {
-		let a: i32 = (i32)DEREFERENCE(pa);
-		let b: i32 = (i32)DEREFERENCE(pb);
-		return a - b;
-	});
+	i32_array_sort(_g2_font_glyphs, null);
 
 	_translator_init_font_cjk = cjk;
 	_translator_init_font_font_path = font_path;

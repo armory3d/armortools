@@ -61,10 +61,7 @@ function file_read_directory(path: string): string[] {
 	///end
 
 	let files: string[] = string_split(iron_read_directory(path), "\n");
-
-	array_sort(files, function (a: any_ptr, b: any_ptr): i32 {
-		return strcmp(DEREFERENCE(a), DEREFERENCE(b));
-	});
+	array_sort(files, null);
 
 	// Folders first
 	let num: i32 = files.length;

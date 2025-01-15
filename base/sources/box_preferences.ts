@@ -754,9 +754,7 @@ function box_preferences_show() {
 			let index: i32 = 0;
 			ui.changed = false;
 			let keys: string[] = map_keys(config_keymap);
-			array_sort(keys, function (a: any_ptr, b: any_ptr): i32 {
-				return strcmp(DEREFERENCE(a), DEREFERENCE(b));
-			});
+			array_sort(keys, null);
 			for (let i: i32 = 0; i < keys.length; ++i) {
 				let key: string = keys[i];
 				let h: ui_handle_t = ui_nest(ui_handle(__ID__), index++);
