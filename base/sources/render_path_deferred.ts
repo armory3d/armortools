@@ -178,7 +178,7 @@ function render_path_deferred_draw_deferred() {
 	render_path_base_draw_voxels();
 	///end
 	render_path_base_draw_deferred_light();
-	render_path_base_draw_bloom();
+	render_path_base_draw_bloom("tex");
 	// draw_motion_blur();
 	// draw_histogram();
 

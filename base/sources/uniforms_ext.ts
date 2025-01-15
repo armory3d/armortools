@@ -15,7 +15,7 @@ function uniforms_ext_i32_link(object: object_t, mat: material_data_t, link: str
 	if (link == "_bloom_current_mip") {
 		return render_path_base_bloom_current_mip;
 	}
-	return 0;
+	return INT_MAX;
 }
 
 function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: string): f32 {

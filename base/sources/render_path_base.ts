@@ -209,46 +209,49 @@ function render_path_base_commands(draw_commands: ()=>void) {
 	render_path_base_end();
 }
 
-function render_path_base_draw_bloom(tex: string = "tex") {
-	if (config_raw.rp_bloom != false) {
-		if (render_path_base_bloom_mipmaps == null) {
-			render_path_base_bloom_mipmaps = [];
+function render_path_base_draw_bloom(tex: string) {
+	if (config_raw.rp_bloom == false) {
+		return;
+	}
 
-			let prev_scale: f32 = 1.0;
-			for (let i: i32 = 0; i < 10; ++i) {
-				let t: render_target_t = render_target_create();
-				t.name = "bloom_mip_" + i;
-				t.width = 0;
-				t.height = 0;
-				t.scale = (prev_scale *= 0.5);
-				t.format = "RGBA64";
-				array_push(render_path_base_bloom_mipmaps, render_path_create_render_target(t));
-			}
+	if (render_path_base_bloom_mipmaps == null) {
+		render_path_base_bloom_mipmaps = [];
 
-			render_path_load_shader("shader_datas/bloom_pass/bloom_downsample_pass");
-			render_path_load_shader("shader_datas/bloom_pass/bloom_upsample_pass");
+		let prev_scale: f32 = 1.0;
+		for (let i: i32 = 0; i < 10; ++i) {
+			let t: render_target_t = render_target_create();
+			t.name = "bloom_mip_" + i;
+			t.width = 0;
+			t.height = 0;
+			prev_scale *= 0.5;
+			t.scale = prev_scale;
+			t.format = "RGBA64";
+			array_push(render_path_base_bloom_mipmaps, render_path_create_render_target(t));
 		}
 
-		let bloom_radius: f32 = 6.5;
-		let min_dim: f32 = math_min(render_path_current_w, render_path_current_h);
-		let log_min_dim: f32 = math_max(1.0, math_log2(min_dim) + (bloom_radius - 8.0));
-		let num_mips: i32 = math_floor(log_min_dim);
-		render_path_base_bloom_sample_scale = 0.5 + log_min_dim - num_mips;
+		render_path_load_shader("shader_datas/bloom_pass/bloom_downsample_pass");
+		render_path_load_shader("shader_datas/bloom_pass/bloom_upsample_pass");
+	}
 
-		for (let i: i32 = 0; i < num_mips; ++i) {
-			render_path_base_bloom_current_mip = i;
-			render_path_set_target(render_path_base_bloom_mipmaps[i].name);
-			render_path_clear_target();
-			render_path_bind_target(i == 0 ? tex : render_path_base_bloom_mipmaps[i - 1].name, "tex");
-			render_path_draw_shader("shader_datas/bloom_pass/bloom_downsample_pass");
-		}
-		for (let i: i32 = 0; i < num_mips; ++i) {
-			let mip_level: i32 = num_mips - 1 - i;
-			render_path_base_bloom_current_mip = mip_level;
-			render_path_set_target(mip_level == 0 ? tex : render_path_base_bloom_mipmaps[mip_level - 1].name);
-			render_path_bind_target(render_path_base_bloom_mipmaps[mip_level].name, "tex");
-			render_path_draw_shader("shader_datas/bloom_pass/bloom_upsample_pass");
-		}
+	let bloom_radius: f32 = 6.5;
+	let min_dim: f32 = math_min(render_path_current_w, render_path_current_h);
+	let log_min_dim: f32 = math_max(1.0, math_log2(min_dim) + (bloom_radius - 8.0));
+	let num_mips: i32 = math_floor(log_min_dim);
+	render_path_base_bloom_sample_scale = 0.5 + log_min_dim - num_mips;
+
+	for (let i: i32 = 0; i < num_mips; ++i) {
+		render_path_base_bloom_current_mip = i;
+		render_path_set_target(render_path_base_bloom_mipmaps[i].name);
+		render_path_clear_target(0x00000000);
+		render_path_bind_target(i == 0 ? tex : render_path_base_bloom_mipmaps[i - 1].name, "tex");
+		render_path_draw_shader("shader_datas/bloom_pass/bloom_downsample_pass");
+	}
+	for (let i: i32 = 0; i < num_mips; ++i) {
+		let mip_level: i32 = num_mips - 1 - i;
+		render_path_base_bloom_current_mip = mip_level;
+		render_path_set_target(mip_level == 0 ? tex : render_path_base_bloom_mipmaps[mip_level - 1].name);
+		render_path_bind_target(render_path_base_bloom_mipmaps[mip_level].name, "tex");
+		render_path_draw_shader("shader_datas/bloom_pass/bloom_upsample_pass");
 	}
 }
 

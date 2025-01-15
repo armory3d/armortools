@@ -227,10 +227,7 @@ function render_path_raytrace_draw(use_live_layer: bool) {
 	///end
 
 	render_path_raytrace_commands(use_live_layer);
-
-	if (config_raw.rp_bloom != false) {
-		render_path_base_draw_bloom("buf");
-	}
+	render_path_base_draw_bloom("buf");
 	render_path_set_target("buf");
 	render_path_draw_meshes("overlay");
 	render_path_set_target("buf");

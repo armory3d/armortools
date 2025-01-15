@@ -147,7 +147,7 @@ function uniforms_bind_render_target(rt: render_target_t, context: shader_contex
 
 			if (starts_with(rt.name, "bloom")) {
 				// Use bilinear filter for bloom mips to get correct blur
-				g4_set_tex_params(context._.tex_units[j], tex_addressing_t.CLAMP, tex_addressing_t.CLAMP, tex_filter_t.LINEAR, tex_filter_t.LINEAR, mip_map_filter_t.LINEAR);
+				g4_set_tex_params(context._.tex_units[j], tex_addressing_t.CLAMP, tex_addressing_t.CLAMP, tex_filter_t.LINEAR, tex_filter_t.LINEAR, mip_map_filter_t.NONE);
 				continue;
 			}
 
@@ -572,16 +572,17 @@ function uniforms_set_obj_const(obj: object_t, loc: kinc_const_loc_t, c: shader_
 		g4_set_floats(loc, fa);
 	}
 	else if (c.type == "int") {
-		let i: i32 = 0;
+		let i: i32 = INT_MAX;
 
 		if (c.link == "_uid") {
 			i = obj.uid;
 		}
 		else if (uniforms_i32_links != null) {
 			i = uniforms_i32_links(obj, current_material(obj), c.link);
-			if (i == 0) {
-				return; // TODO: return when uniform is not found
-			}
+		}
+
+		if (i == INT_MAX) {
+			return;
 		}
 
 		g4_set_int(loc, i);
