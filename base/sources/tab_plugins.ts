@@ -28,5 +28,15 @@ function tab_plugins_draw(htab: ui_handle_t) {
 				js_call(p.on_ui);
 			}
 		}
+
+		///if is_debug
+		let rt_keys: string[] = map_keys(render_path_render_targets);
+		array_sort(rt_keys, null);
+		for (let i: i32 = 0; i < rt_keys.length; ++i) {
+			let rt: render_target_t = map_get(render_path_render_targets, rt_keys[i]);
+			ui_text(rt_keys[i]);
+			_ui_image(rt._image);
+		}
+		///end
 	}
 }
