@@ -180,7 +180,16 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 				render_path_bind_target("texpaint" + tid, "texpaint");
 				render_path_bind_target("texpaint_nor" + tid, "texpaint_nor");
 				render_path_bind_target("texpaint_pack" + tid, "texpaint_pack");
-				render_path_draw_meshes("paint");
+
+				// Full-screen triangle pass - use plane mesh
+				// render_path_draw_meshes("paint");
+				let plane: mesh_object_t = scene_get_child(".Plane").ext;
+				let _visible: bool = plane.base.visible;
+				plane.base.visible = true;
+				mesh_object_render(plane, "paint", _render_path_bind_params);
+				plane.base.visible = _visible;
+				render_path_end();
+
 				if (use_live_layer) {
 					render_path_paint_use_live_layer(false);
 				}
