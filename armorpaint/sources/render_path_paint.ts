@@ -100,6 +100,17 @@ function render_path_paint_init() {
 	render_path_load_shader("shader_datas/dilate_pass/dilate_pass");
 }
 
+function render_path_paint_draw_fullscreen_triangle(context: string) {
+	// Note that vertices are mangled in vertex shader to form a fullscreen triangle,
+	// so plane transform does not matter
+	let plane: mesh_object_t = scene_get_child(".Plane").ext;
+	let _visible: bool = plane.base.visible;
+	plane.base.visible = true;
+	mesh_object_render(plane, context, _render_path_bind_params);
+	plane.base.visible = _visible;
+	render_path_end();
+}
+
 function render_path_paint_commands_paint(dilation: bool = true) {
 	let tid: i32 = context_raw.layer.id;
 
@@ -138,7 +149,7 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 			render_path_set_target("texpaint_colorid");
 			render_path_clear_target(0xff000000);
 			render_path_bind_target("gbuffer2", "gbuffer2");
-			render_path_draw_meshes("paint");
+			render_path_paint_draw_fullscreen_triangle("paint");
 			ui_header_handle.redraws = 2;
 		}
 		else if (context_raw.tool == workspace_tool_t.PICKER || context_raw.tool == workspace_tool_t.MATERIAL) {
@@ -180,15 +191,7 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 				render_path_bind_target("texpaint" + tid, "texpaint");
 				render_path_bind_target("texpaint_nor" + tid, "texpaint_nor");
 				render_path_bind_target("texpaint_pack" + tid, "texpaint_pack");
-
-				// Full-screen triangle pass - use plane mesh
-				// render_path_draw_meshes("paint");
-				let plane: mesh_object_t = scene_get_child(".Plane").ext;
-				let _visible: bool = plane.base.visible;
-				plane.base.visible = true;
-				mesh_object_render(plane, "paint", _render_path_bind_params);
-				plane.base.visible = _visible;
-				render_path_end();
+				render_path_paint_draw_fullscreen_triangle("paint");
 
 				if (use_live_layer) {
 					render_path_paint_use_live_layer(false);
