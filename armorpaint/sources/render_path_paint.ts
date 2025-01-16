@@ -689,8 +689,15 @@ function render_path_paint_draw() {
 		}
 
 		if (context_raw.tool == workspace_tool_t.BAKE) {
+
 			if (context_raw.bake_type == bake_type_t.NORMAL || context_raw.bake_type == bake_type_t.HEIGHT || context_raw.bake_type == bake_type_t.DERIVATIVE) {
 				if (!render_path_paint_baking && context_raw.pdirty > 0) {
+
+					// Use RGBA128 texture format for high poly to low poly baking to prevent artifacts
+					// Existing undo layers are used during the baking process for now
+					base_bits_handle.position = texture_bits_t.BITS32;
+					layers_set_bits();
+
 					render_path_paint_baking = true;
 					_render_path_paint_bake_type = context_raw.bake_type;
 					context_raw.bake_type = context_raw.bake_type == bake_type_t.NORMAL ? bake_type_t.NORMAL_OBJECT : bake_type_t.POSITION; // Bake high poly data

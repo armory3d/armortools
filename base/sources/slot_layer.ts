@@ -377,7 +377,7 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 		let format: tex_format_t =
 			base_bits_handle.position == texture_bits_t.BITS8  ? tex_format_t.RGBA32 :
 			base_bits_handle.position == texture_bits_t.BITS16 ? tex_format_t.RGBA64 :
-			tex_format_t.RGBA128;
+																 tex_format_t.RGBA128;
 
 		///if is_sculpt
 		format = tex_format_t.RGBA128;

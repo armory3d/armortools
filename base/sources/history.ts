@@ -522,7 +522,6 @@ function history_apply_mask() {
 	history_push(tr("Apply Mask"));
 }
 
-
 function history_invert_mask() {
 	history_push(tr("Invert Mask"));
 }
