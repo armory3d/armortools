@@ -8,7 +8,7 @@ let _parser_exr_out: u8[];
 let _parser_exr_src_view: buffer_t;
 let _parser_exr_write_line: (byte_pos: i32)=> void;
 
-function parser_exr_write_string(out: i32[], str: string) {
+function parser_exr_write_string(out: u8[], str: string) {
 	for (let i: i32 = 0; i < str.length; ++i) {
 		array_push(out, char_code_at(str, i));
 	}
@@ -326,5 +326,5 @@ function parser_exr_run(width: i32, height: i32, src: buffer_t, bits: i32 = 16, 
 		pos += width * stride;
 	}
 
-	return u8_array_create_from_array(out).buffer;
+	return out;
 }
