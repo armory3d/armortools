@@ -3,14 +3,14 @@ function geom_make_plane(size_x: f32 = 1.0, size_y: f32 = 1.0, verts_x: i32 = 2,
 
 	let mesh: raw_mesh_t = {};
 	mesh.scale_pos = 1.0;
-	mesh.scale_tex = 1.0;
+	mesh.scale_tex = uv_scale;
 	mesh.name = "";
 	mesh.has_next = false;
 
 	// Pack positions to (-1, 1) range
 	let half_x: f32 = size_x / 2;
 	let half_y: f32 = size_y / 2;
-	mesh.scale_pos = math_max(half_x, half_y);
+	mesh.scale_pos = math_max(size_x, size_y);
 	let inv: f32 = (1 / mesh.scale_pos) * 32767;
 
 	mesh.posa = i16_array_create(verts_x * verts_y * 4);
@@ -30,10 +30,8 @@ function geom_make_plane(size_x: f32 = 1.0, size_y: f32 = 1.0, verts_x: i32 = 2,
 		mesh.posa[i * 4 + 3] = 32767;
 		x = (i % verts_x) / (verts_x - 1);
 		y = 1.0 - math_floor(i / verts_x) / (verts_y - 1);
-		let tx: i32 = (math_floor(x * 32767 * uv_scale) - 1);
-		let ty: i32 = (math_floor(y * 32767 * uv_scale) - 1);
-		mesh.texa[i * 2    ] = tx % 32767;
-		mesh.texa[i * 2 + 1] = ty % 32767;
+		mesh.texa[i * 2    ] = math_floor(x * 32767);
+		mesh.texa[i * 2 + 1] = math_floor(y * 32767);
 	}
 	for (let i: i32 = 0; i < (verts_x - 1) * (verts_y - 1); ++i) {
 		let x: f32 = i % (verts_x - 1);
