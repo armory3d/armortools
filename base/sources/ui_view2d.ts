@@ -466,12 +466,14 @@ function ui_view2d_update() {
 	}
 
 	///if (is_paint || is_sculpt)
-	let decal: bool = context_is_decal();
 	let decal_mask: bool = context_is_decal_mask_paint();
-	let set_clone_source: bool = context_raw.tool == workspace_tool_t.CLONE && operator_shortcut(map_get(config_keymap, "set_clone_source") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
+	let set_clone_source: bool = context_raw.tool == workspace_tool_t.CLONE &&
+		operator_shortcut(map_get(config_keymap, "set_clone_source") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
+	let bake: bool = context_raw.tool == workspace_tool_t.BAKE;
 
 	if (ui_view2d_type == view_2d_type_t.LAYER &&
 		!ui_view2d_text_input_hover &&
+		!bake &&
 		(operator_shortcut(map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN) ||
 			operator_shortcut(map_get(config_keymap, "brush_ruler") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN) ||
 			decal_mask ||
