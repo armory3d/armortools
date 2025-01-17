@@ -196,8 +196,8 @@ function uniforms_set_context_const(location: kinc_const_loc_t, c: shader_const_
 		}
 		else if (c.link == "_skydome_matrix") {
 			let tr: transform_t = camera.base.transform;
-			let v: vec4_t = vec4_create(transform_world_x(tr), transform_world_y(tr), transform_world_z(tr) - 3.5); // Sky
-			let bounds: f32 = camera.data.far_plane * 0.95;
+			let v: vec4_t = vec4_create(transform_world_x(tr), transform_world_y(tr), transform_world_z(tr));
+			let bounds: f32 = camera.data.far_plane * 0.9;
 			let v2: vec4_t = vec4_create(bounds, bounds, bounds);
 			m = mat4_compose(v, _uniforms_quat, v2);
 			m = mat4_mult_mat(m, camera.v);
