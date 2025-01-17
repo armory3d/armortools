@@ -189,8 +189,6 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 
 	render_path_set_target("");
 	g4_set_pipeline(pipes_cursor);
-	let img: image_t = resource_get("cursor.k");
-	g4_set_tex(pipes_cursor_tex, img);
 	let gbuffer0: render_target_t = map_get(render_path_render_targets, "gbuffer0");
 	g4_set_tex_depth(pipes_cursor_gbufferd, gbuffer0._image);
 	g4_set_float2(pipes_cursor_mouse, mx, my);

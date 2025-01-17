@@ -7,10 +7,6 @@ uniform vec2 tex_step;
 uniform float radius;
 uniform vec3 camera_right;
 uniform sampler2D gbufferD;
-#ifdef HLSL
-// direct3d12 unit align
-uniform sampler2D texa;
-#endif
 
 #ifdef HLSL
 in vec4 pos;
@@ -21,8 +17,7 @@ out vec2 tex_coord;
 
 vec3 get_pos(vec2 uv) {
 #ifdef HLSL
-	float keep = textureLod(texa, vec2(0.0, 0.0), 0.0).r; // direct3d12 unit align
-	float keep2 = pos.x + nor.x;
+	float keep = pos.x + nor.x;
 #endif
 
 #ifdef GLSL

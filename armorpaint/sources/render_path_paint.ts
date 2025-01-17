@@ -488,10 +488,6 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 
 	render_path_set_target("");
 	g4_set_pipeline(pipes_cursor);
-	let decal: bool = context_is_decal();
-	let decal_mask: bool = context_is_decal_mask();
-	let img: image_t = (decal && !decal_mask) ? context_raw.decal_image : resource_get("cursor.k");
-	g4_set_tex(pipes_cursor_tex, img);
 	let rt: render_target_t = map_get(render_path_render_targets, "gbuffer0");
 	let gbuffer0: image_t = rt._image;
 	g4_set_tex_depth(pipes_cursor_gbufferd, gbuffer0);

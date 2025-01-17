@@ -47,7 +47,6 @@ let pipes_cursor_tex_step: kinc_const_loc_t;
 let pipes_cursor_radius: kinc_const_loc_t;
 let pipes_cursor_camera_right: kinc_const_loc_t;
 let pipes_cursor_tint: kinc_const_loc_t;
-let pipes_cursor_tex: kinc_tex_unit_t;
 let pipes_cursor_gbufferd: kinc_tex_unit_t;
 
 function _pipes_make_merge(red: bool, green: bool, blue: bool, alpha: bool): pipeline_t {
@@ -287,6 +286,5 @@ function pipes_init() {
 		pipes_cursor_camera_right = g4_pipeline_get_const_loc(pipes_cursor, "camera_right");
 		pipes_cursor_tint = g4_pipeline_get_const_loc(pipes_cursor, "tint");
 		pipes_cursor_gbufferd = g4_pipeline_get_tex_unit(pipes_cursor, "gbufferD");
-		pipes_cursor_tex = g4_pipeline_get_tex_unit(pipes_cursor, "tex");
 	}
 }

@@ -1364,7 +1364,7 @@ function ui_base_render_cursor() {
 	}
 
 	let cursor_img: image_t = resource_get("cursor.k");
-	let psize: i32 = math_floor(cursor_img.width * (context_raw.brush_radius * context_raw.brush_nodes_radius) * ui_SCALE(ui_base_ui));
+	let psize: i32 = math_floor(182 * (context_raw.brush_radius * context_raw.brush_nodes_radius) * ui_SCALE(ui_base_ui));
 
 	// Clone source cursor
 	if (context_raw.tool == workspace_tool_t.CLONE && !keyboard_down("alt") && (mouse_down() || pen_down())) {
