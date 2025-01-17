@@ -137,9 +137,9 @@ function box_preferences_show() {
 							ui.ops.theme.ELEMENT_H = base_default_element_h;
 							config_restore();
 							box_preferences_set_scale();
-							if (box_preferences_files_plugin != null) {
-								for (let i: i32 = 0; i < box_preferences_files_plugin.length; ++i) {
-									let f: string = box_preferences_files_plugin[i];
+							if (config_raw.plugins != null) {
+								for (let i: i32 = 0; i < config_raw.plugins.length; ++i) {
+									let f: string = config_raw.plugins[i];
 									plugin_stop(f);
 								}
 							}
