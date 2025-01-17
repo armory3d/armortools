@@ -654,12 +654,14 @@ FN(parser_material_parse_value_input) {
 
 extern any_array_t *nodes_brush_categories;
 extern any_array_t *nodes_brush_list;
+void nodes_brush_list_init();
 FN(nodes_brush_category_add) {
 	char *category_name = (char *)JS_ToCString(ctx, argv[0]);
 	any_array_push(nodes_brush_categories, category_name);
 	size_t len;
 	void *ab = JS_GetArrayBuffer(ctx, &len, argv[1]);
 	buffer_t b = { .buffer = ab, .length = len, .capacity = len };
+	nodes_brush_list_init();
 	any_array_push(nodes_brush_list, armpack_decode(&b));
 	return JS_UNDEFINED;
 }

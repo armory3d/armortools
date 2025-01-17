@@ -22,6 +22,14 @@ function nodes_brush_init() {
 	map_set(nodes_brush_creates, "vector_node", vector_node_create);
 	map_set(nodes_brush_creates, "vector_math_node", vector_math_node_create);
 
+	nodes_brush_list_init();
+}
+
+function nodes_brush_list_init() {
+	if (nodes_brush_list != null) {
+		return;
+	}
+
 	nodes_brush_category0 = [
 		tex_image_node_def,
 		input_node_def,

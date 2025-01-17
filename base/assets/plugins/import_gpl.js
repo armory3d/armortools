@@ -4,7 +4,7 @@ function import_gpl(path, replace_existing) {
 	// let swatches: TSwatchColor[] = [];
 
 	// let str: string = sys_buffer_to_string(b);
-	// let lines: string[] = string_split(str, "\n");
+	// let lines: string[] = string_split(str, "\\n");
 
 	// // GIMP's color palette importer: https://gitlab.gnome.org/GNOME/gimp/-/blob/gimp-2-10/app/core/gimppalette-load.c#L39
 	// if (!starts_with(lines[0], "GIMP Palette")) {
@@ -41,7 +41,7 @@ function import_gpl(path, replace_existing) {
 }
 
 let plugin = plugin_create();
-path_swatch_importers_set("gpl", import_gpl);
+// path_swatch_importers_set("gpl", import_gpl);
 plugin_notify_on_delete(plugin, function() {
-	path_swatch_importers_delete("gpl");
+	// path_swatch_importers_delete("gpl");
 });
