@@ -69,7 +69,7 @@ function import_stl(path) {
 	}
 
 	data_delete_blob(path);
-	let name = path.split("\\").pop().split("/").pop().split(".").shift();
+	let name = path.split("\\\\").pop().split("/").pop().split(".").shift();
 	return plugin_api_make_raw_mesh(name, posa.buffer, nora.buffer, inda.buffer, scale_pos);
 }
 
