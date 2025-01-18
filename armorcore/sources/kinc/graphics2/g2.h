@@ -43,6 +43,7 @@ void arm_g2_fill_triangle(float x0, float y0, float x1, float y1, float x2, floa
 void arm_g2_fill_rect(float x, float y, float width, float height);
 void arm_g2_draw_rect(float x, float y, float width, float height, float strength);
 void arm_g2_draw_line(float x0, float y0, float x1, float y1, float strength);
+void arm_g2_draw_line_aa(float x0, float y0, float x1, float y1, float strength);
 void arm_g2_draw_string(const char *text, float x, float y);
 void arm_g2_end(void);
 void arm_g2_set_color(uint32_t color);

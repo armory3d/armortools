@@ -2289,6 +2289,10 @@ void iron_g2_draw_line(f32 x0, f32 y0, f32 x1, f32 y1, f32 strength) {
 	arm_g2_draw_line(x0, y0, x1, y1, strength);
 }
 
+void iron_g2_draw_line_aa(f32 x0, f32 y0, f32 x1, f32 y1, f32 strength) {
+	arm_g2_draw_line_aa(x0, y0, x1, y1, strength);
+}
+
 void iron_g2_draw_string(string_t *text, f32 x, f32 y) {
 	arm_g2_draw_string(text, x, y);
 }

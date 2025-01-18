@@ -596,6 +596,37 @@ void arm_g2_draw_line(float x0, float y0, float x1, float y1, float strength) {
 	arm_g2_fill_triangle(p2.x, p2.y, p1.x, p1.y, p3.x, p3.y);
 }
 
+static uint8_t _g2_color_r(uint32_t color) {
+	return (color & 0x00ff0000) >> 16;
+}
+
+static uint8_t _g2_color_g(uint32_t color) {
+	return (color & 0x0000ff00) >>  8;
+}
+
+static uint8_t _g2_color_b(uint32_t color) {
+	return (color & 0x000000ff);
+}
+
+static uint8_t _g2_color_a(uint32_t color) {
+	return (color) >> 24;
+}
+
+static uint32_t _g2_color(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+	return (a << 24) | (r << 16) | (g << 8) | b;
+}
+
+void arm_g2_draw_line_aa(float x0, float y0, float x1, float y1, float strength) {
+	arm_g2_draw_line(x0, y0, x1, y1, strength);
+	uint32_t _color = g2_color;
+	arm_g2_set_color(_g2_color(_g2_color_r(g2_color), _g2_color_g(g2_color), _g2_color_b(g2_color), 150));
+	arm_g2_draw_line(x0 + 0.5, y0, x1 + 0.5, y1, strength);
+	arm_g2_draw_line(x0 - 0.5, y0, x1 - 0.5, y1, strength);
+	arm_g2_draw_line(x0, y0 + 0.5, x1, y1 + 0.5, strength);
+	arm_g2_draw_line(x0, y0 - 0.5, x1, y1 - 0.5, strength);
+	arm_g2_set_color(_color);
+}
+
 void arm_g2_text_set_rect_verts(float btlx, float btly, float tplx, float tply, float tprx, float tpry, float btrx, float btry) {
 	int base_idx = (text_buffer_index - text_buffer_start) * 6 * 4;
 	text_rect_verts[base_idx + 0] = btlx;

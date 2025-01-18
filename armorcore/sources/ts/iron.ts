@@ -320,6 +320,7 @@ declare function iron_g2_fill_triangle(x0: f32, y0: f32, x1: f32, y1: f32, x2: f
 declare function iron_g2_fill_rect(x: f32, y: f32, width: f32, height: f32): void;
 declare function iron_g2_draw_rect(x: f32, y: f32, width: f32, height: f32, strength: f32): void;
 declare function iron_g2_draw_line(x0: f32, y0: f32, x1: f32, y1: f32, strength: f32): void;
+declare function iron_g2_draw_line_aa(x0: f32, y0: f32, x1: f32, y1: f32, strength: f32): void;
 declare function iron_g2_draw_string(text: string, x: f32, y: f32): void;
 declare function iron_g2_set_font(font: any, size: i32): void;
 declare function iron_g2_font_init(blob: buffer_t, font_index: i32): any;

@@ -119,6 +119,10 @@ function g2_draw_line(x0: f32, y0: f32, x1: f32, y1: f32, strength: f32 = 1.0) {
 	iron_g2_draw_line(x0, y0, x1, y1, strength);
 }
 
+function g2_draw_line_aa(x0: f32, y0: f32, x1: f32, y1: f32, strength: f32 = 1.0) {
+	iron_g2_draw_line_aa(x0, y0, x1, y1, strength);
+}
+
 function g2_fill_triangle(x0: f32, y0: f32, x1: f32, y1: f32, x2: f32, y2: f32) {
 	iron_g2_fill_triangle(x0, y0, x1, y1, x2, y2);
 }

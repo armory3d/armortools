@@ -266,12 +266,7 @@ void ui_draw_link(float x1, float y1, float x2, float y2, bool highlight) {
 	int c = highlight ? c1 : c2;
 	arm_g2_set_color(ui_color(ui_color_r(c), ui_color_g(c), ui_color_b(c), 210));
 	if (current->ops->theme->LINK_STYLE == UI_LINK_STYLE_LINE) {
-		arm_g2_draw_line(x1, y1, x2, y2, 1.0);
-		arm_g2_set_color(ui_color(ui_color_r(c), ui_color_g(c), ui_color_b(c), 150)); // AA
-		arm_g2_draw_line(x1 + 0.5, y1, x2 + 0.5, y2, 1.0);
-		arm_g2_draw_line(x1 - 0.5, y1, x2 - 0.5, y2, 1.0);
-		arm_g2_draw_line(x1, y1 + 0.5, x2, y2 + 0.5, 1.0);
-		arm_g2_draw_line(x1, y1 - 0.5, x2, y2 - 0.5, 1.0);
+		arm_g2_draw_line_aa(x1, y1, x2, y2, 1.0);
 	}
 	else if (current->ops->theme->LINK_STYLE == UI_LINK_STYLE_CUBIC_BEZIER) {
 		float x[] = { x1, x1 + fabs(x1 - x2) / 2.0, x2 - fabs(x1 - x2) / 2.0, x2 };
