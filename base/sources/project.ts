@@ -398,7 +398,12 @@ function project_import_brush() {
 function project_import_mesh(replace_existing: bool = true, done: ()=>void = null) {
 	_project_import_mesh_replace_existing = replace_existing;
 	_project_import_mesh_done = done;
-	ui_files_show(string_array_join(path_mesh_formats, ","), false, false, function (path: string) {
+	let formats: string = string_array_join(path_mesh_formats, ",");
+	if (string_index_of(formats, "fbx") == -1) {
+		// Show .fbx in the file picker even when fbx plugin is not yet enabled
+		formats += ",fbx";
+	}
+	ui_files_show(formats, false, false, function (path: string) {
 		project_import_mesh_box(path, _project_import_mesh_replace_existing, true, _project_import_mesh_done);
 	});
 }
