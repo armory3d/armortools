@@ -199,20 +199,20 @@ int ui_inline_radio(ui_handle_t *handle, char_ptr_array_t *texts, int align) {
 
 	for (int i = 0; i < texts->length; ++i) {
 		if (handle->position == i) {
-			arm_g2_set_color(current->ops->theme->HIGHLIGHT_COL);
+			kinc_g2_set_color(current->ops->theme->HIGHLIGHT_COL);
 			if (!current->enabled) {
 				ui_fade_color(0.25);
 			}
 			ui_draw_rect(true, current->_x + step * i, current->_y + current->button_offset_y, step, UI_BUTTON_H());
 		}
 		else if (hovered == i) {
-			arm_g2_set_color(current->ops->theme->BUTTON_COL);
+			kinc_g2_set_color(current->ops->theme->BUTTON_COL);
 			if (!current->enabled) {
 				ui_fade_color(0.25);
 			}
 			ui_draw_rect(false, current->_x + step * i, current->_y + current->button_offset_y, step, UI_BUTTON_H());
 		}
-		arm_g2_set_color(current->ops->theme->TEXT_COL); // Text
+		kinc_g2_set_color(current->ops->theme->TEXT_COL); // Text
 		current->_x += step * i;
 		float _w = current->_w;
 		current->_w = (int)step;
@@ -306,15 +306,15 @@ int ui_color_wheel(ui_handle_t *handle, bool alpha, float w, float h, bool color
 	current->_y = py;
 	ui_image(current->ops->black_white_gradient, false, 0xffffffff, -1);
 
-	arm_g2_set_color(0xff000000);
-	arm_g2_fill_rect(cx - 3.0 * UI_SCALE(), cy - 3.0 * UI_SCALE(), 6.0 * UI_SCALE(), 6.0 * UI_SCALE());
-	arm_g2_set_color(0xffffffff);
-	arm_g2_fill_rect(cx - 2.0 * UI_SCALE(), cy - 2.0 * UI_SCALE(), 4.0 * UI_SCALE(), 4.0 * UI_SCALE());
+	kinc_g2_set_color(0xff000000);
+	kinc_g2_fill_rect(cx - 3.0 * UI_SCALE(), cy - 3.0 * UI_SCALE(), 6.0 * UI_SCALE(), 6.0 * UI_SCALE());
+	kinc_g2_set_color(0xffffffff);
+	kinc_g2_fill_rect(cx - 2.0 * UI_SCALE(), cy - 2.0 * UI_SCALE(), 4.0 * UI_SCALE(), 4.0 * UI_SCALE());
 
-	arm_g2_set_color(0xff000000);
-	arm_g2_fill_rect(grad_tx + grad_w / 2.0 - 3.0 * UI_SCALE(), grad_ty + (1.0 - cval) * grad_h - 3.0 * UI_SCALE(), 6.0 * UI_SCALE(), 6.0 * UI_SCALE());
-	arm_g2_set_color(0xffffffff);
-	arm_g2_fill_rect(grad_tx + grad_w / 2.0 - 2.0 * UI_SCALE(), grad_ty + (1.0 - cval) * grad_h - 2.0 * UI_SCALE(), 4.0 * UI_SCALE(), 4.0 * UI_SCALE());
+	kinc_g2_set_color(0xff000000);
+	kinc_g2_fill_rect(grad_tx + grad_w / 2.0 - 3.0 * UI_SCALE(), grad_ty + (1.0 - cval) * grad_h - 3.0 * UI_SCALE(), 6.0 * UI_SCALE(), 6.0 * UI_SCALE());
+	kinc_g2_set_color(0xffffffff);
+	kinc_g2_fill_rect(grad_tx + grad_w / 2.0 - 2.0 * UI_SCALE(), grad_ty + (1.0 - cval) * grad_h - 2.0 * UI_SCALE(), 4.0 * UI_SCALE(), 4.0 * UI_SCALE());
 
 	if (alpha) {
 		ui_handle_t *alpha_handle = ui_nest(handle, 1);
@@ -557,9 +557,9 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 		new_lines[0] = '\0';
 		for (int i = 0; i < word_count; ++i) {
 			char *w = ui_extract_word(lines, i);
-			float spacew = arm_g2_string_width(current->ops->font->font_, current->font_size, " ");
-			float wordw = spacew + arm_g2_string_width(current->ops->font->font_, current->font_size, w);
-			float linew = wordw + arm_g2_string_width(current->ops->font->font_, current->font_size, line);
+			float spacew = kinc_g2_string_width(current->ops->font->font_, current->font_size, " ");
+			float wordw = spacew + kinc_g2_string_width(current->ops->font->font_, current->font_size, w);
+			float linew = wordw + kinc_g2_string_width(current->ops->font->font_, current->font_size, line);
 			if (linew > current->_w - 10 && linew > wordw) {
 				if (new_lines[0] != '\0') {
 					strcat(new_lines, "\n");
@@ -619,7 +619,7 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 		current->_w -= numbers_w - UI_SCROLL_W();
 	}
 
-	arm_g2_set_color(current->ops->theme->SEPARATOR_COL); // Background
+	kinc_g2_set_color(current->ops->theme->SEPARATOR_COL); // Background
 	ui_draw_rect(true, current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w - current->button_offset_y * 2, line_count * UI_ELEMENT_H() - current->button_offset_y * 2);
 
 	ui_text_coloring_t *_text_coloring = current->text_coloring;
@@ -659,9 +659,9 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 					(i <= text_area_selection_start && i > handle->position)) {
 					int line_height = UI_ELEMENT_H();
 					int cursor_height = line_height - current->button_offset_y * 3.0;
-					int linew = arm_g2_string_width(current->ops->font->font_, current->font_size, line);
-					arm_g2_set_color(current->ops->theme->ACCENT_COL);
-					arm_g2_fill_rect(current->_x + UI_ELEMENT_OFFSET() * 2.0, current->_y + current->button_offset_y * 1.5, linew, cursor_height);
+					int linew = kinc_g2_string_width(current->ops->font->font_, current->font_size, line);
+					kinc_g2_set_color(current->ops->theme->ACCENT_COL);
+					kinc_g2_fill_rect(current->_x + UI_ELEMENT_OFFSET() * 2.0, current->_y + current->button_offset_y * 1.5, linew, cursor_height);
 				}
 				ui_text(line, align, 0x00000000);
 			}
@@ -722,8 +722,8 @@ void ui_begin_menu() {
 	_BUTTON_COL = current->ops->theme->BUTTON_COL;
 	current->ops->theme->ELEMENT_OFFSET = 0;
 	current->ops->theme->BUTTON_COL = current->ops->theme->SEPARATOR_COL;
-	arm_g2_set_color(current->ops->theme->SEPARATOR_COL);
-	arm_g2_fill_rect(0, 0, current->_window_w, UI_MENUBAR_H());
+	kinc_g2_set_color(current->ops->theme->SEPARATOR_COL);
+	kinc_g2_fill_rect(0, 0, current->_window_w, UI_MENUBAR_H());
 }
 
 void ui_end_menu() {
@@ -734,6 +734,6 @@ void ui_end_menu() {
 
 bool _ui_menu_button(char *text) {
 	ui_t *current = ui_get_current();
-	current->_w = arm_g2_string_width(current->ops->font->font_, current->font_size, text) + 25.0 * UI_SCALE();
+	current->_w = kinc_g2_string_width(current->ops->font->font_, current->font_size, text) + 25.0 * UI_SCALE();
 	return ui_button(text, UI_ALIGN_CENTER, "");
 }

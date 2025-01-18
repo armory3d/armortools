@@ -238,15 +238,15 @@ void ui_nodes_bake_elements() {
 		kinc_g4_render_target_destroy(&ui_socket_image);
 	}
 	kinc_g4_render_target_init(&ui_socket_image, 24, 24, KINC_G4_RENDER_TARGET_FORMAT_32BIT, 0, 0);
-	arm_g2_set_render_target(&ui_socket_image);
+	kinc_g2_set_render_target(&ui_socket_image);
 	kinc_g4_clear(KINC_G4_CLEAR_COLOR, 0x00000000, 0, 0);
 
-	arm_g2_set_color(0xff111111);
-	arm_g2_fill_circle(12, 12, 11, 0);
-	arm_g2_set_color(0xffffffff);
-	arm_g2_fill_circle(12, 12, 9, 0);
+	kinc_g2_set_color(0xff111111);
+	kinc_g2_fill_circle(12, 12, 11, 0);
+	kinc_g2_set_color(0xffffffff);
+	kinc_g2_fill_circle(12, 12, 9, 0);
 
-	arm_g2_restore_render_target();
+	kinc_g2_restore_render_target();
 	ui_nodes_elements_baked = true;
 }
 
@@ -264,14 +264,14 @@ void ui_draw_link(float x1, float y1, float x2, float y2, bool highlight) {
 	int c1 = current->ops->theme->LABEL_COL;
 	int c2 = current->ops->theme->ACCENT_COL;
 	int c = highlight ? c1 : c2;
-	arm_g2_set_color(ui_color(ui_color_r(c), ui_color_g(c), ui_color_b(c), 210));
+	kinc_g2_set_color(ui_color(ui_color_r(c), ui_color_g(c), ui_color_b(c), 210));
 	if (current->ops->theme->LINK_STYLE == UI_LINK_STYLE_LINE) {
-		arm_g2_draw_line_aa(x1, y1, x2, y2, 1.0);
+		kinc_g2_draw_line_aa(x1, y1, x2, y2, 1.0);
 	}
 	else if (current->ops->theme->LINK_STYLE == UI_LINK_STYLE_CUBIC_BEZIER) {
 		float x[] = { x1, x1 + fabs(x1 - x2) / 2.0, x2 - fabs(x1 - x2) / 2.0, x2 };
 		float y[] = { y1, y1, y2, y2 };
-		arm_g2_draw_cubic_bezier(x, y, 30, highlight ? 2.0 : 1.0);
+		kinc_g2_draw_cubic_bezier(x, y, 30, highlight ? 2.0 : 1.0);
 	}
 }
 
@@ -406,37 +406,37 @@ void ui_draw_node(ui_node_t *node, ui_node_canvas_t *canvas) {
 	ui_draw_shadow(nx, ny, w, h);
 
 	// Outline
-	arm_g2_set_color(ui_is_selected(node) ? current->ops->theme->LABEL_COL : current->ops->theme->PRESSED_COL);
+	kinc_g2_set_color(ui_is_selected(node) ? current->ops->theme->LABEL_COL : current->ops->theme->PRESSED_COL);
 	ui_draw_rect(true, nx - 1, ny - 1, w + 2, h + 2);
 
 	// Body
-	arm_g2_set_color(current->ops->theme->WINDOW_BG_COL);
+	kinc_g2_set_color(current->ops->theme->WINDOW_BG_COL);
 	ui_draw_rect(true, nx, ny, w, h);
 
 	// Header line
-	arm_g2_set_color(node->color);
-	arm_g2_fill_rect(nx, ny + lineh - ui_p(3), w, ui_p(3));
+	kinc_g2_set_color(node->color);
+	kinc_g2_fill_rect(nx, ny + lineh - ui_p(3), w, ui_p(3));
 
 	// Title
-	arm_g2_set_color(current->ops->theme->TEXT_COL);
-	float textw = arm_g2_string_width(current->ops->font->font_, current->font_size, text);
-	arm_g2_draw_string(text, nx + ui_p(10), ny + ui_p(6));
+	kinc_g2_set_color(current->ops->theme->TEXT_COL);
+	float textw = kinc_g2_string_width(current->ops->font->font_, current->font_size, text);
+	kinc_g2_draw_string(text, nx + ui_p(10), ny + ui_p(6));
 	ny += lineh * 0.5;
 
 	// Outputs
 	for (int i = 0; i < node->outputs->length; ++i) {
 		ui_node_socket_t *out = node->outputs->buffer[i];
 		ny += lineh;
-		arm_g2_set_color(out->color);
-		arm_g2_draw_scaled_render_target(&ui_socket_image, nx + w - ui_p(6), ny - ui_p(3), ui_p(12), ui_p(12));
+		kinc_g2_set_color(out->color);
+		kinc_g2_draw_scaled_render_target(&ui_socket_image, nx + w - ui_p(6), ny - ui_p(3), ui_p(12), ui_p(12));
 	}
 	ny -= lineh * node->outputs->length;
-	arm_g2_set_color(current->ops->theme->LABEL_COL);
+	kinc_g2_set_color(current->ops->theme->LABEL_COL);
 	for (int i = 0; i < node->outputs->length; ++i) {
 		ui_node_socket_t *out = node->outputs->buffer[i];
 		ny += lineh;
-		float strw = arm_g2_string_width(current->ops->font->font_, current->font_size, ui_tr(out->name));
-		arm_g2_draw_string(ui_tr(out->name), nx + w - strw - ui_p(12), ny - ui_p(3));
+		float strw = kinc_g2_string_width(current->ops->font->font_, current->font_size, ui_tr(out->name));
+		kinc_g2_draw_string(ui_tr(out->name), nx + w - strw - ui_p(12), ny - ui_p(3));
 
 		if (ui_nodes_on_socket_released != NULL && current->input_enabled && (current->input_released || current->input_released_r)) {
 			if (current->input_x > wx + nx && current->input_x < wx + nx + w && current->input_y > wy + ny && current->input_y < wy + ny + lineh) {
@@ -611,8 +611,8 @@ void ui_draw_node(ui_node_t *node, ui_node_canvas_t *canvas) {
 	for (int i = 0; i < node->inputs->length; ++i) {
 		ui_node_socket_t *inp = node->inputs->buffer[i];
 		ny += lineh;
-		arm_g2_set_color(inp->color);
-		arm_g2_draw_scaled_render_target(&ui_socket_image, nx - ui_p(6), ny - ui_p(3), ui_p(12), ui_p(12));
+		kinc_g2_set_color(inp->color);
+		kinc_g2_draw_scaled_render_target(&ui_socket_image, nx - ui_p(6), ny - ui_p(3), ui_p(12), ui_p(12));
 		bool is_linked = ui_input_linked(canvas, node->id, i);
 		if (!is_linked && strcmp(inp->type, "VALUE") == 0) {
 			current->_x = nx + ui_p(6);
@@ -649,18 +649,18 @@ void ui_draw_node(ui_node_t *node, ui_node_canvas_t *canvas) {
 			current->ops->theme->TEXT_OFFSET = text_off;
 		}
 		else if (!is_linked && strcmp(inp->type, "RGBA") == 0) {
-			arm_g2_set_color(current->ops->theme->LABEL_COL);
-			arm_g2_draw_string(ui_tr(inp->name), nx + ui_p(12), ny - ui_p(3));
+			kinc_g2_set_color(current->ops->theme->LABEL_COL);
+			kinc_g2_draw_string(ui_tr(inp->name), nx + ui_p(12), ny - ui_p(3));
 			ui_node_socket_t *soc = inp;
-			arm_g2_set_color(0xff000000);
-			arm_g2_fill_rect(nx + w - ui_p(38), ny - ui_p(6), ui_p(36), ui_p(18));
+			kinc_g2_set_color(0xff000000);
+			kinc_g2_fill_rect(nx + w - ui_p(38), ny - ui_p(6), ui_p(36), ui_p(18));
 			float *val = (float *)soc->default_value->buffer;
-			arm_g2_set_color(ui_color(val[0] * 255, val[1] * 255, val[2] * 255, 255));
+			kinc_g2_set_color(ui_color(val[0] * 255, val[1] * 255, val[2] * 255, 255));
 			float rx = nx + w - ui_p(37);
 			float ry = ny - ui_p(5);
 			float rw = ui_p(34);
 			float rh = ui_p(16);
-			arm_g2_fill_rect(rx, ry, rw, rh);
+			kinc_g2_fill_rect(rx, ry, rw, rh);
 			float ix = current->input_x - wx;
 			float iy = current->input_y - wy;
 			if (current->input_started && ix > rx && iy > ry && ix < rx + rw && iy < ry + rh) {
@@ -676,8 +676,8 @@ void ui_draw_node(ui_node_t *node, ui_node_canvas_t *canvas) {
 			}
 		}
 		else if (!is_linked && strcmp(inp->type, "VECTOR") == 0 && inp->display == 1) {
-			arm_g2_set_color(current->ops->theme->LABEL_COL);
-			arm_g2_draw_string(ui_tr(inp->name), nx + ui_p(12), ny - ui_p(3));
+			kinc_g2_set_color(current->ops->theme->LABEL_COL);
+			kinc_g2_draw_string(ui_tr(inp->name), nx + ui_p(12), ny - ui_p(3));
 			ny += lineh / 2;
 			current->_x = nx;
 			current->_y = ny;
@@ -708,8 +708,8 @@ void ui_draw_node(ui_node_t *node, ui_node_canvas_t *canvas) {
 			ny += lineh * 2.5;
 		}
 		else {
-			arm_g2_set_color(current->ops->theme->LABEL_COL);
-			arm_g2_draw_string(ui_tr(inp->name), nx + ui_p(12), ny - ui_p(3));
+			kinc_g2_set_color(current->ops->theme->LABEL_COL);
+			kinc_g2_draw_string(ui_tr(inp->name), nx + ui_p(12), ny - ui_p(3));
 		}
 		if (ui_nodes_on_socket_released != NULL && current->input_enabled && (current->input_released || current->input_released_r)) {
 			if (current->input_x > wx + nx && current->input_x < wx + nx + w && current->input_y > wy + ny && current->input_y < wy + ny + lineh) {
@@ -780,7 +780,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 	current_nodes->ELEMENT_H = current->ops->theme->ELEMENT_H + 2;
 	ui_set_scale(UI_NODES_SCALE()); // Apply zoomed scale
 	current->elements_baked = true;
-	arm_g2_set_font(current->ops->font->font_, current->font_size);
+	kinc_g2_set_font(current->ops->font->font_, current->font_size);
 
 	for (int i = 0; i < canvas->links->length; ++i) {
 		ui_node_link_t *link = canvas->links->buffer[i];
@@ -1016,11 +1016,11 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 	}
 
 	if (ui_box_select) {
-		arm_g2_set_color(0x223333dd);
-		arm_g2_fill_rect(ui_box_select_x, ui_box_select_y, current->input_x - ui_box_select_x - current->_window_x, current->input_y - ui_box_select_y - current->_window_y);
-		arm_g2_set_color(0x773333dd);
-		arm_g2_draw_rect(ui_box_select_x, ui_box_select_y, current->input_x - ui_box_select_x - current->_window_x, current->input_y - ui_box_select_y - current->_window_y, 1);
-		arm_g2_set_color(0xffffffff);
+		kinc_g2_set_color(0x223333dd);
+		kinc_g2_fill_rect(ui_box_select_x, ui_box_select_y, current->input_x - ui_box_select_x - current->_window_x, current->input_y - ui_box_select_y - current->_window_y);
+		kinc_g2_set_color(0x773333dd);
+		kinc_g2_draw_rect(ui_box_select_x, ui_box_select_y, current->input_x - ui_box_select_x - current->_window_x, current->input_y - ui_box_select_y - current->_window_y, 1);
+		kinc_g2_set_color(0xffffffff);
 	}
 	if (current->input_enabled && current->input_started && !current->is_alt_down &&
 		current_nodes->link_drag_id == -1 && !current_nodes->nodes_drag && !current->changed &&
@@ -1227,7 +1227,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 		current->_w = ui_popup_w;
 
 		ui_draw_shadow(current->_x - 5, current->_y - 5, current->_w + 10, ui_popup_h * UI_SCALE() + 10);
-		arm_g2_set_color(current->ops->theme->SEPARATOR_COL);
+		kinc_g2_set_color(current->ops->theme->SEPARATOR_COL);
 		ui_draw_rect(true, current->_x - 5, current->_y - 5, current->_w + 10, ui_popup_h * UI_SCALE() + 10);
 		(*ui_popup_commands)(current, ui_popup_data, ui_popup_data2);
 

@@ -9,7 +9,7 @@ function import_font_run(path: string) {
 	}
 	let font: g2_font_t = data_get_font(path);
 	g2_font_init(font); // Make sure font_ is ready
-	let count: i32 = iron_g2_font_count(font.font_);
+	let count: i32 = kinc_g2_font_count(font.font_);
 	let font_slots: slot_font_t[] = [];
 	for (let i: i32 = 0; i < count; ++i) {
 		let ar: string[] = string_split(path, path_sep);

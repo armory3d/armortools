@@ -18,13 +18,16 @@
 #include <kinc/color.h>
 #include <kinc/window.h>
 #include <iron_string.h>
+#ifdef KINC_DIRECT3D12
+extern bool waitAfterNextDraw;
+#endif
 
 #define G2_BUFFER_SIZE 1000
 
 static kinc_matrix4x4_t g2_projection_matrix;
 static bool g2_bilinear_filter = true;
 static uint32_t g2_color = 0;
-static arm_g2_font_t *g2_font = NULL;
+static kinc_g2_font_t *g2_font = NULL;
 static int g2_font_size;
 static bool g2_is_render_target = false;
 static kinc_g4_pipeline_t *g2_last_pipeline = NULL;
@@ -77,13 +80,13 @@ static int *g2_font_glyphs = NULL;
 static int g2_font_num_glyph_blocks = -1;
 static int g2_font_num_glyphs = -1;
 
-void arm_g2_image_end(void);
-void arm_g2_colored_end(void);
-void arm_g2_colored_rect_end(bool tris_done);
-void arm_g2_colored_tris_end(bool rects_done);
-void arm_g2_text_end(void);
+void kinc_g2_image_end(void);
+void kinc_g2_colored_end(void);
+void kinc_g2_colored_rect_end(bool tris_done);
+void kinc_g2_colored_tris_end(bool rects_done);
+void kinc_g2_text_end(void);
 
-kinc_matrix4x4_t arm_g2_matrix4x4_orthogonal_projection(float left, float right, float bottom, float top, float zn, float zf) {
+kinc_matrix4x4_t kinc_g2_matrix4x4_orthogonal_projection(float left, float right, float bottom, float top, float zn, float zf) {
 	float tx = -(right + left) / (right - left);
 	float ty = -(top + bottom) / (top - bottom);
 	float tz = -(zf + zn) / (zf - zn);
@@ -95,7 +98,7 @@ kinc_matrix4x4_t arm_g2_matrix4x4_orthogonal_projection(float left, float right,
 	};
 }
 
-void arm_g2_matrix3x3_multquad(kinc_matrix3x3_t *m, float qx, float qy, float qw, float qh, kinc_vector2_t *out) {
+void kinc_g2_matrix3x3_multquad(kinc_matrix3x3_t *m, float qx, float qy, float qw, float qh, kinc_vector2_t *out) {
 	kinc_float32x4_t xx = kinc_float32x4_load(qx, qx, qx + qw, qx + qw);
 	kinc_float32x4_t yy = kinc_float32x4_load(qy + qh, qy, qy, qy + qh);
 
@@ -119,34 +122,34 @@ void arm_g2_matrix3x3_multquad(kinc_matrix3x3_t *m, float qx, float qy, float qw
 	out[3] = (kinc_vector2_t){kinc_float32x4_get(px, 3), kinc_float32x4_get(py, 3)};
 }
 
-kinc_vector2_t arm_g2_matrix3x3_multvec(kinc_matrix3x3_t *m, kinc_vector2_t v) {
+kinc_vector2_t kinc_g2_matrix3x3_multvec(kinc_matrix3x3_t *m, kinc_vector2_t v) {
 	float w = m->m[2] * v.x + m->m[5] * v.y + m->m[8] * 1.0f;
 	float x = (m->m[0] * v.x + m->m[3] * v.y + m->m[6] * 1.0f) / w;
 	float y = (m->m[1] * v.x + m->m[4] * v.y + m->m[7] * 1.0f) / w;
 	return (kinc_vector2_t){x, y};
 }
 
-void arm_g2_internal_set_projection_matrix(kinc_g4_render_target_t *target) {
+void kinc_g2_internal_set_projection_matrix(kinc_g4_render_target_t *target) {
 	if (target != NULL) {
 		if (kinc_g4_render_targets_inverted_y()) {
-			g2_projection_matrix = arm_g2_matrix4x4_orthogonal_projection(0.0f, (float)target->width, 0.0f, (float)target->height, 0.1f, 1000.0f);
+			g2_projection_matrix = kinc_g2_matrix4x4_orthogonal_projection(0.0f, (float)target->width, 0.0f, (float)target->height, 0.1f, 1000.0f);
 		}
 		else {
-			g2_projection_matrix = arm_g2_matrix4x4_orthogonal_projection(0.0f, (float)target->width, (float)target->height, 0.0f, 0.1f, 1000.0f);
+			g2_projection_matrix = kinc_g2_matrix4x4_orthogonal_projection(0.0f, (float)target->width, (float)target->height, 0.0f, 0.1f, 1000.0f);
 		}
 	}
 	else {
-		g2_projection_matrix = arm_g2_matrix4x4_orthogonal_projection(0.0f, (float)kinc_window_width(0), (float)kinc_window_height(0), 0.0f, 0.1f, 1000.0f);
+		g2_projection_matrix = kinc_g2_matrix4x4_orthogonal_projection(0.0f, (float)kinc_window_width(0), (float)kinc_window_height(0), 0.0f, 0.1f, 1000.0f);
 	}
 }
 
-void arm_g2_init(void *image_vert, int image_vert_size, void *image_frag, int image_frag_size, void *colored_vert, int colored_vert_size, void *colored_frag, int colored_frag_size, void *text_vert, int text_vert_size, void *text_frag, int text_frag_size) {
-	arm_g2_internal_set_projection_matrix(NULL);
+void kinc_g2_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_vert, buffer_t *colored_frag, buffer_t *text_vert, buffer_t *text_frag) {
+	kinc_g2_internal_set_projection_matrix(NULL);
 	g2_transform = kinc_matrix3x3_identity();
 
 	// Image painter
-	kinc_g4_shader_init(&image_vert_shader, image_vert, image_vert_size, KINC_G4_SHADER_TYPE_VERTEX);
-	kinc_g4_shader_init(&image_frag_shader, image_frag, image_frag_size, KINC_G4_SHADER_TYPE_FRAGMENT);
+	kinc_g4_shader_init(&image_vert_shader, image_vert->buffer, image_vert->length, KINC_G4_SHADER_TYPE_VERTEX);
+	kinc_g4_shader_init(&image_frag_shader, image_frag->buffer, image_frag->length, KINC_G4_SHADER_TYPE_FRAGMENT);
 
 	{
 		kinc_g4_vertex_structure_t structure;
@@ -185,8 +188,8 @@ void arm_g2_init(void *image_vert, int image_vert_size, void *image_frag, int im
 	}
 
 	// Colored painter
-	kinc_g4_shader_init(&colored_vert_shader, colored_vert, colored_vert_size, KINC_G4_SHADER_TYPE_VERTEX);
-	kinc_g4_shader_init(&colored_frag_shader, colored_frag, colored_frag_size, KINC_G4_SHADER_TYPE_FRAGMENT);
+	kinc_g4_shader_init(&colored_vert_shader, colored_vert->buffer, colored_vert->length, KINC_G4_SHADER_TYPE_VERTEX);
+	kinc_g4_shader_init(&colored_frag_shader, colored_frag->buffer, colored_frag->length, KINC_G4_SHADER_TYPE_FRAGMENT);
 
 	{
 		kinc_g4_vertex_structure_t structure;
@@ -236,8 +239,8 @@ void arm_g2_init(void *image_vert, int image_vert_size, void *image_frag, int im
 	}
 
 	// Text painter
-	kinc_g4_shader_init(&text_vert_shader, text_vert, text_vert_size, KINC_G4_SHADER_TYPE_VERTEX);
-	kinc_g4_shader_init(&text_frag_shader, text_frag, text_frag_size, KINC_G4_SHADER_TYPE_FRAGMENT);
+	kinc_g4_shader_init(&text_vert_shader, text_vert->buffer, text_vert->length, KINC_G4_SHADER_TYPE_VERTEX);
+	kinc_g4_shader_init(&text_frag_shader, text_frag->buffer, text_frag->length, KINC_G4_SHADER_TYPE_FRAGMENT);
 
 	{
 		kinc_g4_vertex_structure_t structure;
@@ -289,11 +292,11 @@ void arm_g2_init(void *image_vert, int image_vert_size, void *image_frag, int im
 	}
 }
 
-void arm_g2_begin(void) {
-	arm_g2_set_color(0xffffffff);
+void kinc_g2_begin(void) {
+	kinc_g2_set_color(0xffffffff);
 }
 
-void arm_g2_set_image_rect_verts(float btlx, float btly, float tplx, float tply, float tprx, float tpry, float btrx, float btry) {
+void kinc_g2_set_image_rect_verts(float btlx, float btly, float tplx, float tply, float tprx, float tpry, float btrx, float btry) {
 	int base_idx = (image_buffer_index - image_buffer_start) * 6 * 4;
 	image_rect_verts[base_idx + 0] = btlx;
 	image_rect_verts[base_idx + 1] = btly;
@@ -312,7 +315,7 @@ void arm_g2_set_image_rect_verts(float btlx, float btly, float tplx, float tply,
 	image_rect_verts[base_idx + 20] = -5.0f;
 }
 
-void arm_g2_set_image_rect_tex_coords(float left, float top, float right, float bottom) {
+void kinc_g2_set_image_rect_tex_coords(float left, float top, float right, float bottom) {
 	int base_idx = (image_buffer_index - image_buffer_start) * 6 * 4;
 	image_rect_verts[base_idx + 3] = left;
 	image_rect_verts[base_idx + 4] = bottom;
@@ -327,7 +330,7 @@ void arm_g2_set_image_rect_tex_coords(float left, float top, float right, float 
 	image_rect_verts[base_idx + 22] = bottom;
 }
 
-void arm_g2_set_image_rect_colors(uint32_t color) {
+void kinc_g2_set_image_rect_colors(uint32_t color) {
 	color = (color & 0xff000000) | ((color & 0x00ff0000) >> 16) | (color & 0x0000ff00) | ((color & 0x000000ff) << 16);
 	int base_idx = (image_buffer_index - image_buffer_start) * 6 * 4;
 	image_rect_verts[base_idx + 5] = *(float *)&color;
@@ -336,7 +339,7 @@ void arm_g2_set_image_rect_colors(uint32_t color) {
 	image_rect_verts[base_idx + 23] = *(float *)&color;
 }
 
-void arm_g2_draw_image_buffer(bool end) {
+void kinc_g2_draw_image_buffer(bool end) {
 	if (image_buffer_index - image_buffer_start == 0) return;
 	kinc_g4_vertex_buffer_unlock(&image_vertex_buffer, (image_buffer_index - image_buffer_start) * 4);
 	kinc_g4_set_pipeline(g2_custom_pipeline != NULL ? g2_custom_pipeline : &image_pipeline);
@@ -368,63 +371,77 @@ void arm_g2_draw_image_buffer(bool end) {
 	}
 }
 
-void arm_g2_draw_scaled_sub_image(kinc_g4_texture_t *tex, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh) {
-	arm_g2_colored_end();
-	arm_g2_text_end();
-	if (image_buffer_start + image_buffer_index + 1 >= G2_BUFFER_SIZE || (image_last_texture != NULL && tex != image_last_texture) || image_last_render_target != NULL) arm_g2_draw_image_buffer(false);
+void kinc_g2_draw_scaled_sub_texture(kinc_g4_texture_t *tex, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh) {
+	kinc_g2_colored_end();
+	kinc_g2_text_end();
+	if (image_buffer_start + image_buffer_index + 1 >= G2_BUFFER_SIZE || (image_last_texture != NULL && tex != image_last_texture) || image_last_render_target != NULL) kinc_g2_draw_image_buffer(false);
 
-	arm_g2_set_image_rect_tex_coords(sx / tex->tex_width, sy / tex->tex_height, (sx + sw) / tex->tex_width, (sy + sh) / tex->tex_height);
-	arm_g2_set_image_rect_colors(g2_color);
+	kinc_g2_set_image_rect_tex_coords(sx / tex->tex_width, sy / tex->tex_height, (sx + sw) / tex->tex_width, (sy + sh) / tex->tex_height);
+	kinc_g2_set_image_rect_colors(g2_color);
 	kinc_vector2_t p[4];
-	arm_g2_matrix3x3_multquad(&g2_transform, dx, dy, dw, dh, p);
-	arm_g2_set_image_rect_verts(p[0].x, p[0].y, p[1].x, p[1].y, p[2].x, p[2].y, p[3].x, p[3].y);
+	kinc_g2_matrix3x3_multquad(&g2_transform, dx, dy, dw, dh, p);
+	kinc_g2_set_image_rect_verts(p[0].x, p[0].y, p[1].x, p[1].y, p[2].x, p[2].y, p[3].x, p[3].y);
 
 	++image_buffer_index;
 	image_last_texture = tex;
 	image_last_render_target = NULL;
 }
 
-void arm_g2_draw_scaled_image(kinc_g4_texture_t *tex, float dx, float dy, float dw, float dh) {
-	arm_g2_draw_scaled_sub_image(tex, 0, 0, (float)tex->tex_width, (float)tex->tex_height, dx, dy, dw, dh);
+void kinc_g2_draw_scaled_image(kinc_g4_texture_t *tex, float dx, float dy, float dw, float dh) {
+	kinc_g2_draw_scaled_sub_texture(tex, 0, 0, (float)tex->tex_width, (float)tex->tex_height, dx, dy, dw, dh);
 }
 
-void arm_g2_draw_sub_image(kinc_g4_texture_t *tex, float sx, float sy, float sw, float sh, float x, float y) {
-	arm_g2_draw_scaled_sub_image(tex, sx, sy, sw, sh, x, y, sw, sh);
+void kinc_g2_draw_sub_image(kinc_g4_texture_t *tex, float sx, float sy, float sw, float sh, float x, float y) {
+	kinc_g2_draw_scaled_sub_texture(tex, sx, sy, sw, sh, x, y, sw, sh);
 }
 
-void arm_g2_draw_image(kinc_g4_texture_t *tex, float x, float y) {
-	arm_g2_draw_scaled_sub_image(tex, 0, 0, (float)tex->tex_width, (float)tex->tex_height, x, y, (float)tex->tex_width, (float)tex->tex_height);
+void kinc_g2_draw_image(kinc_g4_texture_t *tex, float x, float y) {
+	kinc_g2_draw_scaled_sub_texture(tex, 0, 0, (float)tex->tex_width, (float)tex->tex_height, x, y, (float)tex->tex_width, (float)tex->tex_height);
 }
 
-void arm_g2_draw_scaled_sub_render_target(kinc_g4_render_target_t *rt, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh) {
-	arm_g2_colored_end();
-	arm_g2_text_end();
-	if (image_buffer_start + image_buffer_index + 1 >= G2_BUFFER_SIZE || (image_last_render_target != NULL && rt != image_last_render_target) || image_last_texture != NULL) arm_g2_draw_image_buffer(false);
+void kinc_g2_draw_scaled_sub_render_target(kinc_g4_render_target_t *rt, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh) {
+	kinc_g2_colored_end();
+	kinc_g2_text_end();
+	if (image_buffer_start + image_buffer_index + 1 >= G2_BUFFER_SIZE || (image_last_render_target != NULL && rt != image_last_render_target) || image_last_texture != NULL) kinc_g2_draw_image_buffer(false);
 
-	arm_g2_set_image_rect_tex_coords(sx / rt->width, sy / rt->height, (sx + sw) / rt->width, (sy + sh) / rt->height);
-	arm_g2_set_image_rect_colors(g2_color);
+	kinc_g2_set_image_rect_tex_coords(sx / rt->width, sy / rt->height, (sx + sw) / rt->width, (sy + sh) / rt->height);
+	kinc_g2_set_image_rect_colors(g2_color);
 	kinc_vector2_t p[4];
-	arm_g2_matrix3x3_multquad(&g2_transform, dx, dy, dw, dh, p);
-	arm_g2_set_image_rect_verts(p[0].x, p[0].y, p[1].x, p[1].y, p[2].x, p[2].y, p[3].x, p[3].y);
+	kinc_g2_matrix3x3_multquad(&g2_transform, dx, dy, dw, dh, p);
+	kinc_g2_set_image_rect_verts(p[0].x, p[0].y, p[1].x, p[1].y, p[2].x, p[2].y, p[3].x, p[3].y);
 
 	++image_buffer_index;
 	image_last_render_target = rt;
 	image_last_texture = NULL;
 }
 
-void arm_g2_draw_scaled_render_target(kinc_g4_render_target_t *rt, float dx, float dy, float dw, float dh) {
-	arm_g2_draw_scaled_sub_render_target(rt, 0, 0, (float)rt->width, (float)rt->height, dx, dy, dw, dh);
+void kinc_g2_draw_scaled_render_target(kinc_g4_render_target_t *rt, float dx, float dy, float dw, float dh) {
+	kinc_g2_draw_scaled_sub_render_target(rt, 0, 0, (float)rt->width, (float)rt->height, dx, dy, dw, dh);
 }
 
-void arm_g2_draw_sub_render_target(kinc_g4_render_target_t *rt, float sx, float sy, float sw, float sh, float x, float y) {
-	arm_g2_draw_scaled_sub_render_target(rt, sx, sy, sw, sh, x, y, sw, sh);
+void kinc_g2_draw_sub_render_target(kinc_g4_render_target_t *rt, float sx, float sy, float sw, float sh, float x, float y) {
+	kinc_g2_draw_scaled_sub_render_target(rt, sx, sy, sw, sh, x, y, sw, sh);
 }
 
-void arm_g2_draw_render_target(kinc_g4_render_target_t *rt, float x, float y) {
-	arm_g2_draw_scaled_sub_render_target(rt, 0, 0, (float)rt->width, (float)rt->height, x, y, (float)rt->width, (float)rt->height);
+void kinc_g2_draw_render_target(kinc_g4_render_target_t *rt, float x, float y) {
+	kinc_g2_draw_scaled_sub_render_target(rt, 0, 0, (float)rt->width, (float)rt->height, x, y, (float)rt->width, (float)rt->height);
 }
 
-void arm_g2_colored_rect_set_verts(float btlx, float btly, float tplx, float tply, float tprx, float tpry, float btrx, float btry) {
+void kinc_g2_draw_scaled_sub_image(image_t *image, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh) {
+	#ifdef KINC_DIRECT3D12
+	waitAfterNextDraw = true;
+	#endif
+	if (image->texture_ != NULL) {
+		kinc_g4_texture_t *texture = (kinc_g4_texture_t *)image->texture_;
+		kinc_g2_draw_scaled_sub_texture(texture, sx, sy, sw, sh, dx, dy, dw, dh);
+	}
+	else {
+		kinc_g4_render_target_t *render_target = (kinc_g4_render_target_t *)image->render_target_;
+		kinc_g2_draw_scaled_sub_render_target(render_target, sx, sy, sw, sh, dx, dy, dw, dh);
+	}
+}
+
+void kinc_g2_colored_rect_set_verts(float btlx, float btly, float tplx, float tply, float tprx, float tpry, float btrx, float btry) {
 	int base_idx = (colored_rect_buffer_index - colored_rect_buffer_start) * 4 * 4;
 	colored_rect_verts[base_idx + 0] = btlx;
 	colored_rect_verts[base_idx + 1] = btly;
@@ -443,7 +460,7 @@ void arm_g2_colored_rect_set_verts(float btlx, float btly, float tplx, float tpl
 	colored_rect_verts[base_idx + 14] = -5.0f;
 }
 
-void arm_g2_colored_rect_set_colors(uint32_t color) {
+void kinc_g2_colored_rect_set_colors(uint32_t color) {
 	color = (color & 0xff000000) | ((color & 0x00ff0000) >> 16) | (color & 0x0000ff00) | ((color & 0x000000ff) << 16);
 	int base_idx = (colored_rect_buffer_index - colored_rect_buffer_start) * 4 * 4;
 	colored_rect_verts[base_idx + 3] = *(float *)&color;
@@ -452,12 +469,12 @@ void arm_g2_colored_rect_set_colors(uint32_t color) {
 	colored_rect_verts[base_idx + 15] = *(float *)&color;
 }
 
-void arm_g2_colored_rect_draw_buffer(bool tris_done) {
+void kinc_g2_colored_rect_draw_buffer(bool tris_done) {
 	if (colored_rect_buffer_index - colored_rect_buffer_start == 0) {
 		return;
 	}
 
-	if (!tris_done) arm_g2_colored_tris_end(true);
+	if (!tris_done) kinc_g2_colored_tris_end(true);
 
 	kinc_g4_vertex_buffer_unlock(&colored_rect_vertex_buffer, (colored_rect_buffer_index - colored_rect_buffer_start) * 4);
 	kinc_g4_set_pipeline(g2_custom_pipeline != NULL ? g2_custom_pipeline : &colored_pipeline);
@@ -477,7 +494,7 @@ void arm_g2_colored_rect_draw_buffer(bool tris_done) {
 	}
 }
 
-void arm_g2_colored_tris_set_verts(float x0, float y0, float x1, float y1, float x2, float y2) {
+void kinc_g2_colored_tris_set_verts(float x0, float y0, float x1, float y1, float x2, float y2) {
 	int base_idx = (colored_tris_buffer_index - colored_tris_buffer_start) * 4 * 3;
 	colored_tris_verts[base_idx + 0] = x0;
 	colored_tris_verts[base_idx + 1] = y0;
@@ -492,7 +509,7 @@ void arm_g2_colored_tris_set_verts(float x0, float y0, float x1, float y1, float
 	colored_tris_verts[base_idx + 10] = -5.0f;
 }
 
-void arm_g2_colored_tris_set_colors(uint32_t color) {
+void kinc_g2_colored_tris_set_colors(uint32_t color) {
 	int base_idx = (colored_tris_buffer_index - colored_tris_buffer_start) * 4 * 3;
 	color = (color & 0xff000000) | ((color & 0x00ff0000) >> 16) | (color & 0x0000ff00) | ((color & 0x000000ff) << 16);
 	colored_tris_verts[base_idx + 3] = *(float *)&color;
@@ -500,12 +517,12 @@ void arm_g2_colored_tris_set_colors(uint32_t color) {
 	colored_tris_verts[base_idx + 11] = *(float *)&color;
 }
 
-void arm_g2_colored_tris_draw_buffer(bool rect_done) {
+void kinc_g2_colored_tris_draw_buffer(bool rect_done) {
 	if (colored_tris_buffer_index - colored_tris_buffer_start == 0) {
 		return;
 	}
 
-	if (!rect_done) arm_g2_colored_rect_end(true);
+	if (!rect_done) kinc_g2_colored_rect_end(true);
 
 	kinc_g4_vertex_buffer_unlock(&colored_tris_vertex_buffer, (colored_tris_buffer_index - colored_tris_buffer_start) * 3);
 	kinc_g4_set_pipeline(g2_custom_pipeline != NULL ? g2_custom_pipeline : &colored_pipeline);
@@ -525,54 +542,54 @@ void arm_g2_colored_tris_draw_buffer(bool rect_done) {
 	}
 }
 
-void arm_g2_colored_rect_end(bool tris_done) {
-	if (colored_rect_buffer_index - colored_rect_buffer_start > 0) arm_g2_colored_rect_draw_buffer(tris_done);
+void kinc_g2_colored_rect_end(bool tris_done) {
+	if (colored_rect_buffer_index - colored_rect_buffer_start > 0) kinc_g2_colored_rect_draw_buffer(tris_done);
 }
 
-void arm_g2_colored_tris_end(bool rects_done) {
-	if (colored_tris_buffer_index - colored_tris_buffer_start > 0) arm_g2_colored_tris_draw_buffer(rects_done);
+void kinc_g2_colored_tris_end(bool rects_done) {
+	if (colored_tris_buffer_index - colored_tris_buffer_start > 0) kinc_g2_colored_tris_draw_buffer(rects_done);
 }
 
-void arm_g2_fill_triangle(float x0, float y0, float x1, float y1, float x2, float y2) {
-	arm_g2_image_end();
-	arm_g2_text_end();
-	if (colored_rect_buffer_index - colored_rect_buffer_start > 0) arm_g2_colored_rect_draw_buffer(true);
-	if (colored_tris_buffer_index + 1 >= G2_BUFFER_SIZE) arm_g2_colored_tris_draw_buffer(false);
+void kinc_g2_fill_triangle(float x0, float y0, float x1, float y1, float x2, float y2) {
+	kinc_g2_image_end();
+	kinc_g2_text_end();
+	if (colored_rect_buffer_index - colored_rect_buffer_start > 0) kinc_g2_colored_rect_draw_buffer(true);
+	if (colored_tris_buffer_index + 1 >= G2_BUFFER_SIZE) kinc_g2_colored_tris_draw_buffer(false);
 
-	arm_g2_colored_tris_set_colors(g2_color);
+	kinc_g2_colored_tris_set_colors(g2_color);
 
-	kinc_vector2_t p0 = arm_g2_matrix3x3_multvec(&g2_transform, (kinc_vector2_t){x0, y0}); // Bottom-left
-	kinc_vector2_t p1 = arm_g2_matrix3x3_multvec(&g2_transform, (kinc_vector2_t){x1, y1}); // Top-left
-	kinc_vector2_t p2 = arm_g2_matrix3x3_multvec(&g2_transform, (kinc_vector2_t){x2, y2}); // Top-right
-	arm_g2_colored_tris_set_verts(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
+	kinc_vector2_t p0 = kinc_g2_matrix3x3_multvec(&g2_transform, (kinc_vector2_t){x0, y0}); // Bottom-left
+	kinc_vector2_t p1 = kinc_g2_matrix3x3_multvec(&g2_transform, (kinc_vector2_t){x1, y1}); // Top-left
+	kinc_vector2_t p2 = kinc_g2_matrix3x3_multvec(&g2_transform, (kinc_vector2_t){x2, y2}); // Top-right
+	kinc_g2_colored_tris_set_verts(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
 
 	++colored_tris_buffer_index;
 }
 
-void arm_g2_fill_rect(float x, float y, float width, float height) {
-	arm_g2_image_end();
-	arm_g2_text_end();
-	if (colored_tris_buffer_index - colored_tris_buffer_start > 0) arm_g2_colored_tris_draw_buffer(true);
-	if (colored_rect_buffer_index + 1 >= G2_BUFFER_SIZE) arm_g2_colored_rect_draw_buffer(false);
+void kinc_g2_fill_rect(float x, float y, float width, float height) {
+	kinc_g2_image_end();
+	kinc_g2_text_end();
+	if (colored_tris_buffer_index - colored_tris_buffer_start > 0) kinc_g2_colored_tris_draw_buffer(true);
+	if (colored_rect_buffer_index + 1 >= G2_BUFFER_SIZE) kinc_g2_colored_rect_draw_buffer(false);
 
-	arm_g2_colored_rect_set_colors(g2_color);
+	kinc_g2_colored_rect_set_colors(g2_color);
 
 	kinc_vector2_t p[4];
-	arm_g2_matrix3x3_multquad(&g2_transform, x, y, width, height, p);
-	arm_g2_colored_rect_set_verts(p[0].x, p[0].y, p[1].x, p[1].y, p[2].x, p[2].y, p[3].x, p[3].y);
+	kinc_g2_matrix3x3_multquad(&g2_transform, x, y, width, height, p);
+	kinc_g2_colored_rect_set_verts(p[0].x, p[0].y, p[1].x, p[1].y, p[2].x, p[2].y, p[3].x, p[3].y);
 
 	++colored_rect_buffer_index;
 }
 
-void arm_g2_draw_rect(float x, float y, float width, float height, float strength) {
+void kinc_g2_draw_rect(float x, float y, float width, float height, float strength) {
 	float hs = strength / 2.0f;
-	arm_g2_fill_rect(x - hs, y - hs, width + strength, strength); // Top
-	arm_g2_fill_rect(x - hs, y + hs, strength, height - strength); // Left
-	arm_g2_fill_rect(x - hs, y + height - hs, width + strength, strength); // Bottom
-	arm_g2_fill_rect(x + width - hs, y + hs, strength, height - strength); // Right
+	kinc_g2_fill_rect(x - hs, y - hs, width + strength, strength); // Top
+	kinc_g2_fill_rect(x - hs, y + hs, strength, height - strength); // Left
+	kinc_g2_fill_rect(x - hs, y + height - hs, width + strength, strength); // Bottom
+	kinc_g2_fill_rect(x + width - hs, y + hs, strength, height - strength); // Right
 }
 
-void arm_g2_draw_line(float x0, float y0, float x1, float y1, float strength) {
+void kinc_g2_draw_line(float x0, float y0, float x1, float y1, float strength) {
 	kinc_vector2_t vec;
 	if (y1 == y0) {
 		vec = (kinc_vector2_t){0.0f, -1.0f};
@@ -592,8 +609,8 @@ void arm_g2_draw_line(float x0, float y0, float x1, float y1, float strength) {
 	kinc_vector2_t p1 = (kinc_vector2_t){x1 + 0.5f * vec.x, y1 + 0.5f * vec.y};
 	kinc_vector2_t p2 = (kinc_vector2_t){p0.x - vec.x, p0.y - vec.y};
 	kinc_vector2_t p3 = (kinc_vector2_t){p1.x - vec.x, p1.y - vec.y};
-	arm_g2_fill_triangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
-	arm_g2_fill_triangle(p2.x, p2.y, p1.x, p1.y, p3.x, p3.y);
+	kinc_g2_fill_triangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
+	kinc_g2_fill_triangle(p2.x, p2.y, p1.x, p1.y, p3.x, p3.y);
 }
 
 static uint8_t _g2_color_r(uint32_t color) {
@@ -616,18 +633,18 @@ static uint32_t _g2_color(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
 	return (a << 24) | (r << 16) | (g << 8) | b;
 }
 
-void arm_g2_draw_line_aa(float x0, float y0, float x1, float y1, float strength) {
-	arm_g2_draw_line(x0, y0, x1, y1, strength);
+void kinc_g2_draw_line_aa(float x0, float y0, float x1, float y1, float strength) {
+	kinc_g2_draw_line(x0, y0, x1, y1, strength);
 	uint32_t _color = g2_color;
-	arm_g2_set_color(_g2_color(_g2_color_r(g2_color), _g2_color_g(g2_color), _g2_color_b(g2_color), 150));
-	arm_g2_draw_line(x0 + 0.5, y0, x1 + 0.5, y1, strength);
-	arm_g2_draw_line(x0 - 0.5, y0, x1 - 0.5, y1, strength);
-	arm_g2_draw_line(x0, y0 + 0.5, x1, y1 + 0.5, strength);
-	arm_g2_draw_line(x0, y0 - 0.5, x1, y1 - 0.5, strength);
-	arm_g2_set_color(_color);
+	kinc_g2_set_color(_g2_color(_g2_color_r(g2_color), _g2_color_g(g2_color), _g2_color_b(g2_color), 150));
+	kinc_g2_draw_line(x0 + 0.5, y0, x1 + 0.5, y1, strength);
+	kinc_g2_draw_line(x0 - 0.5, y0, x1 - 0.5, y1, strength);
+	kinc_g2_draw_line(x0, y0 + 0.5, x1, y1 + 0.5, strength);
+	kinc_g2_draw_line(x0, y0 - 0.5, x1, y1 - 0.5, strength);
+	kinc_g2_set_color(_color);
 }
 
-void arm_g2_text_set_rect_verts(float btlx, float btly, float tplx, float tply, float tprx, float tpry, float btrx, float btry) {
+void kinc_g2_text_set_rect_verts(float btlx, float btly, float tplx, float tply, float tprx, float tpry, float btrx, float btry) {
 	int base_idx = (text_buffer_index - text_buffer_start) * 6 * 4;
 	text_rect_verts[base_idx + 0] = btlx;
 	text_rect_verts[base_idx + 1] = btly;
@@ -646,7 +663,7 @@ void arm_g2_text_set_rect_verts(float btlx, float btly, float tplx, float tply, 
 	text_rect_verts[base_idx + 20] = -5.0f;
 }
 
-void arm_g2_text_set_rect_tex_coords(float left, float top, float right, float bottom) {
+void kinc_g2_text_set_rect_tex_coords(float left, float top, float right, float bottom) {
 	int base_idx = (text_buffer_index - text_buffer_start) * 6 * 4;
 	text_rect_verts[base_idx + 3] = left;
 	text_rect_verts[base_idx + 4] = bottom;
@@ -661,7 +678,7 @@ void arm_g2_text_set_rect_tex_coords(float left, float top, float right, float b
 	text_rect_verts[base_idx + 22] = bottom;
 }
 
-void arm_g2_text_set_rect_colors(uint32_t color) {
+void kinc_g2_text_set_rect_colors(uint32_t color) {
 	color = (color & 0xff000000) | ((color & 0x00ff0000) >> 16) | (color & 0x0000ff00) | ((color & 0x000000ff) << 16);
 	int base_idx = (text_buffer_index - text_buffer_start) * 6 * 4;
 	text_rect_verts[base_idx + 5] = *(float *)&color;
@@ -670,7 +687,7 @@ void arm_g2_text_set_rect_colors(uint32_t color) {
 	text_rect_verts[base_idx + 23] = *(float *)&color;
 }
 
-void arm_g2_text_draw_buffer(bool end) {
+void kinc_g2_text_draw_buffer(bool end) {
 	if (text_buffer_index - text_buffer_start == 0) return;
 	kinc_g4_vertex_buffer_unlock(&text_vertex_buffer, text_buffer_index * 4);
 	kinc_g4_set_pipeline(g2_custom_pipeline != NULL ? g2_custom_pipeline : g2_is_render_target ? &text_pipeline_rt : &text_pipeline);
@@ -699,21 +716,21 @@ void arm_g2_text_draw_buffer(bool end) {
 #define STB_TRUETYPE_IMPLEMENTATION
 #include <stb_truetype.h>
 
-typedef struct arm_g2_font_aligned_quad {
+typedef struct kinc_g2_font_aligned_quad {
 	float x0, y0, s0, t0; // Top-left
 	float x1, y1, s1, t1; // Bottom-right
 	float xadvance;
-} arm_g2_font_aligned_quad_t;
+} kinc_g2_font_aligned_quad_t;
 
-typedef struct arm_g2_font_image {
+typedef struct kinc_g2_font_image {
 	float m_size;
 	stbtt_bakedchar *chars;
 	kinc_g4_texture_t *tex;
 	int width, height, first_unused_y;
 	float baseline, descent, line_gap;
-} arm_g2_font_image_t;
+} kinc_g2_font_image_t;
 
-arm_g2_font_image_t *arm_g2_font_get_image_internal(arm_g2_font_t *font, int size) {
+kinc_g2_font_image_t *kinc_g2_font_get_image_internal(kinc_g2_font_t *font, int size) {
 	for (int i = 0; i < font->m_images_len; ++i) {
 		if ((int)font->images[i].m_size == size) {
 			return &(font->images[i]);
@@ -722,17 +739,17 @@ arm_g2_font_image_t *arm_g2_font_get_image_internal(arm_g2_font_t *font, int siz
 	return NULL;
 }
 
-static inline bool arm_g2_prepare_font_load_internal(arm_g2_font_t *font, int size) {
-	if (arm_g2_font_get_image_internal(font, size) != NULL) return false; // Nothing to do
+static inline bool kinc_g2_prepare_font_load_internal(kinc_g2_font_t *font, int size) {
+	if (kinc_g2_font_get_image_internal(font, size) != NULL) return false; // Nothing to do
 
 	// Resize images array if necessary
 	if (font->m_capacity <= font->m_images_len) {
 		font->m_capacity = font->m_images_len + 1;
 		if (font->images == NULL) {
-			font->images = (arm_g2_font_image_t *)malloc(font->m_capacity * sizeof(arm_g2_font_image_t));
+			font->images = (kinc_g2_font_image_t *)malloc(font->m_capacity * sizeof(kinc_g2_font_image_t));
 		}
 		else {
-			font->images = (arm_g2_font_image_t *)realloc(font->images, font->m_capacity * sizeof(arm_g2_font_image_t));
+			font->images = (kinc_g2_font_image_t *)realloc(font->images, font->m_capacity * sizeof(kinc_g2_font_image_t));
 		}
 	}
 
@@ -784,10 +801,10 @@ static int stbtt_BakeFontBitmapArr(unsigned char *data, int offset,        // Fo
    return bottom_y;
 }
 
-void arm_g2_font_load(arm_g2_font_t *font, int size) {
-	if (!arm_g2_prepare_font_load_internal(font, size)) return;
+void kinc_g2_font_load(kinc_g2_font_t *font, int size) {
+	if (!kinc_g2_prepare_font_load_internal(font, size)) return;
 
-	arm_g2_font_image_t *img = &(font->images[font->m_images_len]);
+	kinc_g2_font_image_t *img = &(font->images[font->m_images_len]);
 	font->m_images_len += 1;
 	int width = 64;
 	int height = 32;
@@ -829,12 +846,12 @@ void arm_g2_font_load(arm_g2_font_t *font, int size) {
 	free(pixels);
 }
 
-kinc_g4_texture_t *arm_g2_font_get_texture(arm_g2_font_t *font, int size) {
-	arm_g2_font_image_t *img = arm_g2_font_get_image_internal(font, size);
+kinc_g4_texture_t *kinc_g2_font_get_texture(kinc_g2_font_t *font, int size) {
+	kinc_g2_font_image_t *img = kinc_g2_font_get_image_internal(font, size);
 	return img->tex;
 }
 
-int arm_g2_font_get_char_index_internal(arm_g2_font_image_t *img, int char_index) {
+int kinc_g2_font_get_char_index_internal(kinc_g2_font_image_t *img, int char_index) {
 	if (g2_font_num_glyphs <= 0) {
 		return 0;
 	}
@@ -857,9 +874,9 @@ int arm_g2_font_get_char_index_internal(arm_g2_font_image_t *img, int char_index
 	return char_index - offset;
 }
 
-bool arm_g2_font_get_baked_quad(arm_g2_font_t *font, int size, arm_g2_font_aligned_quad_t *q, int char_code, float xpos, float ypos) {
-	arm_g2_font_image_t *img = arm_g2_font_get_image_internal(font, size);
-	int char_index = arm_g2_font_get_char_index_internal(img, char_code);
+bool kinc_g2_font_get_baked_quad(kinc_g2_font_t *font, int size, kinc_g2_font_aligned_quad_t *q, int char_code, float xpos, float ypos) {
+	kinc_g2_font_image_t *img = kinc_g2_font_get_image_internal(font, size);
+	int char_index = kinc_g2_font_get_char_index_internal(img, char_code);
 	if (char_index >= g2_font_num_glyphs) return false;
 	float ipw = 1.0f / (float)img->width;
 	float iph = 1.0f / (float)img->height;
@@ -882,32 +899,32 @@ bool arm_g2_font_get_baked_quad(arm_g2_font_t *font, int size, arm_g2_font_align
 	return true;
 }
 
-void arm_g2_draw_string(const char *text, float x, float y) {
-	arm_g2_image_end();
-	arm_g2_colored_end();
+void kinc_g2_draw_string(const char *text, float x, float y) {
+	kinc_g2_image_end();
+	kinc_g2_colored_end();
 
-	arm_g2_font_image_t *img = arm_g2_font_get_image_internal(g2_font, g2_font_size);
+	kinc_g2_font_image_t *img = kinc_g2_font_get_image_internal(g2_font, g2_font_size);
 	kinc_g4_texture_t *tex = img->tex;
 
-	if (text_last_texture != NULL && tex != text_last_texture) arm_g2_text_draw_buffer(false);
+	if (text_last_texture != NULL && tex != text_last_texture) kinc_g2_text_draw_buffer(false);
 	text_last_texture = tex;
 
 	float xpos = x;
 	float ypos = y + img->baseline;
-	arm_g2_font_aligned_quad_t q;
+	kinc_g2_font_aligned_quad_t q;
 	for (int i = 0; text[i] != 0; ) {
 		int l = 0;
 		int codepoint = string_utf8_decode(&text[i], &l);
 		i += l;
 
-		if (arm_g2_font_get_baked_quad(g2_font, g2_font_size, &q, codepoint, xpos, ypos)) {
-			if (text_buffer_index + 1 >= G2_BUFFER_SIZE) arm_g2_text_draw_buffer(false);
-			arm_g2_text_set_rect_colors(g2_color);
-			arm_g2_text_set_rect_tex_coords(q.s0, q.t0, q.s1, q.t1);
+		if (kinc_g2_font_get_baked_quad(g2_font, g2_font_size, &q, codepoint, xpos, ypos)) {
+			if (text_buffer_index + 1 >= G2_BUFFER_SIZE) kinc_g2_text_draw_buffer(false);
+			kinc_g2_text_set_rect_colors(g2_color);
+			kinc_g2_text_set_rect_tex_coords(q.s0, q.t0, q.s1, q.t1);
 
 			kinc_vector2_t p[4];
-			arm_g2_matrix3x3_multquad(&g2_transform, q.x0, q.y0, q.x1 - q.x0, q.y1 - q.y0, p);
-			arm_g2_text_set_rect_verts(p[0].x, p[0].y, p[1].x, p[1].y, p[2].x, p[2].y, p[3].x, p[3].y);
+			kinc_g2_matrix3x3_multquad(&g2_transform, q.x0, q.y0, q.x1 - q.x0, q.y1 - q.y0, p);
+			kinc_g2_text_set_rect_verts(p[0].x, p[0].y, p[1].x, p[1].y, p[2].x, p[2].y, p[3].x, p[3].y);
 
 			xpos += q.xadvance;
 			++text_buffer_index;
@@ -915,7 +932,7 @@ void arm_g2_draw_string(const char *text, float x, float y) {
 	}
 }
 
-void arm_g2_font_default_glyphs() {
+void kinc_g2_font_default_glyphs() {
 	g2_font_num_glyphs = 127 - 32;
 	g2_font_glyphs = (int *)malloc(g2_font_num_glyphs * sizeof(int));
 	for (int i = 32; i < 127; ++i) g2_font_glyphs[i - 32] = i;
@@ -925,9 +942,9 @@ void arm_g2_font_default_glyphs() {
 	g2_font_glyph_blocks[1] = 126;
 }
 
-void arm_g2_font_init(arm_g2_font_t *font, void *blob, int font_index) {
+void _kinc_g2_font_init(kinc_g2_font_t *font, void *blob, int font_index) {
 	if (g2_font_glyphs == NULL) {
-		arm_g2_font_default_glyphs();
+		kinc_g2_font_default_glyphs();
 	}
 
 	font->blob = blob;
@@ -940,9 +957,15 @@ void arm_g2_font_init(arm_g2_font_t *font, void *blob, int font_index) {
 	}
 }
 
-void arm_g2_font_13(arm_g2_font_t *font, void *blob) {
+kinc_g2_font_t *kinc_g2_font_init(buffer_t *blob, int font_index) {
+	kinc_g2_font_t *font = (kinc_g2_font_t *)malloc(sizeof(kinc_g2_font_t));
+	_kinc_g2_font_init(font, blob->buffer, font_index);
+	return font;
+}
+
+void _kinc_g2_font_13(kinc_g2_font_t *font, void *blob) {
 	if (g2_font_glyphs == NULL) {
-		arm_g2_font_default_glyphs();
+		kinc_g2_font_default_glyphs();
 	}
 
 	font->blob = blob;
@@ -950,9 +973,9 @@ void arm_g2_font_13(arm_g2_font_t *font, void *blob) {
 	font->m_images_len = 0;
 	font->m_capacity = 0;
 	font->offset = 0;
-	arm_g2_prepare_font_load_internal(font, 13);
+	kinc_g2_prepare_font_load_internal(font, 13);
 
-	arm_g2_font_image_t *img = &(font->images[font->m_images_len]);
+	kinc_g2_font_image_t *img = &(font->images[font->m_images_len]);
 	font->m_images_len += 1;
 	img->m_size = 13;
 	img->baseline = 0; // 10
@@ -978,10 +1001,15 @@ void arm_g2_font_13(arm_g2_font_t *font, void *blob) {
 		baked[i].xadvance = g2_font_13_xadvance[i];
 	}
 	img->chars = baked;
-
 }
 
-bool arm_g2_font_has_glyph(int glyph) {
+kinc_g2_font_t *kinc_g2_font_13(buffer_t *blob) {
+	kinc_g2_font_t *font = (kinc_g2_font_t *)malloc(sizeof(kinc_g2_font_t));
+	_kinc_g2_font_13(font, blob->buffer);
+	return font;
+}
+
+bool kinc_g2_font_has_glyph(int glyph) {
 	for (int i = 0; i < g2_font_num_glyphs; ++i) {
 		if (g2_font_glyphs[i] == glyph) {
 			return true;
@@ -990,7 +1018,7 @@ bool arm_g2_font_has_glyph(int glyph) {
 	return false;
 }
 
-void arm_g2_font_set_glyphs(int *glyphs, int count) {
+void _kinc_g2_font_set_glyphs(int *glyphs, int count) {
 	free(g2_font_glyphs);
 	g2_font_num_glyphs = count;
 	g2_font_glyphs = (int *)malloc(g2_font_num_glyphs * sizeof(int));
@@ -1030,116 +1058,123 @@ void arm_g2_font_set_glyphs(int *glyphs, int count) {
 	g2_font_glyph_blocks[blocks * 2 - 1] = glyphs[count - 1];
 }
 
-void arm_g2_font_add_glyph(int glyph) {
+void kinc_g2_font_set_glyphs(i32_array_t *glyphs) {
+	_kinc_g2_font_set_glyphs(glyphs->buffer, glyphs->length);
+}
+
+void kinc_g2_font_add_glyph(int glyph) {
 	// TODO: slow
 	g2_font_num_glyphs++;
 	int *font_glyphs = (int *)malloc(g2_font_num_glyphs * sizeof(int));
 	for (int i = 0; i < g2_font_num_glyphs - 1; ++i) font_glyphs[i] = g2_font_glyphs[i];
 	font_glyphs[g2_font_num_glyphs - 1] = glyph;
-	arm_g2_font_set_glyphs(font_glyphs, g2_font_num_glyphs);
+	_kinc_g2_font_set_glyphs(font_glyphs, g2_font_num_glyphs);
 }
 
-int arm_g2_font_count(arm_g2_font_t *font) {
+int kinc_g2_font_count(kinc_g2_font_t *font) {
 	return stbtt_GetNumberOfFonts(font->blob);
 }
 
-float arm_g2_font_height(arm_g2_font_t *font, int font_size) {
-	arm_g2_font_load(font, font_size);
-	return arm_g2_font_get_image_internal(font, font_size)->m_size;
+int kinc_g2_font_height(kinc_g2_font_t *font, int font_size) {
+	kinc_g2_font_load(font, font_size);
+	return (int)kinc_g2_font_get_image_internal(font, font_size)->m_size;
 }
 
-float arm_g2_font_get_char_width_internal(arm_g2_font_image_t *img, int char_index) {
-	int i = arm_g2_font_get_char_index_internal(img, char_index);
+float kinc_g2_font_get_char_width_internal(kinc_g2_font_image_t *img, int char_index) {
+	int i = kinc_g2_font_get_char_index_internal(img, char_index);
 	return img->chars[i].xadvance;
 }
 
-float arm_g2_sub_string_width(arm_g2_font_t *font, int font_size, const char *text, int start, int end) {
-	arm_g2_font_load(font, font_size);
-	arm_g2_font_image_t *img = arm_g2_font_get_image_internal(font, font_size);
+float kinc_g2_sub_string_width(kinc_g2_font_t *font, int font_size, const char *text, int start, int end) {
+	kinc_g2_font_load(font, font_size);
+	kinc_g2_font_image_t *img = kinc_g2_font_get_image_internal(font, font_size);
 	float width = 0.0;
 	for (int i = start; i < end; ++i) {
 		if (text[i] == '\0') break;
-		width += arm_g2_font_get_char_width_internal(img, text[i]);
+		width += kinc_g2_font_get_char_width_internal(img, text[i]);
 	}
 	return width;
 }
 
-float arm_g2_string_width(arm_g2_font_t *font, int font_size, const char *text) {
-	return arm_g2_sub_string_width(font, font_size, text, 0, (int)strlen(text));
+int kinc_g2_string_width(kinc_g2_font_t *font, int font_size, const char *text) {
+	return (int)kinc_g2_sub_string_width(font, font_size, text, 0, (int)strlen(text));
 }
 
-void arm_g2_image_end(void) {
-	if (image_buffer_index > 0) arm_g2_draw_image_buffer(true);
+void kinc_g2_image_end(void) {
+	if (image_buffer_index > 0) kinc_g2_draw_image_buffer(true);
 	image_last_texture = NULL;
 	image_last_render_target = NULL;
 }
 
-void arm_g2_colored_end(void) {
-	arm_g2_colored_rect_end(false);
-	arm_g2_colored_tris_end(false);
+void kinc_g2_colored_end(void) {
+	kinc_g2_colored_rect_end(false);
+	kinc_g2_colored_tris_end(false);
 }
 
-void arm_g2_text_end(void) {
-	if (text_buffer_index > 0) arm_g2_text_draw_buffer(true);
+void kinc_g2_text_end(void) {
+	if (text_buffer_index > 0) kinc_g2_text_draw_buffer(true);
 	text_last_texture = NULL;
 }
 
-void arm_g2_end(void) {
-	arm_g2_image_end();
-	arm_g2_colored_end();
-	arm_g2_text_end();
+void kinc_g2_end(void) {
+	kinc_g2_image_end();
+	kinc_g2_colored_end();
+	kinc_g2_text_end();
 }
 
-void arm_g2_set_color(uint32_t color) {
+void kinc_g2_set_color(uint32_t color) {
 	g2_color = color;
 }
 
-uint32_t arm_g2_get_color() {
+uint32_t kinc_g2_get_color() {
 	return g2_color;
 }
 
-void arm_g2_set_pipeline(kinc_g4_pipeline_t *pipeline) {
+void kinc_g2_set_pipeline(kinc_g4_pipeline_t *pipeline) {
 	if (pipeline == g2_last_pipeline) return;
 	g2_last_pipeline = pipeline;
-	arm_g2_end(); // flush
+	kinc_g2_end(); // flush
 	g2_custom_pipeline = pipeline;
 }
 
-void arm_g2_set_transform(kinc_matrix3x3_t *m) {
+void kinc_g2_set_transform(buffer_t *matrix) {
+	kinc_matrix3x3_t *m = matrix != NULL ? (kinc_matrix3x3_t *)matrix->buffer : NULL;
 	if (m == NULL) {
 		g2_transform = kinc_matrix3x3_identity();
 	}
 	else {
-		for (int i = 0; i < 3 * 3; ++i) g2_transform.m[i] = m->m[i];
+		for (int i = 0; i < 3 * 3; ++i) {
+			g2_transform.m[i] = m->m[i];
+		}
 	}
 }
 
-void arm_g2_set_font(arm_g2_font_t *font, int size) {
-	arm_g2_end(); // flush
+void kinc_g2_set_font(kinc_g2_font_t *font, int size) {
+	kinc_g2_end(); // flush
 	g2_font = font;
 	g2_font_size = size;
-	arm_g2_font_load(font, size);
+	kinc_g2_font_load(font, size);
 }
 
-void arm_g2_set_bilinear_filter(bool bilinear) {
+void kinc_g2_set_bilinear_filter(bool bilinear) {
 	if (g2_bilinear_filter == bilinear) return;
-	arm_g2_end(); // flush
+	kinc_g2_end(); // flush
 	g2_bilinear_filter = bilinear;
 }
 
-void arm_g2_restore_render_target(void) {
+void kinc_g2_restore_render_target(void) {
 	g2_is_render_target = false;
-	arm_g2_end();
-	arm_g2_begin();
+	kinc_g2_end();
+	kinc_g2_begin();
 	kinc_g4_restore_render_target();
-	arm_g2_internal_set_projection_matrix(NULL);
+	kinc_g2_internal_set_projection_matrix(NULL);
 }
 
-void arm_g2_set_render_target(kinc_g4_render_target_t *target) {
+void kinc_g2_set_render_target(kinc_g4_render_target_t *target) {
 	g2_is_render_target = true;
-	arm_g2_end();
-	arm_g2_begin();
+	kinc_g2_end();
+	kinc_g2_begin();
 	kinc_g4_render_target_t *render_targets[1] = { target };
 	kinc_g4_set_render_targets(render_targets, 1);
-	arm_g2_internal_set_projection_matrix(target);
+	kinc_g2_internal_set_projection_matrix(target);
 }

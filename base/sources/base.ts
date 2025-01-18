@@ -86,7 +86,7 @@ function base_init() {
 
 	// Baked font for fast startup
 	if (config_raw.locale == "en") {
-		base_font.font_ = iron_g2_font_13(base_font.blob);
+		base_font.font_ = kinc_g2_font_13(base_font.blob);
 		base_font.glyphs = _g2_font_glyphs;
 	}
 	else {

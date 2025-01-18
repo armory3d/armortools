@@ -140,30 +140,30 @@ ui_handle_t *ui_nest(ui_handle_t *handle, int  pos) {
 }
 
 void ui_fade_color(float alpha) {
-	uint32_t color = arm_g2_get_color();
+	uint32_t color = kinc_g2_get_color();
 	uint8_t r = (color & 0x00ff0000) >> 16;
 	uint8_t g = (color & 0x0000ff00) >> 8;
 	uint8_t b = (color & 0x000000ff);
 	uint8_t a = (uint8_t)(255.0 * alpha);
-	arm_g2_set_color((a << 24) | (r << 16) | (g << 8) | b);
+	kinc_g2_set_color((a << 24) | (r << 16) | (g << 8) | b);
 }
 
 void ui_fill(float x, float y, float w, float h, uint32_t color) {
-	arm_g2_set_color(color);
+	kinc_g2_set_color(color);
 	if (!current->enabled) {
 		ui_fade_color(0.25);
 	}
-	arm_g2_fill_rect(current->_x + x * UI_SCALE(), current->_y + y * UI_SCALE() - 1, w * UI_SCALE(), h * UI_SCALE());
-	arm_g2_set_color(0xffffffff);
+	kinc_g2_fill_rect(current->_x + x * UI_SCALE(), current->_y + y * UI_SCALE() - 1, w * UI_SCALE(), h * UI_SCALE());
+	kinc_g2_set_color(0xffffffff);
 }
 
 void ui_rect(float x, float y, float w, float h, uint32_t color, float strength) {
-	arm_g2_set_color(color);
+	kinc_g2_set_color(color);
 	if (!current->enabled) {
 		ui_fade_color(0.25);
 	}
-	arm_g2_draw_rect(current->_x + x * UI_SCALE(), current->_y + y * UI_SCALE(), w * UI_SCALE(), h * UI_SCALE(), strength);
-	arm_g2_set_color(0xffffffff);
+	kinc_g2_draw_rect(current->_x + x * UI_SCALE(), current->_y + y * UI_SCALE(), w * UI_SCALE(), h * UI_SCALE(), strength);
+	kinc_g2_set_color(0xffffffff);
 }
 
 void ui_draw_shadow(float x, float y, float w, float h) {
@@ -171,14 +171,14 @@ void ui_draw_shadow(float x, float y, float w, float h) {
 		// for (int i = 0; i < 8; i++) {
 		// 	float offset = i * UI_SCALE();
 		// 	float a = (8 - i + 1) * 0.01;
-		// 	arm_g2_set_color(((uint8_t)(a * 255) << 24) | (0 << 16) | (0 << 8) | 0);
+		// 	kinc_g2_set_color(((uint8_t)(a * 255) << 24) | (0 << 16) | (0 << 8) | 0);
 		// 	ui_draw_rect(true, x - offset, y - offset, w + offset * 2, h + offset * 2);
 		// }
 		float max_offset = 4.0 * UI_SCALE();
 		for (int i = 0; i < 4; i++) {
 			float offset = (max_offset / 4) * (i + 1);
 			float a = 0.1 - (0.1 / 4) * i;
-			arm_g2_set_color(((uint8_t)(a * 255) << 24) | (0 << 16) | (0 << 8) | 0);
+			kinc_g2_set_color(((uint8_t)(a * 255) << 24) | (0 << 16) | (0 << 8) | 0);
 			ui_draw_rect(true, x + offset, y + offset, w + (max_offset - offset) * 2, h + (max_offset - offset) * 2);
 		}
 	}
@@ -199,15 +199,15 @@ void ui_draw_rect(bool fill, float x, float y, float w, float h) {
 		if (theme->ROUND_CORNERS && current->enabled && r > 0 && w >= r * 2.0) {
 			y -= 1; // Make it pixel perfect with non-round draw
 			h += 1;
-			arm_g2_draw_scaled_render_target(&current->filled_round_corner_image, x, y, r, r);
-			arm_g2_draw_scaled_render_target(&current->filled_round_corner_image, x, y + h, r, -r);
-			arm_g2_draw_scaled_render_target(&current->filled_round_corner_image, x + w, y, -r, r);
-			arm_g2_draw_scaled_render_target(&current->filled_round_corner_image, x + w, y + h, -r, -r);
-			arm_g2_fill_rect(x + r, y, w - r * 2.0, h);
-			arm_g2_fill_rect(x, y + r, w, h - r * 2.0);
+			kinc_g2_draw_scaled_render_target(&current->filled_round_corner_image, x, y, r, r);
+			kinc_g2_draw_scaled_render_target(&current->filled_round_corner_image, x, y + h, r, -r);
+			kinc_g2_draw_scaled_render_target(&current->filled_round_corner_image, x + w, y, -r, r);
+			kinc_g2_draw_scaled_render_target(&current->filled_round_corner_image, x + w, y + h, -r, -r);
+			kinc_g2_fill_rect(x + r, y, w - r * 2.0, h);
+			kinc_g2_fill_rect(x, y + r, w, h - r * 2.0);
 		}
 		else {
-			arm_g2_fill_rect(x, y - 1, w, h + 1);
+			kinc_g2_fill_rect(x, y - 1, w, h + 1);
 		}
 	}
 	else {
@@ -217,17 +217,17 @@ void ui_draw_rect(bool fill, float x, float y, float w, float h) {
 			w += 1;
 			y -= 1;
 			h += 1;
-			arm_g2_draw_scaled_render_target(&current->round_corner_image, x, y, r, r);
-			arm_g2_draw_scaled_render_target(&current->round_corner_image, x, y + h, r, -r);
-			arm_g2_draw_scaled_render_target(&current->round_corner_image, x + w, y, -r, r);
-			arm_g2_draw_scaled_render_target(&current->round_corner_image, x + w, y + h, -r, -r);
-			arm_g2_fill_rect(x + r, y, w - r * 2.0, strength);
-			arm_g2_fill_rect(x + r, y + h - 1, w - r * 2.0, strength);
-			arm_g2_fill_rect(x, y + r, strength, h - r * 2.0);
-			arm_g2_fill_rect(x + w - 1, y + r, strength, h - r * 2.0);
+			kinc_g2_draw_scaled_render_target(&current->round_corner_image, x, y, r, r);
+			kinc_g2_draw_scaled_render_target(&current->round_corner_image, x, y + h, r, -r);
+			kinc_g2_draw_scaled_render_target(&current->round_corner_image, x + w, y, -r, r);
+			kinc_g2_draw_scaled_render_target(&current->round_corner_image, x + w, y + h, -r, -r);
+			kinc_g2_fill_rect(x + r, y, w - r * 2.0, strength);
+			kinc_g2_fill_rect(x + r, y + h - 1, w - r * 2.0, strength);
+			kinc_g2_fill_rect(x, y + r, strength, h - r * 2.0);
+			kinc_g2_fill_rect(x + w - 1, y + r, strength, h - r * 2.0);
 		}
 		else {
-			arm_g2_draw_rect(x, y, w, h, strength);
+			kinc_g2_draw_rect(x, y, w, h, strength);
 		}
 	}
 }
@@ -238,10 +238,10 @@ void ui_draw_round_bottom(float x, float y, float w) {
 		int h = 4;
 		y -= 1; // Make it pixel perfect with non-round draw
 		h += 1;
-		arm_g2_set_color(theme->SEPARATOR_COL);
-		arm_g2_draw_scaled_render_target(&current->filled_round_corner_image, x, y + h, r, -r);
-		arm_g2_draw_scaled_render_target(&current->filled_round_corner_image, x + w, y + h, -r, -r);
-		arm_g2_fill_rect(x + r, y, w - r * 2.0, h);
+		kinc_g2_set_color(theme->SEPARATOR_COL);
+		kinc_g2_draw_scaled_render_target(&current->filled_round_corner_image, x, y + h, r, -r);
+		kinc_g2_draw_scaled_render_target(&current->filled_round_corner_image, x + w, y + h, -r, -r);
+		kinc_g2_fill_rect(x + r, y, w - r * 2.0, h);
 	}
 }
 
@@ -317,13 +317,13 @@ void ui_draw_string(char *text, float x_offset, float y_offset, int align, bool 
 		char *full_text = text;
 		strcpy(truncated, text);
 		text = &truncated[0];
-		while (strlen(text) > 0 && arm_g2_string_width(current->ops->font->font_, current->font_size, text) > current->_w - 6.0 * UI_SCALE()) {
+		while (strlen(text) > 0 && kinc_g2_string_width(current->ops->font->font_, current->font_size, text) > current->_w - 6.0 * UI_SCALE()) {
 			text[strlen(text) - 1] = 0;
 		}
 		if (strlen(text) < strlen(full_text)) {
 			strcat(text, "..");
 			// Strip more to fit ".."
-			while (strlen(text) > 2 && arm_g2_string_width(current->ops->font->font_, current->font_size, text) > current->_w - 10.0 * UI_SCALE()) {
+			while (strlen(text) > 2 && kinc_g2_string_width(current->ops->font->font_, current->font_size, text) > current->_w - 10.0 * UI_SCALE()) {
 				text[strlen(text) - 3] = 0;
 				strcat(text, "..");
 			}
@@ -336,9 +336,9 @@ void ui_draw_string(char *text, float x_offset, float y_offset, int align, bool 
 	if (ui_dynamic_glyph_load) {
 		int len = strlen(text);
 		for (int i = 0; i < len; ++i) {
-			if (text[i] > 126 && !arm_g2_font_has_glyph((int)text[i])) {
+			if (text[i] > 126 && !kinc_g2_font_has_glyph((int)text[i])) {
 				int glyph = text[i];
-				arm_g2_font_add_glyph(glyph);
+				kinc_g2_font_add_glyph(glyph);
 			}
 		}
 	}
@@ -347,12 +347,12 @@ void ui_draw_string(char *text, float x_offset, float y_offset, int align, bool 
 		x_offset = theme->TEXT_OFFSET;
 	}
 	x_offset *= UI_SCALE();
-	arm_g2_set_font(current->ops->font->font_, current->font_size);
+	kinc_g2_set_font(current->ops->font->font_, current->font_size);
 	if (align == UI_ALIGN_CENTER) {
-		x_offset = current->_w / 2.0 - arm_g2_string_width(current->ops->font->font_, current->font_size, text) / 2.0;
+		x_offset = current->_w / 2.0 - kinc_g2_string_width(current->ops->font->font_, current->font_size, text) / 2.0;
 	}
 	else if (align == UI_ALIGN_RIGHT) {
-		x_offset = current->_w - arm_g2_string_width(current->ops->font->font_, current->font_size, text) - UI_TEXT_OFFSET();
+		x_offset = current->_w - kinc_g2_string_width(current->ops->font->font_, current->font_size, text) - UI_TEXT_OFFSET();
 	}
 
 	if (!current->enabled) {
@@ -360,7 +360,7 @@ void ui_draw_string(char *text, float x_offset, float y_offset, int align, bool 
 	}
 
 	if (current->text_coloring == NULL) {
-		arm_g2_draw_string(text, current->_x + x_offset, current->_y + current->font_offset_y + y_offset);
+		kinc_g2_draw_string(text, current->_x + x_offset, current->_y + current->font_offset_y + y_offset);
 	}
 	else {
 		// Monospace fonts only for now
@@ -369,13 +369,13 @@ void ui_draw_string(char *text, float x_offset, float y_offset, int align, bool 
 			ui_coloring_t *coloring = current->text_coloring->colorings->buffer[i];
 			ui_text_extract_t result = ui_extract_coloring(temp, coloring);
 			if (result.colored[0] != '\0') {
-				arm_g2_set_color(coloring->color);
-				arm_g2_draw_string(result.colored, current->_x + x_offset, current->_y + current->font_offset_y + y_offset);
+				kinc_g2_set_color(coloring->color);
+				kinc_g2_draw_string(result.colored, current->_x + x_offset, current->_y + current->font_offset_y + y_offset);
 			}
 			strcpy(temp, result.uncolored);
 		}
-		arm_g2_set_color(current->text_coloring->default_color);
-		arm_g2_draw_string(temp, current->_x + x_offset, current->_y + current->font_offset_y + y_offset);
+		kinc_g2_set_color(current->text_coloring->default_color);
+		kinc_g2_draw_string(temp, current->_x + x_offset, current->_y + current->font_offset_y + y_offset);
 	}
 }
 
@@ -579,14 +579,14 @@ void ui_draw_tooltip_text(bool bind_global_g) {
 	int line_count = ui_line_count(current->tooltip_text);
 	float tooltip_w = 0.0;
 	for (int i = 0; i < line_count; ++i) {
-		float line_tooltip_w = arm_g2_string_width(current->ops->font->font_, current->font_size, ui_extract_line(current->tooltip_text, i));
+		float line_tooltip_w = kinc_g2_string_width(current->ops->font->font_, current->font_size, ui_extract_line(current->tooltip_text, i));
 		if (line_tooltip_w > tooltip_w) {
 			tooltip_w = line_tooltip_w;
 		}
 	}
 	current->tooltip_x = fmin(current->tooltip_x, kinc_window_width(0) - tooltip_w - 20);
-	if (bind_global_g) arm_g2_restore_render_target();
-	float font_height = arm_g2_font_height(current->ops->font->font_, current->font_size);
+	if (bind_global_g) kinc_g2_restore_render_target();
+	float font_height = kinc_g2_font_height(current->ops->font->font_, current->font_size);
 	float off = 0;
 	if (current->tooltip_img != NULL) {
 		float w = current->tooltip_img->tex_width;
@@ -608,13 +608,13 @@ void ui_draw_tooltip_text(bool bind_global_g) {
 	int w = tooltip_w + 20 + 10;
 	int h = font_height * line_count + 10;
 	ui_draw_shadow(x, y, w, h);
-	arm_g2_set_color(theme->SEPARATOR_COL);
-	arm_g2_fill_rect(x, y, w, h);
+	kinc_g2_set_color(theme->SEPARATOR_COL);
+	kinc_g2_fill_rect(x, y, w, h);
 
-	arm_g2_set_font(current->ops->font->font_, current->font_size);
-	arm_g2_set_color(theme->TEXT_COL);
+	kinc_g2_set_font(current->ops->font->font_, current->font_size);
+	kinc_g2_set_color(theme->TEXT_COL);
 	for (int i = 0; i < line_count; ++i) {
-		arm_g2_draw_string(ui_extract_line(current->tooltip_text, i), current->tooltip_x + 5, current->tooltip_y + off + i * current->font_size);
+		kinc_g2_draw_string(ui_extract_line(current->tooltip_text, i), current->tooltip_x + 5, current->tooltip_y + off + i * current->font_size);
 	}
 }
 
@@ -627,14 +627,14 @@ void ui_draw_tooltip_image(bool bind_global_g) {
 	current->tooltip_x = fmin(current->tooltip_x, kinc_window_width(0) - w - 20);
 	current->tooltip_y = fmin(current->tooltip_y, kinc_window_height(0) - h - 20);
 	if (bind_global_g) {
-		arm_g2_restore_render_target();
+		kinc_g2_restore_render_target();
 	}
-	arm_g2_set_color(0xff000000);
-	arm_g2_fill_rect(current->tooltip_x, current->tooltip_y, w, h);
-	arm_g2_set_color(0xffffffff);
+	kinc_g2_set_color(0xff000000);
+	kinc_g2_fill_rect(current->tooltip_x, current->tooltip_y, w, h);
+	kinc_g2_set_color(0xffffffff);
 	current->tooltip_invert_y ?
-		arm_g2_draw_scaled_image(current->tooltip_img, current->tooltip_x, current->tooltip_y + h, w, -h) :
-		arm_g2_draw_scaled_image(current->tooltip_img, current->tooltip_x, current->tooltip_y, w, h);
+		kinc_g2_draw_scaled_image(current->tooltip_img, current->tooltip_x, current->tooltip_y + h, w, -h) :
+		kinc_g2_draw_scaled_image(current->tooltip_img, current->tooltip_x, current->tooltip_y, w, h);
 }
 
 void ui_draw_tooltip_rt(bool bind_global_g) {
@@ -646,47 +646,47 @@ void ui_draw_tooltip_rt(bool bind_global_g) {
 	current->tooltip_x = fmin(current->tooltip_x, kinc_window_width(0) - w - 20);
 	current->tooltip_y = fmin(current->tooltip_y, kinc_window_height(0) - h - 20);
 	if (bind_global_g) {
-		arm_g2_restore_render_target();
+		kinc_g2_restore_render_target();
 	}
-	arm_g2_set_color(0xff000000);
-	arm_g2_fill_rect(current->tooltip_x, current->tooltip_y, w, h);
-	arm_g2_set_color(0xffffffff);
+	kinc_g2_set_color(0xff000000);
+	kinc_g2_fill_rect(current->tooltip_x, current->tooltip_y, w, h);
+	kinc_g2_set_color(0xffffffff);
 	current->tooltip_invert_y ?
-		arm_g2_draw_scaled_render_target(current->tooltip_rt, current->tooltip_x, current->tooltip_y + h, w, -h) :
-		arm_g2_draw_scaled_render_target(current->tooltip_rt, current->tooltip_x, current->tooltip_y, w, h);
+		kinc_g2_draw_scaled_render_target(current->tooltip_rt, current->tooltip_x, current->tooltip_y + h, w, -h) :
+		kinc_g2_draw_scaled_render_target(current->tooltip_rt, current->tooltip_x, current->tooltip_y, w, h);
 }
 
 void ui_draw_tooltip(bool bind_global_g) {
 	static char temp[1024];
 	if (current->slider_tooltip) {
 		if (bind_global_g) {
-			arm_g2_restore_render_target();
+			kinc_g2_restore_render_target();
 		}
-		arm_g2_set_font(current->ops->font->font_, current->font_size * 2);
+		kinc_g2_set_font(current->ops->font->font_, current->font_size * 2);
 		sprintf(temp, "%f", round(current->scroll_handle->value * 100.0) / 100.0);
 		string_strip_trailing_zeros(temp);
 		char *text = temp;
-		float x_off = arm_g2_string_width(current->ops->font->font_, current->font_size * 2.0, text) / 2.0;
-		float y_off = arm_g2_font_height(current->ops->font->font_, current->font_size * 2.0);
+		float x_off = kinc_g2_string_width(current->ops->font->font_, current->font_size * 2.0, text) / 2.0;
+		float y_off = kinc_g2_font_height(current->ops->font->font_, current->font_size * 2.0);
 		float x = fmin(fmax(current->slider_tooltip_x, current->input_x), current->slider_tooltip_x + current->slider_tooltip_w);
-		arm_g2_set_color(theme->BUTTON_COL);
-		arm_g2_fill_rect(x - x_off, current->slider_tooltip_y - y_off, x_off * 2.0, y_off);
-		arm_g2_set_color(theme->TEXT_COL);
-		arm_g2_draw_string(text, x - x_off, current->slider_tooltip_y - y_off);
+		kinc_g2_set_color(theme->BUTTON_COL);
+		kinc_g2_fill_rect(x - x_off, current->slider_tooltip_y - y_off, x_off * 2.0, y_off);
+		kinc_g2_set_color(theme->TEXT_COL);
+		kinc_g2_draw_string(text, x - x_off, current->slider_tooltip_y - y_off);
 	}
 	if (ui_touch_tooltip && current->text_selected_handle != NULL) {
 		if (bind_global_g) {
-			arm_g2_restore_render_target();
+			kinc_g2_restore_render_target();
 		}
-		arm_g2_set_font(current->ops->font->font_, current->font_size * 2.0);
-		float x_off = arm_g2_string_width(current->ops->font->font_, current->font_size * 2.0, current->text_selected) / 2.0;
-		float y_off = arm_g2_font_height(current->ops->font->font_, current->font_size * 2.0) / 2.0;
+		kinc_g2_set_font(current->ops->font->font_, current->font_size * 2.0);
+		float x_off = kinc_g2_string_width(current->ops->font->font_, current->font_size * 2.0, current->text_selected) / 2.0;
+		float y_off = kinc_g2_font_height(current->ops->font->font_, current->font_size * 2.0) / 2.0;
 		float x = kinc_window_width(0) / 2.0;
 		float y = kinc_window_height(0) / 3.0;
-		arm_g2_set_color(theme->BUTTON_COL);
-		arm_g2_fill_rect(x - x_off, y - y_off, x_off * 2.0, y_off * 2.0);
-		arm_g2_set_color(theme->TEXT_COL);
-		arm_g2_draw_string(current->text_selected, x - x_off, y - y_off);
+		kinc_g2_set_color(theme->BUTTON_COL);
+		kinc_g2_fill_rect(x - x_off, y - y_off, x_off * 2.0, y_off * 2.0);
+		kinc_g2_set_color(theme->TEXT_COL);
+		kinc_g2_draw_string(current->text_selected, x - x_off, y - y_off);
 	}
 
 	if (current->tooltip_text[0] != '\0' || current->tooltip_img != NULL || current->tooltip_rt != NULL) {
@@ -718,9 +718,9 @@ void ui_draw_combo(bool begin /*= true*/) {
 	if (current->combo_selected_handle == NULL) {
 		return;
 	}
-	arm_g2_set_color(theme->SEPARATOR_COL);
+	kinc_g2_set_color(theme->SEPARATOR_COL);
 	if (begin) {
-		arm_g2_restore_render_target();
+		kinc_g2_restore_render_target();
 	}
 
 	float combo_h = (current->combo_selected_texts->length + (current->combo_selected_label != NULL ? 1 : 0) + (current->combo_search_bar ? 1 : 0)) * UI_ELEMENT_H();
@@ -867,7 +867,7 @@ void ui_draw_combo(bool begin /*= true*/) {
 		if (unroll_up) {
 			current->_y -= UI_ELEMENT_H() * 2.0;
 			ui_fill(0, 0, current->_w / UI_SCALE(), UI_ELEMENT_H() / UI_SCALE(), theme->SEPARATOR_COL);
-			arm_g2_set_color(theme->LABEL_COL);
+			kinc_g2_set_color(theme->LABEL_COL);
 			ui_draw_string(current->combo_selected_label, theme->TEXT_OFFSET, 0, UI_ALIGN_RIGHT, true);
 			current->_y += UI_ELEMENT_H();
 			ui_fill(0, 0, current->_w / UI_SCALE(), 1.0 * UI_SCALE(), theme->ACCENT_COL); // Separator
@@ -875,7 +875,7 @@ void ui_draw_combo(bool begin /*= true*/) {
 		else {
 			ui_fill(0, 0, current->_w / UI_SCALE(), UI_ELEMENT_H() / UI_SCALE(), theme->SEPARATOR_COL);
 			ui_fill(0, 0, current->_w / UI_SCALE(), 1.0 * UI_SCALE(), theme->ACCENT_COL); // Separator
-			arm_g2_set_color(theme->LABEL_COL);
+			kinc_g2_set_color(theme->LABEL_COL);
 			ui_draw_string(current->combo_selected_label, theme->TEXT_OFFSET, 0, UI_ALIGN_RIGHT, true);
 			current->_y += UI_ELEMENT_H();
 			ui_draw_round_bottom(current->_x, current->_y - 1, current->_w);
@@ -899,38 +899,38 @@ void ui_bake_elements() {
 	}
 	float r = UI_CHECK_SELECT_SIZE();
 	kinc_g4_render_target_init(&current->check_select_image, r, r, KINC_G4_RENDER_TARGET_FORMAT_32BIT, 0, 0);
-	arm_g2_set_render_target(&current->check_select_image);
+	kinc_g2_set_render_target(&current->check_select_image);
 	kinc_g4_clear(KINC_G4_CLEAR_COLOR, 0x00000000, 0, 0);
-	arm_g2_set_color(0xffffffff);
-	arm_g2_draw_line(0, r / 2.0, r / 2.0 - 2.0 * UI_SCALE(), r - 2.0 * UI_SCALE(), 2.0 * UI_SCALE());
-	arm_g2_draw_line(r / 2.0 - 3.0 * UI_SCALE(), r - 3.0 * UI_SCALE(), r / 2.0 + 5.0 * UI_SCALE(), r - 11.0 * UI_SCALE(), 2.0 * UI_SCALE());
-	arm_g2_end();
+	kinc_g2_set_color(0xffffffff);
+	kinc_g2_draw_line(0, r / 2.0, r / 2.0 - 2.0 * UI_SCALE(), r - 2.0 * UI_SCALE(), 2.0 * UI_SCALE());
+	kinc_g2_draw_line(r / 2.0 - 3.0 * UI_SCALE(), r - 3.0 * UI_SCALE(), r / 2.0 + 5.0 * UI_SCALE(), r - 11.0 * UI_SCALE(), 2.0 * UI_SCALE());
+	kinc_g2_end();
 
 	if (current->radio_image.width != 0) {
 		kinc_g4_render_target_destroy(&current->radio_image);
 	}
 	r = UI_CHECK_SIZE();
 	kinc_g4_render_target_init(&current->radio_image, r, r, KINC_G4_RENDER_TARGET_FORMAT_32BIT, 0, 0);
-	arm_g2_set_render_target(&current->radio_image);
+	kinc_g2_set_render_target(&current->radio_image);
 	kinc_g4_clear(KINC_G4_CLEAR_COLOR, 0x00000000, 0, 0);
-	arm_g2_set_color(0xffaaaaaa);
-	arm_g2_fill_circle(r / 2.0, r / 2.0, r / 2.0, 0);
-	arm_g2_set_color(0xffffffff);
-	arm_g2_draw_circle(r / 2.0, r / 2.0, r / 2.0, 0, 1.0 * UI_SCALE());
-	arm_g2_end();
+	kinc_g2_set_color(0xffaaaaaa);
+	kinc_g2_fill_circle(r / 2.0, r / 2.0, r / 2.0, 0);
+	kinc_g2_set_color(0xffffffff);
+	kinc_g2_draw_circle(r / 2.0, r / 2.0, r / 2.0, 0, 1.0 * UI_SCALE());
+	kinc_g2_end();
 
 	if (current->radio_select_image.width != 0) {
 		kinc_g4_render_target_destroy(&current->radio_select_image);
 	}
 	r = UI_CHECK_SELECT_SIZE();
 	kinc_g4_render_target_init(&current->radio_select_image, r, r, KINC_G4_RENDER_TARGET_FORMAT_32BIT, 0, 0);
-	arm_g2_set_render_target(&current->radio_select_image);
+	kinc_g2_set_render_target(&current->radio_select_image);
 	kinc_g4_clear(KINC_G4_CLEAR_COLOR, 0x00000000, 0, 0);
-	arm_g2_set_color(0xffaaaaaa);
-	arm_g2_fill_circle(r / 2.0, r / 2.0, 4.5 * UI_SCALE(), 0);
-	arm_g2_set_color(0xffffffff);
-	arm_g2_fill_circle(r / 2.0, r / 2.0, 4.0 * UI_SCALE(), 0);
-	arm_g2_end();
+	kinc_g2_set_color(0xffaaaaaa);
+	kinc_g2_fill_circle(r / 2.0, r / 2.0, 4.5 * UI_SCALE(), 0);
+	kinc_g2_set_color(0xffffffff);
+	kinc_g2_fill_circle(r / 2.0, r / 2.0, 4.0 * UI_SCALE(), 0);
+	kinc_g2_end();
 
 	if (theme->ROUND_CORNERS) {
 		if (current->filled_round_corner_image.width != 0) {
@@ -938,24 +938,24 @@ void ui_bake_elements() {
 		}
 		r = 4.0 * UI_SCALE();
 		kinc_g4_render_target_init(&current->filled_round_corner_image, r, r, KINC_G4_RENDER_TARGET_FORMAT_32BIT, 0, 0);
-		arm_g2_set_render_target(&current->filled_round_corner_image);
+		kinc_g2_set_render_target(&current->filled_round_corner_image);
 		kinc_g4_clear(KINC_G4_CLEAR_COLOR, 0x00000000, 0, 0);
-		arm_g2_set_color(0xffffffff);
-		arm_g2_fill_circle(r, r, r, 0);
-		arm_g2_end();
+		kinc_g2_set_color(0xffffffff);
+		kinc_g2_fill_circle(r, r, r, 0);
+		kinc_g2_end();
 
 		if (current->round_corner_image.width != 0) {
 			kinc_g4_render_target_destroy(&current->round_corner_image);
 		}
 		kinc_g4_render_target_init(&current->round_corner_image, r, r, KINC_G4_RENDER_TARGET_FORMAT_32BIT, 0, 0);
-		arm_g2_set_render_target(&current->round_corner_image);
+		kinc_g2_set_render_target(&current->round_corner_image);
 		kinc_g4_clear(KINC_G4_CLEAR_COLOR, 0x00000000, 0, 0);
-		arm_g2_set_color(0xffffffff);
-		arm_g2_draw_circle(r, r, r, 0, 1);
-		arm_g2_end();
+		kinc_g2_set_color(0xffffffff);
+		kinc_g2_draw_circle(r, r, r, 0, 1);
+		kinc_g2_end();
 	}
 
-	arm_g2_restore_render_target();
+	kinc_g2_restore_render_target();
 	current->elements_baked = true;
 }
 
@@ -988,10 +988,10 @@ void ui_end_region(bool last) {
 }
 
 void ui_set_cursor_to_input(int align) {
-	float off = align == UI_ALIGN_LEFT ? UI_TEXT_OFFSET() : current->_w - arm_g2_string_width(current->ops->font->font_, current->font_size, current->text_selected);
+	float off = align == UI_ALIGN_LEFT ? UI_TEXT_OFFSET() : current->_w - kinc_g2_string_width(current->ops->font->font_, current->font_size, current->text_selected);
 	float x = current->input_x - (current->_window_x + current->_x + off);
 	current->cursor_x = 0;
-	while (current->cursor_x < strlen(current->text_selected) && arm_g2_sub_string_width(current->ops->font->font_, current->font_size, current->text_selected, 0, current->cursor_x) < x) {
+	while (current->cursor_x < strlen(current->text_selected) && kinc_g2_sub_string_width(current->ops->font->font_, current->font_size, current->text_selected, 0, current->cursor_x) < x) {
 		current->cursor_x++;
 	}
 	current->highlight_anchor = current->cursor_x;
@@ -1204,23 +1204,23 @@ void ui_update_text_edit(int align, bool editable, bool live_update) {
 			iend = current->cursor_x;
 		}
 
-		float hlstrw = arm_g2_sub_string_width(current->ops->font->font_, current->font_size, text, istart, iend);
-		float start_off = arm_g2_sub_string_width(current->ops->font->font_, current->font_size, text, 0, istart);
+		float hlstrw = kinc_g2_sub_string_width(current->ops->font->font_, current->font_size, text, istart, iend);
+		float start_off = kinc_g2_sub_string_width(current->ops->font->font_, current->font_size, text, 0, istart);
 		float hl_start = align == UI_ALIGN_LEFT ? current->_x + start_off + off : current->_x + current->_w - hlstrw - off;
 		if (align == UI_ALIGN_RIGHT) {
-			hl_start -= arm_g2_sub_string_width(current->ops->font->font_, current->font_size, text, iend, strlen(text));
+			hl_start -= kinc_g2_sub_string_width(current->ops->font->font_, current->font_size, text, iend, strlen(text));
 		}
-		arm_g2_set_color(theme->ACCENT_COL);
-		arm_g2_fill_rect(hl_start, current->_y + current->button_offset_y * 1.5, hlstrw, cursor_height);
+		kinc_g2_set_color(theme->ACCENT_COL);
+		kinc_g2_fill_rect(hl_start, current->_y + current->button_offset_y * 1.5, hlstrw, cursor_height);
 	}
 
 	// Draw cursor
 	int str_start = align == UI_ALIGN_LEFT ? 0 : current->cursor_x;
 	int str_length = align == UI_ALIGN_LEFT ? current->cursor_x : (strlen(text) - current->cursor_x);
-	float strw = arm_g2_sub_string_width(current->ops->font->font_, current->font_size, text, str_start, str_length);
+	float strw = kinc_g2_sub_string_width(current->ops->font->font_, current->font_size, text, str_start, str_length);
 	float cursor_x = align == UI_ALIGN_LEFT ? current->_x + strw + off : current->_x + current->_w - strw - off;
-	arm_g2_set_color(theme->TEXT_COL); // Cursor
-	arm_g2_fill_rect(cursor_x, current->_y + current->button_offset_y * 1.5, 1.0 * UI_SCALE(), cursor_height);
+	kinc_g2_set_color(theme->TEXT_COL); // Cursor
+	kinc_g2_fill_rect(cursor_x, current->_y + current->button_offset_y * 1.5, 1.0 * UI_SCALE(), cursor_height);
 
 	strcpy(current->text_selected, text);
 	if (live_update && current->text_selected_handle != NULL) {
@@ -1267,20 +1267,20 @@ void ui_draw_tabs() {
 		current->tab_handle->position = current->tab_count - 1;
 	}
 
-	arm_g2_set_color(theme->SEPARATOR_COL); // Tab background
+	kinc_g2_set_color(theme->SEPARATOR_COL); // Tab background
 	if (current->tab_vertical) {
-		arm_g2_fill_rect(0, current->_y, UI_ELEMENT_W(), current->_window_h);
+		kinc_g2_fill_rect(0, current->_y, UI_ELEMENT_W(), current->_window_h);
 	}
 	else {
-		arm_g2_fill_rect(0, current->_y, current->_window_w, current->button_offset_y + tab_h + 2);
+		kinc_g2_fill_rect(0, current->_y, current->_window_w, current->button_offset_y + tab_h + 2);
 	}
 
-	arm_g2_set_color(theme->BUTTON_COL); // Underline tab buttons
+	kinc_g2_set_color(theme->BUTTON_COL); // Underline tab buttons
 	if (current->tab_vertical) {
-		arm_g2_fill_rect(UI_ELEMENT_W(), current->_y, 1, current->_window_h);
+		kinc_g2_fill_rect(UI_ELEMENT_W(), current->_y, 1, current->_window_h);
 	}
 	else {
-		arm_g2_fill_rect(current->button_offset_y, current->_y + current->button_offset_y + tab_h + 2, current->_window_w - current->button_offset_y * 2.0, 1);
+		kinc_g2_fill_rect(current->button_offset_y, current->_y + current->button_offset_y + tab_h + 2, current->_window_w - current->button_offset_y * 2.0, 1);
 	}
 
 	float base_y = current->tab_vertical ? current->_y : current->_y + 2;
@@ -1292,7 +1292,7 @@ void ui_draw_tabs() {
 		current->_y = base_y + tab_y;
 		current->_w = current->tab_vertical ? (UI_ELEMENT_W() - 1 * UI_SCALE()) :
 			 		  theme->FULL_TABS ? (current->_window_w / current->tab_count) :
-					  (arm_g2_string_width(current->ops->font->font_, current->font_size, current->tab_names[i]) + current->button_offset_y * 2.0 + 18.0 * UI_SCALE());
+					  (kinc_g2_string_width(current->ops->font->font_, current->font_size, current->tab_names[i]) + current->button_offset_y * 2.0 + 18.0 * UI_SCALE());
 		bool released = ui_get_released(tab_h);
 		bool started = ui_get_started(tab_h);
 		bool pushed = ui_get_pushed(tab_h);
@@ -1318,7 +1318,7 @@ void ui_draw_tabs() {
 		}
 		bool selected = current->tab_handle->position == i;
 
-		arm_g2_set_color((pushed || hover) ? theme->HOVER_COL :
+		kinc_g2_set_color((pushed || hover) ? theme->HOVER_COL :
 			current->tab_colors[i] != -1 ? current->tab_colors[i] :
 			selected ? theme->WINDOW_BG_COL :
 			theme->SEPARATOR_COL);
@@ -1329,8 +1329,8 @@ void ui_draw_tabs() {
 			tab_x += current->_w + 1;
 		}
 		// ui_draw_rect(true, current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w, tab_h); // Round corners
-		arm_g2_fill_rect(current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w, tab_h);
-		arm_g2_set_color(theme->TEXT_COL);
+		kinc_g2_fill_rect(current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w, tab_h);
+		kinc_g2_set_color(theme->TEXT_COL);
 		if (!selected) {
 			ui_fade_color(0.65);
 		}
@@ -1339,19 +1339,19 @@ void ui_draw_tabs() {
 		if (selected) { // Hide underline for active tab
 			if (current->tab_vertical) {
 				// Hide underline
-				// arm_g2_set_color(theme->WINDOW_BG_COL);
-				// arm_g2_fill_rect(current->_x + current->button_offset_y + current->_w - 1, current->_y + current->button_offset_y - 1, 2, tab_h + current->button_offset_y);
+				// kinc_g2_set_color(theme->WINDOW_BG_COL);
+				// kinc_g2_fill_rect(current->_x + current->button_offset_y + current->_w - 1, current->_y + current->button_offset_y - 1, 2, tab_h + current->button_offset_y);
 				// Highlight
-				arm_g2_set_color(theme->HIGHLIGHT_COL);
-				arm_g2_fill_rect(current->_x + current->button_offset_y, current->_y + current->button_offset_y - 1, 2, tab_h + current->button_offset_y);
+				kinc_g2_set_color(theme->HIGHLIGHT_COL);
+				kinc_g2_fill_rect(current->_x + current->button_offset_y, current->_y + current->button_offset_y - 1, 2, tab_h + current->button_offset_y);
 			}
 			else {
 				// Hide underline
-				arm_g2_set_color(theme->WINDOW_BG_COL);
-				arm_g2_fill_rect(current->_x + current->button_offset_y, current->_y + current->button_offset_y + tab_h, current->_w, 1);
+				kinc_g2_set_color(theme->WINDOW_BG_COL);
+				kinc_g2_fill_rect(current->_x + current->button_offset_y, current->_y + current->button_offset_y + tab_h, current->_w, 1);
 				// Highlight
-				arm_g2_set_color(theme->HIGHLIGHT_COL);
-				arm_g2_fill_rect(current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w, 2);
+				kinc_g2_set_color(theme->HIGHLIGHT_COL);
+				kinc_g2_fill_rect(current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w, 2);
 			}
 		}
 
@@ -1361,12 +1361,12 @@ void ui_draw_tabs() {
 			if (sep_col < 0xff000000) {
 				sep_col = theme->SEPARATOR_COL + 0x00050505;
 			}
-			arm_g2_set_color(sep_col);
+			kinc_g2_set_color(sep_col);
 			if (current->tab_vertical) {
-				arm_g2_fill_rect(current->_x, current->_y + tab_h, current->_w, 1);
+				kinc_g2_fill_rect(current->_x, current->_y + tab_h, current->_w, 1);
 			}
 			else {
-				arm_g2_fill_rect(current->_x + current->button_offset_y + current->_w, current->_y, 1, tab_h);
+				kinc_g2_fill_rect(current->_x + current->button_offset_y + current->_w, current->_y, 1, tab_h);
 			}
 		}
 	}
@@ -1382,14 +1382,14 @@ void ui_draw_tabs() {
 void ui_draw_arrow(bool selected) {
 	float x = current->_x + current->arrow_offset_x;
 	float y = current->_y + current->arrow_offset_y;
-	arm_g2_set_color(theme->TEXT_COL);
+	kinc_g2_set_color(theme->TEXT_COL);
 	if (selected) {
-		arm_g2_fill_triangle(x, y,
+		kinc_g2_fill_triangle(x, y,
 						 x + UI_ARROW_SIZE(), y,
 						 x + UI_ARROW_SIZE() / 2.0, y + UI_ARROW_SIZE());
 	}
 	else {
-		arm_g2_fill_triangle(x, y,
+		kinc_g2_fill_triangle(x, y,
 						 x, y + UI_ARROW_SIZE(),
 						 x + UI_ARROW_SIZE(), y + UI_ARROW_SIZE() / 2.0);
 	}
@@ -1399,13 +1399,13 @@ void ui_draw_tree(bool selected) {
 	float SIGN_W = 7.0 * UI_SCALE();
 	float x = current->_x + current->arrow_offset_x + 1;
 	float y = current->_y + current->arrow_offset_y + 1;
-	arm_g2_set_color(theme->TEXT_COL);
+	kinc_g2_set_color(theme->TEXT_COL);
 	if (selected) {
-		arm_g2_fill_rect(x, y + SIGN_W / 2.0 - 1, SIGN_W, SIGN_W / 8.0);
+		kinc_g2_fill_rect(x, y + SIGN_W / 2.0 - 1, SIGN_W, SIGN_W / 8.0);
 	}
 	else {
-		arm_g2_fill_rect(x, y + SIGN_W / 2.0 - 1, SIGN_W, SIGN_W / 8.0);
-		arm_g2_fill_rect(x + SIGN_W / 2.0 - 1, y, SIGN_W / 8.0, SIGN_W);
+		kinc_g2_fill_rect(x, y + SIGN_W / 2.0 - 1, SIGN_W, SIGN_W / 8.0);
+		kinc_g2_fill_rect(x + SIGN_W / 2.0 - 1, y, SIGN_W / 8.0, SIGN_W);
 	}
 }
 
@@ -1413,34 +1413,34 @@ void ui_draw_check(bool selected, bool hover) {
 	float x = current->_x + current->check_offset_x;
 	float y = current->_y + current->check_offset_y;
 
-	arm_g2_set_color(selected ? theme->HIGHLIGHT_COL : theme->PRESSED_COL);
+	kinc_g2_set_color(selected ? theme->HIGHLIGHT_COL : theme->PRESSED_COL);
 	ui_draw_rect(true, x, y, UI_CHECK_SIZE(), UI_CHECK_SIZE()); // Bg
 
-	arm_g2_set_color(hover ? theme->HOVER_COL : theme->BUTTON_COL);
+	kinc_g2_set_color(hover ? theme->HOVER_COL : theme->BUTTON_COL);
 	ui_draw_rect(false, x, y, UI_CHECK_SIZE(), UI_CHECK_SIZE()); // Bg
 
 	if (selected) { // Check
-		arm_g2_set_color(hover ? theme->TEXT_COL : theme->LABEL_COL);
+		kinc_g2_set_color(hover ? theme->TEXT_COL : theme->LABEL_COL);
 		if (!current->enabled) {
 			ui_fade_color(0.25);
 		}
 		int size = UI_CHECK_SELECT_SIZE();
-		arm_g2_draw_scaled_render_target(&current->check_select_image, x + current->check_select_offset_x, y + current->check_select_offset_y, size, size);
+		kinc_g2_draw_scaled_render_target(&current->check_select_image, x + current->check_select_offset_x, y + current->check_select_offset_y, size, size);
 	}
 }
 
 void ui_draw_radio(bool selected, bool hover) {
 	float x = current->_x + current->radio_offset_x;
 	float y = current->_y + current->radio_offset_y;
-	arm_g2_set_color(selected ? theme->HIGHLIGHT_COL : hover ? theme->HOVER_COL : theme->BUTTON_COL);
-	arm_g2_draw_render_target(&current->radio_image, x, y); // Circle bg
+	kinc_g2_set_color(selected ? theme->HIGHLIGHT_COL : hover ? theme->HOVER_COL : theme->BUTTON_COL);
+	kinc_g2_draw_render_target(&current->radio_image, x, y); // Circle bg
 
 	if (selected) { // Check
-		arm_g2_set_color(theme->LABEL_COL);
+		kinc_g2_set_color(theme->LABEL_COL);
 		if (!current->enabled) {
 			ui_fade_color(0.25);
 		}
-		arm_g2_draw_render_target(&current->radio_select_image, x + current->radio_select_offset_x, y + current->radio_select_offset_y); // Circle
+		kinc_g2_draw_render_target(&current->radio_select_image, x + current->radio_select_offset_x, y + current->radio_select_offset_y); // Circle
 	}
 }
 
@@ -1449,15 +1449,15 @@ void ui_draw_slider(float value, float from, float to, bool filled, bool hover) 
 	float y = current->_y + current->button_offset_y;
 	float w = current->_w - current->button_offset_y * 2.0;
 
-	arm_g2_set_color(theme->PRESSED_COL);
+	kinc_g2_set_color(theme->PRESSED_COL);
 	ui_draw_rect(true, x, y, w, UI_BUTTON_H()); // Bg
 
 	if (hover) {
-		arm_g2_set_color(theme->HOVER_COL);
+		kinc_g2_set_color(theme->HOVER_COL);
 		ui_draw_rect(false, x, y, w, UI_BUTTON_H()); // Bg
 	}
 
-	arm_g2_set_color(hover ? theme->HOVER_COL : theme->BUTTON_COL);
+	kinc_g2_set_color(hover ? theme->HOVER_COL : theme->BUTTON_COL);
 	float offset = (value - from) / (to - from);
 	float bar_w = 8.0 * UI_SCALE(); // Unfilled bar
 	float slider_x = filled ? x : x + (w - bar_w) * offset;
@@ -1470,7 +1470,7 @@ void ui_draw_slider(float value, float from, float to, bool filled, bool hover) 
 void ui_set_scale(float factor) {
 	current->ops->scale_factor = factor;
 	current->font_size = UI_FONT_SIZE();
-	float font_height = arm_g2_font_height(current->ops->font->font_, current->font_size);
+	float font_height = kinc_g2_font_height(current->ops->font->font_, current->font_size);
 	current->font_offset_y = (UI_ELEMENT_H() - font_height) / 2.0; // Precalculate offsets
 	current->arrow_offset_y = (UI_ELEMENT_H() - UI_ARROW_SIZE()) / 2.0;
 	current->arrow_offset_x = current->arrow_offset_y;
@@ -1532,7 +1532,7 @@ void ui_begin_sticky() {
 }
 
 void ui_end_sticky() {
-	arm_g2_end();
+	kinc_g2_end();
 	current->sticky = false;
 	current->scissor = true;
 	kinc_g4_scissor(0, current->_y, current->_window_w, current->_window_h - current->_y);
@@ -1558,8 +1558,8 @@ void ui_end_window(bool bind_global_g) {
 		}
 
 		if (handle->drag_enabled) { // Draggable header
-			arm_g2_set_color(theme->SEPARATOR_COL);
-			arm_g2_fill_rect(0, 0, current->_window_w, UI_HEADER_DRAG_H());
+			kinc_g2_set_color(theme->SEPARATOR_COL);
+			kinc_g2_fill_rect(0, 0, current->_window_w, UI_HEADER_DRAG_H());
 		}
 
 		float window_size = handle->layout == UI_LAYOUT_VERTICAL ? current->_window_h - current->window_header_h : current->_window_w - current->window_header_w; // Exclude header
@@ -1616,7 +1616,7 @@ void ui_end_window(bool bind_global_g) {
 			}
 
 			if (handle->layout == UI_LAYOUT_VERTICAL) {
-				arm_g2_set_color(theme->BUTTON_COL); // Bar
+				kinc_g2_set_color(theme->BUTTON_COL); // Bar
 				bool scrollbar_focus = ui_input_in_rect(current->_window_x + current->_window_w - UI_SCROLL_W(), wy, UI_SCROLL_W(), window_size);
 				float bar_w = (scrollbar_focus || handle == current->scroll_handle) ? UI_SCROLL_W() : UI_SCROLL_MINI_W();
 				ui_draw_rect(true, current->_window_w - bar_w - current->scroll_align, bar_y, bar_w, bar_h);
@@ -1639,10 +1639,10 @@ void ui_end_window(bool bind_global_g) {
 	// Draw window texture
 	if (ui_always_redraw_window || handle->redraws > -4) {
 		if (bind_global_g) {
-			arm_g2_restore_render_target();
+			kinc_g2_restore_render_target();
 		}
-		arm_g2_set_color(0xffffffff);
-		arm_g2_draw_render_target(&handle->texture, current->_window_x, current->_window_y);
+		kinc_g2_set_color(0xffffffff);
+		kinc_g2_draw_render_target(&handle->texture, current->_window_x, current->_window_y);
 		if (handle->redraws <= 0) {
 			handle->redraws--;
 		}
@@ -1666,7 +1666,7 @@ bool _ui_window(ui_handle_t *handle, int x, int y, int w, int h, bool drag) {
 	}
 	current->window_ended = false;
 
-	arm_g2_set_render_target(&handle->texture);
+	kinc_g2_set_render_target(&handle->texture);
 	current->current_window = handle;
 	current->_window_x = x + handle->drag_x;
 	current->_window_y = y + handle->drag_y;
@@ -1719,8 +1719,8 @@ bool _ui_window(ui_handle_t *handle, int x, int y, int w, int h, bool drag) {
 	}
 	else {
 		kinc_g4_clear(KINC_G4_CLEAR_COLOR, 0x00000000, 0, 0);
-		arm_g2_set_color(theme->WINDOW_BG_COL);
-		arm_g2_fill_rect(current->_x, current->_y - handle->scroll_offset, handle->last_max_x, handle->last_max_y);
+		kinc_g2_set_color(theme->WINDOW_BG_COL);
+		kinc_g2_fill_rect(current->_x, current->_y - handle->scroll_offset, handle->last_max_x, handle->last_max_y);
 	}
 
 	handle->drag_enabled = drag;
@@ -1755,7 +1755,7 @@ bool ui_button(char *text, int align, char *label/*, kinc_g4_texture_t *icon, in
 		current->changed = true;
 	}
 
-	arm_g2_set_color(pushed ? theme->PRESSED_COL :
+	kinc_g2_set_color(pushed ? theme->PRESSED_COL :
 		(!theme->FILL_BUTTON_BG && hover) ? theme->HIGHLIGHT_COL :
 				 	  hover ? theme->HOVER_COL :
 				 	  theme->BUTTON_COL);
@@ -1765,21 +1765,21 @@ bool ui_button(char *text, int align, char *label/*, kinc_g4_texture_t *icon, in
 			current->_w - current->button_offset_y * 2, UI_BUTTON_H());
 	}
 
-	arm_g2_set_color(theme->TEXT_COL);
+	kinc_g2_set_color(theme->TEXT_COL);
 	ui_draw_string(text, theme->TEXT_OFFSET, 0, align, true);
 	if (label != NULL) {
-		arm_g2_set_color(theme->LABEL_COL);
+		kinc_g2_set_color(theme->LABEL_COL);
 		ui_draw_string(label, theme->TEXT_OFFSET, 0, align == UI_ALIGN_RIGHT ? UI_ALIGN_LEFT : UI_ALIGN_RIGHT, true);
 	}
 
 	/*
 	if (icon != NULL) {
-		arm_g2_set_color(0xffffffff);
+		kinc_g2_set_color(0xffffffff);
 		if (current->image_invert_y) {
-			arm_g2_draw_scaled_sub_image(icon, sx, sy, sw, sh, _x + current->button_offset_y, _y - 1 + sh, sw, -sh);
+			kinc_g2_draw_scaled_sub_texture(icon, sx, sy, sw, sh, _x + current->button_offset_y, _y - 1 + sh, sw, -sh);
 		}
 		else {
-			arm_g2_draw_scaled_sub_image(icon, sx, sy, sw, sh, _x + current->button_offset_y, _y - 1, sw, sh);
+			kinc_g2_draw_scaled_sub_texture(icon, sx, sy, sw, sh, _x + current->button_offset_y, _y - 1, sw, sh);
 		}
 	}
 	*/
@@ -1800,7 +1800,7 @@ int ui_text(char *text, int align, int bg) {
 		ui_split_text(text, align, bg);
 		return UI_STATE_IDLE;
 	}
-	float h = fmax(UI_ELEMENT_H(), arm_g2_font_height(current->ops->font->font_, current->font_size));
+	float h = fmax(UI_ELEMENT_H(), kinc_g2_font_height(current->ops->font->font_, current->font_size));
 	if (!ui_is_visible(h)) {
 		ui_end_element_of_size(h + UI_ELEMENT_OFFSET());
 		return UI_STATE_IDLE;
@@ -1810,10 +1810,10 @@ int ui_text(char *text, int align, int bg) {
 	bool released = ui_get_released(h);
 	bool hover = ui_get_hover(h);
 	if (bg != 0x0000000) {
-		arm_g2_set_color(bg);
-		arm_g2_fill_rect(current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w - current->button_offset_y * 2, UI_BUTTON_H());
+		kinc_g2_set_color(bg);
+		kinc_g2_fill_rect(current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w - current->button_offset_y * 2, UI_BUTTON_H());
 	}
-	arm_g2_set_color(theme->TEXT_COL);
+	kinc_g2_set_color(theme->TEXT_COL);
 	ui_draw_string(text, theme->TEXT_OFFSET, 0, align, true);
 
 	ui_end_element_of_size(h + UI_ELEMENT_OFFSET());
@@ -1869,7 +1869,7 @@ bool ui_panel(ui_handle_t *handle, char *text, bool is_tree, bool filled) {
 		ui_draw_arrow(handle->selected);
 	}
 
-	arm_g2_set_color(theme->LABEL_COL); // Title
+	kinc_g2_set_color(theme->LABEL_COL); // Title
 	ui_draw_string(text, current->title_offset_x, 0, UI_ALIGN_LEFT, true);
 
 	ui_end_element();
@@ -1896,19 +1896,19 @@ static int image_height(void *image, bool is_rt) {
 
 static void draw_scaled_image(void *image, bool is_rt, float dx, float dy, float dw, float dh) {
 	if (is_rt) {
-		arm_g2_draw_scaled_render_target((kinc_g4_render_target_t *)image, dx, dy, dw, dh);
+		kinc_g2_draw_scaled_render_target((kinc_g4_render_target_t *)image, dx, dy, dw, dh);
 	}
 	else {
-		arm_g2_draw_scaled_image((kinc_g4_texture_t *)image, dx, dy, dw, dh);
+		kinc_g2_draw_scaled_image((kinc_g4_texture_t *)image, dx, dy, dw, dh);
 	}
 }
 
 static void draw_scaled_sub_image(void *image, bool is_rt, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh) {
 	if (is_rt) {
-		arm_g2_draw_scaled_sub_render_target((kinc_g4_render_target_t *)image, sx, sy, sw, sh, dx, dy, dw, dh);
+		kinc_g2_draw_scaled_sub_render_target((kinc_g4_render_target_t *)image, sx, sy, sw, sh, dx, dy, dw, dh);
 	}
 	else {
-		arm_g2_draw_scaled_sub_image((kinc_g4_texture_t *)image, sx, sy, sw, sh, dx, dy, dw, dh);
+		kinc_g2_draw_scaled_sub_texture((kinc_g4_texture_t *)image, sx, sy, sw, sh, dx, dy, dw, dh);
 	}
 }
 
@@ -1958,7 +1958,7 @@ int ui_sub_image(/*kinc_g4_texture_t kinc_g4_render_target_t*/ void *image, bool
 	// 	}
 	// }
 
-	arm_g2_set_color(tint);
+	kinc_g2_set_color(tint);
 	if (!current->enabled) {
 		ui_fade_color(0.25);
 	}
@@ -1997,7 +1997,7 @@ char *ui_text_input(ui_handle_t *handle, char *label, int align, bool editable, 
 	if (hover && ui_on_text_hover != NULL) {
 		ui_on_text_hover();
 	}
-	arm_g2_set_color(hover ? theme->HOVER_COL : theme->BUTTON_COL); // Text bg
+	kinc_g2_set_color(hover ? theme->HOVER_COL : theme->BUTTON_COL); // Text bg
 	ui_draw_rect(false, current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w - current->button_offset_y * 2, UI_BUTTON_H());
 
 	bool released = ui_get_released(UI_ELEMENT_H());
@@ -2024,12 +2024,12 @@ char *ui_text_input(ui_handle_t *handle, char *label, int align, bool editable, 
 	}
 
 	if (label[0] != '\0') {
-		arm_g2_set_color(theme->LABEL_COL); // Label
+		kinc_g2_set_color(theme->LABEL_COL); // Label
 		int label_align = align == UI_ALIGN_RIGHT ? UI_ALIGN_LEFT : UI_ALIGN_RIGHT;
 		ui_draw_string(label, label_align == UI_ALIGN_LEFT ? theme->TEXT_OFFSET : 0, 0, label_align, true);
 	}
 
-	arm_g2_set_color(theme->TEXT_COL); // Text
+	kinc_g2_set_color(theme->TEXT_COL); // Text
 	if (current->text_selected_handle != handle) {
 		ui_draw_string(handle->text, theme->TEXT_OFFSET, 0, align, true);
 	}
@@ -2055,11 +2055,11 @@ bool ui_check(ui_handle_t *handle, char *text, char *label) {
 	bool hover = ui_get_hover(UI_ELEMENT_H());
 	ui_draw_check(handle->selected, hover); // Check
 
-	arm_g2_set_color(theme->TEXT_COL); // Text
+	kinc_g2_set_color(theme->TEXT_COL); // Text
 	ui_draw_string(text, current->title_offset_x, 0, UI_ALIGN_LEFT, true);
 
 	if (label[0] != '\0') {
-		arm_g2_set_color(theme->LABEL_COL);
+		kinc_g2_set_color(theme->LABEL_COL);
 		ui_draw_string(label, theme->TEXT_OFFSET, 0, UI_ALIGN_RIGHT, true);
 	}
 
@@ -2084,11 +2084,11 @@ bool ui_radio(ui_handle_t *handle, int position, char *text, char *label) {
 	bool hover = ui_get_hover(UI_ELEMENT_H());
 	ui_draw_radio(handle->position == position, hover); // Radio
 
-	arm_g2_set_color(theme->TEXT_COL); // Text
+	kinc_g2_set_color(theme->TEXT_COL); // Text
 	ui_draw_string(text, current->title_offset_x, 0, UI_ALIGN_LEFT, true);
 
 	if (label[0] != '\0') {
-		arm_g2_set_color(theme->LABEL_COL);
+		kinc_g2_set_color(theme->LABEL_COL);
 		ui_draw_string(label, theme->TEXT_OFFSET, 0, UI_ALIGN_RIGHT, true);
 	}
 
@@ -2115,7 +2115,7 @@ int ui_combo(ui_handle_t *handle, char_ptr_array_t *texts, char *label, bool sho
 			current->combo_selected_w = current->_w;
 			current->combo_search_bar = search_bar;
 			for (int i = 0; i < texts->length; ++i) { // Adapt combo list width to combo item width
-				int w = (int)arm_g2_string_width(current->ops->font->font_, current->font_size, texts->buffer[i]) + 10;
+				int w = (int)kinc_g2_string_width(current->ops->font->font_, current->font_size, texts->buffer[i]) + 10;
 				if (current->combo_selected_w < w) {
 					current->combo_selected_w = w;
 				}
@@ -2144,30 +2144,30 @@ int ui_combo(ui_handle_t *handle, char_ptr_array_t *texts, char *label, bool sho
 		handle->changed = false;
 	}
 
-	arm_g2_set_color(theme->PRESSED_COL); // Bg
+	kinc_g2_set_color(theme->PRESSED_COL); // Bg
 	ui_draw_rect(true, current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w - current->button_offset_y * 2, UI_BUTTON_H());
 
 	bool hover = ui_get_hover(UI_ELEMENT_H());
-	arm_g2_set_color(hover ? theme->HOVER_COL : theme->BUTTON_COL);
+	kinc_g2_set_color(hover ? theme->HOVER_COL : theme->BUTTON_COL);
 	ui_draw_rect(false, current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w - current->button_offset_y * 2, UI_BUTTON_H());
 
 	int x = current->_x + current->_w - current->arrow_offset_x - 8;
 	int y = current->_y + current->arrow_offset_y + 3;
 
-	arm_g2_set_color(theme->HOVER_COL);
+	kinc_g2_set_color(theme->HOVER_COL);
 	// if (handle == current->combo_selected_handle) {
 	//	// Flip arrow when combo is open
-	//	arm_g2_fill_triangle(x, y, x + UI_ARROW_SIZE(), y, x + UI_ARROW_SIZE() / 2.0, y - UI_ARROW_SIZE() / 2.0);
+	//	kinc_g2_fill_triangle(x, y, x + UI_ARROW_SIZE(), y, x + UI_ARROW_SIZE() / 2.0, y - UI_ARROW_SIZE() / 2.0);
 	// }
 	// else {
-		arm_g2_fill_triangle(x, y, x + UI_ARROW_SIZE(), y, x + UI_ARROW_SIZE() / 2.0, y + UI_ARROW_SIZE() / 2.0);
+		kinc_g2_fill_triangle(x, y, x + UI_ARROW_SIZE(), y, x + UI_ARROW_SIZE() / 2.0, y + UI_ARROW_SIZE() / 2.0);
 	// }
 
 	if (show_label && label[0] != '\0') {
 		if (align == UI_ALIGN_LEFT) {
 			current->_x -= 15;
 		}
-		arm_g2_set_color(theme->LABEL_COL);
+		kinc_g2_set_color(theme->LABEL_COL);
 		ui_draw_string(label, theme->TEXT_OFFSET, 0, align == UI_ALIGN_LEFT ? UI_ALIGN_RIGHT : UI_ALIGN_LEFT, true);
 		if (align == UI_ALIGN_LEFT) {
 			current->_x += 15;
@@ -2177,7 +2177,7 @@ int ui_combo(ui_handle_t *handle, char_ptr_array_t *texts, char *label, bool sho
 	if (align == UI_ALIGN_RIGHT) {
 		current->_x -= 15;
 	}
-	arm_g2_set_color(theme->TEXT_COL); // Value
+	kinc_g2_set_color(theme->TEXT_COL); // Value
 	if (handle->position < texts->length) {
 		ui_draw_string(texts->buffer[handle->position], theme->TEXT_OFFSET, 0, align, true);
 	}
@@ -2257,11 +2257,11 @@ float ui_slider(ui_handle_t *handle, char *text, float from, float to, bool fill
 		handle->changed = current->changed = true;
 	}
 
-	arm_g2_set_color(theme->LABEL_COL); // Text
+	kinc_g2_set_color(theme->LABEL_COL); // Text
 	ui_draw_string(text, theme->TEXT_OFFSET, 0, align, true);
 
 	if (display_value) {
-		arm_g2_set_color(theme->TEXT_COL); // Value
+		kinc_g2_set_color(theme->TEXT_COL); // Value
 		if (current->text_selected_handle != handle) {
 			sprintf(temp, "%.2f", round(handle->value * precision) / precision);
 			string_strip_trailing_zeros(temp);
@@ -2282,8 +2282,8 @@ void ui_separator(int h, bool fill) {
 		return;
 	}
 	if (fill) {
-		arm_g2_set_color(theme->SEPARATOR_COL);
-		arm_g2_fill_rect(current->_x, current->_y, current->_w, h * UI_SCALE());
+		kinc_g2_set_color(theme->SEPARATOR_COL);
+		kinc_g2_fill_rect(current->_x, current->_y, current->_w, h * UI_SCALE());
 	}
 	current->_y += h * UI_SCALE();
 }
