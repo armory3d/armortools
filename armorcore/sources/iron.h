@@ -356,7 +356,7 @@ string_t *iron_get_arg(i32 index) {
 #endif
 int LZ4_decompress_safe(const char *source, char *dest, int compressed_size, int maxOutputSize);
 #define STB_IMAGE_IMPLEMENTATION
-#include <kinc/libs/stb_image.h>
+#include <stb_image.h>
 #ifdef KINC_DIRECT3D11
 #include <d3d11.h>
 #endif

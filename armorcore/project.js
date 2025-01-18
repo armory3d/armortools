@@ -2,21 +2,15 @@
 let project = new Project(flags.name);
 
 {
-	project.add_define("KINC_A1");
-	project.add_define("KINC_A2");
 	project.add_define("KINC_G1");
 	project.add_define("KINC_G2");
 	let g5 = false;
 
-	// project.add_cfiles("sources/kinc/**");
 	project.add_cfiles("sources/kinc/*");
-	project.add_cfiles("sources/kinc/audio1/*");
-	project.add_cfiles("sources/kinc/audio2/*");
 	project.add_cfiles("sources/kinc/graphics2/*");
 	project.add_cfiles("sources/kinc/graphics4/*");
 	project.add_cfiles("sources/kinc/input/*");
 	project.add_cfiles("sources/kinc/io/*");
-	project.add_cfiles("sources/kinc/libs/*");
 	project.add_cfiles("sources/kinc/math/*");
 	project.add_cfiles("sources/kinc/network/*");
 	project.add_cfiles("sources/kinc/simd/*");
@@ -303,8 +297,14 @@ project.add_define("IRON_C_PATH=\"" + os_cwd() + "/build/iron.c" + "\"");
 project.add_define("EMBED_H_PATH=\"" + os_cwd() + "/build/embed.h" + "\"");
 
 if (flags.with_audio) {
+	project.add_define("KINC_A1");
+	project.add_define("KINC_A2");
 	project.add_define("WITH_AUDIO");
 	project.add_define("arm_audio");
+
+	project.add_cfiles("sources/kinc/audio1/*");
+	project.add_cfiles("sources/kinc/audio2/*");
+	project.add_cfiles("sources/libs/stb_vorbis.c");
 }
 
 if (flags.with_eval) {

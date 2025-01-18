@@ -4,10 +4,10 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "../../sources/kinc/libs/lz4x.h"
+#include "../../sources/libs/lz4x.h"
 #define STBI_KEEP_STDIO
 #define STB_IMAGE_IMPLEMENTATION
-#include "../../sources/kinc/libs/stb_image.h"
+#include "../../sources/libs/stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "../../sources/libs/stb_image_write.h"
 #define STB_IMAGE_RESIZE_IMPLEMENTATION

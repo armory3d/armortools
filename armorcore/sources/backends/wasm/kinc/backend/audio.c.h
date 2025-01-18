@@ -1,3 +1,6 @@
+
+#ifdef KINC_A2
+
 #include <kinc/audio2/audio.h>
 #include <stdlib.h>
 
@@ -16,3 +19,5 @@ static uint32_t samples_per_second = 44100;
 uint32_t kinc_a2_samples_per_second(void) {
 	return samples_per_second;
 }
+
+#endif

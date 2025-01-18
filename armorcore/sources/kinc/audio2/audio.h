@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef KINC_A2
+
 #include <kinc/global.h>
 
 #include <stdint.h>
@@ -120,4 +122,6 @@ void kinc_a2_internal_sample_rate_callback(void) {
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

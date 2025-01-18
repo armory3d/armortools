@@ -697,7 +697,7 @@ void arm_g2_text_draw_buffer(bool end) {
 }
 
 #define STB_TRUETYPE_IMPLEMENTATION
-#include "stb_truetype.h"
+#include <stb_truetype.h>
 
 typedef struct arm_g2_font_aligned_quad {
 	float x0, y0, s0, t0; // Top-left

@@ -1,7 +1,7 @@
 #include "SystemMicrosoft.h"
 
 #include <kinc/error.h>
-#include <kinc/libs/stb_sprintf.h>
+#include <stb_sprintf.h>
 
 #define S_OK ((HRESULT)0L)
 

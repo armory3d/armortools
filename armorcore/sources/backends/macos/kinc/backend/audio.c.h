@@ -1,3 +1,6 @@
+
+#ifdef KINC_A2
+
 #include <CoreAudio/AudioHardware.h>
 #include <CoreServices/CoreServices.h>
 
@@ -156,3 +159,5 @@ void kinc_a2_shutdown(void) {
 
 	soundPlaying = false;
 }
+
+#endif

@@ -146,7 +146,7 @@ int kinc_image_format_sizeof(kinc_image_format_t format);
 #ifdef KINC_IMPLEMENTATION
 
 #include "image.h"
-#include <kinc/libs/lz4x.h>
+#include <lz4x.h>
 
 #ifdef KINC_IMPLEMENTATION_ROOT
 #undef KINC_IMPLEMENTATION
@@ -217,7 +217,7 @@ static void buffer_free(void *p) {}
 #ifdef __clang__
 #pragma clang diagnostic ignored "-Wunused-function"
 #endif
-#include <kinc/libs/stb_image.h>
+#include <stb_image.h>
 #include <stdio.h>
 #include <string.h>
 

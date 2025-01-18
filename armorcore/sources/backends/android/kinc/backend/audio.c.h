@@ -1,3 +1,6 @@
+
+#ifdef KINC_A2
+
 #include <kinc/audio2/audio.h>
 
 #include <SLES/OpenSLES.h>
@@ -131,3 +134,5 @@ void kinc_a2_shutdown() {
 uint32_t kinc_a2_samples_per_second(void) {
 	return 44100;
 }
+
+#endif

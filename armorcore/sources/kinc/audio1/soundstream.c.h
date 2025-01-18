@@ -1,7 +1,7 @@
 #include "soundstream.h"
 
 #define STB_VORBIS_HEADER_ONLY
-#include <kinc/libs/stb_vorbis.c>
+#include <stb_vorbis.c>
 
 #include <kinc/io/filereader.h>
 

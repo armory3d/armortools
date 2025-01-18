@@ -1,3 +1,6 @@
+
+#ifdef KINC_A2
+
 #import <AudioToolbox/AudioToolbox.h>
 #import <Foundation/Foundation.h>
 
@@ -221,3 +224,5 @@ void kinc_a2_shutdown(void) {
 uint32_t kinc_a2_samples_per_second(void) {
 	return samples_per_second;
 }
+
+#endif

@@ -1,7 +1,7 @@
 #include <kinc/graphics4/pipeline.h>
 #include <kinc/graphics4/shader.h>
 #include <kinc/graphics4/vertexbuffer.h>
-#include <kinc/libs/stb_sprintf.h>
+#include <stb_sprintf.h>
 #include <kinc/log.h>
 
 kinc_g4_pipeline_t *currentPipeline = NULL;

@@ -1,3 +1,6 @@
+
+#ifdef KINC_A2
+
 #include <kinc/audio2/audio.h>
 
 #include <alsa/asoundlib.h>
@@ -231,3 +234,5 @@ void kinc_a2_update() {}
 void kinc_a2_shutdown() {
 	audioRunning = false;
 }
+
+#endif
