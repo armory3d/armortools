@@ -161,6 +161,7 @@ function project_new(reset_layers: bool = true) {
 	}
 	context_raw.layer_preview_dirty = true;
 	context_raw.layer_filter = 0;
+	context_raw.texture = null;
 	project_mesh_assets = [];
 
 	viewport_reset();
