@@ -893,15 +893,27 @@ void kinc_g5_command_list_set_image_texture(kinc_g5_command_list_t *list, kinc_g
 void kinc_g5_command_list_set_render_target_face(kinc_g5_command_list_t *list, kinc_g5_render_target_t *texture, int face) {}
 
 void kinc_g5_command_list_set_texture_from_render_target(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_render_target_t *target) {
-	target->impl.stage = unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT];
-	vulkanRenderTargets[unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT]] = target;
-	vulkanTextures[unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT]] = NULL;
+	if (unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT] >= 0) {
+		target->impl.stage = unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT];
+		vulkanRenderTargets[unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT]] = target;
+	}
+	else if (unit.stages[KINC_G5_SHADER_TYPE_VERTEX] >= 0) {
+		target->impl.stage = unit.stages[KINC_G5_SHADER_TYPE_VERTEX];
+		vulkanRenderTargets[unit.stages[KINC_G5_SHADER_TYPE_VERTEX]] = target;
+	}
+	vulkanTextures[target->impl.stage] = NULL;
 }
 
 void kinc_g5_command_list_set_texture_from_render_target_depth(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_render_target_t *target) {
-	target->impl.stage_depth = unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT];
-	vulkanRenderTargets[unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT]] = target;
-	vulkanTextures[unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT]] = NULL;
+	if (unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT] >= 0) {
+		target->impl.stage_depth = unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT];
+		vulkanRenderTargets[unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT]] = target;
+	}
+	else if (unit.stages[KINC_G5_SHADER_TYPE_VERTEX] >= 0) {
+		target->impl.stage_depth = unit.stages[KINC_G5_SHADER_TYPE_VERTEX];
+		vulkanRenderTargets[unit.stages[KINC_G5_SHADER_TYPE_VERTEX]] = target;
+	}
+	vulkanTextures[target->impl.stage_depth] = NULL;
 }
 
 void kinc_g5_command_list_set_compute_shader(kinc_g5_command_list_t *list, kinc_g5_compute_shader *shader) {

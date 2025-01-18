@@ -164,7 +164,8 @@ static void render_target_init(kinc_g5_render_target_t *target, int width, int h
 		}
 
 		if (depthBufferBits > 0) {
-			const VkFormat depth_format = VK_FORMAT_D16_UNORM;
+			// const VkFormat depth_format = VK_FORMAT_D16_UNORM;
+			const VkFormat depth_format = VK_FORMAT_D24_UNORM_S8_UINT;
 			VkImageCreateInfo image = {0};
 			image.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 			image.pNext = NULL;

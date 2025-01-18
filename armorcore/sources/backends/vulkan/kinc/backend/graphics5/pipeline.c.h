@@ -286,15 +286,21 @@ kinc_g5_constant_location_t kinc_g5_pipeline_get_constant_location(kinc_g5_pipel
 
 kinc_g5_texture_unit_t kinc_g5_pipeline_get_texture_unit(kinc_g5_pipeline_t *pipeline, const char *name) {
 	kinc_g5_texture_unit_t unit;
-	int number = find_number(pipeline->impl.textureBindings, name);
-	assert(number == -1 || number >= 2); // something wrong with the SPIR-V when this triggers
-
 	for (int i = 0; i < KINC_G5_SHADER_TYPE_COUNT; ++i) {
 		unit.stages[i] = -1;
 	}
 
+	int number = find_number(pipeline->impl.vertexTextureBindings, name);
+	assert(number == -1 || number >= 2); // something wrong with the SPIR-V when this triggers
+
 	if (number >= 0) {
-		unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT] = number - 2;
+		unit.stages[KINC_G5_SHADER_TYPE_VERTEX] = number - 2;
+	}
+	else {
+		number = find_number(pipeline->impl.fragmentTextureBindings, name);
+		if (number >= 0) {
+			unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT] = number - 2;
+		}
 	}
 
 	return unit;
@@ -389,11 +395,12 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 	memset(pipeline->impl.vertexOffsets, 0, sizeof(kinc_internal_named_number) * KINC_INTERNAL_NAMED_NUMBER_COUNT);
 	memset(pipeline->impl.fragmentLocations, 0, sizeof(kinc_internal_named_number) * KINC_INTERNAL_NAMED_NUMBER_COUNT);
 	memset(pipeline->impl.fragmentOffsets, 0, sizeof(kinc_internal_named_number) * KINC_INTERNAL_NAMED_NUMBER_COUNT);
-	memset(pipeline->impl.textureBindings, 0, sizeof(kinc_internal_named_number) * KINC_INTERNAL_NAMED_NUMBER_COUNT);
+	memset(pipeline->impl.vertexTextureBindings, 0, sizeof(kinc_internal_named_number) * KINC_INTERNAL_NAMED_NUMBER_COUNT);
+	memset(pipeline->impl.fragmentTextureBindings, 0, sizeof(kinc_internal_named_number) * KINC_INTERNAL_NAMED_NUMBER_COUNT);
 	parse_shader((uint32_t *)pipeline->vertexShader->impl.source, pipeline->vertexShader->impl.length, pipeline->impl.vertexLocations,
-	             pipeline->impl.textureBindings, pipeline->impl.vertexOffsets);
+	             pipeline->impl.vertexTextureBindings, pipeline->impl.vertexOffsets);
 	parse_shader((uint32_t *)pipeline->fragmentShader->impl.source, pipeline->fragmentShader->impl.length, pipeline->impl.fragmentLocations,
-	             pipeline->impl.textureBindings, pipeline->impl.fragmentOffsets);
+	             pipeline->impl.fragmentTextureBindings, pipeline->impl.fragmentOffsets);
 
 	VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo = {0};
 	pPipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -932,9 +939,9 @@ VkDescriptorSet getDescriptorSet() {
 				return descriptor_sets[i].set;
 			}
 			else {
-				if (!textures_changed(&descriptor_sets[i])) {
-					return descriptor_sets[i].set;
-				}
+				// if (!textures_changed(&descriptor_sets[i])) {
+				// 	return descriptor_sets[i].set;
+				// }
 			}
 		}
 	}

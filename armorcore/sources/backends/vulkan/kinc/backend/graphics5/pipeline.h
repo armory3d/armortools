@@ -18,7 +18,8 @@ typedef struct PipelineState5Impl_s {
 
 	kinc_internal_named_number vertexLocations[KINC_INTERNAL_NAMED_NUMBER_COUNT];
 	kinc_internal_named_number fragmentLocations[KINC_INTERNAL_NAMED_NUMBER_COUNT];
-	kinc_internal_named_number textureBindings[KINC_INTERNAL_NAMED_NUMBER_COUNT];
+	kinc_internal_named_number vertexTextureBindings[KINC_INTERNAL_NAMED_NUMBER_COUNT];
+	kinc_internal_named_number fragmentTextureBindings[KINC_INTERNAL_NAMED_NUMBER_COUNT];
 	kinc_internal_named_number vertexOffsets[KINC_INTERNAL_NAMED_NUMBER_COUNT];
 	kinc_internal_named_number fragmentOffsets[KINC_INTERNAL_NAMED_NUMBER_COUNT];
 
