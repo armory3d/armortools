@@ -36,10 +36,7 @@ let line_draw_corner3: vec4_t = vec4_create();
 let line_draw_corner4: vec4_t = vec4_create();
 let line_draw_camera_look: vec4_t = vec4_create();
 
-function line_draw_render(matrix: mat4_t) {
-	line_draw_mat = matrix;
-	line_draw_dim = mat4_get_scale(matrix);
-
+function line_draw_init() {
 	if (line_draw_pipeline == null) {
 		let structure: vertex_struct_t = g4_vertex_struct_create();
 		g4_vertex_struct_add(structure, "pos", vertex_data_t.F32_3X);
@@ -62,6 +59,11 @@ function line_draw_render(matrix: mat4_t) {
 		line_draw_vertex_buffer = g4_vertex_buffer_create(line_draw_max_vertices, structure, usage_t.DYNAMIC);
 		line_draw_index_buffer = g4_index_buffer_create(line_draw_max_indices);
 	}
+}
+
+function line_draw_render(matrix: mat4_t) {
+	line_draw_mat = matrix;
+	line_draw_dim = mat4_get_scale(matrix);
 
 	line_draw_begin();
 	line_draw_bounds(line_draw_mat, line_draw_dim);
@@ -196,6 +198,7 @@ function line_draw_line(x1: f32, y1: f32, z1: f32, x2: f32, y2: f32, z2: f32) {
 }
 
 function line_draw_begin() {
+	line_draw_init();
 	line_draw_lines = 0;
 	line_draw_vb_data = g4_vertex_buffer_lock(line_draw_vertex_buffer);
 	line_draw_ib_data = g4_index_buffer_lock(line_draw_index_buffer);
