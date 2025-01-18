@@ -36,7 +36,7 @@ function util_uv_cache_uv_map() {
 	let inda: u32_array_t = mesh.index_arrays[0].values;
 	g2_begin(util_uv_uvmap);
 	g2_clear(0x00000000);
-	g2_set_color(0xffcccccc);
+	g2_set_color(0xffffffff);
 	let strength: f32 = res_x > 2048 ? 2.0 : 1.0;
 	let f: f32 = (1 / 32767) * util_uv_uvmap.width;
 	for (let i: i32 = 0; i < math_floor(inda.length / 3); ++i) {
@@ -46,9 +46,9 @@ function util_uv_cache_uv_map() {
 		let y1: f32 = (texa[inda[i * 3    ] * 2 + 1]) * f;
 		let y2: f32 = (texa[inda[i * 3 + 1] * 2 + 1]) * f;
 		let y3: f32 = (texa[inda[i * 3 + 2] * 2 + 1]) * f;
-		g2_draw_line(x1, y1, x2, y2, strength);
-		g2_draw_line(x2, y2, x3, y3, strength);
-		g2_draw_line(x3, y3, x1, y1, strength);
+		g2_draw_line_aa(x1, y1, x2, y2, strength);
+		g2_draw_line_aa(x2, y2, x3, y3, strength);
+		g2_draw_line_aa(x3, y3, x1, y1, strength);
 	}
 	g2_end();
 }

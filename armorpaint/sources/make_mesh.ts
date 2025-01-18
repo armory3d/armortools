@@ -339,7 +339,9 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 		}
 
 		if (last_pass && context_raw.draw_wireframe) {
-			node_shader_write(frag, "basecol *= 1.0 - textureLod(texuvmap, tex_coord, 0.0).r;");
+			node_shader_write(frag, "float wireframe = textureLod(texuvmap, tex_coord, 0.0).a;");
+			node_shader_write(frag, "basecol *= 1.0 - wireframe * 0.25;");
+			node_shader_write(frag, "roughness = max(roughness, wireframe);");
 		}
 
 		if (make_material_height_used) {
