@@ -1,6 +1,8 @@
 #version 450
 
 uniform vec3 color;
+
+in vec3 dummy;
 out vec4 frag_color[2];
 
 void main() {
