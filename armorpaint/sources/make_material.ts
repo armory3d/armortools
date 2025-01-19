@@ -34,7 +34,8 @@ function make_material_parse_mesh_material() {
 		while (i < m._.shader._.contexts.length) {
 			let c: shader_context_t = m._.shader._.contexts[i];
 			for (let j: i32 = 1; j < make_mesh_layer_pass_count; ++j) {
-				if (c.name == "mesh" + j) {
+				let name: string = "mesh" + j;
+				if (c.name == name) {
 					array_remove(m._.shader.contexts, c);
 					array_remove(m._.shader._.contexts, c);
 					make_material_delete_context(c);
@@ -49,7 +50,8 @@ function make_material_parse_mesh_material() {
 		while (i < m._.contexts.length) {
 			let c: material_context_t = m._.contexts[i];
 			for (let j: i32 = 1; j < make_mesh_layer_pass_count; ++j) {
-				if (c.name == "mesh" + j) {
+				let name: string = "mesh" + j;
+				if (c.name == name) {
 					array_remove(m.contexts, c);
 					array_remove(m._.contexts, c);
 					i--;
@@ -80,7 +82,10 @@ function make_material_parse_mesh_material() {
 	array_push(m._.shader._.contexts, scon);
 
 	for (let i: i32 = 1; i < make_mesh_layer_pass_count; ++i) {
-		let mm: material_t = { name: "Material", canvas: null };
+		let mm: material_t = {
+			name: "Material",
+			canvas: null
+		};
 		let con: node_shader_context_t = make_mesh_run(mm, i);
 		let scon: shader_context_t = shader_context_create(con.data);
 		let override_context: _shader_override_t = {};
@@ -96,7 +101,10 @@ function make_material_parse_mesh_material() {
 		array_push(m._.shader._.contexts, scon);
 
 		let mcon: material_context_t;
-		let mmcon: material_context_t = { name: "mesh" + i, bind_textures: [] };
+		let mmcon: material_context_t = {
+			name: "mesh" + i,
+			bind_textures: []
+		};
 		mcon = material_context_create(mmcon);
 		array_push(m.contexts, mcon);
 		array_push(m._.contexts, mcon);

@@ -34,7 +34,8 @@ function make_material_parse_mesh_material() {
 		while (i < m._.shader._.contexts.length) {
 			let c: shader_context_t = m._.shader._.contexts[i];
 			for (let j: i32 = 1; j < make_mesh_layer_pass_count; ++j) {
-				if (c.name == "mesh" + j) {
+				let name: string = "mesh" + j;
+				if (c.name == name) {
 					array_remove(m._.shader.contexts, c);
 					array_remove(m._.shader._.contexts, c);
 					make_material_delete_context(c);
@@ -49,7 +50,8 @@ function make_material_parse_mesh_material() {
 		while (i < m._.contexts.length) {
 			let c: material_context_t = m._.contexts[i];
 			for (let j: i32 = 1; j < make_mesh_layer_pass_count; ++j) {
-				if (c.name == "mesh" + j) {
+				let name: string = "mesh" + j;
+				if (c.name == name) {
 					array_remove(m.contexts, c);
 					array_remove(m._.contexts, c);
 					i--;
