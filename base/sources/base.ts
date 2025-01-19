@@ -466,6 +466,7 @@ function base_update() {
 	}
 
 	base_ext_update();
+	compass_update();
 }
 
 function base_material_dropped() {

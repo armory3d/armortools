@@ -63,35 +63,7 @@ function render_path_base_get_super_sampling(): f32 {
 }
 
 function render_path_base_draw_compass() {
-	if (context_raw.show_compass) {
-		let cam: camera_object_t = scene_camera;
-		let compass: mesh_object_t = scene_get_child(".Compass").ext;
-
-		let _visible: bool = compass.base.visible;
-		let _parent: object_t = compass.base.parent;
-		let _loc: vec4_t = compass.base.transform.loc;
-		let _rot: quat_t = compass.base.transform.rot;
-		let crot: quat_t = cam.base.transform.rot;
-		let ratio: f32 = app_w() / app_h();
-		let _P: mat4_t = cam.p;
-		cam.p = mat4_ortho(-8 * ratio, 8 * ratio, -8, 8, -2, 2);
-		compass.base.visible = true;
-		compass.base.parent = cam.base;
-		compass.base.transform.loc = vec4_create(7.4 * ratio, 7.0, -1);
-		compass.base.transform.rot = quat_create(-crot.x, -crot.y, -crot.z, crot.w);
-		compass.base.transform.scale = vec4_create(0.4, 0.4, 0.4);
-		transform_build_matrix(compass.base.transform);
-		compass.frustum_culling = false;
-		let empty: string[] = [];
-		mesh_object_render(compass, "overlay", empty);
-
-		cam.p = _P;
-		compass.base.visible = _visible;
-		compass.base.parent = _parent;
-		compass.base.transform.loc = _loc;
-		compass.base.transform.rot = _rot;
-		transform_build_matrix(compass.base.transform);
-	}
+	compass_render();
 }
 
 function render_path_base_begin() {
@@ -515,6 +487,8 @@ function render_path_base_draw_gbuffer() {
 	let hide: bool = operator_shortcut(map_get(config_keymap, "stencil_hide"), shortcut_type_t.DOWN) || keyboard_down("control");
 	let is_decal: bool = base_is_decal_layer();
 	if (is_decal && !hide) {
+		line_draw_color = 0xff000000;
+		line_draw_strength = 0.005;
 		line_draw_render(context_raw.layer.decal_mat);
 	}
 }
