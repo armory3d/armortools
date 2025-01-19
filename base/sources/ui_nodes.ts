@@ -1269,8 +1269,6 @@ function ui_nodes_render() {
 		if (is_group_category) {
 			for (let i: i32 = 0; i < project_material_groups.length; ++i) {
 				let g: node_group_t = project_material_groups[i];
-				ui_fill(0, 1, ui_nodes_ui._w / ui_SCALE(ui_nodes_ui), ui_nodes_ui.ops.theme.BUTTON_H + 2, ui_nodes_ui.ops.theme.ACCENT_COL);
-				ui_fill(1, 1, ui_nodes_ui._w / ui_SCALE(ui_nodes_ui) - 2, ui_nodes_ui.ops.theme.BUTTON_H + 1, ui_nodes_ui.ops.theme.SEPARATOR_COL);
 				ui_nodes_ui.enabled = ui_nodes_can_place_group(g.canvas.name);
 				let row: f32[] = [5 / 6, 1 / 6];
 				ui_row(row);
