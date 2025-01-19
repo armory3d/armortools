@@ -1,7 +1,7 @@
 
 function import_keymap_run(path: string) {
 	if (!path_is_json(path)) {
-		console_error(strings_error1());
+		console_error(strings_unknown_asset_format());
 		return;
 	}
 

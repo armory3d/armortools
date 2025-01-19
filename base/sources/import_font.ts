@@ -3,7 +3,7 @@ function import_font_run(path: string) {
 	for (let i: i32 = 0; i < project_fonts.length; ++i) {
 		let f: slot_font_t = project_fonts[i];
 		if (f.file == path) {
-			console_info(strings_info0());
+			console_info(strings_asset_already_imported());
 			return;
 		}
 	}

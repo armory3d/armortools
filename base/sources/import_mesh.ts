@@ -12,7 +12,7 @@ function import_mesh_run(path: string, replace_existing: bool = true) {
 
 	if (!path_is_mesh(path)) {
 		if (!context_enable_import_plugin(path)) {
-			console_error(strings_error1());
+			console_error(strings_unknown_asset_format());
 			return;
 		}
 	}
@@ -181,7 +181,7 @@ function import_mesh_first_unwrap_done(mesh: raw_mesh_t) {
 
 function import_mesh_make_mesh(mesh: raw_mesh_t) {
 	if (mesh == null || mesh.posa == null || mesh.nora == null || mesh.inda == null || mesh.posa.length == 0) {
-		console_error(strings_error3());
+		console_error(strings_failed_to_read_mesh_data());
 		return;
 	}
 

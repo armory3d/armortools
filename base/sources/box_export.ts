@@ -239,7 +239,7 @@ function box_export_tab_presets(ui: ui_t) {
 					console_info(tr("Preset imported:") + " " + filename);
 				}
 				else {
-					console_error(strings_error1());
+					console_error(strings_unknown_asset_format());
 				}
 			});
 		}

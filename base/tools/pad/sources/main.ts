@@ -380,5 +380,5 @@ function on_text_hover() {
 ////
 type config_t = { server: string; };
 let config_raw: config_t;
-function strings_error5(): string { return ""; };
+function strings_check_internet_connection(): string { return ""; };
 function console_error(s: string) { };

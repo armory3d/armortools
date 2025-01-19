@@ -627,7 +627,7 @@ function import_arm_run_swatches_from_project(project: project_format_t, path: s
 }
 
 function import_arm_make_pink(abs: string) {
-	console_error(strings_error2() + " " + abs);
+	console_error(strings_could_not_locate_texture() + " " + abs);
 	let b: u8_array_t = u8_array_create(4);
 	b[0] = 255;
 	b[1] = 0;

@@ -1,7 +1,7 @@
 
 function import_plugin_run(path: string) {
 	if (!path_is_plugin(path)) {
-		console_error(strings_error1());
+		console_error(strings_unknown_asset_format());
 		return;
 	}
 

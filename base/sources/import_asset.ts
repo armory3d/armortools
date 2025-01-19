@@ -81,7 +81,7 @@ function import_asset_run(path: string, drop_x: f32 = -1.0, drop_y: f32 = -1.0, 
 			import_asset_run(path, drop_x, drop_y, show_box);
 		}
 		else {
-			console_error(strings_error1());
+			console_error(strings_unknown_asset_format());
 		}
 	}
 

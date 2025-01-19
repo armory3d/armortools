@@ -41,7 +41,7 @@ let _project_scene_mesh_gc: scene_t;
 function project_open() {
 	ui_files_show("arm", false, false, function (path: string) {
 		if (!ends_with(path, ".arm")) {
-			console_error(strings_error0());
+			console_error(strings_arm_file_expected());
 			return;
 		}
 

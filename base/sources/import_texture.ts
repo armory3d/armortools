@@ -7,7 +7,7 @@ type import_texture_data_t = {
 function import_texture_run(path: string, hdr_as_envmap: bool = true) {
 	if (!path_is_texture(path)) {
 		if (!context_enable_import_plugin(path)) {
-			console_error(strings_error1());
+			console_error(strings_unknown_asset_format());
 			return;
 		}
 	}
@@ -24,7 +24,7 @@ function import_texture_run(path: string, hdr_as_envmap: bool = true) {
 					import_envmap_run(itd.path, itd.image);
 				}, itd);
 			}
-			console_info(strings_info0());
+			console_info(strings_asset_already_imported());
 			return;
 		}
 	}

@@ -194,7 +194,7 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 	file_download(url, dest, function (url: string) {
 		let fccd: file_cache_cloud_data_t = map_get(_file_cache_cloud_map, url);
 		if (!file_exists(fccd.dest)) {
-			console_error(strings_error5());
+			console_error(strings_check_internet_connection());
 			fccd.done(null);
 			return;
 		}
@@ -220,7 +220,7 @@ function file_init_cloud_bytes(done: ()=>void, append: string = "") {
 		if (buffer == null) {
 			let empty: string[] = [];
 			map_set(file_cloud, "cloud", empty);
-			console_error(strings_error5());
+			console_error(strings_check_internet_connection());
 			return;
 		}
 		let files: string[] = [];
