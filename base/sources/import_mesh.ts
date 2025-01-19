@@ -68,6 +68,12 @@ function import_mesh_finish_import() {
 
 	context_select_paint_object(context_main_object());
 
+	// No mask by default
+	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+		let p: mesh_object_t = project_paint_objects[i];
+		p.base.visible = true;
+	}
+
 	if (project_paint_objects.length > 1) {
 		// Sort by name
 		array_sort(project_paint_objects, function (pa: any_ptr, pb: any_ptr): i32 {
@@ -76,11 +82,6 @@ function import_mesh_finish_import() {
 			return strcmp(a.base.name, b.base.name);
 		});
 
-		// No mask by default
-		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
-			let p: mesh_object_t = project_paint_objects[i];
-			p.base.visible = true;
-		}
 		if (context_raw.merged_object == null) {
 			util_mesh_merge();
 		}
