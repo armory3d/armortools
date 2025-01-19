@@ -140,6 +140,26 @@ function import_mesh_make_mesh(mesh: raw_mesh_t) {
 	_import_mesh_make_mesh(mesh);
 }
 
+function _import_mesh_is_unique_name(s: string): bool {
+	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+		let p: mesh_object_t = project_paint_objects[i];
+		if (p.base.name == s) {
+			return false;
+		}
+	}
+	return true;
+}
+
+function _import_mesh_number_ext(i: i32): string {
+	if (i < 10) {
+		return ".00" + i;
+	}
+	if (i < 100) {
+		return ".0" + i;
+	}
+	return "." + i;
+}
+
 function import_mesh_add_mesh(mesh: raw_mesh_t) {
 	let raw: raw_mesh_t = import_mesh_raw_mesh(mesh);
 
@@ -150,15 +170,14 @@ function import_mesh_add_mesh(mesh: raw_mesh_t) {
 	object.skip_context = "paint";
 
 	// Ensure unique names
-	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
-		let p: mesh_object_t = project_paint_objects[i];
-		let oname: string = object.base.name;
-		if (p.base.name == oname) {
-			p.base.name += ".001";
-			p.data._.handle += ".001";
-			map_set(data_cached_meshes, p.data._.handle, p.data);
-		}
+	let oname: string = object.base.name;
+	let ext: string = "";
+	let i: i32 = 0;
+	while (!_import_mesh_is_unique_name(oname + ext)) {
+		ext = _import_mesh_number_ext(++i);
 	}
+	object.base.name += ext;
+	raw.name += ext;
 
 	array_push(project_paint_objects, object);
 
