@@ -190,7 +190,8 @@ function gizmo_update() {
 			else if (hit.object == context_raw.gizmo_scale_z) {
 				context_raw.scale_z = true;
 			}
-			if (context_raw.translate_x || context_raw.translate_y || context_raw.translate_z || context_raw.scale_x || context_raw.scale_y || context_raw.scale_z) {
+			if (context_raw.translate_x || context_raw.translate_y || context_raw.translate_z ||
+				context_raw.scale_x || context_raw.scale_y || context_raw.scale_z) {
 				context_raw.gizmo_offset = 0.0;
 				context_raw.gizmo_started = true;
 			}
