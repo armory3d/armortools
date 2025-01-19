@@ -206,7 +206,7 @@ function mesh_data_get(raw: mesh_data_t, vs: vertex_element_t[]): vertex_buffer_
 				has_tex = true;
 				tex_offset = e;
 			}
-			if (vs[e].name == "col") {
+			else if (vs[e].name == "col") {
 				has_col = true;
 			}
 			for (let va: i32 = 0; va < raw.vertex_arrays.length; ++va) {
