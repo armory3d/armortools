@@ -801,8 +801,10 @@ static int stbtt_BakeFontBitmapArr(unsigned char *data, int offset,        // Fo
    return bottom_y;
 }
 
-void kinc_g2_font_load(kinc_g2_font_t *font, int size) {
-	if (!kinc_g2_prepare_font_load_internal(font, size)) return;
+bool kinc_g2_font_load(kinc_g2_font_t *font, int size) {
+	if (!kinc_g2_prepare_font_load_internal(font, size)) {
+		return true;
+	}
 
 	kinc_g2_font_image_t *img = &(font->images[font->m_images_len]);
 	font->m_images_len += 1;
@@ -821,7 +823,8 @@ void kinc_g2_font_load(kinc_g2_font_t *font, int size) {
 			pixels = (unsigned char *)malloc(width * height);
 		else
 			pixels = (unsigned char *)realloc(pixels, width * height);
-		assert(pixels != NULL);
+		if (pixels == NULL)
+			return false;
 		status = stbtt_BakeFontBitmapArr(font->blob, font->offset, (float)size, pixels, width, height, g2_font_glyphs, g2_font_num_glyphs, baked);
 	}
 
@@ -844,6 +847,7 @@ void kinc_g2_font_load(kinc_g2_font_t *font, int size) {
 	kinc_g4_texture_init_from_image(img->tex, &fontimg);
 	kinc_image_destroy(&fontimg);
 	free(pixels);
+	return true;
 }
 
 kinc_g4_texture_t *kinc_g2_font_get_texture(kinc_g2_font_t *font, int size) {
@@ -1149,11 +1153,11 @@ void kinc_g2_set_transform(buffer_t *matrix) {
 	}
 }
 
-void kinc_g2_set_font(kinc_g2_font_t *font, int size) {
+bool kinc_g2_set_font(kinc_g2_font_t *font, int size) {
 	kinc_g2_end(); // flush
 	g2_font = font;
 	g2_font_size = size;
-	kinc_g2_font_load(font, size);
+	return kinc_g2_font_load(font, size);
 }
 
 void kinc_g2_set_bilinear_filter(bool bilinear) {

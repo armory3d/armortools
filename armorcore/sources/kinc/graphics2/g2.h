@@ -63,7 +63,7 @@ void kinc_g2_set_color(uint32_t color);
 uint32_t kinc_g2_get_color();
 void kinc_g2_set_pipeline(kinc_g4_pipeline_t *pipeline);
 void kinc_g2_set_transform(buffer_t *matrix);
-void kinc_g2_set_font(kinc_g2_font_t *font, int size);
+bool kinc_g2_set_font(kinc_g2_font_t *font, int size);
 kinc_g2_font_t *kinc_g2_font_init(buffer_t *blob, int font_index);
 kinc_g2_font_t *kinc_g2_font_13(buffer_t *blob);
 bool kinc_g2_font_has_glyph(int glyph);

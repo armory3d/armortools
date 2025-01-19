@@ -322,7 +322,7 @@ declare function kinc_g2_draw_rect(x: f32, y: f32, width: f32, height: f32, stre
 declare function kinc_g2_draw_line(x0: f32, y0: f32, x1: f32, y1: f32, strength: f32): void;
 declare function kinc_g2_draw_line_aa(x0: f32, y0: f32, x1: f32, y1: f32, strength: f32): void;
 declare function kinc_g2_draw_string(text: string, x: f32, y: f32): void;
-declare function kinc_g2_set_font(font: any, size: i32): void;
+declare function kinc_g2_set_font(font: any, size: i32): bool;
 declare function kinc_g2_font_init(blob: buffer_t, font_index: i32): any;
 declare function kinc_g2_font_13(blob: buffer_t): any;
 declare function kinc_g2_font_set_glyphs(glyphs: i32[]): void;

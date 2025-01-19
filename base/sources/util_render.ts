@@ -2,6 +2,7 @@
 let util_render_material_preview_size: i32 = 256;
 let util_render_decal_preview_size: i32 = 512;
 let util_render_layer_preview_size: i32 = 200;
+let util_render_font_preview_size: i32 = 200;
 let util_render_screen_aligned_full_vb: vertex_buffer_t = null;
 let util_render_screen_aligned_full_ib: index_buffer_t = null;
 
@@ -167,7 +168,7 @@ function util_render_make_text_preview() {
 
 	let text: string = context_raw.text_tool_text;
 	let font: g2_font_t = context_raw.font.font;
-	let font_size: i32 = 200;
+	let font_size: i32 = util_render_font_preview_size;
 	let text_w: i32 = math_floor(g2_font_width(font, font_size, text));
 	let text_h: i32 = math_floor(g2_font_height(font, font_size));
 	let tex_w: i32 = text_w + 32;
@@ -203,7 +204,7 @@ function util_render_make_font_preview() {
 
 	let text: string = "Abg";
 	let font: g2_font_t = context_raw.font.font;
-	let font_size: i32 = 318;
+	let font_size: i32 = util_render_font_preview_size;
 	let text_w: i32 = math_floor(g2_font_width(font, font_size, text)) + 8;
 	let text_h: i32 = math_floor(g2_font_height(font, font_size)) + 8;
 	if (context_raw.font.image == null) {
