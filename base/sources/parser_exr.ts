@@ -300,12 +300,11 @@ function parser_exr_run(width: i32, height: i32, src: buffer_t, bits: i32 = 16, 
 	// scanline data
 	let stride: i32 = channels * byte_size;
 	let pos: i32 = 0;
-	let src_view: buffer_t = src;
 
 	_parser_exr_width = width;
 	_parser_exr_stride = stride;
 	_parser_exr_out = out;
-	_parser_exr_src_view = src_view;
+	_parser_exr_src_view = src;
 
 	_parser_exr_write_line = bits == 16 ? parser_exr_write_line16 : parser_exr_write_line32;
 	let write_data: (off: i32, pos: i32, byte_size: i32)=>void = type == 1 ? parser_exr_write_bgr : parser_exr_write_single;
