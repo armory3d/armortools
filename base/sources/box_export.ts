@@ -32,6 +32,7 @@ let box_export_color_spaces: string[] = [
 let _box_export_bake_material: bool;
 let _box_export_t: export_preset_texture_t;
 let _box_export_apply_displacement: bool;
+let _box_export_merge_vertices: bool;
 
 function box_export_show_textures() {
 	ui_box_show_custom(function (ui: ui_t) {
@@ -356,7 +357,7 @@ function box_export_show_mesh() {
 	ui_box_show_custom(function (ui: ui_t) {
 		let htab: ui_handle_t = ui_handle(__ID__);
 		box_export_tab_export_mesh(ui, htab);
-	});
+	}, 400, 240);
 }
 
 function box_export_tab_export_mesh(ui: ui_t, htab: ui_handle_t) {
@@ -380,6 +381,12 @@ function box_export_tab_export_mesh(ui: ui_t, htab: ui_handle_t) {
 		ui_combo(box_export_mesh_handle, ar, tr("Meshes"), true);
 
 		let apply_displacement: bool = ui_check(ui_handle(__ID__), tr("Apply Displacement"));
+
+		let hmerge: ui_handle_t = ui_handle(__ID__);
+		if (hmerge.init) {
+			hmerge.selected = true;
+		}
+		let merge_vertices: bool = ui_check(hmerge, tr("Merge Shared Vertices"));
 
 		let tris: i32 = 0;
 		let pos: i32 = box_export_mesh_handle.position;
@@ -407,6 +414,7 @@ function box_export_tab_export_mesh(ui: ui_t, htab: ui_handle_t) {
 		if (ui_button(tr("Export"))) {
 			ui_box_hide();
 			_box_export_apply_displacement = apply_displacement;
+			_box_export_merge_vertices = merge_vertices;
 			ui_files_show(context_raw.export_mesh_format == mesh_format_t.OBJ ? "obj" : "arm", true, false, function (path: string) {
 				///if (arm_android || arm_ios)
 				let f: string = sys_title();
@@ -429,7 +437,7 @@ function box_export_tab_export_mesh(ui: ui_t, htab: ui_handle_t) {
 					paint_objects = [po];
 				}
 
-				export_mesh_run(path + path_sep + f, paint_objects, _box_export_apply_displacement);
+				export_mesh_run(path + path_sep + f, paint_objects, _box_export_apply_displacement, _box_export_merge_vertices);
 			});
 		}
 	}

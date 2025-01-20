@@ -177,3 +177,102 @@ function export_obj_run(path: string, paint_objects: mesh_object_t[], apply_disp
 	}
 	iron_file_save_bytes(path, o, 0);
 }
+
+function export_obj_run_fast(path: string, paint_objects: mesh_object_t[]) {
+	// Skips merging shared vertices
+
+	let o: u8[] = [];
+	export_obj_write_string(o, "# armorpaint.org\n");
+
+	let poff: i32 = 0;
+	let noff: i32 = 0;
+	let toff: i32 = 0;
+	for (let i: i32 = 0; i < paint_objects.length; ++i) {
+		let p: mesh_object_t = paint_objects[i];
+		let mesh: mesh_data_t = p.data;
+		let inv: f32 = 1 / 32767;
+		let sc: f32 = p.data.scale_pos * inv;
+		let posa: i16_array_t = mesh.vertex_arrays[0].values;
+		let nora: i16_array_t = mesh.vertex_arrays[1].values;
+		let texa: i16_array_t = mesh.vertex_arrays[2].values;
+
+		let pi: i32 = posa.length / 4;
+		let ni: i32 = pi;
+		let ti: i32 = pi;
+
+		export_obj_write_string(o, "o " + p.base.name + "\n");
+		for (let i: i32 = 0; i < pi; ++i) {
+			export_obj_write_string(o, "v ");
+			let f: f32 = posa[i * 4] * sc;
+			export_obj_write_string(o, f + "");
+			export_obj_write_string(o, " ");
+			f = posa[i * 4 + 2] * sc;
+			export_obj_write_string(o, f + "");
+			export_obj_write_string(o, " ");
+			f = -posa[i * 4 + 1] * sc;
+			export_obj_write_string(o, f + "");
+			export_obj_write_string(o, "\n");
+		}
+		for (let i: i32 = 0; i < ni; ++i) {
+			export_obj_write_string(o, "vn ");
+			let f: f32 = nora[i * 2] * inv;
+			export_obj_write_string(o, f + "");
+			export_obj_write_string(o, " ");
+			f = posa[i * 4 + 3] * inv;
+			export_obj_write_string(o, f + "");
+			export_obj_write_string(o, " ");
+			f = -nora[i * 2 + 1] * inv;
+			export_obj_write_string(o, f + "");
+			export_obj_write_string(o, "\n");
+		}
+		for (let i: i32 = 0; i < ti; ++i) {
+			export_obj_write_string(o, "vt ");
+			let f: f32 = texa[i * 2] * inv;
+			export_obj_write_string(o, f + "");
+			export_obj_write_string(o, " ");
+			f = 1.0 - texa[i * 2 + 1] * inv;
+			export_obj_write_string(o, f + "");
+			export_obj_write_string(o, "\n");
+		}
+
+		let inda: u32_array_t = mesh.index_arrays[0].values;
+		for (let i: i32 = 0; i < math_floor(inda.length / 3); ++i) {
+			let pi1: i32 = inda[i * 3    ] + 1 + poff;
+			let pi2: i32 = inda[i * 3 + 1] + 1 + poff;
+			let pi3: i32 = inda[i * 3 + 2] + 1 + poff;
+			let ni1: i32 = inda[i * 3    ] + 1 + noff;
+			let ni2: i32 = inda[i * 3 + 1] + 1 + noff;
+			let ni3: i32 = inda[i * 3 + 2] + 1 + noff;
+			let ti1: i32 = inda[i * 3    ] + 1 + toff;
+			let ti2: i32 = inda[i * 3 + 1] + 1 + toff;
+			let ti3: i32 = inda[i * 3 + 2] + 1 + toff;
+			export_obj_write_string(o, "f ");
+			export_obj_write_string(o, pi1 + "");
+			export_obj_write_string(o, "/");
+			export_obj_write_string(o, ti1 + "");
+			export_obj_write_string(o, "/");
+			export_obj_write_string(o, ni1 + "");
+			export_obj_write_string(o, " ");
+			export_obj_write_string(o, pi2 + "");
+			export_obj_write_string(o, "/");
+			export_obj_write_string(o, ti2 + "");
+			export_obj_write_string(o, "/");
+			export_obj_write_string(o, ni2 + "");
+			export_obj_write_string(o, " ");
+			export_obj_write_string(o, pi3 + "");
+			export_obj_write_string(o, "/");
+			export_obj_write_string(o, ti3 + "");
+			export_obj_write_string(o, "/");
+			export_obj_write_string(o, ni3 + "");
+			export_obj_write_string(o, "\n");
+		}
+		poff += pi;
+		noff += ni;
+		toff += ti;
+	}
+
+	if (!ends_with(path, ".obj")) {
+		path += ".obj";
+	}
+	iron_file_save_bytes(path, o, 0);
+}
