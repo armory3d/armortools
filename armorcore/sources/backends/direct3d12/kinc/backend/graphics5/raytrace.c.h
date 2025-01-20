@@ -475,6 +475,8 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 		return;
 	}
 
+	descriptorsAllocated = 1; // 1 descriptor already allocated in kinc_raytrace_pipeline_init
+
 	#ifdef is_forge
 	create_srv_ib(_ib_full, _ib_full->impl.count, 0);
 	create_srv_vb(_vb_full, _vb_full->impl.myCount, 8 * 2);
