@@ -97,7 +97,12 @@ function render_path_base_begin() {
 	}
 
 	// Match projection matrix jitter
-	let skip_taa: bool = context_raw.split_view || ((context_raw.tool == workspace_tool_t.CLONE || context_raw.tool == workspace_tool_t.BLUR || context_raw.tool == workspace_tool_t.SMUDGE) && context_raw.pdirty > 0);
+	let skip_taa: bool =
+		context_raw.split_view ||
+		context_raw.viewport_mode == viewport_mode_t.PATH_TRACE ||
+		((context_raw.tool == workspace_tool_t.CLONE ||
+			context_raw.tool == workspace_tool_t.BLUR ||
+			context_raw.tool == workspace_tool_t.SMUDGE) && context_raw.pdirty > 0);
 	scene_camera.frame = skip_taa ? 0 : render_path_base_taa_frame;
 	camera_object_proj_jitter(scene_camera);
 	camera_object_build_mat(scene_camera);

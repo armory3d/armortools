@@ -188,24 +188,18 @@ function render_path_raytrace_build_data(bake: bool = false) {
 	let mo: mesh_object_t = scene_meshes[0];
 	///end
 
+	///if is_forge
 	render_path_raytrace_transform = mo.base.transform.world_unpack;
+	///else
+	render_path_raytrace_transform = mat4_identity();
+	///end
 
 	if (!bake) {
-		let md: mesh_data_t = mo.data;
-		if (md.scale_pos != 1.0) {
-			render_path_raytrace_transform = mat4_scale(
-				render_path_raytrace_transform, vec4_create(md.scale_pos, md.scale_pos, md.scale_pos)
-			);
-		}
-
+		let sc: f32 = mo.base.transform.scale.x * mo.data.scale_pos;
 		if (mo.base.parent != null) {
-			let f: f32 = mo.base.parent.transform.scale.x;
-			if (f != 1.0) {
-				render_path_raytrace_transform = mat4_scale(
-					render_path_raytrace_transform, vec4_create(f, f, f)
-				);
-			}
+			sc *= mo.base.parent.transform.scale.x;
 		}
+		render_path_raytrace_transform = mat4_scale(render_path_raytrace_transform, vec4_create(sc, sc, sc));
 	}
 
 	render_path_raytrace_vb = mo.data._.vertex_buffer;
