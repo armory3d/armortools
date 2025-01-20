@@ -456,3 +456,27 @@ function util_mesh_calc_normal(p0: vec4_t, p1: vec4_t, p2: vec4_t): vec4_t {
 	cb = vec4_norm(cb);
 	return cb;
 }
+
+function util_mesh_decimate() {
+	let o: mesh_object_t = project_paint_objects[0];
+	let vas: vertex_array_t[] = o.data.vertex_arrays;
+	let posa: i16_array_t = vas[0].values;
+	let nora: i16_array_t = vas[1].values;
+	let texa: i16_array_t = vas[2].values;
+	let inda: u32_array_t = o.data.index_arrays[0].values;
+
+	let mesh: raw_mesh_t = {
+		posa: posa,
+		nora: nora,
+		texa: texa,
+		cola: null,
+		inda: inda,
+		vertex_count: posa.length / 4,
+		index_count: inda.length,
+		scale_pos: o.data.scale_pos,
+		scale_tex: 1.0,
+		name: "Decimated",
+	};
+	// decimate_mesh(mesh);
+	import_mesh_add_mesh(mesh);
+}
