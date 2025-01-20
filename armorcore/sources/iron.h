@@ -2125,10 +2125,10 @@ void iron_g4_swap_buffers() {
 	kinc_g4_begin(0);
 }
 
-void iron_file_save_bytes(string_t *path, buffer_t *bytes, i32 length) {
-	int byte_length = length > 0 ? length : (int)bytes->length;
-	if (byte_length > (int)bytes->length) {
-		byte_length = (int)bytes->length;
+void iron_file_save_bytes(string_t *path, buffer_t *bytes, u64 length) {
+	u64 byte_length = length > 0 ? length : (u64)bytes->length;
+	if (byte_length > (u64)bytes->length) {
+		byte_length = (u64)bytes->length;
 	}
 
 	#ifdef KINC_WINDOWS

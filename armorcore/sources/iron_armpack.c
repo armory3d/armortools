@@ -32,6 +32,12 @@ static void store_i16(int16_t i16) {
 	di += 2;
 }
 
+static void store_u32(uint32_t u32) {
+	di += pad(di, 4);
+	*(uint32_t *)(decoded + di) = u32;
+	di += 4;
+}
+
 static void store_i32(int32_t i32) {
 	di += pad(di, 4);
 	*(int32_t *)(decoded + di) = i32;
@@ -138,7 +144,7 @@ static uint32_t traverse(int di, bool count_arrays) {
 	}
 	case 0xdd: { // array
 		uint32_t len = 0;
-		int count = read_i32();
+		uint32_t count = read_u32();
 		uint8_t flag2 = read_u8();
 		switch (flag2) {
 		case 0xca: // Typed f32
@@ -169,7 +175,7 @@ static uint32_t traverse(int di, bool count_arrays) {
 			break;
 		default: // Dynamic (type - value)
 			ei -= 1; // Undo flag2 read
-			for (int j = 0; j < count; ++j) {
+			for (uint32_t j = 0; j < count; ++j) {
 				len += traverse(0, count_arrays);
 			}
 		}
@@ -203,7 +209,7 @@ static uint32_t get_struct_length() {
 	return len;
 }
 
-static void read_store_map(int count) {
+static void read_store_map(uint32_t count) {
 
 	ei -= 5; // u8 map, i32 count
 	uint32_t size = get_struct_length();
@@ -212,7 +218,7 @@ static void read_store_map(int count) {
 	array_count = 0;
 	ei += 5;
 
-	for (int i = 0; i < count; ++i) {
+	for (uint32_t i = 0; i < count; ++i) {
 		read_u8(); // 0xdb string
 		read_string(); // key
 		read_store(); // value
@@ -245,7 +251,7 @@ static void store_typed_array(uint8_t flag, uint32_t count) {
 	di += size;
 }
 
-static void read_store_array(int count) { // Store in any/i32/../_array_t format
+static void read_store_array(uint32_t count) { // Store in any/i32/../_array_t format
 	// Store pointer to array_t struct
 	// Put array contents at the bottom
 	// - pointer to array_t buffer
@@ -263,8 +269,8 @@ static void read_store_array(int count) { // Store in any/i32/../_array_t format
 	else {
 		store_ptr_abs(NULL);
 	}
-	store_i32(count); // Element count
-	store_i32(0); // Capacity = 0 -> do not free on first realloc
+	store_u32(count); // Element count
+	store_u32(0); // Capacity = 0 -> do not free on first realloc
 	bottom = di;
 
 	if (count == 0) {
@@ -289,7 +295,7 @@ static void read_store_array(int count) { // Store in any/i32/../_array_t format
 			// String pointers
 			uint32_t _ei = ei;
 			uint32_t strings_length = 0;
-			for (int i = 0; i < count; ++i) {
+			for (uint32_t i = 0; i < count; ++i) {
 				store_ptr(bottom + count * PTR_SIZE + strings_length);
 				if (i < count - 1) {
 					ei += 1; // String flag
@@ -302,7 +308,7 @@ static void read_store_array(int count) { // Store in any/i32/../_array_t format
 			ei = _ei;
 
 			// String bytes
-			for (int i = 0; i < count; ++i) {
+			for (uint32_t i = 0; i < count; ++i) {
 				ei += 1; // String flag
 				store_string_bytes(read_string());
 			}
@@ -313,7 +319,7 @@ static void read_store_array(int count) { // Store in any/i32/../_array_t format
 			// Array pointers
 			uint32_t _ei = ei;
 			uint32_t arrays_length = 0;
-			for (int i = 0; i < count; ++i) {
+			for (uint32_t i = 0; i < count; ++i) {
 				store_ptr(bottom + count * PTR_SIZE + arrays_length);
 				if (i < count - 1) {
 					ei += 1; // Array flag
@@ -331,7 +337,7 @@ static void read_store_array(int count) { // Store in any/i32/../_array_t format
 
 			array_count = count;
 
-			for (int i = 0; i < count; ++i) {
+			for (uint32_t i = 0; i < count; ++i) {
 				uint8_t flag = read_u8();
 				read_store_array(read_i32());
 			}
@@ -342,7 +348,7 @@ static void read_store_array(int count) { // Store in any/i32/../_array_t format
 			size += pad(size, PTR_SIZE);
 
 			// Struct pointers
-			for (int i = 0; i < count; ++i) {
+			for (uint32_t i = 0; i < count; ++i) {
 				store_ptr(bottom + count * PTR_SIZE + i * size);
 			}
 
@@ -351,7 +357,7 @@ static void read_store_array(int count) { // Store in any/i32/../_array_t format
 
 			array_count = count;
 
-			for (int i = 0; i < count; ++i) {
+			for (uint32_t i = 0; i < count; ++i) {
 				di = pad(di, PTR_SIZE) + di;
 				uint8_t flag = read_u8();
 				read_store_map(read_i32());
@@ -429,6 +435,11 @@ static void armpack_write_i16(int16_t i) {
 	ei += 2;
 }
 
+static void armpack_write_u32(uint32_t i) {
+	*(uint32_t *)(encoded + ei) = i;
+	ei += 4;
+}
+
 static void armpack_write_i32(int32_t i) {
 	*(int32_t *)(encoded + ei) = i;
 	ei += 4;
@@ -446,7 +457,7 @@ void armpack_encode_map(uint32_t count) {
 
 void armpack_encode_array(uint32_t count) { // any
 	armpack_write_u8(0xdd);
-	armpack_write_i32(count);
+	armpack_write_u32(count);
 }
 
 void armpack_encode_array_f32(f32_array_t *f32a) {
@@ -455,9 +466,9 @@ void armpack_encode_array_f32(f32_array_t *f32a) {
 		return;
 	}
 	armpack_write_u8(0xdd);
-	armpack_write_i32(f32a->length);
+	armpack_write_u32(f32a->length);
 	armpack_write_u8(0xca);
-	for (int i = 0; i < f32a->length; ++i) {
+	for (uint32_t i = 0; i < f32a->length; ++i) {
 		armpack_write_f32(f32a->buffer[i]);
 	}
 }
@@ -468,9 +479,9 @@ void armpack_encode_array_i32(i32_array_t *i32a) {
 		return;
 	}
 	armpack_write_u8(0xdd);
-	armpack_write_i32(i32a->length);
+	armpack_write_u32(i32a->length);
 	armpack_write_u8(0xd2);
-	for (int i = 0; i < i32a->length; ++i) {
+	for (uint32_t i = 0; i < i32a->length; ++i) {
 		armpack_write_i32(i32a->buffer[i]);
 	}
 }
@@ -481,9 +492,9 @@ void armpack_encode_array_i16(i16_array_t *i16a) {
 		return;
 	}
 	armpack_write_u8(0xdd);
-	armpack_write_i32(i16a->length);
+	armpack_write_u32(i16a->length);
 	armpack_write_u8(0xd1);
-	for (int i = 0; i < i16a->length; ++i) {
+	for (uint32_t i = 0; i < i16a->length; ++i) {
 		armpack_write_i16(i16a->buffer[i]);
 	}
 }
@@ -494,9 +505,9 @@ void armpack_encode_array_u8(u8_array_t *u8a) {
 		return;
 	}
 	armpack_write_u8(0xdd);
-	armpack_write_i32(u8a->length);
+	armpack_write_u32(u8a->length);
 	armpack_write_u8(0xc4);
-	for (int i = 0; i < u8a->length; ++i) {
+	for (uint32_t i = 0; i < u8a->length; ++i) {
 		armpack_write_u8(u8a->buffer[i]);
 	}
 }
@@ -507,8 +518,8 @@ void armpack_encode_array_string(char_ptr_array_t *strings) {
 		return;
 	}
 	armpack_write_u8(0xdd);
-	armpack_write_i32(strings->length);
-	for (int i = 0; i < strings->length; ++i) {
+	armpack_write_u32(strings->length);
+	for (uint32_t i = 0; i < strings->length; ++i) {
 		armpack_encode_string(strings->buffer[i]);
 	}
 }
@@ -520,8 +531,8 @@ void armpack_encode_string(char *str) {
 	}
 	armpack_write_u8(0xdb);
 	size_t len = strlen(str);
-	armpack_write_i32(len);
-	for (int i = 0; i < len; ++i) {
+	armpack_write_u32(len);
+	for (uint32_t i = 0; i < len; ++i) {
 		armpack_write_u8(str[i]);
 	}
 }
@@ -544,35 +555,35 @@ void armpack_encode_null() {
 	armpack_write_u8(0xc0);
 }
 
-int armpack_size_map() {
-	return 1 + 4; // u8 tag + i32 count
+uint32_t armpack_size_map() {
+	return 1 + 4; // u8 tag + u32 count
 }
 
-int armpack_size_array() {
-	return 1 + 4; // u8 tag + i32 count
+uint32_t armpack_size_array() {
+	return 1 + 4; // u8 tag + u32 count
 }
 
-int armpack_size_array_f32(f32_array_t *f32a) {
-	return 1 + 4 + 1 + f32a->length * 4; // u8 tag + i32 count + u8 flag + f32* contents
+uint32_t armpack_size_array_f32(f32_array_t *f32a) {
+	return 1 + 4 + 1 + f32a->length * 4; // u8 tag + u32 count + u8 flag + f32* contents
 }
 
-int armpack_size_array_u8(u8_array_t *u8a) {
-	return 1 + 4 + 1 + u8a->length; // u8 tag + i32 count + u8 flag + u8* contents
+uint32_t armpack_size_array_u8(u8_array_t *u8a) {
+	return 1 + 4 + 1 + u8a->length; // u8 tag + u32 count + u8 flag + u8* contents
 }
 
-int armpack_size_string(char *str) {
-	return 1 + 4 + strlen(str); // u8 tag + i32 length + contents
+uint32_t armpack_size_string(char *str) {
+	return 1 + 4 + strlen(str); // u8 tag + u32 length + contents
 }
 
-int armpack_size_i32() {
+uint32_t armpack_size_i32() {
 	return 1 + 4; // u8 tag + i32
 }
 
-int armpack_size_f32() {
+uint32_t armpack_size_f32() {
 	return 1 + 4; // u8 tag + f32
 }
 
-int armpack_size_bool() {
+uint32_t armpack_size_bool() {
 	return 1; // u8 tag
 }
 
@@ -595,9 +606,9 @@ typedef union ptr_storage {
 
 any_map_t *_armpack_decode_to_map() {
 	any_map_t *result = any_map_create();
-	int32_t count = read_i32();
+	uint32_t count = read_u32();
 
-	for (int i = 0; i < count; i++) {
+	for (uint32_t i = 0; i < count; i++) {
 		read_u8(); // 0xdb string
 		char *key = read_string_alloc();
 
@@ -645,32 +656,32 @@ any_map_t *_armpack_decode_to_map() {
 				break;
 			}
 			case 0xdd: { // array
-				int32_t array_count = read_i32();
+				uint32_t array_count = read_u32();
 				uint8_t element_flag = read_u8();
 				if (element_flag == 0xca) { // f32
 					f32_array_t *array = f32_array_create(array_count);
-					for (int j = 0; j < array_count; j++) {
+					for (uint32_t j = 0; j < array_count; j++) {
 						array->buffer[j] = read_f32();
 					}
 					any_map_set(result, key, array);
 				}
 				else if (element_flag == 0xd2) { // i32
 					i32_array_t *array = i32_array_create(array_count);
-					for (int j = 0; j < array_count; j++) {
+					for (uint32_t j = 0; j < array_count; j++) {
 						array->buffer[j] = read_i32();
 					}
 					any_map_set(result, key, array);
 				}
 				else if (element_flag == 0xd1) { // i16
 					i16_array_t *array = i16_array_create(array_count);
-					for (int j = 0; j < array_count; j++) {
+					for (uint32_t j = 0; j < array_count; j++) {
 						array->buffer[j] = read_i16();
 					}
 					any_map_set(result, key, array);
 				}
 				else if (element_flag == 0xc4) { // u8
 					u8_array_t *array = u8_array_create(array_count);
-					for (int j = 0; j < array_count; j++) {
+					for (uint32_t j = 0; j < array_count; j++) {
 						array->buffer[j] = read_u8();
 					}
 					any_map_set(result, key, array);
@@ -678,7 +689,7 @@ any_map_t *_armpack_decode_to_map() {
 				else if (element_flag == 0xdb) { // string
 					ei--;
 					char_ptr_array_t *array = char_ptr_array_create(array_count);
-					for (int j = 0; j < array_count; j++) {
+					for (uint32_t j = 0; j < array_count; j++) {
 						read_u8(); // flag
 						array->buffer[j] = read_string_alloc();
 					}
@@ -687,7 +698,7 @@ any_map_t *_armpack_decode_to_map() {
 				else if (element_flag == 0xdf) { // map
 					ei--;
 					any_array_t *array = any_array_create(array_count);
-					for (int j = 0; j < array_count; j++) {
+					for (uint32_t j = 0; j < array_count; j++) {
 						read_u8(); // flag
 						array->buffer[j] = _armpack_decode_to_map();
 					}
@@ -696,11 +707,11 @@ any_map_t *_armpack_decode_to_map() {
 				else if (element_flag == 0xc6) { // buffer_t (deprecated)
 					ei--;
 					any_array_t *array = any_array_create(array_count);
-					for (int j = 0; j < array_count; j++) {
+					for (uint32_t j = 0; j < array_count; j++) {
 						read_u8(); // flag
-						int32_t buffer_size = read_i32();
+						uint32_t buffer_size = read_u32();
 						buffer_t *buffer = buffer_create(buffer_size);
-						for (int k = 0; k < buffer_size; k++) {
+						for (uint32_t k = 0; k < buffer_size; k++) {
 							buffer->buffer[k] = read_u8();
 						}
 						array->buffer[j] = buffer;
@@ -710,9 +721,9 @@ any_map_t *_armpack_decode_to_map() {
 				break;
 			}
 			case 0xc6: { // buffer_t (deprecated)
-				int32_t buffer_size = read_i32();
+				uint32_t buffer_size = read_u32();
 				buffer_t *buffer = buffer_create(buffer_size);
-				for (int j = 0; j < buffer_size; j++) {
+				for (uint32_t j = 0; j < buffer_size; j++) {
 					buffer->buffer[j] = read_u8();
 				}
 				any_map_set(result, key, buffer);

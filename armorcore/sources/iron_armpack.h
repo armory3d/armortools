@@ -26,14 +26,14 @@ void armpack_encode_f32(float f);
 void armpack_encode_bool(bool b);
 void armpack_encode_null();
 
-int armpack_size_map();
-int armpack_size_array();
-int armpack_size_array_f32(f32_array_t *f32a);
-int armpack_size_array_u8(u8_array_t *u8a);
-int armpack_size_string(char *str);
-int armpack_size_i32();
-int armpack_size_f32();
-int armpack_size_bool();
+uint32_t armpack_size_map();
+uint32_t armpack_size_array();
+uint32_t armpack_size_array_f32(f32_array_t *f32a);
+uint32_t armpack_size_array_u8(u8_array_t *u8a);
+uint32_t armpack_size_string(char *str);
+uint32_t armpack_size_i32();
+uint32_t armpack_size_f32();
+uint32_t armpack_size_bool();
 
 any_map_t *armpack_decode_to_map(buffer_t *b);
 float armpack_map_get_f32(any_map_t *map, char *key);

@@ -16,9 +16,9 @@ static uint32_t ti; // token index
 static uint8_t *decoded;
 static uint32_t wi; // write index
 static uint32_t bottom;
-static int array_count;
+static uint32_t array_count;
 
-static inline uint64_t pad(int di, int n) {
+static inline uint64_t pad(uint32_t di, int n) {
 	return (n - (di % n)) % n;
 }
 
@@ -33,6 +33,12 @@ static void store_i32(int32_t i32) {
 	// 	i32 = (int32_t)(i32 - INT32_MAX - 1) - INT32_MAX - 1;
 	wi += pad(wi, 4);
 	*(int32_t *)(decoded + wi) = i32;
+	wi += 4;
+}
+
+static void store_u32(uint32_t u32) {
+	wi += pad(wi, 4);
+	*(uint32_t *)(decoded + wi) = u32;
 	wi += 4;
 }
 
@@ -54,8 +60,8 @@ static void store_ptr_abs(void *ptr) {
 	wi += PTR_SIZE;
 }
 
-static void store_string_bytes(char *str, int len) {
-	for (int i = 0; i < len; ++i) {
+static void store_string_bytes(char *str, uint32_t len) {
+	for (uint32_t i = 0; i < len; ++i) {
 		store_u8(str[i]);
 	}
 	store_u8('\0');
@@ -74,12 +80,12 @@ static jsmntok_t get_token() {
 	return t;
 }
 
-static int traverse(int wi) {
+static int traverse(uint32_t wi) {
 	jsmntok_t t = get_token();
 	if (t.type == JSMN_OBJECT) {
 		ti++;
-		int size = 0;
-		for (int i = 0; i < t.size; ++i) {
+		uint32_t size = 0;
+		for (uint32_t i = 0; i < t.size; ++i) {
 			size += traverse(wi + size);
 		}
 		return pad(wi, PTR_SIZE) + size;
@@ -98,7 +104,7 @@ static int traverse(int wi) {
 	}
 	else if (t.type == JSMN_ARRAY) {
 		ti++;
-		for (int i = 0; i < t.size; ++i) {
+		for (uint32_t i = 0; i < t.size; ++i) {
 			traverse(0);
 		}
 		return pad(wi, PTR_SIZE) + PTR_SIZE;
@@ -118,8 +124,8 @@ static int token_size() {
 	return len;
 }
 
-static bool has_dot(char *str, int len) {
-	for (int i = 0; i < len; ++i) {
+static bool has_dot(char *str, uint32_t len) {
+	for (uint32_t i = 0; i < len; ++i) {
 		if (str[i] == '.') {
 			return true;
 		}
@@ -133,11 +139,11 @@ static void token_write() {
 	if (t.type == JSMN_OBJECT) {
 		// TODO: Object containing another object
 		// Write object contents
-		int size = token_size();
+		uint32_t size = token_size();
 		size += pad(size, PTR_SIZE);
 		bottom += size * array_count;
 		ti++;
-		for (int i = 0; i < t.size; ++i) {
+		for (uint32_t i = 0; i < t.size; ++i) {
 			token_write();
 		}
 	}
@@ -166,8 +172,8 @@ static void token_write() {
 		uint32_t _wi = wi;
 		wi = bottom;
 		store_ptr(bottom + PTR_SIZE + 4 + 4); // Pointer to buffer contents
-		store_i32(t.size); // Element count
-		store_i32(0); // Capacity = 0 -> do not free on first realloc
+		store_u32(t.size); // Element count
+		store_u32(0); // Capacity = 0 -> do not free on first realloc
 		bottom = wi;
 
 		if (t.size == 0) {
@@ -175,7 +181,7 @@ static void token_write() {
 			return;
 		}
 
-		int count = t.size;
+		uint32_t count = t.size;
 		array_count = count;
 		t = get_token();
 
@@ -184,13 +190,13 @@ static void token_write() {
 			uint32_t size = token_size();
 			size += pad(size, PTR_SIZE);
 
-			for (int i = 0; i < count; ++i) {
+			for (uint32_t i = 0; i < count; ++i) {
 				store_ptr(bottom + count * PTR_SIZE + i * size);
 			}
 
 			// Struct contents
 			bottom = pad(wi, PTR_SIZE) + wi;
-			for (int i = 0; i < count; ++i) {
+			for (uint32_t i = 0; i < count; ++i) {
 				wi = pad(wi, PTR_SIZE) + wi;
 				token_write();
 			}
@@ -199,7 +205,7 @@ static void token_write() {
 			// String pointers
 			uint32_t _ti = ti;
 			uint32_t strings_length = 0;
-			for (int i = 0; i < count; ++i) {
+			for (uint32_t i = 0; i < count; ++i) {
 				store_ptr(bottom + count * PTR_SIZE + strings_length);
 				uint32_t length = t.end - t.start; // String length
 				strings_length += length;
@@ -211,7 +217,7 @@ static void token_write() {
 			t = get_token();
 
 			// String bytes
-			for (int i = 0; i < count; ++i) {
+			for (uint32_t i = 0; i < count; ++i) {
 				store_string_bytes(source + t.start, t.end - t.start);
 				ti++;
 				t = get_token();
@@ -220,7 +226,7 @@ static void token_write() {
 		}
 		else {
 			// Array contents
-			for (int i = 0; i < count; ++i) {
+			for (uint32_t i = 0; i < count; ++i) {
 				token_write();
 			}
 			bottom = pad(wi, PTR_SIZE) + wi;
@@ -257,7 +263,7 @@ static void load_tokens(char *s) {
 void *json_parse(char *s) {
 	load_tokens(s);
 
-	int out_size = strlen(s) * 2;
+	uint32_t out_size = strlen(s) * 2;
 	decoded = gc_alloc(out_size);
 	wi = 0;
 	bottom = 0;
@@ -274,7 +280,7 @@ static void token_write_to_map(any_map_t *m) {
 	if (t.type == JSMN_OBJECT) {
 		// TODO: Object containing another object
 		ti++;
-		for (int i = 0; i < t.size; ++i) {
+		for (uint32_t i = 0; i < t.size; ++i) {
 			token_write_to_map(m);
 		}
 	}
@@ -339,7 +345,7 @@ void json_encode_string(char *k, char *v) {
 
 void json_encode_string_array(char *k, char_ptr_array_t *a) {
 	json_encode_begin_array(k);
-	for (int i = 0; i < a->length; ++i) {
+	for (uint32_t i = 0; i < a->length; ++i) {
 		if (i > 0) {
 			encoded = string_join(encoded, ",");
 		}
@@ -365,7 +371,7 @@ void json_encode_null(char *k) {
 
 void json_encode_f32_array(char *k, f32_array_t *a) {
 	json_encode_begin_array(k);
-	for (int i = 0; i < a->length; ++i) {
+	for (uint32_t i = 0; i < a->length; ++i) {
 		if (i > 0) {
 			encoded = string_join(encoded, ",");
 		}
@@ -376,7 +382,7 @@ void json_encode_f32_array(char *k, f32_array_t *a) {
 
 void json_encode_i32_array(char *k, i32_array_t *a) {
 	json_encode_begin_array(k);
-	for (int i = 0; i < a->length; ++i) {
+	for (uint32_t i = 0; i < a->length; ++i) {
 		if (i > 0) {
 			encoded = string_join(encoded, ",");
 		}
@@ -410,7 +416,7 @@ void json_encode_end_object() {
 
 void json_encode_map(any_map_t *m) {
 	any_array_t *keys = map_keys(m);
-	for (int i = 0; i < keys->length; i++) {
+	for (uint32_t i = 0; i < keys->length; i++) {
 		json_encode_string(keys->buffer[i], any_map_get(m, keys->buffer[i]));
 	}
 }
