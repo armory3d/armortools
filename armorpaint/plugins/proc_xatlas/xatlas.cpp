@@ -120,7 +120,8 @@ Copyright (c) 2012 Brandon Pelfrey
 
 #define XA_UNUSED(a) ((void)(a))
 
-#define XA_MERGE_CHARTS 1
+// #define XA_MERGE_CHARTS 1
+#define XA_MERGE_CHARTS 0 ////
 #define XA_MERGE_CHARTS_MIN_NORMAL_DEVIATION 0.5f
 #define XA_RECOMPUTE_CHARTS 1
 #define XA_CHECK_PARAM_WINDING 0
@@ -10055,9 +10056,11 @@ void xatlasPackOptionsInit(xatlasPackOptions *packOptions)
 extern "C" {
 #endif
 
+#include <kinc/system.h>
 #include <iron_obj.h>
 
 void proc_xatlas_unwrap(raw_mesh_t *mesh) {
+	double t = kinc_time();
 	int vertex_count = mesh->posa->length / 4;
 	float *pa = (float *)malloc(sizeof(float) * vertex_count * 3);
 	float *na = (float *)malloc(sizeof(float) * vertex_count * 3);
@@ -10122,6 +10125,8 @@ void proc_xatlas_unwrap(raw_mesh_t *mesh) {
 	xatlas::Destroy(atlas);
 	free(pa);
 	free(na);
+
+	kinc_log(KINC_LOG_LEVEL_INFO, "Unwrapped in %fs.\n", kinc_time() - t);
 }
 
 #ifdef __cplusplus
