@@ -33,6 +33,8 @@ ui_canvas_control_t *(*ui_nodes_on_canvas_control)(void) = NULL;
 void (*ui_nodes_on_canvas_released)(void) = NULL;
 void (*ui_nodes_on_socket_released)(int) = NULL;
 void (*ui_nodes_on_link_drag)(int, bool) = NULL;
+bool ui_nodes_grid_snap = true;
+int ui_nodes_grid_snap_w = 40;
 
 int ui_popup_x = 0;
 int ui_popup_y = 0;
@@ -365,6 +367,12 @@ void ui_nodes_rgba_popup(ui_handle_t *nhandle, float *val, int x, int y) {
 	ui_popup(x, y, 140.0 * current_nodes->scale_factor, current->ops->theme->ELEMENT_H * 10.0, &rgba_popup_commands, nhandle, val);
 }
 
+static float ui_nodes_snap(float f) {
+	float w = ui_nodes_grid_snap_w * UI_NODES_SCALE();
+	f = f * UI_NODES_SCALE();
+	return roundf(f / w) * w;
+}
+
 static char_ptr_array_t enum_ar;
 static char enum_label[64];
 static char enum_texts_data[64][64];
@@ -400,6 +408,19 @@ void ui_draw_node(ui_node_t *node, ui_node_canvas_t *canvas) {
 				break;
 			}
 		}
+	}
+
+	// Grid snap preview
+	if (ui_nodes_grid_snap && ui_is_selected(node) && current_nodes->nodes_drag) {
+		kinc_g2_set_color(current->ops->theme->BUTTON_COL);
+		ui_draw_rect(false,
+			ui_nodes_snap(node->x) + UI_NODES_PAN_X(),
+			ui_nodes_snap(node->y) + UI_NODES_PAN_Y(),
+			w + 2,
+			h + 2
+		);
+		// nx = ui_nodes_snap(node->x) + UI_NODES_PAN_X();
+		// ny = ui_nodes_snap(node->y) + UI_NODES_PAN_Y();
 	}
 
 	// Shadow
@@ -1005,7 +1026,14 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 				current_nodes->dragged = true;
 				node->x += current->input_dx / UI_NODES_SCALE();
 				node->y += current->input_dy / UI_NODES_SCALE();
+				// Absolute
+				// node->x = (current->input_x - current->_window_x - UI_NODES_PAN_X()) / UI_NODES_SCALE();
+				// node->y = (current->input_y - current->_window_y - UI_NODES_PAN_Y()) / UI_NODES_SCALE();
 			}
+		}
+		if (ui_nodes_grid_snap && current->input_released && ui_is_selected(node)) {
+			node->x = ui_nodes_snap(node->x) / UI_NODES_SCALE();
+			node->y = ui_nodes_snap(node->y) / UI_NODES_SCALE();
 		}
 
 		ui_draw_node(node, canvas);

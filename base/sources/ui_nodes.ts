@@ -61,6 +61,7 @@ function ui_viewnodes_init() {
 	ui_nodes_on_socket_released = ui_viewnodes_on_socket_released;
 	ui_nodes_on_canvas_released = ui_viewnodes_on_canvas_released;
 	ui_nodes_on_canvas_control = ui_viewnodes_on_canvas_control;
+	ui_nodes_grid_snap = config_raw.grid_snap;
 	nodes_material_init();
 
 	let scale: f32 = config_raw.window_scale;

@@ -124,8 +124,12 @@ function box_preferences_show() {
 			}
 			config_raw.splash_screen = ui_check(h_splash_screen, tr("Splash Screen"));
 
-			// ui_text("Node Editor");
-			// let grid_snap: bool = ui_check(ui_handle("boxpreferences_11", { selected: false }), "Grid Snap");
+			let h_grid_snap: ui_handle_t = ui_handle(__ID__);
+			if (h_grid_snap.init) {
+				h_grid_snap.selected = config_raw.grid_snap;
+			}
+			config_raw.grid_snap = ui_check(h_grid_snap, tr("Grid Snap"));
+			ui_nodes_grid_snap = config_raw.grid_snap;
 
 			_ui_end_element();
 

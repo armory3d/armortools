@@ -264,6 +264,7 @@ declare let ui_is_copy: bool;
 declare let ui_is_paste: bool;
 declare let ui_nodes_exclude_remove: string[];
 declare let ui_clipboard: string;
+declare let ui_nodes_grid_snap: bool;
 
 declare function ui_nest(handle: ui_handle_t, pos: i32): ui_handle_t;
 declare function ui_theme_default(theme: ui_theme_t): void;

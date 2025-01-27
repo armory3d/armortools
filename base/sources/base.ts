@@ -840,6 +840,7 @@ function base_init_config() {
 	raw.blender = "";
 	raw.atlas_res = 0;
 	raw.pathtrace_mode = pathtrace_mode_t.FAST;
+	raw.grid_snap = false;
 
 	base_ext_init_config(raw);
 }
