@@ -226,11 +226,12 @@ function util_render_make_brush_preview() {
 	if (render_path_paint_live_layer_locked) {
 		return;
 	}
-	context_raw.material_preview = true;
 
 	let current: image_t = _g2_current;
 	let g2_in_use: bool = _g2_in_use;
 	if (g2_in_use) g2_end();
+
+	context_raw.material_preview = true;
 
 	// Prepare layers
 	if (render_path_paint_live_layer == null) {
@@ -319,8 +320,20 @@ function util_render_make_brush_preview() {
 	let _pdirty: i32 = context_raw.pdirty;
 	context_raw.pdirty = 2;
 
-	let points_x: f32[] = [0.2, 0.2,  0.35, 0.5,  0.5, 0.5,  0.65, 0.8,  0.8, 0.8];
-	let points_y: f32[] = [0.5, 0.5,  0.35 - 0.04, 0.2 - 0.08,  0.4 + 0.015, 0.6 + 0.03,  0.45 - 0.025, 0.3 - 0.05,  0.5 + 0.025, 0.7 + 0.05];
+	let points_x: f32[] = [
+		0.2, 0.2,
+		0.35, 0.5,
+		0.5, 0.5,
+		0.65, 0.8,
+		0.8, 0.8
+	];
+	let points_y: f32[] = [
+		0.5, 0.5,
+		0.35 - 0.04, 0.2 - 0.08,
+		0.4 + 0.015, 0.6 + 0.03,
+		0.45 - 0.025, 0.3 - 0.05,
+		0.5 + 0.025, 0.7 + 0.05
+	];
 	for (let i: i32 = 1; i < points_x.length; ++i) {
 		context_raw.last_paint_vec_x = points_x[i - 1];
 		context_raw.last_paint_vec_y = points_y[i - 1];
