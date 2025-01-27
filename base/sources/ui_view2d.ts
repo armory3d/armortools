@@ -27,6 +27,8 @@ let _ui_view2d_render_x: f32;
 let _ui_view2d_render_y: f32;
 let _ui_view2d_render_tw: f32;
 let _ui_view2d_render_th: f32;
+let ui_view2d_grid: image_t = null;
+let ui_view2d_grid_redraw: bool = true;
 
 function ui_view2d_init() {
 	///if (is_paint || is_sculpt)
@@ -90,8 +92,12 @@ function ui_view2d_render() {
 	g2_end();
 
 	// Cache grid
-	if (ui_nodes_grid == null) {
-		ui_nodes_draw_grid();
+	if (ui_view2d_grid_redraw) {
+		if (ui_view2d_grid != null) {
+			image_unload(ui_view2d_grid);
+		}
+		ui_view2d_grid = ui_nodes_draw_grid(ui_view2d_pan_scale);
+		ui_view2d_grid_redraw = false;
 	}
 
 	// Ensure UV map is drawn
@@ -127,11 +133,10 @@ function ui_view2d_render() {
 
 		// Grid
 		g2_set_color(0xffffffff);
-		let ix: i32 = ui_view2d_pan_x * ui_view2d_pan_scale;
-		let iy: i32 = ui_view2d_pan_y * ui_view2d_pan_scale;
-		let gx: i32 = ix % 100 - 100;
-		let gy: i32 = iy % 100 - 100;
-		g2_draw_image(ui_nodes_grid, gx, gy);
+		let step: f32 = ui_nodes_grid_cell_w * ui_view2d_pan_scale;
+		let x: f32 = math_fmod(ui_view2d_pan_x, step) - step;
+		let y: f32 = math_fmod(ui_view2d_pan_y, step) - step;
+		g2_draw_image(ui_view2d_grid, x, y);
 
 		// Texture
 		let tex: image_t = null;
@@ -445,7 +450,7 @@ function ui_view2d_update() {
 	ui_view2d_pan_x += control.pan_x;
 	ui_view2d_pan_y += control.pan_y;
 	ui_view2d_controls_down = control.controls_down;
-	if (control.zoom != 0) {
+	if (control.zoom != 0.0) {
 		let _pan_x: f32 = ui_view2d_pan_x / ui_view2d_pan_scale;
 		let _pan_y: f32 = ui_view2d_pan_y / ui_view2d_pan_scale;
 		ui_view2d_pan_scale += control.zoom;
@@ -463,6 +468,7 @@ function ui_view2d_update() {
 			ui_view2d_pan_x -= (ui_view2d_ui.input_x - ui_view2d_ui._window_x - ui_view2d_ui._window_w / 2) * control.zoom;
 			ui_view2d_pan_y -= (ui_view2d_ui.input_y - ui_view2d_ui._window_y - ui_view2d_ui._window_h / 2) * control.zoom;
 		}
+		ui_view2d_grid_redraw = true;
 	}
 
 	///if (is_paint || is_sculpt)

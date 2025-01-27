@@ -696,10 +696,7 @@ function ui_nodes_get_node_y(): i32 {
 	return math_floor((mouse_y - ui_nodes_wy - ui_nodes_PAN_Y()) / ui_nodes_SCALE());
 }
 
-function ui_nodes_draw_grid() {
-	let ui_nodes: ui_nodes_t = ui_nodes_get_nodes();
-	let zoom: f32 = ui_nodes.zoom;
-
+function ui_nodes_draw_grid(zoom: f32): image_t {
 	let ww: i32 = config_raw.layout[layout_size_t.NODES_W];
 
 	///if (is_paint || is_sculpt)
@@ -720,8 +717,8 @@ function ui_nodes_draw_grid() {
 		h = 1;
 	}
 
-	ui_nodes_grid = image_create_render_target(w, h);
-	g2_begin(ui_nodes_grid);
+	let grid: image_t = image_create_render_target(w, h);
+	g2_begin(grid);
 	g2_clear(ui_nodes_ui.ops.theme.SEPARATOR_COL);
 
 	let sep_col: i32 = ui_nodes_ui.ops.theme.SEPARATOR_COL;
@@ -754,6 +751,7 @@ function ui_nodes_draw_grid() {
 	}
 
 	g2_end();
+	return grid;
 }
 
 let _ui_nodes_render_tmp: (col: i32)=>void;
@@ -841,7 +839,8 @@ function ui_nodes_render() {
 		if (ui_nodes_grid != null) {
 			image_unload(ui_nodes_grid);
 		}
-		ui_nodes_draw_grid();
+		let ui_nodes: ui_nodes_t = ui_nodes_get_nodes();
+		ui_nodes_grid = ui_nodes_draw_grid(ui_nodes.zoom);
 		ui_nodes_grid_redraw = false;
 	}
 
