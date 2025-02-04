@@ -479,10 +479,10 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 
 	#ifdef is_forge
 	create_srv_ib(_ib_full, _ib_full->impl.count, 0);
-	create_srv_vb(_vb_full, _vb_full->impl.myCount, 8 * 2);
+	create_srv_vb(_vb_full, _vb_full->impl.myCount, vb[0]->impl.myStride);
 	#else
 	create_srv_ib(ib[0], ib[0]->impl.count, 0);
-	create_srv_vb(vb[0], vb[0]->impl.myCount, 8 * 2);
+	create_srv_vb(vb[0], vb[0]->impl.myCount, vb[0]->impl.myStride);
 	#endif
 
 	// Reset the command list for the acceleration structure construction
