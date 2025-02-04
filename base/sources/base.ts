@@ -753,27 +753,27 @@ function base_init_undo_layers() {
 function base_init_layout() {
 	let raw: config_t = config_raw;
 	let show2d: bool = (ui_nodes_show || ui_view2d_show) && raw.layout != null;
-	raw.layout = [];
+	let new_layout: i32[] = [];
 
-	array_push(raw.layout, math_floor(ui_base_default_sidebar_w * raw.window_scale)); // LayoutSidebarW
-	array_push(raw.layout, math_floor(sys_height() / 2)); // LayoutSidebarH0
-	array_push(raw.layout, math_floor(sys_height() / 2)); // LayoutSidebarH1
+	array_push(new_layout, math_floor(ui_base_default_sidebar_w * raw.window_scale)); // LayoutSidebarW
+	array_push(new_layout, math_floor(sys_height() / 2)); // LayoutSidebarH0
+	array_push(new_layout, math_floor(sys_height() / 2)); // LayoutSidebarH1
 
 	///if arm_ios
-	array_push(raw.layout, show2d ? math_floor((app_w() + raw.layout[layout_size_t.NODES_W]) * 0.473) : math_floor(app_w() * 0.473)); // LayoutNodesW
+	array_push(new_layout, show2d ? math_floor((app_w() + raw.layout[layout_size_t.NODES_W]) * 0.473) : math_floor(app_w() * 0.473)); // LayoutNodesW
 	///elseif arm_android
-	array_push(raw.layout, show2d ? math_floor((app_w() + raw.layout[layout_size_t.NODES_W]) * 0.473) : math_floor(app_w() * 0.473));
+	array_push(new_layout, show2d ? math_floor((app_w() + raw.layout[layout_size_t.NODES_W]) * 0.473) : math_floor(app_w() * 0.473));
 	///else
-	array_push(raw.layout, show2d ? math_floor((app_w() + raw.layout[layout_size_t.NODES_W]) * 0.515) : math_floor(app_w() * 0.515)); // Align with ui header controls
+	array_push(new_layout, show2d ? math_floor((app_w() + raw.layout[layout_size_t.NODES_W]) * 0.515) : math_floor(app_w() * 0.515)); // Align with ui header controls
 	///end
 
-	array_push(raw.layout, math_floor(app_h() / 2)); // LayoutNodesH
-	array_push(raw.layout, math_floor(ui_status_default_status_h * raw.window_scale)); // LayoutStatusH
+	array_push(new_layout, math_floor(app_h() / 2)); // LayoutNodesH
+	array_push(new_layout, math_floor(ui_status_default_status_h * raw.window_scale)); // LayoutStatusH
 
 	///if (arm_android || arm_ios)
-	array_push(raw.layout, 0); // LayoutHeader
+	array_push(new_layout, 0); // LayoutHeader
 	///else
-	array_push(raw.layout, 1);
+	array_push(new_layout, 1);
 	///end
 
 	raw.layout_tabs = [
@@ -781,6 +781,8 @@ function base_init_layout() {
 		0,
 		0
 	];
+
+	raw.layout = new_layout;
 }
 
 function base_init_config() {
