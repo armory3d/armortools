@@ -207,15 +207,16 @@ function util_render_make_font_preview() {
 	let font_size: i32 = util_render_font_preview_size;
 	let text_w: i32 = math_floor(g2_font_width(font, font_size, text)) + 8;
 	let text_h: i32 = math_floor(g2_font_height(font, font_size)) + 8;
+	let tex_w: i32 = text_w + 32;
 	if (context_raw.font.image == null) {
-		context_raw.font.image = image_create_render_target(512, 512, tex_format_t.RGBA32);
+		context_raw.font.image = image_create_render_target(tex_w, tex_w, tex_format_t.RGBA32);
 	}
 	g2_begin(context_raw.font.image);
 	g2_clear(0x00000000);
 	g2_set_font(font);
 	g2_set_font_size(font_size);
 	g2_set_color(0xffffffff);
-	g2_draw_string(text, 512 / 2 - text_w / 2, 512 / 2 - text_h / 2);
+	g2_draw_string(text, tex_w / 2 - text_w / 2, tex_w / 2 - text_h / 2);
 	g2_end();
 	context_raw.font.preview_ready = true;
 
