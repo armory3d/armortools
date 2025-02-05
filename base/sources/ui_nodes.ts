@@ -39,6 +39,8 @@ let ui_nodes_grid_small_cell_w: i32 = 40;
 let ui_nodes_hwnd: ui_handle_t = ui_handle_create();
 let ui_nodes_group_stack: node_group_t[] = [];
 let ui_nodes_controls_down: bool = false;
+let ui_nodes_tabs: slot_material_t[] = null;
+let ui_nodes_htab: ui_handle_t = ui_handle_create();
 
 let _ui_nodes_on_link_drag_link_drag: ui_node_link_t;
 let _ui_nodes_on_link_drag_node: ui_node_t;
@@ -465,11 +467,24 @@ function ui_nodes_get_zoom_delta(ui: ui_t): f32 {
 		   -(ui.input_dy - ui.input_dx);
 }
 
+function ui_nodes_is_tab_selected(): bool {
+	return ui_nodes_htab.position > 0 &&
+		ui_nodes_htab.position % 2 == 1 && // [tab0, tab1, x, tab2, x, +]
+		ui_nodes_tabs.length >= ui_nodes_htab.position / 2;
+}
+
+function ui_nodes_tab_index(): i32 {
+	return (int)(ui_nodes_htab.position / 2);
+}
+
 function ui_nodes_get_canvas(groups: bool = false): ui_node_canvas_t {
 	///if (is_paint || is_sculpt)
 	if (ui_nodes_canvas_type == canvas_type_t.MATERIAL) {
 		if (groups && ui_nodes_group_stack.length > 0) {
 			return ui_nodes_group_stack[ui_nodes_group_stack.length - 1].canvas;
+		}
+		else if (ui_nodes_is_tab_selected()) {
+			return ui_nodes_tabs[ui_nodes_tab_index()].canvas;
 		}
 		else {
 			return ui_nodes_get_canvas_material();
@@ -494,6 +509,9 @@ function ui_nodes_get_nodes(): ui_nodes_t {
 	if (ui_nodes_canvas_type == canvas_type_t.MATERIAL) {
 		if (ui_nodes_group_stack.length > 0) {
 			return ui_nodes_group_stack[ui_nodes_group_stack.length - 1].nodes;
+		}
+		else if (ui_nodes_is_tab_selected()) {
+			return ui_nodes_tabs[ui_nodes_tab_index()].nodes;
 		}
 		else {
 			return context_raw.material.nodes;
@@ -766,7 +784,19 @@ function ui_nodes_render() {
 			ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 		}
 		else {
-			layers_is_fill_material() ? layers_update_fill_layers() : util_render_make_material_preview();
+
+			let _material: slot_material_t = context_raw.material;
+
+			if (ui_nodes_is_tab_selected()) {
+				context_raw.material = ui_nodes_tabs[ui_nodes_tab_index()];
+			}
+
+			layers_is_fill_material() ?
+				layers_update_fill_layers() :
+				util_render_make_material_preview();
+
+			context_raw.material = _material;
+
 			if (ui_view2d_show && ui_view2d_type == view_2d_type_t.NODE) {
 				ui_view2d_hwnd.redraws = 2;
 			}
@@ -874,9 +904,9 @@ function ui_nodes_render() {
 	///end
 
 	let ew: i32 = math_floor(ui_ELEMENT_W(ui_nodes_ui) * 0.7);
-	ui_nodes_wh = app_h() + ui_header_h;
+	ui_nodes_wh = app_h();
 	if (config_raw.layout[layout_size_t.HEADER] == 1) {
-		ui_nodes_wh += ui_header_h;
+		ui_nodes_wh += ui_header_h * 2;
 	}
 
 	if (ui_view2d_show) {
@@ -892,7 +922,26 @@ function ui_nodes_render() {
 
 	if (ui_window(ui_nodes_hwnd, ui_nodes_wx, ui_nodes_wy, ui_nodes_ww, ui_nodes_wh)) {
 
-		ui_tab(ui_handle(__ID__), tr("Nodes"));
+		ui_tab(ui_nodes_htab, tr("Nodes"));
+
+		// Additional tabs
+		if (ui_nodes_canvas_type == canvas_type_t.MATERIAL) {
+			if (ui_nodes_tabs == null) {
+				ui_nodes_tabs = [];
+			}
+
+			for (let i: i32 = 0; i < ui_nodes_tabs.length; ++i) {
+				ui_tab(ui_nodes_htab, ui_nodes_tabs[i].canvas.name);
+				if (ui_tab(ui_nodes_htab, tr("x"))) {
+					array_splice(ui_nodes_tabs, i, 1);
+					ui_nodes_htab.position = 0;
+				}
+			}
+
+			if (ui_tab(ui_nodes_htab, tr("+"))) {
+				array_push(ui_nodes_tabs, context_raw.material);
+			}
+		}
 
 		// Grid
 		g2_set_color(0xffffffff);
