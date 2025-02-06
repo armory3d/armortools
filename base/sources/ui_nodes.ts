@@ -938,9 +938,11 @@ function ui_nodes_render() {
 				}
 			}
 
+			///if is_paint
 			if (ui_tab(ui_nodes_htab, tr("+"))) {
 				array_push(ui_nodes_tabs, context_raw.material);
 			}
+			///end
 		}
 
 		// Grid
