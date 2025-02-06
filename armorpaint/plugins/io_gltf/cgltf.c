@@ -5,6 +5,10 @@
 #include "iron_array.h"
 #include "iron_obj.h"
 
+static bool has_next = false;
+static int current_node = 0;
+static float scale_pos = 1.0;
+
 uint32_t *io_gltf_read_u8_array(cgltf_accessor *a) {
 	cgltf_buffer_view *v = a->buffer_view;
 	unsigned char *ar = (unsigned char *)v->buffer->data + v->offset;
@@ -37,16 +41,7 @@ float *io_gltf_read_f32_array(cgltf_accessor *a) {
 	return ar;
 }
 
-void *io_gltf_parse(char *buf, size_t size) {
-	cgltf_options options = {0};
-	cgltf_data *data = NULL;
-	cgltf_result result = cgltf_parse(&options, buf, size, &data);
-	if (result != cgltf_result_success) {
-		return NULL;
-	}
-	cgltf_load_buffers(&options, data, NULL);
-
-	cgltf_mesh *mesh = &data->meshes[0];
+void io_gltf_parse_mesh(raw_mesh_t *raw, cgltf_mesh *mesh, float *to_world, float *scale) {
 	cgltf_primitive *prim = &mesh->primitives[0];
 
 	cgltf_accessor *a = prim->indices;
@@ -74,6 +69,27 @@ void *io_gltf_parse(char *buf, size_t size) {
 
 	int vertex_count = prim->attributes[0].data->count; // Assume VEC3 position
 
+	float *m = to_world;
+	for (int i = 0; i < vertex_count; ++i) {
+		float x = posa32[i * 3 + 0];
+		float y = posa32[i * 3 + 1];
+		float z = posa32[i * 3 + 2];
+		posa32[i * 3 + 0] = m[0] * x + m[4] * y + m[8] * z + m[12];
+		posa32[i * 3 + 1] = m[1] * x + m[5] * y + m[9] * z + m[13];
+		posa32[i * 3 + 2] = m[2] * x + m[6] * y + m[10] * z + m[14];
+	}
+
+	if (nora32 != NULL) {
+		for (int i = 0; i < vertex_count; ++i) {
+			float x = nora32[i * 3 + 0] / scale[0];
+			float y = nora32[i * 3 + 1] / scale[1];
+			float z = nora32[i * 3 + 2] / scale[2];
+			nora32[i * 3 + 0] = m[0] * x + m[4] * y + m[8] * z;
+			nora32[i * 3 + 1] = m[1] * x + m[5] * y + m[9] * z;
+			nora32[i * 3 + 2] = m[2] * x + m[6] * y + m[10] * z;
+		}
+	}
+
 	// Pack positions to (-1, 1) range
 	float hx = 0.0;
 	float hy = 0.0;
@@ -86,7 +102,9 @@ void *io_gltf_parse(char *buf, size_t size) {
 		f = fabsf(posa32[i * 3 + 2]);
 		if (hz < f) hz = f;
 	}
-	float scale_pos = fmax(hx, fmax(hy, hz));
+
+	float _scale_pos = fmax(hx, fmax(hy, hz));
+	if (_scale_pos > scale_pos) scale_pos = _scale_pos;
 	float inv = 1 / scale_pos;
 
 	// Pack into 16bit
@@ -148,14 +166,6 @@ void *io_gltf_parse(char *buf, size_t size) {
 		}
 	}
 
-	cgltf_free(data);
-
-	raw_mesh_t *raw = (raw_mesh_t *)calloc(sizeof(raw_mesh_t), 1);
-
-	// raw->name = (char *)malloc(strlen(mesh->name) + 1);
-	// strcpy(raw->name, mesh->name);
-	raw->name = "";
-
 	raw->posa = (i16_array_t *)malloc(sizeof(i16_array_t));
 	raw->posa->buffer = posa;
 	raw->posa->length = raw->posa->capacity = vertex_count * 4;
@@ -174,6 +184,57 @@ void *io_gltf_parse(char *buf, size_t size) {
 
 	raw->scale_pos = scale_pos;
 	raw->scale_tex = 1.0;
+}
+
+void *io_gltf_parse(char *buf, size_t size) {
+	cgltf_options options = {0};
+	cgltf_data *data = NULL;
+	cgltf_result result = cgltf_parse(&options, buf, size, &data);
+	if (result != cgltf_result_success) {
+		return NULL;
+	}
+	cgltf_load_buffers(&options, data, NULL);
+
+	raw_mesh_t *raw = (raw_mesh_t *)calloc(sizeof(raw_mesh_t), 1);
+
+	for (; current_node < data->nodes_count; ++current_node) {
+		cgltf_node *n = &data->nodes[current_node];
+		if (n->mesh != NULL) {
+			raw->name = malloc(strlen(n->name) + 1);
+			strcpy(raw->name, n->name);
+			float m[16];
+			cgltf_node_transform_world(n, &m);
+			float scale[3];
+			scale[0] = 1;
+			scale[1] = 1;
+			scale[2] = 1;
+			if (n->has_scale) {
+				scale[0] = n->scale[0];
+				scale[1] = n->scale[1];
+				scale[2] = n->scale[2];
+			}
+			io_gltf_parse_mesh(raw, n->mesh, &m, &scale);
+			break;
+		}
+	}
+
+	cgltf_free(data);
+
+	current_node++;
+	has_next = false;
+	for (size_t i = current_node; i < data->nodes_count; ++i) {
+		cgltf_node *n = &data->nodes[i];
+		if (n->mesh != NULL) {
+			has_next = true;
+			break;
+		}
+	}
+
+	if (!has_next) {
+		current_node = 0;
+	}
+
+	raw->has_next = has_next;
 
 	return raw;
 }
