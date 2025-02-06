@@ -14,6 +14,7 @@ FN(texsynth_inpaint) {
 	void *mask = JS_GetArrayBuffer(ctx, &size, argv[4]);
 	bool tiling = JS_ToBool(ctx, argv[5]);
 	texsynth_inpaint(w, h, out, img, mask, tiling);
+	return JS_UNDEFINED;
 }
 
 void plugin_embed() {
