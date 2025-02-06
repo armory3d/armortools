@@ -1415,7 +1415,10 @@ function ui_nodes_accept_asset_drag(index: i32) {
 	ui_nodes_push_undo();
 	let g: node_group_t = ui_nodes_group_stack.length > 0 ? ui_nodes_group_stack[ui_nodes_group_stack.length - 1] : null;
 	///if (is_paint || is_sculpt)
-	let n: ui_node_t = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_create_node("TEX_IMAGE", g) : nodes_brush_create_node("TEX_IMAGE");
+	let n: ui_node_t =
+		ui_nodes_canvas_type == canvas_type_t.MATERIAL ?
+			nodes_material_create_node("TEX_IMAGE", g) :
+			nodes_brush_create_node("TEX_IMAGE");
 	///end
 	///if is_lab
 	let n: ui_node_t = nodes_brush_create_node("image_texture_node");
