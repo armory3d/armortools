@@ -96,3 +96,6 @@ function export_obj_run(path: string, paint_objects: mesh_object_t[], apply_disp
 
 	iron_file_save_bytes(path, o, 0);
 }
+
+function export_obj_run_fast(path: string, paint_objects: mesh_object_t[]) {
+}
