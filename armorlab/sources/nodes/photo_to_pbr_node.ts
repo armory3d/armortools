@@ -149,7 +149,7 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): i
 
 		///if (arm_metal || arm_vulkan)
 		if (from == channel_type_t.BASE_COLOR) {
-			photo_to_pbr_node_bgra_swap(u8a.buffer);
+			photo_to_pbr_node_bgra_swap(u8a);
 		}
 		///end
 
