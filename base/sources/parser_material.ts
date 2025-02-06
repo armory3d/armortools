@@ -462,6 +462,26 @@ function parser_material_parse_vector_input(inp: ui_node_socket_t): string {
 	}
 }
 
+function _parser_material_cache_tex_text_node(file: string, text: string) {
+	if (map_get(data_cached_images, file) == null) {
+		app_notify_on_init(function(text: string) {
+			let _text_tool_text: string = context_raw.text_tool_text;
+			let _text_tool_image: image_t = context_raw.text_tool_image;
+			context_raw.text_tool_text = text;
+			context_raw.text_tool_image = null;
+
+			util_render_make_text_preview();
+			let file: string = "tex_text_" + text;
+
+			// TODO: remove old cache
+			map_set(data_cached_images, file, context_raw.text_tool_image);
+
+			context_raw.text_tool_text = _text_tool_text;
+			context_raw.text_tool_image = _text_tool_image;
+		}, text);
+	}
+}
+
 function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t): string {
 	if (node.type == "GROUP") {
 		return parser_material_parse_group(node, socket);
@@ -543,6 +563,16 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 			node_shader_write(parser_material_curshader, "vec4 " + tex_store + " = vec4(1.0, 0.0, 1.0, 1.0);");
 			return tex_store + ".rgb";
 		}
+	}
+	else if (node.type == "TEX_TEXT") {
+		let tex_name: string = parser_material_node_name(node);
+		let text_buffer: buffer_t = node.buttons[0].default_value;
+		let text: string = sys_buffer_to_string(text_buffer);
+		let file: string = "tex_text_" + text;
+		_parser_material_cache_tex_text_node(file, text);
+		let tex: bind_tex_t = parser_material_make_bind_tex(tex_name, file);
+		let texstore: string = parser_material_texture_store(node, tex, tex_name, color_space_t.AUTO);
+		return texstore + ".rrr";
 	}
 	else if (node.type == "TEX_MAGIC") {
 		node_shader_add_function(parser_material_curshader, str_tex_magic);
@@ -1422,6 +1452,16 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 			return texstore + ".a";
 		}
 	}
+	else if (node.type == "TEX_TEXT") {
+		let tex_name: string = parser_material_node_name(node);
+		let text_buffer: buffer_t = node.buttons[0].default_value;
+		let text: string = sys_buffer_to_string(text_buffer);
+		let file: string = "tex_text_" + text;
+		_parser_material_cache_tex_text_node(file, text);
+		let tex: bind_tex_t = parser_material_make_bind_tex(tex_name, file);
+		let texstore: string = parser_material_texture_store(node, tex, tex_name, color_space_t.AUTO);
+		return texstore + ".r";
+	}
 	else if (node.type == "TEX_MAGIC") {
 		node_shader_add_function(parser_material_curshader, str_tex_magic);
 		let co: string = parser_material_get_coord(node);
@@ -1980,16 +2020,10 @@ function parser_material_enum_data(s: string): string {
 	return "";
 }
 
-function parser_material_make_texture(image_node: ui_node_t, tex_name: string, matname: string = null): bind_tex_t {
-	let i: i32 = image_node.buttons[0].default_value[0];
-	let filepath: string = parser_material_enum_data(base_enum_texts(image_node.type)[i]);
-	if (filepath == "" || string_index_of(filepath, ".") == -1) {
-		return null;
-	}
-
+function parser_material_make_bind_tex(tex_name: string, file: string): bind_tex_t {
 	let tex: bind_tex_t = {
 		name: tex_name,
-		file: filepath
+		file: file
 	};
 
 	if (context_raw.texture_filter) {
@@ -2007,6 +2041,16 @@ function parser_material_make_texture(image_node: ui_node_t, tex_name: string, m
 	tex.u_addressing = "repeat";
 	tex.v_addressing = "repeat";
 	return tex;
+}
+
+function parser_material_make_texture(image_node: ui_node_t, tex_name: string): bind_tex_t {
+	let i: i32 = image_node.buttons[0].default_value[0];
+	let filepath: string = parser_material_enum_data(base_enum_texts(image_node.type)[i]);
+	if (filepath == "" || string_index_of(filepath, ".") == -1) {
+		return null;
+	}
+
+	return parser_material_make_bind_tex(tex_name, filepath);
 }
 
 function parser_material_is_pow(num: i32): bool {
