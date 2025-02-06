@@ -2437,7 +2437,7 @@ let nodes_material_color: ui_node_t[] = [
 	{
 		id: 0,
 		name: _tr("Quantize"),
-		type: "QUANTIZE",
+		type: "QUANTIZE", // extension
 		x: 0,
 		y: 0,
 		color: 0xff448c6d,
@@ -2487,7 +2487,7 @@ let nodes_material_color: ui_node_t[] = [
 	{
 		id: 0,
 		name: _tr("Replace Color"),
-		type: "REPLACECOL",
+		type: "REPLACECOL", // extension
 		x: 0,
 		y: 0,
 		color: 0xff448c6d,
@@ -2769,7 +2769,7 @@ let nodes_material_vector: ui_node_t[] = [
 	{
 		id: 0,
 		name: _tr("Mix Normal Map"),
-		type: "MIX_NORMAL_MAP",
+		type: "MIX_NORMAL_MAP", // extension
 		x: 0,
 		y: 0,
 		color: 0xff522c99,
@@ -3144,7 +3144,7 @@ let nodes_material_converter: ui_node_t[] = [
 	{
 		id: 0,
 		name: _tr("Color Mask"),
-		type: "COLMASK",
+		type: "COLMASK", // extension
 		x: 0,
 		y: 0,
 		color: 0xff62676d,
