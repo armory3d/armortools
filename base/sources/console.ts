@@ -49,11 +49,13 @@ function console_progress(s: string) {
 	console_progress_text = s;
 
 	// Pass one frame to immediately show the message
+	///if (!arm_vulkan) // TODO
 	ui_end_input();
 	g2_end();
 	app_render();
 	g2_begin();
 	iron_g4_swap_buffers();
+	///end
 }
 
 function console_info(s: string) {
