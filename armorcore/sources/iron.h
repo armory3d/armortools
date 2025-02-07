@@ -2859,14 +2859,17 @@ void iron_raytrace_set_textures(image_t *tex0, image_t *tex1, image_t *tex2, kin
 	kinc_g4_render_target_t *texpaint0_rt = texpaint0_image->render_target_;
 
 	if (texpaint0_tex != NULL) {
-		#ifdef KINC_DIRECT3D12
 		kinc_g4_texture_t *texture = texpaint0_tex;
 		if (!texture->impl._uploaded) {
 			kinc_g5_command_list_upload_texture(&commandList, &texture->impl._texture);
 			texture->impl._uploaded = true;
 		}
 		texpaint0 = (kinc_g4_render_target_t *)malloc(sizeof(kinc_g4_render_target_t));
+		#ifdef KINC_DIRECT3D12
 		texpaint0->impl._renderTarget.impl.srvDescriptorHeap = texture->impl._texture.impl.srvDescriptorHeap;
+		#endif
+		#ifdef KINC_VULKAN
+		texpaint0->impl._renderTarget.impl.sourceView = texture->impl._texture.impl.texture.view;
 		#endif
 	}
 	else {
@@ -2878,14 +2881,17 @@ void iron_raytrace_set_textures(image_t *tex0, image_t *tex1, image_t *tex2, kin
 	kinc_g4_render_target_t *texpaint1_rt = texpaint1_image->render_target_;
 
 	if (texpaint1_tex != NULL) {
-		#ifdef KINC_DIRECT3D12
 		kinc_g4_texture_t *texture = texpaint1_tex;
 		if (!texture->impl._uploaded) {
 			kinc_g5_command_list_upload_texture(&commandList, &texture->impl._texture);
 			texture->impl._uploaded = true;
 		}
 		texpaint1 = (kinc_g4_render_target_t *)malloc(sizeof(kinc_g4_render_target_t));
+		#ifdef KINC_DIRECT3D12
 		texpaint1->impl._renderTarget.impl.srvDescriptorHeap = texture->impl._texture.impl.srvDescriptorHeap;
+		#endif
+		#ifdef KINC_VULKAN
+		texpaint1->impl._renderTarget.impl.sourceView = texture->impl._texture.impl.texture.view;
 		#endif
 	}
 	else {
@@ -2897,14 +2903,17 @@ void iron_raytrace_set_textures(image_t *tex0, image_t *tex1, image_t *tex2, kin
 	kinc_g4_render_target_t *texpaint2_rt = texpaint2_image->render_target_;
 
 	if (texpaint2_tex != NULL) {
-		#ifdef KINC_DIRECT3D12
 		kinc_g4_texture_t *texture = (kinc_g4_texture_t *)texpaint2_tex;
 		if (!texture->impl._uploaded) {
 			kinc_g5_command_list_upload_texture(&commandList, &texture->impl._texture);
 			texture->impl._uploaded = true;
 		}
 		texpaint2 = (kinc_g4_render_target_t *)malloc(sizeof(kinc_g4_render_target_t));
+		#ifdef KINC_DIRECT3D12
 		texpaint2->impl._renderTarget.impl.srvDescriptorHeap = texture->impl._texture.impl.srvDescriptorHeap;
+		#endif
+		#ifdef KINC_VULKAN
+		texpaint2->impl._renderTarget.impl.sourceView = texture->impl._texture.impl.texture.view;
 		#endif
 	}
 	else {
