@@ -118,11 +118,28 @@ void *any_map_get(any_map_t *m, char *k) {
 	return i == -1 ? NULL : m->values->buffer[i];
 }
 
+static int next_pos(any_map_t *m, int i) {
+	return i == m->keys->capacity - 1 ? 0 : i + 1;
+}
+
 void map_delete(any_map_t *m, char *k) {
 	size_t i = index_get(m->keys, k);
 	if (i != -1) {
 		m->keys->buffer[i] = NULL;
+		m->values->buffer[i] = NULL;
 		m->keys->length--;
+
+		int next = next_pos(m, i);
+		while (m->keys->buffer[next] != NULL && next != i) {
+			int j = index_set(m, m->keys->buffer[next]);
+			if (j != next) {
+				m->keys->buffer[j] = m->keys->buffer[next];
+				m->values->buffer[j] = m->values->buffer[next];
+				m->keys->buffer[next] = NULL;
+				m->values->buffer[next] = NULL;
+			}
+			next = next_pos(m, next);
+		}
 	}
 }
 
