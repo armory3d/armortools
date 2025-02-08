@@ -1033,19 +1033,22 @@ function tab_layers_delete_layer(l: slot_layer_t) {
 	let pointers: map_t<slot_layer_t, i32> = tab_layers_init_layer_map();
 
 	if (slot_layer_is_layer(l) && slot_layer_has_masks(l, false)) {
-		for (let i: i32 = 0; i < slot_layer_get_masks(l, false).length; ++i) {
-			let m: slot_layer_t = slot_layer_get_masks(l, false)[i];
+		let masks: slot_layer_t[] = slot_layer_get_masks(l, false);
+		for (let i: i32 = 0; i < masks.length; ++i) {
+			let m: slot_layer_t = masks[i];
 			context_raw.layer = m;
 			history_delete_layer();
 			slot_layer_delete(m);
 		}
 	}
 	if (slot_layer_is_group(l)) {
-		for (let i: i32 = 0; i < slot_layer_get_children(l).length; ++i) {
-			let c: slot_layer_t = slot_layer_get_children(l)[i];
+		let children: slot_layer_t[] = slot_layer_get_children(l);
+		for (let i: i32 = 0; i < children.length; ++i) {
+			let c: slot_layer_t = children[i];
 			if (slot_layer_has_masks(c, false)) {
-				for (let i: i32 = 0; i < slot_layer_get_masks(c, false).length; ++i) {
-					let m: slot_layer_t = slot_layer_get_masks(c, false)[i];
+				let masks: slot_layer_t[] = slot_layer_get_masks(c, false);
+				for (let i: i32 = 0; i < masks.length; ++i) {
+					let m: slot_layer_t = masks[i];
 					context_raw.layer = m;
 					history_delete_layer();
 					slot_layer_delete(m);
