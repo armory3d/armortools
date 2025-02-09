@@ -171,7 +171,6 @@ function render_path_base_commands(draw_commands: ()=>void) {
 	render_path_base_draw_gbuffer();
 	render_path_paint_draw();
 
-	///if (arm_direct3d12 || arm_vulkan || arm_metal)
 	if (context_raw.viewport_mode == viewport_mode_t.PATH_TRACE) {
 		let use_live_layer: bool = context_raw.tool == workspace_tool_t.MATERIAL;
 		render_path_raytrace_draw(use_live_layer);
@@ -179,7 +178,6 @@ function render_path_base_commands(draw_commands: ()=>void) {
 		render_path_base_end();
 		return;
 	}
-	///end
 
 	draw_commands();
 	render_path_paint_end();
@@ -244,12 +242,10 @@ function render_path_base_draw_split(draw_commands: ()=>void) {
 
 		render_path_base_draw_gbuffer();
 
-		///if (arm_direct3d12 || arm_vulkan || arm_metal)
 		let use_live_layer: bool = context_raw.tool == workspace_tool_t.MATERIAL;
-		context_raw.viewport_mode == viewport_mode_t.PATH_TRACE ? render_path_raytrace_draw(use_live_layer) : draw_commands();
-		///else
-		draw_commands();
-		///end
+		context_raw.viewport_mode == viewport_mode_t.PATH_TRACE ?
+			render_path_raytrace_draw(use_live_layer) :
+			draw_commands();
 
 		context_raw.view_index = context_raw.view_index == 0 ? 1 : 0;
 		transform_set_matrix(cam.base.transform, camera_views[context_raw.view_index].v);
@@ -351,16 +347,12 @@ function render_path_base_draw_deferred_light() {
 		render_path_draw_shader("shader_datas/deferred_light/deferred_light_voxel") :
 		render_path_draw_shader("shader_datas/deferred_light/deferred_light");
 
-	///if (arm_direct3d12 || arm_metal || arm_vulkan)
 	render_path_set_depth_from("tex", "gbuffer0"); // Bind depth for world pass
-	///end
 
 	render_path_set_target("tex");
 	render_path_draw_skydome("shader_datas/world_pass/world_pass");
 
-	///if (arm_direct3d12 || arm_metal || arm_vulkan)
 	render_path_set_depth_from("tex", "gbuffer1"); // Unbind depth
-	///end
 }
 
 // function render_path_base_draw_motion_blur() {

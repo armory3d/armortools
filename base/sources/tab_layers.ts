@@ -206,9 +206,7 @@ function tab_layers_combo_filter() {
 		layers_set_object_mask();
 		util_uv_uvmap_cached = false;
 		context_raw.ddirty = 2;
-		///if (arm_direct3d12 || arm_vulkan || arm_metal)
 		render_path_raytrace_ready = false;
-		///end
 	}
 }
 

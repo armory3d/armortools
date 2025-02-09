@@ -332,9 +332,7 @@ function project_new(reset_layers: bool = true) {
 	context_init_tool();
 	///end
 
-	///if (arm_direct3d12 || arm_vulkan || arm_metal)
 	render_path_raytrace_ready = false;
-	///end
 }
 
 function project_import_material() {

@@ -126,7 +126,5 @@ function ui_nodes_ext_run() {
 	context_raw.ddirty = 2;
 	app_remove_render_2d(ui_nodes_ext_delay_idle_sleep);
 
-	///if (arm_direct3d12 || arm_vulkan || arm_metal)
 	render_path_raytrace_ready = false;
-	///end
 }

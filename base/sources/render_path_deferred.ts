@@ -157,9 +157,7 @@ function render_path_deferred_init() {
 	render_path_preview_init();
 	///end
 
-	///if (arm_direct3d12 || arm_vulkan || arm_metal)
 	render_path_raytrace_init();
-	///end
 }
 
 function render_path_deferred_commands() {

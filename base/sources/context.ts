@@ -589,12 +589,10 @@ function context_init_tool() {
 		make_material_parse_particle_material();
 	}
 	else if (context_raw.tool == workspace_tool_t.BAKE) {
-		///if (arm_direct3d12 || arm_vulkan || arm_metal)
 		// Bake in lit mode for now
 		if (context_raw.viewport_mode == viewport_mode_t.PATH_TRACE) {
 			context_raw.viewport_mode = viewport_mode_t.LIT;
 		}
-		///end
 	}
 	else if (context_raw.tool == workspace_tool_t.MATERIAL) {
 		layers_update_fill_layers();

@@ -4,11 +4,7 @@ function make_brush_run(vert: node_shader_t, frag: node_shader_t) {
 	node_shader_write(frag, "float dist = 0.0;");
 
 	if (config_raw.brush_3d) {
-		///if (arm_direct3d12 || arm_metal || arm_vulkan)
 		node_shader_write(frag, "float depth = textureLod(gbufferD, inp.xy, 0.0).r;");
-		///else
-		node_shader_write(frag, "float depth = textureLod(gbufferD, vec2(inp.x, 1.0 - inp.y), 0.0).r;");
-		///end
 
 		node_shader_add_uniform(frag, "mat4 invVP", "_inv_view_proj_matrix");
 		node_shader_write(frag, "vec4 winp = vec4(vec2(inp.x, 1.0 - inp.y) * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);");
@@ -19,11 +15,7 @@ function make_brush_run(vert: node_shader_t, frag: node_shader_t) {
 
 		node_shader_write_attrib(frag, "vec3 wposition = (mul(texelFetch(texpaint_undo, ivec2(tex_coord.x * textureSize(texpaint_undo, 0).x, tex_coord.y * textureSize(texpaint_undo, 0).y), 0), W)).xyz;");
 
-		///if (arm_direct3d12 || arm_metal || arm_vulkan)
 		node_shader_write(frag, "float depthlast = textureLod(gbufferD, inplast.xy, 0.0).r;");
-		///else
-		node_shader_write(frag, "float depthlast = textureLod(gbufferD, vec2(inplast.x, 1.0 - inplast.y), 0.0).r;");
-		///end
 
 		node_shader_write(frag, "vec4 winplast = vec4(vec2(inplast.x, 1.0 - inplast.y) * 2.0 - 1.0, depthlast * 2.0 - 1.0, 1.0);");
 		node_shader_write(frag, "winplast = mul(winplast, invVP);");

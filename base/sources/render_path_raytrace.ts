@@ -1,6 +1,4 @@
 
-///if (arm_direct3d12 || arm_vulkan || arm_metal)
-
 let render_path_raytrace_frame: i32 = 0;
 let render_path_raytrace_ready: bool = false;
 let render_path_raytrace_dirty: i32 = 0;
@@ -236,5 +234,3 @@ function render_path_raytrace_draw(use_live_layer: bool) {
 		render_path_paint_commands_cursor();
 	}
 }
-
-///end

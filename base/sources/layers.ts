@@ -109,9 +109,7 @@ function layers_resize() {
 	if (render_path_paint_live_layer != null) {
 		slot_layer_resize_and_set_bits(render_path_paint_live_layer);
 	}
-	///if (arm_direct3d12 || arm_vulkan || arm_metal)
 	render_path_raytrace_ready = false; // Rebuild baketex
-	///end
 	context_raw.ddirty = 2;
 }
 

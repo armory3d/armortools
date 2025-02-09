@@ -201,9 +201,7 @@ function ui_menubar_draw_tab_header() {
 				m = mat4_translate(m, 0, 0, 1.6);
 				transform_set_matrix(scene_camera.base.transform, m);
 			}
-			///if (arm_direct3d12 || arm_vulkan || arm_metal)
 			render_path_raytrace_ready = false;
-			///end
 		}
 		///end
 	}

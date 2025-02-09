@@ -1198,11 +1198,7 @@ function parse_normal_map_color_input(inp: ui_node_socket_t) {
 			node_shader_add_function(parser_material_frag, str_cotangent_frame);
 		}
 		parser_material_frag.n = true;
-		///if (arm_direct3d12 || arm_metal || arm_vulkan)
 		node_shader_write(parser_material_frag, "mat3 TBN = cotangent_frame(n, vvec, tex_coord);");
-		///else
-		node_shader_write(parser_material_frag, "mat3 TBN = cotangent_frame(n, -vvec, tex_coord);");
-		///end
 
 		node_shader_write(parser_material_frag, "n = mul(normalize(texn), TBN);");
 	}
@@ -1259,12 +1255,8 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 	else if (node.type == "CAMERA") {
 		if (socket == node.outputs[1]) { // View Z Depth
 			node_shader_add_uniform(parser_material_curshader, "vec2 camera_proj", "_camera_plane_proj");
-			///if (arm_direct3d12 || arm_metal || arm_vulkan)
 			parser_material_curshader.wvpposition = true;
 			return "(camera_proj.y / ((wvpposition.z / wvpposition.w) - camera_proj.x))";
-			///else
-			return "(camera_proj.y / (gl_FragCoord.z - camera_proj.x))";
-			///end
 		}
 		else { // View Distance
 			node_shader_add_uniform(parser_material_curshader, "vec3 eye", "_camera_pos");
@@ -1362,11 +1354,8 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 	}
 	else if (node.type == "NEW_GEOMETRY") {
 		if (socket == node.outputs[6]) { // Backfacing
-			///if (arm_direct3d12 || arm_metal || arm_vulkan)
 			return "0.0"; // SV_IsFrontFace
-			///else
-			return "(1.0 - float(gl_FrontFacing))";
-			///end
+			// return "(1.0 - float(gl_FrontFacing))";
 		}
 		else if (socket == node.outputs[7]) { // Pointiness
 			let strength: f32 = 1.0;

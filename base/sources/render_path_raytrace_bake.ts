@@ -1,6 +1,4 @@
 
-///if (arm_direct3d12 || arm_vulkan || arm_metal)
-
 let render_path_raytrace_bake_rays_pix: i32 = 0;
 let render_path_raytrace_bake_rays_sec: i32 = 0;
 let render_path_raytrace_bake_current_sample: i32 = 0;
@@ -150,5 +148,3 @@ function render_path_raytrace_bake_get_bake_shader_name(): string {
 		   context_raw.bake_type == bake_type_t.BENT_NORMAL ? "raytrace_bake_bent" + render_path_raytrace_ext :
 															  "raytrace_bake_thick" + render_path_raytrace_ext;
 }
-
-///end

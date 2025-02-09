@@ -188,7 +188,5 @@ function layers_ext_on_resized() {
 	util_uv_trianglemap = null;
 	util_uv_trianglemap_cached = false;
 	util_uv_dilatemap_cached = false;
-	///if (arm_direct3d12 || arm_vulkan || arm_metal)
 	render_path_raytrace_ready = false;
-	///end
 }

@@ -105,9 +105,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 			node_shader_add_uniform(frag, "sampler2D gbuffer1");
 			node_shader_add_uniform(frag, "sampler2D gbuffer2");
 			node_shader_write(frag, "vec2 fragcoord = (wvpposition.xy / wvpposition.w) * 0.5 + 0.5;");
-			///if (arm_direct3d12 || arm_metal || arm_vulkan)
 			node_shader_write(frag, "fragcoord.y = 1.0 - fragcoord.y;");
-			///end
 			node_shader_write(frag, "vec4 gbuffer0_sample = textureLod(gbuffer0, fragcoord, 0.0);");
 			node_shader_write(frag, "vec4 gbuffer1_sample = textureLod(gbuffer1, fragcoord, 0.0);");
 			node_shader_write(frag, "vec4 gbuffer2_sample = textureLod(gbuffer2, fragcoord, 0.0);");
@@ -369,11 +367,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 		}
 
 		frag.vvec = true;
-		///if (arm_direct3d12 || arm_metal || arm_vulkan)
 		node_shader_write(frag, "mat3 TBN = cotangent_frame(n, vvec, tex_coord);");
-		///else
-		node_shader_write(frag, "mat3 TBN = cotangent_frame(n, -vvec, tex_coord);");
-		///end
 		node_shader_write(frag, "n = ntex * 2.0 - 1.0;");
 		node_shader_write(frag, "n.y = -n.y;");
 		node_shader_write(frag, "n = normalize(mul(n, TBN));");

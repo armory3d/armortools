@@ -14,11 +14,7 @@ function make_brush_run(vert: node_shader_t, frag: node_shader_t) {
 	}
 
 	if (config_raw.brush_3d) {
-		///if (arm_direct3d12 || arm_metal || arm_vulkan)
 		node_shader_write(frag, "float depth = textureLod(gbufferD, inp.xy, 0.0).r;");
-		///else
-		node_shader_write(frag, "float depth = textureLod(gbufferD, vec2(inp.x, 1.0 - inp.y), 0.0).r;");
-		///end
 
 		node_shader_add_uniform(frag, "mat4 invVP", "_inv_view_proj_matrix");
 		node_shader_write(frag, "vec4 winp = vec4(vec2(inp.x, 1.0 - inp.y) * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);");
@@ -29,11 +25,7 @@ function make_brush_run(vert: node_shader_t, frag: node_shader_t) {
 		if (config_raw.brush_angle_reject || context_raw.xray) {
 			node_shader_add_function(frag, str_octahedron_wrap);
 			node_shader_add_uniform(frag, "sampler2D gbuffer0");
-			///if (arm_direct3d12 || arm_metal || arm_vulkan)
 			node_shader_write(frag, "vec2 g0 = textureLod(gbuffer0, inp.xy, 0.0).rg;");
-			///else
-			node_shader_write(frag, "vec2 g0 = textureLod(gbuffer0, vec2(inp.x, 1.0 - inp.y), 0.0).rg;");
-			///end
 			node_shader_write(frag, "vec3 wn;");
 			node_shader_write(frag, "wn.z = 1.0 - abs(g0.x) - abs(g0.y);");
 			node_shader_write(frag, "wn.xy = wn.z >= 0.0 ? g0.xy : octahedron_wrap(g0.xy);");
@@ -48,11 +40,7 @@ function make_brush_run(vert: node_shader_t, frag: node_shader_t) {
 			}
 		}
 
-		///if (arm_direct3d12 || arm_metal || arm_vulkan)
 		node_shader_write(frag, "float depthlast = textureLod(gbufferD, inplast.xy, 0.0).r;");
-		///else
-		node_shader_write(frag, "float depthlast = textureLod(gbufferD, vec2(inplast.x, 1.0 - inplast.y), 0.0).r;");
-		///end
 
 		node_shader_write(frag, "vec4 winplast = vec4(vec2(inplast.x, 1.0 - inplast.y) * 2.0 - 1.0, depthlast * 2.0 - 1.0, 1.0);");
 		node_shader_write(frag, "winplast = mul(winplast, invVP);");

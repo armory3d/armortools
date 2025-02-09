@@ -82,16 +82,12 @@ function render_path_preview_commands_preview() {
 	}
 	render_path_draw_shader("shader_datas/deferred_light/deferred_light");
 
-	///if (arm_direct3d12 || arm_metal || arm_vulkan)
 	render_path_set_depth_from("mtex", "mgbuffer0"); // Bind depth for world pass
-	///end
 
 	render_path_set_target("mtex"); // Re-binds depth
 	render_path_draw_skydome("shader_datas/world_pass/world_pass");
 
-	///if (arm_direct3d12 || arm_metal || arm_vulkan)
 	render_path_set_depth_from("mtex", "mgbuffer1"); // Unbind depth
-	///end
 
 	let framebuffer: string = "texpreview";
 	let selected_mat: slot_material_t = context_raw.material;
@@ -129,16 +125,12 @@ function render_path_preview_commands_decal() {
 	}
 	render_path_draw_shader("shader_datas/deferred_light/deferred_light");
 
-	///if (arm_direct3d12 || arm_metal || arm_vulkan)
 	render_path_set_depth_from("tex", "gbuffer0"); // Bind depth for world pass
-	///end
 
 	render_path_set_target("tex");
 	render_path_draw_skydome("shader_datas/world_pass/world_pass");
 
-	///if (arm_direct3d12 || arm_metal || arm_vulkan)
 	render_path_set_depth_from("tex", "gbuffer1"); // Unbind depth
-	///end
 
 	let framebuffer: string = "texpreview";
 	let texpreview: render_target_t = map_get(render_path_render_targets, "texpreview");

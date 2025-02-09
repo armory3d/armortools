@@ -51,11 +51,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		node_shader_add_uniform(frag, "vec2 gbuffer_size", "_gbuffer_size");
 		node_shader_add_uniform(frag, "vec4 inp", "_input_brush");
 
-		///if (arm_direct3d12 || arm_metal || arm_vulkan)
 		node_shader_write(frag, "vec2 tex_coord_inp = texelFetch(gbuffer2, ivec2(inp.x * gbuffer_size.x, inp.y * gbuffer_size.y), 0).ba;");
-		///else
-		node_shader_write(frag, "vec2 tex_coord_inp = texelFetch(gbuffer2, ivec2(inp.x * gbuffer_size.x, (1.0 - inp.y) * gbuffer_size.y), 0).ba;");
-		///end
 
 		node_shader_add_out(frag, "vec4 frag_color[4]");
 		node_shader_add_uniform(frag, "sampler2D texpaint");
@@ -71,12 +67,8 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		return con_paint;
 	}
 
-	///if (arm_direct3d12 || arm_metal || arm_vulkan)
 	node_shader_write(vert, "vec2 tpos = vec2(tex.x * 2.0 - 1.0, (1.0 - tex.y) * 2.0 - 1.0);");
 	// node_shader_write(vert, "vec2 tpos = vec2(frac(tex.x * tex_scale) * 2.0 - 1.0, (1.0 - frac(tex.y * tex_scale)) * 2.0 - 1.0);"); // 3D View
-	///else
-	node_shader_write(vert, "vec2 tpos = vec2(tex.xy * 2.0 - 1.0);");
-	///end
 
 	node_shader_write(vert, "gl_Position = vec4(tpos, 0.0, 1.0);");
 
@@ -111,11 +103,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 
 		node_shader_write(frag, "float dist = 0.0;");
 
-		///if (arm_direct3d12 || arm_metal || arm_vulkan)
 		node_shader_write(frag, "float depth = textureLod(gbufferD, inp.xy, 0.0).r;");
-		///else
-		node_shader_write(frag, "float depth = textureLod(gbufferD, vec2(inp.x, 1.0 - inp.y), 0.0).r;");
-		///end
 
 		node_shader_add_uniform(frag, "mat4 invVP", "_inv_view_proj_matrix");
 		node_shader_write(frag, "vec4 winp = vec4(vec2(inp.x, 1.0 - inp.y) * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);");
@@ -123,11 +111,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		node_shader_write(frag, "winp.xyz /= winp.w;");
 		frag.wposition = true;
 
-		///if (arm_direct3d12 || arm_metal || arm_vulkan)
 		node_shader_write(frag, "float depthlast = textureLod(gbufferD, inplast.xy, 0.0).r;");
-		///else
-		node_shader_write(frag, "float depthlast = textureLod(gbufferD, vec2(inplast.x, 1.0 - inplast.y), 0.0).r;");
-		///end
 
 		node_shader_write(frag, "vec4 winplast = vec4(vec2(inplast.x, 1.0 - inplast.y) * 2.0 - 1.0, depthlast * 2.0 - 1.0, 1.0);");
 		node_shader_write(frag, "winplast = mul(winplast, invVP);");
@@ -157,11 +141,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 
 		if (context_raw.tool == workspace_tool_t.CLONE) {
 			// node_shader_add_uniform(frag, "vec2 clone_delta", "_clone_delta");
-			// ///if (arm_direct3d12 || arm_metal || arm_vulkan)
 			// node_shader_write(frag, "vec2 tex_coord_inp = texelFetch(gbuffer2, ivec2((sp.xy + clone_delta) * gbuffer_size), 0).ba;");
-			// ///else
-			// node_shader_write(frag, "vec2 tex_coord_inp = texelFetch(gbuffer2, ivec2((sp.x + clone_delta.x) * gbuffer_size.x, (1.0 - (sp.y + clone_delta.y)) * gbuffer_size.y), 0).ba;");
-			// ///end
 
 			// node_shader_write(frag, "vec3 texpaint_pack_sample = textureLod(texpaint_pack_undo, tex_coord_inp, 0.0).rgb;");
 			// let base: string = "textureLod(texpaint_undo, tex_coord_inp, 0.0).rgb";
@@ -181,11 +161,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 			// node_shader_write(frag, "float opacity = mat_opacity * brush_opacity;");
 		}
 		else { // Blur
-			// ///if (arm_direct3d12 || arm_metal || arm_vulkan)
 			// node_shader_write(frag, "vec2 tex_coord_inp = texelFetch(gbuffer2, ivec2(sp.x * gbuffer_size.x, sp.y * gbuffer_size.y), 0).ba;");
-			// ///else
-			// node_shader_write(frag, "vec2 tex_coord_inp = texelFetch(gbuffer2, ivec2(sp.x * gbuffer_size.x, (1.0 - sp.y) * gbuffer_size.y), 0).ba;");
-			// ///end
 
 			// node_shader_write(frag, "vec3 basecol = vec3(0.0, 0.0, 0.0);");
 			// node_shader_write(frag, "float roughness = 0.0;");
@@ -207,11 +183,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 			// 	node_shader_add_uniform(frag, "vec3 brush_direction", "_brush_direction");
 			// 	node_shader_write(frag, "vec2 blur_direction = brush_direction.yx;");
 			// 	node_shader_write(frag, "for (int i = 0; i < 7; ++i) {");
-			// 	///if (arm_direct3d12 || arm_metal || arm_vulkan)
 			// 	node_shader_write(frag, "vec2 tex_coord_inp2 = texelFetch(gbuffer2, ivec2((sp.x + blur_direction.x * blur_step * float(i)) * gbuffer_size.x, (sp.y + blur_direction.y * blur_step * float(i)) * gbuffer_size.y), 0).ba;");
-			// 	///else
-			// 	node_shader_write(frag, "vec2 tex_coord_inp2 = texelFetch(gbuffer2, ivec2((sp.x + blur_direction.x * blur_step * float(i)) * gbuffer_size.x, (1.0 - (sp.y + blur_direction.y * blur_step * float(i))) * gbuffer_size.y), 0).ba;");
-			// 	///end
 			// 	node_shader_write(frag, "vec4 texpaint_sample = texture(texpaint_undo, tex_coord_inp2);");
 			// 	node_shader_write(frag, "opacity += texpaint_sample.a * blur_weight[i];");
 			// 	node_shader_write(frag, "basecol += texpaint_sample.rgb * blur_weight[i];");
@@ -266,9 +238,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	// Manual blending to preserve memory
 	frag.wvpposition = true;
 	node_shader_write(frag, "vec2 sample_tc = vec2(wvpposition.xy / wvpposition.w) * 0.5 + 0.5;");
-	///if (arm_direct3d12 || arm_metal || arm_vulkan)
 	node_shader_write(frag, "sample_tc.y = 1.0 - sample_tc.y;");
-	///end
 	node_shader_add_uniform(frag, "sampler2D paintmask");
 	node_shader_write(frag, "float sample_mask = textureLod(paintmask, sample_tc, 0.0).r;");
 	node_shader_write(frag, "str = max(str, sample_mask);");

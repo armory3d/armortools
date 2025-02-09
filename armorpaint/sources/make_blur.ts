@@ -1,10 +1,6 @@
 
 function make_blur_run(vert: node_shader_t, frag: node_shader_t) {
-	///if (arm_direct3d12 || arm_metal || arm_vulkan)
 	node_shader_write(frag, "vec2 tex_coord_inp = texelFetch(gbuffer2, ivec2(sp.x * gbuffer_size.x, sp.y * gbuffer_size.y), 0).ba;");
-	///else
-	node_shader_write(frag, "vec2 tex_coord_inp = texelFetch(gbuffer2, ivec2(sp.x * gbuffer_size.x, (1.0 - sp.y) * gbuffer_size.y), 0).ba;");
-	///end
 
 	node_shader_write(frag, "vec3 basecol = vec3(0.0, 0.0, 0.0);");
 	node_shader_write(frag, "float roughness = 0.0;");
@@ -38,11 +34,7 @@ function make_blur_run(vert: node_shader_t, frag: node_shader_t) {
 		node_shader_add_uniform(frag, "vec3 brush_direction", "_brush_direction");
 		node_shader_write(frag, "vec2 blur_direction = brush_direction.yx;");
 		node_shader_write(frag, "for (int i = 0; i < 7; ++i) {");
-		///if (arm_direct3d12 || arm_metal || arm_vulkan)
 		node_shader_write(frag, "vec2 tex_coord_inp2 = texelFetch(gbuffer2, ivec2((sp.x + blur_direction.x * blur_step * float(i)) * gbuffer_size.x, (sp.y + blur_direction.y * blur_step * float(i)) * gbuffer_size.y), 0).ba;");
-		///else
-		node_shader_write(frag, "vec2 tex_coord_inp2 = texelFetch(gbuffer2, ivec2((sp.x + blur_direction.x * blur_step * float(i)) * gbuffer_size.x, (1.0 - (sp.y + blur_direction.y * blur_step * float(i))) * gbuffer_size.y), 0).ba;");
-		///end
 		node_shader_write(frag, "vec4 texpaint_sample = texture(texpaint_undo, tex_coord_inp2);");
 		node_shader_write(frag, "opacity += texpaint_sample.a * blur_weight[i];");
 		node_shader_write(frag, "basecol += texpaint_sample.rgb * blur_weight[i];");

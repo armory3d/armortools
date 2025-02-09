@@ -102,7 +102,6 @@ function pipes_init() {
 		g4_pipeline_compile(pipes_copy_bgra);
 	}
 
-	///if (arm_metal || arm_vulkan || arm_direct3d12)
 	{
 		pipes_copy8 = g4_pipeline_create();
 		pipes_copy8.vertex_shader = sys_get_shader("layer_view.vert");
@@ -130,10 +129,6 @@ function pipes_init() {
 		pipes_copy128.color_attachments[0] = tex_format_t.RGBA128;
 		g4_pipeline_compile(pipes_copy128);
 	}
-	///else
-	pipes_copy8 = pipes_copy;
-	pipes_copy128 = pipes_copy;
-	///end
 
 	///if (is_paint || is_sculpt)
 	{

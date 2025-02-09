@@ -77,7 +77,5 @@ function layers_ext_on_resized() {
 		layers_init();
 	});
 
-	///if (arm_direct3d12 || arm_vulkan || arm_metal)
 	render_path_raytrace_ready = false;
-	///end
 }

@@ -101,9 +101,7 @@ function import_mesh_finish_import() {
 	ui_view2d_hwnd.redraws = 2;
 	///end
 
-	///if (arm_direct3d12 || arm_vulkan || arm_metal)
 	render_path_raytrace_ready = false;
-	///end
 
 	///if arm_physics
 	context_raw.paint_body = null;

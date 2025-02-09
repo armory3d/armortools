@@ -2,11 +2,7 @@
 ///if (is_paint || is_forge)
 
 function make_paint_is_raytraced_bake(): bool {
-	///if (arm_direct3d12 || arm_vulkan || arm_metal)
 	return context_raw.bake_type == bake_type_t.INIT;
-	///else
-	return false;
-	///end
 }
 
 function make_paint_color_attachments(): string[] {
@@ -66,7 +62,6 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	let frag: node_shader_t = node_shader_context_make_frag(con_paint);
 	frag.ins = vert.outs;
 
-	///if (arm_direct3d12 || arm_vulkan || arm_metal)
 	if (context_raw.tool == workspace_tool_t.BAKE && context_raw.bake_type == bake_type_t.INIT) {
 		// Init raytraced bake
 		make_bake_position_normal(vert, frag);
@@ -75,7 +70,6 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		con_paint.data.fragment_shader = node_shader_get(frag);
 		return con_paint;
 	}
-	///end
 
 	if (context_raw.tool == workspace_tool_t.BAKE) {
 		make_bake_set_color_writes(con_paint);
@@ -93,11 +87,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	let uv_island_fill: bool = context_raw.tool == workspace_tool_t.FILL && context_raw.fill_type_handle.position == fill_type_t.UV_ISLAND;
 	let decal: bool = context_is_decal();
 
-	///if (arm_direct3d12 || arm_metal || arm_vulkan)
 	node_shader_write(vert, "vec2 tpos = vec2(tex.x * 2.0 - 1.0, (1.0 - tex.y) * 2.0 - 1.0);");
-	///else
-	node_shader_write(vert, "vec2 tpos = vec2(tex.xy * 2.0 - 1.0);");
-	///end
 
 	node_shader_write(vert, "gl_Position = vec4(tpos, 0.0, 1.0);");
 
@@ -158,11 +148,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		}
 
 		if (depth_reject) {
-			///if (arm_direct3d12 || arm_metal || arm_vulkan)
 			node_shader_write(frag, "if (sp.z > textureLod(gbufferD, sp.xy, 0.0).r + 0.0005) discard;");
-			///else
-			node_shader_write(frag, "if (sp.z > textureLod(gbufferD, vec2(sp.x, 1.0 - sp.y), 0.0).r + 0.0005) discard;");
-			///end
 		}
 
 		make_brush_run(vert, frag);
@@ -184,11 +170,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		}
 		let stencil_fill: bool = context_raw.tool == workspace_tool_t.FILL && context_raw.brush_stencil_image != null;
 		if (stencil_fill) {
-			///if (arm_direct3d12 || arm_metal || arm_vulkan)
 			node_shader_write(frag, "if (sp.z > textureLod(gbufferD, sp.xy, 0.0).r + 0.0005) discard;");
-			///else
-			node_shader_write(frag, "if (sp.z > textureLod(gbufferD, vec2(sp.x, 1.0 - sp.y), 0.0).r + 0.0005) discard;");
-			///end
 		}
 	}
 
@@ -368,9 +350,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	// Manual blending to preserve memory
 	frag.wvpposition = true;
 	node_shader_write(frag, "vec2 sample_tc = vec2(wvpposition.xy / wvpposition.w) * 0.5 + 0.5;");
-	///if (arm_direct3d12 || arm_metal || arm_vulkan)
 	node_shader_write(frag, "sample_tc.y = 1.0 - sample_tc.y;");
-	///end
 	node_shader_add_uniform(frag, "sampler2D paintmask");
 	node_shader_write(frag, "float sample_mask = textureLod(paintmask, sample_tc, 0.0).r;");
 	node_shader_write(frag, "str = max(str, sample_mask);");

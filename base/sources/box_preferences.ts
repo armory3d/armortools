@@ -573,7 +573,6 @@ function box_preferences_show() {
 		}
 
 		if (ui_tab(box_preferences_htab, tr("Viewport"), true)) {
-			///if (arm_direct3d12 || arm_vulkan || arm_metal)
 
 			let hpathtrace_mode: ui_handle_t = ui_handle(__ID__);
 			if (hpathtrace_mode.init) {
@@ -586,8 +585,6 @@ function box_preferences_show() {
 				render_path_raytrace_first = true;
 				context_raw.ddirty = 2;
 			}
-
-			///end
 
 			let hrender_mode: ui_handle_t = ui_handle(__ID__);
 			if (hrender_mode.init) {

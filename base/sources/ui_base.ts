@@ -591,12 +591,10 @@ function ui_base_update() {
 
 					let shortcuts: string[] = ["l", "b", "n", "o", "r", "m", "a", "h", "e", "s", "t", "1", "2", "3", "4"];
 
-					///if (arm_direct3d12 || arm_vulkan || arm_metal)
 					if (iron_raytrace_supported()) {
 						array_push(modes, tr("Path Traced"));
 						array_push(shortcuts, "p");
 					}
-					///end
 
 					for (let i: i32 = 0; i < modes.length; ++i) {
 						ui_radio(mode_handle, i, modes[i], shortcuts[i]);
@@ -1401,11 +1399,7 @@ function ui_base_render_cursor() {
 				let cx: f32 = decalx + psizex / 2;
 				let cy: f32 = decaly + psizey / 2;
 				g2_set_transformation(mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(angle)), mat3_translation(-cx, -cy)));
-				///if (arm_direct3d12 || arm_metal || arm_vulkan)
 				g2_draw_scaled_image(context_raw.decal_image, decalx, decaly, psizex, psizey);
-				///else
-				g2_draw_scaled_image(context_raw.decal_image, decalx, decaly + psizey, psizex, -psizey);
-				///end
 				g2_set_transformation(mat3_nan());
 				g2_set_color(0xffffffff);
 			}

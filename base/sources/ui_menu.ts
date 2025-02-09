@@ -263,10 +263,8 @@ function ui_menu_render() {
 			context_raw.brush_scale = ui_slider(brush_scale_handle, tr("UV Scale"), 0.01, 5.0, true);
 			if (brush_scale_handle.changed) {
 				make_material_parse_mesh_material();
-				///if (arm_direct3d12 || arm_vulkan || arm_metal)
 				render_path_raytrace_uv_scale = context_raw.brush_scale;
 				render_path_raytrace_ready = false;
-				///end
 			}
 			///end
 
@@ -361,12 +359,10 @@ function ui_menu_render() {
 			];
 			let shortcuts: string[] = ["l", "b", "n", "o", "r", "m", "a", "h", "e", "s", "t", "1", "2", "3", "4"];
 
-			///if (arm_direct3d12 || arm_vulkan || arm_metal)
 			if (iron_raytrace_supported()) {
 				array_push(modes, tr("Path Traced"));
 				array_push(shortcuts, "p");
 			}
-			///end
 
 			for (let i: i32 = 0; i < modes.length; ++i) {
 				let shortcut: string = config_raw.touch_ui ? "" : map_get(config_keymap, "viewport_mode") + ", " + shortcuts[i];

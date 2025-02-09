@@ -143,17 +143,12 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 	else if (context_raw.tool == workspace_tool_t.BAKE) {
 		ui.changed = false;
 
-		///if (arm_direct3d12 || arm_vulkan || arm_metal)
 		let baking: bool = context_raw.pdirty > 0;
 		let rt_bake: bool = render_path_paint_is_rt_bake();
 		if (baking && ui_button(tr("Stop"))) {
 			context_raw.pdirty = 0;
 			context_raw.rdirty = 2;
 		}
-		///else
-		let baking: bool = false;
-		let rt_bake: bool = false;
-		///end
 
 		if (!baking && ui_button(tr("Bake"))) {
 			context_raw.pdirty = rt_bake ? context_raw.bake_samples : 1;
@@ -163,9 +158,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			});
 			ui_base_hwnds[0].redraws = 2;
 			history_push_undo = true;
-			///if (arm_direct3d12 || arm_vulkan || arm_metal)
 			render_path_raytrace_bake_current_sample = 0;
-			///end
 		}
 
 		let bake_handle: ui_handle_t = ui_handle(__ID__);
@@ -185,7 +178,6 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			tr("Object ID"),
 			tr("Vertex Color"),
 		];
-		///if (arm_direct3d12 || arm_vulkan || arm_metal)
 		if (iron_raytrace_supported()) {
 			array_push(bakes, tr("Lightmap"));
 			array_push(bakes, tr("Bent Normal"));
@@ -194,17 +186,13 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 		else {
 			array_shift(bakes); // Remove AO
 		}
-		///end
 
 		context_raw.bake_type = ui_combo(bake_handle, bakes, tr("Bake"));
 
-		///if (arm_direct3d12 || arm_vulkan || arm_metal)
 		if (!iron_raytrace_supported()) {
 			context_raw.bake_type += 1; // Offset for removed AO
 		}
-		///end
 
-		///if (arm_direct3d12 || arm_vulkan || arm_metal)
 		if (rt_bake) {
 			let samples_handle: ui_handle_t = ui_handle(__ID__);
 			if (samples_handle.init) {
@@ -212,7 +200,6 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			}
 			context_raw.bake_samples = math_floor(ui_slider(samples_handle, tr("Samples"), 1, 512, true, 1));
 		}
-		///end
 
 		if (context_raw.bake_type == bake_type_t.NORMAL_OBJECT ||
 			context_raw.bake_type == bake_type_t.POSITION ||
@@ -250,7 +237,6 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			}
 			context_raw.bake_ao_offset = ui_slider(offset_handle, tr("Offset"), 0.0, 2.0, true);
 		}
-		///if (arm_direct3d12 || arm_vulkan || arm_metal)
 		if (rt_bake) {
 			let progress: f32 = render_path_raytrace_bake_current_sample / context_raw.bake_samples;
 			if (progress > 1.0) progress = 1.0;
@@ -264,7 +250,6 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			ui_text(tr("Rays/pixel") + ": " + render_path_raytrace_bake_rays_pix);
 			ui_text(tr("Rays/second") + ": " + render_path_raytrace_bake_rays_sec);
 		}
-		///end
 		if (context_raw.bake_type == bake_type_t.CURVATURE) {
 			let strength_handle: ui_handle_t = ui_handle(__ID__);
 			if (strength_handle.init) {

@@ -656,14 +656,12 @@ function _render_path_paint_deriv() {
 	app_notify_on_init(_render_path_paint_final);
 }
 
-///if (arm_direct3d12 || arm_vulkan || arm_metal)
 function render_path_paint_is_rt_bake(): bool {
 	return (context_raw.bake_type == bake_type_t.AO  ||
 		context_raw.bake_type == bake_type_t.LIGHTMAP ||
 		context_raw.bake_type == bake_type_t.BENT_NORMAL ||
 		context_raw.bake_type == bake_type_t.THICKNESS);
 }
-///end
 
 function render_path_paint_update_bake_layer(bits: texture_bits_t) {
 	// Use RGBA128 texture format for high poly to low poly baking to prevent artifacts
@@ -749,7 +747,6 @@ function render_path_paint_draw() {
 				context_select_paint_object(_paint_object);
 				if (is_merged) context_raw.merged_object.base.visible = _visible;
 			}
-			///if (arm_direct3d12 || arm_vulkan || arm_metal)
 			else if (render_path_paint_is_rt_bake()) {
 				let dirty: bool = render_path_raytrace_bake_commands(make_material_parse_paint_material);
 				if (dirty) ui_header_handle.redraws = 2;
@@ -757,7 +754,6 @@ function render_path_paint_draw() {
 					render_path_paint_dilate(true, false);
 				}
 			}
-			///end
 			else {
 				render_path_paint_commands_paint();
 			}
