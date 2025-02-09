@@ -591,9 +591,6 @@ void kinc_g4_set_texture_compare_func(kinc_g4_texture_unit_t unit, kinc_g4_compa
 	}
 }
 
-void kinc_g4_set_cubemap_compare_mode(kinc_g4_texture_unit_t unit, bool enabled) {}
-void kinc_g4_set_cubemap_compare_func(kinc_g4_texture_unit_t unit, kinc_g4_compare_mode_t mode) {}
-
 void kinc_g4_set_texture_max_anisotropy(kinc_g4_texture_unit_t unit, uint16_t max_anisotropy) {
 	for (int i = 0; i < KINC_G5_SHADER_TYPE_COUNT; ++i) {
 		if (unit.stages[i] >= 0) {
@@ -601,8 +598,6 @@ void kinc_g4_set_texture_max_anisotropy(kinc_g4_texture_unit_t unit, uint16_t ma
 		}
 	}
 }
-
-void kinc_g4_set_cubemap_max_anisotropy(kinc_g4_texture_unit_t unit, uint16_t max_anisotropy) {}
 
 void kinc_g4_set_texture_lod(kinc_g4_texture_unit_t unit, float lod_min_clamp, float lod_max_clamp) {
 	for (int i = 0; i < KINC_G5_SHADER_TYPE_COUNT; ++i) {
@@ -612,8 +607,6 @@ void kinc_g4_set_texture_lod(kinc_g4_texture_unit_t unit, float lod_min_clamp, f
 		}
 	}
 }
-
-void kinc_g4_set_cubemap_lod(kinc_g4_texture_unit_t unit, float lod_min_clamp, float lod_max_clamp) {}
 
 void kinc_g4_restore_render_target(void) {
 	kinc_g4_on_g5_internal_restore_render_target();

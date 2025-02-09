@@ -15,12 +15,6 @@ void kinc_g4_render_target_init_with_multisampling(kinc_g4_render_target_t *rend
 	render_target->impl.state = KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
 }
 
-void kinc_g4_render_target_init_cube_with_multisampling(kinc_g4_render_target_t *render_target, int cubeMapSize, kinc_g4_render_target_format_t format,
-                                                        int depthBufferBits, int samples_per_pixel) {
-	kinc_g5_render_target_init_cube_with_multisampling(&render_target->impl._renderTarget, cubeMapSize, (kinc_g5_render_target_format_t)format, depthBufferBits,
-	                                                   samples_per_pixel);
-}
-
 void kinc_g4_render_target_destroy(kinc_g4_render_target_t *render_target) {
 	kinc_g5_render_target_destroy(&render_target->impl._renderTarget);
 }

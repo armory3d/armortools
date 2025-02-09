@@ -9,9 +9,6 @@ void kinc_g5_render_target_init_with_multisampling(kinc_g5_render_target_t *targ
 void kinc_g5_render_target_init_framebuffer_with_multisampling(kinc_g5_render_target_t *target, int width, int height, kinc_g5_render_target_format_t format,
                                                                int depthBufferBits, int samples_per_pixel) {}
 
-void kinc_g5_render_target_init_cube_with_multisampling(kinc_g5_render_target_t *render_target, int cubeMapSize, kinc_g5_render_target_format_t format,
-                                                        int depthBufferBits, int samples_per_pixel) {}
-
 void kinc_g5_render_target_destroy(kinc_g5_render_target_t *renderTarget) {}
 
 void kinc_g5_render_target_set_depth_from(kinc_g5_render_target_t *renderTarget, kinc_g5_render_target_t *source) {}

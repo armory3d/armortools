@@ -31,7 +31,6 @@ typedef struct kinc_g4_render_target {
 	int height;
 	int texWidth;
 	int texHeight;
-	bool isCubeMap;
 	bool isDepthAttachment;
 
 	kinc_g4_render_target_impl_t impl;
@@ -63,30 +62,6 @@ void kinc_g4_render_target_init(kinc_g4_render_target_t *renderTarget, int width
 void kinc_g4_render_target_init_with_multisampling(kinc_g4_render_target_t *renderTarget, int width, int height,
                                                              kinc_g4_render_target_format_t format, int depthBufferBits,
                                                              int samples_per_pixel);
-
-/// <summary>
-/// Allocates and initializes a render-target-cube-map. The contents of the render-target are undefined.
-/// </summary>
-/// <param name="renderTarget"></param>
-/// <param name="cubeMapSize"></param>
-/// <param name="format"></param>
-/// <param name="depthBufferBits"></param>
-/// <param name="stencilBufferBits"></param>
-void kinc_g4_render_target_init_cube(kinc_g4_render_target_t *renderTarget, int cubeMapSize, kinc_g4_render_target_format_t format,
-                                               int depthBufferBits);
-
-/// <summary>
-/// Allocates and initializes a multi-sampled render-target-cube-map. Can fall back to a non-multi-sampled cube-map. The contents of the render-target are
-/// undefined.
-/// </summary>
-/// <param name="renderTarget"></param>
-/// <param name="cubeMapSize"></param>
-/// <param name="format"></param>
-/// <param name="depthBufferBits"></param>
-/// <param name="stencilBufferBits"></param>
-/// <param name="samples_per_pixel"></param>
-void kinc_g4_render_target_init_cube_with_multisampling(kinc_g4_render_target_t *renderTarget, int cubeMapSize, kinc_g4_render_target_format_t format,
-                                                                  int depthBufferBits, int samples_per_pixel);
 
 /// <summary>
 /// Deallocates and destroys a render-target.

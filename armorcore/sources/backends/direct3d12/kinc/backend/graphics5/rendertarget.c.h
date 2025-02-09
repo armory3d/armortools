@@ -256,12 +256,6 @@ void kinc_g5_render_target_init_framebuffer_with_multisampling(kinc_g5_render_ta
 	framebuffer_count += 1;
 }
 
-void kinc_g5_render_target_init_cube_with_multisampling(kinc_g5_render_target_t *render_target, int cubeMapSize, kinc_g5_render_target_format_t format,
-                                                        int depthBufferBits, int samples_per_pixel) {
-	render_target->impl.stage = 0;
-	render_target->impl.stage_depth = -1;
-}
-
 void kinc_g5_render_target_destroy(kinc_g5_render_target_t *render_target) {
 	if (render_target->impl.framebuffer_index >= 0) {
 		framebuffer_count -= 1;

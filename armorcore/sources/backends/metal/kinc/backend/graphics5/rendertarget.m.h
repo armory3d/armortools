@@ -81,13 +81,6 @@ void kinc_g5_render_target_init_framebuffer_with_multisampling(kinc_g5_render_ta
 	framebuffer_count += 1;
 }
 
-void kinc_g5_render_target_init_cube_with_multisampling(kinc_g5_render_target_t *target, int cubeMapSize, kinc_g5_render_target_format_t format,
-                                                        int depthBufferBits, int samples_per_pixel) {
-	target->impl._tex = NULL;
-	target->impl._depthTex = NULL;
-	target->impl._texReadback = NULL;
-}
-
 void kinc_g5_render_target_destroy(kinc_g5_render_target_t *target) {
 	id<MTLTexture> tex = (__bridge_transfer id<MTLTexture>)target->impl._tex;
 	tex = nil;

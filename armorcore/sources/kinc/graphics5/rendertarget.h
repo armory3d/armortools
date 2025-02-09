@@ -30,7 +30,6 @@ typedef struct kinc_g5_render_target {
 	int texWidth;
 	int texHeight;
 	int framebuffer_index;
-	bool isCubeMap;
 	bool isDepthAttachment;
 	RenderTarget5Impl impl;
 } kinc_g5_render_target_t;
@@ -88,30 +87,6 @@ void kinc_g5_render_target_init_framebuffer(kinc_g5_render_target_t *target, int
 void kinc_g5_render_target_init_framebuffer_with_multisampling(kinc_g5_render_target_t *target, int width, int height,
                                                                          kinc_g5_render_target_format_t format, int depthBufferBits,
                                                                          int samples_per_pixel);
-
-/// <summary>
-/// Allocates and initializes a render-target-cube-map. The contents of the render-target are undefined.
-/// </summary>
-/// <param name="target"></param>
-/// <param name="cubeMapSize"></param>
-/// <param name="format"></param>
-/// <param name="depthBufferBits"></param>
-/// <param name="stencilBufferBits"></param>
-/// <returns></returns>
-void kinc_g5_render_target_init_cube(kinc_g5_render_target_t *target, int cubeMapSize, kinc_g5_render_target_format_t format, int depthBufferBits);
-
-/// <summary>
-/// Allocates and initializes a multisampled render-target-cube-map. Can fall back to a regular cube-map. The contents of the render-target are undefined.
-/// </summary>
-/// <param name="target"></param>
-/// <param name="cubeMapSize"></param>
-/// <param name="format"></param>
-/// <param name="depthBufferBits"></param>
-/// <param name="stencilBufferBits"></param>
-/// <param name="samples_per_pixel"></param>
-/// <returns></returns>
-void kinc_g5_render_target_init_cube_with_multisampling(kinc_g5_render_target_t *target, int cubeMapSize, kinc_g5_render_target_format_t format,
-                                                                  int depthBufferBits, int samples_per_pixel);
 
 /// <summary>
 /// Deallocates and destroys a render-target.
