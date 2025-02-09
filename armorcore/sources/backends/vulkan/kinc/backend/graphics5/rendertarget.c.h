@@ -86,7 +86,7 @@ void setImageLayout(VkCommandBuffer _buffer, VkImage image, VkImageAspectFlags a
 }
 
 static void render_target_init(kinc_g5_render_target_t *target, int width, int height, kinc_g5_render_target_format_t format, int depthBufferBits,
-                               int stencilBufferBits, int samples_per_pixel, int framebuffer_index) {
+                               int samples_per_pixel, int framebuffer_index) {
 	target->width = width;
 	target->height = height;
 	target->framebuffer_index = framebuffer_index;
@@ -263,20 +263,20 @@ static void render_target_init(kinc_g5_render_target_t *target, int width, int h
 }
 
 void kinc_g5_render_target_init_with_multisampling(kinc_g5_render_target_t *target, int width, int height, kinc_g5_render_target_format_t format,
-                                                   int depthBufferBits, int stencilBufferBits, int samples_per_pixel) {
-	render_target_init(target, width, height, format, depthBufferBits, stencilBufferBits, samples_per_pixel, -1);
+                                                   int depthBufferBits, int samples_per_pixel) {
+	render_target_init(target, width, height, format, depthBufferBits, samples_per_pixel, -1);
 }
 
 static int framebuffer_count = 0;
 
 void kinc_g5_render_target_init_framebuffer_with_multisampling(kinc_g5_render_target_t *target, int width, int height, kinc_g5_render_target_format_t format,
-                                                               int depthBufferBits, int stencilBufferBits, int samples_per_pixel) {
-	render_target_init(target, width, height, format, depthBufferBits, stencilBufferBits, samples_per_pixel, framebuffer_count);
+                                                               int depthBufferBits, int samples_per_pixel) {
+	render_target_init(target, width, height, format, depthBufferBits, samples_per_pixel, framebuffer_count);
 	framebuffer_count += 1;
 }
 
 void kinc_g5_render_target_init_cube_with_multisampling(kinc_g5_render_target_t *target, int cubeMapSize, kinc_g5_render_target_format_t format,
-                                                        int depthBufferBits, int stencilBufferBits, int samples_per_pixel) {}
+                                                        int depthBufferBits, int samples_per_pixel) {}
 
 void kinc_g5_render_target_destroy(kinc_g5_render_target_t *target) {
 	if (target->framebuffer_index >= 0) {
@@ -295,7 +295,7 @@ void kinc_g5_render_target_destroy(kinc_g5_render_target_t *target) {
 	}
 }
 
-void kinc_g5_render_target_set_depth_stencil_from(kinc_g5_render_target_t *target, kinc_g5_render_target_t *source) {
+void kinc_g5_render_target_set_depth_from(kinc_g5_render_target_t *target, kinc_g5_render_target_t *source) {
 	target->impl.depthImage = source->impl.depthImage;
 	target->impl.depthMemory = source->impl.depthMemory;
 	target->impl.depthView = source->impl.depthView;

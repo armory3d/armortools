@@ -424,7 +424,7 @@ function image_create(width: i32, height: i32, format: tex_format_t = tex_format
 function image_create_render_target(width: i32, height: i32, format: tex_format_t = tex_format_t.RGBA32, depth_format: depth_format_t = depth_format_t.NO_DEPTH): image_t {
 	let image: image_t = _image_create(null);
 	image.format = format;
-	image.render_target_ = iron_g4_create_render_target(width, height, format, image_get_depth_buffer_bits(depth_format), 0);
+	image.render_target_ = iron_g4_create_render_target(width, height, format, image_get_depth_buffer_bits(depth_format));
 	_image_set_size_from_render_target(image, image.render_target_);
 	return image;
 }

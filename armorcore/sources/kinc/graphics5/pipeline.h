@@ -57,17 +57,6 @@ typedef enum kinc_g5_compare_mode {
 	KINC_G5_COMPARE_MODE_GREATER_EQUAL
 } kinc_g5_compare_mode_t;
 
-typedef enum kinc_g5_stencil_action {
-	KINC_G5_STENCIL_ACTION_KEEP,
-	KINC_G5_STENCIL_ACTION_ZERO,
-	KINC_G5_STENCIL_ACTION_REPLACE,
-	KINC_G5_STENCIL_ACTION_INCREMENT,
-	KINC_G5_STENCIL_ACTION_INCREMENT_WRAP,
-	KINC_G5_STENCIL_ACTION_DECREMENT,
-	KINC_G5_STENCIL_ACTION_DECREMENT_WRAP,
-	KINC_G5_STENCIL_ACTION_INVERT
-} kinc_g5_stencil_action_t;
-
 typedef struct kinc_g5_pipeline {
 	kinc_g5_vertex_structure_t *inputLayout[16];
 	struct kinc_g5_shader *vertexShader;
@@ -80,14 +69,6 @@ typedef struct kinc_g5_pipeline {
 
 	bool depthWrite;
 	kinc_g5_compare_mode_t depthMode;
-
-	kinc_g5_compare_mode_t stencilMode;
-	kinc_g5_stencil_action_t stencilBothPass;
-	kinc_g5_stencil_action_t stencilDepthFail;
-	kinc_g5_stencil_action_t stencilFail;
-	int stencilReferenceValue;
-	int stencilReadMask;
-	int stencilWriteMask;
 
 	// One, Zero deactivates blending
 	kinc_g5_blending_factor_t blend_source;
@@ -106,7 +87,6 @@ typedef struct kinc_g5_pipeline {
 	kinc_g5_render_target_format_t colorAttachment[8];
 
 	int depthAttachmentBits;
-	int stencilAttachmentBits;
 
 	bool conservativeRasterization;
 

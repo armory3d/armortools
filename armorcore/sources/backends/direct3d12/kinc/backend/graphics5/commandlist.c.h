@@ -80,8 +80,7 @@ void kinc_g5_command_list_end(struct kinc_g5_command_list *list) {
 #endif
 }
 
-void kinc_g5_command_list_clear(struct kinc_g5_command_list *list, kinc_g5_render_target_t *renderTarget, unsigned flags, unsigned color, float depth,
-                                int stencil) {
+void kinc_g5_command_list_clear(struct kinc_g5_command_list *list, kinc_g5_render_target_t *renderTarget, unsigned flags, unsigned color, float depth) {
 	assert(list->impl.open);
 
 	if (flags & KINC_G5_CLEAR_COLOR) {
@@ -90,14 +89,12 @@ void kinc_g5_command_list_clear(struct kinc_g5_command_list *list, kinc_g5_rende
 		list->impl._commandList->ClearRenderTargetView(renderTarget->impl.renderTargetDescriptorHeap->GetCPUDescriptorHandleForHeapStart(), clearColor, 0,
 		                                               NULL);
 	}
-	if ((flags & KINC_G5_CLEAR_DEPTH) || (flags & KINC_G5_CLEAR_STENCIL)) {
-		D3D12_CLEAR_FLAGS d3dflags = (flags & KINC_G5_CLEAR_DEPTH) && (flags & KINC_G5_CLEAR_STENCIL) ? D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL
-		                             : (flags & KINC_G5_CLEAR_DEPTH)                                  ? D3D12_CLEAR_FLAG_DEPTH
-		                                                                                              : D3D12_CLEAR_FLAG_STENCIL;
+	if (flags & KINC_G5_CLEAR_DEPTH) {
+		D3D12_CLEAR_FLAGS d3dflags = D3D12_CLEAR_FLAG_DEPTH;
 
 		if (renderTarget->impl.depthStencilDescriptorHeap != NULL) {
 			list->impl._commandList->ClearDepthStencilView(renderTarget->impl.depthStencilDescriptorHeap->GetCPUDescriptorHandleForHeapStart(), d3dflags, depth,
-			                                               stencil, 0, NULL);
+			                                               0, 0, NULL);
 		}
 	}
 }

@@ -22,7 +22,6 @@ int newRenderTargetHeight;
 id<CAMetalDrawable> drawable;
 id<MTLTexture> depthTexture;
 int depthBits;
-int stencilBits;
 
 static kinc_g5_render_target_t fallback_render_target;
 
@@ -42,9 +41,8 @@ void kinc_internal_resize(int window, int width, int height) {
 
 void kinc_g5_internal_init(void) {}
 
-void kinc_g5_internal_init_window(int window, int depthBufferBits, int stencilBufferBits, bool vsync) {
+void kinc_g5_internal_init_window(int window, int depthBufferBits, bool vsync) {
 	depthBits = depthBufferBits;
-	stencilBits = stencilBufferBits;
 	kinc_g5_render_target_init(&fallback_render_target, 32, 32, KINC_G5_RENDER_TARGET_FORMAT_32BIT, 0, 0);
 }
 
@@ -75,7 +73,7 @@ static void start_render_pass(void) {
 	renderPassDescriptor.stencilAttachment.loadAction = MTLLoadActionDontCare;
 	renderPassDescriptor.stencilAttachment.storeAction = MTLStoreActionDontCare;
 	renderPassDescriptor.stencilAttachment.texture = depthTexture;
-	
+
 	render_command_encoder = [command_buffer renderCommandEncoderWithDescriptor:renderPassDescriptor];
 }
 
@@ -151,8 +149,7 @@ bool kinc_window_vsynced(int window) {
 	return true;
 }
 
-void kinc_g5_internal_new_render_pass(kinc_g5_render_target_t **renderTargets, int count, bool wait, unsigned clear_flags, unsigned color, float depth,
-                                      int stencil) {
+void kinc_g5_internal_new_render_pass(kinc_g5_render_target_t **renderTargets, int count, bool wait, unsigned clear_flags, unsigned color, float depth) {
 	if (command_buffer != nil && render_command_encoder != nil) {
 		[render_command_encoder endEncoding];
 		[command_buffer commit];
@@ -208,16 +205,9 @@ void kinc_g5_internal_new_render_pass(kinc_g5_render_target_t **renderTargets, i
 		renderPassDescriptor.depthAttachment.storeAction = MTLStoreActionStore;
 	}
 
-	if (clear_flags & KINC_G5_CLEAR_STENCIL) {
-		renderPassDescriptor.stencilAttachment.clearStencil = stencil;
-		renderPassDescriptor.stencilAttachment.loadAction = MTLLoadActionClear;
-		renderPassDescriptor.stencilAttachment.storeAction = MTLStoreActionStore;
-	}
-	else {
-		renderPassDescriptor.stencilAttachment.clearStencil = 0;
-		renderPassDescriptor.stencilAttachment.loadAction = MTLLoadActionDontCare;
-		renderPassDescriptor.stencilAttachment.storeAction = MTLStoreActionDontCare;
-	}
+	renderPassDescriptor.stencilAttachment.clearStencil = 0;
+	renderPassDescriptor.stencilAttachment.loadAction = MTLLoadActionDontCare;
+	renderPassDescriptor.stencilAttachment.storeAction = MTLStoreActionDontCare;
 
 	id<MTLCommandQueue> commandQueue = getMetalQueue();
 	command_buffer = [commandQueue commandBuffer];

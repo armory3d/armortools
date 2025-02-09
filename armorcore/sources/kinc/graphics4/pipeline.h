@@ -55,17 +55,6 @@ typedef enum {
 
 typedef enum { KINC_G4_CULL_CLOCKWISE, KINC_G4_CULL_COUNTER_CLOCKWISE, KINC_G4_CULL_NOTHING } kinc_g4_cull_mode_t;
 
-typedef enum {
-	KINC_G4_STENCIL_KEEP,
-	KINC_G4_STENCIL_ZERO,
-	KINC_G4_STENCIL_REPLACE,
-	KINC_G4_STENCIL_INCREMENT,
-	KINC_G4_STENCIL_INCREMENT_WRAP,
-	KINC_G4_STENCIL_DECREMENT,
-	KINC_G4_STENCIL_DECREMENT_WRAP,
-	KINC_G4_STENCIL_INVERT
-} kinc_g4_stencil_action_t;
-
 typedef struct kinc_g4_pipeline {
 	struct kinc_g4_vertex_structure *input_layout[16];
 	struct kinc_g4_shader *vertex_shader;
@@ -78,20 +67,6 @@ typedef struct kinc_g4_pipeline {
 
 	bool depth_write;
 	kinc_g4_compare_mode_t depth_mode;
-
-	kinc_g4_compare_mode_t stencil_front_mode;
-	kinc_g4_stencil_action_t stencil_front_both_pass;
-	kinc_g4_stencil_action_t stencil_front_depth_fail;
-	kinc_g4_stencil_action_t stencil_front_fail;
-
-	kinc_g4_compare_mode_t stencil_back_mode;
-	kinc_g4_stencil_action_t stencil_back_both_pass;
-	kinc_g4_stencil_action_t stencil_back_depth_fail;
-	kinc_g4_stencil_action_t stencil_back_fail;
-
-	int stencil_reference_value;
-	int stencil_read_mask;
-	int stencil_write_mask;
 
 	// One, Zero deactivates blending
 	kinc_g4_blending_factor_t blend_source;
@@ -110,7 +85,6 @@ typedef struct kinc_g4_pipeline {
 	kinc_g4_render_target_format_t color_attachment[8];
 
 	int depth_attachment_bits;
-	int stencil_attachment_bits;
 
 	bool conservative_rasterization;
 

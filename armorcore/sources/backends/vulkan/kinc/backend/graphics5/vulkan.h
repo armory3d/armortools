@@ -35,7 +35,6 @@ struct vk_window {
 	bool surface_destroyed;
 
 	int depth_bits;
-	int stencil_bits;
 
 	bool vsynced;
 

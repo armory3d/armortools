@@ -1052,12 +1052,11 @@ void kinc_vulkan_init_window(int window_index) {
 	window->surface_destroyed = true;
 }
 
-void kinc_g5_internal_init_window(int window_index, int depthBufferBits, int stencilBufferBits, bool vsync) {
+void kinc_g5_internal_init_window(int window_index, int depthBufferBits, bool vsync) {
 	assert(window_index < MAXIMUM_WINDOWS);
 	struct vk_window *window = &vk_ctx.windows[window_index];
 
 	window->depth_bits = depthBufferBits;
-	window->stencil_bits = stencilBufferBits;
 	window->vsynced = vsync;
 
 	VkResult err = kinc_vulkan_create_surface(vk_ctx.instance, window_index, &window->surface);

@@ -126,14 +126,14 @@ void kinc_g4_on_g5_internal_restore_render_target(void) {
 	windows[current_window].current_render_target_count = 1;
 }
 
-void kinc_g4_internal_init_window(int window, int depthBufferBits, int stencilBufferBits, bool vsync) {
-	kinc_g5_internal_init_window(window, depthBufferBits, stencilBufferBits, vsync);
+void kinc_g4_internal_init_window(int window, int depthBufferBits, bool vsync) {
+	kinc_g5_internal_init_window(window, depthBufferBits, vsync);
 
 	kinc_g5_command_list_init(&commandList);
 	windows[window].currentBuffer = -1;
 	for (int i = 0; i < bufferCount; ++i) {
 		kinc_g5_render_target_init_framebuffer(&windows[window].framebuffers[i], kinc_window_width(window), kinc_window_height(window),
-		                                       KINC_G5_RENDER_TARGET_FORMAT_32BIT, depthBufferBits, 0);
+		                                       KINC_G5_RENDER_TARGET_FORMAT_32BIT, depthBufferBits);
 	}
 	kinc_g5_constant_buffer_init(&vertexConstantBuffer, constantBufferSize * constantBufferMultiply);
 	kinc_g5_constant_buffer_init(&fragmentConstantBuffer, constantBufferSize * constantBufferMultiply);
@@ -287,18 +287,17 @@ void kinc_g4_draw_indexed_vertices_instanced_from_to(int instanceCount, int star
 	endDraw(false);
 }
 
-void kinc_g4_clear(unsigned flags, unsigned color, float depth, int stencil) {
+void kinc_g4_clear(unsigned flags, unsigned color, float depth) {
 	if (windows[current_window].current_render_target_count > 0) {
 		if (windows[current_window].current_render_targets[0] == NULL) {
-			kinc_g5_command_list_clear(&commandList, &windows[current_window].framebuffers[windows[current_window].currentBuffer], flags, color, depth,
-			                           stencil);
+			kinc_g5_command_list_clear(&commandList, &windows[current_window].framebuffers[windows[current_window].currentBuffer], flags, color, depth);
 		}
 		else {
 			if (windows[current_window].current_render_targets[0]->impl.state != KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET) {
 				kinc_g5_command_list_texture_to_render_target_barrier(&commandList, &windows[current_window].current_render_targets[0]->impl._renderTarget);
 				windows[current_window].current_render_targets[0]->impl.state = KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
 			}
-			kinc_g5_command_list_clear(&commandList, &windows[current_window].current_render_targets[0]->impl._renderTarget, flags, color, depth, stencil);
+			kinc_g5_command_list_clear(&commandList, &windows[current_window].current_render_targets[0]->impl._renderTarget, flags, color, depth);
 		}
 	}
 }
@@ -327,7 +326,7 @@ void kinc_g4_begin(int window) {
 	if (resized) {
 		for (int i = 0; i < bufferCount; ++i) {
 			kinc_g5_render_target_init_framebuffer(&windows[current_window].framebuffers[i], kinc_window_width(window), kinc_window_height(window),
-			                                       KINC_G5_RENDER_TARGET_FORMAT_32BIT, 16, 0);
+			                                       KINC_G5_RENDER_TARGET_FORMAT_32BIT, 16);
 		}
 		windows[window].resized = false;
 	}
@@ -418,8 +417,6 @@ bool kinc_g4_swap_buffers(void) {
 void kinc_g4_flush(void) {
 	kinc_g5_flush();
 }
-
-void kinc_g4_set_stencil_reference_value(int value) {}
 
 void kinc_g4_set_int(kinc_g4_constant_location_t location, int value) {
 	if (location.impl._location.impl.vertexOffset >= 0)

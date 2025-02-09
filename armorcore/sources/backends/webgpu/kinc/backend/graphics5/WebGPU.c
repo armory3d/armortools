@@ -24,7 +24,7 @@ void kinc_g5_internal_destroy() {}
 
 void kinc_g5_internal_init() {}
 
-void kinc_g5_internal_init_window(int window, int depthBufferBits, int stencilBufferBits, bool vsync) {
+void kinc_g5_internal_init_window(int window, int depthBufferBits, bool vsync) {
 	newRenderTargetWidth = renderTargetWidth = kinc_width();
 	newRenderTargetHeight = renderTargetHeight = kinc_height();
 

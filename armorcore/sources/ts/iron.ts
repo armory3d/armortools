@@ -280,7 +280,7 @@ declare function iron_display_is_primary(index: i32): bool;
 declare function iron_write_storage(name: string, data: buffer_t): void;
 declare function iron_read_storage(name: string): buffer_t;
 
-declare function iron_g4_create_render_target(width: i32, height: i32, format: i32, depth_buffer_bits: i32, stencil_buffer_bits: i32): any;
+declare function iron_g4_create_render_target(width: i32, height: i32, format: i32, depth_buffer_bits: i32): any;
 declare function iron_g4_create_texture(width: i32, height: i32, format: i32): any;
 declare function iron_g4_create_texture_from_bytes(data: buffer_t, width: i32, height: i32, format: i32, readable: bool): any;
 declare function iron_g4_create_texture_from_encoded_bytes(data: buffer_t, format: string, readable: bool): any;

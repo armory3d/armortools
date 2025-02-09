@@ -102,7 +102,7 @@ void kinc_g5_end(int window);
 bool kinc_g5_swap_buffers(void);
 
 void kinc_g5_internal_init(void);
-void kinc_g5_internal_init_window(int window, int depth_buffer_bits, int stencil_buffer_bits, bool vsync);
+void kinc_g5_internal_init_window(int window, int depth_buffer_bits, bool vsync);
 void kinc_g5_internal_destroy_window(int window);
 void kinc_g5_internal_destroy(void);
 

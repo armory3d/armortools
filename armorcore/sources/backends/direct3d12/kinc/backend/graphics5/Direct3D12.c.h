@@ -485,7 +485,7 @@ void kinc_g5_internal_init() {
 #endif
 }
 
-void kinc_g5_internal_init_window(int windowIndex, int depthBufferBits, int stencilBufferBits, bool verticalSync) {
+void kinc_g5_internal_init_window(int windowIndex, int depthBufferBits, bool verticalSync) {
 	struct dx_window *window = &dx_ctx.windows[windowIndex];
 	window->window_index = windowIndex;
 	window->vsync = verticalSync;

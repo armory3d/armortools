@@ -350,8 +350,7 @@ void kinc_g5_command_list_end(kinc_g5_command_list_t *list) {
 	assert(!err);
 }
 
-void kinc_g5_command_list_clear(kinc_g5_command_list_t *list, struct kinc_g5_render_target *renderTarget, unsigned flags, unsigned color, float depth,
-                                int stencil) {
+void kinc_g5_command_list_clear(kinc_g5_command_list_t *list, struct kinc_g5_render_target *renderTarget, unsigned flags, unsigned color, float depth) {
 	VkClearRect clearRect = {0};
 	clearRect.rect.offset.x = 0;
 	clearRect.rect.offset.y = 0;
@@ -373,10 +372,10 @@ void kinc_g5_command_list_clear(kinc_g5_command_list_t *list, struct kinc_g5_ren
 		attachments[count].clearValue.color = clearColor;
 		count++;
 	}
-	if (((flags & KINC_G5_CLEAR_DEPTH) || (flags & KINC_G5_CLEAR_STENCIL)) && renderTarget->impl.depthBufferBits > 0) {
-		attachments[count].aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT; // | VK_IMAGE_ASPECT_STENCIL_BIT;
+	if ((flags & KINC_G5_CLEAR_DEPTH) && renderTarget->impl.depthBufferBits > 0) {
+		attachments[count].aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 		attachments[count].clearValue.depthStencil.depth = depth;
-		attachments[count].clearValue.depthStencil.stencil = stencil;
+		attachments[count].clearValue.depthStencil.stencil = 0;
 		count++;
 	}
 	vkCmdClearAttachments(list->impl._buffer, count, attachments, 1, &clearRect);

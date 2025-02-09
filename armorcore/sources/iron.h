@@ -847,7 +847,6 @@ void iron_init(string_t *title, i32 width, i32 height, bool vsync, i32 window_mo
 	win.visible = enable_window;
 	frame.color_bits = 32;
 	frame.depth_bits = 0;
-	frame.stencil_bits = 0;
 	frame.samples_per_pixel = 1;
 	kinc_init(title, win.width, win.height, &win, &frame);
 	kinc_random_init((int)(kinc_time() * 1000));
@@ -883,7 +882,7 @@ void iron_log(string_t *value) {
 }
 
 void iron_g4_clear(i32 flags, i32 color, f32 depth) {
-	kinc_g4_clear(flags, color, depth, 0);
+	kinc_g4_clear(flags, color, depth);
 }
 
 void iron_set_update_callback(void (*callback)(void)) {
@@ -1486,7 +1485,6 @@ void iron_g4_compile_pipeline(kinc_g4_pipeline_t *pipeline, vertex_struct_t *str
 		pipeline->color_attachment[i] = (kinc_g4_render_target_format_t)color_attachment_array->buffer[i];
 	}
 	pipeline->depth_attachment_bits = state->depth_attachment_bits;
-	pipeline->stencil_attachment_bits = 0;
 
 	kinc_g4_pipeline_compile(pipeline);
 }
@@ -1848,9 +1846,9 @@ buffer_t *iron_read_storage(string_t *name) {
 }
 
 
-kinc_g4_render_target_t *iron_g4_create_render_target(i32 width, i32 height, i32 format, i32 depth_buffer_bits, i32 stencil_buffer_bits) {
+kinc_g4_render_target_t *iron_g4_create_render_target(i32 width, i32 height, i32 format, i32 depth_buffer_bits) {
 	kinc_g4_render_target_t *render_target = (kinc_g4_render_target_t *)malloc(sizeof(kinc_g4_render_target_t));
-	kinc_g4_render_target_init(render_target, width, height, (kinc_g4_render_target_format_t)format, depth_buffer_bits, stencil_buffer_bits);
+	kinc_g4_render_target_init(render_target, width, height, (kinc_g4_render_target_format_t)format, depth_buffer_bits);
 	return render_target;
 }
 
@@ -2019,7 +2017,7 @@ void iron_g4_set_mipmaps(kinc_g4_texture_t *texture, any_array_t *mipmaps) {
 }
 
 void iron_g4_set_depth_from(kinc_g4_render_target_t *target, kinc_g4_render_target_t *source) {
-	kinc_g4_render_target_set_depth_stencil_from(target, source);
+	kinc_g4_render_target_set_depth_from(target, source);
 }
 
 void iron_g4_viewport(i32 x, i32 y, i32 width, i32 height) {

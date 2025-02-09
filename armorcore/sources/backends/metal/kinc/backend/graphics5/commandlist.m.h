@@ -18,8 +18,7 @@ id getMetalDevice(void);
 id getMetalQueue(void);
 id getMetalEncoder(void);
 
-void kinc_g5_internal_new_render_pass(kinc_g5_render_target_t **renderTargets, int count, bool wait, unsigned clear_flags, unsigned color, float depth,
-                                      int stencil);
+void kinc_g5_internal_new_render_pass(kinc_g5_render_target_t **renderTargets, int count, bool wait, unsigned clear_flags, unsigned color, float depth);
 void kinc_g5_internal_pipeline_set(kinc_g5_pipeline_t *pipeline);
 
 void kinc_g5_command_list_init(kinc_g5_command_list_t *list) {
@@ -53,13 +52,12 @@ void kinc_g5_command_list_begin(kinc_g5_command_list_t *list) {
 
 void kinc_g5_command_list_end(kinc_g5_command_list_t *list) {}
 
-void kinc_g5_command_list_clear(kinc_g5_command_list_t *list, struct kinc_g5_render_target *renderTarget, unsigned flags, unsigned color, float depth,
-                                int stencil) {
+void kinc_g5_command_list_clear(kinc_g5_command_list_t *list, struct kinc_g5_render_target *renderTarget, unsigned flags, unsigned color, float depth) {
 	if (renderTarget->framebuffer_index >= 0) {
-		kinc_g5_internal_new_render_pass(NULL, 1, false, flags, color, depth, stencil);
+		kinc_g5_internal_new_render_pass(NULL, 1, false, flags, color, depth);
 	}
 	else {
-		kinc_g5_internal_new_render_pass(&renderTarget, 1, false, flags, color, depth, stencil);
+		kinc_g5_internal_new_render_pass(&renderTarget, 1, false, flags, color, depth);
 	}
 }
 

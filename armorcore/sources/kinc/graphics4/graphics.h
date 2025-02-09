@@ -107,7 +107,6 @@ bool kinc_g4_swap_buffers(void);
 
 #define KINC_G4_CLEAR_COLOR 1
 #define KINC_G4_CLEAR_DEPTH 2
-#define KINC_G4_CLEAR_STENCIL 4
 
 /// <summary>
 /// Clears the color, depth and/or stencil-components of the current framebuffer or render-target.
@@ -116,7 +115,7 @@ bool kinc_g4_swap_buffers(void);
 /// <param name="color">The color-value to clear to in 0xAARRGGBB</param>
 /// <param name="depth">The depth-value to clear to</param>
 /// <param name="stencil">The stencil-value to clear to</param>
-void kinc_g4_clear(unsigned flags, unsigned color, float depth, int stencil);
+void kinc_g4_clear(unsigned flags, unsigned color, float depth);
 
 /// <summary>
 /// Sets the viewport which defines the portion of the framebuffer or render-target things are rendered into. By default the viewport is equivalent to the full
@@ -176,8 +175,6 @@ void kinc_g4_set_texture_addressing(kinc_g4_texture_unit_t unit, kinc_g4_texture
 /// </summary>
 /// <param name="pipeline">The pipeline to set</param>
 void kinc_g4_set_pipeline(struct kinc_g4_pipeline *pipeline);
-
-void kinc_g4_set_stencil_reference_value(int value);
 
 /// <summary>
 /// Sets the blend constant used for `KINC_G4_BLEND_CONSTANT` or `KINC_G4_INV_BLEND_CONSTANT`
@@ -376,7 +373,7 @@ void kinc_g4_set_compute_shader(struct kinc_g4_compute_shader *shader);
 void kinc_g4_compute(int x, int y, int z);
 
 void kinc_g4_internal_init(void);
-void kinc_g4_internal_init_window(int window, int depth_buffer_bits, int stencil_buffer_bits, bool vsync);
+void kinc_g4_internal_init_window(int window, int depth_buffer_bits, bool vsync);
 void kinc_g4_internal_destroy_window(int window);
 void kinc_g4_internal_destroy(void);
 

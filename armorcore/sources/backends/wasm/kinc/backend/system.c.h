@@ -31,7 +31,7 @@ int kinc_init(const char *name, int width, int height, kinc_window_options_t *wi
 	kinc_internal_window_height = height;
 
 	kinc_g4_internal_init();
-	kinc_g4_internal_init_window(0, frame->depth_bits, frame->stencil_bits, true);
+	kinc_g4_internal_init_window(0, frame->depth_bits, true);
 
 	return 0;
 }

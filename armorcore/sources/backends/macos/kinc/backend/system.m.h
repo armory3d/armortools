@@ -206,7 +206,7 @@ int kinc_init(const char *name, int width, int height, kinc_window_options_t *wi
 
 	int windowId = createWindow(win);
 	kinc_g4_internal_init();
-	kinc_g4_internal_init_window(windowId, frame->depth_bits, frame->stencil_bits, true);
+	kinc_g4_internal_init_window(windowId, frame->depth_bits, true);
 
 	return 0;
 }

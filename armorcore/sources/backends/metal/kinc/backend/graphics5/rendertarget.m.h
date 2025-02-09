@@ -27,7 +27,7 @@ static MTLPixelFormat convert_format(kinc_g5_render_target_format_t format) {
 }
 
 static void render_target_init(kinc_g5_render_target_t *target, int width, int height, kinc_g5_render_target_format_t format, int depthBufferBits,
-                               int stencilBufferBits, int samples_per_pixel, int framebuffer_index) {
+                               int samples_per_pixel, int framebuffer_index) {
 	memset(target, 0, sizeof(kinc_g5_render_target_t));
 
 	target->texWidth = width;
@@ -69,20 +69,20 @@ static void render_target_init(kinc_g5_render_target_t *target, int width, int h
 }
 
 void kinc_g5_render_target_init_with_multisampling(kinc_g5_render_target_t *target, int width, int height, kinc_g5_render_target_format_t format,
-                                                   int depthBufferBits, int stencilBufferBits, int samples_per_pixel) {
-	render_target_init(target, width, height, format, depthBufferBits, stencilBufferBits, samples_per_pixel, -1);
+                                                   int depthBufferBits, int samples_per_pixel) {
+	render_target_init(target, width, height, format, depthBufferBits, samples_per_pixel, -1);
 }
 
 static int framebuffer_count = 0;
 
 void kinc_g5_render_target_init_framebuffer_with_multisampling(kinc_g5_render_target_t *target, int width, int height, kinc_g5_render_target_format_t format,
-                                                               int depthBufferBits, int stencilBufferBits, int samples_per_pixel) {
-	render_target_init(target, width, height, format, depthBufferBits, stencilBufferBits, samples_per_pixel, framebuffer_count);
+                                                               int depthBufferBits, int samples_per_pixel) {
+	render_target_init(target, width, height, format, depthBufferBits, samples_per_pixel, framebuffer_count);
 	framebuffer_count += 1;
 }
 
 void kinc_g5_render_target_init_cube_with_multisampling(kinc_g5_render_target_t *target, int cubeMapSize, kinc_g5_render_target_format_t format,
-                                                        int depthBufferBits, int stencilBufferBits, int samples_per_pixel) {
+                                                        int depthBufferBits, int samples_per_pixel) {
 	target->impl._tex = NULL;
 	target->impl._depthTex = NULL;
 	target->impl._texReadback = NULL;
@@ -159,6 +159,6 @@ void kinc_g5_set_render_target_descriptor(kinc_g5_render_target_t *renderTarget,
 }
 #endif
 
-void kinc_g5_render_target_set_depth_stencil_from(kinc_g5_render_target_t *target, kinc_g5_render_target_t *source) {
+void kinc_g5_render_target_set_depth_from(kinc_g5_render_target_t *target, kinc_g5_render_target_t *source) {
 	target->impl._depthTex = source->impl._depthTex;
 }

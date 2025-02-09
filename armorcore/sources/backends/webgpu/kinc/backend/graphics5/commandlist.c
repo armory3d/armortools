@@ -44,8 +44,7 @@ void kinc_g5_command_list_end(kinc_g5_command_list_t *list) {
 	wgpuQueueSubmit(queue, 1, &commands);
 }
 
-void kinc_g5_command_list_clear(kinc_g5_command_list_t *list, struct kinc_g5_render_target *renderTarget, unsigned flags, unsigned color, float depth,
-                                int stencil) {
+void kinc_g5_command_list_clear(kinc_g5_command_list_t *list, struct kinc_g5_render_target *renderTarget, unsigned flags, unsigned color, float depth) {
 
 }
 

@@ -16,18 +16,6 @@ void kinc_g4_internal_pipeline_set_defaults(kinc_g4_pipeline_t *state) {
 	state->depth_write = false;
 	state->depth_mode = KINC_G4_COMPARE_ALWAYS;
 
-	state->stencil_front_mode = KINC_G4_COMPARE_ALWAYS;
-	state->stencil_front_both_pass = KINC_G4_STENCIL_KEEP;
-	state->stencil_front_depth_fail = KINC_G4_STENCIL_KEEP;
-	state->stencil_front_fail = KINC_G4_STENCIL_KEEP;
-	state->stencil_back_mode = KINC_G4_COMPARE_ALWAYS;
-	state->stencil_back_both_pass = KINC_G4_STENCIL_KEEP;
-	state->stencil_back_depth_fail = KINC_G4_STENCIL_KEEP;
-	state->stencil_back_fail = KINC_G4_STENCIL_KEEP;
-	state->stencil_reference_value = 0;
-	state->stencil_read_mask = 0xff;
-	state->stencil_write_mask = 0xff;
-
 	state->blend_source = KINC_G4_BLEND_ONE;
 	state->blend_destination = KINC_G4_BLEND_ZERO;
 	state->blend_operation = KINC_G4_BLENDOP_ADD;
@@ -49,7 +37,6 @@ void kinc_g4_internal_pipeline_set_defaults(kinc_g4_pipeline_t *state) {
 		state->color_attachment[i] = KINC_G4_RENDER_TARGET_FORMAT_32BIT;
 
 	state->depth_attachment_bits = 0;
-	state->stencil_attachment_bits = 0;
 
 	state->conservative_rasterization = false;
 }

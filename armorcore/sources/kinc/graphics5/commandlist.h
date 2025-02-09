@@ -21,7 +21,6 @@ extern "C" {
 
 #define KINC_G5_CLEAR_COLOR 1
 #define KINC_G5_CLEAR_DEPTH 2
-#define KINC_G5_CLEAR_STENCIL 4
 
 struct kinc_g5_compute_shader;
 struct kinc_g5_constant_buffer;
@@ -81,7 +80,7 @@ void kinc_g5_command_list_end(kinc_g5_command_list_t *list);
 /// <param name="depth">The depth-value to clear to</param>
 /// <param name="stencil">The stencil-value to clear to</param>
 void kinc_g5_command_list_clear(kinc_g5_command_list_t *list, struct kinc_g5_render_target *render_target, unsigned flags, unsigned color,
-                                          float depth, int stencil);
+                                          float depth);
 
 /// <summary>
 /// Records a command that prepares a render-target to be used as the current framebuffer.
