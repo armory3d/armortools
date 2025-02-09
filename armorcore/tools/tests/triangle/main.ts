@@ -1,6 +1,6 @@
 
 // Red triangle test
-// ../../../make --graphics opengl --run
+// ../../../make --graphics vulkan --run
 
 let vs: string = "#version 330\n\
 in vec3 pos; \
@@ -15,37 +15,6 @@ void main() { \
 	frag_color = vec4(1.0, 0.0, 0.0, 1.0); \
 } \
 ";
-
-// let vs: string = " \
-// struct VSOut { float4 gl_Position : SV_Position; }; \
-// VSOut main(float3 pos : TEXCOORD0) { \
-// 	VSOut output; \
-// 	output.gl_Position = float4(pos, 1.0); \
-// 	return output; \
-// } \
-// ";
-
-// let fs: string = " \
-// float4 main() : SV_Target0 { \
-// 	return float4(1.0, 0.0, 0.0, 1.0); \
-// } \
-// ";
-
-// let vs: string = "#version 300 es\n\
-// in vec3 pos; \
-// void main() { \
-// 	gl_Position = vec4(pos, 1.0); \
-// } \
-// ";
-
-// let fs: string = "#version 300 es\n\
-// precision highp float; \
-// precision highp int; \
-// out vec4 frag_color; \
-// void main() { \
-// 	frag_color = vec4(1.0, 0.0, 0.0, 1.0); \
-// } \
-// ";
 
 let vertices: f32[] = [
 	-1.0, -1.0, 0.0,

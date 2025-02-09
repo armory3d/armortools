@@ -1,4 +1,4 @@
-// ../../../make --graphics opengl --run
+// ../../../make --graphics vulkan --run
 
 function main() {
 	let ops: kinc_sys_ops_t = {
