@@ -26,8 +26,7 @@ static MTLPixelFormat convert_format(kinc_g5_render_target_format_t format) {
 	}
 }
 
-static void render_target_init(kinc_g5_render_target_t *target, int width, int height, kinc_g5_render_target_format_t format, int depthBufferBits,
-                               int samples_per_pixel, int framebuffer_index) {
+static void render_target_init(kinc_g5_render_target_t *target, int width, int height, kinc_g5_render_target_format_t format, int depthBufferBits, int framebuffer_index) {
 	memset(target, 0, sizeof(kinc_g5_render_target_t));
 
 	target->texWidth = width;
@@ -68,16 +67,14 @@ static void render_target_init(kinc_g5_render_target_t *target, int width, int h
 	target->impl._texReadback = NULL;
 }
 
-void kinc_g5_render_target_init_with_multisampling(kinc_g5_render_target_t *target, int width, int height, kinc_g5_render_target_format_t format,
-                                                   int depthBufferBits, int samples_per_pixel) {
-	render_target_init(target, width, height, format, depthBufferBits, samples_per_pixel, -1);
+void kinc_g5_render_target_init(kinc_g5_render_target_t *target, int width, int height, kinc_g5_render_target_format_t format, int depthBufferBits) {
+	render_target_init(target, width, height, format, depthBufferBits, -1);
 }
 
 static int framebuffer_count = 0;
 
-void kinc_g5_render_target_init_framebuffer_with_multisampling(kinc_g5_render_target_t *target, int width, int height, kinc_g5_render_target_format_t format,
-                                                               int depthBufferBits, int samples_per_pixel) {
-	render_target_init(target, width, height, format, depthBufferBits, samples_per_pixel, framebuffer_count);
+void kinc_g5_render_target_init_framebuffer(kinc_g5_render_target_t *target, int width, int height, kinc_g5_render_target_format_t format, int depthBufferBits) {
+	render_target_init(target, width, height, format, depthBufferBits, framebuffer_count);
 	framebuffer_count += 1;
 }
 

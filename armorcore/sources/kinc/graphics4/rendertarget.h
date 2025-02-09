@@ -59,9 +59,8 @@ void kinc_g4_render_target_init(kinc_g4_render_target_t *renderTarget, int width
 /// <param name="depthBufferBits"></param>
 /// <param name="stencilBufferBits"></param>
 /// <param name="samples_per_pixel"></param>
-void kinc_g4_render_target_init_with_multisampling(kinc_g4_render_target_t *renderTarget, int width, int height,
-                                                             kinc_g4_render_target_format_t format, int depthBufferBits,
-                                                             int samples_per_pixel);
+void kinc_g4_render_target_init(kinc_g4_render_target_t *renderTarget, int width, int height,
+                                                             kinc_g4_render_target_format_t format, int depthBufferBits);
 
 /// <summary>
 /// Deallocates and destroys a render-target.

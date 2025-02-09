@@ -338,19 +338,6 @@ void kinc_g4_set_render_target_face(struct kinc_g4_render_target *texture, int f
 void kinc_g4_set_texture(kinc_g4_texture_unit_t unit, struct kinc_g4_texture *texture);
 
 /// <summary>
-/// Returns the currently used number of samples for hardware-antialiasing.
-/// </summary>
-/// <returns>The number of samples</returns>
-int kinc_g4_antialiasing_samples(void);
-
-/// <summary>
-/// Sets the number of samples used for hardware-antialiasing. This typically uses multisampling and typically only works with a few specific numbers of
-/// sample-counts - 2 and 4 are pretty safe bets. It also might do nothing at all.
-/// </summary>
-/// <param name="samples">The number of samples</param>
-void kinc_g4_set_antialiasing_samples(int samples);
-
-/// <summary>
 /// Sets a shader for the next compute-run.
 /// </summary>
 /// <param name="shader">The shader to use</param>

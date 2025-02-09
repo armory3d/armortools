@@ -398,7 +398,6 @@ int kinc_window_create(kinc_window_options_t *win, kinc_framebuffer_options_t *f
 	int windowId = createWindow(wbuffer, win->x, win->y, win->width, win->height, frame->color_bits, frame->frequency, win->window_features, win->mode,
 	                            win->display_index);
 
-	kinc_g4_set_antialiasing_samples(frame->samples_per_pixel);
 	bool vsync = frame->vertical_sync;
 #ifdef KINC_OCULUS
 	vsync = false;

@@ -47,20 +47,6 @@ typedef struct kinc_g5_render_target {
 void kinc_g5_render_target_init(kinc_g5_render_target_t *target, int width, int height, kinc_g5_render_target_format_t format, int depthBufferBits);
 
 /// <summary>
-/// Allocates and initializes a regular render-target. Can fall back to a regular render-target. The contents of the render-target are undefined.
-/// </summary>
-/// <param name="target"></param>
-/// <param name="width"></param>
-/// <param name="height"></param>
-/// <param name="format"></param>
-/// <param name="depthBufferBits"></param>
-/// <param name="stencilBufferBits"></param>
-/// <param name="samples_per_pixel"></param>
-/// <returns></returns>
-void kinc_g5_render_target_init_with_multisampling(kinc_g5_render_target_t *target, int width, int height, kinc_g5_render_target_format_t format,
-                                                             int depthBufferBits, int samples_per_pixel);
-
-/// <summary>
 /// Allocates and initializes a framebuffer. The contents of the framebuffer are undefined.
 /// </summary>
 /// <param name="target"></param>
@@ -72,21 +58,6 @@ void kinc_g5_render_target_init_with_multisampling(kinc_g5_render_target_t *targ
 /// <returns></returns>
 void kinc_g5_render_target_init_framebuffer(kinc_g5_render_target_t *target, int width, int height, kinc_g5_render_target_format_t format,
                                                       int depthBufferBits);
-
-/// <summary>
-/// Allocates and initializes a multisampled framebuffer. Can fall back to a regular framebuffer. The contents of the framebuffer are undefined.
-/// </summary>
-/// <param name="target"></param>
-/// <param name="width"></param>
-/// <param name="height"></param>
-/// <param name="format"></param>
-/// <param name="depthBufferBits"></param>
-/// <param name="stencilBufferBits"></param>
-/// <param name="samples_per_pixel"></param>
-/// <returns></returns>
-void kinc_g5_render_target_init_framebuffer_with_multisampling(kinc_g5_render_target_t *target, int width, int height,
-                                                                         kinc_g5_render_target_format_t format, int depthBufferBits,
-                                                                         int samples_per_pixel);
 
 /// <summary>
 /// Deallocates and destroys a render-target.

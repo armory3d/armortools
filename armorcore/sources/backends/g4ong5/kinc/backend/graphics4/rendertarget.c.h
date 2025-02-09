@@ -6,10 +6,8 @@
 
 extern kinc_g5_command_list_t commandList;
 
-void kinc_g4_render_target_init_with_multisampling(kinc_g4_render_target_t *render_target, int width, int height, kinc_g4_render_target_format_t format,
-                                                   int depthBufferBits, int samples_per_pixel) {
-	kinc_g5_render_target_init_with_multisampling(&render_target->impl._renderTarget, width, height, (kinc_g5_render_target_format_t)format, depthBufferBits,
-	                                              samples_per_pixel);
+void kinc_g4_render_target_init(kinc_g4_render_target_t *render_target, int width, int height, kinc_g4_render_target_format_t format, int depthBufferBits) {
+	kinc_g5_render_target_init(&render_target->impl._renderTarget, width, height, (kinc_g5_render_target_format_t)format, depthBufferBits);
 	render_target->texWidth = render_target->width = width;
 	render_target->texHeight = render_target->height = height;
 	render_target->impl.state = KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;

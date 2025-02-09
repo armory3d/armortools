@@ -17,7 +17,6 @@ typedef struct kinc_framebuffer_options {
 	bool vertical_sync;
 	int color_bits;
 	int depth_bits;
-	int samples_per_pixel;
 } kinc_framebuffer_options_t;
 
 typedef enum {
@@ -202,7 +201,6 @@ void kinc_framebuffer_options_set_defaults(kinc_framebuffer_options_t *frame) {
 	frame->vertical_sync = true;
 	frame->color_bits = 32;
 	frame->depth_bits = 16;
-	frame->samples_per_pixel = 1;
 }
 
 #endif
