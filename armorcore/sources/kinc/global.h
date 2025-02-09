@@ -21,9 +21,7 @@
 
 #if defined(_WIN32)
 
-#ifndef KINC_CONSOLE
 #define KINC_WINDOWS
-#endif
 
 #elif defined(__APPLE__)
 

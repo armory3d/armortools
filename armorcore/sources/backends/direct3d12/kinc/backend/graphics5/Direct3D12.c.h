@@ -162,14 +162,8 @@ extern "C" void setupSwapChain(struct dx_window *window) {
 		window->fence_values[i] = 0;
 		device->CreateFence(window->current_fence_value, D3D12_FENCE_FLAG_NONE, IID_GRAPHICS_PPV_ARGS(&window->frame_fences[i]));
 	}
-
-	//**swapChain->GetBuffer(window->current_backbuffer, IID_GRAPHICS_PPV_ARGS(&renderTarget));
-	//**createRenderTargetView();
 }
 
-#ifdef KINC_CONSOLE
-extern "C" void createDeviceAndSwapChain(struct dx_window *window);
-#else
 static void createDeviceAndSwapChain(struct dx_window *window) {
 #ifdef _DEBUG
 	ID3D12Debug *debugController = NULL;
@@ -195,11 +189,8 @@ static void createDeviceAndSwapChain(struct dx_window *window) {
 	device = renderEnv.device;
 	commandQueue = renderEnv.queue;
 
-	// swapChain = renderEnv.swapChain;
-
 	setupSwapChain(NULL);
 }
-#endif
 
 static void createRootSignature() {
 	ID3DBlob *rootBlob;

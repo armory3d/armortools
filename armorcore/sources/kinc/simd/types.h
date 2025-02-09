@@ -34,7 +34,7 @@
 #endif
 
 // NEON Capability check
-#if defined(KINC_IOS) || defined(KINC_SWITCH) || defined(__aarch64__) || defined(KINC_NEON)
+#if defined(KINC_IOS) || defined(__aarch64__) || defined(KINC_NEON)
 #define KINC_NEON
 #endif
 

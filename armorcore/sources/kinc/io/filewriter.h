@@ -25,8 +25,6 @@ void kinc_file_writer_close(kinc_file_writer_t *writer);
 
 #ifdef KINC_IMPLEMENTATION
 
-#if !defined(KINC_CONSOLE)
-
 #include "filewriter.h"
 
 #undef KINC_IMPLEMENTATION
@@ -40,12 +38,6 @@ void kinc_file_writer_close(kinc_file_writer_t *writer);
 
 #if defined(KINC_WINDOWS)
 #include <kinc/backend/MiniWindows.h>
-#endif
-
-#if defined(KINC_PS4) || defined(KINC_SWITCH)
-#define MOUNT_SAVES
-bool mountSaveData(bool);
-void unmountSaveData();
 #endif
 
 bool kinc_file_writer_open(kinc_file_writer_t *writer, const char *filepath) {
@@ -100,7 +92,5 @@ void kinc_file_writer_write(kinc_file_writer_t *writer, void *data, int size) {
 	fwrite(data, 1, size, (FILE *)writer->file);
 #endif
 }
-
-#endif
 
 #endif

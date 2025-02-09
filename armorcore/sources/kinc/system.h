@@ -116,7 +116,7 @@ void kinc_internal_logout_callback(void);
 #include <stdlib.h>
 #include <string.h>
 
-#if !defined(KINC_WASM) && !defined(KINC_EMSCRIPTEN) && !defined(KINC_ANDROID) && !defined(KINC_WINDOWS) && !defined(KINC_CONSOLE)
+#if !defined(KINC_WASM) && !defined(KINC_ANDROID) && !defined(KINC_WINDOWS)
 double kinc_time(void) {
 	return kinc_timestamp() / kinc_frequency();
 }
@@ -310,7 +310,7 @@ bool kinc_internal_frame(void) {
 void kinc_start(void) {
 	running = true;
 
-#if !defined(KINC_WASM) && !defined(KINC_EMSCRIPTEN)
+#if !defined(KINC_WASM)
 
 #if defined(KINC_IOS) || defined(KINC_MACOS)
 	while (withAutoreleasepool(kinc_internal_frame)) {
@@ -331,11 +331,8 @@ int kinc_height(void) {
 	return kinc_window_height(0);
 }
 
-#ifndef KHA
 void kinc_memory_emergency(void) {}
-#endif
 
-#if !defined(KINC_SONY) && !defined(KINC_SWITCH)
 static float safe_zone = 0.9f;
 
 float kinc_safe_zone(void) {
@@ -357,9 +354,7 @@ bool kinc_automatic_safe_zone(void) {
 void kinc_set_safe_zone(float value) {
 	safe_zone = value;
 }
-#endif
 
-#if !defined(KINC_SONY)
 bool is_save_load_initialized(void) {
 	return true;
 }
@@ -371,9 +366,6 @@ bool is_ps4_japanese_button_style(void) {
 bool is_save_load_broken(void) {
 	return false;
 }
-#endif
-
-#if !defined(KINC_CONSOLE)
 
 #define SAVE_RESULT_NONE 0
 #define SAVE_RESULT_SUCCESS 1
@@ -433,8 +425,6 @@ bool kinc_waiting_for_login(void) {
 void kinc_copy_to_clipboard(const char *text) {
 	kinc_log(KINC_LOG_LEVEL_WARNING, "Oh no, kinc_copy_to_clipboard is not implemented for this system.");
 }
-#endif
-
 #endif
 
 #endif

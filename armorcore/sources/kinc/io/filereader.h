@@ -248,11 +248,6 @@ bool kinc_internal_file_reader_open(kinc_file_reader_t *reader, const char *file
 #ifdef KINC_WASM
 	strcpy(filepath, filename);
 #endif
-#ifdef KINC_EMSCRIPTEN
-	strcpy(filepath, KINC_DEBUGDIR);
-	strcat(filepath, "/");
-	strcat(filepath, filename);
-#endif
 
 #ifdef KINC_WINDOWS
 	// Drive letter or network
@@ -300,7 +295,7 @@ bool kinc_internal_file_reader_open(kinc_file_reader_t *reader, const char *file
 	return true;
 }
 
-#if !defined(KINC_ANDROID) && !defined(KINC_CONSOLE)
+#if !defined(KINC_ANDROID)
 bool kinc_file_reader_open(kinc_file_reader_t *reader, const char *filename, int type) {
 	memset(reader, 0, sizeof(*reader));
 	return kinc_internal_file_reader_callback(reader, filename, type) ||

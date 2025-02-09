@@ -126,7 +126,7 @@ unsigned kinc_url_to_int(const char *url, int port);
 
 #include <Ws2tcpip.h>
 #include <winsock2.h>
-#elif defined(KINC_POSIX) || defined(KINC_EMSCRIPTEN)
+#elif defined(KINC_POSIX)
 #include <arpa/inet.h> // for inet_addr()
 #include <ctype.h>
 #include <fcntl.h>
@@ -138,14 +138,7 @@ unsigned kinc_url_to_int(const char *url, int port);
 #include <unistd.h>
 #endif
 
-#if defined(KINC_EMSCRIPTEN)
-#include <emscripten.h>
-#include <emscripten/posix_socket.h>
-#include <emscripten/threading.h>
-#include <emscripten/websocket.h>
-
-static EMSCRIPTEN_WEBSOCKET_T bridgeSocket = 0;
-#elif defined(KINC_POSIX)
+#if defined(KINC_POSIX)
 #include <sys/select.h>
 #endif
 
@@ -204,17 +197,6 @@ void kinc_socket_init(kinc_socket_t *sock) {
 		WSADATA WsaData;
 		WSAStartup(MAKEWORD(2, 2), &WsaData);
 	}
-#if defined(KINC_EMSCRIPTEN)
-	if (!bridgeSocket) {
-		bridgeSocket = emscripten_init_websocket_to_posix_socket_bridge("ws://localhost:8080");
-		// Synchronously wait until connection has been established.
-		uint16_t readyState = 0;
-		do {
-			emscripten_websocket_get_ready_state(bridgeSocket, &readyState);
-			emscripten_thread_sleep(100);
-		} while (readyState == 0);
-	}
-#endif
 #endif
 	++counter;
 }
@@ -287,7 +269,7 @@ bool kinc_socket_open(kinc_socket_t *sock, struct kinc_socket_options *options) 
 		default:
 			kinc_log(KINC_LOG_LEVEL_ERROR, "Unknown error.");
 		}
-#elif defined(KINC_POSIX) && !defined(KINC_EMSCRIPTEN)
+#elif defined(KINC_POSIX)
 		kinc_log(KINC_LOG_LEVEL_ERROR, "%s", strerror(errno));
 #endif
 		return false;
@@ -353,7 +335,7 @@ void kinc_socket_destroy(kinc_socket_t *sock) {
 }
 
 bool kinc_socket_select(kinc_socket_t *sock, uint32_t waittime, bool read, bool write) {
-#if !defined(KINC_EMSCRIPTEN) && (defined(KINC_WINDOWS) || defined(KINC_POSIX))
+#if (defined(KINC_WINDOWS) || defined(KINC_POSIX))
 	fd_set r_fds, w_fds;
 	struct timeval timeout;
 
