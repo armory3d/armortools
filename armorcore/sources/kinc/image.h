@@ -34,7 +34,7 @@ typedef enum kinc_image_format {
 } kinc_image_format_t;
 
 typedef struct kinc_image {
-	int width, height, depth;
+	int width, height;
 	kinc_image_format_t format;
 	unsigned internal_format;
 	kinc_image_compression_t compression;
@@ -54,12 +54,6 @@ typedef struct kinc_image_read_callbacks {
 /// </summary>
 /// <returns>The size that's occupied by the image in memory in bytes</returns>
 size_t kinc_image_init(kinc_image_t *image, void *memory, int width, int height, kinc_image_format_t format);
-
-/// <summary>
-/// Creates a 3D kinc_image in the provided memory.
-/// </summary>
-/// <returns>The size that's occupied by the image in memory in bytes</returns>
-size_t kinc_image_init3d(kinc_image_t *image, void *memory, int width, int height, int depth, kinc_image_format_t format);
 
 /// <summary>
 /// Peeks into an image file and figures out the size it will occupy in memory.
@@ -104,11 +98,6 @@ size_t kinc_image_init_from_encoded_bytes(kinc_image_t *image, void *memory, voi
 /// Creates a 2D image from memory.
 /// </summary>
 void kinc_image_init_from_bytes(kinc_image_t *image, void *data, int width, int height, kinc_image_format_t format);
-
-/// <summary>
-/// Creates a 3D image from memory.
-/// </summary>
-void kinc_image_init_from_bytes3d(kinc_image_t *image, void *data, int width, int height, int depth, kinc_image_format_t format);
 
 /// <summary>
 /// Destroys an image. This does not free the user-provided memory.
@@ -562,27 +551,17 @@ int kinc_image_format_sizeof(kinc_image_format_t format) {
 //}
 
 size_t kinc_image_init(kinc_image_t *image, void *memory, int width, int height, kinc_image_format_t format) {
-	return kinc_image_init3d(image, memory, width, height, 1, format);
-}
-
-size_t kinc_image_init3d(kinc_image_t *image, void *memory, int width, int height, int depth, kinc_image_format_t format) {
 	image->width = width;
 	image->height = height;
-	image->depth = depth;
 	image->format = format;
 	image->compression = KINC_IMAGE_COMPRESSION_NONE;
 	image->data = memory;
-	return width * height * depth * kinc_image_format_sizeof(format);
+	return width * height * kinc_image_format_sizeof(format);
 }
 
 void kinc_image_init_from_bytes(kinc_image_t *image, void *data, int width, int height, kinc_image_format_t format) {
-	kinc_image_init_from_bytes3d(image, data, width, height, 1, format);
-}
-
-void kinc_image_init_from_bytes3d(kinc_image_t *image, void *data, int width, int height, int depth, kinc_image_format_t format) {
 	image->width = width;
 	image->height = height;
-	image->depth = depth;
 	image->format = format;
 	image->compression = KINC_IMAGE_COMPRESSION_NONE;
 	image->data = data;
@@ -690,7 +669,6 @@ size_t kinc_image_init_from_file(kinc_image_t *image, void *memory, const char *
 		kinc_file_reader_close(&reader);
 		image->data = memory;
 		image->data_size = dataSize;
-		image->depth = 1;
 		return dataSize;
 	}
 	return 0;
@@ -712,7 +690,6 @@ size_t kinc_image_init_from_encoded_bytes(kinc_image_t *image, void *memory, voi
 	loadImage(callbacks, &image_memory, format, memory, &dataSize, &image->width, &image->height, &image->compression, &image->format, &image->internal_format);
 	image->data = memory;
 	image->data_size = dataSize;
-	image->depth = 1;
 	return dataSize;
 }
 

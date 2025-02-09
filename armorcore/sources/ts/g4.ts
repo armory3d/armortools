@@ -264,19 +264,8 @@ function g4_set_tex_depth(unit: kinc_tex_unit_t, tex: image_t) {
 	iron_g4_set_texture_depth(unit, tex.render_target_);
 }
 
-function g4_set_image_tex(unit: kinc_tex_unit_t, tex: image_t) {
-	if (tex == null) {
-		return;
-	}
-	iron_g4_set_image_texture(unit, tex.texture_);
-}
-
 function g4_set_tex_params(tex_unit: kinc_tex_unit_t, u_addressing: tex_addressing_t, v_addressing: tex_addressing_t, minification_filter: tex_filter_t, magnification_filter: tex_filter_t, mipmap_filter: mip_map_filter_t) {
 	iron_g4_set_texture_parameters(tex_unit, u_addressing, v_addressing, minification_filter, magnification_filter, mipmap_filter);
-}
-
-function g4_set_tex_3d_params(tex_unit: kinc_tex_unit_t, u_addressing: tex_addressing_t, v_addressing: tex_addressing_t, w_addressing: tex_addressing_t, minification_filter: tex_filter_t, magnification_filter: tex_filter_t, mipmap_filter: mip_map_filter_t) {
-	iron_g4_set_texture3d_parameters(tex_unit, u_addressing, v_addressing, w_addressing, minification_filter, magnification_filter, mipmap_filter);
 }
 
 function g4_set_pipeline(pipe: pipeline_t) {
@@ -519,7 +508,6 @@ declare type image_t = {
 	pixels?: buffer_t;
 	width?: i32;
 	height?: i32;
-	depth?: i32;
 };
 
 type pipeline_t = {

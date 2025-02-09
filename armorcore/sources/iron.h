@@ -1700,25 +1700,12 @@ void iron_g4_set_texture_depth(kinc_g4_texture_unit_t *unit, kinc_g4_render_targ
 	kinc_g4_render_target_use_depth_as_texture(render_target, *unit);
 }
 
-void iron_g4_set_image_texture(kinc_g4_texture_unit_t *unit, kinc_g4_texture_t *texture) {
-	kinc_g4_set_image_texture(*unit, texture);
-}
-
 void iron_g4_set_texture_parameters(kinc_g4_texture_unit_t *unit, i32 u_addr, i32 v_addr, i32 min_filter, i32 mag_filter, i32 mip_filter) {
 	kinc_g4_set_texture_addressing(*unit, KINC_G4_TEXTURE_DIRECTION_U, (kinc_g4_texture_addressing_t)u_addr);
 	kinc_g4_set_texture_addressing(*unit, KINC_G4_TEXTURE_DIRECTION_V, (kinc_g4_texture_addressing_t)v_addr);
 	kinc_g4_set_texture_minification_filter(*unit, (kinc_g4_texture_filter_t)min_filter);
 	kinc_g4_set_texture_magnification_filter(*unit, (kinc_g4_texture_filter_t)mag_filter);
 	kinc_g4_set_texture_mipmap_filter(*unit, (kinc_g4_mipmap_filter_t)mip_filter);
-}
-
-void iron_g4_set_texture3d_parameters(kinc_g4_texture_unit_t *unit, i32 u_addr, i32 v_addr, i32 w_addr, i32 min_filter, i32 mag_filter, i32 mip_filter) {
-	kinc_g4_set_texture3d_addressing(*unit, KINC_G4_TEXTURE_DIRECTION_U, (kinc_g4_texture_addressing_t)u_addr);
-	kinc_g4_set_texture3d_addressing(*unit, KINC_G4_TEXTURE_DIRECTION_V, (kinc_g4_texture_addressing_t)v_addr);
-	kinc_g4_set_texture3d_addressing(*unit, KINC_G4_TEXTURE_DIRECTION_W, (kinc_g4_texture_addressing_t)w_addr);
-	kinc_g4_set_texture3d_minification_filter(*unit, (kinc_g4_texture_filter_t)min_filter);
-	kinc_g4_set_texture3d_magnification_filter(*unit, (kinc_g4_texture_filter_t)mag_filter);
-	kinc_g4_set_texture3d_mipmap_filter(*unit, (kinc_g4_mipmap_filter_t)mip_filter);
 }
 
 void iron_g4_set_bool(kinc_g4_constant_location_t *location, bool value) {
@@ -1979,7 +1966,7 @@ int _format_byte_size(kinc_image_format_t format) {
 
 buffer_t *iron_g4_get_texture_pixels(kinc_image_t *image) {
 	uint8_t *data = kinc_image_get_pixels(image);
-	int byte_length = _format_byte_size(image->format) * image->width * image->height * image->depth;
+	int byte_length = _format_byte_size(image->format) * image->width * image->height;
 	buffer_t *buffer = malloc(sizeof(buffer_t));
 	buffer->buffer = data;
 	buffer->length = byte_length;
@@ -2004,7 +1991,7 @@ void iron_g4_get_render_target_pixels(kinc_g4_render_target_t *rt, buffer_t *dat
 buffer_t *iron_g4_lock_texture(kinc_g4_texture_t *texture, i32 level) {
 	uint8_t *tex = kinc_g4_texture_lock(texture);
 	int stride = kinc_g4_texture_stride(texture);
-	int byte_length = stride * texture->tex_height * texture->tex_depth;
+	int byte_length = stride * texture->tex_height;
 	buffer_t *buffer = malloc(sizeof(buffer_t));
 	buffer->buffer = tex;
 	buffer->length = byte_length;

@@ -171,8 +171,6 @@ void kinc_g4_draw_indexed_vertices_instanced_from_to(int instanceCount, int star
 
 void kinc_g4_set_texture_addressing(kinc_g4_texture_unit_t unit, kinc_g4_texture_direction_t dir, kinc_g4_texture_addressing_t addressing);
 
-void kinc_g4_set_texture3d_addressing(kinc_g4_texture_unit_t unit, kinc_g4_texture_direction_t dir, kinc_g4_texture_addressing_t addressing);
-
 /// <summary>
 /// Sets the pipeline for the next draw-call. The pipeline defines most rendering-state including the shaders to be used.
 /// </summary>
@@ -300,13 +298,6 @@ void kinc_g4_set_matrix4(kinc_g4_constant_location_t location, kinc_matrix4x4_t 
 void kinc_g4_set_texture_magnification_filter(kinc_g4_texture_unit_t unit, kinc_g4_texture_filter_t filter);
 
 /// <summary>
-/// Set the texture-sampling-mode for upscaled 3D-textures.
-/// </summary>
-/// <param name="unit">The texture-unit to set the texture-sampling-mode for</param>
-/// <param name="filter">The mode to set</param>
-void kinc_g4_set_texture3d_magnification_filter(kinc_g4_texture_unit_t texunit, kinc_g4_texture_filter_t filter);
-
-/// <summary>
 /// Set the texture-sampling-mode for downscaled textures.
 /// </summary>
 /// <param name="unit">The texture-unit to set the texture-sampling-mode for</param>
@@ -314,26 +305,11 @@ void kinc_g4_set_texture3d_magnification_filter(kinc_g4_texture_unit_t texunit, 
 void kinc_g4_set_texture_minification_filter(kinc_g4_texture_unit_t unit, kinc_g4_texture_filter_t filter);
 
 /// <summary>
-/// Set the texture-sampling-mode for downscaled 3D-textures.
-/// </summary>
-/// <param name="unit">The texture-unit to set the texture-sampling-mode for</param>
-/// <param name="filter">The mode to set</param>
-void kinc_g4_set_texture3d_minification_filter(kinc_g4_texture_unit_t texunit, kinc_g4_texture_filter_t filter);
-
-/// <summary>
 /// Sets the mipmap-sampling-mode which defines whether mipmaps are used at all and if so whether the two neighbouring mipmaps are linearly interpolated.
 /// </summary>
 /// <param name="unit">The texture-unit to set the mipmap-sampling-mode for</param>
 /// <param name="filter">The mode to set</param>
 void kinc_g4_set_texture_mipmap_filter(kinc_g4_texture_unit_t unit, kinc_g4_mipmap_filter_t filter);
-
-/// <summary>
-/// Sets the mipmap-sampling-mode for a 3D-texture which defines whether mipmaps are used at all and if so whether the two neighbouring mipmaps are linearly
-/// interpolated.
-/// </summary>
-/// <param name="unit">The texture-unit to set the mipmap-sampling-mode for</param>
-/// <param name="filter">The mode to set</param>
-void kinc_g4_set_texture3d_mipmap_filter(kinc_g4_texture_unit_t texunit, kinc_g4_mipmap_filter_t filter);
 
 void kinc_g4_set_texture_compare_mode(kinc_g4_texture_unit_t unit, bool enabled);
 
@@ -371,15 +347,6 @@ void kinc_g4_set_render_target_face(struct kinc_g4_render_target *texture, int f
 /// <param name="unit">The unit to assign this texture to</param>
 /// <param name="texture">The texture to assign to the unit</param>
 void kinc_g4_set_texture(kinc_g4_texture_unit_t unit, struct kinc_g4_texture *texture);
-
-/// <summary>
-/// Assigns a texture to a texture-unit for direct access via GLSL's texelFetch (as
-/// opposed to GLSL's texture). The name of this functions is unfortunately based
-/// on OpenGL's confusing terminology.
-/// </summary>
-/// <param name="unit">The unit to assign this texture to</param>
-/// <param name="texture">The texture to assign to the unit</param>
-void kinc_g4_set_image_texture(kinc_g4_texture_unit_t unit, struct kinc_g4_texture *texture);
 
 /// <summary>
 /// Returns the currently used number of samples for hardware-antialiasing.
