@@ -230,7 +230,7 @@ declare function iron_g4_create_fragment_shader_from_source(source: string): any
 declare function iron_g4_delete_shader(shader: any): void;
 declare function iron_g4_create_pipeline(): any;
 declare function iron_g4_delete_pipeline(pipeline: any): void;
-declare function iron_g4_compile_pipeline(pipeline: any, structure0: any, structure1: any, structure2: any, structure3: any, length: i32, vertex_shader: any, fragment_shader: any, geometry_shader: any, state: any): void;
+declare function iron_g4_compile_pipeline(pipeline: any, structure0: any, structure1: any, structure2: any, structure3: any, length: i32, vertex_shader: any, fragment_shader: any, state: any): void;
 declare function iron_g4_set_pipeline(pipeline: any): void;
 declare function iron_load_image(file: string, readable: bool): any;
 declare function iron_unload_image(image: image_t): void;

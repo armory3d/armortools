@@ -201,7 +201,6 @@ function util_clone_shader_contexts(contexts: shader_context_t[]): shader_contex
 		c.cull_mode = contexts[i].cull_mode;
 		c.vertex_shader = contexts[i].vertex_shader;
 		c.fragment_shader = contexts[i].fragment_shader;
-		c.geometry_shader = contexts[i].geometry_shader;
 		c.shader_from_source = contexts[i].shader_from_source;
 		c.blend_source = contexts[i].blend_source;
 		c.blend_destination = contexts[i].blend_destination;

@@ -634,7 +634,6 @@ type shader_context_t = {
 	cull_mode?: string;
 	vertex_shader?: string;
 	fragment_shader?: string;
-	geometry_shader?: string;
 	shader_from_source?: bool; // Build shader at runtime using from_source()
 	blend_source?: string;
 	blend_destination?: string;

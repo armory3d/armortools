@@ -8,9 +8,6 @@ void kinc_g4_internal_pipeline_set_defaults(kinc_g4_pipeline_t *state) {
 	}
 	state->vertex_shader = NULL;
 	state->fragment_shader = NULL;
-	state->geometry_shader = NULL;
-	state->tessellation_control_shader = NULL;
-	state->tessellation_evaluation_shader = NULL;
 
 	state->cull_mode = KINC_G4_CULL_NOTHING;
 

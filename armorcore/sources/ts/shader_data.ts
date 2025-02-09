@@ -159,9 +159,6 @@ function shader_context_compile(raw: shader_context_t): shader_context_t {
 		///if arm_embed
 		raw._.pipe_state.fragment_shader = sys_get_shader(raw.fragment_shader);
 		raw._.pipe_state.vertex_shader = sys_get_shader(raw.vertex_shader);
-		if (raw.geometry_shader != null) {
-			raw._.pipe_state.geometry_shader = sys_get_shader(raw.geometry_shader);
-		}
 
 		///else // Load shaders manually
 
@@ -169,10 +166,6 @@ function shader_context_compile(raw: shader_context_t): shader_context_t {
 		raw._.pipe_state.vertex_shader = g4_shader_create(vs_buffer, shader_type_t.VERTEX);
 		let fs_buffer: buffer_t = data_get_blob(raw.fragment_shader + shader_data_ext());
 		raw._.pipe_state.fragment_shader = g4_shader_create(fs_buffer, shader_type_t.FRAGMENT);
-		if (raw.geometry_shader != null) {
-			let gs_buffer: buffer_t = data_get_blob(raw.geometry_shader + shader_data_ext());
-			raw._.pipe_state.geometry_shader = g4_shader_create(gs_buffer, shader_type_t.GEOMETRY);
-		}
 		///end
 	}
 
@@ -262,9 +255,6 @@ function shader_context_delete(raw: shader_context_t) {
 	}
 	if (raw._.pipe_state.vertex_shader != null) {
 		g4_shader_delete(raw._.pipe_state.vertex_shader);
-	}
-	if (raw._.pipe_state.geometry_shader != null) {
-		g4_shader_delete(raw._.pipe_state.geometry_shader);
 	}
 	g4_pipeline_delete(raw._.pipe_state);
 }

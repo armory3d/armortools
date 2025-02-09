@@ -6,9 +6,6 @@ void kinc_g5_internal_pipeline_init(kinc_g5_pipeline_t *pipe) {
 	}
 	pipe->vertexShader = NULL;
 	pipe->fragmentShader = NULL;
-	pipe->geometryShader = NULL;
-	pipe->tessellationControlShader = NULL;
-	pipe->tessellationEvaluationShader = NULL;
 
 	pipe->cullMode = KINC_G5_CULL_MODE_NEVER;
 

@@ -83,7 +83,6 @@ function g4_pipeline_compile(raw: pipeline_t) {
 	let structure1: vertex_struct_t = raw.input_layout.length > 1 ? raw.input_layout[1] : null;
 	let structure2: vertex_struct_t = raw.input_layout.length > 2 ? raw.input_layout[2] : null;
 	let structure3: vertex_struct_t = raw.input_layout.length > 3 ? raw.input_layout[3] : null;
-	let gs: any = raw.geometry_shader != null ? raw.geometry_shader.shader_ : null;
 
 	for (let i: i32 = raw.color_write_masks_red.length; i < 8; ++i) {
 		array_push(raw.color_write_masks_red, true);
@@ -114,7 +113,7 @@ function g4_pipeline_compile(raw: pipeline_t) {
 	state.color_attachments = raw.color_attachments;
 	state.depth_attachment_bits = g4_pipeline_get_depth_buffer_bits(raw.depth_attachment);
 
-	iron_g4_compile_pipeline(raw.pipeline_, structure0, structure1, structure2, structure3, raw.input_layout.length, raw.vertex_shader.shader_, raw.fragment_shader.shader_, gs, state);
+	iron_g4_compile_pipeline(raw.pipeline_, structure0, structure1, structure2, structure3, raw.input_layout.length, raw.vertex_shader.shader_, raw.fragment_shader.shader_, state);
 }
 
 function g4_pipeline_set(raw: pipeline_t) {
@@ -515,7 +514,6 @@ type pipeline_t = {
 	input_layout?: vertex_struct_t[];
 	vertex_shader?: shader_t;
 	fragment_shader?: shader_t;
-	geometry_shader?: shader_t;
 	cull_mode?: cull_mode_t;
 	depth_write?: bool;
 	depth_mode?: compare_mode_t;
@@ -669,5 +667,4 @@ enum cull_mode_t {
 enum shader_type_t {
 	FRAGMENT = 0,
 	VERTEX = 1,
-	GEOMETRY = 3,
 }

@@ -378,8 +378,9 @@ function sys_get_shader(name: string): shader_t {
 	if (shader == null) {
 		shader = g4_shader_create(
 			iron_load_blob(data_path() + name + sys_shader_ext()),
-			ends_with(name, ".frag") ? shader_type_t.FRAGMENT : ends_with(name, ".vert") ? shader_type_t.VERTEX : shader_type_t.GEOMETRY);
-			map_set(_sys_shaders, name, shader);
+			ends_with(name, ".frag") ? shader_type_t.FRAGMENT : shader_type_t.VERTEX
+		);
+		map_set(_sys_shaders, name, shader);
 	}
 	return shader;
 }

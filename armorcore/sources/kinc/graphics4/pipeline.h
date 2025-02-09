@@ -55,9 +55,6 @@ typedef struct kinc_g4_pipeline {
 	struct kinc_g4_vertex_structure *input_layout[16];
 	struct kinc_g4_shader *vertex_shader;
 	struct kinc_g4_shader *fragment_shader;
-	struct kinc_g4_shader *geometry_shader;
-	struct kinc_g4_shader *tessellation_control_shader;
-	struct kinc_g4_shader *tessellation_evaluation_shader;
 
 	kinc_g4_cull_mode_t cull_mode;
 

@@ -60,26 +60,6 @@ void kinc_g5_shader_init(kinc_g5_shader_t *shader, const void *_data, size_t len
 	shader->impl.length = (int)length - index;
 	shader->impl.data = (uint8_t *)malloc(shader->impl.length);
 	memcpy(shader->impl.data, &data[index], shader->impl.length);
-
-	switch (type) {
-	case KINC_G5_SHADER_TYPE_VERTEX:
-		// Microsoft::affirm(device->CreateVertexShader(this->data, this->length, nullptr, (ID3D11VertexShader**)&shader));
-		break;
-	case KINC_G5_SHADER_TYPE_FRAGMENT:
-		// Microsoft::affirm(device->CreatePixelShader(this->data, this->length, nullptr, (ID3D11PixelShader**)&shader));
-		break;
-	case KINC_G5_SHADER_TYPE_GEOMETRY:
-		// Microsoft::affirm(device->CreateGeometryShader(this->data, this->length, nullptr, (ID3D11GeometryShader**)&shader));
-		break;
-	case KINC_G5_SHADER_TYPE_TESSELLATION_CONTROL:
-		// Microsoft::affirm(device->CreateHullShader(this->data, this->length, nullptr, (ID3D11HullShader**)&shader));
-		break;
-	case KINC_G5_SHADER_TYPE_TESSELLATION_EVALUATION:
-		// Microsoft::affirm(device->CreateDomainShader(this->data, this->length, nullptr, (ID3D11DomainShader**)&shader));
-		break;
-	default:
-		break;
-	}
 }
 
 void kinc_g5_shader_destroy(kinc_g5_shader_t *shader) {

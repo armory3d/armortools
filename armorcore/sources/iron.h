@@ -1427,7 +1427,7 @@ typedef struct iron_pipeline_state {
 	int depth_attachment_bits;
 } iron_pipeline_state_t;
 
-void iron_g4_compile_pipeline(kinc_g4_pipeline_t *pipeline, vertex_struct_t *structure0, vertex_struct_t *structure1, vertex_struct_t *structure2, vertex_struct_t *structure3, i32 length, kinc_g4_shader_t *vertex_shader, kinc_g4_shader_t *fragment_shader, kinc_g4_shader_t *geometry_shader, iron_pipeline_state_t *state) {
+void iron_g4_compile_pipeline(kinc_g4_pipeline_t *pipeline, vertex_struct_t *structure0, vertex_struct_t *structure1, vertex_struct_t *structure2, vertex_struct_t *structure3, i32 length, kinc_g4_shader_t *vertex_shader, kinc_g4_shader_t *fragment_shader, iron_pipeline_state_t *state) {
 	kinc_g4_vertex_structure_t s0, s1, s2, s3;
 	kinc_g4_vertex_structure_init(&s0);
 	kinc_g4_vertex_structure_init(&s1);
@@ -1450,9 +1450,6 @@ void iron_g4_compile_pipeline(kinc_g4_pipeline_t *pipeline, vertex_struct_t *str
 
 	pipeline->vertex_shader = vertex_shader;
 	pipeline->fragment_shader = fragment_shader;
-	if (geometry_shader != null) {
-		pipeline->geometry_shader = geometry_shader;
-	}
 	for (int i = 0; i < length; ++i) {
 		pipeline->input_layout[i] = structures[i];
 	}

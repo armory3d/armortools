@@ -57,9 +57,6 @@ typedef struct kinc_g5_pipeline {
 	kinc_g5_vertex_structure_t *inputLayout[16];
 	struct kinc_g5_shader *vertexShader;
 	struct kinc_g5_shader *fragmentShader;
-	struct kinc_g5_shader *geometryShader;
-	struct kinc_g5_shader *tessellationControlShader;
-	struct kinc_g5_shader *tessellationEvaluationShader;
 
 	kinc_g5_cull_mode_t cullMode;
 

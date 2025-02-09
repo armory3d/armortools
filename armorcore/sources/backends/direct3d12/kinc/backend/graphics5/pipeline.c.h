@@ -157,24 +157,6 @@ kinc_g5_constant_location_t kinc_g5_pipeline_get_constant_location(struct kinc_g
 	location.impl.computeOffset = 0;
 	location.impl.computeSize = 0;
 
-	{
-		ShaderConstant constant = findConstant(pipe->geometryShader, name);
-		location.impl.geometryOffset = constant.offset;
-		location.impl.geometrySize = constant.size;
-	}
-
-	{
-		ShaderConstant constant = findConstant(pipe->tessellationControlShader, name);
-		location.impl.tessControlOffset = constant.offset;
-		location.impl.tessControlSize = constant.size;
-	}
-
-	{
-		ShaderConstant constant = findConstant(pipe->tessellationEvaluationShader, name);
-		location.impl.tessEvalOffset = constant.offset;
-		location.impl.tessEvalSize = constant.size;
-	}
-
 	return location;
 }
 
