@@ -183,7 +183,6 @@ function util_clone_tex_units(units: tex_unit_t[]): tex_unit_t[] {
 		let u: tex_unit_t = {};
 		u.name = units[i].name;
 		u.link = units[i].link;
-		u.image_uniform = units[i].image_uniform;
 		array_push(r, u);
 	}
 	return r;

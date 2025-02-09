@@ -1,8 +1,6 @@
 
 function make_bake_run(con: node_shader_context_t, vert: node_shader_t, frag: node_shader_t) {
-	if (context_raw.bake_type == bake_type_t.AO) { // Voxel
-	}
-	else if (context_raw.bake_type == bake_type_t.CURVATURE) {
+	if (context_raw.bake_type == bake_type_t.CURVATURE) {
 		let pass: bool = parser_material_bake_passthrough;
 		let strength: string = pass ? parser_material_bake_passthrough_strength : context_raw.bake_curv_strength + "";
 		let radius: string = pass ? parser_material_bake_passthrough_radius : context_raw.bake_curv_radius + "";

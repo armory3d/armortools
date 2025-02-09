@@ -117,12 +117,8 @@ function uniforms_bind_render_target(rt: render_target_t, context: shader_contex
 
 	for (let j: i32 = 0; j < tus.length; ++j) { // Set texture
 		if (sampler_id == tus[j].name) {
-			let is_image: bool = tus[j].image_uniform;
 
-			if (is_image) {
-				g4_set_image_tex(context._.tex_units[j], rt._image); // image2D/3D
-			}
-			else if (attach_depth) {
+			if (attach_depth) {
 				g4_set_tex_depth(context._.tex_units[j], rt._image); // sampler2D
 			}
 			else {
@@ -131,12 +127,6 @@ function uniforms_bind_render_target(rt: render_target_t, context: shader_contex
 
 			if (rt.depth > 1) { // sampler3D
 				g4_set_tex_3d_params(context._.tex_units[j], tex_addressing_t.CLAMP, tex_addressing_t.CLAMP, tex_addressing_t.CLAMP, tex_filter_t.LINEAR, tex_filter_t.ANISOTROPIC, mip_map_filter_t.LINEAR);
-				continue;
-			}
-
-			if (is_image) {
-				// Multiple voxel volumes, always set params
-				g4_set_tex_3d_params(context._.tex_units[j], tex_addressing_t.CLAMP, tex_addressing_t.CLAMP, tex_addressing_t.CLAMP, tex_filter_t.LINEAR, tex_filter_t.POINT, mip_map_filter_t.LINEAR);
 				continue;
 			}
 

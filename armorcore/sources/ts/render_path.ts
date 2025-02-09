@@ -9,7 +9,6 @@ type render_target_t = {
 	depth_buffer?: string; // 2D texture
 	mipmaps?: bool;
 	depth?: i32; // 3D texture
-	is_image?: bool; // Image
 	// Runtime
 	_depth_format?: depth_format_t;
 	_depth_from?: string;
@@ -430,15 +429,9 @@ function render_path_create_image(t: render_target_t, depth_format: depth_format
 		return img;
 	}
 	else { // 2D texture
-		if (t.is_image) { // Image
-			return image_create(width, height,
-				t.format != null ? render_path_get_tex_format(t.format) : tex_format_t.RGBA32);
-		}
-		else { // Render target
-			return image_create_render_target(width, height,
-				t.format != null ? render_path_get_tex_format(t.format) : tex_format_t.RGBA32,
-				depth_format);
-		}
+		return image_create_render_target(width, height,
+			t.format != null ? render_path_get_tex_format(t.format) : tex_format_t.RGBA32,
+			depth_format);
 	}
 }
 
@@ -485,7 +478,6 @@ function render_target_create(): render_target_t {
 	raw.scale = 1.0;
 	raw.mipmaps = false;
 	raw.depth = 1;
-	raw.is_image = false;
 	raw._depth_from = "";
 	raw._has_depth = false;
 	return raw;

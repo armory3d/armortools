@@ -106,7 +106,7 @@ function node_shader_context_add_constant(raw: node_shader_context_t, ctype: str
 	array_push(raw.constants, c);
 }
 
-function node_shader_context_add_texture_unit(raw: node_shader_context_t, ctype: string, name: string, link: string = null, is_image: bool = false) {
+function node_shader_context_add_texture_unit(raw: node_shader_context_t, ctype: string, name: string, link: string = null) {
 	for (let i: i32 = 0; i < raw.tunits.length; ++i) {
 		let c: tex_unit_t = raw.tunits[i];
 		if (c.name == name) {
@@ -117,9 +117,6 @@ function node_shader_context_add_texture_unit(raw: node_shader_context_t, ctype:
 	let c: tex_unit_t = { name: name };
 	if (link != null) {
 		c.link = link;
-	}
-	if (is_image) {
-		c.image_uniform = is_image;
 	}
 	array_push(raw.tunits, c);
 }

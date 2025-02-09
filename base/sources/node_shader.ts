@@ -55,12 +55,11 @@ function node_shader_add_out(raw: node_shader_t, s: string) {
 
 function node_shader_add_uniform(raw: node_shader_t, s: string, link: string = null) {
 	let ar: string[] = string_split(s, " ");
-	// layout(RGBA8) image3D voxels
+	// layout(RGBA8) sampler2D tex
 	let utype: string = ar[ar.length - 2];
 	let uname: string = ar[ar.length - 1];
-	if (starts_with(utype, "sampler") || starts_with(utype, "image") || starts_with(utype, "uimage")) {
-		let is_image: bool = (starts_with(utype, "image") || starts_with(utype, "uimage")) ? true : false;
-		node_shader_context_add_texture_unit(raw.context, utype, uname, link, is_image);
+	if (starts_with(utype, "sampler")) {
+		node_shader_context_add_texture_unit(raw.context, utype, uname, link);
 	}
 	else {
 		// Prefer vec4[] for d3d to avoid padding
@@ -86,7 +85,7 @@ function node_shader_add_shared_sampler(raw: node_shader_t, s: string) {
 		// layout(RGBA8) sampler2D tex
 		let utype: string = ar[ar.length - 2];
 		let uname: string = ar[ar.length - 1];
-		node_shader_context_add_texture_unit(raw.context, utype, uname, null, false);
+		node_shader_context_add_texture_unit(raw.context, utype, uname, null);
 	}
 }
 

@@ -92,11 +92,9 @@ if (flags.raytrace) {
 
 	if (flags.d3d12) {
 		project.add_assets("shaders/raytrace/*.cso", { destination: "data/{name}" });
-		project.add_assets("assets/readme/readme_dxr.txt", { destination: "{name}" });
 	}
 	else if (flags.vulkan) {
 		project.add_assets("shaders/raytrace/*.spirv", { destination: "data/{name}" });
-		project.add_assets("assets/readme/readme_vkrt.txt", { destination: "{name}" });
 	}
 	else if (flags.metal) {
 		project.add_assets("shaders/raytrace/*.metal", { destination: "data/{name}" });

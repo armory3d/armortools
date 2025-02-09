@@ -692,7 +692,6 @@ type shader_const_t = {
 type tex_unit_t = {
 	name?: string;
 	link?: string;
-	image_uniform?: bool; // uniform layout(r8) writeonly image3D voxels
 };
 
 type speaker_data_t = {
