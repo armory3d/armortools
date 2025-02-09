@@ -219,8 +219,6 @@ void kinc_g5_texture_unlock(kinc_g5_texture_t *tex) {
 	         bytesPerImage:kinc_g5_texture_stride(tex) * tex->texHeight];
 }
 
-void kinc_g5_texture_clear(kinc_g5_texture_t *texture, int x, int y, int z, int width, int height, int depth, unsigned color) {}
-
 void kinc_g5_texture_generate_mipmaps(kinc_g5_texture_t *texture, int levels) {}
 
 void kinc_g5_texture_set_mipmap(kinc_g5_texture_t *texture, kinc_image_t *mipmap, int level) {

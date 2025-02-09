@@ -6,10 +6,6 @@
     \brief Provides 128bit SIMD types which are mapped to equivalent SSE or Neon types.
 */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // Any level of AVX Capability (Could be AVX, AVX2, AVX512, etc.)
 //(Currently) only used for checking existence of earlier SSE instruction sets
 #if defined(__AVX__)
@@ -173,8 +169,4 @@ typedef kinc_uint16x8_t kinc_uint16x8_mask_t;
 typedef kinc_int32x4_t kinc_int32x4_mask_t;
 typedef kinc_uint32x4_t kinc_uint32x4_mask_t;
 
-#endif
-
-#ifdef __cplusplus
-}
 #endif

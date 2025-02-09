@@ -7,10 +7,6 @@
    the C-lib.
 */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define KINC_PI 3.141592654
 #define KINC_TAU 6.283185307
 
@@ -63,8 +59,4 @@ float kinc_clamp(float value, float minValue, float maxValue) {
 	return kinc_max(minValue, kinc_min(maxValue, value));
 }
 
-#endif
-
-#ifdef __cplusplus
-}
 #endif

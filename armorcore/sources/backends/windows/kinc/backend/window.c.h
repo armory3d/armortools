@@ -39,11 +39,7 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 static WindowData windows[MAXIMUM_WINDOWS] = {0};
 static int window_counter = 0;
 
-#ifdef KINC_OCULUS
-const wchar_t *windowClassName = L"ORT";
-#else
 const wchar_t *windowClassName = L"KoreWindow";
-#endif
 
 #ifdef KINC_VULKAN
 #include <vulkan/vulkan_core.h>
@@ -399,9 +395,7 @@ int kinc_window_create(kinc_window_options_t *win, kinc_framebuffer_options_t *f
 	                            win->display_index);
 
 	bool vsync = frame->vertical_sync;
-#ifdef KINC_OCULUS
-	vsync = false;
-#endif
+
 	kinc_g4_internal_init_window(windowId, frame->depth_bits, vsync);
 
 	if (win->visible) {

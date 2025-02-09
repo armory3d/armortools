@@ -6,32 +6,9 @@
     \brief Generates values which are kind of random.
 */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/// <summary>
-/// Initializes the randomizer with a seed. This is optional but helpful.
-/// </summary>
-/// <param name="seed">A value which should ideally be pretty random</param>
 void kinc_random_init(int64_t seed);
-
-/// <summary>
-/// Returns a random value.
-/// </summary>
-/// <returns>A random value</returns>
 int64_t kinc_random_get(void);
-
-/// <summary>
-/// Returns a value between 0 and max (both inclusive).
-/// </summary>
-/// <returns>A random value</returns>
 int64_t kinc_random_get_max(int64_t max);
-
-/// <summary>
-/// Returns a value between min and max (both inclusive).
-/// </summary>
-/// <returns>A random value</returns>
 int64_t kinc_random_get_in(int64_t min, int64_t max);
 
 #ifdef KINC_IMPLEMENTATION_MATH
@@ -91,8 +68,4 @@ int64_t kinc_random_get_in(int64_t min, int64_t max) {
 	return (value < -LLONG_MAX ? LLONG_MAX : llabs(value)) % (max + 1 - min) + min;
 }
 
-#endif
-
-#ifdef __cplusplus
-}
 #endif

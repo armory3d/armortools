@@ -10,10 +10,6 @@
     \brief Provides an API very similar to fread and friends but handles the intricacies of where files are actually hidden on each supported system.
 */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #ifndef KINC_DEBUGDIR
 #define KINC_DEBUGDIR "out"
 #endif
@@ -38,146 +34,29 @@ typedef struct kinc_file_reader {
 	bool (*seek)(struct kinc_file_reader *reader, size_t pos);
 } kinc_file_reader_t;
 
-/// <summary>
-/// Opens a file for reading.
-/// </summary>
-/// <param name="reader">The reader to initialize for reading</param>
-/// <param name="filepath">A filepath to identify a file</param>
-/// <param name="type">Looks for a regular file (KINC_FILE_TYPE_ASSET) or a save-file (KINC_FILE_TYPE_SAVE)</param>
-/// <returns>Whether the file could be opened</returns>
 bool kinc_file_reader_open(kinc_file_reader_t *reader, const char *filepath, int type);
-
-/// <summary>
-/// Opens a memory area for reading using the file reader API.
-/// </summary>
-/// <param name="reader">The reader to initialize for reading</param>
-/// <param name="data">A pointer to the memory area to read</param>
-/// <param name="size">The size of the memory area</param>
-/// <returns>This function always returns true</returns>
 bool kinc_file_reader_from_memory(kinc_file_reader_t *reader, void *data, size_t size);
-
-/// <summary>
-/// Registers a file reader callback.
-/// </summary>
-/// <param name="callback">The function to call when opening a file</param>
 void kinc_file_reader_set_callback(bool (*callback)(kinc_file_reader_t *reader, const char *filename, int type));
-
-/// <summary>
-/// Closes a file.
-/// </summary>
-/// <param name="reader">The file to close</param>
-/// <returns>Whether the file could be closed</returns>
 bool kinc_file_reader_close(kinc_file_reader_t *reader);
-
-/// <summary>
-/// Reads data from a file starting from the current reading-position and increases the reading-position accordingly.
-/// </summary>
-/// <param name="reader">The reader to read from</param>
-/// <param name="data">A pointer to write the data to</param>
-/// <param name="size">The amount of data to read in bytes</param>
-/// <returns>The number of bytes that were read - can be less than size if there is not enough data in the file</returns>
 size_t kinc_file_reader_read(kinc_file_reader_t *reader, void *data, size_t size);
-
-/// <summary>
-/// Figures out the size of a file.
-/// </summary>
-/// <param name="reader">The reader which's file-size to figure out</param>
-/// <returns>The size in bytes</returns>
 size_t kinc_file_reader_size(kinc_file_reader_t *reader);
-
-/// <summary>
-/// Figures out the current reading-position in the file.
-/// </summary>
-/// <param name="reader">The reader which's reading-position to figure out</param>
-/// <returns>The current reading-position</returns>
 size_t kinc_file_reader_pos(kinc_file_reader_t *reader);
-
-/// <summary>
-/// Sets the reading-position manually.
-/// </summary>
-/// <param name="reader">The reader which's reading-position to set</param>
-/// <param name="pos">The reading-position to set</param>
-/// <returns>Whether the reading position could be set</returns>
 bool kinc_file_reader_seek(kinc_file_reader_t *reader, size_t pos);
-
-/// <summary>
-/// Interprets four bytes starting at the provided pointer as a little-endian float.
-/// </summary>
 float kinc_read_f32le(uint8_t *data);
-
-/// <summary>
-/// Interprets four bytes starting at the provided pointer as a big-endian float.
-/// </summary>
 float kinc_read_f32be(uint8_t *data);
-
-/// <summary>
-/// Interprets eight bytes starting at the provided pointer as a little-endian uint64.
-/// </summary>
 uint64_t kinc_read_u64le(uint8_t *data);
-
-/// <summary>
-/// Interprets eight bytes starting at the provided pointer as a big-endian uint64.
-/// </summary>
 uint64_t kinc_read_u64be(uint8_t *data);
-
-/// <summary>
-/// Interprets eight bytes starting at the provided pointer as a little-endian int64.
-/// </summary>
 int64_t kinc_read_s64le(uint8_t *data);
-
-/// <summary>
-/// Interprets eight bytes starting at the provided pointer as a big-endian int64.
-/// </summary>
 int64_t kinc_read_s64be(uint8_t *data);
-
-/// <summary>
-/// Interprets four bytes starting at the provided pointer as a little-endian uint32.
-/// </summary>
 uint32_t kinc_read_u32le(uint8_t *data);
-
-/// <summary>
-/// Interprets four bytes starting at the provided pointer as a big-endian uint32.
-/// </summary>
 uint32_t kinc_read_u32be(uint8_t *data);
-
-/// <summary>
-/// Interprets four bytes starting at the provided pointer as a little-endian int32.
-/// </summary>
 int32_t kinc_read_s32le(uint8_t *data);
-
-/// <summary>
-/// Interprets four bytes starting at the provided pointer as a big-endian int32.
-/// </summary>
 int32_t kinc_read_s32be(uint8_t *data);
-
-/// <summary>
-/// Interprets two bytes starting at the provided pointer as a little-endian uint16.
-/// </summary>
 uint16_t kinc_read_u16le(uint8_t *data);
-
-/// <summary>
-/// Interprets two bytes starting at the provided pointer as a big-endian uint16.
-/// </summary>
 uint16_t kinc_read_u16be(uint8_t *data);
-
-/// <summary>
-/// Interprets two bytes starting at the provided pointer as a little-endian int16.
-/// </summary>
 int16_t kinc_read_s16le(uint8_t *data);
-
-/// <summary>
-/// Interprets two bytes starting at the provided pointer as a big-endian int16.
-/// </summary>
 int16_t kinc_read_s16be(uint8_t *data);
-
-/// <summary>
-/// Interprets one byte starting at the provided pointer as a uint8.
-/// </summary>
 uint8_t kinc_read_u8(uint8_t *data);
-
-/// <summary>
-/// Interprets one byte starting at the provided pointer as an int8.
-/// </summary>
 int8_t kinc_read_s8(uint8_t *data);
 
 void kinc_internal_set_files_location(char *dir);
@@ -579,8 +458,4 @@ int8_t kinc_read_s8(uint8_t *data) {
 	return *(int8_t *)data;
 }
 
-#endif
-
-#ifdef __cplusplus
-}
 #endif

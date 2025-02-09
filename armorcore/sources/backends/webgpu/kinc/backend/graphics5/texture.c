@@ -44,8 +44,6 @@ uint8_t *kinc_g5_texture_lock(kinc_g5_texture_t *texture) {
 
 void kinc_g5_texture_unlock(kinc_g5_texture_t *texture) {}
 
-void kinc_g5_texture_clear(kinc_g5_texture_t *texture, int x, int y, int z, int width, int height, int depth, unsigned color) {}
-
 int kinc_g5_texture_stride(kinc_g5_texture_t *texture) {
 	return 32;
 }

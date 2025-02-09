@@ -6,10 +6,6 @@
     \brief Provides 128bit eight-element signed 16-bit integer SIMD operations which are mapped to equivalent SSE2 or Neon operations.
 */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #if defined(KINC_SSE2)
 
 static inline kinc_int16x8_t kinc_int16x8_intrin_load(const int16_t *values) {
@@ -456,8 +452,4 @@ static inline kinc_int16x8_t kinc_int16x8_not(kinc_int16x8_t t) {
 	return value;
 }
 
-#endif
-
-#ifdef __cplusplus
-}
 #endif

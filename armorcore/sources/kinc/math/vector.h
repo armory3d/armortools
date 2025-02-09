@@ -6,10 +6,6 @@
     \brief Provides basic vector types.
 */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct kinc_vector2 {
 	float x;
 	float y;
@@ -27,7 +23,3 @@ typedef struct kinc_vector4 {
 	float z;
 	float w;
 } kinc_vector4_t;
-
-#ifdef __cplusplus
-}
-#endif

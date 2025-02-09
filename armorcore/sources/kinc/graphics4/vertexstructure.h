@@ -8,10 +8,6 @@
     \brief Provides functions for setting up the structure of vertices in a vertex-buffer.
 */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef enum kinc_g4_vertex_data {
 	KINC_G4_VERTEX_DATA_NONE = 0,
 	KINC_G4_VERTEX_DATA_F32_1X = 1,
@@ -51,16 +47,6 @@ typedef enum kinc_g4_vertex_data {
 	KINC_G4_VERTEX_DATA_U32_3X = 35,
 	KINC_G4_VERTEX_DATA_I32_4X = 36,
 	KINC_G4_VERTEX_DATA_U32_4X = 37,
-
-	// deprecated
-	KINC_G4_VERTEX_DATA_FLOAT1 = KINC_G4_VERTEX_DATA_F32_1X,
-	KINC_G4_VERTEX_DATA_FLOAT2 = KINC_G4_VERTEX_DATA_F32_2X,
-	KINC_G4_VERTEX_DATA_FLOAT3 = KINC_G4_VERTEX_DATA_F32_3X,
-	KINC_G4_VERTEX_DATA_FLOAT4 = KINC_G4_VERTEX_DATA_F32_4X,
-	KINC_G4_VERTEX_DATA_FLOAT4X4 = KINC_G4_VERTEX_DATA_F32_4X4,
-	KINC_G4_VERTEX_DATA_SHORT2_NORM = KINC_G4_VERTEX_DATA_I16_2X_NORMALIZED,
-	KINC_G4_VERTEX_DATA_SHORT4_NORM = KINC_G4_VERTEX_DATA_I16_4X_NORMALIZED,
-	KINC_G4_VERTEX_DATA_COLOR = KINC_G4_VERTEX_DATA_U8_4X_NORMALIZED
 } kinc_g4_vertex_data_t;
 
 static inline int kinc_g4_vertex_data_size(kinc_g4_vertex_data_t data) {
@@ -136,22 +122,5 @@ typedef struct kinc_g4_vertex_structure {
 	bool instanced;
 } kinc_g4_vertex_structure_t;
 
-/// <summary>
-/// Initializes a vertex-structure.
-/// </summary>
-/// <param name="structure">The structure to initialize</param>
-/// <returns></returns>
 void kinc_g4_vertex_structure_init(kinc_g4_vertex_structure_t *structure);
-
-/// <summary>
-/// Adds an element to a vertex-structure.
-/// </summary>
-/// <param name="structure">The structure to add an element to</param>
-/// <param name="name">The name to use for the new element</param>
-/// <param name="data">The type of data to assign for the new element</param>
-/// <returns></returns>
 void kinc_g4_vertex_structure_add(kinc_g4_vertex_structure_t *structure, const char *name, kinc_g4_vertex_data_t data);
-
-#ifdef __cplusplus
-}
-#endif

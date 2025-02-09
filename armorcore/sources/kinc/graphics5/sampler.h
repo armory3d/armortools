@@ -7,10 +7,6 @@
     \brief Provides functions for sampler objects.
 */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef enum kinc_g5_texture_addressing {
 	KINC_G5_TEXTURE_ADDRESSING_REPEAT,
 	KINC_G5_TEXTURE_ADDRESSING_MIRROR,
@@ -52,27 +48,6 @@ typedef struct kinc_g5_sampler {
 	kinc_g5_sampler_impl_t impl;
 } kinc_g5_sampler_t;
 
-/// <summary>
-/// Initializes the passed options-object with the default-options.
-/// </summary>
-/// <param name="options">The options-object for which the default-options will be set</param>
 void kinc_g5_sampler_options_set_defaults(kinc_g5_sampler_options_t *options);
-
-/// <summary>
-/// Creates a sampler-object.
-///
-/// On platforms such as older OpenGL not all sampler attributes may be available.
-/// </summary>
-/// <param name="sampler">Pointer to the sampler object to initialize</param>
-/// <param name="descriptor">Options for the sampler</param>
 void kinc_g5_sampler_init(kinc_g5_sampler_t *sampler, const kinc_g5_sampler_options_t *options);
-
-/// <summary>
-/// Destroys a sampler-object.
-/// </summary>
-/// <param name="sampler">The sampler-object to destroy</param>
 void kinc_g5_sampler_destroy(kinc_g5_sampler_t *sampler);
-
-#ifdef __cplusplus
-}
-#endif

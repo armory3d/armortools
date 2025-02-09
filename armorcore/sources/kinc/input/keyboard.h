@@ -6,10 +6,6 @@
     \brief Provides keyboard-support.
 */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define KINC_KEY_UNKNOWN 0
 #define KINC_KEY_BACK 1 // Android
 #define KINC_KEY_CANCEL 3
@@ -198,40 +194,11 @@ extern "C" {
 #define KINC_KEY_PA1 253
 #define KINC_KEY_WIN_OEM_CLEAR 254
 
-/// <summary>
-/// Show the keyboard if the system is using a software-keyboard.
-/// </summary>
 void kinc_keyboard_show(void);
-
-/// <summary>
-/// Hide the keyboard if the system is using a software-keyboard.
-/// </summary>
 void kinc_keyboard_hide(void);
-
-/// <summary>
-/// Figure out whether the keyboard is currently shown if the system is using a software-keyboard.
-/// </summary>
-/// <returns>Whether the keyboard is currently shown</returns>
 bool kinc_keyboard_active(void);
-
-/// <summary>
-/// Sets the keyboard-key-down-callback which is called with a key-code when a key goes down. Do not use this for text-input, that's what the key-press-callback
-/// is here for.
-/// </summary>
-/// <param name="value">The callback</param>
 void kinc_keyboard_set_key_down_callback(void (*value)(int /*key_code*/, void * /*data*/), void *data);
-
-/// <summary>
-/// Sets the keyboard-key-up-callback which is called with a key-code when a key goes up. Do not use this for text-input, that's what the key-press-callback is
-/// here for.
-/// </summary>
-/// <param name="value">The callback</param>
 void kinc_keyboard_set_key_up_callback(void (*value)(int /*key_code*/, void * /*data*/), void *data);
-
-/// <summary>
-/// Sets the keyboard-key-press-callback which is called when the system decides that a character came in via the keyboard. Use this for text-input.
-/// </summary>
-/// <param name="value">The callback</param>
 void kinc_keyboard_set_key_press_callback(void (*value)(unsigned /*character*/, void * /*data*/), void *data);
 
 void kinc_internal_keyboard_trigger_key_down(int key_code);
@@ -287,8 +254,4 @@ void kinc_internal_keyboard_trigger_key_press(unsigned character) {
 	}
 }
 
-#endif
-
-#ifdef __cplusplus
-}
 #endif

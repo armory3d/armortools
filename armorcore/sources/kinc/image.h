@@ -11,10 +11,6 @@
    texture-compression (see kinc_image_compression).
 */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef enum kinc_image_compression {
 	KINC_IMAGE_COMPRESSION_NONE,
 	KINC_IMAGE_COMPRESSION_DXT5,
@@ -49,83 +45,18 @@ typedef struct kinc_image_read_callbacks {
 	size_t (*size)(void *user_data);
 } kinc_image_read_callbacks_t;
 
-/// <summary>
-/// Creates a 2D kinc_image in the provided memory.
-/// </summary>
-/// <returns>The size that's occupied by the image in memory in bytes</returns>
 size_t kinc_image_init(kinc_image_t *image, void *memory, int width, int height, kinc_image_format_t format);
-
-/// <summary>
-/// Peeks into an image file and figures out the size it will occupy in memory.
-/// </summary>
-/// <returns>The memory size in bytes that will be used when loading the image</returns>
 size_t kinc_image_size_from_file(const char *filename);
-
-/// <summary>
-/// Peeks into an image that is loaded via callback functions and figures out the size it will occupy in memory.
-/// </summary>
-/// <returns>The memory size in bytes that will be used when loading the image</returns>
 size_t kinc_image_size_from_callbacks(kinc_image_read_callbacks_t callbacks, void *user_data, const char *format);
-
-/// <summary>
-/// Peeks into an image file that resides in memory and figures out the size it will occupy in memory once it is uncompressed.
-/// </summary>
-/// <param name="data">The encoded data</param>
-/// <param name="data_size">The size of the encoded data</param>
-/// <param name="format_hint">Something like "png" can help, it also works to just put in the filename</param>
-/// <returns>The memory size in bytes that will be used when loading the image</returns>
 size_t kinc_image_size_from_encoded_bytes(void *data, size_t data_size, const char *format_hint);
-
-/// <summary>
-/// Loads an image from a file.
-/// </summary>
-/// <returns>The memory size in bytes that will be used when loading the image</returns>
 size_t kinc_image_init_from_file(kinc_image_t *image, void *memory, const char *filename);
-
-/// <summary>
-/// Loads an image file using callbacks.
-/// </summary>
-/// <returns>The memory size in bytes that will be used when loading the image</returns>
 size_t kinc_image_init_from_callbacks(kinc_image_t *image, void *memory, kinc_image_read_callbacks_t callbacks, void *user_data, const char *format);
-
-/// <summary>
-/// Loads an image file from a memory.
-/// </summary>
-/// <returns>The memory size in bytes that will be used when loading the image</returns>
 size_t kinc_image_init_from_encoded_bytes(kinc_image_t *image, void *memory, void *data, size_t data_size, const char *format);
-
-/// <summary>
-/// Creates a 2D image from memory.
-/// </summary>
 void kinc_image_init_from_bytes(kinc_image_t *image, void *data, int width, int height, kinc_image_format_t format);
-
-/// <summary>
-/// Destroys an image. This does not free the user-provided memory.
-/// </summary>
 void kinc_image_destroy(kinc_image_t *image);
-
-/// <summary>
-/// Gets the color value of a 32 bit pixel. If this doesn't fit the format of the image please use kinc_image_at_raw instead.
-/// </summary>
-/// <returns>One 32 bit color value</returns>
 uint32_t kinc_image_at(kinc_image_t *image, int x, int y);
-
-/// <summary>
-/// Gets a pointer to the color-data of one pixel.
-/// </summary>
-/// <returns>A pointer to the color-data of the pixel pointed to by x and y</returns>
 void *kinc_image_at_raw(kinc_image_t *image, int x, int y);
-
-/// <summary>
-/// Provides access to the image data.
-/// </summary>
-/// <returns>A pointer to the image data</returns>
 uint8_t *kinc_image_get_pixels(kinc_image_t *image);
-
-/// <summary>
-/// Gets the size in bytes of a single pixel for a given image format.
-/// </summary>
-/// <returns>The size of one pixel in bytes</returns>
 int kinc_image_format_sizeof(kinc_image_format_t format);
 
 #ifdef KINC_IMPLEMENTATION_ROOT
@@ -364,36 +295,6 @@ static bool loadImage(kinc_image_read_callbacks_t callbacks, void *user_data, co
 			*internalFormat = (blockdim_x << 8) + blockdim_y;
 
 			return true;
-
-			/*int index = 0;
-			index += 4; // magic
-			u8 blockdim_x = astcdata[index++];
-			u8 blockdim_y = astcdata[index++];
-			++index; // blockdim_z
-			internalFormat = (blockdim_x << 8) + blockdim_y;
-			u8 xsize[4];
-			xsize[0] = astcdata[index++];
-			xsize[1] = astcdata[index++];
-			xsize[2] = astcdata[index++];
-			xsize[3] = 0;
-			this->width = *(unsigned*)&xsize[0];
-			u8 ysize[4];
-			ysize[0] = astcdata[index++];
-			ysize[1] = astcdata[index++];
-			ysize[2] = astcdata[index++];
-			ysize[3] = 0;
-			this->height = *(unsigned*)&ysize[0];
-			u8 zsize[3];
-			zsize[0] = astcdata[index++];
-			zsize[1] = astcdata[index++];
-			zsize[2] = astcdata[index++];
-			u8* all = (u8*)astcdata[index];
-			dataSize -= 16;
-			this->data = new u8[dataSize];
-			for (int i = 0; i < dataSize; ++i) {
-			data[i] = all[16 + i];
-			}
-			free(astcdata);*/
 		}
 		else if (strcmp(fourcc, "DXT5") == 0) {
 			*compression = KINC_IMAGE_COMPRESSION_DXT5;
@@ -545,10 +446,6 @@ int kinc_image_format_sizeof(kinc_image_format_t format) {
 	}
 	return -1;
 }
-
-// static bool formatIsFloatingPoint(kinc_image_format_t format) {
-//	return format == KINC_IMAGE_FORMAT_RGBA128 || format == KINC_IMAGE_FORMAT_RGBA64 || format == KINC_IMAGE_FORMAT_A32 || format == KINC_IMAGE_FORMAT_A16;
-//}
 
 size_t kinc_image_init(kinc_image_t *image, void *memory, int width, int height, kinc_image_format_t format) {
 	image->width = width;
@@ -720,8 +617,4 @@ uint8_t *kinc_image_get_pixels(kinc_image_t *image) {
 	return (uint8_t *)image->data;
 }
 
-#endif
-
-#ifdef __cplusplus
-}
 #endif

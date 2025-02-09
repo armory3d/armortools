@@ -8,14 +8,6 @@
     \brief Provides the constant_location-struct which is used for setting constants/uniforms in a shader.
 */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct kinc_g5_constant_location {
 	ConstantLocation5Impl impl;
 } kinc_g5_constant_location_t;
-
-#ifdef __cplusplus
-}
-#endif

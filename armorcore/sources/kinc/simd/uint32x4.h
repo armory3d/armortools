@@ -6,10 +6,6 @@
     \brief Provides 128bit four-element unsigned 32-bit integer SIMD operations which are mapped to equivalent SSE2 or Neon operations.
 */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #if defined(KINC_SSE2)
 
 static inline kinc_uint32x4_t kinc_uint32x4_intrin_load(const uint32_t *values) {
@@ -410,8 +406,4 @@ static inline kinc_uint32x4_t kinc_uint32x4_shift_right(kinc_uint32x4_t t, const
 	return value;
 }
 
-#endif
-
-#ifdef __cplusplus
-}
 #endif

@@ -406,8 +406,6 @@ void kinc_g5_texture_unlock(struct kinc_g5_texture *texture) {
 	texture->impl.uploadImage->Unmap(0, NULL);
 }
 
-void kinc_g5_texture_clear(kinc_g5_texture_t *texture, int x, int y, int z, int width, int height, int depth, unsigned color) {}
-
 int kinc_g5_texture_stride(struct kinc_g5_texture *texture) {
 	/*int baseStride = texture->format == KINC_IMAGE_FORMAT_RGBA32 ? (texture->texWidth * 4) : texture->texWidth;
 	if (texture->format == KINC_IMAGE_FORMAT_GREY8) return texture->texWidth; // please investigate further

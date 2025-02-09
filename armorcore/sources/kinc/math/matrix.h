@@ -8,10 +8,6 @@
    more complete matrix-API.
 */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef union kinc_matrix3x3 {
 	float m[3 * 3];
 	struct {
@@ -220,8 +216,4 @@ kinc_matrix4x4_t kinc_matrix4x4_multiply(kinc_matrix4x4_t *a, kinc_matrix4x4_t *
 	return result;
 }
 
-#endif
-
-#ifdef __cplusplus
-}
 #endif

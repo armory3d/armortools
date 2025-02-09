@@ -7,10 +7,6 @@
     \brief Provides 128bit four-element floating point SIMD operations which are mapped to equivalent SSE or Neon operations.
 */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #if defined(KINC_SSE)
 
 static inline kinc_float32x4_t kinc_float32x4_intrin_load(const float *values) {
@@ -712,8 +708,4 @@ static inline kinc_float32x4_t kinc_float32x4_shuffle_ghcd(kinc_float32x4_t abcd
 	return value;
 }
 
-#endif
-
-#ifdef __cplusplus
-}
 #endif

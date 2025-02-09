@@ -8,10 +8,6 @@
     \brief Provides type casts and type conversions between all 128bit SIMD types
 */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #if defined(KINC_SSE2)
 
 // Float32x4 ----> Other
@@ -794,7 +790,3 @@ static inline kinc_int8x16_t kinc_uint8x16_cast_to_int8x16(kinc_uint8x16_t t) {
 }
 
 #endif // KINC_SSE || KINC_NOSIMD
-
-#ifdef __cplusplus
-}
-#endif

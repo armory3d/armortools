@@ -6,10 +6,6 @@
     \brief Provides low-level network-communication via UDP or TCP-sockets.
 */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef enum kinc_socket_protocol { KINC_SOCKET_PROTOCOL_UDP, KINC_SOCKET_PROTOCOL_TCP } kinc_socket_protocol_t;
 
 typedef enum kinc_socket_family { KINC_SOCKET_FAMILY_IP4, KINC_SOCKET_FAMILY_IP6 } kinc_socket_family_t;
@@ -45,57 +41,11 @@ typedef struct kinc_socket_options {
 	bool tcp_no_delay;
 } kinc_socket_options_t;
 
-/// <summary>
-/// Initializes a socket-options-object to the default options
-/// </summary>
-/// <param name="options">The new default options</param>
 void kinc_socket_options_set_defaults(kinc_socket_options_t *options);
-
-/// <summary>
-/// Initializes a socket-object. To set the host and port use kinc_socket_set.
-/// Host will be localhost
-/// Port will be 8080
-/// Family will be IPv4
-/// Protocol will be TCP
-/// </summary>
-/// <param name="socket">The socket to initialize</param>
 void kinc_socket_init(kinc_socket_t *socket);
-
-/// <summary>
-/// Sets the sockets properties.
-/// </summary>
-/// <param name="socket">The socket-object to use</param>
-/// <param name="host">The host to use as IP or URL</param>
-/// <param name="port">The port to use</param>
-/// <param name="family">The IP-family to use</param>
-/// <param name="protocol">The protocol to use</param>
-/// <returns>Whether the socket was set correctly</returns>
 bool kinc_socket_set(kinc_socket_t *socket, const char *host, int port, kinc_socket_family_t family, kinc_socket_protocol_t protocol);
-
-/// <summary>
-/// Destroys a socket-object.
-/// </summary>
-/// <param name="socket">The socket to destroy</param>
 void kinc_socket_destroy(kinc_socket_t *socket);
-
-/// <summary>
-/// Opens a socket-connection.
-/// </summary>
-/// <param name="socket">The socket-object to use</param>
-/// <param name="protocol">The protocol to use</param>
-/// <param name="port">The port to use</param>
-/// <param name="options">The options to use</param>
-/// <returns>Whether the socket-connection could be opened</returns>
 bool kinc_socket_open(kinc_socket_t *socket, kinc_socket_options_t *options);
-
-/// <summary>
-/// For use with non-blocking sockets to try to see if we are connected.
-/// </summary>
-/// <param name="socket">The socket-object to use</param>
-/// <param name="waittime">The amount of time in seconds the select function will timeout.</param>
-/// <param name="read">Check if the socket is ready to be read from.</param>
-/// <param name="write">Check if the socket is ready to be written to.</param>
-/// <returns>Whether the socket-connection can read or write or checks both.</returns>
 bool kinc_socket_select(kinc_socket_t *socket, uint32_t waittime, bool read, bool write);
 
 /*Typically these are server actions.*/
@@ -111,12 +61,6 @@ int kinc_socket_send_address(kinc_socket_t *socket, unsigned address, int port, 
 int kinc_socket_send_url(kinc_socket_t *socket, const char *url, int port, const uint8_t *data, int size);
 int kinc_socket_receive(kinc_socket_t *socket, uint8_t *data, int maxSize, unsigned *from_address, unsigned *from_port);
 
-/// <summary>
-/// Resolves a DNS-entry to an IP and returns its integer representation.
-/// </summary>
-/// <param name="url"></param>
-/// <param name="port"></param>
-/// <returns></returns>
 unsigned kinc_url_to_int(const char *url, int port);
 
 #ifdef KINC_IMPLEMENTATION_NETWORK
@@ -658,8 +602,4 @@ unsigned kinc_url_to_int(const char *url, int port) {
 #endif
 }
 
-#endif
-
-#ifdef __cplusplus
-}
 #endif
