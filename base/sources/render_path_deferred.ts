@@ -144,12 +144,6 @@ function render_path_deferred_init() {
 	render_path_load_shader("shader_datas/supersample_resolve/supersample_resolve");
 	// render_path_load_shader("shader_datas/motion_blur_pass/motion_blur_pass");
 	// render_path_load_shader("shader_datas/motion_blur_veloc_pass/motion_blur_veloc_pass");
-	///if arm_voxels
-	{
-		render_path_base_init_voxels();
-		render_path_load_shader("shader_datas/deferred_light/deferred_light_voxel");
-	}
-	///end
 
 	render_path_paint_init();
 
@@ -169,9 +163,6 @@ function render_path_deferred_commands() {
 
 function render_path_deferred_draw_deferred() {
 	render_path_base_draw_ssao();
-	///if arm_voxels
-	render_path_base_draw_voxels();
-	///end
 	render_path_base_draw_deferred_light();
 	render_path_base_draw_bloom("tex");
 	// draw_motion_blur();

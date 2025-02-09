@@ -43,31 +43,10 @@ function make_material_parse_mesh_material() {
 
 	context_raw.ddirty = 2;
 
-	///if arm_voxels
-	make_material_make_voxel(m);
-	///end
-
 	///if (arm_direct3d12 || arm_vulkan)
 	render_path_raytrace_dirty = 1;
 	///end
 }
-
-///if arm_voxels
-function make_material_make_voxel(m: material_data_t) {
-	let rebuild: bool = true; // height_used;
-	if (config_raw.rp_gi != false && rebuild) {
-		let scon: shader_context_t = null;
-		for (let i: i32 = 0; i < m._.shader._.contexts.length; ++i) {
-			let c: shader_context_t = m._.shader._.contexts[i];
-			if (c.name == "voxel") {
-				scon = c;
-				break;
-			}
-		}
-		if (scon != null) make_voxel_run(scon);
-	}
-}
-///end
 
 function make_material_parse_paint_material() {
 	let m: material_data_t = project_material_data;
@@ -130,11 +109,6 @@ function make_material_parse_paint_material() {
 function make_material_get_displace_strength(): f32 {
 	let sc: vec4_t = context_main_object().base.transform.scale;
 	return config_raw.displace_strength * 0.02 * sc.x;
-}
-
-function make_material_voxelgi_half_extents(): string {
-	let ext: i32 = context_raw.vxao_ext;
-	return "const vec3 voxelgi_half_extents = vec3(" + ext + ", " + ext + ", " + ext + ");";
 }
 
 function make_material_delete_context(c: shader_context_t) {

@@ -61,11 +61,6 @@ function shader_data_get_context(raw: shader_data_t, name: string): shader_conte
 
 function shader_context_create(raw: shader_context_t): shader_context_t {
 	raw._ = {};
-	///if (!arm_voxels)
-	if (raw.name == "voxel") {
-		return raw;
-	}
-	///end
 	shader_context_parse_vertex_struct(raw);
 	return shader_context_compile(raw);
 }

@@ -3,7 +3,6 @@ let render_path_paint_live_layer: slot_layer_t = null;
 let render_path_paint_live_layer_drawn: i32 = 0;
 let render_path_paint_live_layer_locked: bool = false;
 let render_path_paint_dilated: bool = true;
-let render_path_paint_init_voxels: bool = true; // Bake AO
 let render_path_paint_push_undo_last: bool;
 let render_path_paint_painto: mesh_object_t = null;
 let render_path_paint_planeo: mesh_object_t = null;
@@ -253,23 +252,6 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 			}
 		}
 		else {
-			///if arm_voxels
-			if (context_raw.tool == workspace_tool_t.BAKE && context_raw.bake_type == bake_type_t.AO) {
-				if (render_path_paint_init_voxels) {
-					render_path_paint_init_voxels = false;
-					let _rp_gi: bool = config_raw.rp_gi;
-					config_raw.rp_gi = true;
-					render_path_base_init_voxels();
-					config_raw.rp_gi = _rp_gi;
-				}
-				render_path_clear_image("voxels", 0x00000000);
-				render_path_set_target("");
-				render_path_set_viewport(256, 256);
-				render_path_bind_target("voxels", "voxels");
-				render_path_draw_meshes("voxel");
-				render_path_gen_mipmaps("voxels");
-			}
-			///end
 
 			let texpaint: string = "texpaint" + tid;
 			if (context_raw.tool == workspace_tool_t.BAKE && context_raw.brush_time == time_delta()) {
@@ -303,11 +285,6 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 				render_path_bind_target("gbuffer0", "gbuffer0");
 			}
 			render_path_bind_target("texpaint_blend1", "paintmask");
-			///if arm_voxels
-			if (context_raw.tool == workspace_tool_t.BAKE && context_raw.bake_type == bake_type_t.AO) {
-				render_path_bind_target("voxels", "voxels");
-			}
-			///end
 			if (context_raw.colorid_picked) {
 				render_path_bind_target("texpaint_colorid", "texpaint_colorid");
 			}

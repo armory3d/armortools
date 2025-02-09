@@ -1,37 +1,6 @@
 
 function make_bake_run(con: node_shader_context_t, vert: node_shader_t, frag: node_shader_t) {
 	if (context_raw.bake_type == bake_type_t.AO) { // Voxel
-		///if arm_voxels
-		// Apply normal channel
-		frag.wposition = true;
-		frag.n = true;
-		frag.vvec = true;
-		node_shader_add_function(frag, str_cotangent_frame);
-		///if arm_direct3d11
-		node_shader_write(frag, "mat3 TBN = cotangent_frame(n, vvec, tex_coord);");
-		///else
-		node_shader_write(frag, "mat3 TBN = cotangent_frame(n, -vvec, tex_coord);");
-		///end
-		node_shader_write(frag, "n = nortan * 2.0 - 1.0;");
-		node_shader_write(frag, "n.y = -n.y;");
-		node_shader_write(frag, "n = normalize(mul(n, TBN));");
-
-		node_shader_write(frag, make_material_voxelgi_half_extents());
-		node_shader_write(frag, "vec3 voxpos = wposition / voxelgi_half_extents;");
-		node_shader_add_uniform(frag, "sampler3D voxels");
-		node_shader_add_function(frag, str_trace_ao);
-		frag.n = true;
-		let strength: f32 = context_raw.bake_ao_strength;
-		let radius: f32 = context_raw.bake_ao_radius;
-		let offset: f32 = context_raw.bake_ao_offset;
-		node_shader_write(frag, "float ao = trace_ao(voxpos, n, " + radius + ", " + offset + ") * " + strength + ";");
-		if (context_raw.bake_axis != bake_axis_t.XYZ) {
-			let axis: string = make_bake_axis_string(context_raw.bake_axis);
-			node_shader_write(frag, "ao *= dot(n, " + axis + ");");
-		}
-		node_shader_write(frag, "ao = 1.0 - ao;");
-		node_shader_write(frag, "frag_color[0] = vec4(ao, ao, ao, 1.0);");
-		///end
 	}
 	else if (context_raw.bake_type == bake_type_t.CURVATURE) {
 		let pass: bool = parser_material_bake_passthrough;

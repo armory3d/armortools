@@ -92,10 +92,6 @@ function scene_set_active(scene_name: string): object_t {
 		scene_remove();
 	}
 
-	///if arm_voxels // Revoxelize
-	_render_path_voxelized = 0;
-	///end
-
 	let format: scene_t = data_get_scene_raw(scene_name);
 	let o: object_t = scene_create(format);
 	return o;

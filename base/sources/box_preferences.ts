@@ -603,35 +603,6 @@ function box_preferences_show() {
 			}
 
 			if (context_raw.render_mode == render_mode_t.DEFERRED) {
-				///if arm_voxels
-				ui_check(context_raw.hvxao, tr("Voxel AO"));
-				if (ui.is_hovered) {
-					ui_tooltip(tr("Cone-traced AO and shadows"));
-				}
-				if (context_raw.hvxao.changed) {
-					config_apply();
-				}
-
-				ui.enabled = context_raw.hvxao.selected;
-				let h: ui_handle_t = ui_handle(__ID__);
-				if (h.init) {
-					h.value = context_raw.vxao_offset;
-				}
-				context_raw.vxao_offset = ui_slider(h, tr("Cone Offset"), 1.0, 4.0, true);
-				if (h.changed) {
-					context_raw.ddirty = 2;
-				}
-				h = ui_handle(__ID__);
-				if (h.init) {
-					h.value = context_raw.vxao_aperture;
-				}
-				context_raw.vxao_aperture = ui_slider(h, tr("Aperture"), 1.0, 4.0, true);
-				if (h.changed) {
-					context_raw.ddirty = 2;
-				}
-				ui.enabled = true;
-				///end
-
 				ui_check(context_raw.hssao, tr("SSAO"));
 				if (context_raw.hssao.changed) {
 					config_apply();

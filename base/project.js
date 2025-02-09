@@ -8,7 +8,6 @@ flags.metal = os_argv().indexOf("metal") >= 0;
 flags.raytrace = flags.d3d12 || flags.vulkan || flags.metal;
 flags.embed = os_argv().indexOf("--embed") >= 0; // os_argv().indexOf("--debug") == -1; // clang 19
 flags.physics = os_argv().indexOf("--debug") == -1;
-flags.voxels = !flags.raytrace && !flags.android && !flags.ios;
 
 flags.with_d3dcompiler = true;
 flags.with_nfd = true;
@@ -101,17 +100,6 @@ if (flags.raytrace) {
 	}
 	else if (flags.metal) {
 		project.add_assets("shaders/raytrace/*.metal", { destination: "data/{name}" });
-	}
-}
-
-if (flags.voxels) {
-	project.add_define("arm_voxels");
-
-	if (platform === "windows") {
-		project.add_assets("shaders/voxel_hlsl/*.d3d11", { destination: "data/{name}" });
-	}
-	else {
-		project.add_shaders("shaders/voxel_glsl/*.glsl", { noprocessing: true });
 	}
 }
 

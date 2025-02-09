@@ -58,13 +58,6 @@ function render_path_ready(): bool {
 	return _render_path_loading == 0;
 }
 
-///if arm_voxels
-let _render_path_voxelized: i32 = 0;
-function render_path_voxelize(): bool { // Returns true if scene should be voxelized
-	return ++_render_path_voxelized > 2 ? false : true;
-}
-///end
-
 function render_path_render_frame() {
 	if (!render_path_ready() ||_render_path_paused || app_w() == 0 || app_h() == 0) {
 		return;

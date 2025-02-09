@@ -144,9 +144,6 @@ function mesh_object_cull_mesh(raw: mesh_object_t, context: string, camera: came
 			radius_scale *= 1000;
 		}
 		///end
-		if (context == "voxel") {
-			radius_scale *= 100;
-		}
 		if (raw.data._.instanced) {
 			radius_scale *= 100;
 		}

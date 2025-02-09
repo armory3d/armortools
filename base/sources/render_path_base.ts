@@ -6,38 +6,12 @@ let render_path_base_last_y: f32 = -1.0;
 let render_path_base_bloom_mipmaps: render_target_t[];
 let render_path_base_bloom_current_mip: i32 = 0;
 let render_path_base_bloom_sample_scale: f32;
-///if arm_voxels
-let render_path_base_voxels_res: i32 = 256;
-let render_path_base_voxels_created: bool = false;
-///end
 
 function render_path_base_init() {
 	pipes_init();
 	const_data_create_screen_aligned_data();
 	render_path_base_super_sample = config_raw.rp_supersample;
 }
-
-///if arm_voxels
-function render_path_base_init_voxels(target_name: string = "voxels") {
-	if (config_raw.rp_gi != true || render_path_base_voxels_created) {
-		return;
-	}
-
-	render_path_base_voxels_created = true;
-
-	{
-		let t: render_target_t = render_target_create();
-		t.name = target_name;
-		t.format = "R8";
-		t.width = render_path_base_voxels_res;
-		t.height = render_path_base_voxels_res;
-		t.depth = render_path_base_voxels_res;
-		t.is_image = true;
-		t.mipmaps = true;
-		render_path_create_render_target(t);
-	}
-}
-///end
 
 function render_path_base_apply_config() {
 	if (render_path_base_super_sample != config_raw.rp_supersample) {
@@ -51,11 +25,6 @@ function render_path_base_apply_config() {
 		}
 		render_path_resize();
 	}
-	///if arm_voxels
-	if (!render_path_base_voxels_created) {
-		render_path_base_init_voxels();
-	}
-	///end
 }
 
 function render_path_base_get_super_sampling(): f32 {
@@ -254,26 +223,6 @@ function render_path_base_draw_split(draw_commands: ()=>void) {
 	}
 }
 
-///if arm_voxels
-function render_path_base_draw_voxels() {
-	if (config_raw.rp_gi != false) {
-		let voxelize: bool = context_raw.ddirty > 0 && render_path_base_taa_frame > 0;
-		if (voxelize) {
-			render_path_clear_image("voxels", 0x00000000);
-			render_path_set_target("");
-			render_path_set_viewport(render_path_base_voxels_res, render_path_base_voxels_res);
-			render_path_bind_target("voxels", "voxels");
-			if (make_material_height_used) {
-				let tid: i32 = 0; // layers[0].id;
-				render_path_bind_target("texpaint_pack" + tid, "texpaint_pack");
-			}
-			render_path_draw_meshes("voxel");
-			render_path_gen_mipmaps("voxels");
-		}
-	}
-}
-///end
-
 function render_path_base_init_ssao() {
 	{
 		let t: render_target_t = render_target_create();
@@ -335,17 +284,8 @@ function render_path_base_draw_deferred_light() {
 		render_path_bind_target("empty_white", "ssaotex");
 	}
 
-	let voxelao_pass: bool = false;
-	///if arm_voxels
-	if (config_raw.rp_gi != false) {
-		voxelao_pass = true;
-		render_path_bind_target("voxels", "voxels");
-	}
-	///end
 
-	voxelao_pass ?
-		render_path_draw_shader("shader_datas/deferred_light/deferred_light_voxel") :
-		render_path_draw_shader("shader_datas/deferred_light/deferred_light");
+	render_path_draw_shader("shader_datas/deferred_light/deferred_light");
 
 	render_path_set_depth_from("tex", "gbuffer0"); // Bind depth for world pass
 
