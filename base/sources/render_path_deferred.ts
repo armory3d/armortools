@@ -37,9 +37,6 @@ function render_path_deferred_init() {
 		t.height = 0;
 		t.format = "RGBA64";
 		t.scale = render_path_base_get_super_sampling();
-		///if arm_opengl
-		t.depth_buffer = "main";
-		///end
 		render_path_create_render_target(t);
 	}
 	{

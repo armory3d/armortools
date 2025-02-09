@@ -178,11 +178,7 @@ function export_arm_run_project() {
 	let mesh_icon: image_t = image_create_render_target(256, 256);
 	let r: f32 = app_w() / app_h();
 	g2_begin(mesh_icon);
-	///if arm_opengl
-	g2_draw_scaled_image(tex, -(256 * r - 256) / 2, 256, 256 * r, -256);
-	///else
 	g2_draw_scaled_image(tex, -(256 * r - 256) / 2, 0, 256 * r, 256);
-	///end
 	g2_end();
 
 	///if arm_metal

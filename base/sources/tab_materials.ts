@@ -102,10 +102,6 @@ function tab_materials_draw_slots(mini: bool) {
 				}
 			}
 
-			///if arm_opengl
-			ui.image_invert_y = project_materials[i].preview_ready;
-			///end
-
 			// Draw material icon
 			let uix: f32 = ui._x;
 			let uiy: f32 = ui._y;
@@ -294,10 +290,6 @@ function tab_materials_draw_slots(mini: bool) {
 		}
 
 		ui._y += mini ? 0 : 6;
-
-		///if arm_opengl
-		ui.image_invert_y = false; // Material preview
-		///end
 	}
 
 	let in_focus: bool = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&

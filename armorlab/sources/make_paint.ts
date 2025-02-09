@@ -51,7 +51,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		node_shader_add_uniform(frag, "vec2 gbuffer_size", "_gbuffer_size");
 		node_shader_add_uniform(frag, "vec4 inp", "_input_brush");
 
-		///if (arm_direct3d11 || arm_direct3d12 || arm_metal || arm_vulkan)
+		///if (arm_direct3d12 || arm_metal || arm_vulkan)
 		node_shader_write(frag, "vec2 tex_coord_inp = texelFetch(gbuffer2, ivec2(inp.x * gbuffer_size.x, inp.y * gbuffer_size.y), 0).ba;");
 		///else
 		node_shader_write(frag, "vec2 tex_coord_inp = texelFetch(gbuffer2, ivec2(inp.x * gbuffer_size.x, (1.0 - inp.y) * gbuffer_size.y), 0).ba;");
@@ -71,7 +71,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		return con_paint;
 	}
 
-	///if (arm_direct3d11 || arm_direct3d12 || arm_metal || arm_vulkan)
+	///if (arm_direct3d12 || arm_metal || arm_vulkan)
 	node_shader_write(vert, "vec2 tpos = vec2(tex.x * 2.0 - 1.0, (1.0 - tex.y) * 2.0 - 1.0);");
 	// node_shader_write(vert, "vec2 tpos = vec2(frac(tex.x * tex_scale) * 2.0 - 1.0, (1.0 - frac(tex.y * tex_scale)) * 2.0 - 1.0);"); // 3D View
 	///else
@@ -111,7 +111,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 
 		node_shader_write(frag, "float dist = 0.0;");
 
-		///if (arm_direct3d11 || arm_direct3d12 || arm_metal || arm_vulkan)
+		///if (arm_direct3d12 || arm_metal || arm_vulkan)
 		node_shader_write(frag, "float depth = textureLod(gbufferD, inp.xy, 0.0).r;");
 		///else
 		node_shader_write(frag, "float depth = textureLod(gbufferD, vec2(inp.x, 1.0 - inp.y), 0.0).r;");
@@ -123,7 +123,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		node_shader_write(frag, "winp.xyz /= winp.w;");
 		frag.wposition = true;
 
-		///if (arm_direct3d11 || arm_direct3d12 || arm_metal || arm_vulkan)
+		///if (arm_direct3d12 || arm_metal || arm_vulkan)
 		node_shader_write(frag, "float depthlast = textureLod(gbufferD, inplast.xy, 0.0).r;");
 		///else
 		node_shader_write(frag, "float depthlast = textureLod(gbufferD, vec2(inplast.x, 1.0 - inplast.y), 0.0).r;");
@@ -157,7 +157,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 
 		if (context_raw.tool == workspace_tool_t.CLONE) {
 			// node_shader_add_uniform(frag, "vec2 clone_delta", "_clone_delta");
-			// ///if (arm_direct3d11 || arm_direct3d12 || arm_metal || arm_vulkan)
+			// ///if (arm_direct3d12 || arm_metal || arm_vulkan)
 			// node_shader_write(frag, "vec2 tex_coord_inp = texelFetch(gbuffer2, ivec2((sp.xy + clone_delta) * gbuffer_size), 0).ba;");
 			// ///else
 			// node_shader_write(frag, "vec2 tex_coord_inp = texelFetch(gbuffer2, ivec2((sp.x + clone_delta.x) * gbuffer_size.x, (1.0 - (sp.y + clone_delta.y)) * gbuffer_size.y), 0).ba;");
@@ -181,7 +181,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 			// node_shader_write(frag, "float opacity = mat_opacity * brush_opacity;");
 		}
 		else { // Blur
-			// ///if (arm_direct3d11 || arm_direct3d12 || arm_metal || arm_vulkan)
+			// ///if (arm_direct3d12 || arm_metal || arm_vulkan)
 			// node_shader_write(frag, "vec2 tex_coord_inp = texelFetch(gbuffer2, ivec2(sp.x * gbuffer_size.x, sp.y * gbuffer_size.y), 0).ba;");
 			// ///else
 			// node_shader_write(frag, "vec2 tex_coord_inp = texelFetch(gbuffer2, ivec2(sp.x * gbuffer_size.x, (1.0 - sp.y) * gbuffer_size.y), 0).ba;");
@@ -199,7 +199,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 			// node_shader_add_uniform(frag, "vec2 texpaint_size", "_texpaint_size");
 			// node_shader_write(frag, "float blur_step = 1.0 / texpaint_size.x;");
 			// if (context_raw.blur_directional) {
-			// 	///if (arm_direct3d11 || arm_direct3d12 || arm_metal)
+			// 	///if (arm_direct3d12 || arm_metal)
 			// 	node_shader_write(frag, "const float blur_weight[7] = {1.0 / 28.0, 2.0 / 28.0, 3.0 / 28.0, 4.0 / 28.0, 5.0 / 28.0, 6.0 / 28.0, 7.0 / 28.0};");
 			// 	///else
 			// 	node_shader_write(frag, "const float blur_weight[7] = float[](1.0 / 28.0, 2.0 / 28.0, 3.0 / 28.0, 4.0 / 28.0, 5.0 / 28.0, 6.0 / 28.0, 7.0 / 28.0);");
@@ -207,7 +207,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 			// 	node_shader_add_uniform(frag, "vec3 brush_direction", "_brush_direction");
 			// 	node_shader_write(frag, "vec2 blur_direction = brush_direction.yx;");
 			// 	node_shader_write(frag, "for (int i = 0; i < 7; ++i) {");
-			// 	///if (arm_direct3d11 || arm_direct3d12 || arm_metal || arm_vulkan)
+			// 	///if (arm_direct3d12 || arm_metal || arm_vulkan)
 			// 	node_shader_write(frag, "vec2 tex_coord_inp2 = texelFetch(gbuffer2, ivec2((sp.x + blur_direction.x * blur_step * float(i)) * gbuffer_size.x, (sp.y + blur_direction.y * blur_step * float(i)) * gbuffer_size.y), 0).ba;");
 			// 	///else
 			// 	node_shader_write(frag, "vec2 tex_coord_inp2 = texelFetch(gbuffer2, ivec2((sp.x + blur_direction.x * blur_step * float(i)) * gbuffer_size.x, (1.0 - (sp.y + blur_direction.y * blur_step * float(i))) * gbuffer_size.y), 0).ba;");
@@ -224,7 +224,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 			// 	node_shader_write(frag, "}");
 			// }
 			// else {
-			// 	///if (arm_direct3d11 || arm_direct3d12 || arm_metal)
+			// 	///if (arm_direct3d12 || arm_metal)
 			// 	node_shader_write(frag, "const float blur_weight[15] = {0.034619 / 2.0, 0.044859 / 2.0, 0.055857 / 2.0, 0.066833 / 2.0, 0.076841 / 2.0, 0.084894 / 2.0, 0.090126 / 2.0, 0.09194 / 2.0, 0.090126 / 2.0, 0.084894 / 2.0, 0.076841 / 2.0, 0.066833 / 2.0, 0.055857 / 2.0, 0.044859 / 2.0, 0.034619 / 2.0};");
 			// 	///else
 			// 	node_shader_write(frag, "const float blur_weight[15] = float[](0.034619 / 2.0, 0.044859 / 2.0, 0.055857 / 2.0, 0.066833 / 2.0, 0.076841 / 2.0, 0.084894 / 2.0, 0.090126 / 2.0, 0.09194 / 2.0, 0.090126 / 2.0, 0.084894 / 2.0, 0.076841 / 2.0, 0.066833 / 2.0, 0.055857 / 2.0, 0.044859 / 2.0, 0.034619 / 2.0);");
@@ -266,7 +266,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	// Manual blending to preserve memory
 	frag.wvpposition = true;
 	node_shader_write(frag, "vec2 sample_tc = vec2(wvpposition.xy / wvpposition.w) * 0.5 + 0.5;");
-	///if (arm_direct3d11 || arm_direct3d12 || arm_metal || arm_vulkan)
+	///if (arm_direct3d12 || arm_metal || arm_vulkan)
 	node_shader_write(frag, "sample_tc.y = 1.0 - sample_tc.y;");
 	///end
 	node_shader_add_uniform(frag, "sampler2D paintmask");

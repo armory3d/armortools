@@ -24,16 +24,12 @@ function strings_asset_already_imported(): string {
 }
 
 function strings_graphics_api(): string {
-	///if arm_direct3d11
-	return "Direct3D11";
-	///elseif arm_direct3d12
+	///if arm_direct3d12
 	return "Direct3D12";
 	///elseif arm_metal
 	return "Metal";
-	///elseif arm_vulkan
-	return "Vulkan";
 	///else
-	return "OpenGL";
+	return "Vulkan";
 	///end
 }
 

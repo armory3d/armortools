@@ -1101,18 +1101,11 @@ function ui_nodes_render() {
 				let tx: f32 = ui_nodes_ww - tw - 8 * ui_SCALE(ui_nodes_ui);
 				let ty: f32 = ui_nodes_wh - th - 8 * ui_SCALE(ui_nodes_ui);
 
-				///if arm_opengl
-				let invert_y: bool = sel.type == "MATERIAL";
-				///else
 				let invert_y: bool = false;
-				///end
 
 				///if (is_paint || is_sculpt)
 				if (single_channel) {
 					g2_set_pipeline(ui_view2d_pipe);
-					///if arm_opengl
-					iron_g4_set_pipeline(ui_view2d_pipe.pipeline_);
-					///end
 					iron_g4_set_int(ui_view2d_channel_loc, 1);
 				}
 				///end

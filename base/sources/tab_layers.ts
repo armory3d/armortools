@@ -366,10 +366,6 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	ui._y -= 3;
 	ui._y -= center;
 
-	///if arm_opengl
-	ui.image_invert_y = l.fill_layer != null;
-	///end
-
 	let uix: f32 = ui._x;
 	let uiy: f32 = ui._y;
 	ui._x += 2;
@@ -387,10 +383,6 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	if (config_raw.touch_ui) {
 		ui._x += 12 * ui_SCALE(ui);
 	}
-
-	///if arm_opengl
-	ui.image_invert_y = false;
-	///end
 
 	tab_layers_handle_layer_icon_state(l, i, state, uix, uiy);
 
@@ -664,9 +656,6 @@ function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32,
 		}
 		if (l.fill_layer == null && slot_layer_is_mask(l)) {
 			g2_set_pipeline(ui_view2d_pipe);
-			///if arm_opengl
-			iron_g4_set_pipeline(ui_view2d_pipe.pipeline_);
-			///end
 			iron_g4_set_int(ui_view2d_channel_loc, 1);
 		}
 

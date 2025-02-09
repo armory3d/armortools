@@ -592,10 +592,6 @@ function base_render() {
 		let h: f32 = img.height * ratio;
 		let inv: i32 = 0;
 
-		///if arm_opengl
-		inv = (base_drag_material != null || (base_drag_layer != null && base_drag_layer.fill_layer != null)) ? h : 0;
-		///end
-
 		g2_set_color(base_drag_tint);
 
 		let bg_rect: rect_t = base_get_drag_background();

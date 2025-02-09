@@ -7,7 +7,7 @@ function make_colorid_picker_run(vert: node_shader_t, frag: node_shader_t) {
 	node_shader_add_uniform(frag, "vec2 gbuffer_size", "_gbuffer_size");
 	node_shader_add_uniform(frag, "vec4 inp", "_input_brush");
 
-	///if (arm_direct3d11 || arm_direct3d12 || arm_metal || arm_vulkan)
+	///if (arm_direct3d12 || arm_metal || arm_vulkan)
 	node_shader_write(frag, "vec2 tex_coord_inp = texelFetch(gbuffer2, ivec2(inp.x * gbuffer_size.x, inp.y * gbuffer_size.y), 0).ba;");
 	///else
 	node_shader_write(frag, "vec2 tex_coord_inp = texelFetch(gbuffer2, ivec2(inp.x * gbuffer_size.x, (1.0 - inp.y) * gbuffer_size.y), 0).ba;");

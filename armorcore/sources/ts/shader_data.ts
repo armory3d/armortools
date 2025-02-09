@@ -13,10 +13,6 @@ function shader_data_create(raw: shader_data_t): shader_data_t {
 function shader_data_ext(): string {
 	///if arm_vulkan
 	return ".spirv";
-	///elseif (arm_android || arm_wasm)
-	return ".essl";
-	///elseif arm_opengl
-	return ".glsl";
 	///elseif arm_metal
 	return ".metal";
 	///else

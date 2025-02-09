@@ -351,14 +351,14 @@ function render_path_base_draw_deferred_light() {
 		render_path_draw_shader("shader_datas/deferred_light/deferred_light_voxel") :
 		render_path_draw_shader("shader_datas/deferred_light/deferred_light");
 
-	///if (arm_direct3d11 || arm_direct3d12 || arm_metal || arm_vulkan)
+	///if (arm_direct3d12 || arm_metal || arm_vulkan)
 	render_path_set_depth_from("tex", "gbuffer0"); // Bind depth for world pass
 	///end
 
 	render_path_set_target("tex");
 	render_path_draw_skydome("shader_datas/world_pass/world_pass");
 
-	///if (arm_direct3d11 || arm_direct3d12 || arm_metal || arm_vulkan)
+	///if (arm_direct3d12 || arm_metal || arm_vulkan)
 	render_path_set_depth_from("tex", "gbuffer1"); // Unbind depth
 	///end
 }

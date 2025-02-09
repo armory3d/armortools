@@ -137,7 +137,7 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 	}
 	else {
 		frag.vvec = true;
-		///if (arm_direct3d11 || arm_direct3d12 || arm_metal || arm_vulkan)
+		///if (arm_direct3d12 || arm_metal || arm_vulkan)
 		node_shader_write(frag, "mat3 TBN = cotangent_frame(n, vvec, tex_coord);");
 		///else
 		node_shader_write(frag, "mat3 TBN = cotangent_frame(n, -vvec, tex_coord);");

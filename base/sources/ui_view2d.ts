@@ -219,15 +219,10 @@ function ui_view2d_render() {
 
 			///if (is_paint || is_sculpt)
 			if (ui_view2d_type == view_2d_type_t.LAYER) {
-				///if (!arm_opengl)
 				g2_set_pipeline(ui_view2d_pipe);
-				///end
 				if (!context_raw.texture_filter) {
 					g2_set_bilinear_filter(false);
 				}
-				///if arm_opengl
-				iron_g4_set_pipeline(ui_view2d_pipe.pipeline_);
-				///end
 				iron_g4_set_int(ui_view2d_channel_loc, channel);
 			}
 			///end

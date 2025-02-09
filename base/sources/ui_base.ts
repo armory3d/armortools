@@ -1351,11 +1351,7 @@ function ui_base_render_cursor() {
 	// Show picked material next to cursor
 	if (context_raw.tool == workspace_tool_t.PICKER && context_raw.picker_select_material && context_raw.color_picker_callback == null) {
 		let img: image_t = context_raw.material.image_icon;
-		///if arm_opengl
-		g2_draw_scaled_image(img, mx + 10, my + 10 + img.height, img.width, -img.height);
-		///else
 		g2_draw_image(img, mx + 10, my + 10);
-		///end
 	}
 	if (context_raw.tool == workspace_tool_t.PICKER && context_raw.color_picker_callback != null) {
 		let img: image_t = resource_get("icons.k");
@@ -1405,7 +1401,7 @@ function ui_base_render_cursor() {
 				let cx: f32 = decalx + psizex / 2;
 				let cy: f32 = decaly + psizey / 2;
 				g2_set_transformation(mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(angle)), mat3_translation(-cx, -cy)));
-				///if (arm_direct3d11 || arm_direct3d12 || arm_metal || arm_vulkan)
+				///if (arm_direct3d12 || arm_metal || arm_vulkan)
 				g2_draw_scaled_image(context_raw.decal_image, decalx, decaly, psizex, psizey);
 				///else
 				g2_draw_scaled_image(context_raw.decal_image, decalx, decaly + psizey, psizex, -psizey);

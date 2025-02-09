@@ -366,10 +366,6 @@ function sys_string_to_buffer(str: string): buffer_t {
 function sys_shader_ext(): string {
 	///if arm_vulkan
 	return ".spirv";
-	///elseif (arm_android || arm_wasm)
-	return ".essl";
-	///elseif arm_opengl
-	return ".glsl";
 	///elseif arm_metal
 	return ".metal";
 	///else

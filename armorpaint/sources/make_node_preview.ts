@@ -37,9 +37,7 @@ function make_node_preview_run(data: material_t, matcon: material_context_t, nod
 	node_shader_write_attrib(vert, "const vec2 madd = vec2(0.5, 0.5);");
 	node_shader_add_out(vert, "vec2 tex_coord");
 	node_shader_write_attrib(vert, "tex_coord = gl_Position.xy * madd + madd;");
-	///if (!arm_opengl)
 	node_shader_write_attrib(vert, "tex_coord.y = 1.0 - tex_coord.y;");
-	///end
 
 	parser_material_init();
 	parser_material_canvases = [context_raw.material.canvas];

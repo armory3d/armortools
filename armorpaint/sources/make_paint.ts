@@ -93,7 +93,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	let uv_island_fill: bool = context_raw.tool == workspace_tool_t.FILL && context_raw.fill_type_handle.position == fill_type_t.UV_ISLAND;
 	let decal: bool = context_is_decal();
 
-	///if (arm_direct3d11 || arm_direct3d12 || arm_metal || arm_vulkan)
+	///if (arm_direct3d12 || arm_metal || arm_vulkan)
 	node_shader_write(vert, "vec2 tpos = vec2(tex.x * 2.0 - 1.0, (1.0 - tex.y) * 2.0 - 1.0);");
 	///else
 	node_shader_write(vert, "vec2 tpos = vec2(tex.xy * 2.0 - 1.0);");
@@ -158,7 +158,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		}
 
 		if (depth_reject) {
-			///if (arm_direct3d11 || arm_direct3d12 || arm_metal || arm_vulkan)
+			///if (arm_direct3d12 || arm_metal || arm_vulkan)
 			node_shader_write(frag, "if (sp.z > textureLod(gbufferD, sp.xy, 0.0).r + 0.0005) discard;");
 			///else
 			node_shader_write(frag, "if (sp.z > textureLod(gbufferD, vec2(sp.x, 1.0 - sp.y), 0.0).r + 0.0005) discard;");
@@ -184,7 +184,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		}
 		let stencil_fill: bool = context_raw.tool == workspace_tool_t.FILL && context_raw.brush_stencil_image != null;
 		if (stencil_fill) {
-			///if (arm_direct3d11 || arm_direct3d12 || arm_metal || arm_vulkan)
+			///if (arm_direct3d12 || arm_metal || arm_vulkan)
 			node_shader_write(frag, "if (sp.z > textureLod(gbufferD, sp.xy, 0.0).r + 0.0005) discard;");
 			///else
 			node_shader_write(frag, "if (sp.z > textureLod(gbufferD, vec2(sp.x, 1.0 - sp.y), 0.0).r + 0.0005) discard;");
@@ -368,7 +368,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	// Manual blending to preserve memory
 	frag.wvpposition = true;
 	node_shader_write(frag, "vec2 sample_tc = vec2(wvpposition.xy / wvpposition.w) * 0.5 + 0.5;");
-	///if (arm_direct3d11 || arm_direct3d12 || arm_metal || arm_vulkan)
+	///if (arm_direct3d12 || arm_metal || arm_vulkan)
 	node_shader_write(frag, "sample_tc.y = 1.0 - sample_tc.y;");
 	///end
 	node_shader_add_uniform(frag, "sampler2D paintmask");

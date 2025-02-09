@@ -113,7 +113,7 @@ function make_particle_mask(vert: node_shader_t, frag: node_shader_t) {
 	///end
 
 	node_shader_add_uniform(frag, "sampler2D texparticle", "_texparticle");
-	///if (arm_direct3d11 || arm_direct3d12 || arm_metal || arm_vulkan)
+	///if (arm_direct3d12 || arm_metal || arm_vulkan)
 	node_shader_write(frag, "float str = textureLod(texparticle, sp.xy, 0.0).r;");
 	///else
 	node_shader_write(frag, "float str = textureLod(texparticle, vec2(sp.x, (1.0 - sp.y)), 0.0).r;");

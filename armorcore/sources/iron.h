@@ -357,9 +357,6 @@ string_t *iron_get_arg(i32 index) {
 int LZ4_decompress_safe(const char *source, char *dest, int compressed_size, int maxOutputSize);
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
-#ifdef KINC_DIRECT3D11
-#include <d3d11.h>
-#endif
 #ifdef KINC_DIRECT3D12
 #include <d3d12.h>
 extern bool waitAfterNextDraw;
@@ -2025,10 +2022,7 @@ void iron_g4_get_render_target_pixels(kinc_g4_render_target_t *rt, buffer_t *dat
 	kinc_g4_render_target_get_pixels(rt, b);
 
 	// Release staging texture immediately to save memory
-	#ifdef KINC_DIRECT3D11
-	rt->impl.textureStaging->lpVtbl->Release(rt->impl.textureStaging);
-	rt->impl.textureStaging = NULL;
-	#elif defined(KINC_DIRECT3D12)
+	#ifdef KINC_DIRECT3D12
 	rt->impl._renderTarget.impl.renderTargetReadback->lpVtbl->Release(rt->impl._renderTarget.impl.renderTargetReadback);
 	rt->impl._renderTarget.impl.renderTargetReadback = NULL;
 	#elif defined(KINC_METAL)
