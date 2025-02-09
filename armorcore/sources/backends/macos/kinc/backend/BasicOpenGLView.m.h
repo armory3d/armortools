@@ -5,9 +5,7 @@
 #include <kinc/input/pen.h>
 #include <kinc/system.h>
 
-#ifdef KINC_METAL
 #include <kinc/graphics5/graphics.h>
-#endif
 
 @implementation BasicOpenGLView
 
@@ -15,34 +13,6 @@ static bool shift = false;
 static bool ctrl = false;
 static bool alt = false;
 static bool cmd = false;
-
-#ifndef KINC_METAL
-+ (NSOpenGLPixelFormat *)basicPixelFormat {
-	// TODO (DK) pass via argument in
-	int aa = 1; // Kore::Application::the()->antialiasing();
-	if (aa > 0) {
-		NSOpenGLPixelFormatAttribute attributes[] = {NSOpenGLPFADoubleBuffer,          NSOpenGLPFADepthSize,
-		                                             (NSOpenGLPixelFormatAttribute)24, // 16 bit depth buffer
-		                                             NSOpenGLPFAOpenGLProfile,         NSOpenGLProfileVersion3_2Core,
-		                                             NSOpenGLPFASupersample,           NSOpenGLPFASampleBuffers,
-		                                             (NSOpenGLPixelFormatAttribute)1,  NSOpenGLPFASamples,
-		                                             (NSOpenGLPixelFormatAttribute)aa, NSOpenGLPFAStencilSize,
-		                                             (NSOpenGLPixelFormatAttribute)8,  (NSOpenGLPixelFormatAttribute)0};
-		return [[NSOpenGLPixelFormat alloc] initWithAttributes:attributes];
-	}
-	else {
-		NSOpenGLPixelFormatAttribute attributes[] = {
-		    NSOpenGLPFADoubleBuffer,         NSOpenGLPFADepthSize,           (NSOpenGLPixelFormatAttribute)24, // 16 bit depth buffer
-		    NSOpenGLPFAOpenGLProfile,        NSOpenGLProfileVersion3_2Core,  NSOpenGLPFAStencilSize,
-		    (NSOpenGLPixelFormatAttribute)8, (NSOpenGLPixelFormatAttribute)0};
-		return [[NSOpenGLPixelFormat alloc] initWithAttributes:attributes];
-	}
-}
-
-- (void)switchBuffers {
-	[[self openGLContext] flushBuffer];
-}
-#endif
 
 - (void)flagsChanged:(NSEvent *)theEvent {
 	if (shift) {
@@ -393,31 +363,8 @@ static bool controlKeyMouseButton = false;
 	return YES;
 }
 
-#ifndef KINC_METAL
-- (void)prepareOpenGL {
-	const GLint swapInt = 1;
-	[[self openGLContext] setValues:&swapInt forParameter:NSOpenGLCPSwapInterval];
-	[super prepareOpenGL];
-}
-#endif
-
 - (void)update { // window resizes, moves and display changes (resize, depth and display config change)
-#ifdef KINC_OPENGL
-	[super update];
-#endif
 }
-
-#ifndef KINC_METAL
-- (id)initWithFrame:(NSRect)frameRect {
-	NSOpenGLPixelFormat *pf = [BasicOpenGLView basicPixelFormat];
-	self = [super initWithFrame:frameRect pixelFormat:pf];
-
-	[self prepareOpenGL];
-	[[self openGLContext] makeCurrentContext];
-	[self setWantsBestResolutionOpenGLSurface:YES];
-	return self;
-}
-#else
 
 - (id)initWithFrame:(NSRect)frameRect {
 	self = [super initWithFrame:frameRect];
@@ -438,7 +385,6 @@ static bool controlKeyMouseButton = false;
 
 	return self;
 }
-#endif
 
 - (BOOL)acceptsFirstResponder {
 	return YES;
@@ -456,7 +402,6 @@ static bool controlKeyMouseButton = false;
 	[self setFrameSize:size];
 }
 
-#ifdef KINC_METAL
 - (CAMetalLayer *)metalLayer {
 	return (CAMetalLayer *)self.layer;
 }
@@ -472,7 +417,6 @@ static bool controlKeyMouseButton = false;
 - (id<MTLCommandQueue>)metalQueue {
 	return commandQueue;
 }
-#endif
 
 @end
 

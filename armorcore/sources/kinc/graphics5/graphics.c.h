@@ -1,4 +1,3 @@
-#ifndef OPENGL_1_X
 
 #include "graphics.h"
 
@@ -18,5 +17,3 @@ bool kinc_g5_fullscreen = false;
 //	VertexBuffer* vertexBuffers[1] = {&vertexBuffer};
 //	setVertexBuffers(vertexBuffers, 1);
 //}
-
-#endif

@@ -10,10 +10,6 @@
 #include <kinc/input/surface.h>
 #include <kinc/system.h>
 
-#ifdef KINC_OPENGL
-#include <kinc/backend/graphics4/OpenGLWindow.h>
-#endif
-
 static const int touchmaxcount = 20;
 static void *touches[touchmaxcount];
 
@@ -63,21 +59,10 @@ int kinc_window_height(int window) {
 
 @implementation GLView
 
-#ifdef KINC_METAL
 + (Class)layerClass {
 	return [CAMetalLayer class];
 }
-#else
-+ (Class)layerClass {
-	return [CAEAGLLayer class];
-}
-#endif
 
-#ifdef KINC_OPENGL
-extern int kinc_ios_gl_framebuffer;
-#endif
-
-#ifdef KINC_METAL
 - (void)hoverGesture:(UIHoverGestureRecognizer *)recognizer {
 	CGPoint point = [recognizer locationInView:self];
 	float x = point.x * self.contentScaleFactor;
@@ -113,102 +98,15 @@ extern int kinc_ios_gl_framebuffer;
 
 	return self;
 }
-#else
-- (id)initWithFrame:(CGRect)frame {
-	self = [super initWithFrame:(CGRect)frame];
-	self.contentScaleFactor = [UIScreen mainScreen].scale;
 
-	backingWidth = frame.size.width * self.contentScaleFactor;
-	backingHeight = frame.size.height * self.contentScaleFactor;
-
-	initTouches();
-
-	CAEAGLLayer *eaglLayer = (CAEAGLLayer *)self.layer;
-
-	eaglLayer.opaque = YES;
-	eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:FALSE], kEAGLDrawablePropertyRetainedBacking,
-	                                                                          kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat, nil];
-
-	context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
-
-	if (!context || ![EAGLContext setCurrentContext:context]) {
-		//[self release];
-		return nil;
-	}
-
-	glGenFramebuffersOES(1, &defaultFramebuffer);
-	glBindFramebufferOES(GL_FRAMEBUFFER_OES, defaultFramebuffer);
-	kinc_ios_gl_framebuffer = defaultFramebuffer;
-
-	glGenRenderbuffersOES(1, &colorRenderbuffer);
-	glBindRenderbufferOES(GL_RENDERBUFFER_OES, colorRenderbuffer);
-	glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_RENDERBUFFER_OES, colorRenderbuffer);
-
-	glGenRenderbuffersOES(1, &depthStencilRenderbuffer);
-	glBindRenderbufferOES(GL_RENDERBUFFER_OES, depthStencilRenderbuffer);
-	glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_DEPTH_ATTACHMENT_OES, GL_RENDERBUFFER_OES, depthStencilRenderbuffer);
-	glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_STENCIL_ATTACHMENT_OES, GL_RENDERBUFFER_OES, depthStencilRenderbuffer);
-
-	// Start acceletometer
-	hasAccelerometer = false;
-#ifndef KINC_TVOS
-	motionManager = [[CMMotionManager alloc] init];
-	if ([motionManager isAccelerometerAvailable]) {
-		motionManager.accelerometerUpdateInterval = 0.033;
-		[motionManager startAccelerometerUpdates];
-		hasAccelerometer = true;
-	}
-#endif
-
-#ifndef KINC_TVOS
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onKeyboardHide:) name:UIKeyboardWillHideNotification object:nil];
-#endif
-
-	return self;
-}
-#endif
-
-#ifdef KINC_METAL
 - (void)begin {
 }
-#else
-- (void)begin {
-	[EAGLContext setCurrentContext:context];
-	// glBindFramebufferOES(GL_FRAMEBUFFER_OES, defaultFramebuffer);
-	// glViewport(0, 0, backingWidth, backingHeight);
 
-#ifndef KINC_TVOS
-	// Accelerometer updates
-	if (hasAccelerometer) {
-
-		CMAcceleration acc = motionManager.accelerometerData.acceleration;
-
-		if (acc.x != lastAccelerometerX || acc.y != lastAccelerometerY || acc.z != lastAccelerometerZ) {
-
-			kinc_internal_on_acceleration(acc.x, acc.y, acc.z);
-
-			lastAccelerometerX = acc.x;
-			lastAccelerometerY = acc.y;
-			lastAccelerometerZ = acc.z;
-		}
-	}
-#endif
-}
-#endif
-
-#ifdef KINC_METAL
 - (void)end {
 }
-#else
-- (void)end {
-	glBindRenderbufferOES(GL_RENDERBUFFER_OES, colorRenderbuffer);
-	[context presentRenderbuffer:GL_RENDERBUFFER_OES]; // crash at end
-}
-#endif
 
 void kinc_internal_call_resize_callback(int window, int width, int height);
 
-#ifdef KINC_METAL
 - (void)layoutSubviews {
 	backingWidth = self.frame.size.width * self.contentScaleFactor;
 	backingHeight = self.frame.size.height * self.contentScaleFactor;
@@ -218,56 +116,9 @@ void kinc_internal_call_resize_callback(int window, int width, int height);
 
 	kinc_internal_call_resize_callback(0, backingWidth, backingHeight);
 }
-#else
-- (void)layoutSubviews {
-	glBindRenderbufferOES(GL_RENDERBUFFER_OES, colorRenderbuffer);
-	[context renderbufferStorage:GL_RENDERBUFFER_OES fromDrawable:(CAEAGLLayer *)self.layer];
 
-	glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_WIDTH_OES, &backingWidth);
-	glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_HEIGHT_OES, &backingHeight);
-
-	printf("backingWitdh/Height: %i, %i\n", backingWidth, backingHeight);
-
-	glBindRenderbufferOES(GL_RENDERBUFFER_OES, depthStencilRenderbuffer);
-	glRenderbufferStorageOES(GL_RENDERBUFFER_OES, GL_DEPTH24_STENCIL8_OES, backingWidth, backingHeight);
-
-	if (glCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES) != GL_FRAMEBUFFER_COMPLETE_OES) {
-		NSLog(@"Failed to make complete framebuffer object %x", glCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES));
-	}
-
-	kinc_internal_call_resize_callback(0, backingWidth, backingHeight);
-}
-#endif
-
-#ifdef KINC_METAL
 - (void)dealloc {
 }
-#else
-- (void)dealloc {
-	if (defaultFramebuffer) {
-		glDeleteFramebuffersOES(1, &defaultFramebuffer);
-		defaultFramebuffer = 0;
-	}
-
-	if (colorRenderbuffer) {
-		glDeleteRenderbuffersOES(1, &colorRenderbuffer);
-		colorRenderbuffer = 0;
-	}
-
-	if (depthStencilRenderbuffer) {
-		glDeleteRenderbuffersOES(1, &depthStencilRenderbuffer);
-		depthStencilRenderbuffer = 0;
-	}
-
-	if ([EAGLContext currentContext] == context)
-		[EAGLContext setCurrentContext:nil];
-
-	//[context release];
-	context = nil;
-
-	//[super dealloc];
-}
-#endif
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
 	for (UITouch *touch in touches) {
@@ -439,7 +290,6 @@ static bool shiftDown = false;
 	kinc_keyboard_hide();
 }
 
-#ifdef KINC_METAL
 - (CAMetalLayer *)metalLayer {
 	return (CAMetalLayer *)self.layer;
 }
@@ -455,6 +305,5 @@ static bool shiftDown = false;
 - (id<MTLCommandQueue>)metalQueue {
 	return commandQueue;
 }
-#endif
 
 @end

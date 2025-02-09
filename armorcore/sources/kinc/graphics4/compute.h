@@ -3,9 +3,6 @@
 #include <kinc/global.h>
 
 #include <kinc/backend/graphics4/compute.h>
-#ifdef KINC_OPENGL
-#include <kinc/graphics4/vertexbuffer.h>
-#endif
 #include <kinc/graphics4/graphics.h>
 
 /*! \file compute.h

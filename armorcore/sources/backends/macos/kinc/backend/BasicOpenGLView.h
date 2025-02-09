@@ -1,15 +1,5 @@
-#ifdef KINC_METAL
-#import <MetalKit/MTKView.h>
-#else
-#import <Cocoa/Cocoa.h>
-#import <OpenGL/CGLContext.h>
-#import <OpenGL/OpenGL.h>
-#import <OpenGL/gl.h>
-#import <OpenGL/glext.h>
-#import <OpenGL/glu.h>
-#endif
 
-#ifdef KINC_METAL
+#import <MetalKit/MTKView.h>
 
 struct kinc_g5_render_target;
 
@@ -20,28 +10,10 @@ struct kinc_g5_render_target;
 	id<MTLLibrary> library;
 }
 
-#else
-
-// (DK) context sharing
-// www.cocoabuilder.com/archive/cocoa/29573-sharing-opengl-context.html
-// basically:
-//  -don't use NSOpenGLView, but implement all that by hand
-//  -use -initWithFormat:shareContext: (NSOpenGLContext) to setup the shared contexts
-@interface BasicOpenGLView : NSOpenGLView {
-}
-
-#endif
-
-#ifdef KINC_METAL
 - (CAMetalLayer *)metalLayer;
 - (id<MTLDevice>)metalDevice;
 - (id<MTLLibrary>)metalLibrary;
 - (id<MTLCommandQueue>)metalQueue;
-#else
-- (void)prepareOpenGL;
-- (void)switchBuffers;
-+ (NSOpenGLPixelFormat *)basicPixelFormat;
-#endif
 
 - (void)keyDown:(NSEvent *)theEvent;
 - (void)keyUp:(NSEvent *)theEvent;
