@@ -5,16 +5,6 @@
 
 #include <string.h>
 
-#ifdef KINC_EGL
-EGLDisplay kinc_egl_get_display() {
-	return procs.egl_get_display();
-}
-EGLNativeWindowType kinc_egl_get_native_window(EGLDisplay display, EGLConfig config, int window_index) {
-	return procs.egl_get_native_window(display, config, window_index);
-}
-#endif
-
-#ifdef KINC_VULKAN
 void kinc_vulkan_get_instance_extensions(const char **extensions, int *count, int max) {
 	procs.vulkan_get_instance_extensions(extensions, count, max);
 }
@@ -25,7 +15,6 @@ VkBool32 kinc_vulkan_get_physical_device_presentation_support(VkPhysicalDevice p
 VkResult kinc_vulkan_create_surface(VkInstance instance, int window_index, VkSurfaceKHR *surface) {
 	return procs.vulkan_create_surface(instance, window_index, surface);
 }
-#endif
 
 int kinc_count_windows(void) {
 	return procs.count_windows();

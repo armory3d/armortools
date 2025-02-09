@@ -10,8 +10,6 @@ kinc_g5_vertex_buffer_t *_current_vertex_buffer = NULL;
 void kinc_g5_vertex_buffer_init(kinc_g5_vertex_buffer_t *buffer, int count, kinc_g5_vertex_structure_t *structure, bool gpuMemory, int instanceDataStepRate) {
 	buffer->impl.myCount = count;
 
-	// static_assert(sizeof(D3D12VertexBufferView) == sizeof(D3D12_VERTEX_BUFFER_VIEW), "Something is wrong with D3D12IVertexBufferView");
-
 	buffer->impl.myStride = 0;
 	for (int i = 0; i < structure->size; ++i) {
 		buffer->impl.myStride += kinc_g4_vertex_data_size(structure->elements[i].data);
@@ -41,10 +39,6 @@ void kinc_g5_vertex_buffer_init(kinc_g5_vertex_buffer_t *buffer, int count, kinc
 
 	device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL,
 	                                IID_GRAPHICS_PPV_ARGS(&buffer->impl.uploadBuffer));
-
-	// device_->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES (D3D12_HEAP_TYPE_DEFAULT), D3D12_HEAP_FLAG_NONE,
-	// &CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize),
-	//	D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&vertexBuffer));
 
 	buffer->impl.view.BufferLocation = buffer->impl.uploadBuffer->GetGPUVirtualAddress();
 	buffer->impl.view.SizeInBytes = uploadBufferSize;
@@ -83,13 +77,6 @@ void kinc_g5_vertex_buffer_unlock_all(kinc_g5_vertex_buffer_t *buffer) {
 	range.Begin = buffer->impl.lastStart * buffer->impl.myStride;
 	range.End = (buffer->impl.lastStart + buffer->impl.lastCount) * buffer->impl.myStride;
 	buffer->impl.uploadBuffer->Unmap(0, &range);
-
-	// view.BufferLocation = uploadBuffer->GetGPUVirtualAddress() + myStart * myStride;
-
-	// commandList->CopyBufferRegion(vertexBuffer, 0, uploadBuffer, 0, count() * stride());
-	// CD3DX12_RESOURCE_BARRIER barriers[1] = { CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer, D3D12_RESOURCE_STATE_COPY_DEST,
-	// D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER) };
-	// commandList->ResourceBarrier(1, barriers);
 }
 
 void kinc_g5_vertex_buffer_unlock(kinc_g5_vertex_buffer_t *buffer, int count) {
@@ -97,19 +84,9 @@ void kinc_g5_vertex_buffer_unlock(kinc_g5_vertex_buffer_t *buffer, int count) {
 	range.Begin = buffer->impl.lastStart * buffer->impl.myStride;
 	range.End = (buffer->impl.lastStart + count) * buffer->impl.myStride;
 	buffer->impl.uploadBuffer->Unmap(0, &range);
-
-	// view.BufferLocation = uploadBuffer->GetGPUVirtualAddress() + myStart * myStride;
-
-	// commandList->CopyBufferRegion(vertexBuffer, 0, uploadBuffer, 0, count() * stride());
-	// CD3DX12_RESOURCE_BARRIER barriers[1] = { CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer, D3D12_RESOURCE_STATE_COPY_DEST,
-	// D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER) };
-	// commandList->ResourceBarrier(1, barriers);
 }
 
 int kinc_g5_internal_vertex_buffer_set(kinc_g5_vertex_buffer_t *buffer, int offset) {
-	// UINT stride = myStride;
-	// UINT offset = 0;
-	// context->IASetVertexBuffers(0, 1, &vb, &stride, &offset);
 	_current_vertex_buffer = buffer;
 	return 0;
 }

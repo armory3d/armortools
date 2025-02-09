@@ -1,16 +1,8 @@
 #include "rendertarget.h"
-
 #include <kinc/graphics5/rendertarget.h>
 #include <kinc/graphics5/texture.h>
 #include <kinc/backend/SystemMicrosoft.h>
-
-#ifdef KINC_WINDOWS
 #include <dxgi1_4.h>
-#endif
-
-#ifdef KINC_DIRECT3D_HAS_NO_SWAPCHAIN
-extern ID3D12Resource *swapChainRenderTargets[QUEUE_SLOT_COUNT];
-#endif
 
 static void WaitForFence(ID3D12Fence *fence, UINT64 completionValue, HANDLE waitEvent) {
 	if (fence->GetCompletedValue() < completionValue) {
@@ -20,7 +12,6 @@ static void WaitForFence(ID3D12Fence *fence, UINT64 completionValue, HANDLE wait
 }
 
 static void createRenderTargetView(ID3D12Resource *renderTarget, ID3D12DescriptorHeap *renderTargetDescriptorHeap, DXGI_FORMAT format) {
-	// const D3D12_RESOURCE_DESC resourceDesc = renderTarget->lpVtbl->GetDesc(renderTarget);
 
 	D3D12_RENDER_TARGET_VIEW_DESC viewDesc;
 	viewDesc.Format = format;
@@ -45,11 +36,7 @@ static DXGI_FORMAT convertFormat(kinc_g5_render_target_format_t format) {
 		return DXGI_FORMAT_R8_UNORM;
 	case KINC_G5_RENDER_TARGET_FORMAT_32BIT:
 	default:
-#ifdef KINC_WINDOWS
 		return DXGI_FORMAT_R8G8B8A8_UNORM;
-#else
-		return DXGI_FORMAT_B8G8R8A8_UNORM;
-#endif
 	}
 }
 
@@ -99,15 +86,12 @@ static void render_target_init(kinc_g5_render_target_t *render_target, int width
 	kinc_microsoft_affirm(device->CreateDescriptorHeap(&heapDesc, IID_GRAPHICS_PPV_ARGS(&render_target->impl.renderTargetDescriptorHeap)));
 
 	if (framebuffer_index >= 0) {
-#ifdef KINC_DIRECT3D_HAS_NO_SWAPCHAIN
-		render_target->impl.renderTarget = swapChainRenderTargets[framebuffer_index];
-#else
 		IDXGISwapChain *swapChain = kinc_dx_current_window()->swapChain;
 		kinc_microsoft_affirm(swapChain->GetBuffer(framebuffer_index, IID_PPV_ARGS(&render_target->impl.renderTarget)));
 		wchar_t buffer[128];
 		wsprintf(buffer, L"Backbuffer (index %i)", framebuffer_index);
 		render_target->impl.renderTarget->SetName(buffer);
-#endif
+
 		createRenderTargetView(render_target->impl.renderTarget, render_target->impl.renderTargetDescriptorHeap, dxgiFormat);
 	}
 	else {

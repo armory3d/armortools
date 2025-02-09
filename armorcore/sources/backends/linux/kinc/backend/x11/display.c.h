@@ -2,8 +2,6 @@
 #include "x11.h"
 #include <string.h>
 
-// TODO: deal with monitor hotplugging and such
-
 void kinc_x11_display_init(void) {
 	int eventBase;
 	int errorBase;

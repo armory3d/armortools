@@ -248,14 +248,12 @@ static bool cmd = false;
 }
 
 static int getMouseX(NSEvent *event) {
-	// TODO (DK) map [theEvent window] to window id instead of 0
 	NSWindow *window = [[NSApplication sharedApplication] mainWindow];
 	float scale = [window backingScaleFactor];
 	return (int)([event locationInWindow].x * scale);
 }
 
 static int getMouseY(NSEvent *event) {
-	// TODO (DK) map [theEvent window] to window id instead of 0
 	NSWindow *window = [[NSApplication sharedApplication] mainWindow];
 	float scale = [window backingScaleFactor];
 	return (int)(kinc_height() - [event locationInWindow].y * scale);
@@ -264,7 +262,6 @@ static int getMouseY(NSEvent *event) {
 static bool controlKeyMouseButton = false;
 
 - (void)mouseDown:(NSEvent *)theEvent {
-	// TODO (DK) map [theEvent window] to window id instead of 0
 	if ([theEvent modifierFlags] & NSControlKeyMask) {
 		controlKeyMouseButton = true;
 		kinc_internal_mouse_trigger_press(0, 1, getMouseX(theEvent), getMouseY(theEvent));
@@ -280,7 +277,6 @@ static bool controlKeyMouseButton = false;
 }
 
 - (void)mouseUp:(NSEvent *)theEvent {
-	// TODO (DK) map [theEvent window] to window id instead of 0
 	if (controlKeyMouseButton) {
 		kinc_internal_mouse_trigger_release(0, 1, getMouseX(theEvent), getMouseY(theEvent));
 	}
@@ -295,12 +291,10 @@ static bool controlKeyMouseButton = false;
 }
 
 - (void)mouseMoved:(NSEvent *)theEvent {
-	// TODO (DK) map [theEvent window] to window id instead of 0
 	kinc_internal_mouse_trigger_move(0, getMouseX(theEvent), getMouseY(theEvent));
 }
 
 - (void)mouseDragged:(NSEvent *)theEvent {
-	// TODO (DK) map [theEvent window] to window id instead of 0
 	kinc_internal_mouse_trigger_move(0, getMouseX(theEvent), getMouseY(theEvent));
 
 	if ([theEvent subtype] == NSTabletPointEventSubtype) {
@@ -309,17 +303,14 @@ static bool controlKeyMouseButton = false;
 }
 
 - (void)rightMouseDown:(NSEvent *)theEvent {
-	// TODO (DK) map [theEvent window] to window id instead of 0
 	kinc_internal_mouse_trigger_press(0, 1, getMouseX(theEvent), getMouseY(theEvent));
 }
 
 - (void)rightMouseUp:(NSEvent *)theEvent {
-	// TODO (DK) map [theEvent window] to window id instead of 0
 	kinc_internal_mouse_trigger_release(0, 1, getMouseX(theEvent), getMouseY(theEvent));
 }
 
 - (void)rightMouseDragged:(NSEvent *)theEvent {
-	// TODO (DK) map [theEvent window] to window id instead of 0
 	kinc_internal_mouse_trigger_move(0, getMouseX(theEvent), getMouseY(theEvent));
 }
 
@@ -336,7 +327,6 @@ static bool controlKeyMouseButton = false;
 }
 
 - (void)scrollWheel:(NSEvent *)theEvent {
-	// TODO (DK) map [theEvent window] to window id instead of 0
 	int delta = [theEvent deltaY];
 	kinc_internal_mouse_trigger_scroll(0, -delta);
 }

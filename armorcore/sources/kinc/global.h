@@ -29,10 +29,7 @@
 
 #if TARGET_OS_IPHONE
 
-#if !defined(KINC_TVOS)
 #define KINC_IOS
-#endif
-
 #define KINC_APPLE_SOC
 
 #else

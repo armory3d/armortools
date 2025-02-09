@@ -1,13 +1,11 @@
 #define EGL_NO_PLATFORM_SPECIFIC_TYPES
 #include <EGL/egl.h>
 #include <kinc/error.h>
-// #include <GLContext.h>
 #include <kinc/backend/Android.h>
 #include <kinc/graphics4/graphics.h>
 #include <kinc/input/gamepad.h>
 #include <kinc/input/keyboard.h>
 #include <kinc/input/mouse.h>
-// #include <kinc/input/sensor.h>
 #include <android/sensor.h>
 #include <android/window.h>
 #include <android_native_app_glue.h>
@@ -18,9 +16,7 @@
 #include <kinc/threads/mutex.h>
 #include <kinc/video.h>
 #include <kinc/window.h>
-
 #include <unistd.h>
-
 #include <stdlib.h>
 
 void pauseAudio();
@@ -41,27 +37,6 @@ static bool activityJustResized = false;
 
 #include <assert.h>
 #include <kinc/log.h>
-
-#ifdef KINC_EGL
-
-EGLDisplay kinc_egl_get_display() {
-	return eglGetDisplay(EGL_DEFAULT_DISPLAY);
-}
-
-EGLNativeWindowType kinc_egl_get_native_window(EGLDisplay display, EGLConfig config, int window) {
-	kinc_affirm(window == 0);
-	EGLint format;
-	eglGetConfigAttrib(display, config, EGL_NATIVE_VISUAL_ID, &format);
-	int e = ANativeWindow_setBuffersGeometry(app->window, 0, 0, format);
-	if (e < 0) {
-		kinc_log(KINC_LOG_LEVEL_ERROR, "Failed to set ANativeWindow buffer geometry.");
-	}
-	return app->window;
-}
-
-#endif
-
-#ifdef KINC_VULKAN
 
 #include <vulkan/vulkan_android.h>
 #include <vulkan/vulkan_core.h>
@@ -90,29 +65,14 @@ VkBool32 kinc_vulkan_get_physical_device_presentation_support(VkPhysicalDevice p
 	// and all queue families must support the necessary image layout transitions and synchronization operations.
 	return true;
 }
-#endif
 
-#ifndef KINC_VULKAN
-void kinc_egl_init_window(int window);
-void kinc_egl_destroy_window(int window);
-#endif
-#ifdef KINC_VULKAN
 void kinc_vulkan_init_window(int window);
-#endif
 
 static void initDisplay() {
-#ifndef KINC_VULKAN
-	kinc_egl_init_window(0);
-#endif
-#ifdef KINC_VULKAN
 	kinc_vulkan_init_window(0);
-#endif
 }
 
 static void termDisplay() {
-#ifndef KINC_VULKAN
-	kinc_egl_destroy_window(0);
-#endif
 }
 
 static void updateAppForegroundStatus(bool displayIsInitializedValue, bool appIsForegroundValue) {
@@ -960,39 +920,26 @@ const char *kinc_language() {
 	return str;
 }
 
-#ifdef KINC_VULKAN
 bool kinc_vulkan_internal_get_size(int *width, int *height);
-#endif
-
-#ifdef KINC_EGL
-extern int kinc_egl_width(int window);
-extern int kinc_egl_height(int window);
-#endif
 
 int kinc_android_width() {
-#if defined(KINC_EGL)
-	return kinc_egl_width(0);
-#elif defined(KINC_VULKAN)
 	int width, height;
 	if (kinc_vulkan_internal_get_size(&width, &height)) {
 		return width;
 	}
-	else
-#endif
-	{ return ANativeWindow_getWidth(app->window); }
+	else {
+		return ANativeWindow_getWidth(app->window);
+	}
 }
 
 int kinc_android_height() {
-#if defined(KINC_EGL)
-	return kinc_egl_height(0);
-#elif defined(KINC_VULKAN)
 	int width, height;
 	if (kinc_vulkan_internal_get_size(&width, &height)) {
 		return height;
 	}
-	else
-#endif
-	{ return ANativeWindow_getHeight(app->window); }
+	else {
+		return ANativeWindow_getHeight(app->window);
+	}
 }
 
 const char *kinc_internal_save_path() {
@@ -1154,9 +1101,6 @@ void android_main(struct android_app *application) {
 	application->onAppCmd = cmd;
 	application->onInputEvent = input;
 	activity->callbacks->onNativeWindowResized = resize;
-	// #ifndef KINC_VULKAN
-	// 	glContext = ndk_helper::GLContext::GetInstance();
-	// #endif
 	sensorManager = ASensorManager_getInstance();
 	accelerometerSensor = ASensorManager_getDefaultSensor(sensorManager, ASENSOR_TYPE_ACCELEROMETER);
 	gyroSensor = ASensorManager_getDefaultSensor(sensorManager, ASENSOR_TYPE_GYROSCOPE);

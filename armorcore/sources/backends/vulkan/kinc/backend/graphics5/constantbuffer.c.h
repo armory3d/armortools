@@ -4,9 +4,6 @@
 
 bool memory_type_from_properties(uint32_t typeBits, VkFlags requirements_mask, uint32_t *typeIndex);
 
-// VkBuffer *vk_ctx.vertex_uniform_buffer = NULL;
-// VkBuffer *vk_ctx.fragment_uniform_buffer = NULL;
-
 bool kinc_g5_transposeMat3 = true;
 bool kinc_g5_transposeMat4 = true;
 
@@ -15,9 +12,11 @@ static void createUniformBuffer(VkBuffer *buf, VkMemoryAllocateInfo *mem_alloc, 
 	memset(&buf_info, 0, sizeof(buf_info));
 	buf_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 	buf_info.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
-#ifdef KINC_VKRT
-	buf_info.usage |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-#endif
+
+	if (kinc_g5_supports_raytracing()) {
+		buf_info.usage |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+	}
+
 	buf_info.size = size;
 	VkResult err = vkCreateBuffer(vk_ctx.device, &buf_info, NULL, buf);
 	assert(!err);

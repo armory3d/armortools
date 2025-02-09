@@ -2,17 +2,12 @@
 
 #include <kinc/graphics4/texture.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct {
 	void *assetReader;
 	void *videoTrackOutput;
 	void *audioTrackOutput;
 	double start;
 	double next;
-	// double audioTime;
 	unsigned long long audioTime;
 	bool playing;
 	void *sound;
@@ -35,15 +30,7 @@ typedef struct kinc_internal_video_sound_stream {
 } kinc_internal_video_sound_stream_t;
 
 void kinc_internal_video_sound_stream_init(kinc_internal_video_sound_stream_t *stream, int channel_count, int frequency);
-
 void kinc_internal_video_sound_stream_destroy(kinc_internal_video_sound_stream_t *stream);
-
 void kinc_internal_video_sound_stream_insert_data(kinc_internal_video_sound_stream_t *stream, float *data, int sample_count);
-
 float *kinc_internal_video_sound_stream_next_frame(kinc_internal_video_sound_stream_t *stream);
-
 bool kinc_internal_video_sound_stream_ended(kinc_internal_video_sound_stream_t *stream);
-
-#ifdef __cplusplus
-}
-#endif

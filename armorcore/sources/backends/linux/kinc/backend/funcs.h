@@ -3,13 +3,7 @@
 #include <kinc/display.h>
 #include <kinc/global.h>
 #include <kinc/window.h>
-#ifdef KINC_EGL
-#define EGL_NO_PLATFORM_SPECIFIC_TYPES
-#include <EGL/egl.h>
-#endif
-#ifdef KINC_VULKAN
 #include <vulkan/vulkan.h>
-#endif
 
 struct linux_procs {
 	bool (*handle_messages)(void);
@@ -51,15 +45,10 @@ struct linux_procs {
 	void (*mouse_set_cursor)(int cursor);
 
 	void (*copy_to_clipboard)(const char *text);
-#ifdef KINC_EGL
-	EGLDisplay (*egl_get_display)(void);
-	EGLNativeWindowType (*egl_get_native_window)(EGLDisplay display, EGLConfig config, int window_index);
-#endif
-#ifdef KINC_VULKAN
+
 	void (*vulkan_get_instance_extensions)(const char **extensions, int *count, int max);
 	VkResult (*vulkan_create_surface)(VkInstance instance, int window_index, VkSurfaceKHR *surface);
 	VkBool32 (*vulkan_get_physical_device_presentation_support)(VkPhysicalDevice physicalDevice, uint32_t queueFamilyIndex);
-#endif
 };
 
 extern struct linux_procs procs;

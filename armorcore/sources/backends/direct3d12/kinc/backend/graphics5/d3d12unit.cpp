@@ -46,17 +46,8 @@
 #define NOWINSTYLES
 #define WIN32_LEAN_AND_MEAN
 
-#ifdef KINC_WINDOWS
 #include <d3d12.h>
-#else
-#include <kinc/backend/d3d12_special_edition.h>
-#endif
-#ifdef KINC_DIRECT3D_HAS_NO_SWAPCHAIN
-struct DXGI_SWAP_CHAIN_DESC1;
-#else
 #include <dxgi.h>
-#endif
-
 #include "d3d12mini.h"
 
 #ifndef IID_GRAPHICS_PPV_ARGS

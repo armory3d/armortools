@@ -46,17 +46,6 @@ static BasicOpenGLView *view;
 static KincAppDelegate *delegate;
 static struct HIDManager *hidManager;
 
-/*struct KoreWindow : public KoreWindowBase {
-    NSWindow* handle;
-    BasicOpenGLView* view;
-
-    KoreWindow(NSWindow* handle, BasicOpenGLView* view, int x, int y, int width, int height)
-        : KoreWindowBase(x, y, width, height), handle(handle), view(view) {
-        ::view = view;
-    }
-};*/
-
-#ifdef KINC_METAL
 CAMetalLayer *getMetalLayer(void) {
 	return [view metalLayer];
 }
@@ -72,7 +61,6 @@ id getMetalLibrary(void) {
 id getMetalQueue(void) {
 	return [view metalQueue];
 }
-#endif
 
 bool kinc_internal_handle_messages(void) {
 	NSEvent *event = [myapp nextEventMatchingMask:NSAnyEventMask
@@ -92,9 +80,6 @@ bool kinc_internal_handle_messages(void) {
 }
 
 void swapBuffersMac(int windowId) {
-#ifndef KINC_METAL
-	[windows[windowId].view switchBuffers];
-#endif
 }
 
 static int createWindow(kinc_window_options_t *options) {
@@ -185,7 +170,6 @@ int kinc_init(const char *name, int width, int height, kinc_window_options_t *wi
 		addMenubar();
 	}
 
-	// System::_init(name, width, height, &win, &frame);
 	kinc_window_options_t defaultWindowOptions;
 	if (win == NULL) {
 		kinc_window_options_set_defaults(&defaultWindowOptions);

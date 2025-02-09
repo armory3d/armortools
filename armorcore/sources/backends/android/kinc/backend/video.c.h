@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#if KINC_ANDROID_API >= 15 && !defined(KINC_VULKAN)
+#if !defined(KINC_VULKAN)
 #include <OMXAL/OpenMAXAL.h>
 #include <OMXAL/OpenMAXAL_Android.h>
 #endif
@@ -18,7 +18,7 @@
 #include <jni.h>
 #include <kinc/backend/Android.h>
 #include <pthread.h>
-#if KINC_ANDROID_API >= 15 && !defined(KINC_VULKAN)
+#if !defined(KINC_VULKAN)
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
 #include <android/native_window_jni.h>
@@ -46,7 +46,7 @@ bool kinc_internal_video_sound_stream_ended(kinc_internal_video_sound_stream_t *
 	return false;
 }
 
-#if KINC_ANDROID_API >= 15 && !defined(KINC_VULKAN)
+#if !defined(KINC_VULKAN)
 
 #define videosCount 10
 static kinc_video_t *videos[videosCount] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
@@ -431,7 +431,7 @@ void kinc_android_video_shutdown(kinc_android_video_t *video) {
 #endif
 
 JNIEXPORT void JNICALL Java_tech_kinc_KincMoviePlayer_nativeCreate(JNIEnv *env, jobject jobj, jstring jpath, jobject surface, jint id) {
-#if KINC_ANDROID_API >= 15 && !defined(KINC_VULKAN)
+#if !defined(KINC_VULKAN)
 	const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
 	kinc_android_video_t *av = malloc(sizeof *av);
 	kinc_android_video_init(av);
@@ -469,7 +469,7 @@ void KoreAndroidVideoInit() {
 void kinc_video_init(kinc_video_t *video, const char *filename) {
 	video->impl.playing = false;
 	video->impl.sound = NULL;
-#if KINC_ANDROID_API >= 15 && !defined(KINC_VULKAN)
+#if !defined(KINC_VULKAN)
 	kinc_log(KINC_LOG_LEVEL_INFO, "Opening video %s.", filename);
 	video->impl.myWidth = 1023;
 	video->impl.myHeight = 684;
@@ -506,7 +506,7 @@ void kinc_video_init(kinc_video_t *video, const char *filename) {
 }
 
 void kinc_video_destroy(kinc_video_t *video) {
-#if KINC_ANDROID_API >= 15 && !defined(KINC_VULKAN)
+#if !defined(KINC_VULKAN)
 	kinc_video_stop(video);
 	kinc_android_video_t *av = (kinc_android_video_t *)video->impl.androidVideo;
 	kinc_android_video_shutdown(av);
@@ -520,20 +520,20 @@ void kinc_video_destroy(kinc_video_t *video) {
 }
 
 void kinc_video_play(kinc_video_t *video, bool loop) {
-#if KINC_ANDROID_API >= 15 && !defined(KINC_VULKAN)
+#if !defined(KINC_VULKAN)
 	video->impl.playing = true;
 	video->impl.start = kinc_time();
 #endif
 }
 
 void kinc_video_pause(kinc_video_t *video) {
-#if KINC_ANDROID_API >= 15 && !defined(KINC_VULKAN)
+#if !defined(KINC_VULKAN)
 	video->impl.playing = false;
 #endif
 }
 
 void kinc_video_stop(kinc_video_t *video) {
-#if KINC_ANDROID_API >= 15 && !defined(KINC_VULKAN)
+#if !defined(KINC_VULKAN)
 	kinc_video_pause(video);
 #endif
 }
@@ -541,7 +541,7 @@ void kinc_video_stop(kinc_video_t *video) {
 void kinc_video_update(kinc_video_t *video, double time) {}
 
 int kinc_video_width(kinc_video_t *video) {
-#if KINC_ANDROID_API >= 15 && !defined(KINC_VULKAN)
+#if !defined(KINC_VULKAN)
 	return video->impl.myWidth;
 #else
 	return 512;
@@ -549,7 +549,7 @@ int kinc_video_width(kinc_video_t *video) {
 }
 
 int kinc_video_height(kinc_video_t *video) {
-#if KINC_ANDROID_API >= 15 && !defined(KINC_VULKAN)
+#if !defined(KINC_VULKAN)
 	return video->impl.myHeight;
 #else
 	return 512;
@@ -557,7 +557,7 @@ int kinc_video_height(kinc_video_t *video) {
 }
 
 kinc_g4_texture_t *kinc_video_current_image(kinc_video_t *video) {
-#if KINC_ANDROID_API >= 15 && !defined(KINC_VULKAN)
+#if !defined(KINC_VULKAN)
 	return &video->impl.image;
 #else
 	return NULL;

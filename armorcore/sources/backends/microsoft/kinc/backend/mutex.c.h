@@ -22,7 +22,6 @@ void kinc_mutex_unlock(kinc_mutex_t *mutex) {
 }
 
 bool kinc_uber_mutex_init(kinc_uber_mutex_t *mutex, const char *name) {
-#if defined(KINC_WINDOWS)
 	mutex->impl.id = (void *)CreateMutexA(NULL, FALSE, name);
 	HRESULT res = GetLastError();
 	if (res && res != ERROR_ALREADY_EXISTS) {
@@ -31,30 +30,21 @@ bool kinc_uber_mutex_init(kinc_uber_mutex_t *mutex, const char *name) {
 		return false;
 	}
 	return true;
-#else
-	return false;
-#endif
 }
 
 void kinc_uber_mutex_destroy(kinc_uber_mutex_t *mutex) {
-#if defined(KINC_WINDOWS)
 	if (mutex->impl.id) {
 		CloseHandle((HANDLE)mutex->impl.id);
 		mutex->impl.id = NULL;
 	}
-#endif
 }
 
 void kinc_uber_mutex_lock(kinc_uber_mutex_t *mutex) {
-#if defined(KINC_WINDOWS)
 	bool succ = WaitForSingleObject((HANDLE)mutex->impl.id, INFINITE) == WAIT_FAILED ? false : true;
 	assert(succ);
-#endif
 }
 
 void kinc_uber_mutex_unlock(kinc_uber_mutex_t *mutex) {
-#if defined(KINC_WINDOWS)
 	bool succ = ReleaseMutex((HANDLE)mutex->impl.id) == FALSE ? false : true;
 	assert(succ);
-#endif
 }

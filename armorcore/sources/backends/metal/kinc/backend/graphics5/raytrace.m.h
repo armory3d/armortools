@@ -165,11 +165,7 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 		return;
 	}
 
-#if !TARGET_OS_IPHONE
-	MTLResourceOptions options = MTLResourceStorageModeManaged;
-#else
 	MTLResourceOptions options = MTLResourceStorageModeShared;
-#endif
 
 	MTLAccelerationStructureTriangleGeometryDescriptor *descriptor = [MTLAccelerationStructureTriangleGeometryDescriptor descriptor];
 	descriptor.indexType = MTLIndexTypeUInt32;
@@ -195,10 +191,6 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 	instance_descriptors[0].transformationMatrix.columns[1] = MTLPackedFloat3Make(instances[0].m.m[4], instances[0].m.m[5], instances[0].m.m[6]);
 	instance_descriptors[0].transformationMatrix.columns[2] = MTLPackedFloat3Make(instances[0].m.m[8], instances[0].m.m[9], instances[0].m.m[10]);
 	instance_descriptors[0].transformationMatrix.columns[3] = MTLPackedFloat3Make(instances[0].m.m[12], instances[0].m.m[13], instances[0].m.m[14]);
-
-#if !TARGET_OS_IPHONE
-	[instance_buffer didModifyRange:NSMakeRange(0, instance_buffer.length)];
-#endif
 
 	MTLInstanceAccelerationStructureDescriptor *inst_accel_descriptor = [MTLInstanceAccelerationStructureDescriptor descriptor];
 	inst_accel_descriptor.instancedAccelerationStructures = _primitive_accels;
@@ -274,14 +266,4 @@ void kinc_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
 }
 
 void kinc_raytrace_copy(kinc_g5_command_list_t *command_list, kinc_g5_render_target_t *target, kinc_g5_texture_t *source) {
-// 	id<MTLCommandQueue> queue = getMetalQueue();
-// 	id<MTLCommandBuffer> command_buffer = [queue commandBuffer];
-// 	id<MTLBlitCommandEncoder> command_encoder = [command_buffer blitCommandEncoder];
-// 	[command_encoder copyFromTexture:(__bridge id<MTLTexture>)source->impl._tex toTexture:(__bridge id<MTLTexture>)target->impl._tex];
-// #ifndef KINC_APPLE_SOC
-// 	[command_encoder synchronizeResource:(__bridge id<MTLTexture>)target->impl._tex];
-// #endif
-// 	[command_encoder endEncoding];
-// 	[command_buffer commit];
-// 	[command_buffer waitUntilCompleted];
 }

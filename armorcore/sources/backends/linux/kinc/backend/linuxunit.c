@@ -80,15 +80,11 @@ void kinc_linux_init_procs() {
 		procs.count_displays = kinc_wayland_count_displays;
 
 		procs.copy_to_clipboard = kinc_wayland_copy_to_clipboard;
-#ifdef KINC_EGL
-		procs.egl_get_display = kinc_wayland_egl_get_display;
-		procs.egl_get_native_window = kinc_wayland_egl_get_native_window;
-#endif
-#ifdef KINC_VULKAN
+
 		procs.vulkan_create_surface = kinc_wayland_vulkan_create_surface;
 		procs.vulkan_get_instance_extensions = kinc_wayland_vulkan_get_instance_extensions;
 		procs.vulkan_get_physical_device_presentation_support = kinc_wayland_vulkan_get_physical_device_presentation_support;
-#endif
+
 	}
 	else
 #endif
@@ -132,15 +128,9 @@ void kinc_linux_init_procs() {
 		procs.mouse_set_cursor = kinc_x11_mouse_set_cursor;
 
 		procs.copy_to_clipboard = kinc_x11_copy_to_clipboard;
-#ifdef KINC_EGL
-		procs.egl_get_display = kinc_x11_egl_get_display;
-		procs.egl_get_native_window = kinc_x11_egl_get_native_window;
-#endif
-#ifdef KINC_VULKAN
 		procs.vulkan_create_surface = kinc_x11_vulkan_create_surface;
 		procs.vulkan_get_instance_extensions = kinc_x11_vulkan_get_instance_extensions;
 		procs.vulkan_get_physical_device_presentation_support = kinc_x11_vulkan_get_physical_device_presentation_support;
-#endif
 	}
 	else
 #endif

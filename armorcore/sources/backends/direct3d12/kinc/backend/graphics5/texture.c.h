@@ -10,14 +10,6 @@
 
 static const int heapSize = 1024;
 
-#if defined(KINC_WINDOWS)
-/*static int d3d12_textureAlignment() {
-    return D3D12_TEXTURE_DATA_PITCH_ALIGNMENT;
-}*/
-#else
-int d3d12_textureAlignment();
-#endif
-
 void kinc_g5_internal_reset_textures(struct kinc_g5_command_list *list) {
 	for (int i = 0; i < KINC_INTERNAL_G5_TEXTURE_COUNT; ++i) {
 		list->impl.currentRenderTargets[i] = NULL;
@@ -407,13 +399,6 @@ void kinc_g5_texture_unlock(struct kinc_g5_texture *texture) {
 }
 
 int kinc_g5_texture_stride(struct kinc_g5_texture *texture) {
-	/*int baseStride = texture->format == KINC_IMAGE_FORMAT_RGBA32 ? (texture->texWidth * 4) : texture->texWidth;
-	if (texture->format == KINC_IMAGE_FORMAT_GREY8) return texture->texWidth; // please investigate further
-	for (int i = 0;; ++i) {
-	    if (d3d12_textureAlignment() * i >= baseStride) {
-	        return d3d12_textureAlignment() * i;
-	    }
-	}*/
 	return texture->impl.stride;
 }
 

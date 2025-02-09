@@ -157,43 +157,17 @@ void kinc_g5_command_list_render_target_to_texture_barrier(struct kinc_g5_comman
 
 void kinc_g5_command_list_set_vertex_constant_buffer(struct kinc_g5_command_list *list, kinc_g5_constant_buffer_t *buffer, int offset, size_t size) {
 	assert(list->impl.open);
-
-#ifdef KINC_DXC
-	if (list->impl._currentPipeline->impl.vertexConstantsSize > 0) {
-		if (list->impl._currentPipeline->impl.textures > 0) {
-			list->impl._commandList->SetGraphicsRootConstantBufferView(2, buffer->impl.constant_buffer->GetGPUVirtualAddress() + offset);
-		}
-		else {
-			list->impl._commandList->SetGraphicsRootConstantBufferView(0, buffer->impl.constant_buffer->GetGPUVirtualAddress() + offset);
-		}
-	}
-#else
 	list->impl._commandList->SetGraphicsRootConstantBufferView(2, buffer->impl.constant_buffer->GetGPUVirtualAddress() + offset);
-#endif
 }
 
 void kinc_g5_command_list_set_fragment_constant_buffer(struct kinc_g5_command_list *list, kinc_g5_constant_buffer_t *buffer, int offset, size_t size) {
 	assert(list->impl.open);
-
-#ifdef KINC_DXC
-	if (list->impl._currentPipeline->impl.fragmentConstantsSize > 0) {
-		list->impl._commandList->SetGraphicsRootConstantBufferView(3, buffer->impl.constant_buffer->GetGPUVirtualAddress() + offset);
-	}
-#else
 	list->impl._commandList->SetGraphicsRootConstantBufferView(3, buffer->impl.constant_buffer->GetGPUVirtualAddress() + offset);
-#endif
 }
 
 void kinc_g5_command_list_set_compute_constant_buffer(struct kinc_g5_command_list *list, kinc_g5_constant_buffer_t *buffer, int offset, size_t size) {
 	assert(list->impl.open);
-
-#ifdef KINC_DXC
-	if (list->impl._currentPipeline->impl.fragmentConstantsSize > 0) {
-		list->impl._commandList->SetGraphicsRootConstantBufferView(3, buffer->impl.constant_buffer->GetGPUVirtualAddress() + offset);
-	}
-#else
 	list->impl._commandList->SetComputeRootConstantBufferView(3, buffer->impl.constant_buffer->GetGPUVirtualAddress() + offset);
-#endif
 }
 
 void kinc_g5_command_list_draw_indexed_vertices(struct kinc_g5_command_list *list) {
@@ -204,28 +178,6 @@ void kinc_g5_command_list_draw_indexed_vertices_from_to(struct kinc_g5_command_l
 	assert(list->impl.open);
 
 	list->impl._commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	/*u8* data;
-	D3D12_RANGE range;
-	range.Begin = currentConstantBuffer * sizeof(vertexConstants);
-	range.End = range.Begin + sizeof(vertexConstants);
-	vertexConstantBuffer->Map(0, &range, (void**)&data);
-	memcpy(data + currentConstantBuffer * sizeof(vertexConstants), vertexConstants, sizeof(vertexConstants));
-	vertexConstantBuffer->Unmap(0, &range);
-
-	range.Begin = currentConstantBuffer * sizeof(fragmentConstants);
-	range.End = range.Begin + sizeof(fragmentConstants);
-	fragmentConstantBuffer->Map(0, &range, (void**)&data);
-	memcpy(data + currentConstantBuffer * sizeof(fragmentConstants), fragmentConstants, sizeof(fragmentConstants));
-	fragmentConstantBuffer->Unmap(0, &range);
-
-	_commandList->SetGraphicsRootConstantBufferView(1, vertexConstantBuffer->GetGPUVirtualAddress() + currentConstantBuffer * sizeof(vertexConstants));
-	_commandList->SetGraphicsRootConstantBufferView(2, fragmentConstantBuffer->GetGPUVirtualAddress() + currentConstantBuffer * sizeof(fragmentConstants));
-
-	++currentConstantBuffer;
-	if (currentConstantBuffer >= constantBufferMultiply) {
-	    currentConstantBuffer = 0;
-	}*/
 
 	list->impl._commandList->DrawIndexedInstanced(count, 1, start, 0, 0);
 }
@@ -423,13 +375,9 @@ void kinc_g5_command_list_upload_texture(kinc_g5_command_list_t *list, kinc_g5_t
 	}
 }
 
-#if defined(KINC_WINDOWS)
 static int d3d12_textureAlignment() {
 	return D3D12_TEXTURE_DATA_PITCH_ALIGNMENT;
 }
-#else
-extern "C" int d3d12_textureAlignment();
-#endif
 
 void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list, kinc_g5_render_target_t *render_target, uint8_t *data) {
 	assert(list->impl.open);

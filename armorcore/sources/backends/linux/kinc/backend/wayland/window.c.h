@@ -11,11 +11,6 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
-#ifdef KINC_EGL
-#define EGL_NO_PLATFORM_SPECIFIC_TYPES
-#include <EGL/egl.h>
-#endif
-
 static void xdg_surface_handle_configure(void *data, struct xdg_surface *surface, uint32_t serial) {
 	xdg_surface_ack_configure(surface, serial);
 	struct kinc_wl_window *window = data;
@@ -64,9 +59,6 @@ static void xdg_toplevel_handle_configure(void *data, struct xdg_toplevel *tople
 		                                window->width + (KINC_WL_DECORATION_WIDTH * 2),
 		                                window->height + KINC_WL_DECORATION_TOP_HEIGHT + KINC_WL_DECORATION_BOTTOM_HEIGHT);
 	}
-#ifdef KINC_EGL
-	wl_egl_window_resize(window->egl_window, window->width, window->height, 0, 0);
-#endif
 
 	kinc_wayland_resize_decoration(&window->decorations.top, KINC_WL_DECORATION_TOP_X, KINC_WL_DECORATION_TOP_Y, KINC_WL_DECORATION_TOP_WIDTH,
 	                               KINC_WL_DECORATION_TOP_HEIGHT);
@@ -363,9 +355,6 @@ int kinc_wayland_window_create(kinc_window_options_t *win, kinc_framebuffer_opti
 		kinc_wayland_create_decorations(window);
 	}
 
-#ifdef KINC_EGL
-	window->egl_window = wl_egl_window_create(window->surface, window->width, window->height);
-#endif
 	wl_surface_commit(window->surface);
 	kinc_wayland_window_change_mode(window_index, win->mode);
 	wl_ctx.num_windows++;
@@ -379,9 +368,6 @@ int kinc_wayland_window_create(kinc_window_options_t *win, kinc_framebuffer_opti
 
 void kinc_wayland_window_destroy(int window_index) {
 	struct kinc_wl_window *window = &wl_ctx.windows[window_index];
-#ifdef KINC_EGL
-	wl_egl_window_destroy(window->egl_window);
-#endif
 	if (window->xdg_decoration) {
 		zxdg_toplevel_decoration_v1_destroy(window->xdg_decoration);
 	}

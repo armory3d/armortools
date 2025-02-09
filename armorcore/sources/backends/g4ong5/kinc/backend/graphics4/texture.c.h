@@ -33,11 +33,9 @@ void kinc_g4_texture_destroy(kinc_g4_texture_t *texture) {
 }
 
 void kinc_g4_internal_texture_unset(kinc_g4_texture_t *texture) {
-	// TODO
 }
 
 void kinc_g4_internal_texture_unmipmap(kinc_g4_texture_t *texture) {
-	// TODO
 }
 
 uint8_t *kinc_g4_texture_lock(kinc_g4_texture_t *texture) {

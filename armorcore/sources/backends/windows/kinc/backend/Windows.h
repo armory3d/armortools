@@ -2,10 +2,6 @@
 
 #include <stdbool.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 struct HMONITOR__;
 struct HWND__;
 
@@ -19,7 +15,3 @@ struct HWND__ *kinc_windows_window_handle(int window_index);
 int kinc_windows_window_index_from_hwnd(struct HWND__ *handle);
 int kinc_windows_manual_width(int window);
 int kinc_windows_manual_height(int window);
-
-#ifdef __cplusplus
-}
-#endif

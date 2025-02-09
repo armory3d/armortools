@@ -49,9 +49,7 @@ void kinc_g5_shader_init(kinc_g5_shader_t *shader, const void *_data, size_t len
 		index += 4;
 		memcpy(&constant.size, &data[index], sizeof(constant.size));
 		index += 4;
-#ifdef KINC_WINDOWS
 		index += 2; // columns and rows
-#endif
 		strcpy(constant.name, name);
 		shader->impl.constants[i] = constant;
 		shader->impl.constantsSize = constant.offset + constant.size;

@@ -28,16 +28,8 @@ void kinc_g5_vertex_buffer_init(kinc_g5_vertex_buffer_t *buffer, int count, kinc
 
 	id<MTLDevice> device = getMetalDevice();
 	MTLResourceOptions options = MTLResourceCPUCacheModeWriteCombined;
-#ifdef KINC_APPLE_SOC
 	options |= MTLResourceStorageModeShared;
-#else
-	if (gpuMemory) {
-		options |= MTLResourceStorageModeManaged;
-	}
-	else {
-		options |= MTLResourceStorageModeShared;
-	}
-#endif
+
 	id<MTLBuffer> buf = [device newBufferWithLength:count * buffer->impl.myStride options:options];
 	buffer->impl.mtlBuffer = (__bridge_retained void *)buf;
 
@@ -69,27 +61,9 @@ float *kinc_g5_vertex_buffer_lock(kinc_g5_vertex_buffer_t *buf, int start, int c
 }
 
 void kinc_g5_vertex_buffer_unlock_all(kinc_g5_vertex_buffer_t *buf) {
-#ifndef KINC_APPLE_SOC
-	if (buf->impl.gpuMemory) {
-		id<MTLBuffer> buffer = (__bridge id<MTLBuffer>)buf->impl.mtlBuffer;
-		NSRange range;
-		range.location = buf->impl.lastStart * buf->impl.myStride;
-		range.length = buf->impl.lastCount * buf->impl.myStride;
-		[buffer didModifyRange:range];
-	}
-#endif
 }
 
 void kinc_g5_vertex_buffer_unlock(kinc_g5_vertex_buffer_t *buf, int count) {
-#ifndef KINC_APPLE_SOC
-	if (buf->impl.gpuMemory) {
-		id<MTLBuffer> buffer = (__bridge id<MTLBuffer>)buf->impl.mtlBuffer;
-		NSRange range;
-		range.location = buf->impl.lastStart * buf->impl.myStride;
-		range.length = count * buf->impl.myStride;
-		[buffer didModifyRange:range];
-	}
-#endif
 }
 
 int kinc_g5_internal_vertex_buffer_set(kinc_g5_vertex_buffer_t *buf, int offset_) {

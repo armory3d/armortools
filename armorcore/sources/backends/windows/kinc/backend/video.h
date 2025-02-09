@@ -1,9 +1,5 @@
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct {
 	void *renderer;
 	double duration;
@@ -25,7 +21,3 @@ void kinc_internal_video_sound_stream_insert_data(kinc_internal_video_sound_stre
 float *kinc_internal_video_sound_stream_next_frame(kinc_internal_video_sound_stream_t *stream);
 
 bool kinc_internal_video_sound_stream_ended(kinc_internal_video_sound_stream_t *stream);
-
-#ifdef __cplusplus
-}
-#endif

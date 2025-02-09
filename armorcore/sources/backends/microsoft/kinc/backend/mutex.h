@@ -1,9 +1,5 @@
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct {
 	void *DebugInfo;
 	long LockCount;
@@ -20,7 +16,3 @@ typedef struct {
 typedef struct {
 	void *id;
 } kinc_uber_mutex_impl_t;
-
-#ifdef __cplusplus
-}
-#endif

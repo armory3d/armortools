@@ -406,10 +406,6 @@ void kinc_g4_end(int window) {
 	kinc_g5_command_list_begin(&commandList);
 }
 
-/*void Graphics4::_changeFramebuffer(int window, Kore::FramebufferOptions* frame) {
-
-}*/
-
 bool kinc_g4_swap_buffers(void) {
 	return kinc_g5_swap_buffers();
 }

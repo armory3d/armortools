@@ -10,7 +10,6 @@ typedef struct {
 	void *_reflection;
 	void *_depthStencil;
 	void *_depthStencilNone;
-	// void _set();
 } PipelineState5Impl;
 
 typedef struct {

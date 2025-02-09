@@ -7,92 +7,30 @@
 #include <kinc/graphics5/pipeline.h>
 #include <kinc/math/core.h>
 #include <kinc/window.h>
-#ifdef KINC_WINDOWS
 #include <dxgi1_4.h>
 #undef CreateWindow
-#endif
 #include <kinc/system.h>
-#ifdef KINC_WINDOWS
 #include <kinc/backend/Windows.h>
-#endif
 #include <kinc/backend/SystemMicrosoft.h>
-
-/*IDXGIFactory4* dxgiFactory;
-ID3D12Device* device;
-ID3D12GraphicsCommandList* commandList;
-ID3D12CommandQueue* commandQueue;
-ID3D12CommandAllocator* commandAllocators[frameCount];
-unsigned currentFrame = 0;
-ID3D12Fence* fence;
-UINT64 window->current_fence_value[frameCount];
-HANDLE fenceEvent;
-ID3D12Resource* renderTargets[frameCount];
-ID3D12DescriptorHeap* rtvHeap;
-unsigned rtvDescriptorSize;
-ID3D12CommandAllocator* bundleAllocator;
-ID3D12RootSignature* rootSignature;
-D3D12_VIEWPORT screenViewport;
-D3D12_RECT scissorRect;
-ID3D12DescriptorHeap* cbvHeap;*/
-// ID3D12DeviceContext* context;
-// ID3D12RenderTargetView* renderTargetView;
-// ID3D12DepthStencilView* depthStencilView;
-
-// ID3D12GraphicsCommandList* commandList;
 
 extern "C" {
 ID3D12CommandQueue *commandQueue;
-#ifdef KINC_DIRECT3D_HAS_NO_SWAPCHAIN
-ID3D12Resource *swapChainRenderTargets[QUEUE_SLOT_COUNT];
-#else
-// IDXGISwapChain *swapChain;
-#endif
 }
-
-// int window->width;
-// int window->height;
-// int window->new_width;
-// int window->new_height;
-
-#ifndef KINC_WINDOWS
-#define DXGI_SWAP_CHAIN_DESC DXGI_SWAP_CHAIN_DESC1
-#define IDXGISwapChain IDXGISwapChain1
-#endif
 
 struct RenderEnvironment {
 	ID3D12Device *device;
 	ID3D12CommandQueue *queue;
-#ifdef KINC_DIRECT3D_HAS_NO_SWAPCHAIN
-	ID3D12Resource *renderTargets[QUEUE_SLOT_COUNT];
-#else
 	IDXGISwapChain *swapChain;
-#endif
 };
 
-#ifndef KINC_WINDOWS
-#ifdef KINC_DIRECT3D_HAS_NO_SWAPCHAIN
-extern "C" void createSwapChain(struct RenderEnvironment *env, int bufferCount);
-#else
-extern "C" void createSwapChain(struct RenderEnvironment *env, const DXGI_SWAP_CHAIN_DESC1 *desc);
-#endif
-#endif
-
 extern bool bilinearFiltering;
-
-// ID3D12Resource* renderTarget;
-// ID3D12DescriptorHeap* renderTargetDescriptorHeap;
-
-// static UINT64 window->current_fence_value;
-// static UINT64 window->current_fence_value[QUEUE_SLOT_COUNT];
-// static HANDLE window->frame_fence_events[QUEUE_SLOT_COUNT];
-// static ID3D12Fence *window->frame_fences[QUEUE_SLOT_COUNT];
 static ID3D12Fence *uploadFence;
 static ID3D12GraphicsCommandList *initCommandList;
 static ID3D12CommandAllocator *initCommandAllocator;
 
 extern "C" struct RenderEnvironment createDeviceAndSwapChainHelper(D3D_FEATURE_LEVEL minimumFeatureLevel, const struct DXGI_SWAP_CHAIN_DESC *swapChainDesc) {
 	struct RenderEnvironment result = {0};
-#ifdef KINC_WINDOWS
+
 	kinc_microsoft_affirm(D3D12CreateDevice(NULL, minimumFeatureLevel, IID_PPV_ARGS(&result.device)));
 
 	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
@@ -106,13 +44,7 @@ extern "C" struct RenderEnvironment createDeviceAndSwapChainHelper(D3D_FEATURE_L
 
 	DXGI_SWAP_CHAIN_DESC swapChainDescCopy = *swapChainDesc;
 	kinc_microsoft_affirm(dxgiFactory->CreateSwapChain((IUnknown *)result.queue, &swapChainDescCopy, &result.swapChain));
-#else
-#ifdef KINC_DIRECT3D_HAS_NO_SWAPCHAIN
-	createSwapChain(&result, QUEUE_SLOT_COUNT);
-#else
-	createSwapChain(&result, swapChainDesc);
-#endif
-#endif
+
 	return result;
 }
 
@@ -124,12 +56,6 @@ static void waitForFence(ID3D12Fence *fence, UINT64 completionValue, HANDLE wait
 }
 
 extern "C" void setupSwapChain(struct dx_window *window) {
-	/*D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
-	heapDesc.NumDescriptors = 1;
-	heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-	heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	device->CreateDescriptorHeap(&heapDesc, IID_GRAPHICS_PPV_ARGS(&renderTargetDescriptorHeap));*/
-
 	D3D12_RESOURCE_DESC depthTexture = {};
 	depthTexture.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	depthTexture.Alignment = 0;
@@ -398,7 +324,6 @@ static void shutdown() {
 	}
 }
 
-#ifdef KINC_WINDOWS
 static void initWindow(struct dx_window *window, int windowIndex) {
 	HWND hwnd = kinc_windows_window_handle(windowIndex);
 
@@ -422,21 +347,17 @@ static void initWindow(struct dx_window *window, int windowIndex) {
 
 	setupSwapChain(window);
 }
-#endif
 
 void kinc_g5_internal_destroy_window(int window) {}
 
 void kinc_g5_internal_destroy() {
-#ifdef KINC_WINDOWS
 	if (device) {
 		device->Release();
 		device = NULL;
 	}
-#endif
 }
 
 void kinc_g5_internal_init() {
-#ifdef KINC_WINDOWS
 #ifdef _DEBUG
 	ID3D12Debug *debugController = NULL;
 	if (D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)) == S_OK) {
@@ -473,7 +394,6 @@ void kinc_g5_internal_init() {
 	initCommandAllocator->Release(); // check me
 
 	CloseHandle(waitEvent);
-#endif
 }
 
 void kinc_g5_internal_init_window(int windowIndex, int depthBufferBits, bool verticalSync) {
@@ -482,24 +402,12 @@ void kinc_g5_internal_init_window(int windowIndex, int depthBufferBits, bool ver
 	window->vsync = verticalSync;
 	window->width = window->new_width = kinc_window_width(windowIndex);
 	window->height = window->new_height = kinc_window_height(windowIndex);
-#ifdef KINC_WINDOWS
 	initWindow(window, windowIndex);
-#else
-	HWND hwnd = NULL;
-	window->vsync = verticalSync;
-	window->new_width = window->width = kinc_width();
-	window->new_height = window->height = kinc_height();
-	initialize(window);
-#endif
 }
 
 int kinc_g5_max_bound_textures(void) {
 	return D3D12_COMMONSHADER_SAMPLER_SLOT_COUNT;
 }
-
-#ifndef KINC_WINDOWS
-extern "C" void kinc_internal_wait_for_frame();
-#endif
 
 static bool began = false;
 
@@ -508,19 +416,15 @@ void kinc_g5_begin(kinc_g5_render_target_t *renderTarget, int windowId) {
 		return;
 	began = true;
 
-#ifndef KINC_WINDOWS
-	kinc_internal_wait_for_frame();
-#endif
-
 	struct dx_window *window = &dx_ctx.windows[windowId];
 	dx_ctx.current_window = windowId;
 
 	window->current_backbuffer = (window->current_backbuffer + 1) % QUEUE_SLOT_COUNT;
 
 	if (window->new_width != window->width || window->new_height != window->height) {
-#ifndef KINC_DIRECT3D_HAS_NO_SWAPCHAIN
+
 		kinc_microsoft_affirm(window->swapChain->ResizeBuffers(QUEUE_SLOT_COUNT, window->new_width, window->new_height, DXGI_FORMAT_R8G8B8A8_UNORM, 0));
-#endif
+
 		setupSwapChain(window);
 		window->width = window->new_width;
 		window->height = window->new_height;
@@ -570,7 +474,6 @@ extern "C" void kinc_internal_resize(int windowId, int width, int height) {
 
 extern "C" void kinc_internal_change_framebuffer(int window, kinc_framebuffer_options_t *frame) {}
 
-#ifndef KINC_DIRECT3D_HAS_NO_SWAPCHAIN
 bool kinc_g5_swap_buffers() {
 	for (int i = 0; i < MAXIMUM_WINDOWS; i++) {
 		struct dx_window *window = &dx_ctx.windows[i];
@@ -580,7 +483,6 @@ bool kinc_g5_swap_buffers() {
 	}
 	return true;
 }
-#endif
 
 void kinc_g5_flush() {}
 

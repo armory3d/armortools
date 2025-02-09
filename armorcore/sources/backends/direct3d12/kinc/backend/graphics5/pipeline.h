@@ -14,38 +14,12 @@ struct ID3D12RootSignature;
 
 typedef struct {
 	struct ID3D12PipelineState *pso;
-#ifdef KINC_DXC
-	// struct ID3D12RootSignature *rootSignature;
-	int vertexConstantsSize;
-	int fragmentConstantsSize;
-#endif
 	int textures;
-	// ID3D11InputLayout* inputLayout;
-	// ID3D11Buffer* fragmentConstantBuffer;
-	// ID3D11Buffer* vertexConstantBuffer;
-	// ID3D11Buffer* geometryConstantBuffer;
-	// ID3D11Buffer* tessEvalConstantBuffer;
-	// ID3D11Buffer* tessControlConstantBuffer;
-
-	// static void setConstants(ID3D12GraphicsCommandList *commandList, Graphics5::PipelineState *pipeline);
 } PipelineState5Impl;
 
 typedef struct {
 	struct ID3D12PipelineState *pso;
-#ifdef KINC_DXC
-	struct ID3D12RootSignature *rootSignature;
-	int vertexConstantsSize;
-	int fragmentConstantsSize;
-#endif
 	int textures;
-	// ID3D11InputLayout* inputLayout;
-	// ID3D11Buffer* fragmentConstantBuffer;
-	// ID3D11Buffer* vertexConstantBuffer;
-	// ID3D11Buffer* geometryConstantBuffer;
-	// ID3D11Buffer* tessEvalConstantBuffer;
-	// ID3D11Buffer* tessControlConstantBuffer;
-
-	// static void setConstants(ID3D12GraphicsCommandList *commandList, Graphics5::PipelineState *pipeline);
 } ComputePipelineState5Impl;
 
 typedef struct {

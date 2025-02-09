@@ -861,17 +861,6 @@ void kinc_x11_copy_to_clipboard(const char *text) {
 	strcpy(clipboardString, text);
 }
 
-#ifdef KINC_EGL
-EGLDisplay kinc_x11_egl_get_display() {
-	return eglGetDisplay(x11_ctx.display);
-}
-
-EGLNativeWindowType kinc_x11_egl_get_native_window(EGLDisplay display, EGLConfig config, int window_index) {
-	return (EGLNativeWindowType)x11_ctx.windows[window_index].window;
-}
-#endif
-
-#ifdef KINC_VULKAN
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_xlib.h>
 VkResult kinc_x11_vulkan_create_surface(VkInstance instance, int window_index, VkSurfaceKHR *surface) {
@@ -895,7 +884,6 @@ VkBool32 kinc_x11_vulkan_get_physical_device_presentation_support(VkPhysicalDevi
 	return vkGetPhysicalDeviceXlibPresentationSupportKHR(physicalDevice, queueFamilyIndex, x11_ctx.display,
 	                                                     DefaultVisual(x11_ctx.display, DefaultScreen(x11_ctx.display))->visualid);
 }
-#endif
 
 void kinc_x11_mouse_lock(int window) {
 	kinc_mouse_hide();

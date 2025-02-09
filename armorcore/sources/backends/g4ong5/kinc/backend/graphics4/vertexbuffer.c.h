@@ -21,11 +21,6 @@ void kinc_g4_vertex_buffer_destroy(kinc_g4_vertex_buffer_t *buffer) {
 }
 
 static void prepareLock(kinc_g4_vertex_buffer_t *buffer) {
-	/*if (frameNumber > _lastFrameNumber) {
-	    _lastFrameNumber = frameNumber;
-	    _currentIndex = 0;
-	}
-	else {*/
 	++buffer->impl._currentIndex;
 	if (buffer->impl._currentIndex >= buffer->impl._multiple - 1) {
 		waitAfterNextDraw = true;
@@ -33,7 +28,6 @@ static void prepareLock(kinc_g4_vertex_buffer_t *buffer) {
 	if (buffer->impl._currentIndex >= buffer->impl._multiple) {
 		buffer->impl._currentIndex = 0;
 	}
-	//}
 }
 
 float *kinc_g4_vertex_buffer_lock_all(kinc_g4_vertex_buffer_t *buffer) {

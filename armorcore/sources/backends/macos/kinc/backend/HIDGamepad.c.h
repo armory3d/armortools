@@ -187,12 +187,6 @@ void HIDGamepad_bind(struct HIDGamepad *gamepad, IOHIDDeviceRef inDeviceRef, int
 		cstringFromCFStringRef(productRef, gamepad->hidDeviceProduct, sizeof(gamepad->hidDeviceProduct));
 	}
 
-	// Initialise Kore::Gamepad for this HID Device
-	//**
-	/*Gamepad *gamepad = Gamepad::get(padIndex);
-	gamepad->vendor 	 = hidDeviceVendor;
-	gamepad->productName = hidDeviceProduct;*/
-
 	kinc_log(KINC_LOG_LEVEL_INFO, "HIDGamepad.bind: <%p> idx:%d [0x%x:0x%x] [%s] [%s]", inDeviceRef, gamepad->padIndex, gamepad->hidDeviceVendorID,
 	         gamepad->hidDeviceProductID, gamepad->hidDeviceVendor, gamepad->hidDeviceProduct);
 }
@@ -214,27 +208,21 @@ static void initDeviceElements(struct HIDGamepad *gamepad, CFArrayRef elements) 
 		case kHIDPage_GenericDesktop:
 			switch (usage) {
 			case kHIDUsage_GD_X: // Left stick X
-				// log(Info, "Left stick X axis[0] = %i", cookie);
 				gamepad->axis[0] = cookie;
 				break;
 			case kHIDUsage_GD_Y: // Left stick Y
-				// log(Info, "Left stick Y axis[1] = %i", cookie);
 				gamepad->axis[1] = cookie;
 				break;
 			case kHIDUsage_GD_Z: // Left trigger
-				// log(Info, "Left trigger axis[4] = %i", cookie);
 				gamepad->axis[4] = cookie;
 				break;
 			case kHIDUsage_GD_Rx: // Right stick X
-				// log(Info, "Right stick X axis[2] = %i", cookie);
 				gamepad->axis[2] = cookie;
 				break;
 			case kHIDUsage_GD_Ry: // Right stick Y
-				// log(Info, "Right stick Y axis[3] = %i", cookie);
 				gamepad->axis[3] = cookie;
 				break;
 			case kHIDUsage_GD_Rz: // Right trigger
-				// log(Info, "Right trigger axis[5] = %i", cookie);
 				gamepad->axis[5] = cookie;
 				break;
 			case kHIDUsage_GD_Hatswitch:
@@ -247,7 +235,6 @@ static void initDeviceElements(struct HIDGamepad *gamepad, CFArrayRef elements) 
 			if ((usage >= 1) && (usage <= 15)) {
 				// Button 1-11
 				gamepad->buttons[usage - 1] = cookie;
-				// log(Info, "Button %i = %i", usage-1, cookie);
 			}
 			break;
 		default:
@@ -276,10 +263,6 @@ void HIDGamepad_unbind(struct HIDGamepad *gamepad) {
 	}
 
 	if (gamepad->padIndex >= 0) {
-		//**
-		/*Gamepad *gamepad = Gamepad::get(padIndex);
-		gamepad->vendor 	 = nullptr;
-		gamepad->productName = nullptr;*/
 	}
 
 	reset(gamepad);
@@ -307,8 +290,6 @@ static void buttonChanged(struct HIDGamepad *gamepad, IOHIDElementRef elementRef
 	double max = IOHIDElementGetLogicalMax(elementRef);
 	double normalize = (rawValue - min) / (max - min);
 
-	// log(Info, "%f %f %f %f", rawValue, min, max, normalize);
-
 	kinc_internal_gamepad_trigger_button(gamepad->padIndex, buttonIndex, normalize);
 
 	if (debugButtonInput)
@@ -328,8 +309,6 @@ static void axisChanged(struct HIDGamepad *gamepad, IOHIDElementRef elementRef, 
 	if (axisIndex % 2 == 1)
 		normalize = -normalize;
 
-	// log(Info, "%f %f %f %f", rawValue, min, max, normalize);
-
 	kinc_internal_gamepad_trigger_axis(gamepad->padIndex, axisIndex, normalize);
 
 	if (debugAxisInput)
@@ -347,13 +326,8 @@ static void valueAvailableCallback(void *inContext, IOReturn inResult, void *inS
 
 		// process the HID value reference
 		IOHIDElementRef elementRef = IOHIDValueGetElement(valueRef);
-		// IOHIDElementType elemType = IOHIDElementGetType(elementRef);
-		// log(Info, "Type %d %d\n", elemType, elementRef);
 
 		IOHIDElementCookie cookie = IOHIDElementGetCookie(elementRef);
-		// uint32_t page = IOHIDElementGetUsagePage(elementRef);
-		// uint32_t usage = IOHIDElementGetUsage(elementRef);
-		// log(Info, "page %i, usage %i cookie %i", page, usage, cookie);
 
 		// Check button
 		for (int i = 0, c = sizeof(pad->buttons); i < c; ++i) {

@@ -69,17 +69,12 @@ static VkBool32 vkDebugUtilsMessengerCallbackEXT(VkDebugUtilsMessageSeverityFlag
 
 #ifndef KINC_ANDROID
 static VKAPI_ATTR void *VKAPI_CALL myrealloc(void *pUserData, void *pOriginal, size_t size, size_t alignment, VkSystemAllocationScope allocationScope) {
-#ifdef _MSC_VER
-	return _aligned_realloc(pOriginal, size, alignment);
-#else
+	// return _aligned_realloc(pOriginal, size, alignment);
 	return realloc(pOriginal, size);
-#endif
 }
 
 static VKAPI_ATTR void *VKAPI_CALL myalloc(void *pUserData, size_t size, size_t alignment, VkSystemAllocationScope allocationScope) {
-#ifdef _MSC_VER
-	return _aligned_malloc(size, alignment);
-#else
+	// return _aligned_malloc(size, alignment);
 	void *ptr;
 
 	if (alignment % sizeof(void *) != 0) {
@@ -90,15 +85,11 @@ static VKAPI_ATTR void *VKAPI_CALL myalloc(void *pUserData, size_t size, size_t 
 		return NULL;
 	}
 	return ptr;
-#endif
 }
 
 static VKAPI_ATTR void VKAPI_CALL myfree(void *pUserData, void *pMemory) {
-#ifdef _MSC_VER
-	_aligned_free(pMemory);
-#else
+	// _aligned_free(pMemory);
 	free(pMemory);
-#endif
 }
 #endif
 
@@ -673,10 +664,11 @@ void kinc_g5_internal_init() {
 	app.applicationVersion = 0;
 	app.pEngineName = "Kore";
 	app.engineVersion = 0;
-#ifdef KINC_VKRT
-	app.apiVersion = VK_API_VERSION_1_2;
+
+#ifdef KINC_ANDROID
+	app.apiVersion = VK_API_VERSION_1_0; // VK_API_VERSION_1_1
 #else
-	app.apiVersion = VK_API_VERSION_1_0;
+	app.apiVersion = VK_API_VERSION_1_2; // VKRT
 #endif
 
 	VkInstanceCreateInfo info = {0};
@@ -836,15 +828,15 @@ void kinc_g5_internal_init() {
 	// Allows negative viewport height to flip viewport
 	wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_MAINTENANCE1_EXTENSION_NAME;
 
-#ifdef KINC_VKRT
-	wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME;
-	wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME;
-	wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME;
-	wanted_device_extensions[wanted_device_extension_count++] = VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME;
-	wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME;
-	wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_SPIRV_1_4_EXTENSION_NAME;
-	wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME;
-#endif
+	if (kinc_g5_supports_raytracing()) {
+		wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME;
+		wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME;
+		wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME;
+		wanted_device_extensions[wanted_device_extension_count++] = VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME;
+		wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME;
+		wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_SPIRV_1_4_EXTENSION_NAME;
+		wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME;
+	}
 
 #ifndef VK_KHR_FORMAT_FEATURE_FLAGS_2_EXTENSION_NAME // For Dave's Debian
 #define VK_KHR_FORMAT_FEATURE_FLAGS_2_EXTENSION_NAME "VK_KHR_format_feature_flags2"
@@ -986,24 +978,24 @@ void kinc_g5_internal_init() {
 			deviceinfo.enabledExtensionCount = wanted_device_extension_count;
 			deviceinfo.ppEnabledExtensionNames = (const char *const *)wanted_device_extensions;
 
-#ifdef KINC_VKRT
-			VkPhysicalDeviceRayTracingPipelineFeaturesKHR rayTracingPipelineExt = {0};
-			rayTracingPipelineExt.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
-			rayTracingPipelineExt.pNext = NULL;
-			rayTracingPipelineExt.rayTracingPipeline = VK_TRUE;
+			if (kinc_g5_supports_raytracing()) {
+				VkPhysicalDeviceRayTracingPipelineFeaturesKHR rayTracingPipelineExt = {0};
+				rayTracingPipelineExt.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
+				rayTracingPipelineExt.pNext = NULL;
+				rayTracingPipelineExt.rayTracingPipeline = VK_TRUE;
 
-			VkPhysicalDeviceAccelerationStructureFeaturesKHR rayTracingAccelerationStructureExt = {0};
-			rayTracingAccelerationStructureExt.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
-			rayTracingAccelerationStructureExt.pNext = &rayTracingPipelineExt;
-			rayTracingAccelerationStructureExt.accelerationStructure = VK_TRUE;
+				VkPhysicalDeviceAccelerationStructureFeaturesKHR rayTracingAccelerationStructureExt = {0};
+				rayTracingAccelerationStructureExt.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+				rayTracingAccelerationStructureExt.pNext = &rayTracingPipelineExt;
+				rayTracingAccelerationStructureExt.accelerationStructure = VK_TRUE;
 
-			VkPhysicalDeviceBufferDeviceAddressFeatures bufferDeviceAddressExt = {0};
-			bufferDeviceAddressExt.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
-			bufferDeviceAddressExt.pNext = &rayTracingAccelerationStructureExt;
-			bufferDeviceAddressExt.bufferDeviceAddress = VK_TRUE;
+				VkPhysicalDeviceBufferDeviceAddressFeatures bufferDeviceAddressExt = {0};
+				bufferDeviceAddressExt.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
+				bufferDeviceAddressExt.pNext = &rayTracingAccelerationStructureExt;
+				bufferDeviceAddressExt.bufferDeviceAddress = VK_TRUE;
 
-			deviceinfo.pNext = &bufferDeviceAddressExt;
-#endif
+				deviceinfo.pNext = &bufferDeviceAddressExt;
+			}
 
 			err = vkCreateDevice(vk_ctx.gpu, &deviceinfo, NULL, &vk_ctx.device);
 			assert(!err);
@@ -1202,10 +1194,10 @@ bool kinc_vulkan_internal_get_size(int *width, int *height) {
 }
 
 bool kinc_g5_supports_raytracing() {
-#ifdef KINC_VKRT
-	return true;
-#else
+#ifdef KINC_ANDROID
 	return false;
+#else
+	return true;
 #endif
 }
 

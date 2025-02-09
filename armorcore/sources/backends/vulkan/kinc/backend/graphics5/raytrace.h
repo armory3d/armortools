@@ -4,10 +4,6 @@
 
 #include "MiniVulkan.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct {
 	VkPipeline pipeline;
 	VkPipelineLayout pipeline_layout;
@@ -32,9 +28,5 @@ typedef struct {
 	VkDeviceMemory instances_mem;
 
 } kinc_raytrace_acceleration_structure_impl_t;
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

@@ -13,20 +13,16 @@ static GLView *glView;
 static bool visible;
 
 void beginGL(void) {
-#ifdef KINC_METAL
 	if (!visible) {
 		return;
 	}
-#endif
 	[glView begin];
 }
 
 void endGL(void) {
-#ifdef KINC_METAL
 	if (!visible) {
 		return;
 	}
-#endif
 	[glView end];
 }
 
@@ -37,8 +33,6 @@ void showKeyboard(void) {
 void hideKeyboard(void) {
 	[glView hideKeyboard];
 }
-
-#ifdef KINC_METAL
 
 CAMetalLayer *getMetalLayer(void) {
 	return [glView metalLayer];
@@ -55,8 +49,6 @@ id getMetalLibrary(void) {
 id getMetalQueue(void) {
 	return [glView metalQueue];
 }
-
-#endif
 
 @implementation GLViewController
 

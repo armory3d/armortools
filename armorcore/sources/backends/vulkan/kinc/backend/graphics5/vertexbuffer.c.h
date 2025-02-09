@@ -27,11 +27,13 @@ void kinc_g5_vertex_buffer_init(kinc_g5_vertex_buffer_t *buffer, int vertexCount
 	buf_info.pNext = NULL;
 	buf_info.size = vertexCount * buffer->impl.myStride;
 	buf_info.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-#ifdef KINC_VKRT
-	buf_info.usage |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
-	buf_info.usage |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
-	buf_info.usage |= VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
-#endif
+
+	if (kinc_g5_supports_raytracing()) {
+		buf_info.usage |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+		buf_info.usage |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+		buf_info.usage |= VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
+	}
+
 	buf_info.flags = 0;
 
 	memset(&buffer->impl.mem_alloc, 0, sizeof(VkMemoryAllocateInfo));
@@ -56,12 +58,12 @@ void kinc_g5_vertex_buffer_init(kinc_g5_vertex_buffer_t *buffer, int vertexCount
 	pass = memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &buffer->impl.mem_alloc.memoryTypeIndex);
 	assert(pass);
 
-#ifdef KINC_VKRT
-	VkMemoryAllocateFlagsInfo memory_allocate_flags_info = {0};
-	memory_allocate_flags_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO;
-	memory_allocate_flags_info.flags = VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT_KHR;
-	buffer->impl.mem_alloc.pNext = &memory_allocate_flags_info;
-#endif
+	if (kinc_g5_supports_raytracing()) {
+		VkMemoryAllocateFlagsInfo memory_allocate_flags_info = {0};
+		memory_allocate_flags_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO;
+		memory_allocate_flags_info.flags = VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT_KHR;
+		buffer->impl.mem_alloc.pNext = &memory_allocate_flags_info;
+	}
 
 	err = vkAllocateMemory(vk_ctx.device, &buffer->impl.mem_alloc, NULL, &buffer->impl.vertices.mem);
 	assert(!err);

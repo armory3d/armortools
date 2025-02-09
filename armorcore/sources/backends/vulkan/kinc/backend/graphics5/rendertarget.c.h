@@ -13,24 +13,6 @@ extern kinc_g5_render_target_t *vulkanRenderTargets[16];
 bool memory_type_from_properties(uint32_t typeBits, VkFlags requirements_mask, uint32_t *typeIndex);
 void setup_init_cmd();
 
-/*static VkFormat convert_format(kinc_g5_render_target_format_t format) {
-    switch (format) {
-    case KINC_G5_RENDER_TARGET_FORMAT_128BIT_FLOAT:
-        return VK_FORMAT_R32G32B32A32_SFLOAT;
-    case KINC_G5_RENDER_TARGET_FORMAT_64BIT_FLOAT:
-        return VK_FORMAT_R16G16B16A16_SFLOAT;
-    case KINC_G5_RENDER_TARGET_FORMAT_32BIT_RED_FLOAT:
-        return VK_FORMAT_R32_SFLOAT;
-    case KINC_G5_RENDER_TARGET_FORMAT_16BIT_RED_FLOAT:
-        return VK_FORMAT_R16_SFLOAT;
-    case KINC_G5_RENDER_TARGET_FORMAT_8BIT_RED:
-        return VK_FORMAT_R8_UNORM;
-    case KINC_G5_RENDER_TARGET_FORMAT_32BIT:
-    default:
-        return VK_FORMAT_B8G8R8A8_UNORM;
-    }
-}*/
-
 void setImageLayout(VkCommandBuffer _buffer, VkImage image, VkImageAspectFlags aspectMask, VkImageLayout oldImageLayout, VkImageLayout newImageLayout) {
 	VkImageMemoryBarrier imageMemoryBarrier = {0};
 	imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;

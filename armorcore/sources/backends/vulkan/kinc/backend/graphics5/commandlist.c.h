@@ -464,13 +464,8 @@ void kinc_g5_command_list_set_blend_constant(kinc_g5_command_list_t *list, float
 void kinc_g5_command_list_set_vertex_buffers(kinc_g5_command_list_t *list, struct kinc_g5_vertex_buffer **vertexBuffers, int *offsets_, int count) {
 // this seems to be a no-op function?
 // kinc_g5_internal_vertex_buffer_set(vertexBuffers[0], 0);
-#ifdef KINC_WINDOWS
-	VkBuffer *buffers = (VkBuffer *)alloca(sizeof(VkBuffer) * count);
-	VkDeviceSize *offsets = (VkDeviceSize *)alloca(sizeof(VkDeviceSize) * count);
-#else
 	VkBuffer buffers[count];
 	VkDeviceSize offsets[count];
-#endif
 	for (int i = 0; i < count; ++i) {
 		buffers[i] = vertexBuffers[i]->impl.vertices.buf;
 		offsets[i] = (VkDeviceSize)(offsets_[i] * kinc_g5_vertex_buffer_stride(vertexBuffers[i]));

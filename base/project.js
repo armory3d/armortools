@@ -23,7 +23,6 @@ let project = new Project("Base");
 	let dir = flags.name.toLowerCase();
 
 	if (graphics === "vulkan") {
-		project.add_define("KINC_VKRT");
 		project.add_project("../armorcore/tools/to_spirv");
 	}
 

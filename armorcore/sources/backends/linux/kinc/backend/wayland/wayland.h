@@ -26,13 +26,6 @@ struct kinc_wl_procs {
 	struct wl_buffer *(*_wl_cursor_image_get_buffer)(struct wl_cursor_image *image);
 	int (*_wl_cursor_frame)(struct wl_cursor *cursor, uint32_t time);
 	int (*_wl_cursor_frame_and_duration)(struct wl_cursor *cursor, uint32_t time, uint32_t *duration);
-
-#ifdef KINC_EGL
-	struct wl_egl_window *(*_wl_egl_window_create)(struct wl_surface *surface, int width, int height);
-	void (*_wl_egl_window_destroy)(struct wl_egl_window *egl_window);
-	void (*_wl_egl_window_resize)(struct wl_egl_window *egl_window, int width, int height, int dx, int dy);
-	void (*_wl_egl_window_get_attached_size)(struct wl_egl_window *egl_window, int *width, int *height);
-#endif
 };
 
 #define wl_event_queue_destroy wl._wl_event_queue_destroy
@@ -203,9 +196,6 @@ struct kinc_wl_window {
 		struct wl_buffer *max_buffer;
 		struct wl_buffer *min_buffer;
 	} decorations;
-#ifdef KINC_EGL
-	struct wl_egl_window *egl_window;
-#endif
 };
 
 struct kinc_wl_display {

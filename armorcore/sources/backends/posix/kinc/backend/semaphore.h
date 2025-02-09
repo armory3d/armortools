@@ -6,10 +6,6 @@
 #include <semaphore.h>
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct {
 #ifdef __APPLE__
 	dispatch_semaphore_t semaphore;
@@ -17,7 +13,3 @@ typedef struct {
 	sem_t semaphore;
 #endif
 } kinc_semaphore_impl_t;
-
-#ifdef __cplusplus
-}
-#endif

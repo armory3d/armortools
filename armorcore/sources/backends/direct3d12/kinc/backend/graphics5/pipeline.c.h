@@ -8,34 +8,7 @@
 #include <kinc/backend/SystemMicrosoft.h>
 
 void kinc_g5_internal_setConstants(kinc_g5_command_list_t *commandList, kinc_g5_pipeline_t *pipeline) {
-	/*if (currentProgram->vertexShader->constantsSize > 0) {
-	    context->UpdateSubresource(currentProgram->vertexConstantBuffer, 0, nullptr, vertexConstants, 0, 0);
-	    context->VSSetConstantBuffers(0, 1, &currentProgram->vertexConstantBuffer);
-	}
-	if (currentProgram->fragmentShader->constantsSize > 0) {
-	    context->UpdateSubresource(currentProgram->fragmentConstantBuffer, 0, nullptr, fragmentConstants, 0, 0);
-	    context->PSSetConstantBuffers(0, 1, &currentProgram->fragmentConstantBuffer);
-	}
-	if (currentProgram->geometryShader != nullptr && currentProgram->geometryShader->constantsSize > 0) {
-	    context->UpdateSubresource(currentProgram->geometryConstantBuffer, 0, nullptr, geometryConstants, 0, 0);
-	    context->GSSetConstantBuffers(0, 1, &currentProgram->geometryConstantBuffer);
-	}
-	if (currentProgram->tessControlShader != nullptr && currentProgram->tessControlShader->constantsSize > 0) {
-	    context->UpdateSubresource(currentProgram->tessControlConstantBuffer, 0, nullptr, tessControlConstants, 0, 0);
-	    context->HSSetConstantBuffers(0, 1, &currentProgram->tessControlConstantBuffer);
-	}
-	if (currentProgram->tessEvalShader != nullptr && currentProgram->tessEvalShader->constantsSize > 0) {
-	    context->UpdateSubresource(currentProgram->tessEvalConstantBuffer, 0, nullptr, tessEvalConstants, 0, 0);
-	    context->DSSetConstantBuffers(0, 1, &currentProgram->tessEvalConstantBuffer);
-	}
-	*/
-
-#ifdef KINC_DXC
-	// commandList->SetGraphicsRootSignature(pipeline->impl.rootSignature);
 	commandList->impl._commandList->SetGraphicsRootSignature(globalRootSignature);
-#else
-	commandList->impl._commandList->SetGraphicsRootSignature(globalRootSignature);
-#endif
 
 	if (pipeline->impl.textures > 0) {
 		kinc_g5_internal_set_textures(commandList);
@@ -43,27 +16,6 @@ void kinc_g5_internal_setConstants(kinc_g5_command_list_t *commandList, kinc_g5_
 }
 
 void kinc_g5_internal_set_compute_constants(kinc_g5_command_list_t *commandList) {
-	/*if (currentProgram->vertexShader->constantsSize > 0) {
-	    context->UpdateSubresource(currentProgram->vertexConstantBuffer, 0, nullptr, vertexConstants, 0, 0);
-	    context->VSSetConstantBuffers(0, 1, &currentProgram->vertexConstantBuffer);
-	}
-	if (currentProgram->fragmentShader->constantsSize > 0) {
-	    context->UpdateSubresource(currentProgram->fragmentConstantBuffer, 0, nullptr, fragmentConstants, 0, 0);
-	    context->PSSetConstantBuffers(0, 1, &currentProgram->fragmentConstantBuffer);
-	}
-	if (currentProgram->geometryShader != nullptr && currentProgram->geometryShader->constantsSize > 0) {
-	    context->UpdateSubresource(currentProgram->geometryConstantBuffer, 0, nullptr, geometryConstants, 0, 0);
-	    context->GSSetConstantBuffers(0, 1, &currentProgram->geometryConstantBuffer);
-	}
-	if (currentProgram->tessControlShader != nullptr && currentProgram->tessControlShader->constantsSize > 0) {
-	    context->UpdateSubresource(currentProgram->tessControlConstantBuffer, 0, nullptr, tessControlConstants, 0, 0);
-	    context->HSSetConstantBuffers(0, 1, &currentProgram->tessControlConstantBuffer);
-	}
-	if (currentProgram->tessEvalShader != nullptr && currentProgram->tessEvalShader->constantsSize > 0) {
-	    context->UpdateSubresource(currentProgram->tessEvalConstantBuffer, 0, nullptr, tessEvalConstants, 0, 0);
-	    context->DSSetConstantBuffers(0, 1, &currentProgram->tessEvalConstantBuffer);
-	}
-	*/
 
 	commandList->impl._commandList->SetComputeRootSignature(globalComputeRootSignature);
 
@@ -82,18 +34,6 @@ void kinc_g5_pipeline_destroy(kinc_g5_pipeline_t *pipe) {
 		pipe->impl.pso = NULL;
 	}
 }
-
-// void PipelineState5Impl::set(Graphics5::PipelineState* pipeline) {
-//_current = this;
-// context->VSSetShader((ID3D11VertexShader*)vertexShader->shader, nullptr, 0);
-// context->PSSetShader((ID3D11PixelShader*)fragmentShader->shader, nullptr, 0);
-
-// if (geometryShader != nullptr) context->GSSetShader((ID3D11GeometryShader*)geometryShader->shader, nullptr, 0);
-// if (tessControlShader != nullptr) context->HSSetShader((ID3D11HullShader*)tessControlShader->shader, nullptr, 0);
-// if (tessEvalShader != nullptr) context->DSSetShader((ID3D11DomainShader*)tessEvalShader->shader, nullptr, 0);
-
-// context->IASetInputLayout(inputLayout);
-//}
 
 #define MAX_SHADER_THING 32
 
@@ -437,15 +377,6 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
 	}
 
 	HRESULT hr = S_OK;
-#ifdef KINC_DXC
-	// hr = device->CreateRootSignature(0, pipe->vertexShader->impl.data, pipe->vertexShader->impl.length, IID_GRAPHICS_PPV_ARGS(&pipe->impl.rootSignature));
-	if (hr != S_OK) {
-		kinc_log(KINC_LOG_LEVEL_WARNING, "Could not create root signature.");
-	}
-	pipe->impl.vertexConstantsSize = pipe->vertexShader->impl.constantsSize;
-	pipe->impl.fragmentConstantsSize = pipe->fragmentShader->impl.constantsSize;
-#endif
-
 	pipe->impl.textures = pipe->fragmentShader->impl.texturesCount;
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {0};
@@ -453,12 +384,7 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
 	psoDesc.VS.pShaderBytecode = pipe->vertexShader->impl.data;
 	psoDesc.PS.BytecodeLength = pipe->fragmentShader->impl.length;
 	psoDesc.PS.pShaderBytecode = pipe->fragmentShader->impl.data;
-#ifdef KINC_DXC
-	// psoDesc.pRootSignature = pipe->impl.rootSignature;
 	psoDesc.pRootSignature = globalRootSignature;
-#else
-	psoDesc.pRootSignature = globalRootSignature;
-#endif
 	psoDesc.NumRenderTargets = pipe->colorAttachmentCount;
 	for (int i = 0; i < pipe->colorAttachmentCount; ++i) {
 		psoDesc.RTVFormats[i] = convert_format(pipe->colorAttachment[i]);

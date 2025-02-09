@@ -4,13 +4,6 @@
 #include <kinc/log.h>
 
 #define maxDisplays 10
-// Display displays[maxDisplays];
-
-/*void initMacDisplays() {
-    for (int i = 0; i < maxDisplays; ++i) {
-        displays[i]._data.index = i;
-    }
-}*/
 
 int kinc_count_displays(void) {
 	NSArray *screens = [NSScreen screens];
@@ -70,43 +63,3 @@ kinc_display_mode_t kinc_display_current_mode(int display) {
 
 	return dm;
 }
-
-//**
-/*
-int Display::x() {
-    NSArray* screens = [NSScreen screens];
-    NSScreen* screen = screens[_data.index];
-    NSRect rect = [screen frame];
-    return rect.origin.x;
-}
-
-int Display::y() {
-    NSArray* screens = [NSScreen screens];
-    NSScreen* screen = screens[_data.index];
-    NSRect rect = [screen frame];
-    return rect.origin.y;
-}
-
-int Display::width() {
-    NSArray* screenArray = [NSScreen screens];
-    NSScreen* screen = [screenArray objectAtIndex:_data.index];
-    NSRect screenRect = [screen visibleFrame];
-    return screenRect.size.width;
-}
-
-int Display::height() {
-    NSArray* screenArray = [NSScreen screens];
-    // unsigned screenCount = [screenArray count];
-    NSScreen* screen = [screenArray objectAtIndex:_data.index];
-    NSRect screenRect = [screen visibleFrame];
-    return screenRect.size.height;
-}
-
-int Display::frequency() {
-    return 60;
-}
-
-int Display::pixelsPerInch() {
-    return 96;
-}
-*/

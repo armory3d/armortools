@@ -11,7 +11,6 @@ static void winerror(HRESULT result) {
 
 	__debugbreak();
 
-#if defined(KINC_WINDOWS)
 	if (dw != 0) {
 		FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, dw,
 		               MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&buffer, 0, NULL);
@@ -19,11 +18,10 @@ static void winerror(HRESULT result) {
 		kinc_error_message("Error: %s", buffer);
 	}
 	else {
-#endif
+
 		kinc_error_message("Unknown Windows error, return value was 0x%x.", result);
-#if defined(KINC_WINDOWS)
+
 	}
-#endif
 }
 
 void kinc_microsoft_affirm(HRESULT result) {

@@ -210,11 +210,7 @@ void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list,
 		descriptor.arrayLength = 1;
 		descriptor.mipmapLevelCount = 1;
 		descriptor.usage = MTLTextureUsageUnknown;
-#ifdef KINC_APPLE_SOC
 		descriptor.resourceOptions = MTLResourceStorageModeShared;
-#else
-		descriptor.resourceOptions = MTLResourceStorageModeManaged;
-#endif
 		render_target->impl._texReadback = (__bridge_retained void *)[device newTextureWithDescriptor:descriptor];
 	}
 
@@ -231,9 +227,6 @@ void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list,
 	               destinationSlice:0
 	               destinationLevel:0
 	              destinationOrigin:MTLOriginMake(0, 0, 0)];
-#ifndef KINC_APPLE_SOC
-	[commandEncoder synchronizeResource:(__bridge id<MTLTexture>)render_target->impl._texReadback];
-#endif
 	[commandEncoder endEncoding];
 	[commandBuffer commit];
 	[commandBuffer waitUntilCompleted];
@@ -285,10 +278,6 @@ void kinc_g5_command_list_set_compute_constant_buffer(kinc_g5_command_list_t *li
 }
 
 void kinc_g5_command_list_render_target_to_texture_barrier(kinc_g5_command_list_t *list, struct kinc_g5_render_target *renderTarget) {
-#ifndef KINC_APPLE_SOC
-	id<MTLRenderCommandEncoder> encoder = getMetalEncoder();
-	[encoder textureBarrier];
-#endif
 }
 
 void kinc_g5_command_list_texture_to_render_target_barrier(kinc_g5_command_list_t *list, struct kinc_g5_render_target *renderTarget) {}

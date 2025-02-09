@@ -41,32 +41,6 @@ static int window_counter = 0;
 
 const wchar_t *windowClassName = L"KoreWindow";
 
-#ifdef KINC_VULKAN
-#include <vulkan/vulkan_core.h>
-#include <vulkan/vulkan_win32.h>
-
-VkResult kinc_vulkan_create_surface(VkInstance instance, int window_index, VkSurfaceKHR *surface) {
-	VkWin32SurfaceCreateInfoKHR createInfo = {0};
-	createInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-	createInfo.pNext = NULL;
-	createInfo.flags = 0;
-	createInfo.hinstance = GetModuleHandle(NULL);
-	createInfo.hwnd = windows[window_index].handle;
-	return vkCreateWin32SurfaceKHR(instance, &createInfo, NULL, surface);
-}
-
-#include <assert.h>
-
-void kinc_vulkan_get_instance_extensions(const char **names, int *index, int max) {
-	assert(*index + 1 < max);
-	names[(*index)++] = VK_KHR_WIN32_SURFACE_EXTENSION_NAME;
-}
-
-VkBool32 kinc_vulkan_get_physical_device_presentation_support(VkPhysicalDevice physicalDevice, uint32_t queueFamilyIndex) {
-	return vkGetPhysicalDeviceWin32PresentationSupportKHR(physicalDevice, queueFamilyIndex);
-}
-#endif
-
 static void RegisterWindowClass(HINSTANCE hInstance, const wchar_t *className) {
 	WNDCLASSEXW wc = {sizeof(WNDCLASSEXA),
 	                  CS_OWNDC /*CS_CLASSDC*/,

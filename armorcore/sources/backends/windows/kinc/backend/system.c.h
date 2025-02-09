@@ -27,13 +27,7 @@
 #include <shellapi.h>
 #include <shlobj.h>
 
-#ifdef KINC_G4ONG5
 #define Graphics Graphics5
-#elif KINC_G4
-#define Graphics Graphics4
-#else
-#define Graphics Graphics3
-#endif
 
 __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
 __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
@@ -109,17 +103,12 @@ static void initKeyTranslation() {
 	keyTranslated[VK_PAUSE] = KINC_KEY_PAUSE;
 	keyTranslated[VK_CAPITAL] = KINC_KEY_CAPS_LOCK;
 	keyTranslated[VK_KANA] = KINC_KEY_KANA;
-	// keyTranslated[VK_HANGUEL]
 	keyTranslated[VK_HANGUL] = KINC_KEY_HANGUL;
 	keyTranslated[VK_JUNJA] = KINC_KEY_JUNJA;
 	keyTranslated[VK_FINAL] = KINC_KEY_FINAL;
 	keyTranslated[VK_HANJA] = KINC_KEY_HANJA;
 	keyTranslated[VK_KANJI] = KINC_KEY_KANJI;
 	keyTranslated[VK_ESCAPE] = KINC_KEY_ESCAPE;
-	// keyTranslated[VK_CONVERT]
-	// keyTranslated[VK_NONCONVERT
-	// keyTranslated[VK_ACCEPT
-	// keyTranslated[VK_MODECHANGE
 	keyTranslated[VK_SPACE] = KINC_KEY_SPACE;
 	keyTranslated[VK_PRIOR] = KINC_KEY_PAGE_UP;
 	keyTranslated[VK_NEXT] = KINC_KEY_PAGE_DOWN;
@@ -129,10 +118,7 @@ static void initKeyTranslation() {
 	keyTranslated[VK_UP] = KINC_KEY_UP;
 	keyTranslated[VK_RIGHT] = KINC_KEY_RIGHT;
 	keyTranslated[VK_DOWN] = KINC_KEY_DOWN;
-	// keyTranslated[VK_SELECT
 	keyTranslated[VK_PRINT] = KINC_KEY_PRINT;
-	// keyTranslated[VK_EXECUTE
-	// keyTranslated[VK_SNAPSHOT
 	keyTranslated[VK_INSERT] = KINC_KEY_INSERT;
 	keyTranslated[VK_DELETE] = KINC_KEY_DELETE;
 	keyTranslated[VK_HELP] = KINC_KEY_HELP;
@@ -175,7 +161,6 @@ static void initKeyTranslation() {
 	keyTranslated[VK_LWIN] = KINC_KEY_WIN;
 	keyTranslated[VK_RWIN] = KINC_KEY_WIN;
 	keyTranslated[VK_APPS] = KINC_KEY_CONTEXT_MENU;
-	// keyTranslated[VK_SLEEP
 	keyTranslated[VK_NUMPAD0] = KINC_KEY_NUMPAD_0;
 	keyTranslated[VK_NUMPAD1] = KINC_KEY_NUMPAD_1;
 	keyTranslated[VK_NUMPAD2] = KINC_KEY_NUMPAD_2;
@@ -188,7 +173,6 @@ static void initKeyTranslation() {
 	keyTranslated[VK_NUMPAD9] = KINC_KEY_NUMPAD_9;
 	keyTranslated[VK_MULTIPLY] = KINC_KEY_MULTIPLY;
 	keyTranslated[VK_ADD] = KINC_KEY_ADD;
-	// keyTranslated[VK_SEPARATOR
 	keyTranslated[VK_SUBTRACT] = KINC_KEY_SUBTRACT;
 	keyTranslated[VK_DECIMAL] = KINC_KEY_DECIMAL;
 	keyTranslated[VK_DIVIDE] = KINC_KEY_DIVIDE;
@@ -218,58 +202,21 @@ static void initKeyTranslation() {
 	keyTranslated[VK_F24] = KINC_KEY_F24;
 	keyTranslated[VK_NUMLOCK] = KINC_KEY_NUM_LOCK;
 	keyTranslated[VK_SCROLL] = KINC_KEY_SCROLL_LOCK;
-	// 0x92-96 //OEM specific
 	keyTranslated[VK_LSHIFT] = KINC_KEY_SHIFT;
 	keyTranslated[VK_RSHIFT] = KINC_KEY_SHIFT;
 	keyTranslated[VK_LCONTROL] = KINC_KEY_CONTROL;
 	keyTranslated[VK_RCONTROL] = KINC_KEY_CONTROL;
-	// keyTranslated[VK_LMENU
-	// keyTranslated[VK_RMENU
-	// keyTranslated[VK_BROWSER_BACK
-	// keyTranslated[VK_BROWSER_FORWARD
-	// keyTranslated[VK_BROWSER_REFRESH
-	// keyTranslated[VK_BROWSER_STOP
-	// keyTranslated[VK_BROWSER_SEARCH
-	// keyTranslated[VK_BROWSER_FAVORITES
-	// keyTranslated[VK_BROWSER_HOME
-	// keyTranslated[VK_VOLUME_MUTE
-	// keyTranslated[VK_VOLUME_DOWN
-	// keyTranslated[VK_VOLUME_UP
-	// keyTranslated[VK_MEDIA_NEXT_TRACK
-	// keyTranslated[VK_MEDIA_PREV_TRACK
-	// keyTranslated[VK_MEDIA_STOP
-	// keyTranslated[VK_MEDIA_PLAY_PAUSE
-	// keyTranslated[VK_LAUNCH_MAIL
-	// keyTranslated[VK_LAUNCH_MEDIA_SELECT
-	// keyTranslated[VK_LAUNCH_APP1
-	// keyTranslated[VK_LAUNCH_APP2
-	keyTranslated[VK_OEM_1] = KINC_KEY_SEMICOLON; // Used for miscellaneous characters; it can vary by keyboard. For the US standard keyboard, the ';:' key
+	keyTranslated[VK_OEM_1] = KINC_KEY_SEMICOLON;
 	keyTranslated[VK_OEM_PLUS] = KINC_KEY_PLUS;
 	keyTranslated[VK_OEM_COMMA] = KINC_KEY_COMMA;
 	keyTranslated[VK_OEM_MINUS] = KINC_KEY_HYPHEN_MINUS;
 	keyTranslated[VK_OEM_PERIOD] = KINC_KEY_PERIOD;
-	keyTranslated[VK_OEM_2] = KINC_KEY_SLASH;         // Used for miscellaneous characters; it can vary by keyboard. For the US standard keyboard, the '/?' key
-	keyTranslated[VK_OEM_3] = KINC_KEY_BACK_QUOTE;    // Used for miscellaneous characters; it can vary by keyboard. For the US standard keyboard, the '`~' key
-	keyTranslated[VK_OEM_4] = KINC_KEY_OPEN_BRACKET;  // Used for miscellaneous characters; it can vary by keyboard. For the US standard keyboard, the '[{' key
-	keyTranslated[VK_OEM_5] = KINC_KEY_BACK_SLASH;    // Used for miscellaneous characters; it can vary by keyboard. For the US standard keyboard, the '\|' key
-	keyTranslated[VK_OEM_6] = KINC_KEY_CLOSE_BRACKET; // Used for miscellaneous characters; it can vary by keyboard. For the US standard keyboard, the ']}' key
-	keyTranslated[VK_OEM_7] = KINC_KEY_QUOTE;         // Used for miscellaneous characters; it can vary by keyboard. For the US standard keyboard, the
-	                                          // 'single-quote/double-quote' key keyTranslated[VK_OEM_8 //Used for miscellaneous characters; it can vary by
-	                                          // keyboard. keyTranslated[0xE1 //OEM specific keyTranslated[VK_OEM_102 //Either the angle bracket key or the
-	                                          // backslash key on the RT 102-key keyboard 0xE3-E4 //OEM specific keyTranslated[VK_PROCESSKEY 0xE6 //OEM specific
-	// keyTranslated[VK_PACKET //Used to pass Unicode characters as if they were keystrokes. The VK_PACKET key is the low word of a 32-bit Virtual Key value
-	// used for non-keyboard input methods.
-	// 0xE9-F5 //OEM specific
-	// keyTranslated[VK_ATTN
-	// keyTranslated[VK_CRSEL
-	// keyTranslated[VK_EXSEL
-	// keyTranslated[VK_EREOF
-	// keyTranslated[VK_PLAY
-	// keyTranslated[VK_ZOOM
-	// keyTranslated[VK_NONAME
-	// keyTranslated[VK_PA1
-	// keyTranslated[PA1 key
-	// keyTranslated[VK_OEM_CLEAR
+	keyTranslated[VK_OEM_2] = KINC_KEY_SLASH;
+	keyTranslated[VK_OEM_3] = KINC_KEY_BACK_QUOTE;
+	keyTranslated[VK_OEM_4] = KINC_KEY_OPEN_BRACKET;
+	keyTranslated[VK_OEM_5] = KINC_KEY_BACK_SLASH;
+	keyTranslated[VK_OEM_6] = KINC_KEY_CLOSE_BRACKET;
+	keyTranslated[VK_OEM_7] = KINC_KEY_QUOTE;
 }
 
 static bool detectGamepad = true;
@@ -864,7 +811,6 @@ LCleanup:
 	return bIsXinputDevice;
 }
 
-// TODO (DK) this should probably be called from somewhere?
 static void cleanupDirectInput() {
 	for (int padIndex = 0; padIndex < KINC_DINPUT_MAX_COUNT; ++padIndex) {
 		cleanupPad(padIndex);
@@ -891,10 +837,6 @@ static BOOL CALLBACK enumerateJoystickAxesCallback(LPCDIDEVICEOBJECTINSTANCEW dd
 
 	if (FAILED(hr)) {
 		kinc_log(KINC_LOG_LEVEL_WARNING, "DirectInput8 / Pad%i / SetProperty() failed (HRESULT=0x%x)", padCount, hr);
-
-		// TODO (DK) cleanup?
-		// cleanupPad(padCount);
-
 		return DIENUM_STOP;
 	}
 
@@ -911,9 +853,6 @@ static BOOL CALLBACK enumerateJoysticksCallback(LPCDIDEVICEINSTANCEW ddi, LPVOID
 
 	if (SUCCEEDED(hr)) {
 		hr = di_pads[padCount]->lpVtbl->SetDataFormat(di_pads[padCount], &c_dfDIJoystick2);
-
-		// TODO (DK) required?
-		// hr = di_pads[padCount]->SetCooperativeLevel(NULL, DISCL_EXCLUSIVE | DISCL_FOREGROUND);
 
 		if (SUCCEEDED(hr)) {
 			di_deviceCaps[padCount].dwSize = sizeof(DIDEVCAPS);
@@ -934,7 +873,6 @@ static BOOL CALLBACK enumerateJoysticksCallback(LPCDIDEVICEINSTANCEW ddi, LPVOID
 						}
 						else {
 							kinc_log(KINC_LOG_LEVEL_WARNING, "DirectInput8 / Pad%i / GetDeviceState() failed (HRESULT=0x%x)", padCount, hr);
-							// cleanupPad(padCount); // (DK) don't kill it, we try again in handleDirectInputPad()
 						}
 					}
 					else {
@@ -1000,7 +938,6 @@ bool handleDirectInputPad(int padIndex) {
 
 	switch (hr) {
 	case S_OK: {
-		// TODO (DK) there is a lot more to handle
 		for (int axisIndex = 0; axisIndex < 2; ++axisIndex) {
 			LONG *now = NULL;
 			LONG *last = NULL;
@@ -1179,10 +1116,6 @@ bool kinc_internal_handle_messages() {
 	return true;
 }
 
-//**vec2i Kore::System::mousePos() {
-//**	return vec2i(mouseX, mouseY);
-//**}
-
 static bool keyboardshown = false;
 static char language[3] = {0};
 
@@ -1268,7 +1201,6 @@ static void findSavePath() {
 	CoTaskMemFree(path);
 	folder->lpVtbl->Release(folder);
 	folders->lpVtbl->Release(folders);
-	// CoUninitialize();
 }
 
 const char *kinc_internal_save_path() {
@@ -1389,7 +1321,6 @@ int kinc_init(const char *name, int width, int height, kinc_window_options_t *wi
 		keyPressed[i] = false;
 	}
 
-	// Kore::System::_init(name, width, height, &win, &frame);
 	kinc_set_application_name(name);
 	kinc_window_options_t defaultWin;
 	if (win == NULL) {

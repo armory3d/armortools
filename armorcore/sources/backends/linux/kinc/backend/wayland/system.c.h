@@ -12,10 +12,6 @@
 #include <wayland-client-protocol.h>
 #include <wayland-util.h>
 
-#ifdef KINC_EGL
-#define EGL_NO_PLATFORM_SPECIFIC_TYPES
-#include <EGL/egl.h>
-#endif
 #include <dlfcn.h>
 #include <errno.h>
 #include <poll.h>
@@ -57,20 +53,6 @@ bool kinc_wayland_load_procs() {
 	LOAD_FUN(wayland_cursor, _wl_cursor_image_get_buffer, "wl_cursor_image_get_buffer")
 	LOAD_FUN(wayland_cursor, _wl_cursor_frame, "wl_cursor_frame")
 	LOAD_FUN(wayland_cursor, _wl_cursor_frame_and_duration, "wl_cursor_frame_and_duration")
-
-#ifdef KINC_EGL
-	void *wayland_egl = NULL;
-	load_lib(&wayland_egl, "wayland-egl");
-
-	if (wayland_egl == NULL) {
-		kinc_log(KINC_LOG_LEVEL_ERROR, "Failed to find libwayland-egl.so");
-		return false;
-	}
-	LOAD_FUN(wayland_egl, _wl_egl_window_create, "wl_egl_window_create")
-	LOAD_FUN(wayland_egl, _wl_egl_window_destroy, "wl_egl_window_destroy")
-	LOAD_FUN(wayland_egl, _wl_egl_window_resize, "wl_egl_window_resize")
-	LOAD_FUN(wayland_egl, _wl_egl_window_get_attached_size, "wl_egl_window_get_attached_size")
-#endif
 
 #undef LOAD_FUN
 #define LOAD_FUN(symbol)                                                                                                                                       \
@@ -1170,17 +1152,6 @@ bool kinc_wayland_handle_messages() {
 
 #undef READ_SIZE
 
-#ifdef KINC_EGL
-EGLDisplay kinc_wayland_egl_get_display() {
-	return eglGetDisplay((EGLNativeDisplayType)wl_ctx.display);
-}
-
-EGLNativeWindowType kinc_wayland_egl_get_native_window(EGLDisplay display, EGLConfig config, int window_index) {
-	return (EGLNativeWindowType)wl_ctx.windows[window_index].egl_window;
-}
-#endif
-
-#ifdef KINC_VULKAN
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_wayland.h>
 VkResult kinc_wayland_vulkan_create_surface(VkInstance instance, int window_index, VkSurfaceKHR *surface) {
@@ -1203,7 +1174,6 @@ void kinc_wayland_vulkan_get_instance_extensions(const char **names, int *index,
 VkBool32 kinc_wayland_vulkan_get_physical_device_presentation_support(VkPhysicalDevice physicalDevice, uint32_t queueFamilyIndex) {
 	return vkGetPhysicalDeviceWaylandPresentationSupportKHR(physicalDevice, queueFamilyIndex, wl_ctx.display);
 }
-#endif
 
 void zwp_locked_pointer_v1_handle_locked(void *data, struct zwp_locked_pointer_v1 *zwp_locked_pointer_v1) {
 	struct kinc_wl_mouse *mouse = data;

@@ -35,9 +35,7 @@ struct D3D12Rect {
 #define QUEUE_SLOT_COUNT 2
 
 struct dx_window {
-#ifndef KINC_DIRECT3D_HAS_NO_SWAPCHAIN
 	struct IDXGISwapChain *swapChain;
-#endif
 	UINT64 current_fence_value;
 	UINT64 fence_values[QUEUE_SLOT_COUNT];
 	HANDLE frame_fence_events[QUEUE_SLOT_COUNT];
