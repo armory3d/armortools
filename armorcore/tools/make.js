@@ -2437,7 +2437,7 @@ function shader_find_type(options) {
 			return 'msl';
 		}
 		else {
-			return 'glsl';
+			return 'spirv';
 		}
 	}
 	else if (options.graphics === 'vulkan') {
@@ -2446,15 +2446,7 @@ function shader_find_type(options) {
 	else if (options.graphics === 'metal') {
 		return 'msl';
 	}
-	else if (options.graphics === 'opengl') {
-		if (goptions.target === "android" || goptions.target === "wasm") {
-			return "essl";
-		}
-		else {
-			return 'glsl';
-		}
-	}
-	else if (options.graphics === 'direct3d11' || options.graphics === 'direct3d12') {
+	else if (options.graphics === 'direct3d12') {
 		return 'hlsl';
 	}
 }
@@ -2575,13 +2567,13 @@ class ArmorCoreExporter {
 		let graphics = this.options.graphics;
 		if (graphics === "default") {
 			if (os_platform() === "win32") {
-				graphics = "direct3d11";
+				graphics = "direct3d12";
 			}
 			else if (os_platform() === "darwin") {
 				graphics = "metal";
 			}
 			else {
-				graphics = "opengl";
+				graphics = "vulkan";
 			}
 		}
 		defines.push("arm_" + graphics);
