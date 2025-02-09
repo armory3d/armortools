@@ -196,9 +196,12 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 
 							file_cache_cloud(handle.text + path_sep + icon_file, function (abs: string) {
 								if (abs != null) {
-									let icon_file: string = substring(abs, string_last_index_of(abs, path_sep) + 1, abs.length);
-									let f: string = map_get(ui_files_icon_file_map, icon_file);
 									let image: image_t = data_get_image(abs);
+									///if arm_windows
+									abs = string_replace_all(abs, "\\", "/");
+									///end
+									let icon_file: string = substring(abs, string_last_index_of(abs, "/") + 1, abs.length);
+									let f: string = map_get(ui_files_icon_file_map, icon_file);
 									let data: draw_cloud_icon_data_t = make_draw_cloud_icon_data(f, image);
 
 									app_notify_on_init(function (data: draw_cloud_icon_data_t) {
