@@ -480,17 +480,8 @@ function scene_load_embedded_data(datas: string[]) {
 }
 
 function scene_embed_data(file: string) {
-	if (ends_with(file, ".raw")) {
-		let b: buffer_t = data_get_blob(file);
-		// Raw 3D texture bytes
-		let w: i32 = math_floor(math_pow(b.length, 1 / 3)) + 1;
-		let image: image_t = image_from_bytes_3d(b, w, w, w, tex_format_t.R8);
-		map_set(scene_embedded, file, image);
-	}
-	else {
-		let image: image_t = data_get_image(file);
-		map_set(scene_embedded, file, image);
-	}
+	let image: image_t = data_get_image(file);
+	map_set(scene_embedded, file, image);
 }
 
 type scene_t = {

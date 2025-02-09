@@ -417,15 +417,6 @@ function image_from_bytes(buffer: buffer_t, width: i32, height: i32, format: tex
 	return image;
 }
 
-function image_from_bytes_3d(buffer: buffer_t, width: i32, height: i32, depth: i32, format: tex_format_t = tex_format_t.RGBA32): image_t {
-	let readable: bool = true;
-	let image: image_t = _image_create(null);
-	image.format = format;
-	image.texture_ = iron_g4_create_texture_from_bytes3d(buffer, width, height, depth, image_get_tex_format(format), readable);
-	_image_set_size_from_texture(image, image.texture_);
-	return image;
-}
-
 function image_from_encoded_bytes(buffer: buffer_t, format: string, readable: bool = false): image_t {
 	let image: image_t = _image_create(null);
 	image.texture_ = iron_g4_create_texture_from_encoded_bytes(buffer, format, readable);
@@ -437,14 +428,6 @@ function image_create(width: i32, height: i32, format: tex_format_t = tex_format
 	let image: image_t = _image_create(null);
 	image.format = format;
 	image.texture_ = iron_g4_create_texture(width, height, image_get_tex_format(format));
-	_image_set_size_from_texture(image, image.texture_);
-	return image;
-}
-
-function image_create_3d(width: i32, height: i32, depth: i32, format: tex_format_t = tex_format_t.RGBA32): image_t {
-	let image: image_t = _image_create(null);
-	image.format = format;
-	image.texture_ = iron_g4_create_texture3d(width, height, depth, image_get_tex_format(format));
 	_image_set_size_from_texture(image, image.texture_);
 	return image;
 }
@@ -526,10 +509,6 @@ function image_set_mipmaps(raw: image_t, mipmaps: image_t[]) {
 
 function image_set_depth_from(raw: image_t, image: image_t) {
 	iron_g4_set_depth_from(raw.render_target_, image.render_target_);
-}
-
-function image_clear(raw: image_t, x: i32, y: i32, z: i32, width: i32, height: i32, depth: i32, color: color_t) {
-	iron_g4_clear_texture(raw.texture_, x, y, z, width, height, depth, color);
 }
 
 declare type image_t = {

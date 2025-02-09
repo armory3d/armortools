@@ -364,7 +364,6 @@ void kinc_g5_texture_init(struct kinc_g5_texture *texture, int width, int height
 }
 
 void kinc_g5_texture_init3d(kinc_g5_texture_t *texture, int width, int height, int depth, kinc_image_format_t format) {
-	// kinc_image_init3d(&texture->image, width, height, depth, format, readable);
 }
 
 void kinc_g5_texture_init_non_sampled_access(struct kinc_g5_texture *texture, int width, int height, kinc_image_format_t format) {

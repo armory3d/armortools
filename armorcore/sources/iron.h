@@ -1873,12 +1873,6 @@ kinc_g4_texture_t *iron_g4_create_texture(i32 width, i32 height, i32 format) {
 	return texture;
 }
 
-kinc_g4_texture_t *iron_g4_create_texture3d(i32 width, i32 height, i32 depth, i32 format) {
-	kinc_g4_texture_t *texture = (kinc_g4_texture_t *)malloc(sizeof(kinc_g4_texture_t));
-	kinc_g4_texture_init3d(texture, width, height, depth, (kinc_image_format_t)format);
-	return texture;
-}
-
 kinc_g4_texture_t *iron_g4_create_texture_from_bytes(buffer_t *data, i32 width, i32 height, i32 format, bool readable) {
 	kinc_g4_texture_t *texture = (kinc_g4_texture_t *)malloc(sizeof(kinc_g4_texture_t));
 	kinc_image_t *image = (kinc_image_t *)malloc(sizeof(kinc_image_t));
@@ -1893,31 +1887,6 @@ kinc_g4_texture_t *iron_g4_create_texture_from_bytes(buffer_t *data, i32 width, 
 
 	kinc_image_init(image, image_data, width, height, (kinc_image_format_t)format);
 	kinc_g4_texture_init_from_image(texture, image);
-	if (!readable) {
-		kinc_image_destroy(image);
-		free(image);
-	}
-	else {
-		texture->image = image;
-	}
-	return texture;
-}
-
-kinc_g4_texture_t *iron_g4_create_texture_from_bytes3d(buffer_t *data, i32 width, i32 height, i32 depth, i32 format, bool readable) {
-	kinc_g4_texture_t *texture = (kinc_g4_texture_t *)malloc(sizeof(kinc_g4_texture_t));
-	kinc_image_t *image = (kinc_image_t *)malloc(sizeof(kinc_image_t));
-	void *image_data;
-	if (readable) {
-		image_data = malloc(data->length);
-		memcpy(image_data, data->buffer, data->length);
-	}
-	else {
-		image_data = data->buffer;
-	}
-
-	kinc_image_init3d(image, image_data, width, height, depth, (kinc_image_format_t)format);
-	kinc_g4_texture_init_from_image3d(texture, image);
-
 	if (!readable) {
 		kinc_image_destroy(image);
 		free(image);
@@ -2044,10 +2013,6 @@ buffer_t *iron_g4_lock_texture(kinc_g4_texture_t *texture, i32 level) {
 
 void iron_g4_unlock_texture(kinc_g4_texture_t *texture) {
 	kinc_g4_texture_unlock(texture);
-}
-
-void iron_g4_clear_texture(kinc_g4_texture_t *texture, i32 x, i32 y, i32 z, i32 width, i32 height, i32 depth, i32 color) {
-	kinc_g4_texture_clear(texture, x, y, z, width, height, depth, color);
 }
 
 void iron_g4_generate_texture_mipmaps(kinc_g4_texture_t *texture, i32 levels) {

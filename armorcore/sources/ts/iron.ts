@@ -284,15 +284,12 @@ declare function iron_read_storage(name: string): buffer_t;
 
 declare function iron_g4_create_render_target(width: i32, height: i32, format: i32, depth_buffer_bits: i32, stencil_buffer_bits: i32): any;
 declare function iron_g4_create_texture(width: i32, height: i32, format: i32): any;
-declare function iron_g4_create_texture3d(width: i32, height: i32, depth: i32, format: i32): any;
 declare function iron_g4_create_texture_from_bytes(data: buffer_t, width: i32, height: i32, format: i32, readable: bool): any;
-declare function iron_g4_create_texture_from_bytes3d(data: buffer_t, width: i32, height: i32, depth: i32, format: i32, readable: bool): any;
 declare function iron_g4_create_texture_from_encoded_bytes(data: buffer_t, format: string, readable: bool): any;
 declare function iron_g4_get_texture_pixels(texture: any): buffer_t;
 declare function iron_g4_get_render_target_pixels(render_target: any, data: buffer_t): void;
 declare function iron_g4_lock_texture(texture: any, level: i32): buffer_t;
 declare function iron_g4_unlock_texture(texture: any): void;
-declare function iron_g4_clear_texture(target: any, x: i32, y: i32, z: i32, width: i32, height: i32, depth: i32, color: i32): void;
 declare function iron_g4_generate_texture_mipmaps(texture: any, levels: i32): void;
 declare function iron_g4_generate_render_target_mipmaps(render_target: any, levels: i32): void;
 declare function iron_g4_set_mipmaps(texture: any, mipmaps: image_t[]): void;

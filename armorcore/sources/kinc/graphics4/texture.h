@@ -34,28 +34,11 @@ typedef struct kinc_g4_texture {
 void kinc_g4_texture_init(kinc_g4_texture_t *texture, int width, int height, kinc_image_format_t format);
 
 /// <summary>
-/// Allocates and initializes a 3d-texture without copying any data into it.
-/// </summary>
-/// <param name="texture">The texture to initialize</param>
-/// <param name="width">The width of the texture to create</param>
-/// <param name="height">The height of the texture to create</param>
-/// <param name="depth">The depth of the texture to create</param>
-/// <param name="format">The format of the texture to create</param>
-void kinc_g4_texture_init3d(kinc_g4_texture_t *texture, int width, int height, int depth, kinc_image_format_t format);
-
-/// <summary>
 /// Allocates and initializes a texture and copies image-data into it.
 /// </summary>
 /// <param name="texture">The texture to initialize</param>
 /// <param name="image">The image which's data is copied into the texture</param>
 void kinc_g4_texture_init_from_image(kinc_g4_texture_t *texture, kinc_image_t *image);
-
-/// <summary>
-/// Allocates and initializes a texture and copies image-data into it.
-/// </summary>
-/// <param name="texture">The texture to initialize</param>
-/// <param name="image">The image which's data is copied into the texture</param>
-void kinc_g4_texture_init_from_image3d(kinc_g4_texture_t *texture, kinc_image_t *image);
 
 /// <summary>
 /// Deallocates and destroys a texture.
@@ -66,11 +49,6 @@ void kinc_g4_texture_destroy(kinc_g4_texture_t *texture);
 unsigned char *kinc_g4_texture_lock(kinc_g4_texture_t *texture);
 
 void kinc_g4_texture_unlock(kinc_g4_texture_t *texture);
-
-/// <summary>
-/// Clears parts of a texture to a color.
-/// </summary>
-void kinc_g4_texture_clear(kinc_g4_texture_t *texture, int x, int y, int z, int width, int height, int depth, unsigned color);
 
 /// <summary>
 /// Generates the mipmap-chain for a texture.
