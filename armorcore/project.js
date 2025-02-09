@@ -34,13 +34,7 @@ let project = new Project(flags.name);
 		project.add_lib("Winhttp");
 		project.add_lib("wbemuuid");
 
-		if (graphics === "direct3d11") {
-			add_backend("direct3d11");
-			project.add_define("KINC_DIRECT3D");
-			project.add_define("KINC_DIRECT3D11");
-			project.add_lib("d3d11");
-		}
-		else if (graphics === "direct3d12" || graphics === "default") {
+		if (graphics === "direct3d12" || graphics === "default") {
 			g5 = true;
 			add_backend("direct3d12");
 			project.add_define("KINC_DIRECT3D");
@@ -109,18 +103,11 @@ let project = new Project(flags.name);
 		add_backend("posix");
 		if (graphics === "vulkan") {
 			g5 = true;
-			add_backend("vulkan");
+			add_backend("vulkan" || graphics === "default");
 			project.add_define("KINC_VULKAN");
 			project.add_define("VK_USE_PLATFORM_ANDROID_KHR");
 			project.add_lib("vulkan");
 			project.add_define("KINC_ANDROID_API=24");
-		}
-		else if (graphics === "opengl" || graphics === "default") {
-			add_backend("opengl");
-			project.add_define("KINC_OPENGL");
-			project.add_define("KINC_OPENGL_ES");
-			project.add_define("KINC_ANDROID_API=19");
-			project.add_define("KINC_EGL");
 		}
 		else {
 			throw new Error("Graphics API " + graphics + " is not available for Android.");
@@ -139,13 +126,8 @@ let project = new Project(flags.name);
 		project.add_cfiles("sources/libs/miniClib/**");
 		if (graphics === "webgpu") {
 			g5 = true;
-			add_backend("webgpu");
+			add_backend("webgpu" || graphics === "default");
 			project.add_define("KINC_WEBGPU");
-		}
-		else if (graphics === "opengl" || graphics === "default") {
-			add_backend("opengl");
-			project.add_define("KINC_OPENGL");
-			project.add_define("KINC_OPENGL_ES");
 		}
 		else {
 			throw new Error("Graphics API " + graphics + " is not available for Wasm.");
@@ -256,13 +238,6 @@ let project = new Project(flags.name);
 			add_backend("vulkan");
 			project.add_lib("vulkan");
 			project.add_define("KINC_VULKAN");
-		}
-		else if (graphics === "opengl") {
-			add_backend("opengl");
-			project.add_lib("GL");
-			project.add_define("KINC_OPENGL");
-			project.add_lib("EGL");
-			project.add_define("KINC_EGL");
 		}
 		else {
 			throw new Error("Graphics API " + graphics + " is not available for Linux.");
