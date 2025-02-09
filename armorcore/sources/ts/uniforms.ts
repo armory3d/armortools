@@ -125,11 +125,6 @@ function uniforms_bind_render_target(rt: render_target_t, context: shader_contex
 				g4_set_tex(context._.tex_units[j], rt._image); // sampler2D
 			}
 
-			if (rt.depth > 1) { // sampler3D
-				g4_set_tex_3d_params(context._.tex_units[j], tex_addressing_t.CLAMP, tex_addressing_t.CLAMP, tex_addressing_t.CLAMP, tex_filter_t.LINEAR, tex_filter_t.ANISOTROPIC, mip_map_filter_t.LINEAR);
-				continue;
-			}
-
 			if (rt.mipmaps) {
 				g4_set_tex_params(context._.tex_units[j], tex_addressing_t.CLAMP, tex_addressing_t.CLAMP, tex_filter_t.LINEAR, tex_filter_t.LINEAR, mip_map_filter_t.LINEAR);
 				continue;
