@@ -18,11 +18,6 @@
 */
 
 bool kinc_g5_supports_raytracing(void);
-bool kinc_g5_supports_instanced_rendering(void);
-bool kinc_g5_supports_compute_shaders(void);
-bool kinc_g5_supports_blend_constants(void);
-bool kinc_g5_supports_non_pow2_textures(void);
-bool kinc_g5_render_targets_inverted_y(void);
 int kinc_g5_max_bound_textures(void);
 void kinc_g5_flush(void);
 void kinc_g5_begin(kinc_g5_render_target_t *renderTarget, int window);

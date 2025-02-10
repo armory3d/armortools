@@ -29,19 +29,11 @@ typedef enum kinc_g5_mipmap_filter {
 typedef struct kinc_g5_sampler_options {
 	kinc_g5_texture_addressing_t u_addressing;
 	kinc_g5_texture_addressing_t v_addressing;
-	kinc_g5_texture_addressing_t w_addressing;
 
 	kinc_g5_texture_filter_t minification_filter;
 	kinc_g5_texture_filter_t magnification_filter;
 	kinc_g5_mipmap_filter_t mipmap_filter;
 
-	float lod_min_clamp;
-	float lod_max_clamp;
-
-	uint16_t max_anisotropy;
-
-	bool is_comparison;
-	kinc_g5_compare_mode_t compare_mode;
 } kinc_g5_sampler_options_t;
 
 typedef struct kinc_g5_sampler {

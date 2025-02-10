@@ -2028,10 +2028,6 @@ void iron_g4_disable_scissor() {
 	kinc_g4_disable_scissor();
 }
 
-bool iron_g4_render_targets_inverted_y() {
-	return kinc_g4_render_targets_inverted_y();
-}
-
 void iron_g4_begin(image_t *render_target, any_array_t *additional) {
 	if (render_target == NULL) {
 		kinc_g4_restore_render_target();

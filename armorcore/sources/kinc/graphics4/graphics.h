@@ -26,8 +26,7 @@ typedef enum {
 
 typedef enum {
 	KINC_G4_TEXTURE_DIRECTION_U,
-	KINC_G4_TEXTURE_DIRECTION_V,
-	KINC_G4_TEXTURE_DIRECTION_W
+	KINC_G4_TEXTURE_DIRECTION_V
 } kinc_g4_texture_direction_t;
 
 typedef enum {
@@ -42,11 +41,6 @@ typedef enum {
 	KINC_G4_MIPMAP_FILTER_LINEAR // linear texture filter + linear mip filter -> trilinear filter
 } kinc_g4_mipmap_filter_t;
 
-bool kinc_g4_supports_instanced_rendering(void);
-bool kinc_g4_supports_compute_shaders(void);
-bool kinc_g4_supports_blend_constants(void);
-bool kinc_g4_supports_non_pow2_textures(void);
-bool kinc_g4_render_targets_inverted_y(void);
 int kinc_g4_max_bound_textures(void);
 void kinc_g4_flush(void);
 void kinc_g4_begin(int window);
@@ -62,12 +56,10 @@ void kinc_g4_scissor(int x, int y, int width, int height);
 void kinc_g4_disable_scissor(void);
 void kinc_g4_draw_indexed_vertices(void);
 void kinc_g4_draw_indexed_vertices_from_to(int start, int count);
-void kinc_g4_draw_indexed_vertices_from_to_from(int start, int count, int vertex_offset);
 void kinc_g4_draw_indexed_vertices_instanced(int instanceCount);
 void kinc_g4_draw_indexed_vertices_instanced_from_to(int instanceCount, int start, int count);
 void kinc_g4_set_texture_addressing(kinc_g4_texture_unit_t unit, kinc_g4_texture_direction_t dir, kinc_g4_texture_addressing_t addressing);
 void kinc_g4_set_pipeline(struct kinc_g4_pipeline *pipeline);
-void kinc_g4_set_blend_constant(float r, float g, float b, float a);
 void kinc_g4_set_int(kinc_g4_constant_location_t location, int value);
 void kinc_g4_set_int2(kinc_g4_constant_location_t location, int value1, int value2);
 void kinc_g4_set_int3(kinc_g4_constant_location_t location, int value1, int value2, int value3);
@@ -84,13 +76,8 @@ void kinc_g4_set_matrix4(kinc_g4_constant_location_t location, kinc_matrix4x4_t 
 void kinc_g4_set_texture_magnification_filter(kinc_g4_texture_unit_t unit, kinc_g4_texture_filter_t filter);
 void kinc_g4_set_texture_minification_filter(kinc_g4_texture_unit_t unit, kinc_g4_texture_filter_t filter);
 void kinc_g4_set_texture_mipmap_filter(kinc_g4_texture_unit_t unit, kinc_g4_mipmap_filter_t filter);
-void kinc_g4_set_texture_compare_mode(kinc_g4_texture_unit_t unit, bool enabled);
-void kinc_g4_set_texture_compare_func(kinc_g4_texture_unit_t unit, kinc_g4_compare_mode_t mode);
-void kinc_g4_set_texture_max_anisotropy(kinc_g4_texture_unit_t unit, uint16_t max_anisotropy);
-void kinc_g4_set_texture_lod(kinc_g4_texture_unit_t unit, float lod_min_clamp, float lod_max_clamp);
 void kinc_g4_restore_render_target(void);
 void kinc_g4_set_render_targets(struct kinc_g4_render_target **targets, int count);
-void kinc_g4_set_render_target_face(struct kinc_g4_render_target *texture, int face);
 void kinc_g4_set_texture(kinc_g4_texture_unit_t unit, struct kinc_g4_texture *texture);
 void kinc_g4_set_compute_shader(struct kinc_g4_compute_shader *shader);
 void kinc_g4_compute(int x, int y, int z);

@@ -49,7 +49,11 @@ typedef enum {
 	KINC_G4_COMPARE_GREATER_EQUAL
 } kinc_g4_compare_mode_t;
 
-typedef enum { KINC_G4_CULL_CLOCKWISE, KINC_G4_CULL_COUNTER_CLOCKWISE, KINC_G4_CULL_NOTHING } kinc_g4_cull_mode_t;
+typedef enum {
+	KINC_G4_CULL_CLOCKWISE,
+	KINC_G4_CULL_COUNTER_CLOCKWISE,
+	KINC_G4_CULL_NOTHING
+} kinc_g4_cull_mode_t;
 
 typedef struct kinc_g4_pipeline {
 	struct kinc_g4_vertex_structure *input_layout[16];

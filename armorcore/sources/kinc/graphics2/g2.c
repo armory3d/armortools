@@ -131,12 +131,7 @@ kinc_vector2_t kinc_g2_matrix3x3_multvec(kinc_matrix3x3_t *m, kinc_vector2_t v) 
 
 void kinc_g2_internal_set_projection_matrix(kinc_g4_render_target_t *target) {
 	if (target != NULL) {
-		if (kinc_g4_render_targets_inverted_y()) {
-			g2_projection_matrix = kinc_g2_matrix4x4_orthogonal_projection(0.0f, (float)target->width, 0.0f, (float)target->height, 0.1f, 1000.0f);
-		}
-		else {
-			g2_projection_matrix = kinc_g2_matrix4x4_orthogonal_projection(0.0f, (float)target->width, (float)target->height, 0.0f, 0.1f, 1000.0f);
-		}
+		g2_projection_matrix = kinc_g2_matrix4x4_orthogonal_projection(0.0f, (float)target->width, (float)target->height, 0.0f, 0.1f, 1000.0f);
 	}
 	else {
 		g2_projection_matrix = kinc_g2_matrix4x4_orthogonal_projection(0.0f, (float)kinc_window_width(0), (float)kinc_window_height(0), 0.0f, 0.1f, 1000.0f);

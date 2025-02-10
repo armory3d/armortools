@@ -218,26 +218,6 @@ bool kinc_g5_supports_raytracing(void) {
 	return false;
 }
 
-bool kinc_g5_supports_instanced_rendering(void) {
-	return true;
-}
-
-bool kinc_g5_supports_compute_shaders(void) {
-	return true;
-}
-
-bool kinc_g5_supports_blend_constants(void) {
-	return true;
-}
-
-bool kinc_g5_supports_non_pow2_textures(void) {
-	return true;
-}
-
-bool kinc_g5_render_targets_inverted_y(void) {
-	return false;
-}
-
 int kinc_g5_max_bound_textures(void) {
 	return 16;
 }

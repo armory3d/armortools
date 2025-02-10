@@ -23,21 +23,12 @@ void kinc_g4_internal_pipeline_set_defaults(kinc_g4_pipeline_t *state) {
 
 	for (int i = 0; i < 8; ++i) {
 		state->color_write_mask_red[i] = true;
-	}
-	for (int i = 0; i < 8; ++i) {
 		state->color_write_mask_green[i] = true;
-	}
-	for (int i = 0; i < 8; ++i) {
 		state->color_write_mask_blue[i] = true;
-	}
-	for (int i = 0; i < 8; ++i) {
 		state->color_write_mask_alpha[i] = true;
-	}
-
-	state->color_attachment_count = 1;
-	for (int i = 0; i < 8; ++i) {
 		state->color_attachment[i] = KINC_G4_RENDER_TARGET_FORMAT_32BIT;
 	}
 
+	state->color_attachment_count = 1;
 	state->depth_attachment_bits = 0;
 }

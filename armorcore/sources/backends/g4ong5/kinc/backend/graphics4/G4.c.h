@@ -78,12 +78,6 @@ typedef struct render_state {
 	int vertex_buffer_offsets[MAX_VERTEX_BUFFERS];
 	int vertex_buffer_count;
 
-	bool blend_constant_set;
-	float blend_constant_r;
-	float blend_constant_g;
-	float blend_constant_b;
-	float blend_constant_a;
-
 	bool viewport_set;
 	int viewport_x;
 	int viewport_y;
@@ -217,10 +211,6 @@ static void endDraw(bool compute) {
 			kinc_g5_command_list_set_vertex_buffers(&commandList, current_state.vertex_buffers, current_state.vertex_buffer_offsets,
 			                                        current_state.vertex_buffer_count);
 		}
-		if (current_state.blend_constant_set) {
-			kinc_g5_command_list_set_blend_constant(&commandList, current_state.blend_constant_r, current_state.blend_constant_g,
-			                                        current_state.blend_constant_b, current_state.blend_constant_a);
-		}
 		if (current_state.viewport_set) {
 			kinc_g5_command_list_viewport(&commandList, current_state.viewport_x, current_state.viewport_y, current_state.viewport_width,
 			                              current_state.viewport_height);
@@ -266,12 +256,6 @@ void kinc_g4_draw_indexed_vertices(void) {
 void kinc_g4_draw_indexed_vertices_from_to(int start, int count) {
 	startDraw(false);
 	kinc_g5_command_list_draw_indexed_vertices_from_to(&commandList, start, count);
-	endDraw(false);
-}
-
-void kinc_g4_draw_indexed_vertices_from_to_from(int start, int count, int vertex_offset) {
-	startDraw(false);
-	kinc_g5_command_list_draw_indexed_vertices_from_to_from(&commandList, start, count, vertex_offset);
 	endDraw(false);
 }
 
@@ -342,7 +326,6 @@ void kinc_g4_begin(int window) {
 		current_state.vertex_buffer_offsets[i] = 0;
 	}
 	current_state.vertex_buffer_count = 0;
-	current_state.blend_constant_set = false;
 	current_state.viewport_set = false;
 	current_state.scissor_set = false;
 	current_state.texture_count = 0;
@@ -540,9 +523,6 @@ void kinc_g4_set_texture_addressing(kinc_g4_texture_unit_t unit, kinc_g4_texture
 			if (dir == KINC_G4_TEXTURE_DIRECTION_V) {
 				sampler_options[i][unit.stages[i]].v_addressing = (kinc_g5_texture_addressing_t)addressing;
 			}
-			if (dir == KINC_G4_TEXTURE_DIRECTION_W) {
-				sampler_options[i][unit.stages[i]].w_addressing = (kinc_g5_texture_addressing_t)addressing;
-			}
 		}
 	}
 }
@@ -571,39 +551,6 @@ void kinc_g4_set_texture_mipmap_filter(kinc_g4_texture_unit_t texunit, kinc_g4_m
 	}
 }
 
-void kinc_g4_set_texture_compare_mode(kinc_g4_texture_unit_t unit, bool enabled) {
-	for (int i = 0; i < KINC_G5_SHADER_TYPE_COUNT; ++i) {
-		if (unit.stages[i] >= 0) {
-			sampler_options[i][unit.stages[i]].is_comparison = enabled;
-		}
-	}
-}
-
-void kinc_g4_set_texture_compare_func(kinc_g4_texture_unit_t unit, kinc_g4_compare_mode_t mode) {
-	for (int i = 0; i < KINC_G5_SHADER_TYPE_COUNT; ++i) {
-		if (unit.stages[i] >= 0) {
-			sampler_options[i][unit.stages[i]].compare_mode = (kinc_g5_compare_mode_t)mode;
-		}
-	}
-}
-
-void kinc_g4_set_texture_max_anisotropy(kinc_g4_texture_unit_t unit, uint16_t max_anisotropy) {
-	for (int i = 0; i < KINC_G5_SHADER_TYPE_COUNT; ++i) {
-		if (unit.stages[i] >= 0) {
-			sampler_options[i][unit.stages[i]].max_anisotropy = max_anisotropy;
-		}
-	}
-}
-
-void kinc_g4_set_texture_lod(kinc_g4_texture_unit_t unit, float lod_min_clamp, float lod_max_clamp) {
-	for (int i = 0; i < KINC_G5_SHADER_TYPE_COUNT; ++i) {
-		if (unit.stages[i] >= 0) {
-			sampler_options[i][unit.stages[i]].lod_min_clamp = lod_min_clamp;
-			sampler_options[i][unit.stages[i]].lod_max_clamp = lod_max_clamp;
-		}
-	}
-}
-
 void kinc_g4_restore_render_target(void) {
 	kinc_g4_on_g5_internal_restore_render_target();
 	current_state.viewport_set = false;
@@ -625,12 +572,6 @@ void kinc_g4_set_render_targets(kinc_g4_render_target_t **targets, int count) {
 		render_targets[i] = &targets[i]->impl._renderTarget;
 	}
 	kinc_g5_command_list_set_render_targets(&commandList, render_targets, count);
-	current_state.viewport_set = false;
-	current_state.scissor_set = false;
-}
-
-void kinc_g4_set_render_target_face(kinc_g4_render_target_t *texture, int face) {
-	kinc_g5_command_list_set_render_target_face(&commandList, &texture->impl._renderTarget, face);
 	current_state.viewport_set = false;
 	current_state.scissor_set = false;
 }
@@ -696,35 +637,6 @@ void kinc_g4_set_pipeline(kinc_g4_pipeline_t *pipeline) {
 	kinc_g5_pipeline_t *g5_pipeline = &pipeline->impl._pipeline;
 	current_state.pipeline = g5_pipeline;
 	kinc_g5_command_list_set_pipeline(&commandList, g5_pipeline);
-}
-
-void kinc_g4_set_blend_constant(float r, float g, float b, float a) {
-	current_state.blend_constant_set = true;
-	current_state.blend_constant_r = r;
-	current_state.blend_constant_g = g;
-	current_state.blend_constant_b = b;
-	current_state.blend_constant_a = a;
-	kinc_g5_command_list_set_blend_constant(&commandList, r, g, b, a);
-}
-
-bool kinc_g4_supports_instanced_rendering(void) {
-	return kinc_g5_supports_instanced_rendering();
-}
-
-bool kinc_g4_supports_compute_shaders(void) {
-	return kinc_g5_supports_compute_shaders();
-}
-
-bool kinc_g4_supports_blend_constants(void) {
-	return kinc_g5_supports_blend_constants();
-}
-
-bool kinc_g4_supports_non_pow2_textures(void) {
-	return kinc_g5_supports_non_pow2_textures();
-}
-
-bool kinc_g4_render_targets_inverted_y(void) {
-	return kinc_g5_render_targets_inverted_y();
 }
 
 void kinc_g4_render_target_use_color_as_texture(kinc_g4_render_target_t *render_target, kinc_g4_texture_unit_t unit) {

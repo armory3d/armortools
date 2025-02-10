@@ -15,12 +15,11 @@ static void samplers_reset(void) {
 }
 
 bool sampler_options_equals(kinc_g5_sampler_options_t *options1, kinc_g5_sampler_options_t *options2) {
-	return options1->u_addressing == options2->u_addressing && options1->v_addressing == options2->v_addressing &&
-	       options1->w_addressing == options2->w_addressing && options1->minification_filter == options2->minification_filter &&
-	       options1->magnification_filter == options2->magnification_filter && options1->mipmap_filter == options2->mipmap_filter &&
-	       options1->lod_min_clamp == options2->lod_min_clamp && options1->lod_max_clamp == options2->lod_max_clamp &&
-	       options1->max_anisotropy == options2->max_anisotropy && options1->is_comparison == options2->is_comparison &&
-	       options1->compare_mode == options2->compare_mode;
+	return options1->u_addressing == options2->u_addressing &&
+		   options1->v_addressing == options2->v_addressing &&
+	       options1->minification_filter == options2->minification_filter &&
+	       options1->magnification_filter == options2->magnification_filter &&
+		   options1->mipmap_filter == options2->mipmap_filter;
 }
 
 struct sampler_cache_entry {

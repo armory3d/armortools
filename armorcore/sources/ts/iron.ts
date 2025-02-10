@@ -295,7 +295,6 @@ declare function iron_g4_set_depth_from(target: any, source: any): void;
 declare function iron_g4_viewport(x: i32, y: i32, width: i32, height: i32): void;
 declare function iron_g4_scissor(x: i32, y: i32, width: i32, height: i32): void;
 declare function iron_g4_disable_scissor(): void;
-declare function iron_g4_render_targets_inverted_y(): bool;
 declare function iron_g4_begin(render_target: image_t, additional: image_t[]): void;
 declare function iron_g4_end(): void;
 declare function iron_g4_swap_buffers(): void;

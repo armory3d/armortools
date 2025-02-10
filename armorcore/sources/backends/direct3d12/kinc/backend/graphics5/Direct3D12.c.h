@@ -486,30 +486,10 @@ bool kinc_g5_swap_buffers() {
 
 void kinc_g5_flush() {}
 
-bool kinc_g5_render_targets_inverted_y() {
-	return false;
-}
-
 bool kinc_g5_supports_raytracing() {
 	D3D12_FEATURE_DATA_D3D12_OPTIONS5 options;
 	if (device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &options, sizeof(options)) == S_OK) {
 		return options.RaytracingTier >= D3D12_RAYTRACING_TIER_1_0;
 	}
 	return false;
-}
-
-bool kinc_g5_supports_instanced_rendering() {
-	return true;
-}
-
-bool kinc_g5_supports_compute_shaders() {
-	return true;
-}
-
-bool kinc_g5_supports_blend_constants() {
-	return true;
-}
-
-bool kinc_g5_supports_non_pow2_textures() {
-	return true;
 }

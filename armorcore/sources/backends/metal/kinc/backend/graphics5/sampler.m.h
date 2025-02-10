@@ -53,10 +53,10 @@ void kinc_g5_sampler_init(kinc_g5_sampler_t *sampler, const kinc_g5_sampler_opti
 	desc.sAddressMode = convert_addressing(options->u_addressing);
 	desc.tAddressMode = convert_addressing(options->v_addressing);
 	desc.mipFilter = convert_mipmap_mode(options->mipmap_filter);
-	desc.maxAnisotropy = options->max_anisotropy;
+	desc.maxAnisotropy = 1;
 	desc.normalizedCoordinates = YES;
-	desc.lodMinClamp = options->lod_min_clamp;
-	desc.lodMaxClamp = options->lod_max_clamp;
+	desc.lodMinClamp = 0;
+	desc.lodMaxClamp = 32;
 
 	sampler->impl.sampler = (__bridge_retained void *)[device newSamplerStateWithDescriptor:desc];
 }

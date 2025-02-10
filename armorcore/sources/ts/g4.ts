@@ -428,10 +428,6 @@ function image_create_render_target(width: i32, height: i32, format: tex_format_
 	return image;
 }
 
-function image_render_targets_inv_y(): bool {
-	return iron_g4_render_targets_inverted_y();
-}
-
 function image_format_byte_size(format: tex_format_t): i32 {
 	if (format == tex_format_t.RGBA32) {
 		return 4;

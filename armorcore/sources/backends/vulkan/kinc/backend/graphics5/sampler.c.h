@@ -53,22 +53,19 @@ void kinc_g5_sampler_init(kinc_g5_sampler_t *sampler, const kinc_g5_sampler_opti
 
 	info.addressModeU = convert_addressing(options->u_addressing);
 	info.addressModeV = convert_addressing(options->v_addressing);
-	info.addressModeW = convert_addressing(options->w_addressing);
+	info.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
 
 	info.mipmapMode = convert_mipmap_mode(options->mipmap_filter);
 
 	info.magFilter = convert_texture_filter(options->magnification_filter);
 	info.minFilter = convert_texture_filter(options->minification_filter);
 
-	info.compareEnable = options->is_comparison;
-	info.compareOp = convert_compare_mode(options->compare_mode);
-
 	info.anisotropyEnable =
 	    (options->magnification_filter == KINC_G5_TEXTURE_FILTER_ANISOTROPIC || options->minification_filter == KINC_G5_TEXTURE_FILTER_ANISOTROPIC);
-	info.maxAnisotropy = options->max_anisotropy;
+	info.maxAnisotropy = 1;
 
-	info.maxLod = options->lod_max_clamp;
-	info.minLod = options->lod_min_clamp;
+	info.maxLod = 32;
+	info.minLod = 0;
 
 	vkCreateSampler(vk_ctx.device, &info, NULL, &sampler->impl.sampler);
 }

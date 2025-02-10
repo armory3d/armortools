@@ -70,23 +70,3 @@ void kinc_g5_flush() {}
 bool kinc_g5_supports_raytracing() {
 	return false;
 }
-
-bool kinc_g5_supports_instanced_rendering() {
-	return true;
-}
-
-bool kinc_g5_supports_compute_shaders() {
-	return true;
-}
-
-bool kinc_g5_supports_blend_constants() {
-	return true;
-}
-
-bool kinc_g5_supports_non_pow2_textures() {
-	return true;
-}
-
-bool kinc_g5_render_targets_inverted_y() {
-	return false;
-}

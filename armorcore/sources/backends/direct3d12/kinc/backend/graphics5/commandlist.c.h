@@ -176,17 +176,8 @@ void kinc_g5_command_list_draw_indexed_vertices(struct kinc_g5_command_list *lis
 
 void kinc_g5_command_list_draw_indexed_vertices_from_to(struct kinc_g5_command_list *list, int start, int count) {
 	assert(list->impl.open);
-
 	list->impl._commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
 	list->impl._commandList->DrawIndexedInstanced(count, 1, start, 0, 0);
-}
-
-void kinc_g5_command_list_draw_indexed_vertices_from_to_from(struct kinc_g5_command_list *list, int start, int count, int vertex_offset) {
-	assert(list->impl.open);
-
-	list->impl._commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	list->impl._commandList->DrawIndexedInstanced(count, 1, start, vertex_offset, 0);
 }
 
 void kinc_g5_command_list_draw_indexed_vertices_instanced(kinc_g5_command_list_t *list, int instanceCount) {
@@ -268,11 +259,6 @@ void kinc_g5_command_list_set_pipeline(struct kinc_g5_command_list *list, kinc_g
 		list->impl.currentTextures[i] = NULL;
 	}
 	kinc_g5_internal_setConstants(list, list->impl._currentPipeline);
-}
-
-void kinc_g5_command_list_set_blend_constant(kinc_g5_command_list_t *list, float r, float g, float b, float a) {
-	const FLOAT BlendFactor[4] = {r, g, b, a};
-	list->impl._commandList->OMSetBlendFactor(BlendFactor);
 }
 
 void kinc_g5_command_list_set_vertex_buffers(struct kinc_g5_command_list *list, kinc_g5_vertex_buffer_t **buffers, int *offsets, int count) {
@@ -486,8 +472,6 @@ void kinc_g5_command_list_compute(kinc_g5_command_list_t *list, int x, int y, in
 	assert(list->impl.open);
 	list->impl._commandList->Dispatch(x, y, z);
 }
-
-void kinc_g5_command_list_set_render_target_face(kinc_g5_command_list_t *list, kinc_g5_render_target_t *texture, int face) {}
 
 void kinc_g5_command_list_set_texture(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *texture) {
 	if (unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT] >= 0) {
