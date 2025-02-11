@@ -17,10 +17,10 @@ flags.with_iron = true;
 flags.with_eval = true;
 
 let project = new Project("Base");
+let dir = flags.name.toLowerCase();
 
 {
 	project.add_define("IDLE_SLEEP");
-	let dir = flags.name.toLowerCase();
 
 	if (graphics === "vulkan") {
 		project.add_project("../armorcore/tools/to_spirv");
@@ -65,6 +65,10 @@ project.add_assets("assets/locale/*", { destination: "data/locale/{name}" });
 project.add_assets("assets/licenses/**", { destination: "data/licenses/{name}" });
 project.add_assets("assets/plugins/*", { destination: "data/plugins/{name}" });
 project.add_assets("assets/themes/*.json", { destination: "data/themes/{name}" });
+
+if (platform === "linux" && fs_exists(os_cwd() + "/icon.png")) {
+	project.add_assets("../" + dir + "/icon.png", { destination: "{name}", noprocessing: true });
+}
 
 if (flags.embed) {
 	project.add_define("WITH_EMBED");
