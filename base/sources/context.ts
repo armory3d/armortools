@@ -296,11 +296,9 @@ function context_create(): context_t {
 	c.parse_transform = true;
 	c.parse_vcols = false;
 	c.select_time = 0.0;
-	///if (arm_direct3d12 || arm_vulkan)
-	c.viewport_mode = viewport_mode_t.PATH_TRACE;
-	///else
-	c.viewport_mode = viewport_mode_t.LIT;
-	///end
+	c.viewport_mode = config_raw.viewport_mode == 0 ?
+		viewport_mode_t.LIT :
+		viewport_mode_t.PATH_TRACE;
 	///if (arm_android || arm_ios)
 	c.render_mode = render_mode_t.FORWARD;
 	///else

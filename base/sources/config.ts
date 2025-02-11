@@ -80,6 +80,8 @@ function config_save() {
 	json_encode_i32("workspace", config_raw.workspace);
 	json_encode_i32("camera_controls", config_raw.camera_controls);
 	json_encode_string("server", config_raw.server);
+	json_encode_i32("viewport_mode", config_raw.viewport_mode);
+	json_encode_i32("pathtrace_mode", config_raw.pathtrace_mode);
 	json_encode_bool("pressure_radius", config_raw.pressure_radius);
 	json_encode_f32("pressure_sensitivity", config_raw.pressure_sensitivity);
 	json_encode_f32("displace_strength", config_raw.displace_strength);
@@ -98,7 +100,6 @@ function config_save() {
 	json_encode_bool("gpu_inference", config_raw.gpu_inference);
 	json_encode_string("blender", config_raw.blender);
 	json_encode_i32("atlas_res", config_raw.atlas_res);
-	json_encode_i32("pathtrace_mode", config_raw.pathtrace_mode);
 	json_encode_bool("grid_snap", config_raw.grid_snap);
 	let config_json: string = json_encode_end();
 
@@ -419,6 +420,8 @@ type config_t = {
 	workspace?: i32;
 	camera_controls?: i32; // Orbit, rotate
 	server?: string;
+	viewport_mode: i32;
+	pathtrace_mode: i32;
 
 	pressure_radius?: bool; // Pen pressure controls
 	pressure_sensitivity?: f32;
@@ -441,6 +444,5 @@ type config_t = {
 	gpu_inference?: bool;
 	blender?: string;
 	atlas_res: i32; // Forge
-	pathtrace_mode: i32;
 	grid_snap: bool;
 };
