@@ -51,12 +51,6 @@ void kinc_g5_internal_init_window(int window, int depthBufferBits, bool vsync) {
 	swapChain = wgpuDeviceCreateSwapChain(device, surface, &scDesc);
 }
 
-void kinc_g5_draw_indexed_vertices_instanced(int instanceCount) {}
-
-void kinc_g5_draw_indexed_vertices_instanced_from_to(int instanceCount, int start, int count) {}
-
-void kinc_g5_draw_indexed_vertices_instanced_from_to_from(int instanceCount, int start, int count, int vertex_offset) {}
-
 void kinc_g5_begin(kinc_g5_render_target_t *renderTarget, int window) {}
 
 void kinc_g5_end(int window) {}

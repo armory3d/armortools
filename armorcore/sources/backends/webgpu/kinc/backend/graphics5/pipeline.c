@@ -43,11 +43,11 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
 	WGPUVertexAttribute vaDesc[8];
 	memset(&vaDesc[0], 0, sizeof(vaDesc[0]) * 8);
 	uint64_t offset = 0;
-	for (int i = 0; i < pipe->inputLayout[0]->size; ++i) {
+	for (int i = 0; i < pipe->inputLayout->size; ++i) {
 		vaDesc[i].shaderLocation = i;
 		vaDesc[i].offset = offset;
-		offset += kinc_g4_vertex_data_size(pipe->inputLayout[0]->elements[i].data);
-		switch (pipe->inputLayout[0]->elements[i].data) {
+		offset += kinc_g4_vertex_data_size(pipe->inputLayout->elements[i].data);
+		switch (pipe->inputLayout->elements[i].data) {
 		case KINC_G4_VERTEX_DATA_NONE:
 			vaDesc[i].format = WGPUVertexFormat_Undefined;
 			assert(false);
@@ -178,7 +178,7 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
 	WGPUVertexBufferLayout vbDesc;
 	memset(&vbDesc, 0, sizeof(vbDesc));
 	vbDesc.arrayStride = offset;
-	vbDesc.attributeCount = pipe->inputLayout[0]->size;
+	vbDesc.attributeCount = pipe->inputLayout->size;
 	vbDesc.attributes = &vaDesc[0];
 
 	WGPUVertexState vsDest;

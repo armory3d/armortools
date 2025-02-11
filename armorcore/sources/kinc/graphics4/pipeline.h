@@ -56,7 +56,7 @@ typedef enum {
 } kinc_g4_cull_mode_t;
 
 typedef struct kinc_g4_pipeline {
-	struct kinc_g4_vertex_structure *input_layout[16];
+	struct kinc_g4_vertex_structure *input_layout;
 	struct kinc_g4_shader *vertex_shader;
 	struct kinc_g4_shader *fragment_shader;
 

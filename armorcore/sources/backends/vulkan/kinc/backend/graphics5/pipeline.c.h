@@ -419,8 +419,7 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 	VkPipelineDepthStencilStateCreateInfo ds = {0};
 	VkPipelineViewportStateCreateInfo vp = {0};
 	VkPipelineMultisampleStateCreateInfo ms = {0};
-#define dynamicStatesCount 2
-	VkDynamicState dynamicStateEnables[dynamicStatesCount];
+	VkDynamicState dynamicStateEnables[2];
 	VkPipelineDynamicStateCreateInfo dynamicState = {0};
 
 	memset(dynamicStateEnables, 0, sizeof(dynamicStateEnables));
@@ -432,160 +431,147 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 	pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 	pipeline_info.layout = pipeline->impl.pipeline_layout;
 
-	int vertexAttributeCount = 0;
-	int vertexBindingCount = 0;
-	for (int i = 0; i < 16; ++i) {
-		if (pipeline->inputLayout[i] == NULL) {
-			break;
-		}
-		vertexAttributeCount += pipeline->inputLayout[i]->size;
-		vertexBindingCount++;
-	}
-
-	VkVertexInputBindingDescription vi_bindings[vertexBindingCount];
+	VkVertexInputBindingDescription vi_bindings[1];
+	int vertexAttributeCount = pipeline->inputLayout->size;
 	VkVertexInputAttributeDescription vi_attrs[vertexAttributeCount];
 
 	VkPipelineVertexInputStateCreateInfo vi = {0};
 	memset(&vi, 0, sizeof(vi));
 	vi.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 	vi.pNext = NULL;
-	vi.vertexBindingDescriptionCount = vertexBindingCount;
+	vi.vertexBindingDescriptionCount = 1;
 	vi.pVertexBindingDescriptions = vi_bindings;
 	vi.vertexAttributeDescriptionCount = vertexAttributeCount;
 	vi.pVertexAttributeDescriptions = vi_attrs;
 
 	uint32_t attr = 0;
-	for (int binding = 0; binding < vertexBindingCount; ++binding) {
-		uint32_t offset = 0;
-		uint32_t stride = 0;
-		for (int i = 0; i < pipeline->inputLayout[binding]->size; ++i) {
-			kinc_g5_vertex_element_t element = pipeline->inputLayout[binding]->elements[i];
+	uint32_t offset = 0;
+	for (int i = 0; i < pipeline->inputLayout->size; ++i) {
+		kinc_g5_vertex_element_t element = pipeline->inputLayout->elements[i];
 
-			vi_attrs[attr].binding = binding;
-			vi_attrs[attr].location = find_number(pipeline->impl.vertexLocations, element.name);
-			vi_attrs[attr].offset = offset;
-			offset += kinc_g4_vertex_data_size(element.data);
-			stride += kinc_g4_vertex_data_size(element.data);
+		vi_attrs[attr].binding = 0;
+		vi_attrs[attr].location = find_number(pipeline->impl.vertexLocations, element.name);
+		vi_attrs[attr].offset = offset;
+		offset += kinc_g4_vertex_data_size(element.data);
 
-			switch (element.data) {
-			case KINC_G4_VERTEX_DATA_F32_1X:
-				vi_attrs[attr].format = VK_FORMAT_R32_SFLOAT;
-				break;
-			case KINC_G4_VERTEX_DATA_F32_2X:
-				vi_attrs[attr].format = VK_FORMAT_R32G32_SFLOAT;
-				break;
-			case KINC_G4_VERTEX_DATA_F32_3X:
-				vi_attrs[attr].format = VK_FORMAT_R32G32B32_SFLOAT;
-				break;
-			case KINC_G4_VERTEX_DATA_F32_4X:
-				vi_attrs[attr].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-				break;
-			case KINC_G4_VERTEX_DATA_I8_1X:
-				vi_attrs[attr].format = VK_FORMAT_R8_SINT;
-				break;
-			case KINC_G4_VERTEX_DATA_U8_1X:
-				vi_attrs[attr].format = VK_FORMAT_R8_UINT;
-				break;
-			case KINC_G4_VERTEX_DATA_I8_1X_NORMALIZED:
-				vi_attrs[attr].format = VK_FORMAT_R8_SNORM;
-				break;
-			case KINC_G4_VERTEX_DATA_U8_1X_NORMALIZED:
-				vi_attrs[attr].format = VK_FORMAT_R8_UNORM;
-				break;
-			case KINC_G4_VERTEX_DATA_I8_2X:
-				vi_attrs[attr].format = VK_FORMAT_R8G8_SINT;
-				break;
-			case KINC_G4_VERTEX_DATA_U8_2X:
-				vi_attrs[attr].format = VK_FORMAT_R8G8_UINT;
-				break;
-			case KINC_G4_VERTEX_DATA_I8_2X_NORMALIZED:
-				vi_attrs[attr].format = VK_FORMAT_R8G8_SNORM;
-				break;
-			case KINC_G4_VERTEX_DATA_U8_2X_NORMALIZED:
-				vi_attrs[attr].format = VK_FORMAT_R8G8_UNORM;
-				break;
-			case KINC_G4_VERTEX_DATA_I8_4X:
-				vi_attrs[attr].format = VK_FORMAT_R8G8B8A8_SINT;
-				break;
-			case KINC_G4_VERTEX_DATA_U8_4X:
-				vi_attrs[attr].format = VK_FORMAT_R8G8B8A8_UINT;
-				break;
-			case KINC_G4_VERTEX_DATA_I8_4X_NORMALIZED:
-				vi_attrs[attr].format = VK_FORMAT_R8G8B8A8_SNORM;
-				break;
-			case KINC_G4_VERTEX_DATA_U8_4X_NORMALIZED:
-				vi_attrs[attr].format = VK_FORMAT_R8G8B8A8_UNORM;
-				break;
-			case KINC_G4_VERTEX_DATA_I16_1X:
-				vi_attrs[attr].format = VK_FORMAT_R16_SINT;
-				break;
-			case KINC_G4_VERTEX_DATA_U16_1X:
-				vi_attrs[attr].format = VK_FORMAT_R16_UINT;
-				break;
-			case KINC_G4_VERTEX_DATA_I16_1X_NORMALIZED:
-				vi_attrs[attr].format = VK_FORMAT_R16_SNORM;
-				break;
-			case KINC_G4_VERTEX_DATA_U16_1X_NORMALIZED:
-				vi_attrs[attr].format = VK_FORMAT_R16_UNORM;
-				break;
-			case KINC_G4_VERTEX_DATA_I16_2X:
-				vi_attrs[attr].format = VK_FORMAT_R16G16_SINT;
-				break;
-			case KINC_G4_VERTEX_DATA_U16_2X:
-				vi_attrs[attr].format = VK_FORMAT_R16G16_UINT;
-				break;
-			case KINC_G4_VERTEX_DATA_I16_2X_NORMALIZED:
-				vi_attrs[attr].format = VK_FORMAT_R16G16_SNORM;
-				break;
-			case KINC_G4_VERTEX_DATA_U16_2X_NORMALIZED:
-				vi_attrs[attr].format = VK_FORMAT_R16G16_UNORM;
-				break;
-			case KINC_G4_VERTEX_DATA_I16_4X:
-				vi_attrs[attr].format = VK_FORMAT_R16G16B16A16_SINT;
-				break;
-			case KINC_G4_VERTEX_DATA_U16_4X:
-				vi_attrs[attr].format = VK_FORMAT_R16G16B16A16_UINT;
-				break;
-			case KINC_G4_VERTEX_DATA_I16_4X_NORMALIZED:
-				vi_attrs[attr].format = VK_FORMAT_R16G16B16A16_SNORM;
-				break;
-			case KINC_G4_VERTEX_DATA_U16_4X_NORMALIZED:
-				vi_attrs[attr].format = VK_FORMAT_R16G16B16A16_UNORM;
-				break;
-			case KINC_G4_VERTEX_DATA_I32_1X:
-				vi_attrs[attr].format = VK_FORMAT_R32_SINT;
-				break;
-			case KINC_G4_VERTEX_DATA_U32_1X:
-				vi_attrs[attr].format = VK_FORMAT_R32_UINT;
-				break;
-			case KINC_G4_VERTEX_DATA_I32_2X:
-				vi_attrs[attr].format = VK_FORMAT_R32G32_SINT;
-				break;
-			case KINC_G4_VERTEX_DATA_U32_2X:
-				vi_attrs[attr].format = VK_FORMAT_R32G32_UINT;
-				break;
-			case KINC_G4_VERTEX_DATA_I32_3X:
-				vi_attrs[attr].format = VK_FORMAT_R32G32B32_SINT;
-				break;
-			case KINC_G4_VERTEX_DATA_U32_3X:
-				vi_attrs[attr].format = VK_FORMAT_R32G32B32_UINT;
-				break;
-			case KINC_G4_VERTEX_DATA_I32_4X:
-				vi_attrs[attr].format = VK_FORMAT_R32G32B32A32_SINT;
-				break;
-			case KINC_G4_VERTEX_DATA_U32_4X:
-				vi_attrs[attr].format = VK_FORMAT_R32G32B32A32_UINT;
-				break;
-			default:
-				assert(false);
-				break;
-			}
-			attr++;
+		switch (element.data) {
+		case KINC_G4_VERTEX_DATA_F32_1X:
+			vi_attrs[attr].format = VK_FORMAT_R32_SFLOAT;
+			break;
+		case KINC_G4_VERTEX_DATA_F32_2X:
+			vi_attrs[attr].format = VK_FORMAT_R32G32_SFLOAT;
+			break;
+		case KINC_G4_VERTEX_DATA_F32_3X:
+			vi_attrs[attr].format = VK_FORMAT_R32G32B32_SFLOAT;
+			break;
+		case KINC_G4_VERTEX_DATA_F32_4X:
+			vi_attrs[attr].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+			break;
+		case KINC_G4_VERTEX_DATA_I8_1X:
+			vi_attrs[attr].format = VK_FORMAT_R8_SINT;
+			break;
+		case KINC_G4_VERTEX_DATA_U8_1X:
+			vi_attrs[attr].format = VK_FORMAT_R8_UINT;
+			break;
+		case KINC_G4_VERTEX_DATA_I8_1X_NORMALIZED:
+			vi_attrs[attr].format = VK_FORMAT_R8_SNORM;
+			break;
+		case KINC_G4_VERTEX_DATA_U8_1X_NORMALIZED:
+			vi_attrs[attr].format = VK_FORMAT_R8_UNORM;
+			break;
+		case KINC_G4_VERTEX_DATA_I8_2X:
+			vi_attrs[attr].format = VK_FORMAT_R8G8_SINT;
+			break;
+		case KINC_G4_VERTEX_DATA_U8_2X:
+			vi_attrs[attr].format = VK_FORMAT_R8G8_UINT;
+			break;
+		case KINC_G4_VERTEX_DATA_I8_2X_NORMALIZED:
+			vi_attrs[attr].format = VK_FORMAT_R8G8_SNORM;
+			break;
+		case KINC_G4_VERTEX_DATA_U8_2X_NORMALIZED:
+			vi_attrs[attr].format = VK_FORMAT_R8G8_UNORM;
+			break;
+		case KINC_G4_VERTEX_DATA_I8_4X:
+			vi_attrs[attr].format = VK_FORMAT_R8G8B8A8_SINT;
+			break;
+		case KINC_G4_VERTEX_DATA_U8_4X:
+			vi_attrs[attr].format = VK_FORMAT_R8G8B8A8_UINT;
+			break;
+		case KINC_G4_VERTEX_DATA_I8_4X_NORMALIZED:
+			vi_attrs[attr].format = VK_FORMAT_R8G8B8A8_SNORM;
+			break;
+		case KINC_G4_VERTEX_DATA_U8_4X_NORMALIZED:
+			vi_attrs[attr].format = VK_FORMAT_R8G8B8A8_UNORM;
+			break;
+		case KINC_G4_VERTEX_DATA_I16_1X:
+			vi_attrs[attr].format = VK_FORMAT_R16_SINT;
+			break;
+		case KINC_G4_VERTEX_DATA_U16_1X:
+			vi_attrs[attr].format = VK_FORMAT_R16_UINT;
+			break;
+		case KINC_G4_VERTEX_DATA_I16_1X_NORMALIZED:
+			vi_attrs[attr].format = VK_FORMAT_R16_SNORM;
+			break;
+		case KINC_G4_VERTEX_DATA_U16_1X_NORMALIZED:
+			vi_attrs[attr].format = VK_FORMAT_R16_UNORM;
+			break;
+		case KINC_G4_VERTEX_DATA_I16_2X:
+			vi_attrs[attr].format = VK_FORMAT_R16G16_SINT;
+			break;
+		case KINC_G4_VERTEX_DATA_U16_2X:
+			vi_attrs[attr].format = VK_FORMAT_R16G16_UINT;
+			break;
+		case KINC_G4_VERTEX_DATA_I16_2X_NORMALIZED:
+			vi_attrs[attr].format = VK_FORMAT_R16G16_SNORM;
+			break;
+		case KINC_G4_VERTEX_DATA_U16_2X_NORMALIZED:
+			vi_attrs[attr].format = VK_FORMAT_R16G16_UNORM;
+			break;
+		case KINC_G4_VERTEX_DATA_I16_4X:
+			vi_attrs[attr].format = VK_FORMAT_R16G16B16A16_SINT;
+			break;
+		case KINC_G4_VERTEX_DATA_U16_4X:
+			vi_attrs[attr].format = VK_FORMAT_R16G16B16A16_UINT;
+			break;
+		case KINC_G4_VERTEX_DATA_I16_4X_NORMALIZED:
+			vi_attrs[attr].format = VK_FORMAT_R16G16B16A16_SNORM;
+			break;
+		case KINC_G4_VERTEX_DATA_U16_4X_NORMALIZED:
+			vi_attrs[attr].format = VK_FORMAT_R16G16B16A16_UNORM;
+			break;
+		case KINC_G4_VERTEX_DATA_I32_1X:
+			vi_attrs[attr].format = VK_FORMAT_R32_SINT;
+			break;
+		case KINC_G4_VERTEX_DATA_U32_1X:
+			vi_attrs[attr].format = VK_FORMAT_R32_UINT;
+			break;
+		case KINC_G4_VERTEX_DATA_I32_2X:
+			vi_attrs[attr].format = VK_FORMAT_R32G32_SINT;
+			break;
+		case KINC_G4_VERTEX_DATA_U32_2X:
+			vi_attrs[attr].format = VK_FORMAT_R32G32_UINT;
+			break;
+		case KINC_G4_VERTEX_DATA_I32_3X:
+			vi_attrs[attr].format = VK_FORMAT_R32G32B32_SINT;
+			break;
+		case KINC_G4_VERTEX_DATA_U32_3X:
+			vi_attrs[attr].format = VK_FORMAT_R32G32B32_UINT;
+			break;
+		case KINC_G4_VERTEX_DATA_I32_4X:
+			vi_attrs[attr].format = VK_FORMAT_R32G32B32A32_SINT;
+			break;
+		case KINC_G4_VERTEX_DATA_U32_4X:
+			vi_attrs[attr].format = VK_FORMAT_R32G32B32A32_UINT;
+			break;
+		default:
+			assert(false);
+			break;
 		}
-		vi_bindings[binding].binding = binding;
-		vi_bindings[binding].stride = stride;
-		vi_bindings[binding].inputRate = pipeline->inputLayout[binding]->instanced ? VK_VERTEX_INPUT_RATE_INSTANCE : VK_VERTEX_INPUT_RATE_VERTEX;
+		attr++;
 	}
+	vi_bindings[0].binding = 0;
+	vi_bindings[0].stride = offset;
+	vi_bindings[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
 	memset(&ia, 0, sizeof(ia));
 	ia.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;

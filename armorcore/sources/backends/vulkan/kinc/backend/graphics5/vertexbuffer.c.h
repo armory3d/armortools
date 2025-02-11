@@ -8,13 +8,8 @@
 
 bool memory_type_from_properties(uint32_t typeBits, VkFlags requirements_mask, uint32_t *typeIndex);
 
-kinc_g5_vertex_buffer_t *currentVertexBuffer = NULL;
-extern kinc_g5_index_buffer_t *currentIndexBuffer;
-
-void kinc_g5_vertex_buffer_init(kinc_g5_vertex_buffer_t *buffer, int vertexCount, kinc_g5_vertex_structure_t *structure, bool gpuMemory,
-                                int instanceDataStepRate) {
+void kinc_g5_vertex_buffer_init(kinc_g5_vertex_buffer_t *buffer, int vertexCount, kinc_g5_vertex_structure_t *structure, bool gpuMemory) {
 	buffer->impl.myCount = vertexCount;
-	buffer->impl.instanceDataStepRate = instanceDataStepRate;
 	buffer->impl.myStride = 0;
 	for (int i = 0; i < structure->size; ++i) {
 		kinc_g5_vertex_element_t element = structure->elements[i];
@@ -73,9 +68,7 @@ void kinc_g5_vertex_buffer_init(kinc_g5_vertex_buffer_t *buffer, int vertexCount
 }
 
 static void unset_vertex_buffer(kinc_g5_vertex_buffer_t *buffer) {
-	if (currentVertexBuffer == buffer) {
-		currentVertexBuffer = NULL;
-	}
+
 }
 
 void kinc_g5_vertex_buffer_destroy(kinc_g5_vertex_buffer_t *buffer) {
@@ -103,13 +96,8 @@ void kinc_g5_vertex_buffer_unlock(kinc_g5_vertex_buffer_t *buffer, int count) {
 	vkUnmapMemory(vk_ctx.device, buffer->impl.vertices.mem);
 }
 
-static int setVertexAttributes(int offset) {
-	return 0;
-}
-
 int kinc_g5_internal_vertex_buffer_set(kinc_g5_vertex_buffer_t *buffer, int offset) {
-	int offsetoffset = setVertexAttributes(offset);
-	return offsetoffset;
+	return 0;
 }
 
 int kinc_g5_vertex_buffer_count(kinc_g5_vertex_buffer_t *buffer) {

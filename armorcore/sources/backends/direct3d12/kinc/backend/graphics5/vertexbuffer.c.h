@@ -7,7 +7,7 @@
 
 kinc_g5_vertex_buffer_t *_current_vertex_buffer = NULL;
 
-void kinc_g5_vertex_buffer_init(kinc_g5_vertex_buffer_t *buffer, int count, kinc_g5_vertex_structure_t *structure, bool gpuMemory, int instanceDataStepRate) {
+void kinc_g5_vertex_buffer_init(kinc_g5_vertex_buffer_t *buffer, int count, kinc_g5_vertex_structure_t *structure, bool gpuMemory) {
 	buffer->impl.myCount = count;
 
 	buffer->impl.myStride = 0;

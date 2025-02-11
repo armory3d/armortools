@@ -48,10 +48,6 @@ void kinc_g5_internal_init_window(int window, int depthBufferBits, bool vsync) {
 
 void kinc_g5_flush(void) {}
 
-void kinc_g5_draw_indexed_vertices_instanced(int instanceCount) {}
-
-void kinc_g5_draw_indexed_vertices_instanced_from_to(int instanceCount, int start, int count) {}
-
 bool kinc_internal_metal_has_depth = false;
 
 bool kinc_internal_current_render_target_has_depth(void) {

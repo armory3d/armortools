@@ -41,8 +41,6 @@ function mesh_data_create(raw: mesh_data_t): mesh_data_t {
 	raw._.refcount = 0;
 	raw._.vertex_buffer_map = map_create();
 	raw._.ready = false;
-	raw._.instanced = false;
-	raw._.instance_count = 0;
 
 	// Mesh data
 	let indices: u32_array_t[] = [];
@@ -167,28 +165,6 @@ function mesh_data_get_vertex_array(raw: mesh_data_t, name: string): vertex_arra
 	return null;
 }
 
-function mesh_data_setup_inst(raw: mesh_data_t, data: f32_array_t, inst_type: i32) {
-	let structure: vertex_struct_t = g4_vertex_struct_create();
-	structure.instanced = true;
-	raw._.instanced = true;
-	// pos, pos+rot, pos+scale, pos+rot+scale
-	g4_vertex_struct_add(structure, "ipos", vertex_data_t.F32_3X);
-	if (inst_type == 2 || inst_type == 4) {
-		g4_vertex_struct_add(structure, "irot", vertex_data_t.F32_3X);
-	}
-	if (inst_type == 3 || inst_type == 4) {
-		g4_vertex_struct_add(structure, "iscl", vertex_data_t.F32_3X);
-	}
-
-	raw._.instance_count = math_floor(data.length / math_floor(g4_vertex_struct_byte_size(structure) / 4));
-	raw._.instanced_vb = g4_vertex_buffer_create(raw._.instance_count, structure, usage_t.STATIC, 1);
-	let vertices: buffer_t = g4_vertex_buffer_lock(raw._.instanced_vb);
-	for (let i: i32 = 0; i < math_floor((vertices.length) / 4); ++i) {
-		buffer_set_f32(vertices, i * 4, data[i]);
-	}
-	g4_vertex_buffer_unlock(raw._.instanced_vb);
-}
-
 function mesh_data_get(raw: mesh_data_t, vs: vertex_element_t[]): vertex_buffer_t {
 	let key: string = "";
 	for (let i: i32 = 0; i < vs.length; ++i) {
@@ -272,11 +248,6 @@ function mesh_data_build(raw: mesh_data_t) {
 
 		g4_index_buffer_unlock(index_buffer);
 		array_push(raw._.index_buffers, index_buffer);
-	}
-
-	// Instanced
-	if (raw.instancing != null) {
-		mesh_data_setup_inst(raw, raw.instancing.data, raw.instancing.type);
 	}
 
 	raw._.ready = true;

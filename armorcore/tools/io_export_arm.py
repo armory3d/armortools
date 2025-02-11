@@ -530,7 +530,6 @@ class ArmoryExporter(bpy.types.Operator, ExportHelper):
         if has_col:
             cdata = np.empty(num_verts * 4, dtype="<f4")
 
-        o["instancing"] = None
         o["skin"] = None
 
         scale_pos = o["scale_pos"]

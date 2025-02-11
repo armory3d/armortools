@@ -55,7 +55,7 @@ function _pipes_make_merge(red: bool, green: bool, blue: bool, alpha: bool): pip
 	pipe.fragment_shader = sys_get_shader("layer_merge.frag");
 	let vs: vertex_struct_t = g4_vertex_struct_create();
 	g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
-	pipe.input_layout = [vs];
+	pipe.input_layout = vs;
 	pipe.color_write_masks_red = [red];
 	pipe.color_write_masks_green = [green];
 	pipe.color_write_masks_blue = [blue];
@@ -86,7 +86,7 @@ function pipes_init() {
 		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_3X);
 		g4_vertex_struct_add(vs, "tex", vertex_data_t.F32_2X);
 		g4_vertex_struct_add(vs, "col", vertex_data_t.U8_4X_NORM);
-		pipes_copy.input_layout = [vs];
+		pipes_copy.input_layout = vs;
 		g4_pipeline_compile(pipes_copy);
 	}
 
@@ -98,7 +98,7 @@ function pipes_init() {
 		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_3X);
 		g4_vertex_struct_add(vs, "tex", vertex_data_t.F32_2X);
 		g4_vertex_struct_add(vs, "col", vertex_data_t.U8_4X_NORM);
-		pipes_copy_bgra.input_layout = [vs];
+		pipes_copy_bgra.input_layout = vs;
 		g4_pipeline_compile(pipes_copy_bgra);
 	}
 
@@ -110,7 +110,7 @@ function pipes_init() {
 		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_3X);
 		g4_vertex_struct_add(vs, "tex", vertex_data_t.F32_2X);
 		g4_vertex_struct_add(vs, "col", vertex_data_t.U8_4X_NORM);
-		pipes_copy8.input_layout = [vs];
+		pipes_copy8.input_layout = vs;
 		pipes_copy8.color_attachment_count = 1;
 		pipes_copy8.color_attachments[0] = tex_format_t.R8;
 		g4_pipeline_compile(pipes_copy8);
@@ -124,7 +124,7 @@ function pipes_init() {
 		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_3X);
 		g4_vertex_struct_add(vs, "tex", vertex_data_t.F32_2X);
 		g4_vertex_struct_add(vs, "col", vertex_data_t.U8_4X_NORM);
-		pipes_copy128.input_layout = [vs];
+		pipes_copy128.input_layout = vs;
 		pipes_copy128.color_attachment_count = 1;
 		pipes_copy128.color_attachments[0] = tex_format_t.RGBA128;
 		g4_pipeline_compile(pipes_copy128);
@@ -139,7 +139,7 @@ function pipes_init() {
 		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_3X);
 		g4_vertex_struct_add(vs, "tex", vertex_data_t.F32_2X);
 		g4_vertex_struct_add(vs, "col", vertex_data_t.U8_4X_NORM);
-		pipes_invert8.input_layout = [vs];
+		pipes_invert8.input_layout = vs;
 		pipes_invert8.color_attachment_count = 1;
 		pipes_invert8.color_attachments[0] = tex_format_t.R8;
 		g4_pipeline_compile(pipes_invert8);
@@ -151,7 +151,7 @@ function pipes_init() {
 		pipes_apply_mask.fragment_shader = sys_get_shader("mask_apply.frag");
 		let vs: vertex_struct_t = g4_vertex_struct_create();
 		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
-		pipes_apply_mask.input_layout = [vs];
+		pipes_apply_mask.input_layout = vs;
 		g4_pipeline_compile(pipes_apply_mask);
 		pipes_tex0_mask = g4_pipeline_get_tex_unit(pipes_apply_mask, "tex0");
 		pipes_texa_mask = g4_pipeline_get_tex_unit(pipes_apply_mask, "texa");
@@ -163,7 +163,7 @@ function pipes_init() {
 		pipes_merge_mask.fragment_shader = sys_get_shader("mask_merge.frag");
 		let vs: vertex_struct_t = g4_vertex_struct_create();
 		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
-		pipes_merge_mask.input_layout = [vs];
+		pipes_merge_mask.input_layout = vs;
 		g4_pipeline_compile(pipes_merge_mask);
 		pipes_tex0_merge_mask = g4_pipeline_get_tex_unit(pipes_merge_mask, "tex0");
 		pipes_texa_merge_mask = g4_pipeline_get_tex_unit(pipes_merge_mask, "texa");
@@ -177,7 +177,7 @@ function pipes_init() {
 		pipes_colorid_to_mask.fragment_shader = sys_get_shader("mask_colorid.frag");
 		let vs: vertex_struct_t = g4_vertex_struct_create();
 		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
-		pipes_colorid_to_mask.input_layout = [vs];
+		pipes_colorid_to_mask.input_layout = vs;
 		g4_pipeline_compile(pipes_colorid_to_mask);
 		pipes_texpaint_colorid = g4_pipeline_get_tex_unit(pipes_colorid_to_mask, "texpaint_colorid");
 		pipes_tex_colorid = g4_pipeline_get_tex_unit(pipes_colorid_to_mask, "texcolorid");
@@ -193,7 +193,7 @@ function pipes_init() {
 		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_3X);
 		g4_vertex_struct_add(vs, "tex", vertex_data_t.F32_2X);
 		g4_vertex_struct_add(vs, "col", vertex_data_t.U8_4X_NORM);
-		pipes_copy_r.input_layout = [vs];
+		pipes_copy_r.input_layout = vs;
 		pipes_copy_r.color_write_masks_green = [false];
 		pipes_copy_r.color_write_masks_blue = [false];
 		pipes_copy_r.color_write_masks_alpha = [false];
@@ -208,7 +208,7 @@ function pipes_init() {
 		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_3X);
 		g4_vertex_struct_add(vs, "tex", vertex_data_t.F32_2X);
 		g4_vertex_struct_add(vs, "col", vertex_data_t.U8_4X_NORM);
-		pipes_copy_g.input_layout = [vs];
+		pipes_copy_g.input_layout = vs;
 		pipes_copy_g.color_write_masks_red = [false];
 		pipes_copy_g.color_write_masks_blue = [false];
 		pipes_copy_g.color_write_masks_alpha = [false];
@@ -221,7 +221,7 @@ function pipes_init() {
 		pipes_inpaint_preview.fragment_shader = sys_get_shader("inpaint_preview.frag");
 		let vs: vertex_struct_t = g4_vertex_struct_create();
 		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
-		pipes_inpaint_preview.input_layout = [vs];
+		pipes_inpaint_preview.input_layout = vs;
 		g4_pipeline_compile(pipes_inpaint_preview);
 		pipes_tex0_inpaint_preview = g4_pipeline_get_tex_unit(pipes_inpaint_preview, "tex0");
 		pipes_texa_inpaint_preview = g4_pipeline_get_tex_unit(pipes_inpaint_preview, "texa");
@@ -233,7 +233,7 @@ function pipes_init() {
 		pipes_copy_a.fragment_shader = sys_get_shader("layer_copy_rrrr.frag");
 		let vs: vertex_struct_t = g4_vertex_struct_create();
 		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
-		pipes_copy_a.input_layout = [vs];
+		pipes_copy_a.input_layout = vs;
 		pipes_copy_a.color_write_masks_red = [false];
 		pipes_copy_a.color_write_masks_green = [false];
 		pipes_copy_a.color_write_masks_blue = [false];
@@ -250,7 +250,7 @@ function pipes_init() {
 		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_3X);
 		g4_vertex_struct_add(vs, "tex", vertex_data_t.F32_2X);
 		g4_vertex_struct_add(vs, "col", vertex_data_t.U8_4X_NORM);
-		pipes_copy_rgb.input_layout = [vs];
+		pipes_copy_rgb.input_layout = vs;
 		pipes_copy_rgb.color_write_masks_alpha = [false];
 		g4_pipeline_compile(pipes_copy_rgb);
 	}
@@ -267,7 +267,7 @@ function pipes_init() {
 		g4_vertex_struct_add(vs, "nor", vertex_data_t.I16_2X_NORM);
 		g4_vertex_struct_add(vs, "tex", vertex_data_t.I16_2X_NORM);
 		///end
-		pipes_cursor.input_layout = [vs];
+		pipes_cursor.input_layout = vs;
 		pipes_cursor.blend_source = blend_factor_t.SOURCE_ALPHA;
 		pipes_cursor.blend_dest = blend_factor_t.INV_SOURCE_ALPHA;
 		pipes_cursor.depth_write = false;

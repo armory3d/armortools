@@ -42,14 +42,12 @@ void kinc_g5_command_list_texture_to_render_target_barrier(kinc_g5_command_list_
 void kinc_g5_command_list_render_target_to_texture_barrier(kinc_g5_command_list_t *list, struct kinc_g5_render_target *renderTarget);
 void kinc_g5_command_list_draw_indexed_vertices(kinc_g5_command_list_t *list);
 void kinc_g5_command_list_draw_indexed_vertices_from_to(kinc_g5_command_list_t *list, int start, int count);
-void kinc_g5_command_list_draw_indexed_vertices_instanced(kinc_g5_command_list_t *list, int instanceCount);
-void kinc_g5_command_list_draw_indexed_vertices_instanced_from_to(kinc_g5_command_list_t *list, int instanceCount, int start, int count);
 void kinc_g5_command_list_viewport(kinc_g5_command_list_t *list, int x, int y, int width, int height);
 void kinc_g5_command_list_scissor(kinc_g5_command_list_t *list, int x, int y, int width, int height);
 void kinc_g5_command_list_disable_scissor(kinc_g5_command_list_t *list);
 void kinc_g5_command_list_set_pipeline(kinc_g5_command_list_t *list, struct kinc_g5_pipeline *pipeline);
 void kinc_g5_command_list_set_compute_shader(kinc_g5_command_list_t *list, struct kinc_g5_compute_shader *shader);
-void kinc_g5_command_list_set_vertex_buffers(kinc_g5_command_list_t *list, struct kinc_g5_vertex_buffer **buffers, int *offsets, int count);
+void kinc_g5_command_list_set_vertex_buffer(kinc_g5_command_list_t *list, struct kinc_g5_vertex_buffer *buffer);
 void kinc_g5_command_list_set_index_buffer(kinc_g5_command_list_t *list, struct kinc_g5_index_buffer *buffer);
 void kinc_g5_command_list_set_render_targets(kinc_g5_command_list_t *list, struct kinc_g5_render_target **targets, int count);
 void kinc_g5_command_list_upload_index_buffer(kinc_g5_command_list_t *list, struct kinc_g5_index_buffer *buffer);

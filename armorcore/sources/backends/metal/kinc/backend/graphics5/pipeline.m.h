@@ -168,11 +168,11 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 	float offset = 0;
 	MTLVertexDescriptor *vertexDescriptor = [[MTLVertexDescriptor alloc] init];
 
-	for (int i = 0; i < pipeline->inputLayout[0]->size; ++i) {
-		int index = findAttributeIndex(renderPipelineDesc.vertexFunction.vertexAttributes, pipeline->inputLayout[0]->elements[i].name);
+	for (int i = 0; i < pipeline->inputLayout->size; ++i) {
+		int index = findAttributeIndex(renderPipelineDesc.vertexFunction.vertexAttributes, pipeline->inputLayout->elements[i].name);
 
 		if (index < 0) {
-			kinc_log(KINC_LOG_LEVEL_WARNING, "Could not find vertex attribute %s\n", pipeline->inputLayout[0]->elements[i].name);
+			kinc_log(KINC_LOG_LEVEL_WARNING, "Could not find vertex attribute %s\n", pipeline->inputLayout->elements[i].name);
 		}
 
 		if (index >= 0) {
@@ -180,9 +180,9 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 			vertexDescriptor.attributes[index].offset = offset;
 		}
 
-		offset += kinc_g4_vertex_data_size(pipeline->inputLayout[0]->elements[i].data);
+		offset += kinc_g4_vertex_data_size(pipeline->inputLayout->elements[i].data);
 		if (index >= 0) {
-			switch (pipeline->inputLayout[0]->elements[i].data) {
+			switch (pipeline->inputLayout->elements[i].data) {
 			case KINC_G4_VERTEX_DATA_NONE:
 				assert(false);
 				break;
@@ -372,7 +372,7 @@ kinc_g5_constant_location_t kinc_g5_pipeline_get_constant_location(kinc_g5_pipel
 	location.impl.vertexOffset = -1;
 	location.impl.fragmentOffset = -1;
 	location.impl.computeOffset = -1;
-	
+
 	MTLRenderPipelineReflection *reflection = (__bridge MTLRenderPipelineReflection *)pipeline->impl._reflection;
 
 	for (MTLArgument *arg in reflection.vertexArguments) {

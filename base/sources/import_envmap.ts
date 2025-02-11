@@ -17,7 +17,7 @@ function import_envmap_run(path: string, image: image_t) {
 		import_envmap_pipeline.fragment_shader = sys_get_shader("prefilter_envmap.frag");
 		let vs: vertex_struct_t = g4_vertex_struct_create();
 		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
-		import_envmap_pipeline.input_layout = [vs];
+		import_envmap_pipeline.input_layout = vs;
 		import_envmap_pipeline.color_attachment_count = 1;
 		import_envmap_pipeline.color_attachments[0] = tex_format_t.RGBA128;
 		g4_pipeline_compile(import_envmap_pipeline);

@@ -10,6 +10,7 @@
 #include "iron_ui.h"
 #include "iron_ui_ext.h"
 #include "iron_armpack.h"
+#include "iron_array.h"
 #include "iron_json.h"
 #include "iron_gc.h"
 
@@ -271,9 +272,13 @@ void ui_draw_link(float x1, float y1, float x2, float y2, bool highlight) {
 		kinc_g2_draw_line_aa(x1, y1, x2, y2, 1.0);
 	}
 	else if (current->ops->theme->LINK_STYLE == UI_LINK_STYLE_CUBIC_BEZIER) {
+		f32_array_t xa;
+		f32_array_t ya;
 		float x[] = { x1, x1 + fabs(x1 - x2) / 2.0, x2 - fabs(x1 - x2) / 2.0, x2 };
 		float y[] = { y1, y1, y2, y2 };
-		kinc_g2_draw_cubic_bezier(x, y, 30, highlight ? 2.0 : 1.0);
+		xa.buffer = x;
+		ya.buffer = y;
+		kinc_g2_draw_cubic_bezier(&xa, &ya, 30, highlight ? 2.0 : 1.0);
 	}
 }
 

@@ -30,9 +30,7 @@ kinc_g4_texture_unit_t kinc_g4_pipeline_get_texture_unit(kinc_g4_pipeline_t *pip
 }
 
 void kinc_g4_pipeline_compile(kinc_g4_pipeline_t *pipe) {
-	for (int i = 0; i < 16; ++i) {
-		pipe->impl._pipeline.inputLayout[i] = pipe->input_layout[i];
-	}
+	pipe->impl._pipeline.inputLayout = pipe->input_layout;
 	pipe->impl._pipeline.vertexShader = &pipe->vertex_shader->impl._shader;
 	pipe->impl._pipeline.fragmentShader = &pipe->fragment_shader->impl._shader;
 	pipe->impl._pipeline.blend_source = (kinc_g5_blending_factor_t)pipe->blend_source;

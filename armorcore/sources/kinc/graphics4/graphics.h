@@ -56,8 +56,6 @@ void kinc_g4_scissor(int x, int y, int width, int height);
 void kinc_g4_disable_scissor(void);
 void kinc_g4_draw_indexed_vertices(void);
 void kinc_g4_draw_indexed_vertices_from_to(int start, int count);
-void kinc_g4_draw_indexed_vertices_instanced(int instanceCount);
-void kinc_g4_draw_indexed_vertices_instanced_from_to(int instanceCount, int start, int count);
 void kinc_g4_set_texture_addressing(kinc_g4_texture_unit_t unit, kinc_g4_texture_direction_t dir, kinc_g4_texture_addressing_t addressing);
 void kinc_g4_set_pipeline(struct kinc_g4_pipeline *pipeline);
 void kinc_g4_set_int(kinc_g4_constant_location_t location, int value);

@@ -79,10 +79,7 @@ function g4_pipeline_delete(raw: pipeline_t) {
 }
 
 function g4_pipeline_compile(raw: pipeline_t) {
-	let structure0: vertex_struct_t = raw.input_layout.length > 0 ? raw.input_layout[0] : null;
-	let structure1: vertex_struct_t = raw.input_layout.length > 1 ? raw.input_layout[1] : null;
-	let structure2: vertex_struct_t = raw.input_layout.length > 2 ? raw.input_layout[2] : null;
-	let structure3: vertex_struct_t = raw.input_layout.length > 3 ? raw.input_layout[3] : null;
+	let structure0: vertex_struct_t = raw.input_layout;
 
 	for (let i: i32 = raw.color_write_masks_red.length; i < 8; ++i) {
 		array_push(raw.color_write_masks_red, true);
@@ -113,7 +110,7 @@ function g4_pipeline_compile(raw: pipeline_t) {
 	state.color_attachments = raw.color_attachments;
 	state.depth_attachment_bits = g4_pipeline_get_depth_buffer_bits(raw.depth_attachment);
 
-	iron_g4_compile_pipeline(raw.pipeline_, structure0, structure1, structure2, structure3, raw.input_layout.length, raw.vertex_shader.shader_, raw.fragment_shader.shader_, state);
+	iron_g4_compile_pipeline(raw.pipeline_, structure0, raw.vertex_shader.shader_, raw.fragment_shader.shader_, state);
 }
 
 function g4_pipeline_set(raw: pipeline_t) {
@@ -128,10 +125,10 @@ function g4_pipeline_get_tex_unit(raw: pipeline_t, name: string): kinc_tex_unit_
 	return iron_g4_get_texture_unit(raw.pipeline_, name);
 }
 
-function g4_vertex_buffer_create(vertex_count: i32, structure: vertex_struct_t, usage: usage_t, inst_data_step_rate: i32 = 0): vertex_buffer_t {
+function g4_vertex_buffer_create(vertex_count: i32, structure: vertex_struct_t, usage: usage_t): vertex_buffer_t {
 	let raw: vertex_buffer_t = {};
 	raw.vertex_count = vertex_count;
-	raw.buffer_ = iron_g4_create_vertex_buffer(vertex_count, structure.elements, usage, inst_data_step_rate);
+	raw.buffer_ = iron_g4_create_vertex_buffer(vertex_count, structure.elements, usage);
 	return raw;
 }
 
@@ -154,7 +151,6 @@ function g4_vertex_buffer_set(raw: vertex_buffer_t) {
 function g4_vertex_struct_create(): vertex_struct_t {
 	let raw: vertex_struct_t = {};
 	raw.elements = [];
-	raw.instanced = false;
 	return raw;
 }
 
@@ -241,10 +237,6 @@ function g4_set_vertex_buffer(vb: vertex_buffer_t) {
 	g4_vertex_buffer_set(vb);
 }
 
-function g4_set_vertex_buffers(vbs: any_array_t[]) {
-	iron_g4_set_vertex_buffers(vbs);
-}
-
 function g4_set_index_buffer(ib: index_buffer_t) {
 	g4_index_buffer_set(ib);
 }
@@ -325,10 +317,6 @@ function g4_set_mat3(loc: kinc_const_loc_t, mat: mat3_t) {
 
 function g4_draw(start: i32 = 0, count: i32 = -1) {
 	iron_g4_draw_indexed_vertices(start, count);
-}
-
-function g4_draw_inst(inst_count: i32, start: i32 = 0, count: i32 = -1) {
-	iron_g4_draw_indexed_vertices_instanced(inst_count, start, count);
 }
 
 function g4_scissor(x: i32, y: i32, width: i32, height: i32) {
@@ -507,7 +495,7 @@ declare type image_t = {
 
 type pipeline_t = {
 	pipeline_?: any;
-	input_layout?: vertex_struct_t[];
+	input_layout?: vertex_struct_t;
 	vertex_shader?: shader_t;
 	fragment_shader?: shader_t;
 	cull_mode?: cull_mode_t;
@@ -537,7 +525,6 @@ type vertex_buffer_t = {
 
 declare type vertex_struct_t = {
 	elements?: kinc_vertex_elem_t[];
-	instanced?: bool;
 };
 
 type index_buffer_t = {

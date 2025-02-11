@@ -504,7 +504,6 @@ type mesh_data_t = {
 	name?: string;
 	scale_pos?: f32; // Unpack pos from (-1,1) coords
 	scale_tex?: f32; // Unpack tex from (-1,1) coords
-	instancing?: mesh_data_instancing_t;
 	skin?: skin_t;
 	vertex_arrays?: vertex_array_t[];
 	index_arrays?: index_array_t[];
@@ -522,19 +521,11 @@ type mesh_data_runtime_t = {
 	indices?: u32_array_t[];
 	material_indices?: i32[];
 	structure?: vertex_struct_t;
-	instanced_vb?: vertex_buffer_t;
-	instanced?: bool;
-	instance_count?: i32;
 	///if arm_skin
 	skeleton_transforms_inv?: mat4_t[];
 	actions?: map_t<string, obj_t[]>;
 	mats?: map_t<string, mat4_t[]>;
 	///end
-};
-
-type mesh_data_instancing_t = {
-	type?: i32; // off, loc, loc+rot, loc+scale, loc+rot+scale
-	data?: f32_array_t;
 };
 
 type skin_t = {
@@ -659,7 +650,6 @@ type shader_context_runtime_t = {
 	tex_units?: kinc_tex_unit_t[];
 	override_context?: _shader_override_t;
 	structure?: vertex_struct_t;
-	instancing_type?: i32;
 };
 
 type _shader_override_t = {

@@ -470,8 +470,8 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 	if (build_bottom) {
 		for (int i = 0; i < vb_count; ++i) {
 
-			int prim_count = ib[i]->impl.count / 3;
-			int vert_count = vb[i]->impl.myCount;
+			uint32_t prim_count = ib[i]->impl.count / 3;
+			uint32_t vert_count = vb[i]->impl.myCount;
 
 			VkDeviceOrHostAddressConstKHR vertex_data_device_address = {0};
 			VkDeviceOrHostAddressConstKHR index_data_device_address = {0};

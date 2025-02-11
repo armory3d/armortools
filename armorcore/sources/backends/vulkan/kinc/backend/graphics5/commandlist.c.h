@@ -393,14 +393,6 @@ void kinc_g5_command_list_draw_indexed_vertices_from_to(kinc_g5_command_list_t *
 	vkCmdDrawIndexed(list->impl._buffer, count, 1, start, 0, 0);
 }
 
-void kinc_g5_command_list_draw_indexed_vertices_instanced(kinc_g5_command_list_t *list, int instanceCount) {
-	kinc_g5_command_list_draw_indexed_vertices_instanced_from_to(list, instanceCount, 0, list->impl._indexCount);
-}
-
-void kinc_g5_command_list_draw_indexed_vertices_instanced_from_to(kinc_g5_command_list_t *list, int instanceCount, int start, int count) {
-	vkCmdDrawIndexed(list->impl._buffer, count, instanceCount, start, 0, 0);
-}
-
 void kinc_g5_command_list_viewport(kinc_g5_command_list_t *list, int x, int y, int width, int height) {
 	VkViewport viewport;
 	memset(&viewport, 0, sizeof(viewport));
@@ -452,16 +444,12 @@ void kinc_g5_command_list_set_pipeline(kinc_g5_command_list_t *list, struct kinc
 	}
 }
 
-void kinc_g5_command_list_set_vertex_buffers(kinc_g5_command_list_t *list, struct kinc_g5_vertex_buffer **vertexBuffers, int *offsets_, int count) {
-// this seems to be a no-op function?
-// kinc_g5_internal_vertex_buffer_set(vertexBuffers[0], 0);
-	VkBuffer buffers[count];
-	VkDeviceSize offsets[count];
-	for (int i = 0; i < count; ++i) {
-		buffers[i] = vertexBuffers[i]->impl.vertices.buf;
-		offsets[i] = (VkDeviceSize)(offsets_[i] * kinc_g5_vertex_buffer_stride(vertexBuffers[i]));
-	}
-	vkCmdBindVertexBuffers(list->impl._buffer, 0, count, buffers, offsets);
+void kinc_g5_command_list_set_vertex_buffer(kinc_g5_command_list_t *list, struct kinc_g5_vertex_buffer *vertexBuffer) {
+	VkBuffer buffers[1];
+	VkDeviceSize offsets[1];
+	buffers[0] = vertexBuffer->impl.vertices.buf;
+	offsets[0] = (VkDeviceSize)(0);
+	vkCmdBindVertexBuffers(list->impl._buffer, 0, 1, buffers, offsets);
 }
 
 void kinc_g5_command_list_set_index_buffer(kinc_g5_command_list_t *list, struct kinc_g5_index_buffer *indexBuffer) {

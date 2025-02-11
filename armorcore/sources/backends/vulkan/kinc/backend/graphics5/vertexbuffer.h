@@ -16,6 +16,5 @@ typedef struct {
 	unsigned bufferId;
 	kinc_g5_vertex_structure_t structure;
 	VkMemoryAllocateInfo mem_alloc;
-	int instanceDataStepRate;
 	struct Vertices vertices;
 } VertexBuffer5Impl;

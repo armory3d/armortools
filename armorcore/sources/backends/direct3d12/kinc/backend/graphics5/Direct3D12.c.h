@@ -444,9 +444,6 @@ void kinc_g5_begin(kinc_g5_render_target_t *renderTarget, int windowId) {
 	// commandList->ClearRenderTargetView(GetCPUDescriptorHandle(renderTargetDescriptorHeap), clearColor, 0, nullptr);
 
 	// commandList->ClearDepthStencilView(GetCPUDescriptorHandle(depthStencilDescriptorHeap), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-
-	static int frameNumber = 0;
-	frameNumber++;
 }
 
 void kinc_g5_end(int window) {

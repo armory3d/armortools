@@ -7,5 +7,4 @@ typedef struct {
 	kinc_g5_vertex_buffer_t _buffer;
 	int _currentIndex;
 	int _multiple;
-	uint64_t _lastFrameNumber;
 } kinc_g4_vertex_buffer_impl_t;

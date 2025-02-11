@@ -7,7 +7,7 @@ extern WGPUDevice device;
 
 kinc_g5_vertex_buffer_t *kinc_g5_internal_current_vertex_buffer = NULL;
 
-void kinc_g5_vertex_buffer_init(kinc_g5_vertex_buffer_t *buffer, int count, kinc_g5_vertex_structure_t *structure, bool gpuMemory, int instanceDataStepRate) {
+void kinc_g5_vertex_buffer_init(kinc_g5_vertex_buffer_t *buffer, int count, kinc_g5_vertex_structure_t *structure, bool gpuMemory) {
 	buffer->impl.count = count;
 	buffer->impl.stride = 0;
 	for (int i = 0; i < structure->size; ++i) {

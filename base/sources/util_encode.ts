@@ -96,8 +96,6 @@ function util_encode_mesh_datas(datas: mesh_data_t[]) {
 		armpack_encode_f32(datas[i].scale_pos);
 		armpack_encode_string("scale_tex");
 		armpack_encode_f32(datas[i].scale_tex);
-		armpack_encode_string("instancing");
-		armpack_encode_null(); // mesh_data_instancing_t
 		armpack_encode_string("skin");
 		armpack_encode_null(); // skin_t
 		armpack_encode_string("vertex_arrays");

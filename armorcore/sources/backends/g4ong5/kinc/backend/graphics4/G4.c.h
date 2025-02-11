@@ -28,7 +28,6 @@
 
 kinc_g5_command_list_t commandList;
 
-uint64_t frameNumber = 0;
 bool waitAfterNextDraw = false;
 
 static kinc_g5_constant_buffer_t vertexConstantBuffer;
@@ -65,7 +64,6 @@ static struct {
 
 static int current_window;
 
-#define MAX_VERTEX_BUFFERS 16
 #define MAX_TEXTURES 16
 
 typedef struct render_state {
@@ -73,10 +71,7 @@ typedef struct render_state {
 	kinc_g5_compute_shader *compute_shader;
 
 	kinc_g5_index_buffer_t *index_buffer;
-
-	kinc_g5_vertex_buffer_t *vertex_buffers[MAX_VERTEX_BUFFERS];
-	int vertex_buffer_offsets[MAX_VERTEX_BUFFERS];
-	int vertex_buffer_count;
+	kinc_g5_vertex_buffer_t *vertex_buffer;
 
 	bool viewport_set;
 	int viewport_x;
@@ -207,9 +202,8 @@ static void endDraw(bool compute) {
 		if (current_state.index_buffer != NULL) {
 			kinc_g5_command_list_set_index_buffer(&commandList, current_state.index_buffer);
 		}
-		if (current_state.vertex_buffer_count > 0) {
-			kinc_g5_command_list_set_vertex_buffers(&commandList, current_state.vertex_buffers, current_state.vertex_buffer_offsets,
-			                                        current_state.vertex_buffer_count);
+		if (current_state.vertex_buffer != NULL) {
+			kinc_g5_command_list_set_vertex_buffer(&commandList, current_state.vertex_buffer);
 		}
 		if (current_state.viewport_set) {
 			kinc_g5_command_list_viewport(&commandList, current_state.viewport_x, current_state.viewport_y, current_state.viewport_width,
@@ -256,18 +250,6 @@ void kinc_g4_draw_indexed_vertices(void) {
 void kinc_g4_draw_indexed_vertices_from_to(int start, int count) {
 	startDraw(false);
 	kinc_g5_command_list_draw_indexed_vertices_from_to(&commandList, start, count);
-	endDraw(false);
-}
-
-void kinc_g4_draw_indexed_vertices_instanced(int instanceCount) {
-	startDraw(false);
-	kinc_g5_command_list_draw_indexed_vertices_instanced(&commandList, instanceCount);
-	endDraw(false);
-}
-
-void kinc_g4_draw_indexed_vertices_instanced_from_to(int instanceCount, int start, int count) {
-	startDraw(false);
-	kinc_g5_command_list_draw_indexed_vertices_instanced_from_to(&commandList, instanceCount, start, count);
 	endDraw(false);
 }
 
@@ -321,11 +303,7 @@ void kinc_g4_begin(int window) {
 	current_state.pipeline = NULL;
 	current_state.compute_shader = NULL;
 	current_state.index_buffer = NULL;
-	for (int i = 0; i < MAX_VERTEX_BUFFERS; ++i) {
-		current_state.vertex_buffers[i] = NULL;
-		current_state.vertex_buffer_offsets[i] = 0;
-	}
-	current_state.vertex_buffer_count = 0;
+	current_state.vertex_buffer = NULL;
 	current_state.viewport_set = false;
 	current_state.scissor_set = false;
 	current_state.texture_count = 0;
@@ -345,8 +323,6 @@ void kinc_g4_begin(int window) {
 
 	kinc_g5_command_list_framebuffer_to_render_target_barrier(&commandList, &windows[current_window].framebuffers[windows[current_window].currentBuffer]);
 	kinc_g4_restore_render_target();
-
-	++frameNumber;
 }
 
 void kinc_g4_viewport(int x, int y, int width, int height) {
@@ -576,22 +552,10 @@ void kinc_g4_set_render_targets(kinc_g4_render_target_t **targets, int count) {
 	current_state.scissor_set = false;
 }
 
-void kinc_g4_set_vertex_buffers(kinc_g4_vertex_buffer_t **buffers, int count) {
-	assert(count <= MAX_VERTEX_BUFFERS);
-	for (int i = 0; i < count; ++i) {
-		current_state.vertex_buffers[i] = &buffers[i]->impl._buffer;
-		int index = buffers[i]->impl._currentIndex;
-		current_state.vertex_buffer_offsets[i] = index * kinc_g4_vertex_buffer_count(buffers[i]);
-	}
-	current_state.vertex_buffer_count = count;
-	kinc_g5_command_list_set_vertex_buffers(&commandList, current_state.vertex_buffers, current_state.vertex_buffer_offsets, count);
-}
-
-int kinc_internal_g4_vertex_buffer_set(kinc_g4_vertex_buffer_t *buffer, int offset) {
-	kinc_g4_vertex_buffer_t *buffers[1];
-	buffers[0] = buffer;
-	kinc_g4_set_vertex_buffers(buffers, 1);
-	return 0;
+void kinc_g4_set_vertex_buffer(kinc_g4_vertex_buffer_t *buffer) {
+	kinc_g5_vertex_buffer_t *g5_vertex_buffer = &buffer->impl._buffer;
+	current_state.vertex_buffer = g5_vertex_buffer;
+	kinc_g5_command_list_set_vertex_buffer(&commandList, g5_vertex_buffer);
 }
 
 void kinc_g4_set_index_buffer(kinc_g4_index_buffer_t *buffer) {

@@ -204,7 +204,7 @@ int last_window_height = 0;
 char temp_string[1024 * 32];
 char temp_string_vs[1024 * 128];
 char temp_string_fs[1024 * 128];
-char temp_string_vstruct[4][32][32];
+char temp_string_vstruct[32][32];
 #ifdef KINC_WINDOWS
 wchar_t temp_wstring[1024 * 32];
 struct HWND__ *kinc_windows_window_handle(int window_index);
@@ -1052,18 +1052,18 @@ typedef struct kinc_vertex_elem {
 	int data; // vertex_data_t
 } kinc_vertex_elem_t;
 
-any iron_g4_create_vertex_buffer(i32 count, any_array_t *elements, i32 usage, i32 inst_data_step_rate) {
+any iron_g4_create_vertex_buffer(i32 count, any_array_t *elements, i32 usage) {
 	kinc_g4_vertex_structure_t structure;
 	kinc_g4_vertex_structure_init(&structure);
 	for (int32_t i = 0; i < elements->length; ++i) {
 		kinc_vertex_elem_t *element = elements->buffer[i];
 		char *str = element->name;
 		int32_t data = element->data;
-		strcpy(temp_string_vstruct[0][i], str);
-		kinc_g4_vertex_structure_add(&structure, temp_string_vstruct[0][i], (kinc_g4_vertex_data_t)data);
+		strcpy(temp_string_vstruct[i], str);
+		kinc_g4_vertex_structure_add(&structure, temp_string_vstruct[i], (kinc_g4_vertex_data_t)data);
 	}
 	kinc_g4_vertex_buffer_t *buffer = (kinc_g4_vertex_buffer_t *)malloc(sizeof(kinc_g4_vertex_buffer_t));
-	kinc_g4_vertex_buffer_init(buffer, count, &structure, (kinc_g4_usage_t)usage, inst_data_step_rate);
+	kinc_g4_vertex_buffer_init(buffer, count, &structure, (kinc_g4_usage_t)usage);
 	return buffer;
 }
 
@@ -1088,10 +1088,6 @@ void iron_g4_set_vertex_buffer(kinc_g4_vertex_buffer_t *buffer) {
 	kinc_g4_set_vertex_buffer(buffer);
 }
 
-void iron_g4_set_vertex_buffers(any_array_t *vertex_buffers) {
-	kinc_g4_set_vertex_buffers(vertex_buffers->buffer, vertex_buffers->length);
-}
-
 void iron_g4_draw_indexed_vertices(i32 start, i32 count) {
 	#ifdef KINC_DIRECT3D12
 	// TODO: Prevent heapIndex overflow in texture.c.h/kinc_g5_internal_set_textures
@@ -1102,15 +1098,6 @@ void iron_g4_draw_indexed_vertices(i32 start, i32 count) {
 	}
 	else {
 		kinc_g4_draw_indexed_vertices_from_to(start, count);
-	}
-}
-
-void iron_g4_draw_indexed_vertices_instanced(i32 instance_count, i32 start, i32 count) {
-	if (count < 0) {
-		kinc_g4_draw_indexed_vertices_instanced(instance_count);
-	}
-	else {
-		kinc_g4_draw_indexed_vertices_instanced_from_to(instance_count, start, count);
 	}
 }
 
@@ -1407,7 +1394,6 @@ void iron_g4_delete_pipeline(kinc_g4_pipeline_t *pipeline) {
 
 typedef struct vertex_struct {
 	any_array_t *elements; // kinc_vertex_elem_t
-	bool instanced;
 } vertex_struct_t;
 
 typedef struct iron_pipeline_state {
@@ -1427,33 +1413,20 @@ typedef struct iron_pipeline_state {
 	int depth_attachment_bits;
 } iron_pipeline_state_t;
 
-void iron_g4_compile_pipeline(kinc_g4_pipeline_t *pipeline, vertex_struct_t *structure0, vertex_struct_t *structure1, vertex_struct_t *structure2, vertex_struct_t *structure3, i32 length, kinc_g4_shader_t *vertex_shader, kinc_g4_shader_t *fragment_shader, iron_pipeline_state_t *state) {
-	kinc_g4_vertex_structure_t s0, s1, s2, s3;
+void iron_g4_compile_pipeline(kinc_g4_pipeline_t *pipeline, vertex_struct_t *structure0, kinc_g4_shader_t *vertex_shader, kinc_g4_shader_t *fragment_shader, iron_pipeline_state_t *state) {
+	kinc_g4_vertex_structure_t s0;
 	kinc_g4_vertex_structure_init(&s0);
-	kinc_g4_vertex_structure_init(&s1);
-	kinc_g4_vertex_structure_init(&s2);
-	kinc_g4_vertex_structure_init(&s3);
-	kinc_g4_vertex_structure_t *structures[4] = { &s0, &s1, &s2, &s3 };
 
-	for (int32_t i1 = 0; i1 < length; ++i1) {
-		vertex_struct_t *structure = i1 == 0 ? structure0 : i1 == 1 ? structure1 : i1 == 2 ? structure2 : structure3;
-		structures[i1]->instanced = structure->instanced;
-		any_array_t *elements = structure->elements;
-		for (int32_t i2 = 0; i2 < elements->length; ++i2) {
-			kinc_vertex_elem_t *element = elements->buffer[i2];
-			char *str = element->name;
-			int32_t data = element->data;
-			strcpy(temp_string_vstruct[i1][i2], str);
-			kinc_g4_vertex_structure_add(structures[i1], temp_string_vstruct[i1][i2], (kinc_g4_vertex_data_t)data);
-		}
+	any_array_t *elements = structure0->elements;
+	for (int32_t i = 0; i < elements->length; ++i) {
+		kinc_vertex_elem_t *element = elements->buffer[i];
+		strcpy(temp_string_vstruct[i], element->name);
+		kinc_g4_vertex_structure_add(&s0, temp_string_vstruct[i], (kinc_g4_vertex_data_t)element->data);
 	}
 
 	pipeline->vertex_shader = vertex_shader;
 	pipeline->fragment_shader = fragment_shader;
-	for (int i = 0; i < length; ++i) {
-		pipeline->input_layout[i] = structures[i];
-	}
-	pipeline->input_layout[length] = NULL;
+	pipeline->input_layout = &s0;
 
 	pipeline->cull_mode = (kinc_g4_cull_mode_t)state->cull_mode;
 	pipeline->depth_write = state->depth_write;

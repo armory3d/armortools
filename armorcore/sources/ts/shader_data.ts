@@ -73,21 +73,7 @@ function shader_context_compile(raw: shader_context_t): shader_context_t {
 	raw._.constants = [];
 	raw._.tex_units = [];
 
-	if (raw._.instancing_type > 0) { // Instancing
-		let inst_struct: vertex_struct_t = g4_vertex_struct_create();
-		g4_vertex_struct_add(inst_struct, "ipos", vertex_data_t.F32_3X);
-		if (raw._.instancing_type == 2 || raw._.instancing_type == 4) {
-			g4_vertex_struct_add(inst_struct, "irot", vertex_data_t.F32_3X);
-		}
-		if (raw._.instancing_type == 3 || raw._.instancing_type == 4) {
-			g4_vertex_struct_add(inst_struct, "iscl", vertex_data_t.F32_3X);
-		}
-		inst_struct.instanced = true;
-		raw._.pipe_state.input_layout = [raw._.structure, inst_struct];
-	}
-	else { // Regular
-		raw._.pipe_state.input_layout = [raw._.structure];
-	}
+	raw._.pipe_state.input_layout = raw._.structure;
 
 	// Depth
 	raw._.pipe_state.depth_write = raw.depth_write;
@@ -216,36 +202,10 @@ function shader_context_parse_data(data: string): vertex_data_t {
 
 function shader_context_parse_vertex_struct(raw: shader_context_t) {
 	raw._.structure = g4_vertex_struct_create();
-	let ipos: bool = false;
-	let irot: bool = false;
-	let iscl: bool = false;
+
 	for (let i: i32 = 0; i < raw.vertex_elements.length; ++i) {
 		let elem: vertex_element_t = raw.vertex_elements[i];
-		if (elem.name == "ipos") {
-			ipos = true;
-			continue;
-		}
-		if (elem.name == "irot") {
-			irot = true;
-			continue;
-		}
-		if (elem.name == "iscl") {
-			iscl = true;
-			continue;
-		}
 		g4_vertex_struct_add(raw._.structure, elem.name, shader_context_parse_data(elem.data));
-	}
-	if (ipos && !irot && !iscl) {
-		raw._.instancing_type = 1;
-	}
-	else if (ipos && irot && !iscl) {
-		raw._.instancing_type = 2;
-	}
-	else if (ipos && !irot && iscl) {
-		raw._.instancing_type = 3;
-	}
-	else if (ipos && irot && iscl) {
-		raw._.instancing_type = 4;
 	}
 }
 

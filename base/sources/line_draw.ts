@@ -43,7 +43,7 @@ function line_draw_init() {
 		let structure: vertex_struct_t = g4_vertex_struct_create();
 		g4_vertex_struct_add(structure, "pos", vertex_data_t.F32_3X);
 		line_draw_pipeline = g4_pipeline_create();
-		line_draw_pipeline.input_layout = [structure];
+		line_draw_pipeline.input_layout = structure;
 		line_draw_pipeline.fragment_shader = sys_get_shader("line.frag");
 		line_draw_pipeline.vertex_shader = sys_get_shader("line.vert");
 		line_draw_pipeline.depth_write = true;
@@ -65,7 +65,7 @@ function line_draw_init() {
 		let structure: vertex_struct_t = g4_vertex_struct_create();
 		g4_vertex_struct_add(structure, "pos", vertex_data_t.F32_3X);
 		line_draw_overlay_pipeline = g4_pipeline_create();
-		line_draw_overlay_pipeline.input_layout = [structure];
+		line_draw_overlay_pipeline.input_layout = structure;
 		line_draw_overlay_pipeline.fragment_shader = sys_get_shader("line_overlay.frag");
 		line_draw_overlay_pipeline.vertex_shader = sys_get_shader("line.vert");
 		line_draw_overlay_pipeline.depth_write = true;

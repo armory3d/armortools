@@ -54,7 +54,7 @@ typedef enum kinc_g5_compare_mode {
 } kinc_g5_compare_mode_t;
 
 typedef struct kinc_g5_pipeline {
-	kinc_g5_vertex_structure_t *inputLayout[16];
+	kinc_g5_vertex_structure_t *inputLayout;
 	struct kinc_g5_shader *vertexShader;
 	struct kinc_g5_shader *fragmentShader;
 

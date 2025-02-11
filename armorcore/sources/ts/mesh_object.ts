@@ -144,9 +144,6 @@ function mesh_object_cull_mesh(raw: mesh_object_t, context: string, camera: came
 			radius_scale *= 1000;
 		}
 		///end
-		if (raw.data._.instanced) {
-			radius_scale *= 100;
-		}
 
 		let frustum_planes: frustum_plane_t[] = camera.frustum_planes;
 		if (!camera_object_sphere_in_frustum(frustum_planes, raw.base.transform, radius_scale)) {
@@ -258,25 +255,9 @@ function mesh_object_render(raw: mesh_object_t, context: string, bind_params: st
 			uniforms_set_material_consts(scontext, material_contexts[mi]);
 		}
 
-		// VB / IB
-		if (raw.data._.instanced_vb != null) {
-			let vb: vertex_buffer_t = mesh_data_get(raw.data, elems);
-			let vbs: vertex_buffer_t[] = [vb.buffer_, raw.data._.instanced_vb.buffer_];
-			g4_set_vertex_buffers(vbs);
-		}
-		else {
-			g4_set_vertex_buffer(mesh_data_get(raw.data, elems));
-		}
-
+		g4_set_vertex_buffer(mesh_data_get(raw.data, elems));
 		g4_set_index_buffer(raw.data._.index_buffers[i]);
-
-		// Draw
-		if (raw.data._.instanced) {
-			g4_draw_inst(raw.data._.instance_count, 0, -1);
-		}
-		else {
-			g4_draw(0, -1);
-		}
+		g4_draw();
 	}
 
 	raw.prev_matrix = mat4_clone(raw.base.transform.world_unpack);

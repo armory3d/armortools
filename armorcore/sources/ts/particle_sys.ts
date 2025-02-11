@@ -147,9 +147,7 @@ function particle_sys_get_data(raw: particle_sys_t): mat4_t {
 }
 
 function particle_sys_update_gpu(raw: particle_sys_t, object: mesh_object_t, owner: mesh_object_t) {
-	if (!object.data._.instanced) {
-		particle_sys_setup_geom(raw, object, owner);
-	}
+	particle_sys_setup_geom(raw, object, owner);
 	// GPU particles transform is attached to owner object
 }
 
@@ -221,8 +219,6 @@ function particle_sys_setup_geom(raw: particle_sys_t, object: mesh_object_t, own
 			i++;
 		}
 	}
-
-	mesh_data_setup_inst(object.data, instanced_data, 1);
 }
 
 function particle_sys_fhash(n: i32): f32 {

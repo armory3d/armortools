@@ -117,7 +117,7 @@ function util_uv_cache_dilate_map() {
 		g4_vertex_struct_add(vs, "nor", vertex_data_t.I16_2X_NORM);
 		g4_vertex_struct_add(vs, "tex", vertex_data_t.I16_2X_NORM);
 		///end
-		util_uv_pipe_dilate.input_layout = [vs];
+		util_uv_pipe_dilate.input_layout = vs;
 		util_uv_pipe_dilate.depth_write = false;
 		util_uv_pipe_dilate.depth_mode = compare_mode_t.ALWAYS;
 		util_uv_pipe_dilate.color_attachments[0] = tex_format_t.R8;

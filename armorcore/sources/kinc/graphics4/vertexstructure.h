@@ -119,7 +119,6 @@ typedef struct kinc_g4_vertex_element {
 typedef struct kinc_g4_vertex_structure {
 	kinc_g4_vertex_element_t elements[KINC_G4_MAX_VERTEX_ELEMENTS];
 	int size;
-	bool instanced;
 } kinc_g4_vertex_structure_t;
 
 void kinc_g4_vertex_structure_init(kinc_g4_vertex_structure_t *structure);

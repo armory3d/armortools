@@ -241,12 +241,8 @@ static void set_blend_state(D3D12_BLEND_DESC *blend_desc, kinc_g5_pipeline_t *pi
 void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
 	// TODO FLOAT4x4
 	int vertexAttributeCount = 0;
-	for (int i = 0; i < 16; ++i) {
-		if (pipe->inputLayout[i] == NULL) {
-			break;
-		}
-		vertexAttributeCount += pipe->inputLayout[i]->size;
-	}
+	vertexAttributeCount += pipe->inputLayout->size;
+
 	D3D12_INPUT_ELEMENT_DESC *vertexDesc = (D3D12_INPUT_ELEMENT_DESC *)alloca(sizeof(D3D12_INPUT_ELEMENT_DESC) * vertexAttributeCount);
 	ZeroMemory(vertexDesc, sizeof(D3D12_INPUT_ELEMENT_DESC) * vertexAttributeCount);
 	int curAttr = 0;
@@ -256,9 +252,8 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
 			vertexDesc[curAttr].SemanticIndex = findAttribute(pipe->vertexShader, pipe->inputLayout[stream]->elements[i].name).attribute;
 			vertexDesc[curAttr].InputSlot = stream;
 			vertexDesc[curAttr].AlignedByteOffset = (i == 0) ? 0 : D3D12_APPEND_ALIGNED_ELEMENT;
-			vertexDesc[curAttr].InputSlotClass =
-			    pipe->inputLayout[stream]->instanced ? D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA : D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
-			vertexDesc[curAttr].InstanceDataStepRate = pipe->inputLayout[stream]->instanced ? 1 : 0;
+			vertexDesc[curAttr].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+			vertexDesc[curAttr].InstanceDataStepRate = 0;
 
 			switch (pipe->inputLayout[stream]->elements[i].data) {
 			case KINC_G4_VERTEX_DATA_F32_1X:

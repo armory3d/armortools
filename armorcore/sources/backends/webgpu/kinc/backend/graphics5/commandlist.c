@@ -61,13 +61,6 @@ void kinc_g5_command_list_draw_indexed_vertices_from_to(kinc_g5_command_list_t *
 
 }
 
-void kinc_g5_command_list_draw_indexed_vertices_instanced(kinc_g5_command_list_t *list, int instanceCount) {
-
-}
-void kinc_g5_command_list_draw_indexed_vertices_instanced_from_to(kinc_g5_command_list_t *list, int instanceCount, int start, int count) {
-
-}
-
 void kinc_g5_command_list_viewport(kinc_g5_command_list_t *list, int x, int y, int width, int height) {
 
 }
@@ -84,9 +77,9 @@ void kinc_g5_command_list_set_pipeline(kinc_g5_command_list_t *list, struct kinc
 
 void kinc_g5_command_list_set_pipeline_layout(kinc_g5_command_list_t *list) {}
 
-void kinc_g5_command_list_set_vertex_buffers(kinc_g5_command_list_t *list, struct kinc_g5_vertex_buffer **buffers, int *offsets, int count) {
-	uint64_t size = (kinc_g5_vertex_buffer_count(buffers[0]) - offsets[0]) * kinc_g5_vertex_buffer_stride(buffers[0]);
-	wgpuRenderPassEncoderSetVertexBuffer(list->impl.pass, 0, buffers[0]->impl.buffer, 0, size);
+void kinc_g5_command_list_set_vertex_buffer(kinc_g5_command_list_t *list, struct kinc_g5_vertex_buffer *buffer) {
+	uint64_t size = (kinc_g5_vertex_buffer_count(buffer)) * kinc_g5_vertex_buffer_stride(buffer);
+	wgpuRenderPassEncoderSetVertexBuffer(list->impl.pass, 0, buffer->impl.buffer, 0, size);
 }
 
 void kinc_g5_command_list_set_index_buffer(kinc_g5_command_list_t *list, struct kinc_g5_index_buffer *buffer) {

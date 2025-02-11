@@ -17,7 +17,7 @@ static void vertex_buffer_unset(kinc_g5_vertex_buffer_t *buffer) {
 		currentVertexBuffer = NULL;
 }
 
-void kinc_g5_vertex_buffer_init(kinc_g5_vertex_buffer_t *buffer, int count, kinc_g5_vertex_structure_t *structure, bool gpuMemory, int instanceDataStepRate) {
+void kinc_g5_vertex_buffer_init(kinc_g5_vertex_buffer_t *buffer, int count, kinc_g5_vertex_structure_t *structure, bool gpuMemory) {
 	memset(&buffer->impl, 0, sizeof(buffer->impl));
 	buffer->impl.myCount = count;
 	buffer->impl.gpuMemory = gpuMemory;
