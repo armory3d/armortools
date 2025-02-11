@@ -1,7 +1,6 @@
 #pragma once
 
 #include <kinc/global.h>
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -129,10 +128,6 @@ const char *macgetresourcepath(void);
 
 #if defined(KINC_WINDOWS)
 #include <kinc/backend/MiniWindows.h>
-#endif
-
-#ifdef KINC_RASPBERRY_PI
-#define KINC_LINUX
 #endif
 
 static char *fileslocation = NULL;
@@ -336,30 +331,12 @@ float kinc_read_f32le(uint8_t *data) {
 #endif
 }
 
-float kinc_read_f32be(uint8_t *data) {
-#ifdef KINC_BIG_ENDIAN // speed optimization
-	return *(float *)data;
-#else // works on all architectures
-	int i = (data[3] << 0) | (data[2] << 8) | (data[1] << 16) | (data[0] << 24);
-	return *(float *)&i;
-#endif
-}
-
 uint64_t kinc_read_u64le(uint8_t *data) {
 #ifdef KINC_LITTLE_ENDIAN
 	return *(uint64_t *)data;
 #else
 	return ((uint64_t)data[0] << 0) | ((uint64_t)data[1] << 8) | ((uint64_t)data[2] << 16) | ((uint64_t)data[3] << 24) | ((uint64_t)data[4] << 32) |
 	       ((uint64_t)data[5] << 40) | ((uint64_t)data[6] << 48) | ((uint64_t)data[7] << 56);
-#endif
-}
-
-uint64_t kinc_read_u64be(uint8_t *data) {
-#ifdef KINC_BIG_ENDIAN
-	return *(uint64_t *)data;
-#else
-	return ((uint64_t)data[7] << 0) | ((uint64_t)data[6] << 8) | ((uint64_t)data[5] << 16) | ((uint64_t)data[4] << 24) | ((uint64_t)data[3] << 32) |
-	       ((uint64_t)data[2] << 40) | ((uint64_t)data[1] << 48) | ((uint64_t)data[0] << 56);
 #endif
 }
 
@@ -372,28 +349,11 @@ int64_t kinc_read_s64le(uint8_t *data) {
 #endif
 }
 
-int64_t kinc_read_s64be(uint8_t *data) {
-#ifdef KINC_BIG_ENDIAN
-	return *(int64_t *)data;
-#else
-	return ((int64_t)data[7] << 0) | ((int64_t)data[6] << 8) | ((int64_t)data[5] << 16) | ((int64_t)data[4] << 24) | ((int64_t)data[3] << 32) |
-	       ((int64_t)data[2] << 40) | ((int64_t)data[1] << 48) | ((int64_t)data[0] << 56);
-#endif
-}
-
 uint32_t kinc_read_u32le(uint8_t *data) {
 #ifdef KINC_LITTLE_ENDIAN
 	return *(uint32_t *)data;
 #else
 	return (data[0] << 0) | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
-#endif
-}
-
-uint32_t kinc_read_u32be(uint8_t *data) {
-#ifdef KINC_BIG_ENDIAN
-	return *(uint32_t *)data;
-#else
-	return (data[3] << 0) | (data[2] << 8) | (data[1] << 16) | (data[0] << 24);
 #endif
 }
 
@@ -405,14 +365,6 @@ int32_t kinc_read_s32le(uint8_t *data) {
 #endif
 }
 
-int32_t kinc_read_s32be(uint8_t *data) {
-#ifdef KINC_BIG_ENDIAN
-	return *(int32_t *)data;
-#else
-	return (data[3] << 0) | (data[2] << 8) | (data[1] << 16) | (data[0] << 24);
-#endif
-}
-
 uint16_t kinc_read_u16le(uint8_t *data) {
 #ifdef KINC_LITTLE_ENDIAN
 	return *(uint16_t *)data;
@@ -421,27 +373,11 @@ uint16_t kinc_read_u16le(uint8_t *data) {
 #endif
 }
 
-uint16_t kinc_read_u16be(uint8_t *data) {
-#ifdef KINC_BIG_ENDIAN
-	return *(uint16_t *)data;
-#else
-	return (data[1] << 0) | (data[0] << 8);
-#endif
-}
-
 int16_t kinc_read_s16le(uint8_t *data) {
 #ifdef KINC_LITTLE_ENDIAN
 	return *(int16_t *)data;
 #else
 	return (data[0] << 0) | (data[1] << 8);
-#endif
-}
-
-int16_t kinc_read_s16be(uint8_t *data) {
-#ifdef KINC_BIG_ENDIAN
-	return *(int16_t *)data;
-#else
-	return (data[1] << 0) | (data[0] << 8);
 #endif
 }
 

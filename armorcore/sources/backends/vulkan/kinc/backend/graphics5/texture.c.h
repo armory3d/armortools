@@ -346,8 +346,6 @@ void kinc_g5_texture_init(kinc_g5_texture_t *texture, int width, int height, kin
 	assert(!err);
 }
 
-void kinc_g5_texture_init3d(kinc_g5_texture_t *texture, int width, int height, int depth, kinc_image_format_t format) {}
-
 void kinc_g5_texture_init_non_sampled_access(kinc_g5_texture_t *texture, int width, int height, kinc_image_format_t format) {
 	texture->texWidth = width;
 	texture->texHeight = height;

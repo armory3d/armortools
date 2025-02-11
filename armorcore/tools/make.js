@@ -1924,7 +1924,7 @@ class AndroidExporter extends Exporter {
 			minSdkVersion: 24,
 			targetSdkVersion: 33,
 			screenOrientation: "sensor",
-			permissions: ["android.permission.VIBRATE"],
+			permissions: [],
 			disableStickyImmersiveMode: false,
 			metadata: [],
 			abiFilters: []

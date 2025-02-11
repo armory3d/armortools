@@ -235,7 +235,7 @@ static void updateImage(kinc_video_t *video) {
 
 		if (pixelBuffer != NULL) {
 			CVPixelBufferLockBaseAddress(pixelBuffer, 0);
-			kinc_g4_texture_upload(&video->impl.image, (uint8_t *)CVPixelBufferGetBaseAddress(pixelBuffer), (int)(CVPixelBufferGetBytesPerRow(pixelBuffer)));
+			// kinc_g4_texture_upload(&video->impl.image, (uint8_t *)CVPixelBufferGetBaseAddress(pixelBuffer), (int)(CVPixelBufferGetBytesPerRow(pixelBuffer)));
 			CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
 		}
 		CFRelease(buffer);

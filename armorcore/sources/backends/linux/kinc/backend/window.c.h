@@ -82,7 +82,6 @@ int kinc_window_create(kinc_window_options_t *win, kinc_framebuffer_options_t *f
 static struct {
 	void (*resize_callback)(int width, int height, void *data);
 	void *resize_data;
-	void (*ppi_callback)(int ppi, void *data);
 	void *ppi_data;
 	bool (*close_callback)(void *data);
 	void *close_data;
@@ -96,17 +95,6 @@ void kinc_window_set_resize_callback(int window_index, void (*callback)(int widt
 void kinc_internal_call_resize_callback(int window_index, int width, int height) {
 	if (kinc_internal_window_callbacks[window_index].resize_callback != NULL) {
 		kinc_internal_window_callbacks[window_index].resize_callback(width, height, kinc_internal_window_callbacks[window_index].resize_data);
-	}
-}
-
-void kinc_window_set_ppi_changed_callback(int window_index, void (*callback)(int ppi, void *data), void *data) {
-	kinc_internal_window_callbacks[window_index].ppi_callback = callback;
-	kinc_internal_window_callbacks[window_index].ppi_data = data;
-}
-
-void kinc_internal_call_ppi_changed_callback(int window_index, int ppi) {
-	if (kinc_internal_window_callbacks[window_index].ppi_callback != NULL) {
-		kinc_internal_window_callbacks[window_index].ppi_callback(ppi, kinc_internal_window_callbacks[window_index].resize_data);
 	}
 }
 

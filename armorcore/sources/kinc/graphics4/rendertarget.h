@@ -1,11 +1,8 @@
 #pragma once
 
 #include <kinc/global.h>
-
 #include <kinc/backend/graphics4/rendertarget.h>
-
 #include "textureunit.h"
-
 #include <stdint.h>
 
 /*! \file rendertarget.h
@@ -28,7 +25,6 @@ typedef struct kinc_g4_render_target {
 	int texWidth;
 	int texHeight;
 	bool isDepthAttachment;
-
 	kinc_g4_render_target_impl_t impl;
 } kinc_g4_render_target_t;
 

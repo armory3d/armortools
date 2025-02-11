@@ -2,8 +2,7 @@
 
 #include <stdlib.h>
 
-bool kinc_g5_transposeMat3 = false;
-bool kinc_g5_transposeMat4 = false;
+bool kinc_g5_transposeMat = false;
 
 void kinc_g5_constant_buffer_init(kinc_g5_constant_buffer_t *buffer, int size) {
 

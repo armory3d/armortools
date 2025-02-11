@@ -27,8 +27,6 @@ typedef struct {
 	int manualWidth, manualHeight;
 	void (*resizeCallback)(int x, int y, void *data);
 	void *resizeCallbackData;
-	void (*ppiCallback)(int ppi, void *data);
-	void *ppiCallbackData;
 	bool (*closeCallback)(void *data);
 	void *closeCallbackData;
 } WindowData;
@@ -384,11 +382,6 @@ void kinc_window_set_resize_callback(int window_index, void (*callback)(int x, i
 	windows[window_index].resizeCallbackData = data;
 }
 
-void kinc_window_set_ppi_changed_callback(int window_index, void (*callback)(int ppi, void *data), void *data) {
-	windows[window_index].ppiCallback = callback;
-	windows[window_index].ppiCallbackData = data;
-}
-
 void kinc_window_set_close_callback(int window_index, bool (*callback)(void *data), void *data) {
 	windows[window_index].closeCallback = callback;
 	windows[window_index].closeCallbackData = data;
@@ -413,12 +406,6 @@ int kinc_windows_manual_height(int window) {
 void kinc_internal_call_resize_callback(int window_index, int width, int height) {
 	if (windows[window_index].resizeCallback != NULL) {
 		windows[window_index].resizeCallback(width, height, windows[window_index].resizeCallbackData);
-	}
-}
-
-void kinc_internal_call_ppi_changed_callback(int window_index, int ppi) {
-	if (windows[window_index].ppiCallback != NULL) {
-		windows[window_index].ppiCallback(ppi, windows[window_index].ppiCallbackData);
 	}
 }
 

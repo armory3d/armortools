@@ -1,9 +1,7 @@
 #pragma once
 
 #include <kinc/global.h>
-
 #include <kinc/backend/graphics5/constantbuffer.h>
-
 #include <kinc/math/matrix.h>
 #include <kinc/math/vector.h>
 
@@ -36,5 +34,4 @@ void kinc_g5_constant_buffer_set_floats(kinc_g5_constant_buffer_t *buffer, int o
 void kinc_g5_constant_buffer_set_matrix3(kinc_g5_constant_buffer_t *buffer, int offset, kinc_matrix3x3_t *value);
 void kinc_g5_constant_buffer_set_matrix4(kinc_g5_constant_buffer_t *buffer, int offset, kinc_matrix4x4_t *value);
 
-extern bool kinc_g5_transposeMat3;
-extern bool kinc_g5_transposeMat4;
+extern bool kinc_g5_transposeMat;

@@ -21,8 +21,6 @@ void kinc_mouse_set_release_callback(void (*value)(int /*window*/, int /*button*
 void kinc_mouse_set_move_callback(void (*value)(int /*window*/, int /*x*/, int /*y*/, int /*movement_x*/, int /*movement_y*/, void * /*data*/),
                                             void *data);
 void kinc_mouse_set_scroll_callback(void (*value)(int /*window*/, int /*delta*/, void * /*data*/), void *data);
-void kinc_mouse_set_enter_window_callback(void (*value)(int /*window*/, void * /*data*/), void *data);
-void kinc_mouse_set_leave_window_callback(void (*value)(int /*window*/, void * /*data*/), void *data);
 bool kinc_mouse_can_lock(void);
 bool kinc_mouse_is_locked(void);
 void kinc_mouse_lock(int window);
@@ -37,8 +35,6 @@ void kinc_internal_mouse_trigger_press(int window, int button, int x, int y);
 void kinc_internal_mouse_trigger_release(int window, int button, int x, int y);
 void kinc_internal_mouse_trigger_move(int window, int x, int y);
 void kinc_internal_mouse_trigger_scroll(int window, int delta);
-void kinc_internal_mouse_trigger_enter_window(int window);
-void kinc_internal_mouse_trigger_leave_window(int window);
 void kinc_internal_mouse_lock(int window);
 void kinc_internal_mouse_unlock(void);
 void kinc_internal_mouse_window_activated(int window);
@@ -65,10 +61,6 @@ static void (*mouse_move_callback)(int /*window*/, int /*x*/, int /*y*/, int /*m
 static void *mouse_move_callback_data = NULL;
 static void (*mouse_scroll_callback)(int /*window*/, int /*delta*/, void * /*data*/) = NULL;
 static void *mouse_scroll_callback_data = NULL;
-static void (*mouse_enter_window_callback)(int /*window*/, void * /*data*/) = NULL;
-static void *mouse_enter_window_callback_data = NULL;
-static void (*mouse_leave_window_callback)(int /*window*/, void * /*data*/) = NULL;
-static void *mouse_leave_window_callback_data = NULL;
 
 void kinc_mouse_set_press_callback(void (*value)(int /*window*/, int /*button*/, int /*x*/, int /*y*/, void * /*data*/), void *data) {
 	mouse_press_callback = value;
@@ -90,16 +82,6 @@ void kinc_mouse_set_scroll_callback(void (*value)(int /*window*/, int /*delta*/,
 	mouse_scroll_callback_data = data;
 }
 
-void kinc_mouse_set_enter_window_callback(void (*value)(int /*window*/, void * /*data*/), void *data) {
-	mouse_enter_window_callback = value;
-	mouse_enter_window_callback_data = data;
-}
-
-void kinc_mouse_set_leave_window_callback(void (*value)(int /*window*/, void * /*data*/), void *data) {
-	mouse_leave_window_callback = value;
-	mouse_leave_window_callback_data = data;
-}
-
 void kinc_internal_mouse_trigger_release(int window, int button, int x, int y) {
 	if (mouse_release_callback != NULL) {
 		mouse_release_callback(window, button, x, y, mouse_release_callback_data);
@@ -109,18 +91,6 @@ void kinc_internal_mouse_trigger_release(int window, int button, int x, int y) {
 void kinc_internal_mouse_trigger_scroll(int window, int delta) {
 	if (mouse_scroll_callback != NULL) {
 		mouse_scroll_callback(window, delta, mouse_scroll_callback_data);
-	}
-}
-
-void kinc_internal_mouse_trigger_enter_window(int window) {
-	if (mouse_enter_window_callback != NULL) {
-		mouse_enter_window_callback(window, mouse_enter_window_callback_data);
-	}
-}
-
-void kinc_internal_mouse_trigger_leave_window(int window) {
-	if (mouse_leave_window_callback != NULL) {
-		mouse_leave_window_callback(window, mouse_leave_window_callback_data);
 	}
 }
 

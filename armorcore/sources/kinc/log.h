@@ -1,7 +1,6 @@
 #pragma once
 
 #include <kinc/global.h>
-
 #include <stdarg.h>
 
 /*! \file log.h

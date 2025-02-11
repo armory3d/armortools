@@ -1,14 +1,11 @@
 #pragma once
 
 #include <kinc/global.h>
-
 #include "rendertarget.h"
 #include "sampler.h"
 #include "texture.h"
 #include "textureunit.h"
-
 #include <kinc/backend/graphics5/commandlist.h>
-
 #include <stddef.h>
 
 /*! \file commandlist.h
@@ -61,7 +58,6 @@ void kinc_g5_command_list_wait_for_execution_to_finish(kinc_g5_command_list_t *l
 void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list, struct kinc_g5_render_target *render_target, uint8_t *data);
 void kinc_g5_command_list_compute(kinc_g5_command_list_t *list, int x, int y, int z);
 void kinc_g5_command_list_set_texture(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *texture);
-void kinc_g5_command_list_set_image_texture(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *texture);
 void kinc_g5_command_list_set_texture_from_render_target(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_render_target_t *target);
 void kinc_g5_command_list_set_texture_from_render_target_depth(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_render_target_t *target);
 void kinc_g5_command_list_set_sampler(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_sampler_t *sampler);

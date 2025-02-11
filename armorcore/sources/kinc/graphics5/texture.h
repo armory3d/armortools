@@ -17,22 +17,11 @@ typedef struct kinc_g5_texture {
 } kinc_g5_texture_t;
 
 void kinc_g5_texture_init(kinc_g5_texture_t *texture, int width, int height, kinc_image_format_t format);
-void kinc_g5_texture_init3d(kinc_g5_texture_t *texture, int width, int height, int depth, kinc_image_format_t format);
 void kinc_g5_texture_init_from_image(kinc_g5_texture_t *texture, kinc_image_t *image);
 void kinc_g5_texture_init_non_sampled_access(kinc_g5_texture_t *texture, int width, int height, kinc_image_format_t format);
 void kinc_g5_texture_destroy(kinc_g5_texture_t *texture);
-
-#ifdef KINC_ANDROID
-void kinc_g5_texture_init_from_id(kinc_g5_texture_t *texture, unsigned texid);
-#endif
-
 uint8_t *kinc_g5_texture_lock(kinc_g5_texture_t *texture);
 void kinc_g5_texture_unlock(kinc_g5_texture_t *texture);
-
-#if defined(KINC_IOS) || defined(KINC_MACOS)
-void kinc_g5_texture_upload(kinc_g5_texture_t *texture, uint8_t *data);
-#endif
-
 void kinc_g5_texture_generate_mipmaps(kinc_g5_texture_t *texture, int levels);
 void kinc_g5_texture_set_mipmap(kinc_g5_texture_t *texture, kinc_image_t *mipmap, int level);
 int kinc_g5_texture_stride(kinc_g5_texture_t *texture);

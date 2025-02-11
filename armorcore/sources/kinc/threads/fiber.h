@@ -1,7 +1,6 @@
 #pragma once
 
 #include <kinc/global.h>
-
 #include <kinc/backend/fiber.h>
 
 /*! \file fiber.h

@@ -1,11 +1,8 @@
 #pragma once
 
 #include <kinc/global.h>
-
 #include <kinc/backend/graphics5/pipeline.h>
-
 #include <kinc/graphics5/vertexstructure.h>
-
 #include "constantlocation.h"
 #include "graphics.h"
 
@@ -15,7 +12,6 @@
 
 struct kinc_g5_shader;
 
-// identical to kinc_g4_blending_factor_t
 typedef enum {
 	KINC_G5_BLEND_ONE,
 	KINC_G5_BLEND_ZERO,
@@ -31,7 +27,6 @@ typedef enum {
 	KINC_G5_BLEND_INV_CONSTANT
 } kinc_g5_blending_factor_t;
 
-// identical to kinc_g4_blending_operation_t
 typedef enum {
 	KINC_G5_BLENDOP_ADD,
 	KINC_G5_BLENDOP_SUBTRACT,
@@ -40,7 +35,11 @@ typedef enum {
 	KINC_G5_BLENDOP_MAX
 } kinc_g5_blending_operation_t;
 
-typedef enum kinc_g5_cull_mode { KINC_G5_CULL_MODE_CLOCKWISE, KINC_G5_CULL_MODE_COUNTERCLOCKWISE, KINC_G5_CULL_MODE_NEVER } kinc_g5_cull_mode_t;
+typedef enum kinc_g5_cull_mode {
+	KINC_G5_CULL_MODE_CLOCKWISE,
+	KINC_G5_CULL_MODE_COUNTERCLOCKWISE,
+	KINC_G5_CULL_MODE_NEVER
+} kinc_g5_cull_mode_t;
 
 typedef enum kinc_g5_compare_mode {
 	KINC_G5_COMPARE_MODE_ALWAYS,
@@ -59,7 +58,6 @@ typedef struct kinc_g5_pipeline {
 	struct kinc_g5_shader *fragmentShader;
 
 	kinc_g5_cull_mode_t cullMode;
-
 	bool depthWrite;
 	kinc_g5_compare_mode_t depthMode;
 
@@ -78,7 +76,6 @@ typedef struct kinc_g5_pipeline {
 
 	int colorAttachmentCount;
 	kinc_g5_render_target_format_t colorAttachment[8];
-
 	int depthAttachmentBits;
 
 	PipelineState5Impl impl;

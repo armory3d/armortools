@@ -839,11 +839,9 @@ bool kinc_x11_handle_messages() {
 			break;
 		}
 		case LeaveNotify:
-			kinc_internal_mouse_trigger_leave_window(k_window->window_index);
 			break;
 		case EnterNotify:
 			x11_ctx.mouse.current_window = k_window->window_index;
-			kinc_internal_mouse_trigger_enter_window(k_window->window_index);
 			break;
 		}
 	}

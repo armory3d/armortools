@@ -488,19 +488,6 @@ void kinc_g5_command_list_set_sampler(kinc_g5_command_list_t *list, kinc_g5_text
 	kinc_g5_internal_set_textures(list);
 }
 
-void kinc_g5_command_list_set_image_texture(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *texture) {
-	if (unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT] >= 0) {
-		kinc_g5_internal_texture_set(list, texture, unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT]);
-	}
-	else if (unit.stages[KINC_G5_SHADER_TYPE_VERTEX] >= 0) {
-		kinc_g5_internal_texture_set(list, texture, unit.stages[KINC_G5_SHADER_TYPE_VERTEX]);
-	}
-	else if (unit.stages[KINC_G5_SHADER_TYPE_COMPUTE] >= 0) {
-		kinc_g5_internal_texture_set(list, texture, unit.stages[KINC_G5_SHADER_TYPE_COMPUTE]);
-	}
-	kinc_g5_internal_set_textures(list);
-}
-
 void kinc_g5_command_list_set_texture_from_render_target(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_render_target_t *target) {
 	if (unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT] >= 0) {
 		target->impl.stage = unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT];

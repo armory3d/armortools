@@ -4,8 +4,7 @@
 
 bool memory_type_from_properties(uint32_t typeBits, VkFlags requirements_mask, uint32_t *typeIndex);
 
-bool kinc_g5_transposeMat3 = true;
-bool kinc_g5_transposeMat4 = true;
+bool kinc_g5_transposeMat = true;
 
 static void createUniformBuffer(VkBuffer *buf, VkMemoryAllocateInfo *mem_alloc, VkDeviceMemory *mem, VkDescriptorBufferInfo *buffer_info, int size) {
 	VkBufferCreateInfo buf_info;

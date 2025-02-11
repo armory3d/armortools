@@ -1,12 +1,9 @@
 #pragma once
 
 #include <kinc/global.h>
-
 #include "usage.h"
 #include "vertexstructure.h"
-
 #include <kinc/backend/graphics4/vertexbuffer.h>
-
 #include <stdbool.h>
 
 /*! \file vertexbuffer.h

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <kinc/global.h>
-
 #include <kinc/backend/graphics5/pipeline.h>
 
 /*! \file constantlocation.h

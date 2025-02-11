@@ -1,7 +1,6 @@
 #pragma once
 
 #include <kinc/global.h>
-
 #include <kinc/backend/graphics5/indexbuffer.h>
 
 /*! \file indexbuffer.h

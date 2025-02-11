@@ -901,14 +901,6 @@ void kinc_load_url(const char *url) {
 	(*activity->vm)->DetachCurrentThread(activity->vm);
 }
 
-void kinc_vibrate(int ms) {
-	JNIEnv *env;
-	(*activity->vm)->AttachCurrentThread(activity->vm, &env, NULL);
-	jclass koreActivityClass = kinc_android_find_class(env, "tech.kinc.KincActivity");
-	(*env)->CallStaticVoidMethod(env, koreActivityClass, (*env)->GetStaticMethodID(env, koreActivityClass, "vibrate", "(I)V"), ms);
-	(*activity->vm)->DetachCurrentThread(activity->vm);
-}
-
 const char *kinc_language() {
 	JNIEnv *env;
 	(*activity->vm)->AttachCurrentThread(activity->vm, &env, NULL);
@@ -1072,10 +1064,6 @@ void kinc_mouse_get_position(int window, int *x, int *y) {
 }
 
 void kinc_mouse_set_cursor(int cursor_index) {}
-
-void kinc_login() {}
-
-void kinc_unlock_achievement(int id) {}
 
 bool kinc_gamepad_connected(int num) {
 	return num == 0;

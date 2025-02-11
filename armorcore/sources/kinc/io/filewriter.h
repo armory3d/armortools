@@ -1,7 +1,6 @@
 #pragma once
 
 #include <kinc/global.h>
-
 #include <stdbool.h>
 
 /*! \file filewriter.h
@@ -12,7 +11,6 @@
 typedef struct kinc_file_writer {
 	void *file;
 	const char *filename;
-	bool mounted;
 } kinc_file_writer_t;
 
 bool kinc_file_writer_open(kinc_file_writer_t *writer, const char *filepath);
@@ -42,13 +40,7 @@ void kinc_file_writer_close(kinc_file_writer_t *writer);
 
 bool kinc_file_writer_open(kinc_file_writer_t *writer, const char *filepath) {
 	writer->file = NULL;
-	writer->mounted = false;
-#ifdef MOUNT_SAVES
-	if (!mountSaveData(true)) {
-		return false;
-	}
-	writer->mounted = true;
-#endif
+
 	char path[1001];
 	strcpy(path, kinc_internal_save_path());
 	strcat(path, filepath);
@@ -76,12 +68,6 @@ void kinc_file_writer_close(kinc_file_writer_t *writer) {
 #endif
 		writer->file = NULL;
 	}
-#ifdef MOUNT_SAVES
-	if (writer->mounted) {
-		writer->mounted = false;
-		unmountSaveData();
-	}
-#endif
 }
 
 void kinc_file_writer_write(kinc_file_writer_t *writer, void *data, int size) {

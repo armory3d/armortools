@@ -269,7 +269,6 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 	case WM_DPICHANGED: {
 		int window = kinc_windows_window_index_from_hwnd(hWnd);
 		if (window >= 0) {
-			kinc_internal_call_ppi_changed_callback(window, LOWORD(wParam));
 		}
 		break;
 	}
@@ -322,7 +321,6 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 	case WM_MOUSELEAVE:
 		windowId = kinc_windows_window_index_from_hwnd(hWnd);
 		//**windows[windowId]->isMouseInside = false;
-		kinc_internal_mouse_trigger_leave_window(windowId);
 		break;
 	case WM_MOUSEMOVE:
 		windowId = kinc_windows_window_index_from_hwnd(hWnd);
@@ -1150,7 +1148,6 @@ void kinc_load_url(const char *url) {
 }
 
 void kinc_set_keep_screen_on(bool on) {}
-void kinc_vibrate(int ms) {}
 
 const char *kinc_language() {
 	wchar_t wlanguage[3] = {0};
@@ -1216,10 +1213,6 @@ static LARGE_INTEGER startCount;
 const char **kinc_video_formats() {
 	return videoFormats;
 }
-
-void kinc_login(void) {}
-
-void kinc_unlock_achievement(int id) {}
 
 bool kinc_gamepad_connected(int num) {
 	return isXInputGamepad(num) || isDirectInputGamepad(num);

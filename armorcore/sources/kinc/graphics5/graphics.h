@@ -1,15 +1,11 @@
 #pragma once
 
 #include <kinc/global.h>
-
 #include <kinc/image.h>
-
 #include "rendertarget.h"
 #include "shader.h"
 #include "vertexstructure.h"
-
 #include <kinc/backend/graphics5/graphics.h>
-
 #include <kinc/math/matrix.h>
 #include <kinc/math/vector.h>
 

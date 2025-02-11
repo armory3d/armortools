@@ -1,9 +1,7 @@
 #pragma once
 
 #include <kinc/global.h>
-
 #include <kinc/backend/graphics5/shader.h>
-
 #include <stddef.h>
 
 /*! \file shader.h
@@ -14,7 +12,6 @@ typedef enum kinc_g5_shader_type {
 	KINC_G5_SHADER_TYPE_FRAGMENT,
 	KINC_G5_SHADER_TYPE_VERTEX,
 	KINC_G5_SHADER_TYPE_COMPUTE,
-
 	KINC_G5_SHADER_TYPE_COUNT
 } kinc_g5_shader_type_t;
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <kinc/global.h>
-
 #include <stdbool.h>
 
 /*! \file vertexstructure.h

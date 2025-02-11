@@ -2,12 +2,10 @@
 
 void kinc_g5_internal_pipeline_init(kinc_g5_pipeline_t *pipe) {
 	pipe->inputLayout = NULL;
-
 	pipe->vertexShader = NULL;
 	pipe->fragmentShader = NULL;
 
 	pipe->cullMode = KINC_G5_CULL_MODE_NEVER;
-
 	pipe->depthWrite = false;
 	pipe->depthMode = KINC_G5_COMPARE_MODE_ALWAYS;
 
@@ -20,21 +18,12 @@ void kinc_g5_internal_pipeline_init(kinc_g5_pipeline_t *pipe) {
 
 	for (int i = 0; i < 8; ++i) {
 		pipe->colorWriteMaskRed[i] = true;
-	}
-	for (int i = 0; i < 8; ++i) {
 		pipe->colorWriteMaskGreen[i] = true;
-	}
-	for (int i = 0; i < 8; ++i) {
 		pipe->colorWriteMaskBlue[i] = true;
-	}
-	for (int i = 0; i < 8; ++i) {
 		pipe->colorWriteMaskAlpha[i] = true;
-	}
-
-	pipe->colorAttachmentCount = 1;
-	for (int i = 0; i < 8; ++i) {
 		pipe->colorAttachment[i] = KINC_G5_RENDER_TARGET_FORMAT_32BIT;
 	}
 
+	pipe->colorAttachmentCount = 1;
 	pipe->depthAttachmentBits = 0;
 }

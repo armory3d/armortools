@@ -1,9 +1,7 @@
 #pragma once
 
 #include <kinc/global.h>
-
 #include "usage.h"
-
 #include <kinc/backend/graphics4/indexbuffer.h>
 
 /*! \file indexbuffer.h
@@ -22,5 +20,4 @@ void kinc_g4_index_buffer_unlock_all(kinc_g4_index_buffer_t *buffer);
 void kinc_g4_index_buffer_unlock(kinc_g4_index_buffer_t *buffer, int count);
 int kinc_g4_index_buffer_count(kinc_g4_index_buffer_t *buffer);
 
-void kinc_internal_g4_index_buffer_set(kinc_g4_index_buffer_t *buffer);
 void kinc_g4_set_index_buffer(kinc_g4_index_buffer_t *buffer);

@@ -61,18 +61,6 @@ class KincActivity: NativeActivity(), KeyEvent.Callback {
 		}
 
 		@JvmStatic
-		fun vibrate(ms: Int) {
-			val v: Vibrator = instance!!.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-				v.vibrate(VibrationEffect.createOneShot(ms.toLong(), VibrationEffect.DEFAULT_AMPLITUDE))
-			}
-			else {
-				// deprecated in API 26
-				v.vibrate(ms.toLong())
-			}
-		}
-
-		@JvmStatic
 		fun getRotation(): Int {
 			val context: Context = instance!!.applicationContext
 			val manager: WindowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager

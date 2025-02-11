@@ -7,7 +7,6 @@
 */
 
 #include <kinc/global.h>
-
 #include <kinc/backend/graphics5/raytrace.h>
 
 struct kinc_g5_command_list;

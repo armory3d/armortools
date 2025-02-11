@@ -1,9 +1,7 @@
 #pragma once
 
 #include <kinc/global.h>
-
 #include "textureunit.h"
-
 #include <kinc/backend/graphics5/rendertarget.h>
 
 /*! \file rendertarget.h

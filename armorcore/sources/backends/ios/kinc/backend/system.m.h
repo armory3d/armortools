@@ -55,11 +55,6 @@ void kinc_load_url(const char *url) {
 	loadURL(url);
 }
 
-// On iOS you can't set the length of the vibration.
-void kinc_vibrate(int ms) {
-	AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
-};
-
 static char language[3];
 
 const char *kinc_language(void) {
@@ -155,10 +150,6 @@ kinc_ticks_t kinc_timestamp(void) {
 	kinc_ticks_t time = mach_absolute_time();
 	return time;
 }
-
-void kinc_login(void) {}
-
-void kinc_unlock_achievement(int id) {}
 
 const char *kinc_gamepad_vendor(int gamepad) {
 	return "nobody";

@@ -28,11 +28,3 @@ void kinc_g4_texture_unlock(kinc_g4_texture_t *texture);
 void kinc_g4_texture_generate_mipmaps(kinc_g4_texture_t *texture, int levels);
 void kinc_g4_texture_set_mipmap(kinc_g4_texture_t *texture, kinc_image_t *mipmap, int level);
 int kinc_g4_texture_stride(kinc_g4_texture_t *texture);
-
-#ifdef KINC_ANDROID
-void kinc_g4_texture_init_from_id(kinc_g4_texture_t *texture, unsigned texid);
-#endif
-
-#if defined(KINC_IOS) || defined(KINC_MACOS)
-void kinc_g4_texture_upload(kinc_g4_texture_t *texture, uint8_t *data, int stride);
-#endif

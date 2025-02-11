@@ -1,9 +1,7 @@
 #pragma once
 
 #include <kinc/global.h>
-
 #include <kinc/log.h>
-
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -23,10 +21,6 @@ int kinc_height(void);
 void kinc_load_url(const char *url);
 const char *kinc_system_id(void);
 const char *kinc_language(void);
-void kinc_vibrate(int milliseconds);
-float kinc_safe_zone(void);
-bool kinc_automatic_safe_zone(void);
-void kinc_set_safe_zone(float value);
 
 typedef uint64_t kinc_ticks_t;
 
@@ -37,11 +31,6 @@ int kinc_hardware_threads(void);
 double kinc_time(void);
 void kinc_start(void);
 void kinc_stop(void);
-void kinc_login(void);
-bool kinc_waiting_for_login(void);
-void kinc_unlock_achievement(int id);
-void kinc_disallow_user_change(void);
-void kinc_allow_user_change(void);
 void kinc_set_keep_screen_on(bool on);
 
 KINC_INLINE void kinc_debug_break(void) {
@@ -62,7 +51,6 @@ KINC_INLINE void kinc_debug_break(void) {
 #endif
 }
 
-bool kinc_debugger_attached(void);
 void kinc_copy_to_clipboard(const char *text);
 void kinc_set_update_callback(void (*callback)(void *), void *data);
 void kinc_set_foreground_callback(void (*callback)(void *), void *data);
@@ -74,8 +62,6 @@ void kinc_set_drop_files_callback(void (*callback)(wchar_t *, void *), void *dat
 void kinc_set_cut_callback(char *(*callback)(void *), void *data);
 void kinc_set_copy_callback(char *(*callback)(void *), void *data);
 void kinc_set_paste_callback(void (*callback)(char *, void *), void *data);
-void kinc_set_login_callback(void (*callback)(void *), void *data);
-void kinc_set_logout_callback(void (*callback)(void *), void *data);
 
 bool kinc_internal_frame(void);
 const char *kinc_internal_save_path(void);
@@ -91,8 +77,6 @@ void kinc_internal_drop_files_callback(wchar_t *);
 char *kinc_internal_cut_callback(void);
 char *kinc_internal_copy_callback(void);
 void kinc_internal_paste_callback(char *);
-void kinc_internal_login_callback(void);
-void kinc_internal_logout_callback(void);
 
 #ifdef KINC_IMPLEMENTATION_ROOT
 #define KINC_IMPLEMENTATION
@@ -142,10 +126,6 @@ static char *(*copy_callback)(void *) = NULL;
 static void *copy_callback_data = NULL;
 static void (*paste_callback)(char *, void *) = NULL;
 static void *paste_callback_data = NULL;
-static void (*login_callback)(void *) = NULL;
-static void *login_callback_data = NULL;
-static void (*logout_callback)(void *) = NULL;
-static void *logout_callback_data = NULL;
 
 #if defined(KINC_IOS) || defined(KINC_MACOS)
 bool withAutoreleasepool(bool (*f)(void));
@@ -199,16 +179,6 @@ void kinc_set_copy_callback(char *(*callback)(void *), void *data) {
 void kinc_set_paste_callback(void (*callback)(char *, void *), void *data) {
 	paste_callback = callback;
 	paste_callback_data = data;
-}
-
-void kinc_set_login_callback(void (*callback)(void *), void *data) {
-	login_callback = callback;
-	login_callback_data = data;
-}
-
-void kinc_set_logout_callback(void (*callback)(void *), void *data) {
-	logout_callback = callback;
-	logout_callback_data = data;
 }
 
 void kinc_internal_update_callback(void) {
@@ -273,20 +243,7 @@ void kinc_internal_paste_callback(char *value) {
 	}
 }
 
-void kinc_internal_login_callback(void) {
-	if (login_callback != NULL) {
-		login_callback(login_callback_data);
-	}
-}
-
-void kinc_internal_logout_callback(void) {
-	if (logout_callback != NULL) {
-		logout_callback(logout_callback_data);
-	}
-}
-
 static bool running = false;
-// static bool showWindowFlag = true;
 static char application_name[1024] = {"Kinc Application"};
 
 const char *kinc_application_name(void) {
@@ -333,49 +290,6 @@ int kinc_height(void) {
 
 void kinc_memory_emergency(void) {}
 
-static float safe_zone = 0.9f;
-
-float kinc_safe_zone(void) {
-#ifdef KINC_ANDROID
-	return 1.0f;
-#else
-	return safe_zone;
-#endif
-}
-
-bool kinc_automatic_safe_zone(void) {
-#ifdef KINC_ANDROID
-	return true;
-#else
-	return false;
-#endif
-}
-
-void kinc_set_safe_zone(float value) {
-	safe_zone = value;
-}
-
-bool is_save_load_initialized(void) {
-	return true;
-}
-
-bool is_ps4_japanese_button_style(void) {
-	return false;
-}
-
-bool is_save_load_broken(void) {
-	return false;
-}
-
-#define SAVE_RESULT_NONE 0
-#define SAVE_RESULT_SUCCESS 1
-#define SAVE_RESULT_FAILURE 2
-volatile int save_result = SAVE_RESULT_SUCCESS;
-
-void kinc_disallow_user_change(void) {}
-
-void kinc_allow_user_change(void) {}
-
 static uint8_t *current_file = NULL;
 static size_t current_file_size = 0;
 
@@ -414,10 +328,6 @@ void kinc_save_save_file(const char *filename, uint8_t *data, size_t size) {
 }
 
 bool kinc_save_is_saving(void) {
-	return false;
-}
-
-bool kinc_waiting_for_login(void) {
 	return false;
 }
 

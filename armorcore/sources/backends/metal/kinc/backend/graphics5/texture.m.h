@@ -84,8 +84,6 @@ void kinc_g5_texture_init(kinc_g5_texture_t *texture, int width, int height, kin
 	create(texture, width, height, format, true);
 }
 
-void kinc_g5_texture_init3d(kinc_g5_texture_t *texture, int width, int height, int depth, kinc_image_format_t format) {}
-
 void kinc_g5_texture_init_from_image(kinc_g5_texture_t *texture, struct kinc_image *image) {
 	texture->texWidth = image->width;
 	texture->texHeight = image->height;
@@ -206,17 +204,4 @@ void kinc_g5_texture_set_mipmap(kinc_g5_texture_t *texture, kinc_image_t *mipmap
 	       mipmapLevel:level
 	         withBytes:mipmap->data
 	       bytesPerRow:mipmap->width * formatByteSize(mipmap->format)];
-}
-
-#include <kinc/graphics4/texture.h>
-
-void kinc_g4_texture_upload(kinc_g4_texture_t *texture_g4, uint8_t *data, int stride) {
-	kinc_g5_texture_t *tex = &texture_g4->impl._texture;
-	id<MTLTexture> texture = (__bridge id<MTLTexture>)tex->impl._tex;
-	[texture replaceRegion:MTLRegionMake2D(0, 0, tex->texWidth, tex->texHeight)
-	           mipmapLevel:0
-	                 slice:0
-	             withBytes:data
-	           bytesPerRow:stride
-	         bytesPerImage:stride * tex->texHeight];
 }

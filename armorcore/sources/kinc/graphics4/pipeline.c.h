@@ -1,15 +1,12 @@
 #include "pipeline.h"
-
 #include <stddef.h>
 
 void kinc_g4_internal_pipeline_set_defaults(kinc_g4_pipeline_t *state) {
 	state->input_layout = NULL;
-
 	state->vertex_shader = NULL;
 	state->fragment_shader = NULL;
 
 	state->cull_mode = KINC_G4_CULL_NOTHING;
-
 	state->depth_write = false;
 	state->depth_mode = KINC_G4_COMPARE_ALWAYS;
 

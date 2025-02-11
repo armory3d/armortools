@@ -183,16 +183,13 @@ void wl_pointer_handle_enter(void *data, struct wl_pointer *wl_pointer, uint32_t
 	window->decorations.focus = focus;
 	if (window != NULL) {
 		mouse->current_window = window->window_id;
-		kinc_internal_mouse_trigger_enter_window(window->window_id);
 	}
 }
 
 void wl_pointer_handle_leave(void *data, struct wl_pointer *wl_pointer, uint32_t serial, struct wl_surface *surface) {
 	enum kinc_wl_decoration_focus focus = KINC_WL_DECORATION_FOCUS_MAIN;
 	struct kinc_wl_window *window = kinc_wayland_window_from_surface(surface, &focus);
-
 	if (window != NULL) {
-		kinc_internal_mouse_trigger_leave_window(window->window_id);
 	}
 }
 

@@ -25,8 +25,6 @@ bool kinc_keyboard_active(void) {
 	return keyboardShown;
 }
 
-void kinc_vibrate(int ms) {}
-
 const char *kinc_system_id(void) {
 	return "macOS";
 }
@@ -50,10 +48,6 @@ double kinc_frequency(void) {
 kinc_ticks_t kinc_timestamp(void) {
 	return mach_absolute_time();
 }
-
-void kinc_login(void) {}
-
-void kinc_unlock_achievement(int id) {}
 
 bool kinc_gamepad_connected(int num) {
 	return true;

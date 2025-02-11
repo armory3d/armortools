@@ -1,11 +1,9 @@
 #pragma once
 
 #include <kinc/global.h>
-
 #include <kinc/graphics4/constantlocation.h>
 #include <kinc/graphics4/rendertarget.h>
 #include <kinc/graphics4/textureunit.h>
-
 #include <kinc/backend/graphics4/pipeline.h>
 
 /*! \file pipeline.h
@@ -61,7 +59,6 @@ typedef struct kinc_g4_pipeline {
 	struct kinc_g4_shader *fragment_shader;
 
 	kinc_g4_cull_mode_t cull_mode;
-
 	bool depth_write;
 	kinc_g4_compare_mode_t depth_mode;
 
@@ -80,7 +77,6 @@ typedef struct kinc_g4_pipeline {
 
 	int color_attachment_count;
 	kinc_g4_render_target_format_t color_attachment[8];
-
 	int depth_attachment_bits;
 
 	kinc_g4_pipeline_impl_t impl;

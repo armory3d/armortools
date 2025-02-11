@@ -1,9 +1,7 @@
 #pragma once
 
 #include <kinc/global.h>
-
 #include <kinc/backend/graphics5/compute.h>
-
 #include <kinc/graphics5/constantlocation.h>
 #include <kinc/graphics5/textureunit.h>
 

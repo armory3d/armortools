@@ -6,9 +6,15 @@
     \brief Provides low-level network-communication via UDP or TCP-sockets.
 */
 
-typedef enum kinc_socket_protocol { KINC_SOCKET_PROTOCOL_UDP, KINC_SOCKET_PROTOCOL_TCP } kinc_socket_protocol_t;
+typedef enum kinc_socket_protocol {
+	KINC_SOCKET_PROTOCOL_UDP,
+	KINC_SOCKET_PROTOCOL_TCP
+} kinc_socket_protocol_t;
 
-typedef enum kinc_socket_family { KINC_SOCKET_FAMILY_IP4, KINC_SOCKET_FAMILY_IP6 } kinc_socket_family_t;
+typedef enum kinc_socket_family {
+	KINC_SOCKET_FAMILY_IP4,
+	KINC_SOCKET_FAMILY_IP6
+} kinc_socket_family_t;
 
 #ifdef KINC_MICROSOFT
 #if defined(_WIN64)

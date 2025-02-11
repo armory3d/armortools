@@ -1,7 +1,6 @@
 #pragma once
 
 #include <kinc/global.h>
-
 #include <kinc/backend/threadlocal.h>
 
 /*! \file threadlocal.h

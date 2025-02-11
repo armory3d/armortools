@@ -68,8 +68,6 @@ void kinc_load_url(const char *url) {
 #undef MAX_COMMAND_BUFFER_SIZE
 }
 
-void kinc_vibrate(int ms) {}
-
 const char *kinc_language() {
 	return "en";
 }
@@ -146,10 +144,6 @@ kinc_ticks_t kinc_timestamp(void) {
 	now.tv_usec -= start.tv_usec;
 	return (kinc_ticks_t)now.tv_sec * 1000000 + (kinc_ticks_t)now.tv_usec;
 }
-
-void kinc_login() {}
-
-void kinc_unlock_achievement(int id) {}
 
 void kinc_linux_init_procs();
 
