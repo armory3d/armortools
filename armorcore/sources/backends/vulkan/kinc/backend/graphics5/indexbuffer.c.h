@@ -43,8 +43,8 @@ void kinc_g5_index_buffer_init(kinc_g5_index_buffer_t *buffer, int indexCount, b
 	bool pass = memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &buffer->impl.mem_alloc.memoryTypeIndex);
 	assert(pass);
 
+	VkMemoryAllocateFlagsInfo memory_allocate_flags_info = {0};
 	if (kinc_g5_supports_raytracing()) {
-		VkMemoryAllocateFlagsInfo memory_allocate_flags_info = {0};
 		memory_allocate_flags_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO;
 		memory_allocate_flags_info.flags = VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT_KHR;
 		buffer->impl.mem_alloc.pNext = &memory_allocate_flags_info;

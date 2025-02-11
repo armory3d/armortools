@@ -978,18 +978,18 @@ void kinc_g5_internal_init() {
 			deviceinfo.enabledExtensionCount = wanted_device_extension_count;
 			deviceinfo.ppEnabledExtensionNames = (const char *const *)wanted_device_extensions;
 
+			VkPhysicalDeviceRayTracingPipelineFeaturesKHR rayTracingPipelineExt = {0};
+			VkPhysicalDeviceAccelerationStructureFeaturesKHR rayTracingAccelerationStructureExt = {0};
+			VkPhysicalDeviceBufferDeviceAddressFeatures bufferDeviceAddressExt = {0};
 			if (kinc_g5_supports_raytracing()) {
-				VkPhysicalDeviceRayTracingPipelineFeaturesKHR rayTracingPipelineExt = {0};
 				rayTracingPipelineExt.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
 				rayTracingPipelineExt.pNext = NULL;
 				rayTracingPipelineExt.rayTracingPipeline = VK_TRUE;
 
-				VkPhysicalDeviceAccelerationStructureFeaturesKHR rayTracingAccelerationStructureExt = {0};
 				rayTracingAccelerationStructureExt.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
 				rayTracingAccelerationStructureExt.pNext = &rayTracingPipelineExt;
 				rayTracingAccelerationStructureExt.accelerationStructure = VK_TRUE;
 
-				VkPhysicalDeviceBufferDeviceAddressFeatures bufferDeviceAddressExt = {0};
 				bufferDeviceAddressExt.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
 				bufferDeviceAddressExt.pNext = &rayTracingAccelerationStructureExt;
 				bufferDeviceAddressExt.bufferDeviceAddress = VK_TRUE;
