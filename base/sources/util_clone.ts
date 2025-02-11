@@ -293,32 +293,6 @@ function util_clone_material_data(m: material_data_t): material_data_t {
 	return r;
 }
 
-function util_clone_particle_refs(parts: particle_ref_t[]): particle_ref_t[] {
-	if (parts == null) {
-		return null;
-	}
-	let r: particle_ref_t[] = [];
-	for (let i: i32 = 0; i < parts.length; ++i) {
-		let p: particle_ref_t = {};
-		p.name = parts[i].name;
-		p.particle = parts[i].particle;
-		p.seed = parts[i].seed;
-		array_push(r, p);
-	}
-	return r;
-}
-
-function util_clone_particles(p: particles_t): particles_t {
-	if (p == null) {
-		return null;
-	}
-	let r: particles_t = {};
-	r.refs = util_clone_particle_refs(p.refs);
-	r.render_emitter = p.render_emitter;
-	r.is_particle = p.is_particle;
-	return r;
-}
-
 function util_clone_tracks(tracks: track_t[]): track_t[] {
 	if (tracks == null) {
 		return null;
@@ -366,7 +340,6 @@ function util_clone_obj(o: obj_t): obj_t {
 	r.dimensions = util_clone_f32_array(o.dimensions);
 	r.visible = o.visible;
 	r.spawn = o.spawn;
-	r.particles = util_clone_particles(o.particles);
 	r.anim = util_clone_anim(o.anim);
 	r.material_refs = util_clone_string_array(o.material_refs);
 	if (o.children != null) {

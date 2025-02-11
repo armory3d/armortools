@@ -707,7 +707,7 @@ function ui_base_update() {
 	}
 
 	///if arm_physics
-	if (context_raw.tool == workspace_tool_t.PARTICLE && context_raw.particle_physics && context_in_paint_area() && !context_raw.paint2d) {
+	if (context_raw.tool == workspace_tool_t.PARTICLE && context_in_paint_area() && !context_raw.paint2d) {
 		util_particle_init_physics();
 		let world: physics_world_t = physics_world_active;
 		physics_world_update(world);
@@ -985,7 +985,7 @@ function ui_base_update_ui() {
 	}
 
 	///if arm_physics
-	if (context_raw.tool == workspace_tool_t.PARTICLE && context_raw.particle_physics) {
+	if (context_raw.tool == workspace_tool_t.PARTICLE) {
 		down = false;
 	}
 	///end
@@ -1037,16 +1037,6 @@ function ui_base_update_ui() {
 						context_raw.clone_delta_x = (context_raw.clone_start_x - mx) / ww;
 						context_raw.clone_delta_y = (context_raw.clone_start_y - my) / app_h();
 						context_raw.clone_start_x = -1;
-					}
-					else if (context_raw.tool == workspace_tool_t.PARTICLE) {
-						// Reset particles
-						///if arm_particles
-						let emitter: mesh_object_t = scene_get_child(".ParticleEmitter").ext;
-						let psys: particle_sys_t = emitter.particle_systems[0];
-						psys.time = 0;
-						// psys.time = psys.seed * psys.animtime;
-						// psys.seed++;
-						///end
 					}
 					else if (context_raw.tool == workspace_tool_t.FILL && context_raw.fill_type_handle.position == fill_type_t.UV_ISLAND) {
 						util_uv_uvislandmap_cached = false;

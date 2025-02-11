@@ -4,34 +4,6 @@ function util_particle_init() {
 		return;
 	}
 
-	let raw: particle_data_t = {
-		name: "Particles",
-		type: 0,
-		loop: false,
-		count: 1000,
-		frame_start: 0,
-		frame_end: 1000,
-		lifetime: 400,
-		lifetime_random: 0.5,
-		emit_from: 1,
-		object_align_factor: f32_array_create_xyz(0, 0, -40),
-		factor_random: 2.0,
-		physics_type: 0,
-		particle_size: 1.0,
-		size_random: 0,
-		mass: 1,
-		instance_object: ".Particle",
-		weight_gravity: 1
-	};
-	_scene_raw.particle_datas = [raw];
-	let particle_refs: particle_ref_t[] = [
-		{
-			name: "Particles",
-			particle: "Particles",
-			seed: 0
-		}
-	];
-
 	{
 		let t: render_target_t = render_target_create();
 		t.name = "texparticle";
@@ -60,10 +32,6 @@ function util_particle_init() {
 		if (obj.name == ".Sphere") {
 			let particle: obj_t = util_clone_obj(obj);
 			particle.name = ".Particle";
-			if (particle.particles == null) {
-				particle.particles = {};
-			}
-			particle.particles.is_particle = true;
 			particle.material_refs = ["MaterialParticle"];
 			array_push(_scene_raw.objects, particle);
 			for (let i: i32 = 0; i < 16; ++i) {
@@ -77,12 +45,6 @@ function util_particle_init() {
 	let mo: mesh_object_t = o.ext;
 	mo.base.name = ".ParticleEmitter";
 	mo.base.raw = util_clone_obj(mo.base.raw);
-	let oraw: obj_t = mo.base.raw;
-	oraw.particles = {};
-	mo.base.raw.particles.refs = particle_refs;
-	///if arm_particles
-	mesh_object_setup_particle_system(mo, "Scene", particle_refs[0]);
-	///end
 }
 
 ///if arm_physics

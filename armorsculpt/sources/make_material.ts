@@ -102,30 +102,6 @@ function make_material_parse_mesh_material() {
 	context_raw.ddirty = 2;
 }
 
-function make_material_parse_particle_material() {
-	let m: material_data_t = context_raw.particle_material;
-	let sc: shader_context_t = null;
-	for (let i: i32 = 0; i < m._.shader._.contexts.length; ++i) {
-		let c: shader_context_t = m._.shader._.contexts[i];
-		if (c.name == "mesh") {
-			sc = c;
-			break;
-		}
-	}
-	if (sc != null) {
-		array_remove(m._.shader.contexts, sc);
-		array_remove(m._.shader._.contexts, sc);
-	}
-	let mt: material_t = { name: "MaterialParticle", canvas: null };
-	let con: node_shader_context_t = make_particle_run(mt);
-	if (sc != null) {
-		make_material_delete_context(sc);
-	}
-	sc = shader_context_create(con.data);
-	array_push(m._.shader.contexts, sc);
-	array_push(m._.shader._.contexts, sc);
-}
-
 function make_material_parse_mesh_preview_material() {
 	if (!make_material_get_mout()) {
 		return;

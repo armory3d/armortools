@@ -114,31 +114,6 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 	let tid: i32 = context_raw.layer.id;
 
 	if (context_raw.pdirty > 0) {
-		///if arm_physics
-		let particle_physics: bool = context_raw.particle_physics;
-		///else
-		let particle_physics: bool = false;
-		///end
-		if (context_raw.tool == workspace_tool_t.PARTICLE && !particle_physics) {
-			render_path_set_target("texparticle");
-			render_path_clear_target(0x00000000);
-			render_path_bind_target("_main", "gbufferD");
-			if ((context_raw.xray || config_raw.brush_angle_reject) && config_raw.brush_3d) {
-				render_path_bind_target("gbuffer0", "gbuffer0");
-			}
-
-			let mo: mesh_object_t = scene_get_child(".ParticleEmitter").ext;
-			mo.base.visible = true;
-			mesh_object_render(mo, "mesh",_render_path_bind_params);
-			mo.base.visible = false;
-
-			mo = scene_get_child(".Particle").ext;
-			mo.base.visible = true;
-			mesh_object_render(mo, "mesh",_render_path_bind_params);
-			mo.base.visible = false;
-			render_path_end();
-		}
-
 		///if is_sculpt
 		render_path_sculpt_commands();
 		return;

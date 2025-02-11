@@ -80,7 +80,6 @@ class ArmoryExporter(bpy.types.Operator, ExportHelper):
         self.output["shader_datas"] = None
         self.output["world_datas"] = None
         self.output["world_ref"] = None
-        self.output["particle_datas"] = None
         self.output["speaker_datas"] = None
         self.output["embedded_datas"] = None
 
@@ -240,7 +239,6 @@ class ArmoryExporter(bpy.types.Operator, ExportHelper):
             o["dimensions"] = None
             o["visible"] = True
             o["spawn"] = True
-            o["particles"] = None
             o["anim"] = None
             o["material_refs"] = None
             o["children"] = None

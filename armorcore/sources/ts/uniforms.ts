@@ -430,14 +430,6 @@ function uniforms_set_obj_const(obj: object_t, loc: kinc_const_loc_t, c: shader_
 			// m = mat4_mult_mat(m, camera.prev_p);
 			m = mat4_mult_mat(m, camera.p);
 		}
-		///if arm_particles
-		else if (c.link == "_particle_data") {
-			let mo: mesh_object_t = obj.ext;
-			if (mo.particle_owner != null && mo.particle_owner.particle_systems != null) {
-				m = particle_sys_get_data(mo.particle_owner.particle_systems[mo.particle_index]);
-			}
-		}
-		///end
 		else if (uniforms_mat4_links != null) {
 			m = uniforms_mat4_links(obj, current_material(obj), c.link);
 		}

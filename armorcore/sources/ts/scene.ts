@@ -406,15 +406,6 @@ function scene_return_mesh_object(object_file: string, data_ref: string, scene_n
 	///end
 	let object: mesh_object_t = scene_add_mesh_object(mesh, materials, parent);
 
-	// Attach particle systems
-	///if arm_particles
-	if (o.particles != null && o.particles.refs != null) {
-		for (let i: i32 = 0; i < o.particles.refs.length; ++i) {
-			let ref: particle_ref_t = o.particles.refs[i];
-			mesh_object_setup_particle_system(object, scene_name, ref);
-		}
-	}
-	///end
 	return scene_return_object(object.base, o);
 }
 
@@ -495,7 +486,6 @@ type scene_t = {
 	shader_datas?: shader_data_t[];
 	world_datas?: world_data_t[];
 	world_ref?: string;
-	particle_datas?: particle_data_t[];
 	speaker_datas?: speaker_data_t[];
 	embedded_datas?: string[]; // Preload for this scene, images only for now
 };
@@ -707,32 +697,6 @@ type irradiance_t = {
 	irradiance?: f32_array_t; // Blob with spherical harmonics, bands 0,1,2
 };
 
-type particle_data_t = {
-	name?: string;
-	type?: i32; // 0 - Emitter, Hair
-	loop?: bool;
-	count?: i32;
-	frame_start?: f32;
-	frame_end?: f32;
-	lifetime?: f32;
-	lifetime_random?: f32;
-	emit_from?: i32; // 0 - Vert, 1 - Face, 2 - Volume
-	object_align_factor?: f32_array_t;
-	factor_random?: f32;
-	physics_type?: i32; // 0 - No, 1 - Newton
-	particle_size?: f32; // Object scale
-	size_random?: f32; // Random scale
-	mass?: f32;
-	instance_object?: string; // Object reference
-	weight_gravity?: f32;
-};
-
-type particle_ref_t = {
-	name?: string;
-	particle?: string;
-	seed?: i32;
-};
-
 type obj_t = {
 	name?: string;
 	type?: string; // object, mesh_object, light_object, camera_object, speaker_object, decal_object
@@ -741,7 +705,6 @@ type obj_t = {
 	dimensions?: f32_array_t; // Geometry objects
 	visible?: bool;
 	spawn?: bool; // Auto add object when creating scene
-	particles?: particles_t;
 	anim?: anim_t; // Bone/object animation
 	material_refs?: string[];
 	children?: obj_t[];
@@ -750,12 +713,6 @@ type obj_t = {
 
 type obj_runtime_t = {
 	_gc?: scene_t; // Link to armpack_decode result
-};
-
-type particles_t = {
-	refs?: particle_ref_t[];
-	render_emitter?: bool;
-	is_particle?: bool; // This object is used as a particle object
 };
 
 type anim_t = {

@@ -127,6 +127,3 @@ function make_material_parse_mesh_preview_material(md: material_data_t = null) {
 function make_material_parse_node_preview_material(node: ui_node_t, group: ui_node_canvas_t = null, parents: ui_node_t[] = null): parse_node_preview_result_t {
 	return null;
 }
-
-function make_material_parse_particle_material() {
-}

@@ -24,8 +24,6 @@ function util_encode_scene(raw: scene_t): buffer_t {
 	armpack_encode_null();
 	armpack_encode_string("world_ref");
 	armpack_encode_null();
-	armpack_encode_string("particle_datas");
-	armpack_encode_null();
 	armpack_encode_string("speaker_datas");
 	armpack_encode_null();
 	armpack_encode_string("embedded_datas");

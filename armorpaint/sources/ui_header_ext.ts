@@ -515,20 +515,5 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 				make_material_parse_paint_material();
 			}
 		}
-
-		///if arm_physics
-		if (context_raw.tool == workspace_tool_t.PARTICLE) {
-			ui._x += 10 * ui_SCALE(ui);
-			let phys_handle: ui_handle_t = ui_handle(__ID__);
-			if (phys_handle.init) {
-				phys_handle.selected = false;
-			}
-			context_raw.particle_physics = ui_check(phys_handle, tr("Physics"));
-			if (phys_handle.changed) {
-				util_particle_init_physics();
-				make_material_parse_paint_material();
-			}
-		}
-		///end
 	}
 }

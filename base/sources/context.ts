@@ -254,7 +254,6 @@ type context_t = {
 	selected_object?: object_t;
 
 	///if arm_physics
-	particle_physics?: bool;
 	particle_hit_x?: f32;
 	particle_hit_y?: f32;
 	particle_hit_z?: f32;
@@ -373,7 +372,6 @@ function context_create(): context_t {
 	c.cache_draws = false;
 	c.write_icon_on_export = false;
 	///if arm_physics
-	c.particle_physics = false;
 	c.particle_hit_x = 0.0;
 	c.particle_hit_y = 0.0;
 	c.particle_hit_z = 0.0;
@@ -584,7 +582,6 @@ function context_init_tool() {
 
 	else if (context_raw.tool == workspace_tool_t.PARTICLE) {
 		util_particle_init();
-		make_material_parse_particle_material();
 	}
 	else if (context_raw.tool == workspace_tool_t.BAKE) {
 		// Bake in lit mode for now

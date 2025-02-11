@@ -82,7 +82,6 @@ if (flags.physics) {
 	project.add_define("arm_physics");
 }
 
-project.add_define("arm_particles");
 // project.add_define("arm_skin");
 // project.add_define("arm_audio");
 
