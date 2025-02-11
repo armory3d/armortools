@@ -10,13 +10,11 @@
     \brief Provides functions for setting up and using index-buffers.
 */
 
-typedef enum kinc_g4_index_buffer_format { KINC_G4_INDEX_BUFFER_FORMAT_32BIT, KINC_G4_INDEX_BUFFER_FORMAT_16BIT } kinc_g4_index_buffer_format_t;
-
 typedef struct kinc_g4_index_buffer {
 	kinc_g4_index_buffer_impl_t impl;
 } kinc_g4_index_buffer_t;
 
-void kinc_g4_index_buffer_init(kinc_g4_index_buffer_t *buffer, int count, kinc_g4_index_buffer_format_t format, kinc_g4_usage_t usage);
+void kinc_g4_index_buffer_init(kinc_g4_index_buffer_t *buffer, int count, kinc_g4_usage_t usage);
 void kinc_g4_index_buffer_destroy(kinc_g4_index_buffer_t *buffer);
 void *kinc_g4_index_buffer_lock_all(kinc_g4_index_buffer_t *buffer);
 void *kinc_g4_index_buffer_lock(kinc_g4_index_buffer_t *buffer, int start, int count);

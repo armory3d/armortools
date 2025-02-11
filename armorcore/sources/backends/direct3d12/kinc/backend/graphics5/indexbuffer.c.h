@@ -3,13 +3,11 @@
 #include <kinc/backend/SystemMicrosoft.h>
 #include <kinc/graphics5/indexbuffer.h>
 
-void kinc_g5_index_buffer_init(kinc_g5_index_buffer_t *buffer, int count, kinc_g5_index_buffer_format_t format, bool gpuMemory) {
+void kinc_g5_index_buffer_init(kinc_g5_index_buffer_t *buffer, int count, bool gpuMemory) {
 	buffer->impl.count = count;
 	buffer->impl.gpu_memory = gpuMemory;
-	buffer->impl.format = format;
 
-	// static_assert(sizeof(D3D12IindexBufferView) == sizeof(D3D12_INDEX_BUFFER_VIEW), "Something is wrong with D3D12IindexBufferView");
-	int uploadBufferSize = format == KINC_G5_INDEX_BUFFER_FORMAT_16BIT ? sizeof(uint16_t) * count : sizeof(uint32_t) * count;
+	int uploadBufferSize = sizeof(uint32_t) * count;
 
 	D3D12_HEAP_PROPERTIES heapProperties;
 	heapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;
@@ -51,7 +49,7 @@ void kinc_g5_index_buffer_init(kinc_g5_index_buffer_t *buffer, int count, kinc_g
 		buffer->impl.index_buffer_view.BufferLocation = buffer->impl.upload_buffer->GetGPUVirtualAddress();
 	}
 	buffer->impl.index_buffer_view.SizeInBytes = uploadBufferSize;
-	buffer->impl.index_buffer_view.Format = format == KINC_G5_INDEX_BUFFER_FORMAT_16BIT ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
+	buffer->impl.index_buffer_view.Format = DXGI_FORMAT_R32_UINT;
 
 	buffer->impl.last_start = 0;
 	buffer->impl.last_count = kinc_g5_index_buffer_count(buffer);
@@ -110,9 +108,7 @@ void kinc_g5_internal_index_buffer_upload(kinc_g5_index_buffer_t *buffer, ID3D12
 	if (!buffer->impl.gpu_memory)
 		return;
 
-	commandList->CopyBufferRegion(buffer->impl.index_buffer, 0, buffer->impl.upload_buffer, 0,
-	                              buffer->impl.format == KINC_G5_INDEX_BUFFER_FORMAT_16BIT ? sizeof(uint16_t) * buffer->impl.count
-	                                                                                       : sizeof(uint32_t) * buffer->impl.count);
+	commandList->CopyBufferRegion(buffer->impl.index_buffer, 0, buffer->impl.upload_buffer, 0, sizeof(uint32_t) * buffer->impl.count);
 
 	D3D12_RESOURCE_BARRIER barriers[1] = {};
 	barriers[0].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;

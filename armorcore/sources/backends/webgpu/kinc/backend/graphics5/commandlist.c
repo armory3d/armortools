@@ -85,7 +85,7 @@ void kinc_g5_command_list_set_vertex_buffer(kinc_g5_command_list_t *list, struct
 void kinc_g5_command_list_set_index_buffer(kinc_g5_command_list_t *list, struct kinc_g5_index_buffer *buffer) {
 	list->impl.indexCount = kinc_g5_index_buffer_count(buffer);
 	uint64_t size = kinc_g5_index_buffer_count(buffer) * sizeof(int);
-	wgpuRenderPassEncoderSetIndexBuffer(list->impl.pass, buffer->impl.buffer, buffer->impl.format == KINC_G5_INDEX_BUFFER_FORMAT_16BIT ? WGPUIndexFormat_Uint16 : WGPUIndexFormat_Uint32, 0, size);
+	wgpuRenderPassEncoderSetIndexBuffer(list->impl.pass, buffer->impl.buffer, WGPUIndexFormat_Uint32, 0, size);
 }
 
 void kinc_g5_command_list_set_render_targets(kinc_g5_command_list_t *list, struct kinc_g5_render_target **targets, int count) {

@@ -1022,7 +1022,7 @@ void iron_show_keyboard(bool show) {
 
 any iron_g4_create_index_buffer(i32 count) {
 	kinc_g4_index_buffer_t *buffer = (kinc_g4_index_buffer_t *)malloc(sizeof(kinc_g4_index_buffer_t));
-	kinc_g4_index_buffer_init(buffer, count, KINC_G4_INDEX_BUFFER_FORMAT_32BIT, KINC_G4_USAGE_STATIC);
+	kinc_g4_index_buffer_init(buffer, count, KINC_G4_USAGE_STATIC);
 	return buffer;
 }
 

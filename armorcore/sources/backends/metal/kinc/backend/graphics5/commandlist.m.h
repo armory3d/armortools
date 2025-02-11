@@ -74,7 +74,7 @@ void kinc_g5_command_list_draw_indexed_vertices_from_to(kinc_g5_command_list_t *
 	id<MTLRenderCommandEncoder> encoder = getMetalEncoder();
 	[encoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
 	                    indexCount:count
-	                     indexType:(list->impl.current_index_buffer->impl.format == KINC_G5_INDEX_BUFFER_FORMAT_16BIT ? MTLIndexTypeUInt16 : MTLIndexTypeUInt32)
+	                     indexType:MTLIndexTypeUInt32
 	                   indexBuffer:indexBuffer
 	             indexBufferOffset:start * 4];
 }

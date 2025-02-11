@@ -508,7 +508,7 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 			geometryDesc.Type = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
 			geometryDesc.Triangles.IndexBuffer = ib[i]->impl.upload_buffer->GetGPUVirtualAddress();
 			geometryDesc.Triangles.IndexCount = ib[i]->impl.count;
-			geometryDesc.Triangles.IndexFormat = ib[i]->impl.format == KINC_G5_INDEX_BUFFER_FORMAT_16BIT ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
+			geometryDesc.Triangles.IndexFormat = DXGI_FORMAT_R32_UINT;
 			geometryDesc.Triangles.Transform3x4 = 0;
 			geometryDesc.Triangles.VertexFormat = DXGI_FORMAT_R16G16B16A16_SNORM;
 			geometryDesc.Triangles.VertexCount = vb[i]->impl.myCount;

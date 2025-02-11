@@ -4,8 +4,8 @@
 
 extern kinc_g5_command_list_t commandList;
 
-void kinc_g4_index_buffer_init(kinc_g4_index_buffer_t *buffer, int count, kinc_g4_index_buffer_format_t format, kinc_g4_usage_t usage) {
-	kinc_g5_index_buffer_init(&buffer->impl._buffer, count, (kinc_g5_index_buffer_format_t)format, usage == KINC_G4_USAGE_STATIC);
+void kinc_g4_index_buffer_init(kinc_g4_index_buffer_t *buffer, int count, kinc_g4_usage_t usage) {
+	kinc_g5_index_buffer_init(&buffer->impl._buffer, count, usage == KINC_G4_USAGE_STATIC);
 }
 
 void kinc_g4_index_buffer_destroy(kinc_g4_index_buffer_t *buffer) {

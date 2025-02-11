@@ -5,5 +5,4 @@
 typedef struct {
 	WGPUBuffer buffer;
 	int count;
-	int format;
 } IndexBuffer5Impl;

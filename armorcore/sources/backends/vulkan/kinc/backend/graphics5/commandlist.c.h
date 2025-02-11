@@ -454,8 +454,7 @@ void kinc_g5_command_list_set_vertex_buffer(kinc_g5_command_list_t *list, struct
 
 void kinc_g5_command_list_set_index_buffer(kinc_g5_command_list_t *list, struct kinc_g5_index_buffer *indexBuffer) {
 	list->impl._indexCount = kinc_g5_index_buffer_count(indexBuffer);
-	vkCmdBindIndexBuffer(list->impl._buffer, indexBuffer->impl.buf, 0,
-	                     indexBuffer->impl.format == KINC_G5_INDEX_BUFFER_FORMAT_16BIT ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32);
+	vkCmdBindIndexBuffer(list->impl._buffer, indexBuffer->impl.buf, 0, VK_INDEX_TYPE_UINT32);
 }
 
 void kinc_internal_restore_render_target(kinc_g5_command_list_t *list, struct kinc_g5_render_target *target) {

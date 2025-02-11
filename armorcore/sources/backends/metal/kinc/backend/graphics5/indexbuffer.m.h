@@ -5,10 +5,9 @@
 
 id getMetalDevice(void);
 
-void kinc_g5_index_buffer_init(kinc_g5_index_buffer_t *buffer, int indexCount, kinc_g5_index_buffer_format_t format, bool gpuMemory) {
+void kinc_g5_index_buffer_init(kinc_g5_index_buffer_t *buffer, int indexCount, bool gpuMemory) {
 	buffer->impl.count = indexCount;
 	buffer->impl.gpu_memory = gpuMemory;
-	buffer->impl.format = format;
 	buffer->impl.last_start = 0;
 	buffer->impl.last_count = indexCount;
 
@@ -17,7 +16,7 @@ void kinc_g5_index_buffer_init(kinc_g5_index_buffer_t *buffer, int indexCount, k
 	options |= MTLResourceStorageModeShared;
 
 	buffer->impl.metal_buffer = (__bridge_retained void *)[device
-	    newBufferWithLength:(format == KINC_G5_INDEX_BUFFER_FORMAT_16BIT ? sizeof(uint16_t) * indexCount : sizeof(uint32_t) * indexCount)
+	    newBufferWithLength:sizeof(uint32_t) * indexCount
 	                options:options];
 }
 
@@ -28,7 +27,7 @@ void kinc_g5_index_buffer_destroy(kinc_g5_index_buffer_t *buffer) {
 }
 
 static int kinc_g5_internal_index_buffer_stride(kinc_g5_index_buffer_t *buffer) {
-	return buffer->impl.format == KINC_G5_INDEX_BUFFER_FORMAT_16BIT ? 2 : 4;
+	return 4;
 }
 
 void *kinc_g5_index_buffer_lock_all(kinc_g5_index_buffer_t *buffer) {

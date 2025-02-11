@@ -7,14 +7,13 @@ bool memory_type_from_properties(uint32_t typeBits, VkFlags requirements_mask, u
 static void unset(kinc_g5_index_buffer_t *buffer) {
 }
 
-void kinc_g5_index_buffer_init(kinc_g5_index_buffer_t *buffer, int indexCount, kinc_g5_index_buffer_format_t format, bool gpuMemory) {
+void kinc_g5_index_buffer_init(kinc_g5_index_buffer_t *buffer, int indexCount, bool gpuMemory) {
 	buffer->impl.count = indexCount;
-	buffer->impl.format = format;
 
 	VkBufferCreateInfo buf_info = {0};
 	buf_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 	buf_info.pNext = NULL;
-	buf_info.size = format == KINC_G5_INDEX_BUFFER_FORMAT_16BIT ? indexCount * sizeof(uint16_t) : indexCount * sizeof(uint32_t);
+	buf_info.size = indexCount * sizeof(uint32_t);
 	buf_info.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
 
 	if (kinc_g5_supports_raytracing()) {
@@ -65,7 +64,7 @@ void kinc_g5_index_buffer_destroy(kinc_g5_index_buffer_t *buffer) {
 }
 
 static int kinc_g5_internal_index_buffer_stride(kinc_g5_index_buffer_t *buffer) {
-	return buffer->impl.format == KINC_G5_INDEX_BUFFER_FORMAT_16BIT ? 2 : 4;
+	return 4;
 }
 
 void *kinc_g5_index_buffer_lock_all(kinc_g5_index_buffer_t *buffer) {
