@@ -181,9 +181,6 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 			node_shader_add_uniform(frag, "vec3 light_area2", "_light_area2");
 			node_shader_add_uniform(frag, "vec3 light_area3", "_light_area3");
 			node_shader_add_function(frag, str_ltc_evaluate);
-			node_shader_add_uniform(frag, "vec3 light_pos", "_point_pos");
-			node_shader_add_uniform(frag, "vec3 light_color", "_point_color");
-			node_shader_write(frag, "float ldist = distance(wposition, light_pos);");
 			node_shader_write(frag, "const float LUT_SIZE = 64.0;");
 			node_shader_write(frag, "const float LUT_SCALE = (LUT_SIZE - 1.0) / LUT_SIZE;");
 			node_shader_write(frag, "const float LUT_BIAS = 0.5 / LUT_SIZE;");
@@ -197,7 +194,6 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 			node_shader_write(frag, "mat3 mident = mat3(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);");
 			node_shader_write(frag, "float ltcdiff = ltc_evaluate(n, vvec, dotnv, wposition, mident, light_area0, light_area1, light_area2, light_area3);");
 			node_shader_write(frag, "vec3 direct = albedo * ltcdiff + ltcspec * 0.05;");
-			node_shader_write(frag, "direct *= light_color * (1.0 / (ldist * ldist));");
 
 			node_shader_add_uniform(frag, "vec4 shirr[7]", "_envmap_irradiance");
 			node_shader_add_function(frag, str_sh_irradiance());

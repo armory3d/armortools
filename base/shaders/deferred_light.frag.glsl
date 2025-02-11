@@ -16,8 +16,6 @@ uniform sampler2D ssaotex;
 uniform vec2 camera_proj;
 uniform vec3 eye;
 uniform vec3 eye_look;
-uniform vec3 point_pos;
-uniform vec3 point_col;
 uniform vec3 light_area0;
 uniform vec3 light_area1;
 uniform vec3 light_area2;
@@ -171,13 +169,9 @@ float ltc_evaluate(vec3 N, vec3 V, float dotnv, vec3 P, mat3 Minv, vec3 points0,
 	return max(0.0, -sum);
 }
 
-vec3 sample_light(const vec3 p, const vec3 n, const vec3 v, const float dotnv, const vec3 lp, const vec3 light_col,
+vec3 sample_light(const vec3 p, const vec3 n, const vec3 v, const float dotnv,
 	const vec3 albedo, const float rough, const vec3 f0, const float occ
 	) {
-	vec3 ld = lp - p;
-	vec3 l = normalize(ld);
-	float dotnl = max(0.0, dot(n, l));
-
 	float theta = acos(dotnv);
 	vec2 tuv = vec2(rough, theta / (0.5 * PI));
 	tuv = tuv * LUT_SCALE + LUT_BIAS;
@@ -195,11 +189,7 @@ vec3 sample_light(const vec3 p, const vec3 n, const vec3 v, const float dotnv, c
 		vec3(0.0, 0.0, 1.0));
 	float ltcdiff = ltc_evaluate(n, v, dotnv, p, m1, light_area0, light_area1, light_area2, light_area3);
 	vec3 direct = albedo * ltcdiff + ltcspec * 0.05;
-
-	direct *= attenuate(distance(p, lp));
-	direct *= light_col;
-	direct *= clamp(dotnl + 2.0 * occ * occ - 1.0, 0.0, 1.0); // Micro shadowing
-
+	direct *= vec3(1000.0, 1000.0, 1000.0);
 	return direct;
 }
 
@@ -252,6 +242,6 @@ void main() {
 		albedo = vec3(0.0, 0.0, 0.0);
 	}
 
-	frag_color.rgb += sample_light(p, n, v, dotnv, point_pos, point_col, albedo, roughness, f0, occ);
+	frag_color.rgb += sample_light(p, n, v, dotnv, albedo, roughness, f0, occ);
 	frag_color.a = 1.0; // Mark as opaque
 }

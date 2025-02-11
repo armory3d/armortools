@@ -36,7 +36,6 @@ let render_path_current_h: i32;
 let _render_path_frame_time: f32 = 0.0;
 let _render_path_frame: i32 = 0;
 let _render_path_current_target: render_target_t = null;
-let _render_path_light: light_object_t = null;
 let _render_path_current_image: image_t = null;
 let _render_path_draw_order: draw_order_t = draw_order_t.DIST;
 let _render_path_paused: bool = false;
@@ -72,16 +71,6 @@ function render_path_render_frame() {
 	render_path_current_w = app_w();
 	render_path_current_h = app_h();
 	_render_path_meshes_sorted = false;
-
-	for (let i: i32 = 0; i < scene_lights.length; ++i) {
-		let l: light_object_t = scene_lights[i];
-		if (l.base.visible) {
-			light_object_build_mat(l, scene_camera);
-		}
-	}
-	if (scene_lights.length > 0) {
-		_render_path_light = scene_lights[0];
-	}
 
 	render_path_commands();
 

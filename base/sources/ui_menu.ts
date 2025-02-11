@@ -196,51 +196,44 @@ function ui_menu_render() {
 				context_raw.ddirty = 2;
 			}
 
-			if (scene_lights.length > 0) {
-				let light: light_object_t = scene_lights[0];
+			let lhandle: ui_handle_t = ui_handle(__ID__);
+			lhandle.value = uniforms_light_strength;
+			lhandle.value = math_floor(lhandle.value * 100) / 100;
+			ui_menu_align(ui);
+			uniforms_light_strength = ui_slider(lhandle, tr("Light"), 0.0, 4.0, true);
+			if (lhandle.changed) {
+				context_raw.ddirty = 2;
+			}
 
-				let lhandle: ui_handle_t = ui_handle(__ID__);
-				let scale: f32 = 1333;
-				lhandle.value = light.data.strength / scale;
-				lhandle.value = math_floor(lhandle.value * 100) / 100;
-				ui_menu_align(ui);
-				light.data.strength = ui_slider(lhandle, tr("Light"), 0.0, 4.0, true) * scale;
-				if (lhandle.changed) {
-					context_raw.ddirty = 2;
+			let lahandle: ui_handle_t = ui_handle(__ID__);
+			lahandle.value = context_raw.light_angle / math_pi() * 180;
+			ui_menu_align(ui);
+			let new_angle: f32 = ui_slider(lahandle, tr("Light Angle"), 0.0, 360.0, true, 1) / 180 * math_pi();
+			if (ui.is_hovered) {
+				let vars: map_t<string, string> = map_create();
+				map_set(vars, "shortcut", map_get(config_keymap, "rotate_light"));
+				ui_tooltip(tr("{shortcut} and move mouse", vars));
+			}
+			let ldiff: f32 = new_angle - context_raw.light_angle;
+			if (math_abs(ldiff) > 0.005) {
+				if (new_angle < 0) {
+					new_angle += (math_floor(-new_angle / (2 * math_pi())) + 1) * 2 * math_pi();
 				}
+				else if (new_angle > 2 * math_pi()) {
+					new_angle -= math_floor(new_angle / (2 * math_pi())) * 2 * math_pi();
+				}
+				context_raw.light_angle = new_angle;
+				let m: mat4_t = mat4_rot_z(ldiff);
+				uniforms_light_world = mat4_mult_mat(uniforms_light_world, m);
+				context_raw.ddirty = 2;
+			}
 
-				light = scene_lights[0];
-				let lahandle: ui_handle_t = ui_handle(__ID__);
-				lahandle.value = context_raw.light_angle / math_pi() * 180;
-				ui_menu_align(ui);
-				let new_angle: f32 = ui_slider(lahandle, tr("Light Angle"), 0.0, 360.0, true, 1) / 180 * math_pi();
-				if (ui.is_hovered) {
-					let vars: map_t<string, string> = map_create();
-					map_set(vars, "shortcut", map_get(config_keymap, "rotate_light"));
-					ui_tooltip(tr("{shortcut} and move mouse", vars));
-				}
-				let ldiff: f32 = new_angle - context_raw.light_angle;
-				if (math_abs(ldiff) > 0.005) {
-					if (new_angle < 0) {
-						new_angle += (math_floor(-new_angle / (2 * math_pi())) + 1) * 2 * math_pi();
-					}
-					else if (new_angle > 2 * math_pi()) {
-						new_angle -= math_floor(new_angle / (2 * math_pi())) * 2 * math_pi();
-					}
-					context_raw.light_angle = new_angle;
-					let m: mat4_t = mat4_rot_z(ldiff);
-					light.base.transform.local = mat4_mult_mat(light.base.transform.local, m);
-					transform_decompose(light.base.transform);
-					context_raw.ddirty = 2;
-				}
-
-				let sxhandle: ui_handle_t = ui_handle(__ID__);
-				sxhandle.value = light.data.size;
-				ui_menu_align(ui);
-				light.data.size = ui_slider(sxhandle, tr("Light Size"), 0.0, 4.0, true);
-				if (sxhandle.changed) {
-					context_raw.ddirty = 2;
-				}
+			let sxhandle: ui_handle_t = ui_handle(__ID__);
+			sxhandle.value = uniforms_light_size_x;
+			ui_menu_align(ui);
+			uniforms_light_size_x = ui_slider(sxhandle, tr("Light Size"), 0.0, 4.0, true);
+			if (sxhandle.changed) {
+				context_raw.ddirty = 2;
 			}
 
 			///if (is_paint || is_sculpt)

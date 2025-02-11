@@ -94,7 +94,7 @@ function mesh_object_cull_material(raw: mesh_object_t, context: string): bool {
 	return mesh_object_set_culled(raw, false);
 }
 
-function mesh_object_cull_mesh(raw: mesh_object_t, context: string, camera: camera_object_t, light: light_object_t): bool {
+function mesh_object_cull_mesh(raw: mesh_object_t, context: string, camera: camera_object_t): bool {
 	if (camera == null) {
 		return false;
 	}
@@ -137,7 +137,7 @@ function mesh_object_render(raw: mesh_object_t, context: string, bind_params: st
 	if (!raw.base.visible) {
 		return; // Skip render if object is hidden
 	}
-	if (mesh_object_cull_mesh(raw, context, scene_camera, _render_path_light)) {
+	if (mesh_object_cull_mesh(raw, context, scene_camera)) {
 		return;
 	}
 	if (mesh_object_cull_material(raw, context)) {

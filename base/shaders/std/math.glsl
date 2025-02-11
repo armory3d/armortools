@@ -13,7 +13,3 @@ vec2 envmap_equirect(const vec3 normal, const float angle) {
 float rand(const vec2 co) { // Unreliable
 	return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
 }
-
-float attenuate(const float dist) {
-	return 1.0 / (dist * dist);
-}

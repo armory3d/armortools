@@ -13,7 +13,7 @@ type object_t = {
 	visible?: bool; // Skip render, keep updating
 	culled?: bool; // base_object_t was culled last frame
 	is_empty?: bool;
-	ext?: any; // mesh_object_t | camera_object_t | light_object_t | speaker_object_t
+	ext?: any; // mesh_object_t | camera_object_t | speaker_object_t
 	ext_type?: string;
 };
 
@@ -82,9 +82,6 @@ function object_remove(raw: object_t) {
 	}
 	else if (raw.ext_type == "camera_object_t") {
 		camera_object_remove(raw.ext);
-	}
-	else if (raw.ext_type == "light_object_t") {
-		light_object_remove(raw.ext);
 	}
 	///if arm_audio
 	else if (raw.ext_type == "speaker_object_t") {

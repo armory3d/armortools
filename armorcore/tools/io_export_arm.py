@@ -73,7 +73,6 @@ class ArmoryExporter(bpy.types.Operator, ExportHelper):
         for o in self.meshArray.items():
             self.export_mesh(o)
 
-        self.output["light_datas"] = None
         self.output["camera_datas"] = None
         self.output["camera_ref"] = None
         self.output["material_datas"] = None

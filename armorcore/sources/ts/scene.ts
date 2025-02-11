@@ -2,7 +2,6 @@
 let scene_camera: camera_object_t;
 let scene_world: world_data_t;
 let scene_meshes: mesh_object_t[];
-let scene_lights: light_object_t[];
 let scene_cameras: camera_object_t[];
 ///if arm_audio
 let scene_speakers: speaker_object_t[];
@@ -28,7 +27,6 @@ let _scene_objects_count: i32;
 function scene_create(format: scene_t): object_t {
 	_scene_uid = _scene_uid_counter++;
 	scene_meshes = [];
-	scene_lights = [];
 	scene_cameras = [];
 	///if arm_audio
 	scene_speakers = [];
@@ -65,10 +63,6 @@ function scene_remove() {
 	for (let i: i32 = 0; i < scene_meshes.length; ++i) {
 		let o: mesh_object_t = scene_meshes[i];
 		mesh_object_remove(o);
-	}
-	for (let i: i32 = 0; i < scene_lights.length; ++i) {
-		let o: light_object_t = scene_lights[i];
-		light_object_remove(o);
 	}
 	for (let i: i32 = 0; i < scene_cameras.length; ++i) {
 		let o: camera_object_t = scene_cameras[i];
@@ -145,16 +139,6 @@ function scene_get_mesh(name: string): mesh_object_t {
 	return null;
 }
 
-function scene_get_light(name: string): light_object_t {
-	for (let i: i32 = 0; i < scene_lights.length; ++i) {
-		let l: light_object_t = scene_lights[i];
-		if (l.base.name == name) {
-			return l;
-		}
-	}
-	return null;
-}
-
 function scene_get_camera(name: string): camera_object_t {
 	for (let i: i32 = 0; i < scene_cameras.length; ++i) {
 		let c: camera_object_t = scene_cameras[i];
@@ -189,12 +173,6 @@ function scene_get_empty(name: string): object_t {
 
 function scene_add_mesh_object(data: mesh_data_t, materials: material_data_t[], parent: object_t = null): mesh_object_t {
 	let object: mesh_object_t = mesh_object_create(data, materials);
-	parent != null ? object_set_parent(object.base, parent) : object_set_parent(object.base, _scene_root);
-	return object;
-}
-
-function scene_add_light_object(data: light_data_t, parent: object_t = null): light_object_t {
-	let object: light_object_t = light_object_create(data);
 	parent != null ? object_set_parent(object.base, parent) : object_set_parent(object.base, _scene_root);
 	return object;
 }
@@ -303,11 +281,6 @@ function scene_create_object(o: obj_t, format: scene_t, parent: object_t, parent
 	if (o.type == "camera_object") {
 		let b: camera_data_t = data_get_camera(scene_name, o.data_ref);
 		let object: camera_object_t = scene_add_camera_object(b, parent);
-		return scene_return_object(object.base, o);
-	}
-	else if (o.type == "light_object") {
-		let b: light_data_t = data_get_light(scene_name, o.data_ref);
-		let object: light_object_t = scene_add_light_object(b, parent);
 		return scene_return_object(object.base, o);
 	}
 	else if (o.type == "mesh_object") {
@@ -479,7 +452,6 @@ type scene_t = {
 	name?: string;
 	objects?: obj_t[];
 	mesh_datas?: mesh_data_t[];
-	light_datas?: light_data_t[];
 	camera_datas?: camera_data_t[];
 	camera_ref?: string;
 	material_datas?: material_data_t[];
@@ -537,14 +509,6 @@ type vertex_array_t = {
 type index_array_t = {
 	material?: i32;
 	values?: u32_array_t; // size = 3
-};
-
-type light_data_t = {
-	name?: string;
-	color?: i32;
-	strength?: f32;
-	size?: f32; // Area light
-	size_y?: f32;
 };
 
 type camera_data_t = {
@@ -699,7 +663,7 @@ type irradiance_t = {
 
 type obj_t = {
 	name?: string;
-	type?: string; // object, mesh_object, light_object, camera_object, speaker_object, decal_object
+	type?: string; // object, mesh_object, camera_object, speaker_object
 	data_ref?: string;
 	transform?: f32_array_t;
 	dimensions?: f32_array_t; // Geometry objects

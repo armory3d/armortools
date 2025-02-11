@@ -2,7 +2,6 @@
 // Global data list
 let data_cached_scene_raws: map_t<string, scene_t> = map_create();
 let data_cached_meshes: map_t<string, mesh_data_t> = map_create();
-let data_cached_lights: map_t<string, light_data_t> = map_create();
 let data_cached_cameras: map_t<string, camera_data_t> = map_create();
 let data_cached_materials: map_t<string, material_data_t> = map_create();
 let data_cached_worlds: map_t<string, world_data_t> = map_create();
@@ -27,18 +26,6 @@ function data_get_mesh(file: string, name: string): mesh_data_t {
 	let b: mesh_data_t = mesh_data_parse(file, name);
 	map_set(data_cached_meshes, handle, b);
 	b._.handle = handle;
-	return b;
-}
-
-function data_get_light(file: string, name: string): light_data_t {
-	let handle: string = file + name;
-	let cached: light_data_t = map_get(data_cached_lights, handle);
-	if (cached != null) {
-		return cached;
-	}
-
-	let b: light_data_t = light_data_parse(file, name);
-	map_set(data_cached_lights, handle, b);
 	return b;
 }
 
@@ -251,7 +238,6 @@ function data_delete_all() {
 	data_cached_shaders = map_create();
 
 	data_cached_scene_raws = map_create();
-	data_cached_lights = map_create();
 	data_cached_cameras = map_create();
 	data_cached_materials = map_create();
 	data_cached_worlds = map_create();

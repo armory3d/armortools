@@ -2,8 +2,6 @@
 function base_ext_init() {
 	sim_init();
 
-	object_remove(scene_lights[0].base);
-
 	transform_move(project_paint_objects[0].base.transform, vec4_z_axis(), -999); // Move default cube away
 	tab_scene_new_object("box.arm");
 }

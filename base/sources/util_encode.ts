@@ -10,8 +10,6 @@ function util_encode_scene(raw: scene_t): buffer_t {
 	armpack_encode_string("objects");
 	armpack_encode_null();
 	util_encode_mesh_datas(raw.mesh_datas);
-	armpack_encode_string("light_datas");
-	armpack_encode_null();
 	armpack_encode_string("camera_datas");
 	armpack_encode_null();
 	armpack_encode_string("camera_ref");

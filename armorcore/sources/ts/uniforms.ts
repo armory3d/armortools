@@ -17,6 +17,28 @@ let uniforms_i32_links: (o: object_t, md: material_data_t, s: string)=>i32 = nul
 let uniforms_pos_unpack: f32 = 1.0;
 let uniforms_tex_unpack: f32 = 1.0;
 
+let uniforms_light_size_x: f32 = 3.0;
+let uniforms_light_size_y: f32 = 0.005;
+let uniforms_light_strength: f32 = 1.0;
+let uniforms_light_world: mat4_t = mat4_create(
+	0.9502051472663879,
+	-0.19612328708171844,
+	0.24216893315315247,
+	0.7578424215316772,
+	0.3094223141670227,
+	0.6860249638557434,
+	-0.658504068851471,
+	-2.0724263191223145,
+	-0.03698595613241196,
+	0.7006464004516602,
+	0.7125493884086609,
+	1.9363592863082886,
+	0,
+	0,
+	0,
+	1
+);
+
 function uniforms_set_context_consts(context: shader_context_t, bind_params: string[]) {
 	if (context.constants != null) {
 		for (let i: i32 = 0; i < context.constants.length; ++i) {
@@ -159,7 +181,6 @@ function uniforms_set_context_const(location: kinc_const_loc_t, c: shader_const_
 	}
 
 	let camera: camera_object_t = scene_camera;
-	let light: light_object_t = _render_path_light;
 
 	if (c.type == "mat4") {
 		let m: mat4_t = mat4_nan();
@@ -213,62 +234,29 @@ function uniforms_set_context_const(location: kinc_const_loc_t, c: shader_const_
 	else if (c.type == "vec3") {
 		let v: vec4_t = vec4_nan();
 
-		if (c.link == "_light_dir") {
-			if (light != null) {
-				v = vec4_norm(light_object_look(light));
-			}
-		}
-		else if (c.link == "_light_pos") {
-			let light: light_object_t = _render_path_light;
-			if (light != null) {
-				v = vec4_create(transform_world_x(light.base.transform), transform_world_y(light.base.transform), transform_world_z(light.base.transform));
-			}
-		}
-		else if (c.link == "_light_color") {
-			let light: light_object_t = _render_path_light;
-			if (light != null) {
-				let str: f32 = light.base.visible ? light.data.strength : 0.0;
-				v = vec4_create(
-					(color_get_rb(light.data.color) / 255) * str,
-					(color_get_gb(light.data.color) / 255) * str,
-					(color_get_bb(light.data.color) / 255) * str);
-			}
-		}
-		else if (c.link == "_light_area0") {
-			if (light != null && light.data.size) {
-				let f2: f32 = 0.5;
-				let sx: f32 = light.data.size * f2;
-				let sy: f32 = light.data.size_y * f2;
-				v = vec4_create(-sx, sy, 0.0);
-				v = vec4_apply_mat(v, light.base.transform.world);
-			}
+		if (c.link == "_light_area0") {
+			let sx: f32 = uniforms_light_size_x * uniforms_light_strength * 0.25;
+			let sy: f32 = uniforms_light_size_y * uniforms_light_strength * 0.25;
+			v = vec4_create(-sx, sy, 0.0);
+			v = vec4_apply_mat(v, uniforms_light_world);
 		}
 		else if (c.link == "_light_area1") {
-			if (light != null && light.data.size) {
-				let f2: f32 = 0.5;
-				let sx: f32 = light.data.size * f2;
-				let sy: f32 = light.data.size_y * f2;
-				v = vec4_create(sx, sy, 0.0);
-				v = vec4_apply_mat(v, light.base.transform.world);
-			}
+			let sx: f32 = uniforms_light_size_x * uniforms_light_strength * 0.25;
+			let sy: f32 = uniforms_light_size_y * uniforms_light_strength * 0.25;
+			v = vec4_create(sx, sy, 0.0);
+			v = vec4_apply_mat(v, uniforms_light_world);
 		}
 		else if (c.link == "_light_area2") {
-			if (light != null && light.data.size) {
-				let f2: f32 = 0.5;
-				let sx: f32 = light.data.size * f2;
-				let sy: f32 = light.data.size_y * f2;
-				v = vec4_create(sx, -sy, 0.0);
-				v = vec4_apply_mat(v, light.base.transform.world);
-			}
+			let sx: f32 = uniforms_light_size_x * uniforms_light_strength * 0.25;
+			let sy: f32 = uniforms_light_size_y * uniforms_light_strength * 0.25;
+			v = vec4_create(sx, -sy, 0.0);
+			v = vec4_apply_mat(v, uniforms_light_world);
 		}
 		else if (c.link == "_light_area3") {
-			if (light != null && light.data.size) {
-				let f2: f32 = 0.5;
-				let sx: f32 = light.data.size * f2;
-				let sy: f32 = light.data.size_y * f2;
-				v = vec4_create(-sx, -sy, 0.0);
-				v = vec4_apply_mat(v, light.base.transform.world);
-			}
+			let sx: f32 = uniforms_light_size_x * uniforms_light_strength * 0.25;
+			let sy: f32 = uniforms_light_size_y * uniforms_light_strength * 0.25;
+			v = vec4_create(-sx, -sy, 0.0);
+			v = vec4_apply_mat(v, uniforms_light_world);
 		}
 		else if (c.link == "_camera_pos") {
 			v = vec4_create(transform_world_x(camera.base.transform), transform_world_y(camera.base.transform), transform_world_z(camera.base.transform));
