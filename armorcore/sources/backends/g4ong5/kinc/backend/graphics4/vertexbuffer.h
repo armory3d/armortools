@@ -4,7 +4,7 @@
 
 typedef struct {
 	int myCount;
-	kinc_g5_vertex_buffer_t _buffer;
+	kinc_g5_vertex_buffer_t _buffer[2];
 	int _currentIndex;
 	int _multiple;
 } kinc_g4_vertex_buffer_impl_t;

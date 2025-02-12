@@ -551,7 +551,7 @@ void kinc_g4_set_render_targets(kinc_g4_render_target_t **targets, int count) {
 }
 
 void kinc_g4_set_vertex_buffer(kinc_g4_vertex_buffer_t *buffer) {
-	kinc_g5_vertex_buffer_t *g5_vertex_buffer = &buffer->impl._buffer;
+	kinc_g5_vertex_buffer_t *g5_vertex_buffer = &buffer->impl._buffer[buffer->impl._currentIndex];
 	current_state.vertex_buffer = g5_vertex_buffer;
 	kinc_g5_command_list_set_vertex_buffer(&commandList, g5_vertex_buffer);
 }
