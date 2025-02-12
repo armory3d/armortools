@@ -1,9 +1,5 @@
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 struct ID3D12Resource;
 
 struct D3D12VertexBufferView {
@@ -21,7 +17,3 @@ typedef struct {
 	int lastStart;
 	int lastCount;
 } VertexBuffer5Impl;
-
-#ifdef __cplusplus
-}
-#endif

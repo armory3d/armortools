@@ -2,10 +2,6 @@
 
 #include <stdbool.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 struct ID3D12CommandAllocator;
 struct ID3D12GraphicsCommandList;
 struct ID3D12Fence;
@@ -48,7 +44,3 @@ struct dx_window {
 	bool vsync;
 	int window_index;
 };
-
-#ifdef __cplusplus
-}
-#endif

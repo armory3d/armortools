@@ -73,7 +73,7 @@ void kinc_g5_sampler_init(kinc_g5_sampler_t *sampler, const kinc_g5_sampler_opti
 	descHeapSampler.NumDescriptors = 2;
 	descHeapSampler.Type = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
 	descHeapSampler.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	device->CreateDescriptorHeap(&descHeapSampler, IID_GRAPHICS_PPV_ARGS(&sampler->impl.sampler_heap));
+	device->lpVtbl->CreateDescriptorHeap(device, &descHeapSampler, &IID_ID3D12DescriptorHeap, &sampler->impl.sampler_heap);
 
 	D3D12_SAMPLER_DESC samplerDesc;
 	ZeroMemory(&samplerDesc, sizeof(D3D12_SAMPLER_DESC));
@@ -84,9 +84,11 @@ void kinc_g5_sampler_init(kinc_g5_sampler_t *sampler, const kinc_g5_sampler_opti
 	samplerDesc.MinLOD = 0;
 	samplerDesc.MaxLOD = 32;
 	samplerDesc.MipLODBias = 0.0f;
-	samplerDesc.MaxAnisotropy = options->max_anisotropy;
+	samplerDesc.MaxAnisotropy = 1;
 	samplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-	device->CreateSampler(&samplerDesc, sampler->impl.sampler_heap->GetCPUDescriptorHandleForHeapStart());
+	D3D12_CPU_DESCRIPTOR_HANDLE handle;
+	sampler->impl.sampler_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(sampler->impl.sampler_heap, &handle);
+	device->lpVtbl->CreateSampler(device, &samplerDesc, handle);
 }
 
 void kinc_g5_sampler_destroy(kinc_g5_sampler_t *sampler) {}

@@ -13,9 +13,7 @@
 #include <kinc/backend/Windows.h>
 #include <kinc/backend/SystemMicrosoft.h>
 
-extern "C" {
 ID3D12CommandQueue *commandQueue;
-}
 
 struct RenderEnvironment {
 	ID3D12Device *device;
@@ -28,34 +26,34 @@ static ID3D12Fence *uploadFence;
 static ID3D12GraphicsCommandList *initCommandList;
 static ID3D12CommandAllocator *initCommandAllocator;
 
-extern "C" struct RenderEnvironment createDeviceAndSwapChainHelper(D3D_FEATURE_LEVEL minimumFeatureLevel, const struct DXGI_SWAP_CHAIN_DESC *swapChainDesc) {
+struct RenderEnvironment createDeviceAndSwapChainHelper(D3D_FEATURE_LEVEL minimumFeatureLevel, const struct DXGI_SWAP_CHAIN_DESC *swapChainDesc) {
 	struct RenderEnvironment result = {0};
 
-	kinc_microsoft_affirm(D3D12CreateDevice(NULL, minimumFeatureLevel, IID_PPV_ARGS(&result.device)));
+	kinc_microsoft_affirm(D3D12CreateDevice(NULL, minimumFeatureLevel, &IID_ID3D12Device, &result.device));
 
 	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 
-	kinc_microsoft_affirm(result.device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&result.queue)));
+	kinc_microsoft_affirm(result.device->lpVtbl->CreateCommandQueue(result.device, &queueDesc, &IID_ID3D12CommandQueue, &result.queue));
 
 	IDXGIFactory4 *dxgiFactory;
-	kinc_microsoft_affirm(CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)));
+	kinc_microsoft_affirm(CreateDXGIFactory1(&IID_IDXGIFactory4, &dxgiFactory));
 
 	DXGI_SWAP_CHAIN_DESC swapChainDescCopy = *swapChainDesc;
-	kinc_microsoft_affirm(dxgiFactory->CreateSwapChain((IUnknown *)result.queue, &swapChainDescCopy, &result.swapChain));
+	kinc_microsoft_affirm(dxgiFactory->lpVtbl->CreateSwapChain(dxgiFactory, (IUnknown *)result.queue, &swapChainDescCopy, &result.swapChain));
 
 	return result;
 }
 
 static void waitForFence(ID3D12Fence *fence, UINT64 completionValue, HANDLE waitEvent) {
-	if (fence->GetCompletedValue() < completionValue) {
-		kinc_microsoft_affirm(fence->SetEventOnCompletion(completionValue, waitEvent));
+	if (fence->lpVtbl->GetCompletedValue(fence) < completionValue) {
+		kinc_microsoft_affirm(fence->lpVtbl->SetEventOnCompletion(fence, completionValue, waitEvent));
 		WaitForSingleObject(waitEvent, INFINITE);
 	}
 }
 
-extern "C" void setupSwapChain(struct dx_window *window) {
+void setupSwapChain(struct dx_window *window) {
 	D3D12_RESOURCE_DESC depthTexture = {};
 	depthTexture.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	depthTexture.Alignment = 0;
@@ -86,15 +84,15 @@ extern "C" void setupSwapChain(struct dx_window *window) {
 	for (int i = 0; i < QUEUE_SLOT_COUNT; ++i) {
 		window->frame_fence_events[i] = CreateEvent(NULL, FALSE, FALSE, NULL);
 		window->fence_values[i] = 0;
-		device->CreateFence(window->current_fence_value, D3D12_FENCE_FLAG_NONE, IID_GRAPHICS_PPV_ARGS(&window->frame_fences[i]));
+		device->lpVtbl->CreateFence(device, window->current_fence_value, D3D12_FENCE_FLAG_NONE, &IID_ID3D12Fence, &window->frame_fences[i]);
 	}
 }
 
 static void createDeviceAndSwapChain(struct dx_window *window) {
 #ifdef _DEBUG
 	ID3D12Debug *debugController = NULL;
-	D3D12GetDebugInterface(IID_PPV_ARGS(&debugController));
-	debugController->EnableDebugLayer();
+	D3D12GetDebugInterface(&IID_ID3D12Debug, &debugController);
+	debugController->lpVtbl->EnableDebugLayer(debugController);
 #endif
 
 	struct DXGI_SWAP_CHAIN_DESC swapChainDesc;
@@ -196,7 +194,8 @@ static void createRootSignature() {
 	descRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 	kinc_microsoft_affirm(D3D12SerializeRootSignature(&descRootSignature, D3D_ROOT_SIGNATURE_VERSION_1, &rootBlob, &errorBlob));
-	device->CreateRootSignature(0, rootBlob->GetBufferPointer(), rootBlob->GetBufferSize(), IID_GRAPHICS_PPV_ARGS(&globalRootSignature));
+	device->lpVtbl->CreateRootSignature(device, 0, rootBlob->lpVtbl->GetBufferPointer(rootBlob), rootBlob->lpVtbl->GetBufferSize(rootBlob), &IID_ID3D12RootSignature,
+	                                    &globalRootSignature);
 }
 
 static void createComputeRootSignature() {
@@ -283,7 +282,8 @@ static void createComputeRootSignature() {
 	descRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 	kinc_microsoft_affirm(D3D12SerializeRootSignature(&descRootSignature, D3D_ROOT_SIGNATURE_VERSION_1, &rootBlob, &errorBlob));
-	device->CreateRootSignature(0, rootBlob->GetBufferPointer(), rootBlob->GetBufferSize(), IID_GRAPHICS_PPV_ARGS(&globalComputeRootSignature));
+	device->lpVtbl->CreateRootSignature(device, 0, rootBlob->lpVtbl->GetBufferPointer(rootBlob), rootBlob->lpVtbl->GetBufferSize(rootBlob), &IID_ID3D12RootSignature,
+	                                    &globalComputeRootSignature);
 
 	// createSamplersAndHeaps();
 }
@@ -293,23 +293,23 @@ static void initialize(struct dx_window *window) {
 	createRootSignature();
 	createComputeRootSignature();
 
-	device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_GRAPHICS_PPV_ARGS(&uploadFence));
+	device->lpVtbl->CreateFence(device, 0, D3D12_FENCE_FLAG_NONE, &IID_ID3D12Fence, &uploadFence);
 
-	device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_GRAPHICS_PPV_ARGS(&initCommandAllocator));
-	device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, initCommandAllocator, NULL, IID_GRAPHICS_PPV_ARGS(&initCommandList));
+	device->lpVtbl->CreateCommandAllocator(device, D3D12_COMMAND_LIST_TYPE_DIRECT, &IID_ID3D12CommandAllocator, &initCommandAllocator);
+	device->lpVtbl->CreateCommandList(device, 0, D3D12_COMMAND_LIST_TYPE_DIRECT, initCommandAllocator, NULL, &IID_ID3D12CommandList, &initCommandList);
 
-	initCommandList->Close();
+	initCommandList->lpVtbl->Close(initCommandList);
 
 	ID3D12CommandList *commandLists[] = {(ID3D12CommandList *)initCommandList};
-	commandQueue->ExecuteCommandLists(1, commandLists);
-	commandQueue->Signal(uploadFence, 1);
+	commandQueue->lpVtbl->ExecuteCommandLists(commandQueue, 1, commandLists);
+	commandQueue->lpVtbl->Signal(commandQueue, uploadFence, 1);
 
 	HANDLE waitEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	waitForFence(uploadFence, 1, waitEvent);
 
-	initCommandAllocator->Reset();
-	initCommandList->Release();      // check me
-	initCommandAllocator->Release(); // check me
+	initCommandAllocator->lpVtbl->Reset(initCommandAllocator);
+	initCommandList->lpVtbl->Release(initCommandList); // check me
+	initCommandAllocator->lpVtbl->Release(initCommandAllocator);            // check me
 
 	CloseHandle(waitEvent);
 }
@@ -341,9 +341,9 @@ static void initWindow(struct dx_window *window, int windowIndex) {
 	swapChainDesc.Windowed = true;
 
 	IDXGIFactory4 *dxgiFactory = NULL;
-	kinc_microsoft_affirm(CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)));
+	kinc_microsoft_affirm(CreateDXGIFactory1(&IID_IDXGIFactory4, &dxgiFactory));
 
-	kinc_microsoft_affirm(dxgiFactory->CreateSwapChain((IUnknown *)commandQueue, &swapChainDesc, &window->swapChain));
+	kinc_microsoft_affirm(dxgiFactory->lpVtbl->CreateSwapChain(dxgiFactory, (IUnknown *)commandQueue, &swapChainDesc, &window->swapChain));
 
 	setupSwapChain(window);
 }
@@ -352,7 +352,7 @@ void kinc_g5_internal_destroy_window(int window) {}
 
 void kinc_g5_internal_destroy() {
 	if (device) {
-		device->Release();
+		device->lpVtbl->Release(device);
 		device = NULL;
 	}
 }
@@ -360,11 +360,11 @@ void kinc_g5_internal_destroy() {
 void kinc_g5_internal_init() {
 #ifdef _DEBUG
 	ID3D12Debug *debugController = NULL;
-	if (D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)) == S_OK) {
-		debugController->EnableDebugLayer();
+	if (D3D12GetDebugInterface(&IID_ID3D12Debug, &debugController) == S_OK) {
+		debugController->lpVtbl->EnableDebugLayer(debugController);
 	}
 #endif
-	kinc_microsoft_affirm(D3D12CreateDevice(NULL, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device)));
+	kinc_microsoft_affirm(D3D12CreateDevice(NULL, D3D_FEATURE_LEVEL_11_0, &IID_ID3D12Device, &device));
 
 	createRootSignature();
 	createComputeRootSignature();
@@ -373,25 +373,25 @@ void kinc_g5_internal_init() {
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 
-	kinc_microsoft_affirm(device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&commandQueue)));
+	kinc_microsoft_affirm(device->lpVtbl->CreateCommandQueue(device, &queueDesc, &IID_ID3D12CommandQueue, &commandQueue));
 
-	device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&uploadFence));
+	device->lpVtbl->CreateFence(device, 0, D3D12_FENCE_FLAG_NONE, &IID_ID3D12Fence, &uploadFence);
 
-	device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&initCommandAllocator));
-	device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, initCommandAllocator, NULL, IID_PPV_ARGS(&initCommandList));
+	device->lpVtbl->CreateCommandAllocator(device, D3D12_COMMAND_LIST_TYPE_DIRECT, &IID_ID3D12CommandAllocator, &initCommandAllocator);
+	device->lpVtbl->CreateCommandList(device, 0, D3D12_COMMAND_LIST_TYPE_DIRECT, initCommandAllocator, NULL, &IID_ID3D12CommandList, &initCommandList);
 
-	initCommandList->Close();
+	initCommandList->lpVtbl->Close(initCommandList);
 
 	ID3D12CommandList *commandLists[] = {(ID3D12CommandList *)initCommandList};
-	commandQueue->ExecuteCommandLists(1, commandLists);
-	commandQueue->Signal(uploadFence, 1);
+	commandQueue->lpVtbl->ExecuteCommandLists(commandQueue, 1, commandLists);
+	commandQueue->lpVtbl->Signal(commandQueue, uploadFence, 1);
 
 	HANDLE waitEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	waitForFence(uploadFence, 1, waitEvent);
 
-	initCommandAllocator->Reset();
-	initCommandList->Release();      // check me
-	initCommandAllocator->Release(); // check me
+	initCommandAllocator->lpVtbl->Reset(initCommandAllocator);
+	initCommandList->lpVtbl->Release(initCommandList); // check me
+	initCommandAllocator->lpVtbl->Release(initCommandAllocator); // check me
 
 	CloseHandle(waitEvent);
 }
@@ -423,7 +423,7 @@ void kinc_g5_begin(kinc_g5_render_target_t *renderTarget, int windowId) {
 
 	if (window->new_width != window->width || window->new_height != window->height) {
 
-		kinc_microsoft_affirm(window->swapChain->ResizeBuffers(QUEUE_SLOT_COUNT, window->new_width, window->new_height, DXGI_FORMAT_R8G8B8A8_UNORM, 0));
+		kinc_microsoft_affirm(window->swapChain->lpVtbl->ResizeBuffers(window->swapChain, QUEUE_SLOT_COUNT, window->new_width, window->new_height, DXGI_FORMAT_R8G8B8A8_UNORM, 0));
 
 		setupSwapChain(window);
 		window->width = window->new_width;
@@ -432,7 +432,7 @@ void kinc_g5_begin(kinc_g5_render_target_t *renderTarget, int windowId) {
 	}
 
 	const UINT64 fenceValue = window->current_fence_value;
-	commandQueue->Signal(window->frame_fences[window->current_backbuffer], fenceValue);
+	commandQueue->lpVtbl->Signal(commandQueue, window->frame_fences[window->current_backbuffer], fenceValue);
 	window->fence_values[window->current_backbuffer] = fenceValue;
 	++window->current_fence_value;
 
@@ -458,9 +458,9 @@ bool kinc_window_vsynced(int window) {
 	return true;
 }
 
-extern "C" void kinc_g4_on_g5_internal_resize(int, int, int);
+void kinc_g4_on_g5_internal_resize(int, int, int);
 
-extern "C" void kinc_internal_resize(int windowId, int width, int height) {
+void kinc_internal_resize(int windowId, int width, int height) {
 	if (width == 0 || height == 0)
 		return;
 	struct dx_window *window = &dx_ctx.windows[windowId];
@@ -469,13 +469,13 @@ extern "C" void kinc_internal_resize(int windowId, int width, int height) {
 	kinc_g4_on_g5_internal_resize(windowId, width, height);
 }
 
-extern "C" void kinc_internal_change_framebuffer(int window, kinc_framebuffer_options_t *frame) {}
+void kinc_internal_change_framebuffer(int window, kinc_framebuffer_options_t *frame) {}
 
 bool kinc_g5_swap_buffers() {
 	for (int i = 0; i < MAXIMUM_WINDOWS; i++) {
 		struct dx_window *window = &dx_ctx.windows[i];
 		if (window->swapChain) {
-			kinc_microsoft_affirm(window->swapChain->Present(window->vsync, 0));
+			kinc_microsoft_affirm(window->swapChain->lpVtbl->Present(window->swapChain, window->vsync, 0));
 		}
 	}
 	return true;
@@ -485,7 +485,7 @@ void kinc_g5_flush() {}
 
 bool kinc_g5_supports_raytracing() {
 	D3D12_FEATURE_DATA_D3D12_OPTIONS5 options;
-	if (device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &options, sizeof(options)) == S_OK) {
+	if (device->lpVtbl->CheckFeatureSupport(device, D3D12_FEATURE_D3D12_OPTIONS5, &options, sizeof(options)) == S_OK) {
 		return options.RaytracingTier >= D3D12_RAYTRACING_TIER_1_0;
 	}
 	return false;

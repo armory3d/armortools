@@ -1,9 +1,5 @@
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 struct ID3D12StateObject;
 struct ID3D12Resource;
 
@@ -18,7 +14,3 @@ typedef struct {
 	struct ID3D12Resource *bottom_level_accel[16];
 	struct ID3D12Resource *top_level_accel;
 } kinc_raytrace_acceleration_structure_impl_t;
-
-#ifdef __cplusplus
-}
-#endif

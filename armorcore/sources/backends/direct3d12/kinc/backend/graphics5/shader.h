@@ -1,9 +1,5 @@
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct {
 	char name[64];
 	uint32_t offset;
@@ -30,7 +26,3 @@ typedef struct {
 	uint8_t *data;
 	int length;
 } Shader5Impl;
-
-#ifdef __cplusplus
-}
-#endif

@@ -2,10 +2,6 @@
 
 #include <stdint.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 struct kinc_g5_shader;
 
 struct ID3D12PipelineState;
@@ -45,7 +41,3 @@ struct kinc_g5_pipeline;
 struct kinc_g5_command_list;
 
 void kinc_g5_internal_setConstants(struct kinc_g5_command_list *commandList, struct kinc_g5_pipeline *pipeline);
-
-#ifdef __cplusplus
-}
-#endif

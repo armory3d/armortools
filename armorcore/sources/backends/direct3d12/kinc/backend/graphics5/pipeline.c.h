@@ -4,11 +4,10 @@
 #include <kinc/graphics5/pipeline.h>
 #include <kinc/graphics5/shader.h>
 #include <kinc/log.h>
-
 #include <kinc/backend/SystemMicrosoft.h>
 
 void kinc_g5_internal_setConstants(kinc_g5_command_list_t *commandList, kinc_g5_pipeline_t *pipeline) {
-	commandList->impl._commandList->SetGraphicsRootSignature(globalRootSignature);
+	commandList->impl._commandList->lpVtbl->SetGraphicsRootSignature(commandList->impl._commandList, globalRootSignature);
 
 	if (pipeline->impl.textures > 0) {
 		kinc_g5_internal_set_textures(commandList);
@@ -17,7 +16,7 @@ void kinc_g5_internal_setConstants(kinc_g5_command_list_t *commandList, kinc_g5_
 
 void kinc_g5_internal_set_compute_constants(kinc_g5_command_list_t *commandList) {
 
-	commandList->impl._commandList->SetComputeRootSignature(globalComputeRootSignature);
+	commandList->impl._commandList->lpVtbl->SetComputeRootSignature(commandList->impl._commandList, globalComputeRootSignature);
 
 	//if (pipeline->impl.textures > 0) {
 		kinc_g5_internal_set_textures(commandList);
@@ -30,7 +29,7 @@ void kinc_g5_pipeline_init(kinc_g5_pipeline_t *pipe) {
 
 void kinc_g5_pipeline_destroy(kinc_g5_pipeline_t *pipe) {
 	if (pipe->impl.pso != NULL) {
-		pipe->impl.pso->Release();
+		pipe->impl.pso->lpVtbl->Release(pipe->impl.pso);
 		pipe->impl.pso = NULL;
 	}
 }
@@ -215,11 +214,7 @@ static DXGI_FORMAT convert_format(kinc_g5_render_target_format_t format) {
 		return DXGI_FORMAT_R8_UNORM;
 	case KINC_G5_RENDER_TARGET_FORMAT_32BIT:
 	default:
-#ifdef KINC_WINDOWS
 		return DXGI_FORMAT_R8G8B8A8_UNORM;
-#else
-		return DXGI_FORMAT_B8G8R8A8_UNORM;
-#endif
 	}
 }
 
@@ -239,135 +234,130 @@ static void set_blend_state(D3D12_BLEND_DESC *blend_desc, kinc_g5_pipeline_t *pi
 }
 
 void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
-	// TODO FLOAT4x4
-	int vertexAttributeCount = 0;
-	vertexAttributeCount += pipe->inputLayout->size;
+	int vertexAttributeCount = pipe->inputLayout->size;
 
 	D3D12_INPUT_ELEMENT_DESC *vertexDesc = (D3D12_INPUT_ELEMENT_DESC *)alloca(sizeof(D3D12_INPUT_ELEMENT_DESC) * vertexAttributeCount);
 	ZeroMemory(vertexDesc, sizeof(D3D12_INPUT_ELEMENT_DESC) * vertexAttributeCount);
-	int curAttr = 0;
-	for (int stream = 0; pipe->inputLayout[stream] != NULL; ++stream) {
-		for (int i = 0; i < pipe->inputLayout[stream]->size; ++i) {
-			vertexDesc[curAttr].SemanticName = "TEXCOORD";
-			vertexDesc[curAttr].SemanticIndex = findAttribute(pipe->vertexShader, pipe->inputLayout[stream]->elements[i].name).attribute;
-			vertexDesc[curAttr].InputSlot = stream;
-			vertexDesc[curAttr].AlignedByteOffset = (i == 0) ? 0 : D3D12_APPEND_ALIGNED_ELEMENT;
-			vertexDesc[curAttr].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
-			vertexDesc[curAttr].InstanceDataStepRate = 0;
 
-			switch (pipe->inputLayout[stream]->elements[i].data) {
-			case KINC_G4_VERTEX_DATA_F32_1X:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R32_FLOAT;
-				break;
-			case KINC_G4_VERTEX_DATA_F32_2X:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R32G32_FLOAT;
-				break;
-			case KINC_G4_VERTEX_DATA_F32_3X:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-				break;
-			case KINC_G4_VERTEX_DATA_F32_4X:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-				break;
-			case KINC_G4_VERTEX_DATA_I8_1X:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R8_SINT;
-				break;
-			case KINC_G4_VERTEX_DATA_U8_1X:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R8_UINT;
-				break;
-			case KINC_G4_VERTEX_DATA_I8_1X_NORMALIZED:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R8_SNORM;
-				break;
-			case KINC_G4_VERTEX_DATA_U8_1X_NORMALIZED:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R8_UNORM;
-				break;
-			case KINC_G4_VERTEX_DATA_I8_2X:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R8G8_SINT;
-				break;
-			case KINC_G4_VERTEX_DATA_U8_2X:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R8G8_UINT;
-				break;
-			case KINC_G4_VERTEX_DATA_I8_2X_NORMALIZED:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R8G8_SNORM;
-				break;
-			case KINC_G4_VERTEX_DATA_U8_2X_NORMALIZED:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R8G8_UNORM;
-				break;
-			case KINC_G4_VERTEX_DATA_I8_4X:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R8G8B8A8_SINT;
-				break;
-			case KINC_G4_VERTEX_DATA_U8_4X:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R8G8B8A8_UINT;
-				break;
-			case KINC_G4_VERTEX_DATA_I8_4X_NORMALIZED:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R8G8B8A8_SNORM;
-				break;
-			case KINC_G4_VERTEX_DATA_U8_4X_NORMALIZED:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-				break;
-			case KINC_G4_VERTEX_DATA_I16_1X:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R16_SINT;
-				break;
-			case KINC_G4_VERTEX_DATA_U16_1X:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R16_UINT;
-				break;
-			case KINC_G4_VERTEX_DATA_I16_1X_NORMALIZED:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R16_SNORM;
-				break;
-			case KINC_G4_VERTEX_DATA_U16_1X_NORMALIZED:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R16_UNORM;
-				break;
-			case KINC_G4_VERTEX_DATA_I16_2X:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R16G16_SINT;
-				break;
-			case KINC_G4_VERTEX_DATA_U16_2X:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R16G16_UINT;
-				break;
-			case KINC_G4_VERTEX_DATA_I16_2X_NORMALIZED:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R16G16_SNORM;
-				break;
-			case KINC_G4_VERTEX_DATA_U16_2X_NORMALIZED:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R16G16_UNORM;
-				break;
-			case KINC_G4_VERTEX_DATA_I16_4X:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R16G16B16A16_SINT;
-				break;
-			case KINC_G4_VERTEX_DATA_U16_4X:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R16G16B16A16_UINT;
-				break;
-			case KINC_G4_VERTEX_DATA_I16_4X_NORMALIZED:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R16G16B16A16_SNORM;
-				break;
-			case KINC_G4_VERTEX_DATA_U16_4X_NORMALIZED:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R16G16B16A16_UNORM;
-				break;
-			case KINC_G4_VERTEX_DATA_I32_1X:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R32_SINT;
-				break;
-			case KINC_G4_VERTEX_DATA_U32_1X:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R32_UINT;
-				break;
-			case KINC_G4_VERTEX_DATA_I32_2X:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R32G32_SINT;
-				break;
-			case KINC_G4_VERTEX_DATA_U32_2X:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R32G32_UINT;
-				break;
-			case KINC_G4_VERTEX_DATA_I32_3X:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R32G32B32_SINT;
-				break;
-			case KINC_G4_VERTEX_DATA_U32_3X:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R32G32B32_UINT;
-				break;
-			case KINC_G4_VERTEX_DATA_I32_4X:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R32G32B32A32_SINT;
-				break;
-			case KINC_G4_VERTEX_DATA_U32_4X:
-				vertexDesc[curAttr].Format = DXGI_FORMAT_R32G32B32A32_UINT;
-				break;
-			default:
-				break;
-			}
-			curAttr++;
+	for (int i = 0; i < pipe->inputLayout->size; ++i) {
+		vertexDesc[i].SemanticName = "TEXCOORD";
+		vertexDesc[i].SemanticIndex = findAttribute(pipe->vertexShader, pipe->inputLayout->elements[i].name).attribute;
+		vertexDesc[i].InputSlot = 0;
+		vertexDesc[i].AlignedByteOffset = (i == 0) ? 0 : D3D12_APPEND_ALIGNED_ELEMENT;
+		vertexDesc[i].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+		vertexDesc[i].InstanceDataStepRate = 0;
+
+		switch (pipe->inputLayout->elements[i].data) {
+		case KINC_G4_VERTEX_DATA_F32_1X:
+			vertexDesc[i].Format = DXGI_FORMAT_R32_FLOAT;
+			break;
+		case KINC_G4_VERTEX_DATA_F32_2X:
+			vertexDesc[i].Format = DXGI_FORMAT_R32G32_FLOAT;
+			break;
+		case KINC_G4_VERTEX_DATA_F32_3X:
+			vertexDesc[i].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+			break;
+		case KINC_G4_VERTEX_DATA_F32_4X:
+			vertexDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+			break;
+		case KINC_G4_VERTEX_DATA_I8_1X:
+			vertexDesc[i].Format = DXGI_FORMAT_R8_SINT;
+			break;
+		case KINC_G4_VERTEX_DATA_U8_1X:
+			vertexDesc[i].Format = DXGI_FORMAT_R8_UINT;
+			break;
+		case KINC_G4_VERTEX_DATA_I8_1X_NORMALIZED:
+			vertexDesc[i].Format = DXGI_FORMAT_R8_SNORM;
+			break;
+		case KINC_G4_VERTEX_DATA_U8_1X_NORMALIZED:
+			vertexDesc[i].Format = DXGI_FORMAT_R8_UNORM;
+			break;
+		case KINC_G4_VERTEX_DATA_I8_2X:
+			vertexDesc[i].Format = DXGI_FORMAT_R8G8_SINT;
+			break;
+		case KINC_G4_VERTEX_DATA_U8_2X:
+			vertexDesc[i].Format = DXGI_FORMAT_R8G8_UINT;
+			break;
+		case KINC_G4_VERTEX_DATA_I8_2X_NORMALIZED:
+			vertexDesc[i].Format = DXGI_FORMAT_R8G8_SNORM;
+			break;
+		case KINC_G4_VERTEX_DATA_U8_2X_NORMALIZED:
+			vertexDesc[i].Format = DXGI_FORMAT_R8G8_UNORM;
+			break;
+		case KINC_G4_VERTEX_DATA_I8_4X:
+			vertexDesc[i].Format = DXGI_FORMAT_R8G8B8A8_SINT;
+			break;
+		case KINC_G4_VERTEX_DATA_U8_4X:
+			vertexDesc[i].Format = DXGI_FORMAT_R8G8B8A8_UINT;
+			break;
+		case KINC_G4_VERTEX_DATA_I8_4X_NORMALIZED:
+			vertexDesc[i].Format = DXGI_FORMAT_R8G8B8A8_SNORM;
+			break;
+		case KINC_G4_VERTEX_DATA_U8_4X_NORMALIZED:
+			vertexDesc[i].Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			break;
+		case KINC_G4_VERTEX_DATA_I16_1X:
+			vertexDesc[i].Format = DXGI_FORMAT_R16_SINT;
+			break;
+		case KINC_G4_VERTEX_DATA_U16_1X:
+			vertexDesc[i].Format = DXGI_FORMAT_R16_UINT;
+			break;
+		case KINC_G4_VERTEX_DATA_I16_1X_NORMALIZED:
+			vertexDesc[i].Format = DXGI_FORMAT_R16_SNORM;
+			break;
+		case KINC_G4_VERTEX_DATA_U16_1X_NORMALIZED:
+			vertexDesc[i].Format = DXGI_FORMAT_R16_UNORM;
+			break;
+		case KINC_G4_VERTEX_DATA_I16_2X:
+			vertexDesc[i].Format = DXGI_FORMAT_R16G16_SINT;
+			break;
+		case KINC_G4_VERTEX_DATA_U16_2X:
+			vertexDesc[i].Format = DXGI_FORMAT_R16G16_UINT;
+			break;
+		case KINC_G4_VERTEX_DATA_I16_2X_NORMALIZED:
+			vertexDesc[i].Format = DXGI_FORMAT_R16G16_SNORM;
+			break;
+		case KINC_G4_VERTEX_DATA_U16_2X_NORMALIZED:
+			vertexDesc[i].Format = DXGI_FORMAT_R16G16_UNORM;
+			break;
+		case KINC_G4_VERTEX_DATA_I16_4X:
+			vertexDesc[i].Format = DXGI_FORMAT_R16G16B16A16_SINT;
+			break;
+		case KINC_G4_VERTEX_DATA_U16_4X:
+			vertexDesc[i].Format = DXGI_FORMAT_R16G16B16A16_UINT;
+			break;
+		case KINC_G4_VERTEX_DATA_I16_4X_NORMALIZED:
+			vertexDesc[i].Format = DXGI_FORMAT_R16G16B16A16_SNORM;
+			break;
+		case KINC_G4_VERTEX_DATA_U16_4X_NORMALIZED:
+			vertexDesc[i].Format = DXGI_FORMAT_R16G16B16A16_UNORM;
+			break;
+		case KINC_G4_VERTEX_DATA_I32_1X:
+			vertexDesc[i].Format = DXGI_FORMAT_R32_SINT;
+			break;
+		case KINC_G4_VERTEX_DATA_U32_1X:
+			vertexDesc[i].Format = DXGI_FORMAT_R32_UINT;
+			break;
+		case KINC_G4_VERTEX_DATA_I32_2X:
+			vertexDesc[i].Format = DXGI_FORMAT_R32G32_SINT;
+			break;
+		case KINC_G4_VERTEX_DATA_U32_2X:
+			vertexDesc[i].Format = DXGI_FORMAT_R32G32_UINT;
+			break;
+		case KINC_G4_VERTEX_DATA_I32_3X:
+			vertexDesc[i].Format = DXGI_FORMAT_R32G32B32_SINT;
+			break;
+		case KINC_G4_VERTEX_DATA_U32_3X:
+			vertexDesc[i].Format = DXGI_FORMAT_R32G32B32_UINT;
+			break;
+		case KINC_G4_VERTEX_DATA_I32_4X:
+			vertexDesc[i].Format = DXGI_FORMAT_R32G32B32A32_SINT;
+			break;
+		case KINC_G4_VERTEX_DATA_U32_4X:
+			vertexDesc[i].Format = DXGI_FORMAT_R32G32B32A32_UINT;
+			break;
+		default:
+			break;
 		}
 	}
 
@@ -455,7 +445,7 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
 	psoDesc.SampleMask = 0xFFFFFFFF;
 	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
-	hr = device->CreateGraphicsPipelineState(&psoDesc, IID_GRAPHICS_PPV_ARGS(&pipe->impl.pso));
+	hr = device->lpVtbl->CreateGraphicsPipelineState(device , &psoDesc, &IID_ID3D12PipelineState, &pipe->impl.pso);
 	if (hr != S_OK) {
 		kinc_log(KINC_LOG_LEVEL_WARNING, "Could not create pipeline.");
 	}

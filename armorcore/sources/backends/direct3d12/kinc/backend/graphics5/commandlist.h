@@ -1,12 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-
 #include "d3d12mini.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 struct kinc_g5_pipeline;
 struct kinc_g5_render_target;
@@ -40,7 +35,3 @@ typedef struct {
 	struct ID3D12DescriptorHeap *srvHeap;
 	struct ID3D12DescriptorHeap *samplerHeap;
 } CommandList5Impl;
-
-#ifdef __cplusplus
-}
-#endif

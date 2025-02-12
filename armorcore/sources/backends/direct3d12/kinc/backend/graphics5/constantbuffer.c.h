@@ -27,17 +27,18 @@ void kinc_g5_constant_buffer_init(kinc_g5_constant_buffer_t *buffer, int size) {
 	resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 	resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-	kinc_microsoft_affirm(device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL,
-	                                                      IID_GRAPHICS_PPV_ARGS(&buffer->impl.constant_buffer)));
+	kinc_microsoft_affirm(device->lpVtbl->CreateCommittedResource(device , &heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc,
+	                                                              D3D12_RESOURCE_STATE_GENERIC_READ, NULL,
+	                                                      &IID_ID3D12Resource, &buffer->impl.constant_buffer));
 
 	void *p;
-	buffer->impl.constant_buffer->Map(0, NULL, &p);
+	buffer->impl.constant_buffer->lpVtbl->Map(buffer->impl.constant_buffer, 0, NULL, &p);
 	ZeroMemory(p, size);
-	buffer->impl.constant_buffer->Unmap(0, NULL);
+	buffer->impl.constant_buffer->lpVtbl->Unmap(buffer->impl.constant_buffer, 0, NULL);
 }
 
 void kinc_g5_constant_buffer_destroy(kinc_g5_constant_buffer_t *buffer) {
-	buffer->impl.constant_buffer->Release();
+	buffer->impl.constant_buffer->lpVtbl->Release(buffer->impl.constant_buffer);
 }
 
 void kinc_g5_constant_buffer_lock_all(kinc_g5_constant_buffer_t *buffer) {
@@ -51,7 +52,7 @@ void kinc_g5_constant_buffer_lock(kinc_g5_constant_buffer_t *buffer, int start, 
 	range.Begin = start;
 	range.End = range.Begin + count;
 	uint8_t *p;
-	buffer->impl.constant_buffer->Map(0, &range, (void **)&p);
+	buffer->impl.constant_buffer->lpVtbl->Map(buffer->impl.constant_buffer, 0, &range, (void **)&p);
 	buffer->data = &p[start];
 }
 
@@ -59,7 +60,7 @@ void kinc_g5_constant_buffer_unlock(kinc_g5_constant_buffer_t *buffer) {
 	D3D12_RANGE range;
 	range.Begin = buffer->impl.lastStart;
 	range.End = range.Begin + buffer->impl.lastCount;
-	buffer->impl.constant_buffer->Unmap(0, &range);
+	buffer->impl.constant_buffer->lpVtbl->Unmap(buffer->impl.constant_buffer, 0, &range);
 	buffer->data = NULL;
 }
 

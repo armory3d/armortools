@@ -50,13 +50,7 @@
 #include <dxgi.h>
 #include "d3d12mini.h"
 
-#ifndef IID_GRAPHICS_PPV_ARGS
-#define IID_GRAPHICS_PPV_ARGS(x) IID_PPV_ARGS(x)
-#endif
-
-extern "C" {
 ID3D12Device *device = NULL;
-}
 static ID3D12RootSignature *globalRootSignature = NULL;
 static ID3D12RootSignature *globalComputeRootSignature = NULL;
 // extern ID3D12GraphicsCommandList* commandList;

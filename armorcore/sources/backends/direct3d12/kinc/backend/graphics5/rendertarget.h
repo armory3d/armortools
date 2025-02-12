@@ -2,10 +2,6 @@
 
 #include "d3d12mini.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 enum RenderTargetResourceState { RenderTargetResourceStateUndefined, RenderTargetResourceStateRenderTarget, RenderTargetResourceStateTexture };
 
 typedef struct {
@@ -22,7 +18,3 @@ typedef struct {
 	int stage_depth;
 	int framebuffer_index;
 } RenderTarget5Impl;
-
-#ifdef __cplusplus
-}
-#endif

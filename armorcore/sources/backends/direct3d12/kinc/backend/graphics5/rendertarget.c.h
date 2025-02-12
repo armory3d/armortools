@@ -5,8 +5,8 @@
 #include <dxgi1_4.h>
 
 static void WaitForFence(ID3D12Fence *fence, UINT64 completionValue, HANDLE waitEvent) {
-	if (fence->GetCompletedValue() < completionValue) {
-		fence->SetEventOnCompletion(completionValue, waitEvent);
+	if (fence->lpVtbl->GetCompletedValue(fence) < completionValue) {
+		fence->lpVtbl->SetEventOnCompletion(fence, completionValue, waitEvent);
 		WaitForSingleObject(waitEvent, INFINITE);
 	}
 }
@@ -19,7 +19,9 @@ static void createRenderTargetView(ID3D12Resource *renderTarget, ID3D12Descripto
 	viewDesc.Texture2D.MipSlice = 0;
 	viewDesc.Texture2D.PlaneSlice = 0;
 
-	device->CreateRenderTargetView(renderTarget, &viewDesc, renderTargetDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+	D3D12_CPU_DESCRIPTOR_HANDLE handle;
+	renderTargetDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(renderTargetDescriptorHeap, &handle);
+	device->lpVtbl->CreateRenderTargetView(device, renderTarget, &viewDesc, handle);
 }
 
 static DXGI_FORMAT convertFormat(kinc_g5_render_target_format_t format) {
@@ -40,7 +42,7 @@ static DXGI_FORMAT convertFormat(kinc_g5_render_target_format_t format) {
 	}
 }
 
-extern "C" void kinc_memory_emergency();
+void kinc_memory_emergency();
 
 static void render_target_init(kinc_g5_render_target_t *render_target, int width, int height, kinc_g5_render_target_format_t format, int depthBufferBits, int framebuffer_index) {
 	render_target->texWidth = render_target->width = width;
@@ -83,25 +85,25 @@ static void render_target_init(kinc_g5_render_target_t *render_target, int width
 	heapDesc.NumDescriptors = 1;
 	heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	kinc_microsoft_affirm(device->CreateDescriptorHeap(&heapDesc, IID_GRAPHICS_PPV_ARGS(&render_target->impl.renderTargetDescriptorHeap)));
+	kinc_microsoft_affirm(device->lpVtbl->CreateDescriptorHeap(device , &heapDesc, &IID_ID3D12DescriptorHeap, &render_target->impl.renderTargetDescriptorHeap));
 
 	if (framebuffer_index >= 0) {
 		IDXGISwapChain *swapChain = kinc_dx_current_window()->swapChain;
-		kinc_microsoft_affirm(swapChain->GetBuffer(framebuffer_index, IID_PPV_ARGS(&render_target->impl.renderTarget)));
+		kinc_microsoft_affirm(swapChain->lpVtbl->GetBuffer(swapChain, framebuffer_index, &IID_ID3D12Resource, &render_target->impl.renderTarget));
 		wchar_t buffer[128];
 		wsprintf(buffer, L"Backbuffer (index %i)", framebuffer_index);
-		render_target->impl.renderTarget->SetName(buffer);
+		render_target->impl.renderTarget->lpVtbl->SetName(render_target->impl.renderTarget, buffer);
 
 		createRenderTargetView(render_target->impl.renderTarget, render_target->impl.renderTargetDescriptorHeap, dxgiFormat);
 	}
 	else {
-		HRESULT result = device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, &texResourceDesc, D3D12_RESOURCE_STATE_RENDER_TARGET,
-		                                                 &clearValue, IID_GRAPHICS_PPV_ARGS(&render_target->impl.renderTarget));
+		HRESULT result = device->lpVtbl->CreateCommittedResource(device, &heapProperties, D3D12_HEAP_FLAG_NONE, &texResourceDesc, D3D12_RESOURCE_STATE_RENDER_TARGET,
+		                                                 &clearValue, &IID_ID3D12Resource, &render_target->impl.renderTarget);
 		if (result != S_OK) {
 			for (int i = 0; i < 10; ++i) {
 				kinc_memory_emergency();
-				result = device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, &texResourceDesc, D3D12_RESOURCE_STATE_RENDER_TARGET,
-				                                         &clearValue, IID_GRAPHICS_PPV_ARGS(&render_target->impl.renderTarget));
+				result = device->lpVtbl->CreateCommittedResource(device, &heapProperties, D3D12_HEAP_FLAG_NONE, &texResourceDesc, D3D12_RESOURCE_STATE_RENDER_TARGET,
+				                                         &clearValue, &IID_ID3D12Resource, &render_target->impl.renderTarget);
 				if (result == S_OK) {
 					break;
 				}
@@ -109,14 +111,16 @@ static void render_target_init(kinc_g5_render_target_t *render_target, int width
 		}
 
 		D3D12_RENDER_TARGET_VIEW_DESC view;
-		// const D3D12_RESOURCE_DESC resourceDesc = render_target->impl.renderTarget->lpVtbl->GetDesc(render_target->impl.renderTarget);
 		view.Format = dxgiFormat;
 		view.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 		view.Texture2D.MipSlice = 0;
 		view.Texture2D.PlaneSlice = 0;
 
-		device->CreateRenderTargetView(render_target->impl.renderTarget, &view,
-		                               render_target->impl.renderTargetDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+		D3D12_CPU_DESCRIPTOR_HANDLE handle;
+		render_target->impl.renderTargetDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(render_target->impl.renderTargetDescriptorHeap, &handle);
+
+		device->lpVtbl->CreateRenderTargetView(device, render_target->impl.renderTarget, &view,
+		    handle);
 	}
 
 	D3D12_DESCRIPTOR_HEAP_DESC descriptorHeapDesc = {};
@@ -126,7 +130,7 @@ static void render_target_init(kinc_g5_render_target_t *render_target, int width
 	descriptorHeapDesc.NodeMask = 0;
 	descriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 
-	kinc_microsoft_affirm(device->CreateDescriptorHeap(&descriptorHeapDesc, IID_GRAPHICS_PPV_ARGS(&render_target->impl.srvDescriptorHeap)));
+	kinc_microsoft_affirm(device->lpVtbl->CreateDescriptorHeap(device, &descriptorHeapDesc, &IID_ID3D12DescriptorHeap, &render_target->impl.srvDescriptorHeap));
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
 	ZeroMemory(&shaderResourceViewDesc, sizeof(shaderResourceViewDesc));
@@ -137,15 +141,18 @@ static void render_target_init(kinc_g5_render_target_t *render_target, int width
 	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
 	shaderResourceViewDesc.Texture2D.ResourceMinLODClamp = 0.0f;
 
-	device->CreateShaderResourceView(render_target->impl.renderTarget, &shaderResourceViewDesc,
-	                                 render_target->impl.srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+	D3D12_CPU_DESCRIPTOR_HANDLE handle;
+	render_target->impl.srvDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(render_target->impl.srvDescriptorHeap, &handle);
+
+	device->lpVtbl->CreateShaderResourceView(device, render_target->impl.renderTarget, &shaderResourceViewDesc,
+	    handle);
 
 	if (depthBufferBits > 0) {
 		D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
 		dsvHeapDesc.NumDescriptors = 1;
 		dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
 		dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-		kinc_microsoft_affirm(device->CreateDescriptorHeap(&dsvHeapDesc, IID_GRAPHICS_PPV_ARGS(&render_target->impl.depthStencilDescriptorHeap)));
+		kinc_microsoft_affirm(device->lpVtbl->CreateDescriptorHeap(device, &dsvHeapDesc, &IID_ID3D12DescriptorHeap, &render_target->impl.depthStencilDescriptorHeap));
 
 		D3D12_RESOURCE_DESC depthTexture;
 		depthTexture.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -172,21 +179,25 @@ static void render_target_init(kinc_g5_render_target_t *render_target, int width
 		heapProperties.CreationNodeMask = 1;
 		heapProperties.VisibleNodeMask = 1;
 
-		HRESULT result = device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, &depthTexture, D3D12_RESOURCE_STATE_DEPTH_WRITE, &clearValue,
-		                                                 IID_GRAPHICS_PPV_ARGS(&render_target->impl.depthStencilTexture));
+		HRESULT result = device->lpVtbl->CreateCommittedResource(device, &heapProperties, D3D12_HEAP_FLAG_NONE, &depthTexture, D3D12_RESOURCE_STATE_DEPTH_WRITE,
+		                                                         &clearValue,
+		                                                 &IID_ID3D12Resource, &render_target->impl.depthStencilTexture);
 		if (result != S_OK) {
 			for (int i = 0; i < 10; ++i) {
 				kinc_memory_emergency();
-				result = device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, &depthTexture, D3D12_RESOURCE_STATE_DEPTH_WRITE, &clearValue,
-				                                         IID_GRAPHICS_PPV_ARGS(&render_target->impl.depthStencilTexture));
+				result = device->lpVtbl->CreateCommittedResource(device, &heapProperties, D3D12_HEAP_FLAG_NONE, &depthTexture, D3D12_RESOURCE_STATE_DEPTH_WRITE,
+				                                                 &clearValue,
+				                                         &IID_ID3D12Resource, &render_target->impl.depthStencilTexture);
 				if (result == S_OK) {
 					break;
 				}
 			}
 		}
 
-		device->CreateDepthStencilView(render_target->impl.depthStencilTexture, NULL,
-		                               render_target->impl.depthStencilDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+		D3D12_CPU_DESCRIPTOR_HANDLE handle;
+		render_target->impl.depthStencilDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(render_target->impl.depthStencilDescriptorHeap, &handle);
+		device->lpVtbl->CreateDepthStencilView(device, render_target->impl.depthStencilTexture, NULL,
+		    handle);
 
 		// Reading depth texture as a shader resource
 		D3D12_DESCRIPTOR_HEAP_DESC srvDepthHeapDesc = {};
@@ -194,7 +205,7 @@ static void render_target_init(kinc_g5_render_target_t *render_target, int width
 		srvDepthHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 		srvDepthHeapDesc.NodeMask = 0;
 		srvDepthHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-		kinc_microsoft_affirm(device->CreateDescriptorHeap(&srvDepthHeapDesc, IID_GRAPHICS_PPV_ARGS(&render_target->impl.srvDepthDescriptorHeap)));
+		kinc_microsoft_affirm(device->lpVtbl->CreateDescriptorHeap(device, &srvDepthHeapDesc, &IID_ID3D12DescriptorHeap, &render_target->impl.srvDepthDescriptorHeap));
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC srvDepthViewDesc;
 		ZeroMemory(&srvDepthViewDesc, sizeof(srvDepthViewDesc));
@@ -204,8 +215,10 @@ static void render_target_init(kinc_g5_render_target_t *render_target, int width
 		srvDepthViewDesc.Texture2D.MipLevels = 1;
 		srvDepthViewDesc.Texture2D.MostDetailedMip = 0;
 		srvDepthViewDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-		device->CreateShaderResourceView(render_target->impl.depthStencilTexture, &srvDepthViewDesc,
-		                                 render_target->impl.srvDepthDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+
+		render_target->impl.srvDepthDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(render_target->impl.srvDepthDescriptorHeap, &handle);
+		device->lpVtbl->CreateShaderResourceView(device, render_target->impl.depthStencilTexture, &srvDepthViewDesc,
+		    handle);
 	}
 	else {
 		render_target->impl.depthStencilDescriptorHeap = NULL;
@@ -242,16 +255,16 @@ void kinc_g5_render_target_destroy(kinc_g5_render_target_t *render_target) {
 		framebuffer_count -= 1;
 	}
 
-	render_target->impl.renderTarget->Release();
-	render_target->impl.renderTargetDescriptorHeap->Release();
-	render_target->impl.srvDescriptorHeap->Release();
+	render_target->impl.renderTarget->lpVtbl->Release(render_target->impl.renderTarget);
+	render_target->impl.renderTargetDescriptorHeap->lpVtbl->Release(render_target->impl.renderTargetDescriptorHeap);
+	render_target->impl.srvDescriptorHeap->lpVtbl->Release(render_target->impl.srvDescriptorHeap);
 	if (render_target->impl.depthStencilTexture != NULL) {
-		render_target->impl.depthStencilTexture->Release();
-		render_target->impl.depthStencilDescriptorHeap->Release();
-		render_target->impl.srvDepthDescriptorHeap->Release();
+		render_target->impl.depthStencilTexture->lpVtbl->Release(render_target->impl.depthStencilTexture);
+		render_target->impl.depthStencilDescriptorHeap->lpVtbl->Release(render_target->impl.depthStencilDescriptorHeap);
+		render_target->impl.srvDepthDescriptorHeap->lpVtbl->Release(render_target->impl.srvDepthDescriptorHeap);
 	}
 	if (render_target->impl.renderTargetReadback != NULL) {
-		render_target->impl.renderTargetReadback->Release();
+		render_target->impl.renderTargetReadback->lpVtbl->Release(render_target->impl.renderTargetReadback);
 	}
 }
 

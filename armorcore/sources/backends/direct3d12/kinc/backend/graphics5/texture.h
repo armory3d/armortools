@@ -1,9 +1,5 @@
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 struct ID3D12Resource;
 struct ID3D12DescriptorHeap;
 struct ID3D12GraphicsCommandList;
@@ -26,7 +22,3 @@ struct kinc_g5_command_list;
 
 void kinc_g5_internal_set_textures(struct kinc_g5_command_list *commandList);
 void kinc_g5_internal_texture_set(struct kinc_g5_command_list *commandList, struct kinc_g5_texture *texture, int unit);
-
-#ifdef __cplusplus
-}
-#endif

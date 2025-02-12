@@ -1,7 +1,5 @@
 #include "vertexbuffer.h"
-
 #include <kinc/graphics5/vertexbuffer.h>
-
 #include <kinc/backend/SystemMicrosoft.h>
 #include <kinc/graphics4/graphics.h>
 
@@ -37,10 +35,10 @@ void kinc_g5_vertex_buffer_init(kinc_g5_vertex_buffer_t *buffer, int count, kinc
 	resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 	resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-	device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL,
-	                                IID_GRAPHICS_PPV_ARGS(&buffer->impl.uploadBuffer));
+	device->lpVtbl->CreateCommittedResource(device, &heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL,
+	                                &IID_ID3D12Resource, &buffer->impl.uploadBuffer);
 
-	buffer->impl.view.BufferLocation = buffer->impl.uploadBuffer->GetGPUVirtualAddress();
+	buffer->impl.view.BufferLocation = buffer->impl.uploadBuffer->lpVtbl->GetGPUVirtualAddress(buffer->impl.uploadBuffer);
 	buffer->impl.view.SizeInBytes = uploadBufferSize;
 	buffer->impl.view.StrideInBytes = buffer->impl.myStride;
 
@@ -49,8 +47,8 @@ void kinc_g5_vertex_buffer_init(kinc_g5_vertex_buffer_t *buffer, int count, kinc
 }
 
 void kinc_g5_vertex_buffer_destroy(kinc_g5_vertex_buffer_t *buffer) {
-	// buffer->impl.vertexBuffer->Release();
-	buffer->impl.uploadBuffer->Release();
+	// buffer->impl.vertexBuffer->lpVtbl->Release();
+	buffer->impl.uploadBuffer->lpVtbl->Release(buffer->impl.uploadBuffer);
 }
 
 float *kinc_g5_vertex_buffer_lock_all(kinc_g5_vertex_buffer_t *buffer) {
@@ -66,7 +64,7 @@ float *kinc_g5_vertex_buffer_lock(kinc_g5_vertex_buffer_t *buffer, int start, in
 	range.End = (start + count) * buffer->impl.myStride;
 
 	void *p;
-	buffer->impl.uploadBuffer->Map(0, &range, &p);
+	buffer->impl.uploadBuffer->lpVtbl->Map(buffer->impl.uploadBuffer, 0, &range, &p);
 	byte *bytes = (byte *)p;
 	bytes += start * buffer->impl.myStride;
 	return (float *)bytes;
@@ -76,14 +74,14 @@ void kinc_g5_vertex_buffer_unlock_all(kinc_g5_vertex_buffer_t *buffer) {
 	D3D12_RANGE range;
 	range.Begin = buffer->impl.lastStart * buffer->impl.myStride;
 	range.End = (buffer->impl.lastStart + buffer->impl.lastCount) * buffer->impl.myStride;
-	buffer->impl.uploadBuffer->Unmap(0, &range);
+	buffer->impl.uploadBuffer->lpVtbl->Unmap(buffer->impl.uploadBuffer, 0, &range);
 }
 
 void kinc_g5_vertex_buffer_unlock(kinc_g5_vertex_buffer_t *buffer, int count) {
 	D3D12_RANGE range;
 	range.Begin = buffer->impl.lastStart * buffer->impl.myStride;
 	range.End = (buffer->impl.lastStart + count) * buffer->impl.myStride;
-	buffer->impl.uploadBuffer->Unmap(0, &range);
+	buffer->impl.uploadBuffer->lpVtbl->Unmap(buffer->impl.uploadBuffer, 0, &range);
 }
 
 int kinc_g5_internal_vertex_buffer_set(kinc_g5_vertex_buffer_t *buffer) {

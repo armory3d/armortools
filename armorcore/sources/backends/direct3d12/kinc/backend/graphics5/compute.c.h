@@ -1,9 +1,7 @@
 #include <kinc/graphics5/compute.h>
-
 #include <kinc/graphics4/texture.h>
 #include <kinc/log.h>
 #include <kinc/math/core.h>
-
 #include <kinc/backend/SystemMicrosoft.h>
 
 void kinc_g5_compute_shader_init(kinc_g5_compute_shader *shader, void *_data, int length) {
@@ -70,7 +68,7 @@ void kinc_g5_compute_shader_init(kinc_g5_compute_shader *shader, void *_data, in
 	desc.CS.BytecodeLength = shader->impl.length;
 	desc.CS.pShaderBytecode = shader->impl.data;
 	desc.pRootSignature = globalComputeRootSignature;
-	HRESULT hr = device->CreateComputePipelineState(&desc, IID_GRAPHICS_PPV_ARGS(&shader->impl.pso));
+	HRESULT hr = device->lpVtbl->CreateComputePipelineState(device , &desc, &IID_ID3D12PipelineState, &shader->impl.pso);
 
 	if (hr != S_OK) {
 		kinc_log(KINC_LOG_LEVEL_WARNING, "Could not initialize compute shader.");
@@ -83,7 +81,7 @@ void kinc_g5_compute_shader_init(kinc_g5_compute_shader *shader, void *_data, in
 
 void kinc_g5_compute_shader_destroy(kinc_g5_compute_shader *shader) {
 	if (shader->impl.pso != NULL) {
-		shader->impl.pso->Release();
+		shader->impl.pso->lpVtbl->Release(shader->impl.pso);
 		shader->impl.pso = NULL;
 	}
 }

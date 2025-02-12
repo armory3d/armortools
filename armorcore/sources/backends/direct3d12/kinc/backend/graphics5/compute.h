@@ -2,10 +2,6 @@
 
 #include <kinc/backend/graphics5/ShaderHash.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct {
 	uint32_t hash;
 	uint32_t offset;
