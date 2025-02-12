@@ -31,10 +31,6 @@ function util_render_make_material_preview() {
 	scene_camera.data.fov = 0.92;
 	viewport_update_camera_type(camera_type_t.PERSPECTIVE);
 
-
-	let _light_strength: f32 = uniforms_light_strength;
-	uniforms_light_strength = 0;
-
 	let probe: world_data_t = scene_world;
 	let _probe_strength: f32 = probe.strength;
 	probe.strength = 7;
@@ -73,7 +69,6 @@ function util_render_make_material_preview() {
 	camera_object_build_proj(scene_camera);
 	camera_object_build_mat(scene_camera);
 
-	uniforms_light_strength = _light_strength;
 	probe.strength = _probe_strength;
 	context_raw.envmap_angle = _envmap_angle;
 	context_raw.brush_scale = _brush_scale;
@@ -110,8 +105,6 @@ function util_render_make_decal_preview() {
 	let saved_fov: f32 = scene_camera.data.fov;
 	scene_camera.data.fov = 0.92;
 	viewport_update_camera_type(camera_type_t.PERSPECTIVE);
-	let _light_strength: f32 = uniforms_light_strength;
-	uniforms_light_strength = 0.0;
 	scene_world._.envmap = context_raw.preview_envmap;
 
 	// No resize
@@ -140,8 +133,6 @@ function util_render_make_decal_preview() {
 	viewport_update_camera_type(context_raw.camera_type);
 	camera_object_build_proj(scene_camera);
 	camera_object_build_mat(scene_camera);
-
-	uniforms_light_strength = _light_strength;
 
 	scene_world._.envmap = context_raw.show_envmap ? context_raw.saved_envmap : context_raw.empty_envmap;
 

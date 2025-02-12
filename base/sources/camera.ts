@@ -49,7 +49,6 @@ function camera_update() {
 		operator_shortcut(map_get(config_keymap, "action_zoom"), shortcut_type_t.STARTED) ||
 		operator_shortcut(map_get(config_keymap, "action_pan"), shortcut_type_t.STARTED) ||
 		operator_shortcut(map_get(config_keymap, "rotate_envmap"), shortcut_type_t.STARTED) ||
-		operator_shortcut(map_get(config_keymap, "rotate_light"), shortcut_type_t.STARTED) ||
 		(mouse_started("right") && !modif) ||
 		(mouse_started("middle") && !modif) ||
 		(mouse_wheel_delta != 0 && !modif_key)) {
@@ -59,7 +58,6 @@ function camera_update() {
 		!operator_shortcut(map_get(config_keymap, "action_zoom"), shortcut_type_t.DOWN) &&
 		!operator_shortcut(map_get(config_keymap, "action_pan"), shortcut_type_t.DOWN) &&
 		!operator_shortcut(map_get(config_keymap, "rotate_envmap"), shortcut_type_t.DOWN) &&
-		!operator_shortcut(map_get(config_keymap, "rotate_light"), shortcut_type_t.DOWN) &&
 		!(mouse_down("right") && !modif) &&
 		!(mouse_down("middle") && !modif) &&
 		(mouse_wheel_delta == 0 && !modif_key)) {
@@ -172,15 +170,6 @@ function camera_update() {
 		camera_redraws = 2;
 		transform_rotate(camera.base.transform, vec4_z_axis(), -mouse_movement_x / 200 * config_raw.camera_rotation_speed);
 		transform_rotate(camera.base.transform, camera_object_right(camera), -mouse_movement_y / 200 * config_raw.camera_rotation_speed);
-	}
-
-	if (operator_shortcut(map_get(config_keymap, "rotate_light"), shortcut_type_t.DOWN)) {
-		camera_redraws = 2;
-		let pi2: f32 = math_pi() * 2.0;
-		let mx: f32 = mouse_movement_x / 100;
-		context_raw.light_angle = math_fmod(context_raw.light_angle + math_fmod(mx, pi2) + pi2, pi2);
-		let m: mat4_t = mat4_rot_z(mx);
-		uniforms_light_world = mat4_mult_mat(uniforms_light_world, m);
 	}
 
 	if (operator_shortcut(map_get(config_keymap, "rotate_envmap"), shortcut_type_t.DOWN)) {

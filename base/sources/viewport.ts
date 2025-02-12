@@ -79,7 +79,6 @@ function viewport_update_camera_type(camera_type: i32) {
 	let cam: camera_object_t = scene_cameras[0];
 	if (camera_type == camera_type_t.PERSPECTIVE) {
 		cam.data.ortho = null;
-		uniforms_light_strength = 1.0;
 	}
 	else {
 		let f32a: f32_array_t = f32_array_create(4);
@@ -89,7 +88,6 @@ function viewport_update_camera_type(camera_type: i32) {
 		f32a[2] = -2 * f * (app_h() / app_w());
 		f32a[3] =  2 * f * (app_h() / app_w());
 		cam.data.ortho = f32a;
-		uniforms_light_strength = 0.0;
 	}
 	camera_object_build_proj(cam);
 	context_raw.ddirty = 2;

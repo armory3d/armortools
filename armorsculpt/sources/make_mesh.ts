@@ -119,8 +119,6 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 		texture_count += 4;
 		node_shader_add_uniform(frag, "sampler2D senvmap_brdf", "$brdf.k");
 		node_shader_add_uniform(frag, "sampler2D senvmap_radiance", "_envmap_radiance");
-		node_shader_add_uniform(frag, "sampler2D sltc_mat", "_ltc_mat");
-		node_shader_add_uniform(frag, "sampler2D sltc_mag", "_ltc_mag");
 	}
 
 	// Get layers for this pass
@@ -278,31 +276,12 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 				node_shader_write(frag, "float envlod = roughness * float(envmap_num_mipmaps);");
 				node_shader_add_function(frag, str_envmap_equirect);
 				node_shader_write(frag, "vec3 prefiltered_color = textureLod(senvmap_radiance, envmap_equirect(wreflect, envmap_data.x), envlod).rgb;");
-				node_shader_add_uniform(frag, "vec3 light_area0", "_light_area0");
-				node_shader_add_uniform(frag, "vec3 light_area1", "_light_area1");
-				node_shader_add_uniform(frag, "vec3 light_area2", "_light_area2");
-				node_shader_add_uniform(frag, "vec3 light_area3", "_light_area3");
-				node_shader_add_function(frag, str_ltc_evaluate);
-				node_shader_write(frag, "const float LUT_SIZE = 64.0;");
-				node_shader_write(frag, "const float LUT_SCALE = (LUT_SIZE - 1.0) / LUT_SIZE;");
-				node_shader_write(frag, "const float LUT_BIAS = 0.5 / LUT_SIZE;");
-				node_shader_write(frag, "float theta = acos(dotnv);");
-				node_shader_write(frag, "vec2 tuv = vec2(roughness, theta / (0.5 * 3.14159265));");
-				node_shader_write(frag, "tuv = tuv * LUT_SCALE + LUT_BIAS;");
-				node_shader_write(frag, "vec4 t = textureLod(sltc_mat, tuv, 0.0);");
-				node_shader_write(frag, "mat3 minv = mat3(vec3(1.0, 0.0, t.y), vec3(0.0, t.z, 0.0), vec3(t.w, 0.0, t.x));");
-				node_shader_write(frag, "float ltcspec = ltc_evaluate(n, vvec, dotnv, wposition, minv, light_area0, light_area1, light_area2, light_area3);");
-				node_shader_write(frag, "ltcspec *= textureLod(sltc_mag, tuv, 0.0).a;");
-				node_shader_write(frag, "mat3 mident = mat3(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);");
-				node_shader_write(frag, "float ltcdiff = ltc_evaluate(n, vvec, dotnv, wposition, mident, light_area0, light_area1, light_area2, light_area3);");
-				node_shader_write(frag, "vec3 direct = albedo * ltcdiff + ltcspec * 0.05;");
-
 				node_shader_add_uniform(frag, "vec4 shirr[7]", "_envmap_irradiance");
 				node_shader_add_function(frag, str_sh_irradiance());
 				node_shader_write(frag, "vec3 indirect = albedo * (sh_irradiance(vec3(n.x * envmap_data.z - n.y * envmap_data.y, n.x * envmap_data.y + n.y * envmap_data.z, n.z), shirr) / 3.14159265);");
 				node_shader_write(frag, "indirect += prefiltered_color * (f0 * env_brdf.x + env_brdf.y) * 1.5;");
 				node_shader_write(frag, "indirect *= envmap_data.w * occlusion;");
-				node_shader_write(frag, "frag_color[1] = vec4(direct + indirect, 1.0);");
+				node_shader_write(frag, "frag_color[1] = vec4(indirect, 1.0);");
 			}
 			else { // Deferred, Pathtraced
 				if (make_material_emis_used) {

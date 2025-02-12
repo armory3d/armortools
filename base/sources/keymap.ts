@@ -33,7 +33,6 @@ function keymap_get_default(): map_t<string, string> {
 	map_set(keymap, "action_rotate", "alt+left");
 	map_set(keymap, "action_pan", "alt+middle");
 	map_set(keymap, "action_zoom", "alt+right");
-	map_set(keymap, "rotate_light", "shift+middle");
 	map_set(keymap, "rotate_envmap", "ctrl+middle");
 	map_set(keymap, "set_clone_source", "alt");
 	map_set(keymap, "stencil_transform", "ctrl");

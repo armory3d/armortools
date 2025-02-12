@@ -329,18 +329,6 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 		let rt: render_target_t = map_get(render_path_render_targets, "texpaint_pack_undo" + i);
 		return rt._image;
 	}
-	else if (link == "_ltc_mat") {
-		if (const_data_ltc_mat_tex == null) {
-			const_data_init_ltc();
-		}
-		return const_data_ltc_mat_tex;
-	}
-	else if (link == "_ltc_mag") {
-		if (const_data_ltc_mag_tex == null) {
-			const_data_init_ltc();
-		}
-		return const_data_ltc_mag_tex;
-	}
 	else if (link == "_texcolorid") {
 		if (project_assets.length == 0) {
 			let rt: render_target_t = map_get(render_path_render_targets, "empty_white");
