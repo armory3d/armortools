@@ -1,11 +1,8 @@
 #include <stdio.h>
 #include <string.h>
-
 #include <Foundation/Foundation.h>
-
 #include <kinc/threads/mutex.h>
 #include <kinc/threads/thread.h>
-
 #include <pthread.h>
 #include <stdio.h>
 #include <wchar.h>
