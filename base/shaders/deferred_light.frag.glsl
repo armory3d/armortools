@@ -50,8 +50,6 @@ void main() {
 
 	occ = mix(1.0, occ, dotnv); // AO Fresnel
 
-	vec2 env_brdf = texelFetch(senvmap_brdf, ivec2(vec2(roughness, 1.0 - dotnv) * 256.0), 0).xy;
-
 	// Envmap
 	vec3 envl = sh_irradiance(vec3(n.x * envmap_data.z - n.y * envmap_data.y, n.x * envmap_data.y + n.y * envmap_data.z, n.z), shirr);
 	envl /= PI;
@@ -61,12 +59,10 @@ void main() {
 	vec3 prefiltered_color = textureLod(senvmap_radiance, envmap_equirect(reflection_world, envmap_data.x), lod).rgb;
 
 	envl.rgb *= albedo;
-
 	// Indirect specular
+	vec2 env_brdf = texelFetch(senvmap_brdf, ivec2(vec2(roughness, 1.0 - dotnv) * 256.0), 0).xy;
 	envl.rgb += prefiltered_color * (f0 * env_brdf.x + env_brdf.y) * 1.5;
-
 	envl.rgb *= envmap_data.w * occ;
-
 	frag_color.rgb = envl;
 	frag_color.rgb *= textureLod(ssaotex, tex_coord, 0.0).r;
 
