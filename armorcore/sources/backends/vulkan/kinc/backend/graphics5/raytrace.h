@@ -2,7 +2,7 @@
 
 #ifndef KINC_ANDROID
 
-#include "MiniVulkan.h"
+#include "minivulkan.h"
 
 typedef struct {
 	VkPipeline pipeline;

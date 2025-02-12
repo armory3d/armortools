@@ -1,7 +1,6 @@
 #include <kinc/backend/Windows.h>
 #include <kinc/system.h>
 #include <kinc/window.h>
-
 #include <kinc/input/mouse.h>
 
 void kinc_internal_mouse_lock(int window) {

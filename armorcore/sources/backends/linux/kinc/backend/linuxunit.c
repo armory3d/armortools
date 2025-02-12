@@ -140,9 +140,7 @@ void kinc_linux_init_procs() {
 }
 
 #include "display.c.h"
-#ifndef __FreeBSD__
 #include "gamepad.c.h"
-#endif
 #include "mouse.c.h"
 #include "sound.c.h"
 #include "system.c.h"

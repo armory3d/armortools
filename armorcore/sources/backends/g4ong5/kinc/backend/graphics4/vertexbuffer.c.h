@@ -1,5 +1,4 @@
 #include <kinc/backend/graphics4/vertexbuffer.h>
-
 #include <kinc/graphics4/graphics.h>
 #include <kinc/graphics4/vertexbuffer.h>
 

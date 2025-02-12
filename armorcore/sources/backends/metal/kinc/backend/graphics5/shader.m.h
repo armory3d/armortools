@@ -2,7 +2,6 @@
 #include <kinc/graphics5/shader.h>
 #include <kinc/log.h>
 #include <kinc/math/core.h>
-
 #include <Metal/Metal.h>
 
 id getMetalDevice(void);

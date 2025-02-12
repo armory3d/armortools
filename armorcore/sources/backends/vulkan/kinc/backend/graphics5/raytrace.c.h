@@ -1,5 +1,4 @@
 #include "vulkan.h"
-
 #include "raytrace.h"
 
 #ifndef KINC_ANDROID
@@ -1281,32 +1280,6 @@ void kinc_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
 	                   output->texWidth, output->texHeight, 1);
 
 	vkCmdBeginRenderPass(command_list->impl._buffer, &currentRenderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-}
-
-void kinc_raytrace_copy(kinc_g5_command_list_t *command_list, kinc_g5_render_target_t *target, kinc_g5_texture_t *source) {
-
-	/*vkCmdEndRenderPass(command_list->impl._buffer);
-
-	VkImageCopy copy_region = {0};
-	copy_region.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	copy_region.srcSubresource.layerCount = 1;
-	copy_region.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	copy_region.dstSubresource.layerCount = 1;
-	copy_region.extent.width = (uint32_t)output->texWidth;
-	copy_region.extent.height = (uint32_t)output->texHeight;
-	copy_region.extent.depth = 1;
-
-	if (target->framebuffer_index >= 0) {
-		vkCmdCopyImage(command_list->impl._buffer, output->impl.sourceImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-		               vk_ctx.windows[vk_ctx.current_window].images[vk_ctx.windows[vk_ctx.current_window].current_image], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		               1, &copy_region);
-	}
-	else {
-		vkCmdCopyImage(command_list->impl._buffer, output->impl.sourceImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, target->impl.sourceImage,
-		               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copy_region);
-	}
-
-	vkCmdBeginRenderPass(command_list->impl._buffer, &currentRenderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);*/
 }
 
 #endif

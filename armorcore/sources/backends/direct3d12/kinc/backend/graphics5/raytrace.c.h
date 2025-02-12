@@ -899,6 +899,3 @@ void kinc_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
 	dxrCommandList->lpVtbl->SetPipelineState1(dxrCommandList, pipeline->impl.dxr_state);
 	dxrCommandList->lpVtbl->DispatchRays(dxrCommandList, &dispatchDesc);
 }
-
-void kinc_raytrace_copy(kinc_g5_command_list_t *command_list, kinc_g5_render_target_t *target, kinc_g5_texture_t *source) {
-}

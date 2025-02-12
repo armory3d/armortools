@@ -1,8 +1,7 @@
 #pragma once
 
 #include <kinc/graphics5/vertexstructure.h>
-
-#include "MiniVulkan.h"
+#include "minivulkan.h"
 
 struct Vertices {
 	VkBuffer buf;

@@ -1,10 +1,8 @@
 #include <kinc/graphics5/shader.h>
 #include <kinc/graphics5/vertexbuffer.h>
-
 #include <kinc/graphics5/graphics.h>
 #include <kinc/graphics5/indexbuffer.h>
 #include <kinc/graphics5/vertexbuffer.h>
-
 #import <Metal/Metal.h>
 
 id getMetalDevice(void);

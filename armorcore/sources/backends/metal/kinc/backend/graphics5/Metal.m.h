@@ -1,12 +1,9 @@
 #include "Metal.h"
-
 #include <kinc/color.h>
 #include <kinc/system.h>
 #include <kinc/window.h>
-
 #include <kinc/graphics5/commandlist.h>
 #include <kinc/graphics5/rendertarget.h>
-
 #import <Metal/Metal.h>
 #import <MetalKit/MTKView.h>
 
@@ -138,10 +135,6 @@ bool kinc_g5_swap_buffers(void) {
 	command_buffer = nil;
 	render_command_encoder = nil;
 
-	return true;
-}
-
-bool kinc_window_vsynced(int window) {
 	return true;
 }
 

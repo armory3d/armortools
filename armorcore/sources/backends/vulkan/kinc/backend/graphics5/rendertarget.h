@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MiniVulkan.h"
+#include "minivulkan.h"
 
 typedef struct {
 	VkImage sourceImage;

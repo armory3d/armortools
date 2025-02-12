@@ -1,5 +1,4 @@
 #include "vulkan.h"
-
 #include <kinc/graphics5/constantbuffer.h>
 
 bool memory_type_from_properties(uint32_t typeBits, VkFlags requirements_mask, uint32_t *typeIndex);

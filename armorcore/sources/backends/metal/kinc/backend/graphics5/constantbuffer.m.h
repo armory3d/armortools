@@ -1,5 +1,4 @@
 #include <kinc/graphics5/constantbuffer.h>
-
 #import <Metal/Metal.h>
 
 id getMetalDevice(void);

@@ -1,6 +1,5 @@
 #include <kinc/graphics5/graphics.h>
 #include <kinc/graphics5/indexbuffer.h>
-
 #import <Metal/Metal.h>
 
 id getMetalDevice(void);

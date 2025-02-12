@@ -1,15 +1,11 @@
 #import "GLView.h"
 #import "GLViewController.h"
-
 #import <Foundation/Foundation.h>
-
 #include <kinc/graphics5/rendertarget.h>
 #include <kinc/math/core.h>
-
 #include <objc/runtime.h>
 
 static GLView *glView;
-
 static bool visible;
 
 void beginGL(void) {

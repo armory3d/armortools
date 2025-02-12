@@ -5,7 +5,6 @@
 #include <kinc/image.h>
 #include <kinc/log.h>
 #include <kinc/math/core.h>
-
 #include <stdio.h>
 #include <string.h>
 

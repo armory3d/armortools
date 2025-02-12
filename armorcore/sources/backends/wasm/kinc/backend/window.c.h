@@ -1,7 +1,6 @@
 #include <kinc/display.h>
 #include <kinc/graphics4/graphics.h>
 #include <kinc/window.h>
-
 #include <string.h>
 
 int kinc_internal_window_width = 0;

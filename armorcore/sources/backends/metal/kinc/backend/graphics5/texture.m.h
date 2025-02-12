@@ -1,10 +1,8 @@
 #include <kinc/graphics5/texture.h>
-
 #include <kinc/graphics5/graphics.h>
 #include <kinc/graphics5/texture.h>
 #include <kinc/image.h>
 #include <kinc/log.h>
-
 #import <Metal/Metal.h>
 
 id getMetalDevice(void);

@@ -1,4 +1,4 @@
-#include "ShaderHash.h"
+#include "shaderhash.h"
 
 // djb2
 uint32_t kinc_internal_hash_name(unsigned char *str) {

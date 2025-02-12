@@ -1,5 +1,4 @@
 #include "vulkan.h"
-
 #include <kinc/graphics5/texture.h>
 #include <kinc/image.h>
 #include <kinc/log.h>

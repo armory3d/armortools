@@ -1,5 +1,4 @@
 #include "SystemMicrosoft.h"
-
 #include <kinc/error.h>
 #include <stb_sprintf.h>
 

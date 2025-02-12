@@ -1,7 +1,6 @@
 #pragma once
 
-#include "MiniVulkan.h"
-
+#include "minivulkan.h"
 #include "named_number.h"
 
 struct kinc_g5_shader;

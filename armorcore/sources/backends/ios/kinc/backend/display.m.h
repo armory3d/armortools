@@ -1,5 +1,4 @@
 #import <UIKit/UIKit.h>
-
 #include <kinc/display.h>
 #include <kinc/log.h>
 

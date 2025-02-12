@@ -2,7 +2,6 @@
 #import "GLViewController.h"
 #import "KoreAppDelegate.h"
 #import <AVFAudio/AVFAudio.h>
-
 #include <kinc/system.h>
 #include <wchar.h>
 

@@ -1,5 +1,4 @@
 #include <kinc/backend/graphics4/pipeline.h>
-
 #include <kinc/graphics4/pipeline.h>
 #include <kinc/graphics4/shader.h>
 #include <kinc/graphics5/pipeline.h>

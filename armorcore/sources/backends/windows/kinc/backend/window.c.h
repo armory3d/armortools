@@ -1,7 +1,6 @@
 #include <kinc/display.h>
 #include <kinc/graphics4/graphics.h>
 #include <kinc/window.h>
-
 #include <kinc/backend/Windows.h>
 
 #undef CreateWindow

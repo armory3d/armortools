@@ -1,5 +1,4 @@
 #import <Cocoa/Cocoa.h>
-
 #include <kinc/display.h>
 #include <kinc/log.h>
 

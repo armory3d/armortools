@@ -3,11 +3,9 @@
 
 #include <CoreAudio/AudioHardware.h>
 #include <CoreServices/CoreServices.h>
-
 #include <kinc/audio2/audio.h>
 #include <kinc/backend/video.h>
 #include <kinc/log.h>
-
 #include <stdio.h>
 
 static kinc_internal_video_sound_stream_t *video = NULL;

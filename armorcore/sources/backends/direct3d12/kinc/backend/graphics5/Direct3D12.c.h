@@ -450,14 +450,6 @@ void kinc_g5_end(int window) {
 	began = false;
 }
 
-bool kinc_g5_vsynced() {
-	return true;
-}
-
-bool kinc_window_vsynced(int window) {
-	return true;
-}
-
 void kinc_g4_on_g5_internal_resize(int, int, int);
 
 void kinc_internal_resize(int windowId, int width, int height) {

@@ -6,10 +6,8 @@
 #include <kinc/graphics5/pipeline.h>
 #include <kinc/graphics5/vertexbuffer.h>
 #include <kinc/window.h>
-
 #import <Metal/Metal.h>
 #import <MetalKit/MTKView.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -1,5 +1,4 @@
 #include <kinc/graphics5/sampler.h>
-
 #include <assert.h>
 
 #define MAX_SAMPLERS_PER_STAGE 16

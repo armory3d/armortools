@@ -1,5 +1,4 @@
 #include <kinc/graphics5/constantbuffer.h>
-
 #include <stdlib.h>
 
 bool kinc_g5_transposeMat = false;

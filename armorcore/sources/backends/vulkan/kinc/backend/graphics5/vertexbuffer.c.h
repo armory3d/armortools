@@ -1,8 +1,6 @@
 #include "vulkan.h"
-
 #include "shader.h"
 #include "vertexbuffer.h"
-
 #include <kinc/graphics5/indexbuffer.h>
 #include <kinc/graphics5/vertexbuffer.h>
 

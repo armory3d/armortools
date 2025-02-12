@@ -1,7 +1,6 @@
 #include "G4.h"
 #include "kinc/graphics4/graphics.h"
 #include "kinc/window.h"
-
 #include <kinc/backend/graphics4/indexbuffer.h>
 #include <kinc/backend/graphics4/pipeline.h>
 #include <kinc/backend/graphics4/vertexbuffer.h>
@@ -22,7 +21,6 @@
 #include <kinc/math/core.h>
 #include <kinc/math/matrix.h>
 #include <kinc/system.h>
-
 #include <assert.h>
 #include <string.h>
 

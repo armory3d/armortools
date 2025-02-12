@@ -1,16 +1,12 @@
 #include "kinc/graphics4/graphics.h"
-
 #include "vulkan.h"
-
 #include <kinc/error.h>
 #include <kinc/graphics5/graphics.h>
 #include <kinc/graphics5/pipeline.h>
 #include <kinc/log.h>
 #include <kinc/system.h>
 #include <kinc/window.h>
-
 #include <stdlib.h>
-
 #include <vulkan/vulkan_core.h>
 
 struct vk_funs vk = {0};
@@ -1102,10 +1098,6 @@ void kinc_g5_internal_destroy_window(int window_index) {
 	destroy_render_target_pass(window);
 	vk.fpDestroySwapchainKHR(vk_ctx.device, swapchain, NULL);
 	vk.fpDestroySurfaceKHR(vk_ctx.instance, window->surface, NULL);
-}
-
-bool kinc_window_vsynced(int window) {
-	return true;
 }
 
 bool kinc_g5_swap_buffers() {

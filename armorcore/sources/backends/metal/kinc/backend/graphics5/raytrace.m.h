@@ -264,6 +264,3 @@ void kinc_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
 	[compute_encoder endEncoding];
 	[command_buffer commit];
 }
-
-void kinc_raytrace_copy(kinc_g5_command_list_t *command_list, kinc_g5_render_target_t *target, kinc_g5_texture_t *source) {
-}

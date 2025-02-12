@@ -42,4 +42,3 @@ void kinc_raytrace_set_acceleration_structure(kinc_raytrace_acceleration_structu
 void kinc_raytrace_set_pipeline(kinc_raytrace_pipeline_t *pipeline);
 void kinc_raytrace_set_target(struct kinc_g5_render_target *output);
 void kinc_raytrace_dispatch_rays(struct kinc_g5_command_list *command_list);
-void kinc_raytrace_copy(struct kinc_g5_command_list *command_list, struct kinc_g5_render_target *target, struct kinc_g5_texture *source);

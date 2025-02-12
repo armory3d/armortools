@@ -1,11 +1,9 @@
 #pragma once
 
 #include <kinc/global.h>
-
 #include <IOKit/IOKitLib.h>
 #include <IOKit/hid/IOHIDKeys.h>
 #include <IOKit/hid/IOHIDManager.h>
-
 #include "HIDGamepad.h"
 
 // Maximum number of devices supported

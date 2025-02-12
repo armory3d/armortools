@@ -60,7 +60,6 @@ void kinc_window_hide(int window);
 void kinc_window_set_title(int window, const char *title);
 void kinc_window_set_resize_callback(int window, void (*callback)(int x, int y, void *data), void *data);
 void kinc_window_set_close_callback(int window, bool (*callback)(void *data), void *data);
-bool kinc_window_vsynced(int window);
 
 void kinc_internal_call_resize_callback(int window, int width, int height);
 bool kinc_internal_call_close_callback(int window);

@@ -1,9 +1,5 @@
 #pragma once
 
-#ifndef _WIN64
-#include <kinc/error.h>
-#endif
-
 #include <intrin.h>
 
 static inline bool kinc_atomic_compare_exchange(volatile int32_t *pointer, int32_t old_value, int32_t new_value) {
@@ -43,11 +39,7 @@ static inline void kinc_atomic_exchange_float(volatile float *pointer, float val
 #define KINC_ATOMIC_EXCHANGE_FLOAT(pointer, value) (kinc_atomic_exchange_float(pointer, value))
 
 static inline void kinc_atomic_exchange_double(volatile double *pointer, double value) {
-#ifdef _WIN64
 	_InterlockedExchange64((volatile __int64 *)pointer, *(__int64 *)&value);
-#else
-	kinc_error_message("kinc_atomic_exchange_double is not supported for 32 bit Windows builds");
-#endif
 }
 
 #define KINC_ATOMIC_EXCHANGE_DOUBLE(pointer, value) (kinc_atomic_exchange_double(pointer, value))

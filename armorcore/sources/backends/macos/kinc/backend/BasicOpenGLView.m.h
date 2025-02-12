@@ -1,10 +1,8 @@
 #import "BasicOpenGLView.h"
-
 #include <kinc/input/keyboard.h>
 #include <kinc/input/mouse.h>
 #include <kinc/input/pen.h>
 #include <kinc/system.h>
-
 #include <kinc/graphics5/graphics.h>
 
 @implementation BasicOpenGLView

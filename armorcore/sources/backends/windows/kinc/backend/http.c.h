@@ -1,9 +1,7 @@
 #include <kinc/log.h>
 #include <kinc/network/http.h>
-
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <winhttp.h>
 
 static const wchar_t *convert(int method) {

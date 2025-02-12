@@ -1,12 +1,10 @@
 #import "KoreAppDelegate.h"
-
 #include <kinc/graphics4/graphics.h>
 #include <kinc/input/gamepad.h>
 #include <kinc/input/keyboard.h>
 #include <kinc/system.h>
 #include <kinc/video.h>
 #include <kinc/window.h>
-
 #import <AudioToolbox/AudioToolbox.h>
 #import <UIKit/UIKit.h>
 
@@ -66,7 +64,6 @@ const char *kinc_language(void) {
 	return language;
 }
 
-// called on rotation event
 void KoreUpdateKeyboard(void) {
 	if (keyboardshown) {
 		hideKeyboard();

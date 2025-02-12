@@ -1,6 +1,6 @@
 #pragma once
 
-#include <kinc/backend/graphics5/ShaderHash.h>
+#include <kinc/backend/graphics5/shaderhash.h>
 
 typedef struct {
 	uint32_t hash;

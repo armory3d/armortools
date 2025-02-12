@@ -2,7 +2,6 @@
 #ifdef KINC_A2
 
 #include <kinc/audio2/audio.h>
-
 #include <alsa/asoundlib.h>
 #include <errno.h>
 #include <poll.h>
@@ -60,9 +59,7 @@ bool tryToRecover(snd_pcm_t *handle, int errorCode) {
 	case EINTR:
 	case EPIPE:
 	case ESPIPE:
-#if !defined(__FreeBSD__)
 	case ESTRPIPE:
-#endif
 	{
 		int recovered = snd_pcm_recover(playback_handle, errorCode, 1);
 

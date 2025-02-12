@@ -1,9 +1,7 @@
 #include "vulkan.h"
-
 #include <kinc/graphics5/pipeline.h>
 #include <kinc/graphics5/shader.h>
 #include <vulkan/vulkan_core.h>
-
 #include <assert.h>
 
 VkDescriptorSetLayout desc_layout;

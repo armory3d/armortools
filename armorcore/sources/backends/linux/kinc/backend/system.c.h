@@ -8,18 +8,13 @@
 #include <kinc/system.h>
 #include <kinc/video.h>
 #include <kinc/window.h>
-
-#ifndef __FreeBSD__
 #include "gamepad.h"
-#endif
-
 #include <assert.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-
 #include <pwd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -31,9 +26,9 @@ bool kinc_internal_handle_messages() {
 	if (!procs.handle_messages()) {
 		return false;
 	}
-#ifndef __FreeBSD__
+
 	kinc_linux_updateHIDGamepads();
-#endif // TODO: add #else with proper call to FreeBSD backend impl
+
 	return true;
 }
 
@@ -148,9 +143,7 @@ kinc_ticks_t kinc_timestamp(void) {
 void kinc_linux_init_procs();
 
 int kinc_init(const char *name, int width, int height, kinc_window_options_t *win, kinc_framebuffer_options_t *frame) {
-#ifndef __FreeBSD__
 	kinc_linux_initHIDGamepads();
-#endif // TODO: add #else with proper call to FreeBSD backend impl
 
 	gettimeofday(&start, NULL);
 	kinc_linux_init_procs();
@@ -183,9 +176,7 @@ int kinc_init(const char *name, int width, int height, kinc_window_options_t *wi
 
 void kinc_internal_shutdown() {
 	kinc_g4_internal_destroy();
-#ifndef __FreeBSD__
 	kinc_linux_closeHIDGamepads();
-#endif // TODO: add #else with proper call to FreeBSD backend impl
 	procs.shutdown();
 	kinc_internal_shutdown_callback();
 }
@@ -271,11 +262,7 @@ int kinc_cpu_cores(void) {
 }
 
 int kinc_hardware_threads(void) {
-#ifndef __FreeBSD__
 	return sysconf(_SC_NPROCESSORS_ONLN);
-#else
-	return kinc_cpu_cores();
-#endif
 }
 
 #include <xkbcommon/xkbcommon.h>

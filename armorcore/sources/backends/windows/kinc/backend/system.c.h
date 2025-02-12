@@ -1,10 +1,7 @@
 #include <kinc/graphics4/graphics.h>
-
 #include <kinc/input/gamepad.h>
-
 #include <kinc/backend/SystemMicrosoft.h>
 #include <kinc/backend/Windows.h>
-
 #include <kinc/display.h>
 #include <kinc/input/keyboard.h>
 #include <kinc/input/mouse.h>
@@ -15,13 +12,11 @@
 #include <kinc/threads/thread.h>
 #include <kinc/video.h>
 #include <kinc/window.h>
-
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 #include <oleauto.h>
 #include <stdio.h>
 #include <wbemidl.h>
-
 #include <XInput.h>
 #include <dbghelp.h>
 #include <shellapi.h>

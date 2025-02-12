@@ -1,5 +1,4 @@
 #include <kinc/threads/mutex.h>
-
 #include <assert.h>
 
 void kinc_mutex_init(kinc_mutex_t *mutex) {

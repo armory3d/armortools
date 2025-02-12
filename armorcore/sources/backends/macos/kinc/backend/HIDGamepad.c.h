@@ -1,6 +1,5 @@
 #include "HIDGamepad.h"
 #include "HIDManager.h"
-
 #include <kinc/error.h>
 #include <kinc/input/gamepad.h>
 #include <kinc/log.h>

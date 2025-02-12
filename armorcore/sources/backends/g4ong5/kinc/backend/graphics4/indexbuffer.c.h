@@ -1,5 +1,4 @@
 #include <kinc/graphics4/indexbuffer.h>
-
 #include <kinc/graphics5/commandlist.h>
 
 extern kinc_g5_command_list_t commandList;

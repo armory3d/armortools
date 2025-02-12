@@ -1,5 +1,4 @@
 #include <kinc/graphics5/indexbuffer.h>
-
 #include <string.h>
 #include <stdlib.h>
 #include <kinc/graphics5/indexbuffer.h>
