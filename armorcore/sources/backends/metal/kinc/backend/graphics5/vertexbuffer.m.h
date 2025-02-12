@@ -66,14 +66,14 @@ void kinc_g5_vertex_buffer_unlock_all(kinc_g5_vertex_buffer_t *buf) {
 void kinc_g5_vertex_buffer_unlock(kinc_g5_vertex_buffer_t *buf, int count) {
 }
 
-int kinc_g5_internal_vertex_buffer_set(kinc_g5_vertex_buffer_t *buf, int offset_) {
+int kinc_g5_internal_vertex_buffer_set(kinc_g5_vertex_buffer_t *buf) {
 	currentVertexBuffer = buf;
 
 	id<MTLRenderCommandEncoder> encoder = getMetalEncoder();
 	id<MTLBuffer> buffer = (__bridge id<MTLBuffer>)buf->impl.mtlBuffer;
-	[encoder setVertexBuffer:buffer offset:offset_ * buf->impl.myStride atIndex:0];
+	[encoder setVertexBuffer:buffer offset:0 atIndex:0];
 
-	return offset_;
+	return 0;
 }
 
 int kinc_g5_vertex_buffer_count(kinc_g5_vertex_buffer_t *buffer) {

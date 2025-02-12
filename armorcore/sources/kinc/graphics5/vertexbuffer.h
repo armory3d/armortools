@@ -21,4 +21,4 @@ void kinc_g5_vertex_buffer_unlock(kinc_g5_vertex_buffer_t *buffer, int count);
 int kinc_g5_vertex_buffer_count(kinc_g5_vertex_buffer_t *buffer);
 int kinc_g5_vertex_buffer_stride(kinc_g5_vertex_buffer_t *buffer);
 
-int kinc_g5_internal_vertex_buffer_set(kinc_g5_vertex_buffer_t *buffer, int offset);
+int kinc_g5_internal_vertex_buffer_set(kinc_g5_vertex_buffer_t *buffer);

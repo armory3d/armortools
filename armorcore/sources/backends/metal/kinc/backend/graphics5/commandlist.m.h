@@ -146,14 +146,14 @@ void kinc_g5_command_list_set_render_targets(kinc_g5_command_list_t *list, struc
 	if (targets[0]->framebuffer_index >= 0) {
 		for (int i = 0; i < 8; ++i)
 			lastRenderTargets[i] = NULL;
-		kinc_g5_internal_new_render_pass(NULL, 1, false, 0, 0, 0.0f, 0);
+		kinc_g5_internal_new_render_pass(NULL, 1, false, 0, 0, 0.0f);
 	}
 	else {
 		for (int i = 0; i < count; ++i)
 			lastRenderTargets[i] = targets[i];
 		for (int i = count; i < 8; ++i)
 			lastRenderTargets[i] = NULL;
-		kinc_g5_internal_new_render_pass(targets, count, false, 0, 0, 0.0f, 0);
+		kinc_g5_internal_new_render_pass(targets, count, false, 0, 0, 0.0f);
 	}
 }
 
@@ -206,13 +206,13 @@ void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list,
 
 void kinc_g5_command_list_execute(kinc_g5_command_list_t *list) {
 	if (lastRenderTargets[0] == NULL) {
-		kinc_g5_internal_new_render_pass(NULL, 1, false, 0, 0, 0.0f, 0);
+		kinc_g5_internal_new_render_pass(NULL, 1, false, 0, 0, 0.0f);
 	}
 	else {
 		int count = 1;
 		while (lastRenderTargets[count] != NULL)
 			count++;
-		kinc_g5_internal_new_render_pass(lastRenderTargets, count, false, 0, 0, 0.0f, 0);
+		kinc_g5_internal_new_render_pass(lastRenderTargets, count, false, 0, 0, 0.0f);
 	}
 	if (lastPipeline != NULL)
 		kinc_g5_internal_pipeline_set(lastPipeline);

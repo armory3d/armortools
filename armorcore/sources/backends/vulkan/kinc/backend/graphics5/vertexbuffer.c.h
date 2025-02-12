@@ -96,7 +96,7 @@ void kinc_g5_vertex_buffer_unlock(kinc_g5_vertex_buffer_t *buffer, int count) {
 	vkUnmapMemory(vk_ctx.device, buffer->impl.vertices.mem);
 }
 
-int kinc_g5_internal_vertex_buffer_set(kinc_g5_vertex_buffer_t *buffer, int offset) {
+int kinc_g5_internal_vertex_buffer_set(kinc_g5_vertex_buffer_t *buffer) {
 	return 0;
 }
 

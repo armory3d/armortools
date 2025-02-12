@@ -86,7 +86,7 @@ void kinc_g5_vertex_buffer_unlock(kinc_g5_vertex_buffer_t *buffer, int count) {
 	buffer->impl.uploadBuffer->Unmap(0, &range);
 }
 
-int kinc_g5_internal_vertex_buffer_set(kinc_g5_vertex_buffer_t *buffer, int offset) {
+int kinc_g5_internal_vertex_buffer_set(kinc_g5_vertex_buffer_t *buffer) {
 	_current_vertex_buffer = buffer;
 	return 0;
 }
