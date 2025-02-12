@@ -13,10 +13,8 @@ in vec3 view_ray;
 in vec2 tex_coord;
 out float frag_color;
 
-const int max_steps = 8;
-const float ray_step = 0.01;
-const float angle_mix = 0.5;
-const float strength = 3.6;
+const int max_steps = 32;
+const float ray_step = 0.001;
 
 vec3 hit_coord;
 vec2 coord;
@@ -43,7 +41,7 @@ float get_delta_depth(vec3 hit_coord) {
 
 void ray_cast(vec3 dir) {
 	hit_coord = vpos;
-	dir *= ray_step * 2;
+	dir *= ray_step;
 	float dist = 0.15;
 	for (int i = 0; i < max_steps; i++) {
 		hit_coord += dir;
@@ -81,8 +79,8 @@ void main() {
 	vec3 o2 = (cross(o1, n));
 	vec3 c1 = 0.5f * (o1 + o2);
 	vec3 c2 = 0.5f * (o1 - o2);
-	ray_cast(mix(n, o1, angle_mix));
-	ray_cast(mix(n, o2, angle_mix));
-	ray_cast(mix(n, -c1, angle_mix));
-	ray_cast(mix(n, -c2, angle_mix));
+	ray_cast(mix(n, o1, 0.5));
+	ray_cast(mix(n, o2, 0.5));
+	ray_cast(mix(n, -c1, 0.5));
+	ray_cast(mix(n, -c2, 0.5));
 }
