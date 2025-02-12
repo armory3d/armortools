@@ -47,7 +47,7 @@
 #include <intrin.h>
 #include <stdio.h>
 
-#include "SystemMicrosoft.c.h"
+#include "system_microsoft.c.h"
 #include "event.c.h"
 #include "fiber.c.h"
 #include "mutex.c.h"

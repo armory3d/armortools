@@ -35,7 +35,7 @@ void kinc_file_writer_close(kinc_file_writer_t *writer);
 #include <string.h>
 
 #if defined(KINC_WINDOWS)
-#include <kinc/backend/MiniWindows.h>
+#include <kinc/backend/miniwindows.h>
 #endif
 
 bool kinc_file_writer_open(kinc_file_writer_t *writer, const char *filepath) {

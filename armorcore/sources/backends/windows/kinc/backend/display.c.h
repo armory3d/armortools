@@ -1,4 +1,4 @@
-#include <kinc/backend/Windows.h>
+#include <kinc/backend/windows.h>
 #include <kinc/display.h>
 #include <kinc/error.h>
 #include <kinc/log.h>

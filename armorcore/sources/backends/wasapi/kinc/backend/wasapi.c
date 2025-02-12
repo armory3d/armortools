@@ -2,7 +2,7 @@
 #ifdef KINC_A2
 
 #include <kinc/audio2/audio.h>
-#include <kinc/backend/SystemMicrosoft.h>
+#include <kinc/backend/system_microsoft.h>
 #include <kinc/error.h>
 #include <kinc/log.h>
 

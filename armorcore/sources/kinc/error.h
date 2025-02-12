@@ -35,8 +35,8 @@ void kinc_error_args(const char *format, va_list args);
 
 #ifdef KINC_WINDOWS
 
-#include <kinc/backend/MiniWindows.h>
-#include <kinc/backend/SystemMicrosoft.h>
+#include <kinc/backend/miniwindows.h>
+#include <kinc/backend/system_microsoft.h>
 #endif
 
 void kinc_affirm(bool condition) {

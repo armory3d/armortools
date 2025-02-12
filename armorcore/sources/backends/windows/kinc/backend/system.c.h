@@ -1,7 +1,7 @@
 #include <kinc/graphics4/graphics.h>
 #include <kinc/input/gamepad.h>
-#include <kinc/backend/SystemMicrosoft.h>
-#include <kinc/backend/Windows.h>
+#include <kinc/backend/system_microsoft.h>
+#include <kinc/backend/windows.h>
 #include <kinc/display.h>
 #include <kinc/input/keyboard.h>
 #include <kinc/input/mouse.h>

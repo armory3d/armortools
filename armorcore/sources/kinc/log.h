@@ -27,8 +27,8 @@ void kinc_log_args(kinc_log_level_t log_level, const char *format, va_list args)
 #endif
 
 #ifdef KINC_MICROSOFT
-#include <kinc/backend/MiniWindows.h>
-#include <kinc/backend/SystemMicrosoft.h>
+#include <kinc/backend/miniwindows.h>
+#include <kinc/backend/system_microsoft.h>
 #endif
 
 #ifdef KINC_ANDROID

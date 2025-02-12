@@ -8,7 +8,7 @@ static id<MTLComputeCommandEncoder> compute_command_encoder = nil;
 static void start_render_pass(void);
 static void end_render_pass(void);
 
-#include "Metal.m.h"
+#include "metal.m.h"
 #include "commandlist.m.h"
 #include "compute.m.h"
 #include "constantbuffer.m.h"

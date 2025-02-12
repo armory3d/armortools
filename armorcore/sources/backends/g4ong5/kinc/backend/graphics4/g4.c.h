@@ -1,4 +1,4 @@
-#include "G4.h"
+#include "g4.h"
 #include "kinc/graphics4/graphics.h"
 #include "kinc/window.h"
 #include <kinc/backend/graphics4/indexbuffer.h>

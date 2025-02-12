@@ -76,7 +76,7 @@ static bool compute_pipeline_set = false;
 #include <malloc.h>
 #include <stdbool.h>
 
-#include "Direct3D12.c.h"
+#include "direct3d12.c.h"
 #include "shaderhash.c.h"
 #include "commandlist.c.h"
 #include "compute.c.h"

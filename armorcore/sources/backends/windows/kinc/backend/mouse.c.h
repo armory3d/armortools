@@ -1,4 +1,4 @@
-#include <kinc/backend/Windows.h>
+#include <kinc/backend/windows.h>
 #include <kinc/system.h>
 #include <kinc/window.h>
 #include <kinc/input/mouse.h>

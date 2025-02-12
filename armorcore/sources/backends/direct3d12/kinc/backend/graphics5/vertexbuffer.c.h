@@ -1,6 +1,6 @@
 #include "vertexbuffer.h"
 #include <kinc/graphics5/vertexbuffer.h>
-#include <kinc/backend/SystemMicrosoft.h>
+#include <kinc/backend/system_microsoft.h>
 #include <kinc/graphics4/graphics.h>
 
 kinc_g5_vertex_buffer_t *_current_vertex_buffer = NULL;

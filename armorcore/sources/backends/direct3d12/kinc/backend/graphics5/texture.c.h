@@ -4,7 +4,7 @@
 #include <kinc/graphics5/texture.h>
 #include <kinc/math/core.h>
 
-#include <kinc/backend/SystemMicrosoft.h>
+#include <kinc/backend/system_microsoft.h>
 
 #include <math.h>
 

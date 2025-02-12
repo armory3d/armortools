@@ -1,6 +1,6 @@
 #include "indexbuffer.h"
 
-#include <kinc/backend/SystemMicrosoft.h>
+#include <kinc/backend/system_microsoft.h>
 #include <kinc/graphics5/indexbuffer.h>
 
 void kinc_g5_index_buffer_init(kinc_g5_index_buffer_t *buffer, int count, bool gpuMemory) {

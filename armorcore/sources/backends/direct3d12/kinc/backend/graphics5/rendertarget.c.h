@@ -1,7 +1,7 @@
 #include "rendertarget.h"
 #include <kinc/graphics5/rendertarget.h>
 #include <kinc/graphics5/texture.h>
-#include <kinc/backend/SystemMicrosoft.h>
+#include <kinc/backend/system_microsoft.h>
 #include <dxgi1_4.h>
 
 static void WaitForFence(ID3D12Fence *fence, UINT64 completionValue, HANDLE waitEvent) {

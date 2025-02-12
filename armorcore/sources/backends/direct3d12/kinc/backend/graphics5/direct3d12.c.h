@@ -10,8 +10,8 @@
 #include <dxgi1_4.h>
 #undef CreateWindow
 #include <kinc/system.h>
-#include <kinc/backend/Windows.h>
-#include <kinc/backend/SystemMicrosoft.h>
+#include <kinc/backend/windows.h>
+#include <kinc/backend/system_microsoft.h>
 
 ID3D12CommandQueue *commandQueue;
 

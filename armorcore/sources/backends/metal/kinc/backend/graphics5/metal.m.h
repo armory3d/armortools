@@ -1,4 +1,4 @@
-#include "Metal.h"
+#include "metal.h"
 #include <kinc/color.h>
 #include <kinc/system.h>
 #include <kinc/window.h>

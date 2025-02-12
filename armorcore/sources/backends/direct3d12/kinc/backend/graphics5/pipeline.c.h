@@ -4,7 +4,7 @@
 #include <kinc/graphics5/pipeline.h>
 #include <kinc/graphics5/shader.h>
 #include <kinc/log.h>
-#include <kinc/backend/SystemMicrosoft.h>
+#include <kinc/backend/system_microsoft.h>
 
 void kinc_g5_internal_setConstants(kinc_g5_command_list_t *commandList, kinc_g5_pipeline_t *pipeline) {
 	commandList->impl._commandList->lpVtbl->SetGraphicsRootSignature(commandList->impl._commandList, globalRootSignature);
