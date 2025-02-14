@@ -37,7 +37,6 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 
 	node_shader_add_out(vert, "vec2 tex_coord");
 	frag.wvpposition = true;
-	node_shader_add_out(vert, "vec4 prevwvpposition");
 	node_shader_add_uniform(vert, "mat4 VP", "_view_proj_matrix");
 	node_shader_add_uniform(vert, "mat4 prevWVP", "_prev_world_view_proj_matrix");
 	vert.wposition = true;
@@ -78,13 +77,6 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 
 	node_shader_write(vert, "gl_Position = mul(vec4(wposition.xyz, 1.0), VP);");
 	node_shader_write(vert, "tex_coord = tex;");
-	if (make_material_height_used && displace_strength > 0) {
-		node_shader_add_uniform(vert, "mat4 invW", "_inv_world_matrix");
-		node_shader_write(vert, "prevwvpposition = mul(mul(vec4(wposition, 1.0), invW), prevWVP);");
-	}
-	else {
-		node_shader_write(vert, "prevwvpposition = mul(vec4(pos.xyz, 1.0), prevWVP);");
-	}
 
 	node_shader_add_out(frag, "vec4 frag_color[3]");
 	frag.n = true;
@@ -492,9 +484,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 		node_shader_write(frag, "frag_color[0] = vec4(n.xy, roughness, pack_f32_i16(metallic, uint(int(matid * 255.0) % 3)));");
 	}
 
-	node_shader_write(frag, "vec2 posa = (wvpposition.xy / wvpposition.w) * 0.5 + 0.5;");
-	node_shader_write(frag, "vec2 posb = (prevwvpposition.xy / prevwvpposition.w) * 0.5 + 0.5;");
-	node_shader_write(frag, "frag_color[2] = vec4(posa - posb, tex_coord.xy);");
+	node_shader_write(frag, "frag_color[2] = vec4(0.0, 0.0, tex_coord.xy);");
 
 	parser_material_finalize(con_mesh);
 	con_mesh.data.shader_from_source = true;

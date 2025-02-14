@@ -1,12 +1,7 @@
 #version 450
 
-#define _Veloc
-
 uniform sampler2D color_tex;
 uniform sampler2D blend_tex;
-#ifdef _Veloc
-uniform sampler2D sveloc;
-#endif
 uniform vec2 screen_size_inv;
 
 in vec2 tex_coord;
@@ -21,15 +16,6 @@ vec4 textureLodA_color_tex(sampler2D color_tex, vec2 coords, float lod) {
 	return textureLod(color_tex, coords, lod);
 }
 
-vec4 textureLodA_sveloc(sampler2D sveloc, vec2 coords, float lod) {
-#ifdef GLSL
-#else
-	coords.y = 1.0 - coords.y;
-#endif
-
-	return textureLod(sveloc, coords, lod);
-}
-
 vec4 smaa_neighborhood_blending_ps(vec2 texcoord, vec4 offset) {
 	vec4 a;
 	a.x = textureLod(blend_tex, offset.xy, 0.0).a; // Right
@@ -38,11 +24,6 @@ vec4 smaa_neighborhood_blending_ps(vec2 texcoord, vec4 offset) {
 
 	if (dot(a, vec4(1.0, 1.0, 1.0, 1.0)) < 1e-5) {
 		vec4 color = textureLod(color_tex, texcoord, 0.0);
-
-#ifdef _Veloc
-		vec2 velocity = textureLod(sveloc, tex_coord, 0.0).rg;
-		color.a = sqrt(5.0 * length(velocity));
-#endif
 		return color;
 	}
 	else {
@@ -72,12 +53,6 @@ vec4 smaa_neighborhood_blending_ps(vec2 texcoord, vec4 offset) {
 		vec4 color = blending_weight.x * textureLodA_color_tex(color_tex, blending_coord.xy, 0.0);
 		color += blending_weight.y * textureLodA_color_tex(color_tex, blending_coord.zw, 0.0);
 
-#ifdef _Veloc
-		vec2 velocity = blending_weight.x * textureLodA_sveloc(sveloc, blending_coord.xy, 0.0).rg;
-		velocity += blending_weight.y * textureLodA_sveloc(sveloc, blending_coord.zw, 0.0).rg;
-
-		color.a = sqrt(5.0 * length(velocity));
-#endif
 		return color;
 	}
 	return vec4(0.0, 0.0, 0.0, 0.0);

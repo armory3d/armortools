@@ -230,6 +230,12 @@ function util_render_make_brush_preview() {
 
 	let _material: slot_material_t = context_raw.material;
 	context_raw.material = slot_material_create();
+
+	// Prevent grid jump
+	context_raw.material.nodes.pan_x = context_raw.brush.nodes.pan_x;
+	context_raw.material.nodes.pan_y = context_raw.brush.nodes.pan_y;
+	context_raw.material.nodes.zoom = context_raw.brush.nodes.zoom;
+
 	let _tool: workspace_tool_t = context_raw.tool;
 	context_raw.tool = workspace_tool_t.BRUSH;
 

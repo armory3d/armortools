@@ -300,17 +300,8 @@ function render_path_base_draw_deferred_light() {
 // 		render_path_set_target("buf");
 // 		render_path_bind_target("tex", "tex");
 // 		render_path_bind_target("gbuffer0", "gbuffer0");
-// 		///if (rp_motionblur == "Camera")
-// 		{
-// 			render_path_bind_target("_main", "gbufferD");
-// 			render_path_draw_shader("shader_datas/motion_blur_pass/motion_blur_pass");
-// 		}
-// 		///else
-// 		{
-// 			render_path_bind_target("gbuffer2", "sveloc");
-// 			render_path_draw_shader("shader_datas/motion_blur_veloc_pass/motion_blur_veloc_pass");
-// 		}
-// 		///end
+// 		render_path_bind_target("_main", "gbufferD");
+// 		render_path_draw_shader("shader_datas/motion_blur_pass/motion_blur_pass");
 // 		render_path_set_target("tex");
 // 		render_path_bind_target("buf", "tex");
 // 		render_path_draw_shader("shader_datas/copy_pass/copy_pass");
@@ -351,7 +342,6 @@ function render_path_base_draw_taa() {
 	render_path_set_target(current);
 	render_path_bind_target("buf", "color_tex");
 	render_path_bind_target("taa", "blend_tex");
-	render_path_bind_target("gbuffer2", "sveloc");
 	render_path_draw_shader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
 
 	let skip_taa: bool = context_raw.split_view;
@@ -364,7 +354,6 @@ function render_path_base_draw_taa() {
 		render_path_set_target("taa");
 		render_path_bind_target(current, "tex");
 		render_path_bind_target(last, "tex2");
-		render_path_bind_target("gbuffer2", "sveloc");
 		render_path_draw_shader("shader_datas/taa_pass/taa_pass");
 	}
 
