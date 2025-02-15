@@ -11,7 +11,7 @@
 #include <kinc/system.h>
 #include <kinc/display.h>
 #include <kinc/threads/thread.h>
-#include <kinc/graphics4/graphics.h>
+#include <kinc/graphics5/graphics.h>
 #include <kinc/io/filereader.h>
 #include "iron_string.h"
 #include "iron_array.h"
@@ -344,12 +344,11 @@ string_t *iron_get_arg(i32 index) {
 #include <kinc/math/core.h>
 #include <kinc/threads/mutex.h>
 #include <kinc/network/http.h>
-#include <kinc/graphics4/shader.h>
-#include <kinc/graphics4/vertexbuffer.h>
-#include <kinc/graphics4/indexbuffer.h>
-#include <kinc/graphics4/pipeline.h>
-#include <kinc/graphics4/rendertarget.h>
-#include <kinc/graphics4/texture.h>
+#include <kinc/graphics5/vertexbuffer.h>
+#include <kinc/graphics5/indexbuffer.h>
+#include <kinc/graphics5/pipeline.h>
+#include <kinc/graphics5/rendertarget.h>
+#include <kinc/graphics5/texture.h>
 #ifdef WITH_AUDIO
 #include <kinc/audio1/audio.h>
 #include <kinc/audio1/sound.h>

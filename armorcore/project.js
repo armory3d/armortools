@@ -8,7 +8,6 @@ let project = new Project(flags.name);
 
 	project.add_cfiles("sources/kinc/*");
 	project.add_cfiles("sources/kinc/graphics2/*");
-	project.add_cfiles("sources/kinc/graphics4/*");
 	project.add_cfiles("sources/kinc/input/*");
 	project.add_cfiles("sources/kinc/io/*");
 	project.add_cfiles("sources/kinc/math/*");

@@ -2,15 +2,13 @@
 #include "g2_font.h"
 
 #include <math.h>
-#include <kinc/graphics4/graphics.h>
-#include <kinc/graphics4/indexbuffer.h>
-#include <kinc/graphics4/pipeline.h>
-#include <kinc/graphics4/shader.h>
-#include <kinc/graphics4/texture.h>
-#include <kinc/graphics4/rendertarget.h>
-#include <kinc/graphics4/textureunit.h>
-#include <kinc/graphics4/vertexbuffer.h>
-#include <kinc/graphics4/vertexstructure.h>
+#include <kinc/graphics5/graphics.h>
+#include <kinc/graphics5/indexbuffer.h>
+#include <kinc/graphics5/pipeline.h>
+#include <kinc/graphics5/texture.h>
+#include <kinc/graphics5/rendertarget.h>
+#include <kinc/graphics5/vertexbuffer.h>
+#include <kinc/graphics5/vertexstructure.h>
 #include <kinc/io/filereader.h>
 #include <kinc/math/matrix.h>
 #include <kinc/math/vector.h>

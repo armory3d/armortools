@@ -1,4 +1,4 @@
-#include <kinc/graphics5/shader.h>
+#include <kinc/graphics5/pipeline.h>
 #include <string.h>
 
 extern WGPUDevice device;

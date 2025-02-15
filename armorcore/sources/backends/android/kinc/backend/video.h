@@ -1,6 +1,6 @@
 #pragma once
 
-#include <kinc/graphics4/texture.h>
+#include <kinc/graphics5/texture.h>
 
 typedef struct {
 	void *assetReader;

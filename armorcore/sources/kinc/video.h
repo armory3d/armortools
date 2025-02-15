@@ -2,7 +2,7 @@
 
 #include <kinc/global.h>
 #include <kinc/backend/video.h>
-#include <kinc/graphics4/texture.h>
+#include <kinc/graphics5/texture.h>
 
 /*! \file video.h
     \brief Hardware-assisted video decoding support. Actually supported

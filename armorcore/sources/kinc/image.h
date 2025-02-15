@@ -61,7 +61,7 @@ int kinc_image_format_sizeof(kinc_image_format_t format);
 #endif
 
 #undef KINC_IMPLEMENTATION
-#include <kinc/graphics4/graphics.h>
+#include <kinc/graphics5/graphics.h>
 #include <kinc/io/filereader.h>
 #include <kinc/math/core.h>
 #define KINC_IMPLEMENTATION

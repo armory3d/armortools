@@ -1,5 +1,5 @@
 #include <kinc/graphics5/compute.h>
-#include <kinc/graphics4/texture.h>
+#include <kinc/graphics5/texture.h>
 #include <kinc/math/core.h>
 #include <Metal/Metal.h>
 

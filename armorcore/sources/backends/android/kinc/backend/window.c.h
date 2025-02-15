@@ -1,5 +1,5 @@
 #include <kinc/display.h>
-#include <kinc/graphics4/graphics.h>
+#include <kinc/graphics5/graphics.h>
 #include <kinc/window.h>
 
 static void (*resizeCallback)(int x, int y, void *data) = NULL;

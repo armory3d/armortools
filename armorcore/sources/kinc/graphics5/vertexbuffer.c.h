@@ -1,7 +1,7 @@
 #include "vertexbuffer.h"
+#include <kinc/graphics5/graphics.h>
 
-#include <kinc/graphics4/graphics.h>
-#include <kinc/graphics4/vertexbuffer.h>
+extern bool waitAfterNextDraw;
 
 static void init_vertex_element(kinc_g4_vertex_element_t *element, const char *name, kinc_g4_vertex_data_t data) {
 	element->name = name;
@@ -15,8 +15,6 @@ void kinc_g4_vertex_structure_init(kinc_g4_vertex_structure_t *structure) {
 void kinc_g4_vertex_structure_add(kinc_g4_vertex_structure_t *structure, const char *name, kinc_g4_vertex_data_t data) {
 	init_vertex_element(&structure->elements[structure->size++], name, data);
 }
-
-extern bool waitAfterNextDraw;
 
 void kinc_g4_vertex_buffer_init(kinc_g4_vertex_buffer_t *buffer, int count, kinc_g4_vertex_structure_t *structure, kinc_g4_usage_t usage) {
 	buffer->impl._multiple = usage == KINC_G4_USAGE_STATIC ? 1 : 2;

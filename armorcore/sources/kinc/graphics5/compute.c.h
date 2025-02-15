@@ -1,7 +1,7 @@
-#include <kinc/graphics4/compute.h>
-#include <kinc/graphics4/graphics.h>
-#include <kinc/graphics4/rendertarget.h>
-#include <kinc/graphics4/texture.h>
+#include <kinc/graphics5/compute.h>
+#include <kinc/graphics5/graphics.h>
+#include <kinc/graphics5/rendertarget.h>
+#include <kinc/graphics5/texture.h>
 #include <kinc/image.h>
 #include <kinc/log.h>
 #include <kinc/math/core.h>

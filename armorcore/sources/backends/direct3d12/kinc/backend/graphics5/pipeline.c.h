@@ -2,7 +2,6 @@
 
 #include <kinc/graphics5/graphics.h>
 #include <kinc/graphics5/pipeline.h>
-#include <kinc/graphics5/shader.h>
 #include <kinc/log.h>
 #include <kinc/backend/system_microsoft.h>
 

@@ -1,5 +1,5 @@
 #include <kinc/graphics5/compute.h>
-#include <kinc/graphics4/texture.h>
+#include <kinc/graphics5/texture.h>
 #include <kinc/log.h>
 #include <kinc/math/core.h>
 #include <kinc/backend/system_microsoft.h>

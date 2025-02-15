@@ -1,24 +1,22 @@
-#include "g4.h"
-#include "kinc/graphics4/graphics.h"
-#include "kinc/window.h"
+#include <kinc/graphics5/graphics.h>
+#include <kinc/window.h>
 #include <kinc/color.h>
-#include <kinc/graphics4/compute.h>
-#include <kinc/graphics4/indexbuffer.h>
-#include <kinc/graphics4/pipeline.h>
-#include <kinc/graphics4/rendertarget.h>
-#include <kinc/graphics4/shader.h>
-#include <kinc/graphics4/texture.h>
-#include <kinc/graphics4/vertexbuffer.h>
+#include <kinc/graphics5/indexbuffer.h>
+#include <kinc/graphics5/pipeline.h>
+#include <kinc/graphics5/rendertarget.h>
+#include <kinc/graphics5/texture.h>
+#include <kinc/graphics5/vertexbuffer.h>
 #include <kinc/graphics5/commandlist.h>
 #include <kinc/graphics5/compute.h>
 #include <kinc/graphics5/constantbuffer.h>
-#include <kinc/graphics5/graphics.h>
 #include <kinc/io/filereader.h>
 #include <kinc/math/core.h>
 #include <kinc/math/matrix.h>
 #include <kinc/system.h>
 #include <assert.h>
 #include <string.h>
+
+void samplers_reset(void);
 
 bool kinc_g5_texture_unit_equals(kinc_g5_texture_unit_t *unit1, kinc_g5_texture_unit_t *unit2) {
 	for (int i = 0; i < KINC_G5_SHADER_TYPE_COUNT; ++i) {
@@ -134,6 +132,8 @@ void kinc_g4_internal_init_window(int window, int depthBufferBits, bool vsync) {
 	// to support doing work after kinc_g4_end and before kinc_g4_begin
 	kinc_g5_command_list_begin(&commandList);
 }
+
+kinc_g5_sampler_t *get_current_sampler(int stage, int unit);
 
 void kinc_g4_on_g5_internal_set_samplers(int count, kinc_g5_texture_unit_t *texture_units) {
 	for (int i = 0; i < count; ++i) {
