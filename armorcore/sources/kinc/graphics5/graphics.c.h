@@ -41,8 +41,6 @@ static struct {
 	bool resized;
 } windows[16] = {0};
 
-static int current_window;
-
 #define MAX_TEXTURES 16
 
 typedef struct render_state {
@@ -100,28 +98,28 @@ void kinc_g4_internal_destroy(void) {
 	kinc_g5_internal_destroy();
 }
 
-void kinc_g4_internal_destroy_window(int window) {
-	kinc_g5_internal_destroy_window(window);
+void kinc_g4_internal_destroy_window() {
+	kinc_g5_internal_destroy_window();
 }
 
-void kinc_g4_on_g5_internal_resize(int window, int width, int height) {
-	windows[window].resized = true;
+void kinc_g4_on_g5_internal_resize(int width, int height) {
+	windows[0].resized = true;
 }
 
 void kinc_g4_on_g5_internal_restore_render_target(void) {
-	windows[current_window].current_render_targets[0] = NULL;
-	kinc_g5_render_target_t *render_target = &windows[current_window].framebuffers[windows[current_window].currentBuffer];
+	windows[0].current_render_targets[0] = NULL;
+	kinc_g5_render_target_t *render_target = &windows[0].framebuffers[windows[0].currentBuffer];
 	kinc_g5_command_list_set_render_targets(&commandList, &render_target, 1);
-	windows[current_window].current_render_target_count = 1;
+	windows[0].current_render_target_count = 1;
 }
 
-void kinc_g4_internal_init_window(int window, int depthBufferBits, bool vsync) {
-	kinc_g5_internal_init_window(window, depthBufferBits, vsync);
+void kinc_g4_internal_init_window(int depthBufferBits, bool vsync) {
+	kinc_g5_internal_init_window(depthBufferBits, vsync);
 
 	kinc_g5_command_list_init(&commandList);
-	windows[window].currentBuffer = -1;
+	windows[0].currentBuffer = -1;
 	for (int i = 0; i < bufferCount; ++i) {
-		kinc_g5_render_target_init_framebuffer(&windows[window].framebuffers[i], kinc_window_width(window), kinc_window_height(window),
+		kinc_g5_render_target_init_framebuffer(&windows[0].framebuffers[i], kinc_window_width(), kinc_window_height(),
 		                                       KINC_G5_RENDER_TARGET_FORMAT_32BIT, depthBufferBits);
 	}
 	kinc_g5_constant_buffer_init(&vertexConstantBuffer, constantBufferSize * constantBufferMultiply);
@@ -180,14 +178,14 @@ static void endDraw(bool compute) {
 		kinc_g5_command_list_execute(&commandList);
 		kinc_g5_command_list_wait_for_execution_to_finish(&commandList);
 		kinc_g5_command_list_begin(&commandList);
-		if (windows[current_window].current_render_targets[0] == NULL) {
+		if (windows[0].current_render_targets[0] == NULL) {
 			kinc_g4_on_g5_internal_restore_render_target();
 		}
 		else {
-			const int count = windows[current_window].current_render_target_count;
+			const int count = windows[0].current_render_target_count;
 			kinc_g5_render_target_t *render_targets[16];
 			for (int i = 0; i < count; ++i) {
-				render_targets[i] = &windows[current_window].current_render_targets[i]->impl._renderTarget;
+				render_targets[i] = &windows[0].current_render_targets[i]->impl._renderTarget;
 			}
 			kinc_g5_command_list_set_render_targets(&commandList, render_targets, count);
 		}
@@ -256,51 +254,49 @@ void kinc_g4_draw_indexed_vertices_from_to(int start, int count) {
 }
 
 void kinc_g4_clear(unsigned flags, unsigned color, float depth) {
-	if (windows[current_window].current_render_target_count > 0) {
-		if (windows[current_window].current_render_targets[0] == NULL) {
-			kinc_g5_command_list_clear(&commandList, &windows[current_window].framebuffers[windows[current_window].currentBuffer], flags, color, depth);
+	if (windows[0].current_render_target_count > 0) {
+		if (windows[0].current_render_targets[0] == NULL) {
+			kinc_g5_command_list_clear(&commandList, &windows[0].framebuffers[windows[0].currentBuffer], flags, color, depth);
 		}
 		else {
-			if (windows[current_window].current_render_targets[0]->impl.state != KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET) {
-				kinc_g5_command_list_texture_to_render_target_barrier(&commandList, &windows[current_window].current_render_targets[0]->impl._renderTarget);
-				windows[current_window].current_render_targets[0]->impl.state = KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
+			if (windows[0].current_render_targets[0]->impl.state != KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET) {
+				kinc_g5_command_list_texture_to_render_target_barrier(&commandList, &windows[0].current_render_targets[0]->impl._renderTarget);
+				windows[0].current_render_targets[0]->impl.state = KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
 			}
-			kinc_g5_command_list_clear(&commandList, &windows[current_window].current_render_targets[0]->impl._renderTarget, flags, color, depth);
+			kinc_g5_command_list_clear(&commandList, &windows[0].current_render_targets[0]->impl._renderTarget, flags, color, depth);
 		}
 	}
 }
 
 bool first_run = true;
 
-void kinc_g4_begin(int window) {
+void kinc_g4_begin() {
 	// to support doing work after kinc_g4_end and before kinc_g4_begin
 	kinc_g5_command_list_end(&commandList);
 	kinc_g5_command_list_execute(&commandList);
 
-	current_window = window;
+	windows[0].currentBuffer = (windows[0].currentBuffer + 1) % bufferCount;
 
-	windows[current_window].currentBuffer = (windows[current_window].currentBuffer + 1) % bufferCount;
-
-	bool resized = windows[window].resized;
+	bool resized = windows[0].resized;
 	if (resized) {
 		for (int i = 0; i < bufferCount; ++i) {
-			kinc_g5_render_target_destroy(&windows[current_window].framebuffers[i]);
+			kinc_g5_render_target_destroy(&windows[0].framebuffers[i]);
 		}
-		windows[current_window].currentBuffer = 0;
+		windows[0].currentBuffer = 0;
 	}
 
-	kinc_g5_begin(&windows[current_window].framebuffers[windows[current_window].currentBuffer], window);
+	kinc_g5_begin(&windows[0].framebuffers[windows[0].currentBuffer]);
 
 	if (resized) {
 		for (int i = 0; i < bufferCount; ++i) {
-			kinc_g5_render_target_init_framebuffer(&windows[current_window].framebuffers[i], kinc_window_width(window), kinc_window_height(window),
+			kinc_g5_render_target_init_framebuffer(&windows[0].framebuffers[i], kinc_window_width(), kinc_window_height(),
 			                                       KINC_G5_RENDER_TARGET_FORMAT_32BIT, 16);
 		}
-		windows[window].resized = false;
+		windows[0].resized = false;
 	}
 
-	windows[current_window].current_render_targets[0] = NULL;
-	windows[current_window].current_render_target_count = 1;
+	windows[0].current_render_targets[0] = NULL;
+	windows[0].current_render_target_count = 1;
 
 	current_state.pipeline = NULL;
 	current_state.compute_shader = NULL;
@@ -319,7 +315,7 @@ void kinc_g4_begin(int window) {
 	// Currently we do not necessarily wait at the end of a frame so for now it's endDraw
 	endDraw(false);
 
-	kinc_g5_command_list_framebuffer_to_render_target_barrier(&commandList, &windows[current_window].framebuffers[windows[current_window].currentBuffer]);
+	kinc_g5_command_list_framebuffer_to_render_target_barrier(&commandList, &windows[0].framebuffers[windows[0].currentBuffer]);
 	kinc_g4_restore_render_target();
 }
 
@@ -346,16 +342,16 @@ void kinc_g4_disable_scissor(void) {
 	kinc_g5_command_list_disable_scissor(&commandList);
 }
 
-void kinc_g4_end(int window) {
+void kinc_g4_end() {
 	kinc_g5_constant_buffer_unlock(&vertexConstantBuffer);
 	kinc_g5_constant_buffer_unlock(&fragmentConstantBuffer);
 	kinc_g5_constant_buffer_unlock(&computeConstantBuffer);
 
-	kinc_g5_command_list_render_target_to_framebuffer_barrier(&commandList, &windows[current_window].framebuffers[windows[current_window].currentBuffer]);
+	kinc_g5_command_list_render_target_to_framebuffer_barrier(&commandList, &windows[0].framebuffers[windows[0].currentBuffer]);
 	kinc_g5_command_list_end(&commandList);
 	kinc_g5_command_list_execute(&commandList);
 
-	kinc_g5_end(window);
+	kinc_g5_end();
 
 	// to support doing work after kinc_g4_end and before kinc_g4_begin
 	kinc_g5_command_list_begin(&commandList);
@@ -523,13 +519,13 @@ void kinc_g4_restore_render_target(void) {
 
 void kinc_g4_set_render_targets(kinc_g4_render_target_t **targets, int count) {
 	for (int i = 0; i < count; ++i) {
-		windows[current_window].current_render_targets[i] = targets[i];
-		if (windows[current_window].current_render_targets[i]->impl.state != KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET) {
-			kinc_g5_command_list_texture_to_render_target_barrier(&commandList, &windows[current_window].current_render_targets[i]->impl._renderTarget);
-			windows[current_window].current_render_targets[i]->impl.state = KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
+		windows[0].current_render_targets[i] = targets[i];
+		if (windows[0].current_render_targets[i]->impl.state != KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET) {
+			kinc_g5_command_list_texture_to_render_target_barrier(&commandList, &windows[0].current_render_targets[i]->impl._renderTarget);
+			windows[0].current_render_targets[i]->impl.state = KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
 		}
 	}
-	windows[current_window].current_render_target_count = count;
+	windows[0].current_render_target_count = count;
 	kinc_g5_render_target_t *render_targets[16];
 	assert(count <= 16);
 	for (int i = 0; i < count; ++i) {

@@ -3,9 +3,9 @@
 #include <kinc/window.h>
 #include <kinc/input/mouse.h>
 
-void kinc_internal_mouse_lock(int window) {
+void kinc_internal_mouse_lock() {
 	kinc_mouse_hide();
-	HWND handle = kinc_windows_window_handle(window);
+	HWND handle = kinc_windows_window_handle();
 	SetCapture(handle);
 	RECT rect;
 	GetWindowRect(handle, &rect);
@@ -34,18 +34,18 @@ void kinc_mouse_hide() {
 	}
 }
 
-void kinc_mouse_set_position(int window, int x, int y) {
+void kinc_mouse_set_position(int x, int y) {
 	POINT point;
 	point.x = x;
 	point.y = y;
-	ClientToScreen(kinc_windows_window_handle(window), &point);
+	ClientToScreen(kinc_windows_window_handle(), &point);
 	SetCursorPos(point.x, point.y);
 }
 
-void kinc_mouse_get_position(int window, int *x, int *y) {
+void kinc_mouse_get_position(int *x, int *y) {
 	POINT point;
 	GetCursorPos(&point);
-	ScreenToClient(kinc_windows_window_handle(window), &point);
+	ScreenToClient(kinc_windows_window_handle(), &point);
 	*x = point.x;
 	*y = point.y;
 }

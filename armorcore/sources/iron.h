@@ -207,7 +207,7 @@ char temp_string_fs[1024 * 128];
 char temp_string_vstruct[32][32];
 #ifdef KINC_WINDOWS
 wchar_t temp_wstring[1024 * 32];
-struct HWND__ *kinc_windows_window_handle(int window_index);
+struct HWND__ *kinc_windows_window_handle();
 #endif
 
 void (*iron_update)(void);
@@ -438,9 +438,9 @@ void _update(void *data) {
 	#endif
 
 	#ifdef IDLE_SLEEP
-	if (last_window_width != kinc_window_width(0) || last_window_height != kinc_window_height(0)) {
-		last_window_width = kinc_window_width(0);
-		last_window_height = kinc_window_height(0);
+	if (last_window_width != kinc_window_width() || last_window_height != kinc_window_height()) {
+		last_window_width = kinc_window_width();
+		last_window_height = kinc_window_height();
 		paused_frames = 0;
 	}
 	#if defined(KINC_IOS) || defined(KINC_ANDROID)
@@ -465,9 +465,9 @@ void _update(void *data) {
 	kinc_a2_update();
 	#endif
 
-	kinc_g4_begin(0);
+	kinc_g4_begin();
 	iron_update();
-	kinc_g4_end(0);
+	kinc_g4_end();
 	kinc_g5_swap_buffers();
 }
 
@@ -549,7 +549,7 @@ void _key_press(unsigned int character, void *data) {
 	#endif
 }
 
-void _mouse_down(int window, int button, int x, int y, void *data) {
+void _mouse_down(int button, int x, int y, void *data) {
 	iron_mouse_down(button, x, y);
 
 	for (int i = 0; i < ui_instances_count; ++i) {
@@ -562,7 +562,7 @@ void _mouse_down(int window, int button, int x, int y, void *data) {
 	#endif
 }
 
-void _mouse_up(int window, int button, int x, int y, void *data) {
+void _mouse_up(int button, int x, int y, void *data) {
 	iron_mouse_up(button, x, y);
 
 	for (int i = 0; i < ui_instances_count; ++i) {
@@ -575,7 +575,7 @@ void _mouse_up(int window, int button, int x, int y, void *data) {
 	#endif
 }
 
-void _mouse_move(int window, int x, int y, int mx, int my, void *data) {
+void _mouse_move(int x, int y, int mx, int my, void *data) {
 	iron_mouse_move(x, y, mx, my);
 
 	for (int i = 0; i < ui_instances_count; ++i) {
@@ -587,7 +587,7 @@ void _mouse_move(int window, int x, int y, int mx, int my, void *data) {
 	#endif
 }
 
-void _mouse_wheel(int window, int delta, void *data) {
+void _mouse_wheel(int delta, void *data) {
 	iron_mouse_wheel(delta);
 
 	for (int i = 0; i < ui_instances_count; ++i) {
@@ -643,7 +643,7 @@ void _touch_up(int index, int x, int y) {
 	#endif
 }
 
-void _pen_down(int window, int x, int y, float pressure) {
+void _pen_down(int x, int y, float pressure) {
 	iron_pen_down(x, y, pressure);
 
 	for (int i = 0; i < ui_instances_count; ++i) {
@@ -656,7 +656,7 @@ void _pen_down(int window, int x, int y, float pressure) {
 	#endif
 }
 
-void _pen_up(int window, int x, int y, float pressure) {
+void _pen_up(int x, int y, float pressure) {
 	iron_pen_up(x, y, pressure);
 
 	for (int i = 0; i < ui_instances_count; ++i) {
@@ -669,7 +669,7 @@ void _pen_up(int window, int x, int y, float pressure) {
 	#endif
 }
 
-void _pen_move(int window, int x, int y, float pressure) {
+void _pen_move(int x, int y, float pressure) {
 	iron_pen_move(x, y, pressure);
 
 	for (int i = 0; i < ui_instances_count; ++i) {
@@ -702,8 +702,8 @@ void _drop_files(wchar_t *file_path, void *data) {
 #ifdef KINC_WINDOWS
 	POINT p;
 	GetCursorPos(&p);
-	ScreenToClient(kinc_windows_window_handle(0), &p);
-	_mouse_move(0, p.x, p.y, 0, 0, NULL);
+	ScreenToClient(kinc_windows_window_handle(), &p);
+	_mouse_move(p.x, p.y, 0, 0, NULL);
 #endif
 
 	char buffer[512];
@@ -852,7 +852,7 @@ void iron_init(string_t *title, i32 width, i32 height, bool vsync, i32 window_mo
 	#ifdef KINC_WINDOWS
 	// Maximized window has x < -1, prevent window centering done by kinc
 	if (win.x < -1 && win.y < -1) {
-		kinc_window_move(0, win.x, win.y);
+		kinc_window_move(win.x, win.y);
 	}
 	#endif
 
@@ -1007,7 +1007,7 @@ bool iron_is_mouse_locked() {
 }
 
 void iron_set_mouse_position(i32 x, i32 y) {
-	kinc_mouse_set_position(0, x, y);
+	kinc_mouse_set_position(x, y);
 }
 
 void iron_show_mouse(bool show) {
@@ -1716,34 +1716,34 @@ f32 iron_get_time() {
 }
 
 i32 iron_window_width() {
-	return kinc_window_width(0);
+	return kinc_window_width();
 }
 
 i32 iron_window_height() {
-	return kinc_window_height(0);
+	return kinc_window_height();
 }
 
 void iron_set_window_title(string_t *title) {
-	kinc_window_set_title(0, title);
+	kinc_window_set_title(title);
 	#if defined(KINC_IOS) || defined(KINC_ANDROID)
 	strcpy(mobile_title, title);
 	#endif
 }
 
 i32 iron_get_window_mode() {
-	return kinc_window_get_mode(0);
+	return kinc_window_get_mode();
 }
 
 void iron_set_window_mode(i32 mode) {
-	kinc_window_change_mode(0, (kinc_window_mode_t)mode);
+	kinc_window_change_mode((kinc_window_mode_t)mode);
 }
 
 void iron_resize_window(i32 width, i32 height) {
-	kinc_window_resize(0, width, height);
+	kinc_window_resize(width, height);
 }
 
 void iron_move_window(i32 x, i32 y) {
-	kinc_window_move(0, x, y);
+	kinc_window_move(x, y);
 }
 
 i32 iron_screen_dpi() {
@@ -2028,9 +2028,9 @@ void iron_g4_end() {
 }
 
 void iron_g4_swap_buffers() {
-	kinc_g4_end(0);
+	kinc_g4_end();
 	kinc_g5_swap_buffers();
-	kinc_g4_begin(0);
+	kinc_g4_begin();
 }
 
 void iron_file_save_bytes(string_t *path, buffer_t *bytes, u64 length) {
@@ -2148,10 +2148,10 @@ bool _window_close_callback(void *data) {
 	#ifdef KINC_WINDOWS
 	bool save = false;
 	wchar_t title[1024];
-	GetWindowTextW(kinc_windows_window_handle(0), title, sizeof(title));
+	GetWindowTextW(kinc_windows_window_handle(), title, sizeof(title));
 	bool dirty = wcsstr(title, L"* - ArmorPaint") != NULL;
 	if (dirty) {
-		int res = MessageBox(kinc_windows_window_handle(0), L"Project has been modified, save changes?", L"Save Changes?", MB_YESNOCANCEL | MB_ICONEXCLAMATION);
+		int res = MessageBox(kinc_windows_window_handle(), L"Project has been modified, save changes?", L"Save Changes?", MB_YESNOCANCEL | MB_ICONEXCLAMATION);
 		if (res == IDYES) {
 			save = true;
 		}
@@ -2173,7 +2173,7 @@ bool _window_close_callback(void *data) {
 void iron_set_save_and_quit_callback(void (*callback)(bool)) {
 	iron_save_and_quit = callback;
 	save_and_quit_callback_set = true;
-	kinc_window_set_close_callback(0, _window_close_callback, NULL);
+	kinc_window_set_close_callback(_window_close_callback, NULL);
 }
 
 void iron_set_mouse_cursor(i32 id) {
@@ -2874,11 +2874,11 @@ void iron_raytrace_dispatch_rays(kinc_g4_render_target_t *render_target, buffer_
 #endif
 
 i32 iron_window_x() {
-	return kinc_window_x(0);
+	return kinc_window_x();
 }
 
 i32 iron_window_y() {
-	return kinc_window_y(0);
+	return kinc_window_y();
 }
 
 char *iron_language() {

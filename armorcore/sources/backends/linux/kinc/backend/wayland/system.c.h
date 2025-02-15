@@ -181,9 +181,6 @@ void wl_pointer_handle_enter(void *data, struct wl_pointer *wl_pointer, uint32_t
 	struct kinc_wl_mouse *mouse = data;
 	mouse->enter_serial = serial;
 	window->decorations.focus = focus;
-	if (window != NULL) {
-		mouse->current_window = window->window_id;
-	}
 }
 
 void wl_pointer_handle_leave(void *data, struct wl_pointer *wl_pointer, uint32_t serial, struct wl_surface *surface) {
@@ -219,7 +216,7 @@ void kinc_wayland_set_cursor(struct kinc_wl_mouse *mouse, const char *name) {
 
 void wl_pointer_handle_motion(void *data, struct wl_pointer *wl_pointer, uint32_t time, wl_fixed_t surface_x, wl_fixed_t surface_y) {
 	struct kinc_wl_mouse *mouse = data;
-	struct kinc_wl_window *window = &wl_ctx.windows[mouse->current_window];
+	struct kinc_wl_window *window = &wl_ctx.windows[0];
 
 	int x = wl_fixed_to_int(surface_x);
 	int y = wl_fixed_to_int(surface_y);
@@ -232,7 +229,7 @@ void wl_pointer_handle_motion(void *data, struct wl_pointer *wl_pointer, uint32_
 
 		switch (window->decorations.focus) {
 		case KINC_WL_DECORATION_FOCUS_MAIN:
-			kinc_internal_mouse_trigger_move(mouse->current_window, x, y);
+			kinc_internal_mouse_trigger_move(x, y);
 			break;
 		case KINC_WL_DECORATION_FOCUS_TOP:
 			if (y < KINC_WL_DECORATION_TOP_HEIGHT / 2)
@@ -275,7 +272,7 @@ void wl_pointer_handle_motion(void *data, struct wl_pointer *wl_pointer, uint32_
 		}
 	}
 	else {
-		kinc_internal_mouse_trigger_move(mouse->current_window, x, y);
+		kinc_internal_mouse_trigger_move(x, y);
 	}
 }
 
@@ -283,7 +280,7 @@ void wl_pointer_handle_motion(void *data, struct wl_pointer *wl_pointer, uint32_
 
 void wl_pointer_handle_button(void *data, struct wl_pointer *wl_pointer, uint32_t serial, uint32_t time, uint32_t button, uint32_t state) {
 	struct kinc_wl_mouse *mouse = data;
-	struct kinc_wl_window *window = &wl_ctx.windows[mouse->current_window];
+	struct kinc_wl_window *window = &wl_ctx.windows[0];
 	int kinc_button = button - BTN_MOUSE; // evdev codes should have the same order as Kinc buttons
 	if (!window->decorations.server_side) {
 		if (kinc_button == 0) {
@@ -319,13 +316,8 @@ void wl_pointer_handle_button(void *data, struct wl_pointer *wl_pointer, uint32_
 				break;
 			case KINC_WL_DECORATION_FOCUS_CLOSE_BUTTON:
 				if (kinc_button == 0) {
-					if (kinc_internal_call_close_callback(window->window_id)) {
-						kinc_window_destroy(window->window_id);
-						if (wl_ctx.num_windows <= 0) {
-							// no windows left, stop
-							kinc_stop();
-						}
-					}
+					kinc_window_destroy();
+					kinc_stop();
 				}
 				break;
 			default:
@@ -344,10 +336,10 @@ void wl_pointer_handle_button(void *data, struct wl_pointer *wl_pointer, uint32_
 
 	if (window->decorations.focus == KINC_WL_DECORATION_FOCUS_MAIN) {
 		if (state == WL_POINTER_BUTTON_STATE_PRESSED) {
-			kinc_internal_mouse_trigger_press(mouse->current_window, kinc_button, mouse->x, mouse->y);
+			kinc_internal_mouse_trigger_press(kinc_button, mouse->x, mouse->y);
 		}
 		if (state == WL_POINTER_BUTTON_STATE_RELEASED) {
-			kinc_internal_mouse_trigger_release(mouse->current_window, kinc_button, mouse->x, mouse->y);
+			kinc_internal_mouse_trigger_release(kinc_button, mouse->x, mouse->y);
 		}
 	}
 }
@@ -356,7 +348,7 @@ void wl_pointer_handle_axis(void *data, struct wl_pointer *wl_pointer, uint32_t 
 	struct kinc_wl_mouse *mouse = data;
 	// FIXME: figure out what the other backends give as deltas
 	int delta = wl_fixed_to_int(value);
-	kinc_internal_mouse_trigger_scroll(mouse->current_window, delta);
+	kinc_internal_mouse_trigger_scroll(delta);
 }
 
 void wl_pointer_handle_frame(void *data, struct wl_pointer *wl_pointer) {}
@@ -394,7 +386,7 @@ void zwp_relative_pointer_v1_handle_relative_motion(void *data, struct zwp_relat
 	if (mouse->locked) {
 		mouse->x += wl_fixed_to_int(dx);
 		mouse->y += wl_fixed_to_int(dy);
-		kinc_internal_mouse_trigger_move(mouse->current_window, mouse->x, mouse->y);
+		kinc_internal_mouse_trigger_move(mouse->x, mouse->y);
 	}
 }
 
@@ -813,27 +805,23 @@ void zwp_tablet_tool_v2_handle_removed(void *data, struct zwp_tablet_tool_v2 *zw
 void zwp_tablet_tool_v2_handle_proximity_in(void *data, struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2, uint32_t serial, struct zwp_tablet_v2 *tablet,
                                             struct wl_surface *surface) {
 	struct kinc_wl_tablet_tool *tool = data;
-	enum kinc_wl_decoration_focus focus;
-	struct kinc_wl_window *window = kinc_wayland_window_from_surface(surface, &focus);
-	tool->current_window = window->window_id;
 }
 
 void zwp_tablet_tool_v2_handle_proximity_out(void *data, struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2) {
 	struct kinc_wl_tablet_tool *tool = data;
-	tool->current_window = -1;
 }
 
 void zwp_tablet_tool_v2_handle_down(void *data, struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2, uint32_t serial) {
 	struct kinc_wl_tablet_tool *tool = data;
-	if (tool->current_window >= 0 && tool->press) {
-		tool->press(tool->current_window, tool->x, tool->y, tool->current_pressure);
+	if (tool->press) {
+		tool->press(tool->x, tool->y, tool->current_pressure);
 	}
 }
 
 void zwp_tablet_tool_v2_handle_up(void *data, struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2) {
 	struct kinc_wl_tablet_tool *tool = data;
-	if (tool->current_window >= 0 && tool->release) {
-		tool->release(tool->current_window, tool->x, tool->y, tool->current_pressure);
+	if (tool->release) {
+		tool->release(tool->x, tool->y, tool->current_pressure);
 	}
 }
 
@@ -841,8 +829,8 @@ void zwp_tablet_tool_v2_handle_motion(void *data, struct zwp_tablet_tool_v2 *zwp
 	struct kinc_wl_tablet_tool *tool = data;
 	tool->x = wl_fixed_to_int(x);
 	tool->y = wl_fixed_to_int(y);
-	if (tool->current_window >= 0 && tool->move) {
-		tool->move(tool->current_window, tool->x, tool->y, tool->current_pressure);
+	if (tool->move) {
+		tool->move(tool->x, tool->y, tool->current_pressure);
 	}
 }
 
@@ -1078,11 +1066,7 @@ bool kinc_wayland_handle_messages() {
 	if (!flush_display()) {
 		// Something went wrong, abort.
 		wl_display_cancel_read(wl_ctx.display);
-
-		for (int i = 0; i < wl_ctx.num_windows; i++) {
-			kinc_window_destroy(i);
-		}
-
+		kinc_window_destroy();
 		return true;
 	}
 
@@ -1151,13 +1135,13 @@ bool kinc_wayland_handle_messages() {
 
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_wayland.h>
-VkResult kinc_wayland_vulkan_create_surface(VkInstance instance, int window_index, VkSurfaceKHR *surface) {
+VkResult kinc_wayland_vulkan_create_surface(VkInstance instance, VkSurfaceKHR *surface) {
 	VkWaylandSurfaceCreateInfoKHR info = {0};
 	info.sType = VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR;
 	info.pNext = NULL;
 	info.flags = 0;
 	info.display = wl_ctx.display;
-	info.surface = wl_ctx.windows[window_index].surface;
+	info.surface = wl_ctx.windows[0].surface;
 	return vkCreateWaylandSurfaceKHR(instance, &info, NULL, surface);
 }
 
@@ -1195,11 +1179,11 @@ void kinc_wl_mouse_hide() {
 	wl_pointer_set_cursor(wl_ctx.seat.mouse.pointer, wl_ctx.seat.mouse.serial, NULL, 0, 0);
 }
 
-void kinc_wl_mouse_lock(int window) {
+void kinc_wl_mouse_lock() {
 	struct kinc_wl_mouse *mouse = &wl_ctx.seat.mouse;
 	struct wl_region *region = wl_compositor_create_region(wl_ctx.compositor);
 	wl_region_add(region, mouse->x, mouse->y, 0, 0);
-	mouse->lock = zwp_pointer_constraints_v1_lock_pointer(wl_ctx.pointer_constraints, wl_ctx.windows[window].surface, wl_ctx.seat.mouse.pointer, region,
+	mouse->lock = zwp_pointer_constraints_v1_lock_pointer(wl_ctx.pointer_constraints, wl_ctx.windows[0].surface, wl_ctx.seat.mouse.pointer, region,
 	                                                      ZWP_POINTER_CONSTRAINTS_V1_LIFETIME_PERSISTENT);
 	zwp_locked_pointer_v1_add_listener(mouse->lock, &zwp_locked_pointer_v1_listener, mouse);
 }
@@ -1284,11 +1268,11 @@ void kinc_wl_mouse_set_cursor(int cursorIndex) {
 	}
 }
 
-void kinc_wl_mouse_set_position(int window_index, int x, int y) {
+void kinc_wl_mouse_set_position(int x, int y) {
 	kinc_log(KINC_LOG_LEVEL_ERROR, "Wayland: cannot set the mouse position.");
 }
 
-void kinc_wl_mouse_get_position(int window_index, int *x, int *y) {
+void kinc_wl_mouse_get_position(int *x, int *y) {
 	*x = wl_ctx.seat.mouse.x;
 	*y = wl_ctx.seat.mouse.y;
 }

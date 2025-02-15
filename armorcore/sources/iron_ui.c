@@ -584,7 +584,7 @@ void ui_draw_tooltip_text(bool bind_global_g) {
 			tooltip_w = line_tooltip_w;
 		}
 	}
-	current->tooltip_x = fmin(current->tooltip_x, kinc_window_width(0) - tooltip_w - 20);
+	current->tooltip_x = fmin(current->tooltip_x, kinc_window_width() - tooltip_w - 20);
 	if (bind_global_g) kinc_g2_restore_render_target();
 	float font_height = kinc_g2_font_height(current->ops->font->font_, current->font_size);
 	float off = 0;
@@ -624,8 +624,8 @@ void ui_draw_tooltip_image(bool bind_global_g) {
 		w = current->tooltip_img_max_width;
 	}
 	float h = current->tooltip_img->tex_height * (w / current->tooltip_img->tex_width);
-	current->tooltip_x = fmin(current->tooltip_x, kinc_window_width(0) - w - 20);
-	current->tooltip_y = fmin(current->tooltip_y, kinc_window_height(0) - h - 20);
+	current->tooltip_x = fmin(current->tooltip_x, kinc_window_width() - w - 20);
+	current->tooltip_y = fmin(current->tooltip_y, kinc_window_height() - h - 20);
 	if (bind_global_g) {
 		kinc_g2_restore_render_target();
 	}
@@ -643,8 +643,8 @@ void ui_draw_tooltip_rt(bool bind_global_g) {
 		w = current->tooltip_img_max_width;
 	}
 	float h = current->tooltip_rt->height * (w / current->tooltip_rt->width);
-	current->tooltip_x = fmin(current->tooltip_x, kinc_window_width(0) - w - 20);
-	current->tooltip_y = fmin(current->tooltip_y, kinc_window_height(0) - h - 20);
+	current->tooltip_x = fmin(current->tooltip_x, kinc_window_width() - w - 20);
+	current->tooltip_y = fmin(current->tooltip_y, kinc_window_height() - h - 20);
 	if (bind_global_g) {
 		kinc_g2_restore_render_target();
 	}
@@ -681,8 +681,8 @@ void ui_draw_tooltip(bool bind_global_g) {
 		kinc_g2_set_font(current->ops->font->font_, current->font_size * 2.0);
 		float x_off = kinc_g2_string_width(current->ops->font->font_, current->font_size * 2.0, current->text_selected) / 2.0;
 		float y_off = kinc_g2_font_height(current->ops->font->font_, current->font_size * 2.0) / 2.0;
-		float x = kinc_window_width(0) / 2.0;
-		float y = kinc_window_height(0) / 3.0;
+		float x = kinc_window_width() / 2.0;
+		float y = kinc_window_height() / 3.0;
 		kinc_g2_set_color(theme->BUTTON_COL);
 		kinc_g2_fill_rect(x - x_off, y - y_off, x_off * 2.0, y_off * 2.0);
 		kinc_g2_set_color(theme->TEXT_COL);
@@ -725,7 +725,7 @@ void ui_draw_combo(bool begin /*= true*/) {
 
 	float combo_h = (current->combo_selected_texts->length + (current->combo_selected_label != NULL ? 1 : 0) + (current->combo_search_bar ? 1 : 0)) * UI_ELEMENT_H();
 	float dist_top = current->combo_selected_y - combo_h - UI_ELEMENT_H() - current->window_border_top;
-	float dist_bottom = kinc_window_height(0) - current->window_border_bottom - (current->combo_selected_y + combo_h );
+	float dist_bottom = kinc_window_height() - current->window_border_bottom - (current->combo_selected_y + combo_h );
 	bool unroll_up = dist_bottom < 0 && dist_bottom < dist_top;
 
 	ui_begin_region(current, current->combo_selected_x, current->combo_selected_y, current->combo_selected_w);
@@ -803,7 +803,7 @@ void ui_draw_combo(bool begin /*= true*/) {
 	int _BUTTON_COL = theme->BUTTON_COL;
 	int _ELEMENT_OFFSET = theme->ELEMENT_OFFSET;
 	theme->ELEMENT_OFFSET = 0;
-	float unroll_right = current->_x + current->combo_selected_w * 2.0 < kinc_window_width(0) - current->window_border_right ? 1 : -1;
+	float unroll_right = current->_x + current->combo_selected_w * 2.0 < kinc_window_width() - current->window_border_right ? 1 : -1;
 	bool reset_position = false;
 	char search[512];
 	search[0] = '\0';
@@ -855,7 +855,7 @@ void ui_draw_combo(bool begin /*= true*/) {
 			}
 			break;
 		}
-		if (current->_y + UI_ELEMENT_H() > kinc_window_height(0) - current->window_border_bottom || current->_y - UI_ELEMENT_H() * 2 < current->window_border_top) {
+		if (current->_y + UI_ELEMENT_H() > kinc_window_height() - current->window_border_bottom || current->_y - UI_ELEMENT_H() * 2 < current->window_border_top) {
 			current->_x += current->combo_selected_w * unroll_right; // Next column
 			current->_y = current->combo_selected_y;
 		}

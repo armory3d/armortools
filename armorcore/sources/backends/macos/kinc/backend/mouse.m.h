@@ -4,7 +4,7 @@
 #include <kinc/input/mouse.h>
 #include <kinc/window.h>
 
-void kinc_internal_mouse_lock(int window) {
+void kinc_internal_mouse_lock() {
 	kinc_mouse_hide();
 }
 
@@ -24,9 +24,9 @@ void kinc_mouse_hide(void) {
 	CGDisplayHideCursor(kCGDirectMainDisplay);
 }
 
-void kinc_mouse_set_position(int windowId, int x, int y) {
+void kinc_mouse_set_position(int x, int y) {
 
-	NSWindow *window = kinc_get_mac_window_handle(windowId);
+	NSWindow *window = kinc_get_mac_window_handle();
 	float scale = [window backingScaleFactor];
 	NSRect rect = [[NSScreen mainScreen] frame];
 
@@ -34,13 +34,12 @@ void kinc_mouse_set_position(int windowId, int x, int y) {
 	point.x = window.frame.origin.x + (x / scale);
 	point.y = rect.size.height - (window.frame.origin.y + (y / scale));
 
-	CGDisplayMoveCursorToPoint(windowId, point);
+	CGDisplayMoveCursorToPoint(point);
 	CGAssociateMouseAndMouseCursorPosition(true);
 }
 
-void kinc_mouse_get_position(int windowId, int *x, int *y) {
-
-	NSWindow *window = kinc_get_mac_window_handle(windowId);
+void kinc_mouse_get_position(int *x, int *y) {
+	NSWindow *window = kinc_get_mac_window_handle();
 	NSPoint point = [window mouseLocationOutsideOfEventStream];
 	*x = (int)point.x;
 	*y = (int)point.y;

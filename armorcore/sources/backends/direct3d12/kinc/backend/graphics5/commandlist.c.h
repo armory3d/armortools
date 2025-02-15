@@ -244,8 +244,8 @@ void kinc_g5_command_list_disable_scissor(struct kinc_g5_command_list *list) {
 		D3D12_RECT scissor;
 		scissor.left = 0;
 		scissor.top = 0;
-		scissor.right = kinc_window_width(0);
-		scissor.bottom = kinc_window_height(0);
+		scissor.right = kinc_window_width();
+		scissor.bottom = kinc_window_height();
 		list->impl._commandList->lpVtbl->RSSetScissorRects(list->impl._commandList, 1, &scissor);
 	}
 }

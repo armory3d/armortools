@@ -650,7 +650,7 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 	pipeline_info.pViewportState = &vp;
 	pipeline_info.pDepthStencilState = &ds;
 	pipeline_info.pStages = shaderStages;
-	pipeline_info.renderPass = vk_ctx.windows[vk_ctx.current_window].framebuffer_render_pass;
+	pipeline_info.renderPass = vk_ctx.windows[0].framebuffer_render_pass;
 	pipeline_info.pDynamicState = &dynamicState;
 
 	err = vkCreateGraphicsPipelines(vk_ctx.device, VK_NULL_HANDLE, 1, &pipeline_info, NULL, &pipeline->impl.framebuffer_pipeline);

@@ -42,5 +42,4 @@ struct dx_window {
 	int new_height;
 	int current_backbuffer;
 	bool vsync;
-	int window_index;
 };

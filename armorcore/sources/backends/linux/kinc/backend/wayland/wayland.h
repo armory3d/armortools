@@ -118,7 +118,7 @@ extern struct kinc_xkb_procs wl_xkb;
 #include <kinc/system.h>
 #include <kinc/window.h>
 
-#define MAXIMUM_WINDOWS 16
+#define MAXIMUM_WINDOWS 1
 #define MAXIMUM_DISPLAYS 16
 #define MAXIMUM_DISPLAY_MODES 16
 
@@ -168,7 +168,6 @@ enum kinc_wl_decoration_focus {
 
 struct kinc_wl_window {
 	int display_index;
-	int window_id;
 	int width;
 	int height;
 	kinc_window_mode_t mode;
@@ -216,7 +215,6 @@ struct kinc_wl_display {
 
 struct kinc_wl_mouse {
 	struct kinc_wl_seat *seat;
-	int current_window;
 	int x;
 	int y;
 	int enter_serial;
@@ -281,15 +279,14 @@ struct kinc_wl_tablet_tool {
 	uint64_t hardware_serial;
 	uint64_t hardware_id_wacom;
 
-	int current_window;
 	int x;
 	int y;
 	float current_pressure;
 	float current_distance;
 
-	void (*press)(int /*window*/, int /*x*/, int /*y*/, float /*pressure*/);
-	void (*move)(int /*window*/, int /*x*/, int /*y*/, float /*pressure*/);
-	void (*release)(int /*window*/, int /*x*/, int /*y*/, float /*pressure*/);
+	void (*press)(int /*x*/, int /*y*/, float /*pressure*/);
+	void (*move)(int /*x*/, int /*y*/, float /*pressure*/);
+	void (*release)(int /*x*/, int /*y*/, float /*pressure*/);
 
 	struct kinc_wl_tablet_seat *seat;
 	struct kinc_wl_tablet_tool *next;
@@ -339,7 +336,6 @@ struct wayland_context {
 	struct zwp_relative_pointer_manager_v1 *relative_pointer_manager;
 	struct wl_cursor_theme *cursor_theme;
 	int cursor_size;
-	int num_windows;
 	struct kinc_wl_window windows[MAXIMUM_WINDOWS];
 	int num_displays;
 	struct kinc_wl_display displays[MAXIMUM_DISPLAYS];
@@ -354,4 +350,4 @@ void kinc_wl_data_source_destroy(struct kinc_wl_data_source *data_source);
 void kinc_wl_data_offer_accept(struct kinc_wl_data_offer *offer, void (*callback)(void *data, size_t data_size, void *user_data), void *user_data);
 void kinc_wl_destroy_data_offer(struct kinc_wl_data_offer *offer);
 void kinc_wayland_set_selection(struct kinc_wl_seat *seat, const char *text, int serial);
-void kinc_wayland_window_destroy(int window_index);
+void kinc_wayland_window_destroy();

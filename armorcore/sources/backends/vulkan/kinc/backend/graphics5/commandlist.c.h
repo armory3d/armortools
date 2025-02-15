@@ -199,13 +199,13 @@ void set_viewport_and_scissor(kinc_g5_command_list_t *list) {
 
 	if (currentRenderTargets[0] == NULL || currentRenderTargets[0]->framebuffer_index >= 0) {
 		viewport.x = 0;
-		viewport.y = (float)kinc_window_height(vk_ctx.current_window);
-		viewport.width = (float)kinc_window_width(vk_ctx.current_window);
-		viewport.height = -(float)kinc_window_height(vk_ctx.current_window);
+		viewport.y = (float)kinc_window_height();
+		viewport.width = (float)kinc_window_width();
+		viewport.height = -(float)kinc_window_height();
 		viewport.minDepth = (float)0.0f;
 		viewport.maxDepth = (float)1.0f;
-		scissor.extent.width = kinc_window_width(vk_ctx.current_window);
-		scissor.extent.height = kinc_window_height(vk_ctx.current_window);
+		scissor.extent.width = kinc_window_width();
+		scissor.extent.height = kinc_window_height();
 		scissor.offset.x = 0;
 		scissor.offset.y = 0;
 	}
@@ -269,7 +269,7 @@ void kinc_g5_command_list_begin(kinc_g5_command_list_t *list) {
 	clear_values[0].color.float32[1] = 0.0f;
 	clear_values[0].color.float32[2] = 0.0f;
 	clear_values[0].color.float32[3] = 1.0f;
-	if (vk_ctx.windows[vk_ctx.current_window].depth_bits > 0) {
+	if (vk_ctx.windows[0].depth_bits > 0) {
 		clear_values[1].depthStencil.depth = 1.0;
 		clear_values[1].depthStencil.stencil = 0;
 	}
@@ -277,13 +277,13 @@ void kinc_g5_command_list_begin(kinc_g5_command_list_t *list) {
 	VkRenderPassBeginInfo rp_begin = {0};
 	rp_begin.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	rp_begin.pNext = NULL;
-	rp_begin.renderPass = vk_ctx.windows[vk_ctx.current_window].framebuffer_render_pass;
-	rp_begin.framebuffer = vk_ctx.windows[vk_ctx.current_window].framebuffers[vk_ctx.windows[vk_ctx.current_window].current_image];
+	rp_begin.renderPass = vk_ctx.windows[0].framebuffer_render_pass;
+	rp_begin.framebuffer = vk_ctx.windows[0].framebuffers[vk_ctx.windows[0].current_image];
 	rp_begin.renderArea.offset.x = 0;
 	rp_begin.renderArea.offset.y = 0;
-	rp_begin.renderArea.extent.width = vk_ctx.windows[vk_ctx.current_window].width;
-	rp_begin.renderArea.extent.height = vk_ctx.windows[vk_ctx.current_window].height;
-	rp_begin.clearValueCount = vk_ctx.windows[vk_ctx.current_window].depth_bits > 0 ? 2 : 1;
+	rp_begin.renderArea.extent.width = vk_ctx.windows[0].width;
+	rp_begin.renderArea.extent.height = vk_ctx.windows[0].height;
+	rp_begin.clearValueCount = vk_ctx.windows[0].depth_bits > 0 ? 2 : 1;
 	rp_begin.pClearValues = clear_values;
 
 	err = vkBeginCommandBuffer(list->impl._buffer, &cmd_buf_info);
@@ -304,7 +304,7 @@ void kinc_g5_command_list_begin(kinc_g5_command_list_t *list) {
 	prePresentBarrier.subresourceRange.baseArrayLayer = 0;
 	prePresentBarrier.subresourceRange.layerCount = 1;
 
-	prePresentBarrier.image = vk_ctx.windows[vk_ctx.current_window].images[vk_ctx.windows[vk_ctx.current_window].current_image];
+	prePresentBarrier.image = vk_ctx.windows[0].images[vk_ctx.windows[0].current_image];
 	VkImageMemoryBarrier *pmemory_barrier = &prePresentBarrier;
 	vkCmdPipelineBarrier(list->impl._buffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0, NULL, 0, NULL, 1,
 	                     pmemory_barrier);
@@ -342,7 +342,7 @@ void kinc_g5_command_list_end(kinc_g5_command_list_t *list) {
 	prePresentBarrier.subresourceRange.baseArrayLayer = 0;
 	prePresentBarrier.subresourceRange.layerCount = 1;
 
-	prePresentBarrier.image = vk_ctx.windows[vk_ctx.current_window].images[vk_ctx.windows[vk_ctx.current_window].current_image];
+	prePresentBarrier.image = vk_ctx.windows[0].images[vk_ctx.windows[0].current_image];
 	VkImageMemoryBarrier *pmemory_barrier = &prePresentBarrier;
 	vkCmdPipelineBarrier(list->impl._buffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, NULL, 0, NULL, 1, pmemory_barrier);
 
@@ -419,8 +419,8 @@ void kinc_g5_command_list_disable_scissor(kinc_g5_command_list_t *list) {
 	VkRect2D scissor;
 	memset(&scissor, 0, sizeof(scissor));
 	if (currentRenderTargets[0] == NULL || currentRenderTargets[0]->framebuffer_index >= 0) {
-		scissor.extent.width = kinc_window_width(vk_ctx.current_window);
-		scissor.extent.height = kinc_window_height(vk_ctx.current_window);
+		scissor.extent.width = kinc_window_width();
+		scissor.extent.height = kinc_window_height();
 	}
 	else {
 		scissor.extent.width = currentRenderTargets[0]->width;
@@ -461,16 +461,16 @@ void kinc_internal_restore_render_target(kinc_g5_command_list_t *list, struct ki
 	VkViewport viewport;
 	memset(&viewport, 0, sizeof(viewport));
 	viewport.x = 0;
-	viewport.y = (float)kinc_window_height(vk_ctx.current_window);
-	viewport.width = (float)kinc_window_width(vk_ctx.current_window);
-	viewport.height = -(float)kinc_window_height(vk_ctx.current_window);
+	viewport.y = (float)kinc_window_height();
+	viewport.width = (float)kinc_window_width();
+	viewport.height = -(float)kinc_window_height();
 	viewport.minDepth = (float)0.0f;
 	viewport.maxDepth = (float)1.0f;
 	vkCmdSetViewport(list->impl._buffer, 0, 1, &viewport);
 	VkRect2D scissor;
 	memset(&scissor, 0, sizeof(scissor));
-	scissor.extent.width = kinc_window_width(vk_ctx.current_window);
-	scissor.extent.height = kinc_window_height(vk_ctx.current_window);
+	scissor.extent.width = kinc_window_width();
+	scissor.extent.height = kinc_window_height();
 	scissor.offset.x = 0;
 	scissor.offset.y = 0;
 	vkCmdSetScissor(list->impl._buffer, 0, 1, &scissor);
@@ -495,12 +495,12 @@ void kinc_internal_restore_render_target(kinc_g5_command_list_t *list, struct ki
 	VkRenderPassBeginInfo rp_begin = {0};
 	rp_begin.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	rp_begin.pNext = NULL;
-	rp_begin.renderPass = vk_ctx.windows[vk_ctx.current_window].framebuffer_render_pass;
-	rp_begin.framebuffer = vk_ctx.windows[vk_ctx.current_window].framebuffers[vk_ctx.windows[vk_ctx.current_window].current_image];
+	rp_begin.renderPass = vk_ctx.windows[0].framebuffer_render_pass;
+	rp_begin.framebuffer = vk_ctx.windows[0].framebuffers[vk_ctx.windows[0].current_image];
 	rp_begin.renderArea.offset.x = 0;
 	rp_begin.renderArea.offset.y = 0;
-	rp_begin.renderArea.extent.width = kinc_window_width(vk_ctx.current_window);
-	rp_begin.renderArea.extent.height = kinc_window_height(vk_ctx.current_window);
+	rp_begin.renderArea.extent.width = kinc_window_width();
+	rp_begin.renderArea.extent.height = kinc_window_height();
 	rp_begin.clearValueCount = 2;
 	rp_begin.pClearValues = clear_values;
 	vkCmdBeginRenderPass(list->impl._buffer, &rp_begin, VK_SUBPASS_CONTENTS_INLINE);
@@ -553,10 +553,10 @@ void kinc_g5_command_list_set_render_targets(kinc_g5_command_list_t *list, struc
 
 	if (count == 1) {
 		if (targets[0]->impl.depthBufferBits > 0) {
-			rp_begin.renderPass = vk_ctx.windows[vk_ctx.current_window].rendertarget_render_pass_with_depth;
+			rp_begin.renderPass = vk_ctx.windows[0].rendertarget_render_pass_with_depth;
 		}
 		else {
-			rp_begin.renderPass = vk_ctx.windows[vk_ctx.current_window].rendertarget_render_pass;
+			rp_begin.renderPass = vk_ctx.windows[0].rendertarget_render_pass;
 		}
 		rp_begin.framebuffer = targets[0]->impl.framebuffer;
 	}

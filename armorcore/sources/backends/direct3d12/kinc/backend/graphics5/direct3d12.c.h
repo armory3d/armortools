@@ -103,7 +103,7 @@ static void createDeviceAndSwapChain(struct dx_window *window) {
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swapChainDesc.BufferDesc.Width = window->width;
 	swapChainDesc.BufferDesc.Height = window->height;
-	swapChainDesc.OutputWindow = kinc_windows_window_handle(window->window_index);
+	swapChainDesc.OutputWindow = kinc_windows_window_handle();
 	swapChainDesc.SampleDesc.Count = 1;
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	swapChainDesc.Windowed = true;
@@ -324,8 +324,8 @@ static void shutdown() {
 	}
 }
 
-static void initWindow(struct dx_window *window, int windowIndex) {
-	HWND hwnd = kinc_windows_window_handle(windowIndex);
+static void initWindow(struct dx_window *window) {
+	HWND hwnd = kinc_windows_window_handle();
 
 	DXGI_SWAP_CHAIN_DESC swapChainDesc;
 	ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
@@ -333,8 +333,8 @@ static void initWindow(struct dx_window *window, int windowIndex) {
 	swapChainDesc.BufferCount = QUEUE_SLOT_COUNT;
 	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	swapChainDesc.BufferDesc.Width = kinc_window_width(windowIndex);
-	swapChainDesc.BufferDesc.Height = kinc_window_height(windowIndex);
+	swapChainDesc.BufferDesc.Width = kinc_window_width();
+	swapChainDesc.BufferDesc.Height = kinc_window_height();
 	swapChainDesc.OutputWindow = hwnd;
 	swapChainDesc.SampleDesc.Count = 1;
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
@@ -348,7 +348,7 @@ static void initWindow(struct dx_window *window, int windowIndex) {
 	setupSwapChain(window);
 }
 
-void kinc_g5_internal_destroy_window(int window) {}
+void kinc_g5_internal_destroy_window() {}
 
 void kinc_g5_internal_destroy() {
 	if (device) {
@@ -396,13 +396,12 @@ void kinc_g5_internal_init() {
 	CloseHandle(waitEvent);
 }
 
-void kinc_g5_internal_init_window(int windowIndex, int depthBufferBits, bool verticalSync) {
-	struct dx_window *window = &dx_ctx.windows[windowIndex];
-	window->window_index = windowIndex;
+void kinc_g5_internal_init_window(int depthBufferBits, bool verticalSync) {
+	struct dx_window *window = &dx_ctx.windows[0];
 	window->vsync = verticalSync;
-	window->width = window->new_width = kinc_window_width(windowIndex);
-	window->height = window->new_height = kinc_window_height(windowIndex);
-	initWindow(window, windowIndex);
+	window->width = window->new_width = kinc_window_width();
+	window->height = window->new_height = kinc_window_height();
+	initWindow(window);
 }
 
 int kinc_g5_max_bound_textures(void) {
@@ -411,13 +410,12 @@ int kinc_g5_max_bound_textures(void) {
 
 static bool began = false;
 
-void kinc_g5_begin(kinc_g5_render_target_t *renderTarget, int windowId) {
+void kinc_g5_begin(kinc_g5_render_target_t *renderTarget) {
 	if (began)
 		return;
 	began = true;
 
-	struct dx_window *window = &dx_ctx.windows[windowId];
-	dx_ctx.current_window = windowId;
+	struct dx_window *window = &dx_ctx.windows[0];
 
 	window->current_backbuffer = (window->current_backbuffer + 1) % QUEUE_SLOT_COUNT;
 
@@ -446,22 +444,20 @@ void kinc_g5_begin(kinc_g5_render_target_t *renderTarget, int windowId) {
 	// commandList->ClearDepthStencilView(GetCPUDescriptorHandle(depthStencilDescriptorHeap), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 }
 
-void kinc_g5_end(int window) {
+void kinc_g5_end() {
 	began = false;
 }
 
-void kinc_g4_on_g5_internal_resize(int, int, int);
+void kinc_g4_on_g5_internal_resize(int, int);
 
-void kinc_internal_resize(int windowId, int width, int height) {
+void kinc_internal_resize(int width, int height) {
 	if (width == 0 || height == 0)
 		return;
-	struct dx_window *window = &dx_ctx.windows[windowId];
+	struct dx_window *window = &dx_ctx.windows[0];
 	window->new_width = width;
 	window->new_height = height;
-	kinc_g4_on_g5_internal_resize(windowId, width, height);
+	kinc_g4_on_g5_internal_resize(width, height);
 }
-
-void kinc_internal_change_framebuffer(int window, kinc_framebuffer_options_t *frame) {}
 
 bool kinc_g5_swap_buffers() {
 	for (int i = 0; i < MAXIMUM_WINDOWS; i++) {

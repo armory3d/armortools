@@ -26,19 +26,19 @@ id getMetalEncoder(void) {
 	return render_command_encoder;
 }
 
-void kinc_g5_internal_destroy_window(int window) {}
+void kinc_g5_internal_destroy_window() {}
 
 void kinc_g5_internal_destroy(void) {}
 
-extern void kinc_g4_on_g5_internal_resize(int, int, int);
+extern void kinc_g4_on_g5_internal_resize(int, int);
 
-void kinc_internal_resize(int window, int width, int height) {
-	kinc_g4_on_g5_internal_resize(window, width, height);
+void kinc_internal_resize(int width, int height) {
+	kinc_g4_on_g5_internal_resize(width, height);
 }
 
 void kinc_g5_internal_init(void) {}
 
-void kinc_g5_internal_init_window(int window, int depthBufferBits, bool vsync) {
+void kinc_g5_internal_init_window(int depthBufferBits, bool vsync) {
 	depthBits = depthBufferBits;
 	kinc_g5_render_target_init(&fallback_render_target, 32, 32, KINC_G5_RENDER_TARGET_FORMAT_32BIT, 0);
 }
@@ -75,7 +75,7 @@ static void end_render_pass(void) {
 	render_command_encoder = nil;
 }
 
-void kinc_g5_begin(kinc_g5_render_target_t *renderTarget, int window) {
+void kinc_g5_begin(kinc_g5_render_target_t *renderTarget) {
 	CAMetalLayer *metalLayer = getMetalLayer();
 	drawable = [metalLayer nextDrawable];
 
@@ -123,7 +123,7 @@ void kinc_g5_begin(kinc_g5_render_target_t *renderTarget, int window) {
 	render_command_encoder = [command_buffer renderCommandEncoderWithDescriptor:renderPassDescriptor];
 }
 
-void kinc_g5_end(int window) {}
+void kinc_g5_end() {}
 
 bool kinc_g5_swap_buffers(void) {
 	if (command_buffer != nil && render_command_encoder != nil) {

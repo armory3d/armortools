@@ -1051,7 +1051,7 @@ void kinc_raytrace_set_target(kinc_g5_render_target_t *_output) {
 		VkFramebufferCreateInfo fbufCreateInfo = {0};
 		fbufCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 		fbufCreateInfo.pNext = NULL;
-		fbufCreateInfo.renderPass = vk_ctx.windows[vk_ctx.current_window].rendertarget_render_pass;
+		fbufCreateInfo.renderPass = vk_ctx.windows[0].rendertarget_render_pass;
 		fbufCreateInfo.attachmentCount = 1;
 		fbufCreateInfo.pAttachments = attachments;
 		fbufCreateInfo.width = _output->width;

@@ -49,8 +49,8 @@ static void xdg_toplevel_handle_configure(void *data, struct xdg_toplevel *tople
 			break;
 		}
 	}
-	kinc_internal_resize(window->window_id, window->width, window->height);
-	kinc_internal_call_resize_callback(window->window_id, window->width, window->height);
+	kinc_internal_resize(window->width, window->height);
+	kinc_internal_call_resize_callback(window->width, window->height);
 	if (window->decorations.server_side) {
 		xdg_surface_set_window_geometry(window->xdg_surface, 0, 0, window->width, window->height);
 	}
@@ -72,17 +72,12 @@ static void xdg_toplevel_handle_configure(void *data, struct xdg_toplevel *tople
 	                               KINC_WL_DECORATION_CLOSE_HEIGHT);
 }
 
-void kinc_wayland_window_destroy(int window_index);
+void kinc_wayland_window_destroy();
 
 static void xdg_toplevel_handle_close(void *data, struct xdg_toplevel *xdg_toplevel) {
 	struct kinc_wl_window *window = data;
-	if (kinc_internal_call_close_callback(window->window_id)) {
-		kinc_window_destroy(window->window_id);
-		if (wl_ctx.num_windows <= 0) {
-			// no windows left, stop
-			kinc_stop();
-		}
-	}
+	kinc_window_destroy();
+	kinc_stop();
 }
 
 static int create_shm_fd(off_t size) {
@@ -311,23 +306,11 @@ static const struct zxdg_toplevel_decoration_v1_listener xdg_toplevel_decoration
     xdg_toplevel_decoration_configure,
 };
 
-void kinc_wayland_window_set_title(int window_index, const char *title);
-void kinc_wayland_window_change_mode(int window_index, kinc_window_mode_t mode);
+void kinc_wayland_window_set_title(const char *title);
+void kinc_wayland_window_change_mode(kinc_window_mode_t mode);
 
-int kinc_wayland_window_create(kinc_window_options_t *win, kinc_framebuffer_options_t *frame) {
-	int window_index = -1;
-	for (int i = 0; i < MAXIMUM_WINDOWS; i++) {
-		if (wl_ctx.windows[i].surface == NULL) {
-			window_index = i;
-			break;
-		}
-	}
-	if (window_index == -1) {
-		kinc_log(KINC_LOG_LEVEL_ERROR, "Too much windows (maximum is %i)", MAXIMUM_WINDOWS);
-		exit(1);
-	}
-	struct kinc_wl_window *window = &wl_ctx.windows[window_index];
-	window->window_id = window_index;
+void kinc_wayland_window_create(kinc_window_options_t *win, kinc_framebuffer_options_t *frame) {
+	struct kinc_wl_window *window = &wl_ctx.windows[0];
 	window->width = win->width;
 	window->height = win->height;
 	window->mode = KINC_WINDOW_MODE_WINDOW;
@@ -341,7 +324,7 @@ int kinc_wayland_window_create(kinc_window_options_t *win, kinc_framebuffer_opti
 	window->toplevel = xdg_surface_get_toplevel(window->xdg_surface);
 	xdg_toplevel_add_listener(window->toplevel, &xdg_toplevel_listener, window);
 
-	kinc_wayland_window_set_title(window_index, win->title);
+	kinc_wayland_window_set_title(win->title);
 
 	if (wl_ctx.decoration_manager) {
 		window->xdg_decoration = zxdg_decoration_manager_v1_get_toplevel_decoration(wl_ctx.decoration_manager, window->toplevel);
@@ -356,18 +339,15 @@ int kinc_wayland_window_create(kinc_window_options_t *win, kinc_framebuffer_opti
 	}
 
 	wl_surface_commit(window->surface);
-	kinc_wayland_window_change_mode(window_index, win->mode);
-	wl_ctx.num_windows++;
+	kinc_wayland_window_change_mode(win->mode);
 
 	while (!window->configured) {
 		wl_display_roundtrip(wl_ctx.display);
 	}
-
-	return window_index;
 }
 
-void kinc_wayland_window_destroy(int window_index) {
-	struct kinc_wl_window *window = &wl_ctx.windows[window_index];
+void kinc_wayland_window_destroy() {
+	struct kinc_wl_window *window = &wl_ctx.windows[0];
 	if (window->xdg_decoration) {
 		zxdg_toplevel_decoration_v1_destroy(window->xdg_decoration);
 	}
@@ -376,54 +356,53 @@ void kinc_wayland_window_destroy(int window_index) {
 	xdg_surface_destroy(window->xdg_surface);
 	wl_surface_destroy(window->surface);
 	*window = (struct kinc_wl_window){0};
-	wl_ctx.num_windows--;
 }
 
-void kinc_wayland_window_set_title(int window_index, const char *title) {
-	struct kinc_wl_window *window = &wl_ctx.windows[window_index];
+void kinc_wayland_window_set_title(const char *title) {
+	struct kinc_wl_window *window = &wl_ctx.windows[0];
 	xdg_toplevel_set_title(window->toplevel, title == NULL ? "" : title);
 }
 
-int kinc_wayland_window_x(int window_index) {
+int kinc_wayland_window_x() {
 	kinc_log(KINC_LOG_LEVEL_ERROR, "Wayland does not support getting the window position.");
 	return 0;
 }
 
-int kinc_wayland_window_y(int window_index) {
+int kinc_wayland_window_y() {
 	kinc_log(KINC_LOG_LEVEL_ERROR, "Wayland does not support getting the window position.");
 	return 0;
 }
 
-void kinc_wayland_window_move(int window_index, int x, int y) {
+void kinc_wayland_window_move(int x, int y) {
 	kinc_log(KINC_LOG_LEVEL_ERROR, "Wayland does not support setting the window position.");
 }
 
-int kinc_wayland_window_width(int window_index) {
-	return wl_ctx.windows[window_index].width;
+int kinc_wayland_window_width() {
+	return wl_ctx.windows[0].width;
 }
 
-int kinc_wayland_window_height(int window_index) {
-	return wl_ctx.windows[window_index].height;
+int kinc_wayland_window_height() {
+	return wl_ctx.windows[0].height;
 }
 
-void kinc_wayland_window_resize(int window_index, int width, int height) {
+void kinc_wayland_window_resize(int width, int height) {
 	kinc_log(KINC_LOG_LEVEL_WARNING, "TODO: resizing windows");
 }
 
-void kinc_wayland_window_show(int window_index) {
+void kinc_wayland_window_show() {
 	kinc_log(KINC_LOG_LEVEL_ERROR, "Wayland does not support unhiding windows.");
 }
 
-void kinc_wayland_window_hide(int window_index) {
+void kinc_wayland_window_hide() {
 	kinc_log(KINC_LOG_LEVEL_ERROR, "Wayland does not support hiding windows.");
 }
 
-kinc_window_mode_t kinc_wayland_window_get_mode(int window_index) {
-	return wl_ctx.windows[window_index].mode;
+kinc_window_mode_t kinc_wayland_window_get_mode() {
+	return wl_ctx.windows[0].mode;
 }
 
-void kinc_wayland_window_change_mode(int window_index, kinc_window_mode_t mode) {
-	struct kinc_wl_window *window = &wl_ctx.windows[window_index];
+void kinc_wayland_window_change_mode(kinc_window_mode_t mode) {
+	struct kinc_wl_window *window = &wl_ctx.windows[0];
 	if (mode == window->mode) {
 		return;
 	}
@@ -444,11 +423,7 @@ void kinc_wayland_window_change_mode(int window_index, kinc_window_mode_t mode) 
 	}
 }
 
-int kinc_wayland_window_display(int window_index) {
-	struct kinc_wl_window *window = &wl_ctx.windows[window_index];
+int kinc_wayland_window_display() {
+	struct kinc_wl_window *window = &wl_ctx.windows[0];
 	return window->display_index;
-}
-
-int kinc_wayland_count_windows() {
-	return wl_ctx.num_windows;
 }

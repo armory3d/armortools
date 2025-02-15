@@ -59,7 +59,6 @@ void kinc_linux_init_procs() {
 		procs.window_resize = kinc_wayland_window_resize;
 		procs.window_show = kinc_wayland_window_show;
 		procs.window_hide = kinc_wayland_window_hide;
-		procs.count_windows = kinc_wayland_count_windows;
 
 		procs.mouse_can_lock = kinc_wl_mouse_can_lock;
 		procs.mouse_lock = kinc_wl_mouse_lock;
@@ -107,7 +106,6 @@ void kinc_linux_init_procs() {
 		procs.window_resize = kinc_x11_window_resize;
 		procs.window_show = kinc_x11_window_show;
 		procs.window_hide = kinc_x11_window_hide;
-		procs.count_windows = kinc_x11_count_windows;
 
 		procs.display_init = kinc_x11_display_init;
 		procs.display_available = kinc_x11_display_available;

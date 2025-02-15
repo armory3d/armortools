@@ -18,13 +18,13 @@ WGPUDevice device;
 WGPUQueue queue;
 WGPUSwapChain swapChain;
 
-void kinc_g5_internal_destroy_window(int windowId) {}
+void kinc_g5_internal_destroy_window() {}
 
 void kinc_g5_internal_destroy() {}
 
 void kinc_g5_internal_init() {}
 
-void kinc_g5_internal_init_window(int window, int depthBufferBits, bool vsync) {
+void kinc_g5_internal_init_window(int depthBufferBits, bool vsync) {
 	newRenderTargetWidth = renderTargetWidth = kinc_width();
 	newRenderTargetHeight = renderTargetHeight = kinc_height();
 
@@ -51,9 +51,9 @@ void kinc_g5_internal_init_window(int window, int depthBufferBits, bool vsync) {
 	swapChain = wgpuDeviceCreateSwapChain(device, surface, &scDesc);
 }
 
-void kinc_g5_begin(kinc_g5_render_target_t *renderTarget, int window) {}
+void kinc_g5_begin(kinc_g5_render_target_t *renderTarget) {}
 
-void kinc_g5_end(int window) {}
+void kinc_g5_end() {}
 
 bool kinc_g5_swap_buffers() {
 	return true;

@@ -13,8 +13,8 @@ struct vk_context vk_ctx = {0};
 
 void kinc_vulkan_get_instance_extensions(const char **extensions, int *index, int max);
 VkBool32 kinc_vulkan_get_physical_device_presentation_support(VkPhysicalDevice physicalDevice, uint32_t queueFamilyIndex);
-VkResult kinc_vulkan_create_surface(VkInstance instance, int window_index, VkSurfaceKHR *surface);
-void kinc_g4_on_g5_internal_resize(int, int, int);
+VkResult kinc_vulkan_create_surface(VkInstance instance, VkSurfaceKHR *surface);
+void kinc_g4_on_g5_internal_resize(int, int);
 
 #define GET_INSTANCE_PROC_ADDR(instance, entrypoint)                                                                                                           \
 	{                                                                                                                                                          \
@@ -86,19 +86,19 @@ bool memory_type_from_properties(uint32_t typeBits, VkFlags requirements_mask, u
 	return false;
 }
 
-void kinc_internal_resize(int window_index, int width, int height) {
-	struct vk_window *window = &vk_ctx.windows[window_index];
+void kinc_internal_resize(int width, int height) {
+	struct vk_window *window = &vk_ctx.windows[0];
 	if (window->width != width || window->height != height) {
 		window->resized = true;
 		window->width = width;
 		window->height = height;
 	}
 
-	kinc_g4_on_g5_internal_resize(window_index, width, height);
+	kinc_g4_on_g5_internal_resize(width, height);
 }
 
-VkSwapchainKHR cleanup_swapchain(int window_index) {
-	struct vk_window *window = &vk_ctx.windows[window_index];
+VkSwapchainKHR cleanup_swapchain() {
+	struct vk_window *window = &vk_ctx.windows[0];
 
 	if (window->framebuffer_render_pass != VK_NULL_HANDLE) {
 		vkDestroyRenderPass(vk_ctx.device, window->framebuffer_render_pass, NULL);
@@ -136,18 +136,18 @@ VkSwapchainKHR cleanup_swapchain(int window_index) {
 	return chain;
 }
 
-void create_swapchain(int window_index) {
-	struct vk_window *window = &vk_ctx.windows[window_index];
+void create_swapchain() {
+	struct vk_window *window = &vk_ctx.windows[0];
 
-	VkSwapchainKHR oldSwapchain = cleanup_swapchain(window_index);
+	VkSwapchainKHR oldSwapchain = cleanup_swapchain();
 	if (window->surface_destroyed) {
 		vk.fpDestroySwapchainKHR(vk_ctx.device, oldSwapchain, NULL);
 		oldSwapchain = VK_NULL_HANDLE;
 		vk.fpDestroySurfaceKHR(vk_ctx.instance, window->surface, NULL);
-		VkResult err = kinc_vulkan_create_surface(vk_ctx.instance, window_index, &window->surface);
+		VkResult err = kinc_vulkan_create_surface(vk_ctx.instance, &window->surface);
 		assert(!err);
-		window->width = kinc_window_width(window_index);
-		window->height = kinc_window_height(window_index);
+		window->width = kinc_window_width();
+		window->height = kinc_window_height();
 		window->surface_destroyed = false;
 	}
 
@@ -968,10 +968,9 @@ void kinc_g5_internal_init() {
 
 void kinc_g5_internal_destroy() {}
 
-void kinc_vulkan_init_window(int window_index) {
+void kinc_vulkan_init_window() {
 	// this function is used in the android backend
-	assert(window_index < MAXIMUM_WINDOWS);
-	struct vk_window *window = &vk_ctx.windows[window_index];
+	struct vk_window *window = &vk_ctx.windows[0];
 
 	// delay swapchain/surface recreation
 	// otherwise trouble ensues due to G4onG5 backend ending the command list in kinc_g4_begin
@@ -979,14 +978,13 @@ void kinc_vulkan_init_window(int window_index) {
 	window->surface_destroyed = true;
 }
 
-void kinc_g5_internal_init_window(int window_index, int depthBufferBits, bool vsync) {
-	assert(window_index < MAXIMUM_WINDOWS);
-	struct vk_window *window = &vk_ctx.windows[window_index];
+void kinc_g5_internal_init_window(int depthBufferBits, bool vsync) {
+	struct vk_window *window = &vk_ctx.windows[0];
 
 	window->depth_bits = depthBufferBits;
 	window->vsynced = vsync;
 
-	VkResult err = kinc_vulkan_create_surface(vk_ctx.instance, window_index, &window->surface);
+	VkResult err = kinc_vulkan_create_surface(vk_ctx.instance, &window->surface);
 	assert(!err);
 
 	VkBool32 surface_supported;
@@ -1022,18 +1020,18 @@ void kinc_g5_internal_init_window(int window_index, int depthBufferBits, bool vs
 		}
 	}
 	free(surfFormats);
-	window->width = kinc_window_width(window_index);
-	window->height = kinc_window_height(window_index);
-	create_swapchain(window_index);
+	window->width = kinc_window_width();
+	window->height = kinc_window_height();
+	create_swapchain();
 	create_render_target_render_pass(window);
 
 	began = false;
-	kinc_g5_begin(NULL, 0);
+	kinc_g5_begin(NULL);
 }
 
-void kinc_g5_internal_destroy_window(int window_index) {
-	struct vk_window *window = &vk_ctx.windows[window_index];
-	VkSwapchainKHR swapchain = cleanup_swapchain(window_index);
+void kinc_g5_internal_destroy_window() {
+	struct vk_window *window = &vk_ctx.windows[0];
+	VkSwapchainKHR swapchain = cleanup_swapchain();
 	destroy_render_target_pass(window);
 	vk.fpDestroySwapchainKHR(vk_ctx.device, swapchain, NULL);
 	vk.fpDestroySurfaceKHR(vk_ctx.instance, window->surface, NULL);
@@ -1043,8 +1041,8 @@ bool kinc_g5_swap_buffers() {
 	return true;
 }
 
-void kinc_g5_begin(kinc_g5_render_target_t *renderTarget, int window_index) {
-	struct vk_window *window = &vk_ctx.windows[window_index];
+void kinc_g5_begin(kinc_g5_render_target_t *renderTarget) {
+	struct vk_window *window = &vk_ctx.windows[0];
 
 	if (began) {
 		return;
@@ -1052,7 +1050,7 @@ void kinc_g5_begin(kinc_g5_render_target_t *renderTarget, int window_index) {
 
 	if (window->resized) {
 		vkDeviceWaitIdle(vk_ctx.device);
-		create_swapchain(window_index);
+		create_swapchain();
 	}
 
 	// Get the index of the next available swapchain image:
@@ -1062,12 +1060,11 @@ void kinc_g5_begin(kinc_g5_render_target_t *renderTarget, int window_index) {
 		err = vk.fpAcquireNextImageKHR(vk_ctx.device, window->swapchain, UINT64_MAX, framebuffer_available, VK_NULL_HANDLE, &window->current_image);
 		if (err == VK_ERROR_SURFACE_LOST_KHR || err == VK_ERROR_OUT_OF_DATE_KHR) {
 			window->surface_destroyed = (err == VK_ERROR_SURFACE_LOST_KHR);
-			create_swapchain(window_index);
+			create_swapchain();
 		}
 		else {
 			assert(err == VK_SUCCESS || err == VK_SUBOPTIMAL_KHR);
 			began = true;
-			vk_ctx.current_window = window_index;
 			if (renderTarget != NULL) {
 				renderTarget->impl.framebuffer = window->framebuffers[window->current_image];
 			}
@@ -1077,13 +1074,13 @@ void kinc_g5_begin(kinc_g5_render_target_t *renderTarget, int window_index) {
 	while (err != VK_SUCCESS && err != VK_SUBOPTIMAL_KHR);
 }
 
-void kinc_g5_end(int window) {
+void kinc_g5_end() {
 	VkPresentInfoKHR present = {0};
 	present.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 	present.pNext = NULL;
 	present.swapchainCount = 1;
-	present.pSwapchains = &vk_ctx.windows[vk_ctx.current_window].swapchain;
-	present.pImageIndices = &vk_ctx.windows[vk_ctx.current_window].current_image;
+	present.pSwapchains = &vk_ctx.windows[0].swapchain;
+	present.pImageIndices = &vk_ctx.windows[0].current_image;
 	present.pWaitSemaphores = &relay_semaphore;
 	present.waitSemaphoreCount = 1;
 	wait_for_relay = false;
@@ -1091,12 +1088,12 @@ void kinc_g5_end(int window) {
 	VkResult err = vk.fpQueuePresentKHR(vk_ctx.queue, &present);
 	if (err == VK_ERROR_SURFACE_LOST_KHR) {
 		vkDeviceWaitIdle(vk_ctx.device);
-		vk_ctx.windows[window].surface_destroyed = true;
-		create_swapchain(window);
+		vk_ctx.windows[0].surface_destroyed = true;
+		create_swapchain();
 	}
 	else if (err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR) {
 		vkDeviceWaitIdle(vk_ctx.device);
-		create_swapchain(window);
+		create_swapchain();
 	}
 	else {
 		assert(err == VK_SUCCESS);

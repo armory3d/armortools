@@ -10,8 +10,7 @@ struct WindowData {
 	void *closeCallbackData;
 };
 
-static struct WindowData windows[10] = {};
-static int windowCounter = 0;
+static struct WindowData windows[16] = {};
 
 #include "BasicOpenGLView.m.h"
 #include "HIDGamepad.c.h"

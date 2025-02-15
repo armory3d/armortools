@@ -60,14 +60,13 @@ static ID3D12RootSignature *globalComputeRootSignature = NULL;
 #define MAXIMUM_WINDOWS 16
 
 struct dx_ctx {
-	int current_window;
 	struct dx_window windows[MAXIMUM_WINDOWS];
 };
 
 static struct dx_ctx dx_ctx = {0};
 
 inline struct dx_window *kinc_dx_current_window() {
-	return &dx_ctx.windows[dx_ctx.current_window];
+	return &dx_ctx.windows[0];
 }
 
 static bool compute_pipeline_set = false;

@@ -76,7 +76,7 @@ void KoreUpdateKeyboard(void) {
 
 void kinc_internal_shutdown(void) {}
 
-int kinc_init(const char *name, int width, int height, struct kinc_window_options *win, struct kinc_framebuffer_options *frame) {
+void kinc_init(const char *name, int width, int height, struct kinc_window_options *win, struct kinc_framebuffer_options *frame) {
 	kinc_window_options_t defaultWin;
 	if (win == NULL) {
 		kinc_window_options_set_defaults(&defaultWin);
@@ -88,9 +88,7 @@ int kinc_init(const char *name, int width, int height, struct kinc_window_option
 		frame = &defaultFrame;
 	}
 	kinc_g4_internal_init();
-	kinc_g4_internal_init_window(0, frame->depth_bits, true);
-
-	return 0;
+	kinc_g4_internal_init_window(frame->depth_bits, true);
 }
 
 void endGL(void);

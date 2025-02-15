@@ -142,7 +142,7 @@ kinc_ticks_t kinc_timestamp(void) {
 
 void kinc_linux_init_procs();
 
-int kinc_init(const char *name, int width, int height, kinc_window_options_t *win, kinc_framebuffer_options_t *frame) {
+void kinc_init(const char *name, int width, int height, kinc_window_options_t *win, kinc_framebuffer_options_t *frame) {
 	kinc_linux_initHIDGamepads();
 
 	gettimeofday(&start, NULL);
@@ -169,9 +169,7 @@ int kinc_init(const char *name, int width, int height, kinc_window_options_t *wi
 		win->title = name;
 	}
 
-	int window = kinc_window_create(win, frame);
-
-	return window;
+	kinc_window_create(win, frame);
 }
 
 void kinc_internal_shutdown() {

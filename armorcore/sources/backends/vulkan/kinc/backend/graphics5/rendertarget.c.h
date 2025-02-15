@@ -222,13 +222,13 @@ static void render_target_init(kinc_g5_render_target_t *target, int width, int h
 		fbufCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 		fbufCreateInfo.pNext = NULL;
 		if (framebuffer_index >= 0) {
-			fbufCreateInfo.renderPass = vk_ctx.windows[vk_ctx.current_window].framebuffer_render_pass;
+			fbufCreateInfo.renderPass = vk_ctx.windows[0].framebuffer_render_pass;
 		}
 		else if (depthBufferBits > 0) {
-			fbufCreateInfo.renderPass = vk_ctx.windows[vk_ctx.current_window].rendertarget_render_pass_with_depth;
+			fbufCreateInfo.renderPass = vk_ctx.windows[0].rendertarget_render_pass_with_depth;
 		}
 		else {
-			fbufCreateInfo.renderPass = vk_ctx.windows[vk_ctx.current_window].rendertarget_render_pass;
+			fbufCreateInfo.renderPass = vk_ctx.windows[0].rendertarget_render_pass;
 		}
 		fbufCreateInfo.attachmentCount = depthBufferBits > 0 ? 2 : 1;
 		fbufCreateInfo.pAttachments = attachments;
@@ -289,10 +289,10 @@ void kinc_g5_render_target_set_depth_from(kinc_g5_render_target_t *target, kinc_
 		fbufCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 		fbufCreateInfo.pNext = NULL;
 		if (target->impl.depthBufferBits > 0) {
-			fbufCreateInfo.renderPass = vk_ctx.windows[vk_ctx.current_window].rendertarget_render_pass_with_depth;
+			fbufCreateInfo.renderPass = vk_ctx.windows[0].rendertarget_render_pass_with_depth;
 		}
 		else {
-			fbufCreateInfo.renderPass = vk_ctx.windows[vk_ctx.current_window].rendertarget_render_pass;
+			fbufCreateInfo.renderPass = vk_ctx.windows[0].rendertarget_render_pass;
 		}
 		fbufCreateInfo.attachmentCount = target->impl.depthBufferBits > 0 ? 2 : 1;
 		fbufCreateInfo.pAttachments = attachments;

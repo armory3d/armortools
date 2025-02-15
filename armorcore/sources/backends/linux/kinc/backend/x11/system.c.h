@@ -40,7 +40,7 @@ struct kinc_x11_window *window_from_window(Window window) {
 	return NULL;
 }
 
-void kinc_internal_resize(int window_index, int width, int height);
+void kinc_internal_resize(int width, int height);
 static void init_pen_device(XDeviceInfo *info, struct x11_pen_device *pen, bool eraser);
 
 static void load_lib(void **lib, const char *name);
@@ -260,13 +260,13 @@ static void check_pen_device(struct kinc_x11_window *window, XEvent *event, stru
 		if (motion->deviceid == pen->id) {
 			float p = (float)motion->axis_data[2] / (float)pen->maxPressure;
 			if (p > 0 && x11_ctx.pen.current_pressure == 0) {
-				pen->press(window->window_index, motion->x, motion->y, p);
+				pen->press(motion->x, motion->y, p);
 			}
 			else if (p == 0 && pen->current_pressure > 0) {
-				pen->release(window->window_index, motion->x, motion->y, p);
+				pen->release(motion->x, motion->y, p);
 			}
 			else if (p > 0) {
-				pen->move(window->window_index, motion->x, motion->y, p);
+				pen->move(motion->x, motion->y, p);
 			}
 			pen->current_pressure = p;
 		}
@@ -663,17 +663,16 @@ bool kinc_x11_handle_messages() {
 		}
 		case ButtonPress: {
 			XButtonEvent *button = (XButtonEvent *)&event;
-			int window_index = k_window->window_index;
 
 			switch (button->button) {
 			case Button1:
-				kinc_internal_mouse_trigger_press(window_index, 0, button->x, button->y);
+				kinc_internal_mouse_trigger_press(0, button->x, button->y);
 				break;
 			case Button2:
-				kinc_internal_mouse_trigger_press(window_index, 2, button->x, button->y);
+				kinc_internal_mouse_trigger_press(2, button->x, button->y);
 				break;
 			case Button3:
-				kinc_internal_mouse_trigger_press(window_index, 1, button->x, button->y);
+				kinc_internal_mouse_trigger_press(1, button->x, button->y);
 				break;
 			// buttons 4-7 are for mouse wheel events because why not
 			case Button4:
@@ -682,53 +681,52 @@ bool kinc_x11_handle_messages() {
 			case Button7:
 				break;
 			default:
-				kinc_internal_mouse_trigger_press(window_index, button->button - Button1 - 4, button->x, button->y);
+				kinc_internal_mouse_trigger_press(button->button - Button1 - 4, button->x, button->y);
 				break;
 			}
 			break;
 		}
 		case ButtonRelease: {
 			XButtonEvent *button = (XButtonEvent *)&event;
-			int window_index = k_window->window_index;
 
 			switch (button->button) {
 			case Button1:
-				kinc_internal_mouse_trigger_release(window_index, 0, button->x, button->y);
+				kinc_internal_mouse_trigger_release(0, button->x, button->y);
 				break;
 			case Button2:
-				kinc_internal_mouse_trigger_release(window_index, 2, button->x, button->y);
+				kinc_internal_mouse_trigger_release(2, button->x, button->y);
 				break;
 			case Button3:
-				kinc_internal_mouse_trigger_release(window_index, 1, button->x, button->y);
+				kinc_internal_mouse_trigger_release(1, button->x, button->y);
 				break;
 			// Button4 and Button5 provide mouse wheel events because why not
 			case Button4:
-				kinc_internal_mouse_trigger_scroll(window_index, -1);
+				kinc_internal_mouse_trigger_scroll(-1);
 				break;
 			case Button5:
-				kinc_internal_mouse_trigger_scroll(window_index, 1);
+				kinc_internal_mouse_trigger_scroll(1);
 				break;
 			// button 6 and 7 seem to be horizontal scrolling, which is not exposed in Kinc's api at the moment
 			case Button6:
 			case Button7:
 				break;
 			default:
-				kinc_internal_mouse_trigger_release(window_index, button->button - Button1 - 4, button->x, button->y);
+				kinc_internal_mouse_trigger_release(button->button - Button1 - 4, button->x, button->y);
 				break;
 			}
 			break;
 		}
 		case MotionNotify: {
 			XMotionEvent *motion = (XMotionEvent *)&event;
-			kinc_internal_mouse_trigger_move(k_window->window_index, motion->x, motion->y);
+			kinc_internal_mouse_trigger_move(motion->x, motion->y);
 			break;
 		}
 		case ConfigureNotify: {
 			if (event.xconfigure.width != k_window->width || event.xconfigure.height != k_window->height) {
 				k_window->width = event.xconfigure.width;
 				k_window->height = event.xconfigure.height;
-				kinc_internal_resize(k_window->window_index, event.xconfigure.width, event.xconfigure.height);
-				kinc_internal_call_resize_callback(k_window->window_index, event.xconfigure.width, event.xconfigure.height);
+				kinc_internal_resize(event.xconfigure.width, event.xconfigure.height);
+				kinc_internal_call_resize_callback(event.xconfigure.width, event.xconfigure.height);
 			}
 			break;
 		}
@@ -754,12 +752,9 @@ bool kinc_x11_handle_messages() {
 				                       event.xclient.data.l[2]);
 			}
 			else if (event.xclient.data.l[0] == x11_ctx.atoms.WM_DELETE_WINDOW) {
-				if (kinc_internal_call_close_callback(k_window->window_index)) {
-					kinc_window_destroy(k_window->window_index);
-					if (x11_ctx.num_windows <= 0) {
-						// no windows left, stop
-						kinc_stop();
-					}
+				if (kinc_internal_call_close_callback()) {
+					kinc_window_destroy();
+					kinc_stop();
 				}
 			}
 		}; break;
@@ -841,7 +836,6 @@ bool kinc_x11_handle_messages() {
 		case LeaveNotify:
 			break;
 		case EnterNotify:
-			x11_ctx.mouse.current_window = k_window->window_index;
 			break;
 		}
 	}
@@ -861,13 +855,13 @@ void kinc_x11_copy_to_clipboard(const char *text) {
 
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_xlib.h>
-VkResult kinc_x11_vulkan_create_surface(VkInstance instance, int window_index, VkSurfaceKHR *surface) {
+VkResult kinc_x11_vulkan_create_surface(VkInstance instance, VkSurfaceKHR *surface) {
 	VkXlibSurfaceCreateInfoKHR info = {0};
 	info.sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR;
 	info.pNext = NULL;
 	info.flags = 0;
 	info.dpy = x11_ctx.display;
-	info.window = x11_ctx.windows[window_index].window;
+	info.window = x11_ctx.windows[0].window;
 	return vkCreateXlibSurfaceKHR(instance, &info, NULL, surface);
 }
 
@@ -883,13 +877,13 @@ VkBool32 kinc_x11_vulkan_get_physical_device_presentation_support(VkPhysicalDevi
 	                                                     DefaultVisual(x11_ctx.display, DefaultScreen(x11_ctx.display))->visualid);
 }
 
-void kinc_x11_mouse_lock(int window) {
+void kinc_x11_mouse_lock() {
 	kinc_mouse_hide();
-	int width = kinc_window_width(window);
-	int height = kinc_window_height(window);
+	int width = kinc_window_width();
+	int height = kinc_window_height();
 
 	int x, y;
-	kinc_mouse_get_position(window, &x, &y);
+	kinc_mouse_get_position(&x, &y);
 
 	// Guess the new position of X and Y
 	int newX = x;
@@ -914,7 +908,7 @@ void kinc_x11_mouse_lock(int window) {
 	}
 
 	// Force the mouse to stay inside the window
-	kinc_mouse_set_position(window, newX, newY);
+	kinc_mouse_set_position(newX, newY);
 }
 
 void kinc_x11_mouse_unlock(void) {
@@ -928,7 +922,7 @@ bool kinc_x11_mouse_can_lock(void) {
 static bool mouseHidden = false;
 
 void kinc_x11_mouse_show() {
-	struct kinc_x11_window *window = &x11_ctx.windows[x11_ctx.mouse.current_window];
+	struct kinc_x11_window *window = &x11_ctx.windows[0];
 	if (mouseHidden) {
 		xlib.XUndefineCursor(x11_ctx.display, window->window);
 		mouseHidden = false;
@@ -936,7 +930,7 @@ void kinc_x11_mouse_show() {
 }
 
 void kinc_x11_mouse_hide() {
-	struct kinc_x11_window *window = &x11_ctx.windows[x11_ctx.mouse.current_window];
+	struct kinc_x11_window *window = &x11_ctx.windows[0];
 	if (!mouseHidden) {
 		XColor col;
 		col.pixel = 0;
@@ -955,7 +949,7 @@ void kinc_x11_mouse_hide() {
 }
 
 void kinc_x11_mouse_set_cursor(int cursorIndex) {
-	struct kinc_x11_window *window = &x11_ctx.windows[x11_ctx.mouse.current_window];
+	struct kinc_x11_window *window = &x11_ctx.windows[0];
 	if (!mouseHidden) {
 		Cursor cursor;
 		switch (cursorIndex) {
@@ -1025,15 +1019,15 @@ void kinc_x11_mouse_set_cursor(int cursorIndex) {
 	}
 }
 
-void kinc_x11_mouse_set_position(int window_index, int x, int y) {
-	struct kinc_x11_window *window = &x11_ctx.windows[window_index];
+void kinc_x11_mouse_set_position(int x, int y) {
+	struct kinc_x11_window *window = &x11_ctx.windows[0];
 
 	xlib.XWarpPointer(x11_ctx.display, None, window->window, 0, 0, 0, 0, x, y);
 	xlib.XFlush(x11_ctx.display); // Flushes the output buffer, therefore updates the cursor's position.
 }
 
-void kinc_x11_mouse_get_position(int window_index, int *x, int *y) {
-	struct kinc_x11_window *window = &x11_ctx.windows[window_index];
+void kinc_x11_mouse_get_position(int *x, int *y) {
+	struct kinc_x11_window *window = &x11_ctx.windows[0];
 	Window inwin;
 	Window inchildwin;
 	int rootx, rooty;

@@ -101,8 +101,8 @@ void kinc_g5_command_list_scissor(kinc_g5_command_list_t *list, int x, int y, in
 		target_h = lastRenderTargets[0]->texHeight;
 	}
 	else {
-		target_w = kinc_window_width(0);
-		target_h = kinc_window_height(0);
+		target_w = kinc_window_width();
+		target_h = kinc_window_height();
 	}
 	scissor.width = (x + width <= target_w) ? width : target_w - x;
 	scissor.height = (y + height <= target_h) ? height : target_h - y;
@@ -119,8 +119,8 @@ void kinc_g5_command_list_disable_scissor(kinc_g5_command_list_t *list) {
 		scissor.height = lastRenderTargets[0]->texHeight;
 	}
 	else {
-		scissor.width = kinc_window_width(0);
-		scissor.height = kinc_window_height(0);
+		scissor.width = kinc_window_width();
+		scissor.height = kinc_window_height();
 	}
 	[encoder setScissorRect:scissor];
 }

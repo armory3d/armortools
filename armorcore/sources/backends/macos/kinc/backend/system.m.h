@@ -75,10 +75,10 @@ bool kinc_internal_handle_messages(void) {
 	return true;
 }
 
-void swapBuffersMac(int windowId) {
+void swapBuffersMac() {
 }
 
-static int createWindow(kinc_window_options_t *options) {
+static void createWindow(kinc_window_options_t *options) {
 	int width = options->width / [[NSScreen mainScreen] backingScaleFactor];
 	int height = options->height / [[NSScreen mainScreen] backingScaleFactor];
 	int styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable;
@@ -99,43 +99,37 @@ static int createWindow(kinc_window_options_t *options) {
 	[[window contentView] addSubview:view];
 	[window center];
 
-	windows[windowCounter].handle = window;
-	windows[windowCounter].view = view;
+	windows[0].handle = window;
+	windows[0].view = view;
 
 	[window makeKeyAndOrderFront:nil];
 
 	if (options->mode == KINC_WINDOW_MODE_FULLSCREEN) {
 		[window toggleFullScreen:nil];
-		windows[windowCounter].fullscreen = true;
+		windows[0].fullscreen = true;
 	}
-
-	return windowCounter++;
 }
 
-int kinc_count_windows(void) {
-	return windowCounter;
-}
-
-void kinc_window_change_window_mode(int window_index, kinc_window_mode_t mode) {
+void kinc_window_change_window_mode(kinc_window_mode_t mode) {
 	switch (mode) {
 	case KINC_WINDOW_MODE_WINDOW:
-		if (windows[window_index].fullscreen) {
+		if (windows[0].fullscreen) {
 			[window toggleFullScreen:nil];
-			windows[window_index].fullscreen = false;
+			windows[0].fullscreen = false;
 		}
 		break;
 	case KINC_WINDOW_MODE_FULLSCREEN:
-		if (!windows[window_index].fullscreen) {
+		if (!windows[0].fullscreen) {
 			[window toggleFullScreen:nil];
-			windows[window_index].fullscreen = true;
+			windows[0].fullscreen = true;
 		}
 		break;
 	}
 }
 
-void kinc_window_set_close_callback(int window, bool (*callback)(void *), void *data) {
-	windows[window].closeCallback = callback;
-	windows[window].closeCallbackData = data;
+void kinc_window_set_close_callback(bool (*callback)(void *), void *data) {
+	windows[0].closeCallback = callback;
+	windows[0].closeCallbackData = data;
 }
 
 static void addMenubar(void) {
@@ -154,7 +148,7 @@ static void addMenubar(void) {
 	[NSApp setMainMenu:menubar];
 }
 
-int kinc_init(const char *name, int width, int height, kinc_window_options_t *win, kinc_framebuffer_options_t *frame) {
+void kinc_init(const char *name, int width, int height, kinc_window_options_t *win, kinc_framebuffer_options_t *frame) {
 	@autoreleasepool {
 		myapp = [KincApplication sharedApplication];
 		[myapp finishLaunching];
@@ -184,27 +178,25 @@ int kinc_init(const char *name, int width, int height, kinc_window_options_t *wi
 		win->title = name;
 	}
 
-	int windowId = createWindow(win);
+	createWindow(win);
 	kinc_g4_internal_init();
-	kinc_g4_internal_init_window(windowId, frame->depth_bits, true);
-
-	return 0;
+	kinc_g4_internal_init_window(frame->depth_bits, true);
 }
 
-int kinc_window_width(int window_index) {
-	NSWindow *window = windows[window_index].handle;
+int kinc_window_width() {
+	NSWindow *window = windows[0].handle;
 	float scale = [window backingScaleFactor];
 	return [[window contentView] frame].size.width * scale;
 }
 
-int kinc_window_height(int window_index) {
-	NSWindow *window = windows[window_index].handle;
+int kinc_window_height() {
+	NSWindow *window = windows[0].handle;
 	float scale = [window backingScaleFactor];
 	return [[window contentView] frame].size.height * scale;
 }
 
-NSWindow *kinc_get_mac_window_handle(int window_index) {
-	return windows[window_index].handle;
+NSWindow *kinc_get_mac_window_handle() {
+	return windows[0].handle;
 }
 
 void kinc_load_url(const char *url) {

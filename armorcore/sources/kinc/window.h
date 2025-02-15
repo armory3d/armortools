@@ -1,7 +1,7 @@
 #pragma once
 
-#include <kinc/global.h>
 #include <stdbool.h>
+#include <kinc/global.h>
 
 /*! \file window.h
     \brief Provides functionality for creating and handling windows.
@@ -27,42 +27,38 @@ typedef enum {
 
 typedef struct kinc_window_options {
 	const char *title;
-
 	int x;
 	int y;
 	int width;
 	int height;
 	int display_index;
-
 	bool visible;
 	int window_features;
 	kinc_window_mode_t mode;
 } kinc_window_options_t;
 
-int kinc_window_create(kinc_window_options_t *win, kinc_framebuffer_options_t *frame);
-void kinc_window_destroy(int window);
+void kinc_window_create(kinc_window_options_t *win, kinc_framebuffer_options_t *frame);
+void kinc_window_destroy();
 void kinc_window_options_set_defaults(kinc_window_options_t *win);
 void kinc_framebuffer_options_set_defaults(kinc_framebuffer_options_t *frame);
-int kinc_count_windows(void);
-void kinc_window_resize(int window, int width, int height);
-void kinc_window_move(int window, int x, int y);
-void kinc_window_change_mode(int window, kinc_window_mode_t mode);
-void kinc_window_change_features(int window, int features);
-void kinc_window_change_framebuffer(int window, kinc_framebuffer_options_t *frame);
-int kinc_window_x(int window);
-int kinc_window_y(int window);
-int kinc_window_width(int window);
-int kinc_window_height(int window);
-int kinc_window_display(int window);
-kinc_window_mode_t kinc_window_get_mode(int window);
-void kinc_window_show(int window);
-void kinc_window_hide(int window);
-void kinc_window_set_title(int window, const char *title);
-void kinc_window_set_resize_callback(int window, void (*callback)(int x, int y, void *data), void *data);
-void kinc_window_set_close_callback(int window, bool (*callback)(void *data), void *data);
+void kinc_window_resize(int width, int height);
+void kinc_window_move(int x, int y);
+void kinc_window_change_mode(kinc_window_mode_t mode);
+void kinc_window_change_features(int features);
+int kinc_window_x();
+int kinc_window_y();
+int kinc_window_width();
+int kinc_window_height();
+int kinc_window_display();
+kinc_window_mode_t kinc_window_get_mode();
+void kinc_window_show();
+void kinc_window_hide();
+void kinc_window_set_title(const char *title);
+void kinc_window_set_resize_callback(void (*callback)(int x, int y, void *data), void *data);
+void kinc_window_set_close_callback(bool (*callback)(void *data), void *data);
 
-void kinc_internal_call_resize_callback(int window, int width, int height);
-bool kinc_internal_call_close_callback(int window);
+void kinc_internal_call_resize_callback(int width, int height);
+bool kinc_internal_call_close_callback();
 
 #ifdef KINC_IMPLEMENTATION_ROOT
 #define KINC_IMPLEMENTATION

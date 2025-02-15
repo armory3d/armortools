@@ -49,11 +49,11 @@ static int removeTouch(void *touch) {
 
 static GLint backingWidth, backingHeight;
 
-int kinc_window_width(int window) {
+int kinc_window_width() {
 	return backingWidth;
 }
 
-int kinc_window_height(int window) {
+int kinc_window_height() {
 	return backingHeight;
 }
 
@@ -105,7 +105,7 @@ int kinc_window_height(int window) {
 - (void)end {
 }
 
-void kinc_internal_call_resize_callback(int window, int width, int height);
+void kinc_internal_call_resize_callback(int width, int height);
 
 - (void)layoutSubviews {
 	backingWidth = self.frame.size.width * self.contentScaleFactor;
@@ -114,7 +114,7 @@ void kinc_internal_call_resize_callback(int window, int width, int height);
 	CAMetalLayer *metalLayer = (CAMetalLayer *)self.layer;
 	metalLayer.drawableSize = CGSizeMake(backingWidth, backingHeight);
 
-	kinc_internal_call_resize_callback(0, backingWidth, backingHeight);
+	kinc_internal_call_resize_callback(backingWidth, backingHeight);
 }
 
 - (void)dealloc {

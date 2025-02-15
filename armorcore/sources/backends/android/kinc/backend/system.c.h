@@ -41,7 +41,7 @@ static bool activityJustResized = false;
 #include <vulkan/vulkan_android.h>
 #include <vulkan/vulkan_core.h>
 
-VkResult kinc_vulkan_create_surface(VkInstance instance, int window_index, VkSurfaceKHR *surface) {
+VkResult kinc_vulkan_create_surface(VkInstance instance, VkSurfaceKHR *surface) {
 	assert(app->window != NULL);
 	VkAndroidSurfaceCreateInfoKHR createInfo = {};
 	createInfo.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
@@ -66,7 +66,7 @@ VkBool32 kinc_vulkan_get_physical_device_presentation_support(VkPhysicalDevice p
 	return true;
 }
 
-void kinc_vulkan_init_window(int window);
+void kinc_vulkan_init_window();
 
 static void initDisplay() {
 	kinc_vulkan_init_window(0);
@@ -981,7 +981,7 @@ double kinc_time() {
 	return (double)(now.tv_sec - start_sec) + (now.tv_usec / 1000000.0);
 }
 
-void kinc_internal_resize(int window, int width, int height);
+void kinc_internal_resize(int width, int height);
 
 bool kinc_internal_handle_messages(void) {
 	kinc_mutex_lock(&unicode_mutex);
@@ -1028,7 +1028,7 @@ bool kinc_internal_handle_messages(void) {
 #ifdef KINC_VULKAN
 		kinc_internal_resize(0, width, height);
 #endif
-		kinc_internal_call_resize_callback(0, width, height);
+		kinc_internal_call_resize_callback(width, height);
 	}
 
 	// Get screen rotation
@@ -1052,13 +1052,13 @@ void kinc_mouse_show() {}
 
 void kinc_mouse_hide() {}
 
-void kinc_mouse_set_position(int window, int x, int y) {}
+void kinc_mouse_set_position(int x, int y) {}
 
-void kinc_internal_mouse_lock(int window) {}
+void kinc_internal_mouse_lock() {}
 
 void kinc_internal_mouse_unlock(void) {}
 
-void kinc_mouse_get_position(int window, int *x, int *y) {
+void kinc_mouse_get_position(int *x, int *y) {
 	x = 0;
 	y = 0;
 }
@@ -1114,7 +1114,7 @@ void android_main(struct android_app *application) {
 	(*activity->vm)->DetachCurrentThread(activity->vm);
 }
 
-int kinc_init(const char *name, int width, int height, struct kinc_window_options *win, struct kinc_framebuffer_options *frame) {
+void kinc_init(const char *name, int width, int height, struct kinc_window_options *win, struct kinc_framebuffer_options *frame) {
 	kinc_mutex_init(&unicode_mutex);
 
 	kinc_window_options_t default_win;
@@ -1132,11 +1132,9 @@ int kinc_init(const char *name, int width, int height, struct kinc_window_option
 	}
 
 	kinc_g4_internal_init();
-	kinc_g4_internal_init_window(0, frame->depth_bits, true);
+	kinc_g4_internal_init_window(frame->depth_bits, true);
 
 	kinc_internal_gamepad_trigger_connect(0);
-
-	return 0;
 }
 
 void kinc_internal_shutdown(void) {

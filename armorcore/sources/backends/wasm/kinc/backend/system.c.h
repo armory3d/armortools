@@ -13,7 +13,7 @@ __attribute__((import_module("imports"), import_name("js_time"))) int js_time();
 extern int kinc_internal_window_width;
 extern int kinc_internal_window_height;
 
-int kinc_init(const char *name, int width, int height, kinc_window_options_t *win, kinc_framebuffer_options_t *frame) {
+void kinc_init(const char *name, int width, int height, kinc_window_options_t *win, kinc_framebuffer_options_t *frame) {
 	kinc_window_options_t defaultWin;
 	if (win == NULL) {
 		kinc_window_options_set_defaults(&defaultWin);
@@ -31,9 +31,7 @@ int kinc_init(const char *name, int width, int height, kinc_window_options_t *wi
 	kinc_internal_window_height = height;
 
 	kinc_g4_internal_init();
-	kinc_g4_internal_init_window(0, frame->depth_bits, true);
-
-	return 0;
+	kinc_g4_internal_init_window(frame->depth_bits, true);
 }
 
 bool kinc_internal_handle_messages() {

@@ -17,7 +17,6 @@
 
 struct kinc_x11_window {
 	int display_index;
-	int window_index;
 	int width;
 	int height;
 	kinc_window_mode_t mode;
@@ -42,7 +41,6 @@ struct kinc_x11_display {
 };
 
 struct kinc_x11_mouse {
-	int current_window;
 	int x;
 	int y;
 };
@@ -169,9 +167,9 @@ struct x11_pen_device {
 	uint32_t maxPressure;
 	float current_pressure;
 
-	void (*press)(int /*window*/, int /*x*/, int /*y*/, float /*pressure*/);
-	void (*move)(int /*window*/, int /*x*/, int /*y*/, float /*pressure*/);
-	void (*release)(int /*window*/, int /*x*/, int /*y*/, float /*pressure*/);
+	void (*press)(int /*x*/, int /*y*/, float /*pressure*/);
+	void (*move)(int /*x*/, int /*y*/, float /*pressure*/);
+	void (*release)(int /*x*/, int /*y*/, float /*pressure*/);
 };
 
 struct x11_context {
@@ -183,7 +181,6 @@ struct x11_context {
 	struct x11_pen_device pen;
 	struct x11_pen_device eraser;
 
-	int num_windows;
 	struct kinc_x11_window windows[MAXIMUM_WINDOWS];
 	int num_displays;
 	struct kinc_x11_display displays[MAXIMUM_DISPLAYS];

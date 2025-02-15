@@ -1,8 +1,8 @@
 #include "funcs.h"
 #include <kinc/input/mouse.h>
 
-void kinc_internal_mouse_lock(int window) {
-	procs.mouse_lock(window);
+void kinc_internal_mouse_lock() {
+	procs.mouse_lock();
 }
 
 void kinc_internal_mouse_unlock() {
@@ -23,14 +23,14 @@ void kinc_mouse_hide() {
 	procs.mouse_hide();
 }
 
-void kinc_mouse_set_cursor(int cursorIndex) {
-	procs.mouse_set_cursor(cursorIndex);
+void kinc_mouse_set_cursor(int cursor_index) {
+	procs.mouse_set_cursor(cursor_index);
 }
 
-void kinc_mouse_set_position(int window, int x, int y) {
-	procs.mouse_set_position(window, x, y);
+void kinc_mouse_set_position(int x, int y) {
+	procs.mouse_set_position(x, y);
 }
 
-void kinc_mouse_get_position(int window, int *x, int *y) {
-	procs.mouse_get_position(window, x, y);
+void kinc_mouse_get_position(int *x, int *y) {
+	procs.mouse_get_position(x, y);
 }

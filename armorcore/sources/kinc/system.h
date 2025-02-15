@@ -13,7 +13,7 @@
 struct kinc_window_options;
 struct kinc_framebuffer_options;
 
-int kinc_init(const char *name, int width, int height, struct kinc_window_options *win, struct kinc_framebuffer_options *frame);
+void kinc_init(const char *name, int width, int height, struct kinc_window_options *win, struct kinc_framebuffer_options *frame);
 const char *kinc_application_name(void);
 void kinc_set_application_name(const char *name);
 int kinc_width(void);
@@ -281,11 +281,11 @@ void kinc_start(void) {
 }
 
 int kinc_width(void) {
-	return kinc_window_width(0);
+	return kinc_window_width();
 }
 
 int kinc_height(void) {
-	return kinc_window_height(0);
+	return kinc_window_height();
 }
 
 void kinc_memory_emergency(void) {}

@@ -26,7 +26,7 @@
 
 __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
 __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
-void kinc_internal_resize(int window, int width, int height);
+void kinc_internal_resize(int width, int height);
 
 typedef BOOL(WINAPI *GetPointerInfoType)(UINT32 pointerId, POINTER_INFO *pointerInfo);
 static GetPointerInfoType MyGetPointerInfo = NULL;
@@ -242,7 +242,6 @@ void kinc_mouse_set_cursor(int set_cursor) {
 }
 
 LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-	int windowId;
 	DWORD pointerId;
 	POINTER_INFO pointerInfo = {0};
 	POINTER_PEN_INFO penInfo = {0};
@@ -262,9 +261,6 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 		}
 		break;
 	case WM_DPICHANGED: {
-		int window = kinc_windows_window_index_from_hwnd(hWnd);
-		if (window >= 0) {
-		}
 		break;
 	}
 	case WM_MOVE:
@@ -273,23 +269,17 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 		// Scheduler::breakTime();
 		break;
 	case WM_SIZE: {
-		int window = kinc_windows_window_index_from_hwnd(hWnd);
-		if (window >= 0) {
-			int width = LOWORD(lParam);
-			int height = HIWORD(lParam);
-			kinc_internal_resize(window, width, height);
-			kinc_internal_call_resize_callback(window, width, height);
-		}
+		int width = LOWORD(lParam);
+		int height = HIWORD(lParam);
+		kinc_internal_resize(width, height);
+		kinc_internal_call_resize_callback(width, height);
 		break;
 	}
 	case WM_CLOSE: {
-		int window_index = kinc_windows_window_index_from_hwnd(hWnd);
-		if (kinc_internal_call_close_callback(window_index)) {
-			kinc_window_destroy(window_index);
-			if (kinc_count_windows() <= 0) {
-				kinc_stop();
-				return 0;
-			}
+		if (kinc_internal_call_close_callback()) {
+			kinc_window_destroy();
+			kinc_stop();
+			return 0;
 		}
 		return 0;
 	}
@@ -301,11 +291,11 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 	}
 	case WM_ACTIVATE:
 		if (LOWORD(wParam) == WA_ACTIVE || LOWORD(wParam) == WA_CLICKACTIVE) {
-			kinc_internal_mouse_window_activated(kinc_windows_window_index_from_hwnd(hWnd));
+			kinc_internal_mouse_window_activated();
 			kinc_internal_foreground_callback();
 		}
 		else {
-			kinc_internal_mouse_window_deactivated(kinc_windows_window_index_from_hwnd(hWnd));
+			kinc_internal_mouse_window_deactivated();
 			kinc_internal_background_callback();
 #ifdef HANDLE_ALT_ENTER
 			altDown = false;
@@ -314,22 +304,11 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 		RegisterTouchWindow(hWnd, 0);
 		break;
 	case WM_MOUSELEAVE:
-		windowId = kinc_windows_window_index_from_hwnd(hWnd);
-		//**windows[windowId]->isMouseInside = false;
 		break;
 	case WM_MOUSEMOVE:
-		windowId = kinc_windows_window_index_from_hwnd(hWnd);
-		/*if (!windows[windowId]->isMouseInside) {
-		    windows[windowId]->isMouseInside = true;
-		    TRACKMOUSEEVENT tme;
-		    tme.cbSize = sizeof(TRACKMOUSEEVENT);
-		    tme.dwFlags = TME_LEAVE;
-		    tme.hwndTrack = hWnd;
-		    TrackMouseEvent(&tme);
-		}*/
 		mouseX = GET_X_LPARAM(lParam);
 		mouseY = GET_Y_LPARAM(lParam);
-		kinc_internal_mouse_trigger_move(windowId, mouseX, mouseY);
+		kinc_internal_mouse_trigger_move(mouseX, mouseY);
 		break;
 	case WM_CREATE:
 		cursors[0] = LoadCursor(0, IDC_ARROW);
@@ -362,47 +341,47 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 			SetCapture(hWnd);
 		mouseX = GET_X_LPARAM(lParam);
 		mouseY = GET_Y_LPARAM(lParam);
-		kinc_internal_mouse_trigger_press(kinc_windows_window_index_from_hwnd(hWnd), 0, mouseX, mouseY);
+		kinc_internal_mouse_trigger_press(0, mouseX, mouseY);
 		break;
 	case WM_LBUTTONUP:
 		if (!kinc_mouse_is_locked())
 			ReleaseCapture();
 		mouseX = GET_X_LPARAM(lParam);
 		mouseY = GET_Y_LPARAM(lParam);
-		kinc_internal_mouse_trigger_release(kinc_windows_window_index_from_hwnd(hWnd), 0, mouseX, mouseY);
+		kinc_internal_mouse_trigger_release(0, mouseX, mouseY);
 		break;
 	case WM_RBUTTONDOWN:
 		mouseX = GET_X_LPARAM(lParam);
 		mouseY = GET_Y_LPARAM(lParam);
-		kinc_internal_mouse_trigger_press(kinc_windows_window_index_from_hwnd(hWnd), 1, mouseX, mouseY);
+		kinc_internal_mouse_trigger_press(1, mouseX, mouseY);
 		break;
 	case WM_RBUTTONUP:
 		mouseX = GET_X_LPARAM(lParam);
 		mouseY = GET_Y_LPARAM(lParam);
-		kinc_internal_mouse_trigger_release(kinc_windows_window_index_from_hwnd(hWnd), 1, mouseX, mouseY);
+		kinc_internal_mouse_trigger_release(1, mouseX, mouseY);
 		break;
 	case WM_MBUTTONDOWN:
 		mouseX = GET_X_LPARAM(lParam);
 		mouseY = GET_Y_LPARAM(lParam);
-		kinc_internal_mouse_trigger_press(kinc_windows_window_index_from_hwnd(hWnd), 2, mouseX, mouseY);
+		kinc_internal_mouse_trigger_press(2, mouseX, mouseY);
 		break;
 	case WM_MBUTTONUP:
 		mouseX = GET_X_LPARAM(lParam);
 		mouseY = GET_Y_LPARAM(lParam);
-		kinc_internal_mouse_trigger_release(kinc_windows_window_index_from_hwnd(hWnd), 2, mouseX, mouseY);
+		kinc_internal_mouse_trigger_release(2, mouseX, mouseY);
 		break;
 	case WM_XBUTTONDOWN:
 		mouseX = GET_X_LPARAM(lParam);
 		mouseY = GET_Y_LPARAM(lParam);
-		kinc_internal_mouse_trigger_press(kinc_windows_window_index_from_hwnd(hWnd), HIWORD(wParam) + 2, mouseX, mouseY);
+		kinc_internal_mouse_trigger_press(HIWORD(wParam) + 2, mouseX, mouseY);
 		break;
 	case WM_XBUTTONUP:
 		mouseX = GET_X_LPARAM(lParam);
 		mouseY = GET_Y_LPARAM(lParam);
-		kinc_internal_mouse_trigger_release(kinc_windows_window_index_from_hwnd(hWnd), HIWORD(wParam) + 2, mouseX, mouseY);
+		kinc_internal_mouse_trigger_release(HIWORD(wParam) + 2, mouseX, mouseY);
 		break;
 	case WM_MOUSEWHEEL:
-		kinc_internal_mouse_trigger_scroll(kinc_windows_window_index_from_hwnd(hWnd), GET_WHEEL_DELTA_WPARAM(wParam) / -120);
+		kinc_internal_mouse_trigger_scroll(GET_WHEEL_DELTA_WPARAM(wParam) / -120);
 		break;
 	case WM_POINTERDOWN:
 		pointerId = GET_POINTERID_WPARAM(wParam);
@@ -410,7 +389,7 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 		if (pointerInfo.pointerType == PT_PEN) {
 			MyGetPointerPenInfo(pointerId, &penInfo);
 			ScreenToClient(hWnd, &pointerInfo.ptPixelLocation);
-			kinc_internal_pen_trigger_press(kinc_windows_window_index_from_hwnd(hWnd), pointerInfo.ptPixelLocation.x, pointerInfo.ptPixelLocation.y,
+			kinc_internal_pen_trigger_press(pointerInfo.ptPixelLocation.x, pointerInfo.ptPixelLocation.y,
 			                                penInfo.pressure / 1024.0f);
 		}
 		break;
@@ -420,7 +399,7 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 		if (pointerInfo.pointerType == PT_PEN) {
 			MyGetPointerPenInfo(pointerId, &penInfo);
 			ScreenToClient(hWnd, &pointerInfo.ptPixelLocation);
-			kinc_internal_pen_trigger_release(kinc_windows_window_index_from_hwnd(hWnd), pointerInfo.ptPixelLocation.x, pointerInfo.ptPixelLocation.y,
+			kinc_internal_pen_trigger_release(pointerInfo.ptPixelLocation.x, pointerInfo.ptPixelLocation.y,
 			                                  penInfo.pressure / 1024.0f);
 		}
 		break;
@@ -430,7 +409,7 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 		if (pointerInfo.pointerType == PT_PEN) {
 			MyGetPointerPenInfo(pointerId, &penInfo);
 			ScreenToClient(hWnd, &pointerInfo.ptPixelLocation);
-			kinc_internal_pen_trigger_move(kinc_windows_window_index_from_hwnd(hWnd), pointerInfo.ptPixelLocation.x, pointerInfo.ptPixelLocation.y,
+			kinc_internal_pen_trigger_move(pointerInfo.ptPixelLocation.x, pointerInfo.ptPixelLocation.y,
 			                               penInfo.pressure / 1024.0f);
 		}
 		break;
@@ -554,20 +533,20 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 
 #ifdef HANDLE_ALT_ENTER
 				if (altDown && keyTranslated[wParam] == KINC_KEY_RETURN) {
-					if (kinc_window_get_mode(0) == KINC_WINDOW_MODE_WINDOW) {
-						last_window_width = kinc_window_width(0);
-						last_window_height = kinc_window_height(0);
-						last_window_x = kinc_window_x(0);
-						last_window_y = kinc_window_y(0);
-						kinc_window_change_mode(0, KINC_WINDOW_MODE_FULLSCREEN);
+					if (kinc_window_get_mode() == KINC_WINDOW_MODE_WINDOW) {
+						last_window_width = kinc_window_width();
+						last_window_height = kinc_window_height();
+						last_window_x = kinc_window_x();
+						last_window_y = kinc_window_y();
+						kinc_window_change_mode(KINC_WINDOW_MODE_FULLSCREEN);
 					}
 					else {
-						kinc_window_change_mode(0, KINC_WINDOW_MODE_WINDOW);
+						kinc_window_change_mode(KINC_WINDOW_MODE_WINDOW);
 						if (last_window_width > 0 && last_window_height > 0) {
-							kinc_window_resize(0, last_window_width, last_window_height);
+							kinc_window_resize(last_window_width, last_window_height);
 						}
 						if (last_window_x > INT_MIN && last_window_y > INT_MIN) {
-							kinc_window_move(0, last_window_x, last_window_y);
+							kinc_window_move(slast_window_x, last_window_y);
 						}
 					}
 				}
@@ -1281,7 +1260,7 @@ static void init_crash_handler() {
 	}
 }
 
-int kinc_init(const char *name, int width, int height, kinc_window_options_t *win, kinc_framebuffer_options_t *frame) {
+void kinc_init(const char *name, int width, int height, kinc_window_options_t *win, kinc_framebuffer_options_t *frame) {
 	init_crash_handler();
 
 	// Pen functions are only in Windows 8 and later, so load them dynamically
@@ -1323,11 +1302,9 @@ int kinc_init(const char *name, int width, int height, kinc_window_options_t *wi
 
 	kinc_g4_internal_init();
 
-	int window = kinc_window_create(win, frame);
+	kinc_window_create(win, frame);
 	loadXInput();
 	initializeDirectInput();
-
-	return window;
 }
 
 void kinc_internal_shutdown() {

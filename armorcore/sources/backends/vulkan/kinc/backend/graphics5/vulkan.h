@@ -75,8 +75,6 @@ struct vk_context {
 	VkBuffer *fragment_uniform_buffer;
 	VkBuffer *compute_uniform_buffer;
 
-	int current_window;
-
 #ifdef VALIDATE
 	bool validation_found;
 	VkDebugUtilsMessengerEXT debug_messenger;
