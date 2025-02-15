@@ -2,11 +2,15 @@
 
 #include <kinc/global.h>
 #include "usage.h"
-#include <kinc/backend/graphics4/indexbuffer.h>
+#include <kinc/graphics5/indexbuffer.h>
 
 /*! \file indexbuffer.h
     \brief Provides functions for setting up and using index-buffers.
 */
+
+typedef struct {
+	kinc_g5_index_buffer_t _buffer;
+} kinc_g4_index_buffer_impl_t;
 
 typedef struct kinc_g4_index_buffer {
 	kinc_g4_index_buffer_impl_t impl;

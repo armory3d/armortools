@@ -3,9 +3,11 @@
 #include <kinc/global.h>
 #include <kinc/image.h>
 #include "rendertarget.h"
-#include "shader.h"
 #include "vertexstructure.h"
-#include <kinc/backend/graphics5/graphics.h>
+#include <kinc/backend/graphics5/indexbuffer.h>
+#include <kinc/backend/graphics5/rendertarget.h>
+#include <kinc/backend/graphics5/texture.h>
+#include <kinc/backend/graphics5/vertexbuffer.h>
 #include <kinc/math/matrix.h>
 #include <kinc/math/vector.h>
 

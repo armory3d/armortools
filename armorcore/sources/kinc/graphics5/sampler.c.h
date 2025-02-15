@@ -1,4 +1,4 @@
-#include "sampler.h"
+#include "pipeline.h"
 
 void kinc_g5_sampler_options_set_defaults(kinc_g5_sampler_options_t *options) {
 	options->u_addressing = KINC_G5_TEXTURE_ADDRESSING_CLAMP;

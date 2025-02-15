@@ -4,7 +4,6 @@
 
 #include <kinc/math/matrix.h>
 
-#include "constantlocation.h"
 #include "pipeline.h"
 #include "textureunit.h"
 

@@ -2,7 +2,6 @@
 
 #include <kinc/global.h>
 #include <kinc/image.h>
-#include "textureunit.h"
 #include <kinc/backend/graphics5/texture.h>
 
 /*! \file texture.h

@@ -3,12 +3,19 @@
 #include <kinc/global.h>
 #include "usage.h"
 #include "vertexstructure.h"
-#include <kinc/backend/graphics4/vertexbuffer.h>
+#include <kinc/graphics5/vertexbuffer.h>
 #include <stdbool.h>
 
 /*! \file vertexbuffer.h
     \brief Provides functions for setting up and using vertex-buffers.
 */
+
+typedef struct {
+	int myCount;
+	kinc_g5_vertex_buffer_t _buffer[2];
+	int _currentIndex;
+	int _multiple;
+} kinc_g4_vertex_buffer_impl_t;
 
 typedef struct kinc_g4_vertex_buffer {
 	kinc_g4_vertex_buffer_impl_t impl;

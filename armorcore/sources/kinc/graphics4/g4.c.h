@@ -1,9 +1,6 @@
 #include "g4.h"
 #include "kinc/graphics4/graphics.h"
 #include "kinc/window.h"
-#include <kinc/backend/graphics4/indexbuffer.h>
-#include <kinc/backend/graphics4/pipeline.h>
-#include <kinc/backend/graphics4/vertexbuffer.h>
 #include <kinc/color.h>
 #include <kinc/graphics4/compute.h>
 #include <kinc/graphics4/indexbuffer.h>
@@ -16,13 +13,21 @@
 #include <kinc/graphics5/compute.h>
 #include <kinc/graphics5/constantbuffer.h>
 #include <kinc/graphics5/graphics.h>
-#include <kinc/graphics5/sampler.h>
 #include <kinc/io/filereader.h>
 #include <kinc/math/core.h>
 #include <kinc/math/matrix.h>
 #include <kinc/system.h>
 #include <assert.h>
 #include <string.h>
+
+bool kinc_g5_texture_unit_equals(kinc_g5_texture_unit_t *unit1, kinc_g5_texture_unit_t *unit2) {
+	for (int i = 0; i < KINC_G5_SHADER_TYPE_COUNT; ++i) {
+		if (unit1->stages[i] != unit2->stages[i]) {
+			return false;
+		}
+	}
+	return true;
+}
 
 kinc_g5_command_list_t commandList;
 

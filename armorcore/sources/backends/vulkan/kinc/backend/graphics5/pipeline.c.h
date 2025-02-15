@@ -1,12 +1,11 @@
 #include "vulkan.h"
 #include <kinc/graphics5/pipeline.h>
-#include <kinc/graphics5/shader.h>
 #include <vulkan/vulkan_core.h>
 #include <assert.h>
 
 VkDescriptorSetLayout desc_layout;
-extern kinc_g5_texture_t *vulkanTextures[16];
-extern kinc_g5_render_target_t *vulkanRenderTargets[16];
+extern kinc_g5_texture_t *vulkan_textures[16];
+extern kinc_g5_render_target_t *vulkan_render_targets[16];
 extern uint32_t swapchainImageCount;
 extern uint32_t current_buffer;
 bool memory_type_from_properties(uint32_t typeBits, VkFlags requirements_mask, uint32_t *typeIndex);
@@ -747,7 +746,7 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 	vkDestroyShaderModule(vk_ctx.device, pipeline->impl.vert_shader_module, NULL);
 }
 
-void createDescriptorLayout(void) {
+void create_descriptor_layout(void) {
 	VkDescriptorSetLayoutBinding layoutBindings[18];
 	memset(layoutBindings, 0, sizeof(layoutBindings));
 
@@ -803,10 +802,10 @@ void createDescriptorLayout(void) {
 int calc_descriptor_id(void) {
 	int texture_count = 0;
 	for (int i = 0; i < 16; ++i) {
-		if (vulkanTextures[i] != NULL) {
+		if (vulkan_textures[i] != NULL) {
 			texture_count++;
 		}
-		else if (vulkanRenderTargets[i] != NULL) {
+		else if (vulkan_render_targets[i] != NULL) {
 			texture_count++;
 		}
 	}
@@ -819,10 +818,10 @@ int calc_descriptor_id(void) {
 int calc_compute_descriptor_id(void) {
 	int texture_count = 0;
 	for (int i = 0; i < 16; ++i) {
-		if (vulkanTextures[i] != NULL) {
+		if (vulkan_textures[i] != NULL) {
 			texture_count++;
 		}
-		else if (vulkanRenderTargets[i] != NULL) {
+		else if (vulkan_render_targets[i] != NULL) {
 			texture_count++;
 		}
 	}
@@ -849,19 +848,19 @@ static int write_tex_descs(VkDescriptorImageInfo *tex_descs) {
 
 	int texture_count = 0;
 	for (int i = 0; i < 16; ++i) {
-		if (vulkanTextures[i] != NULL) {
-			tex_descs[i].sampler = vulkanSamplers[i];
-			tex_descs[i].imageView = vulkanTextures[i]->impl.texture.view;
+		if (vulkan_textures[i] != NULL) {
+			tex_descs[i].sampler = vulkan_samplers[i];
+			tex_descs[i].imageView = vulkan_textures[i]->impl.texture.view;
 			texture_count++;
 		}
-		else if (vulkanRenderTargets[i] != NULL) {
-			tex_descs[i].sampler = vulkanSamplers[i];
-			if (vulkanRenderTargets[i]->impl.stage_depth == i) {
-				tex_descs[i].imageView = vulkanRenderTargets[i]->impl.depthView;
-				vulkanRenderTargets[i]->impl.stage_depth = -1;
+		else if (vulkan_render_targets[i] != NULL) {
+			tex_descs[i].sampler = vulkan_samplers[i];
+			if (vulkan_render_targets[i]->impl.stage_depth == i) {
+				tex_descs[i].imageView = vulkan_render_targets[i]->impl.depthView;
+				vulkan_render_targets[i]->impl.stage_depth = -1;
 			}
 			else {
-				tex_descs[i].imageView = vulkanRenderTargets[i]->impl.sourceView;
+				tex_descs[i].imageView = vulkan_render_targets[i]->impl.sourceView;
 			}
 			texture_count++;
 		}
@@ -895,7 +894,7 @@ static void update_textures(struct destriptor_set *set) {
 		writes[i].pImageInfo = &set->tex_desc[i];
 	}
 
-	if (vulkanTextures[0] != NULL || vulkanRenderTargets[0] != NULL) {
+	if (vulkan_textures[0] != NULL || vulkan_render_targets[0] != NULL) {
 		vkUpdateDescriptorSets(vk_ctx.device, texture_count, writes, 0, NULL);
 	}
 }
@@ -954,20 +953,20 @@ VkDescriptorSet getDescriptorSet() {
 
 	int texture_count = 0;
 	for (int i = 0; i < 16; ++i) {
-		if (vulkanTextures[i] != NULL) {
-			assert(vulkanSamplers[i] != VK_NULL_HANDLE);
-			tex_desc[i].sampler = vulkanSamplers[i];
-			tex_desc[i].imageView = vulkanTextures[i]->impl.texture.view;
+		if (vulkan_textures[i] != NULL) {
+			assert(vulkan_samplers[i] != VK_NULL_HANDLE);
+			tex_desc[i].sampler = vulkan_samplers[i];
+			tex_desc[i].imageView = vulkan_textures[i]->impl.texture.view;
 			texture_count++;
 		}
-		else if (vulkanRenderTargets[i] != NULL) {
-			tex_desc[i].sampler = vulkanSamplers[i];
-			if (vulkanRenderTargets[i]->impl.stage_depth == i) {
-				tex_desc[i].imageView = vulkanRenderTargets[i]->impl.depthView;
-				vulkanRenderTargets[i]->impl.stage_depth = -1;
+		else if (vulkan_render_targets[i] != NULL) {
+			tex_desc[i].sampler = vulkan_samplers[i];
+			if (vulkan_render_targets[i]->impl.stage_depth == i) {
+				tex_desc[i].imageView = vulkan_render_targets[i]->impl.depthView;
+				vulkan_render_targets[i]->impl.stage_depth = -1;
 			}
 			else {
-				tex_desc[i].imageView = vulkanRenderTargets[i]->impl.sourceView;
+				tex_desc[i].imageView = vulkan_render_targets[i]->impl.sourceView;
 			}
 			texture_count++;
 		}
@@ -1000,7 +999,7 @@ VkDescriptorSet getDescriptorSet() {
 		writes[i].pImageInfo = &tex_desc[i - 2];
 	}
 
-	if (vulkanTextures[0] != NULL || vulkanRenderTargets[0] != NULL) {
+	if (vulkan_textures[0] != NULL || vulkan_render_targets[0] != NULL) {
 		if (vk_ctx.vertex_uniform_buffer != NULL && vk_ctx.fragment_uniform_buffer != NULL) {
 			vkUpdateDescriptorSets(vk_ctx.device, 2 + texture_count, writes, 0, NULL);
 		}
@@ -1032,19 +1031,19 @@ static int write_compute_tex_descs(VkDescriptorImageInfo *tex_descs) {
 
 	int texture_count = 0;
 	for (int i = 0; i < 16; ++i) {
-		if (vulkanTextures[i] != NULL) {
-			tex_descs[i].sampler = vulkanSamplers[i];
-			tex_descs[i].imageView = vulkanTextures[i]->impl.texture.view;
+		if (vulkan_textures[i] != NULL) {
+			tex_descs[i].sampler = vulkan_samplers[i];
+			tex_descs[i].imageView = vulkan_textures[i]->impl.texture.view;
 			texture_count++;
 		}
-		else if (vulkanRenderTargets[i] != NULL) {
-			tex_descs[i].sampler = vulkanSamplers[i];
-			if (vulkanRenderTargets[i]->impl.stage_depth == i) {
-				tex_descs[i].imageView = vulkanRenderTargets[i]->impl.depthView;
-				vulkanRenderTargets[i]->impl.stage_depth = -1;
+		else if (vulkan_render_targets[i] != NULL) {
+			tex_descs[i].sampler = vulkan_samplers[i];
+			if (vulkan_render_targets[i]->impl.stage_depth == i) {
+				tex_descs[i].imageView = vulkan_render_targets[i]->impl.depthView;
+				vulkan_render_targets[i]->impl.stage_depth = -1;
 			}
 			else {
-				tex_descs[i].imageView = vulkanRenderTargets[i]->impl.sourceView;
+				tex_descs[i].imageView = vulkan_render_targets[i]->impl.sourceView;
 			}
 			texture_count++;
 		}
@@ -1078,7 +1077,7 @@ static void update_compute_textures(struct destriptor_set *set) {
 		writes[i].pImageInfo = &set->tex_desc[i];
 	}
 
-	if (vulkanTextures[0] != NULL || vulkanRenderTargets[0] != NULL) {
+	if (vulkan_textures[0] != NULL || vulkan_render_targets[0] != NULL) {
 		vkUpdateDescriptorSets(vk_ctx.device, texture_count, writes, 0, NULL);
 	}
 }
@@ -1137,20 +1136,20 @@ static VkDescriptorSet get_compute_descriptor_set() {
 
 	int texture_count = 0;
 	for (int i = 0; i < 16; ++i) {
-		if (vulkanTextures[i] != NULL) {
-			// assert(vulkanSamplers[i] != VK_NULL_HANDLE);
-			tex_desc[i].sampler = VK_NULL_HANDLE; // vulkanSamplers[i];
-			tex_desc[i].imageView = vulkanTextures[i]->impl.texture.view;
+		if (vulkan_textures[i] != NULL) {
+			// assert(vulkan_samplers[i] != VK_NULL_HANDLE);
+			tex_desc[i].sampler = VK_NULL_HANDLE; // vulkan_samplers[i];
+			tex_desc[i].imageView = vulkan_textures[i]->impl.texture.view;
 			texture_count++;
 		}
-		else if (vulkanRenderTargets[i] != NULL) {
-			tex_desc[i].sampler = vulkanSamplers[i];
-			if (vulkanRenderTargets[i]->impl.stage_depth == i) {
-				tex_desc[i].imageView = vulkanRenderTargets[i]->impl.depthView;
-				vulkanRenderTargets[i]->impl.stage_depth = -1;
+		else if (vulkan_render_targets[i] != NULL) {
+			tex_desc[i].sampler = vulkan_samplers[i];
+			if (vulkan_render_targets[i]->impl.stage_depth == i) {
+				tex_desc[i].imageView = vulkan_render_targets[i]->impl.depthView;
+				vulkan_render_targets[i]->impl.stage_depth = -1;
 			}
 			else {
-				tex_desc[i].imageView = vulkanRenderTargets[i]->impl.sourceView;
+				tex_desc[i].imageView = vulkan_render_targets[i]->impl.sourceView;
 			}
 			texture_count++;
 		}
@@ -1183,7 +1182,7 @@ static VkDescriptorSet get_compute_descriptor_set() {
 		writes[i].pImageInfo = &tex_desc[i - 2];
 	}
 
-	if (vulkanTextures[0] != NULL || vulkanRenderTargets[0] != NULL) {
+	if (vulkan_textures[0] != NULL || vulkan_render_targets[0] != NULL) {
 		if (vk_ctx.compute_uniform_buffer != NULL) {
 			vkUpdateDescriptorSets(vk_ctx.device, 2 + texture_count, writes, 0, NULL);
 		}
@@ -1205,4 +1204,93 @@ static VkDescriptorSet get_compute_descriptor_set() {
 	compute_descriptor_sets_count += 1;
 
 	return descriptor_set;
+}
+
+void kinc_g5_shader_init(kinc_g5_shader_t *shader, const void *source, size_t length, kinc_g5_shader_type_t type) {
+	shader->impl.length = (int)length;
+	shader->impl.id = 0;
+	shader->impl.source = (char *)malloc(length + 1);
+	for (int i = 0; i < length; ++i) {
+		shader->impl.source[i] = ((char *)source)[i];
+	}
+	shader->impl.source[length] = 0;
+}
+
+void kinc_g5_shader_destroy(kinc_g5_shader_t *shader) {
+	free(shader->impl.source);
+	shader->impl.source = NULL;
+}
+
+static VkCompareOp convert_compare_mode(kinc_g5_compare_mode_t compare);
+
+static VkSamplerAddressMode convert_addressing(kinc_g5_texture_addressing_t mode) {
+	switch (mode) {
+	case KINC_G5_TEXTURE_ADDRESSING_REPEAT:
+		return VK_SAMPLER_ADDRESS_MODE_REPEAT;
+	case KINC_G5_TEXTURE_ADDRESSING_BORDER:
+		return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+	case KINC_G5_TEXTURE_ADDRESSING_CLAMP:
+		return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+	case KINC_G5_TEXTURE_ADDRESSING_MIRROR:
+		return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
+	default:
+		assert(false);
+		return VK_SAMPLER_ADDRESS_MODE_REPEAT;
+	}
+}
+
+static VkSamplerMipmapMode convert_mipmap_mode(kinc_g5_mipmap_filter_t filter) {
+	switch (filter) {
+	case KINC_G5_MIPMAP_FILTER_NONE:
+	case KINC_G5_MIPMAP_FILTER_POINT:
+		return VK_SAMPLER_MIPMAP_MODE_NEAREST;
+	case KINC_G5_MIPMAP_FILTER_LINEAR:
+		return VK_SAMPLER_MIPMAP_MODE_LINEAR;
+	default:
+		assert(false);
+		return VK_SAMPLER_MIPMAP_MODE_NEAREST;
+	}
+}
+
+static VkFilter convert_texture_filter(kinc_g5_texture_filter_t filter) {
+	switch (filter) {
+	case KINC_G5_TEXTURE_FILTER_POINT:
+		return VK_FILTER_NEAREST;
+	case KINC_G5_TEXTURE_FILTER_LINEAR:
+		return VK_FILTER_LINEAR;
+	case KINC_G5_TEXTURE_FILTER_ANISOTROPIC:
+		return VK_FILTER_LINEAR; // ?
+	default:
+		assert(false);
+		return VK_FILTER_NEAREST;
+	}
+}
+
+void kinc_g5_sampler_init(kinc_g5_sampler_t *sampler, const kinc_g5_sampler_options_t *options) {
+	VkSamplerCreateInfo info = {0};
+	info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+	info.pNext = NULL;
+	info.flags = 0;
+
+	info.addressModeU = convert_addressing(options->u_addressing);
+	info.addressModeV = convert_addressing(options->v_addressing);
+	info.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+
+	info.mipmapMode = convert_mipmap_mode(options->mipmap_filter);
+
+	info.magFilter = convert_texture_filter(options->magnification_filter);
+	info.minFilter = convert_texture_filter(options->minification_filter);
+
+	info.anisotropyEnable =
+	    (options->magnification_filter == KINC_G5_TEXTURE_FILTER_ANISOTROPIC || options->minification_filter == KINC_G5_TEXTURE_FILTER_ANISOTROPIC);
+	info.maxAnisotropy = 1;
+
+	info.maxLod = 32;
+	info.minLod = 0;
+
+	vkCreateSampler(vk_ctx.device, &info, NULL, &sampler->impl.sampler);
+}
+
+void kinc_g5_sampler_destroy(kinc_g5_sampler_t *sampler) {
+	vkDestroySampler(vk_ctx.device, sampler->impl.sampler, NULL);
 }

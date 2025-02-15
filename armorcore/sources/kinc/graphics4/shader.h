@@ -1,11 +1,15 @@
 #pragma once
 
 #include <kinc/global.h>
-#include <kinc/backend/graphics4/shader.h>
+#include <kinc/graphics5/pipeline.h>
 
 /*! \file shader.h
     \brief Provides functions for creating and destroying shaders.
 */
+
+typedef struct {
+	kinc_g5_shader_t _shader;
+} kinc_g4_shader_impl_t;
 
 typedef enum kinc_g4_shader_type {
 	KINC_G4_SHADER_TYPE_FRAGMENT,

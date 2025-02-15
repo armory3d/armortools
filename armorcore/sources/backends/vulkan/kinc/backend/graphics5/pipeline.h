@@ -1,7 +1,6 @@
 #pragma once
 
 #include "minivulkan.h"
-#include "named_number.h"
 
 struct kinc_g5_shader;
 
@@ -38,3 +37,13 @@ typedef struct {
 typedef struct {
 	int nothing;
 } AttributeLocation5Impl;
+
+typedef struct {
+	unsigned id;
+	char *source;
+	int length;
+} Shader5Impl;
+
+typedef struct kinc_g5_sampler_impl {
+	VkSampler sampler;
+} kinc_g5_sampler_impl_t;

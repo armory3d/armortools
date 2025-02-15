@@ -1,13 +1,23 @@
 #pragma once
 
 #include <kinc/global.h>
-#include <kinc/backend/graphics4/rendertarget.h>
+#include <kinc/graphics5/rendertarget.h>
 #include "textureunit.h"
 #include <stdint.h>
 
 /*! \file rendertarget.h
     \brief Provides functions for handling render-targets.
 */
+
+enum kinc_internal_render_target_state {
+	KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET,
+	KINC_INTERNAL_RENDER_TARGET_STATE_TEXTURE
+};
+
+typedef struct {
+	kinc_g5_render_target_t _renderTarget;
+	enum kinc_internal_render_target_state state;
+} kinc_g4_render_target_impl_t;
 
 typedef enum kinc_g4_render_target_format {
 	KINC_G4_RENDER_TARGET_FORMAT_32BIT,

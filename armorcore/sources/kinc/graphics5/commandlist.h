@@ -2,9 +2,8 @@
 
 #include <kinc/global.h>
 #include "rendertarget.h"
-#include "sampler.h"
 #include "texture.h"
-#include "textureunit.h"
+#include "pipeline.h"
 #include <kinc/backend/graphics5/commandlist.h>
 #include <stddef.h>
 

@@ -1,5 +1,4 @@
 #include <kinc/graphics5/pipeline.h>
-#include <kinc/graphics5/constantlocation.h>
 #include <assert.h>
 #include <string.h>
 

@@ -475,7 +475,7 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 			VkDeviceOrHostAddressConstKHR vertex_data_device_address = {0};
 			VkDeviceOrHostAddressConstKHR index_data_device_address = {0};
 
-			vertex_data_device_address.deviceAddress = get_buffer_device_address(vb[i]->impl.vertices.buf);
+			vertex_data_device_address.deviceAddress = get_buffer_device_address(vb[i]->impl.buf);
 			index_data_device_address.deviceAddress = get_buffer_device_address(ib[i]->impl.buf);
 
 			VkAccelerationStructureGeometryKHR acceleration_geometry = {0};
@@ -904,13 +904,13 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 
 		#ifdef is_forge
 
-		vb_full = _vb_full->impl.vertices.buf;
-		vb_full_mem = _vb_full->impl.vertices.mem;
+		vb_full = _vb_full->impl.buf;
+		vb_full_mem = _vb_full->impl.mem;
 
 		#else
 
-		vb_full = vb[0]->impl.vertices.buf;
-		vb_full_mem = vb[0]->impl.vertices.mem;
+		vb_full = vb[0]->impl.buf;
+		vb_full_mem = vb[0]->impl.mem;
 
 		#endif
 	}

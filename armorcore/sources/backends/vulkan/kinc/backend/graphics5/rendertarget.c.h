@@ -5,8 +5,8 @@
 #include <kinc/log.h>
 
 extern uint32_t swapchainImageCount;
-extern kinc_g5_texture_t *vulkanTextures[16];
-extern kinc_g5_render_target_t *vulkanRenderTargets[16];
+extern kinc_g5_texture_t *vulkan_textures[16];
+extern kinc_g5_render_target_t *vulkan_render_targets[16];
 
 bool memory_type_from_properties(uint32_t typeBits, VkFlags requirements_mask, uint32_t *typeIndex);
 void setup_init_cmd();

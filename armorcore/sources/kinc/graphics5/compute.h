@@ -2,8 +2,7 @@
 
 #include <kinc/global.h>
 #include <kinc/backend/graphics5/compute.h>
-#include <kinc/graphics5/constantlocation.h>
-#include <kinc/graphics5/textureunit.h>
+#include <kinc/graphics5/pipeline.h>
 
 /*! \file compute.h
     \brief Provides support for running compute-shaders.

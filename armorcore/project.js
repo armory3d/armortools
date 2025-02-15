@@ -251,8 +251,6 @@ let project = new Project(flags.name);
 	if (g5) {
 		project.add_cfiles("sources/kinc/graphics5/*");
 		project.add_define("KINC_G5");
-		project.add_define("KINC_G4ONG5");
-		add_backend("g4ong5");
 	}
 }
 

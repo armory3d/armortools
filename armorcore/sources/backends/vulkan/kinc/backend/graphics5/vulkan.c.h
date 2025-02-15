@@ -15,6 +15,7 @@ struct vk_context vk_ctx = {0};
 void kinc_vulkan_get_instance_extensions(const char **extensions, int *index, int max);
 VkBool32 kinc_vulkan_get_physical_device_presentation_support(VkPhysicalDevice physicalDevice, uint32_t queueFamilyIndex);
 VkResult kinc_vulkan_create_surface(VkInstance instance, int window_index, VkSurfaceKHR *surface);
+void kinc_g4_on_g5_internal_resize(int, int, int);
 
 #define GET_INSTANCE_PROC_ADDR(instance, entrypoint)                                                                                                           \
 	{                                                                                                                                                          \
@@ -26,68 +27,52 @@ VkResult kinc_vulkan_create_surface(VkInstance instance, int window_index, VkSur
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 
-void createDescriptorLayout(void);
+void create_descriptor_layout(void);
 static void create_compute_descriptor_layout(void);
 void set_image_layout(VkImage image, VkImageAspectFlags aspectMask, VkImageLayout old_image_layout, VkImageLayout new_image_layout);
 
-// uint32_t current_buffer;
+kinc_g5_texture_t *vulkan_textures[16] = {
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+};
 
-kinc_g5_texture_t *vulkanTextures[16] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
-kinc_g5_render_target_t *vulkanRenderTargets[16] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
-VkSampler vulkanSamplers[16] = {VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE,
-                                VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE};
+kinc_g5_render_target_t *vulkan_render_targets[16] = {
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+};
+
+VkSampler vulkan_samplers[16] = {
+	VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE,
+	VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE,
+    VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE,
+	VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE
+};
 
 static bool began = false;
-
-#ifndef KINC_ANDROID
-static VkAllocationCallbacks allocator;
-#endif
-
 static VkPhysicalDeviceProperties gpu_props;
 static VkQueueFamilyProperties *queue_props;
 static uint32_t graphics_queue_node_index;
-
 static VkPhysicalDeviceMemoryProperties memory_properties;
-
 static uint32_t queue_count;
 
-static VkBool32 vkDebugUtilsMessengerCallbackEXT(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageTypes,
-                                                 const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData, void *pUserData) {
-	if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
-		kinc_log(KINC_LOG_LEVEL_ERROR, "Vulkan ERROR: Code %d : %s", pCallbackData->messageIdNumber, pCallbackData->pMessage);
+#define MAX_PRESENT_MODES 256
+static VkPresentModeKHR present_modes[MAX_PRESENT_MODES];
+
+static VkBool32 vkDebugUtilsMessengerCallbackEXT(
+	VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
+	VkDebugUtilsMessageTypeFlagsEXT message_types,
+    const VkDebugUtilsMessengerCallbackDataEXT *pcallback_data,
+	void *puser_data) {
+
+	if (message_severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
+		kinc_log(KINC_LOG_LEVEL_ERROR, "Vulkan ERROR: Code %d : %s", pcallback_data->messageIdNumber, pcallback_data->pMessage);
 		// kinc_debug_break();
 	}
-	else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
-		kinc_log(KINC_LOG_LEVEL_WARNING, "Vulkan WARNING: Code %d : %s", pCallbackData->messageIdNumber, pCallbackData->pMessage);
+	else if (message_severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
+		kinc_log(KINC_LOG_LEVEL_WARNING, "Vulkan WARNING: Code %d : %s", pcallback_data->messageIdNumber, pcallback_data->pMessage);
 	}
 	return VK_FALSE;
 }
-
-#ifndef KINC_ANDROID
-static VKAPI_ATTR void *VKAPI_CALL myrealloc(void *pUserData, void *pOriginal, size_t size, size_t alignment, VkSystemAllocationScope allocationScope) {
-	// return _aligned_realloc(pOriginal, size, alignment);
-	return realloc(pOriginal, size);
-}
-
-static VKAPI_ATTR void *VKAPI_CALL myalloc(void *pUserData, size_t size, size_t alignment, VkSystemAllocationScope allocationScope) {
-	// return _aligned_malloc(size, alignment);
-	void *ptr;
-
-	if (alignment % sizeof(void *) != 0) {
-		alignment *= (sizeof(void *) / alignment);
-	}
-
-	if (posix_memalign(&ptr, alignment, size) != 0) {
-		return NULL;
-	}
-	return ptr;
-}
-
-static VKAPI_ATTR void VKAPI_CALL myfree(void *pUserData, void *pMemory) {
-	// _aligned_free(pMemory);
-	free(pMemory);
-}
-#endif
 
 bool memory_type_from_properties(uint32_t typeBits, VkFlags requirements_mask, uint32_t *typeIndex) {
 	for (uint32_t i = 0; i < 32; i++) {
@@ -102,8 +87,6 @@ bool memory_type_from_properties(uint32_t typeBits, VkFlags requirements_mask, u
 	return false;
 }
 
-extern void kinc_g4_on_g5_internal_resize(int, int, int);
-
 void kinc_internal_resize(int window_index, int width, int height) {
 	struct vk_window *window = &vk_ctx.windows[window_index];
 	if (window->width != width || window->height != height) {
@@ -114,8 +97,6 @@ void kinc_internal_resize(int window_index, int width, int height) {
 
 	kinc_g4_on_g5_internal_resize(window_index, width, height);
 }
-
-void kinc_internal_change_framebuffer(int window, struct kinc_framebuffer_options *frame) {}
 
 VkSwapchainKHR cleanup_swapchain(int window_index) {
 	struct vk_window *window = &vk_ctx.windows[window_index];
@@ -155,9 +136,6 @@ VkSwapchainKHR cleanup_swapchain(int window_index) {
 	window->swapchain = VK_NULL_HANDLE;
 	return chain;
 }
-
-#define MAX_PRESENT_MODES 256
-static VkPresentModeKHR present_modes[MAX_PRESENT_MODES];
 
 void create_swapchain(int window_index) {
 	struct vk_window *window = &vk_ctx.windows[window_index];
@@ -685,14 +663,9 @@ void kinc_g5_internal_init() {
 	info.enabledExtensionCount = wanted_instance_extension_count;
 	info.ppEnabledExtensionNames = (const char *const *)wanted_instance_extensions;
 
-#ifndef KINC_ANDROID
-	allocator.pfnAllocation = myalloc;
-	allocator.pfnFree = myfree;
-	allocator.pfnReallocation = myrealloc;
-	err = vkCreateInstance(&info, &allocator, &vk_ctx.instance);
-#else
+
 	err = vkCreateInstance(&info, NULL, &vk_ctx.instance);
-#endif
+
 	if (err == VK_ERROR_INCOMPATIBLE_DRIVER) {
 		kinc_error_message("Vulkan driver is incompatible");
 	}
@@ -708,13 +681,11 @@ void kinc_g5_internal_init() {
 	err = vkEnumeratePhysicalDevices(vk_ctx.instance, &gpu_count, NULL);
 	assert(!err && gpu_count > 0);
 
-	bool headless = false;
-
-	// TODO: expose gpu selection to user?
 	if (gpu_count > 0) {
 		VkPhysicalDevice *physical_devices = (VkPhysicalDevice *)malloc(sizeof(VkPhysicalDevice) * gpu_count);
 		err = vkEnumeratePhysicalDevices(vk_ctx.instance, &gpu_count, physical_devices);
 		assert(!err);
+
 		// The device with the highest score is chosen.
 		float best_score = 0.0;
 		for (uint32_t gpu_idx = 0; gpu_idx < gpu_count; gpu_idx++) {
@@ -725,9 +696,6 @@ void kinc_g5_internal_init() {
 			vkGetPhysicalDeviceQueueFamilyProperties(gpu, &queue_count, queue_props);
 			bool can_present = false;
 			bool can_render = false;
-			// According to the documentation, a device that supports graphics must also support compute,
-			// Just to be 100% safe verify that it supports both anyway.
-			bool can_compute = false;
 			for (uint32_t i = 0; i < queue_count; i++) {
 				VkBool32 queue_supports_present = kinc_vulkan_get_physical_device_presentation_support(gpu, i);
 				if (queue_supports_present) {
@@ -738,12 +706,8 @@ void kinc_g5_internal_init() {
 				if ((flags & VK_QUEUE_GRAPHICS_BIT) != 0) {
 					can_render = true;
 				}
-				if ((flags & VK_QUEUE_COMPUTE_BIT) != 0) {
-					can_compute = true;
-				}
 			}
-			if (!can_present || !can_render || !can_compute) {
-				// This device is missing required features so move on
+			if (!can_present || !can_render) {
 				continue;
 			}
 
@@ -771,21 +735,17 @@ void kinc_g5_internal_init() {
 			case VK_PHYSICAL_DEVICE_TYPE_MAX_ENUM:
 				break;
 			}
-			// TODO: look into using more metrics than just the device type for scoring, eg: available memory, max texture sizes, etc.
-			// If this is the first usable device, skip testing against the previous best.
+
 			if (vk_ctx.gpu == VK_NULL_HANDLE || score > best_score) {
 				vk_ctx.gpu = gpu;
 				best_score = score;
 			}
 		}
+
 		if (vk_ctx.gpu == VK_NULL_HANDLE) {
-			if (headless) {
-				vk_ctx.gpu = physical_devices[0];
-			}
-			else {
-				kinc_error_message("No Vulkan device that supports presentation found");
-			}
+			kinc_error_message("No Vulkan device that supports presentation found");
 		}
+
 		VkPhysicalDeviceProperties properties;
 		vkGetPhysicalDeviceProperties(vk_ctx.gpu, &properties);
 		kinc_log(KINC_LOG_LEVEL_INFO, "Chosen Vulkan device: %s", properties.deviceName);
@@ -834,12 +794,6 @@ void kinc_g5_internal_init() {
 		wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME;
 	}
 
-#ifndef VK_KHR_FORMAT_FEATURE_FLAGS_2_EXTENSION_NAME // For Dave's Debian
-#define VK_KHR_FORMAT_FEATURE_FLAGS_2_EXTENSION_NAME "VK_KHR_format_feature_flags2"
-#endif
-
-	wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_FORMAT_FEATURE_FLAGS_2_EXTENSION_NAME;
-
 	uint32_t device_extension_count = 0;
 
 	err = vkEnumerateDeviceExtensionProperties(vk_ctx.gpu, NULL, &device_extension_count, NULL);
@@ -850,11 +804,6 @@ void kinc_g5_internal_init() {
 	assert(!err);
 
 	bool missing_device_extensions = check_extensions(wanted_device_extensions, wanted_device_extension_count, device_extensions, device_extension_count);
-	if (missing_device_extensions) {
-		wanted_device_extension_count -= 1; // remove VK_KHR_FORMAT_FEATURE_FLAGS_2_EXTENSION_NAME
-	}
-	missing_device_extensions = check_extensions(wanted_device_extensions, wanted_device_extension_count, device_extensions, device_extension_count);
-
 	free(device_extensions);
 
 	if (missing_device_extensions) {
@@ -900,119 +849,111 @@ void kinc_g5_internal_init() {
 	vkGetPhysicalDeviceQueueFamilyProperties(vk_ctx.gpu, &queue_count, queue_props);
 	assert(queue_count >= 1);
 
-	if (!headless) {
-		// Iterate over each queue to learn whether it supports presenting:
-		VkBool32 *supportsPresent = (VkBool32 *)malloc(queue_count * sizeof(VkBool32));
-		for (uint32_t i = 0; i < queue_count; i++) {
-			supportsPresent[i] = kinc_vulkan_get_physical_device_presentation_support(vk_ctx.gpu, i);
-			// vk.fpGetPhysicalDeviceSurfaceSupportKHR(vk_ctx.gpu, i, surface, &supportsPresent[i]);
-		}
+	// Iterate over each queue to learn whether it supports presenting:
+	VkBool32 *supportsPresent = (VkBool32 *)malloc(queue_count * sizeof(VkBool32));
+	for (uint32_t i = 0; i < queue_count; i++) {
+		supportsPresent[i] = kinc_vulkan_get_physical_device_presentation_support(vk_ctx.gpu, i);
+	}
 
-		// Search for a graphics and a present queue in the array of queue
-		// families, try to find one that supports both
-		uint32_t graphicsQueueNodeIndex = UINT32_MAX;
-		uint32_t presentQueueNodeIndex = UINT32_MAX;
-		for (uint32_t i = 0; i < queue_count; i++) {
-			if ((queue_props[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) != 0) {
-				if (graphicsQueueNodeIndex == UINT32_MAX) {
-					graphicsQueueNodeIndex = i;
-				}
-
-				if (supportsPresent[i] == VK_TRUE) {
-					graphicsQueueNodeIndex = i;
-					presentQueueNodeIndex = i;
-					break;
-				}
-			}
-		}
-		if (presentQueueNodeIndex == UINT32_MAX) {
-			// If didn't find a queue that supports both graphics and present, then
-			// find a separate present queue.
-			for (uint32_t i = 0; i < queue_count; ++i) {
-				if (supportsPresent[i] == VK_TRUE) {
-					presentQueueNodeIndex = i;
-					break;
-				}
-			}
-		}
-		free(supportsPresent);
-
-		// Generate error if could not find both a graphics and a present queue
-		if (graphicsQueueNodeIndex == UINT32_MAX || presentQueueNodeIndex == UINT32_MAX) {
-			kinc_error_message("Graphics or present queue not found");
-		}
-
-		// TODO: Add support for separate queues, including presentation,
-		//       synchronization, and appropriate tracking for QueueSubmit.
-		// NOTE: While it is possible for an application to use a separate graphics
-		//       and a present queues, this demo program assumes it is only using
-		//       one:
-		if (graphicsQueueNodeIndex != presentQueueNodeIndex) {
-			kinc_error_message("Graphics and present queue do not match");
-		}
-
-		graphics_queue_node_index = graphicsQueueNodeIndex;
-
-		{
-			float queue_priorities[1] = {0.0};
-			VkDeviceQueueCreateInfo queue = {0};
-			queue.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-			queue.pNext = NULL;
-			queue.queueFamilyIndex = graphics_queue_node_index;
-			queue.queueCount = 1;
-			queue.pQueuePriorities = queue_priorities;
-
-			VkDeviceCreateInfo deviceinfo = {0};
-			deviceinfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-			deviceinfo.pNext = NULL;
-			deviceinfo.queueCreateInfoCount = 1;
-			deviceinfo.pQueueCreateInfos = &queue;
-
-			deviceinfo.enabledLayerCount = wanted_device_layer_count;
-			deviceinfo.ppEnabledLayerNames = (const char *const *)wanted_device_layers;
-
-			deviceinfo.enabledExtensionCount = wanted_device_extension_count;
-			deviceinfo.ppEnabledExtensionNames = (const char *const *)wanted_device_extensions;
-
-			VkPhysicalDeviceRayTracingPipelineFeaturesKHR rayTracingPipelineExt = {0};
-			VkPhysicalDeviceAccelerationStructureFeaturesKHR rayTracingAccelerationStructureExt = {0};
-			VkPhysicalDeviceBufferDeviceAddressFeatures bufferDeviceAddressExt = {0};
-			if (kinc_g5_supports_raytracing()) {
-				rayTracingPipelineExt.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
-				rayTracingPipelineExt.pNext = NULL;
-				rayTracingPipelineExt.rayTracingPipeline = VK_TRUE;
-
-				rayTracingAccelerationStructureExt.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
-				rayTracingAccelerationStructureExt.pNext = &rayTracingPipelineExt;
-				rayTracingAccelerationStructureExt.accelerationStructure = VK_TRUE;
-
-				bufferDeviceAddressExt.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
-				bufferDeviceAddressExt.pNext = &rayTracingAccelerationStructureExt;
-				bufferDeviceAddressExt.bufferDeviceAddress = VK_TRUE;
-
-				deviceinfo.pNext = &bufferDeviceAddressExt;
+	// Search for a graphics and a present queue in the array of queue
+	// families, try to find one that supports both
+	uint32_t graphicsQueueNodeIndex = UINT32_MAX;
+	uint32_t presentQueueNodeIndex = UINT32_MAX;
+	for (uint32_t i = 0; i < queue_count; i++) {
+		if ((queue_props[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) != 0) {
+			if (graphicsQueueNodeIndex == UINT32_MAX) {
+				graphicsQueueNodeIndex = i;
 			}
 
-			err = vkCreateDevice(vk_ctx.gpu, &deviceinfo, NULL, &vk_ctx.device);
-			assert(!err);
+			if (supportsPresent[i] == VK_TRUE) {
+				graphicsQueueNodeIndex = i;
+				presentQueueNodeIndex = i;
+				break;
+			}
+		}
+	}
+	if (presentQueueNodeIndex == UINT32_MAX) {
+		// If didn't find a queue that supports both graphics and present, then
+		// find a separate present queue.
+		for (uint32_t i = 0; i < queue_count; ++i) {
+			if (supportsPresent[i] == VK_TRUE) {
+				presentQueueNodeIndex = i;
+				break;
+			}
+		}
+	}
+	free(supportsPresent);
+
+	// Generate error if could not find both a graphics and a present queue
+	if (graphicsQueueNodeIndex == UINT32_MAX || presentQueueNodeIndex == UINT32_MAX) {
+		kinc_error_message("Graphics or present queue not found");
+	}
+
+	if (graphicsQueueNodeIndex != presentQueueNodeIndex) {
+		kinc_error_message("Graphics and present queue do not match");
+	}
+
+	graphics_queue_node_index = graphicsQueueNodeIndex;
+
+	{
+		float queue_priorities[1] = {0.0};
+		VkDeviceQueueCreateInfo queue = {0};
+		queue.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		queue.pNext = NULL;
+		queue.queueFamilyIndex = graphics_queue_node_index;
+		queue.queueCount = 1;
+		queue.pQueuePriorities = queue_priorities;
+
+		VkDeviceCreateInfo deviceinfo = {0};
+		deviceinfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+		deviceinfo.pNext = NULL;
+		deviceinfo.queueCreateInfoCount = 1;
+		deviceinfo.pQueueCreateInfos = &queue;
+
+		deviceinfo.enabledLayerCount = wanted_device_layer_count;
+		deviceinfo.ppEnabledLayerNames = (const char *const *)wanted_device_layers;
+
+		deviceinfo.enabledExtensionCount = wanted_device_extension_count;
+		deviceinfo.ppEnabledExtensionNames = (const char *const *)wanted_device_extensions;
+
+		VkPhysicalDeviceRayTracingPipelineFeaturesKHR rayTracingPipelineExt = {0};
+		VkPhysicalDeviceAccelerationStructureFeaturesKHR rayTracingAccelerationStructureExt = {0};
+		VkPhysicalDeviceBufferDeviceAddressFeatures bufferDeviceAddressExt = {0};
+		if (kinc_g5_supports_raytracing()) {
+			rayTracingPipelineExt.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
+			rayTracingPipelineExt.pNext = NULL;
+			rayTracingPipelineExt.rayTracingPipeline = VK_TRUE;
+
+			rayTracingAccelerationStructureExt.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+			rayTracingAccelerationStructureExt.pNext = &rayTracingPipelineExt;
+			rayTracingAccelerationStructureExt.accelerationStructure = VK_TRUE;
+
+			bufferDeviceAddressExt.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
+			bufferDeviceAddressExt.pNext = &rayTracingAccelerationStructureExt;
+			bufferDeviceAddressExt.bufferDeviceAddress = VK_TRUE;
+
+			deviceinfo.pNext = &bufferDeviceAddressExt;
 		}
 
-		vkGetDeviceQueue(vk_ctx.device, graphics_queue_node_index, 0, &vk_ctx.queue);
-
-		vkGetPhysicalDeviceMemoryProperties(vk_ctx.gpu, &memory_properties);
-
-		VkCommandPoolCreateInfo cmd_pool_info = {0};
-		cmd_pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-		cmd_pool_info.pNext = NULL;
-		cmd_pool_info.queueFamilyIndex = graphics_queue_node_index;
-		cmd_pool_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-
-		err = vkCreateCommandPool(vk_ctx.device, &cmd_pool_info, NULL, &vk_ctx.cmd_pool);
-
-		createDescriptorLayout();
-		create_compute_descriptor_layout();
+		err = vkCreateDevice(vk_ctx.gpu, &deviceinfo, NULL, &vk_ctx.device);
 		assert(!err);
 	}
+
+	vkGetDeviceQueue(vk_ctx.device, graphics_queue_node_index, 0, &vk_ctx.queue);
+
+	vkGetPhysicalDeviceMemoryProperties(vk_ctx.gpu, &memory_properties);
+
+	VkCommandPoolCreateInfo cmd_pool_info = {0};
+	cmd_pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	cmd_pool_info.pNext = NULL;
+	cmd_pool_info.queueFamilyIndex = graphics_queue_node_index;
+	cmd_pool_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+
+	err = vkCreateCommandPool(vk_ctx.device, &cmd_pool_info, NULL, &vk_ctx.cmd_pool);
+
+	create_descriptor_layout();
+	create_compute_descriptor_layout();
+	assert(!err);
 
 	VkSemaphoreCreateInfo semInfo = {0};
 	semInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -1028,9 +969,8 @@ void kinc_g5_internal_init() {
 
 void kinc_g5_internal_destroy() {}
 
-// this function is used in the android backend
-
 void kinc_vulkan_init_window(int window_index) {
+	// this function is used in the android backend
 	assert(window_index < MAXIMUM_WINDOWS);
 	struct vk_window *window = &vk_ctx.windows[window_index];
 
@@ -1107,8 +1047,9 @@ bool kinc_g5_swap_buffers() {
 void kinc_g5_begin(kinc_g5_render_target_t *renderTarget, int window_index) {
 	struct vk_window *window = &vk_ctx.windows[window_index];
 
-	if (began)
+	if (began) {
 		return;
+	}
 
 	if (window->resized) {
 		vkDeviceWaitIdle(vk_ctx.device);
@@ -1133,7 +1074,8 @@ void kinc_g5_begin(kinc_g5_render_target_t *renderTarget, int window_index) {
 			}
 			return;
 		}
-	} while (err != VK_SUCCESS && err != VK_SUBOPTIMAL_KHR);
+	}
+	while (err != VK_SUCCESS && err != VK_SUBOPTIMAL_KHR);
 }
 
 void kinc_g5_end(int window) {
@@ -1170,8 +1112,8 @@ void kinc_g5_flush() {
 	vkDeviceWaitIdle(vk_ctx.device);
 }
 
-// this is exclusively used by the Android backend at the moment
 bool kinc_vulkan_internal_get_size(int *width, int *height) {
+	// this is exclusively used by the Android backend at the moment
 	if (vk_ctx.windows[0].surface) {
 		VkSurfaceCapabilitiesKHR capabilities;
 		VkResult err = vk.fpGetPhysicalDeviceSurfaceCapabilitiesKHR(vk_ctx.gpu, vk_ctx.windows[0].surface, &capabilities);

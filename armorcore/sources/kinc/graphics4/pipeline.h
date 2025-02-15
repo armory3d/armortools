@@ -1,14 +1,30 @@
 #pragma once
 
 #include <kinc/global.h>
-#include <kinc/graphics4/constantlocation.h>
 #include <kinc/graphics4/rendertarget.h>
 #include <kinc/graphics4/textureunit.h>
-#include <kinc/backend/graphics4/pipeline.h>
+#include <kinc/graphics5/pipeline.h>
+#include <kinc/graphics4/shader.h>
 
 /*! \file pipeline.h
     \brief Provides functions for creating and using pipelines which configure the GPU for rendering.
 */
+
+typedef struct {
+	kinc_g5_pipeline_t _pipeline;
+} kinc_g4_pipeline_impl_t;
+
+typedef struct {
+	kinc_g5_constant_location_t _location;
+} kinc_g4_constant_location_impl_t;
+
+typedef struct kinc_g4_constant_location {
+	kinc_g4_constant_location_impl_t impl;
+} kinc_g4_constant_location_t;
+
+typedef struct {
+	int nothing;
+} Kinc_G4_AttributeLocationImpl;
 
 struct kinc_g4_vertex_structure;
 struct kinc_g4_shader;

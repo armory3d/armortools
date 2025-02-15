@@ -3,11 +3,8 @@
 #include <kinc/log.h>
 #include <kinc/math/core.h>
 
-static void parse_shader(uint32_t *shader_source, int shader_length, kinc_internal_named_number *locations, kinc_internal_named_number *textureBindings,
-                         kinc_internal_named_number *uniformOffsets);
-
+static void parse_shader(uint32_t *shader_source, int shader_length, kinc_internal_named_number *locations, kinc_internal_named_number *textureBindings, kinc_internal_named_number *uniformOffsets);
 static VkShaderModule create_shader_module(const void *code, size_t size);
-
 static VkDescriptorPool compute_descriptor_pool;
 
 static void create_compute_descriptor_layout(void) {

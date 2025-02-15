@@ -2,12 +2,16 @@
 
 #include <kinc/global.h>
 
-#include <kinc/backend/graphics4/compute.h>
+#include <kinc/graphics5/compute.h>
 #include <kinc/graphics4/graphics.h>
 
 /*! \file compute.h
     \brief Provides support for running compute-shaders.
 */
+
+typedef struct kinc_g4_compute_shader_impl {
+	kinc_g5_compute_shader shader;
+} kinc_g4_compute_shader_impl;
 
 struct kinc_g4_texture;
 struct kinc_g4_render_target;
