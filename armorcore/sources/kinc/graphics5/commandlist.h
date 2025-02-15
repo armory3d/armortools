@@ -1,27 +1,23 @@
 #pragma once
 
+#include <stddef.h>
 #include <kinc/global.h>
+#include <kinc/backend/graphics5/commandlist.h>
 #include "rendertarget.h"
 #include "texture.h"
 #include "pipeline.h"
-#include <kinc/backend/graphics5/commandlist.h>
-#include <stddef.h>
 
 /*! \file commandlist.h
     \brief Contains functions for building command-lists to send commands to the GPU.
 */
 
-#define KINC_G5_CLEAR_COLOR 1
-#define KINC_G5_CLEAR_DEPTH 2
-
 struct kinc_g5_compute_shader;
 struct kinc_g5_constant_buffer;
 struct kinc_g5_index_buffer;
+struct kinc_g5_vertex_buffer;
 struct kinc_g5_pipeline;
 struct kinc_g5_render_target;
 struct kinc_g5_texture;
-struct kinc_g5_vertex_buffer;
-struct kinc_g5_render_target;
 
 typedef struct kinc_g5_command_list {
 	CommandList5Impl impl;

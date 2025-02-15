@@ -1,11 +1,11 @@
 #pragma once
 
+#include <stdbool.h>
 #include <kinc/global.h>
-#include "vertexstructure.h"
 #include <kinc/backend/graphics5/vertexbuffer.h>
 #include <kinc/graphics5/vertexbuffer.h>
-#include "graphics.h"
-#include <stdbool.h>
+#include <kinc/graphics5/graphics.h>
+#include <kinc/graphics5/vertexstructure.h>
 
 /*! \file vertexbuffer.h
     \brief Provides functions for setting up and using vertex-buffers.

@@ -1,34 +1,24 @@
-#include <kinc/graphics5/graphics.h>
+#include "graphics.h"
+#include <assert.h>
+#include <string.h>
+#include <kinc/system.h>
 #include <kinc/window.h>
 #include <kinc/color.h>
-#include <kinc/graphics5/indexbuffer.h>
-#include <kinc/graphics5/pipeline.h>
-#include <kinc/graphics5/rendertarget.h>
-#include <kinc/graphics5/texture.h>
-#include <kinc/graphics5/vertexbuffer.h>
-#include <kinc/graphics5/commandlist.h>
-#include <kinc/graphics5/compute.h>
-#include <kinc/graphics5/constantbuffer.h>
 #include <kinc/io/filereader.h>
 #include <kinc/math/core.h>
 #include <kinc/math/matrix.h>
-#include <kinc/system.h>
-#include <assert.h>
-#include <string.h>
+#include <kinc/graphics5/indexbuffer.h>
+#include <kinc/graphics5/vertexbuffer.h>
+#include <kinc/graphics5/pipeline.h>
+#include <kinc/graphics5/rendertarget.h>
+#include <kinc/graphics5/texture.h>
+#include <kinc/graphics5/commandlist.h>
+#include <kinc/graphics5/compute.h>
+#include <kinc/graphics5/constantbuffer.h>
 
 void samplers_reset(void);
 
-bool kinc_g5_texture_unit_equals(kinc_g5_texture_unit_t *unit1, kinc_g5_texture_unit_t *unit2) {
-	for (int i = 0; i < KINC_G5_SHADER_TYPE_COUNT; ++i) {
-		if (unit1->stages[i] != unit2->stages[i]) {
-			return false;
-		}
-	}
-	return true;
-}
-
 kinc_g5_command_list_t commandList;
-
 bool waitAfterNextDraw = false;
 
 static kinc_g5_constant_buffer_t vertexConstantBuffer;
@@ -37,18 +27,6 @@ static kinc_g5_constant_buffer_t computeConstantBuffer;
 #define constantBufferSize 4096
 #define constantBufferMultiply 100
 static int constantBufferIndex = 0;
-
-void kinc_g4_internal_init(void) {
-	kinc_g5_internal_init();
-}
-
-void kinc_g4_internal_destroy(void) {
-	kinc_g5_internal_destroy();
-}
-
-void kinc_g4_internal_destroy_window(int window) {
-	kinc_g5_internal_destroy_window(window);
-}
 
 #define bufferCount 2
 #define renderTargetCount 8
@@ -104,6 +82,27 @@ typedef struct render_state {
 } render_state;
 
 static render_state current_state;
+
+bool kinc_g5_texture_unit_equals(kinc_g5_texture_unit_t *unit1, kinc_g5_texture_unit_t *unit2) {
+	for (int i = 0; i < KINC_G5_SHADER_TYPE_COUNT; ++i) {
+		if (unit1->stages[i] != unit2->stages[i]) {
+			return false;
+		}
+	}
+	return true;
+}
+
+void kinc_g4_internal_init(void) {
+	kinc_g5_internal_init();
+}
+
+void kinc_g4_internal_destroy(void) {
+	kinc_g5_internal_destroy();
+}
+
+void kinc_g4_internal_destroy_window(int window) {
+	kinc_g5_internal_destroy_window(window);
+}
 
 void kinc_g4_on_g5_internal_resize(int window, int width, int height) {
 	windows[window].resized = true;
@@ -315,13 +314,9 @@ void kinc_g4_begin(int window) {
 
 	samplers_reset();
 
-	// commandList = new Graphics5::CommandList;
 	kinc_g5_command_list_begin(&commandList);
 
 	// Currently we do not necessarily wait at the end of a frame so for now it's endDraw
-	// constantBufferIndex = 0;
-	// kinc_g5_constant_buffer_lock(&vertexConstantBuffer, 0, constantBufferSize);
-	// kinc_g5_constant_buffer_lock(&fragmentConstantBuffer, 0, constantBufferSize);
 	endDraw(false);
 
 	kinc_g5_command_list_framebuffer_to_render_target_barrier(&commandList, &windows[current_window].framebuffers[windows[current_window].currentBuffer]);
@@ -360,20 +355,10 @@ void kinc_g4_end(int window) {
 	kinc_g5_command_list_end(&commandList);
 	kinc_g5_command_list_execute(&commandList);
 
-	// delete commandList;
-	// commandList = nullptr;
 	kinc_g5_end(window);
 
 	// to support doing work after kinc_g4_end and before kinc_g4_begin
 	kinc_g5_command_list_begin(&commandList);
-}
-
-bool kinc_g4_swap_buffers(void) {
-	return kinc_g5_swap_buffers();
-}
-
-void kinc_g4_flush(void) {
-	kinc_g5_flush();
 }
 
 void kinc_g4_set_int(kinc_g4_constant_location_t location, int value) {
@@ -596,10 +581,6 @@ void kinc_g4_set_texture(kinc_g4_texture_unit_t unit, kinc_g4_texture_t *texture
 	kinc_g5_command_list_set_texture(&commandList, g5_unit, &texture->impl._texture);
 }
 
-int kinc_g4_max_bound_textures(void) {
-	return kinc_g5_max_bound_textures();
-}
-
 void kinc_g4_set_pipeline(kinc_g4_pipeline_t *pipeline) {
 	kinc_g5_pipeline_t *g5_pipeline = &pipeline->impl._pipeline;
 	current_state.pipeline = g5_pipeline;
@@ -664,10 +645,9 @@ void kinc_g4_render_target_use_depth_as_texture(kinc_g4_render_target_t *render_
 	kinc_g5_command_list_set_texture_from_render_target_depth(&commandList, g5_unit, &render_target->impl._renderTarget);
 }
 
-void kinc_g4_set_compute_shader(kinc_g4_compute_shader *shader) {
-	kinc_g5_compute_shader *g5_shader = &shader->impl.shader;
-	current_state.compute_shader = g5_shader;
-	kinc_g5_command_list_set_compute_shader(&commandList, g5_shader);
+void kinc_g5_set_compute_shader(kinc_g5_compute_shader *shader) {
+	current_state.compute_shader = shader;
+	kinc_g5_command_list_set_compute_shader(&commandList, shader);
 }
 
 void kinc_g4_compute(int x, int y, int z) {

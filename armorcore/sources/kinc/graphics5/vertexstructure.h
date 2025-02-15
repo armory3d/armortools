@@ -1,7 +1,6 @@
 #pragma once
 
 #include <kinc/global.h>
-#include <kinc/graphics5/vertexstructure.h>
 #include <stdbool.h>
 
 /*! \file vertexstructure.h
@@ -127,11 +126,3 @@ static inline int kinc_g4_vertex_data_size(kinc_g4_vertex_data_t data) {
 
 void kinc_g4_vertex_structure_init(kinc_g4_vertex_structure_t *structure);
 void kinc_g4_vertex_structure_add(kinc_g4_vertex_structure_t *structure, const char *name, kinc_g4_vertex_data_t data);
-
-static inline void kinc_g5_vertex_structure_init(kinc_g5_vertex_structure_t *structure) {
-	kinc_g4_vertex_structure_init(structure);
-}
-
-static inline void kinc_g5_vertex_structure_add(kinc_g5_vertex_structure_t *structure, const char *name, kinc_g5_vertex_data_t data) {
-	kinc_g4_vertex_structure_add(structure, name, data);
-}

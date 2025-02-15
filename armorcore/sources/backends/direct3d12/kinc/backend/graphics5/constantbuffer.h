@@ -8,5 +8,3 @@ typedef struct {
 	int lastCount;
 	int mySize;
 } ConstantBuffer5Impl;
-
-extern bool kinc_g5_transposeMat;

@@ -468,7 +468,7 @@ void _update(void *data) {
 	kinc_g4_begin(0);
 	iron_update();
 	kinc_g4_end(0);
-	kinc_g4_swap_buffers();
+	kinc_g5_swap_buffers();
 }
 
 char *_copy(void *data) {
@@ -2029,7 +2029,7 @@ void iron_g4_end() {
 
 void iron_g4_swap_buffers() {
 	kinc_g4_end(0);
-	kinc_g4_swap_buffers();
+	kinc_g5_swap_buffers();
 	kinc_g4_begin(0);
 }
 

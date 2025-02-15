@@ -16,6 +16,9 @@
     \brief Contains the base G5-functionality.
 */
 
+#define KINC_G5_CLEAR_COLOR 1
+#define KINC_G5_CLEAR_DEPTH 2
+
 bool kinc_g5_supports_raytracing(void);
 int kinc_g5_max_bound_textures(void);
 void kinc_g5_flush(void);
@@ -28,7 +31,6 @@ void kinc_g5_internal_init_window(int window, int depth_buffer_bits, bool vsync)
 void kinc_g5_internal_destroy_window(int window);
 void kinc_g5_internal_destroy(void);
 
-struct kinc_g4_compute_shader;
 struct kinc_g4_pipeline;
 struct kinc_g4_render_target;
 struct kinc_g4_texture;
@@ -65,11 +67,8 @@ typedef enum kinc_g4_usage {
     KINC_G4_USAGE_READABLE
 } kinc_g4_usage_t;
 
-int kinc_g4_max_bound_textures(void);
-void kinc_g4_flush(void);
 void kinc_g4_begin(int window);
 void kinc_g4_end(int window);
-bool kinc_g4_swap_buffers(void);
 
 #define KINC_G4_CLEAR_COLOR 1
 #define KINC_G4_CLEAR_DEPTH 2
@@ -101,7 +100,6 @@ void kinc_g4_set_texture_mipmap_filter(struct kinc_g4_texture_unit unit, kinc_g4
 void kinc_g4_restore_render_target(void);
 void kinc_g4_set_render_targets(struct kinc_g4_render_target **targets, int count);
 void kinc_g4_set_texture(struct kinc_g4_texture_unit unit, struct kinc_g4_texture *texture);
-void kinc_g4_set_compute_shader(struct kinc_g4_compute_shader *shader);
 void kinc_g4_compute(int x, int y, int z);
 
 void kinc_g4_internal_init(void);

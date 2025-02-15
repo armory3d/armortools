@@ -752,7 +752,7 @@ static void cmd(struct android_app *app, int32_t cmd) {
 			}
 			else {
 				initDisplay();
-				kinc_g4_swap_buffers();
+				kinc_g5_swap_buffers();
 			}
 
 			updateAppForegroundStatus(true, appIsForeground);

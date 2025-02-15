@@ -1,7 +1,7 @@
 #include <kinc/graphics5/constantbuffer.h>
 #include <stdlib.h>
 
-bool kinc_g5_transposeMat = false;
+bool kinc_g5_transpose_mat = false;
 
 void kinc_g5_constant_buffer_init(kinc_g5_constant_buffer_t *buffer, int size) {
 

@@ -31,7 +31,7 @@ void kinc_g4_vertex_buffer_destroy(kinc_g4_vertex_buffer_t *buffer) {
 	}
 }
 
-static void prepareLock(kinc_g4_vertex_buffer_t *buffer) {
+static void kinc_internal_prepare_lock(kinc_g4_vertex_buffer_t *buffer) {
 	++buffer->impl._currentIndex;
 	if (buffer->impl._currentIndex >= buffer->impl._multiple - 1) {
 		waitAfterNextDraw = true;
@@ -42,12 +42,12 @@ static void prepareLock(kinc_g4_vertex_buffer_t *buffer) {
 }
 
 float *kinc_g4_vertex_buffer_lock_all(kinc_g4_vertex_buffer_t *buffer) {
-	prepareLock(buffer);
+	kinc_internal_prepare_lock(buffer);
 	return kinc_g5_vertex_buffer_lock_all(&buffer->impl._buffer[buffer->impl._currentIndex]);
 }
 
 float *kinc_g4_vertex_buffer_lock(kinc_g4_vertex_buffer_t *buffer, int start, int count) {
-	prepareLock(buffer);
+	kinc_internal_prepare_lock(buffer);
 	return kinc_g5_vertex_buffer_lock(&buffer->impl._buffer[buffer->impl._currentIndex], start, count);
 }
 
