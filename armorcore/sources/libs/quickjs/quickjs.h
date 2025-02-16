@@ -32,6 +32,9 @@
 #include <string.h>
 #include <math.h>
 
+#undefine NAN
+#define NAN (__builtin_nanf(""))
+
 #ifdef __cplusplus
 extern "C" {
 #endif
