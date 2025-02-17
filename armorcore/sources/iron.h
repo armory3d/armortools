@@ -706,12 +706,18 @@ void _drop_files(wchar_t *file_path, void *data) {
 #ifdef KINC_WINDOWS
 	POINT p;
 	GetCursorPos(&p);
-	ScreenToClient(kinc_windows_window_handle(), &p);
-	_mouse_move(p.x, p.y, 0, 0, NULL);
+	ScreenToClient(kinc_windows_window_handle(0), &p);
+	_mouse_move(0, p.x, p.y, 0, 0, NULL);
 #endif
 
-	char buffer[512];
+	char buffer[1024];
+
+#ifdef KINC_WINDOWS
+	WideCharToMultiByte(CP_UTF8, 0, file_path, wcslen(file_path), buffer, sizeof(buffer), NULL, NULL);
+#else
 	wcstombs(buffer, file_path, sizeof(buffer));
+#endif
+
 	iron_drop_files(buffer);
 	in_background = false;
 
