@@ -802,8 +802,8 @@ void kinc_raytrace_set_target(kinc_g5_render_target_t *_output) {
 		heapProperties.VisibleNodeMask = 1;
 		D3D12_RESOURCE_DESC desc = {};
 		desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-		desc.Width = _output->tex_width;
-		desc.Height = _output->tex_height;
+		desc.Width = _output->width;
+		desc.Height = _output->height;
 		desc.DepthOrArraySize = 1;
 		desc.MipLevels = 1;
 		desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
@@ -893,8 +893,8 @@ void kinc_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
 	dispatchDesc.RayGenerationShaderRecord.StartAddress = pipeline->impl.raygen_shader_table->lpVtbl->GetGPUVirtualAddress(pipeline->impl.raygen_shader_table);
 	pipeline->impl.raygen_shader_table->lpVtbl->GetDesc(pipeline->impl.raygen_shader_table, &desc);
 	dispatchDesc.RayGenerationShaderRecord.SizeInBytes = desc.Width;
-	dispatchDesc.Width = output->tex_width;
-	dispatchDesc.Height = output->tex_height;
+	dispatchDesc.Width = output->width;
+	dispatchDesc.Height = output->height;
 	dispatchDesc.Depth = 1;
 	dxrCommandList->lpVtbl->SetPipelineState1(dxrCommandList, pipeline->impl.dxr_state);
 	dxrCommandList->lpVtbl->DispatchRays(dxrCommandList, &dispatchDesc);

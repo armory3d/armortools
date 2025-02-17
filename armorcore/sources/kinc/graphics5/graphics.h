@@ -32,7 +32,7 @@ void kinc_g5_internal_destroy_window(void);
 void kinc_g5_internal_destroy(void);
 
 struct kinc_g5_pipeline;
-struct kinc_g4_render_target;
+struct kinc_g5_render_target;
 struct kinc_g5_texture;
 struct kinc_g5_texture_unit;
 struct kinc_g5_constant_location;
@@ -95,7 +95,7 @@ void kinc_g4_set_texture_magnification_filter(struct kinc_g5_texture_unit unit, 
 void kinc_g4_set_texture_minification_filter(struct kinc_g5_texture_unit unit, kinc_g4_texture_filter_t filter);
 void kinc_g4_set_texture_mipmap_filter(struct kinc_g5_texture_unit unit, kinc_g4_mipmap_filter_t filter);
 void kinc_g4_restore_render_target(void);
-void kinc_g4_set_render_targets(struct kinc_g4_render_target **targets, int count);
+void kinc_g4_set_render_targets(struct kinc_g5_render_target **targets, int count);
 void kinc_g4_set_texture(struct kinc_g5_texture_unit unit, struct kinc_g5_texture *texture);
 void kinc_g4_compute(int x, int y, int z);
 void kinc_g4_set_index_buffer(struct kinc_g5_index_buffer *buffer);

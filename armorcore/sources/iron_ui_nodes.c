@@ -16,7 +16,7 @@
 
 static ui_nodes_t *current_nodes = NULL;
 static bool ui_nodes_elements_baked = false;
-static kinc_g4_render_target_t ui_socket_image;
+static kinc_g5_render_target_t ui_socket_image;
 static bool ui_box_select = false;
 static int ui_box_select_x = 0;
 static int ui_box_select_y = 0;
@@ -238,9 +238,9 @@ int ui_get_socket_id(ui_node_array_t *nodes) {
 
 void ui_nodes_bake_elements() {
 	if (ui_socket_image.width != 0) {
-		kinc_g4_render_target_destroy(&ui_socket_image);
+		kinc_g5_render_target_destroy(&ui_socket_image);
 	}
-	kinc_g4_render_target_init(&ui_socket_image, 24, 24, KINC_G5_RENDER_TARGET_FORMAT_32BIT, 0);
+	kinc_g5_render_target_init(&ui_socket_image, 24, 24, KINC_G5_RENDER_TARGET_FORMAT_32BIT, 0);
 	kinc_g2_set_render_target(&ui_socket_image);
 	kinc_g5_clear(KINC_G5_CLEAR_COLOR, 0x00000000, 0);
 

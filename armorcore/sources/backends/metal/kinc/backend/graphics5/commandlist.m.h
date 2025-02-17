@@ -97,8 +97,8 @@ void kinc_g5_command_list_scissor(kinc_g5_command_list_t *list, int x, int y, in
 	int target_w = -1;
 	int target_h = -1;
 	if (lastRenderTargets[0] != NULL) {
-		target_w = lastRenderTargets[0]->tex_width;
-		target_h = lastRenderTargets[0]->tex_height;
+		target_w = lastRenderTargets[0]->width;
+		target_h = lastRenderTargets[0]->height;
 	}
 	else {
 		target_w = kinc_window_width();
@@ -115,8 +115,8 @@ void kinc_g5_command_list_disable_scissor(kinc_g5_command_list_t *list) {
 	scissor.x = 0;
 	scissor.y = 0;
 	if (lastRenderTargets[0] != NULL) {
-		scissor.width = lastRenderTargets[0]->tex_width;
-		scissor.height = lastRenderTargets[0]->tex_height;
+		scissor.width = lastRenderTargets[0]->width;
+		scissor.height = lastRenderTargets[0]->height;
 	}
 	else {
 		scissor.width = kinc_window_width();
@@ -167,8 +167,8 @@ void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list,
 		id<MTLDevice> device = getMetalDevice();
 		MTLTextureDescriptor *descriptor = [MTLTextureDescriptor new];
 		descriptor.textureType = MTLTextureType2D;
-		descriptor.width = render_target->tex_width;
-		descriptor.height = render_target->tex_height;
+		descriptor.width = render_target->width;
+		descriptor.height = render_target->height;
 		descriptor.depth = 1;
 		descriptor.pixelFormat = [(__bridge id<MTLTexture>)render_target->impl._tex pixelFormat];
 		descriptor.arrayLength = 1;
@@ -186,7 +186,7 @@ void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list,
 	                    sourceSlice:0
 	                    sourceLevel:0
 	                   sourceOrigin:MTLOriginMake(0, 0, 0)
-	                     sourceSize:MTLSizeMake(render_target->tex_width, render_target->tex_height, 1)
+	                     sourceSize:MTLSizeMake(render_target->width, render_target->height, 1)
 	                      toTexture:(__bridge id<MTLTexture>)render_target->impl._texReadback
 	               destinationSlice:0
 	               destinationLevel:0
@@ -198,8 +198,8 @@ void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list,
 	// Read buffer
 	id<MTLTexture> tex = (__bridge id<MTLTexture>)render_target->impl._texReadback;
 	int formatByteSize = formatSize([(__bridge id<MTLTexture>)render_target->impl._tex pixelFormat]);
-	MTLRegion region = MTLRegionMake2D(0, 0, render_target->tex_width, render_target->tex_height);
-	[tex getBytes:data bytesPerRow:formatByteSize * render_target->tex_width fromRegion:region mipmapLevel:0];
+	MTLRegion region = MTLRegionMake2D(0, 0, render_target->width, render_target->height);
+	[tex getBytes:data bytesPerRow:formatByteSize * render_target->width fromRegion:region mipmapLevel:0];
 }
 
 void kinc_g5_command_list_execute(kinc_g5_command_list_t *list) {

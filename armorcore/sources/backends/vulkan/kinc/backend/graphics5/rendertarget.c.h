@@ -66,11 +66,9 @@ void setImageLayout(VkCommandBuffer _buffer, VkImage image, VkImageAspectFlags a
 }
 
 static void render_target_init(kinc_g5_render_target_t *target, int width, int height, kinc_g5_render_target_format_t format, int depthBufferBits, int framebuffer_index) {
+	target->framebuffer_index = framebuffer_index;
 	target->width = width;
 	target->height = height;
-	target->framebuffer_index = framebuffer_index;
-	target->tex_width = width;
-	target->tex_height = height;
 	target->impl.format = convert_format(format);
 	target->impl.depthBufferBits = depthBufferBits;
 	target->impl.stage = 0;
@@ -243,6 +241,9 @@ static void render_target_init(kinc_g5_render_target_t *target, int width, int h
 
 void kinc_g5_render_target_init(kinc_g5_render_target_t *target, int width, int height, kinc_g5_render_target_format_t format, int depthBufferBits) {
 	render_target_init(target, width, height, format, depthBufferBits, -1);
+	target->width = width;
+	target->height = height;
+	target->state = KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
 }
 
 static int framebuffer_count = 0;

@@ -1277,7 +1277,7 @@ void kinc_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
 
 	_vkCmdTraceRaysKHR = (void *)vkGetDeviceProcAddr(vk_ctx.device, "vkCmdTraceRaysKHR");
 	_vkCmdTraceRaysKHR(command_list->impl._buffer, &raygen_shader_sbt_entry, &miss_shader_sbt_entry, &hit_shader_sbt_entry, &callable_shader_sbt_entry,
-	                   output->tex_width, output->tex_height, 1);
+	                   output->width, output->height, 1);
 
 	vkCmdBeginRenderPass(command_list->impl._buffer, &currentRenderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 }

@@ -48,10 +48,10 @@ void kinc_g2_draw_scaled_sub_texture(kinc_g5_texture_t *tex, float sx, float sy,
 void kinc_g2_draw_scaled_image(kinc_g5_texture_t *tex, float dx, float dy, float dw, float dh);
 void kinc_g2_draw_sub_image(kinc_g5_texture_t *tex, float sx, float sy, float sw, float sh, float x, float y);
 void kinc_g2_draw_image(kinc_g5_texture_t *tex, float x, float y);
-void kinc_g2_draw_scaled_sub_render_target(kinc_g4_render_target_t *rt, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh);
-void kinc_g2_draw_scaled_render_target(kinc_g4_render_target_t *rt, float dx, float dy, float dw, float dh);
-void kinc_g2_draw_sub_render_target(kinc_g4_render_target_t *rt, float sx, float sy, float sw, float sh, float x, float y);
-void kinc_g2_draw_render_target(kinc_g4_render_target_t *rt, float x, float y);
+void kinc_g2_draw_scaled_sub_render_target(kinc_g5_render_target_t *rt, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh);
+void kinc_g2_draw_scaled_render_target(kinc_g5_render_target_t *rt, float dx, float dy, float dw, float dh);
+void kinc_g2_draw_sub_render_target(kinc_g5_render_target_t *rt, float sx, float sy, float sw, float sh, float x, float y);
+void kinc_g2_draw_render_target(kinc_g5_render_target_t *rt, float x, float y);
 void kinc_g2_fill_triangle(float x0, float y0, float x1, float y1, float x2, float y2);
 void kinc_g2_fill_rect(float x, float y, float width, float height);
 void kinc_g2_draw_rect(float x, float y, float width, float height, float strength);
@@ -75,4 +75,4 @@ float kinc_g2_sub_string_width(kinc_g2_font_t *font, int font_size, const char *
 int kinc_g2_string_width(kinc_g2_font_t *font, int font_size, const char *text);
 void kinc_g2_set_bilinear_filter(bool bilinear);
 void kinc_g2_restore_render_target(void);
-void kinc_g2_set_render_target(kinc_g4_render_target_t *target);
+void kinc_g2_set_render_target(kinc_g5_render_target_t *target);

@@ -766,7 +766,7 @@ void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list,
 	// Read buffer
 	void *p;
 	vkMapMemory(vk_ctx.device, render_target->impl.readbackMemory, 0, VK_WHOLE_SIZE, 0, (void **)&p);
-	memcpy(data, p, render_target->tex_width * render_target->tex_height * format_byteS_size);
+	memcpy(data, p, render_target->width * render_target->height * format_byteS_size);
 	vkUnmapMemory(vk_ctx.device, render_target->impl.readbackMemory);
 }
 

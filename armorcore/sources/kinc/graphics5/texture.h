@@ -10,8 +10,8 @@
 */
 
 typedef struct kinc_g5_texture {
-	int tex_width;
-	int tex_height;
+	int width;
+	int height;
 	kinc_image_format_t format;
 	kinc_image_t *image;
 	bool _uploaded;

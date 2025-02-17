@@ -43,7 +43,7 @@ static float *image_rect_verts = NULL;
 static int image_buffer_index = 0;
 static int image_buffer_start = 0;
 static kinc_g5_texture_t *image_last_texture = NULL;
-static kinc_g4_render_target_t *image_last_render_target = NULL;
+static kinc_g5_render_target_t *image_last_render_target = NULL;
 
 static kinc_g4_vertex_buffer_t colored_rect_vertex_buffer;
 static kinc_g5_index_buffer_t colored_rect_index_buffer;
@@ -127,7 +127,7 @@ kinc_vector2_t kinc_g2_matrix3x3_multvec(kinc_matrix3x3_t *m, kinc_vector2_t v) 
 	return (kinc_vector2_t){x, y};
 }
 
-void kinc_g2_internal_set_projection_matrix(kinc_g4_render_target_t *target) {
+void kinc_g2_internal_set_projection_matrix(kinc_g5_render_target_t *target) {
 	if (target != NULL) {
 		g2_projection_matrix = kinc_g2_matrix4x4_orthogonal_projection(0.0f, (float)target->width, (float)target->height, 0.0f, 0.1f, 1000.0f);
 	}
@@ -368,7 +368,7 @@ void kinc_g2_draw_scaled_sub_texture(kinc_g5_texture_t *tex, float sx, float sy,
 		kinc_g2_draw_image_buffer(false);
 	}
 
-	kinc_g2_set_image_rect_tex_coords(sx / tex->tex_width, sy / tex->tex_height, (sx + sw) / tex->tex_width, (sy + sh) / tex->tex_height);
+	kinc_g2_set_image_rect_tex_coords(sx / tex->width, sy / tex->height, (sx + sw) / tex->width, (sy + sh) / tex->height);
 	kinc_g2_set_image_rect_colors(g2_color);
 	kinc_vector2_t p[4];
 	kinc_g2_matrix3x3_multquad(&g2_transform, dx, dy, dw, dh, p);
@@ -380,7 +380,7 @@ void kinc_g2_draw_scaled_sub_texture(kinc_g5_texture_t *tex, float sx, float sy,
 }
 
 void kinc_g2_draw_scaled_image(kinc_g5_texture_t *tex, float dx, float dy, float dw, float dh) {
-	kinc_g2_draw_scaled_sub_texture(tex, 0, 0, (float)tex->tex_width, (float)tex->tex_height, dx, dy, dw, dh);
+	kinc_g2_draw_scaled_sub_texture(tex, 0, 0, (float)tex->width, (float)tex->height, dx, dy, dw, dh);
 }
 
 void kinc_g2_draw_sub_image(kinc_g5_texture_t *tex, float sx, float sy, float sw, float sh, float x, float y) {
@@ -388,10 +388,10 @@ void kinc_g2_draw_sub_image(kinc_g5_texture_t *tex, float sx, float sy, float sw
 }
 
 void kinc_g2_draw_image(kinc_g5_texture_t *tex, float x, float y) {
-	kinc_g2_draw_scaled_sub_texture(tex, 0, 0, (float)tex->tex_width, (float)tex->tex_height, x, y, (float)tex->tex_width, (float)tex->tex_height);
+	kinc_g2_draw_scaled_sub_texture(tex, 0, 0, (float)tex->width, (float)tex->height, x, y, (float)tex->width, (float)tex->height);
 }
 
-void kinc_g2_draw_scaled_sub_render_target(kinc_g4_render_target_t *rt, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh) {
+void kinc_g2_draw_scaled_sub_render_target(kinc_g5_render_target_t *rt, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh) {
 	kinc_g2_colored_end();
 	kinc_g2_text_end();
 	if (image_buffer_start + image_buffer_index + 1 >= G2_BUFFER_SIZE ||
@@ -412,15 +412,15 @@ void kinc_g2_draw_scaled_sub_render_target(kinc_g4_render_target_t *rt, float sx
 	image_last_texture = NULL;
 }
 
-void kinc_g2_draw_scaled_render_target(kinc_g4_render_target_t *rt, float dx, float dy, float dw, float dh) {
+void kinc_g2_draw_scaled_render_target(kinc_g5_render_target_t *rt, float dx, float dy, float dw, float dh) {
 	kinc_g2_draw_scaled_sub_render_target(rt, 0, 0, (float)rt->width, (float)rt->height, dx, dy, dw, dh);
 }
 
-void kinc_g2_draw_sub_render_target(kinc_g4_render_target_t *rt, float sx, float sy, float sw, float sh, float x, float y) {
+void kinc_g2_draw_sub_render_target(kinc_g5_render_target_t *rt, float sx, float sy, float sw, float sh, float x, float y) {
 	kinc_g2_draw_scaled_sub_render_target(rt, sx, sy, sw, sh, x, y, sw, sh);
 }
 
-void kinc_g2_draw_render_target(kinc_g4_render_target_t *rt, float x, float y) {
+void kinc_g2_draw_render_target(kinc_g5_render_target_t *rt, float x, float y) {
 	kinc_g2_draw_scaled_sub_render_target(rt, 0, 0, (float)rt->width, (float)rt->height, x, y, (float)rt->width, (float)rt->height);
 }
 
@@ -433,7 +433,7 @@ void kinc_g2_draw_scaled_sub_image(image_t *image, float sx, float sy, float sw,
 		kinc_g2_draw_scaled_sub_texture(texture, sx, sy, sw, sh, dx, dy, dw, dh);
 	}
 	else {
-		kinc_g4_render_target_t *render_target = (kinc_g4_render_target_t *)image->render_target_;
+		kinc_g5_render_target_t *render_target = (kinc_g5_render_target_t *)image->render_target_;
 		kinc_g2_draw_scaled_sub_render_target(render_target, sx, sy, sw, sh, dx, dy, dw, dh);
 	}
 }
@@ -1171,11 +1171,11 @@ void kinc_g2_restore_render_target(void) {
 	kinc_g2_internal_set_projection_matrix(NULL);
 }
 
-void kinc_g2_set_render_target(kinc_g4_render_target_t *target) {
+void kinc_g2_set_render_target(kinc_g5_render_target_t *target) {
 	g2_is_render_target = true;
 	kinc_g2_end();
 	kinc_g2_begin();
-	kinc_g4_render_target_t *render_targets[1] = { target };
+	kinc_g5_render_target_t *render_targets[1] = { target };
 	kinc_g4_set_render_targets(render_targets, 1);
 	kinc_g2_internal_set_projection_matrix(target);
 }

@@ -75,8 +75,8 @@ static void create(kinc_g5_texture_t *texture, int width, int height, int format
 }
 
 void kinc_g5_texture_init(kinc_g5_texture_t *texture, int width, int height, kinc_image_format_t format) {
-	texture->tex_width = width;
-	texture->tex_height = height;
+	texture->width = width;
+	texture->height = height;
 	texture->format = format;
 	texture->impl.data = malloc(width * height * (format == KINC_IMAGE_FORMAT_GREY8 ? 1 : 4));
 	create(texture, width, height, format, true);
@@ -84,25 +84,25 @@ void kinc_g5_texture_init(kinc_g5_texture_t *texture, int width, int height, kin
 }
 
 void kinc_g5_texture_init_from_image(kinc_g5_texture_t *texture, struct kinc_image *image) {
-	texture->tex_width = image->width;
-	texture->tex_height = image->height;
+	texture->width = image->width;
+	texture->height = image->height;
 	texture->format = image->format;
 	texture->_uploaded = false;
 	texture->format = image->format;
 	texture->impl.data = NULL;
 	create(texture, image->width, image->height, image->format, true);
 	id<MTLTexture> tex = (__bridge id<MTLTexture>)texture->impl._tex;
-	[tex replaceRegion:MTLRegionMake2D(0, 0, texture->tex_width, texture->tex_height)
+	[tex replaceRegion:MTLRegionMake2D(0, 0, texture->width, texture->height)
 	       mipmapLevel:0
 	             slice:0
 	         withBytes:image->data
 	       bytesPerRow:kinc_g5_texture_stride(texture)
-	     bytesPerImage:kinc_g5_texture_stride(texture) * texture->tex_height];
+	     bytesPerImage:kinc_g5_texture_stride(texture) * texture->height];
 }
 
 void kinc_g5_texture_init_non_sampled_access(kinc_g5_texture_t *texture, int width, int height, kinc_image_format_t format) {
-	texture->tex_width = width;
-	texture->tex_height = height;
+	texture->width = width;
+	texture->height = height;
 	texture->format = format;
 	texture->impl.data = malloc(width * height * (format == KINC_IMAGE_FORMAT_GREY8 ? 1 : 4));
 	create(texture, width, height, format, true);
@@ -125,19 +125,19 @@ id getMetalEncoder(void);
 int kinc_g5_texture_stride(kinc_g5_texture_t *texture) {
 	switch (texture->format) {
 	case KINC_IMAGE_FORMAT_GREY8:
-		return texture->tex_width;
+		return texture->width;
 	case KINC_IMAGE_FORMAT_RGBA32:
 	case KINC_IMAGE_FORMAT_BGRA32:
 	case KINC_IMAGE_FORMAT_RGB24:
-		return texture->tex_width * 4;
+		return texture->width * 4;
 	case KINC_IMAGE_FORMAT_RGBA64:
-		return texture->tex_width * 8;
+		return texture->width * 8;
 	case KINC_IMAGE_FORMAT_RGBA128:
-		return texture->tex_width * 16;
+		return texture->width * 16;
 	case KINC_IMAGE_FORMAT_A16:
-		return texture->tex_width * 2;
+		return texture->width * 2;
 	case KINC_IMAGE_FORMAT_A32:
-		return texture->tex_width * 4;
+		return texture->width * 4;
 	}
 }
 
@@ -147,12 +147,12 @@ uint8_t *kinc_g5_texture_lock(kinc_g5_texture_t *texture) {
 
 void kinc_g5_texture_unlock(kinc_g5_texture_t *tex) {
 	id<MTLTexture> texture = (__bridge id<MTLTexture>)tex->impl._tex;
-	[texture replaceRegion:MTLRegionMake2D(0, 0, tex->tex_width, tex->tex_height)
+	[texture replaceRegion:MTLRegionMake2D(0, 0, tex->width, tex->height)
 	           mipmapLevel:0
 	                 slice:0
 	             withBytes:tex->impl.data
 	           bytesPerRow:kinc_g5_texture_stride(tex)
-	         bytesPerImage:kinc_g5_texture_stride(tex) * tex->tex_height];
+	         bytesPerImage:kinc_g5_texture_stride(tex) * tex->height];
 	texture->_uploaded = false;
 }
 
@@ -162,12 +162,12 @@ void kinc_g5_texture_set_mipmap(kinc_g5_texture_t *texture, kinc_image_t *mipmap
 	if (!texture->impl.has_mipmaps) {
 		id<MTLDevice> device = getMetalDevice();
 		MTLTextureDescriptor *descriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:convert_image_format((kinc_image_format_t)texture->format)
-		                                                                                      width:texture->tex_width
-		                                                                                     height:texture->tex_height
+		                                                                                      width:texture->width
+		                                                                                     height:texture->height
 		                                                                                  mipmapped:YES];
 		descriptor.textureType = MTLTextureType2D;
-		descriptor.width = texture->tex_width;
-		descriptor.height = texture->tex_height;
+		descriptor.width = texture->width;
+		descriptor.height = texture->height;
 		descriptor.depth = 1;
 		descriptor.pixelFormat = convert_image_format((kinc_image_format_t)texture->format);
 		descriptor.arrayLength = 1;
@@ -184,7 +184,7 @@ void kinc_g5_texture_set_mipmap(kinc_g5_texture_t *texture, kinc_image_t *mipmap
 		                    sourceSlice:0
 		                    sourceLevel:0
 		                   sourceOrigin:MTLOriginMake(0, 0, 0)
-		                     sourceSize:MTLSizeMake(texture->tex_width, texture->tex_height, 1)
+		                     sourceSize:MTLSizeMake(texture->width, texture->height, 1)
 		                      toTexture:(__bridge id<MTLTexture>)mipmaptex
 		               destinationSlice:0
 		               destinationLevel:0

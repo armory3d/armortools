@@ -29,36 +29,18 @@ enum kinc_internal_render_target_state {
 typedef struct kinc_g5_render_target {
 	int width;
 	int height;
-	int tex_width;
-	int tex_height;
 	int framebuffer_index;
 	bool isDepthAttachment;
 	enum kinc_internal_render_target_state state;
 	RenderTarget5Impl impl;
 } kinc_g5_render_target_t;
 
-typedef struct {
-	kinc_g5_render_target_t _renderTarget;
-} kinc_g4_render_target_impl_t;
-
-typedef struct kinc_g4_render_target {
-	int width;
-	int height;
-	int tex_width;
-	int tex_height;
-	bool isDepthAttachment;
-	kinc_g4_render_target_impl_t impl;
-} kinc_g4_render_target_t;
-
 void kinc_g5_render_target_init(kinc_g5_render_target_t *target, int width, int height, kinc_g5_render_target_format_t format, int depthBufferBits);
 void kinc_g5_render_target_init_framebuffer(kinc_g5_render_target_t *target, int width, int height, kinc_g5_render_target_format_t format, int depthBufferBits);
 void kinc_g5_render_target_destroy(kinc_g5_render_target_t *target);
 void kinc_g5_render_target_set_depth_from(kinc_g5_render_target_t *target, kinc_g5_render_target_t *source);
 
-void kinc_g4_render_target_init(kinc_g4_render_target_t *renderTarget, int width, int height, kinc_g5_render_target_format_t format, int depthBufferBits);
-void kinc_g4_render_target_destroy(kinc_g4_render_target_t *renderTarget);
-void kinc_g4_render_target_use_color_as_texture(kinc_g4_render_target_t *renderTarget, struct kinc_g5_texture_unit unit);
-void kinc_g4_render_target_use_depth_as_texture(kinc_g4_render_target_t *renderTarget, struct kinc_g5_texture_unit unit);
-void kinc_g4_render_target_set_depth_from(kinc_g4_render_target_t *renderTarget, kinc_g4_render_target_t *source);
-void kinc_g4_render_target_get_pixels(kinc_g4_render_target_t *renderTarget, uint8_t *data);
-void kinc_g4_render_target_generate_mipmaps(kinc_g4_render_target_t *renderTarget, int levels);
+void kinc_g4_render_target_use_color_as_texture(kinc_g5_render_target_t *renderTarget, struct kinc_g5_texture_unit unit);
+void kinc_g4_render_target_use_depth_as_texture(kinc_g5_render_target_t *renderTarget, struct kinc_g5_texture_unit unit);
+void kinc_g4_render_target_get_pixels(kinc_g5_render_target_t *renderTarget, uint8_t *data);
+void kinc_g5_render_target_generate_mipmaps(kinc_g5_render_target_t *renderTarget, int levels);
