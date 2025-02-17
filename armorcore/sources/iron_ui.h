@@ -57,8 +57,8 @@ typedef struct ui_options {
 	g2_font_t *font;
 	ui_theme_t *theme;
 	float scale_factor;
-	kinc_g4_texture_t *color_wheel;
-	kinc_g4_texture_t *black_white_gradient;
+	kinc_g5_texture_t *color_wheel;
+	kinc_g5_texture_t *black_white_gradient;
 } ui_options_t;
 
 typedef struct ui_handle_array {
@@ -233,7 +233,7 @@ typedef struct ui {
 	int combo_to_submit;
 	int combo_initial_value;
 	char tooltip_text[512];
-	kinc_g4_texture_t *tooltip_img;
+	kinc_g5_texture_t *tooltip_img;
 	kinc_g4_render_target_t *tooltip_rt;
 	int tooltip_img_max_width;
 	bool tooltip_invert_y;
@@ -271,8 +271,8 @@ bool ui_button(char *text, int align, char *label);
 int ui_text(char *text, int align, int bg);
 bool ui_tab(ui_handle_t *handle, char *text, bool vertical, uint32_t color);
 bool ui_panel(ui_handle_t *handle, char *text, bool is_tree, bool filled);
-int ui_sub_image(/*kinc_g4_texture_t kinc_g4_render_target_t*/ void *image, bool is_rt, uint32_t tint, int h, int sx, int sy, int sw, int sh);
-int ui_image(/*kinc_g4_texture_t kinc_g4_render_target_t*/ void *image, bool is_rt, uint32_t tint, int h);
+int ui_sub_image(/*kinc_g5_texture_t kinc_g4_render_target_t*/ void *image, bool is_rt, uint32_t tint, int h, int sx, int sy, int sw, int sh);
+int ui_image(/*kinc_g5_texture_t kinc_g4_render_target_t*/ void *image, bool is_rt, uint32_t tint, int h);
 char *ui_text_input(ui_handle_t *handle, char *label, int align, bool editable, bool live_update);
 bool ui_check(ui_handle_t *handle, char *text, char *label);
 bool ui_radio(ui_handle_t *handle, int position, char *text, char *label);
@@ -281,7 +281,7 @@ float ui_slider(ui_handle_t *handle, char *text, float from, float to, bool fill
 void ui_row(f32_array_t *ratios);
 void ui_separator(int h, bool fill);
 void ui_tooltip(char *text);
-void ui_tooltip_image(kinc_g4_texture_t *image, int max_width);
+void ui_tooltip_image(kinc_g5_texture_t *image, int max_width);
 void ui_tooltip_render_target(kinc_g4_render_target_t *image, int max_width);
 void _ui_end(bool last);
 void ui_end_window(bool bind_global_g);

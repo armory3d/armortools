@@ -31,9 +31,9 @@ void kinc_g5_internal_init_window(int depth_buffer_bits, bool vsync);
 void kinc_g5_internal_destroy_window(void);
 void kinc_g5_internal_destroy(void);
 
-struct kinc_g4_pipeline;
+struct kinc_g5_pipeline;
 struct kinc_g4_render_target;
-struct kinc_g4_texture;
+struct kinc_g5_texture;
 struct kinc_g5_texture_unit;
 struct kinc_g5_constant_location;
 struct kinc_g5_index_buffer;
@@ -77,7 +77,7 @@ void kinc_g4_disable_scissor(void);
 void kinc_g5_draw_indexed_vertices(void);
 void kinc_g5_draw_indexed_vertices_from_to(int start, int count);
 void kinc_g4_set_texture_addressing(struct kinc_g5_texture_unit unit, kinc_g4_texture_direction_t dir, kinc_g4_texture_addressing_t addressing);
-void kinc_g4_set_pipeline(struct kinc_g4_pipeline *pipeline);
+void kinc_g5_set_pipeline(struct kinc_g5_pipeline *pipeline);
 void kinc_g4_set_int(struct kinc_g5_constant_location location, int value);
 void kinc_g4_set_int2(struct kinc_g5_constant_location location, int value1, int value2);
 void kinc_g4_set_int3(struct kinc_g5_constant_location location, int value1, int value2, int value3);
@@ -96,7 +96,7 @@ void kinc_g4_set_texture_minification_filter(struct kinc_g5_texture_unit unit, k
 void kinc_g4_set_texture_mipmap_filter(struct kinc_g5_texture_unit unit, kinc_g4_mipmap_filter_t filter);
 void kinc_g4_restore_render_target(void);
 void kinc_g4_set_render_targets(struct kinc_g4_render_target **targets, int count);
-void kinc_g4_set_texture(struct kinc_g5_texture_unit unit, struct kinc_g4_texture *texture);
+void kinc_g4_set_texture(struct kinc_g5_texture_unit unit, struct kinc_g5_texture *texture);
 void kinc_g4_compute(int x, int y, int z);
 void kinc_g4_set_index_buffer(struct kinc_g5_index_buffer *buffer);
 

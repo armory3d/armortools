@@ -4,7 +4,7 @@ void kinc_video_init(kinc_video_t *video, const char *filename) {}
 
 void kinc_video_destroy(kinc_video_t *video) {}
 
-kinc_g4_texture_t *kinc_video_current_image(kinc_video_t *video) {
+kinc_g5_texture_t *kinc_video_current_image(kinc_video_t *video) {
 	return NULL;
 }
 

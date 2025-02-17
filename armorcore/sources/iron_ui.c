@@ -484,7 +484,7 @@ void ui_resize(ui_handle_t *handle, int w, int h) {
 	if (h < 1) {
 		h = 1;
 	}
-	kinc_g4_render_target_init(&handle->texture, w, h, KINC_G4_RENDER_TARGET_FORMAT_32BIT, 0);
+	kinc_g4_render_target_init(&handle->texture, w, h, KINC_G5_RENDER_TARGET_FORMAT_32BIT, 0);
 }
 
 bool ui_input_in_rect(float x, float y, float w, float h) {
@@ -898,7 +898,7 @@ void ui_bake_elements() {
 		kinc_g4_render_target_destroy(&current->check_select_image);
 	}
 	float r = UI_CHECK_SELECT_SIZE();
-	kinc_g4_render_target_init(&current->check_select_image, r, r, KINC_G4_RENDER_TARGET_FORMAT_32BIT, 0);
+	kinc_g4_render_target_init(&current->check_select_image, r, r, KINC_G5_RENDER_TARGET_FORMAT_32BIT, 0);
 	kinc_g2_set_render_target(&current->check_select_image);
 	kinc_g5_clear(KINC_G5_CLEAR_COLOR, 0x00000000, 0);
 	kinc_g2_set_color(0xffffffff);
@@ -910,7 +910,7 @@ void ui_bake_elements() {
 		kinc_g4_render_target_destroy(&current->radio_image);
 	}
 	r = UI_CHECK_SIZE();
-	kinc_g4_render_target_init(&current->radio_image, r, r, KINC_G4_RENDER_TARGET_FORMAT_32BIT, 0);
+	kinc_g4_render_target_init(&current->radio_image, r, r, KINC_G5_RENDER_TARGET_FORMAT_32BIT, 0);
 	kinc_g2_set_render_target(&current->radio_image);
 	kinc_g5_clear(KINC_G5_CLEAR_COLOR, 0x00000000, 0);
 	kinc_g2_set_color(0xffaaaaaa);
@@ -923,7 +923,7 @@ void ui_bake_elements() {
 		kinc_g4_render_target_destroy(&current->radio_select_image);
 	}
 	r = UI_CHECK_SELECT_SIZE();
-	kinc_g4_render_target_init(&current->radio_select_image, r, r, KINC_G4_RENDER_TARGET_FORMAT_32BIT, 0);
+	kinc_g4_render_target_init(&current->radio_select_image, r, r, KINC_G5_RENDER_TARGET_FORMAT_32BIT, 0);
 	kinc_g2_set_render_target(&current->radio_select_image);
 	kinc_g5_clear(KINC_G5_CLEAR_COLOR, 0x00000000, 0);
 	kinc_g2_set_color(0xffaaaaaa);
@@ -937,7 +937,7 @@ void ui_bake_elements() {
 			kinc_g4_render_target_destroy(&current->filled_round_corner_image);
 		}
 		r = 4.0 * UI_SCALE();
-		kinc_g4_render_target_init(&current->filled_round_corner_image, r, r, KINC_G4_RENDER_TARGET_FORMAT_32BIT, 0);
+		kinc_g4_render_target_init(&current->filled_round_corner_image, r, r, KINC_G5_RENDER_TARGET_FORMAT_32BIT, 0);
 		kinc_g2_set_render_target(&current->filled_round_corner_image);
 		kinc_g5_clear(KINC_G5_CLEAR_COLOR, 0x00000000, 0);
 		kinc_g2_set_color(0xffffffff);
@@ -947,7 +947,7 @@ void ui_bake_elements() {
 		if (current->round_corner_image.width != 0) {
 			kinc_g4_render_target_destroy(&current->round_corner_image);
 		}
-		kinc_g4_render_target_init(&current->round_corner_image, r, r, KINC_G4_RENDER_TARGET_FORMAT_32BIT, 0);
+		kinc_g4_render_target_init(&current->round_corner_image, r, r, KINC_G5_RENDER_TARGET_FORMAT_32BIT, 0);
 		kinc_g2_set_render_target(&current->round_corner_image);
 		kinc_g5_clear(KINC_G5_CLEAR_COLOR, 0x00000000, 0);
 		kinc_g2_set_color(0xffffffff);
@@ -1743,7 +1743,7 @@ bool _ui_window(ui_handle_t *handle, int x, int y, int w, int h, bool drag) {
 	return true;
 }
 
-bool ui_button(char *text, int align, char *label/*, kinc_g4_texture_t *icon, int sx, int sy, int sw, int sh*/) {
+bool ui_button(char *text, int align, char *label/*, kinc_g5_texture_t *icon, int sx, int sy, int sw, int sh*/) {
 	if (!ui_is_visible(UI_ELEMENT_H())) {
 		ui_end_element();
 		return false;
@@ -1881,7 +1881,7 @@ static int image_width(void *image, bool is_rt) {
 		return ((kinc_g4_render_target_t *)image)->width;
 	}
 	else {
-		return ((kinc_g4_texture_t *)image)->tex_width;
+		return ((kinc_g5_texture_t *)image)->tex_width;
 	}
 }
 
@@ -1890,7 +1890,7 @@ static int image_height(void *image, bool is_rt) {
 		return ((kinc_g4_render_target_t *)image)->height;
 	}
 	else {
-		return ((kinc_g4_texture_t *)image)->tex_height;
+		return ((kinc_g5_texture_t *)image)->tex_height;
 	}
 }
 
@@ -1899,7 +1899,7 @@ static void draw_scaled_image(void *image, bool is_rt, float dx, float dy, float
 		kinc_g2_draw_scaled_render_target((kinc_g4_render_target_t *)image, dx, dy, dw, dh);
 	}
 	else {
-		kinc_g2_draw_scaled_image((kinc_g4_texture_t *)image, dx, dy, dw, dh);
+		kinc_g2_draw_scaled_image((kinc_g5_texture_t *)image, dx, dy, dw, dh);
 	}
 }
 
@@ -1908,11 +1908,11 @@ static void draw_scaled_sub_image(void *image, bool is_rt, float sx, float sy, f
 		kinc_g2_draw_scaled_sub_render_target((kinc_g4_render_target_t *)image, sx, sy, sw, sh, dx, dy, dw, dh);
 	}
 	else {
-		kinc_g2_draw_scaled_sub_texture((kinc_g4_texture_t *)image, sx, sy, sw, sh, dx, dy, dw, dh);
+		kinc_g2_draw_scaled_sub_texture((kinc_g5_texture_t *)image, sx, sy, sw, sh, dx, dy, dw, dh);
 	}
 }
 
-int ui_sub_image(/*kinc_g4_texture_t kinc_g4_render_target_t*/ void *image, bool is_rt, uint32_t tint, int h, int sx, int sy, int sw, int sh) {
+int ui_sub_image(/*kinc_g5_texture_t kinc_g4_render_target_t*/ void *image, bool is_rt, uint32_t tint, int h, int sx, int sy, int sw, int sh) {
 	float iw = (sw > 0 ? sw : image_width(image, is_rt)) * UI_SCALE();
 	float ih = (sh > 0 ? sh : image_height(image, is_rt)) * UI_SCALE();
 	float w = fmin(iw, current->_w);
@@ -1983,7 +1983,7 @@ int ui_sub_image(/*kinc_g4_texture_t kinc_g4_render_target_t*/ void *image, bool
 	return started ? UI_STATE_STARTED : released ? UI_STATE_RELEASED : down ? UI_STATE_DOWN : hover ? UI_STATE_HOVERED : UI_STATE_IDLE;
 }
 
-int ui_image(/*kinc_g4_texture_t kinc_g4_render_target_t*/ void *image, bool is_rt, uint32_t tint, int h) {
+int ui_image(/*kinc_g5_texture_t kinc_g4_render_target_t*/ void *image, bool is_rt, uint32_t tint, int h) {
 	return ui_sub_image(image, is_rt, tint, h, 0, 0, image_width(image, is_rt), image_height(image, is_rt));
 }
 
@@ -2294,7 +2294,7 @@ void ui_tooltip(char *text) {
 	current->tooltip_y = current->_y + current->_window_y;
 }
 
-void ui_tooltip_image(kinc_g4_texture_t *image, int max_width) {
+void ui_tooltip_image(kinc_g5_texture_t *image, int max_width) {
 	current->tooltip_img = image;
 	current->tooltip_img_max_width = max_width;
 	current->tooltip_invert_y = current->image_invert_y;

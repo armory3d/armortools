@@ -23,6 +23,7 @@ void kinc_g5_internal_set_compute_constants(kinc_g5_command_list_t *commandList)
 }
 
 void kinc_g5_pipeline_init(kinc_g5_pipeline_t *pipe) {
+	kinc_g5_internal_pipeline_set_defaults(pipe);
 	kinc_g5_internal_pipeline_init(pipe);
 }
 
@@ -227,9 +228,10 @@ static void set_blend_state(D3D12_BLEND_DESC *blend_desc, kinc_g5_pipeline_t *pi
 	blend_desc->RenderTarget[target].DestBlendAlpha = convert_blend_factor(pipe->alpha_blend_destination);
 	blend_desc->RenderTarget[target].BlendOpAlpha = convert_blend_operation(pipe->alpha_blend_operation);
 	blend_desc->RenderTarget[target].RenderTargetWriteMask =
-	    (((pipe->colorWriteMaskRed[target] ? D3D12_COLOR_WRITE_ENABLE_RED : 0) | (pipe->colorWriteMaskGreen[target] ? D3D12_COLOR_WRITE_ENABLE_GREEN : 0)) |
-	     (pipe->colorWriteMaskBlue[target] ? D3D12_COLOR_WRITE_ENABLE_BLUE : 0)) |
-	    (pipe->colorWriteMaskAlpha[target] ? D3D12_COLOR_WRITE_ENABLE_ALPHA : 0);
+	    (((pipe->color_write_mask_red[target] ? D3D12_COLOR_WRITE_ENABLE_RED : 0) |
+		  (pipe->color_write_mask_green[target] ? D3D12_COLOR_WRITE_ENABLE_GREEN : 0)) |
+	      (pipe->color_write_mask_blue[target] ? D3D12_COLOR_WRITE_ENABLE_BLUE : 0)) |
+	      (pipe->color_write_mask_alpha[target] ? D3D12_COLOR_WRITE_ENABLE_ALPHA : 0);
 }
 
 void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
@@ -369,9 +371,9 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
 	psoDesc.PS.BytecodeLength = pipe->fragment_shader->impl.length;
 	psoDesc.PS.pShaderBytecode = pipe->fragment_shader->impl.data;
 	psoDesc.pRootSignature = globalRootSignature;
-	psoDesc.NumRenderTargets = pipe->colorAttachmentCount;
-	for (int i = 0; i < pipe->colorAttachmentCount; ++i) {
-		psoDesc.RTVFormats[i] = convert_format(pipe->colorAttachment[i]);
+	psoDesc.NumRenderTargets = pipe->color_attachment_count;
+	for (int i = 0; i < pipe->color_attachment_count; ++i) {
+		psoDesc.RTVFormats[i] = convert_format(pipe->color_attachment[i]);
 	}
 	psoDesc.DSVFormat = DXGI_FORMAT_UNKNOWN;
 
@@ -410,8 +412,10 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
 
 	bool independentBlend = false;
 	for (int i = 1; i < 8; ++i) {
-		if (pipe->colorWriteMaskRed[0] != pipe->colorWriteMaskRed[i] || pipe->colorWriteMaskGreen[0] != pipe->colorWriteMaskGreen[i] ||
-		    pipe->colorWriteMaskBlue[0] != pipe->colorWriteMaskBlue[i] || pipe->colorWriteMaskAlpha[0] != pipe->colorWriteMaskAlpha[i]) {
+		if (pipe->color_write_mask_red[0] != pipe->color_write_mask_red[i] ||
+			pipe->color_write_mask_green[0] != pipe->color_write_mask_green[i] ||
+		    pipe->color_write_mask_blue[0] != pipe->color_write_mask_blue[i] ||
+			pipe->color_write_mask_alpha[0] != pipe->color_write_mask_alpha[i]) {
 			independentBlend = true;
 			break;
 		}
@@ -435,9 +439,9 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
 	psoDesc.DepthStencilState.FrontFace = defaultStencilOp;
 	psoDesc.DepthStencilState.BackFace = defaultStencilOp;
 
-	psoDesc.DepthStencilState.DepthEnable = pipe->depthMode != KINC_G5_COMPARE_MODE_ALWAYS;
-	psoDesc.DepthStencilState.DepthWriteMask = pipe->depthWrite ? D3D12_DEPTH_WRITE_MASK_ALL : D3D12_DEPTH_WRITE_MASK_ZERO;
-	psoDesc.DepthStencilState.DepthFunc = convert_compare_mode(pipe->depthMode);
+	psoDesc.DepthStencilState.DepthEnable = pipe->depth_mode != KINC_G5_COMPARE_MODE_ALWAYS;
+	psoDesc.DepthStencilState.DepthWriteMask = pipe->depth_write ? D3D12_DEPTH_WRITE_MASK_ALL : D3D12_DEPTH_WRITE_MASK_ZERO;
+	psoDesc.DepthStencilState.DepthFunc = convert_compare_mode(pipe->depth_mode);
 	psoDesc.DepthStencilState.StencilEnable = false;
 	psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
 	psoDesc.SampleDesc.Count = 1;

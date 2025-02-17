@@ -334,10 +334,9 @@ function _image_create(tex: any): image_t {
 }
 
 function _image_set_size_from_texture(image: image_t, _tex: any) {
-	let tex: kinc_g4_texture_t = _tex;
+	let tex: kinc_g5_texture_t = _tex;
 	image.width = tex.tex_width;
 	image.height = tex.tex_height;
-	image.depth = tex.tex_depth;
 }
 
 function _image_set_size_from_render_target(image: image_t, _rt: any) {

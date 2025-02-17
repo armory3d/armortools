@@ -259,6 +259,7 @@ static VkFormat convert_format(kinc_g5_render_target_format_t format) {
 
 void kinc_g5_pipeline_init(kinc_g5_pipeline_t *pipeline) {
 	kinc_g5_internal_pipeline_init(pipeline);
+	kinc_g5_internal_pipeline_set_defaults(pipeline);
 }
 
 void kinc_g5_pipeline_destroy(kinc_g5_pipeline_t *pipeline) {
@@ -588,12 +589,16 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 	cb.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
 	VkPipelineColorBlendAttachmentState att_state[8];
 	memset(att_state, 0, sizeof(att_state));
-	for (int i = 0; i < pipeline->colorAttachmentCount; ++i) {
+	for (int i = 0; i < pipeline->color_attachment_count; ++i) {
 		att_state[i].colorWriteMask =
-		    (pipeline->colorWriteMaskRed[i] ? VK_COLOR_COMPONENT_R_BIT : 0) | (pipeline->colorWriteMaskGreen[i] ? VK_COLOR_COMPONENT_G_BIT : 0) |
-		    (pipeline->colorWriteMaskBlue[i] ? VK_COLOR_COMPONENT_B_BIT : 0) | (pipeline->colorWriteMaskAlpha[i] ? VK_COLOR_COMPONENT_A_BIT : 0);
-		att_state[i].blendEnable = pipeline->blend_source != KINC_G5_BLEND_ONE || pipeline->blend_destination != KINC_G5_BLEND_ZERO ||
-		                           pipeline->alpha_blend_source != KINC_G5_BLEND_ONE || pipeline->alpha_blend_destination != KINC_G5_BLEND_ZERO;
+		    (pipeline->color_write_mask_red[i] ? VK_COLOR_COMPONENT_R_BIT : 0) |
+			(pipeline->color_write_mask_green[i] ? VK_COLOR_COMPONENT_G_BIT : 0) |
+		    (pipeline->color_write_mask_blue[i] ? VK_COLOR_COMPONENT_B_BIT : 0) |
+			(pipeline->color_write_mask_alpha[i] ? VK_COLOR_COMPONENT_A_BIT : 0);
+		att_state[i].blendEnable = pipeline->blend_source != KINC_G5_BLEND_ONE ||
+								   pipeline->blend_destination != KINC_G5_BLEND_ZERO ||
+		                           pipeline->alpha_blend_source != KINC_G5_BLEND_ONE ||
+								   pipeline->alpha_blend_destination != KINC_G5_BLEND_ZERO;
 		att_state[i].srcColorBlendFactor = convert_blend_factor(pipeline->blend_source);
 		att_state[i].dstColorBlendFactor = convert_blend_factor(pipeline->blend_destination);
 		att_state[i].colorBlendOp = convert_blend_operation(pipeline->blend_operation);
@@ -601,7 +606,7 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 		att_state[i].dstAlphaBlendFactor = convert_blend_factor(pipeline->alpha_blend_destination);
 		att_state[i].alphaBlendOp = convert_blend_operation(pipeline->alpha_blend_operation);
 	}
-	cb.attachmentCount = pipeline->colorAttachmentCount;
+	cb.attachmentCount = pipeline->color_attachment_count;
 	cb.pAttachments = att_state;
 
 	memset(&vp, 0, sizeof(vp));
@@ -613,9 +618,9 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 
 	memset(&ds, 0, sizeof(ds));
 	ds.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-	ds.depthTestEnable = pipeline->depthMode != KINC_G5_COMPARE_MODE_ALWAYS;
-	ds.depthWriteEnable = pipeline->depthWrite;
-	ds.depthCompareOp = convert_compare_mode(pipeline->depthMode);
+	ds.depthTestEnable = pipeline->depth_mode != KINC_G5_COMPARE_MODE_ALWAYS;
+	ds.depthWriteEnable = pipeline->depth_write;
+	ds.depthCompareOp = convert_compare_mode(pipeline->depth_mode);
 	ds.depthBoundsTestEnable = VK_FALSE;
 	ds.back.failOp = VK_STENCIL_OP_KEEP;
 	ds.back.passOp = VK_STENCIL_OP_KEEP;
@@ -657,8 +662,8 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 	assert(!err);
 
 	VkAttachmentDescription attachments[9];
-	for (int i = 0; i < pipeline->colorAttachmentCount; ++i) {
-		attachments[i].format = convert_format(pipeline->colorAttachment[i]);
+	for (int i = 0; i < pipeline->color_attachment_count; ++i) {
+		attachments[i].format = convert_format(pipeline->color_attachment[i]);
 		attachments[i].samples = VK_SAMPLE_COUNT_1_BIT;
 		attachments[i].loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		attachments[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -669,26 +674,26 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 		attachments[i].flags = 0;
 	}
 
-	if (pipeline->depthAttachmentBits > 0) {
-		attachments[pipeline->colorAttachmentCount].format = VK_FORMAT_D16_UNORM;
-		attachments[pipeline->colorAttachmentCount].samples = VK_SAMPLE_COUNT_1_BIT;
-		attachments[pipeline->colorAttachmentCount].loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		attachments[pipeline->colorAttachmentCount].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		attachments[pipeline->colorAttachmentCount].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		attachments[pipeline->colorAttachmentCount].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		attachments[pipeline->colorAttachmentCount].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		attachments[pipeline->colorAttachmentCount].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-		attachments[pipeline->colorAttachmentCount].flags = 0;
+	if (pipeline->depth_attachment_bits > 0) {
+		attachments[pipeline->color_attachment_count].format = VK_FORMAT_D16_UNORM;
+		attachments[pipeline->color_attachment_count].samples = VK_SAMPLE_COUNT_1_BIT;
+		attachments[pipeline->color_attachment_count].loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		attachments[pipeline->color_attachment_count].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		attachments[pipeline->color_attachment_count].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		attachments[pipeline->color_attachment_count].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[pipeline->color_attachment_count].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		attachments[pipeline->color_attachment_count].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		attachments[pipeline->color_attachment_count].flags = 0;
 	}
 
 	VkAttachmentReference color_references[8];
-	for (int i = 0; i < pipeline->colorAttachmentCount; ++i) {
+	for (int i = 0; i < pipeline->color_attachment_count; ++i) {
 		color_references[i].attachment = i;
 		color_references[i].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 	}
 
 	VkAttachmentReference depth_reference = {0};
-	depth_reference.attachment = pipeline->colorAttachmentCount;
+	depth_reference.attachment = pipeline->color_attachment_count;
 	depth_reference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 	VkSubpassDescription subpass = {0};
@@ -696,10 +701,10 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 	subpass.flags = 0;
 	subpass.inputAttachmentCount = 0;
 	subpass.pInputAttachments = NULL;
-	subpass.colorAttachmentCount = pipeline->colorAttachmentCount;
+	subpass.colorAttachmentCount = pipeline->color_attachment_count;
 	subpass.pColorAttachments = color_references;
 	subpass.pResolveAttachments = NULL;
-	subpass.pDepthStencilAttachment = pipeline->depthAttachmentBits > 0 ? &depth_reference : NULL;
+	subpass.pDepthStencilAttachment = pipeline->depth_attachment_bits > 0 ? &depth_reference : NULL;
 	subpass.preserveAttachmentCount = 0;
 	subpass.pPreserveAttachments = NULL;
 
@@ -726,7 +731,7 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 	VkRenderPassCreateInfo rp_info = {0};
 	rp_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 	rp_info.pNext = NULL;
-	rp_info.attachmentCount = pipeline->depthAttachmentBits > 0 ? pipeline->colorAttachmentCount + 1 : pipeline->colorAttachmentCount;
+	rp_info.attachmentCount = pipeline->depth_attachment_bits > 0 ? pipeline->color_attachment_count + 1 : pipeline->color_attachment_count;
 	rp_info.pAttachments = attachments;
 	rp_info.subpassCount = 1;
 	rp_info.pSubpasses = &subpass;

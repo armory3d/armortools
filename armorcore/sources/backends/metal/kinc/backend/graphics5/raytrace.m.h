@@ -235,8 +235,8 @@ void kinc_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
 		dispatch_semaphore_signal(sem);
 	}];
 
-	NSUInteger width = output->texWidth;
-	NSUInteger height = output->texHeight;
+	NSUInteger width = output->tex_width;
+	NSUInteger height = output->tex_height;
 	MTLSize threads_per_threadgroup = MTLSizeMake(8, 8, 1);
 	MTLSize threadgroups = MTLSizeMake((width + threads_per_threadgroup.width - 1) / threads_per_threadgroup.width,
 	                                   (height + threads_per_threadgroup.height - 1) / threads_per_threadgroup.height, 1);

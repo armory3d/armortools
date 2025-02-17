@@ -86,7 +86,7 @@ int kinc_video_height(kinc_video_t *video) {
 	return 512;
 }
 
-kinc_g4_texture_t *kinc_video_current_image(kinc_video_t *video) {
+kinc_g5_texture_t *kinc_video_current_image(kinc_video_t *video) {
 	return NULL;
 }
 

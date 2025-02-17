@@ -229,7 +229,7 @@ static void updateImage(kinc_video_t *video) {
 			CGSize size = CVImageBufferGetDisplaySize(pixelBuffer);
 			video->impl.myWidth = size.width;
 			video->impl.myHeight = size.height;
-			kinc_g4_texture_init(&video->impl.image, kinc_video_width(video), kinc_video_height(video), KINC_IMAGE_FORMAT_BGRA32);
+			kinc_g5_texture_init(&video->impl.image, kinc_video_width(video), kinc_video_height(video), KINC_IMAGE_FORMAT_BGRA32);
 			video->impl.image_initialized = true;
 		}
 
@@ -284,7 +284,7 @@ int kinc_video_height(kinc_video_t *video) {
 	return video->impl.myHeight;
 }
 
-kinc_g4_texture_t *kinc_video_current_image(kinc_video_t *video) {
+kinc_g5_texture_t *kinc_video_current_image(kinc_video_t *video) {
 	kinc_video_update(video, kinc_time());
 	return &video->impl.image;
 }

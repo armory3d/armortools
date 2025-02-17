@@ -104,6 +104,7 @@ static MTLPixelFormat convert_render_target_format(kinc_g5_render_target_format_
 
 void kinc_g5_pipeline_init(kinc_g5_pipeline_t *pipeline) {
 	memset(&pipeline->impl, 0, sizeof(pipeline->impl));
+	kinc_g5_internal_pipeline_set_defaults(pipeline);
 }
 
 void kinc_g5_pipeline_destroy(kinc_g5_pipeline_t *pipeline) {
@@ -144,8 +145,8 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 	MTLRenderPipelineDescriptor *renderPipelineDesc = [[MTLRenderPipelineDescriptor alloc] init];
 	renderPipelineDesc.vertexFunction = (__bridge id<MTLFunction>)pipeline->vertex_shader->impl.mtlFunction;
 	renderPipelineDesc.fragmentFunction = (__bridge id<MTLFunction>)pipeline->fragment_shader->impl.mtlFunction;
-	for (int i = 0; i < pipeline->colorAttachmentCount; ++i) {
-		renderPipelineDesc.colorAttachments[i].pixelFormat = convert_render_target_format(pipeline->colorAttachment[i]);
+	for (int i = 0; i < pipeline->color_attachment_count; ++i) {
+		renderPipelineDesc.colorAttachments[i].pixelFormat = convert_render_target_format(pipeline->color_attachment[i]);
 		renderPipelineDesc.colorAttachments[i].blendingEnabled =
 		    pipeline->blend_source != KINC_G5_BLEND_ONE || pipeline->blend_destination != KINC_G5_BLEND_ZERO ||
 		    pipeline->alpha_blend_source != KINC_G5_BLEND_ONE || pipeline->alpha_blend_destination != KINC_G5_BLEND_ZERO;
@@ -156,8 +157,10 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 		renderPipelineDesc.colorAttachments[i].destinationAlphaBlendFactor = convert_blending_factor(pipeline->alpha_blend_destination);
 		renderPipelineDesc.colorAttachments[i].alphaBlendOperation = convert_blending_operation(pipeline->alpha_blend_operation);
 		renderPipelineDesc.colorAttachments[i].writeMask =
-		    (pipeline->colorWriteMaskRed[i] ? MTLColorWriteMaskRed : 0) | (pipeline->colorWriteMaskGreen[i] ? MTLColorWriteMaskGreen : 0) |
-		    (pipeline->colorWriteMaskBlue[i] ? MTLColorWriteMaskBlue : 0) | (pipeline->colorWriteMaskAlpha[i] ? MTLColorWriteMaskAlpha : 0);
+		    (pipeline->color_write_mask_red[i] ? MTLColorWriteMaskRed : 0) |
+			(pipeline->color_write_mask_green[i] ? MTLColorWriteMaskGreen : 0) |
+		    (pipeline->color_write_mask_blue[i] ? MTLColorWriteMaskBlue : 0) |
+			(pipeline->color_write_mask_alpha[i] ? MTLColorWriteMaskAlpha : 0);
 	}
 	renderPipelineDesc.depthAttachmentPixelFormat = MTLPixelFormatInvalid;
 	renderPipelineDesc.stencilAttachmentPixelFormat = MTLPixelFormatInvalid;
@@ -331,8 +334,8 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 	pipeline->impl._reflection = (__bridge_retained void *)reflection;
 
 	MTLDepthStencilDescriptor *depthStencilDescriptor = [MTLDepthStencilDescriptor new];
-	depthStencilDescriptor.depthCompareFunction = convert_compare_mode(pipeline->depthMode);
-	depthStencilDescriptor.depthWriteEnabled = pipeline->depthWrite;
+	depthStencilDescriptor.depthCompareFunction = convert_compare_mode(pipeline->depth_mode);
+	depthStencilDescriptor.depthWriteEnabled = pipeline->depth_write;
 	pipeline->impl._depthStencil = (__bridge_retained void *)[device newDepthStencilStateWithDescriptor:depthStencilDescriptor];
 
 	depthStencilDescriptor.depthCompareFunction = MTLCompareFunctionAlways;

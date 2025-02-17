@@ -27,8 +27,8 @@ static MTLPixelFormat convert_format(kinc_g5_render_target_format_t format) {
 static void render_target_init(kinc_g5_render_target_t *target, int width, int height, kinc_g5_render_target_format_t format, int depthBufferBits, int framebuffer_index) {
 	memset(target, 0, sizeof(kinc_g5_render_target_t));
 
-	target->texWidth = width;
-	target->texHeight = height;
+	target->tex_width = width;
+	target->tex_height = height;
 
 	target->framebuffer_index = framebuffer_index;
 

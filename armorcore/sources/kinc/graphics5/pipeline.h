@@ -94,8 +94,8 @@ typedef struct kinc_g5_pipeline {
 	kinc_g5_shader_t *fragment_shader;
 
 	kinc_g5_cull_mode_t cull_mode;
-	bool depthWrite;
-	kinc_g5_compare_mode_t depthMode;
+	bool depth_write;
+	kinc_g5_compare_mode_t depth_mode;
 
 	// One, Zero deactivates blending
 	kinc_g5_blending_factor_t blend_source;
@@ -105,14 +105,14 @@ typedef struct kinc_g5_pipeline {
 	kinc_g5_blending_factor_t alpha_blend_destination;
 	kinc_g5_blending_operation_t alpha_blend_operation;
 
-	bool colorWriteMaskRed[8]; // Per render target
-	bool colorWriteMaskGreen[8];
-	bool colorWriteMaskBlue[8];
-	bool colorWriteMaskAlpha[8];
+	bool color_write_mask_red[8]; // Per render target
+	bool color_write_mask_green[8];
+	bool color_write_mask_blue[8];
+	bool color_write_mask_alpha[8];
 
-	int colorAttachmentCount;
-	kinc_g5_render_target_format_t colorAttachment[8];
-	int depthAttachmentBits;
+	int color_attachment_count;
+	kinc_g5_render_target_format_t color_attachment[8];
+	int depth_attachment_bits;
 
 	PipelineState5Impl impl;
 } kinc_g5_pipeline_t;
@@ -131,39 +131,6 @@ typedef struct kinc_g5_sampler {
 	kinc_g5_sampler_impl_t impl;
 } kinc_g5_sampler_t;
 
-typedef struct {
-	kinc_g5_pipeline_t _pipeline;
-} kinc_g4_pipeline_impl_t;
-
-typedef struct kinc_g4_pipeline {
-	struct kinc_g5_vertex_structure *input_layout;
-	kinc_g5_shader_t *vertex_shader;
-	kinc_g5_shader_t *fragment_shader;
-
-	kinc_g5_cull_mode_t cull_mode;
-	bool depth_write;
-	kinc_g5_compare_mode_t depth_mode;
-
-	// One, Zero deactivates blending
-	kinc_g5_blending_factor_t blend_source;
-	kinc_g5_blending_factor_t blend_destination;
-	kinc_g5_blending_operation_t blend_operation;
-	kinc_g5_blending_factor_t alpha_blend_source;
-	kinc_g5_blending_factor_t alpha_blend_destination;
-	kinc_g5_blending_operation_t alpha_blend_operation;
-
-	bool color_write_mask_red[8]; // Per render target
-	bool color_write_mask_green[8];
-	bool color_write_mask_blue[8];
-	bool color_write_mask_alpha[8];
-
-	int color_attachment_count;
-	kinc_g4_render_target_format_t color_attachment[8];
-	int depth_attachment_bits;
-
-	kinc_g4_pipeline_impl_t impl;
-} kinc_g4_pipeline_t;
-
 void kinc_g5_pipeline_init(kinc_g5_pipeline_t *pipeline);
 void kinc_g5_internal_pipeline_init(kinc_g5_pipeline_t *pipeline);
 void kinc_g5_pipeline_destroy(kinc_g5_pipeline_t *pipeline);
@@ -178,15 +145,4 @@ void kinc_g5_sampler_options_set_defaults(kinc_g5_sampler_options_t *options);
 void kinc_g5_sampler_init(kinc_g5_sampler_t *sampler, const kinc_g5_sampler_options_t *options);
 void kinc_g5_sampler_destroy(kinc_g5_sampler_t *sampler);
 
-void kinc_g4_pipeline_init(kinc_g4_pipeline_t *pipeline);
-void kinc_g4_pipeline_destroy(kinc_g4_pipeline_t *pipeline);
-void kinc_g4_pipeline_compile(kinc_g4_pipeline_t *pipeline);
-kinc_g5_constant_location_t kinc_g4_pipeline_get_constant_location(kinc_g4_pipeline_t *pipeline, const char *name);
-kinc_g5_texture_unit_t kinc_g4_pipeline_get_texture_unit(kinc_g4_pipeline_t *pipeline, const char *name);
-
-void kinc_g4_internal_set_pipeline(kinc_g4_pipeline_t *pipeline);
-void kinc_g4_internal_pipeline_set_defaults(kinc_g4_pipeline_t *pipeline);
-
-void kinc_g4_shader_init(kinc_g5_shader_t *shader, const void *data, size_t length, kinc_g5_shader_type_t type);
-int kinc_g4_shader_init_from_source(kinc_g5_shader_t *shader, const char *source, kinc_g5_shader_type_t type);
-void kinc_g4_shader_destroy(kinc_g5_shader_t *shader);
+void kinc_g5_internal_pipeline_set_defaults(kinc_g5_pipeline_t *pipeline);

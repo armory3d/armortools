@@ -166,8 +166,10 @@ void kinc_g5_texture_init_from_image(kinc_g5_texture_t *texture, kinc_image_t *i
 	memset(&texture->impl, 0, sizeof(texture->impl));
 	texture->impl.stage = 0;
 	texture->impl.mipmap = true;
-	texture->texWidth = image->width;
-	texture->texHeight = image->height;
+	texture->tex_width = image->width;
+	texture->tex_height = image->height;
+	texture->_uploaded = false;
+	texture->format = image->format;
 
 	DXGI_FORMAT d3dformat = convertImageFormat(image->format);
 	int formatSize = formatByteSize(image->format);
@@ -182,8 +184,8 @@ void kinc_g5_texture_init_from_image(kinc_g5_texture_t *texture, kinc_image_t *i
 	D3D12_RESOURCE_DESC resourceDescTex;
 	resourceDescTex.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	resourceDescTex.Alignment = 0;
-	resourceDescTex.Width = texture->texWidth;
-	resourceDescTex.Height = texture->texHeight;
+	resourceDescTex.Width = texture->tex_width;
+	resourceDescTex.Height = texture->tex_height;
 	resourceDescTex.DepthOrArraySize = 1;
 	resourceDescTex.MipLevels = 1;
 	resourceDescTex.Format = d3dformat;
@@ -248,8 +250,8 @@ void kinc_g5_texture_init_from_image(kinc_g5_texture_t *texture, kinc_image_t *i
 	BYTE *pixel;
 	texture->impl.uploadImage->lpVtbl->Map(texture->impl.uploadImage, 0, NULL, (void **)&pixel);
 	int pitch = kinc_g5_texture_stride(texture);
-	for (int y = 0; y < texture->texHeight; ++y) {
-		memcpy(&pixel[y * pitch], &((uint8_t *)image->data)[y * texture->texWidth * formatSize], texture->texWidth * formatSize);
+	for (int y = 0; y < texture->tex_height; ++y) {
+		memcpy(&pixel[y * pitch], &((uint8_t *)image->data)[y * texture->tex_width * formatSize], texture->tex_width * formatSize);
 	}
 	texture->impl.uploadImage->lpVtbl->Unmap(texture->impl.uploadImage, 0, NULL);
 
@@ -281,8 +283,8 @@ void create_texture(struct kinc_g5_texture *texture, int width, int height, kinc
 	memset(&texture->impl, 0, sizeof(texture->impl));
 	texture->impl.stage = 0;
 	texture->impl.mipmap = true;
-	texture->texWidth = width;
-	texture->texHeight = height;
+	texture->tex_width = width;
+	texture->tex_height = height;
 
 	DXGI_FORMAT d3dformat = convertImageFormat(format);
 
@@ -296,8 +298,8 @@ void create_texture(struct kinc_g5_texture *texture, int width, int height, kinc
 	D3D12_RESOURCE_DESC resourceDescTex;
 	resourceDescTex.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	resourceDescTex.Alignment = 0;
-	resourceDescTex.Width = texture->texWidth;
-	resourceDescTex.Height = texture->texHeight;
+	resourceDescTex.Width = texture->tex_width;
+	resourceDescTex.Height = texture->tex_height;
 	resourceDescTex.DepthOrArraySize = 1;
 	resourceDescTex.MipLevels = 1;
 	resourceDescTex.Format = d3dformat;
@@ -385,6 +387,8 @@ void create_texture(struct kinc_g5_texture *texture, int width, int height, kinc
 
 void kinc_g5_texture_init(struct kinc_g5_texture *texture, int width, int height, kinc_image_format_t format) {
 	create_texture(texture, width, height, format, D3D12_RESOURCE_FLAG_NONE);
+	texture->_uploaded = true;
+	texture->format = format;
 }
 
 void kinc_g5_texture_init_non_sampled_access(struct kinc_g5_texture *texture, int width, int height, kinc_image_format_t format) {
@@ -425,6 +429,7 @@ uint8_t *kinc_g5_texture_lock(struct kinc_g5_texture *texture) {
 
 void kinc_g5_texture_unlock(struct kinc_g5_texture *texture) {
 	texture->impl.uploadImage->lpVtbl->Unmap(texture->impl.uploadImage, 0, NULL);
+	texture->_uploaded = false;
 }
 
 int kinc_g5_texture_stride(struct kinc_g5_texture *texture) {

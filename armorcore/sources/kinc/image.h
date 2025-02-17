@@ -29,7 +29,8 @@ typedef enum kinc_image_format {
 } kinc_image_format_t;
 
 typedef struct kinc_image {
-	int width, height;
+	int width;
+	int height;
 	kinc_image_format_t format;
 	unsigned internal_format;
 	kinc_image_compression_t compression;

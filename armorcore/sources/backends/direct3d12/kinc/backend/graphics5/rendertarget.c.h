@@ -45,8 +45,8 @@ static DXGI_FORMAT convertFormat(kinc_g5_render_target_format_t format) {
 void kinc_memory_emergency();
 
 static void render_target_init(kinc_g5_render_target_t *render_target, int width, int height, kinc_g5_render_target_format_t format, int depthBufferBits, int framebuffer_index) {
-	render_target->texWidth = render_target->width = width;
-	render_target->texHeight = render_target->height = height;
+	render_target->tex_width = render_target->width = width;
+	render_target->tex_height = render_target->height = height;
 	render_target->impl.stage = 0;
 	render_target->impl.stage_depth = -1;
 	render_target->impl.renderTargetReadback = NULL;
@@ -71,8 +71,8 @@ static void render_target_init(kinc_g5_render_target_t *render_target, int width
 	D3D12_RESOURCE_DESC texResourceDesc;
 	texResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	texResourceDesc.Alignment = 0;
-	texResourceDesc.Width = render_target->texWidth;
-	texResourceDesc.Height = render_target->texHeight;
+	texResourceDesc.Width = render_target->tex_width;
+	texResourceDesc.Height = render_target->tex_height;
 	texResourceDesc.DepthOrArraySize = 1;
 	texResourceDesc.MipLevels = 1;
 	texResourceDesc.Format = dxgiFormat;

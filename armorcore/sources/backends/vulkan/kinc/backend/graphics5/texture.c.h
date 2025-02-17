@@ -222,8 +222,10 @@ static void update_stride(kinc_g5_texture_t *texture) {
 }
 
 void kinc_g5_texture_init_from_image(kinc_g5_texture_t *texture, kinc_image_t *image) {
-	texture->texWidth = image->width;
-	texture->texHeight = image->height;
+	texture->tex_width = image->width;
+	texture->tex_height = image->height;
+	texture->_uploaded = false;
+	texture->format = image->format;
 
 	const VkFormat tex_format = convert_image_format(image->format);
 	VkFormatProperties props;
@@ -305,8 +307,10 @@ void kinc_g5_texture_init_from_image(kinc_g5_texture_t *texture, kinc_image_t *i
 }
 
 void kinc_g5_texture_init(kinc_g5_texture_t *texture, int width, int height, kinc_image_format_t format) {
-	texture->texWidth = width;
-	texture->texHeight = height;
+	texture->tex_width = width;
+	texture->tex_height = height;
+	texture->_uploaded = true;
+	texture->format = format;
 
 	const VkFormat tex_format = convert_image_format(format);
 	VkFormatProperties props;
@@ -346,8 +350,8 @@ void kinc_g5_texture_init(kinc_g5_texture_t *texture, int width, int height, kin
 }
 
 void kinc_g5_texture_init_non_sampled_access(kinc_g5_texture_t *texture, int width, int height, kinc_image_format_t format) {
-	texture->texWidth = width;
-	texture->texHeight = height;
+	texture->tex_width = width;
+	texture->tex_height = height;
 
 	const VkFormat tex_format = convert_image_format(format);
 	VkFormatProperties props;
@@ -408,6 +412,7 @@ uint8_t *kinc_g5_texture_lock(kinc_g5_texture_t *texture) {
 
 void kinc_g5_texture_unlock(kinc_g5_texture_t *texture) {
 	vkUnmapMemory(vk_ctx.device, texture->impl.texture.mem);
+	texture->_uploaded = false;
 }
 
 void kinc_g5_texture_generate_mipmaps(kinc_g5_texture_t *texture, int levels) {}

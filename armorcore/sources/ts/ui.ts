@@ -320,7 +320,7 @@ declare function ui_draw_string(text: string, x_offset: f32, y_offset: f32, alig
 declare function ui_next_node_id(nodes: ui_node_t[]): i32;
 declare function ui_node_canvas(nodes: ui_nodes_t, canvas: ui_node_canvas_t): void;
 
-declare type kinc_g4_texture_t = any;
+declare type kinc_g5_texture_t = any;
 declare type kinc_g4_render_target_t = any;
 declare type ui_theme_t = any;
 
@@ -400,8 +400,8 @@ declare type ui_options_t = {
 	font?: g2_font_t;
 	theme?: ui_theme_t;
 	scale_factor?: f32;
-	color_wheel?: kinc_g4_texture_t;
-	black_white_gradient?: kinc_g4_texture_t;
+	color_wheel?: kinc_g5_texture_t;
+	black_white_gradient?: kinc_g5_texture_t;
 };
 
 declare type ui_coloring_t = {

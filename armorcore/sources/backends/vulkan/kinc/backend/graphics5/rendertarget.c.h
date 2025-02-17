@@ -69,8 +69,8 @@ static void render_target_init(kinc_g5_render_target_t *target, int width, int h
 	target->width = width;
 	target->height = height;
 	target->framebuffer_index = framebuffer_index;
-	target->texWidth = width;
-	target->texHeight = height;
+	target->tex_width = width;
+	target->tex_height = height;
 	target->impl.format = convert_format(format);
 	target->impl.depthBufferBits = depthBufferBits;
 	target->impl.stage = 0;

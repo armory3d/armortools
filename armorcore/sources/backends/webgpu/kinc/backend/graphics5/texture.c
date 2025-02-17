@@ -22,6 +22,9 @@ void kinc_g5_texture_init(kinc_g5_texture_t *texture, int width, int height, kin
 	// tvDesc.dimension = WGPUTextureViewDimension_2D;
  	// WGPUTextureView textureView = wgpuTextureCreateView(texture, &tvDesc);
 
+	texture->_uploaded = true;
+	texture->format = format;
+
 }
 
 void kinc_g5_texture_init_from_image(kinc_g5_texture_t *texture, kinc_image_t *image) {}

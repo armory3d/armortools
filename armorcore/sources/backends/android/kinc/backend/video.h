@@ -13,7 +13,7 @@ typedef struct {
 	void *sound;
 	void *androidVideo;
 	int id;
-	kinc_g4_texture_t image;
+	kinc_g5_texture_t image;
 	double lastTime;
 	int myWidth;
 	int myHeight;

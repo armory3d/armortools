@@ -378,7 +378,7 @@ void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list,
 	render_target->impl.renderTarget->lpVtbl->GetDesc(render_target->impl.renderTarget, &desc);
 	DXGI_FORMAT dxgiFormat = desc.Format;
 	int formatByteSize = formatSize(dxgiFormat);
-	int rowPitch = render_target->texWidth * formatByteSize;
+	int rowPitch = render_target->tex_width * formatByteSize;
 	int align = rowPitch % d3d12_textureAlignment();
 	if (align != 0)
 		rowPitch = rowPitch + (d3d12_textureAlignment() - align);
@@ -395,7 +395,7 @@ void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list,
 		D3D12_RESOURCE_DESC resourceDesc;
 		resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
 		resourceDesc.Alignment = 0;
-		resourceDesc.Width = rowPitch * render_target->texHeight;
+		resourceDesc.Width = rowPitch * render_target->tex_height;
 		resourceDesc.Height = 1;
 		resourceDesc.DepthOrArraySize = 1;
 		resourceDesc.MipLevels = 1;
@@ -433,8 +433,8 @@ void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list,
 	dest.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
 	dest.PlacedFootprint.Offset = 0;
 	dest.PlacedFootprint.Footprint.Format = dxgiFormat;
-	dest.PlacedFootprint.Footprint.Width = render_target->texWidth;
-	dest.PlacedFootprint.Footprint.Height = render_target->texHeight;
+	dest.PlacedFootprint.Footprint.Width = render_target->tex_width;
+	dest.PlacedFootprint.Footprint.Height = render_target->tex_height;
 	dest.PlacedFootprint.Footprint.Depth = 1;
 	dest.PlacedFootprint.Footprint.RowPitch = rowPitch;
 
@@ -459,7 +459,7 @@ void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list,
 	// Read buffer
 	void *p;
 	render_target->impl.renderTargetReadback->lpVtbl->Map(render_target->impl.renderTargetReadback, 0, NULL, &p);
-	memcpy(data, p, render_target->texWidth * render_target->texHeight * formatByteSize);
+	memcpy(data, p, render_target->tex_width * render_target->tex_height * formatByteSize);
 	render_target->impl.renderTargetReadback->lpVtbl->Unmap(render_target->impl.renderTargetReadback, 0, NULL);
 }
 

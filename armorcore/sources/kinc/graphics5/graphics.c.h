@@ -240,9 +240,9 @@ void kinc_g5_clear(unsigned flags, unsigned color, float depth) {
 			kinc_g5_command_list_clear(&commandList, &windows[0].framebuffers[windows[0].currentBuffer], flags, color, depth);
 		}
 		else {
-			if (windows[0].current_render_targets[0]->impl.state != KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET) {
+			if (windows[0].current_render_targets[0]->impl._renderTarget.state != KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET) {
 				kinc_g5_command_list_texture_to_render_target_barrier(&commandList, &windows[0].current_render_targets[0]->impl._renderTarget);
-				windows[0].current_render_targets[0]->impl.state = KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
+				windows[0].current_render_targets[0]->impl._renderTarget.state = KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
 			}
 			kinc_g5_command_list_clear(&commandList, &windows[0].current_render_targets[0]->impl._renderTarget, flags, color, depth);
 		}
@@ -499,9 +499,9 @@ void kinc_g4_restore_render_target(void) {
 void kinc_g4_set_render_targets(kinc_g4_render_target_t **targets, int count) {
 	for (int i = 0; i < count; ++i) {
 		windows[0].current_render_targets[i] = targets[i];
-		if (windows[0].current_render_targets[i]->impl.state != KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET) {
+		if (windows[0].current_render_targets[i]->impl._renderTarget.state != KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET) {
 			kinc_g5_command_list_texture_to_render_target_barrier(&commandList, &windows[0].current_render_targets[i]->impl._renderTarget);
-			windows[0].current_render_targets[i]->impl.state = KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
+			windows[0].current_render_targets[i]->impl._renderTarget.state = KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
 		}
 	}
 	windows[0].current_render_target_count = count;
@@ -526,10 +526,10 @@ void kinc_g4_set_index_buffer(kinc_g5_index_buffer_t *buffer) {
 	kinc_g5_command_list_set_index_buffer(&commandList, buffer);
 }
 
-void kinc_g4_set_texture(kinc_g5_texture_unit_t unit, kinc_g4_texture_t *texture) {
-	if (!texture->impl._uploaded) {
-		kinc_g5_command_list_upload_texture(&commandList, &texture->impl._texture);
-		texture->impl._uploaded = true;
+void kinc_g4_set_texture(kinc_g5_texture_unit_t unit, kinc_g5_texture_t *texture) {
+	if (!texture->_uploaded) {
+		kinc_g5_command_list_upload_texture(&commandList, texture);
+		texture->_uploaded = true;
 	}
 
 	kinc_g5_texture_unit_t g5_unit;
@@ -538,7 +538,7 @@ void kinc_g4_set_texture(kinc_g5_texture_unit_t unit, kinc_g4_texture_t *texture
 	bool found = false;
 	for (int i = 0; i < current_state.texture_count; ++i) {
 		if (kinc_g5_texture_unit_equals(&current_state.texture_units[i], &g5_unit)) {
-			current_state.textures[i] = &texture->impl._texture;
+			current_state.textures[i] = texture;
 			current_state.texture_units[i] = g5_unit;
 			found = true;
 			break;
@@ -546,24 +546,23 @@ void kinc_g4_set_texture(kinc_g5_texture_unit_t unit, kinc_g4_texture_t *texture
 	}
 	if (!found) {
 		assert(current_state.texture_count < MAX_TEXTURES);
-		current_state.textures[current_state.texture_count] = &texture->impl._texture;
+		current_state.textures[current_state.texture_count] = texture;
 		current_state.texture_units[current_state.texture_count] = g5_unit;
 		current_state.texture_count += 1;
 	}
 
-	kinc_g5_command_list_set_texture(&commandList, g5_unit, &texture->impl._texture);
+	kinc_g5_command_list_set_texture(&commandList, g5_unit, texture);
 }
 
-void kinc_g4_set_pipeline(kinc_g4_pipeline_t *pipeline) {
-	kinc_g5_pipeline_t *g5_pipeline = &pipeline->impl._pipeline;
-	current_state.pipeline = g5_pipeline;
-	kinc_g5_command_list_set_pipeline(&commandList, g5_pipeline);
+void kinc_g5_set_pipeline(kinc_g5_pipeline_t *pipeline) {
+	current_state.pipeline = pipeline;
+	kinc_g5_command_list_set_pipeline(&commandList, pipeline);
 }
 
 void kinc_g4_render_target_use_color_as_texture(kinc_g4_render_target_t *render_target, kinc_g5_texture_unit_t unit) {
-	if (render_target->impl.state != KINC_INTERNAL_RENDER_TARGET_STATE_TEXTURE) {
+	if (render_target->impl._renderTarget.state != KINC_INTERNAL_RENDER_TARGET_STATE_TEXTURE) {
 		kinc_g5_command_list_render_target_to_texture_barrier(&commandList, &render_target->impl._renderTarget);
-		render_target->impl.state = KINC_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
+		render_target->impl._renderTarget.state = KINC_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
 	}
 
 	kinc_g5_texture_unit_t g5_unit;
@@ -589,9 +588,9 @@ void kinc_g4_render_target_use_color_as_texture(kinc_g4_render_target_t *render_
 }
 
 void kinc_g4_render_target_use_depth_as_texture(kinc_g4_render_target_t *render_target, kinc_g5_texture_unit_t unit) {
-	if (render_target->impl.state != KINC_INTERNAL_RENDER_TARGET_STATE_TEXTURE) {
+	if (render_target->impl._renderTarget.state != KINC_INTERNAL_RENDER_TARGET_STATE_TEXTURE) {
 		kinc_g5_command_list_render_target_to_texture_barrier(&commandList, &render_target->impl._renderTarget);
-		render_target->impl.state = KINC_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
+		render_target->impl._renderTarget.state = KINC_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
 	}
 
 	kinc_g5_texture_unit_t g5_unit;

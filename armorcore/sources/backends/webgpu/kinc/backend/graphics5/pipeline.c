@@ -6,6 +6,7 @@ extern WGPUDevice device;
 
 void kinc_g5_pipeline_init(kinc_g5_pipeline_t *pipe) {
 	kinc_g5_internal_pipeline_init(pipe);
+	kinc_g5_internal_pipeline_set_defaults(pipe);
 }
 
 kinc_g5_constant_location_t kinc_g5_pipeline_get_constant_location(kinc_g5_pipeline_t *pipe, const char* name) {
