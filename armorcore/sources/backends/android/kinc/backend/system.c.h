@@ -1131,7 +1131,7 @@ void kinc_init(const char *name, int width, int height, struct kinc_window_optio
 		frame = &default_frame;
 	}
 
-	kinc_g4_internal_init();
+	kinc_g5_internal_init();
 	kinc_g4_internal_init_window(frame->depth_bits, true);
 
 	kinc_internal_gamepad_trigger_connect(0);

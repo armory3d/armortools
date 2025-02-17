@@ -21,7 +21,7 @@ void kinc_g5_vertex_buffer_init(kinc_g5_vertex_buffer_t *buffer, int count, kinc
 	buffer->impl.gpuMemory = gpuMemory;
 	for (int i = 0; i < structure->size; ++i) {
 		kinc_g5_vertex_element_t element = structure->elements[i];
-		buffer->impl.myStride += kinc_g4_vertex_data_size(element.data);
+		buffer->impl.myStride += kinc_g5_vertex_data_size(element.data);
 	}
 
 	id<MTLDevice> device = getMetalDevice();

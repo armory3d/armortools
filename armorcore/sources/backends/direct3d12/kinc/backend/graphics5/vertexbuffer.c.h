@@ -10,7 +10,7 @@ void kinc_g5_vertex_buffer_init(kinc_g5_vertex_buffer_t *buffer, int count, kinc
 
 	buffer->impl.myStride = 0;
 	for (int i = 0; i < structure->size; ++i) {
-		buffer->impl.myStride += kinc_g4_vertex_data_size(structure->elements[i].data);
+		buffer->impl.myStride += kinc_g5_vertex_data_size(structure->elements[i].data);
 	}
 
 	int uploadBufferSize = buffer->impl.myStride * buffer->impl.myCount;

@@ -3,8 +3,8 @@
 struct kinc_g5_shader;
 
 typedef struct {
-	struct kinc_g5_shader *vertexShader;
-	struct kinc_g5_shader *fragmentShader;
+	struct kinc_g5_shader *vertex_shader;
+	struct kinc_g5_shader *fragment_shader;
 	void *_pipeline;
 	void *_pipelineDepth;
 	void *_reflection;

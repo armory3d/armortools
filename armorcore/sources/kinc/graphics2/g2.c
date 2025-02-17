@@ -33,12 +33,12 @@ static kinc_g4_pipeline_t *g2_custom_pipeline = NULL;
 static kinc_matrix3x3_t g2_transform;
 
 static kinc_g4_vertex_buffer_t image_vertex_buffer;
-static kinc_g4_index_buffer_t image_index_buffer;
-static kinc_g4_shader_t image_vert_shader;
-static kinc_g4_shader_t image_frag_shader;
+static kinc_g5_index_buffer_t image_index_buffer;
+static kinc_g5_shader_t image_vert_shader;
+static kinc_g5_shader_t image_frag_shader;
 static kinc_g4_pipeline_t image_pipeline;
-static kinc_g4_texture_unit_t image_tex_unit;
-static kinc_g4_constant_location_t image_proj_loc;
+static kinc_g5_texture_unit_t image_tex_unit;
+static kinc_g5_constant_location_t image_proj_loc;
 static float *image_rect_verts = NULL;
 static int image_buffer_index = 0;
 static int image_buffer_start = 0;
@@ -46,13 +46,13 @@ static kinc_g4_texture_t *image_last_texture = NULL;
 static kinc_g4_render_target_t *image_last_render_target = NULL;
 
 static kinc_g4_vertex_buffer_t colored_rect_vertex_buffer;
-static kinc_g4_index_buffer_t colored_rect_index_buffer;
+static kinc_g5_index_buffer_t colored_rect_index_buffer;
 static kinc_g4_vertex_buffer_t colored_tris_vertex_buffer;
-static kinc_g4_index_buffer_t colored_tris_index_buffer;
-static kinc_g4_shader_t colored_vert_shader;
-static kinc_g4_shader_t colored_frag_shader;
+static kinc_g5_index_buffer_t colored_tris_index_buffer;
+static kinc_g5_shader_t colored_vert_shader;
+static kinc_g5_shader_t colored_frag_shader;
 static kinc_g4_pipeline_t colored_pipeline;
-static kinc_g4_constant_location_t colored_proj_loc;
+static kinc_g5_constant_location_t colored_proj_loc;
 static float *colored_rect_verts = NULL;
 static float *colored_tris_verts = NULL;
 static int colored_rect_buffer_index = 0;
@@ -61,13 +61,13 @@ static int colored_tris_buffer_index = 0;
 static int colored_tris_buffer_start = 0;
 
 static kinc_g4_vertex_buffer_t text_vertex_buffer;
-static kinc_g4_index_buffer_t text_index_buffer;
-static kinc_g4_shader_t text_vert_shader;
-static kinc_g4_shader_t text_frag_shader;
+static kinc_g5_index_buffer_t text_index_buffer;
+static kinc_g5_shader_t text_vert_shader;
+static kinc_g5_shader_t text_frag_shader;
 static kinc_g4_pipeline_t text_pipeline;
 static kinc_g4_pipeline_t text_pipeline_rt;
-static kinc_g4_texture_unit_t text_tex_unit;
-static kinc_g4_constant_location_t text_proj_loc;
+static kinc_g5_texture_unit_t text_tex_unit;
+static kinc_g5_constant_location_t text_proj_loc;
 static float *text_rect_verts = NULL;
 static int text_buffer_index = 0;
 static int text_buffer_start = 0;
@@ -141,23 +141,23 @@ void kinc_g2_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_
 	g2_transform = kinc_matrix3x3_identity();
 
 	// Image painter
-	kinc_g4_shader_init(&image_vert_shader, image_vert->buffer, image_vert->length, KINC_G4_SHADER_TYPE_VERTEX);
-	kinc_g4_shader_init(&image_frag_shader, image_frag->buffer, image_frag->length, KINC_G4_SHADER_TYPE_FRAGMENT);
+	kinc_g4_shader_init(&image_vert_shader, image_vert->buffer, image_vert->length, KINC_G5_SHADER_TYPE_VERTEX);
+	kinc_g4_shader_init(&image_frag_shader, image_frag->buffer, image_frag->length, KINC_G5_SHADER_TYPE_FRAGMENT);
 
 	{
-		kinc_g4_vertex_structure_t structure;
-		kinc_g4_vertex_structure_init(&structure);
-		kinc_g4_vertex_structure_add(&structure, "pos", KINC_G4_VERTEX_DATA_F32_3X);
-		kinc_g4_vertex_structure_add(&structure, "tex", KINC_G4_VERTEX_DATA_F32_2X);
-		kinc_g4_vertex_structure_add(&structure, "col", KINC_G4_VERTEX_DATA_U8_4X_NORMALIZED);
+		kinc_g5_vertex_structure_t structure;
+		kinc_g5_vertex_structure_init(&structure);
+		kinc_g5_vertex_structure_add(&structure, "pos", KINC_G5_VERTEX_DATA_F32_3X);
+		kinc_g5_vertex_structure_add(&structure, "tex", KINC_G5_VERTEX_DATA_F32_2X);
+		kinc_g5_vertex_structure_add(&structure, "col", KINC_G5_VERTEX_DATA_U8_4X_NORMALIZED);
 		kinc_g4_pipeline_init(&image_pipeline);
 		image_pipeline.input_layout = &structure;
 		image_pipeline.vertex_shader = &image_vert_shader;
 		image_pipeline.fragment_shader = &image_frag_shader;
-		image_pipeline.blend_source = KINC_G4_BLEND_ONE;
-		image_pipeline.blend_destination = KINC_G4_BLEND_INV_SOURCE_ALPHA;
-		image_pipeline.alpha_blend_source = KINC_G4_BLEND_ONE;
-		image_pipeline.alpha_blend_destination = KINC_G4_BLEND_INV_SOURCE_ALPHA;
+		image_pipeline.blend_source = KINC_G5_BLEND_ONE;
+		image_pipeline.blend_destination = KINC_G5_BLEND_INV_SOURCE_ALPHA;
+		image_pipeline.alpha_blend_source = KINC_G5_BLEND_ONE;
+		image_pipeline.alpha_blend_destination = KINC_G5_BLEND_INV_SOURCE_ALPHA;
 		kinc_g4_pipeline_compile(&image_pipeline);
 
 		image_tex_unit = kinc_g4_pipeline_get_texture_unit(&image_pipeline, "tex");
@@ -166,8 +166,8 @@ void kinc_g2_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_
 		kinc_g4_vertex_buffer_init(&image_vertex_buffer, G2_BUFFER_SIZE * 4, &structure, KINC_G4_USAGE_DYNAMIC);
 		image_rect_verts = kinc_g4_vertex_buffer_lock_all(&image_vertex_buffer);
 
-		kinc_g4_index_buffer_init(&image_index_buffer, G2_BUFFER_SIZE * 3 * 2, KINC_G4_USAGE_STATIC);
-		int *indices = kinc_g4_index_buffer_lock_all(&image_index_buffer);
+		kinc_g5_index_buffer_init(&image_index_buffer, G2_BUFFER_SIZE * 3 * 2, true);
+		int *indices = kinc_g5_index_buffer_lock_all(&image_index_buffer);
 		for (int i = 0; i < G2_BUFFER_SIZE; ++i) {
 			indices[i * 3 * 2 + 0] = i * 4 + 0;
 			indices[i * 3 * 2 + 1] = i * 4 + 1;
@@ -180,23 +180,23 @@ void kinc_g2_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_
 	}
 
 	// Colored painter
-	kinc_g4_shader_init(&colored_vert_shader, colored_vert->buffer, colored_vert->length, KINC_G4_SHADER_TYPE_VERTEX);
-	kinc_g4_shader_init(&colored_frag_shader, colored_frag->buffer, colored_frag->length, KINC_G4_SHADER_TYPE_FRAGMENT);
+	kinc_g4_shader_init(&colored_vert_shader, colored_vert->buffer, colored_vert->length, KINC_G5_SHADER_TYPE_VERTEX);
+	kinc_g4_shader_init(&colored_frag_shader, colored_frag->buffer, colored_frag->length, KINC_G5_SHADER_TYPE_FRAGMENT);
 
 	{
-		kinc_g4_vertex_structure_t structure;
-		kinc_g4_vertex_structure_init(&structure);
-		kinc_g4_vertex_structure_add(&structure, "pos", KINC_G4_VERTEX_DATA_F32_3X);
-		kinc_g4_vertex_structure_add(&structure, "col", KINC_G4_VERTEX_DATA_U8_4X_NORMALIZED);
+		kinc_g5_vertex_structure_t structure;
+		kinc_g5_vertex_structure_init(&structure);
+		kinc_g5_vertex_structure_add(&structure, "pos", KINC_G5_VERTEX_DATA_F32_3X);
+		kinc_g5_vertex_structure_add(&structure, "col", KINC_G5_VERTEX_DATA_U8_4X_NORMALIZED);
 		kinc_g4_pipeline_init(&colored_pipeline);
 		colored_pipeline.input_layout = &structure;
 		colored_pipeline.vertex_shader = &colored_vert_shader;
 		colored_pipeline.fragment_shader = &colored_frag_shader;
-		// colored_pipeline.blend_source = KINC_G4_BLEND_ONE;
-		colored_pipeline.blend_source = KINC_G4_BLEND_SOURCE_ALPHA;
-		colored_pipeline.blend_destination = KINC_G4_BLEND_INV_SOURCE_ALPHA;
-		colored_pipeline.alpha_blend_source = KINC_G4_BLEND_ONE;
-		colored_pipeline.alpha_blend_destination = KINC_G4_BLEND_INV_SOURCE_ALPHA;
+		// colored_pipeline.blend_source = KINC_G5_BLEND_ONE;
+		colored_pipeline.blend_source = KINC_G5_BLEND_SOURCE_ALPHA;
+		colored_pipeline.blend_destination = KINC_G5_BLEND_INV_SOURCE_ALPHA;
+		colored_pipeline.alpha_blend_source = KINC_G5_BLEND_ONE;
+		colored_pipeline.alpha_blend_destination = KINC_G5_BLEND_INV_SOURCE_ALPHA;
 		kinc_g4_pipeline_compile(&colored_pipeline);
 
 		colored_proj_loc = kinc_g4_pipeline_get_constant_location(&colored_pipeline, "P");
@@ -204,8 +204,8 @@ void kinc_g2_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_
 		kinc_g4_vertex_buffer_init(&colored_rect_vertex_buffer, G2_BUFFER_SIZE * 4, &structure, KINC_G4_USAGE_DYNAMIC);
 		colored_rect_verts = kinc_g4_vertex_buffer_lock_all(&colored_rect_vertex_buffer);
 
-		kinc_g4_index_buffer_init(&colored_rect_index_buffer, G2_BUFFER_SIZE * 3 * 2, KINC_G4_USAGE_STATIC);
-		int *indices = kinc_g4_index_buffer_lock_all(&colored_rect_index_buffer);
+		kinc_g5_index_buffer_init(&colored_rect_index_buffer, G2_BUFFER_SIZE * 3 * 2, true);
+		int *indices = kinc_g5_index_buffer_lock_all(&colored_rect_index_buffer);
 		for (int i = 0; i < G2_BUFFER_SIZE; ++i) {
 			indices[i * 3 * 2 + 0] = i * 4 + 0;
 			indices[i * 3 * 2 + 1] = i * 4 + 1;
@@ -219,8 +219,8 @@ void kinc_g2_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_
 		kinc_g4_vertex_buffer_init(&colored_tris_vertex_buffer, G2_BUFFER_SIZE * 3, &structure, KINC_G4_USAGE_DYNAMIC);
 		colored_tris_verts = kinc_g4_vertex_buffer_lock_all(&colored_tris_vertex_buffer);
 
-		kinc_g4_index_buffer_init(&colored_tris_index_buffer, G2_BUFFER_SIZE * 3, KINC_G4_USAGE_STATIC);
-		indices = kinc_g4_index_buffer_lock_all(&colored_tris_index_buffer);
+		kinc_g5_index_buffer_init(&colored_tris_index_buffer, G2_BUFFER_SIZE * 3, true);
+		indices = kinc_g5_index_buffer_lock_all(&colored_tris_index_buffer);
 		for (int i = 0; i < G2_BUFFER_SIZE; ++i) {
 			indices[i * 3 + 0] = i * 3 + 0;
 			indices[i * 3 + 1] = i * 3 + 1;
@@ -230,24 +230,24 @@ void kinc_g2_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_
 	}
 
 	// Text painter
-	kinc_g4_shader_init(&text_vert_shader, text_vert->buffer, text_vert->length, KINC_G4_SHADER_TYPE_VERTEX);
-	kinc_g4_shader_init(&text_frag_shader, text_frag->buffer, text_frag->length, KINC_G4_SHADER_TYPE_FRAGMENT);
+	kinc_g4_shader_init(&text_vert_shader, text_vert->buffer, text_vert->length, KINC_G5_SHADER_TYPE_VERTEX);
+	kinc_g4_shader_init(&text_frag_shader, text_frag->buffer, text_frag->length, KINC_G5_SHADER_TYPE_FRAGMENT);
 
 	{
-		kinc_g4_vertex_structure_t structure;
-		kinc_g4_vertex_structure_init(&structure);
-		kinc_g4_vertex_structure_add(&structure, "pos", KINC_G4_VERTEX_DATA_F32_3X);
-		kinc_g4_vertex_structure_add(&structure, "tex", KINC_G4_VERTEX_DATA_F32_2X);
-		kinc_g4_vertex_structure_add(&structure, "col", KINC_G4_VERTEX_DATA_U8_4X_NORMALIZED);
+		kinc_g5_vertex_structure_t structure;
+		kinc_g5_vertex_structure_init(&structure);
+		kinc_g5_vertex_structure_add(&structure, "pos", KINC_G5_VERTEX_DATA_F32_3X);
+		kinc_g5_vertex_structure_add(&structure, "tex", KINC_G5_VERTEX_DATA_F32_2X);
+		kinc_g5_vertex_structure_add(&structure, "col", KINC_G5_VERTEX_DATA_U8_4X_NORMALIZED);
 
 		kinc_g4_pipeline_init(&text_pipeline);
 		text_pipeline.input_layout = &structure;
 		text_pipeline.vertex_shader = &text_vert_shader;
 		text_pipeline.fragment_shader = &text_frag_shader;
-		text_pipeline.blend_source = KINC_G4_BLEND_SOURCE_ALPHA;
-		text_pipeline.blend_destination = KINC_G4_BLEND_INV_SOURCE_ALPHA;
-		text_pipeline.alpha_blend_source = KINC_G4_BLEND_SOURCE_ALPHA;
-		text_pipeline.alpha_blend_destination = KINC_G4_BLEND_INV_SOURCE_ALPHA;
+		text_pipeline.blend_source = KINC_G5_BLEND_SOURCE_ALPHA;
+		text_pipeline.blend_destination = KINC_G5_BLEND_INV_SOURCE_ALPHA;
+		text_pipeline.alpha_blend_source = KINC_G5_BLEND_SOURCE_ALPHA;
+		text_pipeline.alpha_blend_destination = KINC_G5_BLEND_INV_SOURCE_ALPHA;
 		kinc_g4_pipeline_compile(&text_pipeline);
 		text_tex_unit = kinc_g4_pipeline_get_texture_unit(&text_pipeline, "tex");
 		text_proj_loc = kinc_g4_pipeline_get_constant_location(&text_pipeline, "P");
@@ -256,17 +256,17 @@ void kinc_g2_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_
 		text_pipeline_rt.input_layout = &structure;
 		text_pipeline_rt.vertex_shader = &text_vert_shader;
 		text_pipeline_rt.fragment_shader = &text_frag_shader;
-		text_pipeline_rt.blend_source = KINC_G4_BLEND_SOURCE_ALPHA;
-		text_pipeline_rt.blend_destination = KINC_G4_BLEND_INV_SOURCE_ALPHA;
-		text_pipeline_rt.alpha_blend_source = KINC_G4_BLEND_ONE;
-		text_pipeline_rt.alpha_blend_destination = KINC_G4_BLEND_INV_SOURCE_ALPHA;
+		text_pipeline_rt.blend_source = KINC_G5_BLEND_SOURCE_ALPHA;
+		text_pipeline_rt.blend_destination = KINC_G5_BLEND_INV_SOURCE_ALPHA;
+		text_pipeline_rt.alpha_blend_source = KINC_G5_BLEND_ONE;
+		text_pipeline_rt.alpha_blend_destination = KINC_G5_BLEND_INV_SOURCE_ALPHA;
 		kinc_g4_pipeline_compile(&text_pipeline_rt);
 
 		kinc_g4_vertex_buffer_init(&text_vertex_buffer, G2_BUFFER_SIZE * 4, &structure, KINC_G4_USAGE_DYNAMIC);
 		text_rect_verts = kinc_g4_vertex_buffer_lock_all(&text_vertex_buffer);
 
-		kinc_g4_index_buffer_init(&text_index_buffer, G2_BUFFER_SIZE * 3 * 2, KINC_G4_USAGE_STATIC);
-		int *indices = kinc_g4_index_buffer_lock_all(&text_index_buffer);
+		kinc_g5_index_buffer_init(&text_index_buffer, G2_BUFFER_SIZE * 3 * 2, true);
+		int *indices = kinc_g5_index_buffer_lock_all(&text_index_buffer);
 		for (int i = 0; i < G2_BUFFER_SIZE; ++i) {
 			indices[i * 3 * 2 + 0] = i * 4 + 0;
 			indices[i * 3 * 2 + 1] = i * 4 + 1;
@@ -345,7 +345,7 @@ void kinc_g2_draw_image_buffer(bool end) {
 	kinc_g4_set_texture_mipmap_filter(image_tex_unit, KINC_G4_MIPMAP_FILTER_NONE);
 	kinc_g4_set_texture_minification_filter(image_tex_unit, g2_bilinear_filter ? KINC_G4_TEXTURE_FILTER_LINEAR : KINC_G4_TEXTURE_FILTER_POINT);
 	kinc_g4_set_texture_magnification_filter(image_tex_unit, g2_bilinear_filter ? KINC_G4_TEXTURE_FILTER_LINEAR : KINC_G4_TEXTURE_FILTER_POINT);
-	kinc_g4_draw_indexed_vertices_from_to(image_buffer_start * 2 * 3, (image_buffer_index - image_buffer_start) * 2 * 3);
+	kinc_g5_draw_indexed_vertices_from_to(image_buffer_start * 2 * 3, (image_buffer_index - image_buffer_start) * 2 * 3);
 
 	if (end || image_buffer_index + 1 >= G2_BUFFER_SIZE) {
 		image_buffer_start = 0;
@@ -478,7 +478,7 @@ void kinc_g2_colored_rect_draw_buffer(bool tris_done) {
 	kinc_g4_set_matrix4(colored_proj_loc, &g2_projection_matrix);
 	kinc_g4_set_vertex_buffer(&colored_rect_vertex_buffer);
 	kinc_g4_set_index_buffer(&colored_rect_index_buffer);
-	kinc_g4_draw_indexed_vertices_from_to(colored_rect_buffer_start * 2 * 3, (colored_rect_buffer_index - colored_rect_buffer_start) * 2 * 3);
+	kinc_g5_draw_indexed_vertices_from_to(colored_rect_buffer_start * 2 * 3, (colored_rect_buffer_index - colored_rect_buffer_start) * 2 * 3);
 
 	if (colored_rect_buffer_index + 1 >= G2_BUFFER_SIZE) {
 		colored_rect_buffer_start = 0;
@@ -526,7 +526,7 @@ void kinc_g2_colored_tris_draw_buffer(bool rect_done) {
 	kinc_g4_set_matrix4(colored_proj_loc, &g2_projection_matrix);
 	kinc_g4_set_vertex_buffer(&colored_tris_vertex_buffer);
 	kinc_g4_set_index_buffer(&colored_tris_index_buffer);
-	kinc_g4_draw_indexed_vertices_from_to(colored_tris_buffer_start * 3, (colored_tris_buffer_index - colored_tris_buffer_start) * 3);
+	kinc_g5_draw_indexed_vertices_from_to(colored_tris_buffer_start * 3, (colored_tris_buffer_index - colored_tris_buffer_start) * 3);
 
 	if (colored_tris_buffer_index + 1 >= G2_BUFFER_SIZE) {
 		colored_tris_buffer_start = 0;
@@ -697,7 +697,7 @@ void kinc_g2_text_draw_buffer(bool end) {
 	kinc_g4_set_texture_mipmap_filter(text_tex_unit, KINC_G4_MIPMAP_FILTER_NONE);
 	kinc_g4_set_texture_minification_filter(text_tex_unit, g2_bilinear_filter ? KINC_G4_TEXTURE_FILTER_LINEAR : KINC_G4_TEXTURE_FILTER_POINT);
 	kinc_g4_set_texture_magnification_filter(text_tex_unit, g2_bilinear_filter ? KINC_G4_TEXTURE_FILTER_LINEAR : KINC_G4_TEXTURE_FILTER_POINT);
-	kinc_g4_draw_indexed_vertices_from_to(text_buffer_start * 2 * 3, (text_buffer_index - text_buffer_start) * 2 * 3);
+	kinc_g5_draw_indexed_vertices_from_to(text_buffer_start * 2 * 3, (text_buffer_index - text_buffer_start) * 2 * 3);
 
 	if (end || text_buffer_index + 1 >= G2_BUFFER_SIZE) {
 		text_buffer_start = 0;

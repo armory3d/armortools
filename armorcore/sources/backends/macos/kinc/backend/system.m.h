@@ -179,7 +179,7 @@ void kinc_init(const char *name, int width, int height, kinc_window_options_t *w
 	}
 
 	createWindow(win);
-	kinc_g4_internal_init();
+	kinc_g5_internal_init();
 	kinc_g4_internal_init_window(frame->depth_bits, true);
 }
 

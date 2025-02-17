@@ -14,7 +14,7 @@ struct vk_context vk_ctx = {0};
 void kinc_vulkan_get_instance_extensions(const char **extensions, int *index, int max);
 VkBool32 kinc_vulkan_get_physical_device_presentation_support(VkPhysicalDevice physicalDevice, uint32_t queueFamilyIndex);
 VkResult kinc_vulkan_create_surface(VkInstance instance, VkSurfaceKHR *surface);
-void kinc_g4_on_g5_internal_resize(int, int);
+void kinc_g5_internal_resize(int, int);
 
 #define GET_INSTANCE_PROC_ADDR(instance, entrypoint)                                                                                                           \
 	{                                                                                                                                                          \
@@ -94,7 +94,7 @@ void kinc_internal_resize(int width, int height) {
 		window->height = height;
 	}
 
-	kinc_g4_on_g5_internal_resize(width, height);
+	kinc_g5_internal_resize(width, height);
 }
 
 VkSwapchainKHR cleanup_swapchain() {

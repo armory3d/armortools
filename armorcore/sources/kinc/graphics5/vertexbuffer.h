@@ -37,7 +37,7 @@ int kinc_g5_vertex_buffer_stride(kinc_g5_vertex_buffer_t *buffer);
 
 int kinc_g5_internal_vertex_buffer_set(kinc_g5_vertex_buffer_t *buffer);
 
-void kinc_g4_vertex_buffer_init(kinc_g4_vertex_buffer_t *buffer, int count, kinc_g4_vertex_structure_t *structure, kinc_g4_usage_t usage);
+void kinc_g4_vertex_buffer_init(kinc_g4_vertex_buffer_t *buffer, int count, kinc_g5_vertex_structure_t *structure, kinc_g4_usage_t usage);
 void kinc_g4_vertex_buffer_destroy(kinc_g4_vertex_buffer_t *buffer);
 float *kinc_g4_vertex_buffer_lock_all(kinc_g4_vertex_buffer_t *buffer);
 float *kinc_g4_vertex_buffer_lock(kinc_g4_vertex_buffer_t *buffer, int start, int count);

@@ -1300,7 +1300,7 @@ void kinc_init(const char *name, int width, int height, kinc_window_options_t *w
 		win->title = name;
 	}
 
-	kinc_g4_internal_init();
+	kinc_g5_internal_init();
 
 	kinc_window_create(win, frame);
 	loadXInput();
@@ -1311,7 +1311,7 @@ void kinc_internal_shutdown() {
 	kinc_windows_hide_windows();
 	kinc_internal_shutdown_callback();
 	kinc_windows_destroy_windows();
-	kinc_g4_internal_destroy();
+	kinc_g5_internal_destroy();
 	kinc_windows_restore_displays();
 }
 

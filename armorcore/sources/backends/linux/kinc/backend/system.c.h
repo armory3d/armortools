@@ -151,7 +151,7 @@ void kinc_init(const char *name, int width, int height, kinc_window_options_t *w
 
 	kinc_set_application_name(name);
 
-	kinc_g4_internal_init();
+	kinc_g5_internal_init();
 
 	kinc_window_options_t defaultWin;
 	if (win == NULL) {
@@ -173,7 +173,7 @@ void kinc_init(const char *name, int width, int height, kinc_window_options_t *w
 }
 
 void kinc_internal_shutdown() {
-	kinc_g4_internal_destroy();
+	kinc_g5_internal_destroy();
 	kinc_linux_closeHIDGamepads();
 	procs.shutdown();
 	kinc_internal_shutdown_callback();

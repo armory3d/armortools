@@ -900,7 +900,7 @@ void ui_bake_elements() {
 	float r = UI_CHECK_SELECT_SIZE();
 	kinc_g4_render_target_init(&current->check_select_image, r, r, KINC_G4_RENDER_TARGET_FORMAT_32BIT, 0);
 	kinc_g2_set_render_target(&current->check_select_image);
-	kinc_g4_clear(KINC_G4_CLEAR_COLOR, 0x00000000, 0);
+	kinc_g5_clear(KINC_G5_CLEAR_COLOR, 0x00000000, 0);
 	kinc_g2_set_color(0xffffffff);
 	kinc_g2_draw_line(0, r / 2.0, r / 2.0 - 2.0 * UI_SCALE(), r - 2.0 * UI_SCALE(), 2.0 * UI_SCALE());
 	kinc_g2_draw_line(r / 2.0 - 3.0 * UI_SCALE(), r - 3.0 * UI_SCALE(), r / 2.0 + 5.0 * UI_SCALE(), r - 11.0 * UI_SCALE(), 2.0 * UI_SCALE());
@@ -912,7 +912,7 @@ void ui_bake_elements() {
 	r = UI_CHECK_SIZE();
 	kinc_g4_render_target_init(&current->radio_image, r, r, KINC_G4_RENDER_TARGET_FORMAT_32BIT, 0);
 	kinc_g2_set_render_target(&current->radio_image);
-	kinc_g4_clear(KINC_G4_CLEAR_COLOR, 0x00000000, 0);
+	kinc_g5_clear(KINC_G5_CLEAR_COLOR, 0x00000000, 0);
 	kinc_g2_set_color(0xffaaaaaa);
 	kinc_g2_fill_circle(r / 2.0, r / 2.0, r / 2.0, 0);
 	kinc_g2_set_color(0xffffffff);
@@ -925,7 +925,7 @@ void ui_bake_elements() {
 	r = UI_CHECK_SELECT_SIZE();
 	kinc_g4_render_target_init(&current->radio_select_image, r, r, KINC_G4_RENDER_TARGET_FORMAT_32BIT, 0);
 	kinc_g2_set_render_target(&current->radio_select_image);
-	kinc_g4_clear(KINC_G4_CLEAR_COLOR, 0x00000000, 0);
+	kinc_g5_clear(KINC_G5_CLEAR_COLOR, 0x00000000, 0);
 	kinc_g2_set_color(0xffaaaaaa);
 	kinc_g2_fill_circle(r / 2.0, r / 2.0, 4.5 * UI_SCALE(), 0);
 	kinc_g2_set_color(0xffffffff);
@@ -939,7 +939,7 @@ void ui_bake_elements() {
 		r = 4.0 * UI_SCALE();
 		kinc_g4_render_target_init(&current->filled_round_corner_image, r, r, KINC_G4_RENDER_TARGET_FORMAT_32BIT, 0);
 		kinc_g2_set_render_target(&current->filled_round_corner_image);
-		kinc_g4_clear(KINC_G4_CLEAR_COLOR, 0x00000000, 0);
+		kinc_g5_clear(KINC_G5_CLEAR_COLOR, 0x00000000, 0);
 		kinc_g2_set_color(0xffffffff);
 		kinc_g2_fill_circle(r, r, r, 0);
 		kinc_g2_end();
@@ -949,7 +949,7 @@ void ui_bake_elements() {
 		}
 		kinc_g4_render_target_init(&current->round_corner_image, r, r, KINC_G4_RENDER_TARGET_FORMAT_32BIT, 0);
 		kinc_g2_set_render_target(&current->round_corner_image);
-		kinc_g4_clear(KINC_G4_CLEAR_COLOR, 0x00000000, 0);
+		kinc_g5_clear(KINC_G5_CLEAR_COLOR, 0x00000000, 0);
 		kinc_g2_set_color(0xffffffff);
 		kinc_g2_draw_circle(r, r, r, 0, 1);
 		kinc_g2_end();
@@ -1715,10 +1715,10 @@ bool _ui_window(ui_handle_t *handle, int x, int y, int w, int h, bool drag) {
 	current->tab_count = 0;
 
 	if (theme->FILL_WINDOW_BG) {
-		kinc_g4_clear(KINC_G4_CLEAR_COLOR, theme->WINDOW_BG_COL, 0);
+		kinc_g5_clear(KINC_G5_CLEAR_COLOR, theme->WINDOW_BG_COL, 0);
 	}
 	else {
-		kinc_g4_clear(KINC_G4_CLEAR_COLOR, 0x00000000, 0);
+		kinc_g5_clear(KINC_G5_CLEAR_COLOR, 0x00000000, 0);
 		kinc_g2_set_color(theme->WINDOW_BG_COL);
 		kinc_g2_fill_rect(current->_x, current->_y - handle->scroll_offset, handle->last_max_x, handle->last_max_y);
 	}

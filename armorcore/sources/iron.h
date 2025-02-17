@@ -11,7 +11,7 @@
 #include <kinc/system.h>
 #include <kinc/display.h>
 #include <kinc/threads/thread.h>
-#include <kinc/graphics5/graphics.h>
+#include <kinc/graphics4/graphics.h>
 #include <kinc/io/filereader.h>
 #include "iron_string.h"
 #include "iron_array.h"
@@ -204,10 +204,10 @@ int last_window_height = 0;
 char temp_string[1024 * 32];
 char temp_string_vs[1024 * 128];
 char temp_string_fs[1024 * 128];
-char temp_string_vstruct[32][32];
+char temp_string_vstruct[4][32][32];
 #ifdef KINC_WINDOWS
 wchar_t temp_wstring[1024 * 32];
-struct HWND__ *kinc_windows_window_handle();
+struct HWND__ *kinc_windows_window_handle(int window_index);
 #endif
 
 void (*iron_update)(void);
@@ -344,11 +344,12 @@ string_t *iron_get_arg(i32 index) {
 #include <kinc/math/core.h>
 #include <kinc/threads/mutex.h>
 #include <kinc/network/http.h>
-#include <kinc/graphics5/vertexbuffer.h>
-#include <kinc/graphics5/indexbuffer.h>
-#include <kinc/graphics5/pipeline.h>
-#include <kinc/graphics5/rendertarget.h>
-#include <kinc/graphics5/texture.h>
+#include <kinc/graphics4/shader.h>
+#include <kinc/graphics4/vertexbuffer.h>
+#include <kinc/graphics4/indexbuffer.h>
+#include <kinc/graphics4/pipeline.h>
+#include <kinc/graphics4/rendertarget.h>
+#include <kinc/graphics4/texture.h>
 #ifdef WITH_AUDIO
 #include <kinc/audio1/audio.h>
 #include <kinc/audio1/sound.h>
@@ -356,6 +357,9 @@ string_t *iron_get_arg(i32 index) {
 int LZ4_decompress_safe(const char *source, char *dest, int compressed_size, int maxOutputSize);
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+#ifdef KINC_DIRECT3D11
+#include <d3d11.h>
+#endif
 #ifdef KINC_DIRECT3D12
 #include <d3d12.h>
 extern bool waitAfterNextDraw;
@@ -438,9 +442,9 @@ void _update(void *data) {
 	#endif
 
 	#ifdef IDLE_SLEEP
-	if (last_window_width != kinc_window_width() || last_window_height != kinc_window_height()) {
-		last_window_width = kinc_window_width();
-		last_window_height = kinc_window_height();
+	if (last_window_width != kinc_window_width(0) || last_window_height != kinc_window_height(0)) {
+		last_window_width = kinc_window_width(0);
+		last_window_height = kinc_window_height(0);
 		paused_frames = 0;
 	}
 	#if defined(KINC_IOS) || defined(KINC_ANDROID)
@@ -465,10 +469,10 @@ void _update(void *data) {
 	kinc_a2_update();
 	#endif
 
-	kinc_g4_begin();
+	kinc_g4_begin(0);
 	iron_update();
-	kinc_g4_end();
-	kinc_g5_swap_buffers();
+	kinc_g4_end(0);
+	kinc_g4_swap_buffers();
 }
 
 char *_copy(void *data) {
@@ -549,7 +553,7 @@ void _key_press(unsigned int character, void *data) {
 	#endif
 }
 
-void _mouse_down(int button, int x, int y, void *data) {
+void _mouse_down(int window, int button, int x, int y, void *data) {
 	iron_mouse_down(button, x, y);
 
 	for (int i = 0; i < ui_instances_count; ++i) {
@@ -562,7 +566,7 @@ void _mouse_down(int button, int x, int y, void *data) {
 	#endif
 }
 
-void _mouse_up(int button, int x, int y, void *data) {
+void _mouse_up(int window, int button, int x, int y, void *data) {
 	iron_mouse_up(button, x, y);
 
 	for (int i = 0; i < ui_instances_count; ++i) {
@@ -575,7 +579,7 @@ void _mouse_up(int button, int x, int y, void *data) {
 	#endif
 }
 
-void _mouse_move(int x, int y, int mx, int my, void *data) {
+void _mouse_move(int window, int x, int y, int mx, int my, void *data) {
 	iron_mouse_move(x, y, mx, my);
 
 	for (int i = 0; i < ui_instances_count; ++i) {
@@ -587,7 +591,7 @@ void _mouse_move(int x, int y, int mx, int my, void *data) {
 	#endif
 }
 
-void _mouse_wheel(int delta, void *data) {
+void _mouse_wheel(int window, int delta, void *data) {
 	iron_mouse_wheel(delta);
 
 	for (int i = 0; i < ui_instances_count; ++i) {
@@ -643,7 +647,7 @@ void _touch_up(int index, int x, int y) {
 	#endif
 }
 
-void _pen_down(int x, int y, float pressure) {
+void _pen_down(int window, int x, int y, float pressure) {
 	iron_pen_down(x, y, pressure);
 
 	for (int i = 0; i < ui_instances_count; ++i) {
@@ -656,7 +660,7 @@ void _pen_down(int x, int y, float pressure) {
 	#endif
 }
 
-void _pen_up(int x, int y, float pressure) {
+void _pen_up(int window, int x, int y, float pressure) {
 	iron_pen_up(x, y, pressure);
 
 	for (int i = 0; i < ui_instances_count; ++i) {
@@ -669,7 +673,7 @@ void _pen_up(int x, int y, float pressure) {
 	#endif
 }
 
-void _pen_move(int x, int y, float pressure) {
+void _pen_move(int window, int x, int y, float pressure) {
 	iron_pen_move(x, y, pressure);
 
 	for (int i = 0; i < ui_instances_count; ++i) {
@@ -846,13 +850,15 @@ void iron_init(string_t *title, i32 width, i32 height, bool vsync, i32 window_mo
 	win.visible = enable_window;
 	frame.color_bits = 32;
 	frame.depth_bits = 0;
+	frame.stencil_bits = 0;
+	frame.samples_per_pixel = 1;
 	kinc_init(title, win.width, win.height, &win, &frame);
 	kinc_random_init((int)(kinc_time() * 1000));
 
 	#ifdef KINC_WINDOWS
 	// Maximized window has x < -1, prevent window centering done by kinc
 	if (win.x < -1 && win.y < -1) {
-		kinc_window_move(win.x, win.y);
+		kinc_window_move(0, win.x, win.y);
 	}
 	#endif
 
@@ -880,7 +886,7 @@ void iron_log(string_t *value) {
 }
 
 void iron_g4_clear(i32 flags, i32 color, f32 depth) {
-	kinc_g4_clear(flags, color, depth);
+	kinc_g4_clear(flags, color, depth, 0);
 }
 
 void iron_set_update_callback(void (*callback)(void)) {
@@ -1007,7 +1013,7 @@ bool iron_is_mouse_locked() {
 }
 
 void iron_set_mouse_position(i32 x, i32 y) {
-	kinc_mouse_set_position(x, y);
+	kinc_mouse_set_position(0, x, y);
 }
 
 void iron_show_mouse(bool show) {
@@ -1021,7 +1027,7 @@ void iron_show_keyboard(bool show) {
 
 any iron_g4_create_index_buffer(i32 count) {
 	kinc_g4_index_buffer_t *buffer = (kinc_g4_index_buffer_t *)malloc(sizeof(kinc_g4_index_buffer_t));
-	kinc_g4_index_buffer_init(buffer, count, KINC_G4_USAGE_STATIC);
+	kinc_g4_index_buffer_init(buffer, count, KINC_G4_INDEX_BUFFER_FORMAT_32BIT, KINC_G4_USAGE_STATIC);
 	return buffer;
 }
 
@@ -1051,18 +1057,18 @@ typedef struct kinc_vertex_elem {
 	int data; // vertex_data_t
 } kinc_vertex_elem_t;
 
-any iron_g4_create_vertex_buffer(i32 count, any_array_t *elements, i32 usage) {
+any iron_g4_create_vertex_buffer(i32 count, any_array_t *elements, i32 usage, i32 inst_data_step_rate) {
 	kinc_g4_vertex_structure_t structure;
 	kinc_g4_vertex_structure_init(&structure);
 	for (int32_t i = 0; i < elements->length; ++i) {
 		kinc_vertex_elem_t *element = elements->buffer[i];
 		char *str = element->name;
 		int32_t data = element->data;
-		strcpy(temp_string_vstruct[i], str);
-		kinc_g4_vertex_structure_add(&structure, temp_string_vstruct[i], (kinc_g4_vertex_data_t)data);
+		strcpy(temp_string_vstruct[0][i], str);
+		kinc_g4_vertex_structure_add(&structure, temp_string_vstruct[0][i], (kinc_g4_vertex_data_t)data);
 	}
 	kinc_g4_vertex_buffer_t *buffer = (kinc_g4_vertex_buffer_t *)malloc(sizeof(kinc_g4_vertex_buffer_t));
-	kinc_g4_vertex_buffer_init(buffer, count, &structure, (kinc_g4_usage_t)usage);
+	kinc_g4_vertex_buffer_init(buffer, count, &structure, (kinc_g4_usage_t)usage, inst_data_step_rate);
 	return buffer;
 }
 
@@ -1087,6 +1093,10 @@ void iron_g4_set_vertex_buffer(kinc_g4_vertex_buffer_t *buffer) {
 	kinc_g4_set_vertex_buffer(buffer);
 }
 
+void iron_g4_set_vertex_buffers(any_array_t *vertex_buffers) {
+	kinc_g4_set_vertex_buffers(vertex_buffers->buffer, vertex_buffers->length);
+}
+
 void iron_g4_draw_indexed_vertices(i32 start, i32 count) {
 	#ifdef KINC_DIRECT3D12
 	// TODO: Prevent heapIndex overflow in texture.c.h/kinc_g5_internal_set_textures
@@ -1097,6 +1107,15 @@ void iron_g4_draw_indexed_vertices(i32 start, i32 count) {
 	}
 	else {
 		kinc_g4_draw_indexed_vertices_from_to(start, count);
+	}
+}
+
+void iron_g4_draw_indexed_vertices_instanced(i32 instance_count, i32 start, i32 count) {
+	if (count < 0) {
+		kinc_g4_draw_indexed_vertices_instanced(instance_count);
+	}
+	else {
+		kinc_g4_draw_indexed_vertices_instanced_from_to(instance_count, start, count);
 	}
 }
 
@@ -1393,6 +1412,7 @@ void iron_g4_delete_pipeline(kinc_g4_pipeline_t *pipeline) {
 
 typedef struct vertex_struct {
 	any_array_t *elements; // kinc_vertex_elem_t
+	bool instanced;
 } vertex_struct_t;
 
 typedef struct iron_pipeline_state {
@@ -1412,20 +1432,36 @@ typedef struct iron_pipeline_state {
 	int depth_attachment_bits;
 } iron_pipeline_state_t;
 
-void iron_g4_compile_pipeline(kinc_g4_pipeline_t *pipeline, vertex_struct_t *structure0, kinc_g4_shader_t *vertex_shader, kinc_g4_shader_t *fragment_shader, iron_pipeline_state_t *state) {
-	kinc_g4_vertex_structure_t s0;
+void iron_g4_compile_pipeline(kinc_g4_pipeline_t *pipeline, vertex_struct_t *structure0, vertex_struct_t *structure1, vertex_struct_t *structure2, vertex_struct_t *structure3, i32 length, kinc_g4_shader_t *vertex_shader, kinc_g4_shader_t *fragment_shader, kinc_g4_shader_t *geometry_shader, iron_pipeline_state_t *state) {
+	kinc_g4_vertex_structure_t s0, s1, s2, s3;
 	kinc_g4_vertex_structure_init(&s0);
+	kinc_g4_vertex_structure_init(&s1);
+	kinc_g4_vertex_structure_init(&s2);
+	kinc_g4_vertex_structure_init(&s3);
+	kinc_g4_vertex_structure_t *structures[4] = { &s0, &s1, &s2, &s3 };
 
-	any_array_t *elements = structure0->elements;
-	for (int32_t i = 0; i < elements->length; ++i) {
-		kinc_vertex_elem_t *element = elements->buffer[i];
-		strcpy(temp_string_vstruct[i], element->name);
-		kinc_g4_vertex_structure_add(&s0, temp_string_vstruct[i], (kinc_g4_vertex_data_t)element->data);
+	for (int32_t i1 = 0; i1 < length; ++i1) {
+		vertex_struct_t *structure = i1 == 0 ? structure0 : i1 == 1 ? structure1 : i1 == 2 ? structure2 : structure3;
+		structures[i1]->instanced = structure->instanced;
+		any_array_t *elements = structure->elements;
+		for (int32_t i2 = 0; i2 < elements->length; ++i2) {
+			kinc_vertex_elem_t *element = elements->buffer[i2];
+			char *str = element->name;
+			int32_t data = element->data;
+			strcpy(temp_string_vstruct[i1][i2], str);
+			kinc_g4_vertex_structure_add(structures[i1], temp_string_vstruct[i1][i2], (kinc_g4_vertex_data_t)data);
+		}
 	}
 
 	pipeline->vertex_shader = vertex_shader;
 	pipeline->fragment_shader = fragment_shader;
-	pipeline->input_layout = &s0;
+	if (geometry_shader != null) {
+		pipeline->geometry_shader = geometry_shader;
+	}
+	for (int i = 0; i < length; ++i) {
+		pipeline->input_layout[i] = structures[i];
+	}
+	pipeline->input_layout[length] = NULL;
 
 	pipeline->cull_mode = (kinc_g4_cull_mode_t)state->cull_mode;
 	pipeline->depth_write = state->depth_write;
@@ -1453,6 +1489,7 @@ void iron_g4_compile_pipeline(kinc_g4_pipeline_t *pipeline, vertex_struct_t *str
 		pipeline->color_attachment[i] = (kinc_g4_render_target_format_t)color_attachment_array->buffer[i];
 	}
 	pipeline->depth_attachment_bits = state->depth_attachment_bits;
+	pipeline->stencil_attachment_bits = 0;
 
 	kinc_g4_pipeline_compile(pipeline);
 }
@@ -1666,12 +1703,25 @@ void iron_g4_set_texture_depth(kinc_g4_texture_unit_t *unit, kinc_g4_render_targ
 	kinc_g4_render_target_use_depth_as_texture(render_target, *unit);
 }
 
+void iron_g4_set_image_texture(kinc_g4_texture_unit_t *unit, kinc_g4_texture_t *texture) {
+	kinc_g4_set_image_texture(*unit, texture);
+}
+
 void iron_g4_set_texture_parameters(kinc_g4_texture_unit_t *unit, i32 u_addr, i32 v_addr, i32 min_filter, i32 mag_filter, i32 mip_filter) {
 	kinc_g4_set_texture_addressing(*unit, KINC_G4_TEXTURE_DIRECTION_U, (kinc_g4_texture_addressing_t)u_addr);
 	kinc_g4_set_texture_addressing(*unit, KINC_G4_TEXTURE_DIRECTION_V, (kinc_g4_texture_addressing_t)v_addr);
 	kinc_g4_set_texture_minification_filter(*unit, (kinc_g4_texture_filter_t)min_filter);
 	kinc_g4_set_texture_magnification_filter(*unit, (kinc_g4_texture_filter_t)mag_filter);
 	kinc_g4_set_texture_mipmap_filter(*unit, (kinc_g4_mipmap_filter_t)mip_filter);
+}
+
+void iron_g4_set_texture3d_parameters(kinc_g4_texture_unit_t *unit, i32 u_addr, i32 v_addr, i32 w_addr, i32 min_filter, i32 mag_filter, i32 mip_filter) {
+	kinc_g4_set_texture3d_addressing(*unit, KINC_G4_TEXTURE_DIRECTION_U, (kinc_g4_texture_addressing_t)u_addr);
+	kinc_g4_set_texture3d_addressing(*unit, KINC_G4_TEXTURE_DIRECTION_V, (kinc_g4_texture_addressing_t)v_addr);
+	kinc_g4_set_texture3d_addressing(*unit, KINC_G4_TEXTURE_DIRECTION_W, (kinc_g4_texture_addressing_t)w_addr);
+	kinc_g4_set_texture3d_minification_filter(*unit, (kinc_g4_texture_filter_t)min_filter);
+	kinc_g4_set_texture3d_magnification_filter(*unit, (kinc_g4_texture_filter_t)mag_filter);
+	kinc_g4_set_texture3d_mipmap_filter(*unit, (kinc_g4_mipmap_filter_t)mip_filter);
 }
 
 void iron_g4_set_bool(kinc_g4_constant_location_t *location, bool value) {
@@ -1716,34 +1766,34 @@ f32 iron_get_time() {
 }
 
 i32 iron_window_width() {
-	return kinc_window_width();
+	return kinc_window_width(0);
 }
 
 i32 iron_window_height() {
-	return kinc_window_height();
+	return kinc_window_height(0);
 }
 
 void iron_set_window_title(string_t *title) {
-	kinc_window_set_title(title);
+	kinc_window_set_title(0, title);
 	#if defined(KINC_IOS) || defined(KINC_ANDROID)
 	strcpy(mobile_title, title);
 	#endif
 }
 
 i32 iron_get_window_mode() {
-	return kinc_window_get_mode();
+	return kinc_window_get_mode(0);
 }
 
 void iron_set_window_mode(i32 mode) {
-	kinc_window_change_mode((kinc_window_mode_t)mode);
+	kinc_window_change_mode(0, (kinc_window_mode_t)mode);
 }
 
 void iron_resize_window(i32 width, i32 height) {
-	kinc_window_resize(width, height);
+	kinc_window_resize(0, width, height);
 }
 
 void iron_move_window(i32 x, i32 y) {
-	kinc_window_move(x, y);
+	kinc_window_move(0, x, y);
 }
 
 i32 iron_screen_dpi() {
@@ -1814,15 +1864,21 @@ buffer_t *iron_read_storage(string_t *name) {
 }
 
 
-kinc_g4_render_target_t *iron_g4_create_render_target(i32 width, i32 height, i32 format, i32 depth_buffer_bits) {
+kinc_g4_render_target_t *iron_g4_create_render_target(i32 width, i32 height, i32 format, i32 depth_buffer_bits, i32 stencil_buffer_bits) {
 	kinc_g4_render_target_t *render_target = (kinc_g4_render_target_t *)malloc(sizeof(kinc_g4_render_target_t));
-	kinc_g4_render_target_init(render_target, width, height, (kinc_g4_render_target_format_t)format, depth_buffer_bits);
+	kinc_g4_render_target_init(render_target, width, height, (kinc_g4_render_target_format_t)format, depth_buffer_bits, stencil_buffer_bits);
 	return render_target;
 }
 
 kinc_g4_texture_t *iron_g4_create_texture(i32 width, i32 height, i32 format) {
 	kinc_g4_texture_t *texture = (kinc_g4_texture_t *)malloc(sizeof(kinc_g4_texture_t));
 	kinc_g4_texture_init(texture, width, height, (kinc_image_format_t)format);
+	return texture;
+}
+
+kinc_g4_texture_t *iron_g4_create_texture3d(i32 width, i32 height, i32 depth, i32 format) {
+	kinc_g4_texture_t *texture = (kinc_g4_texture_t *)malloc(sizeof(kinc_g4_texture_t));
+	kinc_g4_texture_init3d(texture, width, height, depth, (kinc_image_format_t)format);
 	return texture;
 }
 
@@ -1840,6 +1896,31 @@ kinc_g4_texture_t *iron_g4_create_texture_from_bytes(buffer_t *data, i32 width, 
 
 	kinc_image_init(image, image_data, width, height, (kinc_image_format_t)format);
 	kinc_g4_texture_init_from_image(texture, image);
+	if (!readable) {
+		kinc_image_destroy(image);
+		free(image);
+	}
+	else {
+		texture->image = image;
+	}
+	return texture;
+}
+
+kinc_g4_texture_t *iron_g4_create_texture_from_bytes3d(buffer_t *data, i32 width, i32 height, i32 depth, i32 format, bool readable) {
+	kinc_g4_texture_t *texture = (kinc_g4_texture_t *)malloc(sizeof(kinc_g4_texture_t));
+	kinc_image_t *image = (kinc_image_t *)malloc(sizeof(kinc_image_t));
+	void *image_data;
+	if (readable) {
+		image_data = malloc(data->length);
+		memcpy(image_data, data->buffer, data->length);
+	}
+	else {
+		image_data = data->buffer;
+	}
+
+	kinc_image_init3d(image, image_data, width, height, depth, (kinc_image_format_t)format);
+	kinc_g4_texture_init_from_image3d(texture, image);
+
 	if (!readable) {
 		kinc_image_destroy(image);
 		free(image);
@@ -1932,7 +2013,7 @@ int _format_byte_size(kinc_image_format_t format) {
 
 buffer_t *iron_g4_get_texture_pixels(kinc_image_t *image) {
 	uint8_t *data = kinc_image_get_pixels(image);
-	int byte_length = _format_byte_size(image->format) * image->width * image->height;
+	int byte_length = _format_byte_size(image->format) * image->width * image->height * image->depth;
 	buffer_t *buffer = malloc(sizeof(buffer_t));
 	buffer->buffer = data;
 	buffer->length = byte_length;
@@ -1944,7 +2025,10 @@ void iron_g4_get_render_target_pixels(kinc_g4_render_target_t *rt, buffer_t *dat
 	kinc_g4_render_target_get_pixels(rt, b);
 
 	// Release staging texture immediately to save memory
-	#ifdef KINC_DIRECT3D12
+	#ifdef KINC_DIRECT3D11
+	rt->impl.textureStaging->lpVtbl->Release(rt->impl.textureStaging);
+	rt->impl.textureStaging = NULL;
+	#elif defined(KINC_DIRECT3D12)
 	rt->impl._renderTarget.impl.renderTargetReadback->lpVtbl->Release(rt->impl._renderTarget.impl.renderTargetReadback);
 	rt->impl._renderTarget.impl.renderTargetReadback = NULL;
 	#elif defined(KINC_METAL)
@@ -1957,7 +2041,7 @@ void iron_g4_get_render_target_pixels(kinc_g4_render_target_t *rt, buffer_t *dat
 buffer_t *iron_g4_lock_texture(kinc_g4_texture_t *texture, i32 level) {
 	uint8_t *tex = kinc_g4_texture_lock(texture);
 	int stride = kinc_g4_texture_stride(texture);
-	int byte_length = stride * texture->tex_height;
+	int byte_length = stride * texture->tex_height * texture->tex_depth;
 	buffer_t *buffer = malloc(sizeof(buffer_t));
 	buffer->buffer = tex;
 	buffer->length = byte_length;
@@ -1966,6 +2050,10 @@ buffer_t *iron_g4_lock_texture(kinc_g4_texture_t *texture, i32 level) {
 
 void iron_g4_unlock_texture(kinc_g4_texture_t *texture) {
 	kinc_g4_texture_unlock(texture);
+}
+
+void iron_g4_clear_texture(kinc_g4_texture_t *texture, i32 x, i32 y, i32 z, i32 width, i32 height, i32 depth, i32 color) {
+	kinc_g4_texture_clear(texture, x, y, z, width, height, depth, color);
 }
 
 void iron_g4_generate_texture_mipmaps(kinc_g4_texture_t *texture, i32 levels) {
@@ -1985,7 +2073,7 @@ void iron_g4_set_mipmaps(kinc_g4_texture_t *texture, any_array_t *mipmaps) {
 }
 
 void iron_g4_set_depth_from(kinc_g4_render_target_t *target, kinc_g4_render_target_t *source) {
-	kinc_g4_render_target_set_depth_from(target, source);
+	kinc_g4_render_target_set_depth_stencil_from(target, source);
 }
 
 void iron_g4_viewport(i32 x, i32 y, i32 width, i32 height) {
@@ -1998,6 +2086,10 @@ void iron_g4_scissor(i32 x, i32 y, i32 width, i32 height) {
 
 void iron_g4_disable_scissor() {
 	kinc_g4_disable_scissor();
+}
+
+bool iron_g4_render_targets_inverted_y() {
+	return kinc_g4_render_targets_inverted_y();
 }
 
 void iron_g4_begin(image_t *render_target, any_array_t *additional) {
@@ -2028,9 +2120,9 @@ void iron_g4_end() {
 }
 
 void iron_g4_swap_buffers() {
-	kinc_g4_end();
-	kinc_g5_swap_buffers();
-	kinc_g4_begin();
+	kinc_g4_end(0);
+	kinc_g4_swap_buffers();
+	kinc_g4_begin(0);
 }
 
 void iron_file_save_bytes(string_t *path, buffer_t *bytes, u64 length) {
@@ -2148,10 +2240,10 @@ bool _window_close_callback(void *data) {
 	#ifdef KINC_WINDOWS
 	bool save = false;
 	wchar_t title[1024];
-	GetWindowTextW(kinc_windows_window_handle(), title, sizeof(title));
+	GetWindowTextW(kinc_windows_window_handle(0), title, sizeof(title));
 	bool dirty = wcsstr(title, L"* - ArmorPaint") != NULL;
 	if (dirty) {
-		int res = MessageBox(kinc_windows_window_handle(), L"Project has been modified, save changes?", L"Save Changes?", MB_YESNOCANCEL | MB_ICONEXCLAMATION);
+		int res = MessageBox(kinc_windows_window_handle(0), L"Project has been modified, save changes?", L"Save Changes?", MB_YESNOCANCEL | MB_ICONEXCLAMATION);
 		if (res == IDYES) {
 			save = true;
 		}
@@ -2173,7 +2265,7 @@ bool _window_close_callback(void *data) {
 void iron_set_save_and_quit_callback(void (*callback)(bool)) {
 	iron_save_and_quit = callback;
 	save_and_quit_callback_set = true;
-	kinc_window_set_close_callback(_window_close_callback, NULL);
+	kinc_window_set_close_callback(0, _window_close_callback, NULL);
 }
 
 void iron_set_mouse_cursor(i32 id) {
@@ -2874,11 +2966,11 @@ void iron_raytrace_dispatch_rays(kinc_g4_render_target_t *render_target, buffer_
 #endif
 
 i32 iron_window_x() {
-	return kinc_window_x();
+	return kinc_window_x(0);
 }
 
 i32 iron_window_y() {
-	return kinc_window_y();
+	return kinc_window_y(0);
 }
 
 char *iron_language() {

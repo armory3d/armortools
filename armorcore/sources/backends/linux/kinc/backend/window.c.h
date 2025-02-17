@@ -51,7 +51,7 @@ int kinc_window_display() {
 }
 
 void kinc_window_destroy() {
-	kinc_g4_internal_destroy_window();
+	kinc_g5_internal_destroy_window();
 	procs.window_destroy();
 }
 

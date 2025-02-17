@@ -11,7 +11,7 @@ void kinc_g5_vertex_buffer_init(kinc_g5_vertex_buffer_t *buffer, int count, kinc
 	buffer->impl.count = count;
 	buffer->impl.stride = 0;
 	for (int i = 0; i < structure->size; ++i) {
-		buffer->impl.stride += kinc_g4_vertex_data_size(structure->elements[i].data);
+		buffer->impl.stride += kinc_g5_vertex_data_size(structure->elements[i].data);
 	}
 }
 

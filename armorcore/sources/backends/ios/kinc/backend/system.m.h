@@ -87,7 +87,7 @@ void kinc_init(const char *name, int width, int height, struct kinc_window_optio
 		kinc_framebuffer_options_set_defaults(&defaultFrame);
 		frame = &defaultFrame;
 	}
-	kinc_g4_internal_init();
+	kinc_g5_internal_init();
 	kinc_g4_internal_init_window(frame->depth_bits, true);
 }
 

@@ -276,7 +276,7 @@ kinc_window_mode_t kinc_window_get_mode() {
 void kinc_window_destroy() {
 	WindowData *win = &windows[0];
 	if (win->handle != NULL) {
-		kinc_g4_internal_destroy_window();
+		kinc_g5_internal_destroy_window();
 		DestroyWindow(win->handle);
 		win->handle = NULL;
 	}

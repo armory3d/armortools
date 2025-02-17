@@ -41,133 +41,133 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
 	WGPUVertexAttribute vaDesc[8];
 	memset(&vaDesc[0], 0, sizeof(vaDesc[0]) * 8);
 	uint64_t offset = 0;
-	for (int i = 0; i < pipe->inputLayout->size; ++i) {
+	for (int i = 0; i < pipe->input_layout->size; ++i) {
 		vaDesc[i].shaderLocation = i;
 		vaDesc[i].offset = offset;
-		offset += kinc_g4_vertex_data_size(pipe->inputLayout->elements[i].data);
-		switch (pipe->inputLayout->elements[i].data) {
-		case KINC_G4_VERTEX_DATA_NONE:
+		offset += kinc_g5_vertex_data_size(pipe->input_layout->elements[i].data);
+		switch (pipe->input_layout->elements[i].data) {
+		case KINC_G5_VERTEX_DATA_NONE:
 			vaDesc[i].format = WGPUVertexFormat_Undefined;
 			assert(false);
 			break;
-		case KINC_G4_VERTEX_DATA_F32_1X:
+		case KINC_G5_VERTEX_DATA_F32_1X:
 			vaDesc[i].format = WGPUVertexFormat_Float32;
 			break;
-		case KINC_G4_VERTEX_DATA_F32_2X:
+		case KINC_G5_VERTEX_DATA_F32_2X:
 			vaDesc[i].format = WGPUVertexFormat_Float32x2;
 			break;
-		case KINC_G4_VERTEX_DATA_F32_3X:
+		case KINC_G5_VERTEX_DATA_F32_3X:
 			vaDesc[i].format = WGPUVertexFormat_Float32x3;
 			break;
-		case KINC_G4_VERTEX_DATA_F32_4X:
+		case KINC_G5_VERTEX_DATA_F32_4X:
 			vaDesc[i].format = WGPUVertexFormat_Float32x4;
 			break;
-		case KINC_G4_VERTEX_DATA_F32_4X4:
+		case KINC_G5_VERTEX_DATA_F32_4X4:
 			vaDesc[i].format = WGPUVertexFormat_Undefined;
 			assert(false);
 			break;
-		case KINC_G4_VERTEX_DATA_I8_1X:
+		case KINC_G5_VERTEX_DATA_I8_1X:
 			vaDesc[i].format = WGPUVertexFormat_Undefined;
 			assert(false);
 			break;
-		case KINC_G4_VERTEX_DATA_U8_1X:
+		case KINC_G5_VERTEX_DATA_U8_1X:
 			vaDesc[i].format = WGPUVertexFormat_Undefined;
 			assert(false);
 			break;
-		case KINC_G4_VERTEX_DATA_I8_1X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_I8_1X_NORMALIZED:
 			vaDesc[i].format = WGPUVertexFormat_Undefined;
 			assert(false);
 			break;
-		case KINC_G4_VERTEX_DATA_U8_1X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_U8_1X_NORMALIZED:
 			vaDesc[i].format = WGPUVertexFormat_Undefined;
 			assert(false);
 			break;
-		case KINC_G4_VERTEX_DATA_I8_2X:
+		case KINC_G5_VERTEX_DATA_I8_2X:
 			vaDesc[i].format = WGPUVertexFormat_Sint8x2;
 			break;
-		case KINC_G4_VERTEX_DATA_U8_2X:
+		case KINC_G5_VERTEX_DATA_U8_2X:
 			vaDesc[i].format = WGPUVertexFormat_Uint8x2 ;
 			break;
-		case KINC_G4_VERTEX_DATA_I8_2X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_I8_2X_NORMALIZED:
 			vaDesc[i].format = WGPUVertexFormat_Snorm8x2;
 			break;
-		case KINC_G4_VERTEX_DATA_U8_2X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_U8_2X_NORMALIZED:
 			vaDesc[i].format = WGPUVertexFormat_Unorm8x2;
 			break;
-		case KINC_G4_VERTEX_DATA_I8_4X:
+		case KINC_G5_VERTEX_DATA_I8_4X:
 			vaDesc[i].format = WGPUVertexFormat_Sint8x4;
 			break;
-		case KINC_G4_VERTEX_DATA_U8_4X:
+		case KINC_G5_VERTEX_DATA_U8_4X:
 			vaDesc[i].format = WGPUVertexFormat_Uint8x4;
 			break;
-		case KINC_G4_VERTEX_DATA_I8_4X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_I8_4X_NORMALIZED:
 			vaDesc[i].format = WGPUVertexFormat_Snorm8x4;
 			break;
-		case KINC_G4_VERTEX_DATA_U8_4X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_U8_4X_NORMALIZED:
 			vaDesc[i].format = WGPUVertexFormat_Unorm8x4;
 			break;
-		case KINC_G4_VERTEX_DATA_I16_1X:
+		case KINC_G5_VERTEX_DATA_I16_1X:
 			vaDesc[i].format = WGPUVertexFormat_Undefined;
 			assert(false);
 			break;
-		case KINC_G4_VERTEX_DATA_U16_1X:
+		case KINC_G5_VERTEX_DATA_U16_1X:
 			vaDesc[i].format = WGPUVertexFormat_Undefined;
 			assert(false);
 			break;
-		case KINC_G4_VERTEX_DATA_I16_1X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_I16_1X_NORMALIZED:
 			vaDesc[i].format = WGPUVertexFormat_Undefined;
 			assert(false);
 			break;
-		case KINC_G4_VERTEX_DATA_U16_1X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_U16_1X_NORMALIZED:
 			vaDesc[i].format = WGPUVertexFormat_Undefined;
 			assert(false);
 			break;
-		case KINC_G4_VERTEX_DATA_I16_2X:
+		case KINC_G5_VERTEX_DATA_I16_2X:
 			vaDesc[i].format = WGPUVertexFormat_Sint16x2;
 			break;
-		case KINC_G4_VERTEX_DATA_U16_2X:
+		case KINC_G5_VERTEX_DATA_U16_2X:
 			vaDesc[i].format = WGPUVertexFormat_Uint16x2;
 			break;
-		case KINC_G4_VERTEX_DATA_I16_2X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_I16_2X_NORMALIZED:
 			vaDesc[i].format = WGPUVertexFormat_Snorm16x2;
 			break;
-		case KINC_G4_VERTEX_DATA_U16_2X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_U16_2X_NORMALIZED:
 			vaDesc[i].format = WGPUVertexFormat_Unorm16x2;
 			break;
-		case KINC_G4_VERTEX_DATA_I16_4X:
+		case KINC_G5_VERTEX_DATA_I16_4X:
 			vaDesc[i].format = WGPUVertexFormat_Sint16x4;
 			break;
-		case KINC_G4_VERTEX_DATA_U16_4X:
+		case KINC_G5_VERTEX_DATA_U16_4X:
 			vaDesc[i].format = WGPUVertexFormat_Uint16x4;
 			break;
-		case KINC_G4_VERTEX_DATA_I16_4X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_I16_4X_NORMALIZED:
 			vaDesc[i].format = WGPUVertexFormat_Snorm16x4;
 			break;
-		case KINC_G4_VERTEX_DATA_U16_4X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_U16_4X_NORMALIZED:
 			vaDesc[i].format = WGPUVertexFormat_Unorm16x4;
 			break;
-		case KINC_G4_VERTEX_DATA_I32_1X:
+		case KINC_G5_VERTEX_DATA_I32_1X:
 			vaDesc[i].format = WGPUVertexFormat_Sint32;
 			break;
-		case KINC_G4_VERTEX_DATA_U32_1X:
+		case KINC_G5_VERTEX_DATA_U32_1X:
 			vaDesc[i].format = WGPUVertexFormat_Uint32;
 			break;
-		case KINC_G4_VERTEX_DATA_I32_2X:
+		case KINC_G5_VERTEX_DATA_I32_2X:
 			vaDesc[i].format = WGPUVertexFormat_Sint32x2;
 			break;
-		case KINC_G4_VERTEX_DATA_U32_2X:
+		case KINC_G5_VERTEX_DATA_U32_2X:
 			vaDesc[i].format = WGPUVertexFormat_Uint32x2;
 			break;
-		case KINC_G4_VERTEX_DATA_I32_3X:
+		case KINC_G5_VERTEX_DATA_I32_3X:
 			vaDesc[i].format = WGPUVertexFormat_Sint32x3;
 			break;
-		case KINC_G4_VERTEX_DATA_U32_3X:
+		case KINC_G5_VERTEX_DATA_U32_3X:
 			vaDesc[i].format = WGPUVertexFormat_Uint32x3;
 			break;
-		case KINC_G4_VERTEX_DATA_I32_4X:
+		case KINC_G5_VERTEX_DATA_I32_4X:
 			vaDesc[i].format = WGPUVertexFormat_Sint32x4;
 			break;
-		case KINC_G4_VERTEX_DATA_U32_4X:
+		case KINC_G5_VERTEX_DATA_U32_4X:
 			vaDesc[i].format = WGPUVertexFormat_Uint32x4;
 			break;
 		}
@@ -176,13 +176,13 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
 	WGPUVertexBufferLayout vbDesc;
 	memset(&vbDesc, 0, sizeof(vbDesc));
 	vbDesc.arrayStride = offset;
-	vbDesc.attributeCount = pipe->inputLayout->size;
+	vbDesc.attributeCount = pipe->input_layout->size;
 	vbDesc.attributes = &vaDesc[0];
 
 	WGPUVertexState vsDest;
 	memset(&vsDest, 0, sizeof(vsDest));
 
-	vsDest.module = pipe->vertexShader->impl.module;
+	vsDest.module = pipe->vertex_shader->impl.module;
 	vsDest.entryPoint = "main";
 
 	vsDest.bufferCount = 1;
@@ -191,7 +191,7 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
 	WGPUFragmentState fragmentDest;
 	memset(&fragmentDest, 0, sizeof(fragmentDest));
 
-	fragmentDest.module = pipe->fragmentShader->impl.module;
+	fragmentDest.module = pipe->fragment_shader->impl.module;
 	fragmentDest.entryPoint = "main";
 
 	fragmentDest.targetCount = 1;

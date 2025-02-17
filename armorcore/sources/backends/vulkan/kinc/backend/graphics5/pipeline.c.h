@@ -229,13 +229,13 @@ static VkShaderModule create_shader_module(const void *code, size_t size) {
 	return module;
 }
 
-static VkShaderModule prepare_vs(VkShaderModule *vert_shader_module, kinc_g5_shader_t *vertexShader) {
-	*vert_shader_module = create_shader_module(vertexShader->impl.source, vertexShader->impl.length);
+static VkShaderModule prepare_vs(VkShaderModule *vert_shader_module, kinc_g5_shader_t *vertex_shader) {
+	*vert_shader_module = create_shader_module(vertex_shader->impl.source, vertex_shader->impl.length);
 	return *vert_shader_module;
 }
 
-static VkShaderModule prepare_fs(VkShaderModule *frag_shader_module, kinc_g5_shader_t *fragmentShader) {
-	*frag_shader_module = create_shader_module(fragmentShader->impl.source, fragmentShader->impl.length);
+static VkShaderModule prepare_fs(VkShaderModule *frag_shader_module, kinc_g5_shader_t *fragment_shader) {
+	*frag_shader_module = create_shader_module(fragment_shader->impl.source, fragment_shader->impl.length);
 	return *frag_shader_module;
 }
 
@@ -303,8 +303,8 @@ kinc_g5_texture_unit_t kinc_g5_pipeline_get_texture_unit(kinc_g5_pipeline_t *pip
 	return unit;
 }
 
-static VkCullModeFlagBits convert_cull_mode(kinc_g5_cull_mode_t cullMode) {
-	switch (cullMode) {
+static VkCullModeFlagBits convert_cull_mode(kinc_g5_cull_mode_t cull_mode) {
+	switch (cull_mode) {
 	case KINC_G5_CULL_MODE_CLOCKWISE:
 		return VK_CULL_MODE_BACK_BIT;
 	case KINC_G5_CULL_MODE_COUNTERCLOCKWISE:
@@ -394,9 +394,9 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 	memset(pipeline->impl.fragmentOffsets, 0, sizeof(kinc_internal_named_number) * KINC_INTERNAL_NAMED_NUMBER_COUNT);
 	memset(pipeline->impl.vertexTextureBindings, 0, sizeof(kinc_internal_named_number) * KINC_INTERNAL_NAMED_NUMBER_COUNT);
 	memset(pipeline->impl.fragmentTextureBindings, 0, sizeof(kinc_internal_named_number) * KINC_INTERNAL_NAMED_NUMBER_COUNT);
-	parse_shader((uint32_t *)pipeline->vertexShader->impl.source, pipeline->vertexShader->impl.length, pipeline->impl.vertexLocations,
+	parse_shader((uint32_t *)pipeline->vertex_shader->impl.source, pipeline->vertex_shader->impl.length, pipeline->impl.vertexLocations,
 	             pipeline->impl.vertexTextureBindings, pipeline->impl.vertexOffsets);
-	parse_shader((uint32_t *)pipeline->fragmentShader->impl.source, pipeline->fragmentShader->impl.length, pipeline->impl.fragmentLocations,
+	parse_shader((uint32_t *)pipeline->fragment_shader->impl.source, pipeline->fragment_shader->impl.length, pipeline->impl.fragmentLocations,
 	             pipeline->impl.fragmentTextureBindings, pipeline->impl.fragmentOffsets);
 
 	VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo = {0};
@@ -429,7 +429,7 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 	pipeline_info.layout = pipeline->impl.pipeline_layout;
 
 	VkVertexInputBindingDescription vi_bindings[1];
-	int vertexAttributeCount = pipeline->inputLayout->size;
+	int vertexAttributeCount = pipeline->input_layout->size;
 	VkVertexInputAttributeDescription vi_attrs[vertexAttributeCount];
 
 	VkPipelineVertexInputStateCreateInfo vi = {0};
@@ -443,121 +443,121 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 
 	uint32_t attr = 0;
 	uint32_t offset = 0;
-	for (int i = 0; i < pipeline->inputLayout->size; ++i) {
-		kinc_g5_vertex_element_t element = pipeline->inputLayout->elements[i];
+	for (int i = 0; i < pipeline->input_layout->size; ++i) {
+		kinc_g5_vertex_element_t element = pipeline->input_layout->elements[i];
 
 		vi_attrs[attr].binding = 0;
 		vi_attrs[attr].location = find_number(pipeline->impl.vertexLocations, element.name);
 		vi_attrs[attr].offset = offset;
-		offset += kinc_g4_vertex_data_size(element.data);
+		offset += kinc_g5_vertex_data_size(element.data);
 
 		switch (element.data) {
-		case KINC_G4_VERTEX_DATA_F32_1X:
+		case KINC_G5_VERTEX_DATA_F32_1X:
 			vi_attrs[attr].format = VK_FORMAT_R32_SFLOAT;
 			break;
-		case KINC_G4_VERTEX_DATA_F32_2X:
+		case KINC_G5_VERTEX_DATA_F32_2X:
 			vi_attrs[attr].format = VK_FORMAT_R32G32_SFLOAT;
 			break;
-		case KINC_G4_VERTEX_DATA_F32_3X:
+		case KINC_G5_VERTEX_DATA_F32_3X:
 			vi_attrs[attr].format = VK_FORMAT_R32G32B32_SFLOAT;
 			break;
-		case KINC_G4_VERTEX_DATA_F32_4X:
+		case KINC_G5_VERTEX_DATA_F32_4X:
 			vi_attrs[attr].format = VK_FORMAT_R32G32B32A32_SFLOAT;
 			break;
-		case KINC_G4_VERTEX_DATA_I8_1X:
+		case KINC_G5_VERTEX_DATA_I8_1X:
 			vi_attrs[attr].format = VK_FORMAT_R8_SINT;
 			break;
-		case KINC_G4_VERTEX_DATA_U8_1X:
+		case KINC_G5_VERTEX_DATA_U8_1X:
 			vi_attrs[attr].format = VK_FORMAT_R8_UINT;
 			break;
-		case KINC_G4_VERTEX_DATA_I8_1X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_I8_1X_NORMALIZED:
 			vi_attrs[attr].format = VK_FORMAT_R8_SNORM;
 			break;
-		case KINC_G4_VERTEX_DATA_U8_1X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_U8_1X_NORMALIZED:
 			vi_attrs[attr].format = VK_FORMAT_R8_UNORM;
 			break;
-		case KINC_G4_VERTEX_DATA_I8_2X:
+		case KINC_G5_VERTEX_DATA_I8_2X:
 			vi_attrs[attr].format = VK_FORMAT_R8G8_SINT;
 			break;
-		case KINC_G4_VERTEX_DATA_U8_2X:
+		case KINC_G5_VERTEX_DATA_U8_2X:
 			vi_attrs[attr].format = VK_FORMAT_R8G8_UINT;
 			break;
-		case KINC_G4_VERTEX_DATA_I8_2X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_I8_2X_NORMALIZED:
 			vi_attrs[attr].format = VK_FORMAT_R8G8_SNORM;
 			break;
-		case KINC_G4_VERTEX_DATA_U8_2X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_U8_2X_NORMALIZED:
 			vi_attrs[attr].format = VK_FORMAT_R8G8_UNORM;
 			break;
-		case KINC_G4_VERTEX_DATA_I8_4X:
+		case KINC_G5_VERTEX_DATA_I8_4X:
 			vi_attrs[attr].format = VK_FORMAT_R8G8B8A8_SINT;
 			break;
-		case KINC_G4_VERTEX_DATA_U8_4X:
+		case KINC_G5_VERTEX_DATA_U8_4X:
 			vi_attrs[attr].format = VK_FORMAT_R8G8B8A8_UINT;
 			break;
-		case KINC_G4_VERTEX_DATA_I8_4X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_I8_4X_NORMALIZED:
 			vi_attrs[attr].format = VK_FORMAT_R8G8B8A8_SNORM;
 			break;
-		case KINC_G4_VERTEX_DATA_U8_4X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_U8_4X_NORMALIZED:
 			vi_attrs[attr].format = VK_FORMAT_R8G8B8A8_UNORM;
 			break;
-		case KINC_G4_VERTEX_DATA_I16_1X:
+		case KINC_G5_VERTEX_DATA_I16_1X:
 			vi_attrs[attr].format = VK_FORMAT_R16_SINT;
 			break;
-		case KINC_G4_VERTEX_DATA_U16_1X:
+		case KINC_G5_VERTEX_DATA_U16_1X:
 			vi_attrs[attr].format = VK_FORMAT_R16_UINT;
 			break;
-		case KINC_G4_VERTEX_DATA_I16_1X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_I16_1X_NORMALIZED:
 			vi_attrs[attr].format = VK_FORMAT_R16_SNORM;
 			break;
-		case KINC_G4_VERTEX_DATA_U16_1X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_U16_1X_NORMALIZED:
 			vi_attrs[attr].format = VK_FORMAT_R16_UNORM;
 			break;
-		case KINC_G4_VERTEX_DATA_I16_2X:
+		case KINC_G5_VERTEX_DATA_I16_2X:
 			vi_attrs[attr].format = VK_FORMAT_R16G16_SINT;
 			break;
-		case KINC_G4_VERTEX_DATA_U16_2X:
+		case KINC_G5_VERTEX_DATA_U16_2X:
 			vi_attrs[attr].format = VK_FORMAT_R16G16_UINT;
 			break;
-		case KINC_G4_VERTEX_DATA_I16_2X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_I16_2X_NORMALIZED:
 			vi_attrs[attr].format = VK_FORMAT_R16G16_SNORM;
 			break;
-		case KINC_G4_VERTEX_DATA_U16_2X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_U16_2X_NORMALIZED:
 			vi_attrs[attr].format = VK_FORMAT_R16G16_UNORM;
 			break;
-		case KINC_G4_VERTEX_DATA_I16_4X:
+		case KINC_G5_VERTEX_DATA_I16_4X:
 			vi_attrs[attr].format = VK_FORMAT_R16G16B16A16_SINT;
 			break;
-		case KINC_G4_VERTEX_DATA_U16_4X:
+		case KINC_G5_VERTEX_DATA_U16_4X:
 			vi_attrs[attr].format = VK_FORMAT_R16G16B16A16_UINT;
 			break;
-		case KINC_G4_VERTEX_DATA_I16_4X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_I16_4X_NORMALIZED:
 			vi_attrs[attr].format = VK_FORMAT_R16G16B16A16_SNORM;
 			break;
-		case KINC_G4_VERTEX_DATA_U16_4X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_U16_4X_NORMALIZED:
 			vi_attrs[attr].format = VK_FORMAT_R16G16B16A16_UNORM;
 			break;
-		case KINC_G4_VERTEX_DATA_I32_1X:
+		case KINC_G5_VERTEX_DATA_I32_1X:
 			vi_attrs[attr].format = VK_FORMAT_R32_SINT;
 			break;
-		case KINC_G4_VERTEX_DATA_U32_1X:
+		case KINC_G5_VERTEX_DATA_U32_1X:
 			vi_attrs[attr].format = VK_FORMAT_R32_UINT;
 			break;
-		case KINC_G4_VERTEX_DATA_I32_2X:
+		case KINC_G5_VERTEX_DATA_I32_2X:
 			vi_attrs[attr].format = VK_FORMAT_R32G32_SINT;
 			break;
-		case KINC_G4_VERTEX_DATA_U32_2X:
+		case KINC_G5_VERTEX_DATA_U32_2X:
 			vi_attrs[attr].format = VK_FORMAT_R32G32_UINT;
 			break;
-		case KINC_G4_VERTEX_DATA_I32_3X:
+		case KINC_G5_VERTEX_DATA_I32_3X:
 			vi_attrs[attr].format = VK_FORMAT_R32G32B32_SINT;
 			break;
-		case KINC_G4_VERTEX_DATA_U32_3X:
+		case KINC_G5_VERTEX_DATA_U32_3X:
 			vi_attrs[attr].format = VK_FORMAT_R32G32B32_UINT;
 			break;
-		case KINC_G4_VERTEX_DATA_I32_4X:
+		case KINC_G5_VERTEX_DATA_I32_4X:
 			vi_attrs[attr].format = VK_FORMAT_R32G32B32A32_SINT;
 			break;
-		case KINC_G4_VERTEX_DATA_U32_4X:
+		case KINC_G5_VERTEX_DATA_U32_4X:
 			vi_attrs[attr].format = VK_FORMAT_R32G32B32A32_UINT;
 			break;
 		default:
@@ -577,7 +577,7 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 	memset(&rs, 0, sizeof(rs));
 	rs.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 	rs.polygonMode = VK_POLYGON_MODE_FILL;
-	rs.cullMode = convert_cull_mode(pipeline->cullMode);
+	rs.cullMode = convert_cull_mode(pipeline->cull_mode);
 	rs.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	rs.depthClampEnable = VK_FALSE;
 	rs.rasterizerDiscardEnable = VK_FALSE;
@@ -634,12 +634,12 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 
 	shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-	shaderStages[0].module = prepare_vs(&pipeline->impl.vert_shader_module, pipeline->vertexShader);
+	shaderStages[0].module = prepare_vs(&pipeline->impl.vert_shader_module, pipeline->vertex_shader);
 	shaderStages[0].pName = "main";
 
 	shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-	shaderStages[1].module = prepare_fs(&pipeline->impl.frag_shader_module, pipeline->fragmentShader);
+	shaderStages[1].module = prepare_fs(&pipeline->impl.frag_shader_module, pipeline->fragment_shader);
 	shaderStages[1].pName = "main";
 
 	pipeline_info.pVertexInputState = &vi;

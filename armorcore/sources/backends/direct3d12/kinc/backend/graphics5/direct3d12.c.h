@@ -448,7 +448,7 @@ void kinc_g5_end() {
 	began = false;
 }
 
-void kinc_g4_on_g5_internal_resize(int, int);
+void kinc_g5_internal_resize(int, int);
 
 void kinc_internal_resize(int width, int height) {
 	if (width == 0 || height == 0)
@@ -456,7 +456,7 @@ void kinc_internal_resize(int width, int height) {
 	struct dx_window *window = &dx_ctx.windows[0];
 	window->new_width = width;
 	window->new_height = height;
-	kinc_g4_on_g5_internal_resize(width, height);
+	kinc_g5_internal_resize(width, height);
 }
 
 bool kinc_g5_swap_buffers() {
