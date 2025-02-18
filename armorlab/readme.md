@@ -20,6 +20,8 @@ cd armortools/armorlab
 ..\armorcore\make --graphics direct3d11
 # Open generated Visual Studio project at `build\ArmorLab.sln`
 # Build and run
+# To launch ArmorLab outside of Visual Studio:
+# Copy file `build\x64\Release\ArmorLab.exe` and place it in folder `build\out\`
 ```
 
 **Linux (x64)** *wip - cpu only*
