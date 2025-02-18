@@ -19,7 +19,7 @@ cd armortools/armorpaint
 ..\armorcore\make --graphics direct3d11
 # Open generated Visual Studio project at `build\ArmorPaint.sln`
 # Build and run
-# To launch ArmorPaint.exe outside of Visual Studio:
+# To launch ArmorPaint outside of Visual Studio:
 # Copy file `build\x64\Release\ArmorPaint.exe` and place it in folder `build\out\`
 ```
 
