@@ -1,7 +1,7 @@
 #include <kinc/audio2/audio.h>
 #include <kinc/graphics5/graphics.h>
-#include <kinc/input/keyboard.h>
-#include <kinc/input/mouse.h>
+#include <kinc/keyboard.h>
+#include <kinc/mouse.h>
 #include <kinc/log.h>
 #include <kinc/system.h>
 #include <kinc/window.h>

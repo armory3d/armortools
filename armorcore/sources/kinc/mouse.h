@@ -40,7 +40,7 @@ void kinc_internal_mouse_unlock(void);
 void kinc_internal_mouse_window_activated();
 void kinc_internal_mouse_window_deactivated();
 
-#ifdef KINC_IMPLEMENTATION_INPUT
+#ifdef KINC_IMPLEMENTATION_ROOT
 #define KINC_IMPLEMENTATION
 #endif
 

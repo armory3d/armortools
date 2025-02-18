@@ -12,7 +12,7 @@
 #include <string.h>
 #include <kinc/graphics5/rendertarget.h>
 #include <kinc/graphics5/texture.h>
-#include <kinc/math/matrix.h>
+#include <kinc/matrix.h>
 #include "vulkan.h"
 
 static VkSemaphore framebuffer_available;

@@ -14,8 +14,8 @@
 #include <Jolt/Physics/Collision/Shape/HeightFieldShape.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/MotionQuality.h>
-#include <kinc/math/vector.h>
-#include <kinc/math/quaternion.h>
+#include <kinc/vector.h>
+#include <kinc/quaternion.h>
 #include "iron_array.h"
 
 JPH_SUPPRESS_WARNINGS

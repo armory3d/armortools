@@ -1,9 +1,9 @@
 #include "HIDGamepad.h"
 #include "HIDManager.h"
 #include <kinc/error.h>
-#include <kinc/input/gamepad.h>
+#include <kinc/gamepad.h>
 #include <kinc/log.h>
-#include <kinc/math/core.h>
+#include <kinc/core.h>
 
 static void inputValueCallback(void *inContext, IOReturn inResult, void *inSender, IOHIDValueRef inIOHIDValueRef);
 static void valueAvailableCallback(void *inContext, IOReturn inResult, void *inSender);

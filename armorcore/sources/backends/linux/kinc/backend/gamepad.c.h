@@ -1,6 +1,6 @@
 #include "gamepad.h"
 
-#include <kinc/input/gamepad.h>
+#include <kinc/gamepad.h>
 
 #include <fcntl.h>
 #include <libudev.h>

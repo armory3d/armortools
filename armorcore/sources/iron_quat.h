@@ -1,6 +1,6 @@
 #pragma once
 
-#include <kinc/math/quaternion.h>
+#include <kinc/quaternion.h>
 #include "iron_vec4.h"
 #include "iron_mat4.h"
 

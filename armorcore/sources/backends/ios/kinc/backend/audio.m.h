@@ -6,7 +6,7 @@
 
 #include <kinc/audio2/audio.h>
 #include <kinc/backend/video.h>
-#include <kinc/math/core.h>
+#include <kinc/core.h>
 
 #include <stdio.h>
 

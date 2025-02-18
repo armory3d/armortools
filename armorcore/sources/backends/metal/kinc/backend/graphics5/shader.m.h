@@ -1,7 +1,7 @@
 #include <kinc/graphics5/graphics.h>
 #include <kinc/graphics5/pipeline.h>
 #include <kinc/log.h>
-#include <kinc/math/core.h>
+#include <kinc/core.h>
 #include <Metal/Metal.h>
 
 id getMetalDevice(void);

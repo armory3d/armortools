@@ -1,6 +1,6 @@
 #pragma once
 
-#include <kinc/math/matrix.h>
+#include <kinc/matrix.h>
 #include "iron_mat4.h"
 
 mat3_t mat3_create(float _00, float _10, float _20,

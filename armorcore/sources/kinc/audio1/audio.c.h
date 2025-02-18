@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #include <kinc/audio2/audio.h>
-#include <kinc/math/core.h>
+#include <kinc/core.h>
 #include <kinc/threads/atomic.h>
 #include <kinc/threads/mutex.h>
 #include <kinc/video.h>

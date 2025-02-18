@@ -6,12 +6,12 @@
 #include <string.h>
 #include <ctype.h>
 #include <kinc/graphics5/graphics.h>
-#include <kinc/input/keyboard.h>
-#include <kinc/input/mouse.h>
+#include <kinc/keyboard.h>
+#include <kinc/mouse.h>
 #include <kinc/system.h>
 #include <kinc/window.h>
 #include <kinc/log.h>
-#include <kinc/graphics2/g2_ext.h>
+#include <kinc/g2_ext.h>
 #include "iron_string.h"
 #include "iron_gc.h"
 

@@ -1,4 +1,4 @@
-#include <kinc/input/mouse.h>
+#include <kinc/mouse.h>
 
 void kinc_internal_mouse_lock() {}
 

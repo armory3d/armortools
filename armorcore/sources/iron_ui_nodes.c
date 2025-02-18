@@ -4,9 +4,9 @@
 #include <string.h>
 #include <math.h>
 #include <kinc/graphics5/graphics.h>
-#include <kinc/input/keyboard.h>
-#include <kinc/graphics2/g2.h>
-#include <kinc/graphics2/g2_ext.h>
+#include <kinc/keyboard.h>
+#include <kinc/g2.h>
+#include <kinc/g2_ext.h>
 #include "iron_ui.h"
 #include "iron_ui_ext.h"
 #include "iron_armpack.h"

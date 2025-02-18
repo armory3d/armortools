@@ -1,7 +1,7 @@
 #include "iron_mat3.h"
 
 #include <math.h>
-#include <kinc/math/core.h>
+#include <kinc/core.h>
 
 mat3_t mat3_create(float _00, float _10, float _20,
 				   float _01, float _11, float _21,

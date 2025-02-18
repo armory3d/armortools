@@ -1,3 +1,3 @@
 #pragma once
 
-#include <kinc/math/vector.h>
+#include <kinc/vector.h>

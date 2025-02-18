@@ -140,7 +140,7 @@ void kinc_linux_init_procs() {
 #include "display.c.h"
 #include "gamepad.c.h"
 #include "mouse.c.h"
-#include "sound.c.h"
+#include "audio.c.h"
 #include "system.c.h"
 #include "video.c.h"
 #include "window.c.h"

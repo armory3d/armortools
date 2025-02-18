@@ -2,7 +2,7 @@
 #include "iron_quat.h"
 
 #include <math.h>
-#include <kinc/math/core.h>
+#include <kinc/core.h>
 
 vec4_t vec4_create(float x, float y, float z, float w) {
 	vec4_t v;

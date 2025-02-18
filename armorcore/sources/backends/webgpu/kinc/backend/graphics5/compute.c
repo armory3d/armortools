@@ -1,5 +1,5 @@
 #include <kinc/graphics5/compute.h>
-#include <kinc/math/core.h>
+#include <kinc/core.h>
 
 void kinc_g5_compute_shader_init(kinc_g5_compute_shader *shader, void *source, int length) {}
 

@@ -2,8 +2,8 @@
 
 #include <kinc/global.h>
 #include <kinc/backend/graphics5/constantbuffer.h>
-#include <kinc/math/matrix.h>
-#include <kinc/math/vector.h>
+#include <kinc/matrix.h>
+#include <kinc/vector.h>
 
 /*! \file constantbuffer.h
     \brief Provides support for managing buffers of constant-data for shaders.

@@ -6,7 +6,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <kinc/graphics2/g2.h>
+#include <kinc/g2.h>
 #include "iron_armpack.h"
 
 #define UI_LAYOUT_VERTICAL 0

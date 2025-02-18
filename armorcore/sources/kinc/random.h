@@ -11,7 +11,7 @@ int64_t kinc_random_get(void);
 int64_t kinc_random_get_max(int64_t max);
 int64_t kinc_random_get_in(int64_t min, int64_t max);
 
-#ifdef KINC_IMPLEMENTATION_MATH
+#ifdef KINC_IMPLEMENTATION_ROOT
 #define KINC_IMPLEMENTATION
 #endif
 

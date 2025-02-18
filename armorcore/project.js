@@ -7,10 +7,6 @@ let project = new Project(flags.name);
 	let g5 = false;
 
 	project.add_cfiles("sources/kinc/*");
-	project.add_cfiles("sources/kinc/graphics2/*");
-	project.add_cfiles("sources/kinc/input/*");
-	project.add_cfiles("sources/kinc/math/*");
-	project.add_cfiles("sources/kinc/simd/*");
 	project.add_cfiles("sources/kinc/threads/*");
 	project.add_include_dir("sources");
 

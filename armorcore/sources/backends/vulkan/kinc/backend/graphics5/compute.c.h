@@ -1,7 +1,7 @@
 #include <kinc/graphics5/compute.h>
 #include <kinc/graphics5/texture.h>
 #include <kinc/log.h>
-#include <kinc/math/core.h>
+#include <kinc/core.h>
 
 static void parse_shader(uint32_t *shader_source, int shader_length, kinc_internal_named_number *locations, kinc_internal_named_number *textureBindings, kinc_internal_named_number *uniformOffsets);
 static VkShaderModule create_shader_module(const void *code, size_t size);

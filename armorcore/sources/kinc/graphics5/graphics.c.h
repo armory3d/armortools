@@ -5,8 +5,8 @@
 #include <kinc/window.h>
 #include <kinc/color.h>
 #include <kinc/filereader.h>
-#include <kinc/math/core.h>
-#include <kinc/math/matrix.h>
+#include <kinc/core.h>
+#include <kinc/matrix.h>
 #include <kinc/graphics5/indexbuffer.h>
 #include <kinc/graphics5/vertexbuffer.h>
 #include <kinc/graphics5/pipeline.h>

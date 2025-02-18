@@ -1,5 +1,5 @@
 #include "funcs.h"
-#include <kinc/input/mouse.h>
+#include <kinc/mouse.h>
 
 void kinc_internal_mouse_lock() {
 	procs.mouse_lock();

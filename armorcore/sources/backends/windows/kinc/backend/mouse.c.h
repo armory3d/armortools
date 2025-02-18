@@ -1,7 +1,7 @@
 #include <kinc/backend/windows.h>
 #include <kinc/system.h>
 #include <kinc/window.h>
-#include <kinc/input/mouse.h>
+#include <kinc/mouse.h>
 
 void kinc_internal_mouse_lock() {
 	kinc_mouse_hide();

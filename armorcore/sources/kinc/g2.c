@@ -10,9 +10,9 @@
 #include <kinc/graphics5/vertexbuffer.h>
 #include <kinc/graphics5/vertexstructure.h>
 #include <kinc/filereader.h>
-#include <kinc/math/matrix.h>
-#include <kinc/math/vector.h>
-#include <kinc/simd/float32x4.h>
+#include <kinc/matrix.h>
+#include <kinc/vector.h>
+#include <kinc/simd.h>
 #include <kinc/color.h>
 #include <kinc/window.h>
 #include <iron_string.h>

@@ -5,7 +5,7 @@
 
 #include <kinc/graphics5/graphics.h>
 #include <kinc/graphics5/pipeline.h>
-#include <kinc/math/core.h>
+#include <kinc/core.h>
 #include <kinc/window.h>
 #include <dxgi1_4.h>
 #undef CreateWindow

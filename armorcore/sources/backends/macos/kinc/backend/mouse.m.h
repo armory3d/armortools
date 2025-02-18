@@ -1,7 +1,7 @@
 #import <Cocoa/Cocoa.h>
 
 #include <kinc/backend/windowdata.h>
-#include <kinc/input/mouse.h>
+#include <kinc/mouse.h>
 #include <kinc/window.h>
 
 void kinc_internal_mouse_lock() {

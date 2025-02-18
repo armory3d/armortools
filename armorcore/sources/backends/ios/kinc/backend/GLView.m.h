@@ -2,12 +2,10 @@
 
 #include <kinc/graphics5/graphics.h>
 #include <kinc/graphics5/rendertarget.h>
-#include <kinc/input/acceleration.h>
-#include <kinc/input/keyboard.h>
-#include <kinc/input/mouse.h>
-#include <kinc/input/pen.h>
-#include <kinc/input/rotation.h>
-#include <kinc/input/surface.h>
+#include <kinc/keyboard.h>
+#include <kinc/mouse.h>
+#include <kinc/pen.h>
+#include <kinc/surface.h>
 #include <kinc/system.h>
 
 static const int touchmaxcount = 20;

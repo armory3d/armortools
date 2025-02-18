@@ -1,7 +1,7 @@
 #include <kinc/graphics5/compute.h>
 #include <kinc/graphics5/texture.h>
 #include <kinc/log.h>
-#include <kinc/math/core.h>
+#include <kinc/core.h>
 #include <kinc/backend/system_microsoft.h>
 
 void kinc_g5_compute_shader_init(kinc_g5_compute_shader *shader, void *_data, int length) {

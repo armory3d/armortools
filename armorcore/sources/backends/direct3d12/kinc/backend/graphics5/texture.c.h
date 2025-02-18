@@ -2,7 +2,7 @@
 
 #include <kinc/graphics5/rendertarget.h>
 #include <kinc/graphics5/texture.h>
-#include <kinc/math/core.h>
+#include <kinc/core.h>
 
 #include <kinc/backend/system_microsoft.h>
 

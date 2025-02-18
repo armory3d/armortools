@@ -1,6 +1,6 @@
 #include <kinc/graphics5/compute.h>
 #include <kinc/graphics5/texture.h>
-#include <kinc/math/core.h>
+#include <kinc/core.h>
 #include <Metal/Metal.h>
 
 id getMetalDevice(void);

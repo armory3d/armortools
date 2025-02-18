@@ -19,7 +19,7 @@ int kinc_mini(int a, int b);
 int kinc_maxi(int a, int b);
 float kinc_clamp(float value, float minValue, float maxValue);
 
-#ifdef KINC_IMPLEMENTATION_MATH
+#ifdef KINC_IMPLEMENTATION_ROOT
 #define KINC_IMPLEMENTATION
 #endif
 

@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <kinc/math/matrix.h>
+#include <kinc/matrix.h>
 #include <kinc/graphics5/texture.h>
 #include <kinc/graphics5/rendertarget.h>
 #include <kinc/graphics5/pipeline.h>

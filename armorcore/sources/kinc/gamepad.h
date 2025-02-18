@@ -22,7 +22,7 @@ void kinc_internal_gamepad_trigger_disconnect(int gamepad);
 void kinc_internal_gamepad_trigger_axis(int gamepad, int axis, float value);
 void kinc_internal_gamepad_trigger_button(int gamepad, int button, float value);
 
-#ifdef KINC_IMPLEMENTATION_INPUT
+#ifdef KINC_IMPLEMENTATION_ROOT
 #define KINC_IMPLEMENTATION
 #endif
 

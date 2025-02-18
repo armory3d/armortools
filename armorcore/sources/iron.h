@@ -38,8 +38,8 @@
 #ifdef WITH_AUDIO
 #include <kinc/audio2/audio.h>
 #endif
-#include <kinc/graphics2/g2.h>
-#include <kinc/graphics2/g2_ext.h>
+#include <kinc/g2.h>
+#include <kinc/g2_ext.h>
 #ifdef WITH_EMBED
 #include EMBED_H_PATH
 #endif
@@ -335,13 +335,13 @@ string_t *iron_get_arg(i32 index) {
 
 #include <stdio.h>
 #include <kinc/filewriter.h>
-#include <kinc/input/mouse.h>
-#include <kinc/input/surface.h>
-#include <kinc/input/keyboard.h>
-#include <kinc/input/pen.h>
-#include <kinc/input/gamepad.h>
-#include <kinc/math/random.h>
-#include <kinc/math/core.h>
+#include <kinc/mouse.h>
+#include <kinc/surface.h>
+#include <kinc/keyboard.h>
+#include <kinc/pen.h>
+#include <kinc/gamepad.h>
+#include <kinc/random.h>
+#include <kinc/core.h>
 #include <kinc/threads/mutex.h>
 #include <kinc/http.h>
 #include <kinc/graphics5/vertexbuffer.h>

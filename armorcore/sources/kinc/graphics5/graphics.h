@@ -8,8 +8,8 @@
 #include <kinc/backend/graphics5/vertexbuffer.h>
 #include <kinc/backend/graphics5/rendertarget.h>
 #include <kinc/backend/graphics5/texture.h>
-#include <kinc/math/matrix.h>
-#include <kinc/math/vector.h>
+#include <kinc/matrix.h>
+#include <kinc/vector.h>
 #include "pipeline.h"
 
 /*! \file graphics.h

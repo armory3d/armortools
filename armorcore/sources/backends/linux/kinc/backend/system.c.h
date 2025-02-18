@@ -1,9 +1,9 @@
 #include "kinc/graphics5/graphics.h"
 #include <kinc/display.h>
-#include <kinc/input/gamepad.h>
-#include <kinc/input/keyboard.h>
-#include <kinc/input/mouse.h>
-#include <kinc/input/pen.h>
+#include <kinc/gamepad.h>
+#include <kinc/keyboard.h>
+#include <kinc/mouse.h>
+#include <kinc/pen.h>
 #include <kinc/log.h>
 #include <kinc/system.h>
 #include <kinc/video.h>

@@ -7,9 +7,9 @@
 #define vec3_t kinc_vector3_t
 #define vec2_t kinc_vector2_t
 
-#include <kinc/math/vector.h>
-#include <kinc/math/quaternion.h>
-#include <kinc/math/matrix.h>
+#include <kinc/vector.h>
+#include <kinc/quaternion.h>
+#include <kinc/matrix.h>
 
 #include "iron_mat4.h"
 

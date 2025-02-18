@@ -1,8 +1,8 @@
 #include "x11.h"
 
 #include <X11/Xlib.h>
-#include <kinc/input/keyboard.h>
-#include <kinc/input/mouse.h>
+#include <kinc/keyboard.h>
+#include <kinc/mouse.h>
 
 #include <assert.h>
 #include <ctype.h>
@@ -224,7 +224,7 @@ void kinc_x11_shutdown() {
 	xlib.XCloseDisplay(x11_ctx.display);
 }
 
-#include <kinc/input/pen.h>
+#include <kinc/pen.h>
 
 static void init_pen_device(XDeviceInfo *info, struct x11_pen_device *pen, bool eraser) {
 	XDevice *device = xlib.XOpenDevice(x11_ctx.display, info->id);

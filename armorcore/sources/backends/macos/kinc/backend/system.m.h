@@ -2,7 +2,7 @@
 #import <Cocoa/Cocoa.h>
 #include <kinc/backend/HIDManager.h>
 #include <kinc/graphics5/graphics.h>
-#include <kinc/input/keyboard.h>
+#include <kinc/keyboard.h>
 #include <kinc/log.h>
 #include <kinc/system.h>
 #include <kinc/window.h>

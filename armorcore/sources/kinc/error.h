@@ -11,7 +11,6 @@
 */
 
 void kinc_affirm(bool condition);
-void kinc_affirm_message(bool condition, const char *format, ...);
 void kinc_affirm_args(bool condition, const char *format, va_list args);
 void kinc_error(void);
 void kinc_error_message(const char *format, ...);
@@ -42,15 +41,6 @@ void kinc_error_args(const char *format, va_list args);
 void kinc_affirm(bool condition) {
 	if (!condition) {
 		kinc_error();
-	}
-}
-
-void kinc_affirm_message(bool condition, const char *format, ...) {
-	if (!condition) {
-		va_list args;
-		va_start(args, format);
-		kinc_error_args(format, args);
-		va_end(args);
 	}
 }
 

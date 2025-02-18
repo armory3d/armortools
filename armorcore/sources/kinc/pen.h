@@ -21,7 +21,7 @@ void kinc_internal_eraser_trigger_move(int x, int y, float pressure);
 void kinc_internal_eraser_trigger_press(int x, int y, float pressure);
 void kinc_internal_eraser_trigger_release(int x, int y, float pressure);
 
-#ifdef KINC_IMPLEMENTATION_INPUT
+#ifdef KINC_IMPLEMENTATION_ROOT
 #define KINC_IMPLEMENTATION
 #endif
 

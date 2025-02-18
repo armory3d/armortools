@@ -1,14 +1,14 @@
 #include "wayland.h"
 
-#include <kinc/input/pen.h>
+#include <kinc/pen.h>
 #include <kinc/log.h>
 #include <wayland-generated/wayland-pointer-constraint.h>
 #include <wayland-generated/wayland-relative-pointer.h>
 #include <wayland-generated/wayland-tablet.h>
 #include <wayland-generated/xdg-shell.h>
 
-#include <kinc/input/keyboard.h>
-#include <kinc/input/mouse.h>
+#include <kinc/keyboard.h>
+#include <kinc/mouse.h>
 #include <wayland-client-protocol.h>
 #include <wayland-util.h>
 

@@ -2,7 +2,7 @@
 #import "GLViewController.h"
 #import <Foundation/Foundation.h>
 #include <kinc/graphics5/rendertarget.h>
-#include <kinc/math/core.h>
+#include <kinc/core.h>
 #include <objc/runtime.h>
 
 static GLView *glView;
@@ -61,8 +61,8 @@ id getMetalQueue(void) {
 }
 
 #include <kinc/system.h>
-#include <kinc/input/mouse.h>
-#include <kinc/input/surface.h>
+#include <kinc/mouse.h>
+#include <kinc/surface.h>
 
 extern char mobile_title[1024];
 

@@ -14,7 +14,7 @@ void kinc_internal_surface_trigger_touch_start(int index, int x, int y);
 void kinc_internal_surface_trigger_move(int index, int x, int y);
 void kinc_internal_surface_trigger_touch_end(int index, int x, int y);
 
-#ifdef KINC_IMPLEMENTATION_INPUT
+#ifdef KINC_IMPLEMENTATION_ROOT
 #define KINC_IMPLEMENTATION
 #endif
 

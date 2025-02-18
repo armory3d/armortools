@@ -1,6 +1,6 @@
 #pragma once
 
-#include <kinc/math/matrix.h>
+#include <kinc/matrix.h>
 #include "iron_vec4.h"
 #include "iron_quat.h"
 #include "iron_array.h"

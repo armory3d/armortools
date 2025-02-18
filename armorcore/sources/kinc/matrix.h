@@ -61,18 +61,18 @@ void kinc_matrix4x4_set(kinc_matrix4x4_t *matrix, int x, int y, float value);
 void kinc_matrix4x4_transpose(kinc_matrix4x4_t *matrix);
 kinc_matrix4x4_t kinc_matrix4x4_multiply(kinc_matrix4x4_t *a, kinc_matrix4x4_t *b);
 
-#ifdef KINC_IMPLEMENTATION_MATH
+#ifdef KINC_IMPLEMENTATION_ROOT
 #define KINC_IMPLEMENTATION
 #endif
 
 #ifdef KINC_IMPLEMENTATION
 
-#ifdef KINC_IMPLEMENTATION_MATH
+#ifdef KINC_IMPLEMENTATION_ROOT
 #undef KINC_IMPLEMENTATION
 #endif
-#include <kinc/math/core.h>
-#include <kinc/math/matrix.h>
-#ifdef KINC_IMPLEMENTATION_MATH
+#include <kinc/core.h>
+#include <kinc/matrix.h>
+#ifdef KINC_IMPLEMENTATION_ROOT
 #define KINC_IMPLEMENTATION
 #endif
 

@@ -205,7 +205,7 @@ void kinc_internal_keyboard_trigger_key_down(int key_code);
 void kinc_internal_keyboard_trigger_key_up(int key_code);
 void kinc_internal_keyboard_trigger_key_press(unsigned character);
 
-#ifdef KINC_IMPLEMENTATION_INPUT
+#ifdef KINC_IMPLEMENTATION_ROOT
 #define KINC_IMPLEMENTATION
 #endif
 

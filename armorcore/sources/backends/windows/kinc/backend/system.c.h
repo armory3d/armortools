@@ -1,12 +1,12 @@
 #include <kinc/graphics5/graphics.h>
-#include <kinc/input/gamepad.h>
+#include <kinc/gamepad.h>
 #include <kinc/backend/system_microsoft.h>
 #include <kinc/backend/windows.h>
 #include <kinc/display.h>
-#include <kinc/input/keyboard.h>
-#include <kinc/input/mouse.h>
-#include <kinc/input/pen.h>
-#include <kinc/input/surface.h>
+#include <kinc/keyboard.h>
+#include <kinc/mouse.h>
+#include <kinc/pen.h>
+#include <kinc/surface.h>
 #include <kinc/log.h>
 #include <kinc/system.h>
 #include <kinc/threads/thread.h>

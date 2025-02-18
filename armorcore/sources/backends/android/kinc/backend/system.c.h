@@ -3,14 +3,14 @@
 #include <kinc/error.h>
 #include <kinc/backend/Android.h>
 #include <kinc/graphics5/graphics.h>
-#include <kinc/input/gamepad.h>
-#include <kinc/input/keyboard.h>
-#include <kinc/input/mouse.h>
+#include <kinc/gamepad.h>
+#include <kinc/keyboard.h>
+#include <kinc/mouse.h>
 #include <android/sensor.h>
 #include <android/window.h>
 #include <android_native_app_glue.h>
-#include <kinc/input/pen.h>
-#include <kinc/input/surface.h>
+#include <kinc/pen.h>
+#include <kinc/surface.h>
 #include <kinc/log.h>
 #include <kinc/system.h>
 #include <kinc/threads/mutex.h>
@@ -957,8 +957,6 @@ void kinc_set_keep_screen_on(bool on) {
 	}
 }
 
-#include <kinc/input/acceleration.h>
-#include <kinc/input/rotation.h>
 #include <kinc/window.h>
 #include <sys/time.h>
 #include <time.h>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <kinc/math/vector.h>
+#include <kinc/vector.h>
 #include "iron_vec4.h"
 
 vec2_t vec2_create(float x, float y);
