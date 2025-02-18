@@ -1,4 +1,4 @@
-#include <kinc/threads/thread.h>
+#include <kinc/thread.h>
 
 void kinc_threads_init() {}
 

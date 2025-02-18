@@ -9,7 +9,7 @@
 #include <kinc/surface.h>
 #include <kinc/log.h>
 #include <kinc/system.h>
-#include <kinc/threads/thread.h>
+#include <kinc/thread.h>
 #include <kinc/video.h>
 #include <kinc/window.h>
 #define DIRECTINPUT_VERSION 0x0800

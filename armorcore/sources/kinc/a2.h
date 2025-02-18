@@ -37,7 +37,7 @@ void kinc_a2_internal_sample_rate_callback(void);
 
 #ifdef KINC_IMPLEMENTATION
 
-#include <kinc/threads/mutex.h>
+#include <kinc/mutex.h>
 #include <memory.h>
 #include <stddef.h>
 

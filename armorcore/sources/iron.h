@@ -10,7 +10,7 @@
 #include <kinc/window.h>
 #include <kinc/system.h>
 #include <kinc/display.h>
-#include <kinc/threads/thread.h>
+#include <kinc/thread.h>
 #include <kinc/graphics5/graphics.h>
 #include <kinc/filereader.h>
 #include "iron_string.h"
@@ -342,7 +342,7 @@ string_t *iron_get_arg(i32 index) {
 #include <kinc/gamepad.h>
 #include <kinc/random.h>
 #include <kinc/core.h>
-#include <kinc/threads/mutex.h>
+#include <kinc/mutex.h>
 #include <kinc/http.h>
 #include <kinc/graphics5/vertexbuffer.h>
 #include <kinc/graphics5/indexbuffer.h>

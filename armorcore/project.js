@@ -7,7 +7,6 @@ let project = new Project(flags.name);
 	let g5 = false;
 
 	project.add_cfiles("sources/kinc/*");
-	project.add_cfiles("sources/kinc/threads/*");
 	project.add_include_dir("sources");
 
 	function add_backend(name) {
@@ -267,9 +266,6 @@ if (flags.with_audio) {
 	project.add_define("KINC_A2");
 	project.add_define("WITH_AUDIO");
 	project.add_define("arm_audio");
-
-	project.add_cfiles("sources/kinc/audio1/*");
-	project.add_cfiles("sources/kinc/audio2/*");
 	project.add_cfiles("sources/libs/stb_vorbis.c");
 }
 

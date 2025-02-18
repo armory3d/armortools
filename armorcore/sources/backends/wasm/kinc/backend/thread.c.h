@@ -1,4 +1,4 @@
-#include <kinc/threads/thread.h>
+#include <kinc/thread.h>
 
 void kinc_thread_init(kinc_thread_t *t, void (*thread)(void *param), void *param) {}
 

@@ -1,4 +1,4 @@
-#include <kinc/threads/thread.h>
+#include <kinc/thread.h>
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>

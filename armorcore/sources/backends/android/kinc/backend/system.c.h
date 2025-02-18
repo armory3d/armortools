@@ -13,7 +13,7 @@
 #include <kinc/surface.h>
 #include <kinc/log.h>
 #include <kinc/system.h>
-#include <kinc/threads/mutex.h>
+#include <kinc/mutex.h>
 #include <kinc/video.h>
 #include <kinc/window.h>
 #include <unistd.h>
