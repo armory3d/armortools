@@ -1005,10 +1005,10 @@ bool kinc_internal_handle_messages(void) {
 				ASensorEvent event;
 				while (ASensorEventQueue_getEvents(sensorEventQueue, &event, 1) > 0) {
 					if (event.type == ASENSOR_TYPE_ACCELEROMETER) {
-						kinc_internal_on_acceleration(event.acceleration.x, event.acceleration.y, event.acceleration.z);
+						// kinc_internal_on_acceleration(event.acceleration.x, event.acceleration.y, event.acceleration.z);
 					}
 					else if (event.type == ASENSOR_TYPE_GYROSCOPE) {
-						kinc_internal_on_rotation(event.vector.x, event.vector.y, event.vector.z);
+						// kinc_internal_on_rotation(event.vector.x, event.vector.y, event.vector.z);
 					}
 				}
 			}
@@ -1149,7 +1149,7 @@ const char *kinc_gamepad_product_name(int gamepad) {
 	return "gamepad";
 }
 
-#include <kinc/io/filereader.h>
+#include <kinc/filereader.h>
 
 #define CLASS_NAME "android/app/NativeActivity"
 

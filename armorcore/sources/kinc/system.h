@@ -93,8 +93,8 @@ void kinc_internal_paste_callback(char *);
 #endif
 
 #undef KINC_IMPLEMENTATION
-#include <kinc/io/filereader.h>
-#include <kinc/io/filewriter.h>
+#include <kinc/filereader.h>
+#include <kinc/filewriter.h>
 #define KINC_IMPLEMENTATION
 
 #include <stdlib.h>

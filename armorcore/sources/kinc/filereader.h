@@ -63,7 +63,7 @@ char *kinc_internal_get_files_location(void);
 bool kinc_internal_file_reader_callback(kinc_file_reader_t *reader, const char *filename, int type);
 bool kinc_internal_file_reader_open(kinc_file_reader_t *reader, const char *filename, int type);
 
-#ifdef KINC_IMPLEMENTATION_IO
+#ifdef KINC_IMPLEMENTATION_ROOT
 #define KINC_IMPLEMENTATION
 #endif
 

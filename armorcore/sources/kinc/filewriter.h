@@ -17,7 +17,7 @@ bool kinc_file_writer_open(kinc_file_writer_t *writer, const char *filepath);
 void kinc_file_writer_write(kinc_file_writer_t *writer, void *data, int size);
 void kinc_file_writer_close(kinc_file_writer_t *writer);
 
-#ifdef KINC_IMPLEMENTATION_IO
+#ifdef KINC_IMPLEMENTATION_ROOT
 #define KINC_IMPLEMENTATION
 #endif
 

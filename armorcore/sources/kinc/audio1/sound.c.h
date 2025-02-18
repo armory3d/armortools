@@ -5,7 +5,7 @@
 
 #include <kinc/audio2/audio.h>
 #include <kinc/error.h>
-#include <kinc/io/filereader.h>
+#include <kinc/filereader.h>
 
 #include <assert.h>
 #include <string.h>

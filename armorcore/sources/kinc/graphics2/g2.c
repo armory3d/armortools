@@ -9,7 +9,7 @@
 #include <kinc/graphics5/rendertarget.h>
 #include <kinc/graphics5/vertexbuffer.h>
 #include <kinc/graphics5/vertexstructure.h>
-#include <kinc/io/filereader.h>
+#include <kinc/filereader.h>
 #include <kinc/math/matrix.h>
 #include <kinc/math/vector.h>
 #include <kinc/simd/float32x4.h>

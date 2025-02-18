@@ -69,7 +69,7 @@ int kinc_socket_receive(kinc_socket_t *socket, uint8_t *data, int maxSize, unsig
 
 unsigned kinc_url_to_int(const char *url, int port);
 
-#ifdef KINC_IMPLEMENTATION_NETWORK
+#ifdef KINC_IMPLEMENTATION_ROOT
 #define KINC_IMPLEMENTATION
 #endif
 

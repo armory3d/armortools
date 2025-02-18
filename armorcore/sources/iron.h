@@ -12,7 +12,7 @@
 #include <kinc/display.h>
 #include <kinc/threads/thread.h>
 #include <kinc/graphics5/graphics.h>
-#include <kinc/io/filereader.h>
+#include <kinc/filereader.h>
 #include "iron_string.h"
 #include "iron_array.h"
 #include "iron_map.h"
@@ -334,7 +334,7 @@ string_t *iron_get_arg(i32 index) {
 #ifndef NO_IRON_API
 
 #include <stdio.h>
-#include <kinc/io/filewriter.h>
+#include <kinc/filewriter.h>
 #include <kinc/input/mouse.h>
 #include <kinc/input/surface.h>
 #include <kinc/input/keyboard.h>
@@ -343,7 +343,7 @@ string_t *iron_get_arg(i32 index) {
 #include <kinc/math/random.h>
 #include <kinc/math/core.h>
 #include <kinc/threads/mutex.h>
-#include <kinc/network/http.h>
+#include <kinc/http.h>
 #include <kinc/graphics5/vertexbuffer.h>
 #include <kinc/graphics5/indexbuffer.h>
 #include <kinc/graphics5/pipeline.h>

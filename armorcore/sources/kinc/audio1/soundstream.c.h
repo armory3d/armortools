@@ -3,7 +3,7 @@
 #define STB_VORBIS_HEADER_ONLY
 #include <stb_vorbis.c>
 
-#include <kinc/io/filereader.h>
+#include <kinc/filereader.h>
 
 #include <stdlib.h>
 #include <string.h>

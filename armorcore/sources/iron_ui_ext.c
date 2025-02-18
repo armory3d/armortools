@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <kinc/input/keyboard.h>
-#include <kinc/io/filereader.h>
+#include <kinc/filereader.h>
 #include <kinc/system.h>
 #include "iron_string.h"
 

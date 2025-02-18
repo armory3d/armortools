@@ -1,5 +1,5 @@
 #include <kinc/log.h>
-#include <kinc/network/http.h>
+#include <kinc/http.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <winhttp.h>

@@ -4,7 +4,7 @@
 #include <kinc/system.h>
 #include <kinc/window.h>
 #include <kinc/color.h>
-#include <kinc/io/filereader.h>
+#include <kinc/filereader.h>
 #include <kinc/math/core.h>
 #include <kinc/math/matrix.h>
 #include <kinc/graphics5/indexbuffer.h>
