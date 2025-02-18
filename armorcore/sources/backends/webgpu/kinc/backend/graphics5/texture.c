@@ -27,7 +27,7 @@ void kinc_g5_texture_init(kinc_g5_texture_t *texture, int width, int height, kin
 
 }
 
-void kinc_g5_texture_init_from_image(kinc_g5_texture_t *texture, kinc_image_t *image) {}
+void kinc_g5_texture_init_from_bytes(kinc_g5_texture_t *texture, void *data, int width, int height, kinc_image_format_t format) {}
 void kinc_g5_texture_init_from_encoded_data(kinc_g5_texture_t *texture, void *data, int size, const char *format, bool readable) {}
 void kinc_g5_texture_init_from_data(kinc_g5_texture_t *texture, void *data, int width, int height, int format, bool readable) {}
 void kinc_g5_texture_init_non_sampled_access(kinc_g5_texture_t *texture, int width, int height, kinc_image_format_t format) {}
@@ -45,4 +45,4 @@ int kinc_g5_texture_stride(kinc_g5_texture_t *texture) {
 
 void kinc_g5_texture_generate_mipmaps(kinc_g5_texture_t *texture, int levels) {}
 
-void kinc_g5_texture_set_mipmap(kinc_g5_texture_t *texture, kinc_image_t *mipmap, int level) {}
+void kinc_g5_texture_set_mipmap(kinc_g5_texture_t *texture, kinc_g5_texture_t *mipmap, int level) {}

@@ -625,3 +625,21 @@ void kinc_g4_compute(int x, int y, int z) {
 	kinc_g5_command_list_compute(&commandList, x, y, z);
 	kinc_internal_end_draw(true);
 }
+
+void kinc_g5_render_target_get_pixels(kinc_g5_render_target_t *render_target, uint8_t *data) {
+	kinc_g5_command_list_get_render_target_pixels(&commandList, render_target, data);
+}
+
+void kinc_g5_render_target_generate_mipmaps(kinc_g5_render_target_t *render_target, int levels) {
+
+}
+
+void kinc_g4_index_buffer_unlock_all(kinc_g5_index_buffer_t *buffer) {
+	kinc_g5_index_buffer_unlock_all(buffer);
+	kinc_g5_command_list_upload_index_buffer(&commandList, buffer);
+}
+
+void kinc_g4_index_buffer_unlock(kinc_g5_index_buffer_t *buffer, int count) {
+	kinc_g5_index_buffer_unlock(buffer, count);
+	kinc_g5_command_list_upload_index_buffer(&commandList, buffer);
+}

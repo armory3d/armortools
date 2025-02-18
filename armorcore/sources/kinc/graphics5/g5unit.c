@@ -1,6 +1,4 @@
 #include "pipeline.c.h"
 #include "constantbuffer.c.h"
 #include "graphics.c.h"
-#include "indexbuffer.c.h"
 #include "vertexbuffer.c.h"
-#include "rendertarget.c.h"

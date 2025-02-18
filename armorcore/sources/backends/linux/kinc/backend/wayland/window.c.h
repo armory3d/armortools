@@ -1,6 +1,6 @@
 #include "wayland.h"
 
-#include <kinc/image.h>
+#include <kinc/graphics5/texture.h>
 #include <kinc/window.h>
 
 // for all that shared memory stuff later on

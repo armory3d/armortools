@@ -33,12 +33,6 @@ static DXGI_FORMAT convertImageFormat(kinc_image_format_t format) {
 		return DXGI_FORMAT_R32G32B32A32_FLOAT;
 	case KINC_IMAGE_FORMAT_RGBA64:
 		return DXGI_FORMAT_R16G16B16A16_FLOAT;
-	case KINC_IMAGE_FORMAT_RGB24:
-		return DXGI_FORMAT_R8G8B8A8_UNORM;
-	case KINC_IMAGE_FORMAT_A32:
-		return DXGI_FORMAT_R32_FLOAT;
-	case KINC_IMAGE_FORMAT_A16:
-		return DXGI_FORMAT_R16_FLOAT;
 	case KINC_IMAGE_FORMAT_GREY8:
 		return DXGI_FORMAT_R8_UNORM;
 	case KINC_IMAGE_FORMAT_BGRA32:
@@ -56,12 +50,6 @@ static int formatByteSize(kinc_image_format_t format) {
 		return 16;
 	case KINC_IMAGE_FORMAT_RGBA64:
 		return 8;
-	case KINC_IMAGE_FORMAT_RGB24:
-		return 4;
-	case KINC_IMAGE_FORMAT_A32:
-		return 4;
-	case KINC_IMAGE_FORMAT_A16:
-		return 2;
 	case KINC_IMAGE_FORMAT_GREY8:
 		return 1;
 	case KINC_IMAGE_FORMAT_BGRA32:
@@ -162,17 +150,18 @@ void createHeaps(kinc_g5_command_list_t *list) {
 
 void kinc_memory_emergency();
 
-void kinc_g5_texture_init_from_image(kinc_g5_texture_t *texture, kinc_image_t *image) {
+void kinc_g5_texture_init_from_bytes(kinc_g5_texture_t *texture, void *data, int width, int height, kinc_image_format_t format) {
 	memset(&texture->impl, 0, sizeof(texture->impl));
 	texture->impl.stage = 0;
 	texture->impl.mipmap = true;
-	texture->width = image->width;
-	texture->height = image->height;
+	texture->width = width;
+	texture->height = height;
 	texture->_uploaded = false;
-	texture->format = image->format;
+	texture->format = format;
+	texture->data = data;
 
-	DXGI_FORMAT d3dformat = convertImageFormat(image->format);
-	int formatSize = formatByteSize(image->format);
+	DXGI_FORMAT d3dformat = convertImageFormat(format);
+	int formatSize = formatByteSize(format);
 
 	D3D12_HEAP_PROPERTIES heapPropertiesDefault;
 	heapPropertiesDefault.Type = D3D12_HEAP_TYPE_DEFAULT;
@@ -245,13 +234,13 @@ void kinc_g5_texture_init_from_image(kinc_g5_texture_t *texture, kinc_image_t *i
 		}
 	}
 
-	texture->impl.stride = (int)ceilf(uploadBufferSize / (float)(image->height * d3d12_textureAlignment())) * d3d12_textureAlignment();
+	texture->impl.stride = (int)ceilf(uploadBufferSize / (float)(height * d3d12_textureAlignment())) * d3d12_textureAlignment();
 
 	BYTE *pixel;
 	texture->impl.uploadImage->lpVtbl->Map(texture->impl.uploadImage, 0, NULL, (void **)&pixel);
 	int pitch = kinc_g5_texture_stride(texture);
 	for (int y = 0; y < texture->height; ++y) {
-		memcpy(&pixel[y * pitch], &((uint8_t *)image->data)[y * texture->width * formatSize], texture->width * formatSize);
+		memcpy(&pixel[y * pitch], &((uint8_t *)data)[y * texture->width * formatSize], texture->width * formatSize);
 	}
 	texture->impl.uploadImage->lpVtbl->Unmap(texture->impl.uploadImage, 0, NULL);
 
@@ -279,7 +268,6 @@ void kinc_g5_texture_init_from_image(kinc_g5_texture_t *texture, kinc_image_t *i
 }
 
 void create_texture(struct kinc_g5_texture *texture, int width, int height, kinc_image_format_t format, D3D12_RESOURCE_FLAGS flags) {
-	// kinc_image_init(&texture->image, width, height, format, readable);
 	memset(&texture->impl, 0, sizeof(texture->impl));
 	texture->impl.stage = 0;
 	texture->impl.mipmap = true;
@@ -438,4 +426,4 @@ int kinc_g5_texture_stride(struct kinc_g5_texture *texture) {
 
 void kinc_g5_texture_generate_mipmaps(struct kinc_g5_texture *texture, int levels) {}
 
-void kinc_g5_texture_set_mipmap(struct kinc_g5_texture *texture, kinc_image_t *mipmap, int level) {}
+void kinc_g5_texture_set_mipmap(struct kinc_g5_texture *texture, struct kinc_g5_texture *mipmap, int level) {}

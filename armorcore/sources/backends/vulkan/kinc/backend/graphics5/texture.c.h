@@ -1,6 +1,5 @@
 #include "vulkan.h"
 #include <kinc/graphics5/texture.h>
-#include <kinc/image.h>
 #include <kinc/log.h>
 
 bool use_staging_buffer = false;
@@ -170,12 +169,6 @@ static VkFormat convert_image_format(kinc_image_format_t format) {
 		return VK_FORMAT_R32G32B32A32_SFLOAT;
 	case KINC_IMAGE_FORMAT_RGBA64:
 		return VK_FORMAT_R16G16B16A16_SFLOAT;
-	case KINC_IMAGE_FORMAT_RGB24:
-		return VK_FORMAT_B8G8R8A8_UNORM;
-	case KINC_IMAGE_FORMAT_A32:
-		return VK_FORMAT_R32_SFLOAT;
-	case KINC_IMAGE_FORMAT_A16:
-		return VK_FORMAT_R16_SFLOAT;
 	case KINC_IMAGE_FORMAT_GREY8:
 		return VK_FORMAT_R8_UNORM;
 	case KINC_IMAGE_FORMAT_BGRA32:
@@ -193,12 +186,6 @@ static int format_byte_size(kinc_image_format_t format) {
 		return 16;
 	case KINC_IMAGE_FORMAT_RGBA64:
 		return 8;
-	case KINC_IMAGE_FORMAT_RGB24:
-		return 4;
-	case KINC_IMAGE_FORMAT_A32:
-		return 4;
-	case KINC_IMAGE_FORMAT_A16:
-		return 2;
 	case KINC_IMAGE_FORMAT_GREY8:
 		return 1;
 	case KINC_IMAGE_FORMAT_BGRA32:
@@ -221,13 +208,14 @@ static void update_stride(kinc_g5_texture_t *texture) {
 	texture->impl.stride = (int)layout.rowPitch;
 }
 
-void kinc_g5_texture_init_from_image(kinc_g5_texture_t *texture, kinc_image_t *image) {
-	texture->width = image->width;
-	texture->height = image->height;
+void kinc_g5_texture_init_from_bytes(kinc_g5_texture_t *texture, void *data, int width, int height, kinc_image_format_t format) {
+	texture->width = width;
+	texture->height = height;
 	texture->_uploaded = false;
-	texture->format = image->format;
+	texture->format = format;
+	texture->data = data;
 
-	const VkFormat tex_format = convert_image_format(image->format);
+	const VkFormat tex_format = convert_image_format(format);
 	VkFormatProperties props;
 	VkResult err;
 
@@ -235,7 +223,7 @@ void kinc_g5_texture_init_from_image(kinc_g5_texture_t *texture, kinc_image_t *i
 
 	if ((props.linearTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT) && !use_staging_buffer) {
 		// Device can texture using linear textures
-		prepare_texture_image((uint8_t *)image->data, (uint32_t)image->width, (uint32_t)image->height, &texture->impl.texture, VK_IMAGE_TILING_LINEAR,
+		prepare_texture_image((uint8_t *)data, (uint32_t)width, (uint32_t)height, &texture->impl.texture, VK_IMAGE_TILING_LINEAR,
 		                      VK_IMAGE_USAGE_SAMPLED_BIT /*| VK_IMAGE_USAGE_STORAGE_BIT*/, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &texture->impl.deviceSize,
 		                      tex_format);
 
@@ -246,9 +234,9 @@ void kinc_g5_texture_init_from_image(kinc_g5_texture_t *texture, kinc_image_t *i
 		struct texture_object staging_texture;
 
 		memset(&staging_texture, 0, sizeof(staging_texture));
-		prepare_texture_image((uint8_t *)image->data, (uint32_t)image->width, (uint32_t)image->height, &staging_texture, VK_IMAGE_TILING_LINEAR,
+		prepare_texture_image((uint8_t *)data, (uint32_t)width, (uint32_t)height, &staging_texture, VK_IMAGE_TILING_LINEAR,
 		                      VK_IMAGE_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &texture->impl.deviceSize, tex_format);
-		prepare_texture_image((uint8_t *)image->data, (uint32_t)image->width, (uint32_t)image->height, &texture->impl.texture, VK_IMAGE_TILING_OPTIMAL,
+		prepare_texture_image((uint8_t *)data, (uint32_t)width, (uint32_t)height, &texture->impl.texture, VK_IMAGE_TILING_OPTIMAL,
 		                      (VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT /*| VK_IMAGE_USAGE_STORAGE_BIT*/),
 		                      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &texture->impl.deviceSize, tex_format);
 		set_image_layout(staging_texture.image, VK_IMAGE_ASPECT_COLOR_BIT, staging_texture.imageLayout, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
@@ -417,4 +405,4 @@ void kinc_g5_texture_unlock(kinc_g5_texture_t *texture) {
 
 void kinc_g5_texture_generate_mipmaps(kinc_g5_texture_t *texture, int levels) {}
 
-void kinc_g5_texture_set_mipmap(kinc_g5_texture_t *texture, kinc_image_t *mipmap, int level) {}
+void kinc_g5_texture_set_mipmap(kinc_g5_texture_t *texture, kinc_g5_texture_t *mipmap, int level) {}

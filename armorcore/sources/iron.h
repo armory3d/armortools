@@ -349,6 +349,7 @@ string_t *iron_get_arg(i32 index) {
 #include <kinc/graphics5/pipeline.h>
 #include <kinc/graphics5/rendertarget.h>
 #include <kinc/graphics5/texture.h>
+#include <lz4x.h>
 #ifdef WITH_AUDIO
 #include <kinc/audio1/audio.h>
 #include <kinc/audio1/sound.h>
@@ -1545,33 +1546,23 @@ kinc_g5_texture_t *iron_load_image(string_t *file, bool readable) {
 	}
 	#endif
 
-	kinc_image_t *image = (kinc_image_t *)malloc(sizeof(kinc_image_t));
 	kinc_file_reader_t reader;
-	if (kinc_file_reader_open(&reader, file, KINC_FILE_TYPE_ASSET)) {
-		unsigned char *image_data;
-		int image_width;
-		int image_height;
-		kinc_image_format_t image_format;
-		if (!_load_image(&reader, file, &image_data, &image_width, &image_height, &image_format)) {
-			free(image);
-			return NULL;
-		}
-		kinc_image_init(image, image_data, image_width, image_height, image_format);
+	if (!kinc_file_reader_open(&reader, file, KINC_FILE_TYPE_ASSET)) {
+		return NULL;
 	}
-	else {
-		free(image);
+
+	unsigned char *image_data;
+	int image_width;
+	int image_height;
+	kinc_image_format_t image_format;
+	if (!_load_image(&reader, file, &image_data, &image_width, &image_height, &image_format)) {
 		return NULL;
 	}
 
 	kinc_g5_texture_t *texture = (kinc_g5_texture_t *)malloc(sizeof(kinc_g5_texture_t));
-	kinc_g5_texture_init_from_image(texture, image);
+	kinc_g5_texture_init_from_bytes(texture, image_data, image_width, image_height, image_format);
 	if (!readable) {
-		free(image->data);
-		kinc_image_destroy(image);
-		free(image);
-	}
-	else {
-		texture->image = image;
+		free(image_data);
 	}
 
 	return texture;
@@ -1834,7 +1825,6 @@ kinc_g5_texture_t *iron_g4_create_texture(i32 width, i32 height, i32 format) {
 
 kinc_g5_texture_t *iron_g4_create_texture_from_bytes(buffer_t *data, i32 width, i32 height, i32 format, bool readable) {
 	kinc_g5_texture_t *texture = (kinc_g5_texture_t *)malloc(sizeof(kinc_g5_texture_t));
-	kinc_image_t *image = (kinc_image_t *)malloc(sizeof(kinc_image_t));
 	void *image_data;
 	if (readable) {
 		image_data = malloc(data->length);
@@ -1844,21 +1834,16 @@ kinc_g5_texture_t *iron_g4_create_texture_from_bytes(buffer_t *data, i32 width, 
 		image_data = data->buffer;
 	}
 
-	kinc_image_init(image, image_data, width, height, (kinc_image_format_t)format);
-	kinc_g5_texture_init_from_image(texture, image);
+	kinc_g5_texture_init_from_bytes(texture, image_data, width, height, (kinc_image_format_t)format);
 	if (!readable) {
-		kinc_image_destroy(image);
-		free(image);
+		// free(image_data);
 	}
-	else {
-		texture->image = image;
-	}
+
 	return texture;
 }
 
 kinc_g5_texture_t *iron_g4_create_texture_from_encoded_bytes(buffer_t *data, string_t *format, bool readable) {
 	kinc_g5_texture_t *texture = (kinc_g5_texture_t *)malloc(sizeof(kinc_g5_texture_t));
-	kinc_image_t *image = (kinc_image_t *)malloc(sizeof(kinc_image_t));
 
 	unsigned char *content_data = (unsigned char *)data->buffer;
 	int content_length = (int)data->length;
@@ -1901,15 +1886,9 @@ kinc_g5_texture_t *iron_g4_create_texture_from_encoded_bytes(buffer_t *data, str
 		image_format = KINC_IMAGE_FORMAT_RGBA32;
 	}
 
-	kinc_image_init(image, image_data, image_width, image_height, image_format);
-	kinc_g5_texture_init_from_image(texture, image);
+	kinc_g5_texture_init_from_bytes(texture, image_data, image_width, image_height, image_format);
 	if (!readable) {
-		free(image->data);
-		kinc_image_destroy(image);
-		free(image);
-	}
-	else {
-		texture->image = image;
+		free(image_data);;
 	}
 
 	return texture;
@@ -1921,12 +1900,6 @@ int _format_byte_size(kinc_image_format_t format) {
 		return 16;
 	case KINC_IMAGE_FORMAT_RGBA64:
 		return 8;
-	case KINC_IMAGE_FORMAT_RGB24:
-		return 4;
-	case KINC_IMAGE_FORMAT_A32:
-		return 4;
-	case KINC_IMAGE_FORMAT_A16:
-		return 2;
 	case KINC_IMAGE_FORMAT_GREY8:
 		return 1;
 	case KINC_IMAGE_FORMAT_BGRA32:
@@ -1936,18 +1909,16 @@ int _format_byte_size(kinc_image_format_t format) {
 	}
 }
 
-buffer_t *iron_g4_get_texture_pixels(kinc_image_t *image) {
-	uint8_t *data = kinc_image_get_pixels(image);
-	int byte_length = _format_byte_size(image->format) * image->width * image->height;
+buffer_t *iron_g4_get_texture_pixels(kinc_g5_texture_t *image) {
 	buffer_t *buffer = malloc(sizeof(buffer_t));
-	buffer->buffer = data;
-	buffer->length = byte_length;
+	buffer->buffer = image->data;
+	buffer->length = _format_byte_size(image->format) * image->width * image->height;
 	return buffer;
 }
 
 void iron_g4_get_render_target_pixels(kinc_g5_render_target_t *rt, buffer_t *data) {
 	uint8_t *b = (uint8_t *)data->buffer;
-	kinc_g4_render_target_get_pixels(rt, b);
+	kinc_g5_render_target_get_pixels(rt, b);
 
 	// Release staging texture immediately to save memory
 	#ifdef KINC_DIRECT3D12
@@ -1986,7 +1957,7 @@ void iron_g4_set_mipmaps(kinc_g5_texture_t *texture, any_array_t *mipmaps) {
 	for (int32_t i = 0; i < mipmaps->length; ++i) {
 		image_t *img = mipmaps->buffer[i];
 		kinc_g5_texture_t *img_tex = img->texture_;
-		kinc_g5_texture_set_mipmap(texture, img_tex->image, i + 1);
+		kinc_g5_texture_set_mipmap(texture, img_tex, i + 1);
 	}
 }
 

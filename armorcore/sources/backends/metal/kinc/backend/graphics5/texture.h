@@ -1,6 +1,6 @@
 #pragma once
 
-#include <kinc/image.h>
+#include <kinc/graphics5/texture.h>
 
 typedef struct {
 	int index;

@@ -838,11 +838,8 @@ bool kinc_g2_font_load(kinc_g2_font_t *font, int size) {
 	img->height = height;
 	img->chars = baked;
 	img->first_unused_y = status;
-	kinc_image_t fontimg;
-	kinc_image_init_from_bytes(&fontimg, pixels, width, height, KINC_IMAGE_FORMAT_GREY8);
 	img->tex = (kinc_g5_texture_t *)malloc(sizeof(kinc_g5_texture_t));
-	kinc_g5_texture_init_from_image(img->tex, &fontimg);
-	kinc_image_destroy(&fontimg);
+	kinc_g5_texture_init_from_bytes(img->tex, pixels, width, height, KINC_IMAGE_FORMAT_GREY8);
 	free(pixels);
 	return true;
 }
@@ -985,11 +982,8 @@ void _kinc_g2_font_13(kinc_g2_font_t *font, void *blob) {
 	img->width = 128;
 	img->height = 128;
 	img->first_unused_y = 0;
-	kinc_image_t font_img;
-	kinc_image_init_from_bytes(&font_img, (void *)g2_font_13_pixels, 128, 128, KINC_IMAGE_FORMAT_GREY8);
 	img->tex = (kinc_g5_texture_t *)malloc(sizeof(kinc_g5_texture_t));
-	kinc_g5_texture_init_from_image(img->tex, &font_img);
-	kinc_image_destroy(&font_img);
+	kinc_g5_texture_init_from_bytes(img->tex, (void *)g2_font_13_pixels, 128, 128, KINC_IMAGE_FORMAT_GREY8);
 
 	stbtt_bakedchar *baked = (stbtt_bakedchar *)malloc(95 * sizeof(stbtt_bakedchar));
 	for (int i = 0; i < 95; ++i) {

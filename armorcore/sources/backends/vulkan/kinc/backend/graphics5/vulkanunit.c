@@ -12,7 +12,6 @@
 #include <string.h>
 #include <kinc/graphics5/rendertarget.h>
 #include <kinc/graphics5/texture.h>
-#include <kinc/image.h>
 #include <kinc/math/matrix.h>
 #include "vulkan.h"
 

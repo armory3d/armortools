@@ -1,7 +1,7 @@
 #pragma once
 
 #include <kinc/global.h>
-#include <kinc/image.h>
+#include <kinc/graphics5/texture.h>
 #include "rendertarget.h"
 #include "vertexstructure.h"
 #include <kinc/backend/graphics5/indexbuffer.h>
@@ -101,3 +101,11 @@ void kinc_g4_compute(int x, int y, int z);
 void kinc_g4_set_index_buffer(struct kinc_g5_index_buffer *buffer);
 
 void kinc_g4_internal_init_window(int depth_buffer_bits, bool vsync);
+
+void kinc_g4_render_target_use_color_as_texture(kinc_g5_render_target_t *renderTarget, struct kinc_g5_texture_unit unit);
+void kinc_g4_render_target_use_depth_as_texture(kinc_g5_render_target_t *renderTarget, struct kinc_g5_texture_unit unit);
+void kinc_g5_render_target_get_pixels(kinc_g5_render_target_t *renderTarget, uint8_t *data);
+void kinc_g5_render_target_generate_mipmaps(kinc_g5_render_target_t *renderTarget, int levels);
+
+void kinc_g4_index_buffer_unlock_all(struct kinc_g5_index_buffer *buffer);
+void kinc_g4_index_buffer_unlock(struct kinc_g5_index_buffer *buffer, int count);

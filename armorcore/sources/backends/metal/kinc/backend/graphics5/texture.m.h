@@ -1,7 +1,6 @@
 #include <kinc/graphics5/texture.h>
 #include <kinc/graphics5/graphics.h>
 #include <kinc/graphics5/texture.h>
-#include <kinc/image.h>
 #include <kinc/log.h>
 #import <Metal/Metal.h>
 
@@ -13,18 +12,12 @@ static MTLPixelFormat convert_image_format(kinc_image_format_t format) {
 		return MTLPixelFormatRGBA8Unorm;
 	case KINC_IMAGE_FORMAT_GREY8:
 		return MTLPixelFormatR8Unorm;
-	case KINC_IMAGE_FORMAT_RGB24:
-		return MTLPixelFormatRGBA8Unorm;
 	case KINC_IMAGE_FORMAT_RGBA128:
 		return MTLPixelFormatRGBA32Float;
 	case KINC_IMAGE_FORMAT_RGBA64:
 		return MTLPixelFormatRGBA16Float;
-	case KINC_IMAGE_FORMAT_A32:
-		return MTLPixelFormatR32Float;
 	case KINC_IMAGE_FORMAT_BGRA32:
 		return MTLPixelFormatBGRA8Unorm;
-	case KINC_IMAGE_FORMAT_A16:
-		return MTLPixelFormatR16Float;
 	}
 }
 
@@ -34,12 +27,6 @@ static int formatByteSize(kinc_image_format_t format) {
 		return 16;
 	case KINC_IMAGE_FORMAT_RGBA64:
 		return 8;
-	case KINC_IMAGE_FORMAT_RGB24:
-		return 4;
-	case KINC_IMAGE_FORMAT_A32:
-		return 4;
-	case KINC_IMAGE_FORMAT_A16:
-		return 2;
 	case KINC_IMAGE_FORMAT_GREY8:
 		return 1;
 	case KINC_IMAGE_FORMAT_BGRA32:
@@ -83,19 +70,19 @@ void kinc_g5_texture_init(kinc_g5_texture_t *texture, int width, int height, kin
 	texture->_uploaded = true;
 }
 
-void kinc_g5_texture_init_from_image(kinc_g5_texture_t *texture, struct kinc_image *image) {
-	texture->width = image->width;
-	texture->height = image->height;
-	texture->format = image->format;
+void kinc_g5_texture_init_from_bytes(kinc_g5_texture_t *texture, void *data, int width, int height, kinc_image_format_t format) {
+	texture->width = width;
+	texture->height = height;
+	texture->format = format;
+	texture->data = data;
 	texture->_uploaded = false;
-	texture->format = image->format;
 	texture->impl.data = NULL;
-	create(texture, image->width, image->height, image->format, true);
+	create(texture, width, height, format, true);
 	id<MTLTexture> tex = (__bridge id<MTLTexture>)texture->impl._tex;
 	[tex replaceRegion:MTLRegionMake2D(0, 0, texture->width, texture->height)
 	       mipmapLevel:0
 	             slice:0
-	         withBytes:image->data
+	         withBytes:data
 	       bytesPerRow:kinc_g5_texture_stride(texture)
 	     bytesPerImage:kinc_g5_texture_stride(texture) * texture->height];
 }
@@ -128,16 +115,11 @@ int kinc_g5_texture_stride(kinc_g5_texture_t *texture) {
 		return texture->width;
 	case KINC_IMAGE_FORMAT_RGBA32:
 	case KINC_IMAGE_FORMAT_BGRA32:
-	case KINC_IMAGE_FORMAT_RGB24:
 		return texture->width * 4;
 	case KINC_IMAGE_FORMAT_RGBA64:
 		return texture->width * 8;
 	case KINC_IMAGE_FORMAT_RGBA128:
 		return texture->width * 16;
-	case KINC_IMAGE_FORMAT_A16:
-		return texture->width * 2;
-	case KINC_IMAGE_FORMAT_A32:
-		return texture->width * 4;
 	}
 }
 
@@ -158,7 +140,7 @@ void kinc_g5_texture_unlock(kinc_g5_texture_t *tex) {
 
 void kinc_g5_texture_generate_mipmaps(kinc_g5_texture_t *texture, int levels) {}
 
-void kinc_g5_texture_set_mipmap(kinc_g5_texture_t *texture, kinc_image_t *mipmap, int level) {
+void kinc_g5_texture_set_mipmap(kinc_g5_texture_t *texture, kinc_g5_texture_t *mipmap, int level) {
 	if (!texture->impl.has_mipmaps) {
 		id<MTLDevice> device = getMetalDevice();
 		MTLTextureDescriptor *descriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:convert_image_format((kinc_image_format_t)texture->format)

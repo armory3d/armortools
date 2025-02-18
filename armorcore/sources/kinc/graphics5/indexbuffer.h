@@ -18,6 +18,3 @@ void *kinc_g5_index_buffer_lock(kinc_g5_index_buffer_t *buffer, int start, int c
 void kinc_g5_index_buffer_unlock_all(kinc_g5_index_buffer_t *buffer);
 void kinc_g5_index_buffer_unlock(kinc_g5_index_buffer_t *buffer, int count);
 int kinc_g5_index_buffer_count(kinc_g5_index_buffer_t *buffer);
-
-void kinc_g4_index_buffer_unlock_all(kinc_g5_index_buffer_t *buffer);
-void kinc_g4_index_buffer_unlock(kinc_g5_index_buffer_t *buffer, int count);
