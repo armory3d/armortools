@@ -27,7 +27,6 @@ void kinc_window_hide() {}
 void kinc_window_set_title(const char *title) {}
 
 void kinc_window_create(kinc_window_options_t *win, kinc_framebuffer_options_t *frame) {
-	return 0;
 }
 
 void kinc_window_set_resize_callback(void (*callback)(int x, int y, void *data), void *data) {

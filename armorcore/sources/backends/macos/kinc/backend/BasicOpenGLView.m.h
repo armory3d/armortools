@@ -262,71 +262,71 @@ static bool controlKeyMouseButton = false;
 - (void)mouseDown:(NSEvent *)theEvent {
 	if ([theEvent modifierFlags] & NSControlKeyMask) {
 		controlKeyMouseButton = true;
-		kinc_internal_mouse_trigger_press(0, 1, getMouseX(theEvent), getMouseY(theEvent));
+		kinc_internal_mouse_trigger_press(1, getMouseX(theEvent), getMouseY(theEvent));
 	}
 	else {
 		controlKeyMouseButton = false;
-		kinc_internal_mouse_trigger_press(0, 0, getMouseX(theEvent), getMouseY(theEvent));
+		kinc_internal_mouse_trigger_press(0, getMouseX(theEvent), getMouseY(theEvent));
 	}
 
 	if ([theEvent subtype] == NSTabletPointEventSubtype) {
-		kinc_internal_pen_trigger_press(0, getMouseX(theEvent), getMouseY(theEvent), theEvent.pressure);
+		kinc_internal_pen_trigger_press(getMouseX(theEvent), getMouseY(theEvent), theEvent.pressure);
 	}
 }
 
 - (void)mouseUp:(NSEvent *)theEvent {
 	if (controlKeyMouseButton) {
-		kinc_internal_mouse_trigger_release(0, 1, getMouseX(theEvent), getMouseY(theEvent));
+		kinc_internal_mouse_trigger_release(1, getMouseX(theEvent), getMouseY(theEvent));
 	}
 	else {
-		kinc_internal_mouse_trigger_release(0, 0, getMouseX(theEvent), getMouseY(theEvent));
+		kinc_internal_mouse_trigger_release(0, getMouseX(theEvent), getMouseY(theEvent));
 	}
 	controlKeyMouseButton = false;
 
 	if ([theEvent subtype] == NSTabletPointEventSubtype) {
-		kinc_internal_pen_trigger_release(0, getMouseX(theEvent), getMouseY(theEvent), theEvent.pressure);
+		kinc_internal_pen_trigger_release(getMouseX(theEvent), getMouseY(theEvent), theEvent.pressure);
 	}
 }
 
 - (void)mouseMoved:(NSEvent *)theEvent {
-	kinc_internal_mouse_trigger_move(0, getMouseX(theEvent), getMouseY(theEvent));
+	kinc_internal_mouse_trigger_move(getMouseX(theEvent), getMouseY(theEvent));
 }
 
 - (void)mouseDragged:(NSEvent *)theEvent {
-	kinc_internal_mouse_trigger_move(0, getMouseX(theEvent), getMouseY(theEvent));
+	kinc_internal_mouse_trigger_move(getMouseX(theEvent), getMouseY(theEvent));
 
 	if ([theEvent subtype] == NSTabletPointEventSubtype) {
-		kinc_internal_pen_trigger_move(0, getMouseX(theEvent), getMouseY(theEvent), theEvent.pressure);
+		kinc_internal_pen_trigger_move(getMouseX(theEvent), getMouseY(theEvent), theEvent.pressure);
 	}
 }
 
 - (void)rightMouseDown:(NSEvent *)theEvent {
-	kinc_internal_mouse_trigger_press(0, 1, getMouseX(theEvent), getMouseY(theEvent));
+	kinc_internal_mouse_trigger_press(1, getMouseX(theEvent), getMouseY(theEvent));
 }
 
 - (void)rightMouseUp:(NSEvent *)theEvent {
-	kinc_internal_mouse_trigger_release(0, 1, getMouseX(theEvent), getMouseY(theEvent));
+	kinc_internal_mouse_trigger_release(1, getMouseX(theEvent), getMouseY(theEvent));
 }
 
 - (void)rightMouseDragged:(NSEvent *)theEvent {
-	kinc_internal_mouse_trigger_move(0, getMouseX(theEvent), getMouseY(theEvent));
+	kinc_internal_mouse_trigger_move(getMouseX(theEvent), getMouseY(theEvent));
 }
 
 - (void)otherMouseDown:(NSEvent *)theEvent {
-	kinc_internal_mouse_trigger_press(0, 2, getMouseX(theEvent), getMouseY(theEvent));
+	kinc_internal_mouse_trigger_press(2, getMouseX(theEvent), getMouseY(theEvent));
 }
 
 - (void)otherMouseUp:(NSEvent *)theEvent {
-	kinc_internal_mouse_trigger_release(0, 2, getMouseX(theEvent), getMouseY(theEvent));
+	kinc_internal_mouse_trigger_release(2, getMouseX(theEvent), getMouseY(theEvent));
 }
 
 - (void)otherMouseDragged:(NSEvent *)theEvent {
-	kinc_internal_mouse_trigger_move(0, getMouseX(theEvent), getMouseY(theEvent));
+	kinc_internal_mouse_trigger_move(getMouseX(theEvent), getMouseY(theEvent));
 }
 
 - (void)scrollWheel:(NSEvent *)theEvent {
 	int delta = [theEvent deltaY];
-	kinc_internal_mouse_trigger_scroll(0, -delta);
+	kinc_internal_mouse_trigger_scroll(-delta);
 }
 
 - (NSDragOperation)draggingEntered:(id<NSDraggingInfo>)sender {

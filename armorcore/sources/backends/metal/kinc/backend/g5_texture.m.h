@@ -117,6 +117,7 @@ int kinc_g5_texture_stride(kinc_g5_texture_t *texture) {
 		return texture->width;
 	case KINC_IMAGE_FORMAT_RGBA32:
 	case KINC_IMAGE_FORMAT_BGRA32:
+	default:
 		return texture->width * 4;
 	case KINC_IMAGE_FORMAT_RGBA64:
 		return texture->width * 8;
@@ -137,7 +138,7 @@ void kinc_g5_texture_unlock(kinc_g5_texture_t *tex) {
 	             withBytes:tex->impl.data
 	           bytesPerRow:kinc_g5_texture_stride(tex)
 	         bytesPerImage:kinc_g5_texture_stride(tex) * tex->height];
-	texture->_uploaded = false;
+	tex->_uploaded = false;
 }
 
 void kinc_g5_texture_generate_mipmaps(kinc_g5_texture_t *texture, int levels) {}

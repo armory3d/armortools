@@ -34,7 +34,7 @@ void kinc_mouse_set_position(int x, int y) {
 	point.x = window.frame.origin.x + (x / scale);
 	point.y = rect.size.height - (window.frame.origin.y + (y / scale));
 
-	CGDisplayMoveCursorToPoint(point);
+	CGDisplayMoveCursorToPoint(0, point);
 	CGAssociateMouseAndMouseCursorPosition(true);
 }
 
