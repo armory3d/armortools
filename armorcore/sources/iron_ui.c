@@ -484,7 +484,7 @@ void ui_resize(ui_handle_t *handle, int w, int h) {
 	if (h < 1) {
 		h = 1;
 	}
-	kinc_g5_render_target_init(&handle->texture, w, h, KINC_G5_RENDER_TARGET_FORMAT_32BIT, 0);
+	kinc_g5_render_target_init(&handle->texture, w, h, KINC_IMAGE_FORMAT_RGBA32, 0);
 }
 
 bool ui_input_in_rect(float x, float y, float w, float h) {
@@ -898,7 +898,7 @@ void ui_bake_elements() {
 		kinc_g5_render_target_destroy(&current->check_select_image);
 	}
 	float r = UI_CHECK_SELECT_SIZE();
-	kinc_g5_render_target_init(&current->check_select_image, r, r, KINC_G5_RENDER_TARGET_FORMAT_32BIT, 0);
+	kinc_g5_render_target_init(&current->check_select_image, r, r, KINC_IMAGE_FORMAT_RGBA32, 0);
 	kinc_g2_set_render_target(&current->check_select_image);
 	kinc_g5_clear(KINC_G5_CLEAR_COLOR, 0x00000000, 0);
 	kinc_g2_set_color(0xffffffff);
@@ -910,7 +910,7 @@ void ui_bake_elements() {
 		kinc_g5_render_target_destroy(&current->radio_image);
 	}
 	r = UI_CHECK_SIZE();
-	kinc_g5_render_target_init(&current->radio_image, r, r, KINC_G5_RENDER_TARGET_FORMAT_32BIT, 0);
+	kinc_g5_render_target_init(&current->radio_image, r, r, KINC_IMAGE_FORMAT_RGBA32, 0);
 	kinc_g2_set_render_target(&current->radio_image);
 	kinc_g5_clear(KINC_G5_CLEAR_COLOR, 0x00000000, 0);
 	kinc_g2_set_color(0xffaaaaaa);
@@ -923,7 +923,7 @@ void ui_bake_elements() {
 		kinc_g5_render_target_destroy(&current->radio_select_image);
 	}
 	r = UI_CHECK_SELECT_SIZE();
-	kinc_g5_render_target_init(&current->radio_select_image, r, r, KINC_G5_RENDER_TARGET_FORMAT_32BIT, 0);
+	kinc_g5_render_target_init(&current->radio_select_image, r, r, KINC_IMAGE_FORMAT_RGBA32, 0);
 	kinc_g2_set_render_target(&current->radio_select_image);
 	kinc_g5_clear(KINC_G5_CLEAR_COLOR, 0x00000000, 0);
 	kinc_g2_set_color(0xffaaaaaa);
@@ -937,7 +937,7 @@ void ui_bake_elements() {
 			kinc_g5_render_target_destroy(&current->filled_round_corner_image);
 		}
 		r = 4.0 * UI_SCALE();
-		kinc_g5_render_target_init(&current->filled_round_corner_image, r, r, KINC_G5_RENDER_TARGET_FORMAT_32BIT, 0);
+		kinc_g5_render_target_init(&current->filled_round_corner_image, r, r, KINC_IMAGE_FORMAT_RGBA32, 0);
 		kinc_g2_set_render_target(&current->filled_round_corner_image);
 		kinc_g5_clear(KINC_G5_CLEAR_COLOR, 0x00000000, 0);
 		kinc_g2_set_color(0xffffffff);
@@ -947,7 +947,7 @@ void ui_bake_elements() {
 		if (current->round_corner_image.width != 0) {
 			kinc_g5_render_target_destroy(&current->round_corner_image);
 		}
-		kinc_g5_render_target_init(&current->round_corner_image, r, r, KINC_G5_RENDER_TARGET_FORMAT_32BIT, 0);
+		kinc_g5_render_target_init(&current->round_corner_image, r, r, KINC_IMAGE_FORMAT_RGBA32, 0);
 		kinc_g2_set_render_target(&current->round_corner_image);
 		kinc_g5_clear(KINC_G5_CLEAR_COLOR, 0x00000000, 0);
 		kinc_g2_set_color(0xffffffff);

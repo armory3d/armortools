@@ -38,7 +38,7 @@ void kinc_g5_internal_pipeline_init(kinc_g5_pipeline_t *pipe) {
 		pipe->color_write_mask_green[i] = true;
 		pipe->color_write_mask_blue[i] = true;
 		pipe->color_write_mask_alpha[i] = true;
-		pipe->color_attachment[i] = KINC_G5_RENDER_TARGET_FORMAT_32BIT;
+		pipe->color_attachment[i] = KINC_IMAGE_FORMAT_RGBA32;
 	}
 
 	pipe->color_attachment_count = 1;
@@ -66,7 +66,7 @@ void kinc_g5_internal_pipeline_set_defaults(kinc_g5_pipeline_t *state) {
 		state->color_write_mask_green[i] = true;
 		state->color_write_mask_blue[i] = true;
 		state->color_write_mask_alpha[i] = true;
-		state->color_attachment[i] = KINC_G5_RENDER_TARGET_FORMAT_32BIT;
+		state->color_attachment[i] = KINC_IMAGE_FORMAT_RGBA32;
 	}
 
 	state->color_attachment_count = 1;

@@ -3,7 +3,6 @@
 #include <stddef.h>
 #include <kinc/global.h>
 #include <kinc/backend/graphics5/g5_commandlist.h>
-#include "rendertarget.h"
 #include "g5_texture.h"
 #include "g5_pipeline.h"
 

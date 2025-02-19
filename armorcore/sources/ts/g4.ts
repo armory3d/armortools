@@ -68,9 +68,6 @@ function g4_pipeline_get_depth_buffer_bits(format: depth_format_t): i32 {
 	if (format == depth_format_t.DEPTH24) {
 		return 24;
 	}
-	if (format == depth_format_t.DEPTH16) {
-		return 16;
-	}
 	return 0;
 }
 
@@ -346,35 +343,10 @@ function _image_set_size_from_render_target(image: image_t, _rt: any) {
 }
 
 function image_get_depth_buffer_bits(format: depth_format_t): i32 {
-	if (format == depth_format_t.NO_DEPTH) {
-		return -1;
-	}
 	if (format == depth_format_t.DEPTH24) {
 		return 24;
 	}
-	if (format == depth_format_t.DEPTH16) {
-		return 16;
-	}
-	return 0;
-}
-
-function image_get_tex_format(format: tex_format_t): i32 {
-	if (format == tex_format_t.RGBA32) {
-		return 0;
-	}
-	if (format == tex_format_t.RGBA128) {
-		return 3;
-	}
-	if (format == tex_format_t.RGBA64) {
-		return 4;
-	}
-	if (format == tex_format_t.R32) {
-		return 5;
-	}
-	if (format == tex_format_t.R16) {
-		return 7;
-	}
-	return 1; // R8
+	return -1;
 }
 
 function image_from_texture(tex: any): image_t {
@@ -387,7 +359,7 @@ function image_from_bytes(buffer: buffer_t, width: i32, height: i32, format: tex
 	let readable: bool = true;
 	let image: image_t = _image_create(null);
 	image.format = format;
-	image.texture_ = iron_g4_create_texture_from_bytes(buffer, width, height, image_get_tex_format(format), readable);
+	image.texture_ = iron_g4_create_texture_from_bytes(buffer, width, height, format, readable);
 	_image_set_size_from_texture(image, image.texture_);
 	return image;
 }
@@ -402,7 +374,7 @@ function image_from_encoded_bytes(buffer: buffer_t, format: string, readable: bo
 function image_create(width: i32, height: i32, format: tex_format_t = tex_format_t.RGBA32): image_t {
 	let image: image_t = _image_create(null);
 	image.format = format;
-	image.texture_ = iron_g4_create_texture(width, height, image_get_tex_format(format));
+	image.texture_ = iron_g4_create_texture(width, height, format);
 	_image_set_size_from_texture(image, image.texture_);
 	return image;
 }
@@ -424,9 +396,6 @@ function image_format_byte_size(format: tex_format_t): i32 {
 	}
 	if (format == tex_format_t.RGBA128) {
 		return 16;
-	}
-	if (format == tex_format_t.DEPTH16) {
-		return 2;
 	}
 	if (format == tex_format_t.RGBA64) {
 		return 8;
@@ -593,16 +562,14 @@ enum usage_t {
 enum tex_format_t {
 	RGBA32,
 	RGBA64,
-	R32,
 	RGBA128,
-	DEPTH16,
 	R8,
 	R16,
+	R32,
 }
 
 enum depth_format_t {
 	NO_DEPTH,
-	DEPTH16,
 	DEPTH24,
 }
 

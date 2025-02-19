@@ -15,7 +15,6 @@ static void end_render_pass(void);
 #include "indexbuffer.m.h"
 #include "pipeline.m.h"
 #include "raytrace.m.h"
-#include "rendertarget.m.h"
 #include "sampler.m.h"
 #include "shader.m.h"
 #include "texture.m.h"

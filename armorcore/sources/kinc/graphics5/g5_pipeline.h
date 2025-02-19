@@ -3,7 +3,7 @@
 #include <kinc/global.h>
 #include <kinc/backend/graphics5/g5_pipeline.h>
 #include <kinc/graphics5/vertexstructure.h>
-#include <kinc/graphics5/rendertarget.h>
+#include <kinc/graphics5/g5_texture.h>
 #include "g5.h"
 
 /*! \file g5_pipeline.h
@@ -111,7 +111,7 @@ typedef struct kinc_g5_pipeline {
 	bool color_write_mask_alpha[8];
 
 	int color_attachment_count;
-	kinc_g5_render_target_format_t color_attachment[8];
+	kinc_image_format_t color_attachment[8];
 	int depth_attachment_bits;
 
 	PipelineState5Impl impl;

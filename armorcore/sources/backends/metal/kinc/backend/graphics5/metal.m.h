@@ -3,7 +3,7 @@
 #include <kinc/system.h>
 #include <kinc/window.h>
 #include <kinc/graphics5/g5_commandlist.h>
-#include <kinc/graphics5/rendertarget.h>
+#include <kinc/graphics5/g5_texture.h>
 #import <Metal/Metal.h>
 #import <MetalKit/MTKView.h>
 
@@ -40,7 +40,7 @@ void kinc_g5_internal_init(void) {}
 
 void kinc_g5_internal_init_window(int depthBufferBits, bool vsync) {
 	depthBits = depthBufferBits;
-	kinc_g5_render_target_init(&fallback_render_target, 32, 32, KINC_G5_RENDER_TARGET_FORMAT_32BIT, 0);
+	kinc_g5_render_target_init(&fallback_render_target, 32, 32, KINC_IMAGE_FORMAT_RGBA32, 0);
 }
 
 void kinc_g5_flush(void) {}

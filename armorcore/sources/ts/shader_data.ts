@@ -331,9 +331,6 @@ function shader_context_get_tex_format(s: string): tex_format_t {
 	if (s == "RGBA128") {
 		return tex_format_t.RGBA128;
 	}
-	if (s == "DEPTH16") {
-		return tex_format_t.DEPTH16;
-	}
 	if (s == "R32") {
 		return tex_format_t.R32;
 	}

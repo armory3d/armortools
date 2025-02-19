@@ -12,3 +12,9 @@ typedef struct {
 	void *data;
 	bool has_mipmaps;
 } Texture5Impl;
+
+typedef struct {
+	void *_tex;
+	void *_texReadback;
+	void *_depthTex;
+} RenderTarget5Impl;

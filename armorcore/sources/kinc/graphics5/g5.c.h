@@ -10,7 +10,6 @@
 #include <kinc/graphics5/indexbuffer.h>
 #include <kinc/graphics5/vertexbuffer.h>
 #include <kinc/graphics5/g5_pipeline.h>
-#include <kinc/graphics5/rendertarget.h>
 #include <kinc/graphics5/g5_texture.h>
 #include <kinc/graphics5/g5_commandlist.h>
 #include <kinc/graphics5/g5_compute.h>
@@ -104,7 +103,7 @@ void kinc_g4_internal_init_window(int depthBufferBits, bool vsync) {
 	windows[0].currentBuffer = -1;
 	for (int i = 0; i < FRAMEBUFFER_COUNT; ++i) {
 		kinc_g5_render_target_init_framebuffer(&windows[0].framebuffers[i], kinc_window_width(), kinc_window_height(),
-		                                       KINC_G5_RENDER_TARGET_FORMAT_32BIT, depthBufferBits);
+		                                       KINC_IMAGE_FORMAT_RGBA32, depthBufferBits);
 	}
 	kinc_g5_constant_buffer_init(&vertexConstantBuffer, CONSTANT_BUFFER_SIZE * CONSTANT_BUFFER_MULTIPLY);
 	kinc_g5_constant_buffer_init(&fragmentConstantBuffer, CONSTANT_BUFFER_SIZE * CONSTANT_BUFFER_MULTIPLY);
@@ -269,7 +268,7 @@ void kinc_g4_begin() {
 	if (resized) {
 		for (int i = 0; i < FRAMEBUFFER_COUNT; ++i) {
 			kinc_g5_render_target_init_framebuffer(&windows[0].framebuffers[i], kinc_window_width(), kinc_window_height(),
-			                                       KINC_G5_RENDER_TARGET_FORMAT_32BIT, 16);
+			                                       KINC_IMAGE_FORMAT_RGBA32, 16);
 		}
 		windows[0].resized = false;
 	}

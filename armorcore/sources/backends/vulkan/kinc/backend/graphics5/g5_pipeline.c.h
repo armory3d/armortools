@@ -239,19 +239,19 @@ static VkShaderModule prepare_fs(VkShaderModule *frag_shader_module, kinc_g5_sha
 	return *frag_shader_module;
 }
 
-static VkFormat convert_format(kinc_g5_render_target_format_t format) {
+static VkFormat convert_format(kinc_image_format_t format) {
 	switch (format) {
-	case KINC_G5_RENDER_TARGET_FORMAT_128BIT_FLOAT:
+	case KINC_IMAGE_FORMAT_RGBA128:
 		return VK_FORMAT_R32G32B32A32_SFLOAT;
-	case KINC_G5_RENDER_TARGET_FORMAT_64BIT_FLOAT:
+	case KINC_IMAGE_FORMAT_RGBA64:
 		return VK_FORMAT_R16G16B16A16_SFLOAT;
-	case KINC_G5_RENDER_TARGET_FORMAT_32BIT_RED_FLOAT:
+	case KINC_IMAGE_FORMAT_R32:
 		return VK_FORMAT_R32_SFLOAT;
-	case KINC_G5_RENDER_TARGET_FORMAT_16BIT_RED_FLOAT:
+	case KINC_IMAGE_FORMAT_R16:
 		return VK_FORMAT_R16_SFLOAT;
-	case KINC_G5_RENDER_TARGET_FORMAT_8BIT_RED:
+	case KINC_IMAGE_FORMAT_R8:
 		return VK_FORMAT_R8_UNORM;
-	case KINC_G5_RENDER_TARGET_FORMAT_32BIT:
+	case KINC_IMAGE_FORMAT_RGBA32:
 	default:
 		return VK_FORMAT_B8G8R8A8_UNORM;
 	}

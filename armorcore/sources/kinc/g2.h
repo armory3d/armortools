@@ -7,7 +7,6 @@
 
 #include <kinc/matrix.h>
 #include <kinc/graphics5/g5_texture.h>
-#include <kinc/graphics5/rendertarget.h>
 #include <kinc/graphics5/g5_pipeline.h>
 #include <stdbool.h>
 #include <stdint.h>

@@ -6,7 +6,6 @@
 #include <kinc/graphics5/indexbuffer.h>
 #include <kinc/graphics5/g5_pipeline.h>
 #include <kinc/graphics5/g5_texture.h>
-#include <kinc/graphics5/rendertarget.h>
 #include <kinc/graphics5/vertexbuffer.h>
 #include <kinc/graphics5/vertexstructure.h>
 #include <kinc/filereader.h>
@@ -839,7 +838,7 @@ bool kinc_g2_font_load(kinc_g2_font_t *font, int size) {
 	img->chars = baked;
 	img->first_unused_y = status;
 	img->tex = (kinc_g5_texture_t *)malloc(sizeof(kinc_g5_texture_t));
-	kinc_g5_texture_init_from_bytes(img->tex, pixels, width, height, KINC_IMAGE_FORMAT_GREY8);
+	kinc_g5_texture_init_from_bytes(img->tex, pixels, width, height, KINC_IMAGE_FORMAT_R8);
 	free(pixels);
 	return true;
 }
@@ -983,7 +982,7 @@ void _kinc_g2_font_13(kinc_g2_font_t *font, void *blob) {
 	img->height = 128;
 	img->first_unused_y = 0;
 	img->tex = (kinc_g5_texture_t *)malloc(sizeof(kinc_g5_texture_t));
-	kinc_g5_texture_init_from_bytes(img->tex, (void *)g2_font_13_pixels, 128, 128, KINC_IMAGE_FORMAT_GREY8);
+	kinc_g5_texture_init_from_bytes(img->tex, (void *)g2_font_13_pixels, 128, 128, KINC_IMAGE_FORMAT_R8);
 
 	stbtt_bakedchar *baked = (stbtt_bakedchar *)malloc(95 * sizeof(stbtt_bakedchar));
 	for (int i = 0; i < 95; ++i) {

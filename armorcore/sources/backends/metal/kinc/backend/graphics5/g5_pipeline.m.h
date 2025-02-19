@@ -84,19 +84,19 @@ static MTLCullMode convert_cull_mode(kinc_g5_cull_mode_t cull) {
 	}
 }
 
-static MTLPixelFormat convert_render_target_format(kinc_g5_render_target_format_t format) {
+static MTLPixelFormat convert_render_target_format(kinc_image_format_t format) {
 	switch (format) {
-	case KINC_G5_RENDER_TARGET_FORMAT_128BIT_FLOAT:
+	case KINC_IMAGE_FORMAT_RGBA128:
 		return MTLPixelFormatRGBA32Float;
-	case KINC_G5_RENDER_TARGET_FORMAT_64BIT_FLOAT:
+	case KINC_IMAGE_FORMAT_RGBA64:
 		return MTLPixelFormatRGBA16Float;
-	case KINC_G5_RENDER_TARGET_FORMAT_32BIT_RED_FLOAT:
+	case KINC_IMAGE_FORMAT_R32:
 		return MTLPixelFormatR32Float;
-	case KINC_G5_RENDER_TARGET_FORMAT_16BIT_RED_FLOAT:
+	case KINC_IMAGE_FORMAT_R16:
 		return MTLPixelFormatR16Float;
-	case KINC_G5_RENDER_TARGET_FORMAT_8BIT_RED:
+	case KINC_IMAGE_FORMAT_R8:
 		return MTLPixelFormatR8Unorm;
-	case KINC_G5_RENDER_TARGET_FORMAT_32BIT:
+	case KINC_IMAGE_FORMAT_RGBA32:
 	default:
 		return MTLPixelFormatBGRA8Unorm;
 	}

@@ -347,7 +347,6 @@ string_t *iron_get_arg(i32 index) {
 #include <kinc/graphics5/vertexbuffer.h>
 #include <kinc/graphics5/indexbuffer.h>
 #include <kinc/graphics5/g5_pipeline.h>
-#include <kinc/graphics5/rendertarget.h>
 #include <kinc/graphics5/g5_texture.h>
 #include <lz4x.h>
 #ifdef WITH_AUDIO
@@ -1457,7 +1456,7 @@ void iron_g4_compile_pipeline(kinc_g5_pipeline_t *pipeline, vertex_struct_t *str
 	pipeline->color_attachment_count = state->color_attachment_count;
 	i32_array_t *color_attachment_array = state->color_attachments;
 	for (int i = 0; i < 8; ++i) {
-		pipeline->color_attachment[i] = (kinc_g5_render_target_format_t)color_attachment_array->buffer[i];
+		pipeline->color_attachment[i] = (kinc_image_format_t)color_attachment_array->buffer[i];
 	}
 	pipeline->depth_attachment_bits = state->depth_attachment_bits;
 
@@ -1813,7 +1812,7 @@ buffer_t *iron_read_storage(string_t *name) {
 
 kinc_g5_render_target_t *iron_g4_create_render_target(i32 width, i32 height, i32 format, i32 depth_buffer_bits) {
 	kinc_g5_render_target_t *render_target = (kinc_g5_render_target_t *)malloc(sizeof(kinc_g5_render_target_t));
-	kinc_g5_render_target_init(render_target, width, height, (kinc_g5_render_target_format_t)format, depth_buffer_bits);
+	kinc_g5_render_target_init(render_target, width, height, (kinc_image_format_t)format, depth_buffer_bits);
 	return render_target;
 }
 
@@ -1900,10 +1899,13 @@ int _format_byte_size(kinc_image_format_t format) {
 		return 16;
 	case KINC_IMAGE_FORMAT_RGBA64:
 		return 8;
-	case KINC_IMAGE_FORMAT_GREY8:
+	case KINC_IMAGE_FORMAT_R8:
 		return 1;
+	case KINC_IMAGE_FORMAT_R16:
+		return 2;
 	case KINC_IMAGE_FORMAT_BGRA32:
 	case KINC_IMAGE_FORMAT_RGBA32:
+	case KINC_IMAGE_FORMAT_R32:
 	default:
 		return 4;
 	}

@@ -1,7 +1,7 @@
 #import "GLView.h"
 #import "GLViewController.h"
 #import <Foundation/Foundation.h>
-#include <kinc/graphics5/rendertarget.h>
+#include <kinc/graphics5/g5_texture.h>
 #include <kinc/core.h>
 #include <objc/runtime.h>
 

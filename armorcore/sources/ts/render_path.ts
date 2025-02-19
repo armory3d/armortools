@@ -409,9 +409,6 @@ function render_path_get_tex_format(s: string): tex_format_t {
 	if (s == "RGBA128") {
 		return tex_format_t.RGBA128;
 	}
-	if (s == "DEPTH16") {
-		return tex_format_t.DEPTH16;
-	}
 	if (s == "R32") {
 		return tex_format_t.R32;
 	}
@@ -430,9 +427,6 @@ function render_path_get_depth_format(s: string): depth_format_t {
 	}
 	if (s == "DEPTH24") {
 		return depth_format_t.DEPTH24;
-	}
-	if (s == "DEPTH16") {
-		return depth_format_t.DEPTH16;
 	}
 	return depth_format_t.DEPTH24;
 }

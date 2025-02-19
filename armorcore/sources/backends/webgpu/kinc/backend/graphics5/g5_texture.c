@@ -46,3 +46,17 @@ int kinc_g5_texture_stride(kinc_g5_texture_t *texture) {
 void kinc_g5_texture_generate_mipmaps(kinc_g5_texture_t *texture, int levels) {}
 
 void kinc_g5_texture_set_mipmap(kinc_g5_texture_t *texture, kinc_g5_texture_t *mipmap, int level) {}
+
+void kinc_g5_render_target_init(kinc_g5_render_target_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits) {
+    target->width = target->width = width;
+	target->height = target->height = height;
+	target->state = KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
+}
+
+void kinc_g5_render_target_init_framebuffer(kinc_g5_render_target_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits) {}
+
+void kinc_g5_render_target_destroy(kinc_g5_render_target_t *renderTarget) {}
+
+void kinc_g5_render_target_set_depth_from(kinc_g5_render_target_t *renderTarget, kinc_g5_render_target_t *source) {}
+
+void kinc_g5_render_target_get_pixels(kinc_g5_render_target_t *renderTarget, uint8_t *data) {}

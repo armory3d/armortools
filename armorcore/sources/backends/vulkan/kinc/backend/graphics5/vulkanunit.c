@@ -10,7 +10,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <kinc/graphics5/rendertarget.h>
 #include <kinc/graphics5/g5_texture.h>
 #include <kinc/matrix.h>
 #include "vulkan.h"
@@ -29,6 +28,5 @@ static VkDescriptorSetLayout compute_descriptor_layout;
 #include "indexbuffer.c.h"
 #include "g5_pipeline.c.h"
 #include "g5_raytrace.c.h"
-#include "rendertarget.c.h"
 #include "g5_texture.c.h"
 #include "vertexbuffer.c.h"

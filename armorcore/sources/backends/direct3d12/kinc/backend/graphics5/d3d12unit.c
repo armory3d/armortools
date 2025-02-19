@@ -83,7 +83,6 @@ static bool compute_pipeline_set = false;
 #include "indexbuffer.c.h"
 #include "g5_pipeline.c.h"
 #include "g5_raytrace.c.h"
-#include "rendertarget.c.h"
 #include "sampler.c.h"
 #include "shader.c.h"
 #include "g5_texture.c.h"
