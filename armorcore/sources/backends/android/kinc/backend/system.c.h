@@ -2,7 +2,7 @@
 #include <EGL/egl.h>
 #include <kinc/error.h>
 #include <kinc/backend/Android.h>
-#include <kinc/graphics5/graphics.h>
+#include <kinc/graphics5/g5.h>
 #include <kinc/gamepad.h>
 #include <kinc/keyboard.h>
 #include <kinc/mouse.h>

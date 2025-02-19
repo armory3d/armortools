@@ -1,6 +1,6 @@
-#include <kinc/graphics5/pipeline.h>
+#include <kinc/graphics5/g5_pipeline.h>
 #include <kinc/graphics5/vertexbuffer.h>
-#include <kinc/graphics5/graphics.h>
+#include <kinc/graphics5/g5.h>
 #include <kinc/graphics5/indexbuffer.h>
 #include <kinc/graphics5/vertexbuffer.h>
 #import <Metal/Metal.h>

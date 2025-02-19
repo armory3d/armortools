@@ -1,6 +1,6 @@
 #include "rendertarget.h"
 #include <kinc/graphics5/rendertarget.h>
-#include <kinc/graphics5/texture.h>
+#include <kinc/graphics5/g5_texture.h>
 #include <kinc/backend/system_microsoft.h>
 #include <dxgi1_4.h>
 

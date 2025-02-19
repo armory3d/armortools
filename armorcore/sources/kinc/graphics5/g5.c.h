@@ -1,4 +1,4 @@
-#include "graphics.h"
+#include "g5.h"
 #include <assert.h>
 #include <string.h>
 #include <kinc/system.h>
@@ -9,11 +9,11 @@
 #include <kinc/matrix.h>
 #include <kinc/graphics5/indexbuffer.h>
 #include <kinc/graphics5/vertexbuffer.h>
-#include <kinc/graphics5/pipeline.h>
+#include <kinc/graphics5/g5_pipeline.h>
 #include <kinc/graphics5/rendertarget.h>
-#include <kinc/graphics5/texture.h>
-#include <kinc/graphics5/commandlist.h>
-#include <kinc/graphics5/compute.h>
+#include <kinc/graphics5/g5_texture.h>
+#include <kinc/graphics5/g5_commandlist.h>
+#include <kinc/graphics5/g5_compute.h>
 #include <kinc/graphics5/constantbuffer.h>
 
 #define CONSTANT_BUFFER_SIZE 4096

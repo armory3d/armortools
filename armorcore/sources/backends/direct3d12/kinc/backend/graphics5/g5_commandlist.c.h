@@ -1,7 +1,7 @@
-#include <kinc/graphics5/commandlist.h>
-#include <kinc/graphics5/compute.h>
+#include <kinc/graphics5/g5_commandlist.h>
+#include <kinc/graphics5/g5_compute.h>
 #include <kinc/graphics5/indexbuffer.h>
-#include <kinc/graphics5/pipeline.h>
+#include <kinc/graphics5/g5_pipeline.h>
 #include <kinc/graphics5/vertexbuffer.h>
 #include <kinc/graphics5/constantbuffer.h>
 #include <kinc/window.h>

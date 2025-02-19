@@ -1,10 +1,10 @@
 #pragma once
 
 #include <kinc/global.h>
-#include <kinc/backend/graphics5/compute.h>
-#include <kinc/graphics5/pipeline.h>
+#include <kinc/backend/graphics5/g5_compute.h>
+#include <kinc/graphics5/g5_pipeline.h>
 
-/*! \file compute.h
+/*! \file g5_compute.h
     \brief Provides support for running compute-shaders.
 */
 

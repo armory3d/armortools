@@ -1,7 +1,7 @@
 #include "vulkan.h"
 #include "rendertarget.h"
 #include <kinc/graphics5/rendertarget.h>
-#include <kinc/graphics5/texture.h>
+#include <kinc/graphics5/g5_texture.h>
 #include <kinc/log.h>
 
 extern uint32_t swapchainImageCount;

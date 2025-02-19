@@ -2,12 +2,12 @@
 
 #include <stddef.h>
 #include <kinc/global.h>
-#include <kinc/backend/graphics5/commandlist.h>
+#include <kinc/backend/graphics5/g5_commandlist.h>
 #include "rendertarget.h"
-#include "texture.h"
-#include "pipeline.h"
+#include "g5_texture.h"
+#include "g5_pipeline.h"
 
-/*! \file commandlist.h
+/*! \file g5_commandlist.h
     \brief Contains functions for building command-lists to send commands to the GPU.
 */
 

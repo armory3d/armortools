@@ -1,5 +1,5 @@
-#include <kinc/graphics5/compute.h>
-#include <kinc/graphics5/texture.h>
+#include <kinc/graphics5/g5_compute.h>
+#include <kinc/graphics5/g5_texture.h>
 #include <kinc/log.h>
 #include <kinc/core.h>
 

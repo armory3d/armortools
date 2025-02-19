@@ -1,5 +1,5 @@
 #pragma once
 
-#include <kinc/graphics5/graphics.h>
-#include <kinc/graphics5/texture.h>
+#include <kinc/graphics5/g5.h>
+#include <kinc/graphics5/g5_texture.h>
 #include <kinc/matrix.h>

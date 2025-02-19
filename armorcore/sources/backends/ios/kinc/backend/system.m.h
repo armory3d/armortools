@@ -1,5 +1,5 @@
 #import "KoreAppDelegate.h"
-#include <kinc/graphics5/graphics.h>
+#include <kinc/graphics5/g5.h>
 #include <kinc/gamepad.h>
 #include <kinc/keyboard.h>
 #include <kinc/system.h>

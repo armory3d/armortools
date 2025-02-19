@@ -1,12 +1,12 @@
 #pragma once
 
 #include <kinc/global.h>
-#include <kinc/backend/graphics5/pipeline.h>
+#include <kinc/backend/graphics5/g5_pipeline.h>
 #include <kinc/graphics5/vertexstructure.h>
 #include <kinc/graphics5/rendertarget.h>
-#include "graphics.h"
+#include "g5.h"
 
-/*! \file pipeline.h
+/*! \file g5_pipeline.h
     \brief Provides functions for creating and using pipelines which configure the GPU for rendering.
 */
 

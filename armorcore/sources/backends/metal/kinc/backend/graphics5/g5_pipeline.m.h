@@ -1,4 +1,4 @@
-#include <kinc/graphics5/pipeline.h>
+#include <kinc/graphics5/g5_pipeline.h>
 #include <kinc/log.h>
 #import <Metal/Metal.h>
 #include <stdio.h>

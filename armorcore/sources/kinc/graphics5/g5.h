@@ -1,16 +1,16 @@
 #pragma once
 
 #include <kinc/global.h>
-#include <kinc/graphics5/texture.h>
+#include <kinc/graphics5/g5_texture.h>
 #include "rendertarget.h"
 #include "vertexstructure.h"
 #include <kinc/backend/graphics5/indexbuffer.h>
 #include <kinc/backend/graphics5/vertexbuffer.h>
 #include <kinc/backend/graphics5/rendertarget.h>
-#include <kinc/backend/graphics5/texture.h>
+#include <kinc/backend/graphics5/g5_texture.h>
 #include <kinc/matrix.h>
 #include <kinc/vector.h>
-#include "pipeline.h"
+#include "g5_pipeline.h"
 
 /*! \file graphics.h
     \brief Contains the base G5-functionality.

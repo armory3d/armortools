@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include <kinc/graphics5/graphics.h>
+#include <kinc/graphics5/g5.h>
 #include <kinc/keyboard.h>
 #include <kinc/mouse.h>
 #include <kinc/system.h>

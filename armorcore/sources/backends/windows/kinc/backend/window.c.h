@@ -1,5 +1,5 @@
 #include <kinc/display.h>
-#include <kinc/graphics5/graphics.h>
+#include <kinc/graphics5/g5.h>
 #include <kinc/window.h>
 #include <kinc/backend/windows.h>
 

@@ -1,4 +1,4 @@
-#include "pipeline.h"
+#include "g5_pipeline.h"
 #include <stddef.h>
 #include <assert.h>
 #include <string.h>

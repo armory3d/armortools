@@ -2,7 +2,7 @@
 
 #import <AVFoundation/AVFoundation.h>
 #include <kinc/audio1/audio.h>
-#include <kinc/graphics5/texture.h>
+#include <kinc/graphics5/g5_texture.h>
 #include <kinc/filereader.h>
 #include <kinc/log.h>
 #include <kinc/system.h>

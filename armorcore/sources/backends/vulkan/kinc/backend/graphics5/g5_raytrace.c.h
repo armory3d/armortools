@@ -1,14 +1,14 @@
 #include "vulkan.h"
-#include "raytrace.h"
+#include "g5_raytrace.h"
 
 #ifndef KINC_ANDROID
 
-#include <kinc/graphics5/commandlist.h>
+#include <kinc/graphics5/g5_commandlist.h>
 #include <kinc/graphics5/constantbuffer.h>
-#include <kinc/graphics5/graphics.h>
+#include <kinc/graphics5/g5.h>
 #include <kinc/graphics5/indexbuffer.h>
-#include <kinc/graphics5/pipeline.h>
-#include <kinc/graphics5/raytrace.h>
+#include <kinc/graphics5/g5_pipeline.h>
+#include <kinc/graphics5/g5_raytrace.h>
 #include <kinc/graphics5/vertexbuffer.h>
 
 extern VkRenderPassBeginInfo currentRenderPassBeginInfo;
@@ -29,8 +29,8 @@ typedef struct inst {
 } inst_t;
 
 static VkDescriptorPool raytrace_descriptor_pool;
-static kinc_raytrace_acceleration_structure_t *accel;
-static kinc_raytrace_pipeline_t *pipeline;
+static kinc_g5_raytrace_acceleration_structure_t *accel;
+static kinc_g5_raytrace_pipeline_t *pipeline;
 static kinc_g5_render_target_t *output = NULL;
 static kinc_g5_render_target_t *texpaint0;
 static kinc_g5_render_target_t *texpaint1;
@@ -61,7 +61,7 @@ static PFN_vkCmdBuildAccelerationStructuresKHR _vkCmdBuildAccelerationStructures
 static PFN_vkDestroyAccelerationStructureKHR _vkDestroyAccelerationStructureKHR = NULL;
 static PFN_vkCmdTraceRaysKHR _vkCmdTraceRaysKHR = NULL;
 
-void kinc_raytrace_pipeline_init(kinc_raytrace_pipeline_t *pipeline, kinc_g5_command_list_t *command_list, void *ray_shader, int ray_shader_size,
+void kinc_g5_raytrace_pipeline_init(kinc_g5_raytrace_pipeline_t *pipeline, kinc_g5_command_list_t *command_list, void *ray_shader, int ray_shader_size,
                                  kinc_g5_constant_buffer_t *constant_buffer) {
 	output = NULL;
 	pipeline->_constant_buffer = constant_buffer;
@@ -377,7 +377,7 @@ void kinc_raytrace_pipeline_init(kinc_raytrace_pipeline_t *pipeline, kinc_g5_com
 	}
 }
 
-void kinc_raytrace_pipeline_destroy(kinc_raytrace_pipeline_t *pipeline) {
+void kinc_g5_raytrace_pipeline_destroy(kinc_g5_raytrace_pipeline_t *pipeline) {
 	vkDestroyPipeline(vk_ctx.device, pipeline->impl.pipeline, NULL);
 	vkDestroyPipelineLayout(vk_ctx.device, pipeline->impl.pipeline_layout, NULL);
 	vkDestroyDescriptorSetLayout(vk_ctx.device, pipeline->impl.descriptor_set_layout, NULL);
@@ -391,7 +391,7 @@ uint64_t get_buffer_device_address(VkBuffer buffer) {
 	return _vkGetBufferDeviceAddressKHR(vk_ctx.device, &buffer_device_address_info);
 }
 
-void kinc_raytrace_acceleration_structure_init(kinc_raytrace_acceleration_structure_t *accel) {
+void kinc_g5_raytrace_acceleration_structure_init(kinc_g5_raytrace_acceleration_structure_t *accel) {
 	_vkGetBufferDeviceAddressKHR = (void *)vkGetDeviceProcAddr(vk_ctx.device, "vkGetBufferDeviceAddressKHR");
 	_vkCreateAccelerationStructureKHR = (void *)vkGetDeviceProcAddr(vk_ctx.device, "vkCreateAccelerationStructureKHR");
 	_vkGetAccelerationStructureDeviceAddressKHR = (void *)vkGetDeviceProcAddr(vk_ctx.device, "vkGetAccelerationStructureDeviceAddressKHR");
@@ -401,7 +401,7 @@ void kinc_raytrace_acceleration_structure_init(kinc_raytrace_acceleration_struct
 	instances_count = 0;
 }
 
-void kinc_raytrace_acceleration_structure_add(kinc_raytrace_acceleration_structure_t *accel, kinc_g5_vertex_buffer_t *_vb, kinc_g5_index_buffer_t *_ib,
+void kinc_g5_raytrace_acceleration_structure_add(kinc_g5_raytrace_acceleration_structure_t *accel, kinc_g5_vertex_buffer_t *_vb, kinc_g5_index_buffer_t *_ib,
 	kinc_matrix4x4_t _transform) {
 
 	int vb_i = -1;
@@ -423,7 +423,7 @@ void kinc_raytrace_acceleration_structure_add(kinc_raytrace_acceleration_structu
 	instances_count++;
 }
 
-void _kinc_raytrace_acceleration_structure_destroy_bottom(kinc_raytrace_acceleration_structure_t *accel) {
+void _kinc_g5_raytrace_acceleration_structure_destroy_bottom(kinc_g5_raytrace_acceleration_structure_t *accel) {
 	_vkDestroyAccelerationStructureKHR = (void *)vkGetDeviceProcAddr(vk_ctx.device, "vkDestroyAccelerationStructureKHR");
 	for (int i = 0; i < vb_count_last; ++i) {
 		_vkDestroyAccelerationStructureKHR(vk_ctx.device, accel->impl.bottom_level_acceleration_structure[i], NULL);
@@ -432,7 +432,7 @@ void _kinc_raytrace_acceleration_structure_destroy_bottom(kinc_raytrace_accelera
 	}
 }
 
-void _kinc_raytrace_acceleration_structure_destroy_top(kinc_raytrace_acceleration_structure_t *accel) {
+void _kinc_g5_raytrace_acceleration_structure_destroy_top(kinc_g5_raytrace_acceleration_structure_t *accel) {
 	_vkDestroyAccelerationStructureKHR = (void *)vkGetDeviceProcAddr(vk_ctx.device, "vkDestroyAccelerationStructureKHR");
 	_vkDestroyAccelerationStructureKHR(vk_ctx.device, accel->impl.top_level_acceleration_structure, NULL);
 	vkFreeMemory(vk_ctx.device, accel->impl.top_level_mem, NULL);
@@ -441,7 +441,7 @@ void _kinc_raytrace_acceleration_structure_destroy_top(kinc_raytrace_acceleratio
 	vkDestroyBuffer(vk_ctx.device, accel->impl.instances_buffer, NULL);
 }
 
-void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_structure_t *accel, kinc_g5_command_list_t *command_list,
+void kinc_g5_raytrace_acceleration_structure_build(kinc_g5_raytrace_acceleration_structure_t *accel, kinc_g5_command_list_t *command_list,
 	kinc_g5_vertex_buffer_t *_vb_full, kinc_g5_index_buffer_t *_ib_full) {
 
 	bool build_bottom = false;
@@ -454,9 +454,9 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 
 	if (vb_count_last > 0) {
 		if (build_bottom) {
-			_kinc_raytrace_acceleration_structure_destroy_bottom(accel);
+			_kinc_g5_raytrace_acceleration_structure_destroy_bottom(accel);
 		}
-		_kinc_raytrace_acceleration_structure_destroy_top(accel);
+		_kinc_g5_raytrace_acceleration_structure_destroy_top(accel);
 	}
 
 	vb_count_last = vb_count;
@@ -976,7 +976,7 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 	}
 }
 
-void kinc_raytrace_acceleration_structure_destroy(kinc_raytrace_acceleration_structure_t *accel) {
+void kinc_g5_raytrace_acceleration_structure_destroy(kinc_g5_raytrace_acceleration_structure_t *accel) {
 	// _vkDestroyAccelerationStructureKHR = (void *)vkGetDeviceProcAddr(vk_ctx.device, "vkDestroyAccelerationStructureKHR");
 	// for (int i = 0; i < vb_count; ++i) {
 	// 	_vkDestroyAccelerationStructureKHR(vk_ctx.device, accel->impl.bottom_level_acceleration_structure[i], NULL);
@@ -990,7 +990,7 @@ void kinc_raytrace_acceleration_structure_destroy(kinc_raytrace_acceleration_str
 	// vkDestroyBuffer(vk_ctx.device, accel->impl.instances_buffer, NULL);
 }
 
-void kinc_raytrace_set_textures(kinc_g5_render_target_t *_texpaint0, kinc_g5_render_target_t *_texpaint1, kinc_g5_render_target_t *_texpaint2, kinc_g5_texture_t *_texenv, kinc_g5_texture_t *_texsobol, kinc_g5_texture_t *_texscramble, kinc_g5_texture_t *_texrank) {
+void kinc_g5_raytrace_set_textures(kinc_g5_render_target_t *_texpaint0, kinc_g5_render_target_t *_texpaint1, kinc_g5_render_target_t *_texpaint2, kinc_g5_texture_t *_texenv, kinc_g5_texture_t *_texsobol, kinc_g5_texture_t *_texscramble, kinc_g5_texture_t *_texrank) {
 	texpaint0 = _texpaint0;
 	texpaint1 = _texpaint1;
 	texpaint2 = _texpaint2;
@@ -1000,15 +1000,15 @@ void kinc_raytrace_set_textures(kinc_g5_render_target_t *_texpaint0, kinc_g5_ren
 	texrank = _texrank;
 }
 
-void kinc_raytrace_set_acceleration_structure(kinc_raytrace_acceleration_structure_t *_accel) {
+void kinc_g5_raytrace_set_acceleration_structure(kinc_g5_raytrace_acceleration_structure_t *_accel) {
 	accel = _accel;
 }
 
-void kinc_raytrace_set_pipeline(kinc_raytrace_pipeline_t *_pipeline) {
+void kinc_g5_raytrace_set_pipeline(kinc_g5_raytrace_pipeline_t *_pipeline) {
 	pipeline = _pipeline;
 }
 
-void kinc_raytrace_set_target(kinc_g5_render_target_t *_output) {
+void kinc_g5_raytrace_set_target(kinc_g5_render_target_t *_output) {
 	if (_output != output) {
 		vkDestroyImage(vk_ctx.device, _output->impl.sourceImage, NULL);
 
@@ -1062,7 +1062,7 @@ void kinc_raytrace_set_target(kinc_g5_render_target_t *_output) {
 	output = _output;
 }
 
-void kinc_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
+void kinc_g5_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
 	VkWriteDescriptorSetAccelerationStructureKHR descriptor_acceleration_structure_info = {0};
 	descriptor_acceleration_structure_info.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
 	descriptor_acceleration_structure_info.accelerationStructureCount = 1;

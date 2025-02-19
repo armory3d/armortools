@@ -1,5 +1,5 @@
 #include "vertexbuffer.h"
-#include <kinc/graphics5/graphics.h>
+#include <kinc/graphics5/g5.h>
 
 extern bool waitAfterNextDraw;
 

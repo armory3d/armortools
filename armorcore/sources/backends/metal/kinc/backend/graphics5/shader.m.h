@@ -1,5 +1,5 @@
-#include <kinc/graphics5/graphics.h>
-#include <kinc/graphics5/pipeline.h>
+#include <kinc/graphics5/g5.h>
+#include <kinc/graphics5/g5_pipeline.h>
 #include <kinc/log.h>
 #include <kinc/core.h>
 #include <Metal/Metal.h>

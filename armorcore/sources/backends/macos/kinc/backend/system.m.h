@@ -1,7 +1,7 @@
 #import "BasicOpenGLView.h"
 #import <Cocoa/Cocoa.h>
 #include <kinc/backend/HIDManager.h>
-#include <kinc/graphics5/graphics.h>
+#include <kinc/graphics5/g5.h>
 #include <kinc/keyboard.h>
 #include <kinc/log.h>
 #include <kinc/system.h>

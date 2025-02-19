@@ -3,7 +3,7 @@
 #include <kinc/mouse.h>
 #include <kinc/pen.h>
 #include <kinc/system.h>
-#include <kinc/graphics5/graphics.h>
+#include <kinc/graphics5/g5.h>
 
 @implementation BasicOpenGLView
 

@@ -1,10 +1,10 @@
-#include "commandlist.h"
+#include "g5_commandlist.h"
 #include "indexbuffer.h"
-#include "pipeline.h"
+#include "g5_pipeline.h"
 #include "vertexbuffer.h"
 
-#include <kinc/graphics5/graphics.h>
-#include <kinc/graphics5/pipeline.h>
+#include <kinc/graphics5/g5.h>
+#include <kinc/graphics5/g5_pipeline.h>
 #include <kinc/core.h>
 #include <kinc/window.h>
 #include <dxgi1_4.h>

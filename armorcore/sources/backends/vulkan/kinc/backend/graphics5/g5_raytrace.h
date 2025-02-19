@@ -12,7 +12,7 @@ typedef struct {
 	VkBuffer raygen_shader_binding_table;
 	VkBuffer miss_shader_binding_table;
 	VkBuffer hit_shader_binding_table;
-} kinc_raytrace_pipeline_impl_t;
+} kinc_g5_raytrace_pipeline_impl_t;
 
 typedef struct {
 	VkAccelerationStructureKHR top_level_acceleration_structure;
@@ -27,6 +27,6 @@ typedef struct {
 	VkBuffer instances_buffer;
 	VkDeviceMemory instances_mem;
 
-} kinc_raytrace_acceleration_structure_impl_t;
+} kinc_g5_raytrace_acceleration_structure_impl_t;
 
 #endif

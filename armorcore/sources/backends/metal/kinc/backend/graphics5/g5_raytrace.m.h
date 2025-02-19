@@ -1,13 +1,13 @@
-#include <kinc/backend/graphics5/raytrace.h>
-#include <kinc/graphics5/commandlist.h>
+#include <kinc/backend/graphics5/g5_raytrace.h>
+#include <kinc/graphics5/g5_commandlist.h>
 #include <kinc/graphics5/constantbuffer.h>
-#include <kinc/graphics5/graphics.h>
+#include <kinc/graphics5/g5.h>
 #include <kinc/graphics5/indexbuffer.h>
-#include <kinc/graphics5/raytrace.h>
+#include <kinc/graphics5/g5_raytrace.h>
 #include <kinc/graphics5/vertexbuffer.h>
 
-static kinc_raytrace_acceleration_structure_t *accel;
-static kinc_raytrace_pipeline_t *pipeline;
+static kinc_g5_raytrace_acceleration_structure_t *accel;
+static kinc_g5_raytrace_pipeline_t *pipeline;
 static kinc_g5_render_target_t *output = NULL;
 static kinc_g5_constant_buffer_t *constant_buf;
 
@@ -40,12 +40,12 @@ static int vb_count_last = 0;
 static inst_t instances[1024];
 static int instances_count = 0;
 
-bool kinc_raytrace_supported() {
+bool kinc_g5_raytrace_supported() {
 	id<MTLDevice> device = getMetalDevice();
 	return device.supportsRaytracing;
 }
 
-void kinc_raytrace_pipeline_init(kinc_raytrace_pipeline_t *pipeline, kinc_g5_command_list_t *command_list, void *ray_shader, int ray_shader_size,
+void kinc_g5_raytrace_pipeline_init(kinc_g5_raytrace_pipeline_t *pipeline, kinc_g5_command_list_t *command_list, void *ray_shader, int ray_shader_size,
                                  kinc_g5_constant_buffer_t *constant_buffer) {
 	id<MTLDevice> device = getMetalDevice();
 	if (!device.supportsRaytracing) return;
@@ -66,7 +66,7 @@ void kinc_raytrace_pipeline_init(kinc_raytrace_pipeline_t *pipeline, kinc_g5_com
 	_sem = dispatch_semaphore_create(2);
 }
 
-void kinc_raytrace_pipeline_destroy(kinc_raytrace_pipeline_t *pipeline) {}
+void kinc_g5_raytrace_pipeline_destroy(kinc_g5_raytrace_pipeline_t *pipeline) {}
 
 id<MTLAccelerationStructure> create_acceleration_sctructure(MTLAccelerationStructureDescriptor *descriptor) {
 	id<MTLDevice> device = getMetalDevice();
@@ -99,12 +99,12 @@ id<MTLAccelerationStructure> create_acceleration_sctructure(MTLAccelerationStruc
 	return compacted_acceleration_structure;
 }
 
-void kinc_raytrace_acceleration_structure_init(kinc_raytrace_acceleration_structure_t *accel) {
+void kinc_g5_raytrace_acceleration_structure_init(kinc_g5_raytrace_acceleration_structure_t *accel) {
 	vb_count = 0;
 	instances_count = 0;
 }
 
-void kinc_raytrace_acceleration_structure_add(kinc_raytrace_acceleration_structure_t *accel, kinc_g5_vertex_buffer_t *_vb, kinc_g5_index_buffer_t *_ib,
+void kinc_g5_raytrace_acceleration_structure_add(kinc_g5_raytrace_acceleration_structure_t *accel, kinc_g5_vertex_buffer_t *_vb, kinc_g5_index_buffer_t *_ib,
 	kinc_matrix4x4_t _transform) {
 
 	int vb_i = -1;
@@ -126,17 +126,17 @@ void kinc_raytrace_acceleration_structure_add(kinc_raytrace_acceleration_structu
 	instances_count++;
 }
 
-void _kinc_raytrace_acceleration_structure_destroy_bottom(kinc_raytrace_acceleration_structure_t *accel) {
+void _kinc_g5_raytrace_acceleration_structure_destroy_bottom(kinc_g5_raytrace_acceleration_structure_t *accel) {
 //	for (int i = 0; i < vb_count_last; ++i) {
 //	}
 	_primitive_accels = nil;
 }
 
-void _kinc_raytrace_acceleration_structure_destroy_top(kinc_raytrace_acceleration_structure_t *accel) {
+void _kinc_g5_raytrace_acceleration_structure_destroy_top(kinc_g5_raytrace_acceleration_structure_t *accel) {
 	_instance_accel = nil;
 }
 
-void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_structure_t *accel, kinc_g5_command_list_t *command_list,
+void kinc_g5_raytrace_acceleration_structure_build(kinc_g5_raytrace_acceleration_structure_t *accel, kinc_g5_command_list_t *command_list,
 	kinc_g5_vertex_buffer_t *_vb_full, kinc_g5_index_buffer_t *_ib_full) {
 
 	bool build_bottom = false;
@@ -149,9 +149,9 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 
 	if (vb_count_last > 0) {
 		if (build_bottom) {
-			_kinc_raytrace_acceleration_structure_destroy_bottom(accel);
+			_kinc_g5_raytrace_acceleration_structure_destroy_bottom(accel);
 		}
-		_kinc_raytrace_acceleration_structure_destroy_top(accel);
+		_kinc_g5_raytrace_acceleration_structure_destroy_top(accel);
 	}
 
 	vb_count_last = vb_count;
@@ -199,9 +199,9 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 	_instance_accel = create_acceleration_sctructure(inst_accel_descriptor);
 }
 
-void kinc_raytrace_acceleration_structure_destroy(kinc_raytrace_acceleration_structure_t *accel) {}
+void kinc_g5_raytrace_acceleration_structure_destroy(kinc_g5_raytrace_acceleration_structure_t *accel) {}
 
-void kinc_raytrace_set_textures(kinc_g5_render_target_t *texpaint0, kinc_g5_render_target_t *texpaint1, kinc_g5_render_target_t *texpaint2, kinc_g5_texture_t *texenv, kinc_g5_texture_t *texsobol, kinc_g5_texture_t *texscramble, kinc_g5_texture_t *texrank) {
+void kinc_g5_raytrace_set_textures(kinc_g5_render_target_t *texpaint0, kinc_g5_render_target_t *texpaint1, kinc_g5_render_target_t *texpaint2, kinc_g5_texture_t *texenv, kinc_g5_texture_t *texsobol, kinc_g5_texture_t *texscramble, kinc_g5_texture_t *texrank) {
 	_texpaint0 = texpaint0;
 	_texpaint1 = texpaint1;
 	_texpaint2 = texpaint2;
@@ -211,19 +211,19 @@ void kinc_raytrace_set_textures(kinc_g5_render_target_t *texpaint0, kinc_g5_rend
 	_texrank = texrank;
 }
 
-void kinc_raytrace_set_acceleration_structure(kinc_raytrace_acceleration_structure_t *_accel) {
+void kinc_g5_raytrace_set_acceleration_structure(kinc_g5_raytrace_acceleration_structure_t *_accel) {
 	accel = _accel;
 }
 
-void kinc_raytrace_set_pipeline(kinc_raytrace_pipeline_t *_pipeline) {
+void kinc_g5_raytrace_set_pipeline(kinc_g5_raytrace_pipeline_t *_pipeline) {
 	pipeline = _pipeline;
 }
 
-void kinc_raytrace_set_target(kinc_g5_render_target_t *_output) {
+void kinc_g5_raytrace_set_target(kinc_g5_render_target_t *_output) {
 	output = _output;
 }
 
-void kinc_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
+void kinc_g5_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
 	id<MTLDevice> device = getMetalDevice();
 	if (!device.supportsRaytracing) return;
 	dispatch_semaphore_wait(_sem, DISPATCH_TIME_FOREVER);

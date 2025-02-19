@@ -6,9 +6,9 @@
 #pragma once
 
 #include <kinc/matrix.h>
-#include <kinc/graphics5/texture.h>
+#include <kinc/graphics5/g5_texture.h>
 #include <kinc/graphics5/rendertarget.h>
-#include <kinc/graphics5/pipeline.h>
+#include <kinc/graphics5/g5_pipeline.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include "iron_array.h"

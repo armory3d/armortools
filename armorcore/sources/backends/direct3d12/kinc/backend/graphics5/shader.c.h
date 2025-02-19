@@ -1,5 +1,5 @@
 #include <kinc/backend/system_microsoft.h>
-#include <kinc/graphics5/pipeline.h>
+#include <kinc/graphics5/g5_pipeline.h>
 #include <kinc/core.h>
 
 void kinc_g5_shader_init(kinc_g5_shader_t *shader, const void *_data, size_t length, kinc_g5_shader_type_t type) {

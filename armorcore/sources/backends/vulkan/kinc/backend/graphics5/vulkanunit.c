@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <kinc/graphics5/rendertarget.h>
-#include <kinc/graphics5/texture.h>
+#include <kinc/graphics5/g5_texture.h>
 #include <kinc/matrix.h>
 #include "vulkan.h"
 
@@ -23,12 +23,12 @@ static VkDescriptorSetLayout compute_descriptor_layout;
 
 #include "minivulkan.c.h"
 #include "vulkan.c.h"
-#include "commandlist.c.h"
-#include "compute.c.h"
+#include "g5_commandlist.c.h"
+#include "g5_compute.c.h"
 #include "constantbuffer.c.h"
 #include "indexbuffer.c.h"
-#include "pipeline.c.h"
-#include "raytrace.c.h"
+#include "g5_pipeline.c.h"
+#include "g5_raytrace.c.h"
 #include "rendertarget.c.h"
-#include "texture.c.h"
+#include "g5_texture.c.h"
 #include "vertexbuffer.c.h"

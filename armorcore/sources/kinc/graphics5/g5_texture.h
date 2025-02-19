@@ -1,13 +1,13 @@
 #pragma once
 
 #include <kinc/global.h>
-#include <kinc/backend/graphics5/texture.h>
-#include <kinc/graphics5/pipeline.h>
+#include <kinc/backend/graphics5/g5_texture.h>
+#include <kinc/graphics5/g5_pipeline.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
-/*! \file texture.h
+/*! \file g5_texture.h
     \brief Provides functions for handling textures.
 */
 

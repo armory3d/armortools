@@ -1,9 +1,9 @@
 
-#include <kinc/backend/graphics5/raytrace.h>
-#include <kinc/graphics5/commandlist.h>
-#include <kinc/graphics5/graphics.h>
+#include <kinc/backend/graphics5/g5_raytrace.h>
+#include <kinc/graphics5/g5_commandlist.h>
+#include <kinc/graphics5/g5.h>
 #include <kinc/graphics5/indexbuffer.h>
-#include <kinc/graphics5/raytrace.h>
+#include <kinc/graphics5/g5_raytrace.h>
 #include <kinc/graphics5/vertexbuffer.h>
 
 static const wchar_t *hit_group_name = L"hitgroup";
@@ -20,8 +20,8 @@ static ID3D12Device5 *dxrDevice = NULL;
 static ID3D12GraphicsCommandList4 *dxrCommandList = NULL;
 static ID3D12RootSignature *dxrRootSignature = NULL;
 static ID3D12DescriptorHeap *descriptorHeap = NULL;
-static kinc_raytrace_acceleration_structure_t *accel;
-static kinc_raytrace_pipeline_t *pipeline;
+static kinc_g5_raytrace_acceleration_structure_t *accel;
+static kinc_g5_raytrace_pipeline_t *pipeline;
 static kinc_g5_render_target_t *output = NULL;
 static D3D12_CPU_DESCRIPTOR_HANDLE outputCpuDescriptor;
 static D3D12_GPU_DESCRIPTOR_HANDLE outputDescriptorHandle;
@@ -45,7 +45,7 @@ static int vb_count_last = 0;
 static inst_t instances[1024];
 static int instances_count = 0;
 
-void kinc_raytrace_pipeline_init(kinc_raytrace_pipeline_t *pipeline, kinc_g5_command_list_t *command_list, void *ray_shader, int ray_shader_size,
+void kinc_g5_raytrace_pipeline_init(kinc_g5_raytrace_pipeline_t *pipeline, kinc_g5_command_list_t *command_list, void *ray_shader, int ray_shader_size,
                                  kinc_g5_constant_buffer_t *constant_buffer) {
 	output = NULL;
 	descriptorsAllocated = 0;
@@ -362,7 +362,7 @@ void kinc_raytrace_pipeline_init(kinc_raytrace_pipeline_t *pipeline, kinc_g5_com
 	    handle.ptr + (INT64)(descriptorHeapIndex) * (UINT64)(descriptorSize);
 }
 
-void kinc_raytrace_pipeline_destroy(kinc_raytrace_pipeline_t *pipeline) {
+void kinc_g5_raytrace_pipeline_destroy(kinc_g5_raytrace_pipeline_t *pipeline) {
 	pipeline->impl.dxr_state->lpVtbl->Release(pipeline->impl.dxr_state);
 	pipeline->impl.raygen_shader_table->lpVtbl->Release(pipeline->impl.raygen_shader_table);
 	pipeline->impl.miss_shader_table->lpVtbl->Release(pipeline->impl.miss_shader_table);
@@ -436,12 +436,12 @@ UINT create_srv_ib(kinc_g5_index_buffer_t *ib, UINT numElements, UINT elementSiz
 	return descriptorIndex;
 }
 
-void kinc_raytrace_acceleration_structure_init(kinc_raytrace_acceleration_structure_t *accel) {
+void kinc_g5_raytrace_acceleration_structure_init(kinc_g5_raytrace_acceleration_structure_t *accel) {
 	vb_count = 0;
 	instances_count = 0;
 }
 
-void kinc_raytrace_acceleration_structure_add(kinc_raytrace_acceleration_structure_t *accel, kinc_g5_vertex_buffer_t *_vb, kinc_g5_index_buffer_t *_ib,
+void kinc_g5_raytrace_acceleration_structure_add(kinc_g5_raytrace_acceleration_structure_t *accel, kinc_g5_vertex_buffer_t *_vb, kinc_g5_index_buffer_t *_ib,
 	kinc_matrix4x4_t _transform) {
 
 	int vb_i = -1;
@@ -463,17 +463,17 @@ void kinc_raytrace_acceleration_structure_add(kinc_raytrace_acceleration_structu
 	instances_count++;
 }
 
-void _kinc_raytrace_acceleration_structure_destroy_bottom(kinc_raytrace_acceleration_structure_t *accel) {
+void _kinc_g5_raytrace_acceleration_structure_destroy_bottom(kinc_g5_raytrace_acceleration_structure_t *accel) {
 	for (int i = 0; i < vb_count_last; ++i) {
 		accel->impl.bottom_level_accel[i]->lpVtbl->Release(accel->impl.bottom_level_accel[i]);
 	}
 }
 
-void _kinc_raytrace_acceleration_structure_destroy_top(kinc_raytrace_acceleration_structure_t *accel) {
+void _kinc_g5_raytrace_acceleration_structure_destroy_top(kinc_g5_raytrace_acceleration_structure_t *accel) {
 	accel->impl.top_level_accel->lpVtbl->Release(accel->impl.top_level_accel);
 }
 
-void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_structure_t *accel, kinc_g5_command_list_t *command_list,
+void kinc_g5_raytrace_acceleration_structure_build(kinc_g5_raytrace_acceleration_structure_t *accel, kinc_g5_command_list_t *command_list,
 	kinc_g5_vertex_buffer_t *_vb_full, kinc_g5_index_buffer_t *_ib_full) {
 
 	bool build_bottom = false;
@@ -486,9 +486,9 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 
 	if (vb_count_last > 0) {
 		if (build_bottom) {
-			_kinc_raytrace_acceleration_structure_destroy_bottom(accel);
+			_kinc_g5_raytrace_acceleration_structure_destroy_bottom(accel);
 		}
-		_kinc_raytrace_acceleration_structure_destroy_top(accel);
+		_kinc_g5_raytrace_acceleration_structure_destroy_top(accel);
 	}
 
 	vb_count_last = vb_count;
@@ -497,7 +497,7 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 		return;
 	}
 
-	descriptorsAllocated = 1; // 1 descriptor already allocated in kinc_raytrace_pipeline_init
+	descriptorsAllocated = 1; // 1 descriptor already allocated in kinc_g5_raytrace_pipeline_init
 
 	#ifdef is_forge
 	create_srv_ib(_ib_full, _ib_full->impl.count, 0);
@@ -719,12 +719,12 @@ void kinc_raytrace_acceleration_structure_build(kinc_raytrace_acceleration_struc
 	instanceDescs->lpVtbl->Release(instanceDescs);
 }
 
-void kinc_raytrace_acceleration_structure_destroy(kinc_raytrace_acceleration_structure_t *accel) {
+void kinc_g5_raytrace_acceleration_structure_destroy(kinc_g5_raytrace_acceleration_structure_t *accel) {
 	// accel->impl.bottom_level_accel->Release();
 	// accel->impl.top_level_accel->Release();
 }
 
-void kinc_raytrace_set_textures(kinc_g5_render_target_t *texpaint0, kinc_g5_render_target_t *texpaint1, kinc_g5_render_target_t *texpaint2, kinc_g5_texture_t *texenv, kinc_g5_texture_t *texsobol, kinc_g5_texture_t *texscramble, kinc_g5_texture_t *texrank) {
+void kinc_g5_raytrace_set_textures(kinc_g5_render_target_t *texpaint0, kinc_g5_render_target_t *texpaint1, kinc_g5_render_target_t *texpaint2, kinc_g5_texture_t *texenv, kinc_g5_texture_t *texsobol, kinc_g5_texture_t *texscramble, kinc_g5_texture_t *texrank) {
 	D3D12_CPU_DESCRIPTOR_HANDLE handle;
 	descriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(descriptorHeap, &handle);
 
@@ -782,15 +782,15 @@ void kinc_raytrace_set_textures(kinc_g5_render_target_t *texpaint0, kinc_g5_rend
 	texrankgpuDescriptorHandle.ptr = ghandle.ptr + 11 * (UINT64)(descriptorSize);
 }
 
-void kinc_raytrace_set_acceleration_structure(kinc_raytrace_acceleration_structure_t *_accel) {
+void kinc_g5_raytrace_set_acceleration_structure(kinc_g5_raytrace_acceleration_structure_t *_accel) {
 	accel = _accel;
 }
 
-void kinc_raytrace_set_pipeline(kinc_raytrace_pipeline_t *_pipeline) {
+void kinc_g5_raytrace_set_pipeline(kinc_g5_raytrace_pipeline_t *_pipeline) {
 	pipeline = _pipeline;
 }
 
-void kinc_raytrace_set_target(kinc_g5_render_target_t *_output) {
+void kinc_g5_raytrace_set_target(kinc_g5_render_target_t *_output) {
 	if (_output != output) {
 		_output->impl.renderTarget->lpVtbl->Release(_output->impl.renderTarget);
 		_output->impl.renderTargetDescriptorHeap->lpVtbl->Release(_output->impl.renderTargetDescriptorHeap);
@@ -861,7 +861,7 @@ void kinc_raytrace_set_target(kinc_g5_render_target_t *_output) {
 	output = _output;
 }
 
-void kinc_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
+void kinc_g5_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
 	command_list->impl._commandList->lpVtbl->SetComputeRootSignature(command_list->impl._commandList, dxrRootSignature);
 
 	// Bind the heaps, acceleration structure and dispatch rays

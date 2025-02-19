@@ -2,10 +2,10 @@
 #include "g2_font.h"
 
 #include <math.h>
-#include <kinc/graphics5/graphics.h>
+#include <kinc/graphics5/g5.h>
 #include <kinc/graphics5/indexbuffer.h>
-#include <kinc/graphics5/pipeline.h>
-#include <kinc/graphics5/texture.h>
+#include <kinc/graphics5/g5_pipeline.h>
+#include <kinc/graphics5/g5_texture.h>
 #include <kinc/graphics5/rendertarget.h>
 #include <kinc/graphics5/vertexbuffer.h>
 #include <kinc/graphics5/vertexstructure.h>

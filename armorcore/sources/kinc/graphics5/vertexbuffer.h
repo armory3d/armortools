@@ -4,7 +4,7 @@
 #include <kinc/global.h>
 #include <kinc/backend/graphics5/vertexbuffer.h>
 #include <kinc/graphics5/vertexbuffer.h>
-#include <kinc/graphics5/graphics.h>
+#include <kinc/graphics5/g5.h>
 #include <kinc/graphics5/vertexstructure.h>
 
 /*! \file vertexbuffer.h
