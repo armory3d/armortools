@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <kinc/global.h>
-#include <kinc/backend/graphics5/g5_texture.h>
+#include <kinc/backend/g5_texture.h>
 
 typedef enum kinc_image_compression {
 	KINC_IMAGE_COMPRESSION_NONE,

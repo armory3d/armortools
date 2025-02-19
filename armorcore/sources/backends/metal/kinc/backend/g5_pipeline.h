@@ -21,3 +21,12 @@ typedef struct {
 	int fragmentOffset;
 	int computeOffset;
 } ConstantLocation5Impl;
+
+typedef struct kinc_g5_sampler_impl {
+	void *sampler;
+} kinc_g5_sampler_impl_t;
+
+typedef struct {
+	char name[1024];
+	void *mtlFunction;
+} Shader5Impl;

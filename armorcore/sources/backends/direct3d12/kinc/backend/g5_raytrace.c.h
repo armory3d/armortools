@@ -1,5 +1,5 @@
 
-#include <kinc/backend/graphics5/g5_raytrace.h>
+#include <kinc/backend/g5_raytrace.h>
 #include <kinc/g5_commandlist.h>
 #include <kinc/g5.h>
 #include <kinc/g5_raytrace.h>

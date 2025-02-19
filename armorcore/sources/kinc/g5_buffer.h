@@ -4,7 +4,7 @@
 #include <kinc/global.h>
 #include <kinc/matrix.h>
 #include <kinc/vector.h>
-#include <kinc/backend/graphics5/g5_buffer.h>
+#include <kinc/backend/g5_buffer.h>
 #include <kinc/g5.h>
 
 typedef struct kinc_g5_vertex_buffer {

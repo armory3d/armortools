@@ -5,7 +5,7 @@
 #include <kinc/vector.h>
 #include <kinc/g5.h>
 #include <kinc/g5_texture.h>
-#include <kinc/backend/graphics5/g5_texture.h>
+#include <kinc/backend/g5_texture.h>
 
 #define KINC_G5_CLEAR_COLOR 1
 #define KINC_G5_CLEAR_DEPTH 2

@@ -15,3 +15,13 @@ typedef struct {
 	int fragmentOffset;
 	int computeOffset;
 } ConstantLocation5Impl;
+
+typedef struct kinc_g5_sampler_impl {
+	int a;
+} kinc_g5_sampler_impl_t;
+
+struct WGPUShaderModuleImpl;
+
+typedef struct {
+	WGPUShaderModule module;
+} Shader5Impl;

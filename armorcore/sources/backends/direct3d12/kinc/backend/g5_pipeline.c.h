@@ -4,6 +4,7 @@
 #include <kinc/g5_pipeline.h>
 #include <kinc/log.h>
 #include <kinc/backend/system_microsoft.h>
+#include <kinc/core.h>
 
 void kinc_g5_internal_setConstants(kinc_g5_command_list_t *commandList, kinc_g5_pipeline_t *pipeline) {
 	commandList->impl._commandList->lpVtbl->SetGraphicsRootSignature(commandList->impl._commandList, globalRootSignature);
@@ -452,4 +453,169 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
 	if (hr != S_OK) {
 		kinc_log(KINC_LOG_LEVEL_WARNING, "Could not create pipeline.");
 	}
+}
+
+static D3D12_TEXTURE_ADDRESS_MODE convert_texture_addressing(kinc_g5_texture_addressing_t addressing) {
+	switch (addressing) {
+	case KINC_G5_TEXTURE_ADDRESSING_REPEAT:
+		return D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	case KINC_G5_TEXTURE_ADDRESSING_MIRROR:
+		return D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+	case KINC_G5_TEXTURE_ADDRESSING_CLAMP:
+		return D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	case KINC_G5_TEXTURE_ADDRESSING_BORDER:
+		return D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	default:
+		assert(false);
+		return D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	}
+}
+
+static D3D12_FILTER convert_filter(kinc_g5_texture_filter_t minification, kinc_g5_texture_filter_t magnification, kinc_g5_mipmap_filter_t mipmap) {
+	switch (minification) {
+	case KINC_G5_TEXTURE_FILTER_POINT:
+		switch (magnification) {
+		case KINC_G5_TEXTURE_FILTER_POINT:
+			switch (mipmap) {
+			case KINC_G5_MIPMAP_FILTER_NONE:
+			case KINC_G5_MIPMAP_FILTER_POINT:
+				return D3D12_FILTER_MIN_MAG_MIP_POINT;
+			case KINC_G5_MIPMAP_FILTER_LINEAR:
+				return D3D12_FILTER_MIN_MAG_POINT_MIP_LINEAR;
+			}
+		case KINC_G5_TEXTURE_FILTER_LINEAR:
+			switch (mipmap) {
+			case KINC_G5_MIPMAP_FILTER_NONE:
+			case KINC_G5_MIPMAP_FILTER_POINT:
+				return D3D12_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT;
+			case KINC_G5_MIPMAP_FILTER_LINEAR:
+				return D3D12_FILTER_MIN_POINT_MAG_MIP_LINEAR;
+			}
+		case KINC_G5_TEXTURE_FILTER_ANISOTROPIC:
+			return D3D12_FILTER_ANISOTROPIC;
+		}
+	case KINC_G5_TEXTURE_FILTER_LINEAR:
+		switch (magnification) {
+		case KINC_G5_TEXTURE_FILTER_POINT:
+			switch (mipmap) {
+			case KINC_G5_MIPMAP_FILTER_NONE:
+			case KINC_G5_MIPMAP_FILTER_POINT:
+				return D3D12_FILTER_MIN_LINEAR_MAG_MIP_POINT;
+			case KINC_G5_MIPMAP_FILTER_LINEAR:
+				return D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+			}
+		case KINC_G5_TEXTURE_FILTER_LINEAR:
+			switch (mipmap) {
+			case KINC_G5_MIPMAP_FILTER_NONE:
+			case KINC_G5_MIPMAP_FILTER_POINT:
+				return D3D12_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+			case KINC_G5_MIPMAP_FILTER_LINEAR:
+				return D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+			}
+		case KINC_G5_TEXTURE_FILTER_ANISOTROPIC:
+			return D3D12_FILTER_ANISOTROPIC;
+		}
+	case KINC_G5_TEXTURE_FILTER_ANISOTROPIC:
+		return D3D12_FILTER_ANISOTROPIC;
+	}
+
+	assert(false);
+	return D3D12_FILTER_MIN_MAG_MIP_POINT;
+}
+
+void kinc_g5_sampler_init(kinc_g5_sampler_t *sampler, const kinc_g5_sampler_options_t *options) {
+	D3D12_DESCRIPTOR_HEAP_DESC descHeapSampler = {};
+	descHeapSampler.NumDescriptors = 2;
+	descHeapSampler.Type = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
+	descHeapSampler.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	device->lpVtbl->CreateDescriptorHeap(device, &descHeapSampler, &IID_ID3D12DescriptorHeap, &sampler->impl.sampler_heap);
+
+	D3D12_SAMPLER_DESC samplerDesc;
+	ZeroMemory(&samplerDesc, sizeof(D3D12_SAMPLER_DESC));
+	samplerDesc.Filter = convert_filter(options->minification_filter, options->magnification_filter, options->mipmap_filter);
+	samplerDesc.AddressU = convert_texture_addressing(options->u_addressing);
+	samplerDesc.AddressV = convert_texture_addressing(options->v_addressing);
+	samplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = 32;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	D3D12_CPU_DESCRIPTOR_HANDLE handle;
+	sampler->impl.sampler_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(sampler->impl.sampler_heap, &handle);
+	device->lpVtbl->CreateSampler(device, &samplerDesc, handle);
+}
+
+void kinc_g5_sampler_destroy(kinc_g5_sampler_t *sampler) {}
+
+void kinc_g5_shader_init(kinc_g5_shader_t *shader, const void *_data, size_t length, kinc_g5_shader_type_t type) {
+	memset(shader->impl.constants, 0, sizeof(shader->impl.constants));
+	memset(shader->impl.attributes, 0, sizeof(shader->impl.attributes));
+	memset(shader->impl.textures, 0, sizeof(shader->impl.textures));
+
+	unsigned index = 0;
+	uint8_t *data = (uint8_t *)_data;
+
+	int attributesCount = data[index++];
+	for (int i = 0; i < attributesCount; ++i) {
+		char name[64];
+		for (unsigned i2 = 0; i2 < 63; ++i2) {
+			name[i2] = data[index++];
+			if (name[i2] == 0)
+				break;
+		}
+		strcpy(shader->impl.attributes[i].name, name);
+		shader->impl.attributes[i].attribute = data[index++];
+	}
+
+	uint8_t texCount = data[index++];
+	for (unsigned i = 0; i < texCount; ++i) {
+		char name[64];
+		for (unsigned i2 = 0; i2 < 63; ++i2) {
+			name[i2] = data[index++];
+			if (name[i2] == 0)
+				break;
+		}
+		strcpy(shader->impl.textures[i].name, name);
+		shader->impl.textures[i].texture = data[index++];
+	}
+	shader->impl.texturesCount = texCount;
+
+	uint8_t constantCount = data[index++];
+	shader->impl.constantsSize = 0;
+	for (unsigned i = 0; i < constantCount; ++i) {
+		char name[64];
+		for (unsigned i2 = 0; i2 < 63; ++i2) {
+			name[i2] = data[index++];
+			if (name[i2] == 0)
+				break;
+		}
+		ShaderConstant constant;
+		memcpy(&constant.offset, &data[index], sizeof(constant.offset));
+		index += 4;
+		memcpy(&constant.size, &data[index], sizeof(constant.size));
+		index += 4;
+		index += 2; // columns and rows
+		strcpy(constant.name, name);
+		shader->impl.constants[i] = constant;
+		shader->impl.constantsSize = constant.offset + constant.size;
+	}
+
+	shader->impl.length = (int)length - index;
+	shader->impl.data = (uint8_t *)malloc(shader->impl.length);
+	memcpy(shader->impl.data, &data[index], shader->impl.length);
+}
+
+void kinc_g5_shader_destroy(kinc_g5_shader_t *shader) {
+	free(shader->impl.data);
+}
+
+// djb2
+uint32_t kinc_internal_hash_name(unsigned char *str) {
+	unsigned long hash = 5381;
+	int c;
+	while ((c = *str++)) {
+		hash = hash * 33 ^ c;
+	}
+	return hash;
 }

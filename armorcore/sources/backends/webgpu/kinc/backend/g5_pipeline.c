@@ -220,3 +220,21 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
 	rpDesc.primitive = rsDesc;
 	pipe->impl.pipeline = wgpuDeviceCreateRenderPipeline(device, &rpDesc);
 }
+
+void kinc_g5_sampler_init(kinc_g5_sampler_t *sampler, const kinc_g5_sampler_options_t *options) {}
+
+void kinc_g5_sampler_destroy(kinc_g5_sampler_t *sampler) {}
+
+void kinc_g5_shader_init(kinc_g5_shader_t *shader, const void *source, size_t length, kinc_g5_shader_type_t type) {
+	WGPUShaderModuleSPIRVDescriptor smSpirvDesc;
+	memset(&smSpirvDesc, 0, sizeof(smSpirvDesc));
+	smSpirvDesc.chain.sType = WGPUSType_ShaderModuleSPIRVDescriptor;
+	smSpirvDesc.codeSize = length / 4;
+	smSpirvDesc.code = source;
+	WGPUShaderModuleDescriptor smDesc;
+	memset(&smDesc, 0, sizeof(smDesc));
+	smDesc.nextInChain = &smSpirvDesc;
+	shader->impl.module = wgpuDeviceCreateShaderModule(device, &smDesc);
+}
+
+void kinc_g5_shader_destroy(kinc_g5_shader_t *shader) {}

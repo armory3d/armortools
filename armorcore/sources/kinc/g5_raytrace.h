@@ -1,7 +1,7 @@
 #pragma once
 
 #include <kinc/global.h>
-#include <kinc/backend/graphics5/g5_raytrace.h>
+#include <kinc/backend/g5_raytrace.h>
 
 struct kinc_g5_command_list;
 struct kinc_g5_constant_buffer;

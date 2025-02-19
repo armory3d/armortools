@@ -1,5 +1,7 @@
+#include <kinc/g5.h>
 #include <kinc/g5_pipeline.h>
 #include <kinc/log.h>
+#include <kinc/core.h>
 #import <Metal/Metal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -430,4 +432,117 @@ kinc_g5_texture_unit_t kinc_g5_pipeline_get_texture_unit(kinc_g5_pipeline_t *pip
 	}
 
 	return unit;
+}
+
+static MTLSamplerAddressMode convert_addressing(kinc_g5_texture_addressing_t mode) {
+	switch (mode) {
+	case KINC_G5_TEXTURE_ADDRESSING_REPEAT:
+		return MTLSamplerAddressModeRepeat;
+	case KINC_G5_TEXTURE_ADDRESSING_BORDER:
+		return MTLSamplerAddressModeClampToBorderColor;
+	case KINC_G5_TEXTURE_ADDRESSING_CLAMP:
+		return MTLSamplerAddressModeClampToEdge;
+	case KINC_G5_TEXTURE_ADDRESSING_MIRROR:
+		return MTLSamplerAddressModeMirrorRepeat;
+	default:
+		assert(false);
+		return MTLSamplerAddressModeRepeat;
+	}
+}
+
+static MTLSamplerMipFilter convert_mipmap_mode(kinc_g5_mipmap_filter_t filter) {
+	switch (filter) {
+	case KINC_G5_MIPMAP_FILTER_NONE:
+		return MTLSamplerMipFilterNotMipmapped;
+	case KINC_G5_MIPMAP_FILTER_POINT:
+		return MTLSamplerMipFilterNearest;
+	case KINC_G5_MIPMAP_FILTER_LINEAR:
+		return MTLSamplerMipFilterLinear;
+	default:
+		assert(false);
+		return MTLSamplerMipFilterNearest;
+	}
+}
+
+static MTLSamplerMinMagFilter convert_texture_filter(kinc_g5_texture_filter_t filter) {
+	switch (filter) {
+	case KINC_G5_TEXTURE_FILTER_POINT:
+		return MTLSamplerMinMagFilterNearest;
+	case KINC_G5_TEXTURE_FILTER_LINEAR:
+		return MTLSamplerMinMagFilterLinear;
+	case KINC_G5_TEXTURE_FILTER_ANISOTROPIC:
+		return MTLSamplerMinMagFilterLinear; // ?
+	default:
+		assert(false);
+		return MTLSamplerMinMagFilterNearest;
+	}
+}
+
+void kinc_g5_sampler_init(kinc_g5_sampler_t *sampler, const kinc_g5_sampler_options_t *options) {
+	id<MTLDevice> device = getMetalDevice();
+
+	MTLSamplerDescriptor *desc = (MTLSamplerDescriptor *)[[MTLSamplerDescriptor alloc] init];
+	desc.minFilter = convert_texture_filter(options->minification_filter);
+	desc.magFilter = convert_texture_filter(options->magnification_filter);
+	desc.sAddressMode = convert_addressing(options->u_addressing);
+	desc.tAddressMode = convert_addressing(options->v_addressing);
+	desc.mipFilter = convert_mipmap_mode(options->mipmap_filter);
+	desc.maxAnisotropy = 1;
+	desc.normalizedCoordinates = YES;
+	desc.lodMinClamp = 0;
+	desc.lodMaxClamp = 32;
+
+	sampler->impl.sampler = (__bridge_retained void *)[device newSamplerStateWithDescriptor:desc];
+}
+
+void kinc_g5_sampler_destroy(kinc_g5_sampler_t *sampler) {
+	id<MTLSamplerState> mtl_sampler = (__bridge_transfer id<MTLSamplerState>)sampler->impl.sampler;
+	mtl_sampler = nil;
+}
+
+void kinc_g5_shader_destroy(kinc_g5_shader_t *shader) {
+	id<MTLFunction> function = (__bridge_transfer id<MTLFunction>)shader->impl.mtlFunction;
+	function = nil;
+	shader->impl.mtlFunction = NULL;
+}
+
+void kinc_g5_shader_init(kinc_g5_shader_t *shader, const void *source, size_t length, kinc_g5_shader_type_t type) {
+	shader->impl.name[0] = 0;
+
+	{
+		uint8_t *data = (uint8_t *)source;
+		if (length > 1 && data[0] == '>') {
+			memcpy(shader->impl.name, data + 1, length - 1);
+			shader->impl.name[length - 1] = 0;
+		}
+		else {
+			for (int i = 3; i < length; ++i) {
+				if (data[i] == '\n') {
+					shader->impl.name[i - 3] = 0;
+					break;
+				}
+				else {
+					shader->impl.name[i - 3] = data[i];
+				}
+			}
+		}
+	}
+
+	char *data = (char *)source;
+	id<MTLLibrary> library = nil;
+	if (length > 1 && data[0] == '>') {
+		library = getMetalLibrary();
+	}
+	else {
+		id<MTLDevice> device = getMetalDevice();
+		NSError *error = nil;
+		library = [device newLibraryWithSource:[[NSString alloc] initWithBytes:data length:length encoding:NSUTF8StringEncoding] options:nil error:&error];
+		if (library == nil) {
+			kinc_log(KINC_LOG_LEVEL_ERROR, "%s", error.localizedDescription.UTF8String);
+		}
+	}
+	shader->impl.mtlFunction = (__bridge_retained void *)[library newFunctionWithName:[NSString stringWithCString:shader->impl.name
+	                                                                                                     encoding:NSUTF8StringEncoding]];
+
+	assert(shader->impl.mtlFunction);
 }

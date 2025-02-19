@@ -2,7 +2,7 @@
 
 #include <kinc/global.h>
 #include <kinc/g5_pipeline.h>
-#include <kinc/backend/graphics5/g5_compute.h>
+#include <kinc/backend/g5_compute.h>
 
 typedef struct kinc_g5_compute_shader {
 	kinc_g5_compute_shader_impl impl;

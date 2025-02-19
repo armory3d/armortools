@@ -76,12 +76,9 @@ static bool compute_pipeline_set = false;
 #include <stdbool.h>
 
 #include "direct3d12.c.h"
-#include "shaderhash.c.h"
 #include "g5_commandlist.c.h"
 #include "g5_compute.c.h"
 #include "g5_pipeline.c.h"
 #include "g5_raytrace.c.h"
-#include "sampler.c.h"
-#include "shader.c.h"
 #include "g5_texture.c.h"
 #include "g5_buffer.c.h"

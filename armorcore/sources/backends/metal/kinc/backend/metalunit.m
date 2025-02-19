@@ -13,7 +13,5 @@ static void end_render_pass(void);
 #include "g5_compute.m.h"
 #include "g5_pipeline.m.h"
 #include "g5_raytrace.m.h"
-#include "sampler.m.h"
-#include "shader.m.h"
 #include "g5_texture.m.h"
 #include "g5_buffer.m.h"

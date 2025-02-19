@@ -3,7 +3,7 @@
 #include <kinc/global.h>
 #include <kinc/g5.h>
 #include <kinc/g5_texture.h>
-#include <kinc/backend/graphics5/g5_pipeline.h>
+#include <kinc/backend/g5_pipeline.h>
 
 typedef enum kinc_g5_shader_type {
 	KINC_G5_SHADER_TYPE_FRAGMENT,

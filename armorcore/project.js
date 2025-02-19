@@ -12,7 +12,6 @@ let project = new Project(flags.name);
 
 	if (platform === "windows") {
 		add_backend("windows");
-		add_backend("microsoft");
 		project.add_lib("dxguid");
 		project.add_lib("dsound");
 		project.add_lib("dinput8");
@@ -31,8 +30,6 @@ let project = new Project(flags.name);
 		else {
 			throw new Error("Graphics API " + graphics + " is not available for Windows.");
 		}
-
-		add_backend("wasapi");
 	}
 	else if (platform === "macos") {
 		add_backend("apple");
