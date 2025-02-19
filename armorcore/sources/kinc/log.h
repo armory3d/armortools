@@ -26,7 +26,7 @@ void kinc_log_args(kinc_log_level_t log_level, const char *format, va_list args)
 #undef KINC_IMPLEMENTATION
 #endif
 
-#ifdef KINC_MICROSOFT
+#ifdef KINC_WINDOWS
 #include <kinc/backend/miniwindows.h>
 #include <kinc/backend/system_microsoft.h>
 #endif
@@ -61,7 +61,7 @@ void kinc_log_args(kinc_log_level_t level, const char *format, va_list args) {
 	}
 	va_end(args_android_copy);
 #endif
-#ifdef KINC_MICROSOFT
+#ifdef KINC_WINDOWS
 #ifdef UTF8
 	wchar_t buffer[4096];
 	kinc_microsoft_format(format, args, buffer);

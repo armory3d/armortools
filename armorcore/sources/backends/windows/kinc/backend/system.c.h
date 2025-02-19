@@ -546,7 +546,7 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 							kinc_window_resize(last_window_width, last_window_height);
 						}
 						if (last_window_x > INT_MIN && last_window_y > INT_MIN) {
-							kinc_window_move(slast_window_x, last_window_y);
+							kinc_window_move(last_window_x, last_window_y);
 						}
 					}
 				}

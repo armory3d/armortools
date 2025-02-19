@@ -1,16 +1,9 @@
 #pragma once
 
-#ifdef _WIN64
 typedef __int64 INT_PTR;
 typedef unsigned __int64 UINT_PTR;
 typedef __int64 LONG_PTR;
 typedef unsigned __int64 ULONG_PTR;
-#else
-typedef _W64 int INT_PTR;
-typedef _W64 unsigned int UINT_PTR;
-typedef _W64 long LONG_PTR;
-typedef _W64 unsigned long ULONG_PTR;
-#endif // WIN64
 
 typedef unsigned long DWORD;
 typedef DWORD *LPDWORD;

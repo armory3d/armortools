@@ -115,7 +115,12 @@ enum tagPOINTER_INPUT_TYPE {
 	PT_TOUCHPAD = 5, // Touchpad
 };
 
+#include <assert.h>
+#include <intrin.h>
 #include <stdio.h>
+#include "system_microsoft.c.h"
+#include "mutex.c.h"
+#include "thread.c.h"
 
 #include "windows.c.h"
 #include "base.c.h"

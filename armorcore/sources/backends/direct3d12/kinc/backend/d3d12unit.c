@@ -57,7 +57,7 @@ static ID3D12RootSignature *globalComputeRootSignature = NULL;
 
 #include <stdbool.h>
 
-#define MAXIMUM_WINDOWS 16
+#define MAXIMUM_WINDOWS 1
 
 struct dx_ctx {
 	struct dx_window windows[MAXIMUM_WINDOWS];

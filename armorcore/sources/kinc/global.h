@@ -15,10 +15,6 @@
 #define KINC_INLINE static __attribute__((always_inline)) inline
 #endif
 
-#ifdef _MSC_VER
-#define KINC_MICROSOFT
-#endif
-
 #if defined(_WIN32)
 
 #define KINC_WINDOWS

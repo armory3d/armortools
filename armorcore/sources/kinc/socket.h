@@ -16,20 +16,13 @@ typedef enum kinc_socket_family {
 	KINC_SOCKET_FAMILY_IP6
 } kinc_socket_family_t;
 
-#ifdef KINC_MICROSOFT
-#if defined(_WIN64)
+#ifdef KINC_WINDOWS
 typedef unsigned __int64 UINT_PTR, *PUINT_PTR;
-#else
-#if !defined _W64
-#define _W64
-#endif
-typedef _W64 unsigned int UINT_PTR, *PUINT_PTR;
-#endif
 typedef UINT_PTR SOCKET;
 #endif
 
 typedef struct kinc_socket {
-#ifdef KINC_MICROSOFT
+#ifdef KINC_WINDOWS
 	SOCKET handle;
 #else
 	int handle;

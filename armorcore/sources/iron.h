@@ -696,7 +696,7 @@ void _drop_files(wchar_t *file_path, void *data) {
 	POINT p;
 	GetCursorPos(&p);
 	ScreenToClient(kinc_windows_window_handle(), &p);
-	_mouse_move(0, p.x, p.y, 0, 0, NULL);
+	_mouse_move(p.x, p.y, 0, 0, NULL);
 #endif
 
 	char buffer[1024];
