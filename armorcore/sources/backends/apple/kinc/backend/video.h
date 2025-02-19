@@ -1,7 +1,7 @@
 #pragma once
 
 #include <objc/runtime.h>
-#include <kinc/graphics5/g5_texture.h>
+#include <kinc/g5_texture.h>
 
 typedef struct {
 	double start;

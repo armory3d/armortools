@@ -11,7 +11,7 @@
 #include <kinc/system.h>
 #include <kinc/display.h>
 #include <kinc/thread.h>
-#include <kinc/graphics5/g5.h>
+#include <kinc/g5.h>
 #include <kinc/filereader.h>
 #include "iron_string.h"
 #include "iron_array.h"
@@ -344,10 +344,11 @@ string_t *iron_get_arg(i32 index) {
 #include <kinc/core.h>
 #include <kinc/mutex.h>
 #include <kinc/http.h>
-#include <kinc/graphics5/vertexbuffer.h>
-#include <kinc/graphics5/indexbuffer.h>
-#include <kinc/graphics5/g5_pipeline.h>
-#include <kinc/graphics5/g5_texture.h>
+#include <kinc/g5_buffer.h>
+#include <kinc/g5_pipeline.h>
+#include <kinc/g5_texture.h>
+#include <kinc/g5_commandlist.h>
+#include <kinc/g5_raytrace.h>
 #include <lz4x.h>
 #ifdef WITH_AUDIO
 #include <kinc/audio1/audio.h>
@@ -360,12 +361,6 @@ int LZ4_decompress_safe(const char *source, char *dest, int compressed_size, int
 #include <d3d12.h>
 extern bool waitAfterNextDraw;
 #endif
-#if defined(KINC_DIRECT3D12) || defined(KINC_VULKAN) || defined(KINC_METAL)
-#include <kinc/graphics5/constantbuffer.h>
-#include <kinc/graphics5/g5_commandlist.h>
-#include <kinc/graphics5/g5_raytrace.h>
-#endif
-
 #ifdef WITH_D3DCOMPILER
 #include <d3d11.h>
 #include <D3Dcompiler.h>
@@ -418,7 +413,6 @@ char mobile_title[1024];
 int krafix_compile(const char *source, char *output, int *length, const char *targetlang, const char *system, const char *shadertype, int version);
 #endif
 
-#if defined(KINC_DIRECT3D12) || defined(KINC_VULKAN) || defined(KINC_METAL)
 extern kinc_g5_command_list_t commandList;
 static kinc_g5_constant_buffer_t constant_buffer;
 static kinc_g5_render_target_t *render_target;
@@ -427,7 +421,6 @@ static kinc_g5_raytrace_acceleration_structure_t accel;
 static bool raytrace_created = false;
 static bool raytrace_accel_created = false;
 const int constant_buffer_size = 24;
-#endif
 
 void _update(void *data) {
 	#ifdef KINC_WINDOWS
@@ -2699,7 +2692,6 @@ void iron_ml_unload() {
 }
 #endif
 
-#if defined(KINC_DIRECT3D12) || defined(KINC_VULKAN) || defined(KINC_METAL)
 bool iron_raytrace_supported() {
 	#ifdef KINC_METAL
 	return kinc_g5_raytrace_supported();
@@ -2849,7 +2841,6 @@ void iron_raytrace_dispatch_rays(kinc_g5_render_target_t *render_target, buffer_
 	kinc_g5_raytrace_set_target(render_target);
 	kinc_g5_raytrace_dispatch_rays(&commandList);
 }
-#endif
 
 i32 iron_window_x() {
 	return kinc_window_x();

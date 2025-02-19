@@ -1,4 +1,4 @@
-#include <kinc/graphics5/g5_texture.h>
+#include <kinc/g5_texture.h>
 
 void kinc_g5_texture_init(kinc_g5_texture_t *texture, int width, int height, kinc_image_format_t format) {
 

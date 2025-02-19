@@ -1,7 +1,7 @@
-#include "kinc/graphics5/g5.h"
+#include "kinc/g5.h"
 #include "vulkan.h"
 #include <kinc/error.h>
-#include <kinc/graphics5/g5_pipeline.h>
+#include <kinc/g5_pipeline.h>
 #include <kinc/log.h>
 #include <kinc/system.h>
 #include <kinc/window.h>

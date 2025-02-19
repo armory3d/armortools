@@ -1,11 +1,5 @@
 #pragma once
 
-/*! \file raytrace.h
-    \brief Preliminary API, requires some actual D3D12/Vulkan code to fill in
-    the acceleration-structure and pipeline-details. Also requires manually
-    compiled shaders. Use with caution.
-*/
-
 #include <kinc/global.h>
 #include <kinc/backend/graphics5/g5_raytrace.h>
 

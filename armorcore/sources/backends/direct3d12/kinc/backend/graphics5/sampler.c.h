@@ -1,4 +1,4 @@
-#include <kinc/graphics5/sampler.h>
+#include <kinc/g5_pipeline.h>
 
 static D3D12_TEXTURE_ADDRESS_MODE convert_texture_addressing(kinc_g5_texture_addressing_t addressing) {
 	switch (addressing) {

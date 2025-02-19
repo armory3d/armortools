@@ -1,12 +1,8 @@
 #pragma once
 
 #include <kinc/global.h>
+#include <kinc/g5_pipeline.h>
 #include <kinc/backend/graphics5/g5_compute.h>
-#include <kinc/graphics5/g5_pipeline.h>
-
-/*! \file g5_compute.h
-    \brief Provides support for running compute-shaders.
-*/
 
 typedef struct kinc_g5_compute_shader {
 	kinc_g5_compute_shader_impl impl;

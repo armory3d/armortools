@@ -1,5 +1,5 @@
 #include <kinc/audio2/audio.h>
-#include <kinc/graphics5/g5.h>
+#include <kinc/g5.h>
 #include <kinc/keyboard.h>
 #include <kinc/mouse.h>
 #include <kinc/log.h>

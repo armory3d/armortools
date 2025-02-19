@@ -1,7 +1,7 @@
 #import "GLView.h"
 
-#include <kinc/graphics5/g5.h>
-#include <kinc/graphics5/g5_texture.h>
+#include <kinc/g5.h>
+#include <kinc/g5_texture.h>
 #include <kinc/keyboard.h>
 #include <kinc/mouse.h>
 #include <kinc/pen.h>

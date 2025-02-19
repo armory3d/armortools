@@ -19,3 +19,6 @@
 #include "core.h"
 #include "matrix.h"
 #include "random.h"
+#include "g5_pipeline.c.h"
+#include "g5_buffer.c.h"
+#include "g5.c.h"

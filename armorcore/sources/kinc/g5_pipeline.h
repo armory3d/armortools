@@ -1,14 +1,9 @@
 #pragma once
 
 #include <kinc/global.h>
+#include <kinc/g5.h>
+#include <kinc/g5_texture.h>
 #include <kinc/backend/graphics5/g5_pipeline.h>
-#include <kinc/graphics5/vertexstructure.h>
-#include <kinc/graphics5/g5_texture.h>
-#include "g5.h"
-
-/*! \file g5_pipeline.h
-    \brief Provides functions for creating and using pipelines which configure the GPU for rendering.
-*/
 
 typedef enum kinc_g5_shader_type {
 	KINC_G5_SHADER_TYPE_FRAGMENT,

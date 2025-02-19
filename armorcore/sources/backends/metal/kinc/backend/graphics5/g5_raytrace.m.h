@@ -1,10 +1,8 @@
 #include <kinc/backend/graphics5/g5_raytrace.h>
-#include <kinc/graphics5/g5_commandlist.h>
-#include <kinc/graphics5/constantbuffer.h>
-#include <kinc/graphics5/g5.h>
-#include <kinc/graphics5/indexbuffer.h>
-#include <kinc/graphics5/g5_raytrace.h>
-#include <kinc/graphics5/vertexbuffer.h>
+#include <kinc/g5_commandlist.h>
+#include <kinc/g5.h>
+#include <kinc/g5_raytrace.h>
+#include <kinc/g5_buffer.h>
 
 static kinc_g5_raytrace_acceleration_structure_t *accel;
 static kinc_g5_raytrace_pipeline_t *pipeline;

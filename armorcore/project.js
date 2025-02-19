@@ -2,10 +2,6 @@
 let project = new Project(flags.name);
 
 {
-	project.add_define("KINC_G1");
-	project.add_define("KINC_G2");
-	let g5 = false;
-
 	project.add_cfiles("sources/kinc/*");
 	project.add_include_dir("sources");
 
@@ -27,9 +23,7 @@ let project = new Project(flags.name);
 		project.add_lib("wbemuuid");
 
 		if (graphics === "direct3d12" || graphics === "default") {
-			g5 = true;
 			add_backend("direct3d12");
-			project.add_define("KINC_DIRECT3D");
 			project.add_define("KINC_DIRECT3D12");
 			project.add_lib("dxgi");
 			project.add_lib("d3d12");
@@ -45,7 +39,6 @@ let project = new Project(flags.name);
 		add_backend("macos");
 		add_backend("posix");
 		if (graphics === "metal" || graphics === "default") {
-			g5 = true;
 			add_backend("metal");
 			project.add_define("KINC_METAL");
 			project.add_lib("Metal");
@@ -69,7 +62,6 @@ let project = new Project(flags.name);
 		add_backend("ios");
 		add_backend("posix");
 		if (graphics === "metal" || graphics === "default") {
-			g5 = true;
 			add_backend("metal");
 			project.add_define("KINC_METAL");
 			project.add_lib("Metal");
@@ -94,7 +86,6 @@ let project = new Project(flags.name);
 		add_backend("android");
 		add_backend("posix");
 		if (graphics === "vulkan") {
-			g5 = true;
 			add_backend("vulkan" || graphics === "default");
 			project.add_define("KINC_VULKAN");
 			project.add_define("VK_USE_PLATFORM_ANDROID_KHR");
@@ -117,7 +108,6 @@ let project = new Project(flags.name);
 		project.add_include_dir("miniClib");
 		project.add_cfiles("sources/libs/miniClib/**");
 		if (graphics === "webgpu") {
-			g5 = true;
 			add_backend("webgpu" || graphics === "default");
 			project.add_define("KINC_WEBGPU");
 		}
@@ -226,7 +216,6 @@ let project = new Project(flags.name);
 		// }
 
 		if (graphics === "vulkan" || graphics === "default") {
-			g5 = true;
 			add_backend("vulkan");
 			project.add_lib("vulkan");
 			project.add_define("KINC_VULKAN");
@@ -236,13 +225,6 @@ let project = new Project(flags.name);
 		}
 		project.add_define("_POSIX_C_SOURCE=200112L");
 		project.add_define("_XOPEN_SOURCE=600");
-	}
-
-	project.add_define("KINC_G4");
-
-	if (g5) {
-		project.add_cfiles("sources/kinc/graphics5/*");
-		project.add_define("KINC_G5");
 	}
 }
 

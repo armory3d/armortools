@@ -2,6 +2,29 @@
 
 struct ID3D12Resource;
 
+struct D3D12VertexBufferView {
+	__int64 BufferLocation;
+	unsigned int SizeInBytes;
+	unsigned int StrideInBytes;
+};
+
+typedef struct {
+	struct ID3D12Resource *uploadBuffer;
+	struct D3D12VertexBufferView view;
+
+	int myCount;
+	int myStride;
+	int lastStart;
+	int lastCount;
+} VertexBuffer5Impl;
+
+typedef struct {
+	struct ID3D12Resource *constant_buffer;
+	int lastStart;
+	int lastCount;
+	int mySize;
+} ConstantBuffer5Impl;
+
 struct D3D12IindexBufferView {
 	__int64 BufferLocation;
 	unsigned int SizeInBytes;

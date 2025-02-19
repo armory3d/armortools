@@ -7,13 +7,11 @@
 #include <kinc/filereader.h>
 #include <kinc/core.h>
 #include <kinc/matrix.h>
-#include <kinc/graphics5/indexbuffer.h>
-#include <kinc/graphics5/vertexbuffer.h>
-#include <kinc/graphics5/g5_pipeline.h>
-#include <kinc/graphics5/g5_texture.h>
-#include <kinc/graphics5/g5_commandlist.h>
-#include <kinc/graphics5/g5_compute.h>
-#include <kinc/graphics5/constantbuffer.h>
+#include <kinc/g5_buffer.h>
+#include <kinc/g5_pipeline.h>
+#include <kinc/g5_texture.h>
+#include <kinc/g5_commandlist.h>
+#include <kinc/g5_compute.h>
 
 #define CONSTANT_BUFFER_SIZE 4096
 #define CONSTANT_BUFFER_MULTIPLY 100
@@ -641,4 +639,17 @@ void kinc_g4_index_buffer_unlock_all(kinc_g5_index_buffer_t *buffer) {
 void kinc_g4_index_buffer_unlock(kinc_g5_index_buffer_t *buffer, int count) {
 	kinc_g5_index_buffer_unlock(buffer, count);
 	kinc_g5_command_list_upload_index_buffer(&commandList, buffer);
+}
+
+static void kinc_internal_init_vertex_element(kinc_g5_vertex_element_t *element, const char *name, kinc_g5_vertex_data_t data) {
+	element->name = name;
+	element->data = data;
+}
+
+void kinc_g5_vertex_structure_init(kinc_g5_vertex_structure_t *structure) {
+	structure->size = 0;
+}
+
+void kinc_g5_vertex_structure_add(kinc_g5_vertex_structure_t *structure, const char *name, kinc_g5_vertex_data_t data) {
+	kinc_internal_init_vertex_element(&structure->elements[structure->size++], name, data);
 }

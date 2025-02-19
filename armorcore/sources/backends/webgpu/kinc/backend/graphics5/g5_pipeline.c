@@ -1,4 +1,4 @@
-#include <kinc/graphics5/g5_pipeline.h>
+#include <kinc/g5_pipeline.h>
 #include <assert.h>
 #include <string.h>
 

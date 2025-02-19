@@ -1,5 +1,5 @@
 #include "vulkan.h"
-#include <kinc/graphics5/g5_texture.h>
+#include <kinc/g5_texture.h>
 #include <kinc/log.h>
 
 bool use_staging_buffer = false;

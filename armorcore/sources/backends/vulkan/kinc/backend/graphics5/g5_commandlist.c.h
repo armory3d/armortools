@@ -1,11 +1,10 @@
 
 #include "vulkan.h"
 
-#include <kinc/graphics5/g5_commandlist.h>
-#include <kinc/graphics5/g5_compute.h>
-#include <kinc/graphics5/indexbuffer.h>
-#include <kinc/graphics5/g5_pipeline.h>
-#include <kinc/graphics5/vertexbuffer.h>
+#include <kinc/g5_commandlist.h>
+#include <kinc/g5_compute.h>
+#include <kinc/g5_pipeline.h>
+#include <kinc/g5_buffer.h>
 #include <kinc/log.h>
 #include <kinc/window.h>
 #include <vulkan/vulkan_core.h>

@@ -1,7 +1,7 @@
 #include "g5_pipeline.h"
 
-#include <kinc/graphics5/g5.h>
-#include <kinc/graphics5/g5_pipeline.h>
+#include <kinc/g5.h>
+#include <kinc/g5_pipeline.h>
 #include <kinc/log.h>
 #include <kinc/backend/system_microsoft.h>
 

@@ -1,4 +1,4 @@
-#include <kinc/graphics5/sampler.h>
+#include <kinc/sampler.h>
 
 void kinc_g5_sampler_init(kinc_g5_sampler_t *sampler, const kinc_g5_sampler_options_t *options) {}
 

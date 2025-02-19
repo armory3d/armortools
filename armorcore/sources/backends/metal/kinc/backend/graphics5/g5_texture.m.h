@@ -1,5 +1,5 @@
-#include <kinc/graphics5/g5_texture.h>
-#include <kinc/graphics5/g5.h>
+#include <kinc/g5_texture.h>
+#include <kinc/g5.h>
 #include <kinc/log.h>
 #import <Metal/Metal.h>
 

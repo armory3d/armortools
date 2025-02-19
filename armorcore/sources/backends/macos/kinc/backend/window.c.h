@@ -1,5 +1,5 @@
 #include <kinc/display.h>
-#include <kinc/graphics5/g5.h>
+#include <kinc/g5.h>
 #include <kinc/window.h>
 
 int kinc_window_x() {

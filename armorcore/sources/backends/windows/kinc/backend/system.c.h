@@ -1,4 +1,4 @@
-#include <kinc/graphics5/g5.h>
+#include <kinc/g5.h>
 #include <kinc/gamepad.h>
 #include <kinc/backend/system_microsoft.h>
 #include <kinc/backend/windows.h>

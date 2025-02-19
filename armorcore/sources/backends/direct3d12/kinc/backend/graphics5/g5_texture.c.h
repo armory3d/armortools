@@ -1,7 +1,7 @@
 #include "g5_texture.h"
 
 #include <kinc/core.h>
-#include <kinc/graphics5/g5_texture.h>
+#include <kinc/g5_texture.h>
 #include <kinc/backend/system_microsoft.h>
 #include <math.h>
 #include <dxgi1_4.h>

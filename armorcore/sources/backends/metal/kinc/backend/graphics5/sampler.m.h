@@ -1,4 +1,4 @@
-#include <kinc/graphics5/sampler.h>
+#include <kinc/g5_pipeline.h>
 
 static MTLSamplerAddressMode convert_addressing(kinc_g5_texture_addressing_t mode) {
 	switch (mode) {

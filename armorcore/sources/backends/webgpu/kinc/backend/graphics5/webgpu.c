@@ -3,8 +3,8 @@
 #include <emscripten/html5.h>
 #include <emscripten/html5_webgpu.h>
 #include <webgpu/webgpu.h>
-#include <kinc/graphics5/g5.h>
-#include <kinc/graphics5/g5_pipeline.h>
+#include <kinc/g5.h>
+#include <kinc/g5_pipeline.h>
 #include <kinc/core.h>
 #include <kinc/system.h>
 #include <kinc/log.h>

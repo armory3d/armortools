@@ -1,5 +1,5 @@
 #include "vulkan.h"
-#include <kinc/graphics5/g5_pipeline.h>
+#include <kinc/g5_pipeline.h>
 #include <vulkan/vulkan_core.h>
 #include <assert.h>
 

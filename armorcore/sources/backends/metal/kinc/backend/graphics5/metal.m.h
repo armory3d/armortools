@@ -2,8 +2,8 @@
 #include <kinc/color.h>
 #include <kinc/system.h>
 #include <kinc/window.h>
-#include <kinc/graphics5/g5_commandlist.h>
-#include <kinc/graphics5/g5_texture.h>
+#include <kinc/g5_commandlist.h>
+#include <kinc/g5_texture.h>
 #import <Metal/Metal.h>
 #import <MetalKit/MTKView.h>
 

@@ -2,13 +2,9 @@
 
 #include <stddef.h>
 #include <kinc/global.h>
+#include <kinc/g5_texture.h>
+#include <kinc/g5_pipeline.h>
 #include <kinc/backend/graphics5/g5_commandlist.h>
-#include "g5_texture.h"
-#include "g5_pipeline.h"
-
-/*! \file g5_commandlist.h
-    \brief Contains functions for building command-lists to send commands to the GPU.
-*/
 
 struct kinc_g5_compute_shader;
 struct kinc_g5_constant_buffer;

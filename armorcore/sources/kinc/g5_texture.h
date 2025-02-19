@@ -1,14 +1,10 @@
 #pragma once
 
-#include <kinc/global.h>
-#include <kinc/backend/graphics5/g5_texture.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-
-/*! \file g5_texture.h
-    \brief Provides functions for handling textures.
-*/
+#include <kinc/global.h>
+#include <kinc/backend/graphics5/g5_texture.h>
 
 typedef enum kinc_image_compression {
 	KINC_IMAGE_COMPRESSION_NONE,
