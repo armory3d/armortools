@@ -76,7 +76,7 @@ bool kinc_internal_file_reader_open(kinc_file_reader_t *reader, const char *file
 #define KINC_IMPLEMENTATION
 
 #ifdef KINC_ANDROID
-#include <kinc/backend/Android.h>
+#include <kinc/backend/android.h>
 #endif
 #include <stdio.h>
 #include <stdlib.h>

@@ -2,20 +2,15 @@
 
 #include "minivulkan.h"
 
-struct texture_object {
+typedef struct {
 	VkImage image;
 	VkImageLayout imageLayout;
-
 	VkDeviceMemory mem;
 	VkImageView view;
 	int32_t width;
 	int32_t height;
-};
 
-typedef struct {
-	struct texture_object texture;
 	VkDeviceSize deviceSize;
-
 	uint8_t *conversionBuffer;
 	int stride;
 } Texture5Impl;

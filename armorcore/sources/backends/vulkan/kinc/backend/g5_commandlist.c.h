@@ -1,5 +1,5 @@
 
-#include "vulkan.h"
+#include "g5.h"
 
 #include <kinc/g5_commandlist.h>
 #include <kinc/g5_compute.h>
@@ -702,14 +702,14 @@ void kinc_g5_command_list_upload_texture(kinc_g5_command_list_t *list, struct ki
 
 void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list, kinc_g5_render_target_t *render_target, uint8_t *data) {
 	VkFormat format = render_target->impl.format;
-	int format_byteS_size = format_size(format);
+	int format_bytes_size = format_size(format);
 
 	// Create readback buffer
 	if (!render_target->impl.readbackBufferCreated) {
 		VkBufferCreateInfo buf_info = {0};
 		buf_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 		buf_info.pNext = NULL;
-		buf_info.size = render_target->width * render_target->height * format_byteS_size;
+		buf_info.size = render_target->width * render_target->height * format_bytes_size;
 		buf_info.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 		buf_info.flags = 0;
 		vkCreateBuffer(vk_ctx.device, &buf_info, NULL, &render_target->impl.readbackBuffer);
@@ -765,7 +765,7 @@ void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list,
 	// Read buffer
 	void *p;
 	vkMapMemory(vk_ctx.device, render_target->impl.readbackMemory, 0, VK_WHOLE_SIZE, 0, (void **)&p);
-	memcpy(data, p, render_target->width * render_target->height * format_byteS_size);
+	memcpy(data, p, render_target->width * render_target->height * format_bytes_size);
 	vkUnmapMemory(vk_ctx.device, render_target->impl.readbackMemory);
 }
 

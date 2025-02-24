@@ -1,7 +1,7 @@
 #define EGL_NO_PLATFORM_SPECIFIC_TYPES
 #include <EGL/egl.h>
 #include <kinc/error.h>
-#include <kinc/backend/Android.h>
+#include <kinc/backend/android.h>
 #include <kinc/g5.h>
 #include <kinc/gamepad.h>
 #include <kinc/keyboard.h>

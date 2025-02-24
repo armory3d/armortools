@@ -1,4 +1,4 @@
-#include "vulkan.h"
+#include "g5.h"
 #include <kinc/g5_pipeline.h>
 #include <vulkan/vulkan_core.h>
 #include <assert.h>
@@ -855,7 +855,7 @@ static int write_tex_descs(VkDescriptorImageInfo *tex_descs) {
 	for (int i = 0; i < 16; ++i) {
 		if (vulkan_textures[i] != NULL) {
 			tex_descs[i].sampler = vulkan_samplers[i];
-			tex_descs[i].imageView = vulkan_textures[i]->impl.texture.view;
+			tex_descs[i].imageView = vulkan_textures[i]->impl.view;
 			texture_count++;
 		}
 		else if (vulkan_render_targets[i] != NULL) {
@@ -961,7 +961,7 @@ VkDescriptorSet getDescriptorSet() {
 		if (vulkan_textures[i] != NULL) {
 			assert(vulkan_samplers[i] != VK_NULL_HANDLE);
 			tex_desc[i].sampler = vulkan_samplers[i];
-			tex_desc[i].imageView = vulkan_textures[i]->impl.texture.view;
+			tex_desc[i].imageView = vulkan_textures[i]->impl.view;
 			texture_count++;
 		}
 		else if (vulkan_render_targets[i] != NULL) {
@@ -1038,7 +1038,7 @@ static int write_compute_tex_descs(VkDescriptorImageInfo *tex_descs) {
 	for (int i = 0; i < 16; ++i) {
 		if (vulkan_textures[i] != NULL) {
 			tex_descs[i].sampler = vulkan_samplers[i];
-			tex_descs[i].imageView = vulkan_textures[i]->impl.texture.view;
+			tex_descs[i].imageView = vulkan_textures[i]->impl.view;
 			texture_count++;
 		}
 		else if (vulkan_render_targets[i] != NULL) {
@@ -1144,7 +1144,7 @@ static VkDescriptorSet get_compute_descriptor_set() {
 		if (vulkan_textures[i] != NULL) {
 			// assert(vulkan_samplers[i] != VK_NULL_HANDLE);
 			tex_desc[i].sampler = VK_NULL_HANDLE; // vulkan_samplers[i];
-			tex_desc[i].imageView = vulkan_textures[i]->impl.texture.view;
+			tex_desc[i].imageView = vulkan_textures[i]->impl.view;
 			texture_count++;
 		}
 		else if (vulkan_render_targets[i] != NULL) {

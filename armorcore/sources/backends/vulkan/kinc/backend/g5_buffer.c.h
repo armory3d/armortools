@@ -1,4 +1,4 @@
-#include "vulkan.h"
+#include "g5.h"
 #include "g5_buffer.h"
 #include <kinc/g5_buffer.h>
 
@@ -105,8 +105,6 @@ int kinc_g5_vertex_buffer_stride(kinc_g5_vertex_buffer_t *buffer) {
 	return buffer->impl.myStride;
 }
 
-bool memory_type_from_properties(uint32_t typeBits, VkFlags requirements_mask, uint32_t *typeIndex);
-
 bool kinc_g5_transpose_mat = true;
 
 static void createUniformBuffer(VkBuffer *buf, VkMemoryAllocateInfo *mem_alloc, VkDeviceMemory *mem, VkDescriptorBufferInfo *buffer_info, int size) {
@@ -191,8 +189,6 @@ void kinc_g5_constant_buffer_unlock(kinc_g5_constant_buffer_t *buffer) {
 int kinc_g5_constant_buffer_size(kinc_g5_constant_buffer_t *buffer) {
 	return buffer->impl.mySize;
 }
-
-bool memory_type_from_properties(uint32_t typeBits, VkFlags requirements_mask, uint32_t *typeIndex);
 
 static void unset(kinc_g5_index_buffer_t *buffer) {
 }

@@ -12,7 +12,7 @@
 #include <string.h>
 #include <kinc/g5_texture.h>
 #include <kinc/matrix.h>
-#include "vulkan.h"
+#include "g5.h"
 
 static VkSemaphore framebuffer_available;
 static VkSemaphore relay_semaphore;
@@ -21,7 +21,7 @@ static void command_list_should_wait_for_framebuffer(void);
 static VkDescriptorSetLayout compute_descriptor_layout;
 
 #include "minivulkan.c.h"
-#include "vulkan.c.h"
+#include "g5.c.h"
 #include "g5_commandlist.c.h"
 #include "g5_compute.c.h"
 #include "g5_pipeline.c.h"

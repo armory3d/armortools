@@ -75,7 +75,7 @@ static bool compute_pipeline_set = false;
 #include <malloc.h>
 #include <stdbool.h>
 
-#include "direct3d12.c.h"
+#include "g5.c.h"
 #include "g5_commandlist.c.h"
 #include "g5_compute.c.h"
 #include "g5_pipeline.c.h"

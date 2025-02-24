@@ -1,4 +1,4 @@
-#include "vulkan.h"
+#include "g5.h"
 #include "g5_raytrace.h"
 
 #ifndef KINC_ANDROID
@@ -1169,7 +1169,7 @@ void kinc_g5_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
 	tex2_image_write.pImageInfo = &tex2image_descriptor;
 
 	VkDescriptorImageInfo texenvimage_descriptor = {0};
-	texenvimage_descriptor.imageView = texenv->impl.texture.view;
+	texenvimage_descriptor.imageView = texenv->impl.view;
 	texenvimage_descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
 	VkWriteDescriptorSet texenv_image_write = {0};
@@ -1182,7 +1182,7 @@ void kinc_g5_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
 	texenv_image_write.pImageInfo = &texenvimage_descriptor;
 
 	VkDescriptorImageInfo texsobolimage_descriptor = {0};
-	texsobolimage_descriptor.imageView = texsobol->impl.texture.view;
+	texsobolimage_descriptor.imageView = texsobol->impl.view;
 	texsobolimage_descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
 	VkWriteDescriptorSet texsobol_image_write = {0};
@@ -1195,7 +1195,7 @@ void kinc_g5_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
 	texsobol_image_write.pImageInfo = &texsobolimage_descriptor;
 
 	VkDescriptorImageInfo texscrambleimage_descriptor = {0};
-	texscrambleimage_descriptor.imageView = texscramble->impl.texture.view;
+	texscrambleimage_descriptor.imageView = texscramble->impl.view;
 	texscrambleimage_descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
 	VkWriteDescriptorSet texscramble_image_write = {0};
@@ -1208,7 +1208,7 @@ void kinc_g5_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
 	texscramble_image_write.pImageInfo = &texscrambleimage_descriptor;
 
 	VkDescriptorImageInfo texrankimage_descriptor = {0};
-	texrankimage_descriptor.imageView = texrank->impl.texture.view;
+	texrankimage_descriptor.imageView = texrank->impl.view;
 	texrankimage_descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
 	VkWriteDescriptorSet texrank_image_write = {0};

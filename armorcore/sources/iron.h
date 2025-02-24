@@ -2747,7 +2747,7 @@ void iron_raytrace_set_textures(image_t *tex0, image_t *tex1, image_t *tex2, kin
 		texpaint0->impl.srvDescriptorHeap = texture->impl.srvDescriptorHeap;
 		#endif
 		#ifdef KINC_VULKAN
-		texpaint0->impl.sourceView = texture->impl.texture.view;
+		texpaint0->impl.sourceView = texture->impl.view;
 		#endif
 	}
 	else {
@@ -2769,7 +2769,7 @@ void iron_raytrace_set_textures(image_t *tex0, image_t *tex1, image_t *tex2, kin
 		texpaint1->impl.srvDescriptorHeap = texture->impl.srvDescriptorHeap;
 		#endif
 		#ifdef KINC_VULKAN
-		texpaint1->impl.sourceView = texture->impl.texture.view;
+		texpaint1->impl.sourceView = texture->impl.view;
 		#endif
 	}
 	else {
@@ -2791,7 +2791,7 @@ void iron_raytrace_set_textures(image_t *tex0, image_t *tex1, image_t *tex2, kin
 		texpaint2->impl.srvDescriptorHeap = texture->impl.srvDescriptorHeap;
 		#endif
 		#ifdef KINC_VULKAN
-		texpaint2->impl.sourceView = texture->impl.texture.view;
+		texpaint2->impl.sourceView = texture->impl.view;
 		#endif
 	}
 	else {

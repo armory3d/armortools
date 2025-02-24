@@ -1,4 +1,4 @@
-#include <kinc/backend/Android.h>
+#include <kinc/backend/android.h>
 
 #include <kinc/display.h>
 #include <kinc/log.h>

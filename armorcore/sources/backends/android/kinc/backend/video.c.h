@@ -12,7 +12,7 @@
 #include <string.h>
 #include <assert.h>
 #include <jni.h>
-#include <kinc/backend/Android.h>
+#include <kinc/backend/android.h>
 #include <pthread.h>
 
 void kinc_video_sound_stream_impl_init(kinc_internal_video_sound_stream_t *stream, int channel_count, int frequency) {
