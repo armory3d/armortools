@@ -1,5 +1,5 @@
 #include <kinc/backend/HIDManager.h>
-#include <iron_log.h>
+#include <iron_system.h>
 
 static int initHIDManager(struct HIDManager *manager);
 static bool addMatchingArray(struct HIDManager *manager, CFMutableArrayRef matchingCFArrayRef, CFDictionaryRef matchingCFDictRef);

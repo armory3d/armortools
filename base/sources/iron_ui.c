@@ -8,7 +8,6 @@
 #include <iron_gpu.h>
 #include <iron_input.h>
 #include <iron_system.h>
-#include <iron_log.h>
 #include "iron_draw.h"
 #include "iron_string.h"
 #include "iron_gc.h"

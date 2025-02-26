@@ -1,7 +1,6 @@
 #include <kinc/backend/android.h>
 
 #include <iron_system.h>
-#include <iron_log.h>
 
 typedef struct {
 	bool available;

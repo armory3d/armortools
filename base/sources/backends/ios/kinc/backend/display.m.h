@@ -1,6 +1,5 @@
 #import <UIKit/UIKit.h>
 #include <iron_system.h>
-#include <iron_log.h>
 
 void kinc_display_init(void) {}
 

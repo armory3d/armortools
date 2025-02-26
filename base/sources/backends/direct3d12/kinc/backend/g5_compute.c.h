@@ -1,5 +1,4 @@
 #include <iron_gpu.h>
-#include <iron_log.h>
 #include <iron_math.h>
 #include <kinc/backend/system_microsoft.h>
 

@@ -27,7 +27,6 @@
 #include <setjmp.h>
 #include <stdlib.h>
 #include <string.h>
-// #include <iron_log.h>
 // #include <iron_system.h>
 
 #define PTRSIZE sizeof(char *)

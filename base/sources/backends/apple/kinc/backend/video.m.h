@@ -4,7 +4,6 @@
 #include <iron_audio.h>
 #include <iron_gpu.h>
 #include <iron_file.h>
-#include <iron_log.h>
 #include <iron_system.h>
 #include <stdio.h>
 #include <stdlib.h>

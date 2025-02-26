@@ -1,7 +1,6 @@
 #include "g5_pipeline.h"
 
 #include <iron_gpu.h>
-#include <iron_log.h>
 #include <kinc/backend/system_microsoft.h>
 #include <iron_math.h>
 

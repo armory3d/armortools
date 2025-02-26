@@ -6,12 +6,7 @@
 #include <iron_global.h>
 #include <iron_math.h>
 #include <iron_gpu.h>
-#include <kinc/backend/g5_texture.h>
-#include <kinc/backend/g5_buffer.h>
-#include <kinc/backend/g5_pipeline.h>
-#include <kinc/backend/g5_commandlist.h>
-#include <kinc/backend/g5_compute.h>
-#include <kinc/backend/g5_raytrace.h>
+#include BACKEND_GPU_H
 
 #define KINC_G5_CLEAR_COLOR 1
 #define KINC_G5_CLEAR_DEPTH 2

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <iron_log.h>
 #include <iron_system.h>
 
 #include <X11/Xatom.h>

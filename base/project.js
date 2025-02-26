@@ -139,6 +139,11 @@ if (export_data_list) {
 		project.add_include_dir("sources/backends/" + name);
 	}
 
+	function add_backend2(name) {
+		project.add_cfiles("sources/backends/" + name + ".c");
+		project.add_define("BACKEND_GPU_H=\"backends/vulkan_gpu.h\"");
+	}
+
 	if (platform === "windows") {
 		add_backend("windows");
 		project.add_lib("dxguid");
@@ -211,8 +216,8 @@ if (export_data_list) {
 		project.add_define("KINC_ANDROID");
 		add_backend("android");
 		add_backend("posix");
-		if (graphics === "vulkan") {
-			add_backend("vulkan" || graphics === "default");
+		if (graphics === "vulkan" || graphics === "default") {
+			add_backend("vulkan");
 			project.add_define("KINC_VULKAN");
 			project.add_define("VK_USE_PLATFORM_ANDROID_KHR");
 			project.add_lib("vulkan");
@@ -233,8 +238,8 @@ if (export_data_list) {
 		add_backend("wasm");
 		project.add_include_dir("miniClib");
 		project.add_cfiles("sources/libs/miniClib/**");
-		if (graphics === "webgpu") {
-			add_backend("webgpu" || graphics === "default");
+		if (graphics === "webgpu" || graphics === "default") {
+			add_backend("webgpu");
 			project.add_define("KINC_WEBGPU");
 		}
 		else {
@@ -342,7 +347,7 @@ if (export_data_list) {
 		// }
 
 		if (graphics === "vulkan" || graphics === "default") {
-			add_backend("vulkan");
+			add_backend2("vulkan_gpu");
 			project.add_lib("vulkan");
 			project.add_define("KINC_VULKAN");
 		}

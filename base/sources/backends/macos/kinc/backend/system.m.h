@@ -3,7 +3,6 @@
 #include <kinc/backend/HIDManager.h>
 #include <iron_gpu.h>
 #include <iron_input.h>
-#include <iron_log.h>
 #include <iron_system.h>
 #include "windowdata.h"
 #include <kinc/backend/windowdata.h>

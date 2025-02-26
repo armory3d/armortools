@@ -1,7 +1,7 @@
 #include "HIDGamepad.h"
 #include "HIDManager.h"
 #include <iron_input.h>
-#include <iron_log.h>
+#include <iron_system.h>
 #include <iron_math.h>
 
 static void inputValueCallback(void *inContext, IOReturn inResult, void *inSender, IOHIDValueRef inIOHIDValueRef);

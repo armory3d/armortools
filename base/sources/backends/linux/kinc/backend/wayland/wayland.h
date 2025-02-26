@@ -3,8 +3,6 @@
 #define _GNU_SOURCE // put this here too, to make clangd happy
 #endif
 #include <iron_system.h>
-#include <iron_log.h>
-#include <iron_system.h>
 
 #include <wayland-client-core.h>
 #include <wayland-cursor.h>

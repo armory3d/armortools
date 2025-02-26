@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <iron_log.h>
 #include <iron_system.h>
 #include <iron_thread.h>
 #include <iron_gpu.h>
@@ -2098,6 +2097,8 @@ void iron_http_request(string_t *url, i32 size, void (*callback)(char *, buffer_
 	url_path[j] = 0;
 	#ifdef KINC_ANDROID // TODO: move to Kinc
 	android_http_request(curl, url_path, NULL, 443, true, 0, NULL, &_http_callback, cbd);
+	#elif defined(KINC_LINUX)
+	// TODO
 	#else
 	kinc_http_request(url_base, url_path, NULL, 443, true, 0, NULL, &_http_callback, cbd);
 	#endif

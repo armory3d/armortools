@@ -3,7 +3,6 @@
 #include <kinc/audio1/audio.h>
 #include <iron_gpu.h>
 #include <iron_file.h>
-#include <iron_log.h>
 #include <iron_system.h>
 
 #include <android_native_app_glue.h>

@@ -13,25 +13,6 @@ typedef void (*kinc_http_callback_t)(int error, int response, const char *body, 
 void kinc_http_request(const char *url, const char *path, const char *data, int port, bool secure, int method, const char *header,
                                  kinc_http_callback_t callback, void *callbackdata);
 
-#ifdef KINC_IMPLEMENTATION_ROOT
-#define KINC_IMPLEMENTATION
-#endif
-
-#ifdef KINC_IMPLEMENTATION
-
-#if !defined KINC_MACOS && !defined KINC_IOS && !defined KINC_WINDOWS
-
-#include <assert.h>
-
-void kinc_http_request(const char *url, const char *path, const char *data, int port, bool secure, int method, const char *header,
-                       kinc_http_callback_t callback, void *callbackdata) {
-	assert(false); // not implemented for the current system, please send a pull-request
-}
-
-#endif
-
-#endif
-
 // typedef enum kinc_socket_protocol {
 // 	KINC_SOCKET_PROTOCOL_UDP,
 // 	KINC_SOCKET_PROTOCOL_TCP
@@ -96,7 +77,7 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 
 // #undef KINC_IMPLEMENTATION
 // #include <stb_sprintf.h>
-// #include <iron_log.h>
+// #include <iron_system.h>
 // #define KINC_IMPLEMENTATION
 
 // #include <errno.h>

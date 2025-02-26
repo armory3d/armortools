@@ -1,5 +1,5 @@
 #include <iron_gpu.h>
-#include <iron_log.h>
+#include <iron_system.h>
 #include <iron_math.h>
 #import <Metal/Metal.h>
 #include <stdio.h>

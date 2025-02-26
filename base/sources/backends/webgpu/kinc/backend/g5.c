@@ -6,7 +6,6 @@
 #include <iron_gpu.h>
 #include <iron_math.h>
 #include <iron_system.h>
-#include <iron_log.h>
 
 int renderTargetWidth;
 int renderTargetHeight;

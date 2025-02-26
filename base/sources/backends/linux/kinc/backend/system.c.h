@@ -1,6 +1,5 @@
 #include "iron_gpu.h"
 #include <iron_input.h>
-#include <iron_log.h>
 #include <iron_video.h>
 #include <iron_system.h>
 #include "gamepad.h"

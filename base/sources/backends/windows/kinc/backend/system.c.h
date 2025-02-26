@@ -3,7 +3,6 @@
 #include <kinc/backend/system_microsoft.h>
 #include <kinc/backend/windows.h>
 #include <iron_input.h>
-#include <iron_log.h>
 #include <iron_system.h>
 #include <iron_thread.h>
 #include <iron_video.h>

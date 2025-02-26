@@ -6,7 +6,6 @@
 #include <android/sensor.h>
 #include <android/window.h>
 #include <android_native_app_glue.h>
-#include <iron_log.h>
 #include <iron_system.h>
 #include <iron_thread.h>
 #include <iron_video.h>

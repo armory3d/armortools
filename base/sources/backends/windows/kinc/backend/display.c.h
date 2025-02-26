@@ -1,6 +1,5 @@
 #include <kinc/backend/windows.h>
 #include <iron_system.h>
-#include <iron_log.h>
 
 #undef RegisterClass
 

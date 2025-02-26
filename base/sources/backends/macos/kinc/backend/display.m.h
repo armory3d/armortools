@@ -1,6 +1,5 @@
 #import <Cocoa/Cocoa.h>
 #include <iron_system.h>
-#include <iron_log.h>
 
 #define maxDisplays 10
 

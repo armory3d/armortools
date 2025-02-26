@@ -1,6 +1,6 @@
 #include "wayland.h"
 
-#include <iron_log.h>
+#include <iron_system.h>
 #include <wayland-generated/wayland-pointer-constraint.h>
 #include <wayland-generated/wayland-relative-pointer.h>
 #include <wayland-generated/wayland-tablet.h>

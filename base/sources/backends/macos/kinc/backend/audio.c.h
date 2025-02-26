@@ -5,7 +5,7 @@
 #include <CoreServices/CoreServices.h>
 #include <kinc/audio2/audio.h>
 #include <kinc/backend/video.h>
-#include <iron_log.h>
+#include <iron_system.h>
 #include <stdio.h>
 
 static kinc_internal_video_sound_stream_t *video = NULL;
