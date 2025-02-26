@@ -134,18 +134,28 @@ if (export_data_list) {
 {
 	project.add_include_dir("sources");
 
-	function add_backend(name) {
-		project.add_cfiles("sources/backends/" + name + "/**");
-		project.add_include_dir("sources/backends/" + name);
+	function add_gpu_backend(name) {
+		project.add_cfiles("sources/backends/" + name + "_gpu.c");
+		project.add_define("BACKEND_GPU_H=\"backends/" + name + "_gpu.h\"");
 	}
 
-	function add_backend2(name) {
-		project.add_cfiles("sources/backends/" + name + ".c");
-		project.add_define("BACKEND_GPU_H=\"backends/vulkan_gpu.h\"");
+	function add_sys_backend(name) {
+		project.add_cfiles("sources/backends/" + name + "_system.c");
+		project.add_define("BACKEND_SYS_H=\"backends/" + name + "_system.h\"");
+	}
+
+	function add_net_backend(name) {
+		project.add_cfiles("sources/backends/" + name + "_net.c");
+		project.add_define("BACKEND_NET_H=\"backends/" + name + "_net.h\"");
+	}
+
+	function add_thread_backend(name) {
+		project.add_cfiles("sources/backends/" + name + "_thread.c");
+		project.add_define("BACKEND_THREAD_H=\"backends/" + name + "_thread.h\"");
 	}
 
 	if (platform === "windows") {
-		add_backend("windows");
+		add_sys_backend("windows");
 		project.add_lib("dxguid");
 		project.add_lib("dsound");
 		project.add_lib("dinput8");
@@ -156,7 +166,7 @@ if (export_data_list) {
 		project.add_lib("wbemuuid");
 
 		if (graphics === "direct3d12" || graphics === "default") {
-			add_backend("direct3d12");
+			add_gpu_backend("direct3d12");
 			project.add_define("KINC_DIRECT3D12");
 			project.add_lib("dxgi");
 			project.add_lib("d3d12");
@@ -166,11 +176,11 @@ if (export_data_list) {
 		}
 	}
 	else if (platform === "macos") {
-		add_backend("apple");
-		add_backend("macos");
-		add_backend("posix");
+		add_sys_backend("apple");
+		add_sys_backend("macos");
+		add_sys_backend("posix");
 		if (graphics === "metal" || graphics === "default") {
-			add_backend("metal");
+			add_gpu_backend("metal");
 			project.add_define("KINC_METAL");
 			project.add_lib("Metal");
 			project.add_lib("MetalKit");
@@ -189,11 +199,11 @@ if (export_data_list) {
 		project.add_lib("Foundation");
 	}
 	else if (platform === "ios") {
-		add_backend("apple");
-		add_backend("ios");
-		add_backend("posix");
+		add_sys_backend("apple");
+		add_sys_backend("ios");
+		add_sys_backend("posix");
 		if (graphics === "metal" || graphics === "default") {
-			add_backend("metal");
+			add_gpu_backend("metal");
 			project.add_define("KINC_METAL");
 			project.add_lib("Metal");
 		}
@@ -214,10 +224,10 @@ if (export_data_list) {
 	}
 	else if (platform === "android") {
 		project.add_define("KINC_ANDROID");
-		add_backend("android");
-		add_backend("posix");
+		add_sys_backend("android");
+		add_sys_backend("posix");
 		if (graphics === "vulkan" || graphics === "default") {
-			add_backend("vulkan");
+			add_gpu_backend("vulkan");
 			project.add_define("KINC_VULKAN");
 			project.add_define("VK_USE_PLATFORM_ANDROID_KHR");
 			project.add_lib("vulkan");
@@ -235,11 +245,11 @@ if (export_data_list) {
 	}
 	else if (platform === "wasm") {
 		project.add_define("KINC_WASM");
-		add_backend("wasm");
+		add_sys_backend("wasm");
 		project.add_include_dir("miniClib");
 		project.add_cfiles("sources/libs/miniClib/**");
 		if (graphics === "webgpu" || graphics === "default") {
-			add_backend("webgpu");
+			add_gpu_backend("webgpu");
 			project.add_define("KINC_WEBGPU");
 		}
 		else {
@@ -247,13 +257,13 @@ if (export_data_list) {
 		}
 	}
 	else if (platform === "linux") {
-		add_backend("linux");
-		add_backend("posix");
+		add_sys_backend("linux");
+		add_thread_backend("posix");
 		project.add_lib("asound");
 		project.add_lib("dl");
 		project.add_lib("udev");
 		if (graphics === "vulkan" || graphics === "default") {
-			add_backend2("vulkan_gpu");
+			add_gpu_backend("vulkan");
 			project.add_lib("vulkan");
 			project.add_define("KINC_VULKAN");
 		}

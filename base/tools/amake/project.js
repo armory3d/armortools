@@ -49,7 +49,7 @@ else if (platform === "windows") {
 	project.add_lib("dxguid");
 }
 else if (platform === "macos") {
-	project.add_cfiles("../../sources/backends/macos/kinc/backend/mac.plist");
+	project.add_cfiles("../../sources/backends/mac.plist");
 }
 
 // QuickJS changes:

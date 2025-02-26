@@ -1,8 +1,0 @@
-#include "audio.c.h"
-#include "display.c.h"
-#include "mouse.c.h"
-#include "mutex.c.h"
-#include "system.c.h"
-#include "thread.c.h"
-#include "video.c.h"
-#include "window.c.h"

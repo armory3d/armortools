@@ -2,9 +2,7 @@
 
 #include <stdbool.h>
 #include <iron_global.h>
-#include <kinc/backend/thread.h>
-#include <kinc/backend/mutex.h>
-#include <kinc/backend/atomic.h>
+#include BACKEND_THREAD_H
 
 typedef struct kinc_thread {
 	kinc_thread_impl_t impl;
@@ -27,12 +25,3 @@ void kinc_mutex_destroy(kinc_mutex_t *mutex);
 void kinc_mutex_lock(kinc_mutex_t *mutex);
 bool kinc_mutex_try_to_lock(kinc_mutex_t *mutex);
 void kinc_mutex_unlock(kinc_mutex_t *mutex);
-
-typedef struct kinc_uber_mutex {
-	kinc_uber_mutex_impl_t impl;
-} kinc_uber_mutex_t;
-
-bool kinc_uber_mutex_init(kinc_uber_mutex_t *mutex, const char *name);
-void kinc_uber_mutex_destroy(kinc_uber_mutex_t *mutex);
-void kinc_uber_mutex_lock(kinc_uber_mutex_t *mutex);
-void kinc_uber_mutex_unlock(kinc_uber_mutex_t *mutex);

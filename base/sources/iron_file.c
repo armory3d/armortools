@@ -52,7 +52,7 @@ const char *macgetresourcepath(void);
 #endif
 
 #ifdef KINC_WINDOWS
-#include <kinc/backend/miniwindows.h>
+#include <kinc/backend/windows_mini.h>
 #endif
 
 static char *fileslocation = NULL;

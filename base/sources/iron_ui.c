@@ -6,7 +6,6 @@
 #include <string.h>
 #include <ctype.h>
 #include <iron_gpu.h>
-#include <iron_input.h>
 #include <iron_system.h>
 #include "iron_draw.h"
 #include "iron_string.h"

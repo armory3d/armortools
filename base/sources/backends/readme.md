@@ -1,4 +1,4 @@
-Mini-Kore based on revision 370f433110c7341ecbc319537493c72375662fb5.
+Based on Kore revision 370f433110c7341ecbc319537493c72375662fb5 by RobDangerous.
 https://github.com/Kode/Kore
 
 Copyright (c) 2024 the Kore Development Team

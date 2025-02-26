@@ -329,16 +329,11 @@ string_t *iron_get_arg(i32 index) {
 #ifndef NO_IRON_API
 
 #include <stdio.h>
-#include <iron_file.h>
-#include <iron_input.h>
 #include <iron_math.h>
-#include <iron_thread.h>
 #include <iron_net.h>
-#include <iron_gpu.h>
 #include <lz4x.h>
 #ifdef WITH_AUDIO
-#include <kinc/audio1/audio.h>
-#include <kinc/audio1/sound.h>
+#include <iron_audio.h>
 #endif
 int LZ4_decompress_safe(const char *source, char *dest, int compressed_size, int maxOutputSize);
 #define STB_IMAGE_IMPLEMENTATION
@@ -354,11 +349,11 @@ extern bool waitAfterNextDraw;
 #ifdef WITH_NFD
 #include <nfd.h>
 #elif defined(KINC_ANDROID)
-#include "kinc/backend/android_file_dialog.h"
-#include "kinc/backend/android_http_request.h"
+#include "android_file_dialog.h"
+#include "android_http_request.h"
 #elif defined(KINC_IOS)
 #include <wchar.h>
-#include <kinc/backend/ios_file_dialog.h>
+#include <ios_file_dialog.h>
 #endif
 #include "dir.h"
 #ifdef WITH_IMAGE_WRITE

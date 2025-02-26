@@ -4,7 +4,7 @@
 #include <string.h>
 #include <math.h>
 #include <iron_gpu.h>
-#include <iron_input.h>
+#include <iron_system.h>
 #include "iron_draw.h"
 #include "iron_ui.h"
 #include "iron_armpack.h"
