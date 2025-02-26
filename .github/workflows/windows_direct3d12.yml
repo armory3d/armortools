@@ -18,4 +18,4 @@ jobs:
     - name: Compile
       run: |
         cd armorpaint
-        ../armorcore/make --graphics direct3d12 --compile
+        ../base/make --graphics direct3d12 --compile

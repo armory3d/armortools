@@ -22,4 +22,4 @@ jobs:
     - name: Compile
       run: |
         cd armorpaint
-        ../armorcore/make --graphics vulkan --compile
+        ../base/make --graphics vulkan --compile

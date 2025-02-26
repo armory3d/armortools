@@ -17,19 +17,19 @@ cd armortools/armorlab
 
 **Windows (x64)**
 ```bash
-..\armorcore\make --graphics direct3d12
+..\base\make --graphics direct3d12
 # Open generated Visual Studio project at `build\ArmorLab.sln`
 # Build and run
 ```
 
 **Linux (x64)** *wip - cpu only*
 ```bash
-../armorcore/make --graphics vulkan --run
+../base/make --graphics vulkan --run
 ```
 
 **macOS (arm64)**
 ```bash
-../armorcore/make --graphics metal
+../base/make --graphics metal
 # Open generated Xcode project at `build/ArmorLab.xcodeproj`
 # Build and run
 ```

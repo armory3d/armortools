@@ -12,12 +12,12 @@ armortools
 
 **Generating a locale file**
 ```bash
-./armorcore/make --js base/tools/extract_locales.js <locale code>
+./base/make --js base/tools/extract_locales.js <locale code>
 # Generates a `base/assets/locale/<locale code>.json` file
 ```
 
 **Embedding data files**
 ```bash
 # Requires compiler with c23 #embed support (clang 19 or newer)
-../armorcore/make --embed
+../base/make --embed
 ```

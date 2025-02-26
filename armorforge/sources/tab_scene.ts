@@ -102,10 +102,10 @@ function tab_scene_draw_list(ui: ui_t, list_handle: ui_handle_t, current_object:
 		tab_scene_select_object(current_object.ext);
 
 		ui_menu_draw(function (ui: ui_t) {
-			if (ui_menu_button(ui, tr("Duplicate"))) {
+			if (ui_menu_button(tr("Duplicate"))) {
 				sim_duplicate();
 			}
-			if (ui_menu_button(ui, tr("Delete"))) {
+			if (ui_menu_button(tr("Delete"))) {
 				sim_delete();
 			}
 		});
@@ -149,7 +149,7 @@ function tab_scene_new_object(mesh_name: string) {
 function tab_scene_new_menu(ui: ui_t) {
 	for (let i: i32 = 0; i < tab_scene_new_meshes.length; ++i) {
 		let mesh_name: string = tab_scene_new_meshes[i];
-		if (ui_menu_button(ui, mesh_name)) {
+		if (ui_menu_button(mesh_name)) {
 			tab_scene_new_object(mesh_name);
 		}
 	}

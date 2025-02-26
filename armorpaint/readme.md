@@ -16,33 +16,33 @@ cd armortools/armorpaint
 
 **Windows (x64)**
 ```bash
-..\armorcore\make --graphics direct3d12
+..\base\make --graphics direct3d12
 # Open generated Visual Studio project at `build\ArmorPaint.sln`
 # Build and run
 ```
 
 **Linux (x64)**
 ```bash
-../armorcore/make --graphics vulkan --run
+../base/make --graphics vulkan --run
 ```
 
 **macOS (arm64)**
 ```bash
-../armorcore/make --graphics metal
+../base/make --graphics metal
 # Open generated Xcode project at `build/ArmorPaint.xcodeproj`
 # Build and run
 ```
 
 **Android (arm64)** *wip*
 ```bash
-../armorcore/make --graphics vulkan --target android
+../base/make --graphics vulkan --target android
 # Open generated Android Studio project at `build/ArmorPaint`
 # Build for device
 ```
 
 **iOS (arm64)** *wip*
 ```bash
-../armorcore/make --graphics metal --target ios
+../base/make --graphics metal --target ios
 # Open generated Xcode project `build/ArmorPaint.xcodeproj`
 # Build for device
 ```

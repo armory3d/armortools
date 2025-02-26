@@ -1,7 +1,7 @@
 // Extracts localizable strings from a set of source files and writes them to JSON files.
 // This script can create new translations or update existing ones.
 // Usage:
-// `../../armorcore/make --js extract_locales.js <locale code>`
+// `../make --js extract_locales.js <locale code>`
 // Generates a `base/assets/locale/<locale code>.json` file
 
 let locale = scriptArgs[4];

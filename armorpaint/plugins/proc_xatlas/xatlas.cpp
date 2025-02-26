@@ -10056,7 +10056,7 @@ void xatlasPackOptionsInit(xatlasPackOptions *packOptions)
 extern "C" {
 #endif
 
-#include <kinc/system.h>
+#include <iron_system.h>
 #include <iron_obj.h>
 
 void proc_xatlas_unwrap(raw_mesh_t *mesh) {
