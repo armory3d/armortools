@@ -1,6 +1,5 @@
 #include <iron_video.h>
 
-#if !defined(KINC_VIDEO_GSTREAMER)
 void kinc_video_init(kinc_video_t *video, const char *filename) {}
 
 void kinc_video_destroy(kinc_video_t *video) {}
@@ -56,4 +55,3 @@ float *kinc_internal_video_sound_stream_next_frame(kinc_internal_video_sound_str
 bool kinc_internal_video_sound_stream_ended(kinc_internal_video_sound_stream_t *stream) {
 	return true;
 }
-#endif

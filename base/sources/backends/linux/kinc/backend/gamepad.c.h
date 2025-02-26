@@ -1,7 +1,6 @@
 #include "gamepad.h"
 
 #include <iron_input.h>
-
 #include <fcntl.h>
 #include <libudev.h>
 #include <linux/joystick.h>

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <iron_system.h>
-
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -186,4 +185,4 @@ struct x11_context {
 struct kinc_x11_procs xlib;
 struct x11_context x11_ctx;
 
-void kinc_x11_copy_to_clipboard(const char *text);
+void kinc_copy_to_clipboard(const char *text);
