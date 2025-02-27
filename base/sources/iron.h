@@ -397,7 +397,7 @@ int krafix_compile(const char *source, char *output, int *length, const char *ta
 extern kinc_g5_command_list_t commandList;
 static kinc_g5_constant_buffer_t constant_buffer;
 static kinc_g5_render_target_t *render_target;
-static kinc_g5_raytrace_pipeline_t pipeline;
+static kinc_g5_raytrace_pipeline_t rt_pipeline;
 static kinc_g5_raytrace_acceleration_structure_t accel;
 static bool raytrace_created = false;
 static bool raytrace_accel_created = false;
@@ -2686,11 +2686,11 @@ bool iron_raytrace_supported() {
 void iron_raytrace_init(buffer_t *shader) {
 	if (raytrace_created) {
 		kinc_g5_constant_buffer_destroy(&constant_buffer);
-		kinc_g5_raytrace_pipeline_destroy(&pipeline);
+		kinc_g5_raytrace_pipeline_destroy(&rt_pipeline);
 	}
 	raytrace_created = true;
 	kinc_g5_constant_buffer_init(&constant_buffer, constant_buffer_size * 4);
-	kinc_g5_raytrace_pipeline_init(&pipeline, &commandList, shader->buffer, (int)shader->length, &constant_buffer);
+	kinc_g5_raytrace_pipeline_init(&rt_pipeline, &commandList, shader->buffer, (int)shader->length, &constant_buffer);
 }
 
 void iron_raytrace_as_init() {
@@ -2820,7 +2820,7 @@ void iron_raytrace_dispatch_rays(kinc_g5_render_target_t *render_target, buffer_
 	kinc_g5_constant_buffer_unlock(&constant_buffer);
 
 	kinc_g5_raytrace_set_acceleration_structure(&accel);
-	kinc_g5_raytrace_set_pipeline(&pipeline);
+	kinc_g5_raytrace_set_pipeline(&rt_pipeline);
 	kinc_g5_raytrace_set_target(render_target);
 	kinc_g5_raytrace_dispatch_rays(&commandList);
 }

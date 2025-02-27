@@ -2,26 +2,6 @@
 // Red triangle test
 // ../../../make --graphics vulkan --run
 
-let vs: string = "#version 330\n\
-in vec3 pos; \
-void main() { \
-	gl_Position = vec4(pos, 1.0); \
-} \
-";
-
-let fs: string = "#version 330\n\
-out vec4 frag_color; \
-void main() { \
-	frag_color = vec4(1.0, 0.0, 0.0, 1.0); \
-} \
-";
-
-let vertices: f32[] = [
-	-1.0, -1.0, 0.0,
-	 1.0, -1.0, 0.0,
-	 0.0,  1.0, 0.0
-];
-let indices: i32[] = [0, 1, 2];
 let pipeline: any;
 let vb: any;
 let ib: any;
@@ -54,8 +34,12 @@ function main() {
 	let elems: kinc_vertex_elem_t[] = [elem];
 
 	let structure0: vertex_struct_t = { elements: elems };
-	let vert: any = iron_g4_create_vertex_shader_from_source(vs);
-	let frag: any = iron_g4_create_fragment_shader_from_source(fs);
+
+	let vs_buffer: buffer_t = iron_load_blob("./data/test.vert.spirv");
+	let fs_buffer: buffer_t = iron_load_blob("./data/test.frag.spirv");
+
+	let vert: any = iron_g4_create_shader(vs_buffer, shader_type_t.VERTEX);
+	let frag: any = iron_g4_create_shader(fs_buffer, shader_type_t.FRAGMENT);
 
 	let masks: bool[] = [true, true, true, true, true, true, true, true];
 	let attachments: i32[] = [0];
@@ -77,9 +61,16 @@ function main() {
 		depth_attachment_bits: 0
 	};
 
-	iron_g4_compile_pipeline(pipeline, structure0, null, null, null, 1, vert, frag, null, state);
+	iron_g4_compile_pipeline(pipeline, structure0, vert, frag, state);
 
-	vb = iron_g4_create_vertex_buffer(vertices.length / 3, structure0.elements, 0, 0);
+	let vertices: f32[] = [
+		-1.0, -1.0, 0.0,
+		 1.0, -1.0, 0.0,
+		 0.0,  1.0, 0.0
+	];
+	let indices: i32[] = [0, 1, 2];
+
+	vb = iron_g4_create_vertex_buffer(vertices.length / 3, structure0.elements, 0);
 	let vb_data: buffer_t = iron_g4_lock_vertex_buffer(vb);
 	for (let i: i32 = 0; i < vertices.length; i++) {
 		buffer_set_f32(vb_data, i * 4, vertices[i]);
