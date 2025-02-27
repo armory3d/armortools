@@ -1,5 +1,5 @@
 
-#include "../../../base/plugins/plugin_api.h"
+#include "plugin_api.h"
 
 void plugin_embed_base() {
 	JSValue global_obj = JS_GetGlobalObject(js_ctx);
