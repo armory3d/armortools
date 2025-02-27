@@ -246,8 +246,8 @@ if (export_data_list) {
 	else if (platform === "wasm") {
 		project.add_define("KINC_WASM");
 		add_sys_backend("wasm");
-		project.add_include_dir("miniClib");
-		project.add_cfiles("sources/libs/miniClib/**");
+		project.add_include_dir("miniclib");
+		project.add_cfiles("sources/libs/miniclib/**");
 		if (graphics === "webgpu" || graphics === "default") {
 			add_gpu_backend("webgpu");
 			project.add_define("KINC_WEBGPU");
