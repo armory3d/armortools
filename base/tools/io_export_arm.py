@@ -24,8 +24,8 @@ bl_info = {
     "location": "File -> Export",
     "description": "Armory mesh data",
     "author": "Armory3D.org",
-    "version": (2024, 3, 0),
-    "blender": (3, 6, 0),
+    "version": (2025, 2, 0),
+    "blender": (4, 3, 1),
     "doc_url": "",
     "tracker_url": "",
 }
@@ -462,7 +462,6 @@ class ArmoryExporter(bpy.types.Operator, ExportHelper):
         ]
 
     def export_mesh_data(self, exportMesh, bobject, o, has_armature=False):
-        exportMesh.calc_normals_split()
         exportMesh.calc_loop_triangles()
 
         loops = exportMesh.loops
