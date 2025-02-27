@@ -1,5 +1,5 @@
 
-#include "../../../base/sources/plugin_api.h"
+#include "../../../base/plugins/plugin_api.h"
 
 void proc_xatlas_unwrap(void *mesh);
 FN(proc_xatlas_unwrap) {

@@ -1,5 +1,5 @@
 
-#include "../../../base/sources/plugin_api.h"
+#include "../../../base/plugins/plugin_api.h"
 #include "iron_array.h"
 #include "proc_texsynth/proc_texsynth.h"
 

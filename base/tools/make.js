@@ -3151,6 +3151,9 @@ class Project {
 
 	add_project(directory) {
 		let from = path_isabs(directory) ? directory : path_join(this.basedir, directory);
+		if (!fs_exists(from)) {
+			return;
+		}
 		let project = load_project(from, false);
 		this.subProjects.push(project);
 		this.asset_matchers = this.asset_matchers.concat(project.asset_matchers);
