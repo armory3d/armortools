@@ -213,7 +213,8 @@ function config_get_options(): kinc_sys_ops_t {
 		mode: window_mode,
 		features: window_features,
 		vsync: config_raw.window_vsync,
-		frequency: config_raw.window_frequency
+		frequency: config_raw.window_frequency,
+		use_depth: false
 	};
 	return ops;
 }

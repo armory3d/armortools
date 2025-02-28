@@ -809,7 +809,7 @@ i32 color_set_ab(i32 c, u8 i) {
 // ██║  ██╗    ██║  ██║    ╚██████╔╝    ██║ ╚═╝ ██║
 // ╚═╝  ╚═╝    ╚═╝  ╚═╝     ╚═════╝     ╚═╝     ╚═╝
 
-void iron_init(string_t *title, i32 width, i32 height, bool vsync, i32 window_mode, i32 window_features, i32 x, i32 y, i32 frequency) {
+void iron_init(string_t *title, i32 width, i32 height, bool vsync, i32 window_mode, i32 window_features, i32 x, i32 y, i32 frequency, bool use_depth) {
 	kinc_window_options_t win;
 	kinc_framebuffer_options_t frame;
 	win.title = title;
@@ -825,7 +825,7 @@ void iron_init(string_t *title, i32 width, i32 height, bool vsync, i32 window_mo
 	win.display_index = -1;
 	win.visible = enable_window;
 	frame.color_bits = 32;
-	frame.depth_bits = 0;
+	frame.depth_bits = use_depth ? 24 : 0;
 	kinc_init(title, win.width, win.height, &win, &frame);
 	kinc_random_init((int)(kinc_time() * 1000));
 

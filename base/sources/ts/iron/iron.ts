@@ -180,7 +180,7 @@ declare function color_set_gb(c: i32, i: u8): i32;
 declare function color_set_bb(c: i32, i: u8): i32;
 declare function color_set_ab(c: i32, i: u8): i32;
 
-declare function iron_init(title: string, width: i32, height: i32, vsync: bool, window_mode: i32, window_features: i32, x: i32, y: i32, frequency: i32): void;
+declare function iron_init(title: string, width: i32, height: i32, vsync: bool, window_mode: i32, window_features: i32, x: i32, y: i32, frequency: i32, use_depth: bool): void;
 declare function iron_set_app_name(name: string): void;
 declare function iron_log(v: any): void;
 declare function iron_g4_clear(flags: i32, color: i32, depth: f32): void;

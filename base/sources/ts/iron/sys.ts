@@ -23,7 +23,7 @@ let _sys_window_title: string;
 let _sys_shaders: map_t<string, shader_t> = map_create();
 
 function sys_start(ops: kinc_sys_ops_t) {
-	iron_init(ops.title, ops.width, ops.height, ops.vsync, ops.mode, ops.features, ops.x, ops.y, ops.frequency);
+	iron_init(ops.title, ops.width, ops.height, ops.vsync, ops.mode, ops.features, ops.x, ops.y, ops.frequency, ops.use_depth);
 
 	_sys_start_time = iron_get_time();
 	g2_init();
@@ -419,6 +419,7 @@ type kinc_sys_ops_t = {
 	mode?: window_mode_t;
 	frequency?: i32;
 	vsync?: bool;
+	use_depth?: bool;
 };
 
 enum window_features_t {
