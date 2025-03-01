@@ -128,7 +128,7 @@ bool kinc_internal_file_reader_open(kinc_file_reader_t *reader, const char *file
 	strcpy(filepath, type == KINC_FILE_TYPE_SAVE ? kinc_internal_save_path() : iphonegetresourcepath());
 	if (type != KINC_FILE_TYPE_SAVE) {
 		strcat(filepath, "/");
-		strcat(filepath, KINC_DEBUGDIR);
+		strcat(filepath, KINC_OUTDIR);
 		strcat(filepath, "/");
 	}
 
@@ -138,7 +138,7 @@ bool kinc_internal_file_reader_open(kinc_file_reader_t *reader, const char *file
 	strcpy(filepath, type == KINC_FILE_TYPE_SAVE ? kinc_internal_save_path() : macgetresourcepath());
 	if (type != KINC_FILE_TYPE_SAVE) {
 		strcat(filepath, "/");
-		strcat(filepath, KINC_DEBUGDIR);
+		strcat(filepath, KINC_OUTDIR);
 		strcat(filepath, "/");
 	}
 	strcat(filepath, filename);
@@ -248,62 +248,31 @@ size_t kinc_file_reader_size(kinc_file_reader_t *reader) {
 }
 
 float kinc_read_f32le(uint8_t *data) {
-#ifdef KINC_LITTLE_ENDIAN // speed optimization
 	return *(float *)data;
-#else // works on all architectures
-	int i = (data[0] << 0) | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
-	return *(float *)&i;
-#endif
 }
 
 uint64_t kinc_read_u64le(uint8_t *data) {
-#ifdef KINC_LITTLE_ENDIAN
 	return *(uint64_t *)data;
-#else
-	return ((uint64_t)data[0] << 0) | ((uint64_t)data[1] << 8) | ((uint64_t)data[2] << 16) | ((uint64_t)data[3] << 24) | ((uint64_t)data[4] << 32) |
-	       ((uint64_t)data[5] << 40) | ((uint64_t)data[6] << 48) | ((uint64_t)data[7] << 56);
-#endif
 }
 
 int64_t kinc_read_s64le(uint8_t *data) {
-#ifdef KINC_LITTLE_ENDIAN
 	return *(int64_t *)data;
-#else
-	return ((int64_t)data[0] << 0) | ((int64_t)data[1] << 8) | ((int64_t)data[2] << 16) | ((int64_t)data[3] << 24) | ((int64_t)data[4] << 32) |
-	       ((int64_t)data[5] << 40) | ((int64_t)data[6] << 48) | ((int64_t)data[7] << 56);
-#endif
 }
 
 uint32_t kinc_read_u32le(uint8_t *data) {
-#ifdef KINC_LITTLE_ENDIAN
 	return *(uint32_t *)data;
-#else
-	return (data[0] << 0) | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
-#endif
 }
 
 int32_t kinc_read_s32le(uint8_t *data) {
-#ifdef KINC_LITTLE_ENDIAN
 	return *(int32_t *)data;
-#else
-	return (data[0] << 0) | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
-#endif
 }
 
 uint16_t kinc_read_u16le(uint8_t *data) {
-#ifdef KINC_LITTLE_ENDIAN
 	return *(uint16_t *)data;
-#else
-	return (data[0] << 0) | (data[1] << 8);
-#endif
 }
 
 int16_t kinc_read_s16le(uint8_t *data) {
-#ifdef KINC_LITTLE_ENDIAN
 	return *(int16_t *)data;
-#else
-	return (data[0] << 0) | (data[1] << 8);
-#endif
 }
 
 uint8_t kinc_read_u8(uint8_t *data) {

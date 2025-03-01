@@ -131,7 +131,7 @@
 // 	strcpy(name, macgetresourcepath());
 // #endif
 // 	strcat(name, "/");
-// 	strcat(name, KINC_DEBUGDIR);
+// 	strcat(name, KINC_OUTDIR);
 // 	strcat(name, "/");
 // 	strcat(name, filename);
 // 	video->impl.url = [NSURL fileURLWithPath:[NSString stringWithUTF8String:name]];

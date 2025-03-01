@@ -111,24 +111,6 @@ void kinc_start(void);
 void kinc_stop(void);
 void kinc_set_keep_screen_on(bool on);
 
-KINC_INLINE void kinc_debug_break(void) {
-#ifndef NDEBUG
-#if defined(_MSC_VER)
-	__debugbreak();
-#elif defined(__clang__)
-	__builtin_debugtrap();
-#else
-#if defined(__aarch64__)
-	__asm__ volatile(".inst 0xd4200000");
-#elif defined(__x86_64__)
-	__asm__ volatile("int $0x03");
-#else
-	kinc_log(KINC_LOG_LEVEL_WARNING, "Oh no, kinc_debug_break is not implemented for the current compiler and CPU.");
-#endif
-#endif
-#endif
-}
-
 void kinc_copy_to_clipboard(const char *text);
 void kinc_set_update_callback(void (*callback)(void *), void *data);
 void kinc_set_foreground_callback(void (*callback)(void *), void *data);

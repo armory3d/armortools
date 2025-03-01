@@ -5,10 +5,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#ifndef KINC_DEBUGDIR
-#define KINC_DEBUGDIR "out"
-#endif
-
+#define KINC_OUTDIR "out"
 #ifdef KINC_ANDROID
 struct AAsset;
 struct __sFILE;

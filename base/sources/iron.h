@@ -2029,14 +2029,14 @@ string_t *iron_get_files_location() {
 	char path[1024];
 	strcpy(path, macgetresourcepath());
 	strcat(path, "/");
-	strcat(path, KINC_DEBUGDIR);
+	strcat(path, KINC_OUTDIR);
 	strcat(path, "/");
 	return path;
 	#elif defined(KINC_IOS)
 	char path[1024];
 	strcpy(path, iphonegetresourcepath());
 	strcat(path, "/");
-	strcat(path, KINC_DEBUGDIR);
+	strcat(path, KINC_OUTDIR);
 	strcat(path, "/");
 	return path;
 	#else

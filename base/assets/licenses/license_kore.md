@@ -18,4 +18,4 @@ freely, subject to the following restrictions:
 
   3. This notice may not be removed or altered from any source distribution.
 
-https://github.com/Kode/Kinc
+https://github.com/Kode/Kore
