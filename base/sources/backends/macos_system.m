@@ -443,63 +443,63 @@ static bool debugButtonInput = false;
 static void logButton(int buttonIndex, bool pressed) {
 	switch (buttonIndex) {
 	case 0:
-		kinc_log(KINC_LOG_LEVEL_INFO, "A Pressed %i", pressed);
+		kinc_log("A Pressed %i", pressed);
 		break;
 
 	case 1:
-		kinc_log(KINC_LOG_LEVEL_INFO, "B Pressed %i", pressed);
+		kinc_log("B Pressed %i", pressed);
 		break;
 
 	case 2:
-		kinc_log(KINC_LOG_LEVEL_INFO, "X Pressed %i", pressed);
+		kinc_log("X Pressed %i", pressed);
 		break;
 
 	case 3:
-		kinc_log(KINC_LOG_LEVEL_INFO, "Y Pressed %i", pressed);
+		kinc_log("Y Pressed %i", pressed);
 		break;
 
 	case 4:
-		kinc_log(KINC_LOG_LEVEL_INFO, "Lb Pressed %i", pressed);
+		kinc_log("Lb Pressed %i", pressed);
 		break;
 
 	case 5:
-		kinc_log(KINC_LOG_LEVEL_INFO, "Rb Pressed %i", pressed);
+		kinc_log("Rb Pressed %i", pressed);
 		break;
 
 	case 6:
-		kinc_log(KINC_LOG_LEVEL_INFO, "Left Stick Pressed %i", pressed);
+		kinc_log("Left Stick Pressed %i", pressed);
 		break;
 
 	case 7:
-		kinc_log(KINC_LOG_LEVEL_INFO, "Right Stick Pressed %i", pressed);
+		kinc_log("Right Stick Pressed %i", pressed);
 		break;
 
 	case 8:
-		kinc_log(KINC_LOG_LEVEL_INFO, "Start Pressed %i", pressed);
+		kinc_log("Start Pressed %i", pressed);
 		break;
 
 	case 9:
-		kinc_log(KINC_LOG_LEVEL_INFO, "Back Pressed %i", pressed);
+		kinc_log("Back Pressed %i", pressed);
 		break;
 
 	case 10:
-		kinc_log(KINC_LOG_LEVEL_INFO, "Home Pressed %i", pressed);
+		kinc_log("Home Pressed %i", pressed);
 		break;
 
 	case 11:
-		kinc_log(KINC_LOG_LEVEL_INFO, "Up Pressed %i", pressed);
+		kinc_log("Up Pressed %i", pressed);
 		break;
 
 	case 12:
-		kinc_log(KINC_LOG_LEVEL_INFO, "Down Pressed %i", pressed);
+		kinc_log("Down Pressed %i", pressed);
 		break;
 
 	case 13:
-		kinc_log(KINC_LOG_LEVEL_INFO, "Left Pressed %i", pressed);
+		kinc_log("Left Pressed %i", pressed);
 		break;
 
 	case 14:
-		kinc_log(KINC_LOG_LEVEL_INFO, "Right Pressed %i", pressed);
+		kinc_log("Right Pressed %i", pressed);
 		break;
 
 	default:
@@ -512,27 +512,27 @@ static bool debugAxisInput = false;
 static void logAxis(int axisIndex) {
 	switch (axisIndex) {
 	case 0:
-		kinc_log(KINC_LOG_LEVEL_INFO, "Left stick X");
+		kinc_log("Left stick X");
 		break;
 
 	case 1:
-		kinc_log(KINC_LOG_LEVEL_INFO, "Left stick Y");
+		kinc_log("Left stick Y");
 		break;
 
 	case 2:
-		kinc_log(KINC_LOG_LEVEL_INFO, "Right stick X");
+		kinc_log("Right stick X");
 		break;
 
 	case 3:
-		kinc_log(KINC_LOG_LEVEL_INFO, "Right stick Y");
+		kinc_log("Right stick Y");
 		break;
 
 	case 4:
-		kinc_log(KINC_LOG_LEVEL_INFO, "Left trigger");
+		kinc_log("Left trigger");
 		break;
 
 	case 5:
-		kinc_log(KINC_LOG_LEVEL_INFO, "Right trigger");
+		kinc_log("Right trigger");
 		break;
 
 	default:
@@ -564,12 +564,6 @@ void HIDGamepad_destroy(struct HIDGamepad *gamepad) {
 }
 
 void HIDGamepad_bind(struct HIDGamepad *gamepad, IOHIDDeviceRef inDeviceRef, int inPadIndex) {
-	kinc_affirm(inDeviceRef != NULL);
-	kinc_affirm(inPadIndex >= 0);
-	kinc_affirm(gamepad->hidDeviceRef == NULL);
-	kinc_affirm(gamepad->hidQueueRef == NULL);
-	kinc_affirm(gamepad->padIndex == -1);
-
 	// Set device and device index
 	gamepad->hidDeviceRef = inDeviceRef;
 	gamepad->padIndex = inPadIndex;
@@ -609,12 +603,11 @@ void HIDGamepad_bind(struct HIDGamepad *gamepad, IOHIDDeviceRef inDeviceRef, int
 		cstringFromCFStringRef(productRef, gamepad->hidDeviceProduct, sizeof(gamepad->hidDeviceProduct));
 	}
 
-	kinc_log(KINC_LOG_LEVEL_INFO, "HIDGamepad.bind: <%p> idx:%d [0x%x:0x%x] [%s] [%s]", inDeviceRef, gamepad->padIndex, gamepad->hidDeviceVendorID,
+	kinc_log("HIDGamepad.bind: <%p> idx:%d [0x%x:0x%x] [%s] [%s]", inDeviceRef, gamepad->padIndex, gamepad->hidDeviceVendorID,
 	         gamepad->hidDeviceProductID, gamepad->hidDeviceVendor, gamepad->hidDeviceProduct);
 }
 
 static void initDeviceElements(struct HIDGamepad *gamepad, CFArrayRef elements) {
-	kinc_affirm(elements != NULL);
 
 	for (CFIndex i = 0, count = CFArrayGetCount(elements); i < count; ++i) {
 		IOHIDElementRef elementRef = (IOHIDElementRef)CFArrayGetValueAtIndex(elements, i);
@@ -671,7 +664,7 @@ static void initDeviceElements(struct HIDGamepad *gamepad, CFArrayRef elements) 
 }
 
 void HIDGamepad_unbind(struct HIDGamepad *gamepad) {
-	kinc_log(KINC_LOG_LEVEL_INFO, "HIDGamepad.unbind: idx:%d [0x%x:0x%x] [%s] [%s]", gamepad->padIndex, gamepad->hidDeviceVendorID, gamepad->hidDeviceProductID,
+	kinc_log("HIDGamepad.unbind: idx:%d [0x%x:0x%x] [%s] [%s]", gamepad->padIndex, gamepad->hidDeviceVendorID, gamepad->hidDeviceProductID,
 	         gamepad->hidDeviceVendor, gamepad->hidDeviceProduct);
 
 	if (gamepad->hidQueueRef) {
@@ -815,7 +808,7 @@ static int initHIDManager(struct HIDManager *manager) {
 			addMatchingArray(manager, matchingCFArrayRef, matchingCFDictRef);
 		}
 		else {
-			kinc_log(KINC_LOG_LEVEL_ERROR, "%s: CFArrayCreateMutable failed.", __PRETTY_FUNCTION__);
+			kinc_error("%s: CFArrayCreateMutable failed.", __PRETTY_FUNCTION__);
 			return -1;
 		}
 
@@ -866,17 +859,17 @@ CFMutableDictionaryRef createDeviceMatchingDictionary(struct HIDManager *manager
 						CFRelease(usageCFNumberRef);
 					}
 					else {
-						kinc_log(KINC_LOG_LEVEL_ERROR, "%s: CFNumberCreate(usage) failed.", __PRETTY_FUNCTION__);
+						kinc_error("%s: CFNumberCreate(usage) failed.", __PRETTY_FUNCTION__);
 					}
 				}
 			}
 			else {
-				kinc_log(KINC_LOG_LEVEL_ERROR, "%s: CFNumberCreate(usage page) failed.", __PRETTY_FUNCTION__);
+				kinc_error("%s: CFNumberCreate(usage page) failed.", __PRETTY_FUNCTION__);
 			}
 		}
 	}
 	else {
-		kinc_log(KINC_LOG_LEVEL_ERROR, "%s: CFDictionaryCreateMutable failed.", __PRETTY_FUNCTION__);
+		kinc_error("%s: CFDictionaryCreateMutable failed.", __PRETTY_FUNCTION__);
 	}
 	return result;
 }

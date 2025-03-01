@@ -199,7 +199,7 @@ function tab_swatches_draw(htab: ui_handle_t) {
 							let color: i32 = context_raw.swatch.base;
 							color = color_set_ab(color, context_raw.swatch.opacity * 255);
 							let val: u32 = color;
-							iron_copy_to_clipboard(i32_to_string(val));
+							kinc_copy_to_clipboard(i32_to_string(val));
 						}
 						///end
 						else if (project_raw.swatches.length > 1 && ui_menu_button(tr("Delete"), "delete")) {

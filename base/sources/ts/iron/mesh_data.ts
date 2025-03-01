@@ -3,7 +3,7 @@ function mesh_data_parse(name: string, id: string): mesh_data_t {
 	let format: scene_t = data_get_scene_raw(name);
 	let raw: mesh_data_t = mesh_data_get_raw_by_name(format.mesh_datas, id);
 	if (raw == null) {
-		iron_log("Mesh data '" + id + "' not found!");
+		kinc_log("Mesh data '" + id + "' not found!");
 		return null;
 	}
 
@@ -204,10 +204,10 @@ function mesh_data_get(raw: mesh_data_t, vs: vertex_element_t[]): vertex_buffer_
 		g4_vertex_buffer_unlock(vb);
 		map_set(raw._.vertex_buffer_map, key, vb);
 		if (has_tex && uvs == null) {
-			iron_log("Geometry " + raw.name + " is missing UV map");
+			kinc_log("Geometry " + raw.name + " is missing UV map");
 		}
 		if (has_col && cols == null) {
-			iron_log("Geometry " + raw.name + " is missing vertex colors");
+			kinc_log("Geometry " + raw.name + " is missing vertex colors");
 		}
 	}
 	return vb;

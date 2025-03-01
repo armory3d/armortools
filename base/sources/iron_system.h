@@ -6,15 +6,8 @@
 #include <stdint.h>
 #include <stdarg.h>
 
-typedef enum { KINC_LOG_LEVEL_INFO, KINC_LOG_LEVEL_WARNING, KINC_LOG_LEVEL_ERROR } kinc_log_level_t;
-void kinc_log(kinc_log_level_t log_level, const char *format, ...);
-void kinc_log_args(kinc_log_level_t log_level, const char *format, va_list args);
-
-void kinc_affirm(bool condition);
-void kinc_affirm_args(bool condition, const char *format, va_list args);
-void kinc_error(void);
-void kinc_error_message(const char *format, ...);
-void kinc_error_args(const char *format, va_list args);
+void kinc_log(const char *format, ...);
+void kinc_error(const char *format, ...);
 
 typedef struct kinc_display_mode {
 	int x;
@@ -93,7 +86,7 @@ struct kinc_framebuffer_options;
 
 void kinc_init(const char *name, int width, int height, struct kinc_window_options *win, struct kinc_framebuffer_options *frame);
 const char *kinc_application_name(void);
-void kinc_set_application_name(const char *name);
+void kinc_set_app_name(const char *name);
 int kinc_width(void);
 int kinc_height(void);
 void kinc_load_url(const char *url);

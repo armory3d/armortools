@@ -19,7 +19,7 @@ function g4_shader_from_source(source: string, type: shader_type_t): shader_t {
 }
 
 function g4_shader_delete(raw: shader_t) {
-	iron_g4_delete_shader(raw.shader_);
+	kinc_g5_shader_destroy(raw.shader_);
 }
 
 function g4_pipeline_create(): pipeline_t {
@@ -111,7 +111,7 @@ function g4_pipeline_compile(raw: pipeline_t) {
 }
 
 function g4_pipeline_set(raw: pipeline_t) {
-	iron_g4_set_pipeline(raw.pipeline_);
+	kinc_g5_set_pipeline(raw.pipeline_);
 }
 
 function g4_pipeline_get_const_loc(raw: pipeline_t, name: string): kinc_const_loc_t {
@@ -138,11 +138,11 @@ function g4_vertex_buffer_lock(raw: vertex_buffer_t): buffer_t {
 }
 
 function g4_vertex_buffer_unlock(raw: vertex_buffer_t) {
-	iron_g4_unlock_vertex_buffer(raw.buffer_);
+	kinc_g4_vertex_buffer_unlock_all(raw.buffer_);
 }
 
 function g4_vertex_buffer_set(raw: vertex_buffer_t) {
-	iron_g4_set_vertex_buffer(raw.buffer_);
+	kinc_g4_set_vertex_buffer(raw.buffer_);
 }
 
 function g4_vertex_struct_create(): vertex_struct_t {
@@ -207,11 +207,11 @@ function g4_index_buffer_lock(raw: index_buffer_t): u32_array_t {
 }
 
 function g4_index_buffer_unlock(raw: index_buffer_t) {
-	iron_g4_unlock_index_buffer(raw.buffer_);
+	kinc_g4_index_buffer_unlock_all(raw.buffer_);
 }
 
 function g4_index_buffer_set(raw: index_buffer_t) {
-	iron_g4_set_index_buffer(raw.buffer_);
+	kinc_g4_set_index_buffer(raw.buffer_);
 }
 
 function g4_begin(render_target: image_t, additional_targets: image_t[] = null) {
@@ -223,7 +223,7 @@ function g4_end() {
 }
 
 function g4_clear(color: color_t = 0x00000000, depth: f32 = 0.0, flags: i32 = clear_flag_t.COLOR) {
-	iron_g4_clear(flags, color, depth);
+	kinc_g5_clear(flags, color, depth);
 }
 
 function g4_viewport(x: i32, y: i32, width: i32, height: i32) {
@@ -420,7 +420,7 @@ function image_lock(raw: image_t, level: i32 = 0): buffer_t {
 }
 
 function image_unlock(raw: image_t) {
-	iron_g4_unlock_texture(raw.texture_);
+	kinc_g5_texture_unlock(raw.texture_);
 }
 
 function image_get_pixels(raw: image_t): buffer_t {
@@ -440,7 +440,7 @@ function image_get_pixels(raw: image_t): buffer_t {
 }
 
 function image_gen_mipmaps(raw: image_t, levels: i32) {
-	raw.texture_ == null ? iron_g4_generate_render_target_mipmaps(raw.render_target_, levels) : iron_g4_generate_texture_mipmaps(raw.texture_, levels);
+	raw.texture_ == null ? kinc_g5_render_target_generate_mipmaps(raw.render_target_, levels) : kinc_g5_texture_generate_mipmaps(raw.texture_, levels);
 }
 
 function image_set_mipmaps(raw: image_t, mipmaps: image_t[]) {
@@ -448,7 +448,7 @@ function image_set_mipmaps(raw: image_t, mipmaps: image_t[]) {
 }
 
 function image_set_depth_from(raw: image_t, image: image_t) {
-	iron_g4_set_depth_from(raw.render_target_, image.render_target_);
+	kinc_g5_render_target_set_depth_from(raw.render_target_, image.render_target_);
 }
 
 declare type image_t = {

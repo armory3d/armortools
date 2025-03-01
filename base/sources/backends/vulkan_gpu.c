@@ -44,7 +44,7 @@ void kinc_g5_internal_resize(int, int);
 	{                                                                                                                                                          \
 		vk.fp##entrypoint = (PFN_vk##entrypoint)vkGetInstanceProcAddr(instance, "vk" #entrypoint);                                                             \
 		if (vk.fp##entrypoint == NULL) {                                                                                                                       \
-			kinc_error_message("vkGetInstanceProcAddr failed to find vk" #entrypoint);                                                                         \
+			kinc_error("vkGetInstanceProcAddr failed to find vk" #entrypoint);                                                                         \
 		}                                                                                                                                                      \
 	}
 
@@ -88,10 +88,10 @@ static VkBool32 vkDebugUtilsMessengerCallbackEXT(
 	void *puser_data) {
 
 	if (message_severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
-		kinc_log(KINC_LOG_LEVEL_ERROR, "Vulkan ERROR: Code %d : %s", pcallback_data->messageIdNumber, pcallback_data->pMessage);
+		kinc_error("Vulkan ERROR: Code %d : %s", pcallback_data->messageIdNumber, pcallback_data->pMessage);
 	}
 	else if (message_severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
-		kinc_log(KINC_LOG_LEVEL_WARNING, "Vulkan WARNING: Code %d : %s", pcallback_data->messageIdNumber, pcallback_data->pMessage);
+		kinc_log("Vulkan WARNING: Code %d : %s", pcallback_data->messageIdNumber, pcallback_data->pMessage);
 	}
 	return VK_FALSE;
 }
@@ -245,7 +245,7 @@ void create_swapchain() {
 		swapchain_info.compositeAlpha = VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR;
 	}
 	else {
-		kinc_log(KINC_LOG_LEVEL_ERROR, "No supported composite alpha, this should not happen.\nPlease go complain to the writers of your Vulkan driver.");
+		kinc_error("No supported composite alpha, this should not happen.\nPlease go complain to the writers of your Vulkan driver.");
 		exit(1);
 	}
 
@@ -579,7 +579,7 @@ static bool check_extensions(const char **wanted_extensions, int wanted_extensio
 
 	for (int i = 0; i < wanted_extension_count; i++) {
 		if (!found_extensions[i]) {
-			kinc_log(KINC_LOG_LEVEL_ERROR, "Failed to find extension %s", wanted_extensions[i]);
+			kinc_error("Failed to find extension %s", wanted_extensions[i]);
 			missing_extensions = true;
 		}
 	}
@@ -617,7 +617,7 @@ void kinc_g5_internal_init() {
 #ifdef VALIDATE
 		vk_ctx.validation_found = find_layer(instance_layers, instance_layer_count, "VK_LAYER_KHRONOS_validation");
 		if (vk_ctx.validation_found) {
-			kinc_log(KINC_LOG_LEVEL_INFO, "Running with Vulkan validation layers enabled.");
+			kinc_log("Running with Vulkan validation layers enabled.");
 			wanted_instance_layers[wanted_instance_layer_count++] = "VK_LAYER_KHRONOS_validation";
 		}
 #endif
@@ -643,7 +643,7 @@ void kinc_g5_internal_init() {
 	    check_extensions(wanted_instance_extensions, wanted_instance_extension_count, instance_extensions, instance_extension_count);
 
 	if (missing_instance_extensions) {
-		kinc_error();
+		kinc_error("");
 	}
 
 #ifdef VALIDATE
@@ -689,13 +689,13 @@ void kinc_g5_internal_init() {
 	err = vkCreateInstance(&info, NULL, &vk_ctx.instance);
 
 	if (err == VK_ERROR_INCOMPATIBLE_DRIVER) {
-		kinc_error_message("Vulkan driver is incompatible");
+		kinc_error("Vulkan driver is incompatible");
 	}
 	else if (err == VK_ERROR_EXTENSION_NOT_PRESENT) {
-		kinc_error_message("Vulkan extension not found");
+		kinc_error("Vulkan extension not found");
 	}
 	else if (err) {
-		kinc_error_message("Can not create Vulkan instance");
+		kinc_error("Can not create Vulkan instance");
 	}
 
 	uint32_t gpu_count;
@@ -765,16 +765,16 @@ void kinc_g5_internal_init() {
 		}
 
 		if (vk_ctx.gpu == VK_NULL_HANDLE) {
-			kinc_error_message("No Vulkan device that supports presentation found");
+			kinc_error("No Vulkan device that supports presentation found");
 		}
 
 		VkPhysicalDeviceProperties properties;
 		vkGetPhysicalDeviceProperties(vk_ctx.gpu, &properties);
-		kinc_log(KINC_LOG_LEVEL_INFO, "Chosen Vulkan device: %s", properties.deviceName);
+		kinc_log("Chosen Vulkan device: %s", properties.deviceName);
 		free(physical_devices);
 	}
 	else {
-		kinc_error_message("No Vulkan device found");
+		kinc_error("No Vulkan device found");
 	}
 
 	static const char *wanted_device_layers[64];
@@ -908,11 +908,11 @@ void kinc_g5_internal_init() {
 
 	// Generate error if could not find both a graphics and a present queue
 	if (graphicsQueueNodeIndex == UINT32_MAX || presentQueueNodeIndex == UINT32_MAX) {
-		kinc_error_message("Graphics or present queue not found");
+		kinc_error("Graphics or present queue not found");
 	}
 
 	if (graphicsQueueNodeIndex != presentQueueNodeIndex) {
-		kinc_error_message("Graphics and present queue do not match");
+		kinc_error("Graphics and present queue do not match");
 	}
 
 	graphics_queue_node_index = graphicsQueueNodeIndex;

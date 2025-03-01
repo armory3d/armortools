@@ -54,7 +54,7 @@ function shutdown() {
 }
 
 function main() {
-	iron_set_app_name("ArmorPad");
+	kinc_set_app_name("ArmorPad");
 
 	let blob_storage: buffer_t = iron_load_blob(iron_save_path() + "/config.json");
 	if (blob_storage == null) {

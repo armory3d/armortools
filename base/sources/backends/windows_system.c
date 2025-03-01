@@ -146,11 +146,11 @@ static void winerror(HRESULT result) {
 		FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, dw,
 		               MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&buffer, 0, NULL);
 
-		kinc_error_message("Error: %s", buffer);
+		kinc_error("Error: %s", buffer);
 	}
 	else {
 
-		kinc_error_message("Unknown Windows error, return value was 0x%x.", result);
+		kinc_error("Unknown Windows error, return value was 0x%x.", result);
 
 	}
 }
@@ -162,10 +162,7 @@ void kinc_microsoft_affirm(HRESULT result) {
 }
 
 void kinc_microsoft_affirm_message(HRESULT result, const char *format, ...) {
-	va_list args;
-	va_start(args, format);
-	kinc_affirm_args(result == S_OK, format, args);
-	va_end(args);
+
 }
 
 void kinc_microsoft_format(const char *format, va_list args, wchar_t *buffer) {
@@ -175,35 +172,22 @@ void kinc_microsoft_format(const char *format, va_list args, wchar_t *buffer) {
 }
 
 #ifdef KINC_NO_CLIB
-
 #ifndef NDEBUG
 void _wassert(wchar_t const *message, wchar_t const *filename, unsigned line) {
 	__debugbreak();
 }
-
 void _RTC_CheckStackVars(void) {}
-
 void _RTC_InitBase(void) {}
-
 void _RTC_Shutdown(void) {}
-
 void _RTC_AllocaHelper(void) {}
-
 void _RTC_CheckStackVars2(void) {}
-
 void __GSHandlerCheck(void) {}
-
 void __fastcall __security_check_cookie(_In_ uintptr_t _StackCookie) {}
-
 uintptr_t __security_cookie;
-
 int _fltused = 1;
-
 void __report_rangecheckfailure(void) {}
-
 void __chkstk(void) {}
 #endif
-
 #endif
 
 #undef RegisterClass
@@ -299,7 +283,7 @@ int kinc_windows_get_display_for_monitor(struct HMONITOR__ *monitor) {
 		}
 	}
 
-	kinc_error_message("Display for monitor not found");
+	kinc_error("Display for monitor not found");
 	return -1;
 }
 
@@ -316,7 +300,7 @@ int kinc_primary_display() {
 		}
 	}
 
-	kinc_error_message("No primary display defined");
+	kinc_error("No primary display defined");
 	return -1;
 }
 
@@ -1235,7 +1219,7 @@ static BOOL CALLBACK enumerateJoystickAxesCallback(LPCDIDEVICEOBJECTINSTANCEW dd
 	HRESULT hr = di_pads[padCount]->lpVtbl->SetProperty(di_pads[padCount], DIPROP_RANGE, &propertyRange.diph);
 
 	if (FAILED(hr)) {
-		kinc_log(KINC_LOG_LEVEL_WARNING, "DirectInput8 / Pad%i / SetProperty() failed (HRESULT=0x%x)", padCount, hr);
+		kinc_log("DirectInput8 / Pad%i / SetProperty() failed (HRESULT=0x%x)", padCount, hr);
 		return DIENUM_STOP;
 	}
 
@@ -1268,29 +1252,29 @@ static BOOL CALLBACK enumerateJoysticksCallback(LPCDIDEVICEINSTANCEW ddi, LPVOID
 						hr = di_pads[padCount]->lpVtbl->GetDeviceState(di_pads[padCount], sizeof(DIJOYSTATE2), &di_padState[padCount]);
 
 						if (SUCCEEDED(hr)) {
-							kinc_log(KINC_LOG_LEVEL_INFO, "DirectInput8 / Pad%i / initialized", padCount);
+							kinc_log("DirectInput8 / Pad%i / initialized", padCount);
 						}
 						else {
-							kinc_log(KINC_LOG_LEVEL_WARNING, "DirectInput8 / Pad%i / GetDeviceState() failed (HRESULT=0x%x)", padCount, hr);
+							kinc_log("DirectInput8 / Pad%i / GetDeviceState() failed (HRESULT=0x%x)", padCount, hr);
 						}
 					}
 					else {
-						kinc_log(KINC_LOG_LEVEL_WARNING, "DirectInput8 / Pad%i / Acquire() failed (HRESULT=0x%x)", padCount, hr);
+						kinc_log("DirectInput8 / Pad%i / Acquire() failed (HRESULT=0x%x)", padCount, hr);
 						cleanupPad(padCount);
 					}
 				}
 				else {
-					kinc_log(KINC_LOG_LEVEL_WARNING, "DirectInput8 / Pad%i / EnumObjects(DIDFT_AXIS) failed (HRESULT=0x%x)", padCount, hr);
+					kinc_log("DirectInput8 / Pad%i / EnumObjects(DIDFT_AXIS) failed (HRESULT=0x%x)", padCount, hr);
 					cleanupPad(padCount);
 				}
 			}
 			else {
-				kinc_log(KINC_LOG_LEVEL_WARNING, "DirectInput8 / Pad%i / GetCapabilities() failed (HRESULT=0x%x)", padCount, hr);
+				kinc_log("DirectInput8 / Pad%i / GetCapabilities() failed (HRESULT=0x%x)", padCount, hr);
 				cleanupPad(padCount);
 			}
 		}
 		else {
-			kinc_log(KINC_LOG_LEVEL_WARNING, "DirectInput8 / Pad%i / SetDataFormat() failed (HRESULT=0x%x)", padCount, hr);
+			kinc_log("DirectInput8 / Pad%i / SetDataFormat() failed (HRESULT=0x%x)", padCount, hr);
 			cleanupPad(padCount);
 		}
 
@@ -1324,7 +1308,7 @@ static void initializeDirectInput() {
 		}
 	}
 	else {
-		kinc_log(KINC_LOG_LEVEL_WARNING, "DirectInput8Create failed (HRESULT=0x%x)", hr);
+		kinc_log("DirectInput8Create failed (HRESULT=0x%x)", hr);
 	}
 }
 
@@ -1540,7 +1524,7 @@ void kinc_load_url(const char *url) {
 		INT_PTR ret = (INT_PTR)ShellExecuteW(NULL, L"open", wurl, NULL, NULL, SW_SHOWNORMAL);
 		// According to ShellExecuteW's documentation return values > 32 indicate a success.
 		if (ret <= 32) {
-			kinc_log(KINC_LOG_LEVEL_WARNING, "Error opening url %s", url);
+			kinc_log("Error opening url %s", url);
 		}
 	}
 #undef HTTPS
@@ -1715,7 +1699,7 @@ void kinc_init(const char *name, int width, int height, kinc_window_options_t *w
 		keyPressed[i] = false;
 	}
 
-	kinc_set_application_name(name);
+	kinc_set_app_name(name);
 	kinc_window_options_t defaultWin;
 	if (win == NULL) {
 		kinc_window_options_set_defaults(&defaultWin);

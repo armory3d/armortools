@@ -10126,7 +10126,7 @@ void proc_xatlas_unwrap(raw_mesh_t *mesh) {
 	free(pa);
 	free(na);
 
-	kinc_log(KINC_LOG_LEVEL_INFO, "Unwrapped in %fs.\n", kinc_time() - t);
+	kinc_log("Unwrapped in %fs.\n", kinc_time() - t);
 }
 
 #ifdef __cplusplus

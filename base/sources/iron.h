@@ -446,19 +446,16 @@ void _update(void *data) {
 }
 
 char *_copy(void *data) {
-	// strcpy(temp_string, iron_copy());
 	strcpy(temp_string, ui_copy());
 	return temp_string;
 }
 
 char *_cut(void *data) {
-	// strcpy(temp_string, iron_cut());
 	strcpy(temp_string, ui_cut());
 	return temp_string;
 }
 
 void _paste(char *text, void *data) {
-	// iron_paste(text);
 	ui_paste(text);
 }
 
@@ -846,23 +843,6 @@ void iron_init(string_t *title, i32 width, i32 height, bool vsync, i32 window_mo
 	#endif
 }
 
-void iron_set_app_name(string_t *name) {
-	kinc_set_application_name(name);
-}
-
-void iron_log(string_t *value) {
-	if (value != NULL) {
-		kinc_log(KINC_LOG_LEVEL_INFO, value);
-	}
-	else {
-		kinc_log(KINC_LOG_LEVEL_INFO, "null");
-	}
-}
-
-void iron_g4_clear(i32 flags, i32 color, f32 depth) {
-	kinc_g5_clear(flags, color, depth);
-}
-
 void iron_set_update_callback(void (*callback)(void)) {
 	iron_update = callback;
 	kinc_set_update_callback(_update, NULL);
@@ -970,26 +950,6 @@ void iron_set_gamepad_button_callback(void (*callback)(int, int, float)) {
 	kinc_gamepad_set_button_callback(_gamepad_button, NULL);
 }
 
-void iron_lock_mouse() {
-	kinc_mouse_lock();
-}
-
-void iron_unlock_mouse() {
-	kinc_mouse_unlock();
-}
-
-bool iron_can_lock_mouse() {
-	return kinc_mouse_can_lock();
-}
-
-bool iron_is_mouse_locked() {
-	return kinc_mouse_is_locked();
-}
-
-void iron_set_mouse_position(i32 x, i32 y) {
-	kinc_mouse_set_position(x, y);
-}
-
 void iron_show_mouse(bool show) {
 	show ? kinc_mouse_show() : kinc_mouse_hide();
 }
@@ -997,7 +957,6 @@ void iron_show_mouse(bool show) {
 void iron_show_keyboard(bool show) {
 	show ? kinc_keyboard_show() : kinc_keyboard_hide();
 }
-
 
 any iron_g4_create_index_buffer(i32 count) {
 	kinc_g5_index_buffer_t *buffer = (kinc_g5_index_buffer_t *)malloc(sizeof(kinc_g5_index_buffer_t));
@@ -1016,14 +975,6 @@ u32_array_t *iron_g4_lock_index_buffer(kinc_g5_index_buffer_t *buffer) {
 	ar->buffer = vertices;
 	ar->length = kinc_g5_index_buffer_count(buffer);
 	return ar;
-}
-
-void iron_g4_unlock_index_buffer(kinc_g5_index_buffer_t *buffer) {
-	kinc_g4_index_buffer_unlock_all(buffer);
-}
-
-void iron_g4_set_index_buffer(kinc_g5_index_buffer_t *buffer) {
-	kinc_g4_set_index_buffer(buffer);
 }
 
 typedef struct kinc_vertex_elem {
@@ -1059,14 +1010,6 @@ buffer_t *iron_g4_lock_vertex_buffer(kinc_g4_vertex_buffer_t *buffer) {
 	return b;
 }
 
-void iron_g4_unlock_vertex_buffer(kinc_g4_vertex_buffer_t *buffer) {
-	kinc_g4_vertex_buffer_unlock_all(buffer);
-}
-
-void iron_g4_set_vertex_buffer(kinc_g4_vertex_buffer_t *buffer) {
-	kinc_g4_set_vertex_buffer(buffer);
-}
-
 void iron_g4_draw_indexed_vertices(i32 start, i32 count) {
 	#ifdef KINC_DIRECT3D12
 	// TODO: Prevent heapIndex overflow in g5_texture.c.h/kinc_g5_internal_set_textures
@@ -1097,7 +1040,7 @@ kinc_g5_shader_t *iron_g4_create_vertex_shader_from_source(string_t *source) {
 	UINT flags = D3DCOMPILE_SKIP_OPTIMIZATION | D3DCOMPILE_SKIP_VALIDATION;// D3DCOMPILE_OPTIMIZATION_LEVEL0
 	HRESULT hr = D3DCompile(temp_string_vs, strlen(source) + 1, NULL, NULL, NULL, "main", "vs_5_0", flags, 0, &shader_buffer, &error_message);
 	if (hr != S_OK) {
-		kinc_log(KINC_LOG_LEVEL_INFO, "%s", (char *)error_message->lpVtbl->GetBufferPointer(error_message));
+		kinc_log("%s", (char *)error_message->lpVtbl->GetBufferPointer(error_message));
 		return NULL;
 	}
 
@@ -1245,7 +1188,7 @@ kinc_g5_shader_t *iron_g4_create_fragment_shader_from_source(string_t *source) {
 	UINT flags = D3DCOMPILE_SKIP_OPTIMIZATION | D3DCOMPILE_SKIP_VALIDATION;// D3DCOMPILE_OPTIMIZATION_LEVEL0
 	HRESULT hr = D3DCompile(temp_string_fs, strlen(source) + 1, NULL, NULL, NULL, "main", "ps_5_0", flags, 0, &shader_buffer, &error_message);
 	if (hr != S_OK) {
-		kinc_log(KINC_LOG_LEVEL_INFO, "%s", (char *)error_message->lpVtbl->GetBufferPointer(error_message));
+		kinc_log("%s", (char *)error_message->lpVtbl->GetBufferPointer(error_message));
 		return NULL;
 	}
 
@@ -1356,10 +1299,6 @@ kinc_g5_shader_t *iron_g4_create_fragment_shader_from_source(string_t *source) {
 	return shader;
 }
 
-void iron_g4_delete_shader(kinc_g5_shader_t *shader) {
-	kinc_g5_shader_destroy(shader);
-}
-
 kinc_g5_pipeline_t *iron_g4_create_pipeline() {
 	kinc_g5_pipeline_t *pipeline = (kinc_g5_pipeline_t *)malloc(sizeof(kinc_g5_pipeline_t));
 	kinc_g5_pipeline_init(pipeline);
@@ -1437,10 +1376,6 @@ void iron_g4_compile_pipeline(kinc_g5_pipeline_t *pipeline, vertex_struct_t *str
 	kinc_g5_pipeline_compile(pipeline);
 }
 
-void iron_g4_set_pipeline(kinc_g5_pipeline_t *pipeline) {
-	kinc_g5_set_pipeline(pipeline);
-}
-
 bool _load_image(kinc_file_reader_t *reader, const char *filename, unsigned char **output, int *width, int *height, kinc_image_format_t *format) {
 	*format = KINC_IMAGE_FORMAT_RGBA32;
 	int size = (int)kinc_file_reader_size(reader);
@@ -1491,7 +1426,7 @@ bool _load_image(kinc_file_reader_t *reader, const char *filename, unsigned char
 		int comp;
 		*output = (unsigned char *)stbi_loadf_from_memory(data, size, width, height, &comp, 4);
 		if (*output == NULL) {
-			kinc_log(KINC_LOG_LEVEL_ERROR, stbi_failure_reason());
+			kinc_error(stbi_failure_reason());
 			success = false;
 		}
 		*format = KINC_IMAGE_FORMAT_RGBA128;
@@ -1500,7 +1435,7 @@ bool _load_image(kinc_file_reader_t *reader, const char *filename, unsigned char
 		int comp;
 		*output = stbi_load_from_memory(data, size, width, height, &comp, 4);
 		if (*output == NULL) {
-			kinc_log(KINC_LOG_LEVEL_ERROR, stbi_failure_reason());
+			kinc_error(stbi_failure_reason());
 			success = false;
 		}
 	}
@@ -1557,27 +1492,9 @@ void iron_unload_image(image_t *image) {
 
 #ifdef WITH_AUDIO
 
-typedef kinc_a1_channel_t audio_channel_t;
-
 any iron_load_sound(string_t *file) {
 	kinc_a1_sound_t *sound = kinc_a1_sound_create(file);
 	return sound;
-}
-
-void iron_unload_sound(kinc_a1_sound_t *sound) {
-	kinc_a1_sound_destroy(sound);
-}
-
-audio_channel_t *iron_play_sound(kinc_a1_sound_t *sound, bool loop, float pitch, bool unique) {
-	return kinc_a1_play_sound(sound, loop, pitch, unique);
-}
-
-void iron_stop_sound(kinc_a1_sound_t *sound) {
-	kinc_a1_stop_sound(sound);
-}
-
-void iron_sound_set_pitch(audio_channel_t *channel, float pitch) {
-	kinc_a1_channel_set_pitch(channel, pitch);
 }
 
 #endif
@@ -1600,15 +1517,6 @@ buffer_t *iron_load_blob(string_t *file) {
 	kinc_file_reader_close(&reader);
 	return buffer;
 }
-
-void iron_load_url(string_t *url) {
-	kinc_load_url(url);
-}
-
-void iron_copy_to_clipboard(string_t *text) {
-	kinc_copy_to_clipboard(text);
-}
-
 
 kinc_g5_constant_location_t *iron_g4_get_constant_location(kinc_g5_pipeline_t *pipeline, string_t *name) {
 	kinc_g5_constant_location_t location = kinc_g5_pipeline_get_constant_location(pipeline, name);
@@ -1680,19 +1588,6 @@ void iron_g4_set_matrix3(kinc_g5_constant_location_t *location, mat3_t m) {
 	kinc_g4_set_matrix3(*location, &m);
 }
 
-
-f32 iron_get_time() {
-	return kinc_time();
-}
-
-i32 iron_window_width() {
-	return kinc_window_width();
-}
-
-i32 iron_window_height() {
-	return kinc_window_height();
-}
-
 void iron_set_window_title(string_t *title) {
 	kinc_window_set_title(title);
 	#if defined(KINC_IOS) || defined(KINC_ANDROID)
@@ -1700,28 +1595,12 @@ void iron_set_window_title(string_t *title) {
 	#endif
 }
 
-i32 iron_get_window_mode() {
-	return kinc_window_get_mode();
-}
-
 void iron_set_window_mode(i32 mode) {
 	kinc_window_change_mode((kinc_window_mode_t)mode);
 }
 
-void iron_resize_window(i32 width, i32 height) {
-	kinc_window_resize(width, height);
-}
-
-void iron_move_window(i32 x, i32 y) {
-	kinc_window_move(x, y);
-}
-
 i32 iron_screen_dpi() {
 	return kinc_display_current_mode(kinc_primary_display()).pixels_per_inch;
-}
-
-string_t *iron_system_id() {
-	return kinc_system_id();
 }
 
 void iron_request_shutdown() {
@@ -1730,10 +1609,6 @@ void iron_request_shutdown() {
 	#ifdef KINC_LINUX
 	exit(1);
 	#endif
-}
-
-i32 iron_display_count() {
-	return kinc_count_displays();
 }
 
 i32 iron_display_width(i32 index) {
@@ -1763,26 +1638,6 @@ bool iron_display_is_primary(i32 index) {
 	return index == kinc_primary_display();
 	#endif
 }
-
-void iron_write_storage(string_t *name, buffer_t *data) {
-	kinc_file_writer_t writer;
-	kinc_file_writer_open(&writer, name);
-	kinc_file_writer_write(&writer, data->buffer, data->length);
-	kinc_file_writer_close(&writer);
-}
-
-buffer_t *iron_read_storage(string_t *name) {
-	kinc_file_reader_t reader;
-	if (!kinc_file_reader_open(&reader, name, KINC_FILE_TYPE_SAVE)) {
-		return NULL;
-	}
-	int reader_size = (int)kinc_file_reader_size(&reader);
-	buffer_t *buffer = buffer_create(reader_size);
-	kinc_file_reader_read(&reader, buffer->buffer, reader_size);
-	kinc_file_reader_close(&reader);
-	return buffer;
-}
-
 
 kinc_g5_render_target_t *iron_g4_create_render_target(i32 width, i32 height, i32 format, i32 depth_buffer_bits) {
 	kinc_g5_render_target_t *render_target = (kinc_g5_render_target_t *)malloc(sizeof(kinc_g5_render_target_t));
@@ -1917,28 +1772,12 @@ buffer_t *iron_g4_lock_texture(kinc_g5_texture_t *texture, i32 level) {
 	return buffer;
 }
 
-void iron_g4_unlock_texture(kinc_g5_texture_t *texture) {
-	kinc_g5_texture_unlock(texture);
-}
-
-void iron_g4_generate_texture_mipmaps(kinc_g5_texture_t *texture, i32 levels) {
-	kinc_g5_texture_generate_mipmaps(texture, levels);
-}
-
-void iron_g4_generate_render_target_mipmaps(kinc_g5_render_target_t *render_target, i32 levels) {
-	kinc_g5_render_target_generate_mipmaps(render_target, levels);
-}
-
 void iron_g4_set_mipmaps(kinc_g5_texture_t *texture, any_array_t *mipmaps) {
 	for (int32_t i = 0; i < mipmaps->length; ++i) {
 		image_t *img = mipmaps->buffer[i];
 		kinc_g5_texture_t *img_tex = img->texture_;
 		kinc_g5_texture_set_mipmap(texture, img_tex, i + 1);
 	}
-}
-
-void iron_g4_set_depth_from(kinc_g5_render_target_t *target, kinc_g5_render_target_t *source) {
-	kinc_g5_render_target_set_depth_from(target, source);
 }
 
 void iron_g4_viewport(i32 x, i32 y, i32 width, i32 height) {
@@ -2560,7 +2399,7 @@ buffer_t *iron_ml_inference(buffer_t *model, any_array_t *tensors, any_array_t *
 			#endif
 			if (onnx_status != NULL) {
 				const char *msg = ort->GetErrorMessage(onnx_status);
-				kinc_log(KINC_LOG_LEVEL_ERROR, "%s", msg);
+				kinc_error("%s", msg);
 				ort->ReleaseStatus(onnx_status);
 			}
 		}
@@ -2575,7 +2414,7 @@ buffer_t *iron_ml_inference(buffer_t *model, any_array_t *tensors, any_array_t *
 		onnx_status = ort->CreateSessionFromArray(ort_env, model->buffer, (int)model->length, ort_session_options, &session);
 		if (onnx_status != NULL) {
 			const char* msg = ort->GetErrorMessage(onnx_status);
-			kinc_log(KINC_LOG_LEVEL_ERROR, "%s", msg);
+			kinc_error("%s", msg);
 			ort->ReleaseStatus(onnx_status);
 		}
 	}
@@ -2626,7 +2465,7 @@ buffer_t *iron_ml_inference(buffer_t *model, any_array_t *tensors, any_array_t *
 	onnx_status = ort->Run(session, NULL, input_node_names, input_tensors, length, &output_node_name, 1, &output_tensor);
 	if (onnx_status != NULL) {
 		const char* msg = ort->GetErrorMessage(onnx_status);
-		kinc_log(KINC_LOG_LEVEL_ERROR, "%s", msg);
+		kinc_error("%s", msg);
 		ort->ReleaseStatus(onnx_status);
 	}
 	float *float_array;
@@ -2676,11 +2515,7 @@ void iron_ml_unload() {
 #endif
 
 bool iron_raytrace_supported() {
-	#ifdef KINC_METAL
 	return kinc_g5_raytrace_supported();
-	#else
-	return true;
-	#endif
 }
 
 void iron_raytrace_init(buffer_t *shader) {

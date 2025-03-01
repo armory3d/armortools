@@ -63,14 +63,14 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 		do {
 			dwSize = 0;
 			if (!WinHttpQueryDataAvailable(hRequest, &dwSize)) {
-				kinc_log(KINC_LOG_LEVEL_ERROR, "Error %d in WinHttpQueryDataAvailable.\n", GetLastError());
+				kinc_error("Error %d in WinHttpQueryDataAvailable.\n", GetLastError());
 			}
 
 			if ((int)dwSize + 1 > returnDataSize - returnDataIndex) {
 				int newReturnDataSize = (returnDataIndex + dwSize + 1) * 2;
 				char *newReturnData = (char *)malloc(newReturnDataSize);
 				if (newReturnData == 0) {
-					kinc_log(KINC_LOG_LEVEL_ERROR, "Out of memory\n");
+					kinc_error("Out of memory\n");
 				}
 				memcpy(newReturnData, returnData, returnDataSize);
 				returnDataSize = newReturnDataSize;
@@ -79,7 +79,7 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 
 			DWORD dwDownloaded = 0;
 			if (!WinHttpReadData(hRequest, (LPVOID)(&returnData[returnDataIndex]), dwSize, &dwDownloaded)) {
-				kinc_log(KINC_LOG_LEVEL_ERROR, "Error %d in WinHttpReadData.\n", GetLastError());
+				kinc_error("Error %d in WinHttpReadData.\n", GetLastError());
 			}
 			returnDataIndex += dwSize;
 		} while (dwSize > 0);
@@ -92,7 +92,7 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 	returnData[returnDataIndex] = 0;
 
 	if (!bResults) {
-		kinc_log(KINC_LOG_LEVEL_ERROR, "Error %d has occurred.\n", GetLastError());
+		kinc_error("Error %d has occurred.\n", GetLastError());
 	}
 
 	if (hRequest) {

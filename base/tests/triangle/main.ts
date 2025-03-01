@@ -12,11 +12,11 @@ function render() {
 	let flags: i32 = 0;
 	flags |= 1; // Color
 	flags |= 2; // Depth
-	iron_g4_clear(flags, 0xff000000, 1.0);
+	kinc_g5_clear(flags, 0xff000000, 1.0);
 
-	iron_g4_set_pipeline(pipeline);
-	iron_g4_set_vertex_buffer(vb);
-	iron_g4_set_index_buffer(ib);
+	kinc_g5_set_pipeline(pipeline);
+	kinc_g4_set_vertex_buffer(vb);
+	kinc_g4_set_index_buffer(ib);
 	iron_g4_draw_indexed_vertices(0, -1);
 
 	iron_g4_end();
@@ -75,14 +75,14 @@ function main() {
 	for (let i: i32 = 0; i < vertices.length; i++) {
 		buffer_set_f32(vb_data, i * 4, vertices[i]);
 	}
-	iron_g4_unlock_vertex_buffer(vb);
+	kinc_g4_vertex_buffer_unlock_all(vb);
 
 	ib = iron_g4_create_index_buffer(indices.length);
 	let ib_data: u32_array_t = iron_g4_lock_index_buffer(ib);
 	for (let i: i32 = 0; i < indices.length; i++) {
 		ib_data[i] = indices[i];
 	}
-	iron_g4_unlock_index_buffer(ib);
+	kinc_g4_index_buffer_unlock_all(ib);
 
 	iron_set_update_callback(render);
 }

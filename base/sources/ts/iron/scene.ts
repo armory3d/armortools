@@ -50,7 +50,7 @@ function scene_create(format: scene_t): object_t {
 	// Startup scene
 	let scene_object: object_t = scene_add_scene(format.name, null);
 	if (scene_cameras.length == 0) {
-		iron_log("No camera found for scene '" + format.name + "'");
+		kinc_log("No camera found for scene '" + format.name + "'");
 	}
 
 	scene_camera = scene_get_camera(format.camera_ref);

@@ -20,7 +20,7 @@ void macStopVideoSoundStream(void) {
 
 static void affirm(OSStatus err) {
 	if (err != kAudioHardwareNoError) {
-		kinc_log(KINC_LOG_LEVEL_ERROR, "Error: %i\n", err);
+		kinc_error("Error: %i\n", err);
 	}
 }
 
@@ -102,7 +102,7 @@ void kinc_a2_init(void) {
 	address.mScope = kAudioDevicePropertyScopeOutput;
 	affirm(AudioObjectGetPropertyData(device, &address, 0, NULL, &size, &deviceBufferSize));
 
-	kinc_log(KINC_LOG_LEVEL_INFO, "deviceBufferSize = %i\n", deviceBufferSize);
+	kinc_log("deviceBufferSize = %i\n", deviceBufferSize);
 
 	size = sizeof(AudioStreamBasicDescription);
 	address.mSelector = kAudioDevicePropertyStreamFormat;
@@ -111,12 +111,12 @@ void kinc_a2_init(void) {
 	affirm(AudioObjectGetPropertyData(device, &address, 0, NULL, &size, &deviceFormat));
 
 	if (deviceFormat.mFormatID != kAudioFormatLinearPCM) {
-		kinc_log(KINC_LOG_LEVEL_ERROR, "mFormatID !=  kAudioFormatLinearPCM\n");
+		kinc_error("mFormatID !=  kAudioFormatLinearPCM\n");
 		return;
 	}
 
 	if (!(deviceFormat.mFormatFlags & kLinearPCMFormatFlagIsFloat)) {
-		kinc_log(KINC_LOG_LEVEL_ERROR, "Only works with float format.\n");
+		kinc_error("Only works with float format.\n");
 		return;
 	}
 
@@ -127,13 +127,13 @@ void kinc_a2_init(void) {
 
 	initialized = true;
 
-	kinc_log(KINC_LOG_LEVEL_INFO, "mSampleRate = %g\n", deviceFormat.mSampleRate);
-	kinc_log(KINC_LOG_LEVEL_INFO, "mFormatFlags = %08X\n", (unsigned int)deviceFormat.mFormatFlags);
-	kinc_log(KINC_LOG_LEVEL_INFO, "mBytesPerPacket = %d\n", (unsigned int)deviceFormat.mBytesPerPacket);
-	kinc_log(KINC_LOG_LEVEL_INFO, "mFramesPerPacket = %d\n", (unsigned int)deviceFormat.mFramesPerPacket);
-	kinc_log(KINC_LOG_LEVEL_INFO, "mChannelsPerFrame = %d\n", (unsigned int)deviceFormat.mChannelsPerFrame);
-	kinc_log(KINC_LOG_LEVEL_INFO, "mBytesPerFrame = %d\n", (unsigned int)deviceFormat.mBytesPerFrame);
-	kinc_log(KINC_LOG_LEVEL_INFO, "mBitsPerChannel = %d\n", (unsigned int)deviceFormat.mBitsPerChannel);
+	kinc_log("mSampleRate = %g\n", deviceFormat.mSampleRate);
+	kinc_log("mFormatFlags = %08X\n", (unsigned int)deviceFormat.mFormatFlags);
+	kinc_log("mBytesPerPacket = %d\n", (unsigned int)deviceFormat.mBytesPerPacket);
+	kinc_log("mFramesPerPacket = %d\n", (unsigned int)deviceFormat.mFramesPerPacket);
+	kinc_log("mChannelsPerFrame = %d\n", (unsigned int)deviceFormat.mChannelsPerFrame);
+	kinc_log("mBytesPerFrame = %d\n", (unsigned int)deviceFormat.mBytesPerFrame);
+	kinc_log("mBitsPerChannel = %d\n", (unsigned int)deviceFormat.mBitsPerChannel);
 
 	if (soundPlaying)
 		return;

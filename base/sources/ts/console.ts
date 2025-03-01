@@ -79,7 +79,7 @@ function console_log(s: string) {
 }
 
 function console_trace(s: string) {
-	iron_log(s);
+	kinc_log(s);
 	base_redraw_console();
 	array_insert(console_last_traces, 0, s);
 	if (console_last_traces.length > 100) {

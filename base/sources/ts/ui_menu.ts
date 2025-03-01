@@ -542,7 +542,7 @@ function ui_menu_render() {
 
 						///if (arm_windows || arm_linux || arm_macos)
 						if (ui_button(tr("Copy"))) {
-							iron_copy_to_clipboard(_ui_menu_render_msg);
+							kinc_copy_to_clipboard(_ui_menu_render_msg);
 						}
 						///else
 						_ui_end_element();

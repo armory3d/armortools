@@ -51,7 +51,7 @@ void kinc_display_init() {
 
 	for (int i = 0; i < screen_resources->noutput; i++) {
 		if (i >= MAXIMUM_DISPLAYS) {
-			kinc_log(KINC_LOG_LEVEL_ERROR, "Too many screens (maximum %i)", MAXIMUM_DISPLAYS);
+			kinc_error("Too many screens (maximum %i)", MAXIMUM_DISPLAYS);
 			break;
 		}
 
@@ -104,14 +104,14 @@ kinc_display_mode_t kinc_display_available_mode(int display_index, int mode_inde
 
 	XRROutputInfo *output_info = xlib.XRRGetOutputInfo(x11_ctx.display, screen_resources, screen_resources->outputs[display->index]);
 	if (output_info->connection != RR_Connected || output_info->crtc == None) {
-		kinc_log(KINC_LOG_LEVEL_ERROR, "Display %i not connected.", display_index);
+		kinc_error("Display %i not connected.", display_index);
 		xlib.XRRFreeOutputInfo(output_info);
 		xlib.XRRFreeScreenResources(screen_resources);
 		return mode;
 	}
 
 	if (mode_index >= output_info->nmode) {
-		kinc_log(KINC_LOG_LEVEL_ERROR, "Invalid mode index %i.", mode_index);
+		kinc_error("Invalid mode index %i.", mode_index);
 	}
 
 	RRMode rr_mode = output_info->modes[mode_index];
@@ -154,7 +154,7 @@ int kinc_display_count_available_modes(int display_index) {
 
 	XRROutputInfo *output_info = xlib.XRRGetOutputInfo(x11_ctx.display, screen_resources, screen_resources->outputs[display->index]);
 	if (output_info->connection != RR_Connected || output_info->crtc == None) {
-		kinc_log(KINC_LOG_LEVEL_ERROR, "Display %i not connected.", display_index);
+		kinc_error("Display %i not connected.", display_index);
 		xlib.XRRFreeOutputInfo(output_info);
 		xlib.XRRFreeScreenResources(screen_resources);
 		return 0;
@@ -198,7 +198,7 @@ kinc_display_mode_t kinc_display_current_mode(int display_index) {
 
 	XRROutputInfo *output_info = xlib.XRRGetOutputInfo(x11_ctx.display, screen_resources, screen_resources->outputs[display->index]);
 	if (output_info->connection != RR_Connected || output_info->crtc == None) {
-		kinc_log(KINC_LOG_LEVEL_ERROR, "Display %i not connected.", display_index);
+		kinc_error("Display %i not connected.", display_index);
 		xlib.XRRFreeOutputInfo(output_info);
 		xlib.XRRFreeScreenResources(screen_resources);
 		return mode;
@@ -497,7 +497,7 @@ static void load_lib(void **lib, const char *name) {
 
 int kinc_x11_error_handler(Display *display, XErrorEvent *error_event) {
 	xlib.XGetErrorText(display, error_event->error_code, buffer, 1024);
-	kinc_log(KINC_LOG_LEVEL_ERROR, "X Error: %s", buffer);
+	kinc_error("X Error: %s", buffer);
 	return 0;
 }
 
@@ -509,7 +509,7 @@ bool kinc_x11_init() {
 		load_lib(&x11_ctx.libs.name, #name);                                                                                                                   \
                                                                                                                                                                \
 		if (x11_ctx.libs.name == NULL) {                                                                                                                       \
-			kinc_log(KINC_LOG_LEVEL_ERROR, "Failed to load lib%s.so", #name);                                                                                  \
+			kinc_error("Failed to load lib%s.so", #name);                                                                                  \
 			return false;                                                                                                                                      \
 		}                                                                                                                                                      \
 	}                                                                                                                                                          \
@@ -528,7 +528,7 @@ bool kinc_x11_init() {
 #define LOAD_FUN(lib, symbol)                                                                                                                                  \
 	xlib.symbol = dlsym(x11_ctx.libs.lib, #symbol);                                                                                                            \
 	if (xlib.symbol == NULL) {                                                                                                                                 \
-		kinc_log(KINC_LOG_LEVEL_ERROR, "Did not find symbol %s in library %s.", #symbol, #lib);                                                                \
+		kinc_error("Did not find symbol %s in library %s.", #symbol, #lib);                                                                \
 	}
 	LOAD_FUN(X11, XOpenDisplay)
 	LOAD_FUN(X11, XCloseDisplay)
@@ -1352,7 +1352,7 @@ void kinc_load_url(const char *url) {
 		snprintf(openUrlCommand, MAX_COMMAND_BUFFER_SIZE, "xdg-open %s", url);
 		int err = system(openUrlCommand);
 		if (err != 0) {
-			kinc_log(KINC_LOG_LEVEL_WARNING, "Error opening url %s", url);
+			kinc_log("Error opening url %s", url);
 		}
 	}
 #undef HTTPS
@@ -1405,7 +1405,7 @@ const char *kinc_internal_save_path() {
 			strcat(save, "/");
 			int res = mkdir(save, 0700);
 			if (res != 0 && errno != EEXIST) {
-				kinc_log(KINC_LOG_LEVEL_ERROR, "Could not create save directory '%s'. Error %d", save, errno);
+				kinc_error("Could not create save directory '%s'. Error %d", save, errno);
 			}
 		}
 
@@ -1441,7 +1441,7 @@ void kinc_init(const char *name, int width, int height, kinc_window_options_t *w
 	kinc_x11_init();
 	kinc_display_init();
 
-	kinc_set_application_name(name);
+	kinc_set_app_name(name);
 
 	kinc_g5_internal_init();
 

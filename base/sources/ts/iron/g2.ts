@@ -140,7 +140,7 @@ function g2_disable_scissor() {
 function g2_begin(render_target: image_t = null) {
 	if (_g2_in_use && !_g2_thrown) {
 		_g2_thrown = true;
-		iron_log("End before you begin");
+		kinc_log("End before you begin");
 	}
 	_g2_in_use = true;
 	_g2_current = render_target;
@@ -158,7 +158,7 @@ function g2_begin(render_target: image_t = null) {
 function g2_end() {
 	if (!_g2_in_use && !_g2_thrown) {
 		_g2_thrown = true;
-		iron_log("Begin before you end");
+		kinc_log("Begin before you end");
 	}
 	_g2_in_use = false;
 	_g2_current = null;

@@ -885,7 +885,7 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 		int index = findAttributeIndex(renderPipelineDesc.vertexFunction.vertexAttributes, pipeline->input_layout->elements[i].name);
 
 		if (index < 0) {
-			kinc_log(KINC_LOG_LEVEL_WARNING, "Could not find vertex attribute %s\n", pipeline->input_layout->elements[i].name);
+			kinc_log("Could not find vertex attribute %s\n", pipeline->input_layout->elements[i].name);
 		}
 
 		if (index >= 0) {
@@ -1249,7 +1249,7 @@ void kinc_g5_shader_init(kinc_g5_shader_t *shader, const void *source, size_t le
 		NSError *error = nil;
 		library = [device newLibraryWithSource:[[NSString alloc] initWithBytes:data length:length encoding:NSUTF8StringEncoding] options:nil error:&error];
 		if (library == nil) {
-			kinc_log(KINC_LOG_LEVEL_ERROR, "%s", error.localizedDescription.UTF8String);
+			kinc_error("%s", error.localizedDescription.UTF8String);
 		}
 	}
 	shader->impl.mtlFunction = (__bridge_retained void *)[library newFunctionWithName:[NSString stringWithCString:shader->impl.name
@@ -1325,7 +1325,7 @@ void kinc_g5_raytrace_pipeline_init(kinc_g5_raytrace_pipeline_t *pipeline, kinc_
 	                                              options:nil
 	                                                error:&error];
 	if (library == nil) {
-		kinc_log(KINC_LOG_LEVEL_ERROR, "%s", error.localizedDescription.UTF8String);
+		kinc_error("%s", error.localizedDescription.UTF8String);
 	}
 
 	MTLComputePipelineDescriptor *descriptor = [[MTLComputePipelineDescriptor alloc] init];

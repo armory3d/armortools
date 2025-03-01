@@ -172,7 +172,7 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // 	address.sin_addr.s_addr = sock->host;
 // 	address.sin_port = sock->port;
 // 	if (bind(sock->handle, (const struct sockaddr *)&address, sizeof(struct sockaddr_in)) < 0) {
-// 		kinc_log(KINC_LOG_LEVEL_ERROR, "Could not bind socket: %s", strerror(errno));
+// 		kinc_error("Could not bind socket: %s", strerror(errno));
 // 		return false;
 // 	}
 // 	return true;
@@ -217,66 +217,66 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // 		sock->handle = socket(sock->family == KINC_SOCKET_FAMILY_IP4 ? AF_INET : AF_INET6, SOCK_STREAM, IPPROTO_TCP);
 // 		break;
 // 	default:
-// 		kinc_log(KINC_LOG_LEVEL_ERROR, "Unsupported socket protocol.");
+// 		kinc_error("Unsupported socket protocol.");
 // 		return false;
 // 	}
 
 // 	if (sock->handle <= 0) {
-// 		kinc_log(KINC_LOG_LEVEL_ERROR, "Could not create socket.");
+// 		kinc_error("Could not create socket.");
 // #if defined(KINC_WINDOWS)
 // 		int errorCode = WSAGetLastError();
 // 		switch (errorCode) {
 // 		case (WSANOTINITIALISED):
-// 			kinc_log(KINC_LOG_LEVEL_ERROR, "A successful WSAStartup call must occur before using this function.");
+// 			kinc_error("A successful WSAStartup call must occur before using this function.");
 // 			break;
 // 		case (WSAENETDOWN):
-// 			kinc_log(KINC_LOG_LEVEL_ERROR, "The network subsystem or the associated service provider has failed.");
+// 			kinc_error("The network subsystem or the associated service provider has failed.");
 // 			break;
 // 		case (WSAEAFNOSUPPORT):
-// 			kinc_log(KINC_LOG_LEVEL_ERROR,
+// 			kinc_error(
 // 			         "The specified address family is not supported.For example, an application tried to create a socket for the AF_IRDA address "
 // 			         "family but an infrared adapter and device driver is not installed on the local computer.");
 // 			break;
 // 		case (WSAEINPROGRESS):
-// 			kinc_log(KINC_LOG_LEVEL_ERROR,
+// 			kinc_error(
 // 			         "A blocking Windows Sockets 1.1 call is in progress, or the service provider is still processing a callback function.");
 // 			break;
 // 		case (WSAEMFILE):
-// 			kinc_log(KINC_LOG_LEVEL_ERROR, "No more socket descriptors are available.");
+// 			kinc_error("No more socket descriptors are available.");
 // 			break;
 // 		case (WSAEINVAL):
-// 			kinc_log(KINC_LOG_LEVEL_ERROR,
+// 			kinc_error(
 // 			         "An invalid argument was supplied.This error is returned if the af parameter is set to AF_UNSPEC and the type and protocol "
 // 			         "parameter are unspecified.");
 // 			break;
 // 		case (WSAENOBUFS):
-// 			kinc_log(KINC_LOG_LEVEL_ERROR, "No buffer space is available.The socket cannot be created.");
+// 			kinc_error("No buffer space is available.The socket cannot be created.");
 // 			break;
 // 		case (WSAEPROTONOSUPPORT):
-// 			kinc_log(KINC_LOG_LEVEL_ERROR, "The specified protocol is not supported.");
+// 			kinc_error("The specified protocol is not supported.");
 // 			break;
 // 		case (WSAEPROTOTYPE):
-// 			kinc_log(KINC_LOG_LEVEL_ERROR, "The specified protocol is the wrong type for this socket.");
+// 			kinc_error("The specified protocol is the wrong type for this socket.");
 // 			break;
 // 		case (WSAEPROVIDERFAILEDINIT):
-// 			kinc_log(KINC_LOG_LEVEL_ERROR,
+// 			kinc_error(
 // 			         "The service provider failed to initialize.This error is returned if a layered service provider(LSP) or namespace provider was "
 // 			         "improperly installed or the provider fails to operate correctly.");
 // 			break;
 // 		case (WSAESOCKTNOSUPPORT):
-// 			kinc_log(KINC_LOG_LEVEL_ERROR, "The specified socket type is not supported in this address family.");
+// 			kinc_error("The specified socket type is not supported in this address family.");
 // 			break;
 // 		case (WSAEINVALIDPROVIDER):
-// 			kinc_log(KINC_LOG_LEVEL_ERROR, "The service provider returned a version other than 2.2.");
+// 			kinc_error("The service provider returned a version other than 2.2.");
 // 			break;
 // 		case (WSAEINVALIDPROCTABLE):
-// 			kinc_log(KINC_LOG_LEVEL_ERROR, "The service provider returned an invalid or incomplete procedure table to the WSPStartup.");
+// 			kinc_error("The service provider returned an invalid or incomplete procedure table to the WSPStartup.");
 // 			break;
 // 		default:
-// 			kinc_log(KINC_LOG_LEVEL_ERROR, "Unknown error.");
+// 			kinc_error("Unknown error.");
 // 		}
 // #elif defined(KINC_POSIX)
-// 		kinc_log(KINC_LOG_LEVEL_ERROR, "%s", strerror(errno));
+// 		kinc_error("%s", strerror(errno));
 // #endif
 // 		return false;
 // 	}
@@ -287,13 +287,13 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // #if defined(KINC_WINDOWS)
 // 			DWORD value = 1;
 // 			if (ioctlsocket(sock->handle, FIONBIO, &value) != 0) {
-// 				kinc_log(KINC_LOG_LEVEL_ERROR, "Could not set non-blocking mode.");
+// 				kinc_error("Could not set non-blocking mode.");
 // 				return false;
 // 			}
 // #elif defined(KINC_POSIX)
 // 			int value = 1;
 // 			if (fcntl(sock->handle, F_SETFL, O_NONBLOCK, value) == -1) {
-// 				kinc_log(KINC_LOG_LEVEL_ERROR, "Could not set non-blocking mode.");
+// 				kinc_error("Could not set non-blocking mode.");
 // 				return false;
 // 			}
 // #endif
@@ -303,7 +303,7 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // #if defined(KINC_WINDOWS) || defined(KINC_POSIX)
 // 			int value = 1;
 // 			if (setsockopt(sock->handle, SOL_SOCKET, SO_BROADCAST, (const char *)&value, sizeof(value)) < 0) {
-// 				kinc_log(KINC_LOG_LEVEL_ERROR, "Could not set broadcast mode.");
+// 				kinc_error("Could not set broadcast mode.");
 // 				return false;
 // 			}
 // #endif
@@ -313,7 +313,7 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // #if defined(KINC_WINDOWS) || defined(KINC_POSIX)
 // 			int value = 1;
 // 			if (setsockopt(sock->handle, IPPROTO_TCP, TCP_NODELAY, (const char *)&value, sizeof(value)) != 0) {
-// 				kinc_log(KINC_LOG_LEVEL_ERROR, "Could not set no-delay mode.");
+// 				kinc_error("Could not set no-delay mode.");
 // 				return false;
 // 			}
 // #endif
@@ -355,7 +355,7 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // 	timeout.tv_usec = 0;
 
 // 	if (select(0, &r_fds, &w_fds, NULL, &timeout) < 0) {
-// 		kinc_log(KINC_LOG_LEVEL_ERROR, "kinc_socket_select didn't work: %s", strerror(errno));
+// 		kinc_error("kinc_socket_select didn't work: %s", strerror(errno));
 // 		return false;
 // 	}
 
@@ -369,7 +369,7 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // 		return FD_ISSET(sock->handle, &w_fds);
 // 	}
 // 	else {
-// 		kinc_log(KINC_LOG_LEVEL_ERROR, "Calling kinc_socket_select with both read and write set to false is useless.");
+// 		kinc_error("Calling kinc_socket_select with both read and write set to false is useless.");
 // 		return false;
 // 	}
 // #else
@@ -391,7 +391,7 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // 		struct in_addr addr;
 
 // 		if (inet_pton(sock->family == KINC_SOCKET_FAMILY_IP4 ? AF_INET : AF_INET6, host, &addr) == 0) {
-// 			kinc_log(KINC_LOG_LEVEL_ERROR, "Invalid %s address: %s\n", sock->family == KINC_SOCKET_FAMILY_IP4 ? "IPv4" : "IPv6", host);
+// 			kinc_error("Invalid %s address: %s\n", sock->family == KINC_SOCKET_FAMILY_IP4 ? "IPv4" : "IPv6", host);
 // 			return false;
 // 		}
 // 		sock->host = addr.s_addr;
@@ -401,7 +401,7 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // 		struct addrinfo *address = NULL;
 // 		int res = resolveAddress(host, port, &address);
 // 		if (res != 0) {
-// 			kinc_log(KINC_LOG_LEVEL_ERROR, "Could not resolve address.");
+// 			kinc_error("Could not resolve address.");
 // 			return false;
 // 		}
 // #if defined(KINC_POSIX)
@@ -479,20 +479,20 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 
 // 		size_t sent = sendto(sock->handle, (const char *)data, size, 0, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
 // 		if (sent != size) {
-// 			kinc_log(KINC_LOG_LEVEL_ERROR, "Could not send packet.");
+// 			kinc_error("Could not send packet.");
 // 			return -1;
 // 		}
 // 		return (int)sent;
 // 	}
 // 	else {
 // 		if (!sock->connected) {
-// 			kinc_log(KINC_LOG_LEVEL_ERROR, "Call kinc_sockect_connect/bind before send/recv can be called for TCP sockets.");
+// 			kinc_error("Call kinc_sockect_connect/bind before send/recv can be called for TCP sockets.");
 // 			return -1;
 // 		}
 
 // 		size_t sent = send(sock->handle, (const char *)data, size, 0);
 // 		if (sent != size) {
-// 			kinc_log(KINC_LOG_LEVEL_ERROR, "Could not send packet.");
+// 			kinc_error("Could not send packet.");
 // 		}
 // 		return (int)sent;
 // 	}
@@ -510,7 +510,7 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 
 // 	size_t sent = sendto(sock->handle, (const char *)data, size, 0, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
 // 	if (sent != size) {
-// 		kinc_log(KINC_LOG_LEVEL_ERROR, "Could not send packet.");
+// 		kinc_error("Could not send packet.");
 // 	}
 // 	return (int)sent;
 // #else
@@ -523,13 +523,13 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // 	struct addrinfo *address = NULL;
 // 	int res = resolveAddress(url, port, &address);
 // 	if (res != 0) {
-// 		kinc_log(KINC_LOG_LEVEL_ERROR, "Could not resolve address.");
+// 		kinc_error("Could not resolve address.");
 // 		return 0;
 // 	}
 
 // 	size_t sent = sendto(sock->handle, (const char *)data, size, 0, address->ai_addr, sizeof(struct sockaddr_in));
 // 	if (sent != size) {
-// 		kinc_log(KINC_LOG_LEVEL_ERROR, "Could not send packet.");
+// 		kinc_error("Could not send packet.");
 // 	}
 // 	freeaddrinfo(address);
 // 	return (int)sent;
@@ -559,7 +559,7 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // 	else {
 
 // 		if (!sock->connected) {
-// 			kinc_log(KINC_LOG_LEVEL_ERROR, "Call kinc_sockect_connect/bind before send/recv can be called for TCP sockets.");
+// 			kinc_error("Call kinc_sockect_connect/bind before send/recv can be called for TCP sockets.");
 // 			return -1;
 // 		}
 // 		ssize_t bytes = recv(sock->handle, (char *)data, maxSize, 0);
@@ -577,7 +577,7 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // 	struct addrinfo *address = NULL;
 // 	int res = resolveAddress(url, port, &address);
 // 	if (res != 0) {
-// 		kinc_log(KINC_LOG_LEVEL_ERROR, "Could not resolve address.");
+// 		kinc_error("Could not resolve address.");
 // 		return -1;
 // 	}
 

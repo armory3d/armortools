@@ -52,7 +52,7 @@
 
 // 	int failure = (*env)->RegisterNatives(env, clazz, methodTable, methodTableSize);
 // 	if (failure != 0) {
-// 		kinc_log(KINC_LOG_LEVEL_WARNING, "Failed to register KincMoviePlayer.nativeCreate");
+// 		kinc_log("Failed to register KincMoviePlayer.nativeCreate");
 // 	}
 
 // 	(*kinc_android_get_activity()->vm)->DetachCurrentThread(kinc_android_get_activity()->vm);

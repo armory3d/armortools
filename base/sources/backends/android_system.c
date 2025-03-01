@@ -956,7 +956,7 @@ void KincAndroidKeyboardInit() {
 
 	int failure = (*env)->RegisterNatives(env, clazz, methodTable, methodTableSize);
 	if (failure != 0) {
-		kinc_log(KINC_LOG_LEVEL_WARNING, "Failed to register KincActivity.nativeKincKeyPress");
+		kinc_log("Failed to register KincActivity.nativeKincKeyPress");
 	}
 
 	(*activity->vm)->DetachCurrentThread(activity->vm);
@@ -1239,7 +1239,7 @@ const char *kinc_gamepad_product_name(int gamepad) {
 
 void initAndroidFileReader(void) {
 	if (activity == NULL) {
-		kinc_log(KINC_LOG_LEVEL_ERROR, "Android activity is NULL");
+		kinc_error("Android activity is NULL");
 		return;
 	}
 

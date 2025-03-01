@@ -24,7 +24,7 @@ function shader_data_parse(file: string, name: string): shader_data_t {
 	let format: scene_t = data_get_scene_raw(file);
 	let raw: shader_data_t = shader_data_get_raw_by_name(format.shader_datas, name);
 	if (raw == null) {
-		iron_log("Shader data '" + name + "' not found!");
+		kinc_log("Shader data '" + name + "' not found!");
 		return null;
 	}
 	return shader_data_create(raw);

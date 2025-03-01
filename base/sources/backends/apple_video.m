@@ -41,19 +41,19 @@
 // float *kinc_internal_video_sound_stream_next_frame(kinc_internal_video_sound_stream_t *stream) {
 // 	++stream->read;
 // 	if (stream->written <= stream->read) {
-// 		kinc_log(KINC_LOG_LEVEL_WARNING, "Out of audio\n");
+// 		kinc_log("Out of audio\n");
 // 		return 0;
 // 	}
 
 // 	if (stream->bufferReadPosition >= stream->bufferSize) {
 // 		stream->bufferReadPosition = 0;
-// 		kinc_log(KINC_LOG_LEVEL_INFO, "buffer read back - %i\n", (int)(stream->written - stream->read));
+// 		kinc_log("buffer read back - %i\n", (int)(stream->written - stream->read));
 // 	}
 // 	samples[0] = stream->buffer[stream->bufferReadPosition++];
 
 // 	if (stream->bufferReadPosition >= stream->bufferSize) {
 // 		stream->bufferReadPosition = 0;
-// 		kinc_log(KINC_LOG_LEVEL_INFO, "buffer read back - %i\n", (int)(stream->written - stream->read));
+// 		kinc_log("buffer read back - %i\n", (int)(stream->written - stream->read));
 // 	}
 // 	samples[1] = stream->buffer[stream->bufferReadPosition++];
 
@@ -115,7 +115,7 @@
 // 	if (video->impl.myHeight < 0)
 // 		video->impl.myHeight = [videoTrack naturalSize].height;
 // 	int framerate = [videoTrack nominalFrameRate];
-// 	kinc_log(KINC_LOG_LEVEL_INFO, "Framerate: %i\n", framerate);
+// 	kinc_log("Framerate: %i\n", framerate);
 // 	video->impl.next = video->impl.videoStart;
 // 	video->impl.audioTime = video->impl.videoStart * 44100;
 // }

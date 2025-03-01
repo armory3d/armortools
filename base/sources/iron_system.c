@@ -15,14 +15,10 @@
 #include <memory.h>
 #include <stddef.h>
 
-void kinc_log(kinc_log_level_t level, const char *format, ...) {
-	va_list args;
-	va_start(args, format);
-	kinc_log_args(level, format, args);
-	va_end(args);
-}
-
-#define UTF8
+typedef enum {
+	KINC_LOG_LEVEL_INFO,
+	KINC_LOG_LEVEL_ERROR
+} kinc_log_level_t;
 
 void kinc_log_args(kinc_log_level_t level, const char *format, va_list args) {
 #ifdef KINC_ANDROID
@@ -32,35 +28,20 @@ void kinc_log_args(kinc_log_level_t level, const char *format, va_list args) {
 	case KINC_LOG_LEVEL_INFO:
 		__android_log_vprint(ANDROID_LOG_INFO, "Kinc", format, args_android_copy);
 		break;
-	case KINC_LOG_LEVEL_WARNING:
-		__android_log_vprint(ANDROID_LOG_WARN, "Kinc", format, args_android_copy);
-		break;
 	case KINC_LOG_LEVEL_ERROR:
 		__android_log_vprint(ANDROID_LOG_ERROR, "Kinc", format, args_android_copy);
 		break;
 	}
 	va_end(args_android_copy);
 #endif
+
 #ifdef KINC_WINDOWS
-#ifdef UTF8
 	wchar_t buffer[4096];
 	kinc_microsoft_format(format, args, buffer);
 	wcscat(buffer, L"\r\n");
 	OutputDebugStringW(buffer);
-#ifdef KINC_WINDOWS
 	DWORD written;
 	WriteConsoleW(GetStdHandle(level == KINC_LOG_LEVEL_INFO ? STD_OUTPUT_HANDLE : STD_ERROR_HANDLE), buffer, (DWORD)wcslen(buffer), &written, NULL);
-#endif
-#else
-	char buffer[4096];
-	vsnprintf(buffer, 4090, format, args);
-	strcat(buffer, "\r\n");
-	OutputDebugStringA(buffer);
-#ifdef KINC_WINDOWS
-	DWORD written;
-	WriteConsoleA(GetStdHandle(level == KINC_LOG_LEVEL_INFO ? STD_OUTPUT_HANDLE : STD_ERROR_HANDLE), buffer, (DWORD)strlen(buffer), &written, NULL);
-#endif
-#endif
 #else
 	char buffer[4096];
 	vsnprintf(buffer, 4090, format, args);
@@ -69,23 +50,14 @@ void kinc_log_args(kinc_log_level_t level, const char *format, va_list args) {
 #endif
 }
 
-void kinc_affirm(bool condition) {
-	if (!condition) {
-		kinc_error();
-	}
+void kinc_log(const char *format, ...) {
+	va_list args;
+	va_start(args, format);
+	kinc_log_args(KINC_LOG_LEVEL_INFO, format == NULL ? "null" : format, args);
+	va_end(args);
 }
 
-void kinc_affirm_args(bool condition, const char *format, va_list args) {
-	if (!condition) {
-		kinc_error_args(format, args);
-	}
-}
-
-void kinc_error(void) {
-	kinc_error_message("Unknown error");
-}
-
-void kinc_error_message(const char *format, ...) {
+void kinc_error(const char *format, ...) {
 	{
 		va_list args;
 		va_start(args, format);
@@ -102,24 +74,6 @@ void kinc_error_message(const char *format, ...) {
 		MessageBoxW(NULL, buffer, L"Error", 0);
 		va_end(args);
 	}
-#endif
-
-#ifndef KINC_NO_CLIB
-	exit(EXIT_FAILURE);
-#endif
-}
-
-void kinc_error_args(const char *format, va_list args) {
-	kinc_log_args(KINC_LOG_LEVEL_ERROR, format, args);
-
-#ifdef KINC_WINDOWS
-	wchar_t buffer[4096];
-	kinc_microsoft_format(format, args, buffer);
-	MessageBoxW(NULL, buffer, L"Error", 0);
-#endif
-
-#ifndef KINC_NO_CLIB
-	exit(EXIT_FAILURE);
 #endif
 }
 
@@ -293,7 +247,7 @@ const char *kinc_application_name(void) {
 	return application_name;
 }
 
-void kinc_set_application_name(const char *name) {
+void kinc_set_app_name(const char *name) {
 	strcpy(application_name, name);
 }
 
@@ -376,7 +330,7 @@ bool kinc_save_is_saving(void) {
 
 #if !defined(KINC_WINDOWS) && !defined(KINC_LINUX) && !defined(KINC_MACOS)
 void kinc_copy_to_clipboard(const char *text) {
-	kinc_log(KINC_LOG_LEVEL_WARNING, "Oh no, kinc_copy_to_clipboard is not implemented for this system.");
+	kinc_log("Oh no, kinc_copy_to_clipboard is not implemented for this system.");
 }
 #endif
 

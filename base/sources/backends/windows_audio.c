@@ -102,7 +102,7 @@ static bool initDefaultDevice() {
 		bufferEndEvent = 0;
 	}
 
-	kinc_log(KINC_LOG_LEVEL_INFO, "Initializing a new default audio device.");
+	kinc_log("Initializing a new default audio device.");
 
 	HRESULT hr = deviceEnumerator->lpVtbl->GetDefaultAudioEndpoint(deviceEnumerator, eRender, eConsole, &device);
 	if (hr == S_OK) {
@@ -124,7 +124,7 @@ static bool initDefaultDevice() {
 
 		HRESULT supported = audioClient->lpVtbl->IsFormatSupported(audioClient, AUDCLNT_SHAREMODE_SHARED, format, &closestFormat);
 		if (supported == S_FALSE) {
-			kinc_log(KINC_LOG_LEVEL_WARNING, "Falling back to the system's preferred WASAPI mix format.", supported);
+			kinc_log("Falling back to the system's preferred WASAPI mix format.", supported);
 			if (closestFormat != NULL) {
 				format = closestFormat;
 			}
@@ -135,7 +135,7 @@ static bool initDefaultDevice() {
 		HRESULT result =
 		    audioClient->lpVtbl->Initialize(audioClient, AUDCLNT_SHAREMODE_SHARED, AUDCLNT_STREAMFLAGS_EVENTCALLBACK, 40 * 1000 * 10, 0, format, 0);
 		if (result != S_OK) {
-			kinc_log(KINC_LOG_LEVEL_WARNING, "Could not initialize WASAPI audio, going silent (error code 0x%x).", result);
+			kinc_log("Could not initialize WASAPI audio, going silent (error code 0x%x).", result);
 			return false;
 		}
 
@@ -151,14 +151,13 @@ static bool initDefaultDevice() {
 		kinc_microsoft_affirm(audioClient->lpVtbl->GetService(audioClient, &IID_IAudioRenderClient, (void **)&renderClient));
 
 		bufferEndEvent = CreateEvent(0, FALSE, FALSE, 0);
-		kinc_affirm(bufferEndEvent != 0);
 
 		kinc_microsoft_affirm(audioClient->lpVtbl->SetEventHandle(audioClient, bufferEndEvent));
 
 		return true;
 	}
 	else {
-		kinc_log(KINC_LOG_LEVEL_WARNING, "Could not initialize WASAPI audio.");
+		kinc_log("Could not initialize WASAPI audio.");
 		return false;
 	}
 }
@@ -276,7 +275,6 @@ void kinc_a2_init() {
 	a2_buffer.channels[1] = (float *)malloc(a2_buffer.data_size * sizeof(float));
 
 	audioProcessingDoneEvent = CreateEvent(0, FALSE, FALSE, 0);
-	kinc_affirm(audioProcessingDoneEvent != 0);
 
 	kinc_windows_co_initialize();
 	kinc_microsoft_affirm(CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL, &IID_IMMDeviceEnumerator, (void **)&deviceEnumerator));

@@ -25,7 +25,7 @@ let _sys_shaders: map_t<string, shader_t> = map_create();
 function sys_start(ops: kinc_sys_ops_t) {
 	iron_init(ops.title, ops.width, ops.height, ops.vsync, ops.mode, ops.features, ops.x, ops.y, ops.frequency, ops.use_depth);
 
-	_sys_start_time = iron_get_time();
+	_sys_start_time = kinc_time();
 	g2_init();
 	iron_set_update_callback(sys_render_callback);
 	iron_set_drop_files_callback(sys_drop_files_callback);
@@ -126,11 +126,11 @@ function sys_drop_files(file_path: string) {
 }
 
 function sys_time(): f32 {
-	return iron_get_time() - _sys_start_time;
+	return kinc_time() - _sys_start_time;
 }
 
 function sys_system_id(): string {
-	return iron_system_id();
+	return kinc_system_id();
 }
 
 function sys_language(): string {
@@ -142,7 +142,7 @@ function sys_stop() {
 }
 
 function sys_load_url(url: string) {
-	iron_load_url(url);
+	kinc_load_url(url);
 }
 
 function sys_render_callback() {
@@ -263,22 +263,22 @@ function sys_gamepad_button_callback(gamepad: i32, button: i32, value: f32) {
 
 function sys_lock_mouse() {
 	if (!sys_is_mouse_locked()) {
-		iron_lock_mouse();
+		kinc_mouse_lock();
 	}
 }
 
 function sys_unlock_mouse() {
 	if (sys_is_mouse_locked()) {
-		iron_unlock_mouse();
+		kinc_mouse_unlock();
 	}
 }
 
 function sys_can_lock_mouse(): bool {
-	return iron_can_lock_mouse();
+	return kinc_mouse_can_lock();
 }
 
 function sys_is_mouse_locked(): bool {
-	return iron_is_mouse_locked();
+	return kinc_mouse_is_locked();
 }
 
 function sys_hide_system_cursor() {
@@ -290,11 +290,11 @@ function sys_show_system_cursor() {
 }
 
 function sys_resize(width: i32, height: i32) {
-	iron_resize_window(width, height);
+	kinc_window_resize(width, height);
 }
 
 function sys_move(x: i32, y: i32) {
-	iron_move_window(x, y);
+	kinc_window_move(x, y);
 }
 
 function sys_x(): i32 {
@@ -306,15 +306,15 @@ function sys_y(): i32 {
 }
 
 function sys_width(): i32 {
-	return iron_window_width();
+	return kinc_window_width();
 }
 
 function sys_height(): i32 {
-	return iron_window_height();
+	return kinc_window_height();
 }
 
 function sys_mode(): window_mode_t {
-	return iron_get_window_mode();
+	return kinc_window_get_mode();
 }
 
 function sys_mode_set(mode: window_mode_t) {
@@ -331,7 +331,7 @@ function sys_title_set(value: string) {
 }
 
 function sys_display_primary_id(): i32 {
-	for (let i: i32 = 0; i < iron_display_count(); ++i) {
+	for (let i: i32 = 0; i < kinc_count_displays(); ++i) {
 		if (iron_display_is_primary(i)) {
 			return i;
 		}
@@ -395,7 +395,7 @@ function sound_create(sound_: any): sound_t {
 }
 
 function sound_unload(raw: sound_t) {
-	iron_unload_sound(raw.sound_);
+	kinc_a1_sound_destroy(raw.sound_);
 }
 ///end
 

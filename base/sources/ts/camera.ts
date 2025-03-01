@@ -21,19 +21,19 @@ function camera_update() {
 		if (config_raw.wrap_mouse && camera_controls_down) {
 			if (mouse_view_x() < 0) {
 				mouse_x = mouse_last_x = app_x() + app_w();
-				iron_set_mouse_position(math_floor(mouse_x), math_floor(mouse_y));
+				kinc_mouse_set_position(math_floor(mouse_x), math_floor(mouse_y));
 			}
 			else if (mouse_view_x() > app_w()) {
 				mouse_x = mouse_last_x = app_x();
-				iron_set_mouse_position(math_floor(mouse_x), math_floor(mouse_y));
+				kinc_mouse_set_position(math_floor(mouse_x), math_floor(mouse_y));
 			}
 			else if (mouse_view_y() < 0) {
 				mouse_y = mouse_last_y = app_y() + app_h();
-				iron_set_mouse_position(math_floor(mouse_x), math_floor(mouse_y));
+				kinc_mouse_set_position(math_floor(mouse_x), math_floor(mouse_y));
 			}
 			else if (mouse_view_y() > app_h()) {
 				mouse_y = mouse_last_y = app_y();
-				iron_set_mouse_position(math_floor(mouse_x), math_floor(mouse_y));
+				kinc_mouse_set_position(math_floor(mouse_x), math_floor(mouse_y));
 			}
 		}
 		else {

@@ -1175,7 +1175,7 @@ void kinc_g5_compute_shader_init(kinc_g5_compute_shader *shader, void *_data, in
 	HRESULT hr = device->lpVtbl->CreateComputePipelineState(device , &desc, &IID_ID3D12PipelineState, &shader->impl.pso);
 
 	if (hr != S_OK) {
-		kinc_log(KINC_LOG_LEVEL_WARNING, "Could not initialize compute shader.");
+		kinc_log("Could not initialize compute shader.");
 		return;
 	}
 
@@ -1224,7 +1224,7 @@ kinc_g5_constant_location_t kinc_g5_compute_shader_get_constant_location(kinc_g5
 	}
 
 	if (location.impl.computeSize == 0) {
-		kinc_log(KINC_LOG_LEVEL_WARNING, "Uniform %s not found.", name);
+		kinc_log("Uniform %s not found.", name);
 	}
 
 	return location;
@@ -1253,11 +1253,11 @@ kinc_g5_texture_unit_t kinc_g5_compute_shader_get_texture_unit(kinc_g5_compute_s
 #ifndef NDEBUG
 		static int notFoundCount = 0;
 		if (notFoundCount < 10) {
-			kinc_log(KINC_LOG_LEVEL_WARNING, "Sampler %s not found.", unitName);
+			kinc_log("Sampler %s not found.", unitName);
 			++notFoundCount;
 		}
 		else if (notFoundCount == 10) {
-			kinc_log(KINC_LOG_LEVEL_WARNING, "Giving up on sampler not found messages.", unitName);
+			kinc_log("Giving up on sampler not found messages.", unitName);
 			++notFoundCount;
 		}
 #endif
@@ -1728,7 +1728,7 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
 
 	hr = device->lpVtbl->CreateGraphicsPipelineState(device , &psoDesc, &IID_ID3D12PipelineState, &pipe->impl.pso);
 	if (hr != S_OK) {
-		kinc_log(KINC_LOG_LEVEL_WARNING, "Could not create pipeline.");
+		kinc_log("Could not create pipeline.");
 	}
 }
 

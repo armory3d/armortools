@@ -403,19 +403,19 @@ function ui_nodes_get_canvas_control(ui: ui_t, controls_down: bool): ui_canvas_c
 	if (config_raw.wrap_mouse && controls_down) {
 		if (ui.input_x < ui._window_x) {
 			ui.input_x = ui._window_x + ui._window_w;
-			iron_set_mouse_position(math_floor(ui.input_x), math_floor(ui.input_y));
+			kinc_mouse_set_position(math_floor(ui.input_x), math_floor(ui.input_y));
 		}
 		else if (ui.input_x > ui._window_x + ui._window_w) {
 			ui.input_x = ui._window_x;
-			iron_set_mouse_position(math_floor(ui.input_x), math_floor(ui.input_y));
+			kinc_mouse_set_position(math_floor(ui.input_x), math_floor(ui.input_y));
 		}
 		else if (ui.input_y < ui._window_y) {
 			ui.input_y = ui._window_y + ui._window_h;
-			iron_set_mouse_position(math_floor(ui.input_x), math_floor(ui.input_y));
+			kinc_mouse_set_position(math_floor(ui.input_x), math_floor(ui.input_y));
 		}
 		else if (ui.input_y > ui._window_y + ui._window_h) {
 			ui.input_y = ui._window_y;
-			iron_set_mouse_position(math_floor(ui.input_x), math_floor(ui.input_y));
+			kinc_mouse_set_position(math_floor(ui.input_x), math_floor(ui.input_y));
 		}
 	}
 

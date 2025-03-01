@@ -97,7 +97,7 @@ function file_start(path: string) {
 }
 
 function file_load_url(url: string) {
-	iron_load_url(url);
+	kinc_load_url(url);
 }
 
 function file_delete(path: string) {

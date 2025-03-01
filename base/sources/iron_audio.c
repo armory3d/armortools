@@ -253,7 +253,6 @@ struct WaveData {
 
 static void checkFOURCC(uint8_t **data, const char *fourcc) {
 	for (int i = 0; i < 4; ++i) {
-		kinc_affirm(**data == fourcc[i]);
 		++*data;
 	}
 }
@@ -282,7 +281,6 @@ static void readChunk(uint8_t **data, struct WaveData *wave) {
 	else if (strcmp(fourcc, "data") == 0) {
 		wave->dataSize = chunksize;
 		wave->data = (uint8_t *)malloc(chunksize * sizeof(uint8_t));
-		kinc_affirm(wave->data != NULL);
 		memcpy(wave->data, *data, chunksize);
 		*data += chunksize;
 	}
@@ -410,9 +408,6 @@ kinc_a1_sound_t *kinc_a1_sound_create(const char *filename) {
 			sound->right = (int16_t *)malloc(sound->size * sizeof(int16_t));
 			splitMono16((int16_t *)data, sound->size, sound->left, sound->right);
 		}
-		else {
-			kinc_affirm(false);
-		}
 	}
 	else {
 		// Left and right channel are in s16 audio stream, alternating.
@@ -427,9 +422,6 @@ kinc_a1_sound_t *kinc_a1_sound_create(const char *filename) {
 			sound->left = (int16_t *)malloc(sound->size * sizeof(int16_t));
 			sound->right = (int16_t *)malloc(sound->size * sizeof(int16_t));
 			splitStereo16((int16_t *)data, sound->size, sound->left, sound->right);
-		}
-		else {
-			kinc_affirm(false);
 		}
 	}
 	sound->sample_rate_pos = 44100 / (float)sound->samples_per_second;

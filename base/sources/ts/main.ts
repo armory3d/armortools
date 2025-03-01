@@ -2,7 +2,7 @@
 function main() {
 
 	// Used to locate external application data folder
-	iron_set_app_name(manifest_title);
+	kinc_set_app_name(manifest_title);
 	config_load();
 
 	app_on_resize = base_on_resize;
@@ -17,7 +17,7 @@ function main() {
 	if (config_raw.layout == null) {
 		base_init_layout();
 	}
-	iron_set_app_name(manifest_title);
+	kinc_set_app_name(manifest_title);
 	app_init();
 	scene_set_active("Scene");
 	uniforms_ext_init();

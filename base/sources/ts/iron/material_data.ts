@@ -38,7 +38,7 @@ function material_data_parse(file: string, name: string): material_data_t {
 	let format: scene_t = data_get_scene_raw(file);
 	let raw: material_data_t = material_data_get_raw_by_name(format.material_datas, name);
 	if (raw == null) {
-		iron_log("Material data '" + name + "' not found!");
+		kinc_log("Material data '" + name + "' not found!");
 		return null;
 	}
 	return material_data_create(raw, file);

@@ -102,7 +102,7 @@ function ui_box_render() {
 
 				///if (arm_windows || arm_linux || arm_macos)
 				if (ui_box_copyable && ui_button(tr("Copy"))) {
-					iron_copy_to_clipboard(ui_box_text);
+					kinc_copy_to_clipboard(ui_box_text);
 				}
 				///end
 				if (ui_button(tr("OK"))) {
