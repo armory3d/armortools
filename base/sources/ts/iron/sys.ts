@@ -134,11 +134,11 @@ function sys_system_id(): string {
 }
 
 function sys_language(): string {
-	return iron_language();
+	return kinc_language();
 }
 
 function sys_stop() {
-	iron_request_shutdown();
+	kinc_stop();
 }
 
 function sys_load_url(url: string) {
@@ -298,11 +298,11 @@ function sys_move(x: i32, y: i32) {
 }
 
 function sys_x(): i32 {
-	return iron_window_x();
+	return kinc_window_x();
 }
 
 function sys_y(): i32 {
-	return iron_window_y();
+	return kinc_window_y();
 }
 
 function sys_width(): i32 {

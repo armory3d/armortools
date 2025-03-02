@@ -25,7 +25,6 @@ typedef struct kinc_g5_render_target {
 	RenderTarget5Impl impl;
 } kinc_g5_render_target_t;
 
-bool kinc_g5_supports_raytracing(void);
 int kinc_g5_max_bound_textures(void);
 void kinc_g5_flush(void);
 void kinc_g5_begin(kinc_g5_render_target_t *renderTarget);
@@ -450,8 +449,8 @@ typedef struct kinc_g5_pipeline {
 	bool color_write_mask_blue[8];
 	bool color_write_mask_alpha[8];
 
-	int color_attachment_count;
 	kinc_image_format_t color_attachment[8];
+	int color_attachment_count;
 	int depth_attachment_bits;
 
 	PipelineState5Impl impl;

@@ -52,7 +52,7 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 		if (l1.paint_base) {
 			g2_begin(layers_temp_image); // Copy to temp
 			g2_set_pipeline(pipes_copy);
-			g2_draw_image(layers_expa, 0, 0);
+			draw_image(layers_expa, 0, 0);
 			g2_set_pipeline(null);
 			g2_end();
 
@@ -60,7 +60,7 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 			// Do not multiply basecol by alpha
 			g2_begin(layers_expa); // Copy to temp
 			g2_set_pipeline(pipes_copy);
-			g2_draw_image(l1.texpaint, 0, 0);
+			draw_image(l1.texpaint, 0, 0);
 			g2_set_pipeline(null);
 			g2_end();
 			///else
@@ -82,7 +82,7 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 		if (l1.paint_nor) {
 			g2_begin(layers_temp_image);
 			g2_set_pipeline(pipes_copy);
-			g2_draw_image(layers_expb, 0, 0);
+			draw_image(layers_expb, 0, 0);
 			g2_set_pipeline(null);
 			g2_end();
 
@@ -103,7 +103,7 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 		if (l1.paint_occ || l1.paint_rough || l1.paint_met || l1.paint_height) {
 			g2_begin(layers_temp_image);
 			g2_set_pipeline(pipes_copy);
-			g2_draw_image(layers_expc, 0, 0);
+			draw_image(layers_expc, 0, 0);
 			g2_set_pipeline(null);
 			g2_end();
 
@@ -145,7 +145,7 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 
 		g2_begin(layers_temp_image);
 		g2_set_pipeline(pipes_copy);
-		g2_draw_image(l0.texpaint_nor, 0, 0);
+		draw_image(l0.texpaint_nor, 0, 0);
 		g2_set_pipeline(null);
 		g2_end();
 

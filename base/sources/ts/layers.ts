@@ -30,7 +30,7 @@ function layers_init() {
 	let texpaint_nor: render_target_t = map_get(render_path_render_targets, "texpaint_nor");
 	let texpaint_pack: render_target_t = map_get(render_path_render_targets, "texpaint_pack");
 	g2_begin(texpaint._image);
-	g2_draw_scaled_image(resource_get("placeholder.k"), 0, 0, config_get_texture_res_x(), config_get_texture_res_y()); // Base
+	draw_scaled_image(resource_get("placeholder.k"), 0, 0, config_get_texture_res_x(), config_get_texture_res_y()); // Base
 	g2_end();
 	g4_begin(texpaint_nor._image);
 	g4_clear(color_from_floats(0.5, 0.5, 1.0, 0.0)); // Nor
@@ -250,7 +250,7 @@ function layers_apply_mask(l: slot_layer_t, m: slot_layer_t) {
 	// Copy layer to temp
 	g2_begin(layers_temp_image);
 	g2_set_pipeline(pipes_copy);
-	g2_draw_image(l.texpaint, 0, 0);
+	draw_image(l.texpaint, 0, 0);
 	g2_set_pipeline(null);
 	g2_end();
 
@@ -713,7 +713,7 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 
 	g2_begin(layers_temp_image); // Copy to temp
 	g2_set_pipeline(pipes_copy);
-	g2_draw_image(l0.texpaint, 0, 0);
+	draw_image(l0.texpaint, 0, 0);
 	g2_set_pipeline(null);
 	g2_end();
 
@@ -760,7 +760,7 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 		if (l0.texpaint_nor != null) {
 			g2_begin(layers_temp_image);
 			g2_set_pipeline(pipes_copy);
-			g2_draw_image(l0.texpaint_nor, 0, 0);
+			draw_image(l0.texpaint_nor, 0, 0);
 			g2_set_pipeline(null);
 			g2_end();
 
@@ -783,7 +783,7 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 		if (l0.texpaint_pack != null) {
 			g2_begin(layers_temp_image);
 			g2_set_pipeline(pipes_copy);
-			g2_draw_image(l0.texpaint_pack, 0, 0);
+			draw_image(l0.texpaint_pack, 0, 0);
 			g2_set_pipeline(null);
 			g2_end();
 

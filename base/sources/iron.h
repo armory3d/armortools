@@ -6,10 +6,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <iron_system.h>
-#include <iron_thread.h>
-#include <iron_gpu.h>
-#include <iron_file.h>
+#include "iron_system.h"
+#include "iron_thread.h"
+#include "iron_gpu.h"
+#include "iron_file.h"
 #include "iron_string.h"
 #include "iron_array.h"
 #include "iron_map.h"
@@ -25,16 +25,13 @@
 #include "iron_mat4.h"
 #include "iron_ui.h"
 #include "iron_ui_nodes.h"
+#include "iron_draw.h"
 #ifdef KINC_WINDOWS
 #include <Windows.h>
 #endif
-#if defined(IDLE_SLEEP) && !defined(KINC_WINDOWS)
-#include <unistd.h>
-#endif
 #ifdef WITH_AUDIO
-#include <kinc/audio2/audio.h>
+#include "iron_audio.h"
 #endif
-#include "iron_draw.h"
 #ifdef WITH_EMBED
 #include EMBED_H_PATH
 #endif
@@ -199,7 +196,7 @@ int last_window_height = 0;
 char temp_string[1024 * 32];
 char temp_string_vs[1024 * 128];
 char temp_string_fs[1024 * 128];
-char temp_string_vstruct[32][32];
+char temp_string_vstruct[8][32];
 #ifdef KINC_WINDOWS
 wchar_t temp_wstring[1024 * 32];
 struct HWND__ *kinc_windows_window_handle();
@@ -256,14 +253,11 @@ int kickstart(int argc, char **argv) {
 	HMODULE hmodule = GetModuleHandleW(NULL);
 	GetModuleFileNameW(hmodule, temp_wstring, 1024);
 	WideCharToMultiByte(CP_UTF8, 0, temp_wstring, -1, temp_string, 4096, NULL, NULL);
-	bindir = temp_string;
-#endif
-
-#ifdef KINC_WINDOWS
-	bindir = _substring(bindir, 0, string_last_index_of(bindir, "\\"));
+	bindir = _substring(temp_string, 0, string_last_index_of(temp_string, "\\"));
 #else
 	bindir = _substring(bindir, 0, string_last_index_of(bindir, "/"));
 #endif
+
 	char *assetsdir = argc > 1 ? argv[1] : bindir;
 
 	// Opening a file
@@ -282,14 +276,6 @@ int kickstart(int argc, char **argv) {
 
 #if !defined(KINC_MACOS) && !defined(KINC_IOS)
 	kinc_internal_set_files_location(assetsdir);
-#endif
-
-#ifdef KINC_MACOS
-	// Handle loading assets located outside of '.app/Contents/Resources/Deployment' folder
-	// when assets and shaders dir is passed as an argument
-	if (argc > 2) {
-		kinc_internal_set_files_location(&assetsdir[0u]);
-	}
 #endif
 
 	kinc_threads_init();
@@ -329,13 +315,13 @@ string_t *iron_get_arg(i32 index) {
 #ifndef NO_IRON_API
 
 #include <stdio.h>
-#include <iron_math.h>
-#include <iron_net.h>
+#include "iron_math.h"
+#include "iron_net.h"
 #include <lz4x.h>
+#include "dir.h"
 #ifdef WITH_AUDIO
-#include <iron_audio.h>
+#include "iron_audio.h"
 #endif
-int LZ4_decompress_safe(const char *source, char *dest, int compressed_size, int maxOutputSize);
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #ifdef KINC_DIRECT3D12
@@ -355,7 +341,6 @@ extern bool waitAfterNextDraw;
 #include <wchar.h>
 #include <ios_file_dialog.h>
 #endif
-#include "dir.h"
 #ifdef WITH_IMAGE_WRITE
 #ifdef WITH_COMPRESS
 unsigned char *iron_deflate_raw(unsigned char *data, int data_len, int *out_len, int quality);
@@ -798,13 +783,6 @@ i32 color_set_bb(i32 c, u8 i) {
 i32 color_set_ab(i32 c, u8 i) {
 	return (i << 24) | (color_get_rb(c) << 16) | (color_get_gb(c) << 8) | color_get_bb(c);
 }
-
-// ██╗  ██╗    ██████╗      ██████╗     ███╗   ███╗
-// ██║ ██╔╝    ██╔══██╗    ██╔═══██╗    ████╗ ████║
-// █████╔╝     ██████╔╝    ██║   ██║    ██╔████╔██║
-// ██╔═██╗     ██╔══██╗    ██║   ██║    ██║╚██╔╝██║
-// ██║  ██╗    ██║  ██║    ╚██████╔╝    ██║ ╚═╝ ██║
-// ╚═╝  ╚═╝    ╚═╝  ╚═╝     ╚═════╝     ╚═╝     ╚═╝
 
 void iron_init(string_t *title, i32 width, i32 height, bool vsync, i32 window_mode, i32 window_features, i32 x, i32 y, i32 frequency, bool use_depth) {
 	kinc_window_options_t win;
@@ -1314,24 +1292,7 @@ typedef struct vertex_struct {
 	any_array_t *elements; // kinc_vertex_elem_t
 } vertex_struct_t;
 
-typedef struct iron_pipeline_state {
-	int cull_mode; // cull_mode_t;
-	bool depth_write;
-	int depth_mode; // compare_mode_t;
-	int blend_source; // blend_factor_t;
-	int blend_dest; // blend_factor_t;
-	int alpha_blend_source; // blend_factor_t;
-	int alpha_blend_dest; // blend_factor_t;
-	u8_array_t *color_write_masks_red;
-	u8_array_t *color_write_masks_green;
-	u8_array_t *color_write_masks_blue;
-	u8_array_t *color_write_masks_alpha;
-	int color_attachment_count;
-	i32_array_t *color_attachments; // tex_format_t
-	int depth_attachment_bits;
-} iron_pipeline_state_t;
-
-void iron_g4_compile_pipeline(kinc_g5_pipeline_t *pipeline, vertex_struct_t *structure0, kinc_g5_shader_t *vertex_shader, kinc_g5_shader_t *fragment_shader, iron_pipeline_state_t *state) {
+void iron_g4_compile_pipeline(kinc_g5_pipeline_t *pipeline, vertex_struct_t *structure0) {
 	kinc_g5_vertex_structure_t s0;
 	kinc_g5_vertex_structure_init(&s0);
 
@@ -1341,37 +1302,7 @@ void iron_g4_compile_pipeline(kinc_g5_pipeline_t *pipeline, vertex_struct_t *str
 		strcpy(temp_string_vstruct[i], element->name);
 		kinc_g5_vertex_structure_add(&s0, temp_string_vstruct[i], (kinc_g5_vertex_data_t)element->data);
 	}
-
-	pipeline->vertex_shader = vertex_shader;
-	pipeline->fragment_shader = fragment_shader;
 	pipeline->input_layout = &s0;
-
-	pipeline->cull_mode = (kinc_g5_cull_mode_t)state->cull_mode;
-	pipeline->depth_write = state->depth_write;
-	pipeline->depth_mode = (kinc_g5_compare_mode_t)state->depth_mode;
-	pipeline->blend_source = (kinc_g5_blending_factor_t)state->blend_source;
-	pipeline->blend_destination = (kinc_g5_blending_factor_t)state->blend_dest;
-	pipeline->alpha_blend_source = (kinc_g5_blending_factor_t)state->alpha_blend_source;
-	pipeline->alpha_blend_destination = (kinc_g5_blending_factor_t)state->alpha_blend_dest;
-
-	u8_array_t *mask_red_array = state->color_write_masks_red;
-	u8_array_t *mask_green_array = state->color_write_masks_green;
-	u8_array_t *mask_blue_array = state->color_write_masks_blue;
-	u8_array_t *mask_alpha_array = state->color_write_masks_alpha;
-
-	for (int i = 0; i < 8; ++i) {
-		pipeline->color_write_mask_red[i] = mask_red_array->buffer[i];
-		pipeline->color_write_mask_green[i] = mask_green_array->buffer[i];
-		pipeline->color_write_mask_blue[i] = mask_blue_array->buffer[i];
-		pipeline->color_write_mask_alpha[i] = mask_alpha_array->buffer[i];
-	}
-
-	pipeline->color_attachment_count = state->color_attachment_count;
-	i32_array_t *color_attachment_array = state->color_attachments;
-	for (int i = 0; i < 8; ++i) {
-		pipeline->color_attachment[i] = (kinc_image_format_t)color_attachment_array->buffer[i];
-	}
-	pipeline->depth_attachment_bits = state->depth_attachment_bits;
 
 	kinc_g5_pipeline_compile(pipeline);
 }
@@ -1603,14 +1534,6 @@ i32 iron_screen_dpi() {
 	return kinc_display_current_mode(kinc_primary_display()).pixels_per_inch;
 }
 
-void iron_request_shutdown() {
-	kinc_stop();
-
-	#ifdef KINC_LINUX
-	exit(1);
-	#endif
-}
-
 i32 iron_display_width(i32 index) {
 	return kinc_display_current_mode(index).width;
 }
@@ -1632,11 +1555,7 @@ i32 iron_display_frequency(i32 index) {
 }
 
 bool iron_display_is_primary(i32 index) {
-	#ifdef KINC_LINUX // TODO: Primary display detection broken in Kinc
-	return true;
-	#else
 	return index == kinc_primary_display();
-	#endif
 }
 
 kinc_g5_render_target_t *iron_g4_create_render_target(i32 width, i32 height, i32 format, i32 depth_buffer_bits) {
@@ -1780,18 +1699,6 @@ void iron_g4_set_mipmaps(kinc_g5_texture_t *texture, any_array_t *mipmaps) {
 	}
 }
 
-void iron_g4_viewport(i32 x, i32 y, i32 width, i32 height) {
-	kinc_g4_viewport(x, y, width, height);
-}
-
-void iron_g4_scissor(i32 x, i32 y, i32 width, i32 height) {
-	kinc_g4_scissor(x, y, width, height);
-}
-
-void iron_g4_disable_scissor() {
-	kinc_g4_disable_scissor();
-}
-
 void iron_g4_begin(image_t *render_target, any_array_t *additional) {
 	if (render_target == NULL) {
 		kinc_g4_restore_render_target();
@@ -1816,7 +1723,6 @@ void iron_g4_begin(image_t *render_target, any_array_t *additional) {
 }
 
 void iron_g4_end() {
-
 }
 
 void iron_g4_swap_buffers() {
@@ -1857,10 +1763,6 @@ i32 iron_sys_command(string_t *cmd) {
 	int result = system(cmd);
 	#endif
 	return result;
-}
-
-string_t *iron_save_path() {
-	return kinc_internal_save_path();
 }
 
 string_t *iron_get_files_location() {
@@ -2514,10 +2416,6 @@ void iron_ml_unload() {
 }
 #endif
 
-bool iron_raytrace_supported() {
-	return kinc_g5_raytrace_supported();
-}
-
 void iron_raytrace_init(buffer_t *shader) {
 	if (raytrace_created) {
 		kinc_g5_constant_buffer_destroy(&constant_buffer);
@@ -2658,23 +2556,6 @@ void iron_raytrace_dispatch_rays(kinc_g5_render_target_t *render_target, buffer_
 	kinc_g5_raytrace_set_pipeline(&rt_pipeline);
 	kinc_g5_raytrace_set_target(render_target);
 	kinc_g5_raytrace_dispatch_rays(&commandList);
-}
-
-i32 iron_window_x() {
-	return kinc_window_x();
-}
-
-i32 iron_window_y() {
-	return kinc_window_y();
-}
-
-char *iron_language() {
-	return kinc_language();
-}
-
-raw_mesh_t *iron_obj_parse(buffer_t *file_bytes, i32 split_code, u64 start_pos, bool udim) {
-	raw_mesh_t *part = obj_parse(file_bytes, split_code, start_pos, udim);
-	return part;
 }
 
 #endif

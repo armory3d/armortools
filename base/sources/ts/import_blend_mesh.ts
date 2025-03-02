@@ -33,7 +33,7 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 
 	let save: string;
 	if (path_is_protected()) {
-		save = iron_save_path();
+		save = kinc_internal_save_path();
 	}
 	else {
 		save = path_data();

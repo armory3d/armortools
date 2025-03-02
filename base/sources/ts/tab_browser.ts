@@ -246,7 +246,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 					tab_browser_hpath.text = "/storage/emulated/0/DCIM/Camera";
 				}
 				if (ui_menu_button(tr("Projects"))) {
-					tab_browser_hpath.text = iron_save_path();
+					tab_browser_hpath.text = kinc_internal_save_path();
 				}
 			});
 			///else

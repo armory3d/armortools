@@ -591,7 +591,7 @@ function ui_base_update() {
 
 					let shortcuts: string[] = ["l", "b", "n", "o", "r", "m", "a", "h", "e", "s", "t", "1", "2", "3", "4"];
 
-					if (iron_raytrace_supported()) {
+					if (kinc_g5_raytrace_supported()) {
 						array_push(modes, tr("Path Traced"));
 						array_push(shortcuts, "p");
 					}
@@ -1092,7 +1092,7 @@ function ui_base_update_ui() {
 			g2_clear(0x00000000);
 			// g2_set_pipeline(l.is_mask() ? pipes_copy8 : pipes_copy);
 			g2_set_pipeline(pipes_copy); // texpaint_preview is always RGBA32 for now
-			g2_draw_scaled_image(source, 0, 0, target.width, target.height);
+			draw_scaled_image(source, 0, 0, target.width, target.height);
 			g2_set_pipeline(null);
 			g2_end();
 		}
@@ -1112,7 +1112,7 @@ function ui_base_update_ui() {
 			g2_clear(0x00000000);
 			// g2_set_pipeline(raw.layer.is_mask() ? pipes_copy8 : pipes_copy);
 			g2_set_pipeline(pipes_copy); // texpaint_preview is always RGBA32 for now
-			g2_draw_scaled_image(source, 0, 0, target.width, target.height);
+			draw_scaled_image(source, 0, 0, target.width, target.height);
 			g2_set_pipeline(null);
 			g2_end();
 			ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
@@ -1313,25 +1313,25 @@ function ui_base_render_cursor() {
 			let cx: f32 = r.x + r.w / 2;
 			let cy: f32 = r.y + r.h / 2;
 			g2_set_transformation(mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(-angle)), mat3_translation(-cx, -cy)));
-			g2_draw_scaled_image(context_raw.brush_stencil_image, r.x, r.y, r.w, r.h);
+			draw_scaled_image(context_raw.brush_stencil_image, r.x, r.y, r.w, r.h);
 			g2_set_transformation(mat3_nan());
 			g2_set_color(0xffffffff);
 		}
 		let transform: bool = operator_shortcut(map_get(config_keymap, "stencil_transform"), shortcut_type_t.DOWN);
 		if (transform) {
 			// Outline
-			g2_draw_rect(r.x, r.y, r.w, r.h);
+			draw_rect(r.x, r.y, r.w, r.h);
 			// Scale
-			g2_draw_rect(r.x - 8,       r.y - 8,       16, 16);
-			g2_draw_rect(r.x - 8 + r.w, r.y - 8,       16, 16);
-			g2_draw_rect(r.x - 8,       r.y - 8 + r.h, 16, 16);
-			g2_draw_rect(r.x - 8 + r.w, r.y - 8 + r.h, 16, 16);
+			draw_rect(r.x - 8,       r.y - 8,       16, 16);
+			draw_rect(r.x - 8 + r.w, r.y - 8,       16, 16);
+			draw_rect(r.x - 8,       r.y - 8 + r.h, 16, 16);
+			draw_rect(r.x - 8 + r.w, r.y - 8 + r.h, 16, 16);
 			// Rotate
 			let angle: f32 = context_raw.brush_stencil_angle;
 			let cx: f32 = r.x + r.w / 2;
 			let cy: f32 = r.y + r.h / 2;
 			g2_set_transformation(mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(-angle)), mat3_translation(-cx, -cy)));
-			g2_fill_circle(r.x + r.w / 2, r.y - 4, 8);
+			draw_filled_circle(r.x + r.w / 2, r.y - 4, 8);
 			g2_set_transformation(mat3_nan());
 		}
 	}
@@ -1339,12 +1339,12 @@ function ui_base_render_cursor() {
 	// Show picked material next to cursor
 	if (context_raw.tool == workspace_tool_t.PICKER && context_raw.picker_select_material && context_raw.color_picker_callback == null) {
 		let img: image_t = context_raw.material.image_icon;
-		g2_draw_image(img, mx + 10, my + 10);
+		draw_image(img, mx + 10, my + 10);
 	}
 	if (context_raw.tool == workspace_tool_t.PICKER && context_raw.color_picker_callback != null) {
 		let img: image_t = resource_get("icons.k");
 		let rect: rect_t = resource_tile50(img, workspace_tool_t.PICKER, 0);
-		g2_draw_sub_image(img, mx + 10, my + 10, rect.x, rect.y, rect.w, rect.h);
+		draw_sub_image(img, mx + 10, my + 10, rect.x, rect.y, rect.w, rect.h);
 	}
 
 	let cursor_img: image_t = resource_get("cursor.k");
@@ -1353,7 +1353,7 @@ function ui_base_render_cursor() {
 	// Clone source cursor
 	if (context_raw.tool == workspace_tool_t.CLONE && !keyboard_down("alt") && (mouse_down() || pen_down())) {
 		g2_set_color(0x66ffffff);
-		g2_draw_scaled_image(cursor_img, mx + context_raw.clone_delta_x * app_w() - psize / 2, my + context_raw.clone_delta_y * app_h() - psize / 2, psize, psize);
+		draw_scaled_image(cursor_img, mx + context_raw.clone_delta_x * app_w() - psize / 2, my + context_raw.clone_delta_y * app_h() - psize / 2, psize, psize);
 		g2_set_color(0xffffffff);
 	}
 
@@ -1389,7 +1389,7 @@ function ui_base_render_cursor() {
 				let cx: f32 = decalx + psizex / 2;
 				let cy: f32 = decaly + psizey / 2;
 				g2_set_transformation(mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(angle)), mat3_translation(-cx, -cy)));
-				g2_draw_scaled_image(context_raw.decal_image, decalx, decaly, psizex, psizey);
+				draw_scaled_image(context_raw.decal_image, decalx, decaly, psizex, psizey);
 				g2_set_transformation(mat3_nan());
 				g2_set_color(0xffffffff);
 			}
@@ -1408,7 +1408,7 @@ function ui_base_render_cursor() {
 			if (config_raw.brush_3d && context_in_2d_view()) {
 				psize = math_floor(psize * ui_view2d_pan_scale);
 			}
-			g2_draw_scaled_image(cursor_img, mx - psize / 2, my - psize / 2, psize, psize);
+			draw_scaled_image(cursor_img, mx - psize / 2, my - psize / 2, psize, psize);
 		}
 	}
 
@@ -1421,12 +1421,12 @@ function ui_base_render_cursor() {
 			context_raw.tool == workspace_tool_t.BLUR ||
 			context_raw.tool == workspace_tool_t.SMUDGE ||
 			context_raw.tool == workspace_tool_t.PARTICLE)) {
-		g2_fill_rect(mx - 1, my - 1, 2, 2);
+		draw_filled_rect(mx - 1, my - 1, 2, 2);
 		mx = context_raw.brush_lazy_x * base_w() + base_x();
 		my = context_raw.brush_lazy_y * base_h() + base_y();
 		let radius: f32 = context_raw.brush_lazy_radius * 180;
 		g2_set_color(0xff666666);
-		g2_draw_scaled_image(cursor_img, mx - radius / 2, my - radius / 2, radius, radius);
+		draw_scaled_image(cursor_img, mx - radius / 2, my - radius / 2, radius, radius);
 		g2_set_color(0xffffffff);
 	}
 }

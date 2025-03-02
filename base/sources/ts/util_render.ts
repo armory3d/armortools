@@ -172,7 +172,7 @@ function util_render_make_text_preview() {
 	g2_set_font(font);
 	g2_set_font_size(font_size);
 	g2_set_color(0xffffffff);
-	g2_draw_string(text, tex_w / 2 - text_w / 2, tex_w / 2 - text_h / 2);
+	draw_string(text, tex_w / 2 - text_w / 2, tex_w / 2 - text_h / 2);
 	g2_end();
 
 	if (g2_in_use) g2_begin(current);
@@ -197,7 +197,7 @@ function util_render_make_font_preview() {
 	g2_set_font(font);
 	g2_set_font_size(font_size);
 	g2_set_color(0xffffffff);
-	g2_draw_string(text, tex_w / 2 - text_w / 2, tex_w / 2 - text_h / 2);
+	draw_string(text, tex_w / 2 - text_w / 2, tex_w / 2 - text_h / 2);
 	g2_end();
 	context_raw.font.preview_ready = true;
 
@@ -371,7 +371,7 @@ function util_render_make_brush_preview() {
 	g2_begin(target);
 	g2_clear(0x00000000);
 	g2_set_pipeline(pipes_copy);
-	g2_draw_scaled_image(l.texpaint, 0, 0, target.width, target.height);
+	draw_scaled_image(l.texpaint, 0, 0, target.width, target.height);
 	g2_set_pipeline(null);
 	g2_end();
 

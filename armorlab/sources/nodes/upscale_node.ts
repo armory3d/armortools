@@ -51,7 +51,7 @@ function upscale_node_do_tile(source: image_t): image_t {
 	}
 	upscale_node_temp = image_create_render_target(size1w, size1h);
 	g2_begin(upscale_node_temp);
-	g2_draw_scaled_image(source, 0, 0, size1w, size1h);
+	draw_scaled_image(source, 0, 0, size1w, size1h);
 	g2_end();
 
 	let bytes_img: buffer_t = image_get_pixels(upscale_node_temp);
@@ -106,17 +106,17 @@ function upscale_node_esrgan(source: image_t): image_t {
 		for (let x: i32 = 0; x < math_floor(size1w / tile_size); ++x) {
 			for (let y: i32 = 0; y < math_floor(size1h / tile_size); ++y) {
 				g2_begin(tile_source);
-				g2_draw_scaled_image(source, 32 - x * tile_size, 32 - y * tile_size, -source.width, source.height);
-				g2_draw_scaled_image(source, 32 - x * tile_size, 32 - y * tile_size, source.width, -source.height);
-				g2_draw_scaled_image(source, 32 - x * tile_size, 32 - y * tile_size, -source.width, -source.height);
-				g2_draw_scaled_image(source, 32 - x * tile_size + tile_size, 32 - y * tile_size + tile_size, source.width, source.height);
-				g2_draw_scaled_image(source, 32 - x * tile_size + tile_size, 32 - y * tile_size + tile_size, -source.width, source.height);
-				g2_draw_scaled_image(source, 32 - x * tile_size + tile_size, 32 - y * tile_size + tile_size, source.width, -source.height);
-				g2_draw_scaled_image(source, 32 - x * tile_size, 32 - y * tile_size, source.width, source.height);
+				draw_scaled_image(source, 32 - x * tile_size, 32 - y * tile_size, -source.width, source.height);
+				draw_scaled_image(source, 32 - x * tile_size, 32 - y * tile_size, source.width, -source.height);
+				draw_scaled_image(source, 32 - x * tile_size, 32 - y * tile_size, -source.width, -source.height);
+				draw_scaled_image(source, 32 - x * tile_size + tile_size, 32 - y * tile_size + tile_size, source.width, source.height);
+				draw_scaled_image(source, 32 - x * tile_size + tile_size, 32 - y * tile_size + tile_size, -source.width, source.height);
+				draw_scaled_image(source, 32 - x * tile_size + tile_size, 32 - y * tile_size + tile_size, source.width, -source.height);
+				draw_scaled_image(source, 32 - x * tile_size, 32 - y * tile_size, source.width, source.height);
 				g2_end();
 				let tile_result: image_t = upscale_node_do_tile(tile_source);
 				g2_begin(result);
-				g2_draw_sub_image(tile_result, x * tile_size2x, y * tile_size2x, 64, 64, tile_size2x, tile_size2x);
+				draw_sub_image(tile_result, x * tile_size2x, y * tile_size2x, 64, 64, tile_size2x, tile_size2x);
 				g2_end();
 				image_unload(tile_result);
 			}

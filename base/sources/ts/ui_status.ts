@@ -23,8 +23,8 @@ function ui_status_render_ui() {
 
 		// Border
 		g2_set_color(ui.ops.theme.SEPARATOR_COL);
-		g2_fill_rect(0, 0, 1, ui._window_h);
-		g2_fill_rect(ui._window_w - 1, 0, 1, ui._window_h);
+		draw_filled_rect(0, 0, 1, ui._window_h);
+		draw_filled_rect(ui._window_w - 1, 0, 1, ui._window_h);
 
 		// Draw tabs
 		let hwnd_draws: tab_draw_t[] = ui_base_hwnd_tabs[tab_area_t.STATUS];

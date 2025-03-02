@@ -80,7 +80,7 @@ function path_working_dir(): string {
 		let cmd: string = path_pwd;
 		let save: string;
 		if (path_is_protected()) {
-			save = iron_save_path();
+			save = kinc_internal_save_path();
 		}
 		else {
 			save = path_data() + path_sep;

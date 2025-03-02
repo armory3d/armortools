@@ -671,9 +671,9 @@ function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32,
 				let width: i32 = g2_font_width(ui.ops.font, ui.font_size, number) + 10;
 				let height: i32 = g2_font_height(ui.ops.font, ui.font_size);
 				g2_set_color(ui.ops.theme.TEXT_COL);
-				g2_fill_rect(uix, uiy, width, height);
+				draw_filled_rect(uix, uiy, width, height);
 				g2_set_color(ui.ops.theme.BUTTON_COL);
-				g2_draw_string(number, uix + 5, uiy);
+				draw_string(number, uix + 5, uiy);
 			}
 		}
 
@@ -1009,7 +1009,7 @@ function tab_layers_make_mask_preview_rgba32(l: slot_layer_t) {
 			g2_begin(context_raw.mask_preview_rgba32);
 			g2_set_pipeline(ui_view2d_pipe);
 			g4_set_int(ui_view2d_channel_loc, 1);
-			g2_draw_image(l.texpaint_preview, 0, 0);
+			draw_image(l.texpaint_preview, 0, 0);
 			g2_end();
 			g2_set_pipeline(null);
 		});

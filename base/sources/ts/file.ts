@@ -131,7 +131,7 @@ function file_download(url: string, dst_path: string, done: (url: string)=>void,
 function file_download_bytes(url: string, done: (url: string, ab: buffer_t)=>void) {
 	let save: string;
 	if (path_is_protected()) {
-		save = iron_save_path();
+		save = kinc_internal_save_path();
 	}
 	else {
 		save = path_data() + path_sep;
@@ -155,7 +155,7 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 	///end
 	let dest: string;
 	if (path_is_protected()) {
-		dest = iron_save_path();
+		dest = kinc_internal_save_path();
 	}
 	else {
 		dest = iron_get_files_location() + path_sep;
@@ -168,7 +168,7 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 		///else
 		let p: string;
 		if (path_is_protected()) {
-			p = iron_save_path();
+			p = kinc_internal_save_path();
 		}
 		else {
 			p = path_working_dir() + path_sep;
@@ -203,7 +203,7 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 		///else
 		let p: string;
 		if (path_is_protected()) {
-			p = iron_save_path();
+			p = kinc_internal_save_path();
 		}
 		else {
 			p = path_working_dir() + path_sep;

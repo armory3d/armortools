@@ -178,7 +178,7 @@ function export_arm_run_project() {
 	let mesh_icon: image_t = image_create_render_target(256, 256);
 	let r: f32 = app_w() / app_h();
 	g2_begin(mesh_icon);
-	g2_draw_scaled_image(tex, -(256 * r - 256) / 2, 0, 256 * r, 256);
+	draw_scaled_image(tex, -(256 * r - 256) / 2, 0, 256 * r, 256);
 	g2_end();
 
 	///if arm_metal
@@ -489,7 +489,7 @@ function export_arm_pack_assets(raw: project_format_t, assets: asset_t[]) {
 			let image: image_t = project_get_image(assets[i]);
 			let temp: image_t = image_create_render_target(image.width, image.height);
 			g2_begin(temp);
-			g2_draw_image(image, 0, 0);
+			draw_image(image, 0, 0);
 			g2_end();
 			array_push(temp_images, temp);
 			let pa: packed_asset_t = {

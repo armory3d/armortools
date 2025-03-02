@@ -630,8 +630,8 @@ void ui_draw_tooltip_image(bool bind_global_g) {
 	draw_filled_rect(current->tooltip_x, current->tooltip_y, w, h);
 	draw_set_color(0xffffffff);
 	current->tooltip_invert_y ?
-		draw_scaled_image(current->tooltip_img, current->tooltip_x, current->tooltip_y + h, w, -h) :
-		draw_scaled_image(current->tooltip_img, current->tooltip_x, current->tooltip_y, w, h);
+		draw_scaled_texture(current->tooltip_img, current->tooltip_x, current->tooltip_y + h, w, -h) :
+		draw_scaled_texture(current->tooltip_img, current->tooltip_x, current->tooltip_y, w, h);
 }
 
 void ui_draw_tooltip_rt(bool bind_global_g) {
@@ -1896,7 +1896,7 @@ static void _draw_scaled_image(void *image, bool is_rt, float dx, float dy, floa
 		draw_scaled_render_target((kinc_g5_render_target_t *)image, dx, dy, dw, dh);
 	}
 	else {
-		draw_scaled_image((kinc_g5_texture_t *)image, dx, dy, dw, dh);
+		draw_scaled_texture((kinc_g5_texture_t *)image, dx, dy, dw, dh);
 	}
 }
 

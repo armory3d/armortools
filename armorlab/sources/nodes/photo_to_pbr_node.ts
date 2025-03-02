@@ -58,13 +58,13 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): i
 		let y: i32 = math_floor(i / tiles_x);
 
 		g2_begin(photo_to_pbr_node_temp);
-		g2_draw_scaled_image(source, photo_to_pbr_node_border_w - x * photo_to_pbr_node_tile_w, photo_to_pbr_node_border_w - y * photo_to_pbr_node_tile_w, -config_get_texture_res_x(), config_get_texture_res_y());
-		g2_draw_scaled_image(source, photo_to_pbr_node_border_w - x * photo_to_pbr_node_tile_w, photo_to_pbr_node_border_w - y * photo_to_pbr_node_tile_w, config_get_texture_res_x(), -config_get_texture_res_y());
-		g2_draw_scaled_image(source, photo_to_pbr_node_border_w - x * photo_to_pbr_node_tile_w, photo_to_pbr_node_border_w - y * photo_to_pbr_node_tile_w, -config_get_texture_res_x(), -config_get_texture_res_y());
-		g2_draw_scaled_image(source, photo_to_pbr_node_border_w - x * photo_to_pbr_node_tile_w + photo_to_pbr_node_tile_w, photo_to_pbr_node_border_w - y * photo_to_pbr_node_tile_w + photo_to_pbr_node_tile_w, config_get_texture_res_x(), config_get_texture_res_y());
-		g2_draw_scaled_image(source, photo_to_pbr_node_border_w - x * photo_to_pbr_node_tile_w + photo_to_pbr_node_tile_w, photo_to_pbr_node_border_w - y * photo_to_pbr_node_tile_w + photo_to_pbr_node_tile_w, -config_get_texture_res_x(), config_get_texture_res_y());
-		g2_draw_scaled_image(source, photo_to_pbr_node_border_w - x * photo_to_pbr_node_tile_w + photo_to_pbr_node_tile_w, photo_to_pbr_node_border_w - y * photo_to_pbr_node_tile_w + photo_to_pbr_node_tile_w, config_get_texture_res_x(), -config_get_texture_res_y());
-		g2_draw_scaled_image(source, photo_to_pbr_node_border_w - x * photo_to_pbr_node_tile_w, photo_to_pbr_node_border_w - y * photo_to_pbr_node_tile_w, config_get_texture_res_x(), config_get_texture_res_y());
+		draw_scaled_image(source, photo_to_pbr_node_border_w - x * photo_to_pbr_node_tile_w, photo_to_pbr_node_border_w - y * photo_to_pbr_node_tile_w, -config_get_texture_res_x(), config_get_texture_res_y());
+		draw_scaled_image(source, photo_to_pbr_node_border_w - x * photo_to_pbr_node_tile_w, photo_to_pbr_node_border_w - y * photo_to_pbr_node_tile_w, config_get_texture_res_x(), -config_get_texture_res_y());
+		draw_scaled_image(source, photo_to_pbr_node_border_w - x * photo_to_pbr_node_tile_w, photo_to_pbr_node_border_w - y * photo_to_pbr_node_tile_w, -config_get_texture_res_x(), -config_get_texture_res_y());
+		draw_scaled_image(source, photo_to_pbr_node_border_w - x * photo_to_pbr_node_tile_w + photo_to_pbr_node_tile_w, photo_to_pbr_node_border_w - y * photo_to_pbr_node_tile_w + photo_to_pbr_node_tile_w, config_get_texture_res_x(), config_get_texture_res_y());
+		draw_scaled_image(source, photo_to_pbr_node_border_w - x * photo_to_pbr_node_tile_w + photo_to_pbr_node_tile_w, photo_to_pbr_node_border_w - y * photo_to_pbr_node_tile_w + photo_to_pbr_node_tile_w, -config_get_texture_res_x(), config_get_texture_res_y());
+		draw_scaled_image(source, photo_to_pbr_node_border_w - x * photo_to_pbr_node_tile_w + photo_to_pbr_node_tile_w, photo_to_pbr_node_border_w - y * photo_to_pbr_node_tile_w + photo_to_pbr_node_tile_w, config_get_texture_res_x(), -config_get_texture_res_y());
+		draw_scaled_image(source, photo_to_pbr_node_border_w - x * photo_to_pbr_node_tile_w, photo_to_pbr_node_border_w - y * photo_to_pbr_node_tile_w, config_get_texture_res_x(), config_get_texture_res_y());
 		g2_end();
 
 		let bytes_img: buffer_t = image_get_pixels(photo_to_pbr_node_temp);
@@ -155,7 +155,7 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): i
 
 		let temp2: image_t = image_from_bytes(u8a, photo_to_pbr_node_tile_w, photo_to_pbr_node_tile_w);
 		g2_begin(photo_to_pbr_node_images[from]);
-		g2_draw_image(temp2, x * photo_to_pbr_node_tile_w, y * photo_to_pbr_node_tile_w);
+		draw_image(temp2, x * photo_to_pbr_node_tile_w, y * photo_to_pbr_node_tile_w);
 		g2_end();
 		app_notify_on_next_frame(function(temp2: image_t) {
 			image_unload(temp2);

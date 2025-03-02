@@ -244,7 +244,7 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 		if (l1.paint_base) {
 			g2_begin(layers_temp_image); // Copy to temp
 			g2_set_pipeline(pipes_copy);
-			g2_draw_image(layers_expa, 0, 0);
+			draw_image(layers_expa, 0, 0);
 			g2_set_pipeline(null);
 			g2_end();
 
@@ -265,7 +265,7 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 		if (l1.paint_nor) {
 			g2_begin(layers_temp_image);
 			g2_set_pipeline(pipes_copy);
-			g2_draw_image(layers_expb, 0, 0);
+			draw_image(layers_expb, 0, 0);
 			g2_set_pipeline(null);
 			g2_end();
 
@@ -286,7 +286,7 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 		if (l1.paint_occ || l1.paint_rough || l1.paint_met || l1.paint_height) {
 			g2_begin(layers_temp_image);
 			g2_set_pipeline(pipes_copy);
-			g2_draw_image(layers_expc, 0, 0);
+			draw_image(layers_expc, 0, 0);
 			g2_set_pipeline(null);
 			g2_end();
 

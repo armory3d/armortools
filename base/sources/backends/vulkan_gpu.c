@@ -806,7 +806,7 @@ void kinc_g5_internal_init() {
 	// Allows negative viewport height to flip viewport
 	wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_MAINTENANCE1_EXTENSION_NAME;
 
-	if (kinc_g5_supports_raytracing()) {
+	if (kinc_g5_raytrace_supported()) {
 		wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME;
 		wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME;
 		wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME;
@@ -941,7 +941,7 @@ void kinc_g5_internal_init() {
 		VkPhysicalDeviceRayTracingPipelineFeaturesKHR rayTracingPipelineExt = {0};
 		VkPhysicalDeviceAccelerationStructureFeaturesKHR rayTracingAccelerationStructureExt = {0};
 		VkPhysicalDeviceBufferDeviceAddressFeatures bufferDeviceAddressExt = {0};
-		if (kinc_g5_supports_raytracing()) {
+		if (kinc_g5_raytrace_supported()) {
 			rayTracingPipelineExt.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
 			rayTracingPipelineExt.pNext = NULL;
 			rayTracingPipelineExt.rayTracingPipeline = VK_TRUE;
@@ -1146,7 +1146,7 @@ bool kinc_vulkan_internal_get_size(int *width, int *height) {
 	}
 }
 
-bool kinc_g5_supports_raytracing() {
+bool kinc_g5_raytrace_supported() {
 #ifdef KINC_ANDROID
 	return false;
 #else
@@ -4433,7 +4433,7 @@ void kinc_g5_vertex_buffer_init(kinc_g5_vertex_buffer_t *buffer, int vertexCount
 	buf_info.size = vertexCount * buffer->impl.myStride;
 	buf_info.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
 
-	if (kinc_g5_supports_raytracing()) {
+	if (kinc_g5_raytrace_supported()) {
 		buf_info.usage |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
 		buf_info.usage |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 		buf_info.usage |= VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
@@ -4465,7 +4465,7 @@ void kinc_g5_vertex_buffer_init(kinc_g5_vertex_buffer_t *buffer, int vertexCount
 	assert(pass);
 
 	VkMemoryAllocateFlagsInfo memory_allocate_flags_info = {0};
-	if (kinc_g5_supports_raytracing()) {
+	if (kinc_g5_raytrace_supported()) {
 		memory_allocate_flags_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO;
 		memory_allocate_flags_info.flags = VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT_KHR;
 		buffer->impl.mem_alloc.pNext = &memory_allocate_flags_info;
@@ -4527,7 +4527,7 @@ static void createUniformBuffer(VkBuffer *buf, VkMemoryAllocateInfo *mem_alloc, 
 	buf_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 	buf_info.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 
-	if (kinc_g5_supports_raytracing()) {
+	if (kinc_g5_raytrace_supported()) {
 		buf_info.usage |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
 	}
 
@@ -4616,7 +4616,7 @@ void kinc_g5_index_buffer_init(kinc_g5_index_buffer_t *buffer, int indexCount, b
 	buf_info.size = indexCount * sizeof(uint32_t);
 	buf_info.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
 
-	if (kinc_g5_supports_raytracing()) {
+	if (kinc_g5_raytrace_supported()) {
 		buf_info.usage |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
 		buf_info.usage |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 		buf_info.usage |= VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
@@ -4644,7 +4644,7 @@ void kinc_g5_index_buffer_init(kinc_g5_index_buffer_t *buffer, int indexCount, b
 	assert(pass);
 
 	VkMemoryAllocateFlagsInfo memory_allocate_flags_info = {0};
-	if (kinc_g5_supports_raytracing()) {
+	if (kinc_g5_raytrace_supported()) {
 		memory_allocate_flags_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO;
 		memory_allocate_flags_info.flags = VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT_KHR;
 		buffer->impl.mem_alloc.pNext = &memory_allocate_flags_info;

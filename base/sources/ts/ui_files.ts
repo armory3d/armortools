@@ -210,7 +210,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 											g2_begin(icon);
 
 											///if (is_paint || is_sculpt)
-											g2_draw_image(project_materials[0].image, 0, 0);
+											draw_image(project_materials[0].image, 0, 0);
 											///end
 										}
 										else {
@@ -218,7 +218,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 											g2_clear(0xffffffff);
 										}
 										g2_set_pipeline(pipes_copy_rgb);
-										g2_draw_image(data.image, 0, 0);
+										draw_image(data.image, 0, 0);
 										g2_set_pipeline(null);
 										g2_end();
 
@@ -435,7 +435,7 @@ function ui_files_make_icon (args: ui_files_make_icon_t) {
 	g2_begin(icon);
 	g2_clear(0xffffffff);
 	g2_set_pipeline(pipes_copy_rgb);
-	g2_draw_scaled_image(image, 0, 0, sw, sh);
+	draw_scaled_image(image, 0, 0, sw, sh);
 	g2_set_pipeline(null);
 	g2_end();
 	map_set(ui_files_icon_map, args.shandle, icon);

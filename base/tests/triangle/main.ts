@@ -2,7 +2,7 @@
 // Red triangle test
 // ../../../make --graphics vulkan --run
 
-let pipeline: any;
+let pipeline: kinc_g5_pipeline_t;
 let vb: any;
 let ib: any;
 
@@ -44,24 +44,24 @@ function main() {
 	let masks: bool[] = [true, true, true, true, true, true, true, true];
 	let attachments: i32[] = [0];
 
-	let state: iron_pipeline_state_t = {
-		cull_mode: 0,
-		depth_write: false,
-		depth_mode: 0,
-		blend_source: 0,
-		blend_dest: 0,
-		alpha_blend_source: 0,
-		alpha_blend_dest: 0,
-		color_write_masks_red: masks,
-		color_write_masks_green: masks,
-		color_write_masks_blue: masks,
-		color_write_masks_alpha: masks,
-		color_attachment_count: 1,
-		color_attachments: attachments,
-		depth_attachment_bits: 0
-	};
+	pipeline.cull_mode = 0;
+	pipeline.depth_write = false;
+	pipeline.depth_mode = 0;
+	pipeline.blend_source = 0;
+	pipeline.blend_dest = 0;
+	pipeline.alpha_blend_source = 0;
+	pipeline.alpha_blend_dest = 0;
+	pipeline.color_write_masks_red = masks;
+	pipeline.color_write_masks_green = masks;
+	pipeline.color_write_masks_blue = masks;
+	pipeline.color_write_masks_alpha = masks;
+	pipeline.color_attachment_count = 1;
+	pipeline.color_attachments = attachments;
+	pipeline.depth_attachment_bits = 0;
+	pipeline.vertex_shader = vert;
+	pipeline.fragment_shader = frag;
 
-	iron_g4_compile_pipeline(pipeline, structure0, vert, frag, state);
+	iron_g4_compile_pipeline(pipeline, structure0);
 
 	let vertices: f32[] = [
 		-1.0, -1.0, 0.0,

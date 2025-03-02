@@ -368,7 +368,7 @@ function make_material_bake_node_preview(node: ui_node_t, group: ui_node_canvas_
 		let texpaint_live: render_target_t = map_get(rts, "texpaint_live");
 
 		g2_begin(image);
-		g2_draw_image(texpaint_live._image, 0, 0);
+		draw_image(texpaint_live._image, 0, 0);
 		g2_end();
 	}
 }

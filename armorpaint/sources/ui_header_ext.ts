@@ -178,7 +178,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			tr("Object ID"),
 			tr("Vertex Color"),
 		];
-		if (iron_raytrace_supported()) {
+		if (kinc_g5_raytrace_supported()) {
 			array_push(bakes, tr("Lightmap"));
 			array_push(bakes, tr("Bent Normal"));
 			array_push(bakes, tr("Thickness"));
@@ -189,7 +189,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 
 		context_raw.bake_type = ui_combo(bake_handle, bakes, tr("Bake"));
 
-		if (!iron_raytrace_supported()) {
+		if (!kinc_g5_raytrace_supported()) {
 			context_raw.bake_type += 1; // Offset for removed AO
 		}
 

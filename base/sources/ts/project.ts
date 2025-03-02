@@ -62,7 +62,7 @@ function project_save(save_and_quit: bool = false) {
 		document_directory = substring(document_directory, 0, document_directory.length - 8); // Strip /"untitled"
 		project_filepath = document_directory + "/" + sys_title() + ".arm";
 		///elseif arm_android
-		project_filepath = iron_save_path() + "/" + sys_title() + ".arm";
+		project_filepath = kinc_internal_save_path() + "/" + sys_title() + ".arm";
 		///else
 		project_save_as(save_and_quit);
 		return;

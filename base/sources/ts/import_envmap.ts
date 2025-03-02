@@ -37,7 +37,7 @@ function import_envmap_run(path: string, image: image_t) {
 	// Down-scale to 1024x512
 	g2_begin(import_envmap_radiance);
 	g2_set_pipeline(pipes_copy128);
-	g2_draw_scaled_image(image, 0, 0, 1024, 512);
+	draw_scaled_image(image, 0, 0, 1024, 512);
 	g2_set_pipeline(null);
 	g2_end();
 

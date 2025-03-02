@@ -59,12 +59,9 @@ bool kinc_g5_swap_buffers() {
 
 void kinc_g5_flush() {}
 
-bool kinc_g5_supports_raytracing() {
+bool kinc_g5_raytrace_supported() {
 	return false;
 }
-
-
-
 
 
 

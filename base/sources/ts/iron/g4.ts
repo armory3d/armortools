@@ -78,36 +78,35 @@ function g4_pipeline_delete(raw: pipeline_t) {
 function g4_pipeline_compile(raw: pipeline_t) {
 	let structure0: vertex_struct_t = raw.input_layout;
 
-	for (let i: i32 = raw.color_write_masks_red.length; i < 8; ++i) {
-		array_push(raw.color_write_masks_red, true);
+	for (let i: i32 = 0; i < raw.color_write_masks_red.length; ++i) {
+		ARRAY_ACCESS(raw.pipeline_.color_write_mask_red, i) = raw.color_write_masks_red[i];
 	}
-	for (let i: i32 = raw.color_write_masks_green.length; i < 8; ++i) {
-		array_push(raw.color_write_masks_green, true);
+	for (let i: i32 = 0; i < raw.color_write_masks_green.length; ++i) {
+		ARRAY_ACCESS(raw.pipeline_.color_write_mask_green, i) = raw.color_write_masks_green[i];
 	}
-	for (let i: i32 = raw.color_write_masks_blue.length; i < 8; ++i) {
-		array_push(raw.color_write_masks_blue, true);
+	for (let i: i32 = 0; i < raw.color_write_masks_blue.length; ++i) {
+		ARRAY_ACCESS(raw.pipeline_.color_write_mask_blue, i) = raw.color_write_masks_blue[i];
 	}
-	for (let i: i32 = raw.color_write_masks_alpha.length; i < 8; ++i) {
-		array_push(raw.color_write_masks_alpha, true);
+	for (let i: i32 = 0; i < raw.color_write_masks_alpha.length; ++i) {
+		ARRAY_ACCESS(raw.pipeline_.color_write_mask_alpha, i) = raw.color_write_masks_alpha[i];
+	}
+	for (let i: i32 = 0; i < raw.color_attachment_count; ++i) {
+		ARRAY_ACCESS(raw.pipeline_.color_attachment, i) = raw.color_attachments[i];
 	}
 
-	let state: iron_pipeline_state_t = {};
-	state.cull_mode = raw.cull_mode;
-	state.depth_write = raw.depth_write;
-	state.depth_mode = raw.depth_mode;
-	state.blend_source = raw.blend_source;
-	state.blend_dest = raw.blend_dest;
-	state.alpha_blend_source = raw.alpha_blend_source;
-	state.alpha_blend_dest = raw.alpha_blend_dest;
-	state.color_write_masks_red = raw.color_write_masks_red;
-	state.color_write_masks_green = raw.color_write_masks_green;
-	state.color_write_masks_blue = raw.color_write_masks_blue;
-	state.color_write_masks_alpha = raw.color_write_masks_alpha;
-	state.color_attachment_count = raw.color_attachment_count;
-	state.color_attachments = raw.color_attachments;
-	state.depth_attachment_bits = g4_pipeline_get_depth_buffer_bits(raw.depth_attachment);
+	raw.pipeline_.cull_mode = raw.cull_mode;
+	raw.pipeline_.depth_write = raw.depth_write;
+	raw.pipeline_.depth_mode = raw.depth_mode;
+	raw.pipeline_.blend_source = raw.blend_source;
+	raw.pipeline_.blend_destination = raw.blend_dest;
+	raw.pipeline_.alpha_blend_source = raw.alpha_blend_source;
+	raw.pipeline_.alpha_blend_destination = raw.alpha_blend_dest;
+	raw.pipeline_.color_attachment_count = raw.color_attachment_count;
+	raw.pipeline_.depth_attachment_bits = g4_pipeline_get_depth_buffer_bits(raw.depth_attachment);
+	raw.pipeline_.vertex_shader = raw.vertex_shader.shader_;
+	raw.pipeline_.fragment_shader = raw.fragment_shader.shader_;
 
-	iron_g4_compile_pipeline(raw.pipeline_, structure0, raw.vertex_shader.shader_, raw.fragment_shader.shader_, state);
+	iron_g4_compile_pipeline(raw.pipeline_, structure0);
 }
 
 function g4_pipeline_set(raw: pipeline_t) {
@@ -227,7 +226,7 @@ function g4_clear(color: color_t = 0x00000000, depth: f32 = 0.0, flags: i32 = cl
 }
 
 function g4_viewport(x: i32, y: i32, width: i32, height: i32) {
-	iron_g4_viewport(x, y, width, height);
+	kinc_g4_viewport(x, y, width, height);
 }
 
 function g4_set_vertex_buffer(vb: vertex_buffer_t) {
@@ -317,11 +316,11 @@ function g4_draw(start: i32 = 0, count: i32 = -1) {
 }
 
 function g4_scissor(x: i32, y: i32, width: i32, height: i32) {
-	iron_g4_scissor(x, y, width, height);
+	kinc_g4_scissor(x, y, width, height);
 }
 
 function g4_disable_scissor() {
-	iron_g4_disable_scissor();
+	kinc_g4_disable_scissor();
 }
 
 function _image_create(tex: any): image_t {
@@ -462,7 +461,7 @@ declare type image_t = {
 };
 
 type pipeline_t = {
-	pipeline_?: any;
+	pipeline_?: kinc_g5_pipeline_t;
 	input_layout?: vertex_struct_t;
 	vertex_shader?: shader_t;
 	fragment_shader?: shader_t;
@@ -507,21 +506,30 @@ declare type kinc_vertex_elem_t = {
 type kinc_const_loc_t = any;
 type kinc_tex_unit_t = any;
 
-declare type iron_pipeline_state_t = {
+declare type kinc_g5_pipeline_t = {
+	input_layout?: any;
+	vertex_shader?: any;
+	fragment_shader?: any;
+
 	cull_mode?: cull_mode_t;
 	depth_write?: bool;
 	depth_mode?: compare_mode_t;
+
 	blend_source?: blend_factor_t;
-	blend_dest?: blend_factor_t;
+	blend_destination?: blend_factor_t;
 	alpha_blend_source?: blend_factor_t;
-	alpha_blend_dest?: blend_factor_t;
-	color_write_masks_red?: bool[];
-	color_write_masks_green?: bool[];
-	color_write_masks_blue?: bool[];
-	color_write_masks_alpha?: bool[];
+	alpha_blend_destination?: blend_factor_t;
+
+	color_write_mask_red?: any;
+	color_write_mask_green?: any;
+	color_write_mask_blue?: any;
+	color_write_mask_alpha?: any;
+
+	color_attachment?: any;
 	color_attachment_count?: i32;
-	color_attachments?: tex_format_t[];
 	depth_attachment_bits?: i32;
+
+	impl?: any;
 };
 
 type iron_texture_t = {

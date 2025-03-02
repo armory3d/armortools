@@ -136,7 +136,7 @@ function ui_view2d_render() {
 		let step: f32 = ui_nodes_grid_cell_w * ui_view2d_pan_scale;
 		let x: f32 = math_fmod(ui_view2d_pan_x, step) - step;
 		let y: f32 = math_fmod(ui_view2d_pan_y, step) - step;
-		g2_draw_image(ui_view2d_grid, x, y);
+		draw_image(ui_view2d_grid, x, y);
 
 		// Texture
 		let tex: image_t = null;
@@ -221,30 +221,30 @@ function ui_view2d_render() {
 			if (ui_view2d_type == view_2d_type_t.LAYER) {
 				g2_set_pipeline(ui_view2d_pipe);
 				if (!context_raw.texture_filter) {
-					g2_set_bilinear_filter(false);
+					draw_set_bilinear_filter(false);
 				}
 				iron_g4_set_int(ui_view2d_channel_loc, channel);
 			}
 			///end
 
-			g2_draw_scaled_image(tex, tx, ty, tw, th);
+			draw_scaled_image(tex, tx, ty, tw, th);
 
 			if (ui_view2d_tiled_show) {
-				g2_draw_scaled_image(tex, tx - tw, ty, tw, th);
-				g2_draw_scaled_image(tex, tx - tw, ty - th, tw, th);
-				g2_draw_scaled_image(tex, tx - tw, ty + th, tw, th);
-				g2_draw_scaled_image(tex, tx + tw, ty, tw, th);
-				g2_draw_scaled_image(tex, tx + tw, ty - th, tw, th);
-				g2_draw_scaled_image(tex, tx + tw, ty + th, tw, th);
-				g2_draw_scaled_image(tex, tx, ty - th, tw, th);
-				g2_draw_scaled_image(tex, tx, ty + th, tw, th);
+				draw_scaled_image(tex, tx - tw, ty, tw, th);
+				draw_scaled_image(tex, tx - tw, ty - th, tw, th);
+				draw_scaled_image(tex, tx - tw, ty + th, tw, th);
+				draw_scaled_image(tex, tx + tw, ty, tw, th);
+				draw_scaled_image(tex, tx + tw, ty - th, tw, th);
+				draw_scaled_image(tex, tx + tw, ty + th, tw, th);
+				draw_scaled_image(tex, tx, ty - th, tw, th);
+				draw_scaled_image(tex, tx, ty + th, tw, th);
 			}
 
 			///if (is_paint || is_sculpt)
 			if (ui_view2d_type == view_2d_type_t.LAYER) {
 				g2_set_pipeline(null);
 				if (!context_raw.texture_filter) {
-					g2_set_bilinear_filter(true);
+					draw_set_bilinear_filter(true);
 				}
 			}
 
@@ -260,7 +260,7 @@ function ui_view2d_render() {
 					let rt: render_target_t = map_get(render_path_render_targets, "texpaint_picker");
 					let texpaint_picker: image_t = rt._image;
 					g2_begin(texpaint_picker);
-					g2_draw_scaled_image(_ui_view2d_render_tex, -_ui_view2d_render_x, -_ui_view2d_render_y, _ui_view2d_render_tw, _ui_view2d_render_th);
+					draw_scaled_image(_ui_view2d_render_tex, -_ui_view2d_render_x, -_ui_view2d_render_y, _ui_view2d_render_tw, _ui_view2d_render_th);
 					g2_end();
 					let a: buffer_t = image_get_pixels(texpaint_picker);
 					///if (arm_metal || arm_vulkan)
@@ -285,14 +285,14 @@ function ui_view2d_render() {
 		///if (is_paint || is_sculpt)
 		// UV map
 		if (ui_view2d_type == view_2d_type_t.LAYER && ui_view2d_uvmap_show) {
-			g2_draw_scaled_image(util_uv_uvmap, tx, ty, tw, th);
+			draw_scaled_image(util_uv_uvmap, tx, ty, tw, th);
 		}
 		///end
 
 		// Menu
 		let ew: i32 = math_floor(ui_ELEMENT_W(ui_view2d_ui));
 		g2_set_color(ui_view2d_ui.ops.theme.SEPARATOR_COL);
-		g2_fill_rect(0, ui_ELEMENT_H(ui_view2d_ui), ui_view2d_ww, ui_ELEMENT_H(ui_view2d_ui) + ui_ELEMENT_OFFSET(ui_view2d_ui) * 2);
+		draw_filled_rect(0, ui_ELEMENT_H(ui_view2d_ui), ui_view2d_ww, ui_ELEMENT_H(ui_view2d_ui) + ui_ELEMENT_OFFSET(ui_view2d_ui) * 2);
 		g2_set_color(0xffffffff);
 
 		let start_y: f32 = ui_ELEMENT_H(ui_view2d_ui) + ui_ELEMENT_OFFSET(ui_view2d_ui);
@@ -413,7 +413,7 @@ function ui_view2d_render() {
 			let cursor_img: image_t = resource_get("cursor.k");
 			let hsize: f32 = 16 * ui_SCALE(ui_view2d_ui);
 			let size: f32 = hsize * 2;
-			g2_draw_scaled_image(cursor_img, tx + tw * context_raw.uvx_picked - hsize, ty + th * context_raw.uvy_picked - hsize, size, size);
+			draw_scaled_image(cursor_img, tx + tw * context_raw.uvx_picked - hsize, ty + th * context_raw.uvy_picked - hsize, size, size);
 		}
 		///end
 	}

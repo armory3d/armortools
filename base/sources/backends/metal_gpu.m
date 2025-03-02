@@ -225,8 +225,8 @@ void kinc_g5_internal_new_render_pass(kinc_g5_render_target_t **renderTargets, i
 	render_command_encoder = [command_buffer renderCommandEncoderWithDescriptor:renderPassDescriptor];
 }
 
-bool kinc_g5_supports_raytracing(void) {
-	return false;
+bool kinc_g5_raytrace_supported(void) {
+	return true;
 }
 
 int kinc_g5_max_bound_textures(void) {

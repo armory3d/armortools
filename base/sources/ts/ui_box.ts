@@ -50,7 +50,7 @@ function ui_box_render() {
 		///else
 		g2_set_color(color_from_floats(0, 0, 0, 0.5));
 		///end
-		g2_fill_rect(0, 0, sys_width(), sys_height());
+		draw_filled_rect(0, 0, sys_width(), sys_height());
 	}
 
 	g2_end();
@@ -200,7 +200,7 @@ function ui_box_window_border(ui: ui_t) {
 	}
 	// Border
 	g2_set_color(ui.ops.theme.SEPARATOR_COL);
-	g2_fill_rect(0, 0, 1, ui._window_h);
-	g2_fill_rect(0 + ui._window_w - 1, 0, 1, ui._window_h);
-	g2_fill_rect(0, 0 + ui._window_h - 1, ui._window_w, 1);
+	draw_filled_rect(0, 0, 1, ui._window_h);
+	draw_filled_rect(0 + ui._window_w - 1, 0, 1, ui._window_h);
+	draw_filled_rect(0, 0 + ui._window_h - 1, ui._window_w, 1);
 }

@@ -754,19 +754,19 @@ function ui_nodes_draw_grid(zoom: f32): image_t {
 	g2_set_color(line_primary);
 	step = ui_nodes_grid_small_cell_w * zoom;
 	for (let i: i32 = 0; i < math_floor(h / step) + 1; ++i) {
-		g2_draw_line(0, i * step, w, i * step);
+		draw_line(0, i * step, w, i * step);
 	}
 	for (let i: i32 = 0; i < math_floor(w / step) + 1; ++i) {
-		g2_draw_line(i * step, 0, i * step, h);
+		draw_line(i * step, 0, i * step, h);
 	}
 
 	g2_set_color(line_secondary);
 	step = ui_nodes_grid_cell_w * zoom;
 	for (let i: i32 = 0; i < math_floor(h / step) + 1; ++i) {
-		g2_draw_line(0, i * step, w, i * step);
+		draw_line(0, i * step, w, i * step);
 	}
 	for (let i: i32 = 0; i < math_floor(w / step) + 1; ++i) {
-		g2_draw_line(i * step, 0, i * step, h);
+		draw_line(i * step, 0, i * step, h);
 	}
 
 	g2_end();
@@ -950,7 +950,7 @@ function ui_nodes_render() {
 		let step: f32 = ui_nodes_grid_cell_w * nodes.zoom;
 		let x: f32 = math_fmod(ui_nodes_PAN_X(), step) - step;
 		let y: f32 = math_fmod(ui_nodes_PAN_Y(), step) - step;
-		g2_draw_image(ui_nodes_grid, x, y);
+		draw_image(ui_nodes_grid, x, y);
 
 		// Undo
 		if (ui_nodes_ui.input_started || ui_nodes_ui.is_key_pressed) {
@@ -1112,8 +1112,8 @@ function ui_nodes_render() {
 
 				g2_set_color(0xffffffff);
 				invert_y ?
-					g2_draw_scaled_image(img, tx, ty + th, tw, -th) :
-					g2_draw_scaled_image(img, tx, ty, tw, th);
+					draw_scaled_image(img, tx, ty + th, tw, -th) :
+					draw_scaled_image(img, tx, ty, tw, th);
 
 				///if (is_paint || is_sculpt)
 				if (single_channel) {
@@ -1125,7 +1125,7 @@ function ui_nodes_render() {
 
 		// Menu
 		g2_set_color(ui_nodes_ui.ops.theme.SEPARATOR_COL);
-		g2_fill_rect(0, ui_ELEMENT_H(ui_nodes_ui), ui_nodes_ww, ui_ELEMENT_H(ui_nodes_ui) + ui_ELEMENT_OFFSET(ui_nodes_ui) * 2);
+		draw_filled_rect(0, ui_ELEMENT_H(ui_nodes_ui), ui_nodes_ww, ui_ELEMENT_H(ui_nodes_ui) + ui_ELEMENT_OFFSET(ui_nodes_ui) * 2);
 		g2_set_color(0xffffffff);
 
 		let start_y: i32 = ui_ELEMENT_H(ui_nodes_ui) + ui_ELEMENT_OFFSET(ui_nodes_ui);

@@ -234,7 +234,7 @@ function import_mesh_pack_to_texture(mesh: raw_mesh_t) {
 	let texpaint: image_t = project_layers[0].texpaint;
 	g2_begin(texpaint);
 	g2_set_pipeline(pipes_copy128);
-	g2_draw_scaled_image(imgmesh, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
+	draw_scaled_image(imgmesh, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
 	g2_set_pipeline(null);
 	g2_end();
 }

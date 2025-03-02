@@ -247,7 +247,7 @@ function import_arm_run_project(path: string) {
 				g2_begin(l.texpaint);
 				// g2_set_pipeline(pipes_copy8);
 				g2_set_pipeline(project.is_bgra ? pipes_copy_bgra : pipes_copy); // Full bits for undo support, R8 is used
-				g2_draw_image(_texpaint, 0, 0);
+				draw_image(_texpaint, 0, 0);
 				g2_set_pipeline(null);
 				g2_end();
 			}
@@ -256,7 +256,7 @@ function import_arm_run_project(path: string) {
 				_texpaint = image_from_bytes(lz4_decode(ld.texpaint, ld.res * ld.res * 4 * bytes_per_pixel), ld.res, ld.res, format);
 				g2_begin(l.texpaint);
 				g2_set_pipeline(project.is_bgra ? pipes_copy_bgra : pipes_copy);
-				g2_draw_image(_texpaint, 0, 0);
+				draw_image(_texpaint, 0, 0);
 				g2_set_pipeline(null);
 				g2_end();
 
@@ -264,14 +264,14 @@ function import_arm_run_project(path: string) {
 				_texpaint_nor = image_from_bytes(lz4_decode(ld.texpaint_nor, ld.res * ld.res * 4 * bytes_per_pixel), ld.res, ld.res, format);
 				g2_begin(l.texpaint_nor);
 				g2_set_pipeline(project.is_bgra ? pipes_copy_bgra : pipes_copy);
-				g2_draw_image(_texpaint_nor, 0, 0);
+				draw_image(_texpaint_nor, 0, 0);
 				g2_set_pipeline(null);
 				g2_end();
 
 				_texpaint_pack = image_from_bytes(lz4_decode(ld.texpaint_pack, ld.res * ld.res * 4 * bytes_per_pixel), ld.res, ld.res, format);
 				g2_begin(l.texpaint_pack);
 				g2_set_pipeline(project.is_bgra ? pipes_copy_bgra : pipes_copy);
-				g2_draw_image(_texpaint_pack, 0, 0);
+				draw_image(_texpaint_pack, 0, 0);
 				g2_set_pipeline(null);
 				g2_end();
 				///end

@@ -312,7 +312,7 @@ function ui_menu_render() {
 			];
 			let shortcuts: string[] = ["l", "b", "n", "o", "r", "m", "a", "h", "e", "s", "t", "1", "2", "3", "4"];
 
-			if (iron_raytrace_supported()) {
+			if (kinc_g5_raytrace_supported()) {
 				array_push(modes, tr("Path Traced"));
 				array_push(shortcuts, "p");
 			}
@@ -494,7 +494,7 @@ function ui_menu_render() {
 				///if arm_windows
 				let save: string;
 				if (path_is_protected()) {
-					save = iron_save_path();
+					save = kinc_internal_save_path();
 				}
 				else {
 					save = path_data();

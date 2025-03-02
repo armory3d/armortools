@@ -545,7 +545,7 @@ bool kinc_g5_swap_buffers() {
 
 void kinc_g5_flush() {}
 
-bool kinc_g5_supports_raytracing() {
+bool kinc_g5_raytrace_supported() {
 	D3D12_FEATURE_DATA_D3D12_OPTIONS5 options;
 	if (device->lpVtbl->CheckFeatureSupport(device, D3D12_FEATURE_D3D12_OPTIONS5, &options, sizeof(options)) == S_OK) {
 		return options.RaytracingTier >= D3D12_RAYTRACING_TIER_1_0;

@@ -50,13 +50,13 @@ function encode_storage(): string {
 
 function shutdown() {
 	let storage_string: string = sys_string_to_buffer(encode_storage());
-	iron_file_save_bytes(iron_save_path() + "/config.json", storage_string, 0);
+	iron_file_save_bytes(kinc_internal_save_path() + "/config.json", storage_string, 0);
 }
 
 function main() {
 	kinc_set_app_name("ArmorPad");
 
-	let blob_storage: buffer_t = iron_load_blob(iron_save_path() + "/config.json");
+	let blob_storage: buffer_t = iron_load_blob(kinc_internal_save_path() + "/config.json");
 	if (blob_storage == null) {
 		storage = {};
 		storage.project = "";
@@ -182,8 +182,8 @@ function list_folder(path: string) {
 function render() {
 	storage.window_w = sys_width();
 	storage.window_h = sys_height();
-	storage.window_x = iron_window_x();
-	storage.window_y = iron_window_y();
+	storage.window_x = kinc_window_x();
+	storage.window_y = kinc_window_y();
 	if (ui.input_dx != 0 || ui.input_dy != 0) {
 		iron_set_mouse_cursor(0); // Arrow
 	}
@@ -268,7 +268,7 @@ function render() {
 
 	if (minimap != null) {
 		g2_begin();
-		g2_draw_image(minimap, minimap_x, minimap_y);
+		draw_image(minimap, minimap_x, minimap_y);
 		g2_end();
 	}
 

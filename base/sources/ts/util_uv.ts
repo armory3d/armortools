@@ -46,9 +46,9 @@ function util_uv_cache_uv_map() {
 		let y1: f32 = (texa[inda[i * 3    ] * 2 + 1]) * f;
 		let y2: f32 = (texa[inda[i * 3 + 1] * 2 + 1]) * f;
 		let y3: f32 = (texa[inda[i * 3 + 2] * 2 + 1]) * f;
-		g2_draw_line_aa(x1, y1, x2, y2, strength);
-		g2_draw_line_aa(x2, y2, x3, y3, strength);
-		g2_draw_line_aa(x3, y3, x1, y1, strength);
+		draw_line_aa(x1, y1, x2, y2, strength);
+		draw_line_aa(x2, y2, x3, y3, strength);
+		draw_line_aa(x3, y3, x1, y1, strength);
 	}
 	g2_end();
 }
@@ -87,7 +87,7 @@ function util_uv_cache_triangle_map() {
 		let y1: f32 = (texa[inda[i * 3    ] * 2 + 1]) * f;
 		let y2: f32 = (texa[inda[i * 3 + 1] * 2 + 1]) * f;
 		let y3: f32 = (texa[inda[i * 3 + 2] * 2 + 1]) * f;
-		g2_fill_triangle(x1, y1, x2, y2, x3, y3);
+		draw_filled_triangle(x1, y1, x2, y2, x3, y3);
 	}
 	g2_end();
 }

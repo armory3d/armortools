@@ -9,14 +9,14 @@ let config_button_spacing: string = config_default_button_spacing;
 function config_load() {
 	let path: string = "";
 	if (path_is_protected()) {
-		path += iron_save_path();
+		path += kinc_internal_save_path();
 	}
 	path += "config.json";
 	let blob: buffer_t = data_get_blob(path);
 
 	///if arm_linux
 	if (blob == null) { // Protected directory
-		blob = data_get_blob(iron_save_path() + "config.json");
+		blob = data_get_blob(kinc_internal_save_path() + "config.json");
 	}
 	///end
 
@@ -31,7 +31,7 @@ function config_save() {
 	// when running from protected path like "Program Files"
 	let path: string = "";
 	if (path_is_protected()) {
-		path += iron_save_path();
+		path += kinc_internal_save_path();
 	}
 	else {
 		path += path_data();
@@ -108,7 +108,7 @@ function config_save() {
 
 	///if arm_linux // Protected directory
 	if (!file_exists(path)) {
-		iron_file_save_bytes(iron_save_path() + "config.json", buffer, 0);
+		iron_file_save_bytes(kinc_internal_save_path() + "config.json", buffer, 0);
 	}
 	///end
 }

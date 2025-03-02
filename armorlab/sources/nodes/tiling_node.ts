@@ -46,7 +46,7 @@ function tiling_node_button(node_id: i32) {
 function tiling_node_get_as_image(self: tiling_node_t, from: i32): image_t {
 	let source: image_t = logic_node_input_get_as_image(self.base.inputs[0]);
 	g2_begin(tiling_node_image);
-	g2_draw_scaled_image(source, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
+	draw_scaled_image(source, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
 	g2_end();
 
 	console_progress(tr("Processing") + " - " + tr("Tiling"));
@@ -68,10 +68,10 @@ function tiling_node_sd_tiling(image: image_t, seed: i32): image_t {
 	text_to_photo_node_tiling = false;
 	let tile: image_t = image_create_render_target(512, 512);
 	g2_begin(tile);
-	g2_draw_scaled_image(image, -256, -256, 512, 512);
-	g2_draw_scaled_image(image, 256, -256, 512, 512);
-	g2_draw_scaled_image(image, -256, 256, 512, 512);
-	g2_draw_scaled_image(image, 256, 256, 512, 512);
+	draw_scaled_image(image, -256, -256, 512, 512);
+	draw_scaled_image(image, 256, -256, 512, 512);
+	draw_scaled_image(image, -256, 256, 512, 512);
+	draw_scaled_image(image, 256, 256, 512, 512);
 	g2_end();
 
 	let u8a: u8_array_t = u8_array_create(512 * 512);

@@ -73,7 +73,7 @@ function inpaint_node_get_as_image(self: inpaint_node_t, from: i32): image_t {
 	console_progress(tr("Processing") + " - " + tr("Inpaint"));
 
 	g2_begin(inpaint_node_image);
-	g2_draw_scaled_image(source, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
+	draw_scaled_image(source, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
 	g2_end();
 
 	if (inpaint_node_auto) {
@@ -146,7 +146,7 @@ function inpaint_node_sd_inpaint(image: image_t, mask: image_t): image_t {
 
 			g2_begin(inpaint_node_temp);
 			// g2_drawImage(image, -x * 512, -y * 512);
-			g2_draw_scaled_image(image, 0, 0, 512, 512);
+			draw_scaled_image(image, 0, 0, 512, 512);
 			g2_end();
 
 			bytes_img = image_get_pixels(inpaint_node_temp);
