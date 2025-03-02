@@ -18,11 +18,21 @@ function _tr(s: string): string {
 // Localizes a string with the given placeholders replaced (format is "{placeholder_name}")
 // If the string isn't available in the translation, this method will return the source English string
 function tr(id: string, vars: map_t<string, string> = null): string {
-	let translation: string = id;
+	let translation: string = string_copy(id);
 
 	// English is the source language
-	if (config_raw.locale != "en" && map_get(translator_translations, id) != null) {
-		translation = map_get(translator_translations, id);
+	if (config_raw.locale != "en") {
+		if (string_index_of(id, "\n") > -1) {
+			id = string_replace_all(id, "\n", "\\n");
+		}
+		let s: string = map_get(translator_translations, id);
+		if (s != null) {
+			if (string_index_of(s, "\\n") > -1) {
+				s = string_replace_all(s, "\\n", "\n");
+			}
+
+			translation = s;
+		}
 	}
 
 	if (vars != null) {
@@ -49,7 +59,7 @@ function translator_load_translations(new_locale: string) {
 	}
 
 	if (new_locale == "system") {
-		config_raw.locale = iron_language();
+		config_raw.locale = kinc_language();
 	}
 
 	// Check whether the requested or detected locale is available
@@ -71,13 +81,7 @@ function translator_load_translations(new_locale: string) {
 	if (config_raw.locale != "en") {
 		// Load the translation file
 		let translation_json: string = sys_buffer_to_string(iron_load_blob("data/locale/" + config_raw.locale + ".json"));
-
-		let data: map_t<string, string> = json_parse_to_map(translation_json);
-		let keys: string[] = map_keys(data);
-		for (let i: i32 = 0; i < keys.length; ++i) {
-			let field: string = keys[i];
-			map_set(translator_translations, field, map_get(data, field));
-		}
+		translator_translations = json_parse_to_map(translation_json);
 	}
 
 	// Generate extended font atlas
@@ -107,8 +111,8 @@ function translator_load_translations(new_locale: string) {
 
 	if (cjk) {
 		if (path_is_protected()) {
-			_translator_load_translations_cjk_font_path = iron_save_path();
-			_translator_load_translations_cjk_font_disk_path = iron_save_path();
+			_translator_load_translations_cjk_font_path = kinc_internal_save_path();
+			_translator_load_translations_cjk_font_disk_path = kinc_internal_save_path();
 		}
 		else {
 			_translator_load_translations_cjk_font_path = "";
