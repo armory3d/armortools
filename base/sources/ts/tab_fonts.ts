@@ -29,7 +29,7 @@ function tab_fonts_draw(htab: ui_handle_t) {
 		ui_end_sticky();
 		ui_separator(3, false);
 
-		let statusw: i32 = sys_width() - ui_toolbar_w - config_raw.layout[layout_size_t.SIDEBAR_W];
+		let statusw: i32 = kinc_window_width() - ui_toolbar_w - config_raw.layout[layout_size_t.SIDEBAR_W];
 		let slotw: i32 = math_floor(51 * ui_SCALE(ui));
 		let num: i32 = math_floor(statusw / slotw);
 		if (num == 0) {

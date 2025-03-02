@@ -44,9 +44,9 @@ function tab_script_draw(htab: ui_handle_t) {
 		}
 		ui_end_sticky();
 
-		let _font: g2_font_t = ui.ops.font;
+		let _font: draw_font_t = ui.ops.font;
 		let _font_size: i32 = ui.font_size;
-		let f: g2_font_t = data_get_font("font_mono.ttf");
+		let f: draw_font_t = data_get_font("font_mono.ttf");
 		ui_set_font(ui, f);
 		ui.font_size = math_floor(15 * ui_SCALE(ui));
 		ui_text_area_line_numbers = true;

@@ -148,7 +148,7 @@ function util_render_make_text_preview() {
 	if (g2_in_use) g2_end();
 
 	let text: string = context_raw.text_tool_text;
-	let font: g2_font_t = context_raw.font.font;
+	let font: draw_font_t = context_raw.font.font;
 	let font_size: i32 = util_render_font_preview_size;
 	let text_w: i32 = math_floor(g2_font_width(font, font_size, text));
 	let text_h: i32 = math_floor(g2_font_height(font, font_size));
@@ -168,10 +168,10 @@ function util_render_make_text_preview() {
 		///end
 	}
 	g2_begin(context_raw.text_tool_image);
-	g2_clear(0xff000000);
+	g4_clear(0xff000000);
 	g2_set_font(font);
 	g2_set_font_size(font_size);
-	g2_set_color(0xffffffff);
+	draw_set_color(0xffffffff);
 	draw_string(text, tex_w / 2 - text_w / 2, tex_w / 2 - text_h / 2);
 	g2_end();
 
@@ -184,7 +184,7 @@ function util_render_make_font_preview() {
 	if (g2_in_use) g2_end();
 
 	let text: string = "Abg";
-	let font: g2_font_t = context_raw.font.font;
+	let font: draw_font_t = context_raw.font.font;
 	let font_size: i32 = util_render_font_preview_size;
 	let text_w: i32 = math_floor(g2_font_width(font, font_size, text)) + 8;
 	let text_h: i32 = math_floor(g2_font_height(font, font_size)) + 8;
@@ -193,10 +193,10 @@ function util_render_make_font_preview() {
 		context_raw.font.image = image_create_render_target(tex_w, tex_w, tex_format_t.RGBA32);
 	}
 	g2_begin(context_raw.font.image);
-	g2_clear(0x00000000);
+	g4_clear(0x00000000);
 	g2_set_font(font);
 	g2_set_font_size(font_size);
-	g2_set_color(0xffffffff);
+	draw_set_color(0xffffffff);
 	draw_string(text, tex_w / 2 - text_w / 2, tex_w / 2 - text_h / 2);
 	g2_end();
 	context_raw.font.preview_ready = true;
@@ -369,7 +369,7 @@ function util_render_make_brush_preview() {
 	l = render_path_paint_live_layer;
 	let target: image_t = context_raw.brush.image;
 	g2_begin(target);
-	g2_clear(0x00000000);
+	g4_clear(0x00000000);
 	g2_set_pipeline(pipes_copy);
 	draw_scaled_image(l.texpaint, 0, 0, target.width, target.height);
 	g2_set_pipeline(null);

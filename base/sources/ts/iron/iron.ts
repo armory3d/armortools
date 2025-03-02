@@ -180,7 +180,7 @@ declare function color_set_gb(c: i32, i: u8): i32;
 declare function color_set_bb(c: i32, i: u8): i32;
 declare function color_set_ab(c: i32, i: u8): i32;
 
-declare function iron_init(title: string, width: i32, height: i32, vsync: bool, window_mode: i32, window_features: i32, x: i32, y: i32, frequency: i32, use_depth: bool): void;
+declare function iron_init(ops: kinc_window_options_t): void;
 declare function kinc_set_app_name(name: string): void;
 declare function kinc_log(v: any): void;
 declare function kinc_g5_clear(flags: i32, color: i32, depth: f32): void;
@@ -316,8 +316,8 @@ declare function draw_line(x0: f32, y0: f32, x1: f32, y1: f32, strength: f32 = 1
 declare function draw_line_aa(x0: f32, y0: f32, x1: f32, y1: f32, strength: f32 = 1.0): void;
 declare function draw_string(text: string, x: f32, y: f32): void;
 declare function draw_set_font(font: any, size: i32): bool;
-declare function draw_font_init(blob: buffer_t, font_index: i32): any;
-declare function draw_font_13(blob: buffer_t): any;
+declare function draw_font_init(font: any, buf: any, font_index: i32): void;
+declare function draw_font_13(font: any, buf: any): any;
 declare function draw_font_set_glyphs(glyphs: i32[]): void;
 declare function draw_font_count(font: any): i32;
 declare function draw_font_height(font: any, size: i32): i32;

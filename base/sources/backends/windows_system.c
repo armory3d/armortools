@@ -1671,7 +1671,7 @@ static void init_crash_handler() {
 	}
 }
 
-void kinc_init(const char *name, int width, int height, kinc_window_options_t *win, kinc_framebuffer_options_t *frame) {
+void kinc_init(const char *name, int width, int height, kinc_window_options_t *win) {
 	init_crash_handler();
 
 	// Pen functions are only in Windows 8 and later, so load them dynamically
@@ -2082,18 +2082,12 @@ void kinc_window_set_title(const char *title) {
 	SetWindowTextW(windows[0].handle, buffer);
 }
 
-void kinc_window_create(kinc_window_options_t *win, kinc_framebuffer_options_t *frame) {
+void kinc_window_create(kinc_window_options_t *win) {
 	kinc_window_options_t defaultWin;
-	kinc_framebuffer_options_t defaultFrame;
 
 	if (win == NULL) {
 		kinc_window_options_set_defaults(&defaultWin);
 		win = &defaultWin;
-	}
-
-	if (frame == NULL) {
-		kinc_framebuffer_options_set_defaults(&defaultFrame);
-		frame = &defaultFrame;
 	}
 
 	if (win->title == NULL) {
@@ -2103,12 +2097,12 @@ void kinc_window_create(kinc_window_options_t *win, kinc_framebuffer_options_t *
 	wchar_t wbuffer[1024];
 	MultiByteToWideChar(CP_UTF8, 0, win->title, -1, wbuffer, 1024);
 
-	createWindow(wbuffer, win->x, win->y, win->width, win->height, frame->color_bits, frame->frequency, win->window_features, win->mode,
+	createWindow(wbuffer, win->x, win->y, win->width, win->height, win->color_bits, win->frequency, win->features, win->mode,
 	                            win->display_index);
 
-	bool vsync = frame->vertical_sync;
+	bool vsync = win->vsync;
 
-	kinc_g4_internal_init_window(frame->depth_bits, vsync);
+	kinc_g4_internal_init_window(win->depth_bits, vsync);
 
 	if (win->visible) {
 		kinc_window_show();

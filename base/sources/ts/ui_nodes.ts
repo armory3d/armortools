@@ -738,7 +738,7 @@ function ui_nodes_draw_grid(zoom: f32): image_t {
 
 	let grid: image_t = image_create_render_target(w, h);
 	g2_begin(grid);
-	g2_clear(ui_nodes_ui.ops.theme.SEPARATOR_COL);
+	g4_clear(ui_nodes_ui.ops.theme.SEPARATOR_COL);
 
 	let sep_col: i32 = ui_nodes_ui.ops.theme.SEPARATOR_COL;
 	let line_primary: i32 = sep_col - 0x00050505;
@@ -751,7 +751,7 @@ function ui_nodes_draw_grid(zoom: f32): image_t {
 		line_secondary = sep_col + 0x00090909;
 	}
 
-	g2_set_color(line_primary);
+	draw_set_color(line_primary);
 	step = ui_nodes_grid_small_cell_w * zoom;
 	for (let i: i32 = 0; i < math_floor(h / step) + 1; ++i) {
 		draw_line(0, i * step, w, i * step);
@@ -760,7 +760,7 @@ function ui_nodes_draw_grid(zoom: f32): image_t {
 		draw_line(i * step, 0, i * step, h);
 	}
 
-	g2_set_color(line_secondary);
+	draw_set_color(line_secondary);
 	step = ui_nodes_grid_cell_w * zoom;
 	for (let i: i32 = 0; i < math_floor(h / step) + 1; ++i) {
 		draw_line(0, i * step, w, i * step);
@@ -858,7 +858,7 @@ function ui_nodes_render() {
 	}
 	ui_nodes_release_link = ui_nodes_ui.input_released;
 
-	if (!ui_nodes_show || sys_width() == 0 || sys_height() == 0) {
+	if (!ui_nodes_show || kinc_window_width() == 0 || kinc_window_height() == 0) {
 		return;
 	}
 
@@ -946,7 +946,7 @@ function ui_nodes_render() {
 		}
 
 		// Grid
-		g2_set_color(0xffffffff);
+		draw_set_color(0xffffffff);
 		let step: f32 = ui_nodes_grid_cell_w * nodes.zoom;
 		let x: f32 = math_fmod(ui_nodes_PAN_X(), step) - step;
 		let y: f32 = math_fmod(ui_nodes_PAN_Y(), step) - step;
@@ -1110,7 +1110,7 @@ function ui_nodes_render() {
 				}
 				///end
 
-				g2_set_color(0xffffffff);
+				draw_set_color(0xffffffff);
 				invert_y ?
 					draw_scaled_image(img, tx, ty + th, tw, -th) :
 					draw_scaled_image(img, tx, ty, tw, th);
@@ -1124,9 +1124,9 @@ function ui_nodes_render() {
 		}
 
 		// Menu
-		g2_set_color(ui_nodes_ui.ops.theme.SEPARATOR_COL);
+		draw_set_color(ui_nodes_ui.ops.theme.SEPARATOR_COL);
 		draw_filled_rect(0, ui_ELEMENT_H(ui_nodes_ui), ui_nodes_ww, ui_ELEMENT_H(ui_nodes_ui) + ui_ELEMENT_OFFSET(ui_nodes_ui) * 2);
-		g2_set_color(0xffffffff);
+		draw_set_color(0xffffffff);
 
 		let start_y: i32 = ui_ELEMENT_H(ui_nodes_ui) + ui_ELEMENT_OFFSET(ui_nodes_ui);
 		ui_nodes_ui._x = 0;

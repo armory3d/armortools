@@ -3,12 +3,12 @@ type slot_font_t = {
 	image?: image_t; // 200px
 	preview_ready?: bool;
 	id?: i32;
-	font?: g2_font_t;
+	font?: draw_font_t;
 	name?: string;
 	file?: string;
 };
 
-function slot_font_create(name: string, font: g2_font_t, file: string = ""): slot_font_t {
+function slot_font_create(name: string, font: draw_font_t, file: string = ""): slot_font_t {
 	let raw: slot_font_t = {};
 	raw.preview_ready = false;
 	raw.id = 0;

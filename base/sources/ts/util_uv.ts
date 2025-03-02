@@ -35,8 +35,8 @@ function util_uv_cache_uv_map() {
 	let texa: i16_array_t = mesh.vertex_arrays[2].values;
 	let inda: u32_array_t = mesh.index_arrays[0].values;
 	g2_begin(util_uv_uvmap);
-	g2_clear(0x00000000);
-	g2_set_color(0xffffffff);
+	g4_clear(0x00000000);
+	draw_set_color(0xffffffff);
 	let strength: f32 = res_x > 2048 ? 2.0 : 1.0;
 	let f: f32 = (1 / 32767) * util_uv_uvmap.width;
 	for (let i: i32 = 0; i < math_floor(inda.length / 3); ++i) {
@@ -74,13 +74,13 @@ function util_uv_cache_triangle_map() {
 	let texa: i16_array_t = mesh.vertex_arrays[2].values;
 	let inda: u32_array_t = mesh.index_arrays[0].values;
 	g2_begin(util_uv_trianglemap);
-	g2_clear(0xff000000);
+	g4_clear(0xff000000);
 	let f: f32 = (1 / 32767) * util_uv_trianglemap.width;
 	let color: i32 = 0xff000001;
 	for (let i: i32 = 0; i < math_floor(inda.length / 3); ++i) {
 		if (color == 0xffffffff) color = 0xff000001;
 		color++;
-		g2_set_color(color);
+		draw_set_color(color);
 		let x1: f32 = (texa[inda[i * 3    ] * 2    ]) * f;
 		let x2: f32 = (texa[inda[i * 3 + 1] * 2    ]) * f;
 		let x3: f32 = (texa[inda[i * 3 + 2] * 2    ]) * f;

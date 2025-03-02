@@ -53,7 +53,7 @@ typedef struct ui_theme {
 } ui_theme_t;
 
 typedef struct ui_options {
-	g2_font_t *font;
+	draw_font_t *font;
 	ui_theme_t *theme;
 	float scale_factor;
 	kinc_g5_texture_t *color_wheel;

@@ -191,27 +191,27 @@ function config_get_date(): string {
 	return v.date;
 }
 
-function config_get_options(): kinc_sys_ops_t {
+function config_get_options(): kinc_window_options_t {
 	let window_mode: window_mode_t = config_raw.window_mode == 0 ? window_mode_t.WINDOWED : window_mode_t.FULLSCREEN;
-	let window_features: window_features_t = window_features_t.NONE;
+	let features: window_features_t = window_features_t.NONE;
 	if (config_raw.window_resizable) {
-		window_features |= window_features_t.RESIZABLE;
+		features |= window_features_t.RESIZABLE;
 	}
 	if (config_raw.window_maximizable) {
-		window_features |= window_features_t.MAXIMIZABLE;
+		features |= window_features_t.MAXIMIZABLE;
 	}
 	if (config_raw.window_minimizable) {
-		window_features |= window_features_t.MINIMIZABLE;
+		features |= window_features_t.MINIMIZABLE;
 	}
 	let title: string = "untitled - " + manifest_title;
-	let ops: kinc_sys_ops_t = {
+	let ops: kinc_window_options_t = {
 		title: title,
 		width: config_raw.window_w,
 		height: config_raw.window_h,
 		x: config_raw.window_x,
 		y: config_raw.window_y,
 		mode: window_mode,
-		features: window_features,
+		features: features,
 		vsync: config_raw.window_vsync,
 		frequency: config_raw.window_frequency,
 		use_depth: false

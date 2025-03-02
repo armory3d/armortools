@@ -153,7 +153,7 @@ function args_run() {
 			}
 
 			if (args_background) {
-				sys_stop();
+				kinc_stop();
 			}
 		});
 	}

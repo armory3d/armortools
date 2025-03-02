@@ -1139,10 +1139,10 @@ static void createWindow(kinc_window_options_t *options) {
 	int width = options->width / [[NSScreen mainScreen] backingScaleFactor];
 	int height = options->height / [[NSScreen mainScreen] backingScaleFactor];
 	int styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable;
-	if ((options->window_features & KINC_WINDOW_FEATURE_RESIZEABLE) || (options->window_features & KINC_WINDOW_FEATURE_MAXIMIZABLE)) {
+	if ((options->features & KINC_WINDOW_FEATURE_RESIZEABLE) || (options->features & KINC_WINDOW_FEATURE_MAXIMIZABLE)) {
 		styleMask |= NSWindowStyleMaskResizable;
 	}
-	if (options->window_features & KINC_WINDOW_FEATURE_MINIMIZABLE) {
+	if (options->features & KINC_WINDOW_FEATURE_MINIMIZABLE) {
 		styleMask |= NSWindowStyleMaskMiniaturizable;
 	}
 
@@ -1205,7 +1205,7 @@ static void addMenubar(void) {
 	[NSApp setMainMenu:menubar];
 }
 
-void kinc_init(const char *name, int width, int height, kinc_window_options_t *win, kinc_framebuffer_options_t *frame) {
+void kinc_init(const char *name, int width, int height, kinc_window_options_t *win) {
 	@autoreleasepool {
 		myapp = [KincApplication sharedApplication];
 		[myapp finishLaunching];
@@ -1223,12 +1223,6 @@ void kinc_init(const char *name, int width, int height, kinc_window_options_t *w
 		win = &defaultWindowOptions;
 	}
 
-	kinc_framebuffer_options_t defaultFramebufferOptions;
-	if (frame == NULL) {
-		kinc_framebuffer_options_set_defaults(&defaultFramebufferOptions);
-		frame = &defaultFramebufferOptions;
-	}
-
 	win->width = width;
 	win->height = height;
 	if (win->title == NULL) {
@@ -1237,7 +1231,7 @@ void kinc_init(const char *name, int width, int height, kinc_window_options_t *w
 
 	createWindow(win);
 	kinc_g5_internal_init();
-	kinc_g4_internal_init_window(frame->depth_bits, true);
+	kinc_g4_internal_init_window(win->depth_bits, true);
 }
 
 int kinc_window_width() {
@@ -1374,7 +1368,7 @@ void kinc_window_hide() {}
 
 void kinc_window_set_title(const char *title) {}
 
-void kinc_window_create(kinc_window_options_t *win, kinc_framebuffer_options_t *frame) {
+void kinc_window_create(kinc_window_options_t *win) {
 }
 
 void kinc_window_set_resize_callback(void (*callback)(int x, int y, void *data), void *data) {

@@ -443,7 +443,7 @@ void ui_draw_node(ui_node_t *node, ui_node_canvas_t *canvas) {
 
 	// Title
 	draw_set_color(current->ops->theme->TEXT_COL);
-	float textw = draw_string_width(current->ops->font->font_, current->font_size, text);
+	float textw = draw_string_width(current->ops->font, current->font_size, text);
 	draw_string(text, nx + ui_p(10), ny + ui_p(6));
 	ny += lineh * 0.5;
 
@@ -459,7 +459,7 @@ void ui_draw_node(ui_node_t *node, ui_node_canvas_t *canvas) {
 	for (int i = 0; i < node->outputs->length; ++i) {
 		ui_node_socket_t *out = node->outputs->buffer[i];
 		ny += lineh;
-		float strw = draw_string_width(current->ops->font->font_, current->font_size, ui_tr(out->name));
+		float strw = draw_string_width(current->ops->font, current->font_size, ui_tr(out->name));
 		draw_string(ui_tr(out->name), nx + w - strw - ui_p(12), ny - ui_p(3));
 
 		if (ui_nodes_on_socket_released != NULL && current->input_enabled && (current->input_released || current->input_released_r)) {
@@ -804,7 +804,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 	current_nodes->ELEMENT_H = current->ops->theme->ELEMENT_H + 2;
 	ui_set_scale(UI_NODES_SCALE()); // Apply zoomed scale
 	current->elements_baked = true;
-	draw_set_font(current->ops->font->font_, current->font_size);
+	draw_set_font(current->ops->font, current->font_size);
 
 	for (int i = 0; i < canvas->links->length; ++i) {
 		ui_node_link_t *link = canvas->links->buffer[i];

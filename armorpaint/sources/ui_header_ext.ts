@@ -241,11 +241,11 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			let progress: f32 = render_path_raytrace_bake_current_sample / context_raw.bake_samples;
 			if (progress > 1.0) progress = 1.0;
 			// Progress bar
-			g2_set_color(ui.ops.theme.SEPARATOR_COL);
+			draw_set_color(ui.ops.theme.SEPARATOR_COL);
 			ui_draw_rect(true, ui._x + 1, ui._y, ui._w - 2, ui_ELEMENT_H(ui));
-			g2_set_color(ui.ops.theme.HIGHLIGHT_COL);
+			draw_set_color(ui.ops.theme.HIGHLIGHT_COL);
 			ui_draw_rect(true, ui._x + 1, ui._y, (ui._w - 2) * progress, ui_ELEMENT_H(ui));
-			g2_set_color(0xffffffff);
+			draw_set_color(0xffffffff);
 			ui_text(tr("Samples") + ": " + render_path_raytrace_bake_current_sample);
 			ui_text(tr("Rays/pixel") + ": " + render_path_raytrace_bake_rays_pix);
 			ui_text(tr("Rays/second") + ": " + render_path_raytrace_bake_rays_sec);

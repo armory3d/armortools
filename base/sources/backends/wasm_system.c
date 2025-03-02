@@ -73,16 +73,11 @@ __attribute__((import_module("imports"), import_name("js_time"))) int js_time();
 extern int kinc_internal_window_width;
 extern int kinc_internal_window_height;
 
-void kinc_init(const char *name, int width, int height, kinc_window_options_t *win, kinc_framebuffer_options_t *frame) {
+void kinc_init(const char *name, int width, int height, kinc_window_options_t *win) {
 	kinc_window_options_t defaultWin;
 	if (win == NULL) {
 		kinc_window_options_set_defaults(&defaultWin);
 		win = &defaultWin;
-	}
-	kinc_framebuffer_options_t defaultFrame;
-	if (frame == NULL) {
-		kinc_framebuffer_options_set_defaults(&defaultFrame);
-		frame = &defaultFrame;
 	}
 	win->width = width;
 	win->height = height;
@@ -91,7 +86,7 @@ void kinc_init(const char *name, int width, int height, kinc_window_options_t *w
 	kinc_internal_window_height = height;
 
 	kinc_g5_internal_init();
-	kinc_g4_internal_init_window(frame->depth_bits, true);
+	kinc_g4_internal_init_window(win->depth_bits, true);
 }
 
 bool kinc_internal_handle_messages() {
@@ -211,9 +206,7 @@ void kinc_window_hide() {}
 // TODO: change browser title.
 void kinc_window_set_title(const char *title) {}
 
-void kinc_window_create(kinc_window_options_t *win, kinc_framebuffer_options_t *frame) {
-
-}
+void kinc_window_create(kinc_window_options_t *win) {}
 
 void kinc_window_set_resize_callback(void (*callback)(int x, int y, void *data), void *data) {}
 

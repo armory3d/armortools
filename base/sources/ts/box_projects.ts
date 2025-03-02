@@ -69,7 +69,7 @@ function box_projects_tab(ui: ui_t) {
 		ui_separator(3, false);
 
 		let slotw: i32 = math_floor(150 * ui_SCALE(ui));
-		let num: i32 = math_floor(sys_width() / slotw);
+		let num: i32 = math_floor(kinc_window_width() / slotw);
 		if (num == 0) {
 			return;
 		}
@@ -261,10 +261,10 @@ function box_projects_get_started_tab(ui: ui_t) {
 }
 
 function box_projects_align_to_fullscreen() {
-	ui_box_modalw = math_floor(sys_width() / ui_SCALE(base_ui_box));
-	ui_box_modalh = math_floor(sys_height() / ui_SCALE(base_ui_box));
-	let appw: i32 = sys_width();
-	let apph: i32 = sys_height();
+	ui_box_modalw = math_floor(kinc_window_width() / ui_SCALE(base_ui_box));
+	ui_box_modalh = math_floor(kinc_window_height() / ui_SCALE(base_ui_box));
+	let appw: i32 = kinc_window_width();
+	let apph: i32 = kinc_window_height();
 	let mw: i32 = appw;
 	let mh: i32 = apph;
 	ui_box_hwnd.drag_x = math_floor(-appw / 2 + mw / 2);

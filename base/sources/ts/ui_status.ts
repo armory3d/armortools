@@ -6,10 +6,10 @@ function ui_status_init() {
 
 function ui_status_width(): i32 {
 	///if (is_paint || is_sculpt)
-	return sys_width() - ui_toolbar_w - config_raw.layout[layout_size_t.SIDEBAR_W];
+	return kinc_window_width() - ui_toolbar_w - config_raw.layout[layout_size_t.SIDEBAR_W];
 	///end
 	///if is_lab
-	return sys_width();
+	return kinc_window_width();
 	///end
 }
 
@@ -18,11 +18,11 @@ function ui_status_render_ui() {
 
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
 
-	if (ui_window(ui_base_hwnds[tab_area_t.STATUS], app_x(), sys_height() - statush, ui_status_width(), statush)) {
+	if (ui_window(ui_base_hwnds[tab_area_t.STATUS], app_x(), kinc_window_height() - statush, ui_status_width(), statush)) {
 		ui._y += 2;
 
 		// Border
-		g2_set_color(ui.ops.theme.SEPARATOR_COL);
+		draw_set_color(ui.ops.theme.SEPARATOR_COL);
 		draw_filled_rect(0, 0, 1, ui._window_h);
 		draw_filled_rect(ui._window_w - 1, 0, 1, ui._window_h);
 

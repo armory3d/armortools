@@ -338,7 +338,7 @@ function slot_layer_duplicate(raw: slot_layer_t): slot_layer_t {
 
 	if (l.texpaint_preview != null) {
 		g2_begin(l.texpaint_preview);
-		g2_clear(0x00000000);
+		g4_clear(0x00000000);
 		g2_set_pipeline(pipes_copy);
 		draw_scaled_image(raw.texpaint_preview, 0, 0, raw.texpaint_preview.width, raw.texpaint_preview.height);
 		g2_set_pipeline(null);

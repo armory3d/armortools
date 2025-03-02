@@ -8,19 +8,19 @@ function import_font_run(path: string) {
 		}
 	}
 
-	let font: g2_font_t = data_get_font(path);
+	let font: draw_font_t = data_get_font(path);
 	g2_font_init(font); // Make sure font_ is ready
-	let count: i32 = draw_font_count(font.font_);
+	let count: i32 = draw_font_count(font);
 	let font_slots: slot_font_t[] = [];
 
 	for (let i: i32 = 0; i < count; ++i) {
 		let ar: string[] = string_split(path, path_sep);
 		let name: string = ar[ar.length - 1];
-		let f: g2_font_t = g2_font_clone(font);
+		let f: draw_font_t = g2_font_clone(font);
 		g2_font_set_font_index(f, i);
 
 		g2_font_init(f);
-		if (!draw_set_font(f.font_, util_render_font_preview_size)) {
+		if (!draw_set_font(f, util_render_font_preview_size)) {
 			console_error(tr("Error: Failed to read font data"));
 			continue;
 		}

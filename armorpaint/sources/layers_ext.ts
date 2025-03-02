@@ -36,7 +36,7 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 			if (l1masks.length > 1) {
 				layers_make_temp_mask_img();
 				g2_begin(pipes_temp_mask_image);
-				g2_clear(0x00000000);
+				g4_clear(0x00000000);
 				g2_end();
 				let l1: slot_layer_t = { texpaint: pipes_temp_mask_image };
 				for (let i: i32 = 0; i < l1masks.length; ++i) {

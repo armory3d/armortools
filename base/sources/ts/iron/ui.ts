@@ -237,7 +237,7 @@ function ui_get_socket(nodes: ui_node_t[], id: i32): ui_node_socket_t {
 	return null;
 }
 
-function ui_set_font(raw: ui_t, font: g2_font_t) {
+function ui_set_font(raw: ui_t, font: draw_font_t) {
 	g2_font_init(font); // Make sure font_ is ready
 	raw.ops.font = font;
 }
@@ -397,7 +397,7 @@ declare type ui_handle_t = {
 };
 
 declare type ui_options_t = {
-	font?: g2_font_t;
+	font?: draw_font_t;
 	theme?: ui_theme_t;
 	scale_factor?: f32;
 	color_wheel?: kinc_g5_texture_t;

@@ -94,7 +94,7 @@ function mouse_released(button: string = "left"): bool {
 }
 
 function mouse_lock() {
-	if (sys_can_lock_mouse()) {
+	if (kinc_mouse_can_lock()) {
 		sys_lock_mouse();
 		mouse_locked = true;
 		mouse_hidden = true;
@@ -102,7 +102,7 @@ function mouse_lock() {
 }
 
 function mouse_unlock() {
-	if (sys_can_lock_mouse()) {
+	if (kinc_mouse_can_lock()) {
 		sys_unlock_mouse();
 		mouse_locked = false;
 		mouse_hidden = false;

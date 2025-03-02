@@ -32,8 +32,8 @@ function ui_menu_render() {
 
 	// First draw out of screen, then align the menu based on menu height
 	if (ui_menu_show_first) {
-		ui_menu_x -= sys_width() * 2;
-		ui_menu_y -= sys_height() * 2;
+		ui_menu_x -= kinc_window_width() * 2;
+		ui_menu_y -= kinc_window_height() * 2;
 	}
 
 	ui_begin_region(ui, ui_menu_x, ui_menu_y, menu_w);
@@ -122,7 +122,7 @@ function ui_menu_render() {
 
 			ui_menu_separator(ui);
 			if (ui_menu_button(tr("Exit"))) {
-				sys_stop();
+				kinc_stop();
 			}
 		}
 		else if (ui_menu_category == menu_category_t.EDIT) {
@@ -437,16 +437,16 @@ function ui_menu_render() {
 			}
 			if (ui_menu_button(tr("Report Bug"))) {
 				///if (arm_macos || arm_ios) // Limited url length
-				file_load_url("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + sys_system_id());
+				file_load_url("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + kinc_system_id());
 				///else
-				file_load_url("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + sys_system_id() + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A");
+				file_load_url("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + kinc_system_id() + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A");
 				///end
 			}
 			if (ui_menu_button(tr("Request Feature"))) {
 				///if (arm_macos || arm_ios) // Limited url length
-				file_load_url("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + sys_system_id());
+				file_load_url("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + kinc_system_id());
 				///else
-				file_load_url("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + sys_system_id() + "*%0A%0A**Feature description:**%0A%0A");
+				file_load_url("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + kinc_system_id() + "*%0A%0A**Feature description:**%0A%0A");
 				///end
 			}
 			ui_menu_separator(ui);
@@ -489,7 +489,7 @@ function ui_menu_render() {
 			if (ui_menu_button(tr("About..."))) {
 
 				let msg: string = manifest_title + ".org - v" + manifest_version + " (" + config_get_date() + ") - " + config_get_sha() + "\n";
-				msg += sys_system_id() + " - " + strings_graphics_api();
+				msg += kinc_system_id() + " - " + strings_graphics_api();
 
 				///if arm_windows
 				let save: string;
@@ -572,8 +572,8 @@ function ui_menu_render() {
 	if (ui_menu_show_first) {
 		ui_menu_show_first = false;
 		ui_menu_h = ui._y - ui_menu_y;
-		ui_menu_x += sys_width() * 2;
-		ui_menu_y += sys_height() * 2;
+		ui_menu_x += kinc_window_width() * 2;
+		ui_menu_y += kinc_window_height() * 2;
 		ui_menu_fit_to_screen();
 		ui_menu_render(); // Render at correct position now
 	}
@@ -602,20 +602,20 @@ function ui_menu_draw(commands: (ui: ui_t)=>void = null, x: i32 = -1, y: i32 = -
 function ui_menu_fit_to_screen() {
 	// Prevent the menu going out of screen
 	let menu_w: f32 = base_default_element_w * ui_SCALE(base_ui_menu) * 2.3;
-	if (ui_menu_x + menu_w > sys_width()) {
+	if (ui_menu_x + menu_w > kinc_window_width()) {
 		if (ui_menu_x - menu_w > 0) {
 			ui_menu_x = math_floor(ui_menu_x - menu_w);
 		}
 		else {
-			ui_menu_x = math_floor(sys_width() - menu_w);
+			ui_menu_x = math_floor(kinc_window_width() - menu_w);
 		}
 	}
-	if (ui_menu_y + ui_menu_h > sys_height()) {
+	if (ui_menu_y + ui_menu_h > kinc_window_height()) {
 		if (ui_menu_y - ui_menu_h > 0) {
 			ui_menu_y = math_floor(ui_menu_y - ui_menu_h);
 		}
 		else {
-			ui_menu_y = sys_height() - ui_menu_h;
+			ui_menu_y = kinc_window_height() - ui_menu_h;
 		}
 		ui_menu_x += 1; // Move out of mouse focus
 	}
@@ -649,9 +649,9 @@ function ui_menu_align(ui: ui_t) {
 function ui_menu_start(ui: ui_t) {
 	ui_draw_shadow(ui._x, ui._y, ui._w, ui_menu_h);
 
-	g2_set_color(ui.ops.theme.SEPARATOR_COL);
+	draw_set_color(ui.ops.theme.SEPARATOR_COL);
 	ui_draw_rect(true, ui._x, ui._y, ui._w, ui_menu_h);
-	g2_set_color(0xffffffff);
+	draw_set_color(0xffffffff);
 }
 
 function ui_menu_end(ui: ui_t) {

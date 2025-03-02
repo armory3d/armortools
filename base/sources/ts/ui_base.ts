@@ -659,8 +659,8 @@ function ui_base_update() {
 				if (config_raw.layout[layout_size_t.NODES_W] < 32) {
 					config_raw.layout[layout_size_t.NODES_W] = 32;
 				}
-				else if (config_raw.layout[layout_size_t.NODES_W] > sys_width() * 0.7) {
-					config_raw.layout[layout_size_t.NODES_W] = math_floor(sys_width() * 0.7);
+				else if (config_raw.layout[layout_size_t.NODES_W] > kinc_window_width() * 0.7) {
+					config_raw.layout[layout_size_t.NODES_W] = math_floor(kinc_window_width() * 0.7);
 				}
 			}
 			else { // UINodes / UIView2D ratio
@@ -675,7 +675,7 @@ function ui_base_update() {
 		}
 		else if (ui_base_border_handle == ui_base_hwnds[tab_area_t.STATUS]) {
 			let my: i32 = math_floor(mouse_movement_y);
-			if (config_raw.layout[layout_size_t.STATUS_H] - my >= ui_status_default_status_h * config_raw.window_scale && config_raw.layout[layout_size_t.STATUS_H] - my < sys_height() * 0.7) {
+			if (config_raw.layout[layout_size_t.STATUS_H] - my >= ui_status_default_status_h * config_raw.window_scale && config_raw.layout[layout_size_t.STATUS_H] - my < kinc_window_height() * 0.7) {
 				config_raw.layout[layout_size_t.STATUS_H] -= my;
 			}
 		}
@@ -685,8 +685,8 @@ function ui_base_update() {
 				if (config_raw.layout[layout_size_t.SIDEBAR_W] < ui_base_sidebar_mini_w) {
 					config_raw.layout[layout_size_t.SIDEBAR_W] = ui_base_sidebar_mini_w;
 				}
-				else if (config_raw.layout[layout_size_t.SIDEBAR_W] > sys_width() - ui_base_sidebar_mini_w) {
-					config_raw.layout[layout_size_t.SIDEBAR_W] = sys_width() - ui_base_sidebar_mini_w;
+				else if (config_raw.layout[layout_size_t.SIDEBAR_W] > kinc_window_width() - ui_base_sidebar_mini_w) {
+					config_raw.layout[layout_size_t.SIDEBAR_W] = kinc_window_width() - ui_base_sidebar_mini_w;
 				}
 			}
 			else {
@@ -1089,7 +1089,7 @@ function ui_base_update_ui() {
 
 			let source: image_t = l.texpaint;
 			g2_begin(target);
-			g2_clear(0x00000000);
+			g4_clear(0x00000000);
 			// g2_set_pipeline(l.is_mask() ? pipes_copy8 : pipes_copy);
 			g2_set_pipeline(pipes_copy); // texpaint_preview is always RGBA32 for now
 			draw_scaled_image(source, 0, 0, target.width, target.height);
@@ -1109,7 +1109,7 @@ function ui_base_update_ui() {
 
 			let source: image_t = l.texpaint;
 			g2_begin(target);
-			g2_clear(0x00000000);
+			g4_clear(0x00000000);
 			// g2_set_pipeline(raw.layer.is_mask() ? pipes_copy8 : pipes_copy);
 			g2_set_pipeline(pipes_copy); // texpaint_preview is always RGBA32 for now
 			draw_scaled_image(source, 0, 0, target.width, target.height);
@@ -1167,7 +1167,7 @@ function ui_base_render() {
 		g2_begin(null);
 	}
 
-	if (!ui_base_show || sys_width() == 0 || sys_height() == 0) {
+	if (!ui_base_show || kinc_window_width() == 0 || kinc_window_height() == 0) {
 		return;
 	}
 
@@ -1208,7 +1208,7 @@ function ui_base_draw_sidebar() {
 	// Tabs
 	let mini: bool = config_raw.layout[layout_size_t.SIDEBAR_W] <= ui_base_sidebar_mini_w;
 	let expand_button_offset: i32 = config_raw.touch_ui ? math_floor(ui_ELEMENT_H(ui_base_ui) + ui_ELEMENT_OFFSET(ui_base_ui)) : 0;
-	ui_base_tabx = sys_width() - config_raw.layout[layout_size_t.SIDEBAR_W];
+	ui_base_tabx = kinc_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W];
 
 	let _SCROLL_W: i32 = ui_base_ui.ops.theme.SCROLL_W;
 	if (mini) {
@@ -1235,7 +1235,7 @@ function ui_base_draw_sidebar() {
 	if (config_raw.touch_ui) {
 		let width: i32 = config_raw.layout[layout_size_t.SIDEBAR_W];
 		let height: i32 = math_floor(ui_ELEMENT_H(ui_base_ui) + ui_ELEMENT_OFFSET(ui_base_ui));
-		if (ui_window(ui_handle(__ID__), sys_width() - width, sys_height() - height, width, height + 1)) {
+		if (ui_window(ui_handle(__ID__), kinc_window_width() - width, kinc_window_height() - height, width, height + 1)) {
 			ui_base_ui._w = width;
 			let _BUTTON_H: i32 = ui_base_ui.ops.theme.BUTTON_H;
 			let _BUTTON_COL: i32 = ui_base_ui.ops.theme.BUTTON_COL;
@@ -1253,7 +1253,7 @@ function ui_base_draw_sidebar() {
 	// Expand button
 	if (config_raw.layout[layout_size_t.SIDEBAR_W] == 0) {
 		let width: i32 = math_floor(g2_font_width(ui_base_ui.ops.font, ui_base_ui.font_size, "<<") + 25 * ui_SCALE(ui_base_ui));
-		if (ui_window(ui_base_hminimized, sys_width() - width, 0, width, math_floor(ui_ELEMENT_H(ui_base_ui) + ui_ELEMENT_OFFSET(ui_base_ui) + 1))) {
+		if (ui_window(ui_base_hminimized, kinc_window_width() - width, 0, width, math_floor(ui_ELEMENT_H(ui_base_ui) + ui_ELEMENT_OFFSET(ui_base_ui) + 1))) {
 			ui_base_ui._w = width;
 			let _BUTTON_H: i32 = ui_base_ui.ops.theme.BUTTON_H;
 			let _BUTTON_COL: i32 = ui_base_ui.ops.theme.BUTTON_COL;
@@ -1286,7 +1286,7 @@ function ui_base_render_cursor() {
 		return;
 	}
 
-	g2_set_color(0xffffffff);
+	draw_set_color(0xffffffff);
 
 	context_raw.view_index = context_raw.view_index_last;
 	let mx: i32 = base_x() + context_raw.paint_vec.x * base_w();
@@ -1295,8 +1295,8 @@ function ui_base_render_cursor() {
 
 	// Radius being scaled
 	if (context_raw.brush_locked) {
-		mx += context_raw.lock_started_x - sys_width() / 2;
-		my += context_raw.lock_started_y - sys_height() / 2;
+		mx += context_raw.lock_started_x - kinc_window_width() / 2;
+		my += context_raw.lock_started_y - kinc_window_height() / 2;
 	}
 
 	if (context_raw.brush_stencil_image != null &&
@@ -1308,14 +1308,14 @@ function ui_base_render_cursor() {
 		context_raw.tool != workspace_tool_t.COLORID) {
 		let r: rect_t = ui_base_get_brush_stencil_rect();
 		if (!operator_shortcut(map_get(config_keymap, "stencil_hide"), shortcut_type_t.DOWN)) {
-			g2_set_color(0x88ffffff);
+			draw_set_color(0x88ffffff);
 			let angle: f32 = context_raw.brush_stencil_angle;
 			let cx: f32 = r.x + r.w / 2;
 			let cy: f32 = r.y + r.h / 2;
 			g2_set_transformation(mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(-angle)), mat3_translation(-cx, -cy)));
 			draw_scaled_image(context_raw.brush_stencil_image, r.x, r.y, r.w, r.h);
 			g2_set_transformation(mat3_nan());
-			g2_set_color(0xffffffff);
+			draw_set_color(0xffffffff);
 		}
 		let transform: bool = operator_shortcut(map_get(config_keymap, "stencil_transform"), shortcut_type_t.DOWN);
 		if (transform) {
@@ -1352,9 +1352,9 @@ function ui_base_render_cursor() {
 
 	// Clone source cursor
 	if (context_raw.tool == workspace_tool_t.CLONE && !keyboard_down("alt") && (mouse_down() || pen_down())) {
-		g2_set_color(0x66ffffff);
+		draw_set_color(0x66ffffff);
 		draw_scaled_image(cursor_img, mx + context_raw.clone_delta_x * app_w() - psize / 2, my + context_raw.clone_delta_y * app_h() - psize / 2, psize, psize);
-		g2_set_color(0xffffffff);
+		draw_set_color(0xffffffff);
 	}
 
 	let decal: bool = context_is_decal();
@@ -1370,8 +1370,8 @@ function ui_base_render_cursor() {
 
 				// Radius being scaled
 				if (context_raw.brush_locked) {
-					context_raw.decal_x += (context_raw.lock_started_x - sys_width() / 2) / base_w();
-					context_raw.decal_y += (context_raw.lock_started_y - sys_height() / 2) / base_h();
+					context_raw.decal_x += (context_raw.lock_started_x - kinc_window_width() / 2) / base_w();
+					context_raw.decal_y += (context_raw.lock_started_y - kinc_window_height() / 2) / base_h();
 				}
 			}
 
@@ -1384,14 +1384,14 @@ function ui_base_render_cursor() {
 				let decaly: f32 = base_y() + context_raw.decal_y * base_h() - psizey / 2;
 				context_raw.view_index = -1;
 
-				g2_set_color(color_from_floats(1, 1, 1, decal_alpha));
+				draw_set_color(color_from_floats(1, 1, 1, decal_alpha));
 				let angle: f32 = (context_raw.brush_angle + context_raw.brush_nodes_angle) * (math_pi() / 180);
 				let cx: f32 = decalx + psizex / 2;
 				let cy: f32 = decaly + psizey / 2;
 				g2_set_transformation(mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(angle)), mat3_translation(-cx, -cy)));
 				draw_scaled_image(context_raw.decal_image, decalx, decaly, psizex, psizey);
 				g2_set_transformation(mat3_nan());
-				g2_set_color(0xffffffff);
+				draw_set_color(0xffffffff);
 			}
 		}
 		if (context_raw.tool == workspace_tool_t.BRUSH  ||
@@ -1425,9 +1425,9 @@ function ui_base_render_cursor() {
 		mx = context_raw.brush_lazy_x * base_w() + base_x();
 		my = context_raw.brush_lazy_y * base_h() + base_y();
 		let radius: f32 = context_raw.brush_lazy_radius * 180;
-		g2_set_color(0xff666666);
+		draw_set_color(0xff666666);
 		draw_scaled_image(cursor_img, mx - radius / 2, my - radius / 2, radius, radius);
-		g2_set_color(0xffffffff);
+		draw_set_color(0xffffffff);
 	}
 }
 

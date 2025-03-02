@@ -10,7 +10,7 @@ let data_cached_shaders: map_t<string, shader_data_t> = map_create();
 let data_cached_blobs: map_t<string, buffer_t> = map_create();
 let data_cached_images: map_t<string, image_t> = map_create();
 let data_cached_videos: map_t<string, video_t> = map_create();
-let data_cached_fonts: map_t<string, g2_font_t> = map_create();
+let data_cached_fonts: map_t<string, draw_font_t> = map_create();
 ///if arm_audio
 let data_cached_sounds: map_t<string, sound_t> = map_create();
 ///end
@@ -140,14 +140,14 @@ function data_get_video(file: string): video_t {
 	return null;
 }
 
-function data_get_font(file: string): g2_font_t {
-	let cached: g2_font_t = map_get(data_cached_fonts, file);
+function data_get_font(file: string): draw_font_t {
+	let cached: draw_font_t = map_get(data_cached_fonts, file);
 	if (cached != null) {
 		return cached;
 	}
 
 	let blob: buffer_t = iron_load_blob(data_resolve_path(file));
-	let b: g2_font_t = g2_font_create(blob);
+	let b: draw_font_t = g2_font_create(blob);
 	map_set(data_cached_fonts, file, b);
 	data_assets_loaded++;
 	return b;
@@ -203,7 +203,7 @@ function data_delete_video(handle: string) {
 }
 
 function data_delete_font(handle: string) {
-	let font: g2_font_t = map_get(data_cached_fonts, handle);
+	let font: draw_font_t = map_get(data_cached_fonts, handle);
 	if (font == null) {
 		return;
 	}
@@ -269,7 +269,7 @@ function data_delete_all() {
 
 	let cached_fonts_keys: string[] = map_keys(data_cached_fonts);
 	for (let i: i32 = 0; i < cached_fonts_keys.length; ++i) {
-		let c: g2_font_t = map_get(data_cached_fonts, cached_fonts_keys[i]);
+		let c: draw_font_t = map_get(data_cached_fonts, cached_fonts_keys[i]);
 		g2_font_unload(c);
 	}
 	data_cached_fonts = map_create();

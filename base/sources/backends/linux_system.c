@@ -373,7 +373,7 @@ void kinc_window_set_title(const char *_title) {
 	xlib.XFlush(x11_ctx.display);
 }
 
-void kinc_window_create(kinc_window_options_t *win, kinc_framebuffer_options_t *frame) {
+void kinc_window_create(kinc_window_options_t *win) {
 	struct kinc_x11_window *window = &x11_ctx.windows[0];
 	window->width = win->width;
 	window->height = win->height;
@@ -424,7 +424,7 @@ void kinc_window_create(kinc_window_options_t *win, kinc_framebuffer_options_t *
 		xlib.XSelectExtensionEvent(x11_ctx.display, window->window, &x11_ctx.eraser.motionClass, 1);
 	}
 
-	kinc_g4_internal_init_window(frame->depth_bits, frame->vertical_sync);
+	kinc_g4_internal_init_window(win->depth_bits, win->vsync);
 }
 
 static struct {
@@ -1434,7 +1434,7 @@ kinc_ticks_t kinc_timestamp(void) {
 	return (kinc_ticks_t)now.tv_sec * 1000000 + (kinc_ticks_t)now.tv_usec;
 }
 
-void kinc_init(const char *name, int width, int height, kinc_window_options_t *win, kinc_framebuffer_options_t *frame) {
+void kinc_init(const char *name, int width, int height, kinc_window_options_t *win) {
 	kinc_linux_initHIDGamepads();
 
 	gettimeofday(&start, NULL);
@@ -1450,18 +1450,13 @@ void kinc_init(const char *name, int width, int height, kinc_window_options_t *w
 		kinc_window_options_set_defaults(&defaultWin);
 		win = &defaultWin;
 	}
-	kinc_framebuffer_options_t defaultFrame;
-	if (frame == NULL) {
-		kinc_framebuffer_options_set_defaults(&defaultFrame);
-		frame = &defaultFrame;
-	}
 	win->width = width;
 	win->height = height;
 	if (win->title == NULL) {
 		win->title = name;
 	}
 
-	kinc_window_create(win, frame);
+	kinc_window_create(win);
 }
 
 void kinc_internal_shutdown() {

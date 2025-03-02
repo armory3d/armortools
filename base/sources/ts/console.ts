@@ -6,15 +6,15 @@ let console_last_traces: string[] = [""];
 let console_progress_text: string = null;
 
 function console_draw_toast(s: string) {
-	g2_set_color(0x55000000);
-	draw_filled_rect(0, 0, sys_width(), sys_height());
+	draw_set_color(0x55000000);
+	draw_filled_rect(0, 0, kinc_window_width(), kinc_window_height());
 	let scale: f32 = ui_SCALE(base_get_uis()[0]);
-	let x: f32 = sys_width() / 2;
-	let y: f32 = sys_height() - 200 * scale;
+	let x: f32 = kinc_window_width() / 2;
+	let y: f32 = kinc_window_height() - 200 * scale;
 	draw_filled_rect(x - 200 * scale, y, 400 * scale, 80 * scale);
 	g2_set_font(base_font);
 	g2_set_font_size(math_floor(22 * scale));
-	g2_set_color(0xffffffff);
+	draw_set_color(0xffffffff);
 	draw_string(s, x - g2_font_width(_g2_font, _g2_font_size, s) / 2, y + 40 * scale - g2_font_height(_g2_font, _g2_font_size) / 2);
 }
 

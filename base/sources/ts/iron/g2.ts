@@ -1,17 +1,18 @@
 
-declare type g2_font_t = {
-	font_?: any; // draw_font_t
-	blob?: buffer_t;
+declare type draw_font_t = {
+	blob?: any; // unsigned char *
+	images: any; // draw_font_image_t *
+	m_capacity?: i32;
+	m_images_len?: i32;
+	offset?: 32;
+
+	buf?: buffer_t;
 	glyphs?: i32[];
 	index?: i32;
 };
 
-let _g2_color: color_t;
-let _g2_font: g2_font_t;
+let _g2_font: draw_font_t;
 let _g2_font_size: i32 = 0;
-let _g2_pipeline: pipeline_t;
-let _g2_transformation: mat3_t = mat3_nan();
-let _g2_render_target: image_t;
 
 let _g2_current: image_t = null;
 let _g2_in_use: bool = false;
@@ -21,17 +22,12 @@ let _g2_thrown: bool = false;
 let _g2_mat: f32_array_t = f32_array_create(9);
 let _g2_initialized: bool = false;
 
-function g2_set_color(c: color_t) {
-	draw_set_color(c);
-	_g2_color = c;
-}
-
-function g2_set_font_and_size(font: g2_font_t, font_size: i32) {
+function g2_set_font_and_size(font: draw_font_t, font_size: i32) {
 	g2_font_init(font);
-	draw_set_font(font.font_, font_size);
+	draw_set_font(font, font_size);
 }
 
-function g2_set_font(f: g2_font_t) {
+function g2_set_font(f: draw_font_t) {
 	if (_g2_font_size != 0) {
 		g2_set_font_and_size(f, _g2_font_size);
 	}
@@ -39,7 +35,7 @@ function g2_set_font(f: g2_font_t) {
 }
 
 function g2_set_font_size(i: i32) {
-	if (_g2_font.font_ != null) {
+	if (_g2_font != null) {
 		g2_set_font_and_size(_g2_font, i);
 	}
 	_g2_font_size = i;
@@ -47,7 +43,6 @@ function g2_set_font_size(i: i32) {
 
 function g2_set_pipeline(p: pipeline_t) {
 	draw_set_pipeline(p == null ? null : p.pipeline_);
-	_g2_pipeline = p;
 }
 
 function g2_set_transformation(m: mat3_t) {
@@ -90,16 +85,6 @@ function g2_init() {
 	}
 }
 
-function g2_scissor(x: i32, y: i32, width: i32, height: i32) {
-	draw_end(); // flush
-	g4_scissor(x, y, width, height);
-}
-
-function g2_disable_scissor() {
-	draw_end(); // flush
-	g4_disable_scissor();
-}
-
 function g2_begin(render_target: image_t = null) {
 	if (_g2_in_use && !_g2_thrown) {
 		_g2_thrown = true;
@@ -129,47 +114,43 @@ function g2_end() {
 	draw_end();
 }
 
-function g2_clear(color: color_t = 0x00000000) {
-	g4_clear(color);
-}
-
-function g2_font_init(raw: g2_font_t) {
+function g2_font_init(raw: draw_font_t) {
 	if (_g2_font_glyphs_last != _g2_font_glyphs) {
 		_g2_font_glyphs_last = _g2_font_glyphs;
 		draw_font_set_glyphs(_g2_font_glyphs);
 	}
 	if (raw.glyphs != _g2_font_glyphs) {
 		raw.glyphs = _g2_font_glyphs;
-		raw.font_ = draw_font_init(raw.blob, raw.index);
+		draw_font_init(raw, raw.buf.buffer, raw.index);
 	}
 }
 
-function g2_font_create(blob: buffer_t, index: i32 = 0): g2_font_t {
-	let raw: g2_font_t = {};
-	raw.blob = blob;
+function g2_font_create(buf: buffer_t, index: i32 = 0): draw_font_t {
+	let raw: draw_font_t = {};
+	raw.buf = buf;
 	raw.index = index;
 	return raw;
 }
 
-function g2_font_height(raw: g2_font_t, size: i32): f32 {
+function g2_font_height(raw: draw_font_t, size: i32): f32 {
 	g2_font_init(raw);
-	return draw_font_height(raw.font_, size);
+	return draw_font_height(raw, size);
 }
 
-function g2_font_width(raw: g2_font_t, size: i32, str: string): f32 {
+function g2_font_width(raw: draw_font_t, size: i32, str: string): f32 {
 	g2_font_init(raw);
-	return draw_string_width(raw.font_, size, str);
+	return draw_string_width(raw, size, str);
 }
 
-function g2_font_unload(raw: g2_font_t) {
-	raw.blob = null;
+function g2_font_unload(raw: draw_font_t) {
+	raw.buf = null;
 }
 
-function g2_font_set_font_index(raw: g2_font_t, index: i32) {
+function g2_font_set_font_index(raw: draw_font_t, index: i32) {
 	raw.index = index;
 	_g2_font_glyphs = array_slice(_g2_font_glyphs, 0, _g2_font_glyphs.length); // Trigger atlas update
 }
 
-function g2_font_clone(raw: g2_font_t): g2_font_t {
-	return g2_font_create(raw.blob, raw.index);
+function g2_font_clone(raw: draw_font_t): draw_font_t {
+	return g2_font_create(raw.buf, raw.index);
 }

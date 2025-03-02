@@ -30,14 +30,11 @@ typedef struct draw_font {
 	size_t m_capacity;
 	size_t m_images_len;
 	int offset;
-} draw_font_t;
 
-typedef struct g2_font {
-	draw_font_t *font_;
-	void *blob; // buffer_t
+	buffer_t *buf;
 	void *glyphs; // i32_array_t
 	int index;
-} g2_font_t;
+} draw_font_t;
 
 void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_vert, buffer_t *colored_frag, buffer_t *text_vert, buffer_t *text_frag);
 void draw_begin(void);
@@ -65,8 +62,8 @@ uint32_t draw_get_color();
 void draw_set_pipeline(kinc_g5_pipeline_t *pipeline);
 void draw_set_transform(buffer_t *matrix);
 bool draw_set_font(draw_font_t *font, int size);
-draw_font_t *draw_font_init(buffer_t *blob, int font_index);
-draw_font_t *draw_font_13(buffer_t *blob);
+void draw_font_init(draw_font_t *font, void *blob, int font_index);
+void draw_font_13(draw_font_t *font, void *blob);
 bool draw_font_has_glyph(int glyph);
 void draw_font_set_glyphs(i32_array_t *glyphs);
 void draw_font_add_glyph(int glyph);

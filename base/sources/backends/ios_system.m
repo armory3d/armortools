@@ -614,19 +614,14 @@ void KoreUpdateKeyboard(void) {
 
 void kinc_internal_shutdown(void) {}
 
-void kinc_init(const char *name, int width, int height, struct kinc_window_options *win, struct kinc_framebuffer_options *frame) {
+void kinc_init(const char *name, int width, int height, struct kinc_window_options *win) {
 	kinc_window_options_t defaultWin;
 	if (win == NULL) {
 		kinc_window_options_set_defaults(&defaultWin);
 		win = &defaultWin;
 	}
-	kinc_framebuffer_options_t defaultFrame;
-	if (frame == NULL) {
-		kinc_framebuffer_options_set_defaults(&defaultFrame);
-		frame = &defaultFrame;
-	}
 	kinc_g5_internal_init();
-	kinc_g4_internal_init_window(frame->depth_bits, true);
+	kinc_g4_internal_init_window(win->depth_bits, true);
 }
 
 void endGL(void);
@@ -732,9 +727,7 @@ void kinc_window_hide() {}
 
 void kinc_window_set_title(const char *title) {}
 
-void kinc_window_create(kinc_window_options_t *win, kinc_framebuffer_options_t *frame) {
-
-}
+void kinc_window_create(kinc_window_options_t *win) {}
 
 void kinc_window_set_resize_callback(void (*callback)(int x, int y, void *data), void *data) {
 	resizeCallback = callback;

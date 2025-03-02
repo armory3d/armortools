@@ -1202,7 +1202,7 @@ void android_main(struct android_app *application) {
 	(*activity->vm)->DetachCurrentThread(activity->vm);
 }
 
-void kinc_init(const char *name, int width, int height, struct kinc_window_options *win, struct kinc_framebuffer_options *frame) {
+void kinc_init(const char *name, int width, int height, struct kinc_window_options *win) {
 	kinc_mutex_init(&unicode_mutex);
 
 	kinc_window_options_t default_win;
@@ -1213,14 +1213,8 @@ void kinc_init(const char *name, int width, int height, struct kinc_window_optio
 	win->width = width;
 	win->height = height;
 
-	kinc_framebuffer_options_t default_frame;
-	if (frame == NULL) {
-		kinc_framebuffer_options_set_defaults(&default_frame);
-		frame = &default_frame;
-	}
-
 	kinc_g5_internal_init();
-	kinc_g4_internal_init_window(frame->depth_bits, true);
+	kinc_g4_internal_init_window(win->depth_bits, true);
 
 	kinc_internal_gamepad_trigger_connect(0);
 }
@@ -1350,9 +1344,7 @@ void kinc_window_hide() {}
 
 void kinc_window_set_title(const char *title) {}
 
-void kinc_window_create(kinc_window_options_t *win, kinc_framebuffer_options_t *frame) {
-
-}
+void kinc_window_create(kinc_window_options_t *win) {}
 
 void kinc_window_set_resize_callback(void (*callback)(int x, int y, void *data), void *data) {
 	resizeCallback = callback;

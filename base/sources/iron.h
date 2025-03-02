@@ -784,30 +784,18 @@ i32 color_set_ab(i32 c, u8 i) {
 	return (i << 24) | (color_get_rb(c) << 16) | (color_get_gb(c) << 8) | color_get_bb(c);
 }
 
-void iron_init(string_t *title, i32 width, i32 height, bool vsync, i32 window_mode, i32 window_features, i32 x, i32 y, i32 frequency, bool use_depth) {
-	kinc_window_options_t win;
-	kinc_framebuffer_options_t frame;
-	win.title = title;
-	win.width = width;
-	win.height = height;
-	frame.vertical_sync = vsync;
-	win.mode = (kinc_window_mode_t)window_mode;
-	win.window_features = window_features;
-	win.x = x;
-	win.y = y;
-	frame.frequency = frequency;
-
-	win.display_index = -1;
-	win.visible = enable_window;
-	frame.color_bits = 32;
-	frame.depth_bits = use_depth ? 24 : 0;
-	kinc_init(title, win.width, win.height, &win, &frame);
+void iron_init(kinc_window_options_t *ops) {
+	ops->display_index = -1;
+	ops->visible = enable_window;
+	ops->color_bits = 32;
+	ops->depth_bits = ops->use_depth ? 24 : 0;
+	kinc_init(ops->title, ops->width, ops->height, ops);
 	kinc_random_init((int)(kinc_time() * 1000));
 
 	#ifdef KINC_WINDOWS
 	// Maximized window has x < -1, prevent window centering done by kinc
-	if (win.x < -1 && win.y < -1) {
-		kinc_window_move(win.x, win.y);
+	if (ops->x < -1 && ops->y < -1) {
+		kinc_window_move(ops->x, ops->y);
 	}
 	#endif
 

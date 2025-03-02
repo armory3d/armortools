@@ -460,6 +460,32 @@ declare type image_t = {
 	height?: i32;
 };
 
+declare type kinc_g5_pipeline_t = {
+	input_layout?: any;
+	vertex_shader?: any;
+	fragment_shader?: any;
+
+	cull_mode?: cull_mode_t;
+	depth_write?: bool;
+	depth_mode?: compare_mode_t;
+
+	blend_source?: blend_factor_t;
+	blend_destination?: blend_factor_t;
+	alpha_blend_source?: blend_factor_t;
+	alpha_blend_destination?: blend_factor_t;
+
+	color_write_mask_red?: any;
+	color_write_mask_green?: any;
+	color_write_mask_blue?: any;
+	color_write_mask_alpha?: any;
+
+	color_attachment?: any;
+	color_attachment_count?: i32;
+	depth_attachment_bits?: i32;
+
+	impl?: any;
+};
+
 type pipeline_t = {
 	pipeline_?: kinc_g5_pipeline_t;
 	input_layout?: vertex_struct_t;
@@ -505,32 +531,6 @@ declare type kinc_vertex_elem_t = {
 
 type kinc_const_loc_t = any;
 type kinc_tex_unit_t = any;
-
-declare type kinc_g5_pipeline_t = {
-	input_layout?: any;
-	vertex_shader?: any;
-	fragment_shader?: any;
-
-	cull_mode?: cull_mode_t;
-	depth_write?: bool;
-	depth_mode?: compare_mode_t;
-
-	blend_source?: blend_factor_t;
-	blend_destination?: blend_factor_t;
-	alpha_blend_source?: blend_factor_t;
-	alpha_blend_destination?: blend_factor_t;
-
-	color_write_mask_red?: any;
-	color_write_mask_green?: any;
-	color_write_mask_blue?: any;
-	color_write_mask_alpha?: any;
-
-	color_attachment?: any;
-	color_attachment_count?: i32;
-	depth_attachment_bits?: i32;
-
-	impl?: any;
-};
 
 type iron_texture_t = {
 	width?: i32;

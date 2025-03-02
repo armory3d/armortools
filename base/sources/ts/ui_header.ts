@@ -24,9 +24,9 @@ function ui_header_render_ui() {
 
 	let nodesw: i32 = (ui_nodes_show || ui_view2d_show) ? config_raw.layout[layout_size_t.NODES_W] : 0;
 	///if is_lab
-	let ww: i32 = sys_width() - nodesw;
+	let ww: i32 = kinc_window_width() - nodesw;
 	///else
-	let ww: i32 = sys_width() - ui_toolbar_w - config_raw.layout[layout_size_t.SIDEBAR_W] - nodesw;
+	let ww: i32 = kinc_window_width() - ui_toolbar_w - config_raw.layout[layout_size_t.SIDEBAR_W] - nodesw;
 	///end
 
 	if (ui_window(ui_header_handle, app_x(), ui_header_h, ww, ui_header_h)) {

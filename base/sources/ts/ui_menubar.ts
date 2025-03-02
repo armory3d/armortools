@@ -125,10 +125,10 @@ function ui_menubar_draw_tab_header() {
 
 	let nodesw: i32 = (ui_nodes_show || ui_view2d_show) ? config_raw.layout[layout_size_t.NODES_W] : 0;
 	///if (is_paint || is_sculpt)
-	let ww: i32 = sys_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - ui_menubar_w - nodesw;
+	let ww: i32 = kinc_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - ui_menubar_w - nodesw;
 	panel_x = (app_x() - item_w) + ui_menubar_w;
 	///else
-	let ww: i32 = sys_width() - ui_menubar_w - nodesw;
+	let ww: i32 = kinc_window_width() - ui_menubar_w - nodesw;
 	panel_x = (app_x()) + ui_menubar_w;
 	///end
 

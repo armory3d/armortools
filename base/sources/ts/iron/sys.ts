@@ -22,8 +22,27 @@ let _sys_start_time: f32;
 let _sys_window_title: string;
 let _sys_shaders: map_t<string, shader_t> = map_create();
 
-function sys_start(ops: kinc_sys_ops_t) {
-	iron_init(ops.title, ops.width, ops.height, ops.vsync, ops.mode, ops.features, ops.x, ops.y, ops.frequency, ops.use_depth);
+declare type kinc_window_options_t = {
+	title?: string;
+	x?: i32;
+	y?: i32;
+	width?: i32;
+	height?: i32;
+	features?: window_features_t;
+	mode?: window_mode_t;
+	frequency?: i32;
+	vsync?: bool;
+
+	use_depth?: bool;
+
+	display_index?: i32;
+	visible?: bool;
+	color_bits?: i32;
+	depth_bits?: i32;
+};
+
+function sys_start(ops: kinc_window_options_t) {
+	iron_init(ops);
 
 	_sys_start_time = kinc_time();
 	g2_init();
@@ -127,22 +146,6 @@ function sys_drop_files(file_path: string) {
 
 function sys_time(): f32 {
 	return kinc_time() - _sys_start_time;
-}
-
-function sys_system_id(): string {
-	return kinc_system_id();
-}
-
-function sys_language(): string {
-	return kinc_language();
-}
-
-function sys_stop() {
-	kinc_stop();
-}
-
-function sys_load_url(url: string) {
-	kinc_load_url(url);
 }
 
 function sys_render_callback() {
@@ -262,23 +265,15 @@ function sys_gamepad_button_callback(gamepad: i32, button: i32, value: f32) {
 }
 
 function sys_lock_mouse() {
-	if (!sys_is_mouse_locked()) {
+	if (!kinc_mouse_is_locked()) {
 		kinc_mouse_lock();
 	}
 }
 
 function sys_unlock_mouse() {
-	if (sys_is_mouse_locked()) {
+	if (kinc_mouse_is_locked()) {
 		kinc_mouse_unlock();
 	}
-}
-
-function sys_can_lock_mouse(): bool {
-	return kinc_mouse_can_lock();
-}
-
-function sys_is_mouse_locked(): bool {
-	return kinc_mouse_is_locked();
 }
 
 function sys_hide_system_cursor() {
@@ -287,38 +282,6 @@ function sys_hide_system_cursor() {
 
 function sys_show_system_cursor() {
 	iron_show_mouse(true);
-}
-
-function sys_resize(width: i32, height: i32) {
-	kinc_window_resize(width, height);
-}
-
-function sys_move(x: i32, y: i32) {
-	kinc_window_move(x, y);
-}
-
-function sys_x(): i32 {
-	return kinc_window_x();
-}
-
-function sys_y(): i32 {
-	return kinc_window_y();
-}
-
-function sys_width(): i32 {
-	return kinc_window_width();
-}
-
-function sys_height(): i32 {
-	return kinc_window_height();
-}
-
-function sys_mode(): window_mode_t {
-	return kinc_window_get_mode();
-}
-
-function sys_mode_set(mode: window_mode_t) {
-	iron_set_window_mode(mode);
 }
 
 function sys_title(): string {
@@ -407,19 +370,6 @@ type video_t = {
 
 type sound_t = {
 	sound_?: any;
-};
-
-type kinc_sys_ops_t = {
-	title?: string;
-	x?: i32;
-	y?: i32;
-	width?: i32;
-	height?: i32;
-	features?: window_features_t;
-	mode?: window_mode_t;
-	frequency?: i32;
-	vsync?: bool;
-	use_depth?: bool;
 };
 
 enum window_features_t {

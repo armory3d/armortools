@@ -87,14 +87,12 @@ void kinc_window_options_set_defaults(kinc_window_options_t *win) {
 	win->width = 800;
 	win->height = 600;
 	win->visible = true;
-	win->window_features = KINC_WINDOW_FEATURE_RESIZEABLE | KINC_WINDOW_FEATURE_MINIMIZABLE | KINC_WINDOW_FEATURE_MAXIMIZABLE;
-}
+	win->features = KINC_WINDOW_FEATURE_RESIZEABLE | KINC_WINDOW_FEATURE_MINIMIZABLE | KINC_WINDOW_FEATURE_MAXIMIZABLE;
 
-void kinc_framebuffer_options_set_defaults(kinc_framebuffer_options_t *frame) {
-	frame->frequency = 60;
-	frame->vertical_sync = true;
-	frame->color_bits = 32;
-	frame->depth_bits = 16;
+	win->frequency = 60;
+	win->vsync = true;
+	win->color_bits = 32;
+	win->depth_bits = 16;
 }
 
 #if !defined(KINC_WASM) && !defined(KINC_ANDROID) && !defined(KINC_WINDOWS)

@@ -946,7 +946,7 @@ void draw_font_default_glyphs() {
 	draw_font_glyph_blocks[1] = 126;
 }
 
-void _draw_font_init(draw_font_t *font, void *blob, int font_index) {
+void draw_font_init(draw_font_t *font, void *blob, int font_index) {
 	if (draw_font_glyphs == NULL) {
 		draw_font_default_glyphs();
 	}
@@ -961,13 +961,7 @@ void _draw_font_init(draw_font_t *font, void *blob, int font_index) {
 	}
 }
 
-draw_font_t *draw_font_init(buffer_t *blob, int font_index) {
-	draw_font_t *font = (draw_font_t *)malloc(sizeof(draw_font_t));
-	_draw_font_init(font, blob->buffer, font_index);
-	return font;
-}
-
-void _draw_font_13(draw_font_t *font, void *blob) {
+void draw_font_13(draw_font_t *font, void *blob) {
 	if (draw_font_glyphs == NULL) {
 		draw_font_default_glyphs();
 	}
@@ -1002,12 +996,6 @@ void _draw_font_13(draw_font_t *font, void *blob) {
 		baked[i].xadvance = iron_font_13_xadvance[i];
 	}
 	img->chars = baked;
-}
-
-draw_font_t *draw_font_13(buffer_t *blob) {
-	draw_font_t *font = (draw_font_t *)malloc(sizeof(draw_font_t));
-	_draw_font_13(font, blob->buffer);
-	return font;
 }
 
 bool draw_font_has_glyph(int glyph) {

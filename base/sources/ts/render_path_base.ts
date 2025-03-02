@@ -95,7 +95,7 @@ function render_path_base_ssaa4(): bool {
 }
 
 function render_path_base_is_cached(): bool {
-	if (sys_width() == 0 || sys_height() == 0) {
+	if (kinc_window_width() == 0 || kinc_window_height() == 0) {
 		return true;
 	}
 

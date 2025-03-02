@@ -81,7 +81,7 @@ function ui_view2d_render() {
 	if (!ui_view2d_show) {
 		return;
 	}
-	if (sys_width() == 0 || sys_height() == 0) {
+	if (kinc_window_width() == 0 || kinc_window_height() == 0) {
 		return;
 	}
 
@@ -117,8 +117,8 @@ function ui_view2d_render() {
 	ui_begin(ui_view2d_ui);
 
 	let headerh: i32 = config_raw.layout[layout_size_t.HEADER] == 1 ? ui_header_h * 2 : ui_header_h;
-	let apph: i32 = sys_height() - config_raw.layout[layout_size_t.STATUS_H] + headerh;
-	ui_view2d_wh = sys_height() - config_raw.layout[layout_size_t.STATUS_H];
+	let apph: i32 = kinc_window_height() - config_raw.layout[layout_size_t.STATUS_H] + headerh;
+	ui_view2d_wh = kinc_window_height() - config_raw.layout[layout_size_t.STATUS_H];
 
 	if (ui_nodes_show) {
 		ui_view2d_wh -= config_raw.layout[layout_size_t.NODES_H];
@@ -132,7 +132,7 @@ function ui_view2d_render() {
 		ui_tab(ui_handle(__ID__), tr("2D View"));
 
 		// Grid
-		g2_set_color(0xffffffff);
+		draw_set_color(0xffffffff);
 		let step: f32 = ui_nodes_grid_cell_w * ui_view2d_pan_scale;
 		let x: f32 = math_fmod(ui_view2d_pan_x, step) - step;
 		let y: f32 = math_fmod(ui_view2d_pan_y, step) - step;
@@ -291,9 +291,9 @@ function ui_view2d_render() {
 
 		// Menu
 		let ew: i32 = math_floor(ui_ELEMENT_W(ui_view2d_ui));
-		g2_set_color(ui_view2d_ui.ops.theme.SEPARATOR_COL);
+		draw_set_color(ui_view2d_ui.ops.theme.SEPARATOR_COL);
 		draw_filled_rect(0, ui_ELEMENT_H(ui_view2d_ui), ui_view2d_ww, ui_ELEMENT_H(ui_view2d_ui) + ui_ELEMENT_OFFSET(ui_view2d_ui) * 2);
-		g2_set_color(0xffffffff);
+		draw_set_color(0xffffffff);
 
 		let start_y: f32 = ui_ELEMENT_H(ui_view2d_ui) + ui_ELEMENT_OFFSET(ui_view2d_ui);
 		ui_view2d_ui._x = 2;

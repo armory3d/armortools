@@ -94,7 +94,7 @@ function ui_toolbar_render_ui() {
 
 	let x: i32 = 0;
 	let y: i32 = ui_header_h;
-	let h: i32 = sys_height() - ui_header_h;
+	let h: i32 = kinc_window_height() - ui_header_h;
 	let _WINDOW_BG_COL: i32 = ui.ops.theme.WINDOW_BG_COL;
 
 	if (context_is_floating_toolbar()) {
@@ -246,6 +246,6 @@ function ui_toolbar_tool_properties_menu() {
 function ui_toolbar_draw_highlight() {
 	let ui: ui_t = ui_base_ui;
 	let size: i32 = ui_toolbar_w - 4;
-	g2_set_color(ui.ops.theme.HIGHLIGHT_COL);
+	draw_set_color(ui.ops.theme.HIGHLIGHT_COL);
 	ui_draw_rect(true, ui._x + -1,  ui._y + 2, size + 2, size + 2);
 }

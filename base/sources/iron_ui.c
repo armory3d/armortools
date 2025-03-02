@@ -314,13 +314,13 @@ void ui_draw_string(char *text, float x_offset, float y_offset, int align, bool 
 		char *full_text = text;
 		strcpy(truncated, text);
 		text = &truncated[0];
-		while (strlen(text) > 0 && draw_string_width(current->ops->font->font_, current->font_size, text) > current->_w - 6.0 * UI_SCALE()) {
+		while (strlen(text) > 0 && draw_string_width(current->ops->font, current->font_size, text) > current->_w - 6.0 * UI_SCALE()) {
 			text[strlen(text) - 1] = 0;
 		}
 		if (strlen(text) < strlen(full_text)) {
 			strcat(text, "..");
 			// Strip more to fit ".."
-			while (strlen(text) > 2 && draw_string_width(current->ops->font->font_, current->font_size, text) > current->_w - 10.0 * UI_SCALE()) {
+			while (strlen(text) > 2 && draw_string_width(current->ops->font, current->font_size, text) > current->_w - 10.0 * UI_SCALE()) {
 				text[strlen(text) - 3] = 0;
 				strcat(text, "..");
 			}
@@ -344,12 +344,12 @@ void ui_draw_string(char *text, float x_offset, float y_offset, int align, bool 
 		x_offset = theme->TEXT_OFFSET;
 	}
 	x_offset *= UI_SCALE();
-	draw_set_font(current->ops->font->font_, current->font_size);
+	draw_set_font(current->ops->font, current->font_size);
 	if (align == UI_ALIGN_CENTER) {
-		x_offset = current->_w / 2.0 - draw_string_width(current->ops->font->font_, current->font_size, text) / 2.0;
+		x_offset = current->_w / 2.0 - draw_string_width(current->ops->font, current->font_size, text) / 2.0;
 	}
 	else if (align == UI_ALIGN_RIGHT) {
-		x_offset = current->_w - draw_string_width(current->ops->font->font_, current->font_size, text) - UI_TEXT_OFFSET();
+		x_offset = current->_w - draw_string_width(current->ops->font, current->font_size, text) - UI_TEXT_OFFSET();
 	}
 
 	if (!current->enabled) {
@@ -576,14 +576,14 @@ void ui_draw_tooltip_text(bool bind_global_g) {
 	int line_count = ui_line_count(current->tooltip_text);
 	float tooltip_w = 0.0;
 	for (int i = 0; i < line_count; ++i) {
-		float line_tooltip_w = draw_string_width(current->ops->font->font_, current->font_size, ui_extract_line(current->tooltip_text, i));
+		float line_tooltip_w = draw_string_width(current->ops->font, current->font_size, ui_extract_line(current->tooltip_text, i));
 		if (line_tooltip_w > tooltip_w) {
 			tooltip_w = line_tooltip_w;
 		}
 	}
 	current->tooltip_x = fmin(current->tooltip_x, kinc_window_width() - tooltip_w - 20);
 	if (bind_global_g) draw_restore_render_target();
-	float font_height = draw_font_height(current->ops->font->font_, current->font_size);
+	float font_height = draw_font_height(current->ops->font, current->font_size);
 	float off = 0;
 	if (current->tooltip_img != NULL) {
 		float w = current->tooltip_img->width;
@@ -608,7 +608,7 @@ void ui_draw_tooltip_text(bool bind_global_g) {
 	draw_set_color(theme->SEPARATOR_COL);
 	draw_filled_rect(x, y, w, h);
 
-	draw_set_font(current->ops->font->font_, current->font_size);
+	draw_set_font(current->ops->font, current->font_size);
 	draw_set_color(theme->TEXT_COL);
 	for (int i = 0; i < line_count; ++i) {
 		draw_string(ui_extract_line(current->tooltip_text, i), current->tooltip_x + 5, current->tooltip_y + off + i * current->font_size);
@@ -659,12 +659,12 @@ void ui_draw_tooltip(bool bind_global_g) {
 		if (bind_global_g) {
 			draw_restore_render_target();
 		}
-		draw_set_font(current->ops->font->font_, current->font_size * 2);
+		draw_set_font(current->ops->font, current->font_size * 2);
 		sprintf(temp, "%f", round(current->scroll_handle->value * 100.0) / 100.0);
 		string_strip_trailing_zeros(temp);
 		char *text = temp;
-		float x_off = draw_string_width(current->ops->font->font_, current->font_size * 2.0, text) / 2.0;
-		float y_off = draw_font_height(current->ops->font->font_, current->font_size * 2.0);
+		float x_off = draw_string_width(current->ops->font, current->font_size * 2.0, text) / 2.0;
+		float y_off = draw_font_height(current->ops->font, current->font_size * 2.0);
 		float x = fmin(fmax(current->slider_tooltip_x, current->input_x), current->slider_tooltip_x + current->slider_tooltip_w);
 		draw_set_color(theme->BUTTON_COL);
 		draw_filled_rect(x - x_off, current->slider_tooltip_y - y_off, x_off * 2.0, y_off);
@@ -675,9 +675,9 @@ void ui_draw_tooltip(bool bind_global_g) {
 		if (bind_global_g) {
 			draw_restore_render_target();
 		}
-		draw_set_font(current->ops->font->font_, current->font_size * 2.0);
-		float x_off = draw_string_width(current->ops->font->font_, current->font_size * 2.0, current->text_selected) / 2.0;
-		float y_off = draw_font_height(current->ops->font->font_, current->font_size * 2.0) / 2.0;
+		draw_set_font(current->ops->font, current->font_size * 2.0);
+		float x_off = draw_string_width(current->ops->font, current->font_size * 2.0, current->text_selected) / 2.0;
+		float y_off = draw_font_height(current->ops->font, current->font_size * 2.0) / 2.0;
 		float x = kinc_window_width() / 2.0;
 		float y = kinc_window_height() / 3.0;
 		draw_set_color(theme->BUTTON_COL);
@@ -985,10 +985,10 @@ void ui_end_region(bool last) {
 }
 
 void ui_set_cursor_to_input(int align) {
-	float off = align == UI_ALIGN_LEFT ? UI_TEXT_OFFSET() : current->_w - draw_string_width(current->ops->font->font_, current->font_size, current->text_selected);
+	float off = align == UI_ALIGN_LEFT ? UI_TEXT_OFFSET() : current->_w - draw_string_width(current->ops->font, current->font_size, current->text_selected);
 	float x = current->input_x - (current->_window_x + current->_x + off);
 	current->cursor_x = 0;
-	while (current->cursor_x < strlen(current->text_selected) && draw_sub_string_width(current->ops->font->font_, current->font_size, current->text_selected, 0, current->cursor_x) < x) {
+	while (current->cursor_x < strlen(current->text_selected) && draw_sub_string_width(current->ops->font, current->font_size, current->text_selected, 0, current->cursor_x) < x) {
 		current->cursor_x++;
 	}
 	current->highlight_anchor = current->cursor_x;
@@ -1201,11 +1201,11 @@ void ui_update_text_edit(int align, bool editable, bool live_update) {
 			iend = current->cursor_x;
 		}
 
-		float hlstrw = draw_sub_string_width(current->ops->font->font_, current->font_size, text, istart, iend);
-		float start_off = draw_sub_string_width(current->ops->font->font_, current->font_size, text, 0, istart);
+		float hlstrw = draw_sub_string_width(current->ops->font, current->font_size, text, istart, iend);
+		float start_off = draw_sub_string_width(current->ops->font, current->font_size, text, 0, istart);
 		float hl_start = align == UI_ALIGN_LEFT ? current->_x + start_off + off : current->_x + current->_w - hlstrw - off;
 		if (align == UI_ALIGN_RIGHT) {
-			hl_start -= draw_sub_string_width(current->ops->font->font_, current->font_size, text, iend, strlen(text));
+			hl_start -= draw_sub_string_width(current->ops->font, current->font_size, text, iend, strlen(text));
 		}
 		draw_set_color(theme->ACCENT_COL);
 		draw_filled_rect(hl_start, current->_y + current->button_offset_y * 1.5, hlstrw, cursor_height);
@@ -1214,7 +1214,7 @@ void ui_update_text_edit(int align, bool editable, bool live_update) {
 	// Draw cursor
 	int str_start = align == UI_ALIGN_LEFT ? 0 : current->cursor_x;
 	int str_length = align == UI_ALIGN_LEFT ? current->cursor_x : (strlen(text) - current->cursor_x);
-	float strw = draw_sub_string_width(current->ops->font->font_, current->font_size, text, str_start, str_length);
+	float strw = draw_sub_string_width(current->ops->font, current->font_size, text, str_start, str_length);
 	float cursor_x = align == UI_ALIGN_LEFT ? current->_x + strw + off : current->_x + current->_w - strw - off;
 	draw_set_color(theme->TEXT_COL); // Cursor
 	draw_filled_rect(cursor_x, current->_y + current->button_offset_y * 1.5, 1.0 * UI_SCALE(), cursor_height);
@@ -1289,7 +1289,7 @@ void ui_draw_tabs() {
 		current->_y = base_y + tab_y;
 		current->_w = current->tab_vertical ? (UI_ELEMENT_W() - 1 * UI_SCALE()) :
 			 		  theme->FULL_TABS ? (current->_window_w / current->tab_count) :
-					  (draw_string_width(current->ops->font->font_, current->font_size, current->tab_names[i]) + current->button_offset_y * 2.0 + 18.0 * UI_SCALE());
+					  (draw_string_width(current->ops->font, current->font_size, current->tab_names[i]) + current->button_offset_y * 2.0 + 18.0 * UI_SCALE());
 		bool released = ui_get_released(tab_h);
 		bool started = ui_get_started(tab_h);
 		bool pushed = ui_get_pushed(tab_h);
@@ -1467,7 +1467,7 @@ void ui_draw_slider(float value, float from, float to, bool filled, bool hover) 
 void ui_set_scale(float factor) {
 	current->ops->scale_factor = factor;
 	current->font_size = UI_FONT_SIZE();
-	float font_height = draw_font_height(current->ops->font->font_, current->font_size);
+	float font_height = draw_font_height(current->ops->font, current->font_size);
 	current->font_offset_y = (UI_ELEMENT_H() - font_height) / 2.0; // Precalculate offsets
 	current->arrow_offset_y = (UI_ELEMENT_H() - UI_ARROW_SIZE()) / 2.0;
 	current->arrow_offset_x = current->arrow_offset_y;
@@ -1797,7 +1797,7 @@ int ui_text(char *text, int align, int bg) {
 		ui_split_text(text, align, bg);
 		return UI_STATE_IDLE;
 	}
-	float h = fmax(UI_ELEMENT_H(), draw_font_height(current->ops->font->font_, current->font_size));
+	float h = fmax(UI_ELEMENT_H(), draw_font_height(current->ops->font, current->font_size));
 	if (!ui_is_visible(h)) {
 		ui_end_element_of_size(h + UI_ELEMENT_OFFSET());
 		return UI_STATE_IDLE;
@@ -2112,7 +2112,7 @@ int ui_combo(ui_handle_t *handle, char_ptr_array_t *texts, char *label, bool sho
 			current->combo_selected_w = current->_w;
 			current->combo_search_bar = search_bar;
 			for (int i = 0; i < texts->length; ++i) { // Adapt combo list width to combo item width
-				int w = (int)draw_string_width(current->ops->font->font_, current->font_size, texts->buffer[i]) + 10;
+				int w = (int)draw_string_width(current->ops->font, current->font_size, texts->buffer[i]) + 10;
 				if (current->combo_selected_w < w) {
 					current->combo_selected_w = w;
 				}
@@ -3141,9 +3141,9 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 		new_lines[0] = '\0';
 		for (int i = 0; i < word_count; ++i) {
 			char *w = ui_extract_word(lines, i);
-			float spacew = draw_string_width(current->ops->font->font_, current->font_size, " ");
-			float wordw = spacew + draw_string_width(current->ops->font->font_, current->font_size, w);
-			float linew = wordw + draw_string_width(current->ops->font->font_, current->font_size, line);
+			float spacew = draw_string_width(current->ops->font, current->font_size, " ");
+			float wordw = spacew + draw_string_width(current->ops->font, current->font_size, w);
+			float linew = wordw + draw_string_width(current->ops->font, current->font_size, line);
 			if (linew > current->_w - 10 && linew > wordw) {
 				if (new_lines[0] != '\0') {
 					strcat(new_lines, "\n");
@@ -3243,7 +3243,7 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 					(i <= text_area_selection_start && i > handle->position)) {
 					int line_height = UI_ELEMENT_H();
 					int cursor_height = line_height - current->button_offset_y * 3.0;
-					int linew = draw_string_width(current->ops->font->font_, current->font_size, line);
+					int linew = draw_string_width(current->ops->font, current->font_size, line);
 					draw_set_color(current->ops->theme->ACCENT_COL);
 					draw_filled_rect(current->_x + UI_ELEMENT_OFFSET() * 2.0, current->_y + current->button_offset_y * 1.5, linew, cursor_height);
 				}
@@ -3318,6 +3318,6 @@ void ui_end_menu() {
 
 bool _ui_menu_button(char *text) {
 	ui_t *current = ui_get_current();
-	current->_w = draw_string_width(current->ops->font->font_, current->font_size, text) + 25.0 * UI_SCALE();
+	current->_w = draw_string_width(current->ops->font, current->font_size, text) + 25.0 * UI_SCALE();
 	return ui_button(text, UI_ALIGN_CENTER, "");
 }

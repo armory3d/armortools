@@ -290,7 +290,7 @@ function _render_path_resize_on_init(_image: image_t) {
 }
 
 function render_path_resize() {
-	if (sys_width() == 0 || sys_height() == 0) {
+	if (kinc_window_width() == 0 || kinc_window_height() == 0) {
 		return;
 	}
 

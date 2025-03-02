@@ -670,9 +670,9 @@ function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32,
 				let number: string = i32_to_string(i + 1) ;
 				let width: i32 = g2_font_width(ui.ops.font, ui.font_size, number) + 10;
 				let height: i32 = g2_font_height(ui.ops.font, ui.font_size);
-				g2_set_color(ui.ops.theme.TEXT_COL);
+				draw_set_color(ui.ops.theme.TEXT_COL);
 				draw_filled_rect(uix, uiy, width, height);
-				g2_set_color(ui.ops.theme.BUTTON_COL);
+				draw_set_color(ui.ops.theme.BUTTON_COL);
 				draw_string(number, uix + 5, uiy);
 			}
 		}

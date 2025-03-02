@@ -14,7 +14,7 @@ let base_drag_off_y: f32 = 0.0;
 let base_drag_start: f32 = 0.0;
 let base_drop_x: f32 = 0.0;
 let base_drop_y: f32 = 0.0;
-let base_font: g2_font_t = null;
+let base_font: draw_font_t = null;
 let base_theme: ui_theme_t;
 let base_color_wheel: image_t;
 let base_color_wheel_gradient: image_t;
@@ -36,8 +36,8 @@ let base_default_fov: f32 = 0.69;
 let _base_material_count: i32;
 
 function base_init() {
-	base_last_window_width = sys_width();
-	base_last_window_height = sys_height();
+	base_last_window_width = kinc_window_width();
+	base_last_window_height = kinc_window_height();
 
 	sys_notify_on_drop_files(function (drop_path: string) {
 		///if arm_linux
@@ -69,7 +69,7 @@ function base_init() {
 
 	iron_set_save_and_quit_callback(base_save_and_quit_callback);
 
-	let font: g2_font_t = data_get_font("font.ttf");
+	let font: draw_font_t = data_get_font("font.ttf");
 	let image_color_wheel: image_t = data_get_image("color_wheel.k");
 	let image_color_wheel_gradient: image_t = data_get_image("color_wheel_gradient.k");
 
@@ -86,7 +86,7 @@ function base_init() {
 
 	// Baked font for fast startup
 	if (config_raw.locale == "en") {
-		base_font.font_ = draw_font_13(base_font.blob);
+		draw_font_13(base_font, base_font.buf.buffer);
 		base_font.glyphs = _g2_font_glyphs;
 	}
 	else {
@@ -156,7 +156,7 @@ function base_save_and_quit_callback(save: bool) {
 		project_save(true);
 	}
 	else {
-		sys_stop();
+		kinc_stop();
 	}
 }
 
@@ -174,16 +174,16 @@ function base_w(): i32 {
 	let res: i32 = 0;
 	if (config_raw.layout == null) {
 		let sidebarw: i32 = ui_base_default_sidebar_w;
-		res = sys_width() - sidebarw - ui_toolbar_default_w;
+		res = kinc_window_width() - sidebarw - ui_toolbar_default_w;
 	}
 	else if (ui_nodes_show || ui_view2d_show) {
-		res = sys_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - config_raw.layout[layout_size_t.NODES_W] - ui_toolbar_w;
+		res = kinc_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - config_raw.layout[layout_size_t.NODES_W] - ui_toolbar_w;
 	}
 	else if (ui_base_show) {
-		res = sys_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - ui_toolbar_w;
+		res = kinc_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - ui_toolbar_w;
 	}
 	else { // Distract free
-		res = sys_width();
+		res = kinc_window_width();
 	}
 	if (context_raw.view_index > -1) {
 		res = math_floor(res / 2);
@@ -206,7 +206,7 @@ function base_h(): i32 {
 		return util_render_decal_preview_size;
 	}
 
-	let res: i32 = sys_height();
+	let res: i32 = kinc_window_height();
 
 	if (config_raw.layout == null) {
 		res -= ui_header_default_h * 2 + ui_status_default_status_h;
@@ -235,33 +235,33 @@ function base_y(): i32 {
 }
 
 function base_on_resize() {
-	if (sys_width() == 0 || sys_height() == 0) {
+	if (kinc_window_width() == 0 || kinc_window_height() == 0) {
 		return;
 	}
 
-	let ratio_w: f32 = sys_width() / base_last_window_width;
-	base_last_window_width = sys_width();
-	let ratio_h: f32 = sys_height() / base_last_window_height;
-	base_last_window_height = sys_height();
+	let ratio_w: f32 = kinc_window_width() / base_last_window_width;
+	base_last_window_width = kinc_window_width();
+	let ratio_h: f32 = kinc_window_height() / base_last_window_height;
+	base_last_window_height = kinc_window_height();
 
 	config_raw.layout[layout_size_t.NODES_W] = math_floor(config_raw.layout[layout_size_t.NODES_W] * ratio_w);
 	config_raw.layout[layout_size_t.SIDEBAR_H0] = math_floor(config_raw.layout[layout_size_t.SIDEBAR_H0] * ratio_h);
-	config_raw.layout[layout_size_t.SIDEBAR_H1] = sys_height() - config_raw.layout[layout_size_t.SIDEBAR_H0];
+	config_raw.layout[layout_size_t.SIDEBAR_H1] = kinc_window_height() - config_raw.layout[layout_size_t.SIDEBAR_H0];
 
 	base_resize();
 	base_save_window_rect();
 }
 
 function base_save_window_rect() {
-	config_raw.window_w = sys_width();
-	config_raw.window_h = sys_height();
-	config_raw.window_x = sys_x();
-	config_raw.window_y = sys_y();
+	config_raw.window_w = kinc_window_width();
+	config_raw.window_h = kinc_window_height();
+	config_raw.window_x = kinc_window_x();
+	config_raw.window_y = kinc_window_y();
 	config_save();
 }
 
 function base_resize() {
-	if (sys_width() == 0 || sys_height() == 0) {
+	if (kinc_window_width() == 0 || kinc_window_height() == 0) {
 		return;
 	}
 
@@ -556,7 +556,7 @@ function base_get_drag_image(): image_t {
 }
 
 function base_render() {
-	if (sys_width() == 0 || sys_height() == 0) {
+	if (kinc_window_width() == 0 || kinc_window_height() == 0) {
 		return;
 	}
 
@@ -592,7 +592,7 @@ function base_render() {
 		let h: f32 = img.height * ratio;
 		let inv: i32 = 0;
 
-		g2_set_color(base_drag_tint);
+		draw_set_color(base_drag_tint);
 
 		let bg_rect: rect_t = base_get_drag_background();
 		if (bg_rect != null) {
@@ -602,7 +602,7 @@ function base_render() {
 		base_drag_rect == null ?
 			draw_scaled_image(img, mouse_x + base_drag_off_x, mouse_y + base_drag_off_y + inv, size, h - inv * 2) :
 			draw_scaled_sub_image(img, base_drag_rect.x, base_drag_rect.y, base_drag_rect.w, base_drag_rect.h, mouse_x + base_drag_off_x, mouse_y + base_drag_off_y + inv, size, h - inv * 2);
-		g2_set_color(0xffffffff);
+		draw_set_color(0xffffffff);
 	}
 
 	let using_menu: bool = ui_menu_show && mouse_y > ui_header_h;
@@ -675,17 +675,17 @@ function base_get_asset_index(file_name: string): i32 {
 }
 
 function base_toggle_fullscreen() {
-	if (sys_mode() == window_mode_t.WINDOWED) {
-		config_raw.window_w = sys_width();
-		config_raw.window_h = sys_height();
-		config_raw.window_x = sys_x();
-		config_raw.window_y = sys_y();
-		sys_mode_set(window_mode_t.FULLSCREEN);
+	if (kinc_window_get_mode() == window_mode_t.WINDOWED) {
+		config_raw.window_w = kinc_window_width();
+		config_raw.window_h = kinc_window_height();
+		config_raw.window_x = kinc_window_x();
+		config_raw.window_y = kinc_window_y();
+		iron_set_window_mode(window_mode_t.FULLSCREEN);
 	}
 	else {
-		sys_mode_set(window_mode_t.WINDOWED);
-		sys_resize(config_raw.window_w, config_raw.window_h);
-		sys_move(config_raw.window_x, config_raw.window_y);
+		iron_set_window_mode(window_mode_t.WINDOWED);
+		kinc_window_resize(config_raw.window_w, config_raw.window_h);
+		kinc_window_move(config_raw.window_x, config_raw.window_y);
 	}
 }
 
@@ -752,8 +752,8 @@ function base_init_layout() {
 	let new_layout: i32[] = [];
 
 	array_push(new_layout, math_floor(ui_base_default_sidebar_w * raw.window_scale)); // LayoutSidebarW
-	array_push(new_layout, math_floor(sys_height() / 2)); // LayoutSidebarH0
-	array_push(new_layout, math_floor(sys_height() / 2)); // LayoutSidebarH1
+	array_push(new_layout, math_floor(kinc_window_height() / 2)); // LayoutSidebarH0
+	array_push(new_layout, math_floor(kinc_window_height() / 2)); // LayoutSidebarH1
 
 	///if arm_ios
 	array_push(new_layout, show2d ? math_floor((app_w() + raw.layout[layout_size_t.NODES_W]) * 0.473) : math_floor(app_w() * 0.473)); // LayoutNodesW

@@ -79,7 +79,7 @@ function project_save(save_and_quit: bool = false) {
 	app_notify_on_init(function () {
 		export_arm_run_project();
 		if (_project_save_and_quit) {
-			sys_stop();
+			kinc_stop();
 		}
 	});
 }

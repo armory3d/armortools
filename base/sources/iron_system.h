@@ -28,13 +28,6 @@ kinc_display_mode_t kinc_display_current_mode(int display_index);
 int kinc_display_count_available_modes(int display_index);
 kinc_display_mode_t kinc_display_available_mode(int display_index, int mode_index);
 
-typedef struct kinc_framebuffer_options {
-	int frequency;
-	bool vertical_sync;
-	int color_bits;
-	int depth_bits;
-} kinc_framebuffer_options_t;
-
 typedef enum {
 	KINC_WINDOW_MODE_WINDOW,
 	KINC_WINDOW_MODE_FULLSCREEN
@@ -52,16 +45,23 @@ typedef struct kinc_window_options {
 	int y;
 	int width;
 	int height;
+	int features;
+	kinc_window_mode_t mode;
+	int frequency;
+	bool vsync;
+
+	bool use_depth;
+
 	int display_index;
 	bool visible;
-	int window_features;
-	kinc_window_mode_t mode;
+	int color_bits;
+	int depth_bits;
+
 } kinc_window_options_t;
 
-void kinc_window_create(kinc_window_options_t *win, kinc_framebuffer_options_t *frame);
+void kinc_window_create(kinc_window_options_t *win);
 void kinc_window_destroy();
 void kinc_window_options_set_defaults(kinc_window_options_t *win);
-void kinc_framebuffer_options_set_defaults(kinc_framebuffer_options_t *frame);
 void kinc_window_resize(int width, int height);
 void kinc_window_move(int x, int y);
 void kinc_window_change_mode(kinc_window_mode_t mode);
@@ -82,9 +82,8 @@ void kinc_internal_call_resize_callback(int width, int height);
 bool kinc_internal_call_close_callback();
 
 struct kinc_window_options;
-struct kinc_framebuffer_options;
 
-void kinc_init(const char *name, int width, int height, struct kinc_window_options *win, struct kinc_framebuffer_options *frame);
+void kinc_init(const char *name, int width, int height, struct kinc_window_options *win);
 const char *kinc_application_name(void);
 void kinc_set_app_name(const char *name);
 int kinc_width(void);
