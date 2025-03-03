@@ -647,17 +647,14 @@ void kinc_g4_index_buffer_unlock(kinc_g5_index_buffer_t *buffer, int count) {
 	kinc_g5_command_list_upload_index_buffer(&commandList, buffer);
 }
 
-static void kinc_internal_init_vertex_element(kinc_g5_vertex_element_t *element, const char *name, kinc_g5_vertex_data_t data) {
-	element->name = name;
-	element->data = data;
-}
-
 void kinc_g5_vertex_structure_init(kinc_g5_vertex_structure_t *structure) {
 	structure->size = 0;
 }
 
 void kinc_g5_vertex_structure_add(kinc_g5_vertex_structure_t *structure, const char *name, kinc_g5_vertex_data_t data) {
-	kinc_internal_init_vertex_element(&structure->elements[structure->size++], name, data);
+	structure->elements[structure->size].name = name;
+	structure->elements[structure->size].data = data;
+	structure->size++;
 }
 
 extern bool waitAfterNextDraw;

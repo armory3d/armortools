@@ -1,7 +1,7 @@
 
 declare type draw_font_t = {
 	blob?: any; // unsigned char *
-	images: any; // draw_font_image_t *
+	images?: any; // draw_font_image_t *
 	m_capacity?: i32;
 	m_images_len?: i32;
 	offset?: 32;
@@ -23,10 +23,6 @@ function g2_set_font(f: draw_font_t, size: i32) {
 	g2_font_init(f);
 	draw_set_font(f, size);
 	draw_font_size = size;
-}
-
-function g2_set_pipeline(p: pipeline_t) {
-	draw_set_pipeline(p == null ? null : p.pipeline_);
 }
 
 function g2_set_transformation(m: mat3_t) {

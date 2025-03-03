@@ -1105,7 +1105,7 @@ function ui_nodes_render() {
 
 				///if (is_paint || is_sculpt)
 				if (single_channel) {
-					g2_set_pipeline(ui_view2d_pipe);
+					draw_set_pipeline(ui_view2d_pipe);
 					iron_g4_set_int(ui_view2d_channel_loc, 1);
 				}
 				///end
@@ -1117,7 +1117,7 @@ function ui_nodes_render() {
 
 				///if (is_paint || is_sculpt)
 				if (single_channel) {
-					g2_set_pipeline(null);
+					draw_set_pipeline(null);
 				}
 				///end
 			}

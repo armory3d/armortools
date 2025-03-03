@@ -10,7 +10,7 @@ function const_data_create_screen_aligned_data() {
 	let indices: i32[] = [0, 1, 2];
 
 	// Mandatory vertex data names and sizes
-	let structure: vertex_struct_t = g4_vertex_struct_create();
+	let structure: kinc_g5_vertex_structure_t = g4_vertex_struct_create();
 	g4_vertex_struct_add(structure, "pos", vertex_data_t.F32_2X);
 	const_data_screen_aligned_vb = g4_vertex_buffer_create(math_floor(data.length / math_floor(g4_vertex_struct_byte_size(structure) / 4)), structure, usage_t.STATIC);
 	let vertices: buffer_t = g4_vertex_buffer_lock(const_data_screen_aligned_vb);
@@ -36,7 +36,7 @@ declare let _const_data_skydome_nor: f32_ptr;
 declare let _const_data_skydome_nor_count: i32;
 
 function const_data_create_skydome_data() {
-	let structure: vertex_struct_t = g4_vertex_struct_create();
+	let structure: kinc_g5_vertex_structure_t = g4_vertex_struct_create();
 	g4_vertex_struct_add(structure, "pos", vertex_data_t.F32_3X);
 	g4_vertex_struct_add(structure, "nor", vertex_data_t.F32_3X);
 	let struct_length: i32 = math_floor(g4_vertex_struct_byte_size(structure) / 4);

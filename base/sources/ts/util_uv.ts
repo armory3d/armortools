@@ -8,7 +8,7 @@ let util_uv_dilatemap_cached: bool = false;
 let util_uv_uvislandmap: image_t = null;
 let util_uv_uvislandmap_cached: bool = false;
 let util_uv_dilate_bytes: buffer_t = null;
-let util_uv_pipe_dilate: pipeline_t = null;
+let util_uv_pipe_dilate: kinc_g5_pipeline_t = null;
 
 function util_uv_cache_uv_map() {
 	if (util_uv_uvmap != null && (util_uv_uvmap.width != config_get_texture_res_x() || util_uv_uvmap.height != config_get_texture_res_y())) {
@@ -109,7 +109,7 @@ function util_uv_cache_dilate_map() {
 		util_uv_pipe_dilate = g4_pipeline_create();
 		util_uv_pipe_dilate.vertex_shader = sys_get_shader("dilate_map.vert");
 		util_uv_pipe_dilate.fragment_shader = sys_get_shader("dilate_map.frag");
-		let vs: vertex_struct_t = g4_vertex_struct_create();
+		let vs: kinc_g5_vertex_structure_t = g4_vertex_struct_create();
 		///if (arm_metal || arm_vulkan)
 		g4_vertex_struct_add(vs, "tex", vertex_data_t.I16_2X_NORM);
 		///else
@@ -120,7 +120,7 @@ function util_uv_cache_dilate_map() {
 		util_uv_pipe_dilate.input_layout = vs;
 		util_uv_pipe_dilate.depth_write = false;
 		util_uv_pipe_dilate.depth_mode = compare_mode_t.ALWAYS;
-		util_uv_pipe_dilate.color_attachments[0] = tex_format_t.R8;
+		ARRAY_ACCESS(util_uv_pipe_dilate.color_attachment, 0) = tex_format_t.R8;
 		g4_pipeline_compile(util_uv_pipe_dilate);
 		// dilate_tex_unpack = getConstantLocation(pipeDilate, "tex_unpack");
 	}

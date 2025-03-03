@@ -196,7 +196,6 @@ int last_window_height = 0;
 char temp_string[1024 * 32];
 char temp_string_vs[1024 * 128];
 char temp_string_fs[1024 * 128];
-char temp_string_vstruct[8][32];
 #ifdef KINC_WINDOWS
 wchar_t temp_wstring[1024 * 32];
 struct HWND__ *kinc_windows_window_handle();
@@ -943,23 +942,9 @@ u32_array_t *iron_g4_lock_index_buffer(kinc_g5_index_buffer_t *buffer) {
 	return ar;
 }
 
-typedef struct kinc_vertex_elem {
-	char *name;
-	int data; // vertex_data_t
-} kinc_vertex_elem_t;
-
-any iron_g4_create_vertex_buffer(i32 count, any_array_t *elements, i32 usage) {
-	kinc_g5_vertex_structure_t structure;
-	kinc_g5_vertex_structure_init(&structure);
-	for (int32_t i = 0; i < elements->length; ++i) {
-		kinc_vertex_elem_t *element = elements->buffer[i];
-		char *str = element->name;
-		int32_t data = element->data;
-		strcpy(temp_string_vstruct[i], str);
-		kinc_g5_vertex_structure_add(&structure, temp_string_vstruct[i], (kinc_g5_vertex_data_t)data);
-	}
+any iron_g4_create_vertex_buffer(i32 count, kinc_g5_vertex_structure_t *structure, i32 usage) {
 	kinc_g4_vertex_buffer_t *buffer = (kinc_g4_vertex_buffer_t *)malloc(sizeof(kinc_g4_vertex_buffer_t));
-	kinc_g4_vertex_buffer_init(buffer, count, &structure, (kinc_g4_usage_t)usage);
+	kinc_g4_vertex_buffer_init(buffer, count, structure, (kinc_g4_usage_t)usage);
 	return buffer;
 }
 
@@ -1155,22 +1140,7 @@ void iron_g4_delete_pipeline(kinc_g5_pipeline_t *pipeline) {
 	free(pipeline);
 }
 
-typedef struct vertex_struct {
-	any_array_t *elements; // kinc_vertex_elem_t
-} vertex_struct_t;
-
-void iron_g4_compile_pipeline(kinc_g5_pipeline_t *pipeline, vertex_struct_t *structure0) {
-	kinc_g5_vertex_structure_t s0;
-	kinc_g5_vertex_structure_init(&s0);
-
-	any_array_t *elements = structure0->elements;
-	for (int32_t i = 0; i < elements->length; ++i) {
-		kinc_vertex_elem_t *element = elements->buffer[i];
-		strcpy(temp_string_vstruct[i], element->name);
-		kinc_g5_vertex_structure_add(&s0, temp_string_vstruct[i], (kinc_g5_vertex_data_t)element->data);
-	}
-	pipeline->input_layout = &s0;
-
+void iron_g4_compile_pipeline(kinc_g5_pipeline_t *pipeline) {
 	kinc_g5_pipeline_compile(pipeline);
 }
 

@@ -1,5 +1,5 @@
 
-let ui_view2d_pipe: pipeline_t;
+let ui_view2d_pipe: kinc_g5_pipeline_t;
 let ui_view2d_channel_loc: kinc_const_loc_t;
 let ui_view2d_text_input_hover: bool = false;
 let ui_view2d_uvmap_show: bool = false;
@@ -35,14 +35,14 @@ function ui_view2d_init() {
 	ui_view2d_pipe = g4_pipeline_create();
 	ui_view2d_pipe.vertex_shader = sys_get_shader("layer_view.vert");
 	ui_view2d_pipe.fragment_shader = sys_get_shader("layer_view.frag");
-	let vs: vertex_struct_t = g4_vertex_struct_create();
+	let vs: kinc_g5_vertex_structure_t = g4_vertex_struct_create();
 	g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_3X);
 	g4_vertex_struct_add(vs, "tex", vertex_data_t.F32_2X);
 	g4_vertex_struct_add(vs, "col", vertex_data_t.U8_4X_NORM);
 	ui_view2d_pipe.input_layout = vs;
 	ui_view2d_pipe.blend_source = blend_factor_t.BLEND_ONE;
-	ui_view2d_pipe.blend_dest = blend_factor_t.BLEND_ZERO;
-	ui_view2d_pipe.color_write_masks_alpha[0] = false;
+	ui_view2d_pipe.blend_destination = blend_factor_t.BLEND_ZERO;
+	ARRAY_ACCESS(ui_view2d_pipe.color_write_mask_alpha, 0) = false;
 	g4_pipeline_compile(ui_view2d_pipe);
 	ui_view2d_channel_loc = g4_pipeline_get_const_loc(ui_view2d_pipe, "channel");
 	///end
@@ -219,7 +219,7 @@ function ui_view2d_render() {
 
 			///if (is_paint || is_sculpt)
 			if (ui_view2d_type == view_2d_type_t.LAYER) {
-				g2_set_pipeline(ui_view2d_pipe);
+				draw_set_pipeline(ui_view2d_pipe);
 				if (!context_raw.texture_filter) {
 					draw_set_bilinear_filter(false);
 				}
@@ -242,7 +242,7 @@ function ui_view2d_render() {
 
 			///if (is_paint || is_sculpt)
 			if (ui_view2d_type == view_2d_type_t.LAYER) {
-				g2_set_pipeline(null);
+				draw_set_pipeline(null);
 				if (!context_raw.texture_filter) {
 					draw_set_bilinear_filter(true);
 				}

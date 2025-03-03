@@ -63,17 +63,17 @@ function ui_nodes_ext_run() {
 
 	if (texocc != null) {
 		g2_begin(texpaint_pack._image);
-		g2_set_pipeline(pipes_copy_r);
+		draw_set_pipeline(pipes_copy_r);
 		draw_scaled_image(texocc, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
-		g2_set_pipeline(null);
+		draw_set_pipeline(null);
 		g2_end();
 	}
 
 	if (texrough != null) {
 		g2_begin(texpaint_pack._image);
-		g2_set_pipeline(pipes_copy_g);
+		draw_set_pipeline(pipes_copy_g);
 		draw_scaled_image(texrough, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
-		g2_set_pipeline(null);
+		draw_set_pipeline(null);
 		g2_end();
 	}
 

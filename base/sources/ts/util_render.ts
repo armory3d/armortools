@@ -368,9 +368,9 @@ function util_render_make_brush_preview() {
 	let target: image_t = context_raw.brush.image;
 	g2_begin(target);
 	g4_clear(0x00000000);
-	g2_set_pipeline(pipes_copy);
+	draw_set_pipeline(pipes_copy);
 	draw_scaled_image(l.texpaint, 0, 0, target.width, target.height);
-	g2_set_pipeline(null);
+	draw_set_pipeline(null);
 	g2_end();
 
 	// Scale image preview down to to icon
@@ -458,7 +458,7 @@ function util_render_create_screen_aligned_full_data() {
 	let indices: u32[] = [0, 1, 2];
 
 	// Mandatory vertex data names and sizes
-	let structure: vertex_struct_t = g4_vertex_struct_create();
+	let structure: kinc_g5_vertex_structure_t = g4_vertex_struct_create();
 	g4_vertex_struct_add(structure, "pos", vertex_data_t.I16_4X_NORM);
 	g4_vertex_struct_add(structure, "nor", vertex_data_t.I16_2X_NORM);
 	g4_vertex_struct_add(structure, "tex", vertex_data_t.I16_2X_NORM);

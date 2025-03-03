@@ -1090,10 +1090,10 @@ function ui_base_update_ui() {
 			let source: image_t = l.texpaint;
 			g2_begin(target);
 			g4_clear(0x00000000);
-			// g2_set_pipeline(l.is_mask() ? pipes_copy8 : pipes_copy);
-			g2_set_pipeline(pipes_copy); // texpaint_preview is always RGBA32 for now
+			// draw_set_pipeline(l.is_mask() ? pipes_copy8 : pipes_copy);
+			draw_set_pipeline(pipes_copy); // texpaint_preview is always RGBA32 for now
 			draw_scaled_image(source, 0, 0, target.width, target.height);
-			g2_set_pipeline(null);
+			draw_set_pipeline(null);
 			g2_end();
 		}
 		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
@@ -1110,10 +1110,10 @@ function ui_base_update_ui() {
 			let source: image_t = l.texpaint;
 			g2_begin(target);
 			g4_clear(0x00000000);
-			// g2_set_pipeline(raw.layer.is_mask() ? pipes_copy8 : pipes_copy);
-			g2_set_pipeline(pipes_copy); // texpaint_preview is always RGBA32 for now
+			// draw_set_pipeline(raw.layer.is_mask() ? pipes_copy8 : pipes_copy);
+			draw_set_pipeline(pipes_copy); // texpaint_preview is always RGBA32 for now
 			draw_scaled_image(source, 0, 0, target.width, target.height);
-			g2_set_pipeline(null);
+			draw_set_pipeline(null);
 			g2_end();
 			ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 		}

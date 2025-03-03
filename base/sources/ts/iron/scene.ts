@@ -482,7 +482,7 @@ type mesh_data_runtime_t = {
 	vertices?: buffer_t;
 	indices?: u32_array_t[];
 	material_indices?: i32[];
-	structure?: vertex_struct_t;
+	structure?: kinc_g5_vertex_structure_t;
 	///if arm_skin
 	skeleton_transforms_inv?: mat4_t[];
 	actions?: map_t<string, obj_t[]>;
@@ -599,11 +599,11 @@ type shader_context_t = {
 };
 
 type shader_context_runtime_t = {
-	pipe_state?: pipeline_t;
+	pipe_state?: kinc_g5_pipeline_t;
 	constants?: kinc_const_loc_t[];
 	tex_units?: kinc_tex_unit_t[];
 	override_context?: _shader_override_t;
-	structure?: vertex_struct_t;
+	structure?: kinc_g5_vertex_structure_t;
 };
 
 type _shader_override_t = {

@@ -217,9 +217,9 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 											g2_begin(icon);
 											g4_clear(0xffffffff);
 										}
-										g2_set_pipeline(pipes_copy_rgb);
+										draw_set_pipeline(pipes_copy_rgb);
 										draw_image(data.image, 0, 0);
-										g2_set_pipeline(null);
+										draw_set_pipeline(null);
 										g2_end();
 
 										map_set(ui_files_icon_map, _ui_files_file_browser_handle.text + path_sep + data.f, icon);
@@ -434,9 +434,9 @@ function ui_files_make_icon (args: ui_files_make_icon_t) {
 	let icon: image_t = image_create_render_target(sw, sh);
 	g2_begin(icon);
 	g4_clear(0xffffffff);
-	g2_set_pipeline(pipes_copy_rgb);
+	draw_set_pipeline(pipes_copy_rgb);
 	draw_scaled_image(image, 0, 0, sw, sh);
-	g2_set_pipeline(null);
+	draw_set_pipeline(null);
 	g2_end();
 	map_set(ui_files_icon_map, args.shandle, icon);
 	ui_base_hwnds[tab_area_t.STATUS].redraws = 3;

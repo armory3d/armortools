@@ -79,10 +79,10 @@ function tab_fonts_draw(htab: ui_handle_t) {
 				let tile: i32 = ui_SCALE(ui) > 1 ? 100 : 50;
 				let state: ui_state_t = ui_state_t.IDLE;
 				if (project_fonts[i].preview_ready) {
-					// g2_set_pipeline(pipe); // L8
+					// draw_set_pipeline(pipe); // L8
 					// g4_set_int(channel_location, 1);
 					state = _ui_image(img);
-					// g2_set_pipeline(null);
+					// draw_set_pipeline(null);
 				}
 				else {
 					state = _ui_image(resource_get("icons.k"), -1, -1.0, tile * 6, tile, tile, tile);

@@ -30,10 +30,10 @@ function main() {
 
 	pipeline = iron_g4_create_pipeline();
 	let f32_3x: vertex_data_t = vertex_data_t.F32_3X;
-	let elem: kinc_vertex_elem_t = { name: "pos", data: f32_3x };
-	let elems: kinc_vertex_elem_t[] = [elem];
+	let elem: kinc_g5_vertex_element_t = { name: "pos", data: f32_3x };
+	let elems: kinc_g5_vertex_element_t[] = [elem];
 
-	let structure0: vertex_struct_t = { elements: elems };
+	let structure0: kinc_g5_vertex_structure_t = { elements: elems };
 
 	let vs_buffer: buffer_t = iron_load_blob("./data/test.vert.spirv");
 	let fs_buffer: buffer_t = iron_load_blob("./data/test.frag.spirv");
@@ -48,20 +48,21 @@ function main() {
 	pipeline.depth_write = false;
 	pipeline.depth_mode = 0;
 	pipeline.blend_source = 0;
-	pipeline.blend_dest = 0;
+	pipeline.blend_destination = 0;
 	pipeline.alpha_blend_source = 0;
-	pipeline.alpha_blend_dest = 0;
-	pipeline.color_write_masks_red = masks;
-	pipeline.color_write_masks_green = masks;
-	pipeline.color_write_masks_blue = masks;
-	pipeline.color_write_masks_alpha = masks;
+	pipeline.alpha_blend_destination = 0;
+	pipeline.color_write_mask_red = masks;
+	pipeline.color_write_mask_green = masks;
+	pipeline.color_write_mask_blue = masks;
+	pipeline.color_write_mask_alpha = masks;
 	pipeline.color_attachment_count = 1;
-	pipeline.color_attachments = attachments;
+	pipeline.color_attachment = attachments;
 	pipeline.depth_attachment_bits = 0;
 	pipeline.vertex_shader = vert;
 	pipeline.fragment_shader = frag;
+	pipeline.input_layout = structure0;
 
-	iron_g4_compile_pipeline(pipeline, structure0);
+	iron_g4_compile_pipeline(pipeline);
 
 	let vertices: f32[] = [
 		-1.0, -1.0, 0.0,

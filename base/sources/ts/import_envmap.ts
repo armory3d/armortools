@@ -1,5 +1,5 @@
 
-let import_envmap_pipeline: pipeline_t = null;
+let import_envmap_pipeline: kinc_g5_pipeline_t = null;
 let import_envmap_params_loc: kinc_const_loc_t;
 let import_envmap_params: vec4_t = vec4_create();
 let import_envmap_n: vec4_t = vec4_create();
@@ -15,11 +15,11 @@ function import_envmap_run(path: string, image: image_t) {
 		import_envmap_pipeline = g4_pipeline_create();
 		import_envmap_pipeline.vertex_shader = sys_get_shader("pass.vert");
 		import_envmap_pipeline.fragment_shader = sys_get_shader("prefilter_envmap.frag");
-		let vs: vertex_struct_t = g4_vertex_struct_create();
+		let vs: kinc_g5_vertex_structure_t = g4_vertex_struct_create();
 		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
 		import_envmap_pipeline.input_layout = vs;
 		import_envmap_pipeline.color_attachment_count = 1;
-		import_envmap_pipeline.color_attachments[0] = tex_format_t.RGBA128;
+		ARRAY_ACCESS(import_envmap_pipeline.color_attachment, 0) = tex_format_t.RGBA128;
 		g4_pipeline_compile(import_envmap_pipeline);
 		import_envmap_params_loc = g4_pipeline_get_const_loc(import_envmap_pipeline, "params");
 		import_envmap_radiance_loc = g4_pipeline_get_tex_unit(import_envmap_pipeline, "radiance");
@@ -36,9 +36,9 @@ function import_envmap_run(path: string, image: image_t) {
 
 	// Down-scale to 1024x512
 	g2_begin(import_envmap_radiance);
-	g2_set_pipeline(pipes_copy128);
+	draw_set_pipeline(pipes_copy128);
 	draw_scaled_image(image, 0, 0, 1024, 512);
-	g2_set_pipeline(null);
+	draw_set_pipeline(null);
 	g2_end();
 
 	let radiance_pixels: buffer_t = image_get_pixels(import_envmap_radiance);

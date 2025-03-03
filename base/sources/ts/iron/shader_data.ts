@@ -87,34 +87,34 @@ function shader_context_compile(raw: shader_context_t): shader_context_t {
 		raw._.pipe_state.blend_source = shader_context_get_blend_fac(raw.blend_source);
 	}
 	if (raw.blend_destination != null) {
-		raw._.pipe_state.blend_dest = shader_context_get_blend_fac(raw.blend_destination);
+		raw._.pipe_state.blend_destination = shader_context_get_blend_fac(raw.blend_destination);
 	}
 	if (raw.alpha_blend_source != null) {
 		raw._.pipe_state.alpha_blend_source = shader_context_get_blend_fac(raw.alpha_blend_source);
 	}
 	if (raw.alpha_blend_destination != null) {
-		raw._.pipe_state.alpha_blend_dest = shader_context_get_blend_fac(raw.alpha_blend_destination);
+		raw._.pipe_state.alpha_blend_destination = shader_context_get_blend_fac(raw.alpha_blend_destination);
 	}
 
 	// Per-target color write mask
 	if (raw.color_writes_red != null) {
 		for (let i: i32 = 0; i < raw.color_writes_red.length; ++i) {
-			raw._.pipe_state.color_write_masks_red[i] = raw.color_writes_red[i];
+			ARRAY_ACCESS(raw._.pipe_state.color_write_mask_red, i) = raw.color_writes_red[i];
 		}
 	}
 	if (raw.color_writes_green != null) {
 		for (let i: i32 = 0; i < raw.color_writes_green.length; ++i) {
-			raw._.pipe_state.color_write_masks_green[i] = raw.color_writes_green[i];
+			ARRAY_ACCESS(raw._.pipe_state.color_write_mask_green, i) = raw.color_writes_green[i];
 		}
 	}
 	if (raw.color_writes_blue != null) {
 		for (let i: i32 = 0; i < raw.color_writes_blue.length; ++i) {
-			raw._.pipe_state.color_write_masks_blue[i] = raw.color_writes_blue[i];
+			ARRAY_ACCESS(raw._.pipe_state.color_write_mask_blue, i) = raw.color_writes_blue[i];
 		}
 	}
 	if (raw.color_writes_alpha != null) {
 		for (let i: i32 = 0; i < raw.color_writes_alpha.length; ++i) {
-			raw._.pipe_state.color_write_masks_alpha[i] = raw.color_writes_alpha[i];
+			ARRAY_ACCESS(raw._.pipe_state.color_write_mask_alpha, i) = raw.color_writes_alpha[i];
 		}
 	}
 
@@ -122,7 +122,7 @@ function shader_context_compile(raw: shader_context_t): shader_context_t {
 	if (raw.color_attachments != null) {
 		raw._.pipe_state.color_attachment_count = raw.color_attachments.length;
 		for (let i: i32 = 0; i < raw.color_attachments.length; ++i) {
-			raw._.pipe_state.color_attachments[i] = shader_context_get_tex_format(raw.color_attachments[i]);
+			ARRAY_ACCESS(raw._.pipe_state.color_attachment, i) = shader_context_get_tex_format(raw.color_attachments[i]);
 		}
 	}
 

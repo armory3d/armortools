@@ -653,14 +653,14 @@ function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32,
 			ui._w = _w;
 		}
 		if (l.fill_layer == null && slot_layer_is_mask(l)) {
-			g2_set_pipeline(ui_view2d_pipe);
+			draw_set_pipeline(ui_view2d_pipe);
 			iron_g4_set_int(ui_view2d_channel_loc, 1);
 		}
 
 		let state: ui_state_t = _ui_image(icon, 0xffffffff, icon_h);
 
 		if (l.fill_layer == null && slot_layer_is_mask(l)) {
-			g2_set_pipeline(null);
+			draw_set_pipeline(null);
 		}
 
 		// Draw layer numbers when selecting a layer via keyboard shortcut
@@ -1007,11 +1007,11 @@ function tab_layers_make_mask_preview_rgba32(l: slot_layer_t) {
 		app_notify_on_init(function () {
 			let l: slot_layer_t = tab_layers_l;
 			g2_begin(context_raw.mask_preview_rgba32);
-			g2_set_pipeline(ui_view2d_pipe);
+			draw_set_pipeline(ui_view2d_pipe);
 			g4_set_int(ui_view2d_channel_loc, 1);
 			draw_image(l.texpaint_preview, 0, 0);
 			g2_end();
-			g2_set_pipeline(null);
+			draw_set_pipeline(null);
 		});
 	}
 }

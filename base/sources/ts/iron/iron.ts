@@ -216,7 +216,7 @@ declare function iron_g4_delete_index_buffer(buffer: any): void;
 declare function iron_g4_lock_index_buffer(buffer: any): u32_array_t;
 declare function kinc_g4_index_buffer_unlock_all(buffer: any): void;
 declare function kinc_g4_set_index_buffer(buffer: any): void;
-declare function iron_g4_create_vertex_buffer(count: i32, structure: kinc_vertex_elem_t[], usage: i32): any;
+declare function iron_g4_create_vertex_buffer(count: i32, structure: kinc_g5_vertex_structure_t, usage: i32): any;
 declare function iron_g4_delete_vertex_buffer(buffer: any): void;
 declare function iron_g4_lock_vertex_buffer(buffer: any): buffer_t;
 declare function kinc_g4_vertex_buffer_unlock_all(buffer: any): void;
@@ -227,7 +227,7 @@ declare function iron_g4_create_shader_from_source(source: string, shader_type: 
 declare function kinc_g5_shader_destroy(shader: kinc_g5_shader_t): void;
 declare function iron_g4_create_pipeline(): any;
 declare function iron_g4_delete_pipeline(pipeline: any): void;
-declare function iron_g4_compile_pipeline(pipeline: any, structure0: any, vertex_shader: any, fragment_shader: any): void;
+declare function iron_g4_compile_pipeline(pipeline: any): void;
 declare function kinc_g5_set_pipeline(pipeline: any): void;
 declare function iron_load_image(file: string, readable: bool): any;
 declare function iron_unload_image(image: image_t): void;

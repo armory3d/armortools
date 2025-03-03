@@ -12,7 +12,7 @@ type mesh_object_t = {
 	prev_matrix?: mat4_t;
 };
 
-let _mesh_object_last_pipeline: pipeline_t = null;
+let _mesh_object_last_pipeline: kinc_g5_pipeline_t = null;
 let _mesh_object_material_contexts: material_context_t[] = [];
 let _mesh_object_shader_contexts: shader_context_t[] = [];
 

@@ -249,9 +249,9 @@ function layers_apply_mask(l: slot_layer_t, m: slot_layer_t) {
 
 	// Copy layer to temp
 	g2_begin(layers_temp_image);
-	g2_set_pipeline(pipes_copy);
+	draw_set_pipeline(pipes_copy);
 	draw_image(l.texpaint, 0, 0);
-	g2_set_pipeline(null);
+	draw_set_pipeline(null);
 	g2_end();
 
 	// Apply mask
@@ -265,7 +265,7 @@ function layers_apply_mask(l: slot_layer_t, m: slot_layer_t) {
 	g4_end();
 }
 
-function layers_commands_merge_pack(pipe: pipeline_t, i0: image_t, i1: image_t, i1pack: image_t, i1mask_opacity: f32, i1texmask: image_t, i1blending: i32 = -1) {
+function layers_commands_merge_pack(pipe: kinc_g5_pipeline_t, i0: image_t, i1: image_t, i1pack: image_t, i1mask_opacity: f32, i1texmask: image_t, i1blending: i32 = -1) {
 	g4_begin(i0);
 	g4_set_pipeline(pipe);
 	g4_set_tex(pipes_tex0, i1);
@@ -712,9 +712,9 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 	layers_make_temp_img();
 
 	g2_begin(layers_temp_image); // Copy to temp
-	g2_set_pipeline(pipes_copy);
+	draw_set_pipeline(pipes_copy);
 	draw_image(l0.texpaint, 0, 0);
-	g2_set_pipeline(null);
+	draw_set_pipeline(null);
 	g2_end();
 
 	let empty_rt: render_target_t = map_get(render_path_render_targets, "empty_white");
@@ -759,9 +759,9 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 
 		if (l0.texpaint_nor != null) {
 			g2_begin(layers_temp_image);
-			g2_set_pipeline(pipes_copy);
+			draw_set_pipeline(pipes_copy);
 			draw_image(l0.texpaint_nor, 0, 0);
-			g2_set_pipeline(null);
+			draw_set_pipeline(null);
 			g2_end();
 
 			if (l1.paint_nor) {
@@ -782,9 +782,9 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 
 		if (l0.texpaint_pack != null) {
 			g2_begin(layers_temp_image);
-			g2_set_pipeline(pipes_copy);
+			draw_set_pipeline(pipes_copy);
 			draw_image(l0.texpaint_pack, 0, 0);
-			g2_set_pipeline(null);
+			draw_set_pipeline(null);
 			g2_end();
 
 			if (l1.paint_occ || l1.paint_rough || l1.paint_met || l1.paint_height) {

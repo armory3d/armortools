@@ -6,8 +6,8 @@ let line_draw_dim: vec4_t = vec4_nan();
 
 let line_draw_vertex_buffer: vertex_buffer_t;
 let line_draw_index_buffer: index_buffer_t;
-let line_draw_pipeline: pipeline_t = null;
-let line_draw_overlay_pipeline: pipeline_t = null;
+let line_draw_pipeline: kinc_g5_pipeline_t = null;
+let line_draw_overlay_pipeline: kinc_g5_pipeline_t = null;
 
 let line_draw_vp: mat4_t;
 let line_draw_vp_loc: kinc_const_loc_t;
@@ -40,7 +40,7 @@ let line_draw_camera_look: vec4_t = vec4_create();
 
 function line_draw_init() {
 	if (line_draw_pipeline == null) {
-		let structure: vertex_struct_t = g4_vertex_struct_create();
+		let structure: kinc_g5_vertex_structure_t = g4_vertex_struct_create();
 		g4_vertex_struct_add(structure, "pos", vertex_data_t.F32_3X);
 		line_draw_pipeline = g4_pipeline_create();
 		line_draw_pipeline.input_layout = structure;
@@ -50,9 +50,9 @@ function line_draw_init() {
 		line_draw_pipeline.depth_mode = compare_mode_t.LESS;
 		line_draw_pipeline.cull_mode = cull_mode_t.NONE;
 		line_draw_pipeline.color_attachment_count = 3;
-		line_draw_pipeline.color_attachments[0] = tex_format_t.RGBA64;
-		line_draw_pipeline.color_attachments[1] = tex_format_t.RGBA64;
-		line_draw_pipeline.color_attachments[2] = tex_format_t.RGBA64;
+		ARRAY_ACCESS(line_draw_pipeline.color_attachment, 0) = tex_format_t.RGBA64;
+		ARRAY_ACCESS(line_draw_pipeline.color_attachment, 1) = tex_format_t.RGBA64;
+		ARRAY_ACCESS(line_draw_pipeline.color_attachment, 2) = tex_format_t.RGBA64;
 		line_draw_pipeline.depth_attachment_bits = 24;
 		g4_pipeline_compile(line_draw_pipeline);
 		line_draw_color_loc = g4_pipeline_get_const_loc(line_draw_pipeline, "color");
@@ -62,7 +62,7 @@ function line_draw_init() {
 		line_draw_index_buffer = g4_index_buffer_create(line_draw_max_indices);
 	}
 	if (line_draw_overlay_pipeline == null) {
-		let structure: vertex_struct_t = g4_vertex_struct_create();
+		let structure: kinc_g5_vertex_structure_t = g4_vertex_struct_create();
 		g4_vertex_struct_add(structure, "pos", vertex_data_t.F32_3X);
 		line_draw_overlay_pipeline = g4_pipeline_create();
 		line_draw_overlay_pipeline.input_layout = structure;
@@ -72,7 +72,7 @@ function line_draw_init() {
 		line_draw_overlay_pipeline.depth_mode = compare_mode_t.LESS;
 		line_draw_overlay_pipeline.cull_mode = cull_mode_t.NONE;
 		line_draw_overlay_pipeline.color_attachment_count = 1;
-		line_draw_overlay_pipeline.color_attachments[0] = tex_format_t.RGBA64;
+		ARRAY_ACCESS(line_draw_overlay_pipeline.color_attachment, 0) = tex_format_t.RGBA64;
 		g4_pipeline_compile(line_draw_overlay_pipeline);
 	}
 }
@@ -256,7 +256,7 @@ function shape_draw_sphere(mat: mat4_t) {
     	let md: mesh_data_t = sphere.data;
 
 		let posa: i16_array_t = md.vertex_arrays[0].values;
-		let structure: vertex_struct_t = g4_vertex_struct_create();
+		let structure: kinc_g5_vertex_structure_t = g4_vertex_struct_create();
 		g4_vertex_struct_add(structure, "pos", vertex_data_t.F32_3X);
 		_shape_draw_sphere_vb = g4_vertex_buffer_create(posa.length, structure, usage_t.STATIC);
 		let data: buffer_t = g4_vertex_buffer_lock(_shape_draw_sphere_vb);

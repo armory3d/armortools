@@ -104,8 +104,8 @@ function mesh_data_create(raw: mesh_data_t): mesh_data_t {
 	return raw;
 }
 
-function mesh_data_get_vertex_struct(vertex_arrays: vertex_array_t[]): vertex_struct_t {
-	let structure: vertex_struct_t = g4_vertex_struct_create();
+function mesh_data_get_vertex_struct(vertex_arrays: vertex_array_t[]): kinc_g5_vertex_structure_t {
+	let structure: kinc_g5_vertex_structure_t = g4_vertex_struct_create();
 	for (let i: i32 = 0; i < vertex_arrays.length; ++i) {
 		g4_vertex_struct_add(structure, vertex_arrays[i].attrib, mesh_data_get_vertex_data(vertex_arrays[i].data));
 	}
@@ -196,7 +196,7 @@ function mesh_data_get(raw: mesh_data_t, vs: vertex_element_t[]): vertex_buffer_
 		let positions: vertex_array_t = mesh_data_get_vertex_array(raw, "pos");
 		let uvs: vertex_array_t = mesh_data_get_vertex_array(raw, "tex");
 		let cols: vertex_array_t = mesh_data_get_vertex_array(raw, "col");
-		let vstruct: vertex_struct_t = mesh_data_get_vertex_struct(vertex_arrays);
+		let vstruct: kinc_g5_vertex_structure_t = mesh_data_get_vertex_struct(vertex_arrays);
 		let size: i32 = mesh_data_get_vertex_size(positions.data);
 		vb = g4_vertex_buffer_create(math_floor(positions.values.length / size), vstruct, usage_t.STATIC);
 		raw._.vertices = g4_vertex_buffer_lock(vb);
@@ -226,8 +226,8 @@ function mesh_data_build(raw: mesh_data_t) {
 	g4_vertex_buffer_unlock(raw._.vertex_buffer);
 
 	let struct_str: string = "";
-	for (let i: i32 = 0; i < raw._.structure.elements.length; ++i) {
-		let e: kinc_vertex_elem_t = raw._.structure.elements[i];
+	for (let i: i32 = 0; i < raw._.structure.size; ++i) {
+		let e: kinc_g5_vertex_element_t = ADDRESS(ARRAY_ACCESS(raw._.structure.elements, i));
 		struct_str += e.name;
 	}
 	map_set(raw._.vertex_buffer_map, struct_str, raw._.vertex_buffer);
