@@ -11,9 +11,6 @@ declare type draw_font_t = {
 	index?: i32;
 };
 
-let _g2_font: draw_font_t;
-let _g2_font_size: i32 = 0;
-
 let _g2_current: image_t = null;
 let _g2_in_use: bool = false;
 let _g2_font_glyphs: i32[] = _g2_make_glyphs(32, 127);
@@ -22,23 +19,10 @@ let _g2_thrown: bool = false;
 let _g2_mat: f32_array_t = f32_array_create(9);
 let _g2_initialized: bool = false;
 
-function g2_set_font_and_size(font: draw_font_t, font_size: i32) {
-	g2_font_init(font);
-	draw_set_font(font, font_size);
-}
-
-function g2_set_font(f: draw_font_t) {
-	if (_g2_font_size != 0) {
-		g2_set_font_and_size(f, _g2_font_size);
-	}
-	_g2_font = f;
-}
-
-function g2_set_font_size(i: i32) {
-	if (_g2_font != null) {
-		g2_set_font_and_size(_g2_font, i);
-	}
-	_g2_font_size = i;
+function g2_set_font(f: draw_font_t, size: i32) {
+	g2_font_init(f);
+	draw_set_font(f, size);
+	draw_font_size = size;
 }
 
 function g2_set_pipeline(p: pipeline_t) {

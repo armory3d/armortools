@@ -995,16 +995,18 @@ kinc_g5_shader_t *iron_g4_create_shader(buffer_t *data, i32 shader_type) {
 	return shader;
 }
 
-kinc_g5_shader_t *iron_g4_create_vertex_shader_from_source(string_t *source) {
+kinc_g5_shader_t *iron_g4_create_shader_from_source(string_t *source, kinc_g5_shader_type_t shader_type) {
+	char *temp_string_s = shader_type == KINC_G5_SHADER_TYPE_VERTEX ? temp_string_vs : temp_string_fs;
 
 #ifdef WITH_D3DCOMPILER
 
-	strcpy(temp_string_vs, source);
+	strcpy(temp_string_s, source);
 
 	ID3DBlob *error_message;
 	ID3DBlob *shader_buffer;
-	UINT flags = D3DCOMPILE_SKIP_OPTIMIZATION | D3DCOMPILE_SKIP_VALIDATION;// D3DCOMPILE_OPTIMIZATION_LEVEL0
-	HRESULT hr = D3DCompile(temp_string_vs, strlen(source) + 1, NULL, NULL, NULL, "main", "vs_5_0", flags, 0, &shader_buffer, &error_message);
+	UINT flags = D3DCOMPILE_SKIP_OPTIMIZATION | D3DCOMPILE_SKIP_VALIDATION;
+	HRESULT hr = D3DCompile(temp_string_s, strlen(source) + 1, NULL, NULL, NULL, "main",
+		shader_type == KINC_G5_SHADER_TYPE_VERTEX ? "vs_5_0" : "ps_5_0", flags, 0, &shader_buffer, &error_message);
 	if (hr != S_OK) {
 		kinc_log("%s", (char *)error_message->lpVtbl->GetBufferPointer(error_message));
 		return NULL;
@@ -1017,31 +1019,37 @@ kinc_g5_shader_t *iron_g4_create_vertex_shader_from_source(string_t *source) {
 	char *file = malloc(size * 2);
 	int output_len = 0;
 
-	bool has_bone = strstr(temp_string_vs, " bone :") != NULL;
-	bool has_col = strstr(temp_string_vs, " col :") != NULL;
-	bool has_nor = strstr(temp_string_vs, " nor :") != NULL;
-	bool has_pos = strstr(temp_string_vs, " pos :") != NULL;
-	bool has_tex = strstr(temp_string_vs, " tex :") != NULL;
+	if (shader_type == KINC_G5_SHADER_TYPE_VERTEX) {
+		bool has_bone = strstr(temp_string_s, " bone :") != NULL;
+		bool has_col = strstr(temp_string_s, " col :") != NULL;
+		bool has_nor = strstr(temp_string_s, " nor :") != NULL;
+		bool has_pos = strstr(temp_string_s, " pos :") != NULL;
+		bool has_tex = strstr(temp_string_s, " tex :") != NULL;
 
-	i32_map_t *attributes = i32_map_create();
-	int index = 0;
-	if (has_bone) i32_map_set(attributes, "bone", index++);
-	if (has_col) i32_map_set(attributes, "col", index++);
-	if (has_nor) i32_map_set(attributes, "nor", index++);
-	if (has_pos) i32_map_set(attributes, "pos", index++);
-	if (has_tex) i32_map_set(attributes, "tex", index++);
-	if (has_bone) i32_map_set(attributes, "weight", index++);
+		i32_map_t *attributes = i32_map_create();
+		int index = 0;
+		if (has_bone) i32_map_set(attributes, "bone", index++);
+		if (has_col) i32_map_set(attributes, "col", index++);
+		if (has_nor) i32_map_set(attributes, "nor", index++);
+		if (has_pos) i32_map_set(attributes, "pos", index++);
+		if (has_tex) i32_map_set(attributes, "tex", index++);
+		if (has_bone) i32_map_set(attributes, "weight", index++);
 
-	file[output_len] = (char)index;
-	output_len += 1;
-
-	any_array_t *keys = map_keys(attributes);
-	for (int i = 0; i < keys->length; ++i) {
-		strcpy(file + output_len, keys->buffer[i]);
-		output_len += strlen(keys->buffer[i]);
-		file[output_len] = 0;
+		file[output_len] = (char)index;
 		output_len += 1;
-		file[output_len] = i32_map_get(attributes, keys->buffer[i]);
+
+		any_array_t *keys = map_keys(attributes);
+		for (int i = 0; i < keys->length; ++i) {
+			strcpy(file + output_len, keys->buffer[i]);
+			output_len += strlen(keys->buffer[i]);
+			file[output_len] = 0;
+			output_len += 1;
+			file[output_len] = i32_map_get(attributes, keys->buffer[i]);
+			output_len += 1;
+		}
+	}
+	else {
+		file[output_len] = 0;
 		output_len += 1;
 	}
 
@@ -1113,152 +1121,23 @@ kinc_g5_shader_t *iron_g4_create_vertex_shader_from_source(string_t *source) {
 	reflector->lpVtbl->Release(reflector);
 
 	kinc_g5_shader_t *shader = (kinc_g5_shader_t *)malloc(sizeof(kinc_g5_shader_t));
-	kinc_g5_shader_init(shader, file, (int)output_len, KINC_G5_SHADER_TYPE_VERTEX);
+	kinc_g5_shader_init(shader, file, (int)output_len, shader_type);
 	free(file);
 
 	#elif defined(KINC_METAL)
 
-	strcpy(temp_string_vs, "// my_main\n");
-	strcat(temp_string_vs, source);
+	strcpy(temp_string_s, "// my_main\n");
+	strcat(temp_string_s, source);
 	kinc_g5_shader_t *shader = (kinc_g5_shader_t *)malloc(sizeof(kinc_g5_shader_t));
-	kinc_g5_shader_init(shader, temp_string_vs, strlen(temp_string_vs), KINC_G5_SHADER_TYPE_VERTEX);
+	kinc_g5_shader_init(shader, temp_string_s, strlen(temp_string_s), shader_type);
 
 	#elif defined(KINC_VULKAN) && defined(KRAFIX_LIBRARY)
 
 	char *output = malloc(1024 * 1024);
 	int length;
-	krafix_compile(source, output, &length, "spirv", "windows", "vert", -1);
+	krafix_compile(source, output, &length, "spirv", "windows", shader_type == KINC_G5_SHADER_TYPE_VERTEX ? "vert" : "frag", -1);
 	kinc_g5_shader_t *shader = (kinc_g5_shader_t *)malloc(sizeof(kinc_g5_shader_t));
-	kinc_g5_shader_init(shader, output, length, KINC_G5_SHADER_TYPE_VERTEX);
-
-	#else
-
-	char *source_ = malloc(strlen(source) + 1);
-	strcpy(source_, source);
-	kinc_g5_shader_t *shader = (kinc_g5_shader_t *)malloc(sizeof(kinc_g5_shader_t));
-	kinc_g5_shader_init(shader, source_, strlen(source_), KINC_G5_SHADER_TYPE_VERTEX);
-
-	#endif
-
-	return shader;
-}
-
-kinc_g5_shader_t *iron_g4_create_fragment_shader_from_source(string_t *source) {
-
-	#ifdef WITH_D3DCOMPILER
-
-	strcpy(temp_string_fs, source);
-
-	ID3DBlob *error_message;
-	ID3DBlob *shader_buffer;
-	UINT flags = D3DCOMPILE_SKIP_OPTIMIZATION | D3DCOMPILE_SKIP_VALIDATION;// D3DCOMPILE_OPTIMIZATION_LEVEL0
-	HRESULT hr = D3DCompile(temp_string_fs, strlen(source) + 1, NULL, NULL, NULL, "main", "ps_5_0", flags, 0, &shader_buffer, &error_message);
-	if (hr != S_OK) {
-		kinc_log("%s", (char *)error_message->lpVtbl->GetBufferPointer(error_message));
-		return NULL;
-	}
-
-	ID3D11ShaderReflection *reflector = NULL;
-	D3DReflect(shader_buffer->lpVtbl->GetBufferPointer(shader_buffer), shader_buffer->lpVtbl->GetBufferSize(shader_buffer), &IID_ID3D11ShaderReflection, (void **)&reflector);
-
-	int size = shader_buffer->lpVtbl->GetBufferSize(shader_buffer);
-	char *file = malloc(size * 2);
-	int output_len = 0;
-	file[output_len] = 0;
-	output_len += 1;
-
-	D3D11_SHADER_DESC desc;
-	reflector->lpVtbl->GetDesc(reflector, &desc);
-
-	file[output_len] = desc.BoundResources;
-	output_len += 1;
-	for (int i = 0; i < desc.BoundResources; ++i) {
-		D3D11_SHADER_INPUT_BIND_DESC bindDesc;
-		reflector->lpVtbl->GetResourceBindingDesc(reflector, i, &bindDesc);
-		strcpy(file + output_len, bindDesc.Name);
-		output_len += strlen(bindDesc.Name);
-		file[output_len] = 0;
-		output_len += 1;
-		file[output_len] = bindDesc.BindPoint;
-		output_len += 1;
-	}
-
-	ID3D11ShaderReflectionConstantBuffer *constants = reflector->lpVtbl->GetConstantBufferByName(reflector, "$Globals");
-	D3D11_SHADER_BUFFER_DESC buffer_desc;
-	hr = constants->lpVtbl->GetDesc(constants, &buffer_desc);
-	if (hr == S_OK) {
-		file[output_len] = buffer_desc.Variables;
-		output_len += 1;
-		for (int i = 0; i < buffer_desc.Variables; ++i) {
-			ID3D11ShaderReflectionVariable *variable = constants->lpVtbl->GetVariableByIndex(constants, i);
-			D3D11_SHADER_VARIABLE_DESC variable_desc;
-			hr = variable->lpVtbl->GetDesc(variable, &variable_desc);
-			if (hr == S_OK) {
-				strcpy(file + output_len, variable_desc.Name);
-				output_len += strlen(variable_desc.Name);
-				file[output_len] = 0;
-				output_len += 1;
-
-				*(uint32_t *)(file + output_len) = variable_desc.StartOffset;
-				output_len += 4;
-
-				*(uint32_t *)(file + output_len) = variable_desc.Size;
-				output_len += 4;
-
-				D3D11_SHADER_TYPE_DESC type_desc;
-				ID3D11ShaderReflectionType *type = variable->lpVtbl->GetType(variable);
-				hr = type->lpVtbl->GetDesc(type, &type_desc);
-				if (hr == S_OK) {
-					file[output_len] = type_desc.Columns;
-					output_len += 1;
-					file[output_len] = type_desc.Rows;
-					output_len += 1;
-				}
-				else {
-					file[output_len] = 0;
-					output_len += 1;
-					file[output_len] = 0;
-					output_len += 1;
-				}
-			}
-		}
-	}
-	else {
-		file[output_len] = 0;
-		output_len += 1;
-	}
-
-	memcpy(file + output_len, (char *)shader_buffer->lpVtbl->GetBufferPointer(shader_buffer), shader_buffer->lpVtbl->GetBufferSize(shader_buffer));
-	output_len += shader_buffer->lpVtbl->GetBufferSize(shader_buffer);
-
-	shader_buffer->lpVtbl->Release(shader_buffer);
-	reflector->lpVtbl->Release(reflector);
-
-	kinc_g5_shader_t *shader = (kinc_g5_shader_t *)malloc(sizeof(kinc_g5_shader_t));
-	kinc_g5_shader_init(shader, file, (int)output_len, KINC_G5_SHADER_TYPE_FRAGMENT);
-	free(file);
-
-	#elif defined(KINC_METAL)
-
-	strcpy(temp_string_fs, "// my_main\n");
-	strcat(temp_string_fs, source);
-	kinc_g5_shader_t *shader = (kinc_g5_shader_t *)malloc(sizeof(kinc_g5_shader_t));
-	kinc_g5_shader_init(shader, temp_string_fs, strlen(temp_string_fs), KINC_G5_SHADER_TYPE_FRAGMENT);
-
-	#elif defined(KINC_VULKAN) && defined(KRAFIX_LIBRARY)
-
-	char *output = malloc(1024 * 1024);
-	int length;
-	krafix_compile(source, output, &length, "spirv", "windows", "frag", -1);
-	kinc_g5_shader_t *shader = (kinc_g5_shader_t *)malloc(sizeof(kinc_g5_shader_t));
-	kinc_g5_shader_init(shader, output, length, KINC_G5_SHADER_TYPE_FRAGMENT);
-
-	#else
-
-	char *source_ = malloc(strlen(source) + 1);
-	strcpy(source_, source);
-	kinc_g5_shader_t *shader = (kinc_g5_shader_t *)malloc(sizeof(kinc_g5_shader_t));
-	kinc_g5_shader_init(shader, source_, strlen(source_), KINC_G5_SHADER_TYPE_FRAGMENT);
+	kinc_g5_shader_init(shader, output, length, shader_type);
 
 	#endif
 

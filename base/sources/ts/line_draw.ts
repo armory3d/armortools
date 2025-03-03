@@ -53,7 +53,7 @@ function line_draw_init() {
 		line_draw_pipeline.color_attachments[0] = tex_format_t.RGBA64;
 		line_draw_pipeline.color_attachments[1] = tex_format_t.RGBA64;
 		line_draw_pipeline.color_attachments[2] = tex_format_t.RGBA64;
-		line_draw_pipeline.depth_attachment = depth_format_t.DEPTH24;
+		line_draw_pipeline.depth_attachment_bits = 24;
 		g4_pipeline_compile(line_draw_pipeline);
 		line_draw_color_loc = g4_pipeline_get_const_loc(line_draw_pipeline, "color");
 		line_draw_vp_loc = g4_pipeline_get_const_loc(line_draw_pipeline, "VP");

@@ -78,3 +78,6 @@ void draw_set_render_target(kinc_g5_render_target_t *target);
 void draw_filled_circle(float cx, float cy, float radius, int segments);
 void draw_circle(float cx, float cy, float radius, int segments, float strength);
 void draw_cubic_bezier(f32_array_t *x, f32_array_t *y, int segments, float strength);
+
+extern int draw_font_size;
+extern draw_font_t *draw_font;

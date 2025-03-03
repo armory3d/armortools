@@ -315,10 +315,6 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
 		vaDesc[i].offset = offset;
 		offset += kinc_g5_vertex_data_size(pipe->input_layout->elements[i].data);
 		switch (pipe->input_layout->elements[i].data) {
-		case KINC_G5_VERTEX_DATA_NONE:
-			vaDesc[i].format = WGPUVertexFormat_Undefined;
-			assert(false);
-			break;
 		case KINC_G5_VERTEX_DATA_F32_1X:
 			vaDesc[i].format = WGPUVertexFormat_Float32;
 			break;
@@ -331,113 +327,14 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
 		case KINC_G5_VERTEX_DATA_F32_4X:
 			vaDesc[i].format = WGPUVertexFormat_Float32x4;
 			break;
-		case KINC_G5_VERTEX_DATA_F32_4X4:
-			vaDesc[i].format = WGPUVertexFormat_Undefined;
-			assert(false);
-			break;
-		case KINC_G5_VERTEX_DATA_I8_1X:
-			vaDesc[i].format = WGPUVertexFormat_Undefined;
-			assert(false);
-			break;
-		case KINC_G5_VERTEX_DATA_U8_1X:
-			vaDesc[i].format = WGPUVertexFormat_Undefined;
-			assert(false);
-			break;
-		case KINC_G5_VERTEX_DATA_I8_1X_NORMALIZED:
-			vaDesc[i].format = WGPUVertexFormat_Undefined;
-			assert(false);
-			break;
-		case KINC_G5_VERTEX_DATA_U8_1X_NORMALIZED:
-			vaDesc[i].format = WGPUVertexFormat_Undefined;
-			assert(false);
-			break;
-		case KINC_G5_VERTEX_DATA_I8_2X:
-			vaDesc[i].format = WGPUVertexFormat_Sint8x2;
-			break;
-		case KINC_G5_VERTEX_DATA_U8_2X:
-			vaDesc[i].format = WGPUVertexFormat_Uint8x2 ;
-			break;
-		case KINC_G5_VERTEX_DATA_I8_2X_NORMALIZED:
-			vaDesc[i].format = WGPUVertexFormat_Snorm8x2;
-			break;
-		case KINC_G5_VERTEX_DATA_U8_2X_NORMALIZED:
-			vaDesc[i].format = WGPUVertexFormat_Unorm8x2;
-			break;
-		case KINC_G5_VERTEX_DATA_I8_4X:
-			vaDesc[i].format = WGPUVertexFormat_Sint8x4;
-			break;
-		case KINC_G5_VERTEX_DATA_U8_4X:
-			vaDesc[i].format = WGPUVertexFormat_Uint8x4;
-			break;
-		case KINC_G5_VERTEX_DATA_I8_4X_NORMALIZED:
-			vaDesc[i].format = WGPUVertexFormat_Snorm8x4;
-			break;
 		case KINC_G5_VERTEX_DATA_U8_4X_NORMALIZED:
 			vaDesc[i].format = WGPUVertexFormat_Unorm8x4;
-			break;
-		case KINC_G5_VERTEX_DATA_I16_1X:
-			vaDesc[i].format = WGPUVertexFormat_Undefined;
-			assert(false);
-			break;
-		case KINC_G5_VERTEX_DATA_U16_1X:
-			vaDesc[i].format = WGPUVertexFormat_Undefined;
-			assert(false);
-			break;
-		case KINC_G5_VERTEX_DATA_I16_1X_NORMALIZED:
-			vaDesc[i].format = WGPUVertexFormat_Undefined;
-			assert(false);
-			break;
-		case KINC_G5_VERTEX_DATA_U16_1X_NORMALIZED:
-			vaDesc[i].format = WGPUVertexFormat_Undefined;
-			assert(false);
-			break;
-		case KINC_G5_VERTEX_DATA_I16_2X:
-			vaDesc[i].format = WGPUVertexFormat_Sint16x2;
-			break;
-		case KINC_G5_VERTEX_DATA_U16_2X:
-			vaDesc[i].format = WGPUVertexFormat_Uint16x2;
 			break;
 		case KINC_G5_VERTEX_DATA_I16_2X_NORMALIZED:
 			vaDesc[i].format = WGPUVertexFormat_Snorm16x2;
 			break;
-		case KINC_G5_VERTEX_DATA_U16_2X_NORMALIZED:
-			vaDesc[i].format = WGPUVertexFormat_Unorm16x2;
-			break;
-		case KINC_G5_VERTEX_DATA_I16_4X:
-			vaDesc[i].format = WGPUVertexFormat_Sint16x4;
-			break;
-		case KINC_G5_VERTEX_DATA_U16_4X:
-			vaDesc[i].format = WGPUVertexFormat_Uint16x4;
-			break;
 		case KINC_G5_VERTEX_DATA_I16_4X_NORMALIZED:
 			vaDesc[i].format = WGPUVertexFormat_Snorm16x4;
-			break;
-		case KINC_G5_VERTEX_DATA_U16_4X_NORMALIZED:
-			vaDesc[i].format = WGPUVertexFormat_Unorm16x4;
-			break;
-		case KINC_G5_VERTEX_DATA_I32_1X:
-			vaDesc[i].format = WGPUVertexFormat_Sint32;
-			break;
-		case KINC_G5_VERTEX_DATA_U32_1X:
-			vaDesc[i].format = WGPUVertexFormat_Uint32;
-			break;
-		case KINC_G5_VERTEX_DATA_I32_2X:
-			vaDesc[i].format = WGPUVertexFormat_Sint32x2;
-			break;
-		case KINC_G5_VERTEX_DATA_U32_2X:
-			vaDesc[i].format = WGPUVertexFormat_Uint32x2;
-			break;
-		case KINC_G5_VERTEX_DATA_I32_3X:
-			vaDesc[i].format = WGPUVertexFormat_Sint32x3;
-			break;
-		case KINC_G5_VERTEX_DATA_U32_3X:
-			vaDesc[i].format = WGPUVertexFormat_Uint32x3;
-			break;
-		case KINC_G5_VERTEX_DATA_I32_4X:
-			vaDesc[i].format = WGPUVertexFormat_Sint32x4;
-			break;
-		case KINC_G5_VERTEX_DATA_U32_4X:
-			vaDesc[i].format = WGPUVertexFormat_Uint32x4;
 			break;
 		}
 	}

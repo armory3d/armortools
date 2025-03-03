@@ -20,7 +20,7 @@ let _sys_paste_listener: (data: string)=>void = null;
 
 let _sys_start_time: f32;
 let _sys_window_title: string;
-let _sys_shaders: map_t<string, shader_t> = map_create();
+let _sys_shaders: map_t<string, kinc_g5_shader_t> = map_create();
 
 declare type kinc_window_options_t = {
 	title?: string;
@@ -336,10 +336,10 @@ function sys_shader_ext(): string {
 	///end
 }
 
-function sys_get_shader(name: string): shader_t {
-	let shader: shader_t = map_get(_sys_shaders, name);
+function sys_get_shader(name: string): kinc_g5_shader_t {
+	let shader: kinc_g5_shader_t = map_get(_sys_shaders, name);
 	if (shader == null) {
-		shader = g4_shader_create(
+		shader = iron_g4_create_shader(
 			iron_load_blob(data_path() + name + sys_shader_ext()),
 			ends_with(name, ".frag") ? shader_type_t.FRAGMENT : shader_type_t.VERTEX
 		);

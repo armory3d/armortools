@@ -169,8 +169,7 @@ function util_render_make_text_preview() {
 	}
 	g2_begin(context_raw.text_tool_image);
 	g4_clear(0xff000000);
-	g2_set_font(font);
-	g2_set_font_size(font_size);
+	g2_set_font(font, font_size);
 	draw_set_color(0xffffffff);
 	draw_string(text, tex_w / 2 - text_w / 2, tex_w / 2 - text_h / 2);
 	g2_end();
@@ -194,8 +193,7 @@ function util_render_make_font_preview() {
 	}
 	g2_begin(context_raw.font.image);
 	g4_clear(0x00000000);
-	g2_set_font(font);
-	g2_set_font_size(font_size);
+	g2_set_font(font, font_size);
 	draw_set_color(0xffffffff);
 	draw_string(text, tex_w / 2 - text_w / 2, tex_w / 2 - text_h / 2);
 	g2_end();

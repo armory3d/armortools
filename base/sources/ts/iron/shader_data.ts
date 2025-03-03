@@ -128,16 +128,16 @@ function shader_context_compile(raw: shader_context_t): shader_context_t {
 
 	// Depth attachment format
 	if (raw.depth_attachment != null) {
-		raw._.pipe_state.depth_attachment = shader_context_get_depth_format(raw.depth_attachment);
+		raw._.pipe_state.depth_attachment_bits = raw.depth_attachment == "NONE" ? 0 : 24;
 	}
 
 	// Shaders
 	if (raw.shader_from_source) {
-		raw._.pipe_state.vertex_shader = g4_shader_from_source(raw.vertex_shader, shader_type_t.VERTEX);
-		raw._.pipe_state.fragment_shader = g4_shader_from_source(raw.fragment_shader, shader_type_t.FRAGMENT);
+		raw._.pipe_state.vertex_shader = iron_g4_create_shader_from_source(raw.vertex_shader, shader_type_t.VERTEX);
+		raw._.pipe_state.fragment_shader = iron_g4_create_shader_from_source(raw.fragment_shader, shader_type_t.FRAGMENT);
 
 		// Shader compile error
-		if (raw._.pipe_state.vertex_shader.shader_ == null || raw._.pipe_state.fragment_shader.shader_ == null) {
+		if (raw._.pipe_state.vertex_shader == null || raw._.pipe_state.fragment_shader == null) {
 			return null;
 		}
 	}
@@ -149,9 +149,9 @@ function shader_context_compile(raw: shader_context_t): shader_context_t {
 		///else // Load shaders manually
 
 		let vs_buffer: buffer_t = data_get_blob(raw.vertex_shader + shader_data_ext());
-		raw._.pipe_state.vertex_shader = g4_shader_create(vs_buffer, shader_type_t.VERTEX);
+		raw._.pipe_state.vertex_shader = iron_g4_create_shader(vs_buffer, shader_type_t.VERTEX);
 		let fs_buffer: buffer_t = data_get_blob(raw.fragment_shader + shader_data_ext());
-		raw._.pipe_state.fragment_shader = g4_shader_create(fs_buffer, shader_type_t.FRAGMENT);
+		raw._.pipe_state.fragment_shader = iron_g4_create_shader(fs_buffer, shader_type_t.FRAGMENT);
 		///end
 	}
 
@@ -211,10 +211,10 @@ function shader_context_parse_vertex_struct(raw: shader_context_t) {
 
 function shader_context_delete(raw: shader_context_t) {
 	if (raw._.pipe_state.fragment_shader != null) {
-		g4_shader_delete(raw._.pipe_state.fragment_shader);
+		kinc_g5_shader_destroy(raw._.pipe_state.fragment_shader);
 	}
 	if (raw._.pipe_state.vertex_shader != null) {
-		g4_shader_delete(raw._.pipe_state.vertex_shader);
+		kinc_g5_shader_destroy(raw._.pipe_state.vertex_shader);
 	}
 	g4_pipeline_delete(raw._.pipe_state);
 }
@@ -341,16 +341,6 @@ function shader_context_get_tex_format(s: string): tex_format_t {
 		return tex_format_t.R8;
 	}
 	return tex_format_t.RGBA32;
-}
-
-function shader_context_get_depth_format(s: string): depth_format_t {
-	if (s == "DEPTH32") {
-		return depth_format_t.DEPTH24;
-	}
-	if (s == "NONE") {
-		return depth_format_t.NO_DEPTH;
-	}
-	return depth_format_t.DEPTH24;
 }
 
 function shader_context_add_const(raw: shader_context_t, c: shader_const_t) {

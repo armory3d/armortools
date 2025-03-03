@@ -2709,104 +2709,14 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 		case KINC_G5_VERTEX_DATA_F32_4X:
 			vi_attrs[attr].format = VK_FORMAT_R32G32B32A32_SFLOAT;
 			break;
-		case KINC_G5_VERTEX_DATA_I8_1X:
-			vi_attrs[attr].format = VK_FORMAT_R8_SINT;
-			break;
-		case KINC_G5_VERTEX_DATA_U8_1X:
-			vi_attrs[attr].format = VK_FORMAT_R8_UINT;
-			break;
-		case KINC_G5_VERTEX_DATA_I8_1X_NORMALIZED:
-			vi_attrs[attr].format = VK_FORMAT_R8_SNORM;
-			break;
-		case KINC_G5_VERTEX_DATA_U8_1X_NORMALIZED:
-			vi_attrs[attr].format = VK_FORMAT_R8_UNORM;
-			break;
-		case KINC_G5_VERTEX_DATA_I8_2X:
-			vi_attrs[attr].format = VK_FORMAT_R8G8_SINT;
-			break;
-		case KINC_G5_VERTEX_DATA_U8_2X:
-			vi_attrs[attr].format = VK_FORMAT_R8G8_UINT;
-			break;
-		case KINC_G5_VERTEX_DATA_I8_2X_NORMALIZED:
-			vi_attrs[attr].format = VK_FORMAT_R8G8_SNORM;
-			break;
-		case KINC_G5_VERTEX_DATA_U8_2X_NORMALIZED:
-			vi_attrs[attr].format = VK_FORMAT_R8G8_UNORM;
-			break;
-		case KINC_G5_VERTEX_DATA_I8_4X:
-			vi_attrs[attr].format = VK_FORMAT_R8G8B8A8_SINT;
-			break;
-		case KINC_G5_VERTEX_DATA_U8_4X:
-			vi_attrs[attr].format = VK_FORMAT_R8G8B8A8_UINT;
-			break;
-		case KINC_G5_VERTEX_DATA_I8_4X_NORMALIZED:
-			vi_attrs[attr].format = VK_FORMAT_R8G8B8A8_SNORM;
-			break;
 		case KINC_G5_VERTEX_DATA_U8_4X_NORMALIZED:
 			vi_attrs[attr].format = VK_FORMAT_R8G8B8A8_UNORM;
-			break;
-		case KINC_G5_VERTEX_DATA_I16_1X:
-			vi_attrs[attr].format = VK_FORMAT_R16_SINT;
-			break;
-		case KINC_G5_VERTEX_DATA_U16_1X:
-			vi_attrs[attr].format = VK_FORMAT_R16_UINT;
-			break;
-		case KINC_G5_VERTEX_DATA_I16_1X_NORMALIZED:
-			vi_attrs[attr].format = VK_FORMAT_R16_SNORM;
-			break;
-		case KINC_G5_VERTEX_DATA_U16_1X_NORMALIZED:
-			vi_attrs[attr].format = VK_FORMAT_R16_UNORM;
-			break;
-		case KINC_G5_VERTEX_DATA_I16_2X:
-			vi_attrs[attr].format = VK_FORMAT_R16G16_SINT;
-			break;
-		case KINC_G5_VERTEX_DATA_U16_2X:
-			vi_attrs[attr].format = VK_FORMAT_R16G16_UINT;
 			break;
 		case KINC_G5_VERTEX_DATA_I16_2X_NORMALIZED:
 			vi_attrs[attr].format = VK_FORMAT_R16G16_SNORM;
 			break;
-		case KINC_G5_VERTEX_DATA_U16_2X_NORMALIZED:
-			vi_attrs[attr].format = VK_FORMAT_R16G16_UNORM;
-			break;
-		case KINC_G5_VERTEX_DATA_I16_4X:
-			vi_attrs[attr].format = VK_FORMAT_R16G16B16A16_SINT;
-			break;
-		case KINC_G5_VERTEX_DATA_U16_4X:
-			vi_attrs[attr].format = VK_FORMAT_R16G16B16A16_UINT;
-			break;
 		case KINC_G5_VERTEX_DATA_I16_4X_NORMALIZED:
 			vi_attrs[attr].format = VK_FORMAT_R16G16B16A16_SNORM;
-			break;
-		case KINC_G5_VERTEX_DATA_U16_4X_NORMALIZED:
-			vi_attrs[attr].format = VK_FORMAT_R16G16B16A16_UNORM;
-			break;
-		case KINC_G5_VERTEX_DATA_I32_1X:
-			vi_attrs[attr].format = VK_FORMAT_R32_SINT;
-			break;
-		case KINC_G5_VERTEX_DATA_U32_1X:
-			vi_attrs[attr].format = VK_FORMAT_R32_UINT;
-			break;
-		case KINC_G5_VERTEX_DATA_I32_2X:
-			vi_attrs[attr].format = VK_FORMAT_R32G32_SINT;
-			break;
-		case KINC_G5_VERTEX_DATA_U32_2X:
-			vi_attrs[attr].format = VK_FORMAT_R32G32_UINT;
-			break;
-		case KINC_G5_VERTEX_DATA_I32_3X:
-			vi_attrs[attr].format = VK_FORMAT_R32G32B32_SINT;
-			break;
-		case KINC_G5_VERTEX_DATA_U32_3X:
-			vi_attrs[attr].format = VK_FORMAT_R32G32B32_UINT;
-			break;
-		case KINC_G5_VERTEX_DATA_I32_4X:
-			vi_attrs[attr].format = VK_FORMAT_R32G32B32A32_SINT;
-			break;
-		case KINC_G5_VERTEX_DATA_U32_4X:
-			vi_attrs[attr].format = VK_FORMAT_R32G32B32A32_UINT;
-			break;
-		default:
-			assert(false);
 			break;
 		}
 		attr++;

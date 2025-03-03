@@ -1,28 +1,7 @@
 
-function g4_shader_create(buffer: buffer_t, type: shader_type_t): shader_t {
-	let raw: shader_t = {};
-	if (buffer != null) {
-		raw.shader_ = iron_g4_create_shader(buffer, type);
-	}
-	return raw;
-}
-
-function g4_shader_from_source(source: string, type: shader_type_t): shader_t {
-	let shader: shader_t = g4_shader_create(null, 0);
-	if (type == shader_type_t.VERTEX) {
-		shader.shader_ = iron_g4_create_vertex_shader_from_source(source);
-	}
-	else if (type == shader_type_t.FRAGMENT) {
-		shader.shader_ = iron_g4_create_fragment_shader_from_source(source);
-	}
-	return shader;
-}
-
-function g4_shader_delete(raw: shader_t) {
-	kinc_g5_shader_destroy(raw.shader_);
-}
-
 function g4_pipeline_create(): pipeline_t {
+	// return iron_g4_create_pipeline();
+
 	let raw: pipeline_t = {};
 	raw.cull_mode = cull_mode_t.NONE;
 	raw.depth_write = false;
@@ -55,20 +34,10 @@ function g4_pipeline_create(): pipeline_t {
 	for (let i: i32 = 0; i < 8; ++i) {
 		array_push(raw.color_attachments, tex_format_t.RGBA32);
 	}
-	raw.depth_attachment = depth_format_t.NO_DEPTH;
+	raw.depth_attachment_bits = 0;
 
 	raw.pipeline_ = iron_g4_create_pipeline();
 	return raw;
-}
-
-function g4_pipeline_get_depth_buffer_bits(format: depth_format_t): i32 {
-	if (format == depth_format_t.NO_DEPTH) {
-		return 0;
-	}
-	if (format == depth_format_t.DEPTH24) {
-		return 24;
-	}
-	return 0;
 }
 
 function g4_pipeline_delete(raw: pipeline_t) {
@@ -102,9 +71,9 @@ function g4_pipeline_compile(raw: pipeline_t) {
 	raw.pipeline_.alpha_blend_source = raw.alpha_blend_source;
 	raw.pipeline_.alpha_blend_destination = raw.alpha_blend_dest;
 	raw.pipeline_.color_attachment_count = raw.color_attachment_count;
-	raw.pipeline_.depth_attachment_bits = g4_pipeline_get_depth_buffer_bits(raw.depth_attachment);
-	raw.pipeline_.vertex_shader = raw.vertex_shader.shader_;
-	raw.pipeline_.fragment_shader = raw.fragment_shader.shader_;
+	raw.pipeline_.depth_attachment_bits = raw.depth_attachment_bits;
+	raw.pipeline_.vertex_shader = raw.vertex_shader;
+	raw.pipeline_.fragment_shader = raw.fragment_shader;
 
 	iron_g4_compile_pipeline(raw.pipeline_, structure0);
 }
@@ -341,13 +310,6 @@ function _image_set_size_from_render_target(image: image_t, _rt: any) {
 	image.height = rt.height;
 }
 
-function image_get_depth_buffer_bits(format: depth_format_t): i32 {
-	if (format == depth_format_t.DEPTH24) {
-		return 24;
-	}
-	return -1;
-}
-
 function image_from_texture(tex: any): image_t {
 	let image: image_t = _image_create(tex);
 	_image_set_size_from_texture(image, tex);
@@ -378,10 +340,10 @@ function image_create(width: i32, height: i32, format: tex_format_t = tex_format
 	return image;
 }
 
-function image_create_render_target(width: i32, height: i32, format: tex_format_t = tex_format_t.RGBA32, depth_format: depth_format_t = depth_format_t.NO_DEPTH): image_t {
+function image_create_render_target(width: i32, height: i32, format: tex_format_t = tex_format_t.RGBA32, depth_buffer_bits: i32 = 0): image_t {
 	let image: image_t = _image_create(null);
 	image.format = format;
-	image.render_target_ = iron_g4_create_render_target(width, height, format, image_get_depth_buffer_bits(depth_format));
+	image.render_target_ = iron_g4_create_render_target(width, height, format, depth_buffer_bits);
 	_image_set_size_from_render_target(image, image.render_target_);
 	return image;
 }
@@ -488,9 +450,10 @@ declare type kinc_g5_pipeline_t = {
 
 type pipeline_t = {
 	pipeline_?: kinc_g5_pipeline_t;
+
 	input_layout?: vertex_struct_t;
-	vertex_shader?: shader_t;
-	fragment_shader?: shader_t;
+	vertex_shader?: kinc_g5_shader_t;
+	fragment_shader?: kinc_g5_shader_t;
 	cull_mode?: cull_mode_t;
 	depth_write?: bool;
 	depth_mode?: compare_mode_t;
@@ -502,13 +465,22 @@ type pipeline_t = {
 	color_write_masks_green?: bool[];
 	color_write_masks_blue?: bool[];
 	color_write_masks_alpha?: bool[];
-	color_attachment_count?: i32;
 	color_attachments?: tex_format_t[];
-	depth_attachment?: depth_format_t;
+	color_attachment_count?: i32;
+	depth_attachment_bits?: i32;
 };
 
-type shader_t = {
-	shader_?: any;
+declare type kinc_g5_shader_t = {
+	impl?: any;
+};
+
+declare type kinc_vertex_elem_t = {
+	name?: string;
+	data?: vertex_data_t;
+};
+
+declare type vertex_struct_t = {
+	elements?: kinc_vertex_elem_t[];
 };
 
 type vertex_buffer_t = {
@@ -516,17 +488,8 @@ type vertex_buffer_t = {
 	vertex_count?: i32;
 };
 
-declare type vertex_struct_t = {
-	elements?: kinc_vertex_elem_t[];
-};
-
 type index_buffer_t = {
 	buffer_?: any;
-};
-
-declare type kinc_vertex_elem_t = {
-	name?: string;
-	data?: vertex_data_t;
 };
 
 type kinc_const_loc_t = any;
@@ -576,19 +539,14 @@ enum tex_format_t {
 	R32,
 }
 
-enum depth_format_t {
-	NO_DEPTH,
-	DEPTH24,
-}
-
 enum vertex_data_t {
-	F32_1X = 1,
-	F32_2X = 2,
-	F32_3X = 3,
-	F32_4X = 4,
-	U8_4X_NORM = 17,
-	I16_2X_NORM = 24,
-	I16_4X_NORM = 28,
+	F32_1X,
+	F32_2X,
+	F32_3X,
+	F32_4X,
+	U8_4X_NORM,
+	I16_2X_NORM,
+	I16_4X_NORM,
 }
 
 enum blend_factor_t {
@@ -622,6 +580,6 @@ enum cull_mode_t {
 }
 
 enum shader_type_t {
-	FRAGMENT = 0,
-	VERTEX = 1,
+	FRAGMENT,
+	VERTEX,
 }

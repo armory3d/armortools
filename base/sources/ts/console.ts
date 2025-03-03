@@ -12,10 +12,9 @@ function console_draw_toast(s: string) {
 	let x: f32 = kinc_window_width() / 2;
 	let y: f32 = kinc_window_height() - 200 * scale;
 	draw_filled_rect(x - 200 * scale, y, 400 * scale, 80 * scale);
-	g2_set_font(base_font);
-	g2_set_font_size(math_floor(22 * scale));
+	g2_set_font(base_font, math_floor(22 * scale));
 	draw_set_color(0xffffffff);
-	draw_string(s, x - g2_font_width(_g2_font, _g2_font_size, s) / 2, y + 40 * scale - g2_font_height(_g2_font, _g2_font_size) / 2);
+	draw_string(s, x - g2_font_width(draw_font, draw_font_size, s) / 2, y + 40 * scale - g2_font_height(draw_font, draw_font_size) / 2);
 }
 
 function _console_toast_render(s: string) {

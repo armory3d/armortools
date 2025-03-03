@@ -16,11 +16,12 @@ extern bool waitAfterNextDraw;
 #define MATH_PI 3.14159265358979323846
 #define DRAW_BUFFER_SIZE 1000
 
+draw_font_t *draw_font = NULL;
+int draw_font_size;
+
 static kinc_matrix4x4_t draw_projection_matrix;
 static bool draw_bilinear_filter = true;
 static uint32_t draw_color = 0;
-static draw_font_t *draw_font = NULL;
-static int draw_font_size;
 static bool draw_is_render_target = false;
 static kinc_g5_pipeline_t *draw_last_pipeline = NULL;
 static kinc_g5_pipeline_t *draw_custom_pipeline = NULL;

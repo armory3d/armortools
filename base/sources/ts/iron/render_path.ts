@@ -9,7 +9,7 @@ type render_target_t = {
 	depth_buffer?: string; // 2D texture
 	mipmaps?: bool;
 	// Runtime
-	_depth_format?: depth_format_t;
+	_depth_buffer_bits?: i32;
 	_depth_from?: string;
 	_image?: image_t; // RT or image
 	_has_depth?: bool;
@@ -324,7 +324,7 @@ function render_path_resize() {
 		if (rt != null && rt.width == 0) {
 			let _image: image_t = rt._image;
 			app_notify_on_init(_render_path_resize_on_init, _image);
-			rt._image = render_path_create_image(rt, rt._depth_format);
+			rt._image = render_path_create_image(rt, rt._depth_buffer_bits);
 		}
 	}
 
@@ -362,28 +362,28 @@ function render_path_create_target(t: render_target_t): render_target_t {
 				let db: depth_buffer_desc_t = _render_path_depth_buffers[i];
 				if (db.name == t.depth_buffer) {
 					map_set(_render_path_depth_to_render_target, db.name, t);
-					t._depth_format = render_path_get_depth_format(db.format);
-					t._image = render_path_create_image(t, t._depth_format);
+					t._depth_buffer_bits = 24;
+					t._image = render_path_create_image(t, t._depth_buffer_bits);
 					break;
 				}
 			}
 		}
 		else { // Reuse
-			t._depth_format = depth_format_t.NO_DEPTH;
+			t._depth_buffer_bits = 0;
 			t._depth_from = t.depth_buffer;
-			t._image = render_path_create_image(t, t._depth_format);
+			t._image = render_path_create_image(t, t._depth_buffer_bits);
 			image_set_depth_from(t._image, depth_target._image);
 		}
 	}
 	else { // No depth buffer
 		t._has_depth = false;
-		t._depth_format = depth_format_t.NO_DEPTH;
-		t._image = render_path_create_image(t, t._depth_format);
+		t._depth_buffer_bits = 0;
+		t._image = render_path_create_image(t, t._depth_buffer_bits);
 	}
 	return t;
 }
 
-function render_path_create_image(t: render_target_t, depth_format: depth_format_t): image_t {
+function render_path_create_image(t: render_target_t, depth_buffer_bits: i32): image_t {
 	let width: i32 = t.width == 0 ? app_w() : t.width;
 	let height: i32 = t.height == 0 ? app_h() : t.height;
 	width = math_floor(width * t.scale);
@@ -396,7 +396,7 @@ function render_path_create_image(t: render_target_t, depth_format: depth_format
 	}
 	return image_create_render_target(width, height,
 		t.format != null ? render_path_get_tex_format(t.format) : tex_format_t.RGBA32,
-		depth_format);
+		depth_buffer_bits);
 }
 
 function render_path_get_tex_format(s: string): tex_format_t {
@@ -419,16 +419,6 @@ function render_path_get_tex_format(s: string): tex_format_t {
 		return tex_format_t.R8;
 	}
 	return tex_format_t.RGBA32;
-}
-
-function render_path_get_depth_format(s: string): depth_format_t {
-	if (s == null || s == "") {
-		return depth_format_t.DEPTH24;
-	}
-	if (s == "DEPTH24") {
-		return depth_format_t.DEPTH24;
-	}
-	return depth_format_t.DEPTH24;
 }
 
 function render_target_create(): render_target_t {
