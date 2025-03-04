@@ -45,7 +45,14 @@ function sys_start(ops: kinc_window_options_t) {
 	iron_init(ops);
 
 	_sys_start_time = kinc_time();
-	g2_init();
+	draw_init(
+		iron_load_blob(data_path() + "draw_image.vert" + sys_shader_ext()),
+		iron_load_blob(data_path() + "draw_image.frag" + sys_shader_ext()),
+		iron_load_blob(data_path() + "draw_colored.vert" + sys_shader_ext()),
+		iron_load_blob(data_path() + "draw_colored.frag" + sys_shader_ext()),
+		iron_load_blob(data_path() + "draw_text.vert" + sys_shader_ext()),
+		iron_load_blob(data_path() + "draw_text.frag" + sys_shader_ext())
+	);
 	iron_set_update_callback(sys_render_callback);
 	iron_set_drop_files_callback(sys_drop_files_callback);
 	iron_set_cut_copy_paste_callback(sys_cut_callback, sys_copy_callback, sys_paste_callback);

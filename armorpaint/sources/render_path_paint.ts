@@ -439,20 +439,20 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 	let geom: mesh_data_t = plane.data;
 
 	render_path_set_target("");
-	g4_set_pipeline(pipes_cursor);
+	kinc_g5_set_pipeline(pipes_cursor);
 	let rt: render_target_t = map_get(render_path_render_targets, "gbuffer0");
 	let gbuffer0: image_t = rt._image;
 	g4_set_tex_depth(pipes_cursor_gbufferd, gbuffer0);
-	g4_set_float2(pipes_cursor_mouse, mx, my);
-	g4_set_float2(pipes_cursor_tex_step, 1 / gbuffer0.width, 1 / gbuffer0.height);
-	g4_set_float(pipes_cursor_radius, radius);
+	iron_g4_set_float2(pipes_cursor_mouse, mx, my);
+	iron_g4_set_float2(pipes_cursor_tex_step, 1 / gbuffer0.width, 1 / gbuffer0.height);
+	iron_g4_set_float(pipes_cursor_radius, radius);
 	let right: vec4_t = vec4_norm(camera_object_right_world(scene_camera));
-	g4_set_float3(pipes_cursor_camera_right, right.x, right.y, right.z);
-	g4_set_float3(pipes_cursor_tint, tint_r, tint_g, tint_b);
-	g4_set_mat(pipes_cursor_vp, scene_camera.vp);
+	iron_g4_set_float3(pipes_cursor_camera_right, right.x, right.y, right.z);
+	iron_g4_set_float3(pipes_cursor_tint, tint_r, tint_g, tint_b);
+	iron_g4_set_matrix4(pipes_cursor_vp, scene_camera.vp);
 	let help_mat: mat4_t = mat4_identity();
 	help_mat = mat4_inv(scene_camera.vp);
-	g4_set_mat(pipes_cursor_inv_vp, help_mat);
+	iron_g4_set_matrix4(pipes_cursor_inv_vp, help_mat);
 	///if (arm_metal || arm_vulkan)
 	let vs: vertex_element_t[] = [
 		{
@@ -460,14 +460,14 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 			data: "short2norm"
 		}
 	];
-	g4_set_vertex_buffer(mesh_data_get(geom, vs));
+	kinc_g4_set_vertex_buffer(mesh_data_get(geom, vs));
 	///else
-	g4_set_vertex_buffer(geom._.vertex_buffer);
+	kinc_g4_set_vertex_buffer(geom._.vertex_buffer);
 	///end
-	g4_set_index_buffer(geom._.index_buffers[0]);
+	kinc_g4_set_index_buffer(geom._.index_buffers[0]);
 	g4_draw();
 
-	g4_disable_scissor();
+	kinc_g4_disable_scissor();
 	render_path_end();
 }
 

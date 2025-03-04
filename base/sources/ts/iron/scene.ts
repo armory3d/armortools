@@ -475,9 +475,9 @@ type mesh_data_t = {
 type mesh_data_runtime_t = {
 	refcount?: i32; // Number of users
 	handle?: string; // Handle used to retrieve this object in Data
-	vertex_buffer?: vertex_buffer_t;
-	vertex_buffer_map?: map_t<string, vertex_buffer_t>;
-	index_buffers?: index_buffer_t[];
+	vertex_buffer?: kinc_g5_vertex_buffer_t;
+	vertex_buffer_map?: map_t<string, kinc_g5_vertex_buffer_t>;
+	index_buffers?: kinc_g5_index_buffer_t[];
 	ready?: bool;
 	vertices?: buffer_t;
 	indices?: u32_array_t[];

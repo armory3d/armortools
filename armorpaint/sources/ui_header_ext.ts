@@ -53,14 +53,14 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			let m: slot_layer_t = layers_new_mask(false, context_raw.layer);
 			app_notify_on_next_frame(function (m: slot_layer_t) {
 				g4_begin(m.texpaint);
-				g4_set_pipeline(pipes_colorid_to_mask);
+				kinc_g5_set_pipeline(pipes_colorid_to_mask);
 				let rt: render_target_t = map_get(render_path_render_targets, "texpaint_colorid");
 				g4_set_tex(pipes_texpaint_colorid, rt._image);
 				g4_set_tex(pipes_tex_colorid, project_get_image(project_assets[context_raw.colorid_handle.position]));
-				g4_set_vertex_buffer(const_data_screen_aligned_vb);
-				g4_set_index_buffer(const_data_screen_aligned_ib);
+				kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
+				kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
 				g4_draw();
-				g4_end();
+				iron_g4_end();
 				context_raw.colorid_picked = false;
 				ui_toolbar_handle.redraws = 1;
 				ui_header_handle.redraws = 1;

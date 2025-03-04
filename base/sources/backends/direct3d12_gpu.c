@@ -484,7 +484,7 @@ int kinc_g5_max_bound_textures(void) {
 
 static bool began = false;
 
-void kinc_g5_begin(kinc_g5_render_target_t *renderTarget) {
+void kinc_g5_begin(kinc_g5_texture_t *renderTarget) {
 	if (began)
 		return;
 	began = true;
@@ -641,7 +641,7 @@ void kinc_g5_command_list_end(struct kinc_g5_command_list *list) {
 #endif
 }
 
-void kinc_g5_command_list_clear(struct kinc_g5_command_list *list, kinc_g5_render_target_t *renderTarget, unsigned flags, unsigned color, float depth) {
+void kinc_g5_command_list_clear(struct kinc_g5_command_list *list, kinc_g5_texture_t *renderTarget, unsigned flags, unsigned color, float depth) {
 	assert(list->impl.open);
 
 	if (flags & KINC_G5_CLEAR_COLOR) {
@@ -673,7 +673,7 @@ void kinc_g5_command_list_clear(struct kinc_g5_command_list *list, kinc_g5_rende
 	}
 }
 
-void kinc_g5_command_list_render_target_to_framebuffer_barrier(struct kinc_g5_command_list *list, kinc_g5_render_target_t *renderTarget) {
+void kinc_g5_command_list_render_target_to_framebuffer_barrier(struct kinc_g5_command_list *list, kinc_g5_texture_t *renderTarget) {
 	assert(list->impl.open);
 
 	D3D12_RESOURCE_BARRIER barrier;
@@ -687,7 +687,7 @@ void kinc_g5_command_list_render_target_to_framebuffer_barrier(struct kinc_g5_co
 	list->impl._commandList->lpVtbl->ResourceBarrier(list->impl._commandList, 1, &barrier);
 }
 
-void kinc_g5_command_list_framebuffer_to_render_target_barrier(struct kinc_g5_command_list *list, kinc_g5_render_target_t *renderTarget) {
+void kinc_g5_command_list_framebuffer_to_render_target_barrier(struct kinc_g5_command_list *list, kinc_g5_texture_t *renderTarget) {
 	assert(list->impl.open);
 
 	D3D12_RESOURCE_BARRIER barrier;
@@ -701,7 +701,7 @@ void kinc_g5_command_list_framebuffer_to_render_target_barrier(struct kinc_g5_co
 	list->impl._commandList->lpVtbl->ResourceBarrier(list->impl._commandList, 1, &barrier);
 }
 
-void kinc_g5_command_list_texture_to_render_target_barrier(struct kinc_g5_command_list *list, kinc_g5_render_target_t *renderTarget) {
+void kinc_g5_command_list_texture_to_render_target_barrier(struct kinc_g5_command_list *list, kinc_g5_texture_t *renderTarget) {
 	assert(list->impl.open);
 
 	D3D12_RESOURCE_BARRIER barrier;
@@ -715,7 +715,7 @@ void kinc_g5_command_list_texture_to_render_target_barrier(struct kinc_g5_comman
 	list->impl._commandList->lpVtbl->ResourceBarrier(list->impl._commandList, 1, &barrier);
 }
 
-void kinc_g5_command_list_render_target_to_texture_barrier(struct kinc_g5_command_list *list, kinc_g5_render_target_t *renderTarget) {
+void kinc_g5_command_list_render_target_to_texture_barrier(struct kinc_g5_command_list *list, kinc_g5_texture_t *renderTarget) {
 	assert(list->impl.open);
 
 	D3D12_RESOURCE_BARRIER barrier;
@@ -845,10 +845,10 @@ void kinc_g5_command_list_set_index_buffer(struct kinc_g5_command_list *list, ki
 	list->impl._commandList->lpVtbl->IASetIndexBuffer(list->impl._commandList, (D3D12_INDEX_BUFFER_VIEW *) & buffer->impl.index_buffer_view);
 }
 
-void kinc_g5_command_list_set_render_targets(struct kinc_g5_command_list *list, kinc_g5_render_target_t **targets, int count) {
+void kinc_g5_command_list_set_render_targets(struct kinc_g5_command_list *list, kinc_g5_texture_t **targets, int count) {
 	assert(list->impl.open);
 
-	kinc_g5_render_target_t *render_target = targets[0];
+	kinc_g5_texture_t *render_target = targets[0];
 
 	D3D12_CPU_DESCRIPTOR_HANDLE target_descriptors[16];
 	for (int i = 0; i < count; ++i) {
@@ -932,7 +932,7 @@ static int d3d12_textureAlignment() {
 	return D3D12_TEXTURE_DATA_PITCH_ALIGNMENT;
 }
 
-void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list, kinc_g5_render_target_t *render_target, uint8_t *data) {
+void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list, kinc_g5_texture_t *render_target, uint8_t *data) {
 	assert(list->impl.open);
 
 	D3D12_RESOURCE_DESC desc;
@@ -1067,7 +1067,7 @@ void kinc_g5_command_list_set_sampler(kinc_g5_command_list_t *list, kinc_g5_text
 	kinc_g5_internal_set_textures(list);
 }
 
-void kinc_g5_command_list_set_texture_from_render_target(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_render_target_t *target) {
+void kinc_g5_command_list_set_texture_from_render_target(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *target) {
 	if (unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT] >= 0) {
 		target->impl.stage = unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT];
 		list->impl.currentRenderTargets[target->impl.stage] = target;
@@ -1081,7 +1081,7 @@ void kinc_g5_command_list_set_texture_from_render_target(kinc_g5_command_list_t 
 	kinc_g5_internal_set_textures(list);
 }
 
-void kinc_g5_command_list_set_texture_from_render_target_depth(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_render_target_t *target) {
+void kinc_g5_command_list_set_texture_from_render_target_depth(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *target) {
 	if (unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT] >= 0) {
 		target->impl.stage_depth = unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT];
 		list->impl.currentRenderTargets[target->impl.stage_depth] = target;
@@ -2285,7 +2285,7 @@ static DXGI_FORMAT convertFormat(kinc_image_format_t format) {
 
 void kinc_memory_emergency();
 
-static void render_target_init(kinc_g5_render_target_t *render_target, int width, int height, kinc_image_format_t format, int depthBufferBits, int framebuffer_index) {
+static void render_target_init(kinc_g5_texture_t *render_target, int width, int height, kinc_image_format_t format, int depthBufferBits, int framebuffer_index) {
 	render_target->width = render_target->width = width;
 	render_target->height = render_target->height = height;
 	render_target->impl.stage = 0;
@@ -2480,18 +2480,18 @@ static void render_target_init(kinc_g5_render_target_t *render_target, int width
 	render_target->impl.viewport.MaxDepth = 1.0f;
 }
 
-void kinc_g5_render_target_init(kinc_g5_render_target_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits) {
+void kinc_g5_render_target_init(kinc_g5_texture_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits) {
 	render_target_init(target, width, height, format, depthBufferBits, -1);
 }
 
 static int framebuffer_count = 0;
 
-void kinc_g5_render_target_init_framebuffer(kinc_g5_render_target_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits) {
+void kinc_g5_render_target_init_framebuffer(kinc_g5_texture_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits) {
 	render_target_init(target, width, height, format, depthBufferBits, framebuffer_count);
 	framebuffer_count += 1;
 }
 
-void kinc_g5_render_target_destroy(kinc_g5_render_target_t *render_target) {
+void kinc_g5_render_target_destroy(kinc_g5_texture_t *render_target) {
 	if (render_target->impl.framebuffer_index >= 0) {
 		framebuffer_count -= 1;
 	}
@@ -2509,7 +2509,7 @@ void kinc_g5_render_target_destroy(kinc_g5_render_target_t *render_target) {
 	}
 }
 
-void kinc_g5_render_target_set_depth_from(kinc_g5_render_target_t *render_target, kinc_g5_render_target_t *source) {
+void kinc_g5_render_target_set_depth_from(kinc_g5_texture_t *render_target, kinc_g5_texture_t *source) {
 	render_target->impl.depthStencilDescriptorHeap = source->impl.depthStencilDescriptorHeap;
 	render_target->impl.srvDepthDescriptorHeap = source->impl.srvDepthDescriptorHeap;
 	render_target->impl.depthStencilTexture = source->impl.depthStencilTexture;
@@ -2834,7 +2834,7 @@ static ID3D12RootSignature *dxrRootSignature = NULL;
 static ID3D12DescriptorHeap *descriptorHeap = NULL;
 static kinc_g5_raytrace_acceleration_structure_t *accel;
 static kinc_g5_raytrace_pipeline_t *pipeline;
-static kinc_g5_render_target_t *output = NULL;
+static kinc_g5_texture_t *output = NULL;
 static D3D12_CPU_DESCRIPTOR_HANDLE outputCpuDescriptor;
 static D3D12_GPU_DESCRIPTOR_HANDLE outputDescriptorHandle;
 static D3D12_GPU_DESCRIPTOR_HANDLE vbgpuDescriptorHandle;
@@ -3536,7 +3536,7 @@ void kinc_g5_raytrace_acceleration_structure_destroy(kinc_g5_raytrace_accelerati
 	// accel->impl.top_level_accel->Release();
 }
 
-void kinc_g5_raytrace_set_textures(kinc_g5_render_target_t *texpaint0, kinc_g5_render_target_t *texpaint1, kinc_g5_render_target_t *texpaint2, kinc_g5_texture_t *texenv, kinc_g5_texture_t *texsobol, kinc_g5_texture_t *texscramble, kinc_g5_texture_t *texrank) {
+void kinc_g5_raytrace_set_textures(kinc_g5_texture_t *texpaint0, kinc_g5_texture_t *texpaint1, kinc_g5_texture_t *texpaint2, kinc_g5_texture_t *texenv, kinc_g5_texture_t *texsobol, kinc_g5_texture_t *texscramble, kinc_g5_texture_t *texrank) {
 	D3D12_CPU_DESCRIPTOR_HANDLE handle;
 	descriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(descriptorHeap, &handle);
 
@@ -3602,7 +3602,7 @@ void kinc_g5_raytrace_set_pipeline(kinc_g5_raytrace_pipeline_t *_pipeline) {
 	pipeline = _pipeline;
 }
 
-void kinc_g5_raytrace_set_target(kinc_g5_render_target_t *_output) {
+void kinc_g5_raytrace_set_target(kinc_g5_texture_t *_output) {
 	if (_output != output) {
 		_output->impl.renderTarget->lpVtbl->Release(_output->impl.renderTarget);
 		_output->impl.renderTargetDescriptorHeap->lpVtbl->Release(_output->impl.renderTargetDescriptorHeap);

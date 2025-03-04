@@ -192,13 +192,13 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 	// Clear export layer
 	g4_begin(layers_expa);
 	g4_clear(color_from_floats(0.0, 0.0, 0.0, 0.0));
-	g4_end();
+	iron_g4_end();
 	g4_begin(layers_expb);
 	g4_clear(color_from_floats(0.5, 0.5, 1.0, 0.0));
-	g4_end();
+	iron_g4_end();
 	g4_begin(layers_expc);
 	g4_clear(color_from_floats(1.0, 0.0, 0.0, 0.0));
-	g4_end();
+	iron_g4_end();
 
 	// Flatten layers
 	for (let i: i32 = 0; i < layers.length; ++i) {
@@ -249,17 +249,17 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 			g2_end();
 
 			g4_begin(layers_expa);
-			g4_set_pipeline(pipes_merge);
+			kinc_g5_set_pipeline(pipes_merge);
 			g4_set_tex(pipes_tex0, l1.texpaint);
 			g4_set_tex(pipes_tex1, empty);
 			g4_set_tex(pipes_texmask, mask);
 			g4_set_tex(pipes_texa, layers_temp_image);
-			g4_set_float(pipes_opac, slot_layer_get_opacity(l1));
-			g4_set_int(pipes_blending, layers.length > 1 ? l1.blending : 0);
-			g4_set_vertex_buffer(const_data_screen_aligned_vb);
-			g4_set_index_buffer(const_data_screen_aligned_ib);
+			iron_g4_set_float(pipes_opac, slot_layer_get_opacity(l1));
+			iron_g4_set_int(pipes_blending, layers.length > 1 ? l1.blending : 0);
+			kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
+			kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
 			g4_draw();
-			g4_end();
+			iron_g4_end();
 		}
 
 		if (l1.paint_nor) {
@@ -270,17 +270,17 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 			g2_end();
 
 			g4_begin(layers_expb);
-			g4_set_pipeline(pipes_merge);
+			kinc_g5_set_pipeline(pipes_merge);
 			g4_set_tex(pipes_tex0, l1.texpaint);
 			g4_set_tex(pipes_tex1, l1.texpaint_nor);
 			g4_set_tex(pipes_texmask, mask);
 			g4_set_tex(pipes_texa, layers_temp_image);
-			g4_set_float(pipes_opac, slot_layer_get_opacity(l1));
-			g4_set_int(pipes_blending, l1.paint_nor_blend ? -2 : -1);
-			g4_set_vertex_buffer(const_data_screen_aligned_vb);
-			g4_set_index_buffer(const_data_screen_aligned_ib);
+			iron_g4_set_float(pipes_opac, slot_layer_get_opacity(l1));
+			iron_g4_set_int(pipes_blending, l1.paint_nor_blend ? -2 : -1);
+			kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
+			kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
 			g4_draw();
-			g4_end();
+			iron_g4_end();
 		}
 
 		if (l1.paint_occ || l1.paint_rough || l1.paint_met || l1.paint_height) {

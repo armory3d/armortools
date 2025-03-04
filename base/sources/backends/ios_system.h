@@ -4,7 +4,7 @@
 #import <QuartzCore/CAMetalLayer.h>
 #import <CoreMotion/CMMotionManager.h>
 
-struct kinc_g5_render_target;
+struct kinc_g5_texture;
 
 @interface GLView : UIView <UIKeyInput> {
 @private

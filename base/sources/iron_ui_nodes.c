@@ -14,7 +14,7 @@
 
 static ui_nodes_t *current_nodes = NULL;
 static bool ui_nodes_elements_baked = false;
-static kinc_g5_render_target_t ui_socket_image;
+static kinc_g5_texture_t ui_socket_image;
 static bool ui_box_select = false;
 static int ui_box_select_x = 0;
 static int ui_box_select_y = 0;

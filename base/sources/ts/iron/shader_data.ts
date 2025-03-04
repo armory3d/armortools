@@ -67,9 +67,9 @@ function shader_context_create(raw: shader_context_t): shader_context_t {
 
 function shader_context_compile(raw: shader_context_t): shader_context_t {
 	if (raw._.pipe_state != null) {
-		g4_pipeline_delete(raw._.pipe_state);
+		iron_g4_delete_pipeline(raw._.pipe_state);
 	}
-	raw._.pipe_state = g4_pipeline_create();
+	raw._.pipe_state = iron_g4_create_pipeline();
 	raw._.constants = [];
 	raw._.tex_units = [];
 
@@ -159,7 +159,7 @@ function shader_context_compile(raw: shader_context_t): shader_context_t {
 }
 
 function shader_context_finish_compile(raw: shader_context_t): shader_context_t {
-	g4_pipeline_compile(raw._.pipe_state);
+	iron_g4_compile_pipeline(raw._.pipe_state);
 
 	if (raw.constants != null) {
 		for (let i: i32 = 0; i < raw.constants.length; ++i) {
@@ -216,7 +216,7 @@ function shader_context_delete(raw: shader_context_t) {
 	if (raw._.pipe_state.vertex_shader != null) {
 		kinc_g5_shader_destroy(raw._.pipe_state.vertex_shader);
 	}
-	g4_pipeline_delete(raw._.pipe_state);
+	iron_g4_delete_pipeline(raw._.pipe_state);
 }
 
 function shader_context_get_compare_mode(s: string): compare_mode_t {
@@ -344,11 +344,11 @@ function shader_context_get_tex_format(s: string): tex_format_t {
 }
 
 function shader_context_add_const(raw: shader_context_t, c: shader_const_t) {
-	array_push(raw._.constants, g4_pipeline_get_const_loc(raw._.pipe_state, c.name));
+	array_push(raw._.constants, iron_g4_get_constant_location(raw._.pipe_state, c.name));
 }
 
 function shader_context_add_tex(raw: shader_context_t, tu: tex_unit_t) {
-	let unit: any = g4_pipeline_get_tex_unit(raw._.pipe_state, tu.name);
+	let unit: any = iron_g4_get_texture_unit(raw._.pipe_state, tu.name);
 	array_push(raw._.tex_units, unit);
 }
 

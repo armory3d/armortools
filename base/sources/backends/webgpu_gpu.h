@@ -2,9 +2,6 @@
 
 #include <iron_gpu.h>
 #include <iron_math.h>
-
-#pragma once
-
 #include <webgpu/webgpu.h>
 
 typedef struct {
@@ -22,24 +19,9 @@ typedef struct {
 	int count;
 } IndexBuffer5Impl;
 
-
-#pragma once
-
-#include <webgpu/webgpu.h>
-
 typedef struct {
 	WGPUTexture texture;
 } Texture5Impl;
-
-typedef struct {
-	WGPUTexture texture;
-} RenderTarget5Impl;
-
-
-
-#pragma once
-
-#include <webgpu/webgpu.h>
 
 typedef struct {
 	WGPURenderPipeline pipeline;
@@ -65,23 +47,12 @@ typedef struct {
 	WGPUShaderModule module;
 } Shader5Impl;
 
-
-
-#pragma once
-
-#include <webgpu/webgpu.h>
-
 typedef struct {
 	WGPUCommandEncoder encoder;
 	WGPURenderPassEncoder pass;
 	int indexCount;
 } CommandList5Impl;
 
-
-
-#pragma once
-
 typedef struct kinc_g5_compute_shader_impl {
 	int nothing;
 } kinc_g5_compute_shader_impl;
-

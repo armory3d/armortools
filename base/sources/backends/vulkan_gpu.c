@@ -59,7 +59,7 @@ kinc_g5_texture_t *vulkan_textures[16] = {
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
 
-kinc_g5_render_target_t *vulkan_render_targets[16] = {
+kinc_g5_texture_t *vulkan_render_targets[16] = {
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
@@ -1064,7 +1064,7 @@ bool kinc_g5_swap_buffers() {
 	return true;
 }
 
-void kinc_g5_begin(kinc_g5_render_target_t *renderTarget) {
+void kinc_g5_begin(kinc_g5_texture_t *renderTarget) {
 	struct vk_window *window = &vk_ctx.windows[0];
 
 	if (began) {
@@ -1178,7 +1178,7 @@ int kinc_g5_max_bound_textures(void) {
 
 
 extern kinc_g5_texture_t *vulkan_textures[16];
-extern kinc_g5_render_target_t *vulkan_render_targets[16];
+extern kinc_g5_texture_t *vulkan_render_targets[16];
 VkDescriptorSet getDescriptorSet(void);
 static VkDescriptorSet get_compute_descriptor_set(void);
 bool memory_type_from_properties(uint32_t typeBits, VkFlags requirements_mask, uint32_t *typeIndex);
@@ -1186,7 +1186,7 @@ void setImageLayout(VkCommandBuffer _buffer, VkImage image, VkImageAspectFlags a
 
 VkRenderPassBeginInfo currentRenderPassBeginInfo;
 VkPipeline currentVulkanPipeline;
-kinc_g5_render_target_t *currentRenderTargets[8] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+kinc_g5_texture_t *currentRenderTargets[8] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 
 static bool onBackBuffer = false;
 static uint32_t lastVertexConstantBufferOffset = 0;
@@ -1517,7 +1517,7 @@ void kinc_g5_command_list_end(kinc_g5_command_list_t *list) {
 	assert(!err);
 }
 
-void kinc_g5_command_list_clear(kinc_g5_command_list_t *list, struct kinc_g5_render_target *renderTarget, unsigned flags, unsigned color, float depth) {
+void kinc_g5_command_list_clear(kinc_g5_command_list_t *list, struct kinc_g5_texture *renderTarget, unsigned flags, unsigned color, float depth) {
 	VkClearRect clearRect = {0};
 	clearRect.rect.offset.x = 0;
 	clearRect.rect.offset.y = 0;
@@ -1548,9 +1548,9 @@ void kinc_g5_command_list_clear(kinc_g5_command_list_t *list, struct kinc_g5_ren
 	vkCmdClearAttachments(list->impl._buffer, count, attachments, 1, &clearRect);
 }
 
-void kinc_g5_command_list_render_target_to_framebuffer_barrier(kinc_g5_command_list_t *list, struct kinc_g5_render_target *renderTarget) {}
+void kinc_g5_command_list_render_target_to_framebuffer_barrier(kinc_g5_command_list_t *list, struct kinc_g5_texture *renderTarget) {}
 
-void kinc_g5_command_list_framebuffer_to_render_target_barrier(kinc_g5_command_list_t *list, struct kinc_g5_render_target *renderTarget) {}
+void kinc_g5_command_list_framebuffer_to_render_target_barrier(kinc_g5_command_list_t *list, struct kinc_g5_texture *renderTarget) {}
 
 void kinc_g5_command_list_draw_indexed_vertices(kinc_g5_command_list_t *list) {
 	kinc_g5_command_list_draw_indexed_vertices_from_to(list, 0, list->impl._indexCount);
@@ -1624,7 +1624,7 @@ void kinc_g5_command_list_set_index_buffer(kinc_g5_command_list_t *list, struct 
 	vkCmdBindIndexBuffer(list->impl._buffer, indexBuffer->impl.buf, 0, VK_INDEX_TYPE_UINT32);
 }
 
-void kinc_internal_restore_render_target(kinc_g5_command_list_t *list, struct kinc_g5_render_target *target) {
+void kinc_internal_restore_render_target(kinc_g5_command_list_t *list, struct kinc_g5_texture *target) {
 	VkViewport viewport;
 	memset(&viewport, 0, sizeof(viewport));
 	viewport.x = 0;
@@ -1680,7 +1680,7 @@ void kinc_internal_restore_render_target(kinc_g5_command_list_t *list, struct ki
 	}
 }
 
-void kinc_g5_command_list_set_render_targets(kinc_g5_command_list_t *list, struct kinc_g5_render_target **targets, int count) {
+void kinc_g5_command_list_set_render_targets(kinc_g5_command_list_t *list, struct kinc_g5_texture **targets, int count) {
 	for (int i = 0; i < count; ++i) {
 		currentRenderTargets[i] = targets[i];
 	}
@@ -1810,7 +1810,7 @@ void kinc_g5_command_list_set_render_targets(kinc_g5_command_list_t *list, struc
 
 		VkImageView attachmentsViews[9];
 		for (int i = 0; i < count; ++i) {
-			attachmentsViews[i] = targets[i]->impl.sourceView;
+			attachmentsViews[i] = targets[i]->impl.view;
 		}
 		if (targets[0]->impl.depthBufferBits > 0) {
 			attachmentsViews[count] = targets[0]->impl.depthView;
@@ -1868,22 +1868,22 @@ void kinc_g5_command_list_upload_vertex_buffer(kinc_g5_command_list_t *list, str
 
 void kinc_g5_command_list_upload_texture(kinc_g5_command_list_t *list, struct kinc_g5_texture *texture) {}
 
-void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list, kinc_g5_render_target_t *render_target, uint8_t *data) {
+void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list, kinc_g5_texture_t *render_target, uint8_t *data) {
 	VkFormat format = render_target->impl.format;
 	int format_bytes_size = format_size(format);
 
 	// Create readback buffer
-	if (!render_target->impl.readbackBufferCreated) {
+	if (!render_target->impl.readback_buffer_created) {
 		VkBufferCreateInfo buf_info = {0};
 		buf_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 		buf_info.pNext = NULL;
 		buf_info.size = render_target->width * render_target->height * format_bytes_size;
 		buf_info.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 		buf_info.flags = 0;
-		vkCreateBuffer(vk_ctx.device, &buf_info, NULL, &render_target->impl.readbackBuffer);
+		vkCreateBuffer(vk_ctx.device, &buf_info, NULL, &render_target->impl.readback_buffer);
 
 		VkMemoryRequirements mem_reqs = {0};
-		vkGetBufferMemoryRequirements(vk_ctx.device, render_target->impl.readbackBuffer, &mem_reqs);
+		vkGetBufferMemoryRequirements(vk_ctx.device, render_target->impl.readback_buffer, &mem_reqs);
 
 		VkMemoryAllocateInfo mem_alloc;
 		memset(&mem_alloc, 0, sizeof(VkMemoryAllocateInfo));
@@ -1893,14 +1893,14 @@ void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list,
 		mem_alloc.memoryTypeIndex = 0;
 		mem_alloc.allocationSize = mem_reqs.size;
 		memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &mem_alloc.memoryTypeIndex);
-		vkAllocateMemory(vk_ctx.device, &mem_alloc, NULL, &render_target->impl.readbackMemory);
-		vkBindBufferMemory(vk_ctx.device, render_target->impl.readbackBuffer, render_target->impl.readbackMemory, 0);
+		vkAllocateMemory(vk_ctx.device, &mem_alloc, NULL, &render_target->impl.readback_memory);
+		vkBindBufferMemory(vk_ctx.device, render_target->impl.readback_buffer, render_target->impl.readback_memory, 0);
 
-		render_target->impl.readbackBufferCreated = true;
+		render_target->impl.readback_buffer_created = true;
 	}
 
 	vkCmdEndRenderPass(list->impl._buffer);
-	setImageLayout(list->impl._buffer, render_target->impl.sourceImage, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+	setImageLayout(list->impl._buffer, render_target->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 	               VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 
 	VkBufferImageCopy region;
@@ -1917,10 +1917,10 @@ void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list,
 	region.imageExtent.width = (uint32_t)render_target->width;
 	region.imageExtent.height = (uint32_t)render_target->height;
 	region.imageExtent.depth = 1;
-	vkCmdCopyImageToBuffer(list->impl._buffer, render_target->impl.sourceImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, render_target->impl.readbackBuffer, 1,
+	vkCmdCopyImageToBuffer(list->impl._buffer, render_target->impl.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, render_target->impl.readback_buffer, 1,
 	                       &region);
 
-	setImageLayout(list->impl._buffer, render_target->impl.sourceImage, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+	setImageLayout(list->impl._buffer, render_target->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 	               VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	vkCmdBeginRenderPass(list->impl._buffer, &currentRenderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 	in_render_pass = true;
@@ -1932,16 +1932,16 @@ void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list,
 
 	// Read buffer
 	void *p;
-	vkMapMemory(vk_ctx.device, render_target->impl.readbackMemory, 0, VK_WHOLE_SIZE, 0, (void **)&p);
+	vkMapMemory(vk_ctx.device, render_target->impl.readback_memory, 0, VK_WHOLE_SIZE, 0, (void **)&p);
 	memcpy(data, p, render_target->width * render_target->height * format_bytes_size);
-	vkUnmapMemory(vk_ctx.device, render_target->impl.readbackMemory);
+	vkUnmapMemory(vk_ctx.device, render_target->impl.readback_memory);
 }
 
-void kinc_g5_command_list_texture_to_render_target_barrier(kinc_g5_command_list_t *list, struct kinc_g5_render_target *renderTarget) {
+void kinc_g5_command_list_texture_to_render_target_barrier(kinc_g5_command_list_t *list, struct kinc_g5_texture *renderTarget) {
 	// render-passes are used to transition render-targets
 }
 
-void kinc_g5_command_list_render_target_to_texture_barrier(kinc_g5_command_list_t *list, struct kinc_g5_render_target *renderTarget) {
+void kinc_g5_command_list_render_target_to_texture_barrier(kinc_g5_command_list_t *list, struct kinc_g5_texture *renderTarget) {
 	// render-passes are used to transition render-targets
 }
 
@@ -2024,7 +2024,7 @@ void kinc_g5_command_list_set_sampler(kinc_g5_command_list_t *list, kinc_g5_text
 	}
 }
 
-void kinc_g5_command_list_set_texture_from_render_target(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_render_target_t *target) {
+void kinc_g5_command_list_set_texture_from_render_target(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *target) {
 	if (unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT] >= 0) {
 		target->impl.stage = unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT];
 		vulkan_render_targets[unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT]] = target;
@@ -2036,7 +2036,7 @@ void kinc_g5_command_list_set_texture_from_render_target(kinc_g5_command_list_t 
 	vulkan_textures[target->impl.stage] = NULL;
 }
 
-void kinc_g5_command_list_set_texture_from_render_target_depth(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_render_target_t *target) {
+void kinc_g5_command_list_set_texture_from_render_target_depth(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *target) {
 	if (unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT] >= 0) {
 		target->impl.stage_depth = unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT];
 		vulkan_render_targets[unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT]] = target;
@@ -2249,7 +2249,7 @@ kinc_g5_texture_unit_t kinc_g5_compute_shader_get_texture_unit(kinc_g5_compute_s
 
 VkDescriptorSetLayout desc_layout;
 extern kinc_g5_texture_t *vulkan_textures[16];
-extern kinc_g5_render_target_t *vulkan_render_targets[16];
+extern kinc_g5_texture_t *vulkan_render_targets[16];
 extern uint32_t swapchainImageCount;
 extern uint32_t current_buffer;
 bool memory_type_from_properties(uint32_t typeBits, VkFlags requirements_mask, uint32_t *typeIndex);
@@ -3019,7 +3019,7 @@ static int write_tex_descs(VkDescriptorImageInfo *tex_descs) {
 				vulkan_render_targets[i]->impl.stage_depth = -1;
 			}
 			else {
-				tex_descs[i].imageView = vulkan_render_targets[i]->impl.sourceView;
+				tex_descs[i].imageView = vulkan_render_targets[i]->impl.view;
 			}
 			texture_count++;
 		}
@@ -3125,7 +3125,7 @@ VkDescriptorSet getDescriptorSet() {
 				vulkan_render_targets[i]->impl.stage_depth = -1;
 			}
 			else {
-				tex_desc[i].imageView = vulkan_render_targets[i]->impl.sourceView;
+				tex_desc[i].imageView = vulkan_render_targets[i]->impl.view;
 			}
 			texture_count++;
 		}
@@ -3202,7 +3202,7 @@ static int write_compute_tex_descs(VkDescriptorImageInfo *tex_descs) {
 				vulkan_render_targets[i]->impl.stage_depth = -1;
 			}
 			else {
-				tex_descs[i].imageView = vulkan_render_targets[i]->impl.sourceView;
+				tex_descs[i].imageView = vulkan_render_targets[i]->impl.view;
 			}
 			texture_count++;
 		}
@@ -3308,7 +3308,7 @@ static VkDescriptorSet get_compute_descriptor_set() {
 				vulkan_render_targets[i]->impl.stage_depth = -1;
 			}
 			else {
-				tex_desc[i].imageView = vulkan_render_targets[i]->impl.sourceView;
+				tex_desc[i].imageView = vulkan_render_targets[i]->impl.view;
 			}
 			texture_count++;
 		}
@@ -3522,9 +3522,6 @@ static void prepare_texture_image(uint8_t *tex_colors, uint32_t width, uint32_t 
 	VkResult err;
 	bool pass;
 
-	tex_obj->width = width;
-	tex_obj->height = height;
-
 	VkImageCreateInfo image_create_info = {0};
 	image_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 	image_create_info.pNext = NULL;
@@ -3664,7 +3661,6 @@ static void prepare_texture_image(uint8_t *tex_colors, uint32_t width, uint32_t 
 		tex_obj->imageLayout = VK_IMAGE_LAYOUT_GENERAL; // VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 	}
 	set_image_layout(tex_obj->image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, tex_obj->imageLayout);
-	// setting the image layout does not reference the actual memory so no need to add a mem ref
 }
 
 static void destroy_texture_image(Texture5Impl *tex_obj) {
@@ -3769,8 +3765,8 @@ void kinc_g5_texture_init_from_bytes(kinc_g5_texture_t *texture, void *data, int
 		copy_region.dstSubresource.baseArrayLayer = 0;
 		copy_region.dstSubresource.layerCount = 1;
 		copy_region.dstOffset.x = copy_region.dstOffset.y = copy_region.dstOffset.z = 0;
-		copy_region.extent.width = (uint32_t)staging_texture.width;
-		copy_region.extent.height = (uint32_t)staging_texture.height;
+		copy_region.extent.width = (uint32_t)width;
+		copy_region.extent.height = (uint32_t)height;
 		copy_region.extent.depth = 1;
 
 		vkCmdCopyImage(vk_ctx.setup_cmd, staging_texture.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, texture->impl.image,
@@ -3997,7 +3993,7 @@ void kinc_g5_texture_set_mipmap(kinc_g5_texture_t *texture, kinc_g5_texture_t *m
 
 extern uint32_t swapchainImageCount;
 extern kinc_g5_texture_t *vulkan_textures[16];
-extern kinc_g5_render_target_t *vulkan_render_targets[16];
+extern kinc_g5_texture_t *vulkan_render_targets[16];
 
 void setup_init_cmd();
 
@@ -4055,7 +4051,7 @@ void setImageLayout(VkCommandBuffer _buffer, VkImage image, VkImageAspectFlags a
 	vkCmdPipelineBarrier(_buffer, srcStageFlags, dstStageFlags, 0, 0, NULL, 0, NULL, 1, &imageMemoryBarrier);
 }
 
-static void render_target_init(kinc_g5_render_target_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits, int framebuffer_index) {
+static void render_target_init(kinc_g5_texture_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits, int framebuffer_index) {
 	target->framebuffer_index = framebuffer_index;
 	target->width = width;
 	target->height = height;
@@ -4063,7 +4059,7 @@ static void render_target_init(kinc_g5_render_target_t *target, int width, int h
 	target->impl.depthBufferBits = depthBufferBits;
 	target->impl.stage = 0;
 	target->impl.stage_depth = -1;
-	target->impl.readbackBufferCreated = false;
+	target->impl.readback_buffer_created = false;
 
 	if (framebuffer_index < 0) {
 		{
@@ -4100,11 +4096,11 @@ static void render_target_init(kinc_g5_render_target_t *target, int width, int h
 			colorImageView.subresourceRange.baseArrayLayer = 0;
 			colorImageView.subresourceRange.layerCount = 1;
 
-			err = vkCreateImage(vk_ctx.device, &image, NULL, &target->impl.sourceImage);
+			err = vkCreateImage(vk_ctx.device, &image, NULL, &target->impl.image);
 			assert(!err);
 
 			VkMemoryRequirements memoryRequirements;
-			vkGetImageMemoryRequirements(vk_ctx.device, target->impl.sourceImage, &memoryRequirements);
+			vkGetImageMemoryRequirements(vk_ctx.device, target->impl.image, &memoryRequirements);
 
 			VkMemoryAllocateInfo allocationInfo = {0};
 			allocationInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -4114,19 +4110,19 @@ static void render_target_init(kinc_g5_render_target_t *target, int width, int h
 			bool pass = memory_type_from_properties(memoryRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &allocationInfo.memoryTypeIndex);
 			assert(pass);
 
-			err = vkAllocateMemory(vk_ctx.device, &allocationInfo, NULL, &target->impl.sourceMemory);
+			err = vkAllocateMemory(vk_ctx.device, &allocationInfo, NULL, &target->impl.mem);
 			assert(!err);
 
-			err = vkBindImageMemory(vk_ctx.device, target->impl.sourceImage, target->impl.sourceMemory, 0);
+			err = vkBindImageMemory(vk_ctx.device, target->impl.image, target->impl.mem, 0);
 			assert(!err);
 
 			setup_init_cmd();
-			setImageLayout(vk_ctx.setup_cmd, target->impl.sourceImage, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED,
+			setImageLayout(vk_ctx.setup_cmd, target->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED,
 			               VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 			flush_init_cmd();
 
-			colorImageView.image = target->impl.sourceImage;
-			err = vkCreateImageView(vk_ctx.device, &colorImageView, NULL, &target->impl.sourceView);
+			colorImageView.image = target->impl.image;
+			err = vkCreateImageView(vk_ctx.device, &colorImageView, NULL, &target->impl.view);
 			assert(!err);
 		}
 
@@ -4200,7 +4196,7 @@ static void render_target_init(kinc_g5_render_target_t *target, int width, int h
 		}
 
 		VkImageView attachments[2];
-		attachments[0] = target->impl.sourceView;
+		attachments[0] = target->impl.view;
 
 		if (depthBufferBits > 0) {
 			attachments[1] = target->impl.depthView;
@@ -4229,7 +4225,7 @@ static void render_target_init(kinc_g5_render_target_t *target, int width, int h
 	}
 }
 
-void kinc_g5_render_target_init(kinc_g5_render_target_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits) {
+void kinc_g5_render_target_init(kinc_g5_texture_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits) {
 	render_target_init(target, width, height, format, depthBufferBits, -1);
 	target->width = width;
 	target->height = height;
@@ -4238,12 +4234,12 @@ void kinc_g5_render_target_init(kinc_g5_render_target_t *target, int width, int 
 
 static int framebuffer_count = 0;
 
-void kinc_g5_render_target_init_framebuffer(kinc_g5_render_target_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits) {
+void kinc_g5_render_target_init_framebuffer(kinc_g5_texture_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits) {
 	render_target_init(target, width, height, format, depthBufferBits, framebuffer_count);
 	framebuffer_count += 1;
 }
 
-void kinc_g5_render_target_destroy(kinc_g5_render_target_t *target) {
+void kinc_g5_render_target_destroy(kinc_g5_texture_t *target) {
 	if (target->framebuffer_index >= 0) {
 		framebuffer_count -= 1;
 	}
@@ -4254,13 +4250,13 @@ void kinc_g5_render_target_destroy(kinc_g5_render_target_t *target) {
 			vkDestroyImage(vk_ctx.device, target->impl.depthImage, NULL);
 			vkFreeMemory(vk_ctx.device, target->impl.depthMemory, NULL);
 		}
-		vkDestroyImageView(vk_ctx.device, target->impl.sourceView, NULL);
-		vkDestroyImage(vk_ctx.device, target->impl.sourceImage, NULL);
-		vkFreeMemory(vk_ctx.device, target->impl.sourceMemory, NULL);
+		vkDestroyImageView(vk_ctx.device, target->impl.view, NULL);
+		vkDestroyImage(vk_ctx.device, target->impl.image, NULL);
+		vkFreeMemory(vk_ctx.device, target->impl.mem, NULL);
 	}
 }
 
-void kinc_g5_render_target_set_depth_from(kinc_g5_render_target_t *target, kinc_g5_render_target_t *source) {
+void kinc_g5_render_target_set_depth_from(kinc_g5_texture_t *target, kinc_g5_texture_t *source) {
 	target->impl.depthImage = source->impl.depthImage;
 	target->impl.depthMemory = source->impl.depthMemory;
 	target->impl.depthView = source->impl.depthView;
@@ -4270,7 +4266,7 @@ void kinc_g5_render_target_set_depth_from(kinc_g5_render_target_t *target, kinc_
 
 	{
 		VkImageView attachments[2];
-		attachments[0] = target->impl.sourceView;
+		attachments[0] = target->impl.view;
 
 		if (target->impl.depthBufferBits > 0) {
 			attachments[1] = target->impl.depthView;
@@ -4663,10 +4659,10 @@ typedef struct inst {
 static VkDescriptorPool raytrace_descriptor_pool;
 static kinc_g5_raytrace_acceleration_structure_t *accel;
 static kinc_g5_raytrace_pipeline_t *pipeline;
-static kinc_g5_render_target_t *output = NULL;
-static kinc_g5_render_target_t *texpaint0;
-static kinc_g5_render_target_t *texpaint1;
-static kinc_g5_render_target_t *texpaint2;
+static kinc_g5_texture_t *output = NULL;
+static kinc_g5_texture_t *texpaint0;
+static kinc_g5_texture_t *texpaint1;
+static kinc_g5_texture_t *texpaint2;
 static kinc_g5_texture_t *texenv;
 static kinc_g5_texture_t *texsobol;
 static kinc_g5_texture_t *texscramble;
@@ -5622,7 +5618,7 @@ void kinc_g5_raytrace_acceleration_structure_destroy(kinc_g5_raytrace_accelerati
 	// vkDestroyBuffer(vk_ctx.device, accel->impl.instances_buffer, NULL);
 }
 
-void kinc_g5_raytrace_set_textures(kinc_g5_render_target_t *_texpaint0, kinc_g5_render_target_t *_texpaint1, kinc_g5_render_target_t *_texpaint2, kinc_g5_texture_t *_texenv, kinc_g5_texture_t *_texsobol, kinc_g5_texture_t *_texscramble, kinc_g5_texture_t *_texrank) {
+void kinc_g5_raytrace_set_textures(kinc_g5_texture_t *_texpaint0, kinc_g5_texture_t *_texpaint1, kinc_g5_texture_t *_texpaint2, kinc_g5_texture_t *_texenv, kinc_g5_texture_t *_texsobol, kinc_g5_texture_t *_texscramble, kinc_g5_texture_t *_texrank) {
 	texpaint0 = _texpaint0;
 	texpaint1 = _texpaint1;
 	texpaint2 = _texpaint2;
@@ -5640,9 +5636,9 @@ void kinc_g5_raytrace_set_pipeline(kinc_g5_raytrace_pipeline_t *_pipeline) {
 	pipeline = _pipeline;
 }
 
-void kinc_g5_raytrace_set_target(kinc_g5_render_target_t *_output) {
+void kinc_g5_raytrace_set_target(kinc_g5_texture_t *_output) {
 	if (_output != output) {
-		vkDestroyImage(vk_ctx.device, _output->impl.sourceImage, NULL);
+		vkDestroyImage(vk_ctx.device, _output->impl.image, NULL);
 
 		VkImageCreateInfo image = {0};
 		image.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -5659,9 +5655,9 @@ void kinc_g5_raytrace_set_target(kinc_g5_render_target_t *_output) {
 		image.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
 		image.flags = 0;
 
-		vkCreateImage(vk_ctx.device, &image, NULL, &_output->impl.sourceImage);
+		vkCreateImage(vk_ctx.device, &image, NULL, &_output->impl.image);
 
-		vkBindImageMemory(vk_ctx.device, _output->impl.sourceImage, _output->impl.sourceMemory, 0);
+		vkBindImageMemory(vk_ctx.device, _output->impl.image, _output->impl.mem, 0);
 
 		VkImageViewCreateInfo colorImageView = {0};
 		colorImageView.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -5674,11 +5670,11 @@ void kinc_g5_raytrace_set_target(kinc_g5_render_target_t *_output) {
 		colorImageView.subresourceRange.levelCount = 1;
 		colorImageView.subresourceRange.baseArrayLayer = 0;
 		colorImageView.subresourceRange.layerCount = 1;
-		colorImageView.image = _output->impl.sourceImage;
-		vkCreateImageView(vk_ctx.device, &colorImageView, NULL, &_output->impl.sourceView);
+		colorImageView.image = _output->impl.image;
+		vkCreateImageView(vk_ctx.device, &colorImageView, NULL, &_output->impl.view);
 
 		VkImageView attachments[1];
-		attachments[0] = _output->impl.sourceView;
+		attachments[0] = _output->impl.view;
 
 		VkFramebufferCreateInfo fbufCreateInfo = {0};
 		fbufCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -5709,7 +5705,7 @@ void kinc_g5_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
 	acceleration_structure_write.descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
 
 	VkDescriptorImageInfo image_descriptor = {0};
-	image_descriptor.imageView = output->impl.sourceView;
+	image_descriptor.imageView = output->impl.view;
 	image_descriptor.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 
 	VkDescriptorBufferInfo buffer_descriptor = {0};
@@ -5764,7 +5760,7 @@ void kinc_g5_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
 	vb_write.pBufferInfo = &vb_descriptor;
 
 	VkDescriptorImageInfo tex0image_descriptor = {0};
-	tex0image_descriptor.imageView = texpaint0->impl.sourceView;
+	tex0image_descriptor.imageView = texpaint0->impl.view;
 	tex0image_descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
 	VkWriteDescriptorSet tex0_image_write = {0};
@@ -5777,7 +5773,7 @@ void kinc_g5_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
 	tex0_image_write.pImageInfo = &tex0image_descriptor;
 
 	VkDescriptorImageInfo tex1image_descriptor = {0};
-	tex1image_descriptor.imageView = texpaint1->impl.sourceView;
+	tex1image_descriptor.imageView = texpaint1->impl.view;
 	tex1image_descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
 	VkWriteDescriptorSet tex1_image_write = {0};
@@ -5790,7 +5786,7 @@ void kinc_g5_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
 	tex1_image_write.pImageInfo = &tex1image_descriptor;
 
 	VkDescriptorImageInfo tex2image_descriptor = {0};
-	tex2image_descriptor.imageView = texpaint2->impl.sourceView;
+	tex2image_descriptor.imageView = texpaint2->impl.view;
 	tex2image_descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
 	VkWriteDescriptorSet tex2_image_write = {0};

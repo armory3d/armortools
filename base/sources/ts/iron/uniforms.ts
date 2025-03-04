@@ -191,7 +191,7 @@ function uniforms_set_context_const(location: kinc_const_loc_t, c: shader_const_
 			return false;
 		}
 
-		g4_set_mat(location, m);
+		iron_g4_set_matrix4(location, m);
 		return true;
 	}
 	else if (c.type == "vec4") {
@@ -202,10 +202,10 @@ function uniforms_set_context_const(location: kinc_const_loc_t, c: shader_const_
 		// }
 
 		if (!vec4_isnan(v)) {
-			g4_set_float4(location, v.x, v.y, v.z, v.w);
+			iron_g4_set_float4(location, v.x, v.y, v.z, v.w);
 		}
 		else {
-			g4_set_float4(location, 0, 0, 0, 0);
+			iron_g4_set_float4(location, 0, 0, 0, 0);
 		}
 		return true;
 	}
@@ -223,10 +223,10 @@ function uniforms_set_context_const(location: kinc_const_loc_t, c: shader_const_
 		}
 
 		if (!vec4_isnan(v)) {
-			g4_set_float3(location, v.x, v.y, v.z);
+			iron_g4_set_float3(location, v.x, v.y, v.z);
 		}
 		else {
-			g4_set_float3(location, 0.0, 0.0, 0.0);
+			iron_g4_set_float3(location, 0.0, 0.0, 0.0);
 		}
 		return true;
 	}
@@ -292,10 +292,10 @@ function uniforms_set_context_const(location: kinc_const_loc_t, c: shader_const_
 		}
 
 		if (!vec4_isnan(v)) {
-			g4_set_float2(location, v.x, v.y);
+			iron_g4_set_float2(location, v.x, v.y);
 		}
 		else {
-			g4_set_float2(location, 0.0, 0.0);
+			iron_g4_set_float2(location, 0.0, 0.0);
 		}
 		return true;
 	}
@@ -312,7 +312,7 @@ function uniforms_set_context_const(location: kinc_const_loc_t, c: shader_const_
 			return false;
 		}
 
-		g4_set_float(location, f);
+		iron_g4_set_float(location, f);
 		return true;
 	}
 	else if (c.type == "floats") {
@@ -338,7 +338,7 @@ function uniforms_set_context_const(location: kinc_const_loc_t, c: shader_const_
 			return false;
 		}
 
-		g4_set_int(location, i);
+		iron_g4_set_int(location, i);
 		return true;
 	}
 	return false;
@@ -379,7 +379,7 @@ function uniforms_set_obj_const(obj: object_t, loc: kinc_const_loc_t, c: shader_
 		if (mat4_isnan(m)) {
 			return;
 		}
-		g4_set_mat(loc, m);
+		iron_g4_set_matrix4(loc, m);
 	}
 	else if (c.type == "mat3") {
 		let m: mat3_t = mat3_nan();
@@ -396,7 +396,7 @@ function uniforms_set_obj_const(obj: object_t, loc: kinc_const_loc_t, c: shader_
 		if (mat3_isnan(m)) {
 			return;
 		}
-		g4_set_mat3(loc, m);
+		iron_g4_set_matrix3(loc, m);
 	}
 	else if (c.type == "vec4") {
 		let v: vec4_t = vec4_nan();
@@ -408,7 +408,7 @@ function uniforms_set_obj_const(obj: object_t, loc: kinc_const_loc_t, c: shader_
 		if (vec4_isnan(v)) {
 			return;
 		}
-		g4_set_float4(loc, v.x, v.y, v.z, v.w);
+		iron_g4_set_float4(loc, v.x, v.y, v.z, v.w);
 	}
 	else if (c.type == "vec3") {
 		let v: vec4_t = vec4_nan();
@@ -430,7 +430,7 @@ function uniforms_set_obj_const(obj: object_t, loc: kinc_const_loc_t, c: shader_
 		if (vec4_isnan(v)) {
 			return;
 		}
-		g4_set_float3(loc, v.x, v.y, v.z);
+		iron_g4_set_float3(loc, v.x, v.y, v.z);
 	}
 	else if (c.type == "vec2") {
 		let v: vec2_t = vec2_nan();
@@ -442,7 +442,7 @@ function uniforms_set_obj_const(obj: object_t, loc: kinc_const_loc_t, c: shader_
 		if (vec2_isnan(v)) {
 			return;
 		}
-		g4_set_float2(loc, v.x, v.y);
+		iron_g4_set_float2(loc, v.x, v.y);
 	}
 	else if (c.type == "float") {
 		let f: f32 = f32_nan();
@@ -469,7 +469,7 @@ function uniforms_set_obj_const(obj: object_t, loc: kinc_const_loc_t, c: shader_
 		if (f32_isnan(f)) {
 			return;
 		}
-		g4_set_float(loc, f);
+		iron_g4_set_float(loc, f);
 	}
 	else if (c.type == "floats") {
 		let fa: f32_array_t = null;
@@ -504,7 +504,7 @@ function uniforms_set_obj_const(obj: object_t, loc: kinc_const_loc_t, c: shader_
 			return;
 		}
 
-		g4_set_int(loc, i);
+		iron_g4_set_int(loc, i);
 	}
 }
 
@@ -558,21 +558,21 @@ function current_material(object: object_t): material_data_t {
 
 function uniforms_set_material_const(location: kinc_const_loc_t, shader_const: shader_const_t, material_const: bind_const_t) {
 	if (shader_const.type == "vec4") {
-		g4_set_float4(location, material_const.vec[0], material_const.vec[1], material_const.vec[2], material_const.vec[3]);
+		iron_g4_set_float4(location, material_const.vec[0], material_const.vec[1], material_const.vec[2], material_const.vec[3]);
 	}
 	else if (shader_const.type == "vec3") {
-		g4_set_float3(location, material_const.vec[0], material_const.vec[1], material_const.vec[2]);
+		iron_g4_set_float3(location, material_const.vec[0], material_const.vec[1], material_const.vec[2]);
 	}
 	else if (shader_const.type == "vec2") {
-		g4_set_float2(location, material_const.vec[0], material_const.vec[1]);
+		iron_g4_set_float2(location, material_const.vec[0], material_const.vec[1]);
 	}
 	else if (shader_const.type == "float") {
-		g4_set_float(location,  material_const.vec[0]);
+		iron_g4_set_float(location,  material_const.vec[0]);
 	}
 	else if (shader_const.type == "bool") {
-		g4_set_bool(location, material_const.vec[0] > 0.0);
+		iron_g4_set_bool(location, material_const.vec[0] > 0.0);
 	}
 	else if (shader_const.type == "int") {
-		g4_set_int(location, math_floor(material_const.vec[0]));
+		iron_g4_set_int(location, math_floor(material_const.vec[0]));
 	}
 }

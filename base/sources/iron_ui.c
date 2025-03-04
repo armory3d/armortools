@@ -1875,7 +1875,7 @@ bool ui_panel(ui_handle_t *handle, char *text, bool is_tree, bool filled) {
 
 static int image_width(void *image, bool is_rt) {
 	if (is_rt) {
-		return ((kinc_g5_render_target_t *)image)->width;
+		return ((kinc_g5_texture_t *)image)->width;
 	}
 	else {
 		return ((kinc_g5_texture_t *)image)->width;
@@ -1884,7 +1884,7 @@ static int image_width(void *image, bool is_rt) {
 
 static int image_height(void *image, bool is_rt) {
 	if (is_rt) {
-		return ((kinc_g5_render_target_t *)image)->height;
+		return ((kinc_g5_texture_t *)image)->height;
 	}
 	else {
 		return ((kinc_g5_texture_t *)image)->height;
@@ -1893,7 +1893,7 @@ static int image_height(void *image, bool is_rt) {
 
 static void _draw_scaled_image(void *image, bool is_rt, float dx, float dy, float dw, float dh) {
 	if (is_rt) {
-		draw_scaled_render_target((kinc_g5_render_target_t *)image, dx, dy, dw, dh);
+		draw_scaled_render_target((kinc_g5_texture_t *)image, dx, dy, dw, dh);
 	}
 	else {
 		draw_scaled_texture((kinc_g5_texture_t *)image, dx, dy, dw, dh);
@@ -1902,14 +1902,14 @@ static void _draw_scaled_image(void *image, bool is_rt, float dx, float dy, floa
 
 static void _draw_scaled_sub_image(void *image, bool is_rt, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh) {
 	if (is_rt) {
-		draw_scaled_sub_render_target((kinc_g5_render_target_t *)image, sx, sy, sw, sh, dx, dy, dw, dh);
+		draw_scaled_sub_render_target((kinc_g5_texture_t *)image, sx, sy, sw, sh, dx, dy, dw, dh);
 	}
 	else {
 		draw_scaled_sub_texture((kinc_g5_texture_t *)image, sx, sy, sw, sh, dx, dy, dw, dh);
 	}
 }
 
-int ui_sub_image(/*kinc_g5_texture_t kinc_g5_render_target_t*/ void *image, bool is_rt, uint32_t tint, int h, int sx, int sy, int sw, int sh) {
+int ui_sub_image(/*kinc_g5_texture_t kinc_g5_texture_t*/ void *image, bool is_rt, uint32_t tint, int h, int sx, int sy, int sw, int sh) {
 	float iw = (sw > 0 ? sw : image_width(image, is_rt)) * UI_SCALE();
 	float ih = (sh > 0 ? sh : image_height(image, is_rt)) * UI_SCALE();
 	float w = fmin(iw, current->_w);
@@ -1980,7 +1980,7 @@ int ui_sub_image(/*kinc_g5_texture_t kinc_g5_render_target_t*/ void *image, bool
 	return started ? UI_STATE_STARTED : released ? UI_STATE_RELEASED : down ? UI_STATE_DOWN : hover ? UI_STATE_HOVERED : UI_STATE_IDLE;
 }
 
-int ui_image(/*kinc_g5_texture_t kinc_g5_render_target_t*/ void *image, bool is_rt, uint32_t tint, int h) {
+int ui_image(/*kinc_g5_texture_t kinc_g5_texture_t*/ void *image, bool is_rt, uint32_t tint, int h) {
 	return ui_sub_image(image, is_rt, tint, h, 0, 0, image_width(image, is_rt), image_height(image, is_rt));
 }
 
@@ -2298,7 +2298,7 @@ void ui_tooltip_image(kinc_g5_texture_t *image, int max_width) {
 	current->tooltip_y = current->_y + current->_window_y;
 }
 
-void ui_tooltip_render_target(kinc_g5_render_target_t *image, int max_width) {
+void ui_tooltip_render_target(kinc_g5_texture_t *image, int max_width) {
 	current->tooltip_rt = image;
 	current->tooltip_img_max_width = max_width;
 	current->tooltip_invert_y = current->image_invert_y;

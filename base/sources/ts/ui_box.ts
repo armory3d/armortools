@@ -196,7 +196,7 @@ function ui_box_tween_tick() {
 function ui_box_window_border(ui: ui_t) {
 	if (ui.scissor) {
 		ui.scissor = false;
-		g4_disable_scissor();
+		kinc_g4_disable_scissor();
 	}
 	// Border
 	draw_set_color(ui.ops.theme.SEPARATOR_COL);

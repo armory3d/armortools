@@ -3,8 +3,8 @@ let util_render_material_preview_size: i32 = 256;
 let util_render_decal_preview_size: i32 = 512;
 let util_render_layer_preview_size: i32 = 200;
 let util_render_font_preview_size: i32 = 200;
-let util_render_screen_aligned_full_vb: vertex_buffer_t = null;
-let util_render_screen_aligned_full_ib: index_buffer_t = null;
+let util_render_screen_aligned_full_vb: kinc_g5_vertex_buffer_t = null;
+let util_render_screen_aligned_full_ib: kinc_g5_index_buffer_t = null;
 
 function util_render_make_material_preview() {
 	context_raw.material_preview = true;
@@ -403,15 +403,15 @@ function util_render_make_node_preview(canvas: ui_node_canvas_t, node: ui_node_t
 	transform_build_matrix(context_raw.paint_object.base.transform);
 
 	g4_begin(image);
-	g4_set_pipeline(res.scon._.pipe_state);
+	kinc_g5_set_pipeline(res.scon._.pipe_state);
 	let empty: string[] = [""];
 	uniforms_set_context_consts(res.scon, empty);
 	uniforms_set_obj_consts(res.scon, context_raw.paint_object.base);
 	uniforms_set_material_consts(res.scon, res.mcon);
-	g4_set_vertex_buffer(util_render_screen_aligned_full_vb);
-	g4_set_index_buffer(util_render_screen_aligned_full_ib);
+	kinc_g4_set_vertex_buffer(util_render_screen_aligned_full_vb);
+	kinc_g4_set_index_buffer(util_render_screen_aligned_full_ib);
 	g4_draw();
-	g4_end();
+	iron_g4_end();
 
 	context_raw.paint_object.base.transform.scale_world = _scale_world;
 	transform_build_matrix(context_raw.paint_object.base.transform);
@@ -463,17 +463,17 @@ function util_render_create_screen_aligned_full_data() {
 	g4_vertex_struct_add(structure, "nor", vertex_data_t.I16_2X_NORM);
 	g4_vertex_struct_add(structure, "tex", vertex_data_t.I16_2X_NORM);
 	g4_vertex_struct_add(structure, "col", vertex_data_t.I16_4X_NORM);
-	util_render_screen_aligned_full_vb = g4_vertex_buffer_create(math_floor(data.length / math_floor(g4_vertex_struct_byte_size(structure) / 2)), structure, usage_t.STATIC);
-	let vertices: buffer_t = g4_vertex_buffer_lock(util_render_screen_aligned_full_vb);
+	util_render_screen_aligned_full_vb = iron_g4_create_vertex_buffer(math_floor(data.length / math_floor(g4_vertex_struct_byte_size(structure) / 2)), structure, usage_t.STATIC);
+	let vertices: buffer_t = iron_g4_lock_vertex_buffer(util_render_screen_aligned_full_vb);
 	for (let i: i32 = 0; i < math_floor((vertices.length) / 2); ++i) {
 		buffer_set_i16(vertices, i * 2, data[i]);
 	}
-	g4_vertex_buffer_unlock(util_render_screen_aligned_full_vb);
+	kinc_g4_vertex_buffer_unlock_all(util_render_screen_aligned_full_vb);
 
-	util_render_screen_aligned_full_ib = g4_index_buffer_create(indices.length);
-	let id: u32_array_t = g4_index_buffer_lock(util_render_screen_aligned_full_ib);
+	util_render_screen_aligned_full_ib = iron_g4_create_index_buffer(indices.length);
+	let id: u32_array_t = iron_g4_lock_index_buffer(util_render_screen_aligned_full_ib);
 	for (let i: i32 = 0; i < id.length; ++i) {
 		id[i] = indices[i];
 	}
-	g4_index_buffer_unlock(util_render_screen_aligned_full_ib);
+	kinc_g4_index_buffer_unlock_all(util_render_screen_aligned_full_ib);
 }

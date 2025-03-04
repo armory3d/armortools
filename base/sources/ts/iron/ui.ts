@@ -321,7 +321,6 @@ declare function ui_next_node_id(nodes: ui_node_t[]): i32;
 declare function ui_node_canvas(nodes: ui_nodes_t, canvas: ui_node_canvas_t): void;
 
 declare type kinc_g5_texture_t = any;
-declare type kinc_g5_render_target_t = any;
 declare type ui_theme_t = any;
 
 declare type ui_t = {
@@ -381,7 +380,7 @@ declare type ui_handle_t = {
 	color: u32;
 	value: f32;
 	text: string;
-	// kinc_g5_render_target_t texture;
+	// kinc_g5_texture_t texture;
 	redraws: i32;
 	scroll_offset: f32;
 	scroll_enabled: bool;

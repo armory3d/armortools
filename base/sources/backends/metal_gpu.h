@@ -11,29 +11,12 @@ typedef struct {
 	struct kinc_g5_index_buffer *current_index_buffer;
 } CommandList5Impl;
 
-
-
-
-
-
-#pragma once
-
 typedef struct kinc_g5_compute_shader_impl {
 	char name[1024];
 	void *_function;
 	void *_pipeline;
 	void *_reflection;
 } kinc_g5_compute_shader_impl;
-
-
-
-
-
-
-
-
-
-#pragma once
 
 struct kinc_g5_shader;
 
@@ -66,11 +49,6 @@ typedef struct {
 	void *mtlFunction;
 } Shader5Impl;
 
-
-
-
-#pragma once
-
 typedef struct {
 	void *_raytracingPipeline;
 } kinc_g5_raytrace_pipeline_impl_t;
@@ -78,16 +56,6 @@ typedef struct {
 typedef struct {
 	void *_accelerationStructure;
 } kinc_g5_raytrace_acceleration_structure_impl_t;
-
-
-
-
-
-
-
-#pragma once
-
-#include <iron_gpu.h>
 
 typedef struct {
 	int index;
@@ -98,21 +66,10 @@ typedef struct {
 	void *_tex;
 	void *data;
 	bool has_mipmaps;
-} Texture5Impl;
 
-typedef struct {
-	void *_tex;
 	void *_texReadback;
 	void *_depthTex;
-} RenderTarget5Impl;
-
-
-
-
-
-
-
-#pragma once
+} Texture5Impl;
 
 typedef struct {
 	int myCount;
@@ -137,4 +94,3 @@ typedef struct {
 	int last_start;
 	int last_count;
 } IndexBuffer5Impl;
-

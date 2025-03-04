@@ -121,20 +121,20 @@ function render_path_begin(render_target: image_t = null, additional_targets: im
 
 function render_path_end() {
 	if (_render_path_scissor_set) {
-		g4_disable_scissor();
+		kinc_g4_disable_scissor();
 		_render_path_scissor_set = false;
 	}
-	g4_end();
+	iron_g4_end();
 	_render_path_current_image = null;
 	_render_path_bind_params = null;
 }
 
 function render_path_set_current_viewport(view_w: i32, view_h: i32) {
-	g4_viewport(app_x(),render_path_current_h - (view_h - app_y()), view_w, view_h);
+	kinc_g4_viewport(app_x(),render_path_current_h - (view_h - app_y()), view_w, view_h);
 }
 
 function render_path_set_current_scissor(view_w: i32, view_h: i32) {
-	g4_scissor(app_x(),render_path_current_h - (view_h - app_y()), view_w, view_h);
+	kinc_g4_scissor(app_x(),render_path_current_h - (view_h - app_y()), view_w, view_h);
 	_render_path_scissor_set = true;
 }
 
@@ -213,11 +213,11 @@ function render_path_draw_skydome(handle: string) {
 	if (cc.context == null) {
 		return; // World data not specified
 	}
-	g4_set_pipeline(cc.context._.pipe_state);
+	kinc_g5_set_pipeline(cc.context._.pipe_state);
 	uniforms_set_context_consts(cc.context, _render_path_bind_params);
 	uniforms_set_obj_consts(cc.context, null); // External hosek
-	g4_set_vertex_buffer(const_data_skydome_vb);
-	g4_set_index_buffer(const_data_skydome_ib);
+	kinc_g4_set_vertex_buffer(const_data_skydome_vb);
+	kinc_g4_set_index_buffer(const_data_skydome_ib);
 	g4_draw();
 	render_path_end();
 }
@@ -239,11 +239,11 @@ function render_path_draw_shader(handle: string) {
 	if (const_data_screen_aligned_vb == null) {
 		const_data_create_screen_aligned_data();
 	}
-	g4_set_pipeline(cc.context._.pipe_state);
+	kinc_g5_set_pipeline(cc.context._.pipe_state);
 	uniforms_set_context_consts(cc.context, _render_path_bind_params);
 	uniforms_set_obj_consts(cc.context, null);
-	g4_set_vertex_buffer(const_data_screen_aligned_vb);
-	g4_set_index_buffer(const_data_screen_aligned_ib);
+	kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
+	kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
 	g4_draw();
 
 	render_path_end();

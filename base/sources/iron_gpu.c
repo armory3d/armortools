@@ -36,8 +36,8 @@ static int constantBufferIndex = 0;
 
 static struct {
 	int currentBuffer;
-	kinc_g5_render_target_t framebuffers[FRAMEBUFFER_COUNT];
-	kinc_g5_render_target_t *current_render_targets[8];
+	kinc_g5_texture_t framebuffers[FRAMEBUFFER_COUNT];
+	kinc_g5_texture_t *current_render_targets[8];
 	int current_render_target_count;
 	bool resized;
 } windows[1] = {0};
@@ -65,11 +65,11 @@ typedef struct render_state {
 	kinc_g5_texture_unit_t texture_units[MAX_TEXTURES];
 	int texture_count;
 
-	kinc_g5_render_target_t *render_targets[MAX_TEXTURES];
+	kinc_g5_texture_t *render_targets[MAX_TEXTURES];
 	kinc_g5_texture_unit_t render_target_units[MAX_TEXTURES];
 	int render_target_count;
 
-	kinc_g5_render_target_t *depth_render_targets[MAX_TEXTURES];
+	kinc_g5_texture_t *depth_render_targets[MAX_TEXTURES];
 	kinc_g5_texture_unit_t depth_render_target_units[MAX_TEXTURES];
 	int depth_render_target_count;
 
@@ -95,7 +95,7 @@ void kinc_g5_internal_resize(int width, int height) {
 
 void kinc_g5_internal_restore_render_target(void) {
 	windows[0].current_render_targets[0] = NULL;
-	kinc_g5_render_target_t *render_target = &windows[0].framebuffers[windows[0].currentBuffer];
+	kinc_g5_texture_t *render_target = &windows[0].framebuffers[windows[0].currentBuffer];
 	kinc_g5_command_list_set_render_targets(&commandList, &render_target, 1);
 	windows[0].current_render_target_count = 1;
 }
@@ -170,7 +170,7 @@ static void kinc_internal_end_draw(bool compute) {
 		}
 		else {
 			const int count = windows[0].current_render_target_count;
-			kinc_g5_render_target_t *render_targets[16];
+			kinc_g5_texture_t *render_targets[16];
 			for (int i = 0; i < count; ++i) {
 				render_targets[i] = windows[0].current_render_targets[i];
 			}
@@ -499,7 +499,7 @@ void kinc_g4_restore_render_target(void) {
 	current_state.scissor_set = false;
 }
 
-void kinc_g4_set_render_targets(kinc_g5_render_target_t **targets, int count) {
+void kinc_g4_set_render_targets(kinc_g5_texture_t **targets, int count) {
 	for (int i = 0; i < count; ++i) {
 		windows[0].current_render_targets[i] = targets[i];
 		if (windows[0].current_render_targets[i]->state != KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET) {
@@ -508,7 +508,7 @@ void kinc_g4_set_render_targets(kinc_g5_render_target_t **targets, int count) {
 		}
 	}
 	windows[0].current_render_target_count = count;
-	kinc_g5_render_target_t *render_targets[16];
+	kinc_g5_texture_t *render_targets[16];
 	assert(count <= 16);
 	for (int i = 0; i < count; ++i) {
 		render_targets[i] = targets[i];
@@ -562,7 +562,7 @@ void kinc_g5_set_pipeline(kinc_g5_pipeline_t *pipeline) {
 	kinc_g5_command_list_set_pipeline(&commandList, pipeline);
 }
 
-void kinc_g4_render_target_use_color_as_texture(kinc_g5_render_target_t *render_target, kinc_g5_texture_unit_t unit) {
+void kinc_g4_render_target_use_color_as_texture(kinc_g5_texture_t *render_target, kinc_g5_texture_unit_t unit) {
 	if (render_target->state != KINC_INTERNAL_RENDER_TARGET_STATE_TEXTURE) {
 		kinc_g5_command_list_render_target_to_texture_barrier(&commandList, render_target);
 		render_target->state = KINC_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
@@ -590,7 +590,7 @@ void kinc_g4_render_target_use_color_as_texture(kinc_g5_render_target_t *render_
 	kinc_g5_command_list_set_texture_from_render_target(&commandList, g5_unit, render_target);
 }
 
-void kinc_g4_render_target_use_depth_as_texture(kinc_g5_render_target_t *render_target, kinc_g5_texture_unit_t unit) {
+void kinc_g4_render_target_use_depth_as_texture(kinc_g5_texture_t *render_target, kinc_g5_texture_unit_t unit) {
 	if (render_target->state != KINC_INTERNAL_RENDER_TARGET_STATE_TEXTURE) {
 		kinc_g5_command_list_render_target_to_texture_barrier(&commandList, render_target);
 		render_target->state = KINC_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
@@ -629,11 +629,11 @@ void kinc_g4_compute(int x, int y, int z) {
 	kinc_internal_end_draw(true);
 }
 
-void kinc_g5_render_target_get_pixels(kinc_g5_render_target_t *render_target, uint8_t *data) {
+void kinc_g5_render_target_get_pixels(kinc_g5_texture_t *render_target, uint8_t *data) {
 	kinc_g5_command_list_get_render_target_pixels(&commandList, render_target, data);
 }
 
-void kinc_g5_render_target_generate_mipmaps(kinc_g5_render_target_t *render_target, int levels) {
+void kinc_g5_render_target_generate_mipmaps(kinc_g5_texture_t *render_target, int levels) {
 
 }
 

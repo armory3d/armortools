@@ -1,51 +1,4 @@
 
-function g4_pipeline_create(): kinc_g5_pipeline_t {
-	return iron_g4_create_pipeline();
-}
-
-function g4_pipeline_delete(raw: kinc_g5_pipeline_t) {
-	iron_g4_delete_pipeline(raw);
-}
-
-function g4_pipeline_compile(raw: kinc_g5_pipeline_t) {
-	iron_g4_compile_pipeline(raw);
-}
-
-function g4_pipeline_set(raw: kinc_g5_pipeline_t) {
-	kinc_g5_set_pipeline(raw);
-}
-
-function g4_pipeline_get_const_loc(raw: kinc_g5_pipeline_t, name: string): kinc_const_loc_t {
-	return iron_g4_get_constant_location(raw, name);
-}
-
-function g4_pipeline_get_tex_unit(raw: kinc_g5_pipeline_t, name: string): kinc_tex_unit_t {
-	return iron_g4_get_texture_unit(raw, name);
-}
-
-function g4_vertex_buffer_create(vertex_count: i32, structure: kinc_g5_vertex_structure_t, usage: usage_t): vertex_buffer_t {
-	let raw: vertex_buffer_t = {};
-	raw.vertex_count = vertex_count;
-	raw.buffer_ = iron_g4_create_vertex_buffer(vertex_count, structure, usage);
-	return raw;
-}
-
-function g4_vertex_buffer_delete(raw: vertex_buffer_t) {
-	iron_g4_delete_vertex_buffer(raw.buffer_);
-}
-
-function g4_vertex_buffer_lock(raw: vertex_buffer_t): buffer_t {
-	return iron_g4_lock_vertex_buffer(raw.buffer_);
-}
-
-function g4_vertex_buffer_unlock(raw: vertex_buffer_t) {
-	kinc_g4_vertex_buffer_unlock_all(raw.buffer_);
-}
-
-function g4_vertex_buffer_set(raw: vertex_buffer_t) {
-	kinc_g4_set_vertex_buffer(raw.buffer_);
-}
-
 function g4_vertex_struct_create(): kinc_g5_vertex_structure_t {
 	let raw: kinc_g5_vertex_structure_t = {};
 	return raw;
@@ -92,96 +45,29 @@ function g4_vertex_struct_data_byte_size(data: vertex_data_t): i32 {
 	return 0;
 }
 
-function g4_index_buffer_create(index_count: i32): index_buffer_t {
-	let raw: index_buffer_t = {};
-	raw.buffer_ = iron_g4_create_index_buffer(index_count);
-	return raw;
-}
-
-function g4_index_buffer_delete(raw: index_buffer_t) {
-	iron_g4_delete_index_buffer(raw.buffer_);
-}
-
-function g4_index_buffer_lock(raw: index_buffer_t): u32_array_t {
-	return iron_g4_lock_index_buffer(raw.buffer_);
-}
-
-function g4_index_buffer_unlock(raw: index_buffer_t) {
-	kinc_g4_index_buffer_unlock_all(raw.buffer_);
-}
-
-function g4_index_buffer_set(raw: index_buffer_t) {
-	kinc_g4_set_index_buffer(raw.buffer_);
-}
-
 function g4_begin(render_target: image_t, additional_targets: image_t[] = null) {
 	iron_g4_begin(render_target, additional_targets);
 }
-
-function g4_end() {
-	iron_g4_end();
-}
-
 function g4_clear(color: color_t = 0x00000000, depth: f32 = 0.0, flags: i32 = clear_flag_t.COLOR) {
 	kinc_g5_clear(flags, color, depth);
 }
 
-function g4_viewport(x: i32, y: i32, width: i32, height: i32) {
-	kinc_g4_viewport(x, y, width, height);
-}
-
-function g4_set_vertex_buffer(vb: vertex_buffer_t) {
-	g4_vertex_buffer_set(vb);
-}
-
-function g4_set_index_buffer(ib: index_buffer_t) {
-	g4_index_buffer_set(ib);
-}
-
 function g4_set_tex(unit: kinc_tex_unit_t, tex: image_t) {
-	if (tex == null) {
-		return;
-	}
+	// if (tex == null) {
+	// 	return;
+	// }
 	tex.texture_ != null ? iron_g4_set_texture(unit, tex.texture_) : iron_g4_set_render_target(unit, tex.render_target_);
 }
 
 function g4_set_tex_depth(unit: kinc_tex_unit_t, tex: image_t) {
-	if (tex == null) {
-		return;
-	}
+	// if (tex == null) {
+	// 	return;
+	// }
 	iron_g4_set_texture_depth(unit, tex.render_target_);
 }
 
 function g4_set_tex_params(tex_unit: kinc_tex_unit_t, u_addressing: tex_addressing_t, v_addressing: tex_addressing_t, minification_filter: tex_filter_t, magnification_filter: tex_filter_t, mipmap_filter: mip_map_filter_t) {
 	iron_g4_set_texture_parameters(tex_unit, u_addressing, v_addressing, minification_filter, magnification_filter, mipmap_filter);
-}
-
-function g4_set_pipeline(pipe: kinc_g5_pipeline_t) {
-	g4_pipeline_set(pipe);
-}
-
-function g4_set_bool(loc: kinc_const_loc_t, value: bool) {
-	iron_g4_set_bool(loc, value);
-}
-
-function g4_set_int(loc: kinc_const_loc_t, value: i32) {
-	iron_g4_set_int(loc, value);
-}
-
-function g4_set_float(loc: kinc_const_loc_t, value: f32) {
-	iron_g4_set_float(loc, value);
-}
-
-function g4_set_float2(loc: kinc_const_loc_t, value1: f32, value2: f32) {
-	iron_g4_set_float2(loc, value1, value2);
-}
-
-function g4_set_float3(loc: kinc_const_loc_t, value1: f32, value2: f32, value3: f32) {
-	iron_g4_set_float3(loc, value1, value2, value3);
-}
-
-function g4_set_float4(loc: kinc_const_loc_t, value1: f32, value2: f32, value3: f32, value4: f32) {
-	iron_g4_set_float4(loc, value1, value2, value3, value4);
 }
 
 function g4_set_floats(loc: kinc_const_loc_t, values: f32_array_t) {
@@ -192,36 +78,12 @@ function g4_set_floats(loc: kinc_const_loc_t, values: f32_array_t) {
 	iron_g4_set_floats(loc, b);
 }
 
-function g4_set_vec2(loc: kinc_const_loc_t, v: vec2_t) {
-	iron_g4_set_float2(loc, v.x, v.y);
-}
-
 function g4_set_vec3(loc: kinc_const_loc_t, v: vec4_t) {
 	iron_g4_set_float3(loc, v.x, v.y, v.z);
 }
 
-function g4_set_vec4(loc: kinc_const_loc_t, v: vec4_t) {
-	iron_g4_set_float4(loc, v.x, v.y, v.z, v.w);
-}
-
-function g4_set_mat(loc: kinc_const_loc_t, mat: mat4_t) {
-	iron_g4_set_matrix4(loc, mat);
-}
-
-function g4_set_mat3(loc: kinc_const_loc_t, mat: mat3_t) {
-	iron_g4_set_matrix3(loc, mat);
-}
-
 function g4_draw(start: i32 = 0, count: i32 = -1) {
 	iron_g4_draw_indexed_vertices(start, count);
-}
-
-function g4_scissor(x: i32, y: i32, width: i32, height: i32) {
-	kinc_g4_scissor(x, y, width, height);
-}
-
-function g4_disable_scissor() {
-	kinc_g4_disable_scissor();
 }
 
 function _image_create(tex: any): image_t {
@@ -237,7 +99,7 @@ function _image_set_size_from_texture(image: image_t, _tex: any) {
 }
 
 function _image_set_size_from_render_target(image: image_t, _rt: any) {
-	let rt: kinc_g5_render_target_t = _rt;
+	let rt: kinc_g5_texture_t = _rt;
 	image.width = rt.width;
 	image.height = rt.height;
 }
@@ -394,23 +256,16 @@ declare type kinc_g5_vertex_structure_t = {
 	size?: i32;
 };
 
-type vertex_buffer_t = {
-	buffer_?: any;
-	vertex_count?: i32;
+declare type kinc_g5_index_buffer_t = {
+	impl?: any;
 };
 
-type index_buffer_t = {
-	buffer_?: any;
+declare type kinc_g5_vertex_buffer_t = {
+	impl?: any;
 };
 
 type kinc_const_loc_t = any;
 type kinc_tex_unit_t = any;
-
-type iron_texture_t = {
-	width?: i32;
-	height?: i32;
-	depth?: i32;
-};
 
 enum clear_flag_t {
 	COLOR = 1,

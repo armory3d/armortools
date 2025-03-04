@@ -172,7 +172,7 @@ function mesh_object_render(raw: mesh_object_t, context: string, bind_params: st
 
 		// Uniforms
 		if (scontext._.pipe_state != _mesh_object_last_pipeline) {
-			g4_set_pipeline(scontext._.pipe_state);
+			kinc_g5_set_pipeline(scontext._.pipe_state);
 			_mesh_object_last_pipeline = scontext._.pipe_state;
 		}
 		uniforms_set_context_consts(scontext, bind_params);
@@ -181,8 +181,8 @@ function mesh_object_render(raw: mesh_object_t, context: string, bind_params: st
 			uniforms_set_material_consts(scontext, material_contexts[mi]);
 		}
 
-		g4_set_vertex_buffer(mesh_data_get(raw.data, elems));
-		g4_set_index_buffer(raw.data._.index_buffers[i]);
+		kinc_g4_set_vertex_buffer(mesh_data_get(raw.data, elems));
+		kinc_g4_set_index_buffer(raw.data._.index_buffers[i]);
 		g4_draw();
 	}
 

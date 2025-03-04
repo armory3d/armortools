@@ -12,7 +12,7 @@ let import_envmap_mips_cpu: image_t[] = null;
 function import_envmap_run(path: string, image: image_t) {
 	// Init
 	if (import_envmap_pipeline == null) {
-		import_envmap_pipeline = g4_pipeline_create();
+		import_envmap_pipeline = iron_g4_create_pipeline();
 		import_envmap_pipeline.vertex_shader = sys_get_shader("pass.vert");
 		import_envmap_pipeline.fragment_shader = sys_get_shader("prefilter_envmap.frag");
 		let vs: kinc_g5_vertex_structure_t = g4_vertex_struct_create();
@@ -20,9 +20,9 @@ function import_envmap_run(path: string, image: image_t) {
 		import_envmap_pipeline.input_layout = vs;
 		import_envmap_pipeline.color_attachment_count = 1;
 		ARRAY_ACCESS(import_envmap_pipeline.color_attachment, 0) = tex_format_t.RGBA128;
-		g4_pipeline_compile(import_envmap_pipeline);
-		import_envmap_params_loc = g4_pipeline_get_const_loc(import_envmap_pipeline, "params");
-		import_envmap_radiance_loc = g4_pipeline_get_tex_unit(import_envmap_pipeline, "radiance");
+		iron_g4_compile_pipeline(import_envmap_pipeline);
+		import_envmap_params_loc = iron_g4_get_constant_location(import_envmap_pipeline, "params");
+		import_envmap_radiance_loc = iron_g4_get_texture_unit(import_envmap_pipeline, "radiance");
 
 		import_envmap_radiance = image_create_render_target(1024, 512, tex_format_t.RGBA128);
 
@@ -88,14 +88,14 @@ function import_envmap_run(path: string, image: image_t) {
 
 function import_envmap_get_radiance_mip(mip: image_t, level: i32, radiance: image_t) {
 	g4_begin(mip);
-	g4_set_vertex_buffer(const_data_screen_aligned_vb);
-	g4_set_index_buffer(const_data_screen_aligned_ib);
-	g4_set_pipeline(import_envmap_pipeline);
+	kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
+	kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
+	kinc_g5_set_pipeline(import_envmap_pipeline);
 	import_envmap_params.x = 0.1 + level / 8;
-	g4_set_float4(import_envmap_params_loc, import_envmap_params.x, import_envmap_params.y, import_envmap_params.z, import_envmap_params.w);
+	iron_g4_set_float4(import_envmap_params_loc, import_envmap_params.x, import_envmap_params.y, import_envmap_params.z, import_envmap_params.w);
 	g4_set_tex(import_envmap_radiance_loc, radiance);
 	g4_draw();
-	g4_end();
+	iron_g4_end();
 }
 
 function import_envmap_reverse_equirect(x: f32, y: f32): vec4_t {

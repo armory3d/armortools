@@ -32,7 +32,7 @@ let ui_view2d_grid_redraw: bool = true;
 
 function ui_view2d_init() {
 	///if (is_paint || is_sculpt)
-	ui_view2d_pipe = g4_pipeline_create();
+	ui_view2d_pipe = iron_g4_create_pipeline();
 	ui_view2d_pipe.vertex_shader = sys_get_shader("layer_view.vert");
 	ui_view2d_pipe.fragment_shader = sys_get_shader("layer_view.frag");
 	let vs: kinc_g5_vertex_structure_t = g4_vertex_struct_create();
@@ -43,8 +43,8 @@ function ui_view2d_init() {
 	ui_view2d_pipe.blend_source = blend_factor_t.BLEND_ONE;
 	ui_view2d_pipe.blend_destination = blend_factor_t.BLEND_ZERO;
 	ARRAY_ACCESS(ui_view2d_pipe.color_write_mask_alpha, 0) = false;
-	g4_pipeline_compile(ui_view2d_pipe);
-	ui_view2d_channel_loc = g4_pipeline_get_const_loc(ui_view2d_pipe, "channel");
+	iron_g4_compile_pipeline(ui_view2d_pipe);
+	ui_view2d_channel_loc = iron_g4_get_constant_location(ui_view2d_pipe, "channel");
 	///end
 
 	let scale: f32 = config_raw.window_scale;

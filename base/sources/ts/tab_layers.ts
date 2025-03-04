@@ -1008,7 +1008,7 @@ function tab_layers_make_mask_preview_rgba32(l: slot_layer_t) {
 			let l: slot_layer_t = tab_layers_l;
 			g2_begin(context_raw.mask_preview_rgba32);
 			draw_set_pipeline(ui_view2d_pipe);
-			g4_set_int(ui_view2d_channel_loc, 1);
+			iron_g4_set_int(ui_view2d_channel_loc, 1);
 			draw_image(l.texpaint_preview, 0, 0);
 			g2_end();
 			draw_set_pipeline(null);

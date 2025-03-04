@@ -35,7 +35,7 @@ function inpaint_node_init() {
 		app_notify_on_next_frame(function () {
 			g4_begin(inpaint_node_mask);
 			g4_clear(color_from_floats(1.0, 1.0, 1.0, 1.0));
-			g4_end();
+			iron_g4_end();
 		});
 	}
 
@@ -88,13 +88,13 @@ function inpaint_node_get_cached_image(self: inpaint_node_t): image_t {
 	app_notify_on_next_frame(function (self: inpaint_node_t) {
 		let source: image_t = logic_node_input_get_as_image(self.base.inputs[0]);
 		g4_begin(inpaint_node_image);
-		g4_set_pipeline(pipes_inpaint_preview);
+		kinc_g5_set_pipeline(pipes_inpaint_preview);
 		g4_set_tex(pipes_tex0_inpaint_preview, source);
 		g4_set_tex(pipes_texa_inpaint_preview, inpaint_node_mask);
-		g4_set_vertex_buffer(const_data_screen_aligned_vb);
-		g4_set_index_buffer(const_data_screen_aligned_ib);
+		kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
+		kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
 		g4_draw();
-		g4_end();
+		iron_g4_end();
 	}, self);
 	return inpaint_node_image;
 }

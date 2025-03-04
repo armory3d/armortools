@@ -79,12 +79,12 @@ function ui_nodes_ext_run() {
 
 	if (texheight != null) {
 		g4_begin(texpaint_pack._image);
-		g4_set_pipeline(pipes_copy_a);
+		kinc_g5_set_pipeline(pipes_copy_a);
 		g4_set_tex(pipes_copy_a_tex, texheight);
-		g4_set_vertex_buffer(const_data_screen_aligned_vb);
-		g4_set_index_buffer(const_data_screen_aligned_ib);
+		kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
+		kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
 		g4_draw();
-		g4_end();
+		iron_g4_end();
 
 		let is_float_node: bool = context_raw.brush_output_node_inst.base.inputs[channel_type_t.HEIGHT].node.base.get == float_node_get;
 
@@ -93,7 +93,7 @@ function ui_nodes_ext_run() {
 			// Make copy of vertices before displacement
 			let o: mesh_object_t = project_paint_objects[0];
 			let g: mesh_data_t = o.data;
-			let vertices: buffer_t = g4_vertex_buffer_lock(g._.vertex_buffer);
+			let vertices: buffer_t = iron_g4_lock_vertex_buffer(g._.vertex_buffer);
 			if (ui_nodes_ext_last_vertices == null || ui_nodes_ext_last_vertices.length != vertices.length) {
 				ui_nodes_ext_last_vertices = buffer_create(vertices.length);
 				for (let i: i32 = 0; i < math_floor((vertices.length) / 2); ++i) {
@@ -105,7 +105,7 @@ function ui_nodes_ext_run() {
 					buffer_set_i16(vertices, i * 2, buffer_get_i16(ui_nodes_ext_last_vertices, i * 2));
 				}
 			}
-			g4_vertex_buffer_unlock(g._.vertex_buffer);
+			kinc_g4_vertex_buffer_unlock_all(g._.vertex_buffer);
 
 			// Apply displacement
 			if (config_raw.displace_strength > 0) {

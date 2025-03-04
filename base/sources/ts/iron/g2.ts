@@ -17,7 +17,6 @@ let _g2_font_glyphs: i32[] = _g2_make_glyphs(32, 127);
 let _g2_font_glyphs_last: i32[] = _g2_font_glyphs;
 let _g2_thrown: bool = false;
 let _g2_mat: f32_array_t = f32_array_create(9);
-let _g2_initialized: bool = false;
 
 function g2_set_font(f: draw_font_t, size: i32) {
 	g2_font_init(f);
@@ -49,20 +48,6 @@ function _g2_make_glyphs(start: i32, end: i32): i32[] {
 		array_push(ar, i);
 	}
 	return ar;
-}
-
-function g2_init() {
-	if (!_g2_initialized) {
-		draw_init(
-			iron_load_blob(data_path() + "draw_image.vert" + sys_shader_ext()),
-			iron_load_blob(data_path() + "draw_image.frag" + sys_shader_ext()),
-			iron_load_blob(data_path() + "draw_colored.vert" + sys_shader_ext()),
-			iron_load_blob(data_path() + "draw_colored.frag" + sys_shader_ext()),
-			iron_load_blob(data_path() + "draw_text.vert" + sys_shader_ext()),
-			iron_load_blob(data_path() + "draw_text.frag" + sys_shader_ext())
-		);
-		_g2_initialized = true;
-	}
 }
 
 function g2_begin(render_target: image_t = null) {
@@ -105,13 +90,6 @@ function g2_font_init(raw: draw_font_t) {
 	}
 }
 
-function g2_font_create(buf: buffer_t, index: i32 = 0): draw_font_t {
-	let raw: draw_font_t = {};
-	raw.buf = buf;
-	raw.index = index;
-	return raw;
-}
-
 function g2_font_height(raw: draw_font_t, size: i32): f32 {
 	g2_font_init(raw);
 	return draw_font_height(raw, size);
@@ -129,6 +107,13 @@ function g2_font_unload(raw: draw_font_t) {
 function g2_font_set_font_index(raw: draw_font_t, index: i32) {
 	raw.index = index;
 	_g2_font_glyphs = array_slice(_g2_font_glyphs, 0, _g2_font_glyphs.length); // Trigger atlas update
+}
+
+function g2_font_create(buf: buffer_t, index: i32 = 0): draw_font_t {
+	let raw: draw_font_t = {};
+	raw.buf = buf;
+	raw.index = index;
+	return raw;
 }
 
 function g2_font_clone(raw: draw_font_t): draw_font_t {

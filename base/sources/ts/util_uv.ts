@@ -106,7 +106,7 @@ function util_uv_cache_dilate_map() {
 	}
 
 	if (util_uv_pipe_dilate == null) {
-		util_uv_pipe_dilate = g4_pipeline_create();
+		util_uv_pipe_dilate = iron_g4_create_pipeline();
 		util_uv_pipe_dilate.vertex_shader = sys_get_shader("dilate_map.vert");
 		util_uv_pipe_dilate.fragment_shader = sys_get_shader("dilate_map.frag");
 		let vs: kinc_g5_vertex_structure_t = g4_vertex_struct_create();
@@ -121,7 +121,7 @@ function util_uv_cache_dilate_map() {
 		util_uv_pipe_dilate.depth_write = false;
 		util_uv_pipe_dilate.depth_mode = compare_mode_t.ALWAYS;
 		ARRAY_ACCESS(util_uv_pipe_dilate.color_attachment, 0) = tex_format_t.R8;
-		g4_pipeline_compile(util_uv_pipe_dilate);
+		iron_g4_compile_pipeline(util_uv_pipe_dilate);
 		// dilate_tex_unpack = getConstantLocation(pipeDilate, "tex_unpack");
 	}
 
@@ -132,7 +132,7 @@ function util_uv_cache_dilate_map() {
 	let geom: mesh_data_t = mask == 0 && context_raw.merged_object != null ? context_raw.merged_object.data : context_raw.paint_object.data;
 	g4_begin(util_uv_dilatemap);
 	g4_clear(0x00000000);
-	g4_set_pipeline(util_uv_pipe_dilate);
+	kinc_g5_set_pipeline(util_uv_pipe_dilate);
 	///if (arm_metal || arm_vulkan)
 	let vs: vertex_element_t[] = [
 		{
@@ -140,13 +140,13 @@ function util_uv_cache_dilate_map() {
 			data: "short2norm"
 		}
 	];
-	g4_set_vertex_buffer(mesh_data_get(geom, vs));
+	kinc_g4_set_vertex_buffer(mesh_data_get(geom, vs));
 	///else
-	g4_set_vertex_buffer(geom._.vertex_buffer);
+	kinc_g4_set_vertex_buffer(geom._.vertex_buffer);
 	///end
-	g4_set_index_buffer(geom._.index_buffers[0]);
+	kinc_g4_set_index_buffer(geom._.index_buffers[0]);
 	g4_draw();
-	g4_end();
+	iron_g4_end();
 	util_uv_dilatemap_cached = true;
 	util_uv_dilate_bytes = null;
 }

@@ -16,18 +16,41 @@ enum kinc_internal_render_target_state {
 	KINC_INTERNAL_RENDER_TARGET_STATE_TEXTURE
 };
 
-typedef struct kinc_g5_render_target {
+typedef enum kinc_image_compression {
+	KINC_IMAGE_COMPRESSION_NONE,
+	KINC_IMAGE_COMPRESSION_DXT5,
+	KINC_IMAGE_COMPRESSION_ASTC
+} kinc_image_compression_t;
+
+typedef enum kinc_image_format {
+	KINC_IMAGE_FORMAT_RGBA32,
+	KINC_IMAGE_FORMAT_RGBA64,
+	KINC_IMAGE_FORMAT_RGBA128,
+	KINC_IMAGE_FORMAT_R8,
+	KINC_IMAGE_FORMAT_R16,
+	KINC_IMAGE_FORMAT_R32,
+	KINC_IMAGE_FORMAT_BGRA32
+} kinc_image_format_t;
+
+typedef struct kinc_g5_texture {
 	int width;
 	int height;
+
+	kinc_image_format_t format;
+	kinc_image_compression_t compression;
+	void *data;
+	bool _uploaded;
+
 	int framebuffer_index;
 	bool isDepthAttachment;
 	enum kinc_internal_render_target_state state;
-	RenderTarget5Impl impl;
-} kinc_g5_render_target_t;
+
+	Texture5Impl impl;
+} kinc_g5_texture_t;
 
 int kinc_g5_max_bound_textures(void);
 void kinc_g5_flush(void);
-void kinc_g5_begin(kinc_g5_render_target_t *renderTarget);
+void kinc_g5_begin(kinc_g5_texture_t *renderTarget);
 void kinc_g5_end(void);
 bool kinc_g5_swap_buffers(void);
 
@@ -37,7 +60,6 @@ void kinc_g5_internal_destroy_window(void);
 void kinc_g5_internal_destroy(void);
 
 struct kinc_g5_pipeline;
-struct kinc_g5_render_target;
 struct kinc_g5_texture;
 struct kinc_g5_texture_unit;
 struct kinc_g5_constant_location;
@@ -100,17 +122,17 @@ void kinc_g4_set_texture_magnification_filter(struct kinc_g5_texture_unit unit, 
 void kinc_g4_set_texture_minification_filter(struct kinc_g5_texture_unit unit, kinc_g4_texture_filter_t filter);
 void kinc_g4_set_texture_mipmap_filter(struct kinc_g5_texture_unit unit, kinc_g4_mipmap_filter_t filter);
 void kinc_g4_restore_render_target(void);
-void kinc_g4_set_render_targets(struct kinc_g5_render_target **targets, int count);
+void kinc_g4_set_render_targets(struct kinc_g5_texture **targets, int count);
 void kinc_g4_set_texture(struct kinc_g5_texture_unit unit, struct kinc_g5_texture *texture);
 void kinc_g4_compute(int x, int y, int z);
 void kinc_g4_set_index_buffer(struct kinc_g5_index_buffer *buffer);
 
 void kinc_g4_internal_init_window(int depth_buffer_bits, bool vsync);
 
-void kinc_g4_render_target_use_color_as_texture(struct kinc_g5_render_target *renderTarget, struct kinc_g5_texture_unit unit);
-void kinc_g4_render_target_use_depth_as_texture(struct kinc_g5_render_target *renderTarget, struct kinc_g5_texture_unit unit);
-void kinc_g5_render_target_get_pixels(struct kinc_g5_render_target *renderTarget, uint8_t *data);
-void kinc_g5_render_target_generate_mipmaps(struct kinc_g5_render_target *renderTarget, int levels);
+void kinc_g4_render_target_use_color_as_texture(struct kinc_g5_texture *renderTarget, struct kinc_g5_texture_unit unit);
+void kinc_g4_render_target_use_depth_as_texture(struct kinc_g5_texture *renderTarget, struct kinc_g5_texture_unit unit);
+void kinc_g5_render_target_get_pixels(struct kinc_g5_texture *renderTarget, uint8_t *data);
+void kinc_g5_render_target_generate_mipmaps(struct kinc_g5_texture *renderTarget, int levels);
 
 void kinc_g4_index_buffer_unlock_all(struct kinc_g5_index_buffer *buffer);
 void kinc_g4_index_buffer_unlock(struct kinc_g5_index_buffer *buffer, int count);
@@ -160,32 +182,6 @@ static inline int kinc_g5_vertex_data_size(kinc_g5_vertex_data_t data) {
 void kinc_g5_vertex_structure_init(kinc_g5_vertex_structure_t *structure);
 void kinc_g5_vertex_structure_add(kinc_g5_vertex_structure_t *structure, const char *name, kinc_g5_vertex_data_t data);
 
-typedef enum kinc_image_compression {
-	KINC_IMAGE_COMPRESSION_NONE,
-	KINC_IMAGE_COMPRESSION_DXT5,
-	KINC_IMAGE_COMPRESSION_ASTC
-} kinc_image_compression_t;
-
-typedef enum kinc_image_format {
-	KINC_IMAGE_FORMAT_RGBA32,
-	KINC_IMAGE_FORMAT_RGBA64,
-	KINC_IMAGE_FORMAT_RGBA128,
-	KINC_IMAGE_FORMAT_R8,
-	KINC_IMAGE_FORMAT_R16,
-	KINC_IMAGE_FORMAT_R32,
-	KINC_IMAGE_FORMAT_BGRA32
-} kinc_image_format_t;
-
-typedef struct kinc_g5_texture {
-	int width;
-	int height;
-	kinc_image_format_t format;
-	kinc_image_compression_t compression;
-	void *data;
-	bool _uploaded;
-	Texture5Impl impl;
-} kinc_g5_texture_t;
-
 void kinc_g5_texture_init(kinc_g5_texture_t *texture, int width, int height, kinc_image_format_t format);
 void kinc_g5_texture_init_from_bytes(kinc_g5_texture_t *texture, void *data, int width, int height, kinc_image_format_t format);
 void kinc_g5_texture_init_non_sampled_access(kinc_g5_texture_t *texture, int width, int height, kinc_image_format_t format);
@@ -198,10 +194,10 @@ int kinc_g5_texture_stride(kinc_g5_texture_t *texture);
 
 struct kinc_g5_texture_unit;
 
-void kinc_g5_render_target_init(kinc_g5_render_target_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits);
-void kinc_g5_render_target_init_framebuffer(kinc_g5_render_target_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits);
-void kinc_g5_render_target_destroy(kinc_g5_render_target_t *target);
-void kinc_g5_render_target_set_depth_from(kinc_g5_render_target_t *target, kinc_g5_render_target_t *source);
+void kinc_g5_render_target_init(kinc_g5_texture_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits);
+void kinc_g5_render_target_init_framebuffer(kinc_g5_texture_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits);
+void kinc_g5_render_target_destroy(kinc_g5_texture_t *target);
+void kinc_g5_render_target_set_depth_from(kinc_g5_texture_t *target, kinc_g5_texture_t *source);
 
 typedef struct kinc_g5_vertex_buffer {
 	VertexBuffer5Impl impl;
@@ -420,7 +416,7 @@ struct kinc_g5_constant_buffer;
 struct kinc_g5_index_buffer;
 struct kinc_g5_vertex_buffer;
 struct kinc_g5_pipeline;
-struct kinc_g5_render_target;
+struct kinc_g5_texture;
 struct kinc_g5_texture;
 
 typedef struct kinc_g5_command_list {
@@ -431,11 +427,11 @@ void kinc_g5_command_list_init(kinc_g5_command_list_t *list);
 void kinc_g5_command_list_destroy(kinc_g5_command_list_t *list);
 void kinc_g5_command_list_begin(kinc_g5_command_list_t *list);
 void kinc_g5_command_list_end(kinc_g5_command_list_t *list);
-void kinc_g5_command_list_clear(kinc_g5_command_list_t *list, struct kinc_g5_render_target *render_target, unsigned flags, unsigned color, float depth);
-void kinc_g5_command_list_render_target_to_framebuffer_barrier(kinc_g5_command_list_t *list, struct kinc_g5_render_target *renderTarget);
-void kinc_g5_command_list_framebuffer_to_render_target_barrier(kinc_g5_command_list_t *list, struct kinc_g5_render_target *renderTarget);
-void kinc_g5_command_list_texture_to_render_target_barrier(kinc_g5_command_list_t *list, struct kinc_g5_render_target *renderTarget);
-void kinc_g5_command_list_render_target_to_texture_barrier(kinc_g5_command_list_t *list, struct kinc_g5_render_target *renderTarget);
+void kinc_g5_command_list_clear(kinc_g5_command_list_t *list, struct kinc_g5_texture *render_target, unsigned flags, unsigned color, float depth);
+void kinc_g5_command_list_render_target_to_framebuffer_barrier(kinc_g5_command_list_t *list, struct kinc_g5_texture *renderTarget);
+void kinc_g5_command_list_framebuffer_to_render_target_barrier(kinc_g5_command_list_t *list, struct kinc_g5_texture *renderTarget);
+void kinc_g5_command_list_texture_to_render_target_barrier(kinc_g5_command_list_t *list, struct kinc_g5_texture *renderTarget);
+void kinc_g5_command_list_render_target_to_texture_barrier(kinc_g5_command_list_t *list, struct kinc_g5_texture *renderTarget);
 void kinc_g5_command_list_draw_indexed_vertices(kinc_g5_command_list_t *list);
 void kinc_g5_command_list_draw_indexed_vertices_from_to(kinc_g5_command_list_t *list, int start, int count);
 void kinc_g5_command_list_viewport(kinc_g5_command_list_t *list, int x, int y, int width, int height);
@@ -445,7 +441,7 @@ void kinc_g5_command_list_set_pipeline(kinc_g5_command_list_t *list, struct kinc
 void kinc_g5_command_list_set_compute_shader(kinc_g5_command_list_t *list, struct kinc_g5_compute_shader *shader);
 void kinc_g5_command_list_set_vertex_buffer(kinc_g5_command_list_t *list, struct kinc_g5_vertex_buffer *buffer);
 void kinc_g5_command_list_set_index_buffer(kinc_g5_command_list_t *list, struct kinc_g5_index_buffer *buffer);
-void kinc_g5_command_list_set_render_targets(kinc_g5_command_list_t *list, struct kinc_g5_render_target **targets, int count);
+void kinc_g5_command_list_set_render_targets(kinc_g5_command_list_t *list, struct kinc_g5_texture **targets, int count);
 void kinc_g5_command_list_upload_index_buffer(kinc_g5_command_list_t *list, struct kinc_g5_index_buffer *buffer);
 void kinc_g5_command_list_upload_vertex_buffer(kinc_g5_command_list_t *list, struct kinc_g5_vertex_buffer *buffer);
 void kinc_g5_command_list_upload_texture(kinc_g5_command_list_t *list, struct kinc_g5_texture *texture);
@@ -454,11 +450,11 @@ void kinc_g5_command_list_set_fragment_constant_buffer(kinc_g5_command_list_t *l
 void kinc_g5_command_list_set_compute_constant_buffer(kinc_g5_command_list_t *list, struct kinc_g5_constant_buffer *buffer, int offset, size_t size);
 void kinc_g5_command_list_execute(kinc_g5_command_list_t *list);
 void kinc_g5_command_list_wait_for_execution_to_finish(kinc_g5_command_list_t *list);
-void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list, struct kinc_g5_render_target *render_target, uint8_t *data);
+void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list, struct kinc_g5_texture *render_target, uint8_t *data);
 void kinc_g5_command_list_compute(kinc_g5_command_list_t *list, int x, int y, int z);
 void kinc_g5_command_list_set_texture(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *texture);
-void kinc_g5_command_list_set_texture_from_render_target(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_render_target_t *target);
-void kinc_g5_command_list_set_texture_from_render_target_depth(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_render_target_t *target);
+void kinc_g5_command_list_set_texture_from_render_target(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *target);
+void kinc_g5_command_list_set_texture_from_render_target_depth(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *target);
 void kinc_g5_command_list_set_sampler(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_sampler_t *sampler);
 
 typedef struct kinc_g5_compute_shader {
@@ -473,7 +469,7 @@ kinc_g5_texture_unit_t kinc_g5_compute_shader_get_texture_unit(kinc_g5_compute_s
 struct kinc_g5_command_list;
 struct kinc_g5_constant_buffer;
 struct kinc_g5_index_buffer;
-struct kinc_g5_render_target;
+struct kinc_g5_texture;
 struct kinc_g5_texture;
 struct kinc_g5_vertex_buffer;
 
@@ -497,9 +493,9 @@ void kinc_g5_raytrace_acceleration_structure_build(kinc_g5_raytrace_acceleration
     struct kinc_g5_vertex_buffer *_vb_full, struct kinc_g5_index_buffer *_ib_full);
 void kinc_g5_raytrace_acceleration_structure_destroy(kinc_g5_raytrace_acceleration_structure_t *accel);
 
-void kinc_g5_raytrace_set_textures(struct kinc_g5_render_target *texpaint0, struct kinc_g5_render_target *texpaint1, struct kinc_g5_render_target *texpaint2,
+void kinc_g5_raytrace_set_textures(struct kinc_g5_texture *texpaint0, struct kinc_g5_texture *texpaint1, struct kinc_g5_texture *texpaint2,
     struct kinc_g5_texture *texenv, struct kinc_g5_texture *texsobol, struct kinc_g5_texture *texscramble, struct kinc_g5_texture *texrank);
 void kinc_g5_raytrace_set_acceleration_structure(kinc_g5_raytrace_acceleration_structure_t *accel);
 void kinc_g5_raytrace_set_pipeline(kinc_g5_raytrace_pipeline_t *pipeline);
-void kinc_g5_raytrace_set_target(struct kinc_g5_render_target *output);
+void kinc_g5_raytrace_set_target(struct kinc_g5_texture *output);
 void kinc_g5_raytrace_dispatch_rays(struct kinc_g5_command_list *command_list);

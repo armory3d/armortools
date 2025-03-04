@@ -160,7 +160,7 @@ function util_mesh_swap_axis(a: i32, b: i32) {
 
 		let g: mesh_data_t = o.data;
 		let l: i32 = g4_vertex_struct_byte_size(g._.structure) / 2;
-		let vertices: buffer_t = g4_vertex_buffer_lock(g._.vertex_buffer); // posnortex
+		let vertices: buffer_t = iron_g4_lock_vertex_buffer(g._.vertex_buffer); // posnortex
 		for (let i: i32 = 0; i < math_floor((vertices.length) / 2 / l); ++i) {
 			buffer_set_i16(vertices, (i * l    ) * 2, vas[0].values[i * 4    ]);
 			buffer_set_i16(vertices, (i * l + 1) * 2, vas[0].values[i * 4 + 1]);
@@ -169,7 +169,7 @@ function util_mesh_swap_axis(a: i32, b: i32) {
 			buffer_set_i16(vertices, (i * l + 4) * 2, vas[1].values[i * 2    ]);
 			buffer_set_i16(vertices, (i * l + 5) * 2, vas[1].values[i * 2 + 1]);
 		}
-		g4_vertex_buffer_unlock(g._.vertex_buffer);
+		kinc_g4_vertex_buffer_unlock_all(g._.vertex_buffer);
 	}
 
 	util_mesh_remove_merged();
@@ -185,7 +185,7 @@ function util_mesh_flip_normals() {
 		let va1: i16_array_t = vas[1].values;
 		let g: mesh_data_t = o.data;
 		let l: i32 = g4_vertex_struct_byte_size(g._.structure) / 2;
-		let vertices: buffer_t = g4_vertex_buffer_lock(g._.vertex_buffer); // posnortex
+		let vertices: buffer_t = iron_g4_lock_vertex_buffer(g._.vertex_buffer); // posnortex
 		for (let i: i32 = 0; i < math_floor((vertices.length) / 2 / l); ++i) {
 			va0[i * 4 + 3] = -va0[i * 4 + 3];
 			va1[i * 2] = -va1[i * 2];
@@ -194,7 +194,7 @@ function util_mesh_flip_normals() {
 			buffer_set_i16(vertices, (i * l + 4) * 2, -buffer_get_i16(vertices, (i * l + 4) * 2));
 			buffer_set_i16(vertices, (i * l + 5) * 2, -buffer_get_i16(vertices, (i * l + 5) * 2));
 		}
-		g4_vertex_buffer_unlock(g._.vertex_buffer);
+		kinc_g4_vertex_buffer_unlock_all(g._.vertex_buffer);
 	}
 
 	render_path_raytrace_ready = false;
@@ -212,7 +212,7 @@ function util_mesh_calc_normals(smooth: bool = false) {
 		let g: mesh_data_t = o.data;
 		let l: i32 = g4_vertex_struct_byte_size(g._.structure) / 2;
 		let inda: u32_array_t = g._.indices[0];
-		let vertices: buffer_t = g4_vertex_buffer_lock(g._.vertex_buffer); // posnortex
+		let vertices: buffer_t = iron_g4_lock_vertex_buffer(g._.vertex_buffer); // posnortex
 		for (let i: i32 = 0; i < math_floor(inda.length / 3); ++i) {
 			let i1: i32 = inda[i * 3    ];
 			let i2: i32 = inda[i * 3 + 1];
@@ -286,7 +286,7 @@ function util_mesh_calc_normals(smooth: bool = false) {
 				}
 			}
 		}
-		g4_vertex_buffer_unlock(g._.vertex_buffer);
+		kinc_g4_vertex_buffer_unlock_all(g._.vertex_buffer);
 
 		let va0: i16_array_t = o.data.vertex_arrays[0].values;
 		let va1: i16_array_t = o.data.vertex_arrays[1].values;
@@ -371,13 +371,13 @@ function util_mesh_to_origin() {
 		}
 
 		let l: i32 = g4_vertex_struct_byte_size(g._.structure) / 2;
-		let vertices: buffer_t = g4_vertex_buffer_lock(g._.vertex_buffer); // posnortex
+		let vertices: buffer_t = iron_g4_lock_vertex_buffer(g._.vertex_buffer); // posnortex
 		for (let i: i32 = 0; i < math_floor((vertices.length) / 2 / l); ++i) {
 			buffer_set_i16(vertices, (i * l    ) * 2, va[i * 4    ]);
 			buffer_set_i16(vertices, (i * l + 1) * 2, va[i * 4 + 1]);
 			buffer_set_i16(vertices, (i * l + 2) * 2, va[i * 4 + 2]);
 		}
-		g4_vertex_buffer_unlock(g._.vertex_buffer);
+		kinc_g4_vertex_buffer_unlock_all(g._.vertex_buffer);
 	}
 
 	util_mesh_merge();
@@ -389,7 +389,7 @@ function util_mesh_apply_displacement(texpaint_pack: image_t, strength: f32 = 0.
 	let o: mesh_object_t = project_paint_objects[0];
 	let g: mesh_data_t = o.data;
 	let l: i32 = g4_vertex_struct_byte_size(g._.structure) / 2;
-	let vertices: buffer_t = g4_vertex_buffer_lock(g._.vertex_buffer); // posnortex
+	let vertices: buffer_t = iron_g4_lock_vertex_buffer(g._.vertex_buffer); // posnortex
 	for (let i: i32 = 0; i < math_floor((vertices.length) / 2 / l); ++i) {
 		let x: i32 = math_floor(buffer_get_i16(vertices, (i * l + 6) * 2) / 32767 * res);
 		let y: i32 = math_floor(buffer_get_i16(vertices, (i * l + 7) * 2) / 32767 * res);
@@ -402,7 +402,7 @@ function util_mesh_apply_displacement(texpaint_pack: image_t, strength: f32 = 0.
 		buffer_set_i16(vertices, (i * l + 1) * 2, buffer_get_i16(vertices, (i * l + 1) * 2) - math_floor(buffer_get_i16(vertices, (i * l + 5) * 2) * h));
 		buffer_set_i16(vertices, (i * l + 2) * 2, buffer_get_i16(vertices, (i * l + 2) * 2) - math_floor(buffer_get_i16(vertices, (i * l + 3) * 2) * h));
 	}
-	g4_vertex_buffer_unlock(g._.vertex_buffer);
+	kinc_g4_vertex_buffer_unlock_all(g._.vertex_buffer);
 
 	let va0: i16_array_t = o.data.vertex_arrays[0].values;
 	for (let i: i32 = 0; i < math_floor((vertices.length) / 4 / l); ++i) {

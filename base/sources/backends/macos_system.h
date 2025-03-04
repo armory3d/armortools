@@ -9,7 +9,7 @@
 #include <IOKit/hid/IOHIDManager.h>
 #include "HIDGamepad.h"
 
-struct kinc_g5_render_target;
+struct kinc_g5_texture;
 
 @interface BasicOpenGLView : MTKView {
 @private

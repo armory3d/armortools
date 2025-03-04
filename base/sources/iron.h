@@ -380,7 +380,7 @@ int krafix_compile(const char *source, char *output, int *length, const char *ta
 
 extern kinc_g5_command_list_t commandList;
 static kinc_g5_constant_buffer_t constant_buffer;
-static kinc_g5_render_target_t *render_target;
+static kinc_g5_texture_t *render_target;
 static kinc_g5_raytrace_pipeline_t rt_pipeline;
 static kinc_g5_raytrace_acceleration_structure_t accel;
 static bool raytrace_created = false;
@@ -1304,11 +1304,11 @@ void iron_g4_set_texture(kinc_g5_texture_unit_t *unit, kinc_g5_texture_t *textur
 	kinc_g4_set_texture(*unit, texture);
 }
 
-void iron_g4_set_render_target(kinc_g5_texture_unit_t *unit, kinc_g5_render_target_t *render_target) {
+void iron_g4_set_render_target(kinc_g5_texture_unit_t *unit, kinc_g5_texture_t *render_target) {
 	kinc_g4_render_target_use_color_as_texture(render_target, *unit);
 }
 
-void iron_g4_set_texture_depth(kinc_g5_texture_unit_t *unit, kinc_g5_render_target_t *render_target) {
+void iron_g4_set_texture_depth(kinc_g5_texture_unit_t *unit, kinc_g5_texture_t *render_target) {
 	kinc_g4_render_target_use_depth_as_texture(render_target, *unit);
 }
 
@@ -1395,8 +1395,8 @@ bool iron_display_is_primary(i32 index) {
 	return index == kinc_primary_display();
 }
 
-kinc_g5_render_target_t *iron_g4_create_render_target(i32 width, i32 height, i32 format, i32 depth_buffer_bits) {
-	kinc_g5_render_target_t *render_target = (kinc_g5_render_target_t *)malloc(sizeof(kinc_g5_render_target_t));
+kinc_g5_texture_t *iron_g4_create_render_target(i32 width, i32 height, i32 format, i32 depth_buffer_bits) {
+	kinc_g5_texture_t *render_target = (kinc_g5_texture_t *)malloc(sizeof(kinc_g5_texture_t));
 	kinc_g5_render_target_init(render_target, width, height, (kinc_image_format_t)format, depth_buffer_bits);
 	return render_target;
 }
@@ -1503,7 +1503,7 @@ buffer_t *iron_g4_get_texture_pixels(kinc_g5_texture_t *image) {
 	return buffer;
 }
 
-void iron_g4_get_render_target_pixels(kinc_g5_render_target_t *rt, buffer_t *data) {
+void iron_g4_get_render_target_pixels(kinc_g5_texture_t *rt, buffer_t *data) {
 	uint8_t *b = (uint8_t *)data->buffer;
 	kinc_g5_render_target_get_pixels(rt, b);
 
@@ -1541,9 +1541,9 @@ void iron_g4_begin(image_t *render_target, any_array_t *additional) {
 		kinc_g4_restore_render_target();
 	}
 	else {
-		kinc_g5_render_target_t *rt = (kinc_g5_render_target_t *)render_target->render_target_;
+		kinc_g5_texture_t *rt = (kinc_g5_texture_t *)render_target->render_target_;
 		int32_t length = 1;
-		kinc_g5_render_target_t *render_targets[8] = { rt, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+		kinc_g5_texture_t *render_targets[8] = { rt, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 		if (additional != NULL) {
 			length = additional->length + 1;
 			if (length > 8) {
@@ -1551,7 +1551,7 @@ void iron_g4_begin(image_t *render_target, any_array_t *additional) {
 			}
 			for (int32_t i = 1; i < length; ++i) {
 				image_t *img = additional->buffer[i - 1];
-				kinc_g5_render_target_t *art = (kinc_g5_render_target_t *)img->render_target_;
+				kinc_g5_texture_t *art = (kinc_g5_texture_t *)img->render_target_;
 				render_targets[i] = art;
 			}
 		}
@@ -2281,13 +2281,13 @@ void iron_raytrace_as_build(kinc_g4_vertex_buffer_t *vb_full, kinc_g5_index_buff
 }
 
 void iron_raytrace_set_textures(image_t *tex0, image_t *tex1, image_t *tex2, kinc_g5_texture_t *texenv, kinc_g5_texture_t *texsobol, kinc_g5_texture_t *texscramble, kinc_g5_texture_t *texrank) {
-	kinc_g5_render_target_t *texpaint0;
-	kinc_g5_render_target_t *texpaint1;
-	kinc_g5_render_target_t *texpaint2;
+	kinc_g5_texture_t *texpaint0;
+	kinc_g5_texture_t *texpaint1;
+	kinc_g5_texture_t *texpaint2;
 
 	image_t *texpaint0_image = tex0;
 	kinc_g5_texture_t *texpaint0_tex = texpaint0_image->texture_;
-	kinc_g5_render_target_t *texpaint0_rt = texpaint0_image->render_target_;
+	kinc_g5_texture_t *texpaint0_rt = texpaint0_image->render_target_;
 
 	if (texpaint0_tex != NULL) {
 		kinc_g5_texture_t *texture = texpaint0_tex;
@@ -2295,12 +2295,12 @@ void iron_raytrace_set_textures(image_t *tex0, image_t *tex1, image_t *tex2, kin
 			kinc_g5_command_list_upload_texture(&commandList, texture);
 			texture->_uploaded = true;
 		}
-		texpaint0 = (kinc_g5_render_target_t *)malloc(sizeof(kinc_g5_render_target_t));
+		texpaint0 = (kinc_g5_texture_t *)malloc(sizeof(kinc_g5_texture_t));
 		#ifdef KINC_DIRECT3D12
 		texpaint0->impl.srvDescriptorHeap = texture->impl.srvDescriptorHeap;
 		#endif
 		#ifdef KINC_VULKAN
-		texpaint0->impl.sourceView = texture->impl.view;
+		texpaint0->impl.view = texture->impl.view;
 		#endif
 	}
 	else {
@@ -2309,7 +2309,7 @@ void iron_raytrace_set_textures(image_t *tex0, image_t *tex1, image_t *tex2, kin
 
 	image_t *texpaint1_image = tex1;
 	kinc_g5_texture_t *texpaint1_tex = texpaint1_image->texture_;
-	kinc_g5_render_target_t *texpaint1_rt = texpaint1_image->render_target_;
+	kinc_g5_texture_t *texpaint1_rt = texpaint1_image->render_target_;
 
 	if (texpaint1_tex != NULL) {
 		kinc_g5_texture_t *texture = texpaint1_tex;
@@ -2317,12 +2317,12 @@ void iron_raytrace_set_textures(image_t *tex0, image_t *tex1, image_t *tex2, kin
 			kinc_g5_command_list_upload_texture(&commandList, texture);
 			texture->_uploaded = true;
 		}
-		texpaint1 = (kinc_g5_render_target_t *)malloc(sizeof(kinc_g5_render_target_t));
+		texpaint1 = (kinc_g5_texture_t *)malloc(sizeof(kinc_g5_texture_t));
 		#ifdef KINC_DIRECT3D12
 		texpaint1->impl.srvDescriptorHeap = texture->impl.srvDescriptorHeap;
 		#endif
 		#ifdef KINC_VULKAN
-		texpaint1->impl.sourceView = texture->impl.view;
+		texpaint1->impl.view = texture->impl.view;
 		#endif
 	}
 	else {
@@ -2331,7 +2331,7 @@ void iron_raytrace_set_textures(image_t *tex0, image_t *tex1, image_t *tex2, kin
 
 	image_t *texpaint2_image = tex2;
 	kinc_g5_texture_t *texpaint2_tex = texpaint2_image->texture_;
-	kinc_g5_render_target_t *texpaint2_rt = texpaint2_image->render_target_;
+	kinc_g5_texture_t *texpaint2_rt = texpaint2_image->render_target_;
 
 	if (texpaint2_tex != NULL) {
 		kinc_g5_texture_t *texture = (kinc_g5_texture_t *)texpaint2_tex;
@@ -2339,12 +2339,12 @@ void iron_raytrace_set_textures(image_t *tex0, image_t *tex1, image_t *tex2, kin
 			kinc_g5_command_list_upload_texture(&commandList, texture);
 			texture->_uploaded = true;
 		}
-		texpaint2 = (kinc_g5_render_target_t *)malloc(sizeof(kinc_g5_render_target_t));
+		texpaint2 = (kinc_g5_texture_t *)malloc(sizeof(kinc_g5_texture_t));
 		#ifdef KINC_DIRECT3D12
 		texpaint2->impl.srvDescriptorHeap = texture->impl.srvDescriptorHeap;
 		#endif
 		#ifdef KINC_VULKAN
-		texpaint2->impl.sourceView = texture->impl.view;
+		texpaint2->impl.view = texture->impl.view;
 		#endif
 	}
 	else {
@@ -2381,7 +2381,7 @@ void iron_raytrace_set_textures(image_t *tex0, image_t *tex1, image_t *tex2, kin
 	}
 }
 
-void iron_raytrace_dispatch_rays(kinc_g5_render_target_t *render_target, buffer_t *buffer) {
+void iron_raytrace_dispatch_rays(kinc_g5_texture_t *render_target, buffer_t *buffer) {
 	float *cb = (float *)buffer->buffer;
 	kinc_g5_constant_buffer_lock_all(&constant_buffer);
 	for (int i = 0; i < constant_buffer_size; ++i) {

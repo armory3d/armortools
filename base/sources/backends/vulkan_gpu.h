@@ -167,22 +167,17 @@ typedef struct kinc_g5_sampler_impl {
 } kinc_g5_sampler_impl_t;
 
 typedef struct {
-	VkImage image;
+	// VkImage image;
+	// VkDeviceMemory mem;
+	// VkImageView view;
+
 	VkImageLayout imageLayout;
+	VkDeviceSize deviceSize;
+	int stride;
+
+	VkImage image;
 	VkDeviceMemory mem;
 	VkImageView view;
-	int32_t width;
-	int32_t height;
-
-	VkDeviceSize deviceSize;
-	uint8_t *conversionBuffer;
-	int stride;
-} Texture5Impl;
-
-typedef struct {
-	VkImage sourceImage;
-	VkDeviceMemory sourceMemory;
-	VkImageView sourceView;
 
 	VkImage depthImage;
 	VkDeviceMemory depthMemory;
@@ -190,16 +185,16 @@ typedef struct {
 	int depthBufferBits;
 
 	VkFramebuffer framebuffer;
-
 	VkFormat format;
 
-	VkBuffer readbackBuffer;
-	VkDeviceMemory readbackMemory;
-	bool readbackBufferCreated;
+	VkBuffer readback_buffer;
+	VkDeviceMemory readback_memory;
+	bool readback_buffer_created;
 
 	int stage;
 	int stage_depth;
-} RenderTarget5Impl;
+
+} Texture5Impl;
 
 typedef struct {
 	float *data;

@@ -1,6 +1,8 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stdint.h>
+#include "d3d12mini.h"
 
 struct ID3D12CommandAllocator;
 struct ID3D12GraphicsCommandList;
@@ -44,19 +46,7 @@ struct dx_window {
 	bool vsync;
 };
 
-
-
-
-
-
-
-#pragma once
-
-#include <stdint.h>
-#include "d3d12mini.h"
-
 struct kinc_g5_pipeline;
-struct kinc_g5_render_target;
 struct kinc_g5_texture;
 struct kinc_g5_sampler;
 
@@ -67,19 +57,15 @@ typedef struct {
 	struct ID3D12GraphicsCommandList *_commandList;
 	struct kinc_g5_pipeline *_currentPipeline;
 	int _indexCount;
-
-#ifndef NDEBUG
 	bool open;
-#endif
 
 	struct D3D12Rect current_full_scissor;
 
-	// keep track of when a command-list is done
 	uint64_t fence_value;
 	struct ID3D12Fence *fence;
 	HANDLE fence_event;
 
-	struct kinc_g5_render_target *currentRenderTargets[KINC_INTERNAL_G5_TEXTURE_COUNT];
+	struct kinc_g5_texture *currentRenderTargets[KINC_INTERNAL_G5_TEXTURE_COUNT];
 	struct kinc_g5_texture *currentTextures[KINC_INTERNAL_G5_TEXTURE_COUNT];
 	struct kinc_g5_sampler *current_samplers[KINC_INTERNAL_G5_TEXTURE_COUNT];
 
@@ -87,16 +73,6 @@ typedef struct {
 	struct ID3D12DescriptorHeap *srvHeap;
 	struct ID3D12DescriptorHeap *samplerHeap;
 } CommandList5Impl;
-
-
-
-
-
-
-
-#pragma once
-
-#include <kinc/backend/g5_pipeline.h>
 
 typedef struct {
 	uint32_t hash;
@@ -116,19 +92,6 @@ typedef struct kinc_g5_compute_shader_impl {
 	struct ID3D12Buffer *constantBuffer;
 	struct ID3D12PipelineState *pso;
 } kinc_g5_compute_shader_impl;
-
-#ifdef __cplusplus
-}
-#endif
-
-
-
-
-
-#pragma once
-
-#include <stdint.h>
-#include <stdbool.h>
 
 struct kinc_g5_shader;
 
@@ -209,11 +172,6 @@ typedef struct {
 
 uint32_t kinc_internal_hash_name(unsigned char *str);
 
-
-#pragma once
-
-#include "d3d12mini.h"
-
 struct ID3D12Resource;
 struct ID3D12DescriptorHeap;
 struct ID3D12GraphicsCommandList;
@@ -229,6 +187,19 @@ typedef struct {
 	struct ID3D12Resource *image;
 	struct ID3D12Resource *uploadImage;
 	struct ID3D12DescriptorHeap *srvDescriptorHeap;
+
+	struct ID3D12Resource *renderTarget;
+	struct ID3D12Resource *renderTargetReadback;
+	struct ID3D12DescriptorHeap *renderTargetDescriptorHeap;
+	// struct ID3D12DescriptorHeap *srvDescriptorHeap;
+	struct ID3D12DescriptorHeap *depthStencilDescriptorHeap;
+	struct ID3D12DescriptorHeap *srvDepthDescriptorHeap;
+	struct ID3D12Resource *depthStencilTexture;
+	struct D3D12Viewport viewport;
+	struct D3D12Rect scissor;
+	// int stage;
+	int stage_depth;
+	int framebuffer_index;
 } Texture5Impl;
 
 struct kinc_g5_texture;
@@ -236,26 +207,6 @@ struct kinc_g5_command_list;
 
 void kinc_g5_internal_set_textures(struct kinc_g5_command_list *commandList);
 void kinc_g5_internal_texture_set(struct kinc_g5_command_list *commandList, struct kinc_g5_texture *texture, int unit);
-
-typedef struct {
-	struct ID3D12Resource *renderTarget;
-	struct ID3D12Resource *renderTargetReadback;
-	struct ID3D12DescriptorHeap *renderTargetDescriptorHeap;
-	struct ID3D12DescriptorHeap *srvDescriptorHeap;
-	struct ID3D12DescriptorHeap *depthStencilDescriptorHeap;
-	struct ID3D12DescriptorHeap *srvDepthDescriptorHeap;
-	struct ID3D12Resource *depthStencilTexture;
-	struct D3D12Viewport viewport;
-	struct D3D12Rect scissor;
-	int stage;
-	int stage_depth;
-	int framebuffer_index;
-} RenderTarget5Impl;
-
-
-
-
-#pragma once
 
 struct ID3D12Resource;
 
@@ -302,12 +253,6 @@ struct kinc_g5_index_buffer;
 
 void kinc_g5_internal_index_buffer_upload(struct kinc_g5_index_buffer *buffer, struct ID3D12GraphicsCommandList *commandList);
 
-
-
-#pragma once
-
-#include "d3d12mini.h"
-
 struct ID3D12StateObject;
 struct ID3D12Resource;
 
@@ -322,5 +267,3 @@ typedef struct {
 	struct ID3D12Resource *bottom_level_accel[16];
 	struct ID3D12Resource *top_level_accel;
 } kinc_g5_raytrace_acceleration_structure_impl_t;
-
-
