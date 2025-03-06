@@ -65,7 +65,6 @@ typedef struct {
 	struct ID3D12Fence *fence;
 	HANDLE fence_event;
 
-	struct kinc_g5_texture *currentRenderTargets[KINC_INTERNAL_G5_TEXTURE_COUNT];
 	struct kinc_g5_texture *currentTextures[KINC_INTERNAL_G5_TEXTURE_COUNT];
 	struct kinc_g5_sampler *current_samplers[KINC_INTERNAL_G5_TEXTURE_COUNT];
 

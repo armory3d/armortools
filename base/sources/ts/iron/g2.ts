@@ -61,7 +61,7 @@ function g2_begin(render_target: image_t = null) {
 	draw_begin();
 
 	if (render_target != null) {
-		draw_set_render_target(render_target.render_target_);
+		draw_set_render_target(render_target.texture_);
 	}
 	else {
 		draw_restore_render_target();

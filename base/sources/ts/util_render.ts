@@ -168,7 +168,7 @@ function util_render_make_text_preview() {
 		///end
 	}
 	g2_begin(context_raw.text_tool_image);
-	g4_clear(0xff000000);
+	kinc_g5_clear(0xff000000);
 	g2_set_font(font, font_size);
 	draw_set_color(0xffffffff);
 	draw_string(text, tex_w / 2 - text_w / 2, tex_w / 2 - text_h / 2);
@@ -192,7 +192,7 @@ function util_render_make_font_preview() {
 		context_raw.font.image = image_create_render_target(tex_w, tex_w, tex_format_t.RGBA32);
 	}
 	g2_begin(context_raw.font.image);
-	g4_clear(0x00000000);
+	kinc_g5_clear(0x00000000);
 	g2_set_font(font, font_size);
 	draw_set_color(0xffffffff);
 	draw_string(text, tex_w / 2 - text_w / 2, tex_w / 2 - text_h / 2);
@@ -367,7 +367,7 @@ function util_render_make_brush_preview() {
 	l = render_path_paint_live_layer;
 	let target: image_t = context_raw.brush.image;
 	g2_begin(target);
-	g4_clear(0x00000000);
+	kinc_g5_clear(0x00000000);
 	draw_set_pipeline(pipes_copy);
 	draw_scaled_image(l.texpaint, 0, 0, target.width, target.height);
 	draw_set_pipeline(null);
@@ -402,7 +402,7 @@ function util_render_make_node_preview(canvas: ui_node_canvas_t, node: ui_node_t
 	context_raw.paint_object.base.transform.scale_world = 3.0;
 	transform_build_matrix(context_raw.paint_object.base.transform);
 
-	g4_begin(image);
+	iron_g4_begin(image);
 	kinc_g5_set_pipeline(res.scon._.pipe_state);
 	let empty: string[] = [""];
 	uniforms_set_context_consts(res.scon, empty);

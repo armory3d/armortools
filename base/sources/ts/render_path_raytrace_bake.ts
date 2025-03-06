@@ -107,7 +107,7 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 		f32a[6] = context_raw.envmap_angle;
 
 		let framebuffer: render_target_t = map_get(render_path_render_targets, "baketex2");
-		iron_raytrace_dispatch_rays(framebuffer._image.render_target_, f32a);
+		iron_raytrace_dispatch_rays(framebuffer._image.texture_, f32a);
 
 		let id: i32 = context_raw.layer.id;
 		let texpaint_id: string = "texpaint" + id;

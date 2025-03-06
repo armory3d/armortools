@@ -236,11 +236,11 @@ int ui_get_socket_id(ui_node_array_t *nodes) {
 
 void ui_nodes_bake_elements() {
 	if (ui_socket_image.width != 0) {
-		kinc_g5_render_target_destroy(&ui_socket_image);
+		kinc_g5_texture_destroy(&ui_socket_image);
 	}
 	kinc_g5_render_target_init(&ui_socket_image, 24, 24, KINC_IMAGE_FORMAT_RGBA32, 0);
 	draw_set_render_target(&ui_socket_image);
-	kinc_g5_clear(KINC_G5_CLEAR_COLOR, 0x00000000, 0);
+	kinc_g5_clear(0x00000000, 0, KINC_G5_CLEAR_COLOR);
 
 	draw_set_color(0xff111111);
 	draw_filled_circle(12, 12, 11, 0);
@@ -452,7 +452,7 @@ void ui_draw_node(ui_node_t *node, ui_node_canvas_t *canvas) {
 		ui_node_socket_t *out = node->outputs->buffer[i];
 		ny += lineh;
 		draw_set_color(out->color);
-		draw_scaled_render_target(&ui_socket_image, nx + w - ui_p(6), ny - ui_p(3), ui_p(12), ui_p(12));
+		draw_scaled_texture(&ui_socket_image, nx + w - ui_p(6), ny - ui_p(3), ui_p(12), ui_p(12));
 	}
 	ny -= lineh * node->outputs->length;
 	draw_set_color(current->ops->theme->LABEL_COL);
@@ -636,7 +636,7 @@ void ui_draw_node(ui_node_t *node, ui_node_canvas_t *canvas) {
 		ui_node_socket_t *inp = node->inputs->buffer[i];
 		ny += lineh;
 		draw_set_color(inp->color);
-		draw_scaled_render_target(&ui_socket_image, nx - ui_p(6), ny - ui_p(3), ui_p(12), ui_p(12));
+		draw_scaled_texture(&ui_socket_image, nx - ui_p(6), ny - ui_p(3), ui_p(12), ui_p(12));
 		bool is_linked = ui_input_linked(canvas, node->id, i);
 		if (!is_linked && strcmp(inp->type, "VALUE") == 0) {
 			current->_x = nx + ui_p(6);

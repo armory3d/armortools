@@ -196,10 +196,10 @@ void ui_draw_rect(bool fill, float x, float y, float w, float h) {
 		if (theme->ROUND_CORNERS && current->enabled && r > 0 && w >= r * 2.0) {
 			y -= 1; // Make it pixel perfect with non-round draw
 			h += 1;
-			draw_scaled_render_target(&current->filled_round_corner_image, x, y, r, r);
-			draw_scaled_render_target(&current->filled_round_corner_image, x, y + h, r, -r);
-			draw_scaled_render_target(&current->filled_round_corner_image, x + w, y, -r, r);
-			draw_scaled_render_target(&current->filled_round_corner_image, x + w, y + h, -r, -r);
+			draw_scaled_texture(&current->filled_round_corner_image, x, y, r, r);
+			draw_scaled_texture(&current->filled_round_corner_image, x, y + h, r, -r);
+			draw_scaled_texture(&current->filled_round_corner_image, x + w, y, -r, r);
+			draw_scaled_texture(&current->filled_round_corner_image, x + w, y + h, -r, -r);
 			draw_filled_rect(x + r, y, w - r * 2.0, h);
 			draw_filled_rect(x, y + r, w, h - r * 2.0);
 		}
@@ -214,10 +214,10 @@ void ui_draw_rect(bool fill, float x, float y, float w, float h) {
 			w += 1;
 			y -= 1;
 			h += 1;
-			draw_scaled_render_target(&current->round_corner_image, x, y, r, r);
-			draw_scaled_render_target(&current->round_corner_image, x, y + h, r, -r);
-			draw_scaled_render_target(&current->round_corner_image, x + w, y, -r, r);
-			draw_scaled_render_target(&current->round_corner_image, x + w, y + h, -r, -r);
+			draw_scaled_texture(&current->round_corner_image, x, y, r, r);
+			draw_scaled_texture(&current->round_corner_image, x, y + h, r, -r);
+			draw_scaled_texture(&current->round_corner_image, x + w, y, -r, r);
+			draw_scaled_texture(&current->round_corner_image, x + w, y + h, -r, -r);
 			draw_filled_rect(x + r, y, w - r * 2.0, strength);
 			draw_filled_rect(x + r, y + h - 1, w - r * 2.0, strength);
 			draw_filled_rect(x, y + r, strength, h - r * 2.0);
@@ -236,8 +236,8 @@ void ui_draw_round_bottom(float x, float y, float w) {
 		y -= 1; // Make it pixel perfect with non-round draw
 		h += 1;
 		draw_set_color(theme->SEPARATOR_COL);
-		draw_scaled_render_target(&current->filled_round_corner_image, x, y + h, r, -r);
-		draw_scaled_render_target(&current->filled_round_corner_image, x + w, y + h, -r, -r);
+		draw_scaled_texture(&current->filled_round_corner_image, x, y + h, r, -r);
+		draw_scaled_texture(&current->filled_round_corner_image, x + w, y + h, -r, -r);
 		draw_filled_rect(x + r, y, w - r * 2.0, h);
 	}
 }
@@ -473,7 +473,7 @@ void ui_end_element() {
 void ui_resize(ui_handle_t *handle, int w, int h) {
 	handle->redraws = 2;
 	if (handle->texture.width != 0) {
-		kinc_g5_render_target_destroy(&handle->texture);
+		kinc_g5_texture_destroy(&handle->texture);
 	}
 	if (w < 1) {
 		w = 1;
@@ -592,13 +592,6 @@ void ui_draw_tooltip_text(bool bind_global_g) {
 		}
 		off = current->tooltip_img->height * (w / current->tooltip_img->width);
 	}
-	else if (current->tooltip_rt != NULL) {
-		float w = current->tooltip_rt->width;
-		if (current->tooltip_img_max_width != 0 && w > current->tooltip_img_max_width) {
-			w = current->tooltip_img_max_width;
-		}
-		off = current->tooltip_rt->height * (w / current->tooltip_rt->width);
-	}
 
 	int x = current->tooltip_x - 5;
 	int y = current->tooltip_y + off - 5;
@@ -634,25 +627,6 @@ void ui_draw_tooltip_image(bool bind_global_g) {
 		draw_scaled_texture(current->tooltip_img, current->tooltip_x, current->tooltip_y, w, h);
 }
 
-void ui_draw_tooltip_rt(bool bind_global_g) {
-	float w = current->tooltip_rt->width;
-	if (current->tooltip_img_max_width != 0 && w > current->tooltip_img_max_width) {
-		w = current->tooltip_img_max_width;
-	}
-	float h = current->tooltip_rt->height * (w / current->tooltip_rt->width);
-	current->tooltip_x = fmin(current->tooltip_x, kinc_window_width() - w - 20);
-	current->tooltip_y = fmin(current->tooltip_y, kinc_window_height() - h - 20);
-	if (bind_global_g) {
-		draw_restore_render_target();
-	}
-	draw_set_color(0xff000000);
-	draw_filled_rect(current->tooltip_x, current->tooltip_y, w, h);
-	draw_set_color(0xffffffff);
-	current->tooltip_invert_y ?
-		draw_scaled_render_target(current->tooltip_rt, current->tooltip_x, current->tooltip_y + h, w, -h) :
-		draw_scaled_render_target(current->tooltip_rt, current->tooltip_x, current->tooltip_y, w, h);
-}
-
 void ui_draw_tooltip(bool bind_global_g) {
 	static char temp[1024];
 	if (current->slider_tooltip) {
@@ -686,7 +660,7 @@ void ui_draw_tooltip(bool bind_global_g) {
 		draw_string(current->text_selected, x - x_off, y - y_off);
 	}
 
-	if (current->tooltip_text[0] != '\0' || current->tooltip_img != NULL || current->tooltip_rt != NULL) {
+	if (current->tooltip_text[0] != '\0' || current->tooltip_img != NULL) {
 		if (ui_input_changed()) {
 			current->tooltip_shown = false;
 			current->tooltip_wait = current->input_dx == 0 && current->input_dy == 0; // Wait for movement before showing up again
@@ -699,9 +673,6 @@ void ui_draw_tooltip(bool bind_global_g) {
 		if (!current->tooltip_wait && kinc_time() - current->tooltip_time > UI_TOOLTIP_DELAY()) {
 			if (current->tooltip_img != NULL) {
 				ui_draw_tooltip_image(bind_global_g);
-			}
-			else if (current->tooltip_rt != NULL) {
-				ui_draw_tooltip_rt(bind_global_g);
 			}
 			if (current->tooltip_text[0] != '\0') {
 				ui_draw_tooltip_text(bind_global_g);
@@ -892,24 +863,24 @@ void ui_draw_combo(bool begin /*= true*/) {
 
 void ui_bake_elements() {
 	if (current->check_select_image.width != 0) {
-		kinc_g5_render_target_destroy(&current->check_select_image);
+		kinc_g5_texture_destroy(&current->check_select_image);
 	}
 	float r = UI_CHECK_SELECT_SIZE();
 	kinc_g5_render_target_init(&current->check_select_image, r, r, KINC_IMAGE_FORMAT_RGBA32, 0);
 	draw_set_render_target(&current->check_select_image);
-	kinc_g5_clear(KINC_G5_CLEAR_COLOR, 0x00000000, 0);
+	kinc_g5_clear(0x00000000, 0, KINC_G5_CLEAR_COLOR);
 	draw_set_color(0xffffffff);
 	draw_line(0, r / 2.0, r / 2.0 - 2.0 * UI_SCALE(), r - 2.0 * UI_SCALE(), 2.0 * UI_SCALE());
 	draw_line(r / 2.0 - 3.0 * UI_SCALE(), r - 3.0 * UI_SCALE(), r / 2.0 + 5.0 * UI_SCALE(), r - 11.0 * UI_SCALE(), 2.0 * UI_SCALE());
 	draw_end();
 
 	if (current->radio_image.width != 0) {
-		kinc_g5_render_target_destroy(&current->radio_image);
+		kinc_g5_texture_destroy(&current->radio_image);
 	}
 	r = UI_CHECK_SIZE();
 	kinc_g5_render_target_init(&current->radio_image, r, r, KINC_IMAGE_FORMAT_RGBA32, 0);
 	draw_set_render_target(&current->radio_image);
-	kinc_g5_clear(KINC_G5_CLEAR_COLOR, 0x00000000, 0);
+	kinc_g5_clear(0x00000000, 0, KINC_G5_CLEAR_COLOR);
 	draw_set_color(0xffaaaaaa);
 	draw_filled_circle(r / 2.0, r / 2.0, r / 2.0, 0);
 	draw_set_color(0xffffffff);
@@ -917,12 +888,12 @@ void ui_bake_elements() {
 	draw_end();
 
 	if (current->radio_select_image.width != 0) {
-		kinc_g5_render_target_destroy(&current->radio_select_image);
+		kinc_g5_texture_destroy(&current->radio_select_image);
 	}
 	r = UI_CHECK_SELECT_SIZE();
 	kinc_g5_render_target_init(&current->radio_select_image, r, r, KINC_IMAGE_FORMAT_RGBA32, 0);
 	draw_set_render_target(&current->radio_select_image);
-	kinc_g5_clear(KINC_G5_CLEAR_COLOR, 0x00000000, 0);
+	kinc_g5_clear(0x00000000, 0, KINC_G5_CLEAR_COLOR);
 	draw_set_color(0xffaaaaaa);
 	draw_filled_circle(r / 2.0, r / 2.0, 4.5 * UI_SCALE(), 0);
 	draw_set_color(0xffffffff);
@@ -931,22 +902,22 @@ void ui_bake_elements() {
 
 	if (theme->ROUND_CORNERS) {
 		if (current->filled_round_corner_image.width != 0) {
-			kinc_g5_render_target_destroy(&current->filled_round_corner_image);
+			kinc_g5_texture_destroy(&current->filled_round_corner_image);
 		}
 		r = 4.0 * UI_SCALE();
 		kinc_g5_render_target_init(&current->filled_round_corner_image, r, r, KINC_IMAGE_FORMAT_RGBA32, 0);
 		draw_set_render_target(&current->filled_round_corner_image);
-		kinc_g5_clear(KINC_G5_CLEAR_COLOR, 0x00000000, 0);
+		kinc_g5_clear(0x00000000, 0, KINC_G5_CLEAR_COLOR);
 		draw_set_color(0xffffffff);
 		draw_filled_circle(r, r, r, 0);
 		draw_end();
 
 		if (current->round_corner_image.width != 0) {
-			kinc_g5_render_target_destroy(&current->round_corner_image);
+			kinc_g5_texture_destroy(&current->round_corner_image);
 		}
 		kinc_g5_render_target_init(&current->round_corner_image, r, r, KINC_IMAGE_FORMAT_RGBA32, 0);
 		draw_set_render_target(&current->round_corner_image);
-		kinc_g5_clear(KINC_G5_CLEAR_COLOR, 0x00000000, 0);
+		kinc_g5_clear(0x00000000, 0, KINC_G5_CLEAR_COLOR);
 		draw_set_color(0xffffffff);
 		draw_circle(r, r, r, 0, 1);
 		draw_end();
@@ -965,7 +936,6 @@ void ui_begin_region(ui_t *ui, int x, int y, int w) {
 	current->current_window = NULL;
 	current->tooltip_text[0] = '\0';
 	current->tooltip_img = NULL;
-	current->tooltip_rt = NULL;
 	current->_window_x = 0;
 	current->_window_y = 0;
 	current->_window_w = w;
@@ -1422,7 +1392,7 @@ void ui_draw_check(bool selected, bool hover) {
 			ui_fade_color(0.25);
 		}
 		int size = UI_CHECK_SELECT_SIZE();
-		draw_scaled_render_target(&current->check_select_image, x + current->check_select_offset_x, y + current->check_select_offset_y, size, size);
+		draw_scaled_texture(&current->check_select_image, x + current->check_select_offset_x, y + current->check_select_offset_y, size, size);
 	}
 }
 
@@ -1430,14 +1400,14 @@ void ui_draw_radio(bool selected, bool hover) {
 	float x = current->_x + current->radio_offset_x;
 	float y = current->_y + current->radio_offset_y;
 	draw_set_color(selected ? theme->HIGHLIGHT_COL : hover ? theme->HOVER_COL : theme->BUTTON_COL);
-	draw_render_target(&current->radio_image, x, y); // Circle bg
+	draw_texture(&current->radio_image, x, y); // Circle bg
 
 	if (selected) { // Check
 		draw_set_color(theme->LABEL_COL);
 		if (!current->enabled) {
 			ui_fade_color(0.25);
 		}
-		draw_render_target(&current->radio_select_image, x + current->radio_select_offset_x, y + current->radio_select_offset_y); // Circle
+		draw_texture(&current->radio_select_image, x + current->radio_select_offset_x, y + current->radio_select_offset_y); // Circle
 	}
 }
 
@@ -1639,7 +1609,7 @@ void ui_end_window(bool bind_global_g) {
 			draw_restore_render_target();
 		}
 		draw_set_color(0xffffffff);
-		draw_render_target(&handle->texture, current->_window_x, current->_window_y);
+		draw_texture(&handle->texture, current->_window_x, current->_window_y);
 		if (handle->redraws <= 0) {
 			handle->redraws--;
 		}
@@ -1708,14 +1678,13 @@ bool _ui_window(ui_handle_t *handle, int x, int y, int w, int h, bool drag) {
 	current->_h = h;
 	current->tooltip_text[0] = 0;
 	current->tooltip_img = NULL;
-	current->tooltip_rt = NULL;
 	current->tab_count = 0;
 
 	if (theme->FILL_WINDOW_BG) {
-		kinc_g5_clear(KINC_G5_CLEAR_COLOR, theme->WINDOW_BG_COL, 0);
+		kinc_g5_clear(theme->WINDOW_BG_COL, 0, KINC_G5_CLEAR_COLOR);
 	}
 	else {
-		kinc_g5_clear(KINC_G5_CLEAR_COLOR, 0x00000000, 0);
+		kinc_g5_clear(0x00000000, 0, KINC_G5_CLEAR_COLOR);
 		draw_set_color(theme->WINDOW_BG_COL);
 		draw_filled_rect(current->_x, current->_y - handle->scroll_offset, handle->last_max_x, handle->last_max_y);
 	}
@@ -1873,45 +1842,25 @@ bool ui_panel(ui_handle_t *handle, char *text, bool is_tree, bool filled) {
 	return handle->selected;
 }
 
-static int image_width(void *image, bool is_rt) {
-	if (is_rt) {
-		return ((kinc_g5_texture_t *)image)->width;
-	}
-	else {
-		return ((kinc_g5_texture_t *)image)->width;
-	}
+static int image_width(void *image) {
+	return ((kinc_g5_texture_t *)image)->width;
 }
 
-static int image_height(void *image, bool is_rt) {
-	if (is_rt) {
-		return ((kinc_g5_texture_t *)image)->height;
-	}
-	else {
-		return ((kinc_g5_texture_t *)image)->height;
-	}
+static int image_height(void *image) {
+	return ((kinc_g5_texture_t *)image)->height;
 }
 
-static void _draw_scaled_image(void *image, bool is_rt, float dx, float dy, float dw, float dh) {
-	if (is_rt) {
-		draw_scaled_render_target((kinc_g5_texture_t *)image, dx, dy, dw, dh);
-	}
-	else {
-		draw_scaled_texture((kinc_g5_texture_t *)image, dx, dy, dw, dh);
-	}
+static void _draw_scaled_image(void *image, float dx, float dy, float dw, float dh) {
+	draw_scaled_texture((kinc_g5_texture_t *)image, dx, dy, dw, dh);
 }
 
-static void _draw_scaled_sub_image(void *image, bool is_rt, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh) {
-	if (is_rt) {
-		draw_scaled_sub_render_target((kinc_g5_texture_t *)image, sx, sy, sw, sh, dx, dy, dw, dh);
-	}
-	else {
-		draw_scaled_sub_texture((kinc_g5_texture_t *)image, sx, sy, sw, sh, dx, dy, dw, dh);
-	}
+static void _draw_scaled_sub_image(void *image, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh) {
+	draw_scaled_sub_texture((kinc_g5_texture_t *)image, sx, sy, sw, sh, dx, dy, dw, dh);
 }
 
-int ui_sub_image(/*kinc_g5_texture_t kinc_g5_texture_t*/ void *image, bool is_rt, uint32_t tint, int h, int sx, int sy, int sw, int sh) {
-	float iw = (sw > 0 ? sw : image_width(image, is_rt)) * UI_SCALE();
-	float ih = (sh > 0 ? sh : image_height(image, is_rt)) * UI_SCALE();
+int ui_sub_image(kinc_g5_texture_t *image, uint32_t tint, int h, int sx, int sy, int sw, int sh) {
+	float iw = (sw > 0 ? sw : image_width(image)) * UI_SCALE();
+	float ih = (sh > 0 ? sh : image_height(image)) * UI_SCALE();
 	float w = fmin(iw, current->_w);
 	float x = current->_x;
 	float scroll = current->current_window != NULL ? current->current_window->scroll_enabled : false;
@@ -1961,18 +1910,18 @@ int ui_sub_image(/*kinc_g5_texture_t kinc_g5_texture_t*/ void *image, bool is_rt
 	}
 	if (sw > 0) { // Source rect specified
 		if (current->image_invert_y) {
-			_draw_scaled_sub_image(image, is_rt, sx, sy, sw, sh, x, current->_y + h, w, -h);
+			_draw_scaled_sub_image(image, sx, sy, sw, sh, x, current->_y + h, w, -h);
 		}
 		else {
-			_draw_scaled_sub_image(image, is_rt, sx, sy, sw, sh, x, current->_y, w, h);
+			_draw_scaled_sub_image(image, sx, sy, sw, sh, x, current->_y, w, h);
 		}
 	}
 	else {
 		if (current->image_invert_y) {
-			_draw_scaled_image(image, is_rt, x, current->_y + h, w, -h);
+			_draw_scaled_image(image, x, current->_y + h, w, -h);
 		}
 		else {
-			_draw_scaled_image(image, is_rt, x, current->_y, w, h);
+			_draw_scaled_image(image, x, current->_y, w, h);
 		}
 	}
 
@@ -1980,8 +1929,8 @@ int ui_sub_image(/*kinc_g5_texture_t kinc_g5_texture_t*/ void *image, bool is_rt
 	return started ? UI_STATE_STARTED : released ? UI_STATE_RELEASED : down ? UI_STATE_DOWN : hover ? UI_STATE_HOVERED : UI_STATE_IDLE;
 }
 
-int ui_image(/*kinc_g5_texture_t kinc_g5_texture_t*/ void *image, bool is_rt, uint32_t tint, int h) {
-	return ui_sub_image(image, is_rt, tint, h, 0, 0, image_width(image, is_rt), image_height(image, is_rt));
+int ui_image(kinc_g5_texture_t *image, uint32_t tint, int h) {
+	return ui_sub_image(image, tint, h, 0, 0, image_width(image), image_height(image));
 }
 
 char *ui_text_input(ui_handle_t *handle, char *label, int align, bool editable, bool live_update) {
@@ -2293,13 +2242,6 @@ void ui_tooltip(char *text) {
 
 void ui_tooltip_image(kinc_g5_texture_t *image, int max_width) {
 	current->tooltip_img = image;
-	current->tooltip_img_max_width = max_width;
-	current->tooltip_invert_y = current->image_invert_y;
-	current->tooltip_y = current->_y + current->_window_y;
-}
-
-void ui_tooltip_render_target(kinc_g5_texture_t *image, int max_width) {
-	current->tooltip_rt = image;
 	current->tooltip_img_max_width = max_width;
 	current->tooltip_invert_y = current->image_invert_y;
 	current->tooltip_y = current->_y + current->_window_y;
@@ -2865,7 +2807,7 @@ int ui_color_wheel(ui_handle_t *handle, bool alpha, float w, float h, bool color
 	current->_w = _w;
 
 	uint32_t col = ui_color(round(cval * 255.0f), round(cval * 255.0f), round(cval * 255.0f), 255);
-	ui_image(current->ops->color_wheel, false, col, -1);
+	ui_image(current->ops->color_wheel, col, -1);
 
 	// Picker
 	float ph = current->_y - py;
@@ -2888,7 +2830,7 @@ int ui_color_wheel(ui_handle_t *handle, bool alpha, float w, float h, bool color
 
 	current->_x = px - (scroll ? 0 : UI_SCROLL_W() / 2.0);
 	current->_y = py;
-	ui_image(current->ops->black_white_gradient, false, 0xffffffff, -1);
+	ui_image(current->ops->black_white_gradient, 0xffffffff, -1);
 
 	draw_set_color(0xff000000);
 	draw_filled_rect(cx - 3.0 * UI_SCALE(), cy - 3.0 * UI_SCALE(), 6.0 * UI_SCALE(), 6.0 * UI_SCALE());

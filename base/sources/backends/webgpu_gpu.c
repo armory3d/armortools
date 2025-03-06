@@ -224,7 +224,7 @@ void kinc_g5_texture_init(kinc_g5_texture_t *texture, int width, int height, kin
 
 	texture->_uploaded = true;
 	texture->format = format;
-
+	texture->data = NULL;
 }
 
 void kinc_g5_texture_init_from_bytes(kinc_g5_texture_t *texture, void *data, int width, int height, kinc_image_format_t format) {}
@@ -251,11 +251,10 @@ void kinc_g5_render_target_init(kinc_g5_texture_t *target, int width, int height
     target->width = target->width = width;
 	target->height = target->height = height;
 	target->state = KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
+	target->data = NULL;
 }
 
 void kinc_g5_render_target_init_framebuffer(kinc_g5_texture_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits) {}
-
-void kinc_g5_render_target_destroy(kinc_g5_texture_t *renderTarget) {}
 
 void kinc_g5_render_target_set_depth_from(kinc_g5_texture_t *renderTarget, kinc_g5_texture_t *source) {}
 
@@ -528,8 +527,6 @@ void kinc_g5_command_list_set_texture(kinc_g5_command_list_t *list, kinc_g5_text
 }
 
 void kinc_g5_command_list_set_sampler(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_sampler_t *sampler) {}
-
-void kinc_g5_command_list_set_texture_from_render_target(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *renderTarget) {}
 
 void kinc_g5_command_list_set_texture_from_render_target_depth(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *renderTarget) {}
 

@@ -502,17 +502,6 @@ void kinc_g5_command_list_set_texture(kinc_g5_command_list_t *list, kinc_g5_text
 	}
 }
 
-void kinc_g5_command_list_set_texture_from_render_target(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *target) {
-	id<MTLRenderCommandEncoder> encoder = getMetalEncoder();
-	id<MTLTexture> tex = (__bridge id<MTLTexture>)target->impl._tex;
-	if (unit.stages[KINC_G5_SHADER_TYPE_VERTEX] >= 0) {
-		[encoder setVertexTexture:tex atIndex:unit.stages[KINC_G5_SHADER_TYPE_VERTEX]];
-	}
-	if (unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT] >= 0) {
-		[encoder setFragmentTexture:tex atIndex:unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT]];
-	}
-}
-
 void kinc_g5_command_list_set_texture_from_render_target_depth(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *target) {
 	id<MTLRenderCommandEncoder> encoder = getMetalEncoder();
 	id<MTLTexture> depth_tex = (__bridge id<MTLTexture>)target->impl._depthTex;
@@ -1537,6 +1526,7 @@ void kinc_g5_texture_init(kinc_g5_texture_t *texture, int width, int height, kin
 	texture->impl.data = malloc(width * height * (format == KINC_IMAGE_FORMAT_R8 ? 1 : 4));
 	create(texture, width, height, format, true);
 	texture->_uploaded = true;
+	texture->data = NULL;
 }
 
 void kinc_g5_texture_init_from_bytes(kinc_g5_texture_t *texture, void *data, int width, int height, kinc_image_format_t format) {
@@ -1564,14 +1554,26 @@ void kinc_g5_texture_init_non_sampled_access(kinc_g5_texture_t *texture, int wid
 	create(texture, width, height, format, true);
 }
 
-void kinc_g5_texture_destroy(kinc_g5_texture_t *texture) {
-	id<MTLTexture> tex = (__bridge_transfer id<MTLTexture>)texture->impl._tex;
+void kinc_g5_texture_destroy(kinc_g5_texture_t *target) {
+	id<MTLTexture> tex = (__bridge_transfer id<MTLTexture>)target->impl._tex;
 	tex = nil;
-	texture->impl._tex = NULL;
+	target->impl._tex = NULL;
 
-	if (texture->impl.data != NULL) {
-		free(texture->impl.data);
-		texture->impl.data = NULL;
+	id<MTLTexture> depthTex = (__bridge_transfer id<MTLTexture>)target->impl._depthTex;
+	depthTex = nil;
+	target->impl._depthTex = NULL;
+
+	id<MTLTexture> texReadback = (__bridge_transfer id<MTLTexture>)target->impl._texReadback;
+	texReadback = nil;
+	target->impl._texReadback = NULL;
+
+	if (target->framebuffer_index >= 0) {
+		framebuffer_count -= 1;
+	}
+
+	if (target->impl.data != NULL) {
+		free(target->impl.data);
+		target->impl.data = NULL;
 	}
 }
 
@@ -1680,6 +1682,7 @@ static void render_target_init(kinc_g5_texture_t *target, int width, int height,
 
 	target->width = width;
 	target->height = height;
+	target->data = NULL;
 
 	target->framebuffer_index = framebuffer_index;
 
@@ -1728,24 +1731,6 @@ static int framebuffer_count = 0;
 void kinc_g5_render_target_init_framebuffer(kinc_g5_texture_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits) {
 	render_target_init(target, width, height, format, depthBufferBits, framebuffer_count);
 	framebuffer_count += 1;
-}
-
-void kinc_g5_render_target_destroy(kinc_g5_texture_t *target) {
-	id<MTLTexture> tex = (__bridge_transfer id<MTLTexture>)target->impl._tex;
-	tex = nil;
-	target->impl._tex = NULL;
-
-	id<MTLTexture> depthTex = (__bridge_transfer id<MTLTexture>)target->impl._depthTex;
-	depthTex = nil;
-	target->impl._depthTex = NULL;
-
-	id<MTLTexture> texReadback = (__bridge_transfer id<MTLTexture>)target->impl._texReadback;
-	texReadback = nil;
-	target->impl._texReadback = NULL;
-
-	if (target->framebuffer_index >= 0) {
-		framebuffer_count -= 1;
-	}
 }
 
 void kinc_g5_render_target_set_depth_from(kinc_g5_texture_t *target, kinc_g5_texture_t *source) {

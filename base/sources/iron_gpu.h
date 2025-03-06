@@ -6,6 +6,7 @@
 #include <iron_global.h>
 #include <iron_math.h>
 #include <iron_gpu.h>
+#include <iron_array.h>
 #include BACKEND_GPU_H
 
 #define KINC_G5_CLEAR_COLOR 1
@@ -44,6 +45,8 @@ typedef struct kinc_g5_texture {
 	int framebuffer_index;
 	bool isDepthAttachment;
 	enum kinc_internal_render_target_state state;
+
+	buffer_t *buffer;
 
 	Texture5Impl impl;
 } kinc_g5_texture_t;
@@ -97,7 +100,7 @@ typedef enum kinc_g4_usage {
 
 void kinc_g4_begin();
 void kinc_g4_end();
-void kinc_g5_clear(unsigned flags, unsigned color, float depth);
+void kinc_g5_clear(unsigned color, float depth, unsigned flags);
 void kinc_g4_viewport(int x, int y, int width, int height);
 void kinc_g4_scissor(int x, int y, int width, int height);
 void kinc_g4_disable_scissor(void);
@@ -129,10 +132,7 @@ void kinc_g4_set_index_buffer(struct kinc_g5_index_buffer *buffer);
 
 void kinc_g4_internal_init_window(int depth_buffer_bits, bool vsync);
 
-void kinc_g4_render_target_use_color_as_texture(struct kinc_g5_texture *renderTarget, struct kinc_g5_texture_unit unit);
 void kinc_g4_render_target_use_depth_as_texture(struct kinc_g5_texture *renderTarget, struct kinc_g5_texture_unit unit);
-void kinc_g5_render_target_get_pixels(struct kinc_g5_texture *renderTarget, uint8_t *data);
-void kinc_g5_render_target_generate_mipmaps(struct kinc_g5_texture *renderTarget, int levels);
 
 void kinc_g4_index_buffer_unlock_all(struct kinc_g5_index_buffer *buffer);
 void kinc_g4_index_buffer_unlock(struct kinc_g5_index_buffer *buffer, int count);
@@ -196,7 +196,6 @@ struct kinc_g5_texture_unit;
 
 void kinc_g5_render_target_init(kinc_g5_texture_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits);
 void kinc_g5_render_target_init_framebuffer(kinc_g5_texture_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits);
-void kinc_g5_render_target_destroy(kinc_g5_texture_t *target);
 void kinc_g5_render_target_set_depth_from(kinc_g5_texture_t *target, kinc_g5_texture_t *source);
 
 typedef struct kinc_g5_vertex_buffer {
@@ -453,9 +452,10 @@ void kinc_g5_command_list_wait_for_execution_to_finish(kinc_g5_command_list_t *l
 void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list, struct kinc_g5_texture *render_target, uint8_t *data);
 void kinc_g5_command_list_compute(kinc_g5_command_list_t *list, int x, int y, int z);
 void kinc_g5_command_list_set_texture(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *texture);
-void kinc_g5_command_list_set_texture_from_render_target(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *target);
 void kinc_g5_command_list_set_texture_from_render_target_depth(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *target);
 void kinc_g5_command_list_set_sampler(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_sampler_t *sampler);
+
+void kinc_g5_render_target_get_pixels(kinc_g5_texture_t *render_target, uint8_t *data);
 
 typedef struct kinc_g5_compute_shader {
 	kinc_g5_compute_shader_impl impl;

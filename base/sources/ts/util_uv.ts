@@ -35,7 +35,7 @@ function util_uv_cache_uv_map() {
 	let texa: i16_array_t = mesh.vertex_arrays[2].values;
 	let inda: u32_array_t = mesh.index_arrays[0].values;
 	g2_begin(util_uv_uvmap);
-	g4_clear(0x00000000);
+	kinc_g5_clear(0x00000000);
 	draw_set_color(0xffffffff);
 	let strength: f32 = res_x > 2048 ? 2.0 : 1.0;
 	let f: f32 = (1 / 32767) * util_uv_uvmap.width;
@@ -74,7 +74,7 @@ function util_uv_cache_triangle_map() {
 	let texa: i16_array_t = mesh.vertex_arrays[2].values;
 	let inda: u32_array_t = mesh.index_arrays[0].values;
 	g2_begin(util_uv_trianglemap);
-	g4_clear(0xff000000);
+	kinc_g5_clear(0xff000000);
 	let f: f32 = (1 / 32767) * util_uv_trianglemap.width;
 	let color: i32 = 0xff000001;
 	for (let i: i32 = 0; i < math_floor(inda.length / 3); ++i) {
@@ -130,8 +130,8 @@ function util_uv_cache_dilate_map() {
 		mask = context_raw.layer_filter;
 	}
 	let geom: mesh_data_t = mask == 0 && context_raw.merged_object != null ? context_raw.merged_object.data : context_raw.paint_object.data;
-	g4_begin(util_uv_dilatemap);
-	g4_clear(0x00000000);
+	iron_g4_begin(util_uv_dilatemap);
+	kinc_g5_clear(0x00000000);
 	kinc_g5_set_pipeline(util_uv_pipe_dilate);
 	///if (arm_metal || arm_vulkan)
 	let vs: vertex_element_t[] = [

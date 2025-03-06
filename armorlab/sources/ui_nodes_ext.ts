@@ -78,7 +78,7 @@ function ui_nodes_ext_run() {
 	}
 
 	if (texheight != null) {
-		g4_begin(texpaint_pack._image);
+		iron_g4_begin(texpaint_pack._image);
 		kinc_g5_set_pipeline(pipes_copy_a);
 		g4_set_tex(pipes_copy_a_tex, texheight);
 		kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);

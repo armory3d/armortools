@@ -123,25 +123,15 @@ function ui_nodes_PAN_Y(): f32 {
 }
 
 function _ui_image(image: image_t, tint: i32 = 0xffffffff, h: f32 = -1.0, sx: i32 = 0, sy: i32 = 0, sw: i32 = 0, sh: i32 = 0): ui_state_t {
-	if (image.texture_ != null) {
-		return ui_sub_image(image.texture_, false, tint, h, sx, sy, sw, sh);
-	}
-	else {
-		return ui_sub_image(image.render_target_, true, tint, h, sx, sy, sw, sh);
-	}
+	return ui_sub_image(image.texture_, tint, h, sx, sy, sw, sh);
 }
 
 function _ui_tooltip_image(image: image_t, max_width: i32 = 0) {
-	if (image.texture_ != null) {
-		return ui_tooltip_image(image.texture_, max_width);
-	}
-	else {
-		return ui_tooltip_render_target(image.render_target_, max_width);
-	}
+	return ui_tooltip_image(image.texture_, max_width);
 }
 
 function ui_window(handle: ui_handle_t, x: i32, y: i32, w: i32, h: i32, drag: bool = false): bool {
-	_g2_current = { render_target_: ADDRESS(handle.texture) };
+	_g2_current = { texture_: ADDRESS(handle.texture) };
 	_g2_in_use = true;
 	return _ui_window(handle, x, y, w, h, drag);
 }
@@ -281,7 +271,6 @@ declare function ui_radio(handle: ui_handle_t, position: i32, text: string, labe
 declare function ui_start_text_edit(handle: ui_handle_t, align: ui_align_t = ui_align_t.LEFT): void;
 declare function ui_tooltip(s: string): void;
 declare function ui_tooltip_image(tex: any, max_width: i32 = 0): void;
-declare function ui_tooltip_render_target(rt: any, max_width: i32 = 0): void;
 declare function ui_separator(h: i32 = 4, fill: bool = true): void;
 declare function ui_text_area(handle: ui_handle_t, align: ui_align_t = ui_align_t.LEFT, editable: bool = true, label: string = "", word_wrap: bool = false): string;
 declare function _ui_window(handle: ui_handle_t, x: i32, y: i32, w: i32, h: i32, drag: bool = false): bool;

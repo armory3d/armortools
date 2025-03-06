@@ -601,7 +601,6 @@ void kinc_g5_command_list_init(struct kinc_g5_command_list *list) {
 	list->impl.current_full_scissor.left = -1;
 
 	for (int i = 0; i < KINC_INTERNAL_G5_TEXTURE_COUNT; ++i) {
-		list->impl.currentRenderTargets[i] = NULL;
 		list->impl.currentTextures[i] = NULL;
 		list->impl.current_samplers[i] = NULL;
 	}
@@ -819,7 +818,6 @@ void kinc_g5_command_list_set_pipeline(struct kinc_g5_command_list *list, kinc_g
 	compute_pipeline_set = false;
 
 	for (int i = 0; i < KINC_INTERNAL_G5_TEXTURE_COUNT; ++i) {
-		list->impl.currentRenderTargets[i] = NULL;
 		list->impl.currentTextures[i] = NULL;
 	}
 	kinc_g5_internal_setConstants(list, list->impl._currentPipeline);
@@ -1031,7 +1029,6 @@ void kinc_g5_command_list_set_compute_shader(kinc_g5_command_list_t *list, kinc_
 	compute_pipeline_set = true;
 
 	for (int i = 0; i < KINC_INTERNAL_G5_TEXTURE_COUNT; ++i) {
-		list->impl.currentRenderTargets[i] = NULL;
 		list->impl.currentTextures[i] = NULL;
 	}
 	kinc_g5_internal_set_compute_constants(list);
@@ -1040,19 +1037,6 @@ void kinc_g5_command_list_set_compute_shader(kinc_g5_command_list_t *list, kinc_
 void kinc_g5_command_list_compute(kinc_g5_command_list_t *list, int x, int y, int z) {
 	assert(list->impl.open);
 	list->impl._commandList->lpVtbl->Dispatch(list->impl._commandList, x, y, z);
-}
-
-void kinc_g5_command_list_set_texture(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *texture) {
-	if (unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT] >= 0) {
-		kinc_g5_internal_texture_set(list, texture, unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT]);
-	}
-	else if (unit.stages[KINC_G5_SHADER_TYPE_VERTEX] >= 0) {
-		kinc_g5_internal_texture_set(list, texture, unit.stages[KINC_G5_SHADER_TYPE_VERTEX]);
-	}
-	else if (unit.stages[KINC_G5_SHADER_TYPE_COMPUTE] >= 0) {
-		kinc_g5_internal_texture_set(list, texture, unit.stages[KINC_G5_SHADER_TYPE_COMPUTE]);
-	}
-	kinc_g5_internal_set_textures(list);
 }
 
 void kinc_g5_internal_sampler_set(kinc_g5_command_list_t *list, kinc_g5_sampler_t *sampler, int unit);
@@ -1067,32 +1051,28 @@ void kinc_g5_command_list_set_sampler(kinc_g5_command_list_t *list, kinc_g5_text
 	kinc_g5_internal_set_textures(list);
 }
 
-void kinc_g5_command_list_set_texture_from_render_target(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *target) {
+void kinc_g5_command_list_set_texture(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *texture) {
 	if (unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT] >= 0) {
-		target->impl.stage = unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT];
-		list->impl.currentRenderTargets[target->impl.stage] = target;
+		texture->impl.stage = unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT];
 	}
 	else if (unit.stages[KINC_G5_SHADER_TYPE_VERTEX] >= 0) {
-		target->impl.stage = unit.stages[KINC_G5_SHADER_TYPE_VERTEX];
-		list->impl.currentRenderTargets[target->impl.stage] = target;
+		texture->impl.stage = unit.stages[KINC_G5_SHADER_TYPE_VERTEX];
 	}
-	list->impl.currentTextures[target->impl.stage] = NULL;
-
+	else if (unit.stages[KINC_G5_SHADER_TYPE_COMPUTE] >= 0) {
+		texture->impl.stage = unit.stages[KINC_G5_SHADER_TYPE_COMPUTE];
+	}
+	list->impl.currentTextures[texture->impl.stage] = texture;
 	kinc_g5_internal_set_textures(list);
 }
 
-void kinc_g5_command_list_set_texture_from_render_target_depth(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *target) {
+void kinc_g5_command_list_set_texture_from_render_target_depth(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *texture) {
 	if (unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT] >= 0) {
-		target->impl.stage_depth = unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT];
-		list->impl.currentRenderTargets[target->impl.stage_depth] = target;
+		texture->impl.stage_depth = unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT];
 	}
 	else if (unit.stages[KINC_G5_SHADER_TYPE_VERTEX] >= 0) {
-		target->impl.stage_depth = unit.stages[KINC_G5_SHADER_TYPE_VERTEX];
-		list->impl.currentRenderTargets[target->impl.stage_depth] = target;
+		texture->impl.stage_depth = unit.stages[KINC_G5_SHADER_TYPE_VERTEX];
 	}
-	list->impl.currentTextures[target->impl.stage_depth] = NULL;
-
-	kinc_g5_internal_set_textures(list);
+	list->impl.currentTextures[texture->impl.stage_depth] = texture;
 }
 
 
@@ -1826,7 +1806,6 @@ static const int heapSize = 1024;
 
 void kinc_g5_internal_reset_textures(struct kinc_g5_command_list *list) {
 	for (int i = 0; i < KINC_INTERNAL_G5_TEXTURE_COUNT; ++i) {
-		list->impl.currentRenderTargets[i] = NULL;
 		list->impl.currentTextures[i] = NULL;
 		list->impl.current_samplers[i] = NULL;
 	}
@@ -1878,7 +1857,7 @@ static int formatByteSize(kinc_image_format_t format) {
 }
 
 void kinc_g5_internal_set_textures(kinc_g5_command_list_t *list) {
-	if (list->impl.currentRenderTargets[0] != NULL || list->impl.currentTextures[0] != NULL) {
+	if (list->impl.currentTextures[0] != NULL) {
 		int srvStep = device->lpVtbl->GetDescriptorHandleIncrementSize(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		int samplerStep = device->lpVtbl->GetDescriptorHandleIncrementSize(device, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 
@@ -1894,7 +1873,7 @@ void kinc_g5_internal_set_textures(kinc_g5_command_list_t *list) {
 		samplerGpu.ptr += list->impl.heapIndex * samplerStep;
 
 		for (int i = 0; i < KINC_INTERNAL_G5_TEXTURE_COUNT; ++i) {
-			if ((list->impl.currentRenderTargets[i] != NULL || list->impl.currentTextures[i] != NULL) && list->impl.current_samplers[i] != NULL) {
+			if (list->impl.currentTextures[i] != NULL && list->impl.current_samplers[i] != NULL) {
 				ID3D12DescriptorHeap *samplerDescriptorHeap = list->impl.current_samplers[i]->impl.sampler_heap;
 
 				D3D12_CPU_DESCRIPTOR_HANDLE srvCpu;
@@ -1905,35 +1884,23 @@ void kinc_g5_internal_set_textures(kinc_g5_command_list_t *list) {
 				samplerCpu.ptr += list->impl.heapIndex * samplerStep;
 				++list->impl.heapIndex;
 
-				if (list->impl.currentRenderTargets[i] != NULL) {
-					bool is_depth = list->impl.currentRenderTargets[i]->impl.stage_depth == i;
-					D3D12_CPU_DESCRIPTOR_HANDLE sourceCpu;
+				bool is_depth = list->impl.currentTextures[i]->impl.stage_depth == i;
+				D3D12_CPU_DESCRIPTOR_HANDLE sourceCpu;
 
-					if (is_depth) {
-						list->impl.currentRenderTargets[i]->impl.srvDepthDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(
-						    list->impl.currentRenderTargets[i]->impl.srvDepthDescriptorHeap, &sourceCpu);
-					}
-					else {
-						list->impl.currentRenderTargets[i]->impl.srvDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(
-						    list->impl.currentRenderTargets[i]->impl.srvDescriptorHeap, &sourceCpu);
-					}
-
-					D3D12_CPU_DESCRIPTOR_HANDLE handle;
-					samplerDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(samplerDescriptorHeap, &handle);
-
-					device->lpVtbl->CopyDescriptorsSimple(device, 1, srvCpu, sourceCpu, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-					device->lpVtbl->CopyDescriptorsSimple(device, 1, samplerCpu, handle, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+				if (is_depth) {
+					list->impl.currentTextures[i]->impl.srvDepthDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(
+						list->impl.currentTextures[i]->impl.srvDepthDescriptorHeap, &sourceCpu);
 				}
 				else {
-					D3D12_CPU_DESCRIPTOR_HANDLE sourceCpu;
 					list->impl.currentTextures[i]->impl.srvDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(
-					    list->impl.currentTextures[i]->impl.srvDescriptorHeap, &sourceCpu);
-					device->lpVtbl->CopyDescriptorsSimple(device, 1, srvCpu, sourceCpu, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-					D3D12_CPU_DESCRIPTOR_HANDLE handle;
-					samplerDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(samplerDescriptorHeap, &handle);
-					device->lpVtbl->CopyDescriptorsSimple(device, 1, samplerCpu, handle, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+						list->impl.currentTextures[i]->impl.srvDescriptorHeap, &sourceCpu);
 				}
+
+				D3D12_CPU_DESCRIPTOR_HANDLE handle;
+				samplerDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(samplerDescriptorHeap, &handle);
+
+				device->lpVtbl->CopyDescriptorsSimple(device, 1, srvCpu, sourceCpu, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+				device->lpVtbl->CopyDescriptorsSimple(device, 1, samplerCpu, handle, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 			}
 		}
 
@@ -2090,6 +2057,7 @@ void create_texture(struct kinc_g5_texture *texture, int width, int height, kinc
 	texture->impl.mipmap = true;
 	texture->width = width;
 	texture->height = height;
+	texture->data = NULL;
 
 	DXGI_FORMAT d3dformat = convertImageFormat(format);
 
@@ -2200,23 +2168,30 @@ void kinc_g5_texture_init_non_sampled_access(struct kinc_g5_texture *texture, in
 	create_texture(texture, width, height, format, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
 }
 
-void kinc_g5_texture_destroy(struct kinc_g5_texture *texture) {
+void kinc_g5_texture_destroy(kinc_g5_texture_t *render_target) {
+	if (render_target->impl.framebuffer_index >= 0) {
+		framebuffer_count -= 1;
+	}
+
+	render_target->impl.renderTarget->lpVtbl->Release(render_target->impl.renderTarget);
+	render_target->impl.renderTargetDescriptorHeap->lpVtbl->Release(render_target->impl.renderTargetDescriptorHeap);
+	render_target->impl.srvDescriptorHeap->lpVtbl->Release(render_target->impl.srvDescriptorHeap);
+	if (render_target->impl.depthStencilTexture != NULL) {
+		render_target->impl.depthStencilTexture->lpVtbl->Release(render_target->impl.depthStencilTexture);
+		render_target->impl.depthStencilDescriptorHeap->lpVtbl->Release(render_target->impl.depthStencilDescriptorHeap);
+		render_target->impl.srvDepthDescriptorHeap->lpVtbl->Release(render_target->impl.srvDepthDescriptorHeap);
+	}
+	if (render_target->impl.renderTargetReadback != NULL) {
+		render_target->impl.renderTargetReadback->lpVtbl->Release(render_target->impl.renderTargetReadback);
+	}
+
 	texture->impl.image->lpVtbl->Release(texture->impl.image);
 	texture->impl.uploadImage->lpVtbl->Release(texture->impl.uploadImage);
-	texture->impl.srvDescriptorHeap->lpVtbl->Release(texture->impl.srvDescriptorHeap);
+	// texture->impl.srvDescriptorHeap->lpVtbl->Release(texture->impl.srvDescriptorHeap);
 }
 
 void kinc_g5_internal_texture_unmipmap(struct kinc_g5_texture *texture) {
 	texture->impl.mipmap = false;
-}
-
-void kinc_g5_internal_texture_set(kinc_g5_command_list_t *list, struct kinc_g5_texture *texture, int unit) {
-	if (unit < 0)
-		return;
-	// context->PSSetShaderResources(unit.unit, 1, &view);
-	texture->impl.stage = unit;
-	list->impl.currentTextures[texture->impl.stage] = texture;
-	list->impl.currentRenderTargets[texture->impl.stage] = NULL;
 }
 
 void kinc_g5_internal_sampler_set(kinc_g5_command_list_t *list, kinc_g5_sampler_t *sampler, int unit) {
@@ -2292,6 +2267,7 @@ static void render_target_init(kinc_g5_texture_t *render_target, int width, int 
 	render_target->impl.stage_depth = -1;
 	render_target->impl.renderTargetReadback = NULL;
 	render_target->impl.framebuffer_index = framebuffer_index;
+	render_target->data = NULL;
 
 	DXGI_FORMAT dxgiFormat = convertFormat(format);
 
@@ -2489,24 +2465,6 @@ static int framebuffer_count = 0;
 void kinc_g5_render_target_init_framebuffer(kinc_g5_texture_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits) {
 	render_target_init(target, width, height, format, depthBufferBits, framebuffer_count);
 	framebuffer_count += 1;
-}
-
-void kinc_g5_render_target_destroy(kinc_g5_texture_t *render_target) {
-	if (render_target->impl.framebuffer_index >= 0) {
-		framebuffer_count -= 1;
-	}
-
-	render_target->impl.renderTarget->lpVtbl->Release(render_target->impl.renderTarget);
-	render_target->impl.renderTargetDescriptorHeap->lpVtbl->Release(render_target->impl.renderTargetDescriptorHeap);
-	render_target->impl.srvDescriptorHeap->lpVtbl->Release(render_target->impl.srvDescriptorHeap);
-	if (render_target->impl.depthStencilTexture != NULL) {
-		render_target->impl.depthStencilTexture->lpVtbl->Release(render_target->impl.depthStencilTexture);
-		render_target->impl.depthStencilDescriptorHeap->lpVtbl->Release(render_target->impl.depthStencilDescriptorHeap);
-		render_target->impl.srvDepthDescriptorHeap->lpVtbl->Release(render_target->impl.srvDepthDescriptorHeap);
-	}
-	if (render_target->impl.renderTargetReadback != NULL) {
-		render_target->impl.renderTargetReadback->lpVtbl->Release(render_target->impl.renderTargetReadback);
-	}
 }
 
 void kinc_g5_render_target_set_depth_from(kinc_g5_texture_t *render_target, kinc_g5_texture_t *source) {

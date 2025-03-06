@@ -21,6 +21,7 @@ static VkSemaphore relay_semaphore;
 static bool wait_for_relay = false;
 static void command_list_should_wait_for_framebuffer(void);
 static VkDescriptorSetLayout compute_descriptor_layout;
+static int framebuffer_count = 0;
 
 // djb2
 uint32_t kinc_internal_hash_name(unsigned char *str) {
@@ -55,11 +56,6 @@ static void create_compute_descriptor_layout(void);
 void set_image_layout(VkImage image, VkImageAspectFlags aspectMask, VkImageLayout old_image_layout, VkImageLayout new_image_layout);
 
 kinc_g5_texture_t *vulkan_textures[16] = {
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
-};
-
-kinc_g5_texture_t *vulkan_render_targets[16] = {
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
@@ -1178,7 +1174,6 @@ int kinc_g5_max_bound_textures(void) {
 
 
 extern kinc_g5_texture_t *vulkan_textures[16];
-extern kinc_g5_texture_t *vulkan_render_targets[16];
 VkDescriptorSet getDescriptorSet(void);
 static VkDescriptorSet get_compute_descriptor_set(void);
 bool memory_type_from_properties(uint32_t typeBits, VkFlags requirements_mask, uint32_t *typeIndex);
@@ -1208,7 +1203,6 @@ static void endPass(kinc_g5_command_list_t *list) {
 
 	for (int i = 0; i < 16; ++i) {
 		vulkan_textures[i] = NULL;
-		vulkan_render_targets[i] = NULL;
 	}
 }
 
@@ -2013,39 +2007,32 @@ void kinc_g5_command_list_wait_for_execution_to_finish(kinc_g5_command_list_t *l
 	assert(!err);
 }
 
-void kinc_g5_command_list_set_texture(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *texture) {
-	vulkan_textures[unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT]] = texture;
-	vulkan_render_targets[unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT]] = NULL;
-}
-
 void kinc_g5_command_list_set_sampler(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_sampler_t *sampler) {
 	if (unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT] >= 0) {
 		vulkan_samplers[unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT]] = sampler->impl.sampler;
 	}
 }
 
-void kinc_g5_command_list_set_texture_from_render_target(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *target) {
+void kinc_g5_command_list_set_texture(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *texture) {
 	if (unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT] >= 0) {
-		target->impl.stage = unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT];
-		vulkan_render_targets[unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT]] = target;
+		texture->impl.stage = unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT];
+		vulkan_textures[unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT]] = texture;
 	}
 	else if (unit.stages[KINC_G5_SHADER_TYPE_VERTEX] >= 0) {
-		target->impl.stage = unit.stages[KINC_G5_SHADER_TYPE_VERTEX];
-		vulkan_render_targets[unit.stages[KINC_G5_SHADER_TYPE_VERTEX]] = target;
+		texture->impl.stage = unit.stages[KINC_G5_SHADER_TYPE_VERTEX];
+		vulkan_textures[unit.stages[KINC_G5_SHADER_TYPE_VERTEX]] = texture;
 	}
-	vulkan_textures[target->impl.stage] = NULL;
 }
 
 void kinc_g5_command_list_set_texture_from_render_target_depth(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *target) {
 	if (unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT] >= 0) {
 		target->impl.stage_depth = unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT];
-		vulkan_render_targets[unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT]] = target;
+		vulkan_textures[unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT]] = target;
 	}
 	else if (unit.stages[KINC_G5_SHADER_TYPE_VERTEX] >= 0) {
 		target->impl.stage_depth = unit.stages[KINC_G5_SHADER_TYPE_VERTEX];
-		vulkan_render_targets[unit.stages[KINC_G5_SHADER_TYPE_VERTEX]] = target;
+		vulkan_textures[unit.stages[KINC_G5_SHADER_TYPE_VERTEX]] = target;
 	}
-	vulkan_textures[target->impl.stage_depth] = NULL;
 }
 
 void kinc_g5_command_list_set_compute_shader(kinc_g5_command_list_t *list, kinc_g5_compute_shader *shader) {
@@ -2249,7 +2236,6 @@ kinc_g5_texture_unit_t kinc_g5_compute_shader_get_texture_unit(kinc_g5_compute_s
 
 VkDescriptorSetLayout desc_layout;
 extern kinc_g5_texture_t *vulkan_textures[16];
-extern kinc_g5_texture_t *vulkan_render_targets[16];
 extern uint32_t swapchainImageCount;
 extern uint32_t current_buffer;
 bool memory_type_from_properties(uint32_t typeBits, VkFlags requirements_mask, uint32_t *typeIndex);
@@ -2964,9 +2950,6 @@ int calc_descriptor_id(void) {
 		if (vulkan_textures[i] != NULL) {
 			texture_count++;
 		}
-		else if (vulkan_render_targets[i] != NULL) {
-			texture_count++;
-		}
 	}
 
 	bool uniform_buffer = vk_ctx.vertex_uniform_buffer != NULL && vk_ctx.fragment_uniform_buffer != NULL;
@@ -2978,9 +2961,6 @@ int calc_compute_descriptor_id(void) {
 	int texture_count = 0;
 	for (int i = 0; i < 16; ++i) {
 		if (vulkan_textures[i] != NULL) {
-			texture_count++;
-		}
-		else if (vulkan_render_targets[i] != NULL) {
 			texture_count++;
 		}
 	}
@@ -3009,17 +2989,12 @@ static int write_tex_descs(VkDescriptorImageInfo *tex_descs) {
 	for (int i = 0; i < 16; ++i) {
 		if (vulkan_textures[i] != NULL) {
 			tex_descs[i].sampler = vulkan_samplers[i];
-			tex_descs[i].imageView = vulkan_textures[i]->impl.view;
-			texture_count++;
-		}
-		else if (vulkan_render_targets[i] != NULL) {
-			tex_descs[i].sampler = vulkan_samplers[i];
-			if (vulkan_render_targets[i]->impl.stage_depth == i) {
-				tex_descs[i].imageView = vulkan_render_targets[i]->impl.depthView;
-				vulkan_render_targets[i]->impl.stage_depth = -1;
+			if (vulkan_textures[i]->impl.stage_depth == i) {
+				tex_descs[i].imageView = vulkan_textures[i]->impl.depthView;
+				vulkan_textures[i]->impl.stage_depth = -1;
 			}
 			else {
-				tex_descs[i].imageView = vulkan_render_targets[i]->impl.view;
+				tex_descs[i].imageView = vulkan_textures[i]->impl.view;
 			}
 			texture_count++;
 		}
@@ -3053,7 +3028,7 @@ static void update_textures(struct destriptor_set *set) {
 		writes[i].pImageInfo = &set->tex_desc[i];
 	}
 
-	if (vulkan_textures[0] != NULL || vulkan_render_targets[0] != NULL) {
+	if (vulkan_textures[0] != NULL) {
 		vkUpdateDescriptorSets(vk_ctx.device, texture_count, writes, 0, NULL);
 	}
 }
@@ -3113,19 +3088,13 @@ VkDescriptorSet getDescriptorSet() {
 	int texture_count = 0;
 	for (int i = 0; i < 16; ++i) {
 		if (vulkan_textures[i] != NULL) {
-			assert(vulkan_samplers[i] != VK_NULL_HANDLE);
 			tex_desc[i].sampler = vulkan_samplers[i];
-			tex_desc[i].imageView = vulkan_textures[i]->impl.view;
-			texture_count++;
-		}
-		else if (vulkan_render_targets[i] != NULL) {
-			tex_desc[i].sampler = vulkan_samplers[i];
-			if (vulkan_render_targets[i]->impl.stage_depth == i) {
-				tex_desc[i].imageView = vulkan_render_targets[i]->impl.depthView;
-				vulkan_render_targets[i]->impl.stage_depth = -1;
+			if (vulkan_textures[i]->impl.stage_depth == i) {
+				tex_desc[i].imageView = vulkan_textures[i]->impl.depthView;
+				vulkan_textures[i]->impl.stage_depth = -1;
 			}
 			else {
-				tex_desc[i].imageView = vulkan_render_targets[i]->impl.view;
+				tex_desc[i].imageView = vulkan_textures[i]->impl.view;
 			}
 			texture_count++;
 		}
@@ -3158,7 +3127,7 @@ VkDescriptorSet getDescriptorSet() {
 		writes[i].pImageInfo = &tex_desc[i - 2];
 	}
 
-	if (vulkan_textures[0] != NULL || vulkan_render_targets[0] != NULL) {
+	if (vulkan_textures[0] != NULL) {
 		if (vk_ctx.vertex_uniform_buffer != NULL && vk_ctx.fragment_uniform_buffer != NULL) {
 			vkUpdateDescriptorSets(vk_ctx.device, 2 + texture_count, writes, 0, NULL);
 		}
@@ -3192,17 +3161,12 @@ static int write_compute_tex_descs(VkDescriptorImageInfo *tex_descs) {
 	for (int i = 0; i < 16; ++i) {
 		if (vulkan_textures[i] != NULL) {
 			tex_descs[i].sampler = vulkan_samplers[i];
-			tex_descs[i].imageView = vulkan_textures[i]->impl.view;
-			texture_count++;
-		}
-		else if (vulkan_render_targets[i] != NULL) {
-			tex_descs[i].sampler = vulkan_samplers[i];
-			if (vulkan_render_targets[i]->impl.stage_depth == i) {
-				tex_descs[i].imageView = vulkan_render_targets[i]->impl.depthView;
-				vulkan_render_targets[i]->impl.stage_depth = -1;
+			if (vulkan_textures[i]->impl.stage_depth == i) {
+				tex_descs[i].imageView = vulkan_textures[i]->impl.depthView;
+				vulkan_textures[i]->impl.stage_depth = -1;
 			}
 			else {
-				tex_descs[i].imageView = vulkan_render_targets[i]->impl.view;
+				tex_descs[i].imageView = vulkan_textures[i]->impl.view;
 			}
 			texture_count++;
 		}
@@ -3236,7 +3200,7 @@ static void update_compute_textures(struct destriptor_set *set) {
 		writes[i].pImageInfo = &set->tex_desc[i];
 	}
 
-	if (vulkan_textures[0] != NULL || vulkan_render_targets[0] != NULL) {
+	if (vulkan_textures[0] != NULL) {
 		vkUpdateDescriptorSets(vk_ctx.device, texture_count, writes, 0, NULL);
 	}
 }
@@ -3296,19 +3260,13 @@ static VkDescriptorSet get_compute_descriptor_set() {
 	int texture_count = 0;
 	for (int i = 0; i < 16; ++i) {
 		if (vulkan_textures[i] != NULL) {
-			// assert(vulkan_samplers[i] != VK_NULL_HANDLE);
-			tex_desc[i].sampler = VK_NULL_HANDLE; // vulkan_samplers[i];
-			tex_desc[i].imageView = vulkan_textures[i]->impl.view;
-			texture_count++;
-		}
-		else if (vulkan_render_targets[i] != NULL) {
 			tex_desc[i].sampler = vulkan_samplers[i];
-			if (vulkan_render_targets[i]->impl.stage_depth == i) {
-				tex_desc[i].imageView = vulkan_render_targets[i]->impl.depthView;
-				vulkan_render_targets[i]->impl.stage_depth = -1;
+			if (vulkan_textures[i]->impl.stage_depth == i) {
+				tex_desc[i].imageView = vulkan_textures[i]->impl.depthView;
+				vulkan_textures[i]->impl.stage_depth = -1;
 			}
 			else {
-				tex_desc[i].imageView = vulkan_render_targets[i]->impl.view;
+				tex_desc[i].imageView = vulkan_textures[i]->impl.view;
 			}
 			texture_count++;
 		}
@@ -3341,7 +3299,7 @@ static VkDescriptorSet get_compute_descriptor_set() {
 		writes[i].pImageInfo = &tex_desc[i - 2];
 	}
 
-	if (vulkan_textures[0] != NULL || vulkan_render_targets[0] != NULL) {
+	if (vulkan_textures[0] != NULL) {
 		if (vk_ctx.compute_uniform_buffer != NULL) {
 			vkUpdateDescriptorSets(vk_ctx.device, 2 + texture_count, writes, 0, NULL);
 		}
@@ -3663,12 +3621,6 @@ static void prepare_texture_image(uint8_t *tex_colors, uint32_t width, uint32_t 
 	set_image_layout(tex_obj->image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, tex_obj->imageLayout);
 }
 
-static void destroy_texture_image(Texture5Impl *tex_obj) {
-	// clean up staging resources
-	vkDestroyImage(vk_ctx.device, tex_obj->image, NULL);
-	vkFreeMemory(vk_ctx.device, tex_obj->mem, NULL);
-}
-
 static VkFormat convert_image_format(kinc_image_format_t format) {
 	switch (format) {
 	case KINC_IMAGE_FORMAT_RGBA128:
@@ -3776,7 +3728,9 @@ void kinc_g5_texture_init_from_bytes(kinc_g5_texture_t *texture, void *data, int
 
 		flush_init_cmd();
 
-		destroy_texture_image(&staging_texture);
+		vkDestroyImage(vk_ctx.device, staging_texture.image, NULL);
+		vkFreeMemory(vk_ctx.device, staging_texture.mem, NULL);
+
 	}
 	else {
 		assert(!"No support for B8G8R8A8_UNORM as texture image format");
@@ -3811,6 +3765,7 @@ void kinc_g5_texture_init(kinc_g5_texture_t *texture, int width, int height, kin
 	texture->height = height;
 	texture->_uploaded = true;
 	texture->format = format;
+	texture->data = NULL;
 
 	const VkFormat tex_format = convert_image_format(format);
 	VkFormatProperties props;
@@ -3890,9 +3845,25 @@ void kinc_g5_texture_init_non_sampled_access(kinc_g5_texture_t *texture, int wid
 	assert(!err);
 }
 
-void kinc_g5_texture_destroy(kinc_g5_texture_t *texture) {
-	vkDestroyImageView(vk_ctx.device, texture->impl.view, NULL);
-	destroy_texture_image(&texture->impl);
+void kinc_g5_texture_destroy(kinc_g5_texture_t *target) {
+	if (target->framebuffer_index >= 0) {
+		framebuffer_count -= 1;
+	}
+	else {
+
+		if (target->impl.framebuffer != NULL) {
+			vkDestroyFramebuffer(vk_ctx.device, target->impl.framebuffer, NULL);
+		}
+
+		if (target->impl.depthBufferBits > 0) {
+			vkDestroyImageView(vk_ctx.device, target->impl.depthView, NULL);
+			vkDestroyImage(vk_ctx.device, target->impl.depthImage, NULL);
+			vkFreeMemory(vk_ctx.device, target->impl.depthMemory, NULL);
+		}
+		vkDestroyImageView(vk_ctx.device, target->impl.view, NULL);
+		vkDestroyImage(vk_ctx.device, target->impl.image, NULL);
+		vkFreeMemory(vk_ctx.device, target->impl.mem, NULL);
+	}
 }
 
 void kinc_g5_internal_texture_set(kinc_g5_texture_t *texture, int unit) {}
@@ -3993,7 +3964,6 @@ void kinc_g5_texture_set_mipmap(kinc_g5_texture_t *texture, kinc_g5_texture_t *m
 
 extern uint32_t swapchainImageCount;
 extern kinc_g5_texture_t *vulkan_textures[16];
-extern kinc_g5_texture_t *vulkan_render_targets[16];
 
 void setup_init_cmd();
 
@@ -4055,6 +4025,7 @@ static void render_target_init(kinc_g5_texture_t *target, int width, int height,
 	target->framebuffer_index = framebuffer_index;
 	target->width = width;
 	target->height = height;
+	target->data = NULL;
 	target->impl.format = convert_format(format);
 	target->impl.depthBufferBits = depthBufferBits;
 	target->impl.stage = 0;
@@ -4232,28 +4203,9 @@ void kinc_g5_render_target_init(kinc_g5_texture_t *target, int width, int height
 	target->state = KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
 }
 
-static int framebuffer_count = 0;
-
 void kinc_g5_render_target_init_framebuffer(kinc_g5_texture_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits) {
 	render_target_init(target, width, height, format, depthBufferBits, framebuffer_count);
 	framebuffer_count += 1;
-}
-
-void kinc_g5_render_target_destroy(kinc_g5_texture_t *target) {
-	if (target->framebuffer_index >= 0) {
-		framebuffer_count -= 1;
-	}
-	else {
-		vkDestroyFramebuffer(vk_ctx.device, target->impl.framebuffer, NULL);
-		if (target->impl.depthBufferBits > 0) {
-			vkDestroyImageView(vk_ctx.device, target->impl.depthView, NULL);
-			vkDestroyImage(vk_ctx.device, target->impl.depthImage, NULL);
-			vkFreeMemory(vk_ctx.device, target->impl.depthMemory, NULL);
-		}
-		vkDestroyImageView(vk_ctx.device, target->impl.view, NULL);
-		vkDestroyImage(vk_ctx.device, target->impl.image, NULL);
-		vkFreeMemory(vk_ctx.device, target->impl.mem, NULL);
-	}
 }
 
 void kinc_g5_render_target_set_depth_from(kinc_g5_texture_t *target, kinc_g5_texture_t *source) {

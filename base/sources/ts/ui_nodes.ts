@@ -738,7 +738,7 @@ function ui_nodes_draw_grid(zoom: f32): image_t {
 
 	let grid: image_t = image_create_render_target(w, h);
 	g2_begin(grid);
-	g4_clear(ui_nodes_ui.ops.theme.SEPARATOR_COL);
+	kinc_g5_clear(ui_nodes_ui.ops.theme.SEPARATOR_COL);
 
 	let sep_col: i32 = ui_nodes_ui.ops.theme.SEPARATOR_COL;
 	let line_primary: i32 = sep_col - 0x00050505;

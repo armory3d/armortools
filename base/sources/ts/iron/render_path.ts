@@ -116,7 +116,7 @@ function render_path_begin(render_target: image_t = null, additional_targets: im
 		render_path_end();
 	}
 	_render_path_current_image = render_target;
-	g4_begin(render_target, additional_targets);
+	iron_g4_begin(render_target, additional_targets);
 }
 
 function render_path_end() {
@@ -144,7 +144,7 @@ function render_path_set_viewport(view_w: i32, view_h: i32) {
 }
 
 function render_path_clear_target(color: color_t = 0x00000000, depth: f32 = 0.0, flags: i32 = clear_flag_t.COLOR) {
-	g4_clear(color, depth, flags);
+	kinc_g5_clear(color, depth, flags);
 }
 
 function render_path_gen_mipmaps(target: string) {

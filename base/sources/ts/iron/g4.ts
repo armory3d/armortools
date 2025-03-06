@@ -45,25 +45,12 @@ function g4_vertex_struct_data_byte_size(data: vertex_data_t): i32 {
 	return 0;
 }
 
-function g4_begin(render_target: image_t, additional_targets: image_t[] = null) {
-	iron_g4_begin(render_target, additional_targets);
-}
-function g4_clear(color: color_t = 0x00000000, depth: f32 = 0.0, flags: i32 = clear_flag_t.COLOR) {
-	kinc_g5_clear(flags, color, depth);
-}
-
 function g4_set_tex(unit: kinc_tex_unit_t, tex: image_t) {
-	// if (tex == null) {
-	// 	return;
-	// }
-	tex.texture_ != null ? iron_g4_set_texture(unit, tex.texture_) : iron_g4_set_render_target(unit, tex.render_target_);
+	iron_g4_set_texture(unit, tex.texture_);
 }
 
 function g4_set_tex_depth(unit: kinc_tex_unit_t, tex: image_t) {
-	// if (tex == null) {
-	// 	return;
-	// }
-	iron_g4_set_texture_depth(unit, tex.render_target_);
+	iron_g4_set_texture_depth(unit, tex.texture_);
 }
 
 function g4_set_tex_params(tex_unit: kinc_tex_unit_t, u_addressing: tex_addressing_t, v_addressing: tex_addressing_t, minification_filter: tex_filter_t, magnification_filter: tex_filter_t, mipmap_filter: mip_map_filter_t) {
@@ -96,12 +83,6 @@ function _image_set_size_from_texture(image: image_t, _tex: any) {
 	let tex: kinc_g5_texture_t = _tex;
 	image.width = tex.width;
 	image.height = tex.height;
-}
-
-function _image_set_size_from_render_target(image: image_t, _rt: any) {
-	let rt: kinc_g5_texture_t = _rt;
-	image.width = rt.width;
-	image.height = rt.height;
 }
 
 function image_from_texture(tex: any): image_t {
@@ -137,37 +118,14 @@ function image_create(width: i32, height: i32, format: tex_format_t = tex_format
 function image_create_render_target(width: i32, height: i32, format: tex_format_t = tex_format_t.RGBA32, depth_buffer_bits: i32 = 0): image_t {
 	let image: image_t = _image_create(null);
 	image.format = format;
-	image.render_target_ = iron_g4_create_render_target(width, height, format, depth_buffer_bits);
-	_image_set_size_from_render_target(image, image.render_target_);
+	image.texture_ = iron_g4_create_render_target(width, height, format, depth_buffer_bits);
+	_image_set_size_from_texture(image, image.texture_);
 	return image;
-}
-
-function image_format_byte_size(format: tex_format_t): i32 {
-	if (format == tex_format_t.RGBA32) {
-		return 4;
-	}
-	if (format == tex_format_t.R8) {
-		return 1;
-	}
-	if (format == tex_format_t.RGBA128) {
-		return 16;
-	}
-	if (format == tex_format_t.RGBA64) {
-		return 8;
-	}
-	if (format == tex_format_t.R32) {
-		return 4;
-	}
-	if (format == tex_format_t.R16) {
-		return 2;
-	}
-	return 4;
 }
 
 function image_unload(raw: image_t) {
 	iron_unload_image(raw);
 	raw.texture_ = null;
-	raw.render_target_ = null;
 }
 
 function image_lock(raw: image_t, level: i32 = 0): buffer_t {
@@ -179,23 +137,11 @@ function image_unlock(raw: image_t) {
 }
 
 function image_get_pixels(raw: image_t): buffer_t {
-	if (raw.render_target_ != null) {
-		// Minimum size of 32x32 required after https://github.com/Kode/Kinc/commit/3797ebce5f6d7d360db3331eba28a17d1be87833
-		let pixels_w: i32 = raw.width < 32 ? 32 : raw.width;
-		let pixels_h: i32 = raw.height < 32 ? 32 : raw.height;
-		if (raw.pixels == null) {
-			raw.pixels = buffer_create(image_format_byte_size(raw.format) * pixels_w * pixels_h);
-		}
-		iron_g4_get_render_target_pixels(raw.render_target_, raw.pixels);
-		return raw.pixels;
-	}
-	else {
-		return iron_g4_get_texture_pixels(raw.texture_);
-	}
+	return iron_g4_get_texture_pixels(raw.texture_);
 }
 
 function image_gen_mipmaps(raw: image_t, levels: i32) {
-	raw.texture_ == null ? kinc_g5_render_target_generate_mipmaps(raw.render_target_, levels) : kinc_g5_texture_generate_mipmaps(raw.texture_, levels);
+	kinc_g5_texture_generate_mipmaps(raw.texture_, levels);
 }
 
 function image_set_mipmaps(raw: image_t, mipmaps: image_t[]) {
@@ -203,15 +149,12 @@ function image_set_mipmaps(raw: image_t, mipmaps: image_t[]) {
 }
 
 function image_set_depth_from(raw: image_t, image: image_t) {
-	kinc_g5_render_target_set_depth_from(raw.render_target_, image.render_target_);
+	kinc_g5_render_target_set_depth_from(raw.texture_, image.texture_);
 }
 
 declare type image_t = {
 	texture_?: any;
-	render_target_?: any;
 	format?: tex_format_t;
-	readable?: bool;
-	pixels?: buffer_t;
 	width?: i32;
 	height?: i32;
 };

@@ -38,7 +38,6 @@ static float *image_rect_verts = NULL;
 static int image_buffer_index = 0;
 static int image_buffer_start = 0;
 static kinc_g5_texture_t *image_last_texture = NULL;
-static kinc_g5_texture_t *image_last_render_target = NULL;
 
 static kinc_g4_vertex_buffer_t colored_rect_vertex_buffer;
 static kinc_g5_index_buffer_t colored_rect_index_buffer;
@@ -328,12 +327,7 @@ void draw_image_buffer(bool end) {
 	kinc_g4_set_matrix4(image_proj_loc, &draw_projection_matrix);
 	kinc_g4_set_vertex_buffer(&image_vertex_buffer);
 	kinc_g4_set_index_buffer(&image_index_buffer);
-	if (image_last_texture != NULL) {
-		kinc_g4_set_texture(image_tex_unit, image_last_texture);
-	}
-	else {
-		kinc_g4_render_target_use_color_as_texture(image_last_render_target, image_tex_unit);
-	}
+	kinc_g4_set_texture(image_tex_unit, image_last_texture);
 	kinc_g4_set_texture_addressing(image_tex_unit, KINC_G4_TEXTURE_DIRECTION_U, KINC_G4_TEXTURE_ADDRESSING_CLAMP);
 	kinc_g4_set_texture_addressing(image_tex_unit, KINC_G4_TEXTURE_DIRECTION_V, KINC_G4_TEXTURE_ADDRESSING_CLAMP);
 	// kinc_g4_set_texture_mipmap_filter(image_tex_unit, draw_bilinear_filter ? KINC_G4_MIPMAP_FILTER_LINEAR : KINC_G4_MIPMAP_FILTER_NONE);
@@ -357,9 +351,7 @@ void draw_scaled_sub_texture(kinc_g5_texture_t *tex, float sx, float sy, float s
 	draw_colored_end();
 	draw_text_end();
 	if (image_buffer_start + image_buffer_index + 1 >= DRAW_BUFFER_SIZE ||
-		(image_last_texture != NULL && tex != image_last_texture) ||
-		image_last_render_target != NULL) {
-
+		(image_last_texture != NULL && tex != image_last_texture)) {
 		draw_image_buffer(false);
 	}
 
@@ -371,7 +363,6 @@ void draw_scaled_sub_texture(kinc_g5_texture_t *tex, float sx, float sy, float s
 
 	++image_buffer_index;
 	image_last_texture = tex;
-	image_last_render_target = NULL;
 }
 
 void draw_scaled_texture(kinc_g5_texture_t *tex, float dx, float dy, float dw, float dh) {
@@ -386,51 +377,12 @@ void draw_texture(kinc_g5_texture_t *tex, float x, float y) {
 	draw_scaled_sub_texture(tex, 0, 0, (float)tex->width, (float)tex->height, x, y, (float)tex->width, (float)tex->height);
 }
 
-void draw_scaled_sub_render_target(kinc_g5_texture_t *rt, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh) {
-	draw_colored_end();
-	draw_text_end();
-	if (image_buffer_start + image_buffer_index + 1 >= DRAW_BUFFER_SIZE ||
-		(image_last_render_target != NULL && rt != image_last_render_target) ||
-		image_last_texture != NULL) {
-
-		draw_image_buffer(false);
-	}
-
-	draw_set_image_rect_tex_coords(sx / rt->width, sy / rt->height, (sx + sw) / rt->width, (sy + sh) / rt->height);
-	draw_set_image_rect_colors(draw_color);
-	kinc_vector2_t p[4];
-	draw_matrix3x3_multquad(&draw_transform, dx, dy, dw, dh, p);
-	draw_set_image_rect_verts(p[0].x, p[0].y, p[1].x, p[1].y, p[2].x, p[2].y, p[3].x, p[3].y);
-
-	++image_buffer_index;
-	image_last_render_target = rt;
-	image_last_texture = NULL;
-}
-
-void draw_scaled_render_target(kinc_g5_texture_t *rt, float dx, float dy, float dw, float dh) {
-	draw_scaled_sub_render_target(rt, 0, 0, (float)rt->width, (float)rt->height, dx, dy, dw, dh);
-}
-
-void draw_sub_render_target(kinc_g5_texture_t *rt, float sx, float sy, float sw, float sh, float x, float y) {
-	draw_scaled_sub_render_target(rt, sx, sy, sw, sh, x, y, sw, sh);
-}
-
-void draw_render_target(kinc_g5_texture_t *rt, float x, float y) {
-	draw_scaled_sub_render_target(rt, 0, 0, (float)rt->width, (float)rt->height, x, y, (float)rt->width, (float)rt->height);
-}
-
 void draw_scaled_sub_image(image_t *image, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh) {
 	#ifdef KINC_DIRECT3D12
 	waitAfterNextDraw = true;
 	#endif
-	if (image->texture_ != NULL) {
-		kinc_g5_texture_t *texture = (kinc_g5_texture_t *)image->texture_;
-		draw_scaled_sub_texture(texture, sx, sy, sw, sh, dx, dy, dw, dh);
-	}
-	else {
-		kinc_g5_texture_t *render_target = (kinc_g5_texture_t *)image->render_target_;
-		draw_scaled_sub_render_target(render_target, sx, sy, sw, sh, dx, dy, dw, dh);
-	}
+	kinc_g5_texture_t *texture = (kinc_g5_texture_t *)image->texture_;
+	draw_scaled_sub_texture(texture, sx, sy, sw, sh, dx, dy, dw, dh);
 }
 
 void draw_scaled_image(image_t *tex, float dx, float dy, float dw, float dh) {
@@ -1093,7 +1045,6 @@ int draw_string_width(draw_font_t *font, int font_size, const char *text) {
 void draw_image_end(void) {
 	if (image_buffer_index > 0) draw_image_buffer(true);
 	image_last_texture = NULL;
-	image_last_render_target = NULL;
 }
 
 void draw_colored_end(void) {

@@ -190,14 +190,14 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 	}
 
 	// Clear export layer
-	g4_begin(layers_expa);
-	g4_clear(color_from_floats(0.0, 0.0, 0.0, 0.0));
+	iron_g4_begin(layers_expa);
+	kinc_g5_clear(color_from_floats(0.0, 0.0, 0.0, 0.0));
 	iron_g4_end();
-	g4_begin(layers_expb);
-	g4_clear(color_from_floats(0.5, 0.5, 1.0, 0.0));
+	iron_g4_begin(layers_expb);
+	kinc_g5_clear(color_from_floats(0.5, 0.5, 1.0, 0.0));
 	iron_g4_end();
-	g4_begin(layers_expc);
-	g4_clear(color_from_floats(1.0, 0.0, 0.0, 0.0));
+	iron_g4_begin(layers_expc);
+	kinc_g5_clear(color_from_floats(1.0, 0.0, 0.0, 0.0));
 	iron_g4_end();
 
 	// Flatten layers
@@ -226,7 +226,7 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 			if (l1masks.length > 1) {
 				layers_make_temp_mask_img();
 				g2_begin(pipes_temp_mask_image);
-				g4_clear(0x00000000);
+				kinc_g5_clear(0x00000000);
 				g2_end();
 				let l1: slot_layer_t = {
 					texpaint: pipes_temp_mask_image
@@ -248,7 +248,7 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 			draw_set_pipeline(null);
 			g2_end();
 
-			g4_begin(layers_expa);
+			iron_g4_begin(layers_expa);
 			kinc_g5_set_pipeline(pipes_merge);
 			g4_set_tex(pipes_tex0, l1.texpaint);
 			g4_set_tex(pipes_tex1, empty);
@@ -269,7 +269,7 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 			draw_set_pipeline(null);
 			g2_end();
 
-			g4_begin(layers_expb);
+			iron_g4_begin(layers_expb);
 			kinc_g5_set_pipeline(pipes_merge);
 			g4_set_tex(pipes_tex0, l1.texpaint);
 			g4_set_tex(pipes_tex1, l1.texpaint_nor);
@@ -436,9 +436,9 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 	}
 
 	// Release staging memory allocated in image_get_pixels()
-	texpaint.pixels = null;
-	texpaint_nor.pixels = null;
-	texpaint_pack.pixels = null;
+	// texpaint.pixels = null;
+	// texpaint_nor.pixels = null;
+	// texpaint_pack.pixels = null;
 }
 
 function export_texture_write_texture(file: string, pixels: buffer_t, type: i32 = 1, off: i32 = 0) {

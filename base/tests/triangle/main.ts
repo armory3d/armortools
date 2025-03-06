@@ -12,7 +12,7 @@ function render() {
 	let flags: i32 = 0;
 	flags |= 1; // Color
 	flags |= 2; // Depth
-	kinc_g5_clear(flags, 0xff000000, 1.0);
+	kinc_g5_clear(0xff000000, 1.0, flags);
 
 	kinc_g5_set_pipeline(pipeline);
 	kinc_g4_set_vertex_buffer(vb);

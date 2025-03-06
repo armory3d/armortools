@@ -118,7 +118,7 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 	///end
 
 	let framebuffer: render_target_t = map_get(render_path_render_targets, "buf");
-	iron_raytrace_dispatch_rays(framebuffer._image.render_target_, render_path_raytrace_f32a);
+	iron_raytrace_dispatch_rays(framebuffer._image.texture_, render_path_raytrace_f32a);
 
 	if (context_raw.ddirty == 1 || context_raw.pdirty == 1) {
 		///if arm_metal

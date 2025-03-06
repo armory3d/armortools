@@ -87,7 +87,7 @@ function import_envmap_run(path: string, image: image_t) {
 }
 
 function import_envmap_get_radiance_mip(mip: image_t, level: i32, radiance: image_t) {
-	g4_begin(mip);
+	iron_g4_begin(mip);
 	kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
 	kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
 	kinc_g5_set_pipeline(import_envmap_pipeline);

@@ -13,13 +13,9 @@
 
 typedef struct image {
 	void *texture_;
-	void *render_target_;
 	int format; // tex_format_t;
-	bool readable;
-	buffer_t *pixels;
 	int width;
 	int height;
-	int depth;
 } image_t;
 
 typedef struct draw_font_image draw_font_image_t;
@@ -46,10 +42,6 @@ void draw_image(image_t *tex, float x, float y);
 void draw_scaled_texture(kinc_g5_texture_t *tex, float dx, float dy, float dw, float dh);
 void draw_sub_texture(kinc_g5_texture_t *tex, float sx, float sy, float sw, float sh, float x, float y);
 void draw_texture(kinc_g5_texture_t *tex, float x, float y);
-void draw_scaled_sub_render_target(kinc_g5_texture_t *rt, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh);
-void draw_scaled_render_target(kinc_g5_texture_t *rt, float dx, float dy, float dw, float dh);
-void draw_sub_render_target(kinc_g5_texture_t *rt, float sx, float sy, float sw, float sh, float x, float y);
-void draw_render_target(kinc_g5_texture_t *rt, float x, float y);
 void draw_filled_triangle(float x0, float y0, float x1, float y1, float x2, float y2);
 void draw_filled_rect(float x, float y, float width, float height);
 void draw_rect(float x, float y, float width, float height, float strength);

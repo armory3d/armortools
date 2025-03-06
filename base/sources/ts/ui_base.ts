@@ -1089,7 +1089,7 @@ function ui_base_update_ui() {
 
 			let source: image_t = l.texpaint;
 			g2_begin(target);
-			g4_clear(0x00000000);
+			kinc_g5_clear(0x00000000);
 			// draw_set_pipeline(l.is_mask() ? pipes_copy8 : pipes_copy);
 			draw_set_pipeline(pipes_copy); // texpaint_preview is always RGBA32 for now
 			draw_scaled_image(source, 0, 0, target.width, target.height);
@@ -1109,7 +1109,7 @@ function ui_base_update_ui() {
 
 			let source: image_t = l.texpaint;
 			g2_begin(target);
-			g4_clear(0x00000000);
+			kinc_g5_clear(0x00000000);
 			// draw_set_pipeline(raw.layer.is_mask() ? pipes_copy8 : pipes_copy);
 			draw_set_pipeline(pipes_copy); // texpaint_preview is always RGBA32 for now
 			draw_scaled_image(source, 0, 0, target.width, target.height);

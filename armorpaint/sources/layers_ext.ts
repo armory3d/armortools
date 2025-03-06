@@ -10,14 +10,14 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 	let empty: image_t = empty_rt._image;
 
 	// Clear export layer
-	g4_begin(layers_expa);
-	g4_clear(color_from_floats(0.0, 0.0, 0.0, 0.0));
+	iron_g4_begin(layers_expa);
+	kinc_g5_clear(color_from_floats(0.0, 0.0, 0.0, 0.0));
 	iron_g4_end();
-	g4_begin(layers_expb);
-	g4_clear(color_from_floats(0.5, 0.5, 1.0, 0.0));
+	iron_g4_begin(layers_expb);
+	kinc_g5_clear(color_from_floats(0.5, 0.5, 1.0, 0.0));
 	iron_g4_end();
-	g4_begin(layers_expc);
-	g4_clear(color_from_floats(1.0, 0.0, 0.0, 0.0));
+	iron_g4_begin(layers_expc);
+	kinc_g5_clear(color_from_floats(1.0, 0.0, 0.0, 0.0));
 	iron_g4_end();
 
 	// Flatten layers
@@ -36,7 +36,7 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 			if (l1masks.length > 1) {
 				layers_make_temp_mask_img();
 				g2_begin(pipes_temp_mask_image);
-				g4_clear(0x00000000);
+				kinc_g5_clear(0x00000000);
 				g2_end();
 				let l1: slot_layer_t = { texpaint: pipes_temp_mask_image };
 				for (let i: i32 = 0; i < l1masks.length; ++i) {
@@ -64,7 +64,7 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 			draw_set_pipeline(null);
 			g2_end();
 			///else
-			g4_begin(layers_expa);
+			iron_g4_begin(layers_expa);
 			kinc_g5_set_pipeline(pipes_merge);
 			g4_set_tex(pipes_tex0, l1.texpaint);
 			g4_set_tex(pipes_tex1, empty);
@@ -86,7 +86,7 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 			draw_set_pipeline(null);
 			g2_end();
 
-			g4_begin(layers_expb);
+			iron_g4_begin(layers_expb);
 			kinc_g5_set_pipeline(pipes_merge);
 			g4_set_tex(pipes_tex0, l1.texpaint);
 			g4_set_tex(pipes_tex1, l1.texpaint_nor);
@@ -149,7 +149,7 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 		draw_set_pipeline(null);
 		g2_end();
 
-		g4_begin(l0.texpaint_nor);
+		iron_g4_begin(l0.texpaint_nor);
 		kinc_g5_set_pipeline(pipes_merge);
 		g4_set_tex(pipes_tex0, layers_temp_image);
 		g4_set_tex(pipes_tex1, l0.texpaint_pack);

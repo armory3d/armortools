@@ -321,7 +321,7 @@ function draw_minimap() {
 	}
 
 	g2_begin(minimap);
-	g4_clear(theme.SEPARATOR_COL);
+	kinc_g5_clear(theme.SEPARATOR_COL);
 	draw_set_color(0xff333333);
 	let lines: string[] = string_split(storage.text, "\n");
 	let minimap_full_h: i32 = lines.length * 2;

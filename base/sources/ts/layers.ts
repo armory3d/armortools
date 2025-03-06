@@ -32,19 +32,19 @@ function layers_init() {
 	g2_begin(texpaint._image);
 	draw_scaled_image(resource_get("placeholder.k"), 0, 0, config_get_texture_res_x(), config_get_texture_res_y()); // Base
 	g2_end();
-	g4_begin(texpaint_nor._image);
-	g4_clear(color_from_floats(0.5, 0.5, 1.0, 0.0)); // Nor
+	iron_g4_begin(texpaint_nor._image);
+	kinc_g5_clear(color_from_floats(0.5, 0.5, 1.0, 0.0)); // Nor
 	iron_g4_end();
-	g4_begin(texpaint_pack._image);
-	g4_clear(color_from_floats(1.0, 0.4, 0.0, 0.0)); // Occ, rough, met
+	iron_g4_begin(texpaint_pack._image);
+	kinc_g5_clear(color_from_floats(1.0, 0.4, 0.0, 0.0)); // Occ, rough, met
 	iron_g4_end();
 	let texpaint_nor_empty: render_target_t = map_get(render_path_render_targets, "texpaint_nor_empty");
 	let texpaint_pack_empty: render_target_t = map_get(render_path_render_targets, "texpaint_pack_empty");
-	g4_begin(texpaint_nor_empty._image);
-	g4_clear(color_from_floats(0.5, 0.5, 1.0, 0.0)); // Nor
+	iron_g4_begin(texpaint_nor_empty._image);
+	kinc_g5_clear(color_from_floats(0.5, 0.5, 1.0, 0.0)); // Nor
 	iron_g4_end();
-	g4_begin(texpaint_pack_empty._image);
-	g4_clear(color_from_floats(1.0, 0.4, 0.0, 0.0)); // Occ, rough, met
+	iron_g4_begin(texpaint_pack_empty._image);
+	kinc_g5_clear(color_from_floats(1.0, 0.4, 0.0, 0.0)); // Occ, rough, met
 	iron_g4_end();
 	///end
 }
@@ -255,7 +255,7 @@ function layers_apply_mask(l: slot_layer_t, m: slot_layer_t) {
 	g2_end();
 
 	// Apply mask
-	g4_begin(l.texpaint);
+	iron_g4_begin(l.texpaint);
 	kinc_g5_set_pipeline(pipes_apply_mask);
 	g4_set_tex(pipes_tex0_mask, layers_temp_image);
 	g4_set_tex(pipes_texa_mask, m.texpaint);
@@ -266,7 +266,7 @@ function layers_apply_mask(l: slot_layer_t, m: slot_layer_t) {
 }
 
 function layers_commands_merge_pack(pipe: kinc_g5_pipeline_t, i0: image_t, i1: image_t, i1pack: image_t, i1mask_opacity: f32, i1texmask: image_t, i1blending: i32 = -1) {
-	g4_begin(i0);
+	iron_g4_begin(i0);
 	kinc_g5_set_pipeline(pipe);
 	g4_set_tex(pipes_tex0, i1);
 	g4_set_tex(pipes_tex1, i1pack);
@@ -729,7 +729,7 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 	}
 
 	if (slot_layer_is_mask(l1)) {
-		g4_begin(l0.texpaint);
+		iron_g4_begin(l0.texpaint);
 		kinc_g5_set_pipeline(pipes_merge_mask);
 		g4_set_tex(pipes_tex0_merge_mask, l1.texpaint);
 		g4_set_tex(pipes_texa_merge_mask, layers_temp_image);
@@ -743,7 +743,7 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 
 	if (slot_layer_is_layer(l1)) {
 		if (l1.paint_base) {
-			g4_begin(l0.texpaint);
+			iron_g4_begin(l0.texpaint);
 			kinc_g5_set_pipeline(pipes_merge);
 			g4_set_tex(pipes_tex0, l1.texpaint);
 			g4_set_tex(pipes_tex1, empty);
@@ -765,7 +765,7 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 			g2_end();
 
 			if (l1.paint_nor) {
-				g4_begin(l0.texpaint_nor);
+				iron_g4_begin(l0.texpaint_nor);
 				kinc_g5_set_pipeline(pipes_merge);
 				g4_set_tex(pipes_tex0, l1.texpaint);
 				g4_set_tex(pipes_tex1, l1.texpaint_nor);

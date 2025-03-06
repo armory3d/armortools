@@ -52,7 +52,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			}
 			let m: slot_layer_t = layers_new_mask(false, context_raw.layer);
 			app_notify_on_next_frame(function (m: slot_layer_t) {
-				g4_begin(m.texpaint);
+				iron_g4_begin(m.texpaint);
 				kinc_g5_set_pipeline(pipes_colorid_to_mask);
 				let rt: render_target_t = map_get(render_path_render_targets, "texpaint_colorid");
 				g4_set_tex(pipes_texpaint_colorid, rt._image);

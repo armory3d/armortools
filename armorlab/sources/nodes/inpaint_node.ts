@@ -33,8 +33,8 @@ function inpaint_node_init() {
 	if (inpaint_node_mask == null) {
 		inpaint_node_mask = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
 		app_notify_on_next_frame(function () {
-			g4_begin(inpaint_node_mask);
-			g4_clear(color_from_floats(1.0, 1.0, 1.0, 1.0));
+			iron_g4_begin(inpaint_node_mask);
+			kinc_g5_clear(color_from_floats(1.0, 1.0, 1.0, 1.0));
 			iron_g4_end();
 		});
 	}
@@ -87,7 +87,7 @@ function inpaint_node_get_as_image(self: inpaint_node_t, from: i32): image_t {
 function inpaint_node_get_cached_image(self: inpaint_node_t): image_t {
 	app_notify_on_next_frame(function (self: inpaint_node_t) {
 		let source: image_t = logic_node_input_get_as_image(self.base.inputs[0]);
-		g4_begin(inpaint_node_image);
+		iron_g4_begin(inpaint_node_image);
 		kinc_g5_set_pipeline(pipes_inpaint_preview);
 		g4_set_tex(pipes_tex0_inpaint_preview, source);
 		g4_set_tex(pipes_texa_inpaint_preview, inpaint_node_mask);

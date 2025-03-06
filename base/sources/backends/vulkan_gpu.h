@@ -167,10 +167,6 @@ typedef struct kinc_g5_sampler_impl {
 } kinc_g5_sampler_impl_t;
 
 typedef struct {
-	// VkImage image;
-	// VkDeviceMemory mem;
-	// VkImageView view;
-
 	VkImageLayout imageLayout;
 	VkDeviceSize deviceSize;
 	int stride;
