@@ -178,7 +178,7 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 	layers_make_temp_img();
 	layers_make_export_img();
 	let rt: render_target_t = map_get(render_path_render_targets, "empty_white");
-	let empty: image_t = rt._image;
+	let empty: kinc_g5_texture_t = rt._image;
 
 	// Append object mask name
 	let export_selected: bool = context_raw.layers_export == export_mode_t.SELECTED;
@@ -220,7 +220,7 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 			}
 		}
 
-		let mask: image_t = empty;
+		let mask: kinc_g5_texture_t = empty;
 		let l1masks: slot_layer_t[] = slot_layer_get_masks(l1);
 		if (l1masks != null && !bake_material) {
 			if (l1masks.length > 1) {
@@ -250,10 +250,10 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 
 			iron_g4_begin(layers_expa);
 			kinc_g5_set_pipeline(pipes_merge);
-			g4_set_tex(pipes_tex0, l1.texpaint);
-			g4_set_tex(pipes_tex1, empty);
-			g4_set_tex(pipes_texmask, mask);
-			g4_set_tex(pipes_texa, layers_temp_image);
+			iron_g4_set_texture(pipes_tex0, l1.texpaint);
+			iron_g4_set_texture(pipes_tex1, empty);
+			iron_g4_set_texture(pipes_texmask, mask);
+			iron_g4_set_texture(pipes_texa, layers_temp_image);
 			iron_g4_set_float(pipes_opac, slot_layer_get_opacity(l1));
 			iron_g4_set_int(pipes_blending, layers.length > 1 ? l1.blending : 0);
 			kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
@@ -271,10 +271,10 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 
 			iron_g4_begin(layers_expb);
 			kinc_g5_set_pipeline(pipes_merge);
-			g4_set_tex(pipes_tex0, l1.texpaint);
-			g4_set_tex(pipes_tex1, l1.texpaint_nor);
-			g4_set_tex(pipes_texmask, mask);
-			g4_set_tex(pipes_texa, layers_temp_image);
+			iron_g4_set_texture(pipes_tex0, l1.texpaint);
+			iron_g4_set_texture(pipes_tex1, l1.texpaint_nor);
+			iron_g4_set_texture(pipes_texmask, mask);
+			iron_g4_set_texture(pipes_texa, layers_temp_image);
 			iron_g4_set_float(pipes_opac, slot_layer_get_opacity(l1));
 			iron_g4_set_int(pipes_blending, l1.paint_nor_blend ? -2 : -1);
 			kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
@@ -312,9 +312,9 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 	///end
 	///end
 
-	let texpaint: image_t = layers_expa;
-	let texpaint_nor: image_t = layers_expb;
-	let texpaint_pack: image_t = layers_expc;
+	let texpaint: kinc_g5_texture_t = layers_expa;
+	let texpaint_nor: kinc_g5_texture_t = layers_expb;
+	let texpaint_pack: kinc_g5_texture_t = layers_expc;
 
 	///if is_lab
 	texpaint = context_raw.brush_output_node_inst.texpaint;
@@ -333,13 +333,13 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 		for (let i: i32 = 0; i < t.channels.length; ++i) {
 			let c: string = t.channels[i];
 			if ((c == "base_r" || c == "base_g" || c == "base_b" || c == "opac") && pixpaint == null) {
-				pixpaint = image_get_pixels(texpaint);
+				pixpaint = iron_g4_get_texture_pixels(texpaint);
 			}
 			else if ((c == "nor_r" || c == "nor_g" || c == "nor_g_directx" || c == "nor_b" || c == "emis" || c == "subs") && pixpaint_nor == null) {
-				pixpaint_nor = image_get_pixels(texpaint_nor);
+				pixpaint_nor = iron_g4_get_texture_pixels(texpaint_nor);
 			}
 			else if ((c == "occ" || c == "rough" || c == "metal" || c == "height" || c == "smooth") && pixpaint_pack == null) {
-				pixpaint_pack = image_get_pixels(texpaint_pack);
+				pixpaint_pack = iron_g4_get_texture_pixels(texpaint_pack);
 			}
 		}
 	}
@@ -435,7 +435,7 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 		}
 	}
 
-	// Release staging memory allocated in image_get_pixels()
+	// Release staging memory allocated in iron_g4_get_texture_pixels()
 	// texpaint.pixels = null;
 	// texpaint_nor.pixels = null;
 	// texpaint_pack.pixels = null;
@@ -464,7 +464,7 @@ function export_texture_write_texture(file: string, pixels: buffer_t, type: i32 
 	}
 
 	if (context_raw.layers_destination == export_destination_t.PACKED) {
-		let image: image_t = image_from_bytes(pixels, res_x, res_y);
+		let image: kinc_g5_texture_t = image_from_bytes(pixels, res_x, res_y);
 		map_set(data_cached_images, file, image);
 		let ar: string[] = string_split(file, path_sep);
 		let name: string = ar[ar.length - 1];

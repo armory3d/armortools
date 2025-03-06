@@ -1,8 +1,8 @@
 
-let layers_temp_image: image_t = null;
-let layers_expa: image_t = null;
-let layers_expb: image_t = null;
-let layers_expc: image_t = null;
+let layers_temp_image: kinc_g5_texture_t = null;
+let layers_expa: kinc_g5_texture_t = null;
+let layers_expb: kinc_g5_texture_t = null;
+let layers_expc: kinc_g5_texture_t = null;
 let layers_default_base: f32 = 0.5;
 let layers_default_rough: f32 = 0.4;
 let layers_max_layers: i32 =
@@ -75,36 +75,36 @@ function layers_resize() {
 	let rts: map_t<string, render_target_t> = render_path_render_targets;
 
 	let blend0: render_target_t = map_get(rts, "texpaint_blend0");
-	let _texpaint_blend0: image_t = blend0._image;
-	app_notify_on_next_frame(function (_texpaint_blend0: image_t) {
-		image_unload(_texpaint_blend0);
+	let _texpaint_blend0: kinc_g5_texture_t = blend0._image;
+	app_notify_on_next_frame(function (_texpaint_blend0: kinc_g5_texture_t) {
+		iron_unload_image(_texpaint_blend0);
 	}, _texpaint_blend0);
 	blend0.width = config_get_texture_res_x();
 	blend0.height = config_get_texture_res_y();
-	blend0._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
+	blend0._image = iron_g4_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
 
 	let blend1: render_target_t = map_get(rts, "texpaint_blend1");
-	let _texpaint_blend1: image_t = blend1._image;
-	app_notify_on_next_frame(function (_texpaint_blend1: image_t) {
-		image_unload(_texpaint_blend1);
+	let _texpaint_blend1: kinc_g5_texture_t = blend1._image;
+	app_notify_on_next_frame(function (_texpaint_blend1: kinc_g5_texture_t) {
+		iron_unload_image(_texpaint_blend1);
 	}, _texpaint_blend1);
 	blend1.width = config_get_texture_res_x();
 	blend1.height = config_get_texture_res_y();
-	blend1._image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
+	blend1._image = iron_g4_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
 
 	context_raw.brush_blend_dirty = true;
 
 	let blur: render_target_t = map_get(rts, "texpaint_blur");
 	if (blur != null) {
-		let _texpaint_blur: image_t = blur._image;
-		app_notify_on_next_frame(function (_texpaint_blur: image_t) {
-			image_unload(_texpaint_blur);
+		let _texpaint_blur: kinc_g5_texture_t = blur._image;
+		app_notify_on_next_frame(function (_texpaint_blur: kinc_g5_texture_t) {
+			iron_unload_image(_texpaint_blur);
 		}, _texpaint_blur);
 		let size_x: f32 = math_floor(config_get_texture_res_x() * 0.95);
 		let size_y: f32 = math_floor(config_get_texture_res_y() * 0.95);
 		blur.width = size_x;
 		blur.height = size_y;
-		blur._image = image_create_render_target(size_x, size_y);
+		blur._image = iron_g4_create_render_target(size_x, size_y);
 	}
 	if (render_path_paint_live_layer != null) {
 		slot_layer_resize_and_set_bits(render_path_paint_live_layer);
@@ -160,14 +160,14 @@ function layers_make_temp_img() {
 
 function layers_make_temp_mask_img() {
 	if (pipes_temp_mask_image != null && (pipes_temp_mask_image.width != config_get_texture_res_x() || pipes_temp_mask_image.height != config_get_texture_res_y())) {
-		let _temp_mask_image: image_t = pipes_temp_mask_image;
-		app_notify_on_next_frame(function (_temp_mask_image: image_t) {
-			image_unload(_temp_mask_image);
+		let _temp_mask_image: kinc_g5_texture_t = pipes_temp_mask_image;
+		app_notify_on_next_frame(function (_temp_mask_image: kinc_g5_texture_t) {
+			iron_unload_image(_temp_mask_image);
 		}, _temp_mask_image);
 		pipes_temp_mask_image = null;
 	}
 	if (pipes_temp_mask_image == null) {
-		pipes_temp_mask_image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
+		pipes_temp_mask_image = iron_g4_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
 	}
 }
 
@@ -180,17 +180,17 @@ function layers_make_export_img() {
 	///end
 
 	if (layers_expa != null && (layers_expa.width != l.texpaint.width || layers_expa.height != l.texpaint.height || layers_expa.format != l.texpaint.format)) {
-		let _expa: image_t = layers_expa;
-		let _expb: image_t = layers_expb;
-		let _expc: image_t = layers_expc;
-		app_notify_on_next_frame(function (_expa: image_t) {
-			image_unload(_expa);
+		let _expa: kinc_g5_texture_t = layers_expa;
+		let _expb: kinc_g5_texture_t = layers_expb;
+		let _expc: kinc_g5_texture_t = layers_expc;
+		app_notify_on_next_frame(function (_expa: kinc_g5_texture_t) {
+			iron_unload_image(_expa);
 		}, _expa);
-		app_notify_on_next_frame(function (_expb: image_t) {
-			image_unload(_expb);
+		app_notify_on_next_frame(function (_expb: kinc_g5_texture_t) {
+			iron_unload_image(_expb);
 		}, _expb);
-		app_notify_on_next_frame(function (_expc: image_t) {
-			image_unload(_expc);
+		app_notify_on_next_frame(function (_expc: kinc_g5_texture_t) {
+			iron_unload_image(_expc);
 		}, _expc);
 		layers_expa = null;
 		layers_expb = null;
@@ -257,21 +257,21 @@ function layers_apply_mask(l: slot_layer_t, m: slot_layer_t) {
 	// Apply mask
 	iron_g4_begin(l.texpaint);
 	kinc_g5_set_pipeline(pipes_apply_mask);
-	g4_set_tex(pipes_tex0_mask, layers_temp_image);
-	g4_set_tex(pipes_texa_mask, m.texpaint);
+	iron_g4_set_texture(pipes_tex0_mask, layers_temp_image);
+	iron_g4_set_texture(pipes_texa_mask, m.texpaint);
 	kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
 	kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
 	g4_draw();
 	iron_g4_end();
 }
 
-function layers_commands_merge_pack(pipe: kinc_g5_pipeline_t, i0: image_t, i1: image_t, i1pack: image_t, i1mask_opacity: f32, i1texmask: image_t, i1blending: i32 = -1) {
+function layers_commands_merge_pack(pipe: kinc_g5_pipeline_t, i0: kinc_g5_texture_t, i1: kinc_g5_texture_t, i1pack: kinc_g5_texture_t, i1mask_opacity: f32, i1texmask: kinc_g5_texture_t, i1blending: i32 = -1) {
 	iron_g4_begin(i0);
 	kinc_g5_set_pipeline(pipe);
-	g4_set_tex(pipes_tex0, i1);
-	g4_set_tex(pipes_tex1, i1pack);
-	g4_set_tex(pipes_texmask, i1texmask);
-	g4_set_tex(pipes_texa, layers_temp_image);
+	iron_g4_set_texture(pipes_tex0, i1);
+	iron_g4_set_texture(pipes_tex1, i1pack);
+	iron_g4_set_texture(pipes_texmask, i1texmask);
+	iron_g4_set_texture(pipes_texa, layers_temp_image);
 	iron_g4_set_float(pipes_opac, i1mask_opacity);
 	iron_g4_set_int(pipes_blending, i1blending);
 	kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
@@ -299,7 +299,7 @@ function layers_update_fill_layers() {
 	let _layer: slot_layer_t = context_raw.layer;
 	let _tool: workspace_tool_t = context_raw.tool;
 	let _fill_type: i32 = context_raw.fill_type_handle.position;
-	let current: image_t = null;
+	let current: kinc_g5_texture_t = null;
 
 	if (context_raw.tool == workspace_tool_t.MATERIAL) {
 		if (render_path_paint_live_layer == null) {
@@ -399,7 +399,7 @@ function layers_update_fill_layers() {
 }
 
 function layers_update_fill_layer(parse_paint: bool = true) {
-	let current: image_t = _g2_current;
+	let current: kinc_g5_texture_t = _g2_current;
 	let g2_in_use: bool = _g2_in_use;
 	if (g2_in_use) g2_end();
 
@@ -718,8 +718,8 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 	g2_end();
 
 	let empty_rt: render_target_t = map_get(render_path_render_targets, "empty_white");
-	let empty: image_t = empty_rt._image;
-	let mask: image_t = empty;
+	let empty: kinc_g5_texture_t = empty_rt._image;
+	let mask: kinc_g5_texture_t = empty;
 	let l1masks: slot_layer_t[] =  use_mask ? slot_layer_get_masks(l1) : null;
 	if (l1masks != null) {
 		// for (let i: i32 = 1; i < l1masks.length - 1; ++i) {
@@ -731,8 +731,8 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 	if (slot_layer_is_mask(l1)) {
 		iron_g4_begin(l0.texpaint);
 		kinc_g5_set_pipeline(pipes_merge_mask);
-		g4_set_tex(pipes_tex0_merge_mask, l1.texpaint);
-		g4_set_tex(pipes_texa_merge_mask, layers_temp_image);
+		iron_g4_set_texture(pipes_tex0_merge_mask, l1.texpaint);
+		iron_g4_set_texture(pipes_texa_merge_mask, layers_temp_image);
 		iron_g4_set_float(pipes_opac_merge_mask, slot_layer_get_opacity(l1));
 		iron_g4_set_int(pipes_blending_merge_mask, l1.blending);
 		kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
@@ -745,10 +745,10 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 		if (l1.paint_base) {
 			iron_g4_begin(l0.texpaint);
 			kinc_g5_set_pipeline(pipes_merge);
-			g4_set_tex(pipes_tex0, l1.texpaint);
-			g4_set_tex(pipes_tex1, empty);
-			g4_set_tex(pipes_texmask, mask);
-			g4_set_tex(pipes_texa, layers_temp_image);
+			iron_g4_set_texture(pipes_tex0, l1.texpaint);
+			iron_g4_set_texture(pipes_tex1, empty);
+			iron_g4_set_texture(pipes_texmask, mask);
+			iron_g4_set_texture(pipes_texa, layers_temp_image);
 			iron_g4_set_float(pipes_opac, slot_layer_get_opacity(l1));
 			iron_g4_set_int(pipes_blending, l1.blending);
 			kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
@@ -767,10 +767,10 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 			if (l1.paint_nor) {
 				iron_g4_begin(l0.texpaint_nor);
 				kinc_g5_set_pipeline(pipes_merge);
-				g4_set_tex(pipes_tex0, l1.texpaint);
-				g4_set_tex(pipes_tex1, l1.texpaint_nor);
-				g4_set_tex(pipes_texmask, mask);
-				g4_set_tex(pipes_texa, layers_temp_image);
+				iron_g4_set_texture(pipes_tex0, l1.texpaint);
+				iron_g4_set_texture(pipes_tex1, l1.texpaint_nor);
+				iron_g4_set_texture(pipes_texmask, mask);
+				iron_g4_set_texture(pipes_texa, layers_temp_image);
 				iron_g4_set_float(pipes_opac, slot_layer_get_opacity(l1));
 				iron_g4_set_int(pipes_blending, l1.paint_nor_blend ? -2 : -1);
 				kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);

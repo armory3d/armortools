@@ -8,7 +8,7 @@ let data_cached_worlds: map_t<string, world_data_t> = map_create();
 let data_cached_shaders: map_t<string, shader_data_t> = map_create();
 
 let data_cached_blobs: map_t<string, buffer_t> = map_create();
-let data_cached_images: map_t<string, image_t> = map_create();
+let data_cached_images: map_t<string, kinc_g5_texture_t> = map_create();
 let data_cached_videos: map_t<string, video_t> = map_create();
 let data_cached_fonts: map_t<string, draw_font_t> = map_create();
 ///if arm_audio
@@ -109,8 +109,8 @@ function data_get_blob(file: string): buffer_t {
 	return b;
 }
 
-function data_get_image(file: string, readable: bool = false): image_t {
-	let cached: image_t = map_get(data_cached_images, file);
+function data_get_image(file: string, readable: bool = false): kinc_g5_texture_t {
+	let cached: kinc_g5_texture_t = map_get(data_cached_images, file);
 	if (cached != null) {
 		return cached;
 	}
@@ -120,7 +120,7 @@ function data_get_image(file: string, readable: bool = false): image_t {
 		return null;
 	}
 
-	let b: image_t = image_from_texture(image_);
+	let b: kinc_g5_texture_t = image_;
 	map_set(data_cached_images, file, b);
 	data_assets_loaded++;
 	return b;
@@ -185,11 +185,11 @@ function data_delete_blob(handle: string) {
 }
 
 function data_delete_image(handle: string) {
-	let image: image_t = map_get(data_cached_images, handle);
+	let image: kinc_g5_texture_t = map_get(data_cached_images, handle);
 	if (image == null) {
 		return;
 	}
-	image_unload(image);
+	iron_unload_image(image);
 	map_delete(data_cached_images, handle);
 }
 
@@ -246,8 +246,8 @@ function data_delete_all() {
 
 	let cached_images_keys: string[] = map_keys(data_cached_images);
 	for (let i: i32 = 0; i < cached_images_keys.length; ++i) {
-		let c: image_t = map_get(data_cached_images, cached_images_keys[i]);
-		image_unload(c);
+		let c: kinc_g5_texture_t = map_get(data_cached_images, cached_images_keys[i]);
+		iron_unload_image(c);
 	}
 	data_cached_images = map_create();
 

@@ -10,7 +10,7 @@ let render_path_raytrace_transform: mat4_t;
 let render_path_raytrace_vb: kinc_g5_vertex_buffer_t;
 let render_path_raytrace_ib: kinc_g5_index_buffer_t;
 
-let render_path_raytrace_last_envmap: image_t = null;
+let render_path_raytrace_last_envmap: kinc_g5_texture_t = null;
 let render_path_raytrace_is_bake: bool = false;
 
 ///if arm_direct3d12
@@ -21,7 +21,7 @@ let render_path_raytrace_ext: string = ".metal";
 let render_path_raytrace_ext: string = ".spirv";
 ///end
 
-let render_path_raytrace_last_texpaint: image_t = null;
+let render_path_raytrace_last_texpaint: kinc_g5_texture_t = null;
 
 function render_path_raytrace_init() {
 }
@@ -45,17 +45,17 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 	}
 
 	let probe: world_data_t = scene_world;
-	let saved_envmap: image_t = context_raw.show_envmap_blur ? probe._.radiance_mipmaps[0] : context_raw.saved_envmap;
+	let saved_envmap: kinc_g5_texture_t = context_raw.show_envmap_blur ? probe._.radiance_mipmaps[0] : context_raw.saved_envmap;
 
 	if (render_path_raytrace_last_envmap != saved_envmap) {
 		render_path_raytrace_last_envmap = saved_envmap;
 
-		let bnoise_sobol: image_t = map_get(scene_embedded, "bnoise_sobol.k");
-		let bnoise_scramble: image_t = map_get(scene_embedded, "bnoise_scramble.k");
-		let bnoise_rank: image_t = map_get(scene_embedded, "bnoise_rank.k");
+		let bnoise_sobol: kinc_g5_texture_t = map_get(scene_embedded, "bnoise_sobol.k");
+		let bnoise_scramble: kinc_g5_texture_t = map_get(scene_embedded, "bnoise_scramble.k");
+		let bnoise_rank: kinc_g5_texture_t = map_get(scene_embedded, "bnoise_rank.k");
 
 		let l: slot_layer_t = layers_flatten(true);
-		iron_raytrace_set_textures(l.texpaint, l.texpaint_nor, l.texpaint_pack, saved_envmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
+		iron_raytrace_set_textures(l.texpaint, l.texpaint_nor, l.texpaint_pack, saved_envmap, bnoise_sobol, bnoise_scramble, bnoise_rank);
 	}
 
 	///if is_lab
@@ -63,11 +63,11 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 	if (l.texpaint != render_path_raytrace_last_texpaint) {
 		render_path_raytrace_last_texpaint = l.texpaint;
 
-		let bnoise_sobol: image_t = map_get(scene_embedded, "bnoise_sobol.k");
-		let bnoise_scramble: image_t = map_get(scene_embedded, "bnoise_scramble.k");
-		let bnoise_rank: image_t = map_get(scene_embedded, "bnoise_rank.k");
+		let bnoise_sobol: kinc_g5_texture_t = map_get(scene_embedded, "bnoise_sobol.k");
+		let bnoise_scramble: kinc_g5_texture_t = map_get(scene_embedded, "bnoise_scramble.k");
+		let bnoise_rank: kinc_g5_texture_t = map_get(scene_embedded, "bnoise_rank.k");
 
-		iron_raytrace_set_textures(l.texpaint, l.texpaint_nor, l.texpaint_pack, saved_envmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
+		iron_raytrace_set_textures(l.texpaint, l.texpaint_nor, l.texpaint_pack, saved_envmap, bnoise_sobol, bnoise_scramble, bnoise_rank);
 	}
 	///end
 
@@ -118,7 +118,7 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 	///end
 
 	let framebuffer: render_target_t = map_get(render_path_render_targets, "buf");
-	iron_raytrace_dispatch_rays(framebuffer._image.texture_, render_path_raytrace_f32a);
+	iron_raytrace_dispatch_rays(framebuffer._image, render_path_raytrace_f32a);
 
 	if (context_raw.ddirty == 1 || context_raw.pdirty == 1) {
 		///if arm_metal

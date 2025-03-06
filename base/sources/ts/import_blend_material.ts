@@ -30,7 +30,7 @@ function import_blend_material_run(path: string) {
 
 function _import_blend_material() {
 
-	let current: image_t = _g2_current;
+	let current: kinc_g5_texture_t = _g2_current;
 	let g2_in_use: bool = _g2_in_use;
 	if (g2_in_use) g2_end();
 

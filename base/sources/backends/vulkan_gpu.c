@@ -3872,20 +3872,6 @@ int kinc_g5_texture_stride(kinc_g5_texture_t *texture) {
 	return texture->impl.stride;
 }
 
-uint8_t *kinc_g5_texture_lock(kinc_g5_texture_t *texture) {
-	void *data;
-
-	VkResult err = vkMapMemory(vk_ctx.device, texture->impl.mem, 0, texture->impl.deviceSize, 0, &data);
-	assert(!err);
-
-	return (uint8_t *)data;
-}
-
-void kinc_g5_texture_unlock(kinc_g5_texture_t *texture) {
-	vkUnmapMemory(vk_ctx.device, texture->impl.mem);
-	texture->_uploaded = false;
-}
-
 void kinc_g5_texture_generate_mipmaps(kinc_g5_texture_t *texture, int levels) {}
 
 extern kinc_g5_command_list_t commandList;

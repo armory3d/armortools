@@ -1,7 +1,7 @@
 
 type draw_cloud_icon_data_t = {
 	f: string;
-	image: image_t;
+	image: kinc_g5_texture_t;
 };
 
 let ui_files_default_path: string =
@@ -21,7 +21,7 @@ let ui_files_path: string = ui_files_default_path;
 let ui_files_last_path: string = "";
 let ui_files_last_search: string = "";
 let ui_files_files: string[] = null;
-let ui_files_icon_map: map_t<string, image_t> = null;
+let ui_files_icon_map: map_t<string, kinc_g5_texture_t> = null;
 let ui_files_icon_file_map: map_t<string, string> = null;
 let ui_files_selected: i32 = -1;
 let ui_files_show_extensions: bool = false;
@@ -71,14 +71,14 @@ function ui_files_release_keys() {
 	///end
 }
 
-function make_draw_cloud_icon_data(f: string, image: image_t): draw_cloud_icon_data_t {
+function make_draw_cloud_icon_data(f: string, image: kinc_g5_texture_t): draw_cloud_icon_data_t {
 	let data: draw_cloud_icon_data_t = { f: f, image: image };
 	return data;
 }
 
 function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool = false, search: string = "", refresh: bool = false, context_menu: (s: string)=>void = null): string {
 
-	let icons: image_t = resource_get("icons.k");
+	let icons: kinc_g5_texture_t = resource_get("icons.k");
 	let folder: rect_t = resource_tile50(icons, 2, 1);
 	let file: rect_t = resource_tile50(icons, 3, 1);
 	let is_cloud: bool = starts_with(handle.text, "cloud");
@@ -173,7 +173,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 			let uiy: f32 = ui._y;
 			let state: ui_state_t = ui_state_t.IDLE;
 			let generic: bool = true;
-			let icon: image_t = null;
+			let icon: kinc_g5_texture_t = null;
 
 			if (is_cloud && f != ".." && !ui_files_offline) {
 				if (ui_files_icon_map == null) {
@@ -188,7 +188,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 						let icon_file: string = substring(f, 0, dot) + "_icon.jpg";
 						if (array_index_of(files_all, icon_file) >= 0) {
 							let rt: render_target_t = map_get(render_path_render_targets, "empty_black");
-							let empty: image_t = rt._image;
+							let empty: kinc_g5_texture_t = rt._image;
 							map_set(ui_files_icon_map, handle.text + path_sep + f, empty);
 
 							_ui_files_file_browser_handle = handle;
@@ -196,7 +196,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 
 							file_cache_cloud(handle.text + path_sep + icon_file, function (abs: string) {
 								if (abs != null) {
-									let image: image_t = data_get_image(abs);
+									let image: kinc_g5_texture_t = data_get_image(abs);
 									///if arm_windows
 									abs = string_replace_all(abs, "\\", "/");
 									///end
@@ -205,7 +205,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 									let data: draw_cloud_icon_data_t = make_draw_cloud_icon_data(f, image);
 
 									app_notify_on_init(function (data: draw_cloud_icon_data_t) {
-										let icon: image_t = image_create_render_target(data.image.width, data.image.height);
+										let icon: kinc_g5_texture_t = iron_g4_create_render_target(data.image.width, data.image.height);
 										if (ends_with(data.f, ".arm")) { // Used for material sphere alpha cutout
 											g2_begin(icon);
 
@@ -312,9 +312,9 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 				icon = map_get(ui_files_icon_map, shandle);
 				if (icon == null) {
 					let rt: render_target_t = map_get(render_path_render_targets, "empty_black");
-					let empty: image_t = rt._image;
+					let empty: kinc_g5_texture_t = rt._image;
 					map_set(ui_files_icon_map, shandle, empty);
-					let image: image_t = data_get_image(shandle);
+					let image: kinc_g5_texture_t = data_get_image(shandle);
 
 					let args: ui_files_make_icon_t = {
 						image: image,
@@ -428,10 +428,10 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 
 function ui_files_make_icon (args: ui_files_make_icon_t) {
 	let w: i32 = args.w;
-	let image: image_t = args.image;
+	let image: kinc_g5_texture_t = args.image;
 	let sw: i32 = image.width > image.height ? w : math_floor(1.0 * image.width / image.height * w);
 	let sh: i32 = image.width > image.height ? math_floor(1.0 * image.height / image.width * w) : w;
-	let icon: image_t = image_create_render_target(sw, sh);
+	let icon: kinc_g5_texture_t = iron_g4_create_render_target(sw, sh);
 	g2_begin(icon);
 	kinc_g5_clear(0xffffffff);
 	draw_set_pipeline(pipes_copy_rgb);
@@ -452,7 +452,7 @@ function ui_files_go_up(handle: ui_handle_t) {
 }
 
 type ui_files_make_icon_t = {
-	image: image_t;
+	image: kinc_g5_texture_t;
 	shandle: string;
 	w: i32;
 };

@@ -4,12 +4,12 @@ let import_envmap_params_loc: kinc_const_loc_t;
 let import_envmap_params: vec4_t = vec4_create();
 let import_envmap_n: vec4_t = vec4_create();
 let import_envmap_radiance_loc: kinc_tex_unit_t;
-let import_envmap_radiance: image_t = null;
-let import_envmap_radiance_cpu: image_t = null;
-let import_envmap_mips: image_t[] = null;
-let import_envmap_mips_cpu: image_t[] = null;
+let import_envmap_radiance: kinc_g5_texture_t = null;
+let import_envmap_radiance_cpu: kinc_g5_texture_t = null;
+let import_envmap_mips: kinc_g5_texture_t[] = null;
+let import_envmap_mips_cpu: kinc_g5_texture_t[] = null;
 
-function import_envmap_run(path: string, image: image_t) {
+function import_envmap_run(path: string, image: kinc_g5_texture_t) {
 	// Init
 	if (import_envmap_pipeline == null) {
 		import_envmap_pipeline = iron_g4_create_pipeline();
@@ -24,12 +24,12 @@ function import_envmap_run(path: string, image: image_t) {
 		import_envmap_params_loc = iron_g4_get_constant_location(import_envmap_pipeline, "params");
 		import_envmap_radiance_loc = iron_g4_get_texture_unit(import_envmap_pipeline, "radiance");
 
-		import_envmap_radiance = image_create_render_target(1024, 512, tex_format_t.RGBA128);
+		import_envmap_radiance = iron_g4_create_render_target(1024, 512, tex_format_t.RGBA128);
 
 		import_envmap_mips = [];
 		let w: i32 = 512;
 		for (let i: i32 = 0; i < 10; ++i) {
-			array_push(import_envmap_mips, image_create_render_target(w, w > 1 ? math_floor(w / 2) : 1, tex_format_t.RGBA128));
+			array_push(import_envmap_mips, iron_g4_create_render_target(w, w > 1 ? math_floor(w / 2) : 1, tex_format_t.RGBA128));
 			w = math_floor(w / 2);
 		}
 	}
@@ -41,11 +41,11 @@ function import_envmap_run(path: string, image: image_t) {
 	draw_set_pipeline(null);
 	g2_end();
 
-	let radiance_pixels: buffer_t = image_get_pixels(import_envmap_radiance);
+	let radiance_pixels: buffer_t = iron_g4_get_texture_pixels(import_envmap_radiance);
 	if (import_envmap_radiance_cpu != null) {
-		let _radiance_cpu: image_t = import_envmap_radiance_cpu;
-		app_notify_on_next_frame(function (_radiance_cpu: image_t) {
-			image_unload(_radiance_cpu);
+		let _radiance_cpu: kinc_g5_texture_t = import_envmap_radiance_cpu;
+		app_notify_on_next_frame(function (_radiance_cpu: kinc_g5_texture_t) {
+			iron_unload_image(_radiance_cpu);
 		}, _radiance_cpu);
 	}
 	import_envmap_radiance_cpu = image_from_bytes(radiance_pixels, import_envmap_radiance.width, import_envmap_radiance.height, tex_format_t.RGBA128);
@@ -53,10 +53,10 @@ function import_envmap_run(path: string, image: image_t) {
 	// Radiance
 	if (import_envmap_mips_cpu != null) {
 		for (let i: i32 = 0; i < import_envmap_mips_cpu.length; ++i) {
-			let mip: image_t = import_envmap_mips_cpu[i];
-			app_notify_on_next_frame(function (mip: image_t) {
+			let mip: kinc_g5_texture_t = import_envmap_mips_cpu[i];
+			app_notify_on_next_frame(function (mip: kinc_g5_texture_t) {
 				///if (!arm_direct3d12) // TODO: crashes after 50+ imports
-				image_unload(mip);
+				iron_unload_image(mip);
 				///end
 			}, mip);
 		}
@@ -64,9 +64,9 @@ function import_envmap_run(path: string, image: image_t) {
 	import_envmap_mips_cpu = [];
 	for (let i: i32 = 0; i < import_envmap_mips.length; ++i) {
 		import_envmap_get_radiance_mip(import_envmap_mips[i], i, import_envmap_radiance);
-		array_push(import_envmap_mips_cpu, image_from_bytes(image_get_pixels(import_envmap_mips[i]), import_envmap_mips[i].width, import_envmap_mips[i].height, tex_format_t.RGBA128));
+		array_push(import_envmap_mips_cpu, image_from_bytes(iron_g4_get_texture_pixels(import_envmap_mips[i]), import_envmap_mips[i].width, import_envmap_mips[i].height, tex_format_t.RGBA128));
 	}
-	image_set_mipmaps(import_envmap_radiance_cpu, import_envmap_mips_cpu);
+	iron_g4_set_mipmaps(import_envmap_radiance_cpu, import_envmap_mips_cpu);
 
 	// Irradiance
 	scene_world._.irradiance = import_envmap_get_spherical_harmonics(radiance_pixels, import_envmap_radiance.width, import_envmap_radiance.height);
@@ -86,14 +86,14 @@ function import_envmap_run(path: string, image: image_t) {
 	project_raw.envmap = path;
 }
 
-function import_envmap_get_radiance_mip(mip: image_t, level: i32, radiance: image_t) {
+function import_envmap_get_radiance_mip(mip: kinc_g5_texture_t, level: i32, radiance: kinc_g5_texture_t) {
 	iron_g4_begin(mip);
 	kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
 	kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
 	kinc_g5_set_pipeline(import_envmap_pipeline);
 	import_envmap_params.x = 0.1 + level / 8;
 	iron_g4_set_float4(import_envmap_params_loc, import_envmap_params.x, import_envmap_params.y, import_envmap_params.z, import_envmap_params.w);
-	g4_set_tex(import_envmap_radiance_loc, radiance);
+	iron_g4_set_texture(import_envmap_radiance_loc, radiance);
 	g4_draw();
 	iron_g4_end();
 }

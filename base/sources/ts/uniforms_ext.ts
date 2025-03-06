@@ -301,7 +301,7 @@ function uniforms_ext_mat4_link(object: object_t, mat: material_data_t, link: st
 	return mat4_nan();
 }
 
-function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: string): image_t {
+function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: string): kinc_g5_texture_t {
 	if (link == "_texpaint_undo") {
 		///if is_lab
 		return null;

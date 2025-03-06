@@ -23,7 +23,7 @@ let minimap_w: i32 = 150;
 let minimap_h: i32 = 0;
 let minimap_box_h: i32 = 0;
 let minimap_scrolling: bool = false;
-let minimap: image_t = null;
+let minimap: kinc_g5_texture_t = null;
 let window_header_h: i32 = 0;
 
 function drop_files(path: string) {
@@ -315,9 +315,9 @@ function draw_minimap() {
 	if (minimap_h != kinc_window_height()) {
 		minimap_h = kinc_window_height();
 		if (minimap != null) {
-			image_unload(minimap);
+			iron_unload_image(minimap);
 		}
-		minimap = image_create_render_target(minimap_w, minimap_h);
+		minimap = iron_g4_create_render_target(minimap_w, minimap_h);
 	}
 
 	g2_begin(minimap);

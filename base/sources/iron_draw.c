@@ -377,23 +377,22 @@ void draw_texture(kinc_g5_texture_t *tex, float x, float y) {
 	draw_scaled_sub_texture(tex, 0, 0, (float)tex->width, (float)tex->height, x, y, (float)tex->width, (float)tex->height);
 }
 
-void draw_scaled_sub_image(image_t *image, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh) {
+void draw_scaled_sub_image(kinc_g5_texture_t *image, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh) {
 	#ifdef KINC_DIRECT3D12
 	waitAfterNextDraw = true;
 	#endif
-	kinc_g5_texture_t *texture = (kinc_g5_texture_t *)image->texture_;
-	draw_scaled_sub_texture(texture, sx, sy, sw, sh, dx, dy, dw, dh);
+	draw_scaled_sub_texture(image, sx, sy, sw, sh, dx, dy, dw, dh);
 }
 
-void draw_scaled_image(image_t *tex, float dx, float dy, float dw, float dh) {
+void draw_scaled_image(kinc_g5_texture_t *tex, float dx, float dy, float dw, float dh) {
 	draw_scaled_sub_image(tex, 0, 0, (float)tex->width, (float)tex->height, dx, dy, dw, dh);
 }
 
-void draw_sub_image(image_t *tex, float sx, float sy, float sw, float sh, float x, float y) {
+void draw_sub_image(kinc_g5_texture_t *tex, float sx, float sy, float sw, float sh, float x, float y) {
 	draw_scaled_sub_image(tex, sx, sy, sw, sh, x, y, sw, sh);
 }
 
-void draw_image(image_t *tex, float x, float y) {
+void draw_image(kinc_g5_texture_t *tex, float x, float y) {
 	draw_scaled_sub_image(tex, 0, 0, (float)tex->width, (float)tex->height, x, y, (float)tex->width, (float)tex->height);
 }
 

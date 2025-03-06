@@ -22,12 +22,12 @@ let ui_view2d_pan_y: f32 = 0.0;
 let ui_view2d_pan_scale: f32 = 1.0;
 let ui_view2d_tiled_show: bool = false;
 let ui_view2d_controls_down: bool = false;
-let _ui_view2d_render_tex: image_t;
+let _ui_view2d_render_tex: kinc_g5_texture_t;
 let _ui_view2d_render_x: f32;
 let _ui_view2d_render_y: f32;
 let _ui_view2d_render_tw: f32;
 let _ui_view2d_render_th: f32;
-let ui_view2d_grid: image_t = null;
+let ui_view2d_grid: kinc_g5_texture_t = null;
 let ui_view2d_grid_redraw: bool = true;
 
 function ui_view2d_init() {
@@ -51,8 +51,8 @@ function ui_view2d_init() {
 	let ops: ui_options_t = {
 		theme: base_theme,
 		font: base_font,
-		color_wheel: base_color_wheel.texture_,
-		black_white_gradient: base_color_wheel_gradient.texture_,
+		color_wheel: base_color_wheel,
+		black_white_gradient: base_color_wheel_gradient,
 		scale_factor: scale
 	};
 	ui_view2d_ui = ui_create(ops);
@@ -94,7 +94,7 @@ function ui_view2d_render() {
 	// Cache grid
 	if (ui_view2d_grid_redraw) {
 		if (ui_view2d_grid != null) {
-			image_unload(ui_view2d_grid);
+			iron_unload_image(ui_view2d_grid);
 		}
 		ui_view2d_grid = ui_nodes_draw_grid(ui_view2d_pan_scale);
 		ui_view2d_grid_redraw = false;
@@ -139,7 +139,7 @@ function ui_view2d_render() {
 		draw_image(ui_view2d_grid, x, y);
 
 		// Texture
-		let tex: image_t = null;
+		let tex: kinc_g5_texture_t = null;
 
 		let l: slot_layer_t = context_raw.layer;
 		let channel: i32 = 0;
@@ -177,14 +177,14 @@ function ui_view2d_render() {
 			}
 
 			if (ui_view2d_layer_mode == view_2d_layer_mode_t.VISIBLE) {
-				let current: image_t = _g2_current;
+				let current: kinc_g5_texture_t = _g2_current;
 				let g2_in_use: bool = _g2_in_use;
 				if (g2_in_use) g2_end();
 				layer = layers_flatten();
 				if (g2_in_use) g2_begin(current);
 			}
 			else if (slot_layer_is_group(layer)) {
-				let current: image_t = _g2_current;
+				let current: kinc_g5_texture_t = _g2_current;
 				let g2_in_use: bool = _g2_in_use;
 				if (g2_in_use) g2_end();
 				layer = layers_flatten(false, slot_layer_get_children(layer));
@@ -258,11 +258,11 @@ function ui_view2d_render() {
 
 				app_notify_on_next_frame(function () {
 					let rt: render_target_t = map_get(render_path_render_targets, "texpaint_picker");
-					let texpaint_picker: image_t = rt._image;
+					let texpaint_picker: kinc_g5_texture_t = rt._image;
 					g2_begin(texpaint_picker);
 					draw_scaled_image(_ui_view2d_render_tex, -_ui_view2d_render_x, -_ui_view2d_render_y, _ui_view2d_render_tw, _ui_view2d_render_th);
 					g2_end();
-					let a: buffer_t = image_get_pixels(texpaint_picker);
+					let a: buffer_t = iron_g4_get_texture_pixels(texpaint_picker);
 					///if (arm_metal || arm_vulkan)
 					let i0: i32 = 2;
 					let i1: i32 = 1;
@@ -410,7 +410,7 @@ function ui_view2d_render() {
 		// Picked position
 		///if (is_paint || is_sculpt)
 		if (context_raw.tool == workspace_tool_t.PICKER && (ui_view2d_type == view_2d_type_t.LAYER || ui_view2d_type == view_2d_type_t.ASSET)) {
-			let cursor_img: image_t = resource_get("cursor.k");
+			let cursor_img: kinc_g5_texture_t = resource_get("cursor.k");
 			let hsize: f32 = 16 * ui_SCALE(ui_view2d_ui);
 			let size: f32 = hsize * 2;
 			draw_scaled_image(cursor_img, tx + tw * context_raw.uvx_picked - hsize, ty + th * context_raw.uvy_picked - hsize, size, size);

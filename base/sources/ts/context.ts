@@ -20,11 +20,11 @@ type context_t = {
 	color_picker_callback?: (sc: swatch_color_t)=>void;
 
 	default_irradiance?: f32_array_t;
-	default_radiance?: image_t;
-	default_radiance_mipmaps?: image_t[];
-	saved_envmap?: image_t;
-	empty_envmap?: image_t;
-	preview_envmap?: image_t;
+	default_radiance?: kinc_g5_texture_t;
+	default_radiance_mipmaps?: kinc_g5_texture_t[];
+	saved_envmap?: kinc_g5_texture_t;
+	empty_envmap?: kinc_g5_texture_t;
+	preview_envmap?: kinc_g5_texture_t;
 	envmap_loaded?: bool;
 	show_envmap?: bool;
 	show_envmap_handle?: ui_handle_t;
@@ -105,11 +105,11 @@ type context_t = {
 	layer_preview_dirty?: bool;
 	layers_preview_dirty?: bool;
 	node_preview_dirty?: bool;
-	node_preview?: image_t;
-	node_previews?: map_t<string, image_t>;
+	node_preview?: kinc_g5_texture_t;
+	node_previews?: map_t<string, kinc_g5_texture_t>;
 	node_previews_used?: string[];
 	node_preview_name?: string;
-	mask_preview_rgba32?: image_t;
+	mask_preview_rgba32?: kinc_g5_texture_t;
 	mask_preview_last?: slot_layer_t;
 
 	colorid_picked?: bool;
@@ -138,7 +138,7 @@ type context_t = {
 	colorid_handle?: ui_handle_t;
 	layers_export?: export_mode_t;
 
-	decal_image?: image_t;
+	decal_image?: kinc_g5_texture_t;
 	decal_preview?: bool;
 	decal_x?: f32;
 	decal_y?: f32;
@@ -146,7 +146,7 @@ type context_t = {
 	cache_draws?: bool;
 	write_icon_on_export?: bool;
 
-	text_tool_image?: image_t;
+	text_tool_image?: kinc_g5_texture_t;
 	text_tool_text?: string;
 	particle_material?: material_data_t;
 
@@ -181,9 +181,9 @@ type context_t = {
 
 	brush_nodes_radius?: f32;
 	brush_nodes_opacity?: f32;
-	brush_mask_image?: image_t;
+	brush_mask_image?: kinc_g5_texture_t;
 	brush_mask_image_is_alpha?: bool;
-	brush_stencil_image?: image_t;
+	brush_stencil_image?: kinc_g5_texture_t;
 	brush_stencil_image_is_alpha?: bool;
 	brush_stencil_x?: f32;
 	brush_stencil_y?: f32;
@@ -543,7 +543,7 @@ function context_set_layer(l: slot_layer_t) {
 	context_raw.layer = l;
 	ui_header_handle.redraws = 2;
 
-	let current: image_t = _g2_current;
+	let current: kinc_g5_texture_t = _g2_current;
 	let g2_in_use: bool = _g2_in_use;
 	if (g2_in_use) g2_end();
 

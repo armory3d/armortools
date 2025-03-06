@@ -11,13 +11,6 @@
 #include <stdint.h>
 #include "iron_array.h"
 
-typedef struct image {
-	void *texture_;
-	int format; // tex_format_t;
-	int width;
-	int height;
-} image_t;
-
 typedef struct draw_font_image draw_font_image_t;
 
 typedef struct draw_font {
@@ -34,11 +27,11 @@ typedef struct draw_font {
 
 void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_vert, buffer_t *colored_frag, buffer_t *text_vert, buffer_t *text_frag);
 void draw_begin(void);
-void draw_scaled_sub_image(image_t *img, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh);
+void draw_scaled_sub_image(kinc_g5_texture_t *img, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh);
 void draw_scaled_sub_texture(kinc_g5_texture_t *tex, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh);
-void draw_scaled_image(image_t *tex, float dx, float dy, float dw, float dh);
-void draw_sub_image(image_t *tex, float sx, float sy, float sw, float sh, float x, float y);
-void draw_image(image_t *tex, float x, float y);
+void draw_scaled_image(kinc_g5_texture_t *tex, float dx, float dy, float dw, float dh);
+void draw_sub_image(kinc_g5_texture_t *tex, float sx, float sy, float sw, float sh, float x, float y);
+void draw_image(kinc_g5_texture_t *tex, float x, float y);
 void draw_scaled_texture(kinc_g5_texture_t *tex, float dx, float dy, float dw, float dh);
 void draw_sub_texture(kinc_g5_texture_t *tex, float sx, float sy, float sw, float sh, float x, float y);
 void draw_texture(kinc_g5_texture_t *tex, float x, float y);

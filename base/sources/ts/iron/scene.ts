@@ -13,7 +13,7 @@ let scene_animations: anim_raw_t[];
 ///if arm_skin
 let scene_armatures: armature_t[];
 ///end
-let scene_embedded: map_t<string, image_t>;
+let scene_embedded: map_t<string, kinc_g5_texture_t>;
 
 let _scene_ready: bool;
 let _scene_uid_counter: i32 = 0;
@@ -444,7 +444,7 @@ function scene_load_embedded_data(datas: string[]) {
 }
 
 function scene_embed_data(file: string) {
-	let image: image_t = data_get_image(file);
+	let image: kinc_g5_texture_t = data_get_image(file);
 	map_set(scene_embedded, file, image);
 }
 
@@ -542,7 +542,7 @@ type material_context_t = {
 };
 
 type material_context_runtime_t = {
-	textures?: image_t[];
+	textures?: kinc_g5_texture_t[];
 };
 
 type bind_const_t = {
@@ -651,9 +651,9 @@ type world_data_t = {
 };
 
 type world_data_runtime_t = {
-	envmap?: image_t;
-	radiance?: image_t;
-	radiance_mipmaps?: image_t[];
+	envmap?: kinc_g5_texture_t;
+	radiance?: kinc_g5_texture_t;
+	radiance_mipmaps?: kinc_g5_texture_t[];
 	irradiance?: f32_array_t;
 };
 

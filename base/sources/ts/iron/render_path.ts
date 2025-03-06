@@ -11,7 +11,7 @@ type render_target_t = {
 	// Runtime
 	_depth_buffer_bits?: i32;
 	_depth_from?: string;
-	_image?: image_t; // RT or image
+	_image?: kinc_g5_texture_t; // RT or image
 	_has_depth?: bool;
 };
 
@@ -36,7 +36,7 @@ let render_path_current_h: i32;
 let _render_path_frame_time: f32 = 0.0;
 let _render_path_frame: i32 = 0;
 let _render_path_current_target: render_target_t = null;
-let _render_path_current_image: image_t = null;
+let _render_path_current_image: kinc_g5_texture_t = null;
 let _render_path_draw_order: draw_order_t = draw_order_t.DIST;
 let _render_path_paused: bool = false;
 let _render_path_depth_to_render_target: map_t<string, render_target_t> = map_create();
@@ -89,7 +89,7 @@ function render_path_set_target(target: string, additional: string[] = null) {
 	else { // Render target
 		let rt: render_target_t = map_get(render_path_render_targets, target);
 		_render_path_current_target = rt;
-		let additional_images: image_t[] = null;
+		let additional_images: kinc_g5_texture_t[] = null;
 		if (additional != null) {
 			additional_images = [];
 			for (let i: i32 = 0; i < additional.length; ++i) {
@@ -108,10 +108,10 @@ function render_path_set_target(target: string, additional: string[] = null) {
 function render_path_set_depth_from(target: string, from: string) {
 	let rt: render_target_t = map_get(render_path_render_targets, target);
 	let rt_from: render_target_t = map_get(render_path_render_targets, from);
-	image_set_depth_from(rt._image, rt_from._image);
+	kinc_g5_render_target_set_depth_from(rt._image, rt_from._image);
 }
 
-function render_path_begin(render_target: image_t = null, additional_targets: image_t[] = null) {
+function render_path_begin(render_target: kinc_g5_texture_t = null, additional_targets: kinc_g5_texture_t[] = null) {
 	if (_render_path_current_image != null) {
 		render_path_end();
 	}
@@ -149,7 +149,7 @@ function render_path_clear_target(color: color_t = 0x00000000, depth: f32 = 0.0,
 
 function render_path_gen_mipmaps(target: string) {
 	let rt: render_target_t = map_get(render_path_render_targets, target);
-	image_gen_mipmaps(rt._image, 1000);
+	kinc_g5_texture_generate_mipmaps(rt._image, 1000);
 }
 
 function _render_path_sort_dist(a: any_ptr, b: any_ptr): i32 {
@@ -285,8 +285,8 @@ function render_path_unload() {
 	}
 }
 
-function _render_path_resize_on_init(_image: image_t) {
-	image_unload(_image);
+function _render_path_resize_on_init(_image: kinc_g5_texture_t) {
+	iron_unload_image(_image);
 }
 
 function render_path_resize() {
@@ -314,7 +314,7 @@ function render_path_resize() {
 		}
 
 		if (nodepth != null) {
-			image_set_depth_from(rt._image, nodepth._image);
+			kinc_g5_render_target_set_depth_from(rt._image, nodepth._image);
 		}
 	}
 
@@ -322,7 +322,7 @@ function render_path_resize() {
 	for (let i: i32 = 0; i < render_targets_keys.length; ++i) {
 		let rt: render_target_t = map_get(render_path_render_targets, render_targets_keys[i]);
 		if (rt != null && rt.width == 0) {
-			let _image: image_t = rt._image;
+			let _image: kinc_g5_texture_t = rt._image;
 			app_notify_on_init(_render_path_resize_on_init, _image);
 			rt._image = render_path_create_image(rt, rt._depth_buffer_bits);
 		}
@@ -333,7 +333,7 @@ function render_path_resize() {
 		let rt: render_target_t = map_get(render_path_render_targets, render_targets_keys[i]);
 		if (rt != null && rt._depth_from != "") {
 			let depth_from: render_target_t = map_get(_render_path_depth_to_render_target, rt._depth_from);
-			image_set_depth_from(rt._image, depth_from._image);
+			kinc_g5_render_target_set_depth_from(rt._image, depth_from._image);
 		}
 	}
 }
@@ -372,7 +372,7 @@ function render_path_create_target(t: render_target_t): render_target_t {
 			t._depth_buffer_bits = 0;
 			t._depth_from = t.depth_buffer;
 			t._image = render_path_create_image(t, t._depth_buffer_bits);
-			image_set_depth_from(t._image, depth_target._image);
+			kinc_g5_render_target_set_depth_from(t._image, depth_target._image);
 		}
 	}
 	else { // No depth buffer
@@ -383,7 +383,7 @@ function render_path_create_target(t: render_target_t): render_target_t {
 	return t;
 }
 
-function render_path_create_image(t: render_target_t, depth_buffer_bits: i32): image_t {
+function render_path_create_image(t: render_target_t, depth_buffer_bits: i32): kinc_g5_texture_t {
 	let width: i32 = t.width == 0 ? app_w() : t.width;
 	let height: i32 = t.height == 0 ? app_h() : t.height;
 	width = math_floor(width * t.scale);
@@ -394,7 +394,7 @@ function render_path_create_image(t: render_target_t, depth_buffer_bits: i32): i
 	if (height < 1) {
 		height = 1;
 	}
-	return image_create_render_target(width, height,
+	return iron_g4_create_render_target(width, height,
 		t.format != null ? render_path_get_tex_format(t.format) : tex_format_t.RGBA32,
 		depth_buffer_bits);
 }
@@ -432,6 +432,6 @@ function render_target_create(): render_target_t {
 
 function render_target_unload(raw: render_target_t) {
 	if (raw._image != null) {
-		image_unload(raw._image);
+		iron_unload_image(raw._image);
 	}
 }

@@ -140,10 +140,10 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 				render_path_draw_meshes("paint");
 				let picker0: render_target_t = map_get(render_path_render_targets, "texpaint_posnortex_picker0");
 				let picker1: render_target_t = map_get(render_path_render_targets, "texpaint_posnortex_picker1");
-				let texpaint_posnortex_picker0: image_t = picker0._image;
-				let texpaint_posnortex_picker1: image_t = picker1._image;
-				let a: buffer_t = image_get_pixels(texpaint_posnortex_picker0);
-				let b: buffer_t = image_get_pixels(texpaint_posnortex_picker1);
+				let texpaint_posnortex_picker0: kinc_g5_texture_t = picker0._image;
+				let texpaint_posnortex_picker1: kinc_g5_texture_t = picker1._image;
+				let a: buffer_t = iron_g4_get_texture_pixels(texpaint_posnortex_picker0);
+				let b: buffer_t = iron_g4_get_texture_pixels(texpaint_posnortex_picker1);
 				context_raw.posx_picked = buffer_get_f32(a, 0);
 				context_raw.posy_picked = buffer_get_f32(a, 4);
 				context_raw.posz_picked = buffer_get_f32(a, 8);
@@ -177,10 +177,10 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 				let texpaint_nor_picker: render_target_t = map_get(render_path_render_targets, "texpaint_nor_picker");
 				let texpaint_pack_picker: render_target_t = map_get(render_path_render_targets, "texpaint_pack_picker");
 				let texpaint_uv_picker: render_target_t = map_get(render_path_render_targets, "texpaint_uv_picker");
-				let a: buffer_t = image_get_pixels(texpaint_picker._image);
-				let b: buffer_t = image_get_pixels(texpaint_nor_picker._image);
-				let c: buffer_t = image_get_pixels(texpaint_pack_picker._image);
-				let d: buffer_t = image_get_pixels(texpaint_uv_picker._image);
+				let a: buffer_t = iron_g4_get_texture_pixels(texpaint_picker._image);
+				let b: buffer_t = iron_g4_get_texture_pixels(texpaint_nor_picker._image);
+				let c: buffer_t = iron_g4_get_texture_pixels(texpaint_pack_picker._image);
+				let d: buffer_t = iron_g4_get_texture_pixels(texpaint_uv_picker._image);
 
 				if (context_raw.color_picker_callback != null) {
 					context_raw.color_picker_callback(context_raw.picked_color);
@@ -441,8 +441,8 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 	render_path_set_target("");
 	kinc_g5_set_pipeline(pipes_cursor);
 	let rt: render_target_t = map_get(render_path_render_targets, "gbuffer0");
-	let gbuffer0: image_t = rt._image;
-	g4_set_tex_depth(pipes_cursor_gbufferd, gbuffer0);
+	let gbuffer0: kinc_g5_texture_t = rt._image;
+	iron_g4_set_texture_depth(pipes_cursor_gbufferd, gbuffer0);
 	iron_g4_set_float2(pipes_cursor_mouse, mx, my);
 	iron_g4_set_float2(pipes_cursor_tex_step, 1 / gbuffer0.width, 1 / gbuffer0.height);
 	iron_g4_set_float(pipes_cursor_radius, radius);

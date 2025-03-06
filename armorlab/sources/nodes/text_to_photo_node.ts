@@ -4,7 +4,7 @@ type text_to_photo_node_t = {
 };
 
 let text_to_photo_node_prompt: string = "";
-let text_to_photo_node_image: image_t = null;
+let text_to_photo_node_image: kinc_g5_texture_t = null;
 let text_to_photo_node_tiling: bool = false;
 let text_to_photo_node_text_encoder_blob: buffer_t;
 let text_to_photo_node_unet_blob: buffer_t;
@@ -18,12 +18,12 @@ function text_to_photo_node_create(raw: ui_node_t, args: f32_array_t): text_to_p
 	return n;
 }
 
-function text_to_photo_node_get_as_image(self: text_to_photo_node_t, from: i32): image_t {
+function text_to_photo_node_get_as_image(self: text_to_photo_node_t, from: i32): kinc_g5_texture_t {
 	text_to_photo_node_image = text_to_photo_node_stable_diffusion(text_to_photo_node_prompt);
 	return text_to_photo_node_image;
 }
 
-function text_to_photo_node_get_cached_image(self: text_to_photo_node_t): image_t {
+function text_to_photo_node_get_cached_image(self: text_to_photo_node_t): kinc_g5_texture_t {
 	return text_to_photo_node_image;
 }
 
@@ -35,7 +35,7 @@ function text_to_photo_node_button(node_id: i32) {
 	node.buttons[1].height = string_split(text_to_photo_node_prompt, "\n").length;
 }
 
-function text_to_photo_node_stable_diffusion(prompt: string, inpaint_latents: f32_array_t = null, offset: i32 = 0, upscale: bool = true, mask: f32_array_t = null, latents_orig: f32_array_t = null): image_t {
+function text_to_photo_node_stable_diffusion(prompt: string, inpaint_latents: f32_array_t = null, offset: i32 = 0, upscale: bool = true, mask: f32_array_t = null, latents_orig: f32_array_t = null): kinc_g5_texture_t {
 	let _text_encoder_blob: buffer_t = data_get_blob("models/sd_text_encoder.quant.onnx");
 	let _unet_blob: buffer_t = data_get_blob("models/sd_unet.quant.onnx");
 	let _vae_decoder_blob: buffer_t = data_get_blob("models/sd_vae_decoder.quant.onnx");
@@ -239,7 +239,7 @@ function text_to_photo_node_unet(latents: f32_array_t, text_embeddings: f32_arra
 	return latents;
 }
 
-function text_to_photo_node_vae_decoder(latents: f32_array_t, upscale: bool): image_t {
+function text_to_photo_node_vae_decoder(latents: f32_array_t, upscale: bool): kinc_g5_texture_t {
 	console_progress(tr("Processing") + " - " + tr("Text to Photo"));
 
 	for (let i: i32 = 0; i < latents.length; ++i) {
@@ -267,7 +267,7 @@ function text_to_photo_node_vae_decoder(latents: f32_array_t, upscale: bool): im
 		u8a[i * 4 + 2] = math_floor(pyimage[i + 512 * 512 * 2] * 255);
 		u8a[i * 4 + 3] = 255;
 	}
-	let image: image_t = image_from_bytes(u8a, 512, 512);
+	let image: kinc_g5_texture_t = image_from_bytes(u8a, 512, 512);
 
 	if (text_to_photo_node_tiling) {
 		tiling_node_prompt = text_to_photo_node_prompt;
@@ -278,9 +278,9 @@ function text_to_photo_node_vae_decoder(latents: f32_array_t, upscale: bool): im
 		if (upscale) {
 			upscale_node_load_blob();
 			while (image.width < config_get_texture_res_x()) {
-				let last_image: image_t = image;
+				let last_image: kinc_g5_texture_t = image;
 				image = upscale_node_esrgan(image);
-				image_unload(last_image);
+				iron_unload_image(last_image);
 			}
 			return image;
 		}

@@ -33,7 +33,7 @@ let pipes_tex_colorid: kinc_tex_unit_t;
 let pipes_texpaint_colorid: kinc_tex_unit_t;
 let pipes_opac_merge_mask: kinc_const_loc_t;
 let pipes_blending_merge_mask: kinc_const_loc_t;
-let pipes_temp_mask_image: image_t = null;
+let pipes_temp_mask_image: kinc_g5_texture_t = null;
 
 let pipes_inpaint_preview: kinc_g5_pipeline_t;
 let pipes_tex0_inpaint_preview: kinc_tex_unit_t;

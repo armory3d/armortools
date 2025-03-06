@@ -383,8 +383,8 @@ function util_mesh_to_origin() {
 	util_mesh_merge();
 }
 
-function util_mesh_apply_displacement(texpaint_pack: image_t, strength: f32 = 0.1, uv_scale: f32 = 1.0) {
-	let height: buffer_t = image_get_pixels(texpaint_pack);
+function util_mesh_apply_displacement(texpaint_pack: kinc_g5_texture_t, strength: f32 = 0.1, uv_scale: f32 = 1.0) {
+	let height: buffer_t = iron_g4_get_texture_pixels(texpaint_pack);
 	let res: i32 = texpaint_pack.width;
 	let o: mesh_object_t = project_paint_objects[0];
 	let g: mesh_data_t = o.data;

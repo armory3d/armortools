@@ -1,7 +1,7 @@
 
 type rgb_node_t = {
 	base?: logic_node_t;
-	image?: image_t;
+	image?: kinc_g5_texture_t;
 	raw?: ui_node_t;
 };
 
@@ -14,10 +14,10 @@ function rgb_node_create(raw: ui_node_t, args: f32_array_t): rgb_node_t {
 	return n;
 }
 
-function rgb_node_get_as_image(self: rgb_node_t, from: i32): image_t {
+function rgb_node_get_as_image(self: rgb_node_t, from: i32): kinc_g5_texture_t {
 	if (self.image != null) {
 		app_notify_on_next_frame(function (self: rgb_node_t) {
-			image_unload(self.image);
+			iron_unload_image(self.image);
 		}, self);
 	}
 
@@ -33,7 +33,7 @@ function rgb_node_get_as_image(self: rgb_node_t, from: i32): image_t {
 	return self.image;
 }
 
-function rgb_node_get_cached_image(self: rgb_node_t): image_t {
+function rgb_node_get_cached_image(self: rgb_node_t): kinc_g5_texture_t {
 	self.base.get_as_image(self, 0);
 	return self.image;
 }

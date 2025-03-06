@@ -345,7 +345,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	}
 
 	// Draw eye icon
-	let icons: image_t = resource_get("icons.k");
+	let icons: kinc_g5_texture_t = resource_get("icons.k");
 	let r: rect_t = resource_tile18(icons, l.visible ? 0 : 1, 0);
 	let center: f32 = (step / 2) * ui_SCALE(ui);
 	ui._x += 2;
@@ -573,7 +573,7 @@ function tab_layers_draw_layer_highlight(l: slot_layer_t, mini: bool) {
 function tab_layers_handle_layer_icon_state(l: slot_layer_t, i: i32, state: ui_state_t, uix: f32, uiy: f32) {
 	let ui: ui_t = ui_base_ui;
 
-	let texpaint_preview: image_t = l.texpaint_preview;
+	let texpaint_preview: kinc_g5_texture_t = l.texpaint_preview;
 
 	tab_layers_show_context_menu = false;
 
@@ -620,7 +620,7 @@ function tab_layers_handle_layer_icon_state(l: slot_layer_t, i: i32, state: ui_s
 
 function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32, mini: bool): ui_state_t {
 	let ui: ui_t = ui_base_ui;
-	let icons: image_t = resource_get("icons.k");
+	let icons: kinc_g5_texture_t = resource_get("icons.k");
 	let icon_h: i32 = (ui_ELEMENT_H(ui) - (mini ? 2 : 3)) * 2;
 
 	if (mini && ui_SCALE(ui) > 1) {
@@ -637,9 +637,9 @@ function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32,
 	}
 
 	if (!slot_layer_is_group(l)) {
-		let texpaint_preview: image_t = l.texpaint_preview;
+		let texpaint_preview: kinc_g5_texture_t = l.texpaint_preview;
 
-		let icon: image_t = l.fill_layer == null ? texpaint_preview : l.fill_layer.image_icon;
+		let icon: kinc_g5_texture_t = l.fill_layer == null ? texpaint_preview : l.fill_layer.image_icon;
 		if (l.fill_layer == null) {
 			// Checker
 			let r: rect_t = resource_tile50(icons, 4, 1);
@@ -750,7 +750,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 					if (!ends_with(f, ".png")) {
 						f += ".png";
 					}
-					iron_write_png(path + path_sep + f, image_get_pixels(l.texpaint), l.texpaint.width, l.texpaint.height, 3); // RRR1
+					iron_write_png(path + path_sep + f, iron_g4_get_texture_pixels(l.texpaint), l.texpaint.width, l.texpaint.height, 3); // RRR1
 				});
 			}
 			else {
@@ -998,7 +998,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 
 function tab_layers_make_mask_preview_rgba32(l: slot_layer_t) {
 	if (context_raw.mask_preview_rgba32 == null) {
-		context_raw.mask_preview_rgba32 = image_create_render_target(util_render_layer_preview_size, util_render_layer_preview_size);
+		context_raw.mask_preview_rgba32 = iron_g4_create_render_target(util_render_layer_preview_size, util_render_layer_preview_size);
 	}
 	// Convert from R8 to RGBA32 for tooltip display
 	if (context_raw.mask_preview_last != l) {

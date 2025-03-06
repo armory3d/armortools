@@ -122,16 +122,16 @@ function ui_nodes_PAN_Y(): f32 {
 	return UI_NODES_PAN_Y();
 }
 
-function _ui_image(image: image_t, tint: i32 = 0xffffffff, h: f32 = -1.0, sx: i32 = 0, sy: i32 = 0, sw: i32 = 0, sh: i32 = 0): ui_state_t {
-	return ui_sub_image(image.texture_, tint, h, sx, sy, sw, sh);
+function _ui_image(image: kinc_g5_texture_t, tint: i32 = 0xffffffff, h: f32 = -1.0, sx: i32 = 0, sy: i32 = 0, sw: i32 = 0, sh: i32 = 0): ui_state_t {
+	return ui_sub_image(image, tint, h, sx, sy, sw, sh);
 }
 
-function _ui_tooltip_image(image: image_t, max_width: i32 = 0) {
-	return ui_tooltip_image(image.texture_, max_width);
+function _ui_tooltip_image(image: kinc_g5_texture_t, max_width: i32 = 0) {
+	return ui_tooltip_image(image, max_width);
 }
 
 function ui_window(handle: ui_handle_t, x: i32, y: i32, w: i32, h: i32, drag: bool = false): bool {
-	_g2_current = { texture_: ADDRESS(handle.texture) };
+	_g2_current = ADDRESS(handle.texture);
 	_g2_in_use = true;
 	return _ui_window(handle, x, y, w, h, drag);
 }
@@ -309,7 +309,10 @@ declare function ui_draw_string(text: string, x_offset: f32, y_offset: f32, alig
 declare function ui_next_node_id(nodes: ui_node_t[]): i32;
 declare function ui_node_canvas(nodes: ui_nodes_t, canvas: ui_node_canvas_t): void;
 
-declare type kinc_g5_texture_t = any;
+declare type kinc_g5_texture_t = {
+	width: i32;
+	height: i32;
+};
 declare type ui_theme_t = any;
 
 declare type ui_t = {

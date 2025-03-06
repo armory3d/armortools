@@ -7,7 +7,7 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 	layers_make_export_img();
 
 	let empty_rt: render_target_t = map_get(render_path_render_targets, "empty_white");
-	let empty: image_t = empty_rt._image;
+	let empty: kinc_g5_texture_t = empty_rt._image;
 
 	// Clear export layer
 	iron_g4_begin(layers_expa);
@@ -30,7 +30,7 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 			continue;
 		}
 
-		let mask: image_t = empty;
+		let mask: kinc_g5_texture_t = empty;
 		let l1masks: slot_layer_t[] = slot_layer_get_masks(l1);
 		if (l1masks != null) {
 			if (l1masks.length > 1) {
@@ -66,10 +66,10 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 			///else
 			iron_g4_begin(layers_expa);
 			kinc_g5_set_pipeline(pipes_merge);
-			g4_set_tex(pipes_tex0, l1.texpaint);
-			g4_set_tex(pipes_tex1, empty);
-			g4_set_tex(pipes_texmask, mask);
-			g4_set_tex(pipes_texa, layers_temp_image);
+			iron_g4_set_texture(pipes_tex0, l1.texpaint);
+			iron_g4_set_texture(pipes_tex1, empty);
+			iron_g4_set_texture(pipes_texmask, mask);
+			iron_g4_set_texture(pipes_texa, layers_temp_image);
 			iron_g4_set_float(pipes_opac, slot_layer_get_opacity(l1));
 			iron_g4_set_int(pipes_blending, layers.length > 1 ? l1.blending : 0);
 			kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
@@ -88,10 +88,10 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 
 			iron_g4_begin(layers_expb);
 			kinc_g5_set_pipeline(pipes_merge);
-			g4_set_tex(pipes_tex0, l1.texpaint);
-			g4_set_tex(pipes_tex1, l1.texpaint_nor);
-			g4_set_tex(pipes_texmask, mask);
-			g4_set_tex(pipes_texa, layers_temp_image);
+			iron_g4_set_texture(pipes_tex0, l1.texpaint);
+			iron_g4_set_texture(pipes_tex1, l1.texpaint_nor);
+			iron_g4_set_texture(pipes_texmask, mask);
+			iron_g4_set_texture(pipes_texa, layers_temp_image);
 			iron_g4_set_float(pipes_opac, slot_layer_get_opacity(l1));
 			iron_g4_set_int(pipes_blending, l1.paint_nor_blend ? -2 : -1);
 			kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
@@ -151,10 +151,10 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 
 		iron_g4_begin(l0.texpaint_nor);
 		kinc_g5_set_pipeline(pipes_merge);
-		g4_set_tex(pipes_tex0, layers_temp_image);
-		g4_set_tex(pipes_tex1, l0.texpaint_pack);
-		g4_set_tex(pipes_texmask, empty);
-		g4_set_tex(pipes_texa, empty);
+		iron_g4_set_texture(pipes_tex0, layers_temp_image);
+		iron_g4_set_texture(pipes_tex1, l0.texpaint_pack);
+		iron_g4_set_texture(pipes_texmask, empty);
+		iron_g4_set_texture(pipes_texa, empty);
 		iron_g4_set_float(pipes_opac, 1.0);
 		iron_g4_set_int(pipes_blending, -4);
 		kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);

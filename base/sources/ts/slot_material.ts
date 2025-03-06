@@ -2,8 +2,8 @@
 type slot_material_t = {
 	nodes?: ui_nodes_t;
 	canvas?: ui_node_canvas_t;
-	image?: image_t;
-	image_icon?: image_t;
+	image?: kinc_g5_texture_t;
+	image_icon?: kinc_g5_texture_t;
 	preview_ready?: bool;
 	data?: material_data_t;
 	id?: i32;
@@ -45,8 +45,8 @@ function slot_material_create(m: material_data_t = null, c: ui_node_canvas_t = n
 
 	let w: i32 = util_render_material_preview_size;
 	let w_icon: i32 = 50;
-	raw.image = image_create_render_target(w, w);
-	raw.image_icon = image_create_render_target(w_icon, w_icon);
+	raw.image = iron_g4_create_render_target(w, w);
+	raw.image_icon = iron_g4_create_render_target(w_icon, w_icon);
 
 	if (c == null) {
 		if (slot_material_default_canvas == null) { // Synchronous
@@ -71,8 +71,8 @@ function slot_material_create(m: material_data_t = null, c: ui_node_canvas_t = n
 
 function slot_material_unload(raw: slot_material_t) {
 	app_notify_on_next_frame(function (raw: slot_material_t) {
-		image_unload(raw.image);
-		image_unload(raw.image_icon);
+		iron_unload_image(raw.image);
+		iron_unload_image(raw.image_icon);
 	}, raw);
 }
 

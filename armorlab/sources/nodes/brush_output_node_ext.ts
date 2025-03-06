@@ -4,11 +4,11 @@ type brush_output_node_t = {
 	raw?: ui_node_t;
 
 	id?: i32;
-	texpaint?: image_t;
-	texpaint_nor?: image_t;
-	texpaint_pack?: image_t;
-	texpaint_nor_empty?: image_t;
-	texpaint_pack_empty?: image_t;
+	texpaint?: kinc_g5_texture_t;
+	texpaint_nor?: kinc_g5_texture_t;
+	texpaint_pack?: kinc_g5_texture_t;
+	texpaint_nor_empty?: kinc_g5_texture_t;
+	texpaint_pack_empty?: kinc_g5_texture_t;
 };
 
 function brush_output_node_create_ext(n: brush_output_node_t) {
@@ -66,7 +66,7 @@ function brush_output_node_create_ext(n: brush_output_node_t) {
 	context_raw.brush_output_node_inst = n;
 }
 
-function brush_output_node_get_as_image(self: brush_output_node_t, from: i32): image_t {
+function brush_output_node_get_as_image(self: brush_output_node_t, from: i32): kinc_g5_texture_t {
 	return logic_node_input_get_as_image(self.base.inputs[from]);
 }
 

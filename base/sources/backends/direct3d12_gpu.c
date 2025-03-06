@@ -2201,17 +2201,6 @@ void kinc_g5_internal_sampler_set(kinc_g5_command_list_t *list, kinc_g5_sampler_
 	list->impl.current_samplers[unit] = sampler;
 }
 
-uint8_t *kinc_g5_texture_lock(struct kinc_g5_texture *texture) {
-	BYTE *pixel;
-	texture->impl.uploadImage->lpVtbl->Map(texture->impl.uploadImage, 0, NULL, (void **)&pixel);
-	return pixel;
-}
-
-void kinc_g5_texture_unlock(struct kinc_g5_texture *texture) {
-	texture->impl.uploadImage->lpVtbl->Unmap(texture->impl.uploadImage, 0, NULL);
-	texture->_uploaded = false;
-}
-
 int kinc_g5_texture_stride(struct kinc_g5_texture *texture) {
 	return texture->impl.stride;
 }

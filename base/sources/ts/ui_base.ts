@@ -151,8 +151,8 @@ function ui_base_init() {
 		theme: base_theme,
 		font: base_font,
 		scale_factor: scale,
-		color_wheel: base_color_wheel.texture_,
-		black_white_gradient: base_color_wheel_gradient.texture_
+		color_wheel: base_color_wheel,
+		black_white_gradient: base_color_wheel_gradient
 	};
 	ui_base_ui = ui_create(ops);
 	ui_on_border_hover = ui_base_on_border_hover;
@@ -1082,12 +1082,12 @@ function ui_base_update_ui() {
 				continue;
 			}
 
-			let target: image_t = l.texpaint_preview;
+			let target: kinc_g5_texture_t = l.texpaint_preview;
 			if (target == null) {
 				continue;
 			}
 
-			let source: image_t = l.texpaint;
+			let source: kinc_g5_texture_t = l.texpaint;
 			g2_begin(target);
 			kinc_g5_clear(0x00000000);
 			// draw_set_pipeline(l.is_mask() ? pipes_copy8 : pipes_copy);
@@ -1104,10 +1104,10 @@ function ui_base_update_ui() {
 		// Update layer preview
 		let l: slot_layer_t = context_raw.layer;
 
-		let target: image_t = l.texpaint_preview;
+		let target: kinc_g5_texture_t = l.texpaint_preview;
 		if (target != null) {
 
-			let source: image_t = l.texpaint;
+			let source: kinc_g5_texture_t = l.texpaint;
 			g2_begin(target);
 			kinc_g5_clear(0x00000000);
 			// draw_set_pipeline(raw.layer.is_mask() ? pipes_copy8 : pipes_copy);
@@ -1338,16 +1338,16 @@ function ui_base_render_cursor() {
 
 	// Show picked material next to cursor
 	if (context_raw.tool == workspace_tool_t.PICKER && context_raw.picker_select_material && context_raw.color_picker_callback == null) {
-		let img: image_t = context_raw.material.image_icon;
+		let img: kinc_g5_texture_t = context_raw.material.image_icon;
 		draw_image(img, mx + 10, my + 10);
 	}
 	if (context_raw.tool == workspace_tool_t.PICKER && context_raw.color_picker_callback != null) {
-		let img: image_t = resource_get("icons.k");
+		let img: kinc_g5_texture_t = resource_get("icons.k");
 		let rect: rect_t = resource_tile50(img, workspace_tool_t.PICKER, 0);
 		draw_sub_image(img, mx + 10, my + 10, rect.x, rect.y, rect.w, rect.h);
 	}
 
-	let cursor_img: image_t = resource_get("cursor.k");
+	let cursor_img: kinc_g5_texture_t = resource_get("cursor.k");
 	let psize: i32 = math_floor(182 * (context_raw.brush_radius * context_raw.brush_nodes_radius) * ui_SCALE(ui_base_ui));
 
 	// Clone source cursor

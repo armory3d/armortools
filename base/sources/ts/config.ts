@@ -253,7 +253,7 @@ function config_apply() {
 	config_save();
 	context_raw.ddirty = 2;
 
-	let current: image_t = _g2_current;
+	let current: kinc_g5_texture_t = _g2_current;
 	let g2_in_use: bool = _g2_in_use;
 	if (g2_in_use) g2_end();
 	render_path_base_apply_config();

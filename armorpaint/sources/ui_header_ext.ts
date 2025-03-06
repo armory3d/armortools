@@ -55,8 +55,8 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 				iron_g4_begin(m.texpaint);
 				kinc_g5_set_pipeline(pipes_colorid_to_mask);
 				let rt: render_target_t = map_get(render_path_render_targets, "texpaint_colorid");
-				g4_set_tex(pipes_texpaint_colorid, rt._image);
-				g4_set_tex(pipes_tex_colorid, project_get_image(project_assets[context_raw.colorid_handle.position]));
+				iron_g4_set_texture(pipes_texpaint_colorid, rt._image);
+				iron_g4_set_texture(pipes_tex_colorid, project_get_image(project_assets[context_raw.colorid_handle.position]));
 				kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
 				kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
 				g4_draw();
@@ -338,7 +338,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			context_raw.brush_scale = ui_slider(brush_scale_handle, tr("UV Scale"), 0.01, 5.0, true);
 			if (brush_scale_handle.changed) {
 				if (context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT) {
-					let current: image_t = _g2_current;
+					let current: kinc_g5_texture_t = _g2_current;
 					g2_end();
 					util_render_make_decal_preview();
 					g2_begin(current);
@@ -423,7 +423,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			ui._w = w;
 
 			if (h.changed) {
-				let current: image_t = _g2_current;
+				let current: kinc_g5_texture_t = _g2_current;
 				g2_end();
 				util_render_make_text_preview();
 				util_render_make_decal_preview();
@@ -436,7 +436,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			ui_combo(context_raw.fill_type_handle, fill_mode_combo, tr("Fill Mode"));
 			if (context_raw.fill_type_handle.changed) {
 				if (context_raw.fill_type_handle.position == fill_type_t.FACE) {
-					let current: image_t = _g2_current;
+					let current: kinc_g5_texture_t = _g2_current;
 					g2_end();
 					// cache_uv_map();
 					util_uv_cache_triangle_map();

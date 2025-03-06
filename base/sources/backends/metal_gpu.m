@@ -1592,21 +1592,6 @@ int kinc_g5_texture_stride(kinc_g5_texture_t *texture) {
 	}
 }
 
-uint8_t *kinc_g5_texture_lock(kinc_g5_texture_t *texture) {
-	return (uint8_t *)texture->impl.data;
-}
-
-void kinc_g5_texture_unlock(kinc_g5_texture_t *tex) {
-	id<MTLTexture> texture = (__bridge id<MTLTexture>)tex->impl._tex;
-	[texture replaceRegion:MTLRegionMake2D(0, 0, tex->width, tex->height)
-	           mipmapLevel:0
-	                 slice:0
-	             withBytes:tex->impl.data
-	           bytesPerRow:kinc_g5_texture_stride(tex)
-	         bytesPerImage:kinc_g5_texture_stride(tex) * tex->height];
-	tex->_uploaded = false;
-}
-
 void kinc_g5_texture_generate_mipmaps(kinc_g5_texture_t *texture, int levels) {}
 
 void kinc_g5_texture_set_mipmap(kinc_g5_texture_t *texture, kinc_g5_texture_t *mipmap, int level) {

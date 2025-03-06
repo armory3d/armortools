@@ -230,8 +230,8 @@ function import_mesh_pack_to_texture(mesh: raw_mesh_t) {
 		buffer_set_f32(b, 4 * i * 4 + 3 * 4, 1.0);
 	}
 
-	let imgmesh: image_t = image_from_bytes(b, config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.RGBA128);
-	let texpaint: image_t = project_layers[0].texpaint;
+	let imgmesh: kinc_g5_texture_t = image_from_bytes(b, config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.RGBA128);
+	let texpaint: kinc_g5_texture_t = project_layers[0].texpaint;
 	g2_begin(texpaint);
 	draw_set_pipeline(pipes_copy128);
 	draw_scaled_image(imgmesh, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());

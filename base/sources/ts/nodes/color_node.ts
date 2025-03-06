@@ -2,7 +2,7 @@
 type color_node_t = {
 	base?: logic_node_t;
 	value?: vec4_t;
-	image?: image_t;
+	image?: kinc_g5_texture_t;
 };
 
 function color_node_create(raw: ui_node_t, args: f32_array_t): color_node_t {
@@ -29,12 +29,12 @@ function color_node_get(self: color_node_t, from: i32): logic_node_value_t {
 	}
 }
 
-function color_node_get_as_image(self: color_node_t, from: i32): image_t {
+function color_node_get_as_image(self: color_node_t, from: i32): kinc_g5_texture_t {
 	if (self.base.inputs.length > 0) {
 		return logic_node_input_get_as_image(self.base.inputs[0]);
 	}
 	if (self.image != null) {
-		image_unload(self.image);
+		iron_unload_image(self.image);
 	}
 	let b: buffer_t = buffer_create(16);
 	buffer_set_f32(b, 0, self.value.x);

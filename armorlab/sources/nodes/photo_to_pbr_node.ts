@@ -3,11 +3,11 @@ type photo_to_pbr_node_t = {
 	base?: logic_node_t;
 };
 
-let photo_to_pbr_node_temp: image_t = null;
-let photo_to_pbr_node_images: image_t[] = null;
+let photo_to_pbr_node_temp: kinc_g5_texture_t = null;
+let photo_to_pbr_node_images: kinc_g5_texture_t[] = null;
 let photo_to_pbr_node_model_names: string[] = ["base", "occlusion", "roughness", "metallic", "normal", "height"];
 
-let photo_to_pbr_node_cached_source: image_t = null;
+let photo_to_pbr_node_cached_source: kinc_g5_texture_t = null;
 let photo_to_pbr_node_border_w: i32 = 64;
 let photo_to_pbr_node_tile_w: i32 = 2048;
 let photo_to_pbr_node_tile_with_border_w: i32 = photo_to_pbr_node_tile_w + photo_to_pbr_node_border_w * 2;
@@ -18,7 +18,7 @@ function photo_to_pbr_node_create(raw: ui_node_t, args: f32_array_t): photo_to_p
 	n.base.get_as_image = photo_to_pbr_node_get_as_image;
 
 	if (photo_to_pbr_node_temp == null) {
-		photo_to_pbr_node_temp = image_create_render_target(photo_to_pbr_node_tile_with_border_w, photo_to_pbr_node_tile_with_border_w);
+		photo_to_pbr_node_temp = iron_g4_create_render_target(photo_to_pbr_node_tile_with_border_w, photo_to_pbr_node_tile_with_border_w);
 	}
 
 	photo_to_pbr_node_init();
@@ -30,14 +30,14 @@ function photo_to_pbr_node_init() {
 	if (photo_to_pbr_node_images == null) {
 		photo_to_pbr_node_images = [];
 		for (let i: i32 = 0; i < photo_to_pbr_node_model_names.length; ++i) {
-			array_push(photo_to_pbr_node_images, image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y()));
+			array_push(photo_to_pbr_node_images, iron_g4_create_render_target(config_get_texture_res_x(), config_get_texture_res_y()));
 		}
 	}
 }
 
-function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): image_t {
+function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): kinc_g5_texture_t {
 
-	let source: image_t;
+	let source: kinc_g5_texture_t;
 	if (photo_to_pbr_node_cached_source != null) {
 		source = photo_to_pbr_node_cached_source;
 	}
@@ -67,7 +67,7 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): i
 		draw_scaled_image(source, photo_to_pbr_node_border_w - x * photo_to_pbr_node_tile_w, photo_to_pbr_node_border_w - y * photo_to_pbr_node_tile_w, config_get_texture_res_x(), config_get_texture_res_y());
 		g2_end();
 
-		let bytes_img: buffer_t = image_get_pixels(photo_to_pbr_node_temp);
+		let bytes_img: buffer_t = iron_g4_get_texture_pixels(photo_to_pbr_node_temp);
 		let u8a: buffer_t = bytes_img;
 		let f32a: f32_array_t = f32_array_create(3 * photo_to_pbr_node_tile_with_border_w * photo_to_pbr_node_tile_with_border_w);
 		for (let i: i32 = 0; i < (photo_to_pbr_node_tile_with_border_w * photo_to_pbr_node_tile_with_border_w); ++i) {
@@ -153,12 +153,12 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): i
 		}
 		///end
 
-		let temp2: image_t = image_from_bytes(u8a, photo_to_pbr_node_tile_w, photo_to_pbr_node_tile_w);
+		let temp2: kinc_g5_texture_t = image_from_bytes(u8a, photo_to_pbr_node_tile_w, photo_to_pbr_node_tile_w);
 		g2_begin(photo_to_pbr_node_images[from]);
 		draw_image(temp2, x * photo_to_pbr_node_tile_w, y * photo_to_pbr_node_tile_w);
 		g2_end();
-		app_notify_on_next_frame(function(temp2: image_t) {
-			image_unload(temp2);
+		app_notify_on_next_frame(function(temp2: kinc_g5_texture_t) {
+			iron_unload_image(temp2);
 		}, temp2);
 	}
 

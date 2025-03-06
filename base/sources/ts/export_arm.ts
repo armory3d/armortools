@@ -87,7 +87,7 @@ function export_arm_run_project() {
 			name: l.name,
 			res: l.texpaint != null ? l.texpaint.width : project_layers[0].texpaint.width,
 			bpp: bpp,
-			texpaint: l.texpaint != null ? lz4_encode(image_get_pixels(l.texpaint)) : null,
+			texpaint: l.texpaint != null ? lz4_encode(iron_g4_get_texture_pixels(l.texpaint)) : null,
 			uv_scale: l.scale,
 			uv_rot: l.angle,
 			uv_type: l.uv_type,
@@ -99,8 +99,8 @@ function export_arm_run_project() {
 			parent: l.parent != null ? array_index_of(project_layers, l.parent) : -1,
 			visible: l.visible,
 			///if is_paint
-			texpaint_nor: l.texpaint_nor != null ? lz4_encode(image_get_pixels(l.texpaint_nor)) : null,
-			texpaint_pack: l.texpaint_pack != null ? lz4_encode(image_get_pixels(l.texpaint_pack)) : null,
+			texpaint_nor: l.texpaint_nor != null ? lz4_encode(iron_g4_get_texture_pixels(l.texpaint_nor)) : null,
+			texpaint_pack: l.texpaint_pack != null ? lz4_encode(iron_g4_get_texture_pixels(l.texpaint_pack)) : null,
 			paint_base: l.paint_base,
 			paint_opac: l.paint_opac,
 			paint_occ: l.paint_occ,
@@ -174,8 +174,8 @@ function export_arm_run_project() {
 
 	///if (arm_android || arm_ios)
 	let rt: render_target_t = map_get(render_path_render_targets, context_raw.render_mode == render_mode_t.FORWARD ? "buf" : "tex");
-	let tex: image_t = rt._image;
-	let mesh_icon: image_t = image_create_render_target(256, 256);
+	let tex: kinc_g5_texture_t = rt._image;
+	let mesh_icon: kinc_g5_texture_t = iron_g4_create_render_target(256, 256);
 	let r: f32 = app_w() / app_h();
 	g2_begin(mesh_icon);
 	draw_scaled_image(tex, -(256 * r - 256) / 2, 0, 256 * r, 256);
@@ -187,7 +187,7 @@ function export_arm_run_project() {
 	g2_end();
 	///end
 
-	let mesh_icon_pixels: buffer_t = image_get_pixels(mesh_icon);
+	let mesh_icon_pixels: buffer_t = iron_g4_get_texture_pixels(mesh_icon);
 	let u8a: u8_array_t = mesh_icon_pixels;
 	for (let i: i32 = 0; i < 256 * 256 * 4; ++i) {
 		u8a[i] = math_floor(math_pow(u8a[i] / 255, 1.0 / 2.2) * 255);
@@ -196,8 +196,8 @@ function export_arm_run_project() {
 	export_arm_bgra_swap(mesh_icon_pixels);
 	///end
 
-	app_notify_on_next_frame(function (mesh_icon: image_t) {
-		image_unload(mesh_icon);
+	app_notify_on_next_frame(function (mesh_icon: kinc_g5_texture_t) {
+		iron_unload_image(mesh_icon);
 	});
 
 	// raw.mesh_icons =
@@ -298,9 +298,9 @@ function export_arm_run_material(path: string) {
 	let micons: buffer_t[] = null;
 	if (!is_cloud) {
 		///if (arm_metal || arm_vulkan)
-		let buf: buffer_t = lz4_encode(export_arm_bgra_swap(image_get_pixels(m.image)));
+		let buf: buffer_t = lz4_encode(export_arm_bgra_swap(iron_g4_get_texture_pixels(m.image)));
 		///else
-		let buf: buffer_t = lz4_encode(image_get_pixels(m.image));
+		let buf: buffer_t = lz4_encode(iron_g4_get_texture_pixels(m.image));
 		///end
 		micons = [buf];
 	}
@@ -315,9 +315,9 @@ function export_arm_run_material(path: string) {
 	};
 
 	if (context_raw.write_icon_on_export) { // Separate icon files
-		iron_write_png(substring(path, 0, path.length - 4) + "_icon.png", image_get_pixels(m.image), m.image.width, m.image.height, 0);
+		iron_write_png(substring(path, 0, path.length - 4) + "_icon.png", iron_g4_get_texture_pixels(m.image), m.image.width, m.image.height, 0);
 		if (is_cloud) {
-			iron_write_jpg(substring(path, 0, path.length - 4) + "_icon.jpg", image_get_pixels(m.image), m.image.width, m.image.height, 0, 50);
+			iron_write_jpg(substring(path, 0, path.length - 4) + "_icon.jpg", iron_g4_get_texture_pixels(m.image), m.image.width, m.image.height, 0, 50);
 		}
 	}
 
@@ -365,9 +365,9 @@ function export_arm_run_brush(path: string) {
 	let bicons: buffer_t[] = null;
 	if (!is_cloud) {
 		///if (arm_metal || arm_vulkan)
-		let buf: buffer_t = lz4_encode(export_arm_bgra_swap(image_get_pixels(b.image)));
+		let buf: buffer_t = lz4_encode(export_arm_bgra_swap(iron_g4_get_texture_pixels(b.image)));
 		///else
-		let buf: buffer_t = lz4_encode(image_get_pixels(b.image));
+		let buf: buffer_t = lz4_encode(iron_g4_get_texture_pixels(b.image));
 		///end
 		bicons = [buf];
 	}
@@ -381,7 +381,7 @@ function export_arm_run_brush(path: string) {
 	};
 
 	if (context_raw.write_icon_on_export) { // Separate icon file
-		iron_write_png(substring(path, 0, path.length - 4) + "_icon.png", image_get_pixels(b.image), b.image.width, b.image.height, 0);
+		iron_write_png(substring(path, 0, path.length - 4) + "_icon.png", iron_g4_get_texture_pixels(b.image), b.image.width, b.image.height, 0);
 	}
 
 	if (context_raw.pack_assets_on_export) { // Pack textures
@@ -483,11 +483,11 @@ function export_arm_pack_assets(raw: project_format_t, assets: asset_t[]) {
 	if (raw.packed_assets == null) {
 		raw.packed_assets = [];
 	}
-	let temp_images: image_t[] = [];
+	let temp_images: kinc_g5_texture_t[] = [];
 	for (let i: i32 = 0; i < assets.length; ++i) {
 		if (!project_packed_asset_exists(raw.packed_assets, assets[i].file)) {
-			let image: image_t = project_get_image(assets[i]);
-			let temp: image_t = image_create_render_target(image.width, image.height);
+			let image: kinc_g5_texture_t = project_get_image(assets[i]);
+			let temp: kinc_g5_texture_t = iron_g4_create_render_target(image.width, image.height);
 			g2_begin(temp);
 			draw_image(image, 0, 0);
 			g2_end();
@@ -495,16 +495,16 @@ function export_arm_pack_assets(raw: project_format_t, assets: asset_t[]) {
 			let pa: packed_asset_t = {
 				name: assets[i].file,
 				bytes: ends_with(assets[i].file, ".jpg") ?
-					iron_encode_jpg(image_get_pixels(temp), temp.width, temp.height, 0, 80) :
-					iron_encode_png(image_get_pixels(temp), temp.width, temp.height, 0)
+					iron_encode_jpg(iron_g4_get_texture_pixels(temp), temp.width, temp.height, 0, 80) :
+					iron_encode_png(iron_g4_get_texture_pixels(temp), temp.width, temp.height, 0)
 			};
 			array_push(raw.packed_assets, pa);
 		}
 	}
-	app_notify_on_next_frame(function (temp_images: image_t[]) {
+	app_notify_on_next_frame(function (temp_images: kinc_g5_texture_t[]) {
 		for (let i: i32 = 0; i < temp_images.length; ++i) {
-			let image: image_t = temp_images[i];
-			image_unload(image);
+			let image: kinc_g5_texture_t = temp_images[i];
+			iron_unload_image(image);
 		}
 	}, temp_images);
 }

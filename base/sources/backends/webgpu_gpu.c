@@ -233,12 +233,6 @@ void kinc_g5_texture_init_from_data(kinc_g5_texture_t *texture, void *data, int 
 void kinc_g5_texture_init_non_sampled_access(kinc_g5_texture_t *texture, int width, int height, kinc_image_format_t format) {}
 void kinc_g5_texture_destroy(kinc_g5_texture_t *texture) {}
 
-uint8_t *kinc_g5_texture_lock(kinc_g5_texture_t *texture) {
-	return NULL;
-}
-
-void kinc_g5_texture_unlock(kinc_g5_texture_t *texture) {}
-
 int kinc_g5_texture_stride(kinc_g5_texture_t *texture) {
 	return 32;
 }

@@ -1,18 +1,18 @@
 
-let util_uv_uvmap: image_t = null;
+let util_uv_uvmap: kinc_g5_texture_t = null;
 let util_uv_uvmap_cached: bool = false;
-let util_uv_trianglemap: image_t = null;
+let util_uv_trianglemap: kinc_g5_texture_t = null;
 let util_uv_trianglemap_cached: bool = false;
-let util_uv_dilatemap: image_t = null;
+let util_uv_dilatemap: kinc_g5_texture_t = null;
 let util_uv_dilatemap_cached: bool = false;
-let util_uv_uvislandmap: image_t = null;
+let util_uv_uvislandmap: kinc_g5_texture_t = null;
 let util_uv_uvislandmap_cached: bool = false;
 let util_uv_dilate_bytes: buffer_t = null;
 let util_uv_pipe_dilate: kinc_g5_pipeline_t = null;
 
 function util_uv_cache_uv_map() {
 	if (util_uv_uvmap != null && (util_uv_uvmap.width != config_get_texture_res_x() || util_uv_uvmap.height != config_get_texture_res_y())) {
-		image_unload(util_uv_uvmap);
+		iron_unload_image(util_uv_uvmap);
 		util_uv_uvmap = null;
 		util_uv_uvmap_cached = false;
 	}
@@ -24,7 +24,7 @@ function util_uv_cache_uv_map() {
 	let res_x: i32 = config_get_texture_res_x();
 	let res_y: i32 = config_get_texture_res_y();
 	if (util_uv_uvmap == null) {
-		util_uv_uvmap = image_create_render_target(res_x, res_y);
+		util_uv_uvmap = iron_g4_create_render_target(res_x, res_y);
 	}
 
 	util_uv_uvmap_cached = true;
@@ -55,7 +55,7 @@ function util_uv_cache_uv_map() {
 
 function util_uv_cache_triangle_map() {
 	if (util_uv_trianglemap != null && (util_uv_trianglemap.width != config_get_texture_res_x() || util_uv_trianglemap.height != config_get_texture_res_y())) {
-		image_unload(util_uv_trianglemap);
+		iron_unload_image(util_uv_trianglemap);
 		util_uv_trianglemap = null;
 		util_uv_trianglemap_cached = false;
 	}
@@ -65,7 +65,7 @@ function util_uv_cache_triangle_map() {
 	}
 
 	if (util_uv_trianglemap == null) {
-		util_uv_trianglemap = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
+		util_uv_trianglemap = iron_g4_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
 	}
 
 	util_uv_trianglemap_cached = true;
@@ -94,7 +94,7 @@ function util_uv_cache_triangle_map() {
 
 function util_uv_cache_dilate_map() {
 	if (util_uv_dilatemap != null && (util_uv_dilatemap.width != config_get_texture_res_x() || util_uv_dilatemap.height != config_get_texture_res_y())) {
-		image_unload(util_uv_dilatemap);
+		iron_unload_image(util_uv_dilatemap);
 		util_uv_dilatemap = null;
 		util_uv_dilatemap_cached = false;
 	}
@@ -102,7 +102,7 @@ function util_uv_cache_dilate_map() {
 	if (util_uv_dilatemap_cached) return;
 
 	if (util_uv_dilatemap == null) {
-		util_uv_dilatemap = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
+		util_uv_dilatemap = iron_g4_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
 	}
 
 	if (util_uv_pipe_dilate == null) {
@@ -179,7 +179,7 @@ function _util_uv_check(cx: i32, cy: i32, w: i32, h: i32, r: i32, view: buffer_t
 function util_uv_cache_uv_island_map() {
 	util_uv_cache_dilate_map();
 	if (util_uv_dilate_bytes == null) {
-		util_uv_dilate_bytes = image_get_pixels(util_uv_dilatemap);
+		util_uv_dilate_bytes = iron_g4_get_texture_pixels(util_uv_dilatemap);
 	}
 	util_render_pick_pos_nor_tex();
 	let w: i32 = 2048; // config_get_texture_res_x()
@@ -198,7 +198,7 @@ function util_uv_cache_uv_island_map() {
 	}
 
 	if (util_uv_uvislandmap != null) {
-		image_unload(util_uv_uvislandmap);
+		iron_unload_image(util_uv_uvislandmap);
 	}
 	util_uv_uvislandmap = image_from_bytes(bytes, w, h, tex_format_t.R8);
 	util_uv_uvislandmap_cached = true;

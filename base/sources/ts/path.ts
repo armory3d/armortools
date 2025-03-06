@@ -15,7 +15,7 @@ let path_mesh_formats: string[] = ["obj", "blend"];
 let path_texture_formats: string[] = ["jpg", "jpeg", "png", "tga", "bmp", "psd", "gif", "hdr", "k"];
 
 let path_mesh_importers: map_t<string, any> = map_create(); // JSValue -> (s: string)=>raw_mesh_t
-let path_texture_importers: map_t<string, any> = map_create(); // JSValue -> (s: string)=>image_t
+let path_texture_importers: map_t<string, any> = map_create(); // JSValue -> (s: string)=>kinc_g5_texture_t
 
 let path_base_color_ext: string[] = ["albedo", "alb", "basecol", "basecolor", "diffuse", "diff", "base", "bc", "d", "color", "col"];
 let path_opacity_ext: string[] = ["opac", "opacity", "alpha"];

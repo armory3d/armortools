@@ -1244,10 +1244,10 @@ kinc_g5_texture_t *iron_load_image(string_t *file, bool readable) {
 	return texture;
 }
 
-void iron_unload_image(image_t *image) {
-	if (image != NULL && image->texture_ != NULL) {
-		kinc_g5_texture_destroy(image->texture_);
-		free(image->texture_);
+void iron_unload_image(kinc_g5_texture_t *image) {
+	if (image != NULL) {
+		kinc_g5_texture_destroy(image);
+		// free(image);
 	}
 }
 
@@ -1515,30 +1515,20 @@ buffer_t *iron_g4_get_texture_pixels(kinc_g5_texture_t *image) {
 	return image->buffer;
 }
 
-buffer_t *iron_g4_lock_texture(kinc_g5_texture_t *texture, i32 level) {
-	uint8_t *tex = kinc_g5_texture_lock(texture);
-	int stride = kinc_g5_texture_stride(texture);
-	int byte_length = stride * texture->height;
-	buffer_t *buffer = malloc(sizeof(buffer_t));
-	buffer->buffer = tex;
-	buffer->length = byte_length;
-	return buffer;
-}
-
 void iron_g4_set_mipmaps(kinc_g5_texture_t *texture, any_array_t *mipmaps) {
 	for (int32_t i = 0; i < mipmaps->length; ++i) {
-		image_t *img = mipmaps->buffer[i];
-		kinc_g5_texture_t *img_tex = img->texture_;
+		kinc_g5_texture_t *img = mipmaps->buffer[i];
+		kinc_g5_texture_t *img_tex = img;
 		kinc_g5_texture_set_mipmap(texture, img_tex, i + 1);
 	}
 }
 
-void iron_g4_begin(image_t *render_target, any_array_t *additional) {
+void iron_g4_begin(kinc_g5_texture_t *render_target, any_array_t *additional) {
 	if (render_target == NULL) {
 		kinc_g4_restore_render_target();
 	}
 	else {
-		kinc_g5_texture_t *rt = (kinc_g5_texture_t *)render_target->texture_;
+		kinc_g5_texture_t *rt = (kinc_g5_texture_t *)render_target;
 		int32_t length = 1;
 		kinc_g5_texture_t *render_targets[8] = { rt, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 		if (additional != NULL) {
@@ -1547,8 +1537,8 @@ void iron_g4_begin(image_t *render_target, any_array_t *additional) {
 				length = 8;
 			}
 			for (int32_t i = 1; i < length; ++i) {
-				image_t *img = additional->buffer[i - 1];
-				kinc_g5_texture_t *art = (kinc_g5_texture_t *)img->texture_;
+				kinc_g5_texture_t *img = additional->buffer[i - 1];
+				kinc_g5_texture_t *art = (kinc_g5_texture_t *)img;
 				render_targets[i] = art;
 			}
 		}
@@ -2277,13 +2267,13 @@ void iron_raytrace_as_build(kinc_g4_vertex_buffer_t *vb_full, kinc_g5_index_buff
 	kinc_g5_raytrace_acceleration_structure_build(&accel, &commandList, &vb_full->impl._buffer, ib_full);
 }
 
-void iron_raytrace_set_textures(image_t *tex0, image_t *tex1, image_t *tex2, kinc_g5_texture_t *texenv, kinc_g5_texture_t *texsobol, kinc_g5_texture_t *texscramble, kinc_g5_texture_t *texrank) {
+void iron_raytrace_set_textures(kinc_g5_texture_t *tex0, kinc_g5_texture_t *tex1, kinc_g5_texture_t *tex2, kinc_g5_texture_t *texenv, kinc_g5_texture_t *texsobol, kinc_g5_texture_t *texscramble, kinc_g5_texture_t *texrank) {
 	kinc_g5_texture_t *texpaint0;
 	kinc_g5_texture_t *texpaint1;
 	kinc_g5_texture_t *texpaint2;
 
-	// image_t *texpaint0_image = tex0;
-	// kinc_g5_texture_t *texpaint0_tex = texpaint0_image->texture_;
+	// kinc_g5_texture_t *texpaint0_image = tex0;
+	// kinc_g5_texture_t *texpaint0_tex = texpaint0_image;
 	// kinc_g5_texture_t *texpaint0_rt = texpaint0_image->render_target_;
 
 	// if (texpaint0_tex != NULL) {
@@ -2304,8 +2294,8 @@ void iron_raytrace_set_textures(image_t *tex0, image_t *tex1, image_t *tex2, kin
 	// 	texpaint0 = texpaint0_rt;
 	// }
 
-	// image_t *texpaint1_image = tex1;
-	// kinc_g5_texture_t *texpaint1_tex = texpaint1_image->texture_;
+	// kinc_g5_texture_t *texpaint1_image = tex1;
+	// kinc_g5_texture_t *texpaint1_tex = texpaint1_image;
 	// kinc_g5_texture_t *texpaint1_rt = texpaint1_image->render_target_;
 
 	// if (texpaint1_tex != NULL) {
@@ -2326,8 +2316,8 @@ void iron_raytrace_set_textures(image_t *tex0, image_t *tex1, image_t *tex2, kin
 	// 	texpaint1 = texpaint1_rt;
 	// }
 
-	// image_t *texpaint2_image = tex2;
-	// kinc_g5_texture_t *texpaint2_tex = texpaint2_image->texture_;
+	// kinc_g5_texture_t *texpaint2_image = tex2;
+	// kinc_g5_texture_t *texpaint2_tex = texpaint2_image;
 	// kinc_g5_texture_t *texpaint2_rt = texpaint2_image->render_target_;
 
 	// if (texpaint2_tex != NULL) {
@@ -2348,9 +2338,9 @@ void iron_raytrace_set_textures(image_t *tex0, image_t *tex1, image_t *tex2, kin
 	// 	texpaint2 = texpaint2_rt;
 	// }
 
-	texpaint0 = tex0->texture_;
-	texpaint1 = tex1->texture_;
-	texpaint2 = tex2->texture_;
+	texpaint0 = tex0;
+	texpaint1 = tex1;
+	texpaint2 = tex2;
 
 	if (!texenv->_uploaded) {
 		kinc_g5_command_list_upload_texture(&commandList, texenv);

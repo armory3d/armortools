@@ -355,7 +355,7 @@ function shader_context_add_tex(raw: shader_context_t, tu: tex_unit_t) {
 function shader_context_set_tex_params(raw: shader_context_t, unit_index: i32, tex: bind_tex_t) {
 	// This function is called for samplers set using material context
 	let unit: any = raw._.tex_units[unit_index];
-	g4_set_tex_params(unit,
+	iron_g4_set_texture_parameters(unit,
 		tex.u_addressing == null ? tex_addressing_t.REPEAT : shader_context_get_tex_addresing(tex.u_addressing),
 		tex.v_addressing == null ? tex_addressing_t.REPEAT : shader_context_get_tex_addresing(tex.v_addressing),
 		tex.min_filter == null ? tex_filter_t.LINEAR : shader_context_get_tex_filter(tex.min_filter),

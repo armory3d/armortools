@@ -5,11 +5,11 @@ type inpaint_node_t = {
 	base?: logic_node_t;
 };
 
-let inpaint_node_image: image_t = null;
-let inpaint_node_mask: image_t = null;
-let inpaint_node_result: image_t = null;
+let inpaint_node_image: kinc_g5_texture_t = null;
+let inpaint_node_mask: kinc_g5_texture_t = null;
+let inpaint_node_result: kinc_g5_texture_t = null;
 
-let inpaint_node_temp: image_t = null;
+let inpaint_node_temp: kinc_g5_texture_t = null;
 let inpaint_node_prompt: string = "";
 let inpaint_node_strength: f32 = 0.5;
 let inpaint_node_auto: bool = true;
@@ -27,11 +27,11 @@ function inpaint_node_create(raw: ui_node_t, args: f32_array_t): inpaint_node_t 
 
 function inpaint_node_init() {
 	if (inpaint_node_image == null) {
-		inpaint_node_image = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
+		inpaint_node_image = iron_g4_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
 	}
 
 	if (inpaint_node_mask == null) {
-		inpaint_node_mask = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
+		inpaint_node_mask = iron_g4_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
 		app_notify_on_next_frame(function () {
 			iron_g4_begin(inpaint_node_mask);
 			kinc_g5_clear(color_from_floats(1.0, 1.0, 1.0, 1.0));
@@ -40,11 +40,11 @@ function inpaint_node_init() {
 	}
 
 	if (inpaint_node_temp == null) {
-		inpaint_node_temp = image_create_render_target(512, 512);
+		inpaint_node_temp = iron_g4_create_render_target(512, 512);
 	}
 
 	if (inpaint_node_result == null) {
-		inpaint_node_result = image_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
+		inpaint_node_result = iron_g4_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
 	}
 }
 
@@ -68,8 +68,8 @@ function inpaint_node_button(node_id: i32) {
 	}
 }
 
-function inpaint_node_get_as_image(self: inpaint_node_t, from: i32): image_t {
-	let source: image_t = logic_node_input_get_as_image(self.base.inputs[0]);
+function inpaint_node_get_as_image(self: inpaint_node_t, from: i32): kinc_g5_texture_t {
+	let source: kinc_g5_texture_t = logic_node_input_get_as_image(self.base.inputs[0]);
 	console_progress(tr("Processing") + " - " + tr("Inpaint"));
 
 	g2_begin(inpaint_node_image);
@@ -84,13 +84,13 @@ function inpaint_node_get_as_image(self: inpaint_node_t, from: i32): image_t {
 	}
 }
 
-function inpaint_node_get_cached_image(self: inpaint_node_t): image_t {
+function inpaint_node_get_cached_image(self: inpaint_node_t): kinc_g5_texture_t {
 	app_notify_on_next_frame(function (self: inpaint_node_t) {
-		let source: image_t = logic_node_input_get_as_image(self.base.inputs[0]);
+		let source: kinc_g5_texture_t = logic_node_input_get_as_image(self.base.inputs[0]);
 		iron_g4_begin(inpaint_node_image);
 		kinc_g5_set_pipeline(pipes_inpaint_preview);
-		g4_set_tex(pipes_tex0_inpaint_preview, source);
-		g4_set_tex(pipes_texa_inpaint_preview, inpaint_node_mask);
+		iron_g4_set_texture(pipes_tex0_inpaint_preview, source);
+		iron_g4_set_texture(pipes_texa_inpaint_preview, inpaint_node_mask);
 		kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
 		kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
 		g4_draw();
@@ -99,16 +99,16 @@ function inpaint_node_get_cached_image(self: inpaint_node_t): image_t {
 	return inpaint_node_image;
 }
 
-function inpaint_node_get_target(): image_t {
+function inpaint_node_get_target(): kinc_g5_texture_t {
 	return inpaint_node_mask;
 }
 
-function inpaint_node_texsynth_inpaint(image: image_t, tiling: bool, mask: image_t): image_t {
+function inpaint_node_texsynth_inpaint(image: kinc_g5_texture_t, tiling: bool, mask: kinc_g5_texture_t): kinc_g5_texture_t {
 	let w: i32 = config_get_texture_res_x();
 	let h: i32 = config_get_texture_res_y();
 
-	let bytes_img: buffer_t = image_get_pixels(image);
-	let bytes_mask: buffer_t = mask != null ? image_get_pixels(mask) : buffer_create(w * h);
+	let bytes_img: buffer_t = iron_g4_get_texture_pixels(image);
+	let bytes_mask: buffer_t = mask != null ? iron_g4_get_texture_pixels(mask) : buffer_create(w * h);
 	let bytes_out: buffer_t = buffer_create(w * h * 4);
 	texsynth_inpaint(w, h, bytes_out.buffer, bytes_img.buffer, bytes_mask.buffer, tiling);
 
@@ -116,10 +116,10 @@ function inpaint_node_texsynth_inpaint(image: image_t, tiling: bool, mask: image
 	return inpaint_node_result;
 }
 
-function inpaint_node_sd_inpaint(image: image_t, mask: image_t): image_t {
+function inpaint_node_sd_inpaint(image: kinc_g5_texture_t, mask: kinc_g5_texture_t): kinc_g5_texture_t {
 	inpaint_node_init();
 
-	let bytes_img: buffer_t = image_get_pixels(mask);
+	let bytes_img: buffer_t = iron_g4_get_texture_pixels(mask);
 	let u8_img: buffer_t = bytes_img;
 	let f32mask: f32_array_t = f32_array_create(4 * 64 * 64);
 
@@ -149,7 +149,7 @@ function inpaint_node_sd_inpaint(image: image_t, mask: image_t): image_t {
 			draw_scaled_image(image, 0, 0, 512, 512);
 			g2_end();
 
-			bytes_img = image_get_pixels(inpaint_node_temp);
+			bytes_img = iron_g4_get_texture_pixels(inpaint_node_temp);
 			let u8a: buffer_t = bytes_img;
 			let f32a: f32_array_t = f32_array_create(3 * 512 * 512);
 			for (let i: i32 = 0; i < (512 * 512); ++i) {

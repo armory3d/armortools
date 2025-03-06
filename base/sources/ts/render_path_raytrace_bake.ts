@@ -4,7 +4,7 @@ let render_path_raytrace_bake_rays_sec: i32 = 0;
 let render_path_raytrace_bake_current_sample: i32 = 0;
 let render_path_raytrace_bake_rays_timer: f32 = 0.0;
 let render_path_raytrace_bake_rays_counter: i32 = 0;
-let render_path_raytrace_bake_last_layer: image_t = null;
+let render_path_raytrace_bake_last_layer: kinc_g5_texture_t = null;
 let render_path_raytrace_bake_last_bake: i32 = 0;
 
 function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>void): bool {
@@ -21,9 +21,9 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 			let baketex0: render_target_t = map_get(render_path_render_targets, "baketex0");
 			let baketex1: render_target_t = map_get(render_path_render_targets, "baketex1");
 			let baketex2: render_target_t = map_get(render_path_render_targets, "baketex2");
-			image_unload(baketex0._image);
-			image_unload(baketex1._image);
-			image_unload(baketex2._image);
+			iron_unload_image(baketex0._image);
+			iron_unload_image(baketex1._image);
+			iron_unload_image(baketex2._image);
 		}
 
 		{
@@ -74,21 +74,21 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 	}
 
 	let probe: world_data_t = scene_world;
-	let saved_envmap: image_t = context_raw.show_envmap_blur ? probe._.radiance_mipmaps[0] : context_raw.saved_envmap;
+	let saved_envmap: kinc_g5_texture_t = context_raw.show_envmap_blur ? probe._.radiance_mipmaps[0] : context_raw.saved_envmap;
 
 	if (render_path_raytrace_last_envmap != saved_envmap || render_path_raytrace_bake_last_layer != context_raw.layer.texpaint) {
 		render_path_raytrace_last_envmap = saved_envmap;
 		render_path_raytrace_bake_last_layer = context_raw.layer.texpaint;
 
-		let bnoise_sobol: image_t = map_get(scene_embedded, "bnoise_sobol.k");
-		let bnoise_scramble: image_t = map_get(scene_embedded, "bnoise_scramble.k");
-		let bnoise_rank: image_t = map_get(scene_embedded, "bnoise_rank.k");
+		let bnoise_sobol: kinc_g5_texture_t = map_get(scene_embedded, "bnoise_sobol.k");
+		let bnoise_scramble: kinc_g5_texture_t = map_get(scene_embedded, "bnoise_scramble.k");
+		let bnoise_rank: kinc_g5_texture_t = map_get(scene_embedded, "bnoise_rank.k");
 
 		let baketex0: render_target_t = map_get(render_path_render_targets, "baketex0");
 		let baketex1: render_target_t = map_get(render_path_render_targets, "baketex1");
 		let texpaint_undo: render_target_t = map_get(render_path_render_targets, "texpaint_undo" + history_undo_i);
 
-		iron_raytrace_set_textures(baketex0._image, baketex1._image, texpaint_undo._image, saved_envmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
+		iron_raytrace_set_textures(baketex0._image, baketex1._image, texpaint_undo._image, saved_envmap, bnoise_sobol, bnoise_scramble, bnoise_rank);
 	}
 
 	if (context_raw.brush_time > 0) {
@@ -107,7 +107,7 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 		f32a[6] = context_raw.envmap_angle;
 
 		let framebuffer: render_target_t = map_get(render_path_render_targets, "baketex2");
-		iron_raytrace_dispatch_rays(framebuffer._image.texture_, f32a);
+		iron_raytrace_dispatch_rays(framebuffer._image, f32a);
 
 		let id: i32 = context_raw.layer.id;
 		let texpaint_id: string = "texpaint" + id;

@@ -243,7 +243,7 @@ function ui_menu_render() {
 			///if (is_paint || is_sculpt)
 			context_raw.draw_wireframe = ui_check(context_raw.wireframe_handle, " " + tr("Wireframe"));
 			if (context_raw.wireframe_handle.changed) {
-				let current: image_t = _g2_current;
+				let current: kinc_g5_texture_t = _g2_current;
 				g2_end();
 				util_uv_cache_uv_map();
 				g2_begin(current);
@@ -528,7 +528,7 @@ function ui_menu_render() {
 					let tab_vertical: bool = config_raw.touch_ui;
 					if (ui_tab(ui_handle(__ID__), tr("About"), tab_vertical)) {
 
-						let img: image_t = data_get_image("badge.k");
+						let img: kinc_g5_texture_t = data_get_image("badge.k");
 						_ui_image(img);
 						_ui_end_element();
 

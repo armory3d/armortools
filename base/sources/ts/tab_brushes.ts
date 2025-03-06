@@ -52,8 +52,8 @@ function tab_brushes_draw(htab: ui_handle_t) {
 					}
 					continue;
 				}
-				let img: image_t = ui_SCALE(ui) > 1 ? project_brushes[i].image : project_brushes[i].image_icon;
-				let img_full: image_t = project_brushes[i].image;
+				let img: kinc_g5_texture_t = ui_SCALE(ui) > 1 ? project_brushes[i].image : project_brushes[i].image_icon;
+				let img_full: kinc_g5_texture_t = project_brushes[i].image;
 
 				if (context_raw.brush == project_brushes[i]) {
 					// ui_fill(1, -2, img.width + 3, img.height + 3, ui.ops.theme.HIGHLIGHT_COL); // TODO

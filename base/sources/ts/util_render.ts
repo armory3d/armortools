@@ -79,12 +79,12 @@ function util_render_make_material_preview() {
 }
 
 function util_render_make_decal_preview() {
-	let current: image_t = _g2_current;
+	let current: kinc_g5_texture_t = _g2_current;
 	let g2_in_use: bool = _g2_in_use;
 	if (g2_in_use) g2_end();
 
 	if (context_raw.decal_image == null) {
-		context_raw.decal_image = image_create_render_target(util_render_decal_preview_size, util_render_decal_preview_size);
+		context_raw.decal_image = iron_g4_create_render_target(util_render_decal_preview_size, util_render_decal_preview_size);
 	}
 	context_raw.decal_preview = true;
 
@@ -143,7 +143,7 @@ function util_render_make_decal_preview() {
 }
 
 function util_render_make_text_preview() {
-	let current: image_t = _g2_current;
+	let current: kinc_g5_texture_t = _g2_current;
 	let g2_in_use: bool = _g2_in_use;
 	if (g2_in_use) g2_end();
 
@@ -157,14 +157,14 @@ function util_render_make_text_preview() {
 		tex_w = 512;
 	}
 	if (context_raw.text_tool_image != null && context_raw.text_tool_image.width < tex_w) {
-		image_unload(context_raw.text_tool_image);
+		iron_unload_image(context_raw.text_tool_image);
 		context_raw.text_tool_image = null;
 	}
 	if (context_raw.text_tool_image == null) {
 		///if arm_metal
-		context_raw.text_tool_image = image_create_render_target(tex_w, tex_w, tex_format_t.RGBA32);
+		context_raw.text_tool_image = iron_g4_create_render_target(tex_w, tex_w, tex_format_t.RGBA32);
 		///else
-		context_raw.text_tool_image = image_create_render_target(tex_w, tex_w, tex_format_t.R8);
+		context_raw.text_tool_image = iron_g4_create_render_target(tex_w, tex_w, tex_format_t.R8);
 		///end
 	}
 	g2_begin(context_raw.text_tool_image);
@@ -178,7 +178,7 @@ function util_render_make_text_preview() {
 }
 
 function util_render_make_font_preview() {
-	let current: image_t = _g2_current;
+	let current: kinc_g5_texture_t = _g2_current;
 	let g2_in_use: bool = _g2_in_use;
 	if (g2_in_use) g2_end();
 
@@ -189,7 +189,7 @@ function util_render_make_font_preview() {
 	let text_h: i32 = math_floor(g2_font_height(font, font_size)) + 8;
 	let tex_w: i32 = text_w + 32;
 	if (context_raw.font.image == null) {
-		context_raw.font.image = image_create_render_target(tex_w, tex_w, tex_format_t.RGBA32);
+		context_raw.font.image = iron_g4_create_render_target(tex_w, tex_w, tex_format_t.RGBA32);
 	}
 	g2_begin(context_raw.font.image);
 	kinc_g5_clear(0x00000000);
@@ -207,7 +207,7 @@ function util_render_make_brush_preview() {
 		return;
 	}
 
-	let current: image_t = _g2_current;
+	let current: kinc_g5_texture_t = _g2_current;
 	let g2_in_use: bool = _g2_in_use;
 	if (g2_in_use) g2_end();
 
@@ -222,8 +222,8 @@ function util_render_make_brush_preview() {
 	slot_layer_clear(l);
 
 	if (context_raw.brush.image == null) {
-		context_raw.brush.image = image_create_render_target(util_render_material_preview_size, util_render_material_preview_size);
-		context_raw.brush.image_icon = image_create_render_target(50, 50);
+		context_raw.brush.image = iron_g4_create_render_target(util_render_material_preview_size, util_render_material_preview_size);
+		context_raw.brush.image_icon = iron_g4_create_render_target(50, 50);
 	}
 
 	let _material: slot_material_t = context_raw.material;
@@ -365,7 +365,7 @@ function util_render_make_brush_preview() {
 
 	// Scale layer down to to image preview
 	l = render_path_paint_live_layer;
-	let target: image_t = context_raw.brush.image;
+	let target: kinc_g5_texture_t = context_raw.brush.image;
 	g2_begin(target);
 	kinc_g5_clear(0x00000000);
 	draw_set_pipeline(pipes_copy);
@@ -388,7 +388,7 @@ function util_render_make_brush_preview() {
 	if (g2_in_use) g2_begin(current);
 }
 
-function util_render_make_node_preview(canvas: ui_node_canvas_t, node: ui_node_t, image: image_t, group: ui_node_canvas_t = null, parents: ui_node_t[] = null) {
+function util_render_make_node_preview(canvas: ui_node_canvas_t, node: ui_node_t, image: kinc_g5_texture_t, group: ui_node_canvas_t = null, parents: ui_node_t[] = null) {
 	let res: parse_node_preview_result_t = make_material_parse_node_preview_material(node, group, parents);
 	if (res == null || res.scon == null) {
 		return;

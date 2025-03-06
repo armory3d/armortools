@@ -32,7 +32,7 @@ let ui_nodes_last_node_selected_id: i32 = -1;
 let ui_nodes_release_link: bool = false;
 let ui_nodes_is_node_menu_op: bool = false;
 
-let ui_nodes_grid: image_t = null;
+let ui_nodes_grid: kinc_g5_texture_t = null;
 let ui_nodes_grid_redraw: bool = true;
 let ui_nodes_grid_cell_w: i32 = 200;
 let ui_nodes_grid_small_cell_w: i32 = 40;
@@ -70,8 +70,8 @@ function ui_viewnodes_init() {
 	let ops: ui_options_t = {
 		theme: base_theme,
 		font: base_font,
-		color_wheel: base_color_wheel.texture_,
-		black_white_gradient: base_color_wheel_gradient.texture_,
+		color_wheel: base_color_wheel,
+		black_white_gradient: base_color_wheel_gradient,
 		scale_factor: scale
 	};
 	ui_nodes_ui = ui_create(ops);
@@ -715,7 +715,7 @@ function ui_nodes_get_node_y(): i32 {
 	return math_floor((mouse_y - ui_nodes_wy - ui_nodes_PAN_Y()) / ui_nodes_SCALE());
 }
 
-function ui_nodes_draw_grid(zoom: f32): image_t {
+function ui_nodes_draw_grid(zoom: f32): kinc_g5_texture_t {
 	let ww: i32 = config_raw.layout[layout_size_t.NODES_W];
 
 	///if (is_paint || is_sculpt)
@@ -736,7 +736,7 @@ function ui_nodes_draw_grid(zoom: f32): image_t {
 		h = 1;
 	}
 
-	let grid: image_t = image_create_render_target(w, h);
+	let grid: kinc_g5_texture_t = iron_g4_create_render_target(w, h);
 	g2_begin(grid);
 	kinc_g5_clear(ui_nodes_ui.ops.theme.SEPARATOR_COL);
 
@@ -868,7 +868,7 @@ function ui_nodes_render() {
 
 	if (ui_nodes_grid_redraw) {
 		if (ui_nodes_grid != null) {
-			image_unload(ui_nodes_grid);
+			iron_unload_image(ui_nodes_grid);
 		}
 		let ui_nodes: ui_nodes_t = ui_nodes_get_nodes();
 		ui_nodes_grid = ui_nodes_draw_grid(ui_nodes.zoom);
@@ -1056,7 +1056,7 @@ function ui_nodes_render() {
 
 		// Node previews
 		if (config_raw.node_preview && nodes.nodes_selected_id.length > 0) {
-			let img: image_t = null;
+			let img: kinc_g5_texture_t = null;
 			let sel: ui_node_t = ui_get_node(c.nodes, nodes.nodes_selected_id[0]);
 
 			///if (is_paint || is_sculpt)
@@ -1587,7 +1587,7 @@ function ui_nodes_make_node_preview() {
 	}
 
 	if (context_raw.node_preview == null) {
-		context_raw.node_preview = image_create_render_target(util_render_material_preview_size, util_render_material_preview_size);
+		context_raw.node_preview = iron_g4_create_render_target(util_render_material_preview_size, util_render_material_preview_size);
 	}
 
 	context_raw.node_preview_dirty = false;

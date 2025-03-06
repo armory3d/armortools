@@ -6,7 +6,7 @@ let _uniforms_vec: vec4_t = vec4_create();
 let _uniforms_vec2: vec4_t = vec4_create();
 let _uniforms_quat: quat_t = quat_create();
 
-let uniforms_tex_links: (o: object_t, md: material_data_t, s: string)=>image_t = null;
+let uniforms_tex_links: (o: object_t, md: material_data_t, s: string)=>kinc_g5_texture_t = null;
 let uniforms_mat4_links: (o: object_t, md: material_data_t, s: string)=>mat4_t = null;
 let uniforms_vec4_links: (o: object_t, md: material_data_t, s: string)=>vec4_t = null;
 let uniforms_vec3_links: (o: object_t, md: material_data_t, s: string)=>vec4_t = null;
@@ -57,21 +57,21 @@ function uniforms_set_context_consts(context: shader_context_t, bind_params: str
 			}
 
 			if (char_at(tulink, 0) == "$") { // Link to embedded data
-				g4_set_tex(context._.tex_units[j], map_get(scene_embedded, substring(tulink, 1, tulink.length)));
-				g4_set_tex_params(context._.tex_units[j], tex_addressing_t.REPEAT, tex_addressing_t.REPEAT, tex_filter_t.LINEAR, tex_filter_t.LINEAR, mip_map_filter_t.NONE);
+				iron_g4_set_texture(context._.tex_units[j], map_get(scene_embedded, substring(tulink, 1, tulink.length)));
+				iron_g4_set_texture_parameters(context._.tex_units[j], tex_addressing_t.REPEAT, tex_addressing_t.REPEAT, tex_filter_t.LINEAR, tex_filter_t.LINEAR, mip_map_filter_t.NONE);
 			}
 			else if (tulink == "_envmap_radiance") {
 				let w: world_data_t = scene_world;
 				if (w != null) {
-					g4_set_tex(context._.tex_units[j], w._.radiance);
-					g4_set_tex_params(context._.tex_units[j], tex_addressing_t.REPEAT, tex_addressing_t.REPEAT, tex_filter_t.LINEAR, tex_filter_t.LINEAR, mip_map_filter_t.LINEAR);
+					iron_g4_set_texture(context._.tex_units[j], w._.radiance);
+					iron_g4_set_texture_parameters(context._.tex_units[j], tex_addressing_t.REPEAT, tex_addressing_t.REPEAT, tex_filter_t.LINEAR, tex_filter_t.LINEAR, mip_map_filter_t.LINEAR);
 				}
 			}
 			else if (tulink == "_envmap") {
 				let w: world_data_t = scene_world;
 				if (w != null) {
-					g4_set_tex(context._.tex_units[j], w._.envmap);
-					g4_set_tex_params(context._.tex_units[j], tex_addressing_t.REPEAT, tex_addressing_t.REPEAT, tex_filter_t.LINEAR, tex_filter_t.LINEAR, mip_map_filter_t.NONE);
+					iron_g4_set_texture(context._.tex_units[j], w._.envmap);
+					iron_g4_set_texture_parameters(context._.tex_units[j], tex_addressing_t.REPEAT, tex_addressing_t.REPEAT, tex_filter_t.LINEAR, tex_filter_t.LINEAR, mip_map_filter_t.NONE);
 				}
 			}
 		}
@@ -96,12 +96,12 @@ function uniforms_set_obj_consts(context: shader_context_t, object: object_t) {
 					continue;
 				}
 
-				let image: image_t = uniforms_tex_links(object, current_material(object), tu.link);
+				let image: kinc_g5_texture_t = uniforms_tex_links(object, current_material(object), tu.link);
 				if (image != null) {
 					ends_with(tu.link, "_depth") ?
-						g4_set_tex_depth(context._.tex_units[j], image) :
-						g4_set_tex(context._.tex_units[j], image);
-					g4_set_tex_params(context._.tex_units[j], tex_addressing_t.REPEAT, tex_addressing_t.REPEAT, tex_filter_t.LINEAR, tex_filter_t.LINEAR, mip_map_filter_t.NONE);
+						iron_g4_set_texture_depth(context._.tex_units[j], image) :
+						iron_g4_set_texture(context._.tex_units[j], image);
+					iron_g4_set_texture_parameters(context._.tex_units[j], tex_addressing_t.REPEAT, tex_addressing_t.REPEAT, tex_filter_t.LINEAR, tex_filter_t.LINEAR, mip_map_filter_t.NONE);
 				}
 			}
 		}
@@ -119,25 +119,25 @@ function uniforms_bind_render_target(rt: render_target_t, context: shader_contex
 		if (sampler_id == tus[j].name) {
 
 			if (attach_depth) {
-				g4_set_tex_depth(context._.tex_units[j], rt._image); // sampler2D
+				iron_g4_set_texture_depth(context._.tex_units[j], rt._image); // sampler2D
 			}
 			else {
-				g4_set_tex(context._.tex_units[j], rt._image); // sampler2D
+				iron_g4_set_texture(context._.tex_units[j], rt._image); // sampler2D
 			}
 
 			if (rt.mipmaps) {
-				g4_set_tex_params(context._.tex_units[j], tex_addressing_t.CLAMP, tex_addressing_t.CLAMP, tex_filter_t.LINEAR, tex_filter_t.LINEAR, mip_map_filter_t.LINEAR);
+				iron_g4_set_texture_parameters(context._.tex_units[j], tex_addressing_t.CLAMP, tex_addressing_t.CLAMP, tex_filter_t.LINEAR, tex_filter_t.LINEAR, mip_map_filter_t.LINEAR);
 				continue;
 			}
 
 			if (starts_with(rt.name, "bloom")) {
 				// Use bilinear filter for bloom mips to get correct blur
-				g4_set_tex_params(context._.tex_units[j], tex_addressing_t.CLAMP, tex_addressing_t.CLAMP, tex_filter_t.LINEAR, tex_filter_t.LINEAR, mip_map_filter_t.NONE);
+				iron_g4_set_texture_parameters(context._.tex_units[j], tex_addressing_t.CLAMP, tex_addressing_t.CLAMP, tex_filter_t.LINEAR, tex_filter_t.LINEAR, mip_map_filter_t.NONE);
 				continue;
 			}
 
 			if (attach_depth) {
-				g4_set_tex_params(context._.tex_units[j], tex_addressing_t.CLAMP, tex_addressing_t.CLAMP, tex_filter_t.POINT, tex_filter_t.POINT, mip_map_filter_t.NONE);
+				iron_g4_set_texture_parameters(context._.tex_units[j], tex_addressing_t.CLAMP, tex_addressing_t.CLAMP, tex_filter_t.POINT, tex_filter_t.POINT, mip_map_filter_t.NONE);
 				continue;
 			}
 
@@ -147,7 +147,7 @@ function uniforms_bind_render_target(rt: render_target_t, context: shader_contex
 			if (allow_params) {
 				let addressing: tex_addressing_t = (oc != null && oc.addressing == "repeat") ? tex_addressing_t.REPEAT : tex_addressing_t.CLAMP;
 				let filter: tex_filter_t = (oc != null && oc.filter == "point") ? tex_filter_t.POINT : tex_filter_t.LINEAR;
-				g4_set_tex_params(context._.tex_units[j], addressing, addressing, filter, filter, mip_map_filter_t.NONE);
+				iron_g4_set_texture_parameters(context._.tex_units[j], addressing, addressing, filter, filter, mip_map_filter_t.NONE);
 			}
 		}
 	}
@@ -536,7 +536,7 @@ function uniforms_set_material_consts(context: shader_context_t, material_contex
 			for (let j: i32 = 0; j < context._.tex_units.length; ++j) {
 				let sname: string = context.texture_units[j].name;
 				if (mname == sname) {
-					g4_set_tex(context._.tex_units[j], material_context._.textures[i]);
+					iron_g4_set_texture(context._.tex_units[j], material_context._.textures[i]);
 					// After texture sampler have been assigned, set texture parameters
 					material_context_set_tex_params(material_context, i, context, j);
 					break;

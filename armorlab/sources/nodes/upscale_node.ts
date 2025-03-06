@@ -3,8 +3,8 @@ type upscale_node_t = {
 	base?: logic_node_t;
 };
 
-let upscale_node_temp: image_t = null;
-let upscale_node_image: image_t = null;
+let upscale_node_temp: kinc_g5_texture_t = null;
+let upscale_node_image: kinc_g5_texture_t = null;
 let upscale_node_esrgan_blob: buffer_t;
 
 function upscale_node_create(raw: ui_node_t, args: f32_array_t): upscale_node_t {
@@ -15,7 +15,7 @@ function upscale_node_create(raw: ui_node_t, args: f32_array_t): upscale_node_t 
 	return n;
 }
 
-function upscale_node_get_as_image(self: upscale_node_t, from: i32): image_t {
+function upscale_node_get_as_image(self: upscale_node_t, from: i32): kinc_g5_texture_t {
 	upscale_node_image = logic_node_input_get_as_image(self.base.inputs[0]);
 
 	console_progress(tr("Processing") + " - " + tr("Upscale"));
@@ -24,9 +24,9 @@ function upscale_node_get_as_image(self: upscale_node_t, from: i32): image_t {
 	if (upscale_node_image.width < config_get_texture_res_x()) {
 		upscale_node_image = upscale_node_esrgan(upscale_node_image);
 		while (upscale_node_image.width < config_get_texture_res_x()) {
-			let last_image: image_t = upscale_node_image;
+			let last_image: kinc_g5_texture_t = upscale_node_image;
 			upscale_node_image = upscale_node_esrgan(upscale_node_image);
-			image_unload(last_image);
+			iron_unload_image(last_image);
 		}
 	}
 	return upscale_node_image;
@@ -36,25 +36,25 @@ function upscale_node_load_blob() {
 	upscale_node_esrgan_blob = data_get_blob("models/esrgan.quant.onnx");
 }
 
-function upscale_node_get_cached_image(self: upscale_node_t): image_t {
+function upscale_node_get_cached_image(self: upscale_node_t): kinc_g5_texture_t {
 	return upscale_node_image;
 }
 
-function upscale_node_do_tile(source: image_t): image_t {
-	let result: image_t = null;
+function upscale_node_do_tile(source: kinc_g5_texture_t): kinc_g5_texture_t {
+	let result: kinc_g5_texture_t = null;
 	let size1w: i32 = source.width;
 	let size1h: i32 = source.height;
 	let size2w: i32 = math_floor(size1w * 2);
 	let size2h: i32 = math_floor(size1h * 2);
 	if (upscale_node_temp != null) {
-		image_unload(upscale_node_temp);
+		iron_unload_image(upscale_node_temp);
 	}
-	upscale_node_temp = image_create_render_target(size1w, size1h);
+	upscale_node_temp = iron_g4_create_render_target(size1w, size1h);
 	g2_begin(upscale_node_temp);
 	draw_scaled_image(source, 0, 0, size1w, size1h);
 	g2_end();
 
-	let bytes_img: buffer_t = image_get_pixels(upscale_node_temp);
+	let bytes_img: buffer_t = iron_g4_get_texture_pixels(upscale_node_temp);
 	let u8a: u8_array_t = bytes_img;
 	let f32a: f32_array_t = f32_array_create(3 * size1w * size1h);
 	for (let i: i32 = 0; i < (size1w * size1h); ++i) {
@@ -91,8 +91,8 @@ function upscale_node_do_tile(source: image_t): image_t {
 	return result;
 }
 
-function upscale_node_esrgan(source: image_t): image_t {
-	let result: image_t = null;
+function upscale_node_esrgan(source: kinc_g5_texture_t): kinc_g5_texture_t {
+	let result: kinc_g5_texture_t = null;
 	let size1w: i32 = source.width;
 	let size1h: i32 = source.height;
 	let tile_size: i32 = 512;
@@ -101,8 +101,8 @@ function upscale_node_esrgan(source: image_t): image_t {
 	if (size1w >= tile_size2x || size1h >= tile_size2x) { // Split into tiles
 		let size2w: i32 = math_floor(size1w * 2);
 		let size2h: i32 = math_floor(size1h * 2);
-		result = image_create_render_target(size2w, size2h);
-		let tile_source: image_t = image_create_render_target(tile_size + 32 * 2, tile_size + 32 * 2);
+		result = iron_g4_create_render_target(size2w, size2h);
+		let tile_source: kinc_g5_texture_t = iron_g4_create_render_target(tile_size + 32 * 2, tile_size + 32 * 2);
 		for (let x: i32 = 0; x < math_floor(size1w / tile_size); ++x) {
 			for (let y: i32 = 0; y < math_floor(size1h / tile_size); ++y) {
 				g2_begin(tile_source);
@@ -114,14 +114,14 @@ function upscale_node_esrgan(source: image_t): image_t {
 				draw_scaled_image(source, 32 - x * tile_size + tile_size, 32 - y * tile_size + tile_size, source.width, -source.height);
 				draw_scaled_image(source, 32 - x * tile_size, 32 - y * tile_size, source.width, source.height);
 				g2_end();
-				let tile_result: image_t = upscale_node_do_tile(tile_source);
+				let tile_result: kinc_g5_texture_t = upscale_node_do_tile(tile_source);
 				g2_begin(result);
 				draw_sub_image(tile_result, x * tile_size2x, y * tile_size2x, 64, 64, tile_size2x, tile_size2x);
 				g2_end();
-				image_unload(tile_result);
+				iron_unload_image(tile_result);
 			}
 		}
-		image_unload(tile_source);
+		iron_unload_image(tile_source);
 	}
 	else {
 		result = upscale_node_do_tile(source); // Single tile

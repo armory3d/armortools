@@ -39,11 +39,11 @@ function ui_nodes_ext_run() {
 	parser_logic_parse(project_canvas);
 
 	photo_to_pbr_node_cached_source = null;
-	let texbase: image_t = logic_node_get_as_image(context_raw.brush_output_node_inst.base, channel_type_t.BASE_COLOR);
-	let texocc: image_t = logic_node_get_as_image(context_raw.brush_output_node_inst.base, channel_type_t.OCCLUSION);
-	let texrough: image_t = logic_node_get_as_image(context_raw.brush_output_node_inst.base, channel_type_t.ROUGHNESS);
-	let texnor: image_t = logic_node_get_as_image(context_raw.brush_output_node_inst.base, channel_type_t.NORMAL_MAP);
-	let texheight: image_t = logic_node_get_as_image(context_raw.brush_output_node_inst.base, channel_type_t.HEIGHT);
+	let texbase: kinc_g5_texture_t = logic_node_get_as_image(context_raw.brush_output_node_inst.base, channel_type_t.BASE_COLOR);
+	let texocc: kinc_g5_texture_t = logic_node_get_as_image(context_raw.brush_output_node_inst.base, channel_type_t.OCCLUSION);
+	let texrough: kinc_g5_texture_t = logic_node_get_as_image(context_raw.brush_output_node_inst.base, channel_type_t.ROUGHNESS);
+	let texnor: kinc_g5_texture_t = logic_node_get_as_image(context_raw.brush_output_node_inst.base, channel_type_t.NORMAL_MAP);
+	let texheight: kinc_g5_texture_t = logic_node_get_as_image(context_raw.brush_output_node_inst.base, channel_type_t.HEIGHT);
 
 	if (texbase != null) {
 		let texpaint: render_target_t = map_get(render_path_render_targets, "texpaint");
@@ -80,7 +80,7 @@ function ui_nodes_ext_run() {
 	if (texheight != null) {
 		iron_g4_begin(texpaint_pack._image);
 		kinc_g5_set_pipeline(pipes_copy_a);
-		g4_set_tex(pipes_copy_a_tex, texheight);
+		iron_g4_set_texture(pipes_copy_a_tex, texheight);
 		kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
 		kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
 		g4_draw();
