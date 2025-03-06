@@ -8,7 +8,7 @@ function import_tiff(path) {
 	let ifds = UTIF.decode(b);
 	UTIF.decodeImage(b, ifds[0]);
 	let rgba = UTIF.toRGBA8(ifds[0]);
-	let image = image_from_bytes(rgba.buffer, ifds[0].width, ifds[0].height);
+	let image = iron_g4_create_texture_from_bytes(rgba.buffer, ifds[0].width, ifds[0].height);
 	return image;
 }
 

@@ -472,6 +472,9 @@ bool kinc_mouse_is_locked(void) {
 }
 
 void kinc_mouse_lock() {
+	if (kinc_mouse_is_locked()) {
+		return;
+	}
 	if (!kinc_mouse_can_lock()) {
 		return;
 	}
@@ -484,6 +487,9 @@ void kinc_mouse_lock() {
 }
 
 void kinc_mouse_unlock(void) {
+	if (!kinc_mouse_is_locked()) {
+		return;
+	}
 	if (!kinc_mouse_can_lock()) {
 		return;
 	}

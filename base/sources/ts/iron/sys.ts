@@ -14,9 +14,6 @@ let _sys_pause_listeners: sys_callback_t[] = [];
 let _sys_background_listeners: sys_callback_t[] = [];
 let _sys_shutdown_listeners: sys_callback_t[] = [];
 let _sys_drop_files_listeners: sys_string_callback_t[] = [];
-let _sys_cut_listener: ()=>string = null;
-let _sys_copy_listener: ()=>string = null;
-let _sys_paste_listener: (data: string)=>void = null;
 
 let _sys_start_time: f32;
 let _sys_window_title: string;
@@ -55,7 +52,6 @@ function sys_start(ops: kinc_window_options_t) {
 	);
 	iron_set_update_callback(sys_render_callback);
 	iron_set_drop_files_callback(sys_drop_files_callback);
-	iron_set_cut_copy_paste_callback(sys_cut_callback, sys_copy_callback, sys_paste_callback);
 	iron_set_application_state_callback(sys_foreground_callback, sys_resume_callback, sys_pause_callback, sys_background_callback, sys_shutdown_callback);
 	iron_set_keyboard_down_callback(sys_keyboard_down_callback);
 	iron_set_keyboard_up_callback(sys_keyboard_up_callback);
@@ -109,12 +105,6 @@ function sys_notify_on_drop_files(drop_files_listener: (s: string)=>void) {
 	array_push(_sys_drop_files_listeners, cb);
 }
 
-function sys_notify_on_cut_copy_paste(on_cut: ()=>string, on_copy: ()=>string, on_paste: (data: string)=>void) {
-	_sys_cut_listener = on_cut;
-	_sys_copy_listener = on_copy;
-	_sys_paste_listener = on_paste;
-}
-
 function sys_foreground() {
 	for (let i: i32 = 0; i < _sys_foreground_listeners.length; ++i) {
 		_sys_foreground_listeners[i].f();
@@ -163,26 +153,6 @@ function sys_render_callback() {
 
 function sys_drop_files_callback(file_path: string) {
 	sys_drop_files(file_path);
-}
-
-function sys_copy_callback(): string {
-	if (_sys_copy_listener != null) {
-		return _sys_copy_listener();
-	}
-	return null;
-}
-
-function sys_cut_callback(): string {
-	if (_sys_cut_listener != null) {
-		return _sys_cut_listener();
-	}
-	return null;
-}
-
-function sys_paste_callback(data: string) {
-	if (_sys_paste_listener != null) {
-		_sys_paste_listener(data);
-	}
 }
 
 function sys_foreground_callback() {
@@ -269,26 +239,6 @@ function sys_gamepad_axis_callback(gamepad: i32, axis: i32, value: f32) {
 
 function sys_gamepad_button_callback(gamepad: i32, button: i32, value: f32) {
 	gamepad_button_listener(gamepad, button, value);
-}
-
-function sys_lock_mouse() {
-	if (!kinc_mouse_is_locked()) {
-		kinc_mouse_lock();
-	}
-}
-
-function sys_unlock_mouse() {
-	if (kinc_mouse_is_locked()) {
-		kinc_mouse_unlock();
-	}
-}
-
-function sys_hide_system_cursor() {
-	iron_show_mouse(false);
-}
-
-function sys_show_system_cursor() {
-	iron_show_mouse(true);
 }
 
 function sys_title(): string {

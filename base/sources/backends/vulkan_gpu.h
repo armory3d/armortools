@@ -72,7 +72,7 @@ struct vk_window {
 	struct vk_depth depth;
 };
 
-#define MAXIMUM_WINDOWS 16
+#define MAXIMUM_WINDOWS 1
 
 struct vk_context {
 	VkInstance instance;
@@ -119,8 +119,6 @@ typedef struct kinc_g5_compute_shader_impl {
 	VkPipeline pipeline;
 	VkShaderModule shader_module;
 } kinc_g5_compute_shader_impl;
-
-struct kinc_g5_shader;
 
 typedef struct PipelineState5Impl_s {
 	const char **textures;
@@ -244,7 +242,6 @@ typedef struct {
 	VkDeviceMemory top_level_mem;
 	VkBuffer instances_buffer;
 	VkDeviceMemory instances_mem;
-
 } kinc_g5_raytrace_acceleration_structure_impl_t;
 
 #endif

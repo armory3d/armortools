@@ -449,8 +449,8 @@ FN(node_shader_add_uniform) {
 
 VOID_FN_PTR_STR(node_shader_write)
 
-void *image_from_bytes(void *p, int w, int h, int format);
-FN(image_from_bytes) {
+void *iron_g4_create_texture_from_bytes(void *p, int w, int h, int format);
+FN(iron_g4_create_texture_from_bytes) {
 	size_t len;
 	void *ab = JS_GetArrayBuffer(ctx, &len, argv[0]);
 	buffer_t b = { .buffer = ab, .length = len, .capacity = len };
@@ -458,7 +458,7 @@ FN(image_from_bytes) {
 	JS_ToInt64(ctx, &w, argv[1]);
 	int64_t h;
 	JS_ToInt64(ctx, &h, argv[2]);
-	int64_t result = (int64_t)image_from_bytes(&b, w, h, 0);
+	int64_t result = (int64_t)iron_g4_create_texture_from_bytes(&b, w, h, 0);
 	return JS_NewInt64(ctx, result);
 }
 
@@ -810,7 +810,7 @@ void plugin_api_init() {
 	BIND(context_set_viewport_shader, 1);
 	BIND(node_shader_add_uniform, 3);
 	BIND(node_shader_write, 2);
-	BIND(image_from_bytes, 3);
+	BIND(iron_g4_create_texture_from_bytes, 3);
 	BIND(project_filepath_get, 0);
 	BIND(project_save, 0);
 

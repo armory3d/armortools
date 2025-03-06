@@ -266,21 +266,21 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 					let raw: project_format_t = armpack_decode(buffer);
 					if (raw.material_icons != null) {
 						let bytes_icon: any = raw.material_icons[0];
-						icon = image_from_bytes(lz4_decode(bytes_icon, 256 * 256 * 4), 256, 256);
+						icon = iron_g4_create_texture_from_bytes(lz4_decode(bytes_icon, 256 * 256 * 4), 256, 256);
 					}
 					else if (raw.mesh_icons != null) {
 						let bytes_icon: any = raw.mesh_icons[0];
-						icon = image_from_bytes(lz4_decode(bytes_icon, 256 * 256 * 4), 256, 256);
+						icon = iron_g4_create_texture_from_bytes(lz4_decode(bytes_icon, 256 * 256 * 4), 256, 256);
 					}
 					else if (raw.brush_icons != null) {
 						let bytes_icon: any = raw.brush_icons[0];
-						icon = image_from_bytes(lz4_decode(bytes_icon, 256 * 256 * 4), 256, 256);
+						icon = iron_g4_create_texture_from_bytes(lz4_decode(bytes_icon, 256 * 256 * 4), 256, 256);
 					}
 
 					///if is_lab
 					if (raw.mesh_icon != null) {
 						let bytes_icon: buffer_t = raw.mesh_icon;
-						icon = image_from_bytes(lz4_decode(bytes_icon, 256 * 256 * 4), 256, 256);
+						icon = iron_g4_create_texture_from_bytes(lz4_decode(bytes_icon, 256 * 256 * 4), 256, 256);
 					}
 					///end
 

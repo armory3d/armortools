@@ -35,7 +35,7 @@ function render_path_sculpt_commands() {
     uniforms_set_material_consts(cc_context, material_contexts[0]);
     kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
     kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
-    g4_draw();
+    iron_g4_draw_indexed_vertices();
     render_path_end();
 }
 

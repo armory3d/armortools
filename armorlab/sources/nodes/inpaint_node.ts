@@ -93,7 +93,7 @@ function inpaint_node_get_cached_image(self: inpaint_node_t): kinc_g5_texture_t 
 		iron_g4_set_texture(pipes_texa_inpaint_preview, inpaint_node_mask);
 		kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
 		kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
-		g4_draw();
+		iron_g4_draw_indexed_vertices();
 		iron_g4_end();
 	}, self);
 	return inpaint_node_image;
@@ -112,7 +112,7 @@ function inpaint_node_texsynth_inpaint(image: kinc_g5_texture_t, tiling: bool, m
 	let bytes_out: buffer_t = buffer_create(w * h * 4);
 	texsynth_inpaint(w, h, bytes_out.buffer, bytes_img.buffer, bytes_mask.buffer, tiling);
 
-	inpaint_node_result = image_from_bytes(bytes_out, w, h);
+	inpaint_node_result = iron_g4_create_texture_from_bytes(bytes_out, w, h);
 	return inpaint_node_result;
 }
 

@@ -95,7 +95,7 @@ function mouse_released(button: string = "left"): bool {
 
 function mouse_lock() {
 	if (kinc_mouse_can_lock()) {
-		sys_lock_mouse();
+		kinc_mouse_lock();
 		mouse_locked = true;
 		mouse_hidden = true;
 	}
@@ -103,19 +103,19 @@ function mouse_lock() {
 
 function mouse_unlock() {
 	if (kinc_mouse_can_lock()) {
-		sys_unlock_mouse();
+		kinc_mouse_unlock();
 		mouse_locked = false;
 		mouse_hidden = false;
 	}
 }
 
 function mouse_hide() {
-	sys_hide_system_cursor();
+	iron_show_mouse(false);
 	mouse_hidden = true;
 }
 
 function mouse_show() {
-	sys_show_system_cursor();
+	iron_show_mouse(true);
 	mouse_hidden = false;
 }
 

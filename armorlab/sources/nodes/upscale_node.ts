@@ -87,7 +87,7 @@ function upscale_node_do_tile(source: kinc_g5_texture_t): kinc_g5_texture_t {
 		u8a[i * 4 + 3] = 255;
 	}
 
-	result = image_from_bytes(u8a, size2w, size2h);
+	result = iron_g4_create_texture_from_bytes(u8a, size2w, size2h);
 	return result;
 }
 

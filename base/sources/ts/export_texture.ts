@@ -258,7 +258,7 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 			iron_g4_set_int(pipes_blending, layers.length > 1 ? l1.blending : 0);
 			kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
 			kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
-			g4_draw();
+			iron_g4_draw_indexed_vertices();
 			iron_g4_end();
 		}
 
@@ -279,7 +279,7 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 			iron_g4_set_int(pipes_blending, l1.paint_nor_blend ? -2 : -1);
 			kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
 			kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
-			g4_draw();
+			iron_g4_draw_indexed_vertices();
 			iron_g4_end();
 		}
 
@@ -464,7 +464,7 @@ function export_texture_write_texture(file: string, pixels: buffer_t, type: i32 
 	}
 
 	if (context_raw.layers_destination == export_destination_t.PACKED) {
-		let image: kinc_g5_texture_t = image_from_bytes(pixels, res_x, res_y);
+		let image: kinc_g5_texture_t = iron_g4_create_texture_from_bytes(pixels, res_x, res_y);
 		map_set(data_cached_images, file, image);
 		let ar: string[] = string_split(file, path_sep);
 		let name: string = ar[ar.length - 1];

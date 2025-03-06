@@ -57,14 +57,14 @@ function tab_scene_draw_list(ui: ui_t, list_handle: ui_handle_t, current_object:
 	// Highlight every other line
 	if (tab_scene_line_counter % 2 == 0) {
 		draw_set_color(ui.ops.theme.SEPARATOR_COL);
-		g2_fill_rect(0, ui._y, ui._window_w, ui_ELEMENT_H(ui));
+		draw_filled_rect(0, ui._y, ui._window_w, ui_ELEMENT_H(ui));
 		draw_set_color(0xffffffff);
 	}
 
 	// Highlight selected line
 	if (current_object == context_raw.selected_object) {
 		draw_set_color(0xff205d9c);
-		g2_fill_rect(0, ui._y, ui._window_w, ui_ELEMENT_H(ui));
+		draw_filled_rect(0, ui._y, ui._window_w, ui_ELEMENT_H(ui));
 		draw_set_color(0xffffffff);
 	}
 
@@ -83,7 +83,7 @@ function tab_scene_draw_list(ui: ui_t, list_handle: ui_handle_t, current_object:
 
 		// Draw line that shows parent relations
 		draw_set_color(ui.ops.theme.BUTTON_COL);
-		g2_draw_line(ui._x - 10, ui._y + ui_ELEMENT_H(ui) / 2, ui._x, ui._y + ui_ELEMENT_H(ui) / 2);
+		draw_line(ui._x - 10, ui._y + ui_ELEMENT_H(ui) / 2, ui._x, ui._y + ui_ELEMENT_H(ui) / 2);
 		draw_set_color(0xffffffff);
 
 		ui_text(current_object.name);
@@ -122,7 +122,7 @@ function tab_scene_draw_list(ui: ui_t, list_handle: ui_handle_t, current_object:
 
 		// Draw line that shows parent relations
 		draw_set_color(ui.ops.theme.BUTTON_COL);
-		g2_draw_line(ui._x + 14, current_y, ui._x + 14, ui._y - ui_ELEMENT_H(ui) / 2);
+		draw_line(ui._x + 14, current_y, ui._x + 14, ui._y - ui_ELEMENT_H(ui) / 2);
 		draw_set_color(0xffffffff);
 	}
 }

@@ -153,7 +153,7 @@ function uniforms_bind_render_target(rt: render_target_t, context: shader_contex
 	}
 }
 
-function uniforms_set_context_const(location: kinc_const_loc_t, c: shader_const_t): bool {
+function uniforms_set_context_const(location: kinc_g5_constant_location_t, c: shader_const_t): bool {
 	if (c.link == null) {
 		return true;
 	}
@@ -323,7 +323,7 @@ function uniforms_set_context_const(location: kinc_const_loc_t, c: shader_const_
 		}
 
 		if (fa != null) {
-			g4_set_floats(location, fa);
+			iron_g4_set_floats(location, fa);
 			return true;
 		}
 	}
@@ -344,7 +344,7 @@ function uniforms_set_context_const(location: kinc_const_loc_t, c: shader_const_
 	return false;
 }
 
-function uniforms_set_obj_const(obj: object_t, loc: kinc_const_loc_t, c: shader_const_t) {
+function uniforms_set_obj_const(obj: object_t, loc: kinc_g5_constant_location_t, c: shader_const_t) {
 	if (c.link == null) {
 		return;
 	}
@@ -488,7 +488,7 @@ function uniforms_set_obj_const(obj: object_t, loc: kinc_const_loc_t, c: shader_
 		if (fa == null) {
 			return;
 		}
-		g4_set_floats(loc, fa);
+		iron_g4_set_floats(loc, fa);
 	}
 	else if (c.type == "int") {
 		let i: i32 = INT_MAX;
@@ -556,7 +556,7 @@ function current_material(object: object_t): material_data_t {
 	return null;
 }
 
-function uniforms_set_material_const(location: kinc_const_loc_t, shader_const: shader_const_t, material_const: bind_const_t) {
+function uniforms_set_material_const(location: kinc_g5_constant_location_t, shader_const: shader_const_t, material_const: bind_const_t) {
 	if (shader_const.type == "vec4") {
 		iron_g4_set_float4(location, material_const.vec[0], material_const.vec[1], material_const.vec[2], material_const.vec[3]);
 	}

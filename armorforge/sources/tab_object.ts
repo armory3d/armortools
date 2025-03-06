@@ -179,9 +179,9 @@ function tab_object_draw(htab: ui_handle_t) {
             let hscript: ui_handle_t = ui_handle(__ID__);
             hscript.text = script;
 
-            let _font: g2_font_t = ui.ops.font;
+            let _font: draw_font_t = ui.ops.font;
             let _font_size: i32 = ui.font_size;
-            let fmono: g2_font_t = data_get_font("font_mono.ttf");
+            let fmono: draw_font_t = data_get_font("font_mono.ttf");
             ui_set_font(ui, fmono);
             ui.font_size = math_floor(15 * ui_SCALE(ui));
             ui_text_area_coloring = tab_script_get_text_coloring();

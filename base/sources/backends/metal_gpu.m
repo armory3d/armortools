@@ -1,5 +1,14 @@
 #import <Metal/Metal.h>
 #import <MetalKit/MTKView.h>
+#include "metal.h"
+#include <iron_math.h>
+#include <iron_system.h>
+#include <iron_gpu.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <kinc/backend/g5_raytrace.h>
+
 
 static id<MTLCommandBuffer> command_buffer = nil;
 static id<MTLRenderCommandEncoder> render_command_encoder = nil;
@@ -7,27 +16,6 @@ static id<MTLComputeCommandEncoder> compute_command_encoder = nil;
 
 static void start_render_pass(void);
 static void end_render_pass(void);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#include "metal.h"
-#include <iron_math.h>
-#include <iron_system.h>
-#include <iron_gpu.h>
-#import <Metal/Metal.h>
-#import <MetalKit/MTKView.h>
 
 id getMetalLayer(void);
 id getMetalDevice(void);
@@ -232,26 +220,6 @@ bool kinc_g5_raytrace_supported(void) {
 int kinc_g5_max_bound_textures(void) {
 	return 16;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-#include <iron_gpu.h>
-#include <iron_system.h>
-#import <Metal/Metal.h>
-#import <MetalKit/MTKView.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 id getMetalDevice(void);
 id getMetalQueue(void);
@@ -555,32 +523,6 @@ void kinc_g5_command_list_compute(kinc_g5_command_list_t *list, int x, int y, in
 	start_render_pass();
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#include <iron_gpu.h>
-#include <iron_math.h>
-#include <Metal/Metal.h>
-
 id getMetalDevice(void);
 id getMetalLibrary(void);
 
@@ -687,25 +629,6 @@ kinc_g5_texture_unit_t kinc_g5_compute_shader_get_texture_unit(kinc_g5_compute_s
 
 	return unit;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-#include <iron_gpu.h>
-#include <iron_system.h>
-#include <iron_math.h>
-#import <Metal/Metal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 id getMetalDevice(void);
 id getMetalEncoder(void);
@@ -1152,22 +1075,6 @@ void kinc_g5_shader_init(kinc_g5_shader_t *shader, const void *source, size_t le
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-#include <kinc/backend/g5_raytrace.h>
-#include <iron_gpu.h>
-
 static kinc_g5_raytrace_acceleration_structure_t *accel;
 static kinc_g5_raytrace_pipeline_t *pipeline;
 static kinc_g5_texture_t *output = NULL;
@@ -1427,34 +1334,6 @@ void kinc_g5_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
 	[command_buffer commit];
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#include <iron_gpu.h>
-#include <iron_system.h>
-#import <Metal/Metal.h>
 
 id getMetalDevice(void);
 id getMetalEncoder(void);
@@ -1723,20 +1602,6 @@ void kinc_g5_render_target_set_depth_from(kinc_g5_texture_t *target, kinc_g5_tex
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-#include <iron_gpu.h>
-#import <Metal/Metal.h>
-
 id getMetalDevice(void);
 id getMetalEncoder(void);
 
@@ -1896,4 +1761,3 @@ void kinc_g5_index_buffer_unlock(kinc_g5_index_buffer_t *buffer, int count) {
 int kinc_g5_index_buffer_count(kinc_g5_index_buffer_t *buffer) {
 	return buffer->impl.count;
 }
-

@@ -153,7 +153,7 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): k
 		}
 		///end
 
-		let temp2: kinc_g5_texture_t = image_from_bytes(u8a, photo_to_pbr_node_tile_w, photo_to_pbr_node_tile_w);
+		let temp2: kinc_g5_texture_t = iron_g4_create_texture_from_bytes(u8a, photo_to_pbr_node_tile_w, photo_to_pbr_node_tile_w);
 		g2_begin(photo_to_pbr_node_images[from]);
 		draw_image(temp2, x * photo_to_pbr_node_tile_w, y * photo_to_pbr_node_tile_w);
 		g2_end();

@@ -410,7 +410,7 @@ function util_render_make_node_preview(canvas: ui_node_canvas_t, node: ui_node_t
 	uniforms_set_material_consts(res.scon, res.mcon);
 	kinc_g4_set_vertex_buffer(util_render_screen_aligned_full_vb);
 	kinc_g4_set_index_buffer(util_render_screen_aligned_full_ib);
-	g4_draw();
+	iron_g4_draw_indexed_vertices();
 	iron_g4_end();
 
 	context_raw.paint_object.base.transform.scale_world = _scale_world;

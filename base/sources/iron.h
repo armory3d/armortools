@@ -981,6 +981,7 @@ kinc_g5_shader_t *iron_g4_create_shader(buffer_t *data, i32 shader_type) {
 }
 
 kinc_g5_shader_t *iron_g4_create_shader_from_source(string_t *source, kinc_g5_shader_type_t shader_type) {
+	kinc_g5_shader_t *shader = NULL;
 	char *temp_string_s = shader_type == KINC_G5_SHADER_TYPE_VERTEX ? temp_string_vs : temp_string_fs;
 
 #ifdef WITH_D3DCOMPILER
@@ -1105,7 +1106,7 @@ kinc_g5_shader_t *iron_g4_create_shader_from_source(string_t *source, kinc_g5_sh
 	shader_buffer->lpVtbl->Release(shader_buffer);
 	reflector->lpVtbl->Release(reflector);
 
-	kinc_g5_shader_t *shader = (kinc_g5_shader_t *)malloc(sizeof(kinc_g5_shader_t));
+	shader = (kinc_g5_shader_t *)malloc(sizeof(kinc_g5_shader_t));
 	kinc_g5_shader_init(shader, file, (int)output_len, shader_type);
 	free(file);
 
@@ -1113,7 +1114,7 @@ kinc_g5_shader_t *iron_g4_create_shader_from_source(string_t *source, kinc_g5_sh
 
 	strcpy(temp_string_s, "// my_main\n");
 	strcat(temp_string_s, source);
-	kinc_g5_shader_t *shader = (kinc_g5_shader_t *)malloc(sizeof(kinc_g5_shader_t));
+	shader = (kinc_g5_shader_t *)malloc(sizeof(kinc_g5_shader_t));
 	kinc_g5_shader_init(shader, temp_string_s, strlen(temp_string_s), shader_type);
 
 	#elif defined(KINC_VULKAN) && defined(KRAFIX_LIBRARY)
@@ -1121,7 +1122,7 @@ kinc_g5_shader_t *iron_g4_create_shader_from_source(string_t *source, kinc_g5_sh
 	char *output = malloc(1024 * 1024);
 	int length;
 	krafix_compile(source, output, &length, "spirv", "windows", shader_type == KINC_G5_SHADER_TYPE_VERTEX ? "vert" : "frag", -1);
-	kinc_g5_shader_t *shader = (kinc_g5_shader_t *)malloc(sizeof(kinc_g5_shader_t));
+	shader = (kinc_g5_shader_t *)malloc(sizeof(kinc_g5_shader_t));
 	kinc_g5_shader_init(shader, output, length, shader_type);
 
 	#endif
@@ -1333,8 +1334,8 @@ void iron_g4_set_float4(kinc_g5_constant_location_t *location, f32 value1, f32 v
 	kinc_g4_set_float4(*location, value1, value2, value3, value4);
 }
 
-void iron_g4_set_floats(kinc_g5_constant_location_t *location, buffer_t *values) {
-	kinc_g4_set_floats(*location, (float *)values->buffer, (int)(values->length / 4));
+void iron_g4_set_floats(kinc_g5_constant_location_t *location, f32_array_t *values) {
+	kinc_g4_set_floats(*location, (float *)values->buffer, values->length);
 }
 
 void iron_g4_set_matrix4(kinc_g5_constant_location_t *location, mat4_t m) {
@@ -1389,13 +1390,6 @@ kinc_g5_texture_t *iron_g4_create_render_target(i32 width, i32 height, i32 forma
 	kinc_g5_render_target_init(render_target, width, height, (kinc_image_format_t)format, depth_buffer_bits);
 	render_target->buffer = NULL;
 	return render_target;
-}
-
-kinc_g5_texture_t *iron_g4_create_texture(i32 width, i32 height, i32 format) {
-	kinc_g5_texture_t *texture = (kinc_g5_texture_t *)malloc(sizeof(kinc_g5_texture_t));
-	kinc_g5_texture_init(texture, width, height, (kinc_image_format_t)format);
-	texture->buffer = NULL;
-	return texture;
 }
 
 kinc_g5_texture_t *iron_g4_create_texture_from_bytes(buffer_t *data, i32 width, i32 height, i32 format, bool readable) {

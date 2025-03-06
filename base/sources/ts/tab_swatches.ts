@@ -14,7 +14,7 @@ function tab_swatches_empty_get(): kinc_g5_texture_t {
 		b[1] = 255;
 		b[2] = 255;
 		b[3] = 255;
-		_tab_swatches_empty = image_from_bytes(b, 1, 1);
+		_tab_swatches_empty = iron_g4_create_texture_from_bytes(b, 1, 1);
 	}
 	return _tab_swatches_empty;
 }

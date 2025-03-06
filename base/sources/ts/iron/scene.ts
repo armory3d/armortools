@@ -600,8 +600,8 @@ type shader_context_t = {
 
 type shader_context_runtime_t = {
 	pipe_state?: kinc_g5_pipeline_t;
-	constants?: kinc_const_loc_t[];
-	tex_units?: kinc_tex_unit_t[];
+	constants?: kinc_g5_constant_location_t[];
+	tex_units?: kinc_g5_texture_unit_t[];
 	override_context?: _shader_override_t;
 	structure?: kinc_g5_vertex_structure_t;
 };

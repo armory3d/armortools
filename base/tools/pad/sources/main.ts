@@ -91,7 +91,7 @@ function main() {
 	};
 	sys_start(ops);
 
-	let font: g2_font_t = data_get_font("font_mono.ttf");
+	let font: draw_font_t = data_get_font("font_mono.ttf");
 	g2_font_init(font);
 
 	theme = {};
@@ -341,7 +341,7 @@ function draw_minimap() {
 		let x: i32 = 0;
 		for (let j: i32 = 0; j < words.length; ++j) {
 			let word: string = words[j];
-			g2_fill_rect(x, i * 2, word.length, 2);
+			draw_filled_rect(x, i * 2, word.length, 2);
 			x += word.length + 1;
 		}
 	}
@@ -350,7 +350,7 @@ function draw_minimap() {
 	let visible_area: i32 = out_of_screen > 0 ? minimap_h : minimap_full_h;
 	draw_set_color(0x11ffffff);
 	minimap_box_h = math_floor((kinc_window_height() - window_header_h) / UI_ELEMENT_H() * 2);
-	g2_fill_rect(0, scroll_progress * visible_area, minimap_w, minimap_box_h);
+	draw_filled_rect(0, scroll_progress * visible_area, minimap_w, minimap_box_h);
 	g2_end();
 }
 

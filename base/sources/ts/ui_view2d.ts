@@ -1,6 +1,6 @@
 
 let ui_view2d_pipe: kinc_g5_pipeline_t;
-let ui_view2d_channel_loc: kinc_const_loc_t;
+let ui_view2d_channel_loc: kinc_g5_constant_location_t;
 let ui_view2d_text_input_hover: bool = false;
 let ui_view2d_uvmap_show: bool = false;
 let ui_view2d_tex_type: paint_tex_t = paint_tex_t.BASE;

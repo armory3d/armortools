@@ -218,7 +218,7 @@ function render_path_draw_skydome(handle: string) {
 	uniforms_set_obj_consts(cc.context, null); // External hosek
 	kinc_g4_set_vertex_buffer(const_data_skydome_vb);
 	kinc_g4_set_index_buffer(const_data_skydome_ib);
-	g4_draw();
+	iron_g4_draw_indexed_vertices();
 	render_path_end();
 }
 
@@ -244,7 +244,7 @@ function render_path_draw_shader(handle: string) {
 	uniforms_set_obj_consts(cc.context, null);
 	kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
 	kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
-	g4_draw();
+	iron_g4_draw_indexed_vertices();
 
 	render_path_end();
 }

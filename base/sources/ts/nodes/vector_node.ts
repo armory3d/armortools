@@ -48,7 +48,7 @@ function vector_node_get_as_image(self: vector_node_t, from: i32): kinc_g5_textu
 	buffer_set_f32(b, 4, n1.value);
 	buffer_set_f32(b, 8, n2.value);
 	buffer_set_f32(b, 12, 1.0);
-	self.image = image_from_bytes(b, 1, 1, tex_format_t.RGBA128);
+	self.image = iron_g4_create_texture_from_bytes(b, 1, 1, tex_format_t.RGBA128);
 	return self.image;
 }
 

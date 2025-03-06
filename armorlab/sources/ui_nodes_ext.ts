@@ -83,7 +83,7 @@ function ui_nodes_ext_run() {
 		iron_g4_set_texture(pipes_copy_a_tex, texheight);
 		kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
 		kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
-		g4_draw();
+		iron_g4_draw_indexed_vertices();
 		iron_g4_end();
 
 		let is_float_node: bool = context_raw.brush_output_node_inst.base.inputs[channel_type_t.HEIGHT].node.base.get == float_node_get;

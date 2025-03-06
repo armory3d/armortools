@@ -267,7 +267,7 @@ function text_to_photo_node_vae_decoder(latents: f32_array_t, upscale: bool): ki
 		u8a[i * 4 + 2] = math_floor(pyimage[i + 512 * 512 * 2] * 255);
 		u8a[i * 4 + 3] = 255;
 	}
-	let image: kinc_g5_texture_t = image_from_bytes(u8a, 512, 512);
+	let image: kinc_g5_texture_t = iron_g4_create_texture_from_bytes(u8a, 512, 512);
 
 	if (text_to_photo_node_tiling) {
 		tiling_node_prompt = text_to_photo_node_prompt;

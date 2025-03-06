@@ -6,6 +6,8 @@
 #include <iron_gpu.h>
 #include <iron_math.h>
 #include <iron_system.h>
+#include <stdlib.h>
+#include <assert.h>
 
 int renderTargetWidth;
 int renderTargetHeight;
@@ -62,17 +64,6 @@ void kinc_g5_flush() {}
 bool kinc_g5_raytrace_supported() {
 	return false;
 }
-
-
-
-
-
-
-
-#include <stdlib.h>
-#include <string.h>
-#include <iron_gpu.h>
-#include <iron_system.h>
 
 extern WGPUDevice device;
 
@@ -186,22 +177,7 @@ int kinc_g5_index_buffer_count(kinc_g5_index_buffer_t *buffer) {
 	return buffer->impl.count;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-#include <iron_gpu.h>
-
 void kinc_g5_texture_init(kinc_g5_texture_t *texture, int width, int height, kinc_image_format_t format) {
-
 	// WGPUExtent3D size = {};
 	// size.width = kinc_width();
 	// size.height = kinc_height();
@@ -253,15 +229,6 @@ void kinc_g5_render_target_init_framebuffer(kinc_g5_texture_t *target, int width
 void kinc_g5_render_target_set_depth_from(kinc_g5_texture_t *renderTarget, kinc_g5_texture_t *source) {}
 
 void kinc_g5_render_target_get_pixels(kinc_g5_texture_t *renderTarget, uint8_t *data) {}
-
-
-
-
-
-
-#include <iron_gpu.h>
-#include <assert.h>
-#include <string.h>
 
 extern WGPUDevice device;
 
@@ -528,15 +495,6 @@ void kinc_g5_command_list_set_compute_shader(kinc_g5_command_list_t *list, kinc_
 
 void kinc_g5_command_list_compute(kinc_g5_command_list_t *list, int x, int y, int z) {}
 
-
-
-
-
-
-
-#include <iron_gpu.h>
-#include <iron_math.h>
-
 void kinc_g5_compute_shader_init(kinc_g5_compute_shader *shader, void *source, int length) {}
 
 void kinc_g5_compute_shader_destroy(kinc_g5_compute_shader *shader) {}
@@ -550,5 +508,3 @@ kinc_g5_texture_unit_t kinc_g5_compute_shader_get_texture_unit(kinc_g5_compute_s
 	kinc_g5_texture_unit_t unit = {0};
 	return unit;
 }
-
-

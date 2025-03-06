@@ -29,7 +29,7 @@ function rgb_node_get_as_image(self: rgb_node_t, from: i32): kinc_g5_texture_t {
 	f32a[2] = default_value[2];
 	f32a[3] = default_value[3];
 	let buf: buffer_t = buffer_create_from_raw(f32a.buffer, f32a.length * 4);
-	self.image = image_from_bytes(buf, 1, 1, tex_format_t.RGBA128);
+	self.image = iron_g4_create_texture_from_bytes(buf, 1, 1, tex_format_t.RGBA128);
 	return self.image;
 }
 

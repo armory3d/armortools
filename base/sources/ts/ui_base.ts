@@ -131,7 +131,7 @@ function ui_base_init() {
 		b[1] = 0;
 		b[2] = 0;
 		b[3] = 255;
-		context_raw.preview_envmap = image_from_bytes(b, 1, 1);
+		context_raw.preview_envmap = iron_g4_create_texture_from_bytes(b, 1, 1);
 	}
 
 	let world: world_data_t = scene_world;
@@ -1579,7 +1579,7 @@ function ui_base_make_empty_envmap(col: i32) {
 	b[1] = color_get_gb(col);
 	b[2] = color_get_bb(col);
 	b[3] = 255;
-	context_raw.empty_envmap = image_from_bytes(b, 1, 1);
+	context_raw.empty_envmap = iron_g4_create_texture_from_bytes(b, 1, 1);
 }
 
 function ui_base_set_viewport_col(col: i32) {

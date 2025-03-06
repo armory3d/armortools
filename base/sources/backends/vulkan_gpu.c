@@ -23,6 +23,81 @@ static void command_list_should_wait_for_framebuffer(void);
 static VkDescriptorSetLayout compute_descriptor_layout;
 static int framebuffer_count = 0;
 
+extern kinc_g5_texture_t *vulkan_textures[16];
+VkDescriptorSet getDescriptorSet(void);
+static VkDescriptorSet get_compute_descriptor_set(void);
+void setImageLayout(VkCommandBuffer _buffer, VkImage image, VkImageAspectFlags aspectMask, VkImageLayout oldImageLayout, VkImageLayout newImageLayout);
+
+VkRenderPassBeginInfo currentRenderPassBeginInfo;
+VkPipeline currentVulkanPipeline;
+kinc_g5_texture_t *currentRenderTargets[8] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+
+static bool onBackBuffer = false;
+static uint32_t lastVertexConstantBufferOffset = 0;
+static uint32_t lastFragmentConstantBufferOffset = 0;
+static uint32_t lastComputeConstantBufferOffset = 0;
+static kinc_g5_pipeline_t *current_pipeline = NULL;
+static kinc_g5_compute_shader *current_compute_shader = NULL;
+static int mrtIndex = 0;
+static VkFramebuffer mrtFramebuffer[16];
+static VkRenderPass mrtRenderPass[16];
+
+static bool in_render_pass = false;
+static bool wait_for_framebuffer = false;
+
+static void parse_shader(uint32_t *shader_source, int shader_length, kinc_internal_named_number *locations, kinc_internal_named_number *textureBindings, kinc_internal_named_number *uniformOffsets);
+static VkShaderModule create_shader_module(const void *code, size_t size);
+static VkDescriptorPool compute_descriptor_pool;
+
+VkDescriptorSetLayout desc_layout;
+extern kinc_g5_texture_t *vulkan_textures[16];
+extern uint32_t swapchainImageCount;
+extern uint32_t current_buffer;
+
+static VkDescriptorPool descriptor_pool;
+
+struct indexed_name {
+	uint32_t id;
+	char *name;
+};
+
+struct indexed_index {
+	uint32_t id;
+	uint32_t value;
+};
+
+#define MAX_THINGS 256
+static struct indexed_name names[MAX_THINGS];
+static uint32_t names_size = 0;
+static struct indexed_name memberNames[MAX_THINGS];
+static uint32_t memberNames_size = 0;
+static struct indexed_index locs[MAX_THINGS];
+static uint32_t locs_size = 0;
+static struct indexed_index bindings[MAX_THINGS];
+static uint32_t bindings_size = 0;
+static struct indexed_index offsets[MAX_THINGS];
+static uint32_t offsets_size = 0;
+
+#define MAX_DESCRIPTOR_SETS 1024
+
+struct descriptor_set {
+	int id;
+	bool in_use;
+	VkDescriptorImageInfo tex_desc[16];
+	VkDescriptorSet set;
+};
+
+static struct descriptor_set descriptor_sets[MAX_DESCRIPTOR_SETS] = {0};
+static int descriptor_sets_count = 0;
+
+static struct descriptor_set compute_descriptor_sets[MAX_DESCRIPTOR_SETS] = {0};
+static int compute_descriptor_sets_count = 0;
+
+bool use_staging_buffer = false;
+
+void set_image_layout(VkImage image, VkImageAspectFlags aspectMask, VkImageLayout old_image_layout, VkImageLayout new_image_layout);
+
+
 // djb2
 uint32_t kinc_internal_hash_name(unsigned char *str) {
 	unsigned long hash = 5381;
@@ -1157,44 +1232,6 @@ int kinc_g5_max_bound_textures(void) {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-extern kinc_g5_texture_t *vulkan_textures[16];
-VkDescriptorSet getDescriptorSet(void);
-static VkDescriptorSet get_compute_descriptor_set(void);
-bool memory_type_from_properties(uint32_t typeBits, VkFlags requirements_mask, uint32_t *typeIndex);
-void setImageLayout(VkCommandBuffer _buffer, VkImage image, VkImageAspectFlags aspectMask, VkImageLayout oldImageLayout, VkImageLayout newImageLayout);
-
-VkRenderPassBeginInfo currentRenderPassBeginInfo;
-VkPipeline currentVulkanPipeline;
-kinc_g5_texture_t *currentRenderTargets[8] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
-
-static bool onBackBuffer = false;
-static uint32_t lastVertexConstantBufferOffset = 0;
-static uint32_t lastFragmentConstantBufferOffset = 0;
-static uint32_t lastComputeConstantBufferOffset = 0;
-static kinc_g5_pipeline_t *current_pipeline = NULL;
-static kinc_g5_compute_shader *current_compute_shader = NULL;
-static int mrtIndex = 0;
-static VkFramebuffer mrtFramebuffer[16];
-static VkRenderPass mrtRenderPass[16];
-
-static bool in_render_pass = false;
-
 static void endPass(kinc_g5_command_list_t *list) {
 	if (in_render_pass) {
 		vkCmdEndRenderPass(list->impl._buffer);
@@ -1960,8 +1997,6 @@ void kinc_g5_command_list_set_compute_constant_buffer(kinc_g5_command_list_t *li
 	                        offsets);
 }
 
-static bool wait_for_framebuffer = false;
-
 static void command_list_should_wait_for_framebuffer(void) {
 	wait_for_framebuffer = true;
 }
@@ -2060,29 +2095,6 @@ void kinc_g5_command_list_compute(kinc_g5_command_list_t *list, int x, int y, in
 		kinc_g5_command_list_set_render_targets(list, currentRenderTargets, render_target_count);
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-static void parse_shader(uint32_t *shader_source, int shader_length, kinc_internal_named_number *locations, kinc_internal_named_number *textureBindings, kinc_internal_named_number *uniformOffsets);
-static VkShaderModule create_shader_module(const void *code, size_t size);
-static VkDescriptorPool compute_descriptor_pool;
 
 static void create_compute_descriptor_layout(void) {
 	VkDescriptorSetLayoutBinding layoutBindings[18];
@@ -2208,40 +2220,6 @@ kinc_g5_texture_unit_t kinc_g5_compute_shader_get_texture_unit(kinc_g5_compute_s
 	return unit;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-VkDescriptorSetLayout desc_layout;
-extern kinc_g5_texture_t *vulkan_textures[16];
-extern uint32_t swapchainImageCount;
-extern uint32_t current_buffer;
-bool memory_type_from_properties(uint32_t typeBits, VkFlags requirements_mask, uint32_t *typeIndex);
-
-static VkDescriptorPool descriptor_pool;
-
 static bool has_number(kinc_internal_named_number *named_numbers, const char *name) {
 	for (int i = 0; i < KINC_INTERNAL_NAMED_NUMBER_COUNT; ++i) {
 		if (strcmp(named_numbers[i].name, name) == 0) {
@@ -2278,28 +2256,6 @@ static void set_number(kinc_internal_named_number *named_numbers, const char *na
 
 	assert(false);
 }
-
-struct indexed_name {
-	uint32_t id;
-	char *name;
-};
-
-struct indexed_index {
-	uint32_t id;
-	uint32_t value;
-};
-
-#define MAX_THINGS 256
-static struct indexed_name names[MAX_THINGS];
-static uint32_t names_size = 0;
-static struct indexed_name memberNames[MAX_THINGS];
-static uint32_t memberNames_size = 0;
-static struct indexed_index locs[MAX_THINGS];
-static uint32_t locs_size = 0;
-static struct indexed_index bindings[MAX_THINGS];
-static uint32_t bindings_size = 0;
-static struct indexed_index offsets[MAX_THINGS];
-static uint32_t offsets_size = 0;
 
 static void add_name(uint32_t id, char *name) {
 	names[names_size].id = id;
@@ -2970,18 +2926,6 @@ int calc_compute_descriptor_id(void) {
 	return 1 | (texture_count << 1) | ((uniform_buffer ? 1 : 0) << 8);
 }
 
-#define MAX_DESCRIPTOR_SETS 1024
-
-struct destriptor_set {
-	int id;
-	bool in_use;
-	VkDescriptorImageInfo tex_desc[16];
-	VkDescriptorSet set;
-};
-
-static struct destriptor_set descriptor_sets[MAX_DESCRIPTOR_SETS] = {0};
-static int descriptor_sets_count = 0;
-
 static int write_tex_descs(VkDescriptorImageInfo *tex_descs) {
 	memset(tex_descs, 0, sizeof(VkDescriptorImageInfo) * 16);
 
@@ -3003,7 +2947,7 @@ static int write_tex_descs(VkDescriptorImageInfo *tex_descs) {
 	return texture_count;
 }
 
-static bool textures_changed(struct destriptor_set *set) {
+static bool textures_changed(struct descriptor_set *set) {
 	VkDescriptorImageInfo tex_desc[16];
 
 	write_tex_descs(tex_desc);
@@ -3011,7 +2955,7 @@ static bool textures_changed(struct destriptor_set *set) {
 	return memcmp(&tex_desc, &set->tex_desc, sizeof(tex_desc)) != 0;
 }
 
-static void update_textures(struct destriptor_set *set) {
+static void update_textures(struct descriptor_set *set) {
 	memset(&set->tex_desc, 0, sizeof(set->tex_desc));
 
 	int texture_count = write_tex_descs(set->tex_desc);
@@ -3151,9 +3095,6 @@ VkDescriptorSet getDescriptorSet() {
 	return descriptor_set;
 }
 
-static struct destriptor_set compute_descriptor_sets[MAX_DESCRIPTOR_SETS] = {0};
-static int compute_descriptor_sets_count = 0;
-
 static int write_compute_tex_descs(VkDescriptorImageInfo *tex_descs) {
 	memset(tex_descs, 0, sizeof(VkDescriptorImageInfo) * 16);
 
@@ -3175,7 +3116,7 @@ static int write_compute_tex_descs(VkDescriptorImageInfo *tex_descs) {
 	return texture_count;
 }
 
-static bool compute_textures_changed(struct destriptor_set *set) {
+static bool compute_textures_changed(struct descriptor_set *set) {
 	VkDescriptorImageInfo tex_desc[16];
 
 	write_compute_tex_descs(tex_desc);
@@ -3183,7 +3124,7 @@ static bool compute_textures_changed(struct destriptor_set *set) {
 	return memcmp(&tex_desc, &set->tex_desc, sizeof(tex_desc)) != 0;
 }
 
-static void update_compute_textures(struct destriptor_set *set) {
+static void update_compute_textures(struct descriptor_set *set) {
 	memset(&set->tex_desc, 0, sizeof(set->tex_desc));
 
 	int texture_count = write_compute_tex_descs(set->tex_desc);
@@ -3411,69 +3352,6 @@ void kinc_g5_sampler_init(kinc_g5_sampler_t *sampler, const kinc_g5_sampler_opti
 void kinc_g5_sampler_destroy(kinc_g5_sampler_t *sampler) {
 	vkDestroySampler(vk_ctx.device, sampler->impl.sampler, NULL);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-bool use_staging_buffer = false;
-
-bool memory_type_from_properties(uint32_t typeBits, VkFlags requirements_mask, uint32_t *typeIndex);
-void set_image_layout(VkImage image, VkImageAspectFlags aspectMask, VkImageLayout old_image_layout, VkImageLayout new_image_layout);
 
 static void prepare_texture_image(uint8_t *tex_colors, uint32_t width, uint32_t height, Texture5Impl *tex_obj, VkImageTiling tiling,
                                   VkImageUsageFlags usage, VkFlags required_props, VkDeviceSize *deviceSize, VkFormat tex_format) {
@@ -3874,8 +3752,6 @@ int kinc_g5_texture_stride(kinc_g5_texture_t *texture) {
 
 void kinc_g5_texture_generate_mipmaps(kinc_g5_texture_t *texture, int levels) {}
 
-extern kinc_g5_command_list_t commandList;
-
 void kinc_g5_texture_set_mipmap(kinc_g5_texture_t *texture, kinc_g5_texture_t *mipmap, int level) {
     // VkBuffer staging_buffer;
     // VkDeviceMemory staging_buffer_mem;
@@ -3947,9 +3823,6 @@ void kinc_g5_texture_set_mipmap(kinc_g5_texture_t *texture, kinc_g5_texture_t *m
 
     // texture->_uploaded = true;
 }
-
-extern uint32_t swapchainImageCount;
-extern kinc_g5_texture_t *vulkan_textures[16];
 
 void setup_init_cmd();
 
@@ -4230,39 +4103,6 @@ void kinc_g5_render_target_set_depth_from(kinc_g5_texture_t *target, kinc_g5_tex
 	}
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-bool memory_type_from_properties(uint32_t typeBits, VkFlags requirements_mask, uint32_t *typeIndex);
-
 void kinc_g5_vertex_buffer_init(kinc_g5_vertex_buffer_t *buffer, int vertexCount, kinc_g5_vertex_structure_t *structure, bool gpuMemory) {
 	buffer->impl.myCount = vertexCount;
 	buffer->impl.myStride = 0;
@@ -4535,52 +4375,11 @@ int kinc_g5_index_buffer_count(kinc_g5_index_buffer_t *buffer) {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef KINC_ANDROID
 
 extern VkRenderPassBeginInfo currentRenderPassBeginInfo;
 extern VkFramebuffer *framebuffers;
 extern uint32_t current_buffer;
-bool memory_type_from_properties(uint32_t typeBits, VkFlags requirements_mask, uint32_t *typeIndex);
 
 static const int INDEX_RAYGEN = 0;
 static const int INDEX_MISS = 1;

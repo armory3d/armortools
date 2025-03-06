@@ -74,7 +74,7 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 			iron_g4_set_int(pipes_blending, layers.length > 1 ? l1.blending : 0);
 			kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
 			kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
-			g4_draw();
+			iron_g4_draw_indexed_vertices();
 			iron_g4_end();
 			///end
 		}
@@ -96,7 +96,7 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 			iron_g4_set_int(pipes_blending, l1.paint_nor_blend ? -2 : -1);
 			kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
 			kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
-			g4_draw();
+			iron_g4_draw_indexed_vertices();
 			iron_g4_end();
 		}
 
@@ -159,7 +159,7 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 		iron_g4_set_int(pipes_blending, -4);
 		kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
 		kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
-		g4_draw();
+		iron_g4_draw_indexed_vertices();
 		iron_g4_end();
 	}
 

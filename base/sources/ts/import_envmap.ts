@@ -1,9 +1,9 @@
 
 let import_envmap_pipeline: kinc_g5_pipeline_t = null;
-let import_envmap_params_loc: kinc_const_loc_t;
+let import_envmap_params_loc: kinc_g5_constant_location_t;
 let import_envmap_params: vec4_t = vec4_create();
 let import_envmap_n: vec4_t = vec4_create();
-let import_envmap_radiance_loc: kinc_tex_unit_t;
+let import_envmap_radiance_loc: kinc_g5_texture_unit_t;
 let import_envmap_radiance: kinc_g5_texture_t = null;
 let import_envmap_radiance_cpu: kinc_g5_texture_t = null;
 let import_envmap_mips: kinc_g5_texture_t[] = null;
@@ -48,7 +48,7 @@ function import_envmap_run(path: string, image: kinc_g5_texture_t) {
 			iron_unload_image(_radiance_cpu);
 		}, _radiance_cpu);
 	}
-	import_envmap_radiance_cpu = image_from_bytes(radiance_pixels, import_envmap_radiance.width, import_envmap_radiance.height, tex_format_t.RGBA128);
+	import_envmap_radiance_cpu = iron_g4_create_texture_from_bytes(radiance_pixels, import_envmap_radiance.width, import_envmap_radiance.height, tex_format_t.RGBA128);
 
 	// Radiance
 	if (import_envmap_mips_cpu != null) {
@@ -64,7 +64,7 @@ function import_envmap_run(path: string, image: kinc_g5_texture_t) {
 	import_envmap_mips_cpu = [];
 	for (let i: i32 = 0; i < import_envmap_mips.length; ++i) {
 		import_envmap_get_radiance_mip(import_envmap_mips[i], i, import_envmap_radiance);
-		array_push(import_envmap_mips_cpu, image_from_bytes(iron_g4_get_texture_pixels(import_envmap_mips[i]), import_envmap_mips[i].width, import_envmap_mips[i].height, tex_format_t.RGBA128));
+		array_push(import_envmap_mips_cpu, iron_g4_create_texture_from_bytes(iron_g4_get_texture_pixels(import_envmap_mips[i]), import_envmap_mips[i].width, import_envmap_mips[i].height, tex_format_t.RGBA128));
 	}
 	iron_g4_set_mipmaps(import_envmap_radiance_cpu, import_envmap_mips_cpu);
 
@@ -94,7 +94,7 @@ function import_envmap_get_radiance_mip(mip: kinc_g5_texture_t, level: i32, radi
 	import_envmap_params.x = 0.1 + level / 8;
 	iron_g4_set_float4(import_envmap_params_loc, import_envmap_params.x, import_envmap_params.y, import_envmap_params.z, import_envmap_params.w);
 	iron_g4_set_texture(import_envmap_radiance_loc, radiance);
-	g4_draw();
+	iron_g4_draw_indexed_vertices();
 	iron_g4_end();
 }
 

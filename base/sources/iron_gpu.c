@@ -1,17 +1,17 @@
 #include "iron_gpu.h"
 #include <assert.h>
 #include <string.h>
-#include <iron_system.h>
-#include <iron_math.h>
-#include <iron_file.h>
 #include <stddef.h>
+#include "iron_system.h"
+#include "iron_math.h"
+#include "iron_file.h"
 
 #define CONSTANT_BUFFER_SIZE 4096
 #define CONSTANT_BUFFER_MULTIPLY 100
 #define FRAMEBUFFER_COUNT 2
 #define MAX_TEXTURES 16
-
 #define MAX_SAMPLERS_PER_STAGE 16
+#define MAX_SAMPLER_CACHE_SIZE 256
 
 static kinc_g5_sampler_options_t sampler_options[KINC_G5_SHADER_TYPE_COUNT][MAX_SAMPLERS_PER_STAGE];
 
@@ -20,11 +20,11 @@ struct sampler_cache_entry {
 	kinc_g5_sampler_t sampler;
 };
 
-#define MAX_SAMPLER_CACHE_SIZE 256
 static struct sampler_cache_entry sampler_cache[MAX_SAMPLER_CACHE_SIZE];
 static int sampler_cache_size = 0;
 
 void kinc_internal_samplers_reset(void);
+kinc_g5_sampler_t *kinc_internal_get_current_sampler(int stage, int unit);
 
 kinc_g5_command_list_t commandList;
 bool waitAfterNextDraw = false;
@@ -112,8 +112,6 @@ void kinc_g4_internal_init_window(int depthBufferBits, bool vsync) {
 	// to support doing work after kinc_g4_end and before kinc_g4_begin
 	kinc_g5_command_list_begin(&commandList);
 }
-
-kinc_g5_sampler_t *kinc_internal_get_current_sampler(int stage, int unit);
 
 void kinc_g5_internal_set_samplers(int count, kinc_g5_texture_unit_t *texture_units) {
 	for (int i = 0; i < count; ++i) {
@@ -621,8 +619,6 @@ void kinc_g5_vertex_structure_add(kinc_g5_vertex_structure_t *structure, const c
 	structure->elements[structure->size].data = data;
 	structure->size++;
 }
-
-extern bool waitAfterNextDraw;
 
 void kinc_g4_vertex_buffer_init(kinc_g4_vertex_buffer_t *buffer, int count, kinc_g5_vertex_structure_t *structure, kinc_g4_usage_t usage) {
 	buffer->impl._multiple = usage == KINC_G4_USAGE_STATIC ? 1 : 2;

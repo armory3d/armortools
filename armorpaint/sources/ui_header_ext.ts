@@ -59,7 +59,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 				iron_g4_set_texture(pipes_tex_colorid, project_get_image(project_assets[context_raw.colorid_handle.position]));
 				kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
 				kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
-				g4_draw();
+				iron_g4_draw_indexed_vertices();
 				iron_g4_end();
 				context_raw.colorid_picked = false;
 				ui_toolbar_handle.redraws = 1;

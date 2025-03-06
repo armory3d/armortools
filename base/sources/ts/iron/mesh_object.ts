@@ -183,7 +183,7 @@ function mesh_object_render(raw: mesh_object_t, context: string, bind_params: st
 
 		kinc_g4_set_vertex_buffer(mesh_data_get(raw.data, elems));
 		kinc_g4_set_index_buffer(raw.data._.index_buffers[i]);
-		g4_draw();
+		iron_g4_draw_indexed_vertices();
 	}
 
 	raw.prev_matrix = mat4_clone(raw.base.transform.world_unpack);

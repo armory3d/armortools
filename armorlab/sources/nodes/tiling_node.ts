@@ -92,7 +92,7 @@ function tiling_node_sd_tiling(image: kinc_g5_texture_t, seed: i32): kinc_g5_tex
 	// 		u8a[y * 512 + x] = 0;
 	// 	}
 	// }
-	let mask: kinc_g5_texture_t = image_from_bytes(u8a, 512, 512, tex_format_t.R8);
+	let mask: kinc_g5_texture_t = iron_g4_create_texture_from_bytes(u8a, 512, 512, tex_format_t.R8);
 
 	inpaint_node_prompt = tiling_node_prompt;
 	inpaint_node_strength = tiling_node_strength;

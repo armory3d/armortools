@@ -145,7 +145,7 @@ function util_uv_cache_dilate_map() {
 	kinc_g4_set_vertex_buffer(geom._.vertex_buffer);
 	///end
 	kinc_g4_set_index_buffer(geom._.index_buffers[0]);
-	g4_draw();
+	iron_g4_draw_indexed_vertices();
 	iron_g4_end();
 	util_uv_dilatemap_cached = true;
 	util_uv_dilate_bytes = null;
@@ -200,6 +200,6 @@ function util_uv_cache_uv_island_map() {
 	if (util_uv_uvislandmap != null) {
 		iron_unload_image(util_uv_uvislandmap);
 	}
-	util_uv_uvislandmap = image_from_bytes(bytes, w, h, tex_format_t.R8);
+	util_uv_uvislandmap = iron_g4_create_texture_from_bytes(bytes, w, h, tex_format_t.R8);
 	util_uv_uvislandmap_cached = true;
 }

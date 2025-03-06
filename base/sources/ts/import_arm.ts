@@ -243,7 +243,7 @@ function import_arm_run_project(path: string) {
 			let _texpaint_pack: kinc_g5_texture_t = null;
 
 			if (is_mask) {
-				_texpaint = image_from_bytes(lz4_decode(ld.texpaint, ld.res * ld.res * 4), ld.res, ld.res, tex_format_t.RGBA32);
+				_texpaint = iron_g4_create_texture_from_bytes(lz4_decode(ld.texpaint, ld.res * ld.res * 4), ld.res, ld.res, tex_format_t.RGBA32);
 				g2_begin(l.texpaint);
 				// draw_set_pipeline(pipes_copy8);
 				draw_set_pipeline(project.is_bgra ? pipes_copy_bgra : pipes_copy); // Full bits for undo support, R8 is used
@@ -253,7 +253,7 @@ function import_arm_run_project(path: string) {
 			}
 			else { // Layer
 				// TODO: create render target from bytes
-				_texpaint = image_from_bytes(lz4_decode(ld.texpaint, ld.res * ld.res * 4 * bytes_per_pixel), ld.res, ld.res, format);
+				_texpaint = iron_g4_create_texture_from_bytes(lz4_decode(ld.texpaint, ld.res * ld.res * 4 * bytes_per_pixel), ld.res, ld.res, format);
 				g2_begin(l.texpaint);
 				draw_set_pipeline(project.is_bgra ? pipes_copy_bgra : pipes_copy);
 				draw_image(_texpaint, 0, 0);
@@ -261,14 +261,14 @@ function import_arm_run_project(path: string) {
 				g2_end();
 
 				///if is_paint
-				_texpaint_nor = image_from_bytes(lz4_decode(ld.texpaint_nor, ld.res * ld.res * 4 * bytes_per_pixel), ld.res, ld.res, format);
+				_texpaint_nor = iron_g4_create_texture_from_bytes(lz4_decode(ld.texpaint_nor, ld.res * ld.res * 4 * bytes_per_pixel), ld.res, ld.res, format);
 				g2_begin(l.texpaint_nor);
 				draw_set_pipeline(project.is_bgra ? pipes_copy_bgra : pipes_copy);
 				draw_image(_texpaint_nor, 0, 0);
 				draw_set_pipeline(null);
 				g2_end();
 
-				_texpaint_pack = image_from_bytes(lz4_decode(ld.texpaint_pack, ld.res * ld.res * 4 * bytes_per_pixel), ld.res, ld.res, format);
+				_texpaint_pack = iron_g4_create_texture_from_bytes(lz4_decode(ld.texpaint_pack, ld.res * ld.res * 4 * bytes_per_pixel), ld.res, ld.res, format);
 				g2_begin(l.texpaint_pack);
 				draw_set_pipeline(project.is_bgra ? pipes_copy_bgra : pipes_copy);
 				draw_image(_texpaint_pack, 0, 0);
@@ -633,7 +633,7 @@ function import_arm_make_pink(abs: string) {
 	b[1] = 0;
 	b[2] = 255;
 	b[3] = 255;
-	let pink: kinc_g5_texture_t = image_from_bytes(b, 1, 1);
+	let pink: kinc_g5_texture_t = iron_g4_create_texture_from_bytes(b, 1, 1);
 	map_set(data_cached_images, abs, pink);
 }
 
@@ -674,7 +674,7 @@ function import_arm_unpack_asset(project: project_format_t, abs: string, file: s
 			if (!project_packed_asset_exists(project_raw.packed_assets, pa.name)) {
 				array_push(project_raw.packed_assets, pa);
 			}
-			let image: kinc_g5_texture_t = image_from_encoded_bytes(pa.bytes, ends_with(pa.name, ".jpg") ? ".jpg" : ".png");
+			let image: kinc_g5_texture_t = iron_g4_create_texture_from_encoded_bytes(pa.bytes, ends_with(pa.name, ".jpg") ? ".jpg" : ".png");
 			map_set(data_cached_images, abs, image);
 			break;
 		}

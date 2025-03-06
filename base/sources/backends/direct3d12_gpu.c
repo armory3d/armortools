@@ -49,13 +49,31 @@
 #include <d3d12.h>
 #include <dxgi.h>
 #include "d3d12mini.h"
+#include <iron_gpu.h>
+#include <iron_system.h>
+#include <stdbool.h>
+#include <assert.h>
+#include <malloc.h>
+#include "g5_commandlist.h"
+#include "g5_pipeline.h"
+#include "g5_buffer.h"
+#include <iron_math.h>
+#include <dxgi1_4.h>
+#undef CreateWindow
+#include <kinc/backend/windows.h>
+#include <kinc/backend/system_microsoft.h>
+#include "g5_pipeline.h"
+#include <iron_gpu.h>
+#include <kinc/backend/system_microsoft.h>
+#include <iron_math.h>
+#include "g5_texture.h"
+#include <math.h>
+#include <kinc/backend/g5_raytrace.h>
 
 ID3D12Device *device = NULL;
 static ID3D12RootSignature *globalRootSignature = NULL;
 static ID3D12RootSignature *globalComputeRootSignature = NULL;
 // extern ID3D12GraphicsCommandList* commandList;
-
-#include <stdbool.h>
 
 #define MAXIMUM_WINDOWS 1
 
@@ -70,22 +88,6 @@ inline struct dx_window *kinc_dx_current_window() {
 }
 
 static bool compute_pipeline_set = false;
-
-#include <assert.h>
-#include <malloc.h>
-#include <stdbool.h>
-
-#include "g5_commandlist.h"
-#include "g5_pipeline.h"
-#include "g5_buffer.h"
-
-#include <iron_gpu.h>
-#include <iron_math.h>
-#include <dxgi1_4.h>
-#undef CreateWindow
-#include <iron_system.h>
-#include <kinc/backend/windows.h>
-#include <kinc/backend/system_microsoft.h>
 
 ID3D12CommandQueue *commandQueue;
 
@@ -552,20 +554,6 @@ bool kinc_g5_raytrace_supported() {
 	}
 	return false;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-#include <iron_gpu.h>
-#include <iron_system.h>
 
 void createHeaps(kinc_g5_command_list_t *list);
 
@@ -1075,19 +1063,6 @@ void kinc_g5_command_list_set_texture_from_render_target_depth(kinc_g5_command_l
 	list->impl.currentTextures[texture->impl.stage_depth] = texture;
 }
 
-
-
-
-
-
-
-
-
-
-#include <iron_gpu.h>
-#include <iron_math.h>
-#include <kinc/backend/system_microsoft.h>
-
 void kinc_g5_compute_shader_init(kinc_g5_compute_shader *shader, void *_data, int length) {
 	unsigned index = 0;
 	uint8_t *data = (uint8_t *)_data;
@@ -1247,21 +1222,6 @@ kinc_g5_texture_unit_t kinc_g5_compute_shader_get_texture_unit(kinc_g5_compute_s
 	}
 	return unit;
 }
-
-
-
-
-
-
-
-
-
-
-#include "g5_pipeline.h"
-
-#include <iron_gpu.h>
-#include <kinc/backend/system_microsoft.h>
-#include <iron_math.h>
 
 void kinc_g5_internal_setConstants(kinc_g5_command_list_t *commandList, kinc_g5_pipeline_t *pipeline) {
 	commandList->impl._commandList->lpVtbl->SetGraphicsRootSignature(commandList->impl._commandList, globalRootSignature);
@@ -1789,18 +1749,6 @@ uint32_t kinc_internal_hash_name(unsigned char *str) {
 	}
 	return hash;
 }
-
-
-
-
-
-#include "g5_texture.h"
-
-#include <iron_math.h>
-#include <iron_gpu.h>
-#include <kinc/backend/system_microsoft.h>
-#include <math.h>
-#include <dxgi1_4.h>
 
 static const int heapSize = 1024;
 
@@ -2462,15 +2410,6 @@ void kinc_g5_render_target_set_depth_from(kinc_g5_texture_t *render_target, kinc
 	render_target->impl.depthStencilTexture = source->impl.depthStencilTexture;
 }
 
-
-
-
-
-
-#include "g5_buffer.h"
-#include <iron_gpu.h>
-#include <kinc/backend/system_microsoft.h>
-
 kinc_g5_vertex_buffer_t *_current_vertex_buffer = NULL;
 
 void kinc_g5_vertex_buffer_init(kinc_g5_vertex_buffer_t *buffer, int count, kinc_g5_vertex_structure_t *structure, bool gpuMemory) {
@@ -2755,15 +2694,6 @@ void kinc_g5_internal_index_buffer_upload(kinc_g5_index_buffer_t *buffer, ID3D12
 int kinc_g5_index_buffer_count(kinc_g5_index_buffer_t *buffer) {
 	return buffer->impl.count;
 }
-
-
-
-
-
-
-
-#include <kinc/backend/g5_raytrace.h>
-#include <iron_gpu.h>
 
 static const wchar_t *hit_group_name = L"hitgroup";
 static const wchar_t *raygen_shader_name = L"raygeneration";
@@ -3658,5 +3588,3 @@ void kinc_g5_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
 	dxrCommandList->lpVtbl->SetPipelineState1(dxrCommandList, pipeline->impl.dxr_state);
 	dxrCommandList->lpVtbl->DispatchRays(dxrCommandList, &dispatchDesc);
 }
-
-

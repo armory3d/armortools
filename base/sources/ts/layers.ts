@@ -261,7 +261,7 @@ function layers_apply_mask(l: slot_layer_t, m: slot_layer_t) {
 	iron_g4_set_texture(pipes_texa_mask, m.texpaint);
 	kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
 	kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
-	g4_draw();
+	iron_g4_draw_indexed_vertices();
 	iron_g4_end();
 }
 
@@ -276,7 +276,7 @@ function layers_commands_merge_pack(pipe: kinc_g5_pipeline_t, i0: kinc_g5_textur
 	iron_g4_set_int(pipes_blending, i1blending);
 	kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
 	kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
-	g4_draw();
+	iron_g4_draw_indexed_vertices();
 	iron_g4_end();
 }
 
@@ -737,7 +737,7 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 		iron_g4_set_int(pipes_blending_merge_mask, l1.blending);
 		kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
 		kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
-		g4_draw();
+		iron_g4_draw_indexed_vertices();
 		iron_g4_end();
 	}
 
@@ -753,7 +753,7 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 			iron_g4_set_int(pipes_blending, l1.blending);
 			kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
 			kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
-			g4_draw();
+			iron_g4_draw_indexed_vertices();
 			iron_g4_end();
 		}
 
@@ -775,7 +775,7 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 				iron_g4_set_int(pipes_blending, l1.paint_nor_blend ? -2 : -1);
 				kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
 				kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
-				g4_draw();
+				iron_g4_draw_indexed_vertices();
 				iron_g4_end();
 			}
 		}

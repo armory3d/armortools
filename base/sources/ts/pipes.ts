@@ -7,7 +7,7 @@ let pipes_copy_rgb: kinc_g5_pipeline_t = null;
 let pipes_copy_r: kinc_g5_pipeline_t;
 let pipes_copy_g: kinc_g5_pipeline_t;
 let pipes_copy_a: kinc_g5_pipeline_t;
-let pipes_copy_a_tex: kinc_tex_unit_t;
+let pipes_copy_a_tex: kinc_g5_texture_unit_t;
 
 let pipes_merge: kinc_g5_pipeline_t = null;
 let pipes_merge_r: kinc_g5_pipeline_t = null;
@@ -19,35 +19,35 @@ let pipes_invert8: kinc_g5_pipeline_t;
 let pipes_apply_mask: kinc_g5_pipeline_t;
 let pipes_colorid_to_mask: kinc_g5_pipeline_t;
 
-let pipes_tex0: kinc_tex_unit_t;
-let pipes_tex1: kinc_tex_unit_t;
-let pipes_texmask: kinc_tex_unit_t;
-let pipes_texa: kinc_tex_unit_t;
-let pipes_opac: kinc_const_loc_t;
-let pipes_blending: kinc_const_loc_t;
-let pipes_tex0_mask: kinc_tex_unit_t;
-let pipes_texa_mask: kinc_tex_unit_t;
-let pipes_tex0_merge_mask: kinc_tex_unit_t;
-let pipes_texa_merge_mask: kinc_tex_unit_t;
-let pipes_tex_colorid: kinc_tex_unit_t;
-let pipes_texpaint_colorid: kinc_tex_unit_t;
-let pipes_opac_merge_mask: kinc_const_loc_t;
-let pipes_blending_merge_mask: kinc_const_loc_t;
+let pipes_tex0: kinc_g5_texture_unit_t;
+let pipes_tex1: kinc_g5_texture_unit_t;
+let pipes_texmask: kinc_g5_texture_unit_t;
+let pipes_texa: kinc_g5_texture_unit_t;
+let pipes_opac: kinc_g5_constant_location_t;
+let pipes_blending: kinc_g5_constant_location_t;
+let pipes_tex0_mask: kinc_g5_texture_unit_t;
+let pipes_texa_mask: kinc_g5_texture_unit_t;
+let pipes_tex0_merge_mask: kinc_g5_texture_unit_t;
+let pipes_texa_merge_mask: kinc_g5_texture_unit_t;
+let pipes_tex_colorid: kinc_g5_texture_unit_t;
+let pipes_texpaint_colorid: kinc_g5_texture_unit_t;
+let pipes_opac_merge_mask: kinc_g5_constant_location_t;
+let pipes_blending_merge_mask: kinc_g5_constant_location_t;
 let pipes_temp_mask_image: kinc_g5_texture_t = null;
 
 let pipes_inpaint_preview: kinc_g5_pipeline_t;
-let pipes_tex0_inpaint_preview: kinc_tex_unit_t;
-let pipes_texa_inpaint_preview: kinc_tex_unit_t;
+let pipes_tex0_inpaint_preview: kinc_g5_texture_unit_t;
+let pipes_texa_inpaint_preview: kinc_g5_texture_unit_t;
 
 let pipes_cursor: kinc_g5_pipeline_t;
-let pipes_cursor_vp: kinc_const_loc_t;
-let pipes_cursor_inv_vp: kinc_const_loc_t;
-let pipes_cursor_mouse: kinc_const_loc_t;
-let pipes_cursor_tex_step: kinc_const_loc_t;
-let pipes_cursor_radius: kinc_const_loc_t;
-let pipes_cursor_camera_right: kinc_const_loc_t;
-let pipes_cursor_tint: kinc_const_loc_t;
-let pipes_cursor_gbufferd: kinc_tex_unit_t;
+let pipes_cursor_vp: kinc_g5_constant_location_t;
+let pipes_cursor_inv_vp: kinc_g5_constant_location_t;
+let pipes_cursor_mouse: kinc_g5_constant_location_t;
+let pipes_cursor_tex_step: kinc_g5_constant_location_t;
+let pipes_cursor_radius: kinc_g5_constant_location_t;
+let pipes_cursor_camera_right: kinc_g5_constant_location_t;
+let pipes_cursor_tint: kinc_g5_constant_location_t;
+let pipes_cursor_gbufferd: kinc_g5_texture_unit_t;
 
 function _pipes_make_merge(red: bool, green: bool, blue: bool, alpha: bool): kinc_g5_pipeline_t {
 	let pipe: kinc_g5_pipeline_t = iron_g4_create_pipeline();
