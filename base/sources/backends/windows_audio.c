@@ -1,9 +1,9 @@
 
 #ifdef KINC_A2
 
-#include <kinc/audio2/audio.h>
-#include <kinc/backend/system_microsoft.h>
+#include <iron_audio.h>
 #include <iron_system.h>
+#include <backends/windows_system.h>
 
 // Windows 7
 #define WINVER 0x0601

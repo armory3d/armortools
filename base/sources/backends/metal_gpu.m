@@ -7,8 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <kinc/backend/g5_raytrace.h>
-
 
 static id<MTLCommandBuffer> command_buffer = nil;
 static id<MTLRenderCommandEncoder> render_command_encoder = nil;
@@ -1588,6 +1586,7 @@ void kinc_g5_render_target_init(kinc_g5_texture_t *target, int width, int height
 	target->width = target->width = width;
 	target->height = target->height = height;
 	target->state = KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
+	target->_uploaded = true;
 }
 
 static int framebuffer_count = 0;

@@ -1495,12 +1495,12 @@ buffer_t *iron_g4_get_texture_pixels(kinc_g5_texture_t *image) {
 
 		// Release staging texture immediately to save memory
 		#ifdef KINC_DIRECT3D12
-		rt->impl.renderTargetReadback->lpVtbl->Release(rt->impl.renderTargetReadback);
-		rt->impl.renderTargetReadback = NULL;
+		image->impl.renderTargetReadback->lpVtbl->Release(image->impl.renderTargetReadback);
+		image->impl.renderTargetReadback = NULL;
 		#elif defined(KINC_METAL)
-		// id<MTLTexture> texReadback = (__bridge_transfer id<MTLTexture>)rt->impl._texReadback;
+		// id<MTLTexture> texReadback = (__bridge_transfer id<MTLTexture>)image->impl._texReadback;
 		// texReadback = nil;
-		// rt->impl._texReadback = NULL;
+		// image->impl._texReadback = NULL;
 		#endif
 	}
 	else {

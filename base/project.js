@@ -157,6 +157,8 @@ if (!flags.lite) {
 
 	if (platform === "windows") {
 		add_sys_backend("windows");
+		add_net_backend("windows");
+		add_thread_backend("windows");
 		project.add_lib("dxguid");
 		project.add_lib("dsound");
 		project.add_lib("dinput8");
@@ -203,6 +205,7 @@ if (!flags.lite) {
 		add_sys_backend("apple");
 		add_sys_backend("ios");
 		add_sys_backend("posix");
+		add_thread_backend("posix");
 		if (graphics === "metal" || graphics === "default") {
 			add_gpu_backend("metal");
 			project.add_define("KINC_METAL");
@@ -227,6 +230,7 @@ if (!flags.lite) {
 		project.add_define("KINC_ANDROID");
 		add_sys_backend("android");
 		add_sys_backend("posix");
+		add_thread_backend("posix");
 		if (graphics === "vulkan" || graphics === "default") {
 			add_gpu_backend("vulkan");
 			project.add_define("KINC_VULKAN");
@@ -247,6 +251,7 @@ if (!flags.lite) {
 	else if (platform === "wasm") {
 		project.add_define("KINC_WASM");
 		add_sys_backend("wasm");
+		add_thread_backend("wasm");
 		project.add_include_dir("miniclib");
 		project.add_cfiles("sources/libs/miniclib/**");
 		if (graphics === "webgpu" || graphics === "default") {

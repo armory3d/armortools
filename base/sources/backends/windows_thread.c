@@ -1,4 +1,5 @@
 #include <iron_thread.h>
+#include <Windows.h>
 
 void kinc_threads_init() {}
 
@@ -30,7 +31,6 @@ void kinc_thread_init(kinc_thread_t *thread, void (*func)(void *param), void *pa
 	starts[start_index].thread = func;
 	starts[start_index].param = param;
 	thread->impl.handle = CreateThread(0, 65536, ThreadProc, (LPVOID)start_index, 0, 0);
-	assert(thread->impl.handle != NULL);
 }
 
 void kinc_thread_wait_and_destroy(kinc_thread_t *thread) {
@@ -71,7 +71,6 @@ void kinc_thread_sleep(int milliseconds) {
 }
 
 void kinc_mutex_init(kinc_mutex_t *mutex) {
-	assert(sizeof(RTL_CRITICAL_SECTION) == sizeof(kinc_microsoft_critical_section_t));
 	InitializeCriticalSection((LPCRITICAL_SECTION)&mutex->impl.criticalSection);
 }
 

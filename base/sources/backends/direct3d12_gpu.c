@@ -48,32 +48,24 @@
 
 #include <d3d12.h>
 #include <dxgi.h>
-#include "d3d12mini.h"
 #include <iron_gpu.h>
 #include <iron_system.h>
 #include <stdbool.h>
 #include <assert.h>
 #include <malloc.h>
-#include "g5_commandlist.h"
-#include "g5_pipeline.h"
-#include "g5_buffer.h"
 #include <iron_math.h>
 #include <dxgi1_4.h>
 #undef CreateWindow
-#include <kinc/backend/windows.h>
-#include <kinc/backend/system_microsoft.h>
-#include "g5_pipeline.h"
+#include <backends/windows_system.h>
 #include <iron_gpu.h>
-#include <kinc/backend/system_microsoft.h>
 #include <iron_math.h>
-#include "g5_texture.h"
 #include <math.h>
-#include <kinc/backend/g5_raytrace.h>
 
 ID3D12Device *device = NULL;
 static ID3D12RootSignature *globalRootSignature = NULL;
 static ID3D12RootSignature *globalComputeRootSignature = NULL;
 // extern ID3D12GraphicsCommandList* commandList;
+static int framebuffer_count = 0;
 
 #define MAXIMUM_WINDOWS 1
 
@@ -239,7 +231,7 @@ static void createRootSignature() {
 		samplers[i].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 		samplers[i].MipLODBias = 0;
 		samplers[i].MaxAnisotropy = 16;
-		samplers[i].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+		samplers[i].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
 		samplers[i].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
 		samplers[i].MinLOD = 0.0f;
 		samplers[i].MaxLOD = D3D12_FLOAT32_MAX;
@@ -254,7 +246,7 @@ static void createRootSignature() {
 		samplers[i].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 		samplers[i].MipLODBias = 0;
 		samplers[i].MaxAnisotropy = 16;
-		samplers[i].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+		samplers[i].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
 		samplers[i].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
 		samplers[i].MinLOD = 0.0f;
 		samplers[i].MaxLOD = D3D12_FLOAT32_MAX;
@@ -327,7 +319,7 @@ static void createComputeRootSignature() {
 		samplers[i].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 		samplers[i].MipLODBias = 0;
 		samplers[i].MaxAnisotropy = 16;
-		samplers[i].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+		samplers[i].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
 		samplers[i].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
 		samplers[i].MinLOD = 0.0f;
 		samplers[i].MaxLOD = D3D12_FLOAT32_MAX;
@@ -342,7 +334,7 @@ static void createComputeRootSignature() {
 		samplers[i].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 		samplers[i].MipLODBias = 0;
 		samplers[i].MaxAnisotropy = 16;
-		samplers[i].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+		samplers[i].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
 		samplers[i].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
 		samplers[i].MinLOD = 0.0f;
 		samplers[i].MaxLOD = D3D12_FLOAT32_MAX;
@@ -952,7 +944,7 @@ void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list,
 		resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 		resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-		device->lpVtbl->CreateCommittedResource(device , &heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_COPY_DEST, NULL,
+		device->lpVtbl->CreateCommittedResource(device , &heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_COMMON, NULL,
 		                                &IID_ID3D12Resource, &render_target->impl.renderTargetReadback);
 	}
 
@@ -1566,7 +1558,7 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
 	psoDesc.DepthStencilState.StencilEnable = FALSE;
 	psoDesc.DepthStencilState.StencilReadMask = D3D12_DEFAULT_STENCIL_READ_MASK;
 	psoDesc.DepthStencilState.StencilWriteMask = D3D12_DEFAULT_STENCIL_WRITE_MASK;
-	const D3D12_DEPTH_STENCILOP_DESC defaultStencilOp = {D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_COMPARISON_FUNC_ALWAYS};
+	const D3D12_DEPTH_STENCILOP_DESC defaultStencilOp = {D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_COMPARISON_FUNC_NEVER};
 	psoDesc.DepthStencilState.FrontFace = defaultStencilOp;
 	psoDesc.DepthStencilState.BackFace = defaultStencilOp;
 
@@ -1670,7 +1662,7 @@ void kinc_g5_sampler_init(kinc_g5_sampler_t *sampler, const kinc_g5_sampler_opti
 	samplerDesc.MaxLOD = 32;
 	samplerDesc.MipLODBias = 0.0f;
 	samplerDesc.MaxAnisotropy = 1;
-	samplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	samplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
 	D3D12_CPU_DESCRIPTOR_HANDLE handle;
 	sampler->impl.sampler_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(sampler->impl.sampler_heap, &handle);
 	device->lpVtbl->CreateSampler(device, &samplerDesc, handle);
@@ -1885,12 +1877,16 @@ void kinc_memory_emergency();
 void kinc_g5_texture_init_from_bytes(kinc_g5_texture_t *texture, void *data, int width, int height, kinc_image_format_t format) {
 	memset(&texture->impl, 0, sizeof(texture->impl));
 	texture->impl.stage = 0;
+	texture->impl.stage_depth = -1;
 	texture->impl.mipmap = true;
 	texture->width = width;
 	texture->height = height;
 	texture->_uploaded = false;
 	texture->format = format;
 	texture->data = data;
+	texture->state = KINC_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
+	texture->framebuffer_index = -1;
+	texture->impl.renderTarget = NULL;
 
 	DXGI_FORMAT d3dformat = convertImageFormat(format);
 	int formatSize = formatByteSize(format);
@@ -2002,10 +1998,13 @@ void kinc_g5_texture_init_from_bytes(kinc_g5_texture_t *texture, void *data, int
 void create_texture(struct kinc_g5_texture *texture, int width, int height, kinc_image_format_t format, D3D12_RESOURCE_FLAGS flags) {
 	memset(&texture->impl, 0, sizeof(texture->impl));
 	texture->impl.stage = 0;
+	texture->impl.stage_depth = -1;
 	texture->impl.mipmap = true;
 	texture->width = width;
 	texture->height = height;
 	texture->data = NULL;
+	texture->framebuffer_index = -1;
+	texture->impl.renderTarget = NULL;
 
 	DXGI_FORMAT d3dformat = convertImageFormat(format);
 
@@ -2109,11 +2108,14 @@ void create_texture(struct kinc_g5_texture *texture, int width, int height, kinc
 void kinc_g5_texture_init(struct kinc_g5_texture *texture, int width, int height, kinc_image_format_t format) {
 	create_texture(texture, width, height, format, D3D12_RESOURCE_FLAG_NONE);
 	texture->_uploaded = true;
+	texture->state = KINC_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
 	texture->format = format;
 }
 
 void kinc_g5_texture_init_non_sampled_access(struct kinc_g5_texture *texture, int width, int height, kinc_image_format_t format) {
 	create_texture(texture, width, height, format, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
+	texture->_uploaded = true;
+	texture->state = KINC_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
 }
 
 void kinc_g5_texture_destroy(kinc_g5_texture_t *render_target) {
@@ -2121,21 +2123,25 @@ void kinc_g5_texture_destroy(kinc_g5_texture_t *render_target) {
 		framebuffer_count -= 1;
 	}
 
-	render_target->impl.renderTarget->lpVtbl->Release(render_target->impl.renderTarget);
-	render_target->impl.renderTargetDescriptorHeap->lpVtbl->Release(render_target->impl.renderTargetDescriptorHeap);
-	render_target->impl.srvDescriptorHeap->lpVtbl->Release(render_target->impl.srvDescriptorHeap);
-	if (render_target->impl.depthStencilTexture != NULL) {
-		render_target->impl.depthStencilTexture->lpVtbl->Release(render_target->impl.depthStencilTexture);
-		render_target->impl.depthStencilDescriptorHeap->lpVtbl->Release(render_target->impl.depthStencilDescriptorHeap);
-		render_target->impl.srvDepthDescriptorHeap->lpVtbl->Release(render_target->impl.srvDepthDescriptorHeap);
-	}
-	if (render_target->impl.renderTargetReadback != NULL) {
-		render_target->impl.renderTargetReadback->lpVtbl->Release(render_target->impl.renderTargetReadback);
+	if (render_target->impl.renderTarget != NULL) {
+		render_target->impl.renderTarget->lpVtbl->Release(render_target->impl.renderTarget);
+		render_target->impl.renderTargetDescriptorHeap->lpVtbl->Release(render_target->impl.renderTargetDescriptorHeap);
+		render_target->impl.srvDescriptorHeap->lpVtbl->Release(render_target->impl.srvDescriptorHeap);
+		if (render_target->impl.depthStencilTexture != NULL) {
+			render_target->impl.depthStencilTexture->lpVtbl->Release(render_target->impl.depthStencilTexture);
+			render_target->impl.depthStencilDescriptorHeap->lpVtbl->Release(render_target->impl.depthStencilDescriptorHeap);
+			render_target->impl.srvDepthDescriptorHeap->lpVtbl->Release(render_target->impl.srvDepthDescriptorHeap);
+		}
+		if (render_target->impl.renderTargetReadback != NULL) {
+			render_target->impl.renderTargetReadback->lpVtbl->Release(render_target->impl.renderTargetReadback);
+		}
 	}
 
-	texture->impl.image->lpVtbl->Release(texture->impl.image);
-	texture->impl.uploadImage->lpVtbl->Release(texture->impl.uploadImage);
-	// texture->impl.srvDescriptorHeap->lpVtbl->Release(texture->impl.srvDescriptorHeap);
+	if (render_target->impl.image != NULL) {
+		render_target->impl.image->lpVtbl->Release(render_target->impl.image);
+		render_target->impl.uploadImage->lpVtbl->Release(render_target->impl.uploadImage);
+		// render_target->impl.srvDescriptorHeap->lpVtbl->Release(render_target->impl.srvDescriptorHeap);
+	}
 }
 
 void kinc_g5_internal_texture_unmipmap(struct kinc_g5_texture *texture) {
@@ -2204,6 +2210,8 @@ static void render_target_init(kinc_g5_texture_t *render_target, int width, int 
 	render_target->impl.stage_depth = -1;
 	render_target->impl.renderTargetReadback = NULL;
 	render_target->impl.framebuffer_index = framebuffer_index;
+	render_target->impl.image = NULL;
+	render_target->impl.uploadImage = NULL;
 	render_target->data = NULL;
 
 	DXGI_FORMAT dxgiFormat = convertFormat(format);
@@ -2395,13 +2403,15 @@ static void render_target_init(kinc_g5_texture_t *render_target, int width, int 
 
 void kinc_g5_render_target_init(kinc_g5_texture_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits) {
 	render_target_init(target, width, height, format, depthBufferBits, -1);
+	target->_uploaded = true;
+	target->state = KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
 }
-
-static int framebuffer_count = 0;
 
 void kinc_g5_render_target_init_framebuffer(kinc_g5_texture_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits) {
 	render_target_init(target, width, height, format, depthBufferBits, framebuffer_count);
 	framebuffer_count += 1;
+	target->_uploaded = true;
+	target->state = KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
 }
 
 void kinc_g5_render_target_set_depth_from(kinc_g5_texture_t *render_target, kinc_g5_texture_t *source) {
@@ -2610,7 +2620,7 @@ void kinc_g5_index_buffer_init(kinc_g5_index_buffer_t *buffer, int count, bool g
 		heapProperties.VisibleNodeMask = 1;
 
 		kinc_microsoft_affirm(device->lpVtbl->CreateCommittedResource(device , &heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc,
-		                                                              D3D12_RESOURCE_STATE_COPY_DEST, NULL,
+			D3D12_RESOURCE_STATE_COMMON, NULL,
 		                                                      &IID_ID3D12Resource, &buffer->impl.index_buffer));
 
 		buffer->impl.index_buffer_view.BufferLocation = buffer->impl.index_buffer->lpVtbl->GetGPUVirtualAddress(buffer->impl.index_buffer);

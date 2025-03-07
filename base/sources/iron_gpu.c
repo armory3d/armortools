@@ -498,7 +498,6 @@ void kinc_g4_set_render_targets(kinc_g5_texture_t **targets, int count) {
 	}
 	windows[0].current_render_target_count = count;
 	kinc_g5_texture_t *render_targets[16];
-	assert(count <= 16);
 	for (int i = 0; i < count; ++i) {
 		render_targets[i] = targets[i];
 	}

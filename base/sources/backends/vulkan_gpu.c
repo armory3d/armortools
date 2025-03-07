@@ -4060,6 +4060,7 @@ void kinc_g5_render_target_init(kinc_g5_texture_t *target, int width, int height
 	target->width = width;
 	target->height = height;
 	target->state = KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
+	target->_uploaded = true;
 }
 
 void kinc_g5_render_target_init_framebuffer(kinc_g5_texture_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits) {

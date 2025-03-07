@@ -2,7 +2,7 @@
 #include "iron_file.h"
 #include <iron_system.h>
 #ifdef KINC_ANDROID
-#include <kinc/backend/android.h>
+#include <backends/android.h>
 #endif
 #include <stdio.h>
 #include <stdlib.h>
@@ -52,7 +52,7 @@ const char *macgetresourcepath(void);
 #endif
 
 #ifdef KINC_WINDOWS
-#include <kinc/backend/windows_mini.h>
+#include <backends/windows_mini.h>
 #endif
 
 static char *fileslocation = NULL;

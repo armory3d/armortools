@@ -5,8 +5,8 @@
 #include <string.h>
 #include <stdlib.h>
 #ifdef KINC_WINDOWS
-#include <kinc/backend/windows_mini.h>
-#include <kinc/backend/system_microsoft.h>
+#include <backends/windows_mini.h>
+#include <backends/windows_system.h>
 #endif
 #ifdef KINC_ANDROID
 #include <android/log.h>

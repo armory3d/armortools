@@ -2,6 +2,7 @@
 #include <iron_net.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <Windows.h>
 #include <winhttp.h>
 
 static const wchar_t *convert(int method) {

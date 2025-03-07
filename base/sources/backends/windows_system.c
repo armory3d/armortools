@@ -1713,7 +1713,7 @@ void kinc_init(const char *name, int width, int height, kinc_window_options_t *w
 
 	kinc_g5_internal_init();
 
-	kinc_window_create(win, frame);
+	kinc_window_create(win);
 	loadXInput();
 	initializeDirectInput();
 }

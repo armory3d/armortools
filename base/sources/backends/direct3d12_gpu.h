@@ -2,7 +2,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "d3d12mini.h"
 
 struct ID3D12CommandAllocator;
 struct ID3D12GraphicsCommandList;
@@ -80,6 +79,11 @@ typedef struct {
 	uint8_t columns;
 	uint8_t rows;
 } kinc_compute_internal_shader_constant_t;
+
+typedef struct {
+	uint32_t hash;
+	uint32_t index;
+} kinc_internal_hash_index_t;
 
 typedef struct kinc_g5_compute_shader_impl {
 	kinc_compute_internal_shader_constant_t constants[64];
@@ -163,11 +167,6 @@ typedef struct {
 	uint8_t *data;
 	int length;
 } Shader5Impl;
-
-typedef struct {
-	uint32_t hash;
-	uint32_t index;
-} kinc_internal_hash_index_t;
 
 uint32_t kinc_internal_hash_name(unsigned char *str);
 
