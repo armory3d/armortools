@@ -3556,6 +3556,11 @@ void kinc_g5_texture_init_from_bytes(kinc_g5_texture_t *texture, void *data, int
 	texture->_uploaded = false;
 	texture->format = format;
 	texture->data = data;
+	texture->impl.stage = 0;
+	texture->impl.stage_depth = -1;
+	texture->state = KINC_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
+	texture->framebuffer_index = -1;
+	texture->impl.renderTarget = NULL;
 
 	const VkFormat tex_format = convert_image_format(format);
 	VkFormatProperties props;
@@ -3644,6 +3649,11 @@ void kinc_g5_texture_init(kinc_g5_texture_t *texture, int width, int height, kin
 	texture->_uploaded = true;
 	texture->format = format;
 	texture->data = NULL;
+	texture->impl.stage = 0;
+	texture->impl.stage_depth = -1;
+	texture->state = KINC_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
+	texture->framebuffer_index = -1;
+	texture->impl.renderTarget = NULL;
 
 	const VkFormat tex_format = convert_image_format(format);
 	VkFormatProperties props;
@@ -3728,7 +3738,6 @@ void kinc_g5_texture_destroy(kinc_g5_texture_t *target) {
 		framebuffer_count -= 1;
 	}
 	else {
-
 		if (target->impl.framebuffer != NULL) {
 			vkDestroyFramebuffer(vk_ctx.device, target->impl.framebuffer, NULL);
 		}

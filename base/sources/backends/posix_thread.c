@@ -82,9 +82,6 @@ void kinc_threads_init() {}
 
 void kinc_threads_quit() {}
 
-#endif
-
-#if !defined(KINC_IOS) && !defined(KINC_MACOS)
 // Alternatively _GNU_SOURCE can be defined to make
 // the headers declare it but let's not make it too
 // easy to write Linux-specific POSIX-code
@@ -102,4 +99,3 @@ void kinc_thread_set_name(const char *name) {
 void kinc_thread_sleep(int milliseconds) {
 	usleep(1000 * (useconds_t)milliseconds);
 }
-

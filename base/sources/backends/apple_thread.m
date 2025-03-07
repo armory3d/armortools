@@ -5,6 +5,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <wchar.h>
+#include "posix_thread.c"
 
 static void *ThreadProc(void *arg) {
 	@autoreleasepool {

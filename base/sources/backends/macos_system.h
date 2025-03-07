@@ -7,7 +7,6 @@
 #include <IOKit/IOKitLib.h>
 #include <IOKit/hid/IOHIDKeys.h>
 #include <IOKit/hid/IOHIDManager.h>
-#include "HIDGamepad.h"
 
 struct kinc_g5_texture;
 

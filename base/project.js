@@ -136,22 +136,22 @@ if (!flags.lite) {
 	project.add_include_dir("sources");
 
 	function add_gpu_backend(name) {
-		project.add_cfiles("sources/backends/" + name + "_gpu.c");
+		project.add_cfiles("sources/backends/" + name + "_gpu.*");
 		project.add_define("BACKEND_GPU_H=\"backends/" + name + "_gpu.h\"");
 	}
 
 	function add_sys_backend(name) {
-		project.add_cfiles("sources/backends/" + name + "_system.c");
+		project.add_cfiles("sources/backends/" + name + "_system.*");
 		project.add_define("BACKEND_SYS_H=\"backends/" + name + "_system.h\"");
 	}
 
 	function add_net_backend(name) {
-		project.add_cfiles("sources/backends/" + name + "_net.c");
+		project.add_cfiles("sources/backends/" + name + "_net.*");
 		project.add_define("BACKEND_NET_H=\"backends/" + name + "_net.h\"");
 	}
 
 	function add_thread_backend(name) {
-		project.add_cfiles("sources/backends/" + name + "_thread.c");
+		project.add_cfiles("sources/backends/" + name + "_thread.*");
 		project.add_define("BACKEND_THREAD_H=\"backends/" + name + "_thread.h\"");
 	}
 
@@ -159,38 +159,28 @@ if (!flags.lite) {
 		add_sys_backend("windows");
 		add_net_backend("windows");
 		add_thread_backend("windows");
+		add_gpu_backend("direct3d12");
+		project.add_define("_CRT_SECURE_NO_WARNINGS");
+		project.add_define("_WINSOCK_DEPRECATED_NO_WARNINGS");
+		project.add_define("KINC_DIRECT3D12");
 		project.add_lib("dxguid");
 		project.add_lib("dsound");
 		project.add_lib("dinput8");
-		project.add_define("_CRT_SECURE_NO_WARNINGS");
-		project.add_define("_WINSOCK_DEPRECATED_NO_WARNINGS");
 		project.add_lib("ws2_32");
 		project.add_lib("Winhttp");
 		project.add_lib("wbemuuid");
-
-		if (graphics === "direct3d12" || graphics === "default") {
-			add_gpu_backend("direct3d12");
-			project.add_define("KINC_DIRECT3D12");
-			project.add_lib("dxgi");
-			project.add_lib("d3d12");
-		}
-		else {
-			throw new Error("Graphics API " + graphics + " is not available for Windows.");
-		}
+		project.add_lib("dxgi");
+		project.add_lib("d3d12");
 	}
 	else if (platform === "macos") {
-		add_sys_backend("apple");
 		add_sys_backend("macos");
-		add_sys_backend("posix");
-		if (graphics === "metal" || graphics === "default") {
-			add_gpu_backend("metal");
-			project.add_define("KINC_METAL");
-			project.add_lib("Metal");
-			project.add_lib("MetalKit");
-		}
-		else {
-			throw new Error("Graphics API " + graphics + " is not available for macOS.");
-		}
+		add_net_backend("apple");
+		add_thread_backend("apple");
+		add_gpu_backend("metal");
+		project.add_cfiles("sources/backends/data/mac.plist");
+		project.add_define("KINC_METAL");
+		project.add_lib("Metal");
+		project.add_lib("MetalKit");
 		project.add_lib("IOKit");
 		project.add_lib("Cocoa");
 		project.add_lib("AppKit");
@@ -202,18 +192,14 @@ if (!flags.lite) {
 		project.add_lib("Foundation");
 	}
 	else if (platform === "ios") {
-		add_sys_backend("apple");
 		add_sys_backend("ios");
-		add_sys_backend("posix");
-		add_thread_backend("posix");
-		if (graphics === "metal" || graphics === "default") {
-			add_gpu_backend("metal");
-			project.add_define("KINC_METAL");
-			project.add_lib("Metal");
-		}
-		else {
-			throw new Error("Graphics API " + graphics + " is not available for iOS.");
-		}
+		add_net_backend("apple");
+		add_thread_backend("apple");
+		add_gpu_backend("metal");
+		project.add_cfiles("sources/backends/data/ios.plist");
+		project.add_cfiles("sources/backends/data/LaunchScreen.storyboard");
+		project.add_define("KINC_METAL");
+		project.add_lib("Metal");
 		project.add_lib("UIKit");
 		project.add_lib("Foundation");
 		project.add_lib("CoreGraphics");
@@ -227,20 +213,15 @@ if (!flags.lite) {
 		project.add_lib("CoreMedia");
 	}
 	else if (platform === "android") {
-		project.add_define("KINC_ANDROID");
 		add_sys_backend("android");
-		add_sys_backend("posix");
+		add_net_backend("posix");
 		add_thread_backend("posix");
-		if (graphics === "vulkan" || graphics === "default") {
-			add_gpu_backend("vulkan");
-			project.add_define("KINC_VULKAN");
-			project.add_define("VK_USE_PLATFORM_ANDROID_KHR");
-			project.add_lib("vulkan");
-			project.add_define("KINC_ANDROID_API=24");
-		}
-		else {
-			throw new Error("Graphics API " + graphics + " is not available for Android.");
-		}
+		add_gpu_backend("vulkan");
+		project.add_define("KINC_ANDROID");
+		project.add_define("KINC_VULKAN");
+		project.add_define("KINC_ANDROID_API=24");
+		project.add_define("VK_USE_PLATFORM_ANDROID_KHR");
+		project.add_lib("vulkan");
 		project.add_lib("log");
 		project.add_lib("android");
 		project.add_lib("EGL");
@@ -249,35 +230,25 @@ if (!flags.lite) {
 		project.add_lib("OpenMAXAL");
 	}
 	else if (platform === "wasm") {
-		project.add_define("KINC_WASM");
 		add_sys_backend("wasm");
 		add_thread_backend("wasm");
-		project.add_include_dir("miniclib");
+		add_gpu_backend("webgpu");
 		project.add_cfiles("sources/libs/miniclib/**");
-		if (graphics === "webgpu" || graphics === "default") {
-			add_gpu_backend("webgpu");
-			project.add_define("KINC_WEBGPU");
-		}
-		else {
-			throw new Error("Graphics API " + graphics + " is not available for Wasm.");
-		}
+		project.add_define("KINC_WASM");
+		project.add_define("KINC_WEBGPU");
+		project.add_include_dir("miniclib");
 	}
 	else if (platform === "linux") {
 		add_sys_backend("linux");
 		add_thread_backend("posix");
+		add_gpu_backend("vulkan");
+		project.add_define("KINC_VULKAN");
+		project.add_define("_POSIX_C_SOURCE=200112L");
+		project.add_define("_XOPEN_SOURCE=600");
 		project.add_lib("asound");
 		project.add_lib("dl");
 		project.add_lib("udev");
-		if (graphics === "vulkan" || graphics === "default") {
-			add_gpu_backend("vulkan");
-			project.add_lib("vulkan");
-			project.add_define("KINC_VULKAN");
-		}
-		else {
-			throw new Error("Graphics API " + graphics + " is not available for Linux.");
-		}
-		project.add_define("_POSIX_C_SOURCE=200112L");
-		project.add_define("_XOPEN_SOURCE=600");
+		project.add_lib("vulkan");
 	}
 }
 

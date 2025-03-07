@@ -1,12 +1,11 @@
-#import <Metal/Metal.h>
-#import <MetalKit/MTKView.h>
-#include "metal.h"
-#include <iron_math.h>
-#include <iron_system.h>
-#include <iron_gpu.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#import <Metal/Metal.h>
+#import <MetalKit/MTKView.h>
+#include <iron_math.h>
+#include <iron_system.h>
+#include <iron_gpu.h>
 
 static id<MTLCommandBuffer> command_buffer = nil;
 static id<MTLRenderCommandEncoder> render_command_encoder = nil;
@@ -23,20 +22,66 @@ int renderTargetWidth;
 int renderTargetHeight;
 int newRenderTargetWidth;
 int newRenderTargetHeight;
-
 id<CAMetalDrawable> drawable;
 id<MTLTexture> depthTexture;
 int depthBits;
-
+bool kinc_internal_metal_has_depth = false;
 static kinc_g5_texture_t fallback_render_target;
+static int framebuffer_count = 0;
+
+void kinc_g5_internal_new_render_pass(kinc_g5_texture_t **renderTargets, int count, bool wait, unsigned clear_flags, unsigned color, float depth);
+void kinc_g5_internal_pipeline_set(kinc_g5_pipeline_t *pipeline);
+static kinc_g5_texture_t *lastRenderTargets[8] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+static kinc_g5_pipeline_t *lastPipeline = NULL;
+extern bool kinc_internal_metal_has_depth;
+id getMetalDevice(void);
+id getMetalQueue(void);
+id getMetalEncoder(void);
+id getMetalLibrary(void);
+bool kinc_internal_current_render_target_has_depth(void);
+static kinc_g5_raytrace_acceleration_structure_t *accel;
+static kinc_g5_raytrace_pipeline_t *pipeline;
+static kinc_g5_texture_t *output = NULL;
+static kinc_g5_constant_buffer_t *constant_buf;
+
+typedef struct inst {
+	kinc_matrix4x4_t m;
+	int i;
+} inst_t;
+
+id<MTLComputePipelineState> _raytracing_pipeline;
+NSMutableArray *_primitive_accels;
+id<MTLAccelerationStructure> _instance_accel;
+dispatch_semaphore_t _sem;
+
+static kinc_g5_texture_t *_texpaint0;
+static kinc_g5_texture_t *_texpaint1;
+static kinc_g5_texture_t *_texpaint2;
+static kinc_g5_texture_t *_texenv;
+static kinc_g5_texture_t *_texsobol;
+static kinc_g5_texture_t *_texscramble;
+static kinc_g5_texture_t *_texrank;
+
+static kinc_g5_vertex_buffer_t *vb[16];
+static kinc_g5_vertex_buffer_t *vb_last[16];
+static kinc_g5_index_buffer_t *ib[16];
+static int vb_count = 0;
+static int vb_count_last = 0;
+static inst_t instances[1024];
+static int instances_count = 0;
+
+kinc_g5_vertex_buffer_t *currentVertexBuffer = NULL;
+bool kinc_g5_transpose_mat = true;
 
 id getMetalEncoder(void) {
 	return render_command_encoder;
 }
 
-void kinc_g5_internal_destroy_window() {}
+void kinc_g5_internal_destroy_window() {
+}
 
-void kinc_g5_internal_destroy(void) {}
+void kinc_g5_internal_destroy(void) {
+}
 
 void kinc_g5_internal_resize(int, int);
 
@@ -44,16 +89,16 @@ void kinc_internal_resize(int width, int height) {
 	kinc_g5_internal_resize(width, height);
 }
 
-void kinc_g5_internal_init(void) {}
+void kinc_g5_internal_init(void) {
+}
 
 void kinc_g5_internal_init_window(int depthBufferBits, bool vsync) {
 	depthBits = depthBufferBits;
 	kinc_g5_render_target_init(&fallback_render_target, 32, 32, KINC_IMAGE_FORMAT_RGBA32, 0);
 }
 
-void kinc_g5_flush(void) {}
-
-bool kinc_internal_metal_has_depth = false;
+void kinc_g5_flush(void) {
+}
 
 bool kinc_internal_current_render_target_has_depth(void) {
 	return kinc_internal_metal_has_depth;
@@ -131,7 +176,8 @@ void kinc_g5_begin(kinc_g5_texture_t *renderTarget) {
 	render_command_encoder = [command_buffer renderCommandEncoderWithDescriptor:renderPassDescriptor];
 }
 
-void kinc_g5_end() {}
+void kinc_g5_end() {
+}
 
 bool kinc_g5_swap_buffers(void) {
 	if (command_buffer != nil && render_command_encoder != nil) {
@@ -211,29 +257,15 @@ void kinc_g5_internal_new_render_pass(kinc_g5_texture_t **renderTargets, int cou
 	render_command_encoder = [command_buffer renderCommandEncoderWithDescriptor:renderPassDescriptor];
 }
 
-bool kinc_g5_raytrace_supported(void) {
-	return true;
-}
-
 int kinc_g5_max_bound_textures(void) {
 	return 16;
 }
-
-id getMetalDevice(void);
-id getMetalQueue(void);
-id getMetalEncoder(void);
-
-void kinc_g5_internal_new_render_pass(kinc_g5_texture_t **renderTargets, int count, bool wait, unsigned clear_flags, unsigned color, float depth);
-void kinc_g5_internal_pipeline_set(kinc_g5_pipeline_t *pipeline);
 
 void kinc_g5_command_list_init(kinc_g5_command_list_t *list) {
 	list->impl.current_index_buffer = NULL;
 }
 
 void kinc_g5_command_list_destroy(kinc_g5_command_list_t *list) {}
-
-static kinc_g5_texture_t *lastRenderTargets[8] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
-static kinc_g5_pipeline_t *lastPipeline = NULL;
 
 static int formatSize(MTLPixelFormat format) {
 	switch (format) {
@@ -344,8 +376,6 @@ void kinc_g5_command_list_set_vertex_buffer(kinc_g5_command_list_t *list, struct
 void kinc_g5_command_list_set_index_buffer(kinc_g5_command_list_t *list, struct kinc_g5_index_buffer *buffer) {
 	list->impl.current_index_buffer = buffer;
 }
-
-extern bool kinc_internal_metal_has_depth;
 
 void kinc_g5_command_list_set_render_targets(kinc_g5_command_list_t *list, struct kinc_g5_texture **targets, int count) {
 	if (targets[0]->framebuffer_index >= 0) {
@@ -521,9 +551,6 @@ void kinc_g5_command_list_compute(kinc_g5_command_list_t *list, int x, int y, in
 	start_render_pass();
 }
 
-id getMetalDevice(void);
-id getMetalLibrary(void);
-
 void kinc_g5_compute_shader_init(kinc_g5_compute_shader *shader, void *_data, int length) {
 	shader->impl.name[0] = 0;
 
@@ -627,9 +654,6 @@ kinc_g5_texture_unit_t kinc_g5_compute_shader_get_texture_unit(kinc_g5_compute_s
 
 	return unit;
 }
-
-id getMetalDevice(void);
-id getMetalEncoder(void);
 
 static MTLBlendFactor convert_blending_factor(kinc_g5_blending_factor_t factor) {
 	switch (factor) {
@@ -870,8 +894,6 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 	pipeline->impl._depthStencilNone = (__bridge_retained void *)[device newDepthStencilStateWithDescriptor:depthStencilDescriptor];
 }
 
-bool kinc_internal_current_render_target_has_depth(void);
-
 void kinc_g5_internal_pipeline_set(kinc_g5_pipeline_t *pipeline) {
 	id<MTLRenderCommandEncoder> encoder = getMetalEncoder();
 	if (kinc_internal_current_render_target_has_depth()) {
@@ -1072,41 +1094,6 @@ void kinc_g5_shader_init(kinc_g5_shader_t *shader, const void *source, size_t le
 	assert(shader->impl.mtlFunction);
 }
 
-
-static kinc_g5_raytrace_acceleration_structure_t *accel;
-static kinc_g5_raytrace_pipeline_t *pipeline;
-static kinc_g5_texture_t *output = NULL;
-static kinc_g5_constant_buffer_t *constant_buf;
-
-id getMetalDevice(void);
-id getMetalQueue(void);
-
-typedef struct inst {
-	kinc_matrix4x4_t m;
-	int i;
-} inst_t;
-
-id<MTLComputePipelineState> _raytracing_pipeline;
-NSMutableArray *_primitive_accels;
-id<MTLAccelerationStructure> _instance_accel;
-dispatch_semaphore_t _sem;
-
-static kinc_g5_texture_t *_texpaint0;
-static kinc_g5_texture_t *_texpaint1;
-static kinc_g5_texture_t *_texpaint2;
-static kinc_g5_texture_t *_texenv;
-static kinc_g5_texture_t *_texsobol;
-static kinc_g5_texture_t *_texscramble;
-static kinc_g5_texture_t *_texrank;
-
-static kinc_g5_vertex_buffer_t *vb[16];
-static kinc_g5_vertex_buffer_t *vb_last[16];
-static kinc_g5_index_buffer_t *ib[16];
-static int vb_count = 0;
-static int vb_count_last = 0;
-static inst_t instances[1024];
-static int instances_count = 0;
-
 bool kinc_g5_raytrace_supported() {
 	id<MTLDevice> device = getMetalDevice();
 	return device.supportsRaytracing;
@@ -1133,7 +1120,8 @@ void kinc_g5_raytrace_pipeline_init(kinc_g5_raytrace_pipeline_t *pipeline, kinc_
 	_sem = dispatch_semaphore_create(2);
 }
 
-void kinc_g5_raytrace_pipeline_destroy(kinc_g5_raytrace_pipeline_t *pipeline) {}
+void kinc_g5_raytrace_pipeline_destroy(kinc_g5_raytrace_pipeline_t *pipeline) {
+}
 
 id<MTLAccelerationStructure> create_acceleration_sctructure(MTLAccelerationStructureDescriptor *descriptor) {
 	id<MTLDevice> device = getMetalDevice();
@@ -1332,10 +1320,6 @@ void kinc_g5_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
 	[command_buffer commit];
 }
 
-
-id getMetalDevice(void);
-id getMetalEncoder(void);
-
 static MTLPixelFormat convert_image_format(kinc_image_format_t format) {
 	switch (format) {
 	case KINC_IMAGE_FORMAT_RGBA32:
@@ -1404,6 +1388,8 @@ void kinc_g5_texture_init(kinc_g5_texture_t *texture, int width, int height, kin
 	create(texture, width, height, format, true);
 	texture->_uploaded = true;
 	texture->data = NULL;
+	texture->state = KINC_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
+	texture->framebuffer_index = -1;
 }
 
 void kinc_g5_texture_init_from_bytes(kinc_g5_texture_t *texture, void *data, int width, int height, kinc_image_format_t format) {
@@ -1413,6 +1399,8 @@ void kinc_g5_texture_init_from_bytes(kinc_g5_texture_t *texture, void *data, int
 	texture->data = data;
 	texture->_uploaded = false;
 	texture->impl.data = NULL;
+	texture->state = KINC_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
+	texture->framebuffer_index = -1;
 	create(texture, width, height, format, true);
 	id<MTLTexture> tex = (__bridge id<MTLTexture>)texture->impl._tex;
 	[tex replaceRegion:MTLRegionMake2D(0, 0, texture->width, texture->height)
@@ -1428,6 +1416,8 @@ void kinc_g5_texture_init_non_sampled_access(kinc_g5_texture_t *texture, int wid
 	texture->height = height;
 	texture->format = format;
 	texture->impl.data = malloc(width * height * (format == KINC_IMAGE_FORMAT_R8 ? 1 : 4));
+	texture->state = KINC_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
+	texture->framebuffer_index = -1;
 	create(texture, width, height, format, true);
 }
 
@@ -1545,7 +1535,8 @@ static void render_target_init(kinc_g5_texture_t *target, int width, int height,
 	target->width = width;
 	target->height = height;
 	target->data = NULL;
-
+	target->_uploaded = true;
+	target->state = KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
 	target->framebuffer_index = framebuffer_index;
 
 	id<MTLDevice> device = getMetalDevice();
@@ -1589,8 +1580,6 @@ void kinc_g5_render_target_init(kinc_g5_texture_t *target, int width, int height
 	target->_uploaded = true;
 }
 
-static int framebuffer_count = 0;
-
 void kinc_g5_render_target_init_framebuffer(kinc_g5_texture_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits) {
 	render_target_init(target, width, height, format, depthBufferBits, framebuffer_count);
 	framebuffer_count += 1;
@@ -1599,12 +1588,6 @@ void kinc_g5_render_target_init_framebuffer(kinc_g5_texture_t *target, int width
 void kinc_g5_render_target_set_depth_from(kinc_g5_texture_t *target, kinc_g5_texture_t *source) {
 	target->impl._depthTex = source->impl._depthTex;
 }
-
-
-id getMetalDevice(void);
-id getMetalEncoder(void);
-
-kinc_g5_vertex_buffer_t *currentVertexBuffer = NULL;
 
 static void vertex_buffer_unset(kinc_g5_vertex_buffer_t *buffer) {
 	if (currentVertexBuffer == buffer)
@@ -1677,8 +1660,6 @@ int kinc_g5_vertex_buffer_count(kinc_g5_vertex_buffer_t *buffer) {
 int kinc_g5_vertex_buffer_stride(kinc_g5_vertex_buffer_t *buffer) {
 	return buffer->impl.myStride;
 }
-
-bool kinc_g5_transpose_mat = true;
 
 void kinc_g5_constant_buffer_init(kinc_g5_constant_buffer_t *buffer, int size) {
 	buffer->impl.mySize = size;

@@ -1154,7 +1154,7 @@ class XCodeExporter extends Exporter {
 			files.push(file);
 		}
 		if (plistname.length === 0) {
-			throw "no plist found";
+			console.log("Error: no plist found");
 		}
 		let frameworks = [];
 		for (let lib of project.getLibs()) {
@@ -2429,18 +2429,7 @@ class CompiledShader {
 }
 
 function shader_find_type(options) {
-	if (options.graphics === 'default') {
-		if (os_platform() === 'win32') {
-			return 'hlsl';
-		}
-		else if (os_platform() === 'darwin') {
-			return 'msl';
-		}
-		else {
-			return 'spirv';
-		}
-	}
-	else if (options.graphics === 'vulkan') {
+	if (options.graphics === 'vulkan') {
 		return 'spirv';
 	}
 	else if (options.graphics === 'metal') {
@@ -2561,19 +2550,7 @@ class IronExporter {
 	}
 
 	ts_options(defines) {
-		let graphics = this.options.graphics;
-		if (graphics === "default") {
-			if (os_platform() === "win32") {
-				graphics = "direct3d12";
-			}
-			else if (os_platform() === "darwin") {
-				graphics = "metal";
-			}
-			else {
-				graphics = "vulkan";
-			}
-		}
-		defines.push("arm_" + graphics);
+		defines.push("arm_" + this.options.graphics);
 		defines.push("arm_" + goptions.target);
 		return {
 			from: ".",
@@ -3342,6 +3319,18 @@ if (goptions.hlslbin) {
 
 if (goptions.run) {
 	goptions.compile = true;
+}
+
+if (goptions.graphics === "default") {
+	if (os_platform() === "win32") {
+		goptions.graphics = "direct3d12";
+	}
+	else if (os_platform() === "darwin") {
+		goptions.graphics = "metal";
+	}
+	else {
+		goptions.graphics = "vulkan";
+	}
 }
 
 let start = Date.now();
