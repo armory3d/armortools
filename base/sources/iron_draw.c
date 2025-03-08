@@ -143,7 +143,7 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_ver
 		kinc_g5_vertex_structure_init(&structure);
 		kinc_g5_vertex_structure_add(&structure, "pos", KINC_G5_VERTEX_DATA_F32_3X);
 		kinc_g5_vertex_structure_add(&structure, "tex", KINC_G5_VERTEX_DATA_F32_2X);
-		kinc_g5_vertex_structure_add(&structure, "col", KINC_G5_VERTEX_DATA_U8_4X_NORMALIZED);
+		kinc_g5_vertex_structure_add(&structure, "col", KINC_G5_VERTEX_DATA_U8_4X_NORM);
 		kinc_g5_pipeline_init(&image_pipeline);
 		image_pipeline.input_layout = &structure;
 		image_pipeline.vertex_shader = &image_vert_shader;
@@ -181,7 +181,7 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_ver
 		kinc_g5_vertex_structure_t structure;
 		kinc_g5_vertex_structure_init(&structure);
 		kinc_g5_vertex_structure_add(&structure, "pos", KINC_G5_VERTEX_DATA_F32_3X);
-		kinc_g5_vertex_structure_add(&structure, "col", KINC_G5_VERTEX_DATA_U8_4X_NORMALIZED);
+		kinc_g5_vertex_structure_add(&structure, "col", KINC_G5_VERTEX_DATA_U8_4X_NORM);
 		kinc_g5_pipeline_init(&colored_pipeline);
 		colored_pipeline.input_layout = &structure;
 		colored_pipeline.vertex_shader = &colored_vert_shader;
@@ -232,7 +232,7 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_ver
 		kinc_g5_vertex_structure_init(&structure);
 		kinc_g5_vertex_structure_add(&structure, "pos", KINC_G5_VERTEX_DATA_F32_3X);
 		kinc_g5_vertex_structure_add(&structure, "tex", KINC_G5_VERTEX_DATA_F32_2X);
-		kinc_g5_vertex_structure_add(&structure, "col", KINC_G5_VERTEX_DATA_U8_4X_NORMALIZED);
+		kinc_g5_vertex_structure_add(&structure, "col", KINC_G5_VERTEX_DATA_U8_4X_NORM);
 
 		kinc_g5_pipeline_init(&text_pipeline);
 		text_pipeline.input_layout = &structure;

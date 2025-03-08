@@ -1800,7 +1800,7 @@ typedef struct {
 
 LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-#define MAXIMUM_WINDOWS 16
+#define MAXIMUM_WINDOWS 1
 static WindowData windows[MAXIMUM_WINDOWS] = {0};
 
 const wchar_t *windowClassName = L"KoreWindow";

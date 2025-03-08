@@ -8,7 +8,7 @@
 #include <X11/extensions/Xinerama.h>
 #include <X11/extensions/Xrandr.h>
 
-#define MAXIMUM_WINDOWS 16
+#define MAXIMUM_WINDOWS 1
 #define MAXIMUM_DISPLAYS 16
 
 struct kinc_x11_window {

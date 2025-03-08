@@ -144,9 +144,9 @@ typedef enum kinc_g5_vertex_data {
 	KINC_G5_VERTEX_DATA_F32_2X = 1,
 	KINC_G5_VERTEX_DATA_F32_3X = 2,
 	KINC_G5_VERTEX_DATA_F32_4X = 3,
-	KINC_G5_VERTEX_DATA_U8_4X_NORMALIZED = 4,
-	KINC_G5_VERTEX_DATA_I16_2X_NORMALIZED = 5,
-	KINC_G5_VERTEX_DATA_I16_4X_NORMALIZED = 6,
+	KINC_G5_VERTEX_DATA_U8_4X_NORM = 4,
+	KINC_G5_VERTEX_DATA_I16_2X_NORM = 5,
+	KINC_G5_VERTEX_DATA_I16_4X_NORM = 6,
 } kinc_g5_vertex_data_t;
 
 typedef struct kinc_g5_vertex_element {
@@ -161,7 +161,6 @@ typedef struct kinc_g5_vertex_structure {
 
 static inline int kinc_g5_vertex_data_size(kinc_g5_vertex_data_t data) {
 	switch (data) {
-	default:
 	case KINC_G5_VERTEX_DATA_F32_1X:
 		return 1 * 4;
 	case KINC_G5_VERTEX_DATA_F32_2X:
@@ -170,13 +169,21 @@ static inline int kinc_g5_vertex_data_size(kinc_g5_vertex_data_t data) {
 		return 3 * 4;
 	case KINC_G5_VERTEX_DATA_F32_4X:
 		return 4 * 4;
-	case KINC_G5_VERTEX_DATA_U8_4X_NORMALIZED:
+	case KINC_G5_VERTEX_DATA_U8_4X_NORM:
 		return 4 * 1;
-	case KINC_G5_VERTEX_DATA_I16_2X_NORMALIZED:
+	case KINC_G5_VERTEX_DATA_I16_2X_NORM:
 		return 2 * 2;
-	case KINC_G5_VERTEX_DATA_I16_4X_NORMALIZED:
+	case KINC_G5_VERTEX_DATA_I16_4X_NORM:
 		return 4 * 2;
 	}
+}
+
+static inline int kinc_g5_vertex_struct_size(kinc_g5_vertex_structure_t *s) {
+	int size = 0;
+	for (int i = 0; i < s->size; ++i) {
+		size += kinc_g5_vertex_data_size(s->elements[i].data);
+	}
+	return size;
 }
 
 void kinc_g5_vertex_structure_init(kinc_g5_vertex_structure_t *structure);

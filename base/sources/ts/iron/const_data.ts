@@ -12,7 +12,7 @@ function const_data_create_screen_aligned_data() {
 	// Mandatory vertex data names and sizes
 	let structure: kinc_g5_vertex_structure_t = g4_vertex_struct_create();
 	g4_vertex_struct_add(structure, "pos", vertex_data_t.F32_2X);
-	const_data_screen_aligned_vb = iron_g4_create_vertex_buffer(math_floor(data.length / math_floor(g4_vertex_struct_byte_size(structure) / 4)), structure, usage_t.STATIC);
+	const_data_screen_aligned_vb = iron_g4_create_vertex_buffer(math_floor(data.length / math_floor(kinc_g5_vertex_struct_size(structure) / 4)), structure, usage_t.STATIC);
 	let vertices: buffer_t = iron_g4_lock_vertex_buffer(const_data_screen_aligned_vb);
 	for (let i: i32 = 0; i < math_floor((vertices.length) / 4); ++i) {
 		buffer_set_f32(vertices, i * 4, data[i]);
@@ -39,7 +39,7 @@ function const_data_create_skydome_data() {
 	let structure: kinc_g5_vertex_structure_t = g4_vertex_struct_create();
 	g4_vertex_struct_add(structure, "pos", vertex_data_t.F32_3X);
 	g4_vertex_struct_add(structure, "nor", vertex_data_t.F32_3X);
-	let struct_length: i32 = math_floor(g4_vertex_struct_byte_size(structure) / 4);
+	let struct_length: i32 = math_floor(kinc_g5_vertex_struct_size(structure) / 4);
 	const_data_skydome_vb = iron_g4_create_vertex_buffer(math_floor(_const_data_skydome_pos_count / 3), structure, usage_t.STATIC);
 	let vertices: buffer_t = iron_g4_lock_vertex_buffer(const_data_skydome_vb);
 	for (let i: i32 = 0; i < math_floor((vertices.length) / 4 / struct_length); ++i) {

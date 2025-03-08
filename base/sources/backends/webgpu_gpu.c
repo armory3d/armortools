@@ -288,13 +288,13 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
 		case KINC_G5_VERTEX_DATA_F32_4X:
 			vaDesc[i].format = WGPUVertexFormat_Float32x4;
 			break;
-		case KINC_G5_VERTEX_DATA_U8_4X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_U8_4X_NORM:
 			vaDesc[i].format = WGPUVertexFormat_Unorm8x4;
 			break;
-		case KINC_G5_VERTEX_DATA_I16_2X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_I16_2X_NORM:
 			vaDesc[i].format = WGPUVertexFormat_Snorm16x2;
 			break;
-		case KINC_G5_VERTEX_DATA_I16_4X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_I16_4X_NORM:
 			vaDesc[i].format = WGPUVertexFormat_Snorm16x4;
 			break;
 		}

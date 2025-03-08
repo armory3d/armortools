@@ -1471,13 +1471,13 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
 		case KINC_G5_VERTEX_DATA_F32_4X:
 			vertexDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 			break;
-		case KINC_G5_VERTEX_DATA_U8_4X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_U8_4X_NORM:
 			vertexDesc[i].Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 			break;
-		case KINC_G5_VERTEX_DATA_I16_2X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_I16_2X_NORM:
 			vertexDesc[i].Format = DXGI_FORMAT_R16G16_SNORM;
 			break;
-		case KINC_G5_VERTEX_DATA_I16_4X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_I16_4X_NORM:
 			vertexDesc[i].Format = DXGI_FORMAT_R16G16B16A16_SNORM;
 			break;
 		default:

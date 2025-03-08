@@ -580,39 +580,8 @@ function g4_vertex_struct_add(raw: kinc_g5_vertex_structure_t, name: string, dat
 	raw.size++;
 }
 
-function g4_vertex_struct_byte_size(raw: kinc_g5_vertex_structure_t): i32 {
-	let byte_size: i32 = 0;
-	for (let i: i32 = 0; i < raw.size; ++i) {
-		let elem: kinc_g5_vertex_element_t = ADDRESS(ARRAY_ACCESS(raw.elements, i));
-		byte_size += g4_vertex_struct_data_byte_size(elem.data);
-	}
-	return byte_size;
-}
-
-function g4_vertex_struct_data_byte_size(data: vertex_data_t): i32 {
-	if (data == vertex_data_t.F32_1X) {
-		return 1 * 4;
-	}
-	if (data == vertex_data_t.F32_2X) {
-		return 2 * 4;
-	}
-	if (data == vertex_data_t.F32_3X) {
-		return 3 * 4;
-	}
-	if (data == vertex_data_t.F32_4X) {
-		return 4 * 4;
-	}
-	if (data == vertex_data_t.U8_4X_NORM) {
-		return 4 * 1;
-	}
-	if (data == vertex_data_t.I16_2X_NORM) {
-		return 2 * 2;
-	}
-	if (data == vertex_data_t.I16_4X_NORM) {
-		return 4 * 2;
-	}
-	return 0;
-}
+declare function kinc_g5_vertex_struct_size(s: kinc_g5_vertex_structure_t): i32;
+declare function kinc_g5_vertex_data_size(data: vertex_data_t);
 
 declare type kinc_g5_pipeline_t = {
 	input_layout?: any;

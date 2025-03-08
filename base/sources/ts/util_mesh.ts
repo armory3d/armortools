@@ -159,7 +159,7 @@ function util_mesh_swap_axis(a: i32, b: i32) {
 		}
 
 		let g: mesh_data_t = o.data;
-		let l: i32 = g4_vertex_struct_byte_size(g._.structure) / 2;
+		let l: i32 = kinc_g5_vertex_struct_size(g._.structure) / 2;
 		let vertices: buffer_t = iron_g4_lock_vertex_buffer(g._.vertex_buffer); // posnortex
 		for (let i: i32 = 0; i < math_floor((vertices.length) / 2 / l); ++i) {
 			buffer_set_i16(vertices, (i * l    ) * 2, vas[0].values[i * 4    ]);
@@ -184,7 +184,7 @@ function util_mesh_flip_normals() {
 		let va0: i16_array_t = vas[0].values;
 		let va1: i16_array_t = vas[1].values;
 		let g: mesh_data_t = o.data;
-		let l: i32 = g4_vertex_struct_byte_size(g._.structure) / 2;
+		let l: i32 = kinc_g5_vertex_struct_size(g._.structure) / 2;
 		let vertices: buffer_t = iron_g4_lock_vertex_buffer(g._.vertex_buffer); // posnortex
 		for (let i: i32 = 0; i < math_floor((vertices.length) / 2 / l); ++i) {
 			va0[i * 4 + 3] = -va0[i * 4 + 3];
@@ -210,7 +210,7 @@ function util_mesh_calc_normals(smooth: bool = false) {
 	for (let i: i32 = 0; i < objects.length; ++i) {
 		let o: mesh_object_t = objects[i];
 		let g: mesh_data_t = o.data;
-		let l: i32 = g4_vertex_struct_byte_size(g._.structure) / 2;
+		let l: i32 = kinc_g5_vertex_struct_size(g._.structure) / 2;
 		let inda: u32_array_t = g._.indices[0];
 		let vertices: buffer_t = iron_g4_lock_vertex_buffer(g._.vertex_buffer); // posnortex
 		for (let i: i32 = 0; i < math_floor(inda.length / 3); ++i) {
@@ -370,7 +370,7 @@ function util_mesh_to_origin() {
 			va[i * 4 + 2] = math_floor((va[i * 4 + 2] * sc - dz) / max_scale * 32767);
 		}
 
-		let l: i32 = g4_vertex_struct_byte_size(g._.structure) / 2;
+		let l: i32 = kinc_g5_vertex_struct_size(g._.structure) / 2;
 		let vertices: buffer_t = iron_g4_lock_vertex_buffer(g._.vertex_buffer); // posnortex
 		for (let i: i32 = 0; i < math_floor((vertices.length) / 2 / l); ++i) {
 			buffer_set_i16(vertices, (i * l    ) * 2, va[i * 4    ]);
@@ -388,7 +388,7 @@ function util_mesh_apply_displacement(texpaint_pack: kinc_g5_texture_t, strength
 	let res: i32 = texpaint_pack.width;
 	let o: mesh_object_t = project_paint_objects[0];
 	let g: mesh_data_t = o.data;
-	let l: i32 = g4_vertex_struct_byte_size(g._.structure) / 2;
+	let l: i32 = kinc_g5_vertex_struct_size(g._.structure) / 2;
 	let vertices: buffer_t = iron_g4_lock_vertex_buffer(g._.vertex_buffer); // posnortex
 	for (let i: i32 = 0; i < math_floor((vertices.length) / 2 / l); ++i) {
 		let x: i32 = math_floor(buffer_get_i16(vertices, (i * l + 6) * 2) / 32767 * res);

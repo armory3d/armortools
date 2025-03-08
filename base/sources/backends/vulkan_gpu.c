@@ -2651,13 +2651,13 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 		case KINC_G5_VERTEX_DATA_F32_4X:
 			vi_attrs[attr].format = VK_FORMAT_R32G32B32A32_SFLOAT;
 			break;
-		case KINC_G5_VERTEX_DATA_U8_4X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_U8_4X_NORM:
 			vi_attrs[attr].format = VK_FORMAT_R8G8B8A8_UNORM;
 			break;
-		case KINC_G5_VERTEX_DATA_I16_2X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_I16_2X_NORM:
 			vi_attrs[attr].format = VK_FORMAT_R16G16_SNORM;
 			break;
-		case KINC_G5_VERTEX_DATA_I16_4X_NORMALIZED:
+		case KINC_G5_VERTEX_DATA_I16_4X_NORM:
 			vi_attrs[attr].format = VK_FORMAT_R16G16B16A16_SNORM;
 			break;
 		}
@@ -3560,7 +3560,6 @@ void kinc_g5_texture_init_from_bytes(kinc_g5_texture_t *texture, void *data, int
 	texture->impl.stage_depth = -1;
 	texture->state = KINC_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
 	texture->framebuffer_index = -1;
-	texture->impl.renderTarget = NULL;
 
 	const VkFormat tex_format = convert_image_format(format);
 	VkFormatProperties props;
@@ -3653,7 +3652,6 @@ void kinc_g5_texture_init(kinc_g5_texture_t *texture, int width, int height, kin
 	texture->impl.stage_depth = -1;
 	texture->state = KINC_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
 	texture->framebuffer_index = -1;
-	texture->impl.renderTarget = NULL;
 
 	const VkFormat tex_format = convert_image_format(format);
 	VkFormatProperties props;

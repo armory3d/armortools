@@ -842,13 +842,13 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 			case KINC_G5_VERTEX_DATA_F32_4X:
 				vertexDescriptor.attributes[index].format = MTLVertexFormatFloat4;
 				break;
-			case KINC_G5_VERTEX_DATA_U8_4X_NORMALIZED:
+			case KINC_G5_VERTEX_DATA_U8_4X_NORM:
 				vertexDescriptor.attributes[index].format = MTLVertexFormatUChar4Normalized;
 				break;
-			case KINC_G5_VERTEX_DATA_I16_2X_NORMALIZED:
+			case KINC_G5_VERTEX_DATA_I16_2X_NORM:
 				vertexDescriptor.attributes[index].format = MTLVertexFormatShort2Normalized;
 				break;
-			case KINC_G5_VERTEX_DATA_I16_4X_NORMALIZED:
+			case KINC_G5_VERTEX_DATA_I16_4X_NORM:
 				vertexDescriptor.attributes[index].format = MTLVertexFormatShort4Normalized;
 				break;
 			}
